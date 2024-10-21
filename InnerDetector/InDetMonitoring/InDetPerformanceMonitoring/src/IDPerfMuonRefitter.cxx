@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -21,7 +21,6 @@
 #include "TrkTrack/TrackCollection.h"
 
 // ATLAS headers
-#include "CxxUtils/checker_macros.h"
 #include "StoreGate/ReadHandle.h"
 #include "GaudiKernel/IInterface.h"
 

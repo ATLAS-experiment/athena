@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //==================================================================================
 //
@@ -17,11 +17,9 @@
 #include "InDetPerformanceMonitoring/PerfMonServices.h"
 #include <sstream>
 // ATLAS headers
+#include "AthenaKernel/getMessageSvc.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "CLHEP/Random/RandFlat.h"
-
-#include "GaudiKernel/IToolSvc.h"
-
 
 // Static declarations
 std::atomic<unsigned int> ElectronSelector::s_uNumInstances;
@@ -41,7 +39,7 @@ ElectronSelector::ElectronSelector():
   
   m_pxElectron = nullptr;
   
-  m_msgStream =  new MsgStream(PerfMonServices::getMessagingService(), "InDetPerformanceMonitoring" );
+  m_msgStream =  new MsgStream(Athena::getMessageSvc(), "InDetPerformanceMonitoring" );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -55,15 +53,7 @@ ElectronSelector::~ElectronSelector()
 void ElectronSelector::Init()
 {
   (*m_msgStream) << MSG::DEBUG << " -- ElectronSelector::Init -- START -- " << endmsg;
-  ISvcLocator* serviceLocator = Gaudi::svcLocator();
-  IToolSvc* toolSvc;
-  StatusCode sc = serviceLocator->service("ToolSvc", toolSvc, true);
-  
-  if ( sc.isFailure() || toolSvc == nullptr ) {
-    (*m_msgStream) << MSG::ERROR << "  * ElectronSelector::Init * Unable to retrieve ToolSvc " << endmsg;
-    return;
-  }
-  
+
   // PARENT::Init();
 
   //---Electron Likelihood tool---

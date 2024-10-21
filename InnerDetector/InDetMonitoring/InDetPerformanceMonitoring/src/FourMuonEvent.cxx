@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //==================================================================================
@@ -15,6 +15,7 @@
 #include "InDetPerformanceMonitoring/PerfMonServices.h"
 
 // ATLAS headers
+#include "AthenaKernel/getMessageSvc.h"
 #include "StoreGate/StoreGateSvc.h"
 
 //#include "muonEvent/MuonParamDefs.h"
@@ -51,7 +52,7 @@ FourMuonEvent::FourMuonEvent()
   m_acceptedMuonCount = 0;
   m_acceptedElecCount = 0;
 
-  m_msgStream =  new MsgStream(PerfMonServices::getMessagingService(), "InDetPerformanceMonitoring" );
+  m_msgStream =  new MsgStream(Athena::getMessageSvc(), "InDetPerformanceMonitoring" );
 }
 
 //==================================================================================
@@ -63,7 +64,7 @@ FourMuonEvent::~FourMuonEvent()
 //==================================================================================
 void FourMuonEvent::Init()
 {
-  (*m_msgStream) << MSG::DEBUG << " * FourMuonEvent::Init * START *" << endmsg; 
+  (*m_msgStream) << MSG::DEBUG << " * FourMuonEvent::Init * START *" << endmsg;
   
   (*m_msgStream) << MSG::DEBUG << " * FourMuonEvent::Init * initializing muon selector *" << endmsg; 
   m_xMuonID.Init();
