@@ -505,6 +505,9 @@ void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
 
   /// Create write decor handles
   SG::WriteDecorHandle<xAOD::JetContainer, float> decTau21WTA(m_decTau21WTAKey);
+  bool decor_available = decTau21WTA.isAvailable();
+  if(decor_available) return;
+
   SG::WriteDecorHandle<xAOD::JetContainer, float> decTau32WTA(m_decTau32WTAKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decTau42WTA(m_decTau42WTAKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decC2(m_decC2Key);
