@@ -48,22 +48,19 @@ StatusCode DataHeaderCnv::initialize()
    // Read properties from the ConversionSvc
    m_inDHFMapMaxsize = 100;   // default DHForm cache size
    bool doFilterDHAliases = true;
-   IConversionSvc* cnvSvc(nullptr);
-   if( service("AthenaPoolCnvSvc", cnvSvc, true ).isSuccess() ) {
-      IProperty* prop = dynamic_cast<IProperty*>( cnvSvc );
-      if( prop ) {
-         IntegerProperty sizeProp("maxDHFormCacheSize", m_inDHFMapMaxsize);
-         if( prop->getProperty(&sizeProp).isSuccess() ) {
-            m_inDHFMapMaxsize = sizeProp.value();
-         }
-         BooleanProperty aliasFilterProp("doFilterDHAliases", doFilterDHAliases);
-         if( prop->getProperty(&aliasFilterProp).isSuccess() ) {
-            doFilterDHAliases = aliasFilterProp.value();
-         }
-         BooleanProperty oneDHForm("OneDataHeaderForm", m_oneDHForm);
-         if( prop->getProperty(&oneDHForm).isSuccess() ) {
-            m_oneDHForm = oneDHForm.value();
-         }
+   SmartIF<IProperty> cnvSvc{service("AthenaPoolCnvSvc")};
+   if( cnvSvc ) {
+      IntegerProperty sizeProp("maxDHFormCacheSize", m_inDHFMapMaxsize);
+      if( cnvSvc->getProperty(&sizeProp).isSuccess() ) {
+         m_inDHFMapMaxsize = sizeProp.value();
+      }
+      BooleanProperty aliasFilterProp("doFilterDHAliases", doFilterDHAliases);
+      if( cnvSvc->getProperty(&aliasFilterProp).isSuccess() ) {
+         doFilterDHAliases = aliasFilterProp.value();
+      }
+      BooleanProperty oneDHForm("OneDataHeaderForm", m_oneDHForm);
+      if( cnvSvc->getProperty(&oneDHForm).isSuccess() ) {
+         m_oneDHForm = oneDHForm.value();
       }
    }
    ATH_MSG_VERBOSE("Using DHForm cache size: " << m_inDHFMapMaxsize);
