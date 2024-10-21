@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -74,8 +74,8 @@ protected:
     m_svcMgr = m_appMgr;
     ASSERT_TRUE( m_svcMgr.isValid() );
 
-    m_sg = nullptr;
-    ASSERT_TRUE( m_svcLoc->service ("StoreGateSvc", m_sg).isSuccess() );
+    m_sg = m_svcLoc->service ("StoreGateSvc");
+    ASSERT_TRUE( m_sg.isValid() );
 
     m_evtSel = m_svcLoc->service("EventSelector");
     ASSERT_TRUE( m_evtSel.isValid() );
@@ -104,8 +104,8 @@ protected:
         ASSERT_TRUE( detStore->record(pHelper, "SCT_ID").isSuccess() );
       }
     }
-    StoreGateSvc* conditionStore = nullptr;
-    ASSERT_TRUE( m_svcLoc->service ("StoreGateSvc/ConditionStore", conditionStore).isSuccess() );
+    SmartIF<StoreGateSvc> conditionStore{m_svcLoc->service ("StoreGateSvc/ConditionStore")};
+    ASSERT_TRUE( conditionStore.isValid() );
 
   }
 
@@ -122,7 +122,7 @@ protected:
   SmartIF<IToolSvc> m_toolSvc;
   SmartIF<IEvtSelector> m_evtSel;
   SmartIF<IProperty> m_propMgr;
-  StoreGateSvc* m_sg{nullptr};
+  SmartIF<StoreGateSvc> m_sg;
   Athena_test::DummyRCUSvc m_rcu;
 };
 
@@ -189,8 +189,8 @@ TEST_F(SCT_RODVetoTool_test, isGood_Id) {
   EventIDBase eid (1, 0, 0, 0, 20);
   ctx.setEventID (eid);
 
-  StoreGateSvc* conditionStore = nullptr;
-  ASSERT_TRUE( m_svcLoc->service ("StoreGateSvc/ConditionStore", conditionStore).isSuccess() );
+  SmartIF<StoreGateSvc> conditionStore{m_svcLoc->service ("StoreGateSvc/ConditionStore")};
+  ASSERT_TRUE( conditionStore.isValid() );
   std::unique_ptr<IdentifierSet> dummyData{std::make_unique<IdentifierSet>()};
 
   DataObjID id2 ("BadSCTModuleIds_RODVeto");

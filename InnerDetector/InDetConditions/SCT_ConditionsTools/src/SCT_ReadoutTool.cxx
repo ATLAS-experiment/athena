@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_ReadoutTool.h"
@@ -12,8 +12,7 @@
 // Constructor
 SCT_ReadoutTool::SCT_ReadoutTool(const std::string& type, const std::string& name, const IInterface* parent):
   base_class(type, name, parent),
-  m_sctId{nullptr},
-  m_msgSvc{nullptr}
+  m_sctId{nullptr}
 {
 }
 
@@ -26,9 +25,7 @@ StatusCode SCT_ReadoutTool::initialize() {
   }
   // Retrieve SCT helper
   ATH_CHECK(detStore()->retrieve(m_sctId, "SCT_ID"));
-  // Get MessageSvc for SCT_ReadoutData
-  ISvcLocator* svcLocator{Gaudi::svcLocator()};
-  ATH_CHECK(svcLocator->service("MessageSvc", m_msgSvc));
+
   return StatusCode::SUCCESS;
 }
 
@@ -82,7 +79,7 @@ StatusCode SCT_ReadoutTool::determineReadout(const Identifier& moduleId, std::ve
     return StatusCode::SUCCESS;
   }
 
-  SCT_ReadoutData data(m_msgSvc);
+  SCT_ReadoutData data(msgSvc());
 
   // Set the chips and sort in order of ID
   data.setChips(chips);
