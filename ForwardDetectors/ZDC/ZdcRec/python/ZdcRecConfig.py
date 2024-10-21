@@ -13,6 +13,8 @@ from OutputStreamAthenaPool.OutputStreamConfig import addToESD
 
 from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
 
+from ZdcRec.SetConfigTagFromFlags import SetConfigTag
+
 from ZdcNtuple.ZdcNtupleConfig import ZdcNtupleCfg
     
 # FIXME: removing for MC
@@ -100,28 +102,26 @@ def RpdSubtractCentroidToolCfg(flags):
 
 def ZdcRecRun2Cfg(flags):        
     acc = ComponentAccumulator()
-    config = "default"
+    config = SetConfigTag(flags)
+    print ('ZdcRecConfig.py: Running with config tag ', config)
+
     doCalib = False
     doTimeCalib = False
     doTrigEff = False
 
     if flags.Input.ProjectName == "data15_hi":
-        config = "PbPb2015"
         doCalib = True
         doTimeCalib = True
         doTrigEff = True
     elif flags.Input.ProjectName == "data17_13TeV":
-        config = "PbPb2015"
         doCalib = False
         doTimeCalib = False
         doTrigEff = False
     elif flags.Input.ProjectName == "data16_hip":
-        config = "pPb2016"
         doCalib = True
         doTimeCalib = False
         doTrigEff = False
     elif flags.Input.ProjectName == "data18_hi":
-        config = "PbPb2018"
         doCalib = True
         doTimeCalib = False
         doTrigEff = False
@@ -141,11 +141,8 @@ def ZdcRecRun2Cfg(flags):
 def ZdcRecRun3Cfg(flags):
 
     acc = ComponentAccumulator()
-    if flags.Input.TriggerStream == "calibration_ZDCInjCalib" or flags.Input.TriggerStream == "calibration_DcmDummyProcessor":
-                # calibration_DcmDummyProcessor is the "trigger stream" in the data we record in the standalone partition that is NOT LED data
-        config = "Injector2024"
-    else:
-        config = "PbPb2023"
+    config = SetConfigTag(flags)
+    print ('ZdcRecConfig.py: Running with config tag ', config)
 
     doCalib = False
     doTimeCalib = False
@@ -153,28 +150,22 @@ def ZdcRecRun3Cfg(flags):
     ForceCalibRun = -1
     ForceCalibLB = 814
     
-    if flags.Input.isMC:
-        config = "MonteCarloPbPb2023"
-    elif flags.Input.ProjectName == "data22_13p6TeV":
-        config = "LHCf2022"
-    elif flags.Input.ProjectName == "data23_900GeV":
-        config = "pp2023"
-    elif flags.Input.ProjectName == "data23_comm":
-        config = "PbPb2023"
-        doCalib = True
-    elif flags.Input.ProjectName == "data23_13p6TeV":
-        config = "pp2023"
-    elif flags.Input.ProjectName == "data23_5p36TeV":
-        config = "pp2023"
-    elif flags.Input.ProjectName == "data23_hi": # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
-        config = "PbPb2023"
-        doCalib = True
-        doTimeCalib = True
-    elif flags.Common.isOnline:
-        doCalib = True
-        doTimeCalib = True
-        ForceCalibRun = 463427
-        ForceCalibLB = 500
+    if flags.Input.TriggerStream != "calibration_ZDCInjCalib" and flags.Input.TriggerStream != "calibration_DcmDummyProcessor":
+        if flags.Input.ProjectName == "data23_comm":
+            doCalib = True
+        elif flags.Input.ProjectName == "data23_hi": # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
+            doCalib = True
+            doTimeCalib = True
+        elif flags.Input.ProjectName == "data24_hi": # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
+            doCalib = True
+            doTimeCalib = True
+            ForceCalibRun = 463427
+            ForceCalibLB = 500
+        elif flags.Common.isOnline:
+            doCalib = True
+            doTimeCalib = True
+            ForceCalibRun = 463427
+            ForceCalibLB = 500
 
     doRPD = flags.Detector.EnableZDC_RPD
 
@@ -273,6 +264,14 @@ def ZdcNtupleRun3Cfg(flags,**kwargs):
     #acc.setAppProperty("HistogramPersistency","ROOT")
     return acc
 
+def ZdcLEDNtupleCfg(flags):
+    acc = ComponentAccumulator()
+    zdcLEDNtuple = CompFactory.ZdcLEDNtuple("ZdcLEDNtuple")
+    zdcLEDNtuple.enableOutputTree = True
+    acc.addEventAlgo(zdcLEDNtuple)
+    acc.addService(CompFactory.THistSvc(Output = ["ANALYSIS DATAFILE='NTUP.root' OPT='RECREATE'"]))    
+    return acc
+
 def ZdcLEDRecCfg(flags):
 
     acc = ComponentAccumulator()
@@ -297,11 +296,6 @@ def ZdcLEDRecCfg(flags):
         # FIXME these are dependent on !65768
         zdcAlg = CompFactory.ZdcRecRun3("ZdcRecRun3",DAQMode=2, ForcedEventType=2, ZdcAnalysisTools=zdcTools) # DAQMode set to PhysicsPEB, event type set to ZdcEventLED
         acc.addEventAlgo(zdcAlg, primary=True)
-
-        zdcLEDNtuple = CompFactory.ZdcLEDNtuple("ZdcLEDNtuple")
-        zdcLEDNtuple.enableOutputTree = True
-        acc.addEventAlgo(zdcLEDNtuple)
-        acc.addService(CompFactory.THistSvc(Output = ["ANALYSIS DATAFILE='NTUP.root' OPT='RECREATE'"]))
 
     if flags.Output.doWriteESD or flags.Output.doWriteAOD:
         acc.merge(ZdcRecOutputCfg(flags))
@@ -466,15 +460,15 @@ if __name__ == '__main__':
         if (isLED):
             from ZdcMonitoring.ZdcLEDMonitorAlgorithm import ZdcLEDMonitoringConfig
             acc.merge(ZdcLEDMonitoringConfig(flags,'ppPbPb2023'))
-        else:
+            acc.merge(ZdcLEDNtupleCfg(flags))
+        if (isCalib):
             from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig
-            config_tag = 'Injector2024' if flags.Input.TriggerStream == "calibration_ZDCInjCalib" or flags.Input.TriggerStream == "calibration_DcmDummyProcessor" else 'PbPb2023'
-            zdcMonitorAcc = ZdcMonitoringConfig(flags,config_tag)
+            
+            zdcMonitorAcc = ZdcMonitoringConfig(flags)
             acc.merge(zdcMonitorAcc)
             # zdcMonitorAcc.getEventAlgo('ZdcMonAlg').OutputLevel = 2 # turn on DEBUG messages
-
-        if (isCalib and flags.Input.TriggerStream != "calibration_DcmDummyProcessor"): # don't configure ntuple for typical reco jobs
-            acc.merge(ZdcNtupleLocalCfg(flags))
+            if (flags.Input.TriggerStream != "calibration_DcmDummyProcessor"): #after ntuple works for standalone data, take this line out
+                acc.merge(ZdcNtupleLocalCfg(flags))
     else:
         acc.merge(ZdcNtupleLocalCfg(flags))
 
