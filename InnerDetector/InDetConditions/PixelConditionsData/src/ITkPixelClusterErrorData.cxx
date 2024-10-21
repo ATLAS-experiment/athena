@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelConditionsData/ITkPixelClusterErrorData.h"
@@ -7,6 +7,7 @@
 #include "GaudiKernel/ISvcLocator.h"
 
 #include "Identifier/IdentifierHash.h"
+#include "StoreGate/StoreGateSvc.h"
 
 #include <fstream>
 #include <string>
@@ -18,13 +19,11 @@ namespace ITk
 
 void PixelClusterErrorData::Initialize()
 {
-
-  ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StatusCode sc = svcLoc->service("DetectorStore", m_detStore);
-  if(sc.isFailure()){
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if(!detStore){
     throw std::runtime_error("Could not retrieve DetectorStore");
   }
-  sc = m_detStore->retrieve(m_pixelID, "PixelID");
+  StatusCode sc = detStore->retrieve(m_pixelID, "PixelID");
   if(sc.isFailure()){
     throw std::runtime_error("Could not retrieve PixelID");
   }
