@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDPerfMonEoverP_H
@@ -51,8 +51,6 @@ CREATED:  July 2011
 #include "xAODEventInfo/EventInfo.h"
 
 #include "ElectronPhotonSelectorTools/AsgElectronLikelihoodTool.h"
-
-#include "CxxUtils/checker_macros.h"
 
 #include <map>
 #include <vector>

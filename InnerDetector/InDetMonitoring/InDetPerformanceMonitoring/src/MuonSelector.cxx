@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //==================================================================================
@@ -20,10 +20,9 @@
 // Package Headers
 #include <sstream>
 // ATLAS headers
+#include "AthenaKernel/getMessageSvc.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "CLHEP/Random/RandFlat.h"
-
-#include "GaudiKernel/IToolSvc.h"
 
 #include "xAODMuon/Muon.h"
 #include "xAODMuon/MuonContainer.h"
@@ -88,7 +87,7 @@ MuonSelector::MuonSelector():
   m_ucID_SCTCut     = 4;        // Hits
   m_ucID_TRTCut     = 0;        // Hits
 
-  m_msgStream =  new MsgStream(PerfMonServices::getMessagingService(), "InDetPerformanceMonitoring");
+  m_msgStream =  new MsgStream(Athena::getMessageSvc(), "InDetPerformanceMonitoring");
 
   // stats
   m_testedmuons = 0;
@@ -113,15 +112,6 @@ MuonSelector::~MuonSelector()
 void MuonSelector::Init()
 {
   
-  ISvcLocator* serviceLocator = Gaudi::svcLocator();
-  IToolSvc* toolSvc;
-  StatusCode sc = serviceLocator->service("ToolSvc", toolSvc, true);
-
-  if ( sc.isFailure() || toolSvc == nullptr ) {
-    (*m_msgStream) << MSG::ERROR << "  * MuonSelector::Init * Unable to retrieve ToolSvc " << endmsg;
-    return;
-  }
-
   // check muon selection tool is available
   if (m_muonSelectionTool.retrieve().isSuccess()) {
     ( *m_msgStream) << MSG::INFO << "  * MuonSelector::Init * m_muonSelectionTool.initialize() success :)" << endmsg;
