@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @class BCMOverlay_test
@@ -43,7 +43,7 @@ namespace OverlayTesting {
   protected:
     virtual void SetUp() override {
       m_alg = new BCMOverlay{"BCMOverlay", g_svcLoc};
-      ASSERT_TRUE( g_svcLoc->service("StoreGateSvc", m_sg) );
+      ASSERT_TRUE( m_sg = g_svcLoc->service("StoreGateSvc") );
     }
 
     virtual void TearDown() override {
@@ -53,7 +53,7 @@ namespace OverlayTesting {
     }
 
     BCMOverlay* m_alg{};
-    StoreGateSvc* m_sg{};
+    SmartIF<StoreGateSvc> m_sg;
   };   // BCMOverlay_test fixture
 
 
