@@ -76,7 +76,10 @@ namespace Analysis {
       ATH_CHECK( m_jetWriteDecorKey.initialize());
     }
 
-    if(msgLvl(MSG::DEBUG)) ATH_CHECK(service("ChronoStatSvc", m_timingProfile));
+    if(msgLvl(MSG::DEBUG)) {
+      m_timingProfile = service("ChronoStatSvc");
+      ATH_CHECK( m_timingProfile.isValid() );
+    }
 //-----
     return StatusCode::SUCCESS;
   }

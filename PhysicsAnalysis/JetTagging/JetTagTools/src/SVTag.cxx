@@ -66,8 +66,8 @@ namespace Analysis
     }
 
     /** retrieving histoHelper: */
-    ITHistSvc* myHistoSvc;
-    if( service( "THistSvc", myHistoSvc ).isSuccess() ) {
+    SmartIF<ITHistSvc> myHistoSvc{service("THistSvc")};
+    if( myHistoSvc ) {
       ATH_MSG_DEBUG("#BTAG#" << name() << ": HistoSvc loaded successfully.");
       m_histoHelper = new HistoHelperRoot(myHistoSvc);
       m_histoHelper->setCheckOverflows(m_checkOverflows);
