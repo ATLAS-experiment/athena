@@ -330,7 +330,8 @@ def FPGATrackSimDataPrepConnectToFastTracking(flags,FinalTracks="FPGADataPrep"):
     
     return result
 
-if __name__ == "__main__":
+
+def runDataPrepChain():
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
@@ -452,3 +453,7 @@ if __name__ == "__main__":
 
     statusCode = acc.run(flags.Exec.MaxEvents)
     assert statusCode.isSuccess() is True, "Application execution did not succeed"
+
+
+if __name__ == "__main__":
+    runDataPrepChain()
