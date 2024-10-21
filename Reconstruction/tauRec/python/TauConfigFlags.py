@@ -29,7 +29,6 @@ def createTauConfigFlags():
     # FIXME: MaxNTracks is not used, drop at the next occasion
     tau_cfg.addFlag("Tau.MaxNTracks", -1)
     tau_cfg.addFlag("Tau.RemoveDupeCoreTracks", True)
-    tau_cfg.addFlag("Tau.doTJVATiebreak", True)
     tau_cfg.addFlag("Tau.useGhostTracks", True)
     tau_cfg.addFlag("Tau.ghostTrackDR", 0.25)
     tau_cfg.addFlag("Tau.shotPtCut_1Photon", [430.*Units.MeV, 300.*Units.MeV, 9999999.*Units.MeV, 330.*Units.MeV, 350.*Units.MeV])

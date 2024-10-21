@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024  CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUVERTEXFINDER_H
@@ -53,7 +53,6 @@ private:
 private:
   
   Gaudi::Property<bool> m_useTJVA {this, "UseTJVA", true};
-  Gaudi::Property<bool> m_useTJVA_Tiebreak {this, "UseTJVA_Tiebreak", false};
   Gaudi::Property<std::string> m_assocTracksName {this, "AssociatedTracks", ""};
   Gaudi::Property<float> m_transDistMax {this, "OnlineMaxTransverseDistance", 10e6};
   Gaudi::Property<float> m_longDistMax {this, "OnlineMaxLongitudinalDistance", 10e6};
