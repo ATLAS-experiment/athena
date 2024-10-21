@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ComTimeRec.h"
@@ -46,11 +46,9 @@ StatusCode ComTimeRec::initialize()
   //  the timing tool, does not provide the method that is needed here (which is bad design).
   // The right thing to do is to fix the interface, at which point this is a simple retrieve.
   // Until then, we are stuck with the old way.
-  IToolSvc *toolSvc(0);
-  CHECK( service( "ToolSvc",toolSvc ) );
 
   IAlgTool *trigTool(0);
-  CHECK( toolSvc->retrieveTool("CosmicTriggerTimeTool",trigTool) );
+  CHECK( toolSvc()->retrieveTool("CosmicTriggerTimeTool",trigTool) );
 
   m_triggerTimeTool = dynamic_cast<CosmicTriggerTimeTool*>(trigTool);
   if(0==m_triggerTimeTool){
@@ -206,14 +204,3 @@ StatusCode ComTimeRec::execute()
   return StatusCode::SUCCESS;
 }
 
-//----------------------------------------------------------------
-
-StatusCode ComTimeRec::finalize() {
-
-  ATH_MSG_INFO( "In finalize()" );
-
-  return StatusCode::SUCCESS;
-
-}
-
-//----------------------------------------------------------------

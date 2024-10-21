@@ -20,7 +20,6 @@ CosmicTriggerTimeTool::CosmicTriggerTimeTool(const std::string& type,
   m_comTime(0) , m_useLArTime(false)
 {
 
-  declareInterface<ITriggerTime>(this);
   declareProperty("UseLArTime", m_useLArTime);
 
 }
@@ -29,8 +28,8 @@ CosmicTriggerTimeTool::CosmicTriggerTimeTool(const std::string& type,
 StatusCode CosmicTriggerTimeTool::initialize()
 {
 
-  IIncidentSvc* incsvc;
-  CHECK( service("IncidentSvc",incsvc) );
+  ServiceHandle<IIncidentSvc> incsvc("IncidentSvc", name());
+  CHECK( incsvc.retrieve() );
 
   long int pri=100;
   incsvc->addListener(this,"BeginEvent",pri);
