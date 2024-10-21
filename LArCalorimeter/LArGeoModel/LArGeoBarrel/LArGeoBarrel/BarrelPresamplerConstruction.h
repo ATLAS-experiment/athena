@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -16,8 +16,6 @@
 #include "LArGeoCode/VDetectorParameters.h"
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "GeoGenericFunctions/FunctionNoop.h"
-
-// Forward declarations
 
 namespace LArGeo {
 

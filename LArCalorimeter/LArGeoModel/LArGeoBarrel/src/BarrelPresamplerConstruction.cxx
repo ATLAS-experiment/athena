@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArGeoBarrel/BarrelPresamplerConstruction.h"
@@ -53,35 +53,17 @@
 // Constructor;
 LArGeo::BarrelPresamplerConstruction ::BarrelPresamplerConstruction(bool fullGeo,
                                                                     const VDetectorParameters* params,
-                                                                    int itb):
-  m_parameters(params),
-  m_psPhysicalPos(nullptr),
-  m_psPhysicalNeg(nullptr),
-  m_fullGeo(fullGeo)
+                                                                    int itb)
+  : m_parameters(params)
+  , m_psPhysicalPos(nullptr)
+  , m_psPhysicalNeg(nullptr)
+  , m_fullGeo(fullGeo)
 {
-
-  ISvcLocator *svcLocator = Gaudi::svcLocator();
-  IMessageSvc * msgSvc;
-  if (svcLocator->service("MessageSvc", msgSvc, true )==StatusCode::FAILURE) {
-    throw std::runtime_error("Error in BarrelPresamplerConstruction, cannot access MessageSvc");
-  }
-  MsgStream log(msgSvc, "BarrelPresamplerConstruction"); 
-  
-
-  log << MSG::INFO;
-  
-  log  << "++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-  log << "+                                                  +" << std::endl;
-  log << "+         Start of Barrel PS GeoModel definition   +" << std::endl;
-  log << "+                                                  +" << std::endl;
-  log << "++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-
-  StoreGateSvc *detStore;
-  if (svcLocator->service("DetectorStore", detStore, false )==StatusCode::FAILURE) {
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if (!detStore.isValid()) {
     throw std::runtime_error("Error in LArDetectorFactory, cannot access DetectorStore");
   }
   
-
   StoredMaterialManager* materialManager = nullptr;
   if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) {
     throw std::runtime_error("Error in BarrelPresamplerConstruction, stored MaterialManager is not found.");

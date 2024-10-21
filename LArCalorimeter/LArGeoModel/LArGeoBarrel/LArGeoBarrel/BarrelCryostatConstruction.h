@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,6 +15,8 @@
 #define LARG4EOBARREL_BARRELCRYOSTATCONSTRUCTION_H
 
 #include "GeoModelKernel/GeoFullPhysVol.h"
+#include "AthenaBaseComps/AthMessaging.h"
+
 class StoreGateSvc;
 
 
@@ -27,7 +29,7 @@ namespace LArGeo {
       Descriptions of the presampler and dead material in the crack region are
       implemented in separate classes
    */
-  class BarrelCryostatConstruction
+  class BarrelCryostatConstruction : public AthMessaging
   {
   public:
 
