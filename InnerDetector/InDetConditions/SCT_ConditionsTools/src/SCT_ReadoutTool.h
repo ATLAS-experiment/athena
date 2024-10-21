@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -48,7 +48,6 @@ class SCT_ReadoutTool : public extends<AthAlgTool, ISCT_ReadoutTool> {
 
   /** Private data*/
   const SCT_ID*                       m_sctId;               //!< ID helper for SCT
-  IMessageSvc* m_msgSvc;
   ToolHandle<ISCT_CablingTool> m_cablingTool{this, "SCT_CablingTool", "SCT_CablingTool", "Tool to retrieve SCT Cabling"};
 
 };
