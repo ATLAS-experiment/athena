@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RpcPadContainerCnv_p2.h"
@@ -9,43 +9,28 @@
 #include "MuonEventAthenaPool/RpcPad_p1.h"
 #include "MuonEventAthenaPool/RpcPadContainer_p2.h"
 #include "RpcPadCnv_p1.h"
-#include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/StatusCode.h"
-#include "GaudiKernel/Service.h"
 #include "GaudiKernel/MsgStream.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "AthAllocators/DataPool.h"
+#include "AthenaKernel/errorcheck.h"
 
 RpcPadContainerCnv_p2::RpcPadContainerCnv_p2() :
   m_isInitialized(false){
 }
 
 
-StatusCode RpcPadContainerCnv_p2::initialize(MsgStream &log) {
+StatusCode RpcPadContainerCnv_p2::initialize(MsgStream & /*log*/) {
                                              
    // Do not initialize again:
     m_isInitialized=true;
 
     // Get the helper from the detector store
-    ISvcLocator* svcLocator = Gaudi::svcLocator();
-    StoreGateSvc *detStore;
-    StatusCode sc = svcLocator->service("DetectorStore", detStore);
-    if (sc.isFailure()) {
-        log << MSG::FATAL << "DetectorStore service not found !" << endmsg;
-        return StatusCode::FAILURE;
-    } else {
-        if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Found DetectorStore." << endmsg;
-    }
-    
-    sc = detStore->retrieve(m_rpcIdHelper);
-    if (sc.isFailure()) {
-        log << MSG::FATAL << "Could not get ID helper !" << endmsg;
-        return StatusCode::FAILURE;
-    }
-    else log<<MSG::DEBUG<<" got RpcIdHelper"<<endmsg;
+    SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+    CHECK( detStore.isValid() );
+    CHECK( detStore->retrieve(m_rpcIdHelper) );
 
-    if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Converter initialized." << endmsg;
-    return sc;
+    return StatusCode::SUCCESS;
 }
 
 void RpcPadContainerCnv_p2::transToPers(const RpcPadContainer* transCont,  RpcPadContainer_p2* persCont, MsgStream &log) 

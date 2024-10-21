@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* Takashi Kubota - June 30, 2008 */
@@ -43,9 +43,6 @@ public:
     virtual AthenaPoolTopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter_tlp3; }
         
 private:
-    //TgcCoinDataCollVec              m_prdCollVec;
-    StoreGateSvc*                   m_storeGate;
-    
     // Not bothering with being able to read 'old' PRDs yet. Ed
     //TgcCoinDataContainerCnv_p1   m_converter_p1;
     TgcCoinDataContainerCnv_tlp1    m_TPConverter_tlp1;

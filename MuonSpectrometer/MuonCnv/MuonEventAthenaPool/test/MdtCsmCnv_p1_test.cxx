@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file MuonEventAthenaPool/test/MdtCsmCnv_p1_test.cxx
@@ -10,6 +10,7 @@
 
 #undef NDEBUG
 #include "../src/MdtCsmCnv_p1.h"
+#include "../src/MdtCsmContainerCnv_p1.h"
 #include "TestTools/leakcheck.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/MsgStream.h"
@@ -44,6 +45,13 @@ void testit (const MdtCsm& trans1)
 void test1 ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "test1\n";
+
+  // Go through initialization once before we enable leak checking,
+  // to get all framework stuff built.
+  {
+    MsgStream log (nullptr, "test");
+    MdtCsmContainerCnv_p1 cnv;
+  }
 
   Athena_test::Leakcheck check;
 

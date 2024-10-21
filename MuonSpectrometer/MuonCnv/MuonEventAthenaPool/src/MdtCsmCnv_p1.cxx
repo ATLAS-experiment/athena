@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRDO/MdtCsm.h"
@@ -7,19 +7,19 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "StoreGate/StoreGateSvc.h"
 
-
 #include "MdtCsmCnv_p1.h"
 #include <sstream>
 
+
 MdtCsmCnv_p1::MdtCsmCnv_p1(){
-    StoreGateSvc* detStore = nullptr;
-    if (!Gaudi::svcLocator()->existsService("DetectorStore")) return;
-    StatusCode sc = Gaudi::svcLocator()->service("DetectorStore", detStore);
-    if (sc != StatusCode::SUCCESS) { return;}
-    sc = detStore->retrieve(m_idHelper, "MDTIDHELPER");
+    SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore", /*createIf*/false)};
+    if (!detStore) { return;}
+    StatusCode sc = detStore->retrieve(m_idHelper, "MDTIDHELPER");
     if (sc != StatusCode::SUCCESS) {return; }
     m_2CSM_Mod = m_idHelper->stationNameIndex("BME") != -1;   
 }
+
+
 void
 MdtCsmCnv_p1::persToTrans(const MdtCsm_p1* persColl, MdtCsm* transColl, MsgStream &log) 
 {
