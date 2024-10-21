@@ -251,16 +251,9 @@ def MC23PhaseIIPileUpMC21a(flags):
 
 def MC23PhaseIINoPileUp(flags):
     """Phase-II Upgrade / Run 4 flags for MC23 and above without pile-up"""
-    flags.Beam.NumberOfCollisions = 0.
-
-    flags.GeoModel.Align.Dynamic = False  # no dynamic alignment for now
-
-    from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
-    LArConfigRun3NoPileUp(flags)
-
-    flags.Digitization.DoInnerDetectorNoise = False  # disable noise for now
-
-
+    PhaseIINoPileUp(flags)
+    
+    
 def MC23PhaseIISimulationNoIoV(flags):
     """Phase-II Upgrade / Run 4 flags for simulation"""
     from SimulationConfig.SimEnums import TruthStrategy
