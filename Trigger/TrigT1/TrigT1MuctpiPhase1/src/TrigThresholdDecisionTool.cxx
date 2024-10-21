@@ -210,8 +210,7 @@ namespace LVL1
   {
     //find the highest pt threshold passed - depite the name of this function
     std::string thrName="";
-    //just some high value ... 
-    double thrVal=999999999999;
+    double thrVal=0;
     for (unsigned idec=0;idec<decisions.size();++idec) {
       if (!decisions[idec].second) continue;
       std::shared_ptr<TrigConf::L1Threshold> thr = decisions[idec].first;
@@ -221,8 +220,6 @@ namespace LVL1
 	  thrName = thr->name();
 	}
     }
-    //if nothing is found set back to the old (broken default value)
-    if (thrVal==999999999999) thrVal=0;
     return std::make_pair(thrName, thrVal);
   }
 
