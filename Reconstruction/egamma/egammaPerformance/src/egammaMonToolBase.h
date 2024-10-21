@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -102,9 +102,6 @@ class egammaMonToolBase : public ManagedMonitorToolBase
   void fillEfficiencies(TH1* h, TH1* href);
   bool hasGoodTrigger(const std::string& comment);
   unsigned int getCurrentLB();
-
-  // Data members
-  StoreGateSvc * m_storeGate;
 
   std::vector<std::string> m_Trigger; // generic Trigger Name
   ToolHandle<Trig::TrigDecisionTool> m_trigdec; // Trigger Decision Tool Handle
