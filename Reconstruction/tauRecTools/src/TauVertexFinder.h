@@ -54,9 +54,6 @@ private:
   
   Gaudi::Property<bool> m_useTJVA {this, "UseTJVA", true};
   Gaudi::Property<std::string> m_assocTracksName {this, "AssociatedTracks", ""};
-  Gaudi::Property<float> m_transDistMax {this, "OnlineMaxTransverseDistance", 10e6};
-  Gaudi::Property<float> m_longDistMax {this, "OnlineMaxLongitudinalDistance", 10e6};
-  Gaudi::Property<float> m_maxZ0SinTheta {this, "OnlineMaxZ0SinTheta", 10e6};
   
   ToolHandle< InDet::IInDetTrackSelectionTool > m_TrackSelectionToolForTJVA {this, "InDetTrackSelectionToolForTJVA", ""};
   ToolHandle<CP::ITrackVertexAssociationTool> m_trkVertexAssocTool{this, "TVATool", "Tau track-vertex association tool"};

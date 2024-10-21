@@ -14,8 +14,6 @@ def trigTauVertexFinderCfg(flags,name=''):
                                       InDetTrackSelectionToolForTJVA =           "",
                                       Key_trackPartInputContainer    =           "",
                                       Key_vertexInputContainer       =           "",
-                                      OnlineMaxTransverseDistance    =       2.5*mm,   
-                                      OnlineMaxZ0SinTheta            =       3.0*mm,
                                       TVATool                        =           "", 
                                       )
 
