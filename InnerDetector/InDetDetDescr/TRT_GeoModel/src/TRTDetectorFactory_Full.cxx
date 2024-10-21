@@ -133,7 +133,7 @@ const InDetDD::TRT_DetectorManager * TRTDetectorFactory_Full::getDetectorManager
 void TRTDetectorFactory_Full::create(GeoPhysVol *world)
 {
   // Create a new detectormanager.
-  m_detectorManager = new InDetDD::TRT_DetectorManager;
+  m_detectorManager = new InDetDD::TRT_DetectorManager(detStore());
 
   //---------------------- Initialize the parameter interface ------------------------//
 

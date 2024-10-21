@@ -151,7 +151,7 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
   
 
   // Create a new detectormanager.
-  m_detectorManager = new InDetDD::TRT_DetectorManager;
+  m_detectorManager = new InDetDD::TRT_DetectorManager(detStore());
 
   //---------------------- Initialize the parameter interface ------------------------//
 
