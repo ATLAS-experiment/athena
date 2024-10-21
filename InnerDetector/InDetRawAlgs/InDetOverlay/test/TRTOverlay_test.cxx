@@ -158,8 +158,8 @@ namespace OverlayTesting {
   protected:
     virtual void SetUp() override {
       // DetectorStore and ID Helper
-      StoreGateSvc *detStore(nullptr);
-      ASSERT_TRUE( m_svcLoc->service("DetectorStore", detStore, true).isSuccess() );
+      SmartIF<StoreGateSvc> detStore{m_svcLoc->service("DetectorStore")};
+      ASSERT_TRUE( detStore.isValid() );
       if (detStore) {
         if (not detStore->contains<TRT_ID>("TRT_ID")) {
           auto trt_id = std::make_unique<TRT_ID>();
@@ -171,8 +171,8 @@ namespace OverlayTesting {
           ASSERT_TRUE( detStore->record (std::move (trt_id), "TRT_ID").isSuccess() );
         }
       }
-      ASSERT_TRUE( m_svcLoc->service("StoreGateSvc", m_sg, true).isSuccess() );
-      ASSERT_TRUE( m_svcLoc->service("ConditionStore", m_cond, true).isSuccess() );
+      ASSERT_TRUE( m_sg = m_svcLoc->service("StoreGateSvc") );
+      ASSERT_TRUE( m_cond = m_svcLoc->service("ConditionStore") );
 
       // the tested Algorithm
       m_alg = new TRTOverlay{"TRTOverlay", m_svcLoc};
@@ -327,8 +327,8 @@ namespace OverlayTesting {
     // the tested AthAlgorithm
     TRTOverlay* m_alg{};
 
-    StoreGateSvc* m_sg{};
-    StoreGateSvc* m_cond{};
+    SmartIF<StoreGateSvc> m_sg;
+    SmartIF<StoreGateSvc> m_cond;
     // mocked Athena components
     OverlayTesting::MockTRT_LocalOccupancy* m_mockTRT_LocalOccupancy = nullptr;
     const std::map<int, double> m_empty_occupancy = {{-2,0.0},{-1,0.0},{1,0.0},{2,0.0}};

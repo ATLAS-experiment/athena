@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -46,10 +46,10 @@ namespace OverlayTesting {
   protected:
     virtual void SetUp() override {
       m_alg = new SCTOverlay{"SCTOverlay", g_svcLoc};
-      ASSERT_TRUE( g_svcLoc->service("StoreGateSvc", m_sg) );
+      ASSERT_TRUE( m_sg = g_svcLoc->service("StoreGateSvc") );
 
-      StoreGateSvc *detStore(nullptr);
-      ASSERT_TRUE( OverlayTesting::g_svcLoc->service("DetectorStore", detStore, true).isSuccess() );
+      SmartIF<StoreGateSvc> detStore{OverlayTesting::g_svcLoc->service("DetectorStore")};
+      ASSERT_TRUE( detStore.isValid() );
       if (detStore) {
         if (not detStore->contains<SCT_ID>("SCT_ID")) {
           auto sct_id = std::make_unique<SCT_ID>();
@@ -79,7 +79,7 @@ namespace OverlayTesting {
       ASSERT_TRUE( m_alg->setProperty( "OutputKey", outputPropertyValue).isSuccess() );
     }
     SCTOverlay* m_alg{};
-    StoreGateSvc* m_sg{};
+    SmartIF<StoreGateSvc> m_sg;
   };   // SCTOverlay_test fixture
 
 
