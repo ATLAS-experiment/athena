@@ -22,6 +22,12 @@
 
 class ZdcMonitorAlgorithm : public AthMonitorAlgorithm {
 public:
+    enum{
+        NoDecodingErrorBit  = 0,
+        ZDCDecodingErrorBit = 1,
+        RPDDecodingErrorBit = 2
+    };
+
     ZdcMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
     virtual ~ZdcMonitorAlgorithm();
     virtual StatusCode initialize() override;
@@ -56,9 +62,10 @@ private:
     static const int m_nSides = 2;
     static const int m_nModules = 4;
     static const int m_nChannels = 16;
-    static const int m_nZdcStatusBits = 18; // ignoring the last one
-    static const int m_nRpdStatusBits = 15; // ignoring the last one
-    static const int m_nRpdCentroidStatusBits = 21; // ignoring the last one
+    static const int m_nDecodingErrorBits = 3;
+    static const int m_nZdcStatusBits = 18;
+    static const int m_nRpdStatusBits = 15;
+    static const int m_nRpdCentroidStatusBits = 21;
 
     // the 2D mapping maps a string "pair" to an integer: the index of the corresponding generic monitoring tool (GMT) in the array of all GMT's
     std::map<std::string,int> m_ZDCSideToolIndices;
@@ -71,13 +78,13 @@ private:
     std::shared_ptr<ZdcInjPulserAmpMap> m_zdcInjPulserAmpMap;
     //---------------------------------------------------
     
-protected:
     // see the standalone version of the Gaudi::Property class (a wrapper in AsgTools) at
     // athena/Control/AthToolSupport/AsgTools/AsgTools/PropertyWrapper.h
     // input to constructor: owner, name, value, title = "" (by default)
     Gaudi::Property<bool> m_isOnline {this,"IsOnline",false};
     Gaudi::Property<bool> m_CalInfoOn {this,"CalInfoOn",false};
     Gaudi::Property<bool> m_enableTrigger {this,"EnableTrigger",true};
+    Gaudi::Property<bool> m_isPPMode {this,"IsPPMode",true};
     Gaudi::Property<bool> m_isInjectedPulse {this,"IsInjectedPulse",false};
     Gaudi::Property<bool> m_isStandalone {this,"IsStandalone",false}; // determine if standalone via metadata
     Gaudi::Property<bool> m_enableZDC {this,"EnableZDC",true};
@@ -86,6 +93,7 @@ protected:
     Gaudi::Property<bool> m_enableRPDAmp {this,"EnableRPDAmp",true};
     Gaudi::Property<bool> m_enableCentroid {this,"EnableCentroid",true};
     
+
     // owner, name (allows us to modify the key in python configuration), key
     SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_ZdcSumContainerKey {this, "ZdcSumContainerKey", "ZdcSums"};
     SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleContainerKey {this, "ZdcModuleContainerKey", "ZdcModules"};
