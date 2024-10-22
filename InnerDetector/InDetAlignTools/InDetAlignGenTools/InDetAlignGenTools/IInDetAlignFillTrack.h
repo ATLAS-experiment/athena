@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNTOOLS_INDETALIGNFILLTRACK_IH
@@ -10,12 +10,9 @@
 
 #include "GaudiKernel/IAlgTool.h"
 
-static const InterfaceID 
-  IID_INDETALIGN_IInDetAlignFillTrack("IInDetAlignFillTrack",1,0);
-
 class IInDetAlignFillTrack: virtual public IAlgTool {
  public:
-  static const InterfaceID& interfaceID();
+  DeclareInterfaceID( IInDetAlignFillTrack, 1, 0 );
 
   virtual StatusCode FillTrack() = 0;
 
@@ -26,9 +23,5 @@ class IInDetAlignFillTrack: virtual public IAlgTool {
   virtual int GetTrkTRTHits() const = 0;
   
 };
-
-inline const InterfaceID& IInDetAlignFillTrack::interfaceID()
-{ return   IID_INDETALIGN_IInDetAlignFillTrack; }
-
 
 #endif // INDETALIGNTOOLS_INDETALIGNFILLTRACK_IH

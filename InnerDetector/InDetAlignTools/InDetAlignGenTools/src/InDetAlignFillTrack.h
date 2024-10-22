@@ -24,34 +24,32 @@
 #include "GaudiKernel/ToolHandle.h"
 
 #include "InDetAlignGenTools/IInDetAlignFillTrack.h"
-
+#include "TrkToolInterfaces/ITruthToTrack.h"
+#include "TrkExInterfaces/IExtrapolator.h"
+#include "TrkToolInterfaces/ITrackParticleCreatorTool.h"
 
 namespace Trk {
   class Track;
-  class ITruthToTrack; //!< Produces perigee track parameters from generated parameters
-  class IExtrapolator;
-  class ITrackParticleCreatorTool;
 }
 
 class INTupleSvc;
 
 
-class InDetAlignFillTrack: virtual public IInDetAlignFillTrack, public AthAlgTool {
+class InDetAlignFillTrack: public extends<AthAlgTool, IInDetAlignFillTrack> {
  public:
   InDetAlignFillTrack(const std::string& type, const std::string& name,
 		      const IInterface* parent);
-  virtual ~InDetAlignFillTrack();
   
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
   
   virtual StatusCode FillTrack() override;
 
-  virtual int GetTrks() const { return m_totaltrks; }
-  virtual int GetTrkHits() const { return m_totalhits; }
-  virtual int GetTrkPixHits() const { return m_totalPixhits; }
-  virtual int GetTrkSCTHits() const { return m_totalSCThits; }
-  virtual int GetTrkTRTHits() const { return m_totalTRThits; }
+  virtual int GetTrks() const override { return m_totaltrks; }
+  virtual int GetTrkHits() const override { return m_totalhits; }
+  virtual int GetTrkPixHits() const override { return m_totalPixhits; }
+  virtual int GetTrkSCTHits() const override { return m_totalSCThits; }
+  virtual int GetTrkTRTHits() const override { return m_totalTRThits; }
 
  private:
   ServiceHandle<INTupleSvc> m_ntupleSvc{this,"NTupleSvc","NTupleSvc"};
@@ -67,39 +65,57 @@ class InDetAlignFillTrack: virtual public IInDetAlignFillTrack, public AthAlgToo
   void dumpPerigee(const Trk::TrackParameters*, int);
   StatusCode dumpMatching(const TrackCollection*,const TrackCollection*);
 
+  // properties
+
+  // Truth information
+  BooleanProperty m_doTruth{this,"doTruth",false};       //!< switch on/off the truth information
+  StringProperty m_TruthTrkCol{this,"TruthTrkCol","TrackTruthCollection"};
+
+  StringProperty m_inputCol{this,"InputTrkCol","Tracks"};
+  StringProperty m_inputUpCol{this,"InputUpTrkCol",""};
+  StringProperty m_inputLowCol{this,"InputLowTrkCol",""};
+
+  // cosmic segments matching
+  BooleanProperty m_doMatching{this,"doMatching",true};  //!< switch on/off the matching information
+  FloatProperty m_matchedRcut{this,"dRCut",100.};
+  FloatProperty m_mindR{this,"minimumdR",10000.};
+
+  // Ntuple
+  StringProperty m_ntupleName{this,"NtupleName","/NTUPLES/GLOBFILE"};
+
   // variables
-  bool                                   m_doMatching;    //!< switch on/off the matching information
-  bool                                   m_doTruth;       //!< switch on/off the truth information
+  int m_totaltrks{0};
+  int m_totalhits{0};
+  int m_totalPixhits{0};
+  int m_totalSCThits{0};
+  int m_totalTRThits{0};
+  int m_totalUptrks{0};
+  int m_totalUphits{0};
+  int m_totalUpPixhits{0};
+  int m_totalUpSCThits{0};
+  int m_totalUpTRThits{0};
+  int m_totalLowtrks{0};
+  int m_totalLowhits{0};
+  int m_totalLowPixhits{0};
+  int m_totalLowSCThits{0};
+  int m_totalLowTRThits{0};
+  int m_events{0};
 
-  std::string                            m_inputCol;
-  std::string                            m_inputUpCol;
-  std::string                            m_inputLowCol;
-  std::string                            m_TruthTrkCol;
-  std::string                            m_ntupleName;    //!< ntuple name
+  // tool handles
+  ToolHandle < Trk::ITruthToTrack > m_truthToTrack{this
+    , "TruthToTrackTool"
+    , "Trk::TruthToTrack"
+    , "tool to produce perigee track parameters from generated parameters"};
 
-  int m_totaltrks;
-  int m_totalhits;
-  int m_totalPixhits;
-  int m_totalSCThits;
-  int m_totalTRThits;
-  int m_totalUptrks;
-  int m_totalUphits;
-  int m_totalUpPixhits;
-  int m_totalUpSCThits;
-  int m_totalUpTRThits;
-  int m_totalLowtrks;
-  int m_totalLowhits;
-  int m_totalLowPixhits;
-  int m_totalLowSCThits;
-  int m_totalLowTRThits;
-  int m_events;
+  ToolHandle < Trk::IExtrapolator > m_extrapolator{this
+    , "ExtrapolationTool"
+    , "Trk::Extrapolator/CosmicsExtrapolator"
+    , "tool to extrapolate tracks"};
 
-  float m_matchedRcut;
-  float m_mindR;
-
-  ToolHandle < Trk::ITruthToTrack >      m_truthToTrack;  //!<  Pointer to TruthToTrack
-  ToolHandle < Trk::IExtrapolator >      m_extrapolator;  //!<  Pointer to IExtrapolator
-  ToolHandle <Trk::ITrackParticleCreatorTool> m_particleCreator; //!< Pointer to track particle creator tool
+  ToolHandle <Trk::ITrackParticleCreatorTool> m_particleCreator{this
+    , "TrackParticleCreatorTool"
+    , "Trk::TrackParticleCreatorTool/TrackParticleCreatorTool"
+    , "tool to build TrackParticle"};
 
   NTuple::Item<long> m_nt_ntracks;            //!< number of tracks
   NTuple::Item<long> m_nt_nUptracks;          //!< number of Up tracks
