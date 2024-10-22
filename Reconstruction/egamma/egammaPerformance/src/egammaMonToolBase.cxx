@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -50,7 +50,6 @@ egammaMonToolBase::egammaMonToolBase(const std::string & type, const std::string
   m_region[FORWARD]="FORWARD";
 
   m_currentLB = 0;
-  m_storeGate = nullptr;
 }
 
 egammaMonToolBase::~egammaMonToolBase()
@@ -63,11 +62,6 @@ StatusCode egammaMonToolBase::initialize()
   StatusCode sc = ManagedMonitorToolBase::initialize();
   if(sc.isFailure()) {
     ATH_MSG_FATAL( "ManagedMonitorToolBase::initialize() - Failed" );
-  }
-
-  sc = service("StoreGateSvc", m_storeGate);
-  if(sc.isFailure()) {
-    ATH_MSG_FATAL( "Unable to locate Service StoreGateSvc" );
   }
 
   if (m_UseTrigger) {
@@ -228,7 +222,7 @@ StatusCode egammaMonToolBase::fillHistograms()
 bool egammaMonToolBase::hasBadLar()
 {
   const xAOD::EventInfo* event_info = nullptr;
-  StatusCode sc = m_storeGate->retrieve( event_info );
+  StatusCode sc = evtStore()->retrieve( event_info );
   if (sc.isFailure()) {
     ATH_MSG_WARNING("Could not get LAr event info!");
   }

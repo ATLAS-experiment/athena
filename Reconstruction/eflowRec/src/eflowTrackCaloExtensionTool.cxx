@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -41,12 +41,6 @@ eflowTrackCaloExtensionTool::eflowTrackCaloExtensionTool(const std::string& type
 eflowTrackCaloExtensionTool::~eflowTrackCaloExtensionTool() = default;
 
 StatusCode eflowTrackCaloExtensionTool::initialize() {
-  /* Tool service */
-  IToolSvc* myToolSvc;
-  if (service("ToolSvc", myToolSvc).isFailure()) {
-    ATH_MSG_WARNING(" Tool Service Not Found");
-    return StatusCode::SUCCESS;
-  }
 
   if (m_theTrackExtrapolatorTool.retrieve().isFailure()) {
     ATH_MSG_WARNING("Cannot find Extrapolation tool "
