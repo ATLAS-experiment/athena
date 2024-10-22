@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file: PerfMonAna/python/DataLoader.py
 # @purpose: handles various data formats and loads data from these files
@@ -52,10 +52,10 @@ class DataHdlr_v000100(object):
             f.close()
             tmpFile.close()
 
-            import imp, inspect
-            tmpFile = open(tmpFileName, 'r')
-            mod = imp.load_source( '_data_loader', '_data_loader.py', tmpFile)
-            tmpFile.close()
+            import importlib.util, inspect
+            spec = importlib.util.spec_from_file_location('_data_loader', tmpFileName)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
             os.remove( tmpFileName )
             def _fctLoader(obj):
                 if inspect.isfunction(obj):
