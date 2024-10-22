@@ -32,10 +32,7 @@
 #include "TrackRecord/TrackRecordCollection.h"
 
 
-#include "TrkToolInterfaces/ITruthToTrack.h"
-#include "TrkExInterfaces/IExtrapolator.h"
 #include "xAODTracking/TrackParticle.h"
-#include "TrkToolInterfaces/ITrackParticleCreatorTool.h"
 #include "TrkEventPrimitives/FitQuality.h"
 #include "CLHEP/GenericFunctions/CumulativeChiSquare.hh"
 #include "CLHEP/Geometry/Point3D.h"
@@ -55,57 +52,9 @@ static const int maxTracks = 10000; // maximal number of tracks per event
 InDetAlignFillTrack::InDetAlignFillTrack (const std::string& type,
                                           const std::string& name,
                                           const IInterface* parent)
-  : AthAlgTool(type, name, parent),
-  m_totaltrks(0),
-  m_totalhits(0),
-  m_totalPixhits(0),
-  m_totalSCThits(0),
-  m_totalTRThits(0),
-  m_totalUptrks(0),
-  m_totalUphits(0),
-  m_totalUpPixhits(0),
-  m_totalUpSCThits(0),
-  m_totalUpTRThits(0),
-  m_totalLowtrks(0),
-  m_totalLowhits(0),
-  m_totalLowPixhits(0),
-  m_totalLowSCThits(0),
-  m_totalLowTRThits(0),
-  m_events(0),
-  m_truthToTrack("Trk::TruthToTrack", this),
-  m_extrapolator("Trk::Extrapolator/CosmicsExtrapolator", this),
-  m_particleCreator("Trk::TrackParticleCreatorTool/TrackParticleCreatorTool", this) {
-  declareInterface<IInDetAlignFillTrack>(this);
-  declareProperty("InputTrkCol", m_inputCol = "Tracks");
-  declareProperty("InputUpTrkCol", m_inputUpCol = "");
-  declareProperty("InputLowTrkCol", m_inputLowCol = "");
-
-  // cosmic segments matching
-  declareProperty("doMatching", m_doMatching = true);
-  declareProperty("dRCut", m_matchedRcut = 100.);
-  declareProperty("minimumdR", m_mindR = 10000.);
-
-  // Truth information
-  declareProperty("doTruth", m_doTruth = false);
-  declareProperty("TruthTrkCol", m_TruthTrkCol = "TrackTruthCollection");
-
-  // Ntuple
-  declareProperty("NtupleName", m_ntupleName = "/NTUPLES/GLOBFILE");
-
-  // Tools
-  declareProperty("TruthToTrackTool", m_truthToTrack,
-                  "tool to produce perigee track parameters from generated parameters");
-  declareProperty("ExtrapolationTool", m_extrapolator,
-                  "tool to extrapolate tracks");
-  declareProperty("TrackParticleCreatorTool", m_particleCreator,
-                  "tool to build TrackParticle");
+  : base_class(type, name, parent)
+{
 }
-
-//=====================================================================
-// ~FillTrack()
-//=====================================================================
-InDetAlignFillTrack::~InDetAlignFillTrack() {}
-
 
 //=====================================================================
 // initialize()
