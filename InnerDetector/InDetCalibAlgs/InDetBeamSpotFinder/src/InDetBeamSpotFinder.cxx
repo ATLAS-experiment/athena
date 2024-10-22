@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetBeamSpotFinder.h"
 #include "InDetBeamSpotFinder/IInDetBeamSpotTool.h"
 #include "InDetBeamSpotVertex.h"
 #include "InDetBeamSpotRooFit.h"
-#include "GaudiKernel/ITHistSvc.h"
 #include "VxVertex/VxCandidate.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/TrackParticle.h"
@@ -29,10 +28,8 @@ namespace{
 }
 
 InDet::InDetBeamSpotFinder::InDetBeamSpotFinder(const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm(name, pSvcLocator),
-  m_toolSvc("ToolSvc",name)
+  AthAlgorithm(name, pSvcLocator)
 {
-  declareProperty( "ToolSvc", m_toolSvc );
   declareProperty( "BeamSpotToolList"  , m_beamSpotToolList );
   declareProperty( "RunRange"     , m_maxRunsPerFit  = 0 );
   declareProperty( "LumiRange"      , m_maxLBsPerFit = 0 );
@@ -61,7 +58,7 @@ StatusCode InDet::InDetBeamSpotFinder::initialize() {
     return StatusCode::FAILURE;
   }
 
-  ATH_CHECK( service("THistSvc",m_thistSvc) );
+  ATH_CHECK( m_thistSvc.retrieve() );
   ATH_CHECK( m_toolSvc.retrieve() );
 
   ATH_CHECK( m_bcDataKey.initialize(m_useFilledBCIDsOnly) );

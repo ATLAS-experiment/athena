@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDET_INDETBEAMSPOTFINDER_H
@@ -13,14 +13,12 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/ITHistSvc.h"
 #include "InDetBeamSpotFinder/IInDetBeamSpotTool.h" //for BeamSpot::Event
-// #include "InDetBeamSpotVertex.h"
-// #include "InDetBeamSpotRooFit.h"
 #include "InDetBeamSpotFinder/BeamSpotStatusCode.h"
 #include "xAODEventInfo/EventInfo.h" //typedef, can't fwd declare
 #include "xAODTracking/VertexContainer.h" //typedef, can't fwd declare
 #include "xAODTracking/TrackingPrimitives.h" //for xAOD::VxType
-// #include "xAODTracking/Vertex.h"
 #include "LumiBlockData/BunchCrossingCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -29,7 +27,6 @@
 #include <vector>
 #include <map>
 
-class ITHistSvc;
 class IToolSvc;
 class IInDetBeamSpotTool;
 class TTree;
@@ -46,7 +43,8 @@ namespace InDet {
 
   private:
     //Reorganize and clean up this section
-    ServiceHandle<IToolSvc> m_toolSvc;
+    ServiceHandle<IToolSvc> m_toolSvc{this, "ToolSvc", "ToolSvc"};
+    ServiceHandle<ITHistSvc> m_thistSvc{this, "THistSvc", "THistSvc"};
     ToolHandleArray<IInDetBeamSpotTool> m_beamSpotToolList;
 
     SG::ReadCondHandleKey<BunchCrossingCondData> m_bcDataKey
@@ -67,7 +65,6 @@ namespace InDet {
     bool m_writeVertexNtuple;
     std::string m_beamSpotNtupleName;
     //Initialize some pointers
-    ITHistSvc * m_thistSvc=0;
     TTree * m_root_bs=0;
     TTree * m_root_vrt=0;
 
