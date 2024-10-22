@@ -72,14 +72,13 @@ using namespace GeoGenfun;
 // in RDBRecordset
 using planeIndMap = std::map<int, unsigned int, std::less<int>>;
 
-LArGeo::BarrelCryostatConstruction::BarrelCryostatConstruction(
-  bool fullGeo, bool ft
-):
-  m_barrelSagging(0),
-  m_barrelVisLimit(-1),
-  m_cryoMotherPhysical(nullptr),
-  m_fullGeo(fullGeo),
-  m_activateFT(ft)
+LArGeo::BarrelCryostatConstruction::BarrelCryostatConstruction(bool fullGeo, bool ft)
+  : AthMessaging("LAr::BarrelCryostatConstruction")
+  , m_barrelSagging(0)
+  , m_barrelVisLimit(-1)
+  , m_cryoMotherPhysical(nullptr)
+  , m_fullGeo(fullGeo)
+  , m_activateFT(ft)
 {}
 
 LArGeo::BarrelCryostatConstruction::~BarrelCryostatConstruction() = default;
@@ -90,18 +89,10 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::BarrelCryostatConstruction::GetEnvelope(
   if (m_cryoMotherPhysical) return m_cryoMotherPhysical;
 
  // Get access to the material manager:
+  ATH_MSG_DEBUG("started");
 
-  ISvcLocator *svcLocator = Gaudi::svcLocator();
-  IMessageSvc * msgSvc;
-  if (svcLocator->service("MessageSvc", msgSvc, true )==StatusCode::FAILURE) {
-    throw std::runtime_error("Error in EMBConstruction, cannot access MessageSvc");
-  }
-
-  MsgStream log(msgSvc, "LAr::BarrelCryostatConstruction");
-  log << MSG::DEBUG << "started" << endmsg;
-
-  StoreGateSvc *detStore;
-  if (svcLocator->service("DetectorStore", detStore, false )==StatusCode::FAILURE) {
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if (!detStore.isValid()) {
     throw std::runtime_error("Error in LArDetectorFactory, cannot access DetectorStore");
   }
 
@@ -134,20 +125,19 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::BarrelCryostatConstruction::GetEnvelope(
 
 
   // ----- ----- ------ Get primary numbers from the GeomDB ----- ----- -----
-  IGeoModelSvc *geoModel;
-  IRDBAccessSvc* rdbAccess;
+  SmartIF<IGeoModelSvc> geoModel{Gaudi::svcLocator()->service("GeoModelSvc")};
+  if(!geoModel.isValid())
+    throw std::runtime_error("Error in BarrelCryostatConstruction, cannot access GeoModelSvc");
+  SmartIF<IRDBAccessSvc> rdbAccess{Gaudi::svcLocator()->service("RDBAccessSvc")};
+  if(!rdbAccess.isValid())
+    throw std::runtime_error("Error in BarrelCryostatConstruction, cannot access RDBAccessSvc");    
+
   planeIndMap innerWallPlanes, innerEndWallPlanes, outerWallPlanes, cryoMotherPlanes, totalLarPlanes, halfLarPlanes, sctEcCoolingPlanes;
   planeIndMap::const_iterator iter;
-  const IRDBRecord* currentRecord;
-
-
-  if(svcLocator->service ("GeoModelSvc",geoModel) == StatusCode::FAILURE)
-    throw std::runtime_error("Error in BarrelCryostatConstruction, cannot access GeoModelSvc");
-  if(svcLocator->service ("RDBAccessSvc",rdbAccess) == StatusCode::FAILURE)
-    throw std::runtime_error("Error in BarrelCryostatConstruction, cannot access RDBAccessSvc");
+  const IRDBRecord* currentRecord{nullptr};
 
   DecodeVersionKey larVersionKey(geoModel, "LAr");
-  log << MSG::DEBUG << "Getting primary numbers for " << larVersionKey.node() << ", " << larVersionKey.tag() << endmsg;
+  ATH_MSG_DEBUG("Getting primary numbers for " << larVersionKey.node() << ", " << larVersionKey.tag());
 
   // ---- Alignable transforms for the barrel:
   // 1. HalfLar + Presampler (pos/neg)
@@ -266,10 +256,10 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::BarrelCryostatConstruction::GetEnvelope(
   {
     iter = cryoMotherPlanes.find(ind);
 
-    if(iter==cryoMotherPlanes.end())
+    if(iter==cryoMotherPlanes.end()) {
       throw std::runtime_error("Error in BarrelCryostatConstruction, missing plane in CryoMother");
-    else
-    {
+    }
+    else {
       currentRecord = (*cryoPcons)[(*iter).second];
 
       cryoMotherShape->addPlane(currentRecord->getDouble("ZPLANE"),
@@ -404,9 +394,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::BarrelCryostatConstruction::GetEnvelope(
 			dphi_all);
       if(m_activateFT){
         if(cylID == 7){ // Cut holes for feedthroughs in warm wall
-          log << MSG::DEBUG << "Cut holes for feedthroughs in warm wall "
-              << cylName
-              << endmsg;
+          ATH_MSG_DEBUG("Cut holes for feedthroughs in warm wall " << cylName);
           const double rmin = currentRecord->getDouble("RMIN")*Gaudi::Units::cm;
           const double rmax = currentRecord->getDouble("RMIN")*Gaudi::Units::cm + currentRecord->getDouble("DR")*Gaudi::Units::cm;
           const double bellow_Router = 0.5*299.*Gaudi::Units::mm; // from DMconstruction
@@ -433,9 +421,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::BarrelCryostatConstruction::GetEnvelope(
           }
           solidBarrelCylinder = warmwall;
         } else if(cylID == 2){ // Cut holes for feedthroughs in cold wall
-          log << MSG::DEBUG << "Cut holes for feedthroughs in cold wall "
-              << cylName
-              << endmsg;
+          ATH_MSG_DEBUG("Cut holes for feedthroughs in cold wall " << cylName);
           const double rmin = currentRecord->getDouble("RMIN")*Gaudi::Units::cm;
           const double rmax = currentRecord->getDouble("RMIN")*Gaudi::Units::cm + currentRecord->getDouble("DR")*Gaudi::Units::cm;
           const double coldhole_radius = 0.5*150.*Gaudi::Units::mm; // see DMconstruction
@@ -565,7 +551,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::BarrelCryostatConstruction::GetEnvelope(
                                                               larVersionKey.tag(),
                                                               larVersionKey.node());
     if (cryoBolts->size() >0) {
-        log << MSG::INFO << " new description with barrel croystat bolts" << endmsg;
+        ATH_MSG_INFO(" new description with barrel croystat bolts");
         const IRDBRecord * cryoBoltsRecord = (*cryoBolts) [0];
         double rmax_vis = cryoBoltsRecord->getDouble("RBOLT");
         int    Nvis     = cryoBoltsRecord->getInt("NBOLT");
@@ -615,7 +601,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::BarrelCryostatConstruction::GetEnvelope(
         }
      }  //  bolts found in the geometry database
      else {
-        log << MSG::INFO << " old description withut bold in the geometry database " << endmsg;
+        ATH_MSG_INFO(" old description withut bold in the geometry database ");
      }
 
 
@@ -667,7 +653,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::BarrelCryostatConstruction::GetEnvelope(
       int nPairTot,indexWall;
       IRDBRecordset_ptr newBlocks        = rdbAccess->getRecordsetPtr("LArBarBumperBlocks", larVersionKey.tag(),larVersionKey.node());
       if (newBlocks->size() >0 ) {
-            log << MSG::INFO << " new coil bumper description " << endmsg;
+	ATH_MSG_INFO(" new coil bumper description ");
             const IRDBRecord * newBlocksRecord = (*newBlocks) [0];
             length         =   newBlocksRecord->getDouble("LENGTH");     // deltaX
             height         =   newBlocksRecord->getDouble("HEIGHT");     // delta Y
@@ -682,7 +668,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::BarrelCryostatConstruction::GetEnvelope(
             }
       }
       else {
-         log << MSG::INFO << " old coil bumper description " << endmsg;
+        ATH_MSG_INFO(" old coil bumper description ");
         IRDBRecordset_ptr tiBlocks        = rdbAccess->getRecordsetPtr("TiBlocks", larVersionKey.tag(),larVersionKey.node());
         const IRDBRecord * tiBlocksRecord = (*tiBlocks)  [0];
         length         =   tiBlocksRecord->getDouble("LENGTH");    // delta X
@@ -746,7 +732,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::BarrelCryostatConstruction::GetEnvelope(
 
      }   // r>0.
      else {
-       log << MSG::WARNING << " could not find wall index plane => no coil bumper description " << endmsg;
+       ATH_MSG_WARNING(" could not find wall index plane => no coil bumper description ");
      }
 
     }  // end of coil supports
@@ -1060,7 +1046,9 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::BarrelCryostatConstruction::GetEnvelope(
         m_cryoMotherPhysical->add(sctCiCoolingPhys);
       } // iterate over Phi Sections
   }
-  else log << MSG::DEBUG << "CryoPconPhiSect table not found - not building SCT cooling " << endmsg;
+  else {
+    ATH_MSG_DEBUG("CryoPconPhiSect table not found - not building SCT cooling ");
+  }
 
 
   if(!rdbAccess->getChildTag("LArBarrelDM",larVersionKey.tag(),larVersionKey.node()).empty() && m_fullGeo) {

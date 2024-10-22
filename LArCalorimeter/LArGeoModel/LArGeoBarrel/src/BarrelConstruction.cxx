@@ -54,7 +54,6 @@
 #include "GeoGenericFunctions/FixedConstant.h"
 // For units:
 #include "GaudiKernel/PhysicalConstants.h"
-#include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/Bootstrap.h"
 
 #include "GeoModelInterfaces/IGeoModelSvc.h"
@@ -77,8 +76,6 @@
 #define BUILD_BACK_G10
 #define BUILD_ACCORDION_PLATES
 #define BUILD_FRONT_STEEL
-
-// #define DEBUGGEO
 
 // GU 29-Jul-2005
 //   *Add summing board effective layer
@@ -106,8 +103,9 @@
 
 LArGeo::BarrelConstruction::BarrelConstruction(bool fullGeo,
                                                const VDetectorParameters* params)
-  :m_parameters(params),
-   m_fullGeo(fullGeo)
+  : AthMessaging("BarrelConstruction")
+  , m_parameters(params)
+  , m_fullGeo(fullGeo)
 {
 }
 
@@ -131,63 +129,55 @@ GeoIntrusivePtr<GeoFullPhysVol>LArGeo::BarrelConstruction::GetNegativeEnvelope()
 void LArGeo::BarrelConstruction::MakeEnvelope()
 {
   ISvcLocator *svcLocator = Gaudi::svcLocator();
-  IMessageSvc * msgSvc;
-  if (svcLocator->service("MessageSvc", msgSvc, true )==StatusCode::FAILURE) {
-    throw std::runtime_error("Error in BarrelConstruction, cannot access MessageSvc");
-  }
-  MsgStream log(msgSvc, "BarrelConstruction"); 
   
+  ATH_MSG_DEBUG("++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
+		<< "+                                                  +\n"
+		<< "+         Start of Barrel EM GeoModel definition   +\n"
+		<< "+                                                  +\n"
+		<< "++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
+		<< " \n"
+		<< "Sagging in geometry " << m_A_SAGGING << "\n"
+		<< " \n"
+		<< " ");
 
-  log << MSG::DEBUG;
-  
-  log  << "++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-  log << "+                                                  +" << std::endl;
-  log << "+         Start of Barrel EM GeoModel definition   +" << std::endl;
-  log << "+                                                  +" << std::endl;
-  log << "++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-
-  log << " " << std::endl;
-  log << "Sagging in geometry " << m_A_SAGGING << std::endl;
-  log << " " << std::endl;
-  log << " " << endmsg;
-
-  if(msgSvc->outputLevel("BarrelConstruction") <= MSG::DEBUG) {
+  if (msgLvl(MSG::DEBUG)) {
     printParams();
   }
 
   bool doDetailedAbsorberStraight = false;
   bool doDetailedAbsorberFold = false;
 
-  IGeoModelSvc *geoModel;
-  IRDBAccessSvc* rdbAccess;
-  if(svcLocator->service ("GeoModelSvc",geoModel) == StatusCode::FAILURE)
-     throw std::runtime_error("Error in BarrelConstruction, cannot access GeoModelSvc"); 
-  if(svcLocator->service ("RDBAccessSvc",rdbAccess) == StatusCode::FAILURE)
-     throw std::runtime_error("Error in BarrelConstruction, cannot access RDBAccessSvc");
-  DecodeVersionKey larVersionKey(geoModel, "LAr"); 
+  SmartIF<IGeoModelSvc> geoModel{Gaudi::svcLocator()->service ("GeoModelSvc")};
+  if(!geoModel.isValid())
+    throw std::runtime_error("Error in BarrelConstruction, cannot access GeoModelSvc"); 
+  SmartIF<IRDBAccessSvc> rdbAccess{Gaudi::svcLocator()->service ("RDBAccessSvc")};
+  if(!rdbAccess.isValid())
+    throw std::runtime_error("Error in BarrelConstruction, cannot access RDBAccessSvc");
 
-  log << MSG::INFO <<  "Getting primary numbers for " << larVersionKey.node() << ", " << larVersionKey.tag() << endmsg;
+  DecodeVersionKey larVersionKey(geoModel, "LAr");
+
+  ATH_MSG_INFO("Getting primary numbers for " << larVersionKey.node() << ", " << larVersionKey.tag());
 
   IRDBRecordset_ptr switchSet = rdbAccess->getRecordsetPtr("LArSwitches", larVersionKey.tag(), larVersionKey.node());
   if ((*switchSet).size() !=0) {
      const IRDBRecord    *switches   = (*switchSet)[0];
      if (!switches->isFieldNull("DETAILED_ABSORBER")) {
           if (switches->getInt("DETAILED_ABSORBER") !=0) {
-            log << MSG::DEBUG  << " DETAILED_ABSORBER is 1 " << endmsg;
+            ATH_MSG_DEBUG(" DETAILED_ABSORBER is 1 ");
             doDetailedAbsorberStraight = true;
             doDetailedAbsorberFold =  true;
           } else {
-            log << MSG::DEBUG  << " DETAILED_ABSORBER is 0 " << endmsg;
+            ATH_MSG_DEBUG(" DETAILED_ABSORBER is 0 ");
           }
      } else {
-       log << MSG::DEBUG  << " no DETAILED_ABSORBER structure in DB " << endmsg;
+       ATH_MSG_DEBUG(" no DETAILED_ABSORBER structure in DB ");
      }
   } else {
-    log << MSG::WARNING  << " LArSwitches structure not found " << endmsg;
+    ATH_MSG_WARNING(" LArSwitches structure not found ");
   }
 
-  log << MSG::INFO << "  Makes detailed absorber sandwich  ? " << doDetailedAbsorberStraight << " " << doDetailedAbsorberFold << endmsg;
-  log << MSG::INFO << "  Use sagging in geometry  ? " << m_A_SAGGING << endmsg;
+  ATH_MSG_INFO("  Makes detailed absorber sandwich  ? " << doDetailedAbsorberStraight << " " << doDetailedAbsorberFold);
+  ATH_MSG_INFO("  Use sagging in geometry  ? " << m_A_SAGGING);
 
   GeoGenfun::Cos  Cos;
   GeoGenfun::Sin  Sin;
@@ -384,14 +374,10 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
        double etaTrans = (double) (m_parameters->GetValue("LArEMBEtaTrans",idat));
        TetaTrans[idat] = 2.*atan(exp(-etaTrans));
 
-// #ifdef DEBUGGEO
-       log << MSG::DEBUG << "idat " << idat << " Rhocen/Phice/Delta/deltay/deltax/etatrans "
-	   << Rhocen[idat] << " " << Phicen[idat]*(1./Gaudi::Units::deg) << " "
-	   << Delta[idat]*(1./Gaudi::Units::deg) << " " << deltay[idat] << " " << deltax[idat]
-	   << " " << etaTrans << endmsg;
-// #endif
-
-
+       ATH_MSG_DEBUG("idat " << idat << " Rhocen/Phice/Delta/deltay/deltax/etatrans "
+		     << Rhocen[idat] << " " << Phicen[idat]*(1./Gaudi::Units::deg) << " "
+		     << Delta[idat]*(1./Gaudi::Units::deg) << " " << deltay[idat] << " " << deltax[idat]
+		     << " " << etaTrans);
     }
 
 // parity of accordion waves
@@ -408,15 +394,13 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
   if (m_NVISLIM > 0) Nabsorber  = m_NVISLIM;
   if (m_NVISLIM > 0) Nelectrode = m_NVISLIM;
   if (m_NVISLIM > 0) {
-    log << MSG::WARNING;
-    log << "================LAr BarrelConstruction===========================" << std::endl;
-    log << "===YOU ARE RUNNING WITH A LIMITED SLICE OF BARREL ACCORDEON   ===" << std::endl;
-    log << "===THIS OPTION IS FOR VISUALIZATION OR OTHER TESTING, ONLY!!  ===" << std::endl;
-    log << "===AND IF THIS IS NOT YOUR INTENTION PLEASE BE SURE TO SET    ===" << std::endl;
-    log << "===THE FLAG GeoModelSvc.LArDetectorTool.BarrelCellVisLimit=-1 ===" << std::endl;
-    log << "===Remember there are no defaults in Athena. Thank you.       ===" << std::endl;
-    log << "=================================================================" << std::endl;
-    log << MSG::INFO;
+    ATH_MSG_WARNING("================LAr BarrelConstruction===========================\n"
+		    << "===YOU ARE RUNNING WITH A LIMITED SLICE OF BARREL ACCORDEON   ===\n"
+		    << "===THIS OPTION IS FOR VISUALIZATION OR OTHER TESTING, ONLY!!  ===\n"
+		    << "===AND IF THIS IS NOT YOUR INTENTION PLEASE BE SURE TO SET    ===\n"
+		    << "===THE FLAG GeoModelSvc.LArDetectorTool.BarrelCellVisLimit=-1 ===\n"
+		    << "===Remember there are no defaults in Athena. Thank you.       ===\n"
+		    << "=================================================================");
   }
 
 
@@ -1564,7 +1548,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
                  }
 
                  if (!phi0_fold || !dphi_fold || !TXfold) {
-                   log << MSG::INFO << " LArGeoBarrel::BarrelConstruction  fold not defined..." << endmsg;
+                   ATH_MSG_INFO(" LArGeoBarrel::BarrelConstruction  fold not defined...");
                  }
                  else
                  for (int instance = 0; instance < Nabsorber; instance++)
@@ -1923,7 +1907,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
                  }
 
                  if (!phi0_fold || !dphi_fold || !TXfold) {
-                   log << MSG::INFO << " LArGeoBarrel::BarrelConstruction  fold not defined..." << endmsg;
+                   ATH_MSG_INFO(" LArGeoBarrel::BarrelConstruction  fold not defined...");
                  }
                  else
                  for (int instance = 0; instance < Nelectrode; instance++)
@@ -1984,138 +1968,136 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
 
 #endif  //  BUILD_ACCORDION_PLATES
   
-  log << MSG::DEBUG << "++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-  log << "+                                                  +" << std::endl;
-  log << "+         END   of Barrel EM GeoModel definition   +" << std::endl;
-  log << "+                                                  +" << std::endl;
-  log << "++++++++++++++++++++++++++++++++++++++++++++++++++++" << endmsg;
-  
-  
+  ATH_MSG_DEBUG("++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
+		<< "+                                                  +\n"
+		<< "+         END   of Barrel EM GeoModel definition   +\n"
+		<< "+                                                  +\n"
+		<< "++++++++++++++++++++++++++++++++++++++++++++++++++++");
 }
 
 void LArGeo::BarrelConstruction::printParams()
 {
- std::cout << "******** Print out of LArBarrel Accordion parameters " << std::endl;
-  std::cout << "Absorber parameters: " <<std::endl;
-  std::cout << "Glue for ThinAbs        " << 
-       m_parameters->GetValue("LArEMBThinAbsGlue") << std::endl;
-  std::cout << "Iron for ThinAbs        " << 
-       m_parameters->GetValue("LArEMBThinAbsIron") << std::endl;
-  std::cout << "Lead for ThinAbs        " << 
-        m_parameters->GetValue("LArEMBThinAbsLead") << std::endl;
-  std::cout << "Glue for ThickAbs       " << 
-        m_parameters->GetValue("LArEMBThickAbsGlue") << std::endl;
-  std::cout << "Iron for ThickAbs       " << 
-       m_parameters->GetValue("LArEMBThickAbsIron") << std::endl;
-  std::cout << "Lead for ThickAbs       " 
-        << m_parameters->GetValue("LArEMBThickAbsLead") << std::endl;
+  ATH_MSG_DEBUG("******** Print out of LArBarrel Accordion parameters ");
+  ATH_MSG_DEBUG("Absorber parameters: ");
+  ATH_MSG_DEBUG("Glue for ThinAbs        " << 
+		m_parameters->GetValue("LArEMBThinAbsGlue"));
+  ATH_MSG_DEBUG("Iron for ThinAbs        " << 
+		m_parameters->GetValue("LArEMBThinAbsIron"));
+  ATH_MSG_DEBUG("Lead for ThinAbs        " << 
+		m_parameters->GetValue("LArEMBThinAbsLead"));
+  ATH_MSG_DEBUG("Glue for ThickAbs       " << 
+		m_parameters->GetValue("LArEMBThickAbsGlue"));
+  ATH_MSG_DEBUG("Iron for ThickAbs       " << 
+		m_parameters->GetValue("LArEMBThickAbsIron"));
+  ATH_MSG_DEBUG("Lead for ThickAbs       " 
+		<< m_parameters->GetValue("LArEMBThickAbsLead"));
 
-  std::cout << "Electrode parameters: " << std::endl;
-  std::cout << "Copper thickness        "  <<
-        m_parameters->GetValue("LArEMBThickElecCopper") << std::endl;
-  std::cout << "Kapton thickness        " <<  
-         m_parameters->GetValue("LArEMBThickElecKapton") << std::endl;
+  ATH_MSG_DEBUG("Electrode parameters: ");
+  ATH_MSG_DEBUG("Copper thickness        "  <<
+		m_parameters->GetValue("LArEMBThickElecCopper"));
+  ATH_MSG_DEBUG("Kapton thickness        " <<  
+		m_parameters->GetValue("LArEMBThickElecKapton"));
 
-  std::cout << "Accordion geometry description " << std::endl;
-  std::cout << "phi first absorber      " << 
-     m_parameters->GetValue("LArEMBAbsPhiFirst") << std::endl;
-  std::cout << "zmin of absorber        " << 
-     m_parameters->GetValue("LArEMBMotherZmin") << std::endl;
-  std::cout << "zmax of absorber        " << 
-    m_parameters->GetValue("LArEMBMotherZmax") << std::endl;
-  std::cout << "Max eta                 " << 
-    m_parameters->GetValue("LArEMBMaxEtaAcceptance") << std::endl;
-  std::cout << "Nominal eta lead change " << 
-    m_parameters->GetValue("LArEMBThickEtaAcceptance") << std::endl;
-  std::cout << "Number of abs in phi    " << 
-    m_parameters->GetValue("LArEMBnoOFPhysPhiCell") << std::endl;
-  std::cout << "Dphi between absorbers  "  << 
-    m_parameters->GetValue("LArEMBPhiGapAperture") << std::endl;
-  std::cout << "Rmin Mother             " << 
-    m_parameters->GetValue("LArEMBMotherRmin") << std::endl;
-  std::cout << "Rmax Mother             " << 
-     m_parameters->GetValue("LArEMBMotherRmax") << std::endl;
-  std::cout << "Rmin at zmax            "  <<
-       m_parameters->GetValue("LArEMBRminHighZ") << std::endl;
-  std::cout << "Phimax barrel           " << 
-       m_parameters->GetValue("LArEMBphiMaxBarrel") << std::endl;
-  std::cout << "Number of zigs          " <<  
-     m_parameters->GetValue("LArEMBnoOFAccZigs") << std::endl;
-  std::cout << "Fold Gaudi::Units::rad of curvature   " << 
-     m_parameters->GetValue("LArEMBNeutFiberRadius") << std::endl;
+  ATH_MSG_DEBUG("Accordion geometry description ");
+  ATH_MSG_DEBUG("phi first absorber      " << 
+		m_parameters->GetValue("LArEMBAbsPhiFirst"));
+  ATH_MSG_DEBUG("zmin of absorber        " << 
+		m_parameters->GetValue("LArEMBMotherZmin"));
+  ATH_MSG_DEBUG("zmax of absorber        " << 
+		m_parameters->GetValue("LArEMBMotherZmax"));
+  ATH_MSG_DEBUG("Max eta                 " << 
+		m_parameters->GetValue("LArEMBMaxEtaAcceptance"));
+  ATH_MSG_DEBUG("Nominal eta lead change " << 
+		m_parameters->GetValue("LArEMBThickEtaAcceptance"));
+  ATH_MSG_DEBUG("Number of abs in phi    " << 
+		m_parameters->GetValue("LArEMBnoOFPhysPhiCell"));
+  ATH_MSG_DEBUG("Dphi between absorbers  "  << 
+		m_parameters->GetValue("LArEMBPhiGapAperture"));
+  ATH_MSG_DEBUG("Rmin Mother             " << 
+		m_parameters->GetValue("LArEMBMotherRmin"));
+  ATH_MSG_DEBUG("Rmax Mother             " << 
+		m_parameters->GetValue("LArEMBMotherRmax"));
+  ATH_MSG_DEBUG("Rmin at zmax            "  <<
+		m_parameters->GetValue("LArEMBRminHighZ"));
+  ATH_MSG_DEBUG("Phimax barrel           " << 
+		m_parameters->GetValue("LArEMBphiMaxBarrel"));
+  ATH_MSG_DEBUG("Number of zigs          " <<  
+		m_parameters->GetValue("LArEMBnoOFAccZigs"));
+  ATH_MSG_DEBUG("Fold Gaudi::Units::rad of curvature   " << 
+		m_parameters->GetValue("LArEMBNeutFiberRadius"));
   for (int i=0;i<15;i++) {
-    std::cout << "Fold " << i << " radius " <<  
-      m_parameters->GetValue("LArEMBRadiusAtCurvature",i) << std::endl;
+    ATH_MSG_DEBUG("Fold " << i << " radius " <<  
+		  m_parameters->GetValue("LArEMBRadiusAtCurvature",i));
   }
   for (int i=0;i<15;i++) {
-    std::cout << "Fold " << i << " phi0   " <<  
-      m_parameters->GetValue("LArEMBPhiAtCurvature",i) << std::endl;
+    ATH_MSG_DEBUG("Fold " << i << " phi0   " <<  
+		  m_parameters->GetValue("LArEMBPhiAtCurvature",i));
   }
   for (int i=0;i<15;i++) {
-    std::cout << "Fold " << i << " eta trans   " <<  
-      m_parameters->GetValue("LArEMBEtaTrans",i) << std::endl;
+    ATH_MSG_DEBUG("Fold " << i << " eta trans   " <<  
+		  m_parameters->GetValue("LArEMBEtaTrans",i));
   }
   for (int i=0;i<14;i++) {
-    std::cout << "zig " << i << " angle   " <<  
-      m_parameters->GetValue("LArEMBDeltaZigAngle",i) << std::endl;
+    ATH_MSG_DEBUG("zig " << i << " angle   " <<  
+		  m_parameters->GetValue("LArEMBDeltaZigAngle",i));
   }
 
-  std::cout << "Fiducial active region definition " << std::endl;
-  std::cout << "Zmin                    " << 
-       m_parameters->GetValue("LArEMBfiducialMothZmin") << std::endl;
-  std::cout << "Zmax                    " << 
-     m_parameters->GetValue("LArEMBfiducialMothZmax") << std::endl;
-  std::cout << "Rmin                    " <<
-     m_parameters->GetValue("LArEMBRadiusInnerAccordion") << std::endl;
-  std::cout << "Rmax                    "  <<  
-    m_parameters->GetValue("LArEMBFiducialRmax") << std::endl;
-  std::cout << "Inactive DR S1 to S2    " << 
-    m_parameters->GetValue("LArEMBDeltaRS12") << std::endl;
-
-  std::cout << "Description of matter from PS to strip " << std::endl;
-  std::cout << "DeltaR for LAR+Cable+MotherBoard volume " << 
-       m_parameters->GetValue("LArEMBInnerElectronics") << std::endl;
-  std::cout << "Number of cable volumes " << 
-      m_parameters->GetValue("LArEMBnoOFcableBundle") << std::endl;
-  std::cout << "Cable Cu fraction       "  <<
-      m_parameters->GetValue("LArEMBmasspercentCu") << std::endl;
-  std::cout << "Cable Kapton fraction   " <<
-       m_parameters->GetValue("LArEMBmasspercentKap") << std::endl;
-  std::cout << "Cable thickness@eta=0   " <<
-       m_parameters->GetValue("LArEMBCablethickat0") << std::endl;
-  std::cout << "Cable thick increase/eta " << 
-     m_parameters->GetValue("LArEMBthickincrfac") << std::endl;
-  std::cout << "Cable width              " << 
-      m_parameters->GetValue("LArEMBCableEtaheight") << std::endl;
-  std::cout << "DR of cable from PS      " << 
-      m_parameters->GetValue("LArEMBCablclearfrPS") << std::endl;
-  std::cout << "Number of motherboard    " << 
-          m_parameters->GetValue("LArEMBnoOFmothboard") << std::endl;
-  std::cout << "MotherBoard Cu thickness " << 
-        m_parameters->GetValue("LArEMBCuThickness") << std::endl;
-  std::cout << "MotherBoard G10 thickness " << 
-     m_parameters->GetValue("LArEMBG10Thickness") << std::endl;
-  std::cout << "MotherBoard thickness    " << 
-     m_parameters->GetValue("LArEMBMoBoTchickness") << std::endl;
- std::cout << "MotherBoard width         " << 
-     m_parameters->GetValue("LArEMBMoBoHeight") << std::endl;
-  std::cout << "MotherBoard DR from PS   " << 
-     m_parameters->GetValue("LArEMBMoBoclearfrPS") << std::endl;
-  std::cout << "G10 inner ring thickness " << 
-    m_parameters->GetValue("LArEMBG10SupportBarsIn") << std::endl;
-  std::cout << "Dz G10 inner ring        " << 
-    m_parameters->GetValue("LArEMBG10FrontDeltaZ") << std::endl;
-  std::cout << "G10 front tip            " << 
-    m_parameters->GetValue("LArEMBG10TipThickFront") << std::endl;
-  std::cout << "Absorber front tip       " << 
-    m_parameters->GetValue("LArEMBLeadTipThickFront") << std::endl;
-  std::cout << "Description of matter after accordion " << std::endl;
-  std::cout << "G10 outer ring thickness " << 
-     m_parameters->GetValue("LArEMBG10SupportBarsOut") << std::endl,
-  std::cout << "Absorber outer tip       " << 
-    m_parameters->GetValue("LArEMBLeadTipThickEnd") << std::endl;
-  std::cout << "G10 outer tip            " <<
-     m_parameters->GetValue("LArEMBG10TipThickEnd") << std::endl;
-  std::cout << "total outer tip DeltaR   " << 
-    m_parameters->GetValue("LArEMBLArGapTail") << std::endl;
+  ATH_MSG_DEBUG("Fiducial active region definition ");
+  ATH_MSG_DEBUG("Zmin                    " << 
+		m_parameters->GetValue("LArEMBfiducialMothZmin"));
+  ATH_MSG_DEBUG("Zmax                    " << 
+		m_parameters->GetValue("LArEMBfiducialMothZmax"));
+  ATH_MSG_DEBUG("Rmin                    " <<
+		m_parameters->GetValue("LArEMBRadiusInnerAccordion"));
+  ATH_MSG_DEBUG("Rmax                    "  <<  
+		m_parameters->GetValue("LArEMBFiducialRmax"));
+  ATH_MSG_DEBUG("Inactive DR S1 to S2    " << 
+		m_parameters->GetValue("LArEMBDeltaRS12"));
+  
+  ATH_MSG_DEBUG("Description of matter from PS to strip ");
+  ATH_MSG_DEBUG("DeltaR for LAR+Cable+MotherBoard volume " << 
+		m_parameters->GetValue("LArEMBInnerElectronics"));
+  ATH_MSG_DEBUG("Number of cable volumes " << 
+		m_parameters->GetValue("LArEMBnoOFcableBundle"));
+  ATH_MSG_DEBUG("Cable Cu fraction       "  <<
+		m_parameters->GetValue("LArEMBmasspercentCu"));
+  ATH_MSG_DEBUG("Cable Kapton fraction   " <<
+		m_parameters->GetValue("LArEMBmasspercentKap"));
+  ATH_MSG_DEBUG("Cable thickness@eta=0   " <<
+		m_parameters->GetValue("LArEMBCablethickat0"));
+  ATH_MSG_DEBUG("Cable thick increase/eta " << 
+		m_parameters->GetValue("LArEMBthickincrfac"));
+  ATH_MSG_DEBUG("Cable width              " << 
+		m_parameters->GetValue("LArEMBCableEtaheight"));
+  ATH_MSG_DEBUG("DR of cable from PS      " << 
+		m_parameters->GetValue("LArEMBCablclearfrPS"));
+  ATH_MSG_DEBUG("Number of motherboard    " << 
+		m_parameters->GetValue("LArEMBnoOFmothboard"));
+  ATH_MSG_DEBUG("MotherBoard Cu thickness " << 
+		m_parameters->GetValue("LArEMBCuThickness"));
+  ATH_MSG_DEBUG("MotherBoard G10 thickness " << 
+		m_parameters->GetValue("LArEMBG10Thickness"));
+  ATH_MSG_DEBUG("MotherBoard thickness    " << 
+		m_parameters->GetValue("LArEMBMoBoTchickness"));
+  ATH_MSG_DEBUG("MotherBoard width         " << 
+		m_parameters->GetValue("LArEMBMoBoHeight"));
+  ATH_MSG_DEBUG("MotherBoard DR from PS   " << 
+		m_parameters->GetValue("LArEMBMoBoclearfrPS"));
+  ATH_MSG_DEBUG("G10 inner ring thickness " << 
+		m_parameters->GetValue("LArEMBG10SupportBarsIn"));
+  ATH_MSG_DEBUG("Dz G10 inner ring        " << 
+		m_parameters->GetValue("LArEMBG10FrontDeltaZ"));
+  ATH_MSG_DEBUG("G10 front tip            " << 
+		m_parameters->GetValue("LArEMBG10TipThickFront"));
+  ATH_MSG_DEBUG("Absorber front tip       " << 
+		m_parameters->GetValue("LArEMBLeadTipThickFront"));
+  ATH_MSG_DEBUG("Description of matter after accordion ");
+  ATH_MSG_DEBUG("G10 outer ring thickness " << 
+		m_parameters->GetValue("LArEMBG10SupportBarsOut"));
+  ATH_MSG_DEBUG("Absorber outer tip       " << 
+		m_parameters->GetValue("LArEMBLeadTipThickEnd"));
+  ATH_MSG_DEBUG("G10 outer tip            " <<
+		m_parameters->GetValue("LArEMBG10TipThickEnd"));
+  ATH_MSG_DEBUG("total outer tip DeltaR   " << 
+		m_parameters->GetValue("LArEMBLArGapTail"));
 }

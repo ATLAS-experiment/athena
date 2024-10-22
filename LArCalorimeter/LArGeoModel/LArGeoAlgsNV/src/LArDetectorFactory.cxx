@@ -25,7 +25,6 @@
 #include "GeoModelUtilities/GeoDBUtils.h"
 
 #include "StoreGate/StoreGateSvc.h"
-#include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/Bootstrap.h"
 #include "GeoModelUtilities/DecodeVersionKey.h"
 #include "GeoModelUtilities/StoredPhysVol.h"
@@ -44,7 +43,8 @@ LArGeo::LArDetectorFactory::LArDetectorFactory(StoreGateSvc* detStore
 					       , const LArHVManager* hvManager
 					       , int testbeam
 					       , bool fullGeo)
-  : m_detectorManager(nullptr)
+  : AthMessaging("LArDetectorFactory")
+  , m_detectorManager(nullptr)
   , m_detStore(detStore)
   , m_hvManager(hvManager)
   , m_barrelSagging(false)
@@ -75,27 +75,18 @@ void LArGeo::LArDetectorFactory::create(GeoPhysVol* a_container )
       m_parameters = std::make_unique<LArGeo::RAL>();
 
       // Get access to the material manager:
-
-      ISvcLocator *svcLocator = Gaudi::svcLocator();
-      IMessageSvc * msgSvc;
-      if (svcLocator->service("MessageSvc", msgSvc, true )==StatusCode::FAILURE) {
-	throw std::runtime_error("Error in LAr::DetectorFactor, cannot access MessageSvc");
-      }
-
-      MsgStream log(msgSvc, "LAr::DetectorFactory");
-
       StoredMaterialManager* materialManager = nullptr;
       if (StatusCode::SUCCESS != m_detStore->retrieve(materialManager, std::string("MATERIALS"))) {
 	throw std::runtime_error("Error in LArDetectorFactory, cannot access Material Manager");
       }
 
-      IRDBAccessSvc* rdbAccess = nullptr;
+      SmartIF<IRDBAccessSvc> rdbAccess{Gaudi::svcLocator()->service("RDBAccessSvc")};
 
-      if(svcLocator->service ("RDBAccessSvc",rdbAccess) == StatusCode::FAILURE)
+      if(!rdbAccess.isValid())
 	throw std::runtime_error("Error in BarrelCryostatConstruction, cannot access RDBAccessSvc");
 
       DecodeVersionKey larVersionKey("LAr");
-      log << MSG::DEBUG << "Getting primary numbers for " << larVersionKey.node() << ", " << larVersionKey.tag() << endmsg;
+      ATH_MSG_DEBUG("Getting primary numbers for " << larVersionKey.node() << ", " << larVersionKey.tag());
 
       IRDBRecordset_ptr larPosition =  rdbAccess->getRecordsetPtr("LArPosition",larVersionKey.tag(),larVersionKey.node());
 

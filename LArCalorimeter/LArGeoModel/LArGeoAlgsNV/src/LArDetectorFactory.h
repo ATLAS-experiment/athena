@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -18,6 +18,7 @@
 #define LARGEOALGSNV_LARDETECTORFACTORY_H
 #include "LArReadoutGeometry/LArDetectorManager.h"
 #include "GeoModelKernel/GeoVDetectorFactory.h"
+#include "AthenaBaseComps/AthMessaging.h"
 
 class StoreGateSvc;
 class LArHVManager;
@@ -25,7 +26,7 @@ class LArHVManager;
 namespace LArGeo {
   class VDetectorParameters;
 
-  class LArDetectorFactory : public GeoVDetectorFactory  {
+  class LArDetectorFactory : public GeoVDetectorFactory, public AthMessaging  {
 
   public:
 
@@ -39,10 +40,10 @@ namespace LArGeo {
     virtual ~LArDetectorFactory();
 
     // Creation of geometry:
-    virtual void create(GeoPhysVol* world);
+    virtual void create(GeoPhysVol* world) override;
 
     // Access to the results:
-    virtual const LArDetectorManager* getDetectorManager() const;
+    virtual const LArDetectorManager* getDetectorManager() const override;
 
     std::unique_ptr<LArGeo::VDetectorParameters> moveParameters();
 

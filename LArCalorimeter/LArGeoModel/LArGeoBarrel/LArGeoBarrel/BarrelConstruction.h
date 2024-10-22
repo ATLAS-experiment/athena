@@ -10,7 +10,7 @@
 #define LARGEOBARREL_BARRELCONSTRUCTION_H
 
 #include "GeoModelKernel/GeoFullPhysVol.h"
-
+#include "AthenaBaseComps/AthMessaging.h"
 
 namespace LArGeo{
   class VDetectorParameters;
@@ -18,7 +18,7 @@ namespace LArGeo{
 
 namespace LArGeo {
 
-  class BarrelConstruction
+  class BarrelConstruction : public AthMessaging
   {
   public:
 
