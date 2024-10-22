@@ -16,12 +16,11 @@ import sys
 
 def ana(fname, n_consumers):
     
-    import imp
+    import importlib
     mod_name = 'perf_dpmon_data_%s' % (
         os.path.splitext(os.path.basename(fname))[0],
         )
-    mod_file = open(fname)
-    mod = imp.load_module(mod_name, mod_file, fname, ('', '', imp.PY_SOURCE))
+    mod = importlib.import_module(mod_name, fname)
 
     dp_mon_data = mod.data
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file: UserFct.py
 # @purpose: classes to allow users to specialize (and load) filtering functions
@@ -12,7 +12,7 @@ __author__  = 'Sebastien Binet'
 __version__ = "$Revision: 1.2 $"
 __doc__     = "Classes to allow users to specialize (and load) filtering functions."
 
-import imp
+import importlib.util
 import inspect
 
 class PluginFct:
@@ -51,9 +51,9 @@ def loadFilterFct( uri ):
 
     if uri.startswith( 'file:' ) or osp.exists( uri ) :
         uri = osp.expanduser( osp.expandvars( uri.replace( 'file:', '' ) ) )
-        plugin = open( uri, 'r' )
-        mod = imp.load_source( plugin.name[:-3], plugin.name, plugin )
-        plugin.close()
+        spec = importlib.util.spec_from_file_location(uri[:-3], uri)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
 
         filterFct.setFilter( inspect.getmembers(mod, pluginFilter)[0][1] )
 
