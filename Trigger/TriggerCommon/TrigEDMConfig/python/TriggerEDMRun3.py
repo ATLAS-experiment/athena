@@ -806,6 +806,9 @@ TriggerHLTListRun3 = [
     # Heavy ion
     ('xAOD::JetContainer#HLT_AntiKt4HIJets',                      'BS ESD AODFULL', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4HIJetsAux.'+HIJetVars,       'BS ESD AODFULL', 'Jet'),
+    
+    ('xAOD::JetContainer#HLT_AntiKt2HIJets',                      'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt2HIJetsAux.'+HIJetVars,       'BS ESD AODFULL', 'Jet'),
 
     # TLA jets + PEB jets
     ('TrigRoiDescriptorCollection#HLT_Roi_DarkJetPEBTLA',             'BS ESD DarkJetPEBTLA',  'Jet'),
