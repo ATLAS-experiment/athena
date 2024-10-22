@@ -96,7 +96,7 @@ def reload_module (modname):
      >>> PyAthena.reload_module (Foo)   # will work too
     """
     import sys, types
-    from imp import reload
+    from importlib import reload
     if isinstance (modname, types.ModuleType):
         modname = modname.__name__
     if modname in sys.modules:
@@ -116,7 +116,7 @@ def py_reload (*args):
     ... # of both alg1 and alg2
     """
     import types, sys
-    from imp import reload
+    from importlib import reload
     for i,arg in enumerate(args):
         if isinstance (arg, types.ModuleType):
 ##             print (" ==> moduletype")
