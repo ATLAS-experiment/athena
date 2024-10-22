@@ -11,26 +11,6 @@ functions to convert an XML file into a python dict, back and forth
 __author__ = "Sebastien Binet <binet@cern.ch>"
 
 
-# hack: LCGCMT had the py-2.5 xml.etree module hidden by mistake.
-#       this is to import it, by hook or by crook
-def import_etree():
-    import xml
-    # first try the usual way
-    try:
-        import xml.etree
-        return xml.etree
-    except ImportError:
-        pass
-    # do it by hook or by crook...
-    import os, imp
-    xml_site_package = os.path.join(os.path.dirname(os.__file__), 'xml')
-    m = imp.find_module('etree', [xml_site_package])
-
-    etree = imp.load_module('xml.etree', *m)
-    xml.etree = etree
-    return etree
-
-etree = import_etree()
 from xml.etree import ElementTree
 
 from xml.sax.saxutils import escape as _xml_escape
