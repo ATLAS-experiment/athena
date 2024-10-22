@@ -504,7 +504,7 @@ void InDetAlignDBTool::dispGroup(const int dettype, const int bec,
   SmartIF<IRndmGenSvc> randsvc{Gaudi::svcLocator()->service("RndmGenSvc")};
   if(!randsvc.isValid()) ATH_MSG_ERROR("Cannot find RndmGenSvc" );
 
-  Rndm::Numbers gauss(randsvc.get(),Rndm::Gauss(0.,1.));
+  Rndm::Numbers gauss(randsvc,Rndm::Gauss(0.,1.));
   if (skip>0) {
     ATH_MSG_DEBUG("Skip random numbers " << skip ); 
     for (int i=0;i<skip;++i) gauss();
