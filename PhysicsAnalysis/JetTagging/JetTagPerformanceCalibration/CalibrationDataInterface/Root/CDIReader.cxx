@@ -33,6 +33,7 @@ Analysis::CDIReader::CDIReader(const std::string& cdipath, bool verbose) :  m_us
 
 
 void Analysis::CDIReader::crawlCDI(TDirectoryFile* parentDir, int depth, const std::string& metamap){
+
   TList* keys = parentDir->GetListOfKeys(); // get directories
   if(isWPdirectory(keys)){
     // now that we are at the level of the individual label directories
@@ -106,6 +107,7 @@ void Analysis::CDIReader::crawlCDI(TDirectoryFile* parentDir, int depth, const s
   } else {
     for(const auto coll: *keys){
       std::string collname = coll->GetName();
+      if ( collname.find("cutvalue") != std::string::npos || collname.find("fraction") != std::string::npos) continue;
       // track the metadata as you traverse
       record_metadata(collname, depth+1);
       TDirectoryFile* collDir = (TDirectoryFile*)parentDir->Get(collname.c_str());

@@ -85,9 +85,9 @@ if( XAOD_ANALYSIS )
 endif()
 
 if( XAOD_STANDALONE )
-   atlas_add_test( ut_BTaggingToolsTest
-     SCRIPT BTaggingToolsTester
-   ) 
+  atlas_add_test( ut_BTaggingToolsTest 
+    SCRIPT BTaggingToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/main/mc_PHYS_Run3/v40/DAOD_PHYS.myOutput.pool.root xAODBTaggingEfficiency/13p6TeV/MC23_2024-10-17_GN2v01_v1.root GN2v01 Continuous 
+  )
    atlas_add_test( ut_BTaggingSelectionTool_fixedcut
       SCRIPT BTaggingSelectionToolTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/main/mc_PHYS_Run3/v14/DAOD_PHYS.myOutput.pool.root xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root GN2v00NewAliasWP FixedCutBEff_77 
    )
