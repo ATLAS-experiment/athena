@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "DumpObjects.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
@@ -129,16 +133,12 @@ StatusCode InDet::DumpObjects::initialize() {
 
   // Define the TTree
   //
-  ITHistSvc *tHistSvc;
-  StatusCode sc = service("THistSvc", tHistSvc);
-  if (sc.isFailure()) {
-    ATH_MSG_ERROR("Unable to retrieve pointer to THistSvc");
-    return sc;
-  }
+  SmartIF<ITHistSvc> tHistSvc{Gaudi::svcLocator()->service("THistSvc")};
+  ATH_CHECK(tHistSvc.isValid());
   m_nt = new TTree(TString(m_ntupleTreeName), "Athena Dump for GNN4ITk");
   // NB: we must not delete the tree, this is done by THistSvc
   std::string fullNtupleName = m_ntupleFileName + m_ntupleDirName + m_ntupleTreeName;
-  sc = tHistSvc->regTree(fullNtupleName, m_nt);
+  StatusCode sc = tHistSvc->regTree(fullNtupleName, m_nt);
   if (sc.isFailure()) {
     ATH_MSG_ERROR("Unable to register TTree: " << fullNtupleName);
     return sc;
