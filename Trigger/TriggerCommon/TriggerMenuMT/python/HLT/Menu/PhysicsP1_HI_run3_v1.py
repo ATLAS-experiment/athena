@@ -472,6 +472,14 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_mb_sp_nototpix30_q2_L1TRT_ZDC_A_C_VjTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_sp_nototpix30_q2_L1TRT_ZDC_XOR_VjTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_sp_nototpix30_q2_L1TRT_ZDC_XOR_VjTE10_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
+
+        ChainProp(name='HLT_mb_pixsptrk_nototpix20_q2_L1TRT_ZDC_A_C_VjTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_mb_pixsptrk_nototpix20_q2_L1TRT_ZDC_XOR_VjTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_mb_pixsptrk_nototpix20_q2_L1TRT_ZDC_XOR_VjTE10_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_mb_pixsptrk_nototpix30_q2_L1TRT_ZDC_A_C_VjTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_mb_pixsptrk_nototpix30_q2_L1TRT_ZDC_XOR_VjTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_mb_pixsptrk_nototpix30_q2_L1TRT_ZDC_XOR_VjTE10_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
+
         #UPC diphotons/dielectrons supporting
         ChainProp(name='HLT_mb_excl_1trk5_pt1_L1eTAU1_jTE4_VjTE200', l1SeedThresholds=['FSNOSEED'],stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_excl_1trk5_pt1_L1eTAU1_TRT_VjTE200', l1SeedThresholds=['FSNOSEED'],stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
