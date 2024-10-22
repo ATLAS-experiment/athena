@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
-
-from __future__ import print_function
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import os
 import glob
@@ -11,14 +9,16 @@ import cgitb
 # Enable debugging output for CGI  
 cgitb.enable()
 
-# Use imp to import directly from path in cgi-bin?
-import imp
+# Use importlib to import directly from path in cgi-bin?
+import importlib.util
 
 if os.environ.get('SERVER_NAME', '') == 'atlas-lumicalc-dev.cern.ch':
-    lcmod = imp.load_source('LumiCalc', '/var/www/lumicalc_dev/athena/LumiBlock/LumiCalc/python/LumiCalcHtml.py')
+    spec = importlib.util.spec_from_file_location('LumiCalc', '/var/www/lumicalc_dev/athena/LumiBlock/LumiCalc/python/LumiCalcHtml.py')
 else:
-    lcmod = imp.load_source('LumiCalc', '/var/www/lumicalc/athena/LumiBlock/LumiCalc/python/LumiCalcHtml.py')
+    spec = importlib.util.spec_from_file_location('LumiCalc', '/var/www/lumicalc/athena/LumiBlock/LumiCalc/python/LumiCalcHtml.py')
 
+lcmod = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(lcmod)
 lc = lcmod.LumiCalc()
 
 lc.workdir = os.getcwd()
