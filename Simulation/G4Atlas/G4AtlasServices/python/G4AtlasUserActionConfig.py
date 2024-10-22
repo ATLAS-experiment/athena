@@ -137,8 +137,8 @@ def getDefaultActions(flags):
     # Calo calibration default processing
     if flags.Sim.CalibrationRun in [CalibrationRun.LArTile, CalibrationRun.LArTileZDC]:
         actions += [result.popToolsAndMerge(CalibrationDefaultProcessingToolCfg(flags))]
-
-    actions += [result.popToolsAndMerge(LooperKillerToolCfg(flags))]
+    if 'G4UserActions.G4UserActionsConfig.MonopoleLooperKillerToolCfg' not in flags.Sim.OptionalUserActionList:
+        actions += [result.popToolsAndMerge(LooperKillerToolCfg(flags))]
 
     result.setPrivateTools(actions)
     return result
