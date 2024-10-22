@@ -122,6 +122,9 @@ StatusCode ZdcNtuple :: initialize ()
     m_outputTree->Branch("timeStampNSOffset",&t_timeStampNSOffset,"timeStampNSOffset/i");
     m_outputTree->Branch("zdcEventInfoError",&t_zdcEventInfoError,"zdcEventInfoError/b");
     m_outputTree->Branch("zdcEventInfoErrorWord",&t_zdcEventInfoErrorWord,"zdcEventInfoErrorWord/i");
+    // ZDC and RPD decoding errors
+    m_outputTree->Branch("zdcDecodingError",&t_zdcDecodingError,"zdcDecodingError/b");
+    m_outputTree->Branch("rpdDecodingError",&t_rpdDecodingError,"rpdDecodingError/b");
 
     if (enableZDC)
       {
@@ -709,15 +712,20 @@ void ZdcNtuple::processZdcNtupleFromModules()
     t_centroidEventValid = false;
     t_cosDeltaReactionPlaneAngle = 0;
   }
-  
+
+  /*
   if (t_zdcEventInfoError == xAOD::EventInfo::Error)
     {
       ANA_MSG_INFO("ZDC event failed EventInfo error check - aborting!");
       return;
     }
+  */
   
   bool rpdErr = m_eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::RPDDECODINGERROR );
   bool zdcErr = m_eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::ZDCDECODINGERROR );
+  t_rpdDecodingError = rpdErr;
+  t_zdcDecodingError = zdcErr;
+  if (rpdErr||zdcErr) ANA_MSG_WARNING( "Decoding errors ZDC=" << zdcErr << " RPD=" << rpdErr );
 
   if (zdcSums.ptr())
     {

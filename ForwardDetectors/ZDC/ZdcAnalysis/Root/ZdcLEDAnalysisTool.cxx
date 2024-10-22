@@ -167,8 +167,17 @@ StatusCode ZdcLEDAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& mo
   if (moduleContainer.size()==0) return StatusCode::SUCCESS; // if no modules, do nothing
 
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
-  ATH_CHECK(eventInfo.isValid());
+  if (!eventInfo.isValid()) return StatusCode::FAILURE;
+  
+  bool zdcErr = eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::ZDCDECODINGERROR );
+  bool rpdErr = eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::RPDDECODINGERROR );
+  if (zdcErr||rpdErr)
+    {
+      ATH_MSG_WARNING("ZDC or RPD decoding error found - abandoning ZdcLEDAnalysisTool!");
+      return StatusCode::SUCCESS;
+    }
 
+  
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> eventTypeHandle(m_eventTypeKey);
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> DAQModeHandle(m_DAQModeKey);
 
