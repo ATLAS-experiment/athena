@@ -24,20 +24,28 @@ def HeavyIonJetRecoDataDeps(flags, **jetRecoDict):
     clustersKey = JetRecoCommon.getClustersKey(jetRecoDict)
     jetDef_unsub = JetRecoCommon.defineHIJets(jetRecoDict,clustersKey=clustersKey,prefix=jetNamePrefix,suffix="_Unsubtracted")
     jetDef_unsub._internalAtt['finalPJContainer'] = "PseudoJet"+clustersKey
+    target_jetReco = f"_for_{jetRecoDict['jetDefStr']}"
 
     # Seed jets for subtraction
     associationName = "%s_DR8Assoc" % (clustersKey)
     jetDef_seed0 = jetDef_unsub.clone()
-    jetDef_seed0.suffix = jetDef_unsub.suffix.replace("Unsubtracted", "seed0")
+    jetDef_seed0.suffix = jetDef_unsub.suffix.replace("Unsubtracted", "seed0"+target_jetReco)
     jetDef_seed0.radius = 0.2
     jetsFullName_seed0 = jetDef_seed0.fullname()
+
+    # Add this to the standard modifiers as we use this repeatedly
     stdJetModifiers.update(
         # we give a function as PtMin : it will be evaluated when instantiating the tool (modspec will come alias usage like "Filter:10000" --> PtMin=100000) 
         HLTHIJetAssoc = JetModifier("HIJetDRAssociationTool","HIJetDRAssociation", ContainerKey=clustersKey, DeltaR=0.8, AssociationName=associationName),
-        HLTHIJetMaxOverMean = JetModifier("HIJetMaxOverMeanTool","HIJetMaxOverMean", JetContainer = jetsFullName_seed0),
-        HLTHIJetDiscrim = JetModifier("HIJetDiscriminatorTool","HIJetDiscriminator", MaxOverMeanCut = 4, MinimumETMaxCut=3000),
     )
-    jetDef_seed0.modifiers=["HLTHIJetAssoc", "HLTHIJetMaxOverMean", "HLTHIJetDiscrim", "Filter:5000"]
+
+    # These mods are custom and used only here
+    jetDef_seed0.modifiers=[
+        "HLTHIJetAssoc",
+        JetModifier("HIJetMaxOverMeanTool","HIJetMaxOverMean"+target_jetReco, JetContainer = jetsFullName_seed0),
+        JetModifier("HIJetDiscriminatorTool","HIJetDiscriminator", MaxOverMeanCut = 4, MinimumETMaxCut=3000),
+        "Filter:5000"
+    ]
 
     JES_is_data=False
     calib_seq='EtaJES' #only do in situ for R=0.4 jets in data
@@ -104,7 +112,7 @@ from JetRecConfig.StandardJetMods import stdJetModifiers
 stdJetModifiers.update(
     HLTHIJetCalib = JetModifier("JetCalibrationTool",
                                 "HLTHICalibTool_{modspec}",
-                                JetCollection="AntiKt4HI",
+                                JetCollection=lambda _, modspec: modspec.split('___')[2] if len(modspec.split('___')) > 2 else "AntiKt4HI",
                                 PrimaryVerticesContainerName="",
                                 ConfigFile='JES_MC16_HI_Jan2021_5TeV.config',
                                 CalibSequence=lambda _, modspec: modspec.split('___')[0],
@@ -144,7 +152,10 @@ def jetHIRecoSequenceCA(configFlags, clustersKey, towerKey, **jetRecoDict):
     jetNamePrefix = JetRecoCommon.getHLTPrefix()
     jetDef = JetRecoCommon.defineHIJets(jetRecoDict,clustersKey=clustersKey,prefix=jetNamePrefix,suffix="_Unsubtracted")
     jetsFullName_Unsub = jetDef.fullname()
-
+    
+    #This is used for calibration and monitoring
+    jet_collection_name = jetsFullName_Unsub.split('_')[1].replace("Jets", "")
+    
     # Add the PseudoJetGetter alg to the sequence
     pjgalg = CompFactory.PseudoJetAlgorithm(
         "pjgalg_HI",
@@ -162,7 +173,7 @@ def jetHIRecoSequenceCA(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     ## Get online monitoring tool
     from JetRec import JetOnlineMon
-    monTool = JetOnlineMon.getMonTool_TrigJetAlgorithm(configFlags, "HLTJets/AntiKt4HI/")
+    monTool = JetOnlineMon.getMonTool_TrigJetAlgorithm(configFlags, "HLTJets/" + jet_collection_name + "/")
 
     # Reconstruction 
     jetRecAlg = getHIJetRecAlg(jetDef, jetsFullName_Unsub, monTool=monTool)
@@ -178,69 +189,72 @@ def jetHIRecoSequenceCA(configFlags, clustersKey, towerKey, **jetRecoDict):
          JES_is_data=True
          calib_seq += "_Insitu"
 
+    target_jetReco = f'_for_{jetRecoDict["jetDefStr"]}'
+
     # Copy unsubtracted jets: seed0
     jetDef_seed0 = jetDef.clone()
-    jetDef_seed0.suffix = jetDef.suffix.replace("Unsubtracted", "seed0")
+    jetDef_seed0.suffix = jetDef.suffix.replace("Unsubtracted", "seed0"+target_jetReco)
     jetDef_seed0.radius = 0.2
     jetsFullName_seed0 = jetDef_seed0.fullname()
-    stdJetModifiers.update(
-        # we give a function as PtMin : it will be evaluated when instantiating the tool (modspec will come alias usage like "Filter:10000" --> PtMin=100000) 
-        HLTHIJetAssoc = JetModifier("HIJetDRAssociationTool","HIJetDRAssociation", ContainerKey=clustersKey, DeltaR=0.8, AssociationName=associationName),
-        HLTHIJetMaxOverMean = JetModifier("HIJetMaxOverMeanTool","HIJetMaxOverMean", JetContainer = jetsFullName_seed0),
-        HLTHIJetDiscrim = JetModifier("HIJetDiscriminatorTool","HIJetDiscriminator", MaxOverMeanCut = 4, MinimumETMaxCut=3000),
-    )
-    jetDef_seed0.modifiers=["HLTHIJetAssoc", "HLTHIJetMaxOverMean", "HLTHIJetDiscrim", "Filter:5000"]
+    jetDef_seed0.modifiers=[
+        JetModifier("HIJetDRAssociationTool","HIJetDRAssociation", ContainerKey=clustersKey, DeltaR=0.8, AssociationName=associationName),
+        JetModifier("HIJetMaxOverMeanTool","HIJetMaxOverMean"+target_jetReco, JetContainer = jetsFullName_seed0),
+        JetModifier("HIJetDiscriminatorTool","HIJetDiscriminator", MaxOverMeanCut = 4, MinimumETMaxCut=3000),
+        "Filter:5000"
+    ]
+
     copySeed0Alg = getJetCopyAlg(jetsin=jetsInUnsub,jetsoutdef=jetDef_seed0,decorations=[],shallowcopy=False,shallowIO=False,monTool=monTool)
     acc.addEventAlgo(copySeed0Alg)
 
     # First iteration!
-    iter0=HLTAddIteration(configFlags, jetsFullName_seed0, eventShapeKey, clustersKey, map_tool=eventShapeMapTool, assoc_name=associationName, suffix="iter0") # subtract UE from jets
-    acc.addEventAlgo(HLTRunTools([iter0], "jetalgHI_iter0"))
+    iter0=HLTAddIteration(configFlags, jetsFullName_seed0, eventShapeKey, clustersKey, map_tool=eventShapeMapTool, assoc_name=associationName, suffix="iter0"+target_jetReco) # subtract UE from jets
+    acc.addEventAlgo(HLTRunTools([iter0], "jetalgHI_iter0"+target_jetReco))
     modulator0=iter0.Modulator
     subtractor0=iter0.Subtractor
 
-    HLTMakeSubtractionTool(configFlags, iter0.OutputEventShapeKey, Modulator=modulator0, EventShapeMapTool=eventShapeMapTool, Subtractor=subtractor0, label="HLTHIJetConstSub_iter0")
+    HLTMakeSubtractionTool(configFlags, iter0.OutputEventShapeKey, Modulator=modulator0, EventShapeMapTool=eventShapeMapTool, Subtractor=subtractor0, label="HLTHIJetConstSub_iter0"+target_jetReco)
 
-    cluster_key_iter0_deep=clustersKey+"_iter0_temp"
-    happy_iter0_Tool = ApplySubtractionToClustersHLT(configFlags, EventShapeKey="HLTHIEventShapeWeighted_iter0", ClusterKey=clustersKey, OutClusterKey=cluster_key_iter0_deep, Modulator=modulator0, EventShapeMapTool=eventShapeMapTool, Subtractor=subtractor0, SetMoments=False, ApplyOriginCorrection=False)
-    acc.addEventAlgo(HLTRunTools([happy_iter0_Tool], "jetalgHI_clusterSub_iter0"))
+    cluster_key_iter0_deep=clustersKey+"_iter0_temp"+target_jetReco
+    happy_iter0_Tool = ApplySubtractionToClustersHLT(configFlags, EventShapeKey="HLTHIEventShapeWeighted_iter0"+target_jetReco, ClusterKey=clustersKey, OutClusterKey=cluster_key_iter0_deep, Modulator=modulator0, EventShapeMapTool=eventShapeMapTool, Subtractor=subtractor0, SetMoments=False, ApplyOriginCorrection=False)
+    acc.addEventAlgo(HLTRunTools([happy_iter0_Tool], "jetalgHI_clusterSub_iter0"+target_jetReco))
 
-    GetConstituentsModifierToolHLT(configFlags, name="HIJetConstituentModifierTool", ClusterKey=cluster_key_iter0_deep, ApplyOriginCorrection=False, label="HLTHIJetJetConstMod_iter0")
+    GetConstituentsModifierToolHLT(configFlags, name="HIJetConstituentModifierTool", ClusterKey=cluster_key_iter0_deep, ApplyOriginCorrection=False, label="HLTHIJetJetConstMod_iter0"+target_jetReco)
 
     # Copy default jets: seed1
     jetDef_seed1 = jetDef.clone()
     jetDef_seed1.suffix = jetDef_seed0.suffix.replace("_seed0","_seed1")
     jetDef_seed1.radius = 0.2
-    jetDef_seed1.modifiers=["HLTHIJetAssoc", "HLTHIJetConstSub_iter0:iter0", "HLTHIJetSeedCalib:{}___{}".format(calib_seq, JES_is_data), "Filter:25000"]
+    jetDef_seed1.modifiers=["HLTHIJetAssoc", f"HLTHIJetConstSub_iter0{target_jetReco}:iter0", "HLTHIJetSeedCalib:{}___{}".format(calib_seq, JES_is_data), "Filter:25000"]
     jetsFullName_seed1 = jetDef_seed1.fullname()
     copySeed1Alg = getJetCopyAlg(jetsin=jetsInUnsub,jetsoutdef=jetDef_seed1,decorations=[],shallowcopy=False,shallowIO=False,monTool=monTool)
     acc.addEventAlgo(copySeed1Alg)
 
-    iter1=HLTAddIteration(configFlags, jetsFullName_seed1, eventShapeKey, clustersKey, map_tool=eventShapeMapTool, assoc_name=associationName, sub_tool=subtractor0, suffix="iter1")
-    iter1.OutputEventShapeKey="HLTHIEventShape_iter1"
+    iter1=HLTAddIteration(configFlags, jetsFullName_seed1, eventShapeKey, clustersKey, map_tool=eventShapeMapTool, assoc_name=associationName, sub_tool=subtractor0, suffix="iter1"+target_jetReco)
+    iter1.OutputEventShapeKey="HLTHIEventShape_iter1"+target_jetReco
     modulator1=iter1.Modulator
     subtractor1=iter1.Subtractor
 
-    HLTMakeSubtractionTool(configFlags, iter1.OutputEventShapeKey, Modulator=modulator1, EventShapeMapTool=eventShapeMapTool, label="HLTHIJetConstSub_iter1")
+    HLTMakeSubtractionTool(configFlags, iter1.OutputEventShapeKey, Modulator=modulator1, EventShapeMapTool=eventShapeMapTool, label="HLTHIJetConstSub_iter1"+target_jetReco)
 
-    acc.addEventAlgo(HLTRunTools([iter1], "jetalgHI_clusterSub_egamma")) 
+    acc.addEventAlgo(HLTRunTools([iter1], "jetalgHI_clusterSub_egamma"+target_jetReco))
 
     # 
-    cluster_key_final_deep=clustersKey+"_final"
-    subToClusterTool = ApplySubtractionToClustersHLT(configFlags, EventShapeKey="HLTHIEventShape_iter1", ClusterKey=clustersKey, OutClusterKey=cluster_key_final_deep, Modulator=modulator1, EventShapeMapTool=eventShapeMapTool, Subtractor=subtractor1, SetMoments=False, ApplyOriginCorrection=False)
-    acc.addEventAlgo(HLTRunTools([subToClusterTool], "jetalgHI_clusterSub"))
+    cluster_key_final_deep=clustersKey+"_final"+target_jetReco
+    subToClusterTool = ApplySubtractionToClustersHLT(configFlags, EventShapeKey="HLTHIEventShape_iter1"+target_jetReco, ClusterKey=clustersKey, OutClusterKey=cluster_key_final_deep, Modulator=modulator1, EventShapeMapTool=eventShapeMapTool, Subtractor=subtractor1, SetMoments=False, ApplyOriginCorrection=False)
+    acc.addEventAlgo(HLTRunTools([subToClusterTool], "jetalgHI_clusterSub"+target_jetReco))
 
-    GetConstituentsModifierToolHLT(configFlags, name="HIJetConstituentModifierTool", ClusterKey=cluster_key_final_deep, ApplyOriginCorrection=False, label="HLTHIJetJetConstMod_iter1")
+    GetConstituentsModifierToolHLT(configFlags, name="HIJetConstituentModifierTool", ClusterKey=cluster_key_final_deep, ApplyOriginCorrection=False, label="HLTHIJetJetConstMod_iter1"+target_jetReco)
 
     jetDef_final = jetDef.clone()
     jetDef_final.suffix = jetDef.suffix.replace("_Unsubtracted","")
-    jetDef_final.modifiers=["HLTHIJetConstSub_iter1:iter1", "HLTHIJetJetConstMod_iter1", "HLTHIJetCalib:{}___{}".format(calib_seq, JES_is_data), "Sort", "Filter:20000"]
+    jetDef_final.modifiers=[f"HLTHIJetConstSub_iter1{target_jetReco}:iter1", "HLTHIJetJetConstMod_iter1"+target_jetReco, "HLTHIJetCalib:{}___{}___{}".format(calib_seq, JES_is_data, jet_collection_name), "Sort", "Filter:20000"]
     copyAlg_final= getJetCopyAlg(jetsin=jetsInUnsub,jetsoutdef=jetDef_final,decorations=[],shallowcopy=False,shallowIO=False,monTool=monTool)
     acc.addEventAlgo(copyAlg_final)
 
     jetsFinal = recordable(jetDef_final.fullname())
 
     jetsOut = jetsFinal
+
     return acc, jetsOut, jetDef_final
 
 def HLTRunTools(toollist, algoName):

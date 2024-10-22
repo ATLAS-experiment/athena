@@ -160,6 +160,7 @@ def getPhysicsHISignatures():
 
     chains['Jet'] = [
         # HI jets
+       
         #HI jet chains with L1jTE
         ChainProp(name='HLT_j50_ion_L1jTE50', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j60_ion_L1jTE50', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+SupportPhIGroup),
@@ -437,6 +438,27 @@ def getPhysicsHISignatures():
         #ATR-29025 - J/Psi chains
         ChainProp(name='HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TRT_VjTE20', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream, 'express'],groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
         ChainProp(name='HLT_mb_excl_1trk5_pt0p5_hi_FgapAC5_L1TRT_VjTE20', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
+        
+        #--- phase-1 HI 0.2 jets in UCC collisions
+        ChainProp(name='HLT_j40_a2_ion_hi_uccTh3_L1jTE10000', l1SeedThresholds=['FSNOSEED']*2, stream=[HardProbesStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j50_a2_ion_hi_uccTh3_L1jTE10000', l1SeedThresholds=['FSNOSEED']*2, stream=[HardProbesStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j60_a2_ion_hi_uccTh3_L1jTE10000', l1SeedThresholds=['FSNOSEED']*2, stream=[HardProbesStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j40_a2_ion_hi_uccTh2_L1jTE9000', l1SeedThresholds=['FSNOSEED']*2, stream=[HardProbesStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j50_a2_ion_hi_uccTh2_L1jTE9000', l1SeedThresholds=['FSNOSEED']*2, stream=[HardProbesStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j60_a2_ion_hi_uccTh2_L1jTE9000', l1SeedThresholds=['FSNOSEED']*2, stream=[HardProbesStream], groups=SingleJetGroup+SupportPhIGroup),
+        
+        ChainProp(name='HLT_j40_a2_ion_hi_uccTh3_L1ZDC_HELT25_jTE4000', l1SeedThresholds=['FSNOSEED']*2, stream=[HardProbesStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j50_a2_ion_hi_uccTh3_L1ZDC_HELT25_jTE4000', l1SeedThresholds=['FSNOSEED']*2, stream=[HardProbesStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j60_a2_ion_hi_uccTh3_L1ZDC_HELT25_jTE4000', l1SeedThresholds=['FSNOSEED']*2, stream=[HardProbesStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j40_a2_ion_hi_uccTh2_L1ZDC_HELT20_jTE4000', l1SeedThresholds=['FSNOSEED']*2, stream=[HardProbesStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j50_a2_ion_hi_uccTh2_L1ZDC_HELT20_jTE4000', l1SeedThresholds=['FSNOSEED']*2, stream=[HardProbesStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j60_a2_ion_hi_uccTh2_L1ZDC_HELT20_jTE4000', l1SeedThresholds=['FSNOSEED']*2, stream=[HardProbesStream], groups=SingleJetGroup+SupportPhIGroup),
+            
+        #--- muons in UCC collisions
+        ChainProp(name='HLT_mu4noL1_hi_uccTh3_L1jTE10000', l1SeedThresholds=['FSNOSEED']*2, stream=[HardProbesStream], groups=SingleMuonGroup),
+        ChainProp(name='HLT_mu4noL1_hi_uccTh2_L1jTE9000', l1SeedThresholds=['FSNOSEED']*2, stream=[HardProbesStream], groups=SingleMuonGroup),
+        ChainProp(name='HLT_mu4noL1_L1ZDC_HELT25_jTE4000', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleMuonGroup),
+        ChainProp(name='HLT_mu4noL1_L1ZDC_HELT20_jTE4000', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleMuonGroup),
 
     ]
 
