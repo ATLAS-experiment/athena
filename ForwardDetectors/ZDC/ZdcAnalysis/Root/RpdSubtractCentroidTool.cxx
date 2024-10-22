@@ -10,6 +10,7 @@
 #include "AsgDataHandles/ReadDecorHandle.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
 #include "ZdcUtils/RPDUtils.h"
+#include "ZdcUtils/ZdcEventInfo.h"
 
 namespace ZDC
 {
@@ -131,12 +132,21 @@ void RpdSubtractCentroidTool::reset() {
   m_cosDeltaReactionPlaneAngle = 0;
 }
 
-bool RpdSubtractCentroidTool::readAOD(xAOD::ZdcModuleContainer const& moduleContainer, xAOD::ZdcModuleContainer const& moduleSumContainer) {
+RpdSubtractCentroidTool::SubstepStatus RpdSubtractCentroidTool::readAOD(xAOD::ZdcModuleContainer const& moduleContainer, xAOD::ZdcModuleContainer const& moduleSumContainer) {
   // initialize read handles from read handle keys
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
   if (!eventInfo.isValid()) {
-    return false;
+    return SubstepStatus::Failure;
   }
+  // RPD decorations are always needed
+  if (eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::RPDDECODINGERROR)) {
+    return SubstepStatus::SkipEvent;
+  }
+  // ZDC decorations are sometimes needed
+  if (m_readZDCDecorations && eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::ZDCDECODINGERROR)) {
+    return SubstepStatus::SkipEvent;
+  }
+
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> xposRelHandle(m_xposRelKey);
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> yposRelHandle(m_yposRelKey);
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned short> rowHandle(m_rowKey);
@@ -214,7 +224,7 @@ bool RpdSubtractCentroidTool::readAOD(xAOD::ZdcModuleContainer const& moduleCont
     if (m_zdcFinalEnergy) m_zdcFinalEnergy->at(side) = (*zdcFinalEnergyHandle)(*zdcSum);
   }
 
-  return true;
+  return SubstepStatus::Success;
 }
 
 bool RpdSubtractCentroidTool::checkZdcRpdValidity(unsigned int side) {
@@ -412,7 +422,17 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(xAOD::ZdcModuleContainer cons
     return StatusCode::SUCCESS;
   }
   reset();
-  if (!readAOD(moduleContainer, moduleSumContainer)) return StatusCode::FAILURE;
+  switch (readAOD(moduleContainer, moduleSumContainer)) {
+    case SubstepStatus::Success:
+      // do nothing - proceed
+      break;
+    case SubstepStatus::Failure:
+      // stop and propagate error to Athena
+      return StatusCode::FAILURE;
+    case SubstepStatus::SkipEvent:
+      // stop and tell Athena the event was a success
+      return StatusCode::SUCCESS;
+  }
   for (auto const side : RPDUtils::sides) {
     if (!checkZdcRpdValidity(side)) continue; // rpd invalid -> don't calculate centroid
     if (!subtractRpdAmplitudes(side)) continue; // bad total sum -> don't calculate centroid

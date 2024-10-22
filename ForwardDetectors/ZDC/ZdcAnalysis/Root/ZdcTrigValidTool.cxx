@@ -10,6 +10,9 @@
 #include "AsgDataHandles/ReadDecorHandle.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
 
+#include "xAODEventInfo/EventInfo.h"
+#include "ZdcUtils/ZdcEventInfo.h"
+
 using json = nlohmann::json;
 
 //**********************************************************************
@@ -72,6 +75,8 @@ StatusCode ZdcTrigValidTool::initialize() {
   m_trigValStatus = "ZdcSums.TrigValStatus"+m_auxSuffix;
   ATH_CHECK(m_trigValStatus.initialize());
 
+  ATH_CHECK( m_eventInfoKey.initialize());
+  
   return StatusCode::SUCCESS;
   
 }
@@ -81,10 +86,21 @@ StatusCode ZdcTrigValidTool::recoZdcModules(const xAOD::ZdcModuleContainer& modu
 { 
   std::vector<float> moduleEnergy = {0., 0., 0., 0., 0., 0., 0., 0.};
 
+  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
+  if (!eventInfo.isValid()) return StatusCode::FAILURE;
+  // Check for decoding errors and bail out if ZDC error found                                                               
+  bool zdcErr = eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::ZDCDECODINGERROR );
+  if (zdcErr)
+    {
+      ATH_MSG_WARNING("ZDC decoding error found - abandoning ZdcTrigValidTool!");
+      return StatusCode::SUCCESS;
+    }
+  
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleAmp(m_zdcModuleAmp);
 
   bool trigMatch = false;
   for (const auto zdcModule : moduleContainer) {
+
     if (zdcModule->zdcType() == 1) continue;
     
     // Side A

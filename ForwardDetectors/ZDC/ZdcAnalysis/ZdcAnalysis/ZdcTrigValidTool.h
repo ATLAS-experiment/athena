@@ -17,6 +17,7 @@
 #include "AsgTools/AsgTool.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "ZdcUtils/ZDCTriggerSim.h"
+#include "xAODEventInfo/EventInfo.h"
 
 #include "nlohmann/json.hpp"
 
@@ -65,7 +66,11 @@ class ATLAS_NOT_THREAD_SAFE ZdcTrigValidTool : public virtual IZdcAnalysisTool, 
 
   SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleAmp{this, "ZdcModuleAmplitude", "", "ZDC module Amplitude"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_trigValStatus{this, "TrigValStatus", "","Trigger validation status"};
-  
+
+  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {
+    this, "EventInfoKey", "EventInfo",
+    "Location of the event info."};
+
 };
 }
 #endif
