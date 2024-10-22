@@ -26,15 +26,24 @@
 
 using CP::CorrectionCode;
 ANA_MSG_HEADER(testBTagSelection)
-ANA_MSG_SOURCE(testBTagSelection, "BtaggingToolTester")
+ANA_MSG_SOURCE(testBTagSelection, "BtaggingToolsTester")
 using namespace testBTagSelection;
 
-int main() {
+int main(int argc, char* argv[]) {
 
-  std::string inputDAOD = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/main/mc_PHYS_Run3/v40/DAOD_PHYS.myOutput.pool.root";
-  std::string CDIPath = "xAODBTaggingEfficiency/13p6TeV/2023-22-13TeV-MC21-CDI-2023-09-13_v1.root";
-  std::string taggerName = "DL1dv01";
-  std::string workingPointName = "FixedCutBEff_77";
+  const char* TEST_NAME = argv[0];
+
+  if (argc < 4) {
+    ANA_MSG_ERROR (  "No right inputs received!" );
+    ANA_MSG_ERROR (  "Usage: " << TEST_NAME << " [DAOD file name] [CDI path] [b-tagger name] [WP name]" );
+    return 1;
+  }
+
+  std::string inputDAOD = argv[1];
+  std::string CDIPath = argv[2];
+  std::string taggerName = argv[3];
+  std::string workingPointName = argv[4];
+
   std::string JetCollectionName = "AntiKt4EMPFlowJets";
   std::string strat = "SFEigen"; // systematic strategy, see here for more info on which strategy to use: https://ftag.docs.cern.ch/calibrations/cdi/systematics/eigenvectordecomp/#which-method-should-i-use
   unsigned int sample_dsid = 601414; // this is needed for the so called MC/MC efficiency map, details can be found here: https://ftag.docs.cern.ch/algorithms/activities/mcmc/
