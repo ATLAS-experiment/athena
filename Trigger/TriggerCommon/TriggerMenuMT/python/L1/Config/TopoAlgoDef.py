@@ -2294,11 +2294,11 @@ class TopoAlgoDef:
         # 4. DeltaPhiMax
         algolist=[
             { "minDphi": 23, "maxDphi": 32, "mult": 2, "otype1" : "eEM",
-              "ocut1": 1, "olist1": "s", "nleading1": HW.eEmOutputWidthSort,"otype2" : ""},#23DPHI32_2eEM1s
+                "ocut1": 1, "olist1": "s", "nleading1": HW.eEmOutputWidthSort, "minET1":0.9, "otype2" : "", "minET2":0.8},#23DPHI32_2eEM1s
             { "minDphi": 23, "maxDphi": 32, "mult": 2, "otype1" : "eTAU",
-              "ocut1": 1, "olist1": "s", "nleading1": HW.eTauOutputWidthSort,"otype2" : ""},#23DPHI32_2eTAU1s
+                "ocut1": 1, "olist1": "s", "nleading1": HW.eTauOutputWidthSort,"minET1":1.0,"otype2" : "","minET2":1.0},#23DPHI32_2eTAU1s
             { "minDphi": 23, "maxDphi": 32, "mult": 2, "otype1" : "jTAU",
-              "ocut1": 1, "olist1": "s", "nleading1": HW.jTauOutputWidthSort,"otype2" : ""},#23DPHI32_2jTAU1s
+                "ocut1": 1, "olist1": "s", "nleading1": HW.jTauOutputWidthSort,"minET1":1.4,"otype2" : "","minET2":1.4},#23DPHI32_2jTAU1s
         ]
         for x in algolist:
             class d:
@@ -2310,14 +2310,12 @@ class TopoAlgoDef:
             log.debug("Define %s", toponame)
             inputList = [d.otype1+d.olist1]
             algoname = AlgConf.DeltaPhiIncl1
-            ttconfig = tm.l1menu.thresholds.typeWideThresholdConfig(d.otype1)
-            ptMin = ttconfig["ptMinToTopo1"] if d.otype1=="jTAU" else ttconfig["ptMinToTopo"]
             alg = algoname( name = toponame, inputs = inputList, outputs = [ toponame ])
             alg.addgeneric('NumResultBits', 1)
             alg.addgeneric('InputWidth', d.nleading1)
             alg.addgeneric('MaxTob', d.nleading1)
-            alg.addvariable('MinET1',      get_threshold_cut(d.otype1, d.ocut1)*_et_conversion)
-            alg.addvariable('MinET2',      ptMin*_et_conversion)
+            alg.addvariable('MinET1',      d.minET1*_et_conversion)
+            alg.addvariable('MinET2',      d.minET2*_et_conversion)
             alg.addvariable('MinDeltaPhi', d.minDphi*_phi_conversion)
             alg.addvariable('MaxDeltaPhi', d.maxDphi*_phi_conversion)
             tm.registerTopoAlgo(alg)
