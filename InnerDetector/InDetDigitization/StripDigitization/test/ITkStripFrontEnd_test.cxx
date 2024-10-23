@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -84,9 +84,8 @@ class GaudiFixture {
      m_toolSvc = m_svcLoc->service("ToolSvc");
      m_appMgr->configure().ignore();
      m_appMgr->initialize().ignore();
-     m_sg = nullptr;
-     m_svcLoc->service ("StoreGateSvc", m_sg).ignore();
-     m_svcLoc->service ("StoreGateSvc/DetectorStore", m_detStore).ignore();
+     m_sg = m_svcLoc->service ("StoreGateSvc");
+     m_detStore = m_svcLoc->service ("StoreGateSvc/DetectorStore");
    }
  
    void 
@@ -110,8 +109,8 @@ class GaudiFixture {
    SmartIF<ISvcManager>     m_svcMgr;
    SmartIF<IToolSvc>        m_toolSvc;
    SmartIF<IProperty>       m_propMgr;
-   StoreGateSvc*            m_sg{ nullptr };
-   StoreGateSvc *           m_detStore{nullptr};
+   SmartIF<StoreGateSvc>    m_sg;
+   SmartIF<StoreGateSvc>    m_detStore;
  };
 
 BOOST_AUTO_TEST_SUITE(TEST_ITkStripFrontEnd)
