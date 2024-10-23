@@ -65,19 +65,16 @@ class L1CaloCondAlg: public ::AthAlgorithm {
     { this, "Calib2Keys", {}, "" };
 
   // Folders only located at V1
-  SG::ReadCondHandleKey<CondAttrListCollection> m_disabledTowers{ this, "DisabledTowers", "/TRIGGER/L1Calo/V1/Conditions/DisabledTowers", "DisabledTowers" };
-  SG::ReadCondHandleKey<CondAttrListCollection> m_derivedRunPars{ this, "DerivedRunPars", "/TRIGGER/L1Calo/V1/Conditions/DerivedRunPars",  "DerivedRunPars"};
-  SG::ReadCondHandleKey<CondAttrListCollection> m_ppmDeadChannels{ this, "PpmDeadChannels", "/TRIGGER/L1Calo/V1/Calibration/PpmDeadChannels","PpmDeadChannels" };
-  SG::ReadCondHandleKey<CondAttrListCollection> m_ppmFineTimeRefs{ this, "PpmFineTimeRefs" ,"/TRIGGER/L1Calo/V1/References/FineTimeReferences",  "PpmFineTimeRefs"};
-  SG::ReadCondHandleKey<CondAttrListCollection> m_runParameters{ this, "RunParameters" ,"/TRIGGER/L1Calo/V1/Conditions/RunParameters",  "RunParameters"};
-
-
-
+  SG::ReadCondHandleKey<CondAttrListCollection> m_disabledTowers{ this, "DisabledTowers", "", "DisabledTowers" };
+  SG::ReadCondHandleKey<CondAttrListCollection> m_derivedRunPars{ this, "DerivedRunPars", "",  "DerivedRunPars"};
+  SG::ReadCondHandleKey<CondAttrListCollection> m_ppmDeadChannels{ this, "PpmDeadChannels", "","PpmDeadChannels" };
+  SG::ReadCondHandleKey<CondAttrListCollection> m_ppmFineTimeRefs{ this, "PpmFineTimeRefs" ,"",  "PpmFineTimeRefs"};
+  SG::ReadCondHandleKey<CondAttrListCollection> m_runParameters{ this, "RunParameters" ,"",  "RunParameters"};
   // Folders with configuration information
-  SG::ReadCondHandleKey<CondAttrListCollection> m_pprChanDefaults{ this, "PprChanDefaults" ,"/TRIGGER/L1Calo/V2/Configuration/PprChanDefaults",  "PprChanDefaults"};
-  SG::ReadCondHandleKey<CondAttrListCollection> m_pprChanStrategy{ this, "PprChanStrategy", "/TRIGGER/L1Calo/V2/Configuration/PprChanStrategy",  "PprChanStrategy"};
-  SG::ReadCondHandleKey<CondAttrListCollection> m_readoutConfig{ this, "ReadoutConfig",  "/TRIGGER/L1Calo/V2/Configuration/ReadoutConfig",  "ReadoutConfig"};
-  SG::ReadCondHandleKey<CondAttrListCollection> m_readoutConfigJSON{ this, "ReadoutConfigJSON",  "/TRIGGER/L1Calo/V2/Configuration/ReadoutConfigJSON",  "ReadoutConfigJSON"};
+  SG::ReadCondHandleKey<CondAttrListCollection> m_pprChanDefaults{ this, "PprChanDefaults" ,"",  "PprChanDefaults"};
+  SG::ReadCondHandleKey<CondAttrListCollection> m_pprChanStrategy{ this, "PprChanStrategy", "",  "PprChanStrategy"};
+  SG::ReadCondHandleKey<CondAttrListCollection> m_readoutConfig{ this, "ReadoutConfig",  "",  "ReadoutConfig"};
+  SG::ReadCondHandleKey<CondAttrListCollection> m_readoutConfigJSON{ this, "ReadoutConfigJSON",  "",  "ReadoutConfigJSON"};
 
 
   // Defining WriteCondHandleKey for saving condition containers 
@@ -94,6 +91,10 @@ class L1CaloCondAlg: public ::AthAlgorithm {
   SG::WriteCondHandleKey<L1CaloReadoutConfigContainer>  m_readoutConfigContainer{ this, "OutputKeyReadoutConfig", "L1CaloReadoutConfigContainer"};
   SG::WriteCondHandleKey<L1CaloReadoutConfigContainerJSON>  m_readoutConfigContainerJSON{ this, "OutputKeyReadoutConfigJSON", "L1CaloReadoutConfigContainerJSON"};
 
+
+  template <typename T> StatusCode updateCond(SG::WriteCondHandleKey<T>& wkey,
+          std::vector<std::reference_wrapper<const SG::ReadCondHandleKey<CondAttrListCollection>>> rkeys,
+          std::unique_ptr<T> obj = nullptr);
 
 
 }; 

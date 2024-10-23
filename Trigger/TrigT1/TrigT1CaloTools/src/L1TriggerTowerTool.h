@@ -26,15 +26,17 @@
 #include "TrigConfData/L1Menu.h"
 #include "CxxUtils/checker_macros.h"
 
+#include "TrigT1CaloCalibConditions/L1CaloRunParametersContainer.h"
+#include "TrigT1CaloCalibConditions/L1CaloPpmFineTimeRefsContainer.h"
+#include "TrigT1CaloCalibConditions/L1CaloPprConditionsContainerRun2.h"
+#include "TrigT1CaloCalibConditions/L1CaloPprDisabledChannelContainerRun2.h"
+
 class CaloIdManager;
 class CaloLVL1_ID;
 class CaloTriggerTowerService;
 class Incident;
-class L1CaloCondSvc;
-class L1CaloPpmFineTimeRefsContainer;
-class L1CaloDerivedRunParsContainer;
-class L1CaloRunParametersContainer;
-class L1CaloPprChanStrategyContainer;
+
+
 
 
 namespace LVL1
@@ -154,21 +156,20 @@ namespace LVL1
       ToolHandle<LVL1::IL1CaloMappingTool> m_mappingTool;
 
       /// L1Calo conditions
-      ServiceHandle<L1CaloCondSvc> m_l1CondSvc;
+      SG::ReadCondHandleKey<L1CaloRunParametersContainer>  m_runParametersContainerKey{ this, "InputKeyRunParameters", "L1CaloRunParametersContainer"};
+      SG::ReadCondHandleKey<L1CaloPprConditionsContainerRun2> m_conditionsContainerKeyRun2{ this, "InputKeyPprConditionsRun2", "L1CaloPprConditionsContainerRun2"};
+      SG::ReadCondHandleKey<L1CaloPprDisabledChannelContainerRun2> m_disabledChannelContainerKeyRun2{ this, "InputKeyDisabledChannelRun2", "L1CaloPprDisabledChannelContainerRun2"};
+      SG::ReadCondHandleKey<L1CaloPpmFineTimeRefsContainer> m_dbFineTimeRefsTowersKey{ this, "InputKeyTimeRefs", "L1CaloPpmFineTimeRefsContainer"};
 
-      // one of L1CaloPprConditionsContainer{,Run2}*
-      
-      /// For Run2 strategy (LowMu, HighMu)
-      L1CaloPprChanStrategyContainer* m_strategyContainer = nullptr;
-      L1CaloDerivedRunParsContainer* m_derivedRunParsContainer = nullptr;
-      L1CaloRunParametersContainer* m_runParametersContainer = nullptr;
-      
-      std::any m_conditionsContainer;
-      // one of L1CaloPprDisabledChannelContainer{,Run2}*
-      std::any m_disabledChannelContainer;
+      const L1CaloRunParametersContainer* m_runParametersContainer = nullptr;
+
+      // - Note: 2024, dropped support for non-Run2 case
+      // this is why these were std::any, to allow for both possibilities when it was previously supported
+      std::any m_conditionsContainer; // one of L1CaloPprConditionsContainer{,Run2}*
+      std::any m_disabledChannelContainer;  // one of L1CaloPprDisabledChannelContainer{,Run2}*
       
       /// For the fine time monitoring
-      L1CaloPpmFineTimeRefsContainer* m_dbFineTimeRefsTowers; 
+      const L1CaloPpmFineTimeRefsContainer* m_dbFineTimeRefsTowers = nullptr;
       
 
       /// Mapping lookup table

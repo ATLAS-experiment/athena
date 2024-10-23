@@ -49,6 +49,11 @@
 //LVL1 Calo trigger includes
 #include "TrigT1CaloCalibConditions/L1CaloCoolChannelId.h"
 #include "TrigT1CaloCalibConditions/L1CaloPprChanDefaults.h"
+#include "TrigT1CaloCalibConditions/L1CaloPprChanCalibContainer.h"
+#include "TrigT1CaloCalibConditions/L1CaloPprChanDefaultsContainer.h"
+#include "TrigT1CaloCalibConditions/L1CaloDisabledTowersContainer.h"
+#include "TrigT1CaloCalibConditions/L1CaloPpmDeadChannelsContainer.h"
+#include "TrigT1CaloToolInterfaces/IL1TriggerTowerTool.h"
 
 #include "TrigConfData/L1Menu.h"
 
@@ -59,13 +64,9 @@
 // forward decl(s)
 class CaloLVL1_ID;
 class CaloTriggerTowerService;
-class L1CaloCondSvc;
-class L1CaloPprChanCalibContainer;
 class L1CaloPprChanCalib;
 class L1CaloPprChanDefaults;
-class L1CaloDisabledTowersContainer;
 class L1CaloDisabledTowers;
-class L1CaloPpmDeadChannelsContainer;
 class L1CaloPpmDeadChannels;
 
 class IAthRNGSvc;
@@ -81,7 +82,6 @@ namespace LVL1BS {
 
 namespace LVL1
 {
-class IL1TriggerTowerTool;
 class IL1CaloMappingTool;
 class InternalTriggerTower;
 class TriggerTower;
@@ -139,10 +139,10 @@ private:
   bool m_requireAllCalos;
 
   // database keys for the variousfolders
-  std::string m_chanCalibKey;
-  std::string m_chanDefaultsKey;
-  std::string m_disabledTowersKey;
-  std::string m_deadChannelsKey;
+  SG::ReadCondHandleKey<L1CaloPprChanCalibContainer> m_chanCalibKey{this,"ChanCalibFolderKey","/TRIGGER/L1Calo/V2/Calibration/Physics/PprChanCalib","PprChanCalib key"};
+  SG::ReadCondHandleKey<L1CaloPprChanDefaultsContainer> m_chanDefaultsKey{this,"ChanDefaultsFolderKey","/TRIGGER/L1Calo/V2/Configuration/PprChanDefaults","PprChanDefaults key"};
+  SG::ReadCondHandleKey<L1CaloDisabledTowersContainer> m_disabledTowersKey{this,"DisabledTowersFolderKey","/TRIGGER/L1Calo/V2/Conditions/DisabledTowers","DisabledTowers key"};
+  SG::ReadCondHandleKey<L1CaloPpmDeadChannelsContainer> m_deadChannelsKey{this,"DeadChannelsFolderKey","/TRIGGER/L1Calo/V2/Calibration/PpmDeadChannels","PpmDeadChannels key"};
   std::string m_chanCalibKeyoverlay;
   std::string m_chanDefaultsKeyoverlay;
   std::string m_disabledTowersKeyoverlay;
@@ -150,10 +150,9 @@ private:
 
   // Tools/Services
   ServiceHandle <IAthRNGSvc> m_rngSvc;
-  ServiceHandle<L1CaloCondSvc> m_condSvc;
   ATHRNG::RNGWrapper* m_rndmADCs; // non owning ptr
 
-  ToolHandle<IL1TriggerTowerTool> m_TTtool;
+  ToolHandle<IL1TriggerTowerTool> m_TTtool{this,"TTTool","LVL1::L1TriggerTowerTool/L1TriggerTowerTool", "The trigger tower tool"};
   ToolHandle<IL1CaloMappingTool> m_mappingTool;
   ToolHandle<LVL1BS::ITrigT1CaloDataAccessV2> m_bstowertool;
 
@@ -175,9 +174,9 @@ private:
   bool m_isReco;
 
   // non-owning pointers
-  L1CaloPprChanCalibContainer* m_chanCalibContainer = nullptr;
-  L1CaloDisabledTowersContainer* m_disabledTowersContainer = nullptr;
-  L1CaloPpmDeadChannelsContainer* m_deadChannelsContainer = nullptr;
+  const L1CaloPprChanCalibContainer* m_chanCalibContainer = nullptr;
+  const L1CaloDisabledTowersContainer* m_disabledTowersContainer = nullptr;
+  const L1CaloPpmDeadChannelsContainer* m_deadChannelsContainer = nullptr;
   L1CaloPprChanDefaults m_chanDefaults;
   L1CaloPprChanCalibContainer* m_chanCalibContaineroverlay = nullptr;
   L1CaloDisabledTowersContainer* m_disabledTowersContaineroverlay = nullptr;
