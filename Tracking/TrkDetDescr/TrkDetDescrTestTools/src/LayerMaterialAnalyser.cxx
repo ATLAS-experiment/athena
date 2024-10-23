@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -88,8 +88,7 @@ StatusCode Trk::LayerMaterialAnalyser::initialize()
     m_binCounter       = new std::vector<int>(LAYERMAXBINS, 0);
     
     // now register the Tree
-    ITHistSvc* tHistSvc = nullptr;
-    
+
     // ------------- validation section ------------------------------------------
     m_validationTree = new TTree(m_validationTreeName.c_str(), m_validationTreeDescription.c_str());
 
@@ -115,7 +114,8 @@ StatusCode Trk::LayerMaterialAnalyser::initialize()
     m_validationTree->Branch("LayerElements",         &m_elements           );
     
     // now register the Tree
-    if (service("THistSvc",tHistSvc).isFailure()) {
+    SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+    if (!tHistSvc) {
         ATH_MSG_ERROR("initialize() Could not find Hist Service -> Switching ValidationMode Off !" );
         delete m_validationTree; m_validationTree = nullptr;
         return StatusCode::SUCCESS;

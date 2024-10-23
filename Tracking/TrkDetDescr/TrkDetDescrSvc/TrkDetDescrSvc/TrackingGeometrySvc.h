@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -73,10 +73,7 @@ namespace Trk {
 
     private:
       void trackingGeometryNotSet() const;
-      //!< cached pointers:
-      ISvcLocator*                                m_pSvcLocator {nullptr};
-      StoreGateSvc*                               m_pDetStore   {nullptr};
-  
+
       ToolHandle<Trk::IGeometryBuilder>           m_trackingGeometryBuilder {this, "GeometryBuilder", ""};
       //!< the actual building tool
       mutable const Trk::TrackingGeometry*        m_trackingGeometry     {nullptr};

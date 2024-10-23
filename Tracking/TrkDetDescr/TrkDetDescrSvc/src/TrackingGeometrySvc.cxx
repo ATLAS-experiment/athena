@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -48,9 +48,6 @@ Trk::TrackingGeometrySvc::initialize()
   m_autoRetrieveTools = false;
   m_checkToolDeps = false;
 
-  // get the DetectorStore
-  ATH_CHECK(service("DetectorStore", m_pDetStore));
-
   if (m_geometryProcessors.retrieve().isFailure()) {
     ATH_MSG_FATAL("Could not retrieve " << m_geometryProcessors);
     return StatusCode::FAILURE;
@@ -85,6 +82,10 @@ StatusCode
 Trk::TrackingGeometrySvc::trackingGeometryInit(bool needsInit)
 {
   ATH_MSG_INFO("Trk::TrackingGeometrySvc::trackingGeometryInit");
+
+  SmartIF<StoreGateSvc> detStore{service("DetectorStore")};
+  ATH_CHECK( detStore.isValid() );
+
   // Retrieve the tracking geometry builder tool
   // ----------------------------------------------------
   if (!m_trackingGeometryBuilder.empty() && m_trackingGeometryBuilder.retrieve().isFailure()) {
@@ -99,7 +100,7 @@ Trk::TrackingGeometrySvc::trackingGeometryInit(bool needsInit)
   }
 
   // nothing to do in this case since rerun is switched off
-  if (m_pDetStore->contains<Trk::TrackingGeometry>(m_trackingGeometryName) && !m_rerunOnCallback) {
+  if (detStore->contains<Trk::TrackingGeometry>(m_trackingGeometryName) && !m_rerunOnCallback) {
     return StatusCode::SUCCESS;
   }
 
@@ -135,13 +136,13 @@ Trk::TrackingGeometrySvc::trackingGeometryInit(bool needsInit)
     Trk::TrackingGeometry* atlasTrackingGeometry = const_cast<Trk::TrackingGeometry*>(m_trackingGeometry);
 
     // check if a second call back has occured
-    if (m_pDetStore->contains<Trk::TrackingGeometry>(m_trackingGeometryName)) {
+    if (detStore->contains<Trk::TrackingGeometry>(m_trackingGeometryName)) {
       ATH_MSG_VERBOSE("New Callback evoked remove of existing object!");
       // you need to retrieve the object first to remove it
       const Trk::TrackingGeometry* oldTrackingGeometry = nullptr;
-      if (m_pDetStore->retrieve(oldTrackingGeometry, m_trackingGeometryName).isFailure())
+      if (detStore->retrieve(oldTrackingGeometry, m_trackingGeometryName).isFailure())
         ATH_MSG_WARNING("Callback evoked remove of '" << m_trackingGeometryName << "'. But retrieve did not succeed! ");
-      if (oldTrackingGeometry && m_pDetStore->remove<Trk::TrackingGeometry>(oldTrackingGeometry).isFailure())
+      if (oldTrackingGeometry && detStore->remove<Trk::TrackingGeometry>(oldTrackingGeometry).isFailure())
         ATH_MSG_WARNING("Callback evoked remove of '" << m_trackingGeometryName << "'. But it did not succeed!");
       // delete is safe
       delete oldTrackingGeometry;
@@ -164,7 +165,7 @@ Trk::TrackingGeometrySvc::trackingGeometryInit(bool needsInit)
       }
     }
     // record the resulting TrackingGeometry
-    if (m_pDetStore->record(atlasTrackingGeometry, m_trackingGeometryName, false).isFailure()) {
+    if (detStore->record(atlasTrackingGeometry, m_trackingGeometryName, false).isFailure()) {
       ATH_MSG_WARNING("Couldn't write TrackingGeometry to DetectorStore.");
     } else {
       ATH_MSG_DEBUG("initialize() successful: TrackingGeometry '" << m_trackingGeometryName

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -22,7 +22,6 @@
 // constructor
 Trk::RandomSurfaceBuilder::RandomSurfaceBuilder(const std::string& t, const std::string& n, const IInterface* p)
 : AthAlgTool(t,n,p),    
-  m_rndmSvc("RndmGenSvc", n),
   m_gaussDist(nullptr),
   m_flatDist(nullptr),
   m_numberOfSurfaces(100),
@@ -50,14 +49,12 @@ StatusCode Trk::RandomSurfaceBuilder::initialize()
 {
    
    // Random number service
-   if ( m_rndmSvc.retrieve().isFailure() ) {
-     ATH_MSG_FATAL( "Could not retrieve " << m_rndmSvc );
-     return StatusCode::FAILURE;
-   }
-   
+   m_rndmSvc = service("RndmGenSvc");
+   ATH_CHECK( m_rndmSvc.isValid() );
+
    // intialize the random number generators
-   m_gaussDist = new Rndm::Numbers(&*m_rndmSvc, Rndm::Gauss(0.,1.));
-   m_flatDist  = new Rndm::Numbers(&*m_rndmSvc, Rndm::Flat(0.,1.));
+   m_gaussDist = new Rndm::Numbers(m_rndmSvc, Rndm::Gauss(0.,1.));
+   m_flatDist  = new Rndm::Numbers(m_rndmSvc, Rndm::Flat(0.,1.));
    
    return StatusCode::SUCCESS;
 }
