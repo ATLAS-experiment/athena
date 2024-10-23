@@ -362,6 +362,7 @@ def getHLTmap_fromTM(flags, period, release):
             menu = getHLTMenuAccess(flags)
             for hltname,chain in menu.chains().items():
                 l1seed  = chain["l1item"]
+                if l1seed == "": l1seed = "All"
                 primary = any('Primary' in g or 'TagAndProbe' in g for g in chain["groups"])
                 ps = 1 if primary else 0
                 hltMap[hltname] = (l1seed, dummyfutureLBs*ps, False, {})  #third arg is hasRerun=False
