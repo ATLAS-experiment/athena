@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONTRUTHSUMMARYTOOL_H
@@ -14,6 +14,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/IIncidentListener.h"
+#include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -29,7 +30,6 @@ namespace Trk {
 }  // namespace Trk
 
 class IIncidentSvc;
-class ITHistSvc;
 class TTree;
 
 namespace Muon {
@@ -117,7 +117,7 @@ namespace Muon {
         mutable std::recursive_mutex m_mutex;
 
         TTree* m_tree;
-        ITHistSvc* m_thistSvc;
+        ServiceHandle<ITHistSvc> m_thistSvc;
         bool m_writeTree;  // Set to true in order to write out ntuple
         std::string m_treeName;
         std::string m_histStream;

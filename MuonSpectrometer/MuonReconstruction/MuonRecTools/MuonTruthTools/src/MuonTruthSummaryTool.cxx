@@ -7,7 +7,6 @@
 #include <iostream>
 
 #include "AtlasHepMC/GenParticle.h"
-#include "GaudiKernel/ITHistSvc.h"
 #include "MuonSegment/MuonSegment.h"
 #include "TTree.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
@@ -22,7 +21,7 @@ namespace Muon {
         m_wasInit(false),
         m_truthHitsTotal(0),
         m_tree(nullptr),
-        m_thistSvc(nullptr),
+        m_thistSvc("THistSvc", n),
         m_writeTree(false),
         m_level(0) {
         declareInterface<IMuonTruthSummaryTool>(this);
@@ -42,7 +41,7 @@ namespace Muon {
         m_incidentSvc->addListener(this, std::string("EndEvent"));
 
         if (m_writeTree) {
-            ATH_CHECK(service("THistSvc", m_thistSvc));
+            ATH_CHECK(m_thistSvc.retrieve());
 
             m_tree = new TTree(m_treeName.c_str(), "Ntuple of MuonTruthSummary");
             constexpr int NUM_LEVELS = 3;  // Hardcoding to 3 levels for the moment.
