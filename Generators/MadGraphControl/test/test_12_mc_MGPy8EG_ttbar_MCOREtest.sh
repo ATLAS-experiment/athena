@@ -7,11 +7,10 @@
 # art-athena-mt: 8
 # art-output: EVNT.root
 
-export ATHENA_PROC_NUMBER=8
-unset ATHENA_CORE_NUMBER # This is not an MT job!
+# On the grid, this will happen in the pilot... adding this so that it gets done for local runs too
+export ATHENA_CORE_NUMBER=8
 
 Gen_tf.py --ecmEnergy=13000. --maxEvents=-1 --firstEvent=1 --randomSeed=123456 --outputEVNTFile=EVNT.root --jobConfig=950112
-# Note 11.4.2020: This is currently crashing because the output validator expects an MP-specific file (asked VT)
 echo "art-result: $? generation"
 
 # Run tests on the log file

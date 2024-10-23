@@ -73,7 +73,7 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh
 # I used 21.6.99 for LHE production, probably safe to stay with that one
 asetup AthGeneration, 21.6.99,here
 # 8 cores, go higher if you have more?!
-export ATHENA_PROC_NUMBER=8
+export ATHENA_CORE_NUMBER=8
 # get a jO known to work
 cp https://gitlab.cern.ch/atlas-physics/pmg/mcjoboptions/-/blob/master/950xxx/950562/mc.Ph_jjj_MiNLO_expo4_kttight_JZ6_valid.py .
 Gen_tf.py --ecmEnergy=13000 --jobConfig=$PWD --outputEVNTFile=tmp.EVNT.pool.root --randomSeed=432 --maxEvents=100 >& log&

@@ -57,7 +57,7 @@ class PowhegControl(object):
         self.scheduler = Scheduler()
 
         # Load run arguments
-        process_kwargs = {"cores": int(os.environ.pop("ATHENA_PROC_NUMBER", 1))}
+        process_kwargs = {"cores": int(os.environ.pop("ATHENA_CORE_NUMBER", 1))}
         if run_args is None:
             logger.warning("No run arguments found! Using defaults.")
         else:

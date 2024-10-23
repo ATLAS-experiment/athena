@@ -21,8 +21,8 @@ def get_physics_short():
 
 
 def check_reset_proc_number(opts):
-    if 'ATHENA_PROC_NUMBER' in os.environ and int(os.environ['ATHENA_PROC_NUMBER'])>0:
-        mglog.info('Noticed that you have run with an athena MP-like whole-node setup.  Will re-configure now to make sure that the remainder of the job runs serially.')
+    if 'ATHENA_CORE_NUMBER' in os.environ and int(os.environ['ATHENA_CORE_NUMBER'])>0:
+        mglog.info('Noticed that you have run with an athena MT-like whole-node setup.  Will re-configure now to make sure that the remainder of the job runs serially.')
         # Try to modify the opts underfoot
         if not hasattr(opts,'nprocs'):
             mglog.warning('Did not see option!')

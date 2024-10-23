@@ -392,8 +392,8 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
     # Set consistent mode and number of jobs
     mode = 0
     njobs = 1
-    if 'ATHENA_PROC_NUMBER' in os.environ and int(os.environ['ATHENA_PROC_NUMBER'])>0:
-        njobs = int(os.environ['ATHENA_PROC_NUMBER'])
+    if 'ATHENA_CORE_NUMBER' in os.environ and int(os.environ['ATHENA_CORE_NUMBER'])>0:
+        njobs = int(os.environ['ATHENA_CORE_NUMBER'])
         mglog.info('Lucky you - you are running on a full node queue.  Will re-configure for '+str(njobs)+' jobs.')
         mode = 2
 
@@ -513,7 +513,7 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
             mglog.info('Modifying bin/internal/cluster.py for PBS cluster running')
             os.system("sed -i \"s:text += prog:text += './'+prog:g\" bin/internal/cluster.py")
     elif mode==2:
-        mglog.info('Setting up multi-core running on '+os.environ['ATHENA_PROC_NUMBER']+' cores')
+        mglog.info('Setting up multi-core running on '+os.environ['ATHENA_CORE_NUMBER']+' cores')
     elif mode==0:
         mglog.info('Setting up serial generation.')
 
@@ -1029,9 +1029,9 @@ def setupLHAPDF(process_dir=None, extlhapath=None, allow_links=True):
 # Function to set the number of cores and the running mode in the run card
 def setNCores(process_dir, Ncores=None):
     my_Ncores = Ncores
-    my_runMode = 2 if 'ATHENA_PROC_NUMBER' in os.environ else 0
-    if Ncores is None and 'ATHENA_PROC_NUMBER' in os.environ and int(os.environ['ATHENA_PROC_NUMBER'])>0:
-        my_Ncores = int(os.environ['ATHENA_PROC_NUMBER'])
+    my_runMode = 2 if 'ATHENA_CORE_NUMBER' in os.environ else 0
+    if Ncores is None and 'ATHENA_CORE_NUMBER' in os.environ and int(os.environ['ATHENA_CORE_NUMBER'])>0:
+        my_Ncores = int(os.environ['ATHENA_CORE_NUMBER'])
         my_runMode = 2
     if my_Ncores is None:
         mglog.info('Setting up for serial run')
@@ -2555,8 +2555,8 @@ def add_reweighting(run_name,reweight_card=None,process_dir=MADGRAPH_GRIDPACK_LO
     mglog.info('Finished reweighting')
 
 def check_reset_proc_number(opts):
-    if 'ATHENA_PROC_NUMBER' in os.environ and int(os.environ['ATHENA_PROC_NUMBER'])>0:
-        mglog.info('Noticed that you have run with an athena MP-like whole-node setup.  Will re-configure now to make sure that the remainder of the job runs serially.')
+    if 'ATHENA_CORE_NUMBER' in os.environ and int(os.environ['ATHENA_CORE_NUMBER'])>0:
+        mglog.info('Noticed that you have run with an athena MT-like whole-node setup.  Will re-configure now to make sure that the remainder of the job runs serially.')
         # Try to modify the opts underfoot
         if not hasattr(opts,'nprocs'):
             mglog.warning('Did not see option!')

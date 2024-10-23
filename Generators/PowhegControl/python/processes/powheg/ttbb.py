@@ -53,8 +53,8 @@ class ttbb(PowhegRES):
             info_message = """
                 Due to an apparent bug in PowhegBox, the *INTEGRATION* for this Powheg process (ttbb)
                 requires running at least two (computer) processes in parallel. Please configure Athena
-                to do so, e.g. by setting the environment variable ATHENA_PROC_NUMBER to 2 or a higher
-                number. In Bash, do e.g.: 'export ATHENA_PROC_NUMBER=4'.
+                to do so, e.g. by setting the environment variable ATHENA_CORE_NUMBER to 2 or a higher
+                number. In Bash, do e.g.: 'export ATHENA_CORE_NUMBER=4'.
                 """
             logger.info(info_message)
 

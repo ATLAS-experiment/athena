@@ -620,7 +620,7 @@ missing subjobs by hand 1 Create gridpack by hand
 
 You can use multi-core MadGraph by doing
 
-    export ATHENA_PROC_NUMBER=8
+    export ATHENA_CORE_NUMBER=8
 
 before running athena. Please keep in mind that this triggers the use of
 8 cores, which while perfectly allowed interactively is not allowed on

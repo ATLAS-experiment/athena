@@ -101,7 +101,7 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh
 # I used 21.6.70 for LHE production, probably safe to stay with that one
 asetup AthGeneration, 21.6.70,here
 # 16 cores
-export ATHENA_PROC_NUMBER=16
+export ATHENA_CORE_NUMBER=16
 # get a jO known to work
 cp /cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/600xxx/600720/mc.Ph_jj_JZ3_opt.py .
 Gen_tf.py --ecmEnergy=13000 --jobConfig=$PWD --outputEVNTFile=tmp.EVNT.pool.root --randomSeed=432 --maxEvents=100 >& log&

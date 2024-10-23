@@ -9,9 +9,9 @@
 
 from __main__ import opts
 import os
-if 'ATHENA_PROC_NUMBER' in os.environ:
+if 'ATHENA_CORE_NUMBER' in os.environ:
     evgenLog.info('Noticed that you have run with an athena MP-like whole-node setup.  Will re-configure now to make sure that the remainder of the job runs serially.')
-    njobs = os.environ.pop('ATHENA_PROC_NUMBER')
+    njobs = os.environ.pop('ATHENA_CORE_NUMBER')
     # Try to modify the opts underfoot
     if not hasattr(opts,'nprocs'): mglog.warning('Did not see option!')
     else: opts.nprocs = 0
