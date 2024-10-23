@@ -5,6 +5,7 @@
 #include "src/TrackParamsEstimationTool.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "Acts/Seeding/EstimateTrackParamsFromSeed.hpp"
+#include "Acts/EventData/TransformationHelpers.hpp"
 
 namespace ActsTrk {
   TrackParamsEstimationTool::TrackParamsEstimationTool(const std::string& type,
@@ -93,39 +94,16 @@ namespace ActsTrk {
 
     if (m_useTopSp) {
       // reverse direction so momentum vector pointing outwards
-      auto [phi, theta] = Acts::detail::normalizePhiTheta(params[Acts::eBoundPhi] - M_PI, M_PI - params[Acts::eBoundTheta]);
-      params[Acts::eBoundPhi] = phi;
-      params[Acts::eBoundTheta] = theta;
-      params[Acts::eBoundQOverP] *= -1.0;
+      params = Acts::reflectBoundParameters(params);
     }
 
-    Acts::BoundVector initialSigmas = {m_sigmaLoc0, m_sigmaLoc1, m_sigmaPhi,
-        m_sigmaTheta, m_sigmaQOverP, m_sigmaT0};
-    Acts::BoundMatrix covariance = Acts::BoundMatrix::Zero();
-
-    for (std::size_t i = Acts::eBoundLoc0; i < Acts::eBoundSize; ++i) {
-      double variance = initialSigmas[i] * initialSigmas[i];
-
-      if (i == Acts::eBoundQOverP) {
-        // note that we rely on the fact that sigma theta is already computed
-        double varianceTheta = covariance(Acts::eBoundTheta, Acts::eBoundTheta);
-
-        // transverse momentum contribution
-        variance +=
-            std::pow(m_initialSigmaPtRel * params[Acts::eBoundQOverP], 2);
-
-        // theta contribution
-        variance +=
-            varianceTheta * std::pow(params[Acts::eBoundQOverP] /
-                                        std::tan(params[Acts::eBoundTheta]),
-                                    2);
-      }
-
-      // Inflate the initial covariance
-      variance *= m_initialVarInflation[i];
-
-      covariance(i, i) = variance;
-    }
+    Acts::EstimateTrackParamCovarianceConfig covarianceEstimationConfig = {
+      .initialSigmas = {m_sigmaLoc0, m_sigmaLoc1, m_sigmaPhi, m_sigmaTheta, m_sigmaQOverP, m_sigmaT0},
+      .initialSigmaPtRel = m_initialSigmaPtRel,
+      .initialVarInflation = Eigen::Map<const Acts::BoundVector>(m_initialVarInflation.value().data()),
+      .noTimeVarInflation = 1.0,
+    };
+    Acts::BoundMatrix covariance = Acts::estimateTrackParamCovariance(covarianceEstimationConfig, params, false);
 
     // Create BoundTrackParameters
     return Acts::BoundTrackParameters(surface.getSharedPtr(),
