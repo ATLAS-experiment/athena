@@ -10,7 +10,7 @@
 #include "MVAUtils/BDT.h"
 #include "TFile.h"
 #include "TTree.h"
-#include "GaudiKernel/IChronoStatSvc.h"
+
 //
 //-------------------------------------------------
 namespace InDet {
@@ -100,7 +100,7 @@ InDetTrkInJetType::InDetTrkInJetType(const std::string& type,
 
      m_initialised = 1;          // Tool is initialised successfully.
 //-----
-     if(msgLvl(MSG::DEBUG)) ATH_CHECK(service("ChronoStatSvc", m_timingProfile));
+     if(msgLvl(MSG::DEBUG)) ATH_CHECK(m_timingProfile.retrieve());
 //-----
      return StatusCode::SUCCESS;
    }

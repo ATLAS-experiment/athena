@@ -34,6 +34,7 @@
 #include <vector>
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/IChronoStatSvc.h"
 #include "xAODJet/JetContainer.h" 
 #include "xAODTracking/TrackParticleContainer.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
@@ -96,7 +97,7 @@ namespace InDet {
    private:
 
     std::vector<std::unique_ptr<MVAUtils::BDT>> m_vTrkClassBDT{};
-    IChronoStatSvc* m_timingProfile = nullptr;
+    ServiceHandle<IChronoStatSvc> m_timingProfile{this,"ChronoStatSvc","ChronoStatSvc"};
    
     IntegerProperty m_trkSctHitsCut
       {this, "trkSctHits", 4, "Cut on track SCT hits number"};
