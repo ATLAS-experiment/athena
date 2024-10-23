@@ -13,10 +13,10 @@
 #include "CxxUtils/checker_macros.h"
 
 // PerfMon includes
-#include "SemiDetMisc.h"   // borrow from existing code
 #include "PerfMonEvent/mallinfo.h"
 
 // STL includes
+#include <dlfcn.h>     // for dlsym
 #include <fcntl.h>     // for open function
 #include <malloc.h>    // for mallinfo function
 #include <sys/stat.h>  // to check whether /proc/* exists in the machine
@@ -54,6 +54,12 @@ namespace PMonMT {
   // Simple check if directory exists
   bool doesDirectoryExist(const std::string& dir);
 
+  // Malloc memory measurements
+  double get_malloc_kb ATLAS_NOT_THREAD_SAFE ();
+
+  // Get library name from symbol
+  const char * symb2lib(const char* symbol, const char* failstr);
+
   // Step name and Component name pairs. Ex: Initialize - StoreGateSvc
   struct StepComp {
     std::string stepName;
@@ -84,7 +90,7 @@ namespace PMonMT {
     bool capture_memory ATLAS_NOT_THREAD_SAFE() {
 
       // Memory
-      malloc = PMonSD::get_malloc_kb();
+      malloc = get_malloc_kb();
       vmem = get_vmem();
       return true;  // dummy return value for use with thread-checker macros
     }
@@ -410,6 +416,30 @@ inline MemoryMap_t operator-(const MemoryMap_t& map1, const MemoryMap_t& map2) {
 inline bool PMonMT::doesDirectoryExist(const std::string& dir) {
   struct stat buffer;
   return (stat(dir.c_str(), &buffer) == 0);
+}
+
+/*
+ * Get Malloc (from SemiDetMisc.h) 
+ */
+inline double PMonMT::get_malloc_kb ATLAS_NOT_THREAD_SAFE () {
+#ifndef __linux
+  return 0.0;
+#else
+  PerfMon::mallinfo_t m=PerfMon::mallinfo();
+  return (m.uordblks+m.hblkhd)/1024.0;
+#endif
+}
+
+/*
+ * Get library name from symbol (from SemiDetMisc.h) 
+ */
+inline const char * PMonMT::symb2lib(const char*symbol,const char * failstr = "unknown") {
+  void * addr = dlsym(RTLD_DEFAULT,symbol);
+  if (!addr) return failstr;
+  Dl_info di;
+  if (!dladdr(addr, &di)) return failstr;
+  if (!di.dli_fname) return failstr;
+  return di.dli_fname;
 }
 
 #endif  // PERFMONCOMPS_PERFMONMTUTILS_H

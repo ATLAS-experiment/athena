@@ -15,8 +15,7 @@
 
 // PerfMonComps includes
 #include "PerfMonMTSvc.h"
-#include "PerfMonUtils.h"  // borrow from existing code
-#include "SemiDetMisc.h"   // borrow from existing code
+#include "PerfMonUtils.h"
 
 // STD includes
 #include <algorithm>
@@ -604,8 +603,8 @@ void PerfMonMTSvc::report2Log_EnvInfo() const {
   ATH_MSG_INFO("                               Environment Information                                 ");
   ATH_MSG_INFO("=======================================================================================");
 
-  ATH_MSG_INFO(std::format("{:<35} {}","Malloc Library:", std::filesystem::path(PMonSD::symb2lib("malloc")).filename().string()));
-  ATH_MSG_INFO(std::format("{:<35} {}","Math Library:", std::filesystem::path(PMonSD::symb2lib("atan2")).filename().string()));
+  ATH_MSG_INFO(std::format("{:<35} {}","Malloc Library:", std::filesystem::path(PMonMT::symb2lib("malloc")).filename().string()));
+  ATH_MSG_INFO(std::format("{:<35} {}","Math Library:", std::filesystem::path(PMonMT::symb2lib("atan2")).filename().string()));
 
   ATH_MSG_INFO("=======================================================================================");
 
@@ -710,8 +709,8 @@ void PerfMonMTSvc::report2JsonFile_Summary(nlohmann::json& j) const {
                              {"totMem", totMem}};
 
   // Report Enviroment info
-  const std::string mallocLib = std::filesystem::path(PMonSD::symb2lib("malloc")).filename().string();
-  const std::string mathLib = std::filesystem::path(PMonSD::symb2lib("atan2")).filename().string();
+  const std::string mallocLib = std::filesystem::path(PMonMT::symb2lib("malloc")).filename().string();
+  const std::string mathLib = std::filesystem::path(PMonMT::symb2lib("atan2")).filename().string();
 
   j["summary"]["envInfo"] = {{"mallocLib", mallocLib},
                              {"mathLib", mathLib}};
