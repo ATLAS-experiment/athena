@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ------------------------------------------------------------------------------
@@ -22,7 +22,7 @@ class SimpleConstraintPointMinimizer {
   // describe the maximum distance from the origin to include in the
   // minimization
   SimpleConstraintPointMinimizer(double proximity);
-  ~SimpleConstraintPointMinimizer();
+  ~SimpleConstraintPointMinimizer() = default;
   // minimize via a trivial algorithm which weights all points and dimensions
   // equally
   double findMinimum(const std::vector<SurveyConstraintPoint>& points,

@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetSurveyConstraintTool/SurveyConstraintTestAlg.h"
+#include "SurveyConstraintTestAlg.h"
 #include "InDetSurveyConstraintTool/ISurveyConstraint.h"
 #include "GaudiKernel/MsgStream.h"
 
@@ -22,7 +22,6 @@
 
 SurveyConstraintTestAlg::SurveyConstraintTestAlg(const std::string& name, ISvcLocator* pSvcLocator) :
 AthAlgorithm(name, pSvcLocator),
-  m_toolsvc{},            //!< Pointer to tool service
   m_SurvConstr{},
   m_pixid{},
   m_sctid{},
@@ -46,11 +45,11 @@ StatusCode SurveyConstraintTestAlg::initialize(){
   ATH_MSG_DEBUG( "initialize()" );
   
   // Get The ToolSvc
-  ATH_CHECK( service("ToolSvc",m_toolsvc));
- 
+  SmartIF<IToolSvc> toolSvc{Gaudi::svcLocator()->service("ToolSvc")};
+  ATH_CHECK(toolSvc.isValid());
   
   // Get SurveyConstraint from ToolService
-  ATH_CHECK( m_toolsvc->retrieveTool("SurveyConstraint",m_SurvConstr));
+  ATH_CHECK( toolSvc->retrieveTool("SurveyConstraint",m_SurvConstr));
  
   // get ID helpers from detector store (relying on GeoModel to put them)
   ATH_CHECK(detStore()->retrieve(m_pixid));

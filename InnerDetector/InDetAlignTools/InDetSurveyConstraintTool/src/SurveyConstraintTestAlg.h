@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaBaseComps/AthAlgorithm.h"
@@ -18,14 +18,13 @@ class TH1;
 class ATLAS_NOT_THREAD_SAFE SurveyConstraintTestAlg : public AthAlgorithm {
  public:
   SurveyConstraintTestAlg (const std::string& name, ISvcLocator* pSvcLocator);
-  StatusCode initialize();
-  StatusCode execute();
-  StatusCode finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute() override;
+  virtual StatusCode finalize() override;
   StatusCode BookHist(); 
   void CreateMisAlignNtuple();
   
  private :
-  IToolSvc*                              m_toolsvc;            //!< Pointer to tool service
   ISurveyConstraint*                     m_SurvConstr;
   const PixelID*                         m_pixid;
   const SCT_ID*                          m_sctid;

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetSurveyConstraintTool/SurveyConstraint.h"
-#include "InDetSurveyConstraintTool/SimpleConstraintPointMinimizer.h"
+#include "SurveyConstraint.h"
+#include "SimpleConstraintPointMinimizer.h"
 
 // Gaudi & StoreGate
 #include "GaudiKernel/MsgStream.h"
@@ -41,14 +41,12 @@ namespace {
 
 SurveyConstraint::SurveyConstraint(const std::string& type,
 				   const std::string& name, const IInterface* parent)
-  : AthAlgTool(type,name,parent),
+  : base_class(type,name,parent),
     m_idHelper{},
     m_pixid(nullptr),
     m_sctid(nullptr),
-    m_toolsvc(nullptr),     
     m_current_IDAlignDBTool(nullptr),
     m_survey_IDAlignDBTool(nullptr),
-    m_randsvc(nullptr), 
     m_SurveyWeightX(1.0),
     m_SurveyWeightY(1.0),
     m_SurveyWeightZ(1.0),
@@ -105,7 +103,6 @@ SurveyConstraint::SurveyConstraint(const std::string& type,
     m_surveyrfile(""),
     m_ntuple(false)
  {
-  declareInterface<ISurveyConstraint>(this);
   declareProperty("SurveyWeightX"              ,     m_SurveyWeightX);
   declareProperty("SurveyWeightY"              ,     m_SurveyWeightY);
   declareProperty("SurveyWeightZ"              ,     m_SurveyWeightZ);
@@ -163,68 +160,40 @@ SurveyConstraint::SurveyConstraint(const std::string& type,
   declareProperty("Ntuple"                     ,     m_ntuple);
 }
 
-SurveyConstraint::~SurveyConstraint()
-{
-  //  delete m_idHelper;
-}
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 StatusCode SurveyConstraint::initialize(){
   
   // Part 1: Get the messaging service, print where you are
-  msg(MSG::INFO) << "SurveyConstraint initialize()" << endmsg;
+  ATH_MSG_INFO("SurveyConstraint initialize()");
 
   // Get The ToolSvc
-  StatusCode sc = service("ToolSvc",m_toolsvc);
-  if (sc.isFailure()) {
-    msg(MSG::FATAL) << "Could not find ToolSvc. Exiting." << endmsg;
-    return sc;
-  }
-  msg(MSG::INFO) << "got ToolSvc" << endmsg;
+  SmartIF<IToolSvc> toolSvc{Gaudi::svcLocator()->service("ToolSvc")};
+  ATH_CHECK(toolSvc.isValid());
+  ATH_MSG_INFO("got ToolSvc");
   
   // Get current InDetAlignDataBaseTool from ToolService
-  sc = m_toolsvc->retrieveTool("InDetAlignDBTool",m_aligndbtoolinst,m_current_IDAlignDBTool);
-  if (sc.isFailure()) {
-    msg(MSG::FATAL) <<"Could not find InDetAlignDBTool. Exiting."<<endmsg;
-    return sc;
-  }
-  msg(MSG::INFO) << "got current_IDAlignDBTool" << endmsg;
-  msg(MSG::INFO) << "current_IDAlignDBTool name = " << m_current_IDAlignDBTool->name() << endmsg;
+  ATH_CHECK(toolSvc->retrieveTool("InDetAlignDBTool",m_aligndbtoolinst,m_current_IDAlignDBTool));
+  ATH_MSG_INFO("got current_IDAlignDBTool");
+  ATH_MSG_INFO("current_IDAlignDBTool name = " << m_current_IDAlignDBTool->name());
   
   // Get survey InDetAlignDataBaseTool from ToolService
-  sc = m_toolsvc->retrieveTool("InDetAlignDBTool",m_surveydbtoolinst,m_survey_IDAlignDBTool);
-  if (sc.isFailure()) {
-    msg(MSG::FATAL) <<"Could not find InDetAlignDBTool. Exiting."<<endmsg;
-    return sc;
-  }
-  msg(MSG::INFO) << "got survey_IDAlignDBTool" << endmsg;
+  ATH_CHECK(toolSvc->retrieveTool("InDetAlignDBTool",m_surveydbtoolinst,m_survey_IDAlignDBTool));
+  ATH_MSG_INFO("got survey_IDAlignDBTool");
 
   //ID Helper
-  sc = detStore()->retrieve(m_idHelper, "AtlasID" );
-  if (sc.isFailure()) {
-    msg(MSG::WARNING) << "Could not get AtlasDetectorID !" << endmsg;
-    return StatusCode::SUCCESS;
-  }else{
-    if (msgLvl(MSG::DEBUG)) msg() << "Found AtlasDetectorID" << endmsg;
-  }
+  ATH_CHECK(detStore()->retrieve(m_idHelper, "AtlasID" ));
+  ATH_MSG_DEBUG("Found AtlasDetectorID");
 
   // get ID helpers from detector store (relying on GeoModel to put them)
-  if ((StatusCode::SUCCESS!=detStore()->retrieve(m_pixid)) ||
-      (StatusCode::SUCCESS!=detStore()->retrieve(m_sctid))) {
-    msg(MSG::FATAL) << "Problem retrieving ID helpers" << endmsg;
-    return StatusCode::FAILURE;
-  }
-  msg(MSG::INFO) << "got ID helpers from detector store (relying on GeoModel to put them)" << endmsg;
+  ATH_CHECK(detStore()->retrieve(m_pixid));
+  ATH_CHECK(detStore()->retrieve(m_sctid));
+  ATH_MSG_INFO("got ID helpers from detector store (relying on GeoModel to put them)");
 
   // ReadCondHandleKeys
   ATH_CHECK(m_pixelDetEleCollKey.initialize());
   ATH_CHECK(m_SCTDetEleCollKey.initialize());
 
-  // random number service
-  if (StatusCode::SUCCESS!=service("RndmGenSvc",m_randsvc,true))
-    msg(MSG::ERROR) << "Cannot find RndmGenSvc" << endmsg;
-  
   // Protection against singular weight matrix
   if (m_surveywfile==""){
     if(m_TransXRand<1.E-7) m_TransXRand=1.E-7;
@@ -253,7 +222,7 @@ StatusCode SurveyConstraint::initialize(){
     if(m_RotYRandSCTB<1.E-7) m_RotYRandSCTB=1.E-7;
     if(m_RotZRandSCTB<1.E-7) m_RotZRandSCTB=1.E-7;
   }
-  msg(MSG::INFO) << "now entering SurveyConstraint::setup_SurveyConstraintModules()" << endmsg;
+  ATH_MSG_INFO("now entering SurveyConstraint::setup_SurveyConstraintModules()");
   setup_SurveyConstraintModules();
   //if (m_surveywfile!="") 
   return StatusCode::SUCCESS;
@@ -264,7 +233,7 @@ StatusCode SurveyConstraint::initialize(){
 StatusCode SurveyConstraint::finalize() {
   
   // Part 1: Get the messaging service, print where you are
-  msg(MSG::INFO) << "finalize()" << endmsg;
+  ATH_MSG_INFO("finalize()");
   
   std::map<Identifier, SurveyConstraintModule*, std::less<Identifier> >::iterator it;
   for (it = m_ModuleMap.begin(); it != m_ModuleMap.end(); ++it) {
@@ -317,35 +286,34 @@ StatusCode SurveyConstraint::computeConstraint(const Identifier& ModuleID,
   Amg::Vector3D staveangles;
   std::vector< SurveyConstraintPoint > Stavepoints;
   mut->getPoints(Stavepoints,SurveyConstraintModule::Stave);
-  if (msgLvl(MSG::DEBUG)) msg() << "SurveyConstraint().computeConstraint: Stavepoints.size() " << Stavepoints.size() << endmsg;
+  ATH_MSG_DEBUG("SurveyConstraint().computeConstraint: Stavepoints.size() " << Stavepoints.size());
   // transform GlobalToLocal
   GlobalToLocal(mut,Stavepoints);
 
   // scale z coordinate
   for (unsigned int iPoint(0); iPoint < Stavepoints.size(); ++iPoint ) {
     Amg::Vector3D survey = Stavepoints[iPoint].survey();
-    if (msgLvl(MSG::DEBUG)) msg() << "Survey Stavepoints before: " << survey.x() << "," << survey.y() << "," << survey.z() << endmsg;
+    ATH_MSG_DEBUG("Survey Stavepoints before: " << survey.x() << "," << survey.y() << "," << survey.z());
     SurveyConstraintPoint& Stavepoint = Stavepoints[iPoint];
     Stavepoint.scaleZ(m_scaleZ);
     survey = Stavepoints[iPoint].survey();
-    if (msgLvl(MSG::DEBUG)) msg() << " and after: " << survey.x() << "," << survey.y() << "," << survey.z() << endmsg;
+    ATH_MSG_DEBUG(" and after: " << survey.x() << "," << survey.y() << "," << survey.z());
   }
 
-  if (msgLvl(MSG::DEBUG)) msg() << "SurveyConstraint().computeConstraint: Now fitting the 2 Staves" << endmsg;
+  ATH_MSG_DEBUG("SurveyConstraint().computeConstraint: Now fitting the 2 Staves");
   double stavemin = minimizer.findMinimum(Stavepoints,staveangles,stavetrans);
 
   
   
   
   stavetrans[2] = (stavetrans.z()/m_scaleZ);
-  if (msgLvl(MSG::DEBUG)) msg() << "Stavepoints translation and rotations: (" << 
-    stavetrans.x() << "," << stavetrans.y() << "," << stavetrans.z() << "," <<
-    staveangles.x()/m_scaleZ << "," << staveangles.y()/m_scaleZ << "," << staveangles.z() << ")" << 
-    endmsg;
+  ATH_MSG_DEBUG("Stavepoints translation and rotations: ("
+		<< stavetrans.x() << "," << stavetrans.y() << "," << stavetrans.z() << ","
+		<< staveangles.x()/m_scaleZ << "," << staveangles.y()/m_scaleZ << "," << staveangles.z() << ")");
       
   
   if(stavemin < 0.0){
-    msg(MSG::FATAL) << "insufficient Points for Stave Fitting" << endmsg;
+    ATH_MSG_FATAL("insufficient Points for Stave Fitting");
     return StatusCode::FAILURE;
   }  
 
@@ -375,10 +343,10 @@ StatusCode SurveyConstraint::computeConstraint(const Identifier& ModuleID,
   //now compute the final parameters: build the 3D residuals between the two sets of MUT points
   Amg::Vector3D modtrans;
   Amg::Vector3D modangles;
-  if (msgLvl(MSG::DEBUG)) msg() << "SurveyConstraint().computeConstraint: Now fitting the 2 Modules" << endmsg;
+  ATH_MSG_DEBUG("SurveyConstraint().computeConstraint: Now fitting the 2 Modules");
   double modmin = minimizer.findMinimum(Modulepoints,modangles,modtrans);
   if(modmin < 0.0){
-    msg(MSG::FATAL) << "insufficient Points for Module Fitting" << endmsg;
+    ATH_MSG_FATAL("insufficient Points for Module Fitting");
     return StatusCode::FAILURE;
   }  
 
@@ -401,11 +369,11 @@ StatusCode SurveyConstraint::computeConstraint(const Identifier& ModuleID,
   else if(isSCTB)  ierr = getWeightSCTB(//ModuleID,
 					weight);
   if(ierr != 0){
-    msg(MSG::FATAL) << "matrixInvertFail" << endmsg;
-    if(isPixEC) msg(MSG::FATAL) << "for PixEC" << endmsg;
-    else if(isPixB) msg(MSG::FATAL) << "for PixB" << endmsg;
-    else if(isSCTEC) msg(MSG::FATAL) << "for SCTEC" << endmsg;
-    else if(isSCTB) msg(MSG::FATAL) << "for SCTB" << endmsg;    
+    ATH_MSG_FATAL("matrixInvertFail");
+    if(isPixEC) ATH_MSG_FATAL("for PixEC");
+    else if(isPixB) ATH_MSG_FATAL("for PixB");
+    else if(isSCTEC) ATH_MSG_FATAL("for SCTEC");
+    else if(isSCTB) ATH_MSG_FATAL("for SCTB");
     return StatusCode::FAILURE;
   }  
 
@@ -417,7 +385,7 @@ StatusCode SurveyConstraint::computeConstraint(const Identifier& ModuleID,
   
   // now get the chi2, add to the vector and the matrix.
   Amg::MatrixX temp =  dparams.transpose() * weight * dparams; 
-  msg(MSG::ERROR) << "Chech that the size of the matrix is a 1,1: " << temp.rows() << ", " << temp.cols() << endmsg;
+  ATH_MSG_ERROR("Chech that the size of the matrix is a 1,1: " << temp.rows() << ", " << temp.cols());
   deltachisq = temp(0,0);
 
 
@@ -433,7 +401,8 @@ StatusCode SurveyConstraint::computeConstraint(const Identifier& ModuleID,
 
 void SurveyConstraint::setup_SurveyConstraintModules()
 {
-  Rndm::Numbers gauss(m_randsvc,Rndm::Gauss(0.,1.));
+  SmartIF<IRndmGenSvc> randsvc{Gaudi::svcLocator()->service("RndmGenSvc")};
+  Rndm::Numbers gauss(randsvc,Rndm::Gauss(0.,1.));
   
   // read in or write an alignment file for the survey alignment, 
   // either a text file (SurveyText.txt) or an ntuple (reading in and writing out
@@ -484,7 +453,7 @@ void SurveyConstraint::setup_SurveyConstraintModules()
       newSCT_Module->set_globaltolocal(globaltolocal);
       m_ModuleMap[SCT_ModuleID] = newSCT_Module;
       ++nSCT;
-      if (msgLvl(MSG::DEBUG)) msg() << "new SCT Module " << nSCT << endmsg;
+      ATH_MSG_DEBUG("new SCT Module " << nSCT);
 
       
 
@@ -575,7 +544,7 @@ void SurveyConstraint::setup_SurveyConstraintModules()
       newPixel_Module->set_globaltolocal(globaltolocal);
       m_ModuleMap[Pixel_ModuleID] = newPixel_Module;
       ++nPixel;
-      if (msgLvl(MSG::DEBUG)) msg() << "new Pixel Module " << nPixel << endmsg;
+      ATH_MSG_DEBUG("new Pixel Module " << nPixel);
       
       // add Pixel EC SurveyCoords
       if(abs(m_pixid->barrel_ec(Pixel_ModuleID)) == 2){
@@ -664,21 +633,18 @@ void SurveyConstraint::setup_SurveyConstraintModules()
     
           // ********************************************
           // Do some tests for first Pixel EC module 
-          if (first){ 
-            //if(SurveyTrans == CurrentTrans) msg(MSG::INFO) << "SurveyTrans == CurrentTrans" << endmsg;
-            //if(surveyPoint == currentPoint) msg(MSG::INFO) << "surveyPoint == currentPoint" << endmsg;
-            //if(globalSurveyPoint == globalCurrentPoint) msg(MSG::INFO) << "globalSurveyPoint == globalCurrentPoint" << endmsg;
-            msg(MSG::INFO)  << "Local Coordinates = (" <<  localSurveyCoords[iCorn][0] << "," 
-                            << localSurveyCoords[iCorn][1] << "," << localSurveyCoords[iCorn][2] << ")" << endmsg; 
-            msg(MSG::INFO)  << "Survey Local Coordinates = (" <<  surveyPoint[0] << "," 
-                            << surveyPoint[1] << "," << surveyPoint[2] << ")" << endmsg; 
-            msg(MSG::INFO)  << "Current Local Coordinates = (" <<  currentPoint[0] << "," 
-                            << currentPoint[1] << "," << currentPoint[2] << ")" << endmsg; 
-            msg(MSG::INFO)  << "Survey Global Coordinates = (" <<  globalSurveyPoint[0] << "," 
-                            << globalSurveyPoint[1] << "," << globalSurveyPoint[2] << ")" << endmsg; 
-            msg(MSG::INFO)  << "Current Global Coordinates = (" <<  globalCurrentPoint[0] << "," 
-                            << globalCurrentPoint[1] << "," << globalCurrentPoint[2] << ")" << endmsg; 
-            msg(MSG::INFO) << "SurveyConstraint().setup_SurveyConstraintModules: nModulePoints " << m_ModuleMap[Pixel_ModuleID]->nModulePoints() << endmsg;
+          if (first){
+            ATH_MSG_INFO("Local Coordinates = (" <<  localSurveyCoords[iCorn][0] << ","
+			 << localSurveyCoords[iCorn][1] << "," << localSurveyCoords[iCorn][2] << ")");
+            ATH_MSG_INFO("Survey Local Coordinates = (" <<  surveyPoint[0] << ","
+			 << surveyPoint[1] << "," << surveyPoint[2] << ")");
+            ATH_MSG_INFO("Current Local Coordinates = (" <<  currentPoint[0] << ","
+			 << currentPoint[1] << "," << currentPoint[2] << ")");
+            ATH_MSG_INFO("Survey Global Coordinates = (" <<  globalSurveyPoint[0] << ","
+			 << globalSurveyPoint[1] << "," << globalSurveyPoint[2] << ")");
+            ATH_MSG_INFO("Current Global Coordinates = (" <<  globalCurrentPoint[0] << ","
+			 << globalCurrentPoint[1] << "," << globalCurrentPoint[2] << ")");
+            ATH_MSG_INFO("SurveyConstraint().setup_SurveyConstraintModules: nModulePoints " << m_ModuleMap[Pixel_ModuleID]->nModulePoints());
             first = false;
           }
           // ********************************************
@@ -734,15 +700,14 @@ void SurveyConstraint::setup_SurveyConstraintModules()
             }
           }
         }
-        msg(MSG::INFO) << "nSCTMod " << nSCTMod 
-            << ", nSCTModInMap " << nSCTModInMap
-            << ", nSCTModEC " << nSCTModEC
-            << ", nSCTModPointsEC " << nSCTModPointsEC
-            << ", nPixMod " << nPixMod 
-            << ", nPixModInMap " << nPixModInMap
-            << ", nPixModEC " << nPixModEC
-            << ", nPixModPointsEC " << nPixModPointsEC
-            << endmsg;
+        ATH_MSG_INFO( "nSCTMod " << nSCTMod
+		      << ", nSCTModInMap " << nSCTModInMap
+		      << ", nSCTModEC " << nSCTModEC
+		      << ", nSCTModPointsEC " << nSCTModPointsEC
+		      << ", nPixMod " << nPixMod 
+		      << ", nPixModInMap " << nPixModInMap
+		      << ", nPixModEC " << nPixModEC
+		      << ", nPixModPointsEC " << nPixModPointsEC);
 
 
 
@@ -778,7 +743,7 @@ void SurveyConstraint::setup_SurveyConstraintModules()
                 if (firstB){ 
                   std::vector< SurveyConstraintPoint > Testpoints;
                   m_ModuleMap[Pixel_ModuleID]->getPoints(Testpoints,SurveyConstraintModule::Stave);
-                  msg(MSG::INFO) << "SurveyConstraint().setup_SurveyConstraintModules: Stavepoints.size() (from map) " << Testpoints.size() << endmsg;
+                  ATH_MSG_INFO("SurveyConstraint().setup_SurveyConstraintModules: Stavepoints.size() (from map) " << Testpoints.size());
                   firstB = false;
                 }
                 // ********************************************
@@ -790,13 +755,12 @@ void SurveyConstraint::setup_SurveyConstraintModules()
       }
     }  
   }
-  msg(MSG::INFO) << "Loop 2, filling stave-points, nPixModEC2 " << nPixModEC2 
-      << ", nPixModPixModEC " <<  nPixModPixModEC
-      << ", nPixModECPixModEC " <<  nPixModECPixModEC
-      << ", nSameLayer " <<  nSameLayer
-      << ", nNotIdentical " <<  nNotIdentical
-      << endmsg;
-  
+  ATH_MSG_INFO("Loop 2, filling stave-points, nPixModEC2 " << nPixModEC2
+	       << ", nPixModPixModEC " <<  nPixModPixModEC
+	       << ", nPixModECPixModEC " <<  nPixModECPixModEC
+	       << ", nSameLayer " <<  nSameLayer
+	       << ", nNotIdentical " <<  nNotIdentical);
+
   // Pix B
   nPixModEC2 = 0;nPixModPixModEC = 0;nPixModECPixModEC = 0;nSameLayer = 0;nNotIdentical = 0;
   for (PixelID::const_id_iterator wafer_it=m_pixid->wafer_begin(); wafer_it!=m_pixid->wafer_end(); ++wafer_it) { 
@@ -818,12 +782,11 @@ void SurveyConstraint::setup_SurveyConstraintModules()
       (m_ModuleMap[Pixel_ModuleID])->addStaveConstraintPoint(Stavepoints); 
     }  
   }
-  msg(MSG::INFO) << "Loop 2, filling stave-points, nPixModB2 " << nPixModEC2 
-      << ", nPixModPixModB " <<  nPixModPixModEC
-      << ", nPixModBPixModB " <<  nPixModECPixModEC
-      << ", nSameLayer " <<  nSameLayer
-      << ", nNotIdentical " <<  nNotIdentical
-      << endmsg;
+  ATH_MSG_INFO("Loop 2, filling stave-points, nPixModB2 " << nPixModEC2
+	       << ", nPixModPixModB " <<  nPixModPixModEC
+	       << ", nPixModBPixModB " <<  nPixModECPixModEC
+	       << ", nSameLayer " <<  nSameLayer
+	       << ", nNotIdentical " <<  nNotIdentical);
 
   // SCT EC
   nPixModEC2 = 0;nPixModPixModEC = 0;nPixModECPixModEC = 0;nSameLayer = 0;nNotIdentical = 0;
@@ -858,18 +821,17 @@ void SurveyConstraint::setup_SurveyConstraintModules()
 	){ 
       std::vector< SurveyConstraintPoint > Testpoints;
       m_ModuleMap[SCT_ModuleID]->getPoints(Testpoints,SurveyConstraintModule::Stave);
-      msg(MSG::INFO) << "SurveyConstraint().setup_SurveyConstraintModules: Stavepoints.size() (from map) " << Testpoints.size() << endmsg;
+      ATH_MSG_INFO("SurveyConstraint().setup_SurveyConstraintModules: Stavepoints.size() (from map) " << Testpoints.size());
     }
     // ********************************************
 
  
   }
-  msg(MSG::INFO) << "Loop 2, filling stave-points, nSCTModEC2 " << nPixModEC2 
-      << ", nSCTModSCTModEC " <<  nPixModPixModEC
-      << ", nSCTModECSCTModEC " <<  nPixModECPixModEC
-      << ", nSameLayer " <<  nSameLayer
-      << ", nNotIdentical " <<  nNotIdentical
-      << endmsg;
+  ATH_MSG_INFO("Loop 2, filling stave-points, nSCTModEC2 " << nPixModEC2
+	       << ", nSCTModSCTModEC " <<  nPixModPixModEC
+	       << ", nSCTModECSCTModEC " <<  nPixModECPixModEC
+	       << ", nSameLayer " <<  nSameLayer
+	       << ", nNotIdentical " <<  nNotIdentical);
 
   // SCT B
   nPixModEC2 = 0;nPixModPixModEC = 0;nPixModECPixModEC = 0;nSameLayer = 0;nNotIdentical = 0;
@@ -894,20 +856,18 @@ void SurveyConstraint::setup_SurveyConstraintModules()
       (m_ModuleMap[SCT_ModuleID])->addStaveConstraintPoint(Stavepoints); 
     }  
   }
-  msg(MSG::INFO) << "Loop 2, filling stave-points, nSCTModB2 " << nPixModEC2 
-      << ", nSCTModSCTModB " <<  nPixModPixModEC
-      << ", nSCTModBSCTModB " <<  nPixModECPixModEC
-      << ", nSameLayer " <<  nSameLayer
-      << ", nNotIdentical " <<  nNotIdentical
-      << endmsg;
-  
+  ATH_MSG_INFO("Loop 2, filling stave-points, nSCTModB2 " << nPixModEC2
+	       << ", nSCTModSCTModB " <<  nPixModPixModEC
+	       << ", nSCTModBSCTModB " <<  nPixModECPixModEC
+	       << ", nSameLayer " <<  nSameLayer
+	       << ", nNotIdentical " <<  nNotIdentical);
 
   // write out to Condstream1 and write out ntuple or textfile 
   if (m_surveywfile!=""){ 
     if(m_ntuple) m_survey_IDAlignDBTool->writeFile(true,m_surveywfile);
     else m_survey_IDAlignDBTool->writeFile(false,m_surveywfile);
     if (StatusCode::SUCCESS!=m_survey_IDAlignDBTool->outputObjs()) 
-      msg(MSG::ERROR) << "Write of AlignableTransforms fails" << endmsg;
+      ATH_MSG_ERROR("Write of AlignableTransforms fails");
   }
 }
 
