@@ -13,9 +13,6 @@ class MetAnalysisConfig (ConfigBlock):
         self.addOption('containerName', containerName, type=str,
             noneAction='error',
             info="the name of the input container")
-        self.addOption ('postfix', '', type=str,
-            info="a postfix to apply to decorations and algorithm names (not "
-            "needed if running a single instance of MET)")
         self.addOption ('useJVT', True, type=bool,
             info="whether to use the JVT decision in the calculation")
         self.addOption ('useFJVT', False, type=bool,
@@ -57,8 +54,6 @@ class MetAnalysisConfig (ConfigBlock):
 
     def makeAlgs (self, config) :
 
-        postfix = self.postfix
-
         if config.isPhyslite() :
             metSuffix = 'AnalysisMET'
         else :
@@ -74,7 +69,7 @@ class MetAnalysisConfig (ConfigBlock):
             metSuffix = metSuffix[:btIndex]
 
         # Set up the met maker algorithm:
-        alg = config.createAlgorithm( 'CP::MetMakerAlg', 'MetMakerAlg' + postfix)
+        alg = config.createAlgorithm( 'CP::MetMakerAlg', 'MetMakerAlg' + self.containerName )
         config.addPrivateTool( 'makerTool', 'met::METMaker' )
         alg.makerTool.skipSystematicJetSelection = self.skipSystematicJetSelection
 
@@ -109,13 +104,13 @@ class MetAnalysisConfig (ConfigBlock):
 
 
         # Set up the met builder algorithm:
-        alg = config.createAlgorithm( 'CP::MetBuilderAlg', 'MetBuilderAlg' + postfix )
+        alg = config.createAlgorithm( 'CP::MetBuilderAlg', 'MetBuilderAlg' + self.containerName )
         alg.met = config.readName (self.containerName)
 
 
         # Set up the met significance algorithm:
         if self.saveSignificance:
-            alg = config.createAlgorithm( 'CP::MetSignificanceAlg', 'MetSignificanceAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::MetSignificanceAlg', 'MetSignificanceAlg' + self.containerName )
             config.addPrivateTool( 'significanceTool', 'met::METSignificance' )
             if self.muons != "" :
                 config.addPrivateTool( 'significanceTool.MuonCalibTool', 'CP::MuonCalibTool' )
@@ -133,7 +128,6 @@ class MetAnalysisConfig (ConfigBlock):
 
 
 def makeMetAnalysisConfig( seq, containerName,
-                             postfix = None,
                              useFJVT = None,
                              treatPUJets = None,
                              setMuonJetEMScale = None,
@@ -156,7 +150,6 @@ def makeMetAnalysisConfig( seq, containerName,
     """
 
     config = MetAnalysisConfig (containerName)
-    config.setOptionValue ('postfix', postfix)
     config.setOptionValue ('useFJVT', useFJVT)
     config.setOptionValue ('treatPUJets', treatPUJets)
     config.setOptionValue ('setMuonJetEMScale', setMuonJetEMScale)
