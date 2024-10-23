@@ -30,3 +30,4 @@ LineNumber,VariableName,Type,Description
 29,tauTrackLinks,vector<vector<ElementLink<DataVector<xAOD::TauTrack_v1> > > >,Link from tau to corresponding tracks
 30,truthParticleLink,vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > >,Link from tau to corresponding truth particles
 31,truthJetLink,vector<ElementLink<DataVector<xAOD::Jet_v1> > >,Link from tau to corresponding truth jet
+32,passTATTauMuonOLR,vector<bool>,flag for passing the MuonOLR TauSelectionTool selection
