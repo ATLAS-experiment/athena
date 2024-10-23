@@ -15,6 +15,7 @@ private:
   //
   // Data members
   //
+  std::string m_filePath;
   unsigned int m_firstLB{1};
   std::vector<float> m_LBPulserVMap;
 
@@ -27,6 +28,8 @@ public:
   ZdcInjPulserAmpMap();
 
   static const ZdcInjPulserAmpMap* getInstance();
+  
+  std::string getFilePath() const {return m_filePath;}
 
   // Return the lumi block number at which we start stepping through the different aplitudes
   //
