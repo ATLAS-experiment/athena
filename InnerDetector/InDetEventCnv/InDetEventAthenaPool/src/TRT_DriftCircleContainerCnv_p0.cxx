@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_DriftCircleContainerCnv_p0.h"
@@ -25,12 +25,11 @@
 
 StatusCode TRT_DriftCircleContainerCnv_p0::initialize(MsgStream &log ) {
 
-   ISvcLocator* svcLocator = Gaudi::svcLocator();
-
    log << MSG::INFO << "TRT_DriftCircleContainerCnv::initialize()" << endmsg;
 
-   StoreGateSvc *detStore = nullptr;
-   CHECK( svcLocator->service("DetectorStore", detStore) );
+   SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+   CHECK( detStore.isValid() );
+
    CHECK( detStore->retrieve(m_trtId, "TRT_ID") );
    // Initialize readCondHandle key                                                  
    CHECK(m_trtDetEleContKey.initialize());

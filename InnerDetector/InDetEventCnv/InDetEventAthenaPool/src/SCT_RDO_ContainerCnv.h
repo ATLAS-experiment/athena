@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_RDO_CONTAINERCNV_H
@@ -16,7 +16,6 @@
 
 #include "InDetRawData/SCT_RDO_Container.h"
 #include "InDetRawData/SCT_RDO_Collection.h"
-#include "StoreGate/StoreGateSvc.h"
 
 // the latest persistent representation type of DataCollection:
 typedef SCT_RawDataContainer_p4    SCT_RDO_Container_PERS;
@@ -37,18 +36,15 @@ class SCT_RDO_ContainerCnv : public SCT_RDO_ContainerCnvBase {
   SCT_RawDataContainerCnv_p4   m_converter_SCT_TP4;
   SCT_RDO_ContainerCnv_PERS    m_converter_PERS;
 
-  // Should not be needed at some point.
-  StoreGateSvc*  m_storeGate;
-
  protected:
  public:
   SCT_RDO_ContainerCnv (ISvcLocator* svcloc);
  protected:
-  virtual SCT_RDO_Container_PERS* createPersistent (SCT_RDO_Container* transCont);
-  virtual SCT_RDO_Container* createTransient ();
+  virtual SCT_RDO_Container_PERS* createPersistent (SCT_RDO_Container* transCont) override;
+  virtual SCT_RDO_Container* createTransient () override;
 
   // Must initialize ID helpers
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
 };
 
 #endif

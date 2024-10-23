@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelRDO_ContainerCnv.h"
@@ -35,41 +35,14 @@ namespace {
 }
 //================================================================
 StatusCode PixelRDO_ContainerCnv::initialize() {
-   StatusCode sc = PixelRDO_ContainerCnvBase::initialize();
-   if (sc.isFailure()) {
-     ATH_MSG_FATAL("PixelRDO_ContainerCnvBase::initialize() returned failure !");
-     return StatusCode::FAILURE;
-   }
+   ATH_CHECK( PixelRDO_ContainerCnvBase::initialize() );
 
    ATH_MSG_INFO("PixelRDO_ContainerCnv::initialize()");
 
-   // get StoreGate service. This is needed only for clients 
-   // that register collections directly to the SG instead of adding 
-   // them to the container.
-   sc = service("StoreGateSvc", m_storeGate);
-   if (sc.isFailure()) {
-     ATH_MSG_FATAL("StoreGate service not found !");
-     return StatusCode::FAILURE;
-   }
-   
-   // get DetectorStore service
-   StoreGateSvc *detStore(nullptr);
-   if (service("DetectorStore", detStore).isFailure()) {
-     ATH_MSG_FATAL("DetectorStore service not found !");
-     return StatusCode::FAILURE;
-   } else {
-     ATH_MSG_DEBUG("Found DetectorStore.");
-   }
-   
    // Get the pixel helper from the detector store
    const PixelID* idhelper(nullptr);
-   if (detStore->retrieve(idhelper, "PixelID").isFailure()) {
-     ATH_MSG_FATAL("Could not get PixelID helper !");
-     return StatusCode::FAILURE;
-   } else {
-     ATH_MSG_DEBUG("Found the PixelID helper.");
-   }
-   
+   ATH_CHECK( detStore()->retrieve(idhelper, "PixelID") );
+
    m_converter_p0.initialize(idhelper);
    m_converter_TP1.initialize(idhelper);
    m_converter_TP2.initialize(idhelper);

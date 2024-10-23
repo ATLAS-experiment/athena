@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_RDO_ContainerCnv.h"
@@ -37,47 +37,19 @@ namespace {
 
 SCT_RDO_ContainerCnv::SCT_RDO_ContainerCnv (ISvcLocator* svcloc)
   : SCT_RDO_ContainerCnvBase(svcloc, "SCT_RDO_ContainerCnv"),
-    m_converter_p0(),
-    m_storeGate(nullptr)
+    m_converter_p0()
 {}
 
 //================================================================
 StatusCode SCT_RDO_ContainerCnv::initialize() {
-  StatusCode sc = SCT_RDO_ContainerCnvBase::initialize();
-  if (sc.isFailure()) {
-    ATH_MSG_FATAL("SCT_RDO_ContainerCnvBase::initialize() returned failure !");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK( SCT_RDO_ContainerCnvBase::initialize() );
 
   ATH_MSG_DEBUG("SCT_RDO_ContainerCnv::initialize()");
 
-  // get StoreGate service. This is needed only for clients
-  // that register collections directly to the SG instead of adding
-  // them to the container.
-  sc = service("StoreGateSvc", m_storeGate);
-  if (sc.isFailure()) {
-    ATH_MSG_FATAL("StoreGate service not found !");
-    return StatusCode::FAILURE;
-  }
-   
-  // get DetectorStore service
-  StoreGateSvc* detStore(nullptr);
-  if (service("DetectorStore", detStore).isFailure()) {
-    ATH_MSG_FATAL("DetectorStore service not found !");
-    return StatusCode::FAILURE;
-  } else {
-    ATH_MSG_DEBUG("Found DetectorStore.");
-  }
-   
   // Get the sct helper from the detector store
   const SCT_ID* idhelper(nullptr);
-  if (detStore->retrieve(idhelper, "SCT_ID").isFailure()) {
-    ATH_MSG_FATAL("Could not get SCT_ID helper !");
-    return StatusCode::FAILURE;
-  } else {
-    ATH_MSG_DEBUG("Found the SCT_ID helper.");
-  }
-   
+  ATH_CHECK( detStore()->retrieve(idhelper, "SCT_ID") );
+
   m_converter_p0.initialize(idhelper);
   m_converter_TP1.initialize(idhelper);
   m_converter_SCT_TP1.initialize(idhelper);
@@ -85,8 +57,6 @@ StatusCode SCT_RDO_ContainerCnv::initialize() {
   m_converter_SCT_TP3.initialize(idhelper);
   m_converter_SCT_TP4.initialize(idhelper);
   m_converter_PERS.initialize(idhelper);
-
-  //   ATH_MSG_DEBUG("Converter initialized");
 
   return StatusCode::SUCCESS;
 }

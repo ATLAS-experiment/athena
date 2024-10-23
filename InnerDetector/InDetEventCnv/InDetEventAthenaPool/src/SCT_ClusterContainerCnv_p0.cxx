@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_ClusterContainerCnv_p0.h"
@@ -34,13 +34,11 @@ SCT_ClusterContainerCnv_p0::SCT_ClusterContainerCnv_p0():
 
 StatusCode SCT_ClusterContainerCnv_p0::initialize(MsgStream& log ) {
 
-  ISvcLocator* svcLocator = Gaudi::svcLocator();
-
-  // Get the messaging service, print where you are
   log << MSG::INFO << "SCT_ClusterContainerCnv::initialize()" << endmsg;
 
-  StoreGateSvc* detStore = nullptr;
-  CHECK( svcLocator->service("DetectorStore", detStore) );
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  CHECK( detStore.isValid() );
+
   CHECK( detStore->retrieve(m_sctId, "SCT_ID") );
   CHECK( m_SCTDetEleCollKey.initialize() );
   MSG_DEBUG(log,"Converter initialized.");

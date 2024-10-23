@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_DRIFTCIRCLECONTAINERCNV_H
@@ -30,33 +30,16 @@ class TRT_DriftCircleContainerCnv : public TRT_DriftCircleContainerCnvBase
   TRT_DriftCircleContainerCnv_tlp1 m_TPConverter;
   TRT_DriftCircleContainerCnv_p2   m_TPConverter2;
 
-  // Should not be needed at some point.
-  StoreGateSvc*  m_storeGate;
-
 protected:
 public:
   TRT_DriftCircleContainerCnv (ISvcLocator* svcloc);
 protected:
-  virtual TRT_DriftCircleContainer_PERS*   createPersistent (InDet::TRT_DriftCircleContainer* transCont);
-  virtual InDet::TRT_DriftCircleContainer* createTransient ();
+  virtual TRT_DriftCircleContainer_PERS*   createPersistent (InDet::TRT_DriftCircleContainer* transCont) override;
+  virtual InDet::TRT_DriftCircleContainer* createTransient () override;
 
   // Must initialize ID helpers
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
   virtual AthenaPoolTopLevelTPCnvBase*	getTopLevelTPCnv() { return &m_TPConverter; }
 };
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-

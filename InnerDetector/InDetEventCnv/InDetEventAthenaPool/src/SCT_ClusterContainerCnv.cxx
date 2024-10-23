@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_ClusterContainerCnv.h"
@@ -14,52 +14,20 @@
 
   SCT_ClusterContainerCnv::SCT_ClusterContainerCnv (ISvcLocator* svcloc)
     : SCT_ClusterContainerCnvBase(svcloc, "SCT_ClusterContainerCnv"),
-      m_converter_p0(),
-      m_storeGate(nullptr)
+      m_converter_p0()
   {}
 
 
 StatusCode SCT_ClusterContainerCnv::initialize() {
    ATH_MSG_INFO("SCT_ClusterContainerCnv::initialize()");
 
-   StatusCode sc = SCT_ClusterContainerCnvBase::initialize();
-   if (sc.isFailure()) {
-     ATH_MSG_FATAL("Cannot initialize cnv base !");
-     return StatusCode::FAILURE;
-   }
+   ATH_CHECK( SCT_ClusterContainerCnvBase::initialize() );
 
-   // get StoreGate service. This is needed only for clients 
-   // that register collections directly to the SG instead of adding 
-   // them to the container.
-   sc = service("StoreGateSvc", m_storeGate);
-   if (sc.isFailure()) {
-     ATH_MSG_FATAL("StoreGate service not found !");
-     return StatusCode::FAILURE;
-   }
-   
-   // get DetectorStore service
-   StoreGateSvc* detStore(nullptr);
-   if (service("DetectorStore", detStore).isFailure()) {
-     ATH_MSG_FATAL("DetectorStore service not found !");
-     return StatusCode::FAILURE;
-   } else {
-     ATH_MSG_DEBUG("Found DetectorStore.");
-   }
-   
    // Get the SCT helper from the detector store
    const SCT_ID* idhelper(nullptr);
-   if (detStore->retrieve(idhelper, "SCT_ID").isFailure()) {
-     ATH_MSG_FATAL("Could not get SCT_ID helper !");
-     return StatusCode::FAILURE;
-   } else {
-     ATH_MSG_DEBUG("Found the SCT_ID helper.");
-   }
-   
-   if (m_converter_p0.initialize(msg()).isFailure())
-   {
-     ATH_MSG_FATAL("Could not initialize converter!");
-     return StatusCode::FAILURE;
-   }
+   ATH_CHECK( detStore()->retrieve(idhelper, "SCT_ID") );
+
+   ATH_CHECK( m_converter_p0.initialize(msg()) );
 
    ATH_MSG_DEBUG("Converter initialized");
 
