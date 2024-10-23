@@ -154,6 +154,18 @@ def enableG4Optimizations(flags):
     enableWoodcockTracking(flags)
 
 
+def disableG4Optimizations(flags):
+    """ Ensure all G4Optimizations are disabled - useful for debugging """
+    disableMuonFieldOnlyInCalo(flags)
+    disablePhotonRussianRoulette(flags)
+    disableNeutronRussianRoulette(flags)
+    disableEMRangeCuts(flags)
+    disableG4GammaGeneralProcess(flags)
+    disableWoodcockTracking(flags)
+    disableBeamPipeKill(flags)
+    disableFrozenShowersFCalOnly(flags)
+
+
 def WoodcockTrackingInEMEC(flags):
     # Use Woodcock Tracking in the EMEC rather than the EMECPara
     # G4Region. This preInclude should be added at the end of the list

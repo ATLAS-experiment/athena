@@ -123,7 +123,9 @@ def InDetTrigAmbiScoringToolCfg(
                 InDetTrigTRTDriftCircleCutToolCfg)
             kwargs.setdefault("DriftCircleCutTool", acc.popToolsAndMerge(
                 InDetTrigTRTDriftCircleCutToolCfg(flags)))
-      
+
+        if flags.Tracking.ActiveConfig.name == 'minBiasPixel':
+            kwargs.setdefault("minSiClusters", flags.Tracking.ActiveConfig.nClustersMin)
         kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPT)
         kwargs.setdefault("useAmbigFcn", True)
         kwargs.setdefault("useTRT_AmbigFcn", False)

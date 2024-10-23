@@ -428,10 +428,12 @@ def setupMenu():
         ChainProp(name='HLT_2e24_lhvloose_L12eEM24L', groups=PrimaryPhIGroup+MultiElectronGroup),
 
         #---------- support 2e + 1g + ZRad triggers 
+        ChainProp(name='HLT_2e17_lhvloose_g20_tight_icaloloose_probe_L12eEM18M', l1SeedThresholds=['eEM18M','PROBEeEM18M'], groups=TagAndProbePhIGroup+MultiElectronGroup),
         ChainProp(name='HLT_2e17_lhvloose_g22_tight_probe_L12eEM18M', l1SeedThresholds=['eEM18M','PROBEeEM18M'], groups=TagAndProbePhIGroup+MultiElectronGroup),
         ChainProp(name='HLT_2e17_lhvloose_g25_medium_probe_L12eEM18M', l1SeedThresholds=['eEM18M','PROBEeEM18M'],groups=TagAndProbePhIGroup+MultiElectronGroup),
         ChainProp(name='HLT_2e17_lhvloose_g50_loose_probe_L12eEM18M', l1SeedThresholds=['eEM18M','PROBEeEM18M'],groups=TagAndProbePhIGroup+MultiElectronGroup),
         ChainProp(name='HLT_2e17_lhvloose_g35_medium_probe_L12eEM18M', l1SeedThresholds=['eEM18M','PROBEeEM18M'],groups=TagAndProbePhIGroup+MultiElectronGroup),
+        ChainProp(name='HLT_2e24_lhvloose_g20_tight_icaloloose_probe_L12eEM24L', l1SeedThresholds=['eEM24L','PROBEeEM24L'],groups=TagAndProbePhIGroup+MultiElectronGroup),
         ChainProp(name='HLT_2e24_lhvloose_g22_tight_probe_L12eEM24L', l1SeedThresholds=['eEM24L','PROBEeEM24L'],groups=TagAndProbePhIGroup+MultiElectronGroup),
         ChainProp(name='HLT_2e24_lhvloose_g25_medium_probe_L12eEM24L', l1SeedThresholds=['eEM24L','PROBEeEM24L'],groups=TagAndProbePhIGroup+MultiElectronGroup),
         ChainProp(name='HLT_2e24_lhvloose_g35_medium_probe_L12eEM24L', l1SeedThresholds=['eEM24L','PROBEeEM24L'],groups=TagAndProbePhIGroup+MultiElectronGroup),
@@ -1866,6 +1868,7 @@ def setupMenu():
         ChainProp(name='HLT_2g10_loose_L1eEM9_mu23_L1MU18VFCH', l1SeedThresholds=['eEM9','MU18VFCH'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMuonGroup), # unsure what eEM seed should be
         
         #---------- support 2m + 1g + ZRad triggers
+        ChainProp(name='HLT_2mu14_g20_tight_icaloloose_probe_L12MU8F', l1SeedThresholds=['MU8F','PROBEeEM18M'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
         ChainProp(name='HLT_2mu14_g20_tight_probe_L1eEM18M_L12MU8F', l1SeedThresholds=['MU8F','PROBEeEM18M'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
         ChainProp(name='HLT_2mu14_g22_tight_probe_L1eEM18M_L12MU8F', l1SeedThresholds=['MU8F','PROBEeEM18M'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
         ChainProp(name='HLT_2mu14_g25_medium_probe_L1eEM24L_L12MU8F', l1SeedThresholds=['MU8F','PROBEeEM24L'],groups=TagAndProbePhIGroup+EgammaMuonGroup),

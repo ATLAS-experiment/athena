@@ -45,7 +45,7 @@ def jetRecoDictToString(jetRecoDict):
     if jetRecoDict['ionopt']=='ion':
         # Unique settings for heavy ions
         # other values will be default
-        return "a4_ion"
+        return jetRecoDict['recoAlg'] + "_ion"
     strtemp = "{recoAlg}_{constitMod}{constitType}_{clusterCalib}_{jetCalib}"
     if doTracking(jetRecoDict):
         strtemp += "_{trkopt}"
@@ -171,7 +171,7 @@ def interpretRecoAlg(recoAlg):
 def jetDefNeedsTracks(jetRecoDict):
   # For tc_a10, tc_a10t and tc_a10sd, we will be agnostic of tracking (no suffix will be added)
   # For everything else (constitType=pf or dependence on small-R jets) we need to be aware of what tracking was used
-  return jetRecoDict["trkopt"]!="notrk" and (jetRecoDict["constitType"]!="tc" or jetRecoDict["recoAlg"] in ['a4','a10'])
+  return jetRecoDict["trkopt"]!="notrk" and (jetRecoDict["constitType"]!="tc" or jetRecoDict["recoAlg"] in ['a2','a4','a10'])
 
 # Check if track reconstruction is enabled
 def doTracking(jetRecoDict):
@@ -189,7 +189,7 @@ def isPFlow(jetRecoDict):
 
 # return the min jet pT in MeV for the configured recoAlg
 def getFilterCut(recoAlg):
-    return {"a4":4000, "a10":50000, "a10r": 50000, "a10t":50000, "a10sd":50000}[recoAlg]
+    return {"a2":4000, "a4":4000, "a10":50000, "a10r": 50000, "a10t":50000, "a10sd":50000}[recoAlg]
 
 def addJetContextFlags(flags):
 
@@ -260,7 +260,7 @@ def getClustersKey(recoDict):
             raise ValueError("Invalid value for calib: '{}'".format(clusterCalib))
 
 def getJetCalibDefaultString(recoAlg, constitType, trkopt):
-    if recoAlg == 'a4':
+    if recoAlg == 'a4' or recoAlg == 'a2':
         if constitType == 'tc':
             return 'subresjesgscIS' if trkopt == 'ftf' else 'subjesIS'
         elif constitType == 'pf':

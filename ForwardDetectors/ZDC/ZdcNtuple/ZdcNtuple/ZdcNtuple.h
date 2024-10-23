@@ -154,6 +154,9 @@ public:
   uint8_t t_zdcEventInfoError;
   uint32_t t_zdcEventInfoErrorWord;
 
+  uint8_t t_zdcDecodingError;
+  uint8_t t_rpdDecodingError;
+  
   uint64_t t_trigger;
   uint32_t t_trigger_TBP;
   //std::vector<uint16_t> t_decisions;

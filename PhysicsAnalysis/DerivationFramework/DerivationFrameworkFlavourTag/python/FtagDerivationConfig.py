@@ -165,7 +165,6 @@ def tagSingleJetCollection(cfgFlags, jet_col, pv_col,
         trackCollection=track_collection,
         primaryVertices=pv_col,
         muons=input_muons,
-        renameTrackJets=True,
         AddedJetSuffix='Jets',
     ))
 

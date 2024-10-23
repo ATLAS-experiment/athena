@@ -154,7 +154,6 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow'
                 JetCollection=jc,
                 nnList=GetTaggerTrainingMap(inputFlags, jc),
                 muons='', # muon augmentation isn't thread safe, disable
-                renameTrackJets=True,
                 AddedJetSuffix='Jets'
             )
         )
@@ -202,7 +201,6 @@ def BTagAlgsCfg(
     primaryVertices='PrimaryVertices',
     muons='Muons',
     BTagCollection=None,
-    renameTrackJets=False,
     AddedJetSuffix='',
 ):
     """
@@ -221,9 +219,6 @@ def BTagAlgsCfg(
     jet = JetCollection
     jetcol_no_suffix = JetCollection
     jetcol = JetCollection + AddedJetSuffix
-    if renameTrackJets is True:
-        jetcol_no_suffix = jet.replace("Track", "PV0Track")
-        jetcol = jetcol.replace("Track", "PV0Track")
     if BTagCollection is None:
         BTagCollection = f'BTagging_{jet}'
 

@@ -53,6 +53,7 @@ def SCTVALIDKernelCfg(flags, name='SCTVALIDKernel', **kwargs):
     if flags.Reco.EnableTracking is True:
         from DerivationFrameworkInDet.InDetToolsConfig import TrackStateOnSurfaceDecoratorCfg
         DFTSOS = acc.getPrimaryAndMerge(TrackStateOnSurfaceDecoratorCfg(flags, name="SCTVALID_DFTrackStateOnSurfaceDecorator",
+                                                                        DecorationPrefix = "SCTVALID_",
                                                                         StoreTRT=True,
                                                                         StoreSCT=True,
                                                                         StorePixel=True,

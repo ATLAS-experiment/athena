@@ -1,5 +1,5 @@
  /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -354,8 +354,8 @@ StatusCode IDPerfMonEoverP::initialize()
     }
 
       // now register the Tree
-    ITHistSvc* tHistSvc = 0;
-    if (service("THistSvc",tHistSvc).isFailure()){
+    ServiceHandle<ITHistSvc> tHistSvc("THistSvc", name());
+    if (tHistSvc.retrieve().isFailure()){
       ATH_MSG_ERROR("initialize() Could not find Hist Service -> Switching ValidationMode Off !");
       delete m_validationTree;      m_validationTree = 0;
       delete m_smallValidationTree; m_smallValidationTree = 0;
