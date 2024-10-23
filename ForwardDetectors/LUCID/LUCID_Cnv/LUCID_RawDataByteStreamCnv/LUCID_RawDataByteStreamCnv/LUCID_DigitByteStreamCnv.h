@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // *************************************************************************
@@ -13,20 +13,17 @@
 #define LUCID_DIGITBYTESTREAMCNV_H
 
 #include "GaudiKernel/Converter.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthMessaging.h"
 #include "ByteStreamData/RawEvent.h"  //for RawEventWrite typedef
 #include "GaudiKernel/StatusCode.h"
+#include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h"
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h" 
 #include "ByteStreamCnvSvcBase/SrcIdMap.h"
-//
-
-
-
 
 class DataObject;
 class StoreGateSvc;
 class LUCID_DigitContainer;
-class IByteStreamEventAccess;
 
 class LUCID_DigitByteStreamCnv: public Converter, public AthMessaging {
 
@@ -52,8 +49,7 @@ class LUCID_DigitByteStreamCnv: public Converter, public AthMessaging {
 
 private:
   
-  IByteStreamEventAccess* m_ByteStreamEventAccess;
-  StoreGateSvc* m_StoreGate;
+  ServiceHandle<IByteStreamEventAccess> m_ByteStreamEventAccess;
 
   FullEventAssembler<SrcIdMap> m_fea;
   unsigned short m_RodBlockVersion;
