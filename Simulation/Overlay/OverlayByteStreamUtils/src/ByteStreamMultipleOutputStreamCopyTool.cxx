@@ -103,7 +103,7 @@ ByteStreamMultipleOutputStreamCopyTool::ByteStreamMultipleOutputStreamCopyTool(
     char buf[100];
     sprintf(buf,"ByteStreamEventStorageOutputSvc%d",i);
     //std::cout<<"Making "<<buf<<std::endl;
-    m_outputSvc.push_back(ServiceHandle<ByteStreamOutputSvc>(buf,name));
+    m_outputSvc.push_back(ServiceHandle<IByteStreamOutputSvc>(buf,name));
 
     //sprintf(buf,"ByteStreamOutputSvc%d",i);
     //declareProperty(buf, m_outputSvc[i], "Handle to the ByteStreamOutputSvc");

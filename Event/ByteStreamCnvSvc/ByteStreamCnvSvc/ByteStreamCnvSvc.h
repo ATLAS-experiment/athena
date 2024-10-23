@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMCNVSVC_BYTESTREAMCNVSVC_H
 #define BYTESTREAMCNVSVC_BYTESTREAMCNVSVC_H
 
+#include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
 #include "ByteStreamCnvSvcBase/ByteStreamCnvSvcBase.h"
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h"
 #include "StoreGate/StoreGateSvc.h"
@@ -14,7 +15,6 @@
 
 #include <map>
 
-class ByteStreamOutputSvc;
 class FullEventAssemblerBase;
 
 /** @class ByteStreamCnvSvc
@@ -28,7 +28,7 @@ class FullEventAssemblerBase;
 
     When writing the object data to ByteStream, an FullEventFragment is assembled
     from lower level fragments using FullEventAssembler, and written out to BS in commitOutput
-    method through ByteStreamOutputSvc.
+    method through IByteStreamOutputSvc.
 */
 
 class ByteStreamCnvSvc : public ByteStreamCnvSvcBase/*, virtual public IService*/ {
@@ -79,7 +79,7 @@ private:
    Gaudi::Property<bool> m_fillTriggerBits{this, "FillTriggerBits", true, "Read in xTrigDecision and use it to fill Trigger bits in event header"};
 
    /// Services for writing output
-   std::map<std::string, ByteStreamOutputSvc*> m_ioSvcMap;
+   std::map<std::string, IByteStreamOutputSvc*> m_ioSvcMap;
 
    /// Event store.
    ServiceHandle<StoreGateSvc> m_evtStore;

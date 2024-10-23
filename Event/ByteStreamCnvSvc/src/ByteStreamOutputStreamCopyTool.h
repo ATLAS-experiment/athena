@@ -22,7 +22,7 @@
 
 // ByteStream
 #include "ByteStreamCnvSvc/ByteStreamInputSvc.h"
-#include "ByteStreamCnvSvc/ByteStreamOutputSvc.h"
+#include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
 
 #include <string>
 #include <vector>
@@ -73,7 +73,7 @@ public:
 
 private:
    /// Handle for BS output Svc
-   ServiceHandle<ByteStreamOutputSvc> m_outputSvc;
+   ServiceHandle<IByteStreamOutputSvc> m_outputSvc;
 
    /// Handle for BS input Svc
    ServiceHandle<ByteStreamInputSvc> m_inputSvc;

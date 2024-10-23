@@ -3,7 +3,7 @@
 */
 
 #include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
-#include "ByteStreamCnvSvc/ByteStreamOutputSvc.h"
+#include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h"
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
 
@@ -65,18 +65,15 @@ StatusCode ByteStreamCnvSvc::initialize() {
    if (!ioSvcNames.empty()) {
       // Check ByteStreamCnvSvc
       for (const std::string& svcName : ioSvcNames) {
-	 ATH_MSG_DEBUG("get " << svcName);
+         ATH_MSG_DEBUG("Retrieving " << svcName);
          // get service
-	 SmartIF<IService> svc = Gaudi::svcLocator()->service(svcName);
-         ByteStreamOutputSvc* ioSvc = dynamic_cast<ByteStreamOutputSvc*>(svc.get());
-         if (!ioSvc) {
-            ATH_MSG_FATAL("Cannot cast to  ByteStreamOutputSvc");
-            return(StatusCode::FAILURE);
-         }
+         SmartIF<IByteStreamOutputSvc> ioSvc{service(svcName)};
+         ATH_CHECK( ioSvc.isValid() );
+
          // get stream name
          std::string bsOutputStreamName;
          SimpleProperty<std::string> propBSO("BSOutputStreamName", bsOutputStreamName);
-	 ATH_CHECK(ioSvc->getProperty(&propBSO));
+         ATH_CHECK(ioSvc.as<IProperty>()->getProperty(&propBSO));
          bsOutputStreamName = propBSO.value();
          // append
          m_ioSvcMap[bsOutputStreamName] = ioSvc;
@@ -212,7 +209,7 @@ StatusCode ByteStreamCnvSvc::commitOutput(const std::string& outputConnection, b
    ATH_MSG_DEBUG("commitOutput: Size of Event (words) = " << rawEvent.fragment_size_word());
    // put event to OutputSvc
    if ((m_ioSvcMap.size() == 1) or (m_ioSvcMap.count(outputConnection) > 0)) {
-      std::map<std::string, ByteStreamOutputSvc*>::iterator itSvc = m_ioSvcMap.find(outputConnection);
+      std::map<std::string, IByteStreamOutputSvc*>::iterator itSvc = m_ioSvcMap.find(outputConnection);
       // for backward compatibility
       if (itSvc == m_ioSvcMap.end()) {
          itSvc = m_ioSvcMap.begin();

@@ -18,11 +18,9 @@ typedef std::map<uint32_t, ROBF*> ROBMAP;
 
 // Constructor.
 ByteStreamMergeOutputSvc::ByteStreamMergeOutputSvc(const std::string& name, ISvcLocator* svcloc) :
-		ByteStreamOutputSvc(name,svcloc), 
-                m_inSvc(0),
-                m_outSvc(0)
+   base_class(name,svcloc),
+   m_inSvc(0)
 {
-   declareProperty("ByteStreamOutputSvc", m_outSvcName);
    declareProperty("ByteStreamInputSvc", m_inSvcName);
    declareProperty("overWriteHeader", m_overwriteHeader = false);
    declareProperty("BSOutputStreamName", m_bsOutputStreamName = name);
@@ -34,13 +32,7 @@ ByteStreamMergeOutputSvc::~ByteStreamMergeOutputSvc() {
 
 // setup input and output paths
 StatusCode ByteStreamMergeOutputSvc::initialize() {
-   ATH_CHECK(ByteStreamOutputSvc::initialize());
-   SmartIF<IService> svcOut = Gaudi::svcLocator()->service(m_outSvcName.value());
-   m_outSvc = dynamic_cast<ByteStreamOutputSvc*>(svcOut.get());
-   if (!m_outSvc) {
-      ATH_MSG_ERROR("Cannot cast " << m_outSvcName << " to ByteStreamOutputSvc");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK( m_outSvc.retrieve() );
 
    SmartIF<IService> svcIn = Gaudi::svcLocator()->service(m_inSvcName.value());
    m_inSvc = dynamic_cast<ByteStreamInputSvc*>(svcIn.get());
@@ -161,15 +153,4 @@ bool  ByteStreamMergeOutputSvc::putEvent(const RawEvent* newEvent) {
 bool ByteStreamMergeOutputSvc::putEvent(const RawEvent* /*re*/, const EventContext& /*ctx*/) {
   ATH_MSG_FATAL(name() << " does not implement the context-aware putEvent method");
   return false;
-}
-
-StatusCode ByteStreamMergeOutputSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-  if (ByteStreamOutputSvc::interfaceID().versionMatch(riid)) {
-    *ppvInterface = dynamic_cast<ByteStreamOutputSvc*>(this);
-  } else {
-    // Interface is not directly available: try out a base class
-    return(::AthService::queryInterface(riid, ppvInterface));
-  }
-  addRef();
-  return(StatusCode::SUCCESS);
 }

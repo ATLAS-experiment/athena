@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMRDP_OUTPUTSVC_H
@@ -11,18 +11,19 @@
 
               RDP == RobDataProvider
  Description: An class for writing FullEventFragment into RobDataProvider
-              this class implements the interface ByteStreamOutputSvc
+              this class implements the interface IByteStreamOutputSvc
               for the conversion service to write the output. 
 */
 
 #include "ByteStreamData/RawEvent.h" 
-#include "ByteStreamCnvSvc/ByteStreamOutputSvc.h"
+#include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
 #include "AthenaKernel/SlotSpecificObj.h"
+#include "AthenaBaseComps/AthService.h"
 #include "GaudiKernel/ServiceHandle.h"
 
 class IROBDataProviderSvc;
 
-class ByteStreamRDP_OutputSvc: public ByteStreamOutputSvc {
+class ByteStreamRDP_OutputSvc: public extends<AthService, IByteStreamOutputSvc> {
 public:
    /// Constructors:
    ByteStreamRDP_OutputSvc(const std::string& name, ISvcLocator* svcloc);
@@ -30,12 +31,9 @@ public:
    /// Required of all Gaudi Services
    virtual StatusCode initialize() override;
 
-   /// Implementation of the ByteStreamOutputSvc interface methods.
+   /// Implementation of the IByteStreamOutputSvc interface methods.
    virtual bool putEvent(const RawEvent* re) override;
    virtual bool putEvent(const RawEvent* re, const EventContext& ctx) override;
-
-   /// Required of all Gaudi services:  see Gaudi documentation for details
-   StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface) override;
 
 private: // data
    struct EventCache {

@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration */
 #include "ByteStreamEventStorageOutputSvc.h"
 
 #include <stdexcept>
@@ -35,8 +35,6 @@ ByteStreamEventStorageOutputSvc::ByteStreamEventStorageOutputSvc(
 StatusCode
 ByteStreamEventStorageOutputSvc::initialize() {
   ATH_MSG_INFO("Initializing");
-
-  ATH_CHECK(ByteStreamOutputSvc::initialize());
 
   ATH_CHECK(m_eventInfoKey.initialize());
   ATH_CHECK(m_byteStreamMetadataKey.initialize());
@@ -452,24 +450,4 @@ ByteStreamEventStorageOutputSvc::updateDataWriterParameters(
   for (const std::string& fmd : metaData.getFreeMetaDataStrings())
     params.fmdStrings.push_back(fmd);
   // if(fmd.find("Compression=") == std::string::npos)
-}
-
-
-StatusCode
-ByteStreamEventStorageOutputSvc::queryInterface(
-    const InterfaceID& riid, void** ppvInterface) {
-
-  if ( !ppvInterface ) return StatusCode::FAILURE;
-
-  // find indirect interfaces :
-  if (ByteStreamOutputSvc::interfaceID().versionMatch(riid)) {
-    *ppvInterface = dynamic_cast<ByteStreamOutputSvc*>(this);
-  } else if (base_class::queryInterface(riid, ppvInterface).isSuccess()) {
-    return StatusCode::SUCCESS;
-  } else {
-    // Interface is not directly available: try out a base class
-    return ::AthService::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }
