@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOTRKMUIDTOOLS_TRACKDEPOSITINCALOTOOL_H
@@ -11,6 +11,7 @@
 
 // --- Athena common ---
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
@@ -32,7 +33,6 @@ class TileDetDescrManager;
 
 class TH1F;
 class TH2F;
-class ITHistSvc;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -172,7 +172,7 @@ private:
 
 private:
     // Services & Tools
-    ITHistSvc* m_histSvc{};
+    ServiceHandle<ITHistSvc> m_histSvc;
     ToolHandle<Trk::IExtrapolator> m_extrapolator{this, "ExtrapolatorHandle", ""};
 
     const TileDetDescrManager* m_tileDDM{nullptr};
