@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// LArNoiseBursts
@@ -47,7 +47,6 @@
 
 ///////////////////////////////////////////////////////////////////
 
-#include "GaudiKernel/ITHistSvc.h"
 #include "TTree.h"
 #include "CLHEP/Vector/LorentzVector.h"
 
@@ -86,7 +85,6 @@ std::vector<HWIdentifier> v_onlIdentifier;
 LArNoiseBursts::LArNoiseBursts(const std::string& name,
 			 ISvcLocator* pSvcLocator) 
   : AthAlgorithm(name, pSvcLocator),
-    m_thistSvc(nullptr),
     m_tree(nullptr),
     m_LArOnlineIDHelper(nullptr),
     m_LArHVLineIDHelper(nullptr),
@@ -215,37 +213,6 @@ LArNoiseBursts::LArNoiseBursts(const std::string& name,
    declareProperty("KeepOnlyCellID",          m_keepOnlyCellID = false);
  }
 
-/////////////////////////////////////////////////////////////////////////////////////
-/// Destructor - check up memory allocation
-/// delete any memory allocation on the heap
-
-LArNoiseBursts::~LArNoiseBursts() {}
-
-////////////////////////////////////////////////////////////////////////////////////
-/// Initialize
-/// initialize StoreGate
-/// get a handle on the analysis tools
-/// book histograms
-/*
-StatusCode LArNoiseBursts::initializeBeforeEventLoop() {
-  MsgStream mLog( messageService(), name() );
-
-  ATH_MSG_DEBUG ( "Initializing LArNoiseBursts (before eventloop)" );
-  
-  // NEW
-  
-
-  // retrieve trigger decision tool
-  // needs to be done before the first run/event since a number of
-  // BeginRun/BeginEvents are registered by dependent services
-  StatusCode sc = StatusCode::SUCCESS;
-
-  return sc;
-} */
-//////////////////////////////////////////////////////////////////////////////////////
-///////////////////          INITIALIZE        ///////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////
-
 StatusCode LArNoiseBursts::initialize() {
 
   ATH_MSG_DEBUG ( "Initializing LArNoiseBursts" );
@@ -286,21 +253,8 @@ StatusCode LArNoiseBursts::initialize() {
   m_LArFCAL_IDHelper = idHelper->fcal_idHelper();
   
   /** get a handle on the NTuple and histogramming service */
-  ATH_CHECK( service("THistSvc", m_thistSvc) );
+  ATH_CHECK( m_thistSvc.retrieve() );
  
-  /*const AthenaAttributeList* fillparams(0);
-  sc =  evtStore()->retrieve(fillparams, "/TDAQ/OLC/LHC/FILLPARAMS");
-  if (sc.isFailure()) {
-     ATH_MSG_WARNING ("Unable to retrieve fillparams information; falling back to" );
-     return StatusCode::SUCCESS;
-   }
- 
-  if (fillparams != 0) {
-     ATH_MSG_DEBUG ("beam 1 #bunches are: " << (*fillparams)["Beam1Bunches"].data<uint32_t>() );
-     ATH_MSG_DEBUG ("beam 2 #bunches are: " << (*fillparams)["Beam2Bunches"].data<uint32_t>() );
-  }
-*/
-
   /** Prepare TTree **/
   m_tree = new TTree( "CollectionTree", "CollectionTree" );
   std::string treeName =  "/TTREE/CollectionTree" ;
@@ -322,23 +276,6 @@ StatusCode LArNoiseBursts::initialize() {
   m_tree->Branch("TimeAfterBunch",&m_nt_bunchtime,"TimeAfterBunch/F"); //time "distance" between the colliding bunch and the nearest one.
   m_tree->Branch("ATLASIsReady",&m_nt_atlasready,"AtlasIsReady/I"); //check if atlas is ready for physics 
   m_tree->Branch("StableBeams",&m_nt_stablebeams,"StableBeams/I");//check stablebeams
-
-  // Background bits in EventInfo
-//  m_tree->Branch("vetoMBTS",&m_nt_veto_mbts,"vetoMBST/S"); //Beam/collision veto based on mbts
-//  m_tree->Branch("vetoPixel",&m_nt_veto_pixel,"vetoPixel/S"); //Beam/collision veto based on indet
-//  m_tree->Branch("vetoSCT",&m_nt_veto_sct,"vetoSCT/S"); //Beam/collision veto based on indet
-//  m_tree->Branch("vetoBcm",&m_nt_veto_bcm,"vetoBcm/S"); //Beam/collision veto based on bcm
-//  m_tree->Branch("vetoLucid",&m_nt_veto_lucid,"vetoLucid/S"); //Beam/collision veto based on lucid
-//  m_tree->Branch("vetoMBTSDtHalo",&m_nt_veto_mbtstdHalo,"vetoMBTSDtHalo/S");
-//  m_tree->Branch("vetoMBTSDtCol",&m_nt_veto_mbtstdCol,"vetoMBTSDtCol/S");
-//  m_tree->Branch("vetoLArDtHalo",&m_nt_veto_lartdHalo,"vetoLArDtHalo/S");
-//  m_tree->Branch("vetoLArDtCol",&m_nt_veto_lartdCol,"vetoLArDtCol/S");
-//  m_tree->Branch("vetoCSCDtHalo",&m_nt_veto_csctdHalo,"vetoCSCDtHalo/S");
-//  m_tree->Branch("vetoCSCDtCol",&m_nt_veto_csctdCol,"vetoCSCDtCol/S");
-//  m_tree->Branch("vetoBCMDtHalo",&m_nt_veto_bcmtHalo,"vetoBCMDtHalo/S");
-//  m_tree->Branch("vetoBCMDtCol",&m_nt_veto_bcmtCol,"vetoBCMDtCol/S");
-//  m_tree->Branch("vetoMuonTimmingCol", &m_nt_veto_muontCol,"vetoMuonTimmingCol/S");
-//  m_tree->Branch("vetoMuonTimmingCosmic",&m_nt_veto_muontCosmic,"vetoMuonTimmingCosmic/S");
 
   // LAr event bit info
   m_tree->Branch("larflag_badFEBs",&m_nt_larflag_badFEBs,"larflag_badFEBs/O");
