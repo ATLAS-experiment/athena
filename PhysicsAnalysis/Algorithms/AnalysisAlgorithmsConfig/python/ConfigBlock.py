@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 import textwrap
+import inspect
 
 from AnaAlgorithm.Logging import logging
 logCPAlgCfgBlock = logging.getLogger('CPAlgCfgBlock')
@@ -86,6 +87,9 @@ class ConfigBlock:
 
     """
 
+    # Class-level dictionary to keep track of instance counts for each derived class
+    instance_counts = {}
+
     def __init__ (self) :
         self._blockName = ''
         self._dependencies = []
@@ -109,6 +113,21 @@ class ConfigBlock:
                   ' (e.g. 410.* to select all 410xxx DSIDs, or'
                   ' ^(?!410) to veto them). An empty list means no'
                   ' DSID restriction.'))
+        # Increment the instance count for the current class
+        cls = type(self)  # Get the actual class of the instance (also derived!)
+        if cls not in ConfigBlock.instance_counts:
+            ConfigBlock.instance_counts[cls] = 0
+        # Note: we do need to check in the call stack that we are
+        # in a real makeConfig situation, and not e.g. printAlgs
+        stack = inspect.stack()
+        for frame_info in stack:
+            # Get the class name (if any) from the frame
+            parent_cls = frame_info.frame.f_locals.get('self', None)
+            if parent_cls is None or not isinstance(parent_cls, ConfigBlock):
+                # If the frame does not belong to an instance of ConfigBlock, it's an external caller
+                if frame_info.function == "makeConfig":
+                    ConfigBlock.instance_counts[cls] += 1
+                    break
 
 
     def setBlockName(self, name):
@@ -245,3 +264,9 @@ class ConfigBlock:
 
     def __str__(self):
         return self._blockName
+
+
+    @classmethod
+    def get_instance_count(cls):
+        # Access the current count for this class
+        return ConfigBlock.instance_counts.get(cls, 0)

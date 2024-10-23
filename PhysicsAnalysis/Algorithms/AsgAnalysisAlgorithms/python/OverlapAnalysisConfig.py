@@ -46,10 +46,10 @@ class OverlapAnalysisConfig (ConfigBlock):
             info="flag to select the anti-tau-jet for the tau-antitau-jet overlap removal. The default is '' (empty string).")
         self.addOption ('antiTauBJetLabel', '', type=str,
             info="flag to select b-jets for the tau-antitau-jet overlap removal. The default is '' (empty string).")
-        self.addOption ('addToAllSelections', False, type=bool,
-            info="add OR selection decision into all object selections")
-        self.addOption ('addPreselection', False, type=bool,
-            info="add preselection decorations without systematics")
+        self.addOption ('addToAllSelections', None, type=bool,
+            info="add OR selection decision into all object selections. For most users, this should only be set to 'True' if there is only one Overlap Removal setup, and to 'False' otherwise. If set to 'None', this is handled automatically.")
+        self.addOption ('addPreselection', None, type=bool,
+            info="add preselection decorations without systematics. If set To 'None', will be turned on in case of multiple Overlap Removal setups.")
         self.addOption ('preselectLabel', None, type=str,
             info="label for preselection decorations")
         self.addOption ('jetsSelectionName', None, type=str,
@@ -105,6 +105,26 @@ class OverlapAnalysisConfig (ConfigBlock):
         alg.selectionDecoration = 'unifiedSelectForOR'
 
     def makeAlgs (self, config) :
+
+        if self.addToAllSelections is None:
+            # we resolve this automatically for the user:
+            # - if there is only one OverlapRemoval config block setup registered,
+            #   we set addToAllSections to True so that the OR decision is propagated
+            #   to all relevant particles
+            # - if there is more than one, than we set it to False
+            # this is the desired behaviour in most cases! If not, set addToAllSelections
+            # yourself :)
+            numORblocks = OverlapAnalysisConfig.get_instance_count()
+            if numORblocks == 1:
+                # there is only one OR setup
+                self.addToAllSelections = True
+                if self.addPreselection is None:
+                    self.addPreselection = False
+            else:
+                # there are more than one OR setups
+                self.addToAllSelections = False
+                if self.addPreselection is None:
+                    self.addPreselection = True
 
         if self.selectionName is not None:
             selectionName = self.selectionName
