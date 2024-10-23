@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PixelGangedClusterAmbiguitiesCnv_p1_H
@@ -14,7 +14,7 @@ class StoreGateSvc;
 class PixelGangedClusterAmbiguitiesCnv_p1 : public T_AthenaPoolTPCnvBase<InDet::PixelGangedClusterAmbiguities, InDet::PixelGangedClusterAmbiguities_p1>
 {
  public:
-  PixelGangedClusterAmbiguitiesCnv_p1() : m_storeGate(0), m_isInitialized(0) {};
+  PixelGangedClusterAmbiguitiesCnv_p1();
   
   virtual void	persToTrans(const InDet::PixelGangedClusterAmbiguities_p1* persCont,
 			    InDet::PixelGangedClusterAmbiguities* transCont,
@@ -24,7 +24,7 @@ class PixelGangedClusterAmbiguitiesCnv_p1 : public T_AthenaPoolTPCnvBase<InDet::
 			    MsgStream &log) ;
 
  private:
-   StoreGateSvc *m_storeGate;
+   ServiceHandle<StoreGateSvc> m_storeGate;
    bool m_isInitialized;
    StatusCode initialize(MsgStream &log);
 };

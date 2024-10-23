@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file InDetEventTPCnv/test/SCT_ClusterContainerCnv_p3_test.cxx
@@ -170,9 +170,8 @@ const SCT_ID& make_dd()
   IdDictMgr& idd = parser.parse ("IdDictParser/ATLAS_IDS.xml");
   sct_id->initialize_from_dictionary (idd);
 
-  ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StoreGateSvc* detStore = nullptr;
-  assert ( svcLoc->service("DetectorStore", detStore).isSuccess() );
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  assert ( detStore.isValid() );
   assert ( detStore->record (std::move (sct_id), "SCT_ID") );
 
   return ret;

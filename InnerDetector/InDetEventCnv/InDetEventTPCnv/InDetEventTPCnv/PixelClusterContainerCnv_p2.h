@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELCLUSTERCONTAINERCNV_P2_H
@@ -38,7 +38,6 @@ class PixelClusterContainerCnv_p2 : public T_AthenaPoolTPCnvBase<InDet::PixelClu
 
  private:
    const PixelID *m_pixId{};
-   StoreGateSvc *m_storeGate{};
    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey;
    bool m_useDetectorElement;
    bool m_isInitialized;

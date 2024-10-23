@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetPrepRawData/PixelGangedClusterAmbiguities.h"
@@ -8,6 +8,7 @@
 #include "InDetEventTPCnv/InDetPrepRawData/PixelGangedClusterAmbiguities_p1.h"
 #include "InDetEventTPCnv/InDetPrepRawData/PixelGangedClusterAmbiguitiesCnv_p1.h"
 #include "AthLinks/tools/IdentContIndex.h"
+#include "AthenaKernel/errorcheck.h"
 
 // Gaudi
 #include "GaudiKernel/ISvcLocator.h"
@@ -18,6 +19,12 @@
 
 // Athena
 #include "StoreGate/StoreGateSvc.h"
+
+
+PixelGangedClusterAmbiguitiesCnv_p1::PixelGangedClusterAmbiguitiesCnv_p1() :
+  m_storeGate("StoreGateSvc", "PixelGangedClusterAmbiguitiesCnv_p1"),
+  m_isInitialized(0)
+{}
 
 
 void PixelGangedClusterAmbiguitiesCnv_p1::transToPers
@@ -146,20 +153,13 @@ void  PixelGangedClusterAmbiguitiesCnv_p1::persToTrans(const InDet::PixelGangedC
 }
 }
 
-StatusCode PixelGangedClusterAmbiguitiesCnv_p1::initialize(MsgStream &log)
+StatusCode PixelGangedClusterAmbiguitiesCnv_p1::initialize(MsgStream&)
 {
    // Do not initialize again:
    m_isInitialized=true;
-   //   if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "PixelGangedClusterAmbiguitiesCnv_p1::initialize called " << endmsg;
-   // Get Storegate, ID helpers, and so on
-   ISvcLocator* svcLocator = Gaudi::svcLocator();
-   // get StoreGate service
-   StatusCode sc = svcLocator->service("StoreGateSvc", m_storeGate);
-   if (sc.isFailure()) {
-      log << MSG::FATAL << "StoreGate service not found !" << endmsg;
-      return StatusCode::FAILURE;
-   }
 
-   //   if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Converter initialized." << endmsg;
+   // get StoreGate service
+   CHECK( m_storeGate.retrieve() );
+
    return StatusCode::SUCCESS;
 }

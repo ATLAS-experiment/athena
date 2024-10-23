@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
@@ -85,13 +85,11 @@ StatusCode PixelClusterOnTrackCnv_p2::initialize(MsgStream &/*log*/) {
     // Do not initialize again:
     m_isInitialized=true;
 
-   //std::cout << "PixelClusterOnTrackCnv_p2::initialize() begin" << std::endl;
-
     // Get Storegate, ID helpers, and so on
     ISvcLocator* svcLocator = Gaudi::svcLocator();
-    StoreGateSvc *detStore;
-    CHECK( svcLocator->service("DetectorStore", detStore) );
-    CHECK(  detStore->retrieve(m_pixId, "PixelID") );
+    SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+    CHECK( detStore.isValid() );
+    CHECK( detStore->retrieve(m_pixId, "PixelID") );
 
     return StatusCode::SUCCESS;
 }

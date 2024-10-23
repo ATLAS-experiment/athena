@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file InDetEventTPCnv/test/PixelClusterContainerCnv_p3_test.cxx
@@ -192,9 +192,8 @@ void make_dd()
   IdDictMgr& idd = parser.parse ("IdDictParser/ATLAS_IDS.xml");
   pix_id->initialize_from_dictionary (idd);
 
-  ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StoreGateSvc* sg = nullptr;
-  assert ( svcLoc->service("DetectorStore", sg).isSuccess() );
+  SmartIF<StoreGateSvc> sg{Gaudi::svcLocator()->service("DetectorStore")};
+  assert ( sg.isValid() );
   assert ( sg->record (std::move (pix_id), "PixelID") );
 }
 

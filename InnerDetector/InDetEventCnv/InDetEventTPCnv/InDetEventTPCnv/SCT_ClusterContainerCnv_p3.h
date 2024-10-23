@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_CLUSTERCONTAINERCNV_P3_H
@@ -23,7 +23,7 @@ class SCT_ClusterContainerCnv_p3 : public T_AthenaPoolTPCnvBase<InDet::SCT_Clust
 {
  public:
   SCT_ClusterContainerCnv_p3() :
-    m_sctId{nullptr}, m_storeGate{nullptr},
+    m_sctId{nullptr},
     m_SCTDetEleCollKey{"SCT_DetectorElementCollection"},
     m_ITkStripDetEleCollKey{"ITkStripDetectorElementCollection"},
     m_useDetectorElement{true}, m_isInitialized{false} {};
@@ -43,7 +43,6 @@ class SCT_ClusterContainerCnv_p3 : public T_AthenaPoolTPCnvBase<InDet::SCT_Clust
 
  private:
   const SCT_ID *m_sctId;
-  StoreGateSvc *m_storeGate;
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCTDetEleCollKey;
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_ITkStripDetEleCollKey;
   bool m_useDetectorElement;

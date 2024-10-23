@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Athena
@@ -154,34 +154,19 @@ InDet::PixelClusterContainer* InDet::PixelClusterContainerCnv_p1::createTransien
     return(trans.release());
 }
 
-StatusCode InDet::PixelClusterContainerCnv_p1::initialize(MsgStream &log) {
+StatusCode InDet::PixelClusterContainerCnv_p1::initialize(MsgStream&) {
    // Do not initialize again:
    m_isInitialized=true;
    
-   // Get Storegate, ID helpers, and so on
-   ISvcLocator* svcLocator = Gaudi::svcLocator();
    // get StoreGate service
-   StatusCode sc = svcLocator->service("StoreGateSvc", m_storeGate);
-   if (sc.isFailure()) {
-      log << MSG::FATAL << "StoreGate service not found !" << endmsg;
-      return StatusCode::FAILURE;
-   }
+   CHECK( m_storeGate.retrieve() );
 
    // get DetectorStore service
-   StoreGateSvc *detStore;
-   sc = svcLocator->service("DetectorStore", detStore);
-   if (sc.isFailure()) {
-      log << MSG::FATAL << "DetectorStore service not found !" << endmsg;
-      return StatusCode::FAILURE;
-   } 
-  
+   SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+   CHECK( detStore.isValid() );
 
    // Get the pixel helper from the detector store
-   sc = detStore->retrieve(m_pixId, "PixelID");
-   if (sc.isFailure()) {
-      log << MSG::FATAL << "Could not get PixelID helper !" << endmsg;
-      return StatusCode::FAILURE;
-   } 
+   CHECK( detStore->retrieve(m_pixId, "PixelID") );
 
    CHECK(m_pixelDetEleCollKey.initialize(m_useDetectorElement));
 

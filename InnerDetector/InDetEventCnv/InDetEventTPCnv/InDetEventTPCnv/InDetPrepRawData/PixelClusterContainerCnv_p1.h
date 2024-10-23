@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELCLUSTERCONTAINERCNV_P1_H
@@ -30,17 +30,17 @@ class PixelClusterContainerCnv_p1 : public T_AthenaPoolTPCnvBase< InDet::PixelCl
  public:
    typedef InDet::InDetPRD_Container_p1 PERS; 
    typedef InDet::PixelClusterContainer TRANS;
- PixelClusterContainerCnv_p1(): m_pixelDetEleCollKey{"PixelDetectorElementCollection"}, m_useDetectorElement{true}, m_isInitialized{false} {}
+   PixelClusterContainerCnv_p1() = default;
    virtual void persToTrans(const PERS* persCont, TRANS* transCont, MsgStream &log); 
    virtual void transToPers(const TRANS* transCont, PERS* persCont, MsgStream &log);
    virtual InDet::PixelClusterContainer* createTransient(const InDet::InDetPRD_Container_p1* persObj, MsgStream& log);
    void setUseDetectorElement(const bool useDetectorElement);
  private:
    const PixelID *m_pixId{};
-   StoreGateSvc *m_storeGate{};
-   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey;
-   bool m_useDetectorElement;
-   bool m_isInitialized{};
+   ServiceHandle<StoreGateSvc> m_storeGate{"StoreGateSvc", "PixelClusterContainerCnv_p1"};
+   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey{"PixelDetectorElementCollection"};
+   bool m_useDetectorElement{true};
+   bool m_isInitialized{false};
    StatusCode initialize(MsgStream &log);
 };
  

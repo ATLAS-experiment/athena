@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetPrepRawData/TRT_DriftCircle.h"
@@ -154,11 +154,8 @@ StatusCode InDet::TRT_DriftCircleContainerCnv_p1::initialize(MsgStream &/*log*/)
    // Do not initialize again:
    m_isInitialized=true;
    
-   // Get Storegate, ID helpers, and so on
-   ISvcLocator* svcLocator = Gaudi::svcLocator();
-
-   StoreGateSvc *detStore = nullptr;
-   CHECK( svcLocator->service("DetectorStore", detStore) );
+   SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+   CHECK( detStore.isValid() );
    CHECK( detStore->retrieve(m_trtId, "TRT_ID") );
    CHECK( detStore->retrieve(m_trtMgr) );
    return StatusCode::SUCCESS;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetPrepRawData/TRT_DriftCircle.h"
@@ -211,45 +211,21 @@ InDet::TRT_DriftCircleContainer* TRT_DriftCircleContainerCnv_p2::createTransient
 }
 
 
-StatusCode TRT_DriftCircleContainerCnv_p2::initialize(MsgStream &log) {
+StatusCode TRT_DriftCircleContainerCnv_p2::initialize(MsgStream&) {
 
 
    // Do not initialize again:
    m_isInitialized=true;
-   //   if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "TRT_DriftCircleContainerCnv_p2::initialize called " << endmsg;
+
    // Get Storegate, ID helpers, and so on
-   ISvcLocator* svcLocator = Gaudi::svcLocator();
-   // get StoreGate service
-   StatusCode sc = svcLocator->service("StoreGateSvc", m_storeGate);
-   if (sc.isFailure()) {
-      log << MSG::FATAL << "StoreGate service not found !" << endmsg;
-      return StatusCode::FAILURE;
-   }
+   SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+   CHECK( detStore.isValid() );
 
-   // get DetectorStore service
-   StoreGateSvc *detStore;
-   sc = svcLocator->service("DetectorStore", detStore);
-   if (sc.isFailure()) {
-      log << MSG::FATAL << "DetectorStore service not found !" << endmsg;
-      return StatusCode::FAILURE;
-   }
-   //   else {
-   //     if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Found DetectorStore." << endmsg;
-   //   }
-
-   // Get the trt helper from the detector store
-   sc = detStore->retrieve(m_trtId, "TRT_ID");
-   if (sc.isFailure()) {
-      log << MSG::FATAL << "Could not get TRT_ID helper !" << endmsg;
-      return StatusCode::FAILURE;
-   }
-   //   else {
-   //     if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Found the TRT_ID helper." << endmsg;
-   //   }
+   // Get the TRT helper from the detector store
+   CHECK( detStore->retrieve(m_trtId, "TRT_ID") );
 
    CHECK(m_trtDetEleContKey.initialize(m_useDetectorElement));
 
-   //   if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Converter initialized." << endmsg;
    return StatusCode::SUCCESS;
 }
 

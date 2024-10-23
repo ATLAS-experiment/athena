@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file InDetEventTPCnv/test/TRT_DriftCircleContainerCnv_p2_test.cxx
@@ -151,8 +151,8 @@ const TRT_ID& make_dd()
   trt_id->initialize_from_dictionary (idd);
 
   ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StoreGateSvc* detStore = nullptr;
-  assert ( svcLoc->service("DetectorStore", detStore).isSuccess() );
+  SmartIF<StoreGateSvc> detStore{svcLoc->service("DetectorStore")};
+  assert ( detStore.isValid() );
   assert ( detStore->record (std::move (trt_id), "TRT_ID") );
 
   //auto sct_dd = std::make_unique<InDetDD::TRT_DetectorManager>(detStore);
