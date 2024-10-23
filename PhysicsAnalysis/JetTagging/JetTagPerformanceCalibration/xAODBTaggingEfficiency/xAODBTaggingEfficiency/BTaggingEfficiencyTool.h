@@ -250,15 +250,6 @@ private:
     case 15:
       return "T";
       break;
-    case 6:
-      return "Top_BX";
-      break;
-    case 21:
-      return "QCD_BB";
-      break;
-    case 23:
-      return "Z_BB";
-      break;
     case 0:
       return "Light";
       break;
@@ -284,15 +275,8 @@ private:
         return 0;
       }
     } else {
-      if(label == "Top_BX"){
-        return 6;
-      } else if (label == "QCD_BB"){
-        return 21;
-      } else if (label == "Z_BB"){
-        return 23;
-      } else {
-        return 25;
-      }
+        ATH_MSG_WARNING("Non-conventional label, return flavour ID = 0!");
+        return 0;
     }
   }
 
@@ -375,7 +359,6 @@ private:
 
   // if true, use the flexible configuration of the CDIReader
   bool m_useFlex = false;
-  bool m_doXbbTagging = false;
   std::vector<std::string> m_flex_labels;
   std::vector<unsigned int> m_flex_label_integers;
 

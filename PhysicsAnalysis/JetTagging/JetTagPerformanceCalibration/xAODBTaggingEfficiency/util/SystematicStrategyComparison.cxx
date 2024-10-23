@@ -83,12 +83,10 @@ int main() {
             StatusCode code6 = tool.setProperty("SystematicsStrategy", strat);//either "SFEigen" or "SFGlobalEigen"
             StatusCode code7 = tool.setProperty("useFlexibleConfig", true);
 
-            StatusCode code8 = tool.setProperty("doXbbTagging", false);
-            
             StatusCode code_init = tool.initialize();
             if (code_init != StatusCode::SUCCESS || code1 != StatusCode::SUCCESS || code2 != StatusCode::SUCCESS 
                  || code3 != StatusCode::SUCCESS || code4 != StatusCode::SUCCESS || code5 != StatusCode::SUCCESS  
-                 || code6 != StatusCode::SUCCESS || code7 != StatusCode::SUCCESS || code8 != StatusCode::SUCCESS)
+                 || code6 != StatusCode::SUCCESS || code7 != StatusCode::SUCCESS)
               {
               std::cout << "Initialization of tool " << tool->name() << " failed! " << std::endl;
               return -1;
