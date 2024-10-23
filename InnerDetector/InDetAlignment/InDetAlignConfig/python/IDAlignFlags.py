@@ -1,0 +1,49 @@
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
+# File: InDetAlignConfig/python/IDAlignFlags.py
+# Author: David Brunner (david.brunner@cern.ch), Thomas Strebler (thomas.strebler@cern.ch)
+
+def createInDetAlignFlags():
+    from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+    icf = AthConfigFlags()
+    
+    icf.addFlag("solveLocal", True)
+    icf.addFlag("doMonitoring", False)
+    icf.addFlag("alignInDet", True)
+    icf.addFlag("alignPixel", True)
+    icf.addFlag("alignSCT", True)
+    icf.addFlag("alignSilicon", True)
+    icf.addFlag("alignTRT", True)
+    icf.addFlag("writeConstantsToPool", True)
+    icf.addFlag("writeSilicon", True)
+    icf.addFlag("writeTRT", True)
+    icf.addFlag("writeTRTL3", False)
+    icf.addFlag("writeIBLDistDB", True)
+    icf.addFlag("writeDynamicDB", True)
+    icf.addFlag("writeAlignNtuple", False)
+    icf.addFlag("readL3Only", False)
+    icf.addFlag("tagSi", "IndetAlign_test")
+    icf.addFlag("tagTRT", "TRTAlign_test")
+    icf.addFlag("tagBow", "IndetIBLDist")
+    icf.addFlag("BeamSpotTag", "IndetBeampos-RUN3-ES1-UPD2-02")
+    icf.addFlag("DynamicL1IDTag", "InDetAlignL1-RUN3-BLK-UPD4-01")
+    icf.addFlag("DynamicL2PIXTag", "InDetAlignL2PIX-RUN3-BLK-UPD4-01")
+    icf.addFlag("DynamicL2SCTTag", "InDetAlignL2SCT-RUN3-BLK-UPD4-01")
+    icf.addFlag("DynamicL1TRTTag", "TRTAlignL1-RUN3-BLK-UPD4-01")
+    icf.addFlag("DynamicL3SiTag", "")
+    icf.addFlag("DynamicL2TRTTag", "")
+    icf.addFlag("ErrorScalingTag", "")
+    icf.addFlag("LorentzAngleTag", "")
+    icf.addFlag("MDNTag", "")
+    icf.addFlag("PixelDistortionTag", "")
+    icf.addFlag("TRTCalibT0TagCos", "")
+    icf.addFlag("TRTCalibRtTagCos", "")
+    icf.addFlag("useDynamicAlignFolders", True)
+    icf.addFlag("inputAlignmentConstants", [])
+    icf.addFlag("inputBowingDatabase", "")
+    icf.addFlag("inputDynamicGlobalDatabase", "")
+    icf.addFlag("siPoolFile", [])
+    icf.addFlag("FileName", "newIDalign.root")
+    icf.addFlag("outputConditionFile", "alignment_output.pool.root")
+
+    return icf

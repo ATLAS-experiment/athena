@@ -2,7 +2,7 @@
 # Configuration of InDetTrackSelectionTool package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import LHCPeriod
+from AthenaConfiguration.Enums import LHCPeriod, BeamType
 
 def InDetTrackSelectionToolCfg(flags, name="InDetTrackSelectionTool", **kwargs):
     acc = ComponentAccumulator()
@@ -41,6 +41,11 @@ def InDetTrackSelectionTool_Loose_Cfg(
 def isoTrackSelectionToolCfg(flags, name="isoTrackSelectionTool", **kwargs):
     kwargs.setdefault("minPt", 1000)
     return InDetTrackSelectionTool_Loose_Cfg(flags, name, **kwargs)
+
+def InDetTrackSelectionTool_Loose_TrackTools_Cfg(
+        flags, name="InDetTrackSelectionTool_Loose", **kwargs):
+    kwargs.setdefault("CutLevel", "Loose")
+    return InDetTrackSelectionTool_TrackTools_Cfg(flags, name, **kwargs)
 
 ####################################################
 #####  Configs based on CutLevel LoosePrimary  #####
@@ -197,3 +202,33 @@ def InDetTrackSelectionTool_AMSVF_Cfg(flags, name='InDetTrackSelectionTool_AMSVF
     kwargs.setdefault("maxNSiSharedHits", 6)
 
     return InDetTrackSelectionTool_TrackTools_Cfg(flags, name, **kwargs)
+
+###############################################
+#####        Configs for alignment        #####
+###############################################
+
+
+def Align_InDetTrackSelectionToolCfg(flags, name="Align_InDetTrackSelectionTool", **kwargs):
+    if flags.Beam.Type is BeamType.Cosmics:
+        kwargs.setdefault("minNPixelHits", 1)
+        kwargs.setdefault("minNSctHits", 8)
+        kwargs.setdefault("minNSiHitsModTop", 2)
+        kwargs.setdefault("minNSiHitsModBottom", 2)
+
+    else:
+        kwargs.setdefault("maxD0", 500.)
+        kwargs.setdefault("maxZ0", 500.)
+        kwargs.setdefault("minNPixelHitsPhysical", 2)
+        kwargs.setdefault("minNSiHitsPhysical", 10)
+        kwargs.setdefault("minNSctHits", 5)
+        kwargs.setdefault("minNSctHitsPhysical", 7)
+
+    return InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg(flags, name, **kwargs)
+
+def Monitor_Align_InDetTrackSelectionToolCfg(flags, name="Monitor_Align_InDetTrackSelectionTool", **kwargs):
+    kwargs.setdefault("minPt", 1000.)
+    kwargs.setdefault("maxD0", 5000.)
+    kwargs.setdefault("maxZ0", 5000.)
+    kwargs.setdefault("minNNextToInnermostLayerHits", 1)
+    return InDetTrackSelectionTool_Loose_TrackTools_Cfg(flags, name, **kwargs)
+    
