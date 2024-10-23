@@ -254,8 +254,8 @@ public:
   virtual std::vector<unsigned> slicePars() const override { return std::vector<unsigned>({0,1}); }
   virtual std::vector<unsigned> scanPars() const override { return std::vector<unsigned>({2,3}); }
 
-  virtual double etaHistScale() const {return 200.0;}
-  virtual double phiHistScale() const {return 0.1;}
+  virtual double etaHistScale() const override {return 200.0;}
+  virtual double phiHistScale() const override {return 0.1;}
 
   virtual const ParSet trackParsToParSet(const FPGATrackSimTrackPars &pars) const override
   {
@@ -286,12 +286,12 @@ public:
     return FPGATrackSimGenScanGeomHelpers::parsToTrkPhi(parSetToTrackPars(pars),hit);
   }
   
-  virtual double etaResidual(const ParSet &parset ,FPGATrackSimHit const * hit, [[maybe_unused]] bool debug=false) const {
+  virtual double etaResidual(const ParSet &parset ,FPGATrackSimHit const * hit, [[maybe_unused]] bool debug=false) const override {
     // this uses a shift in "eta*radius" instead of "z"
     double theta = FPGATrackSimGenScanGeomHelpers::ThetaFromEta(parset[1]);  // 1 = eta
     return (hit->getZ() - parset[0]) * sin(theta) - hit->getR() * cos(theta); // 0=z0
   }
-  virtual double phiResidual(const ParSet &parset,FPGATrackSimHit const *hit, [[maybe_unused]] bool debug=false) const {
+  virtual double phiResidual(const ParSet &parset,FPGATrackSimHit const *hit, [[maybe_unused]] bool debug=false) const override {
     return xAOD::P4Helpers::deltaPhi(hit->getGPhi(), FPGATrackSimGenScanGeomHelpers::phiFromPars(hit->getR(),parSetToTrackPars(parset)));    
   }
 
@@ -390,8 +390,8 @@ public:
   virtual std::vector<unsigned> slicePars() const override { return std::vector<unsigned>({0,1}); }
   virtual std::vector<unsigned> scanPars() const override { return std::vector<unsigned>({2,3}); }
   
-  virtual double etaHistScale() const {return 300.0;}
-  virtual double phiHistScale() const {return 60.0;}
+  virtual double etaHistScale() const override {return 300.0;}
+  virtual double phiHistScale() const override {return 60.0;}
 
   ParSet keyparsToParSet(const FPGATrackSimGenScanKeyLyrHelper::KeyLyrPars& keypars) const {
     return ParSet({keypars.z1,keypars.z2,keypars.phi1,keypars.phi2,keypars.xm});
@@ -459,8 +459,8 @@ public:
   virtual std::vector<unsigned> slicePars() const override { return std::vector<unsigned>({2,3,4}); }
   virtual std::vector<unsigned> scanPars() const override { return std::vector<unsigned>({0,1}); }
   
-  virtual double etaHistScale() const {return 60.0;}
-  virtual double phiHistScale() const {return 30.0;}
+  virtual double etaHistScale() const override {return 60.0;}
+  virtual double phiHistScale() const override {return 30.0;}
 
   ParSet keyparsToParSet(const FPGATrackSimGenScanKeyLyrHelper::KeyLyrPars& keypars) const {
     return ParSet({keypars.z1,keypars.z2,keypars.phi1,keypars.phi2,keypars.xm});
