@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -416,14 +416,10 @@ CaloCellContainer* fill_supercells (const std::vector<CaloCell*>& cells,
 {
   CaloCellContainer* cont = new CaloCellContainer;
 
-  IToolSvc* toolsvc = 0;
-  CHECK( svcloc->service ("ToolSvc", toolsvc, true) );
+  ToolHandle<ICaloSuperCellIDTool> sctool("CaloSuperCellIDTool");
+  CHECK( sctool.retrieve() );
 
-  ICaloSuperCellIDTool* sctool = 0;
-  CHECK( toolsvc->retrieveTool ("CaloSuperCellIDTool", sctool) );
-
-  StoreGateSvc* detstore = 0;
-  CHECK( svcloc->service ("DetectorStore", detstore) );
+  SmartIF<StoreGateSvc> detstore{svcloc->service ("DetectorStore")};
   const CaloIdManager* idmgr = 0;
   CHECK( detstore->retrieve (idmgr, "CaloIdManager") );
   const CaloCell_SuperCell_ID* schelper =
@@ -1184,10 +1180,8 @@ std::vector<CaloCell*> init (IdDictParser* parser,
   scmgr->set_helper (schelper);
   scmgr->initialize();
 
-  StoreGateSvc* detstore = nullptr;
-  CHECK( svcloc->service ("DetectorStore", detstore) );
-  StoreGateSvc* condstore = nullptr;
-  CHECK( svcloc->service ("StoreGateSvc/ConditionStore", condstore) );
+  SmartIF<StoreGateSvc> detstore{svcloc->service ("DetectorStore")};
+  SmartIF<StoreGateSvc> condstore{svcloc->service ("StoreGateSvc/ConditionStore")};
 
   CHECK( detstore->record (idmgr, "CaloIdManager") );
   CHECK( detstore->record (helper, "CaloCell_ID") );
