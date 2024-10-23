@@ -108,8 +108,14 @@ StatusCode IDAlignMonResidualsAlg::initialize()
   m_pixECCResidualY = Monitored::buildToolMap<int>(m_tools, "PixResidualYECC", m_nPixEClayers);
   m_sctResidualX = Monitored::buildToolMap<int>(m_tools, "SCTResidualX", m_nSiBlayers);
   m_sctResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTResidualX_2DProf", m_nSiBlayers);
+  m_sct_s0_ResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCT_s0_ResidualX_2DProf", m_nSiBlayers);
+  m_sct_s1_ResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCT_s1_ResidualX_2DProf", m_nSiBlayers);
   m_sctECAResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTECAResidualX_2DProf", m_nSCTEClayers);
+  m_sctECA_s0_ResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTECA_s0_ResidualX_2DProf", m_nSCTEClayers);
+  m_sctECA_s1_ResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTECA_s1_ResidualX_2DProf", m_nSCTEClayers);
   m_sctECCResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTECCResidualX_2DProf", m_nSCTEClayers);
+  m_sctECC_s0_ResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTECC_s0_ResidualX_2DProf", m_nSCTEClayers);
+  m_sctECC_s1_ResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTECC_s1_ResidualX_2DProf", m_nSCTEClayers);
   m_sctPullX = Monitored::buildToolMap<int>(m_tools, "SCTPullX", m_nSiBlayers);
   m_sctResidualXvsEta = Monitored::buildToolMap<int>(m_tools, "SCTResidualXvsEta", m_nSiBlayers);
   m_sctResidualXvsPhi = Monitored::buildToolMap<int>(m_tools, "SCTResidualXvsPhi", m_nSiBlayers);
@@ -597,7 +603,12 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
           fill(m_tools[m_sctResidualX_2DProf[layerDisk]], modEta_m, modPhi_m, sct_b_residualsx_m);
           auto sct_b_pullsx_m = Monitored::Scalar<float>("m_sct_pullsx", pullX);
           fill(m_tools[m_sctPullX[layerDisk]], sct_b_pullsx_m);
-          
+          if (sctSide == 0) {
+            fill(m_tools[m_sct_s0_ResidualX_2DProf[layerDisk]], modEta_m, modPhi_m, sct_b_residualsx_m);
+          } else {
+            fill(m_tools[m_sct_s1_ResidualX_2DProf[layerDisk]], modEta_m, modPhi_m, sct_b_residualsx_m);
+          }
+
           //Residuals vs Eta and Phi
           fill(m_tools[m_sctResidualXvsEta[layerDisk]], modEta_m, residualX_m);
           fill(m_tools[m_sctResidualXvsPhi[layerDisk]], modPhi_m, residualX_m);
@@ -623,6 +634,11 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
           fill(m_tools[m_sctECAResidualX_2DProf[layerDisk]], modEta_m, modPhi_m, sct_eca_residualx_m);
           auto sct_eca_pullx_m = Monitored::Scalar<float>( "m_sct_eca_pullx", pullX);
           fill(residualGroup, sct_eca_residualx_m, sct_eca_pullx_m);
+          if (sctSide == 0) {
+            fill(m_tools[m_sctECA_s0_ResidualX_2DProf[layerDisk]], modEta_m, modPhi_m, sct_eca_residualx_m);
+          } else {
+            fill(m_tools[m_sctECA_s1_ResidualX_2DProf[layerDisk]], modEta_m, modPhi_m, sct_eca_residualx_m);
+          }
           
           //Residuals vs Eta and Phi
           auto residualX_sct_eca_m = Monitored::Scalar<float>( "m_residualX_sct_eca", residualX);
@@ -645,6 +661,11 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
           fill(m_tools[m_sctECCResidualX_2DProf[layerDisk]], modEta_m, modPhi_m, sct_ecc_residualx_m);
           auto sct_ecc_pullx_m = Monitored::Scalar<float>( "m_sct_ecc_pullx", pullX);
           fill(residualGroup, sct_ecc_residualx_m, sct_ecc_pullx_m);
+          if (sctSide == 0) {
+            fill(m_tools[m_sctECC_s0_ResidualX_2DProf[layerDisk]], modEta_m, modPhi_m, sct_ecc_residualx_m);
+          } else {
+            fill(m_tools[m_sctECC_s1_ResidualX_2DProf[layerDisk]], modEta_m, modPhi_m, sct_ecc_residualx_m);
+          }
           
           //Residuals vs Eta and Phi
           auto residualX_sct_ecc_m = Monitored::Scalar<float>( "m_residualX_sct_ecc", residualX);
