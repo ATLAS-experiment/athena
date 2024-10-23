@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LUCID_DetectorTool.h"
@@ -33,49 +33,36 @@ StatusCode LUCID_DetectorTool::create() {
   
   MsgStream log(msgSvc(), name()); 
   
-  log << MSG::INFO << "Building LUCID geometry" << endmsg;
+  ATH_MSG_INFO("Building LUCID geometry");
   
-  IGeoDbTagSvc* geoDbTag{nullptr};
-  StatusCode sc = service("GeoDbTagSvc",geoDbTag);
-  if (sc.isFailure()) { log << MSG::FATAL << "Could not locate GeoDbTagSvc" << endmsg; return StatusCode::FAILURE; }
+  ServiceHandle<IGeoDbTagSvc> geoDbTag("GeoDbTagSvc", name());
+  ATH_CHECK( geoDbTag.retrieve() );
 
-  IRDBAccessSvc* raccess = nullptr;
-  
-  sc = service("RDBAccessSvc",raccess);
-  
-  if(sc.isFailure()) { log << MSG::FATAL << "Could not locate RDBAccessSvc" << endmsg; return StatusCode::FAILURE; }
+  ServiceHandle<IRDBAccessSvc> raccess("RDBAccessSvc", name());
+  ATH_CHECK( raccess.retrieve() );
 
-  std::string AtlasVersion = geoDbTag->atlasVersion();
-  std::string LucidVersion = raccess->getChildTag("LUCID",AtlasVersion,"ATLAS");
+  const std::string AtlasVersion = geoDbTag->atlasVersion();
+  const std::string LucidVersion = raccess->getChildTag("LUCID",AtlasVersion,"ATLAS");
 
   if(LucidVersion.empty()) {
-    log << MSG::DEBUG << "LUCID is not part of the selected ATLAS geometry. Skipping" << endmsg;
+    ATH_MSG_DEBUG("LUCID is not part of the selected ATLAS geometry. Skipping");
     return StatusCode::SUCCESS;
   }
 
   GeoModelExperiment* theExpt; 
+  ATH_CHECK( detStore()->retrieve(theExpt, "ATLAS") );
 
-  if (StatusCode::SUCCESS != detStore()->retrieve(theExpt, "ATLAS")) { 
-    
-    log << MSG::ERROR << "Could not find GeoModelExperiment ATLAS" << endmsg; 
-    return StatusCode::FAILURE; 
-  } 
-  
   if(nullptr == m_detector) {
 
     GeoPhysVol* world = &*theExpt->getPhysVol();
         
-    LUCID_DetectorFactory theLUCID_Factory(detStore().operator->(),raccess);
+    LUCID_DetectorFactory theLUCID_Factory(detStore().get(),raccess.get());
 
     theLUCID_Factory.create(world);
     m_manager = theLUCID_Factory.getDetectorManager();
     theExpt->addManager(m_manager);
 
-    sc = detStore()->record(m_manager,
-			  m_manager->getName());
-    
-    if (sc.isFailure()) { log << MSG::ERROR << "Could not register LUCID detector manager" << endmsg; return StatusCode::FAILURE; }
-    
+    ATH_CHECK( detStore()->record(m_manager, m_manager->getName()) );
     return StatusCode::SUCCESS;
   }
   

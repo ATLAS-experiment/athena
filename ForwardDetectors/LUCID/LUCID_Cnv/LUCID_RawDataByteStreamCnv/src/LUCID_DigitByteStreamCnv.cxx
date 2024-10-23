@@ -1,13 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LUCID_RawDataByteStreamCnv/LUCID_DigitByteStreamCnv.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include "LUCID_RawEvent/LUCID_DigitContainer.h"
 #include "AthenaKernel/ClassID_traits.h"
-#include "ByteStreamCnvSvcBase/ByteStreamAddress.h" 
-#include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h"
+#include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "LUCID_RawDataByteStreamCnv/LUCID_RodEncoder.h"
 
@@ -20,17 +19,17 @@ typedef std::map<uint32_t, LUCID_RodEncoder> LucidRodEncoder_map;
 LUCID_DigitByteStreamCnv::LUCID_DigitByteStreamCnv(ISvcLocator* svcloc) : 
   Converter(storageType(), classID(), svcloc),
   AthMessaging("LUCID_DigitByteStreamCnv"),
+  m_ByteStreamEventAccess("ByteStreamCnvSvc", "LUCID_DigitByteStreamCnv"),
   m_RodBlockVersion      (0),
   m_BCs_per_LVL1ID       (1)
 {
-  m_ByteStreamEventAccess = nullptr;
-  m_StoreGate             = nullptr;
+
 }
 
 StatusCode LUCID_DigitByteStreamCnv::initialize() {
 
   ATH_CHECK( Converter::initialize() );
-  ATH_CHECK( service("ByteStreamCnvSvc", m_ByteStreamEventAccess) );
+  ATH_CHECK( m_ByteStreamEventAccess.retrieve() );
     
   return StatusCode::SUCCESS;
 }
