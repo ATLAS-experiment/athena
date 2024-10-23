@@ -23,7 +23,7 @@ ISF::ActsFatrasSimTool::~ActsFatrasSimTool() {}
 
 StatusCode ISF::ActsFatrasSimTool::initialize() {
   ATH_CHECK(BaseSimulatorTool::initialize());
-  ATH_MSG_INFO("ISF::ActsFatrasSimTool update with ACTS 35.1.0");
+  ATH_MSG_INFO("ISF::ActsFatrasSimTool update with ACTS 37.0.0");
   // Retrieve particle filter
   if (!m_particleFilter.empty()) ATH_CHECK(m_particleFilter.retrieve());
 
@@ -116,6 +116,9 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
   auto anygctx = gctx.context();
   // Loop over ISFParticleVector and process each separately
   ATH_MSG_VERBOSE(name() << " Processing particles in ISFParticleVector.");
+  // For sihit creation
+  SiHitCollection pixelSiHits;
+  SiHitCollection sctSiHits;
   for (const auto isfp : particles) {
     // ====ACTSFatras Simulation====
     // //  
@@ -202,12 +205,17 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
     }//end of secondaries
     ATH_MSG_VERBOSE(name() << " No. of secondaries: " << secondaries.size());
     ATH_MSG_DEBUG(name() << " End of particle " << isfp->barcode());
-  
-  std::vector<ActsFatras::Particle>().swap(input);
-  std::vector<ActsFatras::Particle>().swap(simulatedInitial);
-  std::vector<ActsFatras::Particle>().swap(simulatedFinal);
-  std::vector<ActsFatras::Hit>().swap(hits);
+    m_ActsFatrasWriteHandler->createHits(*isfp, m_trackingGeometry,hits,pixelSiHits,sctSiHits);
+
+    std::vector<ActsFatras::Particle>().swap(input);
+    std::vector<ActsFatras::Particle>().swap(simulatedInitial);
+    std::vector<ActsFatras::Particle>().swap(simulatedFinal);
+    std::vector<ActsFatras::Hit>().swap(hits);
   } // end of isfp loop
+  std::vector<SiHitCollection> hitcolls;
+  hitcolls.push_back(pixelSiHits);
+  hitcolls.push_back(sctSiHits);
+  ATH_CHECK(m_ActsFatrasWriteHandler->WriteHits(hitcolls,ctx));
   return StatusCode::SUCCESS;
 }
 

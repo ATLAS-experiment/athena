@@ -19,6 +19,7 @@
 #include "ISF_Interfaces/BaseSimulatorTool.h"
 #include "ISF_Interfaces/IParticleFilter.h"
 #include "ISF_Interfaces/ITruthSvc.h"
+#include "ActsFatrasWriteHandler.h"
 
 // ACTS
 #include "Acts/Utilities/UnitVectors.hpp"
@@ -254,6 +255,11 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
       this, "ParticleFilter", "", "Particle filter kinematic cuts, etc."};
 
   ServiceHandle<ISF::ITruthSvc> m_truthRecordSvc{this, "TruthRecordService", "ISF_TruthRecordSvc", ""};
+
+  // ActsFatrasHitConvtTool
+  ToolHandle<ActsFatrasWriteHandler> m_ActsFatrasWriteHandler{
+      this, "ActsFatrasWriteHandler", "ActsFatrasWriteHandler"};
+
   Gaudi::Property<double> m_interact_minPt{this, "Interact_MinPt", 50.0,
       "Min pT of the interactions (MeV)"};
 
