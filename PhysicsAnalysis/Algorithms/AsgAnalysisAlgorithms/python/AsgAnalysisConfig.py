@@ -137,13 +137,17 @@ class PileupReweightingBlock (ConfigBlock):
             import logging
         log = logging.getLogger('makePileupAnalysisSequence')
 
+        eventInfoVar = ['runNumber', 'eventNumber', 'actualInteractionsPerCrossing', 'averageInteractionsPerCrossing']
+        if config.dataType() is not DataType.Data:
+            eventInfoVar += ['mcChannelNumber']
+
         if config.isPhyslite() and not self.alternativeConfig:
             # PHYSLITE already has these variables defined, just need to copy them to the output
             log.info(f'Physlite does not need pileup reweighting. Variables will be copied from input instead. {config.isPhyslite}')
-            config.addOutputVar ('EventInfo', 'runNumber', 'runNumber', noSys=True)
-            config.addOutputVar ('EventInfo', 'eventNumber', 'eventNumber', noSys=True)
+            for var in eventInfoVar:
+                config.addOutputVar ('EventInfo', var, var, noSys=True)
+
             if config.dataType() is not DataType.Data:
-                config.addOutputVar ('EventInfo', 'mcChannelNumber', 'mcChannelNumber', noSys=True)
                 config.addOutputVar ('EventInfo', 'PileupWeight_%SYS%', 'weight_pileup')
                 if config.geometry() is LHCPeriod.Run2:
                     config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True)
@@ -260,13 +264,11 @@ class PileupReweightingBlock (ConfigBlock):
             alg.pileupReweightingTool.LumiCalcFiles = toolLumicalcFiles
 
         if not self.alternativeConfig:
-            config.addOutputVar ('EventInfo', 'runNumber', 'runNumber', noSys=True)
-            config.addOutputVar ('EventInfo', 'eventNumber', 'eventNumber', noSys=True)
+            for var in eventInfoVar:
+                config.addOutputVar ('EventInfo', var, var, noSys=True)
 
-            if config.dataType() is not DataType.Data:
-                config.addOutputVar ('EventInfo', 'mcChannelNumber', 'mcChannelNumber', noSys=True)
-                if config.geometry() is LHCPeriod.Run2:
-                    config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True)
+            if config.dataType() is not DataType.Data and config.geometry() is LHCPeriod.Run2:
+                config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True)
 
         if config.dataType() is not DataType.Data and toolConfigFiles:
             config.addOutputVar ('EventInfo', 'PileupWeight' + self.postfix + '_%SYS%',
