@@ -41,7 +41,7 @@ namespace MuonR4 {
                 default:
                     if (msg.level() <= MSG::WARNING) {
                         msg<<MSG::WARNING<<__FILE__<<":"<<__LINE__<<" - Unsupported measurement: "
-                            <<measurement.chamber()->idHelperSvc()->toString(measurement.identify())<<endmsg;
+                            <<measurement.msSector()->idHelperSvc()->toString(measurement.identify())<<endmsg;
                     }
             }
             return chi2;
@@ -58,7 +58,7 @@ namespace MuonR4 {
                              - mdtSP.driftRadius();
             const double chi2{residual.dot(mdtSP.covariance().inverse()* residual)};
             if (msg.level() <= printLvl) {
-                msg<<printLvl<<"Measurement "<<mdtSP.chamber()->idHelperSvc()->toString(mdtSP.identify());
+                msg<<printLvl<<"Measurement "<<mdtSP.msSector()->idHelperSvc()->toString(mdtSP.identify());
                 msg<<printLvl<<", position: "<<Amg::toString(mdtSP.positionInChamber())
                              <<", driftRadius: "<<mdtSP.driftRadius()
                              <<", status: "<<static_cast<const xAOD::MdtDriftCircle*>(mdtSP.primaryMeasurement())->status()<<endmsg;
@@ -82,7 +82,7 @@ namespace MuonR4 {
             const Amg::Vector2D residual{(planeCrossing - stripSP.positionInChamber()).block<2,1>(0,0)};
             const double chi2 = residual.dot(stripSP.covariance().inverse()* residual);
             if (msg.level() <= printLvl) {
-                msg<<printLvl<<"Measurement "<<stripSP.chamber()->idHelperSvc()->toString(stripSP.identify())
+                msg<<printLvl<<"Measurement "<<stripSP.msSector()->idHelperSvc()->toString(stripSP.identify())
                              <<", position: "<<Amg::toString(stripSP.positionInChamber())<<endmsg;
                 msg<<printLvl<<"Segment: "<<Amg::toString(segPos) <<" + x "<<Amg::toString(segDir)<<endmsg;
                 msg<<printLvl<<"Plane crossing: "<<Amg::toString(planeCrossing)<<", residual: "<<Amg::toString(residual)
@@ -113,7 +113,7 @@ namespace MuonR4 {
                 default:
                    if (msg.level() <= MSG::WARNING) {
                         msg<<MSG::WARNING<<__FILE__<<":"<<__LINE__<<" - Unsupported measurement: "
-                            <<hit.spacePoint()->chamber()->idHelperSvc()->toString(hit.spacePoint()->identify())<<endmsg;
+                            <<hit.spacePoint()->msSector()->idHelperSvc()->toString(hit.spacePoint()->identify())<<endmsg;
                     }
             }
             return chi2;
@@ -138,7 +138,7 @@ namespace MuonR4 {
             const double chi2{contract(inverse(hit.covariance()), residual)};
             if (msg.level() <= printLvl) {
                 const SpacePoint* sp = hit.spacePoint();
-                msg<<printLvl<<"Calibrated measurement "<<sp->chamber()->idHelperSvc()->toString(sp->identify());
+                msg<<printLvl<<"Calibrated measurement "<<sp->msSector()->idHelperSvc()->toString(sp->identify());
                 msg<<printLvl<<", position: "<<Amg::toString(hit.positionInChamber())<<", driftRadius: "<<hit.driftRadius()
                              <<", dimension: "<<sp->dimension()<<endmsg;
                 msg<<printLvl<<", segment: "<<Amg::toString(segPos) <<" + x "<<Amg::toString(segDir)<<endmsg;
@@ -173,7 +173,7 @@ namespace MuonR4 {
             }
             const double chi2 = contract(inverse(strip.covariance()), residual);
             if (msg.level() <= printLvl) {
-                msg<<printLvl<<"Calibrated measurement "<<spacePoint->chamber()->idHelperSvc()->toString(spacePoint->identify())
+                msg<<printLvl<<"Calibrated measurement "<<spacePoint->msSector()->idHelperSvc()->toString(spacePoint->identify())
                              <<", position: "<<Amg::toString(strip.positionInChamber())<<endmsg;
                 msg<<printLvl<<"Segment: "<<Amg::toString(segPos) <<" + x "<<Amg::toString(segDir)<<endmsg;
                 msg<<printLvl<<"Plane crossing: "<<Amg::toString(planeCrossing)<<", residual: "<<Amg::toString(residual)
@@ -226,7 +226,7 @@ namespace MuonR4 {
             const Amg::Vector3D deltaPos{segPos - sp.positionInChamber()};
             const double signedDist = deltaPos.y() - (segDir.y() / segDir.z()) * deltaPos.z();
             if (msg.level() <= printLvl) {
-                msg<<printLvl<<"Hit "<<sp.chamber()->idHelperSvc()->toString(sp.identify())<<" drift radius "<<sp.driftRadius()
+                msg<<printLvl<<"Hit "<<sp.msSector()->idHelperSvc()->toString(sp.identify())<<" drift radius "<<sp.driftRadius()
                                 <<", signed distance: "<<signedDist<<", unsigned distance: "
                                 <<Amg::lineDistance<3>(segPos, segDir, sp.positionInChamber(), sp.directionInChamber())<<endmsg;
             }
@@ -241,7 +241,7 @@ namespace MuonR4 {
             const double signedDist = deltaPos.y() - (segDir.y() / segDir.z()) * deltaPos.z();
             if (msg.level() <= printLvl) {
                 const SpacePoint* sp = calibHit.spacePoint();
-                msg<<printLvl<<"Hit "<<sp->chamber()->idHelperSvc()->toString(sp->identify())<<" drift radius "<<calibHit.driftRadius()
+                msg<<printLvl<<"Hit "<<sp->msSector()->idHelperSvc()->toString(sp->identify())<<" drift radius "<<calibHit.driftRadius()
                                 <<", signed distance: "<<signedDist<<", unsigned distance: "
                                 <<Amg::lineDistance<3>(segPos, segDir, calibHit.positionInChamber(), calibHit.directionInChamber())<<endmsg;
             }

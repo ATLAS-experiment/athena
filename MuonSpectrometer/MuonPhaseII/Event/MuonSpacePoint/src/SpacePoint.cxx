@@ -31,8 +31,8 @@ namespace {
 
 namespace MuonR4{
     SpacePoint::SpacePoint(const ActsGeometryContext& gctx,
-                                   const xAOD::UncalibratedMeasurement* primaryMeas,
-                                   const xAOD::UncalibratedMeasurement* secondaryMeas):
+                           const xAOD::UncalibratedMeasurement* primaryMeas,
+                           const xAOD::UncalibratedMeasurement* secondaryMeas):
         m_primaryMeas{primaryMeas},
         m_secondaryMeas{secondaryMeas},
         m_dir{xAOD::channelDirInChamber(gctx, primaryMeas)},
@@ -46,7 +46,7 @@ namespace MuonR4{
         }
         Jac.col(0)  = m_normal.block<2,1>(0,0).unit();
         if (secondaryMeas) {
-            /// Position of the measurements expressed in the chamber frame
+            /// Position of the measurements expressed in the sector frame
             const Amg::Vector3D pos1{xAOD::positionInChamber(gctx, primaryMeas)};
             const Amg::Vector3D pos2{xAOD::positionInChamber(gctx, secondaryMeas)};
             /// Direction along which the measurement strips point to
@@ -110,8 +110,11 @@ namespace MuonR4{
     const xAOD::UncalibratedMeasurement* SpacePoint::secondaryMeasurement() const {
        return m_secondaryMeas;
     }
-    const MuonGMR4::MuonChamber* SpacePoint::chamber() const {
+    const MuonGMR4::Chamber* SpacePoint::chamber() const {
         return m_chamber;
+    }
+    const MuonGMR4::SpectrometerSector* SpacePoint::msSector() const {
+        return m_msSector;
     }
     const Amg::Vector3D& SpacePoint::positionInChamber() const {
         return m_pos;

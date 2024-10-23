@@ -56,13 +56,14 @@ class TgcReadoutElement;
 class RpcReadoutElement;
 class sTgcReadoutElement;
 class MmReadoutElement;
-class MuonChamber;
+class SpectrometerSector;
+class Chamber;
 
 class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
 
    public:
     MuonDetectorManager();
-    ~MuonDetectorManager() = default;
+    ~MuonDetectorManager();
 
     template <class MuonDetectorType>
     using ElementPtr = std::unique_ptr<MuonDetectorType>;
@@ -94,14 +95,25 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
     MuonReadoutElement* getReadoutElement(const Identifier& id);
 
 #ifndef SIMULATIONBASE
-    const MuonChamber* getChamber(const Identifier& channelId) const;
-    /// Helper struct to ensur that the sorting of the MuonChambers
-    /// remains constants across the jobs
-    struct ChamberSorter{
-        bool operator()(const MuonChamber* a, const MuonChamber* b) const;
+    /** @brief Add a spectrometer enevelope object to the manager
+     *  @param chSector: Unique_ptr to the sector */
+    void addSpectrometerSector(ElementPtr<SpectrometerSector>&& chSector);
+    /** @brief Retrieves the spectrometer envelope enclosing the channel's readout element
+     *  @param channelId: Identifier of a muon channel of interest*/
+    const SpectrometerSector* getSectorEnvelope(const Identifier& channelId) const;
+    /** @brief Retrieves the chamber enclosing the channel's readout element
+      *  @param channelId: Identifier of a muon channel of interest*/
+    const Chamber* getChamber(const Identifier& channelId) const;
+    
+    /** Helper struct to ensure that the spectrometer sectors & chambers are sorted */
+    struct MSEnvelopeSorter{
+        bool operator()(const SpectrometerSector* a, const SpectrometerSector* b) const;
+        bool operator()(const Chamber* a, const Chamber* b) const;
     };
-    using MuonChamberSet = std::set<const MuonChamber*, ChamberSorter>;
+    using MuonSectorSet = std::set<const SpectrometerSector*, MSEnvelopeSorter>;
+    using MuonChamberSet = std::set<const Chamber*, MSEnvelopeSorter>;
     /// @brief: Returns all MuonChambers associated with the readout geometry
+    MuonSectorSet getAllSectors() const;
     MuonChamberSet getAllChambers() const;
 #endif
 
@@ -117,7 +129,9 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{"Muon::MuonIdHelperSvc/MuonIdHelperSvc", 
                                                         "MuonDetectorManager"};
-
+#ifndef SIMULATIONBASE
+    ElementStorage<SpectrometerSector> m_secEnvelopes{};
+#endif
     ElementStorage<MdtReadoutElement> m_mdtEles{};
     ElementStorage<TgcReadoutElement> m_tgcEles{};    
     ElementStorage<RpcReadoutElement> m_rpcEles{};
@@ -125,6 +139,8 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
     ElementStorage<MmReadoutElement> m_mmEles{};
 
     std::vector<PVConstLink> m_treeTopVector{};
+
+
 };
 
 template <> void MuonDetectorManager::linkElements(ElementStorage<MdtReadoutElement>& detStore, MdtReadoutElement* refEle);

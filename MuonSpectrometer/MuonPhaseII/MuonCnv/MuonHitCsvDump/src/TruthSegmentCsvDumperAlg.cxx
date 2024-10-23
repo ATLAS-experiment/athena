@@ -5,7 +5,7 @@
 #include "TruthSegmentCsvDumperAlg.h"
 
 #include "MuonReadoutGeometryR4/MuonReadoutElement.h"
-#include "MuonReadoutGeometryR4/MuonChamber.h"
+#include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 #include <fstream>

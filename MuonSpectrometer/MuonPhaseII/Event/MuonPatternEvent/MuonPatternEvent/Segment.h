@@ -9,7 +9,7 @@
 #include "MuonSpacePoint/CalibratedSpacePoint.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
-#include "MuonReadoutGeometryR4/MuonChamber.h"
+#include "MuonReadoutGeometryR4/SpectrometerSector.h"
 
 namespace MuonR4{
 
@@ -42,8 +42,8 @@ namespace MuonR4{
                 m_chi2{chi2}, 
                 m_nDoF{nDoF}{}
 
-            /** @brief Returns the associated chamber */
-            const MuonGMR4::MuonChamber* chamber() const { return m_chamber; }
+            /** @brief Returns the associated MS sector */
+            const MuonGMR4::SpectrometerSector* msSector() const { return m_parent->msSector(); }
             /** @brief Returns the global segment position */
             const Amg::Vector3D& position() const { return m_globPos; }
             /** @brief Returns the global segment direction */
@@ -96,7 +96,6 @@ namespace MuonR4{
 
             std::optional<double> m_t0{std::nullopt};
 
-            const MuonGMR4::MuonChamber* m_chamber{m_parent->chamber()};
             std::vector<double> m_chi2PerMeasurement{};
             unsigned int m_nCalls{0};
             SegmentFit::Covariance m_cov{SegmentFit::Covariance::Identity()};

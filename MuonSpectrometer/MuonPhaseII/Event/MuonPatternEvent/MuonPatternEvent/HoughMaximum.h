@@ -53,8 +53,8 @@ class HoughMaximum {
     }
     /// @brief getter
     /// @brief Return the associated chamber to the bucket
-    const MuonGMR4::MuonChamber* chamber() const {
-        return m_bucket->chamber();
+    const MuonGMR4::SpectrometerSector* msSector() const {
+        return m_bucket->msSector();
     }
 
    private:

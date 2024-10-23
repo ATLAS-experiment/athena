@@ -8,7 +8,7 @@
 #include "MuonReadoutGeometryR4/RpcReadoutElement.h"
 #include "MuonReadoutGeometryR4/sTgcReadoutElement.h"
 #include "MuonReadoutGeometryR4/MmReadoutElement.h"
-#include "MuonReadoutGeometryR4/MuonChamber.h"
+#include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include <limits>
 
@@ -96,18 +96,25 @@ namespace {
 namespace MuonGMR4 {
 
 #ifndef SIMULATIONBASE
-bool MuonDetectorManager::ChamberSorter::operator()(const MuonChamber* a, const MuonChamber* b) const {
-    if (a->stationName() != b->stationName()) return a->stationName() < b->stationName();
-    if (a->stationEta() != b->stationEta()) return a->stationEta() < b->stationEta();
-    return a->stationPhi() < b->stationPhi();
-}
-#endif
+    using MuonSectorSet = MuonDetectorManager::MuonSectorSet;
+    using MuonChamberSet = MuonDetectorManager::MuonChamberSet;
 
+    bool MuonDetectorManager::MSEnvelopeSorter::operator()(const SpectrometerSector* a, const SpectrometerSector* b) const {
+        return (*a) < (*b);
+    }
+    bool MuonDetectorManager::MSEnvelopeSorter::operator()(const Chamber* a, const Chamber* b) const {
+        return (*a) < (*b);
+    }
+#endif
+MuonDetectorManager::~MuonDetectorManager() {
+#ifndef SIMULATIONBASE
+    m_secEnvelopes.clear();
+#endif    
+}
 MuonDetectorManager::MuonDetectorManager()
     : AthMessaging{"MuonDetectorManagerR4"} {
     if (!m_idHelperSvc.retrieve().isSuccess()) {
-        ATH_MSG_FATAL(__func__<< "()  -- Failed to retrieve the Identifier service");
-        throw std::runtime_error("MuonIdHelperSvc does not exist");
+        THROW_EXCEPTION(__func__<< "()  -- Failed to retrieve the Identifier service");
     }
     setName("MuonR4");
 }
@@ -144,19 +151,38 @@ std::vector<ActsTrk::DetectorType> MuonDetectorManager::getDetectorTypes() const
 }
 
 #ifndef SIMULATIONBASE
-    const MuonChamber* MuonDetectorManager::getChamber(const Identifier& channelId) const {
-        const MuonReadoutElement* re = getReadoutElement(channelId);
-        return re ? re->getChamber() : nullptr;
+       /** @brief Add a spectrometer enevelope object to the manager
+     *  @param chSector: Unique_ptr to the sector */
+    void MuonDetectorManager::addSpectrometerSector(ElementPtr<SpectrometerSector>&& chSector) {
+        m_secEnvelopes.push_back(std::move(chSector));
     }
-    MuonDetectorManager::MuonChamberSet MuonDetectorManager::getAllChambers() const{
-         MuonChamberSet allChambers{};
-         std::vector<const MuonReadoutElement*> allREs{getAllReadoutElements()};
-         for (const MuonReadoutElement* re : allREs) {
-            if (re->getChamber()) {
-                allChambers.insert(re->getChamber());
-            }
-         }
-         return allChambers;
+    const SpectrometerSector* MuonDetectorManager::getSectorEnvelope(const Identifier& channelId) const {
+        return getReadoutElement(channelId)->msSector();
+    }
+    /** @brief Retrieves the chamber enclosing the channel's readout element
+      *  @param channelId: Identifier of a muon channel of interest*/
+    const Chamber* MuonDetectorManager::getChamber(const Identifier& channelId) const {
+        return getReadoutElement(channelId)->chamber();
+    }
+    /// @brief: Returns all MuonChambers associated with the readout geometry
+    MuonSectorSet MuonDetectorManager::getAllSectors() const{
+        MuonSectorSet sectors{};
+        std::ranges::for_each(m_secEnvelopes,
+                [&sectors](const ElementPtr<SpectrometerSector>& ms){ 
+                    sectors.insert(ms.get());
+                });
+        return sectors;
+    }
+    MuonChamberSet MuonDetectorManager::getAllChambers() const {
+        MuonChamberSet chambers{};
+        std::ranges::for_each(m_secEnvelopes,
+                             [&chambers](const ElementPtr<SpectrometerSector>& ms){
+                                std::ranges::for_each(ms->chambers(),
+                                    [&chambers](const SpectrometerSector::ChamberPtr& ch){
+                                        chambers.insert(ch.get());
+                                });
+                            });
+        return chambers;
     }
 #endif
 

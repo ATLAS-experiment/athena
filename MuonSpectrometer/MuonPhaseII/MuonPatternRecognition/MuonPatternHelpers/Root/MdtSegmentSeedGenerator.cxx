@@ -67,7 +67,7 @@ namespace MuonR4{
             for (const HitVec& layer : m_hitLayers.mdtHits()) { 
                 sstr<<"Mdt-hits in layer "<<(++layCount)<<": "<<layer.size()<<std::endl;
                 for (const HoughHitType& hit : layer) {
-                    sstr<<"   **** "<<hit->chamber()->idHelperSvc()->toString(hit->identify())<<" "
+                    sstr<<"   **** "<<hit->msSector()->idHelperSvc()->toString(hit->identify())<<" "
                         <<Amg::toString(hit->positionInChamber())<<", driftRadius: "<<hit->driftRadius()<<std::endl;
                 }
             }
@@ -75,7 +75,7 @@ namespace MuonR4{
             for (const HitVec& layer : m_hitLayers.stripHits()) { 
                 sstr<<"Hits in layer "<<(++layCount)<<": "<<layer.size()<<std::endl;
                 for (const HoughHitType& hit : layer) {
-                    sstr<<"   **** "<<hit->chamber()->idHelperSvc()->toString(hit->identify())<<" "
+                    sstr<<"   **** "<<hit->msSector()->idHelperSvc()->toString(hit->identify())<<" "
                         <<Amg::toString(hit->positionInChamber())<<", driftRadius: "<<hit->driftRadius()<<std::endl;
                 }
             }
@@ -169,7 +169,7 @@ namespace MuonR4{
         double R = signBot *bottomHit->driftRadius() - signTop * topHit->driftRadius(); 
         const Amg::Vector3D& bottomPos{bottomHit->positionInChamber()};
         const Amg::Vector3D& topPos{topHit->positionInChamber()};
-        const Muon::IMuonIdHelperSvc* idHelperSvc{topHit->chamber()->idHelperSvc()};
+        const Muon::IMuonIdHelperSvc* idHelperSvc{topHit->msSector()->idHelperSvc()};
         const Amg::Vector3D D = topPos - bottomPos;
         const double thetaTubes = std::atan2(D.y(), D.z()); 
         const double distTubes =  std::hypot(D.y(), D.z());

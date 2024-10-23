@@ -83,7 +83,7 @@ namespace MuonR4 {
     }
     MeasByLayerMap SegmentAmbiSolver::extractPrds(const Segment& segment) const{
         MeasByLayerMap prds{};
-        const Muon::IMuonIdHelperSvc* idHelperSvc = segment.chamber()->idHelperSvc();
+        const Muon::IMuonIdHelperSvc* idHelperSvc = segment.msSector()->idHelperSvc();
         for (const Segment::MeasType& meas : segment.measurements()) {
             if(meas->fitState() != CalibratedSpacePoint::State::Valid ||
                !meas->spacePoint()) {
@@ -104,7 +104,7 @@ namespace MuonR4 {
                                                    const Segment& segment,
                                                    const std::vector<const SpacePoint*>& measurements) const {
         
-        const Amg::Transform3D globToLoc{segment.chamber()->globalToLocalTrans(gctx)};
+        const Amg::Transform3D globToLoc{segment.msSector()->globalToLocalTrans(gctx)};
         return SegmentFitHelpers::driftSigns(globToLoc*segment.position(), 
                                              globToLoc.linear() * segment.direction(), measurements, msg());
     }

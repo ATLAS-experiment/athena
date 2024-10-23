@@ -52,8 +52,8 @@ namespace MuonR4{
 
       /** @brief Calculates the chi2 contribution from the given measurement. Currently,
         *        MdtDriftCircles, Rpc & Tgc as well as the Beamspot are supported
-       *  @param posInChamber: Position of the segment in the chamber frame
-       *  @param dirInChamber: Direction of flight of the  segment expressed in the chamber frame
+       *  @param posInChamber: Position of the segment in the sector frame
+       *  @param dirInChamber: Direction of flight of the  segment expressed in the sector frame
        *  @param timeShift:    Shift from the nominal arrival time, that's calculated as R / c. 
        *  @param arrivalTime:  Arrival time of the particle at the segment's refernce plane. 
        *                       If the arrival time is passed, the timing information of the measurement is
@@ -68,8 +68,8 @@ namespace MuonR4{
                        const CalibratedSpacePoint& measurement,
                        MsgStream& msg);
       /** @brief Calculates the chi2 contribution from a mdt space point to the segment line
-       *  @param posInChamber: Position of the segment in the chamber frame
-       *  @param dirInChamber: Direction of flight of the  segment expressed in the chamber frame
+       *  @param posInChamber: Position of the segment in the sector frame
+       *  @param dirInChamber: Direction of flight of the  segment expressed in the sector frame
        *  @param mdtSpacePoint: Space point to which the chi2 term is calculated
        *  @param msg: Reference to the callers msgStream. If the level is VERBOSE,
        *              then all relevant parameters are printed */
@@ -78,8 +78,8 @@ namespace MuonR4{
                           const CalibratedSpacePoint& mdtSpacePoint,
                           MsgStream& msg);
       /** @brief Calculates the chi2 contribution from a strip measurement to the segment line
-       *  @param posInChamber: Position of the segment in the chamber frame
-       *  @param dirInChamber: Direction of flight of the  segment expressed in the chamber frame
+       *  @param posInChamber: Position of the segment in the sector frame
+       *  @param dirInChamber: Direction of flight of the  segment expressed in the sector frame
        *  @param timeShift:    Shift from the nominal arrival time, that's calculated as R / c.
        *  @param arrivalTime:  Arrival time of the particle at the segment's refernce plane. 
        *                       If the arrival time is passed, the timing information of the measurement is
@@ -94,8 +94,8 @@ namespace MuonR4{
                             const CalibratedSpacePoint& strip,
                             MsgStream& msg);
       /** @brief Calculates the chi2 contribution from an external beam spot constraint
-        *  @param posInChamber: Position of the segment in the chamber frame
-        *  @param dirInChamber: Direction of flight of the  segment expressed in the chamber frame
+        *  @param posInChamber: Position of the segment in the sector frame
+        *  @param dirInChamber: Direction of flight of the  segment expressed in the sector frame
         *  @param beamSpotMeas: Strip measurement to consider.  
         *  @param msg: Reference to the callers msgStream. If the level is VERBOSE,
         *              then all relevant parameters are printed */
@@ -106,8 +106,8 @@ namespace MuonR4{
 
       /** @brief Calculates whether a segement line travereses the tube measurements on the left (-1) or 
        *         right (1) side of the tube wire. Strip measurements & nullptrs are assigned with 0
-        *  @param posInChamber: Position of the segment in the chamber frame
-        *  @param dirInChamber: Direction of flight of the  segment expressed in the chamber frame
+        *  @param posInChamber: Position of the segment in the sector frame
+        *  @param dirInChamber: Direction of flight of the  segment expressed in the sector frame
         *  @param uncalibHits: List of uncalibrated measurements
         *  @param msg: Reference to the callers msgStream. If the level is VERBOSE,
         *              then all relevant parameters are printed */
@@ -118,8 +118,8 @@ namespace MuonR4{
       
        /** @brief Calculates whether a segement line travereses the tube measurement on the left (-1) or 
         *         right (1) side of the tube wire. Strip measurements & nullptrs are assigned with 0
-        *  @param posInChamber: Position of the segment in the chamber frame
-        *  @param dirInChamber: Direction of flight of the  segment expressed in the chamber frame
+        *  @param posInChamber: Position of the segment in the sector frame
+        *  @param dirInChamber: Direction of flight of the  segment expressed in the sector frame
         *  @param uncalibHit:  Uncalibrated hit to consider
         *  @param msg: Reference to the callers msgStream. If the level is VERBOSE,
         *              then all relevant parameters are printed */
@@ -130,8 +130,8 @@ namespace MuonR4{
 
        /** @brief Calculates whether a segement line travereses the tube measurement on the left (-1) or 
         *         right (1) side of the tube wire. Strip measurements & nullptrs are assigned with 0
-        *  @param posInChamber: Position of the segment in the chamber frame
-        *  @param dirInChamber: Direction of flight of the  segment expressed in the chamber frame
+        *  @param posInChamber: Position of the segment in the sector frame
+        *  @param dirInChamber: Direction of flight of the  segment expressed in the sector frame
         *  @param calibHit: Calibrated hit to consider
         *  @param msg: Reference to the callers msgStream. If the level is VERBOSE,
         *              then all relevant parameters are printed */

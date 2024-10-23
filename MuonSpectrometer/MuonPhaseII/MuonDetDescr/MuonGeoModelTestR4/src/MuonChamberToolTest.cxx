@@ -1,19 +1,26 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonChamberToolTest.h"
 
 #include <StoreGate/ReadCondHandle.h>
-#include <MuonReadoutGeometryR4/MuonChamber.h>
+#include <MuonReadoutGeometryR4/Chamber.h>
+#include <MuonReadoutGeometryR4/SpectrometerSector.h>
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
 #include <MuonReadoutGeometryR4/MmReadoutElement.h>
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
 #include <GaudiKernel/SystemOfUnits.h>
 
-namespace MuonGMR4 {
+#include "Acts/Geometry/TrapezoidVolumeBounds.hpp"
 
+#include <format>
+namespace{
+    constexpr double tolerance = 10. *Gaudi::Units::micrometer;
+}
+
+namespace MuonGMR4 {
     MuonChamberToolTest::MuonChamberToolTest(const std::string& name, ISvcLocator* pSvcLocator):
         AthReentrantAlgorithm{name, pSvcLocator} {}
 
@@ -21,32 +28,29 @@ namespace MuonGMR4 {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
-        ATH_CHECK(m_detVolSvc.retrieve());
         return StatusCode::SUCCESS;
     }
-    StatusCode MuonChamberToolTest::pointInside(const MuonChamber& chamb,
+    template <class EnvelopeType>
+    StatusCode MuonChamberToolTest::pointInside(const EnvelopeType& chamb,
                                                 const Acts::Volume& boundVol,
                                                 const Amg::Vector3D& point,
                                                 const std::string& descr,
                                                 const Identifier& channelId) const {
     
-        constexpr double tolerance = 10. *Gaudi::Units::micrometer;
         if (boundVol.inside(point,tolerance)) {
             ATH_MSG_VERBOSE("In channel "<<m_idHelperSvc->toString(channelId)
-                            <<", point "<<descr <<" is inside of the chamber "<<std::endl<<chamb
-                            <<std::endl
+                            <<", point "<<descr <<" is inside of the chamber "<<std::endl<<chamb<<std::endl
                             <<"Local position:" <<Amg::toString(boundVol.itransform() * point));
             return StatusCode::SUCCESS;
         }
         const Amg::Vector3D locPos{boundVol.itransform() * point};
-        const MuonChamber::defineArgs& chambPars{chamb.parameters()};
         
         StripDesign planeTrapezoid{};
-        planeTrapezoid.defineTrapezoid(chambPars.halfXShort, chambPars.halfXLong, chambPars.halfY);
+        planeTrapezoid.defineTrapezoid(chamb.halfXShort(), chamb.halfXLong(), chamb.halfY());
         planeTrapezoid.setLevel(MSG::VERBOSE);
         /// Why does the strip design give a different result than the Acts bounds?
         static const Eigen::Rotation2D axisSwap{90. *Gaudi::Units::deg};
-        if (std::abs(locPos.z()) - chambPars.halfZ < -tolerance && 
+        if (std::abs(locPos.z()) - chamb.halfZ() < -tolerance && 
             planeTrapezoid.insideTrapezoid(axisSwap*locPos.block<2,1>(0,0))) {
             return StatusCode::SUCCESS;
         }
@@ -58,60 +62,126 @@ namespace MuonGMR4 {
                      <<", box right edge "<<Amg::toString(planeTrapezoid.rightEdge(1).value_or(Amg::Vector2D::Zero())));
         return StatusCode::FAILURE;
     }
-  
 
-    StatusCode MuonChamberToolTest::execute(const EventContext& ctx) const {
-        SG::ReadHandle<ActsGeometryContext> gctx{m_geoCtxKey, ctx};
-        if (!gctx.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve the Acts alignment "<<m_geoCtxKey.fullKey());
-            return StatusCode::FAILURE;
-        }
-
-        m_detVolSvc->detector();
-        using ChamberSet = MuonDetectorManager::MuonChamberSet;
-        const ChamberSet chambers = m_detMgr->getAllChambers();
-        std::vector<const MuonReadoutElement*> elements = m_detMgr->getAllReadoutElements();
-           
-        for (const MuonChamber* chamber : chambers) {
-            /// Create the bounting volume 
-            std::shared_ptr<Acts::Volume> boundVol = chamber->boundingVolume(*gctx);
-            for(const MuonReadoutElement* readOut : chamber->readOutElements()) {                
-                if (readOut->detectorType() == ActsTrk::DetectorType::Tgc) {
-                   const TgcReadoutElement* tgc = static_cast<const TgcReadoutElement*>(readOut);
-                   ATH_CHECK(testTgc(*gctx, *tgc, *chamber, *boundVol)); 
-                }else if (readOut->detectorType() == ActsTrk::DetectorType::Mdt) {
-                    const MdtReadoutElement* mdtMl = static_cast<const MdtReadoutElement*>(readOut);
-                    ATH_CHECK(testMdt(*gctx, *mdtMl, *chamber, *boundVol));
-                } else if (readOut->detectorType() == ActsTrk::DetectorType::Rpc) {
-                    const RpcReadoutElement* rpc = static_cast<const RpcReadoutElement*>(readOut);
-                    ATH_CHECK(testRpc(*gctx, *rpc, *chamber, *boundVol));
-                } else if (readOut->detectorType() == ActsTrk::DetectorType::Mm) {
-                    const MmReadoutElement* mm = static_cast<const MmReadoutElement*>(readOut);
-                    ATH_CHECK(testMm(*gctx, *mm, *chamber, *boundVol));
-                } else if (readOut->detectorType() ==  ActsTrk::DetectorType::sTgc) {
-                    const sTgcReadoutElement* stgc = static_cast<const sTgcReadoutElement*>(readOut);
-                    ATH_CHECK(testStgc(*gctx, *stgc, *chamber, *boundVol));                    
-                } else {
-                    ATH_MSG_FATAL("Who brought the Cscs back? "<<m_idHelperSvc->toStringDetEl(readOut->identify()));
+    template <class EnvelopeType>
+    StatusCode MuonChamberToolTest::allReadoutInEnvelope(const ActsGeometryContext& gctx,
+                                                         const EnvelopeType& envelope) const {
+        std::shared_ptr<Acts::Volume> boundVol = envelope.boundingVolume(gctx);
+        const Chamber::ReadoutSet reEles = envelope.readoutEles();
+        for(const MuonReadoutElement* readOut : reEles) {
+            if constexpr (std::is_same_v<EnvelopeType, SpectrometerSector>) {
+                if (readOut->msSector() != &envelope) {
+                    ATH_MSG_FATAL("Mismatch in the sector association "<<m_idHelperSvc->toStringDetEl(readOut->identify())
+                        <<std::endl<<(*readOut->msSector())<<std::endl<<envelope);
+                    return StatusCode::FAILURE;
+                }
+            } else if constexpr (std::is_same_v<EnvelopeType, Chamber>) {
+                if (readOut->chamber() != &envelope) {
+                    ATH_MSG_FATAL("Mismatch in the chamber association "<<m_idHelperSvc->toStringDetEl(readOut->identify())
+                        <<std::endl<<(*readOut->chamber())<<std::endl<<envelope);
+                    return StatusCode::FAILURE;
+                }
+            }
+            switch (readOut->detectorType()) {
+                case ActsTrk::DetectorType::Tgc: {
+                    const auto* detEle = static_cast<const TgcReadoutElement*>(readOut);
+                    ATH_CHECK(testReadoutEle(gctx, *detEle, envelope, *boundVol));
+                    break; 
+                } case ActsTrk::DetectorType::Mdt: {
+                    const auto* detEle = static_cast<const MdtReadoutElement*>(readOut);
+                    ATH_CHECK(testReadoutEle(gctx, *detEle, envelope, *boundVol));
+                    break; 
+                } case ActsTrk::DetectorType::Rpc: {
+                    const auto* detEle = static_cast<const RpcReadoutElement*>(readOut);
+                    ATH_CHECK(testReadoutEle(gctx, *detEle, envelope, *boundVol));
+                    break; 
+                }  case ActsTrk::DetectorType::Mm: {
+                    const auto* detEle = static_cast<const MmReadoutElement*>(readOut);
+                    ATH_CHECK(testReadoutEle(gctx, *detEle, envelope, *boundVol));
+                    break; 
+                } case ActsTrk::DetectorType::sTgc: {
+                    const auto* detEle = static_cast<const sTgcReadoutElement*>(readOut);
+                    ATH_CHECK(testReadoutEle(gctx, *detEle, envelope, *boundVol));
+                    break; 
+                } default: {
+                    ATH_MSG_FATAL("Who came up with putting "<<ActsTrk::to_string(readOut->detectorType())
+                                <<" into the MS");
                     return StatusCode::FAILURE;
                 }
             }
         }
+        ATH_MSG_DEBUG("All "<<reEles.size()<<" readout elements are embedded in "<<envelope);
         return StatusCode::SUCCESS;
     }
-    StatusCode MuonChamberToolTest::testMdt(const ActsGeometryContext& gctx,
-                                            const MdtReadoutElement& mdtMl,
-                                            const MuonChamber& chamber,
-                                            const Acts::Volume& detVol) const {
 
-        for (unsigned int layer = 1; layer <= mdtMl.numLayers(); layer++) {
-            for (unsigned int tube = 1; tube <= mdtMl.numTubesInLay(); tube++) {
+    std::array<Amg::Vector3D, 8> MuonChamberToolTest::cornerPoints(const Acts::Volume& volume) const {
+        std::array<Amg::Vector3D, 8> edges{make_array<Amg::Vector3D,8>(Amg::Vector3D::Zero())};
+        unsigned int edgeIdx{0};
+        using BoundEnum = Acts::TrapezoidVolumeBounds::BoundValues;
+        const auto& bounds = static_cast<const Acts::TrapezoidVolumeBounds&>(volume.volumeBounds());
+        ATH_MSG_VERBOSE("Fetch volume bounds "<<Amg::toString(volume.transform()));
+        for (const double signX : {-1., 1.}) {
+            for (const double signY : { -1., 1.}) {
+                for (const double signZ: {-1., 1.}) {
+                    const Amg::Vector3D edge{signX* (signY>0 ? bounds.get(BoundEnum::eHalfLengthXposY) :
+                                                               bounds.get(BoundEnum::eHalfLengthXnegY)), 
+                                             signY*bounds.get(BoundEnum::eHalfLengthY), 
+                                             signZ*bounds.get(BoundEnum::eHalfLengthZ)};
+                    edges[edgeIdx] = volume.transform() * edge;
+                    ATH_MSG_VERBOSE("Local edge "<<Amg::toString(edge)<<", global edge: "<<Amg::toString(edges[edgeIdx]));
+                    ++edgeIdx;
+                }
+            }
+        }
+        return edges;
+    }
+
+    StatusCode MuonChamberToolTest::execute(const EventContext& ctx) const {
+        SG::ReadHandle gctx{m_geoCtxKey, ctx};
+        if (!gctx.isValid()) {
+            ATH_MSG_FATAL("Failed to retrieve the Acts alignment "<<m_geoCtxKey.fullKey());
+            return StatusCode::FAILURE;
+        }
+        /** Check that all chambers covered by their sector envelopes */
+        using SectorSet = MuonDetectorManager::MuonSectorSet;
+        const SectorSet sectors = m_detMgr->getAllSectors();
+        ATH_MSG_INFO("Fetched "<<sectors.size()<<" sectors. ");
+        for (const SpectrometerSector* sector : sectors) {
+            ATH_CHECK(allReadoutInEnvelope(*gctx, *sector));
+            const std::shared_ptr<Acts::Volume> secVolume = sector->boundingVolume(*gctx);
+            for (const SpectrometerSector::ChamberPtr& chamber : sector->chambers()){
+                const std::array<Amg::Vector3D, 8> edges = cornerPoints(*chamber->boundingVolume(*gctx));
+                unsigned int edgeCount{0};
+                for (const Amg::Vector3D& edge : edges) {
+                    ATH_CHECK(pointInside(*sector,*secVolume,edge, 
+                              std::format("Edge {:}", edgeCount++),
+                              chamber->readoutEles().front()->identify()));
+                }
+            }
+        } 
+        using ChamberSet = MuonDetectorManager::MuonChamberSet;
+        const ChamberSet chambers = m_detMgr->getAllChambers();
+        for (const Chamber* chamber : chambers) {
+            ATH_CHECK(allReadoutInEnvelope(*gctx, *chamber));
+        }
+        return StatusCode::SUCCESS;
+    }
+    template <class EnvelopeType>
+    StatusCode MuonChamberToolTest::testReadoutEle(const ActsGeometryContext& gctx,
+                                                   const MdtReadoutElement& mdtMl,
+                                                   const EnvelopeType& chamber,
+                                                   const Acts::Volume& detVol) const {
+        ATH_MSG_VERBOSE("Test whether "<<m_idHelperSvc->toStringDetEl(mdtMl.identify())<<std::endl<<mdtMl.getParameters());
+
+        for (unsigned int layer = 1; layer <= mdtMl.numLayers(); ++layer) {
+            for (unsigned int tube = 1; tube <= mdtMl.numTubesInLay(); ++tube) {
                 const IdentifierHash idHash = mdtMl.measurementHash(layer, tube);
                 if (!mdtMl.isValid(idHash)){
                     continue;
                 }
                 const Amg::Transform3D& locToGlob{mdtMl.localToGlobalTrans(gctx, idHash)}; 
                 const Identifier measId{mdtMl.measurementId(idHash)};
+
                 ATH_CHECK(pointInside(chamber, detVol, mdtMl.globalTubePos(gctx, idHash), "tube center", measId));
 
                 ATH_CHECK(pointInside(chamber, detVol, mdtMl.readOutPos(gctx, idHash), "tube readout", measId));
@@ -126,20 +196,18 @@ namespace MuonGMR4 {
                                       "wall to the previous tube", measId));
                 ATH_CHECK(pointInside(chamber, detVol, locToGlob*(-mdtMl.innerTubeRadius() * Amg::Vector3D::UnitY()), 
                                       "wall to the next tube", measId));
-
- 
             }
         }
         return StatusCode::SUCCESS;
     }
-
-    StatusCode MuonChamberToolTest::testRpc(const ActsGeometryContext& gctx,
-                                            const RpcReadoutElement& rpc,
-                                            const MuonChamber& chamber,
-                                            const Acts::Volume& detVol) const {
+    template<class EnvelopeType>
+    StatusCode MuonChamberToolTest::testReadoutEle(const ActsGeometryContext& gctx,
+                                                   const RpcReadoutElement& rpc,
+                                                   const EnvelopeType& chamber,
+                                                   const Acts::Volume& detVol) const {
   
-        ATH_MSG_DEBUG("Test whether "<<m_idHelperSvc->toStringDetEl(rpc.identify())<<std::endl<<rpc.getParameters());
-        
+        ATH_MSG_VERBOSE("Test whether "<<m_idHelperSvc->toStringDetEl(rpc.identify())<<std::endl<<rpc.getParameters());
+    
         const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
         for (unsigned int gasGap = 1 ; gasGap <= rpc.nGasGaps(); ++gasGap) {
             for (int doubletPhi = rpc.doubletPhi(); doubletPhi <= rpc.doubletPhiMax(); ++doubletPhi){
@@ -157,10 +225,11 @@ namespace MuonGMR4 {
         }
         return StatusCode::SUCCESS;
     }
-    StatusCode MuonChamberToolTest::testTgc(const ActsGeometryContext& gctx,
-                                            const TgcReadoutElement& tgc,
-                                            const MuonChamber& chamber,
-                                            const Acts::Volume& detVol) const {        
+    template <class EnevelopeType>
+    StatusCode MuonChamberToolTest::testReadoutEle(const ActsGeometryContext& gctx,
+                                                   const TgcReadoutElement& tgc,
+                                                   const EnevelopeType& chamber,
+                                                   const Acts::Volume& detVol) const {        
       
         const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
         for (unsigned int gasGap = 1; gasGap <= tgc.nGasGaps(); ++gasGap){
@@ -174,11 +243,11 @@ namespace MuonGMR4 {
         }
         return StatusCode::SUCCESS;
     }
-
-    StatusCode MuonChamberToolTest::testMm(const ActsGeometryContext& gctx,
-                                           const MmReadoutElement& mm,
-                                           const MuonChamber& chamber,
-                                           const Acts::Volume& detVol) const {
+    template <class EnevelopeType>
+    StatusCode MuonChamberToolTest::testReadoutEle(const ActsGeometryContext& gctx,
+                                                   const MmReadoutElement& mm,
+                                                   const EnevelopeType& chamber,
+                                                   const Acts::Volume& detVol) const {
 
         const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
         for(unsigned int gasGap = 1; gasGap <= mm.nGasGaps(); ++gasGap){
@@ -194,11 +263,11 @@ namespace MuonGMR4 {
 
         return StatusCode::SUCCESS;
     }
-
-    StatusCode MuonChamberToolTest::testStgc(const ActsGeometryContext& gctx,
-                                            const sTgcReadoutElement& stgc,
-                                            const MuonChamber& chamber,
-                                            const Acts::Volume& detVol) const{
+    template <class EnvelopeType>
+    StatusCode MuonChamberToolTest::testReadoutEle(const ActsGeometryContext& gctx,
+                                                   const sTgcReadoutElement& stgc,
+                                                   const EnvelopeType& chamber,
+                                                   const Acts::Volume& detVol) const{
         
         const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
         for(unsigned int gasGap = 1; gasGap <= stgc.numLayers(); ++gasGap){
@@ -239,7 +308,5 @@ namespace MuonGMR4 {
         return StatusCode::SUCCESS;
 
     }
-
- 
 }
 

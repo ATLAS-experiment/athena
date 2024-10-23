@@ -36,7 +36,7 @@ namespace MuonR4{
     double SegmentSeed::getCounts() const{ return m_counts;}
     const std::vector<SegmentSeed::HitType>& SegmentSeed::getHitsInMax() const { return m_hits; }
     const SpacePointBucket* SegmentSeed::parentBucket() const{ return m_parent; }
-    const MuonGMR4::MuonChamber* SegmentSeed::chamber() const{ return m_parent->chamber(); }
+    const MuonGMR4::SpectrometerSector* SegmentSeed::msSector() const{ return m_parent->msSector(); }
     bool SegmentSeed::hasPhiExtension() const{ return m_hasPhiExt; }
     Amg::Vector3D SegmentSeed::positionInChamber() const{ return Amg::Vector3D{interceptX(), interceptY(),0.}; }
     Amg::Vector3D SegmentSeed::directionInChamber() const{ 

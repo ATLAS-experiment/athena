@@ -5,7 +5,7 @@
 #include "GeoModelMdtTest.h"
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
-#include <MuonReadoutGeometryR4/MuonChamber.h>
+#include <MuonReadoutGeometryR4/SpectrometerSector.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 
 #include <fstream>
@@ -216,7 +216,7 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
          m_tubeLay.push_back(lay);
          m_tubeNum.push_back(tube);         
          m_tubeTransform.push_back(tubeTransform);
-         m_tubePosInCh.push_back(readoutEle->getChamber()->globalToLocalTrans(gctx) * 
+         m_tubePosInCh.push_back(readoutEle->msSector()->globalToLocalTrans(gctx) * 
                                  readoutEle->center(gctx, measHash));
          m_roPos.push_back(readoutEle->readOutPos(gctx, measHash));
          m_tubeLength.push_back(readoutEle->tubeLength(measHash));

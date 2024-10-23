@@ -49,6 +49,10 @@ inline const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const Acts
                                                                       const Identifier& id) const {
     return localToGlobalTrans(ctx, layerHash(id));
 }
+#ifndef SIMULATIONBASE
+inline const SpectrometerSector* MuonReadoutElement::msSector() const { return m_msSectorLink; }
+inline const Chamber* MuonReadoutElement::chamber() const { return m_chambLink; }
+#endif
 
 template<class MuonImpl>
 StatusCode MuonReadoutElement::insertTransform(const IdentifierHash& hash) {    

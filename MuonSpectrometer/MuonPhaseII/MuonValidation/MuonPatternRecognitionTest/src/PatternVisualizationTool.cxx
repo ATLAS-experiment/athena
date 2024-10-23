@@ -359,7 +359,7 @@ namespace MuonValR4 {
         Parameters segPars{};
         {
             SG::ReadHandle geoCtx{m_geoCtxKey, ctx};
-            const Amg::Transform3D trf{segment.chamber()->globalToLocalTrans(*geoCtx)};
+            const Amg::Transform3D trf{segment.msSector()->globalToLocalTrans(*geoCtx)};
             const Amg::Vector3D locPos = trf * segment.position();
             const Amg::Vector3D locDir = trf.linear() * segment.direction();
             segPars[toInt(ParamDefs::x0)] = locPos.x();

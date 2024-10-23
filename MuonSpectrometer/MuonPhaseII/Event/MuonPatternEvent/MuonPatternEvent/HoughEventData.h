@@ -56,7 +56,7 @@ namespace MuonR4{
             // the maxima found by the hough transform
             std::vector<HoughMaximum> maxima{};
             // the hough setup for each logical muon chamber
-            std::unordered_map<const MuonGMR4::MuonChamber*, std::vector<HoughSetupForBucket>> houghSetups{}; 
+            std::unordered_map<const MuonGMR4::SpectrometerSector*, std::vector<HoughSetupForBucket>> houghSetups{}; 
             // the axis ranges currently mapped to the accumulator
             Acts::HoughTransformUtils::HoughAxisRanges currAxisRanges; 
             // current search window for the intercept

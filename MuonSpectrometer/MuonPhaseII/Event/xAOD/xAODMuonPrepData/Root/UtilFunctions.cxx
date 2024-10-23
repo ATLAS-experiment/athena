@@ -19,7 +19,7 @@
 #include "xAODMuonPrepData/MMCluster.h"
 #include "xAODMuonPrepData/sTgcMeasurement.h"
 #include "xAODMuonPrepData/versions/AccessorMacros.h"
-#include "MuonReadoutGeometryR4/MuonChamber.h"
+#include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "TrkEventPrimitives/ParamDefs.h"
 
 namespace {
@@ -34,7 +34,7 @@ namespace {
             hash = unCalibMeas->layerHash();
         }
         const MuonGMR4::MuonReadoutElement* reEle{unCalibMeas->readoutElement()};
-        return reEle->getChamber()->globalToLocalTrans(gctx) * reEle->localToGlobalTrans(gctx, hash);
+        return reEle->msSector()->globalToLocalTrans(gctx) * reEle->localToGlobalTrans(gctx, hash);
     }
 }
 

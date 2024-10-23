@@ -4,7 +4,7 @@
 #ifndef MUONSPACEPOINT_SPACEPOINT_H
 #define MUONSPACEPOINT_SPACEPOINT_H
 
-#include "MuonReadoutGeometryR4/MuonChamber.h"
+#include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 
@@ -31,8 +31,10 @@ namespace MuonR4 {
             const xAOD::UncalibratedMeasurement* primaryMeasurement() const;
             /*** @brief: Pointer to the secondary measurement */
             const xAOD::UncalibratedMeasurement* secondaryMeasurement() const;
-            /*** @brief: Pointer to the associated muon chamber */
-            const MuonGMR4::MuonChamber* chamber() const;
+            /*** @brief: Pointer to the associated ms sector */
+            const MuonGMR4::SpectrometerSector* msSector() const;
+            /** @brief: Pointer to the associated chamber */
+            const MuonGMR4::Chamber* chamber() const;
             /*** @brief: Position of the space point inside the chamber */
             const Amg::Vector3D& positionInChamber() const;
             /*** @brief: Returns the direction parallel to the primary channel, i.e. the strip or the wire */
@@ -73,7 +75,8 @@ namespace MuonR4 {
             const xAOD::UncalibratedMeasurement* m_secondaryMeas{nullptr};
 
             Identifier m_id{xAOD::identify(m_primaryMeas)};
-            const MuonGMR4::MuonChamber* m_chamber{xAOD::readoutElement(m_primaryMeas)->getChamber()};
+            const MuonGMR4::Chamber* m_chamber{xAOD::readoutElement(m_primaryMeas)->chamber()};
+            const MuonGMR4::SpectrometerSector* m_msSector{m_chamber->parent()};
 
             Amg::Vector3D m_pos{Amg::Vector3D::Zero()};
             Amg::Vector3D m_dir{Amg::Vector3D::Zero()};

@@ -24,7 +24,7 @@ namespace MuonR4 {
         std::ranges::sort(hits, [](const SpacePoint* a, const SpacePoint*b){
                         return a->positionInChamber().z() < b->positionInChamber().z();
         });
-        const Muon::IMuonIdHelperSvc* idHelperSvc{hits.front()->chamber()->idHelperSvc()};
+        const Muon::IMuonIdHelperSvc* idHelperSvc{hits.front()->msSector()->idHelperSvc()};
         m_mdtLayers.reserve(8);
 
         /// The hits are radially sorted from low local-z to high local z. Build the gasGap Identifier

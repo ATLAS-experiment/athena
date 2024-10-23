@@ -42,7 +42,7 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
 
    private:
 
-    void fillChamberInfo(const MuonGMR4::MuonChamber* chamber); 
+    void fillChamberInfo(const MuonGMR4::SpectrometerSector* chamber); 
 
     SG::ReadHandleKey<SpacePointContainer> m_readKey{this, "ReadKey", "MuonSpacePoints", "Key to the space point container"};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

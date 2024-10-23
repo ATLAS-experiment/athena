@@ -4,7 +4,7 @@
 
 #include "PhiHoughTransformAlg.h"
 
-#include <MuonReadoutGeometryR4/MuonChamber.h>
+#include <MuonReadoutGeometryR4/SpectrometerSector.h>
 
 
 #include "MuonPatternHelpers/HoughHelperFunctions.h"
@@ -102,8 +102,8 @@ void PhiHoughTransformAlg::preProcessMaximum(const ActsGeometryContext& gctx,
         // reject the pure eta measurements - not relevant here
         if (!hit->measuresPhi())
             continue;
-        // find the direction of the IP viewed from the chamber frame 
-        Amg::Vector3D extrapDir = (hit->positionInChamber() - hit->chamber()->globalToLocalTrans(gctx).translation()).unit(); 
+        // find the direction of the IP viewed from the sector frame 
+        Amg::Vector3D extrapDir = (hit->positionInChamber() - hit->msSector()->globalToLocalTrans(gctx).translation()).unit(); 
         // express the x location of our phi hits on the chamber plane (z = 0) when projecting from the beam spot
         std::optional<double> dummyIntercept = Amg::intersect<3>(hit->positionInChamber(), extrapDir, Amg::Vector3D::UnitZ(),0); 
         double x0 = (hit->positionInChamber() + dummyIntercept.value_or(0) * extrapDir).x(); 
