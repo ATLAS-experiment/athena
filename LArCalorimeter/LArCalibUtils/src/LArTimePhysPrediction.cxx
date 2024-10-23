@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArTimePhysPrediction.h"
@@ -17,7 +17,6 @@
 #include "CaloIdentifier/LArHEC_ID.h"
 #include "CaloIdentifier/LArFCAL_ID.h"
 #include "LArIdentifier/LArOnlineID.h"
-#include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/INTupleSvc.h"
 #include "GaudiKernel/NTuple.h"
 #include "GaudiKernel/IToolSvc.h"
@@ -28,7 +27,6 @@ using CaliWaveIt = LArCaliWaveContainer::LArCaliWaves::const_iterator;
 
 LArTimePhysPrediction::LArTimePhysPrediction (const std::string& name, ISvcLocator* pSvcLocator) : 
   AthAlgorithm(name, pSvcLocator),
-  m_thistSvc(nullptr),
   m_CaloDepthTool(nullptr),
   m_nt(nullptr)  
 {
@@ -61,7 +59,7 @@ LArTimePhysPrediction::~LArTimePhysPrediction()
 StatusCode LArTimePhysPrediction::initialize() 
 {
   ATH_MSG_INFO ( "LArTimePhysPrediction in initialize()" );
-  ATH_CHECK( service("THistSvc", m_thistSvc) );
+  ATH_CHECK( m_thistSvc.retrieve() );
   
   ATH_CHECK( m_cablingKey.initialize() );
   ATH_CHECK( m_calibMapKey.initialize() );

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARELECCALIB_ILARDIGITOSCILLATIONCORRTOOL_H
@@ -10,12 +10,14 @@ class LArDigitContainer;
 
 class ILArDigitOscillationCorrTool: virtual public IAlgTool {
   /**
-   * AlgoTool to correct for oscillating noise
+   *  @brief  AlgoTool to correct for oscillating noise
    *
-   * @author T. Barillari
-   * @version  \$Id: ILArDigitOscillationCorrTool.h,v 1.2 2008-09-27 10:23:37 wlampl Exp $*/
+   *  @author T. Barillari
+   **/
 
- public: 
+ public:
+  DeclareInterfaceID( ILArDigitOscillationCorrTool, 1, 0 );
+
   virtual ~ILArDigitOscillationCorrTool() {};
   
   virtual StatusCode calculateEventPhase(const LArDigitContainer &theDC) = 0;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -27,51 +27,40 @@
 class LArDigitContainer;
 class LArDigit;
 
-static const InterfaceID IID_LArDigitOscillationCorrTool("LArDigitOscillationCorrTool", 1 , 0); 
-
-class LArDigitOscillationCorrTool: public AthAlgTool,
-		      virtual public ILArDigitOscillationCorrTool, 
-		      public IIncidentListener 
+class LArDigitOscillationCorrTool: public extends<AthAlgTool,ILArDigitOscillationCorrTool,IIncidentListener>
 {
- public:
-  
-  // Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_LArDigitOscillationCorrTool; }
-
+public:
   // constructor
-  LArDigitOscillationCorrTool(const std::string& type, 
-		 const std::string& name, 
-		 const IInterface* parent); 
-  
-  // destructor 
-~LArDigitOscillationCorrTool(){}
- 
-// initialize and finalize methods
- virtual StatusCode initialize();
- virtual StatusCode finalize(){return StatusCode::SUCCESS;}
- virtual void handle(const Incident&); 
- 
- //  StatusCode getLArDigitOscillationCorrTool(); 
- StatusCode calculateEventPhase(const LArDigitContainer &theDC);
- StatusCode correctLArDigits(LArDigitContainer &theDC);
- 
- private:
- 
- StatusCode retrieveDB();
- 
- int m_priority;
- double m_nSigma;
- double m_eventPhase;
- double m_omega;
- 
- const LArEM_ID*    m_emId;
- const LArFCAL_ID*  m_fcalId;
- const LArHEC_ID*   m_hecId;
- const LArOnlineID* m_lar_on_id; 
- 
- SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this, "OnOffMap", "LArOnOffIdMap", "SG key for mapping object"};
-};
+  LArDigitOscillationCorrTool(const std::string& type,
+			      const std::string& name,
+			      const IInterface* parent);
 
+  // destructor 
+  ~LArDigitOscillationCorrTool() = default;
+ 
+  // initialize and finalize methods
+  virtual StatusCode initialize() override;
+  virtual void handle(const Incident&) override;
+ 
+  StatusCode calculateEventPhase(const LArDigitContainer &theDC);
+  StatusCode correctLArDigits(LArDigitContainer &theDC);
+ 
+private:
+ 
+  StatusCode retrieveDB();
+
+  int m_priority;
+  double m_nSigma;
+  double m_eventPhase;
+  double m_omega;
+
+  const LArEM_ID*    m_emId{};
+  const LArFCAL_ID*  m_fcalId{};
+  const LArHEC_ID*   m_hecId{};
+  const LArOnlineID* m_lar_on_id{};
+ 
+  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this, "OnOffMap", "LArOnOffIdMap", "SG key for mapping object"};
+};
 
 #endif
 
