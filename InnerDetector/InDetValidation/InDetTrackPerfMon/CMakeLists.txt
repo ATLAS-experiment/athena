@@ -31,8 +31,9 @@ atlas_add_component( InDetTrackPerfMon
 
 atlas_add_test ( hdefXmlToJson_test SCRIPT test/xml2Json.sh
                  POST_EXEC_SCRIPT nopost.sh )
-                 
-atlas_add_test ( validateJson_test SCRIPT test/validateJson.sh
+
+atlas_add_test ( validateJson_test
+                 SCRIPT test/validateJson.sh ${CMAKE_DATA_OUTPUT_DIRECTORY}/InDetTrackPerfMon
                  POST_EXEC_SCRIPT nopost.sh )
 
 # Install files from the package:
