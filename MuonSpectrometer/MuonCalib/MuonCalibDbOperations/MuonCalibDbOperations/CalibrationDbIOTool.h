@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CalibrationDbIOTool_H
@@ -20,7 +20,6 @@ namespace MuonGM {
 #include "MuonCalibDbOperations/CalibHeadOperations.h"
 #include "MuonCalibMath/SamplePoint.h"
 #include "MuonCalibStandAloneBase/ICalibrationIOTool.h"
-class RegionSelectionSvc;
 
 namespace MuonCalib {
 
@@ -62,8 +61,6 @@ namespace MuonCalib {
         int m_max_rt_points;
         int m_headid;
         std::string m_sitename;
-        /** pointer to region selection service */
-        RegionSelectionSvc *p_reg_sel_svc = nullptr;
         std::vector<MuonCalib::NtupleStationId> m_region_ids;
         /** pointer to db connection */
         std::unique_ptr<CalibDbConnection> m_connection;
