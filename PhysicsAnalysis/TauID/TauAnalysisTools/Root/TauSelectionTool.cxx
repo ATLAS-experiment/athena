@@ -255,8 +255,17 @@ StatusCode TauSelectionTool::initialize()
       else if (sCut == "JetIDWP")
       {
         iSelectionCuts = iSelectionCuts | CutJetIDWP;
-        if (m_iJetIDWP == JETIDNONEUNCONFIGURED)
+        if (m_iJetIDWP == JETIDNONEUNCONFIGURED){
           m_iJetIDWP = convertStrToJetIDWP(rEnv.GetValue("JetIDWP","JETIDNONE"));
+	} 
+	  
+	// check for possible mis-config in Tau selection
+        for (const std::string& checkCut : vCuts){
+	   if (checkCut.find("SigTrans") != std::string::npos) {
+              ATH_MSG_ERROR("Misconfig due to JetIDWP and SigTrans cuts both present in the config file. Please CHECK carefully config file again");
+              return StatusCode::FAILURE;
+	   }   
+	}
       }
       else if (sCut == "EleIDWP")
       {
