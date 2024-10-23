@@ -22,6 +22,7 @@ atlas_add_component( FPGATrackSimConfTools
 atlas_install_python_modules( python/*.py )
 atlas_install_scripts( test/FPGATrackSimWorkflow/*.sh)
 atlas_install_scripts( test/test_FPGATrackSimWorkflow.sh)
+atlas_install_scripts( test/test_FPGATrackSimDataPrep.sh)
 atlas_install_scripts( test/FPGATrackSimInputTestSetup.sh )
 
 # Tests in the package:
