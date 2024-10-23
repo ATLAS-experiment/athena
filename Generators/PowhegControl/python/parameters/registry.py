@@ -569,7 +569,7 @@ class Registry(metaclass=Singleton):
         self.add_default("ttype", 1, description="specify top or anti-top. [1:t; -1:tbar]")
         self.add_default("twidth", powheg_atlas_common.width.t, name="width_t", description="top quark width in GeV")
         self.add_default("twidth_phsp", powheg_atlas_common.width.t, description="top width for phase-space generation, should be the same as twidth [-1:use Powheg default]")
-        self.add_default("ubexcess_correct", 1, description="whether to correct for upper bound violations in btilde/remnant generation. [1:enabled]")
+        self.add_default("ubexcess_correct", 0, description="whether to correct for upper bound violations in btilde/remnant generation. [1:enabled]")
         self.add_default("ubsigmadetails", 1, description="output calculated cross-sections. [1:enabled]")
         self.add_default("Umass", powheg_atlas_common.mass.u, description="u-quark mass in GeV")
         self.add_default("useoldphsp", 0, description="gg4l: use the old phase space parametrization from ggZZ")
