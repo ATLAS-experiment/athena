@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -123,12 +123,9 @@ StatusCode Trk::LayerMaterialInspector::processNode(const Trk::Layer& lay, size_
     TString regHistName = folderName+"/"+hName+"/"+hName+pXo;
     TString regTreeName = folderName+"/"+hName+"/"+hName+info;
     
-    ITHistSvc* tHistSvc = nullptr;
-    if (service("THistSvc",tHistSvc).isFailure()) {
-       ATH_MSG_FATAL( "initialize() Could not find Hist Service! Aborting." );
-       return StatusCode::FAILURE;
-    }
-    
+    SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+    ATH_CHECK( tHistSvc.isValid() );
+
     if ( (tHistSvc->regTree(std::string(regTreeName.Data()),lTreeInformation)).isFailure() ){
         ATH_MSG_WARNING("Could not register TTree with name " << hName);
     }

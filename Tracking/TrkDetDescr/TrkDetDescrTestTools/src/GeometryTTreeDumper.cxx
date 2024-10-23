@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -41,8 +41,8 @@ StatusCode Trk::GeometryTTreeDumper::processNode(const Trk::TrackingVolume& tvol
    
    // create the Tree for this TrackingVolume
    m_currentTree = new TTree(tvol.volumeName().c_str(),"Geometrical information");
-   ITHistSvc* tHistSvc = nullptr;
-   if (service("THistSvc",tHistSvc).isFailure()) {
+   SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+   if (!tHistSvc) {
        ATH_MSG_FATAL( "initialize() Could not find Hist Service! Aborting." );
        delete m_currentTree;
        return StatusCode::FAILURE;

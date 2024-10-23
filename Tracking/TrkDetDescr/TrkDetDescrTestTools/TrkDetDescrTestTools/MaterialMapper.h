@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,6 +14,7 @@
 // Gaudi & Athena
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/IIncidentListener.h"
+#include "GaudiKernel/ITHistSvc.h"
 // Trk
 #include "TrkDetDescrInterfaces/IMaterialMapper.h"
 // ROOT
@@ -255,8 +256,9 @@ namespace Trk {
         SurfaceTreeObject* surfaceTreeObject(const Layer& lay) const;
 
 
-        /* Incident Service */ 
-        ServiceHandle<IIncidentSvc>          m_incidentSvc; 
+        /* Services */
+        ServiceHandle<IIncidentSvc>          m_incidentSvc;
+        ServiceHandle<ITHistSvc>             m_histSvc;
 
         int                   m_materialAssociationType;
 

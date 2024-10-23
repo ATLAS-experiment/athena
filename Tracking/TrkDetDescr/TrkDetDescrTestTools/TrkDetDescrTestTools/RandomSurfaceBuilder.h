@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ namespace Trk {
         
      private :
         /** random number engine used */
-        ServiceHandle<IRndmGenSvc>              m_rndmSvc;
+        SmartIF<IRndmGenSvc>                    m_rndmSvc;
         Rndm::Numbers*                          m_gaussDist;
         Rndm::Numbers*                          m_flatDist;
 
