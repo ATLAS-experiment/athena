@@ -4,7 +4,6 @@
 
 #include "EgammaMonitoring.h"
 
-#include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 #include "TH1D.h"
@@ -30,7 +29,7 @@ EgammaMonitoring::EgammaMonitoring(const std::string &name,
 StatusCode EgammaMonitoring::initialize() {
   ATH_MSG_INFO("********************  Running over " << m_sampleType
                                                      << " ******************");
-  ATH_CHECK(service("THistSvc", rootHistSvc));
+  ATH_CHECK( (rootHistSvc = service("THistSvc")).isValid() );
 
   showerShapesAll = std::make_unique<egammaMonitoring::ShowerShapesHistograms>(
       "showerShapesAll", "Shower Shapes ", "/MONITORING/showerShapesAll/",
