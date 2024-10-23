@@ -113,8 +113,14 @@ class IDAlignMonResidualsAlg :  public AthMonitorAlgorithm {
   std::vector<int> m_pixECCResidualY;
   std::vector<int> m_sctResidualX;
   std::vector<int> m_sctResidualX_2DProf;
+  std::vector<int> m_sct_s0_ResidualX_2DProf;
+  std::vector<int> m_sct_s1_ResidualX_2DProf;
   std::vector<int> m_sctECAResidualX_2DProf;
+  std::vector<int> m_sctECA_s0_ResidualX_2DProf;
+  std::vector<int> m_sctECA_s1_ResidualX_2DProf;
   std::vector<int> m_sctECCResidualX_2DProf;
+  std::vector<int> m_sctECC_s0_ResidualX_2DProf;
+  std::vector<int> m_sctECC_s1_ResidualX_2DProf;
   std::vector<int> m_sctPullX;
   std::vector<int> m_sctResidualXvsEta;
   std::vector<int> m_sctResidualXvsPhi;

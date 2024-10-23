@@ -570,6 +570,24 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
                                                   ybins = m_PhiModules[int(layer)], ymin = -0.5, ymax = m_PhiModules[int(layer)] - 0.5,
                                                   zmin = m_minSiResFillRange, zmax = m_maxSiResFillRange)
 
+    residualSCTXS02DProfArray = helper.addArray([len(layersSCTB)], alg, 'SCT_s0_ResidualX_2DProf', topPath = pathResiduals)
+    for postfix, tool in residualSCTXS02DProfArray.Tools.items():
+        layer = layersSCTB[int( postfix.split('_')[1] )]
+        title = ('Local X Residual vs Module Eta-Phi-ID SCT Barrel layer %s side 0; Mod Eta; Mod Phi; Local X Residual side 0 [mm]' % layer) 
+        name = 'm_modEta,m_modPhi,m_sct_residualsx;sct_b' + layer + '_s0_xresvsmodetaphi_2dprof'
+        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = m_EtaModulesPix[int(layer)], xmin = m_EtaModulesMinPix[int(layer)], xmax = m_EtaModulesMaxPix[int(layer)],
+                                                   ybins = m_PhiModules[int(layer)], ymin = -0.5, ymax = m_PhiModules[int(layer)] - 0.5,
+                                                  zmin = m_minSiResFillRange, zmax = m_maxSiResFillRange)
+
+    residualSCTXS12DProfArray = helper.addArray([len(layersSCTB)], alg, 'SCT_s1_ResidualX_2DProf', topPath = pathResiduals)
+    for postfix, tool in residualSCTXS12DProfArray.Tools.items():
+        layer = layersSCTB[int( postfix.split('_')[1] )]
+        title = ('Local X Residual vs Module Eta-Phi-ID SCT Barrel layer %s side 1; Mod Eta; Mod Phi; Local X Residual side 1 [mm]' % layer) 
+        name = 'm_modEta,m_modPhi,m_sct_residualsx;sct_b' + layer + '_s1_xresvsmodetaphi_2dprof'
+        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = m_EtaModulesPix[int(layer)], xmin = m_EtaModulesMinPix[int(layer)], xmax = m_EtaModulesMaxPix[int(layer)],
+                                                   ybins = m_PhiModules[int(layer)], ymin = -0.5, ymax = m_PhiModules[int(layer)] - 0.5,
+                                                   zmin = m_minSiResFillRange, zmax = m_maxSiResFillRange)
+
     pullSCTXArray = helper.addArray([len(layersSCTB)], alg, 'SCTPullX', topPath = pathResiduals)
     for postfix, tool in pullSCTXArray.Tools.items():
         layer = layersSCTB[int( postfix.split('_')[1] )]
@@ -625,6 +643,24 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
                                                   ybins = m_PhiModulesSCTEC, ymin = - 0.5, ymax = m_PhiModulesSCTEC - 0.5,
                                                   zmin = m_minSiResFillRange, zmax = m_maxSiResFillRange)
 
+    residualSCTECAXS02DProfArray = helper.addArray([len(layersECsct)], alg, 'SCTECA_s0_ResidualX_2DProf', topPath = pathResiduals)
+    for postfix, tool in residualSCTECAXS02DProfArray.Tools.items():
+        layer = layersECsct[int( postfix.split('_')[1] )]
+        title = ('Local X Residual vs Module Eta-Phi-ID SCT Endcap A Disk %s side 0; Mod Eta; Mod Phi; Local X Residual side 0 [mm]' % layer) 
+        name = 'm_modEta,m_modPhi,m_sct_eca_residualx;sct_eca' + layer + '_s0_xresvsmodetaphi_2dprof'
+        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = m_EtaModulesSCTEC, xmin = -0.5, xmax = m_EtaModulesSCTEC - 0.5,
+                                                  ybins = m_PhiModulesSCTEC, ymin = - 0.5, ymax = m_PhiModulesSCTEC - 0.5,
+                                                  zmin = m_minSiResFillRange, zmax = m_maxSiResFillRange)
+
+    residualSCTECAXS12DProfArray = helper.addArray([len(layersECsct)], alg, 'SCTECA_s1_ResidualX_2DProf', topPath = pathResiduals)
+    for postfix, tool in residualSCTECAXS12DProfArray.Tools.items():
+        layer = layersECsct[int( postfix.split('_')[1] )]
+        title = ('Local X Residual vs Module Eta-Phi-ID SCT Endcap A Disk %s side 1; Mod Eta; Mod Phi; Local X Residual side 1 [mm]' % layer) 
+        name = 'm_modEta,m_modPhi,m_sct_eca_residualx;sct_eca' + layer + '_s1_xresvsmodetaphi_2dprof'
+        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = m_EtaModulesSCTEC, xmin = -0.5, xmax = m_EtaModulesSCTEC - 0.5,
+                                                  ybins = m_PhiModulesSCTEC, ymin = - 0.5, ymax = m_PhiModulesSCTEC - 0.5,
+                                                  zmin = m_minSiResFillRange, zmax = m_maxSiResFillRange)
+        
     varName = 'm_sct_eca_pullx;sct_eca_pulllx'
     title = 'UnBiased X Pull SCT EndCap A;Pull'
     residualGroup.defineHistogram(varName, type='TH1F', path=pathResiduals, title=title, xbins=100, xmin=-m_RangeOfPullHistos, xmax=m_RangeOfPullHistos)
@@ -639,7 +675,6 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     title = 'X Residual Mean vs (Modified) Module Phi-ID SCT ECA;(Modified) Phi-ID;Residual [mm]'
     residualGroup.defineHistogram(varName, title = title, type = 'TProfile', path=pathResiduals,
                                   xbins = m_PhiModulesShift_sct_ec, xmin = - 0.5, xmax = m_PhiModulesShift_sct_ec - 0.5)
-
 
     #SCT EndCap C plots
     varName = 'm_sct_ecc_residualx;sct_ecc_residualx'
@@ -656,6 +691,24 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
                                                   ybins = m_PhiModulesSCTEC, ymin = -0.5, ymax = m_PhiModulesSCTEC - 0.5,
                                                   zmin = m_minSiResFillRange, zmax = m_maxSiResFillRange)
 
+    residualSCTECCXS02DProfArray = helper.addArray([len(layersECsct)], alg, 'SCTECC_s0_ResidualX_2DProf', topPath = pathResiduals)
+    for postfix, tool in residualSCTECCXS02DProfArray.Tools.items():
+        layer = layersECsct[int( postfix.split('_')[1] )]
+        title = ('Local X Residual vs Module Eta-Phi-ID SCT Endcap C Disk %s side 0; Mod Eta; Mod Phi; Local X Residual side 0 [mm]' % layer) 
+        name = 'm_modEta,m_modPhi,m_sct_ecc_residualx;sct_ecc' + layer + '_s0_xresvsmodetaphi_2dprof'
+        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = m_EtaModulesSCTEC, xmin = -0.5, xmax = m_EtaModulesSCTEC - 0.5,
+                                                  ybins = m_PhiModulesSCTEC, ymin = - 0.5, ymax = m_PhiModulesSCTEC - 0.5,
+                                                  zmin = m_minSiResFillRange, zmax = m_maxSiResFillRange)
+
+    residualSCTECCXS12DProfArray = helper.addArray([len(layersECsct)], alg, 'SCTECC_s1_ResidualX_2DProf', topPath = pathResiduals)
+    for postfix, tool in residualSCTECCXS12DProfArray.Tools.items():
+        layer = layersECsct[int( postfix.split('_')[1] )]
+        title = ('Local X Residual vs Module Eta-Phi-ID SCT Endcap C Disk %s side 1; Mod Eta; Mod Phi; Local X Residual side 1 [mm]' % layer) 
+        name = 'm_modEta,m_modPhi,m_sct_ecc_residualx;sct_ecc' + layer + '_s1_xresvsmodetaphi_2dprof'
+        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = m_EtaModulesSCTEC, xmin = -0.5, xmax = m_EtaModulesSCTEC - 0.5,
+                                                  ybins = m_PhiModulesSCTEC, ymin = - 0.5, ymax = m_PhiModulesSCTEC - 0.5,
+                                                  zmin = m_minSiResFillRange, zmax = m_maxSiResFillRange)
+    
     varName = 'm_sct_ecc_pullx;sct_ecc_pulllx'
     title = 'UnBiased X Pull SCT EndCap C;Pull'
     residualGroup.defineHistogram(varName, type='TH1F', path=pathResiduals, title=title, xbins=100, xmin=-m_RangeOfPullHistos, xmax=m_RangeOfPullHistos)
