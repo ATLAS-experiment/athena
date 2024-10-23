@@ -134,6 +134,8 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('systematicsModelJER', "Full", type=str,
             info="the NP reduction scheme to use for JER: All, Full, Simple. The "
             "default is Full.")
+        self.addOption ('runJERsystematicsOnData', False, type=bool,
+            info="whether to run the All/Full JER model variations also on data samples. Expert option!")
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::JetCalibrationAlg on PHYSLITE derivations. "
             "The default is True.")
@@ -240,7 +242,10 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         jetUncertaintiesAlg.uncertaintiesTool.IsData = (config.dataType() is DataType.Data)
         jetUncertaintiesAlg.uncertaintiesTool.PseudoDataJERsmearingMode = False
 
-        if doPseudoData:
+        if config.dataType() is DataType.Data and not (doPseudoData and self.runJERsystematicsOnData):
+            # we don't want any systematics on data if we're not using the right JER model!
+            jetUncertaintiesAlg.affectingSystematicsFilter = '.*'
+        if config.dataType() is not DataType.Data and doPseudoData and not self.runJERsystematicsOnData:
             # The secondary tool for pseudo-data JER smearing
             config.addPrivateTool( 'uncertaintiesToolPD', 'JetUncertaintiesTool' )
             jetUncertaintiesAlg.uncertaintiesToolPD.JetDefinition = jetCollectionName[:-4]
