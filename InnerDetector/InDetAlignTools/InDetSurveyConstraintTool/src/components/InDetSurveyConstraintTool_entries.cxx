@@ -1,5 +1,5 @@
-#include "InDetSurveyConstraintTool/SurveyConstraint.h"
-#include "InDetSurveyConstraintTool/SurveyConstraintTestAlg.h"
+#include "../SurveyConstraint.h"
+#include "../SurveyConstraintTestAlg.h"
 
 DECLARE_COMPONENT( SurveyConstraintTestAlg )
 DECLARE_COMPONENT( SurveyConstraint )

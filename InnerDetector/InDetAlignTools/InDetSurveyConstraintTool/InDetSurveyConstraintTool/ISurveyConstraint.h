@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SURVEYCONSTRAINTTOOLS_SURVEYCONSTRAINT_IH
@@ -16,16 +16,10 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 class Identifier;
 
-
-
-/** Must declare this, with name of interface*/
-static const InterfaceID IID_ISurveyConstraint("ISurveyConstraint", 1, 0);
-
 class ISurveyConstraint : virtual public IAlgTool {
-        public:
-        /**Declared here, and defined below*/
-        static const InterfaceID& interfaceID();
-        
+public:
+    DeclareInterfaceID( ISurveyConstraint, 1, 0 );
+
         /**Pure virtual*/
 
 	virtual StatusCode computeConstraint(const Identifier&,
@@ -61,10 +55,5 @@ class ISurveyConstraint : virtual public IAlgTool {
 				     Amg::Vector3D&,
 				     Amg::Transform3D) =0;
 };
-
-inline const InterfaceID& ISurveyConstraint::interfaceID()
-{ 
-        return IID_ISurveyConstraint; 
-}
 
 #endif // SURVEYCONSTRAINTTOOLS_SURVEYCONSTRAINT_IH

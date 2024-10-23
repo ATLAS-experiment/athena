@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SURVEYCONSTRAINTTOOLS_SURVEYCONSTRAINT_H
@@ -12,54 +12,52 @@
 #include <vector>
 #include <map>
 
-class IRndmGenSvc;
 class AtlasDetectorID;
-class IToolSvc;
 class IInDetAlignDBTool;
 class PixelID;
 class SCT_ID;
 
-class SurveyConstraint : virtual public ISurveyConstraint, public AthAlgTool{
+class SurveyConstraint : public extends <AthAlgTool, ISurveyConstraint>{
  public:
   SurveyConstraint(const std::string& type,const std::string& name,const IInterface* parent);
   
-  virtual ~SurveyConstraint();
+  virtual ~SurveyConstraint() = default;
   
-  virtual StatusCode initialize(); 
-  virtual StatusCode finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
   
   virtual StatusCode computeConstraint(const Identifier& ModuleID,
 				       Amg::VectorX& dparams,
 				       double& deltachisq,
 				       Amg::VectorX& dchisqdparams,
-				       Amg::MatrixX& d2chisqdpdp); 
-  virtual void setup_SurveyConstraintModules();
+				       Amg::MatrixX& d2chisqdpdp) override;
+  virtual void setup_SurveyConstraintModules() override;
 
-  virtual void MMap(std::map<Identifier, SurveyConstraintModule*, std::less<Identifier> >&  ModuleMap); 
+  virtual void MMap(std::map<Identifier, SurveyConstraintModule*, std::less<Identifier> >&  ModuleMap) override;
 
   virtual int getWeightPixEC(//const Identifier& ModuleID,
-			    Amg::MatrixX& weight);
+			    Amg::MatrixX& weight) override;
   virtual int getWeightPixB(//const Identifier& ModuleID,
-			    Amg::MatrixX& weight);
+			    Amg::MatrixX& weight) override;
   virtual int getWeightSCTEC(//const Identifier& ModuleID,
-			    Amg::MatrixX& weight);
+			    Amg::MatrixX& weight) override;
   virtual int getWeightSCTB(//const Identifier& ModuleID,
-			    Amg::MatrixX& weight);
+			    Amg::MatrixX& weight) override;
   virtual void getSurveyCoordsPixEC(//const Identifier& ModuleID,
-				    std::vector< Amg::Vector3D > & coords);
+				    std::vector< Amg::Vector3D > & coords) override;
   virtual void getSurveyCoordsPixB(//const Identifier& ModuleID,
-				   std::vector< Amg::Vector3D > & coords);
+				   std::vector< Amg::Vector3D > & coords) override;
   virtual void getSurveyCoordsSCTEC(//const Identifier& ModuleID,
-				    std::vector< Amg::Vector3D > & coords);
+				    std::vector< Amg::Vector3D > & coords) override;
   virtual void getSurveyCoordsSCTB(//const Identifier& ModuleID,
-				   std::vector< Amg::Vector3D > & coords);
-  virtual void GlobalToLocal(SurveyConstraintModule* mut,std::vector<SurveyConstraintPoint>& points);
-  virtual int SectorNumber(int phi_module); 
-  virtual double PhiModuleToSector(int phi_module);
+				   std::vector< Amg::Vector3D > & coords) override;
+  virtual void GlobalToLocal(SurveyConstraintModule* mut,std::vector<SurveyConstraintPoint>& points) override;
+  virtual int SectorNumber(int phi_module) override;
+  virtual double PhiModuleToSector(int phi_module) override;
   virtual void TransformSector(Identifier Pixel_ModuleID,
 			       SurveyConstraintModule* mut,
 			       Amg::Vector3D& current,
-			       Amg::Transform3D CurrentTransRandSect);
+			       Amg::Transform3D CurrentTransRandSect) override;
   
  private :
   const AtlasDetectorID*                 m_idHelper;
@@ -67,10 +65,8 @@ class SurveyConstraint : virtual public ISurveyConstraint, public AthAlgTool{
   const SCT_ID*                          m_sctid;
   
 
-  IToolSvc*                              m_toolsvc;            //!< Pointer to tool service
   IInDetAlignDBTool*                     m_current_IDAlignDBTool;
   IInDetAlignDBTool*                     m_survey_IDAlignDBTool;
-  IRndmGenSvc*                           m_randsvc;
 
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey{this, "PixelDetEleCollKey", "PixelDetectorElementCollection", "Key of SiDetectorElementCollection for Pixel"};
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCTDetEleCollKey{this, "SCTDetEleCollKey", "SCT_DetectorElementCollection", "Key of SiDetectorElementCollection for SCT"};

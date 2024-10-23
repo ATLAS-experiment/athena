@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ------------------------------------------------------------------------------
@@ -9,7 +9,7 @@
 //  Authors: Tobias Golling, 10/27/2005
 //------------------------------------------------------------------------------
 
-#include "InDetSurveyConstraintTool/SimpleConstraintPointMinimizer.h"
+#include "SimpleConstraintPointMinimizer.h"
 #include <iostream>
 #include <limits>
 using std::cout;
@@ -19,8 +19,6 @@ SimpleConstraintPointMinimizer::SimpleConstraintPointMinimizer(double proximity)
   m_proximity(proximity)
 {;}
 
-SimpleConstraintPointMinimizer::~SimpleConstraintPointMinimizer()
-{;}
 // *************************************************************************
 // find the best global transformation
 // *************************************************************************
