@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file InDetEventTPCnv/test/PixelGangedClusterAmbiguitiesCnv_p1_test.cxx
@@ -125,8 +125,8 @@ int main ATLAS_NOT_THREAD_SAFE ()
   }
 
   ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StoreGateSvc* sg = nullptr;
-  assert ( svcLoc->service("StoreGateSvc", sg).isSuccess() );
+  SmartIF<StoreGateSvc> sg{svcLoc->service("StoreGateSvc")};
+  assert (sg.isValid());
 
   const InDet::PixelClusterContainer& cont = makeclusts (sg);
 

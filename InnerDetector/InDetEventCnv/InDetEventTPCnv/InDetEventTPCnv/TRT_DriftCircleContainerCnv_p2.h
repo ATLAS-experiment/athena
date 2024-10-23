@@ -1,6 +1,6 @@
 // -*- c++ -*-
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_DRIFTCIRCLECONTAINERCNV_P2_H
@@ -23,8 +23,7 @@ public T_AthenaPoolTPCnvBase<InDet::TRT_DriftCircleContainer, InDet::TRT_DriftCi
  public:
   TRT_DriftCircleContainerCnv_p2() :
     m_trtId{nullptr},
-    m_storeGate{nullptr},
-    m_isInitialized{false}, 
+    m_isInitialized{false},
     m_trtDetEleContKey{"TRT_DetElementContainer"},
     m_useDetectorElement{true}
     {};
@@ -43,7 +42,6 @@ public T_AthenaPoolTPCnvBase<InDet::TRT_DriftCircleContainer, InDet::TRT_DriftCi
 
  private:
    const TRT_ID *m_trtId;
-   StoreGateSvc *m_storeGate;
    bool m_isInitialized;
    SG::ReadCondHandleKey<InDetDD::TRT_DetElementContainer> m_trtDetEleContKey;
    bool m_useDetectorElement;

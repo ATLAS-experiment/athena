@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_CLUSTERCONTAINERCNV_P2_H
@@ -22,7 +22,7 @@ class StoreGateSvc;
 class SCT_ClusterContainerCnv_p2 : public T_AthenaPoolTPCnvBase<InDet::SCT_ClusterContainer, InDet::SCT_ClusterContainer_p2>
 {
  public:
-  SCT_ClusterContainerCnv_p2() : m_sctId{nullptr}, m_storeGate{nullptr}, m_SCTDetEleCollKey{"SCT_DetectorElementCollection"}, m_useDetectorElement{true}, m_isInitialized{false} {};
+  SCT_ClusterContainerCnv_p2() : m_sctId{nullptr}, m_SCTDetEleCollKey{"SCT_DetectorElementCollection"}, m_useDetectorElement{true}, m_isInitialized{false} {};
   
   virtual void transToPers(const InDet::SCT_ClusterContainer* transCont,
                            InDet::SCT_ClusterContainer_p2* persCont,
@@ -39,7 +39,6 @@ class SCT_ClusterContainerCnv_p2 : public T_AthenaPoolTPCnvBase<InDet::SCT_Clust
 
  private:
   const SCT_ID *m_sctId;
-  StoreGateSvc *m_storeGate;
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCTDetEleCollKey;
   bool m_useDetectorElement;
   bool m_isInitialized;

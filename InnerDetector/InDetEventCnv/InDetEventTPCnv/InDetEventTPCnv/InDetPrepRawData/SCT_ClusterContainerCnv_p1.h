@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_CLUSTERCONTAINERCNV_P1_H
@@ -30,19 +30,19 @@ class SCT_ClusterContainerCnv_p1 : public T_AthenaPoolTPCnvBase< InDet::SCT_Clus
  public:
    typedef InDet::InDetPRD_Container_p1 PERS;
    typedef InDet::SCT_ClusterContainer TRANS;
-   SCT_ClusterContainerCnv_p1(): m_sctId{nullptr}, m_storeGate{nullptr}, m_SCTDetEleCollKey{"SCT_DetectorElementCollection"}, m_useDetectorElement{true}, m_isInitialized(false) {}
+   SCT_ClusterContainerCnv_p1() = default;
    virtual void transToPers(const TRANS* transCont, PERS* persCont, MsgStream &log);
    virtual void persToTrans(const PERS* persCont, TRANS* transCont, MsgStream &log);
    virtual InDet::SCT_ClusterContainer* createTransient(const InDet::InDetPRD_Container_p1* persObj, MsgStream& log);
    // Method for test/SCT_ClusterContainerCnv_p1_test.cxx
    void setUseDetectorElement(const bool useDetectorElement);
  private:
-   const SCT_ID *m_sctId;
-   StoreGateSvc *m_storeGate;
-   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCTDetEleCollKey;
+   const SCT_ID *m_sctId{nullptr};
+   ServiceHandle<StoreGateSvc> m_storeGate{"StoreGateSvc", "SCT_ClusterContainerCnv_p1"};
+   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCTDetEleCollKey{"SCT_DetectorElementCollection"};
    // Declaration of ReadCondHandleKey in SCT_ClusterContainerCnv_p1 triggers memory leak in SCT_ClusterCnv_p1_test.
-   bool m_useDetectorElement;
-   bool m_isInitialized;
+   bool m_useDetectorElement{true};
+   bool m_isInitialized{false};
    StatusCode initialize(MsgStream &log);
 };
  

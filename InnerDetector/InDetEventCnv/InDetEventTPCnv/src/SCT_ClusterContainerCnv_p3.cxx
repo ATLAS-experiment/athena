@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetEventTPCnv/SCT_ClusterContainerCnv_p3.h"
@@ -209,43 +209,20 @@ InDet::SCT_ClusterContainer* SCT_ClusterContainerCnv_p3::createTransient(const I
 }
 
 
-StatusCode SCT_ClusterContainerCnv_p3::initialize(MsgStream &log) {
+StatusCode SCT_ClusterContainerCnv_p3::initialize(MsgStream&) {
    // Do not initialize again:
    m_isInitialized=true;
-   //    if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "SCT_ClusterContainerCnv_p2::initialize called " << endmsg;
-   // Get Storegate, ID helpers, and so on
-   ISvcLocator* svcLocator = Gaudi::svcLocator();
-   // get StoreGate service
-   StatusCode sc = svcLocator->service("StoreGateSvc", m_storeGate);
-   if (sc.isFailure()) {
-      log << MSG::FATAL << "StoreGate service not found !" << endmsg;
-      return StatusCode::FAILURE;
-   }
 
-   // get DetectorStore service
-   StoreGateSvc *detStore;
-   sc = svcLocator->service("DetectorStore", detStore);
-   if (sc.isFailure()) {
-      log << MSG::FATAL << "DetectorStore service not found !" << endmsg;
-      return StatusCode::FAILURE;
-   } 
-   //   else {
-   //        if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Found DetectorStore." << endmsg;
-   //   }
+   // Get Storegate, ID helpers, and so on
+   SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+   CHECK( detStore.isValid() );
 
    // Get the sct helper from the detector store
-   sc = detStore->retrieve(m_sctId, "SCT_ID");
-   if (sc.isFailure()) {
-      log << MSG::FATAL << "Could not get SCT_ID helper !" << endmsg;
-      return StatusCode::FAILURE;
-   } 
-   //   else {
-   //     if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Found the SCT_ID helper." << endmsg;
-   //   }
+   CHECK( detStore->retrieve(m_sctId, "SCT_ID") );
 
    CHECK(m_SCTDetEleCollKey.initialize(m_useDetectorElement));
    CHECK(m_ITkStripDetEleCollKey.initialize(m_useDetectorElement));
-   //    if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Converter initialized." << endmsg;
+
    return StatusCode::SUCCESS;
 }
 
