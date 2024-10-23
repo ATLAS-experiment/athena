@@ -7,12 +7,9 @@
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
 #include <MuonReadoutGeometryR4/MdtTubeLayer.h>
 
-
-
 #ifndef SIMULATIONBASE
 #   include <MuonAlignmentData/BLinePar.h>
 #   include <MuonAlignmentData/MdtAsBuiltPar.h>
-#   include "Acts/Surfaces/TrapezoidBounds.hpp"
 #endif
 
 namespace Acts{

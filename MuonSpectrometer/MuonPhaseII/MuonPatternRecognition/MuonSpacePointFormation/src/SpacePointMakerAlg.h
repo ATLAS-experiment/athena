@@ -90,7 +90,7 @@ namespace MuonR4{
                 std::vector<SpacePoint> phiHits{};                
             };
             /** @brief Container abrivation of the presorted space point container per MuonChambers */
-            using PreSortedSpacePointMap = std::unordered_map<const MuonGMR4::MuonChamber*, SpacePointsPerChamber>;
+            using PreSortedSpacePointMap = std::unordered_map<const MuonGMR4::SpectrometerSector*, SpacePointsPerChamber>;
 
   
             /** @brief Retrieve an uncalibrated measurement container <ContType> and fill the hits into the

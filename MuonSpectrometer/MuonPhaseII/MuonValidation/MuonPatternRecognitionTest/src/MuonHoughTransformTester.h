@@ -61,7 +61,7 @@ namespace MuonValR4{
 
 
     struct ObjectMatching{
-        const MuonGMR4::MuonChamber* chamber{nullptr};
+        const MuonGMR4::SpectrometerSector* chamber{nullptr};
         const xAOD::MuonSegment* truthSegment{nullptr};
         const MuonR4::SegmentSeed* matchedSeed{nullptr};
         const MuonR4::Segment* matchedSegment{nullptr};
@@ -77,10 +77,10 @@ namespace MuonValR4{
                                                const MuonR4::SegmentSeedContainer* seedContainer,
                                                const MuonR4::SegmentContainer* segmentContainer) const;
 
-    void fillChamberInfo(const MuonGMR4::MuonChamber* chamber);
+    void fillChamberInfo(const MuonGMR4::SpectrometerSector* chamber);
 
     void fillTruthInfo(const ActsGeometryContext& gctx,
-                       const MuonGMR4::MuonChamber* chamber, 
+                       const MuonGMR4::SpectrometerSector* chamber, 
                        const xAOD::MuonSegment* truthSegment);
     
     void fillSeedInfo(const ObjectMatching& obj);            

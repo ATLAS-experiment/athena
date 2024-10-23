@@ -108,7 +108,7 @@ namespace MuonValR4{
         
 
         m_bucketNumber.push_back(bucket.bucketId());
-        m_bucketId.push_back(bucket.chamber()->readOutElements()[0]->identify());
+        m_bucketId.push_back(bucket.msSector()->chambers().front()->readoutEles().front()->identify());
         m_bucketMin.push_back(bucket.coveredMin());
         m_bucketMax.push_back(bucket.coveredMax());
         std::vector<uint16_t>& spacePoints = m_bucketPoints[m_bucketPoints.size()];

@@ -24,8 +24,8 @@ namespace Acts{
 }
 namespace MuonGMR4 {
 
-class MuonChamber;
-
+class SpectrometerSector;
+class Chamber;
 ///   The MuonReadoutElement is an abstract class representing the geometry
 ///   representing the muon detector. The segmentation of the detectors varies
 ///   along the MS subsystems and is documented further in the specific sub
@@ -141,7 +141,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 
 #ifndef SIMULATIONBASE
     /// Returns the transformation to the origin of the chamber coordinate system
-    const Amg::Transform3D& transform(const Acts::GeometryContext& gctx) const override final;    
+    const Amg::Transform3D& transform(const Acts::GeometryContext& gctx) const override final;
     /// Returns the surface associated to the readout element plane
     const Acts::Surface& surface() const override final;
     Acts::Surface& surface() override final;
@@ -153,10 +153,14 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     /// Returns the pointer associated to a certain wire / plane
     std::shared_ptr<Acts::Surface> surfacePtr(const IdentifierHash& hash) const;
 
-    /// Set's the link to the MuonChamber object to which the MuonReadoutElement belongs to
-    void setChamberLink(GeoModel::TransientConstSharedPtr<MuonChamber> chamber);
-
-    const MuonChamber* getChamber() const;
+    /** @brief Sets the link to the enclosing chamber */
+    void setChamberLink(const Chamber* chamber);
+    /** @brief Set the link to the enclosing sector envelope */
+    void setSectorLink(const SpectrometerSector* envelope);
+    /** @brief Returns the pointer to the envelope volume enclosing all chambers in the sector */
+    const SpectrometerSector* msSector() const;
+    /** @brief Returns the pointer to the chamber enclosing this readout element */
+    const Chamber* chamber() const;
     /// Returns all surfaces that are associated with the active readout planes
     std::vector<std::shared_ptr<Acts::Surface>> getSurfaces() const;
 #else
@@ -189,8 +193,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
      /// placing the ReadoutElement inside the ATLAS coordinate system.
      static IdentifierHash geoTransformHash();
    private:
-    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
-        "Muon::MuonIdHelperSvc/MuonIdHelperSvc", "MuonReadoutElement"};
+    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{"Muon::MuonIdHelperSvc/MuonIdHelperSvc", "MuonReadoutElement"};
 
     const defineArgs m_args{};
     /// Cache of the detector element hash
@@ -203,15 +206,15 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     int m_stEta{-1};
     /// Cache the station phi of the identifier
     int m_stPhi{-1};
-
     /// Cache all local to global transformations
     using TransformCacheMap = std::unordered_map<IdentifierHash, std::unique_ptr<ActsTrk::TransformCache>>;
     TransformCacheMap m_localToGlobalCaches;
 #ifndef SIMULATIONBASE
     ///Cache of all associated surfaces
     ActsTrk::SurfaceCacheSet m_surfaces;
-    /// Pointer to the associated MuonChamber
-    GeoModel::TransientConstSharedPtr<MuonChamber> m_chambLink{};
+    /// Pointer to the associated MS-sector & MuonChamber
+    const SpectrometerSector* m_msSectorLink{};
+    const Chamber* m_chambLink{nullptr};
 #endif
 };
 }  // namespace MuonGMR4

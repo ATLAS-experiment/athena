@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonReadoutGeometryR4/MuonReadoutElement.h"
-#include "MuonReadoutGeometryR4/MuonChamber.h"
+#include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "ActsGeoUtils/TransformCache.h"
 #include "ActsGeoUtils/SurfaceCache.h"
 #ifndef SIMULATIONBASE
@@ -141,12 +141,14 @@ StatusCode MuonReadoutElement::planeSurfaceFactory(const IdentifierHash& hash, s
     (*insert_itr.first)->setSurface(Acts::Surface::makeShared<Acts::PlaneSurface>(pBounds, **insert_itr.first));
     return StatusCode::SUCCESS;
 }
-void MuonReadoutElement::setChamberLink(GeoModel::TransientConstSharedPtr<MuonChamber> chamber) {
-    m_chambLink = std::move(chamber);
+
+void MuonReadoutElement::setChamberLink(const Chamber* chamber) {
+    m_chambLink = chamber;
 }
-const MuonChamber* MuonReadoutElement::getChamber() const {
-    return m_chambLink.get();
+void MuonReadoutElement::setSectorLink(const SpectrometerSector* envelope) {
+    m_msSectorLink = envelope;
 }
+
 std::vector<std::shared_ptr<Acts::Surface>> MuonReadoutElement::getSurfaces() const {
     std::vector<std::shared_ptr<Acts::Surface>> surfaces{};
     surfaces.reserve(m_surfaces.size());

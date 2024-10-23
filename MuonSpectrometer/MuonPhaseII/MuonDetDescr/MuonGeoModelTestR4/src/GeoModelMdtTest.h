@@ -81,7 +81,7 @@ class GeoModelMdtTest : public AthHistogramAlgorithm{
 
       /// Position of the readout
       MuonVal::ThreeVectorBranch m_roPos{m_tree, "readOutPos"};
-      /// Position of the tube in the chamber frame
+      /// Position of the tube in the sector frame
       MuonVal::ThreeVectorBranch m_tubePosInCh{m_tree, "chamberTubePos"};
 
       /// Alignment parameters

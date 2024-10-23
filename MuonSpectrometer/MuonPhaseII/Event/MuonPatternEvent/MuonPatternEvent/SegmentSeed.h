@@ -4,7 +4,7 @@
 #define MUONR4_MUONPATTERNEVENT_HOUGHSEGMENTSEED__H
 
 #include "MuonPatternEvent/SegmentFitterEventData.h"
-#include "MuonReadoutGeometryR4/MuonChamber.h"
+#include "MuonReadoutGeometryR4/SpectrometerSector.h"
 
 
 namespace MuonR4 {
@@ -55,7 +55,7 @@ class SegmentSeed {
     /// @brief Returns the bucket out of which the seed was formed
     const SpacePointBucket* parentBucket() const;
     /// @brief Returns the associated chamber
-    const MuonGMR4::MuonChamber* chamber() const;
+    const MuonGMR4::SpectrometerSector* msSector() const;
 
     /// @brief check whether the segment seed includes a 
     /// valid phi extension
@@ -63,9 +63,9 @@ class SegmentSeed {
     /// we are dealing with a pure eta maximum
     bool hasPhiExtension() const;
 
-    /** @brief Returns the position of the seed in the chamber frame */
+    /** @brief Returns the position of the seed in the sector frame */
     Amg::Vector3D positionInChamber() const;
-    /** @brief Returns the direction of the seed in the chamber frame */
+    /** @brief Returns the direction of the seed in the sector frame */
     Amg::Vector3D directionInChamber() const; 
    private:
         /** @brief Set of defining parameters */

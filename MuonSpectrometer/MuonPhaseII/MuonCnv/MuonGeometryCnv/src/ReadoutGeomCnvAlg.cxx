@@ -17,7 +17,7 @@
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
 
 
-#include <MuonReadoutGeometryR4/MuonChamber.h>
+#include <MuonReadoutGeometryR4/SpectrometerSector.h>
 
 #include <MuonAlignmentDataR4/MdtAlignmentStore.h>
 #include <MuonAlignmentDataR4/sTgcAlignmentStore.h>
@@ -441,7 +441,7 @@ StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx, Construc
         /// Define the local gasGap positions
         for (unsigned int gasGap = 1; gasGap <= copyMe->nGasGaps(); ++gasGap) {
             const IdentifierHash layHash{ copyMe->constructHash(0, gasGap, false)};
-            /// In the chamber frame, the gasGap is oriented along the x-axis
+            /// In the sector frame, the gasGap is oriented along the x-axis
             const Amg::Vector3D translation{copyMe->globalToLocalTrans(gctx) * copyMe->center(gctx, layHash)};            
             newRE->setPlaneZ(translation.x(), gasGap);
         }

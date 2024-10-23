@@ -18,7 +18,7 @@
 namespace MuonR4{
   /*** @brief The TruthSegmentMaker collects hits inside the chamber stemming from the same HepMC::GenParticle. 
    *          The particle state at the first sim hit is propagated via a simple straight line onto the plane 
-   *          z=0 in the chamber frame. The parameters are then translated into the global frame and a xAOD::MuonSegment
+   *          z=0 in the sector frame. The parameters are then translated into the global frame and a xAOD::MuonSegment
    *          is created. The segment hit summary is written based on the sim hit type. If a gasGap has eta & phi measurements,
    *          the counters in the respective categories are each increased for the given sim hit. Finally, a vector of ElementLinks
    *          pointing to the sim hits is decorated to the segment. */

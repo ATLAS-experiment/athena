@@ -5,7 +5,7 @@
 #include "MuonHoughTransformTester.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "MuonTesterTree/EventInfoBranch.h"
-#include "MuonReadoutGeometryR4/MuonChamber.h"
+#include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "MuonPatternHelpers/SegmentFitHelperFunctions.h"
 #include "MuonPatternEvent/MuonHoughDefs.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
@@ -48,11 +48,11 @@ namespace MuonValR4 {
                 const TruthHitCol& truthHits{truthHitsVec.emplace_back(getTruthMatchedHits(*truth))};
                 ObjectMatching matchTempl{};
                 matchTempl.truthSegment = truth;
-                matchTempl.chamber = m_r4DetMgr->getChamber((*truthHits.begin())->identify());
+                matchTempl.chamber = m_r4DetMgr->getSectorEnvelope((*truthHits.begin())->identify());
                 int seedIdx{-1};
                 for (const SegmentSeed* seed : *seedContainer){
                     ++seedIdx;
-                    if (seed->chamber() != matchTempl.chamber) {
+                    if (seed->msSector() != matchTempl.chamber) {
                         continue;
                     }
                     const TruthHitCol& seedHits{seedHitsVec[seedIdx]};
@@ -72,7 +72,7 @@ namespace MuonValR4 {
                 std::vector<const Segment*> matchedSegs{};
                 for (const Segment* segment : *segmentContainer) {
                     ++segmentIdx;
-                    if (segment->chamber() != matchTempl.chamber) {
+                    if (segment->msSector() != matchTempl.chamber) {
                         continue;
                     }
                     const TruthHitCol& segmentHits{segmentHitsVec[segmentIdx]};
@@ -112,7 +112,7 @@ namespace MuonValR4 {
                 continue;
             }
             ObjectMatching match{};
-            match.chamber = seg->chamber();
+            match.chamber = seg->msSector();
             match.matchedSegment = seg;
             match.matchedSeed = seg->parent();
             for (unsigned int truthIdx = 0 ; truthIdx < truthHitsVec.size(); ++truthIdx){
@@ -139,7 +139,7 @@ namespace MuonValR4 {
                 continue;
             }
             ObjectMatching match{};
-            match.chamber = seed->chamber();
+            match.chamber = seed->msSector();
             match.matchedSeed = seed;
             for (unsigned int truthIdx = 0 ; truthIdx < truthHitsVec.size(); ++truthIdx){
                 if (assocObj[truthIdx].chamber != match.chamber) {
@@ -206,20 +206,20 @@ namespace MuonValR4 {
                                                          const Identifier& hitId) const {
         const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(hitId); 
         //transform from local (w.r.t tube's frame) to global (ATLAS frame) and then to chamber's frame
-        const MuonGMR4::MuonChamber* muonChamber = reElement->getChamber();
+        const MuonGMR4::SpectrometerSector* muonChamber = reElement->msSector();
         /// Mdt tubes have all their own transform while for the strip detectors there's one transform per layer
         const IdentifierHash trfHash = reElement->detectorType() == ActsTrk::DetectorType::Mdt ?
                                        reElement->measurementHash(hitId) : reElement->layerHash(hitId);            
         return muonChamber->globalToLocalTrans(gctx) * reElement->localToGlobalTrans(gctx, trfHash);
     }
           
-    void MuonHoughTransformTester::fillChamberInfo(const MuonGMR4::MuonChamber* chamber){
-        m_out_stationName = chamber->stationName();
-        m_out_stationEta = chamber->stationEta();
-        m_out_stationPhi = chamber->stationPhi();
+    void MuonHoughTransformTester::fillChamberInfo(const MuonGMR4::SpectrometerSector* msSector){
+        m_out_stationName = msSector->chamberIndex();
+        m_out_stationEta = msSector->side();
+        m_out_stationPhi = msSector->stationPhi();
     }                
     void MuonHoughTransformTester:: fillTruthInfo(const ActsGeometryContext& gctx,
-                                                  const MuonGMR4::MuonChamber* muonChamber, 
+                                                  const MuonGMR4::SpectrometerSector* muonChamber, 
                                                   const xAOD::MuonSegment* segment) {
         if (!segment) return; 
         m_out_hasTruth = true; 
@@ -322,7 +322,7 @@ namespace MuonValR4 {
         m_out_segment_err_tantheta = segment->covariance()(toInt(ParamDefs::theta), toInt(ParamDefs::theta));
         m_out_segment_err_tanphi   = segment->covariance()(toInt(ParamDefs::phi), toInt(ParamDefs::phi));
         m_out_segment_err_time = segment->covariance()(toInt(ParamDefs::time), toInt(ParamDefs::time));
-        const Amg::Transform3D trf{segment->chamber()->globalToLocalTrans(gctx)};
+        const Amg::Transform3D trf{segment->msSector()->globalToLocalTrans(gctx)};
         for (const double c2 : segment->chi2PerMeasurement()){
             m_out_segment_chi2_measurement.push_back(c2); 
         }

@@ -31,8 +31,8 @@ namespace MuonR4{
              *         if the calibration fails. 
              *  @param ctx: EventContext to access conditions data
              *  @param spacePoint: Pointer to the space point to calibrate.
-             *  @param seedPosInChamb: Position of the external seed expressed in the chamber frame
-             *  @param seedDirInChamb: Direction of the external seed expressed in the chamber frame
+             *  @param seedPosInChamb: Position of the external seed expressed in the sector frame
+             *  @param seedDirInChamb: Direction of the external seed expressed in the sector frame
              *  @param timeDelay: Shift in time to be added to the time of flight of a particle going a straight path */
             virtual CalibSpacePointPtr calibrate(const EventContext& ctx,
                                                  const SpacePoint* spacePoint,
@@ -46,8 +46,8 @@ namespace MuonR4{
              *         if the calibration fails. 
              *  @param ctx: EventContext to access conditions data
              *  @param spacePoint: Pointer to the space point to calibrate.
-             *  @param seedPosInChamb: Position of the external seed expressed in the chamber frame
-             *  @param seedDirInChamb: Direction of the external seed expressed in the chamber frame
+             *  @param seedPosInChamb: Position of the external seed expressed in the sector frame
+             *  @param seedDirInChamb: Direction of the external seed expressed in the sector frame
              *  @param timeDelay: Shift in time to be added to the time of flight of a particle going a straight path */
             virtual CalibSpacePointPtr calibrate(const EventContext& ctx,
                                                  const CalibratedSpacePoint& spacePoint,
@@ -58,8 +58,8 @@ namespace MuonR4{
             /** @brief Calibrates a set of space points.
              *  @param ctx: EventContext to access conditions data
              *  @param spacePoint: Pointer to the space point to calibrate.
-             *  @param seedPosInChamb: Position of the external seed expressed in the chamber frame
-             *  @param seedDirInChamb: Direction of the external seed expressed in the chamber frame
+             *  @param seedPosInChamb: Position of the external seed expressed in the sector frame
+             *  @param seedDirInChamb: Direction of the external seed expressed in the sector frame
              *  @param timeDelay: Shift in time to be added to the time of flight of a particle going a straight path */
             virtual CalibSpacePointVec calibrate(const EventContext& ctx,
                                                  const std::vector<const SpacePoint*>& spacePoints,

@@ -3,8 +3,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 def MuonChamberToolTestCfg(flags, name="MuonChamberToolTest", **kwargs):
     result = ComponentAccumulator()
-    from ActsGeometry.DetectorVolumeSvcCfg import DetectorVolumeSvcCfg
-    kwargs.setdefault("DetectorVolumeSvc", result.getPrimaryAndMerge(DetectorVolumeSvcCfg(flags)))
     the_alg = CompFactory.MuonGMR4.MuonChamberToolTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)    
     return result
@@ -18,8 +16,6 @@ if __name__=="__main__":
     ###
     cfg.merge(MuonChamberToolTestCfg(flags))
     cfg.getService("MessageSvc").verboseLimit = 100000
-    from AthenaCommon.Constants import VERBOSE
-    cfg.getService("GeoModelSvc").DetectorTools["MuonDetectorToolR4"].ReadoutEleBuilders["MuonChamberAssembleTool"].OutputLevel = VERBOSE
     executeTest(cfg)
 
 

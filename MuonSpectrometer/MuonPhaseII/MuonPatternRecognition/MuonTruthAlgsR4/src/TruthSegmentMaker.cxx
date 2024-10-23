@@ -14,7 +14,7 @@
 #include "MuonReadoutGeometryR4/TgcReadoutElement.h"
 #include "MuonReadoutGeometryR4/sTgcReadoutElement.h"
 #include "MuonReadoutGeometryR4/MmReadoutElement.h"
-#include "MuonReadoutGeometryR4/MuonChamber.h"
+#include "MuonReadoutGeometryR4/SpectrometerSector.h"
 
 #include "MuonPatternEvent/MuonHoughDefs.h"
 
@@ -66,7 +66,7 @@ namespace MuonR4{
         const IdentifierHash trfHash{reEle->detectorType() == ActsTrk::DetectorType::Mdt ?
                                                     reEle->measurementHash(chanId) :
                                                     reEle->layerHash(chanId)};
-        return reEle->getChamber()->globalToLocalTrans(gctx) * reEle->localToGlobalTrans(gctx, trfHash);
+        return reEle->msSector()->globalToLocalTrans(gctx) * reEle->localToGlobalTrans(gctx, trfHash);
 
     }
     StatusCode TruthSegmentMaker::execute(const EventContext& ctx) const {
@@ -75,7 +75,7 @@ namespace MuonR4{
         
         
         using HitsPerParticle = std::unordered_map<HepMC::ConstGenParticlePtr, std::vector<const xAOD::MuonSimHit*>>;
-        using HitCollector = std::unordered_map<const MuonGMR4::MuonChamber*, HitsPerParticle>;
+        using HitCollector = std::unordered_map<const MuonGMR4::SpectrometerSector*, HitsPerParticle>;
         HitCollector hitCollector{};
 
         for (const SG::ReadHandleKey<xAOD::MuonSimHitContainer>& key : m_readKeys) {
@@ -83,7 +83,7 @@ namespace MuonR4{
             ATH_CHECK(retrieveContainer(ctx, key, simHits));        
             for (const xAOD::MuonSimHit* simHit : *simHits) {
                 const MuonGMR4::MuonReadoutElement* reElement = m_detMgr->getReadoutElement(simHit->identify()); 
-                const MuonGMR4::MuonChamber* id{reElement->getChamber()};
+                const MuonGMR4::SpectrometerSector* id{reElement->msSector()};
                 auto genLink = simHit->genParticleLink();
                 HepMC::ConstGenParticlePtr genParticle = nullptr; 
                 if (genLink.isValid()){

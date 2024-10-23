@@ -5,7 +5,7 @@
 #include "SimHitCsvDumperAlg.h"
 
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
-#include <MuonReadoutGeometryR4/MuonChamber.h>
+#include <MuonReadoutGeometryR4/SpectrometerSector.h>
 #include <GaudiKernel/SystemOfUnits.h>
 
 #include <fstream>
@@ -80,7 +80,7 @@ StatusCode SimHitCsvDumperAlg::execute(){
          const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(ID);
       
          //transform from local (w.r.t tube's frame) to global (ATLAS frame) and then to chamber's frame
-         const Amg::Transform3D toChamber = reElement->getChamber()->globalToLocalTrans(gctx) *
+         const Amg::Transform3D toChamber = reElement->msSector()->globalToLocalTrans(gctx) *
                                             reElement->localToGlobalTrans(gctx, reElement->measurementHash(ID));
 
          const Amg::Vector3D localPos{toChamber * xAOD::toEigen(simHit->localPosition())};

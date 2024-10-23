@@ -4,7 +4,7 @@
 
 #include "EtaHoughTransformAlg.h"
 
-#include <MuonReadoutGeometryR4/MuonChamber.h>
+#include <MuonReadoutGeometryR4/SpectrometerSector.h>
 #include <StoreGate/ReadCondHandle.h>
 
 #include "MuonPatternHelpers/HoughHelperFunctions.h"
@@ -87,9 +87,9 @@ void EtaHoughTransformAlg::preProcess(const EventContext& ctx,
         if (m_visionTool.isEnabled()) {
             m_visionTool->visualizeBucket(ctx, *bucket, "bucket");
         }
-        std::vector<HoughSetupForBucket>& buckets = data.houghSetups[bucket->front()->chamber()];        
+        std::vector<HoughSetupForBucket>& buckets = data.houghSetups[bucket->front()->msSector()];        
         HoughSetupForBucket& hs{buckets.emplace_back(bucket)};
-        const Amg::Transform3D globToLoc{hs.bucket->chamber()->globalToLocalTrans(gctx)};
+        const Amg::Transform3D globToLoc{hs.bucket->msSector()->globalToLocalTrans(gctx)};
         Amg::Vector3D leftSide  = globToLoc.translation() - (hs.bucket->coveredMin() * Amg::Vector3D::UnitY());
         Amg::Vector3D rightSide = globToLoc.translation() - (hs.bucket->coveredMax() * Amg::Vector3D::UnitY());
 
@@ -189,9 +189,7 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
                                            "#eta Hough accumulator");
     }
     if (maxima.empty()) {
-        ATH_MSG_DEBUG("Station "<<bucket.bucket->chamber()->stationName() 
-            <<" eta "<<bucket.bucket->chamber()->stationEta()
-            <<" "<<bucket.bucket->chamber()->stationPhi()
+        ATH_MSG_DEBUG("Station "<<bucket.bucket->msSector()->identString()
             <<":\n     Mean tanTheta was "<<tanThetaMean 
             << " and my intercept "<<chamberCenter 
             <<", with hits in the bucket in "<< bucket.bucket->coveredMin() 

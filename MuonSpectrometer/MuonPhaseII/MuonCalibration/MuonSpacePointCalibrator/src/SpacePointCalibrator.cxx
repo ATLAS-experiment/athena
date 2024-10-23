@@ -70,7 +70,7 @@ namespace MuonR4{
         
         SG::ReadHandle gctx{m_geoCtxKey, ctx};
         const Amg::Vector3D& spPos{spacePoint->positionInChamber()};
-        const Amg::Transform3D& locToGlob{spacePoint->chamber()->localToGlobalTrans(*gctx)};
+        const Amg::Transform3D& locToGlob{spacePoint->msSector()->localToGlobalTrans(*gctx)};
         Amg::Vector3D chDir{spacePoint->directionInChamber()};
 
         // Adjust the space point position according to the external seed. But only if the space point

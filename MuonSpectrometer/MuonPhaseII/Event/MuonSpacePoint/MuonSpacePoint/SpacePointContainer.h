@@ -32,8 +32,8 @@ namespace MuonR4{
             /** @brief upper interval value covered by the bucket */
             double coveredMax() const { return m_max; }
             /** @brief returns th associated muonChamber */
-            const MuonGMR4::MuonChamber* chamber() const {
-                return empty() ? nullptr : front()->chamber();
+            const MuonGMR4::SpectrometerSector* msSector() const {
+                return empty() ? nullptr : front()->msSector();
             }
             /** @brief sets the Identifier of the MuonSpacePointBucket in context
              *         of the associated muonChamber
@@ -44,10 +44,10 @@ namespace MuonR4{
             /** @brief  Returns the Identifier in the context of the MuonChamber*/
             unsigned int bucketId() const { return m_bucketId; }
             bool operator<(const SpacePointBucket& other) const {
-                using ChamberSorter = MuonGMR4::MuonDetectorManager::ChamberSorter;
+                using ChamberSorter = MuonGMR4::MuonDetectorManager::MSEnvelopeSorter;
                 static const ChamberSorter sorter{};
-                int chambCompare = -sorter(chamber(), other.chamber()) + 
-                                    sorter(other.chamber(), chamber());
+                int chambCompare = -sorter(msSector(), other.msSector()) + 
+                                    sorter(other.msSector(), msSector());
                 if (chambCompare) return chambCompare < 0;
                 return bucketId() < other.bucketId();
             }

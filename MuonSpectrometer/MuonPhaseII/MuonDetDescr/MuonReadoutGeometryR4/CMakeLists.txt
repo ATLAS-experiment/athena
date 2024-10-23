@@ -11,7 +11,8 @@ atlas_subdir( MuonReadoutGeometryR4 )
 set( extra_libs )
 
 if( NOT SIMULATIONBASE )
-    set( extra_libs MuonAlignmentDataR4)
+    find_package(Acts CONFIG COMPONENTS PluginGeoModel)
+    set( extra_libs MuonAlignmentDataR4 ActsPluginGeoModel)
 endif()
 
 # External dependencies:

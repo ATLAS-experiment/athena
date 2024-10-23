@@ -139,7 +139,7 @@ namespace MuonR4{
                                                   const Parameters& startPars,
                                                   const Amg::Transform3D& localToGlobal) const {
 
-        const Muon::IMuonIdHelperSvc* idHelperSvc{calibHits[0]->spacePoint()->chamber()->idHelperSvc()};
+        const Muon::IMuonIdHelperSvc* idHelperSvc{calibHits[0]->spacePoint()->msSector()->idHelperSvc()};
         using State = CalibratedSpacePoint::State;
 
         if (msgLvl(MSG::VERBOSE)) {

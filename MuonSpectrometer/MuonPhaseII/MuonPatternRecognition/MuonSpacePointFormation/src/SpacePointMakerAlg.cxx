@@ -153,7 +153,7 @@ template <class ContType>
     xAOD::ChamberViewer viewer{*readHandle};
     do {
 
-      SpacePointsPerChamber& pointsInChamb = fillContainer[viewer.at(0)->readoutElement()->getChamber()];
+      SpacePointsPerChamber& pointsInChamb = fillContainer[viewer.at(0)->readoutElement()->msSector()];
       ATH_MSG_DEBUG("Fill space points for chamber "<<m_idHelperSvc->toStringDetEl(viewer.at(0)->identify()));
       if constexpr( std::is_same_v<ContType, xAOD::MdtDriftCircleContainer> ||
                     std::is_same_v<ContType, xAOD::MMClusterContainer>) {

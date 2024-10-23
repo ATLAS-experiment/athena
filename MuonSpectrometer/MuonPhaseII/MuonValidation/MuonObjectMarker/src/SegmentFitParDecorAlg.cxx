@@ -8,7 +8,7 @@
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "MuonSegment/MuonSegment.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
-#include "MuonReadoutGeometryR4/MuonChamber.h"
+#include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "TrkCompetingRIOsOnTrack/CompetingRIOsOnTrack.h"
 namespace MuonR4 {
     using namespace SegmentFit;
@@ -132,7 +132,7 @@ namespace MuonR4 {
                     }
                 }
             }
-            const MuonGMR4::MuonChamber* chamber = m_detMgr->getChamber(rotId);
+            const MuonGMR4::SpectrometerSector* chamber = m_detMgr->getSectorEnvelope(rotId);
             const Amg::Transform3D globToLoc{chamber->globalToLocalTrans(*gctx)};
 
             SegPars& locPars{parDecor(*seg)};

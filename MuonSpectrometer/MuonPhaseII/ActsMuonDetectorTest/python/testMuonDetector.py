@@ -26,6 +26,11 @@ if __name__=="__main__":
     parser = SetupArgParser()
     parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R3SimHits.pool.root"])
     parser.set_defaults(outRootFile="MuonNavigationTestR4.root")
+    parser.set_defaults(nEvents=10)
+    parser.add_argument("--dumpDetector", help="Save dump detector visualization", action='store_true', default=False )
+    parser.add_argument("--dumpPassive", help="Save  detector visualization", action='store_true', default=False )
+    parser.add_argument("--dumpDetectorVolumes", help="Save detector visualization", action='store_true', default=False )
+
 
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -39,4 +44,7 @@ if __name__=="__main__":
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
     cfg.merge(AtlasFieldCacheCondAlgCfg(flags))
     cfg.merge(MuonDetectorNavTestCfg(flags))
+    cfg.getPublicTool("MuonDetectorBuilderTool").dumpDetector = args.dumpDetector
+    cfg.getPublicTool("MuonDetectorBuilderTool").dumpPassive = args.dumpPassive
+    cfg.getPublicTool("MuonDetectorBuilderTool").dumpDetectorVolumes = args.dumpDetectorVolumes
     executeTest(cfg)

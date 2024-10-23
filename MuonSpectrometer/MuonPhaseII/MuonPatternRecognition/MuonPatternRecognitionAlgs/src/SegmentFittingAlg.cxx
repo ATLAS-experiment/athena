@@ -130,7 +130,7 @@ namespace MuonR4 {
                                                                 hit->measuresPhi());
                                                 });
             if (numPhi) {
-                const Amg::Transform3D globToLoc{calibHits[0]->spacePoint()->chamber()->globalToLocalTrans(gctx)};
+                const Amg::Transform3D globToLoc{calibHits[0]->spacePoint()->msSector()->globalToLocalTrans(gctx)};
                 Amg::Vector3D beamSpot{globToLoc.translation()};
                 AmgSymMatrix(3) covariance{AmgSymMatrix(3)::Identity()}; 
                 /// placeholder for a very generous beam spot: 300mm in X,Y (tracking volume), 20000 along Z
@@ -147,7 +147,7 @@ namespace MuonR4 {
             }
         }
 
-        const Amg::Transform3D& locToGlob{calibHits[0]->spacePoint()->chamber()->localToGlobalTrans(gctx)};
+        const Amg::Transform3D& locToGlob{calibHits[0]->spacePoint()->msSector()->localToGlobalTrans(gctx)};
 
         if (!m_useMinuit) {
             MdtSegmentFitter::Config fitCfg{};
@@ -239,7 +239,7 @@ namespace MuonR4 {
                                            const ActsGeometryContext& gctx,
                                            const SegmentSeed* patternSeed) const {
 
-        const Amg::Transform3D& locToGlob{patternSeed->chamber()->localToGlobalTrans(gctx)};
+        const Amg::Transform3D& locToGlob{patternSeed->msSector()->localToGlobalTrans(gctx)};
         std::vector<std::unique_ptr<Segment>> segments{};
 
         MdtSegmentSeedGenerator::Config genCfg{};
@@ -363,7 +363,7 @@ namespace MuonR4 {
             newAttempt.nIter+=data.nIter;
             data = std::move(newAttempt);
             if (m_visionTool.isEnabled()) {
-                auto seedCopy = convertToSegment(seed.chamber()->globalToLocalTrans(gctx), &seed, copy(data));
+                auto seedCopy = convertToSegment(seed.msSector()->globalToLocalTrans(gctx), &seed, copy(data));
                 m_visionTool->visualizeSegment(ctx, *seedCopy, "Bad fit recovery");
             }
         } else {
@@ -507,10 +507,10 @@ namespace MuonR4 {
                                                 }
                                                 return true;
                                                 }), candidate.calibMeasurements.end());
-        const MuonGMR4::MuonChamber* chamber{nullptr};
+        const MuonGMR4::SpectrometerSector* chamber{nullptr};
         for (const auto& hit : candidate.calibMeasurements) {
             if (hit->type() != xAOD::UncalibMeasType::Other){
-                chamber = hit->spacePoint()->chamber();
+                chamber = hit->spacePoint()->msSector();
                 break;
             }
         }
@@ -525,10 +525,10 @@ namespace MuonR4 {
                                                std::vector<std::unique_ptr<Segment>>& segmentCandidates) const {
         using SegmentVec = std::vector<std::unique_ptr<Segment>>;
         ATH_MSG_VERBOSE("Resolve ambiguities amongst "<<segmentCandidates.size()<<" segment candidates. ");
-        std::unordered_map<const MuonGMR4::MuonChamber*, SegmentVec> candidatesPerChamber{};
+        std::unordered_map<const MuonGMR4::SpectrometerSector*, SegmentVec> candidatesPerChamber{};
         
         for (std::unique_ptr<Segment>& sortMe : segmentCandidates) {
-            const MuonGMR4::MuonChamber* chamb = sortMe->chamber();
+            const MuonGMR4::SpectrometerSector* chamb = sortMe->msSector();
             candidatesPerChamber[chamb].push_back(std::move(sortMe));
         }
         SegmentAmbiSolver ambiSolver{name()};
