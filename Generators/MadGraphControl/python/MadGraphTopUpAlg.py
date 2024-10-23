@@ -19,8 +19,8 @@ class MadGraphTopUpAlg(EvgenAlg):
         self.threshold = threshold
 
         self.njobs = 1
-        if 'ATHENA_PROC_NUMBER' in os.environ:
-            self.njobs = os.environ['ATHENA_PROC_NUMBER']
+        if 'ATHENA_CORE_NUMBER' in os.environ:
+            self.njobs = os.environ['ATHENA_CORE_NUMBER']
         self.mode = 0 if self.njobs==1 else 2
         self.fileList = []
 

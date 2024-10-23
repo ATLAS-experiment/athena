@@ -139,7 +139,7 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh
 # !really start with 21.6.74!
 asetup AthGeneration, 21.6.74,here
 # 12 cores
-export ATHENA_PROC_NUMBER=12
+export ATHENA_CORE_NUMBER=12
 # get a jO known to work
 cp /cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/950xxx/950535/mc.PhPy8EG_NNPDF30_A14_bb4l_mt172p5_gt1p32_valid.py .
 Gen_tf.py --ecmEnergy=13000 --jobConfig=$PWD --outputEVNTFile=tmp.EVNT.pool.root --randomSeed=432 --maxEvents=100 >& log&

@@ -577,11 +577,11 @@ makes the appropriate check for existing integration grids.
 
 It is possible to run Powheg Box in multicore mode which can speed up
 event generation by parallelising the event generation. In order to
-enable this, simple set the following environment variable `ATHENA_PROC_NUMBER`
+enable this, simple set the following environment variable `ATHENA_CORE_NUMBER`
 to the desired number of cores to use, e.g.:
 
 ```bash
-export ATHENA_PROC_NUMBER=8
+export ATHENA_CORE_NUMBER=8
 ```
 
 
