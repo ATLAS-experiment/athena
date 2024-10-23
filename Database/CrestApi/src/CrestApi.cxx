@@ -49,6 +49,8 @@ namespace Crest {
     size_t n = url.size();
 
     std::string_view url_new = url.substr(found + 3); //url_new is the url excluding the http part
+    m_prefix = url.substr(0,found + 3); // URL prefix "http://" or "https://"   
+    
     size_t found1 = url_new.find_first_of(':');
     size_t found2 = url_new.find_first_of('/');
 
@@ -62,10 +64,16 @@ namespace Crest {
       host = url_new.substr(0, found1);
       port = url_new.substr(found1 + 1);
     } else if (found2 != std::string::npos) {
-      port = "80";
+      if (m_prefix == "https://") {
+	port = "443";
+      }
+      else port = "80";
       host = url_new.substr(0, found2);
     } else {
-      port = "80";
+      if (m_prefix == "https://") {
+	  port = "443";
+      }
+      else port = "80";
       host = url_new;
     }
 
@@ -88,7 +96,7 @@ namespace Crest {
   }
 
  std::string CrestClient::make_url(const std::string &address) const{
-  std::string str("http://");
+  std::string str = m_prefix;
   str += m_host;
   str += ':';
   str += m_port;

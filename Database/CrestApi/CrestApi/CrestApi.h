@@ -72,6 +72,7 @@ namespace Crest {
     std::string m_currentTag {};
 
     std::string m_PATH = "/api-v4.0";
+    std::string m_prefix = "http://";
     char* m_CREST_PROXY = NULL;
     const char* m_CREST_PROXY_VAR = "SOCKS_PROXY";
     inline static const std::string s_TAG_PATH = "/tags";
