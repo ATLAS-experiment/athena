@@ -135,6 +135,8 @@ StatusCode ZdcMonitorAlgorithm::initialize() {
 
     // read json file for LB-to-injector-pulse-amplitude mapping and fill the mapping vector 
     m_zdcInjPulserAmpMap = std::make_shared<ZdcInjPulserAmpMap>();
+    ATH_MSG_DEBUG( "Using JSON file for injector-pulse voltage at path " << m_zdcInjPulserAmpMap->getFilePath() );
+    ATH_MSG_DEBUG("CALIBPATH: " << std::getenv("CALIBPATH"));
 
     // create monitoring tools and map the strings to the tools
     std::vector<std::string> sides = {"C","A"};

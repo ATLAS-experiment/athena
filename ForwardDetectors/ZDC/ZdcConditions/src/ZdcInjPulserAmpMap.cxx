@@ -16,7 +16,7 @@ const ZdcInjPulserAmpMap* ZdcInjPulserAmpMap::getInstance()
 }
 
 //constructor
-ZdcInjPulserAmpMap::ZdcInjPulserAmpMap() : asg::AsgMessaging("ZdcInjPulserAmpMap") 
+ZdcInjPulserAmpMap::ZdcInjPulserAmpMap() : asg::AsgMessaging("ZdcInjPulserAmpMap")
 {
   msg().setLevel(MSG::INFO);
 
@@ -39,6 +39,7 @@ ZdcInjPulserAmpMap::ZdcInjPulserAmpMap() : asg::AsgMessaging("ZdcInjPulserAmpMap
     ATH_MSG_FATAL("ZdcInjPulserAmpMap constructor, JSON file cannot be opened!" ) ;
   }
 
+  m_filePath = filePath;
   ReadPulserSteps(ifs);
 }
 

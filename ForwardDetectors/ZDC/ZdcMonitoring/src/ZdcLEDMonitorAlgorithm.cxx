@@ -29,18 +29,18 @@ StatusCode ZdcLEDMonitorAlgorithm::initialize() {
     ATH_CHECK( m_robBCIDKey.initialize() );
 
     ATH_CHECK( m_LEDTypeKey.initialize() );
-    ATH_CHECK( m_LEDPresampleADCKey.initialize() );
-    ATH_CHECK( m_LEDADCSumKey.initialize() );
-    ATH_CHECK( m_LEDMaxADCKey.initialize() );
-    ATH_CHECK( m_LEDMaxSampleKey.initialize() );
-    ATH_CHECK( m_LEDAvgTimeKey.initialize() );
+    ATH_CHECK( m_LEDPresampleADCKey.initialize(m_enableZDC || m_enableRPD) );
+    ATH_CHECK( m_LEDADCSumKey.initialize(m_enableZDC || m_enableRPD) );
+    ATH_CHECK( m_LEDMaxADCKey.initialize(m_enableZDC || m_enableRPD) );
+    ATH_CHECK( m_LEDMaxSampleKey.initialize(m_enableZDC || m_enableRPD) );
+    ATH_CHECK( m_LEDAvgTimeKey.initialize(m_enableZDC || m_enableRPD) );
 
     std::vector<std::string> sides = {"C","A"};
     std::vector<std::string> modules = {"0","1","2","3"};
     std::vector<std::string> channels = {"0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"};
 
-    m_ZDCModuleLEDToolIndices = buildToolMap<std::map<std::string,std::map<std::string,int>>>(m_tools,"ZdcModLEDMonitor",m_LEDNames,sides,modules);
-    m_RPDChannelLEDToolIndices = buildToolMap<std::map<std::string,std::map<std::string,int>>>(m_tools,"RPDChanLEDMonitor",m_LEDNames,sides,channels);
+    if (m_enableZDC)    m_ZDCModuleLEDToolIndices = buildToolMap<std::map<std::string,std::map<std::string,int>>>(m_tools,"ZdcModLEDMonitor",m_LEDNames,sides,modules);
+    if (m_enableRPD)    m_RPDChannelLEDToolIndices = buildToolMap<std::map<std::string,std::map<std::string,int>>>(m_tools,"RPDChanLEDMonitor",m_LEDNames,sides,channels);
 
     //---------------------------------------------------
     // initialize superclass
@@ -64,6 +64,36 @@ StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms(unsigned int DAQMode, const
     auto lumiBlock = Monitored::Scalar<uint32_t>("lumiBlock", eventInfo->lumiBlock());
     auto bcid = Monitored::Scalar<unsigned int>("bcid", eventInfo->bcid());
 
+// ______________________________________________________________________________
+    // check for decoding errors
+// ______________________________________________________________________________
+    bool zdcDecodingError = eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::ZDCDECODINGERROR );
+    bool rpdDecodingError = eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::RPDDECODINGERROR );
+    std::array<float, m_nDecodingErrorBits> decodingErrorBitsArr = {0, 0, 0};
+    if (!zdcDecodingError && !rpdDecodingError){
+        decodingErrorBitsArr[0] += 1;
+    } else if (zdcDecodingError){
+        ATH_MSG_WARNING("ZDC Decoding error!");
+        decodingErrorBitsArr[1] += 1;
+    } else { // RPD decoding error
+        ATH_MSG_WARNING("RPD Decoding error!");
+        decodingErrorBitsArr[2] += 1;
+    }
+    
+    auto decodingErrorBits = Monitored::Collection("decodingErrorBits", decodingErrorBitsArr);
+    fill("ZdcLEDAllEventsDiagnosis", decodingErrorBits, lumiBlock);
+
+    if (!m_enableZDC && !m_enableRPD){
+        ATH_MSG_WARNING("Neither ZDC nor RPD are enabled! Quit LED histogram filling!");
+    }
+
+    if (zdcDecodingError && rpdDecodingError){
+        ATH_MSG_WARNING("Both ZDC and RPD have decoding errors! Quit LED histogram filling!");
+    }
+
+// ______________________________________________________________________________
+    // BCID
+// ______________________________________________________________________________
 
     if (DAQMode == ZdcEventInfo::Standalone) {  
         SG::ReadDecorHandle<xAOD::ZdcModuleContainer, std::vector<uint16_t> > robBCIDHandle(m_robBCIDKey, ctx);
@@ -92,8 +122,10 @@ StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms(unsigned int DAQMode, const
         bcid = checkBCID;
     }
 
+// ______________________________________________________________________________
+    // LED type
+// ______________________________________________________________________________
 
-    // LED type (event-level info saved in the glocal sum entry of zdcSums)
     unsigned int iLEDType = 1000;
     std::string led_type_str;
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> zdcLEDTypeHandle(m_LEDTypeKey, ctx);
@@ -121,9 +153,6 @@ StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms(unsigned int DAQMode, const
     } 
 
 
-    // trigger passed
-
-
 // ______________________________________________________________________________
     // declaring & obtaining LED variables of interest for the ZDC modules & RPD channels
     // filling arrays of monitoring tools (module/channel-level)
@@ -149,12 +178,15 @@ StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms(unsigned int DAQMode, const
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> LEDAvgTimeHandle(m_LEDAvgTimeKey, ctx);
 
 
-    if (! zdcModules.isValid() ) {
+    if (! zdcModules.isValid()) {
        ATH_MSG_WARNING("evtStore() does not contain Collection with name "<< m_ZdcModuleContainerKey);
        return StatusCode::SUCCESS;
     }
 
-    
+    if (! LEDADCSumHandle.isAvailable()){
+       ATH_MSG_WARNING("LED aux data is not available");
+       return StatusCode::SUCCESS;
+    }
 
     for (const auto zdcMod : *zdcModules){
         int iside = (zdcMod->zdcSide() > 0)? 1 : 0;
