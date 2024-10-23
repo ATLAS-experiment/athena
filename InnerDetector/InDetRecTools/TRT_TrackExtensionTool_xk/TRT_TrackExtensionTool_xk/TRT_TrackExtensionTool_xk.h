@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -136,7 +136,7 @@ namespace InDet{
 	{this, "PropagatorTool", "Trk::RungeKuttaPropagator"};
       PublicToolHandle<Trk::IPatternParametersUpdator>    m_updatortool
 	{this, "UpdatorTool", "Trk::KalmanUpdator_xk"};
-      PublicToolHandle<ITrtDriftCircleCutTool>            m_selectortool
+      ToolHandle<ITrtDriftCircleCutTool>            m_selectortool
 	{this, "DriftCircleCutTool", "InDet::InDetTrtDriftCircleCutTool"};// Segment selector tool
       ToolHandle<Trk::IRIO_OnTrackCreator>          m_riontrackD
 	{this, "RIOonTrackToolYesDr", "InDet::TRT_DriftCircleOnTrackTool/TRT_DriftCircleOnTrackTool"};
@@ -145,26 +145,37 @@ namespace InDet{
 
       SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
 
-
-      int                              m_segmentFindMode; // Method of segment find
       int                              m_outputlevel{}    ; // Print level
-      int                              m_nprint{}         ; // Kind of print
-      int                              m_minNumberDCs   ; // Min. number of DriftCircles
-      int                              m_minNumberSCT   ; // Min. number SCT clusters for extension
-      int                              m_minNumberPIX   ; // Min. number SCT clusters for extension
-      double                           m_roadwidth      ; // Max width of the road
-      double                           m_maxslope       ; //
-      double                           m_zVertexWidth   ; // Z-vertex half width
-      double                           m_impact         ; // max impact parameter
-      bool                             m_usedriftrad    ; // Use drift time ?
-      bool                             m_parameterization; // Use table of min number DCs
-      double                           m_scale_error    ; // Scalefactor for hit uncertainty
-      std::string                      m_fieldmode      ; // Mode of magnetic field
+
+      IntegerProperty m_segmentFindMode{this, "SegmentFindMode", 3,
+	"Method of segment find"};
+      IntegerProperty m_minNumberDCs{this, "MinNumberDriftCircles", 9,
+	"Min. number of DriftCircles"};
+      IntegerProperty m_minNumberSCT{this, "MinNumberSCTclusters", 5,
+	"Min. number SCT clusters for extension"};
+      IntegerProperty m_minNumberPIX{this, "MinNumberPIXclusters", 2,
+	"Min. number pixel clusters for extension"};
+      DoubleProperty m_roadwidth{this, "RoadWidth", 10.,
+	"Max width of the road"};
+      DoubleProperty m_maxslope{this, "Maxslope", .00005};
+      DoubleProperty m_zVertexWidth{this, "ZVertexHalfWidth", 150.,
+	"Z-vertex half width"};
+      DoubleProperty m_impact{this, "maxImpactParameter", 50,
+	"max impact parameter"};
+      BooleanProperty m_usedriftrad{this, "UseDriftRadius", true,
+	"Use drift time ?"};
+      BooleanProperty m_parameterization{this, "UseParameterization", true,
+	"Use table of min number DCs"};
+      DoubleProperty m_scale_error{this, "ScaleHitUncertainty", 2.,
+	"Scalefactor for hit uncertainty"};
+      StringProperty m_fieldmode{this, "MagneticFieldMode", "MapSolenoid",
+	"Mode of magnetic field"};
 
       Trk::MagneticFieldProperties     m_fieldprop      ; // Magnetic field properties
       SG::ReadHandleKey<TRT_DriftCircleContainer> m_trtname {this,"TRT_ClustersContainer","TRT_DriftCircles","RHK to retrieve TRT_DriftCircleContainer"};
 
-      double                           m_minTRTSegmentpT; // Min pT cut required for TRT Segments
+      DoubleProperty m_minTRTSegmentpT{this, "minTRTSegmentpT", 300.,
+	"Min pT cut required for TRT Segments"};
       ///////////////////////////////////////////////////////////////////
       // Methods
       ///////////////////////////////////////////////////////////////////
@@ -178,7 +189,6 @@ namespace InDet{
       bool numberPIXandSCTclustersCut(const Trk::Track&) const;
 
       MsgStream&    dumpConditions(MsgStream   & out) const;
-      static MsgStream&    dumpEvent     (MsgStream   & out) ;
     };
 
   MsgStream&    operator << (MsgStream&   ,const TRT_TrackExtensionTool_xk&);

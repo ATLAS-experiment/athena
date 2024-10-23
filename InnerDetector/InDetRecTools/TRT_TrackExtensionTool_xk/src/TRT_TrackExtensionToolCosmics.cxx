@@ -30,18 +30,10 @@
 
 InDet::TRT_TrackExtensionToolCosmics::TRT_TrackExtensionToolCosmics
 (const std::string& t,const std::string& n,const IInterface* p)
-  : AthAlgTool(t,n,p),
-    m_roadwidth       (10.),
-    m_roadwidth_locz  (10.)
+  : AthAlgTool(t,n,p)
 {
-
   declareInterface<ITRT_TrackExtensionTool>(this);
-
-  declareProperty("RoadWidth"            ,m_roadwidth      );
-  declareProperty("BoundaryLocZTolerance",m_roadwidth_locz );
-  declareProperty("SearchNeighbour"      ,m_searchNeighbour=false);
-
- }
+}
 
 ///////////////////////////////////////////////////////////////////
 // Destructor  
