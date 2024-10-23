@@ -677,9 +677,9 @@ def getConfig_jTE():
 
 def getConfig_gXE(do_HI_tob_thresholds):
     confObj = odict()
-    confObj["seedThrA"] = 4 if do_HI_tob_thresholds else 80 #must be a multiple of 4
-    confObj["seedThrB"] = 4 if do_HI_tob_thresholds else 80 #must be a multiple of 4
-    confObj["seedThrC"] = 4 if do_HI_tob_thresholds else 80 #must be a multiple of 4
+    confObj["seedThrA"] = 12 if do_HI_tob_thresholds else 80 #must be a multiple of 4
+    confObj["seedThrB"] = 12 if do_HI_tob_thresholds else 80 #must be a multiple of 4
+    confObj["seedThrC"] = 12 if do_HI_tob_thresholds else 80 #must be a multiple of 4
     confObj["XERHO_sigmaPosA"] = 3 
     confObj["XERHO_sigmaPosB"] = 3 
     confObj["XERHO_sigmaPosC"] = 3 
