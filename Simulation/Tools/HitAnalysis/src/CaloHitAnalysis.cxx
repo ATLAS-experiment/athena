@@ -38,10 +38,11 @@ CaloHitAnalysis::CaloHitAnalysis(const std::string& name, ISvcLocator* pSvcLocat
 
 StatusCode CaloHitAnalysis::initialize() {
   ATH_MSG_DEBUG( "Initializing CaloHitAnalysis" );
+  if (m_useTile) {
 
-  CHECK( detStore()->retrieve(m_tileMgr) );
-  CHECK( detStore()->retrieve(m_tileID) );
-
+     CHECK( detStore()->retrieve(m_tileMgr) );
+     CHECK( detStore()->retrieve(m_tileID) );
+  }
   // Grab the Ntuple and histogramming service for the tree
   CHECK( m_thistSvc.retrieve() );
 
