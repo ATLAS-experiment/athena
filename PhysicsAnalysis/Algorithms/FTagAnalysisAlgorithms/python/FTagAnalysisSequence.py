@@ -56,7 +56,7 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
     # MC/MC scale factors configuration
     DSID = "default"
     if dataType != "data":
-        DSID = MCMC_dsid_map(geometry=LHCPeriod.Run2, selfDefineGenerator=generator)
+        DSID = MCMC_dsid_map(geometry=LHCPeriod.Run2, selfDefineGenerator=generator, tagger=btagger)
 
     # CDI file
     bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2023-22-13TeV-MC20-CDI-2023-09-13_v1.root"

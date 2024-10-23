@@ -93,7 +93,7 @@ class FTagConfig (ConfigBlock):
             # Check if the right CDI is used for the MC campaign
             check_CDI_campaign(config.campaign(), bTagCalibFile)
             # MC/MC efficiency map for the generator 
-            DSID = MCMC_dsid_map(config.geometry(), config.generatorInfo(), self.generator)
+            DSID = MCMC_dsid_map(config.geometry(), config.generatorInfo(), self.generator, self.btagger)
 
         # Set up the ftag selection algorithm(s):
         if 'Continuous' in self.btagWP:

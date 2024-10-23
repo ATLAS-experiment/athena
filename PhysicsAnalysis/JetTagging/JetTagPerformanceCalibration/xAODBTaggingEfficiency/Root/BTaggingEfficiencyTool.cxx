@@ -84,21 +84,8 @@ namespace {
     return label;
   }
 
-  int LargeJetTruthLabel(const xAOD::Jet& jet, const std::string& jetauthor){
-    int label = -1;
-    if (jetauthor != "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"){
-      jet.getAttribute("R10TruthLabel_R22v1", label);
-      // The following large-jet truth labels 
-      //jet.getAttribute("R10TruthLabel_R21Precision_2022v1", label);
-      //jet.getAttribute("R10TruthLabel_R21Precision", label);
-    }
-    return label;
-  }
-
-  int jetFlavourLabel (const xAOD::Jet& jet, bool doConeLabelling, bool doExtended, bool doXbbTagging, const std::string& jetauthor) {
-    if (doXbbTagging){
-      return LargeJetTruthLabel(jet, jetauthor);
-    } else if (doConeLabelling){
+  int jetFlavourLabel (const xAOD::Jet& jet, bool doConeLabelling, bool doExtended) {
+    if (doConeLabelling){
       return ExclusiveConeHadronFlavourLabel(jet, doExtended);
     } else {
       return GAFinalHadronFlavourLabel(jet);
@@ -175,7 +162,6 @@ BTaggingEfficiencyTool::BTaggingEfficiencyTool( const std::string & name) : asg:
   declareProperty( "pathToONNX",                         m_pathToONNX = "",             "path to the onnx file that will be used for inference");
   // experimental options
   declareProperty("useFlexibleConfig",                   m_useFlex = false,                "Setup the flexible configuration of the xAODBTaggingEfficiencyTool with alternate labeling");
-  declareProperty("doXbbTagging",                        m_doXbbTagging = false,      "Configure the xAODBTaggingEfficiencyTool to perform alternate labeling on large radius jets (typically X->bb tagging)");
   declareProperty("FlexibleScaleFactorCalibrations",     m_SFName_flex = "",          "(semicolon-separated) name of scale factor calibration object for (0,1,2..) indexed flavour labels, e.g. '0:default;1:default;2:default;3:default' ");
   declareProperty("FlexibleEfficiencyCalibrations",      m_EffNames_flex = "",          "(semicolon-separated) name(s) of efficiency object(s) names for (0,1,2..) indexed flavour labels, e.g. '0:default;1:default;2:default;3:default' ");
   declareProperty("FlexibleEigenvectorReduction",        m_EVReduction_flex = "",         "(semicolon-separated) list of eigenvector reduction strategy for (0,1,2..) indexed flavour labels; choose between 'Loose', 'Medium', 'Tight' for different labels, e.g. '0:Loose;1:Loose;2:Loose' ");
@@ -264,11 +250,6 @@ StatusCode BTaggingEfficiencyTool::initialize() {
   std::vector<std::string> to_exclude = split(m_excludeFromEV); // uncertainties to exclude from all flavours
 
   if(!m_useFlex){
-
-    if(m_doXbbTagging){
-      ATH_MSG_ERROR( "BTaggingEfficiencyTool configuration is invalid - cannot perform Xbb tagging without flexible configuration.");
-      return StatusCode::FAILURE;
-    }
 
     //if a configuration file was provided for efficiency maps, overwrite the efficiency map selection with the one provided in the first line of the config
     if(not m_EffConfigFile.empty()){
@@ -748,7 +729,7 @@ BTaggingEfficiencyTool::getScaleFactor( const xAOD::Jet & jet, float & sf)
   // get the btag label
   int flavour{0};
   if (m_using_conventional_labels){ // if not using conventional labels, so flavour label will have to be set by some other means...
-    flavour = jetFlavourLabel(jet, m_coneFlavourLabel, m_extFlavourLabel, m_doXbbTagging, m_jetAuthor);
+    flavour = jetFlavourLabel(jet, m_coneFlavourLabel, m_extFlavourLabel);
   } 
 
   Analysis::CalibrationDataVariables vars;
@@ -831,7 +812,7 @@ BTaggingEfficiencyTool::getEfficiency( const xAOD::Jet & jet, float & eff)
   if (! m_initialised) return CorrectionCode::Error;
 
   // get the btag label
-  int flavour = jetFlavourLabel(jet, m_coneFlavourLabel, m_extFlavourLabel, m_doXbbTagging, m_jetAuthor);
+  int flavour = jetFlavourLabel(jet, m_coneFlavourLabel, m_extFlavourLabel);
 
   Analysis::CalibrationDataVariables vars;
 
@@ -907,7 +888,7 @@ BTaggingEfficiencyTool::getInefficiency( const xAOD::Jet & jet, float & eff)
   if (! m_initialised) return CorrectionCode::Error;
 
   // get the btag label
-  int flavour = jetFlavourLabel(jet, m_coneFlavourLabel, m_extFlavourLabel, m_doXbbTagging, m_jetAuthor);
+  int flavour = jetFlavourLabel(jet, m_coneFlavourLabel, m_extFlavourLabel);
 
   Analysis::CalibrationDataVariables vars;
   if (! fillVariables(jet, vars)) {
@@ -983,7 +964,7 @@ BTaggingEfficiencyTool::getInefficiencyScaleFactor( const xAOD::Jet & jet, float
   if (! m_initialised) return CorrectionCode::Error;
 
   // get the btag label
-  int flavour = jetFlavourLabel(jet, m_coneFlavourLabel, m_extFlavourLabel, m_doXbbTagging, m_jetAuthor);
+  int flavour = jetFlavourLabel(jet, m_coneFlavourLabel, m_extFlavourLabel);
 
   Analysis::CalibrationDataVariables vars;
   if (! fillVariables(jet, vars)) {
@@ -1059,7 +1040,7 @@ BTaggingEfficiencyTool::getMCEfficiency( const xAOD::Jet & jet, float & eff)
   if (! m_initialised) return CorrectionCode::Error;
 
   // get the btag label
-  int flavour = jetFlavourLabel(jet, m_coneFlavourLabel, m_extFlavourLabel, m_doXbbTagging, m_jetAuthor);
+  int flavour = jetFlavourLabel(jet, m_coneFlavourLabel, m_extFlavourLabel);
 
   Analysis::CalibrationDataVariables vars;
   if (! fillVariables(jet, vars)) {
