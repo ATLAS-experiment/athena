@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -104,8 +104,8 @@ StatusCode Trk::MappingTest::bookTree()
     m_unmappedTree->Branch("UnmappedHitR", &m_unmappedPositionR, "unmappedr/F");
     
     // now register the Tree
-    ITHistSvc* tHistSvc = nullptr;
-    if (service("THistSvc",tHistSvc).isFailure()) {
+    SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+    if (!tHistSvc) {
         ATH_MSG_ERROR( "initialize() Could not find Hist Service  -> Switching Tree output off !" );
         delete m_unmappedTree; m_unmappedTree = nullptr;
         delete m_mappingTree; m_mappingTree = nullptr;
