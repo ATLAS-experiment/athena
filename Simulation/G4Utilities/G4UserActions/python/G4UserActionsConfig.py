@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -48,10 +48,21 @@ def AthenaTrackingActionToolCfg(flags, name='G4UA::AthenaTrackingActionTool', **
     result.setPrivateTools( CompFactory.G4UA.AthenaTrackingActionTool(name,**kwargs) )
     return result
 
+
 def LooperKillerToolCfg(flags, name='G4UA::LooperKillerTool', **kwargs):
     result = ComponentAccumulator()
     result.setPrivateTools(CompFactory.G4UA.LooperKillerTool(name, **kwargs))
     return result
+
+
+def MonopoleLooperKillerToolCfg(flags, name="G4UA::MonopoleLooperKillerTool", **kwargs):
+    kwargs.setdefault("MaxSteps", 2000000)
+    kwargs.setdefault("PrintSteps", 2)
+    kwargs.setdefault("VerboseLevel", 0)
+    kwargs.setdefault("AbortEvent", False)
+    kwargs.setdefault("SetError", True)
+    return LooperKillerToolCfg(flags, name, **kwargs)
+
 
 def G4SimTimerToolCfg(flags, name='G4UA::G4SimTimerTool', **kwargs):
     result = ComponentAccumulator()
@@ -127,13 +138,6 @@ def HIPKillerToolCfg(flags, name="G4UA::HIPKillerTool", **kwargs):
     result = ComponentAccumulator()
     result.setPrivateTools(CompFactory.G4UA.HIPKillerTool(name, **kwargs))
     return result
-
-
-def MonopoleLooperKillerToolCfg(flags, name="G4UA::MonopoleLooperKillerTool", **kwargs):
-    kwargs.setdefault("MaxSteps",2000000)
-    kwargs.setdefault("PrintSteps",2)
-    kwargs.setdefault("VerboseLevel",0)
-    return LooperKillerToolCfg(flags, name, **kwargs)
 
 
 def FastIDKillerToolCfg(flags, name="G4UA::FastIDKillerTool", **kwargs):

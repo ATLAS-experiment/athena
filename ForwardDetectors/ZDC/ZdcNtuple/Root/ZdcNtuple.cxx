@@ -11,6 +11,7 @@
 #include "AthContainers/ConstAccessor.h"
 
 #include <ZdcNtuple/ZdcNtuple.h>
+#include <ZdcUtils/ZdcEventInfo.h>
 
 // this is needed to distribute the algorithm to the workers
 //ClassImp(ZdcNtuple)
@@ -120,6 +121,9 @@ StatusCode ZdcNtuple :: initialize ()
     m_outputTree->Branch("timeStampNSOffset",&t_timeStampNSOffset,"timeStampNSOffset/i");
     m_outputTree->Branch("zdcEventInfoError",&t_zdcEventInfoError,"zdcEventInfoError/b");
     m_outputTree->Branch("zdcEventInfoErrorWord",&t_zdcEventInfoErrorWord,"zdcEventInfoErrorWord/i");
+    // ZDC and RPD decoding errors
+    m_outputTree->Branch("zdcDecodingError",&t_zdcDecodingError,"zdcDecodingError/b");
+    m_outputTree->Branch("rpdDecodingError",&t_rpdDecodingError,"rpdDecodingError/b");
 
     if (enableOutputSamples)
     {
@@ -709,12 +713,14 @@ void ZdcNtuple::processZdcNtupleFromModules()
     t_centroidEventValid = false;
     t_cosDeltaReactionPlaneAngle = 0;
   }
-  
+
+  /*
   if (t_zdcEventInfoError == xAOD::EventInfo::Error)
     {
       ANA_MSG_INFO("ZDC event failed EventInfo error check - aborting!");
       return;
     }
+  */
 
   SG::ConstAccessor<char> centroidEventValidAcc("centroidEventValid" + auxSuffix);
   SG::ConstAccessor<float> cosDeltaReactionPlaneAngleAcc("cosDeltaReactionPlaneAngle" + auxSuffix);
@@ -786,6 +792,12 @@ void ZdcNtuple::processZdcNtupleFromModules()
   static const SG::ConstAccessor<std::vector<uint16_t> > g1d1DataAcc("g1d1Data");
   static const SG::ConstAccessor<std::vector<uint16_t> > g0dataAcc("g0data");
   static const SG::ConstAccessor<std::vector<uint16_t> > g1dataAcc("g1data");
+  
+  bool rpdErr = m_eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::RPDDECODINGERROR );
+  bool zdcErr = m_eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::ZDCDECODINGERROR );
+  t_rpdDecodingError = rpdErr;
+  t_zdcDecodingError = zdcErr;
+  if (rpdErr||zdcErr) ANA_MSG_WARNING( "Decoding errors ZDC=" << zdcErr << " RPD=" << rpdErr );
 
   if (zdcSums.ptr())
   {

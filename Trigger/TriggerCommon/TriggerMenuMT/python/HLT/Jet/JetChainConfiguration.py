@@ -188,7 +188,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         return jetStep
 
     def getJetHICaloHypoChainStep(self, flags):
-        stepName = "MainStep_HIjet"
+        stepName = f"MainStep_HIjet_{self.recoDict['jetDefStr']}"
         if self.isPerf:
             stepName += '_perf'
 

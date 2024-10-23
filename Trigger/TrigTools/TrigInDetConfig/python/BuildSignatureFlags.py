@@ -438,7 +438,8 @@ def minBiasPixel(flags: AthConfigFlags, instanceName: str, recoMode: str) -> Ath
   flags.phiHalfWidth    = math.pi
   flags.doZFinder       = False
   flags.doZFinderOnly   = True
-  
+
+  flags.minClusters         = 3
   flags.nClustersMin        = 3
   flags.useSeedFilter       = True
   flags.maxPrimaryImpact    = 10.*Units.mm

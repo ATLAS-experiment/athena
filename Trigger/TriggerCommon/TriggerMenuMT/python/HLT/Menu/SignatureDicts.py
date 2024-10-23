@@ -128,7 +128,7 @@ JetChainParts = {
     # Information unique to the jet slice
     # Reco information
     'recoAlg'      : # Jet clustering algorithm
-      ['a4', 'a10', 'a10r', 'a10t', 'a10sd'],
+      ['a2', 'a4', 'a10', 'a10r', 'a10t', 'a10sd'],
     'constitType'  : # Jet input type
       ['tc','pf'], # 'ufo' might be added at some point
     'clusterCalib' : # Topocluster calibration

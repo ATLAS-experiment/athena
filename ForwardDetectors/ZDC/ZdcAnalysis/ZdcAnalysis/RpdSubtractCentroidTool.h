@@ -154,8 +154,13 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
 
   // methods used for centroid calculation
   //
+  enum class SubstepStatus {
+    Success, // continue to next step
+    Failure, // stop (do not proceed to next step) and propagate error to Athena
+    SkipEvent, // stop (do not proceed to next step) and tell Athena the event was a success
+  };
   void reset();
-  bool readAOD(xAOD::ZdcModuleContainer const& moduleContainer, xAOD::ZdcModuleContainer const& moduleSumContainer);
+  SubstepStatus readAOD(xAOD::ZdcModuleContainer const& moduleContainer, xAOD::ZdcModuleContainer const& moduleSumContainer);
   bool checkZdcRpdValidity(unsigned int side);
   bool subtractRpdAmplitudes(unsigned int side);
   void calculateDetectorCentroid(unsigned int side);

@@ -197,7 +197,7 @@ StatusCode RPDAnalysisTool::recoZdcModules(xAOD::ZdcModuleContainer const& modul
   if (rpdErr)
     {
       ATH_MSG_WARNING("RPD decoding error found!");
-      return StatusCode::FAILURE;
+      return StatusCode::SUCCESS;
     }
   
   reset();

@@ -170,18 +170,6 @@ IDPerfMonZmumu::~IDPerfMonZmumu()
 StatusCode IDPerfMonZmumu::initialize()
 {
   ATH_MSG_DEBUG ("** IDPerfMonZmumu::Initialize ** START **");
-  // Setup the services
-  ISvcLocator* pxServiceLocator = serviceLocator();
-  if ( pxServiceLocator != nullptr ) {
-      StatusCode xSC = PerfMonServices::InitialiseServices( pxServiceLocator );
-      if ( xSC == StatusCode::FAILURE ) {
-	ATH_MSG_FATAL("Problem Initializing PerfMonServices");
-	return StatusCode::FAILURE;
-      }
-      else {
-	ATH_MSG_DEBUG("PerfMonServices::InitialiseServices( pxServiceLocator );  SUCCESS ");
-      }
-  }
 
   // Retrieve Track fitter and track to vertex
   if (m_doRefit) { // only if track refit is requested
@@ -827,8 +815,8 @@ StatusCode IDPerfMonZmumu::bookTrees()
   
   // now register the Trees
   ATH_MSG_INFO("initialize() Going to register the mu+mu- trees");
-  ITHistSvc* tHistSvc = nullptr;
-  if (service("THistSvc",tHistSvc).isFailure()){
+  ServiceHandle<ITHistSvc> tHistSvc("THistSvc", name());
+  if (tHistSvc.retrieve().isFailure()){
     ATH_MSG_ERROR("initialize() Could not find Hist Service -> Switching ValidationMode Off !");
     m_validationMode = false;
   }

@@ -65,7 +65,7 @@ def JetParticleAssociationAlgCfg(
 def JetParticleFixedConeAssociationAlgCfg(ConfigFlags, fixedConeRadius, JetCollection="", InputParticleCollection="", OutputParticleDecoration="", **options):
 
     acc=ComponentAccumulator()
-    jetcol = JetCollection.replace("Track", "PV0Track")
+    jetcol = JetCollection
 
     options['JetContainer'] = jetcol
     options['Decorators'] = [CompFactory.JetParticleShrinkingConeAssociation(

@@ -21,10 +21,10 @@
 #include <vector>
 
 namespace ZDCTriggerSim {
-enum DataType { TCombLUTOutput, TCombLUTInput, TSideLUTsInput, TModAmplsInput };
+  enum DataType { TCombLUTOutput, TCombLUTInput, TSideLUTsInput, TModAmplsInput, TFADCInputs };
 
 const std::vector<std::string> TypeStrings = {"CombLUTOutput", "CombLUTInput",
-                                              "SideLUTsInput", "ModAmplsInput"};
+                                              "SideLUTsInput", "ModAmplsInput", "FADCInput"};
 }  // namespace ZDCTriggerSim
 
 //
@@ -121,15 +121,23 @@ class ZDCTriggerSimData : public ZDCTriggerSimDataBase {
   void clearData() { m_haveData = false; }
 
   virtual void dump(std::ostream& strm) const override {
+    strm << "Data for Type: " << Type << ": ";
     for (auto datum : m_data) {
       strm << doConvTrunc(datum) << " ";
     }
+    strm << std::endl;
   }
 };
 
 namespace ZDCTriggerSim {
 // The usual way we provide the module amplitudes
 //
+
+// It's easier to input the FADC data as a single vector of 8 channels * NBCID* 8 samples/BCID 12-bit data
+//   For physics data, we usually read 3 BCIDs 
+// 
+typedef ZDCTriggerSimData<unsigned int, 8*24, 12, TFADCInputs> FADCInputs;
+
 typedef ZDCTriggerSimData<unsigned int, 8, 12, TModAmplsInput>
     ModuleAmplInputsInt;
 
@@ -170,9 +178,9 @@ typedef std::shared_ptr<ZDCTriggerSimDataBase> SimDataPtr;
 //
 //
 class ZDCTriggerSimBase {
- private:
   typedef std::list<ZDCTriggerSim::SimDataCPtr> SimStack;
 
+private:
   SimStack m_stack;
 
  protected:
@@ -200,6 +208,15 @@ class ZDCTriggerSimBase {
   //
   virtual unsigned int simLevel1Trig(
       const ZDCTriggerSim::SimDataCPtr& data) = 0;
+
+  SimStack::const_iterator stackBottom() const
+  {
+    return m_stack.begin();
+  }
+
+  SimStack::const_reverse_iterator stackTop() const {
+    return m_stack.rbegin();
+  }
 
   void dump(std::ostream& strm) const;
 };
@@ -262,10 +279,10 @@ class ZDCTriggerSimModuleAmpls : virtual public ZDCTriggerSimBase,
                                  public ZDCTriggerSimAllLUTs {
  protected:
   //
-  // The data on the top of the stack should be the two 12 bit inputs
-  //   to each of the side LUT. The output is the two side LUT outputs.
+  // The data on the top of the stack should be the 8 module amplitudes
+  //   four for each ZDC. From these we obtain the module sums divided by four
   //
-  // After we excute the side LUT, we call the CombLUT doSimStage();
+  // After we evalute the per-side sums, we call the AllLUTs doSimStage();
   //
   virtual void doSimStage() override;
 
@@ -275,8 +292,7 @@ class ZDCTriggerSimModuleAmpls : virtual public ZDCTriggerSimBase,
                            const std::array<unsigned int, 256>& inCombLUT)
       : ZDCTriggerSimAllLUTs(sideALUT, sideCLUT, inCombLUT) {}
 
-  virtual unsigned int simLevel1Trig(
-      const ZDCTriggerSim::SimDataCPtr& inputData) override {
+  virtual unsigned int simLevel1Trig(const ZDCTriggerSim::SimDataCPtr& inputData) override {
     stackClear();
     stackPush(inputData);
 
@@ -284,4 +300,56 @@ class ZDCTriggerSimModuleAmpls : virtual public ZDCTriggerSimBase,
     return stackTopData()->getValueTrunc();
   }
 };
+
+class ZDCTriggerSimFADC : virtual public ZDCTriggerSimBase,
+			  public ZDCTriggerSimModuleAmpls
+{
+  std::array<std::array<unsigned int, 4>, 2> m_deriv2ndThresholds;
+  unsigned int m_minSampleAna;
+  unsigned int m_maxSampleAna;
+  unsigned int m_baselineDelta;
+  
+  std::array<std::array<int, 4>, 2> m_maxNegDeriv2nd;
+  std::array<std::array<unsigned int, 4>, 2> m_maxADC;
+  std::array<std::array<unsigned int, 4>, 2> m_baseline;
+
+protected:
+  //
+  // The data on the top of the stack should be the FADC data for
+  //   the eight ZDC channels. There should be a total of 8*3*8 samples
+  //
+  // After we excute 
+  //
+  virtual void doSimStage() override;
+
+  std::vector<unsigned int> CalculateNeg2ndDerivatives(const std::vector<unsigned int>& samples, unsigned int step);
+
+ public:
+  ZDCTriggerSimFADC(const std::array<unsigned int, 4096>& sideALUT,
+		    const std::array<unsigned int, 4096>& sideCLUT,
+		    const std::array<unsigned int, 256>& inCombLUT,
+		    const std::array<std::array<unsigned int, 4>, 2>& negDeriv2ndThresh,
+		    unsigned int minSampleAna, unsigned int maxSampleAna, unsigned int baselineDelta) :
+    ZDCTriggerSimModuleAmpls(sideALUT, sideCLUT, inCombLUT),
+    m_deriv2ndThresholds(negDeriv2ndThresh),
+    m_minSampleAna(minSampleAna),
+    m_maxSampleAna(maxSampleAna),
+    m_baselineDelta(baselineDelta)
+  {}
+
+  virtual unsigned int simLevel1Trig(const ZDCTriggerSim::SimDataCPtr& inputData) override {
+    stackClear();
+    stackPush(inputData);
+
+    doSimStage();
+    return stackTopData()->getValueTrunc();
+  }
+
+
+  auto getMaxNegDeriv2nds() const {return m_maxNegDeriv2nd;}
+  auto getMaxADCs() const {return m_maxADC;}
+  auto getBaselines() const {return m_baseline;}
+};
+
+
 #endif
