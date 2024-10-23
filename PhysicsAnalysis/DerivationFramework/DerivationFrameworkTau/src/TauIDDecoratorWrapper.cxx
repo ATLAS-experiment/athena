@@ -58,6 +58,7 @@ namespace DerivationFramework {
     
     // initialize read/write handle keys
     ATH_CHECK( m_tauContainerKey.initialize() );
+    ATH_CHECK( m_muonContainerKey.initialize() );
     ATH_CHECK( m_vtxContainerKey.initialize() );
     ATH_CHECK( m_decorKeys.initialize() );
 
@@ -109,6 +110,7 @@ namespace DerivationFramework {
     
     //Create accessors  
     static const SG::AuxElement::Decorator<float> acc_trackWidth("trackWidth");
+    static const SG::AuxElement::Decorator<bool> acc_passTATTauMuonOLR("passTATTauMuonOLR");
     static const SG::AuxElement::Accessor<float> acc_absEtaLead("ABS_ETA_LEAD_TRACK");
     static const SG::AuxElement::Accessor<float> acc_dz0_TV_PV0("dz0_TV_PV0");
     static const SG::AuxElement::Accessor<float> acc_log_sumpt_TV("log_sumpt_TV");
@@ -189,6 +191,26 @@ namespace DerivationFramework {
 
     delete shallowCopy.first;
     delete shallowCopy.second;
+
+    // add TauAnalysisTool MuonOLR
+    SG::ReadHandle<xAOD::MuonContainer> muonReadHandle(m_muonContainerKey);
+    if (!muonReadHandle.isValid()) {
+      ATH_MSG_DEBUG ("Could not retrieve MuonContainer with key " << muonReadHandle.key() << " so won't add TAT MuonOLR flag");
+      return StatusCode::SUCCESS;
+    }
+    const xAOD::MuonContainer* muonContainer = muonReadHandle.cptr();
+
+    for (const auto tau : *tauContainer) {
+      bool bTauMuonOLR = true;
+      for (auto muon : *muonContainer){
+        if(muon->pt() < 2000.) continue; // pt > 2 GeV
+        if(muon->muonType() == xAOD::Muon::CaloTagged) continue; // not calo-tagged
+        if(muon->p4().DeltaR( tau->p4() ) > 0.2 ) continue; // delta R < 0.2
+        bTauMuonOLR = false; // muon-tau overlapped
+        break;
+      }
+      acc_passTATTauMuonOLR(*tau) = bTauMuonOLR;
+    }
 
     return StatusCode::SUCCESS;
   }
