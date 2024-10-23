@@ -84,7 +84,8 @@ class MpEvtLoopMgr(AthMpEvtLoopMgr):
                                                    EventsBeforeFork=events_before_fork,
                                                    ChunkSize=chunk_size) ]
 
-            if (self.nThreads >= 1):
+            # In pure MP, self.nThreads may be set to None - we want the pure MP setup in that case
+            if self.nThreads is not None and self.nThreads >= 1:
                 if(pileup):
                     raise Exception('Running pileup digitization in mixed MP+MT currently not supported')
                 from AthenaMPTools.AthenaMPToolsConf import SharedHiveEvtQueueConsumer
@@ -172,10 +173,11 @@ def getChunkSize() -> int :
     from .AthenaMPFlags import jobproperties as jp
     from PyUtils.MetaReaderPeeker import metadata
     chunk_size = 1
+    # In jobs without input (e.g. event generation), metadata is an empty dictionary
     if (jp.AthenaMPFlags.ChunkSize() > 0):
         chunk_size = jp.AthenaMPFlags.ChunkSize()
         msg.info('Chunk size set to %i', chunk_size)
-    elif metadata['file_size'] is not None:
+    elif 'file_size' in metadata and metadata['file_size'] is not None:
         #Don't use auto flush for shared reader
         if (jp.AthenaMPFlags.UseSharedReader()):
             msg.info('Shared Reader in use, chunk_size set to default (%i)', chunk_size)
