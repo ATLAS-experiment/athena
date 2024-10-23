@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZDC_DetTool.h"
@@ -35,38 +35,28 @@ ZDC_DetTool::~ZDC_DetTool()
 
 StatusCode ZDC_DetTool::create()
 { 
-  if (msgLevel(MSG::DEBUG)) msg(MSG::DEBUG) << " Building ZDC geometry " << endmsg;
-  
+
   // Locate the top level experiment node  
   GeoModelExperiment* theExpt = nullptr;
   
-  if (StatusCode::SUCCESS != detStore()->retrieve(theExpt, "ATLAS")) {
+  ATH_CHECK( detStore()->retrieve(theExpt, "ATLAS") );
 
-    if (msgLevel(MSG::ERROR)) msg(MSG::ERROR) << " Could not find GeoModelExperiment ATLAS " << endmsg; 
-    return (StatusCode::FAILURE); 
-  } 
-
-  
   ZDC_DetFactory theZDCFactory(detStore().operator->());
 
-  IGeoDbTagSvc *geoDbTag;
-  StatusCode sc = service ("GeoDbTagSvc",geoDbTag);
-  if (sc.isFailure()) {
-    msg(MSG::FATAL) << "Could not locate GeoDbTagSvc" << endmsg;
-    return StatusCode::FAILURE;
-  }
+  ServiceHandle<IGeoDbTagSvc> geoDbTag("GeoDbTagSvc", name());
+  ATH_CHECK( geoDbTag.retrieve() );
 
   GeoModel::GeoConfig geoConfig = geoDbTag->geoConfig();
   
   //Set the geometry configuration
   if(geoConfig==GeoModel::GEO_RUN2){ 
-    msg(MSG::INFO) << "Initializing ZDC geometry for PbPb2015" << endmsg;
+    ATH_MSG_INFO("Initializing ZDC geometry for PbPb2015");
     theZDCFactory.initializePbPb2015();
   }else if(geoConfig==GeoModel::GEO_RUN3){ 
-    msg(MSG::INFO) << "Initializing ZDC geometry for PbPb2023" << endmsg;
+    ATH_MSG_INFO("Initializing ZDC geometry for PbPb2023");
     theZDCFactory.initializePbPb2023();
   }else if(geoConfig==GeoModel::GEO_RUN4){
-    msg(MSG::ERROR) << "No ZDC geometry defined for RUN4" << endmsg;
+    ATH_MSG_ERROR("No ZDC geometry defined for RUN4");
   }
 
   if (nullptr == m_detector) { // Create the ZDCDetectorNode instance
@@ -78,17 +68,13 @@ StatusCode ZDC_DetTool::create()
     } 
     catch (const std::bad_alloc&) {
       
-      if (msgLevel(MSG::FATAL)) msg(MSG::FATAL) << "Could not create new ZDC DetectorNode!" << endmsg;
+      ATH_MSG_FATAL("Could not create new ZDC DetectorNode!");
       return StatusCode::FAILURE; 
     }
     
     // Register the ZDC DetectorNode instance with the Transient Detector Store
     theExpt->addManager(theZDCFactory.getDetectorManager());
-    if(detStore()->record(theZDCFactory.getDetectorManager(),theZDCFactory.getDetectorManager()->getName())==StatusCode::SUCCESS){
-      return StatusCode::SUCCESS;}
-    else{
-      msg(MSG::FATAL) << "Could not register ZDC detector manager" << endmsg;}
-
+    ATH_CHECK( detStore()->record(theZDCFactory.getDetectorManager(),theZDCFactory.getDetectorManager()->getName()) );
   }
   
   return StatusCode::FAILURE;
