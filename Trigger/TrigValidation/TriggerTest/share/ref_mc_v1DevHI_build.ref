@@ -3232,13 +3232,13 @@ HLT_noalg_L1gLJ80p0ETA25:
 HLT_noalg_L1gTE10:
   eventCount: 20
 HLT_noalg_L1gTE200:
-  eventCount: 14
+  eventCount: 15
 HLT_noalg_L1gTE3:
   eventCount: 20
 HLT_noalg_L1gTE5:
   eventCount: 20
 HLT_noalg_L1gXEJWOJ100:
-  eventCount: 9
+  eventCount: 10
 HLT_noalg_L1jJ40:
   eventCount: 20
 HLT_noalg_L1jJ50:
