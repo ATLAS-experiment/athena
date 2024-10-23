@@ -28,6 +28,7 @@
 #include "AthenaKernel/ISecondaryEventSelector.h"
 #include "AthenaBaseComps/AthService.h"
 
+#include "ByteStreamCnvSvc/IByteStreamInputSvc.h"
 #include "ByteStreamData/RawEvent.h"
 #include "CxxUtils/checker_macros.h"
 #include <mutex>
@@ -35,7 +36,6 @@
 // Forward declarations.
 class ISvcLocator;
 class EventContextByteStream;
-class ByteStreamInputSvc;
 class IROBDataProviderSvc;
 
 // Class EventSelectorByteStream.
@@ -185,7 +185,7 @@ private: // properties
 
    EventContextByteStream*  m_beginIter{};
    EventContextByteStream*  m_endIter{};
-   SmartIF<ByteStreamInputSvc> m_eventSource;
+   SmartIF<IByteStreamInputSvc> m_eventSource;
    Gaudi::Property<std::vector<std::string>> m_inputCollectionsProp{this, "Input", {}, ""};
    void inputCollectionsHandler(Gaudi::Details::PropertyBase&);
    ServiceHandle<IIncidentSvc> m_incidentSvc{this, "IncidentSvc", "IncidentSvc", ""};

@@ -10,7 +10,7 @@
  *  @author Peter van Gemmeren <gemmeren@anl.gov>
  **/
 
-#include "ByteStreamCnvSvc/ByteStreamInputSvc.h"
+#include "ByteStreamCnvSvc/IByteStreamInputSvc.h"
 #include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 
@@ -34,12 +34,11 @@ public:
 private:
    uint32_t reducedROBid(uint32_t);
 
-   Gaudi::Property<std::string> m_inSvcName;
-   ByteStreamInputSvc*  m_inSvc;
+   ServiceHandle<IByteStreamInputSvc> m_inSvc{this, "ByteStreamInputSvc", {}};
    ServiceHandle<IByteStreamOutputSvc> m_outSvc{this, "ByteStreamOutputSvc", {}};
 
-   Gaudi::Property<std::string> m_bsOutputStreamName; //!< stream name for multiple output
-   Gaudi::Property<bool> m_overwriteHeader;
+   Gaudi::Property<std::string> m_bsOutputStreamName{this, "BSOutputStreamName", {}, "stream name for multiple output"};
+   Gaudi::Property<bool> m_overwriteHeader{this, "overWriteHeader", false};
 };
 
 #endif

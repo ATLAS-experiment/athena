@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ByteStreamEventStorageInputSvc.h"
@@ -36,7 +36,7 @@
 // Constructor.
 ByteStreamEventStorageInputSvc::ByteStreamEventStorageInputSvc(
     const std::string& name, ISvcLocator* pSvcLocator)
-  : ByteStreamInputSvc(name, pSvcLocator)
+  : base_class(name, pSvcLocator)
   , m_readerMutex()
   , m_eventsCache()
   , m_reader()
@@ -71,7 +71,6 @@ ByteStreamEventStorageInputSvc::initialize()
 {
   ATH_MSG_INFO("Initializing");
 
-  ATH_CHECK(ByteStreamInputSvc::initialize());
   ATH_CHECK(m_inputMetadata.retrieve());
   ATH_CHECK(m_storeGate.retrieve());
   ATH_CHECK(m_robProvider.retrieve());
@@ -84,7 +83,6 @@ ByteStreamEventStorageInputSvc::initialize()
 StatusCode
 ByteStreamEventStorageInputSvc::stop()
 {
-  ATH_MSG_DEBUG("Calling ByteStreamInputSvc::stop()");
   // close moved to EventSelector for explicit coupling with incident
   //if (m_reader != 0) closeBlockIterator(false);
   return(StatusCode::SUCCESS);
@@ -99,7 +97,7 @@ ByteStreamEventStorageInputSvc::finalize() {
   ATH_CHECK(m_robProvider.release());
   ATH_CHECK(m_inputMetadata.release());
 
-  return(ByteStreamInputSvc::finalize());
+  return(StatusCode::SUCCESS);
 }
 
 
@@ -659,21 +657,6 @@ ByteStreamEventStorageInputSvc::currentEventStatus() const
 {
   const EventContext& context{Gaudi::Hive::currentContext()};
   return m_eventsCache.get(context)->eventStatus;
-}
-
-
-/******************************************************************************/
-StatusCode
-ByteStreamEventStorageInputSvc::queryInterface(const InterfaceID& riid,
-    void** ppvInterface)
-{
-  if(ByteStreamInputSvc::interfaceID().versionMatch(riid))
-    *ppvInterface = dynamic_cast<ByteStreamInputSvc*>(this);
-  else // Interface is not directly available: try out a base class
-    return(::AthService::queryInterface(riid, ppvInterface));
-
-  addRef();
-  return(StatusCode::SUCCESS);
 }
 
 

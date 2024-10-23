@@ -18,12 +18,9 @@ typedef std::map<uint32_t, ROBF*> ROBMAP;
 
 // Constructor.
 ByteStreamMergeOutputSvc::ByteStreamMergeOutputSvc(const std::string& name, ISvcLocator* svcloc) :
-   base_class(name,svcloc),
-   m_inSvc(0)
+   base_class(name,svcloc)
 {
-   declareProperty("ByteStreamInputSvc", m_inSvcName);
-   declareProperty("overWriteHeader", m_overwriteHeader = false);
-   declareProperty("BSOutputStreamName", m_bsOutputStreamName = name);
+   m_bsOutputStreamName = name;
 }
 
 // Destructor.
@@ -33,13 +30,8 @@ ByteStreamMergeOutputSvc::~ByteStreamMergeOutputSvc() {
 // setup input and output paths
 StatusCode ByteStreamMergeOutputSvc::initialize() {
    ATH_CHECK( m_outSvc.retrieve() );
+   ATH_CHECK( m_inSvc.retrieve() );
 
-   SmartIF<IService> svcIn = Gaudi::svcLocator()->service(m_inSvcName.value());
-   m_inSvc = dynamic_cast<ByteStreamInputSvc*>(svcIn.get());
-   if (!m_inSvc) {
-      ATH_MSG_ERROR("Cannot cast " << m_inSvcName << " to ByteStreamInputSvc");
-      return(StatusCode::FAILURE);
-   }
    return(StatusCode::SUCCESS);
 }
 

@@ -8,7 +8,6 @@
 #include <algorithm>
 
 #include "EventContextByteStream.h"
-#include "ByteStreamCnvSvc/ByteStreamInputSvc.h"
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
 #include "ByteStreamCnvSvc/ByteStreamExceptions.h"
 #include "CxxUtils/checker_macros.h"

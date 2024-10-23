@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGEVENTSELECTORBYTESTREAM_H
@@ -9,7 +9,7 @@
 #include "AthenaBaseComps/AthService.h"
 
 // Forward declarations
-class ByteStreamInputSvc;
+class IByteStreamInputSvc;
 class StoreGateSvc;
 
 /**
@@ -61,7 +61,7 @@ public:
 
 private:
   // @property Reference to the event source (ByteStreamInputSvc)
-  ServiceHandle<ByteStreamInputSvc> m_eventSource;
+  ServiceHandle<IByteStreamInputSvc> m_eventSource;
   // Reference to the StoreGateScv
   ServiceHandle<StoreGateSvc> m_evtStore;
 };

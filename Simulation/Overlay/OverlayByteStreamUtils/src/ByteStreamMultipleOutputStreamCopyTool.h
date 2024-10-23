@@ -27,7 +27,7 @@
 
 // ByteStream
 
-#include "ByteStreamCnvSvc/ByteStreamInputSvc.h"
+#include "ByteStreamCnvSvc/IByteStreamInputSvc.h"
 #include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
 
 #include "CxxUtils/checker_macros.h"
@@ -97,7 +97,7 @@ public:
 private:
 
   // Handle for BS input Svc
-  ServiceHandle<ByteStreamInputSvc> m_inputSvc;
+  ServiceHandle<IByteStreamInputSvc> m_inputSvc;
   
   // Whether to use lbn map or not
   bool m_uselbnmap;

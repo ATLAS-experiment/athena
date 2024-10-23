@@ -150,7 +150,7 @@ namespace {
 
 // Constructor.
 ByteStreamEmonInputSvc::ByteStreamEmonInputSvc(const std::string& name, ISvcLocator* svcloc) :
-    ByteStreamInputSvc(name,svcloc),
+    base_class(name,svcloc),
     m_inputMetaDataStore("StoreGateSvc/InputMetaDataStore", name ),
     m_sgSvc("StoreGateSvc", name),
     m_robProvider("ROBDataProviderSvc", name),
@@ -162,8 +162,6 @@ ByteStreamEmonInputSvc::ByteStreamEmonInputSvc(const std::string& name, ISvcLoca
 StatusCode ByteStreamEmonInputSvc::initialize()
 {
     setProperty("State", "Init").ignore();
-
-    ATH_CHECK( ByteStreamInputSvc::initialize() );
 
     // check properties
     if(m_partition.empty() && getenv("TDAQ_PARTITION") != 0) {

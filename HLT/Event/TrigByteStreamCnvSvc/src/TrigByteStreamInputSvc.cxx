@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trigger includes
@@ -24,28 +24,12 @@ namespace {
 // Standard constructor
 // =============================================================================
 TrigByteStreamInputSvc::TrigByteStreamInputSvc(const std::string& name, ISvcLocator* svcLoc)
-: ByteStreamInputSvc(name, svcLoc) {}
+: base_class(name, svcLoc) {}
 
 // =============================================================================
 // Standard destructor
 // =============================================================================
 TrigByteStreamInputSvc::~TrigByteStreamInputSvc() {}
-
-// =============================================================================
-// Implementation of IInterface::queryInterface
-// =============================================================================
-StatusCode TrigByteStreamInputSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-  ATH_MSG_VERBOSE("start of " << __FUNCTION__);
-
-  if(ByteStreamInputSvc::interfaceID().versionMatch(riid))
-    *ppvInterface = static_cast<ByteStreamInputSvc*>(this);
-  else
-    return AthService::queryInterface(riid, ppvInterface);
-
-  addRef();
-  ATH_MSG_VERBOSE("end of " << __FUNCTION__);
-  return StatusCode::SUCCESS;
-}
 
 // =============================================================================
 // Implementation of Service::initialize

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trigger includes
@@ -8,7 +8,7 @@
 
 // Athena includes
 #include "AthenaKernel/EventContextClid.h"
-#include "ByteStreamCnvSvc/ByteStreamInputSvc.h"
+#include "ByteStreamCnvSvc/IByteStreamInputSvc.h"
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
 #include "ByteStreamData/RawEvent.h"
 #include "CxxUtils/checker_macros.h"
