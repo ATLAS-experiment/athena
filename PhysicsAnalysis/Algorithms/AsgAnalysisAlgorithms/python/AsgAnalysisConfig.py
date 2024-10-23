@@ -8,6 +8,7 @@ from enum import Enum
 
 class SystematicsCategories(Enum):
     JETS = ['JET_']
+    JER = ['JET_JER']
     ELECTRONS = ['EG_', 'EL_']
     MUONS = ['MUON_']
     PHOTONS = ['EG_', 'PH_']
@@ -47,20 +48,21 @@ class CommonServicesConfig (ConfigBlock) :
 
         sysService = config.createService( 'CP::SystematicsSvc', 'SystematicsSvc' )
 
-        if config.dataType() is not DataType.Data:
-            if self.runSystematics is not None :
-                runSystematics = self.runSystematics
-            elif config.noSystematics() is not None :
-                # if option not set:
-                # check to see if set in config accumulator
-                self.runSystematics = not config.noSystematics()
-                runSystematics = self.runSystematics
-            else :
-                runSystematics = True
-        else:
-            runSystematics = False
+        if self.runSystematics is not None :
+            runSystematics = self.runSystematics
+        elif config.noSystematics() is not None :
+            # if option not set:
+            # check to see if set in config accumulator
+            self.runSystematics = not config.noSystematics()
+            runSystematics = self.runSystematics
+        else :
+            runSystematics = True
+
         if runSystematics :
             sysService.sigmaRecommended = 1
+            if config.dataType() is DataType.Data:
+                # Only one type of allowed systematics on data: the JER variations!
+                self.onlySystematicsCategories = ['JER']
             if self.onlySystematicsCategories is not None:
                 # Convert strings to enums and validate
                 requested_categories = []
