@@ -11,9 +11,8 @@ def TRT_TrackExtensionToolCosmicsCfg(
 
     if 'Extrapolator' not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-        InDetExtrapolator = acc.popToolsAndMerge(InDetExtrapolatorCfg(flags))
-        acc.addPublicTool(InDetExtrapolator)
-        kwargs.setdefault("Extrapolator", InDetExtrapolator)
+        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
+            InDetExtrapolatorCfg(flags)))
 
     if 'RIOonTrackToolNoDr' not in kwargs:
         from InDetConfig.TRT_DriftCircleOnTrackToolConfig import (

@@ -43,34 +43,9 @@ namespace{
 
 InDet::TRT_TrackExtensionTool_xk::TRT_TrackExtensionTool_xk
 (const std::string& t,const std::string& n,const IInterface* p)
-  : AthAlgTool(t,n,p),
-    m_segmentFindMode (3),
-    m_minNumberDCs    (9),
-    m_minNumberSCT    (5),
-    m_minNumberPIX    (2),
-    m_roadwidth       (10.),
-    m_maxslope        (.00005),
-    m_zVertexWidth    (150.),
-    m_impact          (50.),
-    m_usedriftrad     (true),
-    m_parameterization(true),
-    m_scale_error     (2.),
-    m_fieldmode       ("MapSolenoid")
+  : AthAlgTool(t,n,p)
 {
   declareInterface<ITRT_TrackExtensionTool>(this);
-  declareProperty("RoadWidth"              ,m_roadwidth       );
-  declareProperty("ZVertexHalfWidth"       ,m_zVertexWidth    );
-  declareProperty("maxImpactParameter"     ,m_impact          );
-  declareProperty("Maxslope"               ,m_maxslope        );
-  declareProperty("MinNumberDriftCircles"  ,m_minNumberDCs    );
-  declareProperty("UseParameterization"    ,m_parameterization);
-  declareProperty("UseDriftRadius"         ,m_usedriftrad     );
-  declareProperty("ScaleHitUncertainty"    ,m_scale_error     );
-  declareProperty("SegmentFindMode"        ,m_segmentFindMode );
-  declareProperty("MagneticFieldMode"      ,m_fieldmode       );
-  declareProperty("MinNumberSCTclusters"   ,m_minNumberSCT    );
-  declareProperty("MinNumberPIXclusters"   ,m_minNumberPIX    );
-  declareProperty("minTRTSegmentpT"        ,m_minTRTSegmentpT=300. );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -154,7 +129,6 @@ StatusCode InDet::TRT_TrackExtensionTool_xk::finalize()
 MsgStream& InDet::TRT_TrackExtensionTool_xk::dump( MsgStream& out ) const
 {
   out<<std::endl;
-  if(m_nprint)  return dumpEvent(out);
   return dumpConditions(out);
 }
 
@@ -196,15 +170,6 @@ MsgStream& InDet::TRT_TrackExtensionTool_xk::dumpConditions( MsgStream& out ) co
   out<<"| Scalefactor hit error   | "<< w12 << m_scale_error <<spaces;
   out<<"| Max impact parameter    | "<< w12 << m_impact <<spaces;
   out<< lineSeparator;
-  return out;
-}
-
-///////////////////////////////////////////////////////////////////
-// Dumps event information into the ostream
-///////////////////////////////////////////////////////////////////
-
-MsgStream& InDet::TRT_TrackExtensionTool_xk::dumpEvent( MsgStream& out ) 
-{
   return out;
 }
 

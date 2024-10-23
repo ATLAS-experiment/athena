@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -108,16 +108,19 @@ namespace InDet {
       // Protected Data
       ///////////////////////////////////////////////////////////////////
 
-      PublicToolHandle<Trk::IExtrapolator>        m_extrapolator
+      ToolHandle<Trk::IExtrapolator>        m_extrapolator
         {this, "Extrapolator", "Trk::Extrapolator/InDetExtrapolator"};
       ToolHandle<Trk::IRIO_OnTrackCreator>  m_riontrackN
 	{this, "RIOonTrackToolNoDr", "InDet::TRT_DriftCircleOnTrackNoDriftTimeTool/TRT_DriftCircleOnTrackNoDriftTimeTool"}; //
 
       int                              m_outputlevel{}    ; // Print level
       int                              m_nprint{}         ; // Kind of print
-      double                           m_roadwidth      ; // Max width of the road
-      double                           m_roadwidth_locz ; // Max width of the road along the straw
-      bool                             m_searchNeighbour; // Also search neighbouring detector elements?
+      DoubleProperty m_roadwidth{this, "RoadWidth", 10.,
+	"Max width of the road"};
+      DoubleProperty m_roadwidth_locz{this, "BoundaryLocZTolerance", 10.,
+	"Max width of the road along the straw"};
+      BooleanProperty m_searchNeighbour{this, "SearchNeighbour", false,
+	"Also search neighbouring detector elements?"};
 
       SG::ReadHandleKey<TRT_DriftCircleContainer> m_trtname {this,"TRT_ClustersContainer","TRT_DriftCircles","RHK to retrieve TRT_DriftCircles"};
 
