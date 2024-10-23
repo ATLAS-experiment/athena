@@ -14,9 +14,9 @@
 #include "TrigT1CaloCalibConditions/L1CaloPprChanDefaultsContainer.h"
 #include "TrigT1CaloCalibConditions/L1CaloDisabledTowersContainer.h"
 #include "TrigT1CaloCalibConditions/L1CaloPpmDeadChannelsContainer.h"
-#include "TrigT1CaloCondSvc/L1CaloCondSvc.h"
+
 #include "TrigT1CaloToolInterfaces/IL1CaloMappingTool.h"
-#include "TrigT1CaloToolInterfaces/IL1TriggerTowerTool.h"
+
 #include "TrigT1Interfaces/TrigT1CaloDefs.h"
 #include "TrigConfL1Data/ThresholdConfig.h"
 
@@ -80,9 +80,7 @@ namespace LVL1 {
   Run2TriggerTowerMaker::Run2TriggerTowerMaker(const std::string& name, ISvcLocator* pSvcLocator)
     : AthAlgorithm(name, pSvcLocator),
       m_rngSvc("AthRNGSvc", name),
-      m_condSvc("L1CaloCondSvc", name), 
       m_rndmADCs(0),
-      m_TTtool("LVL1::L1TriggerTowerTool/L1TriggerTowerTool", this),
       m_mappingTool("LVL1::PpmMappingTool/PpmMappingTool", this),
       m_bstowertool("LVL1BS__TrigT1CaloDataAccessV2/TrigT1CaloDataAccessV2", this),
       m_caloId(0),
@@ -122,12 +120,6 @@ namespace LVL1 {
 
     declareProperty("ZeroSuppress", m_ZeroSuppress = true, "Do not save towers with 0 energy");
 
-
-    declareProperty("ChanCalibFolderKey",m_chanCalibKey = "/TRIGGER/L1Calo/V2/Calibration/Physics/PprChanCalib","PprChanCalib key");
-    declareProperty("ChanDefaultsFolderKey",m_chanDefaultsKey = "/TRIGGER/L1Calo/V2/Configuration/PprChanDefaults","PprChanDefaults key");
-    declareProperty("DisabledTowersFolderKey",m_disabledTowersKey = "/TRIGGER/L1Calo/V2/Conditions/DisabledTowers","DisabledTowers key");
-    declareProperty("DeadChannelsFolderKey",m_deadChannelsKey = "/TRIGGER/L1Calo/V2/Calibration/PpmDeadChannels","PpmDeadChannels key");
-    
     declareProperty("ChanCalibFolderKeyoverlay",m_chanCalibKeyoverlay = "/TRIGGER/L1Calo/V2overlay/Calibration/Physics/PprChanCalib","PprChanCalib key for overlay");
     declareProperty("ChanDefaultsFolderKeyoverlay",m_chanDefaultsKeyoverlay = "/TRIGGER/L1Calo/V2overlay/Configuration/PprChanDefaults","PprChanDefaults key for overlay");
     declareProperty("DisabledTowersFolderKeyoverlay",m_disabledTowersKeyoverlay = "/TRIGGER/L1Calo/V2overlay/Conditions/DisabledTowers","DisabledTowers key for overlay");
@@ -166,7 +158,6 @@ namespace LVL1 {
     ATH_CHECK(m_mappingTool.retrieve());
     ATH_CHECK(m_TTtool.retrieve());
     ATH_CHECK(m_rngSvc.retrieve());
-    ATH_CHECK(m_condSvc.retrieve());
     ATH_CHECK(m_bstowertool.retrieve());
 
     m_rndmADCs = m_rngSvc->getEngine(this, m_digiEngine);
@@ -209,6 +200,10 @@ namespace LVL1 {
     }
 
     ATH_CHECK( m_L1MenuKey.initialize() );
+    ATH_CHECK( m_chanCalibKey.initialize() );
+    ATH_CHECK( m_chanDefaultsKey.initialize() );
+    ATH_CHECK( m_disabledTowersKey.initialize() );
+    ATH_CHECK( m_deadChannelsKey.initialize() );
 
     return StatusCode::SUCCESS;
   }
@@ -230,47 +225,34 @@ namespace LVL1 {
     /// globalScale is number of GeV/count. As code is already written to use
     /// MeV/count, safest thing here is to convert:
 
-    // retrieve conditions
-    if (! m_condSvc->retrieve(m_chanCalibContainer, m_chanCalibKey).isSuccess()){ATH_MSG_ERROR("failed!");}
-    ATH_MSG_INFO("Loading "<<m_chanCalibKey<<" into m_chanCalibContainer");
-    if (! m_condSvc->retrieve(m_disabledTowersContainer, m_disabledTowersKey).isSuccess()){ATH_MSG_ERROR("failed!");}
-    if (! m_condSvc->retrieve(m_deadChannelsContainer, m_deadChannelsKey).isSuccess()){ATH_MSG_ERROR("failed!");}
-    L1CaloPprChanDefaultsContainer *cDC = nullptr;
-    if (! m_condSvc->retrieve(cDC, m_chanDefaultsKey).isSuccess()){ATH_MSG_ERROR("failed!");}
-    if(!m_chanCalibContainer || !cDC ||
-      !m_disabledTowersContainer || !m_deadChannelsContainer) {
-      ATH_MSG_ERROR("Could not retrieve database containers. Aborting ...");
-      throw std::runtime_error("Run2TriggerTowerMaker: database container not accesible");
-    }
-    
-    auto* defaults = cDC->pprChanDefaults(0); // non-owning ptr
-    if(!defaults) {
-      ATH_MSG_ERROR("Could not retrieve channel 0 PprChanDefaults folder. Aborting ...");
-      throw std::runtime_error("Run2TriggerTowerMaker: channel 0 of PprChanDefaults not accesible");
-    }
-    m_chanDefaults = *defaults;    
+
     
     
     if (m_doOverlay) {
-    
-      if (! m_condSvc->retrieve(m_chanCalibContaineroverlay, m_chanCalibKeyoverlay).isSuccess()){ATH_MSG_ERROR("failed!");}
-      ATH_MSG_INFO("Loading "<<m_chanCalibKeyoverlay<<" into m_chanCalibContaineroverlay");
-      if (! m_condSvc->retrieve(m_disabledTowersContaineroverlay, m_disabledTowersKeyoverlay).isSuccess()){ATH_MSG_ERROR("failed!");}
-      if (! m_condSvc->retrieve(m_deadChannelsContaineroverlay, m_deadChannelsKeyoverlay).isSuccess()){ATH_MSG_ERROR("failed!");}
-      L1CaloPprChanDefaultsContainer *cDCoverlay = nullptr;
-      if (! m_condSvc->retrieve(cDCoverlay, m_chanDefaultsKeyoverlay).isSuccess()){ATH_MSG_ERROR("failed!");}
-      if(!m_chanCalibContaineroverlay || !cDCoverlay ||
-        !m_disabledTowersContaineroverlay || !m_deadChannelsContaineroverlay) {
-        ATH_MSG_ERROR("Could not retrieve database containers for overlay. Aborting ...");
-        throw std::runtime_error("Run2TriggerTowerMaker: database container for overlay not accesible");
-      }
-    
-      auto* defaultsoverlay = cDCoverlay->pprChanDefaults(0); // non-owning ptr
-      if(!defaultsoverlay) {
-        ATH_MSG_ERROR("Could not retrieve channel 0 PprChanDefaults folder for overlay. Aborting ...");
-        throw std::runtime_error("Run2TriggerTowerMaker: channel 0 of PprChanDefaults for overlay not accesible");
-      }
-      m_chanDefaultsoverlay = *defaultsoverlay;
+
+        throw std::runtime_error("Overlay no longer supported in Run2TriggerTowerMaker");
+
+        // Leaving this code commented here as a reminder of what functionality might need to be added to L1CaloCondAlg
+        // if we want to restart supporting overlay
+
+//      if (! m_condSvc->retrieve(m_chanCalibContaineroverlay, m_chanCalibKeyoverlay).isSuccess()){ATH_MSG_ERROR("failed!");}
+//      ATH_MSG_INFO("Loading "<<m_chanCalibKeyoverlay<<" into m_chanCalibContaineroverlay");
+//      if (! m_condSvc->retrieve(m_disabledTowersContaineroverlay, m_disabledTowersKeyoverlay).isSuccess()){ATH_MSG_ERROR("failed!");}
+//      if (! m_condSvc->retrieve(m_deadChannelsContaineroverlay, m_deadChannelsKeyoverlay).isSuccess()){ATH_MSG_ERROR("failed!");}
+//      L1CaloPprChanDefaultsContainer *cDCoverlay = nullptr;
+//      if (! m_condSvc->retrieve(cDCoverlay, m_chanDefaultsKeyoverlay).isSuccess()){ATH_MSG_ERROR("failed!");}
+//      if(!m_chanCalibContaineroverlay || !cDCoverlay ||
+//        !m_disabledTowersContaineroverlay || !m_deadChannelsContaineroverlay) {
+//        ATH_MSG_ERROR("Could not retrieve database containers for overlay. Aborting ...");
+//        throw std::runtime_error("Run2TriggerTowerMaker: database container for overlay not accesible");
+//      }
+//
+//      auto* defaultsoverlay = cDCoverlay->pprChanDefaults(0); // non-owning ptr
+//      if(!defaultsoverlay) {
+//        ATH_MSG_ERROR("Could not retrieve channel 0 PprChanDefaults folder for overlay. Aborting ...");
+//        throw std::runtime_error("Run2TriggerTowerMaker: channel 0 of PprChanDefaults for overlay not accesible");
+//      }
+//      m_chanDefaultsoverlay = *defaultsoverlay;
     
     }
 
@@ -321,6 +303,26 @@ namespace LVL1 {
     ATH_MSG_VERBOSE("Executing");
 
     if (m_isReco && m_doOverlay) return StatusCode::SUCCESS; // nothing to to, since we did overlay and made towers during digi
+
+
+    // retrieve conditions
+    SG::ReadCondHandle<L1CaloPprChanCalibContainer> pprCalibCont(m_chanCalibKey);
+    CHECK(pprCalibCont.isValid());
+    m_chanCalibContainer = (*pprCalibCont);
+    SG::ReadCondHandle<L1CaloDisabledTowersContainer> pprDisabledTowers(m_disabledTowersKey);
+    CHECK(pprDisabledTowers.isValid());
+    m_disabledTowersContainer = (*pprDisabledTowers);
+    SG::ReadCondHandle<L1CaloPpmDeadChannelsContainer> pprDeadTowers(m_deadChannelsKey);
+    CHECK(pprDeadTowers.isValid());
+    m_deadChannelsContainer = (*pprDeadTowers);
+    SG::ReadCondHandle<L1CaloPprChanDefaultsContainer> pprChanDefaults(m_chanDefaultsKey);
+    CHECK(pprChanDefaults.isValid());
+    auto* defaults = pprChanDefaults->pprChanDefaults(0); // non-owning ptr
+    if(!defaults) {
+        ATH_MSG_ERROR("Could not retrieve channel 0 PprChanDefaults folder. Aborting ...");
+        throw std::runtime_error("Run2TriggerTowerMaker: channel 0 of PprChanDefaults not accesible");
+    }
+    m_chanDefaults = *defaults;
 
     const EventContext& ctx = Gaudi::Hive::currentContext();
     m_rndmADCs->setSeed (m_digiEngine, ctx);

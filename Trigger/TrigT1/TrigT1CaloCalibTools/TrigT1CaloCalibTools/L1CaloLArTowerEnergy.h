@@ -14,7 +14,7 @@
 #include "TrigT1CaloEvent/TriggerTowerCollection.h"
 #include "CaloTriggerTool/CaloTriggerTowerService.h"
 #include "TrigT1CaloCalibTools/L1CaloCells2TriggerTowers.h"
-#include "TrigT1CaloCondSvc/L1CaloCondSvc.h"
+
 #include "CaloIdentifier/CaloIdManager.h"
 #include "LArRecConditions/ILArBadFebMasker.h"
 #include "LArCabling/LArOnOffIdMapping.h"
