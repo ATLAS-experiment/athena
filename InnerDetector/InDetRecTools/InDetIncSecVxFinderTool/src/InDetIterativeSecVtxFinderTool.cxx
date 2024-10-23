@@ -1523,7 +1523,8 @@ StatusCode InDetIterativeSecVtxFinderTool::initialize()
     printParameterSettings();
 
 #ifdef MONITORTUNES
-    ITHistSvc*     hist_root=nullptr;
+    SmartIF<ITHistSvc> hist_root{Gaudi::svcLocator()->service("THistSvc")};
+    ATH_CHECK(hist_root.isValid());
 
     m_leastmodes = new std::vector<int>() ;
     m_sdFsmwX = new std::vector< std::vector < float > >() ;
@@ -1538,13 +1539,6 @@ StatusCode InDetIterativeSecVtxFinderTool::initialize()
     m_seedXYdist = new std::vector< float >() ;
     m_seedZdist = new std::vector< float >() ;
     m_seedac = new std::vector < int >() ;
-
-    sc = service( "THistSvc", hist_root); 
-    if( sc.isFailure() ) 
-    {
-      ATH_MSG_ERROR( "Please switch off fillXcheck or provide THistSvc service" );
-      return StatusCode::FAILURE;
-    }
 
     m_OTree = new TTree( "IncSecVtxUnder", "TTree of underlying/upstream techinfo for InclusiveSecVtx" ) ;
 
