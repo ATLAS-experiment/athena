@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARGEOCODE_LARMATERIALMANAGER_H
@@ -29,13 +29,14 @@
 //                                                          //
 //----------------------------------------------------------//
 
+#include "AthenaBaseComps/AthMessaging.h"
+
 class StoreGateSvc;
 class StoredMaterialManager;
-class IMessageSvc;
-class LArMaterialManager
+
+class LArMaterialManager : public AthMessaging
 {
  public:
-
   // Constructor:
   LArMaterialManager(StoreGateSvc *pDetStore);
   
@@ -46,9 +47,7 @@ class LArMaterialManager
   void buildMaterials();
   
  private:
-  
-  StoredMaterialManager* m_storedManager;
-  IMessageSvc*           m_msgSvc = nullptr;
+  StoredMaterialManager* m_storedManager{nullptr};
 };
 
 #endif
