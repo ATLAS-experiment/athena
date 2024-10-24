@@ -130,6 +130,10 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "plotResolutions"          , True )
     icf.addFlag( "plotFakeRates"            , True )
     icf.addFlag( "plotDuplicateRates"       , False )
+    icf.addFlag( "plotHitsOnTracks"         , True )
+    icf.addFlag( "plotHitsOnTracksReference", False )
+    icf.addFlag( "plotHitsOnMatchedTracks"  , False )
+    icf.addFlag( "plotHitsOnFakeTracks"     , False )
     icf.addFlag( "plotOfflineElectrons"     , False )
     icf.addFlag( "ResolutionMethod"         , "iterRMS" )
     

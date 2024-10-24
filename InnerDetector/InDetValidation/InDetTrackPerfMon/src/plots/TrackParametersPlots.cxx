@@ -75,7 +75,7 @@ template< typename PARTICLE >
 StatusCode IDTPM::TrackParametersPlots::fillPlots(
     const PARTICLE& particle, float weight )
 {
-  /// Compute track parameters - TODO: add more...
+  /// Compute track parameters
   float ppt    = pT( particle ) / Gaudi::Units::GeV;
   float peta   = eta( particle );
   float pphi   = phi( particle );

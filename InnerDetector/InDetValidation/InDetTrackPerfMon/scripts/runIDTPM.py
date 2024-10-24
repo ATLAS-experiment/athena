@@ -54,6 +54,8 @@ flags.PhysVal.IDTPM.unpackTrigChains = MyArgs.unpackTrigChains
 # initialize individual TrkAnalises flags (and output file names)
 flags = initializeIDTPMTrkAnaConfigFlags( flags )
 
+flags.PhysVal.doExample = False
+
 flags.lock()
 flags.dump()
 

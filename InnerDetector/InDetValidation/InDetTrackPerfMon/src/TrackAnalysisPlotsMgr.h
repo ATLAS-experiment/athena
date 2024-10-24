@@ -26,6 +26,7 @@
 #include "plots/ResolutionPlots.h"
 #include "plots/FakeRatePlots.h"
 #include "plots/DuplicateRatePlots.h"
+#include "plots/HitsOnTracksPlots.h"
 
 /// STD includes
 #include <string>
@@ -100,10 +101,14 @@ namespace IDTPM {
     std::unique_ptr< TrackParametersPlots >  m_plots_trkParam_vsTest;
     std::unique_ptr< EfficiencyPlots >       m_plots_eff_vsTest;
     std::unique_ptr< EfficiencyPlots >       m_plots_tech_eff_vsTest;
+    std::unique_ptr< HitsOnTracksPlots >     m_plots_hitsOnTrk_vsTest;
+    std::unique_ptr< HitsOnTracksPlots >     m_plots_hitsOnMatchedTrk;
     /// plots w.r.t. reference tracks parameters
     std::unique_ptr< TrackParametersPlots >  m_plots_trkParam_vsRef;
     std::unique_ptr< EfficiencyPlots >       m_plots_eff_vsRef;
     std::unique_ptr< EfficiencyPlots >       m_plots_tech_eff_vsRef;
+    std::unique_ptr< HitsOnTracksPlots >     m_plots_hitsOnTrk_vsRef;
+    std::unique_ptr< HitsOnTracksPlots >     m_plots_hitsOnMatchedTrk_vsRef;
     /// plots w.r.t. efficiency plots w.r.t. truth (for EFTruthMatch only)
     std::unique_ptr< EfficiencyPlots >       m_plots_eff_vsTruth;
     std::unique_ptr< EfficiencyPlots >       m_plots_tech_eff_vsTruth;
@@ -112,6 +117,8 @@ namespace IDTPM {
     /// fake rate plots (only when reference=truth)
     std::unique_ptr< FakeRatePlots >         m_plots_fakeRate;
     std::unique_ptr< FakeRatePlots >         m_plots_missingTruth;
+    std::unique_ptr< HitsOnTracksPlots >     m_plots_hitsOnFakeTrk;
+    std::unique_ptr< HitsOnTracksPlots >     m_plots_hitsOnUnlinkedTrk;
     /// duplicate rate plots
     std::unique_ptr< DuplicateRatePlots >    m_plots_duplRate;
     /// plots w.r.t. reference offline electron

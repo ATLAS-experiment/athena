@@ -45,6 +45,13 @@ namespace IDTPM {
 
   private:
 
+    /// Utility functions to perform string->number conversion
+    float getFloat(
+      const std::string& s,
+      float defaultNum = std::numeric_limits<float>::quiet_NaN() ) const;
+
+    unsigned int getInt( const std::string& s, unsigned int defaultNum = 0 ) const;
+
     /// Tool properties
     StringArrayProperty m_plotsDefs{ this, "PlotsDefs", {}, "Vector of plots definition strings" }; 
     

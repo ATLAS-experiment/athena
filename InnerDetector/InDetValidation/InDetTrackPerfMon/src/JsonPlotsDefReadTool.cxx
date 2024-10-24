@@ -64,36 +64,33 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
 
     /// nBinsX
     unsigned int nBinsX = plotDef.contains( "xAxis_nBins" ) ?
-        ( unsigned int )std::stoi(
-            plotDef.at( "xAxis_nBins" ).get_ref< cstr_t >() ) : 0;
+        getInt( plotDef.at( "xAxis_nBins" ).get_ref< cstr_t >() ) : 0;
 
     /// nBinsY
     unsigned int nBinsY = plotDef.contains( "yAxis_nBins" ) ?
-        ( unsigned int )std::stoi(
-            plotDef.at( "yAxis_nBins" ).get_ref< cstr_t >() ) : 0;
+        getInt( plotDef.at( "yAxis_nBins" ).get_ref< cstr_t >() ) : 0;
 
     /// nBinsZ
     unsigned int nBinsZ = plotDef.contains( "zAxis_nBins" ) ?
-        ( unsigned int )std::stoi(
-            plotDef.at( "zAxis_nBins" ).get_ref< cstr_t >() ) : 0;
+        getInt( plotDef.at( "zAxis_nBins" ).get_ref< cstr_t >() ) : 0;
 
     /// xAxis limits
     float xLow = plotDef.contains( "xAxis_low" ) ?
-        std::stof( plotDef.at( "xAxis_low" ).get_ref< cstr_t >() ) : 0.;
+        getFloat( plotDef.at( "xAxis_low" ).get_ref< cstr_t >() ) : 0.;
     float xHigh = plotDef.contains( "xAxis_high" ) ?
-        std::stof( plotDef.at( "xAxis_high" ).get_ref< cstr_t >() ) : 0.;
+        getFloat( plotDef.at( "xAxis_high" ).get_ref< cstr_t >() ) : 0.;
 
     /// yAxis limits
     float yLow = plotDef.contains( "yAxis_low" ) ?
-        std::stof( plotDef.at( "yAxis_low" ).get_ref< cstr_t >() ) : 0.;
+        getFloat( plotDef.at( "yAxis_low" ).get_ref< cstr_t >() ) : 0.;
     float yHigh = plotDef.contains( "yAxis_high" ) ?
-        std::stof( plotDef.at( "yAxis_high" ).get_ref< cstr_t >() ) : 0.;
+        getFloat( plotDef.at( "yAxis_high" ).get_ref< cstr_t >() ) : 0.;
 
     /// zAxis limits
     float zLow = plotDef.contains( "zAxis_low" ) ?
-        std::stof( plotDef.at( "zAxis_low" ).get_ref< cstr_t >() ) : 0.;
+        getFloat( plotDef.at( "zAxis_low" ).get_ref< cstr_t >() ) : 0.;
     float zHigh = plotDef.contains( "zAxis_high" ) ?
-        std::stof( plotDef.at( "zAxis_high" ).get_ref< cstr_t >() ) : 0.;
+        getFloat( plotDef.at( "zAxis_high" ).get_ref< cstr_t >() ) : 0.;
 
     /// xAxis doLogLin
     bool xDoLogLinBins(false);
@@ -126,7 +123,7 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
     strVec_t xBinsStrVec;
     if( plotDef.contains( "xAxis_bins" ) ) xBinsStrVec = plotDef.at( "xAxis_bins" ).get< strVec_t >();
     std::vector< float > xBinsVec;
-    for( cstr_t thisBin : xBinsStrVec ) xBinsVec.push_back( std::stof( thisBin ) );
+    for( cstr_t thisBin : xBinsStrVec ) xBinsVec.push_back( getFloat( thisBin ) );
     if( not xBinsVec.empty() ) {
       /// overwriting binning
       xLow = xBinsVec.front();  xHigh = xBinsVec.back();  nBinsX = xBinsVec.size() - 1;
@@ -136,7 +133,7 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
     strVec_t yBinsStrVec;
     if( plotDef.contains( "yAxis_bins" ) ) yBinsStrVec = plotDef.at( "yAxis_bins" ).get< strVec_t >();
     std::vector< float > yBinsVec;
-    for( cstr_t thisBin : yBinsStrVec ) yBinsVec.push_back( std::stof( thisBin ) );
+    for( cstr_t thisBin : yBinsStrVec ) yBinsVec.push_back( getFloat( thisBin ) );
     if( not yBinsVec.empty() ) {
       /// overwriting binning
       yLow = yBinsVec.front();  yHigh = yBinsVec.back();  nBinsY = yBinsVec.size() - 1;
@@ -146,7 +143,7 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
     strVec_t zBinsStrVec;
     if( plotDef.contains( "zAxis_bins" ) ) zBinsStrVec = plotDef.at( "zAxis_bins" ).get< strVec_t >();
     std::vector< float > zBinsVec;
-    for( cstr_t thisBin : zBinsStrVec ) zBinsVec.push_back( std::stof( thisBin ) );
+    for( cstr_t thisBin : zBinsStrVec ) zBinsVec.push_back( getFloat( thisBin ) );
     if( not zBinsVec.empty() ) {
       /// overwriting binning
       zLow = zBinsVec.front();  zHigh = zBinsVec.back();  nBinsZ = zBinsVec.size() - 1;
@@ -174,12 +171,34 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
 
     /// Check if plot definition is valid. Removing
     if( not plotDefVec.back().isValid() ) {
-      ATH_MSG_WARNING( "Tried to add invalid plot : " <<
-                       plotDefVec.back().plotDigest() );
+      ATH_MSG_ERROR( "Removing invalid plot :" <<
+                     "\n\t- string: " << plotDefStr <<
+                     "\n\t- digest: " << plotDefVec.back().plotDigest() );
       plotDefVec.pop_back(); // removing from vector
     }
 
   } // close m_plotDefs loop
 
   return plotDefVec; 
+}
+
+
+///-------------------------
+///--- Utility functions ---
+///-------------------------
+float IDTPM::JsonPlotsDefReadTool::getFloat(
+    const std::string& s, float defaultNum ) const
+{
+  try {
+    float f = std::stof(s);
+    return f;
+  } catch(...) {
+    return defaultNum;
+  }
+}
+
+unsigned int IDTPM::JsonPlotsDefReadTool::getInt(
+    const std::string& s, unsigned int defaultNum ) const
+{
+  return ( static_cast< unsigned int >( getFloat( s, defaultNum ) ) );
 }

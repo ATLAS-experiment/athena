@@ -97,6 +97,37 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
         this, "Tracks/Duplicates", m_anaTag, m_trkAnaDefSvc->referenceTag(), true );
   }
 
+  /// Hits on tracks plots
+  /// -- all tracks
+  if( m_trkAnaDefSvc->plotHitsOnTracks() and not m_trkAnaDefSvc->isTestTruth() ) {
+    m_plots_hitsOnTrk_vsTest = std::make_unique< HitsOnTracksPlots >(
+        this, "Tracks/HitsOnTracks", m_anaTag,
+        m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(), true );
+  }
+  if( m_trkAnaDefSvc->plotHitsOnTracksReference() and not m_trkAnaDefSvc->isReferenceTruth() ) {
+    m_plots_hitsOnTrk_vsRef = std::make_unique< HitsOnTracksPlots >(
+        this, "Tracks/HitsOnTracks", m_anaTag,
+        m_trkAnaDefSvc->referenceTag(), m_trkAnaDefSvc->isITk() );
+  }
+  /// -- matched tracks
+  if( m_trkAnaDefSvc->plotHitsOnMatchedTracks() and not m_trkAnaDefSvc->isTestTruth() ) {
+    m_plots_hitsOnMatchedTrk = std::make_unique< HitsOnTracksPlots >(
+        this, "Tracks/Resolutions/HitsOnTracks", m_anaTag,
+        m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(), true );
+    m_plots_hitsOnMatchedTrk_vsRef = std::make_unique< HitsOnTracksPlots >(
+        this, "Tracks/Resolutions/HitsOnTracks", m_anaTag,
+        m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->referenceTag(), m_trkAnaDefSvc->isITk() );
+  }
+  /// -- fake and unlinked tracks
+  if( m_trkAnaDefSvc->plotHitsOnFakeTracks() and m_trkAnaDefSvc->isReferenceTruth() ) {
+    m_plots_hitsOnFakeTrk = std::make_unique< HitsOnTracksPlots >(
+        this, "Tracks/FakeRates/HitsOnTracks", m_anaTag,
+        m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(), true );
+    m_plots_hitsOnUnlinkedTrk = std::make_unique< HitsOnTracksPlots >(
+        this, "Tracks/FakeRates/Unlinked/HitsOnTracks", m_anaTag,
+        m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(), true );
+  }
+
   /// Offline electron plots
   if( m_trkAnaDefSvc->plotOfflineElectrons() ) {
     m_plots_offEle = std::make_unique< OfflineElectronPlots >(
@@ -174,6 +205,11 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
       ATH_CHECK( m_plots_trkParam_vsTest->fillPlots( *particle, weight ) );
     }
 
+    /// hits on tracks plots
+    if( m_plots_hitsOnTrk_vsTest ) {
+      ATH_CHECK( m_plots_hitsOnTrk_vsTest->fillPlots( *particle, truthMu, actualMu, weight ) );
+    }
+
     bool isMatched = matches.isTestMatched( *particle );
 
     /// efficiency plots
@@ -218,13 +254,31 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
       }
     }
 
-    /// fake rate plots
+    /// hits on matched tracks plots
+    if( m_plots_hitsOnMatchedTrk and m_plots_hitsOnMatchedTrk_vsRef and isMatched ) {
+      ATH_CHECK( m_plots_hitsOnMatchedTrk->fillPlots( *particle, truthMu, actualMu, weight ) );
+      if( m_trkAnaDefSvc->isReferenceTruth() ) {
+        ATH_CHECK( m_plots_hitsOnMatchedTrk_vsRef->fillPlots(
+          *particle, *(matches.getMatchedRefTruth( *particle )), truthMu, actualMu, weight ) );
+      } else {
+        ATH_CHECK( m_plots_hitsOnMatchedTrk_vsRef->fillPlots(
+          *particle, *(matches.getMatchedRefTrack( *particle )), truthMu, actualMu, weight ) );
+      }
+    }
+
+    /// fake rate plots (and hits on fake plots)
     if( m_plots_missingTruth ) {
       bool isUnlinked = isUnlinkedTruth( *particle );
       ATH_CHECK( m_plots_missingTruth->fillPlots( *particle, isUnlinked, truthMu, actualMu, weight ) );
+      if( m_plots_hitsOnUnlinkedTrk and isUnlinked ) {
+        ATH_CHECK( m_plots_hitsOnUnlinkedTrk->fillPlots( *particle, truthMu, actualMu, weight ) ); 
+      }
       if( not isUnlinked and m_plots_fakeRate ) {
         bool isFake = isFakeTruth( *particle, m_trkAnaDefSvc->truthProbCut() );
         ATH_CHECK( m_plots_fakeRate->fillPlots( *particle, isFake, truthMu, actualMu, weight ) );
+        if( m_plots_hitsOnFakeTrk and isFake ) {
+          ATH_CHECK( m_plots_hitsOnFakeTrk->fillPlots( *particle, truthMu, actualMu, weight ) );
+        }
       }
     }
 
@@ -271,6 +325,11 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
     /// track parameters plots
     if( m_plots_trkParam_vsRef ) {
       ATH_CHECK( m_plots_trkParam_vsRef->fillPlots( *particle, weight ) );
+    }
+
+    /// hits on tracks plots
+    if( m_plots_hitsOnTrk_vsRef ) {
+      ATH_CHECK( m_plots_hitsOnTrk_vsRef->fillPlots( *particle, truthMu, actualMu, weight ) );
     }
 
     bool isMatched = matches.isRefMatched( *particle );

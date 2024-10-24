@@ -1,0 +1,1598 @@
+{
+    "$TRKTAG_nInnerMostPixelHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE Next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelEndcapHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE Next to InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE InnerMost Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedEndcapHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE InnerMost Pixel Shared Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nPixelHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nPixelHoles" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE Pixel Holes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nPixelSharedHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_pixeldEdx" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE Pixel dE/dx [MeV cm^{2}g^{-1}]", "nBins" : "25", "low" : "0.0", "high" : "5.0" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nSCTHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE SCT Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nSCTHoles" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE SCT Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nSCTSharedHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE SCT Shared Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nTRTHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nTRTHitsXe" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nTRTHitsAr" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nTRTHighThresholdHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE High Threshold TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsXe" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE High Threshold TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsAr" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE High Threshold TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nInnerMostPixelHits_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapHits_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelHits_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelEndcapHits_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedHits_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedEndcapHits_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHits_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHoles_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Holes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelSharedHits_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_pixeldEdx_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average $TRKTYPE Pixel dE/dx [MeV cm^{2}g^{-1}]", "nBins" : "25", "low" : "0.0", "high" : "5.0" }
+    },
+    "$TRKTAG_nSCTHits_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE SCT Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTHoles_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE SCT Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTSharedHits_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE SCT Shared Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nTRTHits_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsXe_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsAr_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHits_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsXe_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsAr_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelHits_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapHits_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelHits_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelEndcapHits_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedHits_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedEndcapHits_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHits_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHoles_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Holes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelSharedHits_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_pixeldEdx_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average $TRKTYPE Pixel dE/dx [MeV cm^{2}g^{-1}]", "nBins" : "25", "low" : "0.0", "high" : "5.0" }
+    },
+    "$TRKTAG_nSCTHits_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE SCT Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTHoles_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE SCT Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTSharedHits_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE SCT Shared Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nTRTHits_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsXe_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsAr_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHits_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsXe_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsAr_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelHits_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapHits_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelHits_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelEndcapHits_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedHits_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedEndcapHits_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHits_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHoles_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Holes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelSharedHits_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_pixeldEdx_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average $TRKTYPE Pixel dE/dx [MeV cm^{2}g^{-1}]", "nBins" : "25", "low" : "0.0", "high" : "5.0" }
+    },
+    "$TRKTAG_nSCTHits_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE SCT Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTHoles_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE SCT Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTSharedHits_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE SCT Shared Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nTRTHits_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsXe_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsAr_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHits_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsXe_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsAr_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelHits_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapHits_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelHits_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelEndcapHits_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedHits_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedEndcapHits_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHits_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHoles_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Holes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelSharedHits_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_pixeldEdx_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average $TRKTYPE Pixel dE/dx [MeV cm^{2}g^{-1}]", "nBins" : "25", "low" : "0.0", "high" : "5.0" }
+    },
+    "$TRKTAG_nSCTHits_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE SCT Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTHoles_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE SCT Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTSharedHits_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE SCT Shared Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nTRTHits_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsXe_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsAr_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHits_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsXe_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsAr_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelHits_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapHits_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelHits_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelEndcapHits_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedHits_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedEndcapHits_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHits_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHoles_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Holes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelSharedHits_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_pixeldEdx_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average $TRKTYPE Pixel dE/dx [MeV cm^{2}g^{-1}]", "nBins" : "25", "low" : "0.0", "high" : "5.0" }
+    },
+    "$TRKTAG_nSCTHits_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE SCT Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTHoles_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE SCT Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTSharedHits_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE SCT Shared Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nTRTHits_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsXe_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsAr_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHits_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsXe_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsAr_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelHits_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapHits_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelHits_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelEndcapHits_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedHits_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedEndcapHits_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHits_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHoles_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Holes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelSharedHits_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_pixeldEdx_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average $TRKTYPE Pixel dE/dx [MeV cm^{2}g^{-1}]", "nBins" : "25", "low" : "0.0", "high" : "5.0" }
+    },
+    "$TRKTAG_nSCTHits_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTHoles_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTSharedHits_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Shared Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nTRTHits_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsXe_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsAr_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHits_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsXe_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsAr_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelHits_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapHits_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelHits_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelEndcapHits_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedHits_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedEndcapHits_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHits_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHoles_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Holes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelSharedHits_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_pixeldEdx_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average $TRKTYPE Pixel dE/dx [MeV cm^{2}g^{-1}]", "nBins" : "25", "low" : "0.0", "high" : "5.0" }
+    },
+    "$TRKTAG_nSCTHits_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTHoles_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTSharedHits_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Shared Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nTRTHits_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsXe_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsAr_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHits_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsXe_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsAr_vs_$TRK2TAG_pt_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelHits_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapHits_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelHits_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelEndcapHits_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedHits_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedEndcapHits_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHits_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHoles_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Holes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelSharedHits_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_pixeldEdx_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average $TRKTYPE Pixel dE/dx [MeV cm^{2}g^{-1}]", "nBins" : "25", "low" : "0.0", "high" : "5.0" }
+    },
+    "$TRKTAG_nSCTHits_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTHoles_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTSharedHits_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Shared Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nTRTHits_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsXe_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsAr_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHits_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsXe_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsAr_vs_$TRK2TAG_eta_vs_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelHits_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapHits_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelHits_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelEndcapHits_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedHits_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedEndcapHits_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHits_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHoles_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Holes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelSharedHits_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_pixeldEdx_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average $TRKTYPE Pixel dE/dx [MeV cm^{2}g^{-1}]", "nBins" : "25", "low" : "0.0", "high" : "5.0" }
+    },
+    "$TRKTAG_nSCTHits_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTHoles_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTSharedHits_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Shared Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nTRTHits_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsXe_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsAr_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHits_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsXe_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsAr_vs_truthMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelHits_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapHits_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelHits_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelEndcapHits_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedHits_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedEndcapHits_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHits_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHoles_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Holes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelSharedHits_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_pixeldEdx_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average $TRKTYPE Pixel dE/dx [MeV cm^{2}g^{-1}]", "nBins" : "25", "low" : "0.0", "high" : "5.0" }
+    },
+    "$TRKTAG_nSCTHits_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTHoles_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTSharedHits_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Shared Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nTRTHits_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsXe_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsAr_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHits_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsXe_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsAr_vs_truthMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelHits_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapHits_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelHits_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelEndcapHits_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedHits_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedEndcapHits_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHits_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHoles_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Holes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelSharedHits_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_pixeldEdx_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average $TRKTYPE Pixel dE/dx [MeV cm^{2}g^{-1}]", "nBins" : "25", "low" : "0.0", "high" : "5.0" }
+    },
+    "$TRKTAG_nSCTHits_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTHoles_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTSharedHits_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Shared Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nTRTHits_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsXe_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsAr_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHits_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsXe_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsAr_vs_truthMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelHits_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapHits_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelHits_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelEndcapHits_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedHits_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedEndcapHits_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHits_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHoles_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Holes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelSharedHits_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_pixeldEdx_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average $TRKTYPE Pixel dE/dx [MeV cm^{2}g^{-1}]", "nBins" : "25", "low" : "0.0", "high" : "5.0" }
+    },
+    "$TRKTAG_nSCTHits_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTHoles_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTSharedHits_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Shared Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nTRTHits_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsXe_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsAr_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHits_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsXe_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsAr_vs_actualMu_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelHits_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapHits_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelHits_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelEndcapHits_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedHits_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedEndcapHits_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHits_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHoles_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Holes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelSharedHits_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_pixeldEdx_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average $TRKTYPE Pixel dE/dx [MeV cm^{2}g^{-1}]", "nBins" : "25", "low" : "0.0", "high" : "5.0" }
+    },
+    "$TRKTAG_nSCTHits_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTHoles_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTSharedHits_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Shared Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nTRTHits_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsXe_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsAr_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHits_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsXe_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsAr_vs_actualMu_vs_$TRK2TAG_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "$ETABINS2D", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelHits_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapHits_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelHits_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nNextToInnerMostPixelEndcapHits_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Next to InnerMost Pixel Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedHits_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelSharedEndcapHits_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Shared Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHits_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelHoles_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Holes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_nPixelSharedHits_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Shared Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" }
+    },
+    "$TRKTAG_pixeldEdx_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average $TRKTYPE Pixel dE/dx [MeV cm^{2}g^{-1}]", "nBins" : "25", "low" : "0.0", "high" : "5.0" }
+    },
+    "$TRKTAG_nSCTHits_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTHoles_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nSCTSharedHits_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE SCT Shared Hits", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" }
+    },
+    "$TRKTAG_nTRTHits_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsXe_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHitsAr_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHits_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsXe_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Xe Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nTRTHighThresholdHitsAr_vs_actualMu_vs_$TRK2TAG_phi" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    }
+}
