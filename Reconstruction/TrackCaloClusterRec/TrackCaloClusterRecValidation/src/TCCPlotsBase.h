@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKCALOCLUSTERREC_TRACKCALOCLUSTERRECVALIDATION_TCCPLOTSBASE_H
@@ -8,8 +8,9 @@
 #include "TrkValHistUtils/PlotBase.h"
 #include "xAODBase/IParticle.h"
 #include "AthenaBaseComps/AthMessaging.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "InDetPhysValMonitoring/IHistogramDefinitionSvc.h"
 
-class IHistogramDefinitionSvc;
 class SingleHistogramDefinition;
 
 class TCCPlotsBase : public PlotBase, public AthMessaging {
@@ -46,7 +47,7 @@ class TCCPlotsBase : public PlotBase, public AthMessaging {
       std::string m_folder;
             
     private:
-      IHistogramDefinitionSvc* m_histoDefSvc;
+      ServiceHandle<IHistogramDefinitionSvc> m_histoDefSvc;
 
 };
 

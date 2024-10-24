@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TCCPlotsBase.h"
@@ -10,9 +10,7 @@
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/IToolSvc.h"
 
-
-// to retrieve HistogramDefinitionSvc
-#include "InDetPhysValMonitoring/HistogramDefinitionSvc.h"
+#include "AthenaBaseComps/AthCheckMacros.h"
 #include "InDetPhysValMonitoring/SingleHistogramDefinition.h"
 
 #include <cmath>
@@ -38,7 +36,7 @@ TCCPlotsBase::TCCPlotsBase(PlotBase* pParent, const std::string& folder):
   PlotBase(pParent, folder),
   AthMessaging("TCCPlots"),
   m_folder(folder),
-  m_histoDefSvc(nullptr) {}  
+  m_histoDefSvc("HistogramDefinitionSvc", "TCCPlots") {}
   
 
 void TCCPlotsBase::book(TH1*& pHisto, const std::string& histoIdentifier, const std::string& folder) {
@@ -136,15 +134,7 @@ SingleHistogramDefinition TCCPlotsBase::retrieveDefinition(const std::string& hi
   
   ATH_MSG_DEBUG("Retrieving SingleHistogramDefinition for "<< histoIdentifier);
 
-  if (not m_histoDefSvc) {
-    ISvcLocator* svcLoc = Gaudi::svcLocator();
-    StatusCode sc = svcLoc->service("HistogramDefinitionSvc", m_histoDefSvc);
-    if (sc.isFailure()) {
-      ATH_MSG_FATAL("failed to retrieve HistogramDefinitionSvc in " << __FILE__);
-      throw std::runtime_error("Could initialise the HistogramDefinitionSvc");
-      return s;
-    }
-  }
+  ATH_CHECK( m_histoDefSvc.retrieve(), s );
   bool folderDefault = (folder.empty() or folder == "default");
   s = m_histoDefSvc->definition(histoIdentifier, folder);
   // "default" and empty string should be equivalent

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -8,28 +8,27 @@
 #include "JetSubStructureMomentTools/Validator.h"
 #include <TFile.h>
 #include <TH1.h>
-#include "GaudiKernel/ITHistSvc.h"
 
 using namespace std;
 
 Validator::Validator(const std::string& name) : 
-	AsgTool(name)
+  AsgTool(name),
+  m_histSvc("THistSvc", name)
 {
   declareProperty("InputContainer", m_InputContainer = "");
   declareProperty("FloatMoments", m_FloatMoments);
 }
 
+
+StatusCode Validator::initialize()
+{
+  ATH_CHECK( m_histSvc.retrieve() );
+  return StatusCode::SUCCESS;
+}
+
+
 int Validator::execute() const
 {
-	// Load histogram service
-	StatusCode sc;
-	ITHistSvc *histSvc;
-	sc = service("THistSvc", histSvc);
-	if(sc.isFailure()) { 
-		ATH_MSG_ERROR("Unable to access the THistSvc");
-		return 1;
-	}
-	
 	// Get leading jet
 	const xAOD::JetContainer* jets = nullptr;
   if(!evtStore()->contains<xAOD::JetContainer>(m_InputContainer)) {
@@ -43,12 +42,8 @@ int Validator::execute() const
 	// Loop over float moments
 	for(unsigned int i=0; i<m_FloatMoments.size(); i++) {
 		TH1 *outputHist;
-		if(histSvc->exists("/JetSubstructureMoments/" + m_FloatMoments[i])) {
-			sc = histSvc->getHist("/JetSubstructureMoments/" + m_FloatMoments[i], outputHist);
-			if(sc.isFailure()) { 
-				ATH_MSG_ERROR("Unable to retrieve histogram");
-				return 1;
-			}
+		if(m_histSvc->exists("/JetSubstructureMoments/" + m_FloatMoments[i])) {
+			m_histSvc->getHist("/JetSubstructureMoments/" + m_FloatMoments[i], outputHist).ignore();
 		}
 		else {
       unsigned int nbins = 100;
@@ -76,7 +71,7 @@ int Validator::execute() const
 			}
 
 			outputHist = new TH1F(m_FloatMoments[i].c_str(), "", nbins, xlow, xhigh);
-			sc = histSvc->regHist("/JetSubstructureMoments/" + m_FloatMoments[i], outputHist);
+			StatusCode sc = m_histSvc->regHist("/JetSubstructureMoments/" + m_FloatMoments[i], outputHist);
 			if(sc.isFailure()) {
 				ATH_MSG_ERROR("Unable to register histogram");
 				return 1;

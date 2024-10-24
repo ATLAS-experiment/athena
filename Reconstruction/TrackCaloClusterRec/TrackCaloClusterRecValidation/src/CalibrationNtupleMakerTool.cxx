@@ -130,12 +130,9 @@ StatusCode CalibrationNtupleMakerTool::bookTree()
   }
   
   // now register the Tree
-  ITHistSvc* tHistSvc = nullptr;
-  if (service("THistSvc",tHistSvc).isFailure()) {
-    ATH_MSG_ERROR( "initialize() Could not find Hist Service!" );
-    return StatusCode::FAILURE;
-  }
-  
+  SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+  ATH_CHECK( tHistSvc.isValid() );
+
   if (tHistSvc) {
     for (const auto& name : m_collectionNames) {
       if((tHistSvc->regTree(m_treeFolder+name, m_trees.at(name))).isFailure()) {

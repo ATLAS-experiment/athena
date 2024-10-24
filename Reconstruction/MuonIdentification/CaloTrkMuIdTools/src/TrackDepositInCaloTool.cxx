@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackDepositInCaloTool.h"
@@ -17,7 +17,6 @@
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloUtils/CaloCellList.h"
 #include "FourMomUtils/xAODP4Helpers.h"
-#include "GaudiKernel/ITHistSvc.h"
 #include "ParticleCaloExtension/ParticleCaloAssociation.h"
 #include "ParticleCaloExtension/ParticleCellAssociationCollection.h"
 #include "ParticleCaloExtension/ParticleCellIntersection.h"
@@ -42,7 +41,8 @@ namespace {
 // Constructor
 ///////////////////////////////////////////////////////////////////////////////
 TrackDepositInCaloTool::TrackDepositInCaloTool(const std::string& type, const std::string& name, const IInterface* pInterface) :
-    AthAlgTool(type, name, pInterface) {
+    AthAlgTool(type, name, pInterface),
+    m_histSvc("THistSvc", name) {
     declareInterface<ITrackDepositInCaloTool>(this);
     declareProperty("doExtrapolation", m_doExtr = true);
     declareProperty("doEDeposHist", m_doHist = false);
@@ -1010,8 +1010,8 @@ StatusCode TrackDepositInCaloTool::bookHistos() {
       ATH_MSG_FATAL("Filling histograms not supported in MT jobs.");
       return StatusCode::FAILURE;
     }
-    ATH_CHECK(service("THistSvc", m_histSvc));
-    if (!m_histSvc) return StatusCode::FAILURE;
+    ATH_CHECK( m_histSvc.retrieve() );
+
     m_h = std::make_unique<Hists>();
     ATH_CHECK( m_h->book (*m_histSvc) );
     return StatusCode::SUCCESS;

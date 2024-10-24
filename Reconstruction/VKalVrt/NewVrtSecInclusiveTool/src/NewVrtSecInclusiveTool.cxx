@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 ///
 ///  @author  Vadim Kostyukhin <vadim.kostyukhin@cern.ch>
@@ -145,16 +145,15 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
 
 //------------------------------------------       
 //
-     ITHistSvc*     hist_root=nullptr;
      if(m_fillHist){
        if (Gaudi::Concurrency::ConcurrencyFlags::numThreads() > 1) {
          ATH_MSG_FATAL("Filling histograms not supported in MT jobs.");
          return StatusCode::FAILURE;
        }
 
-       StatusCode sc = service( "THistSvc", hist_root); 
-       if( sc.isFailure() )  ATH_MSG_DEBUG("Could not find THistSvc service");
-       else                  ATH_MSG_DEBUG("NewVrtSecInclusiveTool Histograms found");
+       SmartIF<ITHistSvc> hist_root{service("THistSvc")};
+       if( !hist_root )  ATH_MSG_DEBUG("Could not find THistSvc service");
+       else              ATH_MSG_DEBUG("NewVrtSecInclusiveTool Histograms found");
        std::string histDir;
        histDir="/NVSI/stat/MultiSVrt"+m_instanceName+"/";
 

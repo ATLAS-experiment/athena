@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef jetsubstructuremomenttools_validator_header
@@ -9,6 +9,7 @@
 #include "xAODJet/Jet.h"
 #include "xAODJet/JetContainer.h"
 
+#include "GaudiKernel/ITHistSvc.h"
 #include "AsgTools/AsgTool.h"
 #include "JetInterface/IJetExecuteTool.h"
 
@@ -23,12 +24,13 @@ class Validator :
       // Constructor and destructor
       Validator(const std::string& name);
 
-      int execute() const;
+      virtual StatusCode initialize() override;
+      virtual int execute() const override;
 
     private:
       std::string m_InputContainer;
       std::vector<std::string> m_FloatMoments;
-
+      ServiceHandle<ITHistSvc> m_histSvc;
 };
 
 #endif
