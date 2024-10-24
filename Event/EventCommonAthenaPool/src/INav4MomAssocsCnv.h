@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // INav4MomAssocsCnv.h 
@@ -11,8 +11,8 @@
 #ifndef EVENTCOMMONATHENAPOOL_INAV4MOMASSOCSCNV_H 
 #define EVENTCOMMONATHENAPOOL_INAV4MOMASSOCSCNV_H 
 
-// STL includes
-
+// Gaudi includes
+#include "GaudiKernel/ServiceHandle.h"
 
 // AthenaPoolCnvSvc includes
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustomCnv.h"
@@ -69,7 +69,7 @@ protected:
 
   /** Pointer to the StoreGateSvc
    */
-  StoreGateSvc* m_storeGate;
+  ServiceHandle<StoreGateSvc> m_storeGate;
 
   INav4MomAssocsCnv_p3 m_tpConverter_p3;
   INav4MomAssocsCnv_p2 m_tpConverter_p2;

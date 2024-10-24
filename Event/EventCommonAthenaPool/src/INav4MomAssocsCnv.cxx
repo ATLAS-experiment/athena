@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // INav4MomAssocsCnv.cxx 
@@ -23,14 +23,14 @@
 /////////////////////////////////////////////////////////////////// 
 
 INav4MomAssocsCnv::INav4MomAssocsCnv( ISvcLocator* svcLocator ) :
-  T_AthenaPoolCustomCnv<INav4MomAssocs, INav4MomAssocs_PERS>(svcLocator)
+  T_AthenaPoolCustomCnv<INav4MomAssocs, INav4MomAssocs_PERS>(svcLocator, "INav4MomAssocsCnv"),
+  m_storeGate("StoreGateSvc", "INav4MomAssocsCnv")
 {
   if ( 0 == svcLocator ) {
     throw std::runtime_error("NULL pointer to ISvcLocator !!");
   }
 
-  if ( svcLocator->service("StoreGateSvc",m_storeGate).isFailure() || 
-       0 == m_storeGate ) {
+  if ( m_storeGate.retrieve().isFailure() ) {
     throw std::runtime_error("Could not fetch StoreGateSvc !!");
   }
 }
@@ -47,18 +47,13 @@ INav4MomAssocsCnv::INav4MomAssocsCnv( ISvcLocator* svcLocator ) :
 INav4MomAssocs_PERS* 
 INav4MomAssocsCnv::createPersistent( INav4MomAssocs* transCont ) 
 {
-  MsgStream log( msgSvc(), "INav4MomAssocsCnv" );
-
-  INav4MomAssocs_PERS *persObj = m_tpConverter_p3.createPersistent( transCont, log );
+  INav4MomAssocs_PERS *persObj = m_tpConverter_p3.createPersistent( transCont, msg() );
   
-  log << MSG::DEBUG << "::createPersistent [Success]" << endmsg;
-  return persObj; 
+  return persObj;
 }
 
 INav4MomAssocs* INav4MomAssocsCnv::createTransient() 
 {
-  MsgStream log( msgSvc(), "INav4MomAssocsConverter" );
-
   INav4MomAssocs *transObj = 0;
 
   static const pool::Guid tr_guid("DF941034-CCB2-4A1A-9A8C-5F3D5EAFD08C");
@@ -69,18 +64,18 @@ INav4MomAssocs* INav4MomAssocsCnv::createTransient()
   if( compareClassGuid(p3_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
     std::unique_ptr<INav4MomAssocs_p3> persObj( poolReadObject<INav4MomAssocs_p3>() );
-    transObj =  m_tpConverter_p3.createTransient( persObj.get(), log );
+    transObj =  m_tpConverter_p3.createTransient( persObj.get(), msg() );
   }
   else if ( compareClassGuid(p2_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
     std::unique_ptr<INav4MomAssocs_p2> persObj( poolReadObject<INav4MomAssocs_p2>() );
-    transObj = m_tpConverter_p2.createTransient( persObj.get(), log );
+    transObj = m_tpConverter_p2.createTransient( persObj.get(), msg() );
   }
   else if( compareClassGuid(p1_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
     std::unique_ptr<INav4MomAssocs_p1> persObj( poolReadObject<INav4MomAssocs_p1>() );
-    INav4MomAssocsCnv_p1 cnv( m_storeGate );
-    transObj = cnv.createTransient( persObj.get(), log );
+    INav4MomAssocsCnv_p1 cnv( m_storeGate.get() );
+    transObj = cnv.createTransient( persObj.get(), msg() );
   }
   else if( compareClassGuid(tr_guid) ) {
      // regular object from before the T/P separation
