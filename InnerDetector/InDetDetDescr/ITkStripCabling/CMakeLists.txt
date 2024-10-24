@@ -13,7 +13,7 @@ atlas_add_library( ITkStripCablingLib
                    PRIVATE_LINK_LIBRARIES InDetIdentifier )
 
 atlas_add_component( ITkStripCabling
-                     src/* src/components/*.cxx 
+                     src/ITkStripCablingAlg.cxx src/components/*.cxx 
                      LINK_LIBRARIES ITkStripCablingLib 
                      PRIVATE_LINK_LIBRARIES AthenaBaseComps InDetIdentifier PathResolver IdDictParser StoreGateLib)
 
