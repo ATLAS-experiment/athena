@@ -21,6 +21,7 @@
 #include "xAODEgamma/EgammaxAODHelpers.h"
 #include "xAODEgamma/PhotonxAODHelpers.h"
 #include "xAODTruth/xAODTruthHelpers.h"
+#include <EgammaAnalysisHelpers/PhotonHelpers.h>
 
 #include "MCTruthClassifier/IMCTruthClassifier.h"
 #include "MCTruthClassifier/MCTruthClassifierDefs.h"
@@ -64,7 +65,8 @@ EgammaPhysValMonitoringTool::EgammaPhysValMonitoringTool( const std::string& typ
 ////////////////////////////
 StatusCode EgammaPhysValMonitoringTool::initialize()
 {
-  ATH_MSG_INFO ("Initializing " << name() << "...");    
+  ATH_MSG_INFO("Initializing " << name() << "...");
+  ATH_MSG_INFO("using OQ quality cuts: " << m_useOQQuality);
   ATH_CHECK(ManagedMonitorToolBase::initialize());
   ATH_CHECK(m_truthClassifier.retrieve()); 
   ATH_CHECK(m_Electron_VeryLooseNoPix_LLHTool.retrieve()); 
@@ -517,6 +519,9 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoPhotHistograms(const xAOD::Truth
         bool isPhotPrompt=false;
         if (photon->author()&xAOD::EgammaParameters::AuthorCaloTopo35) continue;//21.0.>7
         if(!(photon->isGoodOQ (xAOD::EgammaParameters::BADCLUSPHOTON))) continue;
+        if (m_useOQQuality) {
+          if (!PhotonHelpers::passOQquality(*photon)) continue;
+        }
         
         if(photon->author()&xAOD::EgammaParameters::AuthorPhoton&&photon->pt()/GeV>7.)           numofPhot++;
         else if(photon->pt()*0.001<7.)  numofTopo++;

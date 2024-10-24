@@ -10,6 +10,10 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon.CFElements import seqAND
+
+from AthenaCommon.Logging import logging
+logger = logging.getLogger("PhysValMonitoringConfig")
 
 
 def PhysValExampleCfg(flags, **kwargs):
@@ -33,10 +37,51 @@ def PhysValExampleCfg(flags, **kwargs):
     return acc
 
 
+def GoodRunsListSelectionToolCfg(flags, grls, **kwargs):
+    from GoodRunsLists.GoodRunsListsDictionary import getGoodRunsLists
+    all_grls = getGoodRunsLists()  # this is a Dict[str, List[str]]
+    all_grl_flattened = [grl for grls in all_grls.values() for grl in grls]
+
+    acc = ComponentAccumulator()
+
+    if isinstance(grls, str):
+        raise TypeError("grls must be an iterable of GRLs, e.g. [%s]" % grls)
+
+    resolved_grls = []
+    for grl in grls:
+        if grl.endswith(".xml"):
+            if grl not in all_grl_flattened:
+                logger.warning("GRL '%s' is not in the reccomended GRLs, using it as is.", grl)
+            resolved_grls.append(grl)
+        else:
+            if grl in all_grls:
+                resolved_grls.extend(all_grls[grl])
+            else:
+                raise ValueError(f"GRL name '{grl}' not found in the available GRLs. Available GRL names: %s" % all_grls.keys())
+
+    tool = CompFactory.GoodRunsListSelectionTool(name="GoodRunsListSelectionTool",
+                                                 GoodRunsListVec=resolved_grls,
+                                                 PassThrough=False,
+                                                 **kwargs)
+    acc.setPrivateTools(tool)
+    return acc
+
+
+def GoodRunListSelectionAlgCfg(flags, **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault('GoodRunsListSelectionTool', acc.popToolsAndMerge(
+                      GoodRunsListSelectionToolCfg(flags, grls=flags.PhysVal.GRLs)))
+
+    alg = CompFactory.GRLSelectorAlg(
+        'GRLSelectorAlg', Tool=kwargs['GoodRunsListSelectionTool'], grlKey="EventInfo.passGRL")
+    acc.addEventAlgo(alg)
+    return acc
+
+
 def PhysValMonitoringCfg(flags, name="PhysValMonManager", tools=None, **kwargs):
     if tools is None:
         tools = []
-    
+
     acc = ComponentAccumulator()
 
     kwargs.setdefault("FileKey", "PhysVal")
@@ -63,7 +108,7 @@ def PhysValMonitoringCfg(flags, name="PhysValMonManager", tools=None, **kwargs):
         tools.append(acc.popToolsAndMerge(PhysValMETCfg(flags)))
     if flags.PhysVal.doEgamma:
         from EgammaPhysValMonitoring.EgammaPhysValMonitoringConfig import EgammaPhysValMonitoringToolCfg
-        tools.append(acc.popToolsAndMerge(EgammaPhysValMonitoringToolCfg(flags)))
+        tools.append(acc.popToolsAndMerge(EgammaPhysValMonitoringToolCfg(flags, useOQQuality=flags.PhysVal.applyAllDataCleaning)))
     if flags.PhysVal.doTau:
         from TauDQA.TauDQAConfig import PhysValTauCfg
         tools.append(acc.popToolsAndMerge(PhysValTauCfg(flags)))
@@ -94,6 +139,24 @@ def PhysValMonitoringCfg(flags, name="PhysValMonManager", tools=None, **kwargs):
 
     kwargs.setdefault("AthenaMonTools", tools)
 
-    acc.addEventAlgo(CompFactory.AthenaMonManager(name, **kwargs))
-    acc.addService(CompFactory.THistSvc(Output=[f"PhysVal DATAFILE='{flags.PhysVal.OutputFileName}' OPT='RECREATE'"]))
+    # create the sequence, so that the main algorithm is not executed if the GRL or event cleaning fails
+    acc.addSequence(seqAND("PhysValSequence"))
+
+    if flags.PhysVal.applyAllDataCleaning or flags.PhysVal.applyGRL:
+        if (flags.Input.isMC):
+            raise ValueError("applyGRL (or applyAllDataCleaning) is not supported for MC data, please disable it.")
+        acc.merge(GoodRunListSelectionAlgCfg(flags, **kwargs),
+                sequenceName="PhysValSequence")
+    if flags.PhysVal.applyAllDataCleaning or flags.PhysVal.applyEventStatusSelection:
+        if (flags.Input.isMC):
+            raise ValueError("applyEventStatusSelection (or applyAllDataCleaning) is not supported for MC data, please disable it.")
+        acc.addEventAlgo(CompFactory.CP.EventStatusSelectionAlg("EventStatusSelectionAlg", FilterKey="EventErrorState",
+                        FilterDescription="selecting events without any error state set"), sequenceName="PhysValSequence")
+
+    # add the main algorithm
+    acc.addEventAlgo(CompFactory.AthenaMonManager(
+        name, **kwargs), sequenceName="PhysValSequence")
+    acc.addService(CompFactory.THistSvc(
+        Output=[f"PhysVal DATAFILE='{flags.PhysVal.OutputFileName}' OPT='RECREATE'"]))
+
     return acc
