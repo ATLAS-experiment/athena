@@ -11,7 +11,7 @@ atlas_add_component( DataQualityTools
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaMonitoringKernelLib AthenaMonitoringLib GaudiKernel InDetIdentifier InDetPrepRawData InDetRawData LArRawEvent LArRecEvent LUCID_RawEvent LWHists MCTruthClassifierLib MagFieldConditions MagFieldElements MuonAnalysisInterfacesLib MuonRDO RecBackgroundEvent StoreGateLib TileEvent TrigT1Result TriggerMatchingToolLib TrkSpacePoint xAODEgamma xAODEventInfo xAODMuon xAODTracking xAODTruth )
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaMonitoringKernelLib AthenaMonitoringLib GaudiKernel InDetIdentifier InDetPrepRawData InDetRawData LArRawEvent LArRecEvent LUCID_RawEvent MCTruthClassifierLib MagFieldConditions MagFieldElements MuonAnalysisInterfacesLib MuonRDO RecBackgroundEvent StoreGateLib TileEvent TrigT1Result TriggerMatchingToolLib TrkSpacePoint xAODEgamma xAODEventInfo xAODMuon xAODTracking xAODTruth )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
