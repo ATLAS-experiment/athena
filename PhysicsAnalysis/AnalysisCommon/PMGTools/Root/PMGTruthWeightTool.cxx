@@ -11,7 +11,7 @@
 
 // Local include(s):
 #include <PATInterfaces/SystematicRegistry.h>
-#include <RootCoreUtils/StringUtil.h>
+#include <regex>
 #include <PMGTools/WeightHelpers.h>
 #include <xAODEventInfo/EventInfo.h>
 #include <xAODMetaData/FileMetaData.h>
@@ -114,11 +114,11 @@ namespace PMGTools
       return evtInfo->mcEventWeight(m_weightIndices.at(weightName));
     } catch (const std::out_of_range& e) {
       // Before throwing an exception, try to recover with bad naming conventions
-      std::string strippedName = RCU::substitute (weightName, " ", "_");
+      std::string strippedName = std::regex_replace(weightName, std::regex(" "), "_");
       std::transform(strippedName.begin(), strippedName.end(), strippedName.begin(),
         [](unsigned char c){ return std::tolower(c); });
       for (const std::string &weight : m_weightNames) {
-        std::string modifiedName = RCU::substitute (weight, " ", "_");
+        std::string modifiedName = std::regex_replace(weight, std::regex(" "), "_");
         std::transform(modifiedName.begin(), modifiedName.end(), modifiedName.begin(),
           [](unsigned char c){ return std::tolower(c); });
         if (strippedName == modifiedName){
