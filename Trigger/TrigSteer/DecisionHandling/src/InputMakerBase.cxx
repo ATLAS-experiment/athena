@@ -100,11 +100,8 @@ StatusCode InputMakerBase::decisionInputToOutput(const EventContext& context, SG
   } // end of: for ( auto inputKey: decisionInputs() )
 
   if (usedROIMatching and usedFeatureMatching) {
-    // downgrade ERROR to WARNING temporarely, since we have one case of tau+jet+tauprobe chain interaction, which meets this condition
-    // stay with WARNING to monitor such cases, then remove if they seem to be ok
-    ATH_MSG_WARNING("This input maker used Feature-based mapping on " << usedFeatureMatching << " inputs and ROI-based mapping on " << usedROIMatching
+    ATH_MSG_DEBUG("This input maker used Feature-based mapping on " << usedFeatureMatching << " inputs and ROI-based mapping on " << usedROIMatching
       << " inputs. The isEmptyIM flag is " << m_isEmptyStep);
-    //return StatusCode::FAILURE;
   }
 
   // Print some debug messages summarising the content of the outputHandles.

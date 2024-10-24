@@ -1,15 +1,18 @@
 /*
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAVALIDATION_BASICHISTOGRAMS_H
 #define EGAMMAVALIDATION_BASICHISTOGRAMS_H
 
+#include "GaudiKernel/ITHistSvc.h"
+#include "GaudiKernel/SmartIF.h"
+
 #include "xAODBase/IParticle.h"
 
 #include <map>
 #include <string>
-class ITHistSvc;
+
 class StatusCode;
 class TH1D;
 
@@ -23,12 +26,12 @@ namespace egammaMonitoring {
     IHistograms(std::string name,
 		std::string title,
 		std::string folder,
-		ITHistSvc * &rootHistSvc
+		SmartIF<ITHistSvc> rootHistSvc
 		) :
       m_name(std::move(std::move(name))),
       m_title(std::move(std::move(title))),
       m_folder(std::move(std::move(folder))),
-      m_rootHistSvc(rootHistSvc) {}
+      m_rootHistSvc(std::move(rootHistSvc)) {}
 
     virtual StatusCode initializePlots() = 0;
 
@@ -42,7 +45,7 @@ namespace egammaMonitoring {
     std::string m_name;
     std::string m_title;
     std::string m_folder;
-    ITHistSvc*  m_rootHistSvc = nullptr;
+    SmartIF<ITHistSvc> m_rootHistSvc;
 
   };
 

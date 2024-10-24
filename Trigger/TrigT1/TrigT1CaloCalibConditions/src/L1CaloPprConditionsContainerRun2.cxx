@@ -268,12 +268,8 @@ void L1CaloPprConditionsContainerRun2::makeTransient(const std::map<std::string,
   const CondAttrListCollection* chanDefaultsAttrListCollection =
       it_pprChanDefaultsAttrListCollection->second;
 
-  // There should be only one channel (channel#1) in the Default folder
-  // we just retrieve that one, waiting for a better method to retrieve that
-  // information.
-  const int defaultChannel = 1;
-  const coral::AttributeList& chanDefaultAttrList =
-      chanDefaultsAttrListCollection->attributeList(defaultChannel);
+  // There should be only one channel (channel#1 in data, #0 in MC) in the Default folder
+  const coral::AttributeList& chanDefaultAttrList = std::cbegin(*chanDefaultsAttrListCollection)->second;
 
   m_bcidDecision1 =
       chanDefaultAttrList[this->specificationName(eBcidDecision1)].data<int>();

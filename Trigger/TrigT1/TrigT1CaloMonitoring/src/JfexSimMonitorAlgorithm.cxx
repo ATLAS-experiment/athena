@@ -116,14 +116,16 @@ template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string
     auto IsDataTowers = Monitored::Scalar<bool>("IsDataTowers",evenType=="DataTowers");
     auto IsEmulatedTowers = Monitored::Scalar<bool>("IsEmulatedTowers",!IsDataTowers);
 
+    unsigned zeroTobs1 = 0;
+    unsigned zeroTobs2 = 0;
     for(const auto tob1 : *tobs1Cont) {
         bool isMatched = false;
         auto word1 = tob1->tobWord();
         auto jfex1 = tob1->jFexNumber();
         auto fpga1 = tob1->fpgaNumber();
-
+        
         for (const auto tob2 : *tobs2Cont) {
-            if(word1==0 || (word1 == tob2->tobWord() && jfex1 == tob2->jFexNumber() && fpga1 == tob2->fpgaNumber())) { // not 100% sure about the word1=0 skip, but came from old code comparing global RoI
+            if(word1==0 || (word1 == tob2->tobWord() && jfex1 == tob2->jFexNumber() && fpga1 == tob2->fpgaNumber())) { // do not flag as mismatch if the TOB word is zero, it might simply be (zero) suppressed in the other container!
                 isMatched = true;
                 break;
             }
@@ -131,8 +133,18 @@ template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string
         if(!isMatched) {
             mismatches = true;
         }
+        if (word1 == 0) {
+            zeroTobs1++;
+        }
     }
-    if(tobs2Cont.isValid() && tobs1Cont->size() < tobs2Cont->size()) {
+    
+    for (const auto tob2: *tobs2Cont) {
+        if (tob2->tobWord() == 0) {
+          zeroTobs2++;
+        }
+    }
+    
+    if(tobs2Cont.isValid() && (tobs1Cont->size() - zeroTobs1) < (tobs2Cont->size() - zeroTobs2) ) {
         mismatches=true;
     }
 

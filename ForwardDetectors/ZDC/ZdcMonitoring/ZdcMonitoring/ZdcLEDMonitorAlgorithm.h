@@ -21,6 +21,11 @@
 
 class ZdcLEDMonitorAlgorithm : public AthMonitorAlgorithm {
 public:
+    enum{
+        NoDecodingErrorBit  = 0,
+        ZDCDecodingErrorBit = 1,
+        RPDDecodingErrorBit = 2
+    };
     ZdcLEDMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
     virtual ~ZdcLEDMonitorAlgorithm();
     virtual StatusCode initialize() override;
@@ -31,7 +36,8 @@ private:
     Gaudi::Property<std::string> m_zdcModuleContainerName {this, "ZdcModuleContainerName", "ZdcModules", "Location of ZDC processed data"};
     Gaudi::Property<std::string> m_zdcSumContainerName {this, "ZdcSumContainerName", "ZdcSums", "Location of ZDC processed sums"};
     Gaudi::Property<std::string> m_auxSuffix{this, "AuxSuffix", "", "Append this tag onto end of AuxData"};
-
+    Gaudi::Property<bool> m_enableZDC {this,"EnableZDC",true};
+    Gaudi::Property<bool> m_enableRPD {this,"EnableRPD",true};
     Gaudi::Property<std::string> m_CalReq0{this, "CalReq0", "CALREQ_0"};
     Gaudi::Property<std::string> m_CalReq1{this, "CalReq1", "CALREQ_1"};
     Gaudi::Property<std::string> m_CalReq2{this, "CalReq2", "CALREQ_2"};
@@ -39,6 +45,7 @@ private:
     static const int m_nSides = 2;
     static const int m_nModules = 4;
     static const int m_nChannels = 16;
+    static const int m_nDecodingErrorBits = 3;
     const std::vector<std::string> m_LEDNames = {"Blue1", "Green", "Blue2"};
 
     // the i-th element (or (i,j)-th element for 2D vector) here gives the index of the generic monitoring tool (GMT)

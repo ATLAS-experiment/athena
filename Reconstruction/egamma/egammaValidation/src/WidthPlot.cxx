@@ -16,10 +16,10 @@ using namespace widthestimators;
 
 namespace egammaMonitoring {
 
-  WidthPlot::WidthPlot(std::string name, std::string folder, ITHistSvc * &rootHistSvc ) :
+  WidthPlot::WidthPlot(std::string name, std::string folder, SmartIF<ITHistSvc> rootHistSvc ) :
     m_name(std::move(name)),
     m_folder(std::move(folder)),
-    m_rootHistSvc(rootHistSvc) { }
+    m_rootHistSvc(std::move(rootHistSvc)) { }
 
   StatusCode WidthPlot::fill(IHistograms *input) {
 

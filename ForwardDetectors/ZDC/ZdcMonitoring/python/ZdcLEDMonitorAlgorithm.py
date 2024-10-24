@@ -19,7 +19,8 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     zdcLEDMonAlg = helper.addAlgorithm(CompFactory.ZdcLEDMonitorAlgorithm,'ZdcLEDMonAlg')
-
+    zdcLEDMonAlg.EnableZDC = inputFlags.Detector.EnableZDC_ZDC
+    zdcLEDMonAlg.EnableRPD = inputFlags.Detector.EnableZDC_RPD
 # --------------------------------------------------------------------------------------------------
 
     LEDs = ["Blue1", "Green", "Blue2"]
@@ -38,6 +39,8 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
     nsamples_max = 25.0
     time_max = 75.0
 
+    nDecodingErrorBits = 3
+
 # --------------------------------------------------------------------------------------------------
     zdcLEDAllEventsDiagMonTool = helper.addGroup(zdcLEDMonAlg, 'ZdcLEDAllEventsDiagnosis','ZDC/AllLEDEventsDiagnosis/')
 
@@ -47,8 +50,11 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
 # ------------------------- All-event (including bad events) diagnostic histograms -------------------------
 
 
+    zdcLEDAllEventsDiagMonTool.defineHistogram('decodingErrorBits',title=';;Events',
+                            xbins=nDecodingErrorBits,xmin=0.0,xmax=nDecodingErrorBits,opt='kVec',
+                            xlabels=['No Decoding Error', 'ZDC Decoding Error', 'RPD Decoding Error'])
+
     zdcLEDAllEventsDiagMonTool.defineHistogram('l1TriggerType', title=';L1TriggerType;Events',
-                            path='L1TriggerType',
                             xbins=l1TriggerType_max,xmin=0.0,xmax=l1TriggerType_max)
 
     # zdcLEDAllEventsDiagMonTool.defineHistogram('lumiBlock, l1TriggerType', type='TH2F', title=';lumi block;L1TriggerType',
@@ -59,28 +65,28 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
 
 # -------------------------------------------- Observables ------------------------------------------------------
  
-    zdcModLEDMonToolArr.defineHistogram('zdcLEDADCSum', title='LED ADC Sum [ADC Counts];Events',
+    zdcModLEDMonToolArr.defineHistogram('zdcLEDADCSum', title=';LED ADC Sum [ADC Counts];Events',
                             path='zdcLEDADCSum',
                             xbins=n_adc_sum_fine_bins,xmin=0.0,xmax=adc_sum_max)
-    zdcModLEDMonToolArr.defineHistogram('zdcLEDMaxADC', title='LED Max ADC [ADC Counts];Events',
+    zdcModLEDMonToolArr.defineHistogram('zdcLEDMaxADC', title=';LED Max ADC [ADC Counts];Events',
                             path='zdcLEDMaxADC',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=max_adc_max)
-    zdcModLEDMonToolArr.defineHistogram('zdcLEDMaxSample', title='LED Max Sample [ADC Counts];Events',
+    zdcModLEDMonToolArr.defineHistogram('zdcLEDMaxSample', title=';LED Max Sample [ADC Counts];Events',
                             path='zdcLEDMaxSample',
                             xbins=n_sample_bins_default,xmin=0.0,xmax=nsamples_max)
-    zdcModLEDMonToolArr.defineHistogram('zdcLEDAvgTime', title='LED Average Time [ns];Events',
+    zdcModLEDMonToolArr.defineHistogram('zdcLEDAvgTime', title=';LED Average Time [ns];Events',
                             path='zdcLEDAvgTime',
                             xbins=n_time_bins_default,xmin=0.0,xmax=time_max)
-    rpdChanLEDMonToolArr.defineHistogram('rpdLEDADCSum', title='LED ADC Sum [ADC Counts];Events',
+    rpdChanLEDMonToolArr.defineHistogram('rpdLEDADCSum', title=';LED ADC Sum [ADC Counts];Events',
                             path='rpdLEDADCSum',
                             xbins=n_adc_sum_fine_bins,xmin=0.0,xmax=adc_sum_max)
-    rpdChanLEDMonToolArr.defineHistogram('rpdLEDMaxADC', title='LED Max ADC [ADC Counts];Events',
+    rpdChanLEDMonToolArr.defineHistogram('rpdLEDMaxADC', title=';LED Max ADC [ADC Counts];Events',
                             path='rpdLEDMaxADC',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=max_adc_max)
-    rpdChanLEDMonToolArr.defineHistogram('rpdLEDMaxSample', title='LED Max Sample [ADC Counts];Events',
+    rpdChanLEDMonToolArr.defineHistogram('rpdLEDMaxSample', title=';LED Max Sample [ADC Counts];Events',
                             path='rpdLEDMaxSample',
                             xbins=n_sample_bins_default,xmin=0.0,xmax=nsamples_max)
-    rpdChanLEDMonToolArr.defineHistogram('rpdLEDAvgTime', title='LED Average Time [ns];Events',
+    rpdChanLEDMonToolArr.defineHistogram('rpdLEDAvgTime', title=';LED Average Time [ns];Events',
                             path='rpdLEDAvgTime',
                             xbins=n_time_bins_default,xmin=0.0,xmax=time_max)
 

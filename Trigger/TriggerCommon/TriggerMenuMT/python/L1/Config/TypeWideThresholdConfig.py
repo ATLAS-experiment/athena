@@ -243,7 +243,7 @@ def getConfig_eEM(do_HI_tob_thresholds):
                ("etamin",  24), ("etamax", 49), ("priority", 0)]),
         # More granular cuts from -24 to 25 are specified in FexThresholdParameters
     ]
-    confObj["ptMinToTopo"] = 1 if do_HI_tob_thresholds else 3
+    confObj["ptMinToTopo"] = 0.6 if do_HI_tob_thresholds else 3
     confObj["maxEt"] = 60
     confObj["resolutionMeV"] = 100
 
@@ -404,7 +404,7 @@ class L1Config_eTAU:
                    ("rHad", eFEXfwToFloatConversion(self.rHad_fw_tight, self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_tight), 
                  ]),
         ]
-        confObj["ptMinToTopo"] = 0.2 if do_HI_tob_thresholds else 5 # PLACEHOLDER
+        confObj["ptMinToTopo"] = 0.6 if do_HI_tob_thresholds else 5 # PLACEHOLDER
         confObj["resolutionMeV"] = 100
         confObj["minIsoEt"] = 13.0 # Minimum Et for the BDT cut, in units of GeV (internally with 16-bit resolution, in units of 100 MeV)
         confObj["maxEt"] = 50 # Maximum Et for the RCore/BDT/RHad cuts, in units of GeV
@@ -677,9 +677,9 @@ def getConfig_jTE():
 
 def getConfig_gXE(do_HI_tob_thresholds):
     confObj = odict()
-    confObj["seedThrA"] = 4 if do_HI_tob_thresholds else 80 #must be a multiple of 4
-    confObj["seedThrB"] = 4 if do_HI_tob_thresholds else 80 #must be a multiple of 4
-    confObj["seedThrC"] = 4 if do_HI_tob_thresholds else 80 #must be a multiple of 4
+    confObj["seedThrA"] = 12 if do_HI_tob_thresholds else 80 #must be a multiple of 4
+    confObj["seedThrB"] = 12 if do_HI_tob_thresholds else 80 #must be a multiple of 4
+    confObj["seedThrC"] = 12 if do_HI_tob_thresholds else 80 #must be a multiple of 4
     confObj["XERHO_sigmaPosA"] = 3 
     confObj["XERHO_sigmaPosB"] = 3 
     confObj["XERHO_sigmaPosC"] = 3 

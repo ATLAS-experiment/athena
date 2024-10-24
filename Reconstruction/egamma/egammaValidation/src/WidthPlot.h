@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAVALIDATION_WIDTHPLOTS_H
@@ -7,21 +7,22 @@ Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
 
 #include "IHistograms.h"
 
-class ITHistSvc;
+#include "GaudiKernel/ITHistSvc.h"
+#include "GaudiKernel/SmartIF.h"
 
 namespace egammaMonitoring {
   
   class WidthPlot {
   public:
 
-    WidthPlot(std::string name, std::string folder, ITHistSvc * &rootHistSvc);
+    WidthPlot(std::string name, std::string folder, SmartIF<ITHistSvc> rootHistSvc);
     ~WidthPlot(){ };
     StatusCode fill(IHistograms *input);
 
   private:
     std::string m_name;
     std::string m_folder;
-    ITHistSvc*  m_rootHistSvc = nullptr;
+    SmartIF<ITHistSvc> m_rootHistSvc;
 
   };
   

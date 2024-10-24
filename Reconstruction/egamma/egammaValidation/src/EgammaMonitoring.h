@@ -15,6 +15,8 @@
 
 #include "AsgTools/ToolHandle.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "GaudiKernel/ITHistSvc.h"
+#include "GaudiKernel/SmartIF.h"
 #include "StoreGate/ReadHandleKey.h"
 
 #include "EgammaAnalysisInterfaces/IAsgElectronLikelihoodTool.h"
@@ -48,7 +50,7 @@ class EgammaMonitoring : public AthAlgorithm
 {
 public:
   /// Tools and services ///
-  ITHistSvc* rootHistSvc = nullptr;
+  SmartIF<ITHistSvc> rootHistSvc;
 
   // samples from simulation
   std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterAll;

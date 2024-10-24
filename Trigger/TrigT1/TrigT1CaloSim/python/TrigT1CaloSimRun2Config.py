@@ -1,61 +1,10 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-from TrigT1CaloSim.TrigT1CaloSimConf import LVL1__Run2TriggerTowerMaker
+
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
 
-class Run2TriggerTowerMakerBase (LVL1__Run2TriggerTowerMaker):
-    __slots__ = []
-    def __init__(self, name):
-        super( Run2TriggerTowerMakerBase, self ).__init__( name )
-        self.DigiEngine =  "%s_Digitization"%name
-    
-class Run2TriggerTowerMaker(Run2TriggerTowerMakerBase):
-    """ Baseline Run2 TriggerTower configuration:
-      - with pedestal correction
-      - noise cuts
-    """
-    __slots__ = []
-    def __init__(self, name):
-        super(Run2TriggerTowerMaker, self).__init__(name)
-        self.CellType = 3 # TTL1 input
-        self.ZeroSuppress = True
-
-        from SGComps.AddressRemappingSvc import addInputRename
-        addInputRename ( 'xAOD::TriggerTowerContainer', 'xAODTriggerTowers_rerun', 'xAODTriggerTowers')
-        
-class Run2TriggerTowerMaker25ns(Run2TriggerTowerMaker):
-    """ Run2 TriggerTower configuration for 25ns running """
-    __slots__ = []
-    def __init__(self, name = "Run2TriggerTowerMaker"):
-        super(Run2TriggerTowerMaker25ns, self).__init__(name)
-
-class Run2TriggerTowerMaker50ns(Run2TriggerTowerMaker):
-    """ Run2 TriggerTower configuration for 50ns running """
-    __slots__ = []
-    def __init__(self, name = "Run2TriggerTowerMaker"):
-        super(Run2TriggerTowerMaker50ns, self).__init__(name)
-
-
-def L1CaloCondFoldersCfg(flags):
-        L1CaloFolders = {}
-        L1CaloFolders['PprChanCalib'] = '/TRIGGER/L1Calo/V2/Calibration/Physics/PprChanCalib'
-        L1CaloFolders['PprChanDefaults'] = '/TRIGGER/L1Calo/V2/Configuration/PprChanDefaults'
-        # Different folders for data and MC
-        ver = 'V2' if flags.Input.isMC else 'V1'
-        L1CaloFolders['DisabledTowers'] = f'/TRIGGER/L1Calo/{ver}/Conditions/DisabledTowers'
-        L1CaloFolders['PpmDeadChannels'] = f'/TRIGGER/L1Calo/{ver}/Calibration/PpmDeadChannels'
-
-        # TODO decide what is needed form below items, (likely only needed when re-running on the data)
-        #L1CaloFolderList += ['/TRIGGER/L1Calo/V1/Conditions/RunParameters']
-        #L1CaloFolderList += ['/TRIGGER/L1Calo/V1/Conditions/DerivedRunPars']
-        #L1CaloFolderList += ['/TRIGGER/Receivers/Conditions/VgaDac']
-        #L1CaloFolderList += ['/TRIGGER/Receivers/Conditions/Strategy']
-
-        from IOVDbSvc.IOVDbSvcConfig import addFolders
-        db = 'TRIGGER_ONL' if not flags.Input.isMC else 'TRIGGER_OFL'
-        return addFolders(flags, list(L1CaloFolders.values()), db), L1CaloFolders
 
 
 def Run2TriggerTowerMakerCfg(flags, name='Run2TriggerTowerMaker25ns'):
@@ -74,8 +23,10 @@ def Run2TriggerTowerMakerCfg(flags, name='Run2TriggerTowerMaker25ns'):
     from TileConditions.TileInfoLoaderConfig import TileInfoLoaderCfg
     acc.merge(CaloTTIdMapCfg(flags))
     acc.merge(TileInfoLoaderCfg(flags))
-    condFoldersAcc, condFolders = L1CaloCondFoldersCfg(flags)
-    acc.merge(condFoldersAcc)
+
+    from TrigT1CaloCondSvc.L1CaloCondConfig import L1CaloCondAlgCfg
+    acc.merge(L1CaloCondAlgCfg(flags,Physics=True, Calib1=False, Calib2=False))
+
 
     # R2TTMaker reads TTL1 containers from input POOL file (RDO, ESD, ...)
     if flags.Input.Format is Format.POOL:
@@ -95,6 +46,7 @@ def Run2TriggerTowerMakerCfg(flags, name='Run2TriggerTowerMaker25ns'):
     from LumiBlockComps.LumiBlockMuWriterConfig import LumiBlockMuWriterCfg
     acc.merge(LumiBlockMuWriterCfg(flags))
 
+    condalgo = acc.getCondAlgo("L1CaloCondAlg")
     alg = CompFactory.LVL1.Run2TriggerTowerMaker(name,
                                                  DigiEngine = "{}_Digitization".format(name),
                                                  # TODO make these settings flags dependent
@@ -102,10 +54,15 @@ def Run2TriggerTowerMakerCfg(flags, name='Run2TriggerTowerMaker25ns'):
                                                  inputTTLocation = 'unused',
                                                  TriggerTowerLocationRerun = 'also_unused',
                                                  ZeroSuppress = True, 
-                                                 ChanCalibFolderKey = condFolders['PprChanCalib'],
-                                                 ChanDefaultsFolderKey = condFolders['PprChanDefaults'],
-                                                 DisabledTowersFolderKey = condFolders['DisabledTowers'],
-                                                 DeadChannelsFolderKey = condFolders['PpmDeadChannels'],
+                                                 ChanCalibFolderKey = condalgo.OutputKeyPPr,
+                                                 ChanDefaultsFolderKey = condalgo.OutputKeyDef,
+                                                 DisabledTowersFolderKey = condalgo.OutputKeyDisTowers,
+                                                 DeadChannelsFolderKey = condalgo.OutputKeyPpmDeadChannels,
+                                                 TTTool = CompFactory.LVL1.L1TriggerTowerTool("L1TriggerTowerTool",
+                                                                                              InputKeyRunParameters=condalgo.OutputKeyRunParameters,
+                                                                                              InputKeyPprConditionsRun2=condalgo.OutputKeyPprConditionsRun2,
+                                                                                              InputKeyDisabledChannelRun2=condalgo.OutputKeyDisabledChannelRun2,
+                                                                                              InputKeyTimeRefs=condalgo.OutputKeyTimeRefs)
                                                  #ExtraInputs = {'LArTTL1Container#LArTTL1EM', 'LArTTL1Container#LArTTL1HAD', 'TileTTL1Container#TileTTL1Cnt'}
                                                  )
     acc.addEventAlgo(alg)
