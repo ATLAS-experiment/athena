@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Athena include(s)
-#include "AthenaMonitoring/AthenaMonManager.h"
 #include "CscRdoValMonAlg.h"
 #include "MuonRDO/CscRawData.h"
 #include "MuonRDO/CscRawDataCollection.h"
