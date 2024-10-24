@@ -1458,6 +1458,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
     std::string inputfile = "";
     if (!m_tauConfigPath.empty() && (m_tauConfigPath!="default")) inputfile = m_tauConfigPath;
+    else if (m_tauId == "rnn001") inputfile = "SUSYTools/tau_selection_rnn001.conf";
     else if (m_tauId == "VeryLoose") inputfile = "SUSYTools/tau_selection_veryloose.conf";
     else if (m_tauId == "Loose") inputfile = "SUSYTools/tau_selection_loose.conf";
     else if (m_tauId == "Medium") inputfile = "SUSYTools/tau_selection_medium.conf";
@@ -1490,6 +1491,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     if (!m_tauSelToolBaseline.isUserConfigured()) {
       std::string inputfile = "";
       if (!m_tauConfigPathBaseline.empty() && (m_tauConfigPathBaseline!="default")) inputfile = m_tauConfigPathBaseline;
+      else if (m_tauIdBaseline == "rnn001") inputfile = "SUSYTools/tau_selection_rnn001.conf";
       else if (m_tauIdBaseline == "VeryLoose") inputfile = "SUSYTools/tau_selection_veryloose.conf";
       else if (m_tauIdBaseline == "Loose") inputfile = "SUSYTools/tau_selection_loose.conf";
       else if (m_tauIdBaseline == "Medium") inputfile = "SUSYTools/tau_selection_medium.conf";
@@ -1520,7 +1522,8 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       std::string jetIDWP = m_tauConfigReader.GetValue("JetIDWP" ,"");
       ANA_MSG_DEBUG( "Found JetIDWP in tau config file : " << jetIDWP );
       int jet_id_lvl;
-      if (jetIDWP == "JETIDRNNVERYLOOSE") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDRNNVERYLOOSE;
+      if (jetIDWP == "JETIDNONE") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDNONE;
+      else if (jetIDWP == "JETIDRNNVERYLOOSE") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDRNNVERYLOOSE;
       else if (jetIDWP == "JETIDRNNLOOSE") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDRNNLOOSE;
       else if (jetIDWP == "JETIDRNNMEDIUM") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDRNNMEDIUM;
       else if (jetIDWP == "JETIDRNNTIGHT") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDRNNTIGHT;
@@ -1561,7 +1564,8 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
     if (!isData()) {
       int iTauID = (int) TauAnalysisTools::JETIDNONEUNCONFIGURED;
-      if (m_tauId == "VeryLoose")   iTauID = (int) TauAnalysisTools::JETIDRNNVERYLOOSE;
+      if (m_tauId == "rnn001")   iTauID = (int) TauAnalysisTools::JETIDNONE;
+      else if (m_tauId == "VeryLoose")   iTauID = (int) TauAnalysisTools::JETIDRNNVERYLOOSE;
       else if (m_tauId == "Loose")  iTauID = (int) TauAnalysisTools::JETIDRNNLOOSE;
       else if (m_tauId == "Medium") iTauID = (int) TauAnalysisTools::JETIDRNNMEDIUM;
       else if (m_tauId == "Tight")  iTauID = (int) TauAnalysisTools::JETIDRNNTIGHT;

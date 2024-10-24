@@ -791,6 +791,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   m_mu_id_support = 4; //maximum value supported
 
   // Tau ID WPs
+  m_tau_id_support.push_back("rnn001");
   m_tau_id_support.push_back("VeryLoose");
   m_tau_id_support.push_back("Loose");
   m_tau_id_support.push_back("Medium");
@@ -1996,7 +1997,8 @@ StatusCode SUSYObjDef_xAOD::validConfig(bool strict) const {
 
     std::string theConfig = m_tauConfigPathBaseline;
     if( m_tauConfigPathBaseline=="default" ){
-      if (m_tauId == "VeryLoose")   theConfig = "SUSYTools/tau_selection_veryloose.conf";
+      if (m_tauId == "rnn001")   theConfig = "SUSYTools/tau_selection_rnn001.conf";
+      else if (m_tauId == "VeryLoose")   theConfig = "SUSYTools/tau_selection_veryloose.conf";
       else if (m_tauId == "Loose")  theConfig = "SUSYTools/tau_selection_loose.conf";
       else if (m_tauId == "Medium") theConfig = "SUSYTools/tau_selection_medium.conf";
       else if (m_tauId == "Tight")  theConfig = "SUSYTools/tau_selection_tight.conf";
@@ -2026,7 +2028,8 @@ StatusCode SUSYObjDef_xAOD::validConfig(bool strict) const {
 
     std::string theConfig = m_tauConfigPath;
     if( m_tauConfigPath=="default" ){
-      if (m_tauId == "VeryLoose")   theConfig = "SUSYTools/tau_selection_veryloose.conf";
+      if (m_tauId == "rnn001")   theConfig = "SUSYTools/tau_selection_rnn001.conf";
+      else if (m_tauId == "VeryLoose")   theConfig = "SUSYTools/tau_selection_veryloose.conf";
       else if (m_tauId == "Loose")  theConfig = "SUSYTools/tau_selection_loose.conf";
       else if (m_tauId == "Medium") theConfig = "SUSYTools/tau_selection_medium.conf";
       else if (m_tauId == "Tight")  theConfig = "SUSYTools/tau_selection_tight.conf";
