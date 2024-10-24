@@ -2,7 +2,8 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <MuonGeoModelR4/MdtReadoutGeomTool.h>
+#include "MdtReadoutGeomTool.h"
+
 #include <GaudiKernel/SystemOfUnits.h>
 #include <RDBAccessSvc/IRDBAccessSvc.h>
 #include <RDBAccessSvc/IRDBRecordset.h>
@@ -35,9 +36,7 @@ using physVolWithTrans = IMuonGeoUtilityTool::physVolWithTrans;
 MdtReadoutGeomTool::MdtReadoutGeomTool(const std::string& type,
                                        const std::string& name,
                                        const IInterface* parent)
-    : AthAlgTool{type, name, parent} {
-    declareInterface<IMuonReadoutGeomTool>(this);
-}
+    : base_class{type, name, parent} {}
 
 StatusCode MdtReadoutGeomTool::loadDimensions(FactoryCache& facCache, 
                                               MdtReadoutElement::defineArgs& define) const {

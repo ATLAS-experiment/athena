@@ -3,7 +3,7 @@
 */
 #ifndef SIMULATIONBASE
 
-#include <MuonGeoModelR4/ChamberAssembleTool.h>
+#include "ChamberAssembleTool.h"
 
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>

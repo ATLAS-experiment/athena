@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <MuonGeoModelR4/TgcReadoutGeomTool.h>
+#include "TgcReadoutGeomTool.h"
 
 #include <GaudiKernel/SystemOfUnits.h>
 #include <RDBAccessSvc/IRDBAccessSvc.h>
@@ -40,10 +40,7 @@ using defineArgs = TgcReadoutElement::defineArgs;
 TgcReadoutGeomTool::TgcReadoutGeomTool(const std::string& type,
                                        const std::string& name,
                                        const IInterface* parent)
-    : AthAlgTool{type, name, parent} {
-    declareInterface<IMuonReadoutGeomTool>(this);
-
-}
+    : base_class{type, name, parent} {}
 StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& define,
                                               FactoryCache& factoryCache) {
     ATH_MSG_VERBOSE("Load dimensions of "<<m_idHelperSvc->toString(define.detElId)

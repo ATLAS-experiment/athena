@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <MuonGeoModelR4/sTgcReadoutGeomTool.h>
+#include "sTgcReadoutGeomTool.h"
 
 #include <GaudiKernel/SystemOfUnits.h>
 #include <RDBAccessSvc/IRDBAccessSvc.h>
@@ -38,9 +38,7 @@ using defineArgs = sTgcReadoutElement::defineArgs;
 sTgcReadoutGeomTool::sTgcReadoutGeomTool(const std::string& type,
                                        const std::string& name,
                                        const IInterface* parent)
-    : AthAlgTool{type, name, parent} {
-    declareInterface<IMuonReadoutGeomTool>(this);
-}
+    : base_class{type, name, parent} {}
 
 sTgcReadoutGeomTool::sTgcShape sTgcReadoutGeomTool::extractParameters(const GeoShape* shape) const {
     sTgcShape result{};

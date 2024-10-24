@@ -16,8 +16,7 @@
 
 namespace MuonGMR4 {
 
-class TgcReadoutGeomTool : public AthAlgTool,
-                           virtual public IMuonReadoutGeomTool {
+class TgcReadoutGeomTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
    public:
     // Constructor
     TgcReadoutGeomTool(const std::string &type, const std::string &name,

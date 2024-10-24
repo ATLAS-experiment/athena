@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#include "MuonGeoModelR4/MuonDetectorTool.h"
+#include "MuonDetectorTool.h"
 
 #include <GeoModelInterfaces/IGeoModelSvc.h>
 #include <GeoModelKernel/GeoPerfUtils.h>
