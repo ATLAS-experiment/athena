@@ -9,7 +9,7 @@ if __name__=="__main__":
 
     # Use latest Data or MC
     from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags, defaultGeometryTags
-    if flags.RecExRecoTest.doMC is True:
+    if flags.RecExRecoTest.doMC:
         # Currently not working on latest ESD, see ATLASRECTS-8111
         #flags.Input.Files = defaultTestFiles.ESD_RUN3_MC
         #flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC

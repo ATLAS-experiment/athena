@@ -991,8 +991,9 @@ def TrackRecoConfigTest(flags=None):
         from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
         OnlyTrackingPreInclude(flags)
 
-        from AthenaConfiguration.TestDefaults import defaultTestFiles
+        from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
         flags.Input.Files = defaultTestFiles.RDO_RUN3
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
         flags.Exec.MaxEvents = 1
 
         flags.lock()

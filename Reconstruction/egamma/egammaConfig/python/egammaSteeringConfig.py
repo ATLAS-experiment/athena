@@ -60,8 +60,9 @@ def egammaSteeringConfigTest(flags=None):
         flags = initConfigFlags()
         flags.addFlag('egamma.configOnly', False, help='custom option for egammaSteeringConfig to not run, only output config file')
 
-        from AthenaConfiguration.TestDefaults import defaultTestFiles
+        from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
         flags.Input.Files = defaultTestFiles.RDO_RUN3
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
         flags.Exec.MaxEvents = 1
 
         flags.Output.doWriteESD = True  # To test the ESD parts

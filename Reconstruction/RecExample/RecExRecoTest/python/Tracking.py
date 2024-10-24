@@ -11,12 +11,13 @@ if __name__=="__main__":
         
     # Use latest Data or MC
     from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags, defaultGeometryTags
-    if flags.RecExRecoTest.doMC is True:
-        if flags.RecExRecoTest.doESD is True:
+    if flags.RecExRecoTest.doMC:
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
+        if flags.RecExRecoTest.doESD:
             flags.Input.Files = defaultTestFiles.ESD_RUN3_MC
         else:
             flags.Input.Files = defaultTestFiles.RDO_RUN3
-            print("MC RDO inputs not currently supported for RecExRecoTest.Calo, see ATLASRECTS-8110")
+            print("MC RDO inputs not currently supported for RecExRecoTest.Tracking, see ATLASRECTS-8110")
             exit(1)
     else:
         flags.Input.Files = defaultTestFiles.RAW_RUN3_DATA24

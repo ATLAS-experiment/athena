@@ -10,7 +10,7 @@ if __name__=="__main__":
         
     # Use latest Data or MC
     from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags, defaultGeometryTags
-    if flags.RecExRecoTest.doMC is True:
+    if flags.RecExRecoTest.doMC:
         # Needs to be fixed to use latest ESDs, see ATLASRECTS-8112
         #flags.Input.Files = defaultTestFiles.ESD_RUN3_MC
         #flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
@@ -28,7 +28,7 @@ if __name__=="__main__":
     flags.lock()
 
     # Unify these two strategies? See ATLASRECTS-8112
-    if flags.RecExRecoTest.doMC is True:
+    if flags.RecExRecoTest.doMC:
         from tauRec.TauConfig import TauConfigTest
         TauConfigTest(flags)
     else:

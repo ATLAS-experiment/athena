@@ -10,8 +10,9 @@ if __name__=="__main__":
         
     # Use latest Data or MC
     from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags, defaultGeometryTags
-    if flags.RecExRecoTest.doMC is True:
+    if flags.RecExRecoTest.doMC:
         flags.Input.Files = defaultTestFiles.RDO_RUN3
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
     else:
         flags.Input.Files = defaultTestFiles.RAW_RUN3_DATA24
         flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
