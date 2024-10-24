@@ -40,5 +40,25 @@ def FastCaloSimCfg(flags, **kwargs):
     from G4AtlasTools.G4AtlasToolsConfig import G4CaloTransportToolCfg
     kwargs.setdefault("G4CaloTransportTool", result.addPublicTool(result.popToolsAndMerge(G4CaloTransportToolCfg(flags))))
     
+    # Config FastCaloSim
+    kwargs.setdefault('doEMECFCS', flags.Sim.FastCalo.doEMECFCS)
+
+    if flags.Sim.FastCalo.doEMECFCS:  # AF3 in EMEC and G4 in rest
+        kwargs.setdefault('doPhotons', True)
+        kwargs.setdefault('doElectrons', True)
+        kwargs.setdefault('doHadrons', False)
+        kwargs.setdefault('AbsEtaMin', 1.5)
+        kwargs.setdefault('AbsEtaMax', 3.2)
+        kwargs.setdefault('EkinMin', 0)
+        kwargs.setdefault('EkinMax', 8192)
+    else: # These are set to AF3 configuration
+        kwargs.setdefault('doPhotons', True)
+        kwargs.setdefault('doElectrons', True)
+        kwargs.setdefault('doHadrons', True)
+        kwargs.setdefault('AbsEtaMin', 0)
+        kwargs.setdefault('AbsEtaMax', 10)
+        kwargs.setdefault('EkinMin', 0)
+        kwargs.setdefault('EkinMax', float('inf'))
+
     result.setPrivateTools(CompFactory.FastCaloSimTool(name="FastCaloSim", **kwargs))
     return result
