@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // TheLArHV2Ntuple.h
@@ -64,7 +64,7 @@ class LArHV2Ntuple : public AthAlgorithm {
   //---------------------------------------------------
   // Member variables
   //---------------------------------------------------
-  ITHistSvc* m_thistSvc;
+  ServiceHandle<ITHistSvc> m_thistSvc{this,"THistSvc","THistSvc"};
   TTree* m_tree;
 
   bool m_addcells;
