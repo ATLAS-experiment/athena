@@ -18,7 +18,6 @@
 #include "GaudiKernel/ToolHandle.h"
 
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
-#include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h"
 #include "ALFA_RawEv/ALFA_RawEvDict.h"
 
 #include "ALFA_RawDataProviderTool_charge.h"

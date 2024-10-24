@@ -7,7 +7,6 @@
 #include "ITkStripsByteStreamCnv/IITkStripsRawContByteStreamTool.h"
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h" 
 #include "ByteStreamData/RawEvent.h" 
-#include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h"
 
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include "StoreGate/StoreGateSvc.h"

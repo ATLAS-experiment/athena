@@ -36,7 +36,6 @@
 
 class LArRawChannelContainer; 
 class LArDigitContainer;
-class IByteStreamEventAccess;
 
 /** 
  *@class LArRawDataContByteStreamTool

@@ -12,7 +12,6 @@
 
 class DataObject;
 class StatusCode;
-class IByteStreamEventAccess;
 class StoreGateSvc;
 class TgcRdoContainer;
 

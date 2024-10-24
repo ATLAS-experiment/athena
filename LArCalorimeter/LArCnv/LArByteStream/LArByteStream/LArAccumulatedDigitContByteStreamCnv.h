@@ -19,7 +19,6 @@
 class DataObject;
 class StatusCode;
 class IAddressCreator;
-class IByteStreamEventAccess;
 class StoreGateSvc; 
 class LArAccumulatedDigitContainer; 
 class LArRawDataContByteStreamTool ; 
