@@ -1,13 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRDO_CSCRDOIDHASH_H
 #define MUONRDO_CSCRDOIDHASH_H
-
-
-
-#include "CSCcabling/CSCcablingSvc.h"
 
 #include <map>
 #include <vector>
@@ -44,7 +40,7 @@ public:
 
 private:
   /** total number of IDs */
-  int m_size;
+  int m_size{0};
 
   /** lookup table 
   */
@@ -58,9 +54,6 @@ private:
    */ 
   std::vector<uint16_t> m_int2subDetectorId;
   std::vector<uint16_t> m_int2rodId;
-
-  CSCcablingSvc * m_cabling = nullptr;
-
 };
 
 #endif

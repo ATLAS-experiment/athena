@@ -1,53 +1,38 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-
+#include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/IMessageSvc.h"
-#include "GaudiKernel/StatusCode.h"
-#include "GaudiKernel/MsgStream.h"
+#include "CSCcabling/CSCcablingSvc.h"
 #include "MuonRDO/CscRawDataCollectionIdHash.h" 
 #include "MuonRDO/CscRawDataCollection.h" 
 
 // default contructor 
 CscRawDataCollectionIdHash::CscRawDataCollectionIdHash()
 {
-
-  IMessageSvc*  msgSvc;
-  ISvcLocator* svcLoc = Gaudi::svcLocator( );
-  StatusCode sc = svcLoc->service( "MessageSvc", msgSvc );
-  if (sc.isFailure()) std::cout << "Fail to locate Message Service" << std::endl;
-
-  MsgStream log(msgSvc, "CscRawDataCollectionIdHash" );
-
-  log << MSG::DEBUG << " CscRawDataCollectionIdHash Constructor "<<endmsg; 
-
   // initialize RPC cabling service
-  sc = svcLoc->service("CSCcablingSvc", m_cabling);
-  if (sc != StatusCode::SUCCESS ) {
-     log << MSG::ERROR << " Cannot get CSC cabling Service " << endmsg;
+  SmartIF<CSCcablingSvc> cabling{Gaudi::svcLocator()->service("CSCcablingSvc")};
+  if (!cabling) {
+    REPORT_MESSAGE_WITH_CONTEXT(MSG::ERROR, "CscRawDataCollectionIdHash")
+      << "Cannot get CSC cabling Service " << endmsg;
   }
 
-  m_size=0;
-
   // loop over all RODs
-  for (uint16_t id=0; id<m_cabling->maxId(); ++id)
+  for (uint16_t id=0; id<cabling->maxId(); ++id)
     {
       // map
       m_lookup[id]=m_size;
       m_int2id.push_back(id);
       // ROD ID
-      m_int2rodId.push_back( id%m_cabling->nROD() );
+      m_int2rodId.push_back( id%cabling->nROD() );
       ++m_size;
 
       // SubDetectorID
-      if ( id < m_cabling->nROD() ) // C-side
-	m_int2subDetectorId.push_back(0x6A);
+      if ( id < cabling->nROD() ) // C-side
+        m_int2subDetectorId.push_back(0x6A);
       else                                      // A-side
-	m_int2subDetectorId.push_back(0x69);
-
+        m_int2subDetectorId.push_back(0x69);
     }
 }
 

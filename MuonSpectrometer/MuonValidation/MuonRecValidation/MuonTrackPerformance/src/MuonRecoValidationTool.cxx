@@ -72,8 +72,8 @@ namespace Muon {
         ATH_CHECK(m_extrapolator.retrieve());
         ATH_CHECK(m_matchingTool.retrieve());
         ATH_CHECK(m_hitTimingTool.retrieve());
-        ITHistSvc* thistSvc = nullptr;
-        ATH_CHECK(service("THistSvc", thistSvc));
+        SmartIF<ITHistSvc> thistSvc{service("THistSvc")};
+        ATH_CHECK(thistSvc.isValid());
 
         m_tree = new TTree("data", "RecoValidation");
         ATH_CHECK(thistSvc->regTree("/MuonRecoVal/data", m_tree));
