@@ -126,9 +126,9 @@ void makePixelID(ISvcLocator* pSvcLoc)
   parser.register_external_entity("InnerDetector", "IdDictInnerDetector.xml");
   IdDictMgr& idd = parser.parse("IdDictParser/ATLAS_IDS.xml");
   pix_id->initialize_from_dictionary(idd);
- 
-  StoreGateSvc* detStore = nullptr;
-  assert(pSvcLoc->service("DetectorStore", detStore).isSuccess());
+
+  SmartIF<StoreGateSvc> detStore{pSvcLoc->service("DetectorStore")};
+  assert(detStore.isValid());
   assert(detStore->record(std::move(pix_id), "PixelID"));
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoreGate/StoreGateSvc.h"
@@ -12,52 +12,20 @@
 
   PixelClusterContainerCnv::PixelClusterContainerCnv (ISvcLocator* svcloc)
     : PixelClusterContainerCnvBase(svcloc, "PixelClusterContainerCnv"),
-      m_converter_p0(),
-      m_storeGate(nullptr)
+      m_converter_p0()
   {}
 
 
 StatusCode PixelClusterContainerCnv::initialize() {
    ATH_MSG_INFO("PixelClusterContainerCnv::initialize()");
 
-   StatusCode sc = PixelClusterContainerCnvBase::initialize();
-   if (sc.isFailure()) {
-     ATH_MSG_FATAL("Cannot initialize cnv base !");
-     return StatusCode::FAILURE;
-   }
+   ATH_CHECK( PixelClusterContainerCnvBase::initialize() );
 
-   // get StoreGate service. This is needed only for clients 
-   // that register collections directly to the SG instead of adding 
-   // them to the container.
-   sc = service("StoreGateSvc", m_storeGate);
-   if (sc.isFailure()) {
-     ATH_MSG_FATAL("StoreGate service not found !");
-     return StatusCode::FAILURE;
-   }
-   
-   // get DetectorStore service
-   StoreGateSvc *detStore(nullptr);
-   if (service("DetectorStore", detStore).isFailure()) {
-     ATH_MSG_FATAL("DetectorStore service not found !");
-     return StatusCode::FAILURE;
-   } else {
-     ATH_MSG_DEBUG("Found DetectorStore.");
-   }
-   
    // Get the pixel helper from the detector store
    const PixelID* idhelper(nullptr);
-   if (detStore->retrieve(idhelper, "PixelID").isFailure()) {
-     ATH_MSG_FATAL("Could not get PixelID helper !");
-     return StatusCode::FAILURE;
-   } else {
-     ATH_MSG_DEBUG("Found the PixelID helper.");
-   }
-   
-   if (m_converter_p0.initialize(msg()).isFailure())
-   {
-     ATH_MSG_FATAL("Could not initialize converter!");
-     return StatusCode::FAILURE;
-   }
+   ATH_CHECK( detStore()->retrieve(idhelper, "PixelID") );
+
+   ATH_CHECK( m_converter_p0.initialize(msg()) );
 
    ATH_MSG_DEBUG("Converter initialized");
 

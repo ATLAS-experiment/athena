@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_DriftCircleContainerCnv.h"
@@ -11,52 +11,20 @@
 
   TRT_DriftCircleContainerCnv::TRT_DriftCircleContainerCnv (ISvcLocator* svcloc)
     : TRT_DriftCircleContainerCnvBase(svcloc, "TRT_DriftCircleContainerCnv"),
-      m_converter_p0(),
-      m_storeGate(nullptr)
+      m_converter_p0()
   {}
 
 
 StatusCode TRT_DriftCircleContainerCnv::initialize() {
    ATH_MSG_INFO("TRT_DriftCircleContainerCnv::initialize()");
 
-   StatusCode sc = TRT_DriftCircleContainerCnvBase::initialize();
-   if (sc.isFailure()) {
-     ATH_MSG_FATAL("Cannot initialize cnv base !");
-     return StatusCode::FAILURE;
-   }
+   ATH_CHECK( TRT_DriftCircleContainerCnvBase::initialize() );
 
-   // get StoreGate service. This is needed only for clients 
-   // that register collections directly to the SG instead of adding 
-   // them to the container.
-   sc = service("StoreGateSvc", m_storeGate);
-   if (sc.isFailure()) {
-     ATH_MSG_FATAL("StoreGate service not found !");
-     return StatusCode::FAILURE;
-   }
-   
-   // get DetectorStore service
-   StoreGateSvc *detStore(nullptr);
-   if (service("DetectorStore", detStore).isFailure()) {
-     ATH_MSG_FATAL("DetectorStore service not found !");
-     return StatusCode::FAILURE;
-   } else {
-     ATH_MSG_DEBUG("Found DetectorStore.");
-   }
-   
    // Get the trt helper from the detector store
    const TRT_ID* idhelper(nullptr);
-   if (detStore->retrieve(idhelper, "TRT_ID").isFailure()) {
-     ATH_MSG_FATAL("Could not get TRT_ID helper !");
-     return StatusCode::FAILURE;
-   } else {
-     ATH_MSG_DEBUG("Found the TRT_ID helper.");
-   }
-   
-   if (m_converter_p0.initialize(msg()).isFailure())
-   {
-     ATH_MSG_FATAL("Could not initialize converter!");
-     return StatusCode::FAILURE;
-   }
+   ATH_CHECK( detStore()->retrieve(idhelper, "TRT_ID") );
+
+   ATH_CHECK( m_converter_p0.initialize(msg()) );
 
    ATH_MSG_DEBUG("Converter initialized");
 

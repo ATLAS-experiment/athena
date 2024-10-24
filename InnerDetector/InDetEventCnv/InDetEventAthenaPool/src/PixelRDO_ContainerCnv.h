@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELRDO_CONTAINERCNV_H
@@ -33,21 +33,17 @@ class PixelRDO_ContainerCnv : public PixelRDO_ContainerCnvBase {
   Pixel1RawDataContainerCnv_p2   m_converter_TP2;
   PixelRDO_ContainerCnv_PERS     m_converter_PERS;
 
-  // Should not be needed at some point.
-  StoreGateSvc*  m_storeGate;
-
 public:
   PixelRDO_ContainerCnv (ISvcLocator* svcloc)
     : PixelRDO_ContainerCnvBase(svcloc, "PixelRDO_ContainerCnv"),
-      m_converter_p0(),
-      m_storeGate(nullptr)
+      m_converter_p0()
   {}
 protected:
-  virtual PixelRDO_Container_PERS*   createPersistent (PixelRDO_Container* transCont);
-  virtual PixelRDO_Container* createTransient ();
+  virtual PixelRDO_Container_PERS*   createPersistent (PixelRDO_Container* transCont) override;
+  virtual PixelRDO_Container* createTransient () override;
 
   // Must initialize ID helpers
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
 };
 
 #endif

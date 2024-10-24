@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelClusterContainerCnv_p0.h"
@@ -32,12 +32,11 @@ PixelClusterContainerCnv_p0::PixelClusterContainerCnv_p0():
 
 StatusCode PixelClusterContainerCnv_p0::initialize(MsgStream &log ) {
 
-   ISvcLocator* svcLocator = Gaudi::svcLocator();
-
    log << MSG::INFO << "PixelClusterContainerCnv::initialize()" << endmsg;
 
-   StoreGateSvc* detStore = nullptr;
-   CHECK( svcLocator->service("DetectorStore", detStore) );
+   SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+   CHECK( detStore.isValid() );
+
    CHECK( detStore->retrieve(m_pixId, "PixelID") );
    CHECK( m_pixelDetEleCollKey.initialize() );
    MSG_DEBUG(log,"Converter initialized.");

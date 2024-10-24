@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_CLUSTERCONTAINERCNV_H
@@ -9,16 +9,12 @@
 #include "InDetPrepRawData/SCT_ClusterContainer.h"
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustomCnv.h"
 
-
-
-class StoreGateSvc;
-class SCT_ID;
-
 #include "SCT_ClusterContainerCnv_p0.h"
 #include "InDetEventTPCnv/SCT_ClusterContainerCnv_tlp1.h"
 #include "InDetEventTPCnv/SCT_ClusterContainerCnv_p3.h"
 #include "InDetEventTPCnv/SCT_ClusterContainerCnv_p2.h"
 
+class SCT_ID;
 
 // the latest persistent representation type of DataCollection:
 typedef  InDet::SCT_ClusterContainer_p3  SCT_ClusterContainer_PERS;
@@ -39,18 +35,15 @@ class SCT_ClusterContainerCnv : public SCT_ClusterContainerCnvBase
   SCT_ClusterContainerCnv_p3   m_TPConverter_p3;
   SCT_ClusterContainerCnv_p2   m_TPConverter_p2;
 
-  // Should not be needed at some point.
-  StoreGateSvc*  m_storeGate;
-
 protected:
 public:
   SCT_ClusterContainerCnv (ISvcLocator* svcloc);
 protected:
-  virtual SCT_ClusterContainer_PERS*   createPersistent (InDet::SCT_ClusterContainer* transCont);
-  virtual InDet::SCT_ClusterContainer* createTransient ();
+  virtual SCT_ClusterContainer_PERS*   createPersistent (InDet::SCT_ClusterContainer* transCont) override;
+  virtual InDet::SCT_ClusterContainer* createTransient () override;
 
   // Must initialize ID helpers
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
   virtual AthenaPoolTopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter; }
 };
 

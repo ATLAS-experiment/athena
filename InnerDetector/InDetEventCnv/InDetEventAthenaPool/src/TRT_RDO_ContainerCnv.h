@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_RDO_CONTAINERCNV_H
@@ -39,14 +39,14 @@ class TRT_RDO_ContainerCnv : public TRT_RDO_ContainerCnvBase {
   TRT_RDO_ContainerCnv_PERS         m_converter_PERS;
 
   // Should not be needed at some point.
-  StoreGateSvc*  m_storeGate;
+  ServiceHandle<StoreGateSvc>  m_storeGate;
 
 public:
   TRT_RDO_ContainerCnv (ISvcLocator* svcloc)
     : TRT_RDO_ContainerCnvBase(svcloc, "TRT_RDO_ContainerCnv"),
       m_converter_p1(),
       m_converter_p0(),
-      m_storeGate(nullptr)
+      m_storeGate("StoreGateSvc", "TRT_RDO_ContainerCnv")
   {}
 protected:
   virtual TRT_RDO_Container_PERS*   createPersistent (TRT_RDO_Container* transCont);
