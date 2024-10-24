@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // this
@@ -39,7 +39,7 @@ namespace MuonCalib {
     CoolInserter::CoolInserter(const std::string &name, ISvcLocator *pSvcLocator) :
         AthAlgorithm(name, pSvcLocator),
         m_version("v0.0"),
-        p_reg_sel_svc(nullptr),
+        m_reg_sel_svc("RegionSelectionSvc", name),
         m_cool_connect(false),
         m_t0_created(false),
         m_rt_created(false) {
@@ -73,7 +73,7 @@ namespace MuonCalib {
         ATH_CHECK(m_DetectorManagerKey.initialize());
 
         // get region selection service
-        ATH_CHECK(service("RegionSelectionSvc", p_reg_sel_svc));
+        ATH_CHECK(m_reg_sel_svc.retrieve());
 
         // connect to cool database
         try {
@@ -193,7 +193,7 @@ namespace MuonCalib {
     bool CoolInserter::StoreT0Chamber(const NtupleStationId &id, const std::string &file, unsigned int creation_flags) {
         MuonFixedId fid(id.FixedId());
         // generate fixed if for chamber
-        if (!p_reg_sel_svc->isInRegion(fid)) { return true; }
+        if (!m_reg_sel_svc->isInRegion(fid)) { return true; }
         // do not fill double
         if (m_t0_filled.find(id) != m_t0_filled.end()) { return true; }
         m_t0_filled.insert(id);
@@ -251,7 +251,7 @@ namespace MuonCalib {
                                       unsigned int creation_flags) {
         // generate fixed if for chamber
         MuonFixedId fid(id.FixedId());
-        if (!p_reg_sel_svc->isInRegion(fid)) { return true; }
+        if (!m_reg_sel_svc->isInRegion(fid)) { return true; }
         // check for duplicates
         NtupleStationId id_cp(id);
         bool found[3];

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonCalib_CoolInserter_h
@@ -69,7 +69,7 @@ namespace MuonCalib {
         // calibration source tools - jo
         ToolHandleArray<IMuonCalibConditionsSource> m_calibration_sources{this, "CalibrationSources", {}};
         // region selection service - copy part of the calibration
-        const RegionSelectionSvc *p_reg_sel_svc;
+        ServiceHandle<RegionSelectionSvc> m_reg_sel_svc;
         // cool
         cool::IDatabasePtr m_db;
         std::vector<cool::IFolderPtr> m_mdtt0_fld;

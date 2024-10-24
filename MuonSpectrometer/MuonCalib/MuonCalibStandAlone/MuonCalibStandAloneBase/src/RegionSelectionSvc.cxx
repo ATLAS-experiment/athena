@@ -46,8 +46,8 @@ StatusCode RegionSelectionSvc ::initialize() {
     if (!ProcessString(m_region_string)) return StatusCode::FAILURE;
 
     // detector stre - id to fixed id ...
-    StoreGateSvc *detStore{nullptr};
-    ATH_CHECK(serviceLocator()->service("DetectorStore", detStore));
+    SmartIF<StoreGateSvc> detStore{service("DetectorStore")};
+    ATH_CHECK(detStore.isValid());
     ATH_MSG_DEBUG("Retrieved DetectorStore");
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(detStore->retrieve(m_detMgr));
