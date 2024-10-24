@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LooperKillerTool.h"
@@ -19,6 +19,7 @@ namespace G4UA
     declareProperty("VerboseLevel", m_config.VerboseLevel);
     declareProperty("AbortEvent", m_config.AbortEvent);
     declareProperty("SetError", m_config.SetError);
+    declareProperty("BSM_Only", m_config.BSM_Only);
   }
 
   //---------------------------------------------------------------------------
