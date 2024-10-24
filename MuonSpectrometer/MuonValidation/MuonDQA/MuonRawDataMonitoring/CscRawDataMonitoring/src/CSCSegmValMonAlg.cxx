@@ -39,8 +39,6 @@ StatusCode CSCSegmValMonAlg::initialize() {
     m_doEvtSel = false;
   }
 
-  StoreGateSvc* detStore = nullptr;
-  ATH_CHECK(service("DetectorStore", detStore));
   ATH_CHECK(m_edmHelperSvc.retrieve());
   ATH_CHECK(m_idHelperSvc.retrieve());
   ATH_CHECK(m_segmKey.initialize());
