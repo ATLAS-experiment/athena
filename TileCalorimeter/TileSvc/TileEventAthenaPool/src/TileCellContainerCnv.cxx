@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileCellContainerCnv.h"
@@ -7,28 +7,13 @@
 #include "CaloDetDescr/MbtsDetDescrManager.h"
 
 #include "GaudiKernel/StatusCode.h"
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/IChronoStatSvc.h"
 
-// Athena
-#include "StoreGate/StoreGateSvc.h"
 
-// false positive
-// cppcheck-suppress uninitMemberVar
 TileCellContainerCnv::TileCellContainerCnv(ISvcLocator* svcloc)
-  : TileCellContainerCnvBase::T_AthenaPoolCustomCnv(svcloc)
- // Must create DataVector that does NOT own elements
-  , m_storeGate(0)
-  , m_tileTBID(0)
-  , m_mbtsMgr(0)
-  , m_version(0)
-  , m_id()
-  , m_dde()
-  , m_gainIndex()
-  , m_gain()
+  : TileCellContainerCnvBase::T_AthenaPoolCustomCnv(svcloc, "TileCellContainerCnv"),
+    m_storeGate("StoreGateSvc", "TileCellContainerCnv")
 {
 }
-
 
 TileCellContainerCnv::~TileCellContainerCnv()
 {
@@ -37,41 +22,25 @@ TileCellContainerCnv::~TileCellContainerCnv()
 StatusCode TileCellContainerCnv::initialize()
 {
     // Call base clase initialize
-    if (!AthenaPoolConverter::initialize().isSuccess()) {
-        return StatusCode::FAILURE;
-    }
+    ATH_CHECK( AthenaPoolConverter::initialize() );
 
     // version 2 by default
     m_version = 2;
     
     // Get the messaging service, print where you are
-    MsgStream log(msgSvc(), "TileCellContainerCnv");
-    log << MSG::INFO << "TileCellContainerCnv::initialize(), packing format version " << m_version << endmsg;
+    ATH_MSG_INFO("TileCellContainerCnv::initialize(), packing format version " << m_version);
 
     // get StoreGate service
-    StatusCode sc=service("StoreGateSvc",m_storeGate);
+    StatusCode sc = m_storeGate.retrieve();
     if (sc.isFailure()) {
       this->initIdToIndex();
-      log << MSG::ERROR << "StoreGate service not found !" << endmsg;
-      // log << MSG::FATAL << "StoreGate service not found !" << endmsg;
-      // return StatusCode::FAILURE;
+      ATH_MSG_ERROR("StoreGate service not found !");
     }
 
-    StoreGateSvc* detStore;
-    sc=service("DetectorStore",detStore);
+    sc = detStore()->retrieve(m_tileTBID);
     if (sc.isFailure()) {
       this->initIdToIndex();
-      log << MSG::ERROR << "DetectorStore service not found!" << endmsg;
-      // log << MSG::FATAL << "DetectorStore service not found!" << endmsg;
-      // return StatusCode::FAILURE;
-    }
-
-    sc = detStore->retrieve(m_tileTBID);
-    if (sc.isFailure()) {
-      this->initIdToIndex();
-      log << MSG::ERROR << "No TileTBID helper" << endmsg;
-      // log << MSG::FATAL << "No TileTBID helper" << endmsg;
-      // return StatusCode::FAILURE;
+      ATH_MSG_ERROR("No TileTBID helper");
     } else {
       for (int side=0; side<NSIDE; ++side) {
         for (int phi=0; phi<NPHI; ++phi) {
@@ -82,9 +51,9 @@ StatusCode TileCellContainerCnv::initialize()
       }
     }
     
-    sc = detStore->retrieve(m_mbtsMgr);
+    sc = detStore()->retrieve(m_mbtsMgr);
     if (sc.isFailure()) {
-      log << MSG::WARNING << "Unable to retrieve MbtsDetDescrManager from DetectorStore" << endmsg;
+      ATH_MSG_WARNING("Unable to retrieve MbtsDetDescrManager from DetectorStore");
       memset(m_dde,0,sizeof(m_dde));
     } else {
       for (int side=0; side<NSIDE; ++side) {
@@ -126,16 +95,11 @@ TileCellVec* TileCellContainerCnv::createPersistent(TileCellContainer* cont)
 {
     // Convert every TileCell to 3 32-bit integers: ID,Ene, and (time,qual,qain)
 
-    MsgStream log(msgSvc(),"TileCellContainerCnv" );
-    MSG::Level logLevel = log.level();
-    bool lDebug = (logLevel<=MSG::DEBUG);
-    bool lVerbose = (logLevel<=MSG::VERBOSE);
-
     std::string name = m_storeGate->proxy(cont)->name();
     auto vecCell = std::make_unique<TileCellVec>();
     vecCell->reserve(NCELLMBTS);
 
-    if (lDebug) log << MSG::DEBUG << "storing TileCells from " << name << " in POOL" << endmsg;
+    ATH_MSG_DEBUG("storing TileCells from " << name << " in POOL");
 
     vecCell->push_back(m_version);
     int nMBTSfound=0;
@@ -146,13 +110,10 @@ TileCellVec* TileCellContainerCnv::createPersistent(TileCellContainer* cont)
 
     case 1: // 3 words per cell, energy scale factor is 1000, time scale factor is 100
       for (const TileCell* cell : *cont) {
-        if (lVerbose)
-          log << MSG::VERBOSE 
-              << "ene=" << cell->energy()
-              << " time=" << cell->time() 
-              << " qual=" << (int)cell->qual1()
-              << " gain=" << (int)cell->gain()
-              << endmsg;
+        ATH_MSG_VERBOSE("ene=" << cell->energy()
+                        << " time=" << cell->time()
+                        << " qual=" << (int)cell->qual1()
+                        << " gain=" << (int)cell->gain());
         unsigned int id  = cell->ID().get_identifier32().get_compact();
         int          ene = round32(cell->energy() * 1000.);
         unsigned int tim = 0x8000 + round16(cell->time()*100.);
@@ -162,9 +123,8 @@ TileCellVec* TileCellContainerCnv::createPersistent(TileCellContainer* cont)
         vecCell->push_back(id);
         vecCell->push_back((unsigned int)ene);
         vecCell->push_back(tqg);
-        if (lVerbose)
-          log << MSG::VERBOSE << "packing cell in three words " 
-              << MSG::hex << id << " " << ene << " " << tqg << MSG::dec << endmsg;
+        ATH_MSG_VERBOSE("packing cell in three words " << MSG::hex << id <<
+                        " " << ene << " " << tqg << MSG::dec);
       }
       break;
 
@@ -206,21 +166,14 @@ TileCellVec* TileCellContainerCnv::createPersistent(TileCellContainer* cont)
           quality= cell->qual1();
           gain   = cell->gain();
 
-          if (lVerbose)
-            log << MSG::VERBOSE 
-                << "ind="  << ind
-                << " ene=" << cell->energy()
-                << " time=" << cell->time() 
-                << " qual=" << (int)cell->qual1()
-               << " gain=" << (int)cell->gain()
-                << endmsg;
-        } 
+          ATH_MSG_VERBOSE("ind="  << ind <<
+                          " ene=" << cell->energy() <<
+                          " time=" << cell->time() <<
+                          " qual=" << (int)cell->qual1() <<
+                          " gain=" << (int)cell->gain());
+        }
         else {
-          if (lVerbose)
-            log << MSG::VERBOSE 
-                << "ind="  << ind
-                << " create MBTS cell with zero energy"
-                << endmsg;
+          ATH_MSG_VERBOSE("ind="  << ind << " create MBTS cell with zero energy");
         }
         
         // put correct MBTS cells in one word
@@ -234,9 +187,8 @@ TileCellVec* TileCellContainerCnv::createPersistent(TileCellContainer* cont)
           unsigned int gqe = (gai << 28) | (qua<<20) | ene; // upper most bit is always 1 here
           vecCell->push_back(gqe);
 
-          if (lVerbose)
-            log << MSG::VERBOSE << "packing cell " << ind << " in one word "
-                << MSG::hex << gqe << MSG::dec << endmsg;
+          ATH_MSG_VERBOSE("packing cell " << ind << " in one word " <<
+                          MSG::hex << gqe << MSG::dec);
 
         } else { // cells with time, use 2 words for channel
                  // but make sure that upper most bit in energy word is zero
@@ -249,9 +201,8 @@ TileCellVec* TileCellContainerCnv::createPersistent(TileCellContainer* cont)
           vecCell->push_back(ene);
           vecCell->push_back(tqg);
 
-          if (lVerbose)
-            log << MSG::VERBOSE << "packing cell " << ind << " in two words "
-                << MSG::hex << ene << " " << tqg << MSG::dec << endmsg;
+          ATH_MSG_VERBOSE("packing cell " << ind << " in two words " <<
+                          MSG::hex << ene << " " << tqg << MSG::dec);
         }
       }
 
@@ -265,14 +216,11 @@ TileCellVec* TileCellContainerCnv::createPersistent(TileCellContainer* cont)
         
         const TileCell* cell = allCells[ind];
 
-        if (lVerbose)
-          log << MSG::VERBOSE 
-              << "ind="  << ind
-              << " ene=" << cell->energy()
-              << " time=" << cell->time() 
-              << " qual=" << (int)cell->qual1()
-              << " gain=" << (int)cell->gain()
-              << endmsg;
+        ATH_MSG_VERBOSE("ind="  << ind <<
+                        " ene=" << cell->energy() <<
+                        " time=" << cell->time() <<
+                        " qual=" << (int)cell->qual1() <<
+                        " gain=" << (int)cell->gain());
 
         unsigned int id  = cell->ID().get_identifier32().get_compact();
         int          ene = round32(cell->energy() * 1000.);
@@ -284,19 +232,18 @@ TileCellVec* TileCellContainerCnv::createPersistent(TileCellContainer* cont)
         vecCell->push_back((unsigned int)ene);
         vecCell->push_back(tqg);
 
-        if (lVerbose)
-          log << MSG::VERBOSE << "packing cell " << ind << " in three words "
-              << MSG::hex << id << " " << ene << " " << tqg << MSG::dec << endmsg;
+        ATH_MSG_VERBOSE("packing cell " << ind << " in three words " <<
+                        MSG::hex << id << " " << ene << " " << tqg << MSG::dec);
       }
       break;
 
     default:
 
-      log << MSG::ERROR << "Unknown version of TileCellVec, ver="<<m_version << endmsg;
+      ATH_MSG_ERROR("Unknown version of TileCellVec, ver="<<m_version);
 
     }
 
-    if (lDebug) log << MSG::DEBUG << "Storing data vector of size " << vecCell->size() << " with version " << vecCell->front() << endmsg;
+    ATH_MSG_DEBUG("Storing data vector of size " << vecCell->size() << " with version " << vecCell->front());
 
     return vecCell.release();
 }
@@ -305,14 +252,9 @@ TileCellContainer* TileCellContainerCnv::createTransient()
 {
     // Fill TileCellContainer from vector, creating cells from 3 integers 
 
-    MsgStream log(msgSvc(), "TileCellContainerCnv");
-    MSG::Level logLevel = log.level();
-    bool lDebug = (logLevel<=MSG::DEBUG);
-    bool lVerbose = (logLevel<=MSG::VERBOSE);
-
     std::unique_ptr<TileCellVec> vec(this->poolReadObject<TileCellVec>());
 
-    if (lDebug) log << MSG::DEBUG << "Read TileCell Vec, size " << vec->size() << endmsg;
+    ATH_MSG_DEBUG("Read TileCell Vec, size " << vec->size());
 
     // create the TileCellContainer
     auto cont = std::make_unique<TileCellContainer>();
@@ -338,14 +280,13 @@ TileCellContainer* TileCellContainerCnv::createTransient()
         uint16_t qbit = TileCell::MASK_CMPC | TileCell::MASK_TIME;
         int   gain = (int)(tqg & 0xFF) - 0x80;
 
-        if (lVerbose) {
-          log << MSG::VERBOSE << "reading cell " << (iCell++) << " "
-              << MSG::hex << id << MSG::dec << " " << ene << " " 
-              << MSG::hex << tqg << MSG::dec << endmsg;
-          log << MSG::VERBOSE << "ene=" << ener << " time=" << time 
-              << " qual=" << qual << " gain=" << gain << endmsg;
-        }
-        
+        ATH_MSG_VERBOSE("reading cell " << (iCell++) << " " <<
+                        MSG::hex << id << MSG::dec << " " << ene << " " <<
+                        MSG::hex << tqg << MSG::dec);
+
+        ATH_MSG_VERBOSE("ene=" << ener << " time=" << time <<
+                        " qual=" << qual << " gain=" << gain);
+
         TileCell * cell = new TileCell(NULL,id,ener,time,qual,qbit,(CaloGain::CaloGain)gain);
         cont->push_back(cell);
       }
@@ -362,9 +303,9 @@ TileCellContainer* TileCellContainerCnv::createTransient()
         uint16_t qual = 0;
         uint16_t qbit = TileCell::MASK_CMPC | TileCell::MASK_TIME;
         int gain = m_gain[0]; // non-existing gain in CaloGain - to mark non-existing cells
-        
-        if (lVerbose)
-          log << MSG::VERBOSE << "reading cell " << iCell << " ";
+
+        if (msgLvl(MSG::VERBOSE))
+          msg() << MSG::VERBOSE << "reading cell " << iCell << " ";
 
         if (iCell < NCELLMBTS) { // first 32 cells are MBTS cells without identifier
 
@@ -373,13 +314,13 @@ TileCellContainer* TileCellContainerCnv::createTransient()
 
           int ene = (int)(*it++); // first word is energy
 
-          if (lVerbose)
-            log << MSG::hex << id << " " << ene << " " << MSG::dec;
+          if (msgLvl(MSG::VERBOSE))
+            msg() << MSG::hex << id << " " << ene << " " << MSG::dec;
 
           if (ene < 0 ) { // upper most bit is set, it means that everything is packed in one word
 
-            if (lVerbose)
-              log << endmsg;
+            if (msgLvl(MSG::VERBOSE))
+              msg() << endmsg;
 
             time = 0.0;   // time was zero and it was not saved
             ener = ((ene & 0xFFFFF) - 0x10000) * 1e-3;
@@ -389,8 +330,7 @@ TileCellContainer* TileCellContainerCnv::createTransient()
           } else { // two words packing
           
             unsigned int tqg = *it++;
-            if (lVerbose)
-              log << MSG::hex << tqg << MSG::dec << endmsg;
+            ATH_MSG_VERBOSE(MSG::hex << tqg << MSG::dec);
 
             ener = (ene - 0x40000000) * 1e-3;
             time = ((int)(tqg>>16) - 0x8000 ) * 0.01;
@@ -403,10 +343,9 @@ TileCellContainer* TileCellContainerCnv::createTransient()
           id = Identifier(Identifier32(*it++));
           int ene = (int)(*it++);
           unsigned int tqg = *it++;
-      
-          if (lVerbose)
-            log << MSG::hex << id << MSG::dec << " " << ene << " " 
-                << MSG::hex << tqg << MSG::dec << endmsg;
+
+          ATH_MSG_VERBOSE(MSG::hex << id << MSG::dec << " " << ene <<
+                          " " << MSG::hex << tqg << MSG::dec);
 
           ener = ene*1e-3;
           time = ((int)(tqg>>16) - 0x8000 ) * 0.01;
@@ -414,17 +353,15 @@ TileCellContainer* TileCellContainerCnv::createTransient()
           gain = (int)(tqg & 0xFF) - 0x80;
         }
 
-        if (lVerbose)
-          log << MSG::VERBOSE << "ene=" << ener << " time=" << time 
-              << " qual=" << qual << " gain=" << gain << endmsg;
+        ATH_MSG_VERBOSE("ene=" << ener << " time=" << time
+                        << " qual=" << qual << " gain=" << gain);
 
         if (gain != m_gain[0]) { // don't create cells with non-existing gain
           TileCell * cell = new TileCell(dde,id,ener,time,qual,qbit,(CaloGain::CaloGain)gain);
           cont->push_back(cell);
         }
         else {
-          if (lVerbose)
-            log << MSG::VERBOSE << "Don't create MBTS cell with invalid gain" << endmsg;
+          ATH_MSG_VERBOSE("Don't create MBTS cell with invalid gain");
         }
         ++iCell;
       }
@@ -432,9 +369,8 @@ TileCellContainer* TileCellContainerCnv::createTransient()
       
     default:
 
-      log << MSG::ERROR << "Unknown version of TileCellVec, ver="<<version << endmsg;
+      ATH_MSG_ERROR("Unknown version of TileCellVec, ver="<<version);
     }
     
     return cont.release();
 }
-

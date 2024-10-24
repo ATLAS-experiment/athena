@@ -1,15 +1,15 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TileCellContainerCnv_H
 #define TileCellContainerCnv_H
 
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustomCnv.h"
+#include "StoreGate/StoreGateSvc.h"
 #include "TileEvent/TileCellContainer.h"
 
 class TileTBID;
-class StoreGateSvc;
 class CaloDetDescrElement;
 class MbtsDetDescrManager;
 
@@ -31,11 +31,12 @@ public:
     virtual TileCellContainer* createTransient() override;
 
 private:
-    StoreGateSvc* m_storeGate;
-    const TileTBID* m_tileTBID;
-    const MbtsDetDescrManager* m_mbtsMgr;
+    ServiceHandle<StoreGateSvc> m_storeGate;
 
-    int m_version;
+    const TileTBID* m_tileTBID{nullptr};
+    const MbtsDetDescrManager* m_mbtsMgr{nullptr};
+
+    int m_version{0};
 
     static const int NSIDE = 2;
     static const int NPHI  = 8;
@@ -45,10 +46,10 @@ private:
     inline int cell_index(int side, int phi, int eta) const { return (side*NPHI+phi)*NETA+eta; }
     void initIdToIndex();
   
-    Identifier m_id[NCELLMBTS];
-    CaloDetDescrElement * m_dde[NCELLMBTS];
-    int m_gainIndex[17];
-    int m_gain[8];
+    Identifier m_id[NCELLMBTS]{};
+    CaloDetDescrElement* m_dde[NCELLMBTS]{};
+    int m_gainIndex[17]{};
+    int m_gain[8]{};
 
     inline int round32(double x) { 
       if (x<-2147483647.) return -0x7FFFFFFF;
