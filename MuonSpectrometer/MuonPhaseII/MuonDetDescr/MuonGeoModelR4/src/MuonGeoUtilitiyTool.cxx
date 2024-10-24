@@ -1,7 +1,7 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#include <MuonGeoModelR4/MuonGeoUtilityTool.h>
+#include "MuonGeoUtilityTool.h"
 
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
 #include <GeoModelKernel/GeoBox.h>
@@ -33,9 +33,7 @@ namespace MuonGMR4{
 MuonGeoUtilityTool::~MuonGeoUtilityTool() = default;
 MuonGeoUtilityTool::MuonGeoUtilityTool(const std::string &type, const std::string &name,
                                        const IInterface *parent):
-    AthAlgTool(type,name,parent) {
-    declareInterface<IMuonGeoUtilityTool>(this);
-}
+    base_class(type,name,parent) {}
 
 const GeoShape* MuonGeoUtilityTool::extractShape(const PVConstLink& physVol) const {
     const GeoLogVol* logVol = physVol->getLogVol();

@@ -15,7 +15,7 @@
 
 namespace MuonGMR4 {
 
-class MuonGeoUtilityTool final : virtual public IMuonGeoUtilityTool, public AthAlgTool {
+class MuonGeoUtilityTool final :  public extends<AthAlgTool, IMuonGeoUtilityTool>{
 
    public:
     // Constructor

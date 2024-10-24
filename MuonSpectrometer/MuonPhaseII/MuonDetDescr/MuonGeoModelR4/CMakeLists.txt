@@ -12,17 +12,18 @@ find_package( GeoModel COMPONENTS GeoModelKernel GeoModelDBManager GeoModelRead 
 
 # Component(s) in the package:
 atlas_add_library( MuonGeoModelR4Lib
-                   src/*.cxx
+                   MuonGeoModelR4/*.h
+                   INTERFACE
                    PUBLIC_HEADERS MuonGeoModelR4
                    INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel MuonDetDescrUtils
-                                  GeoModelUtilities GaudiKernel MuonReadoutGeometryR4 StoreGateLib  CxxUtils )
+                   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel)
 
 atlas_add_component( MuonGeoModelR4
-                     src/components/*.cxx
+                     src/*.cxx src/components/*.cxx
                      INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel StoreGateLib GeoModelUtilities 
-                                    GaudiKernel MuonReadoutGeometryR4 MuonGeoModelR4Lib AthenaPoolUtilities)
+                     LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel StoreGateLib GeoModelUtilities 
+                                    GaudiKernel MuonReadoutGeometryR4 MuonGeoModelR4Lib AthenaPoolUtilities MuonDetDescrUtils
+                                    GeoModelUtilities GaudiKernel MuonReadoutGeometryR4 StoreGateLib  CxxUtils)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
