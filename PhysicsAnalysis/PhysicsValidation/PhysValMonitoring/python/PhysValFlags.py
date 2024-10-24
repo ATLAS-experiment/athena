@@ -22,6 +22,15 @@ def createPhysValConfigFlags():
     icf.addFlag("PhysVal.doLLPSecVtx", False)
     icf.addFlag("PhysVal.doLLPSecVtxLeptons", False)
 
+    icf.addFlag("PhysVal.GRLs", ['GRL2015', 'GRL2016', 'GRL2017_Triggerno17e33prim', 'GRL2018_Triggerno17e33prim',
+                'GRL2022', 'GRL2023', 'GRL2024_EtoI'], help='List of GRL names to be used by PhysVal.')
+    icf.addFlag("PhysVal.applyAllDataCleaning", False,
+                help='Apply all data cleaning cuts, (applyGRL, applyEventStatusSelection, and Photon OQ).')
+    icf.addFlag("PhysVal.applyGRL", False,
+                help='Apply Good Run List selection. The GRL is hardcoded, it may be not updated.')
+    icf.addFlag("PhysVal.applyEventStatusSelection", False,
+                help='Apply Event Status selection via EventStatusSelectionAlg.')
+
     from InDetPhysValMonitoring.InDetPhysValFlags import createIDPVMConfigFlags
     icf.addFlagsCategory("PhysVal.IDPVM", createIDPVMConfigFlags, prefix=True)
 

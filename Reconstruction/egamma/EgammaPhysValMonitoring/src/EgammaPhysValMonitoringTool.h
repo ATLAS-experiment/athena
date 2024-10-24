@@ -14,6 +14,8 @@
 
 // FrameWork includes
 #include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/ToolHandle.h"
+#include "Gaudi/Property.h"
 
 // Local includes
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
@@ -146,6 +148,8 @@ class ATLAS_NOT_THREAD_SAFE EgammaPhysValMonitoringTool
   SG::AuxElement::ConstAccessor<char> m_acc_electronLLH_LooseNoPix; // access LLH decision decorators
   SG::AuxElement::ConstAccessor<char> m_acc_electronLLH_MediumNoPix; // access LLH decision decorators
   SG::AuxElement::ConstAccessor<char> m_acc_electronLLH_TightNoPix; // access LLH decision decorators
+
+  Gaudi::Property<bool> m_useOQQuality {this, "useOQQuality", false, "Use OQ quality cuts"};
 
 }; 
 
