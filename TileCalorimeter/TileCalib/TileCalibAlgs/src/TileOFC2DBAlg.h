@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TileCalibAlgs_TileOFC2DBAlg_h
@@ -24,11 +24,12 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "StoreGate/ReadHandleKey.h"
 
+//=== IOVDbTest includes
+#include "RegistrationServices/IIOVRegistrationSvc.h"
+
 // Tile includes
 #include "TileConditions/ITileCondToolOfc.h"
 #include "TileConditions/TileCondToolTiming.h"
-
-class IIOVRegistrationSvc;
 
 class TileOFC2DBAlg: public AthAlgorithm {
 
@@ -60,7 +61,7 @@ class TileOFC2DBAlg: public AthAlgorithm {
     std::string m_runType;
 
     //=== non-property members
-    IIOVRegistrationSvc* m_regSvc;
+    ServiceHandle<IIOVRegistrationSvc> m_regSvc;
     ToolHandle<TileCondToolTiming> m_tileToolTiming{this,
       "TileCondToolTiming", "TileCondToolTiming", "Tile timing tool"};
     ToolHandle<ITileCondToolOfc> m_tileCondToolOfc{this,

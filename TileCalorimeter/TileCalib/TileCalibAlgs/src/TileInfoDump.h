@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -16,6 +16,7 @@
 #define TILECALIBALGS_TILEINFODUMP_H
 
 // Gaudi includes
+#include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/ToolHandle.h"
 
 // Athena includes
@@ -36,7 +37,6 @@
 #include "TileConditions/TileInfo.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 
-class ITHistSvc;
 class TileHWID;
 class TileID;
 class TH2F;
@@ -120,7 +120,7 @@ class TileInfoDump: public AthAlgorithm {
       "TileCondToolMuID", "TileCondToolMuID", "Tile MuID tool"};
 
     //=== a handle on the Hist/TTree registration service 
-    ITHistSvc* m_thistSvc;
+    ServiceHandle<ITHistSvc> m_thistSvc;
 
     const TileHWID* m_tileHWID;
     const TileID* m_tileID;
