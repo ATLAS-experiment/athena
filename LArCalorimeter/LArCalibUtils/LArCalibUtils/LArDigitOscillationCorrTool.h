@@ -42,8 +42,8 @@ public:
   virtual StatusCode initialize() override;
   virtual void handle(const Incident&) override;
  
-  StatusCode calculateEventPhase(const LArDigitContainer &theDC);
-  StatusCode correctLArDigits(LArDigitContainer &theDC);
+  StatusCode calculateEventPhase(const LArDigitContainer &theDC) override;
+  StatusCode correctLArDigits(LArDigitContainer &theDC) override;
  
 private:
  
