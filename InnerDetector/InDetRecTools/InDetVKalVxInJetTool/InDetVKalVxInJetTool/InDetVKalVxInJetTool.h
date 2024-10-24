@@ -43,6 +43,7 @@
 // Gaudi includes
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/IChronoStatSvc.h"
 #include "StoreGate/ReadHandle.h"
 
 //Remove in boost > 1.76 when the boost iterator issue
@@ -247,7 +248,7 @@ namespace InDet {
     ToolHandle < Trk::IVertexFitter > m_fitter
       {this, "VertexFitterTool", "Trk::TrkVKalVrtFitter/VertexFitterTool"};
     Trk::TrkVKalVrtFitter* m_fitSvc{};
-    IChronoStatSvc * m_timingProfile{};
+    ServiceHandle<IChronoStatSvc> m_timingProfile{this,"ChronoStatSvc","ChronoStatSvc"};
 
     bool m_useTrackClassificator = true;
     ToolHandle < IInDetTrkInJetType >  m_trackClassificator

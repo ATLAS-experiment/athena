@@ -11,7 +11,6 @@
 #include  "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 
 #include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/IChronoStatSvc.h"
 #include "GaudiKernel/ConcurrencyFlags.h"
 #include "TH1D.h"
 #include "TH2D.h"
@@ -71,7 +70,7 @@ InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
 
      ATH_CHECK( m_eventInfoKey.initialize() );
      //------------------------------------------
-     if(msgLvl(MSG::DEBUG)) ATH_CHECK(service("ChronoStatSvc", m_timingProfile));
+     if(msgLvl(MSG::DEBUG)) ATH_CHECK(m_timingProfile.retrieve());
 //------------------------------------------
 // Chose whether IBL is installed
      if(m_existIBL){ // 4-layer pixel detector
@@ -93,8 +92,8 @@ InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
          return StatusCode::FAILURE;
        }
 
-       ITHistSvc*     hist_root=nullptr;
-       ATH_CHECK( service( "THistSvc", hist_root) );
+       SmartIF<ITHistSvc> hist_root{Gaudi::svcLocator()->service("THistSvc")};
+       ATH_CHECK(hist_root.isValid());
        ATH_MSG_DEBUG( "InDetVKalVxInJetTool Histograms found" );
 
        std::string histDir;
