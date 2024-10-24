@@ -187,7 +187,7 @@ ChamberAssembleTool::BoundTrfPair
             if (std::ranges::find_if(corners, [&volume](const Amg::Vector3D& v) {
                               return !volume.inside(v);}) == corners.end()) {
                ATH_MSG_VERBOSE("Readout element "<<m_idHelperSvc->toStringDetEl(chambEle->identify())<<" "
-                           <<(*boundingBox(chambEle, boundSet)));
+                           <<(*boundingBox(chambEle, boundSet))<<" fully contained. ");
                continue;
             }
             if (msgLvl(MSG::VERBOSE)) {
@@ -368,19 +368,35 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
          SpectrometerSector::defineArgs sectorArgs{};
          sectorArgs.bounds = envelopeBox;
          sectorArgs.locToGlobTrf = toCenter.inverse() * envelopeCentre;
-         /** Define the chamber envelopes */
-         std::map<PVConstLink, std::vector<const MuonReadoutElement*>> stationMap{};
-         /** Sort the readout elements by common parent volume */
-         for (const MuonReadoutElement* re : candidate.detEles) {
-            stationMap[re->getMaterialGeom()->getParent()].push_back(re);
-         }
-         /** Create the enclosing chamber volume */
-         for (auto& [parent, detEles]: stationMap) {
-            const Amg::Transform3D toChambCentre = axisRotation * detEles.front()->globalToLocalTrans(gctx);
-            ATH_MSG_VERBOSE("New chambre candidate "<<m_idHelperSvc->toStringChamber(detEles.front()->identify()));
-            const auto[chamberBox, chamberCentre] = boundingBox(gctx, detEles, toChambCentre, boundSet, 0.1*Gaudi::Units::cm);
+         
+         if (!isNsw(candidate.detEles.front())) {
+            /** Define the chamber envelopes */
+            std::map<PVConstLink, std::vector<const MuonReadoutElement*>> stationMap{};
+            /** Sort the readout elements by common parent volume */
+            for (const MuonReadoutElement* re : candidate.detEles) {
+               stationMap[re->getMaterialGeom()->getParent()].push_back(re);
+            }
+            /** Create the enclosing chamber volume */
+            for (auto& [parent, detEles]: stationMap) {
+               const Amg::Transform3D toChambCentre = axisRotation * detEles.front()->globalToLocalTrans(gctx);
+               ATH_MSG_VERBOSE("New chambre candidate "<<m_idHelperSvc->toStringChamber(detEles.front()->identify()));
+               const auto[chamberBox, chamberCentre] = boundingBox(gctx, detEles, toChambCentre, boundSet, 0.1*Gaudi::Units::cm);
+               chamberArgs chambArgs{};
+               chambArgs.detEles =std::move(detEles);
+               chambArgs.bounds = chamberBox;
+               chambArgs.locToGlobTrf = toChambCentre.inverse() * chamberCentre;
+               const Chamber* newChamber {sectorArgs.chambers.emplace_back(std::make_unique<Chamber>(std::move(chambArgs))).get()};
+               for (const MuonReadoutElement* re : newChamber->readoutEles()) {
+                  reIds.insert(re->identify());
+                  mgr.getReadoutElement(re->identify())->setChamberLink(newChamber);
+               }
+            }
+         } else {
+            const Amg::Transform3D toChambCentre = axisRotation * candidate.detEles.front()->globalToLocalTrans(gctx);
+            ATH_MSG_VERBOSE("New chambre candidate "<<m_idHelperSvc->toStringChamber(candidate.detEles.front()->identify()));
+            const auto[chamberBox, chamberCentre] = boundingBox(gctx, candidate.detEles, toChambCentre, boundSet, 0.1*Gaudi::Units::cm);
             chamberArgs chambArgs{};
-            chambArgs.detEles =std::move(detEles);
+            chambArgs.detEles = candidate.detEles;
             chambArgs.bounds = chamberBox;
             chambArgs.locToGlobTrf = toChambCentre.inverse() * chamberCentre;
             const Chamber* newChamber {sectorArgs.chambers.emplace_back(std::make_unique<Chamber>(std::move(chambArgs))).get()};
