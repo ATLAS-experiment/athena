@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondAlg/MdtCondDbAlg.h"
@@ -38,16 +38,16 @@ StatusCode MdtCondDbAlg::initialize() {
     ATH_CHECK(m_readKey_folder_mc_deadElements.initialize(false /*!m_readKey_folder_mc_deadElements.empty() && !m_isData*/));
     ATH_CHECK(m_readKey_folder_mc_deadTubes.initialize(false /*!m_readKey_folder_mc_deadTubes.empty() && !m_isData*/));
 
-        IGeoModelSvc* geoModel{nullptr};
-    ATH_CHECK(service("GeoModelSvc", geoModel));
+    ServiceHandle<IGeoModelSvc> geoModel("GeoModelSvc", name());
+    ATH_CHECK(geoModel.retrieve());
 
     std::string AtlasVersion = geoModel->atlasVersion();
     std::string MuonVersion = geoModel->muonVersionOverride();
     std::string detectorKey = MuonVersion.empty() ? AtlasVersion : MuonVersion;
     std::string detectorNode = MuonVersion.empty() ? "ATLAS" : "MuonSpectrometer";
 
-    IRDBAccessSvc* accessSvc{nullptr};
-    ATH_CHECK(service("RDBAccessSvc", accessSvc));
+    ServiceHandle<IRDBAccessSvc> accessSvc("RDBAccessSvc", name());
+    ATH_CHECK(accessSvc.retrieve());
 
     IRDBRecordset_ptr switchSet = accessSvc->getRecordsetPtr("HwSwIdMapping", detectorKey, detectorNode);
 
