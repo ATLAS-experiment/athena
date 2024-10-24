@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LooperKiller.h"
@@ -13,6 +13,8 @@
 #include "G4StackManager.hh"
 #include "G4EventManager.hh"
 #include "G4Event.hh"
+#include "MCTruth/TrackHelper.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/StoreGateSvc.h"
 
@@ -77,24 +79,45 @@ namespace G4UA
       rmk->GetTrackingManager()->SetVerboseLevel(0);
       rmk->GetTrackingManager()->GetSteppingManager()->SetVerboseLevel(0);
       rmk->GetStackManager()->SetVerboseLevel(0);
-
-      // Bail out...
-      if (m_config.AbortEvent){
-	rmk->GetEventManager()->AbortCurrentEvent();
-	rmk->GetEventManager()->GetNonconstCurrentEvent()->SetEventAborted();
+      int pdg_id{0};
+      TrackHelper trackHelper(aStep->GetTrack());
+      if ( m_config.BSM_Only && (trackHelper.IsPrimary() || trackHelper.IsRegisteredSecondary()) ) {
+        HepMC::GenParticlePtr part = trackHelper.GetTrackInformation()->GetHepMCParticle();
+        if (part) { pdg_id = part->pdg_id(); }
       }
-      if (m_config.SetError){
-	
-	// Set error state in eventInfo
-	SG::WriteHandle<EventInfo> eic("McEventInfo");
-	if (! eic.isValid()){
-	  ATH_MSG_WARNING( "Failed to retrieve EventInfo" );
-	} else {
-	  eic->setErrorState(EventInfo::Core,EventInfo::Error);
-	  ATH_MSG_WARNING( "Set error state in event info!" );
-	}
-	
-      } // End of set error
+      if ( !m_config.BSM_Only || MC::isBSM(pdg_id)) { // Sometimes we may ony want to bail out for BSM particles.
+        // Bail out...
+        if (m_config.AbortEvent){
+          rmk->GetEventManager()->AbortCurrentEvent();
+          rmk->GetEventManager()->GetNonconstCurrentEvent()->SetEventAborted();
+        }
+        if (m_config.SetError){
+
+          // Set error state in eventInfo
+          SG::WriteHandle<EventInfo> eic("McEventInfo");
+          if (! eic.isValid()){
+            ATH_MSG_WARNING( "Failed to retrieve EventInfo" );
+          } else {
+            eic->setErrorState(EventInfo::Core,EventInfo::Error);
+            ATH_MSG_WARNING( "Set error state in event info!" );
+          }
+        } // End of set error
+      } // End of BSM-only check
+      const std::string name = aStep->GetTrack()->GetDefinition()->GetParticleName();
+      if ( ( m_config.BSM_Only && !MC::isBSM(pdg_id) ) || !m_config.AbortEvent )  {
+          ATH_MSG_INFO ("Quietly stopped tracking looping " << name
+                        << " (trackID " << aStep->GetTrack()->GetTrackID()
+                        << ", track pos: "<<aStep->GetTrack()->GetPosition()
+                        << ", mom: "<<aStep->GetTrack()->GetMomentum()
+                        << ", parentID " << aStep->GetTrack()->GetParentID() << ")");
+        }
+        else {
+          ATH_MSG_WARNING ("Stopped tracking looping " << name
+                        << " (trackID " << aStep->GetTrack()->GetTrackID()
+                        << ", track pos: "<<aStep->GetTrack()->GetPosition()
+                        << ", mom: "<<aStep->GetTrack()->GetMomentum()
+                        << ", parentID " << aStep->GetTrack()->GetParentID() << "). The event will abort now.");
+        }
     } // End of handling end of error time
   }
 
