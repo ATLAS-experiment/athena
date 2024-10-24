@@ -62,13 +62,16 @@ namespace TrigCompositeUtils {
       for (LinkInfo<T> &info : links)
       {
         if (info.link == featureLink) {
-          if (info.source != start && linkName != initialRoIString() && linkName != roiString() && linkName != "l2cbroi" && linkName != viewString()) {
-            // Leaving this warning in for now, but there are known cases of the FS ROI being re-used
-            // in multiple outputs from the HLTSeeding. E.g. HLTNav_L1J:0 and HLTNav_L1MET:0
-            // so supressing for initialRoIString().
-            // Similar case for tau, just with an ROI created in Step1
-            const auto A = decisionToElementLink(start);
-            const auto B = decisionToElementLink(info.source);
+          const auto  A = decisionToElementLink(start);
+          const auto& B = info.link;
+          if (info.source != start 
+            && linkName != initialRoIString() // Allow multiple nodes to reference the same initial ROI
+            && linkName != roiString()  // Allow multiple nodes to reference the same updated ROI
+            && linkName != "l2cbroi"  // Allow multiple nodes to reference the same l2cb ROI (muon specific use case)
+            && linkName != viewString()  // Allow multiple nodes to reference the same view instance (i.e. re-use of EventViews)
+            && A.dataID().find("_probe") == std::string::npos // Allow re-use if one of the two locations is a tag-and-probe style probe component
+            && B.dataID().find("_probe") == std::string::npos
+          ) {
             ANA_MSG_WARNING ("Found '" << linkName << "' by multiple paths, but "
               << "the links are coming from different places in the navigation graph. " << std::endl
               << "From A:" << A.dataID() << ":" << A.index() << " Dump:" << std::endl << *start << std::endl

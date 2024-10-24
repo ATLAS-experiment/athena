@@ -26,9 +26,9 @@ def SetConfigTag(flags):
                 config = "pp2023"
             elif flags.Input.ProjectName == "data23_hi" or flags.Input.ProjectName == "data23_comm":
                 config = "PbPb2023"
-            elif flags.Input.ProjectName == "data24_5p36TeV" or flags.Input.ProjectName == "data24_900GeV" or flags.Input.ProjectName == "data24_13p6TeV":
+            elif flags.Input.ProjectName == "data24_5p36TeV" or flags.Input.ProjectName == "data24_900GeV" or flags.Input.ProjectName == "data24_13p6TeV" or flags.Input.ProjectName == "data24_refcomm":
                 config = "pp2024"
-            elif flags.Input.ProjectName == "data24_hi":
+            elif flags.Input.ProjectName == "data24_hi" or flags.Input.ProjectName == "data24_hicomm":
                 config = "PbPb2024"
         elif (run == LHCPeriod.Run2):
             if flags.Input.ProjectName == "data15_hi":

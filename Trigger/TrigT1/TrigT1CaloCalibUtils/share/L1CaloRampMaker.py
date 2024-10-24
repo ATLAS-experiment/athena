@@ -103,7 +103,7 @@ def main():
     
     
     from TrigT1CaloCondSvc.L1CaloCondConfig import L1CaloCondAlgCfg
-    acc.merge(L1CaloCondAlgCfg(flags))
+    acc.merge(L1CaloCondAlgCfg(flags,Physics=True,Calib1=True,Calib2=True))
 
     
     decorator = CompFactory.LVL1.L1CaloTriggerTowerDecoratorAlg()

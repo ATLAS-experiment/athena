@@ -14,7 +14,6 @@
 #include "CaloIdentifier/CaloLVL1_ID.h"
 #include "CaloTriggerTool/CaloTriggerTowerService.h"
 
-#include "TrigT1CaloCondSvc/L1CaloCondSvc.h"
 #include "TrigT1CaloCalibConditions/ChanCalibErrorCode.h"
 #include "TrigT1CaloCalibConditions/ChanDeadErrorCode.h"
 #include "TrigT1CaloCalibConditions/FineTimeErrorCode.h"
@@ -65,7 +64,6 @@ L1TriggerTowerTool::L1TriggerTowerTool(const std::string& t,
   m_l1CaloTTIdTools("LVL1::L1CaloTTIdTools/L1CaloTTIdTools", this),
   m_ttSvc("CaloTriggerTowerService/CaloTriggerTowerService", this),
   m_mappingTool("", this),
-  m_l1CondSvc("L1CaloCondSvc", n),
   m_dbFineTimeRefsTowers(0),
   m_correctFir(false),
   m_dynamicPedestalProvider("", this)
@@ -88,8 +86,12 @@ StatusCode L1TriggerTowerTool::initialize()
 {
   m_debug = msgLvl(MSG::VERBOSE); // May want to make this VERBOSE!
 
+  ATH_CHECK( m_runParametersContainerKey.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_conditionsContainerKeyRun2.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_disabledChannelContainerKeyRun2.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_dbFineTimeRefsTowersKey.initialize(SG::AllowEmpty) );
 
-  ATH_CHECK(m_l1CondSvc.retrieve());
+
   ATH_CHECK(m_l1CaloTTIdTools.retrieve());
 
   if(!m_ttSvc.retrieve().isSuccess()) {
@@ -153,121 +155,43 @@ void L1TriggerTowerTool::handle(const Incident& inc)
 
 //================= Now the actual user calls ===================================
 
-namespace { // helper function
-  template<class T>
-  StatusCode retrieveGeneric ATLAS_NOT_THREAD_SAFE (ServiceHandle<L1CaloCondSvc>& svc, std::any& target) {
-    T* C = nullptr;
-    CHECK_WITH_CONTEXT(svc->retrieve(C), "L1TriggerTowerTool");
-    target = C;
-    return StatusCode::SUCCESS;
-  }
-
-  template<class T, class FolderMap>
-  StatusCode retrieveGenericWithFolders ATLAS_NOT_THREAD_SAFE (ServiceHandle<L1CaloCondSvc>& svc, const FolderMap& fmap, std::any& target) {
-    T* C = nullptr;
-    CHECK_WITH_CONTEXT(svc->retrieve(C, fmap), "L1TriggerTowerTool");
-    target = C;
-    return StatusCode::SUCCESS;
-  }
-
-} // anonymous namespace
-
 /** Retrieve pointers to the L1Calo conditions containers */
 StatusCode L1TriggerTowerTool::retrieveConditions()
 {
-  ATH_MSG_VERBOSE("L1TriggerTowerTool::retrieveConditions");
-  if (m_l1CondSvc) {
-    ATH_MSG_VERBOSE( "Retrieving Conditions Containers" );
+    ATH_MSG_VERBOSE("L1TriggerTowerTool::retrieveConditions");
+
+    // retrieving direct from detector store, requires L1CaloCondAlg to have been scheduled
+    // strategy logic etc is now done inside the L1CaloCondAlg too
+    // so we just need to retrieve three containers (runpars, conditions, disabledchannels) ...
     bool verbose = msgLvl(MSG::VERBOSE);
 
-    bool is_run2 = isRun2();
-
-    if(is_run2) {
-      CHECK_WITH_CONTEXT(m_l1CondSvc->retrieve(m_derivedRunParsContainer), "L1TriggerTowerTool");
-      if (std::cbegin(*m_derivedRunParsContainer) == std::cend(*m_derivedRunParsContainer)) {
-        ATH_MSG_WARNING("Empty L1CaloDerivedRunParsContainer");
-        return StatusCode::FAILURE;
-      }
-
-      CHECK_WITH_CONTEXT(m_l1CondSvc->retrieve(m_runParametersContainer), "L1TriggerTowerTool");
-      if (std::cbegin(*m_runParametersContainer) == std::cend(*m_runParametersContainer)) {
-        ATH_MSG_WARNING("Empty L1CaloRunParametersContainer");
-        return StatusCode::FAILURE;
-      }
-
-
-      std::string timingRegime = std::cbegin(*m_derivedRunParsContainer)->timingRegime();
-
-      CHECK_WITH_CONTEXT(m_l1CondSvc->retrieve(m_strategyContainer), "L1TriggerTowerTool");
-      
-      std::string strategy;
-      for(const auto& it: *m_strategyContainer){
-        if (it.timingRegime() == timingRegime){
-          strategy = it.strategy();
-        }
-      }
-
-      std::map<L1CaloPprConditionsContainerRun2::eCoolFolders, std::string> 
-        coolFoldersKeysMap = {
-           {
-            L1CaloPprConditionsContainerRun2::ePprChanDefaults,
-            "/TRIGGER/L1Calo/V2/Configuration/PprChanDefaults"
-           }
-         };
-      
-      if (strategy.empty()){
-        coolFoldersKeysMap[L1CaloPprConditionsContainerRun2::ePprChanCalib] 
-          = "/TRIGGER/L1Calo/V2/Calibration/" + timingRegime + "/PprChanCalib";
-      } else {
-        coolFoldersKeysMap[L1CaloPprConditionsContainerRun2::ePprChanCalibCommon] = 
-            "/TRIGGER/L1Calo/V2/Calibration/" + timingRegime + "/PprChanCommon";
-        coolFoldersKeysMap[L1CaloPprConditionsContainerRun2::ePprChanCalibStrategy] =  
-            "/TRIGGER/L1Calo/V2/Calibration/" + timingRegime + "/PprChan" + strategy;
-      }
-
-      CHECK(retrieveGenericWithFolders<L1CaloPprConditionsContainerRun2>(
-          m_l1CondSvc, coolFoldersKeysMap, m_conditionsContainer));
-
-      CHECK(retrieveGeneric<L1CaloPprDisabledChannelContainerRun2>(m_l1CondSvc, m_disabledChannelContainer));
-    } else {
-      CHECK(retrieveGeneric<L1CaloPprConditionsContainer>(m_l1CondSvc, m_conditionsContainer));
-      CHECK(retrieveGeneric<L1CaloPprDisabledChannelContainer>(m_l1CondSvc, m_disabledChannelContainer));
-    }
-
-    
-    if(verbose) {
-      ATH_MSG_VERBOSE( "Retrieved ConditionsContainer" );
-      if(is_run2){
-        std::any_cast<L1CaloPprConditionsContainerRun2*>(m_conditionsContainer)->dump();
-      } else{
-        std::any_cast<L1CaloPprConditionsContainer*>(m_conditionsContainer)->dump();
-      }
-    }
-
-    if(verbose) {
-      if(is_run2){
-        ATH_MSG_VERBOSE( "Retrieved DerivedRunParsContainer" );
-        m_derivedRunParsContainer->dump();
-	ATH_MSG_VERBOSE( "Retrieved RunParametersContainer" );
-	m_runParametersContainer->dump();
-        ATH_MSG_VERBOSE( "Retrieved StrategyContainer" );
-        m_strategyContainer->dump();
-      }
-    }
-
-    ATH_MSG_VERBOSE( "Retrieved DisabledChannelContainer" );
+    SG::ReadCondHandle <L1CaloRunParametersContainer> rh_rp(m_runParametersContainerKey);
+    CHECK_WITH_CONTEXT(rh_rp.isValid(), "L1TriggerTowerTool");
+    m_runParametersContainer = (*rh_rp);
     if (verbose) {
-      if(is_run2)
-        std::any_cast<L1CaloPprDisabledChannelContainerRun2*>(m_disabledChannelContainer)->dump();
-      else
-        std::any_cast<L1CaloPprDisabledChannelContainer*>(m_disabledChannelContainer)->dump();
+        ATH_MSG_VERBOSE( "Retrieved RunParametersContainer" );
+        rh_rp->dump();
     }
 
-  } else {
-    ATH_MSG_ERROR("Could not retrieve Conditions Containers");
-    return StatusCode::FAILURE;
-  }
-  
+    if(isRun2()) {
+        SG::ReadCondHandle <L1CaloPprConditionsContainerRun2> rh_c(m_conditionsContainerKeyRun2);
+        CHECK_WITH_CONTEXT(rh_c.isValid(), "L1TriggerTowerTool");
+        m_conditionsContainer = (*rh_c);
+        if (verbose) {
+            ATH_MSG_VERBOSE( "Retrieved ConditionsContainer" );
+            rh_c->dump();
+        }
+        SG::ReadCondHandle <L1CaloPprDisabledChannelContainerRun2> rh_dc(m_disabledChannelContainerKeyRun2);
+        CHECK_WITH_CONTEXT(rh_dc.isValid(), "L1TriggerTowerTool");
+        m_disabledChannelContainer = (*rh_dc);
+        if (verbose) {
+            ATH_MSG_VERBOSE( "Retrieved DisabledChannelContainer" );
+            rh_dc->dump();
+        }
+    } else {
+        ATH_MSG_ERROR("non-Run2 no longer supported ... requires update to L1CaloCondAlg to create non-Run2 versions of containers");
+        return StatusCode::FAILURE;
+    }
   return StatusCode::SUCCESS;
 }
 
@@ -1691,31 +1615,21 @@ void L1TriggerTowerTool::printVec(const std::vector<T>& vec)
 
 StatusCode L1TriggerTowerTool::loadFTRefs()
 {
-  //method to load the FineTimeReferences Folder from COOL or an sqlite file (needs to be included in the job options)
-  //implementation very similar to L1TriggerTowerTool::retrieveConditions
-  //calling this method outside of fillHistograms() can result in Errors
-  StatusCode sc;
-  m_dbFineTimeRefsTowers = 0;
-  
-  if (m_l1CondSvc) {
-    ATH_MSG_VERBOSE( "Retrieving FineTimeReferences Containers" );
+    //method to load the FineTimeReferences Folder from COOL or an sqlite file (needs to be included in the job options)
+    //implementation very similar to L1TriggerTowerTool::retrieveConditions
+    //calling this method outside of fillHistograms() can result in Errors
+
+    // this method new requires L1CalCondAlg to be scheduled
+    m_dbFineTimeRefsTowers = nullptr;
     bool verbose = msgLvl(MSG::VERBOSE);
-
-
-    sc = m_l1CondSvc->retrieve(m_dbFineTimeRefsTowers);
-    if (sc.isFailure()) {
-     ATH_MSG_WARNING( "No FineTimeReferences Folder found" );
-     return sc;
+    SG::ReadCondHandle <L1CaloPpmFineTimeRefsContainer> rh(m_dbFineTimeRefsTowersKey);
+    CHECK_WITH_CONTEXT(rh.isValid(), "L1TriggerTowerTool");
+    m_dbFineTimeRefsTowers = (*rh);
+    if (verbose) {
+        ATH_MSG_VERBOSE( "Retrieved FineTimeReferences Container" );
+        rh->dump();
     }
-    ATH_MSG_VERBOSE( "Retrieved FineTimeReferences Container" );
-    if (verbose) m_dbFineTimeRefsTowers->dump();
-
-  } else {
-    ATH_MSG_WARNING( "Could not retrieve FineTimeReferences, as Conditon Service not present" );
-    return StatusCode::FAILURE;
-  }
-  
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 
 std::pair<double, double> L1TriggerTowerTool::refValues(const L1CaloCoolChannelId& channelId)

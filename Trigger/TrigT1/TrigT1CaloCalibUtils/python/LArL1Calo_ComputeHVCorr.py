@@ -100,7 +100,6 @@ if __name__=="__main__":
     # FIXME:
     #include('TrigT1CaloCalibConditions/L1CaloCalibConditionsRun2_jobOptions.py')
     # hack because of deleted files from trigger:
-    cfg.addService(CompFactory.L1CaloCondSvc())
     L1CaloFolderList = []
     L1CaloFolderList += ["/TRIGGER/L1Calo/V1/Calibration/PpmDeadChannels"]
     L1CaloFolderList += ["/TRIGGER/L1Calo/V1/Conditions/DisabledTowers"]

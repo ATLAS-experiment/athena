@@ -10,10 +10,10 @@
 
 namespace egammaMonitoring {
 
-  EfficiencyPlot::EfficiencyPlot(std::string name, std::string folder, ITHistSvc * &rootHistSvc ) :
+  EfficiencyPlot::EfficiencyPlot(std::string name, std::string folder, SmartIF<ITHistSvc> rootHistSvc ) :
     m_name(std::move(name)),
     m_folder(std::move(folder)),
-    m_rootHistSvc(rootHistSvc) {
+    m_rootHistSvc(std::move(rootHistSvc)) {
   }
 
   StatusCode EfficiencyPlot::divide(IHistograms *pass, IHistograms* total) {
