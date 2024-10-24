@@ -10,19 +10,14 @@
 namespace LVL1MUONIF {
 
   Lvl1MuCTPIInput::Lvl1MuCTPIInput() {
-    for (size_t isys=0; isys<NumberOfMuonSystem; isys++){
-      m_isFilledOutOfTimeCandidates[isys] = false;
-    }}
+    m_isFilledOutOfTimeCandidates.fill(false);
+  }
 
   /////////////
   Lvl1MuCTPIInput::Lvl1MuCTPIInput( const Lvl1MuCTPIInput& right ) {
     *this = right;
   }
 
-  /////////////
-  Lvl1MuCTPIInput::~Lvl1MuCTPIInput() {
-    clearAll();
-  }
 
   /////////////
 
@@ -33,7 +28,7 @@ namespace LVL1MUONIF {
 	for( size_t ip=0; ip<right.m_data[idSys].size(); ip++){
 	  int bc=((right.m_data[idSys]).at(ip)).first;
 	  Lvl1MuVect vSL(((right.m_data[idSys]).at(ip)).second);
-	  m_data[idSys].push_back(std::make_pair(bc,vSL));
+	  m_data[idSys].emplace_back(bc,std::move(vSL));
 	}
 	m_isFilledOutOfTimeCandidates[idSys] = right.m_isFilledOutOfTimeCandidates[idSys];
       }	
@@ -53,7 +48,7 @@ namespace LVL1MUONIF {
     for( size_t ip=0; ip<m_data[systemAddress].size(); ip++){
       int bc=((m_data[systemAddress]).at(ip)).first;
       if (bc != bcid) continue;
-      const Lvl1MuVect vecSL( ((m_data[systemAddress]).at(ip)).second);
+      const Lvl1MuVect &vecSL( ((m_data[systemAddress]).at(ip)).second);
       return *(vecSL.at(getSystemIndex(systemAddress,subSystemAddress,sectorAddress)));
     }
     return dummy;
@@ -72,14 +67,14 @@ namespace LVL1MUONIF {
       ip = getBcidIndex( systemAddress, bcid );
     }
 
-    Lvl1MuVect vecSL((((m_data[systemAddress]).at(ip)).second));
+    const Lvl1MuVect &vecSL((((m_data[systemAddress]).at(ip)).second));
     size_t idx= getSystemIndex(systemAddress,subSystemAddress,sectorAddress);
     if ( systemAddress == Barrel ) {
-      *std::dynamic_pointer_cast<Lvl1MuBarrelSectorLogicData>(vecSL.at(idx)) = data;
+      *std::static_pointer_cast<Lvl1MuBarrelSectorLogicData>(vecSL.at(idx)) = data;
     } else if ( systemAddress == Endcap ) {
-      *std::dynamic_pointer_cast<Lvl1MuEndcapSectorLogicData>(vecSL.at(idx))= data;
+      *std::static_pointer_cast<Lvl1MuEndcapSectorLogicData>(vecSL.at(idx))= data;
     } else if ( systemAddress == Forward ) {
-      *std::dynamic_pointer_cast<Lvl1MuForwardSectorLogicData>(vecSL.at(idx))= data;
+      *std::static_pointer_cast<Lvl1MuForwardSectorLogicData>(vecSL.at(idx))= data;
     }
   }
 
@@ -114,7 +109,7 @@ namespace LVL1MUONIF {
 	int bc=((right.m_data[idSys]).at(ip)).first;
 	if (isEmpty( idSys, bc)){
 	  Lvl1MuVect vSL(((right.m_data[idSys]).at(ip)).second);
-	  m_data[idSys].push_back(std::make_pair(bc,vSL));
+	  m_data[idSys].emplace_back(bc,std::move(vSL));
 	  m_isFilledOutOfTimeCandidates[idSys] = right.m_isFilledOutOfTimeCandidates[idSys];
 	}
       }	
@@ -129,26 +124,26 @@ namespace LVL1MUONIF {
     Lvl1MuVect vecSL;
     
     if ( systemAddress == Barrel ) {
+      vecSL.reserve(NumberOfBarrelSector*NumberOfMuonSubSystem);
       for ( size_t id = 0; id < NumberOfBarrelSector*NumberOfMuonSubSystem; id++ ) {
-	std::shared_ptr<Lvl1MuBarrelSectorLogicData> barrelSect(new Lvl1MuBarrelSectorLogicData);
-	vecSL.push_back(barrelSect);
+	vecSL.emplace_back(std::make_shared<Lvl1MuBarrelSectorLogicData>());
       }
 
     } else if ( systemAddress == Endcap ) {
+      vecSL.reserve(NumberOfEndcapSector*NumberOfMuonSubSystem);
       for ( size_t id = 0; id < NumberOfEndcapSector*NumberOfMuonSubSystem; id++ ) {
-	std::shared_ptr<Lvl1MuEndcapSectorLogicData> endcapSect(new Lvl1MuEndcapSectorLogicData);
-	vecSL.push_back(endcapSect);
+	vecSL.emplace_back(std::make_shared<Lvl1MuEndcapSectorLogicData>());
       }
 
     } else if ( systemAddress == Forward ) {
+      vecSL.reserve(NumberOfForwardSector*NumberOfMuonSubSystem);
       for ( size_t id = 0; id < NumberOfForwardSector*NumberOfMuonSubSystem; id++ ) {
-	std::shared_ptr<Lvl1MuForwardSectorLogicData> forwardSect(new Lvl1MuForwardSectorLogicData);
-	vecSL.push_back(forwardSect);
+	vecSL.emplace_back(std::make_shared<Lvl1MuForwardSectorLogicData>());
       }
     }
 
     size_t ip = m_data[systemAddress].size();
-    m_data[systemAddress].push_back( std::make_pair(bcid, vecSL) );
+    m_data[systemAddress].emplace_back( bcid, std::move(vecSL) );
 
     if (bcid!=0) m_isFilledOutOfTimeCandidates[systemAddress] = true; 
 

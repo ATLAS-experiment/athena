@@ -10,6 +10,7 @@
 #include <vector>
 #include <utility>
 #include <memory>
+#include <array>
 
 // Local include(s):
 #include "TrigT1Interfaces/Lvl1MuSectorLogicData.h"
@@ -33,12 +34,12 @@ namespace LVL1MUONIF {
     * $Revision: 782811 $
     * $Date: 2016-11-07 18:20:40 +0100 (Mon, 07 Nov 2016) $
     */
-   class Lvl1MuCTPIInput {
+   class Lvl1MuCTPIInput final {
 
    public:
       Lvl1MuCTPIInput();
       Lvl1MuCTPIInput( const Lvl1MuCTPIInput& );
-      virtual ~Lvl1MuCTPIInput();
+      ~Lvl1MuCTPIInput() = default;
 
       Lvl1MuCTPIInput& operator=( const Lvl1MuCTPIInput& right );
 
@@ -154,7 +155,7 @@ namespace LVL1MUONIF {
        return -1;
      };
 
-     bool m_isFilledOutOfTimeCandidates[NumberOfMuonSystem];
+     std::array<bool, NumberOfMuonSystem> m_isFilledOutOfTimeCandidates;
 
      
      typedef std::vector<std::shared_ptr <Lvl1MuSectorLogicData> > Lvl1MuVect;
