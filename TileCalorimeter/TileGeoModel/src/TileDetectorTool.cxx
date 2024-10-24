@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -86,8 +86,8 @@ StatusCode TileDetectorTool::create()
   ATH_MSG_INFO(" Entering TileDetectorTool::create()");
 
   // Get the detector configuration
-  IGeoModelSvc *geoModel;
-  ATH_CHECK(service ("GeoModelSvc",geoModel));
+  SmartIF<IGeoModelSvc> geoModel{service("GeoModelSvc")};
+  ATH_CHECK(geoModel.isValid());
 
   std::string atlasVersion = geoModel->atlasVersion();
   std::string tileVersion = geoModel->tileVersionOverride();

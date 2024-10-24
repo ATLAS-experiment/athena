@@ -226,9 +226,8 @@ StatusCode TileInfoLoader::initialize() {
   //=== Find the detector store service.
   CHECK( m_detStore.retrieve() );
 
-  const IGeoModelSvc *geoModel=nullptr;
-
-  if(service("GeoModelSvc", geoModel).isFailure()) {
+  SmartIF<IGeoModelSvc> geoModel{service("GeoModelSvc")};
+  if(!geoModel) {
     ATH_MSG_ERROR( "Could not locate GeoModelSvc" );
   } else {
     // check the DetDescr version

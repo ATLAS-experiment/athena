@@ -1,9 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// Gaudi includes
-#include "GaudiKernel/ITHistSvc.h"
 
 // Athena includes
 #include "xAODEventInfo/EventInfo.h"
@@ -34,7 +31,7 @@
 
 TileInfoDump::TileInfoDump(const std::string& name, ISvcLocator* pSvcLocator)
     : AthAlgorithm(name, pSvcLocator)
-    , m_thistSvc(nullptr)
+    , m_thistSvc("THistSvc", name)
     , m_tileHWID(nullptr)
     , m_tileID(nullptr)
     , m_h_badCellA(nullptr)
@@ -120,7 +117,7 @@ StatusCode TileInfoDump::initialize() {
   CHECK( detStore()->retrieve(m_tileID, "TileID") );
 
   //--- Get a handle on the NTuple and histogramming service
-  CHECK( service("THistSvc", m_thistSvc) );
+  CHECK( m_thistSvc.retrieve() );
 
   //=== Get TileInfo and set max ADC counts
   CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );

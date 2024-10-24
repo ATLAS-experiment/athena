@@ -2,10 +2,7 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-//=== IOVDbTest includes
-#include "RegistrationServices/IIOVRegistrationSvc.h"
-
-//=== Event Info 
+//=== Event Info
 #include "xAODEventInfo/EventInfo.h"
 #include "AthenaKernel/errorcheck.h"
 
@@ -25,7 +22,7 @@
 
 TileOFC2DBAlg::TileOFC2DBAlg(const std::string& name, ISvcLocator* pSvcLocator)
     : AthAlgorithm(name, pSvcLocator)
-  , m_regSvc(nullptr)
+    , m_regSvc("IOVRegistrationSvc", name)
 
 {
   declareProperty("OF2",                m_of2            = true,"true => OF2, false => OF1");
@@ -62,10 +59,7 @@ StatusCode TileOFC2DBAlg::initialize() {
   CHECK( m_tileCondToolOfc.retrieve() );
 
   //=== IOVRegistrationSvc
-  CHECK( service("IOVRegistrationSvc", m_regSvc) );
-
-  ATH_MSG_DEBUG( "Found IOVRegistrationSvc " );
-
+  CHECK( m_regSvc.retrieve() );
 
   std::map<std::string, unsigned int> roses = { {"AUX", 0}, {"LBA", 1}, {"LBC", 2}, {"EBA", 3}, {"EBC", 4} };
 

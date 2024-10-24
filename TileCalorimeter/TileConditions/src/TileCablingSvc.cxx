@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi includes
@@ -142,9 +142,8 @@ StatusCode TileCablingSvc::initialize ATLAS_NOT_THREAD_SAFE () {
     msg(MSG::INFO) << MSG::dec << endmsg;
   }
 
-  const IGeoModelSvc* geoModel = nullptr;
-  StatusCode sc = service("GeoModelSvc", geoModel);
-  if (sc.isFailure()) {
+  SmartIF<IGeoModelSvc> geoModel{service("GeoModelSvc")};
+  if (!geoModel) {
     ATH_MSG_ERROR( "Could not locate GeoModelSvc"  );
   } else {
     // check the DetDescr version
