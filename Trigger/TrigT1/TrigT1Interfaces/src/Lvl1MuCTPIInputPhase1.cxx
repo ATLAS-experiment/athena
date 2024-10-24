@@ -81,11 +81,11 @@ namespace LVL1MUONIF {
     const Lvl1MuVect &vecSL((((m_data[systemAddress]).at(ip)).second));
     size_t idx= getSystemIndex(systemAddress,subSystemAddress,sectorAddress);
     if ( systemAddress == Barrel ) {
-      *std::static_pointer_cast<Lvl1MuBarrelSectorLogicDataPhase1>(vecSL.at(idx)) = data;
+      *static_cast<Lvl1MuBarrelSectorLogicDataPhase1*>(vecSL.at(idx).get()) = data;
     } else if ( systemAddress == Endcap ) {
-      *std::static_pointer_cast<Lvl1MuEndcapSectorLogicDataPhase1>(vecSL.at(idx))= data;
+      *static_cast<Lvl1MuEndcapSectorLogicDataPhase1*>(vecSL.at(idx).get())= data;
     } else if ( systemAddress == Forward ) {
-      *std::static_pointer_cast<Lvl1MuForwardSectorLogicDataPhase1>(vecSL.at(idx))= data;
+      *static_cast<Lvl1MuForwardSectorLogicDataPhase1*>(vecSL.at(idx).get())= data;
     }
   }
 
