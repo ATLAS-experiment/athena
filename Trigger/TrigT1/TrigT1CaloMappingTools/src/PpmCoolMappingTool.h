@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOMAPPINGTOOLS_PPMCOOLMAPPINGTOOL_H
@@ -37,7 +37,6 @@ class PpmCoolMappingTool : public extends<AthAlgTool, IL1CaloMappingTool, IIncid
    using base_class::base_class;
 
    virtual StatusCode initialize() override;
-   virtual StatusCode finalize() override;
    virtual void handle(const Incident&) override;
 
    /// Return eta, phi and layer mapping for given crate/module/channel
