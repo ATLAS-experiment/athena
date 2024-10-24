@@ -92,12 +92,14 @@ def configureGeometry(flags, cfg):
     if flags.Detector.GeometryZDC:
         from ZDC_GeoM.ZdcGeoModelConfig import ZDC_DetToolCfg
         cfg.merge(ZDC_DetToolCfg(flags))
+
     # Temporary 'hack': 
     # Replace EllipticTube with Box, 
     # to bypass a crash due to lack of support 
     # for EllipticTube in GeoModelIO 
     # See: https://its.cern.ch/jira/browse/ATLASSIM-7263
-    cfg.getService("GeoModelSvc").DetectorTools["ForwardRegionGeoModelTool"].vp1Compatibility=True
+    if "ForwardRegionGeoModelTool" in cfg.getService("GeoModelSvc").DetectorTools:
+        cfg.getService("GeoModelSvc").DetectorTools["ForwardRegionGeoModelTool"].vp1Compatibility=True
 
 
 def getATLASVersion():
