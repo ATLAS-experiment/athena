@@ -40,6 +40,14 @@ class FastCaloSim: public G4VFastSimulationModel
               const ServiceHandle<ISF::IFastCaloSimParamSvc>& FastCaloSimSvc,
               const Gaudi::Property<std::string>& CaloCellContainerSDName,
               const Gaudi::Property<bool>& doG4Transport,
+              const Gaudi::Property<bool>& doPhotons,
+              const Gaudi::Property<bool>& doElectrons,
+              const Gaudi::Property<bool>& doHadrons,
+              const Gaudi::Property<float>& EtaLow,
+              const Gaudi::Property<float>& EtaHigh,
+              const Gaudi::Property<float>& EkinLow,
+              const Gaudi::Property<float>& EkinHigh,
+              const Gaudi::Property<bool>& doEMECFCS,
               FastCaloSimTool * FastCaloSimTool);
   ~FastCaloSim() {}
 
@@ -80,6 +88,16 @@ class FastCaloSim: public G4VFastSimulationModel
   Gaudi::Property<std::string> m_CaloCellContainerSDName;
   // Boolean flag to enable Geant4 transportation
   Gaudi::Property<bool> m_doG4Transport;
+
+  // Boundaries to enable AF3 transportation
+  Gaudi::Property<bool> m_doPhotons;
+  Gaudi::Property<bool> m_doElectrons;
+  Gaudi::Property<bool> m_doHadrons;
+  Gaudi::Property<float> m_AbsEtaMin;
+  Gaudi::Property<float> m_AbsEtaMax;
+  Gaudi::Property<float> m_EkinMin;
+  Gaudi::Property<float> m_EkinMax;
+  Gaudi::Property<float> m_doEMECFCS;
 
   // Fast simulation FastCaloSimTool 
   FastCaloSimTool * m_FastCaloSimTool;
