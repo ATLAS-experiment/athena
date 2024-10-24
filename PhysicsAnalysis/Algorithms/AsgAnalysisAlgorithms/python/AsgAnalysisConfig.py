@@ -342,10 +342,6 @@ class PtEtaSelectionBlock (ConfigBlock):
             "'' (empty string), meaning that the cuts are applied to every "
             "object within the container. Specifying a name (e.g. loose) "
             "applies the cut only to those object who also pass that selection.")
-        self.addOption ('postfix', '', type=str,
-            info="a postfix to apply to decorations and algorithm names. "
-            "Typically not needed here since we tend apply a single set of "
-            "pT and eta cuts to a given type of object.")
         self.addOption ('minPt', None, type=float,
             info="minimum pT value to cut on, in MeV. No default value.")
         self.addOption ('maxPt', None, type=float,
@@ -370,11 +366,7 @@ class PtEtaSelectionBlock (ConfigBlock):
 
     def makeAlgs (self, config) :
 
-        postfix = self.postfix
-        if postfix != '' and postfix[0] != '_' :
-            postfix = '_' + postfix
-
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PtEtaSelectionAlg' + self.containerName + postfix )
+        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PtEtaSelectionAlg' + self.containerName + self.selectionName )
         config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
         if self.minPt is not None :
             alg.selectionTool.minPt = self.minPt
@@ -412,18 +404,11 @@ class ObjectCutFlowBlock (ConfigBlock):
             "performed for every object within the container. Specifying a "
             "name (e.g. loose) generates the cutflow only for those object "
             "that also pass that selection.")
-        self.addOption ('postfix', '', type=str,
-            info="a postfix to apply to decorations and algorithm names. "
-            "Typically not needed here.")
 
     def makeAlgs (self, config) :
 
-        postfix = self.postfix
-        if postfix != '' and postfix[0] != '_' :
-            postfix = '_' + postfix
-
-        alg = config.createAlgorithm( 'CP::ObjectCutFlowHistAlg', 'CutFlowDumperAlg_' + self.containerName + '_' + self.selectionName + postfix )
-        alg.histPattern = 'cflow_' + self.containerName + "_" + self.selectionName + postfix + '_%SYS%'
+        alg = config.createAlgorithm( 'CP::ObjectCutFlowHistAlg', 'CutFlowDumperAlg_' + self.containerName + '_' + self.selectionName )
+        alg.histPattern = 'cflow_' + self.containerName + "_" + self.selectionName + '_%SYS%'
         alg.selections = config.getSelectionCutFlow (self.containerName, self.selectionName)
         alg.input = config.readName (self.containerName)
         alg.histTitle = "Object Cutflow: " + self.containerName + "." + self.selectionName
@@ -677,53 +662,6 @@ def makeGeneratorAnalysisConfig( seq,
     config.setOptionValue ('cutBookkeepersSystematics', cutBookkeepersSystematics)
     seq.append (config)
 
-
-
-def makePtEtaSelectionConfig( seq, containerName,
-                              *, postfix = None, minPt = None, maxEta = None,
-                              useClusterEta = None,
-                              selectionDecoration = None, selectionName = ''):
-    """Create a pt-eta kinematic selection config
-
-    Keyword arguments:
-      containerName -- name of the container
-      postfix -- a postfix to apply to decorations and algorithm
-                 names.  this is mostly used/needed when using this
-                 sequence with multiple working points to ensure all
-                 names are unique.
-      minPt -- minimum pt value
-      maxEta -- maximum eta value
-      useClusterEta -- use cluster eta (for electrons/photons) instead of track eta
-      selectionDecoration -- the name of the decoration to set
-      selectionName -- the name of the selection to append this to
-    """
-
-    config = PtEtaSelectionBlock (containerName, selectionName)
-    config.setOptionValue ('postfix',postfix)
-    config.setOptionValue ('minPt',minPt)
-    config.setOptionValue ('maxEta',maxEta)
-    config.setOptionValue ('selectionDecoration',selectionDecoration)
-    config.setOptionValue ('useClusterEta',useClusterEta)
-    seq.append (config)
-
-
-
-def makeObjectCutFlowConfig( seq, containerName,
-                              *, postfix = None, selectionName):
-    """Create a pt-eta kinematic selection config
-
-    Keyword arguments:
-      containerName -- name of the container
-      postfix -- a postfix to apply to decorations and algorithm
-                 names.  this is mostly used/needed when using this
-                 sequence with multiple working points to ensure all
-                 names are unique.
-      selectionName -- the name of the selection to do the cutflow for
-    """
-
-    config = ObjectCutFlowBlock (containerName, selectionName)
-    config.setOptionValue ('postfix',postfix)
-    seq.append (config)
 
 
 def makeEventCutFlowConfig( seq, containerName,
