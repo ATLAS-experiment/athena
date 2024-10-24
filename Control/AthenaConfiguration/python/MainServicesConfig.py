@@ -33,6 +33,7 @@ def AvalancheSchedulerSvcCfg(flags, **kwargs):
     kwargs.setdefault("DataDepsGraphFile", flags.Scheduler.DataDepsGraphFile)
     kwargs.setdefault("DataDepsGraphAlgPattern", flags.Scheduler.DataDepsGraphAlgPattern)
     kwargs.setdefault("DataDepsGraphObjectPattern", flags.Scheduler.DataDepsGraphObjectPattern)
+    kwargs.setdefault("NumOffloadThreads", flags.Concurrency.NumOffloadThreads)
     
     cfg = ComponentAccumulator()
     scheduler = CompFactory.AvalancheSchedulerSvc(**kwargs)

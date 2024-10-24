@@ -116,6 +116,7 @@ def initConfigFlags():
     acf.addFlag('Concurrency.NumThreads', 0, help='number of threads' )
     acf.addFlag('Concurrency.NumConcurrentEvents', lambda prevFlags : prevFlags.Concurrency.NumThreads, help='number of concurrent events')
     acf.addFlag('Concurrency.DebugWorkers', False, help='stops the worker in bootstrap until SIGUSR1 is received')
+    acf.addFlag('Concurrency.NumOffloadThreads', 0, help='maximum number of extra threads to use for CPU portion of asynchronous algorithms')
 
     acf.addFlag('Scheduler.CheckDependencies', True, help='runtime check of algorithm input dependencies')
     acf.addFlag('Scheduler.CheckOutputUsage', False, help='runtime check of algorithm output usage')
