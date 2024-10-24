@@ -46,10 +46,17 @@ atlas_add_test( testR4SensitiveDetectors
                 POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( testChamberBuilding
-                SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --noMM --noSTGC
+                SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --noSTGC 
                 PROPERTIES TIMEOUT 900
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( testChamberBuildingR4
+                SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --noSTGC --geoModelFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R4-MUONTEST.db
+                PROPERTIES TIMEOUT 900
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT nopost.sh)
+
 
 file(GLOB_RECURSE files "util/*.cxx")
 foreach(_exeFile ${files})
