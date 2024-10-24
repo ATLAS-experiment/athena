@@ -73,8 +73,13 @@ public:
   virtual bool plotResolutions() const override { return m_plotResolutions.value(); };
   virtual bool plotFakeRates() const override { return m_plotFakeRates.value(); };
   virtual bool plotDuplicateRates() const override { return m_plotDuplicateRates.value(); };
+  virtual bool plotHitsOnTracks() const override { return m_plotHitsOnTracks.value(); };
+  virtual bool plotHitsOnTracksReference() const override { return m_plotHitsOnTracksReference.value(); };
+  virtual bool plotHitsOnMatchedTracks() const override { return m_plotHitsOnMatchedTracks.value(); };
+  virtual bool plotHitsOnFakeTracks() const override { return m_plotHitsOnFakeTracks.value(); };
   virtual bool plotOfflineElectrons() const override { return m_plotOfflineElectrons.value(); };
   virtual unsigned int resolutionMethod() const override;
+  virtual bool isITk() const override { return m_isITk.value(); };
 
 private:
 
@@ -110,8 +115,13 @@ private:
   BooleanProperty m_plotResolutions { this, "plotResolutions", true, "Book/fill track resolutions histograms" };
   BooleanProperty m_plotFakeRates { this, "plotFakeRates", true, "Book/fill fake rate histograms" };
   BooleanProperty m_plotDuplicateRates { this, "plotDuplicateRates", false, "Book/fill duplicate rate histograms" };
+  BooleanProperty m_plotHitsOnTracks { this, "plotHitsOnTracks", true, "Book/fill hits on tracks histograms" };
+  BooleanProperty m_plotHitsOnTracksReference { this, "plotHitsOnTracksReference", false, "Book/fill hits on reference tracks histograms" };
+  BooleanProperty m_plotHitsOnMatchedTracks { this, "plotHitsOnMatchedTracks", false, "Book/fill hits on matched tracks histograms" };
+  BooleanProperty m_plotHitsOnFakeTracks { this, "plotHitsOnFakeTracks", false, "Book/fill hits on fake and unlinked tracks histograms" };
   BooleanProperty m_plotOfflineElectrons { this, "plotOfflineElectrons", false, "Book/fill reference offline electrons histograms" };
   StringProperty m_resolMethod { this, "ResolutionMethod", "iterRMS", "Type of computation method for resolutions" };
+  BooleanProperty m_isITk { this, "isITk", true, "Use ITk configuration for plots, etc." };
 };
 
 #endif // > !INDETTRACKPERFMON_TRACKANALYSISDEFINITIONSVC_H

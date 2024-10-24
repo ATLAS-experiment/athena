@@ -212,7 +212,12 @@ def getPlotsDefList( flags ):
             continue
         for trkLabel in trkLabels :
             newPlotsDefStr = plotsDefStr.replace( "$TRKTYPE", trkLabel[0] ).replace( "$TRKTAG", trkLabel[1] )
-            plotsDefStrList.append( newPlotsDefStr )
+            if ( "$TRK2TAG" not in newPlotsDefStr ) and ( "$TRK2TYPE" not in newPlotsDefStr ) :
+                plotsDefStrList.append( newPlotsDefStr )
+                continue
+            for trk2Label in trkLabels :
+                newPlotsDefStr2 = newPlotsDefStr.replace( "$TRK2TYPE", trk2Label[0] ).replace( "$TRK2TAG", trk2Label[1] )
+                plotsDefStrList.append( newPlotsDefStr2 )
 
     return plotsDefStrList
 

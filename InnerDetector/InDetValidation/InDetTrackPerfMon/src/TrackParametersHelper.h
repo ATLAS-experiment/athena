@@ -99,15 +99,6 @@ namespace IDTPM {
   template< class U >
   inline float prodZ( const U& p ) { return getProdZ( p ); }
 
-  /// Accessor utility function for getting the value of nSiHits
-  inline float getNSiHits( const xAOD::TrackParticle& ) { return -9999.; }
-  inline float getNSiHits( const xAOD::TruthParticle& p ) {
-    static thread_local SG::ConstAccessor<float> prodNSiHits("nSilHits");
-    return (prodNSiHits.isAvailable(p)) ? prodNSiHits(p) : -9999.;
-  }
-  template< class U >
-  inline float nSiHits( const U& p ) { return getNSiHits( p ); }
-
   /// Accessor utility function for getting the value of qOverP
   inline float getQoverP( const xAOD::TrackParticle& p ) { return p.qOverP(); }
   inline float getQoverP( const xAOD::TruthParticle& p ) {
@@ -263,6 +254,212 @@ namespace IDTPM {
   inline float getIsHadron( const xAOD::TruthParticle& p ) { return p.isHadron();}
   template< class U >
   inline float isHadron( const U& p ) { return getIsHadron( p ); }
+
+  /// Accessor utility function for getting the value of nInnerMostPixelHits
+  inline float getNInnerMostPixelHits( const xAOD::TrackParticle& p ) {
+    uint8_t iInnerMostPixelHits(0);
+    return p.summaryValue( iInnerMostPixelHits, xAOD::numberOfInnermostPixelLayerHits ) ?
+           float( iInnerMostPixelHits ) : -9999.;
+  }
+  inline float getNInnerMostPixelHits( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float nInnerMostPixelHits( const U& p ) { return getNInnerMostPixelHits( p ); }
+
+  /// Accessor utility function for getting the value of nInnerMostPixelEndcapHits
+  inline float getNInnerMostPixelEndcapHits( const xAOD::TrackParticle& p ) {
+    uint8_t iInnerMostPixelEndcapHits(0);
+    return p.summaryValue( iInnerMostPixelEndcapHits, xAOD::numberOfInnermostPixelLayerEndcapHits ) ?
+           float( iInnerMostPixelEndcapHits ) : -9999.;
+  }
+  inline float getNInnerMostPixelEndcapHits( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float nInnerMostPixelEndcapHits( const U& p ) { return getNInnerMostPixelEndcapHits( p ); }
+
+  /// Accessor utility function for getting the value of nNextToInnerMostPixelHits
+  inline float getNNextToInnerMostPixelHits( const xAOD::TrackParticle& p ) {
+    uint8_t iNextToInnerMostPixelHits(0);
+    return p.summaryValue( iNextToInnerMostPixelHits, xAOD::numberOfNextToInnermostPixelLayerHits ) ?
+           float( iNextToInnerMostPixelHits ) : -9999.;
+  }
+  inline float getNNextToInnerMostPixelHits( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float nNextToInnerMostPixelHits( const U& p ) { return getNNextToInnerMostPixelHits( p ); }
+
+  /// Accessor utility function for getting the value of nNextToInnerMostPixelEndcapHits
+  inline float getNNextToInnerMostPixelEndcapHits( const xAOD::TrackParticle& p ) {
+    uint8_t iNextToInnerMostPixelEndcapHits(0);
+    return p.summaryValue( iNextToInnerMostPixelEndcapHits, xAOD::numberOfNextToInnermostPixelLayerEndcapHits ) ?
+           float( iNextToInnerMostPixelEndcapHits ) : -9999.;
+  }
+  inline float getNNextToInnerMostPixelEndcapHits( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float nNextToInnerMostPixelEndcapHits( const U& p ) { return getNNextToInnerMostPixelEndcapHits( p ); }
+
+  /// Accessor utility function for getting the value of nInnerMostPixelSharedHits
+  inline float getNInnerMostPixelSharedHits( const xAOD::TrackParticle& p ) {
+    uint8_t iInnerMostPixelSharedHits(0);
+    return p.summaryValue( iInnerMostPixelSharedHits, xAOD::numberOfInnermostPixelLayerSharedHits ) ?
+           float( iInnerMostPixelSharedHits ) : -9999.;
+  }
+  inline float getNInnerMostPixelSharedHits( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float nInnerMostPixelSharedHits( const U& p ) { return getNInnerMostPixelSharedHits( p ); }
+
+  /// Accessor utility function for getting the value of nInnerMostPixelSharedEndcapHits
+  inline float getNInnerMostPixelSharedEndcapHits( const xAOD::TrackParticle& p ) {
+    uint8_t iInnerMostPixelSharedEndcapHits(0);
+    return p.summaryValue( iInnerMostPixelSharedEndcapHits, xAOD::numberOfInnermostPixelLayerSharedEndcapHits ) ?
+           float( iInnerMostPixelSharedEndcapHits ) : -9999.;
+  }
+  inline float getNInnerMostPixelSharedEndcapHits( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float nInnerMostPixelSharedEndcapHits( const U& p ) { return getNInnerMostPixelSharedEndcapHits( p ); }
+
+  /// Accessor utility function for getting the value of nPixelHits
+  inline float getNPixelHits( const xAOD::TrackParticle& p ) {
+    uint8_t iPixelHits(0);
+    return p.summaryValue( iPixelHits, xAOD::numberOfPixelHits ) ?
+           float( iPixelHits ) : -9999.;
+  }
+  inline float getNPixelHits( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float nPixelHits( const U& p ) { return getNPixelHits( p ); }
+
+  /// Accessor utility function for getting the value of nPixelHoles
+  inline float getNPixelHoles( const xAOD::TrackParticle& p ) {
+    uint8_t iPixHoles(0);
+    return p.summaryValue( iPixHoles, xAOD::numberOfPixelHoles ) ?
+           float( iPixHoles ) : -9999.;
+  }
+  inline float getNPixelHoles( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float nPixelHoles( const U& p ) { return getNPixelHoles( p ); }
+
+  /// Accessor utility function for getting the value of nPixelSharedHits
+  inline float getNPixelSharedHits( const xAOD::TrackParticle& p ) {
+    uint8_t iPixelShared(0);
+    return p.summaryValue( iPixelShared, xAOD::numberOfPixelSharedHits ) ?
+           float( iPixelShared ) : -9999.;
+  }
+  inline float getNPixelSharedHits( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float nPixelSharedHits( const U& p ) { return getNPixelSharedHits( p ); }
+
+  /// Accessor utility function for getting the value of pixeldEdx
+  inline float getPixeldEdx( const xAOD::TrackParticle& p ) {
+    float iPixeldEdx(0);
+    return p.summaryValue( iPixeldEdx, xAOD::pixeldEdx ) ? iPixeldEdx : -9999.;
+  }
+  inline float getPixeldEdx( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float pixeldEdx( const U& p ) { return getPixeldEdx( p ); }
+
+  /// Accessor utility function for getting the value of nSCTHits
+  inline float getNSCTHits( const xAOD::TrackParticle& p ) {
+    uint8_t iSctHits(0);
+    return p.summaryValue( iSctHits, xAOD::numberOfSCTHits ) ?
+           float( iSctHits ) : -9999.;
+  }
+  inline float getNSCTHits( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float nSCTHits( const U& p ) { return getNSCTHits( p ); }
+
+  /// Accessor utility function for getting the value of nSCTHoles
+  inline float getNSCTHoles( const xAOD::TrackParticle& p ) {
+    uint8_t iSctHoles(0);
+    return p.summaryValue( iSctHoles, xAOD::numberOfSCTHoles ) ?
+           float( iSctHoles ) : -9999.;
+  }
+  inline float getNSCTHoles( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float nSCTHoles( const U& p ) { return getNSCTHoles( p ); }
+
+  /// Accessor utility function for getting the value of nSCTSharedHits
+  inline float getNSCTSharedHits( const xAOD::TrackParticle& p ) {
+    uint8_t iSCTShared(0);
+    return p.summaryValue( iSCTShared, xAOD::numberOfSCTSharedHits ) ?
+           float( iSCTShared ) : -9999.;
+  }
+  inline float getNSCTSharedHits( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float nSCTSharedHits( const U& p ) { return getNSCTSharedHits( p ); }
+
+  /// Accessor utility function for getting the value of nSiHits
+  inline float getNSiHits( const xAOD::TrackParticle& p ) {
+    if( nPixelHits(p)<0 or nSCTHits(p)<0 ) return -9999.;
+    float pnPixelHits = ( nPixelHits(p) >= 0 ) ? nPixelHits(p) : 0.;
+    float pnSCTHits =   ( nSCTHits(p) >= 0 ) ? nSCTHits(p) : 0.;
+    return ( pnPixelHits + pnSCTHits );
+  }
+  inline float getNSiHits( const xAOD::TruthParticle& p ) {
+    static thread_local SG::ConstAccessor<float> prodNSiHits( "nSilHits" );
+    return prodNSiHits.isAvailable(p) ? prodNSiHits(p) : -9999.;
+  }
+  template< class U >
+  inline float nSiHits( const U& p ) { return getNSiHits( p ); }
+
+  /// Accessor utility function for getting the value of nTRTHits
+  inline float getNTRTHits( const xAOD::TrackParticle& p ) {
+    uint8_t iTrtHits(0);
+    return p.summaryValue( iTrtHits, xAOD::numberOfTRTHits ) ?
+           float( iTrtHits ) : -9999.;
+  }
+  inline float getNTRTHits( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float nTRTHits( const U& p ) { return getNTRTHits( p ); }
+
+  /// Accessor utility function for getting the value of nTRTHitsXe
+  inline float getNTRTHitsXe( const xAOD::TrackParticle& p ) {
+    uint8_t iTrtHitsXe(0);
+    return p.summaryValue( iTrtHitsXe, xAOD::numberOfTRTXenonHits ) ?
+           float( iTrtHitsXe ) : -9999.;
+  }
+  inline float getNTRTHitsXe( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float nTRTHitsXe( const U& p ) { return getNTRTHitsXe( p ); }
+
+  /// Accessor utility function for getting the value of nTRTHitsAr
+  inline float getNTRTHitsAr( const xAOD::TrackParticle& p ) {
+    if( nTRTHits(p)<0 or nTRTHitsXe(p)<0 ) return -9999.;
+    float pnTRTHits   = ( nTRTHits(p) >= 0 ) ? nTRTHits(p) : 0.;
+    float pnTRTHitsXe = ( nTRTHitsXe(p) >= 0 ) ? nTRTHitsXe(p) : 0.;
+    return ( pnTRTHits - pnTRTHitsXe );
+  }
+  inline float getNTRTHitsAr( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float nTRTHitsAr( const U& p ) { return getNTRTHitsAr( p ); }
+
+  /// Accessor utility function for getting the value of nTRTHighThresholdHits
+  inline float getNTRTHighThresholdHits( const xAOD::TrackParticle& p ) {
+    uint8_t iTrtHighThresholdHits(0);
+    return p.summaryValue( iTrtHighThresholdHits, xAOD::numberOfTRTHighThresholdHitsTotal ) ?
+           float( iTrtHighThresholdHits ) : -9999.;
+  }
+  inline float getNTRTHighThresholdHits( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float nTRTHighThresholdHits( const U& p ) { return getNTRTHighThresholdHits( p ); }
+
+  /// Accessor utility function for getting the value of nTRTHighThresholdHitsXe
+  inline float getNTRTHighThresholdHitsXe( const xAOD::TrackParticle& p ) {
+    uint8_t iTrtHighThresholdHitsXe(0);
+    return p.summaryValue( iTrtHighThresholdHitsXe, xAOD::numberOfTRTHighThresholdHits ) ?
+           float( iTrtHighThresholdHitsXe ) : -9999.;
+  }
+  inline float getNTRTHighThresholdHitsXe( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float nTRTHighThresholdHitsXe( const U& p ) { return getNTRTHighThresholdHitsXe( p ); }
+
+  /// Accessor utility function for getting the value of nTRTHighThresholdHitsAr
+  inline float getNTRTHighThresholdHitsAr( const xAOD::TrackParticle& p ) {
+    if( nTRTHighThresholdHits(p)<0 or nTRTHighThresholdHitsXe(p)<0 ) return -9999.;
+    float pnTRTHighThresholdHits   = ( nTRTHighThresholdHits(p) >= 0 ) ? nTRTHighThresholdHits(p) : 0.;
+    float pnTRTHighThresholdHitsXe = ( nTRTHighThresholdHitsXe(p) >= 0 ) ? nTRTHighThresholdHitsXe(p) : 0.;
+    return ( pnTRTHighThresholdHits - pnTRTHighThresholdHitsXe );
+  }
+  inline float getNTRTHighThresholdHitsAr( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float nTRTHighThresholdHitsAr( const U& p ) { return getNTRTHighThresholdHitsAr( p ); }
+
 } // namespace IDTPM
 
 #endif // > ! INDETTRACKPERFMON_TRKPARAMETERSHELPER_H
