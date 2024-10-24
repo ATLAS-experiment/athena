@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ManagedMonitorToolTest_H
@@ -14,10 +14,7 @@ class TH1;
 class TGraph;
 class TTree;
 class TH1D;
-class TH1D_LW;
-class TH1F_LW;
 class TH2F;
-class TH2F_LW;
 
 class ManagedMonitorToolTest : public ManagedMonitorToolBase
 {
@@ -65,10 +62,6 @@ class ManagedMonitorToolTest : public ManagedMonitorToolBase
       std::vector<int>   m_event;
       int                m_counter;
       int                m_variable1, m_variable2;
-
-      TH1D_LW            *m_hlw_1D;
-      TH1F_LW            *m_hlw_1F;
-      TH2F_LW            *m_hlw_2F;
 
       int                m_offset;
       TRandom3           m_gen;

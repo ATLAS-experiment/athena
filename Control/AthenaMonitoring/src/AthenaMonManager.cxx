@@ -10,10 +10,6 @@
 #include "TH1.h"
 #include "TObject.h"
 #include "TROOT.h"
-#include "LWHists/LWHist.h"
-#include "LWHists/LWHistControls.h"
-#include "LWHists/LWHistStats.h"
-#include "LWHistAthMonWrapper.h"
 #include "AthMonBench.h"
 
 #include "Gaudi/Interfaces/IOptionsSvc.h"
@@ -55,7 +51,6 @@ public:
         m_runProp(0),
         m_lumiBlockProp(0),
         m_nMonGroupCopies(0),
-        m_nActiveLWHists(0),
 	m_forkedProcess(false),
 	m_lastPID(0),
     m_rootBackend(false),
@@ -76,9 +71,6 @@ public:
     //These were protected before we moved to a private implementation:
     typedef std::map<std::string,TObject*>  ObjMap_t;
     ObjMap_t     m_objMap;
-
-    typedef std::map<std::string,LWHist*>  ObjMapLW_t;
-    ObjMapLW_t   m_objMapLW;
 
     AthenaMonManager * m_theManager;
     SmartIF<ISGAudSvc> m_sgAudSvc;
@@ -101,26 +93,24 @@ public:
     unsigned int m_lumiBlockProp;
 
     unsigned m_nMonGroupCopies;
-    long m_nActiveLWHists;
 
     bool m_forkedProcess;
     pid_t m_lastPID;
 
     bool m_rootBackend;
 
-    //NB: The LW hist leak checker is now also looking for
+    //Hist leak checker is looking for
     //inappropriate usage of MonGroup copy constructors (temporary
     //until we outlaw copy/assignment of MonGroups):
-    class LWHistLeakChecker {
+    class HistLeakChecker {
         Imp * m_d;
         long m_initVal;
         unsigned m_mgcopies_initval;
     public:
-        LWHistLeakChecker(Imp*d) : m_d(d), m_initVal(LWHistStats::nActiveLWHists()),
+        HistLeakChecker(Imp*d) : m_d(d),
             m_mgcopies_initval(ManagedMonitorToolBase::MonGroup::ncopies()) {}
-        ~LWHistLeakChecker()
-        {   m_d->m_nActiveLWHists += LWHistStats::nActiveLWHists()-m_initVal;
-            m_d->m_nMonGroupCopies += ManagedMonitorToolBase::MonGroup::ncopies()-m_mgcopies_initval;
+        ~HistLeakChecker()
+        {   m_d->m_nMonGroupCopies += ManagedMonitorToolBase::MonGroup::ncopies()-m_mgcopies_initval;
         }
     };
 
@@ -144,7 +134,6 @@ public:
         //NB: So far we don't check the call to runStat()
         AthMonBench m_bench_algfin_finalHists;
         AthMonBench m_bench_algfin_checkHists;
-        AthMonBench m_bench_algfin_convertLWHists;
         void report(AthenaMonManager*a) {
             MSG::Level l(AthMonBench::s_resourceMonThreshold);
             a->msg(l)<<"Init ResourceSummary ["<<m_theTool->name()<<"] --> load/create/initialize : "<<m_bench_alginit_retrieve<<endmsg;
@@ -155,7 +144,6 @@ public:
             a->msg(l)<<"Exec ResourceSummary ["<<m_theTool->name()<<"] --> fill : "<<m_bench_algexec_fillHists<<endmsg;
             a->msg(l)<<"Fin ResourceSummary ["<<m_theTool->name()<<"] --> finalHists : "<<m_bench_algfin_finalHists<<endmsg;
             a->msg(l)<<"Fin ResourceSummary ["<<m_theTool->name()<<"] --> checkHists(fromFinalize==true) : "<<m_bench_algfin_checkHists<<endmsg;
-            a->msg(l)<<"Fin ResourceSummary ["<<m_theTool->name()<<"] --> final LWHist conversion+writeout : "<<m_bench_algfin_convertLWHists<<endmsg;
         }
 
     };
@@ -233,14 +221,6 @@ AthenaMonManager( const std::string& name, ISvcLocator* pSvcLocator )
 AthenaMonManager::
 ~AthenaMonManager()
 {
-    if (m_d->m_nActiveLWHists)
-        msg(MSG::WARNING) << m_d->m_nActiveLWHists<< " LW histograms were created but never deleted" << endmsg;
-    /*
-    if (m_d->m_nMonGroupCopies)
-      msg(MSG::WARNING) << "Usage of MonGroup copy constructor or assignment operator detected in associated tools "
-    	      << m_d->m_nMonGroupCopies<<" time(s). This usually happens when tools pass MonGroup's around by"
-    	      <<" value. This behaviour will be forbidden at the compilation stage soon, so please fix your packages!" << endmsg;
-    */
     delete m_d;
 
     // If it is known that ManagedMonitorToolBase objects are deleted _after_ this object,
@@ -381,7 +361,7 @@ StatusCode
 AthenaMonManager::
 initialize()
 {
-    Imp::LWHistLeakChecker lc(m_d);
+    Imp::HistLeakChecker lc(m_d);
 
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "AthenaMonManager::initialize():" << endmsg;
 
@@ -457,10 +437,6 @@ initialize()
     joSvc->set( client + ".DataType", m_d->m_dataTypeProp );
     joSvc->set( client + ".Environment", m_d->m_environmentProp );
 
-    // LWHists not thread-safe. Use alg property to use ROOT backend in MT mode.
-    ATH_MSG_DEBUG("Setting LWHist ROOT backend flag to " << m_d->m_rootBackend);
-    LWHistControls::setROOTBackend(m_d->m_rootBackend);
-
     if( m_monTools.size() > 0 ) {
       ATH_CHECK( m_monTools.retrieve() );
       if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "  --> Retrieved AthenaMonTools" << endmsg;
@@ -502,7 +478,7 @@ execute()
     }
     m_d->m_lastPID=currPID;
 
-    Imp::LWHistLeakChecker lc(m_d);
+    Imp::HistLeakChecker lc(m_d);
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "AthenaMonManager::execute():" << endmsg;
 
     // This is legacy R2 monitoring.
@@ -588,7 +564,7 @@ StatusCode
 AthenaMonManager::
 stop()
 {
-    Imp::LWHistLeakChecker lc(m_d);
+    Imp::HistLeakChecker lc(m_d);
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "AthenaMonManager::finalize():" << endmsg;
 
     StatusCode sc;
@@ -621,14 +597,6 @@ stop()
             if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "IMonitorToolBase::checkHists() unsuccessful" << endmsg;
         }
         if (tb)
-            tb->m_bench_algfin_convertLWHists.startMeasurement();
-        sc = tool->convertLWHists();
-        if (tb)
-            tb->m_bench_algfin_convertLWHists.finishMeasurement();
-        if( !sc.isSuccess() ) {
-            if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "IMonitorToolBase::convertLWHists() unsuccessful" << endmsg;
-        }
-        if (tb)
             tb->report(this);
         m_d->toolAudEnd();
     }
@@ -644,7 +612,7 @@ StatusCode
 AthenaMonManager::
 start()
 {
-    Imp::LWHistLeakChecker lc(m_d);
+    Imp::HistLeakChecker lc(m_d);
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "AthenaMonManager::start():" << endmsg;
 
     StatusCode sc;
@@ -690,160 +658,6 @@ passOwnership( TObject* h, const std::string& key )
 {
     Imp::ObjMap_t::value_type valToInsert( key, h );
     m_d->m_objMap.insert( valToInsert );
-}
-
-
-void
-AthenaMonManager::
-passOwnership( LWHist* h, const std::string& key )
-{
-    Imp::ObjMapLW_t::value_type valToInsert( key, h );
-    m_d->m_objMapLW.insert( valToInsert );
-}
-
-
-
-LWHist *
-AthenaMonManager::
-ownedLWHistOfKey(const std::string& key) const
-{
-    Imp::ObjMapLW_t::iterator iLW = m_d->m_objMapLW.find( key );
-    return iLW == m_d->m_objMapLW.end() ? 0 : iLW->second;
-}
-
-
-void
-AthenaMonManager::
-writeAndDeleteLWHist( LWHist*lwh  )
-{
-    writeAndDeleteLWHist(LWHistAthMonWrapper::key(lwh),LWHistAthMonWrapper::streamName(lwh));
-}
-
-
-LWHist *
-AthenaMonManager::
-writeAndDeleteLWHist( const std::string& key, const std::string& streamName )
-{
-//     std::cout<<"writeAndDeleteLWHist... maybe"<<std::endl;
-    //If is owned LWHist we write it in a root file and deletes it + returns it's (now deallocated) address.
-
-    Imp::ObjMapLW_t::iterator iLW = m_d->m_objMapLW.find( key );
-    if( iLW != m_d->m_objMapLW.end() )
-    {
-        //Fixme: add private helper method actualWriteAndDelete(TH1*), to use by both...
-        LWHist * lwhist =iLW->second;
-        TH1 * h = lwhist->getROOTHistBase();
-        if( h != 0 )
-        {
-            //Get correct dir by doing a quick reg/dereg:
-            bool ok(false);
-            if (lwhist->usingROOTBackend())
-            {
-                //Already registered
-                ok = true;
-            }
-            else
-            {
-                //Delayed registration:
-                if (m_THistSvc->regHist( streamName, h ).isSuccess())
-                    //    if (m_THistSvc->deReg(  h ).isSuccess())
-                    ok = true;
-            }
-
-            if (ok)
-            {
-                bool doRecursiveReferenceDelete = gROOT->MustClean();
-                gROOT->SetMustClean(false);
-                TDirectory* dir = h->GetDirectory();
-                TDirectory* g = gDirectory;
-                if(dir)
-                    dir->cd();
-                h->Write();
-                g->cd();
-
-                StatusCode sc = m_THistSvc->deReg( h );
-                if( !sc.isSuccess() )
-                {
-                    if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "AthenaMonManager::WriteAndDeleteHist(): Failure to deReg( TObject* )" << endmsg;
-                }
-
-                m_d->m_objMapLW.erase( iLW );
-                lwhist->setOwnsROOTHisto(true);//Since we deregistered
-                LWHistAthMonWrapper::deleteLWHist(lwhist);
-                lwhist=0;
-                gROOT->SetMustClean(doRecursiveReferenceDelete);//Should be after the deleteLWHist call
-            }
-            return lwhist;
-        }
-    }
-    return 0;
-}
-
-LWHist *
-AthenaMonManager::
-writeAndResetLWHist( const std::string& key, const std::string& streamName )
-{
-//     std::cout<<"writeAndDeleteLWHist... maybe"<<std::endl;
-    //If is owned LWHist we write it in a root file and deletes it + returns it's (now deallocated) address.
-
-    Imp::ObjMapLW_t::iterator iLW = m_d->m_objMapLW.find( key );
-    if( iLW != m_d->m_objMapLW.end() )
-    {
-        //Fixme: add private helper method actualWriteAndDelete(TH1*), to use by both...
-        LWHist * lwhist =iLW->second;
-        TH1 * h = lwhist->getROOTHistBase();
-        if( h != 0 )
-        {
-            //Get correct dir by doing a quick reg/dereg:
-            bool ok(false);
-            if (lwhist->usingROOTBackend())
-            {
-                //Already registered
-                ok = true;
-            }
-            else
-            {
-                //Delayed registration:
-                if (m_THistSvc->regHist( streamName, h ).isSuccess())
-                    //    if (m_THistSvc->deReg(  h ).isSuccess())
-                    ok = true;
-            }
-
-            if (ok)
-            {
-                bool doRecursiveReferenceDelete = gROOT->MustClean();
-                gROOT->SetMustClean(false);
-                TDirectory* dir = h->GetDirectory();
-                TDirectory* g = gDirectory;
-                if(dir)
-                    dir->cd();
-                h->Write();
-                g->cd();
-
-                StatusCode sc = m_THistSvc->deReg( h );
-                if( !sc.isSuccess() )
-                {
-                    if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "AthenaMonManager::WriteAndDeleteHist(): Failure to deReg( TObject* )" << endmsg;
-                }
-
-                m_d->m_objMapLW.erase( iLW );
-                lwhist->setOwnsROOTHisto(true);//Since we deregistered
-
-                //LWHistAthMonWrapper::deleteLWHist(lwhist);
-                // Yuriy: commented out this line to make the code properly place  histograms
-                // in the offline environament; It has been a bug after I fixed online environment
-                // with a new approach; Basically inherited from writeAndDeletLWHist(...)
-                //LWHistAthMonWrapper::removeCustomData(lwhist);
-
-                lwhist->Reset();
-
-                lwhist=0;
-                gROOT->SetMustClean(doRecursiveReferenceDelete);//Should be after the deleteLWHist call
-            }
-            return lwhist;
-        }
-    }
-    return 0;
 }
 
 

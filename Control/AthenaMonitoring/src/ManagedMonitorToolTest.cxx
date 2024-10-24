@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
-// $Id: ManagedMonitorToolTest.cxx,v 1.9 2009-05-04 12:48:51 sschaetz Exp $
 // **********************************************************************
 
 #include <sstream>
@@ -19,9 +18,6 @@
 #include "TGraph.h"
 #include "TTree.h"
 #include "TMath.h"
-#include "LWHists/TH1D_LW.h"
-#include "LWHists/TH1F_LW.h"
-#include "LWHists/TH2F_LW.h"
 
 const long ManagedMonitorToolTest::s_nEnsembles         = 100;
 const double ManagedMonitorToolTest::s_ensembleGenMean  =   1.0;
@@ -56,9 +52,6 @@ ManagedMonitorToolTest( const std::string & type, const std::string & name,
    , m_counter(0)
    , m_variable1(0)
    , m_variable2(0)
-   , m_hlw_1D(0)
-   , m_hlw_1F(0)
-   , m_hlw_2F(0)
    , m_offset(0)
    , m_gen(65539)
    , m_efficiency(0)
@@ -222,20 +215,6 @@ bookHistograms( )
    MonGroup managed_booking_run( this, "Managed/Histograms", run);   // to be re-booked every run 
    regHist( m_managedHist_run, managed_booking_run ).ignore();
 
-   // LW Histograms
-   // Register managed LW histogram. Case 1: use the tool regHist method and pass parameters manually.
-   m_hlw_1D = TH1D_LW::create("hLW_1D", "Simple 1D LW histograms", 100, 0, 100); 
-   regHist( m_hlw_1D, "Managed/LW", lowStat ).ignore();   // to be re-booked ever lowStat interval
-
-   // Register managed LW histogram (case 2). Use the tool regHist method and pass parameters manually.
-   m_hlw_1F = TH1F_LW::create("hLW_1F", "Simple 1F LW histograms", 100, 0, 100); 
-   regHist( m_hlw_1F, "Managed/Histograms", eventsBlock ).ignore();
-
-   // Register managed LW histogram. Case 3: use regHist method of the MonGroup instance.
-   MonGroup LWcontent_lumiBlock( this, "Managed/LW", lumiBlock );   // to be re-booked every luminosity block
-   m_hlw_2F = TH2F_LW::create("hLW_2F","content comparison LW", 100, 0, 100, 50, 75, 125);
-   LWcontent_lumiBlock.regHist( m_hlw_2F ).ignore();
-   
    // Example for the managed TGraph
    MonGroup managed_space_point( this, "Managed/SpacePoint", lumiBlock );
    m_managedGraph = new TGraph();
@@ -324,13 +303,6 @@ fillHistograms()
       m_managedHist_lumiBlock->Fill(0);
       m_managedHist_run->Fill(0);
       
-      // Fill managed LW histogram
-      float x = m_gen.Gaus( 50., 15. );
-      float y = m_gen.Gaus( 100., 10. );
-      m_hlw_1D->Fill( x );      
-      m_hlw_1F->Fill( m_offset );      
-      m_hlw_2F->Fill( x, y );    
-
       double a = m_gen.Uniform(10);
       bool b = m_gen.Rndm() < TMath::Gaus(a,5,4);
       m_efficiency->Fill(b,a);
