@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/GaudiException.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/IMessageSvc.h"
 #include "GaudiKernel/StatusCode.h"
+#include "AthenaKernel/errorcheck.h"
 #include "StoreGate/StoreGateSvc.h"
 
 #include "MuonRDO/MdtCsmIdHash.h"
@@ -21,31 +20,15 @@
 // default contructor 
 MdtCsmIdHash::MdtCsmIdHash( )   
 {
-  IMessageSvc*  msgSvc;
-  ISvcLocator* svcLoc = Gaudi::svcLocator( );
-  assert(svcLoc);
-  StatusCode sc = svcLoc->service( "MessageSvc", msgSvc );
-  if (sc.isFailure()) std::cout << "Fail to locate Message Service" << std::endl;
-
-  MsgStream log(msgSvc, "MuonDigitContainer" );
-
-  log << MSG::DEBUG << " MdtCsmIdHash Constructor "<<endmsg; 
-
   const MdtIdHelper* mdtHelper=nullptr;
-  StoreGateSvc* detStore=nullptr;
-  sc = svcLoc->service("DetectorStore", detStore);
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
 
-  if (sc.isSuccess()) {
-    sc = detStore->retrieve( mdtHelper, "MDTIDHELPER" );
-    if (sc.isFailure())
-      log << MSG::ERROR << " Cannot retrieve MdtIdHelper " << endmsg;
-  } else 
-    log << MSG::ERROR << " MdtIdHelper not found in DetectorStore " << endmsg;
-  //too bad, we bail out (PC)
-  if (!sc.isSuccess()) throw GaudiException("can not get MdtIdHelper", 
-					    "MdtCsmIdHash::MdtCsmIdHash()", sc);
+  StatusCode sc = detStore->retrieve( mdtHelper, "MDTIDHELPER" );
+  if (sc.isFailure()) {
+    throw GaudiException("can not get MdtIdHelper",
+                         "MdtCsmIdHash::MdtCsmIdHash()", sc);
+  }
 
- 
   unsigned int used = mdtHelper->module_hash_max();
   IdContext context = mdtHelper->module_context();
 
@@ -59,11 +42,13 @@ MdtCsmIdHash::MdtCsmIdHash( )
     if (!mdtHelper->get_id(hash,id,&context)) {
       m_lookup[id]=(int) hash;
       m_int2id.push_back(id); 
-    } else log << MSG::ERROR << "MDT hash constructor failed!" << endmsg;
+    } else {
+      REPORT_MESSAGE_WITH_CONTEXT(MSG::ERROR, "MdtCscIdHash") <<
+        "MDT hash constructor failed!" << endmsg;
+    }
   } 
 
-  log << MSG::DEBUG << "Number of valid MDT Element IDs " << used << endmsg; 
-  m_size = (int) used; 
+  m_size = (int) used;
 }
 
 MdtCsmIdHash::ID MdtCsmIdHash::identifier(int index) const {
