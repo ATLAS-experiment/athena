@@ -13,7 +13,6 @@
 #include "GaudiKernel/ToolHandle.h"
 
 class DataObject;
-class IByteStreamEventAccess;
 class IOpaqueAddress;
 class ISvcLocator;
 class StatusCode;

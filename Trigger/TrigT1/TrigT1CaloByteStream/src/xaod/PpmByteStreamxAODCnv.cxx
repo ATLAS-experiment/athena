@@ -6,7 +6,6 @@
 #include <stdint.h>
 
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
-#include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 
 #include "ByteStreamData/RawEvent.h"

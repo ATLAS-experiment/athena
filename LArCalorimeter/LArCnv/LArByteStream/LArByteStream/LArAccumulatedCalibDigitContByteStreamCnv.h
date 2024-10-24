@@ -20,7 +20,6 @@
 class DataObject;
 class StatusCode;
 class IAddressCreator;
-class IByteStreamEventAccess;
 class LArAccumulatedCalibDigitContainer; 
 class LArRawDataContByteStreamTool ; 
 class IROBDataProviderSvc; 

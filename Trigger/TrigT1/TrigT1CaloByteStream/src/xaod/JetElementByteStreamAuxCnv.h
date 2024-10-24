@@ -16,7 +16,6 @@
 #include "AthenaBaseComps/AthMessaging.h"
 
 class DataObject;
-class IByteStreamEventAccess;
 class IOpaqueAddress;
 class IROBDataProviderSvc;
 class ISvcLocator;

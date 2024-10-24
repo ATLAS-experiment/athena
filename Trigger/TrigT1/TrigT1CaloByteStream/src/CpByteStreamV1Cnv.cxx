@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
-#include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h"
 
 #include "ByteStreamData/RawEvent.h"
 #include "ByteStreamData/ROBData.h"

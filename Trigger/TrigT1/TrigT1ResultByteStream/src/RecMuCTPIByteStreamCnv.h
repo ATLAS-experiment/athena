@@ -13,7 +13,6 @@
 #include "GaudiKernel/ToolHandle.h"
 
 #include "ByteStreamCnvSvcBase/ROBDataProviderSvc.h"
-#include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h"
 
 // Local include(s):
 #include "RecMuCTPIByteStreamTool.h"

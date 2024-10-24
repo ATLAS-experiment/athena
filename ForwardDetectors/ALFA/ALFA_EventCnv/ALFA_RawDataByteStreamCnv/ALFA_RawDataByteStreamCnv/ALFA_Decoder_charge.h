@@ -29,7 +29,6 @@
 #include "ALFA_RawDataReadOut_charge.h"
 
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
-#include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h"
 
 
 class ISvcLocator;
