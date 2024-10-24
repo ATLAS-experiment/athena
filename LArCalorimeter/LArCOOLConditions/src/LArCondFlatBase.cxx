@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCOOLConditions/LArCondFlatBase.h"
@@ -23,9 +23,6 @@ LArCondFlatBase::LArCondFlatBase (const std::string& name) :
 {
 }
 
-LArCondFlatBase::~LArCondFlatBase() {
-}
-  
 StatusCode LArCondFlatBase::initializeBase() {
 
   ATH_MSG_DEBUG( "initializeBase " );
@@ -35,9 +32,8 @@ StatusCode LArCondFlatBase::initializeBase() {
     return (StatusCode::SUCCESS);
   }
   //Get LArOnlineID....
-  ISvcLocator* svcLoc = Gaudi::svcLocator( );
-  StoreGateSvc* detStore;
-  ATH_CHECK_WITH_CONTEXT( svcLoc->service("DetectorStore",detStore), "LArCondFlatBase" );
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  ATH_CHECK_WITH_CONTEXT( detStore.isValid(), "LArCondFlatBase" );
   ATH_CHECK_WITH_CONTEXT( detStore->retrieve(m_onlineHelper,"LArOnlineID"), "LArCondFlatBase" );
 
   m_isInitialized = true;

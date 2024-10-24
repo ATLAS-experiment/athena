@@ -1,12 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCOOLConditions/LArCondSuperCellBase.h"
-
-
-// Services/helpers
-//#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 
 // Gaudi/Athena
 #include "GaudiKernel/Bootstrap.h"
@@ -22,10 +18,6 @@ LArCondSuperCellBase::LArCondSuperCellBase(const std::string& name) :
   m_scOnlineID(nullptr)
 {
 }
-
-
-LArCondSuperCellBase::~LArCondSuperCellBase() {
-}
   
 StatusCode LArCondSuperCellBase::initializeBase() {
 
@@ -36,9 +28,8 @@ StatusCode LArCondSuperCellBase::initializeBase() {
     return (StatusCode::SUCCESS);
   }
   //Get SuperCellID ...
-  ISvcLocator* svcLoc = Gaudi::svcLocator( );
-  StoreGateSvc* detStore = nullptr;
-  ATH_CHECK_WITH_CONTEXT( svcLoc->service("DetectorStore",detStore), "LArCondSuperCellBase" );
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  ATH_CHECK_WITH_CONTEXT( detStore.isValid(), "LArCondSuperCellBase" );
   ATH_CHECK_WITH_CONTEXT( detStore->retrieve( m_scOnlineID,"LArOnline_SuperCellID"), "LArCondSuperCellBase" );
 
   m_isInitialized = true;
