@@ -52,6 +52,8 @@ class Z_SMEFT(PowhegV2):
         self.add_keyword("btlscalereal")
         self.add_keyword("charmthr")
         self.add_keyword("charmthrpdf")
+        self.add_keyword("check_bad_st1")
+        self.add_keyword("check_bad_st2")
         # clobberlhe: needed to make reweighting work --- otherwise Powheg crashes because it
         # cannot overwrite the LHE file with events before reweighting.
         # The value given to the parameter here doesn't matter, it just needs to be present in

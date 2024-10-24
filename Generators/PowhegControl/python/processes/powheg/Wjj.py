@@ -46,6 +46,7 @@ class Wjj(PowhegV2):
         self.add_keyword("bwcutoff")
         self.add_keyword("charmthr")
         self.add_keyword("charmthrpdf")
+        self.add_keyword("check_bad_st1")
         self.add_keyword("check_bad_st2")
         self.add_keyword("clobberlhe")
         self.add_keyword("colltest")

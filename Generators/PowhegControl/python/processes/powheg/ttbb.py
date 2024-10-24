@@ -75,6 +75,8 @@ class ttbb(PowhegRES):
         self.add_keyword("bornzerodampcut", 5.)
         self.add_keyword("btlscalect", 1)
         self.add_keyword("btlscalereal", 1)
+        self.add_keyword("check_bad_st1")
+        self.add_keyword("check_bad_st2")
         self.add_keyword("clobberlhe")
         self.add_keyword("compress_lhe", 0)
         self.add_keyword("compress_upb", 1)
