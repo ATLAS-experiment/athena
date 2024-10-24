@@ -237,8 +237,8 @@ StatusCode FixLArElecCalib::fix1(const LArOnOffIdMapping *cabling) {
    ATH_CHECK( detStore()->retrieve(online_idhelper) );
 
    // retrieve DetDescrManager
-   const IToolSvc* toolSvc = nullptr;
-   ATH_CHECK( service("ToolSvc", toolSvc) );
+   SmartIF<IToolSvc> toolSvc{Gaudi::svcLocator()->service("ToolSvc")};
+   ATH_CHECK(toolSvc.isValid());
 
    LArDAC2uAMC * dac2ua = nullptr;
    ATH_CHECK( detStore()->retrieve(dac2ua) );
@@ -312,8 +312,8 @@ StatusCode FixLArElecCalib::fix2(const LArOnOffIdMapping *cabling) {
     ATH_CHECK( detStore()->retrieve(online_idhelper) );
     
     // retrieve DetDescrManager 
-    IToolSvc* toolSvc = nullptr;
-    ATH_CHECK( service("ToolSvc", toolSvc) );
+    SmartIF<IToolSvc> toolSvc{Gaudi::svcLocator()->service("ToolSvc")};
+    ATH_CHECK(toolSvc.isValid());
     
     LArDAC2uAMC * dac2ua = nullptr;
     ATH_CHECK( detStore()->retrieve(dac2ua) );

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -1220,55 +1220,6 @@ StatusCode  LArConditionsTestAlg::testCallBack2( int& i , std::list<std::string>
 
 StatusCode LArConditionsTestAlg::testFillIOVDb()
 {
-    IToolSvc* toolSvc = nullptr;
-    ATH_CHECK( service("ToolSvc", toolSvc) );
-
-//      IFillNovaIOVTool* fill; 
-//      if(StatusCode::SUCCESS != toolSvc->retrieveTool("FillNovaIOVTool",fill ))
-//  	{
-//  	    log << MSG::ERROR << " Can't get FillNovaIOVTool " << endmsg;
-//  	    return StatusCode::FAILURE;
-//  	}
-
-//      // Make a new ExampleData object 
-//      ExampleData  v;
-
-//      // prepare some fake data.
-//      int n = 3 ;
-//      for( int i = 0; i<n; ++i ) {
-//  	ExampleData_t p ;
-//  	p.chan_id = i;
-//  	p.fArray[0]  = i*100+0;
-//  	p.fArray[1]  = i*100+1;
-//  	p.fArray[2]  = i*100+2;
-//  	p.fArray[3]  = i*100+3;
-//  	p.fArray[4]  = i*100+4;
-//  	p.i = i;
-//  	p.d = i;
-//  	v.push_back(p);
-//      }
-
-//      typedef ExampleData::const_iterator IT;
-//      IT it = v.begin();
-//      void* vArray = (void*) &(*it);
-  
-//      typedef ExampleData::value_type STRUCT ;  
-//      std::string typenm   = System::typeinfoName(typeid(STRUCT)) ;
-//      std::string folder = "/lar/test/ExampleData1/ExampleDataName"; 
-//      int nrow = v.size(); 
-
-//      log<< MSG::DEBUG <<" writing " <<  typenm <<" through FillNovaIOVTool " <<endmsg;     
-//      log<< MSG::DEBUG <<" to folder  " << folder <<endmsg;     
-//      log<< MSG::DEBUG <<" number of rows  " << nrow <<endmsg; 
-
-    // Fill object to Nova_IOV, using validity specified in the tool. 
-//      StatusCode sc=  fill->fillNovaIOV(vArray, folder,typenm,nrow) ; 
-//      if(!sc.isSuccess())  return sc ; 
-
-//      // put the same reference in a different folder. 
-//      std::string folder2 = "/lar/test/ExampleData2/ExampleDataName"; 
-//      return fill->fillLastIOV(folder2); 
-
     return StatusCode::SUCCESS;
 }
 
