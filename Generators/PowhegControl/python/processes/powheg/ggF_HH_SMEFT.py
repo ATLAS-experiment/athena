@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 import os
+import glob
 from AthenaCommon import Logging
 from ..powheg_V2 import PowhegV2
 
@@ -55,6 +56,7 @@ class ggF_HH_SMEFT(PowhegV2):
         self.add_keyword("btlscalereal")
         self.add_keyword("charmthr")
         self.add_keyword("charmthrpdf")
+        self.add_keyword("check_bad_st1")
         self.add_keyword("check_bad_st2")
         self.add_keyword("chhh", 1.0)
         self.add_keyword("ct", 1.0)
@@ -121,14 +123,14 @@ class ggF_HH_SMEFT(PowhegV2):
         self.add_keyword("mintupbxless")
         self.add_keyword("mtdep", 3)
         self.add_keyword("multiple-insertion", 1)
-        self.add_keyword("ncall1", 10000)
+        self.add_keyword("ncall1", 200000)
         self.add_keyword("ncall1rm")
-        self.add_keyword("ncall2", 15000)
+        self.add_keyword("ncall2", 150000)
         self.add_keyword("ncall2rm")
         self.add_keyword("ncallfrominput")
         self.add_keyword("noevents")
         self.add_keyword("novirtual")
-        self.add_keyword("nubound", 20000)
+        self.add_keyword("nubound", 200000)
         self.add_keyword("olddij")
         self.add_keyword("par_2gsupp")
         self.add_keyword("par_diexp")
@@ -189,9 +191,21 @@ class ggF_HH_SMEFT(PowhegV2):
             logger.error('Impossible to link the needed files locally')
             raise
 
-        # need to override lhapdf python path while the powheg process has been compiled in a different platform
+         # need to override lhapdf python path while the powheg process has been compiled in a different platform
         py_path_save = os.environ["PYTHONPATH"]
-        py_path_temp = os.environ["LHAPDF_INSTAL_PATH"] + "/lib/python3.9/site-packages" + ":" + py_path_save
+        base_path = os.environ["LHAPDF_INSTAL_PATH"]
+
+        # Search for the Python version in the lib folder
+        python_lib_path = glob.glob(os.path.join(base_path, "lib", "python*"))
+
+        # Ensure at least one matching path is found
+        if python_lib_path:
+            python_lib_path = python_lib_path[0]
+        else:
+            raise ValueError("No Python version found in lib folder")
+
+        # Build the temporary path
+        py_path_temp = python_lib_path + "/site-packages" + ":" + py_path_save
         os.environ["PYTHONPATH"] = py_path_temp
         logger.debug(f'Temporarily setting PYTHONPATH to:\n{py_path_temp}')
 

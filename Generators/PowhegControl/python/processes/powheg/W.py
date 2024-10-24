@@ -43,6 +43,8 @@ class W(PowhegV1):
         self.add_keyword("btlscalereal")
         self.add_keyword("charmthr")
         self.add_keyword("charmthrpdf")
+        self.add_keyword("check_bad_st1")
+        self.add_keyword("check_bad_st2")
         self.add_keyword("CKM_Vcb")
         self.add_keyword("CKM_Vcd")
         self.add_keyword("CKM_Vcs")

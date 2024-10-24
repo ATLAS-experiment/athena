@@ -67,6 +67,7 @@ class VBF_ZZ(PowhegV2):
         self.add_keyword("channel_type", 0) # [0:all (default), 7: all Neutral Currents, 1:ucuc-type NC, 2:usus-type NC, 3:dcdc-type NC, 4:dsds-type NC, 8: all Charged Currents, 5: usdc-type CC, 6: dcus-type CC]
         self.add_keyword("charmthr")
         self.add_keyword("charmthrpdf")
+        self.add_keyword("check_bad_st1")
         self.add_keyword("check_bad_st2")
         self.add_keyword("clobberlhe")
         self.add_keyword("colltest")

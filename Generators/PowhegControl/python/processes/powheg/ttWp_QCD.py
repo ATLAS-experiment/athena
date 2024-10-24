@@ -50,6 +50,8 @@ class ttWp_QCD(PowhegV2):
         self.add_keyword("BrWlep")
         self.add_keyword("btlscalect", 1)
         self.add_keyword("btlscalereal", 1)
+        self.add_keyword("check_bad_st1")
+        self.add_keyword("check_bad_st2")
         self.add_keyword("CKM_Vcd")
         self.add_keyword("CKM_Vcs")
         self.add_keyword("CKM_Vud")

@@ -45,6 +45,8 @@ class HZj_EW(PowhegRES):
         self.add_keyword("btlscalereal")
         self.add_keyword("charmthr")
         self.add_keyword("charmthrpdf")
+        self.add_keyword("check_bad_st1")
+        self.add_keyword("check_bad_st2")
         self.add_keyword("chklimseed")
         self.add_keyword("CKM_diagonal")
         self.add_keyword("clobberlhe")
