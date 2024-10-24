@@ -133,9 +133,6 @@ SystemEnergy::SystemEnergy(unsigned int et, unsigned int exTC, unsigned int eyTC
   metSigTrigger();
 }
 
-SystemEnergy::~SystemEnergy()
-{
-}
 
 /** return crate Et */
 int SystemEnergy::et() const
@@ -281,7 +278,7 @@ void SystemEnergy::etMissTrigger()
 
   for ( const auto& thresh : allThresholds ) {
     if ( thresh->type() == L1DataDef::xeType()) {
-      std::shared_ptr<TrigConf::L1Threshold_Calo> thresh_Calo = std::static_pointer_cast<TrigConf::L1Threshold_Calo>(thresh);
+      auto thresh_Calo = static_cast<const TrigConf::L1Threshold_Calo*>(thresh.get());
       unsigned int thresholdValue = thresh_Calo->thrValueCounts();
       uint32_t tvQ = thresholdValue * thresholdValue;
       int threshNumber = thresh->mapping();
@@ -323,7 +320,7 @@ void SystemEnergy::etSumTrigger()
     if ( thresh->type() == L1DataDef::teType()) {
       int threshNumber = thresh->mapping();
       int thresholdValue = m_maxEtSumThr;
-      std::shared_ptr<TrigConf::L1Threshold_Calo> thresh_Calo = std::static_pointer_cast<TrigConf::L1Threshold_Calo>(thresh);
+      auto thresh_Calo = static_cast<const TrigConf::L1Threshold_Calo*>(thresh.get());
       auto tvcs = thresh_Calo->thrValuesCounts();
       if (tvcs.size() == 0) {
         tvcs.addRangeValue(thresh_Calo->thrValueCounts(),-49, 49, 1, true);
@@ -396,7 +393,7 @@ void SystemEnergy::metSigTrigger()
     if ( thresh->type() == L1DataDef::xsType()) {
 
       int threshNumber = thresh->mapping();
-      std::shared_ptr<TrigConf::L1Threshold_Calo> thresh_Calo = std::static_pointer_cast<TrigConf::L1Threshold_Calo>(thresh);
+      auto thresh_Calo = static_cast<const TrigConf::L1Threshold_Calo*>(thresh.get());
       unsigned int Ti = thresh_Calo->thrValueCounts();
       unsigned long aQTiQ = (0.5 + double(aQ * 1.e-8) * Ti * Ti);
 

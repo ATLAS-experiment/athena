@@ -185,7 +185,7 @@ void L1EnergyCMXTools::findRestrictedEta(uint32_t &maskXE, uint32_t &maskTE) con
     std::vector<std::shared_ptr<TrigConf::L1Threshold>> allThresholds = l1Menu->thresholds();
     for ( const auto& thresh : allThresholds ) {
       if ( ( thresh->type() == def.xeType() || thresh->type() == def.teType()) && thresh->mapping() > 7 ) {
-        std::shared_ptr<TrigConf::L1Threshold_Calo> thresh_Calo = std::static_pointer_cast<TrigConf::L1Threshold_Calo>(thresh);
+        auto thresh_Calo = static_cast<TrigConf::L1Threshold_Calo*>(thresh.get());
         auto tvcs = thresh_Calo->thrValuesCounts();
         // Make sure only set masks from the first valid threshold in the range (for each type)
         if (maskXE > 0) maskXESet = true;

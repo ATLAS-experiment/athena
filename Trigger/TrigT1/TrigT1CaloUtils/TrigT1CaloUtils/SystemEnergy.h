@@ -35,7 +35,7 @@ public:
                unsigned int overflowT, unsigned int overflowX,
 	       unsigned int overflowY, unsigned int restricted,
 	       const TrigConf::L1Menu* l1Menu);
-  ~SystemEnergy();
+  ~SystemEnergy() = default;
 
 public:
   /** return global et, ex, ey sums */

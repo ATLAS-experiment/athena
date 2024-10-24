@@ -104,7 +104,7 @@ namespace NSWL1 {
         Gaudi::Property<bool>  m_doNtuple      {this, "DoNtuple",        false, "Save the trigger outputs in an analysis ntuple"};
 
         std::unique_ptr<PadTriggerValidationTree> m_validation_tree;
-        void fillGeometricInformation(const std::shared_ptr<PadOfflineData>&) const;
+        void fillGeometricInformation(PadOfflineData&) const;
         void fillPhiTable();
         L1TdrStgcTriggerLogic m_tdrLogic;
     };
