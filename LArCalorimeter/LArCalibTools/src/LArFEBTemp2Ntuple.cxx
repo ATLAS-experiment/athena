@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArFEBTemp2Ntuple.h"
@@ -8,11 +8,11 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/IToolSvc.h"
 
-LArFEBTemp2Ntuple::LArFEBTemp2Ntuple(const std::string& name, ISvcLocator* pSvcLocator): LArCond2NtupleBase(name, pSvcLocator) {
-
-   m_ntTitle="FEB Temperatures";
-   m_ntpath="/NTUPLES/FILE1/FEBTEMP";
-
+LArFEBTemp2Ntuple::LArFEBTemp2Ntuple(const std::string& name, ISvcLocator* pSvcLocator)
+  : LArCond2NtupleBase(name, pSvcLocator)
+{
+  m_ntTitle = "FEB Temperatures";
+  m_ntpath = "/NTUPLES/FILE1/FEBTEMP";
 }
 
 LArFEBTemp2Ntuple::~LArFEBTemp2Ntuple() 
@@ -35,10 +35,10 @@ StatusCode LArFEBTemp2Ntuple::stop() {
 	return StatusCode::FAILURE;
      }
    
-   IToolSvc* toolSvc=nullptr;
-   sc = service( "ToolSvc",toolSvc);
-   if (sc!=StatusCode::SUCCESS) {
-	ATH_MSG_ERROR( "Unable to retrieve IToolSvc");
+   SmartIF<IToolSvc> toolSvc{Gaudi::svcLocator()->service("ToolSvc")};
+   if(!toolSvc.isValid()) {
+     ATH_MSG_ERROR( "Unable to retrieve IToolSvc");
+     return StatusCode::FAILURE;
    }   
 
    ILArFEBTempTool *larFEBTempTool;

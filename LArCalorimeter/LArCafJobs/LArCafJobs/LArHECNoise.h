@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCAFJOBS_LARHECNOISE_H
@@ -48,7 +48,7 @@ class LArHECNoise : public AthAlgorithm  {
  public:
 
    LArHECNoise(const std::string& name, ISvcLocator* pSvcLocator);
-   ~LArHECNoise();
+   ~LArHECNoise() = default;
 
    virtual StatusCode initialize() override;
    virtual StatusCode finalize() override;
@@ -56,7 +56,7 @@ class LArHECNoise : public AthAlgorithm  {
 
  private:
 
-   ITHistSvc * m_thistSvc;
+   ServiceHandle<ITHistSvc> m_thistSvc{this,"THistSvc","THistSvc"};
     
    TTree* m_tree;
 

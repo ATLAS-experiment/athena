@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/MsgStream.h"
@@ -35,7 +35,6 @@
 #include "CaloDetDescr/CaloDetectorElements.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 
-#include "GaudiKernel/ITHistSvc.h"
 #include "TTree.h"
 
 #include "xAODEventInfo/EventInfo.h"
@@ -55,11 +54,9 @@ using xAOD::EventInfo;
 //////////////////////////////////////////////////////////////////////////////////////
 /// Constructor
 
-
 LArHECNoise::LArHECNoise(const std::string& name,
 			 ISvcLocator* pSvcLocator) 
   : AthAlgorithm(name, pSvcLocator),
-    m_thistSvc(nullptr),
     m_tree(nullptr),
     m_LArOnlineIDHelper(nullptr),
     m_calocell_id(nullptr),
@@ -106,10 +103,6 @@ LArHECNoise::LArHECNoise(const std::string& name,
     m_nt_trigger = new bool[m_TriggerLines.size()];
  }
 
-
-LArHECNoise::~LArHECNoise() {}
-
-
 StatusCode LArHECNoise::initialize() {
 
   ATH_MSG_DEBUG ( "Initializing LArHECNoise" );
@@ -131,7 +124,7 @@ StatusCode LArHECNoise::initialize() {
   ATH_CHECK(m_caloMgrKey.initialize());
 
   /** get a handle on the NTuple and histogramming service */
-  ATH_CHECK( service("THistSvc", m_thistSvc) );
+  ATH_CHECK( m_thistSvc.retrieve() );
  
   /** Prepare TTree **/
   m_tree = new TTree( "HECNoise", "HECNoise" );

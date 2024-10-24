@@ -1,7 +1,5 @@
-//Dear emacs, this is -*- c++ -*-
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -21,8 +19,7 @@ class LArFEBTemp2Ntuple : public LArCond2NtupleBase
    ~LArFEBTemp2Ntuple();
 
    //standard algorithm methods
-   StatusCode finalize(){return StatusCode::SUCCESS;}
-   StatusCode stop();
+   virtual StatusCode stop() override;
  private:
  
 };

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //01/2009: T. Guillemin
@@ -29,14 +29,13 @@ class LArTimePhysPrediction : public AthAlgorithm
   ~LArTimePhysPrediction();
 
   //standard algorithm methods
-  StatusCode initialize(); 
-  StatusCode execute()    { return StatusCode::SUCCESS ; } 
-  StatusCode stop();
-  StatusCode finalize() { return StatusCode::SUCCESS ; }
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute() override { return StatusCode::SUCCESS; }
+  virtual StatusCode stop() override;
   
  private:
   
-  ITHistSvc * m_thistSvc;
+  ServiceHandle<ITHistSvc> m_thistSvc{this,"THistSvc","THistSvc"};
   std::string m_keyoutput;
   std::string m_keyinput;
   std::string m_groupingType;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCAFJOBS_LARNOISEBURSTS_H
@@ -57,7 +57,7 @@ class ATLAS_NOT_THREAD_SAFE LArNoiseBursts : public AthAlgorithm  {
  public:
 
    LArNoiseBursts(const std::string& name, ISvcLocator* pSvcLocator);
-   virtual ~LArNoiseBursts();
+   virtual ~LArNoiseBursts() = default;
 
    //virtual StatusCode initializeBeforeEventLoop();
    virtual StatusCode initialize() override;
@@ -87,7 +87,7 @@ class ATLAS_NOT_THREAD_SAFE LArNoiseBursts : public AthAlgorithm  {
 
  private:
 
-   ITHistSvc * m_thistSvc;
+   ServiceHandle<ITHistSvc> m_thistSvc{this,"THistSvc","THistSvc"};
     
    TTree* m_tree;
 

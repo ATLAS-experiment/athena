@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArDigitOscillationCorrTool.h"
@@ -27,14 +27,12 @@ using CLHEP::ns;
 LArDigitOscillationCorrTool::LArDigitOscillationCorrTool(const std::string& type, 
 							 const std::string& name, 
 							 const IInterface* parent) 
-  : AthAlgTool(type, name, parent) , 
+  : base_class(type, name, parent),
     m_priority(1400), 
     m_nSigma(3.0), 
     m_eventPhase(0),
-    m_omega(1.024e6*hertz),
-    m_emId(nullptr), m_fcalId(nullptr), m_hecId(nullptr), m_lar_on_id(nullptr)
+    m_omega(1.024e6*hertz)
 {
-  declareInterface<ILArDigitOscillationCorrTool>(this);
   declareProperty("BeginRunPriority",m_priority);
   declareProperty("SignalCutInSigma",m_nSigma);
   declareProperty("Omega",m_omega);
@@ -54,8 +52,8 @@ StatusCode LArDigitOscillationCorrTool::initialize()
   
   ATH_CHECK( m_cablingKey.initialize() );
   
-  IIncidentSvc* incSvc = nullptr;
-  ATH_CHECK( service("IncidentSvc", incSvc) );
+  SmartIF<IIncidentSvc> incSvc{Gaudi::svcLocator()->service("IncidentSvc")};
+  ATH_CHECK(incSvc.isValid());
   
   //start listening to "BeginRun"
   incSvc->addListener(this, "BeginRun", m_priority);
