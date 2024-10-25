@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //  HECWheelConstruction.cxx 1.0.0
@@ -87,8 +87,8 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::HECWheelConstruction::GetEnvelope() {
   log << MSG::DEBUG << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endmsg;
 
 
-  StoreGateSvc *detStore;
-  if (svcLocator->service("DetectorStore", detStore, false )==StatusCode::FAILURE) {
+  SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+  if(!detStore.isValid()) {
     throw std::runtime_error("Error in HECWheelConstruction, cannot access DetectorStore");
   }
 
@@ -107,16 +107,13 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::HECWheelConstruction::GetEnvelope() {
 
 
   StatusCode sc;
-  IRDBAccessSvc *pAccessSvc;
-  sc=svcLocator->service("RDBAccessSvc",pAccessSvc);
-  if (sc != StatusCode::SUCCESS) {
+  SmartIF<IRDBAccessSvc> pAccessSvc{svcLocator->service("RDBAccessSvc")};
+  if(!pAccessSvc.isValid()) {
     throw std::runtime_error ("Cannot locate RDBAccessSvc!!");
   }
 
-
-  IGeoModelSvc *geoModel;
-  sc = svcLocator->service ("GeoModelSvc",geoModel);
-  if (sc != StatusCode::SUCCESS) {
+  SmartIF<IGeoModelSvc> geoModel{svcLocator->service ("GeoModelSvc")};
+  if(!geoModel.isValid()) {
     throw std::runtime_error ("Cannot locate GeoModelSvc!!");
   }
   

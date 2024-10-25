@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //  HECClampConstruction.cxx 1.0.0
@@ -60,9 +60,7 @@ using GeoTrf::TranslateZ3D;
 
 //Constructor
 LArGeo::HECClampConstruction::HECClampConstruction(bool front, bool posZSide)
-  : //m_rail(false),
-    //m_left(false),
-    m_moduleNumber(0),
+  : m_moduleNumber(0),
     m_moduleRouter(0),
     m_modulePhistart(0),
     m_rOuter(0),
@@ -85,8 +83,8 @@ PVLink LArGeo::HECClampConstruction::GetClampingBar(bool rail,bool left)
   log << MSG::DEBUG << " In HECClampConstruction " << endmsg;
   
 
-  StoreGateSvc *detStore;
-  if (svcLocator->service("DetectorStore", detStore, false )==StatusCode::FAILURE) {
+  SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+  if(!detStore.isValid()) {
     throw std::runtime_error("Error in HECModuleConstruction(ClampBar), cannot access DetectorStore");
   }
   
@@ -102,16 +100,13 @@ PVLink LArGeo::HECClampConstruction::GetClampingBar(bool rail,bool left)
   if (!Iron) throw std::runtime_error("Error in HECModuleConstruction(ClampBar), std::Iron is not found.");
  
 
-  StatusCode sc;
-  IRDBAccessSvc *pAccessSvc;
-  sc=svcLocator->service("RDBAccessSvc",pAccessSvc);
-  if (sc != StatusCode::SUCCESS) {
+  SmartIF<IRDBAccessSvc> pAccessSvc{svcLocator->service("RDBAccessSvc")};
+  if(!pAccessSvc.isValid()) {
     throw std::runtime_error ("Cannot locate RDBAccessSvc!!");
   }
 
-  IGeoModelSvc *geoModel;
-  sc = svcLocator->service ("GeoModelSvc",geoModel);
-  if (sc != StatusCode::SUCCESS) {
+  SmartIF<IGeoModelSvc> geoModel{svcLocator->service("GeoModelSvc")};
+  if(!geoModel.isValid()) {
     throw std::runtime_error ("Cannot locate GeoModelSvc!!");
   }
   

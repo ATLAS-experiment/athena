@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // HECWheelConstruction.h
@@ -30,13 +30,9 @@ namespace LArGeo
       
     private:
       bool	      m_posZSide;
-      //bool	      m_rail;
-      //bool	      m_left;
       bool	      m_threeBoards;
       bool	      m_frontWheel;
       std::string     m_wheelType;
-      //double          m_clampLength;
-      //double          m_clampAngle;
       bool            m_fullGeo;  // true->FULL, false->RECO
     };
   

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -7,13 +7,12 @@
  *
  * @brief Declaration of HEC2WheelConstruction class
  *
- * $Id: HEC2WheelConstruction.h,v 1.2 2007-11-27 20:02:16 fincke Exp $
  */
-#ifndef __HEC2WheelConstruction_H__
-#define __HEC2WheelConstruction_H__
+
+#ifndef LARGEOHEC_HEC2WHEELCONSTRUCTION_H
+#define LARGEOHEC_HEC2WHEELCONSTRUCTION_H
 
 #include "GeoModelKernel/GeoFullPhysVol.h"
-
 
 namespace LArGeo 
 {
@@ -26,15 +25,16 @@ namespace LArGeo
   class HEC2WheelConstruction 
     {
     public:
-      HEC2WheelConstruction();
-      virtual ~HEC2WheelConstruction();
+      HEC2WheelConstruction() = default;
+      ~HEC2WheelConstruction() = default;
+
       // Get the envelope containing this detector.
       GeoIntrusivePtr<GeoFullPhysVol> GetEnvelope(bool fullGeo, bool posZSide=true);
       
     private:
-      GeoIntrusivePtr<GeoFullPhysVol> m_physiHEC;
-      bool	      m_posZSide;
+      GeoIntrusivePtr<GeoFullPhysVol> m_physiHEC{};
+      bool	      m_posZSide{false};
     };
   
 }
-#endif // __HEC2WheelConstruction_H__
+#endif
