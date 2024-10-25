@@ -84,6 +84,9 @@ def RetagRenameInputContainerCfg(suffix, JetCollectionShort, tracksKey='InDetTra
     bac = 'xAOD::BTaggingAuxContainer'
     tpac = 'xAOD::TrackParticleAuxContainer'
     remapSvc.TypeKeyRenameMaps += [
+        f'{jac}#{jc}Jets.jetFoldHash->{jc}Jets.jetFoldHash_{s}',
+        f'{jac}#{jc}Jets.jetFoldHash_noHits->{jc}Jets.jetFoldHash_noHits_{s}',
+        f'{jac}#{jc}Jets.jetFoldRankHash->{jc}Jets.jetFoldRankHash_{s}',
         f'{jac}#{jc}Jets.BTagTrackToJetAssociator->{jc}Jets.BTagTrackToJetAssociator_{s}',
         f'{jac}#{jc}Jets.JFVtx->{jc}Jets.JFVtx_{s}',
         f'{jac}#{jc}Jets.JFVtxFlip->{jc}Jets.JFVtxFlip_{s}',
