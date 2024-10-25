@@ -36,9 +36,21 @@ atlas_add_test( ITkStripCablingData_test
   POST_EXEC_SCRIPT nopost.sh
 )
 
+
+
+atlas_add_test( OnlineIdGenerator_test	
+  SOURCES 
+  src/OnlineIdGenerator.cxx  test/OnlineIdGenerator_test.cxx 
+  INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}  
+  LINK_LIBRARIES ${Boost_LIBRARIES} TestTools AthenaBaseComps  
+    PathResolver StoreGateLib IdDictParser ITkStripCablingLib 
+    InDetIdentifier
+  POST_EXEC_SCRIPT nopost.sh
+)
+
 atlas_add_test( ITkStripCablingAlg_test	
   SOURCES 
-  src/ITkStripCablingAlg.cxx src/components/*.cxx test/ITkStripCablingAlg_test.cxx 
+  src/ITkStripCablingAlg.cxx src/OnlineIdGenerator.cxx src/components/*.cxx test/ITkStripCablingAlg_test.cxx 
   INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}  
   LINK_LIBRARIES ${Boost_LIBRARIES} TestTools AthenaBaseComps  
     PathResolver StoreGateLib IdDictParser ITkStripCablingLib 

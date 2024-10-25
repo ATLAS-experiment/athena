@@ -29,10 +29,14 @@
 #include "IdDictParser/IdDictParser.h"  
 #include "InDetIdentifier/SCT_ID.h"
 #include "src/ITkStripCablingAlg.h"
+#include "src/OnlineIdGenerator.h"
 #include "StoreGate/ReadHandleKey.h"
+
+
 #include <string>
 #include <sstream>      // std::ostringstream
 #include <memory>
+#include <set>
 
 namespace utf = boost::unit_test;
 
@@ -52,7 +56,7 @@ struct GaudiKernelFixture{
 
 ISvcLocator* GaudiKernelFixture::svcLoc = nullptr;
 
-static const std::string itkDictFilename{"InDetIdDictFiles/IdDictInnerDetector_ITK_HGTD_23.xml"};
+static const std::string itkDictFilename{"InDetIdDictFiles/IdDictInnerDetector_ITK-P2-RUN4-03-00-00.xml"};
 
 //from EventIDBase
 typedef unsigned int number_type;
@@ -107,14 +111,39 @@ BOOST_AUTO_TEST_SUITE(ITkStripCablingAlgTest )
       IdDictMgr& idd = parser.parse ("IdDictParser/ATLAS_IDS.xml");
       auto pITkId=std::make_unique<SCT_ID>();
       BOOST_TEST(pITkId->initialize_from_dictionary(idd)==0);
+      ITkStripCabling::OnlineIdGenerator gen(pITkId.get());
       std::ostringstream os;
       ExpandedIdentifier e{};
+      struct Numerology{
+        int barrelA{};
+        int barrelC{};
+        int endcapA{};
+        int endcapC{};
+      } num;
+      std::set<ITkStripOnlineId> onlineIds;
+      std::set<std::uint32_t> rodIds;
       for(auto i = pITkId->wafer_begin();i!=pITkId->wafer_end();++i){
+        if (pITkId->is_barrel(*i)){
+          if (pITkId->eta_module(*i) > 0) ++num.barrelA;
+          else ++num.barrelC;
+        } else {
+          if (pITkId->barrel_ec(*i) > 0) ++num.endcapA;
+          else ++num.endcapC;
+        }
         pITkId->get_expanded_id(*i,e);
-        os<<*i<<" "<<e<<"\n";
+        onlineIds.insert(gen(*i));
+        rodIds.insert(gen.rod(*i));
+        os<<*i<<" "<<e<<", "<<gen(*i)<<"\n";
       }
       BOOST_TEST_MESSAGE("Wafer Identifiers and Expanded Identifiers {2/2/Bec/LayerDisk/Phi/Eta/Side/0/0}:");
       BOOST_TEST_MESSAGE(os.str());
+      std::string stats = "nBarrel A: "+std::to_string(num.barrelA)+"\n";
+      stats+= "nBarrel C : "+std::to_string(num.barrelC)+"\n";
+      stats+= "nEndcap A : "+std::to_string(num.endcapA)+"\n";
+      stats+= "nEndcap C : "+std::to_string(num.endcapC)+"\n";
+      stats+= "n onlineId: "+std::to_string(onlineIds.size())+"\n";
+      stats+= "n robs    : "+std::to_string(rodIds.size())+"\n";
+      BOOST_TEST_MESSAGE(stats);
       BOOST_TEST(detStore->record(std::move(pITkId), "SCT_ID").isSuccess());
     }//Now the ITkStripID is in StoreGate, ready to be used by the cabling
     ITkStripCablingAlg a("MyAlg", g.svcLoc);
