@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -20,7 +20,6 @@
 #include <stdint.h>
 #include "TH1.h"
 #include "TH2.h"
-#include "LWHists/TProfile_LW.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "InDetRawData/InDetTimeCollection.h"

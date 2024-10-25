@@ -59,7 +59,6 @@ G4VFastSimulationModel* FastCaloSimTool::makeFastSimModel()
 {
   ATH_MSG_DEBUG("Initializing Fast Sim Model");
 
-
   // Create the FastCaloSim fast simulation model
-  return new FastCaloSim(name(), m_rndmGenSvc, m_randomEngineName,  m_FastCaloSimCaloTransportation, m_FastCaloSimCaloExtrapolation, m_G4CaloTransportTool, m_FastCaloSimSvc, m_CaloCellContainerSDName, m_doG4Transport, this);
+  return new FastCaloSim(name(), m_rndmGenSvc, m_randomEngineName,  m_FastCaloSimCaloTransportation, m_FastCaloSimCaloExtrapolation, m_G4CaloTransportTool, m_FastCaloSimSvc, m_CaloCellContainerSDName, m_doG4Transport, m_doPhotons, m_doElectrons, m_doHadrons, m_AbsEtaMin, m_AbsEtaMax, m_EkinMin, m_EkinMax, m_doEMECFCS, this);
 }

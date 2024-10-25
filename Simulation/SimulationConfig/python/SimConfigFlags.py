@@ -238,6 +238,9 @@ def createSimConfigFlags():
 
     scf.addFlag("Sim.FastShower.InputCollection", "TruthEvent") # StoreGate collection name of modified TruthEvent for legacy FastCaloSim use
 
+    # Config FastCaloSim scheme
+    scf.addFlag("Sim.FastCalo.doEMECFCS", False)
+
     # FastChain
     # Setting the BCID for Out-of-Time PU events, list of int
     scf.addFlag("Sim.FastChain.BCID", [1])

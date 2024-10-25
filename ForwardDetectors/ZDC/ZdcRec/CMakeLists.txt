@@ -19,6 +19,9 @@ atlas_add_library( ZdcRecLib
 atlas_add_component( ZdcRec
                      src/components/*.cxx
                      LINK_LIBRARIES ZdcRecLib )
-
+atlas_add_test( ZdcRecConfigTest
+  SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data23_hi.00463427.calibration_ZDCCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
+  POST_EXEC_SCRIPT noerror.sh)
+		     
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
