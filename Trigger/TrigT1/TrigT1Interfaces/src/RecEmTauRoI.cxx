@@ -275,10 +275,10 @@ void LVL1::RecEmTauRoI::constructRun3(const TrigConf::L1Menu *const l1menu)
   unsigned int isolWord = RecEmTauRoI::isolation();
 
   // Iterate through the configured thresholds and see which ones this RoI satisfies
-  for (shared_ptr<TrigConf::L1Threshold> thr : l1menu->thresholds(triggerType))
+  for (const shared_ptr<TrigConf::L1Threshold> &thr : l1menu->thresholds(triggerType))
   {
     // Start by extracting threshold values
-    auto caloThr = std::dynamic_pointer_cast<TrigConf::L1Threshold_Calo>(thr);
+    auto caloThr = dynamic_cast<TrigConf::L1Threshold_Calo*>(thr.get());
     if (!caloThr)
     {
       continue;
@@ -293,7 +293,7 @@ void LVL1::RecEmTauRoI::constructRun3(const TrigConf::L1Menu *const l1menu)
     unsigned int isolMask = 0;
     if (triggerType == "EM")
     {
-      auto emThr = std::dynamic_pointer_cast<TrigConf::L1Threshold_EM>(thr);
+      auto emThr = dynamic_cast<TrigConf::L1Threshold_EM*>(thr.get());
       if (emThr)
       {
         isolMask = emThr->isolationMask(ieta);
@@ -301,7 +301,7 @@ void LVL1::RecEmTauRoI::constructRun3(const TrigConf::L1Menu *const l1menu)
     }
     else if (triggerType == "TAU")
     {
-      auto tauThr = std::dynamic_pointer_cast<TrigConf::L1Threshold_TAU>(thr);
+      auto tauThr = dynamic_cast<TrigConf::L1Threshold_TAU*>(thr.get());
       if (tauThr)
       {
         isolMask = tauThr->isolationMask();

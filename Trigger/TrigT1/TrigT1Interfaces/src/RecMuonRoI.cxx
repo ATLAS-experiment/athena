@@ -205,8 +205,8 @@ LVL1::RecMuonRoI::construct( unsigned int roIWord,
 
    // Get the threshold value
    m_thresholdValue = 0;
-   for( shared_ptr<TrigConf::L1Threshold> thr : l1menu->thresholds("MU")) {
-      auto muonThr = std::dynamic_pointer_cast<TrigConf::L1Threshold_MU>(thr);
+   for( const shared_ptr<TrigConf::L1Threshold> &thr : l1menu->thresholds("MU")) {
+      auto muonThr = static_cast<TrigConf::L1Threshold_MU*>(thr.get());
       if( muonThr->mapping() + 1 == m_thresholdNumber ) {
          m_thresholdValue = muonThr->ptBarrel(); // for new muon thresholds this must be properly chosen, depending on the regiom
       }

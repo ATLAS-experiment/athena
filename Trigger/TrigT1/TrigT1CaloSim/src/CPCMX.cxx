@@ -185,11 +185,11 @@ StatusCode CPCMX::execute( )
         // Does TOB satisfy this threshold?
           std::optional<uint16_t> isolMask;
           if (thresh->className() == "L1Threshold_EM") {
-            std::shared_ptr<TrigConf::L1Threshold_EM> thresh_EM = std::static_pointer_cast<TrigConf::L1Threshold_EM>(thresh);
+            auto thresh_EM = static_cast<TrigConf::L1Threshold_EM*>(thresh.get());
             isolMask = thresh_EM->isolationMask(ieta);
           }
           else if (thresh->className() == "L1Threshold_TAU") {
-            std::shared_ptr<TrigConf::L1Threshold_TAU> thresh_TAU = std::static_pointer_cast<TrigConf::L1Threshold_TAU>(thresh);
+            auto thresh_TAU = static_cast<TrigConf::L1Threshold_TAU*>(thresh.get());
             isolMask = thresh_TAU->isolationMask();
           }
 

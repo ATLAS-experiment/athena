@@ -63,18 +63,18 @@ void PadTriggerLogicOfflineTool::handle(const Incident& inc) {
     }
 }
 
-void PadTriggerLogicOfflineTool::fillGeometricInformation(const std::shared_ptr<PadOfflineData>& pod) const {
-    const MuonGM::sTgcReadoutElement* rdoEl = m_detManager->getsTgcReadoutElement(pod->Identity());
-    const Trk::PlaneSurface &surface = rdoEl->surface(pod->Identity());
+void PadTriggerLogicOfflineTool::fillGeometricInformation(PadOfflineData& pod) const {
+    const MuonGM::sTgcReadoutElement* rdoEl = m_detManager->getsTgcReadoutElement(pod.Identity());
+    const Trk::PlaneSurface &surface = rdoEl->surface(pod.Identity());
     std::array<Amg::Vector2D, 4> local_pad_corners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
     //From MuonPadDesign... read pad local corners
-    rdoEl->padCorners(pod->Identity(),local_pad_corners);
+    rdoEl->padCorners(pod.Identity(),local_pad_corners);
     Amg::Vector3D pad_corner_global;
     for(unsigned int i=0; i<4; i++) {
         surface.localToGlobal(local_pad_corners.at(i), pad_corner_global, pad_corner_global);
-        pod->m_cornerXyz[i][0] = pad_corner_global.x();
-        pod->m_cornerXyz[i][1] = pad_corner_global.y();
-        pod->m_cornerXyz[i][2] = pad_corner_global.z();
+        pod.m_cornerXyz[i][0] = pad_corner_global.x();
+        pod.m_cornerXyz[i][1] = pad_corner_global.y();
+        pod.m_cornerXyz[i][2] = pad_corner_global.z();
     }
 }
 
@@ -183,9 +183,9 @@ StatusCode PadTriggerLogicOfflineTool::compute_pad_triggers(const std::vector<st
                 else {
                   std::vector<std::shared_ptr<PadOfflineData>> trgpads;
                   for(const auto& p : sector_pads){
-                     auto pod=std::dynamic_pointer_cast<PadOfflineData> (p);
-                       fillGeometricInformation(pod);
-                       trgpads.push_back(pod);
+                       auto pod=std::dynamic_pointer_cast<PadOfflineData> (p);
+                       fillGeometricInformation(*pod);
+                       trgpads.emplace_back(std::move(pod));
                   }
                   const std::vector<SectorTriggerCandidate> candidates = m_tdrLogic.buildSectorTriggers(trgpads,m_Zratio);
                   int index=0;

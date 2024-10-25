@@ -208,11 +208,11 @@ LVL1::RecJetRoI::constructRun3(const TrigConf::L1Menu * const l1menu)
    }
 
    // Iterate through vector of thresholds and see which ones this RoI satisfies
-   for (shared_ptr<TrigConf::L1Threshold> thr : l1menu->thresholds("JET"))
+   for (const shared_ptr<TrigConf::L1Threshold> &thr : l1menu->thresholds("JET"))
    {
       // Does it satisfy this one?
       // Start by extracting threshold values
-      auto jetThr = std::dynamic_pointer_cast<TrigConf::L1Threshold_JET>(thr);
+      auto jetThr = dynamic_cast<TrigConf::L1Threshold_JET*>(thr.get());
       if (!jetThr)
       {
          continue;
