@@ -24,9 +24,6 @@ public:
    /// Required of all Gaudi Services
    virtual StatusCode initialize() override;
 
-   /// Required of all Gaudi services:  see Gaudi documentation for details
-   virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface) override;
-
    /// Checks whether an IOpaqueAddress is a GenericAddress
    virtual StatusCode updateServiceState(IOpaqueAddress* pAddress) override;
 

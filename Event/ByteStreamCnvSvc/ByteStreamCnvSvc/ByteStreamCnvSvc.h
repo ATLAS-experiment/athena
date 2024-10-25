@@ -59,12 +59,6 @@ public:
      return m_slots->m_rawEventWrite.get();
    }
 
-   /// FIXME: temporary wrappers until all clients are migrated to IByteStreamCnvSvc
-   ///@{
-   virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface ) override;
-   static const InterfaceID& interfaceID();
-   ///@}
-
 protected:
    RawEventWrite* setRawEvent (std::unique_ptr<RawEventWrite> rawEventWrite);
 

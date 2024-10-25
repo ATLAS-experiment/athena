@@ -38,17 +38,6 @@ StatusCode ByteStreamCnvSvcBase::initialize()     {
    incsvc->addListener(this, "BeginRun", 0, false, true); // true for singleshot
    return(StatusCode::SUCCESS);
 }
-//_______________________________________________________________________
-StatusCode ByteStreamCnvSvcBase::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-   if (IByteStreamEventAccess::interfaceID().versionMatch(riid)) {
-      *ppvInterface = dynamic_cast<IByteStreamEventAccess*>(this);
-   } else {
-      // Interface is not directly available: try out a base class
-      return(::AthCnvSvc::queryInterface(riid, ppvInterface));
-   }
-   addRef();
-   return(StatusCode::SUCCESS);
-}
 //______________________________________________________________________________
 StatusCode ByteStreamCnvSvcBase::updateServiceState(IOpaqueAddress* pAddress) {
    if (pAddress != 0) {
