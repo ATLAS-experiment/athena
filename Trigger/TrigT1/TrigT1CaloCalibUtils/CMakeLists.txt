@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigT1CaloCalibUtils )
@@ -7,17 +7,17 @@ atlas_subdir( TrigT1CaloCalibUtils )
 find_package( Boost )
 find_package( CLHEP )
 find_package( CORAL COMPONENTS CoralBase )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
+find_package( ROOT COMPONENTS Core Hist RIO )
 
 # Component(s) in the package:
 atlas_add_library( TrigT1CaloCalibUtilsLib
                    src/*.cxx
                    PUBLIC_HEADERS TrigT1CaloCalibUtils
-                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} ${CORAL_LIBRARIES} AthenaBaseComps AthenaKernel AthenaPoolUtilities CaloIdentifier CaloTriggerToolLib CxxUtils GaudiKernel Identifier LArCablingLib LArElecCalib RegistrationServicesLib StoreGateLib TrigConfHLTData TrigConfL1Data TrigT1CaloCalibConditions TrigT1CaloCalibToolInterfaces TrigT1CaloCalibToolsLib TrigT1CaloCondSvcLib TrigT1CaloEventLib TrigT1CaloMonitoringToolsLib TrigT1CaloUtilsLib xAODTrigL1Calo
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} CaloDetDescrLib CaloEvent TrigT1CaloToolInterfaces TrigT1Interfaces xAODEventInfo )
+                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+                   PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+                   PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
+                   LINK_LIBRARIES ${Boost_LIBRARIES} AthenaBaseComps CaloDetDescrLib CaloEvent CaloIdentifier GaudiKernel LArCablingLib LArElecCalib StoreGateLib TrigT1CaloCalibConditions TrigT1CaloEventLib TrigT1CaloUtilsLib xAODTrigL1Calo
+                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaKernel AthenaPoolUtilities Identifier TrigT1CaloCalibToolInterfaces TrigT1CaloToolInterfaces TrigT1Interfaces xAODEventInfo )
 
 atlas_add_component( TrigT1CaloCalibUtils
                      src/components/*.cxx
