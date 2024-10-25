@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /******************************************************************************
@@ -47,7 +47,7 @@ class HotCell : public asg::AsgMessaging
         const float m_etaMax;
         const float m_phiMin;
         const float m_phiMax;
-        SG::AuxElement::ConstAccessor< std::vector<float> > m_ePerSamp{"EnergyPerSampling"};
+        SG::ConstAccessor< std::vector<float> > m_ePerSamp{"EnergyPerSampling"};
 };
 
 HotCell::HotCell(const int layer, const float etaMin, const float etaMax, const float phiMin, const float phiMax)
@@ -123,6 +123,8 @@ StatusCode JetCleaningTool::initialize()
   if (m_cutName!="") m_cutLevel = getCutLevel( m_cutName );
   ATH_MSG_INFO( "Configured with cut level " << getCutName( m_cutLevel ) );
   std::string jetCleanDFName = "DFCommonJets_jetClean_"+getCutName(m_cutLevel);
+  // if UseLooseDecorForTightCut=true, retrieve loose cleaning decoration to compute tight cleaning
+  if (m_useLooseDecorForTightCut) jetCleanDFName = "DFCommonJets_jetClean_"+getCutName(LooseBad);
   m_acc_jetClean = jetCleanDFName;
   m_jetCleanKey = m_jetContainerName + "." + getCutName(m_cutLevel);
 
@@ -189,7 +191,7 @@ asg::AcceptData JetCleaningTool::accept( const int isJetClean,
     //=============================================================
     if(isJetClean==0) return acceptData;  //fails Loose cleaning
     else if (fmax<DBL_MIN) return acceptData;
-        else if(std::fabs(eta)<2.4 && chf/fmax<0.1) return acceptData;
+    else if(std::fabs(eta)<2.4 && chf/fmax<0.1) return acceptData;
     else{
         acceptData.setCutResult( "Cleaning", true );
         return acceptData;
@@ -313,8 +315,15 @@ asg::AcceptData JetCleaningTool::accept( const xAOD::Jet& jet) const
   //start jet cleaning 
   int isJetClean = 0; 
   if( m_useDecorations && m_acc_jetClean.isAvailable(jet) ) { //decoration is already available for all jets 
-          isJetClean = m_acc_jetClean(jet);
-          return accept (isJetClean, FracSamplingMaxIndex);
+    isJetClean = m_acc_jetClean(jet);
+
+    // compute tight cleaning on top of the loose cleaning decoration
+    if (m_cutLevel==TightBad && m_useLooseDecorForTightCut) {
+      return accept (isJetClean, sumpttrk, FracSamplingMax, jet.eta(), jet.pt(), FracSamplingMaxIndex);
+    }
+    else {
+      return accept (isJetClean, FracSamplingMaxIndex);
+    }
   }
   else{   //running over AOD, need to use all variables
       ATH_MSG_DEBUG("DFCommon jet cleaning variable not available ... Using jet cleaning tool");
@@ -447,7 +456,7 @@ StatusCode JetCleaningTool::readHotCells()
 
     // Convert into a vector
     std::vector<unsigned int> runNumbers = JCT::utils::vectorize<unsigned int>(runNumbersString,", ");
-    if (!runNumbers.size())
+    if (runNumbers.empty())
     {
         ATH_MSG_ERROR("RunNumbers field specified, but value is empty or not unsigned ints for hot cells file: " << m_hotCellsFile);
         return StatusCode::FAILURE;
