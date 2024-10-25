@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcConditions/ZdcInjPulserAmpMap.h"
 #include "PathResolver/PathResolver.h"
-
 #include <fstream>
 
 // Get singleton instance
@@ -39,7 +38,7 @@ ZdcInjPulserAmpMap::ZdcInjPulserAmpMap() : asg::AsgMessaging("ZdcInjPulserAmpMap
     ATH_MSG_FATAL("ZdcInjPulserAmpMap constructor, JSON file cannot be opened!" ) ;
   }
 
-  m_filePath = filePath;
+  m_filePath = std::move(filePath);
   ReadPulserSteps(ifs);
 }
 
@@ -58,7 +57,7 @@ void ZdcInjPulserAmpMap::ReadPulserSteps(std::ifstream& ifs)
     j.erase(j.begin());
   }
 
-  for (auto entry : j) {
+  for (const auto &entry : j) {
     FillVVector(entry);
   }
 }

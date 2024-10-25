@@ -1,13 +1,17 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCINJPULSERAMPMAP_H
 #define ZDCINJPULSERAMPMAP_H
 
-#include <nlohmann/json.hpp>
-#include <iostream>
 #include "AsgMessaging/AsgMessaging.h"
+#include <nlohmann/json.hpp>
+
+#include <string>
+#include <vector>
+#include <cmath>
+
 
 class ZdcInjPulserAmpMap : public asg::AsgMessaging
 {
