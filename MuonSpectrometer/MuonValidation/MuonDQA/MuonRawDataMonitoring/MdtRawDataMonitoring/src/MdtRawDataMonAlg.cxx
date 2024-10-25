@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -19,12 +19,10 @@
 #include "MdtRawDataMonAlg.h"
 
 #include "AnalysisTriggerEvent/LVL1_ROI.h"
-#include "AthenaMonitoring/AthenaMonManager.h"
 #include "GaudiKernel/MsgStream.h"
 #include "MdtCalibFitters/MTStraightLine.h"
 #include "MdtHistCoder.h"
 #include "MuonCalibIdentifier/MuonFixedId.h"
-#include "MuonChamberIDSelector.h"
 #include "MuonDQAUtils/MuonChamberNameConverter.h"
 #include "MuonDQAUtils/MuonChambersRange.h"
 #include "MuonDQAUtils/MuonDQAHistMap.h"
