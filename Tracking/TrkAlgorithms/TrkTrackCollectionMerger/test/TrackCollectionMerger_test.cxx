@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -53,7 +53,7 @@ class GaudiFixture {
      return m_svcLoc;
    }
    
-   StoreGateSvc* 
+   SmartIF<StoreGateSvc>&
    storeGateSvc(){
     return m_sg;
    }
@@ -76,13 +76,10 @@ class GaudiFixture {
      m_propMgr = m_appMgr;
      m_propMgr->setProperty( "EvtSel",         "NONE" ).ignore() ;
      m_propMgr->setProperty( "JobOptionsType", "FILE" ).ignore();
-     //"TrkTrackCollectionMerger/TrackCollectionMerger_test.txt"
      m_propMgr->setProperty( "JobOptionsPath", joPath ).ignore();
-     m_toolSvc = m_svcLoc->service("ToolSvc");
      m_appMgr->configure().ignore();
      m_appMgr->initialize().ignore();
-     m_sg = nullptr;
-     m_svcLoc->service ("StoreGateSvc", m_sg).ignore();
+     m_sg = m_svcLoc->service ("StoreGateSvc");
    }
  
    void 
@@ -95,18 +92,12 @@ class GaudiFixture {
      Gaudi::setInstance( static_cast<IAppMgrUI*>(nullptr) );
    }
  
-   StoreGateSvc* 
-   evtStore(){
-     return m_sg;
-   }
- 
    //member variables for Core Gaudi components
    IAppMgrUI*               m_appMgr{nullptr};
    SmartIF<ISvcLocator>     m_svcLoc;
    SmartIF<ISvcManager>     m_svcMgr;
-   SmartIF<IToolSvc>        m_toolSvc;
    SmartIF<IProperty>       m_propMgr;
-   StoreGateSvc*            m_sg{ nullptr };
+   SmartIF<StoreGateSvc>    m_sg;
  };
 
 
