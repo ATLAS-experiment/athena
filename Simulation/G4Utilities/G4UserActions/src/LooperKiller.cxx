@@ -14,6 +14,7 @@
 #include "G4EventManager.hh"
 #include "G4Event.hh"
 #include "MCTruth/TrackHelper.h"
+#include "MCTruth/TrackInformation.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/StoreGateSvc.h"
@@ -82,7 +83,7 @@ namespace G4UA
       int pdg_id{0};
       TrackHelper trackHelper(aStep->GetTrack());
       if ( m_config.BSM_Only && (trackHelper.IsPrimary() || trackHelper.IsRegisteredSecondary()) ) {
-        HepMC::GenParticlePtr part = trackHelper.GetTrackInformation()->GetHepMCParticle();
+        HepMC::GenParticlePtr part = trackHelper.GetTrackInformation()->GetCurrentGenParticle();
         if (part) { pdg_id = part->pdg_id(); }
       }
       if ( !m_config.BSM_Only || MC::isBSM(pdg_id)) { // Sometimes we may ony want to bail out for BSM particles.
