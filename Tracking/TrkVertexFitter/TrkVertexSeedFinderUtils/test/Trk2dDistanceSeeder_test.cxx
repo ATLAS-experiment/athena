@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file TrkVertexSeedFinderUtils/test/Trk2dDistanceSeeder_test.cxx
@@ -171,8 +171,8 @@ int main()
   ISvcLocator* svcloc = nullptr;
   Athena_test::initGaudi ("TrkVertexSeedFinderUtils/TrkVertexSeedFinderUtils_tests.txt", svcloc);
 
-  StoreGateSvc *cs=nullptr;
-  assert (svcloc->service("StoreGateSvc/ConditionStore",cs).isSuccess());
+  SmartIF<StoreGateSvc> cs{svcloc->service("StoreGateSvc/ConditionStore")};
+  assert ( cs.isValid() );
 
   SGTest::TestStore dumstore;
   createNewtonTrkDistanceFinderCondData(dumstore);
