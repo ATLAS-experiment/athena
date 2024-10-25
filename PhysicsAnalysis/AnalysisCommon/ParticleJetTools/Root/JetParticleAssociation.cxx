@@ -63,6 +63,36 @@ JetParticleAssociation::matchOriginTrk(SG::ReadDecorHandleKey<xAOD::IParticleCon
     
 }
 
+std::vector<std::vector<ElementLink<xAOD::IParticleContainer>>>* getIntersection(const std::vector<std::vector<ElementLink<xAOD::IParticleContainer>>>*matches1,
+                const std::vector<std::vector<ElementLink<xAOD::IParticleContainer>>>* matches2) {
+
+
+    // Allocate the intersection dynamically, same as in match function
+    auto* intersection = new std::vector<std::vector<ElementLink<xAOD::IParticleContainer>>>(matches1->size());
+
+    for (size_t i = 0; i < matches1->size(); ++i) {
+        // Convert each inner vector to sets for easy intersection
+        std::set<ElementLink<xAOD::IParticleContainer>> set1((*matches1)[i].begin(), (*matches1)[i].end());
+        std::set<ElementLink<xAOD::IParticleContainer>> set2((*matches2)[i].begin(), (*matches2)[i].end());
+
+        // Temporary vector to store the intersection of current index
+        std::vector<ElementLink<xAOD::IParticleContainer>> tempIntersection;
+
+        // Find intersection between set1 and set2
+        std::set_intersection(
+            set1.begin(), set1.end(),
+            set2.begin(), set2.end(),
+            std::back_inserter(tempIntersection)
+        );
+
+        // Move the temporary intersection to the final result
+        (*intersection)[i] = std::move(tempIntersection);
+    }
+
+    return intersection;
+}
+
+
 JetParticleAssociation::JetParticleAssociation(const std::string& name)
     : asg::AsgTool(name) {
 }
@@ -114,7 +144,9 @@ StatusCode JetParticleAssociation::decorate(const xAOD::JetContainer& jets) cons
     
     
     if ((m_jetContainerName == "AntiKt4EMPFlowByVertexJets") && (m_particleKey.key()=="InDetTrackParticles")){
-      matches = matchOriginTrk(m_trk_origin_vtx, *viewJets.asDataVector(), *parts);
+      const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >* matches_origin = matchOriginTrk(m_trk_origin_vtx, *viewJets.asDataVector(), *parts);
+      const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >* matches_dR = match(*viewJets.asDataVector(), *parts);
+      matches = getIntersection(matches_origin, matches_dR);
     }else{
       matches = match(*viewJets.asDataVector(), *parts);
     }
