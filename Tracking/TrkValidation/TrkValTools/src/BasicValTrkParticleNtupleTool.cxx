@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -85,13 +85,9 @@ StatusCode Trk::BasicValTrkParticleNtupleTool::initialize() {
     // create ntuple tree
   if (m_bookNewNtuple) {
     // ---------------------------
-    // retrive pointer to THistSvc
-    ITHistSvc *tHistSvc;
-    StatusCode sc =  service("THistSvc", tHistSvc);
-    if (sc.isFailure()) {
-        ATH_MSG_ERROR("Unable to retrieve pointer to THistSvc");
-        return sc;
-    }
+    // retrieve pointer to THistSvc
+    SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+    ATH_CHECK( tHistSvc.isValid() );
 
     // ---------------------------
     // create tree and register it to THistSvc
@@ -100,11 +96,8 @@ StatusCode Trk::BasicValTrkParticleNtupleTool::initialize() {
     // NB: we must not delete the tree, this is done by THistSvc
 
     std::string fullNtupleName =  "/"+m_ntupleFileName+"/"+m_ntupleDirName+"/"+m_ntupleTreeName;
-    sc = tHistSvc->regTree(fullNtupleName, m_nt);
-    if (sc.isFailure()) {
-        ATH_MSG_ERROR("Unable to register TTree : " << fullNtupleName);
-        return sc;
-    }
+    ATH_CHECK( tHistSvc->regTree(fullNtupleName, m_nt) );
+
     // add the ntuple branches (this function has to be called by the client of this tool, if m_bookNewNtuple is set to false...)
     ATH_CHECK(addNtupleItems(m_nt));
   }

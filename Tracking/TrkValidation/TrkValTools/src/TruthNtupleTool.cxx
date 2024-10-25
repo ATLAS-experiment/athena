@@ -11,10 +11,6 @@
 // Sebastian.Fleischmann@cern.ch
 ///////////////////////////////////////////////////////////////////
 
-
-//Gaudi
-#include "GaudiKernel/ITHistSvc.h"
-
 // Trk
 #include "TrkValTools/TruthNtupleTool.h"
 #include "TrkParameters/TrackParameters.h"
@@ -41,6 +37,7 @@ Trk::TruthNtupleTool::TruthNtupleTool(
         :
         AthAlgTool(t,n,p),
         m_fillJets(false),
+        m_histSvc("THistSvc", n),
         m_nt(nullptr),
         m_numberOfTreeEntries(0),
         m_runNumber{},
@@ -91,23 +88,15 @@ StatusCode Trk::TruthNtupleTool::initialize() {
     }
 
     // ---------------------------
-    // retrive pointer to THistSvc
-    ITHistSvc *tHistSvc;
-    StatusCode sc =  service("THistSvc", tHistSvc);
-    if (sc.isFailure()) {
-      ATH_MSG_ERROR ("Unable to retrieve pointer to THistSvc");
-        return sc;
-    }
+    // retrieve pointer to THistSvc
+    ATH_CHECK( m_histSvc.retrieve() );
+
     // ---------------------------
     // create tree and register it to THistSvc
     m_nt = new TTree(TString(m_ntupleTreeName), "Track Validation Truth");
     // NB: we must not delete the tree, this is done by THistSvc
     std::string fullNtupleName =  "/"+m_ntupleFileName+"/"+m_ntupleTreeName;
-    sc = tHistSvc->regTree(fullNtupleName, m_nt);
-    if (sc.isFailure()) {
-      ATH_MSG_ERROR ("Unable to register TTree : " << m_ntupleTreeName);
-      return sc;
-    }
+    ATH_CHECK( m_histSvc->regTree(fullNtupleName, m_nt) );
 
     //-----------------
     // add items
@@ -201,14 +190,6 @@ StatusCode Trk::TruthNtupleTool::finalize() {
 
   ATH_MSG_INFO ("start finalize() in " << name());
 
-    // retrive pointer to THistSvc
-    ITHistSvc *tHistSvc;
-    StatusCode sc =  service("THistSvc", tHistSvc);
-    if (sc.isFailure()) {
-      ATH_MSG_ERROR ("Unable to retrieve pointer to THistSvc");
-      return sc;
-    }
-
     ATH_MSG_INFO ( "Efficiencies:" );
 
     //Double_t* efficiencyValues;
@@ -230,7 +211,7 @@ StatusCode Trk::TruthNtupleTool::finalize() {
             // add graph to ROOT file
             std::string graphName = "trackEff_" + m_trackTruthClassifiers[classifierIndex]->classificationAsString(clIndex);
             effPlot->SetNameTitle(graphName.c_str(), graphName.c_str());
-            StatusCode sc = tHistSvc->regGraph("/"+m_ntupleFileName+"/"+graphName,    effPlot);
+            StatusCode sc = m_histSvc->regGraph("/"+m_ntupleFileName+"/"+graphName,    effPlot);
             if(sc.isFailure()){
               ATH_MSG_ERROR ("ROOT Graph registration failed");
               return sc;

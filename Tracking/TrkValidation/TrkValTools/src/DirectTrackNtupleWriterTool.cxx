@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -56,30 +56,19 @@ StatusCode Trk::DirectTrackNtupleWriterTool::initialize() {
 
   StatusCode sc(StatusCode::SUCCESS);
     
-  // retrive pointer to THistSvc
-  ITHistSvc *tHistSvc;
-  sc =  service("THistSvc", tHistSvc);
-  if (sc.isFailure()) {
-      ATH_MSG_ERROR ("Unable to retrieve pointer to THistSvc");
-      return sc;
-  }
+  // retrieve pointer to THistSvc
+  SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+  ATH_CHECK( tHistSvc.isValid() );
+
   // ---------------------------
   // create tree and register it to THistSvc
   m_nt = new TTree(TString(m_ntupleTreeName), "Track Validation");
   // NB: we must not delete the tree, this is done by THistSvc
   std::string fullNtupleName =  "/"+m_ntupleFileName+"/"+m_ntupleDirName+"/"+m_ntupleTreeName;
-  sc = tHistSvc->regTree(fullNtupleName, m_nt);
-  if (sc.isFailure()) {
-      ATH_MSG_ERROR ("Unable to register TTree : " << fullNtupleName);
-      return sc;
-  }
-  
+  ATH_CHECK( tHistSvc->regTree(fullNtupleName, m_nt) );
+
   // Get Validation ntuple Tools
-  sc = m_ValidationNtupleTools.retrieve();
-  if (sc.isFailure()) {
-      ATH_MSG_FATAL ("Could not retrieve "<< m_ValidationNtupleTools <<" (to write validation ntuple) ");
-      return sc;
-  }
+  ATH_CHECK( m_ValidationNtupleTools.retrieve() );
 
   // add the ntuple branches to our tree
   ToolHandleArray< Trk::ITrackValidationNtupleTool >::iterator itTools;

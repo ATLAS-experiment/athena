@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -10,11 +10,10 @@
 #define TRK_ENERGYLOSSMONITOR_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "GaudiKernel/INTupleSvc.h"
 #include "GaudiKernel/NTuple.h"
 
 #include "TrkValInterfaces/IEnergyLossMonitor.h"
-
-class INTupleSvc;
 
 namespace Trk {
 
@@ -52,7 +51,7 @@ namespace Trk {
     
 private:    
     /** Ntuple Business */
-    INTupleSvc*                              m_ntupleSvc;  
+    ServiceHandle<INTupleSvc>                m_ntupleSvc;
     std::string                              m_outputNtuplePath;
     std::string                              m_outputNtupleDescription;
 
