@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
      
@@ -32,7 +32,7 @@
 InDet::SiSpacePointsSeedMaker_ATLxk::SiSpacePointsSeedMaker_ATLxk
 (const std::string& t,const std::string& n,const IInterface* p)
   : base_class(t, n, p),
-    m_thistSvc(nullptr),
+    m_thistSvc("THistSvc", n),
     m_outputTree(nullptr),
     m_treeName(""),
     m_treeFolder("/valNtuples/")
@@ -74,7 +74,7 @@ StatusCode InDet::SiSpacePointsSeedMaker_ATLxk::initialize()
 
   if (m_writeNtuple) {
 
-    ATH_CHECK( service("THistSvc",m_thistSvc)  );
+    ATH_CHECK( m_thistSvc.retrieve() );
  
     m_treeName = (std::string("SeedTree_")+name());
     std::replace( m_treeName.begin(), m_treeName.end(), '.', '_' );
