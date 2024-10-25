@@ -14,7 +14,6 @@
 #include "GeoModelHelpers/TransformToStringConverter.h"
 #include <MuonCablingData/MdtCablingData.h>
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
-#include "CxxUtils/starts_with.h"
 #include <GaudiKernel/SystemOfUnits.h>
 #include <iostream>
 
@@ -265,8 +264,8 @@ int main( int argc, char** argv ) {
         return EXIT_FAILURE;
     }
     /// check whether the files are xroot d -> otherwise call path resovler
-    if (!CxxUtils::starts_with (refFile, "root://")) refFile = PathResolver::FindCalibFile(refFile);
-    if (!CxxUtils::starts_with (testFile, "root://")) testFile = PathResolver::FindCalibFile(testFile);
+    if (!refFile.starts_with( "root://")) refFile = PathResolver::FindCalibFile(refFile);
+    if (!testFile.starts_with( "root://")) testFile = PathResolver::FindCalibFile(testFile);
     /// Parse the tree dump
     std::set<MdtChamber> refChambers = readTreeDump(refFile);
     if (refChambers.empty()) {

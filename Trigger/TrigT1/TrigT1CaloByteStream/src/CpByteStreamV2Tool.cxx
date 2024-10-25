@@ -32,8 +32,6 @@
 
 #include "CpByteStreamV2Tool.h"
 
-#include "CxxUtils/starts_with.h"
-
 namespace LVL1BS
 {
 
@@ -530,8 +528,7 @@ StatusCode CpByteStreamV2Tool::convertBs(
 {
     LocalData ld;
 
-    ld.coreOverlap =
-      CxxUtils::ends_with (sgKey, "Overlap") || CxxUtils::ends_with (sgKey, "OverlapAux.");
+    ld.coreOverlap = sgKey.ends_with( "Overlap") || sgKey.ends_with ("OverlapAux.");
 
     const bool debug = msgLvl(MSG::DEBUG);
     if (debug) msg(MSG::DEBUG);

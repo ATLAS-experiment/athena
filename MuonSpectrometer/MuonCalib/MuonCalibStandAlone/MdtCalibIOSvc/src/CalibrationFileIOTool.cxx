@@ -215,7 +215,7 @@ namespace MuonCalib {
         std::string prefix_st(prefix);
         if (!nm.starts_with( prefix_st)) return false;
         // check if filename ends in .dat
-        if (!CxxUtils::ends_with (nm, ".dat")) return false;
+        if (!nm.ends_with( ".dat")) return false;
         // cut prefix and suffix from filename
         std::string cutout(nm, prefix_st.size(), nm.size() - 4 - prefix_st.size());
         // extract station name

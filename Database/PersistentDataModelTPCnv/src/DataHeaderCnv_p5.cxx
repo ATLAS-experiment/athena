@@ -11,7 +11,6 @@
 #include "PersistentDataModel/DataHeader.h"
 #include "PersistentDataModelTPCnv/DataHeaderCnv_p5.h"
 #include "CxxUtils/sgkey_t.h"
-#include "CxxUtils/starts_with.h"
 
 DataHeaderElementCnv_p5::DataHeaderElementCnv_p5() {}
 DataHeaderElementCnv_p5::~DataHeaderElementCnv_p5() {}
@@ -139,7 +138,7 @@ void DataHeaderElementCnv_p5::transToPers(const DataHeaderElement& trans,
          pers.m_token = pers.m_token.substr(delim + 1);
 // Get TypeName
 // Check whether Key only is used for placement
-         if (!CxxUtils::starts_with (pers.m_token, trans.m_key)) {
+         if (!pers.m_token.starts_with( trans.m_key)) {
             std::string::size_type delim = pers.m_token.find_first_of("/()");
             if (delim != std::string::npos) {
                const std::string persComp2 = pers.m_token.substr(0, delim + 1);

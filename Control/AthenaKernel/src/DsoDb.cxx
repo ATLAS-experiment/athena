@@ -83,7 +83,7 @@ namespace {
     if (!lib.starts_with( "lib")) {
       lib = std::string("lib") + lib;
     }
-    if (!boost::algorithm::ends_with(lib, SHLIB_SUFFIX)) {
+    if (!lib.ends_with(SHLIB_SUFFIX)) {
       lib += SHLIB_SUFFIX;
     }
     return lib;
@@ -669,8 +669,8 @@ DsoDb::rflx_type ATLAS_NOT_THREAD_SAFE (const std::string& type_name) const
   if (libname.starts_with(SHLIB_PREFIX)) {
     libname = libname.substr(SHLIB_PREFIX.size(), std::string::npos);
   }
-  if (boost::algorithm::ends_with(libname, SHLIB_SUFFIX)) {
-    libname.resize(libname.size()-SHLIB_SUFFIX.size());
+  if (libname.ends_with(SHLIB_SUFFIX)) {
+    libname.resize(libname.size() - SHLIB_SUFFIX.size());
   }
 
   unsigned long err = System::loadDynamicLib( libname, &handle );

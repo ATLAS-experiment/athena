@@ -171,7 +171,7 @@ foreach( test sincos_test ArrayScanner_test Arrayrep_test
       SimpleUpdater_test hexdump_test
       FPControl_test LockedPointer_test nodiscard_test span_test
       reverse_wrapper_test atomic_bounded_decrement_test
-      releasing_iterator_test SizedUInt_test UIntConv_test starts_with_test
+      releasing_iterator_test SizedUInt_test UIntConv_test
       normalizeFunctionName_test pputils_test StringParse_test
       range_with_at_test range_with_conv_test )
    atlas_add_test( ${test}

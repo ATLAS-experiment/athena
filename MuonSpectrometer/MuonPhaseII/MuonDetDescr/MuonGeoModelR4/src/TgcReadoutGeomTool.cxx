@@ -18,7 +18,6 @@
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <MuonReadoutGeometryR4/WireGroupDesign.h>
 #include <MuonReadoutGeometryR4/RadialStripDesign.h>
-#include "CxxUtils/starts_with.h"
 
 #include <RDBAccessSvc/IRDBRecord.h>
 
@@ -179,7 +178,7 @@ StatusCode TgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         /// where CHAMBERTYPE has to start with TGC
         std::vector<std::string> key_tokens = tokenize(key, "_");
         if (key_tokens.size() < 4 ||
-            !CxxUtils::starts_with (key_tokens[0], "TGC"))
+            !key_tokens[0].starts_with( "TGC"))
             continue;
         
         bool isValid{false};

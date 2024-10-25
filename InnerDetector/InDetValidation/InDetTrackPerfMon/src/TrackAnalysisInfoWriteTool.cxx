@@ -10,7 +10,6 @@
 /// Athena includes
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/Service.h"
-#include "CxxUtils/starts_with.h"
 
 /// Local includes
 #include "TrackAnalysisInfoWriteTool.h"
@@ -58,7 +57,7 @@ StatusCode IDTPM::TrackAnalysisInfoWriteTool::write(
 {
   ATH_MSG_DEBUG( "Writing TrackAnalysisInfo to StoreGate" );
 
-  if( not CxxUtils::ends_with( wh.key(), m_anaTag.value() ) ) {
+  if( not wh.key().ends_with( m_anaTag.value() ) ) {
     ATH_MSG_ERROR( "Invalid TrkAnaInfo container name: " << wh.key() );
     return StatusCode::FAILURE;
   }

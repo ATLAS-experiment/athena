@@ -8,7 +8,6 @@
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "GoodRunsLists/TGRLCollection.h"
-#include "CxxUtils/starts_with.h"
 
 namespace {
   // Cut values on pt bein exploited throughout the monitoring
@@ -95,17 +94,17 @@ StatusCode TgcRawDataMonitorAlgorithm::initialize() {
 	std::string sysItem = monElement->At(j)->GetName();
 	if(sysItem.empty())continue;
 	std::string item = sysItem.substr(4,sysItem.size());// remove "Tit:", "CTP:", "HLT:", "RPC:", "TGC:"
-	if(CxxUtils::starts_with (sysItem, "Tit")){
+	if(sysItem.starts_with( "Tit")){
 	  monObj.title = item;
-	}else if(CxxUtils::starts_with (sysItem, "Mul")){
+	}else if(sysItem.starts_with( "Mul")){
 	  monObj.multiplicity = std::atoi(item.data());
-	}else if(CxxUtils::starts_with (sysItem, "CTP")|| CxxUtils::starts_with (sysItem, "HLT")){
+	}else if(sysItem.starts_with( "CTP")|| sysItem.starts_with( "HLT")){
 	  monObj.trigItem = item;
-	}else if(CxxUtils::starts_with (sysItem, "RPC")){
+	}else if(sysItem.starts_with( "RPC")){
 	  monObj.rpcThr = std::atoi(item.data());
 	  monObj.rpcR = (item.find('R')!=std::string::npos);
 	  monObj.rpcM = (item.find('M')!=std::string::npos);
-	}else if(CxxUtils::starts_with (sysItem, "TGC")){
+	}else if(sysItem.starts_with( "TGC")){
 	  monObj.tgcThr = std::atoi(item.data());
 	  monObj.tgcF = (item.find('F')!=std::string::npos);
 	  monObj.tgcC = (item.find('C')!=std::string::npos);
@@ -122,7 +121,7 @@ StatusCode TgcRawDataMonitorAlgorithm::initialize() {
     std::unique_ptr<TObjArray> arr( Str.Tokenize(",") );
     for(int i = 0 ; i < arr->GetEntries() ; i++){
       std::string name = arr->At(i)->GetName();
-      if(!CxxUtils::starts_with (name, "MU"))continue;
+      if(!name.starts_with( "MU"))continue;
       m_thrMonList.insert(name);
     }
   }
