@@ -121,6 +121,10 @@ TEfficiency SquirrelPlots/Tracks/Efficiency/efficiency_vs_R InDetTrackPerfMonPlo
 TEfficiency SquirrelPlots/Tracks/Efficiency/efficiency_vs_Z InDetTrackPerfMonPlots/TrkAnaOffl/Offline/Tracks/Efficiencies/eff_vs_truth_prodZ
 TEfficiency SquirrelPlots/Tracks/Efficiency/efficiency_vs_truthMu InDetTrackPerfMonPlots/TrkAnaOffl/Offline/Tracks/Efficiencies/eff_vs_truthMu
 TEfficiency SquirrelPlots/Tracks/Efficiency/efficiency_vs_actualMu  InDetTrackPerfMonPlots/TrkAnaOffl/Offline/Tracks/Efficiencies/eff_vs_actualMu
+TH1D SquirrelPlots/Tracks/Tracks/ntrack						InDetTrackPerfMonPlots/TrkAnaOffl/Offline/Tracks/Multiplicities/num_offl_all
+TH1D SquirrelPlots/Tracks/Tracks/ntracksel					InDetTrackPerfMonPlots/TrkAnaOffl/Offline/Tracks/Multiplicities/num_offl_selected
+TH1D SquirrelPlots/Tracks/Tracks/nparticle					InDetTrackPerfMonPlots/TrkAnaOffl/Offline/Tracks/Multiplicities/num_truth_all
+TH1D SquirrelPlots/Tracks/Tracks/nparticlesel				InDetTrackPerfMonPlots/TrkAnaOffl/Offline/Tracks/Multiplicities/num_truth_selected
 TH1D SquirrelPlots/TightPrimary/Tracks/Selected/Parameters/reco_d0 InDetTrackPerfMonPlots/TrkAnaOffl_TightPrimary/Offline/Tracks/Parameters/offl_d0
 TH1D SquirrelPlots/TightPrimary/Tracks/Selected/Parameters/reco_z0 InDetTrackPerfMonPlots/TrkAnaOffl_TightPrimary/Offline/Tracks/Parameters/offl_z0
 TH1D SquirrelPlots/TightPrimary/Tracks/Selected/Parameters/reco_z0sin  InDetTrackPerfMonPlots/TrkAnaOffl_TightPrimary/Offline/Tracks/Parameters/offl_z0sin
@@ -244,3 +248,7 @@ TEfficiency SquirrelPlots/TightPrimary/Tracks/Efficiency/efficiency_vs_R InDetTr
 TEfficiency SquirrelPlots/TightPrimary/Tracks/Efficiency/efficiency_vs_Z InDetTrackPerfMonPlots/TrkAnaOffl_TightPrimary/Offline/Tracks/Efficiencies/eff_vs_truth_prodZ
 TEfficiency SquirrelPlots/TightPrimary/Tracks/Efficiency/efficiency_vs_truthMu InDetTrackPerfMonPlots/TrkAnaOffl_TightPrimary/Offline/Tracks/Efficiencies/eff_vs_truthMu
 TEfficiency SquirrelPlots/TightPrimary/Tracks/Efficiency/efficiency_vs_actualMu  InDetTrackPerfMonPlots/TrkAnaOffl_TightPrimary/Offline/Tracks/Efficiencies/eff_vs_actualMu
+TH1D SquirrelPlots/TightPrimary/Tracks/Tracks/ntrack					InDetTrackPerfMonPlots/TrkAnaOffl_TightPrimary/Offline/Tracks/Multiplicities/num_offl_all
+TH1D SquirrelPlots/TightPrimary/Tracks/Tracks/ntracksel					InDetTrackPerfMonPlots/TrkAnaOffl_TightPrimary/Offline/Tracks/Multiplicities/num_offl_selected
+TH1D SquirrelPlots/TightPrimary/Tracks/Tracks/nparticle					InDetTrackPerfMonPlots/TrkAnaOffl_TightPrimary/Offline/Tracks/Multiplicities/num_truth_all
+TH1D SquirrelPlots/TightPrimary/Tracks/Tracks/nparticlesel				InDetTrackPerfMonPlots/TrkAnaOffl_TightPrimary/Offline/Tracks/Multiplicities/num_truth_selected

@@ -125,6 +125,7 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "truthIsHadron", False, help="Select hadrons" )
     # Histogram properties
     icf.addFlag( "plotTrackParameters"      , True )
+    icf.addFlag( "plotTrackMultiplicities"  , True )
     icf.addFlag( "plotEfficiencies"         , True )
     icf.addFlag( "plotTechnicalEfficiencies", False )
     icf.addFlag( "plotResolutions"          , True )

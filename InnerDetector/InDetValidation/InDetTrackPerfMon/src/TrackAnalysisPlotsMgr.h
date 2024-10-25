@@ -27,6 +27,7 @@
 #include "plots/FakeRatePlots.h"
 #include "plots/DuplicateRatePlots.h"
 #include "plots/HitsOnTracksPlots.h"
+#include "plots/NtracksPlots.h"
 
 /// STD includes
 #include <string>
@@ -103,12 +104,14 @@ namespace IDTPM {
     std::unique_ptr< EfficiencyPlots >       m_plots_tech_eff_vsTest;
     std::unique_ptr< HitsOnTracksPlots >     m_plots_hitsOnTrk_vsTest;
     std::unique_ptr< HitsOnTracksPlots >     m_plots_hitsOnMatchedTrk;
+    std::unique_ptr< NtracksPlots >          m_plots_nTracks_test;
     /// plots w.r.t. reference tracks parameters
     std::unique_ptr< TrackParametersPlots >  m_plots_trkParam_vsRef;
     std::unique_ptr< EfficiencyPlots >       m_plots_eff_vsRef;
     std::unique_ptr< EfficiencyPlots >       m_plots_tech_eff_vsRef;
     std::unique_ptr< HitsOnTracksPlots >     m_plots_hitsOnTrk_vsRef;
     std::unique_ptr< HitsOnTracksPlots >     m_plots_hitsOnMatchedTrk_vsRef;
+    std::unique_ptr< NtracksPlots >          m_plots_nTracks_ref;
     /// plots w.r.t. efficiency plots w.r.t. truth (for EFTruthMatch only)
     std::unique_ptr< EfficiencyPlots >       m_plots_eff_vsTruth;
     std::unique_ptr< EfficiencyPlots >       m_plots_tech_eff_vsTruth;

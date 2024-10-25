@@ -35,7 +35,7 @@ namespace IDTPM {
     virtual ~ITrackMatchingLookup() = default;
 
     /// get overall number of matches
-    virtual unsigned getNmatches() const = 0;
+    virtual unsigned getNmatches( bool getRefN = false ) const = 0;
 
     /// matching properties
     const std::string& anaTag() const { return m_anaTag; }

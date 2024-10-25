@@ -84,6 +84,16 @@
         <hist2D name="truth_z0sin_vs_d0" type="TH2F" plotopts="" tests="KSnorm"/>
         <graph name="offl_hasValidTime_eff_vs_eta" type="TEfficiency" plotopts="" tests="KSnorm"/>
        </TDirectory>
+       <TDirectory name="Multiplicities">
+        <hist1D name="num_offl_all" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="num_offl_selected" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="num_offl_matched" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="num_truth_all" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="num_truth_selected" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="num_truth_matched" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="num_offl_selected_vs_truthMu" type="TH2F" plotopts="" tests="KSnorm"/>
+        <hist1D name="num_offl_selected_vs_actualMu" type="TH2F" plotopts="" tests="KSnorm"/>
+       </TDirectory>
        <TDirectory name="Resolutions">
         <hist1D name="pull_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_pt" type="TH1D" plotopts="" tests="KSnorm"/>
@@ -313,6 +323,16 @@
         <hist2D name="truth_z0_vs_d0" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist2D name="truth_z0sin_vs_d0" type="TH2F" plotopts="" tests="KSnorm"/>
         <graph name="offl_hasValidTime_eff_vs_eta" type="TEfficiency" plotopts="" tests="KSnorm"/>
+       </TDirectory>
+       <TDirectory name="Multiplicities">
+        <hist1D name="num_offl_all" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="num_offl_selected" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="num_offl_matched" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="num_truth_all" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="num_truth_selected" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="num_truth_matched" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="num_offl_selected_vs_truthMu" type="TH2F" plotopts="" tests="KSnorm"/>
+        <hist1D name="num_offl_selected_vs_actualMu" type="TH2F" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="Resolutions">
         <hist1D name="pull_pt" type="TH1D" plotopts="" tests="KSnorm"/>
