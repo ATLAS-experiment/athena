@@ -229,7 +229,7 @@ def dq_combined_trf(jsonfile, outmap):
       # normal output file determination
       histdsname = (parmap['outputHistFile']).split('#')[0]
       histfile = (parmap['outputHistFile']).split('#')[1]
-    amitag = histfile.split('.')[5]
+    amitag = histdsname.split('.')[5]
 
 
     # incremental mode on/off

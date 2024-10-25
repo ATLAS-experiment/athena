@@ -2,8 +2,7 @@
 
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-## @brief Small test transform which only runs HIST merging
-# @version $Id: HLTHistMerge_tf.py 601587 2014-06-13 07:01:23Z graemes $ 
+## @brief Small transform which only runs HIST merging
 
 import sys
 import time
@@ -35,7 +34,7 @@ def main():
     sys.exit(trf.exitCode)
 
 def getTransform():
-    executorSet = DQMergeExecutor(name = 'HLTHistogramMerge', inData = ['HIST'], outData = ['HIST_MRG'])
+    executorSet = DQMergeExecutor(name = 'HistogramMerge', inData = ['HIST'], outData = ['HIST_MRG'])
     
     trf = transform(executor = executorSet)
     
