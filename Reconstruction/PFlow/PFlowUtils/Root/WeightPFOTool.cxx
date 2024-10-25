@@ -121,34 +121,19 @@ namespace CP {
     }
 
     const static SG::AuxElement::ConstAccessor<int> accDenseEnv("IsInDenseEnvironment");
-    const static SG::AuxElement::ConstAccessor<float> accExpE("TracksExpectedEnergyDeposit");
-
     int isInDenseEnvironment = accDenseEnv(cpfo);
-    float expectedEnergy = accExpE(cpfo);
 
     //EM case first
     if (CP::EM == theNeutralPFOScale){
       // Start by computing the correction as though we subtracted the calo energy
       // This interpolates between the full track P and the expected calo E
-      float EoverP = expectedEnergy/cpfo.e(); // divide once only
-      if(m_doEoverPweight) {
-        if(cpfo.pt()<30e3) {        // take full track
-          weight = 1.;
-        } else if(cpfo.pt()<60e3) { // linearly interpolate between 1 and E/P
-          float interpolf = (1.0 - (cpfo.pt()-30000)/30000);
-          weight = EoverP + interpolf * (1-EoverP);
-        } else {                    // take the expected energy
-          weight = EoverP;
-        }
-      }
+      if (m_doEoverPweight) fillInterpolationWeight(cpfo,weight);
 
       ATH_MSG_VERBOSE("cpfo in dense environment? " << isInDenseEnvironment);
-      ATH_MSG_VERBOSE("cpfo pt: " << cpfo.pt() << ", E/P: " << EoverP << ", weight: " << weight);
 
-      if(isInDenseEnvironment) {
-        // In this case we further remove the expected deposited energy from the track
-        weight -= EoverP;
-      }
+      // In this case we further remove the expected deposited energy from the track
+      if(isInDenseEnvironment) fillDoubleCountingWeight(cpfo,weight);
+
     }//EM Scale
     else if (CP::LC == theNeutralPFOScale){
       if(!isInDenseEnvironment){
@@ -164,4 +149,33 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-}
+  void WeightPFOTool::fillInterpolationWeight(const xAOD::FlowElement& cpfo, float& weight) const{    
+
+    const static SG::AuxElement::ConstAccessor<float> accExpE("TracksExpectedEnergyDeposit");
+    float expectedEnergy = accExpE(cpfo);
+
+    float EoverP = expectedEnergy/cpfo.e(); 
+    if(cpfo.pt()<30e3) {        // take full track
+      weight = 1.;
+    } else if(cpfo.pt()<60e3) { // linearly interpolate between 1 and E/P
+      float interpolf = (1.0 - (cpfo.pt()-30000)/30000);
+      weight = EoverP + interpolf * (1-EoverP);
+    } else {                    // take the expected energy
+      weight = EoverP;
+    }    
+
+    ATH_MSG_VERBOSE("cpfo pt: " << cpfo.pt() << ", E/P: " << EoverP << ", weight: " << weight);
+
+  }
+
+  void WeightPFOTool::fillDoubleCountingWeight(const xAOD::FlowElement& cpfo, float& weight) const{
+
+    const static SG::AuxElement::ConstAccessor<float> accExpE("TracksExpectedEnergyDeposit");
+    float expectedEnergy = accExpE(cpfo);
+
+    float EoverP = expectedEnergy/cpfo.e(); 
+    weight -= EoverP;
+
+  }
+
+}//namespace CP

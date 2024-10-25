@@ -33,6 +33,9 @@ namespace CP {
     bool m_doEoverPweight;
     std::string m_theNeutralPFOScaleString;
 
+    void fillInterpolationWeight(const xAOD::FlowElement& cpfo, float& weight) const;
+    void fillDoubleCountingWeight(const xAOD::FlowElement& cpfo, float& weight) const;
+
   };
 
 }
