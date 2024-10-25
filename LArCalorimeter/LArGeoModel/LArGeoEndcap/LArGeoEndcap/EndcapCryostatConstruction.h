@@ -19,9 +19,7 @@
 #include "LArGeoFcal/FCALConstruction.h"
 #include "LArGeoEndcap/EMECConstruction.h"
 
-class IRDBAccessSvc;
 class IRDBRecord;
-class IGeoModelSvc;
 class LArDetectorToolNV;
 class StoredMaterialManager;
 
@@ -41,7 +39,7 @@ namespace LArGeo {
         bool activateFT = false,
         bool enableMBTS = true
     );
-    virtual ~EndcapCryostatConstruction();
+    ~EndcapCryostatConstruction() = default;
 
     EndcapCryostatConstruction(const EndcapCryostatConstruction&) = delete;
     EndcapCryostatConstruction& operator= (const EndcapCryostatConstruction&) = delete;
@@ -57,16 +55,11 @@ namespace LArGeo {
 
   private:
 
-    //    GeoPhysVol          *cryoEnvelopePhysical;
-
     int                 m_fcalVisLimit;
-
-    IRDBAccessSvc       *m_pAccessSvc;
-    IGeoModelSvc        *m_geoModelSvc;
 
     EMECConstruction          m_emec;
     HEC2WheelConstruction     m_hec2;
-    FCALConstruction*         m_fcal;
+    FCALConstruction          m_fcal;
 
     bool                      m_fullGeo;  // true->FULL, false->RECO
     std::string m_EMECVariantInner;

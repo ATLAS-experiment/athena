@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EndcapCryostatConstruction
@@ -34,6 +34,7 @@
 #include "GeoModelKernel/GeoShapeSubtraction.h"
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "StoreGate/StoreGateSvc.h"
+#include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "GeoModelUtilities/StoredPhysVol.h"
 #include "GeoModelUtilities/GeoDBUtils.h"
@@ -49,11 +50,11 @@
 #include "RDBAccessSvc/IRDBRecord.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 
-#include "GeoModelInterfaces/IGeoModelSvc.h"
-
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/SystemOfUnits.h"
+
+#include "AthenaKernel/getMessageSvc.h"
 
 #include <cmath>
 #include <iomanip>
@@ -71,58 +72,29 @@ using namespace GeoXF;
 using planeIndMap = std::map<int, unsigned int, std::less<int>>;
 
 
-LArGeo::EndcapCryostatConstruction::EndcapCryostatConstruction(
-    bool fullGeo, std::string emecVariantInner,
-    std::string emecVariantOuter, bool activateFT, bool enableMBTS
-) :
-  //  cryoEnvelopePhysical(NULL),
-  m_fcalVisLimit(-1),
-  m_pAccessSvc(nullptr),
-  m_geoModelSvc(nullptr),
-  m_fullGeo(fullGeo),
-  m_EMECVariantInner(std::move(emecVariantInner)),
-  m_EMECVariantOuter(std::move(emecVariantOuter)),
-  m_activateFT(activateFT),
-  m_enableMBTS(enableMBTS)
+LArGeo::EndcapCryostatConstruction::EndcapCryostatConstruction(bool fullGeo
+							       , std::string emecVariantInner
+							       , std::string emecVariantOuter
+							       , bool activateFT
+							       , bool enableMBTS)
+  : m_fcalVisLimit(-1),
+    m_fullGeo(fullGeo),
+    m_EMECVariantInner(std::move(emecVariantInner)),
+    m_EMECVariantOuter(std::move(emecVariantOuter)),
+    m_activateFT(activateFT),
+    m_enableMBTS(enableMBTS)
 {
-
-  m_fcal = new FCALConstruction();
-
-  ISvcLocator *svcLocator = Gaudi::svcLocator();
-  StatusCode sc;
-  sc=svcLocator->service("RDBAccessSvc",m_pAccessSvc);
-  if (sc != StatusCode::SUCCESS) {
-    throw std::runtime_error ("Cannot locate RDBAccessSvc!!");
-  }
-
-  sc = svcLocator->service ("GeoModelSvc",m_geoModelSvc);
-  if (sc != StatusCode::SUCCESS) {
-    throw std::runtime_error ("Cannot locate GeoModelSvc!!");
-  }
 }
-
-LArGeo::EndcapCryostatConstruction::~EndcapCryostatConstruction()
-{
-  delete m_fcal;
-}
-
 
 GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
 {
   // Get access to the material manager:
-
-  ISvcLocator *svcLocator = Gaudi::svcLocator();
-  IMessageSvc * msgSvc;
-  if (svcLocator->service("MessageSvc", msgSvc, true )==StatusCode::FAILURE) {
-    throw std::runtime_error("Error in EndcapCryostatConstruction, cannot access MessageSvc");
-  }
-
-  MsgStream log(msgSvc, "LArGeo::EndcapCryostatConstruction");
+  MsgStream log(Athena::getMessageSvc(), "LArGeo::EndcapCryostatConstruction");
   log << MSG::DEBUG << "started" << endmsg;
 
 
-  StoreGateSvc *detStore;
-  if (svcLocator->service("DetectorStore", detStore, false )==StatusCode::FAILURE) {
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if(!detStore.isValid()) {
     throw std::runtime_error("Error in EndcapCryostatConstruction, cannot access DetectorStore");
   }
 
@@ -165,17 +137,24 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EndcapCryostatConstruction::createEnvelo
 
   //                                                                                                 //
   //-------------------------------------------------------------------------------------------------//
+  SmartIF<IGeoModelSvc> geoModelSvc{Gaudi::svcLocator()->service("GeoModelSvc")};
+  if(!geoModelSvc.isValid()) throw std::runtime_error("Cannot locate GeoModelSvc!");
 
-  std::string AtlasVersion = m_geoModelSvc->atlasVersion();
-  std::string LArVersion = m_geoModelSvc->LAr_VersionOverride();
+  std::string AtlasVersion = geoModelSvc->atlasVersion();
+  std::string LArVersion = geoModelSvc->LAr_VersionOverride();
 
   std::string detectorKey  = LArVersion.empty() ? AtlasVersion : LArVersion;
   std::string detectorNode = LArVersion.empty() ? "ATLAS" : "LAr";
 
-  IRDBRecordset_ptr cryoCylinders =  m_pAccessSvc->getRecordsetPtr("CryoCylinders",detectorKey, detectorNode);
-  IRDBRecordset_ptr larPosition  =  m_pAccessSvc->getRecordsetPtr("LArPosition",detectorKey, detectorNode);
+  SmartIF<IRDBAccessSvc> rdbAccessSvc{Gaudi::svcLocator()->service("RDBAccessSvc")};
+  if(!rdbAccessSvc.isValid()) {
+    throw std::runtime_error ("Cannot locate RDBAccessSvc!!");
+  }
+
+  IRDBRecordset_ptr cryoCylinders =  rdbAccessSvc->getRecordsetPtr("CryoCylinders",detectorKey, detectorNode);
+  IRDBRecordset_ptr larPosition  =  rdbAccessSvc->getRecordsetPtr("LArPosition",detectorKey, detectorNode);
   if (larPosition->size()==0 ) {
-    larPosition = m_pAccessSvc->getRecordsetPtr("LArPosition", "LArPosition-00");
+    larPosition = rdbAccessSvc->getRecordsetPtr("LArPosition", "LArPosition-00");
     if (larPosition->size()==0 ) {
       throw std::runtime_error("Error, no lar position table in database!");
     }
@@ -184,11 +163,11 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EndcapCryostatConstruction::createEnvelo
 
 
 
-  if(cryoCylinders->size()==0) cryoCylinders = m_pAccessSvc->getRecordsetPtr("CryoCylinders","CryoCylinders-00");
+  if(cryoCylinders->size()==0) cryoCylinders = rdbAccessSvc->getRecordsetPtr("CryoCylinders","CryoCylinders-00");
 
   // Deal with Pcons
-  IRDBRecordset_ptr cryoPcons = m_pAccessSvc->getRecordsetPtr("CryoPcons",detectorKey, detectorNode);
-  if(cryoPcons->size()==0) cryoPcons = m_pAccessSvc->getRecordsetPtr("CryoPcons","CryoPcons-00");
+  IRDBRecordset_ptr cryoPcons = rdbAccessSvc->getRecordsetPtr("CryoPcons",detectorKey, detectorNode);
+  if(cryoPcons->size()==0) cryoPcons = rdbAccessSvc->getRecordsetPtr("CryoPcons","CryoPcons-00");
 
   planeIndMap cryoMotherPlanes, emhPlanes, fcalNosePlanes;
   std::vector<planeIndMap> brassPlugPlanesVect;
@@ -280,7 +259,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EndcapCryostatConstruction::createEnvelo
 
   //  Extra cylinders
 
-  IRDBRecordset_ptr cryoExtraCyl = m_pAccessSvc->getRecordsetPtr("LArCones",detectorKey, detectorNode);
+  IRDBRecordset_ptr cryoExtraCyl = rdbAccessSvc->getRecordsetPtr("LArCones",detectorKey, detectorNode);
 
   if(m_fullGeo && cryoCylinders->size()>0){
     unsigned int nextra=cryoExtraCyl->size();
@@ -375,7 +354,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EndcapCryostatConstruction::createEnvelo
     // end of inserting extra lead plate before PS
 
 
-  IRDBRecordset_ptr LArEndcapCratePhiPos = m_pAccessSvc->getRecordsetPtr("LArEndcapCratePhiPos",detectorKey, detectorNode);
+  IRDBRecordset_ptr LArEndcapCratePhiPos = rdbAccessSvc->getRecordsetPtr("LArEndcapCratePhiPos",detectorKey, detectorNode);
 
 
   for(unsigned int layer = 0; layer < cryoCylinders->size(); layer++){
@@ -726,12 +705,12 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EndcapCryostatConstruction::createEnvelo
 
 
   // 13-Mar-2002 WGS: Place the FCAL detector inside the cryostat.
-  m_fcal->setFCALVisLimit(m_fcalVisLimit);
-  m_fcal->setFullGeo(m_fullGeo);
+  m_fcal.setFCALVisLimit(m_fcalVisLimit);
+  m_fcal.setFullGeo(m_fullGeo);
   {
 
     // The "envelope" determined by the EMB should be a GeoFullPhysVol.
-    GeoIntrusivePtr<GeoVFullPhysVol> fcalEnvelope = m_fcal->GetEnvelope(bPos);
+    GeoIntrusivePtr<GeoVFullPhysVol> fcalEnvelope = m_fcal.GetEnvelope(bPos);
 
     /* For now, comment out the FCAL placement, for two reasons:
        1) The FCAL geometry helper class has been written yet;
@@ -773,13 +752,13 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EndcapCryostatConstruction::createEnvelo
   }
 
   //__________________________ MBTS+moderator+JM tube _____________________________________
-  if(m_enableMBTS && !m_pAccessSvc->getChildTag("MBTS",detectorKey, detectorNode).empty()) {
+  if(m_enableMBTS && !rdbAccessSvc->getChildTag("MBTS",detectorKey, detectorNode).empty()) {
     // DB related stuff first
-    IRDBRecordset_ptr mbtsTubs   = m_pAccessSvc->getRecordsetPtr("MBTSTubs", detectorKey, detectorNode);
-    IRDBRecordset_ptr mbtsScin   = m_pAccessSvc->getRecordsetPtr("MBTSScin", detectorKey, detectorNode);
-    IRDBRecordset_ptr mbtsPcons  = m_pAccessSvc->getRecordsetPtr("MBTSPcons",detectorKey, detectorNode);
-    IRDBRecordset_ptr mbtsGen    = m_pAccessSvc->getRecordsetPtr("MBTSGen",  detectorKey, detectorNode);
-    IRDBRecordset_ptr mbtsTrds   = m_pAccessSvc->getRecordsetPtr("MBTSTrds", detectorKey, detectorNode);
+    IRDBRecordset_ptr mbtsTubs   = rdbAccessSvc->getRecordsetPtr("MBTSTubs", detectorKey, detectorNode);
+    IRDBRecordset_ptr mbtsScin   = rdbAccessSvc->getRecordsetPtr("MBTSScin", detectorKey, detectorNode);
+    IRDBRecordset_ptr mbtsPcons  = rdbAccessSvc->getRecordsetPtr("MBTSPcons",detectorKey, detectorNode);
+    IRDBRecordset_ptr mbtsGen    = rdbAccessSvc->getRecordsetPtr("MBTSGen",  detectorKey, detectorNode);
+    IRDBRecordset_ptr mbtsTrds   = rdbAccessSvc->getRecordsetPtr("MBTSTrds", detectorKey, detectorNode);
 
     double zposMM = 0.;
     std::map<std::string,unsigned> trdMap;  // Used in the new description only
@@ -1077,8 +1056,8 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EndcapCryostatConstruction::createEnvelo
     // Do it only once for both A and C sides
     if(bPos) {
       if(LArGeo::buildMbtsReadout(detStore
-				  , m_pAccessSvc
-				  , msgSvc
+				  , rdbAccessSvc.get()
+				  , Athena::getMessageSvc()
 				  , zposMM
 				  , trdMap
 				  , detectorKey

@@ -84,26 +84,14 @@
 
 
 LArGeo::EMECConstruction::EMECConstruction(bool is_tb, bool has_inner, bool has_outer)
-  : AthMessaging("EMECConstruction"),
-    m_fullGeo(true), m_isTB(is_tb), m_hasInnerWheel(has_inner), m_hasOuterWheel(has_outer),
-      m_innerWheelVariant("Wheel"), m_outerWheelVariant("Wheel") // "Wheel" (Meaning polycone) or "Cone" or "Slices"
+  : AthMessaging("EMECConstruction")
+  , m_fullGeo(true)
+  , m_isTB(is_tb)
+  , m_hasInnerWheel(has_inner)
+  , m_hasOuterWheel(has_outer)
+  , m_innerWheelVariant("Wheel")
+  , m_outerWheelVariant("Wheel") // "Wheel" (Meaning polycone) or "Cone" or "Slices"
 {
-/*
-	ISvcLocator* svcLocator = Gaudi::svcLocator();
-	IMessageSvc* msgSvc;
-	StatusCode status = svcLocator->service("MessageSvc", msgSvc);
-	if(!status.isFailure()){
-		m_msg = new MsgStream(msgSvc, "EMECConstruction");
-	} else {
-		throw std::runtime_error("EMECConstruction: cannot initialze message service");
-	}
-	(*m_msg) << MSG::DEBUG << "Parameters:"
-	         << "m_fullGeo: " << m_fullGeo << std::endl
-	         << "m_isTB: " << m_isTB << std::endl
-             << "m_hasInnerWheel: " << m_hasInnerWheel << std::endl
-             << "m_hasOuterWheel: " << m_hasOuterWheel
-			 << endmsg;
-*/
 }
 
 LArGeo::EMECConstruction::~EMECConstruction()
@@ -112,22 +100,19 @@ LArGeo::EMECConstruction::~EMECConstruction()
 GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EMECConstruction::GetEnvelope(bool bPos)
 {
   ISvcLocator *svcLocator = Gaudi::svcLocator();
-  StoreGateSvc *detStore;
-  if(svcLocator->service("DetectorStore", detStore, false)==StatusCode::FAILURE) {
+  SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+  if(!detStore.isValid()) {
     throw std::runtime_error("Error in EndcapCryostatConstruction, cannot access DetectorStore");
   }
 
   // Get GeoModelSvc and RDBAccessSvc
-
-  IRDBAccessSvc* pAccessSvc(nullptr);
-  IGeoModelSvc* geoModelSvc(nullptr);
-  StatusCode sc = svcLocator->service("RDBAccessSvc",pAccessSvc);
-  if(sc != StatusCode::SUCCESS){
+  SmartIF<IRDBAccessSvc> pAccessSvc{svcLocator->service("RDBAccessSvc")};
+  if(!pAccessSvc.isValid()) {
     throw std::runtime_error("EMECConstruction: cannot locate RDBAccessSvc!");
   }
 
-  sc = svcLocator->service ("GeoModelSvc",geoModelSvc);
-  if(sc != StatusCode::SUCCESS){
+  SmartIF<IGeoModelSvc> geoModelSvc{svcLocator->service("GeoModelSvc")};
+  if(!geoModelSvc.isValid()) {
     throw std::runtime_error("EMECConstruction: cannot locate GeoModelSvc!");
   }
 

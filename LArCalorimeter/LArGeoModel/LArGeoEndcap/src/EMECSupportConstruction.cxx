@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EMECSupportConstruction
@@ -90,17 +90,18 @@
 
 using namespace LArGeo;
 
-EMECSupportConstruction::EMECSupportConstruction(
-    type_t type, bool pos_zside, bool is_module,
-    std::string basename, double position
-) : m_Type(type), m_pos_zside(pos_zside), m_isModule(is_module),
-    m_BaseName(std::move(basename)), m_Position(position)
+EMECSupportConstruction::EMECSupportConstruction(type_t type, bool pos_zside, bool is_module,
+						 std::string basename, double position)
+  : AthMessaging("EMECSupportConstruction")
+  , m_Type(type)
+  , m_pos_zside(pos_zside)
+  , m_isModule(is_module)
+  , m_BaseName(std::move(basename))
+  , m_Position(position)
 {
-//	std::cout << "Experimental EMECSupportConstruction" << std::endl;
-
     ISvcLocator *svcLocator = Gaudi::svcLocator();
-    StoreGateSvc *detStore;
-    if(svcLocator->service("DetectorStore", detStore, false) == StatusCode::FAILURE){
+    SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+    if(!detStore.isValid()){
         throw std::runtime_error("Error in EMECSupportConstruction, cannot access DetectorStore");
     }
     StoredMaterialManager* materialManager = nullptr;
@@ -148,13 +149,12 @@ EMECSupportConstruction::EMECSupportConstruction(
     m_Cable  = materialManager->getMaterial("LAr::Cables");
     if(!m_Cable) throw std::runtime_error("Error in EMECSupportConstruction, LAr::Cables is not found.");
 
-    IGeoModelSvc *geoModel;
-    IRDBAccessSvc* rdbAccess;
-
-    if(svcLocator->service("GeoModelSvc", geoModel) == StatusCode::FAILURE)
-        throw std::runtime_error("Error cannot access GeoModelSvc");
-    if(svcLocator->service ("RDBAccessSvc",rdbAccess) == StatusCode::FAILURE)
-        throw std::runtime_error("Error cannot access RDBAccessSvc");
+    SmartIF<IGeoModelSvc> geoModel{svcLocator->service("GeoModelSvc")};
+    if(!geoModel.isValid())
+      throw std::runtime_error("Error cannot access GeoModelSvc");
+    SmartIF<IRDBAccessSvc> rdbAccess{svcLocator->service("RDBAccessSvc")};
+    if(!rdbAccess.isValid())
+      throw std::runtime_error("Error cannot access RDBAccessSvc");
 
   //emecExtraCyl, add extra material after PS
     std::string AtlasVersion = geoModel->atlasVersion();
@@ -210,22 +210,7 @@ EMECSupportConstruction::EMECSupportConstruction(
     }
 }
 
-static void printWarning(const std::ostringstream &message)
-{
-    ISvcLocator* svcLocator = Gaudi::svcLocator();
-    IMessageSvc* msgSvc;
-    StatusCode status = svcLocator->service("MessageSvc", msgSvc);
-    if(status.isFailure()){
-        throw std::runtime_error("EMECSupportConstruction: cannot initialze message service");
-    }
-    MsgStream msg(msgSvc, "EMECSupportConstruction");
-    msg << MSG::WARNING << message.str() << endmsg;
-}
-
-#include<map>
-#include <utility>
-using map_t = std::map<std::string, unsigned int>;
-static map_t getMap(const IRDBRecordset_ptr& db, const std::string& s)
+EMECSupportConstruction::map_t EMECSupportConstruction::getMap(const IRDBRecordset_ptr& db, const std::string& s) const
 {
   map_t result;
   for(unsigned int i = 0; i < db->size(); ++ i) {
@@ -235,7 +220,7 @@ static map_t getMap(const IRDBRecordset_ptr& db, const std::string& s)
   return result;
 }
 
-static map_t getNumbersMap(const IRDBRecordset_ptr& db, const std::string& s)
+EMECSupportConstruction::map_t EMECSupportConstruction::getNumbersMap(const IRDBRecordset_ptr& db, const std::string& s) const
 {
   map_t result;
   for(unsigned int i = 0; i < db->size(); ++ i) {
@@ -248,66 +233,60 @@ static map_t getNumbersMap(const IRDBRecordset_ptr& db, const std::string& s)
   return result;
 }
 
-static double getNumber(
-	const IRDBRecordset_ptr& db, const map_t &m, const std::string &idx,
-	const char *number, double defval = 0.
-)
+double EMECSupportConstruction::getNumber(const IRDBRecordset_ptr& db, const map_t &m, const std::string &idx,
+					  const char *number, double defval) const
 {
-	map_t::const_iterator i = m.find(idx);
-	if(i == m.end()){
-		std::ostringstream tmp;
-		tmp << "Cannot get " << idx << "/" << number << " from DB";
-		printWarning(tmp);
-		return defval;
-	}
-	double value = (*db)[(*i).second]->getDouble(number);
-	assert(value == defval);
-	return value;
+  map_t::const_iterator i = m.find(idx);
+  if(i == m.end()){
+    ATH_MSG_WARNING("Cannot get " << idx << "/" << number << " from DB");
+    return defval;
+  }
+  double value = (*db)[(*i).second]->getDouble(number);
+  assert(value == defval);
+  return value;
 }
 
-static double getNumber(
-	const IRDBRecordset_ptr& db, const std::string &s,
-	const std::string &parameter, double defval = 0.)
+double EMECSupportConstruction::getNumber(const IRDBRecordset_ptr& db, const std::string &s,
+					  const std::string &parameter, double defval) const
 {
-	for(unsigned int i = 0; i < db->size(); ++ i){
-		const std::string& object = (*db)[i]->getString("OBJECTNAME");
-		if(object == s){
-			const std::string& key = (*db)[i]->getString("PARNAME");
-			if(key == parameter){
-				double value = (*db)[i]->getDouble("PARVALUE");
-				assert(value == defval);
-				return value;
-			}
-		}
-	}
-	std::ostringstream tmp;
-	tmp << "Cannot get " << s << "/" << parameter << " from DB_numbers";
-	tmp << ", default is " << defval;
-	printWarning(tmp);
-	return defval;
+  for(unsigned int i = 0; i < db->size(); ++ i){
+    const std::string& object = (*db)[i]->getString("OBJECTNAME");
+    if(object == s){
+      const std::string& key = (*db)[i]->getString("PARNAME");
+      if(key == parameter){
+	double value = (*db)[i]->getDouble("PARVALUE");
+	assert(value == defval);
+	return value;
+      }
+    }
+  }
+  ATH_MSG_WARNING("Cannot get " << s << "/" << parameter << " from DB_numbers"
+		  << ", default is " << defval);
+  return defval;
 }
 
 EMECSupportConstruction::~EMECSupportConstruction() = default;
 
 GeoIntrusivePtr<GeoPhysVol> EMECSupportConstruction::GetEnvelope(void) const
 {
-	switch(m_Type){
-	case Front: return front_envelope();
-	case Back: return back_envelope();
-	case Outer: return outer_envelope();
-	case Inner: return inner_envelope();
-	case Middle: return middle_envelope();
-	case FrontInner: return front_inner_envelope();
-	case BackInner: return back_inner_envelope();
-	case FrontOuter: return front_outer_envelope();
-	case BackOuter: return back_outer_envelope();
-	default:
-		std::ostringstream tmp;
-		tmp << "Unknown Type " << m_Type << " in GetEnvelope,"
-			<< " null pointer returned";
-		printWarning(tmp);
-		return nullptr;
-	}
+  switch(m_Type)
+    {
+    case Front: return front_envelope();
+    case Back: return back_envelope();
+    case Outer: return outer_envelope();
+    case Inner: return inner_envelope();
+    case Middle: return middle_envelope();
+    case FrontInner: return front_inner_envelope();
+    case BackInner: return back_inner_envelope();
+    case FrontOuter: return front_outer_envelope();
+    case BackOuter: return back_outer_envelope();
+    default:
+      {
+	ATH_MSG_WARNING("Unknown Type " << m_Type << " in GetEnvelope,"
+			<< " null pointer returned");
+	return nullptr;
+      }
+    }
 }
 
 GeoPcon* EMECSupportConstruction::getPcon(const std::string& id) const
@@ -337,9 +316,7 @@ GeoPcon* EMECSupportConstruction::getPcon(const std::string& id) const
 		if(object == id1){
 			int key = (*m_DB_pcons)[i]->getInt("NZPLANE");
 			if(pcone.find(key) != pcone.end()){
-				std::ostringstream tmp;
-				tmp << "Duplicate NZPLANE in " << id;
-				printWarning(tmp);
+				ATH_MSG_WARNING("Duplicate NZPLANE in ");
 				nzplanes = 0;
 				break;
 			}
@@ -644,9 +621,7 @@ for(int i = 0; i < nzplanes; ++ i){
 	} else {
 		throw std::runtime_error("EMECSupportConstruction: wrong Pcone id");
 	}
-	std::ostringstream tmp;
-	tmp << "Cannot get " << id << " polycone fom DB";
-	printWarning(tmp);
+	ATH_MSG_WARNING("Cannot get " << id << " polycone fom DB");
 	} // zplane.empty()?
 
 	GeoPcon* shape = new GeoPcon(phi_start, phi_size);
@@ -1246,8 +1221,7 @@ GeoIntrusivePtr<GeoPhysVol> EMECSupportConstruction::inner_envelope(void) const
 	}
 	catch(...){
 		dz += 2.*Gaudi::Units::mm;
-		std::ostringstream tmp("cannot get STRAIGHTSTARTSECTION from DB");
-		printWarning(tmp);
+		ATH_MSG_WARNING("cannot get STRAIGHTSTARTSECTION from DB");
 	}
 
 	double r1min = getNumber(m_DB_numbers, numbers, "R1MIN", "PARVALUE", (292.-1.)*Gaudi::Units::mm); //lower radius of front inner ring, -1mm for cold
@@ -1729,6 +1703,16 @@ void EMECSupportConstruction::put_front_outer_extracyl(GeoIntrusivePtr<GeoPhysVo
 
   unsigned int nextra=m_DB_emecExtraCyl->size();
   if(nextra>0){
+
+      SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+      if(!detStore.isValid()){
+	throw std::runtime_error("Error in EMECSupportConstruction/extracyl, cannot access DetectorStore");
+      }
+      StoredMaterialManager* materialManager = nullptr;
+      if (detStore->retrieve(materialManager, std::string("MATERIALS")).isFailure()) {
+	throw std::runtime_error("Error in EMECSupportConstruction: cannot find MATERIALS.");
+      }
+
       bool finloop=false;
       double dzmax=6.6;
       for(unsigned int i=0;i<nextra;i++){
@@ -1738,16 +1722,6 @@ void EMECSupportConstruction::put_front_outer_extracyl(GeoIntrusivePtr<GeoPhysVo
             double rmax=(*m_DB_emecExtraCyl)[i]->getDouble("RMAX1"); //PS rmax
             double dz = (*m_DB_emecExtraCyl)[i]->getDouble("DZ");    //leadthickness
             if(dz>0. && dz<= dzmax){
-
-              ISvcLocator *svcLocator = Gaudi::svcLocator();
-              StoreGateSvc *detStore;
-              if(svcLocator->service("DetectorStore", detStore, false) == StatusCode::FAILURE){
-                throw std::runtime_error("Error in EMECSupportConstruction/extracyl, cannot access DetectorStore");
-              }
-              StoredMaterialManager* materialManager = nullptr;
-              if (detStore->retrieve(materialManager, std::string("MATERIALS")).isFailure()) {
-                throw std::runtime_error("Error in EMECSupportConstruction: cannot find MATERIALS.");
-              }
 
               const std::string& material=(*m_DB_emecExtraCyl)[i]->getString("MATERIAL"); //lead
               const GeoMaterial *mat = materialManager->getMaterial(material);

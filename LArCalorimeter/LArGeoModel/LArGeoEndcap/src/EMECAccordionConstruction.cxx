@@ -51,55 +51,48 @@
 void LArGeo::EMECAccordionConstruction::setWheelParameters()
 {
     ISvcLocator *svcLocator = Gaudi::svcLocator();
-    StoreGateSvc *detStore;
-    if(svcLocator->service("DetectorStore", detStore, false)==StatusCode::FAILURE) {
+    SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+    if(!detStore.isValid()) {
       throw std::runtime_error("Error in EndcapCryostatConstruction, cannot access DetectorStore");
     }
 
     // Get GeoModelSvc and RDBAccessSvc
     
-    IRDBAccessSvc* rdbAccess(nullptr);
-    IGeoModelSvc* geoModelSvc(nullptr);
-    StatusCode sc = svcLocator->service("RDBAccessSvc",rdbAccess);
-    if(sc != StatusCode::SUCCESS){
+    SmartIF<IRDBAccessSvc> rdbAccess{svcLocator->service("RDBAccessSvc")};
+    if(!rdbAccess.isValid()){
        throw std::runtime_error("EMECConstruction: cannot locate RDBAccessSvc!");
     }
     
-    sc = svcLocator->service ("GeoModelSvc",geoModelSvc);
-    if(sc != StatusCode::SUCCESS){
+    SmartIF<IGeoModelSvc> geoModelSvc{svcLocator->service("GeoModelSvc")};
+    if(!geoModelSvc.isValid()) {
        throw std::runtime_error("EMECAccordionConstruction: cannot locate GeoModelSvc!");
     }
     
     DecodeVersionKey larVersionKey(geoModelSvc, "LAr");
     IRDBRecordset_ptr DB_EmecGeometry = rdbAccess->getRecordsetPtr("EmecGeometry", larVersionKey.tag(), larVersionKey.node());
     if(DB_EmecGeometry->size() == 0){
-           DB_EmecGeometry = rdbAccess->getRecordsetPtr("EmecGeometry", "EmecGeometry-00");
-           std::cout<< "Building NEW EMEC ACCORDION STRUCTURE" <<std::endl;
+      DB_EmecGeometry = rdbAccess->getRecordsetPtr("EmecGeometry", "EmecGeometry-00");
     }
     
     IRDBRecordset_ptr emecWheelParameters = rdbAccess->getRecordsetPtr("EmecWheelParameters", larVersionKey.tag(), larVersionKey.node());
     if(emecWheelParameters->size() == 0){
-           emecWheelParameters = rdbAccess->getRecordsetPtr("EmecWheelParameters", "EmecWheelParameters-00");
-           std::cout<< "EmecWheelParameters" <<std::endl;
+      emecWheelParameters = rdbAccess->getRecordsetPtr("EmecWheelParameters", "EmecWheelParameters-00");
     }
 
 
     IRDBRecordset_ptr emecMagicNumbers = rdbAccess->getRecordsetPtr("EmecMagicNumbers", larVersionKey.tag(), larVersionKey.node());
     if(emecMagicNumbers->size() == 0){
-           emecMagicNumbers = rdbAccess->getRecordsetPtr("EmecMagicNumbers", "EmecMagicNumbers-00");
-           std::cout<< "EmecMagicNumbers" <<std::endl;
+      emecMagicNumbers = rdbAccess->getRecordsetPtr("EmecMagicNumbers", "EmecMagicNumbers-00");
     }
 
     IRDBRecordset_ptr coldContraction = rdbAccess->getRecordsetPtr("ColdContraction", larVersionKey.tag(), larVersionKey.node());
     if(coldContraction->size() == 0){
-           coldContraction = rdbAccess->getRecordsetPtr("ColdContraction", "ColdContraction-00");
-           std::cout<< "ColdContraction" <<std::endl;
+      coldContraction = rdbAccess->getRecordsetPtr("ColdContraction", "ColdContraction-00");
     }
 
     IRDBRecordset_ptr emecFan = rdbAccess->getRecordsetPtr("EmecFan", larVersionKey.tag(), larVersionKey.node());
     if(emecFan->size() == 0){
-           emecFan = rdbAccess->getRecordsetPtr("EmecFan", "EmecFan-00");
-           std::cout<< "EmecFan" <<std::endl;
+      emecFan = rdbAccess->getRecordsetPtr("EmecFan", "EmecFan-00");
     }
 
 
