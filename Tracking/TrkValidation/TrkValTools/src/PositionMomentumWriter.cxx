@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -90,8 +90,8 @@ StatusCode Trk::PositionMomentumWriter::initialize()
     m_tree->Branch("MomentumPhi", m_pMomentumPhi);
     
     // now register the Tree
-    ITHistSvc* tHistSvc = nullptr;
-    if (service("THistSvc",tHistSvc).isFailure()) {
+    SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+    if (!tHistSvc) {
         ATH_MSG_ERROR( "initialize() Could not find Hist Service  -> Switching Tree output off !" );
         delete m_pPositionX; m_pPositionX = nullptr; 
         delete m_pPositionY; m_pPositionY = nullptr;

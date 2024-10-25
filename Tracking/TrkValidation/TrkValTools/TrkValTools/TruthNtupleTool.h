@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -16,6 +16,8 @@
 
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "GaudiKernel/ITHistSvc.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -68,7 +70,7 @@ private:
     std::vector<double> m_etaBins;
     bool m_fillJets;            //!< jO: jet filling, set from external call
 
-    //NTuple::Tuple* p_ntuple;          //!< Pointer to the ntuple
+    ServiceHandle<ITHistSvc> m_histSvc;
     TTree* m_nt; //!< Pointer to the NTuple tree
 
     unsigned int m_numberOfTreeEntries;

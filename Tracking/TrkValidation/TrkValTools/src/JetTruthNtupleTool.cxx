@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -60,22 +60,15 @@ StatusCode Trk::JetTruthNtupleTool::initialize() {
 
     // ---------------------------
     // retrieve pointer to THistSvc
-    ITHistSvc *tHistSvc;
-    StatusCode sc =  service("THistSvc", tHistSvc);
-    if (sc.isFailure()) {
-      ATH_MSG_ERROR ( "Unable to retrieve pointer to THistSvc" );
-      return sc;
-    }
+    SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+    ATH_CHECK( tHistSvc.isValid() );
+
     // ---------------------------
     // create tree and register it to THistSvc
     m_nt = new TTree(TString(m_ntupleTreeName), "Track Validation JetTruth");
     // NB: we must not delete the tree, this is done by THistSvc
     std::string fullNtupleName =  "/"+m_ntupleFileName+"/"+m_ntupleTreeName;
-    sc = tHistSvc->regTree(fullNtupleName, m_nt);
-    if (sc.isFailure()) {
-      ATH_MSG_ERROR ( "Unable to register TTree : " << m_ntupleTreeName );
-        return sc;
-    }
+    ATH_CHECK( tHistSvc->regTree(fullNtupleName, m_nt) );
 
     //-----------------
     // add items

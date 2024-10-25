@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -180,9 +180,8 @@ void Trk::MaterialOnTrackValidation::bookTree() {
 
 
   // Registering the Tree
-  ISvcLocator* svcLocator = Gaudi::svcLocator();
-  ITHistSvc* tHistSvc = nullptr;
-  if ((svcLocator->service("THistSvc", tHistSvc)).isFailure()) {
+  SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+  if (!tHistSvc) {
     ATH_MSG_ERROR("initialize() Could not find Hist Service -> Switching ValidationMode Off !");
     delete m_Tree; m_Tree = nullptr;
     return;

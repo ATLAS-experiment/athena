@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -225,13 +225,10 @@ StatusCode Trk::TrackValidationNtupleWriter::initialize() {
     } // if truth is activated
 
     // ---------------------------
-    // retrive pointer to THistSvc
-    ITHistSvc *tHistSvc;
-    sc =  service("THistSvc", tHistSvc);
-    if (sc.isFailure()) {
-        msg(MSG::ERROR) << "Unable to retrieve pointer to THistSvc" << endmsg;
-        return sc;
-    }
+    // retrieve pointer to THistSvc
+    SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+    ATH_CHECK( tHistSvc.isValid() );
+
     // ---------------------------
     // create tree for each given track collection and register it to THistSvc
     std::vector<std::string>::const_iterator trackColNameIter = m_inputTrackCollection.begin();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,7 +9,6 @@
 // InDet include
 #include "TrkValTools/EnergyLossMonitor.h"
 // Gaudi
-#include "GaudiKernel/INTupleSvc.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/SmartDataPtr.h"
 
@@ -17,7 +16,7 @@
 // constructor
 Trk::EnergyLossMonitor::EnergyLossMonitor(const std::string& t, const std::string& n, const IInterface* p) :
   AthAlgTool(t,n,p),
-  m_ntupleSvc{},
+  m_ntupleSvc("NTupleSvc", n),
   m_outputNtuplePath("/NTUPLES/FILE1/EnergyLossMonitor/SingleTrackEnergyLoss"),
   m_outputNtupleDescription("Output of the Trk::EnergyLossMonitor AlgTool"),
   m_currentStep(0)
@@ -32,40 +31,37 @@ Trk::EnergyLossMonitor::EnergyLossMonitor(const std::string& t, const std::strin
 StatusCode Trk::EnergyLossMonitor::initialize()
 { 
     // Retrieve the NTuple Service
-    StatusCode sc = service( "NTupleSvc", m_ntupleSvc );
-    if (sc.isFailure()){
-      ATH_MSG_FATAL( "Couldn't get pointer to Ntuple service ! " );
-      return StatusCode::FAILURE;
-    } else {
-    	NTuplePtr ntr(m_ntupleSvc, m_outputNtuplePath);
-    if (!ntr)
+    ATH_CHECK( m_ntupleSvc.retrieve() );
+    NTuplePtr ntr(m_ntupleSvc.get(), m_outputNtuplePath);
+    StatusCode sc;
+    if (!ntr) {
       ntr = m_ntupleSvc->book(m_outputNtuplePath, CLID_ColumnWiseTuple, m_outputNtupleDescription);
-			if (ntr){
-				 sc = ntr->addItem("Steps",             m_steps, 0, 5000);
-				 // Initial paramters
-				 sc = ntr->addItem("InitialP",          m_initialP, 0., 1000000.);
-				 sc = ntr->addItem("InitialE",          m_initialE, 0., 1000000.);
-				 sc = ntr->addItem("InitialEta",        m_initialEta, -4., 4.);
-				 sc = ntr->addItem("InitialPhi",        m_initialPhi, -4., 4.);
-				 // kinematics       
-				 sc = ntr->addItem("Eta",               m_steps, m_eta);
-				 sc = ntr->addItem("Phi",               m_steps, m_phi);
-				 // Beam Pipe
-				 sc = ntr->addItem("Energy",            m_steps, m_E);
-				 sc = ntr->addItem("Momentum",          m_steps, m_p);
-				 sc = ntr->addItem("Eta",               m_steps, m_eta);
-				 sc = ntr->addItem("Phi",               m_steps, m_phi);
-				 sc = ntr->addItem("MaterialHitX",      m_steps, m_hitX);
-				 sc = ntr->addItem("MaterialHitY",      m_steps, m_hitY);
-				 sc = ntr->addItem("MaterialHitZ",      m_steps, m_hitZ);
-				 sc = ntr->addItem("MaterialHitR",      m_steps, m_hitR);      
-
-				} else {
-         ATH_MSG_ERROR( "Ntuple booking failed!" );
-         return StatusCode::FAILURE;
-      }
     }
-    ATH_MSG_DEBUG("initialize() successful" );    
+    if (ntr){
+      sc = ntr->addItem("Steps",             m_steps, 0, 5000);
+      // Initial paramters
+      sc = ntr->addItem("InitialP",          m_initialP, 0., 1000000.);
+      sc = ntr->addItem("InitialE",          m_initialE, 0., 1000000.);
+      sc = ntr->addItem("InitialEta",        m_initialEta, -4., 4.);
+      sc = ntr->addItem("InitialPhi",        m_initialPhi, -4., 4.);
+      // kinematics
+      sc = ntr->addItem("Eta",               m_steps, m_eta);
+      sc = ntr->addItem("Phi",               m_steps, m_phi);
+      // Beam Pipe
+      sc = ntr->addItem("Energy",            m_steps, m_E);
+      sc = ntr->addItem("Momentum",          m_steps, m_p);
+      sc = ntr->addItem("Eta",               m_steps, m_eta);
+      sc = ntr->addItem("Phi",               m_steps, m_phi);
+      sc = ntr->addItem("MaterialHitX",      m_steps, m_hitX);
+      sc = ntr->addItem("MaterialHitY",      m_steps, m_hitY);
+      sc = ntr->addItem("MaterialHitZ",      m_steps, m_hitZ);
+      sc = ntr->addItem("MaterialHitR",      m_steps, m_hitR);
+
+    } else {
+      ATH_MSG_ERROR( "Ntuple booking failed!" );
+      return StatusCode::FAILURE;
+    }
+    ATH_MSG_DEBUG("initialize() successful" );
     return sc;
 }
 
