@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArGeoCode/DatabaseAccessTool.h"
@@ -25,15 +25,17 @@ public:
 DatabaseAccessTool::DatabaseAccessTool ()
   :m_cw(new Clockwork())
 {
-  IGeoModelSvc *geoModel;
   ISvcLocator  *svcLocator=Gaudi::svcLocator();
-  if (svcLocator->service ("GeoModelSvc",geoModel)!=StatusCode::SUCCESS) {
+  SmartIF<IGeoModelSvc> geoModel{svcLocator->service("GeoModelSvc")};
+  if (!geoModel.isValid()) {
     throw std::runtime_error ("Cannot locate GeoModelSvc!!");
   }
- 
-  if (svcLocator->service("RDBAccessSvc",m_cw->pAccessSvc)!=StatusCode::SUCCESS) {
+
+  SmartIF<IRDBAccessSvc> rdbAccess{svcLocator->service("RDBAccessSvc")};
+  if(!rdbAccess.isValid()) {
     throw std::runtime_error ("Cannot locate RDBAccessSvc!!");
   }
+  m_cw->pAccessSvc = rdbAccess.get();
  
   // Obtain the geometry version information:
   

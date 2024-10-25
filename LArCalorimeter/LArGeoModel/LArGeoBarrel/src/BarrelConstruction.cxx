@@ -147,10 +147,10 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
   bool doDetailedAbsorberStraight = false;
   bool doDetailedAbsorberFold = false;
 
-  SmartIF<IGeoModelSvc> geoModel{Gaudi::svcLocator()->service ("GeoModelSvc")};
+  SmartIF<IGeoModelSvc> geoModel{svcLocator->service ("GeoModelSvc")};
   if(!geoModel.isValid())
     throw std::runtime_error("Error in BarrelConstruction, cannot access GeoModelSvc"); 
-  SmartIF<IRDBAccessSvc> rdbAccess{Gaudi::svcLocator()->service ("RDBAccessSvc")};
+  SmartIF<IRDBAccessSvc> rdbAccess{svcLocator->service ("RDBAccessSvc")};
   if(!rdbAccess.isValid())
     throw std::runtime_error("Error in BarrelConstruction, cannot access RDBAccessSvc");
 
@@ -188,8 +188,8 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
   double twopi32 = 2.*twopi64;  
 
 
-  StoreGateSvc *detStore;
-  if (svcLocator->service("DetectorStore", detStore, false )==StatusCode::FAILURE) {
+  SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+  if (!detStore.isValid()) {
     throw std::runtime_error("Error in LArDetectorFactory, cannot access DetectorStore");
   }
   
