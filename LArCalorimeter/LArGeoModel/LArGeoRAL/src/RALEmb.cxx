@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // RALEmb
@@ -22,6 +22,8 @@
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
+
+#include "AthenaKernel/getMessageSvc.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -53,15 +55,13 @@ LArGeo::RALEmb::RALEmb():
   // First, fetch the Athena services.
   ISvcLocator* svcLocator = Gaudi::svcLocator();
 
-  IGeoDbTagSvc* geoDbTagSvc{nullptr};
-  StatusCode sc = svcLocator->service("GeoDbTagSvc",geoDbTagSvc);
-  if (sc != StatusCode::SUCCESS) {
+  SmartIF<IGeoDbTagSvc> geoDbTagSvc{svcLocator->service("GeoDbTagSvc")};
+  if(!geoDbTagSvc.isValid()) {
     throw std::runtime_error ("Cannot locate GeoDBTagSvc");
   }
   
-  IRDBAccessSvc* pAccessSvc{nullptr};
-  sc = svcLocator->service(geoDbTagSvc->getParamSvcName(),pAccessSvc);
-  if (sc != StatusCode::SUCCESS) {
+  SmartIF<IRDBAccessSvc> pAccessSvc{svcLocator->service(geoDbTagSvc->getParamSvcName())};
+  if(!pAccessSvc.isValid()) {
     throw std::runtime_error ("Cannot locate " + geoDbTagSvc->getParamSvcName());
   }
 
@@ -70,9 +70,8 @@ LArGeo::RALEmb::RALEmb():
 
   if(geoDbTagSvc->getSqliteReader()==nullptr) {
     // The geometry DB is used
-    IGeoModelSvc* geoModel{nullptr};
-    sc = svcLocator->service ("GeoModelSvc",geoModel);
-    if (sc != StatusCode::SUCCESS) {
+    SmartIF<IGeoModelSvc> geoModel{svcLocator->service("GeoModelSvc")};
+    if(!geoModel.isValid()) {
       throw std::runtime_error ("Cannot locate GeoModelSvc");
     }
 
@@ -87,14 +86,16 @@ LArGeo::RALEmb::RALEmb():
       LArVersion=pAccessSvc->getChildTag("LAr",AtlasVersion,"ATLAS");
     }
 
+    MsgStream log(Athena::getMessageSvc(),"RALEmb");
+    
     if (LArVersion == "LAr-00" || LArVersion == "LAr-01" ||
 	LArVersion == "LAr-Rome-Initial-00" ||
 	LArVersion == "LAr-H6-00" ||
 	LArVersion == "LAr-Commissioning-00" ||
 	LArVersion == "LAr-G3-00") {
       m_oldDB=true;
-      std::cout << " in RALEmb: old database tag used, some values are hard coded" << std::endl;
-      std::cout << " Non projectivity of lead transition will not be simulated " << std::endl;
+      log << MSG::INFO << " in RALEmb: old database tag used, some values are hard coded" << endmsg;
+      log << MSG::INFO << " Non projectivity of lead transition will not be simulated " << endmsg;
     } 
 
     if (LArVersion == "LAr-00" || LArVersion == "LAr-01" || LArVersion == "LAr-02" ||
@@ -104,7 +105,7 @@ LArGeo::RALEmb::RALEmb():
 	LArVersion == "LAr-Commissioning-00" ||
 	LArVersion == "LAr-G3-00") {
       m_oldSagging=true;
-      std::cout << " in RALEmb: only old sagging values available" << std::endl;
+      log << MSG::INFO << " in RALEmb: only old sagging values available" << endmsg;
     }
 
     if (LArVersion == "LAr-00" || LArVersion == "LAr-01" || LArVersion == "LAr-02" ||
@@ -277,10 +278,11 @@ double LArGeo::RALEmb::GetValue(const std::string& a_name,
      if (a_name == "LArEMBAbsorberContraction") return 0.997;
   }
 
-  // We didn't find a match.  
+  // We didn't find a match.
+  MsgStream log(Athena::getMessageSvc(),"RALEmb");
   std::string errMessage = "RALEmb::GetValue: could not find a match for the key '" + a_name;
-  std::cerr << errMessage << std::endl;
-  throw std::runtime_error (errMessage.c_str());
+  log << MSG::FATAL << errMessage << endmsg;
+  throw std::runtime_error(errMessage);
 
   // Unreached.
 }

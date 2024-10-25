@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // RALExperimentalHall
@@ -46,15 +46,13 @@ LArGeo::RALExperimentalHall::RALExperimentalHall():
   // First, fetch the Athena services.
   ISvcLocator* svcLocator = Gaudi::svcLocator();
 
-  IGeoDbTagSvc* geoDbTagSvc{nullptr};
-  StatusCode sc = svcLocator->service("GeoDbTagSvc",geoDbTagSvc);
-  if (sc != StatusCode::SUCCESS) {
+  SmartIF<IGeoDbTagSvc> geoDbTagSvc{svcLocator->service("GeoDbTagSvc")};
+  if(!geoDbTagSvc.isValid()) {
     throw std::runtime_error ("Cannot locate GeoDBTagSvc");
   }
   
-  IRDBAccessSvc* pAccessSvc{nullptr};
-  sc = svcLocator->service(geoDbTagSvc->getParamSvcName(),pAccessSvc);
-  if (sc != StatusCode::SUCCESS) {
+  SmartIF<IRDBAccessSvc> pAccessSvc{svcLocator->service(geoDbTagSvc->getParamSvcName())};
+  if(!pAccessSvc.isValid()) {
     throw std::runtime_error ("Cannot locate " + geoDbTagSvc->getParamSvcName());
   }
 
@@ -62,9 +60,8 @@ LArGeo::RALExperimentalHall::RALExperimentalHall():
 
   if(geoDbTagSvc->getSqliteReader()==nullptr) {
     // The geometry DB is used
-    IGeoModelSvc* geoModel{nullptr};
-    sc = svcLocator->service ("GeoModelSvc",geoModel);
-    if (sc != StatusCode::SUCCESS) {
+    SmartIF<IGeoModelSvc> geoModel{svcLocator->service("GeoModelSvc")};
+    if(!geoModel.isValid()) {
       throw std::runtime_error ("Cannot locate GeoModelSvc");
     }
   

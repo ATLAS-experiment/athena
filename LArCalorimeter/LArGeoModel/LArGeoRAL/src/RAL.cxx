@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArGeoRAL/RAL.h"
@@ -10,24 +10,15 @@
 #include "LArGeoRAL/RALEmec.h"
 #include "LArGeoRAL/RALHec.h"
 
+#include "GaudiKernel/MsgStream.h"
+#include "AthenaKernel/getMessageSvc.h"
+
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
 namespace LArGeo {
-
-  RAL::RAL()
-      : m_ExpHall(new RALExperimentalHall())
-      , m_Emec(new RALEmec())
-      , m_Emb(new RALEmb())
-      , m_Hec(new RALHec())
-  {
-  }
-
-
-  RAL::~RAL()
-  = default;
 
   double RAL::GetValue(const std::string& a_name,
 			   const int a0,
@@ -44,22 +35,23 @@ namespace LArGeo {
     // result of a find() method, then the sub-string was not found.
 
     if ( a_name.find("ExpHall") != std::string::npos )
-      return m_ExpHall->GetValue(a_name,a0,a1,a2,a3,a4);
+      return m_ExpHall.GetValue(a_name,a0,a1,a2,a3,a4);
 
     if ( a_name.find("EMEC") != std::string::npos )
-      return m_Emec->GetValue(a_name,a0,a1,a2,a3,a4);
+      return m_Emec.GetValue(a_name,a0,a1,a2,a3,a4);
 
     if ( a_name.find("EMB") != std::string::npos )
-      return m_Emb->GetValue(a_name,a0,a1,a2,a3,a4);
+      return m_Emb.GetValue(a_name,a0,a1,a2,a3,a4);
 
     if ( a_name.find("HEC") != std::string::npos )
-      return m_Hec->GetValue(a_name,a0,a1,a2,a3,a4);
+      return m_Hec.GetValue(a_name,a0,a1,a2,a3,a4);
 
 
     // We didn't find a match.  Throw an exception
+    MsgStream log(Athena::getMessageSvc(),"RAL");
     std::string errMessage = "RAL::GetValue: could not find a match for the key '" + a_name;
-    std::cerr << errMessage << std::endl;
-    throw std::runtime_error(errMessage.c_str());
+    log << MSG::FATAL << errMessage << endmsg;
+    throw std::runtime_error(errMessage);
 
     // Unreached.
   }

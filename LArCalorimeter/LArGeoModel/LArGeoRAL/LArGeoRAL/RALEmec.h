@@ -1,19 +1,16 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-// RALEmec.h
-// JFB Sep 
-
-// Access the HEC parameters from the NOVA database.
+/**
+ *   @class RALEmec
+ *   @brief Access the EMEC parameters from the geometry database.
+ */
 
 #ifndef LARGEORAL_RALEMEC_H
 #define LARGEORAL_RALEMEC_H
 
 #include "LArGeoCode/VDetectorParameters.h"
-
-#include <limits.h>
-#include <string>
 
 namespace LArGeo {
 
