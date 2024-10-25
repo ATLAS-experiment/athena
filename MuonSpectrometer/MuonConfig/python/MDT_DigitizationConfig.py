@@ -73,7 +73,7 @@ def MDT_DigitizationToolCommonCfg(flags, name="MdtDigitizationTool", **kwargs):
         ### Use the simple digitization tool as a first start
         from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
         acc.merge(ActsGeometryContextAlgCfg(flags))
-        kwargs.setdefault("useTwinTubes", False)
+        kwargs.setdefault("useTwinTubes", True)
         if kwargs["useTwinTubes"]:
             from MuonConfig.MuonCablingConfig import MdtTwinTubeMapCondAlgCfg
             acc.merge(MdtTwinTubeMapCondAlgCfg(flags))
