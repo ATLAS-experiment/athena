@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -25,8 +25,6 @@
 
 #include "StoreGate/ReadHandle.h"
 
-#include "GaudiKernel/ITHistSvc.h"
-
 #include "TH1I.h"
 #include "TH1F.h"
 #include "TH2F.h"
@@ -50,7 +48,7 @@ StatusCode
 SCT_CalibLbTool::initialize() {
 
    ATH_MSG_INFO("Initializing");
-   ATH_CHECK(service("THistSvc", m_thistSvc));
+   ATH_CHECK( (m_thistSvc = service("THistSvc")).isValid() );
 
    ATH_CHECK(detStore()->retrieve(m_pSCTHelper, "SCT_ID"));
    m_swapPhiReadoutDirection.resize(m_pSCTHelper->wafer_hash_max(), false);

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -255,7 +255,7 @@ namespace ITk
     //@{
     Gaudi::Property<bool> m_writeNtuple {this, "WriteNtuple", false, "Flag to write Validation Ntuples"};
     ///Flag to write validation ntuples. Turned off by default
-    ITHistSvc* m_thistSvc;
+    ServiceHandle<ITHistSvc> m_thistSvc;
     TTree* m_outputTree;
     mutable std::mutex m_mutex;
     mutable std::string          m_treeName               ATLAS_THREAD_SAFE;

@@ -25,6 +25,7 @@
 #include "InDetConditionsSummaryService/InDetHierarchy.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteCondHandle.h"
+#include "RegistrationServices/IIOVRegistrationSvc.h"
 
 #include "CoralBase/AttributeListSpecification.h"
 
@@ -48,7 +49,6 @@
 class IdentifierHash;
 class Identifier;
 class SCT_ID;
-class IIOVRegistrationSvc;
 class IAthenaOutputStreamTool;
 
 /**
@@ -210,7 +210,7 @@ class SCTCalibWriteTool : public AthAlgTool {
       StringProperty               m_tagID4BSErrors{this, "TagID4BSErrors", ""};
       StringProperty               m_tagID4LorentzAngle{this, "TagID4LorentzAngle", ""};
 
-      IIOVRegistrationSvc*                m_regSvc{nullptr};
+      ServiceHandle<IIOVRegistrationSvc>  m_regSvc;
       ToolHandle<IAthenaOutputStreamTool> m_streamer{nullptr};
       ServiceHandle<IIOVDbSvc>            m_IOVDbSvc;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -42,7 +42,7 @@ SCT_CalibBsErrorTool::SCT_CalibBsErrorTool(const std::string& type, const std::s
 
 StatusCode
 SCT_CalibBsErrorTool::initialize() {
-   ATH_CHECK(service("THistSvc", m_thistSvc));
+   ATH_CHECK( (m_thistSvc = service("THistSvc")).isValid() );
    ATH_CHECK(detStore()->retrieve(m_pSCTHelper, "SCT_ID"));
    ATH_CHECK(m_bytestreamErrorsTool.retrieve());
 

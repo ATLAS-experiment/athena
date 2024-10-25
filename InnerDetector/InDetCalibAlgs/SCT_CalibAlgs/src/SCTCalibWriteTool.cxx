@@ -11,9 +11,6 @@
  **/
 #include "SCT_CalibAlgs/SCTCalibWriteTool.h"
 
-// IOVDbTest includes
-#include "RegistrationServices/IIOVRegistrationSvc.h"
-
 // Athena includes
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
 #include "CoralBase/Attribute.h"
@@ -52,8 +49,9 @@ const bool becUnderscoreFormat{false};
 
 SCTCalibWriteTool::SCTCalibWriteTool(const std::string& type, const std::string& name, const IInterface* parent) :
    AthAlgTool(type, name, parent),
+   m_regSvc("IOVRegistrationSvc", name),
    m_streamer(((m_version == 0) ? "AthenaOutputStreamTool" : "AthenaPoolOutputStreamTool"), this),
-   m_IOVDbSvc("IOVDbSvc", "SCTCalibWriteTool")
+   m_IOVDbSvc("IOVDbSvc", name)
 {
 }
 
@@ -84,10 +82,7 @@ SCTCalibWriteTool::initialize()
 
    ATH_MSG_DEBUG("in SCTCalibWriteTool::initialize start");
 
-   if (detStore()->retrieve(m_pHelper,"SCT_ID").isFailure()) {
-      ATH_MSG_ERROR("SCT mgr failed to retrieve");
-      return StatusCode::FAILURE;
-   }
+   ATH_CHECK( detStore()->retrieve(m_pHelper,"SCT_ID") );
 
    // ------------------------------------------------------------
    // The following is required for writing out something to COOL
@@ -104,16 +99,11 @@ SCTCalibWriteTool::initialize()
 
    // Get the IOVRegistrationSvc when needed
    if (m_regIOV) {
-
-      if (service("IOVRegistrationSvc", m_regSvc).isFailure()) {
-         ATH_MSG_ERROR("Unable to find IOVRegistrationSvc ");
-         return StatusCode::FAILURE;
-      }
+      ATH_CHECK( m_regSvc.retrieve() );
    }
 
    // Retrieve IOVDb service
-   if (m_IOVDbSvc.retrieve().isFailure())
-      return msg(MSG:: ERROR)<< "Failed to retrieve IOVDbSvc " << endmsg, StatusCode::FAILURE;
+   ATH_CHECK( m_IOVDbSvc.retrieve() );
 
    return StatusCode::SUCCESS;
 }
