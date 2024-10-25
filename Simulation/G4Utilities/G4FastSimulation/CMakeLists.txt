@@ -18,7 +18,7 @@ endif()
 # FastCaloSim G4VFastSimulationModel should only be used in Athena builds
 set ( extra_src )
 if( NOT SIMULATIONBASE )
-   set( extra_src src/FastCaloSim.cxx  src/FastCaloSimTool.cxx  )
+   set( extra_src src/FastCaloSim.cxx src/FastCaloSimTool.cxx  )
 endif()
 
 # Component(s) in the package:

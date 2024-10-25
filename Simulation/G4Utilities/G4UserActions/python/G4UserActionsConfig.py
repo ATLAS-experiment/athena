@@ -59,8 +59,7 @@ def MonopoleLooperKillerToolCfg(flags, name="G4UA::MonopoleLooperKillerTool", **
     kwargs.setdefault("MaxSteps", 2000000)
     kwargs.setdefault("PrintSteps", 2)
     kwargs.setdefault("VerboseLevel", 0)
-    kwargs.setdefault("AbortEvent", False)
-    kwargs.setdefault("SetError", True)
+    kwargs.setdefault("BSM_Only", True)
     return LooperKillerToolCfg(flags, name, **kwargs)
 
 

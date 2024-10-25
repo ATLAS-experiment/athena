@@ -30,8 +30,17 @@ def TRT_DriftFunctionToolCfg(flags, name = "InDetTRT_DriftFunctionTool", **kwarg
                             -1.919092, -2.151582, -2.285481, -2.036822,   -2.15805]
     kwargs.setdefault("ToTCorrectionsBarrelXe", ToTCorrectionsBarrel)
     kwargs.setdefault("ToTCorrectionsEndcapXe", ToTCorrectionsEndcap)
-    kwargs.setdefault("ToTCorrectionsBarrelAr", ToTCorrectionsBarrel)
-    kwargs.setdefault("ToTCorrectionsEndcapAr", ToTCorrectionsEndcap)
+
+    if flags.InDet.doTRTArToTCorr:
+        kwargs.setdefault("ToTCorrectionsBarrelAr", ToTCorrectionsBarrel)
+        kwargs.setdefault("ToTCorrectionsEndcapAr", ToTCorrectionsEndcap)
+    else:
+        NullToTCorrections = [ 0., 0., 0., 0., 0.,
+                               0., 0., 0., 0., 0.,
+                               0., 0., 0., 0., 0.,
+                               0., 0., 0., 0., 0. ]
+        kwargs.setdefault("ToTCorrectionsBarrelAr", NullToTCorrections)
+        kwargs.setdefault("ToTCorrectionsEndcapAr", NullToTCorrections)
 
     # Second calibration DB Service in case pile-up and physics hits have different calibrations for data overlay
     if flags.Overlay.DataOverlay:

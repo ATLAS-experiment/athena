@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4USERACTIONS_G4UA_LOOPERKILLER_H
@@ -31,6 +31,7 @@ namespace G4UA
         int VerboseLevel=1;
         bool AbortEvent=true;
         bool SetError=false;
+        bool BSM_Only=false;
       };
 
       struct Report

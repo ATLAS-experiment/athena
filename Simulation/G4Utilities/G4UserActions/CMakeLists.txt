@@ -19,7 +19,7 @@ atlas_add_library( G4UserActions
                    OBJECT
                    NO_PUBLIC_HEADERS
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${XERCESC_LIBRARIES} ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} ${TBB_LIBRARIES} AthenaBaseComps AthenaKernel StoreGateLib GaudiKernel G4AtlasInterfaces G4AtlasToolsLib EventInfo InDetSimEvent MuonSimEvent MCTruth MCTruthBaseLib SimHelpers TrackWriteFastSimLib PathResolver G4DebuggingHelperLib)
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${XERCESC_LIBRARIES} ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} ${TBB_LIBRARIES} AthenaBaseComps AthenaKernel StoreGateLib GaudiKernel G4AtlasInterfaces G4AtlasToolsLib EventInfo InDetSimEvent MuonSimEvent MCTruth MCTruthBaseLib SimHelpers TrackWriteFastSimLib PathResolver G4DebuggingHelperLib TruthUtils)
 set_target_properties( G4UserActions PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:
