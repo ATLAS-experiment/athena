@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARRAWCHANNELCONTRAWEVENTCNV_H
@@ -18,11 +18,10 @@
 class DataObject;
 class StatusCode;
 class IAddressCreator;
-class IByteStreamEventAccess;
-class LArRawChannelContainer; 
+class LArRawChannelContainer;
 class LArRawDataContByteStreamTool;
 class IROBDataProviderSvc;  
-class ByteStreamCnvSvc;
+class IByteStreamCnvSvc;
 
 // Abstract factory to create the converter
 template <class TYPE> class CnvFactory;
@@ -48,8 +47,7 @@ class LArRawChannelContByteStreamCnv: public AthConstConverter
 private: 
   ToolHandle<BYTESTREAMTOOL> m_tool; 
   ServiceHandle<IROBDataProviderSvc> m_rdpSvc;
-  ServiceHandle<IByteStreamEventAccess> m_byteStreamEventAccess;
-  ByteStreamCnvSvc* m_byteStreamCnvSvc;
+  ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc;
   mutable std::atomic<size_t> m_contSize;
 };
 #endif

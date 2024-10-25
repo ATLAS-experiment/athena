@@ -7,7 +7,7 @@
 
 #include "CaloIdentifier/CaloGain.h"
 
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "ByteStreamCnvSvcBase/ByteStreamCnvSvcBase.h" 
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h" 
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h" 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEBYTESTREAM_TILERAWCHANNELCONTRAWEVENTCNV_H
@@ -8,7 +8,7 @@
 #include "AthenaBaseComps/AthConstConverter.h"
 #include "TileEvent/TileMutableRawChannelContainer.h"
 #include "AthenaKernel/RecyclableDataObject.h"
-#include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -18,12 +18,10 @@
 class DataObject;
 class StatusCode;
 class IAddressCreator;
-class IByteStreamEventAccess;
-class MsgStream; 
+class MsgStream;
 class TileRawChannelContainer; 
 class TileRawChannelContByteStreamTool ; 
-class ByteStreamCnvSvc;
-class IROBDataProviderSvc; 
+class IROBDataProviderSvc;
 class TileHid2RESrcID;
 class TileROD_Decoder;
 
@@ -60,8 +58,7 @@ class TileRawChannelContByteStreamCnv
     //    BYTESTREAMTOOL* m_tool ;
     ToolHandle<TileRawChannelContByteStreamTool> m_tool;
     
-    ServiceHandle<IByteStreamEventAccess> m_byteStreamEventAccess;
-    ByteStreamCnvSvc* m_byteStreamCnvSvc;
+    ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc;
     
     /** Pointer to IROBDataProviderSvc */
     ServiceHandle<IROBDataProviderSvc> m_robSvc;

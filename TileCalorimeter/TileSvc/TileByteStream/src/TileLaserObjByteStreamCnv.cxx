@@ -16,7 +16,7 @@
 #include "AthenaKernel/StorableConversions.h"
 #include "AthenaKernel/errorcheck.h"
 
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "ByteStreamCnvSvcBase/ByteStreamCnvSvcBase.h" 
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h" 
 #include "ByteStreamCnvSvcBase/ROBDataProviderSvc.h" 

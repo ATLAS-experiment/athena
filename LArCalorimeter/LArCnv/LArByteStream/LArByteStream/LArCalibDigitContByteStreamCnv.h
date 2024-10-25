@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARCALIBDIGITCONTRAWEVENTCNV_H
@@ -20,11 +20,10 @@
 class DataObject;
 class StatusCode;
 class IAddressCreator;
-class IByteStreamEventAccess;
-class LArCalibDigitContainer; 
+class LArCalibDigitContainer;
 class LArRawDataContByteStreamTool ; 
 class IROBDataProviderSvc; 
-class ByteStreamCnvSvc;
+class IByteStreamCnvSvc;
 class LArCalibLineMapping;
 class LArOnOffIdMapping;
 
@@ -55,8 +54,7 @@ public:
 private: 
   ToolHandle<BYTESTREAMTOOL> m_tool; 
   ServiceHandle<IROBDataProviderSvc> m_rdpSvc;
-  ServiceHandle<IByteStreamEventAccess> m_byteStreamEventAccess;
-  ByteStreamCnvSvc* m_byteStreamCnvSvc;
+  ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc;
   SG::ReadCondHandleKey<LArCalibLineMapping> m_calibLineMappingKey;
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_onOffIdMappingKey;
 };

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( SCT_RawDataByteStreamCnv )
@@ -10,7 +10,7 @@ atlas_add_library( SCT_RawDataByteStreamCnvLib
                    SCT_RawDataByteStreamCnv/*.h
                    INTERFACE
                    PUBLIC_HEADERS SCT_RawDataByteStreamCnv
-                   LINK_LIBRARIES GaudiKernel InDetRawData ByteStreamCnvSvcBaseLib ByteStreamCnvSvcLib ByteStreamData InDetByteStreamErrors )
+                   LINK_LIBRARIES AthAllocators GaudiKernel InDetRawData ByteStreamData InDetByteStreamErrors )
 
 # Component(s) in the package:
 atlas_add_component( SCT_RawDataByteStreamCnv

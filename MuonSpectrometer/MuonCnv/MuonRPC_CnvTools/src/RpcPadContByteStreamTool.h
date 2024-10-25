@@ -6,7 +6,7 @@
 #define MUONRPC_CNVTOOLS_RPCPADCONTRAWEVENTTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h"
 #include "ByteStreamData/RawEvent.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -53,7 +53,7 @@ namespace Muon {
         SG::ReadCondHandleKey<RpcCablingCondData> m_readKey{this, "ReadKey", "RpcCablingCondData", "Key of RpcCablingCondData"};
         RPC_Hid2RESrcID m_hid2re;
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-        ServiceHandle<ByteStreamCnvSvc> m_byteStreamCnvSvc{this, "ByteStreamCnvSvc", "ByteStreamCnvSvc"};
+        ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc{this, "ByteStreamCnvSvc", "ByteStreamCnvSvc"};
     };
 }  // namespace Muon
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/LArDigitContByteStreamCnv.h"
@@ -11,7 +11,7 @@
 
 #include "CaloIdentifier/CaloGain.h"
 
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "ByteStreamCnvSvcBase/ByteStreamCnvSvcBase.h" 
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h" 
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h" 
@@ -34,8 +34,7 @@ LArDigitContByteStreamCnv::LArDigitContByteStreamCnv(ISvcLocator* svcloc) :
   m_tool("LArRawDataContByteStreamTool"),
   m_scTool("LArLATOMEDecoder"),
   m_rdpSvc("ROBDataProviderSvc", name()),
-  m_byteStreamEventAccess("ByteStreamCnvSvc", name()),
-  m_byteStreamCnvSvc(nullptr)
+  m_byteStreamCnvSvc("ByteStreamCnvSvc", name())
 {}
     
 LArDigitContByteStreamCnv::~LArDigitContByteStreamCnv() {
@@ -55,8 +54,7 @@ LArDigitContByteStreamCnv::initialize()
     ATH_MSG_WARNING(  " Can't get ByteStreamInputSvc interface Reading of ByteStream Data not possible. " );
   }
 
-  ATH_CHECK( m_byteStreamEventAccess.retrieve() );
-  m_byteStreamCnvSvc = dynamic_cast<ByteStreamCnvSvc*>(&*m_byteStreamEventAccess);
+  ATH_CHECK( m_byteStreamCnvSvc.retrieve() );
 
   ATH_CHECK( m_tool.retrieve() );
   ATH_CHECK( m_scTool.retrieve() );

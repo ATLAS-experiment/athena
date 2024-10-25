@@ -11,7 +11,7 @@
 #include "MuonTGC_CnvTools/ITGC_RDOtoByteStreamTool.h"
 
 #include "ByteStreamData/RawEvent.h" 
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "TGC_Hid2RESrcID.h"
 
 class TgcRdoContainer; 
@@ -50,7 +50,7 @@ namespace Muon {
       virtual StatusCode convert(const TgcRdoContainer* cont) const override;
 
     private: 
-      ServiceHandle<ByteStreamCnvSvc> m_byteStreamCnvSvc
+      ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc
       { this, "ByteStreamCnvSvc", "ByteStreamCnvSvc" };
 
       std::unique_ptr<TGC_Hid2RESrcID> m_hid2re; 

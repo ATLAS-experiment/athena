@@ -14,7 +14,7 @@
 #include "L1CaloSrcIdMap.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "ByteStreamData/RawEvent.h"
 #include "AthContainers/DataVector.h"
 #include "eformat/SourceIdentifier.h"
@@ -77,7 +77,7 @@ class JepRoiByteStreamV1Tool : public AthAlgTool {
    const std::vector<uint32_t>& sourceIDs(const std::string& sgKey) const;
 
  private:
-   ServiceHandle<ByteStreamCnvSvc> m_byteStreamCnvSvc
+   ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc
    { this, "ByteStreamCnvSvc", "ByteStreamCnvSvc" };
 
    typedef DataVector<LVL1::JEMRoI>                      JemRoiCollection;

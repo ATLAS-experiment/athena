@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi includes
@@ -14,8 +14,7 @@
 #include "AthenaKernel/StorableConversions.h"
 #include "AthenaKernel/errorcheck.h"
 
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
-#include "ByteStreamCnvSvcBase/ByteStreamCnvSvcBase.h" 
+#include "ByteStreamCnvSvcBase/ByteStreamCnvSvcBase.h"
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h" 
 #include "ByteStreamCnvSvcBase/ROBDataProviderSvc.h"
 #include "ByteStreamData/RawEvent.h" 
@@ -37,8 +36,7 @@
 TileRawChannelContByteStreamCnv::TileRawChannelContByteStreamCnv(ISvcLocator* svcloc) 
   : AthConstConverter(storageType(), classID(), svcloc, "TileRawChannelContByteStreamCnv")
   , m_tool("TileRawChannelContByteStreamTool")
-  , m_byteStreamEventAccess("ByteStreamCnvSvc", name())
-  , m_byteStreamCnvSvc(0)
+  , m_byteStreamCnvSvc("ByteStreamCnvSvc", name())
   , m_robSvc("ROBDataProviderSvc", name())
   , m_decoder("TileROD_Decoder")
   , m_hid2re(0)
@@ -56,8 +54,7 @@ StatusCode TileRawChannelContByteStreamCnv::initialize() {
   ATH_CHECK(Converter::initialize());
 
   // Get ByteStreamCnvSvc
-  ATH_CHECK( m_byteStreamEventAccess.retrieve() );
-  m_byteStreamCnvSvc = dynamic_cast<ByteStreamCnvSvc*>(&*m_byteStreamEventAccess);
+  ATH_CHECK( m_byteStreamCnvSvc.retrieve() );
 
   // retrieve Tool
   ATH_CHECK( m_decoder.retrieve() );

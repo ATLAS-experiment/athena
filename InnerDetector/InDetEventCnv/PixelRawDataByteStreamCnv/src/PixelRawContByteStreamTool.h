@@ -27,7 +27,7 @@
 #include "InDetRawData/InDetRawDataCLASS_DEF.h"
 
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h" // needed, template class
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 
 #include "PixelByteStreamModuleMask.h"
 
@@ -74,7 +74,7 @@ class PixelRawContByteStreamTool: public AthAlgTool {
     uint32_t packLinkTrailer_IBL(uint32_t FEonSLink, bool timeOutErrorBit, bool condensedModeBit, bool linkMasked) const; // for IBL
 
   private:
-    ServiceHandle<ByteStreamCnvSvc> m_byteStreamCnvSvc
+    ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc
     { this, "ByteStreamCnvSvc", "ByteStreamCnvSvc" };
 
     ServiceHandle<InDetDD::IPixelReadoutManager> m_pixelReadout
