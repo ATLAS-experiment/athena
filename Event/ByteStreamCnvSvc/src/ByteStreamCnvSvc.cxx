@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvc.h"
 #include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h"
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
