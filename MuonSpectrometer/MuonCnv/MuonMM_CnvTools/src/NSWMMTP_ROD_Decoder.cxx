@@ -53,9 +53,9 @@ StatusCode Muon::NSWMMTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAM
   //for all the 3/5 elinks expected, the MMTP header parameters should be the same by design
   //checking consistency of a fraction of the header
   bool consistent = true;
-  const auto l0 = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerMML1AElink>(decoder.get_elinks()[0]);
+  const auto l0 = dynamic_cast<const Muon::nsw::NSWTriggerMML1AElink*>(decoder.get_elinks()[0].get());
   for(const auto& baseLink: decoder.get_elinks()) {
-    const auto l = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerMML1AElink>(baseLink);
+    const auto l = dynamic_cast<const Muon::nsw::NSWTriggerMML1AElink*>(baseLink.get());
     if (l0->head_sectID() != l->head_sectID()) {consistent = false; break;}
     if (l0->L1ID() != l->L1ID()) {consistent = false; break;}
     if (l0->l1a_versionID() != l->l1a_versionID()) {consistent = false; break;}
@@ -104,7 +104,7 @@ StatusCode Muon::NSWMMTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAM
   rdo->set_l1a_engines(l0->l1a_engine_snapshot());
 
   for(const auto& baseLink: decoder.get_elinks()){
-    const auto l = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerMML1AElink>(baseLink);
+    const auto l = dynamic_cast<const Muon::nsw::NSWTriggerMML1AElink*>(baseLink.get());
     
     if (l->l1a_timeout()==0) {ATH_MSG_DEBUG("NSW MMTP Common Decoder reporting timeout condition: unclear if current event can be trusted");}
 
