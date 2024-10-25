@@ -48,7 +48,7 @@ StatusCode NSWTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::
   }
 
   if (nsw_trigger_decoder.get_elinks().size()==1) {
-    if (std::dynamic_pointer_cast<Muon::nsw::NSWTriggerSTGL1AElink>(nsw_trigger_decoder.get_elinks()[0])->l1a_versionID() >= 3){
+    if (dynamic_cast<Muon::nsw::NSWTriggerSTGL1AElink*>(nsw_trigger_decoder.get_elinks()[0].get())->l1a_versionID() >= 3){
       ATH_MSG_DEBUG("NSW sTGC TP Common Decoder found only one elink in output but incosistent L1A version: something off with this fragment. Skipping.");
       return StatusCode::SUCCESS;
     }
@@ -59,9 +59,9 @@ StatusCode NSWTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::
   }
 
   bool consistent = true;
-  const auto l0 = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerSTGL1AElink>(nsw_trigger_decoder.get_elinks()[0]);
+  const auto l0 = dynamic_cast<Muon::nsw::NSWTriggerSTGL1AElink*>(nsw_trigger_decoder.get_elinks()[0].get());
   for(const auto& baseLink: nsw_trigger_decoder.get_elinks()) {
-    const auto l = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerSTGL1AElink>(baseLink);
+    const auto l = dynamic_cast<Muon::nsw::NSWTriggerSTGL1AElink*>(baseLink.get());
     if (l0->head_sectID() != l->head_sectID()) {consistent = false; break;}
     if (l0->L1ID() != l->L1ID()) {consistent = false; break;}
     if (l0->l1a_versionID() != l->l1a_versionID()) {consistent = false; break;}
@@ -77,7 +77,7 @@ StatusCode NSWTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::
  
   for(const auto& baseLink: nsw_trigger_decoder.get_elinks()){
     /// Create the new trigger processor RDO
-    const auto link = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerSTGL1AElink>(baseLink);
+    const auto link = dynamic_cast<Muon::nsw::NSWTriggerSTGL1AElink*>(baseLink.get());
     const std::shared_ptr<Muon::nsw::NSWResourceId>& elinkID =  link->elinkId ();
 
     uint32_t moduleID{0};
