@@ -10,7 +10,7 @@ uint64_t gFexLRJetRoIThresholdsTool::getPattern(const xAOD::gFexJetRoI& roi,
   uint64_t thresholdMask = 0;
 
   for (const std::shared_ptr<TrigConf::L1Threshold>& thrBase : menuThresholds) {
-    std::shared_ptr<TrigConf::L1Threshold_gLJ> thr = std::static_pointer_cast<TrigConf::L1Threshold_gLJ>(thrBase);
+    auto thr = static_cast<TrigConf::L1Threshold_gLJ*>(thrBase.get());
     
     if (et > thr->thrValueMeV()) {
       thresholdMask |= (1<<thr->mapping());

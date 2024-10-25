@@ -14,7 +14,7 @@ uint64_t jFexLRJetRoIThresholdsTool::getPattern(const xAOD::jFexLRJetRoI& roi,
 
     // Iterate through thresholds and see which ones are passed
     for (const std::shared_ptr<TrigConf::L1Threshold>& thrBase : menuThresholds) {
-        std::shared_ptr<TrigConf::L1Threshold_jLJ> thr = std::static_pointer_cast<TrigConf::L1Threshold_jLJ>(thrBase);
+        auto thr = static_cast<TrigConf::L1Threshold_jLJ*>(thrBase.get());
         
         //Checking et thresholds
         if (et > thr->thrValueMeV(ieta)) {

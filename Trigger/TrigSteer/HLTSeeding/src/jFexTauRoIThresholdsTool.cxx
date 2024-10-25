@@ -28,7 +28,7 @@ uint64_t jFexTauRoIThresholdsTool::getPattern(const xAOD::jFexTauRoI& roi,
 
     // Iterate through thresholds and see which ones are passed
     for (const std::shared_ptr<TrigConf::L1Threshold>& thrBase : menuThresholds) {
-        std::shared_ptr<TrigConf::L1Threshold_jTAU> thr = std::static_pointer_cast<TrigConf::L1Threshold_jTAU>(thrBase);
+        auto thr = static_cast<TrigConf::L1Threshold_jTAU*>(thrBase.get());
 
         
         // Checking et and isolation thresholds

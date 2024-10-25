@@ -46,7 +46,7 @@ uint64_t cTauRoIThresholdsTool::getPattern(const xAOD::eFexTauRoI& eTau,
 
   // Iterate through thresholds and see which ones are passed
   for (const std::shared_ptr<TrigConf::L1Threshold>& thrBase : menuThresholds) {
-    std::shared_ptr<TrigConf::L1Threshold_cTAU> thr = std::static_pointer_cast<TrigConf::L1Threshold_cTAU>(thrBase);
+    auto thr = static_cast<TrigConf::L1Threshold_cTAU*>(thrBase.get());
 
     // Check isolation threshold - unmatched eTau treated as perfectly isolated, ATR-25927
     // The core and isolation E_T values are multiplied by 2 to normalise to 100 MeV/counts units
