@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGBYTESTREAMCNVSVC_H
@@ -19,7 +19,7 @@ class IROBDataProviderSvc;
  *  It overrides the connectOutput and commitOutput methods of the base class. In this implementation, they create
  *  the specific online HLT output and send it out directly to the TDAQ infrastructure without using an output service.
  **/
-class TrigByteStreamCnvSvc : public ByteStreamCnvSvcBase {
+class TrigByteStreamCnvSvc : public extends<ByteStreamCnvSvcBase, IByteStreamEventAccess> {
 public:
   /// Standard constructor
   TrigByteStreamCnvSvc(const std::string& name, ISvcLocator* svcLoc);

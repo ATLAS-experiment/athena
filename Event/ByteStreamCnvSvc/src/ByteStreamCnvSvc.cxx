@@ -32,7 +32,7 @@ namespace {
 
 /// Standard constructor
 ByteStreamCnvSvc::ByteStreamCnvSvc(const std::string& name, ISvcLocator* pSvcLocator)
-  : ByteStreamCnvSvcBase(name, pSvcLocator),
+  : base_class(name, pSvcLocator),
     m_evtStore ("StoreGateSvc", name)
 {
   declareProperty("ByteStreamOutputSvc",     m_ioSvcName);

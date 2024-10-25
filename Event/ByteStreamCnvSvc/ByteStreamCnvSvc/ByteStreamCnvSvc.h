@@ -8,6 +8,7 @@
 #include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
 #include "ByteStreamCnvSvcBase/ByteStreamCnvSvcBase.h"
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h"
+#include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "GaudiKernel/ThreadLocalContext.h"
@@ -31,8 +32,8 @@ class FullEventAssemblerBase;
     method through IByteStreamOutputSvc.
 */
 
-class ByteStreamCnvSvc : public ByteStreamCnvSvcBase/*, virtual public IService*/ {
-
+class ByteStreamCnvSvc : public extends<ByteStreamCnvSvcBase,
+                                        IByteStreamEventAccess> {
 public:
    /// Standard Constructor
    ByteStreamCnvSvc(const std::string& name, ISvcLocator* svc);

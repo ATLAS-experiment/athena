@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMCNVSVCBASE_BYTESTREAMCNVSVCBASE_H
@@ -14,15 +14,12 @@
  * @class ByteStreamCnvSvcBase
  * @brief The base class for offline and HLT ByteStream conversion services
  */
-class ByteStreamCnvSvcBase : public ::AthCnvSvc,
-		public virtual IIncidentListener,
-		public virtual IByteStreamEventAccess {
+class ByteStreamCnvSvcBase : public extends<::AthCnvSvc, IIncidentListener> {
 
 public:
    /// Standard Service Constructor
    ByteStreamCnvSvcBase(const std::string& name, ISvcLocator* pSvcLocator);
    /// Destructor
-
    virtual ~ByteStreamCnvSvcBase();
    /// Required of all Gaudi Services
    virtual StatusCode initialize() override;
