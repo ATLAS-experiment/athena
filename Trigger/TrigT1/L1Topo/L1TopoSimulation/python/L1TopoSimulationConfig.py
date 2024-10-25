@@ -251,6 +251,7 @@ if __name__ == '__main__':
   parser.add_argument("-fCtp","--forceCtp",action="store_true", dest="forceCtp", help="Force to CTP monitoring as primary in Sim/Hdw comparison.",default=False, required=False)
   parser.add_argument("-hdwMon","--algoHdwMon",action="store_true", dest="algoHdwMon", help="Fill algorithm histograms based on hardware decision.",default=False, required=False)
   parser.add_argument("-perfMon","--perfMonitoring",action="store_true", dest="perfmon", help="Enable performance monitoring",default=False, required=False)
+  parser.add_argument("-redoMenu","--rederiveMenu",action="store_true", dest="redoMenu", help="Will rederive the menu based in local code",default=False, required=False)
   parser.add_argument("-l","--logLevel",action="store", dest="log", help="Log level.",default="warning", required=False)
   parser.add_argument("-n","--nevent", type=int, action="store", dest="nevent", help="Maximum number of events will be executed.",default=0, required=False)
   parser.add_argument("-s","--skipEvents", type=int, action="store", dest="skipEvents", help="How many events will be skipped.",default=0, required=False)
@@ -276,7 +277,10 @@ if __name__ == '__main__':
   if(args.nevent > 0):
     flags.Exec.MaxEvents = args.nevent
   flags.Trigger.triggerMenuSetup = 'PhysicsP1_pp_run3_v1'
-  flags.Trigger.triggerConfig = 'DB'
+  if args.redoMenu:
+      flags.Trigger.triggerConfig = 'FILE'
+  else:
+      flags.Trigger.triggerConfig = 'DB'
   flags.Input.Files = args.inputs
   flags.Concurrency.NumThreads = 1
   flags.Concurrency.NumConcurrentEvents = 1
