@@ -27,7 +27,7 @@ def _setup():
         }
     else:
         if len(inFiles) < 1:
-            msg.warning("No input files specified yet! Cannot do anything.")
+            msg.info("No input files specified yet! Cannot do anything.")
             return
             
             
