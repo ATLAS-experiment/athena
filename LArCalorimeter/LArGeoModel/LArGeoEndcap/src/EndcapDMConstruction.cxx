@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 // ***********************************************************************
 // Construction of passive materials around LAr EC cryostate.
@@ -38,32 +38,30 @@
 
 #include "GeoGenericFunctions/Variable.h"
 
+#include "AthenaKernel/getMessageSvc.h"
+
 LArGeo::EndcapDMConstruction::EndcapDMConstruction(bool ft) :
   m_activateFT(ft)
 {
 }
 
 
-
 void LArGeo::EndcapDMConstruction::create(GeoIntrusivePtr<GeoFullPhysVol> envelope) const
 {
   ISvcLocator* svcLocator = Gaudi::svcLocator();
-  IMessageSvc* msgSvc(nullptr);
-  if(svcLocator->service("MessageSvc", msgSvc, true)==StatusCode::FAILURE)
-    throw std::runtime_error("Error in EndcapDMConstruction, cannot access MessageSvc");
-  MsgStream log(msgSvc, "EndcapDMConstruction");
+  MsgStream log(Athena::getMessageSvc(), "EndcapDMConstruction");
   log << MSG::INFO << "Start building EC electronics geometry" << endmsg;
 
-  StoreGateSvc* detStore(nullptr);
-  if(svcLocator->service("DetectorStore", detStore, false)==StatusCode::FAILURE)
+  SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+  if(!detStore.isValid())
     throw std::runtime_error("Error in EndcapDMConstruction, cannot access DetectorStore");
 
-  IGeoModelSvc* geoModel(nullptr);
-  if(svcLocator->service("GeoModelSvc",geoModel) == StatusCode::FAILURE)
+  SmartIF<IGeoModelSvc> geoModel{svcLocator->service("GeoModelSvc")};
+  if(!geoModel.isValid())
     throw std::runtime_error("Error in EndcapDMConstruction, cannot access GeoModelSvc");
 
-  IRDBAccessSvc* rdbAccess(nullptr);
-  if(svcLocator->service("RDBAccessSvc",rdbAccess) == StatusCode::FAILURE)
+  SmartIF<IRDBAccessSvc> rdbAccess{svcLocator->service("RDBAccessSvc")};
+  if(!rdbAccess.isValid())
     throw std::runtime_error("Error in EndcapDMConstruction, cannot access RDBAccessSvc");
 
   DecodeVersionKey keyLAr(geoModel, "LAr");

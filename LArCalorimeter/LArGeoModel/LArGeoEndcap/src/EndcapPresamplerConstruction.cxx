@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArGeoEndcap/EndcapPresamplerConstruction.h"
@@ -56,8 +56,8 @@ GeoIntrusivePtr<GeoFullPhysVol> EndcapPresamplerConstruction::Envelope()
 
 
   ISvcLocator *svcLocator = Gaudi::svcLocator();
-  StoreGateSvc *detStore;
-  if (svcLocator->service("DetectorStore", detStore, false )==StatusCode::FAILURE) {
+  SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+  if (!detStore.isValid()) {
     throw std::runtime_error("Error in EndcapCryostatConstruction, cannot access DetectorStore");
   }
 
@@ -71,17 +71,13 @@ GeoIntrusivePtr<GeoFullPhysVol> EndcapPresamplerConstruction::Envelope()
 
 
  //===>
-
-  StatusCode sc;
-  IRDBAccessSvc *pAccessSvc;
-  sc=svcLocator->service("RDBAccessSvc",pAccessSvc);
-  if (sc != StatusCode::SUCCESS) {
+  SmartIF<IRDBAccessSvc> pAccessSvc{svcLocator->service("RDBAccessSvc")};
+  if (!pAccessSvc.isValid()) {
     throw std::runtime_error ("Cannot locate RDBAccessSvc!!");
   }
 
-  IGeoModelSvc *geoModel;
-  sc = svcLocator->service ("GeoModelSvc",geoModel);
-  if (sc != StatusCode::SUCCESS) {
+  SmartIF<IGeoModelSvc> geoModel{svcLocator->service("GeoModelSvc")};
+  if (!geoModel.isValid()) {
     throw std::runtime_error ("Cannot locate GeoModelSvc!!");
   }
   

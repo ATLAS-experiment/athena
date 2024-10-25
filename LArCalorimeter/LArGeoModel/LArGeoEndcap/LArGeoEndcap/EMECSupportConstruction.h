@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -17,7 +17,9 @@
 #ifndef LARGEOENDCAP_EMECSUPPORTCONSTRUCTION_H
 #define LARGEOENDCAP_EMECSUPPORTCONSTRUCTION_H
 
+#include "AthenaBaseComps/AthMessaging.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
+#include <map>
 
 class GeoPhysVol;
 class GeoElement;
@@ -43,7 +45,7 @@ namespace LArGeo {
   /** @class LArGeo::EMECSupportConstruction
       @brief GeoModel description of the EMEC Support Structures
    */
-class EMECSupportConstruction
+class EMECSupportConstruction : public AthMessaging
 {
   public:
     typedef enum {
@@ -118,6 +120,14 @@ class EMECSupportConstruction
     IRDBRecordset_ptr m_DB_boxes, m_DB_numbers, m_DB_tubes, m_DB_pcons;
     IRDBRecordset_ptr m_DB_emecExtraCyl;
     IRDBRecordset_ptr m_DB_EmecFan,m_DB_ColdContraction;
+
+  using map_t = std::map<std::string, unsigned int>;
+  map_t getMap(const IRDBRecordset_ptr& db, const std::string& s) const;
+  map_t getNumbersMap(const IRDBRecordset_ptr& db, const std::string& s) const;
+  double getNumber(const IRDBRecordset_ptr& db, const map_t &m, const std::string &idx,
+		   const char *number, double defval = 0.) const;
+  double getNumber(const IRDBRecordset_ptr& db, const std::string &s,
+		   const std::string &parameter, double defval = 0.) const;
 };
 
 } // namespace LArGeo
