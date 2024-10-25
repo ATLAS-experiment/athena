@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#include "AthenaMonitoring/AthenaMonManager.h"
-
 #include "CSCSegmValMonAlg.h"
 
 #include "MuonPrepRawData/CscClusterStatus.h"
@@ -41,8 +39,6 @@ StatusCode CSCSegmValMonAlg::initialize() {
     m_doEvtSel = false;
   }
 
-  StoreGateSvc* detStore = nullptr;
-  ATH_CHECK(service("DetectorStore", detStore));
   ATH_CHECK(m_edmHelperSvc.retrieve());
   ATH_CHECK(m_idHelperSvc.retrieve());
   ATH_CHECK(m_segmKey.initialize());

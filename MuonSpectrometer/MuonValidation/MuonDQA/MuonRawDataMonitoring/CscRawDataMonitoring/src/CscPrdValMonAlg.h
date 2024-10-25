@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CscPrdValMonAlg_H
 #define CscPrdValMonAlg_H
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
-#include "AthenaMonitoring/ManagedMonitorToolBase.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
 #include "StoreGate/ReadHandleKey.h"
