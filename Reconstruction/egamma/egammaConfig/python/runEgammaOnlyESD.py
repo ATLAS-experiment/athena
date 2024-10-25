@@ -25,7 +25,7 @@ def _run(args):
 
     flags.Exec.MaxEvents = args.maxEvents
     if not args.inputFileList:
-        flags.Input.Files = defaultTestFiles.ESD
+        flags.Input.Files = defaultTestFiles.ESD_RUN3_MC
     else:
         flags.Input.Files = args.inputFileList
 
