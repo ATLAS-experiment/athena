@@ -195,25 +195,25 @@ float RPDDataAnalyzer::calculateBaselineSamplesMSE(unsigned int channel, std::fu
  */
 bool RPDDataAnalyzer::doPileupExpFit(unsigned int channel, std::vector<std::pair<unsigned int, float>> const& pileupFitPoints)
 {
-  TLinearFitter fitter(1, "1 ++ x");
+  auto pFitter = std::make_unique<TLinearFitter>(1, "1 ++ x");
   double x {};
   for (auto const& [sample, y] : pileupFitPoints) {
     x = sample;
-    fitter.AddPoint(&x, std::log(y));
+    pFitter->AddPoint(&x, std::log(y));
   }
-  if (fitter.Eval()) {
+  if (pFitter->Eval()) {
     (*m_msgFunc_p)(ZDCMsg::Warn, "RPDDataAnalyzer::doPileupExpFit: there was an error while evaluating TLinearFitter!");
     m_chStatus.at(channel).set(PileupExpFitFailBit, true);
     return false;
   }
-  m_chPileupExpFitParams.at(channel) = {static_cast<float>(fitter.GetParameter(0)), static_cast<float>(fitter.GetParameter(1))};
-  m_chPileupExpFitParamErrs.at(channel) = {static_cast<float>(fitter.GetParError(0)), static_cast<float>(fitter.GetParError(1))};
-  m_chExpPileupFuncs.at(channel) = [intercept = fitter.GetParameter(0), slope = fitter.GetParameter(1)](unsigned int sample) { return std::exp(intercept + slope*sample); };
+  m_chPileupExpFitParams.at(channel) = {static_cast<float>(pFitter->GetParameter(0)), static_cast<float>(pFitter->GetParameter(1))};
+  m_chPileupExpFitParamErrs.at(channel) = {static_cast<float>(pFitter->GetParError(0)), static_cast<float>(pFitter->GetParError(1))};
+  m_chExpPileupFuncs.at(channel) = [intercept = pFitter->GetParameter(0), slope = pFitter->GetParameter(1)](unsigned int sample) { return std::exp(intercept + slope*sample); };
   m_chExpPileupMSE.at(channel) = calculateBaselineSamplesMSE(channel, m_chExpPileupFuncs.at(channel));
 
   // check for exponential growth in parameters - we definitely don't want that for a function that describes pileup
-  if (fitter.GetParameter(1) >= 0) {
-    (*m_msgFunc_p)(ZDCMsg::Debug, "RPDDataAnalyzer::doPileupExpFit: p1 is " + std::to_string(fitter.GetParameter(1)) + " > 0 -> there is exponential growth in fit function!");
+  if (pFitter->GetParameter(1) >= 0) {
+    (*m_msgFunc_p)(ZDCMsg::Debug, "RPDDataAnalyzer::doPileupExpFit: p1 is " + std::to_string(pFitter->GetParameter(1)) + " > 0 -> there is exponential growth in fit function!");
     m_chStatus.at(channel).set(PileupExpGrowthBit, true);
     return false;
   }
