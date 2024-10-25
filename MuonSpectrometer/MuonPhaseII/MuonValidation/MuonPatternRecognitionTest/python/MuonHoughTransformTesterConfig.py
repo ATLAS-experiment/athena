@@ -39,6 +39,15 @@ if __name__=="__main__":
     cfg.merge(MuonSegmentFittingAlgCfg(flags))
     cfg.merge(MuonHoughTransformTesterCfg(flags))    
 
+    if flags.Input.isMC:
+        ## Keep them to manually exchange the map
+        # "MDTTwinMapping_compactFormat_allBO", "MDTTwinMapping_compactFormat_fullSpectrometer",  
+        # "MDTTwinMapping_compactFormat_Run123",  
+        from IOVDbSvc.IOVDbSvcConfig import addOverride
+        cfg.merge(addOverride(flags, "/MDT/TWINMAPPING", "MDTTwinMapping_compactFormat_Run123"))
+   
+
+    
     if not args.noMonitorPlots:
         cfg.getEventAlgo("MuonEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="EtaHoughPlotValid",

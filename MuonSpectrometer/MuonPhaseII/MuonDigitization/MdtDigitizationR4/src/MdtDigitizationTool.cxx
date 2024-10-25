@@ -114,6 +114,10 @@ namespace MuonR4 {
                     continue;
                 }
                 const IdentifierHash twinHash{readOutEle->measurementHash(twinId)};
+                if (!readOutEle->isValid(twinHash)) {
+                    ATH_MSG_VERBOSE("Reject "<<m_idHelperSvc->toString(twinId)<<" as there's no tube ");
+                    continue;
+                }
                 /// The signal for the twin tube needs to travel to the HV side & then through the complete twin tube
                 const double twinDist = readOutEle->activeTubeLength(measHash) - distRO + 
                                         readOutEle->activeTubeLength(twinHash);
