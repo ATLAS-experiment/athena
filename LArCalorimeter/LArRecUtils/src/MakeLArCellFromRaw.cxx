@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // implementation of MakeLArCellFromRaw
@@ -51,25 +51,15 @@ void MakeLArCellFromRaw::initialize ( const LArRoIMap& roiMap,
 
   m_poolMaxSize = poolMaxSize;
 
-  ISvcLocator* svcLoc = Gaudi::svcLocator( );
-
-  StatusCode sc = svcLoc->service("MessageSvc", m_msgSvc);
-  if (sc.isFailure())
-  {
-    std::cout << "MakeLArCellFromRaw ERROR cannot retrieve MessageSvc " << std::endl;
-    return;
-  }
-
-  MsgStream log(m_msgSvc, "MakeLArCellFromRaw");
+  MsgStream log(Athena::getMessageSvc(), "MakeLArCellFromRaw");
 
   log << MSG::INFO <<" initializing MakeLArCellFromRaw"<< endmsg ;
 
   if(pCorr) log <<MSG::INFO <<" Number of Corrections "<< pCorr->size()<< endmsg ;
   
 
-  StoreGateSvc* detStore = nullptr;
-  sc = svcLoc->service("DetectorStore", detStore);
-  if (sc.isFailure())
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator( )->service("DetectorStore")};
+  if (!detStore)
   {
     log << MSG::ERROR << "MakeLArCellFromRaw ERROR cannot retrieve DetectorStore " << endmsg;
     return;
