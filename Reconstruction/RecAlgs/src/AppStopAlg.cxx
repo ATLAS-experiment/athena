@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "AppStopAlg.h"
 #include "CxxUtils/checker_macros.h"
@@ -71,13 +71,8 @@ StatusCode AppStopAlg::execute() {
   if (gSignalStatus!=0) {
     
     ATH_MSG_INFO("Got signal " << m_signal << ". Stopping the application");
-    IEventProcessor* appMgr=nullptr;
-    ATH_CHECK(service("ApplicationMgr",appMgr));
-    
-    if (!appMgr) {
-      ATH_MSG_ERROR("Failed to retrieve ApplicationMgr as IEventProcessor");
-      return StatusCode::FAILURE;
-    }
+    SmartIF<IEventProcessor> appMgr{service("ApplicationMgr")};
+    ATH_CHECK(appMgr.isValid());
     ATH_CHECK(appMgr->stopRun());
   }
   
