@@ -36,14 +36,16 @@ def createPriVertexingFlags():
                           PrimaryPassConfig.HeavyIon)))    
     flags.addFlag("maxTracks", 3000)
     flags.addFlag("maxVertices", lambda pcf:
-                  1 if pcf.Tracking.PrimaryPassConfig is (
-                      PrimaryPassConfig.HeavyIon)
+                  1 if pcf.Tracking.PrimaryPassConfig in [
+                      PrimaryPassConfig.HeavyIon, PrimaryPassConfig.VtxLumiHeavyIon]
                   else 200)
 
     # string to store the setup for primary vertexing.
 
     def vertexSetup(pcf):
         if pcf.Reco.EnableHI:
+            return VertexSetup.FastIVF
+        elif pcf.Tracking.PrimaryPassConfig is PrimaryPassConfig.VtxLumiHeavyIon:
             return VertexSetup.FastIVF
         elif (pcf.Tracking.doMinBias or
               pcf.Tracking.doLowMu or
@@ -70,6 +72,8 @@ def createPriVertexingFlags():
         else:
             if not pcf.Tracking.PriVertex.useBeamConstraint:
                 return 10.0 * Units.mm
+            elif pcf.Tracking.PrimaryPassConfig is PrimaryPassConfig.VtxLumiHeavyIon:
+                return 10.0 * Units.mm
             else:  # Default ID
                 return 4.0 * Units.mm
 
@@ -81,7 +85,8 @@ def createPriVertexingFlags():
         else:
             if pcf.Tracking.doMinBias or pcf.Tracking.doLowPt:
                 return 100.0 * Units.MeV
-            elif pcf.Reco.EnableHI or pcf.Tracking.doLowMu:
+            elif pcf.Reco.EnableHI or pcf.Tracking.doLowMu \
+                    or pcf.Tracking.PrimaryPassConfig is PrimaryPassConfig.VtxLumiHeavyIon:
                 return 400.0 * Units.MeV
             else: # Default ID
                 return 500.0 * Units.MeV
