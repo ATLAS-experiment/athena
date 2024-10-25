@@ -16,7 +16,7 @@ uint64_t eFexEMRoIThresholdsTool::getPattern(const xAOD::eFexEMRoI& roi,
   uint64_t thresholdMask = 0;
   // Iterate through thresholds and see which ones are passed
   for (const std::shared_ptr<TrigConf::L1Threshold>& thrBase : menuThresholds) {
-    std::shared_ptr<TrigConf::L1Threshold_eEM> thr = std::static_pointer_cast<TrigConf::L1Threshold_eEM>(thrBase);
+    auto thr = static_cast<TrigConf::L1Threshold_eEM*>(thrBase.get());
     // Test ET threshold and jet discriminant codes, set bit in threshold word if conditions met
     if (et > thr->thrValueCounts(ieta) && reta >= (unsigned int)thr->reta() &&
         rhad >= (unsigned int)thr->rhad() && wstot >= (unsigned int)thr->wstot()) {
