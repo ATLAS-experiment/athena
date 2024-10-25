@@ -9,6 +9,7 @@
 #include <vector>
 #include <utility>
 #include <memory>
+#include <array>
 
 // Local include(s):
 #include "TrigT1Interfaces/Lvl1MuSectorLogicDataPhase1.h"
@@ -30,12 +31,12 @@ namespace LVL1MUONIF {
     *    @see LVL1MUONIF::Lvl1MuForwardSectorLogicDataPhase1
     *
     */
-   class Lvl1MuCTPIInputPhase1 {
+   class Lvl1MuCTPIInputPhase1 final {
 
    public:
       Lvl1MuCTPIInputPhase1();
       Lvl1MuCTPIInputPhase1( const Lvl1MuCTPIInputPhase1& );
-      virtual ~Lvl1MuCTPIInputPhase1();
+      ~Lvl1MuCTPIInputPhase1() = default;
 
       Lvl1MuCTPIInputPhase1& operator=( const Lvl1MuCTPIInputPhase1& right );
 
@@ -126,7 +127,7 @@ namespace LVL1MUONIF {
       size_t reserve( size_t systemAddress ,
 		      int    bcid=0         );
      
-     bool m_isFilledOutOfTimeCandidates[NumberOfMuonSystem];
+     std::array<bool, NumberOfMuonSystem> m_isFilledOutOfTimeCandidates;
      
      std::vector<Lvl1MuVectWithBC> m_data[ NumberOfMuonSystem ];
    }; // class Lvl1MuCTPIInputPhase1
