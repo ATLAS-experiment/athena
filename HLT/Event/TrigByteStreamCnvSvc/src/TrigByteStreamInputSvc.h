@@ -1,13 +1,14 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGBYTESTREAMINPUTSVC_H
 #define TRIGBYTESTREAMINPUTSVC_H
 
-#include "ByteStreamCnvSvc/ByteStreamInputSvc.h"
+#include "ByteStreamCnvSvc/IByteStreamInputSvc.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 #include "ByteStreamData/RawEvent.h"
+#include "AthenaBaseComps/AthService.h"
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include <memory.h>
@@ -20,15 +21,12 @@ class StoreGateSvc;
  *
  *  The layout and implementation are based on ByteStreamEventStorageInputSvc
  **/
-class TrigByteStreamInputSvc : public ByteStreamInputSvc {
+class TrigByteStreamInputSvc : public extends<AthService, IByteStreamInputSvc> {
 public:
   /// Standard constructor
   TrigByteStreamInputSvc(const std::string& name, ISvcLocator* svcLoc);
   /// Standard destructor
   virtual ~TrigByteStreamInputSvc();
-
-  // -------------------------- IInterface methods -----------------------------
-  virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface) override;
 
   // ------------------------- Service methods --------------------------------
   virtual StatusCode initialize() override;

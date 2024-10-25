@@ -18,9 +18,10 @@
 #include <string>
 
 #include "ByteStreamDataWriter.h"
-#include "ByteStreamCnvSvc/ByteStreamOutputSvc.h"
+#include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
 
 #include "AthenaKernel/SlotSpecificObj.h"
+#include "AthenaBaseComps/AthService.h"
 #include "ByteStreamData/ByteStreamMetadataContainer.h"
 #include "ByteStreamData/RawEvent.h"
 #include "EventStorage/EventStorageRecords.h"
@@ -40,13 +41,12 @@ class ByteStreamMetadata;
 /** @class ByteStreamEventStorageOutputSvc
  *  @brief This class provides the services for writing FullEventFragment into
  *         file.
- *  This class implements the interface ByteStreamOutputSvc for the conversion
+ *  This class implements the interface IByteStreamOutputSvc for the conversion
  *  service to write the output to a file.
  **/
 class ByteStreamEventStorageOutputSvc :
-    public extends< ByteStreamOutputSvc, IIoComponent > {
+  public extends< AthService, IByteStreamOutputSvc, IIoComponent > {
  public:
-  using extends::extends;
 
   /// Constructors:
   ByteStreamEventStorageOutputSvc(
@@ -59,11 +59,8 @@ class ByteStreamEventStorageOutputSvc :
   StatusCode initialize() override;
   StatusCode stop() override;
   StatusCode finalize() override;
-  StatusCode
-      queryInterface(const InterfaceID& riid, void** ppvInterface) override;
 
-
-  /// Implementation of the ByteStreamOutputSvc interface method putEvent.
+  /// Implementation of the IByteStreamOutputSvc interface method putEvent.
   virtual bool putEvent(const RawEvent* re) override;
   virtual bool putEvent(const RawEvent* re, const EventContext& ctx) override;
 

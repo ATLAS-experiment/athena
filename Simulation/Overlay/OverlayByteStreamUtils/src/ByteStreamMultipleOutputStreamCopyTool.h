@@ -27,8 +27,8 @@
 
 // ByteStream
 
-#include "ByteStreamCnvSvc/ByteStreamInputSvc.h"
-#include "ByteStreamCnvSvc/ByteStreamOutputSvc.h"
+#include "ByteStreamCnvSvc/IByteStreamInputSvc.h"
+#include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
 
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // this code is obsolete/unused (certainly in production)
@@ -97,7 +97,7 @@ public:
 private:
 
   // Handle for BS input Svc
-  ServiceHandle<ByteStreamInputSvc> m_inputSvc;
+  ServiceHandle<IByteStreamInputSvc> m_inputSvc;
   
   // Whether to use lbn map or not
   bool m_uselbnmap;
@@ -106,7 +106,7 @@ private:
   void initlbnmap();
 
   // Handle for BS output Svc
-  std::vector< ServiceHandle<ByteStreamOutputSvc> > m_outputSvc;
+  std::vector< ServiceHandle<IByteStreamOutputSvc> > m_outputSvc;
   int m_NoutputSvc;
 
   int m_skipevents;

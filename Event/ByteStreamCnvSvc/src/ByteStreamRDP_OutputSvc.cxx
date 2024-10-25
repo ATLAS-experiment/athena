@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //===================================================================
@@ -15,23 +15,17 @@
 
 // Constructor.
 ByteStreamRDP_OutputSvc::ByteStreamRDP_OutputSvc(const std::string& name, ISvcLocator* svcloc)
-	: ByteStreamOutputSvc(name, svcloc) {
+	: base_class(name, svcloc) {
       if (m_bsOutputStreamName.empty()) m_bsOutputStreamName = name;
 }
 
 // Open the first input file and read the first event.
 StatusCode ByteStreamRDP_OutputSvc::initialize() {
    ATH_MSG_INFO("Initializing");
-   if (!ByteStreamOutputSvc::initialize().isSuccess()) {
-      ATH_MSG_FATAL("Cannot initialize ByteStreamOutputSvc base class.");
-      return(StatusCode::FAILURE);
-   }
 
    // Retrieve ROBDataProviderSvc
-   if (!m_robProvider.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Cannot get ROBDataProviderSvc");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK( m_robProvider.retrieve() );
+
    return(StatusCode::SUCCESS);
 }
 
@@ -56,15 +50,4 @@ bool ByteStreamRDP_OutputSvc::putEvent(const RawEvent* re, const EventContext& c
    m_robProvider->setNextEvent(ctx, cache->rawEvent.get());
 
    return true;
-}
-
-StatusCode ByteStreamRDP_OutputSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-   if (ByteStreamOutputSvc::interfaceID().versionMatch(riid)) {
-      *ppvInterface = dynamic_cast<ByteStreamOutputSvc*>(this);
-   } else {
-     // Interface is not directly available: try out a base class
-     return(::AthService::queryInterface(riid, ppvInterface));
-   }
-   addRef();
-   return(StatusCode::SUCCESS);
 }

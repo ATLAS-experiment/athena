@@ -7,7 +7,7 @@
 
 /**
  @class ByteStreamEmonInputSvc
- @brief implements the interface ByteStreamInputSvc for reading events
+ @brief implements the interface IByteStreamInputSvc for reading events
         from emon.
 
 */
@@ -18,7 +18,8 @@
 
 #include "TrigConfData/L1Menu.h"
 
-#include "ByteStreamCnvSvc/ByteStreamInputSvc.h"
+#include "AthenaBaseComps/AthService.h"
+#include "ByteStreamCnvSvc/IByteStreamInputSvc.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 #include "ByteStreamData/RawEvent.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -33,7 +34,7 @@
 class OHRootProvider;
 class StoreGateSvc;
 
-class ByteStreamEmonInputSvc: public ByteStreamInputSvc {
+class ByteStreamEmonInputSvc: public extends<AthService, IByteStreamInputSvc> {
 public:
 
    /// Constructors:

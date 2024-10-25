@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMEVENTSTORAGEINPUTSVC_H
@@ -12,9 +12,10 @@
  **/
 
 // Include files.
-#include "ByteStreamCnvSvc/ByteStreamInputSvc.h"
+#include "ByteStreamCnvSvc/IByteStreamInputSvc.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 #include "ByteStreamData/RawEvent.h"
+#include "AthenaBaseComps/AthService.h"
 #include "AthenaKernel/SlotSpecificObj.h"
 
 // FrameWork includes
@@ -32,7 +33,7 @@ class DataHeaderElement;
  *  @brief This class is the ByteStreamInputSvc for reading events written by EventStorage.
  **/
 class ByteStreamEventStorageInputSvc
-: public ByteStreamInputSvc
+  : public extends<AthService, IByteStreamInputSvc>
 {
 public:
   /// Constructors:
@@ -47,11 +48,7 @@ public:
   virtual StatusCode stop      () override;
   virtual StatusCode finalize  () override;
 
-  /// Required of all Gaudi services:  see Gaudi documentation for details
-  virtual
-  StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface) override;
-
-  /// Implementation of the ByteStreamInputSvc interface methods.
+  /// Implementation of the IByteStreamInputSvc interface methods.
   virtual const RawEvent* currentEvent () const override;
   virtual const RawEvent* nextEvent    () override; //!< ++, new
   virtual const RawEvent* previousEvent() override; //!< --, old
