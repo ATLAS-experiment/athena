@@ -168,29 +168,27 @@ namespace IOVDbNamespace{
     return nullptr;
   }
 
-  nlohmann::json CrestFunctions::getTagProperties(const std::string & tag){
+  nlohmann::json 
+  CrestFunctions::getTagProperties(const std::string & tag){
     try{
       TagDto dto = m_crestCl->findTag(tag);
-      nlohmann::json tag = dto.to_json();
-      return tag;
-
+      return dto.to_json();
     } catch (std::exception & e){
       std::cerr<<__FILE__<<":"<<__LINE__<< ": " << e.what() << " Cannot get a tag Properties of " << tag << std::endl;
     }
     return nullptr;
   }
 
-  std::string CrestFunctions::getTagInfoElement(nlohmann::json tag_info, const std::string & key){
+  std::string 
+  CrestFunctions::getTagInfoElement(nlohmann::json tag_info, const std::string & key){
     if (tag_info.contains(key)){
       if (key == "channel_list"){ 
         return  tag_info[key].dump();
-      }
-      else if (key== "node_description"){
-	std::string v;
-	tag_info[key].get_to(v);
-	return v;
-      }
-      else{
+      } else if (key== "node_description"){
+        std::string v;
+        tag_info[key].get_to(v);
+        return v;
+      } else{
         return nlohmann::to_string(tag_info[key]);
       }
     }
@@ -218,7 +216,8 @@ namespace IOVDbNamespace{
     return std::make_pair(std::move(list), std::move(names));
   }
 
-  nlohmann::json CrestFunctions::getResources(nlohmann::json& js) {
+  nlohmann::json 
+  CrestFunctions::getResources(nlohmann::json& js) {
     nlohmann::json js2 = json::array();
     nlohmann::json result = js.value("resources", js2);
     return result;
@@ -229,19 +228,14 @@ namespace IOVDbNamespace{
     std::vector<uint64_t> v;
     try{
       IovSetDto dto = m_crestCl->selectGroups(tag, 0, 10000, 0, "id.since:ASC");
-
-      std::vector<IovDto> res = dto.resources;
-      
-      for (IovDto item_iov: res){
-	uint64_t since = item_iov.since;
-        v.emplace_back(since);
+      const std::vector<IovDto> & res = dto.resources;
+      for (const IovDto & item_iov: res){
+        v.emplace_back(item_iov.since);
       }
-
     } catch (std::exception & e){
       std::cerr<<__FILE__<<":"<<__LINE__<< ": "<<e.what()<<" while trying to find the IOVs"<<std::endl;
       return {};
     }
-
     return v;
   }
 
@@ -291,65 +285,38 @@ namespace IOVDbNamespace{
   CrestFunctions::getIovInterval(const std::string&  tag, const uint64_t since, const uint64_t until){
     std::vector<uint64_t> v = getIovGroups(tag);
     v.push_back(std::numeric_limits<uint64_t>::max()); // added "infinity" as the last item
-    return getSinceUntilPair(v, since, until);
+    return getSinceUntilPair(std::move(v), since, until);
   }
 
 
   std::vector<IovHashPair>
   CrestFunctions::getIovsForTag(const std::string & tag, uint64_t since, uint64_t until){
-
     std::vector<IovHashPair> iovHashPairs;
-
     int iovNumber = getTagSize(tag);
-    
     try{
       IovSetDto dto;
-
       if (iovNumber <=1000) {
         dto = m_crestCl->selectIovs(tag, 0, -1, 0, 10000, 0, "id.since:ASC");
-      }
-      else{
-
-        std::pair<uint64_t,uint64_t> ppt = getIovInterval(tag, since, until);
-
-	uint64_t s_time = ppt.first;
-        uint64_t u_time = ppt.second;
-
+      } else {
+        const auto &[s_time, u_time] = getIovInterval(tag, since, until);
         if (s_time == 0 && u_time == 0){ // data out of range
-	  return iovHashPairs;
-	}
-	else {
+	        return iovHashPairs;
+	      } else {
           dto = m_crestCl->selectIovs(tag, s_time, u_time, 0, 10000, 0, "id.since:ASC");
-	}
+	      }
       }
-
       std::vector<IovDto> res = dto.resources;
       std::map<uint64_t, std::string> hashmap;
-
-      for (IovDto item: res) {
-
-        uint64_t since = item.since;
-        std::string hash = item.payloadHash;
-
-        if (hashmap.size() == 0){
-	  hashmap.insert(make_pair(since, hash)); 
-        }
-        else if (hashmap.count(since)>0) {
-	  hashmap[since] = hash;
-        } else {
-	  hashmap.insert(make_pair(since, hash)); 
-        }
+      for (const IovDto & item: res) {
+        hashmap[item.since] = item.payloadHash;
       } 
-
       for (auto& t : hashmap){
         iovHashPairs.emplace_back(std::to_string(t.first),t.second);
       }
-      
     } catch (std::exception & e){
       std::cerr<<__FILE__<<":"<<__LINE__<< ": "<<e.what()<<" while trying to find the IOVs"<<std::endl;
       return {};
     }
-
     return iovHashPairs;
   }
 }
