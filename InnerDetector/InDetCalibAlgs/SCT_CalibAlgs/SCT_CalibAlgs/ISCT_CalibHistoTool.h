@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -14,6 +14,7 @@
 //Gaudi includes
 #include "GaudiKernel/IInterface.h"
 #include "GaudiKernel/IAlgTool.h"
+#include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/ToolHandle.h"
 #include <vector>
 #include <string>
@@ -21,16 +22,15 @@
 class TH1F;
 class TH2F;
 class TH1I;
-class ITHistSvc;
 class SCT_ID;
 
 class ISCT_CalibHistoTool: virtual public IAlgTool {
    public:
+      DeclareInterfaceID(ISCT_CalibHistoTool, 1, 0);
+
       ISCT_CalibHistoTool();
       /// no-op destructor
       virtual ~ISCT_CalibHistoTool() = default;
-      /// interfaceID re-implemented from IInterface
-      static const InterfaceID& interfaceID();
       /// book histograms
       virtual bool book()=0;
       /// read histograms
@@ -62,7 +62,7 @@ class ISCT_CalibHistoTool: virtual public IAlgTool {
       std::vector<TH1F*> m_phistoVector;
       std::vector<TH2F*> m_phistoVector2D;
       TH1I* m_numberOfEventsHisto{nullptr};
-      ITHistSvc* m_thistSvc{nullptr};
+      SmartIF<ITHistSvc> m_thistSvc{nullptr};
       const SCT_ID* m_pSCTHelper{nullptr};
       int m_lumiBlock{0};
       int m_nLb{0};
@@ -75,10 +75,5 @@ class ISCT_CalibHistoTool: virtual public IAlgTool {
          return std::make_pair("", true);
       }
 };
-
-inline const InterfaceID& ISCT_CalibHistoTool::interfaceID() {
-   static const InterfaceID IID{"ISCT_CalibHistoTool", 1, 0};
-   return IID;
-}
 
 #endif
