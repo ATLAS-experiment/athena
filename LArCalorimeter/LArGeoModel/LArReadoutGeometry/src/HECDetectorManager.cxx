@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArReadoutGeometry/HECDetDescr.h"
@@ -27,17 +27,17 @@ HECDetectorManager::HECDetectorManager(const HECHVManager* hvManager, bool isTes
   setName("LArHEC");
 
   ISvcLocator *svcLocator = Gaudi::svcLocator();
-  IRDBAccessSvc *rdbAccess{nullptr};
-  IGeoModelSvc  *geoModel{nullptr};
-  IGeoDbTagSvc  *geoDbTagSvc{nullptr};
 
-  if(svcLocator->service("GeoModelSvc",geoModel) == StatusCode::FAILURE)
+  SmartIF<IGeoModelSvc> geoModel{svcLocator->service("GeoModelSvc")};
+  if(!geoModel.isValid())
     throw std::runtime_error("Error in HECDetectorManager, cannot access GeoModelSvc");
 
-  if(svcLocator->service("GeoDbTagSvc",geoDbTagSvc) == StatusCode::FAILURE)
+  SmartIF<IGeoDbTagSvc> geoDbTagSvc{svcLocator->service("GeoDbTagSvc")};
+  if(!geoDbTagSvc.isValid())
     throw std::runtime_error("Error in HECDetectorManager, cannot access GeoDbTagSvc");
 
-  if(svcLocator->service(geoDbTagSvc->getParamSvcName(),rdbAccess) == StatusCode::FAILURE)
+  SmartIF<IRDBAccessSvc> rdbAccess{svcLocator->service(geoDbTagSvc->getParamSvcName())};
+  if(!rdbAccess.isValid())
     throw std::runtime_error("Error in HECDetectorManager, cannot access RDBAccessSvc");
 
   std::string larKey, larNode;

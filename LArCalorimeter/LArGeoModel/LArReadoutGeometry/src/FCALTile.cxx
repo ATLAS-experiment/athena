@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArReadoutGeometry/FCALTile.h"
@@ -103,12 +103,8 @@ FCALTubeConstLink FCALTile::getTube (unsigned int i) const {
 
     std::vector<FCALTubeConstLink> tube;
 
-    //std::cout << " in FCALTile::getTube " << std::endl;
-    // Then go to storegate..
-    ISvcLocator *svcLocator = Gaudi::svcLocator();
-    
-    StoreGateSvc *detStore;
-    if (svcLocator->service("DetectorStore", detStore, false )==StatusCode::FAILURE) {
+    SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+    if(!detStore.isValid()) {
       throw std::runtime_error("Error in FCALTile: cannot access DetectorStore (tube access)");
     }
     
@@ -121,16 +117,9 @@ FCALTubeConstLink FCALTile::getTube (unsigned int i) const {
     unsigned int iSampling    = moduleNumber-1;           // by convention.
     unsigned int iSide        = m_module->getEndcapIndex(); 
 
-    //std::cout << " side,sampling " << iSide << " " << iSampling << std::endl;
- 
     for (FCAL_ChannelMap::tubemap_const_iterator t=channelMap->tubemap_begin(moduleNumber);t!=channelMap->tubemap_end(moduleNumber); ++t) {
       if ((*t).second.get_tileName()==(*m_tile).first) {
 	std::string FeedThrough = (*t).second.getHVft();
-	//int         ElectrodeId = (*t).second.getElectrodeDataID();
-        //std::cout << "FeedThrough " << FeedThrough << std::endl;
-
-
-	// Is it possible to 
 
         std::string::size_type pos = FeedThrough.find('.');
 	if (pos==std::string::npos) {
@@ -171,7 +160,6 @@ FCALTubeConstLink FCALTile::getTube (unsigned int i) const {
 	else throw std::runtime_error("Error in FCALTile: unrecognized HV Line");
 
 	const FCALHVLine& hvElec = hvMod.getHVLine(index);
-        //std::cout << " add hvElec for index " << index << "  hvElec= " << hvElec << std::endl;
 	
 	FCALTubeConstLink tubeLink(new FCALTube(this, hvElec, (*t).second.x(),(*t).second.y()));
 	

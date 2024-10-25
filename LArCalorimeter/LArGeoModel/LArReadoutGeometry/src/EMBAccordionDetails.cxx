@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArReadoutGeometry/EMBAccordionDetails.h"
@@ -12,8 +12,10 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/PhysicalConstants.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/StoreGateSvc.h"
 #include <cmath>
+
 class EMBAccordionDetails::Clockwork {
 
 public:
@@ -69,6 +71,7 @@ public:
   const GeoStraightAccSection *electrodeStraightSection;
   const GeoStraightAccSection *absorberStraightSection;
 
+  ServiceHandle<StoreGateSvc> detStore{"DetectorStore","DetectorStore"};
 };
 
 void EMBAccordionDetails::Clockwork::getRPhi()
@@ -76,10 +79,7 @@ void EMBAccordionDetails::Clockwork::getRPhi()
   const double dl=0.001;
   const double inv_dl = 1 / dl;
   double cenx[15],ceny[15];
-  //double xl,xl2;
   double sum1[5000],sumx[5000];
-  //xl=0;
-  //xl2=0.;
   NRphi=5000;
   Rmin=1500.;
   dR=0.10;
@@ -121,11 +121,8 @@ void EMBAccordionDetails::Clockwork::getRPhi()
            phi1=-delta[i];
         }
      }
-     //xl2+=rint*fabs(phi1-phi0);
      int nstep=int((phi1-phi0) * inv_dt)+1;
-//     std::cout << "fold " << phi0 << " " << phi1 << " " << nstep << std::endl;
      for (int ii=0;ii<nstep;ii++) {
-        //xl+=dl;
         double phi=phi0+dt*((double)ii);
         double x=cenx[i]+rint*cos(phi);
         double y=ceny[i]+rint*sin(phi);
@@ -152,11 +149,8 @@ void EMBAccordionDetails::Clockwork::getRPhi()
         else        phi=-M_PI/2.+delta[i];
         double x1=x0-0.5*along*cos(phi);
         double y1=y0-0.5*along*sin(phi);
-        //xl2+=along;
         int nstep=int(along * inv_dl)+1;
-//        std::cout << "straight" << x0 << " " << y0 << along << " " << nstep << std::endl;
         for (int ii=0;ii<nstep;ii++) {
-           //xl+=dl;
            double x=x1+dl*((double)ii)*cos(phi);
            double y=y1+dl*((double)ii)*sin(phi);
            double radius=sqrt(x*x+y*y);
@@ -170,13 +164,9 @@ void EMBAccordionDetails::Clockwork::getRPhi()
         }
      }
   }
-//  std::cout << "total electrode length " << xl << " " << xl2 << std::endl;
-//  std::cout << "rmax in accordion " << Rmax << std::endl;
   for (int i=0; i<NRphi; i++) {
     if (sum1[i]>0) {
      Rphi[i]=sumx[i]/sum1[i];
-     // Not used: double radius = Rmin + ((double(i))+0.5)*dR;
-//     std::cout << " r,phi0 " << radius << " " << Rphi[i] << std::endl;
     } 
     else Rphi[i]=0.;
   }
@@ -206,19 +196,22 @@ EMBAccordionDetails::EMBAccordionDetails()
   : m_c(new Clockwork()) 
 {
   ISvcLocator *svcLocator = Gaudi::svcLocator();
-  IRDBAccessSvc *rdbAccess{nullptr};
-  IGeoModelSvc  *geoModel{nullptr};
-  IGeoDbTagSvc  *geoDbTagSvc{nullptr};
 
-  if(svcLocator->service("GeoModelSvc",geoModel) == StatusCode::FAILURE)
+  SmartIF<IGeoModelSvc> geoModel{svcLocator->service("GeoModelSvc")};
+  if(!geoModel.isValid())
     throw std::runtime_error("Error in HECDetectorManager, cannot access GeoModelSvc");
 
-  if(svcLocator->service("GeoDbTagSvc",geoDbTagSvc) == StatusCode::FAILURE)
+  SmartIF<IGeoDbTagSvc> geoDbTagSvc{svcLocator->service("GeoDbTagSvc")};
+  if(!geoDbTagSvc.isValid())
     throw std::runtime_error("Error in HECDetectorManager, cannot access GeoDbTagSvc");
 
-  if(svcLocator->service(geoDbTagSvc->getParamSvcName(),rdbAccess) == StatusCode::FAILURE)
+  SmartIF<IRDBAccessSvc> rdbAccess{svcLocator->service(geoDbTagSvc->getParamSvcName())};
+  if(!rdbAccess.isValid())
     throw std::runtime_error("Error in HECDetectorManager, cannot access RDBAccessSvc");
 
+  if(m_c->detStore.retrieve().isFailure())
+      throw std::runtime_error("Error in HECDetectorManager, cannot access DetectorStore");
+  
   std::string detectorKey, detectorNode;
 
   if(geoDbTagSvc->getSqliteReader()==nullptr) {  
@@ -297,17 +290,9 @@ double EMBAccordionDetails::Clockwork::phi0(double radius) const
 
 const GeoStraightAccSection *EMBAccordionDetails::getAbsorberSections() const {
   if (m_c->absorberStraightSection==nullptr) {
-    StatusCode status;
-    ISvcLocator* svcLocator = Gaudi::svcLocator(); 
-    StoreGateSvc *detStore;
-
     const GeoStraightAccSection* sa = nullptr;
-
-    status = svcLocator->service ("DetectorStore",detStore);
-    if (status != StatusCode::SUCCESS) throw std::runtime_error ("Cannot locate Storegate");
-
     
-    status = detStore->retrieve(sa,"STRAIGHTABSORBERS");
+    StatusCode status = m_c->detStore->retrieve(sa,"STRAIGHTABSORBERS");
     if (status != StatusCode::SUCCESS) throw std::runtime_error ("Cannot locate Straight Absorbers");
     
     m_c->absorberStraightSection = sa;
@@ -320,16 +305,9 @@ const GeoStraightAccSection *EMBAccordionDetails::getAbsorberSections() const {
 
 const GeoStraightAccSection *EMBAccordionDetails::getElectrodeSections() const {
   if (m_c->electrodeStraightSection==nullptr) {
-    StatusCode status;
-    ISvcLocator* svcLocator = Gaudi::svcLocator(); 
-    StoreGateSvc *detStore;
-
     const GeoStraightAccSection* sa = nullptr;
 
-    status = svcLocator->service ("DetectorStore",detStore);
-    if (status != StatusCode::SUCCESS) throw std::runtime_error ("Cannot locate Storegate");
-
-    status = detStore->retrieve(sa,"STRAIGHTELECTRODES");
+    StatusCode status = m_c->detStore->retrieve(sa,"STRAIGHTELECTRODES");
     if (status != StatusCode::SUCCESS) throw std::runtime_error ("Cannot locate Straight Electrodes");
     
     m_c->electrodeStraightSection=sa;
