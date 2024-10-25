@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArReadoutGeometry/FCAL_ChannelMap.h"
@@ -51,42 +51,26 @@
 #include <fstream>
 #include <stdexcept>
 
-
-//===================constructor
-
-LArGeo::FCALConstruction::FCALConstruction()
-  : m_fcalPhysical(nullptr)
-  , m_absPhysical1(nullptr)
-  , m_absPhysical2(nullptr)
-  , m_absPhysical3(nullptr)
-  , m_VisLimit(0)
-  , m_svcLocator(nullptr)
-  , m_fullGeo(true)
-{
-}  
-
-
-//===================destructor
-
-LArGeo::FCALConstruction::~FCALConstruction()
-= default;
-
 //================== get envelope
-
 GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::FCALConstruction::GetEnvelope(bool bPos)
 {
   IRDBAccessSvc* rdbAccess{nullptr};
   IGeoModelSvc * geoModel{nullptr};
 
-
   if(!m_absPhysical1) {
     // Access Geometry DB
     m_svcLocator = Gaudi::svcLocator();
-    
-    if(m_svcLocator->service ("GeoModelSvc",geoModel) == StatusCode::FAILURE)
+
+    SmartIF<IGeoModelSvc> gModel{m_svcLocator->service("GeoModelSvc")};
+    if(!gModel.isValid()) {
       throw std::runtime_error("Error in FCALConstruction, cannot access GeoModelSvc");
-    if(m_svcLocator->service ("RDBAccessSvc",rdbAccess) == StatusCode::FAILURE)
+    }
+    geoModel = gModel.get();
+    SmartIF<IRDBAccessSvc> rAccess{m_svcLocator->service("RDBAccessSvc")};
+    if(!rAccess.isValid()) {
       throw std::runtime_error("Error in FCALConstruction, cannot access RDBAccessSvc");
+    }
+    rdbAccess = rAccess.get();
     DecodeVersionKey larVersionKey(geoModel, "LAr");
     
     m_fcalMod = rdbAccess->getRecordsetPtr("FCalMod", larVersionKey.tag(),larVersionKey.node());
@@ -110,8 +94,8 @@ GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::FCALConstruction::GetEnvelope(bool bPos
   // Flags to turn on volumes.
   const bool F1=true,F2=true,F3=true; 
 
-  StoreGateSvc *detStore;
-  if (m_svcLocator->service("DetectorStore", detStore, false )==StatusCode::FAILURE) {
+  SmartIF<StoreGateSvc> detStore{m_svcLocator->service("DetectorStore")};
+  if(!detStore.isValid()) {
     throw std::runtime_error("Error in FCALConstruction, cannot access DetectorStore");
   }
 

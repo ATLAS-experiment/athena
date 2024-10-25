@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -26,11 +26,11 @@ namespace LArGeo {
   {
   public:
 
-    // Constructor;
-    FCALConstruction();
+    FCALConstruction() = default;
+    ~FCALConstruction() = default;
 
-    // Destructor:
-    virtual ~FCALConstruction();
+    FCALConstruction (const FCALConstruction &) = delete;
+    FCALConstruction & operator= (const FCALConstruction &) = delete;
 
     // Get the envelope containing this detector.
     GeoIntrusivePtr<GeoVFullPhysVol> GetEnvelope(bool bPos);
@@ -42,32 +42,22 @@ namespace LArGeo {
     void setFullGeo(bool flag) {m_fullGeo = flag;}
 
   private: 
-
-    // It is illegal to copy a FCALConstruction:
-    FCALConstruction (const FCALConstruction &);
-
-    // It is illegal to assign a FCALConstruction:
-    FCALConstruction & operator= (const FCALConstruction &);
-
-    
     // volumes that are private member variables:
-    GeoIntrusivePtr<GeoFullPhysVol>  m_fcalPhysical;
+    GeoIntrusivePtr<GeoFullPhysVol>  m_fcalPhysical{};
 
     // full physical volumes for absorbers
     GeoIntrusivePtr<GeoFullPhysVol>  m_absPhysical1{};
     GeoIntrusivePtr<GeoFullPhysVol>  m_absPhysical2{};  
     GeoIntrusivePtr<GeoFullPhysVol>  m_absPhysical3{};
 
-    int m_VisLimit;
+    int m_VisLimit{0};
 
-    ISvcLocator*         m_svcLocator;
+    ISvcLocator*         m_svcLocator{nullptr};
     IRDBRecordset_ptr    m_fcalMod;
     IRDBRecordset_ptr    m_LArPosition;
 
-    bool             m_fullGeo;  // true->FULL, false->RECO
+    bool             m_fullGeo{true};  // true->FULL, false->RECO
   };
-
- 
 
 }  // namespace LArGeo
 
