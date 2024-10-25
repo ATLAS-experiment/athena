@@ -51,6 +51,16 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
         this, "Tracks/Parameters", m_anaTag, m_trkAnaDefSvc->referenceTag() );
   } 
 
+  /// Track multiplicity plots
+  if( m_trkAnaDefSvc->plotTrackMultiplicities() ) {
+    m_plots_nTracks_test = std::make_unique< NtracksPlots >(
+        this, "Tracks/Multiplicities", m_anaTag, m_trkAnaDefSvc->testTag(),
+        m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger(), true );
+    m_plots_nTracks_ref = std::make_unique< NtracksPlots >(
+        this, "Tracks/Multiplicities", m_anaTag, m_trkAnaDefSvc->referenceTag(),
+        m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() );
+  }
+
   /// Efficiency plots
   if( m_trkAnaDefSvc->plotEfficiencies() ) {
     m_plots_eff_vsTest = std::make_unique< EfficiencyPlots >(
@@ -183,6 +193,39 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fill(
         trkAnaColls.testTrackVec( TrackAnalysisCollections::InRoI ),
         trkAnaColls.truthPartVec( TrackAnalysisCollections::InRoI ),
         trkAnaColls.matches(), truthMu, actualMu, weight ) );
+  }
+
+  /// Track multiplicity plots
+  if( m_plots_nTracks_test ) {
+    std::vector< unsigned int > countsTest( NtracksPlots::NCOUNTERS, 0 );
+    countsTest[ NtracksPlots::ALL ] = m_trkAnaDefSvc->isTestTruth() ?
+          trkAnaColls.testTruthVec( TrackAnalysisCollections::FULL ).size() :
+          trkAnaColls.testTrackVec( TrackAnalysisCollections::FULL ).size();
+    countsTest[ NtracksPlots::FS ] = m_trkAnaDefSvc->isTestTruth() ?
+          trkAnaColls.testTruthVec( TrackAnalysisCollections::FS ).size() :
+          trkAnaColls.testTrackVec( TrackAnalysisCollections::FS ).size();
+    countsTest[ NtracksPlots::INROI ] = m_trkAnaDefSvc->isTestTruth() ?
+          trkAnaColls.testTruthVec( TrackAnalysisCollections::InRoI ).size() :
+          trkAnaColls.testTrackVec( TrackAnalysisCollections::InRoI ).size();
+    countsTest[ NtracksPlots::MATCHED ] = trkAnaColls.matches().getNmatches();
+
+    ATH_CHECK( m_plots_nTracks_test->fillPlots( countsTest, truthMu, actualMu, weight ) );
+  }
+
+  if( m_plots_nTracks_ref ) {
+    std::vector< unsigned int > countsRef( NtracksPlots::NCOUNTERS, 0 );
+    countsRef[ NtracksPlots::ALL ] = m_trkAnaDefSvc->isReferenceTruth() ?
+          trkAnaColls.refTruthVec( TrackAnalysisCollections::FULL ).size() :
+          trkAnaColls.refTrackVec( TrackAnalysisCollections::FULL ).size();
+    countsRef[ NtracksPlots::FS ] = m_trkAnaDefSvc->isReferenceTruth() ?
+          trkAnaColls.refTruthVec( TrackAnalysisCollections::FS ).size() :
+          trkAnaColls.refTrackVec( TrackAnalysisCollections::FS ).size();
+    countsRef[ NtracksPlots::INROI ] = m_trkAnaDefSvc->isReferenceTruth() ?
+          trkAnaColls.refTruthVec( TrackAnalysisCollections::InRoI ).size() :
+          trkAnaColls.refTrackVec( TrackAnalysisCollections::InRoI ).size();
+    countsRef[ NtracksPlots::MATCHED ] = trkAnaColls.matches().getNmatches( true );
+
+    ATH_CHECK( m_plots_nTracks_ref->fillPlots( countsRef, truthMu, actualMu, weight ) );
   }
 
   return StatusCode::SUCCESS;

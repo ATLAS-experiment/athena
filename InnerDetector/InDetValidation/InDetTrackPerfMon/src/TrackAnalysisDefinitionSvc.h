@@ -68,6 +68,7 @@ public:
   virtual const std::string& pileupSwitch() const override { return m_pileupSwitch; };
 
   virtual bool plotTrackParameters() const override { return m_plotTrackParameters.value(); };
+  virtual bool plotTrackMultiplicities() const override { return m_plotTrackMultiplicities.value(); };
   virtual bool plotEfficiencies() const override { return m_plotEfficiencies.value(); };
   virtual bool plotTechnicalEfficiencies() const override { return m_plotTechnicalEfficiencies.value(); };
   virtual bool plotResolutions() const override { return m_plotResolutions.value(); };
@@ -110,6 +111,7 @@ private:
   /// histogram properties
   BooleanProperty m_sortPlotsByChain { this, "sortPlotsByChain", false, "Save plots in <mainDir>/<chain>/<subDir/TrkAnaName>/... instead of the default <mainDir>/<subDir/TrkAnaName>/<chain>/..." };
   BooleanProperty m_plotTrackParameters { this, "plotTrackParameters", true, "Book/fill track parameters histograms" };
+  BooleanProperty m_plotTrackMultiplicities { this, "plotTrackMultiplicities", true, "Book/fill track multiplicities histograms" };
   BooleanProperty m_plotEfficiencies { this, "plotEfficiencies", true, "Book/fill track efficiencies histograms" };
   BooleanProperty m_plotTechnicalEfficiencies { this, "plotTechnicalEfficiencies", true, "Book/fill track technical efficiencies histograms" };
   BooleanProperty m_plotResolutions { this, "plotResolutions", true, "Book/fill track resolutions histograms" };

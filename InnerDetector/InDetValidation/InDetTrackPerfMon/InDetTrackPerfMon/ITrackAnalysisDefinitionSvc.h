@@ -62,6 +62,7 @@ public:
 
   /// histogram properties
   virtual bool plotTrackParameters() const = 0;
+  virtual bool plotTrackMultiplicities() const = 0;
   virtual bool plotEfficiencies() const = 0;
   virtual bool plotTechnicalEfficiencies() const = 0;
   virtual bool plotResolutions() const = 0;

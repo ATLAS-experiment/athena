@@ -48,7 +48,8 @@ namespace IDTPM {
     TrackMatchingLookupBase& operator=( const TrackMatchingLookupBase<T,R>& ) = delete;
 
     /// get the overall number of matches
-    unsigned getMapsSize() const { return m_mapTestToRef.size(); }
+    unsigned getMapsSize( bool getRefN = false ) const {
+      return getRefN ? m_mapRefToTest.size() : m_mapTestToRef.size(); }
 
     /// get matched reference from map
     const R* getMatchedRef( const T& t ) const;
@@ -115,7 +116,7 @@ namespace IDTPM {
     ~TrackMatchingLookup_trk() = default;
 
     /// getNmatches
-    virtual unsigned getNmatches() const override { return getMapsSize(); }
+    virtual unsigned getNmatches( bool getRefN ) const override { return getMapsSize( getRefN ); }
 
     /// getMatchedRefTrack
     virtual const xAOD::TrackParticle* getMatchedRefTrack(
@@ -241,7 +242,7 @@ namespace IDTPM {
     ~TrackMatchingLookup_trkTruth() = default;
 
     /// getNmatches
-    virtual unsigned getNmatches() const override { return getMapsSize(); }
+    virtual unsigned getNmatches( bool getRefN ) const override { return getMapsSize( getRefN ); }
 
     /// getMatchedRefTrack
     virtual const xAOD::TrackParticle* getMatchedRefTrack(
@@ -367,7 +368,7 @@ namespace IDTPM {
     ~TrackMatchingLookup_truthTrk() = default;
 
     /// getNmatches
-    virtual unsigned getNmatches() const override { return getMapsSize(); }
+    virtual unsigned getNmatches( bool getRefN ) const override { return getMapsSize( getRefN ); }
 
     /// getMatchedRefTrack
     virtual const xAOD::TrackParticle* getMatchedRefTrack(
