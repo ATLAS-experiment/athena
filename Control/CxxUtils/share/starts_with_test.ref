@@ -1,6 +1,0 @@
-CxxUtils/starts_with_test for both const char* inputs 
-testChar1
-CxxUtils/starts_with_test for both std::string inputs 
-testString1
-CxxUtils/starts_with_test for mixed std::string const char* inputs 
-testMixed1
