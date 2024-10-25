@@ -160,6 +160,7 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_noalg_vdm_LumiPEB_L1RD0_BGRP11', l1SeedThresholds=['FSNOSEED'], stream=['VdM'], groups=SupportGroup),
         #ATR-25327 PixelBeam streamers
         ChainProp(name='HLT_noalg_LumiPEB_L1RD0_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=['PixelBeam'], groups=SupportGroup),
+        ChainProp(name='HLT_noalg_LumiPEB_L1RD0_BGRP10', l1SeedThresholds=['FSNOSEED'], stream=['PixelBeam'], groups=SupportGroup),
         ChainProp(name='HLT_noalg_LumiPEB_L1RD0_BGRP15', l1SeedThresholds=['FSNOSEED'], stream=['PixelBeam'], groups=SupportGroup),
         ChainProp(name='HLT_noalg_LumiPEB_L1MBTS_1', l1SeedThresholds=['FSNOSEED'], stream=['PixelBeam'], groups=SupportGroup),
         ChainProp(name='HLT_noalg_LumiPEB_L1MBTS_1_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=['PixelBeam'], groups=SupportGroup),
@@ -362,7 +363,6 @@ def addHighMuP1Signatures(chains):
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1jXE70', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']), 
         
         # Lumi items for vdM programme
-        ChainProp(name='HLT_noalg_LumiPEB_L1RD0_BGRP10', l1SeedThresholds=['FSNOSEED'], stream=['PixelBeam'], groups=SupportGroup),
         ChainProp(name='HLT_noalg_vdm_LumiPEB_L1MBTS_1_1_BGRP11', l1SeedThresholds=['FSNOSEED'], stream=['VdM'], groups=SupportGroup),
 
         ChainProp(name='HLT_larpsallem_L1eEM5_EMPTY', l1SeedThresholds=['eEM5'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
