@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETSELECTORTOOLS_JETCLEANINGTOOL_H
@@ -120,8 +120,8 @@ public:
     CleaningLevel m_cutLevel{LooseBad};
     Gaudi::Property<bool> m_doUgly{this, "DoUgly", false};
     Gaudi::Property<bool> m_useDecorations{this, "UseDecorations", true};
-    
-    SG::AuxElement::ConstAccessor<char> m_acc_jetClean{"DFCommonJets_jetClean_LooseBad"};
+    Gaudi::Property<bool> m_useLooseDecorForTightCut{this, "UseLooseDecorForTightCut", false};
+    SG::ConstAccessor<char> m_acc_jetClean{"DFCommonJets_jetClean_LooseBad"};
   
     //
     Gaudi::Property<std::string> m_jetContainerName{this, "JetContainer", "", "SG key for input jet container"};
