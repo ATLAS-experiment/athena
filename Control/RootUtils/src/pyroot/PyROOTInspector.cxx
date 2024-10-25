@@ -11,7 +11,6 @@
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
-#include "CxxUtils/starts_with.h"
 
 #include "Python.h"
 
@@ -223,8 +222,8 @@ recurse_pyinspect(PyObject *pyobj,
     return;
   }
 
-  if (CxxUtils::starts_with (clsname, "pair<") ||
-      CxxUtils::starts_with (clsname, "std::pair<")) {
+  if (clsname.starts_with( "pair<") ||
+      clsname.starts_with( "std::pair<")) {
     {
       PyObject *v0 = PyUnicode_FromString("first");
       PyObject *v1 = PyObject_GetAttrString(pyobj, "first");
@@ -250,7 +249,7 @@ recurse_pyinspect(PyObject *pyobj,
   // Most xAOD objects don't have any persistent data members.
   // Try to detect that and skip the actual iteration over the
   // container in that case.
-  if (CxxUtils::starts_with (clsname, "DataVector<xAOD::")) {
+  if (clsname.starts_with( "DataVector<xAOD::")) {
     TClassEdit::TSplitType split (clsname.c_str());
     if (split.fElements.size()  > 1) {
       TClass* eltcls = TClass::GetClass (split.fElements[1].c_str());
@@ -373,8 +372,8 @@ recurse_pyinspect(PyObject *pyobj,
 
     if (persistentOnly && !mbr->IsPersistent())
       continue;
-    if (mbr->IsaPointer() || CxxUtils::starts_with(mbr->GetTypeName(), "unique_ptr")
-        || CxxUtils::starts_with(mbr->GetTypeName(), "shared_ptr") )
+    if (mbr->IsaPointer() || std::string(mbr->GetTypeName()).starts_with( "unique_ptr")
+        || std::string(mbr->GetTypeName()).starts_with( "shared_ptr") )
       continue;
     if (mbr->IsBasic()) {
       TDataType * mbr_type = mbr->GetDataType();

@@ -12,7 +12,6 @@
 
 #include "StorageSvc/DbReflex.h"
 #include "RootUtils/APRDefaults.h"
-#include "CxxUtils/starts_with.h"
 
 #include "H5Cpp.h"
 #include "H5File.h"
@@ -192,8 +191,8 @@ StatusCode AthenaHDFStreamTool::putObject(const void* source, std::size_t nbytes
       H5::DataSpace filespace(1, ds_size, maxdim);
       H5::DSetCreatPropList ds_prop;
       hsize_t chunkdim[1] = {nbytes};
-      if( CxxUtils::starts_with(ds_name, APRDefaults::TTreeNames::EventData) ||
-          CxxUtils::starts_with(ds_name, APRDefaults::TTreeNames::EventTag) ) {
+      if( ds_name.starts_with(APRDefaults::TTreeNames::EventData) ||
+          ds_name.starts_with(APRDefaults::TTreeNames::EventTag) ) {
          if (nbytes < 512) {
             chunkdim[0] = 4096;
          } else if (nbytes < 16 * 512) {
