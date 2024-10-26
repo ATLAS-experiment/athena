@@ -116,6 +116,11 @@ template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string
     auto IsDataTowers = Monitored::Scalar<bool>("IsDataTowers",evenType=="DataTowers");
     auto IsEmulatedTowers = Monitored::Scalar<bool>("IsEmulatedTowers",!IsDataTowers);
 
+    // saturation bits currently not properly simulated. But because they aren't used anywhere downstream
+    // in the trigger, we will allow mismatches in these bits. 
+    // The saturation bit is the lowest bit on all TOBs except jTE where it is also the highest bit (2 bits):
+    auto mask = (label=="jTE") ? 0x7FFE : 0xFFFE;
+
     unsigned zeroTobs1 = 0;
     unsigned zeroTobs2 = 0;
     for(const auto tob1 : *tobs1Cont) {
@@ -125,7 +130,7 @@ template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string
         auto fpga1 = tob1->fpgaNumber();
         
         for (const auto tob2 : *tobs2Cont) {
-            if(word1==0 || (word1 == tob2->tobWord() && jfex1 == tob2->jFexNumber() && fpga1 == tob2->fpgaNumber())) { // do not flag as mismatch if the TOB word is zero, it might simply be (zero) suppressed in the other container!
+            if(word1==0 || ((word1&mask) == (tob2->tobWord()&mask) && jfex1 == tob2->jFexNumber() && fpga1 == tob2->fpgaNumber())) { // do not flag as mismatch if the TOB word is zero, it might simply be (zero) suppressed in the other container!
                 isMatched = true;
                 break;
             }
