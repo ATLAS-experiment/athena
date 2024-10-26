@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // TBBarrelCryostatConstruction
@@ -29,7 +29,7 @@
 #include "GaudiKernel/PhysicalConstants.h"
 #include "GeoModelUtilities/StoredPhysVol.h"
 #include "GeoModelUtilities/StoredAlignX.h"
-
+#include "AthenaKernel/getMessageSvc.h"
 
 #include <string>
 #include <cmath>
@@ -62,24 +62,17 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::TBBarrelCryostatConstruction::GetEnvelop
   if (cryoMotherPhysical) return cryoMotherPhysical;
 
 // Get access to the material manager
+  MsgStream log(Athena::getMessageSvc(), "LArGeo::TBBarrelCryostatConstruction"); 
 
-  ISvcLocator *svcLocator = Gaudi::svcLocator();
-  IMessageSvc * msgSvc;
-  if (svcLocator->service("MessageSvc", msgSvc, true )==StatusCode::FAILURE) {
-    throw std::runtime_error("Error in EMBConstruction, cannot access MessageSvc");
-  }
-
-  MsgStream log(msgSvc, "LAr::DetectorFactory"); 
-
-  log <<MSG::INFO <<  "++++++++++++++++++++++++++++++++++++++++++++++++++++i++" <<  endmsg;
-  log <<MSG::INFO <<  "+                                                     +" <<  endmsg;
-  log <<MSG::INFO <<  "+   HELLO from LArGeo::TBBarrelCryostatConstruction   +" << endmsg;
-  log <<MSG::INFO <<  "+                                                     +" <<  endmsg;
-  log <<MSG::INFO <<  "+++++++++++++++++++++++++++++++++++++++++++++++++++++++" <<  endmsg;
+  log << MSG::INFO <<  "++++++++++++++++++++++++++++++++++++++++++++++++++++i++" << endmsg;
+  log << MSG::INFO <<  "+                                                     +" << endmsg;
+  log << MSG::INFO <<  "+   HELLO from LArGeo::TBBarrelCryostatConstruction   +" << endmsg;
+  log << MSG::INFO <<  "+                                                     +" << endmsg;
+  log << MSG::INFO <<  "+++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endmsg;
 
 
-  StoreGateSvc *detStore;
-  if (svcLocator->service("DetectorStore", detStore, false )==StatusCode::FAILURE) {
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if(!detStore.isValid()) {
     throw std::runtime_error("Error in LArDetectorFactory, cannot access DetectorStore");
   }
 

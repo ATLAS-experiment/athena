@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EMECModuleConstruction
@@ -54,7 +54,7 @@
 #include <cmath>
 #include <iostream>
 
-static const bool DEBUG_EMEC = true;
+static const bool DEBUG_EMEC = false;
 
 LArGeo::EMECModuleConstruction::EMECModuleConstruction( bool tbb, bool iwb, bool owb ) {
 
@@ -74,9 +74,8 @@ LArGeo::EMECModuleConstruction::~EMECModuleConstruction() = default;
 
 GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::EMECModuleConstruction::GetEnvelope()
 {
-  ISvcLocator *svcLocator = Gaudi::svcLocator();
-  StoreGateSvc *detStore;
-  if (svcLocator->service("DetectorStore", detStore, false )==StatusCode::FAILURE) {
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if(!detStore.isValid()) {
     throw std::runtime_error("Error in EndcapCryostatConstruction, cannot access DetectorStore");
   }
   StoredMaterialManager* materialManager = nullptr;

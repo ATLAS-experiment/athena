@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // CryostatConstructionTBEC
@@ -7,32 +7,30 @@
 // Dec-2005 V. Niess
 // from CryostatConstructionH62003 and LArG4TBECCryostatConstruction.
 
-#ifndef __CryostatConstructionTBEC_H__
-#define __CryostatConstructionTBEC_H__
+#ifndef LARGEOTBEC_CRYOSTATCONSTRUCTIONTBEC_H
+#define LARGEOTBEC_CRYOSTATCONSTRUCTIONTBEC_H
 
 #include "GeoModelKernel/GeoPhysVol.h"
 #include "GeoModelKernel/GeoFullPhysVol.h"
 namespace LArGeo {
 
   class CryostatConstructionTBEC 
-    {
-    public:
-    
-    CryostatConstructionTBEC();
-    virtual ~CryostatConstructionTBEC();
+  {
+  public:
+    CryostatConstructionTBEC() = default;
+    ~CryostatConstructionTBEC() = default;
     
     // Get the envelope containing this detector.
-    virtual GeoIntrusivePtr<GeoVFullPhysVol> GetEnvelope();
+    GeoIntrusivePtr<GeoVFullPhysVol> GetEnvelope();
     
     // Get the LAr physical volume.
     GeoIntrusivePtr<GeoPhysVol> GetLArPhysical();
-      
+    
   private:
-
-    GeoFullPhysVol      *m_cryoEnvelopePhysical;
-    GeoPhysVol		*m_LArPhysical;
+    GeoFullPhysVol      *m_cryoEnvelopePhysical{nullptr};
+    GeoPhysVol		*m_LArPhysical{nullptr};
   };
-
+  
 } // namespace LArGeo
 
-#endif // __CryostatConstructionTBEC_H__
+#endif

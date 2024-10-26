@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArDetectorToolTBEC.h"
@@ -13,8 +13,8 @@
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 
 LArDetectorToolTBEC::LArDetectorToolTBEC(const std::string& type, 
-				 const std::string& name, 
-				 const IInterface* parent)
+					 const std::string& name, 
+					 const IInterface* parent)
   : GeoModelTool(type,name,parent), 
     m_ecVisLimit(-1)
 {
@@ -29,14 +29,14 @@ StatusCode LArDetectorToolTBEC::create()
   MsgStream log(msgSvc(), name()); 
 
   // Get the detector configuration.
-  IGeoDbTagSvc *geoDbTag;
-  ATH_CHECK(service ("GeoDbTagSvc",geoDbTag));
+  SmartIF<IGeoDbTagSvc> geoDbTag{Gaudi::svcLocator()->service("GeoDbTagSvc")};
+  ATH_CHECK(geoDbTag.isValid());
 
   std::string AtlasVersion = geoDbTag->atlasVersion();
   std::string LArVersion   = geoDbTag->LAr_VersionOverride();
 
-  IRDBAccessSvc *accessSvc;
-  ATH_CHECK(service("RDBAccessSvc",accessSvc));
+  SmartIF<IRDBAccessSvc> accessSvc{Gaudi::svcLocator()->service("RDBAccessSvc")};
+  ATH_CHECK(accessSvc.isValid());
 
   std::string detectorKey  = LArVersion.empty() ? AtlasVersion : LArVersion;
   std::string detectorNode = LArVersion.empty() ? "ATLAS" : "LAr";
