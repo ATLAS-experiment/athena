@@ -41,7 +41,7 @@ class DiffL1MenuStep(CheckSteps.RefComparisonStep):
             self.log.error('Missing input for %s', self.name)
 
         super(DiffL1MenuStep,self).configure(test)
-        self.args += ' {} {}'.format(self.input_file, self.reference)
+        self.args += ' {} {}'.format(self.reference, self.input_file)
 
     def run(self, dry_run=False):
         retcode, cmd = super(DiffL1MenuStep, self).run(dry_run)
