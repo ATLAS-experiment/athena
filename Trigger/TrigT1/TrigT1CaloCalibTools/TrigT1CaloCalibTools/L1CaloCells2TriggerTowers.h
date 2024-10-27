@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOCALIBTOOLS_L1CALOCELLS2TRIGGERTOWERS_H
@@ -126,8 +126,10 @@ private:
     {this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
   ToolHandle<LVL1::IL1CaloMatchCell2Tower> m_cellMatch
     { this, "L1CaloMatchCell2Tower",  "LVL1::L1CaloMatchCell2Tower",  "L1CaloMatchCell2Tower" };
+  ToolHandle<CaloTriggerTowerService> m_ttSvc
+    { this, "CaloTriggerTowerService", "CaloTriggerTowerService"};
+
   const TileCablingService * m_tileCablingService;
-  CaloTriggerTowerService* m_ttSvc;
 
   bool m_bInitialized;
   bool m_bLArDigitsInitialized;

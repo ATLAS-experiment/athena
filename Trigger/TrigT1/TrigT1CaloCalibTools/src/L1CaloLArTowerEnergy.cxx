@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibTools/L1CaloLArTowerEnergy.h"
@@ -12,9 +12,7 @@ namespace LVL1{
     asg::AsgTool( name ),
     m_lvl1Helper(nullptr),
     m_caloMgr(nullptr),
-    m_LArOnlineHelper(nullptr),
-    m_ttService(nullptr),
-    m_badFebMasker("LArBadFebMasker")
+    m_LArOnlineHelper(nullptr)
   {
   }
 
@@ -22,14 +20,9 @@ namespace LVL1{
 
     ATH_MSG_INFO("Initialize LVL1::L1CaloLArTowerEnergy");
 
-    StatusCode sc;
+    ATH_CHECK( detStore()->retrieve(m_caloMgr) );
+    ATH_CHECK( detStore()->retrieve(m_LArOnlineHelper,"LArOnlineID") );
 
-    sc = detStore()->retrieve(m_caloMgr) ;
-    if(sc.isFailure()){ATH_MSG_ERROR( "Cannot access caloMgr");return sc;}
-
-    sc = detStore()->retrieve(m_LArOnlineHelper,"LArOnlineID") ;
-    if(sc.isFailure()){ATH_MSG_ERROR( "Cannot access LArOnlineID");return sc;}
-    
     //Use the CaloIdManager to get a pointer to an instance of the CaloLVL1_ID helper
     m_lvl1Helper = m_caloMgr->getLVL1_ID();
     if(!m_lvl1Helper) {
@@ -40,25 +33,11 @@ namespace LVL1{
     ATH_CHECK(m_badFebMasker.retrieve());
 
     //Retrieve cabling & tt services
-    ISvcLocator* svcLoc = Gaudi::svcLocator( );
-    IToolSvc* toolSvc;
-
-    sc = svcLoc->service( "ToolSvc",toolSvc  );
-    if(sc.isSuccess()) {
-      sc = toolSvc->retrieveTool("CaloTriggerTowerService",m_ttService);
-      if(sc.isFailure()){ATH_MSG_ERROR("Could not retrieve CaloTriggerTowerService Tool");return sc;}
-
-    }
-
+    ATH_CHECK( m_ttService.retrieve() );
     ATH_CHECK( m_cablingKey.initialize() );
 
-    return sc;
+    return StatusCode::SUCCESS;
   }
-
-  StatusCode L1CaloLArTowerEnergy::finalize() {
-      return StatusCode::SUCCESS;
-  }
-
 
 
   double L1CaloLArTowerEnergy::IDeta(const Identifier& TTid) const {

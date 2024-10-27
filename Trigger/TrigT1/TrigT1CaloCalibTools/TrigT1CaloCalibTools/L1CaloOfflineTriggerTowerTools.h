@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //  ***************************************************************************
 //  *   Author: John Morris (john.morris@cern.ch)                             *
@@ -255,7 +255,7 @@ private:
       ToolHandle<LVL1::IL1CaloTTIdTools>               m_l1CaloTTIdTools;
       ToolHandle<LVL1::IL1CaloCells2TriggerTowers>     m_cells2tt;
       const CaloIdManager*                             m_caloMgr;
-      CaloTriggerTowerService*                         m_ttSvc;
+      ToolHandle<CaloTriggerTowerService>              m_ttSvc;
       const TTOnlineID*                                m_ttOnlineIdHelper;
       const CaloLVL1_ID*                               m_lvl1Helper;
       const LArOnlineID*                               m_larOnlineID;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOCALIBTOOLS_L1CALOLARTOWERENERGY_H
@@ -51,7 +51,6 @@ public:
   virtual ~L1CaloLArTowerEnergy() {};
 
   virtual StatusCode initialize() override;
-  virtual StatusCode finalize() override;
 
   virtual bool hasMissingFEB(const Identifier& TTid) const override;
   virtual bool hasMissingFEB(const LArOnOffIdMapping& cabling,
@@ -65,9 +64,10 @@ private:
   const CaloIdManager *m_caloMgr;
   const LArOnlineID *m_LArOnlineHelper;
 
-  CaloTriggerTowerService* m_ttService;
+  ToolHandle<CaloTriggerTowerService> m_ttService
+    {this, "CaloTriggerTowerService", "CaloTriggerTowerService"};
 
-  ToolHandle< ILArBadFebMasker > m_badFebMasker; // Handle to badChannelTool
+  ToolHandle< ILArBadFebMasker > m_badFebMasker{"LArBadFebMasker"};
 
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey
     {this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
