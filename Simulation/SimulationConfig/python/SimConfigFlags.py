@@ -235,11 +235,7 @@ def createSimConfigFlags():
     scf.addFlag("Sim.FastCalo.ParamsInputFilename", "FastCaloSim/MC23/TFCSparam_AF3_MC23_Sep23.root") # filename of the input parametrizations file
     scf.addFlag("Sim.FastCalo.RunOnGPU", False) # Determines if run the FastCaloSim on GPU or not
     scf.addFlag("Sim.FastCalo.CaloCellsName", "AllCalo") # StoreGate collection name for FastCaloSim hits
-
-    scf.addFlag("Sim.FastShower.InputCollection", "TruthEvent") # StoreGate collection name of modified TruthEvent for legacy FastCaloSim use
-
-    # Config FastCaloSim scheme
-    scf.addFlag("Sim.FastCalo.doEMECFCS", False)
+    scf.addFlag("Sim.FastCalo.doEMECFCS", False) # Run FastCaloSim in the EMEC only during full sim jobs
 
     # FastChain
     # Setting the BCID for Out-of-Time PU events, list of int
