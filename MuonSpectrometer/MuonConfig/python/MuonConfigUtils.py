@@ -8,7 +8,19 @@ def SetupMuonStandaloneConfigFlags( default_input = ['/cvmfs/atlas-nightlies.cer
     Setup flags necessary for Muon standalone.
     """
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()    
+    flags = initConfigFlags()
+    flags.Detector.GeometryMDT   = True 
+    flags.Detector.GeometryTGC   = True
+    flags.Detector.GeometryCSC   = True     
+    flags.Detector.GeometryRPC   = True
+    # TODO: disable these for now, to be determined if needed
+    flags.Detector.GeometryCalo  = False
+    flags.Detector.GeometryID    = False
+
+    # FIXME This is temporary. I think it can be removed with some other refactoring
+    flags.Muon.makePRDs          = False
+
+    flags.Exec.MaxEvents = 20 # Set default to 20 if not overridden
     args = flags.fillFromArgs()
 
     if flags.Input.Files == ['_ATHENA_GENERIC_INPUTFILE_NAME_'] :
@@ -36,8 +48,10 @@ def SetupMuonStandaloneCA(args,flags):
     else:
         cfg=ComponentAccumulator()
 
-    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg.merge(PoolReadCfg(flags))
+    from AthenaConfiguration.Enums import Format
+    if flags.Input.Format is Format.POOL:
+        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+        cfg.merge(PoolReadCfg(flags))
 
     if flags.Input.isMC:
         from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for tauLRT_staustau
 # art-type: grid
@@ -29,8 +30,6 @@
 # art-output: *.dat
 
 
-
-useCA_Reco = True
 Slices  = ['tauLRT']
 Events  = 5000
 Threads = 8

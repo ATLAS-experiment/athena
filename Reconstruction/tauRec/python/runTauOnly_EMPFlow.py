@@ -45,15 +45,8 @@ def _run():
                        toggle_geometry=True, keep_beampipe=True)
 
     # Schedule Tau Reco
-    flags.Reco.EnableTrigger = False
-    flags.Reco.EnableCombinedMuon = True
-    flags.Reco.EnablePFlow = True
-    flags.Reco.EnableTau = True
-    flags.Reco.EnableJet = True
-    flags.Reco.EnableBTagging = False
-    flags.Reco.EnableCaloRinger = False
-    flags.Reco.PostProcessing.GeantTruthThinning = False
-    flags.Reco.PostProcessing.TRTAloneThinning = False
+    from tauRec.ConfigurationHelpers import StandaloneTauRecoFlags
+    StandaloneTauRecoFlags(flags)
     flags.Tau.TauRec.SeedJetCollection = "AntiKt4EMPFlowJets" 
     flags.lock()
 

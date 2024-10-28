@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for el_zee_cloneschi2_pu40
 # art-type: grid
@@ -30,7 +30,6 @@
 # art-output: *.dat 
 
 
-useCA_Reco = True
 Slices  = ['electron']
 Events  = 16000
 Threads = 8

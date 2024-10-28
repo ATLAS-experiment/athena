@@ -990,6 +990,17 @@ def createTRTStandaloneTrackingPassFlags():
 
 #####################################################################
 
+def printPrimaryConfig(flags):
+    print()
+    print("************************************************************************")
+
+    print("******************** Tracking reconstruction Config ********************")
+    print("                     Primary Config is",flags.Tracking[flags.Tracking.PrimaryPassConfig.value+"Pass"].extension)
+    flags.dump(pattern="Tracking."+flags.Tracking.PrimaryPassConfig.value+"Pass.*", evaluate=True)
+    print("************************************************************************")
+    return
+
+
 def printActiveConfig(flags):
     print()
     print("************************************************************************")

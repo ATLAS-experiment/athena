@@ -31,8 +31,6 @@
 # art-output: cost-perEvent-chain
 # art-output: *.dat 
 
-useCA_Reco = True # Use CA for RDOtoRDOTrigger step
-
 
 Slices  = ['muon','electron','tau','bjet','fsjet']
 Events  = 4000

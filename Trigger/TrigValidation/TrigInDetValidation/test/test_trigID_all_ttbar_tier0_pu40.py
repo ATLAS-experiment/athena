@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for all_ttbar_tier0_pu40
 # art-type: grid
@@ -30,8 +30,6 @@
 # art-output: *.dat 
 
 
-
-useCA_Reco = True
 Slices  = ['muon','muon-tnp','electron','electron-tnp','tau','bjet','fsjet']
 Events  = 4000
 Threads = 8 

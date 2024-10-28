@@ -137,7 +137,7 @@ def pebInfoWriterToolCfg(flags, name, eventBuildType):
                        SubDetector.TDAQ_CALO_JET_PROC_DAQ, # = 0x74
                        SubDetector.TDAQ_CALO_JET_PROC_ROI # = 0x75
                        ],
-            MatchTriggerType = [0x31, 0x32, 0x34] )
+            MatchTriggerType = [0x31, 0x32, 0x34] if '_L1CALREQ' in name else [] )
 
     elif 'LArPEBNoise' == eventBuildType:
         acc = RoIPEBInfoWriterToolCfg(
@@ -156,7 +156,7 @@ def pebInfoWriterToolCfg(flags, name, eventBuildType):
             flags, name,
             subDets = [SubDetector.FORWARD_ZDC,
                        SubDetector.TDAQ_CTP],
-            MatchTriggerType = [0x69, 0x6a, 0x6c] )
+            MatchTriggerType = [0x69, 0x6a, 0x6c] if '_L1CALREQ' in name else [] )
 
     elif 'AFPPEB' == eventBuildType:
         acc = StaticPEBInfoWriterToolCfg(

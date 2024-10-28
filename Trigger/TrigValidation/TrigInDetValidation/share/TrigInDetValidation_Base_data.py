@@ -4,7 +4,7 @@
 import re
 
 from TrigValTools.TrigValSteering import Test, CheckSteps
-from TrigInDetValidation.TrigInDetArtSteps import TrigInDetReco, TrigInDetAna, TrigCostStep, TrigInDetRdictStep, TrigInDetCompStep, TrigInDetCpuCostStep, TrigInDetRecoData, TrigBSExtr, TrigTZReco
+from TrigInDetValidation.TrigInDetArtSteps import TrigInDetAna, TrigCostStep, TrigInDetRdictStep, TrigInDetCompStep, TrigInDetCpuCostStep, TrigInDetRecoData, TrigBSExtr, TrigTZReco
 
 import os,sys,getopt
 

@@ -2007,7 +2007,105 @@ class DQMergeExecutor(scriptExecutor):
         self._valStop = os.times()
         msg.debug('valStop time is {0}'.format(self._valStop))
 
+## @brief Specialist execution class for DQM post-processing of histograms
+class DQMPostProcessExecutor(scriptExecutor):
+    def __init__(self, name='DQMPostProcess', trf=None, conf=None, inData=set(['HIST']), outData=set(['HIST']),
+                 exe='DQM_Tier0Wrapper_tf.py', exeArgs = [], memMonitor = True):
+        
+        self._histMergeList = 'HISTMergeList.txt'
+        
+        super(DQMPostProcessExecutor, self).__init__(name=name, trf=trf, conf=conf, inData=inData, outData=outData, exe=exe, 
+                                              exeArgs=exeArgs, memMonitor=memMonitor)
 
+
+    def preExecute(self, input = set(), output = set()):
+        self.setPreExeStart()
+        msg.debug('Preparing for execution of {0} with inputs {1} and outputs {2}'.format(self.name, input, output))
+
+        super(DQMPostProcessExecutor, self).preExecute(input=input, output=output)
+
+        #build input file list (typically only one):
+        dsName=self.conf.argdict["inputHISTFile"].dataset 
+        inputList=[]
+        for dataType in input:
+            for fname in self.conf.dataDictionary[dataType].value:
+                #if no dataset name is give, guess it from file name
+                if not dsName: dsName=".".join(fname.split('.')[0:4])
+                inputList.append("#".join([dsName,fname]))
+
+
+        if len(output) != 1:
+            raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_EXEC_SETUP_FAIL'),
+                                                            'One (and only one) output file must be given to {0} (got {1})'.format(self.name, len(output)))
+        outDataType = list(output)[0]
+        #build argument json:
+        #T0 uses keys: 'allowCOOLUpload', 'doWebDisplay', 'incrementalMode', 'inputHistFiles', 'mergeParams', 'outputHistFile', 'postProcessing', 'reverseFileOrder', 'servers'
+        #more keys: runNumber, streamName,projectTag,filepaths,productionMode,skipMerge
+        wrapperParams={"inputHistFiles" : inputList,
+                       "outputHistFile" : dsName+"#"+self.conf.dataDictionary[outDataType].value[0],
+                       "incrementalMode": "True" if self.conf._argdict.get("is_incremental_merge",False) else "False",
+                       "postProcessing" : "True" if self.conf._argdict.get("run_post_processing",False) else "False",
+                       "doWebDisplay"   : "True" if  self.conf._argdict.get("doWebDisplay",False) else "False",
+                       "allowCOOLUpload": "True" if  self.conf._argdict.get("allowCOOLUpload",False) else "False",
+                       "mergeParams" : "",
+
+        }
+        if "servers" in self.conf._argdict:
+            wrapperParams["server"]=self.conf._argdict["servers"]
+
+        for k in ("excludeHist","excludeDir"):
+            if k in self.conf._argdict:
+                wrapperParams["mergeParams"]+=(" --{0}={1}".format(k,self.conf._argdict[k]))
+
+
+        with open("args.json", "w") as f:
+            json.dump(wrapperParams, f)
+
+        self._cmd.append("--argJSON=args.json")
+        
+        
+
+    def validate(self):
+        self.setValStart()
+        super(DQMPostProcessExecutor, self).validate()
+
+        exitErrorMessage = ''
+        # Base class validation successful, Now scan the logfile for missed errors.
+        try:
+            logScan = trfValidation.scriptLogFileReport(self._logFileName)
+            worstError = logScan.worstError()
+
+            # In general we add the error message to the exit message, but if it's too long then don't do
+            # that and just say look in the jobReport
+            if worstError['firstError']:
+                if len(worstError['firstError']['message']) > logScan._msgLimit:
+                    exitErrorMessage = "Long {0} message at line {1}" \
+                                       " (see jobReport for further details)".format(worstError['level'],
+                                        worstError['firstError']['firstLine'])
+                else:
+                    exitErrorMessage = "Logfile error in {0}: \"{1}\"".format(self._logFileName,
+                                                                              worstError['firstError']['message'])
+        except (OSError, IOError) as e:
+            exitCode = trfExit.nameToCode('TRF_EXEC_LOGERROR')
+            raise trfExceptions.TransformValidationException(exitCode,
+                  'Exception raised while attempting to scan logfile {0}: {1}'.format(self._logFileName, e))
+
+        if worstError['nLevel'] == stdLogLevels['ERROR'] and (
+                'ignoreErrors' in self.conf.argdict and self.conf.argdict['ignoreErrors'].value is True):
+            msg.warning('Found ERRORs in the logfile, but ignoring this as ignoreErrors=True (see jobReport for details)')
+
+        elif worstError['nLevel'] >= stdLogLevels['ERROR']:
+            self._isValidated = False
+            msg.error('Fatal error in script logfile (level {0})'.format(worstError['level']))
+            exitCode = trfExit.nameToCode('TRF_EXEC_LOGERROR')
+            raise trfExceptions.TransformLogfileErrorException(exitCode, 'Fatal error in script logfile: "{0}"'.format(exitErrorMessage))
+
+        # Must be ok if we got here!
+        msg.info('Executor {0} has validated successfully'.format(self.name))
+        self._isValidated = True
+
+        self._valStop = os.times()
+        msg.debug('valStop time is {0}'.format(self._valStop))
 ## @brief Specialist execution class for merging NTUPLE files
 class NTUPMergeExecutor(scriptExecutor):
 

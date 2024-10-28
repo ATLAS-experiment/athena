@@ -7,7 +7,7 @@
 # run with
 # python runEgammaOnly.py
 # or
-# pythong -m egammaConfig.runEgammaOnly
+# python -m egammaConfig.runEgammaOnly
 
 import sys
 
@@ -44,32 +44,17 @@ def _run(args):
     )
 
     # egamma Only
-    from egammaConfig.egammaOnlyFromRawFlags import egammaOnlyFromRaw
+    from egammaConfig.ConfigurationHelpers import egammaOnlyFromRaw
 
     egammaOnlyFromRaw(flags)
 
     flags.lock()
 
-    from RecJobTransforms.RecoSteering import RecoSteering
+    # Run central test of egammaSteeringConfig
+    from egammaConfig.egammaSteeringConfig import egammaSteeringConfigTest
 
-    acc = RecoSteering(flags)
+    statusCode = egammaSteeringConfigTest(flags)
 
-    # Special message service configuration
-    from DigitizationConfig.DigitizationSteering import DigitizationMessageSvcCfg
-
-    acc.merge(DigitizationMessageSvcCfg(flags))
-
-    from AthenaConfiguration.Utils import setupLoggingLevels
-
-    setupLoggingLevels(flags, acc)
-
-    # Print reco domain status
-    from RecJobTransforms.RecoConfigFlags import printRecoFlags
-
-    printRecoFlags(flags)
-
-    # running
-    statusCode = acc.run()
     return statusCode
 
 

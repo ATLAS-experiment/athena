@@ -22,7 +22,7 @@ menu.input = ''
 topocnvclone = ExecStep.ExecStep('CloneTopoConverter')
 topocnvclone.type = 'other'
 # On updates to the topoconverterph1 package, update the branch here
-topocnvclone.executable = 'git clone --depth 1 --branch art-2024-00-01 ssh://git@gitlab.cern.ch:7999/atlas-l1calo/l1topo/topoconverterph1.git'
+topocnvclone.executable = 'git clone --depth 1 --branch art-2024-00-01 https://:@gitlab.cern.ch:8443/atlas-l1calo/l1topo/topoconverterph1.git'
 topocnvclone.input = ''
 
 #====================================================================================================
@@ -41,7 +41,7 @@ class DiffL1MenuStep(CheckSteps.RefComparisonStep):
             self.log.error('Missing input for %s', self.name)
 
         super(DiffL1MenuStep,self).configure(test)
-        self.args += ' {} {}'.format(self.input_file, self.reference)
+        self.args += ' {} {}'.format(self.reference, self.input_file)
 
     def run(self, dry_run=False):
         retcode, cmd = super(DiffL1MenuStep, self).run(dry_run)

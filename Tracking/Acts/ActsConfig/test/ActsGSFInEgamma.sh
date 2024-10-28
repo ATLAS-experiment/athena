@@ -10,7 +10,7 @@ ignore_pattern="Acts.+ERROR.+Propagation.+reached.+the.+step.+count.+limit"
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
    --preExec "flags.Exec.FPE=-1;" "flags.Acts.useActsGsfInEgamma=True;" \
-   --preInclude egammaConfig.egammaOnlyFromRawFlags.egammaOnlyFromRaw \
+   --preInclude egammaConfig.ConfigurationHelpers.egammaOnlyFromRaw \
    --autoConfiguration="everything" \
    --inputRDOFile ${input_rdo} \
    --outputAODFile AOD.pool.root \

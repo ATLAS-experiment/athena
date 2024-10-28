@@ -2,7 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType, Format
-from TrkConfig.TrackingPassFlags import printActiveConfig
+from TrkConfig.TrackingPassFlags import printActiveConfig, printPrimaryConfig
 
 _flags_set = []  # For caching
 _extensions_list = [] # For caching
@@ -849,6 +849,8 @@ def InDetTrackRecoCfg(flags):
     StatTrackTruthCollections = []
     isPrimaryPass = True
 
+    printPrimaryConfig(flags)
+
     for current_flags in flags_set:
         printActiveConfig(current_flags)
 
@@ -985,44 +987,70 @@ def InDetTrackRecoCfg(flags):
 
     return result
 
+# Run with python -m InDetConfig.TrackRecoConfig
+# Works with Data RAW (Format.BS), MC RDO, and MC ESD
+def TrackRecoConfigTest(flags=None):
 
+    store_config = False
+    if flags is None:
+        store_config = True
+        from AthenaConfiguration.AllConfigFlags import initConfigFlags
+        flags = initConfigFlags()
 
-if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
+        # Disable calo for this test
+        from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
+        OnlyTrackingPreInclude(flags)
 
-    # Disable calo for this test
-    flags.Detector.EnableCalo = False
+        from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
+        flags.Input.Files = defaultTestFiles.RDO_RUN3
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
+        flags.Exec.MaxEvents = 1
 
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
-    flags.Input.Files = defaultTestFiles.RDO_RUN2
-    flags.lock()
+        flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     top_acc = MainServicesCfg(flags)
 
-    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    top_acc.merge(PoolReadCfg(flags))
+    if flags.Input.Format is not Format.BS:
+        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+        top_acc.merge(PoolReadCfg(flags))
 
-    #######################################################################
-    #################### Additional Configuration  ########################
-    if "EventInfo" not in flags.Input.Collections:
-        from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-        top_acc.merge(EventInfoCnvAlgCfg(flags))
+    if flags.Detector.EnableCalo:
+        if flags.Input.Format is Format.BS:
+            from CaloRec.CaloRecoConfig import CaloRecoCfg
+            top_acc.merge(CaloRecoCfg(flags)) 
+        else:
+            from CaloRec.CaloTopoClusterConfig import CaloTopoClusterCfg
+            top_acc.merge(CaloTopoClusterCfg(flags))
 
-    if flags.Input.isMC:
-        from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
-        top_acc.merge(GEN_AOD2xAODCfg(flags))
+    if flags.Input.Format is not Format.BS:
+        # TODO find better way to determine RDO vs ESD input?
+        if "PixelRDOs" in flags.Input.Collections:
+            if "EventInfo" not in flags.Input.Collections:
+                from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+                top_acc.merge(EventInfoCnvAlgCfg(flags))
+
+            if flags.Input.isMC:
+                from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
+                top_acc.merge(GEN_AOD2xAODCfg(flags))
+        else:
+            if flags.Tracking.doTruth :
+                from xAODTruthCnv.RedoTruthLinksConfig import RedoTruthLinksAlgCfg
+                top_acc.merge( RedoTruthLinksAlgCfg(flags) )
 
     top_acc.merge(InDetTrackRecoCfg(flags))
-    from AthenaCommon.Constants import DEBUG
-    top_acc.foreach_component("AthEventSeq/*").OutputLevel = DEBUG
-    top_acc.printConfig(withDetails=True, summariseProps=True)
-    top_acc.store(open("TrackRecoConfig.pkl", "wb"))
+
+    if store_config:
+        from AthenaCommon.Constants import DEBUG
+        top_acc.foreach_component("AthEventSeq/*").OutputLevel = DEBUG
+        top_acc.printConfig(withDetails=True, summariseProps=True)
+        top_acc.store(open("TrackRecoConfig.pkl", "wb"))
 
     import sys
     if "--norun" not in sys.argv:
-        sc = top_acc.run(1)
+        sc = top_acc.run()
         if sc.isFailure():
             sys.exit(-1)
 
+if __name__ == "__main__":
+    TrackRecoConfigTest()
