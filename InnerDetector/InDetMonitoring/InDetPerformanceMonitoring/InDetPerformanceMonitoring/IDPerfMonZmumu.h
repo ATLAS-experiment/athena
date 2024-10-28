@@ -226,7 +226,8 @@ class IDPerfMonZmumu : public AthAlgorithm
   unsigned int  m_evtNumber{};
   unsigned int  m_lumi_block{};
   unsigned int  m_event_mu{};
-  int           m_triggerPrescale;
+  float         m_event_weight{};
+  int           m_triggerPrescale{};
   std::string m_triggerName;
   unsigned int  m_nVertex{};
 

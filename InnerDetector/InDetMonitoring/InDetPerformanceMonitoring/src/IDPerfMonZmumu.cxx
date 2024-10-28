@@ -170,6 +170,7 @@ IDPerfMonZmumu::~IDPerfMonZmumu()
 StatusCode IDPerfMonZmumu::initialize()
 {
   ATH_MSG_DEBUG ("** IDPerfMonZmumu::Initialize ** START **");
+  // Setup the services
 
   // Retrieve Track fitter and track to vertex
   if (m_doRefit) { // only if track refit is requested
@@ -314,6 +315,7 @@ StatusCode IDPerfMonZmumu::bookTrees()
     m_commonTree->Branch("lumi_block"          , &m_lumi_block, "lumi_block/I");
     m_commonTree->Branch("mu"                  , &m_event_mu,   "mu/I");
     m_commonTree->Branch("preScale"            , &m_triggerPrescale, "preScale/I");
+    m_commonTree->Branch("mcEventWeight"       , &m_event_weight, "mcEventWeight/F");
     m_commonTree->Branch("IDTrack_pt"          , &m_IDTrack_pt); 
     m_commonTree->Branch("IDTrack_eta"         , &m_IDTrack_eta); 
     m_commonTree->Branch("IDTrack_phi"         , &m_IDTrack_phi);
@@ -815,8 +817,8 @@ StatusCode IDPerfMonZmumu::bookTrees()
   
   // now register the Trees
   ATH_MSG_INFO("initialize() Going to register the mu+mu- trees");
-  ServiceHandle<ITHistSvc> tHistSvc("THistSvc", name());
-  if (tHistSvc.retrieve().isFailure()){
+  ITHistSvc* tHistSvc = nullptr;
+  if (service("THistSvc",tHistSvc).isFailure()){
     ATH_MSG_ERROR("initialize() Could not find Hist Service -> Switching ValidationMode Off !");
     m_validationMode = false;
   }
@@ -945,7 +947,13 @@ StatusCode IDPerfMonZmumu::execute()
     m_evtNumber = eventInfo->eventNumber();
     m_lumi_block = eventInfo->lumiBlock();
     m_event_mu = eventInfo->actualInteractionsPerCrossing();
-    ATH_MSG_DEBUG(" Execute() starting on --> Run: " << m_runNumber << "  event: " << m_evtNumber << "   Lumiblock: " << m_lumi_block);
+    if (eventInfo->mcEventWeights().size()>0) { 
+      m_event_weight = eventInfo->mcEventWeights()[0];
+    }
+    else {
+      m_event_weight = 1.; // default
+    }      
+    ATH_MSG_DEBUG(" Execute() starting on --> Run: " << m_runNumber << "  event: " << m_evtNumber << "   Lumiblock: " << m_lumi_block << "    weight:" << m_event_weight);
   }
   else {
     ATH_MSG_DEBUG(" IDPerfMonZmumu::execute evtStore->retrieve (eventInfo) failed ..  trying another strategy.. ");
@@ -955,9 +963,14 @@ StatusCode IDPerfMonZmumu::execute()
       m_evtNumber = eventInfo2->eventNumber();
       m_lumi_block = eventInfo2->lumiBlock();
       m_event_mu = eventInfo2->actualInteractionsPerCrossing();
-      ATH_MSG_DEBUG(" Execute() starting on --> Run: " << m_runNumber << "  event: " << m_evtNumber << "   Lumiblock: " << m_lumi_block);
-    }
-      
+      if (eventInfo->mcEventWeights().size()>0) { 
+	m_event_weight = eventInfo->mcEventWeights()[0];
+      }
+      else {
+	m_event_weight = 1.; // default
+      }      
+      ATH_MSG_DEBUG(" Execute() starting on --> Run: " << m_runNumber << "  event: " << m_evtNumber << "   Lumiblock: " << m_lumi_block << "    weight:" << m_event_weight);
+    }      
     else{
       ATH_MSG_ERROR("** IDPerfMonZmumu::execute ** Could not retrieve event info.");
     }
@@ -976,9 +989,11 @@ StatusCode IDPerfMonZmumu::execute()
   ATH_MSG_DEBUG(" ** IDPerfMonZmumu::execute ** calling dimuon analysis m_xZmm.Reco()...");
   if( m_xZmm.Reco( m_lumi_block ) ){
     ATH_MSG_INFO(   "  Run: " << m_runNumber 
-		 << "  event: " << m_evtNumber 
-		 << "  Lumiblock: " << m_lumi_block 
-		 << "  Invariant mass = " << m_xZmm.GetInvMass() << " GeV  ** SUCCESS **");
+		    << "  event: " << m_evtNumber 
+		    << "  Lumiblock: " << m_lumi_block 
+		    << "  Invariant mass = " << m_xZmm.GetInvMass() << " GeV "
+		    << "  weight: " << m_event_weight 
+		    << "  ** SUCCESS **");
   }
   else {
     ATH_MSG_DEBUG(   "  Run: " << m_runNumber
