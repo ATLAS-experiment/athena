@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -18,6 +18,7 @@ Updated:
 #include "LArFCalTowerStore.h"
 
 // include header files
+#include "AthenaKernel/errorcheck.h"
 #include "Identifier/IdentifierHash.h"
 
 #include "CaloIdentifier/CaloCell_ID.h"
@@ -72,14 +73,6 @@ bool LArFCalTowerStore::buildLookUp(const CaloCell_ID& cellIdHelper,
   // Store Preparation //
   ///////////////////////
 
-  // messaging
-  IMessageSvc* theMsgSvc;
-  StatusCode sc = Gaudi::svcLocator()->service("MessageSvc",theMsgSvc);
-  if(sc.isFailure()){
-    std::cout << "LArFCalTowerStore: could not initialize the MessageSvc " << std::endl;
-  }
-  MsgStream msg(theMsgSvc,"LArFCalTowerStore");
-  
   // get cell id helper
   const LArFCAL_ID& fcalIdHelper = *cellIdHelper.fcal_idHelper();
 
@@ -91,8 +84,10 @@ bool LArFCalTowerStore::buildLookUp(const CaloCell_ID& cellIdHelper,
 
   // check
   if ( m_indxBound <= m_indxOffset ){
-      msg << MSG::ERROR  << "cannot initialize internal store properly, index offset = " << m_indxOffset << ", index boundary = "
-	  << m_indxBound<< " -> module inactivated!"<< endmsg;
+    REPORT_MESSAGE_WITH_CONTEXT(MSG::ERROR, "LArFCalTowerStore")
+      << "cannot initialize internal store properly, index offset = "
+      << m_indxOffset << ", index boundary = " << m_indxBound<< " -> module inactivated!"
+      << endmsg;
       return false;
     }
 
@@ -130,8 +125,8 @@ bool LArFCalTowerStore::buildLookUp(const CaloCell_ID& cellIdHelper,
       // get cell geometry
       const CaloDetDescrElement* theElement = theManager.get_element(cellIndex);
       if (!theElement) {
-        msg << MSG::ERROR<< "Can't find element for index " << cellIndex
-            << endmsg;
+        REPORT_MESSAGE_WITH_CONTEXT(MSG::ERROR, "LArFCalTowerStore")
+          << "Can't find element for index " << cellIndex << endmsg;
         return false;
       }
       double xCell  = theElement->x();

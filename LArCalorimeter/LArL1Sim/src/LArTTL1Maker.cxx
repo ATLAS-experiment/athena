@@ -260,8 +260,8 @@ StatusCode LArTTL1Maker::initialize() {
   ATH_CHECK(m_ttSvc.retrieve());
 
   // Incident Service:
-  IIncidentSvc* incSvc = nullptr;
-  ATH_CHECK(service("IncidentSvc", incSvc));
+  SmartIF<IIncidentSvc> incSvc{service("IncidentSvc")};
+  ATH_CHECK(incSvc.isValid());
   // start listening to "BeginRun"
   incSvc->addListener(this, "BeginRun", m_BeginRunPriority);
 

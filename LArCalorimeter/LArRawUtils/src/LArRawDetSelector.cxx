@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AtlasDetDescr/AtlasDetectorID.h"
@@ -10,7 +10,8 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/IMessageSvc.h"
-#include "StoreGate/StoreGateSvc.h" 
+#include "AthenaKernel/errorcheck.h"
+#include "StoreGate/StoreGateSvc.h"
 
 LArRawDetSelector::LArRawDetSelector ( const LArRawChannelContainer*  )
   : m_onlineID(nullptr),
@@ -19,33 +20,14 @@ LArRawDetSelector::LArRawDetSelector ( const LArRawChannelContainer*  )
     m_hec(false),
     m_fcal(false)
 {
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
 
-  ISvcLocator* svcLoc = Gaudi::svcLocator( );
+  detStore->retrieve(m_onlineID).orThrow(
+    "Faild to get LArOnlineID helper");
 
-  IMessageSvc* msgSvc;
- 
-  StatusCode sc=svcLoc->service("MessageSvc", msgSvc);
-  if (sc.isFailure()) {
-    std::cerr << "LArRawDetSelector: Could not get MessageSvc!" << std::endl; 
-    return;
-  }
-
-  MsgStream log(msgSvc,"LArRawDetSelector");
-
-  StoreGateSvc* sg; 
-  if(svcLoc->service( "DetectorStore",sg).isFailure()) {
-    log << MSG::ERROR << "Faild to get DetectorStore" << endmsg;
-    return;
-  }
-    if(sg->retrieve(m_onlineID).isFailure()) {
-      log << MSG::ERROR << "Faild to get LArOnlineID helper" << endmsg;
-      return;
-    }
-    if(sg->retrieve(m_caloCellID).isFailure()) {
-      log << MSG::ERROR << "Faild to get LArOnlineID helper" << endmsg;
-      return;
-    }
-    }
+  detStore->retrieve(m_caloCellID).orThrow(
+    "Faild to get LArOnlineID helper");
+}
 
 void LArRawDetSelector::setDet(const Identifier& id ){
 
