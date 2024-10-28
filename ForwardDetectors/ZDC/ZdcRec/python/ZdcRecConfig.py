@@ -13,15 +13,77 @@ from OutputStreamAthenaPool.OutputStreamConfig import addToESD
 
 from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
 
-from ZdcRec.SetConfigTagFromFlags import SetConfigTag
-
 from ZdcNtuple.ZdcNtupleConfig import ZdcNtupleCfg
     
 # FIXME: removing for MC
 from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess
 # added getRun3NavigationContainerFromInput as per Tim Martin's suggestions
 from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg, getRun3NavigationContainerFromInput
+
+zdcConfigMap = {}
+
+def GenerateConfigTagDict():
+
+    zdcConfigMap['data15_hi'] = {}
+    zdcConfigMap['data16_hip'] = {}
+    zdcConfigMap['data17_13TeV'] = {}
+    zdcConfigMap['data18_hi'] = {}
+    zdcConfigMap['data22_13p6TeV'] = {}
+    zdcConfigMap['data23_5p36TeV'] = {}
+    zdcConfigMap['data23_13p6TeV'] = {}
+    zdcConfigMap['data23_hi'] = {}
+    zdcConfigMap['data23_comm'] = {}
+    zdcConfigMap['data23_5p36TeV'] = {}
+    zdcConfigMap['data24_900GeV'] = {}
+
+    zdcConfigMap['data24_13p6TeV'] = {}
+    zdcConfigMap['data24_13p6TeV']['default'] = 'pp2024'
     
+    zdcConfigMap['data24_refcomm'] = {}
+    zdcConfigMap['data24_refcomm']['default'] = 'pp2024'
+
+    zdcConfigMap['data24_hicomm'] = {}
+    zdcConfigMap['data24_hicomm']['default'] = 'pp2024'
+
+    zdcConfigMap['data24_hi'] = {}
+    zdcConfigMap['data24_hi']['default']="PbPb2024"
+    zdcConfigMap['data24_hi']['calibration_ZdcInjCalib']="InjectorPbPb2024"
+    
+def SetConfigTag(flags):
+
+    if flags.Input.TriggerStream == "calibration_ZDCInjCalib" or flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # calibration_DcmDummyProcessor is the "trigger stream" in the data we record in the standalone partition that is NOT LED data                
+        config = "Injectorpp2024" # default config tag for injector pulse
+
+        if flags.Input.ProjectName == "data24_hi":
+            config = "InjectorPbPb2024"
+    else:
+        config = "PbPb2023" # default config tag
+        
+        run = flags.GeoModel.Run
+        if (run == LHCPeriod.Run3):
+            if flags.Input.isMC:
+                config = "MonteCarloPbPb2023"
+            elif flags.Input.ProjectName == "data22_13p6TeV":
+                config = "LHCf2022"
+            elif flags.Input.ProjectName == "data23_5p36TeV" or flags.Input.ProjectName == "data23_900GeV" or flags.Input.ProjectName == "data23_13p6TeV":
+                config = "pp2023"
+            elif flags.Input.ProjectName == "data23_hi" or flags.Input.ProjectName == "data23_comm":
+                config = "PbPb2023"
+            elif flags.Input.ProjectName == "data24_5p36TeV" or flags.Input.ProjectName == "data24_900GeV" or flags.Input.ProjectName == "data24_13p6TeV" or flags.Input.ProjectName == "data24_refcomm":
+                config = "pp2024"
+            elif flags.Input.ProjectName == "data24_hi" or flags.Input.ProjectName == "data24_hicomm":
+                config = "PbPb2024"
+        elif (run == LHCPeriod.Run2):
+            if flags.Input.ProjectName == "data15_hi":
+                config = "PbPb2015"
+            elif flags.Input.ProjectName == "data17_13TeV":
+                config = "PbPb2015"
+            elif flags.Input.ProjectName == "data16_hip":
+                config = "pPb2016"
+            elif flags.Input.ProjectName == "data18_hi":
+                config = "PbPb2018"
+
+    return config
 
 def ZdcRecOutputCfg(flags):
 
@@ -264,6 +326,29 @@ def ZdcNtupleRun3Cfg(flags,**kwargs):
     #acc.setAppProperty("HistogramPersistency","ROOT")
     return acc
 
+def ZdcInjNtupleCfg(flags,**kwargs):
+    
+    acc = ComponentAccumulator()
+    acc.merge(ZdcNtupleCfg(flags,
+                           useGRL = False,
+                           zdcOnly = True,
+                           zdcInj = True,
+                           lhcf2022 = False,
+                           lhcf2022zdc = False,
+                           lhcf2022afp = False,
+                           enableTrigger = False,
+                           enableOutputSamples = True,
+                           enableOutputTree = True,
+                           writeOnlyTriggers = False,
+                           enableRPD = False,
+                           enableCentroid = False,
+                           reprocZdc = False,
+                           **kwargs))
+
+    acc.addService(CompFactory.THistSvc(Output = ["ANALYSIS DATAFILE='NTUP.root' OPT='RECREATE'"]))
+    #acc.setAppProperty("HistogramPersistency","ROOT")
+    return acc
+
 def ZdcLEDNtupleCfg(flags):
     acc = ComponentAccumulator()
     zdcLEDNtuple = CompFactory.ZdcLEDNtuple("ZdcLEDNtuple")
@@ -384,7 +469,8 @@ if __name__ == '__main__':
 
     # check for LED / calibration data running, and configure appropriately
     isLED = (flags.Input.TriggerStream == "calibration_ZDCLEDCalib")
-    isCalib = (flags.Input.TriggerStream == "calibration_ZDCCalib" or flags.Input.TriggerStream == "calibration_ZDCInjCalib" or flags.Input.TriggerStream == "physics_MinBias" or flags.Input.TriggerStream == "express_express")
+    isInj = (flags.Input.TriggerStream == "calibration_ZDCInjCalib")
+    isCalib = (flags.Input.TriggerStream == "calibration_ZDCCalib" or flags.Input.TriggerStream == "physics_MinBias" or flags.Input.TriggerStream == "express_express")
     if flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # standalone data: do we want to run calibration or LED?
         if args.runCalibForStandaloneData == "Calib" or args.runCalibForStandaloneData == "calib":
             isCalib = True
@@ -397,6 +483,8 @@ if __name__ == '__main__':
 
     if (isLED):
        print('ZdcRecConfig: Running LED data!')
+    if (isInj):
+       print('ZdcRecConfig: Running Injected pulse data!')
     if (isCalib):
        print('ZdcRecConfig: Running ZDC calibration data!')
     if (flags.Input.isMC):
@@ -408,8 +496,7 @@ if __name__ == '__main__':
     if not pn:
         raise ValueError('Unknown project name')
     
-
-    if isLED or pn == 'data_test':
+    if (isInj or isLED or isInj or pn == 'data_test'):
         flags.Trigger.EDMVersion=3
         flags.GeoModel.Run = LHCPeriod.Run3
         flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
@@ -427,11 +514,10 @@ if __name__ == '__main__':
         print('ZdcRecConfig: Overriding MC run to be Run 3!')
         flags.GeoModel.Run = LHCPeriod.Run3
 
-    if flags.Input.TriggerStream == "calibration_ZDCInjCalib" or flags.Input.TriggerStream == "calibration_DcmDummyProcessor":
-        flags.Detector.EnableZDC_RPD = False # disable RPD for injector
-    elif pn == "data22_13p6TeV":
-        flags.Detector.EnableZDC_RPD = False # disable RPD for LHCf
-
+    if (isInj
+        or flags.Input.TriggerStream == "calibration_DcmDummyProcessor"
+        or pn == "data22_13p6TeV"):
+        flags.Detector.EnableZDC_RPD = False # disable RPD for injector, LHCf
 
     if flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # standalone data: no trigger info available
         flags.DQ.useTrigger = False
@@ -454,6 +540,8 @@ if __name__ == '__main__':
         acc.merge(ZdcLEDRecCfg(flags))
     if isCalib: # should be able to run both if in standalone data
         acc.merge(ZdcRecCfg(flags))
+    if isInj: # should be able to run both if in standalone data
+        acc.merge(ZdcRecCfg(flags))
 
 
     if not flags.Input.isMC:
@@ -461,14 +549,20 @@ if __name__ == '__main__':
             from ZdcMonitoring.ZdcLEDMonitorAlgorithm import ZdcLEDMonitoringConfig
             acc.merge(ZdcLEDMonitoringConfig(flags,'ppPbPb2023'))
             acc.merge(ZdcLEDNtupleCfg(flags))
+            
         if (isCalib):
             from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig
-            
             zdcMonitorAcc = ZdcMonitoringConfig(flags)
             acc.merge(zdcMonitorAcc)
             # zdcMonitorAcc.getEventAlgo('ZdcMonAlg').OutputLevel = 2 # turn on DEBUG messages
             if (flags.Input.TriggerStream != "calibration_DcmDummyProcessor"): #after ntuple works for standalone data, take this line out
                 acc.merge(ZdcNtupleLocalCfg(flags))
+
+        if (isInj):
+            from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig            
+            zdcMonitorAcc = ZdcMonitoringConfig(flags)
+            acc.merge(zdcMonitorAcc)
+            acc.merge(ZdcInjNtupleCfg(flags))            
     else:
         acc.merge(ZdcNtupleLocalCfg(flags))
 

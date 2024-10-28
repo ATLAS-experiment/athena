@@ -45,6 +45,7 @@
 #include "xAODForward/AFPTrackContainer.h"
 #include <TLorentzVector.h>
 #include "StoreGate/ReadHandleKey.h"
+class ZdcInjPulserAmpMap;
 
 class ZdcNtuple : public EL::AnaAlgorithm
 {
@@ -67,6 +68,7 @@ public:
   bool enableTriggerJets; // store trigger jets in ntuple
   bool zdcCalib; // run calibration file
   bool zdcLaser; // run laser file
+  bool zdcInj; // ZDC injected-pulse run
   bool zdcOnly; // process only ZDC+trigger 
   unsigned int zdcLowGainMode; // ZDC LG mode
   size_t trackLimit; // max tracks for writing tree
@@ -122,7 +124,8 @@ public:
   const xAOD::TriggerTowerContainer* m_TTcontainer;
   const xAOD::AFPProtonContainer* m_afpProtons;
 
-
+  std::shared_ptr<ZdcInjPulserAmpMap> m_zdcInjPulserAmpMap;
+  
   int m_nTriggers;
   int m_eventCounter;
   bool m_isMC;
@@ -144,6 +147,7 @@ public:
   uint32_t t_eventNumber;
   uint32_t t_lumiBlock;
   uint32_t t_bcid;
+  float t_vInj;
   uint8_t t_bunchGroup;
   uint32_t t_passBits;
   uint32_t t_extendedLevel1ID;

@@ -470,7 +470,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
         }else{
             injectedPulseInputVoltage = m_zdcInjPulserAmpMap->getPulserAmplitude(lumiBlock);
             if (injectedPulseInputVoltage > 0){ // LB > startLB
-                ATH_MSG_INFO("Lumi block: " << lumiBlock << "; pulser amplitude: " << injectedPulseInputVoltage);        
+                ATH_MSG_DEBUG("Lumi block: " << lumiBlock << "; pulser amplitude: " << injectedPulseInputVoltage);        
             }
         }
     }
