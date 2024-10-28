@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //  ***************************************************************************
 //  *   Author: John Morris (john.morris@cern.ch)                             *
@@ -175,7 +175,7 @@ namespace LVL1{
       /// Helper class for offline TT identifiers
       const CaloIdManager*                         m_caloMgr;
       const CaloLVL1_ID*                           m_lvl1Helper;
-      CaloTriggerTowerService*                     m_ttSvc;
+      ToolHandle<CaloTriggerTowerService>          m_ttSvc;
       
       /// StoreGate keys for the Calo Cells 
       SG::ReadHandleKey<CaloCellContainer> m_caloCellContainerKey

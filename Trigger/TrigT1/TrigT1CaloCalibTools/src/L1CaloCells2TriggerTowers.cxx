@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibTools/L1CaloCells2TriggerTowers.h"
@@ -12,7 +12,6 @@ namespace LVL1{
     m_tileID(nullptr),
     m_caloCellHelper(nullptr),
     m_tileCablingService(nullptr),
-    m_ttSvc(nullptr),
     m_bInitialized(false),
     m_bLArDigitsInitialized(false),
     m_bTileDigitsInitialized(false)
@@ -168,16 +167,7 @@ namespace LVL1{
       if(sc.isFailure()){ATH_MSG_ERROR("Failed to get Tile_ID");return sc;}
 
       //Retrieve cabling & tt services
-      ISvcLocator* svcLoc = Gaudi::svcLocator( );
-      IToolSvc* toolSvc;
-
-      sc = svcLoc->service( "ToolSvc",toolSvc  );
-      if(sc.isSuccess()) {
-        sc = toolSvc->retrieveTool("CaloTriggerTowerService",m_ttSvc);
-        if(sc.isFailure()){ATH_MSG_ERROR("Could not retrieve CaloTriggerTowerService Tool");return sc;}
-        
-      }
-      else{ATH_MSG_ERROR("Could not retrieve ToolSvc");return sc;}
+      ATH_CHECK( m_ttSvc.retrieve() );
 
       m_tileCablingService = TileCablingService::getInstance();
 

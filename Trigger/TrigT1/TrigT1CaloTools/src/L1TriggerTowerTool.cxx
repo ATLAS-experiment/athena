@@ -112,13 +112,9 @@ StatusCode L1TriggerTowerTool::initialize()
   }
 
   // Incident Service:
-  IIncidentSvc* incSvc = 0;
-  if (service("IncidentSvc", incSvc).isFailure()) {
-    ATH_MSG_WARNING( "Unable to retrieve pointer to IncidentSvc " );
-  }
-  else {
-    incSvc->addListener(this, "BeginRun");
-  }
+  SmartIF<IIncidentSvc> incSvc{service("IncidentSvc")};
+  ATH_CHECK( incSvc.isValid() );
+  incSvc->addListener(this, "BeginRun");
 
   // Pedestal Correction
   if (m_correctFir) {

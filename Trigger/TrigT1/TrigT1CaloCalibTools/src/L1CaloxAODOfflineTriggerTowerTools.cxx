@@ -23,7 +23,7 @@ namespace LVL1{
     m_rxMapTool("LVL1::L1CaloFcal23Cells2RxMappingTool/L1CaloFcal23Cells2RxMappingTool"),
     m_caloMgr(nullptr),
     m_lvl1Helper(nullptr),
-    m_ttSvc(nullptr),
+    m_ttSvc("CaloTriggerTowerService"),
     m_dbPpmChanCalib(nullptr)
   {
   }
@@ -46,11 +46,7 @@ namespace LVL1{
     m_lvl1Helper = m_caloMgr->getLVL1_ID();
 
     //Retrieve cabling & tt services
-    ISvcLocator* svcLoc = Gaudi::svcLocator( );
-    IToolSvc* toolSvc;
-
-    CHECK( svcLoc->service( "ToolSvc",toolSvc  ) );
-    CHECK( toolSvc->retrieveTool("CaloTriggerTowerService",m_ttSvc) );
+    CHECK( m_ttSvc.retrieve() );
 
     CHECK( m_caloCellContainerKey.initialize() );
 

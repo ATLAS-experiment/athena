@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //  ***************************************************************************
 //  *   Author: John Morris (john.morris@cern.ch)                             *
@@ -17,6 +17,7 @@ namespace LVL1 {
     asg::AsgTool( name ),
     m_l1CaloTTIdTools("LVL1::L1CaloTTIdTools/L1CaloTTIdTools"),
     m_cells2tt("LVL1::L1CaloCells2TriggerTowers/L1CaloCells2TriggerTowers", this),
+    m_ttSvc("CaloTriggerTowerService"),
     m_scidtool ("CaloSuperCellIDTool"),
     m_scaleCorrKey(""),
     m_cablingKey(""),
@@ -24,7 +25,6 @@ namespace LVL1 {
     m_rxMapTool("LVL1::L1CaloFcal23Cells2RxMappingTool/L1CaloFcal23Cells2RxMappingTool")
     {
     m_caloMgr = 0;
-    m_ttSvc = 0;
     m_ttOnlineIdHelper = 0;
     m_lvl1Helper = 0;
     m_larOnlineID = 0;
@@ -1689,13 +1689,8 @@ namespace LVL1 {
     ATH_CHECK( m_scidtool.retrieve() );
     
     //Retrieve cabling & tt services
-    ISvcLocator* svcLoc = Gaudi::svcLocator( );
-    IToolSvc* toolSvc = nullptr;
+    ATH_CHECK( m_ttSvc.retrieve() );
 
-    ATH_CHECK( svcLoc->service( "ToolSvc",toolSvc  ) );
-    ATH_CHECK( toolSvc->retrieveTool("CaloTriggerTowerService",m_ttSvc) );
-
-    
     ATH_CHECK( m_onlineScaleCorrKey.initialize() );
 
     ATH_MSG_INFO("L1Calo L1CaloOfflineTriggerTowerTools initialize() success!");
