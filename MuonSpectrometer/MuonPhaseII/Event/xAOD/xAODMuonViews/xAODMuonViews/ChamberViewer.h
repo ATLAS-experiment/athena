@@ -40,15 +40,13 @@ namespace xAOD{
         template <typename ObjType> concept hasIdentifyConcept = requires (const ObjType theObj) {
             theObj.identify(); 
         };
-
+       /** @brief Define the concept that the object needs to have an IdentifierHash method  */
         template <typename ObjType> concept hasIdentifierHashConcept = requires(const ObjType theObj) {
             theObj.identifierHash();
         };
 
         BUILD_TRAIT(hasIdentify, hasIdentifyConcept)
         BUILD_TRAIT(hasIdentifyHash, hasIdentifierHashConcept)
-
-        
         template<class HitObjContainer> concept ContainerConcept =
             (hasIdentify<typename std::remove_pointer_t<typename HitObjContainer::value_type>>::value ||
              hasIdentifyHash<typename  std::remove_pointer_t<typename HitObjContainer::value_type>>::value);
@@ -68,6 +66,25 @@ namespace xAOD{
             public:
                 using value_type = typename HitObjContainer::value_type;
                 using element_type = typename std::remove_pointer_t<value_type>;
+                /** @brief Type trait to find the proper refernce type for the lambda function access */
+                template <typename HitObjType> struct ref_trait{};
+                /** @brief Branch if the input value type is a pointer */
+                template <typename HitObjType> requires (std::is_pointer_v<HitObjType>) struct ref_trait<HitObjType>{
+                    /** Convert to the underlying object itself  */
+                    using element_type = typename std::remove_pointer_t<HitObjType>;
+                    /** Make the object to be const  */
+                    using const_type = typename std::add_const_t<element_type>;
+                    /** Declare the type to be a const pointer */
+                    using type = std::add_pointer_t<const_type>; 
+                };
+                /** @brief Branch if the input value is an object */
+                template <typename HitObjType> requires (!std::is_pointer_v<HitObjType>)struct ref_trait<HitObjType>{
+                    /** @brief Const type */
+                    using const_type = typename std::add_const_t<HitObjType>;
+                    /** @brief Const reference type */
+                    using type = typename std::add_lvalue_reference<const_type>::type;
+                };
+                using const_ref = ref_trait<value_type>::type;
                 using ViewMode = ChamberView::Mode;
                 
                 /** @brief Standard constructor
@@ -92,7 +109,10 @@ namespace xAOD{
                 ChamberViewer(const ChamberViewer& other) = delete;
                 /** @brief Delete the copy assignment operator */
                 ChamberViewer& operator=(const ChamberViewer& other) = delete;
-
+                /** @brief Standard move constructor */
+                ChamberViewer(ChamberViewer&& other) = default;
+                /** @brief Standard move operator */
+                ChamberViewer& operator=(ChamberViewer&& other) = default;
                 /** @brief Begin iterator of the current chamber view */
                 HitObjContainer::const_iterator begin() const noexcept{
                     return m_begin;
@@ -122,13 +142,13 @@ namespace xAOD{
                     if constexpr (ChamberViewConcepts::hasIdentifyHash<element_type>::value) {
                         m_currentHash = (*m_end)->identifierHash();
                         m_end = std::find_if(m_begin, m_container.end(),
-                                         [this](const auto& meas){
+                                         [this](const_ref meas){
                                             return meas->identifierHash() != m_currentHash;
                                         });
                     } else {
                          m_currentHash = idHash((*m_end)->identify());
                          m_end = std::find_if(m_begin, m_container.end(),
-                                         [this](const auto& meas){
+                                         [this](const_ref meas){
                                             return idHash(meas->identify()) != m_currentHash;
                                         });                       
                     }
@@ -142,24 +162,35 @@ namespace xAOD{
                 bool loadView(const Identifier& chamberId) {
                     static_assert(ChamberViewConcepts::hasIdentify<element_type>::value, "Object needs to provide identify()" );
                     const IdentifierHash detId = idHash(chamberId);
-                    m_begin = std::ranges::find_if(m_container,[this,&detId](const auto& meas) {
+                    m_begin = std::ranges::find_if(m_container,[this,&detId](const_ref meas) {
                                                         return idHash(meas->identify()) == detId;
                                                    });
-                    m_end = std::find_if(m_begin, m_container.end(),[this,&detId](const auto& meas) {
+                    m_end = std::find_if(m_begin, m_container.end(),[this,&detId](const_ref meas) {
                                                         return idHash(meas->identify()) != detId;
                                                    });
                     return m_begin != m_end;
                 }
-
+                /** @brief Loads the view matching the parsed IdentifierHash. I.e. either the detector element hash or 
+                 *         the chamber module hash. There's no cross-check whether the interpretion of both hashes is the same
+                 *  @param idHash: IdentifierHash to search */
                 bool loadView(const IdentifierHash& idHash) {
                     static_assert(ChamberViewConcepts::hasIdentifyHash<element_type>::value, "Object needs to provide identify()" );
-                    m_begin = std::ranges::find_if(m_container,[&idHash](const auto& meas) {
+                    m_begin = std::ranges::find_if(m_container,[&idHash](const_ref meas) {
                                                         return meas->identifierHash() == idHash;
                                                    });
-                    m_end = std::find_if(m_begin, m_container.end(),[&idHash](const auto& meas) {
+                    m_end = std::find_if(m_begin, m_container.end(),[&idHash](const_ref meas) {
                                                         return meas->identifierHash() != idHash;
                                                    });
                      return m_begin != m_end;
+                }
+
+                bool loadView(std::function<bool(const_ref)> selector) {
+                    m_begin = std::ranges::find_if(m_container, selector);
+                    m_end = std::find_if(m_begin, m_container.end(),
+                                         [&selector](const_ref meas) {
+                                            return !selector(meas);
+                                        });
+                    return m_begin != m_end;
                 }
 
             private:
