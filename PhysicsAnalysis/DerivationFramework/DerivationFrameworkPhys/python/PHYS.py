@@ -23,8 +23,7 @@ def PHYSKernelCfg(flags, name='PHYSKernel', **kwargs):
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(
         flags, 
-        TriggerListsHelper     = kwargs['TriggerListsHelper'], 
-        TauJets_EleRM_in_input = kwargs['TauJets_EleRM_in_input']
+        TriggerListsHelper     = kwargs['TriggerListsHelper']
     ))
 
     # Thinning tools
@@ -40,7 +39,7 @@ def PHYSKernelCfg(flags, name='PHYSKernel', **kwargs):
         'DiTauLowPtTPThinningToolName'        : nametag+"DiTauLowPtTPThinningTool",
     } 
     # for AOD produced before 24.0.17, the electron removal tau is not available
-    if kwargs.get('TauJets_EleRM_in_input', False):
+    if flags.Tau.TauEleRM_isAvailable:
         thinningToolsArgs['TauJets_EleRMThinningToolName'] = nametag+"TauJets_EleRMThinningTool"
     # Configure the thinning tools
     from DerivationFrameworkPhys.PhysCommonThinningConfig import PhysCommonThinningCfg
@@ -56,16 +55,12 @@ def PHYSKernelCfg(flags, name='PHYSKernel', **kwargs):
     return acc
 
 
-def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerListsHelper=None, TauJets_EleRM_in_input=None):
+def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerListsHelper=None):
     
     if TriggerListsHelper is None:
         from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
         TriggerListsHelper = TriggerListsHelper(flags)
     
-    if TauJets_EleRM_in_input is None:
-        # for AOD produced before 24.0.17, the electron removal tau is not available
-        TauJets_EleRM_in_input = (flags.Input.TypedCollections.count('xAOD::TauJetContainer#TauJets_EleRM') > 0)
-
     acc = ComponentAccumulator()
 
     ## Higgs augmentations - create 4l vertex
@@ -115,9 +110,9 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                            "AntiKtVR30Rmax4Rmin02PV0TrackJets",
                                           ]
-    if TauJets_EleRM_in_input:
+    if flags.Tau.TauEleRM_isAvailable:
         PHYSSlimmingHelper.SmartCollections.append("TauJets_EleRM")
-    
+
     excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
     StaticContent = []
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Tight_Vertices"]
@@ -139,7 +134,7 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
                                               "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
-    if TauJets_EleRM_in_input:
+    if flags.Tau.TauEleRM_isAvailable:
         PHYSSlimmingHelper.ExtraVariables += ["TauJets_EleRM.dRmax.etOverPtLeadTrk"]
 
     # FTAG Xbb extra content
@@ -229,28 +224,19 @@ def PHYSCfg(flags):
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
     PHYSTriggerListsHelper = TriggerListsHelper(flags)
 
-    # for AOD produced before 24.0.17, the electron removal tau is not available
-    TauJets_EleRM_in_input = (flags.Input.TypedCollections.count('xAOD::TauJetContainer#TauJets_EleRM') > 0)
-    if TauJets_EleRM_in_input:
-        logPHYS.info("TauJets_EleRM is in the input AOD. Relevant containers will be scheduled")
-    else:
-        logPHYS.info("TauJets_EleRM is Not in the input AOD. No relevant containers will be written")
-
     # Common augmentations
     acc.merge(PHYSKernelCfg(
         flags,
         name="PHYSKernel",
-        StreamName = stream_name, 
-        TriggerListsHelper = PHYSTriggerListsHelper, 
-        TauJets_EleRM_in_input=TauJets_EleRM_in_input
+        StreamName = stream_name,
+        TriggerListsHelper = PHYSTriggerListsHelper
     ))
     # PHYS content
     acc.merge(PHYSCoreCfg(
         flags,
         "PHYS",
-        StreamName = stream_name, 
-        TriggerListsHelper = PHYSTriggerListsHelper, 
-        TauJets_EleRM_in_input=TauJets_EleRM_in_input
+        StreamName = stream_name,
+        TriggerListsHelper = PHYSTriggerListsHelper
         ))
     
     return acc

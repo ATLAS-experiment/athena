@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # PhysCommonConfig
 # Contains the configuration for the common physics containers/decorations used in analysis DAODs
@@ -85,7 +85,7 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets"))
     acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets_MuonRM"))
     # for AOD produced before 24.0.17, the electron removal tau is not available
-    if kwargs.get('TauJets_EleRM_in_input', False): 
+    if flags.Tau.TauEleRM_isAvailable:
         acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets_EleRM"))
     FTagJetColl = ['AntiKt4EMPFlowJets', 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets']
     if flags.GeoModel.Run >= LHCPeriod.Run4:
