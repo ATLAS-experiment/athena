@@ -44,18 +44,18 @@ EMECDetectorManager::EMECDetectorManager(const EMECHVManager* hvManagerInner
 
   // The EMEC gets and managers certain arrays needed to build descriptors.  Here is that:
   ISvcLocator *svcLocator = Gaudi::svcLocator();
-  IRDBAccessSvc *rdbAccess{nullptr};
-  IGeoModelSvc  *geoModel{nullptr};
-  IGeoDbTagSvc  *geoDbTagSvc{nullptr};
 
-  if(svcLocator->service("GeoModelSvc",geoModel) == StatusCode::FAILURE)
-    throw std::runtime_error("Error in HECDetectorManager, cannot access GeoModelSvc");
+  SmartIF<IGeoModelSvc> geoModel{svcLocator->service("GeoModelSvc")};
+  if(!geoModel.isValid())
+    throw std::runtime_error("Error in EMECDetectorManager, cannot access GeoModelSvc");
 
-  if(svcLocator->service("GeoDbTagSvc",geoDbTagSvc) == StatusCode::FAILURE)
-    throw std::runtime_error("Error in HECDetectorManager, cannot access GeoDbTagSvc");
+  SmartIF<IGeoDbTagSvc> geoDbTagSvc{svcLocator->service("GeoDbTagSvc")};
+  if(!geoDbTagSvc.isValid())
+    throw std::runtime_error("Error in EMECDetectorManager, cannot access GeoDbTagSvc");
 
-  if(svcLocator->service(geoDbTagSvc->getParamSvcName(),rdbAccess) == StatusCode::FAILURE)
-    throw std::runtime_error("Error in HECDetectorManager, cannot access RDBAccessSvc");
+  SmartIF<IRDBAccessSvc> rdbAccess{svcLocator->service(geoDbTagSvc->getParamSvcName())};
+  if(!rdbAccess.isValid())
+    throw std::runtime_error("Error in EMECDetectorManager, cannot access RDBAccessSvc");
 
   std::string larKey, larNode;
   if(geoDbTagSvc->getSqliteReader()==nullptr) {

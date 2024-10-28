@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/Bootstrap.h"
@@ -20,10 +20,8 @@ FCALDetectorManager::FCALDetectorManager (const FCALHVManager* hvManager)
     }
   }
 
-  ISvcLocator *svcLocator = Gaudi::svcLocator();
-
-  StoreGateSvc *detStore;
-  if (svcLocator->service("DetectorStore", detStore, false )==StatusCode::FAILURE) {
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if (!detStore.isValid()) {
     throw std::runtime_error("Error in FCALDetectorManager: cannot access DetectorStore");
   }
 
