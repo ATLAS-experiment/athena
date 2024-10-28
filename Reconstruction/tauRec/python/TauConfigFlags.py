@@ -25,7 +25,7 @@ def createTauConfigFlags():
 
     # Settings common to Run2 and Run3
     tau_cfg.addFlag("Tau.SeedMinPt", 0.0*Units.GeV)
-    tau_cfg.addFlag("Tau.SeedMaxEta", lambda pcf: 2.5 if pcf.GeoModel.Run <= LHCPeriod.Run3 else 4.0)
+    tau_cfg.addFlag("Tau.SeedMaxEta", lambda prevFlags: 2.5 if prevFlags.GeoModel.Run <= LHCPeriod.Run3 else 4.0)
     # FIXME: MaxNTracks is not used, drop at the next occasion
     tau_cfg.addFlag("Tau.MaxNTracks", -1)
     tau_cfg.addFlag("Tau.RemoveDupeCoreTracks", True)
@@ -87,6 +87,8 @@ def createTauConfigFlags():
 
     # e-had boosted ditaus, aka electron-subtracted taus
     tau_cfg.addFlag("Tau.doTauEleRMRec", True)
+    # helper for derivations, TauJets_EleRM not available for AODs produced before 24.0.17
+    tau_cfg.addFlag("Tau.TauEleRM_isAvailable", lambda prevFlags : "xAOD::TauJetContainer#TauJets_EleRM" in prevFlags.Input.TypedCollections)
     # had-had boosted ditaus
     tau_cfg.addFlag("Tau.doDiTauRec", True)
 
