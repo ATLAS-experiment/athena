@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trigger includes
@@ -84,7 +84,7 @@ namespace {
 // Standard constructor
 // =============================================================================
 TrigByteStreamCnvSvc::TrigByteStreamCnvSvc(const std::string& name, ISvcLocator* svcLoc)
-: ByteStreamCnvSvcBase(name, svcLoc) {}
+  : base_class(name, svcLoc) {}
 
 // =============================================================================
 // Standard destructor
