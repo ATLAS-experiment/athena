@@ -16,7 +16,6 @@
 #include <string>
 
 #include "MdtRawDataMonAlg.h"
-#include "LWHists/TH1F_LW.h"
 #include "MuonDQAUtils/MuonChamberNameConverter.h"
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
 
@@ -287,92 +286,6 @@ void MdtRawDataMonAlg::CorrectTubeMax(const std::string& hardware_name, int& num
 // Correct for F@#!ing mdtIdHelper
 void MdtRawDataMonAlg::CorrectLayerMax(const std::string& hardware_name, int& numLayers) {
     if (hardware_name == "EEL1A05" || hardware_name == "EEL1C05") numLayers = 3;
-}
-
-/*DEV
-StatusCode MdtRawDataValAlg::bookMDTHisto_overview( TH1*& h, TString h_title, TString xtit, TString ytit, int nbin, float xi, float xf,
-MonGroup& mgrp) { h = new TH1F(h_title, h_title, nbin, xi, xf); h->SetFillColor(42); h->SetTitleSize(0.3, "y");
-  h->GetXaxis()->SetTitle(xtit);
-  h->GetYaxis()->SetTitle(ytit);
-  ATH_MSG_DEBUG("INSIDE bookMDTHisto: " << h << " " << h_title );
-  StatusCode sc = mgrp.regHist( h );
-  if(sc.isFailure()) ATH_MSG_WARNING("couldn't register " << h_title << " hist to MonGroup" );
-  return sc;
-}
-
-StatusCode MdtRawDataValAlg::bookMDTHisto_chambers( TH1F_LW*& h, TString h_title, TString xtit, TString ytit, int nbin, float xi, float xf,
-MonGroup& mgrp) { h = TH1F_LW::create(h_title, h_title, nbin, xi, xf); h->GetXaxis()->SetTitle(xtit); h->GetYaxis()->SetTitle(ytit);
-  ATH_MSG_VERBOSE("INSIDE bookMDTHisto: " << h << " " << h_title );
-  StatusCode sc = mgrp.regHist( h );
-  if(sc.isFailure()) ATH_MSG_WARNING("couldn't register " << h_title << " hist to MonGroup" );
-  return sc;
-}
-
-StatusCode MdtRawDataValAlg::bookMDTHisto_overview_2D( TH2*& h, TString h_title, TString xtit, TString ytit, int nbin1, float xi1, float
-xf1, int nbin2, float xi2, float xf2, MonGroup& mgrp) { h = new TH2F(h_title, h_title, nbin1, xi1, xf1, nbin2, xi2, xf2);
-  h->SetOption("COLZ");
-  h->SetMarkerColor(1);
-  h->SetMarkerStyle(21);
-  h->SetMarkerSize(0.2);
-  h->GetXaxis()->SetTitle(xtit);
-  h->GetYaxis()->SetTitle(ytit);
-  ATH_MSG_DEBUG("INSIDE bookMDTHisto: " << h << " " << h_title );
-  StatusCode sc = mgrp.regHist( h );
-  if(sc.isFailure()) ATH_MSG_WARNING("couldn't register " << h_title << " hist to MonGroup" );
-  return sc;
-}
-
-StatusCode MdtRawDataValAlg::bookMDTHisto_chambers_2D( TH2F_LW*& h, TString h_title, TString xtit, TString ytit, int nbin1, float xi1, float
-xf1, int nbin2, float xi2, float xf2, MonGroup& mgrp) { h = TH2F_LW::create(h_title, h_title, nbin1, xi1, xf1, nbin2, xi2, xf2);
-  h->SetOption("COLZ");
-  //  h->SetFillColor(42);
-  h->SetMarkerColor(1);
-  h->SetMarkerStyle(21);
-  h->SetMarkerSize(0.2);
-  h->GetXaxis()->SetTitle(xtit);
-  h->GetYaxis()->SetTitle(ytit);
-  ATH_MSG_VERBOSE("INSIDE bookMDTHisto: " << h << " " << h_title );
-  StatusCode sc = mgrp.regHist( h );
-  if(sc.isFailure()) ATH_MSG_WARNING("couldn't register " << h_title << " hist to MonGroup" );
-  return sc;
-}
-
-StatusCode MdtRawDataValAlg::bookMDTHisto_OccVsLB( TH2*& h, TString h_title, TString xtit, TString ytit, int nbin1, float xi1, float xf1,
-int nbin2, float xi2, float xf2, MonGroup& mgrp){ h = new TH2F(h_title, h_title, nbin1, xi1, xf1, nbin2, xi2, xf2); h->SetOption("COLZ");
-  h->SetMarkerColor(1);
-  h->SetMarkerStyle(21);
-  h->SetMarkerSize(0.2);
-  h->GetXaxis()->SetTitle(xtit);
-  h->GetYaxis()->SetTitle(ytit);
-  ATH_MSG_DEBUG("INSIDE bookMDTHisto_OccVsLB: " << h << " " << h_title );
-  StatusCode sc = mgrp.regHist( h );
-  if(sc.isFailure()) ATH_MSG_WARNING("couldn't register " << h_title << " hist to MonGroup" );
-  return sc;
-}
-*/
-
-StatusCode MdtRawDataMonAlg::fillMDTMaskedTubes(IdentifierHash idHash, const std::string& hardware_name, TH1F_LW*& h) {
-    // Loop Over all mdt identifiers
-    if (!m_masked_tubes) {
-        ATH_MSG_WARNING("Could Not Fill masked tubes noise map not set!");
-        return StatusCode::SUCCESS;
-    }
-
-    std::set<Identifier> noisyTubes = m_masked_tubes->getNoiseList(idHash);
-    for (auto digcoll_id : noisyTubes) {
-        int mdtlayer = m_idHelperSvc->mdtIdHelper().tubeLayer(digcoll_id);
-        if (m_idHelperSvc->mdtIdHelper().multilayer(digcoll_id) == 2) {
-            if (hardware_name.at(1) == 'I' && hardware_name.at(3) != '8')
-                mdtlayer += 4;
-            else
-                mdtlayer += 3;
-        }
-        int tubeMax = m_idHelperSvc->mdtIdHelper().tubeMax(digcoll_id);
-        int mdttube = m_idHelperSvc->mdtIdHelper().tube(digcoll_id) + (mdtlayer - 1) * tubeMax;
-        ChamberTubeNumberCorrection(mdttube, hardware_name, m_idHelperSvc->mdtIdHelper().tube(digcoll_id), mdtlayer - 1);
-        h->Fill(mdttube, 1);
-    }
-    return StatusCode::SUCCESS;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
