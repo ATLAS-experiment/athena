@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //<doc><file>	$Id: HWIdentifier.h,v 1.3 2004-02-24 13:52:15 schaffer Exp $
@@ -16,16 +16,6 @@ public:
 
     /// Default constructor
     HWIdentifier() = default;
-    /// Default Copy constructor
-    HWIdentifier(const HWIdentifier& other) = default;
-    /// Default Move constructor
-    HWIdentifier(HWIdentifier&& other) = default;
-    /// Default Assignment operators
-    HWIdentifier& operator=(const HWIdentifier& old) = default;
-    ///  Default Move Assignment operator
-    HWIdentifier& operator=(HWIdentifier&& old) = default;
-    /// Default dtor
-    ~HWIdentifier() = default;
 
     /// Constructor from value_type
     explicit HWIdentifier(value_type value);
