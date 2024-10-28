@@ -29,9 +29,8 @@ endif()
 set( ATLAS_GCC_CHECKERS_CONFIG ${_config}
    CACHE STRING "Configuration file(s) for the GCC checker plugins" FORCE )
 
-
 # CppCheck options:
-option( ATLAS_USE_CPPCHECK "Use CppCheck in the build" OFF )
+option( ATLAS_USE_CPPCHECK "Use CppCheck in the build" ON )
 
 # User-defined cppcheck command line options:
 set( ATLAS_CPPCHECK_OPTIONS "--enable=warning,portability"
