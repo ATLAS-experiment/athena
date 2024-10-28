@@ -77,5 +77,5 @@ StatusCode ZDC_DetTool::create()
     ATH_CHECK( detStore()->record(theZDCFactory.getDetectorManager(),theZDCFactory.getDetectorManager()->getName()) );
   }
   
-  return StatusCode::FAILURE;
+  return StatusCode::SUCCESS;
 }

@@ -346,7 +346,7 @@ if __name__ == '__main__':
     """ This is selftest & ZDC calibration transform at the same time"""
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
 
     flags = initConfigFlags()
 
@@ -413,15 +413,18 @@ if __name__ == '__main__':
         flags.Trigger.EDMVersion=3
         flags.GeoModel.Run = LHCPeriod.Run3
         flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
+        flags.IOVDb.GlobalTag=defaultConditionsTags.RUN3_DATA
     else:
         year = int(pn.split('_')[0].split('data')[1])
         if (year < 20):
             flags.Trigger.EDMVersion=2
             flags.GeoModel.Run = LHCPeriod.Run2
+            flags.IOVDb.GlobalTag=defaultConditionsTags.RUN2_DATA
         elif (year > 20):
             flags.Trigger.EDMVersion=3
             flags.GeoModel.Run = LHCPeriod.Run3
             flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
+            flags.IOVDb.GlobalTag=defaultConditionsTags.RUN3_DATA
 
     if (flags.Input.isMC):
         print('ZdcRecConfig: Overriding MC run to be Run 3!')
