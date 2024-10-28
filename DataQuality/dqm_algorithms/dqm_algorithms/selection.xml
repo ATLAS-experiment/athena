@@ -164,4 +164,9 @@
   <class name="dqm_algorithms::TRTWeightedAverage"/>
   <class name="dqm_algorithms::TileTriggerMonitor"/>
   <class name="dqm_algorithms::TripleGaussCollFit"/>
+  <class name="dqm_algorithms::ZDCPercentageThreshTests"/>
+  <class name="dqm_algorithms::ZDCPercentEvents_XthBin_NormalizeToFirstBin"/>
+  <class name="dqm_algorithms::ZDCPercentEvents_XthBin"/>
+  <class name="dqm_algorithms::ZDCPercentEvents_UnderThreshold"/>
+  <class name="dqm_algorithms::ZDCPercentEvents_AboveThreshold"/>
 </lcgdict>
