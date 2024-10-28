@@ -169,7 +169,6 @@ def TRIG9Cfg(flags):
                                             "MET_Baseline_AntiKt4EMPFlow",
                                             "BTagging_AntiKt4EMPFlow",
                                             "TauJets",
-                                            "HLT_TrigTauRecMerged_MVA",
                                             ]
 
     TRIG9SlimmingHelper.StaticContent = [ 
@@ -191,6 +190,7 @@ def TRIG9Cfg(flags):
                             "EventInfo.hardScatterVertexLink.timeStampNSOffset",
                            ]
 
+    TRIG9SlimmingHelper.AllVariables += ['HLT_TrigTauRecMerged_MVA','HLT_tautrack_MVA']
 
     # Truth containers
     if flags.Input.isMC:
