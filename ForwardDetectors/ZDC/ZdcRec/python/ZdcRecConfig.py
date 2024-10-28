@@ -88,16 +88,24 @@ def ZdcTrigValToolCfg(flags, config = 'PbPb2023'):
       
     return acc
 
-def RPDAnalysisToolCfg(flags):
+def RPDAnalysisToolCfg(flags, config: str):
     acc = ComponentAccumulator()
     acc.setPrivateTools(
-        CompFactory.ZDC.RPDAnalysisTool(name="RPDAnalysisTool")
+        CompFactory.ZDC.RPDAnalysisTool(
+            name="RPDAnalysisTool",
+            Configuration=config
+        )
     )
     return acc
 
-def RpdSubtractCentroidToolCfg(flags):
+def RpdSubtractCentroidToolCfg(flags, config: str):
     acc = ComponentAccumulator()
-    acc.setPrivateTools(CompFactory.ZDC.RpdSubtractCentroidTool(name = 'RpdSubtractCentroidTool'))
+    acc.setPrivateTools(
+        CompFactory.ZDC.RpdSubtractCentroidTool(
+            name="RpdSubtractCentroidTool",
+            Configuration=config
+        )
+    )
     return acc
 
 def ZdcRecRun2Cfg(flags):        
@@ -175,8 +183,8 @@ def ZdcRecRun3Cfg(flags):
     anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doTimeCalib,doTrigEff,ForceCalibRun,ForceCalibLB))
 
     if (doRPD):
-        rpdAnaTool = acc.popToolsAndMerge(RPDAnalysisToolCfg(flags))
-        centroidTool = acc.popToolsAndMerge(RpdSubtractCentroidToolCfg(flags))
+        rpdAnaTool = acc.popToolsAndMerge(RPDAnalysisToolCfg(flags, config))
+        centroidTool = acc.popToolsAndMerge(RpdSubtractCentroidToolCfg(flags, config))
 
     if ( flags.Input.isMC ):
         zdcTools = [anaTool] # expand list as needed

@@ -31,7 +31,7 @@ struct RPDConfig {
   float pileupBaselineSumThresh;
   float pileupBaselineStdDevThresh;
   unsigned int nNegativesAllowed;
-  unsigned int AdcOverflow;
+  unsigned int ADCOverflow;
 };
 
 class RPDDataAnalyzer {
