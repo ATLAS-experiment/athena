@@ -31,6 +31,7 @@ namespace DerivationFramework {
     recordPropertyVI("mcBsJpsiPhi"      , {});
     recordPropertyVI("mcBplusJpsiPiplus", {});
     recordPropertyVI("mcBhh"            , {});
+    recordPropertyVI("mcBhhMuMu"            , {});
 
     // MC datasets without trigger information
     recordPropertyVI("mcNoTrigger"     , {});
