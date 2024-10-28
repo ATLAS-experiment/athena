@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ByteStreamCnvSvcBase/SrcIdMap.h" 
@@ -21,13 +21,13 @@ SrcIdMap::SrcIdMap ()
 }
 
 
-uint32_t SrcIdMap::getRobID (uint32_t rod_id)
+uint32_t SrcIdMap::getRobID (uint32_t rod_id) const
 {
   return rod_id;
 }
 
 
-uint32_t SrcIdMap::getRosID (uint32_t rob_id)
+uint32_t SrcIdMap::getRosID (uint32_t rob_id) const
 {
   //  Set module ID = 0 
   //    ALL ROB goes to one ROS 
@@ -37,7 +37,7 @@ uint32_t SrcIdMap::getRosID (uint32_t rob_id)
 }
 
 
-uint32_t SrcIdMap::getDetID  (uint32_t ros_id) 
+uint32_t SrcIdMap::getDetID  (uint32_t ros_id) const
 {
   //  Change Module Type to SUBDET  and set module ID = 0 
   //    ALL ROS goes to one SUBDET 

@@ -1,17 +1,17 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// using namespace EventFormat::RawMemory ; 
 
 #include "GaudiKernel/MsgStream.h"
 #include "eformat/Status.h"
 
-//using namespace OFFLINE_FRAGMENTS_NAMESPACE ; 
+#include <format>
+
 
 template <class IDMAP> 
 FullEventAssembler<IDMAP>::FullEventAssembler():
-  m_runnum(0),m_lvl1_id(0),
+  m_runnum(0),
+  m_lvl1_id(0),
   m_rod_version(0),
   m_rob_version(0),
   m_detEvtType(0),
@@ -28,24 +28,17 @@ FullEventAssembler<IDMAP>::~FullEventAssembler()
 }
 
 
-
-template <class IDMAP> 
+template <class IDMAP>
 void FullEventAssembler<IDMAP>::clear()
 {
    // clear stack
-   RODMAP::iterator it_rod     = m_rodMap.begin(); 
-   RODMAP::iterator it_rod_end = m_rodMap.end(); 
-   for(; it_rod!=it_rod_end; ++it_rod)
-     delete it_rod->second;
+   for(const auto& [id, rod] : m_rodMap) delete rod;
    m_rodMap.clear();
 
-   ROBMAP::iterator it_rob     = m_robMap.begin(); 
-   ROBMAP::iterator it_rob_end = m_robMap.end(); 
-   for(; it_rob!=it_rob_end; ++it_rob)
-     delete it_rob->second;
+   for(const auto& [id, rob] : m_robMap) delete rob;
    m_robMap.clear();
-
 }
+
 
 template <class IDMAP> 
 void FullEventAssembler<IDMAP>::fill(RawEventWrite* re,  MsgStream& log )
@@ -66,86 +59,70 @@ template <class IDMAP>
 typename FullEventAssembler<IDMAP>::RODDATA* 
 FullEventAssembler<IDMAP>::getRodData(uint32_t id) 
 {   
-  RODMAP::iterator itr = m_rodMap.find(id); 
+  RODDATA* theROD = nullptr;
 
-  RODDATA* theROD = 0; 
+  RODMAP::const_iterator itr = m_rodMap.find(id);
   if(itr!=m_rodMap.end())
     {
-      theROD = (*itr).second; 
+      theROD = itr->second;
     } 
   else 
     {
       theROD = new RODDATA(); 	   
-      m_rodMap.insert(RODMAP::value_type(id,theROD)) ; 
+      m_rodMap.emplace(id, theROD);
     }
   
-  return theROD ; 
+  return theROD;
 }
 
 
 template <class IDMAP> 
 void 
 FullEventAssembler<IDMAP>::RodToRob(RODMAP& rodMap,
-			ROBMAP& robMap,  MsgStream& log ) 
+                                    ROBMAP& robMap,  MsgStream& log ) const
 { 
-  log << MSG::DEBUG << " RodToRob " << endmsg;
-
-  // loop over all the RODs 
-  RODMAP::iterator it_rod     = rodMap.begin(); 
-  RODMAP::iterator it_rod_end = rodMap.end(); 
-  for(; it_rod!=it_rod_end; ++it_rod)
+  // loop over all the RODs
+  for(const auto& [rodid, rod] : rodMap)
     {
-      uint32_t rodid = (*it_rod).first; 
-      RODDATA*  intv = (*it_rod).second; 
-
-      std::ios_base::fmtflags oflags=log.stream().flags();
-      log << MSG::DEBUG << " Rod id = " << MSG::hex << rodid << endmsg;
-      log.flags(oflags); // reset precision after use of hex
+      if(log.level() <= MSG::DEBUG)
+          log << MSG::DEBUG << " Rod id = " << std::format("{:x}", rodid) << endmsg;
 
       // make an ROB id from an ROD id. 
-      uint32_t robid = m_idmap.getRobID(rodid); 
+      const uint32_t robid = m_idmap.getRobID(rodid);
       
       // find or make a ROS fragment
-      ROBMAP::iterator itr2 = robMap.find(robid); 
-      if(itr2!=robMap.end())
-	{
-          oflags=log.stream().flags();
-	  log << MSG::ERROR << " More than one RODs in ROB:" << MSG::hex << (*itr2).first << endmsg;
-          log.flags(oflags); // reset precision after use of hex
+      ROBMAP::const_iterator itr = robMap.find(robid);
+      if(itr!=robMap.end())
+        {
+          log << MSG::ERROR << " More than one ROD in ROB:" << std::format("{:x}", itr->first) << endmsg;
         }
       else 
         { // Make a new ROBFragment 
-	  OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*  theROB 
-	    = new OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment(robid,m_runnum,m_lvl1_id,m_bcid,
-								 m_lvl1_trigger_type,m_detEvtType,intv->size(),
-								 &(*intv)[0],eformat::STATUS_BACK);
-	  theROB->minor_version(m_rob_version);
-	  theROB->rod_minor_version(m_rod_version);
-	  robMap.insert(ROBMAP::value_type(robid,theROB)) ; 
+          auto theROB = new OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment(robid,m_runnum,m_lvl1_id,m_bcid,
+                                                                           m_lvl1_trigger_type,m_detEvtType,rod->size(),
+                                                                           &(*rod)[0],eformat::STATUS_BACK);
+          theROB->minor_version(m_rob_version);
+          theROB->rod_minor_version(m_rod_version);
+          robMap.emplace(robid, theROB);
         } 
     }
 } 
 
 
 template <class IDMAP> 
-void FullEventAssembler<IDMAP>::RobToEvt(ROBMAP& robMap, RawEventWrite* re, MsgStream& log ) 
+void FullEventAssembler<IDMAP>::RobToEvt(ROBMAP& robMap, RawEventWrite* re, MsgStream& log ) const
 {
-  log << MSG::DEBUG<< " RobToEvt, number of ROBFrag= " << robMap.size() << endmsg;
-  OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment* theROB; 
-  
-  ROBMAP::iterator it_rob = robMap.begin(); 
-  ROBMAP::iterator it_rob_end = robMap.end(); 
-  for(; it_rob!= it_rob_end;++it_rob)
+  const bool debug = log.level() <= MSG::DEBUG;
+  if(debug) log << MSG::DEBUG << " RobToEvt, number of ROBFrag= " << robMap.size() << endmsg;
+
+  for(const auto& [robid, theROB] : robMap)
     {
-      theROB = (*it_rob).second; 
-      std::ios_base::fmtflags oflags=log.stream().flags();
-      log << MSG::DEBUG << " RobToEvt: adding ROB " << MSG::hex <<
- 	theROB->source_id() << endmsg; 
-      log.flags(oflags); // reset precision after use of hex
-      re->append((*it_rob).second); 
+      if(debug) log << MSG::DEBUG << " RobToEvt: adding ROB "
+                    << std::format("{:x}", theROB->source_id()) << endmsg;
+      re->append(theROB);
     } 
 
-  log << MSG::DEBUG << " FullEventFragment is done " << re << endmsg;
+  if(debug) log << MSG::DEBUG << " FullEventFragment is done " << re << endmsg;
 }
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTRAMCNVSVC_FULLEVENTASSEMBLER_H
@@ -108,11 +108,11 @@ private:
 
    /** @brief converting from ROD to ROB 
     */
-   void RodToRob(RODMAP& rodMap, ROBMAP& robMap, MsgStream& log ) ;
+   void RodToRob(RODMAP& rodMap, ROBMAP& robMap, MsgStream& log ) const;
 
    /** @brief converting from SubDetector to FullEvent
     */
-   void RobToEvt(ROBMAP& robMap, RawEventWrite* re, MsgStream& log ) ;
+   void RobToEvt(ROBMAP& robMap, RawEventWrite* re, MsgStream& log ) const;
 
 private:
    IDMAP_t m_idmap; 
