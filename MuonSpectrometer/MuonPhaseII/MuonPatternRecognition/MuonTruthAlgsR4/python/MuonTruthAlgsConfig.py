@@ -1,6 +1,8 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+
+
 def TruthSegmentMakerCfg(flags, name = "TruthSegmentMakerAlg", **kwargs):
     result = ComponentAccumulator()
     if not flags.Input.isMC:
@@ -53,19 +55,35 @@ def TruthHitAssociationCfg(flags):
                                              AssocPull = 1. if cont_name=="xAODsTgcPads" else 3. ))
     return result
 
-def PrdMultiTruthMakerCfg(flags, name="PrdMultiTruthMaker", **kwargs):
+def PrdMultiTruthMakerCfg(flags):
     result = ComponentAccumulator()
     from MuonConfig.MuonDataPrepConfig import PrimaryMeasContNamesCfg
-    kwargs.setdefault("PrdContainer", PrimaryMeasContNamesCfg(flags))
-
-    if not flags.Detector.GeometryMDT: kwargs.setdefault("MdtPrdKey", "")
-    if not flags.Detector.GeometryRPC: kwargs.setdefault("RpcPrdKey", "")
-    if not flags.Detector.GeometryTGC: kwargs.setdefault("TgcPrdKey", "")
-
-    if not flags.Detector.GeometrysTGC: kwargs.setdefault("sTgcPrdKey", "")
-    if not flags.Detector.GeometryMM: kwargs.setdefault("MmPrdKey", "")
-    the_alg = CompFactory.MuonR4.PrdMultiTruthMaker(name, **kwargs)
-    result.addEventAlgo(the_alg, primary = True)
+    prdContainer = PrimaryMeasContNamesCfg(flags)
+    if flags.Detector.GeometryMDT: 
+        the_alg = CompFactory.MuonR4.PrdMultiTruthMaker("PrdMultiTruthMakerMdt",
+                                                        PrdContainer = [prd for prd in prdContainer if "xMdt" in prd], 
+                                                        WriteKey = "MDT_TruthMap")
+        result.addEventAlgo(the_alg)
+    if flags.Detector.GeometryRPC:
+        the_alg = CompFactory.MuonR4.PrdMultiTruthMaker("PrdMultiTruthMakerRpc",
+                                                        PrdContainer = [prd for prd in prdContainer if "xRpc" in prd], 
+                                                        WriteKey = "RPC_TruthMap")
+        result.addEventAlgo(the_alg)
+    if flags.Detector.GeometryTGC: 
+        the_alg = CompFactory.MuonR4.PrdMultiTruthMaker("PrdMultiTruthMakerTgc",
+                                                        PrdContainer = [prd for prd in prdContainer if "xTgc" in prd],
+                                                        WriteKey = "TGC_TruthMap")
+        result.addEventAlgo(the_alg)       
+    if flags.Detector.GeometryMM: 
+        the_alg = CompFactory.MuonR4.PrdMultiTruthMaker("PrdMultiTruthMakerMm",
+                                                        PrdContainer = [prd for prd in prdContainer if "MM" in prd], 
+                                                        WriteKey = "MM_TruthMap")
+        result.addEventAlgo(the_alg) 
+    if flags.Detector.GeometrysTGC: 
+        the_alg = CompFactory.MuonR4.PrdMultiTruthMaker("PrdMultiTruthMakerSTGC",
+                                                        PrdContainer = [prd for prd in prdContainer if "STGC" in prd], 
+                                                        WriteKey = "STGC_TruthMap")
+        result.addEventAlgo(the_alg) 
     return result
 
 def MuonTruthAlgsCfg(flags):
