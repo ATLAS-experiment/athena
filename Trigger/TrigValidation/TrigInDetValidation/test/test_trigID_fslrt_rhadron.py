@@ -30,8 +30,6 @@
 # art-output: *.dat
 
 
-
-useCA_Reco = True
 Slices  = ['FSLRT']
 Events  = 8000
 Threads = 8

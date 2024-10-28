@@ -31,9 +31,6 @@
 # art-output: *.dat 
 
 
-
-useCA_Reco = True      
-
 Slices  = ['cosmic']
 Events  = 4000
 Threads = 8 

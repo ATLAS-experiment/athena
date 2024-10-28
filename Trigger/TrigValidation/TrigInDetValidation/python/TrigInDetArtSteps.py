@@ -23,7 +23,7 @@ from AthenaCommon.Utils.unixtools import FindFile
 
 class TrigInDetReco(ExecStep):
 
-    def __init__(self, name='TrigInDetReco', postinclude_file='', preinclude_file='', useCA_Reco=False ):
+    def __init__(self, name='TrigInDetReco', postinclude_file='', preinclude_file=''):
         ExecStep.__init__(self, name)
 ##      super(TrigInDetReco, self).__init__(name)
         self.type = 'Reco_tf'
@@ -48,24 +48,13 @@ class TrigInDetReco(ExecStep):
             'flags.Reco.EnableTau=False',
             'flags.Reco.EnablePostProcessing=False',
         ])
-
-        self._isCA = useCA_Reco
-
         self.preexec_all = ';'.join([
             'flags.Trigger.AODEDMSet=\'ESD\'',
         ])
-        if self._isCA:
-            self.postexec_trig = ''
-        else:
-            self.postexec_trig = "from AthenaCommon.AppMgr import ServiceMgr; ServiceMgr.AthenaPoolCnvSvc.MaxFileSizes=['tmp.RDO_TRIG=100000000000']"
-        # no longer needed if we don't write ESDs?
-        #self.postexec_reco = "from AthenaCommon.AppMgr import ServiceMgr; ServiceMgr.AthenaPoolCnvSvc.MaxFileSizes=['tmp.ESD=100000000000']"
+        self.postexec_trig = ''
         self.postexec_reco = ''
         self.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
         self.args += ' --CA'
-        if not self._isCA:
-            self.args += ' "default:True"'
-
        
         if ( self.postinclude_trig != '' ) : 
             print( "postinclude_trig: ", self.postinclude_trig )
@@ -83,47 +72,47 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_mu6_LRT_idperf_L1MU5VF',"
                 chains += "'HLT_mu6_idperf_L1MU5VF',"
                 chains += "'HLT_mu24_idperf_L1MU14FCH',"
-                flags += "'Muon'," if self._isCA else 'doMuonSlice=True;'
+                flags += "'Muon',"
             if (i=='FSLRT') :
                 chains += "'HLT_fslrt0_L1J100',"
-                flags  += "'UnconventionalTracking'," if self._isCA else 'doUnconventionalTrackingSlice=True;'
+                flags  += "'UnconventionalTracking',"
             if (i=='muon') :
                 chains += "'HLT_mu6_idperf_L1MU5VF',"
                 chains += "'HLT_mu24_idperf_L1MU14FCH',"
                 chains += "'HLT_mu26_ivarperf_L1MU14FCH',"
-                flags += "'Muon'," if self._isCA else 'doMuonSlice=True;'
+                flags += "'Muon',"
             if (i=='muon-tnp') :
                 chains += "'HLT_mu14_mu14_idtp_idZmumu_L12MU8F'," 
                 chains += "'HLT_mu14_mu14_idperf_50invmAB130_L12MU8F',"
-                flags += "'Muon'," if self._isCA else 'doMuonSlice=True;'
+                flags += "'Muon',"
             if (i=='L2electronLRT') :
                 chains += "'HLT_e20_idperf_loose_lrtloose_L1eEM18L',"
                 chains += "'HLT_e30_idperf_loose_lrtloose_L1eEM26M',"
                 chains += "'HLT_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1eEM26M',"
                 chains += "'HLT_e5_idperf_loose_lrtloose_probe_g25_medium_L1eEM24L',"
-                flags += "'Egamma'," if self._isCA else 'doEgammaSlice=True;'
+                flags += "'Egamma',"
             if (i=='electron') :
                 # chains +=  "'HLT_e5_etcut_L1EM3',"  ## need an idperf chain once one is in the menu
                 # chains +=  "'HLT_e17_lhvloose_nod0_L1EM15VH',"
                 # chains += "'HLT_e26_idperf_gsf_tight_L1EM22VHI',"
                 chains += "'HLT_e26_idperf_loose_L1eEM26M',"
                 chains += "'HLT_e5_idperf_tight_L1eEM5',"
-                flags += "'Egamma'," if self._isCA else 'doEgammaSlice=True;'
+                flags += "'Egamma',"
             if (i=='electron-tnp') :
                 chains += "'HLT_e26_lhtight_e14_idperf_tight_probe_50invmAB130_L1eEM26M',"
                 chains += "'HLT_e26_lhtight_e14_idperf_tight_nogsf_probe_50invmAB130_L1eEM26M',"
-                flags += "'Egamma'," if self._isCA else 'doEgammaSlice=True;'
+                flags += "'Egamma',"
             if (i=='tau') :
                 chains +=  "'HLT_tau25_idperf_tracktwoMVA_L1TAU12IM',"
                 chains +=  "'HLT_tau20_idperf_tracktwoMVA_L1eTAU12',"
                 chains +=  "'HLT_mu24_ivarmedium_tau25_idperf_tracktwoMVA_probe_03dRAB_L1MU14FCH',"
                 chains +=  "'HLT_mu24_ivarmedium_tau25_idperf_tracktwoMVA_probe_L1cTAU20M_03dRAB_L1MU14FCH',"
-                flags += "'Tau'," if self._isCA else 'doTauSlice=True;'
+                flags += "'Tau',"
             if (i=='tauLRT') :
                 chains +=  "'HLT_tau25_idperf_tracktwoMVA_L1TAU12IM',"
                 chains +=  "'HLT_tau25_idperf_tracktwoLLP_L1TAU12IM',"
                 chains +=  "'HLT_tau25_idperf_trackLRT_L1TAU12IM',"
-                flags += "'Tau'," if self._isCA else 'doTauSlice=True;'
+                flags += "'Tau',"
             if (i=='bjet') :
 #               chains += "'HLT_j80_pf_ftf_preselj20b95_L1J20',"
                 chains += "'HLT_j20_roiftf_preselj20_L1RD0_FILLED',"
@@ -132,40 +121,31 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1J20',"
 #               chains += "'HLT_j75_0eta290_020jvt_bdl1r60_3j75_pf_ftf_preselj50b85XX3j50_L14J20',"
 #               chains += "'HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bdl1d77_pf_ftf_presel2c20XX2c20b85_L1J45p0ETA21_3J15p0ETA25',"
-                flags  += "'Bjet'," if self._isCA else 'doBjetSlice=True;'
+                flags  += "'Bjet',"
             if ( i=='fsjet' or i=='fs' or i=='jet' ) :
                 chains += "'HLT_j45_pf_ftf_preselj20_L1jJ40',"
-                flags  += "'Jet'," if self._isCA else 'doJetSlice=True;'
+                flags  += "'Jet',"
             if (i=='beamspot') :
                 chains += "'HLT_beamspot_allTE_trkfast_BeamSpotPEB_L1J15','HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L1J15',"
-                flags  += "'Beamspot'," if self._isCA else 'doBeamspotSlice=True;'
+                flags  += "'Beamspot',"
             if (i=='minbias') :
                 chains += "'HLT_mb_sptrk_L1RD0_FILLED',"
-                if self._isCA:
-                    flags  +=  "'MinBias',"
-                    self.preexec_trig += "flags.Trigger.triggerMenuSetup='PhysicsP1_pp_lowMu_run3_v1';"
-                else:
-                    flags  += "doMinBiasSlice=True;setMenu='PhysicsP1_pp_lowMu_run3_v1';"
+                flags  +=  "'MinBias',"
+                self.preexec_trig += "flags.Trigger.triggerMenuSetup='PhysicsP1_pp_lowMu_run3_v1';"
             if (i=='cosmic') :
                 chains += "'HLT_mu4_cosmic_L1MU3V_EMPTY'"
-                if self._isCA:
-                    flags  +=  "'Muon','Cosmic',"
-                    self.preexec_trig+= "flags.Trigger.triggerMenuSetup='Cosmic_run3_v1';"
-                else:
-                    flags  += "doMuonSlice=True;doCosmics=True;setMenu='Cosmic_run3_v1';"
+                flags  +=  "'Muon','Cosmic',"
+                self.preexec_trig+= "flags.Trigger.triggerMenuSetup='Cosmic_run3_v1';"
             if (i=='bphys') :
                 chains += "'HLT_mu6_idperf_L1MU5VF',"
                 chains += "'HLT_2mu4_bBmumux_BsmumuPhi_L12MU3V',"
                 chains += "'HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF',"
-                flags += "'Muon','Bphysics'," if self._isCA else 'doMuonSlice=True;doBphysicsSlice=True;'
+                flags += "'Muon','Bphysics',"
         if ( flags=='' ) : 
             print( "ERROR: no chains configured" )
 
         chains += ']'
-        if self._isCA:
-            self.preexec_trig += "flags.Trigger.enabledSignatures=[" + flags + "];flags.Trigger.selectChains="+chains
-        else:
-            self.preexec_trig += 'doEmptyMenu=True;'+flags+'selectChains='+chains
+        self.preexec_trig += "flags.Trigger.enabledSignatures=[" + flags + "];flags.Trigger.selectChains="+chains
 
         AVERSION = ""
         ### # temporary hack until we get to the bottom of why the tests are really failing

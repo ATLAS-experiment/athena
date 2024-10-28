@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for cosmic
 # art-type: grid
@@ -27,8 +27,6 @@
 # art-output: cost-perEvent-chain
 # art-output: *.dat 
 
-
-useCA_Reco = True
 
 Slices  = ['cosmic']
 Events  = 4000

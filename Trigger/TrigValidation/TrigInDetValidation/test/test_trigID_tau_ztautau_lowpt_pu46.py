@@ -40,8 +40,6 @@ Release = "current"
 Input   = 'Ztautau'    # defined in TrigValTools/share/TrigValInputs.json  
 GridFiles = True
 
-useCA_Reco = True # Use CA for RDOtoRDOTrigger step
-
 preexec_trig = "from AthenaCommon.SystemOfUnits import GeV;flags.Trigger.InDetTracking.tauIso.pTmin=0.8*GeV;"
 
 Jobs = [ ( "Offline",  " TIDAdata-run3-offline.dat -r Offline -o data-hists-offline.root" ),
