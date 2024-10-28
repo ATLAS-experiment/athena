@@ -7,6 +7,9 @@
 
 #include <initializer_list>
 #include <ranges>
+#include <iostream>
+#include <sstream>
+#include <vector>
 
 namespace RPDUtils {
   unsigned int constexpr sideC = 0;
@@ -30,6 +33,32 @@ namespace RPDUtils {
       helpZero(v);
     }
   };
+  // implement printing of vector, required for gaudi property of type OptionalToolProperty<std::vector<T>>
+  template<typename T>
+  std::ostream & operator <<(std::ostream & os, const std::vector<T> & v);
+  // the configuration string for RPD and centroid tools handles bulk setting of default reconstruction parameters
+  // then, we would like the option to override each parameter in python configuration
+  // therefore, we provide an std::optional-like implementation which
+  // has the necessary interface to be a gaudi property
+  template <class T>
+  class OptionalToolProperty {
+   public:
+    OptionalToolProperty();
+    explicit OptionalToolProperty(T value);
+    bool has_value() const;
+    T const& value() const;
+    // enable printing; required for a gaudi property
+    template <class V> friend std::ostream & operator<<(std::ostream &os, OptionalToolProperty<V> const& obj);
+    // conversion to inner type for compatibility with gaudi parsers (reference to allow filling value);
+    // this enables Python configuration (ZdcRecConfig.py) to set the corresponding tool property
+    operator T&();
+  private:
+    T m_value {};
+    bool m_hasValue = false;
+  };
+  // for debug printouts in RPD reconstruction
+  template <typename T>
+  std::string vecToString(std::vector<T> const& v);
 } // namespace RPDUtils
 
 #endif

@@ -18,18 +18,19 @@ namespace ZDC
 RpdSubtractCentroidTool::RpdSubtractCentroidTool(const std::string& name)
   : asg::AsgTool(name)
 {
-  declareProperty("ZdcModuleContainerName", m_zdcModuleContainerName = "ZdcModules", "Location of ZDC processed data");
-  declareProperty("ZdcSumContainerName", m_zdcSumContainerName = "ZdcSums", "Location of ZDC processed sums");
+  declareProperty("ZDCModuleContainerName", m_ZDCModuleContainerName = "ZdcModules", "Location of ZDC processed data");
+  declareProperty("ZDCSumContainerName", m_ZDCSumContainerName = "ZdcSums", "Location of ZDC processed sums");
+  declareProperty("Configuration", m_configuration = "default");
   declareProperty("WriteAux", m_writeAux = true, "If true, write AOD decorations");
   declareProperty("AuxSuffix", m_auxSuffix = "", "Suffix to add to AOD decorations for reading and writing");
-  declareProperty("MinZdcEnergy", m_minZdcEnergy = {-1.0, -1.0}, "Minimum (calibrated) ZDC energy for valid centroid (negative to disable); per side");
-  declareProperty("MaxZdcEnergy", m_maxZdcEnergy = {-1.0, -1.0}, "Maximum (calibrated) ZDC energy for valid centroid (negative to disable); per side");
-  declareProperty("MinEmEnergy", m_minEmEnergy = {-1.0, -1.0}, "Minimum (calibrated) EM energy for valid centroid (negative to disable); per side");
-  declareProperty("MaxEmEnergy", m_maxEmEnergy = {-1.0, -1.0}, "Minimum (calibrated) EM energy for valid centroid (negative to disable); per side");
-  declareProperty("PileupMaxFrac", m_pileupMaxFrac = {1.0, 1.0}, "Maximum fractional pileup allowed in an RPD channel for valid centroid; per side");
-  declareProperty("ExcessiveSubtrUnderflowFrac", m_maximumNegativeSubtrAmpFrac = {1.0, 1.0}, "If any RPD channel subtracted amplitude is negative and its fraction of subtracted amplitude sum is greater than or equal to this number, the centroid is invalid; per side");
-  declareProperty("UseRpdSumAdc", m_useRpdSumAdc = true, "If true, use RPD channel sum ADC for centroid calculation, else use RPD channel max ADC");
-  declareProperty("UseCalibDecorations", m_useCalibDecorations = true, "If true, use RPD channel sum/max ADC decorations with output calibration factors applied during reconstruction, else use decorations with raw values");
+  declareProperty("MinZDCEnergy", m_forceMinZDCEnergy, "Minimum (calibrated) ZDC energy for valid centroid (negative to disable); per side");
+  declareProperty("MaxZDCEnergy", m_forceMaxZDCEnergy, "Maximum (calibrated) ZDC energy for valid centroid (negative to disable); per side");
+  declareProperty("MinEMEnergy", m_forceMinEMEnergy, "Minimum (calibrated) EM energy for valid centroid (negative to disable); per side");
+  declareProperty("MaxEMEnergy", m_forceMaxEMEnergy, "Minimum (calibrated) EM energy for valid centroid (negative to disable); per side");
+  declareProperty("PileupMaxFrac", m_forcePileupMaxFrac, "Maximum fractional pileup allowed in an RPD channel for valid centroid; per side");
+  declareProperty("ExcessiveSubtrUnderflowFrac", m_forceMaximumNegativeSubtrAmpFrac, "If any RPD channel subtracted amplitude is negative and its fraction of subtracted amplitude sum is greater than or equal to this number, the centroid is invalid; per side");
+  declareProperty("UseRPDSumAdc", m_forceUseRPDSumAdc, "If true, use RPD channel sum ADC for centroid calculation, else use RPD channel max ADC");
+  declareProperty("UseCalibDecorations", m_forceUseCalibDecorations, "If true, use RPD channel sum/max ADC decorations with output calibration factors applied during reconstruction, else use decorations with raw values");
 }
 
 StatusCode RpdSubtractCentroidTool::initializeKey(std::string const& containerName, SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> & readHandleKey, std::string const& key) {
@@ -43,63 +44,122 @@ StatusCode RpdSubtractCentroidTool::initializeKey(std::string const& containerNa
 }
 
 StatusCode RpdSubtractCentroidTool::initialize() {
+  // first initialize reconstruction parameters from config string
+  if (m_configuration == "default" || m_configuration == "pp2023" || m_configuration == "PbPb2023") {
+    m_minZDCEnergy = {-1.0, -1.0};
+    m_maxZDCEnergy = {-1.0, -1.0};
+    m_minEMEnergy = {-1.0, -1.0};
+    m_maxEMEnergy = {-1.0, -1.0};
+    m_pileupMaxFrac = {1.0, 1.0};
+    m_maximumNegativeSubtrAmpFrac = {1.0, 1.0};
+    m_useRPDSumAdc = true;
+    m_useCalibDecorations = true;
+  } else if (m_configuration == "pp2024" || m_configuration == "PbPb2024") {
+    m_minZDCEnergy = {-1.0, -1.0};
+    m_maxZDCEnergy = {-1.0, -1.0};
+    m_minEMEnergy = {-1.0, -1.0};
+    m_maxEMEnergy = {-1.0, -1.0};
+    m_pileupMaxFrac = {1.0, 1.0};
+    m_maximumNegativeSubtrAmpFrac = {1.0, 1.0};
+    m_useRPDSumAdc = true;
+    m_useCalibDecorations = true;
+  }
+  // then overwrite inidividual parameters from configuration if any were provided
+  if (m_forceMinZDCEnergy.has_value()) {
+    m_minZDCEnergy = m_forceMinZDCEnergy.value();
+  }
+  if (m_forceMaxZDCEnergy.has_value()) {
+    m_maxZDCEnergy = m_forceMaxZDCEnergy.value();
+  }
+  if (m_forceMinEMEnergy.has_value()) {
+    m_minEMEnergy = m_forceMinEMEnergy.value();
+  }
+  if (m_forceMaxEMEnergy.has_value()) {
+    m_maxEMEnergy = m_forceMaxEMEnergy.value();
+  }
+  if (m_forcePileupMaxFrac.has_value()) {
+    m_pileupMaxFrac = m_forcePileupMaxFrac.value();
+  }
+  if (m_forceMaximumNegativeSubtrAmpFrac.has_value()) {
+    m_maximumNegativeSubtrAmpFrac = m_forceMaximumNegativeSubtrAmpFrac.value();
+  }
+  if (m_forceUseRPDSumAdc.has_value()) {
+    m_useRPDSumAdc = m_forceUseRPDSumAdc.value();
+  }
+  if (m_forceUseCalibDecorations.has_value()) {
+    m_useCalibDecorations = m_forceUseCalibDecorations.value();
+  }
+
   // if any ZDC/EM energy threshold is nonnegative, ZDC decorations must be read
-  m_readZDCDecorations = anyNonNegative(m_minZdcEnergy) || anyNonNegative(m_maxZdcEnergy) || anyNonNegative(m_minEmEnergy) || anyNonNegative(m_maxEmEnergy);
+  m_readZDCDecorations = anyNonNegative(m_minZDCEnergy) || anyNonNegative(m_maxZDCEnergy) || anyNonNegative(m_minEMEnergy) || anyNonNegative(m_maxEMEnergy);
+
+  for (auto const side : RPDUtils::sides) {
+    if (m_minZDCEnergy.at(side) < 0) m_minZDCEnergy.at(side) = -std::numeric_limits<float>::infinity();
+    if (m_maxZDCEnergy.at(side) < 0) m_maxZDCEnergy.at(side) = std::numeric_limits<float>::infinity();
+    if (m_minEMEnergy.at(side) < 0) m_minEMEnergy.at(side) = -std::numeric_limits<float>::infinity();
+    if (m_maxEMEnergy.at(side) < 0) m_maxEMEnergy.at(side) = std::numeric_limits<float>::infinity();
+  }
+
+  ATH_MSG_DEBUG("RpdSubtractCentroidTool reconstruction parameters:");
+  ATH_MSG_DEBUG("config = " << m_configuration);
+  ATH_MSG_DEBUG("minZDCEnergy = " << RPDUtils::vecToString(m_minZDCEnergy));
+  ATH_MSG_DEBUG("maxZDCEnergy = " << RPDUtils::vecToString(m_maxZDCEnergy));
+  ATH_MSG_DEBUG("minEMEnergy = " << RPDUtils::vecToString(m_minEMEnergy));
+  ATH_MSG_DEBUG("maxEMEnergy = " << RPDUtils::vecToString(m_maxEMEnergy));
+  ATH_MSG_DEBUG("pileupMaxFrac = " << RPDUtils::vecToString(m_pileupMaxFrac));
+  ATH_MSG_DEBUG("maximumNegativeSubtrAmpFrac = " << RPDUtils::vecToString(m_maximumNegativeSubtrAmpFrac));
+  ATH_MSG_DEBUG("useRPDSumAdc = " << m_useRPDSumAdc);
+  ATH_MSG_DEBUG("useCalibDecorations = " << m_useCalibDecorations);
+
   if (m_readZDCDecorations) {
     ATH_MSG_DEBUG("RpdSubtractCentroidTool is configured to check ZDC or EM energy; ZDC-related ReadDecorHandleKey's will be initialized");
-    m_zdcSideStatus = {0, 0};
-    m_zdcFinalEnergy = {0, 0};
-    m_emCalibEnergy = {0, 0};
-    m_emStatus = {0, 0};
-  }
-  for (auto const side : RPDUtils::sides) {
-    if (m_minZdcEnergy.at(side) < 0) m_minZdcEnergy.at(side) = -std::numeric_limits<float>::infinity();
-    if (m_maxZdcEnergy.at(side) < 0) m_maxZdcEnergy.at(side) = std::numeric_limits<float>::infinity();
-    if (m_minEmEnergy.at(side) < 0) m_minEmEnergy.at(side) = -std::numeric_limits<float>::infinity();
-    if (m_maxEmEnergy.at(side) < 0) m_maxEmEnergy.at(side) = std::numeric_limits<float>::infinity();
+    m_ZDCSideStatus = {0, 0};
+    m_ZDCFinalEnergy = {0, 0};
+    m_EMCalibEnergy = {0, 0};
+    m_EMStatus = {0, 0};
   }
 
   ATH_CHECK(m_eventInfoKey.initialize());
 
   // zdc modules read keys
-  ATH_CHECK(initializeKey(m_zdcModuleContainerName, m_xposRelKey, ".xposRel"));
-  ATH_CHECK(initializeKey(m_zdcModuleContainerName, m_yposRelKey, ".yposRel"));
-  ATH_CHECK(initializeKey(m_zdcModuleContainerName, m_rowKey, ".row"));
-  ATH_CHECK(initializeKey(m_zdcModuleContainerName, m_colKey, ".col"));
+  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_xposRelKey, ".xposRel"));
+  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_yposRelKey, ".yposRel"));
+  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_rowKey, ".row"));
+  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_colKey, ".col"));
 
   if (m_readZDCDecorations) {
-    ATH_CHECK(initializeKey(m_zdcModuleContainerName, m_ZDCModuleCalibEnergyKey, ".CalibEnergy"));
-    ATH_CHECK(initializeKey(m_zdcModuleContainerName, m_ZDCModuleStatusKey, ".Status"));
+    ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_ZDCModuleCalibEnergyKey, ".CalibEnergy"));
+    ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_ZDCModuleStatusKey, ".Status"));
   }
-  ATH_CHECK(initializeKey(m_zdcModuleContainerName, m_RPDChannelAmplitudeKey, ".RPDChannelAmplitude"));
-  ATH_CHECK(initializeKey(m_zdcModuleContainerName, m_RPDChannelAmplitudeCalibKey, ".RPDChannelAmplitudeCalib"));
-  ATH_CHECK(initializeKey(m_zdcModuleContainerName, m_RPDChannelMaxADCKey, ".RPDChannelMaxADC"));
-  ATH_CHECK(initializeKey(m_zdcModuleContainerName, m_RPDChannelMaxADCCalibKey, ".RPDChannelMaxADCCalib"));
-  ATH_CHECK(initializeKey(m_zdcModuleContainerName, m_RPDChannelPileupFracKey, ".RPDChannelPileupFrac"));
-  ATH_CHECK(initializeKey(m_zdcModuleContainerName, m_RPDChannelStatusKey, ".RPDChannelStatus"));
+  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_RPDChannelAmplitudeKey, ".RPDChannelAmplitude"));
+  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_RPDChannelAmplitudeCalibKey, ".RPDChannelAmplitudeCalib"));
+  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_RPDChannelMaxADCKey, ".RPDChannelMaxADC"));
+  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_RPDChannelMaxADCCalibKey, ".RPDChannelMaxADCCalib"));
+  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_RPDChannelPileupFracKey, ".RPDChannelPileupFrac"));
+  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_RPDChannelStatusKey, ".RPDChannelStatus"));
 
   // zdc sums read keys
-  ATH_CHECK(initializeKey(m_zdcSumContainerName, m_RPDSideStatusKey, ".RPDStatus"));
+  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_RPDSideStatusKey, ".RPDStatus"));
   if (m_readZDCDecorations) {
-    ATH_CHECK(initializeKey(m_zdcSumContainerName, m_ZDCFinalEnergyKey, ".FinalEnergy"));
-    ATH_CHECK(initializeKey(m_zdcSumContainerName, m_ZDCStatusKey, ".Status"));
+    ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_ZDCFinalEnergyKey, ".FinalEnergy"));
+    ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_ZDCStatusKey, ".Status"));
   }
 
   // zdc sums write keys
-  ATH_CHECK(initializeKey(m_zdcSumContainerName, m_centroidEventValidKey, ".centroidEventValid"));
-  ATH_CHECK(initializeKey(m_zdcSumContainerName, m_centroidStatusKey, ".centroidStatus"));
-  ATH_CHECK(initializeKey(m_zdcSumContainerName, m_RPDChannelSubtrAmpKey, ".RPDChannelSubtrAmp"));
-  ATH_CHECK(initializeKey(m_zdcSumContainerName, m_RPDSubtrAmpSumKey, ".RPDSubtrAmpSum"));
-  ATH_CHECK(initializeKey(m_zdcSumContainerName, m_xCentroidPreGeomCorPreAvgSubtrKey, ".xCentroidPreGeomCorPreAvgSubtr"));
-  ATH_CHECK(initializeKey(m_zdcSumContainerName, m_yCentroidPreGeomCorPreAvgSubtrKey, ".yCentroidPreGeomCorPreAvgSubtr"));
-  ATH_CHECK(initializeKey(m_zdcSumContainerName, m_xCentroidPreAvgSubtrKey, ".xCentroidPreAvgSubtr"));
-  ATH_CHECK(initializeKey(m_zdcSumContainerName, m_yCentroidPreAvgSubtrKey, ".yCentroidPreAvgSubtr"));
-  ATH_CHECK(initializeKey(m_zdcSumContainerName, m_xCentroidKey, ".xCentroid"));
-  ATH_CHECK(initializeKey(m_zdcSumContainerName, m_yCentroidKey, ".yCentroid"));
-  ATH_CHECK(initializeKey(m_zdcSumContainerName, m_xRowCentroidKey, ".xRowCentroid"));
-  ATH_CHECK(initializeKey(m_zdcSumContainerName, m_yColCentroidKey, ".yColCentroid"));
-  ATH_CHECK(initializeKey(m_zdcSumContainerName, m_reactionPlaneAngleKey, ".reactionPlaneAngle"));
-  ATH_CHECK(initializeKey(m_zdcSumContainerName, m_cosDeltaReactionPlaneAngleKey, ".cosDeltaReactionPlaneAngle"));
+  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_centroidEventValidKey, ".centroidEventValid"));
+  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_centroidStatusKey, ".centroidStatus"));
+  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_RPDChannelSubtrAmpKey, ".RPDChannelSubtrAmp"));
+  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_RPDSubtrAmpSumKey, ".RPDSubtrAmpSum"));
+  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_xCentroidPreGeomCorPreAvgSubtrKey, ".xCentroidPreGeomCorPreAvgSubtr"));
+  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_yCentroidPreGeomCorPreAvgSubtrKey, ".yCentroidPreGeomCorPreAvgSubtr"));
+  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_xCentroidPreAvgSubtrKey, ".xCentroidPreAvgSubtr"));
+  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_yCentroidPreAvgSubtrKey, ".yCentroidPreAvgSubtr"));
+  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_xCentroidKey, ".xCentroid"));
+  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_yCentroidKey, ".yCentroid"));
+  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_xRowCentroidKey, ".xRowCentroid"));
+  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_yColCentroidKey, ".yColCentroid"));
+  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_reactionPlaneAngleKey, ".reactionPlaneAngle"));
+  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_cosDeltaReactionPlaneAngleKey, ".cosDeltaReactionPlaneAngle"));
 
   if (m_writeAux && !m_auxSuffix.empty()) {
     ATH_MSG_DEBUG("suffix string = " << m_auxSuffix);
@@ -140,10 +200,12 @@ RpdSubtractCentroidTool::SubstepStatus RpdSubtractCentroidTool::readAOD(xAOD::Zd
   }
   // RPD decorations are always needed
   if (eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::RPDDECODINGERROR)) {
+    ATH_MSG_WARNING("RPD decoding error found - abandoning RPD centroid reco!");
     return SubstepStatus::SkipEvent;
   }
   // ZDC decorations are sometimes needed
   if (m_readZDCDecorations && eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::ZDCDECODINGERROR)) {
+    ATH_MSG_WARNING("ZDC decoding error found - abandoning RPD centroid reco!");
     return SubstepStatus::SkipEvent;
   }
 
@@ -176,8 +238,8 @@ RpdSubtractCentroidTool::SubstepStatus RpdSubtractCentroidTool::readAOD(xAOD::Zd
     if (zdcModule->zdcType() == RPDUtils::ZDCModuleZDCType && zdcModule->zdcModule() == RPDUtils::ZDCModuleEMModule) {
       // this is a ZDC module and this is an EM module
       if (m_readZDCDecorations) {
-        m_emCalibEnergy->at(side) = (*zdcModuleCalibEnergyHandle)(*zdcModule);
-        m_emStatus->at(side) = (*zdcModuleStatusHandle)(*zdcModule);
+        m_EMCalibEnergy->at(side) = (*zdcModuleCalibEnergyHandle)(*zdcModule);
+        m_EMStatus->at(side) = (*zdcModuleStatusHandle)(*zdcModule);
       }
     } else if (zdcModule->zdcType() == RPDUtils::ZDCModuleRPDType) {
       // this is a Run 3 RPD module
@@ -190,26 +252,26 @@ RpdSubtractCentroidTool::SubstepStatus RpdSubtractCentroidTool::readAOD(xAOD::Zd
       unsigned int const channel = zdcModule->zdcChannel();
       auto const& row = rowHandle(*zdcModule);
       auto const& col = colHandle(*zdcModule);
-      m_rpdChannelData.at(side).at(row).at(col).channel = channel;
-      m_rpdChannelData.at(side).at(row).at(col).xposRel = xposRelHandle(*zdcModule);
-      m_rpdChannelData.at(side).at(row).at(col).yposRel = yposRelHandle(*zdcModule);
-      m_rpdChannelData.at(side).at(row).at(col).row = rowHandle(*zdcModule);
-      m_rpdChannelData.at(side).at(row).at(col).col = colHandle(*zdcModule);
-      if (m_useRpdSumAdc) {
+      m_RPDChannelData.at(side).at(row).at(col).channel = channel;
+      m_RPDChannelData.at(side).at(row).at(col).xposRel = xposRelHandle(*zdcModule);
+      m_RPDChannelData.at(side).at(row).at(col).yposRel = yposRelHandle(*zdcModule);
+      m_RPDChannelData.at(side).at(row).at(col).row = rowHandle(*zdcModule);
+      m_RPDChannelData.at(side).at(row).at(col).col = colHandle(*zdcModule);
+      if (m_useRPDSumAdc) {
         if (m_useCalibDecorations) {
-          m_rpdChannelData.at(side).at(row).at(col).amp = rpdChannelSumAdcCalibHandle(*zdcModule);
+          m_RPDChannelData.at(side).at(row).at(col).amp = rpdChannelSumAdcCalibHandle(*zdcModule);
         } else {
-          m_rpdChannelData.at(side).at(row).at(col).amp = rpdChannelSumAdcHandle(*zdcModule);
+          m_RPDChannelData.at(side).at(row).at(col).amp = rpdChannelSumAdcHandle(*zdcModule);
         }
       } else {
         if (m_useCalibDecorations) {
-          m_rpdChannelData.at(side).at(row).at(col).amp = rpdChannelMaxADCCalibHandle(*zdcModule);
+          m_RPDChannelData.at(side).at(row).at(col).amp = rpdChannelMaxADCCalibHandle(*zdcModule);
         } else {
-          m_rpdChannelData.at(side).at(row).at(col).amp = rpdChannelMaxADCHandle(*zdcModule);
+          m_RPDChannelData.at(side).at(row).at(col).amp = rpdChannelMaxADCHandle(*zdcModule);
         }
       }
-      m_rpdChannelData.at(side).at(row).at(col).pileupFrac = rpdChannelPileupFracHandle(*zdcModule);
-      m_rpdChannelData.at(side).at(row).at(col).status = rpdChannelStatusHandle(*zdcModule);
+      m_RPDChannelData.at(side).at(row).at(col).pileupFrac = rpdChannelPileupFracHandle(*zdcModule);
+      m_RPDChannelData.at(side).at(row).at(col).status = rpdChannelStatusHandle(*zdcModule);
     }
   }
 
@@ -219,9 +281,9 @@ RpdSubtractCentroidTool::SubstepStatus RpdSubtractCentroidTool::readAOD(xAOD::Zd
       continue;
     }
     unsigned int const side = RPDUtils::ZDCSideToSideIndex(zdcSum->zdcSide());
-    m_rpdSideStatus.at(side) = rpdSideStatusHandle(*zdcSum);
-    if (m_zdcSideStatus) m_zdcSideStatus->at(side) = (*zdcStatusHandle)(*zdcSum);
-    if (m_zdcFinalEnergy) m_zdcFinalEnergy->at(side) = (*zdcFinalEnergyHandle)(*zdcSum);
+    m_RPDSideStatus.at(side) = rpdSideStatusHandle(*zdcSum);
+    if (m_ZDCSideStatus) m_ZDCSideStatus->at(side) = (*zdcStatusHandle)(*zdcSum);
+    if (m_ZDCFinalEnergy) m_ZDCFinalEnergy->at(side) = (*zdcFinalEnergyHandle)(*zdcSum);
   }
 
   return SubstepStatus::Success;
@@ -229,53 +291,53 @@ RpdSubtractCentroidTool::SubstepStatus RpdSubtractCentroidTool::readAOD(xAOD::Zd
 
 bool RpdSubtractCentroidTool::checkZdcRpdValidity(unsigned int side) {
   if (m_readZDCDecorations) {
-    if (!m_zdcSideStatus->at(side)) {
+    if (!m_ZDCSideStatus->at(side)) {
       // zdc bad
       m_centroidStatus.at(side).set(ZDCInvalidBit, true);
       m_centroidStatus.at(side).set(ValidBit, false);
     } else {
       // zdc good
-      if (m_zdcFinalEnergy->at(side) < m_minZdcEnergy.at(side)) {
+      if (m_ZDCFinalEnergy->at(side) < m_minZDCEnergy.at(side)) {
         m_centroidStatus.at(side).set(InsufficientZDCEnergyBit, true);
         m_centroidStatus.at(side).set(ValidBit, false);
       }
-      if (m_zdcFinalEnergy->at(side) > m_maxZdcEnergy.at(side)) {
+      if (m_ZDCFinalEnergy->at(side) > m_maxZDCEnergy.at(side)) {
         m_centroidStatus.at(side).set(ExcessiveZDCEnergyBit, true);
         m_centroidStatus.at(side).set(ValidBit, false);
       }
     }
 
-    if (m_emStatus->at(side)[ZDCPulseAnalyzer::FailBit]) {
+    if (m_EMStatus->at(side)[ZDCPulseAnalyzer::FailBit]) {
       // em bad
       m_centroidStatus.at(side).set(EMInvalidBit, true);
       m_centroidStatus.at(side).set(ValidBit, false);
     } else {
       // em good
-      if (m_emCalibEnergy->at(side) < m_minEmEnergy.at(side)) {
+      if (m_EMCalibEnergy->at(side) < m_minEMEnergy.at(side)) {
         m_centroidStatus.at(side).set(InsufficientEMEnergyBit, true);
         m_centroidStatus.at(side).set(ValidBit, false);
       }
-      if (m_emCalibEnergy->at(side) > m_maxEmEnergy.at(side)) {
+      if (m_EMCalibEnergy->at(side) > m_maxEMEnergy.at(side)) {
         m_centroidStatus.at(side).set(ExcessiveEMEnergyBit, true);
         m_centroidStatus.at(side).set(ValidBit, false);
       }
     }
   }
 
-  if (m_rpdSideStatus.at(side)[RPDDataAnalyzer::OutOfTimePileupBit]) {
+  if (m_RPDSideStatus.at(side)[RPDDataAnalyzer::OutOfTimePileupBit]) {
     m_centroidStatus.at(side).set(PileupBit, true);
   }
 
   for (unsigned int row = 0; row < RPDUtils::nRows; row++) {
     for (unsigned int col = 0; col < RPDUtils::nCols; col++) {
-      if (m_rpdChannelData.at(side).at(row).at(col).pileupFrac > m_pileupMaxFrac.at(side)) {
+      if (m_RPDChannelData.at(side).at(row).at(col).pileupFrac > m_pileupMaxFrac.at(side)) {
         m_centroidStatus.at(side).set(ExcessivePileupBit, true);
         m_centroidStatus.at(side).set(ValidBit, false);
       }
     }
   }
 
-  if (!m_rpdSideStatus.at(side)[RPDDataAnalyzer::ValidBit]) {
+  if (!m_RPDSideStatus.at(side)[RPDDataAnalyzer::ValidBit]) {
     m_centroidStatus.at(side).set(RPDInvalidBit, true);
     m_centroidStatus.at(side).set(ValidBit, false);
     return false;
@@ -290,13 +352,13 @@ bool RpdSubtractCentroidTool::subtractRpdAmplitudes(unsigned int side) {
       float subtrAmp {};
       if (row == RPDUtils::nRows - 1) {
         // top row -> nothing to subtract
-        subtrAmp = m_rpdChannelData.at(side).at(row).at(col).amp;
+        subtrAmp = m_RPDChannelData.at(side).at(row).at(col).amp;
       } else {
         // other rows -> subtract the tile above this one
-        subtrAmp = m_rpdChannelData.at(side).at(row).at(col).amp - m_rpdChannelData.at(side).at(row + 1).at(col).amp;
+        subtrAmp = m_RPDChannelData.at(side).at(row).at(col).amp - m_RPDChannelData.at(side).at(row + 1).at(col).amp;
       }
-      m_rpdChannelData.at(side).at(row).at(col).subtrAmp = subtrAmp;
-      m_subtrAmp.at(side).at(m_rpdChannelData.at(side).at(row).at(col).channel) = subtrAmp;
+      m_RPDChannelData.at(side).at(row).at(col).subtrAmp = subtrAmp;
+      m_subtrAmp.at(side).at(m_RPDChannelData.at(side).at(row).at(col).channel) = subtrAmp;
       m_subtrAmpRowSum.at(side).at(row) += subtrAmp;
       m_subtrAmpColSum.at(side).at(col) += subtrAmp;
       m_subtrAmpSum.at(side) += subtrAmp;
@@ -311,7 +373,7 @@ bool RpdSubtractCentroidTool::subtractRpdAmplitudes(unsigned int side) {
 
   for (unsigned int row = 0; row < RPDUtils::nRows; row++) {
     for (unsigned int col = 0; col < RPDUtils::nCols; col++) {
-      const float &subtrAmp = m_rpdChannelData.at(side).at(row).at(col).subtrAmp;
+      const float &subtrAmp = m_RPDChannelData.at(side).at(row).at(col).subtrAmp;
       if (subtrAmp < 0 && -subtrAmp/m_subtrAmpSum.at(side) > m_maximumNegativeSubtrAmpFrac.at(side)) {
         m_centroidStatus.at(side).set(ExcessiveSubtrUnderflowBit, true);
         m_centroidStatus.at(side).set(ValidBit, false);
@@ -324,17 +386,17 @@ bool RpdSubtractCentroidTool::subtractRpdAmplitudes(unsigned int side) {
 
 void RpdSubtractCentroidTool::calculateDetectorCentroid(unsigned int side) {
   for (unsigned int col = 0; col < RPDUtils::nCols; col++) {
-    m_xCentroidPreGeomCorPreAvgSubtr.at(side) += m_subtrAmpColSum.at(side).at(col)*m_rpdChannelData.at(side).at(0).at(col).xposRel/m_subtrAmpSum.at(side);
+    m_xCentroidPreGeomCorPreAvgSubtr.at(side) += m_subtrAmpColSum.at(side).at(col)*m_RPDChannelData.at(side).at(0).at(col).xposRel/m_subtrAmpSum.at(side);
   }
 
   for (unsigned int row = 0; row < RPDUtils::nRows; row++) {
-    m_yCentroidPreGeomCorPreAvgSubtr.at(side) += m_subtrAmpRowSum.at(side).at(row)*m_rpdChannelData.at(side).at(row).at(0).yposRel/m_subtrAmpSum.at(side);
+    m_yCentroidPreGeomCorPreAvgSubtr.at(side) += m_subtrAmpRowSum.at(side).at(row)*m_RPDChannelData.at(side).at(row).at(0).yposRel/m_subtrAmpSum.at(side);
   }
 
   for (unsigned int row = 0; row < RPDUtils::nRows; row++) {
     if (m_subtrAmpRowSum.at(side).at(row) <= 0) continue;
     for (unsigned int col = 0; col < RPDUtils::nCols; col++) {
-      m_xRowCentroid.at(side).at(row) += m_rpdChannelData.at(side).at(row).at(col).subtrAmp*m_rpdChannelData.at(side).at(row).at(col).xposRel/m_subtrAmpRowSum.at(side).at(row);
+      m_xRowCentroid.at(side).at(row) += m_RPDChannelData.at(side).at(row).at(col).subtrAmp*m_RPDChannelData.at(side).at(row).at(col).xposRel/m_subtrAmpRowSum.at(side).at(row);
     }
     m_centroidStatus.at(side).set(Row0ValidBit + row, true);
   }
@@ -342,7 +404,7 @@ void RpdSubtractCentroidTool::calculateDetectorCentroid(unsigned int side) {
   for (unsigned int col = 0; col < RPDUtils::nCols; col++) {
     if (m_subtrAmpColSum.at(side).at(col) <= 0) continue;
     for (unsigned int row = 0; row < RPDUtils::nRows; row++) {
-      m_yColCentroid.at(side).at(col) += m_rpdChannelData.at(side).at(row).at(col).subtrAmp*m_rpdChannelData.at(side).at(row).at(col).yposRel/m_subtrAmpColSum.at(side).at(col);
+      m_yColCentroid.at(side).at(col) += m_RPDChannelData.at(side).at(row).at(col).subtrAmp*m_RPDChannelData.at(side).at(row).at(col).yposRel/m_subtrAmpColSum.at(side).at(col);
     }
     m_centroidStatus.at(side).set(Col0ValidBit + col, true);
   }
@@ -458,11 +520,11 @@ StatusCode RpdSubtractCentroidTool::reprocessZdc() {
     ATH_MSG_WARNING("Tool not initialized!");
     return StatusCode::FAILURE;
   }
-  ATH_MSG_DEBUG("Trying to retrieve " << m_zdcModuleContainerName);
+  ATH_MSG_DEBUG("Trying to retrieve " << m_ZDCModuleContainerName);
   xAOD::ZdcModuleContainer const* zdcModules = nullptr;
-  ATH_CHECK(evtStore()->retrieve(zdcModules, m_zdcModuleContainerName));
+  ATH_CHECK(evtStore()->retrieve(zdcModules, m_ZDCModuleContainerName));
   xAOD::ZdcModuleContainer const* zdcSums = nullptr;
-  ATH_CHECK(evtStore()->retrieve(zdcSums, m_zdcSumContainerName));
+  ATH_CHECK(evtStore()->retrieve(zdcSums, m_ZDCSumContainerName));
   ATH_CHECK(recoZdcModules(*zdcModules, *zdcSums));
   return StatusCode::SUCCESS;
 }

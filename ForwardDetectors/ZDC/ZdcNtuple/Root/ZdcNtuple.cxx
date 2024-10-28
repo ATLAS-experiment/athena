@@ -59,9 +59,9 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   declareProperty("zdcConfig", zdcConfig = "PbPb2018", "argument to configure ZdcAnalysisTool");
   declareProperty("doZdcCalib", doZdcCalib = false, "perform ZDC energy calibration");
   declareProperty("enableZDC", enableZDC = true);
-  declareProperty("enableRPD",enableRPD = false,"enable reading RPD decorations");
-  declareProperty("enableRPDAmp",enableRPDAmp = false,"enable reading RPD amplitudes");
-  declareProperty("enableCentroid",enableCentroid = false,"enable reading centroid decorations");
+  declareProperty("enableRPD",enableRPD = false,"enable reading any RPD decorations");
+  declareProperty("enableRPDAmp",enableRPDAmp = false,"enable reading RPD amplitudes (also requires enableRPD)");
+  declareProperty("enableCentroid",enableCentroid = false,"enable reading centroid decorations (also requires enableRPD)");
 
   declareProperty( "TrackSelectionTool", m_selTool );
 
@@ -215,6 +215,7 @@ StatusCode ZdcNtuple :: initialize ()
       }
     if (enableRPD)
       {
+      if (enableRPDAmp) {
 	m_outputTree->Branch("zdc_RpdChannelBaseline",&t_RpdChannelBaseline,"zdc_RpdChannelBaseline[2][16]/F");
 	m_outputTree->Branch("zdc_RpdChannelPileupExpFitParams",&t_RpdChannelPileupExpFitParams,"zdc_RpdChannelPileupExpFitParams[2][16][2]/F");
 	m_outputTree->Branch("zdc_RpdChannelPileupStretchedExpFitParams",&t_RpdChannelPileupStretchedExpFitParams,"zdc_RpdChannelPileupStretchedExpFitParams[2][16][3]/F");
@@ -233,6 +234,7 @@ StatusCode ZdcNtuple :: initialize ()
       }
     if (enableCentroid)
       {
+	m_outputTree->Branch("zdc_centroidAvailable", &t_centroidDecorationsAvailable);
 	m_outputTree->Branch("zdc_centroidEventValid", &t_centroidEventValid, "zdc_centroidEventValid/B");
 	m_outputTree->Branch("zdc_centroidStatus", &t_centroidStatus, "zdc_centroidStatus[2]/i");
 	m_outputTree->Branch("zdc_RPDChannelSubtrAmp", &t_RPDChannelSubtrAmp, "zdc_RPDChannelSubtrAmp[2][16]/F");
@@ -248,6 +250,7 @@ StatusCode ZdcNtuple :: initialize ()
 	m_outputTree->Branch("zdc_reactionPlaneAngle", &t_reactionPlaneAngle, "zdc_reactionPlaneAngle[2]/F");
 	m_outputTree->Branch("zdc_cosDeltaReactionPlaneAngle", &t_cosDeltaReactionPlaneAngle, "zdc_cosDeltaReactionPlaneAngle/F");
       }
+    }
     
     if (!(zdcCalib || zdcLaser || zdcOnly || zdcInj))
     {
@@ -718,6 +721,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
   
   t_ZdcModuleMask = 0;
   if (enableCentroid) {
+    t_centroidDecorationsAvailable = false;
     t_centroidEventValid = false;
     t_cosDeltaReactionPlaneAngle = 0;
   }
@@ -734,6 +738,21 @@ void ZdcNtuple::processZdcNtupleFromModules()
   bool zdcErr = m_eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::ZDCDECODINGERROR );
   t_rpdDecodingError = rpdErr;
   t_zdcDecodingError = zdcErr;
+  if (enableCentroid) {
+    // locate global sum (only if centroid is needed)
+    xAOD::ZdcModule const * globalSum = nullptr;
+    for (auto const * zdcSum : *zdcSums) {
+      if (zdcSum->zdcSide() == 0) {
+        globalSum = zdcSum;
+        break;
+      }
+    }
+    if (!globalSum) {
+      ANA_MSG_ERROR("unable to locate global ZdcSum (side = 0)");
+    }
+    t_centroidDecorationsAvailable = globalSum->isAvailable<unsigned int>("centroidStatus" + auxSuffix);
+  }
+
   if (rpdErr||zdcErr) ANA_MSG_WARNING( "Decoding errors ZDC=" << zdcErr << " RPD=" << rpdErr );
 
   if (zdcSums.ptr())
@@ -741,7 +760,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
       ANA_MSG_DEBUG( "accessing ZdcSums" );
       for (const auto zdcSum : *zdcSums)
 	{
-	  if (zdcSum->zdcSide()==0 && enableCentroid && !rpdErr)
+	  if (zdcSum->zdcSide()==0 && enableCentroid && t_centroidDecorationsAvailable)
 	    {
 	      // new global sum
 	      t_centroidEventValid = zdcSum->auxdataConst<char>("centroidEventValid" + auxSuffix);
@@ -789,7 +808,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
 		{
 		  t_RpdSideStatus[iside] = zdcSum->auxdataConst<unsigned int>("RPDStatus" + auxSuffix);
 		}
-	      if (enableCentroid && !rpdErr)
+	      if (enableCentroid && t_centroidDecorationsAvailable)
 		{
 		  t_centroidStatus[iside] = zdcSum->auxdataConst<unsigned int>("centroidStatus" + auxSuffix);
 		  std::vector<float> const& rpdChannelSubtrAmp = zdcSum->auxdataConst<std::vector<float>>("RPDChannelSubtrAmp" + auxSuffix);
