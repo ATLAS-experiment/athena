@@ -392,6 +392,10 @@ def EGAM4Cfg(flags):
             "AntiKt4TruthJets",
             "AntiKt4TruthDressedWZJets",
         ]
+    if flags.Derivation.Egamma.addHLTJets:
+        EGAM4SlimmingHelper.SmartCollections += [
+            "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf",
+        ]
 
     # then add extra variables:
 

@@ -11,8 +11,7 @@ def createEGammaDFConfigFlags():
     egdcf.addFlag("Derivation.Egamma.doEventInfoSlimming", False)
     egdcf.addFlag("Derivation.Egamma.addTriggerMatching", False)
     egdcf.addFlag("Derivation.Egamma.addMissingCellInfo", True)
-    # ECIDS currently not supported in R22
-    # For the moment just turn off, remove from code when
-    # final decision is taken on whether to revive it or not
     egdcf.addFlag("Derivation.Egamma.addECIDS", True)
+    # temporary - for fake photon bkg rejection studies
+    egdcf.addFlag("Derivation.Egamma.addHLTJets", False)
     return egdcf
