@@ -99,6 +99,7 @@ BPHY8cf.mcBplusJpsiKplus  = [300203,300306,300307,300308,300309,300997,300999,30
 BPHY8cf.mcBsJpsiPhi       = [300203,300306,300307,300308,300309,300401,300438,300448,300449,300761]
 BPHY8cf.mcBplusJpsiPiplus = [300406,300437,300758,300759]
 BPHY8cf.mcBhh             = [300431,300432,300433,300434,300760,300762,300763,300764,300765]
+BPHY8cf.mcBhhMuMu         = [300760,300762,300763,300764,300765]
 BPHY8cf.mcNoTrigger       = [300446,300447,300448,300449]
 
 #====================================================================
@@ -723,6 +724,8 @@ if BPHY8cf.isSimulation:
             BPHY8cf.doChannels.append("BJpsiPi")
         if (BPHY8cf.mcChNumber in BPHY8cf.mcBhh):
             BPHY8cf.doChannels.append("Bhh")
+        if (BPHY8cf.mcChNumber in BPHY8cf.mcBhhMuMu):
+            BPHY8cf.doChannels.append("BhhMuMu")
         # use trigger?
         if (BPHY8cf.mcChNumber in BPHY8cf.mcNoTrigger):
             BPHY8cf.doTriggerInfo = False
@@ -920,6 +923,7 @@ if [BPHY8_i for BPHY8_i in BPHY8cf.doChannels \
 if "BJpsiK"    in BPHY8cf.doChannels: BPHY8_recoList += [ "BJpsiK" ]
 if "BsJpsiPhi" in BPHY8cf.doChannels: BPHY8_recoList += [ "BsJpsiPhi" ]
 if "BJpsiPi"   in BPHY8cf.doChannels: BPHY8_recoList += [ "BJpsiPi" ]
+if "BhhMuMu" in  BPHY8cf.doChannels: BPHY8_recoList += [ "BhhMuMu" ]
 
 # setup of vertexing tools per channel
 include("DerivationFrameworkBPhys/configureVertexing.py")
@@ -1024,7 +1028,42 @@ for BPHY8_reco in BPHY8_recoList:
             UseMassConstraint           = True,
             ExcludeJpsiMuonsOnly        = True,
             ExcludeCrossJpsiTracks      = False)
-        
+
+# d) second repo for Bhh like samples using Muons not ID tracks
+    if BPHY8_reco == "BhhMuMu":
+        BPHY8_FinderTools[BPHY8_reco] = Analysis__JpsiFinder(
+            name                        = BPHY8cf.DerivationName+"_"+BPHY8_reco+"_Finder",
+            OutputLevel                 = INFO,
+            muAndMu                     = True,
+            muAndTrack                  = False,
+            TrackAndTrack               = False,
+            doTagAndProbe               = False,
+            assumeDiMuons               = False,    # If true, will assume dimu hypothesis and use PDG value for mu mass
+            track1Mass                  = BPHY8cf.GlobalMuonMass,
+            track2Mass                  = BPHY8cf.GlobalMuonMass,
+            muonThresholdPt             = 0.,
+            trackThresholdPt            = 0.,
+            invMassUpper                = BPHY8cf.GlobalDiMuonMassUpperCut,
+            invMassLower                = BPHY8cf.GlobalDiMuonMassLowerCut,
+            # For JpsiFinder the cut is really on chi2 and not on chi2/ndf
+            Chi2Cut                     = BPHY8cf.Chi2Cut2Prong,
+            oppChargesOnly	        = True,
+            sameChargesOnly             = False,
+            allChargeCombinations       = False,
+            allMuons                    = True,
+            combOnly                    = False,
+            atLeastOneComb              = False,
+            useCombinedMeasurement      = False, # Only takes effect if combOnly=True	
+            muonCollectionKey           = BPHY8cf.UsedMuonCollection,
+            TrackParticleCollection     = BPHY8cf.TrkPartContName,
+            V0VertexFitterTool          = BPHY8_VertexTools[BPHY8_reco].TrkV0Fitter,             # V0 vertex fitter
+            useV0Fitter                 = False,                   # if False a TrkVertexFitterTool will be used
+            TrkVertexFitterTool         = BPHY8_VertexTools[BPHY8_reco].TrkVKalVrtFitter,        # VKalVrt vertex fitter
+            TrackSelectorTool           = BPHY8_VertexTools[BPHY8_reco].InDetTrackSelectorTool,
+            ConversionFinderHelperTool  = BPHY8_VertexTools[BPHY8_reco].InDetConversionHelper,
+            VertexPointEstimator        = BPHY8_VertexTools[BPHY8_reco].VtxPointEstimator,
+            useMCPCuts                  = BPHY8cf.useJpsiFinderMCPCuts )
+
 ToolSvc += BPHY8_FinderTools.values()
 for BPHY8_name in BPHY8_FinderTools.keys():
     print BPHY8_FinderTools[BPHY8_name] 
@@ -1081,6 +1120,18 @@ for BPHY8_reco in BPHY8_recoList:
         BPHY8_RecoTools[BPHY8_reco] = DerivationFramework__Reco_dimuTrkTrk(
             name                   = BPHY8cf.DerivationName+"_"+BPHY8_reco+"_Reco",
             Jpsi2PlusTrackName     = BPHY8_FinderTools[BPHY8_reco],
+            OutputVtxContainerName = BPHY8cf.DerivationName+BPHY8_reco+"Candidates",
+            PVContainerName        = BPHY8cf.PVContName,
+            RefPVContainerName     = BPHY8cf.DerivationName+BPHY8_reco+"RefittedPrimaryVertices",
+            RefitPV                = True,
+            Do3d                   = BPHY8cf.do3dProperTime,
+            MaxPVrefit             = 100000,
+            MinNTracksInPV         = BPHY8cf.minNTracksInPV,
+            DoVertexType           = BPHY8cf.doVertexType)
+    if BPHY8_reco == "BhhMuMu":
+        BPHY8_RecoTools[BPHY8_reco] = DerivationFramework__Bmumu_reco_mumu(
+            name                   = BPHY8cf.DerivationName+"_"+BPHY8_reco+"_Reco",
+            JpsiFinder             = BPHY8_FinderTools[BPHY8_reco],
             OutputVtxContainerName = BPHY8cf.DerivationName+BPHY8_reco+"Candidates",
             PVContainerName        = BPHY8cf.PVContName,
             RefPVContainerName     = BPHY8cf.DerivationName+BPHY8_reco+"RefittedPrimaryVertices",
@@ -1191,7 +1242,20 @@ if "Bhh" in BPHY8cf.doChannels:
         MinNTracksInPV             = BPHY8cf.minNTracksInPV,
         PVTypesToConsider          = BPHY8cf.MinChi2ToAnyPVTypes,
         DoVertexType               = BPHY8cf.doVertexType)
-
+# g) for BhhMuMu
+if "BhhMuMu" in BPHY8cf.doChannels:
+    BPHY8_MuMassTools["BhhMuMu"] = DerivationFramework__BPhysAddMuonBasedInvMass(
+        name                       = "BPHY8_MuMass_BhhMuMu",
+        BranchPrefix               = "BhhMuMu",
+        OutputLevel                = WARNING,
+        AdjustToMuonKinematics     = BPHY8cf.adjustMucalcKinematics,
+        VertexContainerName        = BPHY8cf.DerivationName+"BhhMuMuCandidates",
+        TrkMasses                  = [BPHY8cf.GlobalMuonMass, BPHY8cf.GlobalMuonMass],
+        AddMinChi2ToAnyPVMode      = BPHY8cf.AddMinChi2ToAnyPVMode,
+        PrimaryVertexContainerName = BPHY8cf.PVContName,
+        MinNTracksInPV             = BPHY8cf.minNTracksInPV,
+        PVTypesToConsider          = BPHY8cf.MinChi2ToAnyPVTypes,
+        DoVertexType               = BPHY8cf.doVertexType)
 ######################## duplication for debugging only #######################
 
 if BPHY8cf.addMucalcMassForDebug:
@@ -1278,6 +1342,20 @@ if BPHY8cf.addMucalcMassForDebug:
             OutputLevel                = WARNING,
             AdjustToMuonKinematics     = False,
             VertexContainerName        = BPHY8cf.DerivationName+"DiMuonCandidates",
+            TrkMasses                  = [BPHY8cf.GlobalMuonMass, BPHY8cf.GlobalMuonMass],
+            AddMinChi2ToAnyPVMode      = BPHY8cf.AddMinChi2ToAnyPVMode,
+            PrimaryVertexContainerName = BPHY8cf.PVContName,
+            MinNTracksInPV             = BPHY8cf.minNTracksInPV,
+            PVTypesToConsider          = BPHY8cf.MinChi2ToAnyPVTypes,
+            DoVertexType               = BPHY8cf.doVertexType)
+    # g) for BhhMuMu
+    if "BhhMuMu" in BPHY8cf.doChannels:
+        BPHY8_MuMassTools["BhhMuMu2"] = DerivationFramework__BPhysAddMuonBasedInvMass(
+            name                       = "BPHY8_MuMass_BhhMuMu2",
+            BranchPrefix               = "BhhMuMu2",
+            OutputLevel                = WARNING,
+            AdjustToMuonKinematics     = False,
+            VertexContainerName        = BPHY8cf.DerivationName+"BhhMuMuCandidates",
             TrkMasses                  = [BPHY8cf.GlobalMuonMass, BPHY8cf.GlobalMuonMass],
             AddMinChi2ToAnyPVMode      = BPHY8cf.AddMinChi2ToAnyPVMode,
             PrimaryVertexContainerName = BPHY8cf.PVContName,
@@ -1450,6 +1528,11 @@ if "BJpsiPi" in BPHY8cf.doChannels:
     BPHY8cf.RefPVContNames += [ BPHY8cf.DerivationName
                               +"BJpsiPiRefittedPrimaryVertices" ]
     BPHY8cf.BranchPrefixes += [ "BJpsiPi" ];
+if "BhhMuMu" in BPHY8cf.doChannels:
+    BPHY8cf.VtxContNames   += [ BPHY8cf.DerivationName+"BhhMuMuCandidates" ]
+    BPHY8cf.RefPVContNames += [ BPHY8cf.DerivationName
+                              +"BhhMuMuRefittedPrimaryVertices" ]
+    BPHY8cf.BranchPrefixes += [ "BhhMuMu" ];
     
 #
 # Third: Set up the real tools
@@ -1721,6 +1804,26 @@ if "Bhh" in BPHY8cf.doChannels:
         Chi2Max                = BPHY8cf.Chi2Cut2Prong,
         DoVertexType           = BPHY8cf.doVertexType,
         Do3d                   = BPHY8cf.do3dProperTime,
+        UseMuCalcMass          = BPHY8cf.useMuCalcMass,
+        OutputLevel            = WARNING)
+if "BhhMuMu" in BPHY8cf.doChannels:
+    # augment and select B(s)->mumu candidates
+    BPHY8_SelectTools["BhhMuMu"] = DerivationFramework__Select_Bmumu(
+        name                   = "BPHY8_Select_BhhMuMu",
+        HypothesisName         = "BhhMuMu",
+        InputVtxContainerName  = BPHY8cf.DerivationName+"BhhMuMuCandidates",
+        TrkMasses              = [BPHY8cf.GlobalMuonMass, BPHY8cf.GlobalMuonMass],
+        VtxMassHypo            = BPHY8cf.GlobalBsMass,
+        MassMin                = BPHY8cf.GlobalBMassLowerCut,
+        MassMax                = BPHY8cf.GlobalBMassUpperCut,
+        Chi2Max                = BPHY8cf.Chi2Cut2Prong,
+        DoVertexType           = BPHY8cf.doVertexType,
+        Do3d                   = BPHY8cf.do3dProperTime,
+        BlindMassMin           = BPHY8cf.GlobalBlindLowerCut,
+        BlindMassMax           = BPHY8cf.GlobalBlindUpperCut,
+        DoBlinding             = BPHY8cf.doBmumuBlinding,
+        DoCutBlinded           = BPHY8cf.doCutBlinded,
+        BlindOnlyAllMuonsTight = BPHY8cf.blindOnlyAllMuonsTight,
         UseMuCalcMass          = BPHY8cf.useMuCalcMass,
         OutputLevel            = WARNING)
   
