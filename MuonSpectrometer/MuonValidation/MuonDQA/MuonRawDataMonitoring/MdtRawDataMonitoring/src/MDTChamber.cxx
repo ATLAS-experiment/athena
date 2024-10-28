@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MDTChamber.h"
@@ -8,8 +8,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "LWHists/TH1F_LW.h"
-#include "LWHists/TH2F_LW.h"
 #include "TH2F.h"
 
 MDTChamber::MDTChamber(std::string_view name) :
