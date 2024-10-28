@@ -33,7 +33,7 @@ def ZdcMonitoringConfig(inputFlags):
     from AthenaConfiguration.ComponentFactory import CompFactory
     zdcMonAlg = helper.addAlgorithm(CompFactory.ZdcMonitorAlgorithm,'ZdcMonAlg')
 
-    from ZdcRec.SetConfigTagFromFlags import SetConfigTag
+    from ZdcRec.ZdcRecConfig import SetConfigTag
     config = SetConfigTag(inputFlags)
     print ('ZdcMonitorAlgorithm.py: Running with config tag ', config)
     
