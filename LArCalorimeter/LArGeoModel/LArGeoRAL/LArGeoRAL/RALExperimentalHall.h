@@ -1,19 +1,16 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-// RALExperimentalHall.h
-// JFB Sep 
-
-// Access the HEC parameters from the NOVA database.
+/**
+ *   @class RALExperimentalHall
+ *   @brief Access the experimental hall parameters from the geometry database.
+ */
 
 #ifndef LARGEORAL_RALEXPERIMENTALHALL_H
 #define LARGEORAL_RALEXPERIMENTALHALL_H
 
 #include "LArGeoCode/VDetectorParameters.h"
-
-#include <limits.h>
-#include <string>
 
 namespace LArGeo {
 

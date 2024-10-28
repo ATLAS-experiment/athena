@@ -7,10 +7,9 @@
  *
  * @brief Declaration of HECModuleConstruction class
  *
- * $Id: HECModuleConstruction.h,v 1.1 2007-10-09 16:43:20 fincke Exp $
  */
-#ifndef __HECModuleConstruction_H__
-#define __HECModuleConstruction_H__
+#ifndef LARGEOHEC_HECMODULECONSTRUCTION_H
+#define LARGEOHEC_HECMODULECONSTRUCTION_H
 
 #include "GeoModelKernel/GeoFullPhysVol.h"
 
@@ -27,7 +26,7 @@ namespace LArGeo
     {
     public:
       HECModuleConstruction(bool threeBoards=false, bool frontWheel=true, bool tb=false, int tbyear=2002);
-      virtual ~HECModuleConstruction();
+      ~HECModuleConstruction() = default;
       // Get the envelope containing this detector.
       GeoIntrusivePtr<GeoFullPhysVol> GetEnvelope();
       
@@ -40,4 +39,4 @@ namespace LArGeo
     };
   
 }
-#endif // __HECModuleConstruction_H__
+#endif

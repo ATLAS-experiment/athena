@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // RALEmec
@@ -22,6 +22,8 @@
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
+
+#include "AthenaKernel/getMessageSvc.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -52,15 +54,13 @@ LArGeo::RALEmec::RALEmec():
   // First, fetch the Athena services.
   ISvcLocator* svcLocator = Gaudi::svcLocator();
 
-  IGeoDbTagSvc* geoDbTagSvc{nullptr};
-  StatusCode sc = svcLocator->service("GeoDbTagSvc",geoDbTagSvc);
-  if (sc != StatusCode::SUCCESS) {
+  SmartIF<IGeoDbTagSvc> geoDbTagSvc{svcLocator->service("GeoDbTagSvc")};
+  if(!geoDbTagSvc.isValid()) {
     throw std::runtime_error ("Cannot locate GeoDBTagSvc");
   }
   
-  IRDBAccessSvc* pAccessSvc{nullptr};
-  sc = svcLocator->service(geoDbTagSvc->getParamSvcName(),pAccessSvc);
-  if (sc != StatusCode::SUCCESS) {
+  SmartIF<IRDBAccessSvc> pAccessSvc{svcLocator->service(geoDbTagSvc->getParamSvcName())};
+  if(!pAccessSvc.isValid()) {
     throw std::runtime_error ("Cannot locate " + geoDbTagSvc->getParamSvcName());
   }
 
@@ -70,9 +70,8 @@ LArGeo::RALEmec::RALEmec():
 
   if(geoDbTagSvc->getSqliteReader()==nullptr) {
     // The geometry DB is used
-    IGeoModelSvc* geoModel{nullptr};
-    sc = svcLocator->service ("GeoModelSvc",geoModel);
-    if (sc != StatusCode::SUCCESS) {
+    SmartIF<IGeoModelSvc> geoModel{svcLocator->service("GeoModelSvc")};
+    if(!geoModel.isValid()) {
       throw std::runtime_error ("Cannot locate GeoModelSvc");
     }
 
@@ -181,13 +180,11 @@ double LArGeo::RALEmec::GetValue(const std::string& a_name,
   if ( a_name == "LArEMECPreMinRadius"           ) return (*m_c->presamplerPosition)[0]->getDouble("RMIN")*CLHEP::cm;
   if ( a_name == "LArEMECPreMaxRadius"           ) return (*m_c->presamplerPosition)[0]->getDouble("RMAX")*CLHEP::cm;
 
-
-
-
   // We didn't find a match.
+  MsgStream log(Athena::getMessageSvc(),"RALEmec");
   std::string errMessage = "RALEmec::GetValue: could not find a match for the key '" + a_name;
-  std::cerr << errMessage << std::endl;
-  throw std::runtime_error (errMessage.c_str());
+  log << MSG::FATAL << errMessage << endmsg;
+  throw std::runtime_error(errMessage);
 
   // Unreached
 }

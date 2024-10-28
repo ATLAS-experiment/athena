@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //  HECModuleConstruction.cxx 1.0.0
@@ -57,22 +57,11 @@ LArGeo::HECModuleConstruction::HECModuleConstruction(bool threeBoards, bool fron
   m_tb = tb;                    // If true, build a Module for testbeam. 
   m_tbyear = tbyear;            // If testbeam, specify the testbeam year. 
 
-//   if (tb && ( tbyear!=2002 && tbyear!=2004 )) {
-//     throw std::runtime_error ("TESTBEAM HEC: Asking for an unsupported HEC testbeam year!!!!! ");
-//   }
-
 }
-
-//~Destructor
-LArGeo::HECModuleConstruction::~HECModuleConstruction() 
-{;}
-
 
 GeoIntrusivePtr<GeoFullPhysVol> LArGeo::HECModuleConstruction::GetEnvelope()
 {
   if(m_physiHECModule) return m_physiHECModule->clone();
-
-
 
   ISvcLocator *svcLocator = Gaudi::svcLocator();
 
@@ -85,8 +74,8 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::HECModuleConstruction::GetEnvelope()
   log << MSG::DEBUG << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endmsg;
 
 
-  StoreGateSvc *detStore;
-  if (svcLocator->service("DetectorStore", detStore, false )==StatusCode::FAILURE) {
+  SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+  if(!detStore.isValid()) {
     throw std::runtime_error("Error in HECModuleConstruction, cannot access DetectorStore");
   }
 
@@ -109,18 +98,13 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::HECModuleConstruction::GetEnvelope()
   if (!Kapton) throw std::runtime_error("Error in HECModuleConstruction, std::Kapton is not found.");
   
 
-
-  StatusCode sc;
-  IRDBAccessSvc *pAccessSvc;
-  sc=svcLocator->service("RDBAccessSvc",pAccessSvc);
-  if (sc != StatusCode::SUCCESS) {
+  SmartIF<IRDBAccessSvc> pAccessSvc{svcLocator->service("RDBAccessSvc")};
+  if(!pAccessSvc.isValid()) {
     throw std::runtime_error ("Cannot locate RDBAccessSvc!!");
   }
 
-
-  IGeoModelSvc *geoModel;
-  sc = svcLocator->service ("GeoModelSvc",geoModel);
-  if (sc != StatusCode::SUCCESS) {
+  SmartIF<IGeoModelSvc> geoModel{svcLocator->service ("GeoModelSvc")};
+  if(!geoModel.isValid()) {
     throw std::runtime_error ("Cannot locate GeoModelSvc!!");
   }
   

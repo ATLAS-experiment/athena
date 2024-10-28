@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////
@@ -71,20 +71,6 @@ using Gaudi::Units::deg;
 using GeoTrf::Transform3D;
 using GeoTrf::Translate3D;
 
-
-//Constructor
-LArGeo::HEC2WheelConstruction::HEC2WheelConstruction():
-  m_physiHEC(nullptr),
-  m_posZSide(false)
-{
-
-}
-
-//~Destructor
-LArGeo::HEC2WheelConstruction::~HEC2WheelConstruction() 
-{;}
-
-
 GeoIntrusivePtr<GeoFullPhysVol> LArGeo::HEC2WheelConstruction::GetEnvelope(bool fullGeo, bool posZSide)
 {
   m_posZSide = posZSide;
@@ -92,7 +78,6 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::HEC2WheelConstruction::GetEnvelope(bool 
   if(m_physiHEC) return m_physiHEC->clone();
 
   // Get access to the material manager:
-  
   ISvcLocator *svcLocator = Gaudi::svcLocator();
 
   MsgStream log(Athena::getMessageSvc(),"HEC2WheelConstruction " );
@@ -105,8 +90,8 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::HEC2WheelConstruction::GetEnvelope(bool 
   log << MSG::DEBUG << "+++++++++++++++++++++++++++++++++++++++++++++++++++++" << endmsg;
 
 
-  StoreGateSvc *detStore;
-  if (svcLocator->service("DetectorStore", detStore, false )==StatusCode::FAILURE) {
+  SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+  if(!detStore.isValid()) {
     throw std::runtime_error("Error in HEC2WheelConstruction, cannot access DetectorStore");
   }
  
@@ -115,16 +100,13 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::HEC2WheelConstruction::GetEnvelope(bool 
     throw std::runtime_error("Error in HEC2WheelConstruction, cannot access Material Manager");
   }
 
-  StatusCode sc;
-  IRDBAccessSvc *pAccessSvc;
-  sc=svcLocator->service("RDBAccessSvc",pAccessSvc);
-  if (sc != StatusCode::SUCCESS) {
+  SmartIF<IRDBAccessSvc> pAccessSvc{svcLocator->service("RDBAccessSvc")};
+  if(!pAccessSvc.isValid()) {
     throw std::runtime_error ("Cannot locate RDBAccessSvc!!");
   }
 
-  IGeoModelSvc *geoModel;
-  sc = svcLocator->service ("GeoModelSvc",geoModel);
-  if (sc != StatusCode::SUCCESS) {
+  SmartIF<IGeoModelSvc> geoModel{svcLocator->service("GeoModelSvc")};
+  if(!geoModel.isValid()) {
     throw std::runtime_error ("Cannot locate GeoModelSvc!!");
   }
 
@@ -211,7 +193,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::HEC2WheelConstruction::GetEnvelope(bool 
   GeoIntrusivePtr<GeoFullPhysVol> EnvelopeF = theFrontHEC.GetEnvelope();
 
   StoredPhysVol *sPhysVolHec1 = new StoredPhysVol(EnvelopeF);
-  sc=detStore->record(sPhysVolHec1,tag1);
+  StatusCode sc=detStore->record(sPhysVolHec1,tag1);
   if(!sc.isSuccess()) throw std::runtime_error ((std::string("Cannot store")+tag1).c_str());
 
   StoredAlignX *sAlignX1 = new StoredAlignX(xfHec1);
@@ -247,10 +229,6 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::HEC2WheelConstruction::GetEnvelope(bool 
   physiHEC->add(xfHec2);
   physiHEC->add(new GeoIdentifierTag(1));
   physiHEC->add(EnvelopeR);
-
-
-
-
 
   return physiHEC;
 }
