@@ -465,8 +465,9 @@ namespace ActsTrk
 
     const auto &trackSelectorCfg = trackFinder().trackSelector.config();
     auto getCuts = [&trackSelectorCfg](double eta) -> const Acts::TrackSelector::Config & {
-      return (std::abs(eta) < trackSelectorCfg.absEtaEdges.front())   ? trackSelectorCfg.cutSets.front()
-             : (std::abs(eta) >= trackSelectorCfg.absEtaEdges.back()) ? trackSelectorCfg.cutSets.back()
+      // return the last bin for |eta|>=4 or nan
+      return (!(std::abs(eta) < trackSelectorCfg.absEtaEdges.back())) ? trackSelectorCfg.cutSets.back()
+             : (std::abs(eta) < trackSelectorCfg.absEtaEdges.front()) ? trackSelectorCfg.cutSets.front()
                                                                       : trackSelectorCfg.getCuts(eta);
     };
 
@@ -667,7 +668,13 @@ namespace ActsTrk
         ++event_stat[category_i][kNOutputTracks];
 
         // copy selected tracks into output tracksContainer
-        if (trackFinder().trackSelector.isValidTrack(track)) {
+        auto isValidEta = [&](const detail::RecoTrackContainer::TrackProxy &track) {
+          // Protect against eta=nan, which currently crashes in Acts::TrackSelector::isValidTrack().
+          // Can remove once this is fixed in Acts Core.
+          return track.theta() > 0.0 && track.theta() < M_PI;
+        };
+
+        if (isValidEta(track) && trackFinder().trackSelector.isValidTrack(track)) {
           auto destProxy = tracksContainer.getTrack(tracksContainer.addTrack());
           destProxy.copyFrom(track, true);  // make sure we copy track states!
           ++event_stat[category_i][kNSelectedTracks];
