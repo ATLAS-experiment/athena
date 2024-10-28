@@ -1,11 +1,8 @@
-//#include "LArRecUtils/LArCellFakeProbHV.h"
-//#include "LArRecUtils/LArHVGeometryTool.h"
 #include "LArRecUtils/LArOFPeakRecoTool.h"
 #include "LArRecUtils/LArParabolaPeakRecoTool.h"
 #include "LArRecUtils/LArShapePeakRecoTool.h"
 #include "../LArTowerBuilderTool.h"
 #include "../LArFCalTowerBuilderTool.h"
-#include "../LArFlatConditionSvc.h"
 #include "../LArFCalTowerBuilderToolTestAlg.h"
 #include "../LArFlatConditionsAlg.h"
 #include "../LArOnOffMappingAlg.h"
@@ -27,14 +24,11 @@
 #include "../LArXTalkWeightGlobalCondAlg.h"
 
 
-//DECLARE_COMPONENT( LArCellFakeProbHV )
-//DECLARE_COMPONENT( LArHVGeometryTool )
 DECLARE_COMPONENT( LArOFPeakRecoTool )
 DECLARE_COMPONENT( LArParabolaPeakRecoTool )
 DECLARE_COMPONENT( LArShapePeakRecoTool )
 DECLARE_COMPONENT( LArTowerBuilderTool )
 DECLARE_COMPONENT( LArFCalTowerBuilderTool )
-DECLARE_COMPONENT( LArFlatConditionSvc )
 DECLARE_COMPONENT( LArFCalTowerBuilderToolTestAlg )
 DECLARE_COMPONENT( LArCondAlgAutoCorrSC )
 DECLARE_COMPONENT( LArCondAlgDAC2uAFlat )
