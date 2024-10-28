@@ -872,15 +872,19 @@ def removeFromList(l, o):
     if o in l:
         l.remove(o)
 
-    
-if __name__=="__main__":
+# Run test with command like "python -m JetRecConfig.JetRecConfig"
+def JetRecConfigTest(flags=None):
+
     # Config flags steer the job at various levels
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
-    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/mc16_13TeV.410501.PowhegPythia8EvtGen_A14_ttbar_hdamp258p75_nonallhad.merge.AOD.e5458_s3126_r9364_r9315/AOD.11182705._000001.pool.root.1"]
-    flags.Concurrency.NumThreads = 1
-    flags.Concurrency.NumConcurrentEvents = 1
-    flags.lock()
+    if flags is None:
+        from AthenaConfiguration.AllConfigFlags import initConfigFlags
+        flags = initConfigFlags()
+
+        from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
+        flags.Input.Files = defaultTestFiles.LATEST_AOD_MC
+        flags.IOVDb.GlobalTag = defaultConditionsTags.LATEST_MC
+
+        flags.lock()
 
     # Get a ComponentAccumulator setting up the fundamental Athena job
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
@@ -891,10 +895,14 @@ if __name__=="__main__":
     cfg.merge(PoolReadCfg(flags))
 
     # Add the components from our jet reconstruction job
-    from StandardSmallRJets import AntiKt4EMTopo
-    AntiKt4EMTopo.modifiers = ["Calib:T0:mc","Filter:15000","Sort"] + ["JVT"] + ["PartonTruthLabel"]
-    cfg.merge(JetRecCfg(AntiKt4EMTopo,flags,jetnameprefix="New"))
+    from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo
+    cfg.merge(JetRecCfg(flags, AntiKt4EMTopo))
 
     cfg.printConfig(withDetails=False,summariseProps=True)
+    cfg.run(10)
+
+if __name__=="__main__":
+    JetRecConfigTest()
+
 
 

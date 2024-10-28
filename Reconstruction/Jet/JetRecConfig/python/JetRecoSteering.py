@@ -84,3 +84,46 @@ def JetRecoSteeringCfg(flags):
         result.merge(addJetsToOutputCfg(flags, jetdefs, toAOD=False, toESD=True))
 
     return result
+
+def JetRecoSteeringTest(flags=None):
+
+    if flags is None:
+        from AthenaConfiguration.AllConfigFlags import initConfigFlags
+        flags = initConfigFlags()
+
+        from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
+        flags.Input.Files = defaultTestFiles.AOD_RUN3_MC
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
+
+        # We have to set the production step, which PFFlow muon linking uses for autoconfiguration.
+        from AthenaConfiguration.Enums import ProductionStep
+        flags.Common.ProductionStep=ProductionStep.Derivation
+
+        flags.fillFromArgs()
+        flags.lock()
+
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    acc = MainServicesCfg(flags)
+
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    acc.merge(PoolReadCfg(flags))
+
+    # Setup calorimeter geometry, which is needed for jet reconstruction
+    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+    acc.merge(LArGMCfg(flags))
+
+    from TileGeoModel.TileGMConfig import TileGMCfg
+    acc.merge(TileGMCfg(flags))
+
+    acc.merge(JetRecoSteeringCfg(flags))
+
+    # We also need to build links between the newly
+    # created jet constituents (GlobalFE)
+    # and electrons,photons,muons and taus
+    from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
+    acc.merge(PFGlobalFlowElementLinkingCfg(flags))
+
+    acc.run()
+
+if __name__=="__main__":
+    JetRecoSteeringTest()
