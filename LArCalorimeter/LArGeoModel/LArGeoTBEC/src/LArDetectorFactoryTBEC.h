@@ -1,45 +1,44 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef LArGeo_LArDetectorFactoryTBEC_h
-#define LArGeo_LArDetectorFactoryTBEC_h
+#ifndef LARGEOTBEC_LARDETECTORFACTORYTBEC_H
+#define LARGEOTBEC_LARDETECTORFACTORYTBEC_H
 
 #include "GeoModelKernel/GeoVDetectorFactory.h"
 #include "LArReadoutGeometry/LArDetectorManager.h"
 
 namespace LArGeo {
 
-  class LArDetectorFactoryTBEC : public GeoVDetectorFactory  {
-
+  class LArDetectorFactoryTBEC : public GeoVDetectorFactory
+  {
+    
   public:
-  
+    
     // Constructor:
-    LArDetectorFactoryTBEC();
+    LArDetectorFactoryTBEC() = default;
   
     // Destructor:
-    virtual ~LArDetectorFactoryTBEC();
+    virtual ~LArDetectorFactoryTBEC() = default;
+    
+    // Illegal operations:
+    const LArDetectorFactoryTBEC & operator=(const LArDetectorFactoryTBEC &right) = delete;
+    LArDetectorFactoryTBEC(const LArDetectorFactoryTBEC &right) = delete;
   
     // Creation of geometry:
-    virtual void create(GeoPhysVol* world);
-  
+    virtual void create(GeoPhysVol* world) override;
+    
     // Access to the results:
-    virtual const LArDetectorManager* getDetectorManager() const;
-  
-
+    virtual const LArDetectorManager* getDetectorManager() const override;
+    
     // Set parameters:
-
     void setECVisLimit(int maxCell)       {m_ecVisLimit   = maxCell;}
-
+    
   private:  
-  
-    // Illegal operations:
-    const LArDetectorFactoryTBEC & operator=(const LArDetectorFactoryTBEC &right);
-    LArDetectorFactoryTBEC(const LArDetectorFactoryTBEC &right);
-  
+    
     // The manager:
-    LArDetectorManager*       m_detectorManager;
-    int                       m_ecVisLimit;
+    LArDetectorManager*       m_detectorManager{nullptr};
+    int                       m_ecVisLimit{-1};
 
   };
 

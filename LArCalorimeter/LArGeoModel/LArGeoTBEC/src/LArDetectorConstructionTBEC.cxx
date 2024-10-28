@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArDetectorConstructionTBEC
@@ -38,6 +38,8 @@
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
+#include "AthenaKernel/getMessageSvc.h"
+
 // For run options :
 #include "LArG4RunControl/LArGeoTBGeometricOptions.h"
 
@@ -58,51 +60,23 @@ using cryoEndcapCylDBRecord_t = struct {
 };
 
 
-LArGeo::LArDetectorConstructionTBEC::LArDetectorConstructionTBEC():
-m_eta_pos(0),
-m_eta_cell(0),
-m_phi_pos(0),
-m_phi_cell(0),
-m_hasLeadCompensator(false),
-m_hasPresampler(false),
-m_ModuleRotation(0),
-m_YShift(0),
-m_tbecEnvelopePhysical(nullptr),
-m_pAccessSvc(nullptr)
-{;}
-
 void LArGeo::LArDetectorConstructionTBEC::getSimulationParameters()
 {
   m_eta_cell = 12;
   m_phi_cell = 16;
 
-  StoreGateSvc* detStore = nullptr;
+  MsgStream log(Athena::getMessageSvc(),"LArGeo::LArDetectorConstructionTBEC");
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if(!detStore.isValid()) throw std::runtime_error("LArDetectorConstructionTBEC: cannot initialize StoreGate interface");
   const LArGeoTBGeometricOptions  *largeotbgeometricoptions = nullptr;
-  
-  StatusCode status;
-  ISvcLocator* svcLocator = Gaudi::svcLocator(); 
-	IMessageSvc * msgSvc;
-	if(svcLocator->service("MessageSvc", msgSvc, true) == StatusCode::FAILURE){
-		throw std::runtime_error("Error in LArDetectorConstructionTBEC, cannot access MessageSvc");
-	}
-	MsgStream log(msgSvc, "LArGeo::LArDetectorConstructionTBEC"); 
-
-	status = svcLocator->service("DetectorStore", detStore);
-  
-	if(status.isSuccess()){
-		status = detStore->retrieve(largeotbgeometricoptions, "LArGeoTBGeometricOptions");
-		if(!status.isFailure()){
-			m_eta_cell = largeotbgeometricoptions->CryoEtaPosition();
-			m_phi_cell = largeotbgeometricoptions->CryoPhiPosition();
-		} else {
-			log << MSG::WARNING
-			    << "Can't access LArGeoTBGeometricOptions, using default values"
-				<< endmsg;
-		}
-	} else {
-		throw std::runtime_error("LArDetectorConstructionTBEC: cannot initialize \
-StoreGate interface");
-	}
+  StatusCode status = detStore->retrieve(largeotbgeometricoptions, "LArGeoTBGeometricOptions");
+  if(status.isFailure()){
+    log << MSG::WARNING << "Can't access LArGeoTBGeometricOptions, using default values" << endmsg;
+  }
+  else {
+    m_eta_cell = largeotbgeometricoptions->CryoEtaPosition();
+    m_phi_cell = largeotbgeometricoptions->CryoPhiPosition();
+  }
 
   if ( m_eta_cell < 0.5 ) m_eta_pos = 0.05*( m_eta_cell + 0.5 ) + 1.375; // Cell 0 has double eta width
   else if ( m_eta_cell > 43.5 ) m_eta_pos = 0.1*( m_eta_cell - 43.5 ) + 2.5; // Inner Wheel
@@ -113,24 +87,16 @@ StoreGate interface");
     
 }
 
-LArGeo::LArDetectorConstructionTBEC::~LArDetectorConstructionTBEC() = default;
-
 PVLink LArGeo::LArDetectorConstructionTBEC::GetEnvelope()
 {
-
   if (m_tbecEnvelopePhysical) return m_tbecEnvelopePhysical;
 
-  ISvcLocator *svcLocator = Gaudi::svcLocator();
-	IMessageSvc * msgSvc;
-	if(svcLocator->service("MessageSvc", msgSvc, true) == StatusCode::FAILURE){
-		throw std::runtime_error("Error in LArDetectorConstructionTBEC, cannot access MessageSvc");
-	}
-
-	MsgStream log(msgSvc, "LArGeo::LArDetectorConstructionTBEC"); 
-  StoreGateSvc *detStore;
-  if (svcLocator->service("DetectorStore", detStore, false )==StatusCode::FAILURE) {
-    throw std::runtime_error("Error in LArDetectorConstructionTBEC, cannot access DetectorStore");
+  MsgStream log(Athena::getMessageSvc(),"LArGeo::LArDetectorConstructionTBEC");
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if(!detStore.isValid()) {
+    throw std::runtime_error("LArDetectorConstructionTBEC: cannot initialize StoreGate interface");
   }
+
   StoredMaterialManager* materialManager = nullptr;
   if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
 
@@ -139,9 +105,8 @@ PVLink LArGeo::LArDetectorConstructionTBEC::GetEnvelope()
     throw std::runtime_error("Error in LArDetectorConstructionTBEC, std::Air is not found.");
   }
 
-  StatusCode sc;
-  sc=svcLocator->service("RDBAccessSvc",m_pAccessSvc);
-  if (sc != StatusCode::SUCCESS) {
+  SmartIF<IRDBAccessSvc> accessSvc{Gaudi::svcLocator()->service("RDBAccessSvc")};
+  if(!accessSvc.isValid()) {
     throw std::runtime_error ("Cannot locate RDBAccessSvc!!");
   }
 
@@ -155,7 +120,7 @@ PVLink LArGeo::LArDetectorConstructionTBEC::GetEnvelope()
   m_ModuleRotation = 0.*Gaudi::Units::deg;
   m_YShift = 0.*Gaudi::Units::mm;
  
-  IRDBRecordset_ptr tbecGeometry   = m_pAccessSvc->getRecordsetPtr("TBECGeometry",detectorKey, detectorNode); 
+  IRDBRecordset_ptr tbecGeometry   = accessSvc->getRecordsetPtr("TBECGeometry",detectorKey, detectorNode); 
   if ((*tbecGeometry).size()!=0) {
     m_hasLeadCompensator = (*tbecGeometry)[0]->getInt("LEADCOMPENSATOR");
     m_hasPresampler      = (*tbecGeometry)[0]->getInt("PRESAMPLER");
@@ -192,20 +157,12 @@ PVLink LArGeo::LArDetectorConstructionTBEC::GetEnvelope()
 
 GeoIntrusivePtr<GeoFullPhysVol> LArGeo::LArDetectorConstructionTBEC::createEnvelope()
 {
-  // Get access to the material manager:
-  
-  ISvcLocator *svcLocator = Gaudi::svcLocator();
-  IMessageSvc * msgSvc;
-  if (svcLocator->service("MessageSvc", msgSvc, true )==StatusCode::FAILURE) {
-    throw std::runtime_error("Error in LArDetectorConstructionTBEC, cannot access MessageSvc");
-  }
+  // Get access to the material manager:  
+  MsgStream log(Athena::getMessageSvc(),"LArGeo::LArDetectorConstructionTBEC");
+  log << MSG::DEBUG << "createEnvelope() started" << endmsg;
 
-	MsgStream log(msgSvc, "LArGeo::LArDetectorConstructionTBEC"); 
-	log << MSG::DEBUG << "createEnvelope() started" << endmsg;
-
-
-  StoreGateSvc *detStore;
-  if (svcLocator->service("DetectorStore", detStore, false )==StatusCode::FAILURE) {
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if(!detStore.isValid()) {
     throw std::runtime_error("Error in LArDetectorConstructionTBEC, cannot access DetectorStore");
   }
 

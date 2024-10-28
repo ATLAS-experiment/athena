@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // CryostatConstructionTBEC
@@ -31,16 +31,10 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include "AthenaKernel/getMessageSvc.h"
 
 #include <string>
 #include <cmath>
-
-LArGeo::CryostatConstructionTBEC::CryostatConstructionTBEC():
-m_cryoEnvelopePhysical(nullptr),
-m_LArPhysical(nullptr)
-{;}
-
-LArGeo::CryostatConstructionTBEC::~CryostatConstructionTBEC() {;}
 
 GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::CryostatConstructionTBEC::GetEnvelope()
 {
@@ -48,24 +42,17 @@ GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::CryostatConstructionTBEC::GetEnvelope()
   if (m_cryoEnvelopePhysical) return m_cryoEnvelopePhysical;
  
   // Get access to the material manager:
-  
-  ISvcLocator *svcLocator = Gaudi::svcLocator();
-  IMessageSvc * msgSvc;
-  if (svcLocator->service("MessageSvc", msgSvc, true )==StatusCode::FAILURE) {
-    throw std::runtime_error("Error in CryostatConstructionTBEC, cannot access MessageSvc");
-  }
+  MsgStream log(Athena::getMessageSvc(), "LArGeo::CryostatConstructionTBEC"); 
 
-  MsgStream log(msgSvc, "LArGeo::CryostatConstructionTBEC"); 
-
-  log << "++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-  log << "+                                                  +" << std::endl;
-  log << "+    HELLO from LArGeo::CryostatConstructionTBEC   +" << std::endl;
-  log << "+                                                  +" << std::endl;
-  log << "++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+  log << MSG::INFO << "++++++++++++++++++++++++++++++++++++++++++++++++++++" << endmsg;
+  log << MSG::INFO << "+                                                  +" << endmsg;
+  log << MSG::INFO << "+    HELLO from LArGeo::CryostatConstructionTBEC   +" << endmsg;
+  log << MSG::INFO << "+                                                  +" << endmsg;
+  log << MSG::INFO << "++++++++++++++++++++++++++++++++++++++++++++++++++++" << endmsg;
 
 
-  StoreGateSvc *detStore;
-  if (svcLocator->service("DetectorStore", detStore, false )==StatusCode::FAILURE) {
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if(!detStore.isValid()) {
     throw std::runtime_error("Error in CryostatConstructionTBEC, cannot access DetectorStore");
   }
 

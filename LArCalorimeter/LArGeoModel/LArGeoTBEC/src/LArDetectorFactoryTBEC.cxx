@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArDetectorFactory.cxx
@@ -29,50 +29,32 @@
 #include "LArReadoutGeometry/EMECDetDescr.h"
 #include "GeoModelKernel/CellBinning.h"
 
+#include "AthenaKernel/getMessageSvc.h"
+
 // V.N :  Patch LAr materials
 #include "LArGeoCode/LArMaterialManager.h"
 #include "LArGeoRAL/RAL.h"
 #include "LArGeoCode/VDetectorParameters.h"
 
-LArGeo::LArDetectorFactoryTBEC::LArDetectorFactoryTBEC()
-  : m_detectorManager(nullptr),
-    m_ecVisLimit(-1)
-{}
-
-
-LArGeo::LArDetectorFactoryTBEC::~LArDetectorFactoryTBEC()
-= default;
-
-
 // Place the cryostats into a container physical volume.
 void LArGeo::LArDetectorFactoryTBEC::create( GeoPhysVol* a_container )
 {
-
   // V.N :  Patch LAr materials ??? is this needed?
   VDetectorParameters::SetInstance(std::make_unique<LArGeo::RAL>());
 
   EMECDetectorManager *emecDetectorManager = new EMECDetectorManager();
   
-  
   // Get access to the material manager:
+  MsgStream log(Athena::getMessageSvc(), "LArGeo::LArDetectorFactoryTBEC");
+
+  log << MSG::INFO << "+++++++++++++++++++++++++++++++++++++++++++++++++++++" << endmsg;
+  log << MSG::INFO << "+                                                   +" << endmsg;
+  log << MSG::INFO << "+         HELLO from LAr::DetectorFactoryTBEC       +" << endmsg;
+  log << MSG::INFO << "+                                                   +" << endmsg;
+  log << MSG::INFO << "+++++++++++++++++++++++++++++++++++++++++++++++++++++" << endmsg;
   
-  ISvcLocator *svcLocator = Gaudi::svcLocator();
-  IMessageSvc * msgSvc;
-  if (svcLocator->service("MessageSvc", msgSvc, true )==StatusCode::FAILURE) {
-    throw std::runtime_error("Error in LAr::DetectorFactor, cannot access MessageSvc");
-  }
-  
-  MsgStream log(msgSvc, "LAr::DetectorFactory"); 
-  
-  log  << "++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-  log << "+                                                   +" << std::endl;
-  log << "+         HELLO from LAr::DetectorFactoryTBEC       +" << std::endl;
-  log << "+                                                   +" << std::endl;
-  log << "+++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-  
-  
-  StoreGateSvc *detStore;
-  if (svcLocator->service("DetectorStore", detStore, false )==StatusCode::FAILURE) {
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if(!detStore.isValid()) {
     throw std::runtime_error("Error in LArDetectorFactoryTBEC, cannot access DetectorStore");
   }
   
@@ -81,7 +63,6 @@ void LArGeo::LArDetectorFactoryTBEC::create( GeoPhysVol* a_container )
   lArMaterialManager.buildMaterials();
   
   LArDetectorConstructionTBEC CryostatConstructionTB;
-  CryostatConstructionTB.setECVisLimit(m_ecVisLimit);
   
   PVLink Envelope = nullptr;
   
