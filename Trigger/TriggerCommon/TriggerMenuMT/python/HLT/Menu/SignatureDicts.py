@@ -62,7 +62,6 @@ ChainDictTemplate = {
     'groups'        : [],
     'EBstep'        : '',
     'chainParts'   : [],
-    'topoStartFrom' : False,
     'sigDicts' : {},
     'sigFolder'     : [],
     'subSigs'        : [],

@@ -125,7 +125,6 @@ it's doing
 | `groups`             | `['RATE:MultiMET', 'BW:MultiMET']` | Which groups this chain is part of |
 | `mergingStrategy`    | `parallel`       |             |
 | `chainMultiplicities`| `['1', '1']`     | The multiplicities of each substep |
-| `topoStartFrom`      | `False`          |             |
 | `L1item`             | `L1_XE50`        | The L1 item that seeds this chain |
 | `chainName`          | `HLT_xe110_tcpufit_lcw_xe70_cell_L1XE50` | The full chain name |
 
