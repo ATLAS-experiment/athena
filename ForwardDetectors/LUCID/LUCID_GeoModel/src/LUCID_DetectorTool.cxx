@@ -49,7 +49,7 @@ StatusCode LUCID_DetectorTool::create() {
     return StatusCode::SUCCESS;
   }
 
-  GeoModelExperiment* theExpt; 
+  GeoModelExperiment* theExpt = nullptr;
   ATH_CHECK( detStore()->retrieve(theExpt, "ATLAS") );
 
   if(nullptr == m_detector) {
