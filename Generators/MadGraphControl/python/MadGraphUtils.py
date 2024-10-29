@@ -2493,15 +2493,35 @@ def run_card_consistency_check(isNLO=False,process_dir='.'):
             modify_run_card(process_dir=process_dir,settings={'python_seed':mydict['iseed']},skipBaseFragment=True)
 
     # consistency check of 4/5 flavour shceme settings
+    # Note MG5_aMC default is 4-flavour scheme
     FS_updates={}
+    proton_5flav = False
+    jet_5flav = False
     with open(process_dir+'/Cards/proc_card_mg5.dat', 'r') as file:
         content = file.readlines()
-        for line in content:
-            if line.startswith("define p") or line.startswith("define j"):
-                if "b" in line and "b~" in line:
-                    FS_updates['asrwgtflavor'] = 5
-                else:
-                    FS_updates['asrwgtflavor'] = 4
+        for rawline in content:
+            line = rawline.split('#')[0]
+            if line.startswith("define p"):
+                if 'b' in line.split() and 'b~' in line.split():
+                    proton_5flav = True
+                if 'j' in line.split() and jet_5flav:
+                    proton_5flav = True
+            if line.startswith("define j"):
+                if 'b' in line.split() and 'b~' in line.split():
+                    jet_5flav = True
+                if 'p' in line.split() and proton_5flav:
+                    jet_5flav = True
+    if proton_5flav or jet_5flav:
+        FS_updates['asrwgtflavor'] = 5
+        if not proton_5flav:
+            mglog.warning('Found 5-flavour jets but 4-flavour proton. This is inconsistent - please pick one.')
+            mglog.warning('Will proceed assuming 5-flavour scheme.')
+        if not jet_5flav:
+            mglog.warning('Found 5-flavour protons but 4-flavour jets. This is inconsistent - please pick one.')
+            mglog.warning('Will proceed assuming 5-flavour scheme.')
+    else:
+        FS_updates['asrwgtflavor'] = 4
+
     if len(FS_updates)==0:
         mglog.warning(f'Could not identify 4- or 5-flavor scheme from process card {process_dir}/Cards/proc_card_mg5.dat')
 
