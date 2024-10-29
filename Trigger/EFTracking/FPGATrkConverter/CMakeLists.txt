@@ -11,4 +11,4 @@ atlas_add_component( FPGATrkConverter
                      BeamSpotConditionsData FPGATrackSimObjectsLib FPGATrkConverterInterface
                      GaudiKernel Identifier InDetCondTools InDetIdentifier InDetPrepRawData
                      PixelReadoutGeometryLib SCT_ReadoutGeometry StoreGateLib TrkEventPrimitives
-                     xAODInDetMeasurement )
+                     xAODInDetMeasurement TrkSpacePoint )

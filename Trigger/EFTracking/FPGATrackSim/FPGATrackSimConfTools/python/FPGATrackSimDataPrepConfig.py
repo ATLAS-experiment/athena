@@ -135,8 +135,8 @@ def WriteToAOD(flags, stage = ''): #  store xAOD containers in AOD file
     toAOD += [f"xAOD::PixelClusterContainer#xAODPixelClusters{stage}FromFPGACluster",f"xAOD::PixelClusterAuxContainer#xAODPixelClusters{stage}FromFPGAClusterAux.",
               f"xAOD::StripClusterContainer#xAODStripClusters{stage}FromFPGACluster",f"xAOD::StripClusterAuxContainer#xAODStripClusters{stage}FromFPGAClusterAux.",
               "xAOD::TrackParticleContainer#xAODFPGAProtoTracksTrackParticles","xAOD::TrackParticleAuxContainer#xAODFPGAProtoTracksTrackParticlesAux.",
-              f"xAOD::SpacePointContainer#xAODPixelSpacePoints{stage}FromFPGA",f"xAOD::SpacePointContainer#xAODPixelSpacePoints{stage}FromFPGAAux",
-              f"xAOD::SpacePointContainer#xAODStripSpacePoints{stage}FromFPGA",f"xAOD::SpacePointContainer#xAODStripSpacePoints{stage}FromFPGAAux",
+              f"xAOD::SpacePointContainer#xAODPixelSpacePoints{stage}FromFPGA",f"xAOD::SpacePointAuxContainer#xAODPixelSpacePoints{stage}FromFPGAAux.-measurements",
+              f"xAOD::SpacePointContainer#xAODStripSpacePoints{stage}FromFPGA",f"xAOD::SpacePointAuxContainer#xAODStripSpacePoints{stage}FromFPGAAux.-measurements.-sctSpacePointLink",
             ]
     
     result.merge(addToAOD(flags, toAOD))
@@ -430,9 +430,7 @@ def runDataPrepChain():
     acc.merge(FPGATrackSimDataPrepAlgCfg(flags))
 
     if flags.Trigger.FPGATrackSim.doEDMConversion:
-        acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=False))
-        if flags.Trigger.FPGATrackSim.spacePoints : acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgSpacePoints_1st', stage = '_1st', doSP = True, doClusters = False, doHits = False)) 
-        
+        acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=False, doSP = flags.Trigger.FPGATrackSim.spacePoints))
         if flags.Trigger.FPGATrackSim.convertUnmappedHits: acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgUnmapped_1st', stage = 'Unmapped_1st', doClusters = False))
         if flags.Trigger.FPGATrackSim.writeToAOD:
             acc.merge(WriteToAOD(flags, stage = '_1st'))

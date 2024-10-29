@@ -48,8 +48,13 @@ public:
   virtual StatusCode convertClusters(const std::vector<FPGATrackSimCluster>& cl,
                                       xAOD::PixelClusterContainer& pixelCont,
                                       xAOD::StripClusterContainer& SCTCont) const = 0;
-  virtual StatusCode convertSpacePoints(const std::vector<FPGATrackSimCluster>& cl,
-                                      xAOD::SpacePointContainer& SPCont, bool doPixel = false) const = 0;
+
+  virtual StatusCode convertSpacePoints(const std::vector<FPGATrackSimCluster>& fpgaSPs,
+                                    const std::vector<FPGATrackSimCluster>& fpgaClusters,
+                                    xAOD::SpacePointContainer& SPStripCont,
+                                    xAOD::SpacePointContainer& SPPixelCont, 
+                                    xAOD::StripClusterContainer& stripClusterCont,
+                                    xAOD::PixelClusterContainer& pixelClusterCont) const = 0;
 
   virtual StatusCode createPixelCluster(const FPGATrackSimHit& h, const std::vector<Identifier>& rdoList, std::unique_ptr<InDet::PixelCluster>&) const = 0;
   virtual StatusCode createPixelCluster(const FPGATrackSimHit& h, const std::vector<Identifier>& rdoList, xAOD::PixelCluster&) const = 0;
@@ -59,7 +64,8 @@ public:
   virtual StatusCode createPixelCluster(const FPGATrackSimCluster&, xAOD::PixelCluster& ) const = 0;
   virtual StatusCode createSCTCluster(const FPGATrackSimCluster&, std::unique_ptr<InDet::SCT_Cluster>&) const = 0;
   virtual StatusCode createSCTCluster(const FPGATrackSimCluster&, xAOD::StripCluster& ) const = 0;
-  virtual StatusCode createSP(const FPGATrackSimCluster& cl, xAOD::SpacePoint& sp) const = 0;
+  virtual StatusCode createSP(const FPGATrackSimCluster& cl, xAOD::SpacePoint& sp, xAOD::StripClusterContainer& clustersCont ) const = 0;
+  virtual StatusCode createSP(const FPGATrackSimCluster& cl, xAOD::SpacePoint& sp, xAOD::PixelClusterContainer& clustersCont ) const = 0;
 
   virtual StatusCode getRdoList(std::vector<Identifier> &rdoList, const FPGATrackSimCluster& cluster) const = 0;
   virtual StatusCode getRdoList(std::vector<Identifier> &rdoList, const FPGATrackSimHit& hit) const = 0;

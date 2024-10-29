@@ -60,8 +60,12 @@ class FPGAClusterConverter : public extends<AthAlgTool,IFPGAClusterConverter>
     virtual StatusCode convertClusters(const std::vector<FPGATrackSimCluster>& cl,
                                     xAOD::PixelClusterContainer& pixelCont,
                                     xAOD::StripClusterContainer& SCTCont) const override final;
-    virtual StatusCode convertSpacePoints(const std::vector<FPGATrackSimCluster>& cl,
-                                    xAOD::SpacePointContainer& SPCont, bool doPixel = false) const override final;
+    virtual StatusCode convertSpacePoints(const std::vector<FPGATrackSimCluster>& fpgaSPs,
+                                    const std::vector<FPGATrackSimCluster>& fpgaClusters,
+                                    xAOD::SpacePointContainer& SPStripCont,
+                                    xAOD::SpacePointContainer& SPPixelCont, 
+                                    xAOD::StripClusterContainer& stripClusterCont,
+                                    xAOD::PixelClusterContainer& pixelClusterCont) const override final;
 
     virtual StatusCode createPixelCluster(const FPGATrackSimHit& h, const std::vector<Identifier>& rdoList, std::unique_ptr<InDet::PixelCluster>&) const override final;
     virtual StatusCode createPixelCluster(const FPGATrackSimHit& h, const std::vector<Identifier>& rdoList, xAOD::PixelCluster &) const override final;
@@ -71,7 +75,8 @@ class FPGAClusterConverter : public extends<AthAlgTool,IFPGAClusterConverter>
     virtual StatusCode createPixelCluster(const FPGATrackSimCluster&, xAOD::PixelCluster& ) const override final;
     virtual StatusCode createSCTCluster(const FPGATrackSimCluster&, std::unique_ptr<InDet::SCT_Cluster>&) const override final;
     virtual StatusCode createSCTCluster(const FPGATrackSimCluster&, xAOD::StripCluster& ) const override final;
-    virtual StatusCode createSP(const FPGATrackSimCluster& cl, xAOD::SpacePoint& sp) const override final;
+    virtual StatusCode createSP(const FPGATrackSimCluster& cl, xAOD::SpacePoint& sp, xAOD::StripClusterContainer& clustersCont ) const override final;
+    virtual StatusCode createSP(const FPGATrackSimCluster& cl, xAOD::SpacePoint& sp, xAOD::PixelClusterContainer& clustersCont ) const override final;
 
     virtual StatusCode getRdoList(std::vector<Identifier> &rdoList, const FPGATrackSimCluster& cluster) const override final;
     virtual StatusCode getRdoList(std::vector<Identifier> &rdoList, const FPGATrackSimHit& hit) const override final;
