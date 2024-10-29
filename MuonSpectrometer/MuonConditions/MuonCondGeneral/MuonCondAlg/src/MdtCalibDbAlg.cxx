@@ -17,7 +17,6 @@
 #include "MdtCalibData/CalibFunc.h"
 #include "MdtCalibData/IRtRelation.h"
 #include "MdtCalibData/IRtResolution.h"
-#include "MdtCalibData/MdtCalibrationFactory.h"
 #include "MdtCalibData/MdtFullCalibData.h"
 #include "MdtCalibData/MdtSlewCorFuncHardcoded.h"
 #include "MdtCalibData/RtFromPoints.h"
@@ -27,7 +26,6 @@
 #include "MuonCalibIdentifier/MdtCalibCreationFlags.h"
 #include "MuonCalibIdentifier/MuonFixedId.h"
 #include "MuonCalibMath/SamplePoint.h"
-#include "MuonCalibStl/ToString.h"
 #include "MuonCalibTools/IdToFixedIdTool.h"
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
 #include "MuonReadoutGeometryR4/MdtReadoutElement.h"
@@ -209,16 +207,9 @@ StatusCode MdtCalibDbAlg::defaultRt(MuonCalib::MdtCalibDataContainer& writeCdo, 
         ATH_MSG_DEBUG("defaultRt new MuonCalib::IRtResolution");
 
         // create RT and resolution "I" objects
-        std::unique_ptr<MuonCalib::IRtRelation> rtRel {MuonCalib::MdtCalibrationFactory::createRtRelation("RtRelationLookUp", rtPars)};
-        if (!rtRel) ATH_MSG_WARNING("ERROR creating RtRelationLookUp ");
+        std::shared_ptr<MuonCalib::IRtRelation> rtRel{std::make_unique<RtRelationLookUp>(rtPars)};
+        std::shared_ptr<MuonCalib::IRtResolution> resoRel{std::make_unique<RtResolutionLookUp>(resoPars)};
 
-        std::unique_ptr<MuonCalib::IRtResolution> resoRel{MuonCalib::MdtCalibrationFactory::createRtResolution("RtResolutionLookUp", resoPars)};
-        if (!resoRel) ATH_MSG_WARNING("ERROR creating RtResolutionLookUp ");
-
-        // if either RT and resolution are not OK then delete both and try next RT in file
-        if (!resoRel || !rtRel) {
-            continue;
-        }
 
         // Since the same RT is loaded for all chambers you might be tempted to create it once
         // and simply store the same pointer in writeCdoRt for all regions.
@@ -227,9 +218,7 @@ StatusCode MdtCalibDbAlg::defaultRt(MuonCalib::MdtCalibDataContainer& writeCdo, 
         // for rtRel, resoRel, and MdtRtRelation
 
         // Loop over RT regions and store the default RT in each
-        std::unique_ptr<MuonCalib::IRtRelation> rtRelRegion{MuonCalib::MdtCalibrationFactory::createRtRelation("RtRelationLookUp", rtPars)};
-        std::unique_ptr<MuonCalib::IRtResolution> resoRelRegion{MuonCalib::MdtCalibrationFactory::createRtResolution("RtResolutionLookUp", resoPars)};
-        RtRelationPtr MdtRt = std::make_unique<MuonCalib::MdtRtRelation>(std::move(rtRelRegion), std::move(resoRelRegion), 0.);
+        RtRelationPtr MdtRt = std::make_unique<MuonCalib::MdtRtRelation>(rtRel, resoRel, 0.);
         
         for(auto itr = idHelper.detectorElement_begin();
                  itr!= idHelper.detectorElement_end();++itr){

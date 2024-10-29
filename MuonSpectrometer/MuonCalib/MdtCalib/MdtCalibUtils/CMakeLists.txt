@@ -9,5 +9,5 @@ atlas_subdir( MdtCalibUtils )
 atlas_add_library( MdtCalibUtils
                    src/*.cxx
                    PUBLIC_HEADERS MdtCalibUtils
-                   LINK_LIBRARIES MdtCalibData MuonCalibEvent MuonCalibEventBase MuonCalibIdentifier MdtCalibInterfacesLib MuonCalibStl )
+                   LINK_LIBRARIES MdtCalibData MuonCalibEvent MuonCalibEventBase MuonCalibIdentifier MdtCalibInterfacesLib )
 

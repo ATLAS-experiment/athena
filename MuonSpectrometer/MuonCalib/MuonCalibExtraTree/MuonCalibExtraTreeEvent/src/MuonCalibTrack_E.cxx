@@ -12,7 +12,6 @@
 #include "MuonCalibExtraTreeEvent/MuonCalibHit_E.h"
 #include "MuonCalibExtraTreeEvent/MuonCalibHole_E.h"
 #include "MuonCalibExtraUtils/MuonCalibSLPropagator.h"
-#include "MuonCalibStl/DeleteObject.h"
 
 namespace {
     constexpr float qOverP_cutOff = 1.e-9;

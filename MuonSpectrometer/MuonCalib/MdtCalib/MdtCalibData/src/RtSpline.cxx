@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // c- c++
@@ -9,53 +9,47 @@
 #include "MdtCalibData/RtSpline.h"
 
 // root
+#include "GeoModelHelpers/throwExcept.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/IMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
 #include "TSpline.h"
 
 namespace MuonCalib {
-
-    RtSpline::~RtSpline() {
-        // as long as there is no default constructor, we can delete the TSpline3 without a check
-        delete p_sp3;
-    }
-
-    void RtSpline::_init() {
-        MsgStream log(Athena::getMessageSvc(), "RtSpline");
+    RtSpline::~RtSpline() = default;
+    RtSpline::RtSpline(const ParVec &vec) : 
+        IRtRelation(vec) {
         // check for minimum number of parameters
         if (nPar() < 6) {
-            log << MSG::ERROR << "Not enough parameters!" << endmsg;
-            log << MSG::ERROR << "Minimum number of parameters is 6!" << endmsg;
-            throw 1;
+            THROW_EXCEPTION("Not enough parameters!" << std::endl<< "Minimum number of parameters is 6!");
         }
         // check if the number of parameters is even
         if ((nPar() % 2) != 0) {
-            log << MSG::ERROR << "RtSpline::_init(): Odd number of parameters!" << endmsg;
-            throw 2;
+            THROW_EXCEPTION("RtSpline::_init(): Odd number of parameters!");
         }
         // create spline
-        Double_t *x = new Double_t[nPar() / 2];
-        Double_t *y = new Double_t[nPar() / 2];
+        std::vector<double> x(nPar() /2);
+        std::vector<double> y(nPar() /2);
         for (unsigned int i = 0; i < nPar() / 2; i++) {
             x[i] = par(2 * i);
             y[i] = par(2 * i + 1);
         }
-        p_sp3 = new TSpline3("Rt Relation", x, y, nPar() / 2, "b2e2", 0, 0);
-        delete[] x;
-        delete[] y;
+        m_sp3 = std::make_unique<TSpline3>("Rt Relation", x.data(), y.data(), nPar() / 2, "b2e2", 0, 0);
     }  // end RtSpline::_init
 
     double RtSpline::radius(double t) const {
         // check for t_min and t_max
-        if (t > p_sp3->GetXmax()) return p_sp3->Eval(p_sp3->GetXmax());
-        if (t < p_sp3->GetXmin()) return p_sp3->Eval(p_sp3->GetXmin());
-        double r = p_sp3->Eval(t);
+        if (t > m_sp3->GetXmax()) return m_sp3->Eval(m_sp3->GetXmax());
+        if (t < m_sp3->GetXmin()) return m_sp3->Eval(m_sp3->GetXmin());
+        double r = m_sp3->Eval(t);
         return r >= 0 ? r : 0;
     }
 
-    double RtSpline::driftvelocity(double t) const { return p_sp3->Derivative(t); }
-
+    double RtSpline::driftVelocity(double t) const { return m_sp3->Derivative(t); }
+    double RtSpline::driftAcceleration(double t) const { 
+        constexpr double h = 1.e-7;
+        return (driftVelocity(t + h) - driftVelocity(t-h))/ (2.*h);
+    }
     double RtSpline::tLower() const { return par(0); }
 
     double RtSpline::tUpper() const { return par(nPar() - 2); }

@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibDbAlgTest.h"
 
 #include "GaudiKernel/PhysicalConstants.h"
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
+#include "MdtCalibData/MdtFullCalibData.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "TH2D.h"
 #include "TCanvas.h"
@@ -16,7 +17,7 @@ MdtCalibDbAlgTest::MdtCalibDbAlgTest(const std::string& name, ISvcLocator* pSvcL
     AthHistogramAlgorithm(name, pSvcLocator) {}
 
 StatusCode MdtCalibDbAlgTest::initialize() {
-    ATH_MSG_ALWAYS("Initializing MdtCalibDbAlgTest");
+    ATH_MSG_VERBOSE("Initializing MdtCalibDbAlgTest");
     ATH_CHECK(m_MdtKey.initialize());
     ATH_CHECK(m_geoCtxKey.initialize());
     ATH_CHECK(m_calibrationTool.retrieve());
@@ -28,7 +29,7 @@ StatusCode MdtCalibDbAlgTest::initialize() {
 }
 
 StatusCode MdtCalibDbAlgTest::finalize() {
-    ATH_MSG_ALWAYS("Finalizing MdtCalibDbAlgTest");
+    ATH_MSG_VERBOSE("Finalizing MdtCalibDbAlgTest");
     ATH_CHECK(m_tree.write());
     return StatusCode::SUCCESS;
 }
@@ -36,21 +37,20 @@ StatusCode MdtCalibDbAlgTest::finalize() {
 StatusCode MdtCalibDbAlgTest::execute() {
     // ATH_MSG_ALWAYS("Executing MdtCalibDbAlgTest");
     const EventContext& ctx = Gaudi::Hive::currentContext();
-    SG::ReadHandle<xAOD::MdtDriftCircleContainer> mdtHandle{m_MdtKey};
-    SG::ReadHandle<ActsGeometryContext> geoCtxHandle{m_geoCtxKey};
-    ATH_CHECK(mdtHandle.isPresent());
-    ATH_CHECK(geoCtxHandle.isPresent());
-    const xAOD::MdtDriftCircleContainer* mdtContainer = mdtHandle.get();
-    const ActsGeometryContext* geoCtx = geoCtxHandle.get();
+    SG::ReadHandle mdtContainer{m_MdtKey};
+    SG::ReadHandle geoCtx{m_geoCtxKey};
+    ATH_CHECK(mdtContainer.isPresent());
+    ATH_CHECK(geoCtx.isPresent());
     constexpr double inversePropSpeed = 1. / Gaudi::Units::c_light;
     for(const xAOD::MdtDriftCircle* mdt : *mdtContainer) {
         const MuonGMR4::MdtReadoutElement* mdtRE = mdt->readoutElement();
-        const Amg::Vector3D& mdtGlobalTubePos = mdtRE->globalTubePos(*geoCtx, mdt->measurementHash());
-        const float tdcAdj = IMdtCalibrationTool::tdcBinSize * (mdt->tdc() - inversePropSpeed * (mdtGlobalTubePos.norm() - 0.5 * mdtRE->activeTubeLength(mdt->measurementHash())));
+        const Amg::Vector3D mdtGlobalTubePos = mdtRE->globalTubePos(*geoCtx, mdt->measurementHash());
+        const float tdcAdj = IMdtCalibrationTool::tdcBinSize * mdt->tdc()  - inversePropSpeed * (mdtGlobalTubePos.norm() - 0.5 * mdtRE->activeTubeLength(mdt->measurementHash()));
         m_out_tdcAdj = tdcAdj;
         m_out_tdc = mdt->tdc();
         m_out_driftRadius = mdt->driftRadius();
-        m_out_driftdRdt = m_calibrationTool->getdRdtFromRt(ctx, mdtRE->identify(), tdcAdj);
+        const float driftV = m_calibrationTool->getCalibConstants(ctx, mdt->identify())->rtRelation->rt()->driftVelocity(tdcAdj);
+        m_out_driftdRdt = driftV;
         m_out_identifier = mdt->identify();
         m_out_globalPos = mdtGlobalTubePos.norm();
         m_out_globalPosX = mdtGlobalTubePos.x();
@@ -58,7 +58,7 @@ StatusCode MdtCalibDbAlgTest::execute() {
         m_out_globalPosZ = mdtGlobalTubePos.z();
         m_out_tubeLength = mdtRE->activeTubeLength(mdt->measurementHash());
         hist("DriftRadiusVsTdc")->Fill(tdcAdj, mdt->driftRadius());
-        hist("DriftdRdtVsTdc")->Fill(tdcAdj, m_calibrationTool->getdRdtFromRt(ctx, mdtRE->identify(), tdcAdj));
+        hist("DriftdRdtVsTdc")->Fill(tdcAdj, driftV);
         m_tree.fill(ctx);
     }
 

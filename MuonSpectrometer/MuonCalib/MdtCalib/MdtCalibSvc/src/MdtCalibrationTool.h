@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MDTCALIBSVC_MDTCALIBRATIONTOOL_H
@@ -91,10 +91,11 @@ public:
                                      const Identifier& module,
                                      const double time) const override final;
 
-  virtual double getdRdtFromRt(const EventContext& ctx,
-                                const Identifier& module,
-                                const double time) const override final;
   virtual ToolSettings getSettings() const override final;
+
+  virtual const MuonCalib::MdtFullCalibData* 
+          getCalibConstants(const EventContext& ctx,
+                            const Identifier& channelId) const override final;
 private:
   Muon::MdtDriftCircleStatus driftTimeStatus(double driftTime, 
                                              const MuonCalib::MdtRtRelation& rtRelation) const;

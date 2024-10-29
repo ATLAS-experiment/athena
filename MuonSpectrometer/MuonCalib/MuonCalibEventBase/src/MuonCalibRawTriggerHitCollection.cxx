@@ -7,7 +7,7 @@
 #include <algorithm>
 
 #include "MuonCalibEventBase/MuonCalibRawRpcTriggerHit.h"
-#include "MuonCalibStl/DeleteObject.h"
+
 
 namespace MuonCalib {
     MuonCalibRawTriggerHitCollection::MuonCalibRawTriggerHitCollection(MuonCalibRawRpcTriggerHitVec rawRpcTriggerHitVec) :

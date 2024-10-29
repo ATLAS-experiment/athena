@@ -78,7 +78,7 @@ double RT_Relation_DB_DigiTool::getDriftTime(const EventContext& ctx,
         }
 
         double radiusWidth = rtResolution->resolution(time);
-        double velocity = rtRelation->driftvelocity(time);
+        double velocity = rtRelation->driftVelocity(time);
         // std::cout << "time = " << time << "  drift radius = " << measRadius << "  outOfBound = "<< outOfBound << "  velocity = " << velocity <<
         // std::endl;
 

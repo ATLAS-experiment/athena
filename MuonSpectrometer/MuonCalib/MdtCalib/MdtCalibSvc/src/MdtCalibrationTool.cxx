@@ -97,23 +97,22 @@ StatusCode MdtCalibrationTool::initialize() {
 }  //end MdtCalibrationTool::initialize
 
 
-
+const MuonCalib::MdtFullCalibData* MdtCalibrationTool::getCalibConstants(const EventContext& ctx,
+                                                                         const Identifier& channelId) const {
+    SG::ReadCondHandle constantHandle{m_calibDbKey, ctx};
+    if (!constantHandle.isValid()){
+         THROW_EXCEPTION("Failed to retrieve the Mdt calibration constants "<<m_calibDbKey.fullKey());
+    }
+    return constantHandle->getCalibData(channelId, msgStream());
+}
 MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx, 
                                              const MdtCalibInput& calibIn,
                                              bool resolFromRtrack) const {
-
-  const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
-  /// Get the calibration constatns from the conditions store
-  SG::ReadCondHandle<MuonCalib::MdtCalibDataContainer> readCondHandle{m_calibDbKey, ctx};
-  if (!readCondHandle.isValid()){
-       THROW_EXCEPTION("Failed to retrieve the Mdt calibration constants "<<m_calibDbKey.fullKey());
-  }
-
+  
   const Identifier& id{calibIn.identify()};
-
-  const MuonCalib::MdtFullCalibData* calibConstants = readCondHandle->getCalibData(id, msgStream());
+  const MuonCalib::MdtFullCalibData* calibConstants = getCalibConstants(ctx, id);
   if (!calibConstants) {
-      ATH_MSG_WARNING("Could not find calibration data for channel "<<m_idHelperSvc->toString(id));
+     ATH_MSG_WARNING("Could not find calibration data for channel "<<m_idHelperSvc->toString(id));
      return MdtCalibOutput{};
   }
  
@@ -177,7 +176,7 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
       if (m_doField && corrections->bField()) {
         MagField::AtlasFieldCache fieldCache{};
 
-        SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, ctx};
+        SG::ReadCondHandle readHandle{m_fieldCacheCondObjInputKey, ctx};
         if (!readHandle.isValid()) {
           THROW_EXCEPTION("calibrate: Failed to retrieve AtlasFieldCacheCondObj with key " << m_fieldCacheCondObjInputKey.key());
         }
@@ -192,11 +191,10 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
                                                                      locBField[static_cast<int>(BFieldComp::alongTrack)]));
         corrTime -= calibResult.lorentzTime();
       }
-      if(m_doTemp && rt && rt->HasTmaxDiff()) {
+      if(m_doTemp && rt && rt->hasTmaxDiff()) {
+        const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
         const int mL = id_helper.multilayer(id);
-        const double tempTime = MuonCalib::RtScaleFunction(calibResult.driftTime(), 
-                                                           mL == 2, 
-                                                           *rt);
+        const double tempTime = MuonCalib::RtScaleFunction(calibResult.driftTime(), mL == 2, *rt);
         calibResult.setTemperatureTime(tempTime);
         corrTime-=calibResult.temperatureTime();
       }
@@ -312,14 +310,9 @@ MdtCalibTwinOutput MdtCalibrationTool::calibrateTwinTubes(const EventContext& ct
   const Identifier& primId = primHit.identify();
   const Identifier& twinId = twinHit.identify();
 
-  /// Get the calibration constatns from the conditions store
-  SG::ReadCondHandle<MuonCalib::MdtCalibDataContainer> calibDataContainer{m_calibDbKey, ctx};
-  if (!calibDataContainer.isValid()){
-       THROW_EXCEPTION(" Failed to retrieve the Mdt calibration constants "<<m_calibDbKey.fullKey());
-  }
   // get calibration constants from DbTool
-  const MuonCalib::MdtFullCalibData* data1st = calibDataContainer->getCalibData(primId, msgStream());
-  const MuonCalib::MdtFullCalibData* data2nd = calibDataContainer->getCalibData(twinId, msgStream());
+  const MuonCalib::MdtFullCalibData* data1st = getCalibConstants(ctx, primId);
+  const MuonCalib::MdtFullCalibData* data2nd = getCalibConstants(ctx, twinId);
   if (!data1st || !data2nd) {
     ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Failed to access calibration constants for tubes "<<
                     m_idHelperSvc->toString(primId)<<" & "<<m_idHelperSvc->toString(twinId));
@@ -379,11 +372,7 @@ Muon::MdtDriftCircleStatus MdtCalibrationTool::driftTimeStatus(double driftTime,
 }
 double MdtCalibrationTool::getResolutionFromRt(const EventContext& ctx, const Identifier& moduleID, const double time) const  {
   
-  SG::ReadCondHandle<MuonCalib::MdtCalibDataContainer> calibConstants{m_calibDbKey, ctx};
-  if (!calibConstants.isValid()) {
-      THROW_EXCEPTION("Failed to retrieve the calibration constants "<<m_calibDbKey.fullKey());
-  }
-  const MuonCalib::MdtFullCalibData* moduleConstants = calibConstants->getCalibData(moduleID, msgStream());
+  const MuonCalib::MdtFullCalibData* moduleConstants = getCalibConstants(ctx, moduleID);
   if (!moduleConstants){
       THROW_EXCEPTION("Failed to retrieve set of calibration constants for "<<m_idHelperSvc->toString(moduleID));
   }
@@ -393,24 +382,4 @@ double MdtCalibrationTool::getResolutionFromRt(const EventContext& ctx, const Id
   }
   const double t = std::min(std::max(time, rtRel->rt()->tLower()), rtRel->rt()->tUpper());
   return rtRel->rtRes()->resolution(t);
-}
-
-double MdtCalibrationTool::getdRdtFromRt(const EventContext& ctx, const Identifier& moduleID, const double time) const {
-  SG::ReadCondHandle<MuonCalib::MdtCalibDataContainer> calibConstants{m_calibDbKey, ctx};
-  if (!calibConstants.isValid()) {
-      ATH_MSG_FATAL("Failed to retrieve the calibration constants "<<m_calibDbKey.fullKey());
-      throw std::runtime_error("No Mdt calibration constants" );
-  }
-  const MuonCalib::MdtFullCalibData* moduleConstants = calibConstants->getCalibData(moduleID, msgStream());
-  if (!moduleConstants){
-      ATH_MSG_FATAL("Failed to retrieve set of calibration constants for "<<m_idHelperSvc->toString(moduleID));
-      throw std::runtime_error("No constants for calib container");
-  }
-  const RtRelationPtr& rtRel{moduleConstants->rtRelation};
-  if (!rtRel) {
-    ATH_MSG_FATAL("No rt-relation found for "<<m_idHelperSvc->toString(moduleID));
-    throw std::runtime_error("No rt relation ");
-  }
-  const double t = std::min(std::max(time, rtRel->rt()->tLower()), rtRel->rt()->tUpper());
-  return rtRel->rt()->drdt(t);
 }

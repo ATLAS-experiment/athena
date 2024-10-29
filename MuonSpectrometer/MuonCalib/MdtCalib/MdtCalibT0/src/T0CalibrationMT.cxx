@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibT0/T0CalibrationMT.h"
@@ -20,8 +20,7 @@
 #include "MdtCalibT0/T0MTSettings.h"
 #include "MuonCalibEventBase/MuonCalibSegment.h"
 #include "MuonCalibIdentifier/MuonFixedId.h"
-#include "MuonCalibStl/DeleteObject.h"
-#include "MuonCalibStl/ToString.h"
+
 #include "TF1.h"
 #include "TFile.h"
 #include "TH1.h"
@@ -30,7 +29,9 @@
 
 namespace MuonCalib {
 
-    T0CalibrationMT::T0CalibrationMT(const std::string& name, const T0MTSettings *settings, const std::vector<int> &sort_by,
+    T0CalibrationMT::T0CalibrationMT(const std::string& name, 
+                                     std::shared_ptr<const T0MTSettings> settings, 
+                                     const std::vector<int> &sort_by,
                                      const std::vector<int> &adc_sort_by) :
         IMdtCalibration(name),
         m_settings(settings),
@@ -38,13 +39,9 @@ namespace MuonCalib {
         m_name(name),
         m_currentItnum(0),
         m_sort_by(sort_by),
-        m_adc_sort_by(adc_sort_by),
-        m_delete_settings(false) {
-        if (!m_settings) {
-            m_settings = new T0MTSettings();
-            m_delete_settings = true;
-        }
-
+        m_adc_sort_by(adc_sort_by) {
+       
+        m_settings = std::make_unique<T0MTSettings>();   
         std::string HistoFileName = "T0MT_" + m_name + ".root";
         m_file = std::make_unique<TFile>(HistoFileName.c_str(), "recreate");
         m_regiondir = m_file->mkdir(m_name.c_str());
@@ -58,8 +55,7 @@ namespace MuonCalib {
 
     T0CalibrationMT::~T0CalibrationMT() {
         m_file->Write();
-        m_file->Close();
-        if (m_delete_settings) delete m_settings;
+        m_file->Close();      
     }
 
     bool T0CalibrationMT::handleSegment(MuonCalibSegment &seg) {
@@ -267,7 +263,7 @@ namespace MuonCalib {
         if (!m_adc_histos[nr][id]) {
             TDirectory *cwd = gDirectory;
             m_regiondir->cd();
-            m_adc_histos[nr][id] = std::make_unique<ADCMTHistos>(id.getIdInt(), m_settings, id.HistogramName().c_str());
+            m_adc_histos[nr][id] = std::make_unique<ADCMTHistos>(id.getIdInt(), m_settings.get(), id.HistogramName().c_str());
             cwd->cd();
         }
         m_adc_tube_ids[nr][id].insert(idtube);
@@ -280,7 +276,7 @@ namespace MuonCalib {
         if (!m_histos[nr][id]) {
             TDirectory *cwd = gDirectory;
             m_regiondir->cd();
-            m_histos[nr][id] = std::make_unique<T0MTHistos>(id.getIdInt(), m_settings, id.HistogramName().c_str());
+            m_histos[nr][id] = std::make_unique<T0MTHistos>(id.getIdInt(), m_settings.get(), id.HistogramName().c_str());
             cwd->cd();
         }
         m_tube_ids[nr][id].insert(idtube);

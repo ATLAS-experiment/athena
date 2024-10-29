@@ -579,7 +579,7 @@ namespace TrkDriftCircleMath {
       deriv[1] = sign(dd) * cosin ;
       // del R / del t0
 
-      deriv[2] = -1* coords.rt->driftvelocity(coords.t-t0);
+      deriv[2] = -1* coords.rt->driftVelocity(coords.t-t0);
 
       double covsq=0;
       for(int rr=0; rr<3; rr++) {

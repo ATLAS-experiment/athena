@@ -5,7 +5,6 @@
 #include "MuonCalibExtraTreeEvent/MuonCalibEvent_E.h"
 
 #include "MuonCalibEventBase/MuonCalibEvent.h"
-#include "MuonCalibStl/DeleteObject.h"
 
 namespace MuonCalib {
     MuonCalibEvent_E::MuonCalibEvent_E(const MuonCalibEvent& event) : MuonCalibEvent(event) {}

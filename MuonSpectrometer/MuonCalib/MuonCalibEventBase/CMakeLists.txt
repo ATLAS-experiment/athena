@@ -9,5 +9,5 @@ atlas_subdir( MuonCalibEventBase )
 atlas_add_library( MuonCalibEventBase
                    src/*.cxx
                    PUBLIC_HEADERS MuonCalibEventBase
-                   LINK_LIBRARIES GeoPrimitives MuonCalibIdentifier MuonRDO MuonCalibStl )
+                   LINK_LIBRARIES GeoPrimitives MuonCalibIdentifier MuonRDO )
 

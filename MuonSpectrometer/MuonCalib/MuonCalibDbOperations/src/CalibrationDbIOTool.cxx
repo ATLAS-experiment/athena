@@ -141,7 +141,7 @@ namespace MuonCalib {
         // fill resolution points
         fillResPoints(resolution, points);
         // fill multilayer rt difference as pseudo-point
-        if (rt_relation->rt()->HasTmaxDiff()) {
+        if (rt_relation->rt()->hasTmaxDiff()) {
             SamplePoint point(rt_relation->rt()->GetTmaxDiff(), -99.9, 0.0);
             points.push_back(point);
         }
