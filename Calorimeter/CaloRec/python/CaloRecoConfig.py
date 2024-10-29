@@ -136,7 +136,7 @@ def CaloRecoConfigTest(flags=None):
 if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaCommon.Logging import log
-    from AthenaCommon.Constants import DEBUG,INFO
+    from AthenaCommon.Constants import DEBUG
     from AthenaConfiguration.TestDefaults import defaultGeometryTags,defaultConditionsTags,defaultTestFiles
     log.setLevel(DEBUG)
     flags = initConfigFlags()

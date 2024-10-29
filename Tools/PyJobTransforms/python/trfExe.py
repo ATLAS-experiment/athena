@@ -2085,7 +2085,7 @@ class DQMPostProcessExecutor(scriptExecutor):
                 else:
                     exitErrorMessage = "Logfile error in {0}: \"{1}\"".format(self._logFileName,
                                                                               worstError['firstError']['message'])
-        except (OSError, IOError) as e:
+        except OSError as e:
             exitCode = trfExit.nameToCode('TRF_EXEC_LOGERROR')
             raise trfExceptions.TransformValidationException(exitCode,
                   'Exception raised while attempting to scan logfile {0}: {1}'.format(self._logFileName, e))
