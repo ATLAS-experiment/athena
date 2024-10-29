@@ -453,7 +453,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         acc.merge(AddTruthJetsCfg(flags))
         acc.merge(AddTruthMETCfg(flags))
         acc.merge(PostJetMCTruthAugmentationsCfg(flags, decorationDressing = 'dressedPhoton'))
-        acc.addEventAlgo(CompFactory.DerivationFramework.LockDecoration(name ="L1CALOTruthContentsLockDecoration", Decoration = 'TruthParticles.dressedPhoton'))
+        acc.addEventAlgo(CompFactory.DerivationFramework.LockDecorations(name ="L1CALOTruthContentsLockDecoration", Decorations = ['TruthParticles.dressedPhoton']))
         acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, ["TruthElectrons", "TruthMuons", "TruthPhotons", "TruthTaus", "TruthNeutrinos"]))
         # Special collection for Born leptons
         acc.merge(AddBornLeptonCollectionCfg(flags))

@@ -104,7 +104,7 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
     SG::WriteDecorHandle< xAOD::TruthParticleContainer,int > decorator_nphoton(m_decorator_nphotonKey, ctx);
     // One for the photons as well
     // Can't use a handle here, as this decoration gets touched by
-    // multiple algorithms.  Need to explicitly schedule a LockDecoration
+    // multiple algorithms.  Need to explicitly schedule a LockDecorations
     // algorithm to lock it after all modifications.
     // FIXME: This is not MT-safe.
     SG::Decorator< char > dressDec (SG::decorKeyFromKey (m_decorationKey.key()));
