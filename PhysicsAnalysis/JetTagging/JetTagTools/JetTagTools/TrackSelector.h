@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGTOOLS_TRACKSELECTOR_H
@@ -51,7 +51,7 @@ public:
                    std::bitset<17>& failedCuts,
                    double refPt = 0) const;
 
-  inline const std::bitset<17> currentTrackpassedCuts() const { return m_passedCuts; }
+  inline const std::bitset<17>& currentTrackpassedCuts() const { return m_passedCuts; }
 
 private:
   /** Properties for V0 finding:

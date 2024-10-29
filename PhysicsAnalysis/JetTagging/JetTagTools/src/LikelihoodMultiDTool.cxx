@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -407,7 +407,7 @@ namespace Analysis
     return m_likelihoodVector;
   }
 
-  std::vector<double> LikelihoodMultiDTool::tagLikelihood()
+  const std::vector<double>& LikelihoodMultiDTool::tagLikelihood()
   {
     return m_likelihoodVector;
   }
