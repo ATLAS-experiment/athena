@@ -27,10 +27,10 @@ fi
 
 run () {
     name="${1}"
-    cmd="${@:2}"
+    cmd=("${@:2}")
     ############
     echo "Running ${name}..."
-    time ${cmd}
+    time "${cmd[@]}"
     rc=$?
     # Only report hard failures for comparison Acts-Trk since we know
     # they are different. We do not expect these tests to succeed
@@ -124,8 +124,8 @@ if [ $ckf_rc != 0 -a $ambi_rc != 0 ]; then
     exit $exit_rc
 fi
 
-echo "Running Reconstruction-ambi-scored ..."
-Reco_tf.py \
+run "Reconstruction-ambi-scored" \
+    Reco_tf.py \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateResolvedTracksFlags" \
     --preExec "flags.Acts.doMonitoring=True; \
@@ -139,7 +139,6 @@ Reco_tf.py \
     --multithreaded
 
 reco_rc=$?
-echo "art-result: ${reco_rc} Reconstruction-ambi-scored"
 
 mv log.RAWtoALL log.RAWtoALL.AMBI.SCORED
 mv acts-expert-monitoring.root acts-expert-monitoring.ambi.scored.root
