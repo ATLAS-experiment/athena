@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGTOOLS_LIKELIHOODMULTIDTOOL_H
@@ -48,7 +48,7 @@ class LikelihoodMultiDTool : public AthAlgTool
   void setLhVariableValue(std::vector<Slice>& value);
   void setLhVariableValue(Slice& value);
   std::vector<double> calculateLikelihood();
-  std::vector<double> tagLikelihood();
+  const std::vector<double>& tagLikelihood();
   void printStatus();
   double getEff(const std::string& , const std::string& , const std::string&);
   void addLhVariableToUse(const std::string&);
