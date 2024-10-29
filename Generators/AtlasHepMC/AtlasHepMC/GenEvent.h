@@ -251,7 +251,7 @@ public:
       if (hasBarcodeAttribute && barcodeAttributeIt->second.count(i) > 0) {
         const auto &ptr = barcodeAttributeIt->second.at(i);
         if (ptr->is_parsed()) {
-          m_particleBC[std::dynamic_pointer_cast<HepMC3::IntAttribute>(ptr)->value()] = ptr->particle();
+          m_particleBC[static_cast<HepMC3::IntAttribute*>(ptr.get())->value()] = ptr->particle();
         }
         else {
           m_particleBC[std::atoi(ptr->unparsed_string().c_str())] = ptr->particle();
@@ -265,7 +265,7 @@ public:
       if (hasBarcodeAttribute && barcodeAttributeIt->second.count(-i) > 0) {
         const auto &ptr = barcodeAttributeIt->second.at(-i);
         if (ptr->is_parsed()) {
-          m_vertexBC[std::dynamic_pointer_cast<HepMC3::IntAttribute>(ptr)->value()] = ptr->vertex();
+          m_vertexBC[static_cast<HepMC3::IntAttribute*>(ptr.get())->value()] = ptr->vertex();
         }
         else {
           m_vertexBC[std::atoi(ptr->unparsed_string().c_str())] = ptr->vertex();
@@ -401,7 +401,7 @@ inline ConstGenVertexPtr  barcode_to_vertex(const GenEvent* e, int id ) {
       if (ptrIt != barcodeAttributeIt->second.end()) {
         const auto &ptr = ptrIt->second;
         if (ptr->is_parsed()) {
-          if (id == std::dynamic_pointer_cast<HepMC3::IntAttribute>(ptr)->value()) {
+          if (id == static_cast<HepMC3::IntAttribute*>(ptr.get())->value()) {
             return ptr->vertex();
           }
         }
@@ -441,7 +441,7 @@ inline ConstGenParticlePtr  barcode_to_particle(const GenEvent* e, int id ) {
       if (ptrIt != barcodeAttributeIt->second.end()) {
         const auto &ptr = ptrIt->second;
         if (ptr->is_parsed()) {
-          if (id == std::dynamic_pointer_cast<HepMC3::IntAttribute>(ptr)->value()) {
+          if (id == static_cast<HepMC3::IntAttribute*>(ptr.get())->value()) {
             return ptr->particle();
           }
         }
@@ -481,7 +481,7 @@ inline GenVertexPtr  barcode_to_vertex(GenEvent* e, int id ) {
       if (ptrIt != barcodeAttributeIt->second.end()) {
         const auto &ptr = ptrIt->second;
         if (ptr->is_parsed()) {
-          if (id == std::dynamic_pointer_cast<HepMC3::IntAttribute>(ptr)->value()) {
+          if (id == static_cast<HepMC3::IntAttribute*>(ptr.get())->value()) {
             return ptr->vertex();
           }
         }
@@ -521,7 +521,7 @@ inline GenParticlePtr  barcode_to_particle(GenEvent* e, int id ) {
       if (ptrIt != barcodeAttributeIt->second.end()) {
         const auto &ptr = ptrIt->second;
         if (ptr->is_parsed()) {
-          if (id == std::dynamic_pointer_cast<HepMC3::IntAttribute>(ptr)->value()) {
+          if (id == static_cast<HepMC3::IntAttribute*>(ptr.get())->value()) {
             return ptr->particle();
           }
         }
@@ -561,11 +561,11 @@ inline int signal_process_id(const GenEvent* evt) {
 }
 inline void set_signal_process_id(GenEvent* e, const int i=0) {
     std::shared_ptr<HepMC3::IntAttribute> signal_process_id = std::make_shared<HepMC3::IntAttribute>(i);
-    e->add_attribute("signal_process_id",signal_process_id);
+    e->add_attribute("signal_process_id",std::move(signal_process_id));
 }
 inline void set_mpi(GenEvent* e, const int i=0) {
     std::shared_ptr<HepMC3::IntAttribute> mpi = std::make_shared<HepMC3::IntAttribute>(i);
-    e->add_attribute("mpi",mpi);
+    e->add_attribute("mpi",std::move(mpi));
 }
 inline void set_random_states(GenEvent* e, std::vector<long int>& a) {
     e->add_attribute("random_states",std::make_shared<HepMC3::VectorLongIntAttribute>(a));
