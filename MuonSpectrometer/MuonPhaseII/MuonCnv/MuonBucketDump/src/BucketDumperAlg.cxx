@@ -25,7 +25,7 @@ namespace MuonR4{
     StatusCode BucketDumperAlg::initialize() {
         ATH_CHECK(m_readKey.initialize());
         ATH_CHECK(m_idHelperSvc.retrieve());
-        ATH_CHECK(m_inSimHitKeys.initialize());
+        ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(m_inSegmentKey.initialize(!m_inSegmentKey.empty()));
         ATH_CHECK(m_tree.init(this));
         ATH_CHECK(m_idHelperSvc.retrieve());
@@ -49,6 +49,9 @@ namespace MuonR4{
         for (const MuonR4::Segment* segment : *readSegment) {
             segmentMap[segment->parent()->parentBucket()].push_back(segment);
         }
+
+        SG::ReadHandle gctx(m_geoCtxKey, ctx);
+        ATH_CHECK(gctx.isPresent());
 
         SG::ReadHandle<SpacePointContainer> readHandle{m_readKey, ctx};
         ATH_CHECK(readHandle.isPresent());
@@ -86,7 +89,6 @@ namespace MuonR4{
                     m_segmentDir.push_back(segment->direction());
                     m_segment_chiSquared.push_back(segment->chi2());
                     m_segment_numberDoF.push_back(segment->nDoF());
-   
                 }
             }
 
@@ -101,15 +103,24 @@ namespace MuonR4{
                         continue;
                     }
 
+                    m_spoint_id.push_back(sp->identify());
+
+                    Identifier id = sp->identify();
+                    unsigned int mdt_ML = m_idHelperSvc->mdtIdHelper().multilayer(id);
+                    unsigned int mdt_TL = m_idHelperSvc->mdtIdHelper().tubeLayer(id);
+                    unsigned int mdt_nL = m_idHelperSvc->mdtIdHelper().tubeLayerMax(id);
+                    m_spoint_mdtLayer   = mdt_ML * (mdt_nL-1) + mdt_TL;
+                    m_spoint_mdtTube    = m_idHelperSvc->mdtIdHelper().tube(id);
+
                     const std::vector<int16_t>& segIdxs = spacePointToSegment[sp];
 
                     m_spoint_mat[m_spoint_mat.size()] = segIdxs;
                     m_spoint_nSegments.push_back(segIdxs.size());
-                    
-                    m_spoint_id.push_back(sp->identify());
+                
                     m_bucket_spacePoints = bucket->size();
                     m_spoint_localPosition.push_back(sp->positionInChamber());
                     m_spoint_adc.push_back(dc->adc());
+                    m_spoint_adc.push_back(dc->tdc());
                     m_spoint_covX.push_back(sp->covariance()(Amg::x, Amg::x));
                     m_spoint_covY.push_back(sp->covariance()(Amg::y, Amg::y));
                     m_spoint_covXY.push_back(sp->covariance()(Amg::x, Amg::y));
@@ -122,8 +133,9 @@ namespace MuonR4{
                     m_spoint_dimension.push_back(sp->dimension());
                     m_spoint_layer.push_back(layer);
                     m_spoint_isMdt.push_back(true);
-                    m_spoint_isStrip.push_back(false);
 
+                    Amg::Vector3D globalPos = sp->msSector()->localToGlobalTrans(*gctx) * sp->positionInChamber();
+                    m_spoint_globalPosition.push_back( globalPos );
 
                 }
                 ++layer;
@@ -133,7 +145,6 @@ namespace MuonR4{
             for (const auto& hitsInLay : sorter.stripHits()) {
 
                 for (const auto sp : hitsInLay){
-
 
                     const std::vector<int16_t>& segIdxs = spacePointToSegment[sp];
 
@@ -158,7 +169,9 @@ namespace MuonR4{
                     m_spoint_dimension.push_back(sp->dimension());
                     m_spoint_layer.push_back(layer);
                     m_spoint_isStrip.push_back(true);
-                    m_spoint_isMdt.push_back(false);
+
+                    Amg::Vector3D globalPos = sp->msSector()->localToGlobalTrans(*gctx) * sp->positionInChamber();
+                    m_spoint_globalPosition.push_back( globalPos );
 
                 }
                 ++layer;
