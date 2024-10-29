@@ -492,6 +492,12 @@ def addLowMuP1Signatures(chains):
         ChainProp(name='HLT_noalg_LArPEBNoise_L1eEM1_EMPTY',  l1SeedThresholds=['eEM1'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
         ChainProp(name='HLT_larpsallem_L1eTAU1_EMPTY', l1SeedThresholds=['eTAU1'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_LArPEBNoise_L1eTAU1_EMPTY',  l1SeedThresholds=['eTAU1'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
+        # ATR-30399
+        ChainProp(name='HLT_larpsallem_L1eEM2_EMPTY', l1SeedThresholds=['eEM2'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
+        ChainProp(name='HLT_larpsallem_L1eEM5_EMPTY', l1SeedThresholds=['eEM5'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_LArPEBNoise_L1eEM2_EMPTY',  l1SeedThresholds=['eEM2'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_LArPEBNoise_L1eEM5_EMPTY',  l1SeedThresholds=['eEM5'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
+
     ]
 
     chainsP1['Beamspot'] = [
@@ -581,6 +587,11 @@ def addHeavyIonP1Signatures(chains):
         ChainProp(name='HLT_noalg_LArPEBNoise_L1eEM1_EMPTY',  l1SeedThresholds=['eEM1'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
         ChainProp(name='HLT_larpsallem_L1eTAU1_EMPTY', l1SeedThresholds=['eTAU1'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_LArPEBNoise_L1eTAU1_EMPTY',  l1SeedThresholds=['eTAU1'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
+        # ATR-30399
+        ChainProp(name='HLT_larpsallem_L1eEM2_EMPTY', l1SeedThresholds=['eEM2'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
+        ChainProp(name='HLT_larpsallem_L1eEM5_EMPTY', l1SeedThresholds=['eEM5'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_LArPEBNoise_L1eEM2_EMPTY',  l1SeedThresholds=['eEM2'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_LArPEBNoise_L1eEM5_EMPTY',  l1SeedThresholds=['eEM5'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
     ]
 
     addP1Signatures(chains,chainsP1)

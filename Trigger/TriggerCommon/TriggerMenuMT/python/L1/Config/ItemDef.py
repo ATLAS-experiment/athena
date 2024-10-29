@@ -213,6 +213,7 @@ class ItemDef:
         MenuItem('L1_eEM40L'    ).setLogic( d.eEM40L     & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eEM1_EMPTY'        ).setLogic(d.eEM1 & cosmiccond      ).setTriggerType( TT.calo )
         MenuItem('L1_eEM5_EMPTY'        ).setLogic(d.eEM5 & cosmiccond      ).setTriggerType( TT.calo )
+        MenuItem('L1_eEM2_EMPTY'        ).setLogic(d.eEM2 & cosmiccond      ).setTriggerType( TT.calo )
         MenuItem('L1_eEM9_EMPTY'        ).setLogic(d.eEM9 & cosmiccond      ).setTriggerType( TT.calo )
         MenuItem('L1_2eEM9_EMPTY'       ).setLogic(d.eEM9.x(2) & cosmiccond ).setTriggerType( TT.calo )
         MenuItem('L1_eEM9_UNPAIRED_ISO' ).setLogic(d.eEM9 & unpaired_isocond).setTriggerType( TT.calo )
@@ -253,8 +254,7 @@ class ItemDef:
         MenuItem('L1_J25p0ETA23_2J15p31ETA49'  ).setLogic( d.J250ETA23 & d.J1531ETA49.x(2) & physcond).setTriggerType(TT.calo)
 
         # HI
-        MenuItem('L1_EM3_EMPTY'          ).setLogic(d.EM3 & cosmiccond).setTriggerType( TT.calo )
-
+        MenuItem('L1_EM3_EMPTY'       ).setLogic(d.EM3 & cosmiccond).setTriggerType( TT.calo )
         MenuItem('L1_EM7_EMPTY'          ).setLogic(d.EM7 & cosmiccond).setTriggerType( TT.calo )
         MenuItem('L1_EM7_FIRSTEMPTY'     ).setLogic(d.EM7 & firstempty).setTriggerType( TT.calo )
         MenuItem('L1_eEM9_FIRSTEMPTY'     ).setLogic(d.eEM9 & firstempty).setTriggerType( TT.calo )
