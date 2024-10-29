@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -12,7 +12,6 @@
  *
  *
  * File and Version Information:
- * $Id: HLTSrcIdMap.h,v 1.3 2007-07-05 13:40:31 eifert Exp $
  **********************************************************************************/
 
 #ifndef HLTSrcIdMap_h
@@ -41,15 +40,15 @@ namespace HLT {
 
     /** @brief Make a ROB Source ID from a ROD source ID
      */
-    uint32_t getRobID  ( uint32_t rod_id=0);
+    uint32_t getRobID  ( uint32_t rod_id=0) const;
 
     /** @brief Make a ROS Source ID from a ROB source ID
      */
-    uint32_t getRosID  ( uint32_t rob_id=0);
+    uint32_t getRosID  ( uint32_t rob_id=0) const;
 
     /** @brief Make a SubDetector ID from ROS source ID
      */
-    uint32_t getDetID  ( uint32_t ros_id=0);
+    uint32_t getDetID  ( uint32_t ros_id=0) const;
 
     void setDetId(eformat::SubDetector detId) { m_detId = detId; } //!< setter for the detector ID
 
