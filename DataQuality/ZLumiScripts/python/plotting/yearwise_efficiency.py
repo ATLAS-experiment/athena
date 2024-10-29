@@ -31,23 +31,14 @@ if year == "run3":
     time_format = "%m/%y"
     xtitle = 'Month / Year'
     date_tag = "Run 3, #sqrt{s} = 13.6 TeV"
-    if channel is not None: 
-        xval = 0.30
-        yval = 0.33
-    else:
-        xval = 0.43
-        yval = 0.33
-    set_size = 1
+    labelsize = 44
 else: 
     years = [year]
     out_tag = "data"+year
     time_format = "%d/%m"
-    ymin, ymax = 0.5, 1.1
     xtitle = 'Date in 20' + year
     date_tag = "Data 20" + year  + ", #sqrt{s} = 13.6 TeV"
-    xval = 0.235
-    yval = 0.86
-    set_size = 0
+    labelsize = 22
 
 def main():
     plot_efficiency(channel, years)
@@ -66,7 +57,7 @@ def plot_efficiency_comb(channel, years):
         for run in grl:
             livetime, zlumi, zerr, olumi, timestamp, dfz_small = pt.get_dfz(args.indir, year, run, channel)
             # Cut out short runs
-            if livetime < pt.livetimecut:
+            if livetime < pt.lblivetimecut:
                 if livetime >= 0.: print(f"Skip Run {run} because of live time {livetime/60:.1f} min")
                 continue
 
@@ -125,11 +116,8 @@ def plot_efficiency_comb(channel, years):
     elif channel == "Zmumu":
         pt.drawAtlasLabel(0.2, ymax-0.4, "Internal")
 
-    if year in ['15', '16', '17', '18']:
-        pt.drawText(0.2, ymax-0.46, date_tag)
-    else:
-        pt.drawText(0.2, ymax-0.46, date_tag)
-    pt.drawText(0.2, ymax-0.52, pt.plotlabel[channel] + " counting")
+    pt.drawText(0.2, ymax-0.46, date_tag, size=labelsize)
+    pt.drawText(0.2, ymax-0.52, pt.plotlabel[channel] + " counting", size=labelsize)
 
     leg.SetBorderSize(0)
     leg.SetTextSize(0.07)
@@ -159,13 +147,20 @@ def plot_efficiency(channel, years):
     arr_recoerr = []
     run_num   = []
 
+    trigeff_vs_runlength = R.TH2D("trigeff_vs_runlength",\
+                                  "Trigger efficiency vs. Run Length;Run Length [h]; Trigger Efficiency;N_{run}",\
+                                  48, 0., 24., 80, .6, 1.0)
+    recoeff_vs_runlength = R.TH2D("recoeff_vs_runlength",\
+                                  "Reconstruction efficiency vs. Run Length;Run Length [h]; Reconstruction Efficiency;N_{run}",\
+                                  48, 0., 24., 60, .8, 1.0)
+    
     for year in years:
         grl = pt.get_grl(year)
 
         for run in grl:
             livetime, zlumi, zerr, olumi, timestamp, dfz_small = pt.get_dfz(args.indir, year, run, channel)
             # Cut out short runs
-            if livetime < pt.livetimecut:
+            if livetime < pt.lblivetimecut:
                 if livetime >= 0.: print(f"Skip Run {run} because of live time {livetime/60:.1f} min")
                 continue
 
@@ -199,6 +194,9 @@ def plot_efficiency(channel, years):
             arr_recoerr.append(reco_err_avg)
             run_num.append(run)
 
+            trigeff_vs_runlength.Fill(min(livetime/3600, 23.99), trig_eff_avg)
+            recoeff_vs_runlength.Fill(min(livetime/3600, 23.99), reco_eff_avg)
+
     arr_date = array('d', arr_date)
 
     arr_trigeff = np.array(arr_trigeff)
@@ -208,10 +206,9 @@ def plot_efficiency(channel, years):
 
     if channel == "Zee": 
         lep = "e"
-        ymin, ymax = 0.64, 0.96
     elif channel == "Zmumu": 
         lep = "#mu"
-        ymin, ymax = 0.64, 0.96
+    ymin, ymax = 0.64, 0.96
 
     trig_graph = R.TGraphErrors(len(arr_date), arr_date, arr_trigeff, R.nullptr,arr_trigerr)
     trig_graph.GetHistogram().SetYTitle("Efficiency")
@@ -244,13 +241,13 @@ def plot_efficiency(channel, years):
     if channel == "Zee":
         leg = R.TLegend(0.645, 0.2, 0.805, 0.4)
         pt.drawAtlasLabel(0.2, ymax-0.64, "Internal")
-        pt.drawText(0.2, ymax-0.70, date_tag)
-        pt.drawText(0.2, ymax-0.76, pt.plotlabel[channel] + " counting")
+        pt.drawText(0.2, ymax-0.70, date_tag, size=labelsize)
+        pt.drawText(0.2, ymax-0.76, pt.plotlabel[channel] + " counting", size=labelsize)
     elif channel == "Zmumu":
         leg = R.TLegend(0.645, 0.45, 0.805, 0.65)
         pt.drawAtlasLabel(0.2, ymax-0.36, "Internal")
-        pt.drawText(0.2, ymax-0.42, date_tag)
-        pt.drawText(0.2, ymax-0.48, pt.plotlabel[channel] + " counting")
+        pt.drawText(0.2, ymax-0.42, date_tag, size=labelsize)
+        pt.drawText(0.2, ymax-0.48, pt.plotlabel[channel] + " counting", size=labelsize)
 
     leg.SetBorderSize(0)
     leg.SetTextSize(0.07)
@@ -269,6 +266,30 @@ def plot_efficiency(channel, years):
 
     trig_graph.GetHistogram().SetXTitle("Date")
     c1.SaveAs(outdir + channel + "_eff_vs_time_"+out_tag+".pdf")
+
+    c1.SetRightMargin(0.15)
+    trigeff_vs_runlength.Draw("colz")
+    if channel == "Zee":
+        ymin, ymax = 0.73, 0.95
+    elif channel == "Zmumu":
+        ymin, ymax = 0.6, 0.85
+    trigeff_vs_runlength.GetYaxis().SetRangeUser(ymin, ymax)
+    pt.drawAtlasLabel(0.2, 0.89, "Internal")
+    pt.drawText(0.2, 0.83, date_tag, size=labelsize)
+    pt.drawText(0.2, 0.77, pt.plotlabel[channel] + " counting", size=labelsize)
+    c1.SaveAs(outdir + channel + "_trigeff_vs_runlength_"+out_tag+".pdf")
+
+    recoeff_vs_runlength.Draw("colz")
+    if channel == "Zee":
+        ymin, ymax = 0.8, 0.95
+    elif channel == "Zmumu":
+        ymin, ymax = 0.92, 1.0
+    recoeff_vs_runlength.GetYaxis().SetRangeUser(ymin, ymax)
+    pt.drawAtlasLabel(0.2, 0.89, "Internal")
+    pt.drawText(0.2, 0.83, date_tag, size=labelsize)
+    pt.drawText(0.2, 0.77, pt.plotlabel[channel] + " counting", size=labelsize)
+    c1.SaveAs(outdir + channel + "_recoeff_vs_runlength_"+out_tag+".pdf")
+    
 
 if __name__ == "__main__":
     pt.setAtlasStyle()
