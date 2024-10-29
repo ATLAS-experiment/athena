@@ -90,6 +90,12 @@
     "EFminbias":{
         "chains" : "HLT_mb_sptrk_L1RD0_FILLED:HLT_IDTrack_MinBias_IDTrig"
     },
+    "L2minbiaspix":{
+        "chains" : "HLT_mb_pixsptrk_nototpix20_q2_L1TRT_ZDC_A_C_VjTE10:HLT_IDTrack_MinBiasPixel_IDTrig"
+    },
+    "EFminbiaspix":{
+        "chains" : "HLT_mb_pixsptrk_nototpix20_q2_L1TRT_ZDC_A_C_VjTE10:HLT_IDTrack_MinBiasPixel_IDTrig"
+    },
     "L2FSLRT":{
         "chains" : "HLT_fslrt0_L1J100:HLT_IDTrack_FSLRT_FTF_DTE  HLT_fslrt0_L1J100:HLT_IDTrack_FS_FTF_DTE"
     },
