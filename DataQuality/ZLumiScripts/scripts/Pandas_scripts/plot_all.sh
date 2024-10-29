@@ -26,6 +26,6 @@ echo "INFO: Running now ./plot_yearwise.sh 24 run3"
 ./plot_yearwise.sh 24 run3 | egrep $filter
 
 
-echo "INFO: Running now ./make_latexslides"
-./make_latexslides.sh | egrep $filter
+echo "INFO: Running now ./make_latexslides 24"
+./make_latexslides.sh 24 | egrep $filter
 
