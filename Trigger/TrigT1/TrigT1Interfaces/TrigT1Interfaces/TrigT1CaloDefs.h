@@ -38,6 +38,7 @@ public:
   static const std::string CPMTowerLocation;
   static const std::string JetElementLocation;
   static const std::string xAODZdcModuleLocation;
+  static const std::string ZdcLucrodDataContainer;
 
   static const std::string CPMCMXDataLocation;
   static const std::string JetCMXDataLocation;

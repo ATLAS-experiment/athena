@@ -700,7 +700,7 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
              {
                 continue;
              }
-             cable = static_cast<uint64_t>(zdcInput->cableWord0());
+             cable = static_cast<uint64_t>(zdcInput->cableWord1());
              auto &conn = l1menu->connector(connName);
              for (const auto &tl : conn.triggerLines()){
                 if (tl.name().find("ZDC") == std::string::npos)
