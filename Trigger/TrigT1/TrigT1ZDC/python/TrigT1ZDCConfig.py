@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 ## @brief this function sets up the L1 simulation sequence with the ZDC
 ## it covers the case of rerunning the L1 on run2 HI data
 
@@ -9,6 +9,7 @@ def L1ZDCSimCfg(flags):
 
     from ZdcRec.ZdcRecConfig import ZdcRecRun2Cfg, ZdcRecRun3Cfg,ZdcRecOutputCfg
     from AthenaConfiguration.ComponentFactory import CompFactory
+    
 
     pn = flags.Input.ProjectName
     year = int(pn.split('_')[0].split('data')[1])
@@ -18,8 +19,13 @@ def L1ZDCSimCfg(flags):
                                                 EnergyADCScale = 0.4))
     else:
         acc.merge(ZdcRecRun3Cfg(flags))
-        acc.addEventAlgo(CompFactory.LVL1.TrigT1ZDC(filepath_LUT = 'TrigT1ZDC/zdc_json_PbPb5.36TeV_2023.json',
-                                                EnergyADCScale = 0)) #all EB runs > 462494 --> all use this LUT
+        acc.addEventAlgo(CompFactory.LVL1.TrigT1Run3ZDC(filepath_LUT = 'TrigT1ZDC/zdc_json_PbPb5.36TeV_2024_TriggerSim.json',
+                                                MinSampleAna = 7,
+                                                MaxSampleAna = 15,
+                                                NegHG2ndDerivThresh = 45,
+                                                NegLG2ndDerivThresh = 15,
+                                                BaselineDelta = 3
+                                                )) #all EB runs > 462494 --> all use this LUT
     
     if flags.Output.doWriteESD or flags.Output.doWriteAOD:
         acc.merge(ZdcRecOutputCfg(flags))
@@ -29,9 +35,11 @@ def L1ZDCSimCfg(flags):
 if __name__ == '__main__':
     import sys
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
 
     flags = initConfigFlags()
-    flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data15_hi.00287843.physics_EnhancedBias.merge.RAW._lb0226._SFO-2._0001.1']
+    #flags.Input.Files = ['/eos/user/m/mhoppesc/datasets/data23_hi/data23_hi.00462533.physics_EnhancedBias.merge.RAW._lb0680._SFO-17._0001.1']
+    flags.Input.Files = ['/eos/atlas/atlascerngroupdisk/phys-hi/trig-heavyion/data18_hi.00367273.physics_EnhancedBias.merge.RAW/data18_hi.00367273.physics_EnhancedBias.merge.RAW._lb0251._SFO-7._0002.1']
     flags.Common.isOnline=False
     flags.Exec.MaxEvents=100
     flags.Concurrency.NumThreads = 1
@@ -40,10 +48,11 @@ if __name__ == '__main__':
     flags.Scheduler.CheckDependencies=True
     flags.Scheduler.ShowDataFlow=True
     flags.Trigger.enableL1MuonPhase1=True
-    flags.Trigger.triggerMenuSetup='Dev_HI_run3_v1'
+    flags.Trigger.triggerMenuSetup='PhysicsP1_HI_run3_v1'
     flags.Trigger.EDMVersion=3
     flags.Trigger.doZDC=True
     flags.Trigger.enableL1CaloPhase1 = False # FIXME: ATR-27095
+    flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN2
     flags.fillFromArgs()
     flags.lock()
     
