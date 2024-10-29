@@ -8,6 +8,7 @@
 // ATHENA
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "ActsInterop/Logger.h"
 
 namespace ActsTrk {
   
@@ -64,6 +65,12 @@ namespace ActsTrk {
         "Inflate tracks"};
     Gaudi::Property< bool > m_useTopSp {this, "useTopSp", false,
         "Use top SP. By default, use bottom SP."};
+
+    /// Private access to the logger
+    const Acts::Logger &logger() const { return *m_logger; }
+    /// logging instance
+    std::unique_ptr<const Acts::Logger> m_logger {nullptr};
+
   };
   
 } // namespace
