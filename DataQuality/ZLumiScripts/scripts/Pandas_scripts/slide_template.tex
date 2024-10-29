@@ -1,13 +1,13 @@
-\documentclass[aspectratio=169]{beamer}
+\documentclass[english,aspectratio=169]{beamer}
 
 \usepackage{pgffor}
 \usepackage{verbatim}
 
 \def\plotdir{/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/Plots/}
-\def\year{YEAR}
-\def\datayear{data\year_13p6TeV/}
+\def\myyear{YEAR}
+\def\datayear{data\myyear_13p6TeV/}
 
-\title{$Z$ counting}
+\title{$Z$ counting -- Year 20\myyear}
 \author{Sam Alibocus, Uta Klein, Jan Kretzschmar, Josh Newell\\University of Liverpool}
 \date{\today}
 
@@ -96,17 +96,17 @@
   \includegraphics[width=.4\textwidth]{\plotdir/Zmumu_eventeff_vs_mu_run3}
 }
 
-\section{20\year}
+\section{20\myyear}
 
-\frame{\frametitle{20\year{} -- Luminosity}
-  \includegraphics[width=.41\textwidth]{\plotdir/\datayear/ZllATLAS_ratio_vs_time_data\year}
-  \includegraphics[width=.41\textwidth]{\plotdir/\datayear/ZllATLAS_ratio_vs_mu_data\year}
+\frame{\frametitle{20\myyear{} -- Luminosity}
+  \includegraphics[width=.41\textwidth]{\plotdir/\datayear/ZllATLAS_ratio_vs_time_data\myyear}
+  \includegraphics[width=.41\textwidth]{\plotdir/\datayear/ZllATLAS_ratio_vs_mu_data\myyear}
 
-  \includegraphics[width=.41\textwidth]{\plotdir/\datayear/ZeeZmm_ratio_vs_time_data\year}
-  \includegraphics[width=.41\textwidth]{\plotdir/\datayear/ZeeZmm_ratio_vs_mu_data\year}
+  \includegraphics[width=.41\textwidth]{\plotdir/\datayear/ZeeZmm_ratio_vs_time_data\myyear}
+  \includegraphics[width=.41\textwidth]{\plotdir/\datayear/ZeeZmm_ratio_vs_mu_data\myyear}
 }
 
-\frame{\frametitle{20\year{} -- Skipped runs}
+\frame{\frametitle{20\myyear{} -- Skipped runs}
   \scriptsize
   \begin{columns}[t]
     \begin{column}{.5\textwidth}

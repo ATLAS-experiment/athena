@@ -7,7 +7,7 @@ atlas_add_library (ZdcNtupleLib
 		   LINK_LIBRARIES AnaAlgorithmLib AsgAnalysisInterfaces
                    AsgTools PMGAnalysisInterfacesLib PMGToolsLib GeneratorObjects
                    TrigConfInterfaces TrigDecisionToolLib
-                   ZdcAnalysisLib xAODCaloEvent xAODEventInfo
+                   ZdcAnalysisLib xAODCaloEvent xAODEventInfo ZdcConditions ZdcUtilsLib
                    xAODForward xAODHIEvent xAODTracking InDetTrackSelectionToolLib
                    xAODTrigL1Calo xAODTrigMinBias xAODTrigger xAODTruth TrigConfxAODLib
                    PRIVATE_LINK_LIBRARIES xAODCore xAODRootAccess AthContainers)

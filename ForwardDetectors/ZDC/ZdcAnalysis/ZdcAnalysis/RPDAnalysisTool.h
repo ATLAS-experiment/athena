@@ -43,25 +43,26 @@ class ATLAS_NOT_THREAD_SAFE RPDAnalysisTool : public virtual IZdcAnalysisTool, p
   ZDCMsg::MessageFunctionPtr MakeMessageFunction();
 
   bool m_initialized = false;
+  // tool properties to be configured in Python
+  std::string m_configuration;
   bool m_writeAux;
   std::string m_auxSuffix;
   std::string m_ZDCModuleContainerName;
   std::string m_ZDCSumContainerName;
-
-  // tool properties to be configured in Python
-  unsigned int m_nSamples; // total number of FADC samples in readout window
-  unsigned int m_nBaselineSamples; // number of baseline samples; the sample equal to this number is the start of signal region
-  unsigned int m_endSignalSample; // samples before (not including) this sample are the signal region; 0 or Nsamples goes to end of window
-  float m_pulse2ndDerivThresh; // second differences less than or equal to this number indicate a pulse
-  float m_postPulseFracThresh; // if there is a good pulse and post-pulse and size of post-pulse as a fraction of good pulse is less than or equal to this number, ignore post-pulse
-  unsigned int m_goodPulseSampleStart; // pulses before this sample are considered pre-pulses
-  unsigned int m_goodPulseSampleStop; // pulses after this sample are considered post-pulses
-  float m_nominalBaseline; // the global nominal baseline; used when pileup is detected
-  float m_pileupBaselineSumThresh; // baseline sum (after subtracting nominal baseline) less than this number indicates there is NO pileup
-  float m_pileupBaselineStdDevThresh; // baseline standard deviations less than this number indicate there is NO pileup
-  unsigned int m_nNegativesAllowed; // maximum number of negative ADC values after baseline and pileup subtraction allowed in signal range
-  unsigned int m_ADCOverflow; // ADC values greater than or equal to this number are considered overflow
-  std::array<std::vector<float>, 2> m_outputCalibFactors; // multiplicative calibration factors to apply to RPD output, e.g., sum/max ADC, per channel, per side
+  // these are optional and null by default; if their values are set, they will overwrite the bulk configuration from config string
+  RPDUtils::OptionalToolProperty<unsigned int> m_forceNSamples; // total number of FADC samples in readout window
+  RPDUtils::OptionalToolProperty<unsigned int> m_forceNBaselineSamples; // number of baseline samples; the sample equal to this number is the start of signal region
+  RPDUtils::OptionalToolProperty<unsigned int> m_forceEndSignalSample; // samples before (not including) this sample are the signal region; 0 or Nsamples goes to end of window
+  RPDUtils::OptionalToolProperty<float> m_forcePulse2ndDerivThresh; // second differences less than or equal to this number indicate a pulse
+  RPDUtils::OptionalToolProperty<float> m_forcePostPulseFracThresh; // if there is a good pulse and post-pulse and size of post-pulse as a fraction of good pulse is less than or equal to this number, ignore post-pulse
+  RPDUtils::OptionalToolProperty<unsigned int> m_forceGoodPulseSampleStart; // pulses before this sample are considered pre-pulses
+  RPDUtils::OptionalToolProperty<unsigned int> m_forceGoodPulseSampleStop; // pulses after this sample are considered post-pulses
+  RPDUtils::OptionalToolProperty<float> m_forceNominalBaseline; // the global nominal baseline; used when pileup is detected
+  RPDUtils::OptionalToolProperty<float> m_forcePileupBaselineSumThresh; // baseline sum (after subtracting nominal baseline) less than this number indicates there is NO pileup
+  RPDUtils::OptionalToolProperty<float> m_forcePileupBaselineStdDevThresh; // baseline standard deviations less than this number indicate there is NO pileup
+  RPDUtils::OptionalToolProperty<unsigned int> m_forceNNegativesAllowed; // maximum number of negative ADC values after baseline and pileup subtraction allowed in signal range
+  RPDUtils::OptionalToolProperty<unsigned int> m_forceADCOverflow; // ADC values greater than or equal to this number are considered overflow
+  std::array<RPDUtils::OptionalToolProperty<std::vector<float>>, 2> m_forceOutputCalibFactors; // multiplicative calibration factors to apply to RPD output, e.g., sum/max ADC, per channel, per side
 
   // one for each side
   std::array<std::unique_ptr<RPDDataAnalyzer>, 2> m_dataAnalyzers;
@@ -84,11 +85,7 @@ class ATLAS_NOT_THREAD_SAFE RPDAnalysisTool : public virtual IZdcAnalysisTool, p
 
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_sideStatusKey {this, "ZdcSumRPDStatus", "", "RPD side level status"};
 
-  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {
-    this, "EventInfoKey", "EventInfo",
-      "Location of the event info."};
-
-  
+  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {this, "EventInfoKey", "EventInfo", "Location of the event info."};
 };
 
 } // namespace ZDC

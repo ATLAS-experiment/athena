@@ -580,12 +580,21 @@ namespace EL
 
 
   bool Worker ::
-  fileOpenErrorFilter(int level, bool, const char*, const char *)
+  fileOpenErrorFilter(int level, bool /*b1*/, const char* s1, const char * s2)
   {
+    // Don't fail on missing dictionary messages.
+    if (strstr (s2, "no streamer or dictionary") != nullptr) {
+      return true;
+    }
+
     // For messages above warning level (SysError, Error, Fatal)
     if( level > kWarning ) {
       // We won't output further; ROOT should have already put something in the log file
-      throw std::runtime_error("ROOT error detected");
+      std::string msg = "ROOT error detected in Worker.cxx: ";
+      msg += s1;
+      msg += " ";
+      msg += s2;
+      throw std::runtime_error(msg);
 
       // No need for further error handling
       return false;

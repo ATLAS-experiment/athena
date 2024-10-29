@@ -5,6 +5,7 @@
 #include <AsgDataHandles/WriteDecorHandle.h>
 
 #include "ZdcAnalysis/RPDAnalysisTool.h"
+#include "ZdcUtils/RPDUtils.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "ZdcUtils/ZdcEventInfo.h"
 
@@ -13,23 +14,24 @@ namespace ZDC {
 RPDAnalysisTool::RPDAnalysisTool(std::string const& name) : asg::AsgTool(name) {
   declareProperty("ZdcModuleContainerName", m_ZDCModuleContainerName = "ZdcModules", "Location of ZDC processed data");
   declareProperty("ZdcSumContainerName", m_ZDCSumContainerName = "ZdcSums", "Location of ZDC processed sums");
+  declareProperty("Configuration", m_configuration = "default");
   declareProperty("WriteAux", m_writeAux = true);
   declareProperty("AuxSuffix", m_auxSuffix = "");
 
-  declareProperty("RpdNSamples", m_nSamples = 24, "Total number of FADC samples in readout window");
-  declareProperty("RpdNbaselineSamples", m_nBaselineSamples = 7, "Number of baseline samples; the sample equal to this number is the start of signal region");
-  declareProperty("RpdEndSignalSample", m_endSignalSample = 23, "Samples before (not including) this sample are the signal region; 0 or Nsamples goes to end of window");
-  declareProperty("RpdPulse2ndDerivThresh", m_pulse2ndDerivThresh = -18, "Second differences less than or equal to this number indicate a pulse");
-  declareProperty("RpdPostPulseFracThresh", m_postPulseFracThresh = 0.15, "If there is a good pulse and post-pulse and size of post-pulse as a fraction of good pulse is less than or equal to this number, ignore post-pulse");
-  declareProperty("RpdGoodPulseSampleStart", m_goodPulseSampleStart = 8, "Pulses before this sample are considered pre-pulses");
-  declareProperty("RpdGoodPulseSampleStop", m_goodPulseSampleStop = 10, "Pulses after this sample are considered post-pulses");
-  declareProperty("RpdNominalBaseline", m_nominalBaseline = 100, "The global nominal baseline; used when pileup is detected");
-  declareProperty("RpdPileupBaselineSumThresh", m_pileupBaselineSumThresh = 53, "Baseline sum (after subtracting nominal baseline) less than this number indicates there is NO pileup");
-  declareProperty("RpdPileupBaselineStdDevThresh", m_pileupBaselineStdDevThresh = 2, "Baseline standard deviations less than this number indicate there is NO pileup");
-  declareProperty("RpdNNegativesAllowed", m_nNegativesAllowed = 2, "Maximum number of negative ADC values after baseline and pileup subtraction allowed in signal range");
-  declareProperty("RpdAdcOverflow", m_ADCOverflow = 4095, "ADC values greater than or equal to this number are considered overflow");
-  declareProperty("RpdSideCCalibFactors", m_outputCalibFactors.at(RPDUtils::sideC) = std::vector<float>(16, 1.0), "Multiplicative calibration factors to apply to RPD output, e.g., sum/max ADC, per channel on side C");
-  declareProperty("RpdSideACalibFactors", m_outputCalibFactors.at(RPDUtils::sideA) = std::vector<float>(16, 1.0), "Multiplicative calibration factors to apply to RPD output, e.g., sum/max ADC, per channel on side A");
+  declareProperty("NSamples", m_forceNSamples, "Total number of FADC samples in readout window");
+  declareProperty("NBaselineSamples", m_forceNBaselineSamples, "Number of baseline samples; the sample equal to this number is the start of signal region");
+  declareProperty("EndSignalSample", m_forceEndSignalSample, "Samples before (not including) this sample are the signal region; 0 or Nsamples goes to end of window");
+  declareProperty("Pulse2ndDerivThresh", m_forcePulse2ndDerivThresh, "Second differences less than or equal to this number indicate a pulse");
+  declareProperty("PostPulseFracThresh", m_forcePostPulseFracThresh, "If there is a good pulse and post-pulse and size of post-pulse as a fraction of good pulse is less than or equal to this number, ignore post-pulse");
+  declareProperty("GoodPulseSampleStart", m_forceGoodPulseSampleStart, "Pulses before this sample are considered pre-pulses");
+  declareProperty("GoodPulseSampleStop", m_forceGoodPulseSampleStop, "Pulses after this sample are considered post-pulses");
+  declareProperty("NominalBaseline", m_forceNominalBaseline, "The global nominal baseline; used when pileup is detected");
+  declareProperty("PileupBaselineSumThresh", m_forcePileupBaselineSumThresh, "Baseline sum (after subtracting nominal baseline) less than this number indicates there is NO pileup");
+  declareProperty("PileupBaselineStdDevThresh", m_forcePileupBaselineStdDevThresh, "Baseline standard deviations less than this number indicate there is NO pileup");
+  declareProperty("NNegativesAllowed", m_forceNNegativesAllowed, "Maximum number of negative ADC values after baseline and pileup subtraction allowed in signal range");
+  declareProperty("ADCOverflow", m_forceADCOverflow, "ADC values greater than or equal to this number are considered overflow");
+  declareProperty("SideCCalibFactors", m_forceOutputCalibFactors.at(RPDUtils::sideC), "Multiplicative calibration factors to apply to RPD output, e.g., sum/max ADC, per channel on side C");
+  declareProperty("SideACalibFactors", m_forceOutputCalibFactors.at(RPDUtils::sideA), "Multiplicative calibration factors to apply to RPD output, e.g., sum/max ADC, per channel on side A");
 }
 
 StatusCode RPDAnalysisTool::initializeKey(std::string const& containerName, SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> & writeHandleKey, std::string const& key) {
@@ -38,21 +40,102 @@ StatusCode RPDAnalysisTool::initializeKey(std::string const& containerName, SG::
 }
 
 StatusCode RPDAnalysisTool::initialize() {
-  RPDConfig config {};
-  config.nSamples = m_nSamples;
-  config.nBaselineSamples = m_nBaselineSamples;
-  config.endSignalSample = m_endSignalSample;
-  config.pulse2ndDerivThresh = m_pulse2ndDerivThresh;
-  config.postPulseFracThresh = m_postPulseFracThresh;
-  config.goodPulseSampleStart = m_goodPulseSampleStart;
-  config.goodPulseSampleStop = m_goodPulseSampleStop;
-  config.nominalBaseline = m_nominalBaseline;
-  config.pileupBaselineSumThresh = m_pileupBaselineSumThresh;
-  config.pileupBaselineStdDevThresh = m_pileupBaselineStdDevThresh;
-  config.nNegativesAllowed = m_nNegativesAllowed;
-  config.AdcOverflow = m_ADCOverflow;
-  m_dataAnalyzers.at(RPDUtils::sideC) = std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", config, m_outputCalibFactors.at(RPDUtils::sideC));
-  m_dataAnalyzers.at(RPDUtils::sideA) = std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", config, m_outputCalibFactors.at(RPDUtils::sideA));
+  RPDConfig finalConfig {};
+  std::array<std::vector<float>, 2> finalOutputCalibFactors;
+  // first initialize reconstruction parameters from config string
+  if (m_configuration == "default" || m_configuration == "pp2023" || m_configuration == "PbPb2023") {
+    finalConfig.nSamples = 24;
+    finalConfig.nBaselineSamples = 7;
+    finalConfig.endSignalSample = 23;
+    finalConfig.pulse2ndDerivThresh = -18;
+    finalConfig.postPulseFracThresh = 0.15;
+    finalConfig.goodPulseSampleStart = 8;
+    finalConfig.goodPulseSampleStop = 10;
+    finalConfig.nominalBaseline = 100;
+    finalConfig.pileupBaselineSumThresh = 53;
+    finalConfig.pileupBaselineStdDevThresh = 2;
+    finalConfig.nNegativesAllowed = 2;
+    finalConfig.ADCOverflow = 4095;
+    finalOutputCalibFactors.at(RPDUtils::sideC) = std::vector<float>(16, 1.0);
+    finalOutputCalibFactors.at(RPDUtils::sideA) = std::vector<float>(16, 1.0);
+  } else if (m_configuration == "pp2024" || m_configuration == "PbPb2024") {
+    finalConfig.nSamples = 24;
+    finalConfig.nBaselineSamples = 7;
+    finalConfig.endSignalSample = 23;
+    finalConfig.pulse2ndDerivThresh = -18;
+    finalConfig.postPulseFracThresh = 0.15;
+    finalConfig.goodPulseSampleStart = 8;
+    finalConfig.goodPulseSampleStop = 10;
+    finalConfig.nominalBaseline = 100;
+    finalConfig.pileupBaselineSumThresh = 53;
+    finalConfig.pileupBaselineStdDevThresh = 2;
+    finalConfig.nNegativesAllowed = 2;
+    finalConfig.ADCOverflow = 4095;
+    finalOutputCalibFactors.at(RPDUtils::sideC) = std::vector<float>(16, 1.0);
+    finalOutputCalibFactors.at(RPDUtils::sideA) = std::vector<float>(16, 1.0);
+  }
+  // then overwrite inidividual parameters from configuration if any were provided
+  if (m_forceNSamples.has_value()) {
+    finalConfig.nSamples = m_forceNSamples.value();
+  }
+  if (m_forceNBaselineSamples.has_value()) {
+    finalConfig.nBaselineSamples = m_forceNBaselineSamples.value();
+  }
+  if (m_forceEndSignalSample.has_value()) {
+    finalConfig.endSignalSample = m_forceEndSignalSample.value();
+  }
+  if (m_forcePulse2ndDerivThresh.has_value()) {
+    finalConfig.pulse2ndDerivThresh = m_forcePulse2ndDerivThresh.value();
+  }
+  if (m_forcePostPulseFracThresh.has_value()) {
+    finalConfig.postPulseFracThresh = m_forcePostPulseFracThresh.value();
+  }
+  if (m_forceGoodPulseSampleStart.has_value()) {
+    finalConfig.goodPulseSampleStart = m_forceGoodPulseSampleStart.value();
+  }
+  if (m_forceGoodPulseSampleStop.has_value()) {
+    finalConfig.goodPulseSampleStop = m_forceGoodPulseSampleStop.value();
+  }
+  if (m_forceNominalBaseline.has_value()) {
+    finalConfig.nominalBaseline = m_forceNominalBaseline.value();
+  }
+  if (m_forcePileupBaselineSumThresh.has_value()) {
+    finalConfig.pileupBaselineSumThresh = m_forcePileupBaselineSumThresh.value();
+  }
+  if (m_forcePileupBaselineStdDevThresh.has_value()) {
+    finalConfig.pileupBaselineStdDevThresh = m_forcePileupBaselineStdDevThresh.value();
+  }
+  if (m_forceNNegativesAllowed.has_value()) {
+    finalConfig.nNegativesAllowed = m_forceNNegativesAllowed.value();
+  }
+  if (m_forceADCOverflow.has_value()) {
+    finalConfig.ADCOverflow = m_forceADCOverflow.value();
+  }
+  for (auto const side : RPDUtils::sides) {
+    if (m_forceOutputCalibFactors.at(side).has_value()) {
+      finalOutputCalibFactors.at(side) = m_forceOutputCalibFactors.at(side).value();
+    }
+  }
+
+  ATH_MSG_DEBUG("RPDAnalysisTool reconstruction parameters:");
+  ATH_MSG_DEBUG("config = " << m_configuration);
+  ATH_MSG_DEBUG("nSamples = " << finalConfig.nSamples);
+  ATH_MSG_DEBUG("nBaselineSamples = " << finalConfig.nBaselineSamples);
+  ATH_MSG_DEBUG("endSignalSample = " << finalConfig.endSignalSample);
+  ATH_MSG_DEBUG("pulse2ndDerivThresh = " << finalConfig.pulse2ndDerivThresh);
+  ATH_MSG_DEBUG("postPulseFracThresh = " << finalConfig.postPulseFracThresh);
+  ATH_MSG_DEBUG("goodPulseSampleStart = " << finalConfig.goodPulseSampleStart);
+  ATH_MSG_DEBUG("goodPulseSampleStop = " << finalConfig.goodPulseSampleStop);
+  ATH_MSG_DEBUG("nominalBaseline = " << finalConfig.nominalBaseline);
+  ATH_MSG_DEBUG("pileupBaselineSumThresh = " << finalConfig.pileupBaselineSumThresh);
+  ATH_MSG_DEBUG("pileupBaselineStdDevThresh = " << finalConfig.pileupBaselineStdDevThresh);
+  ATH_MSG_DEBUG("nNegativesAllowed = " << finalConfig.nNegativesAllowed);
+  ATH_MSG_DEBUG("ADCOverflow = " << finalConfig.ADCOverflow);
+  ATH_MSG_DEBUG("sideCCalibFactors = " << RPDUtils::vecToString(finalOutputCalibFactors.at(RPDUtils::sideC)));
+  ATH_MSG_DEBUG("sideACalibFactors = " << RPDUtils::vecToString(finalOutputCalibFactors.at(RPDUtils::sideA)));
+
+  m_dataAnalyzers.at(RPDUtils::sideC) = std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", finalConfig, finalOutputCalibFactors.at(RPDUtils::sideC));
+  m_dataAnalyzers.at(RPDUtils::sideA) = std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", finalConfig, finalOutputCalibFactors.at(RPDUtils::sideA));
 
   // initialize per-channel decorations (in ZdcModules)
   ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_chBaselineKey, ".RPDChannelBaseline"));
@@ -186,20 +269,20 @@ void RPDAnalysisTool::writeAOD(xAOD::ZdcModuleContainer const& moduleContainer, 
 }
 
 StatusCode RPDAnalysisTool::recoZdcModules(xAOD::ZdcModuleContainer const& moduleContainer, xAOD::ZdcModuleContainer const& moduleSumContainer) {
-    if (moduleContainer.empty()) {
-      return StatusCode::SUCCESS; // if no modules, do nothing
-    }
-    
-    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);                     
-  if (!eventInfo.isValid()) return StatusCode::FAILURE;
-  
-  bool rpdErr = eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::RPDDECODINGERROR );
-  if (rpdErr)
-    {
-      ATH_MSG_WARNING("RPD decoding error found!");
-      return StatusCode::SUCCESS;
-    }
-  
+  if (moduleContainer.empty()) {
+    return StatusCode::SUCCESS; // if no modules, do nothing
+  }
+
+  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
+  if (!eventInfo.isValid()) {
+    return StatusCode::FAILURE;
+  }
+
+  if (eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::RPDDECODINGERROR)) {
+    ATH_MSG_WARNING("RPD decoding error found - abandoning RPD reco!");
+    return StatusCode::SUCCESS;
+  }
+
   reset();
   readAOD(moduleContainer);
   analyze();
