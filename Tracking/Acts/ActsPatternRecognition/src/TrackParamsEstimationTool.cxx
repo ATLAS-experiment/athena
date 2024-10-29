@@ -29,6 +29,8 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "   " << m_initialVarInflation );
     ATH_MSG_DEBUG( "   " << m_useTopSp );
 
+    // Make the logger And Propagate to ACTS routines
+    m_logger = makeActsAthenaLogger(this, "Acts");
     return StatusCode::SUCCESS;
   }
 
@@ -71,7 +73,7 @@ namespace ActsTrk {
     // Get SPs
     const auto& sp_collection = seed.sp();
     if ( sp_collection.size() < 3 ) return std::nullopt;
-
+    
     // Compute Bound parameters at surface
     std::optional<Acts::BoundVector> params_opt = m_useTopSp ?
       Acts::estimateTrackParamsFromSeed(geoContext,
@@ -79,16 +81,19 @@ namespace ActsTrk {
                                         sp_collection.rend(),
                                         surface,
                                         bField,
-                                        bFieldMin) :
+                                        bFieldMin,
+					logger()) :
       Acts::estimateTrackParamsFromSeed(geoContext,
                                         sp_collection.begin(),
                                         sp_collection.end(),
                                         surface,
                                         bField,
-                                        bFieldMin);
-
-    if ( not params_opt.has_value() )
+                                        bFieldMin,
+					logger());
+    
+    if ( not params_opt.has_value() ) {
       return std::nullopt;
+    }
 
     auto& params = params_opt.value();
 
