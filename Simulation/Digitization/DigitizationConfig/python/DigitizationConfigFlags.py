@@ -78,6 +78,10 @@ def createDigitizationCfgFlags():
     # Set the type of the radiation damage simulation type for 3D planar sensors
     flags.addFlag("Digitization.Pixel3DRadiationDamageSimulationType",
                   PixelRadiationDamageSimulationType.NoRadiationDamage, type=PixelRadiationDamageSimulationType)
+    # Set the flag to tell the code to treat 3D sensors in in Pixel ITk as 3D sensors (instead of planar)
+    # Current default is False as this is what has been used so far for the ITk simulation (treating 3D as Planar)
+    # This is a temporary flag that will be eventually removed FIXME
+    flags.addFlag("Digitization.DigitizeITk3Das3D", False)
 
     # for PileUp digitization
     # Bunch structure configuration

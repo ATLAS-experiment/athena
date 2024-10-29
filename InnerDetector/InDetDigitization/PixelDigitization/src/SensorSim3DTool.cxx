@@ -12,12 +12,15 @@
 #include "SiPropertiesTool/SiliconProperties.h"
 #include "SiDigitization/SiChargedDiodeCollection.h"
 
+#include "GaudiKernel/SystemOfUnits.h"
 
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 
 #include "CLHEP/Units/PhysicalConstants.h"
 #include "PathResolver/PathResolver.h"
+
+#include "TFile.h"
 
 #include <cmath>
 #include <memory>
@@ -44,6 +47,39 @@ StatusCode SensorSim3DTool::initialize() {
 
   ATH_CHECK(readProbMap(m_cc_prob_file_fei3));
   ATH_CHECK(readProbMap(m_cc_prob_file_fei4));
+  
+  // read the template correction maps if template correction is used
+  if (m_radiationDamageSimulationType == RadiationDamageSimulationType::TEMPLATE_CORRECTION) {
+    ATH_MSG_INFO("Opening file: " << m_templateCorrectionRootFile << " for radiation damage correction");
+    std::unique_ptr<TFile> file(TFile::Open(PathResolverFindCalibFile(m_templateCorrectionRootFile).c_str(), "READ"));
+    if (!file) {
+      ATH_MSG_ERROR("Unable to read the ROOT file needed for radiation damage correction at: " << m_templateCorrectionRootFile);
+      return StatusCode::FAILURE;
+    }
+    
+    // we need separate corrections for the barrel and for the rings
+    constexpr std::size_t numberOfLayers = 2;
+    if (m_chargeCorrectionHistos.size() != numberOfLayers) {
+      ATH_MSG_ERROR("The size of the vector of charge correction histogram paths is " << m_chargeCorrectionHistos.size() << " instead of " << numberOfLayers);
+      return StatusCode::FAILURE;
+    }
+
+    for (const std::string& i : m_chargeCorrectionHistos) {
+      ATH_MSG_INFO("Reading histogram: " << i << " for charge correction needed for Pixel radiation damage simulation");
+      std::unique_ptr<TH1> h(file->Get<TH1>(i.c_str()));
+      if (!h) {
+        ATH_MSG_ERROR("Cannot read histogram " << i << " needed for charge correction");
+        return StatusCode::FAILURE;
+      }
+
+      h->SetDirectory(nullptr);
+
+      m_chargeCorrection.emplace_back();
+      ATH_CHECK(m_chargeCorrection.back().setHisto1D(h.get()));
+    }
+
+    file->Close();
+  }
 
   return StatusCode::SUCCESS;
 }
@@ -129,7 +165,9 @@ StatusCode SensorSim3DTool::induceCharge(const TimedHitPtr<SiHit>& phit,
   const HepMcParticleLink particleLink = HepMcParticleLink::getRedirectedLink(phit->particleLink(), phit.eventId(), ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
   const double pHitTime = hitTime(phit);
 
-  if (m_radiationDamageSimulationType != RadiationDamageSimulationType::NO_RADIATION_DAMAGE) {
+  const int layerIndex = Module.isBarrel() ? 0 : 1;
+
+  if (m_radiationDamageSimulationType == RadiationDamageSimulationType::RAMO_POTENTIAL) {
     const bool doChunkCorrection = m_doChunkCorrection.value();
     //**************************************//
     //*** Now diffuse charges to surface *** //
@@ -160,7 +198,7 @@ StatusCode SensorSim3DTool::induceCharge(const TimedHitPtr<SiHit>& phit,
     std::vector<double> rdifElectron (ncharges, 0.);
     std::vector<double> rdifHole (ncharges, 0.);
 
-    for (auto & iHitRecord : trfHitRecord) {
+    for (const auto & iHitRecord : trfHitRecord) {
       double eta_i = eta_0;
       double phi_i = phi_0;
       double depth_i = depth_0;
@@ -510,11 +548,77 @@ StatusCode SensorSim3DTool::induceCharge(const TimedHitPtr<SiHit>& phit,
           addCharge(scharge_mimj_holes);
       }
     }
+  } else if (m_radiationDamageSimulationType == RadiationDamageSimulationType::TEMPLATE_CORRECTION) {
+    const PixelHistoConverter& chargeCorrectionHist = m_chargeCorrection[layerIndex];
+
+    for (const auto& iHitRecord : trfHitRecord) {
+      double eta_i = eta_0;
+      double phi_i = phi_0;
+      double depth_i = depth_0;
+
+      if (iTotalLength) {
+        eta_i += 1.0 * iHitRecord.first / iTotalLength * dEta;
+        phi_i += 1.0 * iHitRecord.first / iTotalLength * dPhi;
+        depth_i += 1.0 * iHitRecord.first / iTotalLength * dDepth;
+      }
+
+      double es_current = 1.0 * iHitRecord.second / 1.E+6;
+
+      double dist_electrode = 0.5 * sensorThickness - Module.design().readoutSide() * depth_i;
+      if (dist_electrode < 0) dist_electrode = 0;
+
+      CLHEP::Hep3Vector chargepos;
+      chargepos.setX(phi_i);
+      chargepos.setY(eta_i);
+      chargepos.setZ(dist_electrode);
+
+      bool coord = Module.isModuleFrame();
+
+      ATH_MSG_DEBUG(
+        "ismoduleframe " << coord << " -- startPosition (x,y,z) = " << chargepos.x() << ", " << chargepos.y() << ", " <<
+          chargepos.z());
+
+      // -- change origin of coordinates to the left bottom of module
+      const double x_new = chargepos.x() + 0.5*module_size_x;
+      const double y_new = chargepos.y() + 0.5*module_size_y;
+
+      // -- change from module frame to pixel frame
+      const int nPixX = int(x_new / pixel_size_x);
+      const int nPixY = int(y_new / pixel_size_y);
+      ATH_MSG_DEBUG(" -- nPixX = " << nPixX << "  nPixY = " << nPixY);
+      const double x_pix = x_new - pixel_size_x * (nPixX);
+      const double y_pix = y_new - pixel_size_y * (nPixY);
+      // -- change origin of coordinates to the center of the pixel
+      const double x_pix_center = x_pix - pixel_size_x / 2;
+      const double y_pix_center = y_pix - pixel_size_y / 2;
+      ATH_MSG_DEBUG(" -- current hit position w.r.t. pixel center = " << x_pix_center << "  " << y_pix_center);
+           
+      // radiation damage correction
+      const double distance = std::hypot(x_pix_center, y_pix_center) / Gaudi::Units::micrometer; // to get it in micrometers
+      const double chargeCorrection = chargeCorrectionHist.getContent(distance);
+
+      // calculate the charge at the incident sensor
+      // no neighbours are considered as that is allready included in the template correction
+      const double ed = es_current * eleholePairEnergy * chargeCorrection;
+
+      // -- pixel coordinates --> module coordinates
+      const double x_mod = x_pix_center + 0.5*pixel_size_x + pixel_size_x * nPixX - 0.5*module_size_x;
+      const double y_mod = y_pix_center + 0.5*pixel_size_y + pixel_size_y * nPixY - 0.5*module_size_y;
+      const SiLocalPosition& chargePos = Module.hitLocalToLocal(y_mod, x_mod);
+
+      const SiSurfaceCharge scharge(chargePos,
+                                    SiCharge(ed, pHitTime, SiCharge::track, particleLink));
+      const SiCellId& diode = Module.cellIdOfPosition(scharge.position());
+      if (diode.isValid()) {
+        const SiCharge& charge = scharge.charge();
+        chargedDiodes.add(diode, charge);
+      }
+    }
   } else {
     //**************************************//
     //*** Now diffuse charges to surface *** //
     //**************************************//
-    for (auto iHitRecord : trfHitRecord) {
+    for (const auto& iHitRecord : trfHitRecord) {
       double eta_i = eta_0;
       double phi_i = phi_0;
       double depth_i = depth_0;
