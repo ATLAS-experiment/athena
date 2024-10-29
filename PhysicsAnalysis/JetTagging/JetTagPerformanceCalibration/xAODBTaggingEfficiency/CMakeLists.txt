@@ -86,16 +86,13 @@ endif()
 
 if( XAOD_STANDALONE )
   atlas_add_test( ut_BTaggingToolsTest 
-    SCRIPT BTaggingToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/main/mc_PHYS_Run3/v40/DAOD_PHYS.myOutput.pool.root xAODBTaggingEfficiency/13p6TeV/MC23_2024-10-17_GN2v01_v1.root GN2v01 Continuous 
+    SCRIPT BTaggingToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/DAOD_PHYS/p6491/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.deriv.DAOD_PHYS.e8514_e8528_s4162_s4114_r15540_r15516_p6491/DAOD_PHYS.41633384._000880.pool.root.1 xAODBTaggingEfficiency/13p6TeV/MC23_2024-10-17_GN2v01_v1.root GN2v01 Continuous 
   )
-   atlas_add_test( ut_BTaggingSelectionTool_fixedcut
-      SCRIPT BTaggingSelectionToolTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/main/mc_PHYS_Run3/v14/DAOD_PHYS.myOutput.pool.root xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root GN2v00NewAliasWP FixedCutBEff_77 
-   )
    atlas_add_test( ut_BTaggingSelectionTool_continuous
-      SCRIPT BTaggingSelectionToolTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/main/mc_PHYS_Run3/v14/DAOD_PHYS.myOutput.pool.root xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root GN2v00NewAliasWP Continuous
+     SCRIPT BTaggingSelectionToolTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/DAOD_PHYS/p6491/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.deriv.DAOD_PHYS.e8514_e8528_s4162_s4114_r15540_r15516_p6491/DAOD_PHYS.41633384._000880.pool.root.1 xAODBTaggingEfficiency/13p6TeV/MC23_2024-10-17_GN2v01_v1.root GN2v01 Continuous
    )
    atlas_add_test( ut_BTaggingEfficiencyTool
-      SCRIPT BTaggingEfficiencyToolTester xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root GN2v00NewAliasWP FixedCutBEff_77
+     SCRIPT BTaggingEfficiencyToolTester xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root GN2v00NewAliasWP FixedCutBEff_77
    )
 endif()
 

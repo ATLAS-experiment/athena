@@ -1,9 +1,7 @@
-Package.BtaggingSelect...INFO    jet 0 GN2v00NewAliasWP  Continuous tag weight -2.60442 quantile 1
-Package.BtaggingSelect...INFO    jet 1 GN2v00NewAliasWP  Continuous tag weight -4.39446 quantile 1
-Package.BtaggingSelect...INFO    jet 2 GN2v00NewAliasWP  Continuous tag weight 7.84662 quantile 5
-Package.BtaggingSelect...INFO    jet 3 GN2v00NewAliasWP  Continuous tag weight -1.7771 quantile 1
-Package.BtaggingSelect...INFO    jet 4 GN2v00NewAliasWP  Continuous tag weight -2.59781 quantile 1
-Package.BtaggingSelect...INFO    jet 5 GN2v00NewAliasWP  Continuous tag weight -1.5533 quantile 1
-Package.BtaggingSelect...INFO    jet 6 GN2v00NewAliasWP  Continuous tag weight -1.498 quantile -1
-Package.BtaggingSelect...INFO    jet 7 GN2v00NewAliasWP  Continuous tag weight 2.07503 quantile -1
-Package.BtaggingSelect...INFO    jet 8 GN2v00NewAliasWP  Continuous tag weight -1.1504 quantile -1
+Package.BtaggingSelect...INFO    jet 0 GN2v01  Continuous tag weight -5.03348 quantile 1
+Package.BtaggingSelect...INFO    jet 1 GN2v01  Continuous tag weight -4.45057 quantile 1
+Package.BtaggingSelect...INFO    jet 2 GN2v01  Continuous tag weight 2.99855 quantile 6
+Package.BtaggingSelect...INFO    jet 3 GN2v01  Continuous tag weight 0.164935 quantile 3
+Package.BtaggingSelect...INFO    jet 4 GN2v01  Continuous tag weight -3.50595 quantile -1
+Package.BtaggingSelect...INFO    jet 5 GN2v01  Continuous tag weight -2.71129 quantile -1
+Package.BtaggingSelect...INFO    jet 6 GN2v01  Continuous tag weight -3.35987 quantile -1
