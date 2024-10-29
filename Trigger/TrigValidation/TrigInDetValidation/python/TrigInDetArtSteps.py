@@ -132,6 +132,10 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_mb_sptrk_L1RD0_FILLED',"
                 flags  +=  "'MinBias',"
                 self.preexec_trig += "flags.Trigger.triggerMenuSetup='PhysicsP1_pp_lowMu_run3_v1';"
+            if (i=='minbias-pixonly') :
+                chains += "'HLT_mb_pixsptrk_nototpix20_q2_L1TRT_ZDC_A_C_VjTE10',"
+                flags  +=  "'MinBias',"
+                self.preexec_trig += "flags.Trigger.triggerMenuSetup='PhysicsP1_HI_run3_v1';"
             if (i=='cosmic') :
                 chains += "'HLT_mu4_cosmic_L1MU3V_EMPTY'"
                 flags  +=  "'Muon','Cosmic',"
