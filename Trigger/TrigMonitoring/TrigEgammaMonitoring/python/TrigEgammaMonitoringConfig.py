@@ -405,7 +405,7 @@ class TrigEgammaMonAlgBuilder:
       self.elMonAlg.LHResultNames=self.lhnames
       self.elMonAlg.DNNResultNames=self.dnnnames
       self.elMonAlg.ElectronIsEMSelector =[TightElectronSelector,MediumElectronSelector,LooseElectronSelector]
-      self.elMonAlg.ElectronLikelihoodTool =[TightLHSelector,MediumLHSelector,LooseLHSelector]
+      self.elMonAlg.ElectronLikelihoodTool =[TightLHSelector,MediumLHSelector,LooseLHSelector,VeryLooseLHSelector]
       self.elMonAlg.ForcePidSelection=True
       self.elMonAlg.ForceProbeIsolation=False
       self.elMonAlg.ForceEtThreshold=True
