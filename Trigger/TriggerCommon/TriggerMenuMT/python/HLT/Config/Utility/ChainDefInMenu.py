@@ -16,7 +16,6 @@ class ChainProp:
     mergingStrategy: str        = 'auto'
     mergingOrder: List[str]     = field(default_factory = list)
     mergingOffset: int          = -1
-    topoStartFrom: bool         = False  # might be obsolete
 
     # currently we don't have a type-checker in LCG so we
     # implement a limited version ourselves:

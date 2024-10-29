@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
 # PhysicsP1_pp_run3_v1.py menu
@@ -6,12 +6,13 @@
 # Combines physics triggers with P1 monitoring chains
 #------------------------------------------------------------------------#
 
+# All chains are represented as ChainProp objects in a ChainStore
+from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
+from .SignatureDicts import ChainStore
+
 
 from . import Physics_pp_run3_v1 as physics_menu 
 from . import P1_run3_v1
-
-from .SignatureDicts import ChainStore
-from ..Config.Utility.ChainDefInMenu import ChainProp
 
 from .Physics_pp_run3_v1 import (
     SingleMuonGroup,

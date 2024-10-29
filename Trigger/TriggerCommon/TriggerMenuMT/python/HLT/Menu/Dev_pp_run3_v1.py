@@ -4,13 +4,11 @@
 # Dev_pp_run3_v1.py menu for the long shutdown development
 #------------------------------------------------------------------------#
 
-# This defines the input format of the chain and it's properties with the defaults set
-# always required are: name, stream and groups
-#['name', 'L1chainParts'=[], 'stream', 'groups', 'merging'=[], 'topoStartFrom'=False],
+# All chains are represented as ChainProp objects in a ChainStore
+from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
+from .SignatureDicts import ChainStore
 
 from . import MC_pp_run3_v1 as mc_menu
-from .SignatureDicts import ChainStore
-from ..Config.Utility.ChainDefInMenu import ChainProp
 
 # this is not the best option, due to flake violation, this list has to be changed when some groups are removed
 

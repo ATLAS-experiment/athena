@@ -1,15 +1,11 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
 # P1_run3_v1.py menu containing monitoring chains used only at P1
 #------------------------------------------------------------------------#
 
-# This defines the input format of the chain and it's properties with the defaults set
-# always required are: name, stream and groups
-#['name', 'L1chainParts'=[], 'stream', 'groups', 'merging'=[], 'topoStartFrom'=False],
-#from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
-
-from ..Config.Utility.ChainDefInMenu import ChainProp
+# All chains are represented as ChainProp objects in a ChainStore
+from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
 from .SignatureDicts import ChainStore
 
 from .Physics_pp_run3_v1 import (
@@ -27,7 +23,7 @@ from .Physics_pp_run3_v1 import (
 )
 
 from AthenaCommon.Logging import logging
-log = logging.getLogger( __name__ )
+log = logging.getLogger(__name__)
 
 def addCommonP1Signatures(chains):
 
