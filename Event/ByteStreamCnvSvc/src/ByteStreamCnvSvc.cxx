@@ -44,6 +44,21 @@ ByteStreamCnvSvc::ByteStreamCnvSvc(const std::string& name, ISvcLocator* pSvcLoc
 ByteStreamCnvSvc::~ByteStreamCnvSvc() {
 }
 
+FullEventAssemblerBase* ByteStreamCnvSvc::findFullEventAssembler(const std::string& name) const
+{
+   const EventContext& ctx = Gaudi::Hive::currentContext();
+   const auto& feaMap = m_slots.get(ctx)->m_feaMap;
+   const auto& fea = feaMap.find(name);
+   return fea!=feaMap.end() ? fea->second.get() : nullptr;
+}
+
+StatusCode ByteStreamCnvSvc::storeFullEventAssembler(std::unique_ptr<FullEventAssemblerBase> fea, const std::string& name)
+{
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  m_slots.get(ctx)->m_feaMap[name] = std::move(fea);
+  return StatusCode::SUCCESS;
+}
+
 /// Initialize the service.
 StatusCode ByteStreamCnvSvc::initialize() {
    if (!ByteStreamCnvSvcBase::initialize().isSuccess()) {
@@ -227,7 +242,7 @@ StatusCode ByteStreamCnvSvc::commitOutput(const std::string& outputConnection, b
 
 void ByteStreamCnvSvc::writeFEA (SlotData& slot)
 {
-   FEAMap_t& feaMap = slot.m_feaMap;
+   const auto& feaMap = slot.m_feaMap;
    ATH_MSG_DEBUG("before FEAMAP size = " << feaMap.size());
    for (auto& p : feaMap) {
       MsgStream log(msgSvc(), name());

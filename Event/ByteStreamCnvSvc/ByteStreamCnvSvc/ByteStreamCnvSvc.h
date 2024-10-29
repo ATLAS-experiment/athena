@@ -6,6 +6,7 @@
 #define BYTESTREAMCNVSVC_BYTESTREAMCNVSVC_H
 
 #include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "ByteStreamCnvSvcBase/ByteStreamCnvSvcBase.h"
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h"
 #include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h"
@@ -33,7 +34,7 @@ class FullEventAssemblerBase;
 */
 
 class ByteStreamCnvSvc : public extends<ByteStreamCnvSvcBase,
-                                        IByteStreamEventAccess> {
+                                        IByteStreamCnvSvc, IByteStreamEventAccess> {
 public:
    /// Standard Constructor
    ByteStreamCnvSvc(const std::string& name, ISvcLocator* svc);
@@ -58,16 +59,18 @@ public:
      return m_slots->m_rawEventWrite.get();
    }
 
-  /// @brief Access to FullEventAssembler
-   template <class T> StatusCode getFullEventAssembler(T*&t, const std::string& nm);
-
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface ) override;
-  //@}
-  /// Should rather be in IByteStreamSvc.h if we had one
-  static const InterfaceID& interfaceID();
+   /// FIXME: temporary wrappers until all clients are migrated to IByteStreamCnvSvc
+   ///@{
+   virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface ) override;
+   static const InterfaceID& interfaceID();
+   ///@}
 
 protected:
    RawEventWrite* setRawEvent (std::unique_ptr<RawEventWrite> rawEventWrite);
+
+   /// Implementation of IByteStreamCnvSvc interface
+   virtual FullEventAssemblerBase* findFullEventAssembler(const std::string& name) const override;
+   virtual StatusCode storeFullEventAssembler(std::unique_ptr<FullEventAssemblerBase> fea, const std::string& name) override;
 
 private:
    /// name of the service
@@ -88,15 +91,11 @@ private:
    /// user type
    std::string m_userType;
 
-   /// @brief common FEA, indexed by string key
-   using FEAPtr_t = std::unique_ptr<FullEventAssemblerBase>;
-   using FEAMap_t = std::map<std::string,  FEAPtr_t>;
-
    /// Slot-specific state.
    struct SlotData
    {
      std::unique_ptr<RawEventWrite> m_rawEventWrite;
-     FEAMap_t m_feaMap;
+     std::map<std::string, std::unique_ptr<FullEventAssemblerBase>> m_feaMap;
      std::vector<uint32_t> m_tagBuff;
      std::vector<uint32_t> m_l1Buff;
      std::vector<uint32_t> m_l2Buff;
@@ -117,28 +116,5 @@ private:
    /// Write the FEA to RawEvent.
    void writeFEA (SlotData& slot);
 };
-
-// Implementation of template method:
-template <class T> StatusCode ByteStreamCnvSvc::getFullEventAssembler(T*& t, const std::string& nm)
-{
-   const EventContext& ctx = Gaudi::Hive::currentContext();
-   FEAMap_t& feaMap = m_slots.get (ctx)->m_feaMap;
-   FEAPtr_t& fea = feaMap[nm];
-   if (fea) {
-      T* p = dynamic_cast<T*>(fea.get());
-      if (p == 0) {
-         ATH_MSG_WARNING(" Key = " << nm << " exists, but of different type");
-         return(StatusCode::FAILURE);
-      }
-      t = p;
-      return(StatusCode::SUCCESS);
-   }
-
-   // reach here if key does not exist
-   auto ptr = std::make_unique<T>();
-   t = ptr.get();
-   fea = std::move (ptr);
-   return(StatusCode::SUCCESS);
-}
 
 #endif
