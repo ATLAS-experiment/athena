@@ -41,15 +41,16 @@ if __name__ == "__main__":
 
     # Set the input file - can also use command line via --files
     flags.Input.Files = defaultTestFiles.AOD_RUN3_MC
-    # Configure the file reading machinery
-    cfg = MainServicesCfg(flags)
-    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg.merge(PoolReadCfg(flags))
-
+    
     # Number of events to process
     flags.Exec.MaxEvents = 1000
     flags.fillFromArgs()
     flags.lock()
+    
+    # Configure the file reading machinery
+    cfg = MainServicesCfg(flags)
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    cfg.merge(PoolReadCfg(flags))
 
     # Run the job
     cfg.merge(ReadxAODCfg(flags))
