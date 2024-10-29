@@ -14,7 +14,7 @@
 
 
 namespace MuonCalib{
-    class MdtFullCalibData; 
+    struct MdtFullCalibData;
 }
 
 /**
