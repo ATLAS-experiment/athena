@@ -492,9 +492,7 @@ if __name__ == "__main__":
        acc.merge(FPGATrackSimLogicalHitsProcessAlgCfg(flags))
    
        if flags.Trigger.FPGATrackSim.doEDMConversion:
-           acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=True))
-           if flags.Trigger.FPGATrackSim.spacePoints : acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgSpacePoints_1st', stage = '_1st', doSP = True, doClusters = False, doHits = False)) 
-           
+           acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=True, doSP=flags.Trigger.FPGATrackSim.spacePoints))
            from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGATruthDecorationCfg, FPGAProtoTrackFitCfg
            acc.merge(FPGAProtoTrackFitCfg(flags,stage='_1st')) # Run ACTS KF for 1st stage
            acc.merge(FPGATruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage='_1st')) # Run ACTS KF for 1st stage

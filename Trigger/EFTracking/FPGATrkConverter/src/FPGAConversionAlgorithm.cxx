@@ -48,6 +48,7 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
     std::unique_ptr<xAOD::PixelClusterContainer> PixelContFromClusters = std::make_unique<xAOD::PixelClusterContainer>();
     std::unique_ptr<xAOD::PixelClusterAuxContainer> PixelAuxContFromClusters = std::make_unique<xAOD::PixelClusterAuxContainer>();
     PixelContFromClusters->setStore (PixelAuxContFromClusters.get());
+
     std::unique_ptr<xAOD::StripClusterContainer> SCTContFromClusters = std::make_unique<xAOD::StripClusterContainer>();
     std::unique_ptr<xAOD::StripClusterAuxContainer> SCTAuxContFromClusters = std::make_unique<xAOD::StripClusterAuxContainer>();
     SCTContFromClusters->setStore(SCTAuxContFromClusters.get() );
@@ -62,19 +63,6 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
     
     std::unique_ptr<ActsTrk::ProtoTrackCollection> ProtoTracksFromRoads = std::make_unique<ActsTrk::ProtoTrackCollection>();
     std::unique_ptr<ActsTrk::ProtoTrackCollection> ProtoTracksFromTracks = std::make_unique<ActsTrk::ProtoTrackCollection>();
-
-    if (m_doSP) {
-      SG::ReadHandle<FPGATrackSimClusterCollection> FPGASPHandle (m_FPGASPKey, ctx);
-      SG::ReadHandle<FPGATrackSimClusterCollection> FPGAClustersHandle (m_FPGAClusterKey, ctx);
-      const FPGATrackSimClusterCollection *FPGASPColl = FPGASPHandle.cptr();
-      const FPGATrackSimClusterCollection *FPGAClustersColl = FPGAClustersHandle.cptr();
-      ATH_CHECK( m_ClusterConverter->convertSpacePoints(*FPGASPColl, *StripSPCont) );
-      ATH_CHECK( m_ClusterConverter->convertSpacePoints(*FPGAClustersColl, *PixelSPCont, true) );
-      SG::WriteHandle<xAOD::SpacePointContainer> xAODStripSpacePointFromFPGAHandle (m_xAODStripSpacePointFromFPGAKey, ctx);
-      SG::WriteHandle<xAOD::SpacePointContainer> xAODPixelSpacePointFromFPGAHandle (m_xAODPixelSpacePointFromFPGAKey, ctx);
-      ATH_CHECK( xAODStripSpacePointFromFPGAHandle.record (std::move(StripSPCont), std::move(StripSPAuxCont)));
-      ATH_CHECK( xAODPixelSpacePointFromFPGAHandle.record (std::move(PixelSPCont), std::move(PixelSPAuxCont)));
-    }
 
     
     if (m_doClusters) {
@@ -118,6 +106,18 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
             ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx,*PixelContFromClusters,*SCTContFromClusters,*ProtoTracksFromTracks, *FPGATrackColl ));
           }
         }
+
+        if (m_doSP) {
+          SG::ReadHandle<FPGATrackSimClusterCollection> FPGASPHandle (m_FPGASPKey, ctx);
+          SG::ReadHandle<FPGATrackSimClusterCollection> FPGAClustersHandle (m_FPGAClusterKey, ctx);
+
+          if (FPGASPHandle.isValid()) { // To avoid running over events that didn't pass truth tracks selections
+            const FPGATrackSimClusterCollection *FPGASPColl = FPGASPHandle.cptr();
+            const FPGATrackSimClusterCollection *FPGAClustersColl = FPGAClustersHandle.cptr();
+            ATH_CHECK( m_ClusterConverter->convertSpacePoints(*FPGASPColl, *FPGAClustersColl, *StripSPCont, *PixelSPCont, *SCTContFromClusters, *PixelContFromClusters) );
+          }
+          else {{ATH_MSG_WARNING("Failed to retrieve 1st stage FPGATrackSimSpacePointCollection. Will skip SP conversion ");}}
+        }
       }
 
       else {ATH_MSG_WARNING("Failed to retrieve 1st stage FPGATrackSimClusterCollection. Will skip clusters and track conversion ");}
@@ -133,7 +133,17 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
         ATH_CHECK( ActsProtoTrackFromFPGARoadHandle.record (std::move(ProtoTracksFromRoads)));
         ATH_CHECK( ActsProtoTrackFromFPGATrackHandle.record (std::move(ProtoTracksFromTracks)));
       }
+      if (m_doSP) 
+      {
+        SG::WriteHandle<xAOD::SpacePointContainer> xAODStripSpacePointFromFPGAHandle (m_xAODStripSpacePointFromFPGAKey, ctx);
+        SG::WriteHandle<xAOD::SpacePointContainer> xAODPixelSpacePointFromFPGAHandle (m_xAODPixelSpacePointFromFPGAKey, ctx);
+        ATH_CHECK( xAODStripSpacePointFromFPGAHandle.record (std::move(StripSPCont), std::move(StripSPAuxCont)));
+        ATH_CHECK( xAODPixelSpacePointFromFPGAHandle.record (std::move(PixelSPCont), std::move(PixelSPAuxCont)));
+      }
     }  
+
+
+
 
     if (m_doHits) {
 
