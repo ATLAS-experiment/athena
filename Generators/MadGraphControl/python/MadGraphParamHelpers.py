@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Helper functions for working with parameter settings in MadGraph
 
@@ -154,14 +154,14 @@ def do_PMG_updates(process_dir):
 def check_PMG_updates(process_dir):
     """ Check if the param card is consistent with the PMG values
     Takes a process directory
-    Prints warnings in case there is an inconsistency
+    Prints info in case there is an inconsistency
     Return value is an error code (0 for all ok)
     """
     param_card_settings = get_PMG_updates(process_dir)
     code = 0
     for block in param_card_settings:
         if len(param_card_settings[block].keys())>0:
-            mgparlog.warning('Block '+block+' needs updates: '+str(param_card_settings[block]))
+            mgparlog.info('Block '+block+' needs updates: '+str(param_card_settings[block]))
             code = 1
     return code
 

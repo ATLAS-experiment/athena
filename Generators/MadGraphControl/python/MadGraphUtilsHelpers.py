@@ -1,6 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
-
-import os
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 def getDictFromCard(card_loc,lowercase=False):
     card=open(card_loc)
@@ -107,6 +105,7 @@ def get_runArgs_info(runArgs):
     return beamEnergy,random_seed
 
 def get_physics_short():
+    import os
     FIRST_DIR = (os.environ['JOBOPTSEARCHPATH']).split(":")[0]
     jofiles = [f for f in os.listdir(FIRST_DIR) if (f.startswith('mc') and f.endswith('.py'))]
     if len(jofiles)==0:

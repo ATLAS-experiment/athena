@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Pythonized version of MadGraph steering executables
 #    written by Zach Marshall <zach.marshall@cern.ch>
@@ -325,7 +325,7 @@ def new_process(process='generate p p > t t~\noutput -f', plugin=None, keepJpegs
     in_config.close()
     for o in needed_options:
         if o not in option_paths:
-            mglog.warning('Path for option '+o+' not found in original config')
+            mglog.info('Path for option '+o+' not found in original config')
 
     mglog.info('Modifying config paths to avoid use of afs:')
     mglog.info(option_paths)
@@ -2259,7 +2259,7 @@ def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAP
             continue
         if settings_lower[asetting] is None:
             continue
-        mglog.warning('Option '+asetting+' was not in the default run_card.  Adding by hand a setting to '+str(settings_lower[asetting]) )
+        mglog.info('Option '+asetting+' was not in the default run_card (normal for hidden options).  Adding by hand a setting to '+str(settings_lower[asetting]) )
         newCard.write( ' '+str(settings_lower[asetting])+'   = '+str(asetting)+'\n')
     # close files
     oldCard.close()
