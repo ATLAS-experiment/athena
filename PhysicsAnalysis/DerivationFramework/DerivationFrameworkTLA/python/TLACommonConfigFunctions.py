@@ -138,7 +138,7 @@ def AddStandardTLATruthContentsCfg(flags,
     # Should photons that are dressed onto taus also be removed from truth jets?
     if includeTausInDressingPhotonRemoval:
         acc.getPublicTool("DFCommonTruthTauDressingTool").decorationName=decorationDressing
-    acc.addEventAlgo(CompFactory.DerivationFramework.LockDecoration(name ="AddStandardTLATruthContentsLockDecoration", Decoration = 'TruthParticles.' + decorationDressing))
+    acc.addEventAlgo(CompFactory.DerivationFramework.LockDecorations(name ="AddStandardTLATruthContentsLockDecoration", Decorations = ['TruthParticles.' + decorationDressing]))
 
     # Add back the navigation contect for the collections we want
     acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, ["TruthElectrons", "TruthMuons", "TruthPhotons", "TruthTaus", "TruthNeutrinos", "TruthBSM", "TruthBottom", "TruthTop", "TruthBoson"], prefix=prefix))
