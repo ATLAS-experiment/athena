@@ -817,9 +817,9 @@ StatusCode IDPerfMonZmumu::bookTrees()
   
   // now register the Trees
   ATH_MSG_INFO("initialize() Going to register the mu+mu- trees");
-  ITHistSvc* tHistSvc = nullptr;
-  if (service("THistSvc",tHistSvc).isFailure()){
-    ATH_MSG_ERROR("initialize() Could not find Hist Service -> Switching ValidationMode Off !");
+  ServiceHandle<ITHistSvc> tHistSvc("THistSvc", name());
+  if (tHistSvc.retrieve().isFailure()){
+        ATH_MSG_ERROR("initialize() Could not find Hist Service -> Switching ValidationMode Off !");
     m_validationMode = false;
   }
   
