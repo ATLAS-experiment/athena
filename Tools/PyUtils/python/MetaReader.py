@@ -241,19 +241,19 @@ read_md("{filename}")
                     "m_eventTypes",
                     "m_branchNames",
                     "m_classNames",
-                    "FileMetaDataAux::amiTag",
-                    "FileMetaDataAux::AODFixVersion",
-                    "FileMetaDataAux::AODCalibVersion",
-                    "FileMetaDataAux::beamEnergy",
-                    "FileMetaDataAux::beamType",
-                    "FileMetaDataAux::conditionsTag",
-                    "FileMetaDataAux::dataYear",
-                    "FileMetaDataAux::generatorsInfo",
-                    "FileMetaDataAux::geometryVersion",
-                    "FileMetaDataAux::isDataOverlay",
-                    "FileMetaDataAux::mcCampaign",
-                    "FileMetaDataAux::mcProcID",
-                    "FileMetaDataAux::simFlavour",
+                    "FileMetaDataAuxDyn:amiTag",
+                    "FileMetaDataAuxDyn:AODFixVersion",
+                    "FileMetaDataAuxDyn:AODCalibVersion",
+                    "FileMetaDataAuxDyn:beamEnergy",
+                    "FileMetaDataAuxDyn:beamType",
+                    "FileMetaDataAuxDyn:conditionsTag",
+                    "FileMetaDataAuxDyn:dataYear",
+                    "FileMetaDataAuxDyn:generatorsInfo",
+                    "FileMetaDataAuxDyn:geometryVersion",
+                    "FileMetaDataAuxDyn:isDataOverlay",
+                    "FileMetaDataAuxDyn:mcCampaign",
+                    "FileMetaDataAuxDyn:mcProcID",
+                    "FileMetaDataAuxDyn:simFlavour",
                     "productionRelease",
                     "dataType",
                 ]
@@ -296,7 +296,7 @@ read_md("{filename}")
                 meta_dict[filename]["FileMetaData"] = {}
                 for key in keys_to_extract:
                     try:
-                        meta_dict[filename]["FileMetaData"][key.split("::")[1]] = (
+                        meta_dict[filename]["FileMetaData"][key.split(":")[1]] = (
                             result[key]
                         )
                     except (IndexError, KeyError):
