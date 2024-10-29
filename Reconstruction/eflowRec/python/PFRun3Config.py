@@ -135,31 +135,36 @@ def PFTauFELinkCfg(inputFlags,**kwargs):
   result.addEventAlgo(getTauFlowElementAssocAlgorithm(inputFlags))
   return result
 
-if __name__=="__main__":
+# Run with python -m eflowRec.PFRun3Config
+def PFRun3ConfigTest(flags=None):
 
+  if flags is None:
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    cfgFlags = initConfigFlags()
-    cfgFlags.Concurrency.NumThreads=8
-    cfgFlags.Input.isMC=True
-    cfgFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc21_13p6TeV/ESDFiles/mc21_13p6TeV.421450.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep_fct.recon.ESD.e8445_e8447_s3822_r13565/ESD.28877240._000046.pool.root.1"]
-    # Use latest MC21 tag to pick up latest muon folders apparently needed
-    cfgFlags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-10"
-    cfgFlags.Output.AODFileName="output_AOD.root"
-    cfgFlags.Output.doWriteAOD=True
-    cfgFlags.fillFromArgs()
-    cfgFlags.lock()
+    flags = initConfigFlags()
 
-    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg=MainServicesCfg(cfgFlags)
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
+    flags.Input.Files = defaultTestFiles.ESD_RUN3_MC
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
+    flags.Output.doWriteAOD=True
+    flags.Output.AODFileName="output_AOD.root"
 
-    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg.merge(PoolReadCfg(cfgFlags))
-    cfg.merge(PFFullCfg(cfgFlags))
-    
-    from eflowRec.PFRun3Remaps import ListRemaps
+    flags.fillFromArgs()
+    flags.lock()
 
-    list_remaps=ListRemaps()
-    for mapping in list_remaps:
-        cfg.merge(mapping)    
+  from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+  cfg=MainServicesCfg(flags)
 
-    cfg.run()
+  from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+  cfg.merge(PoolReadCfg(flags))
+  cfg.merge(PFFullCfg(flags))
+  
+  from eflowRec.PFRun3Remaps import ListRemaps
+
+  list_remaps=ListRemaps()
+  for mapping in list_remaps:
+      cfg.merge(mapping)    
+
+  cfg.run()
+
+if __name__=="__main__":
+  PFRun3ConfigTest()

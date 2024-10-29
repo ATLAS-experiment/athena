@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -487,51 +487,47 @@ def addSnapshot(topomaker, corrName,contName):
         topomaker.ClusterCorrectionTools += [newSnapshot]
     return   
 
+# Run with python -m CaloRec.CaloTopoClusterConfig
+def CaloTopoClusterConfigTest(flags=None):
+    if flags is None:
+        from AthenaConfiguration.AllConfigFlags import initConfigFlags
+        flags = initConfigFlags()
+        from AthenaConfiguration.TestDefaults import defaultTestFiles
+        flags.Input.Files = defaultTestFiles.ESD_RUN3_MC
+        flags.Output.ESDFileName="esdOut.pool.root"
+        flags.Exec.MaxEvents = 10
 
-if __name__=="__main__":
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
-    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc20e_13TeV/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.ESD.e4993_s3227_r12689/myESD.pool.root"]  
-    flags.Output.ESDFileName="esdOut.pool.root"
-
-    flags.fillFromArgs()
-    flags.lock()
+        flags.fillFromArgs()
+        flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-
     cfg = MainServicesCfg(flags)
+
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(flags))
 
-    theKey="CaloCalTopoClustersNew"
-
-    topoAcc=CaloTopoClusterCfg(flags)
+    topoAcc = CaloTopoClusterCfg(flags)
     topoAlg = topoAcc.getPrimary()
-    topoAlg.ClustersOutputName=theKey
-
+    topoAlg.ClustersOutputName = "CaloCalTopoClustersNew"
     cfg.merge(topoAcc)
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    cfg.merge(OutputStreamCfg(flags,"xAOD", ItemList=["xAOD::CaloClusterContainer#CaloCalTopoClusters*",#+theKey,
-                                                            "xAOD::CaloClusterAuxContainer#*CaloCalTopoClusters*Aux.",#+theKey+"Aux.",
-                                                            # "CaloClusterCellLinkContainer#"+theKey+"_links"
-                                                           ]))
+    cfg.merge(OutputStreamCfg(flags,"xAOD", ItemList =  ["xAOD::CaloClusterContainer#CaloCalTopoClusters*",
+                                                         "xAOD::CaloClusterAuxContainer#*CaloCalTopoClusters*Aux.",
+                                                        ]))
 
     ThinNegativeEnergyCaloClustersAlg=CompFactory.ThinNegativeEnergyCaloClustersAlg
     theNegativeEnergyCaloClustersThinner = ThinNegativeEnergyCaloClustersAlg(
         "ThinNegativeEnergyCaloClustersAlg",
-        CaloClustersKey=theKey,
+        CaloClustersKey=topoAlg.ClustersOutputName,
         ThinNegativeEnergyCaloClusters = True,
         StreamName = 'StreamAOD'
     )
     cfg.addEventAlgo(theNegativeEnergyCaloClustersThinner,"AthAlgSeq")
 
-    
-    cfg.addEventAlgo(CompFactory.ClusterDumper("TopoDumper",ContainerName=theKey,FileName="NewTopoClusters.txt"),sequenceName="AthAlgSeq")
+    cfg.addEventAlgo(CompFactory.ClusterDumper("TopoDumper",ContainerName=topoAlg.ClustersOutputName,FileName="NewTopoClusters.txt"),sequenceName="AthAlgSeq")
 
-#    cfg.getService("StoreGateSvc").Dump=True
+    cfg.run()
 
-    cfg.run(10)
-    #f=open("CaloTopoCluster.pkl","wb")
-    #cfg.store(f)
-    #f.close()
+if __name__=="__main__":
+    CaloTopoClusterConfigTest()

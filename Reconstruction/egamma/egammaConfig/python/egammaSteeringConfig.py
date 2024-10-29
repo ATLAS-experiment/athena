@@ -52,20 +52,52 @@ def EGammaSteeringCfg(flags,
     mlog.info("EGamma Steering done")
     return acc
 
+# Run with python -m egammaConfig.egammaSteeringConfig
+def egammaSteeringConfigTest(flags=None):
 
-if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
-    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.RDO_RUN2
-    flags.Output.doWriteESD = True  # To test the ESD parts
-    flags.Output.doWriteAOD = True  # To test the AOD parts
-    flags.lock()
-    acc = MainServicesCfg(flags)
-    acc.merge(EGammaSteeringCfg(flags))
-    acc.printConfig(withDetails=True,
-                    printDefaults=True)
+    if flags is None:
+        from AthenaConfiguration.AllConfigFlags import initConfigFlags
+        flags = initConfigFlags()
+        flags.addFlag('egamma.configOnly', False, help='custom option for egammaSteeringConfig to not run, only output config file')
+
+        from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
+        flags.Input.Files = defaultTestFiles.RDO_RUN3
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
+        flags.Exec.MaxEvents = 1
+
+        flags.Output.doWriteESD = True  # To test the ESD parts
+        flags.Output.doWriteAOD = True  # To test the AOD parts
+        flags.Output.ESDFileName = "myESD.pool.root"
+        flags.Output.AODFileName = "myAOD.pool.root"
+        
+        from egammaConfig.ConfigurationHelpers import egammaOnlyFromRaw
+        egammaOnlyFromRaw(flags)
+        flags.fillFromArgs()
+
+        flags.lock()
+
+    from RecJobTransforms.RecoSteering import RecoSteering
+    acc = RecoSteering(flags)
+
+    # Special message service configuration
+    from DigitizationConfig.DigitizationSteering import DigitizationMessageSvcCfg
+    acc.merge(DigitizationMessageSvcCfg(flags))
+
+    from AthenaConfiguration.Utils import setupLoggingLevels
+    setupLoggingLevels(flags, acc)
+
+    # Print reco domain status
+    from RecJobTransforms.RecoConfigFlags import printRecoFlags
+    printRecoFlags(flags)
 
     with open("egammasteeringconfig.pkl", "wb") as f:
         acc.store(f)
+
+    if hasattr(flags, 'egamma') and flags.egamma.configOnly:
+        return None  # returns statusCode of None
+    else:
+        statusCode = acc.run()
+        return statusCode
+
+if __name__ == "__main__":
+    egammaSteeringConfigTest()

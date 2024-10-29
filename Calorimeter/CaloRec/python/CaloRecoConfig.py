@@ -95,38 +95,52 @@ def CaloRecoDebuggingCfg(flags):
 
     return result
 
+# Run with python -m CaloRec.CaloRecoConfig
+def CaloRecoConfigTest(flags=None):
 
-if __name__=="__main__":
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaCommon.Logging import log
-    from AthenaCommon.Constants import DEBUG,INFO
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags,defaultConditionsTags,defaultTestFiles
-    log.setLevel(DEBUG)
-    flags = initConfigFlags()
-    flags.Input.Files = (defaultTestFiles.RAW_RUN3)
-    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
-    flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
+    if flags is None:
+        from AthenaConfiguration.AllConfigFlags import initConfigFlags
+        flags = initConfigFlags()
 
-    flags.Exec.OutputLevel=INFO
-    flags.Exec.MaxEvents=10
-    flags.fillFromArgs()
+        from AthenaConfiguration.TestDefaults import defaultGeometryTags,defaultConditionsTags,defaultTestFiles
+        flags.Input.Files = defaultTestFiles.RAW_RUN3_DATA24
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
+        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
-    flags.lock()
+        from AthenaCommon.Constants import DEBUG,INFO
+        from AthenaCommon.Logging import log
+        log.setLevel(DEBUG)
+        flags.Exec.OutputLevel=INFO
+
+        flags.Exec.MaxEvents=10
+        flags.fillFromArgs()
+        flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg(flags)
 
     acc.merge(CaloRecoCfg(flags))
 
-
-    CaloCellDumper=CompFactory.CaloCellDumper
+    CaloCellDumper = CompFactory.CaloCellDumper
     acc.addEventAlgo(CaloCellDumper(),sequenceName="AthAlgSeq")
 
-    ClusterDumper=CompFactory.ClusterDumper
+    ClusterDumper = CompFactory.ClusterDumper
     acc.addEventAlgo(ClusterDumper("TopoDumper",ContainerName="CaloCalTopoClusters",FileName="TopoCluster.txt"),sequenceName="AthAlgSeq")
 
-    f=open("CaloRec.pkl","wb")
+    f = open("CaloRec.pkl","wb")
     acc.store(f)
     f.close()
 
     acc.run()
+
+if __name__=="__main__":
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaCommon.Logging import log
+    from AthenaCommon.Constants import DEBUG
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags,defaultConditionsTags,defaultTestFiles
+    log.setLevel(DEBUG)
+    flags = initConfigFlags()
+    flags.Input.Files = (defaultTestFiles.RAW_RUN3)
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
+    flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
+    CaloRecoConfigTest(flags)

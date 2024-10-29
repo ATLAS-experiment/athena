@@ -166,4 +166,9 @@
 #include "dqm_algorithms/TileTriggerMonitor.h"
 #include "dqm_algorithms/TripleGaussCollFit.h"
 #include "dqm_algorithms/LastBinThresholdAction.h"
+#include "dqm_algorithms/ZDCPercentageThreshTests.h"
+#include "dqm_algorithms/ZDCPercentEvents_XthBin_NormalizeToFirstBin.h"
+#include "dqm_algorithms/ZDCPercentEvents_XthBin.h"
+#include "dqm_algorithms/ZDCPercentEvents_UnderThreshold.h"
+#include "dqm_algorithms/ZDCPercentEvents_AboveThreshold.h"
 #endif // DQM_ALGORITHMS_DQM_ALGORITHMSDICT_H
