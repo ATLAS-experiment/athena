@@ -4,11 +4,10 @@
 #include "AthenaKernel/IOVInfiniteRange.h"
 
 #include "MdtCalibDbAlg.h"
-#include "MdtCalibR4/RtSqrt.h"
 #include "MdtCalibR4/TrSqrt.h"
 #include "MdtCalibR4/RtResolutionSqrt.h"
 #include "MdtCalibData/MdtRtRelation.h"
-
+#include "MdtCalibData/RootRtRelation.h"
 #include "MdtCalibData/MdtFullCalibData.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
@@ -49,18 +48,14 @@ StatusCode MdtCalibDbAlg::execute(const EventContext& ctx) const {
 StatusCode MdtCalibDbAlg::loadRt(MuonCalib::MdtCalibDataContainer& writeHandle) const {
     ATH_MSG_DEBUG("loadRt " << name());
 
-    MuonCalib::CalibFunc::ParVec rtPars{-10000, 10000};
+    MuonCalib::CalibFunc::ParVec rtPars{-10000, 10000, 1.};
     MuonCalib::CalibFunc::ParVec resoPars{-10000, 10000.};
 
-    //Create an RtSqrt
-    auto rtRel{std::make_unique<MuonCalibR4::RtSqrt>(rtPars)};
-    auto rtRes{std::make_unique<MuonCalibR4::RtResolutionSqrt>(resoPars)};
-    auto trRel{std::make_unique<MuonCalibR4::TrSqrt>(MuonCalibR4::RtSqrt(rtPars))};
    
     //Loop over RT regions and store the RT in each
-    auto rtRelRegion{std::make_unique<MuonCalibR4::RtSqrt>(rtPars)};
+    auto rtRelRegion{std::make_unique<MuonCalib::RootRtRelation>(rtPars)};
     auto rtResRegion{std::make_unique<MuonCalibR4::RtResolutionSqrt>(resoPars)};
-    auto trRelRegion{std::make_unique<MuonCalibR4::TrSqrt>(MuonCalibR4::RtSqrt(rtPars))};
+    auto trRelRegion{std::make_unique<MuonCalibR4::TrSqrt>(*rtRelRegion)};
     RtRelationPtr MdtRt = std::make_unique<MuonCalib::MdtRtRelation>(std::move(rtRelRegion), std::move(rtResRegion), std::move(trRelRegion), 0.);
     std::vector<const MuonGMR4::MdtReadoutElement*> detEls = m_r4detMgr->getAllMdtReadoutElements();
     for(const MuonGMR4::MuonReadoutElement* mdtDetEl : detEls) {

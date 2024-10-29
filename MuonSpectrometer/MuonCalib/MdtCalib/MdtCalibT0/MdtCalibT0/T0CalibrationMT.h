@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef T0CALIBRATIONMT_H
@@ -10,7 +10,7 @@
 #include <set>
 #include <string>
 #include <vector>
-
+#include <memory>
 #include "MdtCalibData/MdtTubeFitContainer.h"
 #include "MdtCalibInterfaces/IMdtCalibration.h"
 #include "MuonCalibStandAloneBase/NtupleStationId.h"
@@ -45,7 +45,9 @@ namespace MuonCalib {
          * @param[in] sorting criteria (TUBE, CHAMBER, MULTILAYER...) default is by TUBE
          */
 
-        T0CalibrationMT(const std::string& name, const T0MTSettings *settings, const std::vector<int> &sort_by,
+        T0CalibrationMT(const std::string& name, 
+                        std::shared_ptr<const T0MTSettings> settings, 
+                        const std::vector<int> &sort_by,
                         const std::vector<int> &adc_sort_by);
 
         /** destructor */
@@ -80,7 +82,7 @@ namespace MuonCalib {
         void doAdcFit(ADCMTHistos *T0h, const std::set<MuonFixedId> &tube_ids, std::map<int, MdtTubeFitContainer::SingleTubeFit> &fim,
                       std::map<int, MdtTubeFitContainer::SingleTubeCalib> &stcm);  //!< fit adc spectrum
 
-        const T0MTSettings *m_settings;  //!< pointer to the settings
+        std::shared_ptr<const T0MTSettings> m_settings;  //!< pointer to the settings
         bool m_converged;                //!< convergence status
         std::string m_name;              //!< calibration region name
         int m_currentItnum;              //!< current iteration (always 1?)
@@ -96,7 +98,6 @@ namespace MuonCalib {
         std::map<NtupleStationId, MdtRelativeTubeT0> m_rel_tube_t0s;
         const std::vector<int> &m_sort_by;
         const std::vector<int> &m_adc_sort_by;
-        bool m_delete_settings;
 
         // hidden assignment operator and copy constructor
         T0CalibrationMT &operator=(const T0CalibrationMT &right) = delete;

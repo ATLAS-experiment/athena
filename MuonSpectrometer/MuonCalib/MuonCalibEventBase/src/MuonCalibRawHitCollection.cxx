@@ -12,7 +12,6 @@
 #include "MuonCalibEventBase/MuonCalibRawRpcHit.h"
 #include "MuonCalibEventBase/MuonCalibRawTgcCoin.h"
 #include "MuonCalibEventBase/MuonCalibRawTgcHit.h"
-#include "MuonCalibStl/DeleteObject.h"
 
 namespace MuonCalib {
 

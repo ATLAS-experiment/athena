@@ -8,7 +8,6 @@
 #include <limits>
 
 #include "MuonCalibEventBase/MuonCalibSegment.h"
-#include "MuonCalibStl/DeleteObject.h"
 
 namespace MuonCalib {
 

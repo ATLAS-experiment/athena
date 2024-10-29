@@ -11,7 +11,6 @@
 #include <sstream>
 #include <string>
 
-#include "MuonCalibStl/DeleteObject.h"
 
 namespace MuonCalib {
 

@@ -13,7 +13,6 @@
 #include "MuonCalibEventBase/MuonCalibRawTriggerHitCollection.h"
 #include "MuonCalibEventBase/MuonCalibTriggerTimeInfo.h"
 #include "MuonCalibEventBase/MuonCalibTruthCollection.h"
-#include "MuonCalibStl/DeleteObject.h"
 
 namespace MuonCalib {
     MuonCalibEvent::~MuonCalibEvent() = default;

@@ -1,13 +1,15 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibUtils/GlobalTimeFitter.h"
-#include "MdtCalibData/MdtCalibrationFactory.h"
+#include "MdtCalibData/RtRelationLookUp.h"
+#include "MdtCalibInterfaces/IMdtCalibrationTool.h"
 #include <sstream>
 #include <string>
+#include <array>
 namespace {
-    constexpr double tdc_bc_conv = 25. / 32.;
+    constexpr double tdc_bc_conv = IMdtCalibrationTool::tdcBinSize;
     constexpr double max_drift_time_30mm = 750;
 }  // namespace
 
@@ -17,8 +19,9 @@ namespace MuonCalib {
         double timeShift = 0;
         float tdcmin = FLT_MAX;
         double timeoffset = 0.;
-        int stepf, stepff[13], stepl, stepr, dtt, dttbuono(0);
-        double chi2r, chi2l;
+        int stepf{0}, stepl{0}, stepr{0}, dtt{0}, dttbuono{0};
+        std::array<int, 13> stepff{};
+        double chi2r{0.}, chi2l{0.};
         double chi2min = FLT_MAX;
         double bestchi2 = FLT_MAX;
 
@@ -128,7 +131,7 @@ namespace MuonCalib {
         return timeShift;
     }
 
-    IRtRelation* GlobalTimeFitter::getDefaultRtRelation() {
+    std::unique_ptr<IRtRelation> GlobalTimeFitter::getDefaultRtRelation() {
         static const MuonCalib::CalibFunc::ParVec rtPars{
 
             -50.,  // t_Start
@@ -147,10 +150,7 @@ namespace MuonCalib {
             14.458,  14.516,   14.8312,  14.85,    14.86,    14.87
 
         };
-
-        IRtRelation* rt = MuonCalib::MdtCalibrationFactory::createRtRelation("RtRelationLookUp", rtPars);
-
-        return rt;
+        return std::make_unique<RtRelationLookUp>(rtPars);
     }
 
 }  // namespace MuonCalib

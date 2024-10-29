@@ -18,7 +18,7 @@ namespace MuonCalib {
     }
 
     float RtScaleFunction(const float t, const bool ml2, const IRtRelation &rt) {
-        if (t < rt.tLower() || !rt.HasTmaxDiff()) return 0.0;
+        if (t < rt.tLower() || !rt.hasTmaxDiff()) return 0.0;
         // apply linear scale and calculate r as input to the polinomial
         float rt_length = rt.tUpper() - rt.tLower();
         float corr_val = (t / rt_length) * rt.GetTmaxDiff() * (ml2 ? -0.5 : +0.5);

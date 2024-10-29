@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCALIB_GLOBALTIMEFITTER_H
 #define MUONCALIB_GLOBALTIMEFITTER_H
 
 #include <iostream>
+#include <memory>
 
 #include "MdtCalibData/IRtRelation.h"
 #include "MdtCalibInterfaces/IMdtSegmentFitter.h"
@@ -28,7 +29,7 @@ namespace MuonCalib {
         double GTFit(MuonCalibSegment *seg);
         double GTFit2(MuonCalibSegment *seg);
 
-        IRtRelation *getDefaultRtRelation();
+        static std::unique_ptr<IRtRelation> getDefaultRtRelation();
 
         void setRtRelation(const IRtRelation *rtRel) { m_rtRel = rtRel; };
 

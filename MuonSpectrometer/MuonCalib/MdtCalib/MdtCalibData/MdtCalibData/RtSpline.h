@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // 23.03.2005, AUTHOR: OLIVER KORTNER
 // Modified: 31.05.2006 by O. Kortner: major redesign:
-//                                     driftvelocity implemented,
+//                                     driftVelocity implemented,
 //                                     resolution has been removed,
 //                                     set-method have been removed
 //           04.06.2006 by O. Kortner: bug in constructor fixed,
@@ -25,7 +25,7 @@
 
 // STL //
 #include <vector>
-
+#include <memory>
 // MDT calibration //
 #include "MdtCalibData/IRtRelation.h"
 
@@ -45,11 +45,7 @@ namespace MuonCalib {
     class RtSpline : public IRtRelation {
     private:
         // Spline Class//
-        TSpline3 *p_sp3;
-
-        // private methods //
-        /** initialization method */
-        void _init();
+        std::unique_ptr<TSpline3> m_sp3{};
 
     public:
         // Constructors
@@ -61,30 +57,29 @@ namespace MuonCalib {
         ParVec[1 + 2n] = y coordinate of n_th support point
 
         */
-        explicit RtSpline(const ParVec &vec) : IRtRelation(vec) { _init(); }
+        explicit RtSpline(const ParVec &vec);
 
-        ~RtSpline();
+        virtual ~RtSpline();
 
         // Methods //
         // methods required by the base classes //
-        inline std::string name() const { return "RtSpline"; }
+        inline std::string name() const override final{ return "RtSpline"; }
 
         //!< get the class name
-        double radius(double t) const;
+        virtual double radius(double t) const override final;
         //!< get the radius corresponding to the
         //!< drift time t;
         //!< 0 or 14.6 is returned if t is outside
         //!< the range
-        double driftvelocity(double t) const;
+        virtual double driftVelocity(double t) const override final;
         //!< get the drift velocity
-
-        //dummy method for drdt
-        double drdt(double /*t*/) const { return 0.0; }
+       virtual double driftAcceleration(double t) const override final;
+       
 
         // get-methods specific to the RtSpline class //
-        double tLower() const;
+        virtual double tLower() const override final;
         //!< get the lower drift-time bound
-        double tUpper() const;
+        virtual double tUpper() const override final;
         //!< get the upper drift-time bound
     };
 }  // namespace MuonCalib

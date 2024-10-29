@@ -13,6 +13,10 @@
 #include <MdtCalibInterfaces/MdtCalibTwinOutput.h>
 
 
+namespace MuonCalib{
+    class MdtFullCalibData; 
+}
+
 /**
    @class IMdtCalibrationTool
    the Mdt Calib Service provides, on request, the drift radius and its 
@@ -76,13 +80,13 @@ public:
                                                 MdtCalibInput&& primHit, 
                                                 MdtCalibInput&& twinHit) const = 0;
   
+  
+  virtual const MuonCalib::MdtFullCalibData* getCalibConstants(const EventContext& ctx,
+                                                               const Identifier& channelId) const = 0;
   virtual double getResolutionFromRt(const EventContext& ctx,
                                      const Identifier& module,
                                      const double time) const  = 0;
 
-  virtual double getdRdtFromRt(const EventContext& ctx,
-                               const Identifier& module,
-                               const double time) const  = 0;
   struct ToolSettings {
       enum class Property {
         TofCorrection = 0,

@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
+#include <span>
 
 // MDT calibration //
 #include "MdtCalibData/IRtRelation.h"
@@ -42,23 +43,22 @@ namespace MuonCalib {
         explicit RtChebyshev(const ParVec& vec) ;
         // Methods //
         // methods required by the base classes //
-        std::string name() const;  //!< get the class name
+        virtual std::string name() const override final;  //!< get the class name
 
-        double radius(double t) const;
+
         //!< get the radius corresponding to the drift time t;
         //!< if t is not within [t_low, t_up] an unphysical radius of 99999 is returned
-        
-        //method for getting drdt
-        double drdt(double t) const;
-
+        virtual double radius(double t) const override final;
         //!< get the drift velocity
-        double driftvelocity(double t) const;
+        virtual double driftVelocity(double t) const override final;
+        //!< get the drift acceleration
+        virtual double driftAcceleration(double t) const override final;
 
         // get-methods specific to the RtChebyshev class //
         //!< get the lower drift-time bound
-        double tLower() const;
+        virtual double tLower() const override final;
         //!< get the upper drift-time bound
-        double tUpper() const;
+        virtual double tUpper() const override final;
 
         //!< get the number of parameters used to describe the r(t) relationship
         unsigned int numberOfRtParameters() const;
@@ -67,7 +67,7 @@ namespace MuonCalib {
         std::vector<double> rtParameters() const;
 
         //!< get the reduced time which is the argument of the Chebyshev polynomial
-        double get_reduced_time(const double  t) const;
+        double getReducedTime(const double  t) const;
     };
 }  // namespace MuonCalib
 

@@ -346,7 +346,7 @@ namespace MuonCombined {
                     auto data = mdtCalibConstants->getCalibData(id, msgStream());
                     const auto& rtRelation = data->rtRelation;
                     bool out_of_bound_flag = false;
-                    float drdt = rtRelation->rt()->driftvelocity(driftTime);
+                    float drdt = rtRelation->rt()->driftVelocity(driftTime);
                     float rres = rtRelation->rtRes()->resolution(driftTime);
                     float tres = rres / drdt;
                     float TlocR = rtRelation->tr()->tFromR(std::abs(locR), out_of_bound_flag);
@@ -638,7 +638,7 @@ namespace MuonCombined {
                 auto data = mdtCalibConstants->getCalibData(id, msgStream());
                 const auto& rtRelation = data->rtRelation;
                 bool out_of_bound_flag = false;
-                float drdt = rtRelation->rt()->driftvelocity(driftTime);
+                float drdt = rtRelation->rt()->driftVelocity(driftTime);
                 float rres = rtRelation->rtRes()->resolution(driftTime);
                 float tres = rres / drdt;
                 float TlocR = rtRelation->tr()->tFromR(std::abs(locR), out_of_bound_flag);

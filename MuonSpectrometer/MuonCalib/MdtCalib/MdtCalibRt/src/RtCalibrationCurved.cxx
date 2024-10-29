@@ -605,7 +605,7 @@ bool RtCalibrationCurved::analyse(const MuonSegVec &seg) {
         for (unsigned int k = 0; k < nb_points + 1; k++) {
             x_r[k].set_x1(t_from_r(k * step));
             x_r[k].set_x2(rt_Chebyshev->radius(x_r[k].x1()));
-            x_r[k].set_x1(rt_Chebyshev->get_reduced_time(x_r[k].x1()));
+            x_r[k].set_x1(rt_Chebyshev->getReducedTime(x_r[k].x1()));
             x_r[k].set_error(1.0);
 
             r_corr = 0.0;
@@ -951,13 +951,13 @@ std::shared_ptr<RtRelationLookUp> RtCalibrationCurved::performParabolicExtrapola
     // RETURN RESULTS //
     ////////////////////
     if (min && max) {
-        if (in_rt.HasTmaxDiff()) { rt_low->SetTmaxDiff(in_rt.GetTmaxDiff()); }
+        if (in_rt.hasTmaxDiff()) { rt_low->SetTmaxDiff(in_rt.GetTmaxDiff()); }
         return rt_low;
     }
     if (min) {
-        if (in_rt.HasTmaxDiff()) { rt_low->SetTmaxDiff(in_rt.GetTmaxDiff()); }
+        if (in_rt.hasTmaxDiff()) { rt_low->SetTmaxDiff(in_rt.GetTmaxDiff()); }
         return rt_low;
     }
-    if (in_rt.HasTmaxDiff() && rt_high) { rt_high->SetTmaxDiff(in_rt.GetTmaxDiff()); }
+    if (in_rt.hasTmaxDiff() && rt_high) { rt_high->SetTmaxDiff(in_rt.GetTmaxDiff()); }
     return rt_high;
 }

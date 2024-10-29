@@ -176,7 +176,7 @@ namespace MuonCalib {
         int ml = hit.identify().mdtMultilayer() - 1;
         double r_track = std::abs(hit.signedDistanceToTrack());
         double res = std::abs(hit.driftRadius()) - r_track;
-        double v = rt_relation.driftvelocity(hit.driftTime());
+        double v = rt_relation.driftVelocity(hit.driftTime());
         m_histograms->GetResHist(ml)->Fill(r_track, res / v);
     }
 
@@ -201,7 +201,7 @@ namespace MuonCalib {
         if (!rt_relation) return true;
         float scale = m_polfun->GetParameter(0);
         if (std::abs(scale) > 2) scale *= 4;
-        if (rt_relation->HasTmaxDiff()) { scale += rt_relation->GetTmaxDiff(); }
+        if (rt_relation->hasTmaxDiff()) { scale += rt_relation->GetTmaxDiff(); }
         rt_relation->SetTmaxDiff(scale);
         if (seg.empty()) return true;
         // update input segments

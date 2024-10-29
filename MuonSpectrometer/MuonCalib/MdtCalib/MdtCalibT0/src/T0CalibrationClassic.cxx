@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibT0/T0CalibrationClassic.h"
@@ -8,12 +8,11 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <format>
 
 #include "MdtCalibT0/T0CalibrationOutput.h"
 #include "MuonCalibEventBase/MuonCalibSegment.h"
 #include "MuonCalibIdentifier/MuonFixedId.h"
-#include "MuonCalibStl/DeleteObject.h"
-#include "MuonCalibStl/ToString.h"
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TMinuit.h"
@@ -192,8 +191,7 @@ namespace MuonCalib {
             if (fitMezz == 1 && !isMultilayer) {  // FIT MEZZANINE
                 int hIdMezz = fId.mdtMezzanine();
 
-                ToString ts;
-                std::string HistoId(std::string("time_mezz_") + ts((hIdMezz) % (900000000)));
+                std::string HistoId = std::format("time_mezz_{:}", (hIdMezz) % (900000000));
                 if (log.level() <= MSG::DEBUG) {
                     log << MSG::DEBUG << " doTimeFit HistogramId : " << T0h.id << endmsg;
                     log << MSG::DEBUG << " doTimeFit Histogram : " << HistoId << endmsg;
@@ -359,8 +357,7 @@ namespace MuonCalib {
 
             if (fitMezz == 1) {
                 int hIdMezz = fId.mdtMezzanine();
-                ToString ts;
-                std::string HistoId(std::string("charge_mezz_") + ts((hIdMezz) % (900000000)));
+                std::string HistoId = std::format("charge_mezz_{:}", (hIdMezz) % (900000000));
                 if (log.level() <= MSG::DEBUG) {
                     log << MSG::DEBUG << " doAdcFit HistogramId : " << T0h.id << endmsg;
                     log << MSG::DEBUG << " doAdcFit Histogram : " << HistoId << endmsg;
@@ -531,11 +528,10 @@ namespace MuonCalib {
     }
 
     T0ClassicHistos *T0CalibrationClassic::getHistos(unsigned int idtube) {
-        ToString ts;
         std::string HistoId;
         if ((int)(idtube / 100000000) == 9) {
             int mezz = (idtube) % (900000000);
-            HistoId = "time_mezz_" + ts(mezz);
+            HistoId = std::format("time_mezz_{:}", mezz);
         } else if (idtube == 0) {
             HistoId = "time";
         } else if (idtube == 1) {
@@ -564,7 +560,7 @@ namespace MuonCalib {
             std::string stationName = fId.stationNumberToFixedStationString(nstat);
             int eta = fId.eta();
             int phi = fId.phi();
-            HistoId = "time_" + stationName + "_" + ts(eta) + "_" + ts(phi) + "_" + ts(tubeid);
+            HistoId = std::format("time_{:}_{:}_{:}_{:}", stationName, eta, phi, tubeid);
         }
         T0ClassicHistos *ret = nullptr;
         TH1F *timeHis = (TH1F *)m_regiondir->Get(HistoId.c_str());
@@ -584,16 +580,14 @@ namespace MuonCalib {
 
     T0ClassicHistos *T0CalibrationClassic::bookHistos(unsigned int idtube) {
         std::unique_ptr<T0ClassicHistos> histos = std::make_unique<T0ClassicHistos>();
-        ToString ts;
-        std::string histonametdc;
-        std::string histonameadc;
+        std::string histonametdc{}, histonameadc{};
 
         histos->id = idtube;
         m_regiondir->cd();
         if ((int)(idtube / 100000000) == 9) {
             int mezz = (idtube) % (900000000);
-            histonametdc = "time_mezz_" + ts(mezz);
-            histonameadc = "charge_mezz_" + ts(mezz);
+            histonametdc = std::format("time_mezz_{:}", mezz);
+            histonameadc = std::format("charge_mezz_{:}", mezz);
         } else if (idtube == 0) {
             histonametdc = "time";
             histonameadc = "charge";
@@ -631,8 +625,8 @@ namespace MuonCalib {
             std::string stationName = fId.stationNumberToFixedStationString(nstat);
             int eta = fId.eta();
             int phi = fId.phi();
-            histonametdc = "time_" + stationName + "_" + ts(eta) + "_" + ts(phi) + "_" + ts(tubeid);
-            histonameadc = "charge_" + stationName + "_" + ts(eta) + "_" + ts(phi) + "_" + ts(tubeid);
+            histonametdc = std::format("time_{:}_{:}_{:}_{:}", stationName, eta, phi, tubeid);
+            histonameadc = std::format("charge_{:}_{:}_{:}_{:}", stationName, eta, phi, tubeid);
         }
 
         histos->time =

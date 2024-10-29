@@ -9,7 +9,6 @@
 
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
-#include "MuonCalibStl/DeleteObject.h"
 
 namespace MuonCalib {
 

@@ -14,7 +14,7 @@ atlas_add_library( MdtCalibT0
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaKernel GaudiKernel MdtCalibData MdtCalibInterfacesLib MuonCalibStandAloneBaseLib
-                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils MuonCalibEventBase MuonCalibIdentifier MuonCalibStl )
+                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils MuonCalibEventBase MuonCalibIdentifier )
 
 atlas_add_dictionary( MdtCalibT0Dict
                       MdtCalibT0/ReflexHeaders.h

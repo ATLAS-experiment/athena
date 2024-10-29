@@ -8,9 +8,10 @@
 
 #include <string>
 
-#include "MuonCalibStl/DeleteObject.h"
 
-#define M_MAX_RTS 100000
+namespace {
+    constexpr int M_MAX_RTS = 100000;
+}
 
 namespace MuonCalib {
 

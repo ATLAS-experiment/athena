@@ -167,7 +167,7 @@ double BFieldCorFunc::integral(const double r_min, const double r_max, const IRt
     while (rp < radius) {
         time = t_from_r(rp, rt);
         if (rp + step > radius) delta = radius - rp;
-        integ += 1.0e-3 * delta * std::pow(std::abs(rt->driftvelocity(time)) * 1.0e6, 1.0 - m_param[1]) /
+        integ += 1.0e-3 * delta * std::pow(std::abs(rt->driftVelocity(time)) * 1.0e6, 1.0 - m_param[1]) /
                             std::pow(E0 / (rp * 1.0e-3), 2.0 - m_param[1]);
         rp += step;
     }
