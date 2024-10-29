@@ -67,7 +67,7 @@ std::vector<std::vector<ElementLink<xAOD::IParticleContainer>>>* getIntersection
                 const std::vector<std::vector<ElementLink<xAOD::IParticleContainer>>>* matches2) {
 
 
-    // Allocate the intersection dynamically, same as in match function
+    // Create intersection vector, the same size as the match functions
     auto* intersection = new std::vector<std::vector<ElementLink<xAOD::IParticleContainer>>>(matches1->size());
 
     for (size_t i = 0; i < matches1->size(); ++i) {
@@ -75,7 +75,7 @@ std::vector<std::vector<ElementLink<xAOD::IParticleContainer>>>* getIntersection
         std::set<ElementLink<xAOD::IParticleContainer>> set1((*matches1)[i].begin(), (*matches1)[i].end());
         std::set<ElementLink<xAOD::IParticleContainer>> set2((*matches2)[i].begin(), (*matches2)[i].end());
 
-        // Temporary vector to store the intersection of current index
+        // Temp vector to store index
         std::vector<ElementLink<xAOD::IParticleContainer>> tempIntersection;
 
         // Find intersection between set1 and set2
