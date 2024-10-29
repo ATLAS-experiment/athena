@@ -34,7 +34,9 @@ run () {
     rc=$?
     # Only report hard failures for comparison Acts-Trk since we know
     # they are different. We do not expect these tests to succeed
-    [ "${name}" = "dcube-ckf-ambi" -o "${name}" = "dcube-ckf-athena" -o "${name}" = "dcube-ambi-greedy-scored"] && [ $rc -ne 255 ] && rc=0
+    if [[ ("${name}" == "dcube-ckf-ambi" || "${name}" == "dcube-ckf-athena" || "${name}" == "dcube-ambi-greedy-scored") && ${rc} -ne 255 ]]; then
+        rc=0
+    fi
     echo "art-result: $rc ${name}"
     return $rc
 }
@@ -137,6 +139,7 @@ Reco_tf.py \
     --multithreaded
 
 reco_rc=$?
+echo "art-result: ${reco_rc} Reconstruction-ambi-scored"
 
 mv log.RAWtoALL log.RAWtoALL.AMBI.SCORED
 mv acts-expert-monitoring.root acts-expert-monitoring.ambi.scored.root
