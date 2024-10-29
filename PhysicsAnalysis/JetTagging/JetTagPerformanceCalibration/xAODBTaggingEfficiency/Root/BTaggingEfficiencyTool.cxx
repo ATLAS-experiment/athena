@@ -417,11 +417,6 @@ StatusCode BTaggingEfficiencyTool::initialize() {
     // First, copy the charm-jet calibration settings
     excludeFromEVCov["T"] = excludeFromEVCov["C"];
 
-    // Then ensure that the charm -> tau extrapolation uncertainty is added.
-    // Technically the additional condition should never be necessary, as existing entries should not apply to tau "jets"; so this is mostly to protect users against a duplicate specification
-    if (m_systStrategy != "Envelope" && std::find(excludeFromEVCov["T"].begin(), excludeFromEVCov["T"].end(), "extrapolation from charm") == excludeFromEVCov["T"].end())
-      excludeFromEVCov["T"].push_back("extrapolation from charm");
-
     //high pt extrapolation uncertainties
     if(m_OP.find("Continuous") != std::string::npos){
       excludeFromEVCov["B"].push_back("extrapolation_pt_b_Eigen*");
