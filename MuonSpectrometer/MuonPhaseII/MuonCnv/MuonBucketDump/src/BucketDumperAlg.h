@@ -42,19 +42,20 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
 
    private:
 
-    void fillChamberInfo(const MuonGMR4::SpectrometerSector* chamber); 
+    void fillChamberInfo(const MuonGMR4::Chamber* chamber); 
 
     SG::ReadHandleKey<SpacePointContainer> m_readKey{this, "ReadKey", "MuonSpacePoints", "Key to the space point container"};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-    SG::ReadHandleKeyArray<xAOD::MuonSimHitContainer> m_inSimHitKeys {this, "SimHitKeys",{}, "xAOD  SimHit collections"};
     SG::ReadHandleKey<MuonR4::SegmentContainer> m_inSegmentKey{this, "SegmentKey", "R4MuonSegments"};
 
+    SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+    
     Gaudi::Property<bool> m_isMC{this, "isMC", true};
     Gaudi::Property<double> m_fracToKeep{this,"dataFracToKeep", 0.055};
     Gaudi::Property<std::string> m_streamName{this, "StreamName", ""};
     ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};
-   CLHEP::HepRandomEngine* getRandomEngine(const EventContext&ctx) const;
+    CLHEP::HepRandomEngine* getRandomEngine(const EventContext&ctx) const;
 
     MuonVal::MuonTesterTree m_tree{"MuonBucketDump","MuonBucketDump"};
 
@@ -63,13 +64,18 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<uint16_t>&        m_bucket_spacePoints{m_tree.newScalar<uint16_t>("bucket_spacePoints", 0)};
     MuonVal::ScalarBranch<uint16_t>&        m_bucket_segments{m_tree.newScalar<uint16_t>("bucket_segments", 0)};
 
-    MuonVal::MuonIdentifierBranch           m_spoint_id{m_tree, "id"};
     MuonVal::ThreeVectorBranch              m_spoint_localPosition{m_tree, "localPosition"}; 
+    MuonVal::ThreeVectorBranch              m_spoint_globalPosition{m_tree, "globalPosition"}; 
+
+    MuonVal::MuonIdentifierBranch           m_spoint_id{m_tree, "id"};
     MuonVal::VectorBranch<uint16_t>&        m_spoint_layer{m_tree.newVector<uint16_t>("Layer")};
-    MuonVal::VectorBranch<bool>&            m_spoint_isMdt{m_tree.newVector<bool>("isMdt", false)};
     MuonVal::VectorBranch<bool>&            m_spoint_isStrip{m_tree.newVector<bool>("isStrip", false)};
+    MuonVal::VectorBranch<bool>&            m_spoint_isMdt{m_tree.newVector<bool>("isMdt", false)};
+    MuonVal::ScalarBranch<short>&           m_spoint_mdtLayer{m_tree.newScalar<short>("mdtLayer", 0)};
+    MuonVal::ScalarBranch<short>&           m_spoint_mdtTube{m_tree.newScalar<short>("mdtTube", 0)};  
 
     MuonVal::VectorBranch<uint16_t>&        m_spoint_adc{m_tree.newVector<uint16_t>("adc")};
+    MuonVal::VectorBranch<uint16_t>&        m_spoint_tdc{m_tree.newVector<uint16_t>("tdc")};
 
     MuonVal::VectorBranch<float>&           m_spoint_covX{m_tree.newVector<float>("covX")};
     MuonVal::VectorBranch<float>&           m_spoint_covXY{m_tree.newVector<float>("covXY")};
