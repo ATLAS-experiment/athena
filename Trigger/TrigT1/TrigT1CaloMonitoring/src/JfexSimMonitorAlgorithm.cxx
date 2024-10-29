@@ -107,7 +107,7 @@ template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string
         return false;
     }
 
-    bool mismatches = (tobs1Cont->size()!=tobs2Cont->size());
+    bool mismatches = false;
 
     auto eventType = Monitored::Scalar<std::string>("EventType",evenType);
     auto Signature = Monitored::Scalar<std::string>("Signature",label);
@@ -119,7 +119,7 @@ template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string
     // saturation bits currently not properly simulated. But because they aren't used anywhere downstream
     // in the trigger, we will allow mismatches in these bits. 
     // The saturation bit is the lowest bit on all TOBs except jTE where it is also the highest bit (2 bits):
-    auto mask = (label=="jTE") ? 0x7FFE : 0xFFFE;
+    auto mask = (label=="jTE") ? 0x7FFFFFFE : 0xFFFFFFFE;
 
     unsigned zeroTobs1 = 0;
     unsigned zeroTobs2 = 0;
