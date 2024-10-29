@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,7 +10,8 @@
 
 #include "DerivationFrameworkTools/AsgSelectionToolWrapper.h"
 #include "PATCore/AcceptData.h"
-#include <StoreGate/ReadHandle.h>
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 
 namespace DerivationFramework {
@@ -44,16 +45,14 @@ namespace DerivationFramework {
     // retrieve container
     
     const EventContext& ctx = Gaudi::Hive::currentContext();
-    SG::ReadHandle<xAOD::IParticleContainer> particles{m_containerKey, ctx};
-    if( ! particles.isValid() ) {
+    SG::WriteDecorHandle<xAOD::IParticleContainer, char> decorator (m_decorKey, ctx);
+    if( ! decorator.isValid() ) {
         ATH_MSG_ERROR ("Couldn't retrieve IParticles with key: " << m_containerKey.fullKey() );
         return StatusCode::FAILURE;
     }
-    // Decorator
-    const SG::AuxElement::Decorator< char > decorator(m_sgName);
     
     // Write mask for each element and record to SG for subsequent selection
-    for ( const xAOD::IParticle* part : *particles) {
+    for ( const xAOD::IParticle* part : *decorator) {
       auto theAccept = m_tool->accept(part);  // asg::AcceptData or TAccept
       if(m_cut.empty()){
         decorator(*part) = true && theAccept;    
