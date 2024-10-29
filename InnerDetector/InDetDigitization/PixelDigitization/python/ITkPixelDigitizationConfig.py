@@ -89,8 +89,14 @@ def ITkSensorSimPlanarToolCfg(flags, name="ITkSensorSimPlanarTool", **kwargs):
     kwargs.setdefault("SiPropertiesTool", acc.popToolsAndMerge(ITkPixelSiPropertiesToolCfg(flags)))
     kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkPixelLorentzAngleToolCfg(flags)))
     kwargs.setdefault("PixelModuleData", "ITkPixelModuleData")
-    kwargs.setdefault("DigitizeITk3Das3D", False)
+    kwargs.setdefault("DigitizeITk3Das3D", flags.Digitization.DigitizeITk3Das3D)
     kwargs.setdefault("RadiationDamageSimulationType", flags.Digitization.PixelPlanarRadiationDamageSimulationType.value)
+
+    # radiation damage temlate corrections paths/histograms
+    kwargs.setdefault("TemplateCorrectionROOTfile", "maps_ITk_Planar_100V_fl10e15.root")
+    kwargs.setdefault("LorentzAngleCorrectionHistos", ["layer_1_100_um_la", "layer_2_150_um_la", "layer_3_150_um_la", "layer_4_150_um_la"])
+    kwargs.setdefault("ChargeCorrectionHistos", ["layer_1_100_um_cce", "layer_2_150_um_cce", "layer_3_150_um_cce", "layer_4_150_um_cce"])
+    kwargs.setdefault("DistanceCorrectionHistos", ["layer_1_100_um_dz", "layer_2_150_um_dz", "layer_3_150_um_dz", "layer_4_150_um_dz"])
     if flags.Digitization.PixelPlanarRadiationDamageSimulationType is not PixelRadiationDamageSimulationType.NoRadiationDamage:
         # acc.merge(ITkPixelRadSimFluenceMapAlgCfg(flags))  # TODO: not supported yet
         pass
@@ -104,7 +110,11 @@ def ITkSensorSim3DToolCfg(flags, name="ITkSensorSim3DTool", **kwargs):
     kwargs.setdefault("SiPropertiesTool", acc.popToolsAndMerge(ITkPixelSiPropertiesToolCfg(flags)))
     kwargs.setdefault("PixelModuleData", "ITkPixelModuleData")
     kwargs.setdefault("RadiationDamageSimulationType", flags.Digitization.Pixel3DRadiationDamageSimulationType.value)
-    kwargs.setdefault("DigitizeITk3Das3D", False)
+    kwargs.setdefault("DigitizeITk3Das3D", flags.Digitization.DigitizeITk3Das3D)
+
+    # radiation damage temlate corrections paths/histograms
+    kwargs.setdefault("TemplateCorrectionROOTfile", "maps_ITk_3D_100V_fl10e15.root")
+    kwargs.setdefault("ChargeCorrectionHistos", ["barrel_25_um_cee", "ring_25_um_cee"])
     if flags.Digitization.Pixel3DRadiationDamageSimulationType is not PixelRadiationDamageSimulationType.NoRadiationDamage:
         # acc.merge(ITkPixelRadSimFluenceMapAlgCfg(flags))  # TODO: not supported yet
         pass

@@ -90,40 +90,25 @@ protected:
 
   Gaudi::Property<std::string> m_templateCorrectionRootFile
   {
-    this, "TemplateCorrectionROOTfile", "maps_ITk_PL_100um_100V_fl10e15.root",
+    this, "TemplateCorrectionROOTfile", "",
     "Path to the ROOT file with histograms for radiation damage template corrections"
   };
   
   Gaudi::Property<std::vector<std::string> > m_lorentzAngleCorrectionHistos
   {
-    this, "LorentzAngleCorrectionHistos", {
-      "la",
-      "la",
-      "la",
-      "la"
-    },
+    this, "LorentzAngleCorrectionHistos", {},
     "Paths to the histograms inside the ROOT file for Lorentz angle correction"
   };
 
   Gaudi::Property<std::vector<std::string> > m_chargeCorrectionHistos
   {
-    this, "ChargeCorrectionHistos", {
-      "cce",
-      "cce",
-      "cce",
-      "cce"
-    },
+    this, "ChargeCorrectionHistos", {},
     "Paths to the histograms inside the ROOT file for radiation damage charge correction"
   };
 
   Gaudi::Property<std::vector<std::string> > m_distanceCorrectionHistos
   {
-    this, "DistanceCorrectionHistos", {
-      "dz",
-      "dz",
-      "dz",
-      "dz"
-    },
+    this, "DistanceCorrectionHistos", {},
     "Paths to the histograms inside the ROOT file for radiation damage distance correction"
   };
 

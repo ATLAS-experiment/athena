@@ -67,6 +67,8 @@ private:
   std::multimap<std::pair<int, int>, double> m_probMapFEI4;
   std::multimap<std::pair<int, int>, double> m_probMapFEI3;
 
+  std::vector<PixelHistoConverter> m_chargeCorrection;
+  
   Gaudi::Property<std::string> m_cc_prob_file_fei3
   {
     this, "CCProbMapFileFEI3", "PixelDigitization/3DFEI3-3E-problist-1um_v1.txt",
