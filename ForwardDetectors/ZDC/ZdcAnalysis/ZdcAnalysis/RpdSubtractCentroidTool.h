@@ -67,20 +67,30 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
   StatusCode reprocessZdc() override;
 
  private:
-  // job properties
-  //
-  std::string m_zdcModuleContainerName;
-  std::string m_zdcSumContainerName;
+  // tool properties to be configured in Python
+  std::string m_configuration;
+  std::string m_ZDCModuleContainerName;
+  std::string m_ZDCSumContainerName;
   bool m_writeAux;
   std::string m_auxSuffix;
+  // these are optional and null by default; if their values are set, they will overwrite the bulk configuration from config string
+  RPDUtils::OptionalToolProperty<std::vector<float>> m_forceMinZDCEnergy;
+  RPDUtils::OptionalToolProperty<std::vector<float>> m_forceMaxZDCEnergy;
+  RPDUtils::OptionalToolProperty<std::vector<float>> m_forceMinEMEnergy;
+  RPDUtils::OptionalToolProperty<std::vector<float>> m_forceMaxEMEnergy;
+  RPDUtils::OptionalToolProperty<std::vector<float>> m_forcePileupMaxFrac;
+  RPDUtils::OptionalToolProperty<std::vector<float>> m_forceMaximumNegativeSubtrAmpFrac;
+  RPDUtils::OptionalToolProperty<bool> m_forceUseRPDSumAdc;
+  RPDUtils::OptionalToolProperty<bool> m_forceUseCalibDecorations;
 
-  std::vector<float> m_minZdcEnergy;
-  std::vector<float> m_maxZdcEnergy;
-  std::vector<float> m_minEmEnergy;
-  std::vector<float> m_maxEmEnergy;
+  // these are the final reconstruction parameters
+  std::vector<float> m_minZDCEnergy;
+  std::vector<float> m_maxZDCEnergy;
+  std::vector<float> m_minEMEnergy;
+  std::vector<float> m_maxEMEnergy;
   std::vector<float> m_pileupMaxFrac;
   std::vector<float> m_maximumNegativeSubtrAmpFrac;
-  bool m_useRpdSumAdc;
+  bool m_useRPDSumAdc;
   bool m_useCalibDecorations;
 
   StatusCode initializeKey(std::string const& containerName, SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> & readHandleKey, std::string const& key);
@@ -95,7 +105,7 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
 
   // results from RPD analysis needed for centroid calculation (read from AOD)
   //
-  struct RpdChannelData {
+  struct RPDChannelData {
     unsigned int channel;
     float xposRel;
     float yposRel;
@@ -106,12 +116,12 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
     float pileupFrac;
     unsigned int status;
   };
-  std::array<std::bitset<RPDDataAnalyzer::N_STATUS_BITS>, 2> m_rpdSideStatus {}; /** RPD analysis status word on each side */
-  std::optional<std::array<unsigned int, 2>> m_zdcSideStatus; /** ZDC analysis status on each side */
-  std::optional<std::array<float, 2>> m_zdcFinalEnergy; /** ZDC final (calibrated) energy on each side */
-  std::optional<std::array<float, 2>> m_emCalibEnergy; /** EM calibrated energy on each side */
-  std::optional<std::array<std::bitset<ZDCPulseAnalyzer::N_STATUS_BITS>, 2>> m_emStatus; /** EM modlue status word on each side */
-  std::array<std::array<std::array<RpdChannelData, RPDUtils::nCols>, RPDUtils::nRows>, 2> m_rpdChannelData {}; /** RPD channel data for each channel (first index row, then index column) on each side */
+  std::array<std::bitset<RPDDataAnalyzer::N_STATUS_BITS>, 2> m_RPDSideStatus {}; /** RPD analysis status word on each side */
+  std::optional<std::array<unsigned int, 2>> m_ZDCSideStatus; /** ZDC analysis status on each side */
+  std::optional<std::array<float, 2>> m_ZDCFinalEnergy; /** ZDC final (calibrated) energy on each side */
+  std::optional<std::array<float, 2>> m_EMCalibEnergy; /** EM calibrated energy on each side */
+  std::optional<std::array<std::bitset<ZDCPulseAnalyzer::N_STATUS_BITS>, 2>> m_EMStatus; /** EM modlue status word on each side */
+  std::array<std::array<std::array<RPDChannelData, RPDUtils::nCols>, RPDUtils::nRows>, 2> m_RPDChannelData {}; /** RPD channel data for each channel (first index row, then index column) on each side */
 
   // alignment (geometry) and crossing angle correction, to be read from ZdcConditions
   //

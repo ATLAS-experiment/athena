@@ -8,7 +8,7 @@
 
 export ATHENA_CORE_NUMBER=4
 INPUTFILE=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RAW_RUN1_DATA11_HI[0])")
-CONDTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN1_DATA11)")
+CONDTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN1_DATA)")
 GEOTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN1_2011)")
 
 Reco_tf.py --CA --multithreaded --maxEvents 10 \

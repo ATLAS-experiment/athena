@@ -216,10 +216,10 @@ def zcounting_vs_atlas(channel, years):
     arr_olumi = np.array(arr_olumi)
     arr_zlumi = np.array(arr_zlumi)
     arr_zerr = np.array(arr_zerr)
-    total_zlumi = arr_zlumi.sum()/1000000
-    total_zlumi_string = "Official DQ "
-    if year == "24": total_zlumi_string = "Preliminary DQ "
-    total_zlumi_string += str(round(total_zlumi, 1)) + " fb^{-1}"
+    total_lumi = arr_olumi.sum()/1000000
+    total_lumi_string = "Official DQ "
+    if year == "24": total_lumi_string = "Preliminary DQ "
+    total_lumi_string += str(round(total_lumi, 1)) + " fb^{-1}"
 
     #-----------Normalisation------------
 
@@ -279,7 +279,7 @@ def zcounting_vs_atlas(channel, years):
     pt.drawText(xval, yval-0.53, date_tag, size=labelsize)
     pt.drawText(xval, yval-0.59, zstring, size=labelsize)
     pt.drawText(xval, yval-0.65, "OflLumi-Run3-005", size=labelsize)
-    pt.drawText(xval, yval-0.04, total_zlumi_string, size=labelsize)
+    pt.drawText(xval, yval-0.04, total_lumi_string, size=labelsize)
 
     pt.drawText(xval, 0.88, plot_title, size=labelsize)
 

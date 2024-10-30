@@ -36,7 +36,7 @@ RPDDataAnalyzer::RPDDataAnalyzer(
     m_pileupBaselineSumThresh(config.pileupBaselineSumThresh),
     m_pileupBaselineStdDevThresh(config.pileupBaselineStdDevThresh),
     m_nNegativesAllowed(config.nNegativesAllowed),
-    m_AdcOverflow(config.AdcOverflow)
+    m_AdcOverflow(config.ADCOverflow)
 {
   if (m_endSignalSample == 0) m_endSignalSample = m_nSamples; // sentinel value 0 -> go to end of waveform
   if (m_outputCalibFactors.size() != s_nChannels) {
