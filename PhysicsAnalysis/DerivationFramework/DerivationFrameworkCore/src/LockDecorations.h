@@ -3,10 +3,10 @@
  * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
- * @file DerivationFrameworkCore/src/LockDecoration.h
+ * @file DerivationFrameworkCore/src/LockDecorations.h
  * @author scott snyder <snyder@bnl.gov>
  * @date Sep, 2024
- * @brief Algorithm to explicitly lock a decoration.
+ * @brief Algorithm to explicitly lock a set of decorations.
  */
 
 
@@ -15,27 +15,27 @@
 
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "StoreGate/WriteDecorHandleKey.h"
+#include "StoreGate/WriteDecorHandleKeyArray.h"
 
 
 namespace DerivationFramework {
 
 
 /**
- * @brief Algorithm to explicitly lock a decoration.
+ * @brief Algorithm to explicitly lock a set of decorations.
  *
  * In some derivation configurations, multiple algorthims can be modifying
- * the same decoration (for example TruthDressingTool).  In such cases,
- * we cannot lock the decoration at the end of the algorithm, as is usually
+ * the same decorations (for example TruthDressingTool).  In such cases,
+ * we cannot lock the decorations at the end of the algorithm, as is usually
  * done, since this would cause subsequent algorithms to fail.  However,
- * we also don't want to leave the decoration unlocked, as the fix
+ * we also don't want to leave the decorations unlocked, as the fix
  * for ATLASRECTS-8008 would cause those decorations to be lost in a deep copy.
  * Instead, in those cases, we can use this algorithm to explicitly lock
- * the decoration after all algorithms that modify it have completed.
+ * the decorations after all algorithms that modify it have completed.
  *
  * Note, though, that such configurations are likely not compatible with MT.
  */
-class LockDecoration : public AthReentrantAlgorithm
+class LockDecorations : public AthReentrantAlgorithm
 {
 public:
   using AthReentrantAlgorithm::AthReentrantAlgorithm;
@@ -56,8 +56,8 @@ public:
 
 private:
   /// The decoration to lock.
-  SG::WriteDecorHandleKey<SG::AuxVectorBase> m_decoration
-  { this, "Decoration", "" };
+  SG::WriteDecorHandleKeyArray<SG::AuxVectorBase> m_decorations
+  { this, "Decorations", {} };
 };
 
 
