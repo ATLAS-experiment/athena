@@ -506,6 +506,6 @@ def HIGG1D1Cfg(flags):
     # Output stream    
     HIGG1D1ItemList = HIGG1D1SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_HIGG1D1", ItemList=HIGG1D1ItemList, AcceptAlgs=["HIGG1D1Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_HIGG1D1", AcceptAlgs=["HIGG1D1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_HIGG1D1", AcceptAlgs=["HIGG1D1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
