@@ -79,6 +79,7 @@ int EfficiencyResponseHistos::fillHistosFromContainer(const xAOD::JetContainer &
     }
     if (itmin == listJets.end()) break;
     const xAOD::Jet* matched = *itmin;
+    //cppcheck-suppress eraseIteratorOutOfBoundsCond
     listJets.erase(itmin);
     
     double dr = std::sqrt(dr2min);
