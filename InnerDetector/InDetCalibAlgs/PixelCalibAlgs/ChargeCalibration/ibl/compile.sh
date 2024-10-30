@@ -1,2 +1,2 @@
-g++ -O2 `root-config --libs --cflags` ../common/PixelMapping.cxx CalibrateIBL.C -o CalibrateIBL.exe
+g++ -O2 `root-config --libs --cflags` ../common/PixelMapping.cxx CalibrateIBL.cxx -o CalibrateIBL.exe
 

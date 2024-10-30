@@ -162,11 +162,11 @@ def recover_empties(new_calib, ref_calib):
     
     return report_dict, report_counter_dict
 
-def UpdateAndSave(new_calib, ref_calib):
+def UpdateAndSave(new_calib, iov, namef, ref_calib):
     
     # Validation for the new calibration (checks the threshold, RMS, Noise and Intime thresholds)
     from PixelCalibAlgs.CheckValues import CheckThresholds
-    CheckThresholds(new_calib)
+    CheckThresholds(new_calib,iov,namef)
     
     # Making a copy of the reference calibration
     updated_calib = ref_calib.copy()
@@ -215,7 +215,7 @@ def UpdateCalib(tag):
     report, counter_report = recover_empties(new_calib,ref_calib)
     
     print("Validating and updating reference calibration.. ")
-    UpdateAndSave(new_calib,ref_calib)
+    UpdateAndSave(new_calib, "latest","calibration_merged.txt",ref_calib)
     
     f = open("log_recovery.txt", "w")
     str = "-------- SUMMARY OF PIXEL CALIB RECOVERY --------\n"
