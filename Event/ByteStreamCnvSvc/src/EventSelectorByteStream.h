@@ -28,7 +28,7 @@
 #include "AthenaKernel/ISecondaryEventSelector.h"
 #include "AthenaBaseComps/AthService.h"
 
-#include "ByteStreamCnvSvc/IByteStreamInputSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamInputSvc.h"
 #include "ByteStreamData/RawEvent.h"
 #include "CxxUtils/checker_macros.h"
 #include <mutex>

@@ -12,7 +12,7 @@
  **/
 
 // Include files.
-#include "ByteStreamCnvSvc/IByteStreamInputSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamInputSvc.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 #include "ByteStreamData/RawEvent.h"
 #include "AthenaBaseComps/AthService.h"

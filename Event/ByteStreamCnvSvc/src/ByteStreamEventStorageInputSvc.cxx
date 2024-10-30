@@ -7,6 +7,7 @@
 #include "DumpFrags.h"
 #include "ByteStreamData/ByteStreamMetadataContainer.h"
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
+#include "ByteStreamCnvSvcBase/ByteStreamExceptions.h"
 #include "EventStorage/pickDataReader.h"
 #include "EventStorage/DataReader.h"
 
