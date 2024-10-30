@@ -45,14 +45,19 @@ namespace CP
             xAOD::TauJetAuxContainer* outputTauContAux = new xAOD::TauJetAuxContainer();
             outputTauCont->setStore(outputTauContAux);
             for (const xAOD::TauJet* tau : combined_taus_vec){
-                decSelection(*tau) = true;
-                xAOD::TauJet* newTau = new xAOD::TauJet();
-                newTau->makePrivateStore(*tau);
-                if(linkAcc.isAvailable(*tau)){
-                  auto link = linkAcc(*tau);
-                  if(link.isValid()) setOriginalObjectLink(**link, *newTau);
-                }
-                outputTauCont->push_back(newTau);
+              if(linkAcc.isAvailable(*tau) && !linkAcc(*tau).isValid()){
+                ATH_MSG_WARNING("Invalid originalTauJet link for tau with pT="<<tau->pt());
+                continue;
+              }
+              decSelection(*tau) = true;
+              xAOD::TauJet* newTau = new xAOD::TauJet();
+              newTau->makePrivateStore(*tau);
+              if(linkAcc.isAvailable(*tau)){
+                auto link = linkAcc(*tau);
+                setOriginalObjectLink(**link, *newTau);
+              }
+              else setOriginalObjectLink(*tau, *newTau);
+              outputTauCont->push_back(newTau);
             }
             ANA_CHECK (evtStore()->record (outputTauCont,    m_outputTauHandle.getName (sys)));
             ANA_CHECK (evtStore()->record (outputTauContAux, m_outputTauHandle.getName (sys) + "Aux."));
