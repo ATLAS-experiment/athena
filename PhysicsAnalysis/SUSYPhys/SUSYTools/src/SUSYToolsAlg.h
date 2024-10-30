@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // SUSYToolsAlg.h
@@ -114,15 +114,15 @@ class SUSYToolsAlg : public EL::AnaAlgorithm {
     std::vector<std::string> m_vars;   
     std::map<std::string,std::map<std::string,int>> m_obj_count;
 
-    xAOD::MissingETContainer* mettst_syst;
-    xAOD::MissingETAuxContainer* mettst_syst_aux;
-    xAOD::MissingETContainer* metcst_syst;
-    xAOD::MissingETAuxContainer* metcst_syst_aux;
+    xAOD::MissingETContainer* m_mettst_syst;
+    xAOD::MissingETAuxContainer* m_mettst_syst_aux;
+    xAOD::MissingETContainer* m_metcst_syst;
+    xAOD::MissingETAuxContainer* m_metcst_syst_aux;
 
-    xAOD::MissingETContainer* metcst_nominal;
-    xAOD::MissingETAuxContainer* metcst_nominal_aux;
-    xAOD::MissingETContainer* mettst_nominal;
-    xAOD::MissingETAuxContainer* mettst_nominal_aux;
+    xAOD::MissingETContainer* m_metcst_nominal;
+    xAOD::MissingETAuxContainer* m_metcst_nominal_aux;
+    xAOD::MissingETContainer* m_mettst_nominal;
+    xAOD::MissingETAuxContainer* m_mettst_nominal_aux;
 
 }; 
 
