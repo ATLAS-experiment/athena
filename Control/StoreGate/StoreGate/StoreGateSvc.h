@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_STOREGATESVC_H
@@ -93,15 +93,12 @@ namespace SG {
 //friends...
 class AthenaOutputStream;
 class IOVDbSvc;
-class IOVSvc;
 class IOVSvcTool;
 class PileUpMergeSvc;
 class SGDeleteAlg;
-class CondSvc;
-namespace SG { 
+namespace SG {
   class VarHandleBase; 
 }
-namespace PerfMon { class StorePayloadMon; }
 
 /** @class StoreGateSvc 
  * @brief The Athena Transient Store API.
@@ -845,7 +842,6 @@ private:
   friend
   void
   AthenaInternal::py_sg_clearProxyPayload(StoreGateSvc*, SG::DataProxy*);
-  friend class PerfMon::StorePayloadMon;
 
   /// use to reset a proxy (clearing the data object it contains)
   /// Unlike DataProxy::reset this method correctly updates SGSvc internals

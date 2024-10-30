@@ -70,7 +70,6 @@ namespace SG {
 
 class DataObject;
 class IConversionSvc;
-//FIXME class IIncidentSvc;
 class Incident;
 class IHistorySvc;
 
@@ -89,15 +88,12 @@ namespace SG {
 //friends...
 class AthenaOutputStream;
 class IOVDbSvc;
-class IOVSvc;
 class IOVSvcTool;
-class PileUpMergeSvc;
 class SGDeleteAlg;
 class ActiveStoreSvc;
 namespace SG { 
   class VarHandleBase; 
 }
-namespace PerfMon { class StorePayloadMon; }
 
 /** @class SGImplSvc 
  * @brief The Athena Transient Store API.
@@ -592,7 +588,6 @@ private:
   friend class IOVDbSvc;
   friend class IOVSvcTool;
   friend class SGDeleteAlg;
-  friend class PerfMon::StorePayloadMon;
   friend
   void
   AthenaInternal::py_sg_clearProxyPayload(StoreGateSvc*, SG::DataProxy*);
@@ -611,9 +606,6 @@ private:
                         SG::ConstProxyIterator& beg,
                         SG::ConstProxyIterator& end) const; 
   
-  ///access store()
-  friend class IOVSvc;              // FIXME
-  friend class PileUpMergeSvc;      // FIXME needs to call tRange
   friend class StoreGateSvc;
   ///access typeless_record
   friend class SG::VarHandleBase;                                                      
