@@ -489,44 +489,44 @@ StatusCode SUSYToolsAlg::execute() {
      ATH_MSG_DEBUG( "Number of taus: " << taus_nominal->size() );
   }
 
-    metcst_nominal = new xAOD::MissingETContainer;
-    metcst_nominal_aux = new xAOD::MissingETAuxContainer;
-    metcst_nominal->setStore(metcst_nominal_aux);
-    metcst_nominal->reserve(10);
-    mettst_nominal = new xAOD::MissingETContainer;
-    mettst_nominal_aux = new xAOD::MissingETAuxContainer;
-    mettst_nominal->setStore(mettst_nominal_aux);
-    mettst_nominal->reserve(10);
+    m_metcst_nominal = new xAOD::MissingETContainer;
+    m_metcst_nominal_aux = new xAOD::MissingETAuxContainer;
+    m_metcst_nominal->setStore(m_metcst_nominal_aux);
+    m_metcst_nominal->reserve(10);
+    m_mettst_nominal = new xAOD::MissingETContainer;
+    m_mettst_nominal_aux = new xAOD::MissingETAuxContainer;
+    m_mettst_nominal->setStore(m_mettst_nominal_aux);
+    m_mettst_nominal->reserve(10);
 
   double metsig_cst(0.);
   double metsig_tst(0.);
   if (m_slices["met"]) {
     // (met, jets, electrons, muons, photons, taus, doTST, doJVT)
-    ATH_CHECK( m_SUSYTools->GetMET(*metcst_nominal, jets_nominal, electrons_nominal, muons_nominal, photons_nominal, 0, false, false) );
-    ATH_MSG_DEBUG("RefFinal CST etx="   << (*metcst_nominal)["Final"]->mpx()
-                          << ", ety="   << (*metcst_nominal)["Final"]->mpy()
-                          << ", et="    << (*metcst_nominal)["Final"]->met()
-                          << ", sumet=" << (*metcst_nominal)["Final"]->sumet());
-    ATH_CHECK( m_SUSYTools->GetMETSig(*metcst_nominal, metsig_cst, false, false) );
+    ATH_CHECK( m_SUSYTools->GetMET(*m_metcst_nominal, jets_nominal, electrons_nominal, muons_nominal, photons_nominal, 0, false, false) );
+    ATH_MSG_DEBUG("RefFinal CST etx="   << (*m_metcst_nominal)["Final"]->mpx()
+                          << ", ety="   << (*m_metcst_nominal)["Final"]->mpy()
+                          << ", et="    << (*m_metcst_nominal)["Final"]->met()
+                          << ", sumet=" << (*m_metcst_nominal)["Final"]->sumet());
+    ATH_CHECK( m_SUSYTools->GetMETSig(*m_metcst_nominal, metsig_cst, false, false) );
     ATH_MSG_DEBUG("METSignificance = " << metsig_cst);
 
-    ATH_CHECK( m_SUSYTools->GetMET(*mettst_nominal, jets_nominal, electrons_nominal, muons_nominal, photons_nominal, 0, true, true) ); // bugfix for PHYSLITE with p5511
-    ATH_MSG_DEBUG("RefFinal TST etx="   << (*mettst_nominal)["Final"]->mpx()
-                          << ", ety="   << (*mettst_nominal)["Final"]->mpy()
-                          << ", et="    << (*mettst_nominal)["Final"]->met()
-                          << ", sumet=" << (*mettst_nominal)["Final"]->sumet());
-    ATH_CHECK( m_SUSYTools->GetMETSig(*mettst_nominal, metsig_tst, true,  true) );
+    ATH_CHECK( m_SUSYTools->GetMET(*m_mettst_nominal, jets_nominal, electrons_nominal, muons_nominal, photons_nominal, 0, true, true) ); // bugfix for PHYSLITE with p5511
+    ATH_MSG_DEBUG("RefFinal TST etx="   << (*m_mettst_nominal)["Final"]->mpx()
+                          << ", ety="   << (*m_mettst_nominal)["Final"]->mpy()
+                          << ", et="    << (*m_mettst_nominal)["Final"]->met()
+                          << ", sumet=" << (*m_mettst_nominal)["Final"]->sumet());
+    ATH_CHECK( m_SUSYTools->GetMETSig(*m_mettst_nominal, metsig_tst, true,  true) );
     ATH_MSG_DEBUG("METSignificance = " << metsig_tst);
 
-    hist("MET/met_et")    ->Fill( (*mettst_nominal)["Final"]->met()*0.001 );
-    hist("MET/met_sumet") ->Fill( (*mettst_nominal)["Final"]->sumet()*0.001 );
-    hist("MET/met_phi")   ->Fill( (*mettst_nominal)["Final"]->phi() );
-    hist("MET/met_et_tst")->Fill( (*mettst_nominal)["PVSoftTrk"]->met() *0.001 );
-    hist("MET/met_et_el") ->Fill( (*mettst_nominal)["RefEle"]->met()    *0.001 );
-    hist("MET/met_et_ph") ->Fill( (*mettst_nominal)["RefGamma"]->met()  *0.001 );
-    hist("MET/met_et_mu") ->Fill( (*mettst_nominal)["Muons"]->met()     *0.001 );
-    hist("MET/met_et_jet")->Fill( (*mettst_nominal)["RefJet"]->met()    *0.001 );
-    //hist("MET/met_et_tau")->Fill( (*mettst_nominal)["RefTau"]->met()    *0.001 );
+    hist("MET/met_et")    ->Fill( (*m_mettst_nominal)["Final"]->met()*0.001 );
+    hist("MET/met_sumet") ->Fill( (*m_mettst_nominal)["Final"]->sumet()*0.001 );
+    hist("MET/met_phi")   ->Fill( (*m_mettst_nominal)["Final"]->phi() );
+    hist("MET/met_et_tst")->Fill( (*m_mettst_nominal)["PVSoftTrk"]->met() *0.001 );
+    hist("MET/met_et_el") ->Fill( (*m_mettst_nominal)["RefEle"]->met()    *0.001 );
+    hist("MET/met_et_ph") ->Fill( (*m_mettst_nominal)["RefGamma"]->met()  *0.001 );
+    hist("MET/met_et_mu") ->Fill( (*m_mettst_nominal)["Muons"]->met()     *0.001 );
+    hist("MET/met_et_jet")->Fill( (*m_mettst_nominal)["RefJet"]->met()    *0.001 );
+    //hist("MET/met_et_tau")->Fill( (*m_mettst_nominal)["RefTau"]->met()    *0.001 );
 
     hist("MET/met_significance")->Fill( metsig_tst );
   }
@@ -856,10 +856,10 @@ StatusCode SUSYToolsAlg::execute() {
                          << ", ety="   << (*met_truth)["NonInt"]->mpy()
                          << ", et="    << (*met_truth)["NonInt"]->met()
                          << ", sumet=" << (*met_truth)["NonInt"]->sumet());
-      ATH_MSG_DEBUG("CST residuals: detx=" << (*metcst_nominal)["Final"]->mpx() - (*met_truth)["NonInt"]->mpx()
-                    << ", dety=" << (*metcst_nominal)["Final"]->mpy() - (*met_truth)["NonInt"]->mpy());
-      ATH_MSG_DEBUG("TST residuals: detx=" << (*mettst_nominal)["Final"]->mpx() - (*met_truth)["NonInt"]->mpx()
-                    << ", dety=" << (*mettst_nominal)["Final"]->mpy() - (*met_truth)["NonInt"]->mpy());
+      ATH_MSG_DEBUG("CST residuals: detx=" << (*m_metcst_nominal)["Final"]->mpx() - (*met_truth)["NonInt"]->mpx()
+                    << ", dety=" << (*m_metcst_nominal)["Final"]->mpy() - (*met_truth)["NonInt"]->mpy());
+      ATH_MSG_DEBUG("TST residuals: detx=" << (*m_mettst_nominal)["Final"]->mpx() - (*met_truth)["NonInt"]->mpx()
+                    << ", dety=" << (*m_mettst_nominal)["Final"]->mpy() - (*met_truth)["NonInt"]->mpy());
     }
   }
 
@@ -932,8 +932,8 @@ StatusCode SUSYToolsAlg::execute() {
     xAOD::JetContainer* fatjets(fatjets_nominal);
     xAOD::JetContainer* trkjets(trkjets_nominal);
     xAOD::TauJetContainer* taus(taus_nominal);
-    xAOD::MissingETContainer *mettst(mettst_nominal), *metcst(metcst_nominal);
-    xAOD::MissingETAuxContainer *mettst_aux(mettst_nominal_aux), *metcst_aux(metcst_nominal_aux);
+    xAOD::MissingETContainer *mettst(m_mettst_nominal), *metcst(m_metcst_nominal);
+    xAOD::MissingETAuxContainer *mettst_aux(m_mettst_nominal_aux), *metcst_aux(m_metcst_nominal_aux);
 
     bool syst_affectsElectrons = ST::testAffectsObject(xAOD::Type::Electron, sysInfo.affectsType);
     bool syst_affectsMuons     = ST::testAffectsObject(xAOD::Type::Muon, sysInfo.affectsType);
@@ -1010,24 +1010,24 @@ StatusCode SUSYToolsAlg::execute() {
       }
 
       ATH_MSG_DEBUG("Get systematics-varied MET");
-      mettst_syst = new xAOD::MissingETContainer;
-      mettst_syst_aux = new xAOD::MissingETAuxContainer;
-      metcst_syst = new xAOD::MissingETContainer;
-      metcst_syst_aux = new xAOD::MissingETAuxContainer;
-      mettst_syst->setStore(mettst_syst_aux);
-      metcst_syst->setStore(metcst_syst_aux);
-      mettst_syst->reserve(10);
-      metcst_syst->reserve(10);
+      m_mettst_syst = new xAOD::MissingETContainer;
+      m_mettst_syst_aux = new xAOD::MissingETAuxContainer;
+      m_metcst_syst = new xAOD::MissingETContainer;
+      m_metcst_syst_aux = new xAOD::MissingETAuxContainer;
+      m_mettst_syst->setStore(m_mettst_syst_aux);
+      m_metcst_syst->setStore(m_metcst_syst_aux);
+      m_mettst_syst->reserve(10);
+      m_metcst_syst->reserve(10);
       //
       if (m_slices["met"]) {
-        ATH_CHECK( m_SUSYTools->GetMET(*metcst_syst, jets, electrons, muons, photons, 0) );
-        ATH_CHECK( m_SUSYTools->GetMET(*mettst_syst, jets, electrons, muons, photons, 0, true, true) );
+        ATH_CHECK( m_SUSYTools->GetMET(*m_metcst_syst, jets, electrons, muons, photons, 0) );
+        ATH_CHECK( m_SUSYTools->GetMET(*m_mettst_syst, jets, electrons, muons, photons, 0, true, true) );
       }
       //
-      mettst     = mettst_syst;
-      mettst_aux = mettst_syst_aux;
-      metcst     = metcst_syst;
-      metcst_aux = metcst_syst_aux;
+      mettst     = m_mettst_syst;
+      mettst_aux = m_mettst_syst_aux;
+      metcst     = m_metcst_syst;
+      metcst_aux = m_metcst_syst_aux;
     }
 
     //--- Overlap Removal
@@ -1307,10 +1307,10 @@ StatusCode SUSYToolsAlg::execute() {
   }
   ++m_Nevts;
 
-  delete metcst_nominal;
-  delete metcst_nominal_aux;
-  delete mettst_nominal;
-  delete mettst_nominal_aux;
+  delete m_metcst_nominal;
+  delete m_metcst_nominal_aux;
+  delete m_mettst_nominal;
+  delete m_mettst_nominal_aux;
 
   return StatusCode::SUCCESS;
 }
