@@ -230,7 +230,7 @@ StatusCode BTaggingTruthTaggingTool::initialize() {
   if(m_OP == "Continuous"){
     std::vector<float> bin_edges;
     bin_edges.push_back(min_cut_low);
-    for (auto bin_name : m_availableOP_fixCut){
+    for (const std::string& bin_name : m_availableOP_fixCut){
       TString cutname = m_taggerName+"/"+m_jetAuthor+"/"+bin_name+"/cutvalue";
       float cutval = ((TVector*) m_inf->Get(cutname))[0](0);
       bin_edges.push_back(cutval);
@@ -282,7 +282,7 @@ StatusCode BTaggingTruthTaggingTool::initialize() {
   } //FixedCut
 
   if(m_continuous)
-    for (auto c :  m_cuts){
+    for (const auto& c :  m_cuts){
       ATH_MSG_INFO("b-tag low: " <<c.bcut_low <<" b-tag hig: " <<c.bcut_hig  <<" c-tag low: " <<c.ccut_low <<" c-tag hig: " <<c.ccut_hig <<" Added to tag bins: " <<c.is_tagbin);
     }
   
@@ -811,7 +811,7 @@ StatusCode BTaggingTruthTaggingTool::getTagPermutation(TRFinfo &trfinf, std::vec
   trf_chosen_perm_ex = trfinf.perm_ex;
   trf_chosen_perm_in = trfinf.perm_in;
   std::string print_perm = "Permutation: ";
-  for(auto perm: trfinf.perm_ex){
+  for(const auto& perm: trfinf.perm_ex){
     for(auto is: perm) {
       if(is) print_perm+=std::to_string(1);
       else print_perm+=std::to_string(0);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -177,7 +177,7 @@ std::vector<float> BTaggingEigenVectorRecompositionTool::getCoefficients(const s
   }
   
   std::map<std::string, float> oneEVmap = fullMap[evName];
-  for(std::string NPname : NPnameList){
+  for(const std::string& NPname : NPnameList){
     coefficients.push_back(oneEVmap[NPname]);
   }
   return coefficients;
