@@ -119,6 +119,20 @@ StatusCode TrigByteStreamCnvSvc::finalize() {
 }
 
 // =============================================================================
+// Implementation of (unsupported) IByteStreamCnvSvc
+// =============================================================================
+FullEventAssemblerBase* TrigByteStreamCnvSvc::findFullEventAssembler(const std::string& /*name*/) const {
+  ATH_MSG_ERROR("Bytestream creation is not supported by TrigByteStreamCnvSvc");
+  return nullptr;
+}
+
+StatusCode TrigByteStreamCnvSvc::storeFullEventAssembler(std::unique_ptr<FullEventAssemblerBase> /*fea*/,
+                                                         const std::string& /*name*/) {
+  ATH_MSG_ERROR("Bytestream creation is not supported by TrigByteStreamCnvSvc");
+  return StatusCode::FAILURE;
+}
+
+// =============================================================================
 // Implementation of IConversionSvc::connectOutput
 // The argument outputFile is not used
 // =============================================================================
