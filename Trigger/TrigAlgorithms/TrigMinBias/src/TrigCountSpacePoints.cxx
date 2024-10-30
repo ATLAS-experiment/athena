@@ -5,6 +5,26 @@
 #include "TrigCountSpacePoints.h"
 
 #include "InDetPrepRawData/PixelCluster.h"
+namespace {
+  bool isInNoiseArea(float r, float zz) {
+    if(r<40){
+      if(zz>-3.5 && zz<-1.5) return true;
+      if(zz>38. && zz<40.) return true;
+      if(zz>79.5 && zz<81.5) return true;
+      if(zz>121. && zz<123.) return true;
+      if(zz>162. && zz<165.) return true;
+      if(zz>204. && zz<206.) return true;
+      if(zz>245.5 && zz<247.5) return true;
+      if(zz>-45. && zz<-43.5) return true;
+      if(zz>-86.5 && zz<-84.5) return true;
+      if(zz>-128. && zz<-126.) return true;
+      if(zz>-170. && zz<-167.) return true;
+      if(zz>-211. && zz<-209.) return true;
+      if(zz>-252.5 && zz<-250.5) return true;
+    }
+    return false;
+  }
+}
 
 TrigCountSpacePoints::TrigCountSpacePoints(const std::string &name, ISvcLocator *pSvcLocator) : AthReentrantAlgorithm(name, pSvcLocator) {}
 
@@ -58,6 +78,12 @@ StatusCode TrigCountSpacePoints::execute(const EventContext &context) const {
 
     for (const auto pSP : *pixSPointColl) {
       pixCLBeforeCuts++;
+      if (m_removeBLayerModuleEdgeNoise) {
+        if ( isInNoiseArea(pSP->r(), pSP->globalPosition()[Amg::z]) ) {
+          continue;
+        }
+      }
+
       const InDet::PixelCluster *pixClust = static_cast<const InDet::PixelCluster *>(pSP->clusterList().first);
 
       const int pixClSize = (pixClust->rdoList()).size();
