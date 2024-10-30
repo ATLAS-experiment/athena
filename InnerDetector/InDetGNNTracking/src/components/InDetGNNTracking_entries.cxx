@@ -4,6 +4,7 @@
 #include "../GNNTrackReaderTool.h"
 #include "../DumpObjects.h"
 #include "../GNNSeedingTrackMaker.h"
+#include "../SpacepointFeatureTool.h"
 
 using namespace InDet;
 
@@ -13,3 +14,4 @@ DECLARE_COMPONENT( GNNTrackReaderTool )
 DECLARE_COMPONENT( SiSPGNNTrackMaker )
 DECLARE_COMPONENT( DumpObjects )
 DECLARE_COMPONENT( GNNSeedingTrackMaker )
+DECLARE_COMPONENT( SpacepointFeatureTool )
