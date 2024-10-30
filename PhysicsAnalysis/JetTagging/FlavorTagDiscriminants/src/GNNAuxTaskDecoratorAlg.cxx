@@ -55,7 +55,7 @@ namespace FlavorTagDiscriminants {
     SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_trackContainerKey, ctx);
     ATH_CHECK(tracks.isValid());
 
-    for (const auto& track: *tracks) {
+    for (const auto track: *tracks) {
       for (auto& wdh: track_wdhs) {
         char value = -1;
         wdh(*track) = value;
@@ -66,7 +66,7 @@ namespace FlavorTagDiscriminants {
     SG::ReadHandle<xAOD::BTaggingContainer> jets(m_jetContainerKey, ctx);
     ATH_CHECK(jets.isValid());
     SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<ElementLink<xAOD::TrackParticleContainer>>> trackLinks_rdh(m_trackLinksKey, ctx);
-    for (const auto& jet: *jets) {
+    for (const auto jet: *jets) {
       auto irdh = jet_rdhs.begin();
       auto iwdh = track_wdhs.begin();
       for (; irdh != jet_rdhs.end() && iwdh != track_wdhs.end(); ++irdh, ++iwdh) {
