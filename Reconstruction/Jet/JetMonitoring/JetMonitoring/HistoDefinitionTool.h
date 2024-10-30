@@ -1,7 +1,7 @@
 //  -*- c++ -*- 
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETMONITORING_HISTODEFINITIONTOOL_H
@@ -41,7 +41,7 @@ class HistoDefinitionTool :  public asg::AsgTool {
 
   virtual StatusCode initialize() ;
 
-  std::string attributeName(){return m_attname;}
+  const std::string& attributeName(){return m_attname;}
 
 
   /// Build histos according to properties

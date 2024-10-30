@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
@@ -63,6 +63,7 @@ StatusCode JetHistoResponseAndEff::processJetContainer(const JetMonitoringAlg& p
     // calculate efficiency and response from matched jet
     //cppcheck-suppress derefInvalidIterator
     const xAOD::Jet* matched = *itmin;
+    //cppcheck-suppress eraseIteratorOutOfBoundsCond
     listJets.erase(itmin);
     
     double dr = sqrt(dr2min);
