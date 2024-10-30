@@ -64,9 +64,9 @@ def GfexMonitoringConfig(flags):
                             )
     #nned to put a condition on eta values
     helper.defineDQAlgorithm("Gfex_etaPhiMapFilled_gLJ",
-                        hanConfig={"libname":"libdqm_summaries.so","name":"Bins_Equal_Threshold","BinThreshold":"0"}, # counts empty bins
-                        thresholdConfig={"NBins":[0,nbins_total]}, # 0 bins expected empty, warning above that, error if entirely empty (save for known empties)
-                        )
+                            hanConfig={"libname":"libdqm_summaries.so","name":"Bins_Equal_Threshold","BinThreshold":"0"}, # counts empty bins
+                            thresholdConfig={"NBins":[0,nbins_total]}, # 0 bins expected empty, warning above that, error if entirely empty (save for known empties)
+                            )
 
     # Jet TOB list
     for containerKey in gFexJetTobKeyList:
@@ -102,7 +102,7 @@ def GfexMonitoringConfig(flags):
                     helper.defineHistogram(f"{containerKey}LBN{ptCutString},{containerKey}binNumber{ptCutString};h_{containerKey}{ptCutString}_posVsLBN",title="{} {} LBN vs 40(y-1)+x; LBN; 40(y-1)+x".format(tobTypeStr, ptStrTitle),
                            path=f"{expertPath}{gPath}/detail",
                            fillGroup = groupName,
-                           hanConfig={"description":f"x and y correspond to axis bin numbers on <a href='h_etaphiMap{containerKey}{ptCutString}</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
+                           hanConfig={"description":f"x and y correspond to axis bin numbers on <a href='../h_etaphiMap{containerKey}{ptCutString}'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
                            type='TH2I',
                            xbins=1,xmin=0,xmax=10,
                            ybins=40*32,ymin=0.5,ymax=40*32+0.5,
@@ -122,7 +122,7 @@ def GfexMonitoringConfig(flags):
                     helper.defineHistogram(f"{containerKey}LBN{ptCutString},{containerKey}binNumber{ptCutString};h_{containerKey}{ptCutString}_posVsLBN",title="{} {} LBN vs 40(y-1)+x; LBN; 40(y-1)+x".format(tobTypeStr, ptStrTitle),
                            path=f"{expertPath}{gPath}/detail",
                            fillGroup = groupName,
-                           hanConfig={"description":f"x and y correspond to axis bin numbers on <a href='h_etaphiMap{containerKey}{ptCutString}</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
+                           hanConfig={"description":f"x and y correspond to axis bin numbers on <a href='../h_etaphiMap{containerKey}{ptCutString}'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
                            type='TH2I',
                            xbins=1,xmin=0,xmax=10,
                            ybins=40*32,ymin=0.5,ymax=40*32+0.5,

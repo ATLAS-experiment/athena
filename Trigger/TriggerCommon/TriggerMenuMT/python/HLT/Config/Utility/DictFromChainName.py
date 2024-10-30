@@ -630,10 +630,10 @@ def dictFromChainName(flags, chainInfo):
     The logic:
     ---- Loop over all chains (keys) in dictionary ----
     ---- Then complete the dict with other info    ----
-    Default input format will be namedtuple:
-    ChainProp: ['name', 'L1Thresholds'=[], 'stream', 'groups', 'merging'=[], 'topoStartFrom'=False, 'monGroups' = []],
+    Default input format will be a ChainProp object:
+    ChainProp(name: str, groups: list[str], l1SeedThresholds: list[str] = [], stream: list[str] = ['Main'], 
+                monGroups: list[str] = [], mergingStrategy: str = 'auto', mergingOrder: list[str] = [], mergingOffset: int = -1),
     but for nwo plain chain name is also supported
-    
     """
 
     # these if/elif/else statements are due to temporary development
@@ -645,7 +645,6 @@ def dictFromChainName(flags, chainInfo):
         mergingStrategy = 'parallel'
         mergingOffset   = -1
         mergingOrder    = []
-        topoStartFrom   = ''
         monGroups       = []
 
     elif 'ChainProp' in str(type(chainInfo)):	
@@ -657,7 +656,6 @@ def dictFromChainName(flags, chainInfo):
         mergingStrategy = chainInfo.mergingStrategy
         mergingOffset   = chainInfo.mergingOffset
         mergingOrder    = chainInfo.mergingOrder
-        topoStartFrom   = chainInfo.topoStartFrom
         monGroups       = chainInfo.monGroups
 
     else:
@@ -735,7 +733,6 @@ def dictFromChainName(flags, chainInfo):
     chainDict['mergingStrategy'] = mergingStrategy
     chainDict['mergingOffset']   = mergingOffset
     chainDict['mergingOrder']    = mergingOrder
-    chainDict['topoStartFrom']   = topoStartFrom
     chainDict['monGroups']       = monGroups
     chainDict['chainNameHash']   = string2hash(chainDict['chainName'])
 

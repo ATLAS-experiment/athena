@@ -105,6 +105,13 @@ namespace LVL1 {
    // convert int to bitset
    std::bitset<3> bin(wordOut);
 
+   // ZDC L1 items are located on CTPIN SLOT 9
+   // Each slot holds 4 connectors that each carry a 32 bit trigger word
+   // ZDC HG items are located on Connector 1 (CTPCAL)
+   // at bits 25, 26, 27
+   // for more info see
+   // twiki.cern.ch/twiki/bin/view/Atlas/LevelOneCentralTriggerSetup#CTPIN_Slot_9
+
    // load output into trigger word on correct bits
    unsigned int word0 = 0;
    word0 += (bin[0] << 25);
