@@ -40,9 +40,8 @@ SAVE
 """,
   'ejets': """
 IMPORT SUBcommon
-EL_N 25000 >= 1
-EL_N loose 25000 == 1
-MU_N 5000 == 0
+EL_N 5000 == 1
+MU_N 3000 == 0
 MWT < 170000
 MET+MWT > 40000
 SAVE
