@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ANALYSISTRUTHTAGRESULTS_H
@@ -61,18 +61,18 @@ namespace Analysis {
 
     }
 
-    float getEvtDirectTagSF(std::string syst_name="Nominal")
+    float getEvtDirectTagSF(const std::string& syst_name="Nominal")
     {
         return(map_SF[syst_name]);
     }
 
-    std::vector<bool> getDirectTaggedJets()
+    const std::vector<bool>& getDirectTaggedJets()
     {
         return(is_tagged);
 
     }
 
-    float getEventWeight(int nbtag,bool Ex,std::string syst_name="Nominal")
+    float getEventWeight(int nbtag,bool Ex,const std::string& syst_name="Nominal")
     {
         if(Ex)
         {
