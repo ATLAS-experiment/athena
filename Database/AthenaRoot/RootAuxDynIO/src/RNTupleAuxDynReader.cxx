@@ -119,6 +119,9 @@ namespace RootAuxDynIO
       if( m_storeFieldName.rfind( field_type, 0 ) != std::string::npos ) {
          m_key = m_storeFieldName.substr( field_type.size()+1 );
       }
+      else if( m_storeFieldName.ends_with( "Aux:" ) ) {
+        m_key = m_storeFieldName.substr( 0, m_storeFieldName.size() - 4 );
+      }
       ATH_MSG_VERBOSE("field name=" << m_storeFieldName << "  field_prefix=" << field_prefix << "  key=" << m_key);
       TClass *tc = TClass::GetClass( field_type.c_str() );
       if( tc ) {
@@ -197,15 +200,7 @@ namespace RootAuxDynIO
             return fieldInfo;
          }
 
-         bool isFieldFound = false;
-
-         if( !fieldInfo.fieldName.empty() ) {
-            const string field_prefix = RootAuxDynIO::auxFieldName("", m_storeFieldName);
-            const string attr_infile = fieldInfo.fieldName.substr(field_prefix.size());
-            isFieldFound = (attr_infile == fieldInfo.attribName);
-         }
-
-         if( !isFieldFound ) {
+         if( fieldInfo.fieldName.empty() ) {
             // mark initialized here so it remembers this field was not found
             fieldInfo.status = FieldInfo::NotFound;
             return fieldInfo;
