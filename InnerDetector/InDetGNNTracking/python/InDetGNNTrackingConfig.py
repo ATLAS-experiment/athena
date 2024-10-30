@@ -62,6 +62,16 @@ def SeedFitterToolCfg(flags, name="SeedFitterTool", **kwargs):
     acc.setPrivateTools(CompFactory.InDet.SeedFitterTool(name, **kwargs))
     return acc
 
+
+def SpacepointFeatureToolCfg(flags, name="SpacepointFeatureTool", **kwargs):
+    """Sets up a SpacepointFeature tool and returns it."""
+    acc = ComponentAccumulator()
+    
+    ### parameters for SpacepointFeature
+    acc.setPrivateTools(CompFactory.InDet.SpacepointFeatureTool(name, **kwargs))
+    return acc
+
+
 def GNNTrackReaderToolCfg(flags, name='GNNTrackReaderTool', **kwargs):
     """Set up a GNNTrackReader tool and return it."""
     acc = ComponentAccumulator()
