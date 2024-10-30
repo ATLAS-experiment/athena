@@ -1,6 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-
-
 """
   ComponentAccumulator tool configuration for ISF_ActsTools
 """
@@ -8,10 +6,47 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
+from ISF_Algorithms.CollectionMergerConfig import CollectionMergerCfg
+
+def ActsFatrasWriteHandlerCfg(flags, name="ActsFatrasWriteHandler", **kwargs):
+    """Return ActsFatrasWriteHandler configured with ComponentAccumulator"""
+    acc = ComponentAccumulator()
+    mlog = logging.getLogger(name)
+    mlog.info('Start configuration ActsFatrasWriteHandler')
+
+    bare_collection_name = "PixelHits"
+    mergeable_collection_suffix = "_Fatras"
+    merger_input_property = "PixelHits"
+    region = "ID"
+    acc_pixel, pixel_hits_collection_name = CollectionMergerCfg(flags,
+                                                       bare_collection_name,
+                                                       mergeable_collection_suffix,
+                                                       merger_input_property,
+                                                       region)
+    acc.merge(acc_pixel)
+
+    bare_collection_name = "SCT_Hits"
+    mergeable_collection_suffix = "_Fatras"
+    merger_input_property = "SCTHits"
+    region = "ID"
+    acc_sct, sct_hits_collection_name = CollectionMergerCfg(flags,
+                                                       bare_collection_name,
+                                                       mergeable_collection_suffix,
+                                                       merger_input_property,
+                                                       region)
+    acc.merge(acc_sct)
+
+    kwargs.setdefault("PixelCollectionName", pixel_hits_collection_name)
+    kwargs.setdefault("SCTCollectionName", sct_hits_collection_name)
+
+    acc.setPrivateTools(CompFactory.ActsFatrasWriteHandler(name=name, **kwargs))
+    return acc
 
 def ActsFatrasSimToolCfg(flags, name="ISF_ActsFatrasSimTool", **kwargs):
     """Return ISF_FatrasSimHitCreatorID configured with ComponentAccumulator"""
     acc = ComponentAccumulator()
+    mlog = logging.getLogger(name)
+    mlog.info('Start configuration ISF_ActsFatrasSimTool')
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
     kwargs.setdefault('TrackingGeometryTool', acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
 
@@ -23,44 +58,7 @@ def ActsFatrasSimToolCfg(flags, name="ISF_ActsFatrasSimTool", **kwargs):
     from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RNGService", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
 
+    kwargs.setdefault("ActsFatrasWriteHandler", acc.popToolsAndMerge(ActsFatrasWriteHandlerCfg(flags)))
+
     acc.setPrivateTools(CompFactory.ISF.ActsFatrasSimTool(name, **kwargs))
     return acc
-
-def ActsFatrasWriteHandlerCfg(flags, name="ActsFatrasWriteHandler", **kwargs):
-    """Return ActsFatrasWriteHandler configured with ComponentAccumulator"""
-    from ISF_Algorithms.CollectionMergerConfig import CollectionMergerCfg
-
-    mlog = logging.getLogger(name)
-    mlog.debug('Start configuration')
-
-    result = ComponentAccumulator()
-
-    bare_collection_name = "PixelHits"
-    mergeable_collection_suffix = "_ActsFatras"
-    merger_input_property = "PixelHits"
-    region = "ID"
-
-    acc, pixel_hits_collection_name = CollectionMergerCfg(flags,
-                                                       bare_collection_name,
-                                                       mergeable_collection_suffix,
-                                                       merger_input_property,
-                                                       region)
-    result.merge(acc)
-
-    bare_collection_name = "SCT_Hits"
-    mergeable_collection_suffix = "_ActsFatras"
-    merger_input_property = "SCT_Hits"
-    region = "ID"
-
-    acc, sct_hits_collection_name = CollectionMergerCfg(flags,
-                                                       bare_collection_name,
-                                                       mergeable_collection_suffix,
-                                                       merger_input_property,
-                                                       region)
-    result.merge(acc)
-    
-    kwargs.setdefault("PixelCollectionName", pixel_hits_collection_name)
-    kwargs.setdefault("SCTCollectionName", sct_hits_collection_name)
-
-    result.setPrivateTools(CompFactory.ActsFatrasWriteHandler(name=name, **kwargs))
-    return result
