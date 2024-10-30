@@ -6,6 +6,7 @@
 #define TRIGBYTESTREAMCNVSVC_H
 
 #include "ByteStreamCnvSvcBase/ByteStreamCnvSvcBase.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "AthenaKernel/SlotSpecificObj.h"
 
@@ -19,7 +20,8 @@ class IROBDataProviderSvc;
  *  It overrides the connectOutput and commitOutput methods of the base class. In this implementation, they create
  *  the specific online HLT output and send it out directly to the TDAQ infrastructure without using an output service.
  **/
-class TrigByteStreamCnvSvc : public extends<ByteStreamCnvSvcBase, IByteStreamEventAccess> {
+class TrigByteStreamCnvSvc : public extends<ByteStreamCnvSvcBase,
+                                            IByteStreamCnvSvc, IByteStreamEventAccess> {
 public:
   /// Standard constructor
   TrigByteStreamCnvSvc(const std::string& name, ISvcLocator* svcLoc);
@@ -47,6 +49,11 @@ public:
   virtual RawEventWrite* getRawEvent() override;
   /// Return a pointer to the raw event for the given event context
   RawEventWrite* getRawEvent(const EventContext& eventContext) const;
+
+protected:
+   // ------------------------- IByteStreamCnvSvc methods ------------------
+   virtual FullEventAssemblerBase* findFullEventAssembler(const std::string& name) const override;
+   virtual StatusCode storeFullEventAssembler(std::unique_ptr<FullEventAssemblerBase> fea, const std::string& name) override;
 
 private:
   // ------------------------- Helper methods ----------------------------------
