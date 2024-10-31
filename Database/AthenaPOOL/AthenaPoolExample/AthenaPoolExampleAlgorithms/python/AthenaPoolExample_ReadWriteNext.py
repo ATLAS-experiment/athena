@@ -71,9 +71,3 @@ stream.HelperTools[0].OutputLevel = 3
 import sys
 sc = acc.run(flags.Exec.MaxEvents)
 sys.exit(sc.isFailure())
-
-
-
-
-
-

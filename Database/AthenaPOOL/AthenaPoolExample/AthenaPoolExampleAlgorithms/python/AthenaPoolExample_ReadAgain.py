@@ -10,8 +10,7 @@
 # 1. Reads the data from files have been written with AthneaPoolExample_Write.py
 #    and AthneaPoolExample_ReadWrite.py
 # 2. Same as 1., but using TAG collections. Instead of SkipEvents, a HelperTool is used to skip the
-#    first 10 events using their MagicTag attribute (example for computational TAG processing).
-#
+#    first 10 events 
 #==============================================================
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags

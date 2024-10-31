@@ -7,6 +7,8 @@
 #include "../WriteTag.h"
 #include "../QueryTag.h"
 #include "../PassNoneFilter.h"
+#include "../WriteExampleElectron.h"
+#include "../ReadExampleElectron.h"
 
 DECLARE_COMPONENT( AthPoolEx::WriteData )
 DECLARE_COMPONENT( AthPoolEx::ReWriteData )
@@ -17,4 +19,5 @@ DECLARE_COMPONENT( AthPoolEx::WriteTag )
 DECLARE_COMPONENT( AthPoolEx::PassNoneFilter )
 DECLARE_COMPONENT( AthPoolEx::ReadMeta )
 DECLARE_COMPONENT( AthPoolEx::QueryTag )
-
+DECLARE_COMPONENT( AthPoolEx::WriteExampleElectron )
+DECLARE_COMPONENT( AthPoolEx::ReadExampleElectron )

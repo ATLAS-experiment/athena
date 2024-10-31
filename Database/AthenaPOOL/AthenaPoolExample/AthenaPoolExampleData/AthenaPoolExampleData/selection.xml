@@ -7,4 +7,10 @@
    <class name="ExampleTrack"/>
    <class name="DataVector<ExampleTrack>"/>
    <class name="std::vector<ExampleTrack*>"/>
+   <class name="xAOD::ExampleElectron_v1" id="9ED519B3-7CC8-4AE6-B2E8-F2B84029576B"/>
+   <typedef name="xAOD::ExampleElectron" /> 
+   <class name="xAOD::ExampleElectronContainer_v1" id="4508E3FC-03A7-4770-BF41-71431F86050C"/>
+   <typedef name="xAOD::ExampleElectronContainer" /> 
+   <class name="xAOD::ExampleElectronAuxContainer_v1" id="A57CD90B-B697-4067-93C7-28252B1FF9D5"/>
+   <typedef name="xAOD::ExampleElectronAuxContainer" /> 
 </lcgdict>

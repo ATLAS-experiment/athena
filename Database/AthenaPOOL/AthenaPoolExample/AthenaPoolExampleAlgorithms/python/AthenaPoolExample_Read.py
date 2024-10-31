@@ -10,7 +10,7 @@
 # 1. Reads the data from files have been written with AthneaPoolExample_Write.py
 #    and AthneaPoolExample_ReadWrite.py
 # 2. Same as 1., but using TAG collections. Instead of SkipEvents, a HelperTool is used to skip the
-#    first 10 events using their MagicTag attribute (example for computational TAG processing).
+#    first 10 events.
 #
 #==============================================================
 
@@ -20,8 +20,8 @@ from AthenaCommon.Constants import DEBUG
 
 # Setup flags
 flags = initConfigFlags()
-flags.Input.Files = [ "EmptyPoolFile.root", "SimplePoolFile1.root",
-                      "EmptyPoolFile.root", "SimplePoolFile2.root", "SimplePoolFile3.root" ]
+flags.Input.Files = [ "EmptyPoolFile.root", "SimplePoolFile1.root", 
+                      "EmptyPoolFile.root", "SimplePoolFile2.root", "SimplePoolFile3.root"]
 flags.Exec.MaxEvents = -1
 flags.Common.MsgSuppression = False
 flags.Exec.DebugMessageComponents = [ "ReadData", "PoolSvc", "AthenaPoolCnvSvc",
@@ -36,7 +36,7 @@ acc = MainServicesCfg( flags )
 from AthenaPoolExampleAlgorithms.AthenaPoolExampleConfig import AthenaPoolExampleReadCfg
 acc.merge( AthenaPoolExampleReadCfg(flags, readCatalogs = ["file:Catalog1.xml"]) )
 
-# Creata and attach the reading algorithm
+# Create and attach the reading algorithm 
 acc.addEventAlgo( CompFactory.AthPoolEx.ReadData("ReadData", OutputLevel = DEBUG) )
 
 evSelector = acc.getService("EventSelector")
@@ -72,9 +72,3 @@ printOpts += [ "DatabaseName = '*'; READ_CALLS = 'int'" ]
 import sys
 sc = acc.run(flags.Exec.MaxEvents)
 sys.exit(sc.isFailure())
-
-
-
-
-
-

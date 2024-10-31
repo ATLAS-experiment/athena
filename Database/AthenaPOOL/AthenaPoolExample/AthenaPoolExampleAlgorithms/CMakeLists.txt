@@ -7,7 +7,7 @@ atlas_subdir( AthenaPoolExampleAlgorithms )
 atlas_add_component( AthenaPoolExampleAlgorithms
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps AthenaKernel AthenaPoolExampleData AthenaPoolUtilities EventBookkeeperMetaData EventInfo GaudiKernel PersistentDataModel StoreGateLib )
+		     LINK_LIBRARIES AthenaBaseComps AthenaKernel AthenaPoolExampleData AthenaPoolUtilities EventBookkeeperMetaData EventInfo GaudiKernel PersistentDataModel StoreGateLib xAODCore )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
@@ -80,10 +80,23 @@ _add_test( AthenaPoolExample_ReadWriteNext
    DEPENDS AthenaPoolExample_Copy
    IGNORE ${TEST_IGNORE_STR} )
 
+# Testing Writing xAOD::ExampleElectrons
+_add_test( AthenaPoolExample_WritexAODElectrons
+   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_WritexAODElectrons.py"
+   DEPENDS AthenaPoolExample_ReadWriteNext
+   IGNORE ${TEST_IGNORE_STR} 
+   PRE_EXEC test/pre_check.sh )
+
+# Testing Reading xAOD::ExampleElectrons
+_add_test( AthenaPoolExample_ReadxAODElectrons
+   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_ReadxAODElectrons.py"
+   DEPENDS AthenaPoolExample_WritexAODElectrons
+   IGNORE ${TEST_IGNORE_STR} )
+
 # Read all
 _add_test( AthenaPoolExample_ReadAgain
    "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_ReadAgain.py"
-   DEPENDS AthenaPoolExample_ReadWriteNext
+   DEPENDS AthenaPoolExample_ReadxAODElectrons
    IGNORE ${TEST_IGNORE_STR} )
 
 # Concatenate jobs write 'Hits' and 'Tracks' to different streams
@@ -118,3 +131,5 @@ _add_test( AthenaPoolExample_ReadMeta
    "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_ReadMeta.py"
    DEPENDS AthenaPoolExample_WriteMeta
    IGNORE ${TEST_IGNORE_STR} )
+
+

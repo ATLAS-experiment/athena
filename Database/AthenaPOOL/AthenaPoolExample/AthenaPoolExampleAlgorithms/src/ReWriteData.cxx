@@ -45,6 +45,8 @@ StatusCode ReWriteData::execute (const EventContext& ctx) const {
    ATH_MSG_DEBUG("in execute()");
 
    if (!m_exampleHitKey.key().empty()) {
+
+     // Take in the ExampleHit, obtain pT, eta and phi. 
      SG::ReadHandle<ExampleHitContainer> hitCont (m_exampleHitKey, ctx);
      double pT = 0.0, eta = 0.0, phi = 0.0;
      for (const ExampleHit* hit : *hitCont) {
@@ -53,6 +55,8 @@ StatusCode ReWriteData::execute (const EventContext& ctx) const {
        eta = eta + hit->getX() / hit->getZ();
        phi = phi + hit->getX() / hit->getY();
      }
+     
+     // Create an ExampleTrack object, set the hit values appropriately
      auto trackObj = std::make_unique<ExampleTrack>();
      trackObj->setPT(pT / hitCont->size());
      trackObj->setEta(eta);
@@ -63,6 +67,7 @@ StatusCode ReWriteData::execute (const EventContext& ctx) const {
      trackObj->getElementLink2()->toIndexedElement(*hitCont, hitCont->size() - 1);
      ATH_MSG_INFO("ElementLink2 = " << trackObj->getElement2()->getX());
      
+     // ElementLink creation
      ElementLink<ExampleHitContainer> eLink1, eLink2, eLink3;
      eLink1.toContainedElement(*hitCont, *hitCont->begin());
      trackObj->getElementLinkVector()->push_back(eLink1);
@@ -74,7 +79,8 @@ StatusCode ReWriteData::execute (const EventContext& ctx) const {
      for (ElementLinkVector<ExampleHitContainer>::iterator iter = trackObj->getElementLinkVector()->begin(); iter != trackObj->getElementLinkVector()->end(); ++iter) {
        ATH_MSG_INFO("Element = " << (**iter) << " : " << (**iter)->getX());
      }
-
+     
+     // Print out Navigable elements
      trackObj->getNavigable()->putElement(hitCont.cptr(), *hitCont->begin());
      trackObj->getNavigable()->putElement(hitCont.cptr(), (*hitCont)[5]);
      ATH_MSG_INFO("Link Navigable = " << trackObj->getNavigable()->size());
@@ -82,6 +88,7 @@ StatusCode ReWriteData::execute (const EventContext& ctx) const {
        ATH_MSG_INFO("Element = " << (*iter) << " : " << (*iter)->getX());
      }
 
+     // Print out WeightedNavigable elements
      trackObj->getWeightedNavigable()->putElement(hitCont.cptr(), *hitCont->begin(), 3.33);
      trackObj->getWeightedNavigable()->putElement(hitCont.cptr(), (*hitCont)[5], 1.11);
      trackObj->getWeightedNavigable()->putElement(hitCont.cptr(), (*hitCont)[3], 5.55);
@@ -89,14 +96,17 @@ StatusCode ReWriteData::execute (const EventContext& ctx) const {
      for (Navigable<ExampleHitContainer, double>::object_iter iter = trackObj->getWeightedNavigable()->begin(); iter != trackObj->getWeightedNavigable()->end(); ++iter) {
        ATH_MSG_INFO("Element = " << (*iter) << " : " << (*iter)->getX());
      }
-
+     
+     // Print out Track info
      ATH_MSG_INFO("Track pt = " << trackObj->getPT() << " eta = " << trackObj->getEta() << " phi = " << trackObj->getPhi() << " detector = " << trackObj->getDetector());
-
+     
+     // Create Track container, record it. 
      auto trackCont = std::make_unique<ExampleTrackContainer>();
      trackCont->push_back(std::move(trackObj));
      SG::WriteHandle<ExampleTrackContainer> trackContH (m_exampleTrackKey, ctx);
      ATH_CHECK( trackContH.record (std::move (trackCont)) );
-   }
+     
+   } // end if
 
    ATH_MSG_INFO("registered all data");
    return StatusCode::SUCCESS;
