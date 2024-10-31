@@ -1345,6 +1345,8 @@ namespace Crest {
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrite_CallbackFunc_StdString);
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
 
+      // Set the option for the redirection of the request
+      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
       /* Perform the request, res will get the return code */
       res = curl_easy_perform(curl);
@@ -1600,6 +1602,9 @@ namespace Crest {
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrite_CallbackFunc_StdString);
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
 
+      // Set the option for the redirection of the request
+      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+      
       // Perform the request, res will get the return code
       res = curl_easy_perform(curl);
 
