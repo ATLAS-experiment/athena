@@ -8,6 +8,7 @@
 #include <sstream>
 #include <utility>
 
+#include "CxxUtils/trapping_fp.h"
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
@@ -568,9 +569,12 @@ bool ZDCDataAnalyzer::FinishEvent()
       // subtract the fraction of LGOverflow events if we have fraction available (<0 means unavailable)
       if (pulseAna_p->LGOverflow() && m_moduleAmpFractionLG[side][module] > 0) {tempFraction -= m_moduleAmpFractionLG[side][module];}
     }
-    
-    if (m_moduleSum[side] > 0) m_moduleSumBkgdFrac[side] = sumAmpTimesBkgdFrac/m_moduleSum[side];
-    else m_moduleSumBkgdFrac[side] = 0;
+
+    {
+      CXXUTILS_TRAPPING_FP;
+      if (m_moduleSum[side] > 0) m_moduleSumBkgdFrac[side] = sumAmpTimesBkgdFrac/m_moduleSum[side];
+      else m_moduleSumBkgdFrac[side] = 0;
+    }
     
     if (m_calibModuleSum[side] > 1e-6) {
       m_averageTime[side] /= m_calibModuleSum[side];
