@@ -4,7 +4,6 @@
 # art-description: Run Trigger on data with athena and write ByteStream output, then run offline reco
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 from TrigValTools.TrigValSteering.Common import find_file

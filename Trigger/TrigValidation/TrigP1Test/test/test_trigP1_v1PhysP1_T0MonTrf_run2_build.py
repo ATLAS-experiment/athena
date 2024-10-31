@@ -4,7 +4,6 @@
 # art-description: transform test of BSRDOtoRAW + T0Reco + T0Mon, using v1PhysP1 menu, and Run2 EB data as input
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 

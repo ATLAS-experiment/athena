@@ -4,7 +4,6 @@
 # art-description: athenaHLT test of the Dev_pp_run3_v1 menu only dumping options for SMK generation
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 

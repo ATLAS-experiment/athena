@@ -4,7 +4,6 @@
 # art-description: BeamSpot update test using athenaHLT
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
 
 from TrigValTools.TrigValSteering import Test, Step, ExecStep, CheckSteps
 from TrigValTools.TrigValSteering.Input import get_input

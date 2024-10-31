@@ -4,7 +4,6 @@
 # art-description: Test running on ALFACalib data with ALFA ROB Monitor chains
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
