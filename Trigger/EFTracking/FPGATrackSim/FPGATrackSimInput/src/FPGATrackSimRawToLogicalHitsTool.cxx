@@ -54,19 +54,7 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
   ATH_MSG_DEBUG ("Getting Event " << eventinfo);
   logicEventHeader.newEvent(eventinfo);//this also reset all varaibles
 
-  // Get correct maps
-  const FPGATrackSimPlaneMap *pmap = nullptr;
-  const FPGATrackSimRegionMap *rmap = nullptr;
-  if (stage == 1)
-  {
-      rmap = m_FPGATrackSimMapping->RegionMap_1st();
-  }
-  else if (stage == 2)
-  {
-      pmap = m_FPGATrackSimMapping->PlaneMap_2nd();
-      rmap = m_FPGATrackSimMapping->RegionMap_2nd();
-  }
-  else
+  if(stage!=1 && stage!=2)
   {
       ATH_MSG_FATAL("convert() must have stage == 1 or 2");
   }
@@ -81,12 +69,10 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
       // This causes the code in this hit loop to crash. As a workaround for the moment, we currently
       // skip over hits in layers that are not included in the FPGATrackSim geometry, with plane = -1
 
-      bool mapped=false;
       for (unsigned int ireg=0;ireg!=m_towers.size();++ireg){
             // if the equivalent hit is compatible with this tower the hit is saved                            
             logicEventHeader.getTower( ireg )->addHit(hit);
             ATH_MSG_VERBOSE ("Hit mapped to tower="<<ireg << ", nHits now=" << logicEventHeader.getTower(ireg)->nHits());
-            mapped=true;
       }
   } // end hit loop
   

@@ -46,14 +46,12 @@ StatusCode FPGATrackSimDataFlowTool::calculateDataFlow(FPGATrackSimDataFlowInfo*
                                               const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_2nd, std::vector<FPGATrackSimTrack> const & tracks_2nd)
 {
     info->nMappedHits_1st_layer.resize(m_nLayers_1st);
-    for (FPGATrackSimHit const & hit : header_1st->towers().at(0).hits()) {
+    for (int i=0; header_1st->towers().at(0).nHits(); i++) {
         info->nMappedHits_1st_total++;
     }
 
     info->nClusters_1st_layer.resize(m_nLayers_1st);
-    for (FPGATrackSimCluster const & cluster : clusters_1st) {
-        info->nClusters_1st_total = clusters_1st.size();
-    }
+    info->nClusters_1st_total = clusters_1st.size();
 
     info->nRoads_1st_total = roads_1st.size();
     for (const auto & r : roads_1st) {

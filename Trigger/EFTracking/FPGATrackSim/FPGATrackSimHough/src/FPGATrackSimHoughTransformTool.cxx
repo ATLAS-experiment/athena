@@ -172,10 +172,6 @@ FPGATrackSimHoughTransformTool::Image FPGATrackSimHoughTransformTool::createLaye
     {
       if (std::find(layers.begin(), layers.end(), hit->getLayer()) == layers.end()) continue;
 
-      if (m_subRegion >= 0) {
-        // NOTE: uncomment middle piece if we port over 2nd stage functionality.
-        auto* subrmap = /*(m_2ndStage) ? m_FPGATrackSimMapping->SubRegionMap_2nd() :*/ m_FPGATrackSimMapping->SubRegionMap();
-      }
 
       // This scans over y (pT) because that is more efficient in memory, in C.
       // Unknown if firmware will want to scan over x instead.

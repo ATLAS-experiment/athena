@@ -68,11 +68,8 @@ StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr
             std::shared_ptr<FPGATrackSimHit> hitCopy = std::make_shared<FPGATrackSimHit>(*iHit);
  
             pmap->map(*hitCopy);
-            if (hitCopy->getLayer()>=0)
-            {
-                if ((subrmap->isInRegion(tool->getSubRegion(), *hitCopy))) {
-                    sliceHits[toolNum].push_back(hitCopy);
-                }
+            if ((subrmap->isInRegion(tool->getSubRegion(), *hitCopy))) {
+                sliceHits[toolNum].push_back(hitCopy);
             }
 
         }   
