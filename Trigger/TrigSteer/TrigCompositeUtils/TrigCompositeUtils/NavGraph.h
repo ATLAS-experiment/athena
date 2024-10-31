@@ -171,11 +171,6 @@ namespace TrigCompositeUtils {
       std::vector<const Decision*> thin();
 
       /**
-       * @brief Resets the object, clearing any transient graph.
-       **/
-      void reset();
-
-      /**
        * @brief Helper function. Print the internal graph structure to the terminal.
        * @param[in] log Athena messaging service reference.
        * @param[in] msgLevel Athena messaging service verbosity level.
