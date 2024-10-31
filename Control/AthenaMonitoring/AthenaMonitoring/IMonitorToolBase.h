@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IMONITORTOOLBASE_H
@@ -41,6 +41,5 @@ class IMonitorToolBase : virtual public IAlgTool
   virtual StatusCode runStat() = 0;
   virtual StatusCode checkHists(bool fromFinalize) = 0;
   virtual bool       preSelector() = 0;
-  virtual StatusCode convertLWHists() = 0; 
 };
 #endif
