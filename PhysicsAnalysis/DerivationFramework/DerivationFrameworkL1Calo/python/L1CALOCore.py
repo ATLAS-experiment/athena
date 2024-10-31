@@ -447,7 +447,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     if flags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import PreJetMCTruthAugmentationsCfg,AddTruthJetsCfg
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTruthCollectionNavigationDecorationsCfg,AddBornLeptonCollectionCfg
-        from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddHardScatterCollectionCfg,AddTruthMETCfg,PostJetMCTruthAugmentationsCfg
+        from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTruthMETCfg,PostJetMCTruthAugmentationsCfg
 
         acc.merge(PreJetMCTruthAugmentationsCfg(flags,decorationDressing = 'dressedPhoton'))
         acc.merge(AddTruthJetsCfg(flags))
@@ -457,8 +457,6 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, ["TruthElectrons", "TruthMuons", "TruthPhotons", "TruthTaus", "TruthNeutrinos"]))
         # Special collection for Born leptons
         acc.merge(AddBornLeptonCollectionCfg(flags))
-        # Special collection for hard scatter (matrix element) - save TWO extra generations of particles
-        acc.merge(AddHardScatterCollectionCfg(flags, 2))
 
         L1CaloSlimmingHelper.AppendToDictionary.update (
             {'TruthElectrons':'xAOD::TruthParticleContainer','TruthElectronsAux':'xAOD::TruthParticleAuxContainer',
@@ -467,7 +465,6 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
              'TruthTaus':'xAOD::TruthParticleContainer','TruthTausAux':'xAOD::TruthParticleAuxContainer',
              'TruthNeutrinos':'xAOD::TruthParticleContainer','TruthNeutrinosAux':'xAOD::TruthParticleAuxContainer',
              'BornLeptons':'xAOD::TruthParticleContainer','BornLeptonsAux':'xAOD::TruthParticleAuxContainer',
-             'HardScatterParticles':'xAOD::TruthParticleContainer','HardScatterParticlesAux':'xAOD::TruthParticleAuxContainer',
              'MET_Truth':'xAOD::MissingETContainer','MET_TruthAux':'xAOD::MissingETAuxContainer'}
         )
         AllVariables += [
@@ -477,7 +474,6 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
             "TruthTaus",
             "TruthNeutrinos",
             "BornLeptons",
-            "HardScatterParticles",
             "MET_Truth"
         ]
 

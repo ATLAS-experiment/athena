@@ -121,8 +121,6 @@ def addTLATruth3ContentToSlimmerTool(slimmer):
         "TruthBosonsWithDecayVertices",
         "TruthBSMWithDecayParticles",
         "TruthBSMWithDecayVertices",
-        "HardScatterParticles",
-        "HardScatterVertices",
     ]
     slimmer.ExtraVariables += [
         "AntiKt4TruthDressedWZJets.GhostCHadronsFinalCount.GhostBHadronsFinalCount.pt.HadronConeExclTruthLabelID.PartonTruthLabelID.TrueFlavor",
