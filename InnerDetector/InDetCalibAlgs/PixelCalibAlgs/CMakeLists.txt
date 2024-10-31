@@ -35,6 +35,11 @@ atlas_add_executable( PixelCalibration
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils PixelCalibAlgsLib )
    
+atlas_add_executable( IBLCalibration
+   ChargeCalibration/ibl/CalibrateIBL.cxx
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils PixelCalibAlgsLib )
+   
 atlas_add_executable( MakeReferenceFile
    ChargeCalibration/pixel/MakeReferenceFile.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}

@@ -102,9 +102,8 @@ def EvoMon(old_calib, new_calib, mapping, old_iov, new_iov):
         axs = fig.add_subplot(1,1,1)
         status = "_OK"
         
-        
-        
         for fe in range(len(new_calib[str(mod)])):
+            
             information["Total_FE"] += 1
             newQ = []
             oldQ = []
@@ -239,7 +238,7 @@ def setupRunEvo(path_newCalib, path_oldCalib):
     new_calib, new_iov = "", ""
     if "PIX_FINAL_calibration_candidate.txt" in path_newCalib:
         new_calib, new_iov = ReadCalibOutput(path_newCalib)
-    elif "ChagreCalib_" in path_newCalib:
+    elif "ChargeCalib_" in path_newCalib:
         new_calib, new_iov = ReadCalibOutput(path_newCalib)
     else:
         new_calib, read_report = ReadNewCalib(path_newCalib)
