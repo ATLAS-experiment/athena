@@ -51,14 +51,14 @@ Muon::nsw::NSWCommonDecoder::NSWCommonDecoder (const eformat::read::ROBFragment 
     catch (Muon::nsw::MuonNSWCommonDecoder::NSWElinkFelixHeaderException &e)
     {
       m_has_error = true;
-      ers::warning (e);
+      ERS_DEBUG (1, e.what());
       break;
     }
 
     catch (Muon::nsw::MuonNSWCommonDecoder::NSWElinkROCHeaderException &e)
     {
       m_has_error = true;
-      ers::warning (e);
+      ERS_DEBUG (1, e.what());
 
       // Try to move to next link
 
