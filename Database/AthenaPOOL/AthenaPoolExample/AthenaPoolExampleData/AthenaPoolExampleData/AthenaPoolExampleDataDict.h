@@ -13,5 +13,9 @@
 
 #include "AthenaPoolExampleData/ExampleHitContainer.h"
 #include "AthenaPoolExampleData/ExampleTrackContainer.h"
+#include "AthenaPoolExampleData/ExampleElectron.h"
+#include "AthenaPoolExampleData/ExampleElectronContainer.h"
+#include "AthenaPoolExampleData/ExampleElectronAuxContainer.h"
+
 
 #endif

@@ -12,11 +12,12 @@ atlas_add_library( AthenaPoolExampleData
                    PUBLIC_HEADERS AthenaPoolExampleData
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${CLHEP_LIBRARIES} AthContainers AthLinks AthenaKernel GaudiKernel Navigation )
+		   LINK_LIBRARIES ${CLHEP_LIBRARIES} AthContainers AthLinks AthenaKernel GaudiKernel Navigation xAODCore)
 
 atlas_add_dictionary( AthenaPoolExampleDataDict
                       AthenaPoolExampleData/AthenaPoolExampleDataDict.h
                       AthenaPoolExampleData/selection.xml
                       LINK_LIBRARIES AthenaPoolExampleData
-                      NAVIGABLES ExampleHitContainer )
+                      EXTRA_FILES src/dict/*.cxx 
+		      NAVIGABLES ExampleHitContainer )
 

@@ -106,7 +106,6 @@ MagicWriteTag.TagKey = "MagicTag"
 MagicWriteTag.Magic = 24
 acc.addEventAlgo( MagicWriteTag )
 
-
 # ----------------  Output Stream 1 configuration
 from AthenaPoolExampleAlgorithms.AthenaPoolExampleConfig import AthenaPoolExampleWriteCfg
 acc.merge( AthenaPoolExampleWriteCfg( flags, stream1name, writeCatalog = "file:Catalog1.xml",
