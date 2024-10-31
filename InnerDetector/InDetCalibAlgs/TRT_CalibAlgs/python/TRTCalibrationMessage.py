@@ -10,6 +10,11 @@ def EmailNotification(jobStatus):
     AtlasRelease    =os.environ.get("ATLAS_RELEASE_BASE", "UNDEFINED")
     Atlasbuild      =os.environ.get("AtlasBuildStamp"   , "UNDEFINED")
 
+    if AtlasBuildBranch != "24.0" and AtlasBuildBranch != "main":
+        print("AtlasBuildBranch not 24.0 or main. Exiting.")
+        sys.exit(0)
+
+
     mserver = "cernmx.cern.ch"
     mfrom   = "no-reply@cern.ch"
     mto     = ["atlas-trt-offline-shifts@cern.ch","atlas-trt-expert-shifters@cern.ch"]
