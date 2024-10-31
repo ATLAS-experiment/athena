@@ -10,10 +10,7 @@
  *  @author Peter van Gemmeren <gemmeren@anl.gov>
  **/
 
-#include <exception>
-#include "AthenaBaseComps/AthService.h"
 #include "ByteStreamData/RawEvent.h"
-#include "ByteStreamCnvSvc/ByteStreamExceptions.h"
 #include "GaudiKernel/IInterface.h"
 
 

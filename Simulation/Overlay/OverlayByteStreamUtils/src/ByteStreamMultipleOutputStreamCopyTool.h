@@ -27,8 +27,8 @@
 
 // ByteStream
 
-#include "ByteStreamCnvSvc/IByteStreamInputSvc.h"
-#include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamInputSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamOutputSvc.h"
 
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // this code is obsolete/unused (certainly in production)

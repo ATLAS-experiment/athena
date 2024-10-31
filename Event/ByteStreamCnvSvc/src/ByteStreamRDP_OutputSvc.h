@@ -16,7 +16,7 @@
 */
 
 #include "ByteStreamData/RawEvent.h" 
-#include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamOutputSvc.h"
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "AthenaBaseComps/AthService.h"
 #include "GaudiKernel/ServiceHandle.h"

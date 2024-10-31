@@ -10,8 +10,9 @@
  *  @author Peter van Gemmeren <gemmeren@anl.gov>
  **/
 
-#include "ByteStreamCnvSvc/IByteStreamInputSvc.h"
-#include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
+#include "AthenaBaseComps/AthService.h"
+#include "ByteStreamCnvSvcBase/IByteStreamInputSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamOutputSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 
 /** @class ByteStreamMergeOutputSvc

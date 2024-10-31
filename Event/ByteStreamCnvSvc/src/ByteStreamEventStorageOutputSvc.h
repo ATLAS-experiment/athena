@@ -18,7 +18,7 @@
 #include <string>
 
 #include "ByteStreamDataWriter.h"
-#include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamOutputSvc.h"
 
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "AthenaBaseComps/AthService.h"

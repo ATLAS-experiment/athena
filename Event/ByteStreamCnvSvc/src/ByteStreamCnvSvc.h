@@ -5,7 +5,7 @@
 #ifndef BYTESTREAMCNVSVC_BYTESTREAMCNVSVC_H
 #define BYTESTREAMCNVSVC_BYTESTREAMCNVSVC_H
 
-#include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamOutputSvc.h"
 #include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "ByteStreamCnvSvcBase/ByteStreamCnvSvcBase.h"
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h"

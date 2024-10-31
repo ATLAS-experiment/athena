@@ -3,7 +3,7 @@
 */
 
 #include "ByteStreamCnvSvc.h"
-#include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamOutputSvc.h"
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h"
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
 

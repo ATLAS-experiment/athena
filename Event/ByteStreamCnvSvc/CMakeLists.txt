@@ -10,19 +10,14 @@ find_package( tdaq-common COMPONENTS eformat_old eformat_write RawFileName
    DataReader DataWriter )
 
 # Libraries in the package:
-atlas_add_library( ByteStreamCnvSvcLib
-   ByteStreamCnvSvc/*.h src/*.cxx
-   PUBLIC_HEADERS ByteStreamCnvSvc
-   PRIVATE_INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES AthenaBaseComps ByteStreamCnvSvcBaseLib ByteStreamData GaudiKernel
-   PRIVATE_LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES}
-   AthenaKernel StoreGateLib
-   AthenaPoolUtilities PersistentDataModel xAODEventInfo xAODTrigger
-   ByteStreamCnvSvcLegacy CxxUtils )
-
 atlas_add_component( ByteStreamCnvSvc
+   src/*.cxx
    src/components/*.cxx
-   LINK_LIBRARIES ByteStreamCnvSvcLib )
+   INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+   LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES}
+   AthenaBaseComps ByteStreamCnvSvcBaseLib ByteStreamData GaudiKernel
+   AthenaKernel StoreGateLib AthenaPoolUtilities PersistentDataModel xAODEventInfo xAODTrigger
+   ByteStreamCnvSvcLegacy CxxUtils )
 
 # Executables in the package:
 atlas_add_executable( AtlFindBSEvent test/AtlFindBSEvent.cxx
