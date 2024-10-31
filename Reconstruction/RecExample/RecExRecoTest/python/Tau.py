@@ -24,6 +24,7 @@ if __name__=="__main__":
         # Schedule Tau Reco flags for RecoSteering
         from tauRec.ConfigurationHelpers import StandaloneTauRecoFlags
         StandaloneTauRecoFlags(flags)
+        flags.Jet.strictMode = False
     flags.lock()
 
     # Unify these two strategies? See ATLASRECTS-8112
