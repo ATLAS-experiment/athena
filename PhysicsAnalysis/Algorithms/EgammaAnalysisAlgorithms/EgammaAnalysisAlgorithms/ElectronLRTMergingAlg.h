@@ -61,7 +61,7 @@ namespace CP
 
         SG::ReadHandleKey<xAOD::ElectronContainer> m_promptElectronLocation{this, "PromptElectronLocation", "Electrons", "Prompt electrons to merge"}; /** Standard electron collection to be merged. */
 
-        SG::ReadHandleKey<xAOD::ElectronContainer> m_lrtElectronLocation{this, "LRTElectronLocation", "ElectronsLRT", "LRT electrons to merge"}; /** LRT electron collection to be merged. */
+        SG::ReadHandleKey<xAOD::ElectronContainer> m_lrtElectronLocation{this, "LRTElectronLocation", "LRTElectrons", "LRT electrons to merge"}; /** LRT electron collection to be merged. */
 
         SG::WriteHandleKey<xAOD::ElectronContainer> m_outElectronLocation{this, "OutputCollectionName", "StdWithLRTElectrons", "Name for combined output collection"}; /** Combined electron collection.   */
 
