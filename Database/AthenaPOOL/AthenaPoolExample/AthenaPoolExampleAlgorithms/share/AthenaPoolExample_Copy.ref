@@ -365,6 +365,7 @@ StreamCopy.StreamCopy_FileMetaDataCreatorTool       DEBUG added 1 to list of lum
 StreamCopy.StreamCopy_FileMetaDataCreatorTool       DEBUG Retrieved  'EventInfoKey':'EventInfo'
 StreamCopy.StreamCopy_FileMetaDataCreatorTool       DEBUG setting xAOD::FileMetaData::mcProcID to 0
 MetaDataSvc                                         DEBUG MetaDataSvc will handle EventStreamInfo ClassID: 167728019
+StreamCopy.StreamCopy_MakeEventStreamInfo           DEBUG Resetting the EventStreamInfo payload at the first event
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967297, run #1 1 events processed so far  <<<===
 EventSelector                                       DEBUG Get AttributeList from the collection
 EventSelector                                       DEBUG AttributeList size 3

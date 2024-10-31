@@ -69,7 +69,7 @@ StatusCode CopyEventStreamInfo::beginInputFile(const SG::SourceID&)
          keys.end());
    }
 
-   // If the input file doesn't have any event format metadata,
+   // If the input file doesn't have any event stream info metadata,
    // then finish right away:
    if (keys.empty()) return StatusCode::SUCCESS;
 
