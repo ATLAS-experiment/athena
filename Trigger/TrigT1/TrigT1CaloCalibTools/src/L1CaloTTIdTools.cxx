@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibTools/L1CaloTTIdTools.h"
@@ -32,7 +32,7 @@ namespace LVL1{
 
       StatusCode sc ;
 
-      const TTOnlineID* l1ttonline_id;
+      const TTOnlineID* l1ttonline_id = nullptr;
       sc = detStore()->retrieve(l1ttonline_id, "TTOnlineID");
       if(sc.isFailure()){
         ATH_MSG_ERROR("Could not get TTOnlineID helper !");
