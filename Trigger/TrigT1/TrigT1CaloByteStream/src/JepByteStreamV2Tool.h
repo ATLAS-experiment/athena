@@ -15,7 +15,7 @@
 #include "TrigT1CaloUtils/JetElementKey.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "ByteStreamData/RawEvent.h"
 #include "AthContainers/DataVector.h"
 #include "eformat/SourceIdentifier.h"
@@ -110,7 +110,7 @@ class JepByteStreamV2Tool : public AthAlgTool {
    // decoding in online HLT framework (which uses TrigByteStreamCnvSvc)
    Gaudi::Property<bool> m_enableEncoding{
      this, "enableEncoding", true, "Enable conversion from RDO to ByteStream"};
-   SmartIF<ByteStreamCnvSvc> m_byteStreamCnvSvc;
+   SmartIF<IByteStreamCnvSvc> m_byteStreamCnvSvc;
 
   struct LocalData
   {

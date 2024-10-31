@@ -1,4 +1,4 @@
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
+#include "../ByteStreamCnvSvc.h"
 #include "../EventSelectorByteStream.h"
 #include "../ByteStreamMergeOutputSvc.h"
 #include "../EventInfoByteStreamxAODCnv.h"

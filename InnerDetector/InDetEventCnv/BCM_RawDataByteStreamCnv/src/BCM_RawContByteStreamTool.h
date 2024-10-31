@@ -21,7 +21,7 @@
 #include "ByteStreamData/RawEvent.h" 
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h" 
 #include "ByteStreamCnvSvcBase/SrcIdMap.h" 
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 
 class BCM_RDO_Container;
 class MsgStream;
@@ -44,7 +44,7 @@ public:
   StatusCode convert(BCM_RDO_Container* cont) const;
   
 private:
-  ServiceHandle<ByteStreamCnvSvc> m_byteStreamCnvSvc
+  ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc
   { this, "ByteStreamCnvSvc", "ByteStreamCnvSvc" };
   unsigned int getSourceID(int ChannelID) const;
 

@@ -15,7 +15,7 @@
 
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h" 
 #include "ByteStreamCnvSvcBase/SrcIdMap.h" 
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 
 
 class TRT_ID;
@@ -55,7 +55,7 @@ class TRTRawContByteStreamTool: public extends<AthAlgTool, ITRTRawContByteStream
   virtual StatusCode convert(TRT_RDO_Container* cont) const override; 
   
 private: 
-   ServiceHandle<ByteStreamCnvSvc> m_byteStreamCnvSvc
+   ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc
    { this, "ByteStreamCnvSvc", "ByteStreamCnvSvc" };
 
   ServiceHandle<ITRT_CablingSvc>  m_trt_CablingSvc;

@@ -14,7 +14,8 @@
 #include "ByteStreamData/RawEvent.h" 
 #include "EventInfo/EventInfo.h"
 #include "EventInfo/EventID.h"
-#include "ByteStreamCnvSvcBase/ByteStreamAddress.h" 
+#include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
+#include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h"
 #include "TBEvent/TBTDC.h"
 #include "TBEvent/TBBeamDetector.h"
 #include "TBEvent/TBBPCRawCont.h"
@@ -33,8 +34,7 @@
 
 #include "eformat/SourceIdentifier.h"
 
-class ByteStreamCnvSvc;
-class IROBDataProviderSvc; 
+class IROBDataProviderSvc;
 class LArOnlineID;
 
 /** An AlgTool class to provide conversion 
@@ -88,7 +88,7 @@ private:
 
   static const eformat::SubDetector m_DontCheckRodSubDetID; //==0xff
 
-  ServiceHandle<ByteStreamCnvSvc> m_ByteStreamEventAccess;
+  ServiceHandle<IByteStreamEventAccess> m_ByteStreamEventAccess;
   ServiceHandle<IROBDataProviderSvc> m_rdpSvc;
   EventID m_lastEventID;
   eformat::SubDetector m_subdet_id;

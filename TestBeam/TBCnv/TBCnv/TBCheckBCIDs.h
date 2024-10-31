@@ -8,11 +8,7 @@
 #ifndef TBCHECKBCIDS
 #define TBCHECKBCIDS
 
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
-#include "ByteStreamCnvSvcBase/ByteStreamCnvSvcBase.h" 
-#include "ByteStreamCnvSvcBase/ByteStreamAddress.h" 
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h" 
-#include "ByteStreamData/RawEvent.h" 
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/MsgStream.h"

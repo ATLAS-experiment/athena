@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEBYTESTREAM_TILEL2_BYTESTREAMCNV_H
@@ -85,9 +85,8 @@ class TileL2ContByteStreamCnv
     //    BYTESTREAMTOOL* m_tool ;
     ToolHandle<BYTESTREAMTOOL> m_tool;
     
-    ServiceHandle<IByteStreamEventAccess> m_byteStreamEventAccess;
-    ByteStreamCnvSvc* m_byteStreamCnvSvc;
-    
+    ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc;
+
     /** Pointer to StoreGateSvc */
     ServiceHandle<StoreGateSvc> m_storeGate; 
     
