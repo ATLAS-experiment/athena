@@ -472,6 +472,7 @@ SimplePoolFile4.root                                DEBUG --->Adding Assoc :298D
 SimplePoolFile4.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
 SimplePoolFile4.root                                DEBUG DB Action Commit
 MetaDataSvc                                         DEBUG MetaDataSvc will handle EventStreamInfo ClassID: 167728019
+StreamStream1.StreamStream1_MakeEventStreamInfo     DEBUG Resetting the EventStreamInfo payload at the first event
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967297, run #1 1 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.

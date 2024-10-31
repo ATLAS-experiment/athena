@@ -68,6 +68,8 @@ public:
 
   /// Print a EventStreamInfo to the log file.
   void print(MsgStream& log) const;
+  // Reset the EventStreamInfo payload (clear all sets and set number of events to 0)
+  void reset();
 private:
   unsigned int m_numberOfEvents;   // Number of Events
   std::set<unsigned int> m_runNumbers; // Run#
