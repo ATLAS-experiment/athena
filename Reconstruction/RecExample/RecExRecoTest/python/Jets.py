@@ -19,9 +19,6 @@ if __name__=="__main__":
         flags.Input.Files = defaultTestFiles.AOD_RUN3_DATA
         flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
       
-        # Ensure MC-based modifiers are removed (!74396)
-        flags.Jet.strictMode = False
-
     # We have to set the production step, which PFFlow muon linking uses for autoconfiguration.
     from AthenaConfiguration.Enums import ProductionStep
     flags.Common.ProductionStep=ProductionStep.Derivation
