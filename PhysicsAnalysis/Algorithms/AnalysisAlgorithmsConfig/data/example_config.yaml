@@ -13,14 +13,16 @@ Jets:
     runNNJvtUpdate: True
     FlavourTagging:
       - selectionName: 'ftag'
-        noEffSF: False
-        btagger: 'DL1dv01'
-        btagWP: 'FixedCutBEff_60'
+        noEffSF: True
+        btagger: 'GN2v01'
+        btagWP: 'FixedCutBEff_65'
+      - noEffSF: False
+        btagger: 'GN2v01'
+        btagWP: 'Continuous'
     FlavourTaggingEventSF:
       - containerName: 'AnaJets.baselineJvt'
-        selectionName: 'ftag'
-        btagger: 'DL1dv01'
-        btagWP: 'FixedCutBEff_60'
+        btagger: 'GN2v01'
+        btagWP: 'Continuous'
     JVT: {}
     PtEtaSelection: {}
 

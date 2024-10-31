@@ -59,7 +59,7 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
         DSID = MCMC_dsid_map(geometry=LHCPeriod.Run2, selfDefineGenerator=generator, tagger=btagger)
 
     # CDI file
-    bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2023-22-13TeV-MC20-CDI-2023-09-13_v1.root"
+    bTagCalibFile = "xAODBTaggingEfficiency/13TeV/MC20_2024-10-17_GN2v01_v1.root"
 
     # # Create the analysis algorithm sequence object:
     # seq = AnaAlgSequence( "FTagAnalysisSequence" )

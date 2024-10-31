@@ -15,9 +15,8 @@ Jets:
     FlavourTagging:
       - selectionName: 'ftag'
         noEffSF: True
-        btagger: 'DL1dv01'
-        btagWP: 'FixedCutBEff_60'
-        saveScores: 'All'
+        btagger: 'GN2v01'
+        btagWP: 'FixedCutBEff_65'
     JVT: {}
     PtEtaSelection: {}
 

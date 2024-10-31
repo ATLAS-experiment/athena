@@ -188,9 +188,9 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noSystematics, fo
                                            runGhostMuonAssociation = not isPhyslite)
 
     from FTagAnalysisAlgorithms.FTagAnalysisSequence import makeFTagAnalysisSequence
-    btagger = "DL1dv01"
-    btagWP = "FixedCutBEff_60"
-    makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = False,
+    btagger = "GN2v01"
+    btagWP = "FixedCutBEff_65"
+    makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = True,
                               enableCutflow=True, btagger = btagger, btagWP = btagWP, kinematicSelection = False )
     vars += [
         'OutJets_NOSYS.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select',
@@ -731,20 +731,25 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     # refuses to work on that
     if geometry is not LHCPeriod.Run4:
 
-        btagger = "DL1dv01"
-        btagWP = "FixedCutBEff_60"
+        btagger = "GN2v01"
+        btagWP = "FixedCutBEff_65"
         configSeq += config.makeConfig( 'Jets.FlavourTagging',
-            containerName='AnaJets',
-            selectionName='ftag' )
-        configSeq.setOptionValue ('.noEffSF', forCompare)
+                                        containerName='AnaJets',
+                                        selectionName='ftag' )
+        configSeq.setOptionValue ('.noEffSF', True)
         configSeq.setOptionValue ('.btagger', btagger)
         configSeq.setOptionValue ('.btagWP', btagWP)
-        configSeq.setOptionValue ('.saveScores', 'All')
 
         if not forCompare:
+            btagWP = "Continuous"
+            configSeq += config.makeConfig( 'Jets.FlavourTagging',
+                                            containerName='AnaJets')
+            configSeq.setOptionValue ('.btagger', btagger)
+            configSeq.setOptionValue ('.btagWP', btagWP)
+            configSeq.setOptionValue ('.saveScores', 'All')
+
             configSeq += config.makeConfig( 'Jets.FlavourTaggingEventSF',
-                containerName='AnaJets.baselineJvt',
-                selectionName='ftag')
+                                            containerName='AnaJets.baselineJvt')
             configSeq.setOptionValue ('.btagger', btagger)
             configSeq.setOptionValue ('.btagWP', btagWP)
 
