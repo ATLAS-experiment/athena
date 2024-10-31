@@ -38,6 +38,8 @@ StatusCode FPGATrackSimMappingSvc::checkAllocs()
         ATH_MSG_FATAL("Error creating region map for 2nd stage from: " << m_rmap_path);
     if (!m_subrmap)
         ATH_MSG_FATAL("Error creating sub-region map from: " << m_subrmap_path);
+    if (!m_subrmap_2nd)
+        ATH_MSG_FATAL("Error creating second stage sub-region map from: " << m_subrmap_path);
 
     return StatusCode::SUCCESS;
 }
@@ -64,6 +66,9 @@ StatusCode FPGATrackSimMappingSvc::initialize()
 
         ATH_MSG_DEBUG("Creating the sub-region map");
         m_subrmap = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_1st.get(), PathResolverFindCalibFile(m_subrmap_path.value())));
+
+        ATH_MSG_DEBUG("Creating the 2nd stage sub-region map");
+        m_subrmap_2nd = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_2nd.get(), PathResolverFindCalibFile(m_subrmap_path.value())));
 
         ATH_MSG_DEBUG("Setting the Modules LUT for Region Maps");
         m_rmap_1st->loadModuleIDLUT(PathResolverFindCalibFile(m_modulelut_path.value()));

@@ -17,12 +17,13 @@ class IFPGATrackSimMappingSvc: virtual public IService
 {
     public:
         DeclareInterfaceID(IFPGATrackSimMappingSvc, 1, 0);
-  
+
         virtual const FPGATrackSimPlaneMap* PlaneMap_1st() const = 0;
         virtual const FPGATrackSimPlaneMap* PlaneMap_2nd() const = 0;
         virtual const FPGATrackSimRegionMap* RegionMap_1st() const = 0;
         virtual const FPGATrackSimRegionMap* RegionMap_2nd() const = 0;
         virtual const FPGATrackSimRegionMap* SubRegionMap() const = 0;
+        virtual const FPGATrackSimRegionMap* SubRegionMap_2nd() const = 0;
         virtual const FPGATrackSimNNMap* NNMap() const = 0;
 };
 

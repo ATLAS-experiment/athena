@@ -27,6 +27,7 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
         virtual const FPGATrackSimRegionMap* RegionMap_1st()     const override { return m_rmap_1st.get(); }
         virtual const FPGATrackSimRegionMap* RegionMap_2nd()     const override { return m_rmap_2nd.get(); }
         virtual const FPGATrackSimRegionMap* SubRegionMap()      const override { return m_subrmap.get();  }
+        virtual const FPGATrackSimRegionMap* SubRegionMap_2nd()  const override { return m_subrmap_2nd.get(); }
         virtual const FPGATrackSimNNMap* NNMap()                 const override { return m_NNmap.get();    }
 
     private:
@@ -51,6 +52,7 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
         std::unique_ptr<FPGATrackSimRegionMap> m_rmap_1st = nullptr; //  pointer to the RMAP object using 1st stage plane map
         std::unique_ptr<FPGATrackSimRegionMap> m_rmap_2nd = nullptr; //  pointer to the RMAP object using 2nd stage plane map
         std::unique_ptr<FPGATrackSimRegionMap> m_subrmap = nullptr;
+        std::unique_ptr<FPGATrackSimRegionMap> m_subrmap_2nd = nullptr;
         std::unique_ptr<FPGATrackSimNNMap>     m_NNmap = nullptr;
 
         // Helpers
