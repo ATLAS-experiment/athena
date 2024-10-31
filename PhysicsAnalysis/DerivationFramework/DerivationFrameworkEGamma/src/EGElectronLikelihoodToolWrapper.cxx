@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -81,6 +81,54 @@ EGElectronLikelihoodToolWrapper::addBranches() const
   const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::EgammaContainer> particles{ m_ContainerName, ctx };
 
+  // If we're applying corrections, the correction tools will give us
+  // copies that we need to keep track of.  (We want to do all the copies
+  // before we start writing decorations, to avoid warnings about having
+  // unlocked decorations in a copy).
+  // The copies we get back from the tool will have standalone aux stores.
+  // We'll put them in a DataVector to get them deleted, but we don't
+  // need to copy the aux data to the container, so construct it with
+  // @c NEVER_TRACK_INDICES.
+  xAOD::EgammaContainer pCopies (SG::OWN_ELEMENTS, SG::NEVER_TRACK_INDICES);
+  if (!m_fudgeMCTool.empty()) {
+    pCopies.reserve (particles->size());
+    for (const xAOD::Egamma* par : *particles) {
+      xAOD::Type::ObjectType type = par->type();
+      // apply the shower shape corrections
+      CP::CorrectionCode correctionCode = CP::CorrectionCode::Ok;
+      xAOD::Egamma* pCopy = nullptr;
+      if (type == xAOD::Type::Electron) {
+        const xAOD::Electron* eg = static_cast<const xAOD::Electron*>(par);
+        xAOD::Electron* el = nullptr;
+        correctionCode = m_fudgeMCTool->correctedCopy(*eg, el);
+        pCopy = el;
+      } else {
+        const xAOD::Photon* eg = static_cast<const xAOD::Photon*>(par);
+        xAOD::Photon* ph = nullptr;
+        correctionCode = m_fudgeMCTool->correctedCopy(*eg, ph);
+        pCopy = ph;
+      }
+      if (correctionCode == CP::CorrectionCode::Ok) { // All OK
+      } else if (correctionCode == CP::CorrectionCode::Error) {
+        Error("addBranches()",
+              "Error applying fudge factors to current photon");
+      } else if (correctionCode == CP::CorrectionCode::OutOfValidityRange) {
+        Warning(
+                "addBranches()",
+                "Current object has no valid fudge factors due to out-of-range");
+      } else {
+        Warning(
+                "addBranches()",
+                "Unknown correction code %d from ElectronPhotonShowerShapeFudgeTool",
+                (int)correctionCode);
+      }
+      pCopies.push_back (pCopy);
+    }
+  }
+  else {
+    pCopies.resize (particles->size());
+  }
+
   // Decorators
   SG::WriteDecorHandle<xAOD::EgammaContainer, char> decoratorPass{
     m_decoratorPass, ctx
@@ -99,44 +147,10 @@ EGElectronLikelihoodToolWrapper::addBranches() const
 
   auto decoratorMultipleOutputs = m_decoratorMultipleOutputs.makeHandles();
 
-  bool applyFF = (!m_fudgeMCTool.empty());
   // Write mask for each element and record to SG for subsequent selection
-  for (const xAOD::Egamma* par : *particles) {
-    // point to the input which we do not own ,
-    // in case we fundge this will become
-    // a corrected one which needs to be deleted
-    // corrected copy can be a bit awkward
-    const xAOD::Egamma* pCopy = par;
-    if (applyFF) {
-      xAOD::Type::ObjectType type = par->type();
-      // apply the shower shape corrections
-      CP::CorrectionCode correctionCode = CP::CorrectionCode::Ok;
-      if (type == xAOD::Type::Electron) {
-        const xAOD::Electron* eg = static_cast<const xAOD::Electron*>(par);
-        xAOD::Electron* el = nullptr;
-        correctionCode = m_fudgeMCTool->correctedCopy(*eg, el);
-        pCopy = el;
-      } else {
-        const xAOD::Photon* eg = static_cast<const xAOD::Photon*>(par);
-        xAOD::Photon* ph = nullptr;
-        correctionCode = m_fudgeMCTool->correctedCopy(*eg, ph);
-        pCopy = ph;
-      }
-      if (correctionCode == CP::CorrectionCode::Ok) { // All OK
-      } else if (correctionCode == CP::CorrectionCode::Error) {
-        Error("addBranches()",
-              "Error applying fudge factors to current photon");
-      } else if (correctionCode == CP::CorrectionCode::OutOfValidityRange) {
-        Warning(
-          "addBranches()",
-          "Current object has no valid fudge factors due to out-of-range");
-      } else {
-        Warning(
-          "addBranches()",
-          "Unknown correction code %d from ElectronPhotonShowerShapeFudgeTool",
-          (int)correctionCode);
-      }
-    }
+  for (size_t ipar = 0; const xAOD::Egamma* par : *particles) {
+    const xAOD::Egamma* pCopy = pCopies[ipar++];
+    if (!pCopy) pCopy = par;
     // compute the output of the selector
     asg::AcceptData theAccept(m_tool->accept(ctx, pCopy));
     const unsigned int isEM =
@@ -186,10 +200,6 @@ EGElectronLikelihoodToolWrapper::addBranches() const
           decoratorMultipleOutputs.at(i)(*par) = toolOutput.at(i);
         }
       }
-    }
-    // delete the particle copy
-    if (applyFF) {
-      delete pCopy;
     }
   }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tool to decorate the EventInfo object with truth categories informations
@@ -56,37 +56,101 @@ namespace DerivationFramework {
         //  3: the above + 4-vector sum of all decay products from Higgs boson and V-boson
         Gaudi::Property<int> m_detailLevel{this, "DetailLevel", 3};
 
-        // Methods for decoration of four vectors
-        StatusCode decorateFourVec(const EventContext& ctx, const std::string& prefix, const TLorentzVector& p4) const;
-        StatusCode decorateFourVecs(const EventContext& ctx, const std::string& prefix, const std::vector<TLorentzVector>& p4s) const;
-
         SG::ReadHandleKey<xAOD::TruthEventContainer> m_truthEvtKey{this, "TruthEvtKey", "TruthEvents"};
         SG::ReadHandleKey<xAOD::EventInfo> m_evtInfoKey{this, "EvtKey", "EventInfo"};
 
         using EvtInfoDecorKey = SG::WriteDecorHandleKey<xAOD::EventInfo>;
-        SG::WriteDecorHandleKeyArray<xAOD::EventInfo> m_STXSDecors{this, "ToolDecorations", {}, "List of all keys decorated by the alg"};
+
+        EvtInfoDecorKey m_dec_prodModeKey
+          { this, "ProdModeDecorKey", m_evtInfoKey, "HTXS_prodMode", "" };
+        EvtInfoDecorKey m_dec_errorCodeKey
+          { this, "ErrorCodeDecorKey", m_evtInfoKey, "HTXS_errorCore", "" };
+        EvtInfoDecorKey m_dec_stage0CatKey
+          { this, "Stage0CatDecorKey", m_evtInfoKey, "HTXS_Stage0_Category", "" };
+        // Stage 1 binning
+        EvtInfoDecorKey m_dec_stage1CatPt25Key
+          { this, "Stage1CatPt25Key", m_evtInfoKey, "HTXS_Stage1_Category_pTjet25", "" };
+        EvtInfoDecorKey m_dec_stage1CatPt30Key
+          { this, "Stage1CatPt30Key", m_evtInfoKey, "HTXS_Stage1_Category_pTjet30", "" };
+        EvtInfoDecorKey m_dec_stage1IdxPt25Key
+          { this, "Stage1IdxPt25Key", m_evtInfoKey, "HTXS_Stage1_FineIndex_pTjet25", "" };
+        EvtInfoDecorKey m_dec_stage1IdxPt30Key
+          { this, "Stage1IdxPt30Key", m_evtInfoKey, "HTXS_Stage1_FineIndex_pTjet30", "" };
+
+        // Stage-1.2 binning
+        EvtInfoDecorKey m_dec_stage1p2_CatPt25Key
+          { this, "Stage1p2_CatPt25Key", m_evtInfoKey, "HTXS_Stage1_2_Category_pTjet25", "" };
+        EvtInfoDecorKey m_dec_stage1p2_CatPt30Key
+          { this, "Stage1p2_CatPt30Key", m_evtInfoKey, "HTXS_Stage1_2_Category_pTjet30", "" };
+        EvtInfoDecorKey m_dec_stage1p2_IdxPt25Key
+          { this, "Stage1p2_IdxPt25Key", m_evtInfoKey, "HTXS_Stage1_2_FineIndex_pTjet25", "" };
+        EvtInfoDecorKey m_dec_stage1p2_IdxPt30Key
+          { this, "Stage1p2_IdxPt30Key", m_evtInfoKey, "HTXS_Stage1_2_FineIndex_pTjet30", "" };
+
+        // Stage-1.2 finer binning
+        EvtInfoDecorKey m_dec_stage1p2_Fine_CatPt25Key
+          { this, "Stage1p2_Fine_CatPt25Key", m_evtInfoKey, "HTXS_Stage1_2_Fine_Category_pTjet25", "" };
+        EvtInfoDecorKey m_dec_stage1p2_Fine_CatPt30Key
+          { this, "Stage1p2_Fine_CatPt30Key", m_evtInfoKey, "HTXS_Stage1_2_Fine_Category_pTjet30", "" };
+        EvtInfoDecorKey m_dec_stage1p2_Fine_IdxPt25Key
+          { this, "Stage1p2_Fine_IdxPt25Key", m_evtInfoKey, "HTXS_Stage1_2_Fine_FineIndex_pTjet25", "" };
+        EvtInfoDecorKey m_dec_stage1p2_Fine_IdxPt30Key
+          { this, "Stage1p2_Fine_IdxPt30Key", m_evtInfoKey, "HTXS_Stage1_2_Fine_FineIndex_pTjet30", "" };
+
+        EvtInfoDecorKey m_dec_NJets25Key
+          { this, "NJets25Key", m_evtInfoKey, "HTXS_Njets_pTjet25", "" };
+        EvtInfoDecorKey m_dec_NJets30Key
+          { this, "NJets30Key", m_evtInfoKey, "HTXS_Njets_pTjet30", "" };
+        EvtInfoDecorKey m_dec_isZnunuKey
+          { this, "IsZnunuKey", m_evtInfoKey, "HTXS_isZ2vvDecay", "" };
 
         /// Set of DecorHandleKeys to write the four momenta needed for the HTXS categorization.
-        struct FourMomDecoration {
-            FourMomDecoration(const SG::ReadHandleKey<xAOD::EventInfo>& ev_key, const std::string& prefix) :
-                pt{ev_key.key() + "." + prefix + "_pt"},
-                eta{ev_key.key() + "." + prefix + "_eta"},
-                phi{ev_key.key() + "." + prefix + "_phi"},
-                m{ev_key.key() + "." + prefix + "_m"} {}
+        struct FourMomDecorationKeys {
+            FourMomDecorationKeys(TruthCategoriesDecorator* parent,
+                                  const SG::ReadHandleKey<xAOD::EventInfo>& ei_key,
+                                  const std::string& the_prefix) :
+                prefix{the_prefix},
+                pt{parent, prefix + "_ptKey", ei_key, prefix + "_pt"},
+                eta{parent, prefix + "_etaKey", ei_key, prefix + "_eta"},
+                phi{parent, prefix + "_phiKey", ei_key, prefix + "_phi"},
+                m{parent, prefix + "_mKey", ei_key, prefix + "_m"} {}
+            std::string prefix;
             EvtInfoDecorKey pt;
             EvtInfoDecorKey eta;
             EvtInfoDecorKey phi;
             EvtInfoDecorKey m;
-            std::vector<EvtInfoDecorKey> vect() const { return {pt, eta, phi, m}; }
-            StatusCode initialize(){
-                if (!pt.initialize().isSuccess() || !eta.initialize().isSuccess() || !phi.initialize().isSuccess() || !m.initialize().isSuccess()){
+            StatusCode initialize(bool used=true){
+                if (!pt.initialize(used).isSuccess() || !eta.initialize(used).isSuccess() || !phi.initialize(used).isSuccess() || !m.initialize(used).isSuccess()){
                     return StatusCode::FAILURE;
                 }
                 return StatusCode::SUCCESS;
             }
         };
-        using P4DecorMap = std::map<std::string, FourMomDecoration>;
-        P4DecorMap m_p4_decors{};
+
+        EvtInfoDecorKey m_dec_Higgs_ptKey
+          { this, "Higgs_ptKey", m_evtInfoKey, "HTXS_Higgs_pt", "" };
+        FourMomDecorationKeys m_decp4_HiggsKeys
+          { this, m_evtInfoKey, "HTXS_Higgs" };
+        FourMomDecorationKeys m_decp4_VKeys
+          { this, m_evtInfoKey, "HTXS_V" };
+        FourMomDecorationKeys m_decp4_V_jets25Keys
+          { this, m_evtInfoKey, "HTXS_V_jets25" };
+        FourMomDecorationKeys m_decp4_V_jets30Keys
+          { this, m_evtInfoKey, "HTXS_V_jets30" };
+        FourMomDecorationKeys m_decp4_Higgs_decayKeys
+          { this, m_evtInfoKey, "HTXS_Higgs_decay" };
+        FourMomDecorationKeys m_decp4_V_decayKeys
+          { this, m_evtInfoKey, "HTXS_V_decay" };
+
+        // Methods for decoration of four vectors
+        StatusCode decorateFourVec(const EventContext& ctx,
+                                   const FourMomDecorationKeys& keys,
+                                   const xAOD::EventInfo& eventInfo,
+                                   const TLorentzVector& p4) const;
+        StatusCode decorateFourVecs(const EventContext& ctx,
+                                    const FourMomDecorationKeys& keys,
+                                    const xAOD::EventInfo& eventInfo,
+                                    const std::vector<TLorentzVector>& p4s) const;
     };  /// class
 
 }  // namespace DerivationFramework

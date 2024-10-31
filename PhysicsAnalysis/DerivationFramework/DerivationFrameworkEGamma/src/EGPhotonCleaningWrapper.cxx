@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -50,6 +50,44 @@ EGPhotonCleaningWrapper::addBranches() const
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::PhotonContainer> photons{ m_containerName, ctx };
+
+  // If we're applying corrections, the correction tools will give us
+  // copies that we need to keep track of.  (We want to do all the copies
+  // before we start writing decorations, to avoid warnings about having
+  // unlocked decorations in a copy).
+  // The copies we get back from the tool will have standalone aux stores.
+  // We'll put them in a DataVector to get them deleted, but we don't
+  // need to copy the aux data to the container, so construct it with
+  // @c NEVER_TRACK_INDICES.
+  xAOD::PhotonContainer pCopies (SG::OWN_ELEMENTS, SG::NEVER_TRACK_INDICES);
+  if (!m_fudgeMCTool.empty()) {
+    pCopies.reserve (photons->size());
+    for (const xAOD::Photon* photon : *photons) {
+      // apply the shower shape corrections
+      CP::CorrectionCode correctionCode = CP::CorrectionCode::Ok;
+      xAOD::Photon* ph = nullptr;
+      correctionCode = m_fudgeMCTool->correctedCopy(*photon, ph);
+      if (correctionCode == CP::CorrectionCode::Ok) {
+      } else if (correctionCode == CP::CorrectionCode::Error) {
+        Error("addBranches()",
+              "Error applying fudge factors to current photon");
+      } else if (correctionCode == CP::CorrectionCode::OutOfValidityRange) {
+        Warning(
+                "addBranches()",
+                "Current photon has no valid fudge factors due to out-of-range");
+      } else {
+        Warning("addBranches()",
+                "Unknown correction code %d from "
+                "ElectronPhotonShowerShapeFudgeTool",
+                (int)correctionCode);
+      }
+      pCopies.push_back (ph);
+    }
+  }
+  else {
+    pCopies.resize (photons->size());
+  }
+
   SG::WriteDecorHandle<xAOD::PhotonContainer, char> decoratorPass{
     m_decoratorPass, ctx
   };
@@ -58,50 +96,14 @@ EGPhotonCleaningWrapper::addBranches() const
   };
 
   // Write mask for each element and record to SG for subsequent selection
-  for (const xAOD::Photon* photon : *photons) {
+  for (size_t ipar = 0; const xAOD::Photon* photon : *photons) {
 
-    bool passSelection = false;
-    bool passSelectionDelayed = false;
-    bool applyFF = (!m_fudgeMCTool.empty());
-
-    if (!applyFF) {
-      passSelection = PhotonHelpers::passOQquality(*photon);
-      passSelectionDelayed = PhotonHelpers::passOQqualityDelayed(*photon);
-    } else {
-      // apply the shower shape corrections
-      CP::CorrectionCode correctionCode = CP::CorrectionCode::Ok;
-      xAOD::Photon* ph = nullptr;
-      correctionCode = m_fudgeMCTool->correctedCopy(*photon, ph);
-      if (correctionCode == CP::CorrectionCode::Ok) {
-        passSelection = PhotonHelpers::passOQquality(*ph);
-        passSelectionDelayed = PhotonHelpers::passOQqualityDelayed(*ph);
-      } else if (correctionCode == CP::CorrectionCode::Error) {
-        Error("addBranches()",
-              "Error applying fudge factors to current photon");
-      } else if (correctionCode == CP::CorrectionCode::OutOfValidityRange) {
-        Warning(
-          "addBranches()",
-          "Current photon has no valid fudge factors due to out-of-range");
-      } else {
-        Warning("addBranches()",
-                "Unknown correction code %d from "
-                "ElectronPhotonShowerShapeFudgeTool",
-                (int)correctionCode);
-      }
-      delete ph;
-    }
+    const xAOD::Photon* pCopy = pCopies[ipar++];
+    if (!pCopy) pCopy = photon;
 
     // decorate the original object
-    if (passSelection) {
-      decoratorPass(*photon) = 1;
-    } else {
-      decoratorPass(*photon) = 0;
-    }
-    if (passSelectionDelayed) {
-      decoratorPassDelayed(*photon) = 1;
-    } else {
-      decoratorPassDelayed(*photon) = 0;
-    }
+    decoratorPass(*photon) = static_cast<int> (PhotonHelpers::passOQquality(*pCopy));
+    decoratorPassDelayed(*photon) = static_cast<int> (PhotonHelpers::passOQqualityDelayed(*pCopy));
   }
   return StatusCode::SUCCESS;
 }

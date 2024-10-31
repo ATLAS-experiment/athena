@@ -4,9 +4,7 @@
 # Physics_pp_run3_v1.py menu -- contains physics chains for MC and data
 #------------------------------------------------------------------------#
 
-# This defines the input format of the chain and it's properties with the defaults set
-# always required are: name, stream and groups
-#['name', 'chainParts'=[], 'stream', 'groups', 'merging'=[], 'topoStartFrom'=False],
+# All chains are represented as ChainProp objects in a ChainStore
 from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
 from .SignatureDicts import ChainStore
 

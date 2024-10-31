@@ -531,8 +531,7 @@ if __name__ == '__main__':
           'signatures': ['Photon', 'Bjet', 'Jet'],
           'stream': ['Main'],
         'subSigs': [],
-          'topo': [],
-          'topoStartFrom': False}
+          'topo': []}
 
     hypotool_from_chaindict(cd)
 

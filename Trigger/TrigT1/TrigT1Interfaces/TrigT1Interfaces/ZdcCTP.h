@@ -34,12 +34,15 @@ namespace LVL1 {
       ZdcCTP() = delete;
 
       // Constructor with parameters:
-      ZdcCTP( unsigned int cableword0 = 0 );
+      ZdcCTP( unsigned int cableword0 = 0, unsigned int cableword1 = 0 );
 
       /// Destructor:
       virtual ~ZdcCTP() = default;
       /** @brief set the data that is sent on cable 0 */
       void setCableWord0( unsigned int data);
+
+      /** @brief set the data that is sent on cable 0 */
+      void setCableWord1(unsigned int data);
 
       /** @brief return the data that is sent on cable 0 */
 
@@ -52,14 +55,18 @@ namespace LVL1 {
 
       uint32_t cableWord0() const;
 
+      uint32_t cableWord1() const;
+
       //! dump raw object content to string
       const std::string dump() const;
       //! print object content in a human readable form to string
       const std::string print() const;
 
    private:
-      /** A data member to contain two 3bit trigger multiplicities. */
-      uint32_t m_cableWord0;
+   /** A data member to contain 3bit trigger multiplicities. */
+    uint32_t m_cableWord0;
+    /** A data member to contain ALT 3bit trigger multiplicities. */
+    uint32_t m_cableWord1;
 
    }; // class ZdcCTP
 
