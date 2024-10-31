@@ -13,10 +13,10 @@ if __name__=="__main__":
     # Tests of jet reconstruction in RAWtoALL is performed by RecJobTransformTests
     from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
     if flags.RecExRecoTest.doMC is True:
-        flags.Input.Files = defaultTestFiles.AOD_RUN3_DATA
+        flags.Input.Files = defaultTestFiles.AOD_RUN3_MC
         flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
     else:
-        flags.Input.Files = defaultTestFiles.AOD_RUN3_MC
+        flags.Input.Files = defaultTestFiles.AOD_RUN3_DATA
         flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
       
         # Ensure MC-based modifiers are removed (!74396)
