@@ -4,7 +4,6 @@
 # art-description: Trigger athenaHLT test of the Cosmic_run3_v1 menu on express stream from a cosmic run
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 

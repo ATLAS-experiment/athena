@@ -4,7 +4,6 @@
 # art-description: athenaHLT test of the Dev_pp_run3_v1_HLTReprocessing_prescale menu only dumping options for SMK generation for HLT reprocessings
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 

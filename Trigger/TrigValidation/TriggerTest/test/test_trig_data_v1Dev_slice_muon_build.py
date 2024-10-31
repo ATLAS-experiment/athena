@@ -4,7 +4,6 @@
 # art-description: Trigger RDO->RDO_TRIG athena test of the muon slice in Dev_pp_run3_v1 menu, data input
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 

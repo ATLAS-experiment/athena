@@ -4,7 +4,6 @@
 # art-description: athenaHLT test of partial event building and data scouting
 # art-type: build                                                                  
 # art-include: main/Athena
-# art-include: 23.0/Athena                                                       
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 from TrigP1Test.TrigP1TestSteps import TrigBSDumpGrepStep

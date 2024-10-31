@@ -4,7 +4,6 @@
 # art-description: Trigger athenaHLT test of the PhysicsP1_pp_run3_v1 menu, with Run2 EB data as input
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 

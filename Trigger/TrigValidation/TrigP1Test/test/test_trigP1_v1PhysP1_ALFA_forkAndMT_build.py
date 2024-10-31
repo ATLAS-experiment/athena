@@ -4,7 +4,6 @@
 # art-description: Test running on ALFACalib data with ALFA ROB Monitor chains, 2 forks, 3 slots, 6 threads
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 

@@ -4,7 +4,6 @@
 # art-description: Compare athenaHLT configuration with Dev_pp_run3_v1 menu and different threads/slots/forks settings
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps, Step
 

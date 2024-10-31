@@ -4,7 +4,6 @@
 # art-description: Trigger BS->RDO_TRIG athena test without any HLT chains and without L1Sim (only tests L1 decoding)
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
