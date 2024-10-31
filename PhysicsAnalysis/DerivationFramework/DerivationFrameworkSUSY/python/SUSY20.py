@@ -416,8 +416,6 @@ def SUSY20Cfg(flags):
 			'TruthTausWithDecayParticles',
 			'TruthTausWithDecayVertices',
 			'AntiKt4TruthJets',
-			'HardScatterParticles',
-			'HardScatterVertices'
 		]
 		SUSY20SlimmingHelper.ExtraVariables += [
 			"Electrons.TruthLink",
