@@ -23,9 +23,7 @@ namespace {
 namespace Muon {
 
 MuonSegmentConverterTool::MuonSegmentConverterTool(const std::string& t, const std::string& n, const IInterface* p)
-    : AthAlgTool(t, n, p) {
-    declareInterface<xAODMaker::IMuonSegmentConverterTool>(this);
-}
+    : base_class(t, n, p) {}
 
 StatusCode
 MuonSegmentConverterTool::initialize()

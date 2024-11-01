@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONSEGMENTCONVERTERTOOL_H
@@ -19,26 +19,19 @@
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "xAODMuonCnv/IMuonSegmentConverterTool.h"
 
-static const InterfaceID IID_MuonSegmentConverterTool("xAODMaker::IMuonSegmentConverterTool", 1, 0);
 
 namespace Muon {
 
-class MuonSegmentConverterTool : public AthAlgTool, virtual public xAODMaker::IMuonSegmentConverterTool {
+class MuonSegmentConverterTool : public extends<AthAlgTool, xAODMaker::IMuonSegmentConverterTool> {
   public:
     /** @brief default AlgTool constructor */
     MuonSegmentConverterTool(const std::string&, const std::string&, const IInterface*);
 
     /** @brief destructor */
-    ~MuonSegmentConverterTool(){};
+    ~MuonSegmentConverterTool() = default;
 
     /** @brief initialize method, method taken from bass-class AlgTool */
     StatusCode initialize();
-
-    /** @brief access to tool interface */
-    static const InterfaceID& interfaceID()
-    {
-        return IID_MuonSegmentConverterTool;
-    }
 
     /** @brief convert a ElementLink to a Trk::Segment (should be of type MuonSegment) to a xAOD::MuonSegment, the
        segment is add to the container if provided so the caller should not delete it */
