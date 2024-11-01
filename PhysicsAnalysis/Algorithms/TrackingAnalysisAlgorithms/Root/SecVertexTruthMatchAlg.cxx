@@ -214,7 +214,7 @@ namespace CP {
     return StatusCode::SUCCESS;
 
   }
-  void SecVertexTruthMatchAlg::fillRecoHistograms(const xAOD::Vertex* secVtx, std::string matchType) {
+  void SecVertexTruthMatchAlg::fillRecoHistograms(const xAOD::Vertex* secVtx, const std::string& matchType) {
 
 		// set of accessors for tracks and weights
 		xAOD::Vertex::ConstAccessor<xAOD::Vertex::TrackParticleLinks_t> trkAcc("trackParticleLinks");
@@ -361,7 +361,7 @@ namespace CP {
     }
   }
 
-  void SecVertexTruthMatchAlg::fillTruthHistograms(const xAOD::TruthVertex* truthVtx, std::string truthType) {
+  void SecVertexTruthMatchAlg::fillTruthHistograms(const xAOD::TruthVertex* truthVtx, const std::string& truthType) {
 
     hist("TruthVertex/" + truthType + "_x")->Fill(truthVtx->x());
     hist("TruthVertex/" + truthType + "_y")->Fill(truthVtx->y());
