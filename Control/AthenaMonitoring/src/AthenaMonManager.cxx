@@ -104,7 +104,6 @@ public:
     //until we outlaw copy/assignment of MonGroups):
     class HistLeakChecker {
         Imp * m_d;
-        long m_initVal;
         unsigned m_mgcopies_initval;
     public:
         HistLeakChecker(Imp*d) : m_d(d),

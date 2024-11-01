@@ -52,7 +52,6 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
     private:
 
         std::string m_description;
-        int m_ev = 0;
 
         // Handles
         ToolHandle<IFPGATrackSimTrackExtensionTool>      m_trackExtensionTool {this, "TrackExtensionTool", "FPGATrackSimTrackExtensionTool", "Track extensoin tool"};
