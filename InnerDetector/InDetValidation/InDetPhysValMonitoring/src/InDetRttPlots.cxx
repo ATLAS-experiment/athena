@@ -26,7 +26,7 @@ InDetRttPlots::InDetRttPlots(InDetPlotBase* pParent, const std::string& sDir, co
   if (m_config.doHitResidualPlot)                     m_hitResidualPlot= std::make_unique<InDetPerfPlot_HitResidual>(this, "Tracks/Hits/Residuals");
   if (m_config.doHitEffPlot)                          m_hitEffPlot= std::make_unique<InDetPerfPlot_HitEfficiency>(this, "Tracks/Hits/Efficiency");
   if (m_config.doFakePlots)                           m_fakePlots= std::make_unique<InDetPerfPlot_FakeRate>(this, "Tracks/FakeRate");
-  if (m_config.doMissingTruthFakePlots)               m_missingTruthFakePlots= std::make_unique<InDetPerfPlot_FakeRate>(this, "Tracks/Unlinked/FakeRate");
+  if (m_config.doMissingTruthFakePlots)               m_missingTruthFakePlots= std::make_unique<InDetPerfPlot_FakeRate>(this, "Tracks/Unlinked/FakeRate", true);
   if (m_config.doResolutionPlotPrim)                  m_resolutionPlotPrim= std::make_unique<InDetPerfPlot_Resolution>(this, "Tracks/Matched/Resolutions/Primary");
   if (m_config.doResolutionPlotPrim_truthFromB)       m_resolutionPlotPrim_truthFromB= std::make_unique<InDetPerfPlot_Resolution>(this, "Tracks/Matched/Resolutions/TruthFromB");
   if (m_config.doHitsRecoTracksPlots)                 m_hitsRecoTracksPlots= std::make_unique<InDetPerfPlot_Hits>(this, "Tracks/Selected/HitsOnTracks");
@@ -255,8 +255,9 @@ void InDetRttPlots::fillTechnicalEfficiency
 
 void
 InDetRttPlots::fillFakeRate(const xAOD::TrackParticle& track, const bool isFake, const bool isAssociatedTruth, const float mu, float weight){
-
-  if (m_missingTruthFakePlots) m_missingTruthFakePlots->fill(track, !isAssociatedTruth, weight, mu);
+  if (m_missingTruthFakePlots && !isAssociatedTruth) {
+    m_missingTruthFakePlots->fill(track, isFake, weight, mu);
+  }
   if(isAssociatedTruth) {
     if (m_fakePlots) m_fakePlots->fill(track, isFake, weight, mu);
     if (m_hitsFakeTracksPlots) m_hitsFakeTracksPlots->fill(track, mu, weight);
