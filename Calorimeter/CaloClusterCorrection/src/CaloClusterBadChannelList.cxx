@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -31,6 +31,10 @@ CaloClusterBadChannelList::CaloClusterBadChannelList(const std::string& type,
 StatusCode CaloClusterBadChannelList::initialize()
 {
   CHECK( m_badChannelTool.retrieve() );
+  // Make sure the variable used list is declared to the auxiliary
+  // variable registry.  Otherwise, if there are no clusters in the first event,
+  // then we can get warnings from AuxSelection.
+  SG::Accessor<xAOD::CaloClusterBadChannelList> accBCL("BadChannelList");
   return CaloClusterCorrection::initialize();
 }
 

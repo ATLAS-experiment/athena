@@ -407,13 +407,20 @@ if __name__=='__main__':
 
    print('CONFIG ',CONFIG)
    print('STREAM ',STREAM)
-   if CONFIG!="LArDTMon":
+
+   if "LArSCvsRawChannel" in CONFIG:
+      from LArMonitoring.RecoPT_Phase1NewConfig import LArSCvsRawChannelMonAlgCfg
+      acc.merge(LArSCvsRawChannelMonAlgCfg(flags,STREAM))
+
+   elif CONFIG!="LArDTMon":
       from LArMonitoring.RecoPT_NewConfig import LArMonitoringConfig
       acc.merge(LArMonitoringConfig(flags,CONFIG,STREAM,RunType))
+      
    else:
       from LArMonitoring.RecoPT_Phase1NewConfig import LArDTMonitoringConfig
       acc.merge(LArDTMonitoringConfig(flags,STREAM))
-   
+
+      
    # fixes for splashes
    if RunType == 0 and CONFIG!="LArDTMon":
       acc.getEventAlgo("LArRawDataReadingAlg").LArRawChannelKey="" 

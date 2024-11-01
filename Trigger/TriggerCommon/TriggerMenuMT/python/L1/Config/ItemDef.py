@@ -887,8 +887,8 @@ class ItemDef:
 
         # LAr Saturation
         MenuItem('L1_LArSaturation').setLogic( d.LArSaturation & physcond ).setTriggerType(TT.calo)
-        
-        if ('Physics_HI_run3_v' in menuName or 'MC_HI_run3_v' in menuName):
+
+        if ('HI_run3_v' in menuName):
             MenuItem('L1_ZeroBias').setLogic( d.ZeroBiasB & physcond ).setTriggerType(TT.zerobs)
         else:
             MenuItem('L1_ZeroBias').setLogic( d.ZeroBiasA & physcond ).setTriggerType(TT.zerobs)

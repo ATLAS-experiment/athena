@@ -65,6 +65,18 @@ namespace DerivationFramework {
     ATH_CHECK( m_trackWidthKey.initialize() );
     ATH_CHECK( m_passTATTauMuonOLRKey.initialize() );
 
+    // declare decorations to the scheduler
+    for (const std::string& score : m_scores) {
+      m_scoreDecorKeys.emplace_back(m_tauContainerKey.key() + "." + score);
+    }
+    for (const std::string& WP : m_WPs) {
+      m_WPDecorKeys.emplace_back(m_tauContainerKey.key() + "." + WP);
+    }
+
+    ATH_CHECK( m_scoreDecorKeys.initialize() );
+    ATH_CHECK( m_WPDecorKeys.initialize() );
+    ATH_CHECK( m_trackWidthKey.initialize() );
+
     return StatusCode::SUCCESS;
   }
 
@@ -85,15 +97,7 @@ namespace DerivationFramework {
     }
     const xAOD::TauJetContainer* tauContainer = tauJetsReadHandle.cptr();
 
-    // retrieve PrimaryVertices container
-    SG::ReadHandle<xAOD::VertexContainer> vtxReadHandle(m_vtxContainerKey, ctx);
-    if (!vtxReadHandle.isValid()) {
-      ATH_MSG_ERROR ("Could not retrieve VertexContainer with key " << vtxReadHandle.key());
-      return StatusCode::FAILURE;
-    }
-    const xAOD::VertexContainer* vtxContainer = vtxReadHandle.cptr();
-    const xAOD::Vertex* pVtx = nullptr;
-    float sumpt_PV0 = 0., sumpt2_PV0 = 0.;
+  SG::WriteDecorHandle<xAOD::TauJetContainer, float> dec_trackWidth (m_trackWidthKey, ctx);
 
     // Check that PV container exists and is non-empty, find the PV if possible
     if (vtxContainer != nullptr && !vtxContainer->empty()) {
@@ -132,28 +136,19 @@ namespace DerivationFramework {
       WPDecors.emplace_back (k, ctx);
     }
 
-    SG::WriteDecorHandle<xAOD::TauJetContainer, float> dec_trackWidth (m_trackWidthKey, ctx);
-    SG::WriteDecorHandle<xAOD::TauJetContainer, bool> dec_passTATTauMuonOLR (m_passTATTauMuonOLRKey, ctx);
-    for (const auto tau : *tauContainer) {
-      float tauTrackBasedWidth = 0.;
-      // equivalent to tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedCharged)
-      std::vector<const xAOD::TauTrack *> tauTracks = tau->tracks();
-      for (const xAOD::TauTrack *trk : tau->tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedIsolation)) {
-        tauTracks.push_back(trk);
-      }
-      double sumWeightedDR = 0.;
-      double ptSum = 0.;
-      for (const xAOD::TauTrack *track : tauTracks) {
-          double deltaR = tau->p4().DeltaR(track->p4());
-          sumWeightedDR += deltaR * track->pt();
-          ptSum += track->pt();
-      }
-      if (ptSum > 0.) {
-        tauTrackBasedWidth = sumWeightedDR / ptSum;
-      }
+    dec_trackWidth(*tau) = tauTrackBasedWidth;
+  }
 
-      dec_trackWidth(*tau) = tauTrackBasedWidth;
-    }
+  std::vector<SG::WriteDecorHandle<xAOD::TauJetContainer, float> > scoreDecors;
+  scoreDecors.reserve (m_scores.size());
+  for (const SG::WriteDecorHandleKey<xAOD::TauJetContainer>& k : m_scoreDecorKeys) {
+    scoreDecors.emplace_back (k, ctx);
+  }
+  std::vector<SG::WriteDecorHandle<xAOD::TauJetContainer, char> > WPDecors;
+  WPDecors.reserve (m_WPs.size());
+  for (const SG::WriteDecorHandleKey<xAOD::TauJetContainer>& k : m_WPDecorKeys) {
+    WPDecors.emplace_back (k, ctx);
+  }
 
     // create shallow copy
     auto shallowCopy = xAOD::shallowCopyContainer (*tauContainer);
@@ -195,11 +190,11 @@ namespace DerivationFramework {
       const xAOD::TauJet* xTau = tauContainer->at(tau->index());
       for (SG::WriteDecorHandle<xAOD::TauJetContainer, float>& dec : scoreDecors) {
         SG::ConstAccessor<float> scoreAcc (dec.auxid());
-	dec(*xTau) = scoreAcc(*tau);
+        dec(*xTau) = scoreAcc(*tau);
       }
       for (SG::WriteDecorHandle<xAOD::TauJetContainer, char>& dec : WPDecors) {
         SG::ConstAccessor<char> WPAcc (dec.auxid());
-	dec(*xTau) = WPAcc(*tau);
+        dec(*xTau) = WPAcc(*tau);
       }
     }
 

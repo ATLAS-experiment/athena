@@ -3,25 +3,25 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def LArDTMonitoringConfig(ConfigFlags,STREAM):
+def LArDTMonitoringConfig(flags,STREAM):
     
     acc=ComponentAccumulator()
     
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    acc.merge(LArGMCfg(ConfigFlags))
+    acc.merge(LArGMCfg(flags))
 
     from LArCabling.LArCablingConfig import LArLATOMEMappingCfg
-    acc.merge(LArLATOMEMappingCfg(ConfigFlags))
+    acc.merge(LArLATOMEMappingCfg(flags))
 
     LArRawSCDataReadingAlg=CompFactory.LArRawSCDataReadingAlg
     acc.addEventAlgo(LArRawSCDataReadingAlg(LATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder",ProtectSourceId = True)))
 
     from TileGeoModel.TileGMConfig import TileGMCfg
-    acc.merge(TileGMCfg(ConfigFlags))
+    acc.merge(TileGMCfg(flags))
     acc.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg('CaloSuperCellAlignCondAlg')) 
 
     from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
-    acc.merge(LArBadChannelCfg(ConfigFlags, isSC=True))
+    acc.merge(LArBadChannelCfg(flags, isSC=True))
 
     larLATOMEBuilderAlg=CompFactory.LArLATOMEBuilderAlg("LArLATOMEBuilderAlg",LArDigitKey="SC", isADCBas=False)
     acc.addEventAlgo(larLATOMEBuilderAlg)
@@ -30,10 +30,11 @@ def LArDTMonitoringConfig(ConfigFlags,STREAM):
     mlog = logging.getLogger( 'RecoPT_Phase1' )
 
     from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
-    mlog.info("Run number: "+str(ConfigFlags.Input.RunNumbers[0]))
+    mlog.info("Run number: "+str(flags.Input.RunNumbers[0]))
 
+    #if 'PEB' in STREAM:
     try:
-        runinfo=getLArDTInfoForRun(ConfigFlags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
+        runinfo=getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
         streams=runinfo.streamTypes()
         nsamples=int(runinfo.streamLengths()[0])
     except Exception as e:
@@ -41,8 +42,52 @@ def LArDTMonitoringConfig(ConfigFlags,STREAM):
         mlog(e)
         streams=[]
         nsamples=32
+    #else:       
+    #    streams=["ADC","SelectedEnergy"]
+    #    nsamples=2
+
 
     from LArMonitoring.LArDigitalTriggMonAlg import LArDigitalTriggMonConfig
-    acc.merge(LArDigitalTriggMonConfig(ConfigFlags, larLATOMEBuilderAlg, nsamples, streams))
+    acc.merge(LArDigitalTriggMonConfig(flags, larLATOMEBuilderAlg, nsamples, streams))
+
+    return acc
+
+
+
+
+def LArSCvsRawChannelMonAlgCfg(flags,STREAM):  # HERE stream doesn't do anything??
+    acc=ComponentAccumulator()    
+    from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
+    acc.merge(LArBadChannelCfg(flags))
+    acc.merge(LArBadChannelCfg(flags,isSC=True))
+
+    from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
+    from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg, LArOnOffIdMappingSCCfg
+
+    acc.merge(LArOnOffIdMappingCfg(flags))
+    acc.merge(LArOnOffIdMappingSCCfg(flags))
+    acc.merge(LArRawSCDataReadingCfg(flags))
+    
+    from CaloRec.CaloBCIDAvgAlgConfig import CaloBCIDAvgAlgCfg
+    acc.merge(CaloBCIDAvgAlgCfg(flags))
+
+    from TileGeoModel.TileGMConfig import TileGMCfg
+    acc.merge(TileGMCfg(flags))
+    acc.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg('CaloSuperCellAlignCondAlg')) 
+
+    from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
+    acc.merge(LArRawDataReadingCfg(flags))
+    
+    if flags.Input.isMC is False and not flags.Common.isOnline:
+       from LumiBlockComps.LuminosityCondAlgConfig import  LuminosityCondAlgCfg
+       acc.merge(LuminosityCondAlgCfg(flags))
+       from LumiBlockComps.LBDurationCondAlgConfig import  LBDurationCondAlgCfg
+       acc.merge(LBDurationCondAlgCfg(flags))
+
+
+    from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelper
+    helper = AthMonitorCfgHelper(flags,'LArSuperCellMonAlgCfg')
+    from LArMonitoring.LArSCvsRawChannelMonAlg import LArSCvsRawChannelMonConfigCore
+    acc.merge(LArSCvsRawChannelMonConfigCore(helper, flags))
 
     return acc
