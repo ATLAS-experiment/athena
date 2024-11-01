@@ -81,13 +81,13 @@ namespace MuonValR4 {
             /** @brief Fetches all truth segments where at least one measurement in the list was used to 
              *         build them 
              *  @param hits: Vector of hits to search */
-            TruthSegmentSet fetchTruthSegs(const std::vector<const MuonR4::SpacePoint*>& hits) const;
-            TruthSegmentSet fetchTruthSegs(const std::vector<const xAOD::UncalibratedMeasurement*>& hits) const;
+            virtual TruthSegmentSet fetchTruthSegs(const std::vector<const MuonR4::SpacePoint*>& hits) const override final;
+            virtual TruthSegmentSet fetchTruthSegs(const std::vector<const xAOD::UncalibratedMeasurement*>& hits) const override final;
             
             /** @brief Returns whether the hit has been used in the truth-segment building
              *  @param hit: Reference to the hit to check */
-            bool isTruthMatched(const MuonR4::SpacePoint& hit) const;
-            bool isTruthMatched(const xAOD::UncalibratedMeasurement& hit) const;
+            virtual bool isTruthMatched(const MuonR4::SpacePoint& hit) const override final;
+            virtual bool isTruthMatched(const xAOD::UncalibratedMeasurement& hit) const override final;
         private:
             /** @brief Closes the summary canvas & closes the associated ROOT file */ 
             void closeSummaryCanvas() const;

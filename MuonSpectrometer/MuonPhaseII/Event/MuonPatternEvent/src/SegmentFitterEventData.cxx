@@ -16,12 +16,11 @@ namespace MuonR4{
     }
     double houghTanPhi(const Amg::Vector3D& v){            
         constexpr double eps = std::numeric_limits<float>::epsilon();
-        return v.y() /  ( std::abs(v.z()) > eps ? v.z() : eps); 
+        return v.x() /  ( std::abs(v.z()) > eps ? v.z() : eps); 
     }
     namespace SegmentFit {
         Amg::Vector3D dirFromTangents(const double tanPhi, const double tanTheta) {
-            Amg::Vector3D dir = Amg::Vector3D(tanPhi, tanTheta, 1.).unit();
-            return tanTheta >= 0. ? dir : - dir;
+            return Amg::Vector3D(tanPhi, tanTheta, 1.).unit();
         }
         Amg::Vector3D dirFromAngles(const double phi, const double theta) {
             const CxxUtils::sincos csPhi{phi}, csTheta{theta};
