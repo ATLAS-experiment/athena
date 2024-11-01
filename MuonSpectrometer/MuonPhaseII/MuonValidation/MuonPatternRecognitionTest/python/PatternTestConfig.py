@@ -21,14 +21,14 @@ def PatternVisualizationToolCfg(flags, name="PatternVisualizationTool", **kwargs
 def MuonRecoChainTesterCfg(flags,name="MuonRecoChainTester", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("isMC", flags.Input.isMC)
-    if not flags.Input.isMC:
-        kwargs.setdefault("TruthSegmentKey", "")
     theAlg = CompFactory.MuonValR4.MuonRecoChainTester(name, **kwargs)
     result.addEventAlgo(theAlg, primary = True)
     return result
 
 def MuonHoughTransformTesterCfg(flags, name = "MuonHoughTransformTester", **kwargs):
     result = ComponentAccumulator()
+    if not flags.Input.isMC:
+        kwargs.setdefault("TruthSegmentKey", "")
     theAlg = CompFactory.MuonValR4.MuonHoughTransformTester(name, **kwargs) 
     result.addEventAlgo(theAlg, primary=True)
     return result
@@ -81,9 +81,9 @@ def LegacyMuonRecoChainCfg(flags):
                                          SegmentKey="MuonSegments", SegmentLinkKey="HabemusZ"))
 
     from MuonObjectMarker.ObjectMarkerConfig import MuonSegmentFitParDecorAlgCfg
-    result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="SegmentParDecorAlgLegacy", 
+    result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="SegmentParDecorAlgMuonSegments", 
                                              SegmentKey="MuonSegments"))
-    result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="SegmentParDecorAlgLegacy1", 
+    result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="SegmentParDecorAlgUnAssoc", 
                                               SegmentKey="UnAssocMuonSegments"))
 
     #### Build a view container for later n-tuple dumping

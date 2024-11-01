@@ -14,10 +14,8 @@ if __name__=="__main__":
                                     #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
                                     ])
     parser.set_defaults(eventPrintoutLevel = 500)
-    parser.add_argument("--displayFailedSeeds", 
-                        help="Saves the hits of failed seeds in a pdf", action='store_true', default = False)
-    parser.add_argument("--displayGoodSeeds", 
-                        help="Saves the hits of failed seeds in a pdf", action='store_true', default = False)
+    parser.add_argument("--monitorPlots", action='store_true', default=False, 
+                        help="Setup monitoring plots of the pattern recognition")
     parser.add_argument("--runVtune", 
                         help="runs VTune profiler service for the muon hough alg", action='store_true', default = False)
 
@@ -56,5 +54,22 @@ if __name__=="__main__":
         from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
         cfg.merge(VTuneProfilerServiceCfg(flags, ProfiledAlgs=["MuonHoughTransformAlg"]))
 
+    if args.monitorPlots:
+        from MuonPatternRecognitionTest.PatternTestConfig import PatternVisualizationToolCfg
+        cfg.getEventAlgo("MuonEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+                                                                                                CanvasPreFix="EtaHoughPlotValid",
+                                                                                                AllCanvasName="AllEtaHoughiDiPuffPlots",
+                                                                                                TruthSegDecors=["HabemusZ"],
+                                                                                                saveSinglePDFs = False, saveSummaryPDF= False))
+        cfg.getEventAlgo("MuonPhiHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+                                                                                                CanvasPreFix="PhiHoughPlotValid",
+                                                                                                AllCanvasName="AllPhiHoughiDiPuffPlots",
+                                                                                                TruthSegDecors=["HabemusZ"],
+                                                                                                saveSinglePDFs = False, saveSummaryPDF= False))
+        cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+                                                                                                CanvasPreFix="SegmentPlotValid",
+                                                                                                AllCanvasName="AllSegmentFitPlots",
+                                                                                                TruthSegDecors=["HabemusZ"],
+                                                                                                saveSinglePDFs = True, saveSummaryPDF= False)) 
     executeTest(cfg)
     
