@@ -163,6 +163,8 @@ namespace ActsTrk
 
     if (!m_chi2CutOff.empty())
       measurementSelectorCuts.chi2CutOff = m_chi2CutOff;
+    if (!m_chi2OutlierCutOff.empty() && m_chi2OutlierCutOff.size() == m_chi2CutOff.size())
+      measurementSelectorCuts.chi2CutOffOutlier = m_chi2OutlierCutOff;
     if (!m_numMeasurementsCutOff.empty())
       measurementSelectorCuts.numMeasurementsCutOff = m_numMeasurementsCutOff;
 
