@@ -40,10 +40,10 @@ namespace MuonCalib {
 
       private:
           // auxiliary minimization objects //
-          int m_nb_coefficients{0}; //!< number of coefficients
-          Amg::MatrixX m_A; //!< coefficient matrix for the fit
-          Amg::VectorX m_alpha; //!< coefficients of the base functions after the fit
-          Amg::VectorX m_b; //!< m_A*m_alpha = m_b;
+          unsigned int m_nb_coefficients{0}; //!< number of coefficients
+          Amg::MatrixX m_A{}; //!< coefficient matrix for the fit
+          Amg::VectorX m_alpha{}; //!< coefficients of the base functions after the fit
+          Amg::VectorX m_b{}; //!< m_A*m_alpha = m_b;
 
           // private methods //
           void init(); //!< default initialization method
@@ -70,10 +70,10 @@ namespace MuonCalib {
     	     and stopping at the point last_point, 
     	     1 <= first_point < last_point <= size of the sample_point vector;
     	     the method returns true, if the fit failed */
-        bool fit_parameters(const std::vector<SamplePoint> & sample_point,
+        void fit_parameters(const std::vector<SamplePoint> & sample_point,
 			                      const unsigned int first_point,
 			                      const unsigned int last_point,
-			                      BaseFunction * base_function);
+			                      const BaseFunction& base_function);
     };
 }
 #endif

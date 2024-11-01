@@ -33,10 +33,10 @@ namespace MuonCalib {
     void BaseFunctionFitter::set_number_of_coefficients(const unsigned nb_coefficients) {
         init(nb_coefficients);
     }
-    bool BaseFunctionFitter::fit_parameters(const std::vector<SamplePoint> & sample_point,
+    void BaseFunctionFitter::fit_parameters(const std::vector<SamplePoint> & sample_point,
                                             const unsigned int first_point,
                                             const unsigned int last_point,
-                                            BaseFunction * base_function) {
+                                            const BaseFunction& base_function) {
         if (first_point<1 || first_point>sample_point.size()) {
             THROW_EXCEPTION("BaseFunctionFitter::fit_parameters() - ERROR: Illegal first point "
 						    <<first_point<<", must be >=1 and <="<<sample_point.size());
@@ -48,23 +48,20 @@ namespace MuonCalib {
         // clear the objects //
         init(m_nb_coefficients);
 
-        for (int j=0; j<m_nb_coefficients; j++) {
-            for (int p=j; p<m_nb_coefficients; p++) {
-              for (unsigned int k=first_point-1; k<last_point; k++) {
-                m_A.fillSymmetric(j,p,m_A(j,p)+base_function->value(j,sample_point[k].x1())
-                          *base_function->value(p,sample_point[k].x1()) /
+        for (unsigned j=0; j<m_nb_coefficients; ++j) {
+            for (unsigned p=j; p<m_nb_coefficients; ++p) {
+              for (unsigned k=first_point-1; k<last_point; ++k) {
+                m_A.fillSymmetric(j,p,m_A(j,p)+base_function.value(j,sample_point[k].x1())
+                                              *base_function.value(p,sample_point[k].x1()) /
                           std::pow(sample_point[k].error(), 2));
               }
             }
-            for (unsigned int k=first_point-1; k<last_point; k++) {
-                 m_b[j] = m_b[j]+sample_point[k].x2()*
-                          base_function->value(j, sample_point[k].x1()) /
+            for (unsigned k=first_point-1; k<last_point; k++) {
+                 m_b[j] = m_b[j]+sample_point[k].x2()* base_function.value(j, sample_point[k].x1()) /
                           std::pow(sample_point[k].error(), 2);
             }
         }
         // perform the minimization //
-        Amg::MatrixX aInv = m_A.inverse();
-        m_alpha = aInv*m_b;
-        return false;
+        m_alpha = m_A.inverse()*m_b;
     }
 }

@@ -149,7 +149,7 @@ RtRelationLookUp AdaptiveResidualSmoothing::performSmoothing(const IRtRelation &
 
     PolygonBase polygon(radi);
     BaseFunctionFitter fitter(bin_maker.getBins().size());
-    fitter.fit_parameters(corr, 1, corr.size(), &polygon);
+    fitter.fit_parameters(corr, 1, corr.size(), polygon);
 
     // create an improved r-t relationship //
     std::vector<double> rt_params;
@@ -269,7 +269,7 @@ RtRelationLookUp AdaptiveResidualSmoothing::performSmoothing(const IRtRelation &
     // correction polygon //
     PolygonBase polygon(radii);
     BaseFunctionFitter fitter(nb_bins);
-    fitter.fit_parameters(corr, 1, corr.size(), &polygon);
+    fitter.fit_parameters(corr, 1, corr.size(), polygon);
 
     // create output r-t relationship //
     std::vector<double> rt_params;

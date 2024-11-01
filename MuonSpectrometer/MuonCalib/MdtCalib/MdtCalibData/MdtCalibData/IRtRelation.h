@@ -24,10 +24,12 @@ namespace MuonCalib {
         virtual double driftVelocity(double t) const = 0;
         /** Returns the acceleration of the r-t relation */
         virtual double driftAcceleration(double t) const = 0;
-
+        /** Returns the lower time covered by the r-t */
         virtual double tLower() const = 0;
+        /** Returns the upper time covered by the r-t */
         virtual double tUpper() const = 0;
-
+        /** Returns the step-size for the sampling */
+        virtual double tBinWidth() const =0;
         /** return the difference in total dirft time between the two multilayers (ML1 - ML2) */
         double GetTmaxDiff() const { return m_tmax_diff.value_or(0.); }
 
@@ -37,6 +39,8 @@ namespace MuonCalib {
         void SetTmaxDiff(const double d) { m_tmax_diff = d; }
       private:
         std::optional<double> m_tmax_diff{std::nullopt};
+      protected:
+        static constexpr double s_tBinWidth = 1.e-3;
     };
 
 }  // namespace MuonCalib
