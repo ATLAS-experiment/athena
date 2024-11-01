@@ -27,7 +27,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "DataQualityUtils/MonitoringFile.h" 
 
-#define MAXSKIPPEDFILES 5
+#define MAXSKIPPEDFILES 10
 #define MAXSKIPPEDFILESFRACTION 0.1
 
 TFile* openWithRetry(const char* path, const unsigned nTrys=3) {
@@ -114,12 +114,13 @@ bool histCollection::isExcluded(const std::string& dir) {
   return false;
 }
 
+
 void histCollection::print() {
   std::map<std::string,histDir_t>::const_iterator it=m_data.begin();
   std::map<std::string,histDir_t>::const_iterator it_e=m_data.end();
   for(;it!=it_e;++it) {
-    std::cout << "Dir: " << it->first << std::endl;
     const histDir_t& hd=it->second;
+    std::cout << "Dir: " << it->first <<" has "<<hd.histos.size()<<" histos"<<std::endl;
     std::vector<histPerDir_t>::const_iterator it1=hd.histos.begin();
     std::vector<histPerDir_t>::const_iterator it1_e=hd.histos.end();
     for (;it1!=it1_e;++it1) 
@@ -299,14 +300,12 @@ histCollection::histPerDir_t::histPerDir_t(const std::string& nameIn, TObject* o
 
 
 void histCollection::addDirectory(TDirectory* dir, const std::string& dirName) {
-  
   TIter next( dir->GetListOfKeys() );
   TKey* key;
   while((key=(TKey*)next()))  {
     const char* name=key->GetName();
     const char* classname=key->GetClassName();
     if (m_dbg) std::cout << "Found name " << name << ", classname=" << classname << std::endl;
-
     const std::string newName=dirName+"/"+name;
 
     if (this->isExcluded(newName)) {
@@ -314,16 +313,28 @@ void histCollection::addDirectory(TDirectory* dir, const std::string& dirName) {
       return;
     }
 
-   
     if (!strncmp(classname,"TH1",3) || !strncmp(classname,"TH2",3) || !strncmp(classname,"TProfile",8)) {
       std::map<std::string,histDir_t>::iterator mIt=m_data.find("dirName");
+      
       if (mIt==m_data.end()) { // New top-level directory
 	TTree* md=(TTree*)dir->Get("metadata");
 	if (!md) std::cout << "ERROR: Did not find metadata tree in directroy " << dirName << std::endl;
 	mIt=m_data.insert(std::make_pair(dirName,histDir_t(md))).first;
       }
       histPerDir_t histo(name,key->ReadObj(),mIt->second.md,m_dbg);
-      mIt->second.histos.push_back(histo);
+
+      // Check if we already have this histogram in the list
+      bool found = 0;
+      for (auto it1=mIt->second.histos.begin(); it1!=mIt->second.histos.end();++it1) {
+	if( it1->name == name){
+	  found=1;
+	  break;
+	}
+      }
+      if ( found == 0 ){ // Add the histrogam if we didn't already have it
+	mIt->second.histos.push_back(histo);
+      }
+
     }
     else if (!strncmp(classname,"TDirectory",10)) {
       TObject* obj = key->ReadObj();
@@ -354,7 +365,7 @@ void histCollection::addFile(TFile* in) {
     for (;it1!=it1_e;++it1) {
       const std::string fullName=dirName+"/"+it1->name;
       if (!it1->obj) {
-	//std::cout << "Object " << fullName << " not properly set up. Not merged." << std::endl;
+	std::cout << "Object " << fullName << " not properly set up. Not merged." << std::endl;
 	continue;
       }
       TObject* obj=in->Get(fullName.c_str());
@@ -367,8 +378,6 @@ void histCollection::addFile(TFile* in) {
   }//End loop over directory names
   return;
 }
-
-
 
 void histCollection::write(TFile* out) {
   unsigned nWritten=0;
@@ -419,7 +428,6 @@ void histCollection::write(TFile* out) {
     std::cout << " Omitting " << nIgnored << " histograms." << std::endl;
   else
     std::cout << std::endl;
-    
   return;
 }
 
@@ -436,16 +444,12 @@ std::vector<std::string> splitString(const std::string& in, const std::string& d
   return retvec;
 }
 
-
-
 bool readFromTextFile(const char* filename, std::vector<std::string>& out) {
-
   std::ifstream ifs (filename, std::ifstream::in );
   if (!ifs.good()) {
     std::cout << "Failed to open file " << filename << " for reading." << std::endl;
     return false;
   }
-  
   while (ifs.good()) {
     std::string line;
     getline(ifs,line);
@@ -464,11 +468,7 @@ bool readFromTextFile(const char* filename, std::vector<std::string>& out) {
   return true;
 }
 
-
-
 // =================================================================================================
-
-
 int main(int argc, char** argv) {
 
   if (argc<2 || (argc>1 && (!strcmp(argv[1],"-h") || !strcmp(argv[1],"--help")))) {
@@ -559,6 +559,8 @@ int main(int argc, char** argv) {
     }//end loop over directories
   }
 
+  // Keeping track of which directories we found
+  std::vector<std::string> foundDirs;
 
   histCollection listOfHists(debug);
   listOfHists.addExclusion("/CaloMonitoring/LArCellMon_NoTrigSel/Sporadic");
@@ -571,7 +573,8 @@ int main(int argc, char** argv) {
   const size_t nFiles=inFileNames.size(); 
 
   //Loop to find the first non-empty file
-  for (;fileIndex<nFiles && runDir.size()==1;++fileIndex) {
+  //for (;fileIndex<nFiles && runDir.size()==1;++fileIndex) {
+  for (;fileIndex<nFiles && foundDirs.size()!=baseDirs.size() ;++fileIndex) {
     //in1=TFile::Open(inFileNames[fileIndex].c_str(),"READ");
     in1=openWithRetry(inFileNames[fileIndex].c_str());
     if (!in1) {
@@ -589,7 +592,7 @@ int main(int argc, char** argv) {
       continue;
     }
 
-    std::cout << "Working on file " << inFileNames[fileIndex] << std::endl;
+    std::cout << "First loop: Working on file " << inFileNames[fileIndex] <<std::endl;
     //Get run_XXXX directory name
     TIter next(in1->GetListOfKeys() );
     TKey* key;
@@ -613,20 +616,32 @@ int main(int argc, char** argv) {
     //Collect histogram directories
     std::vector<std::string>::const_iterator dIt=baseDirs.begin();
     std::vector<std::string>::const_iterator dIt_e=baseDirs.end();
+
     for (;dIt!=dIt_e;++dIt) {
       std::string dirName=runDir+"/"+(*dIt);
+      // In case we are looping over more files to find the directory
+
       TDirectory* dir=dynamic_cast<TDirectory*>(in1->Get(dirName.c_str()));
       if (!dir) {
-	std::cout << "Did not find directory " << dirName <<"!" << std::endl;
+	std::cout << "Did not find directory " << dirName <<" in file "<<inFileNames[fileIndex].c_str()<<" !" << std::endl;
 	continue;
       }
+      if (std::find(foundDirs.begin(), foundDirs.end(), dirName) != foundDirs.end())
+	{
+	  std::cout<<"Already found "<<dirName<<" before"<<std::endl;
+	  //continue;
+	}else{
+	foundDirs.push_back(dirName);
+      }
+      if (debug) std::cout << "Found directory " << dirName <<" in file "<<inFileNames[fileIndex].c_str()<<" !" << std::endl;
       listOfHists.addDirectory(dir,dirName);
     }
 
     std::cout << "Number of directories: " << listOfHists.size() << std::endl;
+    std::cout<<"SIZE "<< listOfHists.size() <<std::endl;
 
     if (debug) listOfHists.print();
-
+    
     //std::cout << "Closing first file" << std::endl;
     //in1->Close("R");
     //delete in1;
