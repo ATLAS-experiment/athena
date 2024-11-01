@@ -57,20 +57,13 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
   // Get correct maps
   const FPGATrackSimPlaneMap *pmap = nullptr;
   const FPGATrackSimRegionMap *rmap = nullptr;
-  if (stage == 1)
-  {
-      pmap = m_FPGATrackSimMapping->PlaneMap_1st();
-      rmap = m_FPGATrackSimMapping->RegionMap_1st();
-  }
-  else if (stage == 2)
-  {
+
+  // TODO this is all temporary until Whit's MR refactors this.
+  // But since we now require that logical layer (1st) = logical layer (2nd), we can just
+  // use the second stage plane map here to map ALL THE HITS, and then sort them into buckets
+  // in the data prep algorithm.
       pmap = m_FPGATrackSimMapping->PlaneMap_2nd();
       rmap = m_FPGATrackSimMapping->RegionMap_2nd();
-  }
-  else
-  {
-      ATH_MSG_FATAL("convert() must have stage == 1 or 2");
-  }
 
   logicEventHeader.reserveTowers(m_towers.size());
   for (int ireg: m_towers){

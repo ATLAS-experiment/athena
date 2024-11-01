@@ -125,8 +125,10 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
       return appMgr->stopRun();
     }
 
-    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits (m_FPGAHitKey.at(0), ctx);
-    ATH_CHECK( FPGAHits.record (std::make_unique<FPGATrackSimHitCollection>()));
+    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits_1st (m_FPGAHitKey.at(0), ctx);
+    ATH_CHECK( FPGAHits_1st.record (std::make_unique<FPGATrackSimHitCollection>()));
+    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits_2nd (m_FPGAHitKey.at(1), ctx);
+    ATH_CHECK( FPGAHits_2nd.record (std::make_unique<FPGATrackSimHitCollection>()));
 
     SG::WriteHandle<FPGATrackSimHitCollection> FPGAHitUnmapped (m_FPGAHitUnmappedKey, ctx);
     ATH_CHECK( FPGAHitUnmapped.record (std::make_unique<FPGATrackSimHitCollection>()));
@@ -229,7 +231,16 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
         if (h.isReal()) phits.emplace_back(std::make_shared<const FPGATrackSimHit>(h));
     }
 
-    for (const auto & Hit : phits) FPGAHits->push_back(*Hit);
+    // Split the hits here by first stage vs second stage.
+    const FPGATrackSimRegionMap* rmap_1st = m_FPGATrackSimMapping->SubRegionMap();
+    for (const auto & hit : phits) {
+        // If the hit falls within the boundaries of ANY subregion in the first stage, it's 1st stage.
+        if (rmap_1st->getRegions(*hit).size() > 0) {
+            FPGAHits_1st->push_back(*hit);
+        } else {
+            FPGAHits_2nd->push_back(*hit);
+        }
+    }
  
     auto mon_nhits = Monitored::Scalar<unsigned>("nHits", hits.size());
     auto mon_nhits_unmapped = Monitored::Scalar<unsigned>("nHits_unmapped", m_hits_miss.size());
