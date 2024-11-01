@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -182,6 +182,8 @@ CaloClusterMomentsMaker::CaloClusterMomentsMaker(const std::string& type,
 
 StatusCode CaloClusterMomentsMaker::initialize()
 {
+  xAOD::CaloCluster dummyCluster;
+
   // loop list of requested moments
   std::string::size_type nstr(0); int nmom(0);
   for (const auto& mom : m_momentsNames) {
@@ -197,6 +199,12 @@ StatusCode CaloClusterMomentsMaker::initialize()
         // calculated in this tool! Do not add to internal (!) valid moments
         // list. Its value is available from xAOD::CaloCluster::secondTime()!
         m_secondTime = true;
+
+        // Make sure the variable used for the moment is declared
+        // to the auxiliary variable registry.  Otherwise, if we don't
+        // set the moment for the first event (perhaps because there
+        // are no clusters), then we can get warnings from AuxSelection.
+        (void)dummyCluster.getMomentValue (fmap->second);
       } else if (fmap->second == NCELL_SAMPLING) {
         // flag indicates if number of cells in a sampling should be counted.
         // This is a vector of integers counts that is filled in this tool but
@@ -204,10 +212,19 @@ StatusCode CaloClusterMomentsMaker::initialize()
         // added to the valid moments list for this reason.
         ATH_MSG_DEBUG("moment " << fmap->first << " found");
         m_nCellsPerSampling = true;
+        xAOD::CaloCluster::ncells_store_t cellsdum;
+
+        // Make sure the variable used for the moment is declared
+        // to the auxiliary variable registry.
+        (void)dummyCluster.retrieveMoment (fmap->second, cellsdum);
       } else if (fmap->second == EM_PROBABILITY) {
         ATH_MSG_WARNING(mom
                         << " not calculated in this tool - misconfiguration?");
       } else {
+        // Make sure the variable used for the moment is declared
+        // to the auxiliary variable registry.
+        (void)dummyCluster.getMomentValue (fmap->second);
+
         // all other valid moments
         m_validMoments.push_back(fmap->second);
         // flag some special requests
