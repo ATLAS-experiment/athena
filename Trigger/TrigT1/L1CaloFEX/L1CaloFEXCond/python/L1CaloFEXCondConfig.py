@@ -30,3 +30,22 @@ def jFexDBConfig(flags, name="jFEXCondAlgo"):
     acc.addCondAlgo(DBCond)
 
     return acc
+
+def gFexDBConfig(flags, name="gFEXCondAlgo"):
+
+
+    acc=ComponentAccumulator()
+    DBCond = CompFactory.LVL1.gFEXCondAlgo(name)
+    NoiseCut_folder     = "/TRIGGER/L1Calo/V1/Calibration/GfexModuleSettings"
+    database = "TRIGGER_ONL"
+
+    if not flags.Input.isMC:
+        from IOVDbSvc.IOVDbSvcConfig import addFolders
+        acc.merge(addFolders(flags, NoiseCut_folder, database, className="CondAttrListCollection"))
+        DBCond.GfexNoiseCuts = NoiseCut_folder
+
+    DBCond.IsMC = flags.Input.isMC
+
+    acc.addCondAlgo(DBCond)
+
+    return acc
