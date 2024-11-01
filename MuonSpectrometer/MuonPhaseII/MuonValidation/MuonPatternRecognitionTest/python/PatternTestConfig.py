@@ -21,6 +21,8 @@ def PatternVisualizationToolCfg(flags, name="PatternVisualizationTool", **kwargs
 def MuonRecoChainTesterCfg(flags,name="MuonRecoChainTester", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("isMC", flags.Input.isMC)
+    if not flags.Input.isMC:
+        kwargs.setdefault("TruthSegmentKey", "")
     theAlg = CompFactory.MuonValR4.MuonRecoChainTester(name, **kwargs)
     result.addEventAlgo(theAlg, primary = True)
     return result
