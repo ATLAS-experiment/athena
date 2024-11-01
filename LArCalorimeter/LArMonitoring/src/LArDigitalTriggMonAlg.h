@@ -88,14 +88,15 @@ private:
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_actualMuKey {this, "actualInteractionsPerCrossing",
            "EventInfo.actualInteractionsPerCrossing","Decoration for Actual Number of Interactions Per Crossing"};
 
-  StringArrayProperty m_layerNames{this, "LayerNames", {"EMBPC", "EMBPA", "EMB1C", "EMB1A", "EMB2C", "EMB2A", "EMB3C", "EMB3A", "EMECPC", "EMECPA", "EMEC1C", "EMEC1A", "EMEC2C", "EMEC2A", "EMEC3C", "EMEC3A", "HEC0C", "HEC0A", "HEC1C", "HEC1A", "HEC2C", "HEC2A", "HEC3C", "HEC3A", "FCAL1C", "FCAL1A", "FCAL2C", "FCAL2A", "FCAL3C", "FCAL3A", "ALL"},
+  StringArrayProperty m_layerNames{this, "LayerNames", {"EMBPC", "EMBPA", "EMB1C", "EMB1A", "EMB2C", "EMB2A", "EMB3C", "EMB3A", "EMECPC", "EMECPA", "EMEC1C", "EMEC1A", "EMEC2C", "EMEC2A", "EMEC3C", "EMEC3A", "HECC", "HECA", "FCAL1C", "FCAL1A", "FCAL2C", "FCAL2A", "FCAL3C", "FCAL3A", "ALL"},
           "Names of individual layers to monitor"};
 
 
   //Enumerate layer-types, ignoring sides. Useful for configuration that is per-definition symmetric 
-  enum LayerEnumNoSides{EMBPNS=0,EMB1NS,EMB2NS,EMB3NS,EMECPNS,EMEC1NS,EMEC2NS,EMEC3NS,HEC0NS, HEC1NS, HEC2NS,HEC3NS,FCAL1NS,FCAL2NS,FCAL3NS,MAXLYRNS};
+  enum LayerEnumNoSides{EMBPNS=0,EMB1NS,EMB2NS,EMB3NS,EMECPNS,EMEC1NS,EMEC2NS,EMEC3NS,HECNS,FCAL1NS,FCAL2NS,FCAL3NS,MAXLYRNS};
 
-  //Mapping of CaloCell nomencature to CaloCellMonitoring nomencature
+  // Mapping of CaloCell nomencature to CaloCellMonitoring nomencature
+  // From Calorimeter/CaloGeoHelpers/CaloGeoHelpers/CaloSampling.def
   const std::array<unsigned,CaloSampling::Unknown> m_caloSamplingToLyrNS{ 
     EMBPNS,   //CALOSAMPLING(PreSamplerB, 1, 0) //  0
     EMB1NS,   //CALOSAMPLING(EMB1,        1, 0) //  1
@@ -105,10 +106,10 @@ private:
     EMEC1NS,  //CALOSAMPLING(EME1,        0, 1) //  5
     EMEC2NS,  //CALOSAMPLING(EME2,        0, 1) //  6
     EMEC3NS,  //CALOSAMPLING(EME3,        0, 1) //  7
-    HEC0NS,  //CALOSAMPLING(HEC0,        0, 1) //  8
-    HEC1NS,   //CALOSAMPLING(HEC1,        0, 1) //  9
-    HEC2NS,   //CALOSAMPLING(HEC2,        0, 1) // 10
-    HEC3NS,   //CALOSAMPLING(HEC3,        0, 1) // 11
+    HECNS,  //CALOSAMPLING(HEC0,        0, 1) //  8
+    HECNS,  //CALOSAMPLING(HEC0,        0, 1) //  9
+    HECNS,  //CALOSAMPLING(HEC0,        0, 1) //  19
+    HECNS,  //CALOSAMPLING(HEC0,        0, 1) //  11
     MAXLYRNS, //CALOSAMPLING(TileBar0,    1, 0) // 12
     MAXLYRNS, //CALOSAMPLING(TileBar1,    1, 0) // 13
     MAXLYRNS, //CALOSAMPLING(TileBar2,    1, 0) // 14
