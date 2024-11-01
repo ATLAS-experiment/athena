@@ -20,6 +20,7 @@
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
+#include "Acts/TrackFinding/TrackStateCreator.hpp"
 
 #include "src/detail/MeasurementSelector.h"
 #include "ActsEvent/TrackContainer.h"
@@ -36,6 +37,8 @@
 
 #include <tuple>
 #include <type_traits>
+#include <span>
+#include <ranges>
 
 #include "src/detail/AtlasMeasurementSelector.h"
 
@@ -120,11 +123,13 @@ struct MeasurementSelectorTraits<  AtlasMeasurementSelector<NMeasMax, traj_t, me
    template <std::size_t N>
    using PredictedCovariance = CalibratedMeasurementCovariance<N>;
 
-   // e.g. helper template to get the value_type from the container type
-   template <typename T_Container>
+   // e.g. helper template to get the value_type from the measurement range iterator type
+   template <typename T_MeasurementRangeIterator>
    struct MeasurementContainerTraits {
-      using value_type = typename T_Container::const_value_type;
+      using value_type = typename T_MeasurementRangeIterator::value_type;
    };
+
+   using abstract_measurement_range_t = std::ranges::iota_view<unsigned int, unsigned int>;
 
    // the trajectory type to which states for selected measurements are to be added
    using trajectory_t = traj_t;
@@ -162,6 +167,8 @@ struct AtlasMeasurementSelector
    template <std::size_t DIM>
    using Measurement = typename traits::template CalibratedMeasurement<DIM>;
 
+   using abstract_measurement_range_t = BASE::abstract_measurement_range_t;
+
    // the delegate used for the final calibration
    template <std::size_t DIM, typename measurement_t>
    using Calibrator = Acts::Delegate<
@@ -186,6 +193,7 @@ struct AtlasMeasurementSelector
       using MeassurementContainerValueType = typename traits::template MeasurementContainerTraits<T_Container>::value_type;
    };
 
+   const ActsTrk::detail::MeasurementRangeList *m_measurementRanges{};
    // Helper to provide the mapping between bound parameters and coordinates
    // @TODO is the default projector always good enough or is there some dependency
    //       on the geoemtry ?
@@ -195,6 +203,13 @@ struct AtlasMeasurementSelector
    std::conditional<s_fullPreCalibration,
       CalibratorRegistry< CalibratedMeasurementTraits, typename traits::BoundTrackParameters, measurement_container_variant_t>,
                     Empty>::type m_preCalibrators {};
+
+
+   AtlasMeasurementSelector(typename BASE::Config &&config,
+                            const ActsTrk::detail::MeasurementRangeList &measurementRanges)
+      : BASE{std::move(config)},
+        m_measurementRanges(&measurementRanges)
+   {}
 
    // register  a calibrator for the given measurement type and the measurement dimension i.e. number of coordinates
    template <std::size_t DIM, typename T_ValueType>
@@ -261,6 +276,33 @@ struct AtlasMeasurementSelector
              };
       }
    }
+
+   std::tuple<const measurement_container_variant_t *, abstract_measurement_range_t >
+   containerAndRange(const Acts::Surface &surface) const {
+
+      const ActsTrk::detail::MeasurementRangeList::const_iterator
+         range_iter = m_measurementRanges->find(surface.geometryId().value());
+      if (range_iter == m_measurementRanges->end())
+      {
+         return {nullptr, abstract_measurement_range_t{}};
+      }
+      else {
+         abstract_measurement_range_t range{range_iter->second.elementBeginIndex(),
+                                            range_iter->second.elementEndIndex()};
+         return {&m_measurementRanges->container(range_iter->second.containerIndex()),
+                 std::move(range)};
+      }
+   }
+
+   template <typename measurement_container_t>
+   auto
+   rangeForContainer(const measurement_container_t &concrete_container,
+                     const abstract_measurement_range_t &abstract_range) const {
+      unsigned int begin_idx = abstract_range.front();
+      auto begin_iter = concrete_container.container().begin() + begin_idx;
+      auto end_iter = begin_iter + static_cast<unsigned int>(abstract_range.size());
+      return  std::ranges::subrange(begin_iter, end_iter);
+   }
 };
 
 namespace {
@@ -274,7 +316,7 @@ namespace {
 
    // Wrapper class which provides the actual measurement selector and
    // allows to connect it to the delegate used by the track finder
-   template <typename source_link_iterator_t, typename track_container_t>
+   template <typename track_container_t>
    class AtlasActsMeasurmentSelector : public ActsTrk::IMeasurementSelector {
    public:
       using TheAtlasMeasurementSelector
@@ -288,13 +330,13 @@ namespace {
 
       using BoundState = std::tuple<Acts::BoundTrackParameters, Acts::BoundMatrix, double>;
       // the delegate used by the track finder to which the measurement selector needs to be connected to
-      using TrackStateCandidateCreator =
-         Acts::CombinatorialKalmanFilterOptions<source_link_iterator_t, track_container_t>::TrackStateCandidateCreator;
 
       AtlasActsMeasurmentSelector(ActsTrk::MeasurementCalibrator2 &&calibrator,
+                                  const ActsTrk::detail::MeasurementRangeList &measurementRanges,
                                   TheAtlasMeasurementSelector::Config &&config)
          : m_calibrator( std::move(calibrator)),
-           m_measurementSelector{ {std::move(config)} }
+           m_measurementSelector(std::move(config),
+                                 measurementRanges)
       {
          // have to register one calibrator per measurement container type and associated dimension.
          // @TODO unfortunately automatic type deduction does not work, so have to provide the type
@@ -316,8 +358,10 @@ namespace {
 
       // called by the track finder to connect this measurement selector to the ckf.
       void connect(std::any delegate_ptr) const override {
-         auto delegate = std::any_cast< TrackStateCandidateCreator *>(delegate_ptr);
-         delegate->template connect< & TheAtlasMeasurementSelector::template createSourceLinkTrackStates<source_link_iterator_t> >(&m_measurementSelector);
+         using TrackStateCreator = Acts::CombinatorialKalmanFilterExtensions<RecoTrackContainer>::TrackStateCreator;
+
+         auto delegate = std::any_cast< TrackStateCreator *>(delegate_ptr);
+         delegate->template connect< & TheAtlasMeasurementSelector::createTrackStates >(&m_measurementSelector);
       }
 
       // provides the calibrators
@@ -331,6 +375,7 @@ namespace {
 namespace ActsTrk::detail {
 // return a configured, wrapper for the measurement selector
 std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const ActsTrk::IOnBoundStateCalibratorTool *onTrackCalibratorTool,
+                                                                       const ActsTrk::detail::MeasurementRangeList &measurementRanges,
                                                                        const std::vector<float> &etaBinsf,
                                                                        const std::vector<std::pair<float, float> > &chi2CutOffOutlier,
                                                                        const std::vector<size_t> &numMeasurementsCutOff) {
@@ -339,12 +384,13 @@ std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const Act
     ActsTrk::MeasurementCalibrator2 atl_measurement_calibrator(onTrackCalibratorTool);
     using AtlMeasurementSelectorCuts = AtlasMeasurementSelectorCuts;
 
-    using AtlMeasurementSelector = AtlasActsMeasurmentSelector<ActsTrk::detail::UncalibSourceLinkAccessor::Iterator, RecoTrackContainer>;
+    using AtlMeasurementSelector = AtlasActsMeasurmentSelector<RecoTrackContainer>;
     using AtlMeasurementSelectorConfig = AtlMeasurementSelector::TheAtlasMeasurementSelector::Config;
 
     std::unique_ptr<ActsTrk::IMeasurementSelector>
        selector(new AtlMeasurementSelector(
                            std::move(atl_measurement_calibrator),
+                           measurementRanges,
                            AtlMeasurementSelectorConfig{ {Acts::GeometryIdentifier(),
                                                           AtlMeasurementSelectorCuts{ etaBinsf,
                                                                                       chi2CutOffOutlier,

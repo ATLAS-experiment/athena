@@ -27,6 +27,7 @@
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Utilities/TrackHelpers.hpp"
+#include "Acts/TrackFinding/TrackStateCreator.hpp"
 
 // ActsTrk
 #include "ActsEvent/TrackContainer.h"
@@ -148,8 +149,10 @@ namespace ActsTrk{
       measurementIndex->addMeasurements(*pixelClustersHandle);
     }
 
+    using DefaultTrackStateCreator = Acts::TrackStateCreator<ActsTrk::detail::UncalibSourceLinkAccessor::Iterator,detail::RecoTrackContainer>;
+
     ActsTrk::detail::UncalibSourceLinkAccessor slAccessor(measurements.measurementRanges());
-    Acts::SourceLinkAccessorDelegate<ActsTrk::detail::UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
+    DefaultTrackStateCreator::SourceLinkAccessor slAccessorDelegate;
     slAccessorDelegate.connect<&ActsTrk::detail::UncalibSourceLinkAccessor::range>(&slAccessor);
 
     Acts::PropagatorPlainOptions plainOptions(tgContext, mfContext);
@@ -157,10 +160,10 @@ namespace ActsTrk{
     plainOptions.direction= m_propagateForward ? Acts::Direction::Forward() : Acts::Direction::Backward();
 
 
+
     TrackExtensionAlg::CKFOptions options(tgContext,
                       mfContext,
                       m_calibrationContext,
-                      slAccessorDelegate,
                       m_ckfConfig->ckfExtensions,
                       plainOptions,
                       perigeeSurface.get());
@@ -173,8 +176,13 @@ namespace ActsTrk{
        m_pixelCalibTool,
        m_stripCalibTool,
        m_hgtdCalibTool);
-    options.extensions.calibrator.connect<&detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
+    DefaultTrackStateCreator defaultTrackStateCreator{};
+    defaultTrackStateCreator.sourceLinkAccessor = slAccessorDelegate;
+    defaultTrackStateCreator.calibrator.template connect<&detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
 
+    options.extensions.createTrackStates.template connect<
+       &DefaultTrackStateCreator
+       ::createTrackStates>(&defaultTrackStateCreator);
     if ( not m_truthParticlesKey.empty() ) {
       auto truthHandle = SG::ReadHandle(m_truthParticlesKey, context);
       for ( auto truthParticle: *truthHandle ) {

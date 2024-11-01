@@ -161,6 +161,11 @@ namespace ActsTrk
 
     Gaudi::Property<bool> m_useDefaultMeasurementSelector{this, "UseDefaultActsMeasurementSelector", true, ""};
 
+    struct MeasurementSelectorConfig {
+       std::vector<std::pair<float, float> > m_chi2CutOffOutlier;
+       std::vector<float>                    m_etaBins;
+    } m_measurementSelectorConfig;
+
     enum EStat : std::size_t
     {
       kNTotalSeeds,
@@ -227,7 +232,6 @@ namespace ActsTrk
     CKF_pimpl &trackFinder();
     const CKF_pimpl &trackFinder() const;
 
-    std::unique_ptr<ActsTrk::IMeasurementSelector> m_measurementSelector;
     std::unique_ptr<CKF_pimpl> m_trackFinder;
 
     static xAOD::UncalibMeasType measurementType (const detail::RecoTrackContainer::TrackStateProxy &trackState);

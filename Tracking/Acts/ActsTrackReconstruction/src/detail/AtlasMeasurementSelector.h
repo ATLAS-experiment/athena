@@ -10,12 +10,20 @@
 #include <utility>
 #include <memory>
 
+#include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
+#include "src/detail/AtlasUncalibSourceLinkAccessor.h"
+
+#include <vector>
+#include <utility>
+
 namespace ActsTrk::detail {
    class IOnBoundStateCalibratorTool;
    std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const ActsTrk::IOnBoundStateCalibratorTool *onTrackCalibratorTool,
+                                                                          const ActsTrk::detail::MeasurementRangeList &measurementRanges,
                                                                           const std::vector<float> &etaBinsf,
                                                                           const std::vector<std::pair<float, float> > &chi2CutOffOutlier,
                                                                           const std::vector<size_t> &numMeasurementsCutOff);
+
 }
 
 #endif

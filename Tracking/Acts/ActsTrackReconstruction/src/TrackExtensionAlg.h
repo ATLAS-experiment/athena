@@ -52,8 +52,7 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
 
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& context) const override;
-  using CKFOptions = Acts::CombinatorialKalmanFilterOptions<
-    ActsTrk::detail::UncalibSourceLinkAccessor::Iterator, detail::RecoTrackContainer>;
+  using CKFOptions = Acts::CombinatorialKalmanFilterOptions<detail::RecoTrackContainer>;
 
  private:
   SG::ReadHandleKey<xAOD::PixelClusterContainer> m_pixelClusters{
