@@ -86,9 +86,53 @@ getAuxElementType( bool standalone, std::string& elementTypeName, const std::str
 
 
 SG::auxid_t
-getAuxIdForAttribute(const std::string& attr_name, const std::string& attr_type, bool standalone)
+getAuxIdForAttribute(const SG::AuxTypeRegistry& r,
+                     const ROOT::Experimental::RNTupleDescriptor& desc,
+                     const std::string& field_prefix,
+                     const std::string& attr_name,
+                     const std::string& attr_type,
+                     bool standalone);
+
+
+SG::auxid_t
+getLinkedAuxId (const SG::AuxTypeRegistry& r,
+                const ROOT::Experimental::RNTupleDescriptor& desc,
+                const std::string& field_prefix,
+                const std::string& attr_name,
+                const std::string& attr_type,
+                bool standalone)
 {
-   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t linked_auxid = SG::null_auxid;
+  if (SG::AuxTypeRegistry::classNameHasLink (attr_type)) {
+    using ROOT::Experimental::DescriptorId_t;
+    using ROOT::Experimental::RFieldDescriptor;
+    using ROOT::Experimental::RNTupleDescriptor;
+    using ROOT::Experimental::kInvalidDescriptorId;
+    std::string linked_attr = SG::AuxTypeRegistry::linkedName (attr_name);
+    DescriptorId_t did = desc.FindFieldId (field_prefix + linked_attr);
+    if (did != kInvalidDescriptorId) {
+      const RFieldDescriptor& linked_f = desc.GetFieldDescriptor (did);
+      linked_auxid = getAuxIdForAttribute (r, desc, field_prefix,
+                                           linked_attr, linked_f.GetTypeName(), standalone);
+    }
+    if (linked_auxid == SG::null_auxid) {
+      errorcheck::ReportMessage msg (MSG::WARNING, ERRORCHECK_ARGS, "RNTupleAuxDynReader.cxx:getLinkedAuxId");
+      msg << "Could not find linked variable  for " << attr_name
+          << " type: " << attr_type;
+    }
+  }
+  return linked_auxid;
+}
+
+
+SG::auxid_t
+getAuxIdForAttribute(const SG::AuxTypeRegistry& r,
+                     const ROOT::Experimental::RNTupleDescriptor& desc,
+                     const std::string& field_prefix,
+                     const std::string& attr_name,
+                     const std::string& attr_type,
+                     bool standalone)
+{
    SG::auxid_t auxid = r.findAuxID(attr_name);
    if(auxid != SG::null_auxid)
       return auxid;
@@ -98,7 +142,9 @@ getAuxIdForAttribute(const std::string& attr_name, const std::string& attr_type,
    if( !ti )
       return auxid;
 
-   return SG::getDynamicAuxID (*ti, attr_name, element_type, attr_type, standalone, SG::null_auxid);
+   SG::auxid_t linked_auxid = getLinkedAuxId (r, desc, field_prefix, attr_name, attr_type, standalone);
+
+   return SG::getDynamicAuxID (*ti, attr_name, element_type, attr_type, standalone, linked_auxid);
 }
 
 } // anonymous namespace
@@ -153,7 +199,8 @@ namespace RootAuxDynIO
             const string attr_name = reg.inputRename(m_key, attr_infile);
             const string field_type = f.GetTypeName();
 
-            SG::auxid_t auxid = getAuxIdForAttribute(attr_name, field_type, standalone);
+            SG::auxid_t auxid = getAuxIdForAttribute(reg, desc, field_prefix,
+                                                     attr_name, field_type, standalone);
             // add AuxID to the list
             // May still be null if we don't have a dictionary for this field
             if( auxid != SG::null_auxid ) {
