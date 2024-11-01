@@ -109,7 +109,7 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
     // FIXME: This is not MT-safe.
     SG::Decorator< char > dressDec (SG::decorKeyFromKey (m_decorationKey.key()));
     // If we want to decorate, then we need to decorate everything with false to begin with
-    if (!m_decorationKey.key().empty()){
+    if (!m_decorationName.empty()){
       if (!dressDec.isAvailable(*truthParticles)) {
         for (const auto * particle : *truthParticles){
           dressDec(*particle);
