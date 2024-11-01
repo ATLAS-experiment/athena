@@ -68,11 +68,11 @@ class FPGATrackSimSpacepointRoadFilterTool : public extends<AthAlgTool, IFPGATra
         Gaudi::Property <unsigned> m_minSpacePlusPixel2 {this, "minSpacePlusPixel2", 0, "Minimum number of '2D' hits to accept as a road for 2nd stage"};
         Gaudi::Property <bool> m_filtering {this, "filtering", 0, "Filter out unpaired strip hits"};
         Gaudi::Property <bool> m_setSectors {this, "setSectors", true, "Should the bank service be used to set sectors."};
+        Gaudi::Property <bool> m_isSecondStage {this, "isSecondStage", false, "Is this the second stage?"};
 
         ///////////////////////////////////////////////////////////////////////
         // Event Storage
         std::vector<FPGATrackSimRoad> m_postfilter_roads;
-        std::vector<FPGATrackSimRoad> m_postfilter_roads_2nd;
         ///////////////////////////////////////////////////////////////////////
         // Convenience
 
@@ -81,8 +81,6 @@ class FPGATrackSimSpacepointRoadFilterTool : public extends<AthAlgTool, IFPGATra
 
         TH1I* m_inputRoads;
         TH1I* m_badRoads;
-        TH1I* m_inputRoads_2nd;
-        TH1I* m_badRoads_2nd;
     
         ///////////////////////////////////////////////////////////////////////
         // Helpers

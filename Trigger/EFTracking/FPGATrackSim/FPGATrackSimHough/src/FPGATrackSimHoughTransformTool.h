@@ -51,6 +51,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimVectors.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
+#include "FPGATrackSimObjects/FPGATrackSimFunctions.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFinderTool.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFilterTool.h"
@@ -111,10 +112,6 @@ class FPGATrackSimHoughTransformTool : public extends <AthAlgTool, IFPGATrackSim
         double getMaxY() const { return m_parMax[m_par_y]; }
         unsigned getThreshold() const { return m_threshold[m_threshold.size() / 2]; }
         int getSubRegion() const { return m_subRegion; }
-
-        // Apply correction due to B != 2T everywhere. This correction should be ADDED to
-        // phi_track.
-        static double fieldCorrection(unsigned region, double y, double r);
 
         double yToX(double y, const std::shared_ptr<const FPGATrackSimHit> &hit) const;
 

@@ -67,6 +67,12 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(const std::vector<std::shared_ptr<
     temp.setNMissing(nMissing);
     temp.setQOverPt(y);
 
+    temp.setSubRegion(iroad->getSubRegion());
+    temp.setHoughX(iroad->getX());
+    temp.setHoughY(iroad->getY());
+    temp.setHoughXBin(iroad->getXBin());
+    temp.setHoughYBin(iroad->getYBin());
+
     ////////////////////////////////////////////////////////////////////////
     // Get a list of indices for all possible combinations given a certain
     // number of layers

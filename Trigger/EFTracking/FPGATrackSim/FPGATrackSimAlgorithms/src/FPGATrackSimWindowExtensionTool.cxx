@@ -118,12 +118,10 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
                 double pred_hitz = trackz0 + hitr*cottracktheta;
 
                 // Field correction, now pulled from FPGATrackSimFunctions.
-                // Disable for now, re-enable once the rest of second stage is merged
-                // (which will include this function).
-                /*if (m_fieldCorrection){
+                if (m_fieldCorrection){
                     double fieldCor = fieldCorrection(track->getRegion(), trackqoverpt, hitr);
                     pred_hitphi += fieldCor;
-                }*/
+                }
 
                 double diff = abs(hitphi-pred_hitphi);
                 double diffz = abs(hitz-pred_hitz);

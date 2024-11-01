@@ -44,6 +44,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimVectors.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
+#include "FPGATrackSimObjects/FPGATrackSimFunctions.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFinderTool.h"
 #include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"

@@ -116,10 +116,11 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
 
         ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool", "", "Monitoring tool"};
 
+        // NOTE: the clusters collection(s) contain ALL Clusters, not just "first stage" clusters.
         SG::WriteHandleKeyArray<FPGATrackSimClusterCollection> m_FPGAClusterKey{this, "FPGATrackSimClusterKey",{"FPGAClusters_1st"},"FPGATrackSim Clusters key"};
         SG::WriteHandleKey<FPGATrackSimClusterCollection> m_FPGAClusterFilteredKey{this, "FPGATrackSimClusterFilteredKey","FPGAClustersFiltered","FPGATrackSim Filtered Clusters key"};
         SG::WriteHandleKeyArray<FPGATrackSimClusterCollection> m_FPGASpacePointsKey{this, "FPGATrackSimSpacePoints1stKey",{"FPGASpacePoints_1st","FPGASpacePoints_2nd"},"FPGATrackSim SpacePoints key"};
-        SG::WriteHandleKeyArray<FPGATrackSimHitCollection> m_FPGAHitKey{this, "FPGATrackSimHitKey",{"FPGAHits_1st"},"FPGATrackSim Hits key"};
+        SG::WriteHandleKeyArray<FPGATrackSimHitCollection> m_FPGAHitKey{this, "FPGATrackSimHitKey",{"FPGAHits_1st", "FPGAHits_2nd"},"FPGATrackSim Hits key"};
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitUnmappedKey{this, "FPGATrackSimHitUnmappedKey","FPGAHitsUnmapped_1st","FPGATrackSim Unmapped Hits 1st stage key"};
         
         SG::ReadHandleKey<xAOD::TruthParticleContainer> m_inputTruthParticleContainerKey{this, "TruthTrackContainer", "TruthParticles", "Truth Particle Container"};

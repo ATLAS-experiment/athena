@@ -618,7 +618,7 @@ std::pair<float, bool> FPGATrackSimHough1DShiftTool::phitrk(int bin, std::vector
 float FPGATrackSimHough1DShiftTool::deltaPhi(float r, float qPt) const
 {
    float dPhi = std::asin(fpgatracksim::A * r * qPt);
-    if (m_fieldCorrection) dPhi += FPGATrackSimHoughTransformTool::fieldCorrection(m_EvtSel->getRegionID(), qPt, r);
+    if (m_fieldCorrection) dPhi += fieldCorrection(m_EvtSel->getRegionID(), qPt, r);
     return dPhi;
 }
 
