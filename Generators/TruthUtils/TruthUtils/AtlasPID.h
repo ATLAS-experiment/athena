@@ -197,7 +197,7 @@ template<> inline bool isTrajectory(const int& p){ return std::abs(p) == POMERON
 template<class T> inline bool isHiggs(const T& p){return isHiggs(p->pdg_id());}
 template<> inline bool isHiggs(const int& p){ return p == HIGGSBOSON; }
 
-template<class T> inline bool isResonance(const T& p) { return isZ(p)||isW(p)||isHiggs(p)||isTop(p); }
+template<class T> inline bool isResonance(const T& p) { return isZ(p) || isW(p) || isHiggs(p) || isTop(p); } // APID: not including t' (pdg_id=8)
 
 template<class T> inline bool isGraviton(const T& p) {return isGraviton(p->pdg_id());}
 template<> inline bool isGraviton(const int& p){ return p == GRAVITON; }
@@ -613,23 +613,23 @@ namespace SUSY {
   }
   template<> inline bool isRGlueball(const int& p) {  auto value_digits = DecodedPID(p);  return isRGlueball(value_digits); }
   template<class T> inline bool isRHadron(const T& p) { return isRHadron(p->pdg_id()); }
-  template<> inline bool isRHadron(const DecodedPID& p){ if (!isSUSY(p)) return false; auto pp = p.shift(1); if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return (isHadron(pp) || isRGlueball(p));}
+  template<> inline bool isRHadron(const DecodedPID& p){ if (!isSUSY(p)) return false; auto pp = p.shift(1); if (pp.ndigits() < 2) return false; if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return (isHadron(pp) || isRGlueball(p));}
   template<> inline bool isRHadron(const int& p){ auto value_digits = DecodedPID(p); return isRHadron(value_digits);}
 
   template<class T> inline bool isRMeson(const T& p) { return isRMeson(p->pdg_id()); }
-  template<> inline bool isRMeson(const DecodedPID& p){ if (!isSUSY(p)) return false; auto pp = p.shift(1); if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isMeson(pp);}
+  template<> inline bool isRMeson(const DecodedPID& p){ if (!isSUSY(p)) return false; auto pp = p.shift(1); if (pp.ndigits() < 2) return false;if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isMeson(pp);}
   template<> inline bool isRMeson(const int& p){ auto value_digits = DecodedPID(p); return isRMeson(value_digits);}
 
   template<class T> inline bool isRBaryon(const T& p) { return isRBaryon(p->pdg_id()); }
-  template<> inline bool isRBaryon(const DecodedPID& p){ if (!isSUSY(p)) return false; auto pp = p.shift(1); if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isBaryon(pp);}
+  template<> inline bool isRBaryon(const DecodedPID& p){ if (!isSUSY(p)) return false; auto pp = p.shift(1); if (pp.ndigits() < 2) return false; if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isBaryon(pp);}
   template<> inline bool isRBaryon(const int& p){ auto value_digits = DecodedPID(p); return isRBaryon(value_digits);}
 
   template<class T> inline bool isRBottomHadron(const T& p) { return isRBottomHadron(p->pdg_id()); }
-  template<> inline bool isRBottomHadron(const DecodedPID& p){ if (!isSUSY(p)) return false; auto pp = p.shift(1); if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isBottomHadron(pp);}
+  template<> inline bool isRBottomHadron(const DecodedPID& p){ if (!isSUSY(p)) return false; auto pp = p.shift(1); if (pp.ndigits() < 2) return false;if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isBottomHadron(pp);}
   template<> inline bool isRBottomHadron(const int& p){ auto value_digits = DecodedPID(p); return isRBottomHadron(value_digits);}
 
   template<class T> inline bool isRTopHadron(const T& p) { return isRTopHadron(p->pdg_id()); }
-  template<> inline bool isRTopHadron(const DecodedPID& p){ if (!isSUSY(p)) return false; auto pp = p.shift(1); if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isTopHadron(pp);}
+  template<> inline bool isRTopHadron(const DecodedPID& p){ if (!isSUSY(p)) return false; auto pp = p.shift(1); if (pp.ndigits() < 2) return false;if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isTopHadron(pp);}
   template<> inline bool isRTopHadron(const int& p){ auto value_digits = DecodedPID(p); return isRTopHadron(value_digits);}
 
 
