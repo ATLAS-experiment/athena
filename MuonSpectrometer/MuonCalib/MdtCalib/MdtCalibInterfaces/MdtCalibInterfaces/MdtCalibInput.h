@@ -27,7 +27,6 @@ namespace Muon{
 
 namespace Trk {
   class StraightLineSurface;
-  class SaggedLineSurface;
 }
 
 class MdtDigit;

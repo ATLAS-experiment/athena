@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MdtDriftCircleOnTrackCreator )
@@ -11,5 +11,5 @@ atlas_add_component( MdtDriftCircleOnTrackCreator
                      LINK_LIBRARIES AthenaBaseComps GaudiKernel MuonRIO_OnTrack MuonRecToolInterfaces 
                                     TrkEventPrimitives TrkSpaceTimePoint Identifier EventPrimitives 
                                     MuonReadoutGeometry MdtCalibInterfacesLib TrkParameters MdtCalibData
-                                    MuonIdHelpersLib MuonPrepRawData TrkDistortedSurfaces TrkSurfaces)
+                                    MuonIdHelpersLib MuonPrepRawData TrkSurfaces)
 

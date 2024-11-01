@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondAlg/MdtCalibDbAlg.h"
@@ -21,7 +21,6 @@
 #include "MdtCalibData/MdtSlewCorFuncHardcoded.h"
 #include "MdtCalibData/RtFromPoints.h"
 #include "MdtCalibData/RtResolutionFromPoints.h"
-#include "MdtCalibData/WireSagCorFunc.h"
 #include "MdtCalibUtils/RtDataFromFile.h"
 #include "MuonCalibIdentifier/MdtCalibCreationFlags.h"
 #include "MuonCalibIdentifier/MuonFixedId.h"
@@ -249,7 +248,7 @@ StatusCode MdtCalibDbAlg::defaultRt(MuonCalib::MdtCalibDataContainer& writeCdo, 
                 return StatusCode::FAILURE;
             }
             
-            if (!(m_create_b_field_function || m_createWireSagFunction|| m_createSlewingFunction)) continue;
+            if (!(m_create_b_field_function || m_createSlewingFunction)) continue;
             loadedRts[detElId] = MdtRt;
 
         }
@@ -537,7 +536,7 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
         RtRelationPtr rt_rel = std::make_unique<MuonCalib::MdtRtRelation>(std::move(rt), std::move(reso), 0.);
 
         if (!writeCdo.storeData(athenaId ,rt_rel, msgStream())) return StatusCode::FAILURE;
-        if (!(m_create_b_field_function || m_createWireSagFunction|| m_createSlewingFunction)) continue;
+        if (!(m_create_b_field_function || m_createSlewingFunction)) continue;
         loadedRtRel[athenaId] = rt_rel;
         
     }  // end loop over itr (strings read from COOL)        
@@ -585,7 +584,6 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
             corr_params[1] = 0.11;    // epsilon parameter
             corrFuncSet->setBField(std::make_unique<MuonCalib::BFieldCorFunc>("medium", corr_params, rtRelation->rt()));
         }
-        if (m_createWireSagFunction) initializeSagCorrection(*corrFuncSet);
         if (m_createSlewingFunction) {
             corrFuncSet->setSlewing(std::make_unique<MuonCalib::MdtSlewCorFuncHardcoded>(MuonCalib::CalibFunc::ParVec()));
         }
@@ -907,10 +905,4 @@ std::unique_ptr<MuonCalib::RtResolutionLookUp> MdtCalibDbAlg::getRtResolutionInt
       }
     }
     return std::make_unique<MuonCalib::RtResolutionLookUp>(std::move(res_param));
-}
-
-void MdtCalibDbAlg::initializeSagCorrection(MuonCalib::MdtCorFuncSet& funcSet) const {
-    ATH_MSG_VERBOSE("initializeSagCorrection...");
-    std::vector<double> corr_params(0);
-    funcSet.wireSag(std::make_unique<MuonCalib::WireSagCorFunc>(corr_params));
 }

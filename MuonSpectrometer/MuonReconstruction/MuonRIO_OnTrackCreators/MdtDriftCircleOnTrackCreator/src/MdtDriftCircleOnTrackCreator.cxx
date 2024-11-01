@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtDriftCircleOnTrackCreator.h"
@@ -14,7 +14,6 @@
 #include "MuonRIO_OnTrack/MdtDriftCircleOnTrack.h"
 #include "MuonRIO_OnTrack/MuonDriftCircleErrorStrategy.h"
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
-#include "TrkDistortedSurfaces/DistortedSurface.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkSurfaces/StraightLineSurface.h"
 
@@ -47,7 +46,6 @@ StatusCode MdtDriftCircleOnTrackCreator::initialize() {
     m_errorStrategy.setParameter(MuonDriftCircleErrorStrategy::StationError, m_stationError);
     m_errorStrategy.setParameter(MuonDriftCircleErrorStrategy::ErrorAtPredictedPosition, m_errorAtPredictedPosition);
     m_errorStrategy.setParameter(MuonDriftCircleErrorStrategy::T0Refit, m_t0Refit);
-    m_errorStrategy.setParameter(MuonDriftCircleErrorStrategy::WireSagGeomCorrection, m_doWireSag);
     m_errorStrategy.setParameter(MuonDriftCircleErrorStrategy::Segment, m_doSegments);
     using ToolSettings = IMdtCalibrationTool::ToolSettings;
     using Property = ToolSettings::Property;
@@ -60,8 +58,6 @@ StatusCode MdtDriftCircleOnTrackCreator::initialize() {
                                  calibSettings.isActive(Property::TempCorrection));
     m_errorStrategy.setParameter(MuonDriftCircleErrorStrategy::MagFieldCorrection,
                                  calibSettings.isActive(Property::MagFieldCorrection));
-    m_errorStrategy.setParameter(MuonDriftCircleErrorStrategy::WireSagTimeCorrection,
-                                 calibSettings.isActive(Property::WireSagTimeCorrection));
     m_errorStrategy.setParameter(MuonDriftCircleErrorStrategy::SlewCorrection,
                                  calibSettings.isActive(Property::SlewCorrection));
     m_errorStrategy.setParameter(MuonDriftCircleErrorStrategy::BackgroundCorrection,
