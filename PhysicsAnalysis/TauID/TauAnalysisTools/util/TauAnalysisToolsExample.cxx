@@ -32,7 +32,6 @@
 #include "TauAnalysisTools/TauSelectionTool.h"
 #include "TauAnalysisTools/TauSmearingTool.h"
 #include "TauAnalysisTools/TauTruthMatchingTool.h"
-#include "TauAnalysisTools/TauTruthTrackMatchingTool.h"
 
 #include "PileupReweighting/PileupReweightingTool.h"
 
@@ -167,7 +166,8 @@ int main( int argc, char* argv[] )
   // ===========================================================================
   TauAnalysisTools::TauEfficiencyCorrectionsTool TauEffCorrTool( "TauEfficiencyCorrectionsTool" );
   TauEffCorrTool.msg().setLevel( MSG::VERBOSE );
-  CHECK(TauEffCorrTool.setProperty("TauSelectionTool",TauSelToolHandle));
+  CHECK(TauEffCorrTool.setProperty("JetIDLevel", (int)TauAnalysisTools::JetID::JETIDRNNMEDIUM));
+  CHECK(TauEffCorrTool.setProperty("EfficiencyCorrectionTypes", (int)TauAnalysisTools::EfficiencyCorrectionType::SFJetIDHadTau));
   CHECK(TauEffCorrTool.setProperty("RecommendationTag","2022-prerec"));
   CHECK(TauEffCorrTool.initialize());
 
@@ -191,7 +191,7 @@ int main( int argc, char* argv[] )
       TauEffTrigTool.msg().setLevel( MSG::DEBUG );
       CHECK(TauEffTrigTool.setProperty("EfficiencyCorrectionTypes", std::vector<int>({SFTriggerHadTau}) ));
       CHECK(TauEffTrigTool.setProperty("TriggerName", "HLT_tau25_medium1_tracktwo" ));
-      CHECK(TauEffTrigTool.setProperty("JetIDLevel", (int)JETIDRNNTIGHT ));
+      CHECK(TauEffTrigTool.setProperty("JetIDLevel", (int)JETIDRNNMEDIUM ));
       CHECK(TauEffTrigTool.setProperty("PileupReweightingTool", m_tPRWToolHandle ));
       CHECK(TauEffTrigTool.setProperty("TriggerSFMeasurement", "combined"));
       CHECK(TauEffTrigTool.initialize());
@@ -210,14 +210,6 @@ int main( int argc, char* argv[] )
   T2MT.msg().setLevel( MSG::INFO );
   CHECK(T2MT.setProperty("TruthJetContainerName", "AntiKt4TruthDressedWZJets"));
   CHECK(T2MT.initialize());
-
-  // ===========================================================================
-  // TauTruthTrackMatchingTool
-  // ===========================================================================
-  TauAnalysisTools::TauTruthTrackMatchingTool T3MT( "TauTruthTrackMatchingTool");
-  T3MT.msg().setLevel( MSG::INFO );
-  CHECK(T3MT.initialize());
-
 
   static const SG::ConstAccessor<char> acc_IsTruthMatched("IsTruthMatched");
   static const SG::ConstAccessor<char> acc_IsHadronicTau("IsHadronicTau");
@@ -371,24 +363,6 @@ int main( int argc, char* argv[] )
       // print some info about the selected tau:
       Info( "TauAnalysisToolsExample", "Selected tau: pt = %g MeV, eta = %g, phi = %g, prong = %i, charge = %i",
             xTau->pt(), xTau->eta(), xTau->phi(), int(xTau->nTracks()), int(xTau->charge()));
-
-
-      // for (size_t iTrack = 1; iTrack < xTau->nTracks(); iTrack++)
-      // {
-      //   const TAUTRACKPARTICLE* xTrack = xTau->track(iTrack);
-
-      //   CHECK(T3MT.classifyTrack(*xTrack));
-      //   static const SG::ConstAccessor<char> acc_IsHadronicTrack("IsHadronicTrack");
-      //   static const SG::ConstAccessor<int> acc_IsHadronicTrackDecayDepth("IsHadronicTrackDecayDepth");
-      //   static const SG::ConstAccessor<string> acc_DecayHistory("DecayHistory");
-      //   static const SG::ConstAccessor<int> acc_TrackType("TrackType");
-      //   if (acc_IsHadronicTrack(*xTrack))
-      //     Info( "TauAnalysisToolsExample", "Track is matched to a hadronic tau decay, with decay depth %i", acc_IsHadronicTrackDecayDepth(*xTrack));
-      //   else
-      //     Info( "TauAnalysisToolsExample", "Track is not matched to a hadronic tau decay");
-      //   Info ("TauAnalysisToolsExample", "The track decay history is: %s", (acc_DecayHistory(*xTrack)).c_str());
-      //   Info ("TauAnalysisToolsExample", "The spurious type is: %i", acc_TrackType(*xTrack) );
-      // }
     }
     if (xTauJetContainer->empty())
       CHECK (T2MT.retrieveTruthTaus());
