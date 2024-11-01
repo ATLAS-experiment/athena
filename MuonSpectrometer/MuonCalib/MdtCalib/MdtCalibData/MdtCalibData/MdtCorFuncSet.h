@@ -9,7 +9,6 @@
 #include "MdtCalibData/IMdtBackgroundCorFunc.h"
 #include "MdtCalibData/IMdtSlewCorFunc.h"
 #include "MdtCalibData/IMdtTempCorFunc.h"
-#include "MdtCalibData/IMdtWireSagCorFunc.h"
 
 #include <memory>
 namespace MuonCalib {
@@ -22,8 +21,7 @@ namespace MuonCalib {
         MdtCorFuncSet(std::unique_ptr<IMdtSlewCorFunc> && s, 
                       std::unique_ptr<IMdtBFieldCorFunc>&& bf, 
                       std::unique_ptr<IMdtTempCorFunc>&& t, 
-                      std::unique_ptr<IMdtBackgroundCorFunc>&& bg, 
-                      std::unique_ptr<IMdtWireSagCorFunc>&& w);
+                      std::unique_ptr<IMdtBackgroundCorFunc>&& bg);
 
         ~MdtCorFuncSet() = default;
 
@@ -31,13 +29,11 @@ namespace MuonCalib {
         const IMdtBFieldCorFunc* bField() const { return m_bField.get(); }
         const IMdtTempCorFunc* temperature() const { return m_temperature.get(); }
         const IMdtBackgroundCorFunc* background() const { return m_background.get(); }
-        const IMdtWireSagCorFunc* wireSag() const { return m_wireSag.get(); }
 
         void setSlewing(std::unique_ptr<IMdtSlewCorFunc>&& slew);
         void setBField(std::unique_ptr<IMdtBFieldCorFunc>&& bField);
         void setTemperature(std::unique_ptr<IMdtTempCorFunc>&& temperature);
         void background(std::unique_ptr<IMdtBackgroundCorFunc>&& background);
-        void wireSag(std::unique_ptr<IMdtWireSagCorFunc>&& wireSag);
 
     private:
 
@@ -45,7 +41,6 @@ namespace MuonCalib {
         std::unique_ptr<IMdtBFieldCorFunc> m_bField{};
         std::unique_ptr<IMdtTempCorFunc> m_temperature{};
         std::unique_ptr<IMdtBackgroundCorFunc> m_background{};
-        std::unique_ptr<IMdtWireSagCorFunc> m_wireSag{};
     };
 
 }  // namespace MuonCalib

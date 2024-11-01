@@ -534,8 +534,6 @@ TrkObjToString::addFullInfo(QStringList& info, const Trk::RIO_OnTrack* rot){
       case Trk::CORRUPT: { info+="Corrupt"; break;}
       case Trk::NODRIFTTIME: { info+="No Drift Time"; break;}
     }
-    info+="Has sagging correction";
-    info+=mdt->errorStrategy().creationParameter(Muon::MuonDriftCircleErrorStrategy::WireSagGeomCorrection) ? "True": "False";
     info+="Drift time";
     info+=QString::number(mdt->driftTime ())+QString(" [CLHEP::ns]");
     //TK: Uncomment timing mode for now due to const issues

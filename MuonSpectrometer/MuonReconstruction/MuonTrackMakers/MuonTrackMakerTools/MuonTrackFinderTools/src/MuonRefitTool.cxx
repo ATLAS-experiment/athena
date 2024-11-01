@@ -79,12 +79,10 @@ namespace Muon {
         strategy.setParameter(MuonDriftCircleErrorStrategy::StationError, false);
         strategy.setParameter(MuonDriftCircleErrorStrategy::ErrorAtPredictedPosition, false);
         strategy.setParameter(MuonDriftCircleErrorStrategy::T0Refit, false);
-        strategy.setParameter(MuonDriftCircleErrorStrategy::WireSagGeomCorrection, false);
         strategy.setParameter(MuonDriftCircleErrorStrategy::TofCorrection, false);
         strategy.setParameter(MuonDriftCircleErrorStrategy::PropCorrection, false);
         strategy.setParameter(MuonDriftCircleErrorStrategy::TempCorrection, false);
         strategy.setParameter(MuonDriftCircleErrorStrategy::MagFieldCorrection, false);
-        strategy.setParameter(MuonDriftCircleErrorStrategy::WireSagTimeCorrection, false);
         strategy.setParameter(MuonDriftCircleErrorStrategy::SlewCorrection, false);
         strategy.setParameter(MuonDriftCircleErrorStrategy::BackgroundCorrection, false);
         strategy.setParameter(MuonDriftCircleErrorStrategy::Segment, false);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -80,12 +80,9 @@ private:
     Gaudi::Property<bool> m_create_b_field_function{this, "CreateBFieldFunctions", false,
         "If set to true, the B-field correction functions are initialized for each rt-relation that is loaded."};
 
-    Gaudi::Property<bool> m_createWireSagFunction{this, "CreateWireSagFunctions", false,
-        "If set to true, the wire sag correction functions are initialized for each rt-relation that is loaded."};
     Gaudi::Property<bool> m_createSlewingFunction{this, "CreateSlewingFunctions", false,
         "If set to true, the slewing correction functions are initialized for each rt-relation that is loaded."};
 
-    void initializeSagCorrection(MuonCalib::MdtCorFuncSet& funcSet) const;
 
     // if m_TimeSlewingCorrection is set to true then it is assumed that the
     // time slewing correction is applied. If false not. If this flag does
