@@ -78,7 +78,7 @@ int main(int argc, char **argv)
 
         else
         {
-            std::cout << "\n Please use one or several of the following options: \n"
+            std::cerr << "\n Please use one or several of the following options: \n"
                       << "\n\t - StatusPermanent: to only mask entire dead boards -- for use if updating StatusPermanent "
                       << "\n\t\t - if this option is used, all others will be ignored. \n"
                       << "\n\t - checkNoisy_HT: to mask straws with HT fraction > 0.5 "
@@ -88,7 +88,7 @@ int main(int argc, char **argv)
                       << "\n\t - checkDead_LT : to mask straws with LT fraction = 0.0 "
                       << "\n\t Replace \"check\" with \"ignore\" to ignore this category. \n "
                       << std::endl;
-            return 1;
+            exit(1);
         }
     }
 
@@ -184,17 +184,12 @@ void simpleAnalysis(std::string filename)
         else
         {
             // ignore all other possible types of bad straw if we're masking dead boards
-            if (HToccupancy > 0.5)
-                skip = 51; // high HT fraction straws
-            if (HToccupancy < 0.0001)
-                skip = 52; // low HT fraction straws
-            if (efficiency < 0.7)
-                skip = 42; // low efficiency LT straws
-            if (occupancy > 0.99)
-                skip = 11; // 100% occupancy straws
+            if (HToccupancy > 0.5   ) skip = 51; // high HT fraction straws
+            if (HToccupancy < 0.0001) skip = 52; // low HT fraction straws
+            if (efficiency < 0.7    ) skip = 42; // low efficiency LT straws
+            if (occupancy > 0.99    ) skip = 11; // 100% occupancy straws
 
-            if (tmp[3] == 0)
-                skip = 12; // 0 hits
+            if (tmp[3] == 0         ) skip = 12; // 0 hits
         }
 
         if (deadStraws[(tmp[0] > 0) ? 0 : 1][tmp[1]][tmp[2]] == 1)
@@ -215,8 +210,7 @@ void simpleAnalysis(std::string filename)
             }
         }
 
-        if (skip && !deadStraws[(tmp[0] > 0) ? 0 : 1][tmp[1]][tmp[2]])
-            deadStraws[(tmp[0] > 0) ? 0 : 1][tmp[1]][tmp[2]] = skip;
+        if (skip && !deadStraws[(tmp[0] > 0) ? 0 : 1][tmp[1]][tmp[2]]) deadStraws[(tmp[0] > 0) ? 0 : 1][tmp[1]][tmp[2]] = skip;
     }
 
     std::cout << "read " << countlines << " lines from file " << filename << ", N events: " << nevents << std::endl;

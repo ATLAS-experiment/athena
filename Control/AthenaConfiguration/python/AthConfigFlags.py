@@ -218,6 +218,11 @@ class FlagAddress(object):
 
 class AthConfigFlags(object):
 
+    # A list of all flags instances for which we've returned a hash.
+    # We can't allow them to be deleted; otherwise, we might get new
+    # flags object with the same hash.
+    _hashedFlags = []
+
     def __init__(self):
         self._flagdict=dict()
         self._locked=False
@@ -240,6 +245,13 @@ class AthConfigFlags(object):
         raise DeprecationWarning("__hash__ method in AthConfigFlags is deprecated. Probably called from function decorator, use AccumulatorCache decorator instead.")
 
     def _calculateHash(self):
+        # Once we've hashed a flags instance, we need to be sure that
+        # it never goes away.  Otherwise, since we base the hash
+        # on just the id of the dictionary, if a flags object is deleted
+        # and a new one created, the hash of the new one could match the
+        # hash of the old, even if contents are different.
+        # See ATLASRECTS-8070.
+        AthConfigFlags._hashedFlags.append (self)
         return hash( (frozenset({k: v for k, v in self._renames.items() if k != v}), id(self._flagdict)) )
 
     def __getattr__(self, name):

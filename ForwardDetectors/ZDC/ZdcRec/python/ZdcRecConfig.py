@@ -229,13 +229,16 @@ def ZdcRecRun3Cfg(flags):
         elif flags.Input.ProjectName == "data24_hi": # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
             doCalib = True
             doTimeCalib = True
-            ForceCalibRun = 463427
-            ForceCalibLB = 500
-        elif flags.Common.isOnline:
+        elif flags.Common.isOnline: # calibration file for ongoing run not available - copy calib file from eos & hard code the run + lb
             doCalib = True
             doTimeCalib = True
-            ForceCalibRun = 463427
-            ForceCalibLB = 500
+            if flags.Input.ProjectName == "data24_5p36TeV":
+                ForceCalibRun = 488239
+                ForceCalibLB = 1
+            elif flags.Input.ProjectName == "data24_hi":
+                ForceCalibRun = 463427 # place holder available at point1 - replace with a 2024 run during data taking
+                ForceCalibLB = 500
+
 
     doRPD = flags.Detector.EnableZDC_RPD
 
