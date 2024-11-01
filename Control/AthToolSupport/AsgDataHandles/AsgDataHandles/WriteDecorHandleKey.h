@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 
 /**
@@ -80,10 +80,28 @@ public:
    * separated by a "+":  "MyStore+Obj".  If no "+" is present
    * the store named by @c storeName is used.
    */
-  template <class OWNER, class K>
+  template <class OWNER>
   WriteDecorHandleKey (OWNER* owner,
                        const std::string& name,
-                       const K& key = {},
+                       const std::string& key = {},
+                       const std::string& doc = "");
+
+
+  /**
+   * @brief auto-declaring Property Constructor.
+   * @param owner Owning component.
+   * @param name name of the Property
+   * @param contKey VarHandleKey of the associated container
+   * @param decorKey name The decoration name.
+   * @param doc Documentation string.
+   *
+   * will associate the named Property with this WDHK via declareProperty
+   */
+  template <class OWNER>
+  WriteDecorHandleKey (OWNER* owner,
+                       const std::string& name,
+                       const VarHandleKey& contKey,
+                       const std::string& decorKey = {},
                        const std::string& doc = "");
 
 

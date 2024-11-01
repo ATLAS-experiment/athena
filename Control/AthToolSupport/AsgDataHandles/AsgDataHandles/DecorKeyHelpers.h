@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 
 #ifndef ASG_DATA_HANDLES_DECOR_KEY_HELPERS_H
@@ -9,6 +9,7 @@
 #include <StoreGate/DecorKeyHelpers.h>
 #else
 
+#include "AsgDataHandles/VarHandleKey.h"
 #include <stdexcept>
 #include <string>
 
@@ -28,6 +29,18 @@ inline std::string decorKeyFromKey (const std::string& key)
   if (split == std::string::npos)
     return "";
   return key.substr (split + 1);
+}
+
+inline std::string makeContDecorKey(const std::string& cont, const std::string& decor)
+{
+  if (cont.empty()) return decor;
+  if (decor.empty()) return cont;
+  return cont + '.' + decor;
+}
+
+inline std::string makeContDecorKey(const VarHandleKey& contKey, const std::string& key)
+{
+  return makeContDecorKey( contKey.key(), key);
 }
 
 }
