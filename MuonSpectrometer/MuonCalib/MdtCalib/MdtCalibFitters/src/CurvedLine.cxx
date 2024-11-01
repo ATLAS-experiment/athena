@@ -164,7 +164,7 @@ void CurvedLine::init(std::vector<Amg::Vector3D>& points, std::vector<Amg::Vecto
         sample_points[k].set_error(x_and_y_errors[k].x());
     }
     fitter.set_number_of_coefficients(2);
-    fitter.fit_parameters(sample_points, 1, sample_points.size(), &legendre);
+    fitter.fit_parameters(sample_points, 1, sample_points.size(), legendre);
     m_coeff_xz = fitter.coefficients();
 
     // yz plane //
@@ -174,7 +174,7 @@ void CurvedLine::init(std::vector<Amg::Vector3D>& points, std::vector<Amg::Vecto
         sample_points[k].set_error(x_and_y_errors[k].y());
     }
     fitter.set_number_of_coefficients(3);
-    fitter.fit_parameters(sample_points, 1, sample_points.size(), &legendre);
+    fitter.fit_parameters(sample_points, 1, sample_points.size(), legendre);
     m_coeff_yz = fitter.coefficients();
 
 }

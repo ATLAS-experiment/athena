@@ -36,7 +36,9 @@ namespace MuonCalib {
         }
         m_sp3 = std::make_unique<TSpline3>("Rt Relation", x.data(), y.data(), nPar() / 2, "b2e2", 0, 0);
     }  // end RtSpline::_init
-
+    double RtSpline::tBinWidth() const {
+        return m_sp3->GetDelta();
+    }
     double RtSpline::radius(double t) const {
         // check for t_min and t_max
         if (t > m_sp3->GetXmax()) return m_sp3->Eval(m_sp3->GetXmax());

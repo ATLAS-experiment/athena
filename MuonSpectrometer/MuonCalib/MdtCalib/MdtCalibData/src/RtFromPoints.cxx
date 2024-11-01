@@ -57,10 +57,8 @@ RtChebyshev RtFromPoints::getRtChebyshev(const std::vector<SamplePoint> &sample_
     //////////////////////////////////////////////////
     // PERFORM A CHEBYSHEV FIT TO THE SAMPLE POINTS //
     //////////////////////////////////////////////////
-    if (fitter.fit_parameters(my_points, 1, sample_points.size(), &chebyshev)) {
-        MsgStream log(Athena::getMessageSvc(), "RtFromPoints");
-        log << MSG::WARNING << "Class RtFromPoints, method getRtChebyshev: Could not determine Chebyshev coefficients." << endmsg;
-    }
+    fitter.fit_parameters(my_points, 1, sample_points.size(), chebyshev);
+       
     for (unsigned int k = 0; k < order + 1; k++) { rt_param[k + 2] = fitter.coefficients()[k]; }
 
     //////////////////////////////////////////////////////////////

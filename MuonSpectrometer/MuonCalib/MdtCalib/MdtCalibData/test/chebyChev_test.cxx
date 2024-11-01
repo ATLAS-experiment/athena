@@ -12,7 +12,7 @@ constexpr double cutOff(const double value, const double cut) {
     return std::abs(value)> cut ? value : 1.;
 }
 int main(){
-    constexpr unsigned maxOrder = 15;
+    constexpr unsigned maxOrder = 16;
     constexpr double h = 1.e-7;
     for (unsigned int o = 0 ; o <= maxOrder ; ++o) {
         for(unsigned step = 0; step <= 200; ++step) {

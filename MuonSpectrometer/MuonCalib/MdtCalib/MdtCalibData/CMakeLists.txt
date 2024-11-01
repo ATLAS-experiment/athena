@@ -23,6 +23,8 @@ foreach(_theTestSource ${tests})
     get_filename_component(_theTest ${_theTestSource} NAME_WE)
     atlas_add_test( ${_theTest} SOURCES ${_theTestSource}
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} 
-                   LINK_LIBRARIES  ${ROOT_LIBRARIES} MuonCalibMath 
-                    POST_EXEC_SCRIPT nopost.sh)
+                   LINK_LIBRARIES  ${ROOT_LIBRARIES} MuonCalibMath MdtCalibData
+                   PROPERTIES TIMEOUT 900
+                   PRIVATE_WORKING_DIRECTORY
+                   POST_EXEC_SCRIPT nopost.sh)
 endforeach()

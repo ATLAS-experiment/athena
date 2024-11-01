@@ -84,5 +84,6 @@ namespace MuonCalib{
 
     double RtRelationLookUp::tLower() const { return m_t_min; }
     double RtRelationLookUp::tUpper() const { return m_t_min + m_bin_size * rtBins(); }
+    double RtRelationLookUp::tBinWidth() const {return m_bin_size; }
 }
 

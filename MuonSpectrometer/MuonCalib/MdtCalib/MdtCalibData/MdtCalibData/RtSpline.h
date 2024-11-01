@@ -81,6 +81,7 @@ namespace MuonCalib {
         //!< get the lower drift-time bound
         virtual double tUpper() const override final;
         //!< get the upper drift-time bound
+        virtual double tBinWidth() const override final;
     };
 }  // namespace MuonCalib
 

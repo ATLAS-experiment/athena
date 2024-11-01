@@ -7,8 +7,8 @@
 #include "MdtCalibR4/TrSqrt.h"
 #include "MdtCalibR4/RtResolutionSqrt.h"
 #include "MdtCalibData/MdtRtRelation.h"
-#include "MdtCalibData/RootRtRelation.h"
 #include "MdtCalibData/MdtFullCalibData.h"
+#include "MdtCalibData/RtChebyshev.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
 using RegionGranularity = MuonCalib::MdtCalibDataContainer::RegionGranularity;
@@ -48,12 +48,12 @@ StatusCode MdtCalibDbAlg::execute(const EventContext& ctx) const {
 StatusCode MdtCalibDbAlg::loadRt(MuonCalib::MdtCalibDataContainer& writeHandle) const {
     ATH_MSG_DEBUG("loadRt " << name());
 
-    MuonCalib::CalibFunc::ParVec rtPars{-10000, 10000, 1.};
+    MuonCalib::CalibFunc::ParVec rtPars{-10000, 10000, 1., 2.};
     MuonCalib::CalibFunc::ParVec resoPars{-10000, 10000.};
 
    
     //Loop over RT regions and store the RT in each
-    auto rtRelRegion{std::make_unique<MuonCalib::RootRtRelation>(rtPars)};
+    auto rtRelRegion{std::make_unique<MuonCalib::RtChebyshev>(rtPars)};
     auto rtResRegion{std::make_unique<MuonCalibR4::RtResolutionSqrt>(resoPars)};
     auto trRelRegion{std::make_unique<MuonCalibR4::TrSqrt>(*rtRelRegion)};
     RtRelationPtr MdtRt = std::make_unique<MuonCalib::MdtRtRelation>(std::move(rtRelRegion), std::move(rtResRegion), std::move(trRelRegion), 0.);

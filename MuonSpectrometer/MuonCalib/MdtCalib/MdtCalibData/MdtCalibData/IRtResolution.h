@@ -12,7 +12,7 @@ namespace MuonCalib {
 
     class IRtResolution : public CalibFunc {
     public:
-        explicit IRtResolution(const CalibFunc::ParVec& vec) : CalibFunc(vec){};
+        using CalibFunc::CalibFunc;
         virtual ~IRtResolution() = default;
         virtual std::string typeName() const override { return "IRtResolution"; }
 
