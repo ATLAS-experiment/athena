@@ -79,12 +79,6 @@ class MdtHitIdHelper;
   The EOL/EOS chambers are presumably built with tubes bent to conform to the wire sag-
   so this code does not introduce wire-sag induced RT distortions for these chambers
 
-
-
-  This drift time delta is turned on/off via  m_useWireSagGeom for the geomtrical wiresag effect
-  It operates on all end cap chambers (EIL/EIS; EML/EMS EOL/EOS )
-
-
   -DSL----------------------------------------------------------------------------
 
 */
@@ -165,10 +159,6 @@ private:
     Gaudi::Property<bool> m_useTof{this, "UseTof", true, "Option for the tof calculation"};
     Gaudi::Property<bool> m_useAttenuation{this, "UseAttenuation", false, ""};
     Gaudi::Property<bool> m_useProp{this, "UseProp", true, ""};
-
-    // WIRE SAG
-    Gaudi::Property<bool> m_useWireSagGeom{this, "UseWireSagGeom", false, "Option for the wire sagitta correction"};
-    Gaudi::Property<bool> m_useWireSagRT{this, "UseWireSagRT", false, "Option for the wire sagitta correction"};
 
     // TWIN TUBE
     Gaudi::Property<bool> m_useTwin{this, "UseTwin", false, ""};
