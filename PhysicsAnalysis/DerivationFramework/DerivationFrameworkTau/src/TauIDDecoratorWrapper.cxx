@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkTau/TauIDDecoratorWrapper.h"
@@ -50,6 +50,18 @@ namespace DerivationFramework {
     // initialize read handle key
     ATH_CHECK( m_tauContainerKey.initialize() );
 
+    // declare decorations to the scheduler
+    for (const std::string& score : m_scores) {
+      m_scoreDecorKeys.emplace_back(m_tauContainerKey.key() + "." + score);
+    }
+    for (const std::string& WP : m_WPs) {
+      m_WPDecorKeys.emplace_back(m_tauContainerKey.key() + "." + WP);
+    }
+
+    ATH_CHECK( m_scoreDecorKeys.initialize() );
+    ATH_CHECK( m_WPDecorKeys.initialize() );
+    ATH_CHECK( m_trackWidthKey.initialize() );
+
     return StatusCode::SUCCESS;
   }
 
@@ -60,15 +72,17 @@ namespace DerivationFramework {
 
   StatusCode TauIDDecoratorWrapper::addBranches() const
   {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
     // retrieve tau container
-    SG::ReadHandle<xAOD::TauJetContainer> tauJetsReadHandle(m_tauContainerKey);
+    SG::ReadHandle<xAOD::TauJetContainer> tauJetsReadHandle(m_tauContainerKey, ctx);
     if (!tauJetsReadHandle.isValid()) {
       ATH_MSG_ERROR ("Could not retrieve TauJetContainer with key " << tauJetsReadHandle.key());
       return StatusCode::FAILURE;
     }
     const xAOD::TauJetContainer* tauContainer = tauJetsReadHandle.cptr();
 
-  static const SG::AuxElement::Decorator<float> acc_trackWidth("trackWidth");
+  SG::WriteDecorHandle<xAOD::TauJetContainer, float> dec_trackWidth (m_trackWidthKey, ctx);
 
   for (const auto tau : *tauContainer) {
     float tauTrackBasedWidth = 0;
@@ -90,7 +104,18 @@ namespace DerivationFramework {
       tauTrackBasedWidth = sumWeightedDR / ptSum;
     }
 
-    acc_trackWidth(*tau) = tauTrackBasedWidth;
+    dec_trackWidth(*tau) = tauTrackBasedWidth;
+  }
+
+  std::vector<SG::WriteDecorHandle<xAOD::TauJetContainer, float> > scoreDecors;
+  scoreDecors.reserve (m_scores.size());
+  for (const SG::WriteDecorHandleKey<xAOD::TauJetContainer>& k : m_scoreDecorKeys) {
+    scoreDecors.emplace_back (k, ctx);
+  }
+  std::vector<SG::WriteDecorHandle<xAOD::TauJetContainer, char> > WPDecors;
+  WPDecors.reserve (m_WPs.size());
+  for (const SG::WriteDecorHandleKey<xAOD::TauJetContainer>& k : m_WPDecorKeys) {
+    WPDecors.emplace_back (k, ctx);
   }
 
     // create shallow copy
@@ -118,11 +143,13 @@ namespace DerivationFramework {
 
       // copy over the relevant decorations (scores and working points)
       const xAOD::TauJet* xTau = tauContainer->at(tau->index());
-      for (const std::string& score : m_scores) {
-	xTau->auxdecor<float>(score) = tau->auxdataConst<float>(score);
+      for (SG::WriteDecorHandle<xAOD::TauJetContainer, float>& dec : scoreDecors) {
+        SG::ConstAccessor<float> scoreAcc (dec.auxid());
+        dec(*xTau) = scoreAcc(*tau);
       }
-      for (const std::string& WP : m_WPs) {
-	xTau->auxdecor<char>(WP) = tau->auxdataConst<char>(WP);
+      for (SG::WriteDecorHandle<xAOD::TauJetContainer, char>& dec : WPDecors) {
+        SG::ConstAccessor<char> WPAcc (dec.auxid());
+        dec(*xTau) = WPAcc(*tau);
       }
     }
 

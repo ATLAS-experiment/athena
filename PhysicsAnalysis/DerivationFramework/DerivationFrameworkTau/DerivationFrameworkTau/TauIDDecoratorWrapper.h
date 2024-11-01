@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORKTAU_TAUIDDECORATORWRAPPER_H
@@ -10,6 +10,7 @@
 #include "AsgTools/ToolHandleArray.h"
 #include "tauRecTools/TauRecToolBase.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "xAODTau/TauJetContainer.h"
 
 #include <string>
@@ -25,12 +26,16 @@ namespace DerivationFramework {
     public:
       TauIDDecoratorWrapper(const std::string& t, const std::string& n, const IInterface* p);
 
-      StatusCode initialize() override;
-      StatusCode finalize() override;
+      virtual StatusCode initialize() override;
+      virtual StatusCode finalize() override;
       virtual StatusCode addBranches() const override;
 
     private:
       SG::ReadHandleKey<xAOD::TauJetContainer> m_tauContainerKey { this, "TauContainerName", "TauJets", "Input tau container key" };
+      SG::WriteDecorHandleKeyArray<xAOD::TauJetContainer> m_scoreDecorKeys{ this, "ScoreDecorationKeys", {}, "List of score decorations added to the tau"};
+      SG::WriteDecorHandleKeyArray<xAOD::TauJetContainer> m_WPDecorKeys{ this, "WPDecorationKeys", {}, "List of WP decorations added to the tau"};
+      SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_trackWidthKey{ this, "TrackWidthKey", m_tauContainerKey, "trackWidth", "Track width decoration name"};
+
       ToolHandleArray<TauRecToolBase> m_tauIDTools { this, "TauIDTools", {}, "" };
       bool m_doEvetoWP = false;
       std::vector<std::string> m_scores;
