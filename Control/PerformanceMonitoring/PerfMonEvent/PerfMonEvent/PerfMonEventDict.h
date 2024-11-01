@@ -7,11 +7,8 @@
 #ifndef PERFMONEVENT_PERFMONEVENTDICT_H
 #define PERFMONEVENT_PERFMONEVENTDICT_H
 
-#include "PerfMonEvent/PyStore.h"
-#include "PerfMonEvent/PyChrono.h"
+
 #include "PerfMonEvent/DataModel.h"
-#include "PerfMonEvent/MemStatsHooks.h"
-#include "PerfMonEvent/MallocStats.h"
 
 /* POSIX includes */
 #include <time.h>
