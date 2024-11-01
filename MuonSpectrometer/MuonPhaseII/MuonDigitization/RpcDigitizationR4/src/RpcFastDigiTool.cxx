@@ -230,7 +230,7 @@ namespace MuonR4 {
             ATH_MSG_VERBOSE("Reject hit due to dead map constraint");
             return false;
         }
-
+        ATH_MSG_VERBOSE("Digitize hit "<<m_idHelperSvc->toString(digitId)<<" located at: "<<Amg::toString(locHitPos));
         /// Check whether the digit is actually efficient
         const bool effiSignal1 = !effiMap ||  effiMap->getEfficiency(gasGapId) >= CLHEP::RandFlat::shoot(rndEngine,0., 1.);
         const bool effiSignal2 = !effiMap ||  effiMap->getEfficiency(gasGapId) >= CLHEP::RandFlat::shoot(rndEngine,0., 1.);

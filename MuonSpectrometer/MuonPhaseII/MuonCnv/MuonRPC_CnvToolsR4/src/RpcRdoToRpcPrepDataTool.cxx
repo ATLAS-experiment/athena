@@ -121,13 +121,14 @@ namespace MuonR4{
                 xAOD::MeasMatrix<2> lCov{xAOD::MeasMatrix<2>::Identity()};
 
                 lPos[0] = stripLocX;
-                lPos[1] = m_propagationVelocity *(rdoPairs[0]->time() - rdoPairs[1]->time());
+                lPos[1] = -0.5*m_propagationVelocity *(rdoPairs[0]->time() - rdoPairs[1]->time());
                 lCov(0,0) = stripCovX;
                 lCov(1,1) = M_SQRT1_2 * m_propagationVelocity* m_stripTimeResolution;
                 /// Hash is overwritten by the setMeasValues method
                 measurement->setMeasurement<2>(0, lPos, lCov);
                 // CheckVector2D stripPos
                 setMeasValues(measurement, rdoPairs[0], offId);
+                ATH_MSG_VERBOSE("Measurement "<<m_idHelperSvc->toString(offId)<<" "<<lPos.x()<<", "<<lPos.y());
                 continue;
             }
 
