@@ -170,9 +170,7 @@ namespace ActsTrk
         // some dummy implementations for vector properties:
         std::size_t size() const {return 0u; }
         bool empty() const {return true; }
-        auto operator[](std::size_t idx) { return value().at(idx);}
-        auto begin() const {return value().end(); }
-        auto end() const {return value().end(); }
+        auto operator[](std::size_t /*idx*/) { throw std::out_of_range("DummyProperty");}
 
         // Delegate operator() to the value
         template <class... Args>
