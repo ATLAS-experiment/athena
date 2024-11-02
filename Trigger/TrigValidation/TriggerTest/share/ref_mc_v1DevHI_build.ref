@@ -2481,9 +2481,13 @@ HLT_mb_sp_vpix60_hi_FgapAC5_L12eTAU1_VjTE200_UNPAIRED_NONISO:
   eventCount: 0
 HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI-2eEM1_VjTE200:
   eventCount: 0
+HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI-2eEM1_VjTE200_EMPTY:
+  eventCount: 0
 HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI-2eEM1_VjTE200_GAP_AANDC:
   eventCount: 0
 HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI-2eTAU1_VjTE200:
+  eventCount: 0
+HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI-2eTAU1_VjTE200_EMPTY:
   eventCount: 0
 HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI-2eTAU1_VjTE200_GAP_AANDC:
   eventCount: 0
