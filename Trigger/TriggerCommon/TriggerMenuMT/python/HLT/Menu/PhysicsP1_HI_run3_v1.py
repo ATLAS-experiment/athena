@@ -413,6 +413,8 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_mb_sptrk_hi_FgapAC5_L12eTAU1_VjTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_sptrk_hi_FgapAC5_L1eTAU1_TRT_VjTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_L1eEM9_VjTE200_EMPTY', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI-2eEM1_VjTE200_EMPTY', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup+['PS:NoHLTRepro']),
+        ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI-2eTAU1_VjTE200_EMPTY', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup+['PS:NoHLTRepro']),
 
         #----------- UPC ditaus - Phase-1
         #primary

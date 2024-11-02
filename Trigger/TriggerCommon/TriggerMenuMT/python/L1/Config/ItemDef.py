@@ -218,6 +218,9 @@ class ItemDef:
         MenuItem('L1_2eEM9_EMPTY'       ).setLogic(d.eEM9.x(2) & cosmiccond ).setTriggerType( TT.calo )
         MenuItem('L1_eEM9_UNPAIRED_ISO' ).setLogic(d.eEM9 & unpaired_isocond).setTriggerType( TT.calo )
         MenuItem('L1_eEM15_EMPTY'       ).setLogic(d.eEM15 & cosmiccond     ).setTriggerType( TT.calo )
+        # ATR-29025
+        MenuItem('L1_DPHI-2eEM1_VjTE200_EMPTY'  ).setLogic(d.TOPO_23DPHI32_2eEM1s  & Not(d.jTE200) & cosmiccond ).setTriggerType( TT.calo )
+        MenuItem('L1_DPHI-2eTAU1_VjTE200_EMPTY' ).setLogic(d.TOPO_23DPHI32_2eTAU1s & Not(d.jTE200) & cosmiccond ).setTriggerType( TT.calo )
 
         MenuItem('L1_eEM22A'    ).setLogic( d.eEM22A     & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eEM22C'    ).setLogic( d.eEM22C     & physcond).setTriggerType( TT.calo )
