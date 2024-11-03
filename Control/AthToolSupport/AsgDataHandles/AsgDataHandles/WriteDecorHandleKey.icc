@@ -1,6 +1,6 @@
 // $Id$
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/WriteDecorHandleKey.h
@@ -63,14 +63,38 @@ WriteDecorHandleKey<T>::WriteDecorHandleKey (const std::string& key /*= ""*/) :
  * the store named by @c storeName is used.
  */
 template <class T>
-template <class OWNER, class K>
+template <class OWNER>
 inline
 WriteDecorHandleKey<T>::WriteDecorHandleKey( OWNER* owner,
                                              const std::string& name,
-                                             const K& key /*={}*/,
+                                             const std::string& key /*={}*/,
                                              const std::string& doc /*=""*/)
   : Base (key),
     m_contHandleKey (contKeyFromKey (key)/*, StoreID::storeName(StoreID::EVENT_STORE) */)
+{
+  owner->declareProperty(name, *this, doc);
+}
+
+
+/**
+ * @brief auto-declaring Property Constructor.
+ * @param owner Owning component.
+ * @param name name of the Property
+ * @param contKey VarHandleKey of the associated container
+ * @param decorKey name The decoration name.
+ * @param doc Documentation string.
+ *
+ * will associate the named Property with this WDHK via declareProperty
+ */
+template <class T>
+template <class OWNER>
+WriteDecorHandleKey<T>::WriteDecorHandleKey (OWNER* owner,
+                                             const std::string& name,
+                                             const VarHandleKey& contKey,
+                                             const std::string& decorKey,
+                                             const std::string& doc)
+ : Base (makeContDecorKey (contKey, decorKey)),
+   m_contHandleKey (contKey.key()/*, StoreID::storeName(StoreID::EVENT_STORE)*/)
 {
   owner->declareProperty(name, *this, doc);
 }

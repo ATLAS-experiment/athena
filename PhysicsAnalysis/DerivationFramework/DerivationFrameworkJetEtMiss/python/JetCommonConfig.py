@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Contains the configuration for common jet reconstruction + decorations
@@ -146,6 +146,29 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
                                                 TauLabel=tauLabel,
                                                 BJetLabel=bJetLabel)
     acc.addEventAlgo(algOR)
+
+    # Explictly lock the decorations produced by overlap removal.
+    # This is problematic to do inside the overlap removal algorithm
+    # itself, because we schedule two of them above --- the second
+    # overwriting most of the decorations produced by the first.
+    # This is not MT-safe.
+    lockOR = CompFactory.DerivationFramework.LockDecorations \
+        ('OverlapRemovalLockDecorAlg',
+         Decorations = [
+             'Electrons.selected',
+             'Electrons.' + outputLabel,
+             'Muons.selected',
+             'Muons.' + outputLabel,
+             'Photons.selected',
+             'Photons.' + outputLabel,
+             'AntiKt4EMPFlowJets.selected',
+             'AntiKt4EMPFlowJets.' + outputLabel,
+             'AntiKt4EMTopoJets.selected',
+             'AntiKt4EMTopoJets.' + outputLabel,
+             'TauJets.selected',
+             'TauJets.' + outputLabel,
+         ])
+    acc.addEventAlgo(lockOR)
 
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     from DerivationFrameworkMuons.MuonsToolsConfig import MuonJetDrToolCfg

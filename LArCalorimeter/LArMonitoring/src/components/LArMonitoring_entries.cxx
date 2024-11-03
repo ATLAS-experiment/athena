@@ -8,6 +8,7 @@
 #include "../LArHVCorrectionMonAlg.h"
 #include "../LArCosmicsMonAlg.h"
 #include "../LArDigitalTriggMonAlg.h"
+#include "../LArSCvsRawChannelMonAlg.h"
 #include "../LArNoiseCorrelationMonAlg.h"
 #include "../LArCalibPedMonAlg.h"
 #include "../LArCoherentNoisefractionMonAlg.h"

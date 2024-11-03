@@ -181,9 +181,9 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
 
     inThrFile = InDir + THRscan + ".root";
     inTotFile = InDir + scan + ".root";
-    rodPath = inTotFile + ":/" + scan;
+    rodPath = inTotFile + ":/" + scan.substr(scan.find("_")+1);
     inTotFileAux = InDir + scanLowCharge + ".root";
-    rodPathAux = inTotFileAux + ":/" + scanLowCharge;
+    rodPathAux = inTotFileAux + ":/" + scanLowCharge.substr(scanLowCharge.find("_")+1);
 
     // historical record for run2 fomat
     if (!run3)
@@ -680,14 +680,14 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
             for (int c = 0; c < nchargeIBL; c++)
             {
                 TString totHistDirPath = modName + "/" + totHistName + "/A0/B0/C";
-                totHistDirPath += c;
+                totHistDirPath += std::to_string(c);
                 
                 TDirectoryFile* totHistDir(static_cast<TDirectoryFile*> (rodDir->Get(totHistDirPath)));
                 if(!totHistDir){
                     std::cout<<" Missing totHistDir in : " << totHistDirPath << endl;
                 }
                 
-                std::unique_ptr<TH2D> h2dTot(static_cast<TH2D*> ((static_cast<TKey*>(totHistDir->GetListOfKeys()->First()))->ReadObj()));
+                std::unique_ptr<TH2F> h2dTot(static_cast<TH2F*> ((static_cast<TKey*>(totHistDir->GetListOfKeys()->First()))->ReadObj()));
                 h2dTot->SetDirectory(0);
                 
                 TDirectoryFile* totHistDirAux(static_cast<TDirectoryFile*>(rodDirAux->Get(totHistDirPath)));
@@ -697,13 +697,14 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
                     logout << " Missing totHistDir in : " << totHistDirPath << endl;
                 }
                 
-                unique_ptr<TH2D> h2dTotAux (static_cast<TH2D*> (((TKey *)totHistDirAux->GetListOfKeys()->First())->ReadObj()));    
+                unique_ptr<TH2F> h2dTotAux (static_cast<TH2F*> ((static_cast<TKey*>(totHistDirAux->GetListOfKeys()->First())->ReadObj())));    
                 h2dTotAux->SetDirectory(0);
+
                 
                 TString totSigHistDirPath = modName + "/" + totSigHistName + "/A0/B0/C";
-                totSigHistDirPath += c;
-                TDirectoryFile* totSigHistDir ((TDirectoryFile *)rodDir->Get(totSigHistDirPath));
-                unique_ptr<TH2D> h2dTotSig (static_cast<TH2D*> ((static_cast<TKey*>(totSigHistDir->GetListOfKeys()->First()))->ReadObj()));
+                totSigHistDirPath += std::to_string(c);
+                TDirectoryFile* totSigHistDir (static_cast<TDirectoryFile*>(rodDir->Get(totSigHistDirPath)));
+                unique_ptr<TH2F> h2dTotSig (static_cast<TH2F*> ((static_cast<TKey*>(totSigHistDir->GetListOfKeys()->First()))->ReadObj()));
                 h2dTotSig->SetDirectory(0);
                 
                 // Now one fill the calib-data from all pixles as basics.
@@ -752,8 +753,10 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
                         if (c > 19)
                             filltot = 0.5 * (totAux + tot + 2.);
 
-                        if (filltot > 0.)
+                        if (filltot > 0.){
                             h2d_XchrgYtot[circ]->Fill(chrgAbaciIBL[c], filltot, 1.);
+                        }
+                            
 
                         float err = h2dTotSig->GetBinContent(ieta + 1, iphi + 1);
                         h2d_XchrgYToTSig[circ]->Fill(chrgAbaciIBL[c], err, 1.);
@@ -850,6 +853,7 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
 
                         TotSigArray[idxFE][c] = 0.5 * (TotSigArray[idxFE - 1][c] + TotSigArray[idxFE - 2][c]);
                         TotSigErrArray[idxFE][c] = 0.5 * (TotSigErrArray[idxFE - 1][c] + TotSigErrArray[idxFE - 2][c]);
+
                     }
                 }
                 // Charges distribution along 16 bins ToT
@@ -891,9 +895,6 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
                     h1d_totSprdAll[b - 1]->Fill(err);
                 }
 #endif
-
-                // 
-                // 
 
                 //  try a correction upon dumb FE
                 if (dumbFE > 5)

@@ -3,8 +3,10 @@
 */
 
 #include "../jFEXCondAlgo.h"
+#include "../gFEXCondAlgo.h"
 
 using namespace LVL1;
 
 DECLARE_COMPONENT( jFEXCondAlgo )
+DECLARE_COMPONENT( gFEXCondAlgo )
 

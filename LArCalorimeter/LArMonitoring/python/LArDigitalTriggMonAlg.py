@@ -178,11 +178,15 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
             topPath=""
         else:
             topPath="PerPartition/"
-            Part = part[:-2]
+            Side = part[-1]
+            if "HEC" in part:
+                Sampling = "0"
+                Part = part[:-1]
+            else:
+                Sampling = part[-2]
+                Part = part[:-2]
             if Part == "FCAL": 
                 Part = "FCal"
-            Side = part[-1]
-            Sampling = part[-2]
             if Sampling == "P": 
                 Sampling = "0"
             partxbins=lArDQGlobals.SuperCell_Variables["etaRange"][Part][Side][Sampling]
@@ -453,7 +457,7 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
             
             if not flags.Common.isOnline: continue   # Skip the remaining histos if we are running offline
             #### HERE - plots which should only be booked for the nominal selection
-            if thisSel !=  "passSCNom": continue
+            if thisSel !=  "passSCNom1": continue
 
             partGroup_sc.defineHistogram('SC_part_eta,SC_part_phi,SC_part_et_onl;Coverage_Et_Onl_'+thisSel,
                                          title='SC Energy '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',

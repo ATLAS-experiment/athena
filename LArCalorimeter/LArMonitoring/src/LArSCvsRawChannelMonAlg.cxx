@@ -21,8 +21,21 @@ StatusCode LArSCvsRawChannelMonAlg::initialize() {
   ATH_CHECK(m_scidtool.retrieve());
   ATH_CHECK(m_bcMask.buildBitMask(m_problemsToMask, msg()));
   ATH_CHECK(m_caloBCIDAvg.initialize(SG::AllowEmpty));
+
+  ATH_MSG_INFO("Building tool map");
+  m_toolmapPerLayer = Monitored::buildToolMap<int>( m_tools, "LArSCvsRawChannelMon", m_layerNames);
+  
   return AthMonitorAlgorithm::initialize();
 }
+
+struct MonValues {
+  float raw_eta;
+  float raw_phi;
+  float scEne;
+  float eneSum;
+  float eneFrac;
+};
+
 
 StatusCode LArSCvsRawChannelMonAlg::fillHistograms(const EventContext& ctx) const {
 
@@ -86,9 +99,11 @@ StatusCode LArSCvsRawChannelMonAlg::fillHistograms(const EventContext& ctx) cons
 
   std::vector<std::pair<Monitored::Scalar<float>, Monitored::Scalar<float> > > monVars;
   for (int p = 0; p < MAXPARTITIONS; ++p) {
-    monVars.emplace_back(Monitored::Scalar<float>("SCEne_" + m_partitionNames.value()[p], 0.0),
+    monVars.emplace_back(Monitored::Scalar<float>("scEne_" + m_partitionNames.value()[p], 0.0),
                          Monitored::Scalar<float>("eneSum_" + m_partitionNames.value()[p], 0.0));
   }
+
+  std::vector<std::vector<MonValues>> MonValueVec(m_layerNames.size());
 
   for (const LArRawSC* rawSC : *scHdl) {
     const std::vector<unsigned short>& bcids = rawSC->bcids();
@@ -113,12 +128,12 @@ StatusCode LArSCvsRawChannelMonAlg::fillHistograms(const EventContext& ctx) cons
       continue;
     Identifier off_id = cablingSCHdl->cnvToIdentifier(rawSC->hardwareID());
 
+
     const int iPart = getPartition(off_id);
     if (iPart < 0) {
       ATH_MSG_ERROR("Got unkonwn partition number " << iPart);
       return StatusCode::FAILURE;
     }
-
     const std::vector<Identifier>& regularIDs = m_scidtool->superCellToOfflineID(off_id);
     std::set<HWIdentifier> hwids;
     for (const Identifier& id : regularIDs) {
@@ -164,12 +179,49 @@ StatusCode LArSCvsRawChannelMonAlg::fillHistograms(const EventContext& ctx) cons
                                              << "]=" << scEne << " Sum of RC energies=" << eneSum);
     }
 
+    float eneFrac = 0;
+    if ( eneSum != 0 and scEne != 0 ){
+      eneFrac = scEne / eneSum; 
+    }
+    
+    
+    const float eta = scDDE->eta_raw();
+    const float phi = scDDE->phi_raw();
+    const int calosample=scDDE->getSampling();
+    const unsigned iLyrNS=m_caloSamplingToLyrNS[calosample];
+    const int side = m_onlineID->pos_neg(rawSC->hardwareID());
+    const unsigned iLyr=iLyrNS*2+side;
+    
+    auto& lvaluemap = MonValueVec[iLyr];
+    
+    ATH_MSG_DEBUG("Chan "<<rawSC->hardwareID()<<" "<<rawSC->SourceId()<<" "<<m_onlineID->channel_name(rawSC->hardwareID())<<" iPart "<<iPart<<" iLyrNS "<<iLyrNS<<" side "<<side<<" iLyr "<<iLyr<<" "<<m_layerNames[iLyr]<<" MAXP "<<MAXPARTITIONS<<" MAXL "<<MAXLYRNS);
+    
+    
     auto& monPair = monVars[iPart];
     monPair.first = scEne;
     monPair.second = eneSum;
-
-    fill(m_MonGroupName, monPair.first, monPair.second);
+    
+    
+    lvaluemap.emplace_back(eta, phi, scEne, eneSum, eneFrac);
+    
+    
+    fill(m_MonGroupName, monPair.first, monPair.second); //, monPairLyr.first, monPairLyr.second);
   }
+  
+  
+  for (size_t ilayer = 0; ilayer < MonValueVec.size(); ++ilayer) {
+    const auto& tool = MonValueVec[ilayer];
+    auto part_eta = Monitored::Collection("part_eta",tool,[](const auto& v){return v.raw_eta;});
+    auto part_phi = Monitored::Collection("part_phi",tool,[](const auto& v){return v.raw_phi;});
+    auto part_scEne = Monitored::Collection("part_scEne",tool,[](const auto& v){return v.scEne;});
+    auto part_eneSum = Monitored::Collection("part_eneSum",tool,[](const auto& v){return v.eneSum;});
+    auto part_eneFrac = Monitored::Collection("part_eneFrac",tool,[](const auto& v){return v.eneFrac;});
+    
+    fill(m_tools[m_toolmapPerLayer.at(m_layerNames[ilayer])],
+	 part_eta, part_phi, part_scEne, part_eneSum, part_eneFrac);
+    
+  }
+    
 
   return StatusCode::SUCCESS;
 }
