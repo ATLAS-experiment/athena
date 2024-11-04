@@ -126,6 +126,8 @@ namespace LVL1
       /** Get extra noise cut with disabled channel */
       bool disabledChannel(const L1CaloCoolChannelId& channelId, unsigned int& noiseCut) const;
 
+      // calculate the LUT offset from DB parameters
+      unsigned int getLutOffset(const double &pedMean, const unsigned int &firStartBit, const std::vector<short int> &firCoeff, const unsigned int &lutSlope, const unsigned int &lutStrategy) const;
 
       /// Id managers
       const CaloIdManager* m_caloMgr;

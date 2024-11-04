@@ -221,7 +221,6 @@ void L1TriggerTowerToolRun3::simulateChannel(const xAOD::TriggerTower& tt, std::
 
   //If we have 80 MHz readout, we need to extract the 40 MHz samples. The central 80 MHz sample is always a 40 MHz sample. We use the cool database (runParameters folder) to understand if we are in 80MHz readout
   
-  
   SG::ReadCondHandle<L1CaloRunParametersContainer> runParameters( m_runParametersContainer);
   unsigned int readoutConfigID   = runParameters->runParameters(1)->readoutConfigID(); 
   ATH_MSG_DEBUG("RunParameters:: readoutConfigID " <<  readoutConfigID);
@@ -689,7 +688,6 @@ void L1TriggerTowerToolRun3::cpLut(const std::vector<int> &fir, const L1CaloCool
   int startBit = 0;
   int strategy = 0;
   int offset   = 0;
-  double offsetReal = 0;
   int slope    = 0;
   int cut      = 0;
   unsigned short scale_menu = 0;
@@ -717,17 +715,11 @@ void L1TriggerTowerToolRun3::cpLut(const std::vector<int> &fir, const L1CaloCool
       auto l1Menu = getL1Menu(ctx);
       scale_menu = l1Menu->thrExtraInfo().EM().emScale(); // Retrieve scale param from menu
     
-      
       for( auto &coeffs :  *hwCoeffs) { 
 	hwCoeffSum += coeffs;
       }
-      if (strategy == 0){
-        offsetReal = pedMean * hwCoeffSum / pow(2.,startBit);
-      }
-      else{
-	offsetReal = pedMean * static_cast<double>(hwCoeffSum) * static_cast<double>(slope) / pow(2.,static_cast<double>(startBit)) - static_cast<double>(slope)/2.;
-      }
-      offset = static_cast<unsigned short>( offsetReal < 0. ? 0 : offsetReal + 0.5 );
+      
+      offset = this->getLutOffset(pedMean, startBit, *hwCoeffs, slope, strategy);
 
       ATH_MSG_DEBUG( "::cpLut: Offset: offset/strategy/pedMean/firCoeffSum/startBit/slope: "
 		       << offset << " " << strategy << " " << " " << pedMean << " " << hwCoeffSum << " " << startBit << " " << slope );
@@ -764,7 +756,6 @@ void L1TriggerTowerToolRun3::jepLut(const std::vector<int> &fir, const L1CaloCoo
   int startBit = 0;
   int strategy   = 0;
   int offset     = 0;
-  double offsetReal = 0;
   int slope      = 0;
   int cut        = 0;
   unsigned short scale_db   = 0;
@@ -813,13 +804,8 @@ void L1TriggerTowerToolRun3::jepLut(const std::vector<int> &fir, const L1CaloCoo
       for( auto &coeffs :  *hwCoeffs) { 
 	 hwCoeffSum += coeffs;
       }
-      if (strategy == 0){
-        offsetReal = pedMean * hwCoeffSum / pow(2.,startBit);
-      }
-      else{
-        offsetReal = pedMean * static_cast<double>(hwCoeffSum) * static_cast<double>(slope) / pow(2.,static_cast<double>(startBit)) - static_cast<double>(slope)/2.;
-      }
-      offset = static_cast<unsigned short>( offsetReal < 0. ? 0 : offsetReal + 0.5 );
+
+      offset = this->getLutOffset(pedMean, startBit, *hwCoeffs, slope, strategy);
 
       ATH_MSG_VERBOSE( "::jepLut: Offset: offset/strategy/pedMean/firCoeffSum/startBit/slope: "
 		       << offset << " " << strategy << " " << " " << pedMean << " " << hwCoeffSum << " " << startBit << " " << slope );
@@ -1118,7 +1104,6 @@ void L1TriggerTowerToolRun3::cpLutParams(const L1CaloCoolChannelId& channelId, i
   startBit = 0;
   strategy = 0;
   offset   = 0;
-  double offsetReal = 0;
   slope    = 0;
   cut      = 0;
   pedValue = 0;
@@ -1126,6 +1111,7 @@ void L1TriggerTowerToolRun3::cpLutParams(const L1CaloCoolChannelId& channelId, i
   disabled = true;
   int hwCoeffSum = 0;
   const std::vector<short int>* hwCoeffs;
+
   
   if(!isRun2()) {
     // assert instead ?!
@@ -1149,13 +1135,8 @@ void L1TriggerTowerToolRun3::cpLutParams(const L1CaloCoolChannelId& channelId, i
       for( auto &coeffs :  *hwCoeffs) { 
 	hwCoeffSum += coeffs;
       }
-      if (strategy == 0){
-	offsetReal = pedMean * hwCoeffSum / pow(2.,startBit);
-      }
-      else{
-	offsetReal = pedMean * hwCoeffSum * slope / pow(2.,startBit) - slope/2.;
-      }
-      offset = static_cast<unsigned short>( offsetReal < 0. ? 0 : offsetReal + 0.5 );
+
+      offset  = this->getLutOffset(pedMean, startBit, *hwCoeffs, slope, strategy);
       
       ATH_MSG_VERBOSE( "::jepLutParams: Offset: offset/strategy/pedMean/firCoeffSum/startBit/slope: "
 		     << offset << " " << strategy << " " << " " << pedMean << " " << hwCoeffSum << " " << startBit << " " << slope );
@@ -1175,7 +1156,6 @@ void L1TriggerTowerToolRun3::jepLutParams(const L1CaloCoolChannelId& channelId, 
   startBit = 0;
   strategy = 0;
   offset   = 0;
-  double offsetReal = 0;
   slope    = 0;
   cut      = 0;
   pedValue = 0;
@@ -1205,13 +1185,8 @@ void L1TriggerTowerToolRun3::jepLutParams(const L1CaloCoolChannelId& channelId, 
       for( auto &coeffs :  *hwCoeffs) { 
 	hwCoeffSum += coeffs;
       }
-      if (strategy == 0){
-	offsetReal = pedMean * hwCoeffSum / pow(2.,startBit);
-      }
-      else{
-	offsetReal = pedMean * hwCoeffSum * slope / pow(2.,startBit) - slope/2.;
-      }
-      offset = static_cast<unsigned short>( offsetReal < 0. ? 0 : offsetReal + 0.5 );
+
+      offset = this->getLutOffset(pedMean, startBit, *hwCoeffs, slope, strategy);
       
       ATH_MSG_VERBOSE( "::jepLutParams: Offset: offset/strategy/pedMean/firCoeffSum/startBit/slope: "
 		       << offset << " " << strategy << " " << " " << pedMean << " " << hwCoeffSum << " " << startBit << " " << slope );
@@ -1510,7 +1485,31 @@ bool L1TriggerTowerToolRun3::isRun2() const
   return false;
 }
 
+unsigned int L1TriggerTowerToolRun3::getLutOffset(const double &pedMean, const unsigned int &firStartBit, const std::vector<short int> &firCoeff, const unsigned int &lutSlope, const unsigned int &lutStrategy) const
+{
+  unsigned int lutOffset = 0;
+  // essential to save in long long to avoid rounding errors
+  long long int lutOffsetLong = 0;
+  long long int lutSlopeLong = lutSlope;
+  long long int firStartBitLong = firStartBit;
+  long long int pedMeanLong = std::lround(pedMean * 10000.);
+  long long int firCoeffSum = 0;
+  
+  for (unsigned int i=0; i<firCoeff.size(); i++) {
+    firCoeffSum += firCoeff.at(i);
+  }
+  
+  if ( lutStrategy == 0 ) {
+    lutOffsetLong = ((pedMeanLong*firCoeffSum) >> firStartBitLong);
+  }
+  else {
+    lutOffsetLong = ((pedMeanLong*firCoeffSum*lutSlopeLong) >> firStartBitLong) - ((lutSlopeLong * 10000) >> 1);    
+  }
 
+  lutOffsetLong = (lutOffsetLong + (10000-1))/10000;
+  lutOffset = static_cast<unsigned int>( lutOffsetLong < 0 ? 0 : lutOffsetLong );
+  return lutOffset;
+}
 
 const TrigConf::L1Menu* L1TriggerTowerToolRun3::getL1Menu(const EventContext& ctx) const {
   const TrigConf::L1Menu* menu = nullptr;
