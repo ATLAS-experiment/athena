@@ -2,7 +2,7 @@
 #!/usr/bin/env python
 #========================================================================
 # DAOD_SUSY20.py
-# This defines DAOD_SUSY20, an unskimmed DAOD format for Run-2 and Run-3.
+# This defines DAOD_SUSY20, a skimmed DAOD format for Run-2 and Run-3.
 # It requires the flag SUSY20 in Derivation_tf.py
 #========================================================================
 
@@ -480,17 +480,20 @@ def SUSY20Cfg(flags):
 	# Run 2
 	if flags.Trigger.EDMVersion == 2:
 		from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-		AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SUSY20SlimmingHelper, 
-										OutputContainerPrefix = "TrigMatch_", 
-										TriggerList = SUSY20TriggerListsHelper.Run2TriggerNamesTau)
-		AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SUSY20SlimmingHelper, 
-										OutputContainerPrefix = "TrigMatch_",
-										TriggerList = SUSY20TriggerListsHelper.Run2TriggerNamesNoTau)
+		AddRun2TriggerMatchingToSlimmingHelper(
+			SlimmingHelper        = SUSY20SlimmingHelper, 
+			OutputContainerPrefix = "TrigMatch_", 
+			TriggerList           = SUSY20TriggerListsHelper.Run2TriggerNamesTau
+		)
+		AddRun2TriggerMatchingToSlimmingHelper(
+			SlimmingHelper        = SUSY20SlimmingHelper, 
+			OutputContainerPrefix = "TrigMatch_",
+			TriggerList           = SUSY20TriggerListsHelper.Run2TriggerNamesNoTau
+		)
 	# Run 3, or Run 2 with navigation conversion
 	if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
 		from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
 		AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(SUSY20SlimmingHelper)
-
 
 	# Output stream
 	SUSY20ItemList = SUSY20SlimmingHelper.GetItemList()
