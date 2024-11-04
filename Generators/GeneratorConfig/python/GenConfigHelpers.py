@@ -172,7 +172,7 @@ def checkKeywords(sample, evgenLog, officialJO):
                 import sys
                 sys.exit(1)
     else:
-        evgenLog.warning("evgenkeywords = not found ")
+        evgenLog.warning("evgenkeywords.txt not found ")
 
 def checkCategories(sample, evgenLog, officialJO):
     # Get file containing category names
