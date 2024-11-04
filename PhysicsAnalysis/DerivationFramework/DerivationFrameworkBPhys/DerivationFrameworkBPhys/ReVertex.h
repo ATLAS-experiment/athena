@@ -18,6 +18,9 @@
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "StoreGate/ReadHandleKeyArray.h"
+#include "xAODTracking/TrackParticleContainerFwd.h"
+
 /** forward declarations
  */
 namespace Trk {
@@ -93,6 +96,10 @@ private:
    double m_trkDeltaZ;               // DeltaZ between the JPsi vertex and hadronic tracks Z0
 
    bool m_useAdditionalTrack;
+
+   SG::ReadHandleKeyArray<xAOD::VertexContainer> m_CollectionsToCheck{this, "CheckVertexContainers", {}};
+   SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_RelinkContainers{this, "RelinkTracks", {}, "Track Containers if they need to be relinked through indirect use" };
+
 };
 }
 
