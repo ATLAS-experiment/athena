@@ -97,8 +97,10 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   if( m_trkAnaDefSvc->plotFakeRates() and m_trkAnaDefSvc->isReferenceTruth() ) {
     m_plots_fakeRate = std::make_unique< FakeRatePlots >(
         this, "Tracks/FakeRates", m_anaTag, m_trkAnaDefSvc->testTag(), true );
-    m_plots_missingTruth = std::make_unique< FakeRatePlots >(
-        this, "Tracks/FakeRates/Unlinked", m_anaTag, m_trkAnaDefSvc->testTag(), true );
+    if ( not m_trkAnaDefSvc->unlinkedAsFakes() ) {
+      m_plots_missingTruth = std::make_unique< FakeRatePlots >(
+          this, "Tracks/FakeRates/Unlinked", m_anaTag, m_trkAnaDefSvc->testTag(), true );
+    }
   }
 
   /// Duplicate Rate plots
@@ -133,9 +135,11 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
     m_plots_hitsOnFakeTrk = std::make_unique< HitsOnTracksPlots >(
         this, "Tracks/FakeRates/HitsOnTracks", m_anaTag,
         m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(), true );
-    m_plots_hitsOnUnlinkedTrk = std::make_unique< HitsOnTracksPlots >(
-        this, "Tracks/FakeRates/Unlinked/HitsOnTracks", m_anaTag,
-        m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(), true );
+    if ( not m_trkAnaDefSvc->unlinkedAsFakes() ) {
+      m_plots_hitsOnUnlinkedTrk = std::make_unique< HitsOnTracksPlots >(
+          this, "Tracks/FakeRates/Unlinked/HitsOnTracks", m_anaTag,
+          m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(), true );
+    }
   }
 
   /// Offline electron plots
@@ -310,18 +314,21 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
     }
 
     /// fake rate plots (and hits on fake plots)
+    bool isUnlinked = isUnlinkedTruth( *particle );
     if( m_plots_missingTruth ) {
-      bool isUnlinked = isUnlinkedTruth( *particle );
       ATH_CHECK( m_plots_missingTruth->fillPlots( *particle, isUnlinked, truthMu, actualMu, weight ) );
       if( m_plots_hitsOnUnlinkedTrk and isUnlinked ) {
         ATH_CHECK( m_plots_hitsOnUnlinkedTrk->fillPlots( *particle, truthMu, actualMu, weight ) ); 
       }
-      if( not isUnlinked and m_plots_fakeRate ) {
-        bool isFake = isFakeTruth( *particle, m_trkAnaDefSvc->truthProbCut() );
-        ATH_CHECK( m_plots_fakeRate->fillPlots( *particle, isFake, truthMu, actualMu, weight ) );
-        if( m_plots_hitsOnFakeTrk and isFake ) {
-          ATH_CHECK( m_plots_hitsOnFakeTrk->fillPlots( *particle, truthMu, actualMu, weight ) );
-        }
+    }
+
+    bool doFakes = m_trkAnaDefSvc->unlinkedAsFakes() ? true : not isUnlinked;
+    if( doFakes and m_plots_fakeRate ) {
+      bool isFake = isFakeTruth( *particle, m_trkAnaDefSvc->truthProbCut(),
+                                 m_trkAnaDefSvc->unlinkedAsFakes() );
+      ATH_CHECK( m_plots_fakeRate->fillPlots( *particle, isFake, truthMu, actualMu, weight ) );
+      if( m_plots_hitsOnFakeTrk and isFake ) {
+        ATH_CHECK( m_plots_hitsOnFakeTrk->fillPlots( *particle, truthMu, actualMu, weight ) );
       }
     }
 
