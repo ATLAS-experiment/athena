@@ -3,25 +3,32 @@
 */
 
 #include "AthMonBench.h"
-#include <cstring>
-#include <stdio.h>
+#include <iostream>
+#include <limits>
+#include <fstream>
 
-AthMonBench::TMem AthMonBench::currentVMem()
-{
+namespace{
+  template <long f>
+  long
+  multiply(long result){
+    static constexpr long maxval = std::numeric_limits<long>::max()/f;
+    if ((result>maxval) or (result<0)) return -1;
+    return result * f;
+  }
+}
+
+AthMonBench::TMem 
+AthMonBench::currentVMem(){
   long result = -1;
-  FILE* file = fopen("/proc/self/status", "r");
-  if (!file)
-    return result;
-  char line[128];
-  while (fgets(line, 128, file) != NULL){
-    if (strncmp(line, "VmSize:", 7) == 0) {
-      std::stringstream s(&(line[7]));
-      s >> result;
-      result *= 1024;//NB: ~1K uncertainty
-      break;
+  std::ifstream file("/proc/self/status");
+  const std::string search{"VmSize:"};
+  std::string line;
+  while(getline(file, line)) { 
+    if (line.starts_with(search)) {
+      result = std::stol(line.substr(search.size()));
+      result = multiply<1024L>(result);
     }
   }
-  fclose(file);
   return result;
 }
 
