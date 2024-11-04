@@ -12,5 +12,4 @@ find_package( zipp )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 
 # Install files from the package:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( bin/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
