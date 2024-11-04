@@ -9,7 +9,7 @@ _steeringFlags = [ 'doGlobalMon', 'doLVL1CaloMon', 'doLVL1InterfacesMon', 'doCTP
                    'doPixelMon', 'doSCTMon', 'doTRTMon', 'doInDetMon',
                    'doLArMon', 'doTileMon',
                    'doCaloGlobalMon', 'doMuonMon',
-                   'doLucidMon', 'doAFPMon',
+                   'doLucidMon', 'doAFPMon', 'doZDCMon',
                    'doHIMon', 'doEgammaMon', 'doJetMon', 'doMissingEtMon',
                    'doJetInputsMon',
                    'doTauMon', 'doJetTagMon', 'doDataFlowMon' ]
