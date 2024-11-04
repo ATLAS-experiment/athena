@@ -957,6 +957,10 @@ CorrectionCode
 BTaggingEfficiencyTool::getInefficiencyScaleFactor( const xAOD::Jet & jet, float & sf)
 {
   if (! m_initialised) return CorrectionCode::Error;
+  if (m_isContinuous || m_isContinuous2D){
+      ATH_MSG_ERROR("Inefficiency SF should NOT be included for the Continous operation point");
+      return CorrectionCode::Error;
+  }
 
   // get the btag label
   int flavour = jetFlavourLabel(jet, m_coneFlavourLabel, m_extFlavourLabel);
@@ -975,6 +979,10 @@ BTaggingEfficiencyTool::getInefficiencyScaleFactor( int flavour, const Analysis:
 						    float & sf)
 {
   if (! m_initialised) return CorrectionCode::Error;
+  if (m_isContinuous || m_isContinuous2D){
+      ATH_MSG_ERROR("Inefficiency SF should NOT be included for the Continous operation point");
+      return CorrectionCode::Error;
+  }
 
   CalibResult result;
 
