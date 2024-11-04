@@ -178,11 +178,12 @@ StatusCode TrigT1Run3ZDC::execute(const EventContext& ctx) const {
           FADCSamplesLG.at((side == 1)).at(module).at(counter) = sample;
           counter++;
         }
-      } else {
+      } else if(gain == 1) {
         unsigned int counter = 0;
         for (const auto& sample : zlc.waveform) {
           // fill high gain FADC samples
           FADCSamplesHG.at((side == 1)).at(module).at(counter) = sample;
+          counter++;
         }
       }
       // retrive Trig Avg amp for debugging
