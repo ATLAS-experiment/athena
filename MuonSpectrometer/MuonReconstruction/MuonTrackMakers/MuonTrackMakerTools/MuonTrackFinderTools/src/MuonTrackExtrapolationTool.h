@@ -77,7 +77,7 @@ namespace Muon {
                                                               "Handle to the service providing the IMuonEDMHelperSvc interface"};
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-        ToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "EDMPrinter", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool",
+        PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "EDMPrinter", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool",
                                                        "helper to nicely print out tracks"};
         ToolHandle<Trk::IExtrapolator> m_atlasExtrapolator{this, "AtlasExtrapolator", "Trk::Extrapolator/AtlasExtrapolator"};
         ToolHandle<Trk::IExtrapolator> m_muonExtrapolator{this, "MuonExtrapolator", "Trk::Extrapolator/MuonExtrapolator"};

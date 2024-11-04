@@ -103,7 +103,7 @@ namespace Muon {
             this, "MdtRotCreator", "Muon::MdtDriftCircleOnTrackCreator/MdtDriftCircleOnTrackCreator"};  //!< IMdtDriftCircleOnTrackCreator
         Trk::MagneticFieldProperties m_magFieldProperties;                                              //!< magnetic field properties
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-        ToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer",
+        PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer",
                                                        "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};  //!< EDM printer tool
 
         SG::ReadHandleKey<Muon::MdtPrepDataContainer> m_key_mdt{this, "MdtPrepDataContainer", "MDT_DriftCircles", "MDT PRDs"};

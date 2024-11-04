@@ -1005,10 +1005,8 @@ def MuonInsideOutRecoToolCfg(flags, name="MuonInsideOutRecoTool", **kwargs):
     from MuonConfig.MuonRecToolsConfig import MuonAmbiProcessorCfg
     if flags.Muon.MuonTrigger:
         kwargs.setdefault("VertexContainer", "")
-
-    result = MuonEDMPrinterToolCfg(flags)
-    kwargs.setdefault("MuonEDMPrinterTool", result.popPrivateTools())
-
+    result = ComponentAccumulator()
+    kwargs.setdefault("MuonEDMPrinterTool", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)))
     layersegmentfindertool = result.popToolsAndMerge(
         MuonLayerSegmentFinderToolCfg(flags, name="MuonLayerSegmentFinderTool"))
     kwargs.setdefault("MuonLayerSegmentFinderTool", layersegmentfindertool)
@@ -1167,7 +1165,7 @@ def MuonSystemExtensionToolCfg(flags, **kwargs):
     from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
 
     kwargs.setdefault("Extrapolator", result.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
-    kwargs.setdefault("Printer", result.addPublicTool(result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags))) )
+    kwargs.setdefault("Printer", result.addPublicTool(result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags))) )
     kwargs.setdefault("ParticleCaloExtensionTool",
                         result.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags, 
                                                                              name='MuonParticleCaloExtensionTool')))
@@ -1227,8 +1225,8 @@ def MuTagAmbiguitySolverToolCfg(flags, name='MuTagAmbiguitySolverTool', **kwargs
     #TODO: defaults in cxx
     kwargs.setdefault("RejectOuterEndcap", True)
     kwargs.setdefault("RejectMatchPhi", True)
-    result = MuonEDMPrinterToolCfg(flags)
-    kwargs.setdefault("Printer", result.popPrivateTools())
+    result = ComponentAccumulator()
+    kwargs.setdefault("Printer", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)))
     kwargs.setdefault("MuonSegmentMatchingTool", result.popToolsAndMerge(
         MuonSegmentMatchingToolCfg(flags, name='MuonSegmentMatchingTool', doPhiMatching=False)))
     # EJWM. Not sure where doPhiMatching is set to False in old, but this is what I see in configuration diffs

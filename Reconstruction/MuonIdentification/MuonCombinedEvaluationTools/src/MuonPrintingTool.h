@@ -52,11 +52,7 @@ namespace Rec {
     private:
         std::string print(const xAOD::TrackParticle& tp) const;
 
-        ToolHandle<Muon::MuonEDMPrinterTool> m_edmPrinter{
-            this,
-            "MuonStationPrinter",
-            "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool",
-        };
+        PublicToolHandle<Muon::MuonEDMPrinterTool> m_edmPrinter{this, "MuonStationPrinter",""};
     };
 
 }  // namespace Rec

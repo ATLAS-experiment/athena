@@ -88,7 +88,7 @@ class MuonSegmentReader : public AthHistogramAlgorithm
 
         ToolHandle<MuonCalib::IIdToFixedIdTool> m_idToFixedIdTool{this, "IdToFixedIdTool", "MuonCalib::IdToFixedIdTool/MuonCalib_IdToFixedIdTool"};
 
-        ToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
+        PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
 
         MuonTesterTree m_tree{"Segments", "CALIBNTUPLESTREAM"};
         // book event_x branches

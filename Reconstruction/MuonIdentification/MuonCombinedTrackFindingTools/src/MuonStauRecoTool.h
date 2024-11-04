@@ -232,7 +232,7 @@ namespace MuonCombined {
         ServiceHandle<Muon::IMuonEDMHelperSvc> m_edmHelperSvc{this, "edmHelper", "Muon::MuonEDMHelperSvc/MuonEDMHelperSvc",
                                                               "Handle to the service providing the IMuonEDMHelperSvc interface"};
 
-        ToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "MuonEDMPrinterTool", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
+        PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "MuonEDMPrinterTool", ""};
         ToolHandle<Muon::IMuonSegmentMaker> m_segmentMaker{this, "MuonSegmentMaker", "Muon::DCMathSegmentMaker/DCMathSegmentMaker"};
         ToolHandle<Muon::IMuonSegmentMaker> m_segmentMakerT0Fit{this, "MuonSegmentMakerT0Fit",
                                                                 "Muon::DCMathSegmentMaker/DCMathT0FitSegmentMaker"};
