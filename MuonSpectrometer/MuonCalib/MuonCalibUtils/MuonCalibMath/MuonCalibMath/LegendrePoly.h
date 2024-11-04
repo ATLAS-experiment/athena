@@ -88,7 +88,7 @@ namespace MuonCalib{
          *  @param x: Dependency of the polynomial */
         template <unsigned int l, unsigned int k> 
             constexpr double polySum(const double x) {
-                constexpr double a_n = coeff(l,k);
+                const double a_n = coeff(l,k);
                 if constexpr (k > 1) {                    
                     return a_n* std::pow(x,k) + polySum<l, k-2>(x);
                 } else{
@@ -105,7 +105,7 @@ namespace MuonCalib{
                 static_assert(d> 0);
                 if constexpr(k <= l && k>=d) {
                     constexpr unsigned long powFac = factorial(k) / factorial(k-d);
-                    constexpr double a_n = coeff(l,k) * powFac;
+                    const double a_n = coeff(l,k) * powFac;
                     return a_n *std::pow(x,k-d) + derivativeSum<l, k-2, d>(x);
                 } else {
                      return 0.;
