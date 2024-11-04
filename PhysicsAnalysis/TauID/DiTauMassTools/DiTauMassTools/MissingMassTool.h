@@ -1,18 +1,18 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Asg wrapper around the MissingMassCalculator
 // author Quentin Buat <quentin.buat@no.spam.cern.ch>
-#ifndef DITAUMASSTOOLS_MISSINGMASSTOOLV2_H
-#define DITAUMASSTOOLS_MISSINGMASSTOOLV2_H
+#ifndef DITAUMASSTOOLS_MISSINGMASSTOOL_H
+#define DITAUMASSTOOLS_MISSINGMASSTOOL_H
 
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
 
 //Local include(s):
 #include "DiTauMassTools/IMissingMassTool.h"
-#include "DiTauMassTools/MissingMassCalculatorV2.h"
+#include "DiTauMassTools/MissingMassCalculator.h"
 #include "DiTauMassTools/HelperFunctions.h"
 
 #include <string>
@@ -21,21 +21,21 @@ namespace DiTauMassTools{
   using ROOT::Math::PtEtaPhiMVector;
   using ROOT::Math::VectorUtil::Phi_mpi_pi;
 
-class MissingMassToolV2 : virtual public IMissingMassTool, virtual public asg::AsgTool
+class MissingMassTool : virtual public IMissingMassTool, virtual public asg::AsgTool
 {
 
   /// Proper constructor for Athena
-  ASG_TOOL_CLASS(MissingMassToolV2, IMissingMassTool)
+  ASG_TOOL_CLASS(MissingMassTool, IMissingMassTool)
 
  public:
   
   /// Standard constructor for standalone usage
-  MissingMassToolV2(const std::string& name);
+  MissingMassTool(const std::string& name);
   /// Copy constructor for reflex in Athena
-  MissingMassToolV2(const MissingMassToolV2& other);
+  MissingMassTool(const MissingMassTool& other);
 
   /// virtual destructor
-  virtual ~MissingMassToolV2() { };
+  virtual ~MissingMassTool() { };
 
   /// Initialize the tool
   virtual StatusCode initialize();
@@ -62,7 +62,7 @@ class MissingMassToolV2 : virtual public IMissingMassTool, virtual public asg::A
 	  ignore(tau1_decay_type); ignore(tau2_decay_type);
 	  ignore(met); ignore(njets);}
 
-  virtual MissingMassCalculatorV2* get() {return m_MMC;}
+  virtual MissingMassCalculator* get() {return m_MMC;}
   virtual double GetFitStatus(int method) {(void) method; return m_MMC->OutputInfo.GetFitStatus();}
   virtual double GetFittedMass(int method) {return m_MMC->OutputInfo.GetFittedMass(method);}
   virtual double GetFittedMassErrorUp(int method) {return m_MMC->OutputInfo.GetFittedMassErrorUp(method);}
@@ -77,7 +77,7 @@ class MissingMassToolV2 : virtual public IMissingMassTool, virtual public asg::A
 
  private:
 
-  MissingMassCalculatorV2* m_MMC;
+  MissingMassCalculator* m_MMC;
   double m_n_sigma_met;
   int m_tail_cleanup;
   int m_use_verbose;

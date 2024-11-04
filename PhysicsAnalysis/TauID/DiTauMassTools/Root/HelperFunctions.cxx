@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // vim: ts=2 sw=2
@@ -79,7 +79,7 @@ bool DiTauMassTools::updateDouble  (const double in, double & out)
   return false;
 }
 
-//CP::CorrectionCode MissingMassToolV2::getLFVMode( const xAOD::IParticle* p1, const xAOD::IParticle* p2, int mmcType1, int mmcType2) {
+//CP::CorrectionCode MissingMassTool::getLFVMode( const xAOD::IParticle* p1, const xAOD::IParticle* p2, int mmcType1, int mmcType2) {
 int DiTauMassTools::getLFVMode( const xAOD::IParticle* p1, const xAOD::IParticle* p2, int mmcType1, int mmcType2) {
 
   // Check if particles pointers are null
@@ -174,9 +174,9 @@ int DiTauMassTools::mmcType(const xAOD::IParticle* part)
 }
 //________________________________________________________________________
 
-void DiTauMassTools::readInParams(TDirectory* dir, MMCCalibrationSetV2::e aset, std::vector<TF1*>& lep_numass, std::vector<TF1*>& lep_angle, std::vector<TF1*>& lep_ratio, std::vector<TF1*>& had_angle, std::vector<TF1*>& had_ratio) {
+void DiTauMassTools::readInParams(TDirectory* dir, MMCCalibrationSet::e aset, std::vector<TF1*>& lep_numass, std::vector<TF1*>& lep_angle, std::vector<TF1*>& lep_ratio, std::vector<TF1*>& had_angle, std::vector<TF1*>& had_ratio) {
 	std::string paramcode;
-	if (aset == MMCCalibrationSetV2::MMC2019) paramcode = "MMC2019MC16";
+	if (aset == MMCCalibrationSet::MMC2019) paramcode = "MMC2019MC16";
 	else {
 		Info("DiTauMassTools", "The specified calibration version does not support root file parametrisations");
 		return;

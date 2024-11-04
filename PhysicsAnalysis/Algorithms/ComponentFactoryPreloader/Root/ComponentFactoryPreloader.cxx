@@ -54,7 +54,7 @@
 #include <AssociationUtils/EleMuSharedTrkOverlapTool.h>
 #include <AssociationUtils/MuJetOverlapTool.h>
 #include <AssociationUtils/OverlapRemovalTool.h>
-#include <DiTauMassTools/MissingMassToolV2.h>
+#include <DiTauMassTools/MissingMassTool.h>
 #include <EgammaAnalysisAlgorithms/EgammaCalibrationAndSmearingAlg.h>
 #include <EgammaAnalysisAlgorithms/EgammaFSRForMuonsCollectorAlg.h>
 #include <EgammaAnalysisAlgorithms/EgammaIsGoodOQSelectionTool.h>
@@ -281,7 +281,7 @@ namespace CP
     ANA_CHECK (asg::registerToolFactory<CP::MuonSelectionTool> ("CP::MuonSelectionTool"));
     ANA_CHECK (asg::registerToolFactory<CP::NNJvtSelectionTool> ("CP::NNJvtSelectionTool"));
     ANA_CHECK (asg::registerToolFactory<CP::PileupReweightingTool> ("CP::PileupReweightingTool"));
-    ANA_CHECK (asg::registerToolFactory<DiTauMassTools::MissingMassToolV2> ("DiTauMassTools::MissingMassToolV2"));
+    ANA_CHECK (asg::registerToolFactory<DiTauMassTools::MissingMassTool> ("DiTauMassTools::MissingMassTool"));
     ANA_CHECK (asg::registerToolFactory<GoodRunsListSelectionTool> ("GoodRunsListSelectionTool"));
     ANA_CHECK (asg::registerToolFactory<JetCalibrationTool> ("JetCalibrationTool"));
     ANA_CHECK (asg::registerToolFactory<BJetCorrectionTool> ("BJetCorrectionTool"));

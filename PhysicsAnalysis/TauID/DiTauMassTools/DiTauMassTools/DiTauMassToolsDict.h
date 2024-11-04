@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DITAUMASSTOOLS_DITAUMASSTOOLSDICT_H
@@ -17,6 +17,6 @@
 #include "DiTauMassTools/MissingMassInput.h"
 #include "DiTauMassTools/MissingMassOutput.h"
 #include "DiTauMassTools/MissingMassProb.h"
-#include "DiTauMassTools/MissingMassCalculatorV2.h"
-#include "DiTauMassTools/MissingMassToolV2.h"
+#include "DiTauMassTools/MissingMassCalculator.h"
+#include "DiTauMassTools/MissingMassTool.h"
 #endif

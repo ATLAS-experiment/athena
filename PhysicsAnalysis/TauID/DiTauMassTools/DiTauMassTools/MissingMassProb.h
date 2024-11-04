@@ -23,12 +23,12 @@
 namespace DiTauMassTools{
   using ROOT::Math::PtEtaPhiMVector;
 
-class MissingMassCalculatorV2;
+class MissingMassCalculator;
 
 class MissingMassProb {
 
   public:
-    MissingMassProb(MMCCalibrationSetV2::e aset, const std::string& paramFilePath);
+    MissingMassProb(MMCCalibrationSet::e aset, const std::string& paramFilePath);
     ~MissingMassProb();
 
     double apply(MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2, bool constant=false, bool oneTau=false, bool twoTau=false);
@@ -115,7 +115,7 @@ class MissingMassProb {
 
     std::string m_paramFilePath;
     TFile *m_fParams;
-    MMCCalibrationSetV2::e m_mmcCalibrationSet;
+    MMCCalibrationSet::e m_mmcCalibrationSet;
 
     bool m_allowUseHT;
     bool m_UseHT;
