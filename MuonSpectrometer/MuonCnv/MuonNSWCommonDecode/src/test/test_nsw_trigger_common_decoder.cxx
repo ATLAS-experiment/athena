@@ -8,6 +8,7 @@
 #include <string>
 #include <chrono>
 #include <iomanip>
+#include <limits>
 #include <math.h>
 #include <regex>
 #include <span>
@@ -37,9 +38,10 @@
 
 void test_nsw_trigger_common_decoder_help (char *progname) {
   std::cout << "Usage: " << progname
-	    << " [-h] [-n events] [-p] [-v [-v [-v]]] [-d MML1A,MMMon,PadL1A,STGL1A] [-t] infile1, infile2, ..." << std::endl;
+	    << " [-h] [-c entryID] [-n events] [-p] [-v [-v [-v]]] [-d MML1A,MMMon,PadL1A,STGL1A] [-t] infile1, infile2, ..." << std::endl;
   std::cout << std::endl;
   std::cout << "\t\t[-h] Print this message and exit" << std::endl;
+  std::cout << "\t\t[-c entryID] Cherry pick the event to read (default = -1)" << std::endl;
   std::cout << "\t\t[-n events] Maximum number of events to read (default = all)" << std::endl;
   std::cout << "\t\t[-p] Only print raw fragments" << std::endl;
   std::cout << "\t\tMultiple [-v] options increase printout detail level" << std::endl;
@@ -57,6 +59,9 @@ int test_nsw_trigger_common_decoder_opt (int argc, char **argv, Params& params) 
       case 'h':
         test_nsw_trigger_common_decoder_help (argv[0]);
         return 1;
+      case 'c':
+	params.cherry_pick_event = static_cast <uint32_t> (strtol(argv[++i], nullptr, 10));
+	break;
       case 'n':
 	params.max_events = static_cast <uint32_t> (strtol(argv[++i], nullptr, 10));
 	break;
@@ -147,7 +152,7 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
   uint16_t m = source_id.module_id ();
   
   const uint32_t *bs = r.rod_data ();
-  
+
   // Print out raw fragment
   if (params.print_only || params.printout_level > 2) {
     std::cout << "ROD Fragment sizes in words:" << std::endl;
@@ -717,6 +722,15 @@ int test_nsw_trigger_common_decoder_loop_txt(Params& params, Statistics& statist
 
       data = outBranches();
 
+      if (params.cherry_pick_event != std::numeric_limits<uint32_t>::max()) {
+        if (params.cherry_pick_event > statistics.nevents) {
+          ++statistics.nevents;
+          continue;
+        } else if (params.cherry_pick_event < statistics.nevents) {
+          break;
+        }
+      }
+
       int report = 0;
       if ((report = test_nsw_trigger_common_decoder_fragment(r, params.elink_types[0], data, params, statistics))) {
         std::cout << "Cannot decode properly event " << statistics.nevents << "; skipping it! \n" << std::endl;
@@ -727,7 +741,7 @@ int test_nsw_trigger_common_decoder_loop_txt(Params& params, Statistics& statist
       if (!params.print_only){
         outtree->Fill();
       }
-    }
+    } // loop over events
 
     if (!params.print_only) {
       outtree->Write();
@@ -738,7 +752,6 @@ int test_nsw_trigger_common_decoder_loop_txt(Params& params, Statistics& statist
 
   return 0;
 }
-
 
 int test_nsw_trigger_common_decoder_loop(Params& params, Statistics& statistics) {
 
@@ -792,6 +805,15 @@ int test_nsw_trigger_common_decoder_loop(Params& params, Statistics& statistics)
 
       data = outBranches();
 
+      if (params.cherry_pick_event != std::numeric_limits<uint32_t>::max()) {
+        if (params.cherry_pick_event > statistics.nevents) {
+          ++statistics.nevents;
+          continue;
+        } else if (params.cherry_pick_event < statistics.nevents) {
+          break;
+        }
+      }
+
       int report = 0;
       if ((report = test_nsw_trigger_common_decoder_event(p, data, params, statistics))) {
         std::cout << "No requested ROBs found for event " << statistics.nevents << "; skipping it! \n" << std::endl;
@@ -808,7 +830,7 @@ int test_nsw_trigger_common_decoder_loop(Params& params, Statistics& statistics)
       if (buf) {
         delete[] buf;
       }
-    }
+    } // loop over events
     if (!params.print_only) {
       outtree->Write();
       outfile->Close();

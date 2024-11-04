@@ -2,6 +2,7 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <limits>
 
 //support header for structs and branch managment
 
@@ -11,6 +12,7 @@ struct Params
   bool          print_only {false};
   bool          is_netio {false};
   uint32_t      printout_level {0};
+  uint32_t      cherry_pick_event {std::numeric_limits<uint32_t>::max()};
   uint32_t      max_events {0};
   std::vector<std::string>   elink_types {};  //comma separated list of allowed technologies/elinks
   std::vector<std::string>   file_names  {};  //will create independent out files, nothing smarter for now
