@@ -28,10 +28,11 @@ namespace FlavorTagDiscriminants
     };
   }
 
-  class NNSharingSvc: public asg::AsgService, public INNSharingSvc
+  class NNSharingSvc: public extends<asg::AsgService, INNSharingSvc>
   {
   public:
-    NNSharingSvc(const std::string& name, ISvcLocator* svc);
+    using extends::extends;  // base class constructor
+
     virtual std::shared_ptr<const GNN> get(
       const std::string& nn_name,
       const GNNOptions& opts) override;
