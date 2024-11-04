@@ -266,7 +266,8 @@ map<string, calibpars> readoldpars()
         oldconstfile.close();
     }
     else{
-        std::cerr << "Unable to open precision t0 file!\n";
+        // Output to std::cout since for online calibration this file is not used.
+        std::cout << "Unable to open precision t0 file!\n";
     }
         
 
