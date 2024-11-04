@@ -164,7 +164,7 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
 
             // set hit layers and hits
             road.setHitLayers(hitLayers);
-            road.setHits(road_hits);
+            road.setHits(std::move(road_hits));
 
             // set the sector ID. TODO make this its own function in FPGATrackSimFunctions or something.
             if (m_idealGeoRoads) {
@@ -226,8 +226,8 @@ void FPGATrackSimWindowExtensionTool::matchIdealGeoSector(FPGATrackSimRoad & r) 
       wcHit->setLayer(il);
       wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_2nd()->getDetType(il));
       std::vector<std::shared_ptr<const FPGATrackSimHit>> wcHits;
-      wcHits.push_back(wcHit);
-      r.setHits(il,wcHits);
+      wcHits.push_back(std::move(wcHit));
+      r.setHits(il,std::move(wcHits));
     }
     else {
       modules.push_back(sectorbin);
