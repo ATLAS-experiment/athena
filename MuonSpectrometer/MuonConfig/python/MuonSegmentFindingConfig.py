@@ -424,6 +424,11 @@ def MuonPatternCalibrationCfg(flags, name="MuonPatternCalibration", **kwargs):
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg, MdtDriftCircleOnTrackCreatorCfg, MdtCalibToolForRotsCfg
     result = ComponentAccumulator()
     
+    if not flags.Detector.EnableRPC:
+        kwargs.setdefault("RpcPrepDataContainer", "")
+    if not flags.Detector.EnableTGC:
+        kwargs.setdefault("TgcPrepDataContainer", "")
+
     if "MdtCreator" not in kwargs: 
         # on data configure a MdtDriftCircleOnTrackCreator for the segment finding with reduced errors
         # when using the t0 refit enlarge the time window
