@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// \author Nils Krumnack
@@ -15,6 +15,7 @@
 #include <AsgMessaging/INamedInterface.h>
 #include <AsgMessaging/MessageCheck.h>
 #include <AsgMessaging/MsgLevel.h>
+#include <AsgTools/Interfaces.h>
 #include <memory>
 #include <vector>
 

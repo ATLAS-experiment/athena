@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -38,13 +38,12 @@ namespace asg
   ///
   /// Loosely based on the \ref AsgTool implementation.
 
-  class AsgService : public virtual IAsgService,
-                     public AsgServiceBase
+  class AsgService :
+    public extends<AsgServiceBase, IAsgService>
   {
   public:
     AsgService (const std::string& name,
                 ISvcLocator* pSvcLocator);
-
 
     /// set up/tear down functions
     /// \{
@@ -55,30 +54,7 @@ namespace asg
     /// Print the state of the service
     virtual void print() const;
 
-    /// add the given interface to the list of interfaces
-    template<typename T> void declareServiceInterface ();
-
-
-#ifndef XAOD_STANDALONE
-    /// query interface for gaudi
-    virtual StatusCode queryInterface (const InterfaceID& riid, void **ppvi);
-
-    /// list of interfaces we have
-  private:
-    std::vector<std::pair<const InterfaceID& (*)(),void *(*)(AsgService*)>> m_interfaces;
-#endif
-
   }; // class AsgService
-
-
-
-  template<typename T>
-  void AsgService :: declareServiceInterface ()
-  {
-#ifndef XAOD_STANDALONE
-    m_interfaces.emplace_back (T::interfaceID, [] (AsgService *self) -> void* {return dynamic_cast<T*>(self);});
-#endif
-  }
 
 } // namespace asg
 

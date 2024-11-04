@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -22,29 +22,15 @@ namespace CP
 {
   /// \brief the canonical implementation of \ref ISelectionNameSvc
 
-  class SelectionNameSvc final : public asg::AsgService,
-                                 virtual public ISelectionNameSvc
+  class SelectionNameSvc final : public extends<asg::AsgService, ISelectionNameSvc>
   {
+
     //
     // public interface
     //
 
-    /// \brief standard constructor
-    /// \par Guarantee
-    ///   strong
-    /// \par Failures
-    ///   out of memory II
   public:
-    SelectionNameSvc (const std::string& name,
-                      ISvcLocator* pSvcLocator);
-
-
-
-    //
-    // inherited interface
-    //
-
-  public:
+    using extends::extends;  // base class constructor
 
     virtual StatusCode initialize () override;
     virtual StatusCode addAcceptInfo (const std::string& objectName, const std::string& decorName,
