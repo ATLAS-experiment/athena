@@ -100,12 +100,14 @@ StatusCode ReVertex::initialize() {
     ATH_CHECK(m_pvContainerName.initialize());
     ATH_CHECK(m_refPVContainerName.initialize());
     ATH_CHECK(m_eventInfo_key.initialize());
+    ATH_CHECK(m_RelinkContainers.initialize());
+    ATH_CHECK(m_CollectionsToCheck.initialize());
     return StatusCode::SUCCESS;
 }
 
 
 StatusCode ReVertex::addBranches() const {
-
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     SG::WriteHandle<xAOD::VertexContainer> vtxContainer(m_OutputContainerName);
     ATH_CHECK(vtxContainer.record(std::make_unique<xAOD::VertexContainer>(), std::make_unique<xAOD::VertexAuxContainer>()));
 
@@ -189,6 +191,23 @@ StatusCode ReVertex::addBranches() const {
      }
     }
 
+    using Analysis::JpsiUpsilonCommon;
+
+    std::vector<const xAOD::TrackParticleContainer*> trackCols;
+    for(const auto &str : m_RelinkContainers){
+      SG::ReadHandle<xAOD::TrackParticleContainer> handle(str,ctx);
+      trackCols.push_back(handle.cptr());
+    }
+    if(not trackCols.empty()){
+       for(xAOD::Vertex* vtx : *vtxContainer){
+          try{
+            JpsiUpsilonCommon::RelinkVertexTracks(trackCols, vtx);
+          }catch(std::runtime_error const& e){
+            ATH_MSG_ERROR(e.what());
+            return StatusCode::FAILURE;
+          }
+       }
+    }
     return StatusCode::SUCCESS;
 }
 
