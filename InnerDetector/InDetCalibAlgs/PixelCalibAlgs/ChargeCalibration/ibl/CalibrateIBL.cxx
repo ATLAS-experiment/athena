@@ -526,7 +526,6 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
     TKey *rodKey;
 
     std::map<float, std::pair<vector<TString>, vector<Double_t>>> ModuDataToPrint;
-    int totModNum = 0;
 
 #if defined(DEMOXCHECK)
     vector<TH1F *> h1_ChrgEntry;
@@ -779,7 +778,6 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
             if (!(ibl3Dfe0 || ibl3Dfe1))
             {
                 modHash = hashID;
-                totModNum++;
             }
 
             array<TDirectory *, npsFEs> dirFE;
@@ -794,12 +792,10 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
                 if (ibl3Dfe0 && sfe < npsFEs / 2)
                 {
                     modHash = hashIDL;
-                    totModNum++;
                 }
                 else if (ibl3Dfe1 && sfe >= npsFEs / 2)
                 {
                     modHash = hashIDR;
-                    totModNum++;
                 }
                 else
                     modHash += (sfe < npsFEs / 2 ? 0 : 1) * 0.8;
