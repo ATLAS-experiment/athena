@@ -2278,10 +2278,11 @@ int main(int argc, char** argv)
                                              //       (which is ideally pT ordered e.g. 0, 1, 3)
         }
 
+	/// check configuration is provided ...
+        if ( cf ) {
 
-        /// remove any tracks below the pt threshold if one is specifed for the analysis
+	  /// remove any tracks below the pt threshold if one is specifed for the analysis
 
-        if ( cf ) { 
           std::string ptconfig = cf->config().postvalue("pt");
           if ( ptconfig!="" ) { 
             double pt = std::atof( ptconfig.c_str() );
@@ -2293,6 +2294,21 @@ int main(int argc, char** argv)
               refp_vec = reft;
             }
           }
+
+	  /// remove any tracks outside the d0 region if one is specifed for the analysis
+
+	  std::string d0config = cf->config().postvalue("d0");
+          if ( d0config!="" ) { 
+            double d0 = std::atof( d0config.c_str() );
+            if ( d0>0 ) { 
+              std::vector<TIDA::Track*> reft; reft.reserve(refp_vec.size());
+              for ( std::vector<TIDA::Track*>::const_iterator itr=refp_vec.begin() ; itr!=refp_vec.end() ; ++itr ) { 
+                if ( std::fabs((*itr)->a0())<=d0 ) reft.push_back( *itr );
+              }
+              refp_vec = reft;
+            }
+          }
+	  
         }    
         
         /// if requesting an object match, remove any tracks which correspond to an object
