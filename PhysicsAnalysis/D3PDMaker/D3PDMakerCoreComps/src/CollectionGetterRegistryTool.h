@@ -43,7 +43,7 @@ namespace D3PD {
  * collection getters are stateful.)
  */
 class CollectionGetterRegistryTool
-  : public extends1<AthAlgTool, ICollectionGetterRegistryTool>
+  : public extends<AthAlgTool, ICollectionGetterRegistryTool>
 {
 public:
   /**

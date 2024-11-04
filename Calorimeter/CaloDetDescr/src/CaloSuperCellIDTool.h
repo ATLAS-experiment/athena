@@ -27,7 +27,7 @@ class CaloCell_ID;
 class CaloCell_SuperCell_ID;
 
 class CaloSuperCellIDTool
-  : public extends1<AthAlgTool, ICaloSuperCellIDTool>
+  : public extends<AthAlgTool, ICaloSuperCellIDTool>
 {
 public:
   /**

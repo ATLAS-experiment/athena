@@ -85,7 +85,7 @@ struct PRDSourceLinkSurfaceAccessor {
   const Acts::Surface* operator()(const Acts::SourceLink& sourceLink) const;
 };
 
-class KalmanFitter : public extends2<AthAlgTool, Trk::ITrackFitter, ActsTrk::IFitterTool> { 
+class KalmanFitter : public extends<AthAlgTool, Trk::ITrackFitter, ActsTrk::IFitterTool> { 
 public:
 
   KalmanFitter(const std::string&,const std::string&,const IInterface*);

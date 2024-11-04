@@ -13,7 +13,7 @@
 namespace LVL1 {
 
 
-  class IControlHistSvc : virtual public extend_interfaces1<IAlgTool> {
+  class IControlHistSvc : virtual public extend_interfaces<IAlgTool> {
 
 
     public:

@@ -43,7 +43,7 @@ class ID3PD;
  * For each event, we loop over all block filler tools.
  */
 class VoidObjFillerTool
-  : public extends2<AthAlgTool, IObjFillerTool, IIncidentListener>,
+  : public extends<AthAlgTool, IObjFillerTool, IIncidentListener>,
     public AddVariable
 {
 public:

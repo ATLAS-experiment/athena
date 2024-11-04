@@ -20,7 +20,7 @@ namespace JiveXML {
    * running as standalone application or in another athena application. It only
    * provides means for streaming events to that server.
    */
-  class ExternalONCRPCServerSvc : public extends1<AthService, IServerSvc> {
+  class ExternalONCRPCServerSvc : public extends<AthService, IServerSvc> {
 
   public:
     

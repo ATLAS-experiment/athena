@@ -66,7 +66,7 @@ class ID3PD;
  * to each.
  */
 class VectorFillerTool
-  : public extends2<VectorFillerToolBase, IObjFillerTool, IIncidentListener>
+  : public extends<VectorFillerToolBase, IObjFillerTool, IIncidentListener>
 {
 public:
   /**

@@ -37,7 +37,7 @@ namespace D3PD {
  * @c ObjGetterTool.
  */       
 class ObjGetterToolImpl
-  : public extends1<AthAlgTool, IObjGetterTool>
+  : public extends<AthAlgTool, IObjGetterTool>
 {
 public:
   /**
