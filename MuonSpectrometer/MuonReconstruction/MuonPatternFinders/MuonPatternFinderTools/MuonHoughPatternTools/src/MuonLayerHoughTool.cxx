@@ -29,8 +29,6 @@ namespace Muon {
         m_ntechnologies = m_idHelperSvc->mdtIdHelper().technologyNameIndexMax() + 1;
         ATH_CHECK(m_printer.retrieve());
         ATH_CHECK(m_muonManagerKey.initialize());
-
-
         ATH_CHECK(m_truthNames.initialize());
      
         // initialize cuts, if only one cut, use make_pair to avoid compiler issues, format is (position, cut)
@@ -1916,49 +1914,40 @@ namespace Muon {
                                                                 << m_ntechnologies << " sectorLayers "
                                                                 << MuonStationIndex::sectorLayerHashMax());
         // loop over all available MDT collection identifiers and order them per sector
-        MuonIdHelper::const_id_iterator it = m_idHelperSvc->mdtIdHelper().module_begin();
-        MuonIdHelper::const_id_iterator it_end = m_idHelperSvc->mdtIdHelper().module_end();
-        for (; it != it_end; ++it) {
-            IdentifierHash hash;
-            m_idHelperSvc->mdtIdHelper().get_module_hash(*it, hash);
-            insertHash(hash, *it);
-        }
-
-        // loop over all available RPC collection identifiers and order them per sector
-        it = m_idHelperSvc->rpcIdHelper().module_begin();
-        it_end = m_idHelperSvc->rpcIdHelper().module_end();
-        for (; it != it_end; ++it) {
-            IdentifierHash hash;
-            m_idHelperSvc->rpcIdHelper().get_module_hash(*it, hash);
-            insertHash(hash, *it);
-        }
-
-        // loop over all available CSC collection identifiers and order them per sector
-        if (m_idHelperSvc->hasCSC()) {
-            it = m_idHelperSvc->cscIdHelper().module_begin();
-            it_end = m_idHelperSvc->cscIdHelper().module_end();
+        
+        auto loadHashes = [this] (const MuonIdHelper& idHelper){
+            auto it = idHelper.module_begin();
+            const auto it_end = idHelper.module_end();
             for (; it != it_end; ++it) {
                 IdentifierHash hash;
-                m_idHelperSvc->cscIdHelper().get_module_hash(*it, hash);
+                idHelper.get_module_hash(*it, hash);
                 insertHash(hash, *it);
             }
-        }
+        };
 
+        if (m_idHelperSvc->hasMDT()) {
+            loadHashes(m_idHelperSvc->mdtIdHelper());
+        }
+        if (m_idHelperSvc->hasRPC()) {
+            loadHashes(m_idHelperSvc->rpcIdHelper());
+        }
+        if (m_idHelperSvc->hasCSC()) {
+            loadHashes(m_idHelperSvc->cscIdHelper());
+        }
         // loop over all available MM collection identifiers and order them per sector
         if (m_idHelperSvc->hasMM()) {
-            it = m_idHelperSvc->mmIdHelper().detectorElement_begin();
-            it_end = m_idHelperSvc->mmIdHelper().detectorElement_end();
+            auto it = m_idHelperSvc->mmIdHelper().detectorElement_begin();
+            const auto it_end = m_idHelperSvc->mmIdHelper().detectorElement_end();
             for (; it != it_end; ++it) {
                 IdentifierHash hash;
                 m_idHelperSvc->mmIdHelper().get_module_hash(*it, hash);
                 insertHash(hash, *it);
             }
         }
-
         // loop over all available STGC collection identifiers and order them per sector
         if (m_idHelperSvc->hasSTGC()) {
-            it = m_idHelperSvc->stgcIdHelper().detectorElement_begin();
-            it_end = m_idHelperSvc->stgcIdHelper().detectorElement_end();
+            auto it = m_idHelperSvc->stgcIdHelper().detectorElement_begin();
+            const auto it_end = m_idHelperSvc->stgcIdHelper().detectorElement_end();
             for (; it != it_end; ++it) {
                 IdentifierHash hash;
                 m_idHelperSvc->stgcIdHelper().get_module_hash(*it, hash);
@@ -1971,51 +1960,44 @@ namespace Muon {
             }
         }
 
-        // loop over all available TGC collection identifiers and order them per sector
-        it = m_idHelperSvc->tgcIdHelper().module_begin();
-        it_end = m_idHelperSvc->tgcIdHelper().module_end();
-        for (; it != it_end; ++it) {
-            const MuonGM::TgcReadoutElement* detEl = detMgr->getTgcReadoutElement(*it);
-            if (!detEl) {
-                ATH_MSG_DEBUG(" No detector element found for " << m_idHelperSvc->toString(*it));
-                continue;
-            }
-            IdentifierHash hash;
-            m_idHelperSvc->tgcIdHelper().get_module_hash(*it, hash);
-            int nstrips = detEl->nStrips(1);
-            Amg::Vector3D p1 = detEl->channelPos(1, 1, 1);
-            Amg::Vector3D p2 = detEl->channelPos(1, 1, nstrips);
-            std::vector<int> sectors1;
-            getSectors(p1, sectors1);
-            std::set<int> added;
-            std::vector<int>::iterator sit = sectors1.begin();
-            std::vector<int>::iterator sit_end = sectors1.end();
-            for (; sit != sit_end; ++sit) {
-                insertHash(*sit, hash, *it);
-                added.insert(*sit);
-            }
-
-            std::vector<int> sectors2;
-            getSectors(p2, sectors2);
-            sit = sectors2.begin();
-            sit_end = sectors2.end();
-            for (; sit != sit_end; ++sit) {
-                if (added.count(*sit)) continue;
-                added.insert(*sit);
-                insertHash(*sit, hash, *it);
+        if (m_idHelperSvc->hasTGC()) {
+            // loop over all available TGC collection identifiers and order them per sector
+            auto it = m_idHelperSvc->tgcIdHelper().module_begin();
+            const auto it_end = m_idHelperSvc->tgcIdHelper().module_end();
+            for (; it != it_end; ++it) {
+                 const MuonGM::TgcReadoutElement* detEl = detMgr->getTgcReadoutElement(*it);
+                 IdentifierHash hash;
+                m_idHelperSvc->tgcIdHelper().get_module_hash(*it, hash);
+                int nstrips = detEl->nStrips(1);
+                const Amg::Vector3D p1 = detEl->channelPos(1, 1, 1);
+                const Amg::Vector3D p2 = detEl->channelPos(1, 1, nstrips);
+                std::vector<int> sectors1{}, sectors2{};
+                getSectors(p1, sectors1);
+                getSectors(p2, sectors2);
+                std::unordered_set<int> added{};
+                for (const int sector : sectors1) {
+                    insertHash(sector, hash, *it);
+                    added.insert(sector);
+                }
+                for (const int sector: sectors2) {
+                    if (added.insert(sector).second){
+                        insertHash(sector, hash, *it);
+                    }
+                }
             }
         }
 
-        if (msgLvl(MSG::DEBUG)) ATH_MSG_DEBUG(" Printing collections per sector, number of technologies " << m_ntechnologies);
+
+        ATH_MSG_DEBUG(" Printing collections per sector, number of technologies " << m_ntechnologies);
         for (int sector = 1; sector <= 16; ++sector) {
             MuonStationIndex::DetectorRegionIndex currentRegion = MuonStationIndex::DetectorRegionUnknown;
-            if (msgLvl(MSG::DEBUG)) ATH_MSG_DEBUG(" sector " << sector);
+            ATH_MSG_DEBUG(" sector " << sector);
             TechnologyRegionHashVec& vec = m_collectionsPerSector[sector - 1].technologyRegionHashVecs;
             for (unsigned int hash = 0; hash < nsectorHashMax; ++hash) {
                 std::pair<MuonStationIndex::DetectorRegionIndex, MuonStationIndex::LayerIndex> regionLayer =
                     MuonStationIndex::decomposeSectorLayerHash(hash);
-                if (msgLvl(MSG::DEBUG))
-                    if (regionLayer.first != currentRegion) ATH_MSG_DEBUG("  " << MuonStationIndex::regionName(regionLayer.first));
+               
+                if (regionLayer.first != currentRegion) ATH_MSG_DEBUG("  " << MuonStationIndex::regionName(regionLayer.first));
                 bool first = true;
                 currentRegion = regionLayer.first;
                 for (unsigned int tech = 0; tech < m_ntechnologies; ++tech) {
