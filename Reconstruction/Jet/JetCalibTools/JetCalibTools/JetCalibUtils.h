@@ -39,7 +39,7 @@ namespace JetCalibUtils {
   int countNPV(const VXCONT& vxCont){
       int eventNPV = 0;  
       for(const xAOD::Vertex* vtx: vxCont){
-	if ( vtx->nTrackParticles() >= 2 ) ++eventNPV;    
+	if ( vtx->vertexType() == xAOD::VxType::PriVtx || vtx->vertexType() == xAOD::VxType::PileUp) ++eventNPV;
       }
       return eventNPV;
   }

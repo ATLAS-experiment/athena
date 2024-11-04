@@ -229,6 +229,9 @@ std::map<std::string,double> GlobalNNCalibration::getJetFeatures(const xAOD::Jet
 
   float jetE_constitscale = jetconstitP4.e();
 
+  // Get the index of the PV
+  int PVindex = jetEventInfo.PVIndex();
+
   //EM3 and Tile0 fraction calculations
   //EM3 = (EMB3+EME3)/energy, Tile0 = (TileBar0+TileExt0)/energy
   //Check the map above to make sure the correct entries of samplingFrac are being used
@@ -276,9 +279,9 @@ std::map<std::string,double> GlobalNNCalibration::getJetFeatures(const xAOD::Jet
   inputValues["FCAL0"] = FCAL0;
   inputValues["FCAL1"] = FCAL1;
   inputValues["FCAL2"] = FCAL2;
-  inputValues["jet_Ntrk1000"] = getJetNtrk1000(jet_reco);
-  inputValues["jet_ChargedFraction"] = getJetChargedFraction(jet_reco);
-  inputValues["jet_Wtrk1000"] = getJetWtrk1000(jet_reco);
+  inputValues["jet_Ntrk1000"] = getJetNtrk1000(jet_reco, PVindex);
+  inputValues["jet_ChargedFraction"] = getJetChargedFraction(jet_reco, PVindex);
+  inputValues["jet_Wtrk1000"] = getJetWtrk1000(jet_reco, PVindex);
   inputValues["jet_DetEta"] = getJetDetEta(jet_reco);
   inputValues["jet_n90Constituents"] = jet_reco.getAttribute<float>("N90Constituents");
   inputValues["jet_nMuSeg"] = jet_reco.getAttribute<int>("GhostMuonSegmentCount");
@@ -307,10 +310,10 @@ int GlobalNNCalibration::getEtaBin(const xAOD::Jet& jet_reco, const std::vector<
 }
 
 
-double GlobalNNCalibration::getJetChargedFraction(const xAOD::Jet& jet_reco) const{
+double GlobalNNCalibration::getJetChargedFraction(const xAOD::Jet& jet_reco, int PVindex) const{
   static const SG::ConstAccessor<std::vector<float> > SumPtChargedPFOPt500Acc ("SumPtChargedPFOPt500");
   if( SumPtChargedPFOPt500Acc.isAvailable(jet_reco) ) {
-    float thisChargedFraction =  SumPtChargedPFOPt500Acc(jet_reco).at(0);
+    float thisChargedFraction =  SumPtChargedPFOPt500Acc(jet_reco).at(PVindex);
     thisChargedFraction /= jet_reco.jetP4(xAOD::JetConstitScaleMomentum).Pt();
     return double(thisChargedFraction);
   }
@@ -323,17 +326,17 @@ double GlobalNNCalibration::getJetDetEta(const xAOD::Jet& jet_reco) const {
   return DetectorEtaAcc.withDefault (jet_reco, -999);
 }
 
-int GlobalNNCalibration::getJetNtrk1000(const xAOD::Jet& jet_reco) const {
+int GlobalNNCalibration::getJetNtrk1000(const xAOD::Jet& jet_reco, int PVindex) const {
   static const SG::ConstAccessor<std::vector<int> > NumTrkPt1000Acc ("NumTrkPt1000");
   if(NumTrkPt1000Acc.isAvailable(jet_reco))
-    return NumTrkPt1000Acc(jet_reco).at(0);
+    return NumTrkPt1000Acc(jet_reco).at(PVindex);
   return -999;
 }
 
-double GlobalNNCalibration::getJetWtrk1000(const xAOD::Jet& jet_reco) const {
+double GlobalNNCalibration::getJetWtrk1000(const xAOD::Jet& jet_reco, int PVindex) const {
   static const SG::ConstAccessor<std::vector<float> > TrackWidthPt1000Acc ("TrackWidthPt1000");
   if(TrackWidthPt1000Acc.isAvailable(jet_reco))
-    return double(TrackWidthPt1000Acc(jet_reco).at(0));
+    return double(TrackWidthPt1000Acc(jet_reco).at(PVindex));
   return -999.;
 }
 

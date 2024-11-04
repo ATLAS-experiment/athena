@@ -451,9 +451,29 @@ StatusCode JetCalibrationTool::initializeEvent(JetEventInfo& jetEventInfo) const
       // However, if specified, it should be a sane value - fail if not
       if ( m_doGSC && PVIndexAccessor.isAvailable(*eventObj) )
         jetEventInfo.setPVIndex( PVIndexAccessor(*eventObj) );
-      else
-        jetEventInfo.setPVIndex(0);
-      
+      else{
+	if(!m_pvKey.empty()){
+	  const xAOD::VertexContainer * vertices = nullptr;
+	  SG::ReadHandle<xAOD::VertexContainer> rhPV(m_pvKey);
+	  if (rhPV.isValid()) {
+	    vertices = rhPV.cptr();
+	    xAOD::VertexContainer::const_iterator vtx_itr = vertices->begin();
+	    xAOD::VertexContainer::const_iterator vtx_end = vertices->end();
+	    for ( ; vtx_itr != vtx_end; ++vtx_itr ){
+	      if ( (*vtx_itr)->vertexType() == xAOD::VxType::PriVtx ){
+		jetEventInfo.setPVIndex((*vtx_itr)->index());
+		break;
+	      }
+	    }
+	  }
+	  else{
+	    jetEventInfo.setPVIndex(0);
+	  }
+	}
+	else{
+	  jetEventInfo.setPVIndex(0);
+	}
+      }
     }
 
     // Extract the BCID information for the BCID correction
@@ -490,14 +510,10 @@ StatusCode JetCalibrationTool::initializeEvent(JetEventInfo& jetEventInfo) const
       if (m_doResidual)
       {
         int eventNPV = 0;
-        xAOD::VertexContainer::const_iterator vtx_itr = vertices->begin();
-        xAOD::VertexContainer::const_iterator vtx_end = vertices->end(); 
-        for ( ; vtx_itr != vtx_end; ++vtx_itr ) 
-          if ( (*vtx_itr)->nTrackParticles() >= 2 ) ++eventNPV;
-  
+	eventNPV = std::count_if(vertices->begin(), vertices->end(), [](const xAOD::Vertex* vtx){ return vtx->vertexType() == xAOD::VxType::PileUp || vtx->vertexType() == xAOD::VxType::PriVtx;});
         jetEventInfo.setNPV(eventNPV);
       }
-      
+
       // Validate value of non-standard PV index usage
       if (m_doGSC && jetEventInfo.PVIndex())
       {
@@ -531,11 +547,7 @@ StatusCode JetCalibrationTool::initializeEvent(JetEventInfo& jetEventInfo) const
     if (rhPV.isValid()) {
       vertices = rhPV.cptr();
       int eventNPV = 0;
-      xAOD::VertexContainer::const_iterator vtx_itr = vertices->begin();
-      xAOD::VertexContainer::const_iterator vtx_end = vertices->end(); 
-      for ( ; vtx_itr != vtx_end; ++vtx_itr ) 
-        if ( (*vtx_itr)->nTrackParticles() >= 2 ) ++eventNPV;
-
+      eventNPV = std::count_if(vertices->begin(), vertices->end(), [](const xAOD::Vertex* vtx){ return vtx->vertexType() == xAOD::VxType::PileUp || vtx->vertexType() == xAOD::VxType::PriVtx;});
       jetEventInfo.setNPV(eventNPV);
     } else {
       ++eventInfoWarningsPV;

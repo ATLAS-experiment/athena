@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -80,8 +80,9 @@ class GlobalNNCalibration : virtual public ::JetCalibrationStep {
   /**
    @brief          Returns the charged fraction of a jet
    @param jet_reco The jet
+   @param PVindex  The index of the PV in the PrimaryVertices container
   */
-  double getJetChargedFraction(const xAOD::Jet& jet_reco) const;
+  double getJetChargedFraction(const xAOD::Jet& jet_reco, int PVindex) const;
 
   /**
    @brief          Returns the detector eta of the jet
@@ -92,14 +93,16 @@ class GlobalNNCalibration : virtual public ::JetCalibrationStep {
   /**
    @brief          Returns the number of tracks with pT > 1 GeV associated to the jet
    @param jet_reco The jet
+   @param PVindex  The index of the PV in the PrimaryVertices container
   */
-  int getJetNtrk1000(const xAOD::Jet& jet_reco) const;
+  int getJetNtrk1000(const xAOD::Jet& jet_reco, int PVindex) const;
 
   /**
    @brief          Returns the jet width
    @param jet_reco The jet
+   @param PVindex  The index of the PV in the PrimaryVertices container
   */
-  double getJetWtrk1000(const xAOD::Jet& jet_reco) const;
+  double getJetWtrk1000(const xAOD::Jet& jet_reco, int PVindex) const;
 
   /**
    @brief          Returns the jet pT after the MCJES calibration
