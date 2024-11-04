@@ -363,6 +363,7 @@ def SUSY20Cfg(flags):
 		"Muons",
 		"InDetTrackParticles",
 		"PrimaryVertices",
+		"TauJets",
 		"AntiKt4EMTopoJets",
 		"AntiKt4EMPFlowJets",
 		"BTagging_AntiKt4EMPFlow",
