@@ -122,6 +122,11 @@ def AthenaMonitoringCfg(flags):
         from Run3AFPMonitoring.Run3AFPExampleMonitorAlgorithm import Run3AFPExampleMonitoringConfig
         result.merge(Run3AFPExampleMonitoringConfig(flags))
 
+    if flags.DQ.Steering.doZDCMon and not flags.Input.isMC and flags.GeoModel.Run > LHCPeriod.Run2:
+        info('Set up ZDC monitoring')
+        from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig
+        result.merge(ZdcMonitoringConfig(flags))
+
     #According to ATR-25910, LV1CaloMon should not be run on run 1 data    
     if flags.DQ.Steering.doLVL1CaloMon and flags.GeoModel.Run > LHCPeriod.Run1:
         info('Set up LVL1Calo monitoring')

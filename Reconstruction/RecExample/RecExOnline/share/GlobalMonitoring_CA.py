@@ -169,6 +169,8 @@ if __name__=='__main__':
     flags.DQ.Steering.doHLTMon = True
     ### AFPmon
     flags.DQ.Steering.doAFPMon = True
+    ### AFPmon
+    flags.DQ.Steering.doZDCMon = False
     ### LVL1Calo
     flags.DQ.Steering.doLVL1CaloMon = False
     flags.DQ.Steering.doLVL1InterfacesMon = False 
