@@ -7,16 +7,10 @@
 
 #include <list>
 #include <set>
-#include <string>
-#include <vector>
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "EventPrimitives/EventPrimitives.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "MuonPrepRawData/RpcPrepDataContainer.h"
 #include "MuonRIO_OnTrack/MuonClusterOnTrack.h"
 #include "MuonRecHelperTools/IMuonEDMHelperSvc.h"
 #include "MuonRecHelperTools/MuonEDMPrinterTool.h"
@@ -99,7 +93,7 @@ namespace Muon {
 
         For more details look at the mainpage of this package.
     */
-    class DCMathSegmentMaker : virtual public IMuonSegmentMaker, public AthAlgTool {
+    class DCMathSegmentMaker :  public extends<AthAlgTool, IMuonSegmentMaker> {
     public:
         // pair of eta-phi hits in the same gasgap
         using EtaPhiHitsPair = std::pair<std::vector<const MuonClusterOnTrack*>, std::vector<const MuonClusterOnTrack*> >;
@@ -111,15 +105,15 @@ namespace Muon {
         struct HitInXZ {
             HitInXZ(Identifier i, bool isM, bool measP, double lx, double lz, double lxmin, double lxmax, double phmin, double phmax) :
                 id(i), isMdt(isM), measPhi(measP), x(lx), z(lz), xmin(lxmin), xmax(lxmax), phimin(phmin), phimax(phmax) {}
-            Identifier id;
-            bool isMdt;
-            bool measPhi;
-            double x;
-            double z;
-            double xmin;
-            double xmax;
-            double phimin;
-            double phimax;
+            Identifier id{};
+            bool isMdt{false};
+            bool measPhi{false};
+            double x{0.};
+            double z{0.};
+            double xmin{0.};
+            double xmax{0.};
+            double phimin{0.};
+            double phimax{0.};
         };
 
         struct Cluster2D {
@@ -140,10 +134,10 @@ namespace Muon {
             }
             Identifier detElId;
             Identifier gasGapId;
-            Amg::Vector2D locPos;
+            Amg::Vector2D locPos{Amg::Vector2D::Zero()};
             double error;  // assume same error for eta and phi
-            const MuonClusterOnTrack* etaHit;
-            const MuonClusterOnTrack* phiHit;
+            const MuonClusterOnTrack* etaHit{nullptr};
+            const MuonClusterOnTrack* phiHit{nullptr};
             std::vector<const MuonClusterOnTrack*> phiHits;
             const Trk::Surface& surface() const {
                 if (etaHit)
@@ -432,10 +426,6 @@ namespace Muon {
         Gaudi::Property<bool> m_redo2DFit{this, "Redo2DFit", true};
 
 
-
-
-        SG::ReadHandleKey<Muon::RpcPrepDataContainer> m_rpcKey{this, "RpcPrepDataContainer", "RPC_Measurements"};
-        SG::ReadHandleKey<Muon::TgcPrepDataContainer> m_tgcKey{this, "TgcPrepDataContainer", "TGC_Measurements"};
         SG::ReadHandleKey<Muon::MdtPrepDataContainer> m_mdtKey{this, "MdtPrepDataContainer", "MDT_DriftCircles"};
         
         SG::ReadCondHandleKey<Muon::MuonIntersectGeoData> m_chamberGeoKey{this, "ChamberGeoKey", "MuonStationIntersects", "Pointer to hole search service"};
