@@ -27,8 +27,7 @@
 
 
 class PlotsDefinitionSvc :
-    public asg::AsgService,
-    virtual public IPlotsDefinitionSvc {
+    public extends<asg::AsgService, IPlotsDefinitionSvc> {
 
 public:
 

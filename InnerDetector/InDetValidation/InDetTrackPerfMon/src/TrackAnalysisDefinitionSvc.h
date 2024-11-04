@@ -24,14 +24,11 @@
 #include <vector>
 
 class TrackAnalysisDefinitionSvc final :
-    public asg::AsgService,
-    virtual public ITrackAnalysisDefinitionSvc {
+    public extends<asg::AsgService, ITrackAnalysisDefinitionSvc> {
 
 public:
-
-  TrackAnalysisDefinitionSvc( const std::string& name, ISvcLocator* pSvcLocator );
-
-  virtual ~TrackAnalysisDefinitionSvc();
+  using extends::extends;  // base class constructor
+  virtual ~TrackAnalysisDefinitionSvc() = default;
 
   virtual StatusCode initialize() override final;
 

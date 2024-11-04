@@ -19,19 +19,6 @@
 /// Athena includes
 #include "InDetPhysValMonitoring/ResolutionHelper.h"
 
-/// -------------------
-/// --- Constructor ---
-/// -------------------
-TrackAnalysisDefinitionSvc::TrackAnalysisDefinitionSvc( const std::string& name, ISvcLocator* pSvcLocator ) :
-    AsgService( name, pSvcLocator )
-{
-  declareServiceInterface< ITrackAnalysisDefinitionSvc >();
-}
-
-/// ------------------
-/// --- Destructor ---
-/// ------------------
-TrackAnalysisDefinitionSvc::~TrackAnalysisDefinitionSvc() = default;
 
 /// ------------------
 /// --- initialize ---

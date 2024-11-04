@@ -17,10 +17,9 @@
 /// -------------------
 PlotsDefinitionSvc::PlotsDefinitionSvc(
     const std::string& name, ISvcLocator* pSvcLocator ) :
-        AsgService( name, pSvcLocator ),
+        base_class( name, pSvcLocator ),
         m_plotsDefMap{}, m_nullDef()
 {
-  declareServiceInterface< IPlotsDefinitionSvc >();
 }
 
 
