@@ -157,7 +157,7 @@ namespace Muon {
         ToolHandle<Muon::IMuonCombinePatternTool> m_muonCombinePatternTool{this, "muonCombinePatternTool",
                                                                            ""};  //!< Pointer to concrete tool
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-        ToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "printerTool", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool",
+        PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "printerTool", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool",
                                                        "ToolHandle for EDM printing of segments"};
 
         /** reweight hits (true) */

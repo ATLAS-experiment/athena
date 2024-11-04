@@ -170,7 +170,7 @@ def DCMathSegmentMakerCfg(flags,
     kwargs.setdefault("MdtCreator", result.getPrimaryAndMerge(MdtDriftCircleOnTrackCreatorCfg(flags)))
     # Set MdtCreatorT0 below
     kwargs.setdefault("MuonCompetingClustersCreator", result.getPrimaryAndMerge(TriggerChamberClusterOnTrackCreatorCfg(flags)))
-    edm_printer = result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags) ) # Needed again below
+    edm_printer = result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags) ) # Needed again below
     kwargs.setdefault("EDMPrinter", edm_printer )
     if doSegmentT0Fit:        
         mdt_dcot_CA = MdtDriftCircleOnTrackCreatorCfg(flags,    
@@ -344,7 +344,7 @@ def Csc2dSegmentMakerCfg(flags, name= "Csc2dSegmentMaker", **kwargs):
         kwargs.setdefault('segmentTool', csc_segment_util_tool)
         result.merge(acc)
     
-    kwargs.setdefault("printerTool", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags) ))
+    kwargs.setdefault("printerTool", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags) ))
 
     csc_segment_maker = Csc2dSegmentMaker(name=name, **kwargs)
     result.setPrivateTools(csc_segment_maker)
@@ -355,7 +355,7 @@ def Csc2dSegmentMakerCfg(flags, name= "Csc2dSegmentMaker", **kwargs):
 def Csc4dSegmentMakerCfg(flags, name= "Csc4dSegmentMaker", **kwargs):    
     result=CscSegmentUtilToolCfg(flags)
     kwargs.setdefault("segmentTool",  result.getPrimary() )
-    kwargs.setdefault("Printer", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags)) )
+    kwargs.setdefault("Printer", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)) )
     result.setPrivateTools(CompFactory.Csc4dSegmentMaker(name=name, **kwargs))
     return result
 
@@ -368,7 +368,7 @@ def MuonNSWSegmentFinderToolCfg(flags, name='MuonNSWSegmentFinderTool', **kwargs
     kwargs.setdefault('SegmentAmbiguityTool', result.popToolsAndMerge( MuonAmbiProcessorCfg(flags) ) ) 
     kwargs.setdefault('SLFitter', result.popToolsAndMerge( MCTBSLFitterMaterialFromTrackCfg(flags) ) ) 
     kwargs.setdefault("TrackToSegmentTool", result.popToolsAndMerge( MuonTrackToSegmentToolCfg(flags) ) )
-    kwargs.setdefault("Printer", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags)) )
+    kwargs.setdefault("Printer", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)) )
     if flags.Beam.Type is not BeamType.Collisions:
         kwargs.setdefault("MmOccupancyBinWidth", 2048)
 
@@ -416,7 +416,7 @@ def MuonLayerHoughAlgCfg(flags, name = "MuonLayerHoughAlg", **kwargs):
     kwargs.setdefault("MMPrepDataContainer", "MM_Measurements" if flags.Detector.EnableMM else "")
     
     kwargs.setdefault("PrintSummary", flags.Muon.printSummary)
-    kwargs.setdefault("printerTool", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags) ))
+    kwargs.setdefault("printerTool", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags) ))
 
     hough_tool = result.getPrimaryAndMerge(MuonLayerHoughToolCfg(flags,
                                             name = "MuonLayerHoughTool")) if flags.Beam.Type is not BeamType.Cosmics else \
@@ -457,7 +457,7 @@ def MuonPatternCalibrationCfg(flags, name="MuonPatternCalibration", **kwargs):
         kwargs.setdefault('MdtCreator', result.popToolsAndMerge(acc))
     
     kwargs.setdefault('ClusterCreator', result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags)))
-    kwargs.setdefault("Printer", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags) ))
+    kwargs.setdefault("Printer", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags) ))
     kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
 
     if flags.Beam.Type is BeamType.Cosmics:
@@ -520,7 +520,7 @@ def MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMaker", **kwargs):
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg
     result = ComponentAccumulator()
     # Won't configure MuonIdHelperSvc
-    kwargs.setdefault("EDMPrinter", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags)) )
+    kwargs.setdefault("EDMPrinter", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)) )
     
     # for test purposes allow parallel running of truth segment finding and new segment finder
     kwargs.setdefault('MuonPatternCalibration', result.popToolsAndMerge( MuonPatternCalibrationCfg(flags) ) )   

@@ -34,7 +34,7 @@ namespace MuonCombined {
                             TrackCollection& outputTracks, const EventContext& ctx) const override;
 
     private:
-        ToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
+        PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
         ToolHandle<Rec::ICombinedMuonTrackBuilder> m_trackBuilder{this, "TrackBuilder", "", ""};
         ToolHandle<Muon::IMuonTrackExtrapolationTool> m_trackExtrapolationTool{this, "TrackExtrapolationTool",
                                                                                "ExtrapolateMuonToIPTool/ExtrapolateMuonToIPTool"};

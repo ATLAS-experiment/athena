@@ -90,7 +90,7 @@ namespace MuonCombined {
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
         ServiceHandle<Muon::IMuonEDMHelperSvc> m_edmHelperSvc{this, "edmHelper", "Muon::MuonEDMHelperSvc/MuonEDMHelperSvc",
                                                               "Handle to the service providing the IMuonEDMHelperSvc interface"};
-        ToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "MuonEDMPrinterTool", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
+        PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "MuonEDMPrinterTool", ""};
         ToolHandle<Muon::IMuonLayerSegmentFinderTool> m_segmentFinder{this, "MuonLayerSegmentFinderTool",
                                                                       "Muon::MuonLayerSegmentFinderTool/MuonLayerSegmentFinderTool"};
         ToolHandle<Muon::IMuonLayerSegmentMatchingTool> m_segmentMatchingTool{

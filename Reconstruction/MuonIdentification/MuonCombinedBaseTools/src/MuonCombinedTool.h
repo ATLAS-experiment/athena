@@ -40,7 +40,7 @@ namespace MuonCombined {
         ///
         bool pass_prematching(const MuonCandidate& muonCandidate, const InDetCandidate& idCandidate) const;
         // helpers, managers, tools
-        ToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
+        PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
         ToolHandleArray<MuonCombined::IMuonCombinedTagTool> m_muonCombinedTagTools{this, "MuonCombinedTagTools", {}};
         ToolHandle<MuonCombinedDebuggerTool> m_muonCombDebugger{this, "MuonCombinedDebuggerTool",
                                                                 "MuonCombined::MuonCombinedDebuggerTool/MuonCombinedDebuggerTool"};

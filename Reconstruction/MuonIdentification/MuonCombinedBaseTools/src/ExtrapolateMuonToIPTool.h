@@ -66,7 +66,7 @@ private:
         "Trk::Extrapolator/MuonExtrapolator",
         "MuonExtrapolator",
     };  //!< MuonExtrapolator
-    ToolHandle<Muon::MuonEDMPrinterTool> m_printer{
+    PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{
         this,
         "Printer",
         "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool",

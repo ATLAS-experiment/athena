@@ -43,7 +43,7 @@ private:
     ToolHandle<ICscSegmentUtilTool> m_segmentTool{this, "segmentTool", "CscSegmentUtilTool/CscSegmentUtilTool"};
     ToolHandle<Muon::IMuonClusterOnTrackCreator> m_cscClusterOnTrackCreator{this, "cscRotCreator",
                                                                             "Muon::CscClusterOnTrackCreator/CscClusterOnTrackCreator"};
-    ToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "printerTool", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
+    PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "printerTool", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
 };
 
 #endif

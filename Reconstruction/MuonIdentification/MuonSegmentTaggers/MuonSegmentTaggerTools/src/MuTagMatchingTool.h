@@ -119,11 +119,7 @@ private:
         "Propagator",
         "Trk::RungeKuttaPropagator/AtlasRungeKuttaPropagator",
     };  //!< Pointer on propagator for SL propagation
-    ToolHandle<Muon::MuonEDMPrinterTool> m_printer{
-        this,
-        "Printer",
-        "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool",
-    };
+    PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{this,"Printer", ""};
     ToolHandle<Muon::IMuonSegmentHitSummaryTool> m_hitSummaryTool{
         this,
         "MuonSegmentHitSummary",

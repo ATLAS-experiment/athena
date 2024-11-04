@@ -66,7 +66,7 @@ namespace Muon {
         std::string print(MuonSegmentCombiSummary& summary) const;
         static std::string print(MuonSegmentCombiOverlapSummary& summary) ;
 
-        ToolHandle<Muon::MuonEDMPrinterTool> m_printer{
+        PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{
             this,
             "Printer",
             "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool",
