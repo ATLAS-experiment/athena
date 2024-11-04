@@ -109,11 +109,6 @@ StatusCode MakeEventStreamInfo::postExecute() {
          return(StatusCode::FAILURE);
       }
    }
-   static std::once_flag resetNumberOfEventsFlag;
-   std::call_once(resetNumberOfEventsFlag, [this, pEventStream]() -> void {
-      ATH_MSG_DEBUG("Resetting the EventStreamInfo payload at the first event");
-      pEventStream->reset();
-   });
    pEventStream->addEvent();
    pEventStream->insertProcessingTag(dataHeader->getProcessTag());
    pEventStream->insertLumiBlockNumber( lumiN );
