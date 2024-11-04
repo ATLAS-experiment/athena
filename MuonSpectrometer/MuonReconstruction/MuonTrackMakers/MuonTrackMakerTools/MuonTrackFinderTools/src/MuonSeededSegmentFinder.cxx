@@ -21,11 +21,18 @@
 namespace Muon {
 
     MuonSeededSegmentFinder::MuonSeededSegmentFinder(const std::string& ty, const std::string& na, const IInterface* pa) :
-        AthAlgTool(ty, na, pa), m_magFieldProperties(Trk::NoField) {
-        declareInterface<IMuonSeededSegmentFinder>(this);
-    }
+        base_class(ty, na, pa), m_magFieldProperties(Trk::NoField) {}
 
     StatusCode MuonSeededSegmentFinder::initialize() {
+
+
+        ATH_CHECK(m_key_mdt.initialize(!m_key_mdt.empty()));
+        ATH_CHECK(m_key_csc.initialize(!m_key_csc.empty()));  // check for layouts without CSCs
+        ATH_CHECK(m_key_tgc.initialize(!m_key_tgc.empty()));
+        ATH_CHECK(m_key_rpc.initialize(!m_key_rpc.empty()));
+        ATH_CHECK(m_key_stgc.initialize(!m_key_stgc.empty()));  // check for layouts without STGCs
+        ATH_CHECK(m_key_mm.initialize(!m_key_mm.empty()));      // check for layouts without MicroMegas
+
         ATH_CHECK(m_DetectorManagerKey.initialize());
         ATH_CHECK(m_segMaker.retrieve());
         ATH_CHECK(m_segMakerNoHoles.retrieve());
@@ -34,12 +41,7 @@ namespace Muon {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_printer.retrieve());
 
-        ATH_CHECK(m_key_mdt.initialize());
-        ATH_CHECK(m_key_csc.initialize(!m_key_csc.empty()));  // check for layouts without CSCs
-        ATH_CHECK(m_key_tgc.initialize());
-        ATH_CHECK(m_key_rpc.initialize());
-        ATH_CHECK(m_key_stgc.initialize(!m_key_stgc.empty()));  // check for layouts without STGCs
-        ATH_CHECK(m_key_mm.initialize(!m_key_mm.empty()));      // check for layouts without MicroMegas
+
 
         return StatusCode::SUCCESS;
     }
@@ -183,14 +185,9 @@ namespace Muon {
 
     void MuonSeededSegmentFinder::extractMdtPrdCols(const EventContext& ctx, const std::set<IdentifierHash>& chIdHs,
                                                     std::vector<const MdtPrepDataCollection*>& target) const {
-        SG::ReadHandle<Muon::MdtPrepDataContainer> h_mdtPrdCont(m_key_mdt, ctx);
-        const Muon::MdtPrepDataContainer* mdtPrdContainer;
-        if (h_mdtPrdCont.isValid()) {
-            mdtPrdContainer = h_mdtPrdCont.cptr();
-        } else {
-            ATH_MSG_WARNING("Cannot retrieve mdtPrepDataContainer " << m_key_mdt.key());
-            return;
-        }
+
+        if (m_key_mdt.empty()) return;
+        SG::ReadHandle mdtPrdContainer{m_key_mdt, ctx};
         if (mdtPrdContainer->empty()) return;
 
         // loop over chambers and get collections
@@ -209,14 +206,8 @@ namespace Muon {
 
     void MuonSeededSegmentFinder::extractRpcPrdCols(const EventContext& ctx, const std::set<IdentifierHash>& chIdHs,
                                                     std::vector<const RpcPrepDataCollection*>& target) const {
-        SG::ReadHandle<Muon::RpcPrepDataContainer> h_rpcPrdCont(m_key_rpc, ctx);
-        const Muon::RpcPrepDataContainer* rpcPrdContainer;
-        if (h_rpcPrdCont.isValid()) {
-            rpcPrdContainer = h_rpcPrdCont.cptr();
-        } else {
-            ATH_MSG_WARNING("Cannot retrieve rpcPrepDataContainer " << m_key_rpc.key());
-            return;
-        }
+        if (m_key_rpc.empty()) return;
+        SG::ReadHandle rpcPrdContainer{m_key_rpc, ctx};
         if (rpcPrdContainer->empty()) return;
 
         // loop over chambers and get collections
@@ -235,14 +226,8 @@ namespace Muon {
 
     void MuonSeededSegmentFinder::extractTgcPrdCols(const EventContext& ctx, const std::set<IdentifierHash>& chIdHs,
                                                     std::vector<const TgcPrepDataCollection*>& target) const {
-        SG::ReadHandle<Muon::TgcPrepDataContainer> h_tgcPrdCont(m_key_tgc, ctx);
-        const Muon::TgcPrepDataContainer* tgcPrdContainer;
-        if (h_tgcPrdCont.isValid()) {
-            tgcPrdContainer = h_tgcPrdCont.cptr();
-        } else {
-            ATH_MSG_WARNING("Cannot retrieve tgcPrepDataContainer " << m_key_tgc.key());
-            return;
-        }
+        if (m_key_tgc.empty()) return;
+        SG::ReadHandle tgcPrdContainer{m_key_tgc, ctx};
         if (tgcPrdContainer->empty()) return;
 
         // loop over chambers and get collections
@@ -261,19 +246,11 @@ namespace Muon {
 
     void MuonSeededSegmentFinder::extractCscPrdCols(const std::set<IdentifierHash>& chIdHs,
                                                     std::vector<const CscPrepDataCollection*>& target) const {
-        if (m_key_csc.key().empty()) {
+        if (m_key_csc.empty()) {
             ATH_MSG_DEBUG("No CSC collection");
             return;
         }
-
-        SG::ReadHandle<Muon::CscPrepDataContainer> h_cscPrdCont(m_key_csc);
-        const Muon::CscPrepDataContainer* cscPrdContainer;
-        if (h_cscPrdCont.isValid()) {
-            cscPrdContainer = h_cscPrdCont.cptr();
-        } else {
-            ATH_MSG_WARNING("Cannot retrieve cscPrepDataContainer " << m_key_csc.key());
-            return;
-        }
+        SG::ReadHandle cscPrdContainer{m_key_csc};
         if (cscPrdContainer->empty()) return;
 
         // loop over chambers and get collections

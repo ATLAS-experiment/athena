@@ -62,7 +62,7 @@ def MuonHitSummaryToolCfg(flags, name="MuonHitSummaryTool", **kwargs):
     return result
 
 def MuonSeededSegmentFinderCfg(flags,name="MuonSeededSegmentFinder", **kwargs):
-    Muon__MuonSeededSegmentFinder=CompFactory.Muon.MuonSeededSegmentFinder
+
     from MuonConfig.MuonSegmentFindingConfig import DCMathSegmentMakerCfg, MdtMathSegmentFinderCfg # FIXME - should really shift this to RecTools then.
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg
     from TrkConfig.TrkExRungeKuttaPropagatorConfig import RungeKuttaPropagatorCfg
@@ -82,6 +82,13 @@ def MuonSeededSegmentFinderCfg(flags,name="MuonSeededSegmentFinder", **kwargs):
     kwargs.setdefault("Propagator", result.popToolsAndMerge(RungeKuttaPropagatorCfg(flags)) )
     kwargs.setdefault("MdtRotCreator", result.popToolsAndMerge (MdtDriftCircleOnTrackCreatorCfg(flags)))
     kwargs.setdefault("Printer", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)) ) # private here
+ 
+    if not flags.Detector.GeometryTGC:
+        kwargs.setdefault('TgcPrepDataContainer', "")
+    if not flags.Detector.GeometryMDT:
+        kwargs.setdefault('MdtPrepDataContainer', "")
+    if not flags.Detector.GeometryRPC:
+        kwargs.setdefault('RpcPrepDataContainer', "")
     if not flags.Detector.GeometryCSC:
         kwargs.setdefault("CscPrepDataContainer","")
     if not flags.Detector.GeometrysTGC:
@@ -92,7 +99,7 @@ def MuonSeededSegmentFinderCfg(flags,name="MuonSeededSegmentFinder", **kwargs):
   
     kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
     
-    muon_seeded_segment_finder = Muon__MuonSeededSegmentFinder(name, **kwargs)
+    muon_seeded_segment_finder = CompFactory.Muon.MuonSeededSegmentFinder(name, **kwargs)
     result.setPrivateTools(muon_seeded_segment_finder)
     return result
         

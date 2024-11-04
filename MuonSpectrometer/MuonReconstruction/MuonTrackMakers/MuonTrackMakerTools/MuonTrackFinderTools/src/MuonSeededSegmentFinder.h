@@ -27,7 +27,7 @@ namespace Muon {
        @brief seeded segment finder that gets its data directly from storegate for a give set of Identifiers or IdentifierHashes
 
     */
-    class MuonSeededSegmentFinder : virtual public IMuonSeededSegmentFinder, public AthAlgTool {
+    class MuonSeededSegmentFinder : public extends<AthAlgTool,  IMuonSeededSegmentFinder> {
     public:
         /** @brief constructor */
         MuonSeededSegmentFinder(const std::string&, const std::string&, const IInterface*);
