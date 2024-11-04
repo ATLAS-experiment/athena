@@ -38,7 +38,7 @@ namespace D3PD {
  * the pieces that don't depend on the template argument.
  */
 class CollectionGetterToolImpl
-  : public extends1<ObjGetterToolImpl, ICollectionGetterTool>
+  : public extends<ObjGetterToolImpl, ICollectionGetterTool>
 {
 public:
   /**

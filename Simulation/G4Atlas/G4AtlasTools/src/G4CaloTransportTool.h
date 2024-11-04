@@ -21,7 +21,7 @@ class G4FieldTrack;
 ///
 /// @author Joshua Falco Beirer <joshua.falco.beirer@cern.ch>
 ///
-class G4CaloTransportTool : virtual public extends1<AthAlgTool, IG4CaloTransportTool>
+class G4CaloTransportTool : virtual public extends<AthAlgTool, IG4CaloTransportTool>
 {
 
   public:

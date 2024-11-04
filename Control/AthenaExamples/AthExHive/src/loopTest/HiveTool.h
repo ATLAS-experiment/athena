@@ -13,7 +13,7 @@
 
 #include <string>
 
-class HiveTool : public extends1<AthAlgTool,IHiveTool> {
+class HiveTool : public extends<AthAlgTool,IHiveTool> {
 public:
   HiveTool( const std::string&, const std::string&, const IInterface* );
   virtual ~HiveTool();

@@ -59,7 +59,7 @@ class ICollectionGetterTool;
  *   CollectionGetterRegistry - The ICollectionGetterRegistryTool instance.
  */
 class IndexAssociationFillerTool
-  : public extends1<AthAlgTool, IBlockFillerTool>, public AddVariable
+  : public extends<AthAlgTool, IBlockFillerTool>, public AddVariable
 {
 public:
   /**

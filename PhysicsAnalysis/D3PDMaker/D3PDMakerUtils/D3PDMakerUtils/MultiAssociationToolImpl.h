@@ -41,7 +41,7 @@ namespace D3PD {
  * be overridden if the tool should itself fill any tuple variables.
  */
 class MultiAssociationToolImpl
-  : public extends1<AthAlgTool, IMultiAssociationTool>,
+  : public extends<AthAlgTool, IMultiAssociationTool>,
     public AddVariable
 {
 public:

@@ -54,7 +54,7 @@ namespace  D3PD {
  *                  Omitted if empty.
  */
 class ContainedMultiAssociationFillerTool
-  : public extends1<AthAlgTool, IBlockFillerTool>, public AddVariable
+  : public extends<AthAlgTool, IBlockFillerTool>, public AddVariable
 {
 public:
   /**

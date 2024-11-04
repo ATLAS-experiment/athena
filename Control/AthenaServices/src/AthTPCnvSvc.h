@@ -28,7 +28,7 @@ class ICLIDSvc;
 
 
 class AthTPCnvSvc
-  : public extends1<AthService, ITPCnvSvc>
+  : public extends<AthService, ITPCnvSvc>
 { 
  public: 
 

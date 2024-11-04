@@ -21,7 +21,7 @@
 #include <mutex>
 #include <memory>
 
-class HiveExSvc : public extends1<AthService,IHiveExSvc> {
+class HiveExSvc : public extends<AthService,IHiveExSvc> {
 
 public:
   HiveExSvc(const std::string& name, ISvcLocator* svc);
