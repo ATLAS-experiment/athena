@@ -19,8 +19,7 @@
 #define ATHMONBENCH_H
 
 #include <ctime>
-#include <sstream>
-#include <ostream>
+#include <iosfwd>
 #include "GaudiKernel/IMessageSvc.h"
 
 class AthMonBench {
@@ -28,7 +27,7 @@ public:
 
   static const MSG::Level s_resourceMonThreshold = MSG::DEBUG;
 
-  AthMonBench();
+  AthMonBench() = default;
   ~AthMonBench() = default;
 
   //Modify:
@@ -51,9 +50,9 @@ public:
 
 private:
   typedef long long TMem;//bytes
-  TMem m_deltaMem;
-  clock_t m_deltaCPU;
-  int m_count;
+  TMem m_deltaMem{};
+  clock_t m_deltaCPU{};
+  int m_count{};
   static TMem currentVMem();
 };
 
@@ -62,10 +61,8 @@ std::ostream& operator << ( std::ostream& os, const AthMonBench& br);
 /////////////
 // Inlines //
 /////////////
-inline AthMonBench::AthMonBench() { reset(); }
 
-inline void AthMonBench::reset()
-{
+inline void AthMonBench::reset(){
   m_deltaMem = 0;
   m_deltaCPU = 0;
   m_count = 0;
