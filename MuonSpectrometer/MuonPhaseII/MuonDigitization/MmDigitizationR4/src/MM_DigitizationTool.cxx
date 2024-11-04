@@ -277,7 +277,7 @@ namespace MuonR4 {
 	// TO DO: THERE IS NO DESING THICKNESS, BUT HOW TO GET DIFFERENT THICKNESSES LIKE BEFORE?
 	// double shift = 0.5 * design.thickness();
 	double shift = 0.5 * m_driftGapWidth ;
-	std::optional<double> lambda, lambdaEntrance;
+	std::optional<double> lambda;
 	if (gasGap == 1 || gasGap == 3) {
 	  lambda = Amg::intersect<3>(locPos, locDir, Amg::Vector3D::UnitZ(), -shift);
 	} else if (gasGap == 2 || gasGap == 4) {
