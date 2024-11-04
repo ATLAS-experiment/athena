@@ -1,5 +1,4 @@
-/*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+/*  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/SeedingTool.h"
@@ -417,6 +416,11 @@ namespace ActsTrk {
     
     // define cuts used for fast tracking configuration
     if (m_useExperimentCuts) {
+
+      // This function will be applied to select space points during grid filling
+      m_finderCfg.spacePointSelector
+        .connect<itkFastTrackingSPselect>();
+      
       m_finderCfg.experimentCuts.connect(
 					 [](const void*, float bottomRadius, float cotTheta) -> bool {
 					   
