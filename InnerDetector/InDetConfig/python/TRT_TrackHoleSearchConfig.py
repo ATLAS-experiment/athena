@@ -9,8 +9,8 @@ def TRTTrackHoleSearchToolCfg(flags, name="TRTTrackHoleSearchTool", **kwargs):
 
     if "extrapolator" not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-        kwargs.setdefault("extrapolator", acc.addPublicTool(
-            acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))))
+        kwargs.setdefault("extrapolator", acc.popToolsAndMerge(
+            AtlasExtrapolatorCfg(flags)))
     
     acc.setPrivateTools(CompFactory.TRTTrackHoleSearchTool(name, **kwargs))
     return acc
