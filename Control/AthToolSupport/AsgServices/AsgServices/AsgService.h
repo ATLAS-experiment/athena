@@ -39,16 +39,11 @@ namespace asg
   /// Loosely based on the \ref AsgTool implementation.
 
   class AsgService :
-#ifndef XAOD_STANDALONE
     public extends<AsgServiceBase, IAsgService>
-#else
-    public AsgServiceBase, public virtual IAsgService
-#endif
   {
   public:
     AsgService (const std::string& name,
                 ISvcLocator* pSvcLocator);
-
 
     /// set up/tear down functions
     /// \{
@@ -59,27 +54,7 @@ namespace asg
     /// Print the state of the service
     virtual void print() const;
 
-    /// add the given interface to the list of interfaces
-    template<typename T> void declareServiceInterface ();
-
-
-#ifndef XAOD_STANDALONE
-  private:
-    /// list of interfaces we have
-    std::vector<std::pair<const InterfaceID& (*)(),void *(*)(AsgService*)>> m_interfaces;
-#endif
-
   }; // class AsgService
-
-
-
-  template<typename T>
-  void AsgService :: declareServiceInterface ()
-  {
-#ifndef XAOD_STANDALONE
-    m_interfaces.emplace_back (T::interfaceID, [] (AsgService *self) -> void* {return dynamic_cast<T*>(self);});
-#endif
-  }
 
 } // namespace asg
 

@@ -21,10 +21,10 @@ namespace asg
 #ifndef XAOD_STANDALONE
     : base_class(name, pSvcLocator)
 #else
-      : AsgServiceBase(name)
+    : base_class(name)
 #endif
    {
-     (void) pSvcLocator;
+     (void) pSvcLocator;  // suppress compiler warning in XAOD_STANDALONE
    }
 
   StatusCode AsgService ::

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -13,16 +13,7 @@
 
 // Local include(s):
 #include "AsgMessaging/INamedInterface.h"
-
-#ifdef XAOD_STANDALONE
-/// \brief standalone version of the Gaudi interface declaration
-///
-/// This can't be a no-op, because the Gaudi version needs to be
-/// followed by a semicolon, so we need a statement that requires to
-/// be followed by a semi-colon.
-#define DeclareInterfaceID(iface, major, minor) \
-  static constexpr std::nullptr_t interfaceID = nullptr
-#endif
+#include "AsgTools/Interfaces.h"
 
 namespace asg
 {

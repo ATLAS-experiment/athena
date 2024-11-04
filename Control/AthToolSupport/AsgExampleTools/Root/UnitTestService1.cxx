@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -27,10 +27,8 @@ namespace asg
 {
   UnitTestService1 ::
   UnitTestService1 (const std::string& name, ISvcLocator* pSvcLocator)
-    : AsgService (name, pSvcLocator)
+    : base_class (name, pSvcLocator)
   {
-    declareServiceInterface<IUnitTestService1>();
-
     declareProperty ("propertyInt", m_propertyInt, "the integer property");
     declareProperty ("propertyString", m_propertyString, "the string property");
     declareProperty ("initializeFail", m_initializeFail, "whether initialize should fail");
