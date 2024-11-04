@@ -78,7 +78,7 @@ TestChainParts = {
     'alignmentGroup' : ['Test'],
     'chainPartName'  : '',
     'multiplicity'   : '',
-    'extra'          : ['mv1', 'mv1step', 'mv2', 'ev1', 'ev2', 'ev3', 'gv1', 'mEmpty1', 'mEmpty2', 'ev1dr', 'mv1dr','merge'],
+    'extra'          : ['mv1', 'mv1step', 'mv2', 'ev1', 'ev2', 'ev3', 'gv1', 'mEmpty1', 'mEmpty2', 'mEmpty3', 'ev1dr', 'mv1dr','merge'],
     'trigType'       : ['TestChain'],
     'threshold'      : '',
     'addInfo'        : [''],
