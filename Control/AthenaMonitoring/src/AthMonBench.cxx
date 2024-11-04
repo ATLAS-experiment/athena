@@ -5,6 +5,7 @@
 #include "AthMonBench.h"
 #include <iostream>
 #include <limits>
+#include <string>
 #include <fstream>
 
 namespace{
@@ -27,6 +28,7 @@ AthMonBench::currentVMem(){
     if (line.starts_with(search)) {
       result = std::stol(line.substr(search.size()));
       result = multiply<1024L>(result);
+      break;
     }
   }
   return result;
