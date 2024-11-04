@@ -24,7 +24,7 @@ namespace AthOnnx {
    ///
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
-   class OnnxRuntimeSvc : public asg::AsgService, virtual public IOnnxRuntimeSvc {
+   class OnnxRuntimeSvc : public extends<asg::AsgService, IOnnxRuntimeSvc> {
 
    public:
 
