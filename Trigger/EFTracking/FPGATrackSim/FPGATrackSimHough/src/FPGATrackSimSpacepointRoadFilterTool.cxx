@@ -182,11 +182,11 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
             // Now update the two layers accordingly, having converted invalid SPs back to paired hits.
             std::vector<std::shared_ptr<const FPGATrackSimHit>> new_all_in = spacepoints_in;
             new_all_in.insert(std::end(new_all_in), std::begin(strip_hits_in), std::end(strip_hits_in));
-            initial_road->setHits(layer, new_all_in);
+            initial_road->setHits(layer, std::move(new_all_in));
 
             std::vector<std::shared_ptr<const FPGATrackSimHit>> new_all_out = spacepoints_out;
             new_all_out.insert(std::end(new_all_out), std::begin(strip_hits_out), std::end(strip_hits_out));
-            initial_road->setHits(layer + 1, new_all_out);
+            initial_road->setHits(layer + 1, std::move(new_all_out));
 
             // Debug message.
             ATH_MSG_DEBUG("Found inconsistent number of spacepoints in road with x = " << initial_road->getXBin() << ", y = " << initial_road->getYBin());
@@ -252,10 +252,10 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
                 FPGATrackSimRoad spacepoints_only(working_roads[i]);
 
                 // Update their hits in these layers accordingly.
-                strips_only.setHits(layer, strip_hits_in);
-                strips_only.setHits(layer + 1, strip_hits_out);
-                spacepoints_only.setHits(layer, entry.second);
-                spacepoints_only.setHits(layer + 1, outer_spacepoints[layer + 1]);
+                strips_only.setHits(layer, std::vector<std::shared_ptr<const FPGATrackSimHit>>(strip_hits_in));
+                strips_only.setHits(layer + 1, std::vector<std::shared_ptr<const FPGATrackSimHit>>(strip_hits_out));
+                spacepoints_only.setHits(layer, std::vector<std::shared_ptr<const FPGATrackSimHit>>(entry.second));
+                spacepoints_only.setHits(layer + 1, std::vector<std::shared_ptr<const FPGATrackSimHit>>(outer_spacepoints[layer + 1]));
 
                 // If we inserted a wildcard hit previously, update the WC layers accordingly
                 // in the strips_only road.

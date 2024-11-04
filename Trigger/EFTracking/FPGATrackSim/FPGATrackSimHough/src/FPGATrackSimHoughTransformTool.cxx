@@ -420,8 +420,8 @@ void FPGATrackSimHoughTransformTool::matchIdealGeoSector(FPGATrackSimRoad & r) c
       wcHit->setLayer(il);
       wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st()->getDetType(il));
       std::vector<std::shared_ptr<const FPGATrackSimHit>> wcHits;
-      wcHits.push_back(wcHit);
-      r.setHits(il,wcHits);
+      wcHits.emplace_back(std::move(wcHit));
+      r.setHits(il,std::move(wcHits));
     }
     else {
       modules.push_back(sectorbin);
@@ -450,7 +450,7 @@ void FPGATrackSimHoughTransformTool::addRoad(const std::vector<std::vector<std::
 
   r.setRoadID(m_roads.size() - 1);
   r.setPID(y * m_imageSize_y + x);
-  r.setHits(hits);
+  r.setHits( std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>(hits)); //copy hits
 
   // We use the y coordinate in matchIdealGeoSectors
   // and so it needs to be available before setting the sector.

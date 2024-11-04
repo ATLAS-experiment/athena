@@ -38,12 +38,17 @@ public:
     FPGATrackSimRoad(unsigned nLayers) : m_hits_trans(nLayers) { }
 
     FPGATrackSimRoad(int roadID, pid_t pid, sector_t sector, layer_bitmask_t hit_layers,
-        layer_bitmask_t wildcard_layers, std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> & hits)
+        layer_bitmask_t wildcard_layers, std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> && hits)
         : m_roadID(roadID), m_pid(pid), m_sector(sector), m_hit_layers(hit_layers), m_wildcard_layers(wildcard_layers)/* , m_hits_trans(hits) */
     {
-        setHits(hits);
+        setHits(std::move(hits));
     }
-
+    //Move operators
+    FPGATrackSimRoad(FPGATrackSimRoad&&) noexcept = default;
+    FPGATrackSimRoad& operator=(FPGATrackSimRoad&&) noexcept = default;
+    //Copy operators
+    FPGATrackSimRoad(const FPGATrackSimRoad&) = default;
+    FPGATrackSimRoad& operator=(const FPGATrackSimRoad&) = default;
     virtual ~FPGATrackSimRoad() = default;
 
     ///////////////////////////////////////////////////////////////////////
@@ -58,27 +63,10 @@ public:
     void setWCLayers(layer_bitmask_t wc_layers) { m_wildcard_layers = wc_layers; }
 
     void setNLayers(unsigned layers) { m_hits_trans.resize(layers); m_hits.resize(layers); }
-    void setHits(const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> &hits){
-        if (hits.size() != m_hits_trans.size()) setNLayers(hits.size());
-        for (unsigned i = 0;i < hits.size();++i)
-            setHits(i,hits[i]);
-    }
-    void setHits(unsigned layer, const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits) {
-        m_hits_trans[layer] = hits;
-        m_hits[layer].clear();
-        for (const auto& hit : m_hits_trans[layer])
-            m_hits[layer].push_back(*hit);
-    } // ensure setNLayers is called first
+    void setHits(std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> &&hits);
+    void setHits(unsigned layer, std::vector<std::shared_ptr<const FPGATrackSimHit>> && hits);
 
-    void repopulateTransHits() {  // this is needed if trying to read the hits from the road in a stored output file, call this first, otherwise not in Athena
-      m_hits_trans.resize(m_hits.size());
-      for (unsigned ilayer = 0; ilayer < m_hits.size(); ilayer++) {
-	m_hits_trans[ilayer].resize(m_hits[ilayer].size());
-	for (unsigned ihit = 0; ihit < m_hits[ilayer].size(); ihit++) {
-	  m_hits_trans[ilayer][ihit] = std::make_shared<const FPGATrackSimHit>(m_hits[ilayer][ihit]);
-	}
-      }
-    }
+    void repopulateTransHits();
   
     void setEtaPatternID(int patternID) { m_etaPatternID = patternID; }
 
@@ -110,14 +98,7 @@ public:
 
     const std::vector<std::shared_ptr<const FPGATrackSimHit>> &getHits(size_t layer) const { return m_hits_trans.at(layer); }
 
-    std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> getHits_flat() const {
-        std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> hits;
-        for (const auto& layerHits : m_hits_trans)
-            for (auto const& hit : layerHits)
-                hits.insert(hit);
-                // for (const auto& x : m_hits) hits.insert(x.begin(), x.end());
-        return hits;
-    }
+    std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> getHits_flat() const;
 
     ///////////////////////////////////////////////////////////////////////
     // Utility

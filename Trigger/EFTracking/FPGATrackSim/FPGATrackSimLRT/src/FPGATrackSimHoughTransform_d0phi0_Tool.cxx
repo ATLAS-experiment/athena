@@ -425,7 +425,7 @@ FPGATrackSimRoad FPGATrackSimHoughTransform_d0phi0_Tool::createRoad(const std::u
   r.setPID(y * m_imageSize_y + x);
   if (m_idealGeoRoads) matchIdealGeoSector(r);
   r.setHitLayers(hitLayers);
-  r.setHits(sorted_hits);
+  r.setHits(std::move(sorted_hits));
   r.setSubRegion(m_subRegion);
   r.setX(m_bins_x[x] + m_step_x/2);
   r.setY(m_bins_y[y] + m_step_y/2);
@@ -433,7 +433,7 @@ FPGATrackSimRoad FPGATrackSimHoughTransform_d0phi0_Tool::createRoad(const std::u
 }
 
 // Creates a road from hits that pass through the given bin (x, y), and pushes it onto m_roads
-FPGATrackSimRoad FPGATrackSimHoughTransform_d0phi0_Tool::createRoad(const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> &hits, layer_bitmask_t hitLayers, unsigned x, unsigned y) const
+FPGATrackSimRoad FPGATrackSimHoughTransform_d0phi0_Tool::createRoad(std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> &&hits, layer_bitmask_t hitLayers, unsigned x, unsigned y) const
 {
   FPGATrackSimRoad r;
   r.setRoadID(m_roads.size());
@@ -441,7 +441,7 @@ FPGATrackSimRoad FPGATrackSimHoughTransform_d0phi0_Tool::createRoad(const std::v
   if (m_useSectors) r.setSector(m_FPGATrackSimBankSvc->SectorBank_1st()->findSector(hits));
   else if (m_idealGeoRoads) matchIdealGeoSector(r);
   r.setHitLayers(hitLayers);
-  r.setHits(hits);
+  r.setHits(std::move(hits));
   r.setSubRegion(m_subRegion);
   r.setX(m_bins_x[x] + m_step_x/2);
   r.setY(m_bins_y[y] + m_step_y/2);
@@ -460,7 +460,7 @@ void FPGATrackSimHoughTransform_d0phi0_Tool::addRoad(const std::unordered_set<st
 
   auto sorted_hits = ::sortByLayer(hits);
   sorted_hits.resize(m_nLayers); // If no hits in last layer, return from sortByLayer will be too short
-  m_roads.push_back(createRoad(sorted_hits, hitLayers, x, y));
+  m_roads.push_back(createRoad(std::move(sorted_hits), hitLayers, x, y));
 }
 
 // Use this version of addRoad when hit tracing is turned off
@@ -498,7 +498,7 @@ void FPGATrackSimHoughTransform_d0phi0_Tool::addRoad(const std::vector<std::shar
   auto sorted_hits = ::sortByLayer(road_hits);
   sorted_hits.resize(m_nLayers); // If no hits in last layer, return from sortByLayer will be too short
 
-  m_roads.push_back(createRoad(sorted_hits, hitLayers, x, y));
+  m_roads.push_back(createRoad(std::move(sorted_hits), hitLayers, x, y));
 }
 
 

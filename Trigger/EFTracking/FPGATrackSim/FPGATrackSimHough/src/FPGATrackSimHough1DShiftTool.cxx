@@ -464,7 +464,7 @@ FPGATrackSimRoad FPGATrackSimHough1DShiftTool::makeRoad(const std::vector<std::s
 
     FPGATrackSimRoad r;
     r.setHitLayers(hitLayers);
-    r.setHits(sorted_hits);
+    r.setHits(std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>(sorted_hits));
     r.setSubRegion(m_subRegion);
     if (m_fieldCorrection) {
       int inner_bin = static_cast<int>(bin_track)-static_cast<int>(shifts[0]);
@@ -526,7 +526,7 @@ void FPGATrackSimHough1DShiftTool::matchIdealGeoSector(FPGATrackSimRoad & r) con
             wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st()->getDetType(il));
             std::vector<std::shared_ptr<const FPGATrackSimHit>> wcHits;
             wcHits.push_back(std::move(wcHit));
-            r.setHits(il,wcHits);
+            r.setHits(il,std::move(wcHits));
         }
         else {
             modules.push_back(sectorbin);

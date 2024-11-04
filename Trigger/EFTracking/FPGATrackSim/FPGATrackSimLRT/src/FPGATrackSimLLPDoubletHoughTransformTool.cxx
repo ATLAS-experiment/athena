@@ -154,7 +154,7 @@ FPGATrackSimRoad FPGATrackSimLLPDoubletHoughTransformTool::createRoad(const std:
 
     FPGATrackSimRoad r;
     r.setHitLayers(hitLayers);
-    r.setHits(sorted_hits);
+    r.setHits(std::move(sorted_hits));
     return r;
 }
 

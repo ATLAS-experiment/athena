@@ -113,7 +113,7 @@ FPGATrackSimRoad FPGATrackSimPhiRoadFilterTool::buildRoad(std::shared_ptr<const 
       road_hits.push_back(std::move(wcHit));
     }
     ATH_MSG_DEBUG("PhiRoad Hits " << lyr << " " << road_hits.size() << " " << origr->getHits(lyr).size());
-    r.setHits(lyr,road_hits);
+    r.setHits(lyr,std::move(road_hits));
   }
 
   r.setHitLayers(hitLayers);
