@@ -55,13 +55,14 @@ int main(int argc, char** argv) {
         TEST_FUNCTION(isElectron)
         TEST_FUNCTION(isEMInteracting)
         TEST_FUNCTION(isGenSpecific)
+        TEST_FUNCTION(isGlueball)
         TEST_FUNCTION(isGluon)
         TEST_FUNCTION(isGraviton)
         TEST_FUNCTION(isHadron)
         TEST_FUNCTION(isHeavyBaryon)
         TEST_FUNCTION(isHeavyHadron)
-        TEST_FUNCTION(isHeavyMeson)
-        TEST_FUNCTION(isHiggs) // 30
+        TEST_FUNCTION(isHeavyMeson) // 30
+        TEST_FUNCTION(isHiggs)
         TEST_FUNCTION(isLepton)
         TEST_FUNCTION(isLeptoQuark)
         TEST_FUNCTION(isLightBaryon)
@@ -70,8 +71,8 @@ int main(int argc, char** argv) {
         TEST_FUNCTION(isMeson)
         TEST_FUNCTION(isMuon)
         TEST_FUNCTION(isNeutral)
-        TEST_FUNCTION(isNeutrino)
-        TEST_FUNCTION(isNucleus) // 40
+        TEST_FUNCTION(isNeutrino) // 40
+        TEST_FUNCTION(isNucleus)
         TEST_FUNCTION(isParton)
         TEST_FUNCTION(isPentaquark)
         TEST_FUNCTION(isPhoton)
@@ -80,22 +81,19 @@ int main(int argc, char** argv) {
         TEST_FUNCTION(isStrange)
         TEST_FUNCTION(isStrangeBaryon)
         TEST_FUNCTION(isStrangeHadron)
-        TEST_FUNCTION(isStrangeMeson)
-        TEST_FUNCTION(isStrongInteracting) // 50
+        TEST_FUNCTION(isStrangeMeson) // 50
+        TEST_FUNCTION(isStrongInteracting)
         TEST_FUNCTION(isSUSY)
         TEST_FUNCTION(isTau)
-        /*TEST_FUNCTION(isTetraquark) */
         TEST_FUNCTION(isTop)
-        /*TEST_FUNCTION(isTrajectory)*/
         TEST_FUNCTION(isTransportable)
         TEST_FUNCTION(isValid)
         TEST_FUNCTION(isW)
         TEST_FUNCTION(isZ)
-        /*TEST_FUNCTION(leadingQuark)*/
         TEST_FUNCTION(threeCharge)
         /* NEW **/
-        TEST_FUNCTION(isBBbarMeson)
-        TEST_FUNCTION(isCCbarMeson) // 60
+        TEST_FUNCTION(isBBbarMeson) // 60
+        TEST_FUNCTION(isCCbarMeson)
         TEST_FUNCTION(isExcited)
         TEST_FUNCTION(isGeantino)
         TEST_FUNCTION(isHiddenValley)
@@ -104,8 +102,8 @@ int main(int argc, char** argv) {
         TEST_FUNCTION(isPythia8Specific)
         TEST_FUNCTION(SUSY::isRBaryon)
         TEST_FUNCTION(SUSY::isRBottomHadron)
-        TEST_FUNCTION(SUSY::isRGlueball)
-        TEST_FUNCTION(SUSY::isRHadron) // 70
+        TEST_FUNCTION(SUSY::isRGlueball) // 70
+        TEST_FUNCTION(SUSY::isRHadron)
         TEST_FUNCTION(SUSY::isRMeson)
         TEST_FUNCTION(SUSY::isRTopHadron)
         TEST_FUNCTION(SUSY::isSBaryon)
@@ -114,8 +112,8 @@ int main(int argc, char** argv) {
         TEST_FUNCTION(SUSY::isSBottomMeson)
         TEST_FUNCTION(SUSY::isSLepton)
         TEST_FUNCTION(isSMLepton)
-        TEST_FUNCTION(isSMNeutrino)
-        TEST_FUNCTION(SUSY::isSMeson) // 80
+        TEST_FUNCTION(isSMNeutrino) // 80
+        TEST_FUNCTION(SUSY::isSMeson)
         TEST_FUNCTION(SUSY::isSTopBaryon)
         TEST_FUNCTION(SUSY::isSTopHadron)
         TEST_FUNCTION(SUSY::isSTopMeson)
@@ -123,8 +121,8 @@ int main(int argc, char** argv) {
         TEST_FUNCTION(isTopBaryon)
         TEST_FUNCTION(isTopHadron)
         TEST_FUNCTION(isTopMeson)
-        TEST_FUNCTION(isTrajectory)
-        TEST_FUNCTION(leadingQuark)  // 90
+        TEST_FUNCTION(isTrajectory)  // 90
+        TEST_FUNCTION(leadingQuark)
         TEST_FUNCTION(SUSY::spin)
         if  (myline!=current) { printf("reference :%s\ncalculated:%s\n",myline.c_str(),current.c_str()); return 1; }
         //printf("%s\n",current.c_str());
