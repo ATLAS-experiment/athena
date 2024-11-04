@@ -1011,9 +1011,9 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
     const xAOD::FileMetaData* fmd = nullptr;
 
     // configure PRW rtag options from m_autoconfigPRWRtags string
-    // e.g. "mc20a:r13167_r14859,mc20d:r13144_r14860,mc20e:r13145_r14861,mc21a:r13752_r13829,mc23a:r14622_r14932,mc23c:r14799_r14908,mc23d:r15224"
+    // e.g. "mc20a:r13167_r14859,mc20d:r13144_r14860,mc20e:r13145_r14861,mc21a:r13752_r13829,mc23a:r14622_r14932_r15540,mc23c:r14799_r14908,mc23d:r15224_r15530,mc23e:r16083"
     std::map<std::string,std::vector<std::string>> PRWRtags = {};
-    std::string allcampaigns = "mc20a.mc20d.mc20e.mc21a.mc23a.mc23c.mc23d";
+    std::string allcampaigns = "mc20a.mc20d.mc20e.mc21a.mc23a.mc23c.mc23d.mc23e";
     bool standard_like = true;
     for ( const auto& campaign_rtags : split( m_autoconfigPRWRtags, "," ) ) {                                          // split string by ","
        std::string icampaign = campaign_rtags.substr(0, campaign_rtags.find(":"));                              // first field = campaign, split by ":"
@@ -1677,7 +1677,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_autoconfigPRWFile, "PRW.autoconfigPRWFile", rEnv, "None");
   configFromFile(m_autoconfigPRWCombinedmode, "PRW.autoconfigPRWCombinedmode", rEnv, false);
   configFromFile(m_autoconfigPRWRPVmode, "PRW.autoconfigPRWRPVmode", rEnv, false);
-  configFromFile(m_autoconfigPRWRtags, "PRW.autoconfigPRWRtags", rEnv, "mc20a:r13167_r14859,mc20d:r13144_r14860,mc20e:r13145_r14861,mc21a:r13752_r13829,mc23a:r14622_r14932_r15540,mc23c:r14799_r14908,mc23d:r15224_r15530"); // Tag details here: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/AtlasProductionGroup
+  configFromFile(m_autoconfigPRWRtags, "PRW.autoconfigPRWRtags", rEnv, "mc20a:r13167_r14859,mc20d:r13144_r14860,mc20e:r13145_r14861,mc21a:r13752_r13829,mc23a:r14622_r14932_r15540,mc23c:r14799_r14908,mc23d:r15224_r15530,mc23e:r16083"); // Tag details here: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/AtlasProductionGroup
   configFromFile(m_commonPRWFileMC20a, "PRW.commonPRWFileMC20a", rEnv, "PileupReweighting/mc20_common/mc20a.284500.physlite.prw.v1.root");
   configFromFile(m_commonPRWFileMC20d, "PRW.commonPRWFileMC20d", rEnv, "PileupReweighting/mc20_common/mc20d.300000.physlite.prw.v1.root");
   configFromFile(m_commonPRWFileMC20e, "PRW.commonPRWFileMC20e", rEnv, "PileupReweighting/mc20_common/mc20e.310000.physlite.prw.v1.root");
