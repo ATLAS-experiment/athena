@@ -37,28 +37,9 @@
 
 //____________________________________________________________________________
 TRTTrackHoleSearchTool::TRTTrackHoleSearchTool(const std::string& type, const std::string& name, const IInterface* parent)
-	: AthAlgTool(type, name, parent),
-	  m_extrapolator("Trk::Extrapolator"),
-	  m_conditions_svc("TRT_ConditionsSummarySvc", name),
-	  m_has_been_called(false),
-	  m_TRT_ID(nullptr),
-	  m_trt_outer_surf(nullptr)
+	: AthAlgTool(type, name, parent)
 {
 	declareInterface<ITrackHoleSearchTool>(this);
-
-	declareProperty("extrapolator",             m_extrapolator );
-	declareProperty("conditions_svc",           m_conditions_svc);
-	declareProperty("use_conditions_svc",       m_use_conditions_svc =  true);
-	declareProperty("outer_radius",             m_outer_radius =        1075.0*CLHEP::mm );  // barrel 1075.0, EC 1010.0
-	declareProperty("max_z",                    m_max_z =               2715.0*CLHEP::mm );  // barrel 715.0, EC 2715.0
-	declareProperty("max_trailing_holes",       m_max_trailing_holes =  1 );   // only used if not end_at_last_trt_hit
-	declareProperty("begin_at_first_trt_hit",   m_begin_at_first_trt_hit = false ); // if not, extrapolate from last Si hit
-	declareProperty("end_at_last_trt_hit",      m_end_at_last_trt_hit = false ); // if not, continue hole search to the edge of the TRT
-	declareProperty("bcheck",                   m_bcheck =              false );
-	declareProperty("do_dump_bad_straw_log",    m_do_dump_bad_straw_log = false );
-	declareProperty("locR_cut",                 m_locR_cut =            -1.0 );   // 1.4*CLHEP::mm // negative means no cut
-	declareProperty("locR_sigma_cut",           m_locR_sigma_cut =      -1.0 );
-	declareProperty("locZ_cut",                 m_locZ_cut =            5.0*CLHEP::mm ); // 5.0*CLHEP::mm );
 }
 
 
@@ -260,7 +241,8 @@ int TRTTrackHoleSearchTool::extrapolateBetweenHits(const Trk::TrackParameters* s
           m_extrapolator->extrapolateStepwise(Gaudi::Hive::currentContext(),
                                               *start_parameters, 
                                               end_surf, 
-                                              Trk::alongMomentum, m_bcheck, partHyp);
+                                              Trk::alongMomentum, m_bcheck.value(),
+                                              partHyp);
 
 	if(steps.empty()) {
 		ATH_MSG_DEBUG("extrapolateBetweenHits: extrapolateStepwise returned null");

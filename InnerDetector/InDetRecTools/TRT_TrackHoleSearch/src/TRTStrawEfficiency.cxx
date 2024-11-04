@@ -13,11 +13,8 @@
 #include "TRT_TrackHoleSearch/TRTStrawEfficiency.h"
 #include "TRT_TrackHoleSearch/TRTTrackHoleSearchTool.h"
 
-//#include "TrkParameters/Perigee.h"
 #include "TrkParameters/TrackParameters.h"
-//#include "TrkParameters/MeasuredTrackParameters.h"
 #include "TrkTrack/TrackStateOnSurface.h"
-#include "CLHEP/Units/SystemOfUnits.h"
 #include "Identifier/Identifier.h"
 #include "InDetIdentifier/TRT_ID.h"
 #include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
@@ -34,48 +31,7 @@
 
 #include "TTree.h"
 
-TRTStrawEfficiency::TRTStrawEfficiency(const std::string& name, ISvcLocator* pSvcLocator)
-	: AthAlgorithm(name, pSvcLocator),
-	  m_trt_hole_finder("TRTTrackHoleSearchTool"),
-	  m_hist_svc("THistSvc", name),
-	  m_TRTStrawNeighbourSvc("TRT_StrawNeighbourSvc", name),
-	  m_tree(nullptr),
-	  m_TRT_ID(nullptr),
-	  m_num_events(0),
-	  m_num_tracks(0),
-	  m_num_preselected_tracks(0),
-	  m_event_number(0),
-	  m_run_number(0),
-	  m_lumi_block(0),
-	  m_track_pt(0.),
-	  m_track_eta(0.),
-	  m_track_phi(0.),
-	  m_track_d0(0.),
-	  m_track_z0(0.),
-	  m_n_pixel_hits(0),
-	  m_n_sct_hits(0),
-	  m_n_trt_hits(0),
-	  m_n_pixel_holes(0),
-	  m_n_sct_holes(0),
-	  m_n_trt_holes(0),
-	  m_n_primary_vertex(0),
-	  m_n_tube_hits(0)
-{
-	declareProperty("trt_hole_finder",          m_trt_hole_finder);
-	declareProperty("max_abs_d0",               m_max_abs_d0 =          600*CLHEP::mm );
-	declareProperty("max_abs_z0",               m_max_abs_z0 =          600*CLHEP::mm );
-	declareProperty("min_pT",                   m_min_pT =              1.0*CLHEP::GeV );
-	declareProperty("min_p",                    m_min_p =               2.0*CLHEP::GeV ); // added by dan
-	declareProperty("max_abs_eta",              m_max_abs_eta =         2.5 );
-	declareProperty("min_pixel_hits",           m_min_pixel_hits =      0 );
-	declareProperty("min_sct_hits",             m_min_sct_hits =        2 );
-	declareProperty("min_trt_hits",             m_min_trt_hits =        15 );
-	declareProperty("hist_svc",                 m_hist_svc );
-	declareProperty("straw_neighbour_svc",      m_TRTStrawNeighbourSvc );
-	declareProperty("tree_name",                m_tree_name =           "trt_eff" );
-	declareProperty("stream_name",              m_stream_name =         "TRTEffStream" );
-	declareProperty("required_trigger",         m_required_trigger =    "" );
-}
+TRTStrawEfficiency::TRTStrawEfficiency(const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator) {}
 
 
 //____________________________________________________________________________
@@ -101,7 +57,7 @@ StatusCode TRTStrawEfficiency::initialize() {
 	}
 
 	// ntuple
-	m_tree = new TTree(m_tree_name.c_str(), m_tree_name.c_str());
+	m_tree = new TTree(m_tree_name.value().c_str(), m_tree_name.value().c_str());
 	ATH_CHECK(m_hist_svc->regTree(std::string("/") + m_stream_name + std::string("/") + m_tree_name, m_tree));
 
 	// Read handles
