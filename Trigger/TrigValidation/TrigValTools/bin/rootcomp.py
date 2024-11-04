@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # @file:    rootcomp.py
 # @purpose: Script to compare the histograms in two root files
 # @author:  Frank Winklmeier, Will Buttinger
 #
-from __future__ import print_function
 import sys
 import os
 import os.path
@@ -132,14 +131,9 @@ def main():
 
    print("-"*70)
 
-
    # Now import ROOT
-   import cppyy  # noqa: F401
-   try:
-      from PerfMonAna import PyRootLib
-      ROOT = PyRootLib.importRoot( batch=True )
-   except ImportError:
-      import ROOT   # noqa: F401
+   from PyUtils import RootUtils
+   ROOT = RootUtils.import_root( batch=True ) # noqa: F841
 
    sys.stdout.flush()
    sys.stderr.flush()
