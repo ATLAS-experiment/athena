@@ -113,7 +113,7 @@ def FPGAActsTrkConverterCfg(flags):
     return result
 
 
-def WriteToAOD(flags, stage = ''): #  store xAOD containers in AOD file
+def WriteToAOD(flags, stage = '',finalTrackParticles = ''): #  store xAOD containers in AOD file
     result = ComponentAccumulator()
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from OutputStreamAthenaPool.OutputStreamConfig import outputStreamName
@@ -134,7 +134,7 @@ def WriteToAOD(flags, stage = ''): #  store xAOD containers in AOD file
     toAOD = []
     toAOD += [f"xAOD::PixelClusterContainer#xAODPixelClusters{stage}FromFPGACluster",f"xAOD::PixelClusterAuxContainer#xAODPixelClusters{stage}FromFPGAClusterAux.",
               f"xAOD::StripClusterContainer#xAODStripClusters{stage}FromFPGACluster",f"xAOD::StripClusterAuxContainer#xAODStripClusters{stage}FromFPGAClusterAux.",
-              "xAOD::TrackParticleContainer#xAODFPGAProtoTracksTrackParticles","xAOD::TrackParticleAuxContainer#xAODFPGAProtoTracksTrackParticlesAux.",
+              f"xAOD::TrackParticleContainer#{finalTrackParticles}",f"xAOD::TrackParticleAuxContainer#{finalTrackParticles}Aux.",
               f"xAOD::SpacePointContainer#xAODPixelSpacePoints{stage}FromFPGA",f"xAOD::SpacePointAuxContainer#xAODPixelSpacePoints{stage}FromFPGAAux.-measurements",
               f"xAOD::SpacePointContainer#xAODStripSpacePoints{stage}FromFPGA",f"xAOD::SpacePointAuxContainer#xAODStripSpacePoints{stage}FromFPGAAux.-measurements.-sctSpacePointLink",
             ]
@@ -432,12 +432,15 @@ def runDataPrepChain():
     if flags.Trigger.FPGATrackSim.doEDMConversion:
         acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=False, doSP = flags.Trigger.FPGATrackSim.spacePoints))
         if flags.Trigger.FPGATrackSim.convertUnmappedHits: acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgUnmapped_1st', stage = 'Unmapped_1st', doClusters = False))
-        if flags.Trigger.FPGATrackSim.writeToAOD:
-            acc.merge(WriteToAOD(flags, stage = '_1st'))
-            if flags.Trigger.FPGATrackSim.spacePoints : acc.merge(WriteToAOD(flags, stage = '_1st'))
         
         if flags.Trigger.FPGATrackSim.connectToToITkTracking:
             acc.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks=FinalDataPrepTrackChainxAODTracksKeyPrefix))
+        
+        if flags.Trigger.FPGATrackSim.writeToAOD:
+            acc.merge(WriteToAOD(flags, stage = '_1st',))
+            if flags.Trigger.FPGATrackSim.spacePoints : acc.merge(WriteToAOD(flags,
+                                                                             stage = '_1st',
+                                                                             finalTrackParticles=f"{FinalDataPrepTrackChainxAODTracksKeyPrefix}TrackParticles"))
             
         # Printout for various FPGA-related objects
         from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
