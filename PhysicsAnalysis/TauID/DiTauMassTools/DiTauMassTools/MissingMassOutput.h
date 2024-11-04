@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class handling the output of the MissingMassCalculator
@@ -18,7 +18,7 @@ namespace DiTauMassTools{
   using ROOT::Math::PtEtaPhiMVector;
   using ROOT::Math::XYVector;
 
-class MissingMassCalculatorV2;
+class MissingMassCalculator;
 
 class MissingMassOutput {
 
@@ -45,21 +45,21 @@ class MissingMassOutput {
     PtEtaPhiMVector GetResonanceVec(int fitcode) const; // returns 4-vec for resonance
     XYVector GetFittedMetVec(int fitcode) const; // returns 2-vec for fitted MET
 
-    friend class MissingMassCalculatorV2;
+    friend class MissingMassCalculator;
 
   private:
     void ClearOutput(bool fUseVerbose);
     int m_FitStatus;
-    double m_FitSignificance[MMCFitMethodV2::MAX];
-    double m_FittedMass[MMCFitMethodV2::MAX];
-    double m_FittedMassUpperError[MMCFitMethodV2::MAX];
-    double m_FittedMassLowerError[MMCFitMethodV2::MAX];
-    PtEtaPhiMVector m_nuvec1[MMCFitMethodV2::MAX];
-    PtEtaPhiMVector m_objvec1[MMCFitMethodV2::MAX];
-    PtEtaPhiMVector m_nuvec2[MMCFitMethodV2::MAX];
-    PtEtaPhiMVector m_objvec2[MMCFitMethodV2::MAX];
-    PtEtaPhiMVector m_totalvec[MMCFitMethodV2::MAX];
-    XYVector m_FittedMetVec[MMCFitMethodV2::MAX];
+    double m_FitSignificance[MMCFitMethod::MAX];
+    double m_FittedMass[MMCFitMethod::MAX];
+    double m_FittedMassUpperError[MMCFitMethod::MAX];
+    double m_FittedMassLowerError[MMCFitMethod::MAX];
+    PtEtaPhiMVector m_nuvec1[MMCFitMethod::MAX];
+    PtEtaPhiMVector m_objvec1[MMCFitMethod::MAX];
+    PtEtaPhiMVector m_nuvec2[MMCFitMethod::MAX];
+    PtEtaPhiMVector m_objvec2[MMCFitMethod::MAX];
+    PtEtaPhiMVector m_totalvec[MMCFitMethod::MAX];
+    XYVector m_FittedMetVec[MMCFitMethod::MAX];
     double m_RMS2MPV;
     std::shared_ptr<TH1F> m_hMfit_all;
     std::shared_ptr<TH1F> m_hMfit_allNoWeight;

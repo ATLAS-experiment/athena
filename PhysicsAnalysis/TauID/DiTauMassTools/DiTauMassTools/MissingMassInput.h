@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class handling the input of the MissingMassCalculator
@@ -46,7 +46,7 @@ class MissingMassInput {
     void SetUseVerbose(bool val) { m_fUseVerbose=val; }
     void SetLFVmode(int val) { m_LFVmode=val; }
 
-    friend class MissingMassCalculatorV2;
+    friend class MissingMassCalculator;
     friend class MissingMassProb;
 
   private:

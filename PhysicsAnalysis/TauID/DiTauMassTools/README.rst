@@ -8,7 +8,7 @@ DiTauMassTools: Package holding the Missing Mass Calculator (MMC)
 Introduction
 ------------
 
-This package holds the refactored version (V2) that aims to be more comprehensible, faster and easier to re-tune by reading in the used PDFs from a root-file.
+This package holds the refactored version that aims to be more comprehensible, faster and easier to re-tune by reading in the used PDFs from a root-file.
 The documentation of the original package can be found here:
 `original MMC <doc/README-old.rst>`_.
 
@@ -57,7 +57,7 @@ The general settings of the tool are handled via properties. The most important 
 Example
 -------
 
-An minimal example on how to set up the tool can be found in ``test/ut_ditaumasstools_missingmasstoolv2_test.cxx``.
+An minimal example on how to set up the tool can be found in ``test/ut_ditaumasstools_missingmasstool_test.cxx``.
 
 -------
 Classes
@@ -69,7 +69,7 @@ In order to streamline the code there have been several new classes introduced f
 * MissingMassOutput: handles the output of the MMC
 * HelperFunctions: collection of functions for general usage
 * MissingMassProb: handles the probability calculation for the likelihoods
-* MissingMassCalculatorV2: uses the other classes and handles the Markov Chain, i.e. the phase space scan and the calculation of the neutrino results
+* MissingMassCalculator: uses the other classes and handles the Markov Chain, i.e. the phase space scan and the calculation of the neutrino results
 
 --------------------------
 Remarks on the refactoring

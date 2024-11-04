@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class handling the output of the MissingMassCalculator
@@ -26,7 +26,7 @@ void MissingMassOutput::ClearOutput(bool fUseVerbose) {
   if(fUseVerbose == 1){ Info("DiTauMassTools", "MissingMassCalculator::ClearOutput()"); }
   m_FitStatus=0;
 
-  for (int imeth=0; imeth<MMCFitMethodV2::MAX; ++imeth)
+  for (int imeth=0; imeth<MMCFitMethod::MAX; ++imeth)
     {
       if(fUseVerbose == 1){ Info("DiTauMassTools", "%s", ("MissingMassCalculator::ClearOutput(): clearing for method "+std::to_string(imeth)).c_str()); }
       m_FitSignificance[imeth] = -1.0;
@@ -53,9 +53,9 @@ int MissingMassOutput::GetFitStatus() const {
 // returns fit significance
 double MissingMassOutput::GetFitSignificance(int fitcode) const {
   double signif = -1.0;
-  if (fitcode<0 || fitcode >= MMCFitMethodV2::MAX) {
-    Error("DiTauMassTools", "%s", ("MissingMassCalculatorV2::GetFitSignificance ERROR ! fitcode="+std::to_string(fitcode)
-              +". Should be between 0 and "+std::to_string(MMCFitMethodV2::MAX-1)).c_str());
+  if (fitcode<0 || fitcode >= MMCFitMethod::MAX) {
+    Error("DiTauMassTools", "%s", ("MissingMassCalculator::GetFitSignificance ERROR ! fitcode="+std::to_string(fitcode)
+              +". Should be between 0 and "+std::to_string(MMCFitMethod::MAX-1)).c_str());
   } else {
     signif = m_FitSignificance[fitcode];
   }
@@ -74,9 +74,9 @@ double MissingMassOutput::GetFittedMass(int fitcode) const {
   // 1 best mass
   // best nu from hist
   double mass = 0.0;
-  if (fitcode<0 || fitcode >= MMCFitMethodV2::MAX) {
-    Error("DiTauMassTools", "%s", ("MissingMassCalculatorV2::GetFittedMass ERROR ! fitcode="+std::to_string(fitcode)
-              +". Should be between 0 and "+std::to_string(MMCFitMethodV2::MAX-1)).c_str());
+  if (fitcode<0 || fitcode >= MMCFitMethod::MAX) {
+    Error("DiTauMassTools", "%s", ("MissingMassCalculator::GetFittedMass ERROR ! fitcode="+std::to_string(fitcode)
+              +". Should be between 0 and "+std::to_string(MMCFitMethod::MAX-1)).c_str());
   } else {
     mass = m_FittedMass[fitcode];
   }
@@ -90,9 +90,9 @@ double MissingMassOutput::GetFittedMassErrorUp(int fitcode) const {
   // 1 best mass
   // best nu from hist
   double massUpperError = 0.0;
-  if (fitcode<0 || fitcode >= MMCFitMethodV2::MAX) {
-    Error("DiTauMassTools", "%s", ("MissingMassCalculatorV2::GetFittedMass ERROR ! fitcode="+std::to_string(fitcode)
-              +". Should be between 0 and "+std::to_string(MMCFitMethodV2::MAX-1)).c_str());
+  if (fitcode<0 || fitcode >= MMCFitMethod::MAX) {
+    Error("DiTauMassTools", "%s", ("MissingMassCalculator::GetFittedMass ERROR ! fitcode="+std::to_string(fitcode)
+              +". Should be between 0 and "+std::to_string(MMCFitMethod::MAX-1)).c_str());
   } else {
     massUpperError = m_FittedMassUpperError[fitcode];
   }
@@ -106,9 +106,9 @@ double MissingMassOutput::GetFittedMassErrorLow(int fitcode) const {
   // 1 best mass
   // best nu from hist
   double massLowerError = 0.0;
-  if (fitcode<0 || fitcode >= MMCFitMethodV2::MAX) {
-    Error("DiTauMassTools", "%s", ("MissingMassCalculatorV2::GetFittedMass ERROR ! fitcode="+std::to_string(fitcode)
-              +". Should be between 0 and "+std::to_string(MMCFitMethodV2::MAX-1)).c_str());
+  if (fitcode<0 || fitcode >= MMCFitMethod::MAX) {
+    Error("DiTauMassTools", "%s", ("MissingMassCalculator::GetFittedMass ERROR ! fitcode="+std::to_string(fitcode)
+              +". Should be between 0 and "+std::to_string(MMCFitMethod::MAX-1)).c_str());
   } else {
     massLowerError = m_FittedMassLowerError[fitcode];
   }
@@ -157,10 +157,10 @@ std::shared_ptr<TH1F> MissingMassOutput::GetMassHistogramNoWeight() const
 PtEtaPhiMVector MissingMassOutput::GetNeutrino4vec(int fitcode, int ind) const
 {
   PtEtaPhiMVector vec(0.0,0.0,0.0,0.0);
-  if (fitcode!=MMCFitMethodV2::MAXW && fitcode!=MMCFitMethodV2::MLNU3P )
+  if (fitcode!=MMCFitMethod::MAXW && fitcode!=MMCFitMethod::MLNU3P )
     {
-      Error("DiTauMassTools", "%s", ("MissingMassCalculatorV2::GetNeutrino4Vec ERROR ! fitcode="+std::to_string(fitcode)
-                +". Should be either "+std::to_string(MMCFitMethodV2::MAXW)+" or "+std::to_string(MMCFitMethodV2::MLNU3P)).c_str());
+      Error("DiTauMassTools", "%s", ("MissingMassCalculator::GetNeutrino4Vec ERROR ! fitcode="+std::to_string(fitcode)
+                +". Should be either "+std::to_string(MMCFitMethod::MAXW)+" or "+std::to_string(MMCFitMethod::MLNU3P)).c_str());
     }
   else if (m_FitStatus>0)
     {
@@ -174,10 +174,10 @@ PtEtaPhiMVector MissingMassOutput::GetNeutrino4vec(int fitcode, int ind) const
 PtEtaPhiMVector MissingMassOutput::GetTau4vec(int fitcode, int ind) const
 {
   PtEtaPhiMVector vec(0.0,0.0,0.0,0.0);
-  if (fitcode!=MMCFitMethodV2::MAXW && fitcode!=MMCFitMethodV2::MLNU3P )
+  if (fitcode!=MMCFitMethod::MAXW && fitcode!=MMCFitMethod::MLNU3P )
     {
-      Error("DiTauMassTools", "%s", ("MissingMassCalculatorV2::GetTau4vec ERROR ! fitcode="+std::to_string(fitcode)
-                +". Should be either "+std::to_string(MMCFitMethodV2::MAXW)+" or "+std::to_string(MMCFitMethodV2::MLNU3P)).c_str());
+      Error("DiTauMassTools", "%s", ("MissingMassCalculator::GetTau4vec ERROR ! fitcode="+std::to_string(fitcode)
+                +". Should be either "+std::to_string(MMCFitMethod::MAXW)+" or "+std::to_string(MMCFitMethod::MLNU3P)).c_str());
     }
   else if (m_FitStatus>0)
     {
@@ -190,10 +190,10 @@ PtEtaPhiMVector MissingMassOutput::GetTau4vec(int fitcode, int ind) const
 // returns 4-vec for resonance
 PtEtaPhiMVector MissingMassOutput::GetResonanceVec(int fitcode) const {
   PtEtaPhiMVector vec(0.0,0.0,0.0,0.0);
-  if (fitcode!=MMCFitMethodV2::MAXW && fitcode!=MMCFitMethodV2::MLNU3P )
+  if (fitcode!=MMCFitMethod::MAXW && fitcode!=MMCFitMethod::MLNU3P )
     {
-      Error("DiTauMassTools", "%s", ("MissingMassCalculatorV2::GetResonanceVec ERROR ! fitcode="+std::to_string(fitcode)
-                +". Should be either "+std::to_string(MMCFitMethodV2::MAXW)+" or "+std::to_string(MMCFitMethodV2::MLNU3P)).c_str());
+      Error("DiTauMassTools", "%s", ("MissingMassCalculator::GetResonanceVec ERROR ! fitcode="+std::to_string(fitcode)
+                +". Should be either "+std::to_string(MMCFitMethod::MAXW)+" or "+std::to_string(MMCFitMethod::MLNU3P)).c_str());
     }
   else if (m_FitStatus>0)
     {
@@ -206,10 +206,10 @@ PtEtaPhiMVector MissingMassOutput::GetResonanceVec(int fitcode) const {
 // returns 2-vec for fitted MET
 XYVector MissingMassOutput::GetFittedMetVec(int fitcode) const {
   XYVector vec(0.0,0.0);
-  if (fitcode!=MMCFitMethodV2::MAXW && fitcode!=MMCFitMethodV2::MLNU3P )
+  if (fitcode!=MMCFitMethod::MAXW && fitcode!=MMCFitMethod::MLNU3P )
     {
-      Error("DiTauMassTools", "%s", ("MissingMassCalculatorV2::GetFittedMetVec ERROR ! fitcode="+std::to_string(fitcode)
-                +". Should be either "+std::to_string(MMCFitMethodV2::MAXW)+" or "+std::to_string(MMCFitMethodV2::MLNU3P)).c_str());
+      Error("DiTauMassTools", "%s", ("MissingMassCalculator::GetFittedMetVec ERROR ! fitcode="+std::to_string(fitcode)
+                +". Should be either "+std::to_string(MMCFitMethod::MAXW)+" or "+std::to_string(MMCFitMethod::MLNU3P)).c_str());
     }
   else if (m_FitStatus>0)
     {

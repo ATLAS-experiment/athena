@@ -22,7 +22,7 @@
 #include <xAODMissingET/MissingETContainer.h>
 #include <xAODEventInfo/EventInfo.h>
 
-#include <DiTauMassTools/MissingMassToolV2.h>
+#include <DiTauMassTools/MissingMassTool.h>
 #include "Math/Vector4D.h"
 
 namespace CP {
@@ -43,7 +43,7 @@ namespace CP {
     Gaudi::Property<bool> m_doMLNU3P      {this, "doMLNU3P", false, "save information about the reconstruction with the best-fit neutrino kinematics"};
 
     // the MMC tool
-    ToolHandle<DiTauMassTools::MissingMassToolV2> m_mmc {this, "mmcTool", "DiTauMassTools::MissingMassToolV2", "the Missing Mass Calculator tool"};
+    ToolHandle<DiTauMassTools::MissingMassTool> m_mmc {this, "mmcTool", "DiTauMassTools::MissingMassTool", "the Missing Mass Calculator tool"};
 
     // systematics
     SysListHandle m_systematicsList{this};

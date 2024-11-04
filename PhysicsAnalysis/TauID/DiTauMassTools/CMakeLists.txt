@@ -36,8 +36,8 @@ atlas_add_dictionary( DiTauMassToolsDict
 
 # Test(s) in the package:
 if( XAOD_STANDALONE )
-   atlas_add_test( missingmasstoolv2_test
-      SOURCES test/ut_ditaumasstools_missingmasstoolv2_test.cxx
+   atlas_add_test( missingmasstool_test
+      SOURCES test/ut_ditaumasstools_missingmasstool_test.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthContainers xAODEventInfo xAODJet
       xAODTau xAODMissingET xAODRootAccess DiTauMassToolsLib

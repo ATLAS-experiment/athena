@@ -30,7 +30,7 @@
 #include "xAODRootAccess/TEvent.h"
 #include "xAODRootAccess/tools/ReturnCheck.h"
 #include "xAODRootAccess/tools/Message.h"
-#include "DiTauMassTools/MissingMassToolV2.h"
+#include "DiTauMassTools/MissingMassTool.h"
 
 #include "AsgMessaging/MessageCheck.h"
 
@@ -40,13 +40,13 @@ int main() {
    using namespace asg::msgUserCode;
 
    // Get the name of the application:
-   const char* APP_NAME = "ut_ditaumasstools_missingmasstoolv2_test";
+   const char* APP_NAME = "ut_ditaumasstools_missingmasstool_test";
 
    // Initialise the environment:
    ANA_CHECK( xAOD::Init(APP_NAME) );
 
    // Initialize the tool
-   DiTauMassTools::MissingMassToolV2 missingmassTool("missingmass_tool");
+   DiTauMassTools::MissingMassTool missingmassTool("missingmass_tool");
    ANA_CHECK( missingmassTool.setProperty("Decorate", true)) ;
    ANA_CHECK( missingmassTool.setProperty("UseVerbose", 1)) ;
    ANA_CHECK( missingmassTool.setProperty("CalibSet", "2019"));

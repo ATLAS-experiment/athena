@@ -12,12 +12,12 @@
 // if histogram smoothing
 //#define SMOOTH
 
-#include "DiTauMassTools/MissingMassCalculatorV2.h" // this is for RootCore package
+#include "DiTauMassTools/MissingMassCalculator.h" // this is for RootCore package
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
-// #include "MissingMassCalculatorV2.h" // this is for standalone
+// #include "MissingMassCalculator.h" // this is for standalone
 // package
 
 #include <TObject.h>
@@ -38,8 +38,8 @@ using ROOT::Math::VectorUtil::DeltaR;
 using ROOT::Math::VectorUtil::Phi_mpi_pi;
 
 //______________________________constructor________________________________
-MissingMassCalculatorV2::MissingMassCalculatorV2(
-    MMCCalibrationSetV2::e aset, std::string m_paramFilePath)
+MissingMassCalculator::MissingMassCalculator(
+    MMCCalibrationSet::e aset, std::string m_paramFilePath)
     : m_randomGen(), Prob(new MissingMassProb(aset, m_paramFilePath)) {
   m_mmcCalibrationSet = aset;
   preparedInput.m_fUseVerbose = 0;
@@ -251,7 +251,7 @@ MissingMassCalculatorV2::MissingMassCalculatorV2(
 
   // max hist fitting function
   m_fFitting =
-      new TF1("MMC_maxFitting", this, &MissingMassCalculatorV2::maxFitting, 0., hEmax, 3);
+      new TF1("MMC_maxFitting", this, &MissingMassCalculator::maxFitting, 0., hEmax, 3);
   // Sets initial parameter names
   m_fFitting->SetParNames("Max", "Mean", "InvWidth2");
 
@@ -266,11 +266,11 @@ MissingMassCalculatorV2::MissingMassCalculatorV2(
   }
 }
 
-MissingMassCalculatorV2::~MissingMassCalculatorV2() { delete Prob; }
+MissingMassCalculator::~MissingMassCalculator() { delete Prob; }
 
 //_____________________________________________________________________________
 // Main Method to run MissingMassCalculator
-int MissingMassCalculatorV2::RunMissingMassCalculator(const xAOD::IParticle *part1,
+int MissingMassCalculator::RunMissingMassCalculator(const xAOD::IParticle *part1,
                                                                const xAOD::IParticle *part2,
                                                                const xAOD::MissingET *met,
                                                                const int &njets) {
@@ -364,7 +364,7 @@ int MissingMassCalculatorV2::RunMissingMassCalculator(const xAOD::IParticle *par
 }
 
 //-------- clearing ditau container
-void MissingMassCalculatorV2::ClearDitauStuff(DitauStuff &fStuff) {
+void MissingMassCalculator::ClearDitauStuff(DitauStuff &fStuff) {
   fStuff.Mditau_best = 0.0;
   fStuff.Sign_best = 1.0E6;
   fStuff.nutau1 = PtEtaPhiMVector(0., 0., 0., 0.);
@@ -379,71 +379,71 @@ void MissingMassCalculatorV2::ClearDitauStuff(DitauStuff &fStuff) {
 //---------------------------- Accessors to output parameters
 //------------------------
 // finalizes output information
-void MissingMassCalculatorV2::DoOutputInfo() {
+void MissingMassCalculator::DoOutputInfo() {
   if (OutputInfo.m_FitStatus > 0) {
     if (preparedInput.m_fUseVerbose == 1) {
       Info("DiTauMassTools", "Retrieving output from fDitauStuffFit");
     }
     // MAXW method : get from fDittauStuffFit
-    OutputInfo.m_FitSignificance[MMCFitMethodV2::MAXW] = m_fDitauStuffFit.Sign_best;
-    OutputInfo.m_FittedMass[MMCFitMethodV2::MAXW] = m_fDitauStuffFit.Mditau_best;
+    OutputInfo.m_FitSignificance[MMCFitMethod::MAXW] = m_fDitauStuffFit.Sign_best;
+    OutputInfo.m_FittedMass[MMCFitMethod::MAXW] = m_fDitauStuffFit.Mditau_best;
     double q1 = (1. - 0.68) / 2.;
     double q2 = 1. - q1;
     double xq[2], yq[2];
     xq[0] = q1;
     xq[1] = q2;
     m_fMfit_all->GetQuantiles(2, yq, xq);
-    OutputInfo.m_FittedMassLowerError[MMCFitMethodV2::MAXW] = yq[0];
-    OutputInfo.m_FittedMassUpperError[MMCFitMethodV2::MAXW] = yq[1];
-    OutputInfo.m_nuvec1[MMCFitMethodV2::MAXW] = m_fDitauStuffFit.nutau1;
-    OutputInfo.m_objvec1[MMCFitMethodV2::MAXW] =
+    OutputInfo.m_FittedMassLowerError[MMCFitMethod::MAXW] = yq[0];
+    OutputInfo.m_FittedMassUpperError[MMCFitMethod::MAXW] = yq[1];
+    OutputInfo.m_nuvec1[MMCFitMethod::MAXW] = m_fDitauStuffFit.nutau1;
+    OutputInfo.m_objvec1[MMCFitMethod::MAXW] =
         m_fDitauStuffFit.vistau1 + m_fDitauStuffFit.nutau1;
-    OutputInfo.m_nuvec2[MMCFitMethodV2::MAXW] = m_fDitauStuffFit.nutau2;
-    OutputInfo.m_objvec2[MMCFitMethodV2::MAXW] =
+    OutputInfo.m_nuvec2[MMCFitMethod::MAXW] = m_fDitauStuffFit.nutau2;
+    OutputInfo.m_objvec2[MMCFitMethod::MAXW] =
         m_fDitauStuffFit.vistau2 + m_fDitauStuffFit.nutau2;
-    OutputInfo.m_totalvec[MMCFitMethodV2::MAXW] =
-        OutputInfo.m_objvec1[MMCFitMethodV2::MAXW] +
-        OutputInfo.m_objvec2[MMCFitMethodV2::MAXW];
-    XYVector metmaxw(OutputInfo.m_nuvec1[MMCFitMethodV2::MAXW].Px() +
-                         OutputInfo.m_nuvec2[MMCFitMethodV2::MAXW].Px(),
-                     OutputInfo.m_nuvec1[MMCFitMethodV2::MAXW].Py() +
-                         OutputInfo.m_nuvec2[MMCFitMethodV2::MAXW].Py());
-    OutputInfo.m_FittedMetVec[MMCFitMethodV2::MAXW] = metmaxw;
+    OutputInfo.m_totalvec[MMCFitMethod::MAXW] =
+        OutputInfo.m_objvec1[MMCFitMethod::MAXW] +
+        OutputInfo.m_objvec2[MMCFitMethod::MAXW];
+    XYVector metmaxw(OutputInfo.m_nuvec1[MMCFitMethod::MAXW].Px() +
+                         OutputInfo.m_nuvec2[MMCFitMethod::MAXW].Px(),
+                     OutputInfo.m_nuvec1[MMCFitMethod::MAXW].Py() +
+                         OutputInfo.m_nuvec2[MMCFitMethod::MAXW].Py());
+    OutputInfo.m_FittedMetVec[MMCFitMethod::MAXW] = metmaxw;
 
-    OutputInfo.m_FittedMass[MMCFitMethodV2::MLM] = m_fDitauStuffHisto.Mditau_best;
-    OutputInfo.m_FittedMassLowerError[MMCFitMethodV2::MLM] = yq[0];
-    OutputInfo.m_FittedMassUpperError[MMCFitMethodV2::MLM] = yq[1];
+    OutputInfo.m_FittedMass[MMCFitMethod::MLM] = m_fDitauStuffHisto.Mditau_best;
+    OutputInfo.m_FittedMassLowerError[MMCFitMethod::MLM] = yq[0];
+    OutputInfo.m_FittedMassUpperError[MMCFitMethod::MLM] = yq[1];
 
     PtEtaPhiMVector tlvdummy(0., 0., 0., 0.);
     XYVector metdummy(0., 0.);
-    OutputInfo.m_FitSignificance[MMCFitMethodV2::MLM] = -1.;
-    OutputInfo.m_nuvec1[MMCFitMethodV2::MLM] = tlvdummy;
-    OutputInfo.m_objvec1[MMCFitMethodV2::MLM] = tlvdummy;
-    OutputInfo.m_nuvec2[MMCFitMethodV2::MLM] = tlvdummy;
-    OutputInfo.m_objvec2[MMCFitMethodV2::MLM] = tlvdummy;
-    OutputInfo.m_totalvec[MMCFitMethodV2::MLM] = tlvdummy;
-    OutputInfo.m_FittedMetVec[MMCFitMethodV2::MLM] = metdummy;
+    OutputInfo.m_FitSignificance[MMCFitMethod::MLM] = -1.;
+    OutputInfo.m_nuvec1[MMCFitMethod::MLM] = tlvdummy;
+    OutputInfo.m_objvec1[MMCFitMethod::MLM] = tlvdummy;
+    OutputInfo.m_nuvec2[MMCFitMethod::MLM] = tlvdummy;
+    OutputInfo.m_objvec2[MMCFitMethod::MLM] = tlvdummy;
+    OutputInfo.m_totalvec[MMCFitMethod::MLM] = tlvdummy;
+    OutputInfo.m_FittedMetVec[MMCFitMethod::MLM] = metdummy;
 
     // MLNU3P method : get from fDittauStuffHisto 4 momentum
-    OutputInfo.m_nuvec1[MMCFitMethodV2::MLNU3P] = m_fDitauStuffHisto.nutau1;
-    OutputInfo.m_objvec1[MMCFitMethodV2::MLNU3P] =
+    OutputInfo.m_nuvec1[MMCFitMethod::MLNU3P] = m_fDitauStuffHisto.nutau1;
+    OutputInfo.m_objvec1[MMCFitMethod::MLNU3P] =
         m_fDitauStuffHisto.vistau1 + m_fDitauStuffHisto.nutau1;
-    OutputInfo.m_nuvec2[MMCFitMethodV2::MLNU3P] = m_fDitauStuffHisto.nutau2;
-    OutputInfo.m_objvec2[MMCFitMethodV2::MLNU3P] =
+    OutputInfo.m_nuvec2[MMCFitMethod::MLNU3P] = m_fDitauStuffHisto.nutau2;
+    OutputInfo.m_objvec2[MMCFitMethod::MLNU3P] =
         m_fDitauStuffHisto.vistau2 + m_fDitauStuffHisto.nutau2;
-    OutputInfo.m_totalvec[MMCFitMethodV2::MLNU3P] =
-        OutputInfo.m_objvec1[MMCFitMethodV2::MLNU3P] +
-        OutputInfo.m_objvec2[MMCFitMethodV2::MLNU3P];
-    OutputInfo.m_FittedMass[MMCFitMethodV2::MLNU3P] =
-        OutputInfo.m_totalvec[MMCFitMethodV2::MLNU3P].M();
-    OutputInfo.m_FittedMassUpperError[MMCFitMethodV2::MLNU3P] = 0.;
-    OutputInfo.m_FittedMassLowerError[MMCFitMethodV2::MLNU3P] = 0.;
+    OutputInfo.m_totalvec[MMCFitMethod::MLNU3P] =
+        OutputInfo.m_objvec1[MMCFitMethod::MLNU3P] +
+        OutputInfo.m_objvec2[MMCFitMethod::MLNU3P];
+    OutputInfo.m_FittedMass[MMCFitMethod::MLNU3P] =
+        OutputInfo.m_totalvec[MMCFitMethod::MLNU3P].M();
+    OutputInfo.m_FittedMassUpperError[MMCFitMethod::MLNU3P] = 0.;
+    OutputInfo.m_FittedMassLowerError[MMCFitMethod::MLNU3P] = 0.;
 
-    XYVector metmlnu3p(OutputInfo.m_nuvec1[MMCFitMethodV2::MLNU3P].Px() +
-                           OutputInfo.m_nuvec2[MMCFitMethodV2::MLNU3P].Px(),
-                       OutputInfo.m_nuvec1[MMCFitMethodV2::MLNU3P].Py() +
-                           OutputInfo.m_nuvec2[MMCFitMethodV2::MLNU3P].Py());
-    OutputInfo.m_FittedMetVec[MMCFitMethodV2::MLNU3P] = metmlnu3p;
+    XYVector metmlnu3p(OutputInfo.m_nuvec1[MMCFitMethod::MLNU3P].Px() +
+                           OutputInfo.m_nuvec2[MMCFitMethod::MLNU3P].Px(),
+                       OutputInfo.m_nuvec1[MMCFitMethod::MLNU3P].Py() +
+                           OutputInfo.m_nuvec2[MMCFitMethod::MLNU3P].Py());
+    OutputInfo.m_FittedMetVec[MMCFitMethod::MLNU3P] = metmlnu3p;
 
     OutputInfo.m_RMS2MPV = m_fDitauStuffHisto.RMSoverMPV;
   }
@@ -476,7 +476,7 @@ void MissingMassCalculatorV2::DoOutputInfo() {
 }
 
 // Printout of final results
-void MissingMassCalculatorV2::PrintOtherInput() {
+void MissingMassCalculator::PrintOtherInput() {
   if (preparedInput.m_fUseVerbose != 1)
     return;
 
@@ -487,7 +487,7 @@ void MissingMassCalculatorV2::PrintOtherInput() {
         "  sqrt(S) for collisions =" + std::to_string(2.0 * preparedInput.m_beamEnergy))
            .c_str());
   Info("DiTauMassTools", "%s",
-       ("CalibrationSet " + MMCCalibrationSetV2::name[m_mmcCalibrationSet])
+       ("CalibrationSet " + MMCCalibrationSet::name[m_mmcCalibrationSet])
            .c_str());
   Info("DiTauMassTools", "%s",
        ("LFV mode " + std::to_string(preparedInput.m_LFVmode) + " seed=" + std::to_string(m_seed))
@@ -518,7 +518,7 @@ void MissingMassCalculatorV2::PrintOtherInput() {
 }
 
 // Printout of final results
-void MissingMassCalculatorV2::PrintResults() {
+void MissingMassCalculator::PrintResults() {
 
   if (preparedInput.m_fUseVerbose != 1)
     return;
@@ -543,16 +543,16 @@ void MissingMassCalculatorV2::PrintResults() {
        ".............................................................................");
   Info("DiTauMassTools", "%s", ("Fit status=" + std::to_string(OutputInfo.m_FitStatus)).c_str());
 
-  for (int imeth = 0; imeth < MMCFitMethodV2::MAX; ++imeth) {
+  for (int imeth = 0; imeth < MMCFitMethod::MAX; ++imeth) {
     Info("DiTauMassTools", "%s",
-         ("___  Results for " + MMCFitMethodV2::name[imeth] + "Method ___")
+         ("___  Results for " + MMCFitMethod::name[imeth] + "Method ___")
              .c_str());
     Info("DiTauMassTools", "%s",
          (" signif=" + std::to_string(OutputInfo.m_FitSignificance[imeth])).c_str());
     Info("DiTauMassTools", "%s", (" mass=" + std::to_string(OutputInfo.m_FittedMass[imeth])).c_str());
     Info("DiTauMassTools", "%s", (" rms/mpv=" + std::to_string(OutputInfo.m_RMS2MPV)).c_str());
 
-    if (imeth == MMCFitMethodV2::MLM) {
+    if (imeth == MMCFitMethod::MLM) {
       Info("DiTauMassTools", " no 4-momentum or MET from this method ");
       continue;
     }
@@ -623,7 +623,7 @@ void MissingMassCalculatorV2::PrintResults() {
 // makes it more readable). Only quantities fixed within an event are cached.
 // relies on a number of these variables to be initialised before the loop.
 
-int MissingMassCalculatorV2::NuPsolutionV3(const double &mNu1, const double &mNu2,
+int MissingMassCalculator::NuPsolutionV3(const double &mNu1, const double &mNu2,
                                                     const double &phi1, const double &phi2,
                                                     int &nsol1, int &nsol2) {
 
@@ -828,7 +828,7 @@ int MissingMassCalculatorV2::NuPsolutionV3(const double &mNu1, const double &mNu
 }
 
 // returns solution for Lepton Flavor Violating X->lep+tau studies
-int MissingMassCalculatorV2::NuPsolutionLFV(const XYVector &met_vec,
+int MissingMassCalculator::NuPsolutionLFV(const XYVector &met_vec,
                                                      const PtEtaPhiMVector &tau, const double &l_nu,
                                                      std::vector<PtEtaPhiMVector> &nu_vec) {
   int solution_code = 0; // 0 with no solution, 1 with solution
@@ -865,7 +865,7 @@ int MissingMassCalculatorV2::NuPsolutionLFV(const XYVector &met_vec,
 
 // like v9fast, but the parameter space scanning is now factorised out, to allow
 // flexibility
-int MissingMassCalculatorV2::DitauMassCalculatorV9walk() {
+int MissingMassCalculator::DitauMassCalculatorV9walk() {
 
   int nsuccesses = 0;
 
@@ -993,9 +993,9 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9walk() {
 
     // default max finding method defined in MissingMassCalculator.h
     // note that window defined in terms of number of bin, so depend on binning
-    std::vector<double> histInfo(HistInfoV2::MAXHISTINFO);
+    std::vector<double> histInfo(HistInfo::MAXHISTINFO);
     m_fDitauStuffHisto.Mditau_best = maxFromHist(m_fMfit_all, histInfo);
-    double prob_hist = histInfo.at(HistInfoV2::PROB);
+    double prob_hist = histInfo.at(HistInfo::PROB);
 
     if (prob_hist != 0.0)
       m_fDitauStuffHisto.Sign_best = -log10(std::abs(prob_hist));
@@ -1009,7 +1009,7 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9walk() {
 
     if (m_fDitauStuffHisto.Mditau_best > 0.0)
       m_fDitauStuffHisto.RMSoverMPV = m_fMfit_all->GetRMS() / m_fDitauStuffHisto.Mditau_best;
-    std::vector<double> histInfoOther(HistInfoV2::MAXHISTINFO);
+    std::vector<double> histInfoOther(HistInfo::MAXHISTINFO);
     //---- getting full tau1 momentum
     Px1 = maxFromHist(m_fPXfit1, histInfoOther);
     Py1 = maxFromHist(m_fPYfit1, histInfoOther);
@@ -1087,7 +1087,7 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9walk() {
   return fit_code;
 }
 
-int MissingMassCalculatorV2::DitauMassCalculatorV9lfv(bool refit) {
+int MissingMassCalculator::DitauMassCalculatorV9lfv(bool refit) {
 
   // debugThisIteration=false;
   m_debugThisIteration = true;
@@ -1504,9 +1504,9 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv(bool refit) {
 
     // default max finding method defined in MissingMassCalculator.h
     // note that window defined in terms of number of bin, so depend on binning
-    std::vector<double> histInfo(HistInfoV2::MAXHISTINFO);
+    std::vector<double> histInfo(HistInfo::MAXHISTINFO);
     m_fDitauStuffHisto.Mditau_best = maxFromHist(m_fMfit_all, histInfo);
-    double prob_hist = histInfo.at(HistInfoV2::PROB);
+    double prob_hist = histInfo.at(HistInfo::PROB);
 
     if (prob_hist != 0.0)
       m_fDitauStuffHisto.Sign_best = -log10(std::abs(prob_hist));
@@ -1520,7 +1520,7 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv(bool refit) {
 
     if (m_fDitauStuffHisto.Mditau_best > 0.0)
       m_fDitauStuffHisto.RMSoverMPV = m_fMfit_all->GetRMS() / m_fDitauStuffHisto.Mditau_best;
-    std::vector<double> histInfoOther(HistInfoV2::MAXHISTINFO);
+    std::vector<double> histInfoOther(HistInfo::MAXHISTINFO);
     //---- getting Nu1
     double Px1 = maxFromHist(m_fPXfit1, histInfoOther);
     double Py1 = maxFromHist(m_fPYfit1, histInfoOther);
@@ -1572,7 +1572,7 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv(bool refit) {
 }
 
 // function to fit maximum
-Double_t MissingMassCalculatorV2::maxFitting(Double_t *x, Double_t *par)
+Double_t MissingMassCalculator::maxFitting(Double_t *x, Double_t *par)
 // Double_t maxFitting(Double_t *x, Double_t *par)
 {
   // parabola with parameters max, mean and invwidth
@@ -1592,8 +1592,8 @@ Double_t MissingMassCalculatorV2::maxFitting(Double_t *x, Double_t *par)
 // should also find the effective range of the hist
 
 double
-MissingMassCalculatorV2::maxFromHist(TH1F *theHist, std::vector<double> &histInfo,
-                                              const MaxHistStrategyV2::e maxHistStrategy,
+MissingMassCalculator::maxFromHist(TH1F *theHist, std::vector<double> &histInfo,
+                                              const MaxHistStrategy::e maxHistStrategy,
                                               const int winHalfWidth, bool debug) {
   // namespace HistInfo
   // enum e {
@@ -1606,11 +1606,11 @@ MissingMassCalculatorV2::maxFromHist(TH1F *theHist, std::vector<double> &histInf
     *itr = -1;
   }
 
-  histInfo[HistInfoV2::INTEGRAL] = theHist->Integral();
+  histInfo[HistInfo::INTEGRAL] = theHist->Integral();
 
-  if (maxHistStrategy == MaxHistStrategyV2::MAXBIN ||
-      ((maxHistStrategy == MaxHistStrategyV2::MAXBINWINDOW ||
-        maxHistStrategy == MaxHistStrategyV2::SLIDINGWINDOW) &&
+  if (maxHistStrategy == MaxHistStrategy::MAXBIN ||
+      ((maxHistStrategy == MaxHistStrategy::MAXBINWINDOW ||
+        maxHistStrategy == MaxHistStrategy::SLIDINGWINDOW) &&
        winHalfWidth == 0)) {
 
     // simple max search
@@ -1622,13 +1622,13 @@ MissingMassCalculatorV2::maxFromHist(TH1F *theHist, std::vector<double> &histInf
     prob = theHist->GetBinContent(max_bin) / double(theHist->GetEntries());
     if (prob > 1.)
       prob = 1.;
-    histInfo[HistInfoV2::PROB] = prob;
+    histInfo[HistInfo::PROB] = prob;
     return maxPos;
   }
 
   int hNbins = theHist->GetNbinsX();
 
-  if (maxHistStrategy == MaxHistStrategyV2::MAXBINWINDOW) {
+  if (maxHistStrategy == MaxHistStrategy::MAXBINWINDOW) {
     // average around maximum bin (nearly useless in fact)
     // could be faster
     int max_bin = theHist->GetMaximumBin();
@@ -1656,8 +1656,8 @@ MissingMassCalculatorV2::maxFromHist(TH1F *theHist, std::vector<double> &histInf
   }
 
   // now compute sliding window anyway
-  if (maxHistStrategy != MaxHistStrategyV2::SLIDINGWINDOW &&
-      maxHistStrategy != MaxHistStrategyV2::FIT) {
+  if (maxHistStrategy != MaxHistStrategy::SLIDINGWINDOW &&
+      maxHistStrategy != MaxHistStrategy::FIT) {
     Error("DiTauMassTools", "%s",
           ("ERROR undefined maxHistStrategy:" + std::to_string(maxHistStrategy)).c_str());
     return -10.;
@@ -1757,7 +1757,7 @@ MissingMassCalculatorV2::maxFromHist(TH1F *theHist, std::vector<double> &histInf
   // Definitions of some useful parameters
 
   const double h_rms = theHist->GetRMS(1);
-  histInfo[HistInfoV2::RMS] = h_rms;
+  histInfo[HistInfo::RMS] = h_rms;
 
   double num = 0;
   double numerator = 0;
@@ -1775,18 +1775,18 @@ MissingMassCalculatorV2::maxFromHist(TH1F *theHist, std::vector<double> &histInf
     denominator = denominator + (1 / (binErrorSquare));
   }
   if (numerator < 1e-10 || denominator < 1e-10 || nullBin == true) {
-    histInfo[HistInfoV2::MEANBIN] = -1;
+    histInfo[HistInfo::MEANBIN] = -1;
   } else {
-    histInfo[HistInfoV2::MEANBIN] = sqrt(1 / denominator) / (numerator / denominator);
+    histInfo[HistInfo::MEANBIN] = sqrt(1 / denominator) / (numerator / denominator);
   }
 
   // stop here if only looking for sliding window
-  if (maxHistStrategy == MaxHistStrategyV2::SLIDINGWINDOW) {
+  if (maxHistStrategy == MaxHistStrategy::SLIDINGWINDOW) {
     return maxPosWin;
   }
 
   maxPos = maxPosWin;
-  // now FIT   maxHistStrategy==MaxHistStrategyV2::FIT
+  // now FIT   maxHistStrategy==MaxHistStrategy::FIT
 
   // now mass fit in range defined by sliding window
   // window will be around maxPos
@@ -1817,7 +1817,7 @@ MissingMassCalculatorV2::maxFromHist(TH1F *theHist, std::vector<double> &histInf
 
   if (int(fitRes) == 0) {
     // root fit
-    histInfo[HistInfoV2::CHI2] = fitRes->Chi2();
+    histInfo[HistInfo::CHI2] = fitRes->Chi2();
     const double mMax = fitRes->Parameter(0);
     const double mMean = fitRes->Parameter(1);
     const double mInvWidth2 = fitRes->Parameter(2);
@@ -1838,13 +1838,13 @@ MissingMassCalculatorV2::maxFromHist(TH1F *theHist, std::vector<double> &histInf
     // const double a=fitRes->Parameter(2);
 
     const double h_discri = b * b - 4 * a * c;
-    histInfo[HistInfoV2::DISCRI] = h_discri;
+    histInfo[HistInfo::DISCRI] = h_discri;
     const double sqrth_discri = sqrt(h_discri);
     const double h_fitLength = sqrth_discri / a;
-    histInfo[HistInfoV2::FITLENGTH] = h_fitLength;
-    histInfo[HistInfoV2::TANTHETA] = 2 * a / sqrth_discri;
-    histInfo[HistInfoV2::TANTHETAW] = 2 * a * sumw / sqrth_discri;
-    histInfo[HistInfoV2::RMSVSDISCRI] = h_rms / h_fitLength;
+    histInfo[HistInfo::FITLENGTH] = h_fitLength;
+    histInfo[HistInfo::TANTHETA] = 2 * a / sqrth_discri;
+    histInfo[HistInfo::TANTHETAW] = 2 * a * sumw / sqrth_discri;
+    histInfo[HistInfo::RMSVSDISCRI] = h_rms / h_fitLength;
     // compute maximum position (only if inverted parabola)
     if (a < 0)
       maxPosFit = -b / (2 * a);
@@ -1852,13 +1852,13 @@ MissingMassCalculatorV2::maxFromHist(TH1F *theHist, std::vector<double> &histInf
 
   // keep fit result only if within 80% of fit window, and fit succeeded
   if (maxPosFit >= 0. and std::abs(maxPosFit - maxPosWin) < 0.8 * fitWidth) {
-    histInfo[HistInfoV2::PROB] = prob;
+    histInfo[HistInfo::PROB] = prob;
     return maxPosFit;
   } else {
     // otherwise keep the weighted average
     // negate prob just to flag such event
     prob = -prob;
-    histInfo[HistInfoV2::PROB] = prob;
+    histInfo[HistInfo::PROB] = prob;
     return maxPosWin;
   }
 }
@@ -1868,7 +1868,7 @@ MissingMassCalculatorV2::maxFromHist(TH1F *theHist, std::vector<double> &histInf
 // deltametvec is along phijet
 // returns number of solution if positive, return code if negative, vector of
 // probability and mass
-int MissingMassCalculatorV2::probCalculatorV9fast(const double &phi1, const double &phi2,
+int MissingMassCalculator::probCalculatorV9fast(const double &phi1, const double &phi2,
                                                            const double &M_nu1,
                                                            const double &M_nu2) {
   //  bool debug=true;
@@ -1894,7 +1894,7 @@ int MissingMassCalculatorV2::probCalculatorV9fast(const double &phi1, const doub
 }
 
 // nuvecsol1 and nuvecsol2 passed by MMC
-int MissingMassCalculatorV2::refineSolutions(const double &M_nu1, const double &M_nu2,
+int MissingMassCalculator::refineSolutions(const double &M_nu1, const double &M_nu2,
                                                       const int nsol1, const int nsol2,
                                                       const double &Mvis, const double &Meff)
 
@@ -2065,7 +2065,7 @@ int MissingMassCalculatorV2::refineSolutions(const double &M_nu1, const double &
   return m_nsol;
 }
 
-int MissingMassCalculatorV2::TailCleanUp(const PtEtaPhiMVector &vis1,
+int MissingMassCalculator::TailCleanUp(const PtEtaPhiMVector &vis1,
                                                   const PtEtaPhiMVector &nu1,
                                                   const PtEtaPhiMVector &vis2,
                                                   const PtEtaPhiMVector &nu2, const double &mmc_mass,
@@ -2101,10 +2101,10 @@ int MissingMassCalculatorV2::TailCleanUp(const PtEtaPhiMVector &vis1,
   if (preparedInput.m_tauTypes == TauTypes::lh) // lepton-hadron channel
   {
 
-    if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2015HIGHMASS ||
-	m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2016MC15C ||
-        m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2019 ||
-        m_mmcCalibrationSet == MMCCalibrationSetV2::UPGRADE)
+    if (m_mmcCalibrationSet == MMCCalibrationSet::MMC2015HIGHMASS ||
+	m_mmcCalibrationSet == MMCCalibrationSet::MMC2016MC15C ||
+        m_mmcCalibrationSet == MMCCalibrationSet::MMC2019 ||
+        m_mmcCalibrationSet == MMCCalibrationSet::UPGRADE)
       return pass_code; // don't use TailCleanup for 8 & 13 TeV data
 
     //--------- leave code uncommented to avoid Compilation warnings
@@ -2120,7 +2120,7 @@ int MissingMassCalculatorV2::TailCleanUp(const PtEtaPhiMVector &vis1,
 }
 
 // note that if MarkovChain the input solutions can be modified
-void MissingMassCalculatorV2::handleSolutions()
+void MissingMassCalculator::handleSolutions()
 
 {
 
@@ -2389,7 +2389,7 @@ void MissingMassCalculatorV2::handleSolutions()
   return;
 }
 
-void MissingMassCalculatorV2::SpaceWalkerInit() {
+void MissingMassCalculator::SpaceWalkerInit() {
   // FIXME could use function pointer to switch between functions
   m_nsolOld = 0;
 
@@ -2400,7 +2400,7 @@ void MissingMassCalculatorV2::SpaceWalkerInit() {
 
   // precompute some quantities and store in m_ data members
   precomputeCache();
-  if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2019) {
+  if (m_mmcCalibrationSet == MMCCalibrationSet::MMC2019) {
     if (Prob->GetUseMnuProbability() == true && (preparedInput.m_tauTypes == TauTypes::ll || preparedInput.m_tauTypes == TauTypes::lh) ) Prob->setParamNuMass();
     Prob->setParamAngle(m_tauVec1, 1, preparedInput.m_type_visTau1);
     Prob->setParamAngle(m_tauVec2, 2, preparedInput.m_type_visTau2);
@@ -2569,7 +2569,7 @@ void MissingMassCalculatorV2::SpaceWalkerInit() {
 // iterator. walk has internal counters, should only be used in a while loop
 // so far only implement grid strategy
 // act on MMC data member to be fast
-bool MissingMassCalculatorV2::SpaceWalkerWalk() {
+bool MissingMassCalculator::SpaceWalkerWalk() {
   preparedInput.m_MEtX = -999.;
   preparedInput.m_MEtY = -999.;
 
@@ -2583,11 +2583,11 @@ bool MissingMassCalculatorV2::SpaceWalkerWalk() {
     m_meanbinToBeEvaluated = false;
 
     // Meanbin stopping criterion
-    std::vector<double> histInfo(HistInfoV2::MAXHISTINFO);
+    std::vector<double> histInfo(HistInfo::MAXHISTINFO);
     // SLIDINGWINDOW strategy to avoid doing the parabola fit now given it will
     // not be use
-    maxFromHist(m_fMfit_all, histInfo, MaxHistStrategyV2::SLIDINGWINDOW);
-    double meanbin = histInfo.at(HistInfoV2::MEANBIN);
+    maxFromHist(m_fMfit_all, histInfo, MaxHistStrategy::SLIDINGWINDOW);
+    double meanbin = histInfo.at(HistInfo::MEANBIN);
     if (meanbin < 0) {
       m_nsucStop = -1; // no meaningful meanbin switch back to niter criterion
     } else {
@@ -2693,7 +2693,7 @@ bool MissingMassCalculatorV2::SpaceWalkerWalk() {
 
 // compute cached values (this value do not change within one call of MMC,
 // except for tau e scanning) return true if cache was already uptodatexs
-inline bool MissingMassCalculatorV2::precomputeCache() {
+inline bool MissingMassCalculator::precomputeCache() {
 
   // copy tau 4 vect. If tau E scanning, these vectors will be modified
   m_tauVec1 = preparedInput.m_vistau1;
@@ -2738,7 +2738,7 @@ inline bool MissingMassCalculatorV2::precomputeCache() {
 }
 
 // return true if all parameters are within their domain
-inline bool MissingMassCalculatorV2::checkAllParamInRange() {
+inline bool MissingMassCalculator::checkAllParamInRange() {
 
   if (m_scanMnu1) {
     if (m_Mnu1 < m_Mnu1Min)
@@ -2779,7 +2779,7 @@ inline bool MissingMassCalculatorV2::checkAllParamInRange() {
 }
 
 // return true if Met is within disk instead of withing square (cut the corners)
-inline bool MissingMassCalculatorV2::checkMEtInRange() {
+inline bool MissingMassCalculator::checkMEtInRange() {
   // check MEt is in allowed range
   // range is 3sigma disk ("cutting the corners")
   if (std::pow(m_MEtL / preparedInput.m_METsigmaL, 2) +
@@ -2795,7 +2795,7 @@ inline bool MissingMassCalculatorV2::checkMEtInRange() {
 // limit_code=0: 99% lower limit
 // limit_code=1; 99% upper limit
 // limit_code=2; 95% upper limit
-double MissingMassCalculatorV2::dTheta3DLimit(const int &tau_type, const int &limit_code,
+double MissingMassCalculator::dTheta3DLimit(const int &tau_type, const int &limit_code,
                                                        const double &P_tau) {
 
 #ifndef WITHDTHETA3DLIM
@@ -2899,7 +2899,7 @@ double MissingMassCalculatorV2::dTheta3DLimit(const int &tau_type, const int &li
 // checks units of input variables, converts into [GeV] if needed, make all
 // possible corrections DR new : now a second structure preparedInput is derived
 // from the input one which only has direct user input
-void MissingMassCalculatorV2::FinalizeSettings(const xAOD::IParticle *part1,
+void MissingMassCalculator::FinalizeSettings(const xAOD::IParticle *part1,
                                                         const xAOD::IParticle *part2,
                                                         const xAOD::MissingET *met,
                                                         const int &njets) {
@@ -2915,7 +2915,7 @@ void MissingMassCalculatorV2::FinalizeSettings(const xAOD::IParticle *part1,
   preparedInput.SetLFVmode(-2); // initialise LFV mode value for this event with being *not* LFV
   // if(getLFVMode(part1, part2, mmcType1, mmcType2) ==
   // CP::CorrectionCode::Error) {
-  if (m_mmcCalibrationSet == MMCCalibrationSetV2::LFVMMC2012) {
+  if (m_mmcCalibrationSet == MMCCalibrationSet::LFVMMC2012) {
     int LFVMode = getLFVMode(part1, part2, mmcType1, mmcType2);
     if (LFVMode == -1) {
       return; // return CP::CorrectionCode::Error;
@@ -2958,9 +2958,9 @@ void MissingMassCalculatorV2::FinalizeSettings(const xAOD::IParticle *part1,
   preparedInput.SetNjet25(njets);
 
   // check that the calibration set has been chosen explicitly, otherwise abort
-  if (m_mmcCalibrationSet == MMCCalibrationSetV2::MAXMMCCALIBRATIONSET) {
+  if (m_mmcCalibrationSet == MMCCalibrationSet::MAXMMCCALIBRATIONSET) {
     Error("DiTauMassTools", "MMCCalibrationSet has not been set !. Please use "
-                            "fMMC.SetCalibrationSet(MMCCalibrationSetV2::MMC2019)"
+                            "fMMC.SetCalibrationSet(MMCCalibrationSet::MMC2019)"
                             ". Abort now. ");
     std::abort();
   }
@@ -3026,7 +3026,7 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
   // one prong
   //   // checking input mass of hadronic tau-1
   // DRMERGE LFV addition
-  if (m_mmcCalibrationSet == MMCCalibrationSetV2::LFVMMC2012 ) {
+  if (m_mmcCalibrationSet == MMCCalibrationSet::LFVMMC2012 ) {
     if ((preparedInput.m_type_visTau1 >= 0 && preparedInput.m_type_visTau1 <= 2) &&
         preparedInput.m_vistau1.M() != 1.1) {
       preparedInput.m_vistau1.SetCoordinates(preparedInput.m_vistau1.Pt(), preparedInput.m_vistau1.Eta(),
@@ -3087,8 +3087,8 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
    
       // T. Davidek: hack for lep-lep -- subtract lepton pT both for muon and
       //  electron
-    if ((m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2016MC15C ||
-	 m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2019) &&
+    if ((m_mmcCalibrationSet == MMCCalibrationSet::MMC2016MC15C ||
+	 m_mmcCalibrationSet == MMCCalibrationSet::MMC2019) &&
         preparedInput.m_vistau1.M() < 0.12 && preparedInput.m_vistau2.M() < 0.12) { // lep-lep channel
       if (preparedInput.m_SumEt > preparedInput.m_vistau1.Pt())
         preparedInput.m_SumEt -= preparedInput.m_vistau1.Pt();
@@ -3097,14 +3097,14 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
     } else {
       // continue with the original code
       if (preparedInput.m_SumEt > preparedInput.m_vistau1.Pt() && preparedInput.m_vistau1.M() < 0.05 &&
-          m_mmcCalibrationSet != MMCCalibrationSetV2::MMC2015HIGHMASS) {
+          m_mmcCalibrationSet != MMCCalibrationSet::MMC2015HIGHMASS) {
         if (preparedInput.m_fUseVerbose == 1) {
           Info("DiTauMassTools", "Substracting pt1 from sumEt");
         }
         preparedInput.m_SumEt -= preparedInput.m_vistau1.Pt();
       }
       if (preparedInput.m_SumEt > preparedInput.m_vistau2.Pt() && preparedInput.m_vistau2.M() < 0.05 &&
-          m_mmcCalibrationSet != MMCCalibrationSetV2::MMC2015HIGHMASS) {
+          m_mmcCalibrationSet != MMCCalibrationSet::MMC2015HIGHMASS) {
         if (preparedInput.m_fUseVerbose == 1) {
           Info("DiTauMassTools", "Substracting pt2 from sumEt");
         }
@@ -3114,7 +3114,7 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
   }
 
   // controling TauProbability settings for UPGRADE studies
-  if (m_mmcCalibrationSet == MMCCalibrationSetV2::UPGRADE &&
+  if (m_mmcCalibrationSet == MMCCalibrationSet::UPGRADE &&
       preparedInput.m_fUseDefaults == 1) {
     if ((preparedInput.m_vistau1.M() < 0.12 && preparedInput.m_vistau2.M() > 0.12) ||
         (preparedInput.m_vistau2.M() < 0.12 && preparedInput.m_vistau1.M() > 0.12)) {
@@ -3131,7 +3131,7 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
   //--------------------- pre-set defaults for Run-2. To disable pre-set
   // defaults set fUseDefaults=0
   if (preparedInput.m_fUseDefaults == 1) {
-    if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2015HIGHMASS) {
+    if (m_mmcCalibrationSet == MMCCalibrationSet::MMC2015HIGHMASS) {
       SetNsigmaMETscan_ll(4.0);
       SetNsigmaMETscan_lh(4.0);
       SetNsigmaMETscan_hh(4.0);

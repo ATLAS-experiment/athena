@@ -4,7 +4,7 @@
 
 // vim: ts=2 sw=2
 // Local include(s)
-#include "DiTauMassTools/MissingMassToolV2.h"
+#include "DiTauMassTools/MissingMassTool.h"
 
 // EDM include(s):
 #include "xAODTau/TauJet.h"
@@ -13,7 +13,7 @@ using namespace DiTauMassTools;
 using ROOT::Math::PtEtaPhiMVector;
 
 // Default constructor
-MissingMassToolV2::MissingMassToolV2(const std::string& name) : asg::AsgTool(name)
+MissingMassTool::MissingMassTool(const std::string& name) : asg::AsgTool(name)
 
 {
   declareProperty("Decorate",			m_decorate=false, "Activate EventInfo decoration");
@@ -39,30 +39,30 @@ MissingMassToolV2::MissingMassToolV2(const std::string& name) : asg::AsgTool(nam
 }
 
 // Copy constructor
-MissingMassToolV2::MissingMassToolV2(const MissingMassToolV2& other): asg::AsgTool(other.name() + "_copy") {}
+MissingMassTool::MissingMassTool(const MissingMassTool& other): asg::AsgTool(other.name() + "_copy") {}
 
 
-StatusCode MissingMassToolV2::initialize()
+StatusCode MissingMassTool::initialize()
 
 {
   ATH_MSG_INFO("Initialize MissingMassTool");
 
-  MMCCalibrationSetV2::e aset;
+  MMCCalibrationSet::e aset;
 
   if (m_calib_set == "2015HIGHMASS") {
-    aset = MMCCalibrationSetV2::MMC2015HIGHMASS;
+    aset = MMCCalibrationSet::MMC2015HIGHMASS;
   } else if (m_calib_set == "UPGRADE") {
-    aset = MMCCalibrationSetV2::UPGRADE;
+    aset = MMCCalibrationSet::UPGRADE;
   } else if (m_calib_set == "LFV") {
-    aset = MMCCalibrationSetV2::LFVMMC2012;
+    aset = MMCCalibrationSet::LFVMMC2012;
   } else if (m_calib_set == "2016MC15C") {
-    aset = MMCCalibrationSetV2::MMC2016MC15C;
+    aset = MMCCalibrationSet::MMC2016MC15C;
   } else if (m_calib_set == "2019") {
-    aset = MMCCalibrationSetV2::MMC2019;
+    aset = MMCCalibrationSet::MMC2019;
   } else {
     return StatusCode::FAILURE;
   }
-  m_MMC = new MissingMassCalculatorV2(aset, m_param_file_path);
+  m_MMC = new MissingMassCalculator(aset, m_param_file_path);
   // set properties if non negative
   if (!m_float_stop) m_MMC->SetUseFloatStopping(false);
   if (m_n_sigma_met>=0) m_MMC->SetNsigmaMETscan(m_n_sigma_met);
@@ -85,7 +85,7 @@ StatusCode MissingMassToolV2::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode MissingMassToolV2::finalize()
+StatusCode MissingMassTool::finalize()
 
 {
   ATH_MSG_INFO("Finalize MissingMassTool");
@@ -97,7 +97,7 @@ StatusCode MissingMassToolV2::finalize()
 
 
 // generic method
-CP::CorrectionCode MissingMassToolV2::apply(const xAOD::EventInfo& ei,
+CP::CorrectionCode MissingMassTool::apply(const xAOD::EventInfo& ei,
     const xAOD::IParticle* part1,
     const xAOD::IParticle* part2,
     const xAOD::MissingET* met,
@@ -108,7 +108,7 @@ CP::CorrectionCode MissingMassToolV2::apply(const xAOD::EventInfo& ei,
   m_MMC->RunMissingMassCalculator(part1, part2, met, njets);
 
   // Very dry decoration - MET and resonance vectors are retrieved
-  // in dedicated method (see MissingMassToolV2.h)
+  // in dedicated method (see MissingMassTool.h)
 
   if (m_decorate) {
     int aFitStatus = m_MMC->OutputInfo.GetFitStatus();
@@ -118,11 +118,11 @@ CP::CorrectionCode MissingMassToolV2::apply(const xAOD::EventInfo& ei,
     static const SG::Decorator<double> dec_mmc_mlnu3p_mass ("mmc_mlnu3p_mass");
     static const SG::Decorator<PtEtaPhiMVector> dec_mmc_mlnu3p_4vect ("mmc_mlnu3p_4vect");
     dec_mmc_fit_status(ei) = aFitStatus;
-    dec_mmc_maxw_mass(ei)  = aFitStatus==1 ? m_MMC->OutputInfo.GetFittedMass(MMCFitMethodV2::MAXW) : -1;
-    dec_mmc_mlm_mass(ei)   = aFitStatus==1 ? m_MMC->OutputInfo.GetFittedMass(MMCFitMethodV2::MLM) : -1;
-    dec_mmc_mlnu3p_mass(ei) = aFitStatus==1 ? m_MMC->OutputInfo.GetFittedMass(MMCFitMethodV2::MLNU3P) : -1;
+    dec_mmc_maxw_mass(ei)  = aFitStatus==1 ? m_MMC->OutputInfo.GetFittedMass(MMCFitMethod::MAXW) : -1;
+    dec_mmc_mlm_mass(ei)   = aFitStatus==1 ? m_MMC->OutputInfo.GetFittedMass(MMCFitMethod::MLM) : -1;
+    dec_mmc_mlnu3p_mass(ei) = aFitStatus==1 ? m_MMC->OutputInfo.GetFittedMass(MMCFitMethod::MLNU3P) : -1;
     PtEtaPhiMVector null4V(0.,0.,0.,0.);
-    dec_mmc_mlnu3p_4vect(ei) = aFitStatus==1 ? m_MMC->OutputInfo.GetResonanceVec(MMCFitMethodV2::MLNU3P) : null4V;
+    dec_mmc_mlnu3p_4vect(ei) = aFitStatus==1 ? m_MMC->OutputInfo.GetResonanceVec(MMCFitMethod::MLNU3P) : null4V;
   }
 
   return CP::CorrectionCode::Ok;

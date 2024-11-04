@@ -9,8 +9,8 @@
 MissingMassCalculator is designed to reconstruct mass in
 events where two particles decay into states with missing ET.
 */
-#ifndef MissingMassCalculatorV2_h
-#define MissingMassCalculatorV2_h
+#ifndef MissingMassCalculator_h
+#define MissingMassCalculator_h
 
 
 
@@ -43,7 +43,7 @@ events where two particles decay into states with missing ET.
 namespace DiTauMassTools{
   using ROOT::Math::PtEtaPhiMVector;
 
-class MissingMassCalculatorV2 {
+class MissingMassCalculator {
 
  public:
 
@@ -62,7 +62,7 @@ class MissingMassCalculatorV2 {
 
   TRandom2 m_randomGen;
   
-  MMCCalibrationSetV2::e m_mmcCalibrationSet;
+  MMCCalibrationSet::e m_mmcCalibrationSet;
 
   bool m_fUseEfficiencyRecovery; // switch to turn ON/OFF re-fit in order to recover efficiency
   bool m_fUseFloatStopping; // switch to turn ON/OFF floating stopping criterion
@@ -325,12 +325,12 @@ class MissingMassCalculatorV2 {
 
 public:
 
-  ~MissingMassCalculatorV2() ;
+  ~MissingMassCalculator() ;
 
-  MissingMassCalculatorV2(MMCCalibrationSetV2::e aset, std::string m_paramFilePath) ;
+  MissingMassCalculator(MMCCalibrationSet::e aset, std::string m_paramFilePath) ;
 
-  MissingMassCalculatorV2 (const MissingMassCalculatorV2&) = delete;
-  MissingMassCalculatorV2& operator= (const MissingMassCalculatorV2&) = delete;
+  MissingMassCalculator(const MissingMassCalculator&) = delete;
+  MissingMassCalculator& operator= (const MissingMassCalculator&) = delete;
 
   MissingMassInput preparedInput;
   MissingMassOutput OutputInfo;
@@ -405,8 +405,8 @@ public:
   Double_t maxFitting(Double_t *x, Double_t *par);
   
   // compute maximum from histo
-  double maxFromHist(TH1F *theHist, std::vector<double> & histInfo, const MaxHistStrategyV2::e maxHistStrategy=MaxHistStrategyV2::FIT,const int winHalfWidth=2,bool debug=false);
-  double maxFromHist(const std::shared_ptr<TH1F>& theHist, std::vector<double> & histInfo, const MaxHistStrategyV2::e maxHistStrategy=MaxHistStrategyV2::FIT,const int winHalfWidth=2,bool debug=false) {
+  double maxFromHist(TH1F *theHist, std::vector<double> & histInfo, const MaxHistStrategy::e maxHistStrategy=MaxHistStrategy::FIT,const int winHalfWidth=2,bool debug=false);
+  double maxFromHist(const std::shared_ptr<TH1F>& theHist, std::vector<double> & histInfo, const MaxHistStrategy::e maxHistStrategy=MaxHistStrategy::FIT,const int winHalfWidth=2,bool debug=false) {
     return maxFromHist(theHist.get(), histInfo, maxHistStrategy, winHalfWidth, debug);
   }
 
