@@ -25,15 +25,6 @@
 
 namespace CP
 {
-  SystematicsSvc ::
-  SystematicsSvc (const std::string& name,
-                    ISvcLocator* pSvcLocator)
-    : AsgService (name, pSvcLocator)
-  {
-    declareServiceInterface<ISystematicsSvc>();
-  }
-
-
 
   StatusCode SystematicsSvc ::
   initialize ()

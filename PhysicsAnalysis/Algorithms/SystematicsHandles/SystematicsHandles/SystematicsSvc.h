@@ -20,29 +20,16 @@ namespace CP
 {
   /// \brief the canonical implementation of \ref ISystematicsSvc
 
-  class SystematicsSvc final : public asg::AsgService,
-                                 virtual public ISystematicsSvc
+  class SystematicsSvc final : public extends<asg::AsgService, ISystematicsSvc>
   {
+
     //
     // public interface
     //
 
-    /// \brief standard constructor
-    /// \par Guarantee
-    ///   strong
-    /// \par Failures
-    ///   out of memory II
   public:
-    SystematicsSvc (const std::string& name,
-                      ISvcLocator* pSvcLocator);
+    using extends::extends;  // base class constructor
 
-
-
-    //
-    // inherited interface
-    //
-
-  public:
     virtual StatusCode initialize () override;
     virtual StatusCode finalize () override;
     virtual std::vector<CP::SystematicSet>
