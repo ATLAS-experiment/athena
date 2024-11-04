@@ -38,9 +38,9 @@ StatusCode MuonLayerHoughAlg::initialize() {
     }
     ATH_CHECK(m_layerTool.retrieve());
     ATH_CHECK(m_printer.retrieve());
-    ATH_CHECK(m_keyRpc.initialize());
-    ATH_CHECK(m_keyMdt.initialize());
-    ATH_CHECK(m_keyTgc.initialize());
+    ATH_CHECK(m_keyRpc.initialize(!m_keyRpc.empty()));
+    ATH_CHECK(m_keyMdt.initialize(!m_keyMdt.empty()));
+    ATH_CHECK(m_keyTgc.initialize(!m_keyTgc.empty()));
     ATH_CHECK(m_keyCsc.initialize(!m_keyCsc.empty()));
     ATH_CHECK(m_keysTgc.initialize(!m_keysTgc.empty()));
     ATH_CHECK(m_keyMM.initialize(!m_keyMM.empty()));

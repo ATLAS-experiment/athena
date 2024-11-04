@@ -402,11 +402,19 @@ def MuonLayerHoughToolCfg(flags, name = "MuonLayerHoughTool" , **kwargs):
 def MuonLayerHoughAlgCfg(flags, name = "MuonLayerHoughAlg", **kwargs):
     result = ComponentAccumulator()
 
+    if not flags.Detector.EnableMDT:
+        kwargs.setdefault("MdtPrepDataContainer", "")
+    if not flags.Detector.EnableRPC:
+        kwargs.setdefault("RpcPrepDataContainer", "")
+    if not flags.Detector.EnableTGC:
+        kwargs.setdefault("TgcPrepDataContainer", "")
+
     kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
     kwargs.setdefault("CscPrepDataContainer", "CSC_Clusters" if flags.Detector.EnableCSC else "")
     kwargs.setdefault("sTgcPrepDataContainer", "STGC_Measurements" if flags.Detector.EnablesTGC else "")
     kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
     kwargs.setdefault("MMPrepDataContainer", "MM_Measurements" if flags.Detector.EnableMM else "")
+    
     kwargs.setdefault("PrintSummary", flags.Muon.printSummary)
     kwargs.setdefault("printerTool", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags) ))
 
