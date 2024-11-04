@@ -2,303 +2,484 @@
 
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
-
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from TrigEDMConfig.TriggerEDM import recordable
-
 from TrigInDetConfig.utils import getFlagsForActiveConfig
+
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
 
-def _caloSeq(flags, is_probe_leg=False):
-    selAcc = SelectionCA('CaloTau', isProbe=is_probe_leg)
-
-    recoAcc = InViewRecoCA(name       = 'tauCaloMVA', 
-                           InViewRoIs = 'CaloMVA_RoIs',
-                           isProbe    = is_probe_leg)
-
-    recoAcc.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(name=recoAcc.name+'RecoVDV',
-                                                              DataObjects={('TrigRoiDescriptorCollection', 'StoreGateSvc+'+recoAcc.inputMaker().InViewRoIs.Path),
-                                                                           #( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+HLT_TAURoI'),
-                                                                           ('CaloBCIDAverage', 'StoreGateSvc+CaloBCIDAverage'),
-                                                                           ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
-                                                                           ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.actualInteractionsPerCrossing'),
-                                                                           ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing')}))
-
-    from TrigCaloRec.TrigCaloRecConfig import tauTopoClusteringCfg
-    recoAcc.mergeReco(tauTopoClusteringCfg(flags,
-                                           RoIs = recoAcc.inputMaker().InViewRoIs))
-
-    from TrigTauRec.TrigTauRecConfig import trigTauRecMergedCaloOnlyMVACfg
-    from TrigTauHypo.TrigTauHypoConfig import tauCaloRoiUpdaterCfg
-
-    recoAcc.mergeReco(tauCaloRoiUpdaterCfg(flags,inputRoIs=recoAcc.inputMaker().InViewRoIs,clusters = 'HLT_TopoCaloClustersLC'))
-
-    recoAcc.mergeReco(trigTauRecMergedCaloOnlyMVACfg(flags))    
-
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
-    robPrefetchAlg = ROBPrefetchingAlgCfg_Calo( flags, nameSuffix='IM_'+recoAcc.name+'_probe' if is_probe_leg else 'IM_'+recoAcc.name)    
-    selAcc.mergeReco(recoAcc, robPrefetchCA=robPrefetchAlg)
-
-    hypoAlg = CompFactory.TrigTauCaloHypoAlg("TauL2CaloMVAHypo",
-                                                    taujets = "HLT_TrigTauRecMerged_CaloMVAOnly" )
-    selAcc.addHypoAlgo(hypoAlg)
-
-    from TrigTauHypo.TrigTauHypoTool import TrigL2TauHypoToolFromDict
-    menuCA = MenuSequence(flags, selAcc, HypoToolGen=TrigL2TauHypoToolFromDict)   
-    return (selAcc , menuCA)
+# Check the ATLAS Software Docs for more details about the different sub-sequences, CAs, and details
+# about the step configuration.
 
 
+#================================================================
+# CaloMVA sequences
+#================================================================
 @AccumulatorCache
 def tauCaloMVAMenuSequenceGenCfg(flags, is_probe_leg=False):
-    (selAcc , menuCA) = _caloSeq(flags, is_probe_leg)
-    return menuCA 
+    '''Calorimeter-only reconstruction and hypothesis (BRT-calibrated pT cut)'''
+
+    # Reconstruction sequence CA (parOR), executting all reco algorithms within the View (from the RoI)
+    # in parallel whenever possible, according to their data dependencies.
+    # Create the EventViews based on the HLTSeeding RoIs (from the input L1 TOBs)
+    recoAcc = InViewRecoCA(name='tauCaloMVA', InViewRoIs='CaloMVA_RoIs', isProbe=is_probe_leg)
+    RoIs = recoAcc.inputMaker().InViewRoIs
 
 
-def _ftfCoreSeq(flags,name,is_probe_leg=False):
-    selAcc=SelectionCA('tau'+name+'FTF', isProbe=is_probe_leg)
+    # VDV with all the required collections/objects in the View
+    # (the VDV checks are disabled unless running with -l DEBUG)
+    recoAcc.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(
+        name=f'{recoAcc.name}RecoVDV',
+        DataObjects={
+            ('TrigRoiDescriptorCollection', f'StoreGateSvc+{RoIs}'),
+            ('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
+            ('SG::AuxElement', 'StoreGateSvc+EventInfo.actualInteractionsPerCrossing'),
+            ('SG::AuxElement', 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing'),
+            ('CaloBCIDAverage', 'StoreGateSvc+CaloBCIDAverage'),
+        }
+    ))
 
-    newRoITool   = CompFactory.ViewCreatorFetchFromViewROITool( 
-                                RoisWriteHandleKey = recordable(flags.Tracking.ActiveConfig.roi),
-                                InViewRoIs = 'UpdatedCaloRoI')
 
-    # Resize the RoI before running the tracking to either 'tauCore' or 'tauIso'
-    newRoITool.doResize = True
-    newRoITool.RoIEtaWidth = flags.Tracking.ActiveConfig.etaHalfWidth
-    newRoITool.RoIPhiWidth = flags.Tracking.ActiveConfig.phiHalfWidth
-    newRoITool.RoIZedWidth = flags.Tracking.ActiveConfig.zedHalfWidth
-                                                                                                
+    # Reconstruction tools/algorithms:
 
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
+    # Topo-clustering
+    from TrigCaloRec.TrigCaloRecConfig import tauTopoClusteringCfg
+    recoAcc.mergeReco(tauTopoClusteringCfg(flags, RoIs=RoIs))
+
+    # Create new RoIs with an updated position, based on the central axis of the clusters
+    from TrigTauHypo.TrigTauHypoConfig import tauCaloRoiUpdaterCfg
+    recoAcc.mergeReco(tauCaloRoiUpdaterCfg(flags, inputRoIs=RoIs, clusters='HLT_TopoCaloClustersLC'))
+
+    # Construct the calo-only TauJet (with BRT calibration)
+    from TrigTauRec.TrigTauRecConfig import trigTauRecMergedCaloOnlyMVACfg
+    recoAcc.mergeReco(trigTauRecMergedCaloOnlyMVACfg(flags))
+
+
+    # Calo ROB prefetching, to reduce number of calls to the readout
+    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
+    robPrefetchAlg = ROBPrefetchingAlgCfg_Calo(flags, nameSuffix=f'IM_{recoAcc.name}_probe' if is_probe_leg else f'IM_{recoAcc.name}')
+
+
+    # Selection sequence CA (seqAND), executing the recoAcc view creation alg. first, the rob prefetching alg. second, 
+    # the reco CA (with all the reco algs) after, and the Hypo alg. at last
+    selAcc = SelectionCA('tauCalo', isProbe=is_probe_leg)
+    selAcc.mergeReco(recoAcc, robPrefetchCA=robPrefetchAlg)
+
+
+    # Hypothesis:
+    # The Hypotools in the Hypo algorithm will execute the BRT-calibrated Tau pT cut
+    selAcc.addHypoAlgo(CompFactory.TrigTauCaloHypoAlg('TauCaloMVAHypoAlg', taujets='HLT_TrigTauRecMerged_CaloMVAOnly'))
+
+
+    # Menu sequence, connecting everything internally for the step, and configuring the tools for the Hypo alg.
+    # based on the partDict for each chain tau leg
+    from TrigTauHypo.TrigTauHypoTool import TrigL2TauHypoToolFromDict
+    menuSeq = MenuSequence(flags, selAcc, HypoToolGen=TrigL2TauHypoToolFromDict)
+
+    return menuSeq
+
+
+
+#================================================================
+# 1st FTF step: FTFCore / FTFLRT
+#================================================================
+
+def _ftfCoreSeq(flags, name, is_probe_leg=False):
+    '''1st FTF step sequence, for both the tauCore and tauLRT RoIs'''
+
+    if name not in ['Core', 'LRT']:
+        raise ValueError('Invalid name')
+
+
+    # Create new RoIs from 'UpdatedCaloRoI', resized to 'tauCore/LRT' before running the FTF algorithms
+    newRoITool = CompFactory.ViewCreatorFetchFromViewROITool(
+        RoisWriteHandleKey=recordable(flags.Tracking.ActiveConfig.roi),
+        InViewRoIs='UpdatedCaloRoI',
+        doResize=True,
+        RoIEtaWidth=flags.Tracking.ActiveConfig.etaHalfWidth,
+        RoIPhiWidth=flags.Tracking.ActiveConfig.phiHalfWidth,
+        RoIZedWidth=flags.Tracking.ActiveConfig.zedHalfWidth,
+    )
+
+
+    # If we're running on tauCore RoIs, we will optionally  prefetch ROBs for the larger 'tauIso' RoIs ahead of time,
+    # to avoid retrieving more detector information again later in the next step
     from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
+    if doExtraPrefetching := name == 'Core' and ROBPrefetching.TauCoreLargeRoI in flags.Trigger.ROBPrefetchingOptions:
+        prefetchRoIUpdater = CompFactory.RoiUpdaterTool(
+            useBeamSpot=True,
+            NSigma=1.5,
+            EtaWidth=flags.Trigger.InDetTracking.tauIso.etaHalfWidth,
+            PhiWidth=flags.Trigger.InDetTracking.tauIso.phiHalfWidth,
+            ZedWidth=flags.Trigger.InDetTracking.tauIso.zedHalfWidth,
+        )
 
-    extraPrefetching = ROBPrefetching.TauCoreLargeRoI in flags.Trigger.ROBPrefetchingOptions and 'Core' in name
-    if extraPrefetching:
-      # Add extra RoI to prefetch ROBs for the subsequent tauIso step together with ROBs for tauCore
-      prefetchRoIUpdater                   = CompFactory.RoiUpdaterTool()
-      prefetchRoIUpdater.useBeamSpot       = True
-      prefetchRoIUpdater.NSigma            = 1.5
-      prefetchRoIUpdater.EtaWidth          = flags.Trigger.InDetTracking.tauIso.etaHalfWidth
-      prefetchRoIUpdater.PhiWidth          = flags.Trigger.InDetTracking.tauIso.phiHalfWidth
-      prefetchRoIUpdater.ZedWidth          = flags.Trigger.InDetTracking.tauIso.zedHalfWidth
-      prefetchRoITool                      = CompFactory.ViewCreatorExtraPrefetchROITool()
-      prefetchRoITool.RoiCreator           = newRoITool
-      prefetchRoITool.RoiUpdater           = prefetchRoIUpdater
-      prefetchRoITool.ExtraPrefetchRoIsKey = str(newRoITool.RoisWriteHandleKey) + "_forPrefetching"
-      prefetchRoITool.PrefetchRoIsLinkName = "prefetchRoI"
-      prefetchRoITool.MergeWithOriginal    = True                                                      
+        prefetchRoITool = CompFactory.ViewCreatorExtraPrefetchROITool(
+            RoiCreator=newRoITool,
+            RoiUpdater=prefetchRoIUpdater,
+            ExtraPrefetchRoIsKey=f'{newRoITool.RoisWriteHandleKey}_forPrefetching',
+            PrefetchRoIsLinkName='prefetchRoI',
+            MergeWithOriginal=True,
+        )
 
-    fastInDetReco = InViewRecoCA('tauFastTrack'+name,RoITool           = prefetchRoITool if extraPrefetching else newRoITool,
-                                                ViewFallThrough   = True,
-                                                RequireParentView = True,
-                                                mergeUsingFeature = True,
-                                                isProbe           = is_probe_leg)
 
-    robPrefetchAlg = ROBPrefetchingAlgCfg_Si( flags, nameSuffix='IM_'+fastInDetReco.name)
-    if extraPrefetching:
-      robPrefetchAlg.RoILinkName = str(prefetchRoITool.PrefetchRoIsLinkName) 
+    # Reconstruction sequence CA (parOR), executting all reco algorithms within the View (from the RoI)
+    # in parallel whenever possible, according to their data dependencies.
+    # Create the EventViews from the resized RoIs, based on the 'UpdatedCaloRoI' created in the CaloMVA step
+    recoAcc = InViewRecoCA(
+        f'tauFastTrack{name}',
+        RoITool=prefetchRoITool if doExtraPrefetching else newRoITool,
+        ViewFallThrough=True,
+        RequireParentView=True,
+        mergeUsingFeature=True,
+        isProbe=is_probe_leg
+    )
+    RoIs = recoAcc.inputMaker().InViewRoIs
 
-    from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
-    fastInDetReco.mergeReco(trigInDetFastTrackingCfg(flags, roisKey=fastInDetReco.inputMaker().InViewRoIs, signatureName='tau'+name))
-    fastInDetReco.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(
-        name='VDVFastTau'+name,
-        DataObjects={( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+{}'.format(fastInDetReco.inputMaker().InViewRoIs) ),
-                     ( 'xAOD::TauJetContainer' , 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly')}) )
 
-    RoIs = fastInDetReco.inputMaker().InViewRoIs
-    TrackCollection = flags.Tracking.ActiveConfig.trkTracks_FTF
+    # VDV with all the required collections/objects in the View
+    # (the VDV checks are disabled unless running with -l DEBUG)
+    recoAcc.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(
+        name=f'{recoAcc.name}RecoVDV',
+        DataObjects={
+            ('TrigRoiDescriptorCollection', f'StoreGateSvc+{RoIs}'),
+        }
+    ))
 
-    from TrigTauHypo.TrigTauHypoConfig import tauTrackRoiUpdaterCfg,tauLRTRoiUpdaterCfg
-
-    if 'LRT' in name:
-       fastInDetReco.mergeReco(tauLRTRoiUpdaterCfg(flags,inputRoIs = RoIs,tracks = TrackCollection))
-    else:
-       fastInDetReco.mergeReco(tauTrackRoiUpdaterCfg(flags,inputRoIs = RoIs,tracks = TrackCollection))
     
-    selAcc.mergeReco(fastInDetReco, robPrefetchCA=robPrefetchAlg)
-    hypoAlg = CompFactory.TrigTrackPreSelHypoAlg('TrackPreSelHypoAlg_PassBy'+name,
-                                                 RoIForIDReadHandleKey = 'UpdatedTrackLRTRoI' if 'LRT' in name else '',
-                                                 trackcollection       = flags.Tracking.ActiveConfig.trkTracks_FTF )
-    selAcc.addHypoAlgo(hypoAlg)
+    # Reconstruction tools/algorithms:
+
+    # Fast Track Finder (FTF) sequence (the main point of this step)
+    from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
+    recoAcc.mergeReco(trigInDetFastTrackingCfg(flags, roisKey=RoIs, signatureName=f'tau{name}'))
+
+    # Create new RoIs for the next tracking steps (FTFIso and PrecTrack), based on the found tracks
+    TrackCollection = flags.Tracking.ActiveConfig.trkTracks_FTF
+    if name == 'Core':
+        from TrigTauHypo.TrigTauHypoConfig import tauTrackRoiUpdaterCfg
+        recoAcc.mergeReco(tauTrackRoiUpdaterCfg(flags, inputRoIs=RoIs, tracks=TrackCollection))
+    elif name == 'LRT':
+        from TrigTauHypo.TrigTauHypoConfig import tauLRTRoiUpdaterCfg
+        recoAcc.mergeReco(tauLRTRoiUpdaterCfg(flags, inputRoIs=RoIs, tracks=TrackCollection))
+
+
+    # ROB prefetching for the Pixel and SCT data
+    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
+    robPrefetchAlg = ROBPrefetchingAlgCfg_Si(flags, nameSuffix=f'IM_{recoAcc.name}')
+    if doExtraPrefetching:
+        robPrefetchAlg.RoILinkName = prefetchRoITool.PrefetchRoIsLinkName
+    
+
+    # Selection sequence CA (seqAND), executing the recoAcc view creation alg. first, the rob prefetching alg. second, 
+    # the reco CA (with all the reco algs) after, and the Hypo alg. at last
+    selAcc = SelectionCA(f'tauFTF{name}', isProbe=is_probe_leg)
+    selAcc.mergeReco(recoAcc, robPrefetchCA=robPrefetchAlg)
+
+
+    # Hypothesis:
+    # The hypothesis algorithm/tool does not perform any action (online monitoring of tracks only)
+    selAcc.addHypoAlgo(CompFactory.TrigTrackPreSelHypoAlg(
+        f'TauFastTrackHypoAlg_PassBy{name}',
+        RoIForIDReadHandleKey='UpdatedTrackLRTRoI' if name == 'LRT' else '',
+        trackcollection=TrackCollection
+    ))
+
+
+    # Menu sequence, connecting everything internally for the step, and configuring the tools for the Hypo alg.
+    # based on the partDict for each chain tau leg
     from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
-    menuCA = MenuSequence(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
-    return (selAcc , menuCA)
+    menuSeq = MenuSequence(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
+
+    return menuSeq
 
 
 @AccumulatorCache
 def tauFTFTauCoreSequenceGenCfg(flags, is_probe_leg=False):
-    newflags = getFlagsForActiveConfig(flags,'tauCore',log)
+    # Retrieve 'tauCore' RoI tracking configuration
+    newflags = getFlagsForActiveConfig(flags, 'tauCore', log)
 
-    name='Core'
-    (selAcc , menuCA) = _ftfCoreSeq(newflags,name,is_probe_leg)
-    return menuCA 
+    return _ftfCoreSeq(newflags, name='Core', is_probe_leg=is_probe_leg)
 
 
 @AccumulatorCache
 def tauFTFTauLRTSequenceGenCfg(flags, is_probe_leg=False):
-    newflags = getFlagsForActiveConfig(flags,'tauLRT',log)
-    name='LRT'
-    (selAcc , menuCA) = _ftfCoreSeq(newflags,name,is_probe_leg)
-    return menuCA 
+    # Retrieve 'tauLRT' RoI tracking configuration
+    newflags = getFlagsForActiveConfig(flags, 'tauLRT', log)
+
+    return _ftfCoreSeq(newflags, name='LRT', is_probe_leg=is_probe_leg)
 
 
-def _ftfTauIsoSeq(flags,name,is_probe_leg=False):
-    selAcc=SelectionCA('tau'+name+'FTF', isProbe=is_probe_leg)
 
+#================================================================
+# 2nd FTF step: FTFIso
+#================================================================
+
+def _ftfTauIsoSeq(flags, name, is_probe_leg=False):
+    '''2nd FTF step sequence, for the tauIso RoI'''
+
+    if name not in ['Iso']:
+        raise ValueError('Invalid name')
+
+
+    # Create new RoIs from , resized to 'tauCore/LRT' before running the FTF algorithms
     newRoITool = CompFactory.ViewCreatorFetchFromViewROITool(
-                             RoisWriteHandleKey = recordable(flags.Tracking.ActiveConfig.roi),
-                             InViewRoIs = 'UpdatedTrackRoI')
+        RoisWriteHandleKey=recordable(flags.Tracking.ActiveConfig.roi),
+        InViewRoIs='UpdatedTrackRoI'
+    )
 
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
 
-    fastInDetReco = InViewRecoCA('tauFastTrack'+name,RoITool           = newRoITool,
-                                                RequireParentView = True,
-                                                ViewFallThrough   = True,
-                                                isProbe           = is_probe_leg)
+    # Reconstruction sequence CA (parOR), executting all reco algorithms within the View (from the RoI)
+    # in parallel whenever possible, according to their data dependencies.
+    # Create the EventViews based on the RoIs created in the previous step
+    recoAcc = InViewRecoCA(
+        f'tauFastTrack{name}', 
+        RoITool=newRoITool, 
+        RequireParentView=True, 
+        ViewFallThrough=True, 
+        isProbe=is_probe_leg
+    )
+    RoIs = recoAcc.inputMaker().InViewRoIs
 
-    robPrefetchAlg = ROBPrefetchingAlgCfg_Si( flags, nameSuffix='IM_'+fastInDetReco.name)
 
+    # VDV with all the required collections/objects in the View
+    # (the VDV checks are disabled unless running with -l DEBUG)
+    recoAcc.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(
+        name=f'{recoAcc.name}RecoVDV',
+        DataObjects={
+            ('TrigRoiDescriptorCollection', f'StoreGateSvc+{RoIs}'),
+            ('TrackCollection', f'StoreGateSvc+{flags.Trigger.InDetTracking.tauCore.trkTracks_FTF}'),
+        }
+    ))
+
+    
+    # Reconstruction tools/algorithms:
+
+    # Fast Track Finder (FTF) sequence (the main point of this step)
     from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
-    idTracking = trigInDetFastTrackingCfg(flags, roisKey=fastInDetReco.inputMaker().InViewRoIs, signatureName='tau'+name)
-    fastInDetReco.mergeReco(idTracking)
-    fastInDetReco.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(
-        name='VDVFastTau'+name,
-        DataObjects={( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+{}'.format(fastInDetReco.inputMaker().InViewRoIs) ),
-                     ( 'xAOD::TauJetContainer' , 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly')}) )
+    recoAcc.mergeReco(trigInDetFastTrackingCfg(flags, roisKey=RoIs, signatureName=f'tau{name}'))
 
-    selAcc.mergeReco(fastInDetReco, robPrefetchCA=robPrefetchAlg)
-    hypoAlg = CompFactory.TrigTrackPreSelHypoAlg('TrackPreSelHypoAlg_PassBy'+name,
-                                                    trackcollection = flags.Tracking.ActiveConfig.trkTracks_FTF )
-    selAcc.addHypoAlgo(hypoAlg)
 
+    # ROB prefetching for the Pixel and SCT data
+    # Note: if enabled in the config flags, the tauIso RoI would have already been prefetched in the previous step
+    #       through the 'extra prefetching' procedure, so we can skip it
+    from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
+    if name == 'Iso' and ROBPrefetching.TauCoreLargeRoI in flags.Trigger.ROBPrefetchingOptions:
+        robPrefetchAlg = None
+    else:
+        from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
+        robPrefetchAlg = ROBPrefetchingAlgCfg_Si(flags, nameSuffix=f'IM_{recoAcc.name}')
+
+    # Selection sequence CA (seqAND), executing the recoAcc view creation alg. first, the rob prefetching alg. second (if enabled), 
+    # the reco CA (with all the reco algs) after, and the Hypo alg. at last
+    selAcc = SelectionCA(f'tauFTF{name}', isProbe=is_probe_leg)
+    selAcc.mergeReco(recoAcc, robPrefetchCA=robPrefetchAlg)
+
+
+    # Hypothesis:
+    # The hypothesis algorithm/tool does not perform any action (debug logging of number of tracks only)
+    selAcc.addHypoAlgo(CompFactory.TrigTrackPreSelHypoAlg(
+        f'TauFastTrackHypoAlg_PassBy{name}',
+        trackcollection=flags.Tracking.ActiveConfig.trkTracks_FTF,
+    ))
+
+
+    # Menu sequence, connecting everything internally for the step, and configuring the tools for the Hypo alg.
+    # based on the partDict for each chain tau leg
     from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
-    menuCA = MenuSequence(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
-    return (selAcc , menuCA)
+    menuSeq = MenuSequence(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
+
+    return menuSeq
 
 
 @AccumulatorCache
 def tauFTFTauIsoSequenceGenCfg(flags, is_probe_leg=False):
-    newflags = getFlagsForActiveConfig(flags,'tauIso',log)
-    name = 'Iso'
-    (selAcc , menuCA) = _ftfTauIsoSeq(newflags,name,is_probe_leg)
-    return menuCA
+    # Retrieve 'tauIso' RoI tracking configuration
+    newflags = getFlagsForActiveConfig(flags, 'tauIso', log)
+
+    return _ftfTauIsoSeq(newflags, name='Iso', is_probe_leg=is_probe_leg)
 
 
-def _precTrackSeq(flags,name,is_probe_leg=False):
-    selAcc=SelectionCA('tau'+name+'Track', isProbe=is_probe_leg)
 
-    recoAcc = InViewRecoCA(name              = 'prec'+name+'Track', 
-                           RoITool           = CompFactory.ViewCreatorPreviousROITool(),
-                           InViewRoIs        = 'tauFastTrack'+name,
-                           RequireParentView = True,
-                           ViewFallThrough   = True,                           
-                           isProbe           = is_probe_leg)
+#================================================================
+# Precision Tracking step
+#================================================================
 
+def _precTrackSeq(flags, name, is_probe_leg=False):
+    '''Precision Tracking step sequence, for both the tauIso and tauLRT RoIs'''
+
+    if name not in ['Iso', 'LRT']:
+        raise ValueError('Invalid name')
+
+
+    # Reconstruction sequence CA (parOR), executting all reco algorithms within the View (from the RoI)
+    # in parallel whenever possible, according to their data dependencies.
+    # Create the EventViews based on the RoIs created in the previous steps (tauIso and tauLRT)
+    recoAcc = InViewRecoCA(
+        name=f'tauPrecTrack{name}', 
+        RoITool=CompFactory.ViewCreatorPreviousROITool(),
+        InViewRoIs=f'tauFastTrack{name}',
+        RequireParentView=True,
+        ViewFallThrough=True,                           
+        isProbe=is_probe_leg,
+    )
+    RoIs = recoAcc.inputMaker().InViewRoIs
+
+
+    # VDV with all the required collections/objects in the View
+    # (the VDV checks are disabled unless running with -l DEBUG)
+    recoAcc.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(
+        name=f'{recoAcc.name}RecoVDV',
+        DataObjects={
+            ('TrigRoiDescriptorCollection', f'StoreGateSvc+{RoIs}'),
+            ('SG::AuxElement', 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing'),
+        }
+    ))
+
+
+    # Reconstruction tools/algorithms:
+
+    # Precision Tracking sequence (track extension to the TRT and refitting)
     from TrigInDetConfig.TrigInDetConfig import trigInDetPrecisionTrackingCfg
-    precTracking = trigInDetPrecisionTrackingCfg(flags, rois=recoAcc.inputMaker().InViewRoIs, signatureName='tau'+name)
-    recoAcc.mergeReco(precTracking)
+    recoAcc.mergeReco(trigInDetPrecisionTrackingCfg(flags, rois=RoIs, signatureName=f'tau{name}'))
 
-    ViewVerifyTrk =  CompFactory.AthViews.ViewDataVerifier(
-        name='VDVPrecTrkTau'+name,
-        DataObjects = {( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+%s' % flags.Tracking.ActiveConfig.tracks_FTF ),
-                       ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' ),
-                       ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+{}'.format(recoAcc.inputMaker().InViewRoIs) ),
-                       ( 'xAOD::TauTrackContainer' , 'StoreGateSvc+HLT_tautrack_dummy' ),
-                       ( 'xAOD::TauJetContainer' , 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly' ),
-                       ( 'xAOD::IParticleContainer' , 'StoreGateSvc+%s' % flags.Tracking.ActiveConfig.tracks_FTF ),
-                       })
-
-    recoAcc.addRecoAlgo(ViewVerifyTrk)
-
-    precTracks = flags.Tracking.ActiveConfig.tracks_IDTrig
-
+    # Vertexing sequence
     from TrigInDetConfig.TrigInDetConfig import trigInDetVertexingCfg
-    recoAcc.mergeReco(trigInDetVertexingCfg(flags,precTracks,flags.Tracking.ActiveConfig.vertex))
+    recoAcc.mergeReco(trigInDetVertexingCfg(flags, flags.Tracking.ActiveConfig.tracks_IDTrig, flags.Tracking.ActiveConfig.vertex))
 
+
+    # Selection sequence CA (seqAND), executing the recoAcc view creation alg. first,
+    # the reco CA (with all the reco algs) after, and the Hypo alg. at last
+    # Note: no need to prefetch anything from Pixel or SCT, since we already prefetched 
+    #       all the necesary information in the previous step
+    selAcc = SelectionCA(f'tauPT{name}', isProbe=is_probe_leg)
     selAcc.mergeReco(recoAcc)
-    hypoAlg = CompFactory.TrigTrkPrecHypoAlg('TrkPrec'+name+'HypoAlg',
-                                                    trackparticles = precTracks, 
-                                                    RoIForIDReadHandleKey = '' )
-    selAcc.addHypoAlgo(hypoAlg)
 
+
+    # Hypothesis:
+    # The hypothesis algorithm/tool does not perform any action (debug logging of number of tracks only)
+    selAcc.addHypoAlgo(CompFactory.TrigTrkPrecHypoAlg(
+        f'TauPrecTrackHypoAlg_PassBy{name}',
+        trackparticles=flags.Tracking.ActiveConfig.tracks_IDTrig, 
+        RoIForIDReadHandleKey='',
+    ))
+
+
+    # Menu sequence, connecting everything internally for the step, and configuring the tools for the Hypo alg.
+    # based on the partDict for each chain tau leg
     from TrigTauHypo.TrigTauHypoTool import TrigTrkPrecHypoToolFromDict
-    menuCA = MenuSequence(flags, selAcc, HypoToolGen=TrigTrkPrecHypoToolFromDict)
-    return (selAcc , menuCA)
+    menuSeq = MenuSequence(flags, selAcc, HypoToolGen=TrigTrkPrecHypoToolFromDict)
+
+    return menuSeq
 
 
 @AccumulatorCache
 def tauPrecTrackIsoSequenceGenCfg(flags, is_probe_leg=False):
-    newflags = getFlagsForActiveConfig(flags,'tauIso',log)
-    name = 'Iso'
-    (selAcc , menuCA) = _precTrackSeq(newflags,name,is_probe_leg)
-    return menuCA
+    # Retrieve 'tauIso' RoI tracking configuration
+    newflags = getFlagsForActiveConfig(flags, 'tauIso', log)
+
+    return  _precTrackSeq(newflags, name='Iso', is_probe_leg=is_probe_leg)
 
 
 @AccumulatorCache
 def tauPrecTrackLRTSequenceGenCfg(flags, is_probe_leg=False):
-    newflags = getFlagsForActiveConfig(flags,'tauLRT',log)
-    name = 'LRT'
-    (selAcc , menuCA) = _precTrackSeq(newflags,name,is_probe_leg)
-    return menuCA
+    # Retrieve 'tauLRT' RoI tracking configuration
+    newflags = getFlagsForActiveConfig(flags, 'tauLRT', log)
+
+    return _precTrackSeq(newflags, name='LRT', is_probe_leg=is_probe_leg)
 
 
-def _tauPrecSeq(flags,name,is_probe_leg=False):
-    selAcc=SelectionCA('tauPrec'+name, isProbe=is_probe_leg)
 
+#================================================================
+# Precision Tau step
+#================================================================
+
+def _tauPrecisionSeq(flags, name, tau_ids: list[str], output_name=None, is_probe_leg=False):
+    '''Precision Tau step sequence, for all ID and reconstruction settings'''
+
+    # 'tauIso' (and its derivatives) for all chains except for trackLRT
     InViewName = 'Iso' if 'LRT' not in name else 'LRT' 
-    recoAcc = InViewRecoCA(name              = 'prec'+name+'Tau', 
-                           RoITool           = CompFactory.ViewCreatorPreviousROITool(),
-                           InViewRoIs        = 'tauFastTrack'+InViewName,
-                           RequireParentView = True,
-                           ViewFallThrough   = True,                           
-                           isProbe           = is_probe_leg)
 
-    ViewVerifyID =  CompFactory.AthViews.ViewDataVerifier(
-        name='VDVPrecTau'+name,
-        DataObjects = {( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+{}'.format(recoAcc.inputMaker().InViewRoIs)),
-                       ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing'   ),
-                       ( 'xAOD::VertexContainer', 'StoreGateSvc+'+flags.Tracking.ActiveConfig.vertex),
-                       ( 'xAOD::TauTrackContainer' , 'StoreGateSvc+HLT_tautrack_dummy' ),
-                       ( 'xAOD::TauJetContainer' , 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly' ),
-                       ( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+flags.Tracking.ActiveConfig.tracks_IDTrig )})
+    # Reconstruction sequence CA (parOR), executting all reco algorithms within the View (from the RoI)
+    # in parallel whenever possible, according to their data dependencies.
+    # Create the EventViews based on the RoIs created in the previous steps (tauIso and tauLRT)
+    recoAcc = InViewRecoCA(
+        name=f'tauPrecisionReco_{name}', 
+        RoITool=CompFactory.ViewCreatorPreviousROITool(),
+        InViewRoIs=f'tauFastTrack{InViewName}',
+        RequireParentView=True,
+        ViewFallThrough=True,                           
+        isProbe=is_probe_leg,
+    )
+    RoIs = recoAcc.inputMaker().InViewRoIs
 
-    recoAcc.addRecoAlgo(ViewVerifyID)
 
+    # VDV with all the required collections/objects in the View
+    # (the VDV checks are disabled unless running with -l DEBUG)
+    recoAcc.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(
+        name=f'{recoAcc.name}RecoVDV',
+        DataObjects={
+            ('TrigRoiDescriptorCollection', f'StoreGateSvc+{RoIs}'),
+            ('SG::AuxElement', 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing'),
+            ('xAOD::VertexContainer', f'StoreGateSvc+{flags.Tracking.ActiveConfig.vertex}'),
+            ('xAOD::TrackParticleContainer', f'StoreGateSvc+{flags.Tracking.ActiveConfig.tracks_IDTrig}'),
+            ('xAOD::TauTrackContainer', 'StoreGateSvc+HLT_tautrack_dummy'),
+            ('xAOD::TauJetContainer', 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly'),
+        }
+    ))
+
+
+    # Reconstruction tools/algorithms:
+
+    # Precision TauJet reconstruction sequence
     from TrigTauRec.TrigTauRecConfig import trigTauRecMergedPrecisionMVACfg
-    tauPrecisionAlg = trigTauRecMergedPrecisionMVACfg(flags, name, inputRoIs = recoAcc.inputMaker().InViewRoIs, tracks = flags.Tracking.ActiveConfig.tracks_IDTrig)
+    recoAcc.mergeReco(trigTauRecMergedPrecisionMVACfg(
+        flags,
+        name,
+        inputRoIs=RoIs,
+        tracks=flags.Tracking.ActiveConfig.tracks_IDTrig,
+    ))
 
-    recoAcc.mergeReco(tauPrecisionAlg)
 
+    # Selection sequence CA (seqAND), executing the recoAcc view creation alg. first,
+    # the reco CA (with all the reco algs) after, and the Hypo alg. at last (no ROB prefetching)
+    selAcc = SelectionCA(f'tauPrecision_{name}', isProbe=is_probe_leg)
     selAcc.mergeReco(recoAcc)
-    hypoAlg = CompFactory.TrigEFTauMVHypoAlg('EFTauMVHypoAlg'+name,
-                                                    taujetcontainer = 'HLT_TrigTauRecMerged_'+name)
-    selAcc.addHypoAlgo(hypoAlg)
 
+
+    # Hypothesis:
+    # The Hypotools in the Hypo algorithm will execute the calibrated Tau pT cut,
+    # NTrack cut, NWideTrack cut, and ID WP selections (or meson variable cuts)
+    selAcc.addHypoAlgo(CompFactory.TrigEFTauMVHypoAlg(
+        f'TauPrecisionHypoAlg_{name}',
+        taujetcontainer=f'HLT_TrigTauRecMerged_{output_name if output_name else name}'
+    ))
+
+
+    # Menu sequence, connecting everything internally for the step, and configuring the tools for the Hypo alg.
+    # based on the partDict for each chain tau leg
     from TrigTauHypo.TrigTauHypoTool import TrigEFTauMVHypoToolFromDict
-    menuCA = MenuSequence(flags, selAcc, HypoToolGen=TrigEFTauMVHypoToolFromDict)
-    return (selAcc , menuCA)
+    menuSeq = MenuSequence(flags, selAcc, HypoToolGen=TrigEFTauMVHypoToolFromDict)
+
+    return menuSeq
 
 
 @AccumulatorCache
-def tauTrackTwoMVASequenceGenCfg(flags, is_probe_leg=False):
-    newflags = getFlagsForActiveConfig(flags,'tauIso',log)
-    name = 'MVA'
-    (selAcc , menuCA) = _tauPrecSeq(newflags,name,is_probe_leg)
-    return menuCA
+def tauPrecisionSequenceGenCfg(flags, seq_name, output_name=None, is_probe_leg=False):
+    # Retrieve 'tauIso' RoI tracking configuration
+    newflags = getFlagsForActiveConfig(flags, 'tauIso', log)
+
+    from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getPrecisionSequenceTauIDs
+
+    return _tauPrecisionSeq(newflags, seq_name, tau_ids=getPrecisionSequenceTauIDs(seq_name), output_name=output_name, is_probe_leg=is_probe_leg)
 
 
 @AccumulatorCache
-def tauTrackTwoLLPSequenceGenCfg(flags, is_probe_leg=False):
-    newflags = getFlagsForActiveConfig(flags,'tauIso',log)
-    name = 'LLP'
-    (selAcc , menuCA) = _tauPrecSeq(newflags,name,is_probe_leg)
-    return menuCA
+def tauPrecisionLRTSequenceGenCfg(flags, seq_name, output_name=None, is_probe_leg=False):
+    # Retrieve 'tauLRT' RoI tracking configuration
+    newflags = getFlagsForActiveConfig(flags, 'tauLRT', log)
 
+    from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getPrecisionSequenceTauIDs
 
-@AccumulatorCache
-def tauTrackLRTSequenceGenCfg(flags, is_probe_leg=False):
-    newflags = getFlagsForActiveConfig(flags,'tauLRT',log)
-    name = 'LRT'
-    (selAcc , menuCA) = _tauPrecSeq(newflags,name,is_probe_leg)
-    return menuCA
+    return _tauPrecisionSeq(newflags, seq_name, tau_ids=getPrecisionSequenceTauIDs(seq_name), output_name=output_name, is_probe_leg=is_probe_leg)

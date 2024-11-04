@@ -2,133 +2,144 @@
 
 ########################################################################
 #
-# SliceDef file for muon chains/signatures
+# SliceDef file for tau chains
 #
 #########################################################################
+
+from typing import List
+
 from AthenaCommon.Logging import logging
-logging.getLogger().info("Importing %s",__name__)
+logging.getLogger().info(f'Importing {__name__}')
 log = logging.getLogger(__name__)
 
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
 
 from .TauMenuSequences import (
-    tauCaloMVAMenuSequenceGenCfg, tauFTFTauCoreSequenceGenCfg, 
-    tauFTFTauIsoSequenceGenCfg, tauFTFTauLRTSequenceGenCfg, 
+    tauCaloMVAMenuSequenceGenCfg,
+    tauFTFTauCoreSequenceGenCfg, tauFTFTauLRTSequenceGenCfg,
+    tauFTFTauIsoSequenceGenCfg,
     tauPrecTrackIsoSequenceGenCfg, tauPrecTrackLRTSequenceGenCfg, 
-    tauTrackTwoMVASequenceGenCfg, tauTrackTwoLLPSequenceGenCfg, 
-    tauTrackLRTSequenceGenCfg )
+    tauPrecisionSequenceGenCfg, tauPrecisionLRTSequenceGenCfg)
+
+from .TauConfigurationTools import getChainSequenceConfigName, getChainPrecisionSeqName
 
 
 ############################################# 
-###  Class/function to configure muon chains 
+###  Class to configure tau chains 
 #############################################
 
 class TauChainConfiguration(ChainConfigurationBase):
-
     def __init__(self, chainDict):
-        ChainConfigurationBase.__init__(self,chainDict)
+        ChainConfigurationBase.__init__(self, chainDict)
         
-    # ----------------------
-    # Assemble the chain depending on information from chainName
-    # ----------------------
     def assembleChainImpl(self, flags):                            
-        chainSteps = []
-        log.debug("Assembling chain for %s", self.chainName)
+        log.debug(f'Assembling chain for {self.chainName}')
 
-        # --------------------
-        # define here the names of the steps and obtain the chainStep configuration 
-        # --------------------
-        stepDictionary = {
-            "ptonly"        :['getCaloMVASeq', 'getFTFEmpty', 'getTrkEmpty' , 'getPTEmpty'      , 'getIDEmpty'     ],
-            "tracktwoMVA"   :['getCaloMVASeq', 'getFTFCore' , 'getFTFIso'   , 'getPrecTrackIso' , 'getTrackTwoMVA' ],
-            "tracktwoLLP"   :['getCaloMVASeq', 'getFTFCore' , 'getFTFIso'   , 'getPrecTrackIso' , 'getTrackTwoLLP' ],
-            "trackLRT"      :['getCaloMVASeq', 'getFTFLRT'  , 'getTrkEmpty' , 'getPrecTrackLRT' , 'getTrackLRT'    ],
+        chain_steps = []
+
+        # Overall Tau Trigger sequences steps: 
+        step_dictionary = {
+            # BRT calibration chains
+            'ptonly'        : ['getCaloMVA', 'getFTFCoreEmpty', 'getFTFIsoEmpty', 'getPrecTrackEmpty', 'getPrecisionEmpty'],
+
+            # 2-step tracking + ID chains 
+            'tracktwoMVA'   : ['getCaloMVA', 'getFTFCore'     , 'getFTFIso'     , 'getPrecTrackIso'  , 'getPrecision'     ],
+            'tracktwoLLP'   : ['getCaloMVA', 'getFTFCore'     , 'getFTFIso'     , 'getPrecTrackIso'  , 'getPrecision'     ],
+
+            # LRT chains
+            'trackLRT'      : ['getCaloMVA', 'getFTFLRT'      , 'getFTFIsoEmpty', 'getPrecTrackLRT'  , 'getPrecisionLRT'  ],
         }
 
-        # this should be extended by the signature expert to make full use of the dictionary!
-        key = self.chainPart['preselection']
-        steps=stepDictionary[key]
+        steps = step_dictionary[getChainSequenceConfigName(self.chainPart)]
         for step in steps:
-            is_probe_leg = self.chainPart['tnpInfo']=='probe'
             if 'Empty' in step:
-                chainstep = getattr(self, step)(flags)
+                chain_step = getattr(self, step)(flags)
             else:
-                chainstep = getattr(self, step)(flags, is_probe_leg=is_probe_leg)
-            chainSteps+=[chainstep]
+                is_probe_leg = self.chainPart['tnpInfo']=='probe'
+                chain_step = getattr(self, step)(flags, is_probe_leg=is_probe_leg)
+
+            chain_steps.append(chain_step)
     
-        myChain = self.buildChain(chainSteps)
-        return myChain
+        return self.buildChain(chain_steps)
+    
 
-
-    # --------------------
-    def getCaloMVASeq(self, flags, is_probe_leg=False):
-        stepName = 'MVA_tau'
+    #--------------------------------------------------
+    # Step 1: CaloMVA reconstruction
+    #--------------------------------------------------
+    def getCaloMVA(self, flags, is_probe_leg=False):
+        stepName = 'CaloMVA_tau'
         return self.getStep(flags, stepName, [tauCaloMVAMenuSequenceGenCfg], is_probe_leg=is_probe_leg)
+
         
-    # --------------------
+    #--------------------------------------------------
+    # Step 2: 1st FTF stage (FTFCore/LRT)
+    #--------------------------------------------------
     def getFTFCore(self, flags, is_probe_leg=False):
         stepName = 'FTFCore_tau'
         return self.getStep(flags, stepName, [tauFTFTauCoreSequenceGenCfg], is_probe_leg=is_probe_leg)
 
-    # --------------------
     def getFTFLRT(self, flags, is_probe_leg=False):
         stepName = 'FTFLRT_tau'
         return self.getStep(flags, stepName, [tauFTFTauLRTSequenceGenCfg], is_probe_leg=is_probe_leg)
 
-    # --------------------
+    def getFTFCoreEmpty(self, flags):
+        stepName = 'FTFCoreEmpty_tau'
+        return self.getEmptyStep(2, stepName)
 
-    def getFTFEmpty(self, flags):
-        stepName = 'FTFEmpty_tau'
-        return self.getEmptyStep(2,stepName)
 
-    # --------------------
-
+    #--------------------------------------------------
+    # Step 3: 2nd FTF stage (FTFIso)
+    #--------------------------------------------------
     def getFTFIso(self, flags, is_probe_leg=False):
         stepName = 'FTFIso_tau'
         return self.getStep(flags, stepName, [tauFTFTauIsoSequenceGenCfg], is_probe_leg=is_probe_leg)
 
-    # --------------------
+    def getFTFIsoEmpty(self, flags):
+        stepName = 'FTFIsoEmpty_tau'
+        return self.getEmptyStep(3, stepName)
 
-    def getTrkEmpty(self, flags):
-        stepName = 'TrkEmpty_tau'
-        return self.getEmptyStep(3,stepName)
 
-    # --------------------
-
+    #--------------------------------------------------
+    # Step 4: Precision tracking
+    #--------------------------------------------------
     def getPrecTrackIso(self, flags, is_probe_leg=False):
         stepName = 'PrecTrkIso_tau'
-        return self.getStep(flags, stepName,[tauPrecTrackIsoSequenceGenCfg],is_probe_leg=is_probe_leg)
+        return self.getStep(flags, stepName, [tauPrecTrackIsoSequenceGenCfg], is_probe_leg=is_probe_leg)
 
-    # --------------------
     def getPrecTrackLRT(self, flags, is_probe_leg=False):
         stepName = 'PrecTrkLRT_tau'
-        return self.getStep(flags, stepName,[tauPrecTrackLRTSequenceGenCfg],is_probe_leg=is_probe_leg)
+        return self.getStep(flags, stepName, [tauPrecTrackLRTSequenceGenCfg], is_probe_leg=is_probe_leg)
 
-    # --------------------
+    def getPrecTrackEmpty(self, flags):
+        stepName = 'PrecTrkEmpty_tau'
+        return self.getEmptyStep(4, stepName)
 
-    def getPTEmpty(self, flags):
-        stepName = 'PTEmpty_tau'
-        return self.getEmptyStep(4,stepName)
 
-    # --------------------
+    #--------------------------------------------------
+    # Step 5: Precision reconstruction + ID
+    #--------------------------------------------------
+    def getPrecision(self, flags, is_probe_leg=False):
+        sequenceName = getChainPrecisionSeqName(self.chainPart)
+        stepName = f'Precision_{sequenceName}_tau'
+        return self.getStep(
+            flags, 
+            stepName, 
+            [tauPrecisionSequenceGenCfg],
+            seq_name=sequenceName,
+            is_probe_leg=is_probe_leg,
+        )
 
-    def getTrackTwoMVA(self, flags, is_probe_leg=False):
-        stepName = "TrkTwoMVA_tau"
-        return self.getStep(flags, stepName,[tauTrackTwoMVASequenceGenCfg],is_probe_leg=is_probe_leg)
+    def getPrecisionLRT(self, flags, is_probe_leg=False):
+        sequenceName = getChainPrecisionSeqName(self.chainPart)
+        stepName = f'Precision_{sequenceName}_tau'
+        return self.getStep(
+            flags, 
+            stepName, 
+            [tauPrecisionLRTSequenceGenCfg],
+            seq_name=sequenceName,
+            is_probe_leg=is_probe_leg,
+        )
 
-    # --------------------
-
-    def getTrackTwoLLP(self, flags, is_probe_leg=False):
-        stepName = "TrkTwoLLP_tau"
-        return self.getStep(flags, stepName,[tauTrackTwoLLPSequenceGenCfg],is_probe_leg=is_probe_leg)
-
-    # --------------------
-    def getTrackLRT(self, flags, is_probe_leg=False):
-        stepName = "TrkLRT_tau"
-        return self.getStep(flags, stepName,[tauTrackLRTSequenceGenCfg],is_probe_leg=is_probe_leg)
-
-    # --------------------
-
-    def getIDEmpty(self, flags):
-        stepName = 'IDEmpty_tau'
-        return self.getEmptyStep(5,stepName)
+    def getPrecisionEmpty(self, flags):
+        stepName = 'PrecisionEmpty_tau'
+        return self.getEmptyStep(5, stepName)
