@@ -121,15 +121,3 @@ operator<<(std::ostream& os, const EventStreamInfo& esi){
 
   return os;
 }
-
-//______________________________________________________________________________
-void
-EventStreamInfo::reset() {
-  m_numberOfEvents = 0;
-  m_runNumbers.clear();
-  m_lumiBlockNumbers.clear();
-  m_processingTags.clear();
-  m_itemList.clear();
-  m_eventTypes.clear();
-  return;
-}

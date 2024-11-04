@@ -275,7 +275,6 @@ StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG beam energy "" tag cou
 StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG Failed to retrieve  'SimInfoKey':'/Simulation/Parameters' => cannot set: xAOD::FileMetaData::simFlavour, and xAOD::FileMetaData::isDataOverlay. Trying to get them from input metadata store.
 StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG set xAOD::FileMetaData::dataType to StreamStream1
 StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG Failed to retrieve  'EventInfoKey':'EventInfo' => cannot set xAOD::FileMetaData::mcProcID, runNumbers, or lumiBlockNumbers
-StreamStream1.StreamStream1_MakeEventStreamInfo     DEBUG Resetting the EventStreamInfo payload at the first event
 ClassIDSvc                                           INFO getRegistryEntries: read 14 CLIDRegistry entries for module ALL
 StreamStream2                                       DEBUG addItemObjects(2101,"*") called
 StreamStream2                                       DEBUG            Key:*
