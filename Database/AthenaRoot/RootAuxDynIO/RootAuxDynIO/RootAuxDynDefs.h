@@ -26,7 +26,7 @@ namespace RootAuxDynIO
    * @brief if a string ends with AUX_POSTFIX then remove it
    * @param str the string to modify
    */
-   bool removeAuxPostfix(std::string str);
+   bool removeAuxPostfix(std::string& str);
 
    /**
    * @brief Construct branch name for a given dynamic attribute
@@ -46,7 +46,7 @@ namespace RootAuxDynIO
 
 
 inline bool
-RootAuxDynIO::removeAuxPostfix(std::string str)
+RootAuxDynIO::removeAuxPostfix(std::string& str)
 {
    if( endsWithAuxPostfix(str) ) {
       str.resize( str.size() - AUX_POSTFIX_LEN );
