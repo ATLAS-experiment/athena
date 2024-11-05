@@ -50,7 +50,7 @@ G4InitTool::initThread() {
   // Assign the thread id
   // TODO: implement a better solution.
   // WARNING: not portable!
-#ifdef __USE_GNU
+#if defined(__USE_GNU) || defined(__CPPCHECK__)
   pid_t tid = gettid();
   wThreadContext->SetThreadId( tid );
 #else
