@@ -833,7 +833,7 @@ def TgcRawDataMonitoringConfig(inputFlags):
                         label_glbl_index_online.append( label )
     for iphi in range(24):
         for igap in range(1,3):
-            if iphi==0 and igap==1: label =  'M4f%dL%d' % (iphi,igap)
+            if iphi==0 and igap==1: label =  'M4f%dE1L%d' % (iphi+1,igap)
             else: label =  ''
             label_glbl_index_online.append( label )
 
