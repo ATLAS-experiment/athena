@@ -28,23 +28,22 @@ DL1dv01_MC23_Generator_dict = {
 
 GN2v01_MC20_Generator_dict = {
     "default": "default",
-    "Pythia8EvtGen": "default",
+    "Pythia8": "default",
+    "Herwig713": "411233",
+    "Herwig721": "600666",
+    "Herwig723": "600666",
     "Sherpa2210": "700660",
     "Sherpa2211": "700660",
     "Sherpa2212": "700660",
     "Sherpa2214": "700660",
-    "PowhegHerwig7": "411233",
-    "PhH7EG": "600666",
-    "Pythia8EvtGen517": "410480",
 }
 
 GN2v01_MC23_Generator_dict = {
     "default": "default",
-    "Pythia8EvtGen": "default",
+    "Pythia8": "default",
+    "Herwig723": "601414",
     "Sherpa2212": "700808",
     "Sherpa2214": "700808",
-    "PhH7EG": "601414",
-    "Pythia8EvtGen517": "601398",
 }
 dict_tagger_generator = {
         ('DL1dv01', LHCPeriod.Run2): DL1dv01_MC20_Generator_dict,
@@ -64,17 +63,10 @@ def MCMC_generator_map(generatorDict, tagger='GN2v01'):
         elif 'Herwig7' in generatorDict:
             generator = 'Herwig'+generatorDict['Herwig7'].replace('.', '')
     else:
-        if 'Herwig7' in generatorDict and 'EvtGen' not in generatorDict: #herwig7 only
-            if 'Powheg' in generatorDict:
-                generator = 'PowhegHerwig7'
-        elif 'Pythia8' in generatorDict and 'EvtGen' in generatorDict: #pythia8 + evtgen
-            if 'EvtGen517' in generatorDict:
-                generator = 'Pythia8EvtGen517'
-            else:
-                generator = 'Pythia8EvtGen'
-        elif 'Herwig7' in generatorDict and 'EvtGen' in generatorDict: #herwig7 + evtgen
-            if 'Powheg' in generatorDict:
-                generator = 'PhH7EG'
+        if 'Herwig7' in generatorDict:
+            generator = 'Herwig'+generatorDict['Herwig7'].replace('.', '')
+        elif 'Pythia8' in generatorDict:
+            generator = 'Pythia8'
     if 'Sherpa' in generatorDict:
         sherpa_versions = ['Sherpa2210', 'Sherpa2211', 'Sherpa2212', 'Sherpa2214']
         generator = 'Sherpa'+generatorDict['Sherpa'].replace('.', '')
