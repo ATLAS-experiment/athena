@@ -716,8 +716,8 @@ void RtCalibrationAnalytic::setInput(const IMdtCalibrationOutput *rt_input) {
     m_alpha = CLHEP::HepVector(m_order, 0);
 
     // drift-time interval //
-    std::shared_ptr<const RtChebyshev> rt_Chebyshev = std::dynamic_pointer_cast<const RtChebyshev>(m_rt);
-    std::shared_ptr<const RtRelationLookUp> rt_LookUp = std::dynamic_pointer_cast<const RtRelationLookUp>(m_rt);
+    auto rt_Chebyshev = dynamic_cast<const RtChebyshev*>(m_rt.get());
+    auto rt_LookUp = dynamic_cast<const RtRelationLookUp*>(m_rt.get());
 
     if (!rt_Chebyshev && !rt_LookUp) {
         throw std::runtime_error(
@@ -746,8 +746,8 @@ bool RtCalibrationAnalytic::analyse() {
     int ifail;                   // flag indicating a failure of the matrix inversion
     unsigned int nb_points(30);  // number of points used to set the new r-t relationship
     double step;                 // r step size
-    std::shared_ptr<const RtChebyshev> rt_Chebyshev = std::dynamic_pointer_cast<const RtChebyshev>(m_rt);
-    std::shared_ptr<const RtRelationLookUp> rt_LookUp = std::dynamic_pointer_cast<const RtRelationLookUp>(m_rt);
+    auto rt_Chebyshev = dynamic_cast<const RtChebyshev*>(m_rt.get());
+    auto rt_LookUp = dynamic_cast<const RtRelationLookUp*>(m_rt.get());
     double r_corr;                               // radial correction
     std::vector<double> rt_param(m_rt->nPar());  // parameters for the new r-t
     double x;                                    // reduced time
