@@ -31,7 +31,7 @@ StatusCode FPGATrackSimWindowExtensionTool::initialize() {
     // Retrieve the mapping service.
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
     if (m_idealGeoRoads) ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
-    m_nLayers_1stStage = m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers();
+    m_nLayers_1stStage = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
     m_nLayers_2ndStage = m_FPGATrackSimMapping->PlaneMap_2nd()->getNLogiLayers() - m_nLayers_1stStage;
 
     // We need to make this loop slice aware in the future.
