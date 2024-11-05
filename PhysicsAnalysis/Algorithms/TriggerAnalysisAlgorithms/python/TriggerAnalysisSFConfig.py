@@ -153,8 +153,8 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             elif is_data_from(config, 2016):
                 if not alg.triggers_2016:
                     raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the year 2016!')
-            elif is_mc_from(config, Campaign.MC20d):
-                if not alg.triggers_2017 or is_data_from(config, 2017):
+            elif is_mc_from(config, Campaign.MC20d) or is_data_from(config, 2017):
+                if not alg.triggers_2017:
                     raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the year 2017!')
             elif is_mc_from(config, Campaign.MC20e) or is_data_from(config, 2018):
                 if not alg.triggers_2018:
@@ -216,10 +216,12 @@ class TriggerAnalysisSFBlock(ConfigBlock):
     ) -> None:
         years = []
         if config.campaign() is Campaign.MC20a:     years = ['2015', '2016']
-        elif config.campaign() is Campaign.MC20d:   years = ['2017']
-        elif config.campaign() is Campaign.MC20e:   years = ['2018']
-        elif config.campaign() in [Campaign.MC21a, Campaign.MC23a]: years = ['2022']
-        elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]: years = ['2023']
+        elif is_data_from(config, 2015):   years = ['2015']
+        elif is_data_from(config, 2016):   years = ['2016']
+        elif config.campaign() is Campaign.MC20d or is_data_from(config, 2017):   years = ['2017']
+        elif config.campaign() is Campaign.MC20e or is_data_from(config, 2018):   years = ['2018']
+        elif config.campaign() in [Campaign.MC21a, Campaign.MC23a] or is_data_from(config, 2022): years = ['2022']
+        elif config.campaign() in [Campaign.MC23c, Campaign.MC23d] or is_data_from(config, 2023): years = ['2023']
 
         triggerMatchingChains = []
         for year in years:
