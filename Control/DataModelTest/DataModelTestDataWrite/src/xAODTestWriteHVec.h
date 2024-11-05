@@ -1,10 +1,8 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file DataModelTestDataWrite/src/xAODTestWriteHVec.h
  * @author scott snyder <snyder@bnl.gov>
@@ -34,13 +32,8 @@ class xAODTestWriteHVec
   : public AthReentrantAlgorithm
 {
 public:
-  /**
-   * @brief Constructor.
-   * @param name The algorithm name.
-   * @param svc The service locator.
-   */
-  xAODTestWriteHVec (const std::string &name, ISvcLocator *pSvcLocator);
-  
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+
 
   /**
    * @brief Algorithm initialization; called at the beginning of the job.
@@ -54,15 +47,11 @@ public:
   virtual StatusCode execute (const EventContext& ctx) const override;
 
 
-  /**
-   * @brief Algorithm finalization; called at the end of the job.
-   */
-  virtual StatusCode finalize() override;
-
-
 private:
-  SG::WriteHandleKey<DMTest::HVec> m_hvecKey;
-  SG::WriteHandleKey<DMTest::HView> m_hviewKey;
+  SG::WriteHandleKey<DMTest::HVec> m_hvecKey
+  { this, "HVecKey", "hvec", "" };
+  SG::WriteHandleKey<DMTest::HView> m_hviewKey
+  { this, "HViewKey", "hview", "" };
 };
 
 
