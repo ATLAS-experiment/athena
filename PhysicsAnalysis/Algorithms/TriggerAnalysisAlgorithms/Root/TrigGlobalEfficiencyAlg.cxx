@@ -118,7 +118,7 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
       for (bool isSFTool : {true, false}) { // one tool instance for efficiencies, another for scale factors
 	auto t = m_electronToolsFactory.emplace(m_electronToolsFactory.end(),
 						"AsgElectronEfficiencyCorrectionTool/ElTrigEff_"
-						+ std::to_string(isSFTool) + "_" + std::to_string(nTools));
+						+ std::to_string(isSFTool) + "_" + std::to_string(nTools) + "_" + m_electronID.value() + "_" + m_electronIsol.value());
 	if (!m_isRun3Geo) {
 	  ANA_CHECK(t->setProperty("MapFilePath", "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"));
 	}
@@ -155,7 +155,7 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
       for (bool isSFTool : {true, false}) { // one tool instance for efficiencies, another for scale factors
 	auto t = m_photonToolsFactory.emplace(m_photonToolsFactory.end(),
 					      "AsgPhotonEfficiencyCorrectionTool/PhTrigEff_"
-					      + std::to_string(isSFTool) + "_" + std::to_string(nTools));
+					      + std::to_string(isSFTool) + "_" + std::to_string(nTools) + "_" + m_photonIsol.value());
 	if (!m_isRun3Geo) {
 	  ANA_CHECK(t->setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map3.txt"));
 	}
@@ -179,7 +179,7 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
   ToolHandleArray<CP::IMuonTriggerScaleFactors> muonTools;
   if (!m_muonsHandle.empty() && !m_doMatchingOnly) {
     if (m_muonID.empty()) ATH_MSG_ERROR("Muon ID was not set for TrigGlobalEfficiencyAlg!");
-    m_muonTool = asg::AnaToolHandle<CP::IMuonTriggerScaleFactors>("CP::MuonTriggerScaleFactors/MuonTrigEff");
+    m_muonTool = asg::AnaToolHandle<CP::IMuonTriggerScaleFactors>("CP::MuonTriggerScaleFactors/MuonTrigEff_" + m_muonID.value());
     ANA_CHECK(m_muonTool.setProperty("MuonQuality", m_muonID.value()));
     ANA_CHECK(m_muonTool.setProperty("AllowZeroSF", true));
     ANA_CHECK(m_muonTool.initialize());
@@ -190,7 +190,7 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
   }
 
   // finally, set up the global trigger tool
-  m_tgecTool = asg::AnaToolHandle<ITrigGlobalEfficiencyCorrectionTool>("TrigGlobalEfficiencyCorrectionTool/TrigGlobal");
+  m_tgecTool = asg::AnaToolHandle<ITrigGlobalEfficiencyCorrectionTool>("TrigGlobalEfficiencyCorrectionTool/TrigGlobal_" + this->name() );
   ANA_CHECK(m_tgecTool.setProperty("ElectronEfficiencyTools", electronEffTools));
   ANA_CHECK(m_tgecTool.setProperty("ElectronScaleFactorTools", electronSFTools));
   ANA_CHECK(m_tgecTool.setProperty("PhotonEfficiencyTools", photonEffTools));
