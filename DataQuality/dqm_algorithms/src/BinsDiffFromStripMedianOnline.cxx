@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*  BinsDiffFromStripMedianOnline.cxx is to pick out the problematic bins in 2D histogram assuming that y-axis(the phi direction) be symmetric. 
@@ -20,10 +20,6 @@
 
 #include <iostream>
 #include <string>
-
-
-//bool mySortfunc(binOnline i,binOnline j){return (i.m_value > j.m_value);}
-//bool mySortfunc_ratio(binOnline i, binOnline j){return (i.m_outstandingRatio> j.m_outstandingRatio);}
 
 static dqm_algorithms::BinsDiffFromStripMedianOnline myInstance;
 
@@ -183,7 +179,6 @@ dqm_core::Result * dqm_algorithms::BinsDiffFromStripMedianOnline::execute(const 
       double phi = histogram->GetYaxis()->GetBinCenter(l); 
       binOnline onebin = {eta,phi,k,l,binvalue,outstandingRatio};
       Allbins.push_back(onebin);
-      //      if( VisualMode  && (binvalue / maxInMap < suppressFactor) ) continue;
       if(std::abs(outstandingRatio) > rthreshold ) {
         if( VisualMode  && (binvalue / maxInMap < suppressRedFactor) ){
 	  continue;
@@ -207,7 +202,6 @@ dqm_core::Result * dqm_algorithms::BinsDiffFromStripMedianOnline::execute(const 
       int k =q+range[0];
       std::vector<colorbinOnline> oneColorStrip;
       for ( int l = range[2]; l <= range[3]; ++l ) {
-	//     colorbinOnline oneColorBin = {k,l,-1,-1,-1,green,1};
 	colorbinOnline oneColorBin = {-1,-1,k,l,-1,green,1};
 	oneColorStrip.push_back(oneColorBin);
       }
@@ -216,8 +210,7 @@ dqm_core::Result * dqm_algorithms::BinsDiffFromStripMedianOnline::execute(const 
 
     // map redbins and yellowbins to ColorBinMap
     for(unsigned int i=0;i<redbins.size();i++){
-      //  int k=redbins[i].m_ix;
-      //  int l=redbins[i].m_iy;
+
       int q=redbins[i].m_ix - range[0];
       int p = redbins[i].m_iy-range[2];
 
@@ -239,8 +232,6 @@ dqm_core::Result * dqm_algorithms::BinsDiffFromStripMedianOnline::execute(const 
 
 
     for(unsigned int i=0;i<yellowbins.size();i++){
-      //  int k=yellowbins[i].m_ix;
-      //  int l=yellowbins[i].m_iy;
       int q=yellowbins[i].m_ix - range[0];
       int p = yellowbins[i].m_iy-range[2];
 
@@ -262,8 +253,7 @@ dqm_core::Result * dqm_algorithms::BinsDiffFromStripMedianOnline::execute(const 
     // cluster bad bins
     std::vector<colorclusterOnline > clusterArray;
     for(unsigned int i=0;i<redbins.size();i++){
-      //   const int k=redbins[i].m_ix;
-      //   const int l=redbins[i].m_iy;
+    
       int q=redbins[i].m_ix - range[0];
       int p = redbins[i].m_iy-range[2];
 
@@ -277,13 +267,10 @@ dqm_core::Result * dqm_algorithms::BinsDiffFromStripMedianOnline::execute(const 
 
       if(ColorBinMap[q][p].m_color != green){
 	colorclusterOnline onecluster = MakeClusterOnline(name,range[0],range[2],redbins[i],ColorBinMap);
-	//   colorclusterOnline onecluster = {0,0,0,0,green,-1};
 	if((int)onecluster.m_size > 1) clusterArray.push_back(onecluster);
       }
     }
     for(unsigned int i=0;i<yellowbins.size();i++){
-      //   const int k=yellowbins[i].m_ix;
-      //   const int l=yellowbins[i].m_iy;
       int q=yellowbins[i].m_ix - range[0];
       int p = yellowbins[i].m_iy-range[2];
 
@@ -297,14 +284,13 @@ dqm_core::Result * dqm_algorithms::BinsDiffFromStripMedianOnline::execute(const 
 
       if(ColorBinMap[q][p].m_color != green){
 	colorclusterOnline onecluster = MakeClusterOnline(name,range[0],range[2],yellowbins[i],ColorBinMap);
-	//   colorclusterOnline onecluster = {0,0,0,0,green,-1};
 	if((int)onecluster.m_size > 1) clusterArray.push_back(onecluster);
       }
     }
 
     // publish clusters here:
     for(unsigned int i=0;i<clusterArray.size();i++){
-      char tmp[500];
+      char tmp[500]{};
       if(clusterArray[i].m_color==red){
 	snprintf(tmp,500,"CR%i-(eta,phi)(r)(size)=(%0.3f,%0.3f)(%0.3f)(%i)",count_red_c,clusterArray[i].m_eta,clusterArray[i].m_phi,clusterArray[i].m_radius,clusterArray[i].m_size);
 	count_red_c++;
@@ -320,11 +306,8 @@ dqm_core::Result * dqm_algorithms::BinsDiffFromStripMedianOnline::execute(const 
 
   }
 
-  // std::sort(redbins.begin(),redbins.end(),mySortfunc);
   std::sort(redbins.begin(),redbins.end());
-  // std::sort(yellowbins.begin(),yellowbins.end(),mySortfunc); 
   std::sort(yellowbins.begin(),yellowbins.end()); 
-  // std::sort(Allbins.begin(),Allbins.end(),mySortfunc_ratio);
   std::sort(Allbins.begin(),Allbins.end());
   // publish red bins
   int count_red=0;
@@ -342,7 +325,7 @@ dqm_core::Result * dqm_algorithms::BinsDiffFromStripMedianOnline::execute(const 
     }
 
     if(publish){
-      char tmp[500];
+      char tmp[500]{};
       snprintf(tmp,500,"R%i-(eta,phi)[OSRatio]=(%0.3f,%0.3f)[%0.2e]",count_red,redbins[i].m_eta,redbins[i].m_phi,redbins[i].m_outstandingRatio);
       std::string tag(tmp);
       result->tags_[tag] = redbins[i].m_value;
@@ -367,7 +350,7 @@ dqm_core::Result * dqm_algorithms::BinsDiffFromStripMedianOnline::execute(const 
       }
     }
     if(publish && (count_red+count_yellow) < Nmaxpublish ){
-      char tmp[500];
+      char tmp[500]{};
       snprintf(tmp,500,"Y%i-(eta,phi)[OSRatio]=(%0.3f,%0.3f)[%.2e]",count_yellow,yellowbins[i].m_eta,yellowbins[i].m_phi,yellowbins[i].m_outstandingRatio);
       std::string tag(tmp);
       result->tags_[tag] = yellowbins[i].m_value;
@@ -379,7 +362,7 @@ dqm_core::Result * dqm_algorithms::BinsDiffFromStripMedianOnline::execute(const 
 
   if(count_red+count_yellow==0 && (int)Allbins.size()>=5 ){
     for(int i=0;i<5;i++){
-      char tmptmp[500];
+      char tmptmp[500]{};
       snprintf(tmptmp,500,"LeadingBin%i-(eta,phi)=(%0.3f,%0.3f)",i,Allbins[i].m_eta,Allbins[i].m_phi);
       std::string tagtag(tmptmp);
       result->tags_[tagtag] = Allbins[i].m_value;
@@ -412,15 +395,12 @@ dqm_core::Result * dqm_algorithms::BinsDiffFromStripMedianOnline::execute(const 
 
 void dqm_algorithms::BinsDiffFromStripMedianOnline::FindStripMedianOnline(const std::string &  name,std::vector<double> onestrip_tmp,std::vector<double>& stripsMedian){
   double median=0;
-  //  if(onestrip_tmp.size()==0) stripsMedian.push_back(median);
-  //  else{
+  
   std::sort(onestrip_tmp.begin(),onestrip_tmp.end());
   int index1=(int)(onestrip_tmp.size()/4.);
-  //   int index1=int(floor(onestrip_tmp.size()/4.));
-  //   int index2=int(floor(onestrip_tmp.size()/2.));
+ 
   int index2=(int)(onestrip_tmp.size()/2.);
   int index3=(int) (3.*onestrip_tmp.size()/4.);
-  //   int index3=int(floor(3*onestrip_tmp.size()/4.));
   if(onestrip_tmp.size()>0){
       if ((int)onestrip_tmp.size() <= index1 || (int)onestrip_tmp.size() <= index2 || (int)onestrip_tmp.size() <= index3){
 	throw dqm_core::BadConfig( ERS_HERE, name, "out of onestrip_tmp range " );
@@ -428,9 +408,7 @@ void dqm_algorithms::BinsDiffFromStripMedianOnline::FindStripMedianOnline(const 
 
       median = (onestrip_tmp[index1]+onestrip_tmp[index2]+onestrip_tmp[index3])/3.0;
     }
-  //   median = (onestrip_tmp[index2]);
   stripsMedian.push_back(median);
-  //  }
 }
 
 void dqm_algorithms::BinsDiffFromStripMedianOnline::AddToList(const int r0,const int r2,int i,int j,std::vector<std::vector<colorbinOnline> > & ColorBinMap, std::vector<colorbinOnline>& LookAtList){

@@ -292,7 +292,7 @@ namespace dqutils {
 
           m.setBins(5000);
           RooFFTConvPdf bxc("bxc", "BW (X) CB", m, bw, cb);
-          bxc.fitTo(*data, RooFit::PrintLevel(-1), RooFit::PrintEvalErrors(-1), RooFit::Warnings(kFALSE));
+          auto resourceToDelete = bxc.fitTo(*data, RooFit::PrintLevel(-1), RooFit::PrintEvalErrors(-1), RooFit::Warnings(kFALSE));
           RooPlot* frame;
           if (saveHistos == true) {
             frame = m.frame();
@@ -301,6 +301,7 @@ namespace dqutils {
             bxc.plotOn(frame, RooFit::LineColor(kBlue));
             delete frame;
           }
+          delete resourceToDelete;
           mean = bwm0.getVal();
           meanErr = bwm0.getError();
           sigma = cbsg.getVal();

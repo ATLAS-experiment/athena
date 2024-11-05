@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -13,8 +13,7 @@
 #include <TClass.h>
 #include <TH1.h>
 #include <TAxis.h>
-//#include <TF1.h>
-//#include <TProfile.h>
+
 
 #include "dqm_core/exceptions.h"
 #include "dqm_core/AlgorithmConfig.h"
@@ -165,9 +164,7 @@ MDTTubeCheckError::execute( const std::string& name, const TObject& object, cons
   if (Tubes.size()>0) {
     for (int k=0; k<(int)Tubes.size(); k++) {
       std::string ToDB="ChangedStatusTube_";
-      char* nn;
-      asprintf(&nn, "%i", k+1);
-      ToDB += nn;
+      ToDB += std::to_string(k+1);
       result->tags_[ToDB] = Tubes[k];
       ERS_DEBUG(1,"MDT Tube which changed status: "<<ToDB<<" = "<<Tubes[k] );
     }
