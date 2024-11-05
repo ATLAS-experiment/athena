@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -eu
+
+function check() {
+    # check that one number we set is there
+    local TMP=$(mktemp)
+    h5dump -o $TMP -y -d $1 hists.h5 > /dev/null
+    local NUMBER=$(cat $TMP | xargs )
+    if [[ $NUMBER == $2 ]]; then
+        echo "number in $1 is correct! ($NUMBER)"
+    else
+        echo "test magic number is incorrect ($NUMBER != $2)"
+        return 1
+    fi
+}
+
+# weighted hist
+check 'h3dw/histogram[0,1,2]' 0.5
+check 'h3dw/histogram[0,1,3]' 10
+check 'h3dw/histogram[0,1,1]' 0
+
+# profile hist
+check 'h3dp/sum_of_weights_squared[0,1,0]' 0
+check 'h3dp/sum_of_weights_squared[0,1,2]' 0.5
+check 'h3dp/sum_of_weights[0,1,2]' 1
+check 'h3dp/count[0,1,2]' 2
+check 'h3dp/variance[0,1,2]' 0
+
+# category hist
+check 'h1c/histogram[0]' 0
+check 'h1c/histogram[2]' 1
+check 'h1c/histogram[4]' 1

@@ -4,13 +4,13 @@
 atlas_subdir( HDF5Utils )
 
 # Grab HDF5 from AnalysisBaseExternals.
-find_package( HDF5 1.10.1 COMPONENTS CXX )
+find_package( HDF5 1.10.1 COMPONENTS CXX HL)
 
 # find root
 find_package(ROOT COMPONENTS RIO Hist Tree Net Core TreePlayer)
 
 # find boost
-find_package( Boost 1.54.0 COMPONENTS program_options )
+find_package( Boost 1.54.0 COMPONENTS program_options)
 
 # Add the hdf tuple library
 atlas_add_library(HDF5Utils
@@ -72,6 +72,16 @@ atlas_add_executable( test-hdf5-writer
   LINK_LIBRARIES HDF5Utils )
 atlas_install_scripts( test/test-h5-output )
 
+atlas_add_executable( test-histogram
+  util/test-histogram.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES HDF5Utils ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
+atlas_install_scripts( test/test-histogram-output )
+
 atlas_add_test( test_hdf5_writer
   SCRIPT test-hdf5-writer
   POST_EXEC_SCRIPT test-h5-output)
+
+atlas_add_test( test_histogram
+  SCRIPT test-histogram
+  POST_EXEC_SCRIPT test-histogram-output)
