@@ -2260,9 +2260,9 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::newOneSeed
 namespace {
    inline
    float computeEta( float r, float z) {
-      float theta = r > 10e-9 ? std::atan2(r,z) : 0.f;
-      float tan_half_theta = std::tan(.5f * theta);
-      return tan_half_theta > 0.f ? -std::log(tan_half_theta) : 0.f;
+      if (r <= 10e-9) return 0;
+      auto asinh = [] (double x) { return std::log (std::sqrt (x*x+1) + x); };
+      return asinh (z / r);
    }
 }
 
