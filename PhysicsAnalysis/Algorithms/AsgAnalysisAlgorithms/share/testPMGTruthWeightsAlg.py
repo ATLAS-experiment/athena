@@ -11,7 +11,6 @@ import os
 
 from GaudiKernel.Configurable import DEBUG
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AsgAnalysisAlgorithms.PMGTruthWeightAlgConfig import PMGTruthWeightAlgCfg

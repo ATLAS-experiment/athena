@@ -143,6 +143,6 @@ Output:
     commands:
       - 'disable jet_select_baselineJvt.*'
       - 'disable mu_select_medium.*'
+      - 'disable el_select_loose.*'
       - 'disable ph_select_tight.*'
       - 'disable tau_select_tight.*'
-      - 'disable el_select_loose.*'
