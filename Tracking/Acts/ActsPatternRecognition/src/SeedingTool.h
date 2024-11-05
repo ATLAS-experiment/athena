@@ -15,6 +15,7 @@
 // ATHENA
 #include "ActsToolInterfaces/ISeedingTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "ActsInterop/Logger.h"
 
 // ACTS CORE
 #include "Acts/Definitions/Units.hpp"
@@ -272,6 +273,11 @@ namespace ActsTrk {
     std::unique_ptr< Acts::GridBinFinder< 3ul > > m_topBinFinder{nullptr};
 
     std::array<std::vector<std::size_t>, 3ul> m_navigation{};
+
+    /// Private access to the logger
+    const Acts::Logger &logger() const { return *m_logger; }
+    /// logging instance
+    std::unique_ptr<const Acts::Logger> m_logger {nullptr};
 
     static inline bool itkFastTrackingSPselect(const value_type& sp) {
       // At small r we remove points beyond |z| > 200.

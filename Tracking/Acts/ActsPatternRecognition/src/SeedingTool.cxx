@@ -135,6 +135,8 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_numSeedIncrement);
     ATH_MSG_DEBUG("   " << m_deltaInvHelixDiameter);
 
+    // Make the logger And Propagate to ACTS routines
+    m_logger = makeActsAthenaLogger(this, "Acts");
  
     if (m_zBinEdges.size() - 1 !=
       m_zBinNeighborsTop.size() and
@@ -196,7 +198,7 @@ namespace ActsTrk {
     m_navigation[0ul] = {};
     m_navigation[1ul] = m_finderCfg.zBinsCustomLooping;
     m_navigation[2ul] = m_rBinsCustomLooping.value();
-    
+
     return StatusCode::SUCCESS;
   }
 
@@ -250,10 +252,10 @@ namespace ActsTrk {
 
     
     Acts::CylindricalSpacePointGrid< value_type > grid =
-      Acts::CylindricalSpacePointGridCreator::createGrid< value_type >(m_gridCfg, gridOpts);
+      Acts::CylindricalSpacePointGridCreator::createGrid< value_type >(m_gridCfg, gridOpts, logger());
 
     Acts::CylindricalSpacePointGridCreator::fillGrid(m_finderCfg, finderOpts, grid,
-						     spBegin, spEnd);
+						     spBegin, spEnd, logger());
 
     // Compute radius Range
     // we rely on the fact the grid is storing the proxies
@@ -345,6 +347,8 @@ namespace ActsTrk {
 
   StatusCode 
   SeedingTool::prepareConfiguration() {
+    assert(m_logger != nullptr);
+    
     // Prepare the Acts::SeedFinderConfig object
     // This is done only once, during initialization using the
     // parameters set in the JO
@@ -453,7 +457,7 @@ namespace ActsTrk {
     filterCfg.seedWeightIncrement = m_seedWeightIncrement;
     filterCfg.numSeedIncrement = m_numSeedIncrement;
     filterCfg.deltaInvHelixDiameter = m_deltaInvHelixDiameter;
-    m_finderCfg.seedFilter = std::make_unique<Acts::SeedFilter< value_type > >(filterCfg.toInternalUnits());    
+    m_finderCfg.seedFilter = std::make_unique<Acts::SeedFilter< value_type > >(filterCfg.toInternalUnits(), logger().cloneWithSuffix("Filter"));    
 
     m_finderCfg = m_finderCfg.toInternalUnits().calculateDerivedQuantities();
 
@@ -474,7 +478,7 @@ namespace ActsTrk {
     m_gridCfg = m_gridCfg.toInternalUnits();
 
     // Seed Finder
-    m_finder = {m_finderCfg};
+    m_finder = {m_finderCfg, logger().cloneWithSuffix("Finder")};
  
     return StatusCode::SUCCESS;
   }
