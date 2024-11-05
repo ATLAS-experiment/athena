@@ -35,7 +35,9 @@ StatusCode xAODTestReadCVec::initialize()
 {
   errorcheck::ReportMessage::hideErrorLocus();
 
-  SG::ConstAccessor<float> dVar1 ("dVar1");
+  if (m_testDecorSE) {
+    SG::ConstAccessor<float> dVar1 ("dVar1");
+  }
 
   ATH_CHECK( m_cvecKey.initialize() );
   if (!m_writeKey.key().empty())
@@ -64,12 +66,15 @@ StatusCode xAODTestReadCVec::execute (const EventContext& ctx) const
   const static SG::ConstAccessor<int> anInt2 ("anInt2");
   const static SG::ConstAccessor<int> anInt10 ("anInt10");
   const static SG::ConstAccessor<int> dInt1 ("dInt1");
-  const static SG::ConstAccessor<float> dVar1 ("dVar1"); // testing schema evolution
   const static SG::ConstAccessor<int> dInt100 ("dInt100");
   const static SG::ConstAccessor<int> dInt150 ("dInt150");
   const static SG::ConstAccessor<int> dInt200 ("dInt200");
   const static SG::ConstAccessor<int> dInt250 ("dInt250");
   const static SG::ConstAccessor<ElementLink<DMTest::CVec> > cEL ("cEL");
+
+   // testing schema evolution
+  const static SG::ConstAccessor<float> dVar1SE (m_testDecorSE ? "dVar1" : "dxVar1");
+  const static SG::ConstAccessor<int> dVar1NoSE (m_testDecorSE ? "dxVar1" : "dVar1");
 
   // Ordering of auxid is not reliable.  Sort by name.
   const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
@@ -96,8 +101,14 @@ StatusCode xAODTestReadCVec::execute (const EventContext& ctx) const
       ost << " anInt2: " << anInt2(*c);
     if (dInt1.isAvailable(*c))
       ost << " dInt1: " << dInt1(*c);
-    if (dVar1.isAvailable(*c))
-      ost << " dVar1: " << dVar1(*c);
+    if (m_testDecorSE) {
+      if (dVar1SE.isAvailable(*c))
+        ost << " dVar1: " << dVar1SE(*c);
+    }
+    else {
+      if (dVar1NoSE.isAvailable(*c))
+        ost << " dVar1: " << dVar1NoSE(*c);
+    }
     if (dInt100.isAvailable(*c))
       ost << " dInt100: " << dInt100(*c);
     if (dInt150.isAvailable(*c))
