@@ -100,27 +100,38 @@ namespace HLTTest {
       auto roiLink = featureInfo.link;
       CHECK( roiLink.isValid() );
       if ( roiLink.isValid() ) {
-	auto roiPtr(roiLink.cptr());
-	ATH_MSG_DEBUG("RoI" << **roiPtr );
-	// create new outpu objects and add the properties
-	if (objects.size() > output->size()) {
-	  auto object=objects[output->size()];
-	  auto xobj = new xAOD::TrigComposite;
-	  output->push_back( xobj );
-	  // maintain link to previous collections
-	  xobj->setObjectLink( "initialRoI", roiLink );// this is used by the HypoAlg
-
-	  ATH_MSG_DEBUG( "Reconstructed object" );
-	  for ( const auto& prop : object )  {
-	    xobj->setDetail( prop.first, prop.second );
-	    ATH_MSG_DEBUG( "  " << prop.first << " : " << prop.second );
-	  }
-	}
-	else {
-	  ATH_MSG_DEBUG( "No reco object created for this RoI because it's not found in the event");
-	}
+      	auto roiPtr(roiLink.cptr());
+      	ATH_MSG_DEBUG("RoI" << **roiPtr );
+        bool foundObject = false;
+      	// create new outpu objects and add the properties
+      	if (objects.size() > output->size()) {  	   
+          // attaching the correct object form input data:
+          for (auto object: objects){              	        
+            auto eta = object[0].second;
+            auto phi = object[1].second;
+            // check eta and phi
+            if (std::abs( eta - (*roiPtr)->eta()) <0.01 && std::abs(phi - (*roiPtr)->phi())< 0.01){
+              foundObject = true;
+              ATH_MSG_DEBUG( "Found object: " << object[0].first << " : " << object[0].second <<" ,   " << object[1].first << " : " << object[1].second );
+              auto xobj = new xAOD::TrigComposite;
+    	        output->push_back( xobj );
+	            // maintain link to previous collections
+      	      xobj->setObjectLink( "initialRoI", roiLink );// this is used by the HypoAlg
+              for ( const auto& prop : object )  {
+                 xobj->setDetail( prop.first, prop.second );
+                 ATH_MSG_DEBUG( "  " << prop.first << " : " << prop.second );
+              }
+	          }
+          }
+          if (!foundObject) {
+            ATH_MSG_ERROR("No reco object found in eta and phi range: this might be an error");
+          }
+	      }
+      	else {
+      	  ATH_MSG_DEBUG( "No reco object created for this RoI because it's not found in the event");
+      	}
       } else {
-	ATH_MSG_DEBUG("RoI information missing");
+      	ATH_MSG_DEBUG("RoI information missing");
       }
     }
   

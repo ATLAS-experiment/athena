@@ -78,7 +78,7 @@ TestChainParts = {
     'alignmentGroup' : ['Test'],
     'chainPartName'  : '',
     'multiplicity'   : '',
-    'extra'          : ['mv1', 'mv1step', 'mv2', 'ev1', 'ev2', 'ev3', 'gv1', 'mEmpty1', 'mEmpty2', 'ev1dr', 'mv1dr','merge'],
+    'extra'          : ['mv1', 'mv1step', 'mv2', 'ev1', 'ev2', 'ev3', 'gv1', 'mEmpty1', 'mEmpty2', 'mEmpty3', 'ev1dr', 'mv1dr','merge'],
     'trigType'       : ['TestChain'],
     'threshold'      : '',
     'addInfo'        : [''],
@@ -608,20 +608,39 @@ AllowedTopos_tau = []
 TauChainParts = {
     'signature'     : ['Tau'],
     'alignmentGroup': ['Tau'],
+    'extra'         : [],
     'L1threshold'   : '',
     'chainPartName' : '',
     'threshold'     : '',
-    'preselection'  : ['tracktwoMVA', 'tracktwoLLP', 'ptonly', 'trackLRT' ],
-    'selection'     : ['looseRNN', 'mediumRNN', 'tightRNN', 'perf', 'idperf',
-                       'kaonpi1', 'kaonpi2', 'dipion1', 'dipion2', 'dipion3', 'dipion4', 'dikaonmass', 'singlepion'],
+    'reconstruction': [
+                        # BRT calibration (no-tracking)
+                        'ptonly',
+
+                        # Standard reconstruction triggers
+                        # 2-step FTF (Core + Iso) + PT
+                        # Split in different sequences to avoid running unnecesary TauIDs
+                        'tracktwoMVA', # DeepSet and MesonCuts triggers
+                        'tracktwoLLP', # RNNLLP triggers
+
+                        # LRT reconstruction triggers
+                        # 1-step FTF (LRT) + PT
+                        'trackLRT', # RNNLLP triggers
+                      ],
+    'jet'           : ['lc', 'pf'], # Only use LCTopo jets for now
+    'preselection'  : [],
+    'selection'     : [
+                        'idperf', # No selection
+                        'perf', # NTrk selection
+
+                        # RNN/DeepSet ID WPs (for tracktwoMVA/LLP/LRT reco with DeepSet/RNNLLP TauIDs):
+                        'looseRNN', 'mediumRNN', 'tightRNN',
+
+                        # Meson b-phys triggers (used with tracktwoMVA reco without cutting on the RNN/DeepSet score):
+                        'kaonpi1', 'kaonpi2', 'dipion1', 'dipion2', 'dipion3', 'dipion4', 'dikaonmass', 'singlepion',
+                      ],
     'multiplicity'  : '',
     'trigType'      : ['tau'],
-    'trkInfo'       : '',
     'tnpInfo'       : ['probe'],
-    'extra'         : '',
-    'recoAlg'       : '',
-    'calib'         : '',
-    'addInfo'       : ['IdTest'],
     'topo'          : AllowedTopos_tau,
     'sigFolder'     : ['Tau'],
     'subSigs'       : ['Tau'],
@@ -630,24 +649,23 @@ TauChainParts = {
 TauChainParts_Default = {
     'signature'     : ['Tau'],
     'alignmentGroup': ['Tau'],
+    'extra'         : '',
     'L1threshold'   : '',
     'chainPartName' : '',
-    'threshold'     : '20',
+    'threshold'     : '',
+    'reconstruction': '',
+    'jet'           : 'lc',
     'preselection'  : '',
     'selection'     : '',
     'multiplicity'  : '',
     'trigType'      : '',
-    'trkInfo'       : [],
     'tnpInfo'       : '',
-    'extra'         : '',
-    'recoAlg'       : '',
-    'calib'         : '',
-    'addInfo'       : '',
     'topo'          : [],
     'sigFolder'     : ['Tau'],
     'subSigs'       : ['Tau'],
     'chainPartIndex': 0
 }
+
 
 #==========================================================
 # MET

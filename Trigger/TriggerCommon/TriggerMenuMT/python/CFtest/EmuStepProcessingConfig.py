@@ -57,20 +57,23 @@ def generateEmuEvents():
                              HLT_2TestChain6_mv1_L12MU5VF \
                              HLT_TestChain10_mv2_L1MU8F \
                              HLT_TestChain6_mv1_TestChain10_mv1_L12MU5VF \
+                             HLT_TestChain6_mEmpty3_TestChain10_mv1_L12MU5VF \
                              HLT_2TestChain4_mv1_dr_L12MU5VF'
     data['l1emroi'][1]   =  '1,1,0,EM3,EM7,EM20,EM30,EM100; 2.,-1.2,0,EM3,EM7; 3.,0.2,0,EM3;'
-    data['emclusters'][1]=  'eta:1,phi:1,et:180000; eta:1,phi:-1.2,et:6000; eta:0.5,phi:-1.2,et:3000;'
+    data['emclusters'][1]=  'eta:1,phi:1,et:180000; eta:2,phi:-1.2,et:6000; eta:3.,phi:0.2,et:3000;'
     data['l1muroi'][1]   =  '2,0.5,0,MU5VF; 3,0.5,0,MU5VF;'
-    data['msmu'][1]      = 'eta:-1.2,phi:0.7,pt:1500,pt2:1500; eta:-1.1,phi:0.6,pt:1500,pt2:1500;'
+    data['msmu'][1]      = 'eta:2,phi:0.5,pt:1500,pt2:1500; eta:3,phi:0.5,pt:1500,pt2:1500;'
 
     # event 2: 2e+ 3mu : HLT_TestChain5_ev1_TestChain8_ev1_2TestChain6_mv1_L1_2EM8VH_MU8F, HLT_TestChain6_mv1_TestChain10_ev1_L12eEM10L_MU8F
     data['ctp'] [2]      =  'HLT_TestChain6_mv1_L1MU5VF \
                              HLT_TestChain8_mv1_L1MU8F \
                              HLT_TestChain10_mv2_L1MU8F \
-                             HLT_TestChain8_mv1step_L1MU5VF \
+                             HLT_TestChain8_mv1step_L1MU8F \
                              HLT_TestChain5_ev1_L1EM3 \
                              HLT_TestChain8_ev1_L1EM3 \
-                             HLT_TestChain6_mEmpty2_L1MU5VF \
+                             HLT_TestChain8_mEmpty2_L1MU8F \
+                             HLT_TestChain8_mEmpty3_L1MU8F \
+                             HLT_TestChain6_mEmpty3_TestChain10_mv1_L12MU5VF \
                              HLT_TestChain6_mv1_TestChain10_ev1_L12eEM10L_MU8F \
                              HLT_TestChain6_mv2_TestChain8_ev2_L12eEM10L_MU8F \
                              HLT_2TestChain6_mv1_L12MU5VF \
@@ -83,22 +86,25 @@ def generateEmuEvents():
                              HLT_TestChain5_ev1_TestChain8_ev1_merge_L12EM3 \
                              HLT_TestChain5_ev1_TestChain8_ev1_L12EM3  \
                              HLT_TestChain6_mv1_TestChain5_ev1_dr_L12MU5VF'
-    data['l1emroi'][2]   =  '2,0.2,0,EM3,EM7,EM15,EM20,EM30,EM100; 1,-1.1,0,EM3,EM7,EM15,EM20,EM30;'
-    data['emclusters'][2]=  'eta:0.5,phi:0,et:120000; eta:1,phi:-1.2,et:65000;'
-    data['l1muroi'][2]   =  '2,0.5,0,MU5VF,MU8VF; 3,0.5,0,MU5VF,MU8F,MU8VF;2.2,0.6,0,MU5VF;'
-    data['msmu'][2]      =  'eta:-1.2,phi:0.7,pt:6500,pt2:8500; eta:-1.1,phi:0.6,pt:10500,pt2:8500;eta:-1.1,phi:0.6,pt:8500,pt2:8500;'
+    data['l1emroi'][2]   =  '0.5,0.1,0,EM3,EM7,EM15,EM20,EM30,EM100; 1,-1.2,0,EM3,EM7,EM15,EM20,EM30;'
+    data['emclusters'][2]=  'eta:0.5,phi:0.1,et:120000; eta:1,phi:-1.2,et:65000;'
+    data['l1muroi'][2]   =  '-1.2,0.7,0,MU5VF,MU8VF; -1.1,0.6,0,MU5VF,MU8F,MU8VF;1.1,0.6,0,MU5VF;'
+    data['msmu'][2]      =  'eta:-1.2,phi:0.7,pt:6500,pt2:8500; eta:-1.1,phi:0.6,pt:10500,pt2:8500;eta:1.1,phi:0.6,pt:8500,pt2:8500;'
 
     #event 3: 1e + 1mu; HLT_TestChain6_mv1_TestChain10_ev1_L12eEM10L_MU8F does not pass because of e10
     data['ctp'] [3]      =  'HLT_TestChain20_mv1_L1MU8F \
                              HLT_TestChain10_mv1_L1MU8F \
                              HLT_TestChain8_mv1_L1MU8F \
-                             HLT_TestChain8_mv1step_L1MU5VF \
+                             HLT_TestChain8_mEmpty3_L1MU8F \
+                             HLT_TestChain8_mEmpty2_L1MU8F \
+                             HLT_TestChain6_mEmpty3_TestChain8_mv1_L12MU5VF \
+                             HLT_TestChain8_mv1step_L1MU8F \
                              HLT_TestChain8_ev1_L1EM3 \
                              HLT_TestChain6_mv1_TestChain10_ev1_L12eEM10L_MU8F\
                              HLT_TestChain6_mv2_TestChain8_ev2_L12eEM10L_MU8F'
-    data['l1emroi'][3]   =  '1,1.5,0,EM3,EM7;'
+    data['l1emroi'][3]   =  '-0.6,1.7,0,EM3,EM7;'
     data['emclusters'][3]=  'eta:-0.6,phi:1.7,et:9000;'
-    data['l1muroi'][3]   =  '2,-0.1,0,MU5VF,MU8F,MU8VF;'
+    data['l1muroi'][3]   =  '-1.7,-0.2,0,MU5VF,MU8F,MU8VF;'
     data['msmu'][3]      =  'eta:-1.7,phi:-0.2,pt:29500,pt2:8500;'
 
     # otehr vectors
@@ -167,11 +173,11 @@ def generateChainsManually(flags, maskbit=0x7):
         step_empy= makeChainStep("Step2_mu1empty", isEmpty=True)
 
         MuChains  = [
-            makeChain(flags, name='HLT_TestChain8_mv1step_L1MU5VF', L1Thresholds=["MU5VF"],    ChainSteps=[step_mu11]),
+            makeChain(flags, name='HLT_TestChain8_mv1step_L1MU8F', L1Thresholds=["MU5VF"],    ChainSteps=[step_mu11]),
             makeChain(flags, name='HLT_TestChain8_mv1_L1MU8F',    L1Thresholds=["MU8F"],   ChainSteps=[step_mu11 , step_mu21 , step_mu31, step_mu41] ),
             makeChain(flags, name='HLT_TestChain20_mv1_L1MU8F',   L1Thresholds=["MU8F"],   ChainSteps=[step_mu11 , step_mu21 , step_mu31, step_mu41] ),
             makeChain(flags, name='HLT_TestChain10_mv2_L1MU8F',   L1Thresholds=["MU8F"],   ChainSteps=[step_mu11 , step_mu22 , step_mu31] ),
-            makeChain(flags, name='HLT_TestChain6_mEmpty2_L1MU5VF', L1Thresholds=["MU5VF"],    ChainSteps=[step_mu11 , step_empy , step_mu32, step_mu41] )
+            makeChain(flags, name='HLT_TestChain8_mEmpty2_L1MU8F', L1Thresholds=["MU5VF"],    ChainSteps=[step_mu11 , step_empy , step_mu32, step_mu41] )
             ]
                 
 

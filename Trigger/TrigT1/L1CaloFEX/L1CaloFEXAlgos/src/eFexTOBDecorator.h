@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -50,11 +50,7 @@ namespace LVL1 {
     SG::WriteDecorHandleKey<xAOD::eFexEMRoIContainer> m_WstotDenDec { this, "WstotDenDecDecorKey"  , m_ReadKeyEM_name+".WstotDenDec"  , "Recalculated EM WstotDen" };
     SG::WriteDecorHandleKey<xAOD::eFexEMRoIContainer> m_WstotNumDec { this, "WstotNumDecDecorKey"  , m_ReadKeyEM_name+".WstotNumDec"  , "Recalculated EM WstotNum" };
 
-    SG::WriteDecorHandleKey<xAOD::eFexEMRoIContainer> m_ClusterEtSumPSDec { this, "ClusterEtSumPSDecorKey"  , m_ReadKeyEM_name+".ClusterEtSumPS"  , "Cluster ET sum PS PS" };
-    SG::WriteDecorHandleKey<xAOD::eFexEMRoIContainer> m_ClusterEtSumL1Dec { this, "ClusterEtSumL1DecorKey"  , m_ReadKeyEM_name+".ClusterEtSumL1"  , "Cluster ET sum PSL1" };
-    SG::WriteDecorHandleKey<xAOD::eFexEMRoIContainer> m_ClusterEtSumL2Dec { this, "ClusterEtSumL2DecorKey"  , m_ReadKeyEM_name+".ClusterEtSumL2"  , "Cluster ET sum PSL2" };
-    SG::WriteDecorHandleKey<xAOD::eFexEMRoIContainer> m_ClusterEtSumL3Dec { this, "ClusterEtSumL3DecorKey"  , m_ReadKeyEM_name+".ClusterEtSumL3"  , "Cluster ET sum PSL3" };
-
+    SG::WriteDecorHandleKey<xAOD::eFexEMRoIContainer> m_ClusterSCellEtSumsDec { this, "ClusterSCellEtSumsDecorKey"  , m_ReadKeyEM_name+".ClusterSCellEtSums", "name of the decoration key for SCell Ets of the cluster"};
 
     // WriteDecor handles for the Tau RoI decorations
     SG::WriteDecorHandleKey<xAOD::eFexTauRoIContainer> m_RCoreDec   { this, "RCoreDecorKey"   , m_ReadKeyTau_name+".RCoreDec"   , "Recalculated Tau RCore" };
