@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDALG_RPCCONDDBALG_H
@@ -34,9 +34,9 @@ public:
 
 private:
     template <class WriteCont>
-    StatusCode addDependency(const EventContext& ctx,
-                             const SG::ReadCondHandleKey<CondAttrListCollection>& key,
-                             SG::WriteCondHandle<WriteCont>& writeHandle) const;
+    StatusCode addCondDependency(const EventContext& ctx,
+                                 const SG::ReadCondHandleKey<CondAttrListCollection>& key,
+                                 SG::WriteCondHandle<WriteCont>& writeHandle) const;
 
     StatusCode loadMcElementStatus(const EventContext & ctx, RpcCondDbData& condData) const;
 

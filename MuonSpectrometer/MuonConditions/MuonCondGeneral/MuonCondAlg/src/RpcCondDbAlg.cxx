@@ -20,9 +20,9 @@ StatusCode RpcCondDbAlg::initialize() {
 }
 
 template <class WriteCont>
-    StatusCode RpcCondDbAlg::addDependency(const EventContext& ctx,
-                                           const SG::ReadCondHandleKey<CondAttrListCollection>& key,
-                                           SG::WriteCondHandle<WriteCont>& writeHandle) const {
+    StatusCode RpcCondDbAlg::addCondDependency(const EventContext& ctx,
+                                               const SG::ReadCondHandleKey<CondAttrListCollection>& key,
+                                               SG::WriteCondHandle<WriteCont>& writeHandle) const {
         if (key.empty()) {
             return StatusCode::SUCCESS;
         }
@@ -45,7 +45,7 @@ StatusCode RpcCondDbAlg::execute(const EventContext& ctx) const {
         return StatusCode::SUCCESS;
     }
     writeHandle.addDependency(IOVInfiniteRange::infiniteMixed());
-    ATH_CHECK(addDependency(ctx, m_readKey_folder_mc_deadElements, writeHandle));
+    ATH_CHECK(addCondDependency(ctx, m_readKey_folder_mc_deadElements, writeHandle));
 
     std::unique_ptr<RpcCondDbData> writeCdo{std::make_unique<RpcCondDbData>()};
     // data and MC
