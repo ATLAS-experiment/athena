@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/DigitMonitor.h"
@@ -555,6 +555,7 @@ int DigitMonitor::combine(SimpleShape*& shape, SimpleShape*& ref, const TString&
       n++;
     }
   }
+  if (n==0) return -1;
   if (!SimpleShape::scaleAndShift(shape, 1.0/n)) return -1;
   if (!SimpleShape::scaleAndShift(ref,   1.0/n)) return -1;
   return n;
