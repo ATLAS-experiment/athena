@@ -46,6 +46,9 @@ namespace xAOD {
     auxid_t auxid_NSWTP_mm_segments = getAuxID("NSWTP_mm_segments", NSWTP_mm_segments);
     regAuxVar(auxid_NSWTP_mm_segments, "NSWTP_mm_segments", NSWTP_mm_segments);
 
+    auxid_t auxid_NSWTP_mm_candidateNumber = getAuxID("NSWTP_mm_candidateNumber", NSWTP_mm_candidateNumber);
+    regAuxVar(auxid_NSWTP_mm_candidateNumber, "NSWTP_mm_candidateNumber", NSWTP_mm_candidateNumber);
+    
     auxid_t auxid_NSWTP_mm_BCID = getAuxID("NSWTP_mm_BCID", NSWTP_mm_BCID);
     regAuxVar(auxid_NSWTP_mm_BCID, "NSWTP_mm_BCID", NSWTP_mm_BCID);
 

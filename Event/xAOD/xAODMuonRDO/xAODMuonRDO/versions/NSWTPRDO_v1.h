@@ -72,6 +72,9 @@ namespace xAOD {
         const std::vector<uint32_t>& NSWTP_mm_segments() const;
         std::vector<uint32_t>& NSWTP_mm_segments();
         
+        const std::vector<uint8_t>& NSWTP_mm_candidateNumber() const;
+        std::vector<uint8_t>& NSWTP_mm_candidateNumber();
+        
         const std::vector<uint32_t>& NSWTP_mm_BCID() const;
         std::vector<uint32_t>& NSWTP_mm_BCID();
         
