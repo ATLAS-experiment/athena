@@ -54,6 +54,9 @@ private:
 
   BooleanProperty m_brief
   { this, "Brief", false, "" };
+
+  BooleanProperty m_testDecorSE
+  { this, "TestDecorSE", true, "" };
 };
 
 
