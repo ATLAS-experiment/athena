@@ -35,6 +35,7 @@ if __name__=='__main__':
    parser.add_argument('-a','--isRawdata', dest='rawdata', default=False, action="store_true", help='is raw data ?')
    parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Input sqlite file with bad chans.', type=str)
    parser.add_argument('--FW6', dest='fw6', default=False, help='Is it for fw v. 6', action='store_true')
+   parser.add_argument('--EMF', dest='emf', default=False, help='Is it for EMF', action='store_true')
 
    args = parser.parse_args()
    if help in args and args.help is not None and args.help:
@@ -149,10 +150,11 @@ if __name__=='__main__':
    flags.IOVDb.GlobalTag = "LARCALIB-RUN2-00"
    
    #BadChannels sqlite file to be created 
-   if args.badsql.startswith("/"):
-      flags.LArCalib.BadChannelDB =  args.badsql
-   else:   
-      flags.LArCalib.BadChannelDB = args.outpdir + "/" + args.badsql
+   if not args.emf:
+      if args.badsql.startswith("/"):
+         flags.LArCalib.BadChannelDB =  args.badsql
+      else:   
+         flags.LArCalib.BadChannelDB = args.outpdir + "/" + args.badsql
 
    #Other potentially useful flags-settings:
    
@@ -162,6 +164,12 @@ if __name__=='__main__':
 
    from AthenaConfiguration.Enums import LHCPeriod
    flags.GeoModel.Run = LHCPeriod.Run3
+
+   if args.emf:
+      # additions for EMF
+      flags.IOVDb.SqliteInput="/afs/cern.ch/user/p/pavol/public/EMF_otherCond.db"
+      flags.IOVDb.SqliteFolders = ("/LAR/BadChannelsOfl/BadChannelsSC","/LAR/BadChannels/BadChannelsSC","/LAR/Identifier/OnOffIdMap","/LAR/BadChannelsOfl/MissingFEBs","/LAR/BadChannelsOfl/KnownMNBFEBs", "/LAR/BadChannelsOfl/KnownBADFEBs")
+      flags.LArCalib.doValidation=False
 
    flags.lock()
    flags.dump(evaluate=True) 
@@ -198,6 +206,14 @@ if __name__=='__main__':
    if args.fw6:
       from IOVDbSvc.IOVDbSvcConfig import addOverride
       cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))   
+
+   cfg.getService("IOVDbSvc").DBInstance=""
+
+   if args.emf:   
+      fldrs=cfg.getService("IOVDbSvc").Folders   
+      for i in range(0, len(fldrs)):
+          if 'Align' in fldrs[i]: fldrs[i] += '<forceRunNumber>9999999</forceRunNumber>'
+          if 'LatomeMapping' in fldrs[i]: fldrs[i] +='<tag>LARIdentifierLatomeMapping-EMF</tag>'
 
    #run the application
    cfg.run() 

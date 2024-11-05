@@ -33,6 +33,7 @@ if __name__=='__main__':
    parser.add_argument('-v','--ignoreEndcap', dest='ignoreE', default=False, action="store_true", help='ignore Endcap channels ?')
    parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Output sqlite file, in pool output dir.', type=str)
    parser.add_argument('--FW6', dest='fw6', default=False, help='Is it for fw v. 6', action='store_true')
+   parser.add_argument('--EMF', dest='emf', default=False, help='Is it for EMF', action='store_true')
 
    args = parser.parse_args()
    if help in args and args.help is not None and args.help:
@@ -78,6 +79,7 @@ if __name__=='__main__':
    flags.LArCalib.Input.Type = args.trig
    flags.LArCalib.Input.RunNumbers = [int(args.run),]
    flags.LArCalib.Input.Database = args.outpdir + "/" +args.insql
+   flags.LArCalib.Input.isRawData = args.rawdata
    gainNumMap={"HIGH":0,"MEDIUM":1,"LOW":2}
    flags.LArCalib.Gain=gainNumMap[args.gain.upper()]
 
@@ -164,6 +166,28 @@ if __name__=='__main__':
 
    #Other potentially useful flags-settings:
    
+   # patterns file searching
+   if args.rawdata:
+      if args.emf:
+         pdir='/afs/cern.ch/user/l/lardaq/public/detlar/athena/P1CalibrationProcessing/run/Patterns/EMF/EMF_Oct2024/Delay/emf/'
+         pfile = pdir+args.partition+'/parameters.dat'
+      else:
+         pdir='/afs/cern.ch/user/l/lardaq/public/detlar/athena/P1CalibrationProcessing/run/Patterns/P1/'
+         if args.supercells:
+            pdir += 'LatomeRuns/'
+            if 'Emec' in args.partition:
+               pfile = pdir + 'emec-std/SC_HighDelay/parameters.dat'
+            else:   
+               pfile = pdir + 'barrel/Delay_' + args.partition[:-4] + '/parameters.dat'
+ 
+            flags.LArCalib.Input.paramsFile = pfile
+         else:   
+            pdir += 'Delay/'
+            #FIXME create search also for main readout
+      pass
+      flags.LArCalib.Input.paramsFile = pfile
+
+
    #Define the global output Level:
    from AthenaCommon.Constants import INFO
    flags.Exec.OutputLevel = INFO
@@ -173,6 +197,12 @@ if __name__=='__main__':
 
    from AthenaConfiguration.TestDefaults import defaultGeometryTags
    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+
+   if args.emf:
+      # additions for EMF
+      flags.IOVDb.SqliteInput="/afs/cern.ch/user/p/pavol/public/EMF_otherCond.db"
+      flags.IOVDb.SqliteFolders = ("/LAR/BadChannelsOfl/BadChannelsSC","/LAR/BadChannels/BadChannelsSC","/LAR/Identifier/OnOffIdMap",)
+      flags.LArCalib.doValidation=False
 
    flags.lock()
    flags.dump(evaluate=True)
@@ -194,11 +224,26 @@ if __name__=='__main__':
       from IOVDbSvc.IOVDbSvcConfig import addOverride
       cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))   
 
+   if args.emf:   
+      from IOVDbSvc.IOVDbSvcConfig import addOverride
+      cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-EMF"))   
+      fldrs=cfg.getService("IOVDbSvc").Folders   
+      for i in range(0, len(fldrs)):
+          if 'Align' in fldrs[i]: fldrs[i] += '<forceRunNumber>9999999</forceRunNumber>'
+
    # ignore some channels ?
    if args.ignoreB:
+      if args.rawdata:
+         cfg.getEventAlgo("LArRawSCDataReadingAlg").LATOMEDecoder.IgnoreBarrelChannels=args.ignoreB
+      else:
          cfg.getEventAlgo("LArRawSCCalibDataReadingAlg").LATOMEDecoder.IgnoreBarrelChannels=args.ignoreB
    if args.ignoreE:
+      if args.rawdata:
+         cfg.getEventAlgo("LArRawSCDataReadingAlg").LATOMEDecoder.IgnoreEndcapChannels=args.ignoreE
+      else:
          cfg.getEventAlgo("LArRawSCCalibDataReadingAlg").LATOMEDecoder.IgnoreEndcapChannels=args.ignoreE
+
+   cfg.getService("IOVDbSvc").DBInstance=""
 
    cfg.getService("MessageSvc").defaultLimit=20000 #more messages
 

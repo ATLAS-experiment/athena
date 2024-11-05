@@ -9,6 +9,7 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawEvent/LArAccumulatedCalibDigitContainer.h"
+#include "LArRawEvent/LArAccumulatedDigitContainer.h"
 #include "LArRawEvent/LArFebHeaderContainer.h"
 
 
@@ -42,9 +43,8 @@ class LArDigits2Ntuple : public LArCond2NtupleBase
   NTuple::Item<unsigned long long> m_IEvent;
   NTuple::Array<short>  m_samples;
   // variables for accCalibDigit case
-  NTuple::Array<unsigned long>  m_samplesSum;
-  NTuple::Array<unsigned long>  m_samples2Sum;
-  NTuple::Item<unsigned int> m_nTriggers;
+  NTuple::Array<float>  m_mean;
+  NTuple::Array<float>  m_RMS;
   NTuple::Item<unsigned int> m_dac;
   NTuple::Item<unsigned int> m_delay;
   NTuple::Item<unsigned int> m_pulsed;
@@ -57,7 +57,8 @@ class LArDigits2Ntuple : public LArCond2NtupleBase
   NTuple::Item<short> m_LB;
 
   SG::ReadHandleKey<LArDigitContainer> m_contKey{this, "ContainerKey", "FREE", "key for LArDigitContainer"};
-  SG::ReadHandleKey<LArAccumulatedCalibDigitContainer> m_accContKey{this, "AccContainerKey", "HIGH", "key for LArAccumulatedCalibDigitDigitContainer"};
+  SG::ReadHandleKey<LArAccumulatedCalibDigitContainer> m_accCalibContKey{this, "AccCalibContainerKey", "HIGH", "key for LArAccumulatedCalibDigitDigitContainer"};
+  SG::ReadHandleKey<LArAccumulatedDigitContainer> m_accContKey{this, "AccContainerKey", "HIGH", "key for LArAccumulatedDigitDigitContainer"};
   SG::ReadHandleKey<LArFebHeaderContainer> m_LArFebHeaderContainerKey { this, "LArFebHeaderKey", "LArFebHeader" };
 };
 

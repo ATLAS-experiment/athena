@@ -161,7 +161,7 @@ def LArRampCfg(flags):
        else:   
           theRampValidationAlg.ProblemsToMask=["deadReadout","deadCalib","deadPhys","almostDead",
                                                "highNoiseHG","highNoiseMG","highNoiseLG"]
-       theRampValidationAlg.KeyList=[digKey,]
+       theRampValidationAlg.KeyList=["LArRamp"+digKey,]
        if flags.LArCalib.isSC:
           theRampValidationAlg.PatchMissingFEBs = False
           theRampValidationAlg.CheckCompletness = False
@@ -195,7 +195,6 @@ def LArRampCfg(flags):
 
     #RegistrationSvc    
     result.addService(CompFactory.IOVRegistrationSvc(RecreateFolders = False))
-    result.getService("IOVDbSvc").DBInstance=""
 
 
     #ROOT ntuple writing:

@@ -51,6 +51,7 @@ def addLArCalibFlags(flags, isSC=False):
     flags.addFlag("LArCalib.Input.Files",_getInputFiles)
     flags.addFlag("LArCalib.Input.SubDet","") #EM, HEC or FCAL 
     flags.addFlag("LArCalib.Input.isRawData",False)
+    flags.addFlag("LArCalib.Input.paramsFile","parameters.dat")
     
     flags.addFlag("LArCalib.Input.Database","LAR_OFL") #In practice, a sqlite file
     flags.addFlag("LArCalib.Input.Database2","LAR_OFL") #In practice, a sqlite file, sometimes we need 2 of them

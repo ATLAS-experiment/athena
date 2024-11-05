@@ -46,7 +46,10 @@ def LArPhysWavePredictionCfg(flags):
     if flags.LArCalib.isSC:
        result.merge(addFolders(flags,"/LAR/ElecCalibOflSC/Tdrift/Computed",detDb="LAR_OFL",tag="LARElecCalibOflSCTdriftComputed-000"))
        result.merge(addFolders(flags,"/LAR/ElecCalibOflSC/PhysWaves/HECIdeal",detDb="LAR_OFL",tag="LARElecCalibOflSCPhysWavesHECIdeal-calib-02"))
-       result.merge(addFolders(flags,flags.LArCalib.FCALPhysWave.Folder,detDb="LAR_OFL",tag="LARElecCalibOflPhysWavesFCALFromTB-calib-01",modifiers="<key>FCALFromTB</key>"))
+       # in case main readout shape should be used:
+       #result.merge(addFolders(flags,flags.LArCalib.FCALPhysWave.Folder,detDb="LAR_OFL",tag="LARElecCalibOflPhysWavesFCALFromTB-calib-01",modifiers="<key>FCALFromTB</key>"))
+       # otherwise:
+       result.merge(addFolders(flags,"/LAR/ElecCalibOflSC/PhysWaves/FCALmeasured",detDb="LAR_OFL",tag="LARElecCalibOflSCPhysWavesFCALmeasured-data-00",modifiers="<key>FCALFromData</key>"))
     else:   
        result.merge(addFolders(flags,"/LAR/ElecCalibOfl/Tdrift/Computed",detDb="LAR_OFL",tag="LARElecCalibOflTdriftComputed-calib-03"))
     
@@ -83,6 +86,8 @@ def LArPhysWavePredictionCfg(flags):
     LArPhysWavePredictor.isHEC                    = isHEC
     LArPhysWavePredictor.BadChanKey               = bcKey
 
+    if flags.LArCalib.isSC:
+       LArPhysWavePredictor.KeyFcal               = "FCALFromData"
 
     result.addEventAlgo(LArPhysWavePredictor)
     

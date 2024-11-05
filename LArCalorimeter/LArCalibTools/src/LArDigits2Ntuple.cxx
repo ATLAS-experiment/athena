@@ -26,8 +26,9 @@ StatusCode LArDigits2Ntuple::initialize()
 
   ATH_MSG_DEBUG(" IS it SC?? " << m_isSC );
 
-  if( (!m_contKey.key().empty()) && (!m_accContKey.key().empty()) ){
+  if( (m_contKey.key().size()) && (m_accContKey.key().size() ||  m_accCalibContKey.key().size()) ){
        ATH_MSG_FATAL("Could not run with both standard and acc. digits !!!");
+       ATH_MSG_FATAL("m_contKey: "<<m_contKey.key()<<" m_accContKey: "<<m_accContKey.key()<<" m_accCalibContKey: "<<m_accCalibContKey.key());
        return StatusCode::FAILURE;
   }
   
@@ -39,37 +40,34 @@ StatusCode LArDigits2Ntuple::initialize()
     return sc;
   }
   
-  if(m_accContKey.key().size()) {
-     sc = m_nt->addItem("samplesSum",m_Nsamples,m_samplesSum);
+  if(m_accContKey.key().size() || m_accCalibContKey.key().size()) {
+     sc = m_nt->addItem("mean",m_Nsamples,m_mean);
      if (sc!=StatusCode::SUCCESS) {
-       ATH_MSG_ERROR( "addItem 'samplesSum' failed" );
+       ATH_MSG_ERROR( "addItem 'mean' failed" );
        return sc;
      }
-     sc = m_nt->addItem("samples2Sum",m_Nsamples,m_samples2Sum);
+     sc = m_nt->addItem("RMS",m_Nsamples,m_RMS);
      if (sc!=StatusCode::SUCCESS) {
-       ATH_MSG_ERROR( "addItem 'samples2Sum' failed" );
+       ATH_MSG_ERROR( "addItem 'RMS' failed" );
        return sc;
      }
-    sc = m_nt->addItem("nTriggers",m_nTriggers);
-    if (sc!=StatusCode::SUCCESS) {
-      ATH_MSG_ERROR( "addItem 'nTriggers' failed" );
-      return sc;
-    }
-    sc = m_nt->addItem("DAC",m_dac);
-    if (sc!=StatusCode::SUCCESS) {
-      ATH_MSG_ERROR( "addItem 'DAC' failed" );
-      return sc;
-    }
-    sc = m_nt->addItem("delay",m_delay);
-    if (sc!=StatusCode::SUCCESS) {
-      ATH_MSG_ERROR( "addItem 'delay' failed" );
-      return sc;
-    }
-    sc = m_nt->addItem("Pulsed",m_pulsed);
-    if (sc!=StatusCode::SUCCESS) {
-      ATH_MSG_ERROR( "addItem 'Pulsed' failed" );
-      return sc;
-    }
+     if(m_accCalibContKey.key().size()) { 
+       sc = m_nt->addItem("DAC",m_dac);
+       if (sc!=StatusCode::SUCCESS) {
+         ATH_MSG_ERROR( "addItem 'DAC' failed" );
+         return sc;
+       }
+       sc = m_nt->addItem("delay",m_delay);
+       if (sc!=StatusCode::SUCCESS) {
+         ATH_MSG_ERROR( "addItem 'delay' failed" );
+         return sc;
+       }
+       sc = m_nt->addItem("Pulsed",m_pulsed);
+       if (sc!=StatusCode::SUCCESS) {
+         ATH_MSG_ERROR( "addItem 'Pulsed' failed" );
+         return sc;
+       }
+     }
   }
    
   if(m_contKey.key().size()) {
@@ -132,8 +130,9 @@ StatusCode LArDigits2Ntuple::initialize()
         return sc;
     }
   }
-  ATH_CHECK(m_contKey.initialize(!m_contKey.key().empty()) );
-  ATH_CHECK(m_accContKey.initialize(!m_accContKey.key().empty()) );
+  ATH_CHECK(m_contKey.initialize(m_contKey.key().size()) );
+  ATH_CHECK(m_accContKey.initialize(m_accContKey.key().size()) );
+  ATH_CHECK(m_accCalibContKey.initialize(m_accCalibContKey.key().size()) );
   ATH_CHECK(m_LArFebHeaderContainerKey.initialize(!m_isSC) );
 
   m_ipass	   = 0;
@@ -147,7 +146,7 @@ StatusCode LArDigits2Ntuple::execute()
 {
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
-  if(m_contKey.key().empty() && m_accContKey.key().empty()) return StatusCode::SUCCESS;
+  if(!m_contKey.key().size() && !m_accContKey.key().size() && !m_accCalibContKey.key().size()) return StatusCode::SUCCESS;
 
   StatusCode	sc;
   
@@ -161,7 +160,7 @@ StatusCode LArDigits2Ntuple::execute()
 
   // Get BCID from FEB header
   if ( !m_isSC ){ // we are not processing SC data, Feb header could be accessed
-    SG::ReadHandle<LArFebHeaderContainer> hdrCont(m_LArFebHeaderContainerKey);
+    SG::ReadHandle<LArFebHeaderContainer> hdrCont(m_LArFebHeaderContainerKey, ctx);
     if (! hdrCont.isValid()) {
       ATH_MSG_WARNING( "No LArFEB container found in TDS" );
     }
@@ -177,8 +176,8 @@ StatusCode LArDigits2Ntuple::execute()
     thisbcid	   = ctx.eventID().bunch_crossing_id();
   }
 
-  if( !m_contKey.key().empty() ) { // fill from standard digits
-    SG::ReadHandle<LArDigitContainer> hdlDigit(m_contKey);
+  if( m_contKey.key().size() ) { // fill from standard digits
+    SG::ReadHandle<LArDigitContainer> hdlDigit(m_contKey, ctx);
     if(!hdlDigit.isValid()) {
       ATH_MSG_WARNING( "Unable to retrieve LArDigitContainer with key " << m_contKey << " from DetectorStore. " );
       return StatusCode::SUCCESS;
@@ -243,13 +242,13 @@ StatusCode LArDigits2Ntuple::execute()
     }// over cells 
   }// standard digits
    
-  if( !m_accContKey.key().empty() ) { // fill from acc. calib digits
-    SG::ReadHandle<LArAccumulatedCalibDigitContainer> hdlDigit(m_accContKey);
+  if( m_accCalibContKey.key().size() ) { // fill from acc. calib digits
+    SG::ReadHandle<LArAccumulatedCalibDigitContainer> hdlDigit(m_accCalibContKey, ctx);
     if(!hdlDigit.isValid()) {
-      ATH_MSG_WARNING( "Unable to retrieve LArAccumulatedCalibDigitContainer with key " << m_accContKey << " from DetectorStore. " );
+      ATH_MSG_WARNING( "Unable to retrieve LArAccumulatedCalibDigitContainer with key " << m_accCalibContKey << " from DetectorStore. " );
       return StatusCode::SUCCESS;
     } else
-      ATH_MSG_DEBUG( "Got LArAccumulatedCalibDigitContainer with key " << m_accContKey.key() );
+      ATH_MSG_DEBUG( "Got LArAccumulatedCalibDigitContainer with key " << m_accCalibContKey.key() );
  
     const LArAccumulatedCalibDigitContainer DigitContainer   = *hdlDigit;
  
@@ -303,10 +302,10 @@ StatusCode LArDigits2Ntuple::execute()
         }
       }
       for(unsigned i =	0; i<trueMaxSample;++i) {
-         m_samplesSum[i]	   = digi->sampleSum().at(i);
-         m_samples2Sum[i]	   = digi->sample2Sum().at(i);
+         m_mean[i] = digi->mean(i);
+         m_RMS[i] = digi->RMS(i);
       }
-      m_nTriggers = digi->nTriggers();
+      //m_nTriggers = digi->nTriggers();
       m_dac = digi->DAC();
       m_delay = digi->delay();
       m_pulsed = digi->getIsPulsedInt();
@@ -315,6 +314,74 @@ StatusCode LArDigits2Ntuple::execute()
       ATH_CHECK( ntupleSvc()->writeRecord(m_nt) );
     }// over cells 
   }// acc calib. digits
+
+  if( m_accContKey.key().size() ) { // fill from acc digits
+    SG::ReadHandle<LArAccumulatedDigitContainer> hdlDigit(m_accContKey, ctx);
+    if(!hdlDigit.isValid()) {
+      ATH_MSG_WARNING( "Unable to retrieve LArAccumulatedDigitContainer with key " << m_accContKey << " from DetectorStore. " );
+      return StatusCode::SUCCESS;
+    } else
+      ATH_MSG_DEBUG( "Got LArAccumulatedDigitContainer with key " << m_accContKey.key() );
+ 
+    const LArAccumulatedDigitContainer DigitContainer = *hdlDigit;
+ 
+    if(!hdlDigit.cptr()) {
+       ATH_MSG_WARNING( "No digits in this event ?");
+       return StatusCode::SUCCESS;
+    }
+ 
+    for( const LArAccumulatedDigit *digi : DigitContainer ){
+ 
+      if(m_fillBCID) m_bcid = thisbcid; 
+      m_ELVL1Id = thisELVL1Id; 
+      m_IEvent = thisevent;
+ 
+      unsigned int trueMaxSample = digi->nsample();
+ 
+      if (!m_isSC){
+        m_gain = digi->gain();
+        if(m_gain < CaloGain::INVALIDGAIN || m_gain > CaloGain::LARNGAIN) m_gain  = CaloGain::LARNGAIN;
+      }
+
+      if(trueMaxSample>m_Nsamples){
+        if(!m_ipass){
+          ATH_MSG_WARNING( "The number of digi samples in data is larger than the one specified by JO: " << trueMaxSample << " > " << m_Nsamples << " --> only " << m_Nsamples << " will be available in the ntuple " );
+          m_ipass   = 1;
+        }
+        trueMaxSample   = m_Nsamples;
+      } else if(trueMaxSample<m_Nsamples){
+        if(!m_ipass){
+          ATH_MSG_WARNING( "The number of digi samples in data is lower than the one specified by JO: " << trueMaxSample << " > " << m_Nsamples << " --> only " << trueMaxSample << " will be available in the ntuple " );
+          m_ipass   = 1;
+        }
+      }
+      m_ntNsamples   = trueMaxSample;
+      ATH_MSG_DEBUG( "The number of acc. digi samples in data "<< m_Nsamples  );
+ 
+      fillFromIdentifier(digi->hardwareID());      
+ 
+      if(m_isSC && m_fillEMB && m_barrel_ec !=0) continue;
+      if(m_isSC && m_fillEndcap && m_barrel_ec !=1) continue;
+ 
+      if(m_FTlist.size() > 0) {	// should do a selection
+        if(std::find(std::begin(m_FTlist), std::end(m_FTlist), m_FT)  == std::end(m_FTlist)) {	// is our FT in list ?
+          continue;
+        }
+      }
+ 
+      if(m_Slotlist.size() > 0) {	// should do a selection
+        if(std::find(std::begin(m_Slotlist), std::end(m_Slotlist), m_slot)  == std::end(m_Slotlist)) {	// is our slot in list ?
+          continue;
+        }
+      }
+      for(unsigned i =	0; i<trueMaxSample;++i) {
+         m_mean[i] = digi->mean(i);
+         m_RMS[i] = digi->RMS(i);
+      }
+ 
+      ATH_CHECK( ntupleSvc()->writeRecord(m_nt) );
+    }// over cells 
+  }// acc digits
 
   if(m_fillLB) {
      m_IEventEvt   = thisevent;
