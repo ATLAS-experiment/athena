@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -1271,7 +1271,7 @@ CalibrationDataMappedHistogramContainer::setMappedVariables(const std::vector<st
 }
 
 //________________________________________________________________________________
-std::vector<std::string>
+const std::vector<std::string>&
 CalibrationDataMappedHistogramContainer::getMappedVariables() const
 {
   // List which variables get mapped onto a single histogram axis
