@@ -6,6 +6,7 @@ atlas_subdir( PerfMonComps )
 # External dependencies:
 find_package( TBB )
 find_package( nlohmann_json )
+find_package( psutil )
 
 # Component(s) in the package:
 atlas_add_component( PerfMonComps
