@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/TreeAccessor.h"
@@ -86,6 +86,7 @@ TreeAccessor* TreeAccessor::merge(const std::vector<const Accessor*>& accessors,
   for (const Accessor* accessor : accessors) {
     if (!accessor) {
       cout << "Cannot merge: one of the inputs is null!" << endl;
+      delete newAcc;
       return nullptr;
     }
     for (unsigned int i = 0; i < accessor->nRuns(); i++) {
@@ -199,6 +200,7 @@ TreeAccessor* TreeAccessor::merge(const std::vector<const Accessor*>& accessors,
   for (const Accessor* accessor : accessors) {
     if (!accessor) {
       cout << "Cannot merge: one of the inputs is null!" << endl;
+      delete newAcc;
       return nullptr;
     }
     for (unsigned int i = 0; i < accessor->nRuns(); i++) {

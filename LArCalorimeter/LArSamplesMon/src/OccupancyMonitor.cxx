@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/OccupancyMonitor.h"
@@ -15,11 +15,15 @@
 #include <vector>
 
 #include <iostream>
+#include <limits>
 using std::cout;
 using std::endl;
 
 using namespace LArSamples;
 
+namespace{
+  constexpr float infinity=std::numeric_limits<float>::infinity();
+}
 
 TH1I* OccupancyMonitor::runOccupancyHistory() const
 {
@@ -260,7 +264,9 @@ void OccupancyMonitor::cellAndRingOccupancy(CaloId calo, unsigned int nMin) cons
     unsigned int n[3] = {0,0,0};
     int layer = history->cellInfo()->layer();
     for (unsigned int k = 0; k < history->nData(); k++) {
-      ringOccupancy[history->cellInfo()->globalPhiRing()][layer][(int)history->data(k)->gain()]++;
+      const auto globalPhiRing = history->cellInfo()->globalPhiRing();
+      if (globalPhiRing<0) continue;
+      ringOccupancy[globalPhiRing][layer][(int)history->data(k)->gain()]++;
       n[(int)history->data(k)->gain()]++;
     }
     for (unsigned int g = 0; g < 3; g++) if (n[g] >= nMin) nCells[layer][g]++;
@@ -274,18 +280,32 @@ void OccupancyMonitor::cellAndRingOccupancy(CaloId calo, unsigned int nMin) cons
   
   for (unsigned int i = 0; i < 4; i++) {
     cout << "layer " << i << endl;
+    const auto nChann = Geo::nChannels(calo,i);
+    const auto nEta = Geo::nEta(calo,i);
     for (unsigned int j = 0; j < 3; j++) {
+      float nCellFract= infinity;
+      if (nChann>0) nCellFract = nCells[i][j]*100.0/nChann;
+      float nRingFract = infinity;
+      if (nEta > 0) nRingFract = nRings[i][j]*100.0/nEta;
       cout << " gain " << j << " : " 
-           << nCells[i][j] << " cells of " << Geo::nChannels(calo,i) << " (" << nCells[i][j]*100.0/Geo::nChannels(calo,i) << " %), " 
-           << nRings[i][j] << " rings of " << Geo::nEta(calo,i) << " (" << nRings[i][j]*100.0/Geo::nEta(calo,i) << " %)." << endl;
+           << nCells[i][j] << " cells of " << nChann << " (" << nCellFract << " %), " 
+           << nRings[i][j] << " rings of " << nEta << " (" << nRingFract << " %)." << endl;
     }
   }
   for (unsigned int i = 0; i < 4; i++) {
-    cout << i << " & " << Geo::nChannels(calo,i) << " & " << Geo::nEta(calo,i) << " & ";
-    for (unsigned int j = 0; j < 3; j++)
-       cout << Form("%4.1f\\%% & ", nCells[i][j]*100.0/Geo::nChannels(calo,i));
-    for (unsigned int j = 0; j < 3; j++)
-       cout << Form("%4.1f\\%% & ", nRings[i][j]*100.0/Geo::nEta(calo,i));
+    const auto nChann = Geo::nChannels(calo,i);
+    const auto nEta = Geo::nEta(calo,i);
+    cout << i << " & " << nChann << " & " << nEta << " & ";
+    for (unsigned int j = 0; j < 3; j++){
+       float val = infinity;
+       if (nChann>0) val = nCells[i][j]*100.0/nChann;
+       cout << Form("%4.1f\\%% & ", val);
+    }
+    for (unsigned int j = 0; j < 3; j++){
+       float val = infinity;
+       if (nEta > 0) val = nRings[i][j]*100.0/nEta;
+       cout << Form("%4.1f\\%% & ", val);
+    }
     cout << endl;
   }
 }

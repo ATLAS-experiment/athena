@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/Interface.h"
@@ -316,9 +316,15 @@ bool Interface::filterAndMerge(const TString& listFileName, const TString& outFi
   Interface* multi = openList(listFileName);
   if (!multi) return 0;
   const MultiTreeAccessor* mt = dynamic_cast<const MultiTreeAccessor*>(&multi->accessor());
-  if (!mt) return 0;
+  if (!mt){
+    delete multi;
+    return 0;
+  } 
   std::vector<MultiTreeAccessor*> filtered_mts = mt->filterComponents(filterList, tweak);
-  if (filtered_mts.size() != filterList.size()) return 0;
+  if (filtered_mts.size() != filterList.size()){
+    delete multi;
+    return 0;
+  } 
   delete multi;
   cout << "Component filtering done!" << endl;
   // The following line should work, but doesn't... so the block of code below replaces it.
@@ -353,8 +359,10 @@ Interface* Interface::filter(const TString& sel, const TString& fileName, const 
  
   TString thisFN = fileName;
   if (thisFN.Index(".root") < 0 && dynamic_cast<const TreeAccessor*>(&accessor())) {
-    TString newFN = addSuffix(dynamic_cast<const TreeAccessor*>(&accessor())->fileName(), fileName);
-    if (newFN != "") thisFN = newFN;
+    auto pAccess = dynamic_cast<const TreeAccessor*>(&accessor());
+    if (not pAccess) return nullptr;
+    TString newFN = addSuffix(pAccess->fileName(), fileName);
+    if (newFN != "") thisFN = std::move(newFN);
   }
   return filter(f, tweak, thisFN);
 }

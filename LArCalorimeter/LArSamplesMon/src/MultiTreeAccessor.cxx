@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/MultiTreeAccessor.h"
@@ -53,7 +53,6 @@ MultiTreeAccessor* MultiTreeAccessor::openList(const TString& fileList)
   std::vector<const TreeAccessor*> accessors;
   
   while (f >> fileName) {
-    //gSystem->Exec("free");
     const TreeAccessor* accessor = TreeAccessor::open(fileName.c_str());
     if (!accessor) {
       cout << "Skipping invalid file " << fileName << endl;
@@ -159,15 +158,11 @@ const History* MultiTreeAccessor::getCellHistory(unsigned int i) const
   std::vector<const Data*> allData;
   std::vector<const EventData*> allEventData;
   for (const TreeAccessor* accessor : m_accessors) {
-    //cout << "---> Getting history for a treeAccessor..." << endl; 
     const History* thisHistory = accessor->getCellHistory(i);
-    //cout << "---> done Getting history for a treeAccessor..." << endl; 
     if (!thisHistory) continue;
     if (!cellInfo) {
       cellInfo = new CellInfo(*thisHistory->cellInfo());
-    //cout << "---> done new cell info" << endl; 
     }
-    //cout << "---> Creating new event data N = " << thisHistory->eventData().size() << endl; 
     const std::vector<const EventData*>& thisEventData = thisHistory->eventData();
     std::map<const EventData*, const EventData*> eventMap;
     for (const EventData* event : thisEventData) {
@@ -176,23 +171,20 @@ const History* MultiTreeAccessor::getCellHistory(unsigned int i) const
       eventMap[event] = newED;
       allEventData.push_back(newED);
     }
-    //cout << "---> Creating new data N = " << thisHistory->nData() << endl; 
    
     for (unsigned int i = 0; i < thisHistory->nData(); i++) {
-     //cout << "------> Creating new data " << i << endl; 
       allData.push_back(new Data(*thisHistory->data(i), eventMap[thisHistory->data(i)->eventData()], nullptr, -1));
-     //cout << "------> done Creating new data " << i << endl; 
       if (!cellInfo->shape(thisHistory->data(i)->gain())) {
         const ShapeInfo* thisShape = thisHistory->cellInfo()->shape(thisHistory->data(i)->gain());
         cellInfo->setShape(thisHistory->data(i)->gain(), thisShape ? new ShapeInfo(*thisShape) : nullptr);
       }
-     //cout << "------> done shape " << i << endl; 
     }
-     //cout << "---> done Creating new data, deleting treeAcc history" << endl; 
     delete thisHistory;
   }
-  //cout << "--->returning new history..." << endl; 
-  return (cellInfo ? new History(allData, *cellInfo, allEventData, i) : nullptr); 
+  //data are copied from cellInfo into History member variable
+  auto * h  = cellInfo ? new History(allData, *cellInfo, allEventData, i): nullptr;
+  delete cellInfo;
+  return h; 
 }
       
         
@@ -244,7 +236,6 @@ std::vector<MultiTreeAccessor*> MultiTreeAccessor::filterComponents(const Filter
 	pathname.resize( slpos );
       }
       TString thisFN = Form("%s_filter%d.root", pathname.c_str(), i );//filterList.fileName(f).Data(), i);
-      //if (treeAcc) thisFN = treeAcc->fileName() + Form("_filter%d.root", f);
       thisFilterList.add(filterList.filterParams(f), thisFN);
     }
     std::vector<TreeAccessor*> filteredTreeAccs = TreeAccessor::filter(accessor(i), thisFilterList, tweaker);
@@ -253,7 +244,6 @@ std::vector<MultiTreeAccessor*> MultiTreeAccessor::filterComponents(const Filter
       return std::vector<MultiTreeAccessor*>();
     }
     for (unsigned int f = 0; f < filteredTreeAccs.size(); f++) filteredAccessors[f].push_back(filteredTreeAccs[f]);
-    //if (treeAcc) treeAcc->resetCache(); // to save memory
   }
 
   std::vector<MultiTreeAccessor*> result;
