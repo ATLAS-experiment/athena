@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( FPGATrackSimObjects )
@@ -16,7 +16,7 @@ atlas_add_dictionary( FPGATrackSimObjectsDict
 )
 
 atlas_add_library( FPGATrackSimObjectsLib
-   src/*.cxx FPGATrackSimObjects/*.h src/*.h ${FPGATrackSimObjectsLibDictSource}
+   src/*.cxx FPGATrackSimObjects/*.h src/*.h 
    PUBLIC_HEADERS          FPGATrackSimObjects
    INCLUDE_DIRS            ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES          ${ROOT_LIBRARIES} AthContainers GeneratorObjects
