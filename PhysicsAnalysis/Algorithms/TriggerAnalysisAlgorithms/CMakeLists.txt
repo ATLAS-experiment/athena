@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # @author Tadej Novak
 
@@ -24,36 +24,3 @@ if( NOT XAOD_STANDALONE )
 endif()
 
 atlas_install_python_modules( python/*.py )
-atlas_install_joboptions( share/*_jobOptions.py )
-atlas_install_scripts( share/*_eljob.py )
-
-if( XAOD_STANDALONE )
-   atlas_add_test( TriggerAlgorithmsTestJobData
-      SCRIPT TriggerAlgorithmsTest_eljob.py --data-type data --unit-test
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
-   atlas_add_test( TriggerAlgorithmsTestJobFullSim
-      SCRIPT TriggerAlgorithmsTest_eljob.py --data-type mc --unit-test
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
-   atlas_add_test( TriggerAlgorithmsTestJobFastSim
-      SCRIPT TriggerAlgorithmsTest_eljob.py --data-type afii --unit-test
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
-else()
-   atlas_add_test( TriggerAlgorithmsTestJobData
-      SCRIPT athena.py
-             TriggerAnalysisAlgorithms/TriggerAlgorithmsTest_jobOptions.py - --data-type data
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
-   atlas_add_test( TriggerAlgorithmsTestJobFullSim
-      SCRIPT athena.py
-             TriggerAnalysisAlgorithms/TriggerAlgorithmsTest_jobOptions.py - --data-type mc
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
-   atlas_add_test( TriggerAlgorithmsTestJobFastSim
-      SCRIPT athena.py
-             TriggerAnalysisAlgorithms/TriggerAlgorithmsTest_jobOptions.py - --data-type afii
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
-endif()
