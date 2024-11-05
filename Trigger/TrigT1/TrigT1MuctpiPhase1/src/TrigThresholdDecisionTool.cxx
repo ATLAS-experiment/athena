@@ -45,7 +45,7 @@ namespace LVL1
     ATH_CHECK(menuThresholds.has_value());
 
     for (const std::shared_ptr<TrigConf::L1Threshold>& thrBase : menuThresholds.value().get()) {
-      std::shared_ptr<TrigConf::L1Threshold_MU> thr = std::static_pointer_cast<TrigConf::L1Threshold_MU>(thrBase);
+      auto thr = static_cast<TrigConf::L1Threshold_MU*>(thrBase.get());
 
       //parse the tgc flags and buffer them
       std::string tgcFlags = getShapedFlags( thr->tgcFlags() );
@@ -124,7 +124,7 @@ namespace LVL1
 
     //loop over the thresholds
     for (const std::shared_ptr<TrigConf::L1Threshold>& thrBase : menuThresholds) {
-      std::shared_ptr<TrigConf::L1Threshold_MU> thr = std::static_pointer_cast<TrigConf::L1Threshold_MU>(thrBase);
+      auto thr = static_cast<TrigConf::L1Threshold_MU*>(thrBase.get());
 
       bool passed{false};
       if (system == LVL1::ITrigT1MuonRecRoiTool::Barrel) {
