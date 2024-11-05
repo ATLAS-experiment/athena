@@ -229,7 +229,7 @@ bool FPGATrackSimRegionMap::isInRegion(uint32_t region, const FPGATrackSimHit &h
     // when testing if a spacepoint is in a (sub)region.
     uint32_t layer;
     uint32_t section;
-    if (((int)(hit.getLayer()))>0) {
+    if (hit.isMapped()) {
         layer = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedLayer() : hit.getLayer();
         section = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedSection() : hit.getSection();
     } else {

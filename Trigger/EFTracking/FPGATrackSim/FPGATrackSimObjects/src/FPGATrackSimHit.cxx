@@ -12,14 +12,10 @@
 
 bool FPGATrackSimHit::isMapped() const
 {
-    switch (m_hitType)
-    {
-    case HitType::unmapped:
-    case HitType::undefined:
-        return false;
-    default:
+    if(m_layer>=0){
         return true;
     }
+    return false;
 }
 
 bool FPGATrackSimHit::isClustered() const
