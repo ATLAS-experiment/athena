@@ -64,6 +64,16 @@ std::vector<uint32_t>& NSWTPRDO_v1::NSWTP_mm_segments() {
     return dec(*this);
 }
 
+const std::vector<uint8_t>& NSWTPRDO_v1::NSWTP_mm_candidateNumber() const {
+    static const SG::AuxElement::Accessor<std::vector<uint8_t>> dec{"NSWTP_mm_candidateNumber"};
+    return dec(*this);
+}
+
+std::vector<uint8_t>& NSWTPRDO_v1::NSWTP_mm_candidateNumber() {
+    static const SG::AuxElement::Accessor<std::vector<uint8_t>> dec{"NSWTP_mm_candidateNumber"};
+    return dec(*this);
+}
+
 const std::vector<uint32_t>& NSWTPRDO_v1::NSWTP_mm_BCID() const {
     static const SG::AuxElement::Accessor<std::vector<uint32_t>> dec{"NSWTP_mm_BCID"};
     return dec(*this);

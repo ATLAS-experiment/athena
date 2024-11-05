@@ -172,9 +172,11 @@ StatusCode NSWTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::
         encodeSegmentProperty(MergedSegmentProperty::dTheta, payload.dTheta,word);
         encodeSegmentProperty(MergedSegmentProperty::phiID, payload.phiID,word);
         encodeSegmentProperty(MergedSegmentProperty::rIndex, payload.rIndex ,word);
+        uint8_t candidateNumber = (i_packetIndex<<4) | i_candidateIndex;
         ++i_candidateIndex;
-
+        
         rdo->NSWTP_mm_segments().push_back(word);
+        rdo->NSWTP_mm_candidateNumber().push_back(candidateNumber);
       }
       // the first 12 bit are used for the bcid and the last 4 for sector ID
       rdo->NSWTP_mm_BCID().push_back(mm_packet.BCID());
