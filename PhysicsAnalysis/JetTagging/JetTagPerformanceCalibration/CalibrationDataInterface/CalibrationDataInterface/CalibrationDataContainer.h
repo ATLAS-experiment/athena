@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -355,7 +355,7 @@ namespace Analysis {
     void setMappedVariables(const std::vector<std::string>& variables);
 
     /** List which variables get mapped onto a single histogram axis */
-    std::vector<std::string> getMappedVariables() const;
+    const std::vector<std::string>& getMappedVariables() const;
 
     /** Retrieve the bin boundaries for the specified variable type (which should be a CalibrationParametrization enum).
 	An empty vector will be returned if the specified variable is not actually used. */

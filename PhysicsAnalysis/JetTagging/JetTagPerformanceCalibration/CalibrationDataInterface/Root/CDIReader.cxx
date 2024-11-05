@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////
@@ -224,7 +224,7 @@ bool Analysis::CDIReader::checkConfig(const std::string& tagger, const std::stri
         if (verbose) std::cout << " Your configuration looks good! Available labels are : " << std::endl;
         if (verbose) printMetadata(tagger_ind, jetcoll_ind, wp_ind, -1);
         // construct vector of labels
-        for(std::string flavour_label : m_metadata[tagger][jetcoll][wp]["labels"]){
+        for(const std::string& flavour_label : m_metadata[tagger][jetcoll][wp]["labels"]){
           m_label_vec.push_back(flavour_label);
         }
         // sort the vector of labels
@@ -303,7 +303,7 @@ std::vector<std::string> Analysis::CDIReader::getLabels(const std::string& tagge
   } else if(m_workingpoints.find(workingpoint) == m_workingpoints.end()){
     std::cout << " The working point [" << workingpoint << "] doesn't exist in " << tagger << "/" << jetcollection <<  " this CDI file!" << std::endl;
   } else {
-    for (std::string label : m_metadata[tagger][jetcollection][workingpoint]["labels"]){
+    for (const std::string& label : m_metadata[tagger][jetcollection][workingpoint]["labels"]){
       labels.push_back(label);
     }
   }
