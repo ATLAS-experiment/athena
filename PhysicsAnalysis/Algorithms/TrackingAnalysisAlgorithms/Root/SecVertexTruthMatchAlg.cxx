@@ -128,7 +128,7 @@ namespace CP {
     std::vector<const xAOD::Vertex*> recoVerticesToMatch;
     std::vector<const xAOD::TruthVertex*> truthVerticesToMatch;
 
-    for(const auto &recoVertex : *recoVertexContainer) {
+    for(const auto recoVertex : *recoVertexContainer) {
       xAOD::VxType::VertexType vtxType = static_cast<xAOD::VxType::VertexType>( recoVertex->vertexType() );
 
       if(vtxType != xAOD::VxType::SecVtx ){
@@ -138,7 +138,7 @@ namespace CP {
       recoVerticesToMatch.push_back(recoVertex);
     }
 
-    for(const auto &truthVertex : *truthVertexContainer) {
+    for(const auto truthVertex : *truthVertexContainer) {
       if(truthVertex->nIncomingParticles() != 1) {
         continue;
       }
