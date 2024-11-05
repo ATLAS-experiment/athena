@@ -70,7 +70,7 @@ namespace H5Utils::hist::detail {
     }
 
     // calculate a global index for the flat output array
-    auto global_index = [&dims=hist_dims, &hist](const auto& hist_idx)
+    auto global_index = [&hist](const auto& hist_idx)
     {
       // This is unrolling the index to a c-style array. We calculate
       // a global index, starting with the last dimension. The last
