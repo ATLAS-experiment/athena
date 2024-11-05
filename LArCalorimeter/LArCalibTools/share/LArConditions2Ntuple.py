@@ -24,6 +24,7 @@ if __name__=='__main__':
   parser.add_argument("--folders",dest="folders",default="/LAR/ElecCalibFlat/Pedestal,/LAR/ElecCalibFlat/Ramp",help="List of folders to be taken from sqlite",type=str)
   parser.add_argument('--offline',dest="offline", action='store_true', default=False, help='is offline folder?')
   parser.add_argument('--poolcat',dest="poolcat", default="", type=str, help='is offline folder?')
+  parser.add_argument('-n', '--ntuple', dest='ntname', default='', help='output ntuple name (if different from default)', type=str)
    
   args = parser.parse_args()
   if help in args and args.help is not None and args.help:
@@ -177,7 +178,10 @@ if __name__=='__main__':
     ckey = "LArRampSC" if flags.LArCalib.isSC else "LArRamp"
     if args.offline:
        from IOVDbSvc.IOVDbSvcConfig import addFolders
-       cfg.merge(addFolders(flags,'/LAR/ElecCalibOflSC/Ramps/RampLinea',modifiers='<key>LArRampSC</key>',className='LArRampComplete'))
+       if flags.LArCalib.isSC:
+          cfg.merge(addFolders(flags,'/LAR/ElecCalibOflSC/Ramps/RampLinea',modifiers='<key>LArRampSC</key>',className='LArRampComplete'))
+       else:   
+          cfg.merge(addFolders(flags,'/LAR/ElecCalibOfl/Ramps/RampLinea',className='LArRampComplete'))
     cfg.addEventAlgo(CompFactory.LArRamps2Ntuple(RampKey="LArRampSym" if flags.Input.isMC else ckey,
                                                  AddFEBTempInfo = False, 
                                                  AddCalib = True,
@@ -229,7 +233,7 @@ if __name__=='__main__':
     cfg.addEventAlgo(CompFactory.LArOFC2Ntuple("LArOFC2NtupleCali",
                                                AddFEBTempInfo   = False,   
                                                ContainerKey=ckey,
-                                               NtupleName="OFCCali",
+                                               NtupleName="OFCCali" if args.ntname=='' else args.ntname,
                                                isSC = flags.LArCalib.isSC,
                                                BadChanKey = bcKey
                                              ))
