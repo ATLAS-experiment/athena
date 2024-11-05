@@ -13,7 +13,7 @@ constexpr double cutOff(const double value, const double cut) {
 }
 int main(){
     constexpr unsigned maxOrder = 16;
-    constexpr double h = 1.e-7;
+    constexpr double h = 5.e-7;
     for (unsigned int o = 0 ; o <= maxOrder ; ++o) {
         for(unsigned step = 0; step <= 200; ++step) {
             const double x = -1. + 1.*step / 100;
