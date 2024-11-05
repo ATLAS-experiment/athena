@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_ZDCTRIGGEREFFICIENCY_H
@@ -62,8 +62,8 @@ public:
 
   }
 
-  void SetEffParamsAndErrors(std::array<std::vector<TSpline3*>, 2> effParams,
-                             std::array<std::vector<TSpline3*>, 2> effParamErrors) {
+  void SetEffParamsAndErrors(const std::array<std::vector<TSpline3*>, 2>& effParams,
+                             const std::array<std::vector<TSpline3*>, 2>& effParamErrors) {
     for (int side : {0, 1}) {
       m_effParams[side] = effParams[side];
       m_effParamErrors[side] = effParamErrors[side];
@@ -74,7 +74,7 @@ public:
     m_haveParams = true;
   }
 
-  void SetEffParamCorrCoeffs(std::array<std::vector<TSpline3*>, 2> effParamsCorrCoeffs) {
+  void SetEffParamCorrCoeffs(const std::array<std::vector<TSpline3*>, 2>& effParamsCorrCoeffs) {
     for (int side : {0, 1}) {
       m_effParamCorrCoeffs[side] = effParamsCorrCoeffs[side];
     }
