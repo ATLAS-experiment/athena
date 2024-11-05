@@ -54,6 +54,7 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
     std::vector<std::regex*> all_regexes = {&tau_rgx, &elec_rgx, &muon_rgx, &gamma_rgx, &jet_rgx, &met_rgx, &l1_rgx};
 
     std::regex tau_type_rgx("^(ptonly|tracktwoMVA|tracktwoMVABDT|tracktwoLLP|trackLRT)$");
+    std::regex tau_ID_rgx("^(perf|idperf|veryloose.*|loose.*|medium.*|tight.*)$");
 
     std::smatch match;
     std::regex_token_iterator<std::string::iterator> rend;
@@ -69,12 +70,33 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
             if(std::regex_match(leg[0], match, tau_rgx)) {
                 size_t multiplicity = match[1].str() == "" ? 1 : std::stoi(match[1].str());
                 unsigned int threshold = std::stoi(match[2].str());
+                
+                // HLT Tau sequence
                 auto itr = find_if(leg.begin(), leg.end(), [tau_type_rgx](const std::string& s) { return std::regex_match(s, tau_type_rgx); });
                 std::string type = itr != leg.end() ? *itr : "";
+
+                // HLT Tau ID
+                itr = find_if(leg.begin(), leg.end(), [tau_ID_rgx](const std::string& s) { return std::regex_match(s, tau_ID_rgx); });
+                std::string tau_id = itr != leg.end() ? *itr : "";
+                if(boost::starts_with(tau_id, "veryloose")) tau_id = tau_id.substr(9);
+                else if(boost::starts_with(tau_id, "loose")) tau_id = tau_id.substr(5);
+                else if(boost::starts_with(tau_id, "medium")) tau_id = tau_id.substr(6);
+                else if(boost::starts_with(tau_id, "tight")) tau_id = tau_id.substr(5);
+
+                // Override for the old trigger names
+                if(tau_id == "RNN") {
+                    if(type == "tracktwoMVA") tau_id = "DeepSet";
+                    if(type == "tracktwoLLP" || type == "trackLRT") tau_id = "RNNLLP";
+                }
+
+                // Replacements (this is temprary, the entire TrigTauInfo class will be removed soon, and all this will be handled centrally in Python using the already available infrastructure)
+                if(tau_id == "DS") tau_id = "DeepSet";
+                else if(tau_id == "GNT") tau_id = "GNTau";
 
                 for(size_t j = 0; j < multiplicity; j++) {
                     m_HLTThr.push_back(threshold);
                     m_HLTTauTypes.push_back(type);
+                    m_HLTTauIDs.push_back(tau_id);
                 }
             } else if(std::regex_match(leg[0], match, elec_rgx)) {
                 size_t multiplicity = match[1].str() == "" ? 1 : std::stoi(match[1].str());
