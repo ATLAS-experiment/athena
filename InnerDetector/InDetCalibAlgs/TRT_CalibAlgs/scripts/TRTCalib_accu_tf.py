@@ -10,6 +10,7 @@ from PyJobTransforms.transform import transform
 from PyJobTransforms.trfExe import athenaExecutor
 from PyJobTransforms.trfArgs import addAthenaArguments, addDetectorArguments
 import PyJobTransforms.trfArgClasses as trfArgClasses
+from AthenaConfiguration.TestDefaults import defaultTestFiles
 
 if __name__ == '__main__':
 
@@ -27,7 +28,7 @@ if __name__ == '__main__':
     # Input file! Always must be RAW data 
     trf.parser.add_argument('--inputRAWFile', nargs='+',
                             type=trfArgClasses.argFactory(trfArgClasses.argBSFile, io='input'),
-                            help='Input bytestream file name. RAW data', group='TRTCalib_tf')
+                            help='Input bytestream file name. RAW data',  default=trfArgClasses.argBSFile(defaultTestFiles.RAW_RUN3), group='TRTCalib_tf')
     
     # OutputFile name
     trf.parser.add_argument('--outputTARFile',
