@@ -128,6 +128,8 @@ if( ATLAS_USE_CPPCHECK )
          list( JOIN CMAKE_CPPCHECK_DEFAULT " " _cmd )
          message( STATUS "Checking C/C++ files with: ${_cmd}" )
       endif()
+   else()
+      message( WARNING "Cppcheck is enabled via ATLAS_USE_CPPCHECK but cannot be found.")
    endif()
 endif()
 
