@@ -9,7 +9,7 @@ from ..Config.ChainConfigurationBase import ChainConfigurationBase
 
 from TriggerMenuMT.CFtest.HLTSignatureConfig import  muMenuSequence, elMenuSequence, gamMenuSequence
 from TriggerMenuMT.CFtest.HLTSignatureHypoTools import dimuDrComboHypoTool
-
+from TriggerMenuMT.HLT.Config.MenuComponents import EmptyMenuSequenceCfg
 
 #--------------------------------------------------------
 # fragments generating config will be functions in new JO
@@ -108,9 +108,10 @@ class TestChainConfiguration(ChainConfigurationBase):
             'mv1step': ['Step_mu11'],
             'mv1':     ['Step_mu11', 'Step_mu21', 'Step_mu31', 'Step_mu41'], 
             'mv2':     ['Step_mu11', 'Step_mu22', 'Step_mu31'],
-            'mEmpty1': ['Step_empty1', 'Step_mu21'],
+            'mEmpty1': ['Step_empty1', 'Step_mu21'], # empty step
             #'mEmpty1': ['Step_empty1', 'Step_mu11'], # try to break 'Step_mu21'],
-            'mEmpty2': ['Step_mu11'  ,'Step_empty2' ,'Step_mu32', 'Step_mu41'],
+            'mEmpty2': ['Step_mu11'  ,'Step_empty2' ,'Step_mu31', 'Step_mu41'], # same as mv1 with empty step
+            'mEmpty3': ['Step_mu11'  ,'Step_empty2' ,'Step_empty3', 'Step_mu41'], # empty step + emtpy sequence
             'mv1dr' :  ['Step_mu11Dr', 'Step_mu21', 'Step_mu31', 'Step_mu41'],
             #egamma
             'ev1':     ['Step_em11', 'Step_em21', 'Step_em31'],
@@ -152,6 +153,9 @@ class TestChainConfiguration(ChainConfigurationBase):
 
     def Step_empty2(self, flags):
         return self.getEmptyStep(2,'empty')
+
+    def Step_empty3(self, flags):
+        return self.getStep(flags,'emptySeq', [EmptyMenuSequenceCfg], name="EmptySequence")
 
     # Electrons
 

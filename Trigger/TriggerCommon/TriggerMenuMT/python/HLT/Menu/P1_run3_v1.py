@@ -603,6 +603,8 @@ def addHeavyIonP1Signatures(chains):
         ChainProp(name='HLT_noalg_L1eEM1_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','BW:MinBias','RATE:Calibration']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1eEM2_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','BW:MinBias','RATE:Calibration']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1eEM5_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','BW:MinBias','RATE:Calibration']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1DPHI-2eTAU1_VjTE200_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','BW:MinBias','RATE:Calibration']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1DPHI-2eEM1_VjTE200_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','BW:MinBias','RATE:Calibration']+SupportPhIGroup),
     ]
 
     addP1Signatures(chains,chainsP1)

@@ -131,7 +131,7 @@ def TrigEFTauMVHypoToolFromDict( flags, chainDict ):
             currentHypo.AcceptAll   = True
 
         # 2023 DeepSet triggers
-        if chainPart['preselection'] == 'tracktwoMVA':
+        if chainPart['reconstruction'] == 'tracktwoMVA':
             currentHypo.HighPtSelectionLooseIDThr = 200e3
             currentHypo.HighPtSelectionJetThr = 430e3
             currentHypo.TrackPtCut = 1.5e3

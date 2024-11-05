@@ -46,10 +46,7 @@ def eFexTOBDecoratorCfg(flags, name, eFexEMRoIContainer = "L1_eEMRoI", eFexTauRo
         decorator.RhadHadDecDecorKey = eFexEMRoIContainer+".RhadHadDec"
         decorator.WstotDenDecDecorKey = eFexEMRoIContainer+".WstotDenDec"
         decorator.WstotNumDecDecorKey = eFexEMRoIContainer+".WstotNumDec"
-        decorator.ClusterEtSumPSDecorKey = eFexEMRoIContainer+".ClusterEtSumPS"
-        decorator.ClusterEtSumL1DecorKey = eFexEMRoIContainer+".ClusterEtSumL1"
-        decorator.ClusterEtSumL2DecorKey = eFexEMRoIContainer+".ClusterEtSumL2"
-        decorator.ClusterEtSumL3DecorKey = eFexEMRoIContainer+".ClusterEtSumL3"
+        decorator.ClusterSCellEtSumsDecorKey = eFexEMRoIContainer+".ClusterSCellEtSums"
 
     if eFexEMRoIContainer != "L1_eTauRoI":
         decorator.RCoreDecorKey = eFexTauRoIContainer+".RCoreDec"

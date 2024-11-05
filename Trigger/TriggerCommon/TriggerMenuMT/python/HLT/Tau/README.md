@@ -7,4 +7,5 @@ Modules in this directory
   * Defines the ChainConfiguration object that interprets the chain dict and builds the chain
 * [TauMenuSequences](TauMenuSequences.py)
   * Defines the top-level sequences containing the input maker and hypothesis alg
-
+* [TauConfigurationTools](TauConfigurationTools.py)
+  * Defines the tools used by multiple modules to parse the Tau Trigger configuration
