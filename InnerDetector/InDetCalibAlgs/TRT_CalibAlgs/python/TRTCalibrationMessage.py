@@ -21,8 +21,10 @@ def EmailNotification(jobStatus):
     msubject = "ART test notification: TRT calibration Workflow for %s" % (AtlasBuildBranch)
 
     status="*SUCCEEDED*"
-    if jobStatus:
-        status="*FAILED* - The TRT calibration workflow is broken."
+    if jobStatus.ACCU != 0 or jobStatus.MERGE != 0:
+        status  = "*FAILED*\n"
+        status += "\t- The TRT ACCU  transform %s.\n" % ("*is broken*" if jobStatus.ACCU else "works")
+        status += "\t- The TRT MERGE transform %s." % ("*is broken*" if jobStatus.MERGE else "works")
 
     # assemble mail body
     mbody  = "Dear TRT expert/shifter\n\n" 
@@ -56,12 +58,13 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(prog='python -m TRT_CalibAlgs.TRTCalibrationMessage',
                                    description="""Email notification for ART test - R-t TRT calibration.\n\n
-                                   Example: python -m TRT_CalibAlgs.TRTCalibrationMessage --jobStatus [status]""")
+                                   Example: python -m TRT_CalibAlgs.TRTCalibrationMessage --ACCU [status]...""")
     
-    parser.add_argument('--jobStatus'      ,type=int, help="Stores the status of the job")
+    parser.add_argument('--ACCU'      ,type=int, help="Stores the status of the job")
+    parser.add_argument('--MERGE'     ,type=int, help="Stores the status of the job")
     args = parser.parse_args()
     
-    EmailNotification(args.jobStatus)
+    EmailNotification(args)
 
     sys.exit(0)
 

@@ -6,6 +6,7 @@ from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, pr
 from TRT_CalibAlgs.TRTCalibrationMgrConfig import CalibConfig, TRT_CalibrationMgrCfg, TRT_StrawStatusCfg
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
+
 def nextstep(text):
     print("\n"+"#"*100)
     print("#")
@@ -39,9 +40,14 @@ def fromRunArgs(runArgs):
     processPreInclude(runArgs, flags)
     processPreExec(runArgs, flags)
 
+    if "TRTCalibAccu_ART_Output" in runArgs.outputTARFile:
+        print("WARNING - Testing the TRTCalib_accu transform")
+    else:
+        print("INFO - Running TRTCalib_accu transform")
+
     flags.Input.Files=runArgs.inputRAWFile
     flags.Output.HISTFileName=runArgs.outputTARFile
-    
+
     #Importing flags - Switching off detector parts and monitoring
     CalibConfig(flags)
     
