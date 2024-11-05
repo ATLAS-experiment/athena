@@ -327,7 +327,7 @@ void ZDCDataAnalyzer::SetNonlinCorrParams(float refADC, float refScale,
   }
 }
 
-void ZDCDataAnalyzer::enableTimeSigCut(bool AND, float sigCut, std::string TF1String,
+void ZDCDataAnalyzer::enableTimeSigCut(bool AND, float sigCut, const std::string& TF1String,
 			const std::array<std::array<std::vector<double>, 4>, 2>& parsHGArr, 
 			const std::array<std::array<std::vector<double>, 4>, 2>& parsLGArr)
 {

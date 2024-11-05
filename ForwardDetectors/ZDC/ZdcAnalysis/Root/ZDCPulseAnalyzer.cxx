@@ -410,7 +410,7 @@ void ZDCPulseAnalyzer::SetCutValues(float chisqDivAmpCutHG, float chisqDivAmpCut
   m_T0CutHighLG = deltaT0MaxLG;
 }
 
-void ZDCPulseAnalyzer::enableTimeSigCut(bool AND, float sigCut, std::string TF1String,
+void ZDCPulseAnalyzer::enableTimeSigCut(bool AND, float sigCut, const std::string& TF1String,
 					const std::vector<double>& parsHG, 
 					const std::vector<double>& parsLG)
 {
