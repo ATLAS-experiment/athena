@@ -12,6 +12,7 @@ def SPCounterRecoAlgCfg(flags):
     from TrigMinBias.TrigMinBiasMonitoring import SpCountMonitoring
     alg = CompFactory.TrigCountSpacePoints(SpacePointsKey=recordable("HLT_SpacePointCounts"),
                                            MonTool=SpCountMonitoring(flags))
+    alg.ModulesToSkip=[403] # see ATLHI-569
     acc.addEventAlgo(alg)
     return acc
 

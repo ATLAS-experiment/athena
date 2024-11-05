@@ -29,7 +29,8 @@ class TrigCountSpacePoints : public AthReentrantAlgorithm {
   Gaudi::Property<int> m_sctModuleHigherThreshold{this, "sctModuleHigherThreshold", 2000000, "Dont take modules with SP Count higher than this threshold in SCT"};
   Gaudi::Property<int> m_sctModuleLowerThreshold{this, "sctModuleLowerThreshold", 0, "Dont take modules with SP Count lowerer than this threshold in SCT"};
   Gaudi::Property<int> m_pixelClusToTCut{this, "pixelClusToTCut", 20, "ToT Cut for Pixel Clusters"};
-
+  Gaudi::Property<std::vector<unsigned int>> m_modulesToSkip{this, "ModulesToSkip", {}, "Set of modules to be ignored when counting SP"};
+  std::set<unsigned int> m_modulesToSkipSet;
   SG::ReadHandleKey<SpacePointContainer> m_pixelSpKey{this, "PixelSpKey", "PixelTrigSpacePoints", " "};
   SG::ReadHandleKey<SpacePointContainer> m_sctSpKey{this, "SCTSpKey", "SCT_TrigSpacePoints", " "};
   SG::ReadHandleKey<PixelID> m_pixelHelperKey{this, "pixelHelperKey", "DetectorStore+PixelID", " "};

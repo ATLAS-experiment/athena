@@ -38,6 +38,7 @@ StatusCode TrigCountSpacePoints::initialize() {
   if (!m_monTool.empty()) {
     ATH_CHECK(m_monTool.retrieve());
   }
+  m_modulesToSkipSet.insert(m_modulesToSkip.begin(), m_modulesToSkip.end());
   return StatusCode::SUCCESS;
 }
 
@@ -82,6 +83,11 @@ StatusCode TrigCountSpacePoints::execute(const EventContext &context) const {
         if ( isInNoiseArea(pSP->r(), pSP->globalPosition()[Amg::z]) ) {
           continue;
         }
+      }
+      auto[hashId1, hashId2]  = pSP->elementIdList();
+      if ( m_modulesToSkipSet.count(static_cast<unsigned int>(hashId1)) != 0) {
+        ATH_MSG_VERBOSE("Module " << hashId1 << " in exclusion list, skipping the SP");
+        continue;
       }
 
       const InDet::PixelCluster *pixClust = static_cast<const InDet::PixelCluster *>(pSP->clusterList().first);
