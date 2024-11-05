@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -26,6 +26,9 @@
 #include "TileMuId2DBAlg.h"
 #include "CaloIdentifier/CaloGain.h"
 #include "StoreGate/ReadCondHandle.h"
+#include "CaloIdentifier/CaloCell_ID.h"
+#include "CaloDetDescr/CaloDetDescrManager.h"
+#include "CaloIdentifier/CaloIdManager.h"
 
 #include <fstream>
 
@@ -39,10 +42,6 @@ TileMuId2DBAlg::TileMuId2DBAlg(const std::string& name, ISvcLocator* pSvcLocator
 }
 
 
-  
-TileMuId2DBAlg::~TileMuId2DBAlg()
-{
-} 
 
 
 
@@ -96,10 +95,14 @@ StatusCode TileMuId2DBAlg::execute()
 
     IdentifierHash idHash = i;
     Identifier id = m_calo_id->cell_id(idHash);
-    int subCalo;
+    int subCalo{};
     IdentifierHash idSubHash = m_calo_id->subcalo_cell_hash (idHash, subCalo);
 
     int module = m_calo_id->module(id);
+    if (module == CaloIDHelper::NOT_VALID){
+      ATH_MSG_ERROR("Module invalid in TileMuId2DBAlg::execute");
+      return StatusCode::FAILURE;
+    }
 
     CaloGain::CaloGain gain=CaloGain::TILEHIGHHIGH;
 
