@@ -825,7 +825,7 @@ namespace MuonGM {
         //*********************
         const NswAsBuilt::StgcStripCalculator* sc = manager()->getStgcAsBuiltCalculator();        
         if(manager()->getsTGCAsBuilt2() && design->type == MuonChannelDesign::ChannelType::etaStrip){
-            pos.head(2) = manager()->getsTGCAsBuilt2()->correctPosition(layerId, pos.head(2));
+            pos.head<2>() = manager()->getsTGCAsBuilt2()->correctPosition(layerId, pos.head<2>());
 
         } else if (sc && design->type == MuonChannelDesign::ChannelType::etaStrip) {
 
