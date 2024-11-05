@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -48,8 +48,9 @@ StatusCode DerivationFramework::TruthLinkRepointTool::addBranches() const {
   // Retrieve the truth collections
   std::vector<const xAOD::TruthParticleContainer*> targets{};
   targets.reserve(m_targetKeys.size());
-  
-  const SG::AuxElement::Decorator< ElementLink<xAOD::TruthParticleContainer> > output_decorator(m_decOutput);
+
+  SG::WriteDecorHandle<xAOD::IParticleContainer, ElementLink<xAOD::TruthParticleContainer> >
+    output_decorator (m_decorKey, ctx);
 
   for (const SG::ReadHandleKey<xAOD::TruthParticleContainer>& key : m_targetKeys) {
     SG::ReadHandle<xAOD::TruthParticleContainer> readHandle{key, ctx};
