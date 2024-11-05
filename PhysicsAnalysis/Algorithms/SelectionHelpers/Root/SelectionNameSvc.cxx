@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -24,16 +24,6 @@
 
 namespace CP
 {
-  SelectionNameSvc ::
-  SelectionNameSvc (const std::string& name,
-                    ISvcLocator* pSvcLocator)
-    : AsgService (name, pSvcLocator)
-  {
-
-    declareServiceInterface<ISelectionNameSvc>();
-  }
-
-
 
   StatusCode SelectionNameSvc ::
   initialize ()

@@ -35,7 +35,7 @@ private:
     SG::WriteHandleKey<MuonPatternCombinationCollection> m_combis{this, "MuonPatternCombinationCollection", "MuonLayerHoughCombis"};
     SG::WriteHandleKey<Muon::HoughDataPerSectorVec> m_houghDataPerSectorVecKey{this, "Key_MuonLayerHoughToolHoughDataPerSectorVec",
                                                                                "HoughDataPerSectorVec", "HoughDataPerSectorVec key"};
-    ToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "printerTool", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
+    PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "printerTool", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
     ToolHandle<Muon::IMuonHoughPatternFinderTool> m_layerTool{this, "MuonLayerScanTool", "Muon::MuonLayerHoughTool/MuonLayerHoughTool"};
     Gaudi::Property<bool> m_printSummary{this, "PrintSummary", false};
 };

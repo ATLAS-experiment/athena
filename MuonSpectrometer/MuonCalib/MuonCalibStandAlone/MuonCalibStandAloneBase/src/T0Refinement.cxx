@@ -212,7 +212,7 @@ double T0Refinement::getDeltaT0(MuonCalibSegment* segment, const IRtRelation* rt
     // CALCULATE THE BEST t0 CORRECTION //
     //////////////////////////////////////
 
-    fitter.fit_parameters(my_points, my_points.size() - 2, my_points.size(), &pol);
+    fitter.fit_parameters(my_points, my_points.size() - 2, my_points.size(), pol);
     double nom(fitter.coefficients()[1]);
     double denom(fitter.coefficients()[2]);
     delta_t0_opt = -0.5 * nom / denom;

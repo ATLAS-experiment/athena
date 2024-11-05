@@ -56,11 +56,11 @@ if __name__=="__main__":
         cfg.getEventAlgo("MuonPhiHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="PhiHoughPlotValid",
                                                                                                 AllCanvasName="AllPhiHoughiDiPuffPlots",
-                                                                                                saveSinglePDFs = False, saveSummaryPDF= False))
+                                                                                                saveSinglePDFs = True, saveSummaryPDF= False))
         cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="SegmentPlotValid",
                                                                                                 AllCanvasName="AllSegmentFitPlots",
-                                                                                                saveSinglePDFs = False, saveSummaryPDF= True))
+                                                                                                saveSinglePDFs = True, saveSummaryPDF= False))
 
     executeTest(cfg)
     

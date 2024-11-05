@@ -8,38 +8,30 @@ find_package( Boost )
 find_package( CORAL COMPONENTS CoralBase )
 find_package( tdaq-common COMPONENTS eformat_old eformat_write RawFileName
    DataReader DataWriter )
-find_package( GTest )
 
 # Libraries in the package:
-atlas_add_library( ByteStreamCnvSvcLib
-   ByteStreamCnvSvc/*.h src/*.cxx
-   PUBLIC_HEADERS ByteStreamCnvSvc
-   PRIVATE_INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES AthenaBaseComps ByteStreamData GaudiKernel
-   ByteStreamCnvSvcBaseLib StoreGateLib rt
-   PRIVATE_LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES}
-   AthenaKernel SGTools CollectionBase FileCatalog
-   AthenaPoolUtilities PersistentDataModel xAODEventInfo xAODTrigger
-   ByteStreamCnvSvcLegacy CxxUtils )
-
 atlas_add_component( ByteStreamCnvSvc
+   src/*.cxx
    src/components/*.cxx
-   LINK_LIBRARIES ByteStreamCnvSvcLib )
+   INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+   LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES}
+   AthenaBaseComps ByteStreamCnvSvcBaseLib ByteStreamData GaudiKernel
+   AthenaKernel StoreGateLib AthenaPoolUtilities PersistentDataModel xAODEventInfo xAODTrigger
+   ByteStreamCnvSvcLegacy CxxUtils )
 
 # Executables in the package:
 atlas_add_executable( AtlFindBSEvent test/AtlFindBSEvent.cxx
-   INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES CxxUtils ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES} )
+   INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
+   LINK_LIBRARIES CxxUtils ${TDAQ-COMMON_LIBRARIES} )
 
 atlas_add_executable( AtlCopyBSEvent test/AtlCopyBSEvent.cxx
    INCLUDE_DIRS ${CORAL_INCLUDE_DIRS} ${TDAQ-COMMON_INCLUDE_DIRS}
-   ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES CxxUtils ${CORAL_LIBRARIES} ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES}
+   LINK_LIBRARIES CxxUtils ${CORAL_LIBRARIES} ${TDAQ-COMMON_LIBRARIES}
    CollectionBase FileCatalog PersistentDataModel )
 
 atlas_add_executable( AtlListBSEvents test/AtlListBSEvents.cxx
-   INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES CxxUtils ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES} )
+   INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
+   LINK_LIBRARIES CxxUtils ${TDAQ-COMMON_LIBRARIES} )
 
 # Test(s) in the package:
 atlas_add_test( AtlCopyBSEvent1
@@ -80,10 +72,11 @@ atlas_add_test( ByteStreamMetadataToolTest
     AthenaKernel
     AthenaBaseComps
     ByteStreamData
+    CxxUtils
     GaudiKernel
     GoogleTestTools
+    StoreGateLib
     TestTools
-    CxxUtils
   POST_EXEC_SCRIPT noerror.sh )
 
 

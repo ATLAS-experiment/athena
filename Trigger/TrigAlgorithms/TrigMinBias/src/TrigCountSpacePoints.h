@@ -24,6 +24,7 @@ class TrigCountSpacePoints : public AthReentrantAlgorithm {
 
  private:
   Gaudi::Property<bool> m_doOnlyBLayer{this, "doOnlyBLayer", false, " "};
+  Gaudi::Property<bool> m_removeBLayerModuleEdgeNoise{this, "removeBLayerModuleEdgeNoise", true, " "};
   Gaudi::Property<int> m_pixModuleThreshold{this, "pixModuleThreshold", 100, "Dont take modules with SP Count higher than this threshold in Pixel Det."};
   Gaudi::Property<int> m_sctModuleHigherThreshold{this, "sctModuleHigherThreshold", 2000000, "Dont take modules with SP Count higher than this threshold in SCT"};
   Gaudi::Property<int> m_sctModuleLowerThreshold{this, "sctModuleLowerThreshold", 0, "Dont take modules with SP Count lowerer than this threshold in SCT"};

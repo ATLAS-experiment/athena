@@ -57,7 +57,7 @@ namespace  D3PD {
  *                  Omitted if empty (default).
  */
 class ContainedVectorMultiAssociationFillerTool
-  : public extends1<VectorFillerToolBase, IBlockFillerTool>
+  : public extends<VectorFillerToolBase, IBlockFillerTool>
 {
 public:
   /**

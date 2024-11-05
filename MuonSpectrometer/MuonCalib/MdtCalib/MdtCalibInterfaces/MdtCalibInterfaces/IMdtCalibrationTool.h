@@ -88,12 +88,11 @@ public:
                                      const double time) const  = 0;
 
   struct ToolSettings {
-      enum class Property {
+      enum class Property: int {
         TofCorrection = 0,
         PropCorrection,
         TempCorrection,
         MagFieldCorrection,
-        WireSagTimeCorrection,
         SlewCorrection,
         BackgroundCorrection,
         NumSettings

@@ -295,23 +295,6 @@ static inline std::string to_string(const std::vector<T> &v)
   return oss.str();
 }
 
-
-double FPGATrackSimHoughTransformTool::fieldCorrection(unsigned region, double qpt, double r)
-{
-  r = r / 1000; // convert to meters
-  if (region == 3)
-    {
-      double cor = 0.1216 * r * r - 0.0533 * r + 0.0069;
-      return -cor * qpt;
-    }
-  else if (region == 4)
-    {
-      double cor = 0.4265 * r * r - 0.0662 * r + 0.0036;
-      return -cor * qpt;
-    }
-  else return 0;
-}
-
 double FPGATrackSimHoughTransformTool::yToX(double y, const std::shared_ptr<const FPGATrackSimHit> &hit) const
 {
   double x = 0;
@@ -418,8 +401,8 @@ void FPGATrackSimHoughTransformTool::matchIdealGeoSector(FPGATrackSimRoad & r) c
       wcHit->setLayer(il);
       wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st(0)->getDetType(il));
       std::vector<std::shared_ptr<const FPGATrackSimHit>> wcHits;
-      wcHits.push_back(wcHit);
-      r.setHits(il,wcHits);
+      wcHits.emplace_back(std::move(wcHit));
+      r.setHits(il,std::move(wcHits));
     }
     else {
       modules.push_back(sectorbin);
@@ -448,7 +431,7 @@ void FPGATrackSimHoughTransformTool::addRoad(const std::vector<std::vector<std::
 
   r.setRoadID(m_roads.size() - 1);
   r.setPID(y * m_imageSize_y + x);
-  r.setHits(hits);
+  r.setHits( std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>(hits)); //copy hits
 
   // We use the y coordinate in matchIdealGeoSectors
   // and so it needs to be available before setting the sector.

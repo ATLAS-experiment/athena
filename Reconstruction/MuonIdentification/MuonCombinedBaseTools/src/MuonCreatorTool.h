@@ -142,7 +142,7 @@ namespace MuonCombined {
         ServiceHandle<Muon::IMuonEDMHelperSvc> m_edmHelperSvc{this, "edmHelper", "Muon::MuonEDMHelperSvc/MuonEDMHelperSvc",
                                                               "Handle to the service providing the IMuonEDMHelperSvc interface"};
 
-        ToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
+        PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
         ToolHandle<Rec::IMuonPrintingTool> m_muonPrinter{this, "MuonPrinter", "Rec::MuonPrintingTool/MuonPrintingTool"};
 
         ToolHandle<Trk::IParticleCaloExtensionTool> m_caloExtTool{this, "ParticleCaloExtensionTool",

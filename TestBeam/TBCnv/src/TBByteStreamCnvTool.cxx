@@ -5,7 +5,6 @@
 #include "TBCnv/TBByteStreamCnvTool.h"
 #include "GaudiKernel/MsgStream.h"
 #include "Gaudi/Property.h"
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 
 #include "eformat/Status.h"

@@ -21,8 +21,6 @@
 #include "GaudiKernel/IIncidentListener.h"
 #include "GaudiKernel/System.h"
 
-#include "PerfMonKernel/IPerfMonSvc.h"
-#include "PerfMonEvent/DataModel.h"
 #include "AthenaKernel/ILoggedMessageSvc.h"
 
 #include <fstream>
@@ -459,24 +457,6 @@ AthenaSummarySvc::createASCII( std::ofstream& ofs ) {
     }
   }
 
-  // Get Perfmon data
-  SmartIF<IPerfMonSvc> ipms{service("PerfMonSvc", /*createIf*/false)};
-  if (!ipms) {
-    ATH_MSG_DEBUG("unable to get the PerfMonSvc: not printing perf summaries");
-  } else {
-
-    ofs << "Monitored Components:" << endl;
-    vector<string>::const_iterator itr;
-
-    vector<string> cmp_i = ipms->components("ini");
-    vector<string> cmp_e = ipms->components("exe");
-    vector<string> cmp_f = ipms->components("fin");
-
-    for (itr=cmp_i.begin(); itr!=cmp_i.end(); ++itr) {
-      ofs << "  " << *itr << endl;
-    }
-  }
-
   if (s_badalloc) {
     ofs << "std::bad_alloc caught: out of memory condition detected" 
 	<< endl;
@@ -602,57 +582,6 @@ AthenaSummarySvc::createDict( std::ofstream& ofd) {
 //     }
 
     p.add("extra incidents",inc);
-  }
-
-  // Get Perfmon data
-  SmartIF<IPerfMonSvc> ipms{service("PerfMonSvc", /*createIf*/false)};
-  if (!ipms) {
-    ATH_MSG_DEBUG("unable to get the PerfMonSvc: not printing perf summaries");
-  } else {
-
-    PD mon,ini,exe,fin;
-    vector<string>::const_iterator itr;
-
-    vector<string> cmp_i = ipms->components("ini");
-    vector<string> cmp_e = ipms->components("exe");
-    vector<string> cmp_f = ipms->components("fin");
-
-    for (itr=cmp_i.begin(); itr!=cmp_i.end(); ++itr) {
-      const PerfMon::Component* cmp = ipms->component("ini",*itr);
-      PD prf;
-      prf.add("cpu",cmp->cpu.user);
-      prf.add("cpu",cmp->cpu.sys);
-      prf.add("cpu",cmp->cpu.real);
-      prf.add("mem",cmp->mem.dVmem());
-      prf.add("mem",cmp->mem.dRss());
-      ini.add(*itr,prf);
-    }
-    for (itr=cmp_e.begin(); itr!=cmp_e.end(); ++itr) {
-      const PerfMon::Component* cmp = ipms->component("exe",*itr);
-      PD prf;
-      prf.add("cpu",cmp->cpu.user);
-      prf.add("cpu",cmp->cpu.sys);
-      prf.add("cpu",cmp->cpu.real);
-      prf.add("mem",cmp->mem.dVmem());
-      prf.add("mem",cmp->mem.dRss());
-      exe.add(*itr,prf);
-    }
-    for (itr=cmp_f.begin(); itr!=cmp_f.end(); ++itr) {
-      const PerfMon::Component* cmp = ipms->component("fin",*itr);
-      PD prf;
-      prf.add("cpu",cmp->cpu.user);
-      prf.add("cpu",cmp->cpu.sys);
-      prf.add("cpu",cmp->cpu.real);
-      prf.add("mem",cmp->mem.dVmem());
-      prf.add("mem",cmp->mem.dRss());
-      fin.add(*itr,prf);
-    }
-    mon.add("ini",ini);
-    mon.add("fin",fin);
-    mon.add("exe",exe);
-
-    p.add("monitored components",mon);
-
   }
 
   p.add("exit",m_status);

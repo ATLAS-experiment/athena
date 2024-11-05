@@ -12,11 +12,10 @@ atlas_add_library( TileByteStreamLib
    PUBLIC_HEADERS TileByteStream
    INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
    LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} AthenaBaseComps AthenaKernel
-   ByteStreamData GaudiKernel TileEvent TileIdentifier ByteStreamCnvSvcBaseLib
-   CaloDetDescrLib StoreGateLib ByteStreamCnvSvcLib TileConditionsLib
-   TileL2AlgsLib TileRecUtilsLib CxxUtils
-   PRIVATE_LINK_LIBRARIES CaloIdentifier TileCalibBlobObjs
-   TileDetDescr )
+   ByteStreamCnvSvcBaseLib ByteStreamData CxxUtils GaudiKernel StoreGateLib TileCalibBlobObjs
+   TileConditionsLib TileEvent TileIdentifier TileL2AlgsLib
+   PRIVATE_LINK_LIBRARIES CaloDetDescrLib CaloIdentifier TileDetDescr
+   TileRecUtilsLib xAODEventInfo )
 
 atlas_add_component( TileByteStream
    src/components/*.cxx

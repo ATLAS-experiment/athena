@@ -184,7 +184,7 @@ def AddStandardTruthContentsCfg(flags,
     # Should photons that are dressed onto taus also be removed from truth jets?
     if includeTausInDressingPhotonRemoval:
         acc.getPublicTool("DFCommonTruthTauDressingTool").decorationName=decorationDressing
-    acc.addEventAlgo(CompFactory.DerivationFramework.LockDecoration(name ="AddStandardTruthContentsLockDecoration", Decoration = 'TruthParticles.' + decorationDressing))
+    acc.addEventAlgo(CompFactory.DerivationFramework.LockDecorations(name ="AddStandardTruthContentsLockDecoration", Decorations = ['TruthParticles.' + decorationDressing]))
 
     # Add back the navigation contect for the collections we want
     acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, ["TruthElectrons", "TruthMuons", "TruthPhotons", "TruthTaus", "TruthNeutrinos", "TruthBSM", "TruthBottom", "TruthTop", "TruthBoson"], prefix=prefix))
@@ -195,8 +195,6 @@ def AddStandardTruthContentsCfg(flags,
     acc.merge(AddBSMAndDownstreamParticlesCfg(flags))
     # Special collection for Born leptons
     acc.merge(AddBornLeptonCollectionCfg(flags))
-    # Special collection for hard scatter (matrix element) - save TWO extra generations of particles
-    acc.merge(AddHardScatterCollectionCfg(flags, 2))
     # Energy density for isolation corrections
     if isEVNT: acc.merge(AddTruthEnergyDensityCfg(flags))
 
@@ -328,12 +326,6 @@ def AddPVCollectionCfg(flags):
         AugmentationTools = [DFCommonTruthPVCollTool] ))
     return acc
 
-# Add a mini-collection for the hard scatter and N subsequent generations
-def AddHardScatterCollectionCfg(flags, generations=1):
-    """Add a mini-collection for the hard scatter and N subsequent generations"""
-    # Set up a tool to keep the taus and all downstream particles
-    acc = ComponentAccumulator()
-    return acc
 
 # Add navigation decorations on the truth collections
 def AddTruthCollectionNavigationDecorationsCfg(flags, TruthCollections=[], prefix=''):
@@ -485,8 +477,6 @@ def addTruth3ContentToSlimmerTool(slimmer):
         "TruthBosonsWithDecayVertices",
         "TruthBSMWithDecayParticles",
         "TruthBSMWithDecayVertices",
-        "HardScatterParticles",
-        "HardScatterVertices",
     ]
     slimmer.ExtraVariables += [
         "AntiKt4TruthDressedWZJets.GhostCHadronsFinalCount.GhostBHadronsFinalCount.pt.HadronConeExclTruthLabelID.PartonTruthLabelID.TrueFlavor",

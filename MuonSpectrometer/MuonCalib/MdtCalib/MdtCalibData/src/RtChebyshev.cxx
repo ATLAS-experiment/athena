@@ -17,7 +17,8 @@ RtChebyshev::RtChebyshev(const ParVec& vec) :
     }
 }  // end RtChebyshev::_init
 
-std::string RtChebyshev::name() const { return std::string("RtChebyshev"); }
+std::string RtChebyshev::name() const { return "RtChebyshev"; }
+double RtChebyshev::tBinWidth() const { return s_tBinWidth; }
 
 double RtChebyshev::radius(double t) const {
     ////////////////////////

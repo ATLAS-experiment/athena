@@ -27,7 +27,7 @@
 //-------------------------------------------------------------------------------
 
 
-class ThreadInitTool: virtual public extends1<AthAlgTool, IThreadInitTool> {
+class ThreadInitTool: virtual public extends<AthAlgTool, IThreadInitTool> {
 
 public:
   ThreadInitTool( const std::string&, const std::string&, const IInterface* );

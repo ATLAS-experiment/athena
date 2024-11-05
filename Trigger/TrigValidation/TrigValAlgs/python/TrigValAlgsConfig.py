@@ -17,7 +17,7 @@ def TrigEDMCheckerCfg(flags, name="TrigEDMChecker", doDumpAll=True):
         cfg.merge(MuonGeoModelCfg(flags))
         cfg.merge(MuonIdHelperSvcCfg(flags))
         edmchecker.MuonPrinter = CompFactory.Rec.MuonPrintingTool(
-            MuonStationPrinter = cfg.popToolsAndMerge(MuonEDMPrinterToolCfg(flags)) )
+            MuonStationPrinter = cfg.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)) )
 
     cfg.addEventAlgo(edmchecker)
 

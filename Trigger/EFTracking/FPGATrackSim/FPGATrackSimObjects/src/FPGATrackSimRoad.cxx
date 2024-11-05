@@ -27,6 +27,7 @@ size_t FPGATrackSimRoad::getNHits() const
 std::vector<size_t> FPGATrackSimRoad::getNHits_layer() const
 {
     std::vector<size_t> out;
+    out.reserve(m_hits_trans.size());
     for (const auto& l : m_hits_trans) out.push_back(l.size());
     return out;
 }
@@ -100,13 +101,47 @@ FPGATrackSimMultiTruth FPGATrackSimRoad::getTruth() const
                 w += (i < nPixel) ? 2 : 1; // double weight pixels
         }
         if (n == 0){
-          throw "divide by zero in FPGATrackSimRoad::getTruth";
+          throw std::range_error("divide by zero in FPGATrackSimRoad::getTruth");
         }
         mt.add(x.first, static_cast<float>(w) / n);
     }
 
     return mt;
 }
+
+
+std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> FPGATrackSimRoad::getHits_flat() const {
+    std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> hits;
+    for (const auto& layerHits : m_hits_trans)
+        for (auto const& hit : layerHits)
+            hits.insert(hit);
+            // for (const auto& x : m_hits) hits.insert(x.begin(), x.end());
+    return hits;
+}
+
+void FPGATrackSimRoad::repopulateTransHits() {  // this is needed if trying to read the hits from the road in a stored output file, call this first, otherwise not in Athena
+    m_hits_trans.resize(m_hits.size());
+    for (unsigned ilayer = 0; ilayer < m_hits.size(); ilayer++) {
+       m_hits_trans[ilayer].resize(m_hits[ilayer].size());
+       for (unsigned ihit = 0; ihit < m_hits[ilayer].size(); ihit++) {
+          m_hits_trans[ilayer][ihit] = std::make_shared<const FPGATrackSimHit>(m_hits[ilayer][ihit]);
+       }
+    }
+}
+
+void FPGATrackSimRoad::setHits(unsigned layer, std::vector<std::shared_ptr<const FPGATrackSimHit>> && hits) {
+    m_hits_trans[layer] = std::move(hits);
+    m_hits[layer].clear();
+    for (const auto& hit : m_hits_trans[layer])
+        m_hits[layer].push_back(*hit);
+} // ensure setNLayers is called first
+
+void FPGATrackSimRoad::setHits(std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> &&hits){
+    if (hits.size() != m_hits_trans.size()) setNLayers(hits.size());
+    for (unsigned i = 0;i < hits.size();++i)
+        setHits(i,std::move(hits[i]));
+}
+
 
 ostream& operator<<(ostream& os, const FPGATrackSimRoad& road)
 {

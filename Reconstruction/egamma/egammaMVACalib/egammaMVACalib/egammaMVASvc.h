@@ -1,7 +1,7 @@
 // Dear Emacs, this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAMVACALIB_EGAMMAMVASVC_H
@@ -16,10 +16,11 @@
 
 #include <string>
 
-class egammaMVASvc : public asg::AsgService, virtual public IegammaMVASvc
+class egammaMVASvc : public extends<asg::AsgService, IegammaMVASvc>
 {
 public:
-  egammaMVASvc( const std::string& name, ISvcLocator* svc );
+  using extends::extends;  // base class constructor
+
   virtual ~egammaMVASvc() override {};
   virtual StatusCode initialize() override;
 

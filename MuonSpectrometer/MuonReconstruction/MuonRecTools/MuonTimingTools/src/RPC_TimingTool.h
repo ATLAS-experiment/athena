@@ -21,19 +21,17 @@ namespace Muon{
 
   class MuonClusterOnTrack;
   
-  class RPC_TimingTool : virtual public Muon::IMuonHitTimingTool, public AthAlgTool{
+  class RPC_TimingTool : public extends <AthAlgTool, Muon::IMuonHitTimingTool> {
   public:
     RPC_TimingTool(const std::string&, const std::string&, const IInterface*);
 
     virtual ~RPC_TimingTool()=default;
 
-    virtual StatusCode initialize();
+    virtual StatusCode initialize() override final;
 
     /** Calculate the time offset of a given set of hits wrt to the current bunch */
-    TimingResult calculateTimingResult( const std::vector<const MuonClusterOnTrack*>& hits ) const;
+    virtual TimingResult calculateTimingResult( const std::vector<const MuonClusterOnTrack*>& hits ) const override final;
 
-    /** return a set of technologies accepted by the tool */
-    std::set<MuonStationIndex::TechnologyIndex> acceptedTechnologies() const { return std::set<MuonStationIndex::TechnologyIndex>({MuonStationIndex::RPC}); }
 
   private:
     /** calculate error on the RPC time */

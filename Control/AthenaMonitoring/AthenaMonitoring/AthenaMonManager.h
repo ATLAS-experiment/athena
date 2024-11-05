@@ -20,7 +20,6 @@ class ITHistSvc;
 class ManagedMonitorToolBase;
 class TObject;
 class IMonitorToolBase;
-class LWHist;
 
 /**
  * An Algorithm that manages a set of modules,
@@ -104,21 +103,14 @@ class AthenaMonManager : public AthAlgorithm {
       virtual std::string fileKey() const;
 
       /**
-       * Pass ownership of a TObject/LWHist to this manager so that it will be deleted appropriately.
+       * Pass ownership of a TObject to this manager so that it will be deleted appropriately.
        */
       virtual void passOwnership( TObject* h, const std::string& key );
-      virtual void passOwnership( LWHist* h, const std::string& key );
 
       /**
        * If the TObject is owned by this manager, its Write() method is called and it is deleted.
        */
       virtual void writeAndDelete( const std::string& key );
-      virtual LWHist *ownedLWHistOfKey(const std::string& key) const;
-      // If you know it is an LWHist use writeAndDeleteLWHist. The just deleted LWHist pointer will be returned (0 if nothing deleted)
-      virtual LWHist *writeAndDeleteLWHist( const std::string& key, const std::string& streamName );
-      virtual LWHist *writeAndResetLWHist( const std::string& key, const std::string& streamName );
-
-      virtual void writeAndDeleteLWHist( LWHist*lwh );
 
    protected:
       ToolHandleArray<IMonitorToolBase> m_monTools;

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # List of containers that are made on-the-fly by basically all DAOD types and
 # can therefore be reasonably added to the NameAndTypes dictionary centrally
@@ -58,10 +58,6 @@ def ContainersOnTheFly(flags=None):
         ['TruthBSMWithDecayParticlesAux','xAOD::TruthParticleAuxContainer'],
         ['TruthBSMWithDecayVertices','xAOD::TruthVertexContainer'],
         ['TruthBSMWithDecayVerticesAux','xAOD::TruthVertexAuxContainer'],
-        ['HardScatterParticles','xAOD::TruthParticleContainer'],
-        ['HardScatterParticlesAux','xAOD::TruthParticleAuxContainer'],
-        ['HardScatterVertices','xAOD::TruthVertexContainer'],
-        ['HardScatterVerticesAux','xAOD::TruthVertexAuxContainer'],
         ['TruthHFWithDecayParticles','xAOD::TruthParticleContainer'],
         ['TruthHFWithDecayParticlesAux','xAOD::TruthParticleAuxContainer'],
         ['TruthHFWithDecayVertices','xAOD::TruthVertexContainer'],

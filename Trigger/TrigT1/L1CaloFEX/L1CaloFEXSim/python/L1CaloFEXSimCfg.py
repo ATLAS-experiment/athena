@@ -223,6 +223,9 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         gFEXInputs50.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper50', SCell=sCellType)
         gFEXInputs50.gSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
 
+        from L1CaloFEXCond.L1CaloFEXCondConfig import gFexDBConfig
+        acc.merge(gFexDBConfig(flags))
+
         gFEX = CompFactory.LVL1.gFEXDriver('gFEXDriver')    
         gFEX.gFEXSysSimTool = CompFactory.LVL1.gFEXSysSim('gFEXSysSimTool')
         acc.addEventAlgo(gFEXInputs)

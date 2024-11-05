@@ -60,11 +60,10 @@ namespace {
 namespace Muon {
 
     DCMathSegmentMaker::DCMathSegmentMaker(const std::string& t, const std::string& n, const IInterface* p) :
-        AthAlgTool(t, n, p)  {
-        declareInterface<IMuonSegmentMaker>(this);
-    }
+        base_class(t, n, p)  {}
 
     StatusCode DCMathSegmentMaker::initialize() {
+        ATH_CHECK(m_mdtKey.initialize(m_removeDeltas && !m_mdtKey.empty()));
         // retrieve MuonDetectorManager
         ATH_CHECK(m_DetectorManagerKey.initialize());
         ATH_CHECK(m_mdtCreator.retrieve());
@@ -80,11 +79,7 @@ namespace Muon {
         ATH_CHECK(m_dcslFitProvider.retrieve(DisableTool{m_dcslFitProvider.empty()}));
 
         // initialise for data handles
-        ATH_CHECK(m_rpcKey.initialize());
-        ATH_CHECK(m_tgcKey.initialize());
-        ATH_CHECK(m_mdtKey.initialize());
         ATH_CHECK(m_chamberGeoKey.initialize());
-
         return StatusCode::SUCCESS;
     }
 

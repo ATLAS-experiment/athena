@@ -35,7 +35,7 @@ class IMultiAssociationTool;
  * association tool by only using the first result from the association.
  */
 class FirstAssociationTool
-  : public extends1<AthAlgTool, ISingleAssociationTool>
+  : public extends<AthAlgTool, ISingleAssociationTool>
 {
 public:
   /**

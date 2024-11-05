@@ -161,14 +161,14 @@ namespace CP {
 	// retrieve the output variables and decorate them
 	PtEtaPhiMVector null4V(0.0, 0.0, 0.0, 0.0);
 	int fitStatus        = m_mmc->GetFitStatus(0);
-	double mlm_mass      = fitStatus == 1 ? m_mmc->GetFittedMass(DiTauMassTools::MMCFitMethodV2::MLM)    : -1;
+	double mlm_mass      = fitStatus == 1 ? m_mmc->GetFittedMass(DiTauMassTools::MMCFitMethod::MLM)    : -1;
 	if (m_doMAXW) {
-	  double maxw_mass   = fitStatus == 1 ? m_mmc->GetFittedMass(DiTauMassTools::MMCFitMethodV2::MAXW)   : -1;
-	  PtEtaPhiMVector maxw_res_4vect    = fitStatus == 1 ? m_mmc->GetResonanceVec(DiTauMassTools::MMCFitMethodV2::MAXW)      : null4V;
-	  PtEtaPhiMVector maxw_nu1_4vect    = fitStatus == 1 ? m_mmc->GetNeutrino4vec(DiTauMassTools::MMCFitMethodV2::MAXW, 0)   : null4V;
-	  PtEtaPhiMVector maxw_nu2_4vect    = fitStatus == 1 ? m_mmc->GetNeutrino4vec(DiTauMassTools::MMCFitMethodV2::MAXW, 1)   : null4V;
-	  PtEtaPhiMVector maxw_tau1_4vect   = fitStatus == 1 ? m_mmc->GetTau4vec(DiTauMassTools::MMCFitMethodV2::MAXW, 0)        : null4V;
-	  PtEtaPhiMVector maxw_tau2_4vect   = fitStatus == 1 ? m_mmc->GetTau4vec(DiTauMassTools::MMCFitMethodV2::MAXW, 1)        : null4V;
+	  double maxw_mass   = fitStatus == 1 ? m_mmc->GetFittedMass(DiTauMassTools::MMCFitMethod::MAXW)   : -1;
+	  PtEtaPhiMVector maxw_res_4vect    = fitStatus == 1 ? m_mmc->GetResonanceVec(DiTauMassTools::MMCFitMethod::MAXW)      : null4V;
+	  PtEtaPhiMVector maxw_nu1_4vect    = fitStatus == 1 ? m_mmc->GetNeutrino4vec(DiTauMassTools::MMCFitMethod::MAXW, 0)   : null4V;
+	  PtEtaPhiMVector maxw_nu2_4vect    = fitStatus == 1 ? m_mmc->GetNeutrino4vec(DiTauMassTools::MMCFitMethod::MAXW, 1)   : null4V;
+	  PtEtaPhiMVector maxw_tau1_4vect   = fitStatus == 1 ? m_mmc->GetTau4vec(DiTauMassTools::MMCFitMethod::MAXW, 0)        : null4V;
+	  PtEtaPhiMVector maxw_tau2_4vect   = fitStatus == 1 ? m_mmc->GetTau4vec(DiTauMassTools::MMCFitMethod::MAXW, 1)        : null4V;
 	  m_maxw_mass_decor.set(*evtInfo, maxw_mass, sys);
 	  m_maxw_res_4vect_decor.set(*evtInfo, maxw_res_4vect, sys);
 	  m_maxw_nu1_4vect_decor.set(*evtInfo, maxw_nu1_4vect, sys);
@@ -177,12 +177,12 @@ namespace CP {
 	  m_maxw_tau2_4vect_decor.set(*evtInfo, maxw_tau2_4vect, sys);
 	}
 	if (m_doMLNU3P) {
-	  double mlnu3p_mass = fitStatus == 1 ? m_mmc->GetFittedMass(DiTauMassTools::MMCFitMethodV2::MLNU3P) : -1;
-	  PtEtaPhiMVector mlnu3p_res_4vect  = fitStatus == 1 ? m_mmc->GetResonanceVec(DiTauMassTools::MMCFitMethodV2::MLNU3P)    : null4V;
-	  PtEtaPhiMVector mlnu3p_nu1_4vect  = fitStatus == 1 ? m_mmc->GetNeutrino4vec(DiTauMassTools::MMCFitMethodV2::MLNU3P, 0) : null4V;
-	  PtEtaPhiMVector mlnu3p_nu2_4vect  = fitStatus == 1 ? m_mmc->GetNeutrino4vec(DiTauMassTools::MMCFitMethodV2::MLNU3P, 1) : null4V;
-	  PtEtaPhiMVector mlnu3p_tau1_4vect = fitStatus == 1 ? m_mmc->GetTau4vec(DiTauMassTools::MMCFitMethodV2::MLNU3P, 0)      : null4V;
-	  PtEtaPhiMVector mlnu3p_tau2_4vect = fitStatus == 1 ? m_mmc->GetTau4vec(DiTauMassTools::MMCFitMethodV2::MLNU3P, 1)      : null4V;
+	  double mlnu3p_mass = fitStatus == 1 ? m_mmc->GetFittedMass(DiTauMassTools::MMCFitMethod::MLNU3P) : -1;
+	  PtEtaPhiMVector mlnu3p_res_4vect  = fitStatus == 1 ? m_mmc->GetResonanceVec(DiTauMassTools::MMCFitMethod::MLNU3P)    : null4V;
+	  PtEtaPhiMVector mlnu3p_nu1_4vect  = fitStatus == 1 ? m_mmc->GetNeutrino4vec(DiTauMassTools::MMCFitMethod::MLNU3P, 0) : null4V;
+	  PtEtaPhiMVector mlnu3p_nu2_4vect  = fitStatus == 1 ? m_mmc->GetNeutrino4vec(DiTauMassTools::MMCFitMethod::MLNU3P, 1) : null4V;
+	  PtEtaPhiMVector mlnu3p_tau1_4vect = fitStatus == 1 ? m_mmc->GetTau4vec(DiTauMassTools::MMCFitMethod::MLNU3P, 0)      : null4V;
+	  PtEtaPhiMVector mlnu3p_tau2_4vect = fitStatus == 1 ? m_mmc->GetTau4vec(DiTauMassTools::MMCFitMethod::MLNU3P, 1)      : null4V;
 	  m_mlnu3p_mass_decor.set(*evtInfo, mlnu3p_mass, sys);
 	  m_mlnu3p_res_4vect_decor.set(*evtInfo, mlnu3p_res_4vect, sys);
 	  m_mlnu3p_nu1_4vect_decor.set(*evtInfo, mlnu3p_nu1_4vect, sys);

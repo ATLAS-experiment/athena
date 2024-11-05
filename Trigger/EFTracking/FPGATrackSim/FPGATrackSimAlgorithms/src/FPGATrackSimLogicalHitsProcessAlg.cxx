@@ -90,7 +90,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
 
     ATH_MSG_DEBUG("initialize() Finished");
 
-    
     return StatusCode::SUCCESS;
 }
 
@@ -258,8 +257,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(tracks_1st));
     unsigned ntrackOLRChi2 = 0;
     for (const FPGATrackSimTrack& track : tracks_1st) {
-        // This threshold probably shouldn't be hardcoded?
-        if (track.getChi2ndof() < 10) {
+        if (track.getChi2ndof() < m_trackScoreCut) {
             m_nTracksChi2Tot++;
             if (track.passedOR()) {
                 ntrackOLRChi2++;

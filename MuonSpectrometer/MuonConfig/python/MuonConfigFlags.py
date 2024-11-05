@@ -51,6 +51,7 @@ def createMuonConfigFlags():
                                                                           prevFlags.GeoModel.SQLiteDBFullPath)["Muon"]["useR4Plugin"] )
     # 1. Digitization
     mcf.addFlag("Muon.doDigitization",True)
+    mcf.addFlag("Muon.doFastMMDigitization",True)
     # 2. Reco MuonRecFlags    
     mcf.addFlag("Muon.doTGCClusterSegmentFinding", False) # Run cluster segment finding
     mcf.addFlag("Muon.doRPCClusterSegmentFinding", False) # Run cluster segment finding

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRecHelperTools/MuonEDMPrinterTool.h"
@@ -38,17 +38,20 @@ MuonEDMPrinterTool::MuonEDMPrinterTool(const std::string& ty, const std::string&
     declareInterface<MuonEDMPrinterTool>(this);
 }
 
-StatusCode
-MuonEDMPrinterTool::initialize()
-{
+StatusCode MuonEDMPrinterTool::initialize(){
+    if (parent() != toolSvc()) {
+        ATH_MSG_FATAL("There's no need to make this tool private");
+        return StatusCode::FAILURE;
+    }
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_edmHelperSvc.retrieve());
     ATH_CHECK(m_pullCalculator.retrieve());
 
     ATH_CHECK(m_DetectorManagerKey.initialize());
-    ATH_CHECK(m_mdtKey.initialize());
-    ATH_CHECK(m_rpcKey.initialize());
-    ATH_CHECK(m_tgcKey.initialize());
+    ATH_CHECK(m_mdtKey.initialize(!m_mdtKey.empty()));
+    ATH_CHECK(m_rpcKey.initialize(!m_rpcKey.empty()));
+    ATH_CHECK(m_tgcKey.initialize(!m_tgcKey.empty()));
+
 
     return StatusCode::SUCCESS;
 }
@@ -785,64 +788,33 @@ MuonEDMPrinterTool::print(const MuonPatternChamberIntersect& intersect) const
     unsigned int nchHitsPhi = 0;
 
 
-    if (isMdt) {
-        SG::ReadHandle<MdtPrepDataContainer> rh_mdt(m_mdtKey);
-        const MdtPrepDataContainer*          mdtPrdContainer = nullptr;
-        if (!rh_mdt.isValid()) {
-            ATH_MSG_DEBUG("Cannot retrieve " << m_mdtKey.key());
-        } else {
-            mdtPrdContainer = rh_mdt.cptr();
-            IdentifierHash hash_id;
-            m_idHelperSvc->mdtIdHelper().get_module_hash(chId, hash_id);
-            const auto *coll = mdtPrdContainer->indexFindPtr(hash_id);
-            if (coll != nullptr)
-                nchHitsEta = coll->size();
-            else
-                ATH_MSG_DEBUG("Collection not found: hash " << hash_id);
+    if (isMdt && !m_mdtKey.empty()) {
+        SG::ReadHandle mdtPrdContainer{m_mdtKey};
+        const MdtPrepDataCollection *coll = mdtPrdContainer->indexFindPtr(m_idHelperSvc->moduleHash(chId));
+        if (coll != nullptr) {
+            nchHitsEta = coll->size();
         }
-    } else if (m_idHelperSvc->isRpc(chId)) {
-        SG::ReadHandle<RpcPrepDataContainer> rh_rpc(m_rpcKey);
-        const RpcPrepDataContainer*          rpcPrdContainer = nullptr;
-        if (!rh_rpc.isValid()) {
-            ATH_MSG_DEBUG("Cannot retrieve " << m_rpcKey.key());
-        } else {
-            rpcPrdContainer = rh_rpc.cptr();
-            IdentifierHash hash_id;
-            m_idHelperSvc->rpcIdHelper().get_module_hash(chId, hash_id);
-            const auto *coll = rpcPrdContainer->indexFindPtr(hash_id);
-            if (coll != nullptr) {
-                RpcPrepDataCollection::const_iterator rpcIt     = coll->begin();
-                RpcPrepDataCollection::const_iterator rpcIt_end = coll->end();
-                for (; rpcIt != rpcIt_end; ++rpcIt) {
-                    if (m_idHelperSvc->measuresPhi((*rpcIt)->identify()))
-                        ++nchHitsPhi;
-                    else
-                        ++nchHitsEta;
-                }
-            } else
-                ATH_MSG_DEBUG("Collection not found: hash " << hash_id);
-        }
-    } else if (m_idHelperSvc->isTgc(chId)) {
-        SG::ReadHandle<TgcPrepDataContainer> rh_tgc(m_tgcKey);
-        const TgcPrepDataContainer*          tgcPrdContainer = nullptr;
-        if (!rh_tgc.isValid()) {
-            ATH_MSG_DEBUG("Cannot retrieve " << m_tgcKey.key());
-        } else {
-            tgcPrdContainer = rh_tgc.cptr();
-            IdentifierHash hash_id;
-            m_idHelperSvc->tgcIdHelper().get_module_hash(chId, hash_id);
-            const auto *coll = tgcPrdContainer->indexFindPtr(hash_id);
-            if (coll != nullptr) {
-                TgcPrepDataCollection::const_iterator tgcIt     = coll->begin();
-                TgcPrepDataCollection::const_iterator tgcIt_end = coll->end();
-                for (; tgcIt != tgcIt_end; ++tgcIt) {
-                    if (m_idHelperSvc->measuresPhi((*tgcIt)->identify()))
-                        ++nchHitsPhi;
-                    else
-                        ++nchHitsEta;
-                }
-            } else
-                ATH_MSG_DEBUG("Collection not found: hash " << hash_id);
+    } else if (m_idHelperSvc->isRpc(chId) && !m_rpcKey.empty()) {
+        SG::ReadHandle rpcPrdContainer{m_rpcKey};
+        const RpcPrepDataCollection* coll = rpcPrdContainer->indexFindPtr(m_idHelperSvc->moduleHash(chId));
+        if (coll != nullptr) {
+            for (const RpcPrepData* prd : *coll) {
+                if (m_idHelperSvc->measuresPhi(prd->identify()))
+                    ++nchHitsPhi;
+                else
+                    ++nchHitsEta;
+            }
+        } 
+    } else if (m_idHelperSvc->isTgc(chId) && !m_tgcKey.empty()) {
+        SG::ReadHandle tgcPrdContainer{m_tgcKey};
+        const TgcPrepDataCollection *coll = tgcPrdContainer->indexFindPtr(m_idHelperSvc->moduleHash(chId));
+         if (coll != nullptr) {
+            for (const TgcPrepData* prd : *coll) {
+                if (m_idHelperSvc->measuresPhi(prd->identify()))
+                    ++nchHitsPhi;
+                else
+                    ++nchHitsEta;
+            }
         }
     }
 

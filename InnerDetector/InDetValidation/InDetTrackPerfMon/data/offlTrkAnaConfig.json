@@ -4,13 +4,16 @@
         "TestType"  : "Offline",
         "RefType"   : "Truth", 
         "MatchingType"  : "TruthMatch",
-        "OfflineQualityWP"  : "" 
+        "unlinkedAsFakes"  : false,
+        "_comment"  : "unlinkedAsFakes=false is used for comparisons with IDPVM but the recommended default is true"
     },
     "TrkAnaOffl_TightPrimary" : {
         "enabled" : true,
         "TestType"  : "Offline",
         "RefType"   : "Truth", 
         "MatchingType"  : "TruthMatch",
+        "unlinkedAsFakes"  : false,
+        "_comment"  : "unlinkedAsFakes=false is used for comparisons with IDPVM but the recommended default is true",
         "OfflineQualityWP"  : "TightPrimary" 
     }
 }

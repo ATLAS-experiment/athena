@@ -158,7 +158,7 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm
                 {"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"}
             },
             { // region 3
-	            {"pb4","pe83+","pe84+","pe85+","pe86+","pe87+","pe88+","pe89+"},{"se4+"},{"se5+"},{"se6+"},{"se7+"},{"se8+"},{"se9+"},{"se10+"},{"se11+"}
+                {"pb4","pe83+","pe84+","pe85+","pe86+","pe87+","pe88+","pe89+"},{"se4+"},{"se5+"},{"se6+"},{"se7+"},{"se8+"},{"se9+"},{"se10+"},{"se11+"}
             },
             { // region 4
                 //{"pe34+","pe12+"},{"pe36+","pe29+"},{"pe8+","pe40+","pe30+"},{"pe56+","pe65+"},{"pe10+","pe6+"},{"pe11+","pe7+"},{"pe31+","pe32+"},{"pe9+","pe53+"},{"pe30+"}
@@ -186,28 +186,28 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm
         const std::vector <std::vector <std::vector <std::string> > > m_planes2 = // second stage
         {
             { // region 0
-                {"pb0"},{"pb1"},{"pb2"},{"pb3"},{"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"}
+                {"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"},{"pb0"},{"pb1"},{"pb2"},{"pb3"}
             },
             { // region 1
-                {"pb0"},{"pb1"},{"pb2"},{"pb3"},{"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"}
+                {"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"},{"pb0"},{"pb1"},{"pb2"},{"pb3"}
             },
             { // region 2
                 {"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"}
             },
             { // region 3
-            	{"pb2"},{"pb3","pe58+"},{"pb4","pe83+","pe84+","pe85+","pe86+","pe87+","pe88+","pe89+"},{"se2+"},{"se3+"},{"se4+"},{"se5+"},{"se6+"},{"se7+"},{"se8+"},{"se9+"},{"se10+"},{"se11+"}
+            	{"pb4","pe83+","pe84+","pe85+","pe86+","pe87+","pe88+","pe89+"},{"se4+"},{"se5+"},{"se6+"},{"se7+"},{"se8+"},{"se9+"},{"se10+"},{"se11+"},{"pb2"},{"pb3","pe58+"},{"se2+"},{"se3+"},
             },
             { // region 4
                 {"pe0+"},{"pe1+"},{"pe2+"},{"pe3+"},{"pe4+"},{"pe5+"},{"pe6+"},{"pe7+"},{"pe8+"},{"pe9+"},{"pe10+"},{"pe11+"},{"pe12+"} // dummy values to avoid "vector::_M_range_check:"
             },
             { // region 5 - same eta as region 0, different phi
-                {"pb0"},{"pb1"},{"pb2"},{"pb3"},{"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"}
+                {"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"},{"pb0"},{"pb1"},{"pb2"},{"pb3"}
             },
             { // region 6 - same eta as region 0, different phi
-                {"pb0"},{"pb1"},{"pb2"},{"pb3"},{"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"}
+                {"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"},{"pb0"},{"pb1"},{"pb2"},{"pb3"}
             },
             { // region 7 - same eta as region 0, different phi
-                {"pb0"},{"pb1"},{"pb2"},{"pb3"},{"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"}
+                {"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"},{"pb0"},{"pb1"},{"pb2"},{"pb3"}
             },
         };
 

@@ -10,7 +10,7 @@ atlas_add_library( ITkStripsByteStreamCnvLib
                    ITkStripsByteStreamCnv/*.h
                    INTERFACE
                    PUBLIC_HEADERS ITkStripsByteStreamCnv
-                   LINK_LIBRARIES GaudiKernel InDetRawData ByteStreamCnvSvcBaseLib ByteStreamCnvSvcLib ByteStreamData InDetByteStreamErrors )
+                   LINK_LIBRARIES GaudiKernel InDetRawData ByteStreamCnvSvcBaseLib ByteStreamData InDetByteStreamErrors )
 
 # Component(s) in the package:
 atlas_add_component( ITkStripsByteStreamCnv

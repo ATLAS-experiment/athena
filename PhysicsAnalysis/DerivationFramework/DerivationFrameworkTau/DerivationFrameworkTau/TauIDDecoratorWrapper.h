@@ -28,15 +28,18 @@ namespace DerivationFramework {
     public:
       TauIDDecoratorWrapper(const std::string& t, const std::string& n, const IInterface* p);
 
-      StatusCode initialize() override;
-      StatusCode finalize() override;
+      virtual StatusCode initialize() override;
+      virtual StatusCode finalize() override;
       virtual StatusCode addBranches() const override;
 
     private:
       SG::ReadHandleKey<xAOD::TauJetContainer> m_tauContainerKey { this, "TauContainerName", "TauJets", "Input tau container key" };
       SG::ReadHandleKey<xAOD::MuonContainer> m_muonContainerKey { this, "MuonContainerName", "Muons", "Input muon container key" };
       SG::ReadHandleKey<xAOD::VertexContainer> m_vtxContainerKey { this, "VertexContainerName", "PrimaryVertices", "Input PV container key" };
-      SG::WriteDecorHandleKeyArray<xAOD::TauJetContainer> m_decorKeys{ this, "DecorationKeys", {}, "List of decorations added to the tau"};
+      SG::WriteDecorHandleKeyArray<xAOD::TauJetContainer> m_scoreDecorKeys{ this, "ScoreDecorationKeys", {}, "List of score decorations added to the tau"};
+      SG::WriteDecorHandleKeyArray<xAOD::TauJetContainer> m_WPDecorKeys{ this, "WPDecorationKeys", {}, "List of WP decorations added to the tau"};
+      SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_trackWidthKey{ this, "TrackWidthKey", m_tauContainerKey, "trackWidth", "Track width decoration name"};
+      SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_passTATTauMuonOLRKey{ this, "PassTATTauMuonOLRKey", m_tauContainerKey, "passTATTauMuonOLR", "Decoration name"};
 
       ToolHandleArray<TauRecToolBase> m_tauIDTools { this, "TauIDTools", {}, "" };
       bool m_doEvetoWP = false;

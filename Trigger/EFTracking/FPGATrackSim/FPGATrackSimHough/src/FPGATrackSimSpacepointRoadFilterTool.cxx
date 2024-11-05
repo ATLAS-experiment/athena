@@ -44,10 +44,9 @@ StatusCode FPGATrackSimSpacepointRoadFilterTool::initialize()
     if (m_setSectors) ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
 
     // This should be done properly through the monitors, later.
-    m_inputRoads = new TH1I("srft_input_roads", "srft_input_roads", 1000, -0.5, 1000-0.5);
-    m_inputRoads_2nd = new TH1I("srft_input_roads_2nd", "srft_input_roads_2nd", 1000, -0.5, 1000-0.5);
-    m_badRoads = new TH1I("srft_bad_roads", "srft_bad_roads", 1000, -0.5, 1000-0.5);
-    m_badRoads_2nd = new TH1I("srft_bad_roads_2nd", "srft_bad_roads_2nd", 1000, -0.5, 1000-0.5); 
+    m_inputRoads = new TH1I((m_isSecondStage) ? "srft_input_roads2" : "srft_input_roads", "srft_input_roads", 1000, -0.5, 1000-0.5);
+    m_badRoads = new TH1I((m_isSecondStage) ? "srft_bad_roads2" : "srft_bad_roads", "srft_bad_roads", 1000, -0.5, 1000-0.5);
+    ATH_MSG_INFO("Configuring SPRT for " << m_isSecondStage);
 
     return StatusCode::SUCCESS;
 }
@@ -55,7 +54,6 @@ StatusCode FPGATrackSimSpacepointRoadFilterTool::initialize()
 StatusCode FPGATrackSimSpacepointRoadFilterTool::finalize()
 {
     ATH_MSG_DEBUG("Spacepoint road filter: processed average of " << m_inputRoads->GetMean() << " input roads, found average of " << m_badRoads->GetMean() << " bad roads per event.");
-    ATH_MSG_DEBUG("Spacepoint road filter 2nd: processed average of " << m_inputRoads_2nd->GetMean() << " input roads, found average of " << m_badRoads_2nd->GetMean() << " bad roads per event.");
     return StatusCode::SUCCESS;
 }
 
@@ -65,29 +63,17 @@ StatusCode FPGATrackSimSpacepointRoadFilterTool::finalize()
 StatusCode FPGATrackSimSpacepointRoadFilterTool::filterRoads(std::vector<std::shared_ptr<const FPGATrackSimRoad>> & prefilter_roads, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & postfilter_roads) {
     // Record the number of input roads and roads with problems.
     int badRoads = 0;
-    bool isSecondStage = false;
     if (prefilter_roads.size() > 0) {
-        // NOTE when we add back support for second stage roads, fix this.
-        isSecondStage = false; //prefilter_roads[0]->isSecondStage();
-        if (isSecondStage) {
-            m_inputRoads_2nd->Fill(prefilter_roads.size());
-        } else {
             m_inputRoads->Fill(prefilter_roads.size());
-        }
     }
 
-    // Depending on isSecondStage, clear the underlying memory for the filtered roads.
+    // Clear the underlying memory for the filtered roads.
     postfilter_roads.clear();
-    if (prefilter_roads.size() == 0) {
-        m_postfilter_roads_2nd.clear();
         m_postfilter_roads.clear();
+    if (prefilter_roads.size() == 0) {
         return StatusCode::SUCCESS;
     }
-    if (isSecondStage) {
-        m_postfilter_roads_2nd.clear();
-    } else {
-        m_postfilter_roads.clear();
-    }
+
 
     // This tool takes a road and checks to see if there are any layers containing
     // both spacepoints and unpaired strip hits. If so, it splits the road into
@@ -103,15 +89,12 @@ StatusCode FPGATrackSimSpacepointRoadFilterTool::filterRoads(std::vector<std::sh
             badRoads += 1;
         }
     }
-    if (isSecondStage) {
-        m_badRoads_2nd->Fill(badRoads);
-    } else {
+
         m_badRoads->Fill(badRoads);
-    }
 
     // copy roads to outputs - borrowed from the eta pattern filter.
-    postfilter_roads.reserve((isSecondStage) ? m_postfilter_roads_2nd.size() : m_postfilter_roads.size());
-    for (FPGATrackSimRoad & r : (isSecondStage ? m_postfilter_roads_2nd : m_postfilter_roads))
+    postfilter_roads.reserve(m_postfilter_roads.size());
+    for (FPGATrackSimRoad & r : m_postfilter_roads)
         postfilter_roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
 
     return StatusCode::SUCCESS;
@@ -128,12 +111,12 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
     // Loop over each pair of strip layers.
     for (size_t layer = 0; layer < initial_road->getNLayers(); layer++) {
         // Do nothing for pixel layers.
-        /*if (initial_road->isSecondStage()){
+        if (m_isSecondStage){
             if(m_FPGATrackSimMapping->PlaneMap_2nd()->isPixel(layer)){
                 continue;
             }
         }
-        else*/ if (m_FPGATrackSimMapping->PlaneMap_1st(initial_road->getSubRegion())->isPixel(layer)) {
+        else if (m_FPGATrackSimMapping->PlaneMap_1st(initial_road->getSubRegion())->isPixel(layer)) {
             continue;
         }
 
@@ -182,11 +165,11 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
             // Now update the two layers accordingly, having converted invalid SPs back to paired hits.
             std::vector<std::shared_ptr<const FPGATrackSimHit>> new_all_in = spacepoints_in;
             new_all_in.insert(std::end(new_all_in), std::begin(strip_hits_in), std::end(strip_hits_in));
-            initial_road->setHits(layer, new_all_in);
+            initial_road->setHits(layer, std::move(new_all_in));
 
             std::vector<std::shared_ptr<const FPGATrackSimHit>> new_all_out = spacepoints_out;
             new_all_out.insert(std::end(new_all_out), std::begin(strip_hits_out), std::end(strip_hits_out));
-            initial_road->setHits(layer + 1, new_all_out);
+            initial_road->setHits(layer + 1, std::move(new_all_out));
 
             // Debug message.
             ATH_MSG_DEBUG("Found inconsistent number of spacepoints in road with x = " << initial_road->getXBin() << ", y = " << initial_road->getYBin());
@@ -231,7 +214,7 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
             if (strip_hits_in.size() == 0 || strip_hits_out.size() == 0) {
                 std::unique_ptr<FPGATrackSimHit> wcHit = std::make_unique<FPGATrackSimHit>();
                 wcHit->setHitType(HitType::wildcard);
-                wcHit->setDetType(/*initial_road->isSecondStage() ? m_FPGATrackSimMapping->PlaneMap_2nd()->getDetType(layer) :*/ m_FPGATrackSimMapping->PlaneMap_1st(new_road.getSubRegion())->getDetType(layer));
+                wcHit->setDetType(m_isSecondStage ? m_FPGATrackSimMapping->PlaneMap_2nd()->getDetType(layer) : m_FPGATrackSimMapping->PlaneMap_1st(new_road.getSubRegion())->getDetType(layer));
                 if (strip_hits_in.size() == 0) {
                     wildcard_layer = layer;
                     wcHit->setLayer(wildcard_layer);
@@ -252,10 +235,10 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
                 FPGATrackSimRoad spacepoints_only(working_roads[i]);
 
                 // Update their hits in these layers accordingly.
-                strips_only.setHits(layer, strip_hits_in);
-                strips_only.setHits(layer + 1, strip_hits_out);
-                spacepoints_only.setHits(layer, entry.second);
-                spacepoints_only.setHits(layer + 1, outer_spacepoints[layer + 1]);
+                strips_only.setHits(layer, std::vector<std::shared_ptr<const FPGATrackSimHit>>(strip_hits_in));
+                strips_only.setHits(layer + 1, std::vector<std::shared_ptr<const FPGATrackSimHit>>(strip_hits_out));
+                spacepoints_only.setHits(layer, std::vector<std::shared_ptr<const FPGATrackSimHit>>(entry.second));
+                spacepoints_only.setHits(layer + 1, std::vector<std::shared_ptr<const FPGATrackSimHit>>(outer_spacepoints[layer + 1]));
 
                 // If we inserted a wildcard hit previously, update the WC layers accordingly
                 // in the strips_only road.
@@ -287,9 +270,9 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
 
     // Now, any finalized roads need to have their sectors set/updated, and added to the output vector.
     for (auto road : working_roads) {
-        //if (initial_road->isSecondStage()) road.setSecondStage();
         unsigned numSpacePlusPixel = setSector(road);
         ATH_MSG_DEBUG("This road has sector = " << road.getSector() << " and q/pt = " << road.getX() << ", x = " << road.getY());
+        ATH_MSG_DEBUG("numSpacePlusPixel = " << numSpacePlusPixel << ", nhitlayers = " << road.getNHitLayers());
 
         // Filter any roads that don't have enough real hits.
         if (road.getNHitLayers() < m_threshold) {
@@ -297,16 +280,11 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
         }
 
         // Filter any roads that don't have enough spacepoints + pixel hits.
-        if (numSpacePlusPixel < (/*initial_road->isSecondStage() ? m_minSpacePlusPixel2 :*/ m_minSpacePlusPixel)) {
+        if (numSpacePlusPixel < m_minSpacePlusPixel) {
             continue;
         }
 
-        // NOTE fix with second stage support later.
-        /*if (initial_road->isSecondStage()) {
-            m_postfilter_roads_2nd.push_back(road);
-        } else {*/
             m_postfilter_roads.push_back(road);
-        //}
     }
 
     return retval;
@@ -345,7 +323,7 @@ unsigned FPGATrackSimSpacepointRoadFilterTool::setSector(FPGATrackSimRoad& road)
 
     unsigned numSpacePlusPixel = (num_spacepoints/2) + num_pixel;
     if (m_setSectors) {
-        const FPGATrackSimSectorBank* sectorbank = /*!(road.isSecondStage()) ?*/ m_FPGATrackSimBankSvc->SectorBank_1st(); //: m_FPGATrackSimBankSvc->SectorBank_2nd();
+        const FPGATrackSimSectorBank* sectorbank = m_isSecondStage ? m_FPGATrackSimBankSvc->SectorBank_2nd() : m_FPGATrackSimBankSvc->SectorBank_1st();
         // Written a bit unintuitively, but the "default" should be that it's not second stage
         // NOTE fix this when we add second stage roads back.
         road.setSector(sectorbank->findSector(modules));

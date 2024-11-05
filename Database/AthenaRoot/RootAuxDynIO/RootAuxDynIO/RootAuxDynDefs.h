@@ -18,7 +18,15 @@ namespace RootAuxDynIO
    * @brief Check if a string ends with AUX_POSTFIX
    * @param str the string to check
    */
-   bool endsWithAuxPostfix(std::string_view str);
+   inline bool endsWithAuxPostfix(std::string_view str) {
+      return str.ends_with(AUX_POSTFIX);
+   }
+
+   /**
+   * @brief if a string ends with AUX_POSTFIX then remove it
+   * @param str the string to modify
+   */
+   bool removeAuxPostfix(std::string str);
 
    /**
    * @brief Construct branch name for a given dynamic attribute
@@ -37,12 +45,16 @@ namespace RootAuxDynIO
 } // namespace
 
 
-/// check if a string ends with AUX_POSTFIX
 inline bool
-RootAuxDynIO::endsWithAuxPostfix(std::string_view str) {
-   return str.size() >= AUX_POSTFIX_LEN and
-      str.compare(str.size()-AUX_POSTFIX_LEN, AUX_POSTFIX_LEN, AUX_POSTFIX) == 0;
+RootAuxDynIO::removeAuxPostfix(std::string str)
+{
+   if( endsWithAuxPostfix(str) ) {
+      str.resize( str.size() - AUX_POSTFIX_LEN );
+      return true;
+   }
+   return false;
 }
+
 
 inline std::string
 RootAuxDynIO::auxBranchName(const std::string& attr_name, const std::string& baseBranchName)

@@ -11,7 +11,7 @@ atlas_add_component( OverlayByteStreamUtils
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel ByteStreamCnvSvcLib CxxUtils GaudiKernel TrigConfData TrigConfInterfaces TrigDecisionToolLib )
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel ByteStreamCnvSvcBaseLib CxxUtils GaudiKernel TrigConfData TrigConfInterfaces TrigDecisionToolLib )
 
 # Utility scripts
 atlas_install_runtime( scripts/*.py )

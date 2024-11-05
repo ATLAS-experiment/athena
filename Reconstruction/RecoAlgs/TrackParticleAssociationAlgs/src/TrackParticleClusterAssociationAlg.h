@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKPARTICLEASSOCIATIONALGS_TRACKPARTICLECLUSTERASSOCIATIONALG_H
 #define TRACKPARTICLEASSOCIATIONALGS_TRACKPARTICLECLUSTERASSOCIATIONALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadDecorHandleKey.h"
@@ -35,20 +35,22 @@
 /// and a Rec::ParticleClusterAssociation and was using ParticleCaloClusterAssociationTool to retrieve the extrapolation
 /// and perform the clusters association.
 /// All of this was suppress or replaced in order to simplify the procedure.
-class TrackParticleClusterAssociationAlg : public AthAlgorithm
+class TrackParticleClusterAssociationAlg : public AthReentrantAlgorithm
 {
  public:
-  TrackParticleClusterAssociationAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
 
-  StatusCode initialize() override ;
-  StatusCode execute() override ;
+  virtual StatusCode initialize() override ;
+  virtual StatusCode execute(const EventContext& ctx) const override ;
 
 
  private:
 
   /// returns the clusters from allClusters which are close enough to caloExtensions
-  std::vector<const xAOD::CaloCluster* > associatedClusters(const Trk::CaloExtension & caloExtensions, const xAOD::CaloClusterContainer & allClusters) ;
+  std::vector<const xAOD::CaloCluster* >
+  associatedClusters(const Trk::CaloExtension & caloExtensions, const xAOD::CaloClusterContainer & allClusters,
+                     const EventContext& ctx) const;
   
   
 
@@ -64,7 +66,7 @@ class TrackParticleClusterAssociationAlg : public AthAlgorithm
   // Whether or not to use the DetectorEta attribute of the clusters, which is important if the input cluster container has had the origin correction applied
   // Default assumes no origin correction, must be configured if desired
   SG::ReadDecorHandleKey<xAOD::CaloClusterContainer> m_detectorEtaDecor { this, "DetectorEtaName", "", "Decoration for CaloCluster DetectorEta" };
-  bool m_doDetEta;
+  bool m_doDetEta = false;
 
   // vertex handling
   SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContHandle {this, "VertexContainerName", "", "if empty all tracks will be decorated. if not only those corresponding to the PV[0] will."};
@@ -74,6 +76,8 @@ class TrackParticleClusterAssociationAlg : public AthAlgorithm
   // decorations 
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_assocClustersDecor {this, "AssociatedClusterDecorKey" , "", "Decoration key to store associated clusters. IMPORTANT  must be consistent with TrackParticleContainer" };
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_caloEntryParsDecor {this, "CaloEntryParsDecorKey" , "", "Decoration name to store trk parameters to calo entry (if non blank). IMPORTANT : must be consistent with TrackParticleContainer" };
+  SG::WriteDecorHandleKey<xAOD::CaloClusterContainer> m_sigmaWidthKey
+    { this, "SigmaWidthKey", m_caloClusters, "sigmaWidth", "sigmaWidth decoration" };
 };
 
 #endif

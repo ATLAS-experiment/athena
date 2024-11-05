@@ -49,7 +49,7 @@ namespace RootAuxDynIO
          if( strncmp(brname, clname, namelen) == 0 && brname[namelen] == '_' ) {
             key.erase (0, namelen+1);
          }
-         if( endsWithAuxPostfix(key) )  key.erase( key.size()-AUX_POSTFIX_LEN );
+         removeAuxPostfix(key);
          return key;
       }
       return "";

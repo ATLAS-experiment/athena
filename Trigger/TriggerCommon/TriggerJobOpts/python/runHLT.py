@@ -132,7 +132,7 @@ def athenaHLTCfg(flags):
    return cfg
 
 
-def athenaCfg(flags):
+def athenaCfg(flags, parser=None):
    """Top-level cfg function when running in athena"""
    from AthenaConfiguration.Enums import Format
 
@@ -143,7 +143,8 @@ def athenaCfg(flags):
    flags.Common.isOnline = lambda f: not f.Input.isMC
 
    # Add options to command line parser
-   parser = flags.getArgumentParser()
+   if not parser:
+      parser = flags.getArgumentParser()
    parser.add_argument('--postExec', metavar='CMD',
                        help='Commands executed after Python configuration')
 

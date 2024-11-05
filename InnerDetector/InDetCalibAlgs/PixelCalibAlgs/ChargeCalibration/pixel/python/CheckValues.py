@@ -242,7 +242,14 @@ def plot(axs,arr, xlabel, islog = False):
     axs.set_xlabel(xlabel)
     if islog:
         axs.set_yscale("log")
-    axs.set_ylabel("Counts [log scale]" if islog else "Counts")    
+    axs.set_ylabel("Counts [log scale]" if islog else "Counts")  
+
+
+def  CheckThresholdsIBL(_file):
+    from PixelCalibAlgs.EvoMonitoring import ReadCalibOutput
+    new_calib, new_iov = ReadCalibOutput(_file)
+    
+    CheckThresholds(new_calib,new_iov,_file)    
     
     
 if __name__ == "__main__":

@@ -2,8 +2,8 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
-#include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
+#include "ByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamOutputSvc.h"
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h"
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
 
@@ -250,28 +250,6 @@ void ByteStreamCnvSvc::writeFEA (SlotData& slot)
    }
    ATH_MSG_DEBUG("after FEAMAP size = " << feaMap.size());
 }
-
-
-StatusCode ByteStreamCnvSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) 
-{
-  if ( interfaceID().versionMatch(riid) )    {
-    *ppvInterface = (StoreGateSvc*)this;
-  }
-  else  {
-    // Interface is not directly available: try out a base class
-    return ByteStreamCnvSvcBase::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
-}
-
-
-const InterfaceID& 
-ByteStreamCnvSvc::interfaceID() { 
-  static const InterfaceID IDByteStreamCnvSvc("ByteStreamCnvSvc", 1, 0);
-  return IDByteStreamCnvSvc;
-}
-
 
 RawEventWrite*
 ByteStreamCnvSvc::setRawEvent (std::unique_ptr<RawEventWrite> rawEventWrite)

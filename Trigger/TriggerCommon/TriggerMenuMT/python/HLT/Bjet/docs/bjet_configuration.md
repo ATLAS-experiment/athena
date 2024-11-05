@@ -150,8 +150,7 @@ For the chain '*HLT_2j55_0eta290_020jvt_pf_ftf_bdl1r60_2j55_pf_ftf_0eta320_L14J1
          'signatures': ['Bjet', 'Jet'],
          'stream': ['Main'],
          'subSigs': [],
-         'topo': [],
-         'topoStartFrom': False}]
+         'topo': []}]
 ```
 </details>
 

@@ -79,8 +79,6 @@ StatusCode MdtDigitizationTool::initialize() {
     ATH_MSG_INFO("UseAttenuation         " << m_useAttenuation);
     ATH_MSG_INFO("UseTof                 " << m_useTof);
     ATH_MSG_INFO("UseProp                " << m_useProp);
-    ATH_MSG_INFO("UseWireSagGeom         " << m_useWireSagGeom);
-    ATH_MSG_INFO("UseWireSagRT           " << m_useWireSagRT);
     ATH_MSG_INFO("UseDeformations        " << m_useDeformations);
     ATH_MSG_INFO("UseTimeWindow          " << m_useTimeWindow);
     ATH_MSG_INFO("BunchCountOffset       " << m_bunchCountOffset);
@@ -396,27 +394,9 @@ bool MdtDigitizationTool::handleMDTSimHit(const EventContext& ctx,
     // store local hit position + sign
     GeoCorOut result = correctGeometricalWireSag(hit, DigitId, element);
     if (m_useDeformations) { result = correctGeometricalWireSag(newSimhit, DigitId, element); }
-    double saggingSign = result.sagSign;
-    double trackingSign = result.trackingSign;
-    Amg::Vector3D lpos = result.localPosition;
-    double localSag = result.localSag;
-
-    // set segment (radius + distance to readout)
-    if (m_useWireSagGeom) {
-        driftRadius = lpos.perp();
-
-        double projectiveSag = hit.driftRadius() - std::abs(driftRadius);
-        if (m_useDeformations) projectiveSag = newSimhit.driftRadius() - std::abs(driftRadius);
-
-        ATH_MSG_DEBUG(" Geometrical WIRESAGINFO "
-                      << stationName << " " << stationEta << " " << stationPhi << " " << multilayer << " " << layer << " " << tube << " "
-                      << Amg::toString(hit.localPosition(), 3) << " "
-                      << hit.driftRadius() << " " << element->tubeLength(DigitId) << " " << " " << localSag
-                      << " " << projectiveSag << " " << driftRadius << " " << saggingSign);
-    }
-
+    
     // correctly set sign of drift radius
-    driftRadius *= trackingSign;
+    driftRadius *= result.trackingSign;
 
     //+Implementation for RT_Relation_DB_Tool
     MdtDigiToolInput digiInput(std::abs(driftRadius), distRO, 0., 0., 0., 0., DigitId);
@@ -451,49 +431,6 @@ bool MdtDigitizationTool::handleMDTSimHit(const EventContext& ctx,
         double adc = digiOutput.adc();
 
         ATH_MSG_VERBOSE("Tube efficient: driftTime  " << driftTime << " adc value " << adc);
-
-        // compute RT effect
-        if (m_useWireSagRT && !element->barrel() && stationName != "EOS" && stationName != "EOL") {
-            Amg::Vector3D gpos = element->localToGlobalTransf(DigitId)*lpos;
-
-            // fit parameters for drift time difference vs impact radius for a wire 500 microns off axis
-            // garfield calculation. details on http://dslevin.home.cern.ch/atlas/wiresag.ppt
-            // Line below: old code
-            // double param[4] = {-0.3025,0.58303,0.012177,0.0065818};
-            // New code
-            static constexpr std::array<double, 6> param{-4.47741E-3, 1.75541E-2, -1.32913E-2, 2.57938E-3, -4.55015E-5, -1.70821E-7};
-
-            // get delta T, change in drift time for reference sag (default=100 microns) and scale by projective sag
-            double deltaT{0.};
-            double dR = std::abs(driftRadius);
-            for (int i = 0; i < 6; ++i) { deltaT += param[i] * std::pow(dR, i); }
-
-            // reference sag now set to 0.1 mm
-            double referenceSag = 0.1;
-
-            // Calculate angle at which track cross plane of sag.
-            // Note that this assumes the track is coming from the center of the detector.
-            double cosTheta = std::abs(gpos.z()) / gpos.mag();
-
-            // This calculates the sag seen by a track; if a particle passes parallel to the sag,
-            // the shift in drift circle location will have no affect.
-            double projectiveSag = localSag * cosTheta;
-
-            deltaT *= (projectiveSag / referenceSag);
-
-            // saggingSign is calculated by the correctGeometricalWireSag function of this class
-            // It is +/- 1 depending on whether or not the track passed above or below the wire.
-            deltaT = -1 * saggingSign * deltaT;
-
-            double driftTimeOriginal = driftTime;
-            driftTime += deltaT;  // update drift time
-
-            ATH_MSG_DEBUG(" RT WIRESAGINFO " << stationName << " " << stationEta << " " << stationPhi << " " << multilayer << " " << layer
-                                             << " " << tube << " " << Amg::toString(hit.localPosition(), 3) 
-                                             << " " << driftRadius << " " << element->tubeLength(DigitId) / 1000.
-                                             << " " << cosTheta << " " << localSag << " " << projectiveSag << " " << deltaT << "   "
-                                             << driftTimeOriginal << "    " << driftTime);
-        }  // m_useWireSagRT
 
         if (m_useProp) {
             double position_along_wire = hit.localPosition().z();
@@ -889,7 +826,7 @@ MdtDigitizationTool::GeoCorOut MdtDigitizationTool::correctGeometricalWireSag(co
     Amg::Vector3D gdir = transf* ldir;
 
     // get wire surface
-    const Trk::SaggedLineSurface& surface = element->surface(id);
+    const Trk::StraightLineSurface& surface = element->surface(id);
 
     // check whether direction is pointing away from IP
     double pointingCheck = gpos.dot(gdir) < 0 ? -1. : 1.;
@@ -897,51 +834,12 @@ MdtDigitizationTool::GeoCorOut MdtDigitizationTool::correctGeometricalWireSag(co
 
     double trackingSign = 1.;
     double localSag = 0.0;
-    if (m_useWireSagGeom) {
-        // calculate local hit position in nominal wire frame
-        Amg::Vector2D lp{Amg::Vector2D::Zero()};
-        surface.globalToLocal(gpos, gpos, lp);
+    
+    // recalculate tracking sign
+    Amg::Vector2D lpsag{Amg::Vector2D::Zero()};
+    surface.globalToLocal(gpos, gdir, lpsag);
+    trackingSign = lpsag[Trk::locR] < 0 ? -1. : 1.;
 
-        // calculate sagged wire position
-        std::unique_ptr<const Trk::StraightLineSurface> wireSurface {surface.correctedSurface(lp)};
-        // calculate displacement of wire from nominal
-        // To do this, note that the sagged surface is modeled as a straight line
-        // through the point in the space that the bit of wire closest to the hit
-        // sagged to and is parallel to the nominal wire. Find the center of the
-        // sagged surface in global coordinates, transform this into the nominal
-        // surface's local coordinates, and calculate that point's distance from
-        // the origin.
-        const Amg::Vector3D gSaggedSpot = wireSurface->center();
-        Amg::Vector3D lSaggedSpot = gToWireFrame * gSaggedSpot;
-        
-        localSag = lSaggedSpot.perp();
-
-        // global to local sagged wire frame transform
-        gToWireFrame = wireSurface->transform().inverse();
-
-        // local hit position in sagged wire frame
-        lpos = gToWireFrame * gpos;
-        ldir = gToWireFrame * gdir;
-        ldir.normalize();
-
-        // compute drift radius ( = impact parameter)
-        double alpha = -1 * lpos.dot(ldir);
-        lpos = lpos + alpha * ldir;
-
-        // calculate global point of closest approach
-        Amg::Vector3D saggedGPos = wireSurface->transform() * lpos;
-
-        // recalculate tracking sign
-        Amg::Vector2D lpsag{Amg::Vector2D::Zero()};
-        wireSurface->globalToLocal(saggedGPos, gdir, lpsag);
-        trackingSign = lpsag[Trk::locR] < 0 ? -1. : 1.;
-
-    } else {
-        // recalculate tracking sign
-        Amg::Vector2D lpsag{Amg::Vector2D::Zero()};
-        surface.globalToLocal(gpos, gdir, lpsag);
-        trackingSign = lpsag[Trk::locR] < 0 ? -1. : 1.;
-    }
 
     // local gravity vector
     Amg::Vector3D gravityDir =-1. * Amg::Vector3D::UnitY();

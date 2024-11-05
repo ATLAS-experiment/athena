@@ -8,6 +8,7 @@
 #include <GaudiKernel/IAlgTool.h>
 #include <GeoPrimitives/GeoPrimitives.h>
 #include <MuonPatternEvent/MuonHoughDefs.h>
+#include <xAODMuon/MuonSegment.h>
 #include <memory>
 
 class EventContext;
@@ -105,6 +106,20 @@ namespace MuonValR4{
                                           const MuonR4::Segment& segment,
                                           const std::string& extraLabel,
                                           PrimitiveVec&& extraPaints) const = 0;
+
+            /** @brief Returns whether the hit has been used in the truth-segment building
+             *  @param hit: Reference to the hit to check */
+            virtual bool isTruthMatched(const MuonR4::SpacePoint& hit) const = 0;
+            virtual bool isTruthMatched(const xAOD::UncalibratedMeasurement& hit) const = 0;
+            
+            
+            using TruthSegmentSet = std::unordered_set<const xAOD::MuonSegment*>;
+            /** @brief Fetches all truth segments where at least one measurement in the list was used to 
+             *         build them 
+             *  @param hits: Vector of hits to search */
+            virtual TruthSegmentSet fetchTruthSegs(const std::vector<const MuonR4::SpacePoint*>& hits) const = 0;
+            virtual TruthSegmentSet fetchTruthSegs(const std::vector<const xAOD::UncalibratedMeasurement*>& hits) const = 0;
+
     };
 }
 #endif

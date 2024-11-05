@@ -28,10 +28,9 @@
 #include "xAODForward/ZdcModuleContainer.h"
 
 // Outputs to CTP
-#include "TrigT1Interfaces/ZdcCTP.h"
 #include "TrigT1Interfaces/TrigT1CaloDefs.h"
-
-#include "ZDCTriggerSim.h"
+#include "TrigT1Interfaces/ZdcCTP.h"
+#include "ZdcUtils/ZDCTriggerSim.h"
 #include "nlohmann/json.hpp"
 
 namespace LVL1 {

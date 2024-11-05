@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RPC_TimingTool.h"
@@ -9,9 +9,7 @@
 namespace Muon {
 
   RPC_TimingTool::RPC_TimingTool(const std::string& t, const std::string& n, const IInterface* p) :
-      AthAlgTool(t,n,p) {
-    declareInterface<IMuonHitTimingTool>(this);
-  }
+      base_class(t,n,p) {}
 
   StatusCode RPC_TimingTool::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());

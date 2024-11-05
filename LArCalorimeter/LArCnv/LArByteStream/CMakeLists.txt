@@ -11,11 +11,11 @@ atlas_add_library( LArByteStreamLib
    LArByteStream/*.h LArByteStream/*.icc src/*.cxx
    PUBLIC_HEADERS LArByteStream
    INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
-   LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} CaloIdentifier AthenaBaseComps
-   AthenaKernel xAODEventInfo ByteStreamData GaudiKernel LArIdentifier LArRawEvent
+   LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} CaloIdentifier AthenaBaseComps AthenaKernel
+   xAODEventInfo ByteStreamCnvSvcBaseLib ByteStreamData GaudiKernel LArIdentifier LArRawEvent
    LArRecConditions LArRecEvent CaloDetDescrLib CaloUtilsLib StoreGateLib
    ByteStreamCnvSvcBaseLib LArCablingLib CaloConditions CxxUtils
-   PRIVATE_LINK_LIBRARIES AtlasDetDescr ByteStreamCnvSvcLib Identifier LArElecCalib LArRawConditions )
+   PRIVATE_LINK_LIBRARIES AtlasDetDescr Identifier LArElecCalib LArRawConditions )
 
 atlas_add_component( LArByteStream
    src/components/*.cxx

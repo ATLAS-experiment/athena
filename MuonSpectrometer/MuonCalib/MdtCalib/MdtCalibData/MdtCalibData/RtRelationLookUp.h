@@ -37,7 +37,7 @@ namespace MuonCalib {
         /** return rt range */
         virtual double tLower() const override final;
         virtual double tUpper() const override final;
-
+        virtual double tBinWidth() const override final;
     private:
         int getBin(double t) const;
 

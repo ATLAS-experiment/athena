@@ -20,9 +20,7 @@
 namespace Muon {
 
 MuonPatternCalibration::MuonPatternCalibration(const std::string& t, const std::string& n, const IInterface* p)
-    : AthAlgTool(t, n, p) {
-    declareInterface<IMuonPatternCalibration>(this);
-}
+    : base_class(t, n, p) {}
 
 StatusCode
 MuonPatternCalibration::initialize()
@@ -31,9 +29,9 @@ MuonPatternCalibration::initialize()
     ATH_CHECK(m_mdtCreator.retrieve());
     ATH_CHECK(m_printer.retrieve());
     ATH_CHECK(m_idHelperSvc.retrieve());
-    ATH_CHECK(m_clusterCreator.retrieve());
-    ATH_CHECK(m_keyRpc.initialize());
-    ATH_CHECK(m_keyTgc.initialize());
+    ATH_CHECK(m_keyRpc.initialize(!m_keyRpc.empty()));
+    ATH_CHECK(m_keyTgc.initialize(!m_keyTgc.empty()));
+    ATH_CHECK(m_clusterCreator.retrieve(EnableTool{!m_keyRpc.empty() || !m_keyTgc.empty()}));
     return StatusCode::SUCCESS;
 }
 
@@ -438,7 +436,6 @@ MuonPatternCalibration::calibrateRegionMap(const RegionMap& regionMap,
         rotRegion.regionId  = regionId;
         rotRegion.regionPos = regMeasColl.regionPos;
         rotRegion.regionDir = regMeasColl.regionDir;
- 
         for (const auto& [globalPos, prd] : regMeasColl.triggerPrds) {
             std::unique_ptr<const MuonClusterOnTrack> cluster{m_clusterCreator->createRIO_OnTrack(*prd, globalPos)};
             if (!cluster) continue;

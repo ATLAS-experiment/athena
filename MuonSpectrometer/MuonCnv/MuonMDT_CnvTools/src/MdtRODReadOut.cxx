@@ -1,15 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtRODReadOut.h"
 
-#include <cassert>
+#include "AthenaKernel/errorcheck.h"
 
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/IMessageSvc.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/MsgStream.h"
 
 MdtRODReadOut::MdtRODReadOut() :
     // m_dataWord(0),
@@ -21,26 +17,16 @@ MdtRODReadOut::MdtRODReadOut() :
 
 // Decode the ROD header
 void MdtRODReadOut::decodeHeader(const std::vector<uint32_t>& p) {
-#ifndef NDEBUG
-    IMessageSvc* msgSvc = 0;
-    ISvcLocator* svcLocator = Gaudi::svcLocator();
-    svcLocator->service("MessageSvc", msgSvc).ignore();
-    MsgStream log(msgSvc, "MdtRODReadOut::decodeHeader");
-#endif
 
     setZero();
 
     if (p[0] != s_RODstart) {
-#ifndef NDEBUG
-        log << MSG::ERROR << "ROD Start of header marker not found" << endmsg;
-#endif
-        assert(0);
+      REPORT_MESSAGE_WITH_CONTEXT(MSG::ERROR, "MdtRODReadOut")
+        << "ROD Start of header marker not found" << endmsg;
     }
     if (p[1] != s_RODheadersize) {
-#ifndef NDEBUG
-        log << MSG::ERROR << "ROD header size doesn't match " << s_RODheadersize << endmsg;
-#endif
-        assert(0);
+      REPORT_MESSAGE_WITH_CONTEXT(MSG::ERROR, "MdtRODReadOut")
+        << "ROD header size doesn't match " << s_RODheadersize << endmsg;
     }
 
     // decode the rest of the header

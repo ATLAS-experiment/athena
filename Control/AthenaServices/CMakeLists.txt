@@ -19,8 +19,8 @@ atlas_add_component( AthenaServices
    ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS} ${YAMPL_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${Python_LIBRARIES} ${ROOT_LIBRARIES} ${TBB_LIBRARIES} ${UUID_LIBRARIES} ${YAMPL_LIBRARIES}
    ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel RootUtilsPyROOT CxxUtils
-   AthContainers AthContainersInterfaces DataModelRoot PerfMonEvent
-   PerfMonKernel SGTools StoreGateLib PersistentDataModel EventInfo xAODCore
+   AthContainers AthContainersInterfaces DataModelRoot SGTools
+   StoreGateLib PersistentDataModel EventInfo xAODCore
    xAODEventInfo EventInfoUtils GaudiKernel RootAuxDynIOHeaders )
 
 # Test library checking the ability to build T/P converters:

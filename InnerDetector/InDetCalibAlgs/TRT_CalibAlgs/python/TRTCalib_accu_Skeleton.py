@@ -92,7 +92,7 @@ def fromRunArgs(runArgs):
     tryError(command,"ERROR: Failed in process TRTCalib_bhadd\n")
     
     ##################################################################################################
-    nextstep("Renaming outputs from TRTCalib_bhadd")
+    nextstep("Renaming outputs from Athena and TRTCalib_bhadd")
     ##################################################################################################
     
     command  = "mv -v tracktuple.root %s.tracktuple.root ; " % (outputFile) 

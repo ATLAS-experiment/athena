@@ -9,7 +9,7 @@
 #include "ITkStripsByteStreamCnv/IITkStripsRawContByteStreamTool.h"
 
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h"
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -56,7 +56,7 @@ ITkStripsRawContByteStreamTool : public extends<AthAlgTool, IITkStripsRawContByt
   virtual StatusCode convert(const SCT_RDO_Container* itkRDOCont) const override;
   
  private:
-  ServiceHandle<ByteStreamCnvSvc> m_byteStreamCnvSvc
+  ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc
   { this, "ByteStreamCnvSvc", "ByteStreamCnvSvc" };
 
   /** Algorithm Tool to decode ROB bytestream data into RDO. */ 

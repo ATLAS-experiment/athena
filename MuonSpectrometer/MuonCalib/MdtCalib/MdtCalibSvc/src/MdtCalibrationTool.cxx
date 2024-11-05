@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibrationTool.h"
@@ -15,7 +15,6 @@
 #include "MdtCalibData/IMdtSlewCorFunc.h"
 #include "MdtCalibData/IMdtTempCorFunc.h"
 #include "MdtCalibData/IMdtBackgroundCorFunc.h"
-#include "MdtCalibData/IMdtWireSagCorFunc.h"
 #include "MdtCalibData/IRtRelation.h"
 #include "MdtCalibData/IRtResolution.h"
 #include "MdtCalibData/TrRelation.h"

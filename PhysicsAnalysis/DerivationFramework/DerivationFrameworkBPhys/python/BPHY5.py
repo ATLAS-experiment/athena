@@ -298,6 +298,65 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
                                 MassMax                    = 5800.0, Do3d = False,
                                 Chi2Max                    = 200)
 
+   #Do vertices without constraint for systematic reference
+   BPHY5_Revertex_Bs_NoMassConst  = CompFactory.DerivationFramework.ReVertex(
+       name                       = "BPHY5_Revertex_Bs_NoMassConst",
+       InputVtxContainerName      = BsJpsiPhiContainerName,
+       TrackIndices               = [ 0, 1, 2, 3 ],
+       RefitPV                    = False,
+       UseMassConstraint          = False,
+       TrackContainerName         = mainIDInput,
+       RelinkTracks  =  toRelink,
+       PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+       TrkVertexFitterTool        = vkalvrt,
+       OutputVtxContainerName     = "BPHY5BsJpsiKKCandidatesNoConstraint")
+
+   BPHY5_Revertex_Bd_NoMassConst  = CompFactory.DerivationFramework.ReVertex(
+       name                       = "BPHY5_Revertex_Bd_NoMassConst",
+       InputVtxContainerName      = "BPHY5BdJpsiKstCandidates",
+       TrackIndices               = [ 0, 1, 2, 3 ],
+       RefitPV                    = False,
+       UseMassConstraint          = False,
+       TrackContainerName         = mainIDInput,
+       RelinkTracks  =  toRelink,
+       PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+       TrkVertexFitterTool        = vkalvrt,
+       OutputVtxContainerName     = "BPHY5BdJpsiKstCandidatesNoConstraint")
+
+   BPHY5_Select_Bs2JpsiKKNoConstraint = CompFactory.DerivationFramework.Select_onia2mumu(
+     name                       = "BPHY5_Select_Bs2JpsiKKNoConstraint",
+     HypothesisName             = "Bs",
+     V0Tools                    = V0Tools,
+     InputVtxContainerName      = "BPHY5BsJpsiKKCandidatesNoConstraint",
+     TrkMasses                  = [105.658, 105.658, 493.677, 493.677],
+     VtxMassHypo                = 5366.3,
+     MassMin                    = 5000.0,
+     MassMax                    = 5800.0, Do3d = False,
+     Chi2Max                    = 200)
+
+   BPHY5_Select_BdBar2JpsiKpiNoConstraint = CompFactory.DerivationFramework.Select_onia2mumu(
+     name                       = "BPHY5_Select_BdBar2JpsiKpiNoConstraint",
+     HypothesisName             = "BdBar",
+     V0Tools                    = V0Tools,
+     InputVtxContainerName      = "BPHY5BdJpsiKstCandidatesNoConstraint",
+     TrkMasses                  = [105.658, 105.658, 139.570, 493.677],
+     VtxMassHypo                = 5279.6,
+     MassMin                    = 100.0,      #no mass cuts here
+     MassMax                    = 100000.0,   #no mass cuts here
+     Chi2Max                    = 200)
+
+   BPHY5_Select_Bd2JpsiKpiNoConstraint = CompFactory.DerivationFramework.Select_onia2mumu(
+     name                       = "BPHY5_Select_Bd2JpsiKpiNoConstraint",
+     HypothesisName             = "Bd",
+     V0Tools                    = V0Tools,
+     InputVtxContainerName      = "BPHY5BdJpsiKstCandidatesNoConstraint",
+     TrkMasses                  = [105.658, 105.658, 493.677, 139.570],
+     VtxMassHypo                = 5279.6,
+     MassMin                    = 100.0,      #no mass cuts here
+     MassMax                    = 100000.0,   #no mass cuts here
+     Chi2Max                    = 200)
+
+
    if not isSimulation: #Only Skim Data
         BPHY5_SelectBsJpsiKKEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(
           name = "BPHY5_SelectBsJpsiKKEvent",
@@ -327,9 +386,9 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
         for t in filterlist +[BPHY5SkimmingOR]: acc.addPublicTool(t)
 
    augTools =   [BPHY5JpsiSelectAndWrite,  BPHY5_Select_Jpsi2mumu, BPHY5_AugOriginalCounts]
-   if "Bs" in Decays : augTools += [BPHY5BsKKSelectAndWrite,  BPHY5_Select_Bs2JpsiKK]
+   if "Bs" in Decays : augTools += [BPHY5BsKKSelectAndWrite,  BPHY5_Select_Bs2JpsiKK, BPHY5_Revertex_Bs_NoMassConst, BPHY5_Select_Bs2JpsiKKNoConstraint]
    if "B+" in Decays : augTools += [BPHY5BplKplSelectAndWrite, BPHY5_Select_Bpl2JpsiKpl, BPHY5_Select_Bpl2JpsiPi]
-   if "BdKst" in Decays : augTools += [ BPHY5BdKstSelectAndWrite, BPHY5_Select_Bd2JpsiKst, BPHY5_Select_Bd2JpsiKstbar]
+   if "BdKst" in Decays : augTools += [ BPHY5BdKstSelectAndWrite, BPHY5_Select_Bd2JpsiKst, BPHY5_Select_Bd2JpsiKstbar, BPHY5_Revertex_Bd_NoMassConst, BPHY5_Select_BdBar2JpsiKpiNoConstraint, BPHY5_Select_Bd2JpsiKpiNoConstraint]
    if "BpipiX" in Decays : augTools+= [ BPHY5BpipiXSelectAndWrite, BPHY5_Select_B2JpsipipiX]
    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY5Kernel",
                                                     AugmentationTools = augTools,
@@ -396,7 +455,13 @@ def BPHY5Cfg(flags):
    
    StaticContent += ["xAOD::VertexContainer#%s"        %                 BdJpsiKstContainerName]
    StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BdJpsiKstContainerName]
-   
+
+   StaticContent += ["xAOD::VertexContainer#%sNoConstraint"        %                 BsJpsiPhiContainerName]
+   StaticContent += ["xAOD::VertexAuxContainer#%sNoConstraintAux.-vxTrackAtVertex" % BsJpsiPhiContainerName]
+
+   StaticContent += ["xAOD::VertexContainer#%sNoConstraint"        %                 BdJpsiKstContainerName]
+   StaticContent += ["xAOD::VertexAuxContainer#%sNoConstraintAux.-vxTrackAtVertex" % BdJpsiKstContainerName]
+
    # Tagging information (in addition to that already requested by usual algorithms)
    AllVariables += ["GSFTrackParticles",  "MuonSpectrometerTrackParticles" ]
    tagJetCollections = ['AntiKt4LCTopoJets', 'AntiKt4EMTopoJets', 'AntiKt4PV0TrackJets']

@@ -19,7 +19,7 @@ namespace LVL1 {
    *
    * \brief Interface for tools to convert any input to TOBs for topo steering
    */
-  class IInputTOBConverter : virtual public extend_interfaces1<IAlgTool> {
+  class IInputTOBConverter : virtual public extend_interfaces<IAlgTool> {
   public:
      DeclareInterfaceID(IInputTOBConverter, 0, 1);
 

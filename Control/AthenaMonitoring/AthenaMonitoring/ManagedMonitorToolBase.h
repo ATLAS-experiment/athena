@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ManagedMonitorToolBase_H
@@ -32,7 +32,6 @@
 class IInterface;
 class ISvcLocator;//not needed
 class TGraph;
-class LWHist;
 class TH1;
 class TH2;
 class TTree;
@@ -222,14 +221,14 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
 
 
             /**
-             * De-registers a TGraph from the THistSvc, but does NOT delete the object (also works for LWHists).
+             * De-registers a TGraph from the THistSvc, but does NOT delete the object.
              */
 
             StatusCode deregGraph( TGraph* g );
 
 
             /**
-             * De-registers a TObject from the THistSvc, but does NOT delete the object (also works for LWHists).
+             * De-registers a TObject from the THistSvc, but does NOT delete the object.
              */
 
             StatusCode deregObject( const std::string& objName );
@@ -240,30 +239,6 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
              */
 
             StatusCode deregAll();
-
-            /**
-             * Support for lightweight histograms (NB: The various
-             * deReg methods also work, but of course will just
-             * prevent the LWHist's from being dereg'ed later).
-             */
-            StatusCode regHist( LWHist* h );
-            /* 
-            template <class TLWHist>
-            StatusCode regHist( TLWHist*& h )
-            {
-               if( m_tool != 0 ) {
-                  std::string hName( h->GetName() );
-                  HistMapLW_t::value_type valToInsert( hName, h );//Fixme: Just keep a list of the hists
-                  m_mapLW.insert( valToInsert );
-                  return m_tool->regHist( h, *this );
-               }
-
-               return StatusCode::FAILURE;
-            } 
-            */          
-
-            StatusCode getHist( LWHist*& h, const std::string& hName );
-            StatusCode deregHist( LWHist* h );
 
 
             inline const std::string&  system()   const { return m_system; }
@@ -278,16 +253,13 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
              */
 
             typedef std::map<std::string,TH1*>  HistMap_t;
-            typedef std::map<std::string,LWHist*>  HistMapLW_t;
 
 
             /**
              * A map containing all histograms registered with this MonGroup.
-             * NB: Does not return LWHists (support for this could be added).
              */
 
             inline HistMap_t&          map()            { return m_map; }
-            inline HistMapLW_t&        mapLW()          { return m_mapLW; }
 
 	    //Copy and assignment constructors! To forbid eventually, but for now we monitor their usage:
             MonGroup( const MonGroup & o )
@@ -298,8 +270,7 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
                   m_histo_mgmt(o.m_histo_mgmt),
 		          m_chain(o.m_chain),
 		          m_merge(o.m_merge),
-		          m_map(o.m_map),
-		          m_mapLW(o.m_mapLW) 
+		          m_map(o.m_map)
                   { 
                       badusage(); 
                   }
@@ -315,7 +286,6 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
                 m_chain = o.m_chain;
                 m_merge = o.m_merge;
                 m_map = o.m_map;
-                m_mapLW = o.m_mapLW;
               }
               badusage();
 	      return *this;
@@ -331,7 +301,6 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
             std::string              m_chain;
             std::string              m_merge;
             HistMap_t                m_map;
-            HistMapLW_t              m_mapLW;
             static void badusage();
       };
 
@@ -449,12 +418,6 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
        */
 
       virtual StatusCode finalHists();
-
-
-      /**
-       * Deal with the LW histograms
-       */
-      virtual StatusCode convertLWHists();
 
 
       /**
@@ -584,27 +547,6 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
 
 
       /**
-       * Support for lightweight histograms:
-       */
-      
-      virtual StatusCode regHist( LWHist* h, const std::string& system,
-                                  Interval_t interval, MgmtAttr_t histo_mgmt = ATTRIB_MANAGED, const std::string& chain = "", const std::string& merge = "" );
-      virtual StatusCode regHist( LWHist* h, const MonGroup& group );
-      
-      /*
-      template <class TLWHist>
-      StatusCode regHist( TLWHist*& h,const std::string& system,
-                                                  Interval_t interval, MgmtAttr_t histo_mgmt, const std::string& chain, const std::string& merge );
-
-      template <class TLWHist>
-      StatusCode regHist( TLWHist*& h, const MonGroup& group );
-      */
-         
-      virtual StatusCode getHist( LWHist*& h, const std::string& hName, const std::string& system, Interval_t interval );
-      virtual StatusCode getHist( LWHist*& h, const std::string& hName, const MonGroup& group );
-      virtual StatusCode deregHist( LWHist* h );
-
-      /**
        * Write out histogram and delete it
        */
 
@@ -730,10 +672,6 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
       std::map< Interval_t, std::vector< MgmtParams<TTree> > > m_templateTrees;
       // Runs over the vector of managed trees, register clonned tree and saves it to a file.
       StatusCode regManagedTrees(std::vector< MgmtParams<TTree> >& templateTrees);
-
-      std::map< Interval_t, std::vector< MgmtParams<LWHist> > > m_templateLWHistograms;
-      // Runs over the vector of managed histograms and register them (just a helper method).
-      StatusCode regManagedLWHistograms(std::vector< MgmtParams<LWHist> >& templateLWHistograms);
 
       std::map< Interval_t, std::vector< MgmtParams<TEfficiency> > > m_templateEfficiencies;
       // Runs over the vector of managed graphs, register clonned graph and saves it to a file.
@@ -888,7 +826,6 @@ protected:
       typedef std::map<std::string,OutputMetadata*> MDMap_t;
       MDMap_t m_metadataMap;
 
-      std::set<LWHist*> m_lwhists;
       AthenaMonManager* m_manager;
 
       std::string  m_managerNameProp;

@@ -25,23 +25,23 @@ namespace DiTauMassTools{
   using ROOT::Math::XYVector;
   using ROOT::Math::VectorUtil::Phi_mpi_pi;
 
-namespace MaxHistStrategyV2
+namespace MaxHistStrategy
 {
   enum e { MAXBIN=0,MAXBINWINDOW, SLIDINGWINDOW, FIT,MAXMAXHISTSTRATEGY };
 }
 
-namespace HistInfoV2
+namespace HistInfo
 {
   enum e { PROB=0, INTEGRAL, CHI2, DISCRI, TANTHETA, TANTHETAW, FITLENGTH, RMS, RMSVSDISCRI, MEANBIN, MAXHISTINFO };
 }
 
-namespace MMCCalibrationSetV2
+namespace MMCCalibrationSet
 {
   enum e { MMC2015HIGHMASS=0, UPGRADE, LFVMMC2012, MMC2016MC15C, MMC2019, MAXMMCCALIBRATIONSET };
   const std::string name[MAXMMCCALIBRATIONSET]={ "MMC2015HIGHMASS", "UPGRADE", "LFVMMC2012", "MMC2016MC15C", "MMC2019"};
 }
 
-namespace MMCFitMethodV2
+namespace MMCFitMethod
 {
   enum e { MAXW=0, MLM, MLNU3P,MAX};
   const std::string name[MAX]={ "MAXW=MaximumWeight", "MLM=MostLikelyMass", "MLNU3P=MostLikelyNeUtrino3Momentum"};
@@ -85,7 +85,7 @@ double fixPhiRange (const double & phi);
 double MaxDelPhi(int tau_type, double Pvis, double dRmax_tau);
 int getLFVMode( const xAOD::IParticle* p1, const xAOD::IParticle* p2, int mmcType1, int mmcType2);
 int mmcType(const xAOD::IParticle* part); // returns particle type as required by MMC
-void readInParams(TDirectory* dir, MMCCalibrationSetV2::e aset, std::vector<TF1*>& lep_numass, std::vector<TF1*>& lep_angle, std::vector<TF1*>& lep_ratio, std::vector<TF1*>& had_angle, std::vector<TF1*>& had_ratio);
+void readInParams(TDirectory* dir, MMCCalibrationSet::e aset, std::vector<TF1*>& lep_numass, std::vector<TF1*>& lep_angle, std::vector<TF1*>& lep_ratio, std::vector<TF1*>& had_angle, std::vector<TF1*>& had_ratio);
 } // namespace DiTauMassTools
 
 #endif // not DITAUMASSTOOLS_HELPERFUNCTIONS_H

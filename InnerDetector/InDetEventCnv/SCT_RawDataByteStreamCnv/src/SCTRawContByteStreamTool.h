@@ -11,7 +11,7 @@
 #include "SCT_RawDataByteStreamCnv/ISCTRawContByteStreamTool.h"
 
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h"
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -61,7 +61,7 @@ class SCTRawContByteStreamTool : public extends<AthAlgTool, ISCTRawContByteStrea
   virtual StatusCode convert(const SCT_RDO_Container* sctRDOCont) const override;
   
  private:
-  ServiceHandle<ByteStreamCnvSvc> m_byteStreamCnvSvc
+  ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc
   { this, "ByteStreamCnvSvc", "ByteStreamCnvSvc" };
 
   /** Algorithm Tool to decode ROB bytestream data into RDO. */ 

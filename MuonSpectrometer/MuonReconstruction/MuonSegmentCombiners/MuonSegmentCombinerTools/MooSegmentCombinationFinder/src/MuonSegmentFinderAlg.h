@@ -35,7 +35,7 @@ private:
         "Muon::MuonIdHelperSvc/MuonIdHelperSvc",
     };
 
-    ToolHandle<Muon::MuonEDMPrinterTool> m_printer{
+    PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{
         this,
         "EDMPrinter",
         "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool",

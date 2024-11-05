@@ -31,9 +31,11 @@ def getmodule(modname):
     if (modname.endswith('GeV')
         or modname.endswith('TeV')
         or modname.endswith('_calib')
-        or modname.endswith('_comm')):
+        or modname.endswith('_comm')
+        or modname.endswith('_refcomm')):
         from . import base_data; return base_data
     if (modname.endswith('_hi')
+        or modname.endswith('_hicomm')
         or modname.endswith('_hip')):
         from . import base_data_hi; return base_data_hi
     elif (modname.endswith('_1beam') ):

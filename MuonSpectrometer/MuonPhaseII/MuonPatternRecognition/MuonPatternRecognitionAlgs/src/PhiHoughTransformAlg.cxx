@@ -10,8 +10,15 @@
 #include "MuonPatternHelpers/HoughHelperFunctions.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h" 
 #include "MuonSpacePoint/UtilFunctions.h"
+#include "EventPrimitives/EventPrimitivesHelpers.h"
+
+namespace {
+    constexpr double resetVal = 1.e10;
+}
+
 
 namespace MuonR4{
+using namespace SegmentFit;
 
 PhiHoughTransformAlg::PhiHoughTransformAlg(const std::string& name,
                                                    ISvcLocator* pSvcLocator)
@@ -95,15 +102,17 @@ void PhiHoughTransformAlg::preProcessMaximum(const ActsGeometryContext& gctx,
                                              HoughEventData& eventData) const{
     // reset the event data 
     eventData.phiHitsOnMax = 0; 
-    eventData.searchSpaceTanAngle = std::make_pair(1e10, -1e10); 
-    eventData.searchSpaceIntercept = std::make_pair(1e10, -1e10); 
+    eventData.searchSpaceTanAngle = std::make_pair(resetVal, -resetVal); 
+    eventData.searchSpaceIntercept = std::make_pair(resetVal, -resetVal); 
     // loop over the measurements on the maximum
     for (auto hit : maximum.getHitsInMax()) {
         // reject the pure eta measurements - not relevant here
-        if (!hit->measuresPhi())
+        if (!hit->measuresPhi()) {
             continue;
+        }
         // find the direction of the IP viewed from the sector frame 
-        Amg::Vector3D extrapDir = (hit->positionInChamber() - hit->msSector()->globalToLocalTrans(gctx).translation()).unit(); 
+        const Amg::Vector3D extrapDir = (hit->positionInChamber() - hit->msSector()->globalToLocalTrans(gctx).translation()).unit();
+        ATH_MSG_VERBOSE("Direction "<<Amg::toString(extrapDir));
         // express the x location of our phi hits on the chamber plane (z = 0) when projecting from the beam spot
         std::optional<double> dummyIntercept = Amg::intersect<3>(hit->positionInChamber(), extrapDir, Amg::Vector3D::UnitZ(),0); 
         double x0 = (hit->positionInChamber() + dummyIntercept.value_or(0) * extrapDir).x(); 
@@ -133,6 +142,8 @@ void PhiHoughTransformAlg::preProcessMaximum(const ActsGeometryContext& gctx,
     // and update the axis ranges for the search space according to our results
     eventData.currAxisRanges =
     Acts::HoughTransformUtils::HoughAxisRanges{searchStartTanPhi, searchEndTanPhi, searchStart, searchEnd};
+    ATH_MSG_VERBOSE("Accumulator search window: tanPhi: ["<<searchStartTanPhi<<";"<<searchEndTanPhi<<"], x0: ["
+                <<searchStart<<";"<<searchEnd<<"]");
 }
 
 std::vector<ActsPeakFinderForMuon::Maximum> 
@@ -144,8 +155,11 @@ std::vector<ActsPeakFinderForMuon::Maximum>
     eventData.houghPlane->reset();
     // fill the accumulator with the phi measurements   
     for (auto hit : maximum.getHitsInMax()){
-        if (!hit->measuresPhi())
+        if (!hit->measuresPhi()) {
+            ATH_MSG_VERBOSE("Hit "<<hit->msSector()->idHelperSvc()->toString(hit->identify())<<" does not have a phi measurement");
             continue;
+        }
+        ATH_MSG_VERBOSE("Fill hit "<<hit->msSector()->idHelperSvc()->toString(hit->identify())<<", "<<Amg::toString(hit->positionInChamber()));
         eventData.houghPlane->fill<HoughHitType>(
             hit, eventData.currAxisRanges,
             HoughHelpers::Phi::houghParamStrip,
@@ -212,6 +226,15 @@ StatusCode PhiHoughTransformAlg::execute(const EventContext& ctx) const {
     // loop over the previously found eta-maxima for each station
     for (const HoughMaximum* max : *maxima) {
         // for each maximum, pre-process 
+        ATH_MSG_VERBOSE("Search extra phi hits on maximum "<<max->msSector()->identString()<<", tanTheta: "<<max->tanTheta()
+                     <<", y0: "<<max->interceptY());
+        if (m_visionTool.isEnabled() && msgLvl(MSG::VERBOSE)) {
+            for (const auto& truth : m_visionTool->fetchTruthSegs(max->getHitsInMax())) {
+                Parameters truthPars = localSegmentPars(*truth);
+                ATH_MSG_VERBOSE("Truth parameters "<<toString(truthPars)<<", tanPhi: "
+                            <<houghTanPhi(dirFromAngles(truthPars[toInt(ParamDefs::phi)],truthPars[toInt(ParamDefs::theta)])));
+            }
+        }
         preProcessMaximum(*gctx, *max, eventData); 
         bool foundSolution=false; 
         // if we have enough hits, run a phi transform 
@@ -225,6 +248,7 @@ StatusCode PhiHoughTransformAlg::execute(const EventContext& ctx) const {
                 }  
             }
         }
+        ATH_MSG_VERBOSE("Solution found: "<<foundSolution);
         // if we do not have at least two phi-hits for a proper transform: 
         if (!foundSolution){
             // if we have a single phi hit, we can approximate the phi 

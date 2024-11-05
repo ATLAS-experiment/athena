@@ -8,7 +8,7 @@
 # This Job option:
 # ----------------
 # 1. Reads the data (EventInfo, ExampleHits) from the SimplePoolFile1.root file
-#    that has been written with the AthneaPoolExample_Write.py
+#    that has been written with the AthenaPoolExample_Write.py
 # 2. Writes SimplePoolFile3.root file with ExampleTracks using ReWriteData algorithm
 # ------------------------------------------------------------
 
@@ -42,7 +42,7 @@ acc.merge( AthenaPoolExampleWriteCfg( flags, streamName,
                                       writeCatalog = "file:Catalog1.xml",
                                       disableEventTag = noTag ) )
 
-# Creata and attach the algorithms
+# Create and attach the algorithms
 acc.addEventAlgo( CompFactory.AthPoolEx.ReadData("ReadData", OutputLevel = DEBUG) )
 acc.addEventAlgo( CompFactory.AthPoolEx.ReWriteData("ReWriteData", OutputLevel = DEBUG) )
 
@@ -76,9 +76,3 @@ stream.HelperTools[0].OutputLevel = 3
 import sys
 sc = acc.run(flags.Exec.MaxEvents)
 sys.exit(sc.isFailure())
-
-
-
-
-
-

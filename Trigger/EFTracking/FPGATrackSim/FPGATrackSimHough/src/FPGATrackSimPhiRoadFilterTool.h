@@ -21,6 +21,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimVectors.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
+#include "FPGATrackSimObjects/FPGATrackSimFunctions.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFilterTool.h"
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"

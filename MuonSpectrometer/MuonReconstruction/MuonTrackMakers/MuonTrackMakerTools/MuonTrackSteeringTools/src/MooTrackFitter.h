@@ -1,13 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
 #ifndef MUON_MOOTRACKFITTER_H
 #define MUON_MOOTRACKFITTER_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 
 // Misc
 #include "TrkGeometry/MagneticFieldProperties.h"
@@ -276,7 +273,7 @@ namespace Muon {
         ServiceHandle<IMuonEDMHelperSvc> m_edmHelperSvc{
             this, "edmHelper", "Muon::MuonEDMHelperSvc/MuonEDMHelperSvc",
             "Handle to the service providing the IMuonEDMHelperSvc interface"};  //!< multi purpose helper tool
-        ToolHandle<MuonEDMPrinterTool> m_printer{this, "MuonPrinterTool",
+        PublicToolHandle<MuonEDMPrinterTool> m_printer{this, "MuonPrinterTool",
                                                  "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};  //!< tool to print out EDM objects
         ToolHandle<IMuonTrackToSegmentTool> m_trackToSegmentTool{
             this, "TrackToSegmentTool",

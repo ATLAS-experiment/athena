@@ -72,7 +72,7 @@ namespace MuonCombined {
         ServiceHandle<Muon::IMuonEDMHelperSvc> m_edmHelperSvc{this, "edmHelper", "Muon::MuonEDMHelperSvc/MuonEDMHelperSvc",
                                                               "Handle to the service providing the IMuonEDMHelperSvc interface"};
 
-        ToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
+        PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
         ToolHandle<IMuTagMatchingTool> m_MuTagMatchingTool{this, "MuTagMatchingTool", "MuTagMatchingTool/MuTagMatchingTool"};
         ToolHandle<IMuTagAmbiguitySolverTool> m_MuTagAmbiguitySolverTool{this, "MuTagAmbiguitySolverTool",
                                                                          "MuTagAmbiguitySolverTool/MuTagAmbiguitySolverTool"};

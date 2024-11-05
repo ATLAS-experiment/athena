@@ -1,15 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuTagAmbiguitySolverTool_H
 #define MuTagAmbiguitySolverTool_H
 
-#include <string>
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "MuonCombinedEvent/MuonSegmentInfo.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRecHelperTools/IMuonEDMHelperSvc.h"
@@ -18,18 +15,13 @@
 #include "MuonSegmentTaggerToolInterfaces/IMuTagAmbiguitySolverTool.h"
 #include "TrkSegment/SegmentCollection.h"
 
-/**
-   @class MuTagAmbiguitySolverTool
-
-   @author Zdenko.van.Kesteren@cern.ch
-
-*/
+/** @class MuTagAmbiguitySolverTool */
 
 namespace Muon {
     class MuonSegment;
 }
 
-class MuTagAmbiguitySolverTool : virtual public IMuTagAmbiguitySolverTool, public AthAlgTool {
+class MuTagAmbiguitySolverTool :  public extends<AthAlgTool, IMuTagAmbiguitySolverTool> {
 public:
     MuTagAmbiguitySolverTool(const std::string& t, const std::string& n, const IInterface* p);
     virtual ~MuTagAmbiguitySolverTool() = default;
@@ -57,22 +49,21 @@ private:
         "Muon::MuonIdHelperSvc/MuonIdHelperSvc",
     };
 
-    ToolHandle<Muon::MuonEDMPrinterTool> p_muonPrinter{
-        this,
-        "Printer",
-        "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool",
-    };  //!< Pointer on MuonEDMPrinterTool
-    ToolHandle<Muon::IMuonSegmentMatchingTool> p_segmentMatchingTool{
+    PublicToolHandle<Muon::MuonEDMPrinterTool> m_muonPrinter{this,"Printer", ""};  //!< Pointer on MuonEDMPrinterTool
+    ToolHandle<Muon::IMuonSegmentMatchingTool> m_segmentMatchingTool{
         this,
         "MuonSegmentMatchingTool",
         "Muon::MuonSegmentMatchingTool/MuonSegmentMatchingTool",
     };  //!< Pointer on MuonSegmentMatchingTool
 
-    bool m_hitOverlapMatching;  //!< check hit overlap of segments in ambi solving
-    bool m_slOverlapMatching;   //!< for segments in a SL overlap in the same station layer, check whether from same
-                                //!< particle
-    bool m_rejectOuterEndcap;   //!< reject Endcap Outer one station layer tags (without EI or EM)
-    bool m_rejectMatchPhi;      //!< reject one station tags with phi hits and a fabs(MatchPhi = minPullPhi) > 3
+    //!< check hit overlap of segments in ambi solving
+    Gaudi::Property<bool> m_hitOverlapMatching{this, "DoHitOverlapMatching", true};
+    //!< for segments in a SL overlap in the same station layer, check whether from same particle
+    Gaudi::Property<bool> m_slOverlapMatching{"ResolveSLOverlaps",  false};
+    //!< reject Endcap Outer one station layer tags (without EI or EM)
+    Gaudi::Property<bool> m_rejectOuterEndcap{this, "RejectOuterEndcap", true};
+    //!< reject one station tags with phi hits and a fabs(MatchPhi = minPullPhi) > 3
+    Gaudi::Property<bool> m_rejectMatchPhi{this, "RejectMatchPhi",  true};
 };
 
 #endif  // MuTagAmbiguitySolverTool_H

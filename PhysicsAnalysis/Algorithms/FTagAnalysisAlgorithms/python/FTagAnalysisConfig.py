@@ -21,11 +21,11 @@ class FTagConfig (ConfigBlock):
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as internally the string "
             "f'{btagger}_{btagWP}' is used.")
-        self.addOption ('btagWP', "FixedCutBEff_77", type=str,
-            info="the flavour tagging WP. The default is FixedCutBEff_77.")
-        self.addOption ('btagger', "DL1r", type=str,
+        self.addOption ('btagWP', "Continuous", type=str,
+            info="the flavour tagging WP. The default is Continuous.")
+        self.addOption ('btagger', "GN2v01", type=str,
             info="the flavour tagging algorithm: DL1dv01, GN2v01. The default "
-            "is DL1r.")
+            "is GN2v01.")
         self.addOption ('generator', "autoconfig", type=str,
             info="MC generator setup, for MC/MC SFs. The default is 'autoconfig'"
             " (relies on the sample metadata).")
@@ -120,6 +120,10 @@ class FTagConfig (ConfigBlock):
             config.addSelection (self.containerName, selectionName, alg.selectionDecoration)
 
         if not self.noEffSF and config.dataType() is not DataType.Data:
+            if 'FixedCutBEff' in self.btagWP:
+                raise ValueError('FTAG calibration is only available for Continuous WP. '
+                                 'Please configure the Continuous btagWP in addition to the FixedCutBEff one to retrieve scale factors')
+
             # Set up the efficiency calculation algorithm:
             alg = config.createAlgorithm( 'CP::BTaggingEfficiencyAlg',
                                           'FTagEfficiencyScaleFactorAlg' + postfix )

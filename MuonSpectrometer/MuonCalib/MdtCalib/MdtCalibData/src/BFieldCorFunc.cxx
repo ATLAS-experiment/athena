@@ -105,9 +105,7 @@ void BFieldCorFunc::init(const std::string &quality, const CalibFunc::ParVec &pa
     }
 
     // perform the fit //
-    if (fitter.fit_parameters(sample_points, 1, nb_points, &legendre)) {
-        THROW_EXCEPTION("Unable to fit the integral in the correction!");
-    }
+    fitter.fit_parameters(sample_points, 1, nb_points, legendre);
     m_alpha = fitter.coefficients();
 
 }  // end BFieldCorFunc::init

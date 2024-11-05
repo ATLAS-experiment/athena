@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -15,6 +15,8 @@
 
 #include <TClass.h>
 #include <TF1.h>
+#include <TH1.h>
+
 
 #include "dqm_core/exceptions.h"
 #include "dqm_core/AlgorithmConfig.h"
@@ -22,6 +24,7 @@
 #include "dqm_core/Result.h"
 #include "dqm_algorithms/tools/AlgorithmHelper.h"
 #include "ers/ers.h"
+
 
 
 namespace

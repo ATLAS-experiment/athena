@@ -40,7 +40,7 @@ namespace D3PD {
  * interface.
  */       
 class BlockFillerToolImpl
-  : public extends1<AthAlgTool, IBlockFillerTool>, public AddVariable
+  : public extends<AthAlgTool, IBlockFillerTool>, public AddVariable
 {
 public:
   /**

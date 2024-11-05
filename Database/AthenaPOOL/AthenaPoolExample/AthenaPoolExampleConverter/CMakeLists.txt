@@ -16,8 +16,9 @@ atlas_add_library( AthenaPoolExampleConverter
                    PRIVATE_LINK_LIBRARIES AthenaPoolCnvSvcLib )
 
 atlas_add_poolcnv_library( AthenaPoolExampleConverterPoolCnv
-                           FILES AthenaPoolExampleData/ExampleHitContainer.h AthenaPoolExampleData/ExampleTrackContainer.h
-                           LINK_LIBRARIES AthenaPoolExampleConverter )
+			   FILES AthenaPoolExampleData/ExampleHitContainer.h AthenaPoolExampleData/ExampleTrackContainer.h AthenaPoolExampleData/ExampleElectron.h AthenaPoolExampleData/ExampleElectronContainer.h AthenaPoolExampleData/ExampleElectronAuxContainer.h
+			   TYPES_WITH_NAMESPACE xAOD::ExampleElectron xAOD::ExampleElectronContainer xAOD::ExampleElectronAuxContainer
+			   LINK_LIBRARIES AthenaPoolExampleConverter )
 
 atlas_add_dictionary( AthenaPoolExampleConverterDict
                       AthenaPoolExampleConverter/AthenaPoolExampleConverterDict.h

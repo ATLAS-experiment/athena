@@ -59,5 +59,12 @@ bool RNTupleAuxDynStore::readData(SG::auxid_t auxid)
       ATHCONTAINERS_ERROR("RNTupleAuxDynStore::getData", e_str);
       return false;
    }
+
+   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+   SG::auxid_t linked_auxid = r.linkedVariable (auxid);
+   if (linked_auxid != SG::null_auxid) {
+     return readData (linked_auxid);
+   }
+
    return true;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibData/MdtCorFuncSet.h"
@@ -9,13 +9,11 @@ namespace MuonCalib {
     MdtCorFuncSet::MdtCorFuncSet(std::unique_ptr<IMdtSlewCorFunc>&& s, 
                                  std::unique_ptr<IMdtBFieldCorFunc>&& bf, 
                                  std::unique_ptr<IMdtTempCorFunc>&& t, 
-                                 std::unique_ptr<IMdtBackgroundCorFunc>&& bg,
-                                 std::unique_ptr<IMdtWireSagCorFunc>&& w) :
+                                 std::unique_ptr<IMdtBackgroundCorFunc>&& bg) :
     m_slewing(std::move(s)), 
     m_bField(std::move(bf)), 
     m_temperature(std::move(t)), 
-    m_background(std::move(bg)), 
-    m_wireSag(std::move(w)) {}
+    m_background(std::move(bg)) {}
 
 
     void MdtCorFuncSet::setSlewing(std::unique_ptr<IMdtSlewCorFunc>&& slew) {
@@ -29,8 +27,5 @@ namespace MuonCalib {
     }
     void MdtCorFuncSet::background(std::unique_ptr<IMdtBackgroundCorFunc>&& background) {
         m_background = std::move(background);
-    }
-    void MdtCorFuncSet::wireSag(std::unique_ptr<IMdtWireSagCorFunc>&& wireSag) {
-        m_wireSag = std::move(wireSag);
     }
 }  // namespace MuonCalib

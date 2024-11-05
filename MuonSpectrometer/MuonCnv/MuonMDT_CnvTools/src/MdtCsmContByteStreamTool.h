@@ -6,7 +6,7 @@
 #define MUONMDT_CNVTOOLS_MDTCSMCONTRAWEVENTTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h"
 #include "ByteStreamData/RawEvent.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -49,7 +49,7 @@ namespace Muon {
 
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-        ServiceHandle<ByteStreamCnvSvc> m_byteStreamCnvSvc{this, "ByteStreamCnvSvc", "ByteStreamCnvSvc"};
+        ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc{this, "ByteStreamCnvSvc", "ByteStreamCnvSvc"};
     };
 
 }  // namespace Muon

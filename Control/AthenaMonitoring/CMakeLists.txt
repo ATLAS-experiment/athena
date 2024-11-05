@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaMonitoring )
@@ -34,7 +34,6 @@ atlas_add_library(
         SGAudCore
         StoreGateLib
         AthenaPoolUtilities
-        LWHists
         MuonAlignmentData
         InDetReadoutGeometry
         MuonAlignmentData
@@ -48,7 +47,6 @@ atlas_add_component(
         ${CORAL_INCLUDE_DIRS}
     LINK_LIBRARIES
         AthenaMonitoringLib
-        LWHists
         SGAudCore
         MuonAlignmentData
 )

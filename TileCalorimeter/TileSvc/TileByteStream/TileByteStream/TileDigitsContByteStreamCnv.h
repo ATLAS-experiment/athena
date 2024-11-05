@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -19,11 +19,10 @@
 class DataObject;
 class StatusCode;
 class IAddressCreator;
-class IByteStreamEventAccess;
-class MsgStream; 
+class MsgStream;
 class TileDigitsContainer; 
 class TileDigitsContByteStreamTool;
-class ByteStreamCnvSvc; 
+class IByteStreamCnvSvc;
 class IROBDataProviderSvc; 
 class TileHid2RESrcID;
 class TileROD_Decoder;
@@ -65,9 +64,8 @@ class TileDigitsContByteStreamCnv
     //    BYTESTREAMTOOL* m_tool ;
     ToolHandle<TileDigitsContByteStreamTool> m_tool;
     
-    ServiceHandle<IByteStreamEventAccess> m_byteStreamEventAccess;
-    ByteStreamCnvSvc* m_byteStreamCnvSvc;
-    
+    ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc;
+
     /** Pointer to IROBDataProviderSvc */
     ServiceHandle<IROBDataProviderSvc> m_robSvc;
     

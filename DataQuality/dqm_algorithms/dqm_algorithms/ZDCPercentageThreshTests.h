@@ -14,7 +14,9 @@
 #include "dqm_core/Algorithm.h"
 #include <string>
 #include <iosfwd>
-#include <TH1.h>
+
+class TH1;
+class TObject;
 
 
 namespace dqm_algorithms {
@@ -29,15 +31,15 @@ public:
     virtual dqm_core::Result*     execute( const std::string& name, const TObject& data, const dqm_core::AlgorithmConfig& config );
     double calculatePercentage(const TH1 * hist, dqm_core::Result * result);
     using dqm_core::Algorithm::printDescription;
-    virtual void                  printDescription(std::ostream& out);
+    virtual void printDescription(std::ostream& out);
 
 private:
     std::string  m_name;
-    double m_minstat;
-    double m_thresh;
-    double m_greenTh;
-    double m_redTh;
-    int m_binNum;
+    double m_minstat{};
+    double m_thresh{};
+    double m_greenTh{};
+    double m_redTh{};
+    int m_binNum{};
 
 
 };

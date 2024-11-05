@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
-# This package is a collection of 'duel-use' tools to calculate
+# This package is a collection of 'dual-use' tools to calculate
 # high-level flavor tagging discriminants. Because it should work both
 # inside and outside Athena, nothing here can use the magnetic field,
 # atlas geometry, or material maps, but neural networks etc are all

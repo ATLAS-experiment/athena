@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
         FILE *f = fopen(filename.c_str(), "r");
         if (f==nullptr)
         {
-            printf("file %s missing\n", filename.c_str());
+            fprintf(stderr," - file %s missing\n", filename.c_str());
             exit(1);
         }
         int tmp[10];
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     FILE *fout = fopen(argv[1], "w"); // The output merged file.
     if (fout == nullptr)
     {
-        printf("could not open file %s for writing, EXIT", argv[1]);
+        fprintf(stderr,"could not open file %s for writing, EXIT", argv[1]);
         exit(1);
     }
     printf("writing to merged file: %s\n", argv[1]);

@@ -264,6 +264,7 @@ if ( True ) :
     #"HLT_mb.*:HLT_IDTrack_Cosmic_EFID",
     #"HLT_mb.*:HLT_IDTrack_MinBias_FTF",  #There are no tracks here
     "HLT_mb.*:HLT_IDTrack_MinBias_IDTrig",
+    "HLT_mb.*:HLT_IDTrack_MinBiasPixel_IDTrig",
     #"HLT_mb.*:HLT_IDTrack_MinBias_EFID"  #There are no tracks here
     
     "HLT_2mu4_bBmumux_BsmumuPhi_L12MU3V:HLT_IDTrack_Bmumux_FTF",

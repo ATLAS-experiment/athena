@@ -631,7 +631,7 @@ bool RtCalibrationCurved::analyse(const MuonSegVec &seg) {
         }
 
         // create the new r-t relationship //
-        fitter.fit_parameters(x_r, 1, nb_points + 1, &chebyshev);
+        fitter.fit_parameters(x_r, 1, nb_points + 1, chebyshev);
         rt_param[0] = rt_Chebyshev->tLower();
         rt_param[1] = rt_Chebyshev->tUpper();
         for (unsigned int k = 0; k < rt_Chebyshev->numberOfRtParameters(); k++) { rt_param[k + 2] = fitter.coefficients()[k]; }

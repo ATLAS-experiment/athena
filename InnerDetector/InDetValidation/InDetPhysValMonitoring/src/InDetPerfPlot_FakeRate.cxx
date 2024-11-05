@@ -8,9 +8,10 @@
 #include "xAODTruth/TruthVertex.h"
 #include "InDetPhysValMonitoringUtilities.h"
 #include <cmath>
+#include <regex>
 using namespace IDPVM;
 
-InDetPerfPlot_FakeRate::InDetPerfPlot_FakeRate(InDetPlotBase* pParent, const std::string& sDir) :
+InDetPerfPlot_FakeRate::InDetPerfPlot_FakeRate(InDetPlotBase* pParent, const std::string& sDir, bool useUnlinked) :
   InDetPlotBase(pParent, sDir),
   m_fakerate_vs_eta{},
   m_fakerate_vs_pt{},
@@ -18,8 +19,20 @@ InDetPerfPlot_FakeRate::InDetPerfPlot_FakeRate(InDetPlotBase* pParent, const std
   m_fakerate_vs_phi{},
   m_fakerate_vs_d0{},
   m_fakerate_vs_z0{},
-  m_fakerate_vs_mu{} {
+  m_fakerate_vs_mu{},
+  m_useUnlinked{useUnlinked} {
   // nop
+}
+
+void unlinked_ylabel(TEfficiency *teff)
+{
+    if (teff) {
+	std::string title = std::regex_replace(teff->GetTitle(), std::regex("linked"), "unlinked");
+	std::string xlabel = teff->GetTotalHistogram()->GetXaxis()->GetTitle();
+	std::string ylabel = std::regex_replace(teff->GetTotalHistogram()->GetYaxis()->GetTitle(), std::regex("linked"), "unlinked");
+	std::string s = title + ";" + xlabel + ";" + ylabel;
+	teff->SetTitle(s.c_str());
+    }
 }
 
 void
@@ -33,6 +46,15 @@ InDetPerfPlot_FakeRate::initializePlots() {
   book(m_fakerate_vs_z0, "fakerate_vs_z0");
   book(m_fakerate_vs_mu, "fakerate_vs_mu");
 
+  if (m_useUnlinked) {
+      unlinked_ylabel(m_fakerate_vs_eta);
+      unlinked_ylabel(m_fakerate_vs_pt);
+      unlinked_ylabel(m_fakerate_vs_lowpt);
+      unlinked_ylabel(m_fakerate_vs_phi);
+      unlinked_ylabel(m_fakerate_vs_d0);
+      unlinked_ylabel(m_fakerate_vs_z0);
+      unlinked_ylabel(m_fakerate_vs_mu);
+  }
 }
 
 void

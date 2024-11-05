@@ -6,10 +6,10 @@
 
 namespace AthOnnx {
   OnnxRuntimeSvc::OnnxRuntimeSvc(const std::string& name, ISvcLocator* svc) :
-      asg::AsgService(name, svc)
+      base_class(name, svc)
    {
-     declareServiceInterface<AthOnnx::IOnnxRuntimeSvc>();
    }
+
    StatusCode OnnxRuntimeSvc::initialize() {
 
       // Create the environment object.

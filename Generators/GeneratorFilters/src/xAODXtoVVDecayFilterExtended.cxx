@@ -12,6 +12,8 @@ xAODXtoVVDecayFilterExtended::xAODXtoVVDecayFilterExtended(const std::string &na
     declareProperty("PDGParent", m_PDGParent);
     declareProperty("PDGChild1", m_PDGChild1);
     declareProperty("PDGChild2", m_PDGChild2);
+    declareProperty("UseStatusParent", m_UseStatusParent);
+    declareProperty("StatusParent", m_StatusParent);
 
     // initialize member variables (to make Coverity tool happy...)
     m_nHtoVV = 0;
@@ -30,6 +32,8 @@ StatusCode xAODXtoVVDecayFilterExtended::filterInitialize()
         ATH_MSG_INFO("PDGChild1[" << i << "] = " << m_PDGChild1[i]);
     for (size_t i = 0; i < m_PDGChild2.size(); ++i)
         ATH_MSG_INFO("PDGChild2[" << i << "] = " << m_PDGChild2[i]);
+    ATH_MSG_INFO("UseStatusParent  " << m_UseStatusParent);
+    ATH_MSG_INFO("StatusParent  " << m_StatusParent);
 
     // init
     m_nHtoVV = 0;
@@ -69,8 +73,9 @@ StatusCode xAODXtoVVDecayFilterExtended::filterEvent()
         for (unsigned int iPart = 0; iPart < nPart; ++iPart)
         {
             const xAOD::TruthParticle *pitr = (*itr)->truthParticle(iPart);
-            if (std::abs(pitr->pdgId()) == m_PDGParent && MC::isDecayed(pitr))
+            if (std::abs(pitr->pdgId()) == m_PDGParent)
             {
+                if((!m_UseStatusParent && !MC::isDecayed(pitr)) || (m_UseStatusParent && pitr->status() != m_StatusParent)) continue;
                 bool isGrandParentOK = RunHistory(pitr);
                 ATH_MSG_DEBUG(" Grand Parent is OK? " << isGrandParentOK);
                 if (!isGrandParentOK)

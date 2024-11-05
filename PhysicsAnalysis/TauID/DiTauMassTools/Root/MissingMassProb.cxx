@@ -212,7 +212,7 @@ void MissingMassProb::setParamRatio(int tau, int tautype) {
 }
 
 // Default Constructor
-MissingMassProb::MissingMassProb(MMCCalibrationSetV2::e aset, const std::string& paramFilePath) {
+MissingMassProb::MissingMassProb(MMCCalibrationSet::e aset, const std::string& paramFilePath) {
   m_mmcCalibrationSet = aset;
   m_allowUseHT = false;
   m_UseHT = false;
@@ -222,7 +222,7 @@ MissingMassProb::MissingMassProb(MMCCalibrationSetV2::e aset, const std::string&
      std::string total_path = "DiTauMassTools/"+paramFilePath;
      m_fParams = TFile::Open( (const char*) PathResolverFindCalibFile(total_path).c_str() ,"READ");
   }
-  if (aset == MMCCalibrationSetV2::MMC2019) {
+  if (aset == MMCCalibrationSet::MMC2019) {
     m_probListConstant.push_back( std::bind(&mEtAndTauProbabilityWrapper, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7) );
     m_probListOneTau.push_back( std::bind(&dTheta3d_probabilityNewWrapper, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7) );
     m_probListTwoTau.push_back( std::bind(&TauProbabilityNewWrapper, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7) );
@@ -1054,10 +1054,10 @@ double MissingMassProb::dTheta3d_probabilityFast(MissingMassInput& preparedInput
 
   for (int i=0;i<6;++i)
     {
-      if(m_mmcCalibrationSet==MMCCalibrationSetV2::UPGRADE
-         || m_mmcCalibrationSet==MMCCalibrationSetV2::LFVMMC2012
-	 || m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C
-         || m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS)
+      if(m_mmcCalibrationSet==MMCCalibrationSet::UPGRADE
+         || m_mmcCalibrationSet==MMCCalibrationSet::LFVMMC2012
+	 || m_mmcCalibrationSet==MMCCalibrationSet::MMC2016MC15C
+         || m_mmcCalibrationSet==MMCCalibrationSet::MMC2015HIGHMASS)
         myDelThetaParam[i]=dTheta3Dparam(i,tau_code,P_tau,s_fit_param[1][tau_code][i]);
     }
   double dTheta3dVal=dTheta3d;
@@ -1093,10 +1093,10 @@ double MissingMassProb::myDelThetaHadFunc(double *x, double *par)
   const double mpv=par[3];
   const double sigmaL=par[4];
 
-  if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS
-      || m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C
-      || m_mmcCalibrationSet==MMCCalibrationSetV2::UPGRADE
-      || m_mmcCalibrationSet==MMCCalibrationSetV2::LFVMMC2012){
+  if (m_mmcCalibrationSet==MMCCalibrationSet::MMC2015HIGHMASS
+      || m_mmcCalibrationSet==MMCCalibrationSet::MMC2016MC15C
+      || m_mmcCalibrationSet==MMCCalibrationSet::UPGRADE
+      || m_mmcCalibrationSet==MMCCalibrationSet::LFVMMC2012){
     const double norm=sqrt(2.0*TMath::Pi());
     const double g1=TMath::Gaus(arg,mean,sigmaG)/norm;
     const double g2=TMath::Landau(arg_L,mpv,sigmaL)/norm;
@@ -1138,18 +1138,18 @@ double MissingMassProb::dTheta3Dparam(const int & parInd, const int & tau_type, 
 
 
   if(parInd==0) {
-    if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS
-	|| m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C
-	|| m_mmcCalibrationSet==MMCCalibrationSetV2::UPGRADE
-	|| m_mmcCalibrationSet==MMCCalibrationSetV2::LFVMMC2012){
+    if (m_mmcCalibrationSet==MMCCalibrationSet::MMC2015HIGHMASS
+	|| m_mmcCalibrationSet==MMCCalibrationSet::MMC2016MC15C
+	|| m_mmcCalibrationSet==MMCCalibrationSet::UPGRADE
+	|| m_mmcCalibrationSet==MMCCalibrationSet::LFVMMC2012){
       return (par[0]+par[1]*P_tau+par[2]*pow(P_tau,2)+par[3]*pow(P_tau,3)+par[4]*pow(P_tau,4))*0.00125;
     }
   }
   else { // parInd==0
-    if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS
-	|| m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C
-	|| m_mmcCalibrationSet==MMCCalibrationSetV2::UPGRADE
-	|| m_mmcCalibrationSet==MMCCalibrationSetV2::LFVMMC2012){
+    if (m_mmcCalibrationSet==MMCCalibrationSet::MMC2015HIGHMASS
+	|| m_mmcCalibrationSet==MMCCalibrationSet::MMC2016MC15C
+	|| m_mmcCalibrationSet==MMCCalibrationSet::UPGRADE
+	|| m_mmcCalibrationSet==MMCCalibrationSet::LFVMMC2012){
       if(tau_type==0) return par[0]*(exp(-par[1]*P_tau)+par[2]/P_tau)+par[3]+par[4]*P_tau;
       else return par[0]*(exp(-par[1]*sqrt(P_tau))+par[2]/P_tau)+par[3]+par[4]*P_tau;
     }
@@ -1161,7 +1161,7 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
   // compute MET resolution (eventually use HT)
   if(preparedInput.m_METsigmaP<0.1 || preparedInput.m_METsigmaL<0.1)
     {
-      if(m_mmcCalibrationSet==MMCCalibrationSetV2::LFVMMC2012)
+      if(m_mmcCalibrationSet==MMCCalibrationSet::LFVMMC2012)
         {
           if(preparedInput.m_fUseVerbose==1) { Info("DiTauMassTools", "Attempting to set LFV MMC settings"); }
           double mT1 = mT(preparedInput.m_vistau1,preparedInput.m_MetVec);
@@ -1276,8 +1276,8 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                   if(preparedInput.m_Njet25==0)//0-jet
                     {
                       // placeholder for 2019 tune
-                      if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C ||
-			  m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2019){
+                      if (m_mmcCalibrationSet==MMCCalibrationSet::MMC2016MC15C ||
+			  m_mmcCalibrationSet==MMCCalibrationSet::MMC2019){
                         if(preparedInput.m_MetVec.R()<20.0) // 0-jet low MET case
                           {
                             if(std::abs(preparedInput.m_DelPhiTT)>2.95 && m_allowUseHT) // use mHt only if dPhi(lep-tau)>2.95
@@ -1324,7 +1324,7 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                           } // high MET
                       } // MMC2016MC15C or MMC2019
                       // 2015 high-mass tune; avergare MET resolution for Mh=600,1000 mass points
-                      else if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS)
+                      else if (m_mmcCalibrationSet==MMCCalibrationSet::MMC2015HIGHMASS)
                         {
                           m_UseHT = false;
                           double sigmaSyst = 0.10; // 10% systematics for now (be conservative)
@@ -1341,7 +1341,7 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                       double sigmaSyst=0.10; // 10% systematics for now (be conservative)
                       double sigma=0.;
                       // 2015 high-mass tune; average MET resolution for Mh=400,600 mass points (they look consistent);
-                      if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS)
+                      if (m_mmcCalibrationSet==MMCCalibrationSet::MMC2015HIGHMASS)
                         {
                           double METresScale=0.86*(1.0+preparedInput.m_METresSyst*sigmaSyst);
                           double METoffset=3.0*(1.0+preparedInput.m_METresSyst*sigmaSyst);
@@ -1349,8 +1349,8 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                           sigma= preparedInput.m_SumEt>0.0 ? METoffset+METresScale*sqrt(preparedInput.m_SumEt) : METoffset;
                         }
                       //2016 mc15c or 2019
-		      else if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C ||
-			       m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2019)
+		      else if (m_mmcCalibrationSet==MMCCalibrationSet::MMC2016MC15C ||
+			       m_mmcCalibrationSet==MMCCalibrationSet::MMC2019)
                         {
 			  double x = preparedInput.m_DelPhiTT;
 			  double dphi_scale = x > 0.3 ? 0.9429 - 0.059*x + 0.054*x*x : 0.728;
@@ -1373,7 +1373,7 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
 	      //HAD-HAD
               else if(preparedInput.m_tauTypes==TauTypes::hh) // had-had events
                 {
-                  if(preparedInput.m_Njet25==0 && m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS) //0-jet high mass hadhad
+                  if(preparedInput.m_Njet25==0 && m_mmcCalibrationSet==MMCCalibrationSet::MMC2015HIGHMASS) //0-jet high mass hadhad
                     {
                       // 2015 high-mass tune; average of all mass points
                       //                      double METresScale=-1.;
@@ -1388,8 +1388,8 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
 
                     }
                   else if(preparedInput.m_Njet25==0 &&
-			  (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C ||
-			   m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2019))
+			  (m_mmcCalibrationSet==MMCCalibrationSet::MMC2016MC15C ||
+			   m_mmcCalibrationSet==MMCCalibrationSet::MMC2019))
                     {
                       double sigmaSyst=0.10; // 10% systematics for now (be conservative)
                       double x = preparedInput.m_DelPhiTT;
@@ -1421,7 +1421,7 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                       double sigmaSyst=0.10; // 10% systematics for now (be conservative)
 
                       // previous value in trunk
-                      if(m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS) {
+                      if(m_mmcCalibrationSet==MMCCalibrationSet::MMC2015HIGHMASS) {
                         // 2015 high-mass tune; average of all mass points
                         METresScale = 1.1*(1.0+preparedInput.m_METresSyst*sigmaSyst);
                         METoffset = -5.0*(1.0+preparedInput.m_METresSyst*sigmaSyst);
@@ -1429,8 +1429,8 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                       // MET resolution can't be perfect in presence of other objects (i.e., electrons, jets, taus), so assume minSumEt=5.0 for now
                       double sigma =  preparedInput.m_SumEt>0.0 ? METoffset+METresScale*sqrt(preparedInput.m_SumEt) : std::abs(METoffset);
 
-                      if(m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C ||
-			 m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2019) {
+                      if(m_mmcCalibrationSet==MMCCalibrationSet::MMC2016MC15C ||
+			 m_mmcCalibrationSet==MMCCalibrationSet::MMC2019) {
                         double x = preparedInput.m_DelPhiTT;
                         double dphi_scale = x > 0.6 ? 1.42047 - 0.666644*x + 0.199986*x*x : 1.02;
                         METoffset = 1.19769*(1.0+preparedInput.m_METresSyst*sigmaSyst);
@@ -1448,7 +1448,7 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
 	      //LEP-LEP
               else if(preparedInput.m_tauTypes==TauTypes::ll) // setup for LEP-LEP channel
                 {
-                  if(m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS) // placeholder for 2015 high-mass tune; for now it is the same as 2012
+                  if(m_mmcCalibrationSet==MMCCalibrationSet::MMC2015HIGHMASS) // placeholder for 2015 high-mass tune; for now it is the same as 2012
                     {
                       m_UseHT = false;
                       double sigmaSyst = 0.10; // 10% systematics for now (be conservative)
@@ -1482,8 +1482,8 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                       preparedInput.m_METsigmaL = sigma;
                     } // end of MMC2015HIGHMASS
 
-                  if(m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C ||
-		     m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2019)
+                  if(m_mmcCalibrationSet==MMCCalibrationSet::MMC2016MC15C ||
+		     m_mmcCalibrationSet==MMCCalibrationSet::MMC2019)
 		    // 2016 MC15c + 2019 leplep
                     {
 		      m_UseHT=false;

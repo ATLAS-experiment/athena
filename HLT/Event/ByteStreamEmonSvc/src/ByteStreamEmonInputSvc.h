@@ -19,7 +19,7 @@
 #include "TrigConfData/L1Menu.h"
 
 #include "AthenaBaseComps/AthService.h"
-#include "ByteStreamCnvSvc/IByteStreamInputSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamInputSvc.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 #include "ByteStreamData/RawEvent.h"
 #include "GaudiKernel/ServiceHandle.h"

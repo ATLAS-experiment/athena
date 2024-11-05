@@ -131,6 +131,10 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
     temp.setTrackCorrType(m_IdealCoordFitType);
     temp.setDoDeltaGPhis(m_doDeltaGPhis);
 
+    temp.setSubRegion(road->getSubRegion());
+    temp.setHoughXBin(road->getXBin());
+    temp.setHoughYBin(road->getYBin());
+
     // Create a list of track candidates by taking all possible combinations of hits in road.
     std::vector<FPGATrackSimTrack> track_cands;
     makeTrackCandidates(*road, temp, track_cands);

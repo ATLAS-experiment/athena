@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "egammaMVACalib/egammaMVASvc.h"
@@ -10,12 +10,6 @@
 #include "xAODEgamma/Photon.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
 
-
-egammaMVASvc::egammaMVASvc(const std::string& name, ISvcLocator* svc) :
-  asg::AsgService( name, svc )
-{
-  declareServiceInterface<IegammaMVASvc>();
-}
 
 StatusCode egammaMVASvc::initialize()
 {

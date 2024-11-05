@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TriggerChamberClusterOnTrackCreator.h"
@@ -115,9 +115,11 @@ TriggerChamberClusterOnTrackCreator::applyClusterConsistency(
     int sizeMin 	= 999;
     for (std::list<int>::iterator l = limitingChannels.begin();
 	 l != limitingChannels.end() && l != std::prev(limitingChannels.end());
-	 ++l)
+	 )
     {
-	int size = abs(*l - *(++l));
+        int end = *l++;
+        int beg = *l++;
+	int size = abs(end - beg);
 	if (size > sizeMax) sizeMax = size;
 	if (size < sizeMin) sizeMin = size;
     }
@@ -125,10 +127,12 @@ TriggerChamberClusterOnTrackCreator::applyClusterConsistency(
     std::list<int>::iterator discard	= limitingChannels.end();
     for (std::list<int>::iterator l = limitingChannels.begin();
 	 l != limitingChannels.end() && l != std::prev(limitingChannels.end());
-	 ++l)
+	 )
     {
 	std::list<int>::iterator first = l;
-	int size = abs(*l - *(++l));
+        int end = *l++;
+        int beg = *l++;
+	int size = abs(end - beg);
 	if (m_chooseBroadestCluster	&& size < sizeMax) discard = first;
 	if (! m_chooseBroadestCluster	&& size > sizeMin) discard = first;
     }

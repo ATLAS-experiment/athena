@@ -45,7 +45,7 @@ RtRelationLookUp RtParabolicExtrapolation::getRtWithParabolicExtrapolation(const
         t_r[k].set_x2(in_rt.radius(t_min + k * step_size));
         t_r[k].set_error(1.0);
     }
-    fitter.fit_parameters(t_r, 1, t_r.size(), &pol);
+    fitter.fit_parameters(t_r, 1, t_r.size(), pol);
 
     rt_param[0] = in_rt.tLower();
     rt_param[1] = (in_rt.tUpper() - in_rt.tLower()) / 99.0;
@@ -102,7 +102,7 @@ RtRelationLookUp RtParabolicExtrapolation::getRtWithParabolicExtrapolation(const
     for (const auto & add_fit_point : add_fit_points) { t_r.push_back(add_fit_point); }
 
     // perform fit //
-    fitter.fit_parameters(t_r, 1, t_r.size(), &pol);
+    fitter.fit_parameters(t_r, 1, t_r.size(), pol);
 
     // bring r-t-points in the right format for RtRelationLookUp and fill non
     // modified and extrapolated points in the r-t

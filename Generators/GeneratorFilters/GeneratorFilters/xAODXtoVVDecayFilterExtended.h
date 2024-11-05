@@ -32,6 +32,8 @@ private:
 
   int m_PDGGrandParent;
   int m_PDGParent;
+  bool m_UseStatusParent;
+  int m_StatusParent;
   std::vector<int> m_PDGChild1;
   std::vector<int> m_PDGChild2;
 

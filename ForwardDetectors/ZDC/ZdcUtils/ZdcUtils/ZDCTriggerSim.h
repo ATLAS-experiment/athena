@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file ZdcUtils/ZDCTriggerSim.h
@@ -56,11 +56,11 @@ class ZDCTriggerSimDataBase {
 template <typename T, unsigned int NData, unsigned int NBits,
           ZDCTriggerSim::DataType Type>
 class ZDCTriggerSimData : public ZDCTriggerSimDataBase {
-  bool m_doConvert;
+  bool m_doConvert{};
   std::vector<float> m_convertFactors;
 
   std::vector<T> m_data;
-  bool m_haveData;
+  bool m_haveData{};
 
   unsigned int doConvTrunc(const T& inValue) const {
     unsigned int value = inValue;
@@ -222,7 +222,7 @@ private:
 };
 
 class ZDCTriggerSimCombLUT : virtual public ZDCTriggerSimBase {
-  std::array<unsigned int, 256> m_combLUT;
+  std::array<unsigned int, 256> m_combLUT{};
 
  protected:
   //
@@ -247,8 +247,8 @@ class ZDCTriggerSimCombLUT : virtual public ZDCTriggerSimBase {
 
 class ZDCTriggerSimAllLUTs : virtual public ZDCTriggerSimBase,
                              public ZDCTriggerSimCombLUT {
-  std::array<unsigned int, 4096> m_LUTA;
-  std::array<unsigned int, 4096> m_LUTC;
+  std::array<unsigned int, 4096> m_LUTA{};
+  std::array<unsigned int, 4096> m_LUTC{};
 
  protected:
   //
@@ -305,13 +305,13 @@ class ZDCTriggerSimFADC : virtual public ZDCTriggerSimBase,
 			  public ZDCTriggerSimModuleAmpls
 {
   std::array<std::array<unsigned int, 4>, 2> m_deriv2ndThresholds;
-  unsigned int m_minSampleAna;
-  unsigned int m_maxSampleAna;
-  unsigned int m_baselineDelta;
+  unsigned int m_minSampleAna{};
+  unsigned int m_maxSampleAna{};
+  unsigned int m_baselineDelta{};
   
-  std::array<std::array<int, 4>, 2> m_maxNegDeriv2nd;
-  std::array<std::array<unsigned int, 4>, 2> m_maxADC;
-  std::array<std::array<unsigned int, 4>, 2> m_baseline;
+  std::array<std::array<int, 4>, 2> m_maxNegDeriv2nd{};
+  std::array<std::array<unsigned int, 4>, 2> m_maxADC{};
+  std::array<std::array<unsigned int, 4>, 2> m_baseline{};
 
 protected:
   //

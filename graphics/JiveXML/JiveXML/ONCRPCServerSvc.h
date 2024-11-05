@@ -39,7 +39,7 @@ namespace JiveXML {
    * forbid you to start several servers with the same ONCRPCSERVERPROG.
    */
 
-  class ONCRPCServerSvc : public extends1<AthService, IServerSvc>, 
+  class ONCRPCServerSvc : public extends<AthService, IServerSvc>, 
                           virtual public IServer {
    public:
     

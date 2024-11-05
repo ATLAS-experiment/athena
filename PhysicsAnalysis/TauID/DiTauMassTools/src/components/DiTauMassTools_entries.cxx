@@ -1,4 +1,4 @@
-#include "DiTauMassTools/MissingMassToolV2.h"
+#include "DiTauMassTools/MissingMassTool.h"
 
-DECLARE_COMPONENT( DiTauMassTools::MissingMassToolV2 )
+DECLARE_COMPONENT( DiTauMassTools::MissingMassTool )
 

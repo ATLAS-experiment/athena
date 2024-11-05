@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -22,8 +22,7 @@ namespace asg
   /// This allows to unit test the various capabilities of
   /// AnaToolHandle in a controlled fashion.
 
-  struct UnitTestService1 : virtual public IUnitTestService1,
-                            public AsgService
+  struct UnitTestService1 : extends<AsgService, IUnitTestService1>
   {
     /// \brief standard constructor
   public:

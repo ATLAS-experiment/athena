@@ -158,3 +158,20 @@ std::vector<float> computeIdealCoords(const FPGATrackSimHit &hit, const double h
   return idealized_coordinates;
 
 }
+// This is the magnetic field correction for the Hough transform tools
+// and related algorithms, parametrized by region number.
+double fieldCorrection(unsigned region, double qpt, double r)
+{
+  r = r / 1000; // convert to meters
+  if (region == 3)
+    {
+      double cor = 0.1216 * r * r - 0.0533 * r + 0.0069;
+      return -cor * qpt;
+    }
+  else if (region == 4)
+    {
+      double cor = 0.4265 * r * r - 0.0662 * r + 0.0036;
+      return -cor * qpt;
+    }
+  else return 0;
+}

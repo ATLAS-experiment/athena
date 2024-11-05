@@ -19,15 +19,19 @@ class FTagEventSFConfig(ConfigBlock):
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as internally the string "
             "f'{btagger}_{btagWP}' is used.")
-        self.addOption('btagWP', "FixedCutBEff_77", type=str,
-            info="the flavour tagging WP. The default is FixedCutBEff_77.")
-        self.addOption('btagger', "DL1r", type=str,
-            info="the flavour tagging algorithm: DL1dv01, GN2v00. The default is DL1r.")
+        self.addOption('btagWP', "Continuous", type=str,
+            info="the flavour tagging WP. The default is Continuous.")
+        self.addOption('btagger', "GN2v01", type=str,
+            info="the flavour tagging algorithm: DL1dv01, GN2v01. The default is GN2v01.")
 
     def makeAlgs(self, config):
 
         if config.dataType() is DataType.Data: return
 
+        if 'FixedCutBEff' in self.btagWP:
+            raise ValueError('FTAG calibration is only available for Continuous WP. '
+                             'Please configure the Continuous btagWP in addition to the FixedCutBEff one to retrieve scale factors.')
+        
         selectionName = self.selectionName
         if selectionName is None or selectionName == '':
             selectionName = self.btagger + '_' + self.btagWP

@@ -9,18 +9,20 @@ from AthenaConfiguration.Enums import BeamType
 
 def MuonEDMPrinterToolCfg(flags, name="MuonEDMPrinterTool", **kwargs):
     result = ComponentAccumulator()  
+    if not flags.Detector.EnableTGC:
+         kwargs.setdefault("TgcPrdCollection", "")
+    if not flags.Detector.EnableMDT:
+         kwargs.setdefault("MdtPrdCollection", "")
+    if not flags.Detector.EnableRPC:
+         kwargs.setdefault("RpcPrdCollection", "")
+        
     kwargs.setdefault('TgcPrdCollection', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
-    #kwargs.setdefault('TgcPrdCollection', 'TGC_Measurements' )
-    # We need to override TgcPrdCollection to match old config, so keep line above for ease of testing.
 
-    if "ResidualPullCalculator" not in kwargs:
-        from TrkConfig.TrkResidualPullCalculatorConfig import (
-            ResidualPullCalculatorCfg)
-        kwargs.setdefault("ResidualPullCalculator", result.popToolsAndMerge(
-            ResidualPullCalculatorCfg(flags)))
+    from TrkConfig.TrkResidualPullCalculatorConfig import ResidualPullCalculatorCfg
+    kwargs.setdefault("ResidualPullCalculator", result.popToolsAndMerge(ResidualPullCalculatorCfg(flags)))
 
     the_tool = CompFactory.Muon.MuonEDMPrinterTool(name, **kwargs)
-    result.setPrivateTools(the_tool)
+    result.addPublicTool(the_tool, primary = True)
     result.merge(MuonEDMHelperSvcCfg(flags))
     from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg   
     result.merge(MuonIdHelperSvcCfg(flags))
@@ -52,7 +54,7 @@ def MuonTrackToSegmentToolCfg(flags,name="MuonTrackToSegmentTool", **kwargs):
 def MuonHitSummaryToolCfg(flags, name="MuonHitSummaryTool", **kwargs):
     result = ComponentAccumulator()       
     kwargs.setdefault('MuonTrackSummaryHelperTool', result.popToolsAndMerge(MuonTrackSummaryHelperToolCfg(flags)))
-    printer = result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags))
+    printer = result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags))
     kwargs.setdefault('Printer', printer )
     result.addPublicTool(printer)
     the_tool = CompFactory.Muon.MuonHitSummaryTool(name, **kwargs)
@@ -60,7 +62,7 @@ def MuonHitSummaryToolCfg(flags, name="MuonHitSummaryTool", **kwargs):
     return result
 
 def MuonSeededSegmentFinderCfg(flags,name="MuonSeededSegmentFinder", **kwargs):
-    Muon__MuonSeededSegmentFinder=CompFactory.Muon.MuonSeededSegmentFinder
+
     from MuonConfig.MuonSegmentFindingConfig import DCMathSegmentMakerCfg, MdtMathSegmentFinderCfg # FIXME - should really shift this to RecTools then.
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg
     from TrkConfig.TrkExRungeKuttaPropagatorConfig import RungeKuttaPropagatorCfg
@@ -79,7 +81,14 @@ def MuonSeededSegmentFinderCfg(flags,name="MuonSeededSegmentFinder", **kwargs):
     
     kwargs.setdefault("Propagator", result.popToolsAndMerge(RungeKuttaPropagatorCfg(flags)) )
     kwargs.setdefault("MdtRotCreator", result.popToolsAndMerge (MdtDriftCircleOnTrackCreatorCfg(flags)))
-    kwargs.setdefault("Printer", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags)) ) # private here
+    kwargs.setdefault("Printer", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)) ) # private here
+ 
+    if not flags.Detector.GeometryTGC:
+        kwargs.setdefault('TgcPrepDataContainer', "")
+    if not flags.Detector.GeometryMDT:
+        kwargs.setdefault('MdtPrepDataContainer', "")
+    if not flags.Detector.GeometryRPC:
+        kwargs.setdefault('RpcPrepDataContainer', "")
     if not flags.Detector.GeometryCSC:
         kwargs.setdefault("CscPrepDataContainer","")
     if not flags.Detector.GeometrysTGC:
@@ -90,7 +99,7 @@ def MuonSeededSegmentFinderCfg(flags,name="MuonSeededSegmentFinder", **kwargs):
   
     kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
     
-    muon_seeded_segment_finder = Muon__MuonSeededSegmentFinder(name, **kwargs)
+    muon_seeded_segment_finder = CompFactory.Muon.MuonSeededSegmentFinder(name, **kwargs)
     result.setPrivateTools(muon_seeded_segment_finder)
     return result
         
@@ -127,7 +136,7 @@ def MuonTrackScoringToolCfg(flags, name="MuonTrackScoringTool", **kwargs):
     from TrkConfig.TrkTrackSummaryToolConfig import MuonTrackSummaryToolCfg
     track_summary = result.getPrimaryAndMerge(MuonTrackSummaryToolCfg(flags)) 
     kwargs.setdefault('SumHelpTool', track_summary)
-    printer = result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags)) 
+    printer = result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)) 
     kwargs.setdefault("EDMPrinter", printer)
     result.setPrivateTools(Muon__MuonTrackScoringTool(name=name,**kwargs))
     return result
@@ -138,8 +147,8 @@ def MuonAmbiProcessorCfg(flags, name="MuonAmbiProcessor", **kwargs):
     scoring_tool =  result.getPrimaryAndMerge(MuonTrackScoringToolCfg( flags ))
     kwargs.setdefault('ScoringTool', scoring_tool )
     result.addPublicTool(scoring_tool)
-    muon_edm_printer = result.popToolsAndMerge(MuonEDMPrinterToolCfg( flags )) #private here
-    # muon_edm_printer = result.popToolsAndMerge(MuonEDMPrinterToolCfg( flags, TgcPrdCollection="TGC_Measurements" )) # FIXME Hack to get wrapping working. Keep in for now, to aid debugging
+    muon_edm_printer = result.getPrimaryAndMerge(MuonEDMPrinterToolCfg( flags )) #private here
+    # muon_edm_printer = result.getPrimaryAndMerge(MuonEDMPrinterToolCfg( flags, TgcPrdCollection="TGC_Measurements" )) # FIXME Hack to get wrapping working. Keep in for now, to aid debugging
 
     muon_ami_selection_tool = CompFactory.Muon.MuonAmbiTrackSelectionTool(name="MuonAmbiSelectionTool", Printer=muon_edm_printer)
     result.addPublicTool(muon_ami_selection_tool)
@@ -185,8 +194,8 @@ def MuonTrackCleanerCfg(flags, name="MuonTrackCleaner", seg=False, **kwargs):
     else:
         kwargs.setdefault("Fitter", result.popToolsAndMerge(MCTBFitterMaterialFromTrackCfg(flags)))
 
-    kwargs.setdefault("Printer", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags)) ) #private here
-    # kwargs.setdefault("Printer", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags, TgcPrdCollection="TGC_Measurements" )) ) # FIXME Hack to get wrapping working. Keep in for now, to aid debugging
+    kwargs.setdefault("Printer", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)) ) #private here
+    # kwargs.setdefault("Printer", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags, TgcPrdCollection="TGC_Measurements" )) ) # FIXME Hack to get wrapping working. Keep in for now, to aid debugging
 
     kwargs.setdefault("MaxAvePullSumPerChamber", 6)
     kwargs.setdefault("Chi2Cut", flags.Muon.Chi2NDofCut)
@@ -239,7 +248,7 @@ def MuPatHitToolCfg(flags, name="MuPatHitTool",**kwargs):
         kwargs.setdefault("CscRotCreator", result.popToolsAndMerge(CscClusterOnTrackCreatorCfg(flags)))
     else:
         kwargs.setdefault("CscRotCreator", "")    
-    printer =  result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags))
+    printer =  result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags))
     kwargs.setdefault('Printer', printer)
     result.addPublicTool( printer )
     kwargs.setdefault('edmHelper', result.getPrimaryAndMerge(MuonEDMHelperSvcCfg(flags)))
@@ -262,7 +271,7 @@ def MuonTrackExtrapolationToolCfg(flags, name="MuonTrackExtrapolationTool", **kw
 
     kwargs.setdefault("AtlasExtrapolator", result.popToolsAndMerge( AtlasExtrapolatorCfg(flags) ) )
     kwargs.setdefault("MuonExtrapolator",  result.popToolsAndMerge( MuonExtrapolatorCfg(flags) ) )
-    kwargs.setdefault('EDMPrinter', result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags))) #private here
+    kwargs.setdefault('EDMPrinter', result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags))) #private here
     result.setPrivateTools(
         CompFactory.Muon.MuonTrackExtrapolationTool(name, **kwargs))
     return result
@@ -279,7 +288,7 @@ def MuonRefitToolCfg(flags, name="MuonRefitTool", **kwargs):
     else:
         from MuonAlignErrorTool.AlignmentErrorToolConfig import AlignmentErrorToolCfg
         kwargs.setdefault("AlignmentErrorTool", result.popToolsAndMerge(AlignmentErrorToolCfg(flags)))
-    printer =  result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags))
+    printer =  result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags))
     kwargs.setdefault('Printer', printer) #PublicToolHandle
     result.addPublicTool(printer)
     kwargs.setdefault("Fitter", result.popToolsAndMerge(MCTBFitterMaterialFromTrackCfg(flags)))

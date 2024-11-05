@@ -29,6 +29,10 @@ def GfexInputMonitoringConfig(flags):
             eta_bins.append(eta)
     eta_bins+= [2.2,2.5,2.7,2.9,3.1,3.25,3.3,3.5,4.1,4.9]
 
+    helper.defineDQAlgorithm("Gfex_Tower_etaPhiMapFilled",
+                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_Equal_Threshold","BinThreshold":"0."},
+                             thresholdConfig={"NBins":[0,32*40]}, # 0 bins expected to be empty
+                             )
 
     
     # histograms of gFex tower variables
@@ -46,15 +50,17 @@ def GfexInputMonitoringConfig(flags):
                            fillGroup = "highEtgTowers",
                            type='TH2F',
                            path=trigPath,
-                           hanConfig={"description":"Look for hot spots with unusual high statistics; Check <a href='./detail/h_HotTowers_posVsLBN'>detail plot</a> to get timeseries for each location", "display":"SetPalette(55),Draw=COL1Z"},
+                           hanConfig={
+                            "algorithm": "Gfex_Tower_etaPhiMapFilled",
+                            "description":"Look for hot spots with unusual high statistics; Check <a href='./detail/h_HotTowers_posVsLBN'>detail plot</a> to get timeseries for each location", "display":"SetPalette(55),Draw=COL1Z"},
                            xbins=eta_bins, ybins=32,ymin=-3.2,ymax=3.2)
 
                           
 
-    helper.defineHistogram('LBN,binNumber;h_HotTowers_posVsLBN',title='gFex Towers with Et > 2GeV;LB;binNumber',
+    helper.defineHistogram('LBN,binNumber;h_HotTowers_posVsLBN',title='gFex Towers with Et > 2GeV;LB;40(y-1)+x',
                            path=f"{trigPath}/detail",
                            fillGroup = "highEtgTowers",
-                           hanConfig={"description":"x and y correspond to axis bin numbers on <a href='h_HotTower_EtaPhiMap'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
+                           hanConfig={"description":"x and y correspond to axis bin numbers on <a href='../h_HotTower_EtaPhiMap'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
                            type='TH2I',
                            xbins=1,xmin=0,xmax=10,
                            ybins=40*32,ymin=0.5,ymax=40*32+0.5,
@@ -72,13 +78,15 @@ def GfexInputMonitoringConfig(flags):
                            fillGroup = "lowEtgTowers",
                            type='TH2F',
                            path=trigPath,
-                           hanConfig={"description":"Look for cold spots with unusual high statistics; Check <a href='./detail/h_ColdTowers_posVsLBN'>detail plot</a> to get timeseries for each location ", "display":"SetPalette(55),Draw=COL1Z"},
+                           hanConfig={
+                            "algorithm": "Gfex_Tower_etaPhiMapFilled",
+                            "description":"Look for cold spots with unusual high statistics; Check <a href='./detail/h_ColdTowers_posVsLBN'>detail plot</a> to get timeseries for each location ", "display":"SetPalette(55),Draw=COL1Z"},
                            xbins=eta_bins, ybins=32,ymin=-3.2,ymax=3.2)
 
     helper.defineHistogram('LBN,binNumber;h_ColdTowers_posVsLBN',title='gFex Towers with Et < -2GeV;LB;40(y-1)+x',
                            path=f"{trigPath}/detail",
                            fillGroup = "lowEtgTowers",
-                           hanConfig={"description":"x and y correspond to axis bin numbers on <a href='h_ColdTower_EtaPhiMap'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
+                           hanConfig={"description":"x and y correspond to axis bin numbers on <a href='../h_ColdTower_EtaPhiMap'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
                            type='TH2I',
                            xbins=1,xmin=0,xmax=10,
                            ybins=40*32,ymin=0.5,ymax=40*32+0.5,

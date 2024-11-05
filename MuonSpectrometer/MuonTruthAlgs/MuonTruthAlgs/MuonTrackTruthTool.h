@@ -140,7 +140,7 @@ namespace Muon {
 
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-        ToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
+        PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
         ToolHandle<Trk::ITruthTrajectoryBuilder> m_truthTrajectoryBuilder{
             this, "TruthTrajectoryBuilder", "Muon::MuonDecayTruthTrajectoryBuilder/MuonDecayTruthTrajectoryBuilder"};
 

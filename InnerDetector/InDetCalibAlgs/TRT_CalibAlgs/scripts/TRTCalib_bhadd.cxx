@@ -265,9 +265,10 @@ map<string, calibpars> readoldpars()
         }
         oldconstfile.close();
     }
-
-    else
-        cout << "Unable to open precision t0 file!" << endl;
+    else{
+        std::cerr << "Unable to open precision t0 file!\n";
+    }
+        
 
     return oldparsmap;
 }
@@ -697,7 +698,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            cout << "WRONG INPUT FILE!" << endl;
+            std::cerr << "WRONG INPUT FILE!\n";
             return -1;
         }
 

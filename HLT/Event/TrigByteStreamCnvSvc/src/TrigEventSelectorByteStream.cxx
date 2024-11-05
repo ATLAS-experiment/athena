@@ -8,7 +8,7 @@
 
 // Athena includes
 #include "AthenaKernel/EventContextClid.h"
-#include "ByteStreamCnvSvc/IByteStreamInputSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamInputSvc.h"
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
 #include "ByteStreamData/RawEvent.h"
 #include "CxxUtils/checker_macros.h"

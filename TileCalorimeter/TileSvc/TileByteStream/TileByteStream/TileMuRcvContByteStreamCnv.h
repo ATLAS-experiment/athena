@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEBYTESTREAM_TILEMURCVCONTBYTESTREAMCNV_H
@@ -13,11 +13,10 @@
 class DataObject;
 class StatusCode;
 class IAddressCreator;
-class IByteStreamEventAccess;
-class StoreGateSvc; 
+class StoreGateSvc;
 class IROBDataProviderSvc; 
 class TileMuRcvContByteStreamTool ; 
-class ByteStreamCnvSvc;
+class IByteStreamCnvSvc;
 class TileROD_Decoder;
 
 // Abstract factory to create the converter
@@ -54,8 +53,7 @@ class TileMuRcvContByteStreamCnv
   /** Pointer to TileMuRcvContByteStreamTool */
   ToolHandle<BYTESTREAMTOOL> m_tool;
 
-  ServiceHandle<IByteStreamEventAccess> m_byteStreamEventAccess;
-  ByteStreamCnvSvc* m_byteStreamCnvSvc;
+  ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc;
 
   /** Pointer to StoreGateSvc */
   ServiceHandle<StoreGateSvc> m_storeGate;

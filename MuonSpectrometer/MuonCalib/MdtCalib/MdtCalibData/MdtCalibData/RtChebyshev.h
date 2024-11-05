@@ -53,13 +53,13 @@ namespace MuonCalib {
         virtual double driftVelocity(double t) const override final;
         //!< get the drift acceleration
         virtual double driftAcceleration(double t) const override final;
-
         // get-methods specific to the RtChebyshev class //
         //!< get the lower drift-time bound
         virtual double tLower() const override final;
         //!< get the upper drift-time bound
         virtual double tUpper() const override final;
 
+        virtual double tBinWidth() const override final;
         //!< get the number of parameters used to describe the r(t) relationship
         unsigned int numberOfRtParameters() const;
 

@@ -8,7 +8,7 @@
 
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h"
 #include "ByteStreamData/RawEvent.h"
 #include "CSC_Hid2RESrcID.h"
@@ -48,7 +48,7 @@ namespace Muon {
         CSC_Hid2RESrcID m_hid2re;
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-        ServiceHandle<ByteStreamCnvSvc> m_byteStreamCnvSvc{this, "ByteStreamCnvSvc", "ByteStreamCnvSvc"};
+        ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc{this, "ByteStreamCnvSvc", "ByteStreamCnvSvc"};
 
         ServiceHandle<CSCcablingSvc> m_cabling{this, "CablingSvc", "CSCcablingSvc"};
 

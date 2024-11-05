@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUON_MUONPATTERNCALIBRATION_H
 #define MUON_MUONPATTERNCALIBRATION_H
@@ -27,7 +27,7 @@ class MdtPrepData;
 class MuonClusterOnTrack;
 class MdtDriftCircleOnTrack;
 
-class MuonPatternCalibration : virtual public IMuonPatternCalibration, public AthAlgTool {
+class MuonPatternCalibration :  public extends<AthAlgTool, IMuonPatternCalibration> {
   public:
     using ISPrd = std::pair<Amg::Vector3D, const MuonCluster*>;
     using ISPrdVec = std::vector<ISPrd>;    

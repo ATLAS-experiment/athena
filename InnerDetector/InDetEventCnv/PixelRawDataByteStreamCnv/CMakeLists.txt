@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PixelRawDataByteStreamCnv )
@@ -19,6 +19,6 @@ atlas_add_component( PixelRawDataByteStreamCnv
    LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ByteStreamData AthenaKernel EventContainers
    GaudiKernel InDetRawData AthenaBaseComps AthContainers CxxUtils StoreGateLib
    ByteStreamCnvSvcBaseLib InDetIdentifier PixelReadoutGeometryLib IRegionSelector
-   xAODEventInfo TrigSteeringEvent InDetByteStreamErrors PixelConditionsData PixelRawDataByteStreamCnvLib ByteStreamCnvSvcLib )
+   xAODEventInfo TrigSteeringEvent InDetByteStreamErrors PixelConditionsData PixelRawDataByteStreamCnvLib )
 
    atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

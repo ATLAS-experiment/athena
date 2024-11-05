@@ -257,8 +257,6 @@ class MdtDriftCircleOnTrackCreator: public AthAlgTool, public IMdtDriftCircleOnT
     //!< adjusted to be that corresponding to the predicted position. This is
     //!< useful to fix problems with tracks very close to the wire.
     Gaudi::Property<bool> m_errorAtPredictedPosition{this, "UseErrorAtPredictedPosition", false};
-    //!< if set to true, then apply wire sag corrections.
-    Gaudi::Property<bool> m_doWireSag{this, "DoWireSag", false};
     //!< Add a term to the error to account for very poorly aligned stations
     Gaudi::Property<bool> m_stationError{this, "DoStationError", false};
     //!< Add a special error to account for the T0 refit

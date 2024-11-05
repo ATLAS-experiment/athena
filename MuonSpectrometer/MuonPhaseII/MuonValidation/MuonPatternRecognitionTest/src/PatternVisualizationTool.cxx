@@ -154,6 +154,10 @@ namespace MuonValR4 {
         if (m_canvCounter >= m_canvasLimit) {
             return;
         }
+        if (accumulator.getNonEmptyBins().empty()) {
+            ATH_MSG_WARNING("Hough accumulator is empty");
+            return;
+        }
 
         auto accHisto = std::make_unique<TH2F>("AccumulatorHisto", "histo",
                                                 accumulator.nBinsX(), axisRanges.xMin, axisRanges.xMax,
@@ -170,6 +174,7 @@ namespace MuonValR4 {
             spacePointsInAcc.insert(spacePointsInAcc.end(),hitsInBin.begin(), hitsInBin.end());
             accHisto->SetBinContent(xBin+1, yBin+1, accumulator.nHits(bin));
         }
+
         const TruthSegmentSet truthSegs{fetchTruthSegs(spacePointsInAcc)};
         for (const xAOD::MuonSegment* segment : truthSegs) {
             const auto [pos, dir] = makeLine(localSegmentPars(*segment));

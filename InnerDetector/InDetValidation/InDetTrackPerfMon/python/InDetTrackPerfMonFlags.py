@@ -130,6 +130,7 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "plotTechnicalEfficiencies", False )
     icf.addFlag( "plotResolutions"          , True )
     icf.addFlag( "plotFakeRates"            , True )
+    icf.addFlag( "unlinkedAsFakes"          , True )
     icf.addFlag( "plotDuplicateRates"       , False )
     icf.addFlag( "plotHitsOnTracks"         , True )
     icf.addFlag( "plotHitsOnTracksReference", False )
@@ -178,6 +179,7 @@ def initializeIDTPMTrkAnaConfigFlags(flags):
 
             # set flags from values in trkAnaDict
             for fname, fvalue in trkAnaDict.items():
+                if fname.startswith( "_comment" ): continue
                 setattr( flags.PhysVal.IDTPM, 
                         trkAnaName+"."+fname, fvalue )
 

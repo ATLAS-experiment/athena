@@ -18,4 +18,4 @@ atlas_add_component( MuonCSC_CnvTools
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ${CLHEP_LIBRARIES} ByteStreamData GaudiKernel AthenaBaseComps AthenaKernel StoreGateLib ByteStreamCnvSvcBaseLib EventPrimitives CSCcablingLib MuonReadoutGeometry MuonDigitContainer MuonIdHelpersLib MuonRDO MuonPrepRawData TrkSurfaces MuonCnvToolInterfacesLib CscCalibToolsLib MuonDigToolInterfacesLib MuonCSC_CnvToolsLib ByteStreamCnvSvcLib xAODEventInfo )
+                     LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ${CLHEP_LIBRARIES} ByteStreamData GaudiKernel AthenaBaseComps AthenaKernel StoreGateLib ByteStreamCnvSvcBaseLib EventPrimitives CSCcablingLib MuonReadoutGeometry MuonDigitContainer MuonIdHelpersLib MuonRDO MuonPrepRawData TrkSurfaces MuonCnvToolInterfacesLib CscCalibToolsLib MuonDigToolInterfacesLib MuonCSC_CnvToolsLib xAODEventInfo )

@@ -1,17 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_RawDataByteStreamCnv/ALFA_RawDataContainerReadOut.h"
 
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/IMessageSvc.h"
+#include "AthenaKernel/errorcheck.h"
 
-#include <cassert>
 
- 
 ALFA_RawDataContainerReadOut::ALFA_RawDataContainerReadOut():
   m_wordMarker(0),
   m_subdetId(0),
@@ -59,32 +54,17 @@ void ALFA_RawDataContainerReadOut::decodeHeaderFull(std::vector<uint32_t>& vData
 // Decode the ROD header
 void ALFA_RawDataContainerReadOut::decodeHeader(std::vector<uint32_t>& vData)
 { 
-
-  //static const uint32_t RODheadersize = 0x00000009; 
-
-
-#ifndef NDEBUG
-  IMessageSvc* msgSvc = 0;
-  ISvcLocator* svcLocator = Gaudi::svcLocator();
-  svcLocator->service("MessageSvc", msgSvc).ignore();
-  MsgStream log(msgSvc, "ALFA_RawDataContainerReadOut::decodeHeader");
-#endif
-
   setZero();
 
   if (vData[0] != s_RODmarker) 
     {
-#ifndef NDEBUG
-      log << MSG::ERROR << "ROD Start of header marker not found" << endmsg;
-#endif
-      assert(0);
+      REPORT_MESSAGE_WITH_CONTEXT(MSG::ERROR, "ALFA_RawDataContainerReadOut")
+        << "ROD Start of header marker not found" << endmsg;
     }
   if (vData[1] != s_RODheadersize) 
     {
-#ifndef NDEBUG
-      log << MSG::ERROR << "ROD header size doesn't match " << endmsg;
-#endif
-      assert(0);
+      REPORT_MESSAGE_WITH_CONTEXT(MSG::ERROR, "ALFA_RawDataContainerReadOut")
+        << "ROD header size doesn't match " << endmsg;
     }
   
   // decode the rest of the header

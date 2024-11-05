@@ -35,7 +35,7 @@ namespace D3PD {
  * @brief Service to create a root-based D3PD.
  */
 class RootD3PDSvc
-  : public extends1<AthService, ID3PDSvc>
+  : public extends<AthService, ID3PDSvc>
 {
 public:
   /**

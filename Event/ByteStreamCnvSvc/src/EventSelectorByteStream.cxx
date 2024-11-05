@@ -9,7 +9,7 @@
 
 #include "EventContextByteStream.h"
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
-#include "ByteStreamCnvSvc/ByteStreamExceptions.h"
+#include "ByteStreamCnvSvcBase/ByteStreamExceptions.h"
 #include "CxxUtils/checker_macros.h"
 
 #include "GaudiKernel/ClassID.h"

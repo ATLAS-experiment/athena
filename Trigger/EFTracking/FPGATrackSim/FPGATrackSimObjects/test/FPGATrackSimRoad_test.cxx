@@ -26,12 +26,12 @@ int main(int, char**)
     hits[i].setHitType(HitType::mapped);
     std::shared_ptr<const FPGATrackSimHit> hitP = std::make_shared<const FPGATrackSimHit>(hits[i]);
     std::vector<std::shared_ptr<const FPGATrackSimHit>> hitPVec;
-    hitPVec.push_back(hitP);
-    hitVec.push_back(hitPVec);
+    hitPVec.emplace_back(std::move(hitP));
+    hitVec.emplace_back(std::move(hitPVec));
   }
   
   FPGATrackSimRoad road;
-  road.setHits(hitVec);
+  road.setHits(std::move(hitVec));
   road.setRoadID(roadid);
   std::cout << "road id = " << road.getRoadID() << std::endl;
   for (unsigned i = 0; i < 8; i++) {

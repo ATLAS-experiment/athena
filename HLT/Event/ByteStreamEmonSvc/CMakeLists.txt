@@ -6,12 +6,13 @@ atlas_subdir( ByteStreamEmonSvc )
 # External dependencies:
 find_package( Boost COMPONENTS regex unit_test_framework )
 find_package( tdaq COMPONENTS emon ohroot owl is omniORB4 omnithread oh )
+find_package( ROOT COMPONENTS Hist )
 
 # Component(s) in the package:
 atlas_add_component( ByteStreamEmonSvc
                      src/*.cxx src/components/*.cxx
-                     INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${TDAQ-COMMON_INCLUDE_DIRS} ${TDAQ_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${Boost_LIBRARIES} ${TDAQ-COMMON_LIBRARIES} ${TDAQ_LIBRARIES} ByteStreamCnvSvcLib ByteStreamData GaudiKernel StoreGateLib PersistentDataModel ByteStreamCnvSvcBaseLib xAODEventInfo TrigConfData )
+                     INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TDAQ-COMMON_INCLUDE_DIRS} ${TDAQ_INCLUDE_DIRS}
+                     LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${TDAQ-COMMON_LIBRARIES} ${TDAQ_LIBRARIES} AthenaBaseComps ByteStreamData CxxUtils GaudiKernel StoreGateLib PersistentDataModel ByteStreamCnvSvcBaseLib xAODEventInfo TrigConfData )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
@@ -21,5 +22,5 @@ atlas_add_test(
     SOURCES test/test_extract_histogram_tag.cxx src/extract_histogram_tag.cxx
     POST_EXEC_SCRIPT nopost.sh
     INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-    LINK_LIBRARIES Boost::unit_test_framework
+    LINK_LIBRARIES ${Boost_LIBRARIES}
 )

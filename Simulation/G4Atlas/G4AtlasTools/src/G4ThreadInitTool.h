@@ -16,7 +16,7 @@
 ///
 /// @author Steve Farrell <Steven.Farrell@cern.ch>
 ///
-class G4ThreadInitTool : virtual public extends1<AthAlgTool, IThreadInitTool>
+class G4ThreadInitTool : virtual public extends<AthAlgTool, IThreadInitTool>
 {
 
   public:

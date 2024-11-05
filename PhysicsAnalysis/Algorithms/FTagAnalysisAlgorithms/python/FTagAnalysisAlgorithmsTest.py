@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -20,10 +20,10 @@ def makeSequence (dataType, jetContainer="AntiKt4EMPFlowJets") :
                                            enableCutflow=True, enableKinematicHistograms=True )
     from FTagAnalysisAlgorithms.FTagAnalysisSequence import makeFTagAnalysisSequence
 
-    btagOPs = ['FixedCutBEff_60', 'Continuous']
+    btagOPs = ['FixedCutBEff_65', 'Continuous']
     for btagOP in btagOPs:
         makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = True,
-                                  enableCutflow=True, btagger = 'DL1dv01', btagWP = btagOP )
+                                  enableCutflow=True, btagger = 'GN2v01', btagWP = btagOP )
     jetSequence.configure( inputName = jetContainer, outputName = 'AnalysisJets_%SYS%' )
 
     # Add the sequence to the job:

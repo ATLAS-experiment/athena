@@ -34,7 +34,7 @@ namespace Muon {
     private:
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-        ToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
+        PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
         ToolHandle<Muon::IMuonTrackTruthTool> m_muonTrackTruthTool{this, "MuonTrackTruthTool",
                                                                    "Muon::MuonTrackTruthTool/MuonTrackTruthTool"};
 

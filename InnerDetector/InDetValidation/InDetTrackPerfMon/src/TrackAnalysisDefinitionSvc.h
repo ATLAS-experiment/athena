@@ -24,14 +24,11 @@
 #include <vector>
 
 class TrackAnalysisDefinitionSvc final :
-    public asg::AsgService,
-    virtual public ITrackAnalysisDefinitionSvc {
+    public extends<asg::AsgService, ITrackAnalysisDefinitionSvc> {
 
 public:
-
-  TrackAnalysisDefinitionSvc( const std::string& name, ISvcLocator* pSvcLocator );
-
-  virtual ~TrackAnalysisDefinitionSvc();
+  using extends::extends;  // base class constructor
+  virtual ~TrackAnalysisDefinitionSvc() = default;
 
   virtual StatusCode initialize() override final;
 
@@ -73,6 +70,7 @@ public:
   virtual bool plotTechnicalEfficiencies() const override { return m_plotTechnicalEfficiencies.value(); };
   virtual bool plotResolutions() const override { return m_plotResolutions.value(); };
   virtual bool plotFakeRates() const override { return m_plotFakeRates.value(); };
+  virtual bool unlinkedAsFakes() const override { return m_unlinkedAsFakes.value(); };
   virtual bool plotDuplicateRates() const override { return m_plotDuplicateRates.value(); };
   virtual bool plotHitsOnTracks() const override { return m_plotHitsOnTracks.value(); };
   virtual bool plotHitsOnTracksReference() const override { return m_plotHitsOnTracksReference.value(); };
@@ -116,6 +114,7 @@ private:
   BooleanProperty m_plotTechnicalEfficiencies { this, "plotTechnicalEfficiencies", true, "Book/fill track technical efficiencies histograms" };
   BooleanProperty m_plotResolutions { this, "plotResolutions", true, "Book/fill track resolutions histograms" };
   BooleanProperty m_plotFakeRates { this, "plotFakeRates", true, "Book/fill fake rate histograms" };
+  BooleanProperty m_unlinkedAsFakes { this, "unlinkedAsFakes", false, "Consider non-truth-linked tracks as fakes" };
   BooleanProperty m_plotDuplicateRates { this, "plotDuplicateRates", false, "Book/fill duplicate rate histograms" };
   BooleanProperty m_plotHitsOnTracks { this, "plotHitsOnTracks", true, "Book/fill hits on tracks histograms" };
   BooleanProperty m_plotHitsOnTracksReference { this, "plotHitsOnTracksReference", false, "Book/fill hits on reference tracks histograms" };

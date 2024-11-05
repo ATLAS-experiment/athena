@@ -369,35 +369,8 @@ else:
 
 ## Check that the keywords are in the list of allowed words (and exit if processing an official JO)
 if evgenConfig.keywords:
-    ## Get the allowed keywords file from the JO package if possibe
-    # TODO: Make the package name configurable
-    kwfile = "evgenkeywords.txt"
-    kwpath = None
-    for p in os.environ["DATAPATH"].split(":"):
-        kwpath = os.path.join(p, kwfile)
-        if os.path.exists(kwpath):
-            break
-        kwpath = None
-    ## Load the allowed keywords from the file
-    allowed_keywords = []
-    if kwpath: 
-        evgenLog.info("evgenkeywords = "+kwpath)
-        kwf = open(kwpath, "r")
-        for l in kwf:
-            allowed_keywords += l.strip().lower().split()
-        ## Check the JO keywords against the allowed ones
-        evil_keywords = []
-        for k in evgenConfig.keywords:
-            if k.lower() not in allowed_keywords:
-                evil_keywords.append(k)
-        if evil_keywords:
-            msg = "evgenConfig.keywords contains non-standard keywords: %s. " % ", ".join(evil_keywords)
-            msg += "Please check the allowed keywords list and fix."
-            evgenLog.error(msg)
-            if officialJO:
-                sys.exit(1)
-    else:
-        evgenLog.warning("evgenkeywords = not found ")
+    from GeneratorConfig.GenConfigHelpers import checkKeywords
+    checkKeywords(evgenConfig, evgenLog, officialJO)
 
 ## Check that the L1 and L2 keywords pairs are in the list of allowed words pairs (and exit if processing an official JO)
 if evgenConfig.categories:

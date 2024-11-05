@@ -67,8 +67,10 @@ namespace IDTPM {
   }
 
   /// isFake
-  bool isFakeTruth( const xAOD::TrackParticle& track, const float truthProbCut )
+  bool isFakeTruth( const xAOD::TrackParticle& track, const float truthProbCut, const bool unlinkedAsFakes )
   {
+    /// if fakes include unlinked, return true if isUnlinked is true
+    if( unlinkedAsFakes and isUnlinkedTruth( track ) ) return true;
     float prob = getTruthMatchProb( track );
     /// returns true if truthMatchProbability deco isn't available or
     /// if the truth matching probability is below theshold

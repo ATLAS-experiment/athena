@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuTagAmbiguitySolverTool.h"
@@ -15,24 +15,14 @@
 #include "TrkEventPrimitives/LocalDirection.h"
 #include "TrkTrack/Track.h"
 
-MuTagAmbiguitySolverTool::MuTagAmbiguitySolverTool(const std::string& t, const std::string& n, const IInterface* p) : AthAlgTool(t, n, p) {
-    declareInterface<IMuTagAmbiguitySolverTool>(this);
-    declareProperty("DoHitOverlapMatching", m_hitOverlapMatching = true);
-    declareProperty("ResolveSLOverlaps", m_slOverlapMatching = false);
-    declareProperty("RejectOuterEndcap", m_rejectOuterEndcap = true);
-    declareProperty("RejectMatchPhi", m_rejectMatchPhi = true);
-}
+MuTagAmbiguitySolverTool::MuTagAmbiguitySolverTool(const std::string& t, const std::string& n, const IInterface* p) : base_class{t, n, p} {}
+
 
 StatusCode MuTagAmbiguitySolverTool::initialize() {
-    ATH_MSG_INFO("================================");
-    ATH_MSG_INFO("=Proprieties are ");
-    ATH_MSG_INFO("================================");
-
     ATH_CHECK(m_edmHelperSvc.retrieve());
-    ATH_CHECK(p_muonPrinter.retrieve());
+    ATH_CHECK(m_muonPrinter.retrieve());
     ATH_CHECK(m_idHelperSvc.retrieve());
-    ATH_CHECK(p_segmentMatchingTool.retrieve());
-
+    ATH_CHECK(m_segmentMatchingTool.retrieve());
     return StatusCode::SUCCESS;
 }
 
@@ -262,11 +252,11 @@ int MuTagAmbiguitySolverTool::ambiguousSegment(const EventContext& ctx, const Mu
 
             if (sectorOk) {
                 // check whether the two segments actually belong to the same particle
-                bool match = p_segmentMatchingTool->match(ctx, seg1, seg2);
+                bool match = m_segmentMatchingTool->match(ctx, seg1, seg2);
                 if (match) {
                     ATH_MSG_VERBOSE("Found matching segment pair: " << std::endl
-                                                                    << p_muonPrinter->print(seg1) << std::endl
-                                                                    << p_muonPrinter->print(seg2));
+                                                                    << m_muonPrinter->print(seg1) << std::endl
+                                                                    << m_muonPrinter->print(seg2));
                     // if overlap matching enabled flag as ambiguous
                     if (m_slOverlapMatching) return 2;
                 }
@@ -288,8 +278,8 @@ int MuTagAmbiguitySolverTool::ambiguousSegment(const EventContext& ctx, const Mu
             if (m_hitOverlapMatching) {
                 if (msgLvl(MSG::VERBOSE))
                     msg(MSG::VERBOSE) << " found overlapping segment pair: " << compareSegments.print(result) << std::endl
-                                      << p_muonPrinter->print(seg1) << std::endl
-                                      << p_muonPrinter->print(seg2) << endmsg;
+                                      << m_muonPrinter->print(seg1) << std::endl
+                                      << m_muonPrinter->print(seg2) << endmsg;
                 return 3;
             }
         }

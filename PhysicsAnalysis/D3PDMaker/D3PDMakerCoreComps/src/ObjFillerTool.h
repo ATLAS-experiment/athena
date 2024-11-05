@@ -47,7 +47,7 @@ class ID3PD;
  * to each.
  */
 class ObjFillerTool
-  : public extends2<AthAlgTool, IObjFillerTool, IIncidentListener>,
+  : public extends<AthAlgTool, IObjFillerTool, IIncidentListener>,
     public AddVariable
 {
 public:

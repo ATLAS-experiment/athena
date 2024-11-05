@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi includes
@@ -12,7 +12,7 @@
 // Athena includes
 #include "AthenaKernel/errorcheck.h"
 
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "ByteStreamCnvSvcBase/ByteStreamCnvSvcBase.h" 
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h" 
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h" 
@@ -60,8 +60,7 @@ void TileRecyclableL2Container::recycle()
 TileL2ContByteStreamCnv::TileL2ContByteStreamCnv(ISvcLocator* svcloc)
   : AthConstConverter(storageType(), classID(), svcloc, "TileL2ContByteStreamCnv")
   , m_tool("TileL2ContByteStreamTool")
-  , m_byteStreamEventAccess("ByteStreamCnvSvc", name())
-  , m_byteStreamCnvSvc(0)
+  , m_byteStreamCnvSvc("ByteStreamCnvSvc", name())
   , m_storeGate("StoreGateSvc", name())
   , m_robSvc("ROBDataProviderSvc", name())
   , m_decoder("TileROD_Decoder")
@@ -80,8 +79,7 @@ StatusCode TileL2ContByteStreamCnv::initialize() {
   ATH_MSG_DEBUG(" initialize ");
 
   // Get ByteStreamCnvSvc
-  ATH_CHECK( m_byteStreamEventAccess.retrieve() );
-  m_byteStreamCnvSvc = dynamic_cast<ByteStreamCnvSvc*>(&*m_byteStreamEventAccess);
+  ATH_CHECK( m_byteStreamCnvSvc.retrieve() );
 
   // retrieve Tool
   ATH_CHECK( m_decoder.retrieve() );

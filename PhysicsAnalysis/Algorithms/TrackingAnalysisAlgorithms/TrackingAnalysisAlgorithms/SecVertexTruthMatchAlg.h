@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKINGANALYSISALGORITHMS_SECVERTEXTRUTHMATCHALG_H
@@ -53,8 +53,8 @@ namespace CP {
 
     ToolHandle<IInDetSecVtxTruthMatchTool> m_matchTool{this, "MatchTool", "InDetSecVtxTruthMatchTool"};
 
-    void fillRecoHistograms(const xAOD::Vertex* secVtx, std::string matchType);
-    void fillTruthHistograms(const xAOD::TruthVertex* truthVtx, std::string truthType);
+    void fillRecoHistograms(const xAOD::Vertex* secVtx, const std::string& matchType);
+    void fillTruthHistograms(const xAOD::TruthVertex* truthVtx, const std::string& truthType);
 
   };
 } // namespace CP

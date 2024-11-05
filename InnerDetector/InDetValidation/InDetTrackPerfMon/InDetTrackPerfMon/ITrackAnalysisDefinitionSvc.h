@@ -67,6 +67,7 @@ public:
   virtual bool plotTechnicalEfficiencies() const = 0;
   virtual bool plotResolutions() const = 0;
   virtual bool plotFakeRates() const = 0;
+  virtual bool unlinkedAsFakes() const = 0;
   virtual bool plotDuplicateRates() const = 0;
   virtual bool plotHitsOnTracks() const = 0;
   virtual bool plotHitsOnTracksReference() const = 0;

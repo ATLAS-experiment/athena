@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_IMUONSEGMENTCONVERTERTOOL_H
@@ -12,30 +12,27 @@
 #include "AthLinks/ElementLink.h"
 #include "TrkSegment/SegmentCollection.h"
 
-static const InterfaceID IID_IMuonSegmentConverterTool("Muon::IMuonSegmentConverterTool",1,0);
+
 
 namespace xAODMaker {
   /** Interface for tools calculating hit count summaries for track */
   class IMuonSegmentConverterTool : virtual public IAlgTool {      
   public:
+    virtual ~IMuonSegmentConverterTool() = default;
     /** IAlgTool interface */
-    static const InterfaceID& interfaceID();
+    DeclareInterfaceID(xAODMaker::IMuonSegmentConverterTool, 1, 0);
 
     /** @brief convert a ElementLink to a Trk::Segment (should be of type MuonSegment) to a xAOD::MuonSegment, the segment is add to the container if provided 
         so the caller should not delete it */
     virtual xAOD::MuonSegment* convert( const ElementLink< ::Trk::SegmentCollection >& segLink, 
-					xAOD::MuonSegmentContainer* container = 0 ) const = 0;
+					                              xAOD::MuonSegmentContainer* container = nullptr ) const = 0;
 
     /** @brief convert a Muon::MuonSegment to a xAOD::MuonSegment, the segment is add to the container if provided 
         so the caller should not delete it */
     virtual xAOD::MuonSegment* convert( const Muon::MuonSegment& seg, 
-					xAOD::MuonSegmentContainer* container = 0 ) const = 0;
+					                              xAOD::MuonSegmentContainer* container = nullptr ) const = 0;
   };
   
-  inline const InterfaceID& IMuonSegmentConverterTool::interfaceID()
-  {
-    return IID_IMuonSegmentConverterTool;
-  }
 
 } // end of name space
 

@@ -11,7 +11,7 @@
 #include <string>
 #include <atomic>
 
-class G4InitTool: virtual public extends1<AthAlgTool, IThreadInitTool> {
+class G4InitTool: virtual public extends<AthAlgTool, IThreadInitTool> {
 
 public:
   G4InitTool( const std::string&, const std::string&, const IInterface* );

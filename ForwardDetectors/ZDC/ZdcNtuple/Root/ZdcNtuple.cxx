@@ -12,6 +12,7 @@
 
 #include <ZdcNtuple/ZdcNtuple.h>
 #include <ZdcUtils/ZdcEventInfo.h>
+#include <ZdcConditions/ZdcInjPulserAmpMap.h>
 
 // this is needed to distribute the algorithm to the workers
 //ClassImp(ZdcNtuple)
@@ -42,8 +43,9 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   declareProperty("useGRL",  useGRL = true, "comment");
   declareProperty("grlFilename",  grlFilename = "$ROOTCOREBIN/data/ZdcNtuple/data16_hip8TeV.periodAllYear_DetStatus-v86-pro20-19_DQDefects-00-02-04_PHYS_HeavyIonP_All_Good.xml", "comment");
   declareProperty("slimmed",  slimmed = false, "comment");
-  declareProperty("zdcCalib",  zdcCalib = false, "comment");
-  declareProperty("zdcLaser",  zdcLaser = false, "comment");
+  declareProperty("zdcCalib",  zdcCalib = false, "zdc/ZDCCalib file");
+  declareProperty("zdcInj",  zdcInj = false, "ZDC injected pulse");
+  declareProperty("zdcLaser",  zdcLaser = false, "Run 2 ZDC Laser");
   declareProperty("zdcOnly", zdcOnly = false, "comment");
   declareProperty("zdcLowGainMode",  zdcLowGainMode = 0, "comment");
 
@@ -109,6 +111,7 @@ StatusCode ZdcNtuple :: initialize ()
     m_outputTree->Branch("lumiBlock", &t_lumiBlock, "lumiBlock/i");
     m_outputTree->Branch("bunchGroup", &t_bunchGroup, "bunchGroup/b");
     m_outputTree->Branch("bcid", &t_bcid, "bcid/i");
+    if (zdcInj) m_outputTree->Branch("vInj",&t_vInj,"vInj/F");
     m_outputTree->Branch("avgIntPerCrossing", &t_avgIntPerCrossing, "avgIntPerCrossing/F");
     m_outputTree->Branch("actIntPerCrossing", &t_actIntPerCrossing, "actIntPerCrossing/F");
     m_outputTree->Branch("trigger", &t_trigger, "trigger/l");
@@ -242,7 +245,7 @@ StatusCode ZdcNtuple :: initialize ()
       m_outputTree->Branch("zdc_cosDeltaReactionPlaneAngle", &t_cosDeltaReactionPlaneAngle, "zdc_cosDeltaReactionPlaneAngle/F");
     }
 
-    if (!(zdcCalib || zdcLaser || zdcOnly))
+    if (!(zdcCalib || zdcLaser || zdcOnly || zdcInj))
     {
       m_outputTree->Branch("mbts_in_e", &t_mbts_in_e, "mbts_in_e[2][8]/F");
       m_outputTree->Branch("mbts_in_t", &t_mbts_in_t, "mbts_in_t[2][8]/F");
@@ -394,6 +397,7 @@ StatusCode ZdcNtuple :: initialize ()
   ANA_MSG_INFO("enableOutputSamples = " << enableOutputSamples);
   ANA_MSG_INFO("enableTrigger = " << enableTrigger);
   ANA_MSG_INFO("zdcCalib = " << zdcCalib);
+  ANA_MSG_INFO("zdcInj = " << zdcInj);
   ANA_MSG_INFO("zdcLaser = " << zdcLaser);
   ANA_MSG_INFO("zdcConfig = " << zdcConfig);
   ANA_MSG_INFO("reprocZdc = " << reprocZdc);
@@ -486,7 +490,11 @@ StatusCode ZdcNtuple :: initialize ()
     ANA_MSG_INFO("Trying to initialize ZDC Analysis Tool!");
     ANA_CHECK(m_zdcAnalysisTool.initialize());
   }
-  
+  if (zdcInj)
+    {
+      m_zdcInjPulserAmpMap = std::make_shared<ZdcInjPulserAmpMap>();
+      ATH_MSG_INFO( "Using JSON file for injector-pulse voltage at path " << m_zdcInjPulserAmpMap->getFilePath() );
+    }
   
   return StatusCode::SUCCESS;
 }
@@ -516,7 +524,7 @@ StatusCode ZdcNtuple :: execute ()
 
   m_trackParticles = 0;
 
-  if (!(zdcCalib || zdcLaser || zdcOnly))
+  if (!(zdcCalib || zdcLaser || zdcOnly || zdcInj))
   {
     ANA_MSG_DEBUG("Trying to extract InDetTrackParticles from evtStore()=" << evtStore());
     ANA_CHECK(evtStore()->retrieve( m_trackParticles, "InDetTrackParticles") );
@@ -548,7 +556,7 @@ StatusCode ZdcNtuple :: execute ()
     processMCEventCollection();
   }
 
-  if (!(zdcCalib || zdcLaser || zdcOnly))
+  if (!(zdcCalib || zdcLaser || zdcOnly || zdcInj))
   {
 
     // PLEASE NOTE: the commented sections here will be restored once we have a better sense of the Run 3 HI data
@@ -1163,6 +1171,10 @@ void ZdcNtuple::processEventInfo()
   t_runNumber = m_eventInfo->runNumber();
   t_eventNumber = m_eventInfo->eventNumber();
   t_lumiBlock = m_eventInfo->lumiBlock();
+  if (zdcInj)
+    {
+      t_vInj = m_zdcInjPulserAmpMap->getPulserAmplitude(t_lumiBlock);
+    }
   t_bunchGroup = -1;
   t_extendedLevel1ID = m_eventInfo->extendedLevel1ID();
   t_timeStamp = m_eventInfo->timeStamp();

@@ -17,7 +17,7 @@
 #include <vector>
 #include <mutex>
 
-class ASCIICondDbSvc: public extends1<AthService, IASCIICondDbSvc> {
+class ASCIICondDbSvc: public extends<AthService, IASCIICondDbSvc> {
 public:
 
   ASCIICondDbSvc(const std::string& name, ISvcLocator* svc);

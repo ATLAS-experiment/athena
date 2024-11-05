@@ -98,7 +98,7 @@ namespace Muon {
         ATH_CHECK(m_trackingVolumesSvc.retrieve());
         ATH_CHECK(m_printer.retrieve());
         ATH_CHECK(m_extrapolator.retrieve());
-        ATH_CHECK(m_mdtRotCreator.retrieve());
+
 
         ATH_CHECK(m_key_csc.initialize(!m_key_csc.empty()));
         ATH_CHECK(m_key_stgc.initialize(!m_key_stgc.empty()));
@@ -110,7 +110,9 @@ namespace Muon {
 
         ATH_CHECK(m_cscRotCreator.retrieve(DisableTool{m_key_csc.empty()}));
 
-        ATH_CHECK(m_clusRotCreator.retrieve());
+        const bool hasClusKey = !m_key_stgc.empty() || !m_key_mm.empty() || !m_key_tgc.empty() || !m_key_rpc.empty();
+        ATH_CHECK(m_clusRotCreator.retrieve(EnableTool{hasClusKey}));
+        ATH_CHECK(m_mdtRotCreator.retrieve(EnableTool{!m_key_mdt.empty()}));
         ATH_CHECK(m_pullCalculator.retrieve());
 
         ATH_CHECK(m_chamberGeoKey.initialize());

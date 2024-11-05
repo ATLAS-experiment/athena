@@ -45,6 +45,9 @@ class FPGATrackSimTrack {
   float getOrigChi2() const { return m_origchi2; }
   float getChi2ndof() const { return m_chi2 / (getNCoords() - m_nmissing - 5); }
   float getOrigChi2ndof() const { return m_origchi2 / (getNCoords() - m_nmissing - 5); }
+  int getSubRegion() const { return m_subregion; }
+  unsigned getHoughXBin() const { return m_xBin; }
+  unsigned getHoughYBin() const { return m_yBin; }
 
   int   getNMissing() const { return m_nmissing; } // missing coordinates
   unsigned int getTypeMask() const { return m_typemask; }
@@ -101,6 +104,10 @@ class FPGATrackSimTrack {
   void setUniqueID(const HepMcParticleLink::barcode_type& v) { m_uniqueID = v; }
   void setBarcodeFrac(const float& v) { m_barcode_frac = v; }
 
+  void setSubRegion(unsigned v) { m_subregion = v; }
+  void setHoughXBin(unsigned v) { m_xBin = v; }
+  void setHoughYBin(unsigned v) { m_yBin = v;}
+
   void setValidCand(bool v)   { m_isValidCand = v; }
   void setIdealRadii(const std::vector<double>& v) { m_idealRadii = v; }
 
@@ -151,6 +158,13 @@ class FPGATrackSimTrack {
   unsigned int m_typemask = 0; // set on in bits related to the step recovery were used, ex.: 0 no recovery, 01, rec 1st step, 11, recovery in the 1st and the 2nd stage
   unsigned int m_hitmap = 0;
 
+  // Subregion (aka slice) number of the corresponding road.
+  int m_subregion = 0;
+
+  // Hough x, y bin numbers (needed for recreation of roads in extrapolation)
+  unsigned m_xBin = 0;
+  unsigned m_yBin = 0;
+
   std::vector<FPGATrackSimHit> m_hits; //[m_nlayers] hits associated to the track
 
   signed long m_eventindex = -1; // matched particle event index
@@ -174,7 +188,7 @@ class FPGATrackSimTrack {
   // There is currently only one algorithm
   unsigned int m_ORcode = 1; // Each digit should represent pass/fail(1/0) result from a specific OR algorithm
 
-  ClassDefNV(FPGATrackSimTrack, 4)
+  ClassDefNV(FPGATrackSimTrack, 5)
 };
 
 #endif // TRIGFPGATrackSimOBJECTS_FPGATrackSimTRACK_H

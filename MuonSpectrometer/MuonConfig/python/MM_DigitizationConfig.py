@@ -70,7 +70,7 @@ def MM_DigitizationToolCfg(flags, name="MM_DigitizationTool", **kwargs):
         result.merge(AtlasFieldCacheCondAlgCfg(flags))   
         kwargs.setdefault("CheckSimHits", True)
         the_tool = CompFactory.MM_DigitizationTool(name, **kwargs)
-    else:
+    elif flags.Muon.doFastMMDigitization:
         kwargs.setdefault("StreamName", "MmSimForklift")
         kwargs.setdefault("SimHitKey", "xMmSimHits")    
         """
@@ -86,6 +86,24 @@ def MM_DigitizationToolCfg(flags, name="MM_DigitizationTool", **kwargs):
         from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
         result.merge(ActsGeometryContextAlgCfg(flags))
         the_tool = CompFactory.MuonR4.MmFastDigiTool(name, **kwargs)
+    else:
+        from MuonConfig.MuonCalibrationConfig import NSWCalibToolCfg, MMCalibSmearingToolCfg  
+        kwargs.setdefault("CalibrationTool", result.popToolsAndMerge(NSWCalibToolCfg(flags)))
+        kwargs.setdefault("SmearingTool", result.popToolsAndMerge(MMCalibSmearingToolCfg(flags)))
+        result.merge(AtlasFieldCacheCondAlgCfg(flags))   
+        kwargs.setdefault("CheckSimHits", True)
+
+        kwargs.setdefault("StreamName", "MmSimForklift")
+        kwargs.setdefault("SimHitKey", "xMmSimHits")
+
+        kwargs.setdefault("EffiDataKey", "")
+        
+        from MuonConfig.MuonCalibrationConfig import NswErrorCalibDbAlgCfg
+        result.merge(NswErrorCalibDbAlgCfg(flags))
+        from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+        result.merge(ActsGeometryContextAlgCfg(flags))
+        the_tool = CompFactory.MuonR4.MM_DigitizationTool(name, **kwargs)
+
 
     result.setPrivateTools(the_tool)
     return result

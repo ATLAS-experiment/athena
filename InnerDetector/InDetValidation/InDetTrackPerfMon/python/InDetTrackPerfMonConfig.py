@@ -109,6 +109,7 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
     kwargs.setdefault( "plotTechnicalEfficiencies", flags.PhysVal.IDTPM.currentTrkAna.plotTechnicalEfficiencies )
     kwargs.setdefault( "plotResolutions", flags.PhysVal.IDTPM.currentTrkAna.plotResolutions )
     kwargs.setdefault( "plotFakeRates", flags.PhysVal.IDTPM.currentTrkAna.plotFakeRates )
+    kwargs.setdefault( "unlinkedAsFakes", flags.PhysVal.IDTPM.currentTrkAna.unlinkedAsFakes )
     kwargs.setdefault( "plotDuplicateRates", flags.PhysVal.IDTPM.currentTrkAna.plotDuplicateRates )
     kwargs.setdefault( "plotHitsOnTracks", flags.PhysVal.IDTPM.currentTrkAna.plotHitsOnTracks )
     kwargs.setdefault( "plotHitsOnTracksReference", flags.PhysVal.IDTPM.currentTrkAna.plotHitsOnTracksReference )

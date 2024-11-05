@@ -21,8 +21,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 // ByteStream
-#include "ByteStreamCnvSvc/IByteStreamInputSvc.h"
-#include "ByteStreamCnvSvc/IByteStreamOutputSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamInputSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamOutputSvc.h"
 
 #include <string>
 #include <vector>

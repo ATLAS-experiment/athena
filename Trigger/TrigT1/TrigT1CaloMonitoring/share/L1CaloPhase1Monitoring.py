@@ -61,14 +61,15 @@ else:
 parser = flags.getArgumentParser(epilog="""
 Extra flags are specified after a " -- " and the following are most relevant bool flags for this script:
   
-  Trigger.enableL1CaloPhase1 : turn on/off the offline simulation
-  DQ.doMonitoring            : turn on/off the monitoring
-  Trigger.L1.doCaloInputs    : controls input readout decoding and monitoring
-  Trigger.L1.doeFex          : controls efex simulation and monitoring
-  Trigger.L1.dojFex          : controls jfex simulation and monitoring
-  Trigger.L1.dogFex          : controls gfex simulation and monitoring
-  DQ.useTrigger              : controls if JetEfficiency monitoring alg is run or not (default is false)
-  PerfMon.doFullMonMT        : if true, gives extra printout about execution time of algorithms and memory use etc
+  Trigger.enableL1CaloPhase1 : turn on/off the offline simulation [default: True]
+  DQ.doMonitoring            : turn on/off the monitoring [default: True]
+  Trigger.L1.doCaloInputs    : controls input readout decoding and monitoring [default: True]
+  Trigger.L1.doCalo          : controls trex (legacy syst) monitoring  [default: True]
+  Trigger.L1.doeFex          : controls efex simulation and monitoring [default: True]
+  Trigger.L1.dojFex          : controls jfex simulation and monitoring [default: True]
+  Trigger.L1.dogFex          : controls gfex simulation and monitoring [default: True]
+  DQ.useTrigger              : controls if JetEfficiency monitoring alg is run or not  [default: False]
+  PerfMon.doFullMonMT        : print info about execution time of algorithms and memory use etc [default: False]
 
 E.g. to run just the jFex monitoring, without offline simulation, you can do:
 
@@ -244,7 +245,10 @@ if partition.isValid() or (flags.Input.Format != Format.POOL and not flags.Input
 # rerun sim if required
 if flags.Trigger.enableL1CaloPhase1:
   from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
-  cfg.merge(L1CaloFEXSimCfg(flags,outputSuffix="DAODSim" if flags.Input.Format == Format.POOL else ""))
+  # note to self ... could look into input key remapping to avoid conflict with sim from input:
+  #   from SGComps.AddressRemappingConfig import InputRenameCfg
+  #   acc.merge(InputRenameCfg('xAOD::TriggerTowerContainer', 'xAODTriggerTowers_rerun', 'xAODTriggerTowers'))
+  cfg.merge(L1CaloFEXSimCfg(flags,outputSuffix="_ReSim" if flags.Input.Format == Format.POOL else ""))
 
   # do otf masking:
   # from IOVDbSvc.IOVDbSvcConfig import addFolders,addOverride
@@ -260,6 +264,19 @@ if flags.Trigger.enableL1CaloPhase1:
 
 
 if flags.DQ.doMonitoring:
+  if flags.Trigger.L1.doCalo:
+    from TrigT1CaloMonitoring.PprMonitorAlgorithm import PprMonitoringConfig
+    cfg.merge(PprMonitoringConfig(flags))
+    from TrigT1CaloMonitoring.PPMSimBSMonitorAlgorithm import PPMSimBSMonitoringConfig
+    cfg.merge(PPMSimBSMonitoringConfig(flags))
+    from TrigT1CaloMonitoring.OverviewMonitorAlgorithm import OverviewMonitoringConfig
+    cfg.merge(OverviewMonitoringConfig(flags))
+    # CPM was disabled for run 480893 onwards, so stop monitoring that part
+    # could have used detectorMask to determine if CPM is disabled, but will just assume it here
+    OverviewMonAlg = cfg.getEventAlgo("OverviewMonAlg")
+    OverviewMonAlg.CPMErrorLocation = ""
+    OverviewMonAlg.CPMMismatchLocation = ""
+
   if flags.Trigger.L1.doeFex:
     from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringConfig
     cfg.merge(EfexMonitoringConfig(flags))
@@ -269,7 +286,7 @@ if flags.DQ.doMonitoring:
     EfexMonAlg.eFexTauTobKeyList = ['L1_eTauRoI', 'L1_eTauxRoI']
     #  Adjust eFEX containers to be monitored to also monitor the sim RoI unless running on raw without simulation
     if flags.Input.Format == Format.POOL or flags.Trigger.enableL1CaloPhase1:
-      for l in [EfexMonAlg.eFexEMTobKeyList,EfexMonAlg.eFexTauTobKeyList]: l += [x + ("DAODSim" if flags.Input.Format == Format.POOL and flags.Trigger.enableL1CaloPhase1 else "Sim") for x in l ]
+      for l in [EfexMonAlg.eFexEMTobKeyList,EfexMonAlg.eFexTauTobKeyList]: l += [x + ("_ReSim" if flags.Input.Format == Format.POOL and flags.Trigger.enableL1CaloPhase1 else "Sim") for x in l ]
     # monitoring of simulation vs hardware
     if not flags.Input.isMC and flags.Trigger.enableL1CaloPhase1:
       from TrigT1CaloMonitoring.EfexSimMonitorAlgorithm import EfexSimMonitoringConfig
@@ -357,33 +374,69 @@ if type(args.dbOverrides)==list:
 # configure output AOD if requested
 if flags.Output.AODFileName != "":
   def addEDM(edmType, edmName):
+    if edmName.endswith("Sim") and flags.Input.Format == Format.POOL: edmName = edmName.replace("Sim","_ReSim")
     auxType = edmType.replace('Container','AuxContainer')
     return [f'{edmType}#{edmName}', f'{auxType}#{edmName}Aux.']
 
   outputEDM = []
-  outputEDM += addEDM('xAOD::jFexTowerContainer'   , "L1_jFexDataTowers")
-  outputEDM += addEDM('xAOD::jFexTowerContainer'   , "L1_jFexEmulatedTowers")
-  outputEDM += addEDM('xAOD::jFexSRJetRoIContainer', 'L1_jFexSRJetRoISim')
-  outputEDM += addEDM('xAOD::jFexLRJetRoIContainer', 'L1_jFexLRJetRoISim')
-  outputEDM += addEDM('xAOD::jFexTauRoIContainer'  , 'L1_jFexTauRoISim'  )
-  outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElRoISim')
-  outputEDM += addEDM('xAOD::jFexSumETRoIContainer', 'L1_jFexSumETRoISim')
-  outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETRoISim'  )
-  outputEDM += addEDM('xAOD::jFexSRJetRoIContainer', 'L1_jFexSRJetRoI')
-  outputEDM += addEDM('xAOD::jFexLRJetRoIContainer', 'L1_jFexLRJetRoI')
-  outputEDM += addEDM('xAOD::jFexTauRoIContainer'  , 'L1_jFexTauRoI'  )
-  outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElRoI')
-  outputEDM += addEDM('xAOD::jFexSumETRoIContainer', 'L1_jFexSumETRoI')
-  outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETRoI'  )
 
-  outputEDM += addEDM('xAOD::jFexSRJetRoIContainer', 'L1_jFexSRJetxRoI')
-  outputEDM += addEDM('xAOD::jFexLRJetRoIContainer', 'L1_jFexLRJetxRoI')
-  outputEDM += addEDM('xAOD::jFexTauRoIContainer'  , 'L1_jFexTauxRoI'  )
-  outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElxRoI')
-  outputEDM += addEDM('xAOD::jFexSumETRoIContainer', 'L1_jFexSumETxRoI')
-  outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETxRoI'  )
+  if flags.Trigger.L1.doeFex:
+    outputEDM += addEDM('xAOD::eFexEMRoIContainer'   , "L1_eEMRoI")
+    outputEDM += addEDM('xAOD::eFexEMRoIContainer'   , "L1_eEMRoISim")
+    outputEDM += addEDM('xAOD::eFexEMRoIContainer'   , "L1_eEMxRoI")
+    outputEDM += addEDM('xAOD::eFexEMRoIContainer'   , "L1_eEMxRoISim")
+
+    outputEDM += addEDM('xAOD::eFexTauRoIContainer'   , "L1_eTauRoI")
+    outputEDM += addEDM('xAOD::eFexTauRoIContainer'   , "L1_eTauRoISim")
+    outputEDM += addEDM('xAOD::eFexTauRoIContainer'   , "L1_eTauxRoI")
+    outputEDM += addEDM('xAOD::eFexTauRoIContainer'   , "L1_eTauxRoISim")
+
+  if flags.Trigger.L1.dojFex:
+    outputEDM += addEDM('xAOD::jFexTowerContainer'   , "L1_jFexDataTowers")
+    outputEDM += addEDM('xAOD::jFexTowerContainer'   , "L1_jFexEmulatedTowers")
+    outputEDM += addEDM('xAOD::jFexSRJetRoIContainer', 'L1_jFexSRJetRoISim')
+    outputEDM += addEDM('xAOD::jFexLRJetRoIContainer', 'L1_jFexLRJetRoISim')
+    outputEDM += addEDM('xAOD::jFexTauRoIContainer'  , 'L1_jFexTauRoISim'  )
+    outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElRoISim')
+    outputEDM += addEDM('xAOD::jFexSumETRoIContainer', 'L1_jFexSumETRoISim')
+    outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETRoISim'  )
+    outputEDM += addEDM('xAOD::jFexSRJetRoIContainer', 'L1_jFexSRJetRoI')
+    outputEDM += addEDM('xAOD::jFexLRJetRoIContainer', 'L1_jFexLRJetRoI')
+    outputEDM += addEDM('xAOD::jFexTauRoIContainer'  , 'L1_jFexTauRoI'  )
+    outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElRoI')
+    outputEDM += addEDM('xAOD::jFexSumETRoIContainer', 'L1_jFexSumETRoI')
+    outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETRoI'  )
+
+    outputEDM += addEDM('xAOD::jFexSRJetRoIContainer', 'L1_jFexSRJetxRoI')
+    outputEDM += addEDM('xAOD::jFexLRJetRoIContainer', 'L1_jFexLRJetxRoI')
+    outputEDM += addEDM('xAOD::jFexTauRoIContainer'  , 'L1_jFexTauxRoI'  )
+    outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElxRoI')
+    outputEDM += addEDM('xAOD::jFexSumETRoIContainer', 'L1_jFexSumETxRoI')
+    outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETxRoI'  )
+
+  if flags.Trigger.L1.dogFex:
+    outputEDM += addEDM('xAOD::gFexGlobalRoIContainer','L1_gMETComponentsJwoj')
+    outputEDM += addEDM('xAOD::gFexGlobalRoIContainer','L1_gMETComponentsJwojSim')
+    outputEDM += addEDM('xAOD::gFexGlobalRoIContainer','L1_gMHTComponentsJwoj')
+    outputEDM += addEDM('xAOD::gFexGlobalRoIContainer','L1_gMHTComponentsJwojSim')
+    outputEDM += addEDM('xAOD::gFexGlobalRoIContainer','L1_gMSTComponentsJwoj')
+    outputEDM += addEDM('xAOD::gFexGlobalRoIContainer','L1_gMSTComponentsJwojSim')
+    outputEDM += addEDM('xAOD::gFexGlobalRoIContainer','L1_gScalarEJwoj')
+    outputEDM += addEDM('xAOD::gFexGlobalRoIContainer','L1_gScalarEJwojSim')
+    outputEDM += addEDM('xAOD::gFexGlobalRoIContainer','L1_gScalarENoiseCutSim')
+    outputEDM += addEDM('xAOD::gFexGlobalRoIContainer','L1_gScalarERmsSim')
+
+    outputEDM += addEDM('xAOD::gFexJetRoIContainer','L1_gFexLRJetRoI')
+    outputEDM += addEDM('xAOD::gFexJetRoIContainer','L1_gFexLRJetRoISim')
+    outputEDM += addEDM('xAOD::gFexJetRoIContainer','L1_gFexSRJetRoI')
+    outputEDM += addEDM('xAOD::gFexJetRoIContainer','L1_gFexSRJetRoISim')
+    outputEDM += addEDM('xAOD::gFexJetRoIContainer','L1_gFexRhoRoI')
+    outputEDM += addEDM('xAOD::gFexJetRoIContainer','L1_gFexRhoRoISim')
+
+
+
   from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-  cfg.merge(OutputStreamCfg(flags, 'AOD', ItemList=outputEDM))
+  cfg.merge(OutputStreamCfg(flags, 'AOD', ItemList=outputEDM, takeItemsFromInput=True))
   from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
   cfg.merge(SetupMetaDataForStreamCfg(flags, 'AOD'))
 
@@ -412,12 +465,16 @@ print("Configured Services:",*[svc.name for svc in cfg.getServices()])
 #print("Configured EventAlgos:",*[alg.name for alg in cfg.getEventAlgos()])
 #print("Configured CondAlgos:",*[alg.name for alg in cfg.getCondAlgos()])
 
-cfg.getService("StoreGateSvc").Dump=(flags.Exec.MaxEvents==1)
+if flags.Exec.MaxEvents==1:
+  # special debugging mode
+  cfg.getService("StoreGateSvc").Dump=True
+  cfg.getService("DetectorStore").Dump=True
 
 # ensure printout level is low enough if dumping
 if cfg.getService("StoreGateSvc").Dump:
   cfg.getService("StoreGateSvc").OutputLevel=3
-
+if cfg.getService("DetectorStore").Dump:
+  cfg.getService("DetectorStore").OutputLevel=3
 
 if flags.Exec.MaxEvents==0:
   # create a han config file if running in config-only mode

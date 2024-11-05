@@ -15,7 +15,7 @@
 #include "TrigT1CaloUtils/TriggerTowerKey.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
-#include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "ByteStreamData/RawEvent.h"
 #include "AthContainers/DataVector.h"
 #include "eformat/SourceIdentifier.h"
@@ -83,7 +83,7 @@ class CpByteStreamV1Tool : public AthAlgTool {
    const std::vector<uint32_t>& sourceIDs() const;
 
  private:
-   ServiceHandle<ByteStreamCnvSvc> m_byteStreamCnvSvc
+   ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc
    { this, "ByteStreamCnvSvc", "ByteStreamCnvSvc" };
 
    struct LocalData

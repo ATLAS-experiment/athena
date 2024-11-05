@@ -55,7 +55,7 @@ def StandardTLAJetsCfg(ConfigFlags):
 
 ## Custom functions for handling TLA truth jets (and related truth content) for MC
 ## designed to remove large-R jets that are un-needed at the moment
-from DerivationFrameworkMCTruth.MCTruthCommonConfig import (HepMCtoXAODTruthCfg, PreJetMCTruthAugmentationsCfg, PostJetMCTruthAugmentationsCfg, AddTruthCollectionNavigationDecorationsCfg, AddBosonsAndDownstreamParticlesCfg, AddBSMAndDownstreamParticlesCfg, AddTruthEnergyDensityCfg, AddHardScatterCollectionCfg)
+from DerivationFrameworkMCTruth.MCTruthCommonConfig import (HepMCtoXAODTruthCfg, PreJetMCTruthAugmentationsCfg, PostJetMCTruthAugmentationsCfg, AddTruthCollectionNavigationDecorationsCfg, AddBosonsAndDownstreamParticlesCfg, AddBSMAndDownstreamParticlesCfg, AddTruthEnergyDensityCfg)
 
 def AddTLATruthJetsCfg(flags):
     acc = ComponentAccumulator()
@@ -133,7 +133,7 @@ def AddStandardTLATruthContentsCfg(flags,
     # Should photons that are dressed onto taus also be removed from truth jets?
     if includeTausInDressingPhotonRemoval:
         acc.getPublicTool("DFCommonTruthTauDressingTool").decorationName=decorationDressing
-    acc.addEventAlgo(CompFactory.DerivationFramework.LockDecoration(name ="AddStandardTLATruthContentsLockDecoration", Decoration = 'TruthParticles.' + decorationDressing))
+    acc.addEventAlgo(CompFactory.DerivationFramework.LockDecorations(name ="AddStandardTLATruthContentsLockDecoration", Decorations = ['TruthParticles.' + decorationDressing]))
 
     # Add back the navigation contect for the collections we want
     acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, ["TruthElectrons", "TruthMuons", "TruthPhotons", "TruthTaus", "TruthNeutrinos", "TruthBSM", "TruthBottom", "TruthTop", "TruthBoson"], prefix=prefix))
@@ -142,9 +142,6 @@ def AddStandardTLATruthContentsCfg(flags,
     
     # Special collection for BSM particles
     acc.merge(AddBSMAndDownstreamParticlesCfg(flags))
-
-    # Special collection for hard scatter (matrix element) - save TWO extra generations of particles
-    acc.merge(AddHardScatterCollectionCfg(flags, 2))
 
     # Energy density for isolation corrections
     if isEVNT: acc.merge(AddTruthEnergyDensityCfg(flags))

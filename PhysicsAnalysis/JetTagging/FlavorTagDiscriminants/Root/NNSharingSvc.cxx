@@ -19,11 +19,6 @@ namespace FlavorTagDiscriminants {
     }
   }
 
-  NNSharingSvc::NNSharingSvc(const std::string& name, ISvcLocator* svc):
-    AsgService(name, svc)
-  {
-    declareServiceInterface<INNSharingSvc>();
-  }
   std::shared_ptr<const GNN> NNSharingSvc::get(
     const std::string& nn_name,
     const GNNOptions& opts) {

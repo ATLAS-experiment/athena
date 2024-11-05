@@ -99,7 +99,7 @@ FPGATrackSimRoad FPGATrackSimPhiRoadFilterTool::buildRoad(std::shared_ptr<const 
     std::vector<std::shared_ptr<const FPGATrackSimHit>> road_hits;
     for (auto &hit : origr->getHits(lyr)) {
       float phi_expected = -1.0*asin(fpgatracksim::A * hit->getR() * qPt) + phi;
-      if (m_fieldCorrection) phi_expected  -= FPGATrackSimHoughTransformTool::fieldCorrection(m_EvtSel->getRegionID(), qPt, hit->getR());
+      if (m_fieldCorrection) phi_expected  -= fieldCorrection(m_EvtSel->getRegionID(), qPt, hit->getR());
       if (abs(hit->getGPhi()-phi_expected)< (m_window.value()[lyr]+qPt*m_ptscaling)) {
         road_hits.push_back(hit);
         hitLayers |= 1 << hit->getLayer();
@@ -113,7 +113,7 @@ FPGATrackSimRoad FPGATrackSimPhiRoadFilterTool::buildRoad(std::shared_ptr<const 
       road_hits.push_back(std::move(wcHit));
     }
     ATH_MSG_DEBUG("PhiRoad Hits " << lyr << " " << road_hits.size() << " " << origr->getHits(lyr).size());
-    r.setHits(lyr,road_hits);
+    r.setHits(lyr,std::move(road_hits));
   }
 
   r.setHitLayers(hitLayers);
