@@ -424,13 +424,7 @@ StatusCode LArPhysWavePredictor::stop()
           if(m_onlineHelper->isFCALchannel(chid)) {
              if(!m_isSC) continue; // Skip if it is FCAL ini standard readout
              LArPhysWave fcalw; 
-             // we have only 3 FCAL phys waves, according a layer
-             switch (layer) {
-                case 1: fcalw = fcalPhysWaves->get(HWIdentifier(0x3b300000),0); break;
-                case 2: fcalw = fcalPhysWaves->get(HWIdentifier(0x3b348000),0); break;
-                case 3: fcalw = fcalPhysWaves->get(HWIdentifier(0x3b368000),0); break;
-                default : ATH_MSG_ERROR("Wrong layer for FCAL SC: "<<layer<<" skipping channel 0x"<< MSG::hex << chid << MSG::dec); continue;
-             }
+             fcalw = fcalPhysWaves->get(chid,0);
                           
              // we need full length phys wave (truncation during merging
              if(fcalw.getSize()<768) {

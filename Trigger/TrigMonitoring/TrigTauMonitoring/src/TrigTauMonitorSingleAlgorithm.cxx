@@ -10,6 +10,47 @@ TrigTauMonitorSingleAlgorithm::TrigTauMonitorSingleAlgorithm(const std::string& 
 {}
 
 
+StatusCode TrigTauMonitorSingleAlgorithm::initialize()
+{
+    ATH_CHECK( TrigTauMonitorBaseAlgorithm::initialize() );
+
+    // Create the "cache" of TauID score accessors for the Monitoring...
+    for(const auto& [seq_name, m] : m_monitoredHLTIdScores) {
+        for(const auto& [key, p] : m) {
+            if(p.first.empty() || p.second.empty()) {
+                ATH_MSG_WARNING("Invalid HLT TauID score variable names; skipping this entry for the monitoring!");
+                continue;
+            }
+
+            m_monitoredHLTIdAccessors[seq_name].emplace(
+                key, 
+                std::make_pair(
+                    SG::AuxElement::ConstAccessor<float>(p.first),
+                    SG::AuxElement::ConstAccessor<float>(p.second)
+                )
+            );
+        }
+    }
+
+    for(const auto& [key, p] : m_monitoredOfflineIdScores) {
+        if(p.first.empty() || p.second.empty()) {
+            ATH_MSG_WARNING("Invalid Offline TauID score variable names; skipping this entry for the monitoring!");
+            continue;
+        }
+
+        m_monitoredOfflineIdAccessors.emplace(
+            key, 
+            std::make_pair(
+                SG::AuxElement::ConstAccessor<float>(p.first),
+                SG::AuxElement::ConstAccessor<float>(p.second)
+            )
+        );
+    }
+
+    return StatusCode::SUCCESS;
+}
+
+
 StatusCode TrigTauMonitorSingleAlgorithm::processEvent(const EventContext& ctx) const
 {
     constexpr float threshold_offset = 10.0;
@@ -43,45 +84,50 @@ StatusCode TrigTauMonitorSingleAlgorithm::processEvent(const EventContext& ctx) 
         std::vector<const xAOD::TauJet*> hlt_taus_1p = std::get<1>(hlt_taus);
         std::vector<const xAOD::TauJet*> hlt_taus_mp = std::get<2>(hlt_taus);
 
-	if(m_do_variable_plots) {
+        if(m_do_variable_plots) {
             // Offline variables:
             if(m_doOfflineTausDistributions && !offline_taus_1p.empty()) {
                 fillBasicVars(ctx, trigger, offline_taus_1p, "1P", false);
-                fillRNNInputVars(trigger, offline_taus_1p, "1P", false);
-                fillRNNTrack(trigger, offline_taus_1p, false);
-                fillRNNCluster(trigger, offline_taus_1p, false);
+                fillIDScores(trigger, offline_taus_1p, "1P", false);
+                fillIDInputVars(trigger, offline_taus_1p, "1P", false);
+                fillIDTrack(trigger, offline_taus_1p, false);
+                fillIDCluster(trigger, offline_taus_1p, false);
             }
             if(m_doOfflineTausDistributions && !offline_taus_3p.empty()) {
                 fillBasicVars(ctx, trigger, offline_taus_3p, "3P", false);
-                fillRNNInputVars(trigger, offline_taus_3p, "3P", false);
-                fillRNNTrack(trigger, offline_taus_3p, false);
-                fillRNNCluster(trigger, offline_taus_3p, false);
+                fillIDScores(trigger, offline_taus_3p, "3P", false);
+                fillIDInputVars(trigger, offline_taus_3p, "3P", false);
+                fillIDTrack(trigger, offline_taus_3p, false);
+                fillIDCluster(trigger, offline_taus_3p, false);
             }
 
             // Fill information for online 0 prong taus
             if(!hlt_taus_0p.empty()) {
                 fillBasicVars(ctx, trigger, hlt_taus_0p, "0P", true);
-                fillRNNInputVars(trigger, hlt_taus_0p, "0P", true);
-                fillRNNTrack(trigger, hlt_taus_0p, true);
-                fillRNNCluster(trigger, hlt_taus_0p, true);
+                fillIDScores(trigger, hlt_taus_0p, "0P", true);
+                fillIDInputVars(trigger, hlt_taus_0p, "0P", true);
+                fillIDTrack(trigger, hlt_taus_0p, true);
+                fillIDCluster(trigger, hlt_taus_0p, true);
             }
 
             // Fill information for online 1 prong taus
             if(!hlt_taus_1p.empty()) {
                 fillBasicVars(ctx, trigger, hlt_taus_1p, "1P", true);
-                fillRNNInputVars(trigger, hlt_taus_1p, "1P", true);
-                fillRNNTrack(trigger, hlt_taus_1p, true);
-                fillRNNCluster(trigger, hlt_taus_1p, true);
+                fillIDScores(trigger, hlt_taus_1p, "1P", true);
+                fillIDInputVars(trigger, hlt_taus_1p, "1P", true);
+                fillIDTrack(trigger, hlt_taus_1p, true);
+                fillIDCluster(trigger, hlt_taus_1p, true);
             }
 
             // Fill information for online multiprong prong taus 
             if(!hlt_taus_mp.empty()) {
                 fillBasicVars(ctx, trigger, hlt_taus_mp, "MP", true);
-                fillRNNInputVars(trigger, hlt_taus_mp, "MP", true);
-                fillRNNTrack(trigger, hlt_taus_mp, true);
-                fillRNNCluster(trigger, hlt_taus_mp, true);
+                fillIDScores(trigger, hlt_taus_mp, "MP", true);
+                fillIDInputVars(trigger, hlt_taus_mp, "MP", true);
+                fillIDTrack(trigger, hlt_taus_mp, true);
+                fillIDCluster(trigger, hlt_taus_mp, true);
             }
-	}
+	    }
 
         if(m_do_efficiency_plots && hlt_not_prescaled_flag) {
             fillHLTEfficiencies(ctx, trigger, l1_accept_flag, offline_taus_1p, hlt_taus_all, "1P");
@@ -162,11 +208,11 @@ void TrigTauMonitorSingleAlgorithm::fillHLTEfficiencies(const EventContext& ctx,
 }
 
 
-void TrigTauMonitorSingleAlgorithm::fillRNNInputVars(const std::string& trigger, const std::vector<const xAOD::TauJet*>& tau_vec,const std::string& nProng, bool online) const
+void TrigTauMonitorSingleAlgorithm::fillIDInputVars(const std::string& trigger, const std::vector<const xAOD::TauJet*>& tau_vec,const std::string& nProng, bool online) const
 {
-    ATH_MSG_DEBUG("Fill RNN input variables: " << trigger);
+    ATH_MSG_DEBUG("Fill ID input variables: " << trigger);
 
-    auto monGroup = getGroup(trigger+"_RNN_"+(online ? "HLT" : "Offline")+"_InputScalar_"+nProng);  
+    auto monGroup = getGroup(trigger+"_ID_"+(online ? "HLT" : "Offline")+"_InputScalar_"+nProng);  
 
     auto centFrac           = Monitored::Collection("centFrac", tau_vec, [](const xAOD::TauJet* tau){
                                                         float detail = -999;
@@ -227,22 +273,22 @@ void TrigTauMonitorSingleAlgorithm::fillRNNInputVars(const std::string& trigger,
     
     fill(monGroup, centFrac, etOverPtLeadTrk, dRmax, absipSigLeadTrk, sumPtTrkFrac, emPOverTrkSysP, ptRatioEflowApprox, mEflowApprox, ptDetectorAxis, massTrkSys, trFlightPathSig);     
 
-    ATH_MSG_DEBUG("After fill RNN input variables: " << trigger);
+    ATH_MSG_DEBUG("After fill ID input variables: " << trigger);
 }
 
 
-void TrigTauMonitorSingleAlgorithm::fillRNNTrack(const std::string& trigger, const std::vector<const xAOD::TauJet*>& tau_vec, bool online) const
+void TrigTauMonitorSingleAlgorithm::fillIDTrack(const std::string& trigger, const std::vector<const xAOD::TauJet*>& tau_vec, bool online) const
 {
-    ATH_MSG_DEBUG("Fill RNN input Track: " << trigger);
+    ATH_MSG_DEBUG("Fill ID input Track: " << trigger);
 
-    auto monGroup = getGroup(trigger+"_RNN_"+(online ? "HLT" : "Offline")+"_InputTrack");  
+    auto monGroup = getGroup(trigger+"_ID_"+(online ? "HLT" : "Offline")+"_InputTrack");  
 
     auto track_pt_jetseed_log = Monitored::Collection("track_pt_jetseed_log", tau_vec, [](const xAOD::TauJet* tau){ return std::log10(tau->ptJetSeed()); });
     fill(monGroup, track_pt_jetseed_log);
 
     for(const auto *tau : tau_vec) {
         // Don't call ->allTracks() unless the element links are valid
-        const SG::AuxElement::ConstAccessor< std::vector<ElementLink<xAOD::TauTrackContainer>> > tauTrackAcc("tauTrackLinks");
+        static const SG::AuxElement::ConstAccessor< std::vector<ElementLink<xAOD::TauTrackContainer>> > tauTrackAcc("tauTrackLinks");
         bool linksValid = true;
         for(const ElementLink<xAOD::TauTrackContainer>& trackEL : tauTrackAcc(*tau)) {
             if(!trackEL.isValid()) {
@@ -250,7 +296,6 @@ void TrigTauMonitorSingleAlgorithm::fillRNNTrack(const std::string& trigger, con
                 break;
             }
         }
-
         if(!linksValid) {
             ATH_MSG_WARNING("Invalid track element links from TauJet in " << trigger);
             continue;
@@ -259,16 +304,18 @@ void TrigTauMonitorSingleAlgorithm::fillRNNTrack(const std::string& trigger, con
         auto tracks = tau->allTracks();
         std::sort(tracks.begin(), tracks.end(), [](const xAOD::TauTrack* lhs, const xAOD::TauTrack* rhs){ return lhs->pt() > rhs->pt(); });
                                 
-        auto n_track = Monitored::Scalar<int>("n_track",0);
-        n_track = tracks.size();
+        auto n_track = Monitored::Scalar<int>("n_track", tracks.size());
 
         auto track_pt_log = Monitored::Collection("track_pt_log", tracks, [](const xAOD::TauTrack *track){ return std::log10(track->pt()); }); 
         auto track_eta = Monitored::Collection("track_eta", tracks, [](const xAOD::TauTrack *track){ return track->eta(); });
         auto track_phi = Monitored::Collection("track_phi", tracks, [](const xAOD::TauTrack *track){ return track->phi(); }); 
+
         auto track_dEta = Monitored::Collection("track_dEta", tracks, [&tau](const xAOD::TauTrack *track){ return track->eta() - tau->eta(); });
         auto track_dPhi = Monitored::Collection("track_dPhi", tracks, [&tau](const xAOD::TauTrack *track){ return track->p4().DeltaPhi(tau->p4()); });
+
         auto track_z0sinthetaTJVA_abs_log = Monitored::Collection("track_z0sinthetaTJVA_abs_log", tracks, [](const xAOD::TauTrack *track){return track->z0sinthetaTJVA(); }); 
         auto track_d0_abs_log = Monitored::Collection("track_d0_abs_log", tracks, [](const xAOD::TauTrack *track){ return std::log10(std::abs(track->track()->d0()) + 1e-6); }); 
+
         auto track_nIBLHitsAndExp = Monitored::Collection("track_nIBLHitsAndExp", tracks, [](const xAOD::TauTrack *track){
                                                             uint8_t inner_pixel_hits, inner_pixel_exp;
                                                             const auto success1_innerPixel_hits = track->track()->summaryValue(inner_pixel_hits, xAOD::numberOfInnermostPixelLayerHits);
@@ -297,15 +344,15 @@ void TrigTauMonitorSingleAlgorithm::fillRNNTrack(const std::string& trigger, con
         fill(monGroup, n_track, track_pt_log, track_eta, track_phi, track_dEta, track_dPhi, track_z0sinthetaTJVA_abs_log, track_d0_abs_log, track_nIBLHitsAndExp, track_nPixelHitsPlusDeadSensors, track_nSCTHitsPlusDeadSensors);
     }
 
-    ATH_MSG_DEBUG("After fill RNN input Track: " << trigger);
+    ATH_MSG_DEBUG("After fill ID input Track: " << trigger);
 }
 
 
-void TrigTauMonitorSingleAlgorithm::fillRNNCluster(const std::string& trigger, const std::vector<const xAOD::TauJet*>& tau_vec, bool online) const
+void TrigTauMonitorSingleAlgorithm::fillIDCluster(const std::string& trigger, const std::vector<const xAOD::TauJet*>& tau_vec, bool online) const
 {
-    ATH_MSG_DEBUG("Fill RNN input Cluster: " << trigger << " for online/offline " << online);
+    ATH_MSG_DEBUG("Fill ID input Cluster: " << trigger << " for online/offline " << online);
     
-    auto monGroup = getGroup(trigger+"_RNN_"+(online ? "HLT" : "Offline")+"_InputCluster");  
+    auto monGroup = getGroup(trigger+"_ID_"+(online ? "HLT" : "Offline")+"_InputCluster");  
     
     for(const auto *tau : tau_vec){
         auto cluster_pt_jetseed_log = Monitored::Collection("cluster_pt_jetseed_log", tau_vec, [](const xAOD::TauJet* tau){ return std::log10(tau->ptJetSeed()); });
@@ -349,7 +396,7 @@ void TrigTauMonitorSingleAlgorithm::fillRNNCluster(const std::string& trigger, c
         fill(monGroup, n_cluster, cluster_pt_jetseed_log, cluster_et_log, cluster_eta, cluster_phi, cluster_dEta, cluster_dPhi, cluster_SECOND_R_log10, cluster_SECOND_LAMBDA_log10, cluster_CENTER_LAMBDA_log10);
     }
 
-    ATH_MSG_DEBUG("After fill RNN input Cluster: " << trigger);
+    ATH_MSG_DEBUG("After fill ID input Cluster: " << trigger);
 }
 
 
@@ -361,17 +408,14 @@ void TrigTauMonitorSingleAlgorithm::fillBasicVars(const EventContext& ctx, const
 
     auto Pt = Monitored::Collection("Pt", tau_vec, [](const xAOD::TauJet* tau){ return tau->pt()/Gaudi::Units::GeV; });
     auto Eta = Monitored::Collection("Eta", tau_vec, [](const xAOD::TauJet* tau){ return tau->eta(); });                                                     
-
     auto Phi = Monitored::Collection("Phi", tau_vec, [](const xAOD::TauJet* tau){ return tau->phi(); });
+
     auto nTrack = Monitored::Collection("nTrack", tau_vec, [](const xAOD::TauJet* tau){
                                             int nTrack = -1;
                                             tau->detail(xAOD::TauJetParameters::nChargedTracks, nTrack);
                                             return nTrack;
                                             });
-    auto nWideTrack = Monitored::Collection("nWideTrack", tau_vec, [](const xAOD::TauJet* tau){ return tau->nTracksIsolation(); });
-
-    auto RNNScore = Monitored::Collection("RNNScore", tau_vec, [](const xAOD::TauJet* tau){ return tau->discriminant(xAOD::TauJetParameters::RNNJetScore); });
-    auto RNNScoreSigTrans = Monitored::Collection("RNNScoreSigTrans", tau_vec, [](const xAOD::TauJet* tau){ return tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans); });
+    auto nIsoTrack = Monitored::Collection("nIsoTrack", tau_vec, [](const xAOD::TauJet* tau){ return tau->nTracksIsolation(); });
 
     auto averageMu = Monitored::Scalar<float>("averageMu", 0.0);
     averageMu = lbAverageInteractionsPerCrossing(ctx);
@@ -381,22 +425,61 @@ void TrigTauMonitorSingleAlgorithm::fillBasicVars(const EventContext& ctx, const
                                                 if(tau->vertex() != nullptr) vtx = tau->vertex()->x();
                                                 return vtx;
                                             });
-
     auto TauVertexY = Monitored::Collection("TauVertexY", tau_vec, [](const xAOD::TauJet* tau){
                                                 double vty = -999;
                                                 if(tau->vertex() != nullptr) vty = tau->vertex()->y();
                                                 return vty;
                                             });
-    
     auto TauVertexZ = Monitored::Collection("TauVertexZ", tau_vec, [](const xAOD::TauJet* tau){
                                                 double vtz = -999;
                                                 if(tau->vertex() != nullptr) vtz = tau->vertex()->z();
                                                 return vtz;
                                             });
 
-    fill(monGroup, Pt, Eta, Phi, nTrack, nWideTrack, RNNScore, RNNScoreSigTrans, averageMu, TauVertexX, TauVertexY, TauVertexZ);
+    fill(monGroup, Pt, Eta, Phi, nTrack, nIsoTrack, averageMu, TauVertexX, TauVertexY, TauVertexZ);
 
     ATH_MSG_DEBUG("After fill Basic variables: " << trigger);
+}
+
+
+void TrigTauMonitorSingleAlgorithm::fillIDScores(const std::string& trigger, const std::vector<const xAOD::TauJet*>& tau_vec, const std::string& nProng, bool online) const
+{
+    ATH_MSG_DEBUG("Fill TauID Scores: " << trigger); 
+
+    const TrigTauInfo& info = getTrigInfo(trigger);
+    const std::string tau_id = info.getHLTTauID();
+    bool store_all = tau_id == "idperf" || tau_id == "perf";
+
+    if(online) {
+        if(m_monitoredHLTIdAccessors.find(info.getHLTTauType()) == m_monitoredHLTIdAccessors.end()) return;
+    } else {
+        if(m_monitoredOfflineIdAccessors.size() == 0) return;
+    }
+    const auto& idAccessors = online ? m_monitoredHLTIdAccessors.at(info.getHLTTauType()) : m_monitoredOfflineIdAccessors;
+
+    // This has to be down here, because otherwise we crash on unmonitored chains
+    auto monGroup = getGroup(trigger+"_"+(online ? "HLT" : "Offline")+"_IDScores_"+nProng);
+
+    for(const auto& [key, p] : idAccessors) {
+        // We will either store the TauID scores indicated in the chain name, or all of them in case of (id)perf chains
+        if(online && !store_all && tau_id != key) continue;
+           
+        std::vector<float> score, score_sig_trans;
+
+        for(const xAOD::TauJet* tau : tau_vec) {
+            // Skip if both the Score and ScoreSigTrans aren't available
+            if(!p.first.isAvailable(*tau) || !p.second.isAvailable(*tau)) continue;
+
+            score.push_back(p.first(*tau));
+            score_sig_trans.push_back(p.second(*tau));
+        }
+
+        auto IDScore = Monitored::Collection(key + "_TauIDScore", score);
+        auto IDScoreSigTrans = Monitored::Collection(key + "_TauIDScoreSigTrans", score_sig_trans);
+        fill(monGroup, IDScore, IDScoreSigTrans);
+    }
+
+    ATH_MSG_DEBUG("After fill TauID Scores: " << trigger);
 }
 
 

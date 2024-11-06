@@ -27,6 +27,8 @@ public:
     inline const std::vector<float>& getHLTTauThresholds() const { return m_HLTThr; }
     inline const std::string getHLTTauType() const { return m_HLTTauTypes.size() ? m_HLTTauTypes[0] : ""; } // Returns the main HLT tau leg type
     inline const std::vector<std::string>& getHLTTauTypes() const { return m_HLTTauTypes; }
+    inline const std::string getHLTTauID() const { return m_HLTTauIDs.size() ? m_HLTTauIDs[0] : ""; } // Returns the main HLT tau leg ID algorithm
+    inline const std::vector<std::string>& getHLTTauIDs() const { return m_HLTTauIDs; }
 
     inline const std::string& getTriggerL1Name() const { return m_L1Item; }
     inline const std::vector<std::string>& getTriggerL1Items() const { return m_L1Items; }
@@ -71,6 +73,7 @@ private:
     bool m_isStreamer = false; // Is a streamer HLT trigger
     std::vector<float> m_HLTThr; // List of all tau thresholds
     std::vector<std::string> m_HLTTauTypes; // Type for each tau leg (e.g. tracktwoMVA, trackwoLLP, etc...)
+    std::vector<std::string> m_HLTTauIDs; // Tau ID algorithm for each tau leg (e.g. DeepSet, RNNLLP, GNTau, etc...)
 
     std::string m_L1Item; // full L1 trigger string (e.g. L1eTAU20, or L1eTAU80_2eTAU60)
     std::vector<std::string> m_L1Items; // full L1 trigger items
