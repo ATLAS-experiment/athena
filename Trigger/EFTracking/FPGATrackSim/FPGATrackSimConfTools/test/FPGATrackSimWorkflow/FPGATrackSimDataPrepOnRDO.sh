@@ -7,7 +7,8 @@ RDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking
 # instructions on how to change version of files can be found in https://twiki.cern.ch/twiki/bin/view/Atlas/EFTrackingSoftware
 MAP_VERSION="v0.20"
 export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/:$CALIBPATH
-MAPS="maps_9L/DataPreparation/${MAP_VERSION}/"
+MAPS="maps_9L/OtherFPGAPipelines/${MAP_VERSION}"
+
 
 if [ -z $1 ]; then
     xAODOutput="FPGATrackSimCITestAOD.root"
