@@ -184,6 +184,9 @@ void PFChargedFlowElementCreatorAlgorithm::createChargedFlowElements(const eflow
 
       const static SG::AuxElement::Accessor<float > accPull15("Pull15");
       accPull15(*thisFE) = efRecTrack->getpull15();
+
+      const static SG::AuxElement::Accessor<std::vector<std::pair<ElementLink<CaloCellContainer>, double> > > accSubtractedCaloCells("SubtractedCaloCells");
+      accSubtractedCaloCells(*thisFE) = efRecTrack->getSubtractedCaloCells();
     }
 
   }//loop over eflowRecTracks

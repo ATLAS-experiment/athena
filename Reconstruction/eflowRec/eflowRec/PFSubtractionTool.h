@@ -60,6 +60,8 @@ private:
   static std::string printCluster(const xAOD::CaloCluster* cluster);
   void printAllClusters(const eflowRecClusterContainer& recClusterContainer) const;
 
+  void addSubtractedCells(eflowCaloObject& thisEflowCaloObject, const std::vector<std::pair<xAOD::CaloCluster *, bool> >& clusterList) const;
+
   /** Tool for getting e/p values and hadronic shower cell ordering principle parameters */
   ToolHandle<IEFlowCellEOverPTool> m_theEOverPTool{this, "eflowCellEOverPTool", "eflowCellEOverPTool", "Energy Flow E/P Values and Shower Parameters Tool"};
 

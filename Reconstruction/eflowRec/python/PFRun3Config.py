@@ -110,6 +110,10 @@ def PFCfg(inputFlags,**kwargs):
       #this allows clients of the AOD to calculate deltaRPrime for track-calocluster pairs.
       PFClusterWidthDecorator = CompFactory.PFClusterWidthDecorator()
       result.addEventAlgo(PFClusterWidthDecorator)
+      #For the CP data we need to keep all the CaloCells and write to AOD
+      from TrigGepPerf.KeepCellsConfig import KeepCellsCfg
+      result.merge(KeepCellsCfg(inputFlags))
+      toESDAndAOD += ["CaloCellContainer#AllCalo"]
 
     result.merge(addToESD(inputFlags, toESDAndAOD))
     result.merge(addToAOD(inputFlags, toESDAndAOD))
@@ -120,9 +124,6 @@ def PFCfg(inputFlags,**kwargs):
     if "StreamESD" not in inputFlags.Input.ProcessingTags:
       from ThinningUtils.ThinNegativeEnergyNeutralPFOCfg import ThinNegativeEnergyNeutralPFOCfg
       result.merge(ThinNegativeEnergyNeutralPFOCfg(inputFlags))
-
-    if inputFlags.PF.addCPData:
-      result.addEventAlgo(CompFactory.PFlowCellCPDataDecoratorAlgorithm())
 
     return result
 
