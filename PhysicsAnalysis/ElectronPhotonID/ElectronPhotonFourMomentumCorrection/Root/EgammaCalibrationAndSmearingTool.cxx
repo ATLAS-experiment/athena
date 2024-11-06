@@ -1091,6 +1091,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
   energy = m_rootTool->getCorrectedEnergy(
       runNumber_for_tool, dataType, xAOD2ptype(input),
       input.caloCluster()->eta(),
+      input.caloCluster()->etaBE(2),
       xAOD::get_eta_calo(*input.caloCluster(), input.author(), false), energy,
       Es2Acc.isAvailable(*input.caloCluster())
           ? Es2Acc(*input.caloCluster())

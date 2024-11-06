@@ -414,7 +414,7 @@ class egammaEnergyCorrectionTool : public asg::AsgMessaging {
 
   double getCorrectedEnergy(
       unsigned int runnumber, PATCore::ParticleDataType::DataType dataType,
-      PATCore::ParticleType::Type ptype, double cl_eta, double cl_etaCalo,
+      PATCore::ParticleType::Type ptype, double cl_eta, double cl_etaS2,double cl_etaCalo,
       double energy, double energyS2, double eraw, RandomNumber seed,
       egEnergyCorr::Scale::Variation scaleVar = egEnergyCorr::Scale::None,
       egEnergyCorr::Resolution::Variation resVar =
@@ -466,14 +466,14 @@ class egammaEnergyCorrectionTool : public asg::AsgMessaging {
   std::unique_ptr<e1hg_systematics> m_e1hg_tool;
 
   double getAlphaValue(
-      long int runnumber, double cl_eta, double cl_etaCalo, double energy,
+      long int runnumber, double cl_eta, double cl_etaS2, double cl_etaCalo, double energy,
       double energyS2, double eraw,
       PATCore::ParticleType::Type ptype = PATCore::ParticleType::Electron,
       egEnergyCorr::Scale::Variation var = egEnergyCorr::Scale::Nominal,
       double varSF = 1.) const;
 
   double getAlphaUncertainty(
-      long int runnumber, double cl_eta, double cl_etaCalo, double energy,
+      long int runnumber, double cl_eta, double cl_etaS2, double cl_etaCalo, double energy,
       double energyS2, double eraw,
       PATCore::ParticleType::Type ptype = PATCore::ParticleType::Electron,
       egEnergyCorr::Scale::Variation var = egEnergyCorr::Scale::Nominal,
