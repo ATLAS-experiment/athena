@@ -10,6 +10,7 @@
 #====================================================================
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from Campaigns.Utils import getMCCampaign, Campaign
 from PathResolver import PathResolver
 
 def read_trig_list_file(fname):
@@ -26,6 +27,23 @@ def read_trig_list_file(fname):
          triggers.append(line)
    return triggers
 
+def getDataYear(flags):
+    dataYear = 0
+    if flags.Input.isMC:
+        campaign = getMCCampaign(flags.Input.Files)
+        dataYear = {
+            Campaign.MC20a: 2016, # prefer over 2015
+            Campaign.MC20d: 2017,
+            Campaign.MC20e: 2018,
+            Campaign.MC21a: 2022,
+            Campaign.MC23a: 2022, 
+            Campaign.MC23d: 2023,
+            Campaign.MC23e: 2024,
+            Campaign.PhaseII: 2030,
+        }[campaign]
+    else:
+        dataYear = flags.Input.DataYear
+    return dataYear
 
 def AddRun2TriggerMatchingToSlimmingHelper(**kwargs):
     """Adds the trigger matching info to the slimming helper"""
@@ -48,7 +66,7 @@ def AddRun2TriggerMatchingToSlimmingHelper(**kwargs):
             }
         )
 
-def AddRun2L1JetRoIsToSlimmingHelper(**kwargs):
+def AddLegacyL1JetRoIsToSlimmingHelper(**kwargs):
     slimmingHelper = kwargs['SlimmingHelper']
     slimmingHelper.AppendToDictionary.update(
         {
@@ -57,6 +75,16 @@ def AddRun2L1JetRoIsToSlimmingHelper(**kwargs):
         }
     )
     slimmingHelper.AllVariables += ["LVL1JetRoIs"]
+
+def AddjFexRoIsToSlimmingHelper(**kwargs):
+    slimmingHelper = kwargs['SlimmingHelper']
+    slimmingHelper.AppendToDictionary.update(
+        {
+            "L1_jFexSRJetRoI":"xAOD::jFexSRJetRoIContainer",
+            "L1_jFexSRJetRoIAux":"xAOD::jFexSRJetRoIAuxContainer"
+        }
+    )
+    slimmingHelper.AllVariables += ["L1_jFexSRJetRoI"]
 
 
 def TriggerMatchingCommonRun2Cfg(ConfigFlags, name, **kwargs):
