@@ -15,5 +15,3 @@ atlas_add_component( xAODTauCnv
                      src/components/*.cxx
                      LINK_LIBRARIES xAODTauCnvLib xAODTau tauEvent AthenaBaseComps AthenaKernel GaudiKernel )
 
-# Install files from the package:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
