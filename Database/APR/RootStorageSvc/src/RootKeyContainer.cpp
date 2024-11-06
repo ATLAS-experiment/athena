@@ -104,7 +104,7 @@ DbStatus RootKeyContainer::transAct(Transaction::Action action)
 // Interface Implementation: Find entry in container
 DbStatus RootKeyContainer::fetch(const Token::OID_t& linkH, Token::OID_t& stmt) {
   char txt[64];
-  ::sprintf(txt, "_pool_valid_%08d", int(linkH.second));
+  ::sprintf(txt, "_pool_valid_%08d", static_cast<int>(linkH.second));
   TKey* key = (TKey*)m_dir->GetListOfKeys()->FindObject(txt);
   if ( key )    {
     stmt = linkH;
@@ -122,7 +122,7 @@ DbStatus RootKeyContainer::fetch(DbSelect& sel)   {
     const long long int cnt_size = nextRecordId()-stk_size;
     for(int j=lnk.second; j < cnt_size; ++j) {
       ++lnk.second;
-      ::sprintf(txt, "_pool_valid_%08d", int(lnk.second));
+      ::sprintf(txt, "_pool_valid_%08d", static_cast<int>(lnk.second));
       const TKey* key = (TKey*)m_dir->GetListOfKeys()->FindObject(txt);
       if ( key )    {
         const char* class_name = key->GetClassName();
@@ -178,7 +178,7 @@ DbStatus RootKeyContainer::load( void** ptr, ShapeH shape,
   oid.second = linkH.second;
   for(long long int cnt = oid.second,last=nextRecordId(); cnt <= last; ++cnt) {
     char txt[64];
-    ::sprintf(txt, "_pool_valid_%08d", int(oid.second));
+    ::sprintf(txt, "_pool_valid_%08d", static_cast<int>(oid.second));
     const TKey* key = (TKey*)m_dir->GetListOfKeys()->FindObject(txt);
     if ( key )    {
        sc = loadObject(ptr, shape, oid);
@@ -202,7 +202,7 @@ DbStatus RootKeyContainer::destroyObject(ActionList::value_type& entry) {
   char txt[64];
   const Token::OID_t& lnkH = entry.link;
   // Does not work, because container size is changed...
-  ::sprintf(txt, "_pool_valid_%08d", int(lnkH.second));
+  ::sprintf(txt, "_pool_valid_%08d", static_cast<int>(lnkH.second));
   TDirectory::TContext dirCtxt(m_dir);
   TKey* key = (TKey*)m_dir->GetListOfKeys()->FindObject(txt);
   if ( key )    {
@@ -224,7 +224,7 @@ DbStatus RootKeyContainer::loadObject( void** ptr, ShapeH shape,
                                        Token::OID_t&   oid )
 {
    char txt[64];
-   ::sprintf(txt, "_pool_valid_%08d", int(oid.second));
+   ::sprintf(txt, "_pool_valid_%08d", static_cast<int>(oid.second));
    TDirectory::TContext dirCtxt(m_dir->GetFile());
    TKey* key = (TKey*)m_dir->GetListOfKeys()->FindObject(txt);
    if ( key && ptr )    {
@@ -275,7 +275,7 @@ DbStatus RootKeyContainer::loadObject( void** ptr, ShapeH shape,
 DbStatus RootKeyContainer::writeObject(ActionList::value_type& action)   {
    if ( m_dir )  {
       char knam[64];
-      ::sprintf(knam, "_pool_valid_%08d", int(action.link.second));
+      ::sprintf(knam, "_pool_valid_%08d", static_cast<int>(action.link.second));
       auto typ = static_cast<const DbTypeInfo*>(action.shape);
       if ( 0 == typ )   {
          DbPrint log(m_name);

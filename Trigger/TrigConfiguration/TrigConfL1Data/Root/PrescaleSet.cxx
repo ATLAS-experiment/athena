@@ -96,11 +96,11 @@ void
 TrigConf::PrescaleSet::setCut(unsigned int ctpid, int32_t cut) {
    m_Cuts[ctpid] = cut;
 
-   float ps_f = getPrescaleFromCut(cut);
+   const float ps_f = getPrescaleFromCut(cut);
    m_Prescales_float[ctpid] = ps_f;
    
-   int sign = ps_f<0 ? -1 : 1;
-   int ps = sign * int(fabs(ps_f)+0.5);
+   const int sign = ps_f<0 ? -1 : 1;
+   int ps = sign * static_cast<int>(fabs(ps_f)+0.5);
 
    m_Prescales[ctpid] = ps;
 
