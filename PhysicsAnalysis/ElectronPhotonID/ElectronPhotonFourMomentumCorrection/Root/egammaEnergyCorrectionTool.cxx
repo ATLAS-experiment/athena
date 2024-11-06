@@ -1871,7 +1871,7 @@ double egammaEnergyCorrectionTool::getCorrectedMomentum(
 // flavours. Called internally by getCorrectedEnergy(...)
 double egammaEnergyCorrectionTool::getCorrectedEnergy(
     unsigned int runnumber, PATCore::ParticleDataType::DataType dataType,
-    PATCore::ParticleType::Type ptype, double cl_eta, double cl_etaCalo,
+    PATCore::ParticleType::Type ptype, double cl_eta, double cl_etaS2, double cl_etaCalo,
     double energy, double energyS2, double eraw, RandomNumber random_seed,
     egEnergyCorr::Scale::Variation scaleVar,
     egEnergyCorr::Resolution::Variation resVar,
@@ -1903,7 +1903,7 @@ double egammaEnergyCorrectionTool::getCorrectedEnergy(
 
     if (scaleVar == egEnergyCorr::Scale::Nominal) {
       double alpha =
-          getAlphaValue(runnumber, cl_eta, cl_etaCalo, fullyCorrectedEnergy,
+          getAlphaValue(runnumber, cl_eta, cl_etaS2, cl_etaCalo, fullyCorrectedEnergy,
                         energyS2, eraw, ptype, scaleVar, varSF);
       fullyCorrectedEnergy /= (1 + alpha);
       // apply additional k.E+b corrections if histograms exist (like in
@@ -1926,7 +1926,7 @@ double egammaEnergyCorrectionTool::getCorrectedEnergy(
 
     if (scaleVar != egEnergyCorr::Scale::None &&
         scaleVar != egEnergyCorr::Scale::Nominal) {
-      double deltaAlpha = getAlphaUncertainty(runnumber, cl_eta, cl_etaCalo,
+      double deltaAlpha = getAlphaUncertainty(runnumber, cl_eta, cl_etaS2, cl_etaCalo,
                                               fullyCorrectedEnergy, energyS2,
                                               eraw, ptype, scaleVar, varSF);
       ATH_MSG_DEBUG("alpha sys " << variationName(scaleVar) << " = "
@@ -1990,7 +1990,7 @@ double egammaEnergyCorrectionTool::getCorrectedEnergy(
 // variation
 
 double egammaEnergyCorrectionTool::getAlphaValue(
-    long int runnumber, double cl_eta, double cl_etaCalo,
+    long int runnumber, double cl_eta, double cl_etaS2, double cl_etaCalo,
     double energy,    // input energy (not ET!!)
     double energyS2,  // raw energy in S2
     double eraw, PATCore::ParticleType::Type ptype,
@@ -2188,7 +2188,7 @@ double egammaEnergyCorrectionTool::getAlphaValue(
   }
 
   // Leakage contribution (electron-photon difference)
-  double daLeakage = getAlphaLeakage2D(cl_eta, Et, ptype, var, varSF);
+  double daLeakage = getAlphaLeakage2D(cl_etaS2, Et, ptype, var, varSF);
 
   // L1 Gain switch contribution
 
@@ -2418,12 +2418,12 @@ double egammaEnergyCorrectionTool::getAlphaValue(
 // returns alpha_var - alpha_nom, for systematic variations.
 
 double egammaEnergyCorrectionTool::getAlphaUncertainty(
-    long int runnumber, double cl_eta, double cl_etaCalo, double energy,
+    long int runnumber, double cl_eta, double cl_etaS2, double cl_etaCalo, double energy,
     double energyS2, double eraw, PATCore::ParticleType::Type ptype,
     egEnergyCorr::Scale::Variation var, double varSF) const {
 
   double alphaNom =
-      getAlphaValue(runnumber, cl_eta, cl_etaCalo, energy, energyS2, eraw,
+      getAlphaValue(runnumber, cl_eta, cl_etaS2, cl_etaCalo, energy, energyS2, eraw,
                     ptype, egEnergyCorr::Scale::Nominal);
   double alphaVar = 0.;
 
@@ -2432,7 +2432,7 @@ double egammaEnergyCorrectionTool::getAlphaUncertainty(
       var != egEnergyCorr::Scale::AllCorrelatedUp and
       var != egEnergyCorr::Scale::AllCorrelatedDown) {
     // not an ALLUP
-    alphaVar = getAlphaValue(runnumber, cl_eta, cl_etaCalo, energy, energyS2,
+    alphaVar = getAlphaValue(runnumber, cl_eta, cl_etaS2, cl_etaCalo, energy, energyS2,
                              eraw, ptype, var, varSF) -
                alphaNom;
   } else if (var == egEnergyCorr::Scale::AllUp) {
@@ -2441,7 +2441,7 @@ double egammaEnergyCorrectionTool::getAlphaUncertainty(
          ivar = egEnergyCorr::Scale::Variation(ivar + 2)) {
       if (ivar == egEnergyCorr::Scale::ZeeAllUp)
         continue;
-      const double v = getAlphaValue(runnumber, cl_eta, cl_etaCalo, energy,
+      const double v = getAlphaValue(runnumber, cl_eta, cl_etaS2, cl_etaCalo, energy,
                                      energyS2, eraw, ptype, ivar, varSF) -
                        alphaNom;
       ATH_MSG_DEBUG("computing ALLUP, adding " << variationName(ivar) << ": "
@@ -2455,7 +2455,7 @@ double egammaEnergyCorrectionTool::getAlphaUncertainty(
          ivar = egEnergyCorr::Scale::Variation(ivar + 2)) {
       if (ivar == egEnergyCorr::Scale::ZeeAllDown)
         continue;
-      const double v = getAlphaValue(runnumber, cl_eta, cl_etaCalo, energy,
+      const double v = getAlphaValue(runnumber, cl_eta, cl_etaS2, cl_etaCalo, energy,
                                      energyS2, eraw, ptype, ivar, varSF) -
                        alphaNom;
       ATH_MSG_DEBUG("computing ALLDOWN, adding " << variationName(ivar) << ": "
@@ -2473,7 +2473,7 @@ double egammaEnergyCorrectionTool::getAlphaUncertainty(
           ivar == egEnergyCorr::Scale::LArTemperature2016PreUp or
           ivar == egEnergyCorr::Scale::E4ScintillatorUp)
         continue;
-      const double v = getAlphaValue(runnumber, cl_eta, cl_etaCalo, energy,
+      const double v = getAlphaValue(runnumber, cl_eta, cl_etaS2, cl_etaCalo, energy,
                                      energyS2, eraw, ptype, ivar, varSF) -
                        alphaNom;
       alphaVar += pow(v, 2);
@@ -2489,7 +2489,7 @@ double egammaEnergyCorrectionTool::getAlphaUncertainty(
           ivar == egEnergyCorr::Scale::LArTemperature2016PreDown or
           ivar == egEnergyCorr::Scale::E4ScintillatorDown)
         continue;
-      const double v = getAlphaValue(runnumber, cl_eta, cl_etaCalo, energy,
+      const double v = getAlphaValue(runnumber, cl_eta, cl_etaS2, cl_etaCalo, energy,
                                      energyS2, eraw, ptype, ivar, varSF) -
                        alphaNom;
       alphaVar += pow(v, 2);
