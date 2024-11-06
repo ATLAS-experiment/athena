@@ -83,6 +83,9 @@ namespace CP
 	//Physically it means that the resolution has caused the pT to be reconstructed with a flip of the charge.
 	//Therefore in addition to correcting the pT, a flip of the charge is also done through the calib_charge variable.
 
+    // First compute the calibrated CB pT under the recombination scheme with uncalibrated ID & ME pT
+    double corrCBpTWithIDME =  getCorrectedCBPtWithIDMSComb(mu, IDcorrConstants, MEcorrConstants);
+
         // Write the pT into the object (if negative pT, multiply it by -1)
 	//< 0.1 because sometimes the pT is -0.
         mu.ID.calib_pt = corrIDpT * ((corrIDpT < -0.1) ? -1 : 1);
@@ -93,7 +96,6 @@ namespace CP
         mu.ME.calib_charge = mu.ME.uncalib_charge * ((corrMEpT < -0.1) ? -1 : 1);
 	mu.CB.calib_charge = mu.CB.uncalib_charge * ((corrCBpT < -0.1) ? -1 : 1);
 
-        double corrCBpTWithIDME =  getCorrectedCBPtWithIDMSComb(mu, IDcorrConstants, MEcorrConstants);
         if(!m_doDirectCBCalib) {
 	  mu.CB.calib_pt = corrCBpTWithIDME * ((corrCBpTWithIDME < -0.1) ? -1 : 1);
 	  mu.CB.calib_charge = mu.CB.uncalib_charge * ((corrCBpTWithIDME < -0.1) ? -1 : 1);
