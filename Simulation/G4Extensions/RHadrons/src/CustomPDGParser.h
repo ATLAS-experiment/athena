@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CustomPDGParser_h
@@ -12,8 +12,6 @@ class CustomPDGParser
 {
 public:
   static bool s_isRHadron(int pdg);
-  static bool s_isstopHadron(int pdg);
-  static bool s_issbottomHadron(int pdg) ;
   static bool s_isSLepton(int pdg);
   static bool s_isRBaryon(int pdg);
   static bool s_isRMeson(int pdg);
@@ -24,6 +22,10 @@ public:
   static double s_spin(int pdg);
   static std::vector<int> s_containedQuarks(int pdg);
   static int s_containedQuarksCode(int pdg);
+private:
+  // Only used by s_charge function
+  static bool s_isstopHadron(int pdg);
+  static bool s_issbottomHadron(int pdg) ;
 
 };
 
