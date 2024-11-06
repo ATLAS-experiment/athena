@@ -67,6 +67,7 @@ StatusCode BTaggingSelectionTool::initialize() {
   TString pathtofile =  PathResolverFindCalibFile(m_CutFileName);
   m_inf = TFile::Open(pathtofile, "read");
   if (0==m_inf) {
+
     ATH_MSG_ERROR( "BTaggingSelectionTool couldn't access tagging cut definitions" );
     return StatusCode::FAILURE;
   }
@@ -74,12 +75,12 @@ StatusCode BTaggingSelectionTool::initialize() {
   // check the CDI file for the selected tagger and jet collection
   TString check_CDI = m_taggerName;
   if(!m_inf->Get(check_CDI)){
-     ATH_MSG_ERROR( "Tagger: "+m_taggerName+" not found in this CDI file: "+m_CutFileName);
+    ATH_MSG_ERROR( "Tagger: "+m_taggerName+" not found in this CDI file: "+m_CutFileName);
     return StatusCode::FAILURE;
   }
   check_CDI = m_taggerName+"/"+m_jetAuthor;
   if(!m_inf->Get(check_CDI)){
-     ATH_MSG_ERROR( "Tagger: "+m_taggerName+" and Jet Collection : "+m_jetAuthor+"  not found in this CDI file: "+m_CutFileName);
+    ATH_MSG_ERROR( "Tagger: "+m_taggerName+" and Jet Collection : "+m_jetAuthor+"  not found in this CDI file: "+m_CutFileName);
     return StatusCode::FAILURE;
   }
  
@@ -94,10 +95,11 @@ StatusCode BTaggingSelectionTool::initialize() {
  }
  
  // Change the minPt cut if the user didn't touch it
- if (m_minPt < 0) {
-   ATH_MSG_ERROR( "Tagger: "+m_taggerName+" and Jet Collection : "+m_jetAuthor+" do not have a minimum jet pT cut set.");
-   return StatusCode::FAILURE;
+ if (m_minPt < 0){
+    ATH_MSG_ERROR( "Tagger: "+m_taggerName+" and Jet Collection : "+m_jetAuthor+" do not have a minimum jet pT cut set.");
+    return StatusCode::FAILURE;
  }
+
  
  // Operating point reading
  TString cutname = m_OP;
@@ -111,7 +113,7 @@ StatusCode BTaggingSelectionTool::initialize() {
    m_useCTag      = false; //important for backward compatibility in getTaggerWeight methods.
    cutname = m_taggerName+"/"+m_jetAuthor+"/Continuous2D/cutvalue";
    m_tagger.name = m_taggerName;
-   TMatrixD* matrix = (TMatrixD*) m_inf->Get(cutname);
+   TMatrixD* matrix = dynamic_cast<TMatrixD*> (m_inf->Get(cutname));
    m_tagger.cuts2D = matrix;
 
    for (int bin = 0; bin < m_tagger.cuts2D->GetNrows(); bin++)
@@ -120,35 +122,53 @@ StatusCode BTaggingSelectionTool::initialize() {
 		   <<m_tagger.get2DCutValue(bin,2) <<" "
 		   <<m_tagger.get2DCutValue(bin,3));
    
-   if (m_tagger.cuts2D == nullptr) ATH_MSG_ERROR( "Invalid operating point" );
+   if (m_tagger.cuts2D == nullptr){
+     ATH_MSG_ERROR( "Invalid operating point" );
+     return StatusCode::FAILURE;
+   }
    
    m_tagger.spline = nullptr;
    
    TString fraction_data_name = m_taggerName+"/"+m_jetAuthor+"/Continuous2D/fraction_b";
-   TVector *fraction_data = (TVector*) m_inf->Get(fraction_data_name);
-   if(fraction_data!=nullptr)
+   TVector *fraction_data = dynamic_cast<TVector*> (m_inf->Get(fraction_data_name));
+   if(fraction_data!=nullptr){
      m_tagger.fraction_b = fraction_data[0](0);
-   else
+   }
+   else{
      ATH_MSG_ERROR("Tagger fraction_b in Continuous2D WP not available");
+     return StatusCode::FAILURE;
+   }
    
    //now the c-fraction:
    fraction_data_name = m_taggerName+"/"+m_jetAuthor+"/Continuous2D/fraction_c";
-   fraction_data = (TVector*) m_inf->Get(fraction_data_name);
+   fraction_data = dynamic_cast<TVector*> (m_inf->Get(fraction_data_name));
    if(fraction_data!=nullptr){
      m_tagger.fraction_c = fraction_data[0](0);}
    else{
      ATH_MSG_ERROR("Tagger fraction_c in Continuous2D WP not available");
+     return StatusCode::FAILURE;
    }
    //now the tau-fraction if the tagger is GN2*:
    if ( m_taggerName == "GN2v01" ){
      fraction_data_name = m_taggerName+"/"+m_jetAuthor+"/Continuous2D/fraction_tau";
-     fraction_data = (TVector*) m_inf->Get(fraction_data_name);
+     TString fraction_data_name_cTag = m_taggerName+"/"+m_jetAuthor+"/Continuous2D/fraction_tau_cTag";
+     fraction_data = dynamic_cast<TVector*> (m_inf->Get(fraction_data_name));
+     TVector *fraction_data_cTag = dynamic_cast<TVector*> (m_inf->Get(fraction_data_name_cTag));
      if(fraction_data!=nullptr){
        m_tagger.fraction_tau = fraction_data[0](0);
      }else{
        ATH_MSG_ERROR("Tagger fraction_tau in Continuous2D WP not available");
+       return StatusCode::FAILURE;
      }
+     if(fraction_data_cTag!=nullptr){
+       m_tagger.fraction_tau_cTag = fraction_data_cTag[0](0);
+     }else{
+       ATH_MSG_ERROR("Tagger fraction_tau_cTag in Continuous2D WP not available");
+       return StatusCode::FAILURE;
+     }
+     delete fraction_data_cTag;
    }
+   delete fraction_data;
  } //Continuous2D
  else if ("Continuous"==cutname(0,10)){ // For continuous tagging load all flat-cut WPs
       if(m_useCTag)
@@ -162,22 +182,23 @@ StatusCode BTaggingSelectionTool::initialize() {
       std::reverse(workingpoints.begin(), workingpoints.end()); // put in descending order
       for(const std::string& wp : workingpoints){
         cutname = m_taggerName + "/" + m_jetAuthor + "/" + wp + "/cutvalue";
-        m_tagger.constcut = (TVector*) m_inf->Get(cutname);
+        m_tagger.constcut = dynamic_cast<TVector*> (m_inf->Get(cutname));
         if (m_tagger.constcut != nullptr) {
           m_continuouscuts.push_back(m_tagger.constcut[0](0));
         } else {
           ATH_MSG_ERROR( "Continuous tagging is trying to use an invalid operating point: " + wp );
+          return StatusCode::FAILURE;
         }
       }
 
       //The WP is not important. This is just to retrieve the c-fraction. 
-      ExtractTaggerProperties(m_tagger, m_taggerName, workingpoints.at(0));
+      ANA_CHECK(ExtractTaggerProperties(m_tagger, m_taggerName, workingpoints.at(0)));
 
  } else {  // FixedCut Working Point: load only one WP
     if(m_useCTag){
       ATH_MSG_WARNING( "Running in FixedCut WP and using c-tagging");
     }
-    ExtractTaggerProperties(m_tagger,m_taggerName, m_OP);
+    ANA_CHECK(ExtractTaggerProperties(m_tagger,m_taggerName, m_OP));
  }
 
  //set the accept working points, jets in these pseudo-continuous bins will be accepted
@@ -200,7 +221,7 @@ StatusCode BTaggingSelectionTool::initialize() {
  return StatusCode::SUCCESS;
 }
 
-void BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagger, const std::string& taggerName, const std::string& OP){
+StatusCode BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagger, const std::string& taggerName, const std::string& OP){
 
   TString cutname = OP;
 
@@ -209,14 +230,20 @@ void BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagger, co
 
   if ("FlatBEff"==cutname(0,8) || "HybBEff"==cutname(0,7) ){
     cutname = taggerName+"/"+m_jetAuthor+"/"+OP+"/cutprofile";
-    tagger.spline = (TSpline3*) m_inf->Get(cutname);
-    if (tagger.spline == nullptr) ATH_MSG_ERROR( "Invalid operating point" );
+    tagger.spline = dynamic_cast<TSpline3*> (m_inf->Get(cutname));
+    if (tagger.spline == nullptr){
+      ATH_MSG_ERROR( "Invalid operating point" );
+      return StatusCode::FAILURE;
+    }
     tagger.constcut = nullptr;
   }
   else {
     cutname = taggerName+"/"+m_jetAuthor+"/"+OP+"/cutvalue";
-    tagger.constcut = (TVector*) m_inf->Get(cutname);
-    if (tagger.constcut == nullptr) ATH_MSG_ERROR( "Invalid operating point" );
+    tagger.constcut = dynamic_cast<TVector*> (m_inf->Get(cutname));
+    if (tagger.constcut == nullptr){ 
+      ATH_MSG_ERROR( "Invalid operating point" );
+      return StatusCode::FAILURE;
+    }
     tagger.spline = nullptr;
   }
 
@@ -225,7 +252,7 @@ void BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagger, co
   if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) || (m_taggerEnum == Tagger::GN2)){
 
     TString fraction_data_name = taggerName+"/"+m_jetAuthor+"/"+OP+"/fraction";
-    TVector *fraction_data = (TVector*) m_inf->Get(fraction_data_name);
+    TVector *fraction_data = dynamic_cast<TVector*> (m_inf->Get(fraction_data_name));
     
     double fraction = -1;
     if(fraction_data!=nullptr){
@@ -239,16 +266,33 @@ void BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagger, co
     tagger.fraction_b = fraction;
 
     double fraction_tau = 0.;
+    double fraction_tau_cTag = 0.;
     TString fraction_tau_name = taggerName+"/"+m_jetAuthor+"/"+OP+"/fraction_tau";
-    TVector *fraction_tau_data = (TVector*) m_inf->Get(fraction_tau_name);
-    if( fraction_tau_data != nullptr ) {
-      fraction_tau = fraction_tau_data[0](0);
+    TVector *fraction_tau_data = dynamic_cast<TVector*> (m_inf->Get(fraction_tau_name));
+    if (m_taggerEnum == Tagger::GN2 && !(taggerName.find("GN2v00") != std::string::npos)){
+      if( fraction_tau_data != nullptr ) {
+        if (m_useCTag){
+          // tau fraction for c-tagging 
+          fraction_tau_cTag = fraction_tau_data[0](0);
+        }
+        else{
+          // tau fraction for b-tagging 
+          fraction_tau = fraction_tau_data[0](0);
+        }
+      }
+      else {
+        // For GN2v01 taggers and onwards the fraction_tau should be in the CDI file 
+        ATH_MSG_ERROR("Tagger fraction_tau is not available");
+        return StatusCode::FAILURE;
+      }
     }
     tagger.fraction_tau = fraction_tau;
+    tagger.fraction_tau_cTag = fraction_tau_cTag;
 
     delete fraction_data;
     delete fraction_tau_data;
   }
+  return StatusCode::SUCCESS;
 }
 
 CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, double & tagweight) const{
@@ -361,7 +405,7 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, dou
     }
 
     if(getCTagW){
-     tagweight = log(pc / (m_tagger.fraction_b * pb + (1. - m_tagger.fraction_b - m_tagger.fraction_tau) * pu + m_tagger.fraction_tau * ptau) );
+     tagweight = log(pc / (m_tagger.fraction_b * pb + (1. - m_tagger.fraction_b - m_tagger.fraction_tau_cTag) * pu + m_tagger.fraction_tau_cTag * ptau) );
     }
     else{
      tagweight = log(pb / (m_tagger.fraction_c * pc + (1. - m_tagger.fraction_c - m_tagger.fraction_tau) * pu + m_tagger.fraction_tau * ptau) );

@@ -19,6 +19,7 @@
 #include <set>
 #include <vector>
 #include <map>
+#include <limits>
 
 class BTaggingSelectionTool: public asg::AsgTool,
 			     public virtual IBTaggingSelectionTool,
@@ -91,12 +92,13 @@ private:
 
   struct taggerproperties{
     std::string  name;
-    double fraction_b;
-    double fraction_c;
-    double fraction_tau;
-    TSpline3*  spline;
-    TVector* constcut; 
-    TMatrixD*  cuts2D; //useful only in Continuous2D
+    double fraction_b = std::numeric_limits<double>::max(); 
+    double fraction_c = std::numeric_limits<double>::max();
+    double fraction_tau = std::numeric_limits<double>::max();
+    double fraction_tau_cTag = std::numeric_limits<double>::max();
+    TSpline3*  spline = nullptr;
+    TVector* constcut = nullptr;
+    TMatrixD*  cuts2D = nullptr; //useful only in Continuous2D
     std::vector<int>  benchmarks; //useful only in Continuous WP. list of bins that are considered as tagged. 
 
     double get2DCutValue(int row, int column) const{
@@ -123,7 +125,7 @@ private:
   };
   //get from the CDI file the taggers cut object(that holds the definition of cut values)
   //and flaovur fraction (for DL1 tagger) and store them in the right taggerproperties struct
-  void ExtractTaggerProperties(taggerproperties& tagger, const std::string& taggerName, const std::string& OP);
+  StatusCode ExtractTaggerProperties(taggerproperties& tagger, const std::string& taggerName, const std::string& OP);
 
   std::vector<std::string> split (const std::string &input, const char &delimiter);
 
