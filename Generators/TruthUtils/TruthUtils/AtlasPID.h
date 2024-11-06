@@ -643,22 +643,9 @@ namespace SUSY {
   template<> inline bool isRBaryon(const DecodedPID& p) { if (!isSUSY(p)) return false; auto pp = p.shift(1); if (pp.ndigits() < 2) return false; if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isBaryon(pp); }
   template<> inline bool isRBaryon(const int& p) { auto value_digits = DecodedPID(p); return isRBaryon(value_digits); }
 
-  template<class T> inline bool isRBottomHadron(const T& p) { return isRBottomHadron(p->pdg_id()); }
-  template<> inline bool isRBottomHadron(const DecodedPID& p) { if (!isSUSY(p)) return false; auto pp = p.shift(1); if (pp.ndigits() < 2) return false;if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isBottomHadron(pp); }
-  template<> inline bool isRBottomHadron(const int& p) { auto value_digits = DecodedPID(p); return isRBottomHadron(value_digits); }
-
-  template<class T> inline bool isRTopHadron(const T& p) { return isRTopHadron(p->pdg_id()); }
-  template<> inline bool isRTopHadron(const DecodedPID& p) { if (!isSUSY(p)) return false; auto pp = p.shift(1); if (pp.ndigits() < 2) return false;if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isTopHadron(pp); }
-  template<> inline bool isRTopHadron(const int& p) { auto value_digits = DecodedPID(p); return isRTopHadron(value_digits); }
-
-
   template<class T> inline bool isSLepton(const T& p) { return isSLepton(p->pdg_id()); }
   template<> inline bool isSLepton(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isLepton(pp);}
   template<> inline bool isSLepton(const int& p){ auto value_digits = DecodedPID(p); return isSLepton(value_digits);}
-
-  template<class T> inline bool isSTopHadron(const T& p) { return isSTopHadron(p->pdg_id()); }
-  template<> inline bool isSTopHadron(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isTopHadron(pp);}
-  template<> inline bool isSTopHadron(const int& p){ auto value_digits = DecodedPID(p); return isSTopHadron(value_digits);}
 
   template<class T> inline bool isSBaryon(const T& p) { return isSBaryon(p->pdg_id()); }
   template<> inline bool isSBaryon(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isBaryon(pp);}
@@ -668,28 +655,6 @@ namespace SUSY {
   template<class T> inline bool isSMeson(const T& p) { return isSMeson(p->pdg_id()); }
   template<> inline bool isSMeson(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isMeson(pp);}
   template<> inline bool isSMeson(const int& p){ auto value_digits = DecodedPID(p); return isSMeson(value_digits);}
-
-
-  template<class T> inline bool isSBottomHadron(const T& p) { return isSBottomHadron(p->pdg_id()); }
-  template<> inline bool isSBottomHadron(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isBottomHadron(pp);}
-  template<> inline bool isSBottomHadron(const int& p){ auto value_digits = DecodedPID(p); return isSBottomHadron(value_digits);}
-
-  template<class T> inline bool isSTopMeson(const T& p) { return isSTopMeson(p->pdg_id()); }
-  template<> inline bool isSTopMeson(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isTopMeson(pp);}
-  template<> inline bool isSTopMeson(const int& p){ auto value_digits = DecodedPID(p); return isSTopMeson(value_digits);}
-
-  template<class T> inline bool isSBottomMeson(const T& p) { return isSBottomMeson(p->pdg_id()); }
-  template<> inline bool isSBottomMeson(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isBottomMeson(pp);}
-  template<> inline bool isSBottomMeson(const int& p){ auto value_digits = DecodedPID(p); return isSBottomMeson(value_digits);}
-
-  template<class T> inline bool isSTopBaryon(const T& p) { return isSTopBaryon(p->pdg_id()); }
-  template<> inline bool isSTopBaryon(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isTopBaryon(pp);}
-  template<> inline bool isSTopBaryon(const int& p){ auto value_digits = DecodedPID(p); return isSTopBaryon(value_digits);}
-
-  template<class T> inline bool isSBottomBaryon(const T& p) { return isSBottomBaryon(p->pdg_id()); }
-  template<> inline bool isSBottomBaryon(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isBottomBaryon(pp);}
-  template<> inline bool isSBottomBaryon(const int& p){ auto value_digits = DecodedPID(p); return isSBottomBaryon(value_digits);}
-
 
   template<class T> inline bool spin(const T& p) { return spin(p->pdg_id()); }
   template<> inline bool spin(const int& p) { return p%10; }
