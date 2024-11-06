@@ -57,6 +57,12 @@ atlas_add_test( ITkStripCablingAlg_test
     InDetIdentifier
   POST_EXEC_SCRIPT nopost.sh
 )
+
+atlas_add_executable( ProduceDummyStripCabling
+  SOURCES src/OnlineIdGenerator.cxx utilities/ProduceDummyStripCabling.cxx 
+  LINK_LIBRARIES   IdDictParser ITkStripCablingLib  TestTools  InDetIdentifier 
+)
+
 atlas_install_joboptions(share/*.txt)
 atlas_install_runtime(share/*.dat)
 
