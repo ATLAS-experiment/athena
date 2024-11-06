@@ -96,7 +96,7 @@ def select_random(frac = None, input_data=None, output_file=None):
     IDs = []
 
     num = int(round(frac * len(data), 0))
-    IDs = random.choices(list(data.keys()), k=num)
+    IDs = random.sample(list(data.keys()), k=num)
 
     for ID, info in data.items():
         info["Decimal_ID"] = str(int(ID, 16))
