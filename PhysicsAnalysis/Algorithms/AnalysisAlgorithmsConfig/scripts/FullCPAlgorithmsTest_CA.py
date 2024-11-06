@@ -28,11 +28,8 @@ athArgsParser.add_argument("--dump-config", action="store", dest="dump_config",
 athArgsParser.add_argument("--data-type", action="store", dest="data_type",
                            default="data",
                            help="Type of input to run over. Valid options are 'data', 'fullsim', 'fastsim'")
-athArgsParser.add_argument('--block-config', dest='block_config',
-                           action='store_true', default=False,
-                           help='Configure the job with block configuration')
 athArgsParser.add_argument('--text-config', dest='text_config',
-                           action='store', default='',
+                           action='store', default=None,
                            help='Configure the job with the provided text configuration')
 athArgsParser.add_argument('--for-compare', dest='for_compare',
                            action='store_true', default=False,
@@ -49,7 +46,6 @@ athArgsParser.add_argument('--only-nominal-or', dest='onlyNominalOR',
 athArgs = flags.fillFromArgs(parser=athArgsParser)
 
 dataType = DataType(athArgs.data_type)
-blockConfig = athArgs.block_config
 textConfig = athArgs.text_config
 forCompare = athArgs.for_compare
 
@@ -85,7 +81,7 @@ cfg.merge(PoolReadCfg(flags))
 cfg.merge(CutFlowSvcCfg(flags))
 
 # Setup the configuration
-cp_cfg = makeSequence(dataType, blockConfig, textConfig,
+cp_cfg = makeSequence(dataType, yamlPath=textConfig,
                       forCompare=forCompare,
                       noSystematics=athArgs.no_systematics,
                       isPhyslite=athArgs.physlite,
@@ -95,12 +91,10 @@ cp_cfg = makeSequence(dataType, blockConfig, textConfig,
 cfg.merge(cp_cfg)
 
 # Set up a histogram output file for the job:
-if blockConfig:
-    outputFile = f"ANALYSIS DATAFILE='FullCPAlgorithmsConfigTest.{dataType.value}.hist.root' OPT='RECREATE'"
-elif textConfig:
+if textConfig:
     outputFile = f"ANALYSIS DATAFILE='FullCPAlgorithmsTextConfigTest.{dataType.value}.hist.root' OPT='RECREATE'"
 else:
-    outputFile = f"ANALYSIS DATAFILE='FullCPAlgorithmsTest.{dataType.value}.hist.root' OPT='RECREATE'"
+    outputFile = f"ANALYSIS DATAFILE='FullCPAlgorithmsConfigTest.{dataType.value}.hist.root' OPT='RECREATE'"
 if athArgs.output_file:
     outputFile = f"ANALYSIS DATAFILE='{athArgs.output_file}' OPT='RECREATE'"
 cfg.addService(CompFactory.THistSvc(Output=[outputFile]))

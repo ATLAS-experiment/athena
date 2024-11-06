@@ -240,9 +240,9 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     disable_commands = [
         'disable jet_select_baselineJvt.*',
         'disable mu_select_medium.*',
+        'disable el_select_loose.*',
         'disable ph_select_tight.*',
         'disable tau_select_tight.*',
-        'disable el_select_loose.*',
     ]
     config.setOptions (commands=disable_commands)
 
@@ -265,8 +265,8 @@ def compareBlockConfig(yamlPath='', *, checkOrder=False) :
     Will raise an exception if configSequences differ
     """
     # create configSeq for block configuration
-    from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequenceBlocks
-    configSeq = makeSequenceBlocks(dataType='fullsim', algSeq=None,
+    from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeTestSequenceBlocks
+    configSeq = makeTestSequenceBlocks(dataType='fullsim', algSeq=None,
             forCompare=True, isPhyslite=False, forceEGammaFullSimConfig=True,
             returnConfigSeq=True)
 

@@ -135,7 +135,7 @@ if options.factory_preload != '' :
 
 
 from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence, printSequenceAlgs
-algSeq = makeSequence (dataType, blockConfig, textConfig,
+algSeq = makeSequence (dataType, yamlPath=textConfig,
                        forCompare=forCompare,
                        noSystematics = options.no_systematics,
                        hardCuts = options.hard_cuts, isPhyslite=options.physlite,
