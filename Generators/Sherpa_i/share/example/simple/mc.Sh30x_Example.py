@@ -18,7 +18,6 @@ SELECTORS:
 - [Mass, 11, -11, 40, E_CMS]
 """
 
-genSeq.Sherpa_i.Parameters += []
 genSeq.Sherpa_i.OpenLoopsLibs = []
 genSeq.Sherpa_i.ExtraFiles = []
 genSeq.Sherpa_i.NCores = 1

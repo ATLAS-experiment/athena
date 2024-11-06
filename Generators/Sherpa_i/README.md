@@ -16,11 +16,11 @@ The recommended way of getting Sherpa events into Athena is to use the on-the-fl
 
 Event generation jobs in ATLAS are steered using jobOption files and run using the `Gen_tf.py` transform as described in [PmgMcSoftware#Production_transforms_and_job_op](https://twiki.cern.ch/twiki/bin/view/AtlasProtected/PmgMcSoftware#Production_transforms_and_job_op).
 
-A simple example JO for running Sherpa on-the-fly within Athena can be found in the [Sherpa_i interface](https://gitlab.cern.ch/atlas/athena/blob/21.6/Generators/Sherpa_i/share/example/simple/). Please see the documentation in that directory for more details on how to write Sherpa job option files.
+A simple example JO for running Sherpa on-the-fly within Athena can be found in the [Sherpa_i interface](share/example/simple/). Please see the documentation in that directory for more details on how to write Sherpa job option files.
 
 ## Running the event generation
 
-Such a JO lives in a directory (e.g. `./athena/Generators/Sherpa_i/share/example/simple/mc.Sh_Example.py`) and can be used to generate events with Gen_tf:
+Such a JO lives in a directory (e.g. `./athena/Generators/Sherpa_i/share/example/simple/mc.Sh30x_Example.py`) and can be used to generate events with Gen_tf:
 ```
 Gen_tf.py --ecmEnergy=13000.0 --randomSeed=1234 --jobConfig=./athena/Generators/Sherpa_i/share/example/simple --outputEVNTFile=tmp.EVNT.root --maxEvents=10
 ```
@@ -37,12 +37,14 @@ In this case you have to execute the freshly created `./makelibs` in the same wo
 
 It will take a few minutes to initialise the generator, e.g. performing the phase space integrations over the Z+n jet processes. The initialisation results will be written out to `Process/` and `Results.db`.
 
-The time taken by this initialisation step depends very much on the complexity of the process and can easily take in the order of a day for complicated processes. To avoid the initialisation step in case you are doing multiple evgen runs, `Sherpa_i` allows the usage of an input file which stores process libraries or integration results. This is beam-dependent and can be provided in the setup directory as e.g. `simple/mc_13TeV.Sh_Example.GRID.tar.gz`. The Gen_tf.py transform will take care of unpacking the tarball and thus its contents will be available for the generator (interface) in the working directory at run time.
+The time taken by this initialisation step depends very much on the complexity of the process and can easily take in the order of a day for complicated processes. To avoid the initialisation step in case you are doing multiple evgen runs, `Sherpa_i` allows the usage of an input file which stores process libraries or integration results. This is beam-dependent and can be provided in the setup directory as e.g. `simple/mc_13TeV.Sh30x_Example.GRID.tar.gz`:
 ```
-tar czf /path/to/999999/mc_13TeV.Sh_Example.GRID.tar.gz Process/ Results.db
+tar czf ./athena/Generators/Sherpa_i/share/example/mc_13TeV.Sh30x_Example.GRID.tar.gz Process/ Results.db
 Gen_tf.py --ecmEnergy=13000.0 --randomSeed=1234 --jobConfig=./athena/Generators/Sherpa_i/share/example/simple --outputEVNTFile=tmp.EVNT.root --maxEvents=10
 ## this run should start generating events more quickly than before
 ```
+
+The Gen_tf.py transform will take care of unpacking the tarball and thus its contents will be available for the generator (interface) in the working directory at run time.
 
 Official Sherpa JOs and input tarballs have DSIDs in the 7xxxxx range and can be found in `/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/700xxx` etc or browsed in [GitLab](https://gitlab.cern.ch/atlas-physics/pmg/mcjoboptions/tree/master).
 
@@ -53,9 +55,7 @@ Notes for running with input tarball:
 
 ## Preparing input tarballs with sherpaTarCreator
 
-A tool to automatically generate the input tarball for a given Sherpa JO is provided within the Sherpa_i interface and is available as `sherpaTarCreator.py` after asetup. Documentation can be found in [git](https://gitlab.cern.ch/atlas/athena/-/tree/21.6/Generators/Sherpa_i/python/sherpaTarCreator/).
-
-If you want to create tarballs for an older release (<=21.6.48) in which the sherpaTarCreator did not exist yet, you may obtain a standalone version of the tool from [[https://gitlab.cern.ch/atlas-physics/pmg/tools/sherpaTarCreator/]] (the documentation in git above still applies).
+A tool to automatically generate the input tarball for a given Sherpa JO is provided within the Sherpa_i interface and is available as `sherpaTarCreator.py` after asetup. Documentation can be [found in git](python/sherpaTarCreator/).
 
 # Some practical information for users
 
