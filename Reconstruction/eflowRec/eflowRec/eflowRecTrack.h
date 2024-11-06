@@ -18,6 +18,7 @@
 #include <string>
 
 #include "CaloEvent/CaloCell.h"
+#include "CaloEvent/CaloCellContainer.h"
 
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -111,6 +112,9 @@ public:
   void insertTruthEnergyPair (const CaloCell* cell, double truthEnergy);
   double getCellTruthEnergy (const CaloCell* cell) const;
 
+  void addSubtractedCaloCell(ElementLink<CaloCellContainer> theCellLink, const double& weight) { m_subtractedCells.push_back(std::make_pair(theCellLink,weight)); }
+  const std::vector<std::pair<ElementLink<CaloCellContainer>, double> >& getSubtractedCaloCells() const { return m_subtractedCells; }
+
 private:
 
   int m_trackId;
@@ -145,6 +149,9 @@ private:
   //for truth cheating mode only, we store the list of cells and their truth energies
   std::vector<std::pair<const CaloCell*, double> > m_cellTruthEnergyList;
   std::map<Identifier,double> m_cellTruthEnergyStore;
+
+  //list of cells that were removed from CaloCluster (only used in doCPData mode)
+  std::vector<std::pair<ElementLink<CaloCellContainer>, double> > m_subtractedCells;
 
 public:
   class SortDescendingPt {

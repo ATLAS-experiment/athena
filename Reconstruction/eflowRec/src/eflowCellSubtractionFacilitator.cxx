@@ -23,15 +23,15 @@ eflowCellSubtractionFacilitator::eflowCellSubtractionFacilitator()
 double
 eflowCellSubtractionFacilitator::subtractCells(
   eflowRingSubtractionManager& cellSubtractionManager,
-  double trackEnergy,
+  eflowRecTrack& theTrack,
   xAOD::CaloCluster* tracksCluster,
   eflowCellList& orderedCells,
-  bool& annFlag) const
+  bool& annFlag, const bool& addCPData) const
 {
   std::vector<std::pair<xAOD::CaloCluster*, bool>> localClusterBoolPairVec(
     1, std::pair(tracksCluster, false));
   return subtractCells(
-    cellSubtractionManager, trackEnergy, localClusterBoolPairVec, orderedCells, annFlag);
+    cellSubtractionManager, theTrack, localClusterBoolPairVec, orderedCells, annFlag, addCPData);
 }
 
 void
@@ -94,15 +94,18 @@ eflowCellSubtractionFacilitator::getRingsEnergy(
 
 void
 eflowCellSubtractionFacilitator::annihilateClusters(
-  std::vector<std::pair<xAOD::CaloCluster*, bool>>& tracksClusters, bool& annFlag) 
+  std::vector<std::pair<xAOD::CaloCluster*, bool>>& tracksClusters, bool& annFlag,
+  eflowRecTrack& theTrack, const bool& addCPData) 
 {
   for (auto& thisPair : tracksClusters) {
     xAOD::CaloCluster* thisCluster = thisPair.first;
     CaloClusterCellLink* theCellLink = thisCluster->getOwnCellLinks();
     CaloClusterCellLink::iterator theFirstCell = theCellLink->begin();
     CaloClusterCellLink::iterator theLastCell = theCellLink->end();
-    for (; theFirstCell != theLastCell; ++theFirstCell)
+    for (; theFirstCell != theLastCell; ++theFirstCell){
+      if (addCPData) theTrack.addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theFirstCell.index()),1.0);
       thisCluster->removeCell(*theFirstCell);
+    }
     thisCluster->setCalE(0.0);
     thisCluster->setRawE(0.0);
     // set the subtracted status to true
@@ -117,7 +120,8 @@ eflowCellSubtractionFacilitator::subtractPartialRings(
   CellIt beginRing,
   CellIt endRing,
   double targetRingEnergy,
-  double eRings) const
+  double eRings, eflowRecTrack& theTrack,
+  const bool& addCPData) const
 {
   for (CellIt itRing = beginRing; itRing != endRing; ++itRing) {
     /* Loop over Rings */
@@ -131,12 +135,14 @@ eflowCellSubtractionFacilitator::subtractPartialRings(
       CaloClusterCellLink::iterator theIterator =
         eflowCellSubtractionFacilitator::getCellIterator(cluster, cell);
       double oldCellWeight = theIterator.weight();
-      const double newCellWeight = oldCellWeight * targetRingEnergy / eRings;
+      double ringWeight = targetRingEnergy / eRings;
+      const double newCellWeight = oldCellWeight * ringWeight;
       ATH_MSG_DEBUG("eflowCellSubtractionFacilitator: Cluster with e "
                     << cluster->e()
                     << " is changing weight of cell with energy " << cell->e()
                     << " from " << oldCellWeight << " to " << newCellWeight);
       theIterator.reweight(newCellWeight);
+      if (addCPData) theTrack.addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theIterator.index()),ringWeight);
     }
   }
 }
@@ -145,7 +151,8 @@ void
 eflowCellSubtractionFacilitator::subtractFullRings(
   std::vector<std::pair<xAOD::CaloCluster*, bool>>& tracksClusters,
   CellIt beginRing,
-  CellIt endRing) const
+  CellIt endRing, eflowRecTrack& theTrack,
+  const bool& addCPData) const
 {
   /* Subtract full ring */
 
@@ -160,6 +167,8 @@ eflowCellSubtractionFacilitator::subtractFullRings(
       ATH_MSG_DEBUG("eflowCellSubtractionFacilitator: Cluster with e "
                     << cluster->e() << " is removing cell with e "
                     << thisPair.first->e());
+      CaloClusterCellLink::iterator theIterator = this->getCellIterator(cluster, thisPair.first);
+      if (addCPData) theTrack.addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theIterator.index()),1.0);
       cluster->removeCell(thisPair.first);
     }
   }
@@ -173,7 +182,8 @@ eflowCellSubtractionFacilitator::subtractRings(
   const double eExpect,
   eflowCellList& orderedCells,
   std::vector<std::pair<xAOD::CaloCluster*, bool>>& tracksClusters,
-  bool& annFlag ) const
+  bool& annFlag, eflowRecTrack& theTrack,
+  const bool& addCPData ) const
 {
   /* Subtract energy from ring, return TRUE if the whole expected energy is
    * subtracted */
@@ -204,7 +214,7 @@ eflowCellSubtractionFacilitator::subtractRings(
     ATH_MSG_DEBUG("eflowCellSubtractionFacilitator: targetRingEnergy is "
                   << targetRingEnergy);
     subtractPartialRings(
-      tracksClusters, beginRing, endRing, targetRingEnergy, eRings);
+      tracksClusters, beginRing, endRing, targetRingEnergy, eRings, theTrack, addCPData);
     eSubtracted = eExpect;
 
     /* Update the cluster four-momenta having done the subtraction */
@@ -217,7 +227,7 @@ eflowCellSubtractionFacilitator::subtractRings(
 
     ATH_MSG_DEBUG("eflowCellSubtractionFacilitator: Subtracting full ring ");
 
-    subtractFullRings(tracksClusters, beginRing, endRing);
+    subtractFullRings(tracksClusters, beginRing, endRing, theTrack, addCPData);
     orderedCells.deleteFromList(beginRing, endRing);
     eSubtracted += eRings;
 
@@ -226,7 +236,7 @@ eflowCellSubtractionFacilitator::subtractRings(
     if (fabs(eClustersOld - eSubtracted) < 1.0e-6 * eClustersOld) {
       /* Annihilate clusters, clear orderedCells, and update subtracted cluster
        * kinematics */
-      annihilateClusters(tracksClusters,annFlag);
+      annihilateClusters(tracksClusters,annFlag, theTrack, addCPData);
       orderedCells.eraseList();
       updateClusterKinematics(tracksClusters);
 
@@ -241,7 +251,9 @@ bool
 eflowCellSubtractionFacilitator::subtractCaloCell(double& eSubtracted,
                                                   const double eExpect,
                                                   xAOD::CaloCluster* cluster,
-                                                  const CaloCell* cell)
+                                                  const CaloCell* cell, 
+                                                  eflowRecTrack& theTrack,
+                                                  const bool& addCPData)
 {
 
   CaloClusterCellLink::iterator theIterator =
@@ -254,8 +266,10 @@ eflowCellSubtractionFacilitator::subtractCaloCell(double& eSubtracted,
      * subtracted */
     double targetCellEnergy = oldCellEnergy - (eExpect - eSubtracted);
 
-    double newCellWeight = oldCellWeight * targetCellEnergy / oldCellEnergy;
+    double energyWeight = targetCellEnergy / oldCellEnergy;
+    double newCellWeight = oldCellWeight * energyWeight;
     theIterator.reweight(newCellWeight);
+    if (addCPData) theTrack.addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theIterator.index()), energyWeight);
 
     eSubtracted = eExpect;
 
@@ -265,6 +279,7 @@ eflowCellSubtractionFacilitator::subtractCaloCell(double& eSubtracted,
     return true;
 
   } else {
+    if (addCPData) theTrack.addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theIterator.index()),1.0);
     cluster->removeCell(cell);
     eSubtracted += oldCellEnergy;
 
@@ -279,7 +294,9 @@ eflowCellSubtractionFacilitator::subtractReorderedCells(
   std::vector<std::pair<xAOD::CaloCluster*, bool>>& tracksClusters,
   double eSubtracted,
   const double eExpect,
-  eflowCellList& reorderedCells)
+  eflowCellList& reorderedCells, 
+  eflowRecTrack& theTrack,
+  const bool& addCPData)
 {
   CellIt itCellPosition = reorderedCells.begin();
   CellIt endCellPosition = reorderedCells.end();
@@ -295,7 +312,7 @@ eflowCellSubtractionFacilitator::subtractReorderedCells(
       // flag this cluster as having had subtraction applied to it
       tracksClusters[thisPair.second].second = true;
       const CaloCell* cell = thisPair.first;
-      bool isFinished = subtractCaloCell(eSubtracted, eExpect, cluster, cell);
+      bool isFinished = subtractCaloCell(eSubtracted, eExpect, cluster, cell, theTrack, addCPData);
       if (isFinished)
         return true;
     }
@@ -310,12 +327,13 @@ eflowCellSubtractionFacilitator::subtractReorderedCells(
 double
 eflowCellSubtractionFacilitator::subtractCells(
   eflowRingSubtractionManager& cellSubtractionManager,
-  double trackEnergy,
+  eflowRecTrack& theTrack,
   std::vector<std::pair<xAOD::CaloCluster*, bool>>& tracksClusters,
   eflowCellList& orderedCells,
-  bool& annFlag) const
+  bool& annFlag, const bool& addCPData) const
 {
 
+  const double trackEnergy = theTrack.getTrack()->e();
   const double eExpect = cellSubtractionManager.fudgeMean() * trackEnergy;
   const double sigmaEExpect =
     cellSubtractionManager.fudgeStdDev() * trackEnergy;
@@ -339,7 +357,9 @@ eflowCellSubtractionFacilitator::subtractCells(
                                     eExpect,
                                     orderedCells,
                                     tracksClusters,
-                                    annFlag);
+                                    annFlag,
+                                    theTrack,
+                                    addCPData);
     if (isFinished) {
       return sigmaEExpect;
     }
@@ -359,7 +379,7 @@ eflowCellSubtractionFacilitator::subtractCells(
   orderedCells.reorderWithoutLayers();
 
   bool isFinished =
-    subtractReorderedCells(tracksClusters, eSubtracted, eExpect, orderedCells);
+    subtractReorderedCells(tracksClusters, eSubtracted, eExpect, orderedCells, theTrack, addCPData);
   if (isFinished) {
     return sigmaEExpect;
   }

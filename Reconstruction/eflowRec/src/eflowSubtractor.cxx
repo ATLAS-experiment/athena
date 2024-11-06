@@ -26,7 +26,7 @@ namespace eflowSubtract {
 void
 Subtractor::subtractTracksFromClusters(
   eflowRecTrack* efRecTrack,
-  std::vector<std::pair<xAOD::CaloCluster*, bool>>& clusterSubtractionList) const
+  std::vector<std::pair<xAOD::CaloCluster*, bool>>& clusterSubtractionList, const bool& addCPData) const
 {
 
   /* Make ordered cell list */
@@ -42,7 +42,7 @@ Subtractor::subtractTracksFromClusters(
 
   bool annFlag;
   m_facilitator.subtractCells(
-    ranking, efRecTrack->getTrack()->e(), clusterSubtractionList, orderedCells, annFlag);
+    ranking, *efRecTrack, clusterSubtractionList, orderedCells, annFlag, addCPData);
 
   orderedCells.eraseList();
 }
@@ -96,8 +96,8 @@ Subtractor::annihilateCluster(xAOD::CaloCluster* cluster)
   CaloClusterCellLink::iterator theLastCell = theCellLink->end();
 
   for (; theFirstCell != theLastCell; ++theFirstCell)
-    theCellLink->removeCell(theFirstCell);
-
+      theCellLink->removeCell(theFirstCell);    
+  
   cluster->setE(0.0);
   cluster->setRawE(0.0);
   CaloClusterKineHelper::calculateKine(cluster, true, true);

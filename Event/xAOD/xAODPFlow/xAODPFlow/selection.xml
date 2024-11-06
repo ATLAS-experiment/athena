@@ -49,6 +49,8 @@
    <class name="std::vector<std::vector<std::pair<ElementLink<xAOD::CaloClusterContainer_v1>,double> > >" />
    <class name="SG::AuxTypeVectorFactory<std::vector<std::pair<ElementLink<xAOD::CaloClusterContainer_v1>,double> > >" />
    <class name="SG::AuxTypeVectorFactoryImpl<std::vector<std::pair<ElementLink<xAOD::CaloClusterContainer_v1>,double> > >" />
+   <class name="SG::AuxTypeVectorFactoryImpl<std::vector<std::pair<ElementLink<CaloCellContainer>,double> > >" />
+   <class name="std::vector<std::vector<std::pair<ElementLink<CaloCellContainer>,double> > >" />
    <class name="std::vector<xAOD::PFODetails::PFOLeptonType>" />
 
 </lcgdict>

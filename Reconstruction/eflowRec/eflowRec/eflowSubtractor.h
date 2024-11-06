@@ -41,7 +41,7 @@ public:
 
   void subtractTracksFromClusters(
     eflowRecTrack* efRecTrack,
-    std::vector<std::pair<xAOD::CaloCluster*, bool>>& clusterSubtractionList) const;
+    std::vector<std::pair<xAOD::CaloCluster*, bool>>& clusterSubtractionList, const bool& addCPData) const;
 
   static void annihilateClusters(
     std::vector<std::pair<xAOD::CaloCluster*, bool>>& clusters);
@@ -54,6 +54,8 @@ public:
     eflowCellList& orderedCells);
 
   eflowCellSubtractionFacilitator m_facilitator{};
+
+
 };
 }
 

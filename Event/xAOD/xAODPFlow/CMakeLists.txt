@@ -16,14 +16,27 @@ atlas_add_library( xAODPFlow
    xAODCaloEvent xAODCore xAODTracking )
 
 atlas_add_xaod_smart_pointer_dicts(
-   INPUT xAODPFlow/selection.xml
-   OUTPUT _selectionFile
-   CONTAINERS "xAOD::PFOContainer_v1" "xAOD::TrackCaloClusterContainer_v1"  "xAOD::FlowElementContainer_v1")
+      INPUT xAODPFlow/selection.xml
+      OUTPUT _selectionFile
+      CONTAINERS "xAOD::PFOContainer_v1" "xAOD::TrackCaloClusterContainer_v1"  "xAOD::FlowElementContainer_v1")
 
-atlas_add_dictionary( xAODPFlowDict
-   xAODPFlow/xAODPFlowDict.h
-   ${_selectionFile}
-   LINK_LIBRARIES AthLinks xAODCore xAODPFlow
-   EXTRA_FILES Root/dict/*.cxx )
+if(  XAOD_ANALYSIS AND NOT XAOD_STANDALONE )
+
+   atlas_add_dictionary( xAODPFlowDict
+      xAODPFlow/xAODPFlowDict.h
+      ${_selectionFile}
+      LINK_LIBRARIES AthLinks xAODCore xAODPFlow
+      EXTRA_FILES Root/dict/*.cxx )
+endif()
+
+if( NOT XAOD_ANALYSIS )
+
+   atlas_add_dictionary( xAODPFlowDict
+      xAODPFlow/xAODPFlowAthenaDict.h
+      ${_selectionFile}
+      LINK_LIBRARIES AthLinks xAODCore xAODPFlow
+      EXTRA_FILES Root/dict/*.cxx )
+endif()
+
 
 atlas_generate_cliddb( xAODPFlow)

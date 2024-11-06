@@ -352,6 +352,10 @@ void PFSubtractionTool::performSubtraction(eflowCaloObject& thisEflowCaloObject)
           ATH_MSG_DEBUG("Annihilating cluster with E and eta " << thisPair.first->e() << " and " << thisPair.first->eta());
 
       m_pfSubtractionStatusSetter.markAllTracksAnnihStatus(thisEflowCaloObject);
+
+      //before we remove all the cells, we create a list of the removed cells if in doCPData mode
+      if (m_addCPData) this->addSubtractedCells(thisEflowCaloObject, clusterList);
+
       Subtractor::annihilateClusters(clusterList);
 
       if (msgLevel(MSG::DEBUG))
@@ -430,6 +434,9 @@ void PFSubtractionTool::performSubtraction(eflowCaloObject& thisEflowCaloObject)
           for (auto thisPair : clusterSubtractionList)
             ATH_MSG_DEBUG("Annihilating cluster with E and eta " << thisPair.first->e() << " and " << thisPair.first->eta());
 
+        //before we remove all the cells, we create a list of the removed cells if in doCPData mode
+        if (m_addCPData) this->addSubtractedCells(thisEflowCaloObject, clusterSubtractionList);
+
         Subtractor::annihilateClusters(clusterSubtractionList);
         //Now we should mark all of these clusters as being subtracted
         //Now need to mark which clusters were modified in the subtraction procedure
@@ -441,7 +448,7 @@ void PFSubtractionTool::performSubtraction(eflowCaloObject& thisEflowCaloObject)
       {
 
         /* Subtract the track from all matched clusters */
-        m_subtractor.subtractTracksFromClusters(thisEfRecTrack, clusterSubtractionList);
+        m_subtractor.subtractTracksFromClusters(thisEfRecTrack, clusterSubtractionList, m_addCPData);
 
         //recalculate total cluster energy from the clusters afer subtraction
         totalClusterEnergy = std::accumulate(clusterSubtractionList.begin(),clusterSubtractionList.end(),0.0,sumClusEnergy);        
@@ -582,5 +589,20 @@ void PFSubtractionTool::printAllClusters(const eflowRecClusterContainer& recClus
   }
 }
 
+void PFSubtractionTool::addSubtractedCells(eflowCaloObject& thisEflowCaloObject, const std::vector<std::pair<xAOD::CaloCluster *, bool> >& clusterList) const{
+
+  unsigned int numTracks = thisEflowCaloObject.nTracks();
+
+  for (unsigned int iTrack = 0; iTrack < numTracks; ++iTrack){
+    eflowRecTrack* thisTrack = thisEflowCaloObject.efRecTrack(iTrack);
+    for (auto thisPair : clusterList){
+      xAOD::CaloCluster* thisCluster = thisPair.first;
+      const CaloClusterCellLink* theCellLink = thisCluster->getCellLinks();
+      CaloClusterCellLink::const_iterator theCell = theCellLink->begin();
+      CaloClusterCellLink::const_iterator lastCell = theCellLink->end();
+      for (; theCell != lastCell; theCell++) thisTrack->addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theCell.index()),1./numTracks);
+    }
+  }
+}
 
 StatusCode PFSubtractionTool::finalize() { return StatusCode::SUCCESS; }
