@@ -14,12 +14,10 @@
 static void 
 show_vector (const ExpandedIdentifier::element_vector& v){
   ExpandedIdentifier::element_vector::const_iterator it;
-  bool first = true;
   std::cout << "[";
-  for (it = v.begin (); it != v.end (); ++it){
-      if (first) first = false;
-      else std::cout << ".";
-      ExpandedIdentifier::element_type value = *it;
+  for (bool first{true}; auto value:v){
+      std::cout << (first?"":".");
+      first = false;
       std::cout << value;
     }
   std::cout << "]";
@@ -56,18 +54,13 @@ ExpandedIdentifier::set (const std::string& text){
 
 
 ExpandedIdentifier::operator std::string () const{
-  std::string result;
-  char temp[20];
-  size_type my_fields = m_fields.size ();
-  if (my_fields == 0) return (result);
   // print fields one by one.
-  for (size_type field_number = 0; field_number < my_fields; field_number++){
-    element_type value = m_fields[field_number];
-    if (field_number > 0) result += "/";
-    sprintf (temp, "%d", value);
-    result += temp;
+  std::string result;
+  for (bool first{true}; auto value :m_fields){
+    result += (first? "":"/") + std::to_string(value);
+    first = false;
   }
-  return (result);
+  return result;
 }
 
 void 
