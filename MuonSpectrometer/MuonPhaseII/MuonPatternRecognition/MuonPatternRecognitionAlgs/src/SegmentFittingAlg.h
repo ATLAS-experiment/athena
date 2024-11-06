@@ -1,7 +1,6 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
 #ifndef MUONR4_MUONPATTERNRECOGNTIONALGS_SEGMENTFITTINGALG__H
 #define MUONR4_MUONPATTERNRECOGNTIONALGS_SEGMENTFITTINGALG__H
 
@@ -14,6 +13,7 @@
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "MuonPatternEvent/MuonHoughDefs.h"
+#include "MuonPatternHelpers/SegmentAmbiSolver.h"
 
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -24,21 +24,13 @@
 #include <set>
 
 
-namespace ROOT {
-  namespace Math{
-    class Minimizer;
-  }
-}
-
-
-
 namespace MuonR4{
-     /// @brief Algorithm to handle segment fits  
+    /// @brief Algorithm to handle segment fits  
     /// 
     /// This is currently a placeholder to test ideas! 
     class SegmentFittingAlg: public AthReentrantAlgorithm{
         public:
-            SegmentFittingAlg(const std::string& name, ISvcLocator* pSvcLocator);
+            using AthReentrantAlgorithm::AthReentrantAlgorithm;
             virtual ~SegmentFittingAlg();
             virtual StatusCode initialize() override;
             virtual StatusCode execute(const EventContext& ctx) const override;
@@ -143,6 +135,8 @@ namespace MuonR4{
             /** Cut on the segment chi2 / nDoF to launch the outlier removal */
             Gaudi::Property<double> m_outlierRemovalCut{this, "OutlierRemoval", 5.};
             Gaudi::Property<double> m_recoveryPull{this, "RecoveryPull", 5.};
+
+            std::unique_ptr<SegmentAmbiSolver> m_ambiSolver{};
 
     };
 }

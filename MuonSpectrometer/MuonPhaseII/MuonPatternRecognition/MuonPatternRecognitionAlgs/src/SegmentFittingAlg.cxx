@@ -10,7 +10,6 @@
 #include <MuonPatternHelpers/SegmentFitHelperFunctions.h>
 #include <MuonPatternHelpers/MdtSegmentSeedGenerator.h>
 #include <MuonPatternHelpers/CalibSegmentChi2Minimizer.h>
-#include <MuonPatternHelpers/SegmentAmbiSolver.h>
 #include <MuonPatternHelpers/MdtSegmentFitter.h>
 
 #include <MuonSpacePoint/SpacePointPerLayerSorter.h>
@@ -25,8 +24,6 @@
 #include <Math/Minimizer.h>
 
 #include <MuonVisualizationHelpersR4/VisualizationHelpers.h>
-
-
 
 namespace MuonR4 {
     using namespace SegmentFit;
@@ -48,6 +45,7 @@ namespace MuonR4 {
         toRet.calibMeasurements = copy(toCopy.calibMeasurements);
         toRet.chi2 = toCopy.chi2;
         toRet.nDoF = toCopy.nDoF;
+        toRet.timeFit = toCopy.timeFit;
         return toRet;
     }
     bool removeBeamSpot(MuonR4::SegmentFitResult::HitVec& hits){
@@ -62,9 +60,6 @@ namespace MuonR4 {
     using PrimitiveVec = MuonValR4::IPatternVisualizationTool::PrimitiveVec;
 
     SegmentFittingAlg::~SegmentFittingAlg() = default;
-    SegmentFittingAlg::SegmentFittingAlg(const std::string& name, ISvcLocator* pSvcLocator): 
-            AthReentrantAlgorithm(name, pSvcLocator) {}
-
     StatusCode SegmentFittingAlg::initialize() {
         ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(m_seedKey.initialize());
@@ -72,6 +67,8 @@ namespace MuonR4 {
         ATH_CHECK(m_calibTool.retrieve());
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_visionTool.retrieve(EnableTool{!m_visionTool.empty()}));
+        SegmentAmbiSolver::Config cfg{};
+        m_ambiSolver = std::make_unique<SegmentAmbiSolver>(name(), std::move(cfg));
         return StatusCode::SUCCESS;
     }
     StatusCode SegmentFittingAlg::execute(const EventContext& ctx) const {
@@ -86,6 +83,39 @@ namespace MuonR4 {
         std::vector<std::unique_ptr<Segment>> allSegments{};
         for (const SegmentSeed* seed : *segmentSeeds) {
             std::vector<std::unique_ptr<Segment>> segments = fitSegmentSeed(ctx, *gctx, seed);
+            if (m_visionTool.isEnabled() && segments.size() > 1) {
+                auto drawFinalReco = [this, &segments, &gctx, &ctx,&seed](const std::string& nameTag) {
+                    PrimitiveVec segmentLines{};
+                    double yLegend{0.85};
+                    segmentLines.push_back(drawLabel(std::format("# segments: {:d}",  segments.size()), 0.15, yLegend, 14));
+                    yLegend-=0.04;
+                    for (const std::unique_ptr<Segment>& seg : segments) {
+                        const Parameters pars = localSegmentPars(*gctx, *seg);
+                        const auto [locPos, locDir] = makeLine(pars);
+
+                        segmentLines.emplace_back(drawLine(pars, -Gaudi::Units::m, Gaudi::Units::m, kRed));
+                        std::stringstream signStream{};
+                        signStream<<"#chi^{2}/nDoF: "<<std::format("{:.2f}", seg->chi2() / seg->nDoF())<<"("<<seg->nDoF()<<"), ";
+                        signStream<<"y_{0}="<<std::format("{:.2f}",pars[toInt(ParamDefs::y0)])<<", ";
+                        signStream<<std::format("#theta={:.1f}", pars[toInt(ParamDefs::theta)]/ Gaudi::Units::deg )<<", ";
+                        for (const Segment::MeasType& m : seg->measurements()) {
+                            if (m->type() == xAOD::UncalibMeasType::MdtDriftCircleType && m->fitState() == CalibratedSpacePoint::State::Valid) {
+                                signStream<<(SegmentFitHelpers::driftSign(locPos, locDir, *m, msgStream()) == -1 ? "L" : "R");
+                            }
+                        }
+                        segmentLines.push_back(drawLabel(signStream.str(), 0.15, yLegend, 12));
+                        yLegend-=0.03;
+                    }
+
+                    m_visionTool->visualizeBucket(ctx, *seed->parentBucket(), nameTag, std::move(segmentLines));
+                };
+                drawFinalReco("all segments");
+                const unsigned int nBeforeAmbi = segments.size();
+                segments = m_ambiSolver->resolveAmbiguity(*gctx, std::move(segments));
+                if (nBeforeAmbi != segments.size()) {
+                    drawFinalReco("post ambiguity");
+                }
+            }
             allSegments.insert(allSegments.end(), std::make_move_iterator(segments.begin()),
                                                   std::make_move_iterator(segments.end()));
         }
@@ -199,10 +229,10 @@ namespace MuonR4 {
         }
         /// Assumption that the particle travels at the speed of light
         if (data.timeFit) {
-            minimizer.SetVariable(toInt(ParamDefs::time), "t0", startPars[toInt(ParamDefs::time)] , 1.e-5 );
+            minimizer.SetVariable(toInt(ParamDefs::time), "t0", startPars[toInt(ParamDefs::time)] , 1.);
             minimizer.SetVariableLimits(toInt(ParamDefs::time), 
-                                        startPars[toInt(ParamDefs::time)] - 12.5,
-                                        startPars[toInt(ParamDefs::time)] + 12.5);
+                                        startPars[toInt(ParamDefs::time)] - 50,
+                                        startPars[toInt(ParamDefs::time)] + 50);
         } else{
             minimizer.SetFixedVariable(toInt(ParamDefs::time), "t0", 0.);
         }
@@ -259,7 +289,7 @@ namespace MuonR4 {
                 seedLines.push_back(drawLine(s->parameters, -Gaudi::Units::m, Gaudi::Units::m, kViolet));
             }
             seedLines.push_back(drawLabel(std::format("possible seeds: {:d}",  drawMe.numGenerated()), 0.15, 0.85, 14));
-            m_visionTool->visualizeSeed(ctx, *patternSeed, "pattern");
+            m_visionTool->visualizeSeed(ctx, *patternSeed, "pattern", std::move(seedLines));
         }
 
         MdtSegmentSeedGenerator seedGen{name(), patternSeed, std::move(genCfg)};
@@ -308,7 +338,10 @@ namespace MuonR4 {
         finalSeg->setParUncertainties(std::move(data.segmentParErrs));
         if (data.timeFit) {
             finalSeg->setSegmentT0(data.segmentPars[toInt(ParamDefs::time)]);
+            
         }
+
+
         return finalSeg;
     }
 
@@ -331,6 +364,7 @@ namespace MuonR4 {
                             <<". Don't remove outliers");
             return true;
         }
+        ATH_MSG_VERBOSE("Segment "<<toString(data.segmentPars)<<" is of badish quality.");
         /** Remove a priori the beamspot constaint as it never should pose any problem and
          *  another one will be added anyway in the next iteration */        
         if (m_doBeamspotConstraint && removeBeamSpot(data.calibMeasurements)) {
@@ -363,7 +397,7 @@ namespace MuonR4 {
             newAttempt.nIter+=data.nIter;
             data = std::move(newAttempt);
             if (m_visionTool.isEnabled()) {
-                auto seedCopy = convertToSegment(seed.msSector()->globalToLocalTrans(gctx), &seed, copy(data));
+                auto seedCopy = convertToSegment(seed.msSector()->localToGlobalTrans(gctx), &seed, copy(data));
                 m_visionTool->visualizeSegment(ctx, *seedCopy, "Bad fit recovery");
             }
         } else {
@@ -531,10 +565,9 @@ namespace MuonR4 {
             const MuonGMR4::SpectrometerSector* chamb = sortMe->msSector();
             candidatesPerChamber[chamb].push_back(std::move(sortMe));
         }
-        SegmentAmbiSolver ambiSolver{name()};
         segmentCandidates.clear();
         for (auto& [chamber, resolveMe] : candidatesPerChamber) {
-            SegmentVec resolvedSegments = ambiSolver.resolveAmbiguity(gctx, std::move(resolveMe));
+            SegmentVec resolvedSegments = m_ambiSolver->resolveAmbiguity(gctx, std::move(resolveMe));
             segmentCandidates.insert(segmentCandidates.end(), 
                                      std::make_move_iterator(resolvedSegments.begin()),
                                      std::make_move_iterator(resolvedSegments.end()));

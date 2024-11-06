@@ -104,14 +104,14 @@ namespace MuonR4{
    
         const double timeDelay = pars[toInt(ParamDefs::time)];
         ATH_MSG_VERBOSE("Starting parameters  position: "<<Amg::toString(segPos)<<", direction: "<<Amg::toString(segDir)
-                       <<", timeDelay: "<<timeDelay<<".");
+                       <<", timeDelay: "<<timeDelay<<". Do time fit "<<m_doT0Fit);
    
         m_hits = m_calibrator->calibrate(m_ctx, std::move(m_hits), segPos, segDir, timeDelay);
      
         double chi2{0.};
         std::optional<double> arrivalTime = std::nullopt;
         if (m_doT0Fit) {
-            arrivalTime = std::make_optional<double>( (m_locToGlob *segPos).mag() * c_inv / timeDelay);
+            arrivalTime = std::make_optional<double>( (m_locToGlob *segPos).mag() * c_inv + timeDelay);
         }
         for (const HitType& hit : m_hits) {            
             chi2 += SegmentFitHelpers::chiSqTerm(segPos,segDir, timeDelay, arrivalTime, *hit, msg());

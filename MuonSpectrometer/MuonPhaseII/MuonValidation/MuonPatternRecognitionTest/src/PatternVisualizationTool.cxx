@@ -43,8 +43,10 @@ namespace {
     }
     constexpr int truthColor = kOrange +2;
     constexpr int parLineColor = kRed;
-    std::mutex s_mutex ATLAS_THREAD_SAFE{};
     using SpacePointSet = std::unordered_set<const MuonR4::SpacePoint*>;
+    enum Edges {
+        yLow = 0, yHigh, zLow, zHigh
+    };
 }
 
 
@@ -52,7 +54,7 @@ namespace MuonValR4 {
     using namespace MuonR4;
     using namespace SegmentFit;
     using TruthSegmentSet = PatternVisualizationTool::TruthSegmentSet;
-
+    std::mutex PatternVisualizationTool::s_mutex{};
     PatternVisualizationTool::PatternVisualizationTool(const std::string& type, const std::string& name, const IInterface* parent):
             base_class{type,name,parent} {}
 
@@ -86,6 +88,7 @@ namespace MuonValR4 {
             }
         }
         ATH_CHECK(m_truthLinkDecorKeys.initialize());
+        m_displayOnlyTruth.value() &= !m_truthLinkDecorKeys.empty();
 
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_geoCtxKey.initialize());
@@ -176,6 +179,9 @@ namespace MuonValR4 {
         }
 
         const TruthSegmentSet truthSegs{fetchTruthSegs(spacePointsInAcc)};
+        if (truthSegs.empty() && m_displayOnlyTruth) {
+            return;
+        }
         for (const xAOD::MuonSegment* segment : truthSegs) {
             const auto [pos, dir] = makeLine(localSegmentPars(*segment));
             const double tan = m_accumlIsEta ? houghTanTheta(dir) : houghTanPhi(dir);
@@ -192,7 +198,10 @@ namespace MuonValR4 {
             primitives.push_back(std::move(maxMarker));
         }
         
-        auto canvas = std::make_unique<TCanvas>("can", "can", m_canvasWidth, m_canvasHeight);
+        std::stringstream canvasName{};
+        canvasName<<name()<<"_"<<ctx.eventID().event_number()<<"_"<<m_canvCounter;
+        auto canvas = std::make_unique<TCanvas>(canvasName.str().c_str(), 
+                                                 "can", m_canvasWidth, m_canvasHeight);
         canvas->cd();
         accHisto->Draw("COLZ");
         for (auto& prim : primitives) {
@@ -201,9 +210,9 @@ namespace MuonValR4 {
         primitives.push_back(std::move(accHisto));
         saveCanvas(ctx, spacePointsInAcc.front()->identify(), *canvas, extraLabel);
         primitives.push_back(std::move(canvas));
-        
+
+        primitives.clear();        
         if (m_canvasLimit <= m_canvCounter) {
-            primitives.clear();
             closeSummaryCanvas();
         }
     }
@@ -231,6 +240,9 @@ namespace MuonValR4 {
         }
 
         const TruthSegmentSet truthSegs{fetchTruthSegs(seed.getHitsInMax())};
+        if (truthSegs.empty() && m_displayOnlyTruth) {
+            return;
+        }
 
         std::array<double, 4> canvasDim{};
         const std::size_t parsedPrimSize{primitives.size()};
@@ -247,10 +259,10 @@ namespace MuonValR4 {
             }
 
             for (const xAOD::MuonSegment* segment : truthSegs) {
-                primitives.push_back(drawLine(localSegmentPars(*segment), canvasDim[2], canvasDim[3],
+                primitives.push_back(drawLine(localSegmentPars(*segment), canvasDim[Edges::zLow], canvasDim[Edges::zHigh],
                                                truthColor, kDotted, view));
             }
-            primitives.push_back(drawLine(seed.parameters(), canvasDim[2], canvasDim[3],
+            primitives.push_back(drawLine(seed.parameters(), canvasDim[Edges::zLow], canvasDim[Edges::zHigh],
                                          parLineColor, kDashed, view));
         
             writeChi2(seed.parameters(), seed.getHitsInMax(), primitives);
@@ -302,6 +314,9 @@ namespace MuonValR4 {
         }
         std::array<double, 4> canvasDim{};        
         TruthSegmentSet truthSegs{fetchTruthSegs(stripSmartPtr(bucket))};
+        if (truthSegs.empty() && m_displayOnlyTruth) {
+            return;
+        }
         const std::size_t parsedPrimSize{primitives.size()};
         for (const int view : {objViewEta, objViewPhi}) {
             if ((view == objViewEta && !m_doEtaBucketViews) ||
@@ -314,7 +329,7 @@ namespace MuonValR4 {
                 continue;
             }
             for (const xAOD::MuonSegment* segment : truthSegs) {
-                primitives.push_back(drawLine(localSegmentPars(*segment), canvasDim[2], canvasDim[3],
+                primitives.push_back(drawLine(localSegmentPars(*segment), canvasDim[Edges::zLow], canvasDim[Edges::zHigh],
                                            truthColor, kDotted, view));
             }
             
@@ -360,7 +375,10 @@ namespace MuonValR4 {
         if (m_canvCounter >= m_canvasLimit) {
             return;
         }
-
+        const TruthSegmentSet truthSegs{fetchTruthSegs(segment.parent()->getHitsInMax())};
+        if (truthSegs.empty() && m_displayOnlyTruth) {
+            return;
+        }
         Parameters segPars{};
         {
             SG::ReadHandle geoCtx{m_geoCtxKey, ctx};
@@ -388,16 +406,33 @@ namespace MuonValR4 {
                           primitives, canvasDim, view)) {
                 continue;
             }
+            for (const xAOD::MuonSegment* segment : truthSegs) {
+                primitives.push_back(drawLine(localSegmentPars(*segment), canvasDim[Edges::zLow], canvasDim[Edges::zHigh],
+                                           truthColor, kDotted, view));
+            }
             writeChi2(segPars, segment.measurements(), primitives);
 
-            primitives.push_back(drawLine(segPars, canvasDim[2], canvasDim[3],
+            primitives.push_back(drawLine(segPars, canvasDim[Edges::zLow], canvasDim[Edges::zHigh],
                                           parLineColor, kDashed, view));
+
+
+            std::stringstream legendLabel{};
+            const Identifier canvasId{segment.parent()->getHitsInMax().front()->identify()};
+            legendLabel<<"Event: "<<ctx.eventID().event_number() <<", chamber : "<<m_idHelperSvc->toStringChamber(canvasId)
+                         <<", #chi^{2} /nDoF: "<<std::format("{:.2f} ({:d})", segment.chi2() /std::max(1u, segment.nDoF()), segment.nDoF())
+                        <<", #"<<(view ==objViewEta ? "eta" : "phi")<<"-view";
+
+            if (!extraLabel.empty()) {
+                legendLabel<<" ("<<extraLabel<<")";
+            }
+            primitives.push_back(drawLabel(legendLabel.str(), 0.1, 0.96));
+            primitives.push_back(drawLabel(makeLabel(segPars),0.25, 0.91));
 
             auto canvas = makeCanvas(ctx, canvasDim, view);
             for (PrimitivePtr& prim : primitives) {
                 prim->Draw();
             }
-            saveCanvas(ctx, segment.parent()->getHitsInMax().front()->identify(), *canvas, extraLabel);
+            saveCanvas(ctx, canvasId, *canvas, extraLabel);
         }
         if (m_canvasLimit <= m_canvCounter) {
             primitives.clear();
@@ -419,10 +454,10 @@ namespace MuonValR4 {
         }
         
         if (hit.type() != xAOD::UncalibMeasType::Other) {
-            canvasDim[0] = std::min(canvasDim[0], hit.positionInChamber()[view] - hit.driftRadius());
-            canvasDim[1] = std::max(canvasDim[1], hit.positionInChamber()[view] + hit.driftRadius());
-            canvasDim[2] = std::min(canvasDim[2], hit.positionInChamber().z() - hit.driftRadius());
-            canvasDim[3] = std::max(canvasDim[3], hit.positionInChamber().z() + hit.driftRadius());
+            canvasDim[Edges::yLow] = std::min(canvasDim[Edges::yLow], hit.positionInChamber()[view] - hit.driftRadius());
+            canvasDim[Edges::yHigh] = std::max(canvasDim[Edges::yHigh], hit.positionInChamber()[view] + hit.driftRadius());
+            canvasDim[Edges::zLow] = std::min(canvasDim[Edges::zLow], hit.positionInChamber().z() - hit.driftRadius());
+            canvasDim[Edges::zHigh] = std::max(canvasDim[Edges::zHigh], hit.positionInChamber().z() + hit.driftRadius());
         }
 
         const SpacePoint* underlyingSp{nullptr};
@@ -485,8 +520,8 @@ namespace MuonValR4 {
                                                 std::array<double, 4>& canvasDim,
                                                 unsigned int view) const {
 
-        canvasDim[0] = canvasDim[2] = 100. *Gaudi::Units::m;
-        canvasDim[1] = canvasDim[3] = -100. *Gaudi::Units::m;
+        canvasDim[Edges::yLow] = canvasDim[Edges::zLow] = 100. *Gaudi::Units::m;
+        canvasDim[Edges::yHigh] = canvasDim[Edges::zHigh] = -100. *Gaudi::Units::m;
         
         SpacePointSet drawnPoints{};
         for (const SpacePointType& hit : hitsToDraw) {            
@@ -501,17 +536,17 @@ namespace MuonValR4 {
                 drawHit(*hit, primitives, canvasDim, view, hollowFilling);
             } 
         }
-        double width =  (canvasDim[1] - canvasDim[0])*m_canvasExtraScale;
-        double height = (canvasDim[3] - canvasDim[2])*m_canvasExtraScale;
+        double width =  (canvasDim[Edges::yHigh] - canvasDim[Edges::yLow])*m_canvasExtraScale;
+        double height = (canvasDim[Edges::zHigh] - canvasDim[Edges::zLow])*m_canvasExtraScale;
         if (height > width) width = height; 
         else height = width;
 
-        const double midPointX = 0.5 * (canvasDim[1] + canvasDim[0]);
-        const double midPointY = 0.5 * (canvasDim[3] + canvasDim[2]);
-        canvasDim[0] = midPointX - 0.5 * width;
-        canvasDim[1] = midPointY - 0.5 * height;
-        canvasDim[2] = midPointX + 0.5 * width;
-        canvasDim[3] = midPointY + 0.5 * height;        
+        const double midPointX = 0.5 * (canvasDim[Edges::yHigh] + canvasDim[Edges::yLow]);
+        const double midPointY = 0.5 * (canvasDim[Edges::zHigh] + canvasDim[Edges::zLow]);
+        canvasDim[Edges::yLow] = midPointX - 0.5 * width;
+        canvasDim[Edges::zLow] = midPointY - 0.5 * height;
+        canvasDim[Edges::yHigh] = midPointX + 0.5 * width;
+        canvasDim[Edges::zHigh] = midPointY + 0.5 * height;        
         return drawnPoints.size() - drawnPoints.count(nullptr) > 1;
     }
     template<class SpacePointType>
@@ -611,9 +646,10 @@ namespace MuonValR4 {
                                                                   const int view) const {
         std::stringstream canvasName{};
         canvasName<<name()<<"_"<<ctx.eventID().event_number()<<"_"<<m_canvCounter;
+        ATH_MSG_VERBOSE("Create new canvas "<<canvasName.str()<<" "<<canvasDim);
         auto canvas = std::make_unique<TCanvas>(canvasName.str().c_str(), "all", m_canvasWidth, m_canvasHeight);
         canvas->cd();
-        TH1F* frame = canvas->DrawFrame(canvasDim[0],canvasDim[1], canvasDim[2], canvasDim[3]);
+        TH1F* frame = canvas->DrawFrame(canvasDim[Edges::yLow],canvasDim[Edges::zLow], canvasDim[Edges::yHigh], canvasDim[Edges::zHigh]);
         frame->GetXaxis()->SetTitle(std::format("{:} [mm]", view == objViewEta ? 'y' : 'x').c_str());
         frame->GetYaxis()->SetTitle("z [mm]");
         return canvas;

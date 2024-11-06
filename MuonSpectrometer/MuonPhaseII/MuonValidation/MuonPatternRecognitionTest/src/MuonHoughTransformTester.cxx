@@ -244,8 +244,8 @@ namespace MuonValR4 {
         m_out_gen_nRPCHits = (segment->chamberIndex() <= Muon::MuonStationIndex::ChIndex::BEE ? segment->nPhiLayers() + segment->nTrigEtaLayers() : 0);
 
 
-        m_out_gen_tantheta = houghTanPhi(chamberDir); 
-        m_out_gen_tanphi   = houghTanTheta(chamberDir);
+        m_out_gen_tantheta = houghTanTheta(chamberDir); 
+        m_out_gen_tanphi   = houghTanPhi(chamberDir);
         m_out_gen_y0 = chamberPos.y(); 
         m_out_gen_x0 = chamberPos.x(); 
         m_out_gen_time = segment->t0();

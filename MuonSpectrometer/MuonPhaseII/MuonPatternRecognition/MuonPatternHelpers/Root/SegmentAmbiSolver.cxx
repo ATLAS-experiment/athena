@@ -3,109 +3,131 @@
 */
 #include <MuonPatternHelpers/SegmentAmbiSolver.h>
 #include <MuonPatternHelpers/SegmentFitHelperFunctions.h>
+#include <Acts/Utilities/Enumerate.hpp>
 
 namespace MuonR4 {
-    using MeasByLayerMap = SegmentAmbiSolver::MeasByLayerMap;
+    using namespace SegmentFit;
     using SegmentVec = SegmentAmbiSolver::SegmentVec;
 
-    SegmentAmbiSolver::SegmentAmbiSolver(const std::string& name):
-        AthMessaging{name} {}
+    SegmentAmbiSolver::SegmentAmbiSolver(const std::string& name, Config&& cfg):
+        AthMessaging{name},
+        m_cfg{std::move(cfg)} {}
 
-    
+    double SegmentAmbiSolver::redChi2(const Segment& segment) const {
+        return segment.chi2() / segment.nDoF();
+    }
     SegmentVec SegmentAmbiSolver::resolveAmbiguity(const ActsGeometryContext& gctx,
                                                    SegmentVec&& toResolve) const {
         
-        std::ranges::stable_sort(toResolve,[](const std::unique_ptr<Segment>& a,
-                                              const std::unique_ptr<Segment>&b){
-            const double redChi2A = a->chi2() / a->nDoF();
-            const double redChi2B = b->chi2() / b->nDoF();
-            if (redChi2A < 5. && redChi2B < 5.){
+        std::ranges::stable_sort(toResolve,[this](const SegmentVec::value_type& a,
+                                              const SegmentVec::value_type& b){
+            const double redChi2A = redChi2(*a);
+            const double redChi2B = redChi2(*b);
+            if (redChi2A < m_cfg.selectByNDoFChi2 && redChi2B < m_cfg.selectByNDoFChi2){
                 return a->nDoF() > b->nDoF();
             }
             return redChi2A < redChi2B;
         });
         SegmentVec resolved{};
+
         /// Mark the first object as resolved
         resolved.push_back(std::move(toResolve[0]));
-        std::vector<MeasByLayerMap> resolvedPrds{extractPrds(*resolved[0])};
         toResolve.erase(toResolve.begin());
+        std::vector<std::vector<int>> segmentSigns{driftSigns(gctx, *resolved.front(), resolved.front()->measurements())};
+        std::vector<MeasurementSet> segMeasurements{extractPrds(*resolved.front())};
+
         for (std::unique_ptr<Segment>& resolveMe : toResolve) {
-            MeasByLayerMap testPrds{extractPrds(*resolveMe)};
+
+            MeasurementSet testMeas{extractPrds(*resolveMe)};
 
             Resolution reso{Resolution::noOverlap};
-            
-            unsigned int prdPointer{0};
-            for (std::unique_ptr<Segment>& reference : resolved) {
-                MeasByLayerMap& refPrds{resolvedPrds[prdPointer++]};
-                std::vector<const SpacePoint*> overlaps{};
-                overlaps.reserve(testPrds.size());
-                for (auto& [layerId, spacePoint] : testPrds) {
-                    MeasByLayerMap::const_iterator ref_itr = refPrds.find(layerId);
-                    if (ref_itr == refPrds.end() || ref_itr->second != spacePoint){
-                        continue;
+            unsigned int resolvedIdx{0};
+            for (std::unique_ptr<Segment>& goodSeg : resolved) {
+                ATH_MSG_VERBOSE("Test against segment "<<toString(localSegmentPars(gctx, *goodSeg)));
+                MeasurementSet& resolvedM = segMeasurements[resolvedIdx];
+                std::vector<int>& existSigns{segmentSigns[resolvedIdx++]};
+                unsigned int shared = countShared(resolvedM, testMeas);
+                if (shared < m_cfg.sharedPrecHits) {
+                    ATH_MSG_VERBOSE("Too few shared measurements "<<shared<<" (Required: "<<m_cfg.sharedPrecHits<<").");
+                    continue;
+                }
+                const std::vector<int> reEvaluatedSigns{driftSigns(gctx, *resolveMe, goodSeg->measurements())};
+
+                unsigned int sameSides{0};
+                for (unsigned int s =0 ; s < existSigns.size(); ++s) {
+                    sameSides += (reEvaluatedSigns[s] == existSigns[s]);
+                }
+                if (sameSides != existSigns.size() && resolveMe->nDoF() == goodSeg->nDoF()) {
+                    ATH_MSG_VERBOSE("Reference signs: "<<existSigns<<" / re-evaluated: "<<reEvaluatedSigns);
+                    continue;
+                }
+                reso = Resolution::subSet;
+                const double resolvedChi2  = redChi2(*goodSeg);
+                const double resolveMeChi2 = redChi2(*resolveMe);
+                ATH_MSG_VERBOSE("Chi2 good "<<resolvedChi2<<", candidate chi2: "<<resolveMeChi2);
+                /// Segments below that threshold are not considered for outlier removal
+                /// Take the one which has more degrees of freedom
+                if (resolveMeChi2 < m_cfg.selectByNDoFChi2 && resolvedChi2 < m_cfg.selectByNDoFChi2) {
+                    if (resolveMe->nDoF() > goodSeg->nDoF()){
+                        reso = Resolution::superSet;
                     }
-                    overlaps.push_back(spacePoint);
-                }
-                if (overlaps.empty()) {
-                    continue;
-                }
-                std::vector<int> signRef{driftSigns(gctx, *reference, overlaps)}, 
-                                 signTest{driftSigns(gctx, *resolveMe, overlaps)};
-                /** Count in how many cases the signs are differing */
-                unsigned int diffSites{0};
-                for (unsigned sIdx = 0; sIdx < signRef.size(); ++sIdx) {
-                    diffSites += signRef[sIdx] != signTest[sIdx];
-                }
-                ATH_MSG_VERBOSE("Signs reference: "<<signRef<<", signs test: "<<signTest);
-                if (signRef.size() - diffSites <= 1 && testPrds.size() == refPrds.size()) {
-                    ATH_MSG_VERBOSE("Both segments are describing different solutions.");
-                    continue;
-                }
-                if (overlaps.size() == testPrds.size()) {
-                    ATH_MSG_VERBOSE("The test segment is a subset of the reference.");
-                    reso = Resolution::subSet;
-                    break;
-                } else if (overlaps.size() == refPrds.size()) {
-                    ATH_MSG_VERBOSE("The test segment is a superset of the reference.");
+                } else if (resolveMeChi2 < resolvedChi2) {
                     reso = Resolution::superSet;
-                    refPrds = std::move(testPrds);
-                    reference = std::move(resolveMe);
-                    break;
+                }
+                if (reso == Resolution::superSet) {
+                    std::swap(goodSeg, resolveMe);
+                    std::swap(resolvedM, testMeas);
+                    existSigns = driftSigns(gctx, *resolveMe, resolveMe->measurements());
                 }
             }
-            if(reso == Resolution::noOverlap) {
+            if (reso == Resolution::noOverlap) {
+                segMeasurements.push_back(std::move(testMeas));
+                segmentSigns.push_back(driftSigns(gctx, *resolveMe, resolveMe->measurements()));
                 resolved.push_back(std::move(resolveMe));
-                resolvedPrds.push_back(std::move(testPrds));
             }
-           
         }
         return resolved;
     }
-    MeasByLayerMap SegmentAmbiSolver::extractPrds(const Segment& segment) const{
-        MeasByLayerMap prds{};
-        const Muon::IMuonIdHelperSvc* idHelperSvc = segment.msSector()->idHelperSvc();
-        for (const Segment::MeasType& meas : segment.measurements()) {
-            if(meas->fitState() != CalibratedSpacePoint::State::Valid ||
-               !meas->spacePoint()) {
-                continue;
-            }
-            const Identifier layerId = idHelperSvc->layerId(meas->spacePoint()->identify());
-            auto insert_itr = prds.insert(std::make_pair(layerId, meas->spacePoint()));
-            if (!insert_itr.second) {
-                ATH_MSG_WARNING("Layer "<<idHelperSvc->toString(layerId)
-                             <<" has already meaasurement "<<idHelperSvc->toString(insert_itr.first->second->identify())
-                             <<". Cannot add "<<idHelperSvc->toString(meas->spacePoint()->identify())<<" for ambiguity resolution.");
-            }
-        }
-        return prds;
-    }
-
     std::vector<int> SegmentAmbiSolver::driftSigns(const ActsGeometryContext& gctx,
                                                    const Segment& segment,
-                                                   const std::vector<const SpacePoint*>& measurements) const {
+                                                   const Segment::MeasVec& measurements) const {
+        std::vector<int> signs{};
+        signs.reserve(measurements.size());
+        const auto [locPos, locDir] = makeLine(localSegmentPars(gctx, segment));
+        ATH_MSG_VERBOSE("Fetch drift signs for segment "<<segment.msSector()->identString()<<" -- "<<Amg::toString(locPos)
+                        <<Amg::toString(locDir));
+        for (const Segment::MeasVec::value_type& hit : measurements) {
+            if (!hit->spacePoint()) {
+                continue;
+            }
+            signs.push_back(SegmentFitHelpers::driftSign(locPos,locDir,*hit, msg()));
+        }
+        return signs;
+    }
+    SegmentAmbiSolver::MeasurementSet 
+        SegmentAmbiSolver::extractPrds(const Segment& segment) const {
         
-        const Amg::Transform3D globToLoc{segment.msSector()->globalToLocalTrans(gctx)};
-        return SegmentFitHelpers::driftSigns(globToLoc*segment.position(), 
-                                             globToLoc.linear() * segment.direction(), measurements, msg());
+        MeasurementSet meas{};
+        for (const Segment::MeasVec::value_type& hit : segment.measurements()) {
+            if (!hit->spacePoint() || hit->fitState() != CalibratedSpacePoint::State::Valid || !hit->measuresEta()) {
+                continue;
+            }
+            meas.insert(hit->spacePoint()->primaryMeasurement());
+            if (hit->spacePoint()->secondaryMeasurement()) {
+                 meas.insert(hit->spacePoint()->secondaryMeasurement());
+            }
+        }
+        return meas;
+    }
+    unsigned int SegmentAmbiSolver::countShared(const MeasurementSet& measSet1, 
+                                                const MeasurementSet& measSet2) const {
+        if (measSet1.size() > measSet2.size()) {
+            return std::count_if(measSet2.begin(),measSet2.end(),[&measSet1](const xAOD::UncalibratedMeasurement* meas){
+                return measSet1.count(meas);
+            });
+        }
+        return std::count_if(measSet1.begin(),measSet1.end(),[&measSet2](const xAOD::UncalibratedMeasurement* meas){
+                return measSet2.count(meas);
+            }); 
     }
 }

@@ -13,6 +13,7 @@
 class ActsGeometryContext;
 namespace MuonR4{
     class CalibratedSpacePoint;
+    class Segment;
     
     /** @brief Returns the hough tanTheta  [y] / [z]
      *  @param v: Arbitrary direction vector */
@@ -38,6 +39,11 @@ namespace MuonR4{
         Amg::Vector3D dirFromAngles(const double phi, const double theta);
         /** @brief Returns the localSegPars decoration from a xAODMuon::Segment*/
         Parameters localSegmentPars(const xAOD::MuonSegment& seg);
+        /** @brief Returns the local segment parameters from a segment object
+         *  @param gctx: Geometry context storing the local -> global transformation
+         *  @param segment: Reference to the segment */
+        Parameters localSegmentPars(const ActsGeometryContext& gctx,
+                                    const Segment& segment);
     }
 
 

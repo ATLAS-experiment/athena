@@ -15,8 +15,16 @@
 namespace MuonR4{
     class SegmentAmbiSolver : public AthMessaging {
         public:
+            struct Config{
+                /** If two overlapping segments have both the chi2 below the threshold, the one 
+                 *  with more degrees of freedom is chosen */
+                double selectByNDoFChi2{5.};
+                /** Cut on the number of shared precision hits */
+                unsigned int sharedPrecHits{3};
+            };
             
-            SegmentAmbiSolver(const std::string&name);
+            SegmentAmbiSolver(const std::string&name,
+                              Config&& config);
 
 
             using SegmentVec = std::vector<std::unique_ptr<Segment>>; 
@@ -29,13 +37,27 @@ namespace MuonR4{
                 superSet,
                 subSet
             };
-
-            using MeasByLayerMap = std::unordered_map<Identifier, const SpacePoint*>;            
-            MeasByLayerMap extractPrds(const Segment& segment) const;
+        private:
+            const Config m_cfg{};
 
             std::vector<int> driftSigns(const ActsGeometryContext& gctx,
                                         const Segment& segment,
-                                        const std::vector<const SpacePoint*>& measurements) const;
+                                        const Segment::MeasVec& measurements) const;
+            
+            using MeasurementSet = std::unordered_set<const xAOD::UncalibratedMeasurement*>;
+
+            /** @brief Extract the Uncalibrated measurements used to build the segment */
+            MeasurementSet extractPrds(const Segment& segment) const;
+            
+            /** @brief counts the number of measurements that're in both sets */
+            unsigned int countShared(const MeasurementSet& measSet1, 
+                                     const MeasurementSet& measSet2) const;
+
+            /** @brief Returns the reduced chi2 of the segment */
+            double redChi2(const Segment& segment) const;
+
+
+
 
     };
 }

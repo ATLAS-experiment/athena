@@ -2,6 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonPatternEvent/SegmentFitterEventData.h>
+#include <MuonPatternEvent/Segment.h>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <CxxUtils/sincos.h>
 #include <vector>
@@ -36,6 +37,20 @@ namespace MuonR4{
             static const SG::Accessor<xAOD::MeasVector<toInt(ParamDefs::nPars)>> acc{"localSegPars"};
             return xAOD::toEigen(xAOD::ConstVectorMap<toInt(ParamDefs::nPars)>{acc(seg).data()});
         }
+        Parameters localSegmentPars(const ActsGeometryContext& gctx,
+                                    const Segment& segment) {
+            Parameters pars{Parameters::Zero()};
+            const Amg::Transform3D globToLoc = segment.msSector()->globalToLocalTrans(gctx);
+            const Amg::Vector3D locPos = globToLoc * segment.position();
+            const Amg::Vector3D locDir = globToLoc.linear() * segment.direction();
+            pars[toInt(ParamDefs::x0)] = locPos.x();
+            pars[toInt(ParamDefs::y0)] = locPos.y();
+            pars[toInt(ParamDefs::theta)] = locDir.theta();
+            pars[toInt(ParamDefs::phi)] = locDir.phi();
+            pars[toInt(ParamDefs::time)] = segment.segementT0();
+            return pars;
+        }
+
         std::string makeLabel(const Parameters&pars) {
             std::stringstream sstr{};
             sstr<<"x_{0}="<<std::format("{:.2f}", pars[toInt(ParamDefs::x0)])<<", ";

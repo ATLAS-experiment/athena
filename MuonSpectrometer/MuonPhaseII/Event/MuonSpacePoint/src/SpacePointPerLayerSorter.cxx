@@ -33,11 +33,12 @@ namespace MuonR4 {
         using LayerCounting = std::unordered_map<Identifier, unsigned int>;
         LayerCounting mdtLayerCounting{}, stripLayerCounting{};
         for (const SpacePoint* hit : hits) {
-            const Identifier id = hit->identify();
+            const Identifier& id {hit->identify()};
             if (hit->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
                 const MdtIdHelper& idHelper{idHelperSvc->mdtIdHelper()};
-                const Identifier layId = idHelper.channelID(id, idHelper.multilayer(id), idHelper.tubeLayer(id), 1);
-             
+                const Identifier layId = idHelper.channelID(idHelper.stationName(id), 1, idHelper.stationPhi(id), 
+                                                            idHelper.multilayer(id), idHelper.tubeLayer(id), 1);
+
                 const unsigned int layer = mdtLayerCounting.insert(std::make_pair(layId, mdtLayerCounting.size())).first->second;
                 if (layer >= m_mdtLayers.size()) {
                     m_mdtLayers.resize(layer + 1);

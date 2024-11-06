@@ -7,6 +7,8 @@
 #include <MuonSpacePoint/CalibratedSpacePoint.h>
 #include <xAODMuonPrepData/MdtDriftCircle.h>
 #include <EventPrimitives/EventPrimitivesHelpers.h>
+
+#include <Acts/Utilities/Enumerate.hpp>
 #include <CxxUtils/sincos.h>
 #include <format>
 
@@ -40,7 +42,6 @@ namespace MuonR4{
             AthMessaging{name},
             m_cfg{configuration},
             m_segmentSeed{segmentSeed} {
-        
 
         if (m_hitLayers.mdtHits().empty()) return;
         
@@ -60,27 +61,25 @@ namespace MuonR4{
         while (m_lowerLayer < m_upperLayer && m_hitLayers.mdtHits()[m_upperLayer].size() > m_cfg.busyLayerLimit) {
             --m_upperLayer;
         }
-       
-        if (msgLvl(MSG::DEBUG)) {
+
+        if (msgLvl(MSG::VERBOSE)) {
             std::stringstream sstr{};
-            unsigned int layCount{0};
-            for (const HitVec& layer : m_hitLayers.mdtHits()) { 
-                sstr<<"Mdt-hits in layer "<<(++layCount)<<": "<<layer.size()<<std::endl;
+            for (const auto& [layCount, layer] : Acts::enumerate(m_hitLayers.mdtHits())) { 
+                sstr<<"Mdt-hits in layer "<<layCount<<": "<<layer.size()<<std::endl;
                 for (const HoughHitType& hit : layer) {
                     sstr<<"   **** "<<hit->msSector()->idHelperSvc()->toString(hit->identify())<<" "
                         <<Amg::toString(hit->positionInChamber())<<", driftRadius: "<<hit->driftRadius()<<std::endl;
                 }
             }
-            layCount = 0;
-            for (const HitVec& layer : m_hitLayers.stripHits()) { 
-                sstr<<"Hits in layer "<<(++layCount)<<": "<<layer.size()<<std::endl;
+            for (const auto& [layCount, layer] : Acts::enumerate(m_hitLayers.stripHits())) { 
+                sstr<<"Hits in layer "<<layCount<<": "<<layer.size()<<std::endl;
                 for (const HoughHitType& hit : layer) {
                     sstr<<"   **** "<<hit->msSector()->idHelperSvc()->toString(hit->identify())<<" "
                         <<Amg::toString(hit->positionInChamber())<<", driftRadius: "<<hit->driftRadius()<<std::endl;
                 }
             }
-            ATH_MSG_DEBUG("SeedGenerator - sorting of hits done. Mdt layers: "<<m_hitLayers.mdtHits().size()
-                         <<", strip layers: "<<m_hitLayers.stripHits().size()<<std::endl<<sstr.str());
+            ATH_MSG_VERBOSE("SeedGenerator - sorting of hits done. Mdt layers: "<<m_hitLayers.mdtHits().size()
+                            <<", strip layers: "<<m_hitLayers.stripHits().size()<<std::endl<<sstr.str());
         }
     }
     
@@ -141,8 +140,16 @@ namespace MuonR4{
                             <<" -- next bottom hit: "<<m_lowerLayer<<", hit: "<<m_lowerHitIndex
                             <<" ("<<lower.size()<<"), topHit " <<m_upperLayer<<", "<<m_upperHitIndex
                             <<" ("<<upper.size()<<") - ambiguity "<<s_signCombos[m_signComboIndex]);
-
-            found = buildSeed(ctx, upper.at(m_upperHitIndex), lower.at(m_lowerHitIndex), s_signCombos.at(m_signComboIndex));
+            /** Force that the hits are from different multilayers if there're two  */
+            const SpacePoint* topHit{upper[m_upperHitIndex]};
+            const SpacePoint* bottomHit{lower[m_lowerHitIndex]};
+            const MdtIdHelper& idHelper{topHit->msSector()->idHelperSvc()->mdtIdHelper()};
+            if (false && idHelper.numberOfMultilayers(topHit->identify()) == 2 && 
+                topHit->primaryMeasurement()->identifierHash() == bottomHit->primaryMeasurement()->identifierHash()) {
+                m_lowerLayer= m_upperLayer;
+                return std::nullopt;
+            }
+            found = buildSeed(ctx, topHit, bottomHit, s_signCombos[m_signComboIndex]);
             /// Increment for the next candidate
             moveToNextCandidate();
             /// If a candidate is built return it. Otherwise continue the process
@@ -163,7 +170,7 @@ namespace MuonR4{
         if (bottomPrd->status() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime ||
             topPrd->status() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime) {
                 return std::nullopt;
-        }   
+        }
         const int signTop = signs[0];
         const int signBot = signs[1];
         double R = signBot *bottomHit->driftRadius() - signTop * topHit->driftRadius(); 
@@ -182,13 +189,12 @@ namespace MuonR4{
         candidateSeed.parameters = m_segmentSeed->parameters();
         candidateSeed.parentBucket = m_segmentSeed->parentBucket();
         double theta{thetaTubes - std::asin(std::clamp(R / distTubes, -1., 1.))};
-        const CxxUtils::sincos initTheta{theta};
-        Amg::Vector3D seedDir{0, initTheta.sn, initTheta.cs};
+        Amg::Vector3D seedDir = dirFromAngles(90.*Gaudi::Units::deg, theta);
         double Y0 = bottomPos.y()*seedDir.z() - bottomPos.z()*seedDir.y() + signBot*bottomHit->driftRadius();
         double combDriftUncert{std::sqrt(bottomPrd->driftRadiusCov() + topPrd->driftRadiusCov())};
         if (m_cfg.recalibSeedCircles) {
             candidateSeed.parameters[toInt(ParamDefs::theta)] = theta;
-            candidateSeed.parameters[toInt(ParamDefs::y0)] = Y0 / initTheta.cs;
+            candidateSeed.parameters[toInt(ParamDefs::y0)] = Y0 / seedDir.z();
             /// Create a new line position & direction which also takes the
             /// potential phi estimates into account
             const auto [linePos, lineDir] = makeLine(candidateSeed.parameters);
@@ -199,8 +205,7 @@ namespace MuonR4{
             R = signBot * calibBottom->driftRadius() - signTop * calibTop->driftRadius();
             /// Recalculate the seed with the calibrated parameters
             theta =  thetaTubes - std::asin(std::clamp(R / distTubes, -1., 1.));
-            const CxxUtils::sincos initTheta{theta};
-            seedDir = Amg::Vector3D{0, initTheta.sn, initTheta.cs};
+            seedDir = dirFromAngles(90.*Gaudi::Units::deg, theta);
             Y0 = bottomPos.y()*seedDir.z() - bottomPos.z()*seedDir.y() + signBot*bottomHit->driftRadius();
             combDriftUncert = std::sqrt(driftCov(*calibBottom) + driftCov(*calibTop));
         }
@@ -222,14 +227,15 @@ namespace MuonR4{
         solCandidate.Y0 = seedPos[toInt(ParamDefs::y0)];
         solCandidate.theta = theta;
         /// d/dx asin(x) = 1 / sqrt(1- x*x)
-        solCandidate.dTheta =  combDriftUncert / std::sqrt(1 - std::pow(std::clamp(R / distTubes, -1., 1.), 2)) / distTubes;
+        solCandidate.dTheta =  combDriftUncert / std::sqrt(1. - std::pow(std::clamp(R / distTubes, -1., 1.), 2)) / distTubes;
         solCandidate.dY0 =  std::hypot(-bottomPos.y()*seedDir.y() + bottomPos.z()*seedDir.z(), 1.) * solCandidate.dTheta;
         ATH_MSG_VERBOSE("Test new "<<solCandidate<<".");
 
         using CalibSpacePointPtr = ISpacePointCalibrator::CalibSpacePointPtr;
         unsigned int nMdt{0};
         /** Collect all hits close to the seed line */
-        for (const std::vector<HoughHitType>& hitsInLayer : m_hitLayers.mdtHits()) {           
+        for (const auto& [layerNr,  hitsInLayer] : Acts::enumerate(m_hitLayers.mdtHits())) {
+            ATH_MSG_VERBOSE( hitsInLayer.size()<<" hits in layer "<<(layerNr +1));
             for (const HoughHitType testMe : hitsInLayer){
                 CalibSpacePointPtr calibHit = m_cfg.calibrator->calibrate(ctx,testMe, seedPos, seedDir, 0.);
                 if (!calibHit || calibHit->fitState() != CalibratedSpacePoint::State::Valid) {
@@ -286,6 +292,10 @@ namespace MuonR4{
         if (m_cfg.tightenHitCut) {
             m_cfg.nMdtHitCut = std::max(m_cfg.nMdtHitCut, nMdt);
         }
+        /** Let's find out whether they're topological connected by comparing the tube numbers
+          *
+         */
+        
         ++m_nGenSeeds;
         
         ATH_MSG_VERBOSE("In event "<<ctx.eventID().event_number()<<" found new seed solution "<<toString(candidateSeed.parameters));
@@ -329,7 +339,7 @@ namespace MuonR4{
   
         double theta = inSeed.parameters[toInt(ParamDefs::theta)];
         
-        Amg::Vector3D seedDir{0, std::sin(theta), std::cos(theta)};
+        Amg::Vector3D seedDir = dirFromAngles(90.* Gaudi::Units::deg, theta);
 
         const double y0 = inSeed.parameters[toInt(ParamDefs::y0)] * seedDir.z();
 
@@ -355,10 +365,9 @@ namespace MuonR4{
         centerOfGravity *= invNorm;
 
         double Tzzyy{0.}, Tyz{0.}, Trz{0.}, Try{0.};
-        unsigned int covIdx{0};
-        for (const std::unique_ptr<CalibratedSpacePoint>& hit : inSeed.measurements) {
+        for (const auto&[covIdx, hit] : Acts::enumerate(inSeed.measurements)) {
             const double invCov = invCovs[covIdx]*invNorm;
-            const int sign = driftSigns[covIdx++];
+            const int sign = driftSigns[covIdx];
             const Amg::Vector3D pos  = hit->positionInChamber() - centerOfGravity;
             Tzzyy += invCov * (std::pow(pos.z(), 2) - std::pow(pos.y(), 2));
             Tyz   += invCov * pos.y()*pos.z();
@@ -404,8 +413,7 @@ namespace MuonR4{
         }
         inSeed.parameters[toInt(ParamDefs::theta)] = theta;
         inSeed.parameters[toInt(ParamDefs::y0)] = (centerOfGravity.y() *seedDir.z() - centerOfGravity.z() * seedDir.y() + fitY0) / std::cos(theta);
-        ATH_MSG_VERBOSE("Drift circle fit converged within "<<inSeed.nIter
-                    <<" iterations giving "<<toString(inSeed.parameters)<<", chi2: "<<inSeed.chi2);
+        ATH_MSG_VERBOSE("Drift circle fit converged within "<<inSeed.nIter<<" iterations giving "<<toString(inSeed.parameters)<<", chi2: "<<inSeed.chi2);
     }
   
 }
