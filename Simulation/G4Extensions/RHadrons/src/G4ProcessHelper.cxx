@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "G4ProcessHelper.hh"
 #include "CustomParticle.h"
-#include "TruthUtils/HepMCHelpers.h"
+#include "CustomPDGParser.h"
+#include "TruthUtils/HepMCHelpers.h" // TODO migrate G4ProcessHelper back to using HepMCHelpers functions once they are ready
 #include "G4ParticleTable.hh"
 #include "G4DecayTable.hh"
 #include "CLHEP/Random/RandFlat.h"
@@ -194,10 +195,10 @@ G4double G4ProcessHelper::GetInclusiveCrossSection(const G4DynamicParticle *aPar
 
   if(!reggemodel){
       //Flat cross section
-      if(MC::SUSY::isRGlueball(thePDGCode)) {
+      if(CustomPDGParser::s_isRGlueball(thePDGCode)) {
         theXsec = 24 * CLHEP::millibarn;
       } else {
-        std::vector<G4int> nq=MC::SUSY::containedQuarks(thePDGCode);
+        std::vector<G4int> nq=CustomPDGParser::s_containedQuarks(thePDGCode);
         for (std::vector<G4int>::iterator it = nq.begin();
              it != nq.end();
              ++it)
@@ -216,17 +217,17 @@ G4double G4ProcessHelper::GetInclusiveCrossSection(const G4DynamicParticle *aPar
     double P = Pom(boost);
     if(thePDGCode>0)
       {
-        if(MC::SUSY::isSMeson(thePDGCode)) theXsec=(P+R)*CLHEP::millibarn;
-        if(MC::SUSY::isSBaryon(thePDGCode)) theXsec=2*P*CLHEP::millibarn;
-        if(MC::SUSY::isRMeson(thePDGCode)||MC::SUSY::isRGlueball(thePDGCode)) theXsec=(R+2*P)*CLHEP::millibarn;
-        if(MC::SUSY::isRBaryon(thePDGCode)) theXsec=3*P*CLHEP::millibarn;
+        if(CustomPDGParser::s_isMesonino(thePDGCode)) theXsec=(P+R)*CLHEP::millibarn;
+        if(CustomPDGParser::s_isSbaryon(thePDGCode)) theXsec=2*P*CLHEP::millibarn;
+        if(CustomPDGParser::s_isRMeson(thePDGCode)||CustomPDGParser::s_isRGlueball(thePDGCode)) theXsec=(R+2*P)*CLHEP::millibarn;
+        if(CustomPDGParser::s_isRBaryon(thePDGCode)) theXsec=3*P*CLHEP::millibarn;
       }
     else
       {
-        if(MC::SUSY::isSMeson(thePDGCode)) theXsec=P*CLHEP::millibarn;
-        if(MC::SUSY::isSBaryon(thePDGCode)) theXsec=(2*(P+R)+30/sqrt(boost))*CLHEP::millibarn;
-        if(MC::SUSY::isRMeson(thePDGCode)||MC::SUSY::isRGlueball(thePDGCode)) theXsec=(R+2*P)*CLHEP::millibarn;
-        if(MC::SUSY::isRBaryon(thePDGCode)) theXsec=3*P*CLHEP::millibarn;
+        if(CustomPDGParser::s_isMesonino(thePDGCode)) theXsec=P*CLHEP::millibarn;
+        if(CustomPDGParser::s_isSbaryon(thePDGCode)) theXsec=(2*(P+R)+30/sqrt(boost))*CLHEP::millibarn;
+        if(CustomPDGParser::s_isRMeson(thePDGCode)||CustomPDGParser::s_isRGlueball(thePDGCode)) theXsec=(R+2*P)*CLHEP::millibarn;
+        if(CustomPDGParser::s_isRBaryon(thePDGCode)) theXsec=3*P*CLHEP::millibarn;
       }
   }
 
@@ -297,7 +298,7 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
   G4int theIncidentPDG = aDynamicParticle->GetDefinition()->GetPDGEncoding();
 
   if(reggemodel
-     &&MC::SUSY::isSMeson(theIncidentPDG)
+     &&CustomPDGParser::s_isMesonino(theIncidentPDG)
      &&CLHEP::RandFlat::shoot()*mixing>0.5
      &&aDynamicParticle->GetDefinition()->GetPDGCharge()==0.
      )
@@ -313,9 +314,9 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
      && reggemodel
      && CLHEP::RandFlat::shoot()>0.9
      && (
-        (MC::SUSY::isSMeson(theIncidentPDG)&&theIncidentPDG>0)
+        (CustomPDGParser::s_isMesonino(theIncidentPDG)&&theIncidentPDG>0)
         ||
-        MC::SUSY::isRMeson(theIncidentPDG)
+        CustomPDGParser::s_isRMeson(theIncidentPDG)
         )
      ){
     baryonise=true;
@@ -350,9 +351,9 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
           ||
           (!baryonise&&!ReactionGivesBaryon(prod))
           ||
-          (MC::SUSY::isSBaryon(theIncidentPDG))
+          (CustomPDGParser::s_isSbaryon(theIncidentPDG))
           ||
-          (MC::SUSY::isRBaryon(theIncidentPDG))
+          (CustomPDGParser::s_isRBaryon(theIncidentPDG))
           ||!reggemodel
           )
        )
@@ -491,7 +492,7 @@ G4bool G4ProcessHelper::ReactionIsPossible(const ReactionProduct& aReaction,cons
 
 G4bool G4ProcessHelper::ReactionGivesBaryon(const ReactionProduct& aReaction) const{
   for (ReactionProduct::const_iterator it = aReaction.begin();it!=aReaction.end();++it)
-    if(MC::SUSY::isSBaryon(*it)||MC::SUSY::isRBaryon(*it)) return true;
+    if(CustomPDGParser::s_isSbaryon(*it)||CustomPDGParser::s_isRBaryon(*it)) return true;
   return false;
 }
 
