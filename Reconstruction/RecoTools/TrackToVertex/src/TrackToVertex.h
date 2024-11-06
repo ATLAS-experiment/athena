@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,6 +16,7 @@
 // Trk
 #include "ITrackToVertex/ITrackToVertex.h"
 #include "TrkParameters/TrackParameters.h"
+#include "TrkTrack/Track.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "BeamSpotConditionsData/BeamSpotData.h"
 #include "TrkExInterfaces/IExtrapolator.h"
@@ -25,7 +26,6 @@ namespace Rec {
 }
 
 namespace Trk {
-  class Track;
   class StraightLineSurface;
 }
 
@@ -127,8 +127,17 @@ namespace Reco {
         const Trk::StraightLineSurface* beamline) const override final;
 
     private:
+      inline bool startAtOriginalPerigee(const Trk::Track &track) const {
+        return m_startTRTSAAtPerigee.value()
+            && track.info().patternRecognition().test(Trk::TrackInfo::TRTStandalone)
+            && track.perigeeParameters();
+      }
+
       ToolHandle<Trk::IExtrapolator>
         m_extrapolator {this, "Extrapolator", "Trk::Extrapolator/AtlasExtrapolator"}; //!< ToolHandle for Extrapolator
+      Gaudi::Property<bool> m_startTRTSAAtPerigee
+        {this, "StartTRTStandaloneTracksAtOriginalPerigee", false,
+         "When extrapolating TRT standalone start at their original perigee which may have a more realistic covariance"};
 
       const static Amg::Vector3D s_origin; //!< static origin
   };
