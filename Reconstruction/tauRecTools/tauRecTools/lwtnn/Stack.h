@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STACK_HH_TAURECTOOLS
@@ -222,7 +222,7 @@ namespace lwtDev {
   class EmbeddingLayer : public IRecurrentLayer
   {
   public:
-    EmbeddingLayer(int var_row_index, MatrixXd W);
+    EmbeddingLayer(int var_row_index, const MatrixXd & W);
     virtual ~EmbeddingLayer() {};
     virtual MatrixXd scan( const MatrixXd&) const override;
 
@@ -236,12 +236,12 @@ namespace lwtDev {
   class LSTMLayer : public IRecurrentLayer
   {
   public:
-    LSTMLayer(ActivationConfig activation,
-              ActivationConfig inner_activation,
-              MatrixXd W_i, MatrixXd U_i, VectorXd b_i,
-              MatrixXd W_f, MatrixXd U_f, VectorXd b_f,
-              MatrixXd W_o, MatrixXd U_o, VectorXd b_o,
-              MatrixXd W_c, MatrixXd U_c, VectorXd b_c,
+    LSTMLayer(const ActivationConfig & activation,
+              const ActivationConfig & inner_activation,
+              const MatrixXd & W_i, const MatrixXd & U_i, const VectorXd & b_i,
+              const MatrixXd & W_f, const MatrixXd & U_f, const VectorXd & b_f,
+              const MatrixXd & W_o, const MatrixXd & U_o, const VectorXd & b_o,
+              const MatrixXd & W_c, const MatrixXd & U_c, const VectorXd & b_c,
               bool go_backwards,
               bool return_sequence);
 
@@ -277,11 +277,11 @@ namespace lwtDev {
   class GRULayer : public IRecurrentLayer
   {
   public:
-    GRULayer(ActivationConfig activation,
-             ActivationConfig inner_activation,
-             MatrixXd W_z, MatrixXd U_z, VectorXd b_z,
-             MatrixXd W_r, MatrixXd U_r, VectorXd b_r,
-             MatrixXd W_h, MatrixXd U_h, VectorXd b_h);
+    GRULayer(const ActivationConfig & activation,
+                     const ActivationConfig & inner_activation,
+                     const MatrixXd & W_z, const  MatrixXd & U_z, const VectorXd & b_z,
+                     const MatrixXd & W_r, const MatrixXd & U_r, const VectorXd & b_r,
+                     const MatrixXd & W_h, const MatrixXd & U_h, const VectorXd & b_h);
 
     virtual ~GRULayer() {};
     virtual MatrixXd scan( const MatrixXd&) const override;

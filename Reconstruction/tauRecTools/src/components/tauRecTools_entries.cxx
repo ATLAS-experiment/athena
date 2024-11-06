@@ -25,6 +25,7 @@
 #include "tauRecTools/TauWPDecorator.h"
 #include "tauRecTools/TauIDVarCalculator.h"
 #include "tauRecTools/TauJetRNNEvaluator.h"
+#include "tauRecTools/TauGNNEvaluator.h"
 #include "tauRecTools/TauDecayModeNNClassifier.h"
 #include "tauRecTools/TauVertexedClusterDecorator.h"
 #include "tauRecTools/TauAODSelector.h"
@@ -59,6 +60,7 @@ DECLARE_COMPONENT( TauPi0Selector )
 DECLARE_COMPONENT( TauWPDecorator )
 DECLARE_COMPONENT( TauIDVarCalculator )
 DECLARE_COMPONENT( TauJetRNNEvaluator )
+DECLARE_COMPONENT( TauGNNEvaluator )
 DECLARE_COMPONENT( TauDecayModeNNClassifier )
 DECLARE_COMPONENT( TauVertexedClusterDecorator )
 DECLARE_COMPONENT( TauAODSelector )
