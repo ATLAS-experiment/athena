@@ -172,18 +172,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st = prefilter_roads;
     ATH_CHECK(m_roadFinderTool->getRoads(phits_1st, roads_1st));
 
-    for (auto const &road:roads_1st){
-        std::vector<FPGATrackSimHit> road_hits;
-        ATH_MSG_DEBUG("Hough Road X Y: " << road->getX() << " " << road->getY());
-        for (size_t l = 0; l < road->getNLayers(); ++l) {
-            for (const auto &layerH : road->getHits(l)) {
-                road_hits.push_back(*layerH);
-            }
-        }
-        FPGAHitsInRoads_1st->push_back(road_hits);
-        FPGARoads_1st->push_back(*road);
-    }
-
     auto mon_nroads_1st = Monitored::Scalar<unsigned>("nroads_1st", roads_1st.size());
     for (auto const &road : roads_1st) {
       unsigned bitmask = road->getHitLayers();
@@ -217,6 +205,19 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         ATH_CHECK(m_spRoadFilterTool->filterRoads(roads_1st, postfilter3_roads));
         roads_1st = postfilter3_roads;
     }
+
+    for (auto const &road:roads_1st){
+        std::vector<FPGATrackSimHit> road_hits;
+        ATH_MSG_DEBUG("Hough Road X Y: " << road->getX() << " " << road->getY());
+        for (size_t l = 0; l < road->getNLayers(); ++l) {
+            for (const auto &layerH : road->getHits(l)) {
+                road_hits.push_back(*layerH);
+            }
+        }
+        FPGAHitsInRoads_1st->push_back(road_hits);
+        FPGARoads_1st->push_back(*road);
+    }
+
     auto mon_nroads_1st_postfilter = Monitored::Scalar<unsigned>("nroads_1st_postfilter", roads_1st.size());
     Monitored::Group(m_monTool, mon_nroads_1st_postfilter);
 

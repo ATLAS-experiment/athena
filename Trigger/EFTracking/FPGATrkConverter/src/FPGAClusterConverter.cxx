@@ -357,7 +357,7 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   double phiW = design->widthFromRowRange(rowMin, rowMax-1); 
 
   InDet::SiWidth siWidth(Amg::Vector2D(phiWidth,etaWidth),Amg::Vector2D(phiW,etaW));
-  
+
   // **** Get SiLocalPosition from cell id and define Amg::Vector2D position
   InDetDD::SiLocalPosition silPos(pDE->rawLocalPositionOfCell(cell)); 
   Amg::Vector2D localPos(silPos);
@@ -370,9 +370,7 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
     localPos = localPosShift;
   }
 
-  Amg::Vector3D globalPos = pDE->globalPosition(localPos);
   ATH_MSG_DEBUG("\t\tLocal position: x=" << localPos.x() << " y=" << localPos.y() ); 
-  ATH_MSG_DEBUG("\t\tGlobal position: x=" << globalPos.x() << " y=" << globalPos.y()  << " z=" << globalPos.z() );
 
   Amg::MatrixX cov(2,2); 
   cov.setZero();
@@ -392,7 +390,8 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   localCovariance(0, 0) = cov(0, 0);
   localCovariance(1, 1) = cov(1, 1);
 
-  Eigen::Matrix<float,3,1> globalPosition(globalPos.x(), globalPos.y(), globalPos.z()); // TODO: or positionShift?
+  Eigen::Matrix<float,3,1> globalPosition(h.getX(),h.getY(),h.getZ());
+  ATH_MSG_DEBUG("\t\tGlobal position: x=" << globalPosition.x() << " y=" << globalPosition.y()  << " z=" << globalPosition.z() );
 
   cl.setMeasurement<2>(hash, localPosition, localCovariance);
   cl.setIdentifier( rdoList.front().get_compact() );
@@ -554,9 +553,7 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
     localPos = localPosShift;
   }
 
-  Amg::Vector3D globalPos = pDE->globalPosition(localPos);
   ATH_MSG_DEBUG("\t\tLocal position: x=" << localPos.x() << " y=" << localPos.y() ); 
-  ATH_MSG_DEBUG("\t\tGlobal position: x=" << globalPos.x() << " y=" << globalPos.y()  << " z=" << globalPos.z() );
 
   /* TODO */
   Eigen::Matrix<float,1,1> localPosition;
@@ -575,7 +572,8 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
     localCovariance(0, 0) = designNew->phiPitchPhi() * designNew->phiPitchPhi() * (1./12.);
   }
 
-  Eigen::Matrix<float,3,1> globalPosition(globalPos.x(), globalPos.y(), globalPos.z()); 
+  Eigen::Matrix<float,3,1> globalPosition(h.getX(),h.getY(),h.getZ()); 
+  ATH_MSG_DEBUG("\t\tGlobal position: x=" << globalPosition.x() << " y=" << globalPosition.y()  << " z=" << globalPosition.z() );
 
   cl.setMeasurement<1>(hash, localPosition, localCovariance);
   cl.setIdentifier( rdoList.front().get_compact() );
