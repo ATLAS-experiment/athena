@@ -10,17 +10,16 @@
 #include <iostream>
 #include <charconv>
 #include <stdexcept>
+#include <ranges>
 
-static void 
-show_vector (const ExpandedIdentifier::element_vector& v){
-  ExpandedIdentifier::element_vector::const_iterator it;
-  std::cout << "[";
-  for (bool first{true}; auto value:v){
-      std::cout << (first?"":".");
-      first = false;
-      std::cout << value;
-    }
-  std::cout << "]";
+static std::string 
+show_vector (const ExpandedIdentifier::element_vector& v, const std::string & sep="/"){
+  if (v.empty()) return {};
+  std::string result = std::to_string(v.front());
+  for (auto value : v | std::views::drop(1)){
+      result+= sep + std::to_string(value);
+  }
+  return result;
 }
 
 
@@ -54,18 +53,12 @@ ExpandedIdentifier::set (const std::string& text){
 
 
 ExpandedIdentifier::operator std::string () const{
-  // print fields one by one.
-  std::string result;
-  for (bool first{true}; auto value :m_fields){
-    result += (first? "":"/") + std::to_string(value);
-    first = false;
-  }
-  return result;
+  return show_vector(m_fields);
 }
 
 void 
 ExpandedIdentifier::show () const{
-  show_vector (m_fields);
+  std::cout<<  "["<< show_vector (m_fields,".") <<"]";
 }
 
 std::ostream & operator << (std::ostream &out, const ExpandedIdentifier & x){
