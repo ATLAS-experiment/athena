@@ -6,6 +6,7 @@
 
 ArtInFile=$1
 dcubeRef=$2
+maxEvents=$3
 
 lastref_dir=last_results
 dcubeXml=dcube_ART_IDPVMPlots_ITk.xml
@@ -45,7 +46,7 @@ run "Simulation" \
     --geometryVersion "default:${geometry}" \
     --inputEVNTFile ${ArtInFile} \
     --outputHITSFile HITS.root \
-    --maxEvents -1 \
+    --maxEvents ${maxEvents} \
     --imf False
 
 run "Digitization"\
