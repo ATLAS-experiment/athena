@@ -435,7 +435,7 @@ public:
 
   void enableRepass(float peak2ndDerivMinRepassHG, float peak2ndDerivMinRepassLG);
 
-  void enableTimeSigCut(bool AND, float sigCut, std::string TF1String,
+  void enableTimeSigCut(bool AND, float sigCut, const std::string& TF1String,
 			const std::vector<double>& parsHG, 
 			const std::vector<double>& parsLG); 
 

@@ -301,6 +301,7 @@ StatusCode LArRamps2Ntuple::stop() {
  }
 
  unsigned cellCounter=0;
+ std::set<std::pair<HWIdentifier,unsigned> > cellDone;
  if (hasRawRampContainer) { //Loop over raw ramp container and fill ntuple
 
    //Retrieve Raw Ramp Container
@@ -355,6 +356,7 @@ StatusCode LArRamps2Ntuple::stop() {
 
           //FT move to here
 	  fillFromIdentifier(chid);
+          cellDone.insert(std::make_pair(chid, igain));
 	  
           unsigned nDAC=0;
           unsigned nCoeff=0;
@@ -393,34 +395,35 @@ StatusCode LArRamps2Ntuple::stop() {
        
        }//end loop over container
    }    // loop over gains
- } else {//have only fitted ramp
+ }
 
-   //Iterate over gains and cells
-   unsigned nGain = m_isSC ? 1 : CaloGain::LARNGAIN;
-   for ( unsigned igain=CaloGain::LARHIGHGAIN; igain<nGain ; ++igain )
-   {
-     for (HWIdentifier chid : m_onlineId->channel_range()) {
-       if (cabling->isOnlineConnected(chid)) {
-	 gain  = (long)igain;
-	 if (m_addCorrUndo) corrUndo = 0;
-         const ILArRamp::RampRef_t  rampcoeff=ramp->ADC2DAC(chid, gain);
-         if (rampcoeff.size()==0) continue; // No ramp for this cell
-         cellIndex  = cellCounter;
-         fillFromIdentifier(chid);
-         for (coeffIndex=0;coeffIndex<rampcoeff.size();coeffIndex++) coeffs[coeffIndex]=rampcoeff[coeffIndex];
-     
-	 sc=ntupleSvc()->writeRecord(m_nt);
+ //Iterate over gains and cells
+ // check if cell was already filled in rawRamp loop
+ unsigned nGain = m_isSC ? 1 : CaloGain::LARNGAIN;
+ for ( unsigned igain=CaloGain::LARHIGHGAIN; igain<nGain ; ++igain )
+ {
+   for (HWIdentifier chid : m_onlineId->channel_range()) {
+     if (cabling->isOnlineConnected(chid)) {
+       gain  = (long)igain;
+       if ( !cellDone.empty() && cellDone.contains(std::make_pair(chid,gain)) ) continue;
+       if (m_addCorrUndo) corrUndo = 0;
+       const ILArRamp::RampRef_t  rampcoeff=ramp->ADC2DAC(chid, gain);
+       if (rampcoeff.size()==0) continue; // No ramp for this cell
+       cellIndex  = cellCounter;
+       fillFromIdentifier(chid);
+       for (coeffIndex=0;coeffIndex<rampcoeff.size();coeffIndex++) coeffs[coeffIndex]=rampcoeff[coeffIndex];
+   
+       sc=ntupleSvc()->writeRecord(m_nt);
 
-	 if (sc!=StatusCode::SUCCESS) {
-	   ATH_MSG_ERROR( "writeRecord failed" );
-	   return StatusCode::FAILURE;
-	 }
-       }// end if isConnected
-       cellCounter++;
-     }//end loop over cells 
-   }//end loop over gains
+       if (sc!=StatusCode::SUCCESS) {
+         ATH_MSG_ERROR( "writeRecord failed" );
+         return StatusCode::FAILURE;
+       }
+     }// end if isConnected
+     cellCounter++;
+   }//end loop over cells 
+ }//end loop over gains
 
- } //end else have only fitted ramp
 
  if (ramp && m_addCorrUndo) {
    //Now loop over undoCorrections:

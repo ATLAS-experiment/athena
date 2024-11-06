@@ -6,6 +6,7 @@ def addSCDumpFlags(flags):
 
     flags.addFlag("LArSCDump.digitsKey","SC")
     flags.addFlag("LArSCDump.accdigitsKey","")
+    flags.addFlag("LArSCDump.acccalibdigitsKey","")
     flags.addFlag("LArSCDump.nSamples",32)
     flags.addFlag("LArSCDump.nEt",3)
     flags.addFlag("LArSCDump.doSamples",True)

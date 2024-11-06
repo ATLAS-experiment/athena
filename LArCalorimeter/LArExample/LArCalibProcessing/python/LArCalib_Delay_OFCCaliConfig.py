@@ -57,9 +57,8 @@ def LArDelay_OFCCaliCfg(flags):
        if flags.LArCalib.Input.isRawData:
           result.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(adcCollKey = digKey, adcBasCollKey = "", etCollKey = "",
                                                                etIdCollKey = "", LATOMEDecoder = theLArLATOMEDecoder))
-          result.addEventAlgo(CompFactory.LArDigitsAccumulator("LArDigitsAccumulator", KeyList = [digKey], 
-                                                             LArAccuDigitContainerName = "", NTriggersPerStep = 100,
-                                                             isSC = flags.LArCalib.isSC, DropPercentTrig = 20))
+          from LArCalibProcessing.LArCalib_CalibDigitsMakerConfig import LArCalibDigitsMakerCfg
+          result.merge(LArCalibDigitsMakerCfg(flags,digKey))
 
 
        else:   
@@ -203,6 +202,7 @@ def LArDelay_OFCCaliCfg(flags):
            result.addEventAlgo(CompFactory.LArOFC2Ntuple(ContainerKey = "LArOFC",
                                                       AddFEBTempInfo  = False,
                                                       BadChanKey = bcKey,
+                                                      isSC = flags.LArCalib.isSC,
                                                       OffId=True,
                                                       AddCalib=True
                                                   ))
@@ -219,6 +219,7 @@ def LArDelay_OFCCaliCfg(flags):
                                                    AddFEBTempInfo  = False,
                                                    NtupleFile = "FILE2",
                                                    BadChanKey = bcKey,
+                                                   isSC = flags.LArCalib.isSC,
                                                    AddCalib=True
                                                ))
 
@@ -255,8 +256,6 @@ def LArDelay_OFCCaliCfg(flags):
     #RegistrationSvc    
     result.addService(CompFactory.IOVRegistrationSvc(RecreateFolders = False))
 
-
-    result.getService("IOVDbSvc").DBInstance=""
 
     from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
     result.merge(PerfMonMTSvcCfg(flags))

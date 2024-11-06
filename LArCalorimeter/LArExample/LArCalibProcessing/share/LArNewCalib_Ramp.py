@@ -34,6 +34,7 @@ if __name__=='__main__':
    parser.add_argument('-v','--ignoreEndcap', dest='ignoreE', default=False, action="store_true", help='ignore Endcap channels ?')
    parser.add_argument('-w','--doValid', dest='doValid', default=False, action="store_true", help='run vcalidation ?')
    parser.add_argument('--FW6', dest='fw6', default=False, help='Is it for fw v. 6', action='store_true')
+   parser.add_argument('--EMF', dest='emf', default=False, help='Is it for EMF', action='store_true')
 
 
    args = parser.parse_args()
@@ -178,6 +179,11 @@ if __name__=='__main__':
    from AthenaConfiguration.Enums import LHCPeriod
    flags.GeoModel.Run = LHCPeriod.Run3
 
+   if args.emf:
+      # additions for EMF
+      flags.IOVDb.SqliteInput="/afs/cern.ch/user/p/pavol/public/EMF_otherCond.db"
+      flags.IOVDb.SqliteFolders = ("/LAR/BadChannelsOfl/BadChannelsSC","/LAR/BadChannels/BadChannelsSC","/LAR/Identifier/OnOffIdMap",)
+
    flags.lock()
    
    cfg=MainServicesCfg(flags)
@@ -212,6 +218,8 @@ if __name__=='__main__':
        cfg.getEventAlgo("LArRawSCCalibDataReadingAlg").LATOMEDecoder.IgnoreBarrelChannels=args.ignoreB
    if args.ignoreE:
        cfg.getEventAlgo("LArRawSCCalibDataReadingAlg").LATOMEDecoder.IgnoreEndcapChannels=args.ignoreE
+
+   cfg.getService("IOVDbSvc").DBInstance=""
 
    # all messages
    cfg.getService("MessageSvc").debugLimit = 99999999

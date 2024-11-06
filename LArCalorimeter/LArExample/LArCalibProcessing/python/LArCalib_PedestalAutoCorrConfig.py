@@ -1,6 +1,33 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+
+def RawCalibDataReadingCfg(flags, digKey):
+     result=ComponentAccumulator()
+     result.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArDigitKey=digKey,
+                                                              LArFebHeaderKey="LArFebHeader",
+                                                              FailOnCorruption=False,
+                                                              SubCaloPreselection=flags.LArCalib.Input.SubDet,
+                                                              PosNegPreselection=flags.LArCalib.Preselection.Side,
+                                                              BEPreselection=flags.LArCalib.Preselection.BEC,
+                                                              FTNumPreselection=flags.LArCalib.Preselection.FT))
+     result.addEventAlgo(CompFactory.LArDigitsAccumulator("LArDigitsAccumulator", KeyList = [digKey], 
+                                                               LArAccuDigitContainerName = "", NTriggersPerStep = 100,
+                                                               isSC = flags.LArCalib.isSC, DropPercentTrig = 0))
+     return result
+
+def AccCalibDataReadingCfg(flags, digKey):
+     result=ComponentAccumulator()
+     result.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArAccDigitKey=digKey,
+                                                              LArFebHeaderKey="LArFebHeader",
+                                                              FailOnCorruption=False,
+                                                              SubCaloPreselection=flags.LArCalib.Input.SubDet,
+                                                              PosNegPreselection=flags.LArCalib.Preselection.Side,
+                                                              BEPreselection=flags.LArCalib.Preselection.BEC,
+                                                              FTNumPreselection=flags.LArCalib.Preselection.FT))
+     return result
+
 
 def LArPedestalAutoCorrCfg(flags):
 
@@ -19,13 +46,10 @@ def LArPedestalAutoCorrCfg(flags):
 
     if not flags.LArCalib.isSC:
        digKey=gainStrMap[flags.LArCalib.Gain]
-       result.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArAccDigitKey=digKey,
-                                                              LArFebHeaderKey="LArFebHeader",
-                                                              FailOnCorruption=False,
-                                                              SubCaloPreselection=flags.LArCalib.Input.SubDet,
-                                                              PosNegPreselection=flags.LArCalib.Preselection.Side,
-                                                              BEPreselection=flags.LArCalib.Preselection.BEC,
-                                                              FTNumPreselection=flags.LArCalib.Preselection.FT))
+       if flags.LArCalib.Input.isRawData:
+          result.merge(RawCalibDataReadingCfg(flags, digKey))
+       else:
+          result.merge(AccCalibDataReadingCfg(flags, digKey))
 
        from LArROD.LArFebErrorSummaryMakerConfig import LArFebErrorSummaryMakerCfg
        result.merge(LArFebErrorSummaryMakerCfg(flags))
@@ -211,8 +235,6 @@ def LArPedestalAutoCorrCfg(flags):
            theBadAutoCorr.CalibLineKey = "LArCalibIdMapSC" 
            theBadAutoCorr.BadChanKey = bcKey 
         result.addEventAlgo(theBadAutoCorr)
-
-        result.getService("IOVDbSvc").DBInstance=""
 
     from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
     result.merge(PerfMonMTSvcCfg(flags))

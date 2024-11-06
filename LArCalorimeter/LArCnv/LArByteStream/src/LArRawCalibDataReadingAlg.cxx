@@ -245,6 +245,10 @@ StatusCode LArRawCalibDataReadingAlg::execute(const EventContext& ctx) const {
 	return StatusCode::FAILURE;
       }else 
 	continue; //Jump to next ROD block
+    }else if(rob.rob_source_id()& 0x1000 ){
+        ATH_MSG_VERBOSE(" skip Latome fragment with source ID "<< std::hex << rob.rob_source_id());
+        rodBlock=nullptr;
+        continue;
     }
     
      eformat::helper::Version ver(rob.rod_version());
@@ -265,7 +269,8 @@ StatusCode LArRawCalibDataReadingAlg::execute(const EventContext& ctx) const {
             return m_failOnCorruption ? StatusCode::FAILURE : StatusCode::SUCCESS;
          }
       } else {
-	ATH_MSG_ERROR("Found unsupported Rod block type " << rodBlockType);
+	ATH_MSG_ERROR("Found unsupported Rod block type " << rodBlockType << " in ROB sourceId: 0x" << std::hex << rob.rob_source_id () << std::dec
+                      << ", ROD source ID: 0x" << rob.rod_source_id() << std::dec);
 	if (m_failOnCorruption) 
 	  return StatusCode::FAILURE;
 	else 

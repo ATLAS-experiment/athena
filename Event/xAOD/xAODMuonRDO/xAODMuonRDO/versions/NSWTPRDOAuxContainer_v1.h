@@ -57,6 +57,8 @@ namespace xAOD {
 	std::vector<std::vector<uint8_t>  > merge_candidateNumber{};
 
         std::vector<std::vector<uint32_t> > NSWTP_mm_segments{};
+        std::vector<std::vector<uint8_t> >  NSWTP_mm_candidateNumber{};
+
         std::vector<std::vector<uint32_t> > NSWTP_mm_BCID{};
 
         std::vector<std::vector<uint8_t>  > NSWTP_strip_bands_bandID{}; 

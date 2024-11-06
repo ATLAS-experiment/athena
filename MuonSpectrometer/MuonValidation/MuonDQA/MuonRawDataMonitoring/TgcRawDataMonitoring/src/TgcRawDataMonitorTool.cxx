@@ -153,7 +153,7 @@ bool TgcRawDataMonitorTool::getMapIndexOnline(const std::string& chamber_type_na
   }
 
   if(layerNumber<7){
-    phimap_global_index = iLay + (efNumber-1)*3 + phi*18 + (station-1)*72 + (sector-1)*216;
+    phimap_global_index = iLay + efNumber*3 + phi*18 + (station-1)*72 + (sector-1)*216;
   }else{
     phimap_global_index = 2592 + iLay + phiId*2;
   }

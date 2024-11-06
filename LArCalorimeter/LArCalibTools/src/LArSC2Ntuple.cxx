@@ -226,15 +226,28 @@ StatusCode LArSC2Ntuple::execute()
      }
   } else hasDigitContainer=false;   
 
-  bool hasAccDigitContainer=true;
-  const LArAccumulatedCalibDigitContainer *AccDigitContainer   = nullptr;
-  if(!m_accContKey.key().empty()) {
-     SG::ReadHandle<LArAccumulatedCalibDigitContainer> hdlAccDigit(m_accContKey, ctx);
+  bool hasAccCalibDigitContainer=true;
+  const LArAccumulatedCalibDigitContainer *AccCalibDigitContainer   = nullptr;
+  if(!m_accCalibContKey.key().empty()) {
+     SG::ReadHandle<LArAccumulatedCalibDigitContainer> hdlAccDigit(m_accCalibContKey, ctx);
      if(!hdlAccDigit.isValid()) {
-       ATH_MSG_WARNING( "Unable to retrieve LArAccumulatedCalibDigitContainer with key " << m_accContKey << " from DetectorStore. " );
+       ATH_MSG_WARNING( "Unable to retrieve LArAccumulatedCalibDigitContainer with key " << m_accCalibContKey << " from DetectorStore. " );
+       hasAccCalibDigitContainer=false;
+     } else {
+       ATH_MSG_DEBUG( "Got LArAccumulatedCalibDigitContainer with key " << m_accCalibContKey.key() );
+       AccCalibDigitContainer   = hdlAccDigit.cptr();
+     }
+  } else hasAccCalibDigitContainer=false;   
+
+  bool hasAccDigitContainer=true;
+  const LArAccumulatedDigitContainer *AccDigitContainer   = nullptr;
+  if(!m_accContKey.key().empty()) {
+     SG::ReadHandle<LArAccumulatedDigitContainer> hdlAccDigit(m_accContKey, ctx);
+     if(!hdlAccDigit.isValid()) {
+       ATH_MSG_WARNING( "Unable to retrieve LArAccumulatedDigitContainer with key " << m_accContKey << " from DetectorStore. " );
        hasAccDigitContainer=false;
      } else {
-       ATH_MSG_DEBUG( "Got LArAccumulatedCalibDigitContainer with key " << m_accContKey.key() );
+       ATH_MSG_DEBUG( "Got LArAccumulatedDigitContainer with key " << m_accContKey.key() );
        AccDigitContainer   = hdlAccDigit.cptr();
      }
   } else hasAccDigitContainer=false;   
@@ -337,6 +350,15 @@ StatusCode LArSC2Ntuple::execute()
   }
   ATH_MSG_DEBUG("DigitContainer has size: "<<cellsno<<" hasDigitContainer: "<<hasDigitContainer);
 
+  if (hasAccCalibDigitContainer) {
+     if( !AccCalibDigitContainer->empty() ) {
+        cellsno = AccCalibDigitContainer->size();
+        ATH_MSG_DEBUG("AccCalibDigitContainer has size: "<<cellsno<<" hasAccCalibDigitContainer: "<<hasAccCalibDigitContainer);
+     } else {
+       ATH_MSG_WARNING("AccCalibDigitContainer has zero size, but asked, will be not filled... ");
+       return StatusCode::SUCCESS;
+     }
+  }
   if (hasAccDigitContainer) {
      if( !AccDigitContainer->empty() ) {
         cellsno = AccDigitContainer->size();
@@ -377,7 +399,33 @@ StatusCode LArSC2Ntuple::execute()
 
     if( hasAccDigitContainer ){
 
-      const LArAccumulatedCalibDigit* digi   = AccDigitContainer->at(c);     
+      const LArAccumulatedDigit* digi   = AccDigitContainer->at(c);     
+      // ======================
+
+
+      unsigned int trueMaxSample	   = digi->nsample();
+
+      if(trueMaxSample>m_Nsamples){
+	if(!m_ipass){
+	  ATH_MSG_DEBUG( "The number of samples in data is larger than the one specified by JO: " << trueMaxSample << " > " << m_Nsamples << " --> only " << m_Nsamples << " will be available in the ntuple " );
+	  m_ipass   = 1;
+	}
+	trueMaxSample   = m_Nsamples;
+      }
+      m_ntNsamples   = trueMaxSample;
+
+      fillFromIdentifier(digi->hardwareID());      
+
+      for(unsigned i =	0; i<trueMaxSample;++i) {
+         m_mean[i] = digi->mean(i);
+         m_RMS[i] = digi->RMS(i);
+      }
+
+    }//hasAccDigitContainer
+
+    if( hasAccCalibDigitContainer ){
+
+      const LArAccumulatedCalibDigit* digi   = AccCalibDigitContainer->at(c);     
       // ======================
 
 
@@ -395,15 +443,14 @@ StatusCode LArSC2Ntuple::execute()
       fillFromIdentifier(digi->hardwareID());      
 
       for(unsigned i =	0; i<trueMaxSample;++i) {
-         m_samplesSum[i]           = digi->sampleSum().at(i);
-         m_samples2Sum[i]          = digi->sample2Sum().at(i);
+         m_mean[i] = digi->mean(i);
+         m_RMS[i] = digi->RMS(i);
       }
-      m_nTriggers = digi->nTriggers();
       m_dac = digi->DAC();
       m_delay = digi->delay();
       m_pulsed = digi->getIsPulsedInt();
 
-    }//hasAccDigitContainer
+    }//hasAccCalibDigitContainer
 
     if( hasDigitContainer ){
 

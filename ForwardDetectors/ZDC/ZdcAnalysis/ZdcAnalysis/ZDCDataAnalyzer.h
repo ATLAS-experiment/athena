@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_ZDCDataAnalyzer_h
@@ -175,7 +175,7 @@ public:
   void SetModuleAmpFractionLG(const ZDCDataAnalyzer::ZDCModuleFloatArray& moduleAmpFractionLG);
 
 
-  void enableTimeSigCut(bool AND, float sigCut, std::string TF1String,
+  void enableTimeSigCut(bool AND, float sigCut, const std::string& TF1String,
 			const std::array<std::array<std::vector<double>, 4>, 2>& parsHGArr, 
 			const std::array<std::array<std::vector<double>, 4>, 2>& parsLGArr);
 

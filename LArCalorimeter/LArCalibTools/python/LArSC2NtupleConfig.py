@@ -1,13 +1,13 @@
 #  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def LArSC2NtupleCfg(flags, isEmf=False, **kwargs):
 
        kwargs['isSC'] = True
 
-       cfg=ComponentAccumulator()
+       from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+       cfg = ByteStreamReadCfg(flags)
 
        if kwargs.get("ContainerKey") != "" or "SC_ADC_BAS" in kwargs.get('SCContainerKeys'):
           from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
@@ -18,7 +18,8 @@ def LArSC2NtupleCfg(flags, isEmf=False, **kwargs):
           from LArCabling.LArCablingConfig import LArCalibIdMappingCfg,LArOnOffIdMappingCfg
           cfg.merge(LArOnOffIdMappingCfg(flags))
           cfg.merge(LArCalibIdMappingCfg(flags))
-          cfg.addEventAlgo(CompFactory.LArRawSCCalibDataReadingAlg(LArSCAccCalibDigitKey = flags.LArSCDump.accdigitsKey,
+          cfg.addEventAlgo(CompFactory.LArRawSCCalibDataReadingAlg(LArSCAccCalibDigitKey = flags.LArSCDump.acccalibdigitsKey,
+                                                                   LArSCAccDigitKey = flags.LArSCDump.accdigitsKey,
                                                                       CalibCablingKeyLeg="LArCalibLineMap",
                                                                       OnOffMapLeg="LArOnOffIdMap",
                                                                       LATOMEDecoder = theLArLATOMEDecoder, ))
