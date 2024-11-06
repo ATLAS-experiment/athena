@@ -11,19 +11,20 @@ class L1MenuAccess(TriggerConfigAccess):
     this class provides access to the L1Menu
     the methods are self-explanatory for people with knowledge of the configuration
     """
-    def __init__(self, filename = None, jsonString = None, dbalias = None, smkey = None ):
+    def __init__(self, filename = None, jsonString = None, dbalias = None, smkey = None, useCrest=False, crestServer=""):
         """
         accessor needs to be initialized with either a filename or the dbalias and smkey
         """
-        super(L1MenuAccess,self).__init__( ConfigType.L1MENU, mainkey = "items",
-                                           jsonString = jsonString, filename = filename, dbalias = dbalias, dbkey = smkey)
+        super().__init__(ConfigType.L1MENU, mainkey = "items",
+                         jsonString = jsonString, filename = filename, dbalias = dbalias, dbkey = smkey,
+                         useCrest=useCrest, crestServer=crestServer)
         self.loader.setQuery({
             2: "SELECT L1MT.L1TM_DATA FROM {schema}.SUPER_MASTER_TABLE SMT, {schema}.L1_MENU L1MT WHERE L1MT.L1TM_ID=SMT.SMT_L1_MENU_ID AND SMT.SMT_ID=:dbkey", # for new db schema
             1: "SELECT L1MT.L1MT_MENU FROM {schema}.SUPER_MASTER_TABLE SMT, {schema}.L1_MASTER_TABLE L1MT WHERE L1MT.L1MT_ID=SMT.SMT_L1_MASTER_TABLE_ID AND SMT.SMT_ID=:dbkey"  # for current db schema
         })
         self.load()
         if smkey is not None:
-            log.info(f"Loaded L1 menu {self.name()} with {len(self)} items from {dbalias} with smk {smkey}")
+            log.info(f"Loaded L1 menu {self.name()} with {len(self)} items from {dbalias} with smk {smkey}{' using CREST' if useCrest else ''}")
         elif filename is not None:
             log.info(f"Loaded L1 menu {self.name()} with {len(self)} chains from file {filename}")
 
@@ -158,18 +159,19 @@ class L1PrescalesSetAccess(TriggerConfigAccess):
         """
         return 0xFFFFFF / ( 0x1000000 - cut )
 
-    def __init__(self, filename = None, jsonString = None, dbalias = None, l1pskey = None ):
+    def __init__(self, filename = None, jsonString = None, dbalias = None, l1pskey = None, useCrest=False, crestServer=""):
         """
         accessor needs to be initialized with either a filename or the dbalias and l1pskey
         """
-        super(L1PrescalesSetAccess,self).__init__( ConfigType.L1PS, mainkey = "cutValues",
-                                                   jsonString = jsonString, filename = filename, dbalias = dbalias, dbkey = l1pskey )
+        super().__init__(ConfigType.L1PS, mainkey = "cutValues",
+                         jsonString = jsonString, filename = filename, dbalias = dbalias, dbkey = l1pskey,
+                         useCrest=useCrest, crestServer=crestServer)
         self.loader.setQuery({
             1: "SELECT L1PS_DATA FROM {schema}.L1_PRESCALE_SET L1PS WHERE L1PS_ID=:dbkey" # for current and new db schema
         })
         self.load()
         if l1pskey is not None:
-            log.info(f"Loaded L1 prescales {self.name()} with {len(self)} items from {dbalias} with psk {l1pskey}")
+            log.info(f"Loaded L1 prescales {self.name()} with {len(self)} items from {dbalias} with psk {l1pskey}{' using CREST' if useCrest else ''}")
         elif filename is not None:
             log.info(f"Loaded L1 prescales {self.name()} with {len(self)} items from file {filename}")
 
@@ -197,15 +199,16 @@ class BunchGroupSetAccess(TriggerConfigAccess):
     this class provides access to the L1 bunchgroup set
     the methods are self-explanatory for people with knowledge of the configuration
     """
-    def __init__(self, filename = None, jsonString = None, dbalias = None, bgskey = None ):
-        super(BunchGroupSetAccess,self).__init__( ConfigType.BGS, mainkey = "bunchGroups",
-                                                  jsonString = jsonString, filename = filename, dbalias = dbalias, dbkey = bgskey )
+    def __init__(self, filename = None, jsonString = None, dbalias = None, bgskey = None, useCrest=False, crestServer=""):
+        super().__init__(ConfigType.BGS, mainkey = "bunchGroups",
+                         jsonString = jsonString, filename = filename, dbalias = dbalias, dbkey = bgskey,
+                         useCrest=useCrest, crestServer=crestServer)
         self.loader.setQuery({
             1: "SELECT L1BGS_DATA FROM {schema}.L1_BUNCH_GROUP_SET BGS WHERE L1BGS_ID=:dbkey" # for current and new db schema
         })
         self.load()
         if bgskey is not None:
-            log.info(f"Loaded L1 bunchgroup set {self.name()} with {len(self)} bunchgroups from {dbalias} with bgsk {bgskey}")
+            log.info(f"Loaded L1 bunchgroup set {self.name()} with {len(self)} bunchgroups from {dbalias} with bgsk {bgskey}{' using CREST' if useCrest else ''}")
         elif filename is not None:
             log.info(f"Loaded L1 bunchgroup set {self.name()} with {len(self)} bunchgroups from file {filename}")
 
