@@ -14,4 +14,4 @@ ref_21p9=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitorin
 script=test_MC_Run4_mu0_simreco.sh
 echo "Executing script ${script}"
 echo " "
-"$script" ${ArtInFile} ${ref_21p9}
+"$script" ${ArtInFile} ${ref_21p9} 1000
