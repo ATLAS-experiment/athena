@@ -12,6 +12,7 @@ __all__ = [
     'PoolFileCatalog',
     'PoolOpts',
     'extract_items',
+    'isRNTuple',
     'PoolRecord',
     'PoolFile',
     'DiffFiles',
@@ -32,6 +33,13 @@ class Units (object):
     Mb = 1024.*1024.
 
 ### --- implementations -------------------------------------------------------
+def isRNTuple(obj):
+    # MN: remove the "try" after migration to ROOT 6.34
+    try: from ROOT import RNTuple
+    except(ImportError): from ROOT.Experimental import RNTuple
+    return isinstance( obj, RNTuple )
+
+
 class PoolFileCatalog(object):
     """ reverse-engineering of the POOL FileCatalog.
         allows to retrieve the physical filename from a logical one, provided
@@ -611,7 +619,7 @@ class PoolFile(object):
                 obj = self.poolFile.Get( name )
                 if isinstance(obj, self.ROOT.TTree):
                     nEntries = obj.GetEntries()
-                elif isinstance(obj, self.ROOT.Experimental.RNTuple):
+                elif isRNTuple(obj):
                     nEntries = self.ROOT.Experimental.RNTupleReader.Open(obj).GetNEntries()
                 else:
                     raise NotImplementedError(f"Keys of type {type(obj)!r} not supported")
@@ -628,7 +636,7 @@ class PoolFile(object):
                 containerName = obj.GetName()
                 nEntries = obj.GetEntries()
                 dirType = "T"
-            elif isinstance(obj, self.ROOT.Experimental.RNTuple):
+            elif isRNTuple(obj):
                 reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
                 containerName = reader.GetDescriptor().GetName()
                 nEntries = reader.GetNEntries()
@@ -653,7 +661,7 @@ class PoolFile(object):
             obj = self.poolFile.Get( k.GetName() )
             if isinstance(obj, self.ROOT.TTree):
                 name = obj.GetName()
-            elif isinstance(obj, self.ROOT.Experimental.RNTuple):
+            elif isRNTuple(obj):
                 reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
                 name = reader.GetDescriptor().GetName()
 
@@ -691,7 +699,7 @@ class PoolFile(object):
                                                 dirType = "T")
 
                     self.dataHeader = poolRecord
-                elif isinstance(obj, self.ROOT.Experimental.RNTuple):
+                elif isRNTuple(obj):
                     reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
                     inspector = self.ROOT.Experimental.RNTupleInspector.Create(obj)
                     diskSize = inspector.GetCompressedSize() / Units.kb
@@ -722,7 +730,7 @@ class PoolFile(object):
                         poolRecord.augName = PoolOpts.augmentationName(name)
                         self.augNames.add(poolRecord.augName)
                         self.data += [ poolRecord ]
-                elif isinstance(obj, self.ROOT.Experimental.RNTuple):
+                elif isRNTuple(obj):
                     reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
                     descriptor = reader.GetDescriptor()
                     inspector = self.ROOT.Experimental.RNTupleInspector.Create(obj)

@@ -11,7 +11,7 @@ from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
 from AthenaPython.PyAthena import Alg, StatusCode, py_svc
 from PyUtils.MetaReader import read_metadata
-from PyUtils.PoolFile import PoolOpts
+from PyUtils.PoolFile import PoolOpts, isRNTuple
 
 
 class ValidateMetadataAlg(Alg):
@@ -86,7 +86,7 @@ def validateInputMetadata(infile):
                 "ROOT ver. 6.31/01 or greater needed to read RNTuple files"
             )
         dataHeaderRNT = current_file.Get(PoolOpts.RNTupleNames.DataHeader)
-        if isinstance(dataHeaderRNT, ROOT.Experimental.RNTuple):
+        if isRNTuple( dataHeaderRNT ):
             nevts_dh = ROOT.Experimental.RNTupleReader.Open(dataHeaderRNT).GetNEntries()
         else:
             nevts_dh = None

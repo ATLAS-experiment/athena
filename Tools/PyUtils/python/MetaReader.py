@@ -165,10 +165,8 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
             meta_dict[filename]['file_comp_alg'] = current_file.GetCompressionAlgorithm()
             meta_dict[filename]['file_comp_level'] = current_file.GetCompressionLevel()
 
-            if isinstance(
-                current_file.Get(PoolOpts.RNTupleNames.MetaData),
-                ROOT.Experimental.RNTuple,
-            ):
+            from PyUtils.PoolFile import isRNTuple
+            if isRNTuple( current_file.Get(PoolOpts.RNTupleNames.MetaData) ):
                 msg.warning(
                     "Reading in-file metadata from RNTuple is currently of limited support"
                 )
