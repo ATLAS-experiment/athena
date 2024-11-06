@@ -31,12 +31,12 @@ def MuonTrackConfig(flags, **kwargs):
             title='Muons_Jpsi_Origin_eta_phi;eta;phi', 
             type='TH2F', path='Muons/Jpsi', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('JpsiMuonEtaTight,JpsiMuonPhiTight;Muons_Jpsi_Tight_eff',           
-            title='Muons_Jpsi_Tight_eff;eta;phi', 
+    myGroup.defineHistogram('JpsiMuonEtaTight,JpsiMuonPhiTight;Muons_Jpsi_eta_phi_tight', 
+            title='Muons_Jpsi_eta_phi_tight;eta;phi', 
             type='TH2F', path='Muons/Jpsi', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('JpsiMuonEtaMedium,JpsiMuonPhiMedium;Muons_Jpsi_Medium_eff',        
-            title='Muons_Jpsi_Medium_eff;eta;phi', 
+    myGroup.defineHistogram('JpsiMuonEtaMedium,JpsiMuonPhiMedium;Muons_Jpsi_eta_phi_medium', 
+            title='Muons_Jpsi_eta_phi_medium;eta;phi', 
             type='TH2F', path='Muons/Jpsi', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
     myGroup.defineHistogram('JpsiMuonD0;Muons_Jpsi_d0', 
@@ -115,12 +115,12 @@ def MuonTrackConfig(flags, **kwargs):
             title='Muons_Z_Origin_eta_phi;eta;phi', 
             type='TH2F', path='Muons/Z', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('ZMuonEtaTight,ZMuonPhiTight;Muons_Z_Tight_eff', 
-            title='Muons_Z_Tight_eff;eta;phi', 
+    myGroup.defineHistogram('ZMuonEtaTight,ZMuonPhiTight;Muons_Z_eta_phi_tight', 
+            title='Muons_Z_eta_phi_tight;eta;phi', 
             type='TH2F', path='Muons/Z', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('ZMuonEtaMedium,ZMuonPhiMedium;Muons_Z_Medium_eff', 
-            title='Muons_Z_Medium_eff;eta;phi', 
+    myGroup.defineHistogram('ZMuonEtaMedium,ZMuonPhiMedium;Muons_Z_eta_phi_medium', 
+            title='Muons_Z_eta_phi_medium;eta;phi', 
             type='TH2F', path='Muons/Z', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
     myGroup.defineHistogram('ZMuonD0;Muons_Z_d0', 
@@ -255,10 +255,6 @@ def MuonTrackConfig(flags, **kwargs):
             title='Muons_AllCBMuons_Type;Type;Entries', 
             type='TH1F', path='Muons/AllCBMuons', 
             xbins=20, xmin=0, xmax=20, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllCBMuonEtaMedium,AllCBMuonMuonPhiMedium;Muons_AllCBMuons_Medium_eff', 
-            title='Muons_AllCBMuons_Medium_eff;eta;phi', 
-            type='TH2F', path='Muons/AllCBMuons', 
-            xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
     myGroup.defineHistogram('AllCBMuonEta1Triggered,AllCBMuonMuonPhi1Triggered;Muons_AllCBMuons_eta_phi_1Triggered', 
             title='Muons_AllCBMuons_eta_phi_1Triggered;eta;phi', 
             type='TH2F', path='Muons/AllCBMuons', 
@@ -359,10 +355,6 @@ def MuonTrackConfig(flags, **kwargs):
             title='Muons_CBMuons_Type;Type;Entries', 
             type='TH1F', path='Muons/CBMuons', 
             xbins=20, xmin=0, xmax=20, opt='kAlwaysCreate')
-    myGroup.defineHistogram('CBMuonEtaMedium,CBMuonPhiMedium;Muons_CBMuons_Medium_eff', 
-            title='Muons_CBMuons_Medium_eff;eta;phi', 
-            type='TH2F', path='Muons/CBMuons', 
-            xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
     myGroup.defineHistogram('CBMuonEta1Triggered,CBMuonPhi1Triggered;Muons_CBMuons_1Triggered_eta_phi', 
             title='Muons_CBMuons_eta_phi_1Triggered;eta;phi', 
             type='TH2F', path='Muons/CBMuons', 
@@ -395,19 +387,19 @@ def MuonTrackConfig(flags, **kwargs):
 
     # Muons/AllNonCBMuons
     # -----------------------------------------------------
-    myGroup.defineHistogram('AllNonCBMuonEta,NonCBMuonPhi;Muons_AllNonCBMuons_Origin_eta_phi', 
+    myGroup.defineHistogram('AllNonCBMuonEta,AllNonCBMuonPhi;Muons_AllNonCBMuons_Origin_eta_phi', 
             title='Muons_AllNonCBMuons_Origin_eta_phi;eta;phi;', 
             type='TH2F', path='Muons/AllNonCBMuons', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllNonCBMuonEta,NonCBMuonPhi;AllNonMuons_AllNonCBMuons_eta_phi', 
+    myGroup.defineHistogram('AllNonCBMuonEta,AllNonCBMuonPhi;Muons_AllNonCBMuons_eta_phi', 
             title='Muons_AllNonCBMuons_eta_phi;eta;phi', 
             type='TH2F', path='Muons/AllNonCBMuons', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllNonCBMuonEtaTight,NonCBMuonPhiTight;Muons_AllNonCBMuons_eta_phi_tight', 
+    myGroup.defineHistogram('AllNonCBMuonEtaTight,AllNonCBMuonPhiTight;Muons_AllNonCBMuons_eta_phi_tight', 
             title='Muons_AllNonCBMuons_eta_phi_tight;eta;phi', 
             type='TH2F', path='Muons/AllNonCBMuons', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllNonCBMuonEtaMedium,NonCBMuonPhiMedium;Muons_AllNonCBMuons_eta_phi_medium', 
+    myGroup.defineHistogram('AllNonCBMuonEtaMedium,AllNonCBMuonPhiMedium;Muons_AllNonCBMuons_eta_phi_medium', 
             title='Muons_AllNonCBMuons_eta_phi_medium;eta;phi', 
             type='TH2F', path='Muons/AllNonCBMuons', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
@@ -455,19 +447,15 @@ def MuonTrackConfig(flags, **kwargs):
             title='Muons_AllNonCBMuons_Type;Type;Entries', 
             type='TH1F', path='Muons/AllNonCBMuons', 
             xbins=20, xmin=0, xmax=20, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllNonCBMuonEtaMedium,NonCBMuonPhiMedium;Muons_AllNonCBMuons_Medium_eff', 
-            title='Muons_AllNonCBMuons_Medium_eff;eta;phi', 
-            type='TH2F', path='Muons/AllNonCBMuons', 
-            xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllNonCBMuonEta1Triggered,NonCBMuonPhi1Triggered;Muons_AllNonCBMuons_1Triggered_eta_phi', 
+    myGroup.defineHistogram('AllNonCBMuonEta1Triggered,AllNonCBMuonPhi1Triggered;Muons_AllNonCBMuons_1Triggered_eta_phi', 
             title='Muons_AllNonCBMuons_eta_phi_1Triggered;eta;phi', 
             type='TH2F', path='Muons/AllNonCBMuons', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllNonCBMuonEta1All,NonCBMuonPhi1All;Muons_AllNonCBMuons_1All_eta_phi', 
+    myGroup.defineHistogram('AllNonCBMuonEta1All,AllNonCBMuonPhi1All;Muons_AllNonCBMuons_1All_eta_phi', 
             title='Muons_AllNonCBMuons_eta_phi_1All;eta;phi', 
             type='TH2F', path='Muons/AllNonCBMuons', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllNonCBMuonEta,CBMuonPt;Muons_AllNonCBMuons_eta_pt', 
+    myGroup.defineHistogram('AllNonCBMuonEta,AllNonCBMuonPt;Muons_AllNonCBMuons_eta_pt', 
             title='Muons_AllNonCBMuons_eta_pt;eta;pt', 
             type='TH2F', path='Muons/AllNonCBMuons', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=100, ymin=0, ymax=200, opt='kAlwaysCreate')
@@ -551,10 +539,6 @@ def MuonTrackConfig(flags, **kwargs):
             title='Muons_NonCBMuons_Type;Type;Entries', 
             type='TH1F', path='Muons/NonCBMuons', 
             xbins=20, xmin=0, xmax=20, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NonCBMuonEtaMedium,NonCBMuonPhiMedium;Muons_NonCBMuons_Medium_eff', 
-            title='Muons_NonCBMuons_Medium_eff;eta;phi', 
-            type='TH2F', path='Muons/NonCBMuons', 
-            xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
     myGroup.defineHistogram('NonCBMuonEta1Triggered,NonCBMuonPhi1Triggered;Muons_NonCBMuons_1Triggered_eta_phi', 
             title='Muons_NonCBMuons_eta_phi_1Triggered;eta;phi', 
             type='TH2F', path='Muons/NonCBMuons', 
@@ -659,10 +643,6 @@ def MuonTrackConfig(flags, **kwargs):
             title='Muons_NoTrigCBMuons_eta_phi_medium;eta;phi', 
             type='TH2F', path='Muons/NoTrigCBMuons', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigCBMuonEtaMedium,NoTrigCBMuonPhiMedium;Muons_NoTrigCBMuons_Medium_eff', 
-            title='Muons_NoTrigCBMuons_Medium_eff;eta;phi', 
-            type='TH2F', path='Muons/NoTrigCBMuons', 
-            xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
     myGroup.defineHistogram('NoTrigCBMuonEta1,NoTrigCBMuonPhi1;Muons_NoTrigCBMuons_1Triggered_eta_phi', 
             title='Muons_NoTrigCBMuons_eta_phi_1Triggered;eta;phi', 
             type='TH2F', path='Muons/NoTrigCBMuons', 
@@ -765,10 +745,6 @@ def MuonTrackConfig(flags, **kwargs):
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
     myGroup.defineHistogram('NoTrigNonCBMuonEtaMedium,NoTrigNonCBMuonPhiMedium;Muons_NoTrigNonCBMuons_eta_phi_medium', 
             title='Muons_NoTrigNonCBMuons_eta_phi_medium;eta;phi', 
-            type='TH2F', path='Muons/NoTrigNonCBMuons', 
-            xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigNonCBMuonEtaMedium,NoTrigNonCBMuonPhiMedium;Muons_NoTrigNonCBMuons_Medium_eff', 
-            title='Muons_NoTrigNonCBMuons_Medium_eff;eta;phi', 
             type='TH2F', path='Muons/NoTrigNonCBMuons', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
     myGroup.defineHistogram('NoTrigNonCBMuonEta1Triggered,NoTrigNonCBMuonPhi1Triggered;Muons_NoTrigNonCBMuons_1Triggered_eta_phi', 
