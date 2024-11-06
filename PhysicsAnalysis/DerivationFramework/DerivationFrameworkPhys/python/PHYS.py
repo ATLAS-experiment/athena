@@ -199,9 +199,15 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(PHYSSlimmingHelper)
 
     # L1 trigger objects
-    if flags.Derivation.Trigger.outputL1JetRoIs:
-        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2L1JetRoIsToSlimmingHelper
-        AddRun2L1JetRoIsToSlimmingHelper(SlimmingHelper = PHYSSlimmingHelper)
+    from DerivationFrameworkPhys.TriggerMatchingCommonConfig import getDataYear
+    if getDataYear(flags) >= 2024:
+        # Run 3 with Phase I jet RoIs.
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddjFexRoIsToSlimmingHelper
+        AddjFexRoIsToSlimmingHelper(SlimmingHelper = PHYSSlimmingHelper)
+    elif getDataYear(flags) >= 2015:
+        # Run 2 and early Run 3, legacy L1 RoIs
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddLegacyL1JetRoIsToSlimmingHelper
+        AddLegacyL1JetRoIsToSlimmingHelper(SlimmingHelper = PHYSSlimmingHelper)
 
     # Output stream    
     PHYSItemList = PHYSSlimmingHelper.GetItemList()

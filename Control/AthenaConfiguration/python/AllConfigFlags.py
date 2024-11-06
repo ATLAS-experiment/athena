@@ -513,12 +513,6 @@ def initConfigFlags():
         return createLLPDFConfigFlags()
     _addFlagsCategory(acf, "Derivation.LLP", __llpDerivation, 'DerivationFrameworkLLP' )
 
-    # Trigger derivation flags
-    def __triggerDerivation():
-        from DerivationFrameworkTrigger.TriggerDFConfigFlags import createTriggerDFConfigFlags
-        return createTriggerDFConfigFlags()
-    _addFlagsCategory(acf, "Derivation.Trigger", __triggerDerivation, 'DerivationFrameworkTrigger')
-
     # onnxruntime flags
     def __onnxruntime():
         from AthOnnxComps.OnnxRuntimeFlags import createOnnxRuntimeFlags
