@@ -195,6 +195,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fill(
   if( m_trkAnaDefSvc->matchingType() == "EFTruthMatch" ) {
     ATH_CHECK( fillPlotsTruth(
         trkAnaColls.testTrackVec( TrackAnalysisCollections::InRoI ),
+        trkAnaColls.refTrackVec( TrackAnalysisCollections::InRoI ),
         trkAnaColls.truthPartVec( TrackAnalysisCollections::InRoI ),
         trkAnaColls.matches(), truthMu, actualMu, weight ) );
   }
@@ -466,7 +467,8 @@ IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference< xAOD::TruthParticle >(
 /// --- Fill plots w.r.t. truth ---
 /// ------------------------------
 StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTruth(
-    const std::vector< const xAOD::TrackParticle* >& tracks,
+    const std::vector< const xAOD::TrackParticle* >& testTracks,
+    const std::vector< const xAOD::TrackParticle* >& refTracks,
     const std::vector< const xAOD::TruthParticle* >& truths,
     const ITrackMatchingLookup& matches,
     float truthMu, float actualMu, float weight )
@@ -474,9 +476,11 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTruth(
 
   for( const xAOD::TruthParticle* thisTruth : truths ) {
 
-    /// Loop over tracks to find if truth is matched
-    bool isMatched( false );
-    for( const xAOD::TrackParticle* thisTrack : tracks ) {
+    bool isMatched( false );  // test track matched to reference track through EFTruthMatch method
+    bool refMatched( false ); // reference track matched to thisTruth
+
+    /// Loop over reference tracks to look for a reference matched to thisTruth
+    for( const xAOD::TrackParticle* thisTrack : refTracks ) {
       const xAOD::TruthParticle* linkedTruth = getLinkedTruth(
           *thisTrack, m_trkAnaDefSvc->truthProbCut() );
       if( not linkedTruth ) {
@@ -484,22 +488,42 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTruth(
         continue;
       }
       if( thisTruth == linkedTruth ) {
-        isMatched = matches.isTestMatched( *thisTrack );
+        refMatched = true;
         break;
       }
-    } // close loop over tracks
+    } // close loop over reference tracks
 
-    /// efficiency plots (for EFTruthMatch only)
-    if( m_plots_eff_vsTruth ) {
-      ATH_CHECK( m_plots_eff_vsTruth->fillPlots(
-          *thisTruth, isMatched, truthMu, actualMu, weight ) );
-    }
+    /// Fill the histogram only if a matched reference is found
+    if ( not refMatched ) continue;
+    
+    else {
 
-    /// technical efficiency plots (for EFTruthMatch only)
-    if( m_plots_tech_eff_vsTruth ) {
-      if (isReconstructable( *thisTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() )) {
-          ATH_CHECK( m_plots_tech_eff_vsTruth->fillPlots(
-          *thisTruth, isMatched , truthMu, actualMu, weight ) );
+      /// Loop over test tracks to look for a test matched to thisTruth
+      for( const xAOD::TrackParticle* thisTrack : testTracks ) {
+        const xAOD::TruthParticle* linkedTruth = getLinkedTruth(
+            *thisTrack, m_trkAnaDefSvc->truthProbCut() );
+        if( not linkedTruth ) {
+          ATH_MSG_WARNING( "Unlinked track!!" );
+          continue;
+        }
+        if( thisTruth == linkedTruth ) {
+          isMatched = matches.isTestMatched( *thisTrack ); // Check if this test is matched to reference with EFTruthMatch
+          break;
+        }
+      } // close loop over test tracks
+      
+      /// efficiency plots (for EFTruthMatch only)
+      if( m_plots_eff_vsTruth ) {
+        ATH_CHECK( m_plots_eff_vsTruth->fillPlots(
+            *thisTruth, isMatched, truthMu, actualMu, weight ) );
+      }
+
+      /// technical efficiency plots (for EFTruthMatch only)
+      if( m_plots_tech_eff_vsTruth ) {
+        if (isReconstructable( *thisTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() )) {
+            ATH_CHECK( m_plots_tech_eff_vsTruth->fillPlots(
+            *thisTruth, isMatched , truthMu, actualMu, weight ) );
+        }
       }
     }
   } // close loop over truth particles

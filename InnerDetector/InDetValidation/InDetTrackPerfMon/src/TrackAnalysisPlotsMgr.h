@@ -83,7 +83,8 @@ namespace IDTPM {
 
     /// Fill efficiency plots w.r.t. truth (for EFTruthMatch only)
     StatusCode fillPlotsTruth(
-        const std::vector< const xAOD::TrackParticle* >& tracks,
+        const std::vector< const xAOD::TrackParticle* >& testTracks,
+        const std::vector< const xAOD::TrackParticle* >& refTracks,
         const std::vector< const xAOD::TruthParticle* >& truths,
         const ITrackMatchingLookup& matches,
         float truthMu=0., float actualMu=0., float weight=1.0 );
