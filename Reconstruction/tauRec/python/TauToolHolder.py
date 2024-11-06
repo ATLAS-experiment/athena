@@ -851,6 +851,52 @@ def TauWPDecoratorJetDeepSetCfg(flags, version=None):
     result.setPrivateTools(myTauWPDecorator)
     return result
 
+def TauGNNEvaluatorCfg(flags, version=0):
+    result = ComponentAccumulator()
+    _name = flags.Tau.ActiveConfig.prefix + 'TauGNN_v' + str(version)
+
+    TauGNNEvaluator = CompFactory.getComp("TauGNNEvaluator")
+    GNNConf = flags.Tau.TauGNNConfig[version]
+    myTauGNNEvaluator = TauGNNEvaluator(name = _name,
+                                              NetworkFile = GNNConf,
+                                              OutputVarname = flags.Tau.GNTauScoreName[version],
+                                              OutputPTau = "GNTauProbTau",
+                                              OutputPJet = "GNTauProbJet",
+                                              MaxTracks = flags.Tau.GNTauMaxTracks[version], 
+                                              MaxClusters = flags.Tau.GNTauMaxClusters[version],
+                                              MaxClusterDR = 15.0,
+                                              MinTauPt = flags.Tau.MinPtDAOD,
+                                              VertexCorrection = True,
+                                              DecorateTracks = False,
+                                              InputLayerScalar = "tau_vars",
+                                              InputLayerTracks = "track_vars",
+                                              InputLayerClusters = "cluster_vars",
+                                              NodeNameTau=flags.Tau.GNTauNodeNameTau,
+                                              NodeNameJet=flags.Tau.GNTauNodeNameJet)
+
+    result.setPrivateTools(myTauGNNEvaluator)
+    return result
+
+def TauWPDecoratorGNNCfg(flags, version):
+    result = ComponentAccumulator()
+    _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorGNN_v' + str(version)
+
+    TauWPDecorator = CompFactory.getComp("TauWPDecorator")
+    WPConf = flags.Tau.TauGNNWP[version]
+    myTauWPDecorator = TauWPDecorator(name=_name,
+                                      flatteningFile1Prong = WPConf[0],
+                                      flatteningFile2Prong = WPConf[1],
+                                      flatteningFile3Prong = WPConf[2],
+                                      DecorWPNames = flags.Tau.GNTauDecorWPNames[version],
+                                      DecorWPCutEffs1P = [0.95, 0.85, 0.75, 0.60],
+                                      DecorWPCutEffs2P = [0.95, 0.75, 0.60, 0.45],
+                                      DecorWPCutEffs3P = [0.95, 0.75, 0.60, 0.45],
+                                      ScoreName = flags.Tau.GNTauScoreName[version],
+                                      NewScoreName = flags.Tau.GNTauTransScoreName[version],
+                                      DefineWPs = True)
+    result.setPrivateTools(myTauWPDecorator)
+    return result
+
 def TauEleRNNEvaluatorCfg(flags):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauEleRNN'

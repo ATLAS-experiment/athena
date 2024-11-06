@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import unittest
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -48,6 +48,7 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.MvaTESConfig", "MvaTES_R23.root")
     tau_cfg.addFlag("Tau.MinPt0p", 9.25*Units.GeV)
     tau_cfg.addFlag("Tau.MinPt", 6.75*Units.GeV)
+    tau_cfg.addFlag("Tau.MinPtDAOD", 13*Units.GeV)
     tau_cfg.addFlag("Tau.TauJetRNNConfig", ["tauid_rnn_1p_R22_v1.json", "tauid_rnn_2p_R22_v1.json", "tauid_rnn_3p_R22_v1.json"])
     tau_cfg.addFlag("Tau.TauJetRNNWPConfig", ["tauid_rnnWP_1p_R22_v0.root", "tauid_rnnWP_2p_R22_v0.root", "tauid_rnnWP_3p_R22_v0.root"])
     tau_cfg.addFlag("Tau.TauEleRNNConfig", ["taueveto_rnn_config_1P_r22.json", "taueveto_rnn_config_3P_r22.json"])
@@ -60,6 +61,25 @@ def createTauConfigFlags():
     # R22 DeepSet tau ID tune without track RNN scores, for now define a second set of flags, but ultimately we'll choose one and drop the other
     tau_cfg.addFlag("Tau.TauJetDeepSetConfig_v2", ["tauid_1p_R22_dpst_noTrackScore.json", "tauid_2p_R22_dpst_noTrackScore.json", "tauid_3p_R22_dpst_noTrackScore.json"])
     tau_cfg.addFlag("Tau.TauJetDeepSetWP_v2", ["model_1p_R22_dpst_noTrackScore.root", "model_2p_R22_dpst_noTrackScore.root", "model_3p_R22_dpst_noTrackScore.root"])
+    # GNTau ID tune file (need to add another version for noAux)
+    tau_cfg.addFlag("Tau.TauGNNConfig", ["GNTau_pruned_MC23.onnx","GNTau_trunc_MC23.onnx"])
+    tau_cfg.addFlag("Tau.TauGNNWP",
+                    [ 
+                        ["GNTauNAprune_flat_model_1p.root", "GNTauNAprune_flat_model_2p.root", "GNTauNAprune_flat_model_3p.root"],
+                        ["GNTauNAtrunc_flat_model_1p.root", "GNTauNAtrunc_flat_model_2p.root", "GNTauNAtrunc_flat_model_3p.root"]
+                    ])
+    tau_cfg.addFlag("Tau.GNTauScoreName", ["GNTauScore_v0prune","GNTauScore_v1trunc"])
+    tau_cfg.addFlag("Tau.GNTauTransScoreName", ["GNTauScoreSigTrans_v0prune","GNTauScoreSigTrans_v1trunc"])
+    tau_cfg.addFlag("Tau.GNTauMaxTracks", [30,10])
+    tau_cfg.addFlag("Tau.GNTauMaxClusters", [20,6])
+    tau_cfg.addFlag("Tau.GNTauNodeNameTau", "GN2TauNoAux_pb")
+    tau_cfg.addFlag("Tau.GNTauNodeNameJet", "GN2TauNoAux_pu")
+    tau_cfg.addFlag("Tau.GNTauDecorWPNames", 
+                    [
+                        ["GNTauVL_v0prune", "GNTauL_v0prune", "GNTauM_v0prune", "GNTauT_v0prune"],
+                        ["GNTauVL_v1trunc", "GNTauL_v1trunc", "GNTauM_v1trunc", "GNTauT_v1trunc"]
+                    ])
+
 
     # PanTau config flags
     from PanTauAlgs.PanTauConfigFlags import createPanTauConfigFlags
