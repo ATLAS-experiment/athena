@@ -33,7 +33,7 @@ namespace MuonValR4{
         /** @brief Keys to the segment collections */
         
         /** @brief Segment made from the full legacy chain */
-        Gaudi::Property<std::string> m_legacySegmentKey{this, "LegacySegmentKey", "MuonSegments"};
+        Gaudi::Property<std::string> m_legacySegmentKey{this, "LegacySegmentKey", "LegacyChainSegments"};
         /** @brief Segments seeded from the R4 pattern but made with the legacy segment maker */
         Gaudi::Property<std::string> m_r4PatternSegmentKey{this, "SegmentFromR4HoughKey", "MuonSegmentsFromHoughR4"};
         /** @brief Segments made from the R4 segment maker */

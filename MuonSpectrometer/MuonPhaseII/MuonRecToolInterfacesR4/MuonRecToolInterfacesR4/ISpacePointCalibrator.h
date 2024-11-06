@@ -54,10 +54,9 @@ namespace MuonR4{
                                                  const Amg::Vector3D& seedPosInChamb,
                                                  const Amg::Vector3D& seedDirInChamb,
                                                  const double timeDelay) const = 0;
-
             /** @brief Calibrates a set of space points.
              *  @param ctx: EventContext to access conditions data
-             *  @param spacePoint: Pointer to the space point to calibrate.
+             *  @param spacePoints: List of space points that will be calibrated
              *  @param seedPosInChamb: Position of the external seed expressed in the sector frame
              *  @param seedDirInChamb: Direction of the external seed expressed in the sector frame
              *  @param timeDelay: Shift in time to be added to the time of flight of a particle going a straight path */
@@ -67,12 +66,22 @@ namespace MuonR4{
                                                  const Amg::Vector3D& seedDirInChamb,
                                                  const double timeDelay) const = 0;
     
+            /** @brief Refines the calibration constants of already calibrated space points
+             *  @param ctx: EventContext to access conditions data
+             *  @param spacePoints: List of already calibrated space points that's eaten by the method
+             *  @param seedPosInChamb: Position of the external seed expressed in the sector frame
+             *  @param seedDirInChamb: Direction of the external seed expressed in the sector frame
+             *  @param timeDelay: Shift in time to be added to the time of flight of a particle going a straight path */
             virtual CalibSpacePointVec calibrate(const EventContext& ctx,
                                                  CalibSpacePointVec&& spacePoints,
                                                  const Amg::Vector3D& seedPosInChamb,
                                                  const Amg::Vector3D& seedDirInChamb,
                                                  const double timeDelay) const = 0;
-    
+            /** @brief Returns the drift velocity for a given space point
+             *  @param ctx: EventContext to access conditions data
+             *  @param spacePoint: Reference to the calibrated space point for which the velocity needs to be calculated. */
+            virtual double driftVelocity(const EventContext& ctx,
+                                         const CalibratedSpacePoint& spacePoint) const = 0;
     };
 
 }

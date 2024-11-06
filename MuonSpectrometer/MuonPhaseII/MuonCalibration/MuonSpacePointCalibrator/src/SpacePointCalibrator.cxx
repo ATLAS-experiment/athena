@@ -12,7 +12,8 @@
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "MuonSpacePoint/UtilFunctions.h"
 #include "GaudiKernel/PhysicalConstants.h"
-
+#include "MdtCalibData/MdtFullCalibData.h"
+#include "MuonPatternEvent/SegmentFitterEventData.h"
 namespace {
     constexpr double c_inv = 1./ Gaudi::Units::c_light;
 }
@@ -21,6 +22,7 @@ namespace MuonR4{
      using CalibSpacePointVec = ISpacePointCalibrator::CalibSpacePointVec;
      using CalibSpacePointPtr = ISpacePointCalibrator::CalibSpacePointPtr;
      using State = CalibratedSpacePoint::State;
+     using namespace SegmentFit;
 
 
     SpacePointCalibrator::SpacePointCalibrator(const std::string& type, const std::string &name, const IInterface* parent) :
@@ -97,24 +99,23 @@ namespace MuonR4{
                     calibInput.setTrackDirection(locToGlob.linear() * dirInChamb);
                     calibInput.setTimeOfFlight(timeOfArrival);
                     calibInput.setClosestApproach(std::move(closestApproach));
-
-                    /** In valid drift radius has been created */
+                    ATH_MSG_VERBOSE("Parse hit calibration "<<m_idHelperSvc->toString(dc->identify())<<", "<<calibInput);
                     MdtCalibOutput calibOutput = m_mdtCalibrationTool->calibrate(ctx, calibInput);
                     State fitState{State::Valid};
                     AmgSymMatrix(2) diagCov{AmgSymMatrix(2)::Identity()};
-                    diagCov(Amg::y, Amg::y) = std::pow(0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash()),2);
-
+                    diagCov(toInt(AxisDefs::eta), toInt(AxisDefs::eta)) = std::pow(0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash()),2);
+                    /** In valid drift radius has been created */
                     if (calibOutput.status() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime) {
                         ATH_MSG_DEBUG("Failed to create a valid hit from "<<m_idHelperSvc->toString(dc->identify())
                                         <<std::endl<<calibInput<<std::endl<<calibOutput);
                         fitState =  State::FailedCalib;
-                        diagCov(Amg::x, Amg::x) = std::pow(dc->readoutElement()->innerTubeRadius(), 2);
+                        diagCov(toInt(AxisDefs::phi), toInt(AxisDefs::phi)) = std::pow(dc->readoutElement()->innerTubeRadius(), 2);
                     } else {
                         double uncert = calibOutput.driftRadiusUncert();
                         if(m_doMdtUncertFromProp) {
                             uncert = std::hypot(uncert, calibOutput.driftUncertSigProp());
                         }
-                        diagCov(Amg::x, Amg::x) = std::pow(m_mdtErrorScale * uncert, 2);
+                        diagCov(toInt(AxisDefs::phi), toInt(AxisDefs::phi)) = std::pow(m_mdtErrorScale * uncert, 2);
                     }
                     calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), std::move(chDir), fitState);
                     calibSP->setCovariance<2>(jac.inverse()*diagCov*jac);
@@ -138,12 +139,12 @@ namespace MuonR4{
                     if (calibOutput.primaryStatus() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime) {
                         ATH_MSG_DEBUG("Failed to create a valid hit from "<<m_idHelperSvc->toString(dc->identify())
                                      <<std::endl<<calibOutput);
-                        diagCov(Amg::x, Amg::x) = std::pow(dc->readoutElement()->innerTubeRadius(), 2);
-                        diagCov(Amg::y, Amg::y) = std::pow(0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash()), 2);
+                        diagCov(toInt(AxisDefs::phi), toInt(AxisDefs::phi)) = std::pow(dc->readoutElement()->innerTubeRadius(), 2);
+                        diagCov(toInt(AxisDefs::eta), toInt(AxisDefs::eta)) = std::pow(0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash()), 2);
                         fitState = State::FailedCalib;
                     } else {
-                        diagCov(Amg::x, Amg::x) = std::pow(m_mdtErrorScale * calibOutput.uncertPrimaryR(), 2);
-                        diagCov(Amg::y, Amg::y) = std::pow(calibOutput.sigmaZ(), 2);
+                        diagCov(toInt(AxisDefs::phi), toInt(AxisDefs::phi)) = std::pow(m_mdtErrorScale * calibOutput.uncertPrimaryR(), 2);
+                        diagCov(toInt(AxisDefs::eta), toInt(AxisDefs::eta)) = std::pow(calibOutput.sigmaZ(), 2);
                     }
                     calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), std::move(chDir), fitState);
                     calibSP->setCovariance<2>(jac.inverse()*diagCov*jac);
@@ -222,5 +223,15 @@ namespace MuonR4{
             if (hit) calibSpacePoints.push_back(std::move(hit));
         }
         return calibSpacePoints;
+    }
+    double SpacePointCalibrator::driftVelocity(const EventContext& ctx,
+                                               const CalibratedSpacePoint& spacePoint) const {
+        if(spacePoint.type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
+            const MuonCalib::MdtFullCalibData* calibConsts = m_mdtCalibrationTool->getCalibConstants(ctx, spacePoint.spacePoint()->identify());
+            bool valid{false};
+            const double driftTime = calibConsts->rtRelation->tr()->tFromR(spacePoint.driftRadius(), valid);
+            return calibConsts->rtRelation->rt()->driftVelocity(driftTime);
+        }
+        return 0.;
     }
 }

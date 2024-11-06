@@ -23,6 +23,9 @@ if __name__=="__main__":
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
+    flags.Muon.Align.UseAsBuilt = False
+    flags.Muon.Align.UseBLines = False
+
    
     # flags.PerfMon.doFullMonMT = True
     flags, cfg = setupGeoR4TestCfg(args,flags)
@@ -50,6 +53,9 @@ if __name__=="__main__":
 
     ### What happens if you parse the R4 patterns to the legacy chain?
     cfg.merge(MuonR4SegmentRecoChainCfg(flags))
+
+    from MuonPatternRecognitionTest.PatternTestConfig import MuonRecoChainTesterCfg
+    cfg.merge(MuonRecoChainTesterCfg(flags))
     if args.runVtune: 
         from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
         cfg.merge(VTuneProfilerServiceCfg(flags, ProfiledAlgs=["MuonHoughTransformAlg"]))
@@ -70,6 +76,7 @@ if __name__=="__main__":
                                                                                                 CanvasPreFix="SegmentPlotValid",
                                                                                                 AllCanvasName="AllSegmentFitPlots",
                                                                                                 TruthSegDecors=["HabemusZ"],
+                                                                                                displayTruthOnly = True,
                                                                                                 saveSinglePDFs = True, saveSummaryPDF= False)) 
     executeTest(cfg)
     

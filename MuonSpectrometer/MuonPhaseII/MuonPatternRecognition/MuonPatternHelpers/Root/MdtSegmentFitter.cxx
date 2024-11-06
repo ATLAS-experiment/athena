@@ -144,11 +144,12 @@ namespace MuonR4{
 
         if (msgLvl(MSG::VERBOSE)) {
             std::stringstream hitStream{};
+            const auto [startPos, startDir] = makeLine(startPars);
             for (const HitType& hit : calibHits) {
                 hitStream<<"       **** "<<(hit->type() != xAOD::UncalibMeasType::Other ? idHelperSvc->toString(hit->spacePoint()->identify()): "beamspot" )
                          <<" position: "<<Amg::toString(hit->positionInChamber());
                 if (hit->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
-                    hitStream<<", driftRadius: "<<hit->driftRadius();
+                    hitStream<<", driftRadius: "<<SegmentFitHelpers::driftSign(startPos,startDir, *hit, msg())*hit->driftRadius() ;
                 }
                 hitStream<<", channel dir: "<<Amg::toString(hit->directionInChamber())<<std::endl;
             }
@@ -159,10 +160,8 @@ namespace MuonR4{
 
         SegmentFitResult fitResult{};
         fitResult.segmentPars = startPars;
-        fitResult.segmentPars[toInt(ParamDefs::time)] = 0.;
         fitResult.timeFit = m_cfg.doTimeFit;
         fitResult.calibMeasurements = std::move(calibHits);
-        
 
         Parameters gradient{AmgVector(5)::Zero()}, prevGrad{AmgVector(5)::Zero()}, prevPars{AmgVector(5)::Zero()};
         AmgSymMatrix(5) hessian{AmgSymMatrix(5)::Zero()};
@@ -171,7 +170,6 @@ namespace MuonR4{
         LinePartialArray linePartials{make_array<Amg::Vector3D, toInt(ParamDefs::nPars)>(Amg::Vector3D::Zero())};
         linePartials[toInt(ParamDefs::x0)] = Amg::Vector3D::UnitX();
         linePartials[toInt(ParamDefs::y0)] = Amg::Vector3D::UnitY();
-
 
         /// Partials of the residual w.r.t. the fit parameters
         LinePartialArray partialsResidual{make_array<Amg::Vector3D,toInt(ParamDefs::nPars)>(Amg::Vector3D::Zero())};
@@ -232,7 +230,6 @@ namespace MuonR4{
             updateLinePartials(fitResult.segmentPars, linePartials);
 
             /** Loop over the hits to calculate the partial derivatives */
-            /// 5_1702_BMS1A4
             for (const HitType& hit : fitResult.calibMeasurements) {
                 if (hit->fitState() != State::Valid) {
                     continue;
@@ -255,11 +252,12 @@ namespace MuonR4{
                         /// Reset the explicit time residual
                         residual[toInt(AxisDefs::t0)] = 0.;
                         residual[toInt(AxisDefs::eta)] = lineDist - hit->driftRadius();
-                        
+                        const Amg::Vector3D globApproach = (localToGlobal*closePointSeg).unit();
                         // For twin tubes, the hit position is not updated during the calibration. Make use of 
                         // additional constraint to fit phi
                         residual[toInt(AxisDefs::phi)] =  dim == 2 ? (hitPos - closePointSeg).x() : 0.;
                         /// Update the residual partial derivatives
+                        const double driftV{m_cfg.calibrator->driftVelocity(ctx, *hit)};
                         for (int p = start;  p >= 0; --p) {
                             const ParamDefs par{static_cast<ParamDefs>(p)};
                             /// Derivative of the closest approach along trajectory w.r.t. fit parameter
@@ -267,35 +265,24 @@ namespace MuonR4{
                             /// Propagation to the closest point along the wire
                             const Amg::Vector3D partialClosePointW = hitDir.dot(partialClosePointOnSeg) * hitDir;
 
-                            partialsResidual[toInt(par)][toInt(AxisDefs::phi)] = dim ==2 ? -partialClosePointOnSeg.x() : 0.;
-                            partialsResidual[toInt(par)][toInt(AxisDefs::eta)] = lineConnect.dot(partialClosePointW - partialClosePointOnSeg) / lineDist;
-  
+                            const double dR = -driftV * c_inv * globApproach.dot(linePartials[p]);
+
+                            partialsResidual[p][toInt(AxisDefs::phi)] = dim ==2 ? -partialClosePointOnSeg.x() : 0.;
+                            partialsResidual[p][toInt(AxisDefs::eta)] = lineConnect.dot(partialClosePointW - partialClosePointOnSeg) / lineDist;
+                            partialsResidual[p][toInt(AxisDefs::t0)] = 0.;
                             ATH_MSG_VERBOSE("Partial derivative of "<<idHelperSvc->toString(hit->spacePoint()->identify())
                                           <<" residual "<<Amg::toString(residual)<<" w.r.t "<<toString(par)<<"="
-                                          <<Amg::toString(partialsResidual[toInt(par)]));
-                        
+                                          <<Amg::toString(partialsResidual[p])<<", drift velocity: "<<driftV
+                                          <<" in terms of beta: "<<(driftV * c_inv)<<" -> dR: "<<dR);
+
                         }
                         /// Calculate the time derivative
                         if (fitResult.timeFit) {
-                            /// Currently there's no explicit derivative function available. solve it via the calibrator
-                            constexpr double stepSize = 1.e-7;
-                            constexpr ParamDefs par = ParamDefs::time;
-                            HitType timeUp = m_cfg.calibrator->calibrate(ctx, hit->spacePoint(), segPos, segDir,
-                                                                         fitResult.segmentPars[toInt(par)] + stepSize);
-                            HitType timeDn = m_cfg.calibrator->calibrate(ctx, hit->spacePoint(), segPos, segDir,
-                                                                         fitResult.segmentPars[toInt(par)] - stepSize);
-                            
-                            
-                            partialsResidual[toInt(par)][toInt(AxisDefs::phi)] = partialsResidual[toInt(par)][toInt(AxisDefs::t0)] = 0;
-                            /// Only update if the calibrator didn't kill the hit
-                            if (timeUp->fitState() == State::Valid && timeDn->fitState() == State::Valid) {
-                                partialsResidual[toInt(par)][toInt(AxisDefs::eta)] = - 0.5 *(timeUp->driftRadius() - timeDn->driftRadius()) / stepSize;
-                                ATH_MSG_VERBOSE("Partial derivative of "<<idHelperSvc->toString(hit->spacePoint()->identify())
-                                             <<" residual "<<Amg::toString(residual)<<" w.r.t "<<toString(par)<<"="<<Amg::toString(partialsResidual[toInt(par)]));
-                            } else {
-                                partialsResidual[toInt(par)][toInt(AxisDefs::eta)] = 0.;
-                                --fitResult.nDoF;                               
-                            }
+                            constexpr int par = toInt(ParamDefs::time);
+                            partialsResidual[par] = driftV * Amg::Vector3D::Unit(toInt(AxisDefs::eta));
+                            ATH_MSG_VERBOSE("Partial derivative of "<<idHelperSvc->toString(hit->spacePoint()->identify())
+                                            <<", driftRadius: "<<hit->driftRadius()<<", residual "<<Amg::toString(residual)
+                                            <<" w.r.t "<<toString(ParamDefs::time)<<"="<<Amg::toString(partialsResidual[par]));
                         }
                         break;
                     }
@@ -303,8 +290,7 @@ namespace MuonR4{
                     case xAOD::UncalibMeasType::TgcStripType:{
                         const Amg::Vector3D normal = hit->spacePoint()->planeNormal();
                         const double planeOffSet = normal.dot(hit->positionInChamber());
-                        const Amg::Vector3D planeIsect = segPos 
-                                                       + Amg::intersect<3>(segPos, segDir, normal, planeOffSet).value_or(0)* segDir; 
+                        const Amg::Vector3D planeIsect = segPos + Amg::intersect<3>(segPos, segDir, normal, planeOffSet).value_or(0)* segDir; 
 
                         /// The complementary coordinate does not contribute if the measurement is 1D
                         residual.block<2,1>(0,0) = (hitPos - planeIsect).block<2,1>(0,0);
@@ -328,11 +314,11 @@ namespace MuonR4{
                                           Amg::toString(multiply(inverse(hit->covariance()), residual))
                                           <<" "<<std::endl<<toString(hit->covariance())<<std::endl<<" w.r.t "<<toString(par)<<"="
                                           <<Amg::toString(partialsResidual[toInt(par)]));
-                        
+
                         }
                         if (fitResult.timeFit && hit->measuresTime()) {
                            constexpr ParamDefs par = ParamDefs::time;
-                           partialsResidual[toInt(par)] = -Amg::Vector3D::UnitZ();
+                           partialsResidual[toInt(par)] = -Amg::Vector3D::Unit(toInt(AxisDefs::t0));
                            ATH_MSG_VERBOSE("Partial derivative of "<<idHelperSvc->toString(hit->spacePoint()->identify())
                                           <<" residual "<<Amg::toString(residual)<<" w.r.t "<<toString(par)<<"="
                                           <<Amg::toString(partialsResidual[toInt(par)]));
@@ -341,10 +327,8 @@ namespace MuonR4{
                     } case xAOD::UncalibMeasType::Other:{
                         static const Amg::Vector3D normal = Amg::Vector3D::UnitZ();
                         const double planeOffSet = normal.dot(hit->positionInChamber());
-                        const Amg::Vector3D planeIsect = segPos 
-                                                       + Amg::intersect<3>(segPos, segDir, normal, planeOffSet).value_or(0)* segDir;
-                        
-                       
+                        const Amg::Vector3D planeIsect = segPos + Amg::intersect<3>(segPos, segDir, normal, planeOffSet).value_or(0)* segDir;
+
                         residual.block<2,1>(0,0) = (hitPos - planeIsect).block<2,1>(0,0);
                         residual[toInt(AxisDefs::t0)] =0.;
                         for (int p = start;  p >= 0; --p) {
@@ -505,12 +489,12 @@ namespace MuonR4{
                 currPars.block<nDim,1>(0,0) -= updateMe;
                 prevGrad.block<nDim,1>(0,0)  = currGrad.block<nDim,1>(0,0);
                 ATH_MSG_VERBOSE("Hessian inverse:\n"<<miniHessian.inverse()<<"\n\nUpdate the parameters by -"
-                             <<Amg::toString(miniHessian.inverse()* currGrad.block<nDim, 1>(0,0)));
+                             <<Amg::toString(updateMe));
             } else {
                 const AmgVector(nDim) gradDiff = (currGrad - prevGrad).block<nDim,1>(0,0);
                 const double gradDiffMag = gradDiff.mag2();
                 const double gamma = std::abs((currPars - prevPars).block<nDim,1>(0,0).dot(gradDiff))
-                                   / gradDiffMag > std::numeric_limits<double>::epsilon() ? gradDiffMag : 1.;
+                                   / gradDiffMag > std::numeric_limits<float>::epsilon() ? gradDiffMag : 1.;
                 ATH_MSG_VERBOSE("Hessian determinant invalid. Try deepest descent - \nprev parameters: "
                              <<toString(prevPars)<<",\nprevious gradient: "<<toString(prevGrad)<<", gamma: "<<gamma);
                 prevPars.block<nDim, 1>(0,0) = currPars.block<nDim, 1>(0,0);

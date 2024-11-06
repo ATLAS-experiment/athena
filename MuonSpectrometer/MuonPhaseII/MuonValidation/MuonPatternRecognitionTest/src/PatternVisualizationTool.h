@@ -17,10 +17,9 @@
 
 #include <MuonPatternEvent/HoughEventData.h>
 
-#include <mutex>
-
 #include "TCanvas.h"
 #include "TFile.h"
+#include <mutex>
 
 namespace MuonR4 {
     class SpacePoint;
@@ -195,6 +194,8 @@ namespace MuonValR4 {
             Gaudi::Property<unsigned> m_canvasWidth{this, "CanvasWidth", 800};
             Gaudi::Property<unsigned> m_canvasHeight{this, "CanvasHeight", 600};
 
+            Gaudi::Property<bool> m_displayOnlyTruth{this, "displayTruthOnly", false}; 
+
 
             /** @brief pointer to the Detector manager */
             const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
@@ -203,6 +204,7 @@ namespace MuonValR4 {
             /** @brief Service Handle to the IMuonIdHelperSvc */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
+            static std::mutex s_mutex;
             mutable std::unique_ptr<TCanvas> m_allCan ATLAS_THREAD_SAFE{};
             mutable std::unique_ptr<TFile> m_outFile ATLAS_THREAD_SAFE{};
             /** @brief how many canvases have been visualized */

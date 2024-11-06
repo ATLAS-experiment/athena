@@ -54,7 +54,8 @@ namespace MuonR4{
                                          const Amg::Vector3D& seedDirInChamb,
                                          const double timeDelay) const override final;
 
-
+            double driftVelocity(const EventContext& ctx,
+                                 const CalibratedSpacePoint& spacePoint) const override final;
         private:
             /// access to the ACTS geometry context 
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"}; 
