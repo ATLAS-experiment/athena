@@ -21,6 +21,10 @@ def main():
     parser.add_argument("--print",  dest="doPrint", help="Prints the loaded information", action="store_true", default = False)
     parser.add_argument("-w", "--write",  dest="doWrite", help="Writes the loaded information to a file", action="store_true", default = False)
     parser.add_argument("-l", "--loglevel",  dest="loglevel", help="Log level [DEBUG, INFO, WARNING] (default INFO)", default = "INFO")
+    parser.add_argument("--use-crest",  dest="useCrest", action="store_true",
+                        help="Uses CREST to access the TriggerDB")
+    parser.add_argument("--crest-server", dest="crestServer", type=str, default="http://crest-04.cern.ch/api-v5.0", 
+                        help="CREST server (default: http://crest-04.cern.ch/api-v5.0)")
     
     args = parser.parse_args()
 
@@ -52,18 +56,18 @@ def main():
     elif args.dbalias:
         cfg = []
         if args.smk:
-            cfg += [ L1MenuAccess( dbalias = args.dbalias, smkey = args.smk ) ]
-            cfg += [ HLTMenuAccess( dbalias = args.dbalias, smkey = args.smk ) ]
-            cfg += [ HLTJobOptionsAccess( dbalias = args.dbalias, smkey = args.smk ) ]
-            cfg += [ HLTMonitoringAccess( dbalias = args.dbalias, smkey = args.smk ) ]
+            cfg += [ L1MenuAccess( dbalias = args.dbalias, smkey = args.smk, useCrest = args.useCrest, crestServer = args.crestServer) ]
+            cfg += [ HLTMenuAccess( dbalias = args.dbalias, smkey = args.smk, useCrest = args.useCrest, crestServer = args.crestServer) ]
+            cfg += [ HLTJobOptionsAccess( dbalias = args.dbalias, smkey = args.smk, useCrest = args.useCrest, crestServer = args.crestServer) ]
+            cfg += [ HLTMonitoringAccess( dbalias = args.dbalias, smkey = args.smk, useCrest = args.useCrest, crestServer = args.crestServer) ]
         if args.l1psk:
-            cfg += [ L1PrescalesSetAccess( dbalias = args.dbalias, l1pskey = args.l1psk ) ]
+            cfg += [ L1PrescalesSetAccess( dbalias = args.dbalias, l1pskey = args.l1psk, useCrest = args.useCrest, crestServer = args.crestServer) ]
         if args.hltpsk:
-            cfg += [ HLTPrescalesSetAccess( dbalias = args.dbalias, hltpskey = args.hltpsk ) ]
+            cfg += [ HLTPrescalesSetAccess( dbalias = args.dbalias, hltpskey = args.hltpsk, useCrest = args.useCrest, crestServer = args.crestServer) ]
         if args.bgsk:
-            cfg += [ BunchGroupSetAccess( dbalias = args.dbalias, bgskey = args.bgsk ) ]
+            cfg += [ BunchGroupSetAccess( dbalias = args.dbalias, bgskey = args.bgsk, useCrest = args.useCrest, crestServer = args.crestServer) ]
         if args.monk:
-            cfg += [ HLTMonitoringAccess( dbalias = args.dbalias, monikey = args.monk ) ]
+            cfg += [ HLTMonitoringAccess( dbalias = args.dbalias, monikey = args.monk, useCrest = args.useCrest, crestServer = args.crestServer) ]
     else:
         print("Either a file or dbalias and key need to be specified")
         return 1

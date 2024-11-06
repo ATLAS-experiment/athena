@@ -11,19 +11,21 @@ class HLTMenuAccess(TriggerConfigAccess):
     this class provides access to the HLT menu
     the methods are self-explanatory for people with knowledge of the configuration
     """
-    def __init__(self, filename = None, jsonString = None, dbalias = None, smkey = None ):
+    def __init__(self, filename = None, jsonString = None, dbalias = None, smkey = None,
+                 useCrest=False, crestServer=""):
         """
         accessor needs to be initialized with either a filename or the dbalias and smkey
         """
-        super(HLTMenuAccess,self).__init__( ConfigType.HLTMENU, mainkey = "chains",
-                                            filename = filename, jsonString = jsonString, dbalias = dbalias, dbkey = smkey )
+        super().__init__(ConfigType.HLTMENU, mainkey = "chains",
+                         filename = filename, jsonString = jsonString, dbalias = dbalias, dbkey = smkey,
+                         useCrest=useCrest, crestServer=crestServer)
         self.loader.setQuery({
             2: "SELECT HMT.HTM_DATA FROM {schema}.SUPER_MASTER_TABLE SMT, {schema}.HLT_MENU HMT WHERE HMT.HTM_ID=SMT.SMT_HLT_MENU_ID AND SMT.SMT_ID=:dbkey", # for new db schema
             1: "SELECT HMT.HMT_MENU FROM {schema}.SUPER_MASTER_TABLE SMT, {schema}.HLT_MASTER_TABLE HMT WHERE HMT.HMT_ID=SMT.SMT_HLT_MASTER_TABLE_ID AND SMT.SMT_ID=:dbkey"  # for current db schema
         })
         self.load()
         if smkey is not None:
-            log.info(f"Loaded HLT menu {self.name()} with {len(self)} chains from {dbalias} with smk {smkey}")
+            log.info(f"Loaded HLT menu {self.name()} with {len(self)} chains from {dbalias} with smk {smkey}{' using CREST' if useCrest else ''}")
         elif filename is not None:
             log.info(f"Loaded HLT menu {self.name()} with {len(self)} chains from file {filename}")
 
@@ -59,18 +61,20 @@ class HLTPrescalesSetAccess(TriggerConfigAccess):
     this class provides access to the HLT prescales set
     the methods are self-explanatory for people with knowledge of the configuration
     """
-    def __init__(self, filename = None, jsonString = None, dbalias = None, hltpskey = None ):
+    def __init__(self, filename = None, jsonString = None, dbalias = None, hltpskey = None,
+                 useCrest=False, crestServer=""):
         """
         accessor needs to be initialized with either a filename or the dbalias and hlpskey
         """
-        super(HLTPrescalesSetAccess,self).__init__( ConfigType.HLTPS, mainkey = "prescales",
-                                                    jsonString = jsonString, filename = filename, dbalias = dbalias, dbkey = hltpskey )
+        super().__init__(ConfigType.HLTPS, mainkey = "prescales",
+                         jsonString = jsonString, filename = filename, dbalias = dbalias, dbkey = hltpskey,
+                         useCrest=useCrest, crestServer=crestServer)
         self.loader.setQuery({
             1: "SELECT HPS_DATA FROM {schema}.HLT_PRESCALE_SET HPS WHERE HPS_ID=:dbkey" # for current and new db schema
         })
         self.load()
         if hltpskey is not None:
-            log.info(f"Loaded HLT prescales {self.name()} (size {len(self)}) from {dbalias} with psk {hltpskey}")
+            log.info(f"Loaded HLT prescales {self.name()} (size {len(self)}) from {dbalias} with psk {hltpskey}{' using CREST' if useCrest else ''}")
         elif filename is not None:
             log.info(f"Loaded HLT prescales {self.name()} with {len(self)} chains from file {filename}")
 
@@ -98,19 +102,21 @@ class HLTJobOptionsAccess(TriggerConfigAccess):
     this class provides access to the HLT algorithm configuration
     the methods are self-explanatory for people with knowledge of the configuration
     """
-    def __init__(self, filename = None, dbalias = None, smkey = None ):
+    def __init__(self, filename = None, dbalias = None, smkey = None,
+                 useCrest = False, crestServer = ""):
         """
         accessor needs to be initialized with either a filename or the dbalias and smkey
         """
-        super(HLTJobOptionsAccess,self).__init__( ConfigType.HLTJO, mainkey = "properties",
-                                                  filename = filename, dbalias = dbalias, dbkey = smkey )
+        super().__init__(ConfigType.HLTJO, mainkey = "properties",
+                         filename = filename, dbalias = dbalias, dbkey = smkey,
+                         useCrest=useCrest, crestServer=crestServer)
         self.loader.setQuery({
             2: "SELECT JO.HJO_DATA FROM {schema}.SUPER_MASTER_TABLE SMT, {schema}.HLT_JOBOPTIONS JO WHERE JO.HJO_ID=SMT.SMT_HLT_JOBOPTIONS_ID AND SMT.SMT_ID=:dbkey", # for new db schema
             1: "SELECT JO.JO_CONTENT FROM {schema}.SUPER_MASTER_TABLE SMT, {schema}.JO_MASTER_TABLE JO WHERE JO.JO_ID=SMT.SMT_JO_MASTER_TABLE_ID AND SMT.SMT_ID=:dbkey"  # for current db schema
         })
         self.load()
         if smkey is not None:
-            log.info(f"Loaded HLT job options {self.name()} with {len(self)} algorithms from {dbalias} with smk {smkey}")
+            log.info(f"Loaded HLT job options {self.name()} with {len(self)} algorithms from {dbalias} with smk {smkey}{' using CREST' if useCrest else ''}")
         elif filename is not None:
             log.info(f"Loaded HLT job options {self.name()} with {len(self)} chains from file {filename}")
 
@@ -138,13 +144,14 @@ class HLTMonitoringAccess(TriggerConfigAccess):
     """
     this class provides access to the HLT monitoring json
     """
-    def __init__(self, filename = None, jsonString = None, dbalias = None, smkey = None, monikey = None):
+    def __init__(self, filename = None, jsonString = None, dbalias = None, smkey = None, monikey = None,
+                 useCrest=False, crestServer=""):
         """
         accessor needs to be initialized with either a filename or the dbalias and hlpskey
         """
-        super(HLTMonitoringAccess,self).__init__( ConfigType.HLTMON, mainkey = "signatures",
-                                                  jsonString = jsonString, filename = filename, dbalias = dbalias, dbkey = smkey if smkey else monikey )
-
+        super().__init__(ConfigType.HLTMON, mainkey = "signatures",
+                         jsonString = jsonString, filename = filename, dbalias = dbalias, dbkey = smkey if smkey else monikey,
+                         useCrest=useCrest, crestServer=crestServer)
         self.loader.setQuery({
             7: (
                 "SELECT HMG.HMG_DATA FROM {schema}.HLT_MONITORING_GROUPS HMG, {schema}.SUPER_MASTER_TABLE SMT WHERE HMG.HMG_IN_USE=1 "
@@ -155,7 +162,7 @@ class HLTMonitoringAccess(TriggerConfigAccess):
         })
         self.load()
         if smkey is not None:
-            log.info(f"Loaded HLT monitoring {self.name()} with {len(self)} signatures from {dbalias} with smk {smkey}")
+            log.info(f"Loaded HLT monitoring {self.name()} with {len(self)} signatures from {dbalias} with smk {smkey}{' using CREST' if useCrest else ''}")
         elif filename is not None:
             log.info(f"Loaded HLT monitoring {self.name()} with {len(self)} signatures from file {filename}")
     

@@ -34,6 +34,11 @@ atlas_add_executable( TriggerMenuRW utils/TriggerMenuRW.cxx
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
+# Tests:
+atlas_add_test( CrestReadTest
+  SCRIPT test/readAccessCrestPy.sh
+  POST_EXEC_SCRIPT nopost.sh )
+
 # => disabling this test for now until I find a better way to store the test menus
 # Test(s) in the package.
 # atlas_add_test( ReadTriggerConfig
