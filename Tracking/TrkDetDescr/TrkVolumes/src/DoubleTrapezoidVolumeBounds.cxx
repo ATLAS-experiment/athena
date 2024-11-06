@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -107,8 +107,9 @@ const std::vector<const Trk::Surface*>*
   retsf->push_back(new Trk::PlaneSurface(
     Amg::Transform3D(
       transform *
-      Amg::AngleAxis3D(180 * Gaudi::Units::deg, Amg::Vector3D(0., 1., 0.)) *
-      Amg::Translation3D(Amg::Vector3D(0., 0., this->halflengthZ()))),
+      Amg::Translation3D(Amg::Vector3D(0., 0., -this->halflengthZ())) *
+      Amg::AngleAxis3D(180 * Gaudi::Units::deg, Amg::Vector3D(0., 1., 0.))
+      ),
     this->faceXYDiamondBounds()));
   //   (2) - at positive local z
   retsf->push_back(new Trk::PlaneSurface(
@@ -119,76 +120,73 @@ const std::vector<const Trk::Surface*>*
   // face surfaces yz
   // transmute cyclical
   //   (3) - at point A, attached to alpha opening angle
-  Amg::Vector3D A(
-    diamondCenter - this->minHalflengthX() * diamondX -
-    2 * this->halflengthY1() * diamondY);
+  // in the local diamond coordinate system the center of the bottom left yz face plane is:
+  Amg::Vector3D A(- this->minHalflengthX(), -this->halflengthY1(), 0.);
   Amg::AngleAxis3D alpha1ZRotation(this->alpha1(), Amg::Vector3D(0., 0., 1.));
+  // the face plane has to be rotated first by 90 degrees around the z-axis
+  // because the x-axis should point into ~y direction
+  // then it has to be rotated around the y-axis by 90 degrees to become a yz plane
+  // finally it is rotated by alpha1 around the z-axis
   Amg::RotationMatrix3D alpha1Rotation(
-    diamondRotation * alpha1ZRotation *
+    alpha1ZRotation *
     Amg::AngleAxis3D(-90 * Gaudi::Units::deg, Amg::Vector3D(0., 1., 0.)) *
     Amg::AngleAxis3D(90 * Gaudi::Units::deg, Amg::Vector3D(0., 0., 1.)));
   RectangleBounds* faceAlpha1Bounds = this->faceAlpha1RectangleBounds();
-  Amg::Vector3D faceAlpha1Position(
-    A + alpha1Rotation.col(0) * faceAlpha1Bounds->halflengthX());
+  Amg::Vector3D faceAlpha1Position(A);
   retsf->push_back(new Trk::PlaneSurface(
    Amg::Transform3D(
-      alpha1Rotation * Amg::Translation3D(faceAlpha1Position)),
+    transform * Amg::Translation3D(faceAlpha1Position) * Amg::Transform3D(alpha1Rotation) ),
     faceAlpha1Bounds));
   //   (4) - at point B, attached to beta opening angle
-  Amg::Vector3D B(
-    diamondCenter + this->minHalflengthX() * diamondX -
-    2 * this->halflengthY1() * diamondY);
+  // in the local diamond coordinate system the center of the bottom right yz face plane is:
+  Amg::Vector3D B(this->minHalflengthX(), -this->halflengthY1(), 0.);
   Amg::AngleAxis3D beta1ZRotation(-this->alpha1(), Amg::Vector3D(0., 0., 1.));
   Amg::RotationMatrix3D beta1Rotation(
-    diamondRotation * beta1ZRotation *
+    beta1ZRotation *
     Amg::AngleAxis3D(90 * Gaudi::Units::deg, Amg::Vector3D(0., 1., 0.)) *
     Amg::AngleAxis3D(90 * Gaudi::Units::deg, Amg::Vector3D(0., 0., 1.)));
   RectangleBounds* faceBeta1Bounds = this->faceBeta1RectangleBounds();
-  Amg::Vector3D faceBeta1Position(
-    B + beta1Rotation.col(0) * faceBeta1Bounds->halflengthX());
+  Amg::Vector3D faceBeta1Position(B);
   retsf->push_back(new Trk::PlaneSurface(
-    Amg::Transform3D(beta1Rotation * Amg::Translation3D(faceBeta1Position)),
+    transform * Amg::Translation3D(faceBeta1Position) * Amg::Transform3D(beta1Rotation) ,
     faceBeta1Bounds));
   // face surfaces yz
   // transmute cyclical
   //   (5) - at point A', attached to alpha opening angle
-  Amg::Vector3D AA(
-    diamondCenter - this->maxHalflengthX() * diamondX +
-    2 * this->halflengthY2() * diamondY);
+  // center of the left top yz face plate;
+  Amg::Vector3D AA(- this->maxHalflengthX(), this->halflengthY2(), 0.);
   Amg::AngleAxis3D alpha2ZRotation(-this->alpha2(), Amg::Vector3D(0., 0., 1.));
   Amg::RotationMatrix3D alpha2Rotation(
-    diamondRotation * alpha2ZRotation *
+    alpha2ZRotation *
     Amg::AngleAxis3D(-90 * Gaudi::Units::deg, Amg::Vector3D(0., 1., 0.)) *
     Amg::AngleAxis3D(-90 * Gaudi::Units::deg, Amg::Vector3D(0., 0., 1.)));
   RectangleBounds* faceAlpha2Bounds = this->faceAlpha2RectangleBounds();
   Amg::Vector3D faceAlpha2Position(
-    AA + alpha2Rotation.col(0) * faceAlpha2Bounds->halflengthX());
+    AA);
   retsf->push_back(new Trk::PlaneSurface(
     Amg::Transform3D(
-      alpha2Rotation * Amg::Translation3D(faceAlpha2Position)),
+    transform * Amg::Translation3D(faceAlpha2Position) * Amg::Transform3D(alpha2Rotation)),
     faceAlpha2Bounds));
   //   (6) - at point B', attached to beta opening angle
-  Amg::Vector3D BB(
-    diamondCenter + this->maxHalflengthX() * diamondX +
-    2 * this->halflengthY2() * diamondY);
+  // center of the right top yz face plate;
+  Amg::Vector3D BB( this->maxHalflengthX(),this->halflengthY2(), 0.);
   Amg::AngleAxis3D beta2ZRotation(this->alpha2(), Amg::Vector3D(0., 0., 1.));
   Amg::RotationMatrix3D beta2Rotation(
-    diamondRotation * beta2ZRotation *
+    beta2ZRotation *
     Amg::AngleAxis3D(90 * Gaudi::Units::deg, Amg::Vector3D(0., 1., 0.)) *
     Amg::AngleAxis3D(-90 * Gaudi::Units::deg, Amg::Vector3D(0., 0., 1.)));
   RectangleBounds* faceBeta2Bounds = this->faceBeta2RectangleBounds();
-  Amg::Vector3D faceBeta2Position(
-    BB + beta2Rotation.col(0) * faceBeta2Bounds->halflengthX());
+  Amg::Vector3D faceBeta2Position(BB);
   retsf->push_back(new Trk::PlaneSurface(
-    Amg::Transform3D(beta2Rotation * Amg::Translation3D(faceBeta2Position)),
+    transform * Amg::Translation3D(faceBeta2Position) * Amg::Transform3D(beta2Rotation),
     faceBeta2Bounds));
   // face surfaces zx
   //   (7) - at negative local y
   retsf->push_back(new Trk::PlaneSurface(
     Amg::Transform3D(
       transform *
+      Amg::Translation3D(Amg::Vector3D(0., -2 * this->halflengthY1(), 0.)) *
       Amg::AngleAxis3D(180. * Gaudi::Units::deg, Amg::Vector3D(1., 0., 0.)) *
-      Amg::Translation3D(Amg::Vector3D(0., 2 * this->halflengthY1(), 0.)) *
       Amg::AngleAxis3D(-90 * Gaudi::Units::deg, Amg::Vector3D(0., 1., 0.)) *
       Amg::AngleAxis3D(-90. * Gaudi::Units::deg, Amg::Vector3D(1., 0., 0.))),
     this->faceZXRectangleBoundsBottom()));
@@ -196,7 +194,7 @@ const std::vector<const Trk::Surface*>*
   retsf->push_back(new Trk::PlaneSurface(
     Amg::Transform3D(
       transform *
-      Amg::Translation3D(Amg::Vector3D(0., this->halflengthY2(), 0.)) *
+      Amg::Translation3D(Amg::Vector3D(0., 2*this->halflengthY2(), 0.)) *
       Amg::AngleAxis3D(-90 * Gaudi::Units::deg, Amg::Vector3D(0., 1., 0.)) *
       Amg::AngleAxis3D(-90. * Gaudi::Units::deg, Amg::Vector3D(1., 0., 0.))),
     this->faceZXRectangleBoundsTop()));
@@ -264,11 +262,11 @@ Trk::DoubleTrapezoidVolumeBounds::inside(const Amg::Vector3D& pos, double tol)
     return false;
   if (pos.y() < -2 * m_halfY1 - tol)
     return false;
-  if (pos.y() > 2 * m_halfY2 - tol)
+  if (pos.y() > 2 * m_halfY2 + tol)
     return false;
   Trk::DiamondBounds* faceXYBounds = this->faceXYDiamondBounds();
   Amg::Vector2D locp(pos.x(), pos.y());
-  bool inside(faceXYBounds->inside(locp, tol));
+  bool inside(faceXYBounds->inside(locp, tol, tol));
   delete faceXYBounds;
   return inside;
 }

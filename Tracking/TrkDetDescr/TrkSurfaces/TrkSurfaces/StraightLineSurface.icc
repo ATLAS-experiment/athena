@@ -91,7 +91,7 @@ inline const Amg::Vector3D&
 StraightLineSurface::lineDirection() const
 {
   if (!m_lineDirection.isValid()) {
-    m_lineDirection.set(transform().rotation().col(2));
+    m_lineDirection.set(transform().linear().col(2));
   }
   return *(m_lineDirection.ptr());
 }

@@ -60,7 +60,7 @@ CylinderSurface::normal(const Amg::Vector2D& lp) const
 {
   double phi = lp[Trk::locRPhi] / (bounds().r());
   Amg::Vector3D localNormal(cos(phi), sin(phi), 0.);
-  return Amg::Vector3D(transform().rotation() * localNormal);
+  return Amg::Vector3D(transform().linear() * localNormal);
 }
 
 inline double

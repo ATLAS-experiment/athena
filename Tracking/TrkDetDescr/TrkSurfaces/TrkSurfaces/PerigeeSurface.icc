@@ -100,7 +100,7 @@ PerigeeSurface::lineDirection() const
 
   if (Surface::m_transforms) {
     if (!m_lineDirection.isValid()) {
-      m_lineDirection.set(transform().rotation().col(2));
+      m_lineDirection.set(transform().linear().col(2));
       return *(m_lineDirection.ptr());
     }
   }
