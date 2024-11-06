@@ -265,7 +265,7 @@ def FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags):
     monTool.defineHistogram('layerIDs_1st', path='EXPERT', type='TH1I', title='layerIDs_1st', xbins=20, xmin=-0.5, xmax = 19.5)
     monTool.defineHistogram('chi2_1st_all', path='EXPERT', type='TH1F', title='chi2_1st_all', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('chi2_1st_afterOLR', path='EXPERT', type='TH1F', title='chi2_1st_afterOLR', xbins=nbin, xmin=0, xmax=10.0)
-    monTool.defineHistogram('best_chi2_1st', path='EXPERT', type='TH1F', title='chi2_1st_all', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('best_chi2_1st', path='EXPERT', type='TH1F', title='best_chi2_1st', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('ntrack_1st', path='EXPERT', type='TH1F', title='ntrack_1st', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('ntrack_1st_afterOLR', path='EXPERT', type='TH1F', title='ntrack_1st_afterOLR', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('eff_road,pT', path='EXPERT', type='TEfficiency', title='eff_road_pt', xbins=20, xmin=0, xmax=100)
@@ -291,3 +291,49 @@ def FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags):
 
     return result
 
+def FPGATrackSimSecondStageAlgMonitoringCfg(flags):
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    result = ComponentAccumulator()
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    monTool = GenericMonitoringTool(flags, 'MonTool')
+    nbin=100
+    low=-0.5
+    high=99.5
+
+    etamins={0:0.1, 1:0.7, 2:1.2, 3: 2.0, 4: 3.2}
+    etamaxs={0:0.3, 1:0.9, 2:1.4, 3: 2.2, 4: 3.4}
+    etamin=etamins.get(flags.Trigger.FPGATrackSim.region,0.1) ### default to region 0 if we don't find the value
+    etamax=etamaxs.get(flags.Trigger.FPGATrackSim.region,0.3) ### default to region 0 if we don't find the value
+
+    monTool.defineHistogram('nHits_2nd', path='EXPERT', type='TH1I', title='nHits_2nd', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('nHits_2nd_unmapped', path='EXPERT', type='TH1I', title='nHits_2nd_unmapped', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('nroads_2nd', path='EXPERT', type='TH1I', title='nroads_2nd', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('nroads_2nd_postfilter', path='EXPERT', type='TH1I', title='nroads_2nd_postfilter', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('layerIDs_2nd', path='EXPERT', type='TH1I', title='layerIDs_2nd', xbins=20, xmin=-0.5, xmax = 19.5)
+    monTool.defineHistogram('chi2_2nd_all', path='EXPERT', type='TH1F', title='chi2_2nd_all', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('chi2_2nd_afterOLR', path='EXPERT', type='TH1F', title='chi2_2nd_afterOLR', xbins=nbin, xmin=0, xmax=10.0)
+    monTool.defineHistogram('best_chi2_2nd', path='EXPERT', type='TH1F', title='best_chi2_2nd', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('ntrack_2nd', path='EXPERT', type='TH1F', title='ntrack_2nd', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('ntrack_2nd_afterOLR', path='EXPERT', type='TH1F', title='ntrack_2nd_afterOLR', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('eff_road_2nd,pT', path='EXPERT', type='TEfficiency', title='eff_road_pt', xbins=20, xmin=0, xmax=100)
+    monTool.defineHistogram('eff_track_2nd,pT', path='EXPERT', type='TEfficiency', title='eff_track_pt', xbins=20, xmin=0, xmax=100)
+    monTool.defineHistogram('eff_track_chi2_2nd,pT', path='EXPERT', type='TEfficiency', title='eff_track_chi2_pt', xbins=20, xmin=0, xmax=100)
+    monTool.defineHistogram('eff_road_2nd,pT_zoom', path='EXPERT', type='TEfficiency', title='eff_road_pt_zoom', xbins=10, xmin=0, xmax=10)
+    monTool.defineHistogram('eff_track_2nd,pT_zoom', path='EXPERT', type='TEfficiency', title='eff_track_pt_zoom', xbins=10, xmin=0, xmax=10)
+    monTool.defineHistogram('eff_track_chi2_2nd,pT_zoom', path='EXPERT', type='TEfficiency', title='eff_track_chi2_pt_zoom', xbins=10, xmin=0, xmax=10)
+    monTool.defineHistogram('eff_road_2nd,eta', path='EXPERT', type='TEfficiency', title='eff_road_eta', xbins = 20, xmin=etamin, xmax=etamax)
+    monTool.defineHistogram('eff_track_2nd,eta', path='EXPERT', type='TEfficiency', title='eff_track_eta', xbins = 20, xmin=etamin, xmax=etamax)
+    monTool.defineHistogram('eff_track_chi2_2nd,eta', path='EXPERT', type='TEfficiency', title='eff_track_chi2_eta', xbins = 20, xmin=etamin, xmax=etamax)
+    monTool.defineHistogram('eff_road_2nd,phi', path='EXPERT', type='TEfficiency', title='eff_road_phi', xbins = 20, xmin=flags.Trigger.FPGATrackSim.ActiveConfig.phiMin, xmax=flags.Trigger.FPGATrackSim.ActiveConfig.phiMax)
+    monTool.defineHistogram('eff_track_2nd,phi', path='EXPERT', type='TEfficiency', title='eff_track_phi', xbins = 20, xmin=flags.Trigger.FPGATrackSim.ActiveConfig.phiMin, xmax=flags.Trigger.FPGATrackSim.ActiveConfig.phiMax)
+    monTool.defineHistogram('eff_track_chi2_2nd,phi', path='EXPERT', type='TEfficiency', title='eff_track_chi2_phi', xbins = 20, xmin=flags.Trigger.FPGATrackSim.ActiveConfig.phiMin, xmax=flags.Trigger.FPGATrackSim.ActiveConfig.phiMax)
+    monTool.defineHistogram('eff_road_2nd,d0', path='EXPERT', type='TEfficiency', title='eff_road_d0', xbins = 20, xmin = -2.0, xmax = 2.0)
+    monTool.defineHistogram('eff_track_2nd,d0', path='EXPERT', type='TEfficiency', title='eff_track_d0', xbins = 20, xmin = -2.0, xmax = 2.0)
+    monTool.defineHistogram('eff_track_chi2_2nd,d0', path='EXPERT', type='TEfficiency', title='eff_track_chi2_d0', xbins = 20, xmin = -2.0, xmax = 2.0)
+    monTool.defineHistogram('eff_road_2nd,z0', path='EXPERT', type='TEfficiency', title='eff_road_z0', xbins = 20, xmin = -150, xmax = 150.0)
+    monTool.defineHistogram('eff_track_2nd,z0', path='EXPERT', type='TEfficiency', title='eff_track_z0', xbins = 20, xmin = -150.0, xmax = 150.0)
+    monTool.defineHistogram('eff_track_chi2_2nd,z0', path='EXPERT', type='TEfficiency', title='eff_track_chi2_z0', xbins = 20, xmin = -150.0, xmax = 150.0)
+
+    result.setPrivateTools(monTool)
+
+    return result

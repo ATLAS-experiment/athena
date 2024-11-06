@@ -1,0 +1,165 @@
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from PathResolver import PathResolver
+
+#### Now inmport Data Prep config from other file
+from FPGATrackSimConfTools import FPGATrackSimDataPrepConfig
+from FPGATrackSimConfTools import FPGATrackSimAnalysisConfig
+
+def getNSubregions(filePath):
+    with open(PathResolver.FindCalibFile(filePath), 'r') as f:
+        fields = f.readline()
+        assert(fields.startswith('towers'))
+        n = fields.split()[1]
+        return int(n)
+
+def FPGATrackSimWindowExtensionToolCfg(flags):
+    result = ComponentAccumulator()
+    FPGATrackSimWindowExtensionTool = CompFactory.FPGATrackSimWindowExtensionTool()
+
+    # these are services so we use getPrimaryAndMerge; tools (configured elsewhere) should use popToolsAndMerge
+    FPGATrackSimWindowExtensionTool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.FPGATrackSimBankSvcCfg(flags))
+    FPGATrackSimWindowExtensionTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
+
+    # Hardcoded settings for now, hook up to flags later...
+    FPGATrackSimWindowExtensionTool.threshold = 11
+
+    # These MUST be of size equal to the full number of layers (13), though only the "new" layers
+    # in the second stage are actually used.
+    FPGATrackSimWindowExtensionTool.phiWindow = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0.035, 0.01, 0.008, 0.008]
+    FPGATrackSimWindowExtensionTool.zWindow =   [0, 0, 0, 0, 0, 0, 0, 0, 0, 3.62, 4.42, 5.59, 7.13]
+
+    # Other settings, shared with the first stage mostly. disable 2nd stage tracking for now.
+    FPGATrackSimWindowExtensionTool.fieldCorrection =flags.Trigger.FPGATrackSim.ActiveConfig.fieldCorrection
+    FPGATrackSimWindowExtensionTool.IdealGeoRoads = False # (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
+    FPGATrackSimWindowExtensionTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints
+    result.setPrivateTools(FPGATrackSimWindowExtensionTool)
+    return result
+
+# Need to figure out if we have two output writers or somehow only one.
+def FPGATrackSimSecondStageOutputCfg(flags):
+    result=ComponentAccumulator()
+    FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool("FPGATrackSimWriteOutputSecondStage")
+    FPGATrackSimWriteOutput.InFileName = ["test.root"]
+    FPGATrackSimWriteOutput.OutputTreeName = "FPGATrackSimSecondStageTree"
+    # RECREATE means that that this tool opens the file.
+    # HEADER would mean that something else (e.g. THistSvc) opens it and we just add the object.
+    FPGATrackSimWriteOutput.RWstatus = "HEADER"
+    FPGATrackSimWriteOutput.THistSvc = CompFactory.THistSvc()
+    result.setPrivateTools(FPGATrackSimWriteOutput)
+    return result
+
+def FPGATrackSimHoughRootOutputToolCfg(flags):
+    result=ComponentAccumulator()
+    HoughRootOutputTool = CompFactory.FPGATrackSimHoughRootOutputTool()
+    HoughRootOutputTool.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionCfg(flags))
+    HoughRootOutputTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
+    HoughRootOutputTool.THistSvc = CompFactory.THistSvc()
+    result.setPrivateTools(HoughRootOutputTool)
+    return result
+
+def NNTrackToolCfg(flags):
+    result=ComponentAccumulator()
+    NNTrackTool = CompFactory.FPGATrackSimNNTrackTool()
+    NNTrackTool.THistSvc = CompFactory.THistSvc()
+    NNTrackTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
+    result.setPrivateTools(NNTrackTool)
+    return result
+
+def FPGATrackSimTrackFitterToolCfg(flags):
+    result=ComponentAccumulator()
+    TF = CompFactory.FPGATrackSimTrackFitterTool("FPGATrackSimTrackFitterTool_2nd")
+    TF.GuessHits = flags.Trigger.FPGATrackSim.ActiveConfig.guessHits
+    TF.IdealCoordFitType = flags.Trigger.FPGATrackSim.ActiveConfig.idealCoordFitType
+    TF.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.FPGATrackSimBankSvcCfg(flags))
+    TF.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
+    TF.chi2DofRecoveryMax = flags.Trigger.FPGATrackSim.ActiveConfig.chi2DoFRecoveryMax
+    TF.chi2DofRecoveryMin = flags.Trigger.FPGATrackSim.ActiveConfig.chi2DoFRecoveryMin
+    TF.doMajority = flags.Trigger.FPGATrackSim.ActiveConfig.doMajority
+    TF.nHits_noRecovery = flags.Trigger.FPGATrackSim.ActiveConfig.nHitsNoRecovery
+    TF.DoDeltaGPhis = flags.Trigger.FPGATrackSim.ActiveConfig.doDeltaGPhis
+    TF.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
+    result.setPrivateTools(TF)
+    return result
+
+def FPGATrackSimOverlapRemovalToolCfg(flags):
+    result=ComponentAccumulator()
+    OR = CompFactory.FPGATrackSimOverlapRemovalTool("FPGATrackSimOverlapRemovalTool_2nd")
+    OR.ORAlgo = "Normal"
+    OR.doFastOR =flags.Trigger.FPGATrackSim.ActiveConfig.doFastOR
+    OR.NumOfHitPerGrouping = 5
+    OR.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
+    OR.MinChi2 = flags.Trigger.FPGATrackSim.ActiveConfig.secondChi2Cut
+    if flags.Trigger.FPGATrackSim.ActiveConfig.hough:
+        OR.nBins_x = flags.Trigger.FPGATrackSim.ActiveConfig.xBins + 2 * flags.Trigger.FPGATrackSim.ActiveConfig.xBufferBins
+        OR.nBins_y = flags.Trigger.FPGATrackSim.ActiveConfig.yBins + 2 * flags.Trigger.FPGATrackSim.ActiveConfig.yBufferBins
+        OR.localMaxWindowSize = flags.Trigger.FPGATrackSim.ActiveConfig.localMaxWindowSize
+        OR.roadSliceOR = flags.Trigger.FPGATrackSim.ActiveConfig.roadSliceOR
+
+    result.setPrivateTools(OR)
+    return result
+
+def prepareFlagsForFPGATrackSimSecondStageAlg(flags):
+    newFlags = flags.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + flags.Trigger.FPGATrackSim.algoTag)
+    return newFlags
+
+def FPGATrackSimSecondStageAlgCfg(inputFlags):
+
+    flags = prepareFlagsForFPGATrackSimSecondStageAlg(inputFlags)
+
+    result=ComponentAccumulator()
+
+    theFPGATrackSimSecondStageAlg=CompFactory.FPGATrackSimSecondStageAlg()
+    theFPGATrackSimSecondStageAlg.writeOutputData = flags.Trigger.FPGATrackSim.ActiveConfig.writeOutputData
+    theFPGATrackSimSecondStageAlg.tracking = False #flags.Trigger.FPGATrackSim.tracking
+    theFPGATrackSimSecondStageAlg.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
+    theFPGATrackSimSecondStageAlg.DoHoughRootOutput = False #flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput
+    theFPGATrackSimSecondStageAlg.DoNNTrack = False
+    theFPGATrackSimSecondStageAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionCfg(flags))
+    theFPGATrackSimSecondStageAlg.TrackScoreCut = flags.Trigger.FPGATrackSim.ActiveConfig.secondChi2Cut
+
+    FPGATrackSimMapping = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
+    theFPGATrackSimSecondStageAlg.FPGATrackSimMapping = FPGATrackSimMapping
+
+    # If tracking is set to False, don't configure the bank service
+    if flags.Trigger.FPGATrackSim.tracking:
+        result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.FPGATrackSimBankSvcCfg(flags))
+
+    # Here, configure the window tool.
+    theFPGATrackSimSecondStageAlg.TrackExtensionTool = result.popToolsAndMerge(FPGATrackSimWindowExtensionToolCfg(flags))
+
+    theFPGATrackSimSecondStageAlg.HoughRootOutputTool = result.popToolsAndMerge(FPGATrackSimHoughRootOutputToolCfg(flags))
+
+    theFPGATrackSimSecondStageAlg.NNTrackTool = result.popToolsAndMerge(NNTrackToolCfg(flags))
+
+    theFPGATrackSimSecondStageAlg.OutputTool = result.popToolsAndMerge(FPGATrackSimSecondStageOutputCfg(flags))
+    theFPGATrackSimSecondStageAlg.TrackFitter_2nd = result.popToolsAndMerge(FPGATrackSimTrackFitterToolCfg(flags))
+    theFPGATrackSimSecondStageAlg.OverlapRemoval_2nd = result.popToolsAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags))
+
+    # Create SPRoadFilterTool if spacepoints are turned on. TODO: make things configurable?
+    if flags.Trigger.FPGATrackSim.spacePoints:
+        SPRoadFilter = CompFactory.FPGATrackSimSpacepointRoadFilterTool("FPGATrackSimSpacepointRoadFilterTool_2nd")
+        SPRoadFilter.filtering = flags.Trigger.FPGATrackSim.ActiveConfig.spacePointFiltering
+        SPRoadFilter.minSpacePlusPixel = flags.Trigger.FPGATrackSim.minSpacePlusPixel
+        SPRoadFilter.isSecondStage = True
+        # TODO guard here against threshold being more than one value?
+        # TODO this should be the second stage threshold.
+        if (flags.Trigger.FPGATrackSim.ActiveConfig.hough1D):
+          SPRoadFilter.threshold = flags.Trigger.FPGATrackSim.Hough1D.threshold[0]
+        else:
+          SPRoadFilter.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold[0]
+        SPRoadFilter.setSectors = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
+        theFPGATrackSimSecondStageAlg.SPRoadFilterTool = SPRoadFilter
+        theFPGATrackSimSecondStageAlg.Spacepoints = True
+
+    from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimSecondStageAlgMonitoringCfg
+    theFPGATrackSimSecondStageAlg.MonTool = result.popToolsAndMerge(FPGATrackSimSecondStageAlgMonitoringCfg(flags))
+
+    result.addEventAlgo(theFPGATrackSimSecondStageAlg)
+
+    return result
+
+if __name__ == "__main__":
+    print("Running second stage separately is currently unsupported")

@@ -9,7 +9,7 @@ log = AthenaLogger(__name__)
 
 #### Now inmport Data Prep config from other file
 from FPGATrackSimConfTools import FPGATrackSimDataPrepConfig
-
+from FPGATrackSimConfTools import FPGATrackSimSecondStageConfig
 
 def getNSubregions(filePath):
     with open(PathResolver.FindCalibFile(filePath), 'r') as f:
@@ -240,30 +240,6 @@ def FPGATrackSimOverlapRemovalToolCfg(flags):
     result.addPublicTool(OR_1st, primary=True)
     return result
 
-
-def FPGATrackSimOverlapRemovalTool_2ndCfg(flags):
-    result=ComponentAccumulator()
-    OR_2nd = CompFactory.FPGATrackSimOverlapRemovalTool("FPGATrackSimOverlapRemovalTool_2nd")
-    OR_2nd.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
-    if flags.Trigger.FPGATrackSim.ActiveConfig.secondStage:
-        OR_2nd.DoSecondStage = True
-        OR_2nd.ORAlgo = "Normal"
-        OR_2nd.doFastOR = flags.Trigger.FPGATrackSim.ActiveConfig.doFastOR
-        OR_2nd.NumOfHitPerGrouping = 5
-    result.setPrivateTools(OR_2nd)
-    return result
-
-
-def FPGATrackSimTrackFitterTool_2ndCfg(flags):
-    result=ComponentAccumulator()
-    TF_2nd = CompFactory.FPGATrackSimTrackFitterTool(name="FPGATrackSimTrackFitterTool_2nd")
-    TF_2nd.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
-    TF_2nd.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
-    if flags.Trigger.FPGATrackSim.ActiveConfig.secondStage:
-        TF_2nd.Do2ndStageTrackFit = True 
-    result.setPrivateTools(TF_2nd)
-    return result
-
 def prepareFlagsForFPGATrackSimLogicalHitsProcessAlg(flags):
     newFlags = flags.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + flags.Trigger.FPGATrackSim.algoTag)
     return newFlags
@@ -285,6 +261,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHitsProcessAlg.DoNNTrack = False
     theFPGATrackSimLogicalHitsProcessAlg.runOnRDO = not flags.Trigger.FPGATrackSim.wrapperFileName
     theFPGATrackSimLogicalHitsProcessAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionCfg(flags))
+    theFPGATrackSimLogicalHitsProcessAlg.TrackScoreCut = flags.Trigger.FPGATrackSim.ActiveConfig.chi2cut
 
     FPGATrackSimMaping = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     theFPGATrackSimLogicalHitsProcessAlg.FPGATrackSimMapping = FPGATrackSimMaping
@@ -334,7 +311,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
 
     # Create SPRoadFilterTool if spacepoints are turned on. TODO: make things configurable?
     if flags.Trigger.FPGATrackSim.spacePoints:
-        SPRoadFilter = CompFactory.FPGATrackSimSpacepointRoadFilterTool()
+        SPRoadFilter = CompFactory.FPGATrackSimSpacepointRoadFilterTool("FPGATrackSimSpacepointRoadFilterTool_1st")
         SPRoadFilter.filtering = flags.Trigger.FPGATrackSim.ActiveConfig.spacePointFiltering
         SPRoadFilter.minSpacePlusPixel = flags.Trigger.FPGATrackSim.minSpacePlusPixel
         # TODO guard here against threshold being more than one value?
@@ -404,7 +381,6 @@ if __name__ == "__main__":
     flags.PhysVal.IDTPM.TrkAnaDoubleRatio.TrigTrkKey = f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"
 
     flags.PhysVal.doExample = False
-    
     ############################################
     flags.Concurrency.NumThreads=1
     #flags.Concurrency.NumProcs=0
@@ -463,7 +439,7 @@ if __name__ == "__main__":
        acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
    
        if (flags.Trigger.FPGATrackSim.Hough.houghRootoutput):
-               acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimHOUGHOUTPUT DATAFILE='HoughRootOutput.root', OPT='RECREATE'"]))
+           acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimHOUGHOUTPUT DATAFILE='HoughRootOutput.root', OPT='RECREATE'"]))
    
        acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='test.root', OPT='RECREATE'"]))
    
@@ -490,6 +466,10 @@ if __name__ == "__main__":
        # Configure both the dataprep and logical hits algorithms.
        acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepAlgCfg(flags))
        acc.merge(FPGATrackSimLogicalHitsProcessAlgCfg(flags))
+
+       # If second stage is turned on, turn that algorithm on too.
+       if flags.Trigger.FPGATrackSim.Hough.secondStage:
+           acc.merge(FPGATrackSimSecondStageConfig.FPGATrackSimSecondStageAlgCfg(flags))
    
        if flags.Trigger.FPGATrackSim.doEDMConversion:
            acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=True, doSP=flags.Trigger.FPGATrackSim.spacePoints))
