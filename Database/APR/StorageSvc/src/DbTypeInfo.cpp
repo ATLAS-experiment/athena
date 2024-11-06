@@ -232,7 +232,7 @@ const std::string DbTypeInfo::toString() const   {
     rep += "{CL=<no_class>}";
   else
     rep += "{CL=" + DbReflex::fullTypeName(cls) + "}";
-  sprintf(txt,"{NCOL=%ld}{CNT=%d}", long(m_columns.size()), m_mult);
+  sprintf(txt,"{NCOL=%ld}{CNT=%d}", static_cast<long>(m_columns.size()), m_mult);
   rep += txt;
   for(Columns::const_iterator i=m_columns.begin(); i<m_columns.end();++i) {
     rep += "{COL={";

@@ -452,7 +452,7 @@ DbStatus DbDatabaseObj::open()   {
 	    const std::string& fid = (*fidIt).second;
 	    for(size_t i=0; fids.size()>0 && i<fids.size()-1;++i)  {	    
 	      char num[32];
-	      ::sprintf(num, "FID.%d", int(i+1));
+	      ::sprintf(num, "FID.%d", static_cast<int>(i+1));
 	      log << "--->Redirect FID[" << i << "]: " << fids[i] 
 		  << " to " << fid << DbPrint::endmsg;
 	      m_paramMap[num] = fid;
