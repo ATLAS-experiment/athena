@@ -7,7 +7,7 @@
 # art-output: *.root
 # art-output: *.xml
 # art-output: dcube*
-# art-html: dcube_ckf_last
+# art-html: dcube_ckf_shifter_last
 
 lastref_dir=last_results
 dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
@@ -81,7 +81,7 @@ ls -la "$lastref_dir"
 
 run "dcube-ckf-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_ckf_last \
+    -p -x dcube_ckf_shifter_last \
     -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/idpvm.root \
     idpvm.root

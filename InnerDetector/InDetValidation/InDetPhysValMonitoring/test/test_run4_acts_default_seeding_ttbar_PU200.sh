@@ -5,7 +5,7 @@
 # art-output: *.root
 # art-output: *.xml
 # art-output: dcube*
-# art-html: dcube_last
+# art-html: dcube_shifter_last
 
 lastref_dir=last_results
 dcubeXml=dcube_ART_ACTS_SEEDS_R22.xml
@@ -61,7 +61,7 @@ ls -la "$lastref_dir"
 # Needs to be updated!!!
 run "dcube-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_last \
+    -p -x dcube_shifter_last \
     -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/ActsMonitoringOutput.root \
     ActsMonitoringOutput.root
