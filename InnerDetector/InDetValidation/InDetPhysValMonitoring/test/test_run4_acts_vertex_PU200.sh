@@ -5,7 +5,7 @@
 # art-output: *.root
 # art-output: *.xml
 # art-output: dcube*
-# art-html: dcube_acts_last
+# art-html: dcube_acts_shifter_last
 
 lastref_dir=last_results
 dcubeXml=dcube_IDPVMPlots_ACTS_VERTEX_ITk.xml
@@ -98,14 +98,14 @@ ls -la "$lastref_dir"
 
 run "dcube-acts-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_acts_last \
+    -p -x dcube_acts_shifter_last \
     -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/idpvm.acts.root \
     idpvm.acts.root
 
 run "dcube-athena-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_athena_last \
+    -p -x dcube_athena_shifter_last \
     -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/idpvm.athena.root \
     idpvm.athena.root

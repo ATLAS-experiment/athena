@@ -5,7 +5,7 @@
 # art-output: *.root
 # art-output: *.xml
 # art-output: dcube*
-# art-html: dcube_ambi_last
+# art-html: dcube_ambi_shifter_last
 # art-athena-mt: 4
 
 lastref_dir=last_results
@@ -170,7 +170,7 @@ ls -la "$lastref_dir"
 if [ $ckf_rc == 0 ]; then
     run "dcube-ckf-last" \
         $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-        -p -x dcube_ckf_last \
+        -p -x dcube_ckf_shifter_last \
         -c ${dcubeXmlAbsPath} \
         -r ${lastref_dir}/idpvm.ckf.root \
         idpvm.ckf.root
@@ -191,7 +191,7 @@ fi
 if [ $ambi_rc == 0 ]; then
     run "dcube-ambi-last" \
         $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-        -p -x dcube_ambi_last \
+        -p -x dcube_ambi_shifter_last \
         -c ${dcubeXmlAbsPath} \
         -r ${lastref_dir}/idpvm.ambi.root \
         idpvm.ambi.root
@@ -212,7 +212,7 @@ fi
 if [ $ambi_scored_rc == 0 ]; then
     run "dcube-ambi-scored-last" \
         $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-        -p -x dcube_ambi_scored_last \
+        -p -x dcube_ambi_scored_shifter_last \
         -c ${dcubeXmlAbsPath} \
         -r ${lastref_dir}/idpvm.ambi.scored.root \
         idpvm.ambi.scored.root
