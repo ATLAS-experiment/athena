@@ -9,6 +9,7 @@
 #include "AthContainers/ConstDataVector.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
 
+      
 const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
 JetParticleAssociation::matchOriginTrk(SG::ReadDecorHandleKey<xAOD::IParticleContainer> trk_origin_vtx, const xAOD::JetContainer& jets, const xAOD::IParticleContainer& parts) const {
 
@@ -18,46 +19,48 @@ JetParticleAssociation::matchOriginTrk(SG::ReadDecorHandleKey<xAOD::IParticleCon
     std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >* matchedparts =
         new std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >(jets.size());
     
+    // Set parameters for the cone size
+    double coneSizeFitPar1 = +0.239;
+    double coneSizeFitPar2 = -1.220;
+    double coneSizeFitPar3 = -1.64e-5;
     //loop through the tracks
     for (const xAOD::IParticle* part: parts) {
       // Retrieve the ElementLink to the vertex
       const ElementLink<xAOD::VertexContainer>& vertexLink = trkOrigin(*part);
-      // Check if the link is valid
-      if (vertexLink.isValid()) {
-        // Continue processing
-        //Get vertex associated with the track
-        const xAOD::Vertex* vtx_to_trk = *vertexLink; //&trkOrigin(*part); //change here
-        int matchjetidx = -1;
-        for (unsigned int iJet = 0; iJet < jets.size(); iJet++) {
-            //get jet
-            const xAOD::Jet* jet = jets[iJet];
-            // if origin of jet is the same as the vertex associated to the track then get index of jet
-            if (jet->getAssociatedObject<xAOD::Vertex>("OriginVertex") == vtx_to_trk){
-                matchjetidx = iJet;
-            }else{
-                continue;
-            }
-
-        }
-        if (matchjetidx >= 0) {
-          ElementLink<xAOD::IParticleContainer> EL; 
-          EL.toContainedElement(parts, part);
-          (*matchedparts)[matchjetidx].push_back(EL);
-        }
-    
-      
-      } else {
-          ATH_MSG_WARNING("Track decoration 'btagIp_TrkOriginVertex' is missing for this track");
+      // check if link is valid
+      if (!vertexLink.isValid()) {
+        ATH_MSG_WARNING("Track decoration 'btagIp_TrkOriginVertex' is missing for this track");
+        continue;
       }
       
-      
-
-      
-
-      
+      // Continue processing
+      //Get vertex associated with the track
+      const xAOD::Vertex* vtx_to_trk = *vertexLink; 
+      int matchjetidx = -1;
+      double drmin = -1.0;
+      for (unsigned int iJet = 0; iJet < jets.size(); iJet++) {
+          //get jet
+          const xAOD::Jet* jet = jets[iJet];
+          // if origin of jet is not the same as the vertex associated to the track then continue to next jet
+          if (jet->getAssociatedObject<xAOD::Vertex>("OriginVertex") != vtx_to_trk) {
+            continue;
+          }
+          
+          // do dR matching between jet and track
+          double match_dr = coneSizeFitPar1 + exp(coneSizeFitPar2 + coneSizeFitPar3*jet->pt());
+          double dr = jet->p4().DeltaR(part->p4());
+          if (dr > match_dr) continue;
+          if (drmin < 0 || dr < drmin) {
+              drmin = dr;
+              matchjetidx = iJet;
+          }
+      }
+      if (matchjetidx >= 0) {
+        ElementLink<xAOD::IParticleContainer> EL; 
+        EL.toContainedElement(parts, part);
+        (*matchedparts)[matchjetidx].push_back(EL);
+      }      
     }
-
-    
 
     return matchedparts;
     
@@ -144,9 +147,7 @@ StatusCode JetParticleAssociation::decorate(const xAOD::JetContainer& jets) cons
     
     
     if ((m_jetContainerName == "AntiKt4EMPFlowByVertexJets") && (m_particleKey.key()=="InDetTrackParticles")){
-      const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >* matches_origin = matchOriginTrk(m_trk_origin_vtx, *viewJets.asDataVector(), *parts);
-      const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >* matches_dR = match(*viewJets.asDataVector(), *parts);
-      matches = getIntersection(matches_origin, matches_dR);
+      matches = matchOriginTrk(m_trk_origin_vtx, *viewJets.asDataVector(), *parts);
     }else{
       matches = match(*viewJets.asDataVector(), *parts);
     }
