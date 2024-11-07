@@ -33,11 +33,7 @@ atlas_add_library( ActsEventLib
 atlas_add_dictionary( ActsEventDict
 		      ActsEvent/ActsEventDict.h
 		      ActsEvent/selection.xml
-		      LINK_LIBRARIES AthLinks ActsEventLib
-		      DATA_LINKS
-		      ActsTrk::SeedContainer
-		      ActsTrk::BoundTrackParametersContainer
-		      )
+		      LINK_LIBRARIES AthLinks ActsEventLib)
 
 atlas_add_test( MultiTrajectoryBasic_test
 				SOURCES test/MultiTrajectoryBasic_test.cxx

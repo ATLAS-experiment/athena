@@ -9,7 +9,9 @@
 
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 #include "ActsEvent/Seed.h"
+#include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/TrackParameters.h"
+#include "ActsEvent/TrackParametersContainer.h"
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 
 #include "StoreGate/WriteHandleKey.h"

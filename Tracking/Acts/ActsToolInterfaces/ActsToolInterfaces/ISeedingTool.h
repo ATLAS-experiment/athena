@@ -16,6 +16,7 @@
 #include "xAODInDetMeasurement/SpacePointAuxContainer.h"
 #include "ActsEvent/SpacePointCollector.h"
 #include "ActsEvent/Seed.h"
+#include "ActsEvent/SeedContainer.h"
 
 #include "Acts/EventData/SpacePointContainer.hpp"
 #include "Acts/Definitions/Algebra.hpp"
