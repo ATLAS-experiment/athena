@@ -1612,13 +1612,15 @@ std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::proce
     std::string vName = gv->getLogVol()->getName();
     ATH_MSG_DEBUG("processing sTGC prototype of " << vName);
 
-    std::unique_ptr<Trk::Volume> envelope = m_geoShapeConverter.translateGeoShape(gv->getLogVol()->getShape(), transf);
+    Amg::Transform3D tr_env(transf);
+    std::unique_ptr<Trk::Volume> envelope = m_geoShapeConverter.translateGeoShape(gv->getLogVol()->getShape(), tr_env);
     if (!envelope) {
         ATH_MSG_WARNING("sTGC prototype for " << vName << " not built ");
         return nullptr;
     }
     double thickness = envelopeThickness(envelope->volumeBounds());  // half thickness
-
+    Amg::Transform3D envelope_trf_local = transf.inverse()*envelope->transform();
+ 
     // use envelope to define layer bounds
     Trk::SharedObject<const Trk::SurfaceBounds> layBounds{getLayerBoundsFromEnvelope(*envelope)};
     // calculate layer area
@@ -1638,16 +1640,12 @@ std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::proce
     unsigned int ic = 0;
     const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
     for (const auto& [cv, trc] : geoGetVolumes(gv)) {
-    
-        auto layer = std::make_unique<Trk::PlaneLayer>(envelope->transform() * trc, layBounds,
-                                                      stgcLayMaterial, sTgc_layerMat.thickness());
-        
+        auto layer = std::make_unique<Trk::PlaneLayer>(transf * trc * envelope_trf_local, layBounds,
+                                                  stgcLayMaterial, sTgc_layerMat.thickness());
         const Identifier id = idHelper.channelID(nswId,idHelper.multilayer(nswId),
                                                  idHelper.gasGap(nswId) + ic, sTgcIdHelper::Wire, 1);
-         
-        layer->setLayerType(id.get_identifier32().get_compact());
-        
-        layers.push_back(std::move(layer));
+        layer->setLayerType(id.get_identifier32().get_compact());    
+        layers.push_back(std::move(layer));                                               
         ++ic;
     }
     // create the BinnedArray
@@ -1669,7 +1667,7 @@ std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::proce
     auto sTgc = std::make_unique<Trk::TrackingVolume>(*envelope, *m_muonMaterial, 
                                                       stgcLayerArray.release(), nullptr, vName);
     // create layer representation
-    auto layerRepr = std::make_unique<Trk::PlaneLayer>(transf, layBounds, stgcMaterial, sTgc_mat.thickness());
+    auto layerRepr = std::make_unique<Trk::PlaneLayer>(transf * envelope_trf_local, layBounds, stgcMaterial, sTgc_mat.thickness());
     // create prototype as detached tracking volume
     return std::make_unique<Trk::DetachedTrackingVolume>(vName, sTgc.release(), layerRepr.release(), nullptr);
 }
@@ -1681,14 +1679,17 @@ std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::proce
     std::string vName = gv->getLogVol()->getName();
 
     ATH_MSG_DEBUG("processing MM:" << vName << ":"<< gv->getLogVol()->getShape()->type());
-    std::unique_ptr<const Trk::Volume> envelope{m_geoShapeConverter.translateGeoShape(gv->getLogVol()->getShape(), transf)};
+
+    Amg::Transform3D tr_env(transf);
+    std::unique_ptr<const Trk::Volume> envelope{m_geoShapeConverter.translateGeoShape(gv->getLogVol()->getShape(), tr_env)};
     if (!envelope) {
         ATH_MSG_WARNING("MM prototype for " << vName << " not built ");
         return nullptr;
     }
     double thickness = envelopeThickness(envelope->volumeBounds());
     printVolumeBounds("MM envelope bounds", envelope->volumeBounds());
-
+    Amg::Transform3D envelope_trf_local = transf.inverse()*envelope->transform();
+ 
     // use envelope to define layer bounds
      Trk::SharedObject<const Trk::SurfaceBounds> layBounds = getLayerBoundsFromEnvelope(*envelope);
     // calculate layer area
@@ -1707,10 +1708,9 @@ std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::proce
     unsigned int ic = 0;
     const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
     for (const auto& [cv, trc] : geoGetVolumes(gv)) {
-        auto layer = std::make_unique<Trk::PlaneLayer>(transf * trc, layBounds, mmLayMaterial, mm_layerMat.thickness());
+        auto layer = std::make_unique<Trk::PlaneLayer>(transf * trc * envelope_trf_local, layBounds, mmLayMaterial, mm_layerMat.thickness());
         Identifier id = idHelper.channelID(nswId, idHelper.multilayer(nswId), 1 + ic, 1);
         layer->setLayerType(id.get_identifier32().get_compact());
-
         layers.push_back(std::move(layer));
         ic++;
     }
@@ -1733,7 +1733,7 @@ std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::proce
     // build tracking volume
     auto mM = std::make_unique<Trk::TrackingVolume>(*envelope, *m_muonMaterial, mmLayerArray.release(), nullptr, vName);
     // create layer representation
-    auto layerRepr = std::make_unique<Trk::PlaneLayer>(transf, layBounds, mmMaterial, mm_mat.thickness());
+    auto layerRepr = std::make_unique<Trk::PlaneLayer>(transf * envelope_trf_local, layBounds, mmMaterial, mm_mat.thickness());
     // create prototype as detached tracking volume
     return std::make_unique<Trk::DetachedTrackingVolume>(vName, mM.release(), layerRepr.release(), nullptr);
 }

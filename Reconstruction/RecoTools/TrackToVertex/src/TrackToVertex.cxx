@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,7 +14,6 @@
 #include "TrkSurfaces/StraightLineSurface.h"
 #include "TrkDetDescrUtils/GeometryStatics.h"
 #include "TrkParameters/TrackParameters.h"
-#include "TrkTrack/Track.h"
 #include "VxVertex/VxCandidate.h"
 #include "VxVertex/RecVertex.h"
 
@@ -137,7 +136,9 @@ std::unique_ptr<Trk::Perigee> Reco::TrackToVertex::perigeeAtVertex(const EventCo
   Trk::PerigeeSurface persf(gp);
   std::unique_ptr<Trk::Perigee> vertexPerigee;
   std::unique_ptr<Trk::TrackParameters> extrapResult =
-    m_extrapolator->extrapolateTrack(ctx,track, persf);
+     !startAtOriginalPerigee(track)
+     ? m_extrapolator->extrapolateTrack(ctx,track, persf)
+     : m_extrapolator->extrapolate(ctx, *(track.perigeeParameters()), persf);
   if (extrapResult && extrapResult->surfaceType() == Trk::SurfaceType::Perigee) {
     vertexPerigee.reset( static_cast<Trk::Perigee*>(extrapResult.release()));
   }
@@ -181,7 +182,9 @@ Reco::TrackToVertex::perigeeAtBeamline(
 
   std::unique_ptr<Trk::Perigee> vertexPerigee;
   std::unique_ptr<Trk::TrackParameters> extrapResult =
-    m_extrapolator->extrapolateTrack(ctx,track, persf);
+     !startAtOriginalPerigee(track)
+     ? m_extrapolator->extrapolateTrack(ctx,track, persf)
+     : m_extrapolator->extrapolate(ctx,*(track.perigeeParameters()), persf);
   if (extrapResult && extrapResult->surfaceType() == Trk::SurfaceType::Perigee) {
     vertexPerigee.reset(static_cast<Trk::Perigee*>(extrapResult.release()));
   }
@@ -263,7 +266,9 @@ std::unique_ptr<Trk::TrackParameters> Reco::TrackToVertex::trackAtBeamline(const
 std::unique_ptr<Trk::TrackParameters> Reco::TrackToVertex::trackAtBeamline(const EventContext& ctx, const Trk::Track& trk,
                                 const Trk::StraightLineSurface* beamline) const
 {
-  return m_extrapolator->extrapolateTrack(ctx, trk, *beamline);
+  return !startAtOriginalPerigee(trk)
+     ? m_extrapolator->extrapolateTrack(ctx, trk, *beamline)
+     : m_extrapolator->extrapolate(ctx,*(trk.perigeeParameters()), *beamline);
 }
 
 std::unique_ptr<Trk::TrackParameters> Reco::TrackToVertex::trackAtBeamline(const EventContext& ctx, const Trk::TrackParameters& tpars,

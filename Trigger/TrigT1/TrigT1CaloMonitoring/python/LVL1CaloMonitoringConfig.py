@@ -22,7 +22,13 @@ class L1CaloMonitorCfgHelper(object):
     @staticmethod
     def printHanConfig(filename="collisions_run.config"):
         from contextlib import redirect_stdout
+        from PathResolver import PathResolver
+        header = PathResolver.FindCalibFile("TrigT1CaloMonitoring/hanConfig_header.txt")
         with open(filename,'w') as f:
+            # copy the header if we have one
+            if header != "":
+                with open(header,'r') as fh:
+                    for line in fh: f.write(line)
             with redirect_stdout(f):
                 # Note: common configs (see common dir in DataQualityConfiguration) provides following algorithms by default:
                 #     algorithm All_Bins_Filled
