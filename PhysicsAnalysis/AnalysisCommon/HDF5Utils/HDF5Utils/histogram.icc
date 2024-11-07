@@ -217,7 +217,7 @@ namespace H5Utils::hist {
       const std::string& name,
       const auto& func) {
       auto flat = get_flat_hist_array<T>(hist, func);
-      assert(space.getSelectNpoints() == flat.size());
+      assert(static_cast<std::size_t>(space.getSelectNpoints()) == flat.size());
       H5::DataSet dataset = group.createDataSet(
         name,
         type,
