@@ -1,6 +1,7 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-  */
+*/
+
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 
@@ -20,21 +21,23 @@
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 
-#include "MeasurementSelector.h"
+#include "src/detail/MeasurementSelector.h"
 #include "ActsEvent/TrackContainer.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "xAODInDetMeasurement/HGTDClusterContainer.h"
 
-#include "AtlasUncalibSourceLinkAccessor.h"
-#include "IMeasurementSelector.h"
-#include "CalibratorRegistry.h"
-#include "MeasurementCalibrator2.h"
+#include "src/detail/AtlasUncalibSourceLinkAccessor.h"
+#include "src/IMeasurementSelector.h"
+#include "src/detail/CalibratorRegistry.h"
+#include "src/detail/MeasurementCalibrator2.h"
 
 #include "boost/container/small_vector.hpp"
 
 #include <tuple>
 #include <type_traits>
+
+#include "src/detail/AtlasMeasurementSelector.h"
 
 template <std::size_t NMeasMax, typename traj_t, typename measurement_container_variant_t>
 struct AtlasMeasurementSelector;
@@ -136,7 +139,7 @@ struct MeasurementSelectorTraits<  AtlasMeasurementSelector<NMeasMax, traj_t, me
    using BoundState = std::tuple<BoundTrackParameters, BoundMatrix, double>;
 
    // maximum dimension of measurements determined from the measurement "container" variant
-   static const std::size_t s_dimMax = ActsTrk::AtlasMeasurementContainerList::getMeasurementDimMax();
+  static const std::size_t s_dimMax = ActsTrk::detail::AtlasMeasurementContainerList::getMeasurementDimMax();
 
    // must be the same as what is used for the CKF
    static constexpr std::size_t s_maxBranchesPerSurface = 10;
@@ -278,7 +281,7 @@ namespace {
                = AtlasMeasurementSelector<
                      gAbsoluteMaxBranchesPerSurface,
                      typename track_container_t::TrackStateContainerBackend,
-                     ActsTrk::AtlasMeasurementContainerList::measurement_container_variant_t
+                     ActsTrk::detail::AtlasMeasurementContainerList::measurement_container_variant_t
                      // where measurement_container_variant_t is e.g.
                      //   variant<  ContainerRefWithDim<xAOD::PixelClusterContainer,2>, ... >
                     >;
@@ -325,7 +328,7 @@ namespace {
    };
 }
 
-namespace ActsTrk {
+namespace ActsTrk::detail {
 // return a configured, wrapper for the measurement selector
 std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const ActsTrk::IOnBoundStateCalibratorTool *onTrackCalibratorTool,
                                                                        const std::vector<float> &etaBinsf,
@@ -336,7 +339,7 @@ std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const Act
     ActsTrk::MeasurementCalibrator2 atl_measurement_calibrator(onTrackCalibratorTool);
     using AtlMeasurementSelectorCuts = AtlasMeasurementSelectorCuts;
 
-    using AtlMeasurementSelector = AtlasActsMeasurmentSelector<ActsTrk::UncalibSourceLinkAccessor::Iterator, RecoTrackContainer>;
+    using AtlMeasurementSelector = AtlasActsMeasurmentSelector<ActsTrk::detail::UncalibSourceLinkAccessor::Iterator, RecoTrackContainer>;
     using AtlMeasurementSelectorConfig = AtlMeasurementSelector::TheAtlasMeasurementSelector::Config;
 
     std::unique_ptr<ActsTrk::IMeasurementSelector>

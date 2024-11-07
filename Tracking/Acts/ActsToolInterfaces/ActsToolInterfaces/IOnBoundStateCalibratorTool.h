@@ -36,8 +36,8 @@ public:
                                        const Acts::CalibrationContext&,
                                        const xAOD::StripCluster &,
                                        const Acts::BoundTrackParameters &)>;
-      PixelCalibrator pixel_calibrator;
-      StripCalibrator strip_calibrator;
+  PixelCalibrator pixelCalibrator;
+  StripCalibrator stripCalibrator;
    virtual void connectPixelCalibrator([[maybe_unused]] PixelCalibrator &calibrator) const {}
    virtual void connectStripCalibrator([[maybe_unused]] StripCalibrator &calibrator) const {}
 

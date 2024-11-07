@@ -10,7 +10,7 @@
 #include <PixelReadoutGeometry/PixelModuleDesign.h>
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 
-namespace ActsTrk {
+namespace ActsTrk::detail {
 
 template <typename calib_data_t, typename traj_t>
 AnalogueClusteringToolImpl<calib_data_t, traj_t>::AnalogueClusteringToolImpl(
@@ -324,11 +324,11 @@ void AnalogueClusteringToolImpl<calib_data_t, traj_t>::connect(OnTrackCalibrator
                                                              const xAOD::PixelCluster&,
                                                              const TrackStateProxy&) const;
 
-   calibrator.pixel_calibrator. template connect<static_cast<CalibFuncPtr_t>(&AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrate)>(this);
+   calibrator.pixelCalibrator. template connect<static_cast<CalibFuncPtr_t>(&AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrate)>(this);
 }
 
 template <typename calib_data_t, typename traj_t>
-void AnalogueClusteringToolImpl<calib_data_t, traj_t>::connectPixelCalibrator(IOnBoundStateCalibratorTool::PixelCalibrator& pixel_calibrator) const
+void AnalogueClusteringToolImpl<calib_data_t, traj_t>::connectPixelCalibrator(IOnBoundStateCalibratorTool::PixelCalibrator& pixelCalibrator) const
 {
    using CalibFuncPtr_t =
       std::pair<typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Pos,
@@ -338,8 +338,12 @@ void AnalogueClusteringToolImpl<calib_data_t, traj_t>::connectPixelCalibrator(IO
                                                              const xAOD::PixelCluster&,
                                                              const Acts::BoundTrackParameters&) const;
 
-   pixel_calibrator. template connect<static_cast<CalibFuncPtr_t>(&AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrate)>(this);
+   pixelCalibrator.template connect<static_cast<CalibFuncPtr_t>(&AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrate)>(this);
 }
+
+template <typename calib_data_t, typename traj_t>
+bool AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrateAfterMeasurementSelection() const
+{ return m_postCalibration.value(); }
 
 } // namespace ActsTrk
 

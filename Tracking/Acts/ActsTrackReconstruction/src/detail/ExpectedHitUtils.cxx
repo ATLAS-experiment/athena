@@ -3,14 +3,14 @@
 */
 
 #include "ActsGeometry/ActsDetectorElement.h"
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 
 #include "ExpectedHitUtils.h"
 
-namespace ActsTrk {
+namespace ActsTrk::detail {
+
    std::array<unsigned int,4> expectedLayerPattern(const EventContext& ctx,
                                                    const IActsExtrapolationTool &extrapolator,
                                                    Acts::BoundTrackParameters perigee_parameters,
@@ -50,4 +50,5 @@ namespace ActsTrk {
       }
       return expected_layer_pattern;
    }
+
 }

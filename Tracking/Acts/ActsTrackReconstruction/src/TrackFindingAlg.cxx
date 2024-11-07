@@ -3,7 +3,7 @@
 */
 #include "src/TrackFindingAlg.h"
 #include "Acts/Propagator/PropagatorOptions.hpp"
-#include "src/FitterHelperFunctions.h"
+#include "src/detail/FitterHelperFunctions.h"
 
 // Athena
 #include "AsgTools/ToolStore.h"
@@ -36,8 +36,8 @@
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsInterop/Logger.h"
 #include "ActsInterop/TableUtils.h"
-#include "AtlasMeasurementSelector.h"
-#include "src/OnTrackCalibrator.h"
+#include "src/detail/AtlasMeasurementSelector.h"
+#include "src/detail/OnTrackCalibrator.h"
 
 // STL
 #include <sstream>
@@ -223,7 +223,7 @@ namespace ActsTrk
 
     m_trackFinder = std::make_unique<CKF_pimpl>(std::move(ckfConfig));
 
-    trackFinder().ckfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<detail::RecoTrackStateContainer>>();
+    trackFinder().ckfExtensions.updater.connect<&ActsTrk::detail::FitterHelperFunctions::gainMatrixUpdate<detail::RecoTrackStateContainer>>();
     trackFinder().ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<detail::RecoTrackStateContainer>>(&trackFinder().measurementSelector);
     initStatTables();
 
@@ -399,11 +399,11 @@ namespace ActsTrk
     // CalibrationContext converter not implemented yet.
     Acts::CalibrationContext calContext = Acts::CalibrationContext();
 
-    using AtlUncalibSourceLinkAccessor = UncalibSourceLinkAccessor;
+    using AtlUncalibSourceLinkAccessor = detail::UncalibSourceLinkAccessor;
 
     AtlUncalibSourceLinkAccessor slAccessor(measurements.measurementRanges());
-    Acts::SourceLinkAccessorDelegate<UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
-    slAccessorDelegate.connect<&UncalibSourceLinkAccessor::range>(&slAccessor);
+    Acts::SourceLinkAccessorDelegate<detail::UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
+    slAccessorDelegate.connect<&detail::UncalibSourceLinkAccessor::range>(&slAccessor);
 
     Acts::PropagatorPlainOptions plainOptions{tgContext, mfContext};
     Acts::PropagatorPlainOptions plainSecondOptions{tgContext, mfContext};
@@ -415,7 +415,7 @@ namespace ActsTrk
     plainSecondOptions.direction = plainOptions.direction.invert();
 
     // Set the CombinatorialKalmanFilter options
-    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<UncalibSourceLinkAccessor::Iterator, detail::RecoTrackContainer>;
+    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<detail::UncalibSourceLinkAccessor::Iterator, detail::RecoTrackContainer>;
     TrackFinderOptions options(tgContext,
                                mfContext,
                                calContext,
@@ -452,17 +452,17 @@ namespace ActsTrk
     // N.B. OnTrackCalibrator expects disabled tool handles when no calibration is requested.
     // Therefore, passing them without checking if they are enabled is safe.
 
-    auto calibrator = OnTrackCalibrator<detail::RecoTrackStateContainer>(trackingGeometry,
-                                                                         detectorElementToGeoId,
-                                                                         m_pixelCalibTool,
-                                                                         m_stripCalibTool);
-
+    auto calibrator = detail::OnTrackCalibrator<detail::RecoTrackStateContainer>(trackingGeometry,
+										 detectorElementToGeoId,
+										 m_pixelCalibTool,
+										 m_stripCalibTool);
+    
     if (m_useDefaultMeasurementSelector.value()) {
-       // for default measurement selector need connect calibrator
-       options.extensions.calibrator.connect<&OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
-       if (m_doTwoWay) {
-          secondOptions->extensions.calibrator.connect<&OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
-       }
+      // for default measurement selector need connect calibrator
+      options.extensions.calibrator.connect<&detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
+      if (m_doTwoWay) {
+	secondOptions->extensions.calibrator.connect<&detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
+      }
     }
 
     const auto &trackSelectorCfg = trackFinder().trackSelector.config();
@@ -1071,10 +1071,10 @@ namespace ActsTrk
       etaBinsf.assign(m_etaBins.begin() + 1, m_etaBins.end() - 1);
     }
 
-    m_measurementSelector = ActsTrk::getMeasurementSelector(m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
-                                                            etaBinsf,
-                                                            chi2CutOffOutlier,
-                                                            m_numMeasurementsCutOff.value());
+    m_measurementSelector = ActsTrk::detail::getMeasurementSelector(m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
+								    etaBinsf,
+								    chi2CutOffOutlier,
+								    m_numMeasurementsCutOff.value());
 
     return m_measurementSelector ? StatusCode::SUCCESS : StatusCode::FAILURE;
   }

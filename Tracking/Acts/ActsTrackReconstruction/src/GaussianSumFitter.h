@@ -31,8 +31,8 @@
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
-#include "FitterHelperFunctions.h"
-#include "MeasurementCalibrator.h"
+#include "src/detail/FitterHelperFunctions.h"
+#include "src/detail/MeasurementCalibrator.h"
 #include "ActsGeometry/ATLASSourceLinkSurfaceAccessor.h"
 
 // STL
@@ -181,7 +181,7 @@ private:
   ATLASSourceLinkSurfaceAccessor m_surfaceAccessor{};
   Acts::GsfExtensions<ActsTrk::MutableTrackStateBackend> m_gsfExtensions;
 
-  ActsTrk::FitterHelperFunctions::ATLASOutlierFinder m_outlierFinder{0};
+  ActsTrk::detail::FitterHelperFunctions::ATLASOutlierFinder m_outlierFinder{0};
 
   /// logging instance
   std::unique_ptr<const Acts::Logger> m_logger;

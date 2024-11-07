@@ -10,15 +10,14 @@
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "xAODInDetMeasurement/HGTDClusterContainer.h"
 
-
-// #include "MakeDerivedVariant.h"
-#include "MeasurementContainerWithDimension.h"
+#include "src/detail/MeasurementContainerWithDimension.h"
 #include <variant>
 #include <vector>
 #include <unordered_map>
 #include <utility>
 
-namespace ActsTrk {
+namespace ActsTrk::detail {
+  
 // Helper class to describe ranges of measurements
 // the range provides the measurement collection index and  element index range (begin, end)
   struct MeasurementRange : public std::pair<unsigned int, unsigned int>
@@ -206,4 +205,5 @@ namespace ActsTrk {
   using UncalibSourceLinkAccessor = GenUncalibSourceLinkAccessor< MeasurementRangeList >;
 
 }
+
 #endif

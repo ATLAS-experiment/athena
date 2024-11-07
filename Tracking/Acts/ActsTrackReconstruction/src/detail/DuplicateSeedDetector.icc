@@ -1,0 +1,35 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+namespace ActsTrk::detail {
+
+  inline bool DuplicateSeedDetector::isEnabled() const
+  { return not m_disabled; };
+
+  inline const std::unordered_multimap<const xAOD::UncalibratedMeasurement *, std::size_t>&
+  DuplicateSeedDetector::seedIndexes() const
+  { return m_seedIndexes; }
+  
+  inline const std::vector<std::size_t>& DuplicateSeedDetector::nUsedMeasurements() const
+  { return m_nUsedMeasurements; }
+  
+  inline const std::vector<std::size_t>& DuplicateSeedDetector::nSeedMeasurements() const
+  { return m_nSeedMeasurements; }
+  
+  inline const std::vector<bool>& DuplicateSeedDetector::isDuplicateSeeds() const
+  { return m_isDuplicateSeeds; }
+  
+  inline const std::vector<std::size_t>& DuplicateSeedDetector::seedOffsets() const
+  { return m_seedOffsets; }
+  
+  inline std::size_t DuplicateSeedDetector::numSeeds() const
+  { return m_numSeeds; }
+  
+  inline std::size_t DuplicateSeedDetector::nextSeeds() const
+  { return m_nextSeeds; }
+  
+  inline std::size_t DuplicateSeedDetector::foundSeeds() const
+  { return m_foundSeeds; }
+  
+}

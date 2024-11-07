@@ -37,6 +37,7 @@
 #include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
 
 #include "ActsEvent/TrackContainer.h"
+
 // PACKAGE
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
@@ -45,6 +46,7 @@
 #include "ActsInterop/Logger.h"
 
 #include "Acts/Propagator/DirectNavigator.hpp"
+#include "src/detail/OnTrackCalibrator.h"
 
 // STL
 #include <vector>
@@ -210,10 +212,10 @@ StatusCode KalmanFitter::initialize() {
   m_outlierFinder.StateChiSquaredPerNumberDoFCut = m_option_outlierChi2Cut;
   m_reverseFilteringLogic.momentumMax = m_option_ReverseFilteringPt;
 
-  m_kfExtensions.outlierFinder.connect<&ActsTrk::FitterHelperFunctions::ATLASOutlierFinder::operator()<ActsTrk::MutableTrackStateBackend>>(&m_outlierFinder);
-  m_kfExtensions.reverseFilteringLogic.connect<&ActsTrk::FitterHelperFunctions::ReverseFilteringLogic::operator()<ActsTrk::MutableTrackStateBackend>>(&m_reverseFilteringLogic);
-  m_kfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::MutableTrackStateBackend>>();
-  m_kfExtensions.smoother.connect<&ActsTrk::FitterHelperFunctions::mbfSmoother<ActsTrk::MutableTrackStateBackend>>();
+  m_kfExtensions.outlierFinder.connect<&ActsTrk::detail::FitterHelperFunctions::ATLASOutlierFinder::operator()<ActsTrk::MutableTrackStateBackend>>(&m_outlierFinder);
+  m_kfExtensions.reverseFilteringLogic.connect<&ActsTrk::detail::FitterHelperFunctions::ReverseFilteringLogic::operator()<ActsTrk::MutableTrackStateBackend>>(&m_reverseFilteringLogic);
+  m_kfExtensions.updater.connect<&ActsTrk::detail::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::MutableTrackStateBackend>>();
+  m_kfExtensions.smoother.connect<&ActsTrk::detail::FitterHelperFunctions::mbfSmoother<ActsTrk::MutableTrackStateBackend>>();
   m_kfExtensions.calibrator.connect<&TrkMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(m_calibrator.get());
 
   return StatusCode::SUCCESS;
@@ -472,10 +474,10 @@ KalmanFitter::fit(const EventContext&,
   ActsTrk::ATLASUncalibSourceLinkSurfaceAccessor surfaceAccessor( *actsTrackingGeometry, detectorElementToGeometryIdMap);
   kfExtensions.surfaceAccessor.connect<&ActsTrk::ATLASUncalibSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
 
-  OnTrackCalibrator calibrator = OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>
-      ::NoCalibration(*actsTrackingGeometry, detectorElementToGeometryIdMap);
+  detail::OnTrackCalibrator calibrator = detail::OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>
+    ::NoCalibration(*actsTrackingGeometry, detectorElementToGeometryIdMap);
 
-  kfExtensions.calibrator.connect<&OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>::calibrate>(&calibrator);
+  kfExtensions.calibrator.connect<&detail::OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>::calibrate>(&calibrator);
    
   Acts::PropagatorPlainOptions propagationOption(tgContext, mfContext);
   propagationOption.maxSteps = m_option_maxPropagationStep;

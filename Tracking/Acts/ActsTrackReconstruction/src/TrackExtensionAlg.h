@@ -35,7 +35,9 @@
 // Handle Keys
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 #include "StoreGate/WriteHandleKey.h"
-#include "TrackFindingData.h"
+#include "src/detail/Definitions.h"
+#include "src/detail/DuplicateSeedDetector.h"
+#include "src/detail/TrackFindingMeasurements.h"
 #include "src/TrackStatePrinter.h"
 
 /**
@@ -51,7 +53,7 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& context) const override;
   using CKFOptions = Acts::CombinatorialKalmanFilterOptions<
-      ActsTrk::UncalibSourceLinkAccessor::Iterator, detail::RecoTrackContainer>;
+    ActsTrk::detail::UncalibSourceLinkAccessor::Iterator, detail::RecoTrackContainer>;
 
  private:
   SG::ReadHandleKey<xAOD::PixelClusterContainer> m_pixelClusters{

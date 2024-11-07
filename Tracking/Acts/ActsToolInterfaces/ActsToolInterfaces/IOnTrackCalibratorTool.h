@@ -9,17 +9,19 @@
 
 namespace ActsTrk {
 
-template <typename traj_t>
-class OnTrackCalibrator;
-
-template <typename traj_t>
-class IOnTrackCalibratorTool : virtual public IOnBoundStateCalibratorTool {
-public:
+  namespace detail {
+    template <typename traj_t>
+    class OnTrackCalibrator;
+  }
+  
+  template <typename traj_t>
+  class IOnTrackCalibratorTool : virtual public IOnBoundStateCalibratorTool {
+  public:
     DeclareInterfaceID(IOnTrackCalibratorTool, 1, 0);
-
-    virtual void connect(OnTrackCalibrator<traj_t>& calibrator) const = 0;
-};
-
+    
+    virtual void connect(detail::OnTrackCalibrator<traj_t>& calibrator) const = 0;
+  };
+  
 } // namespace ActsTrk
 
 #endif

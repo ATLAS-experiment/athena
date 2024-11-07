@@ -9,9 +9,9 @@
 #include "xAODMeasurementBase/MeasurementDefs.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 
-#include "HitSummaryDataUtils.h"
+#include "src/detail/HitSummaryDataUtils.h"
 
-namespace ActsTrk {
+namespace ActsTrk::detail {
 
   void gatherTrackSummaryData(const ActsTrk::TrackContainer &tracksContainer,
                               const typename ActsTrk::TrackContainer::ConstTrackProxy &track,

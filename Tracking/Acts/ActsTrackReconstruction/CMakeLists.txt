@@ -8,7 +8,7 @@ find_package( Acts COMPONENTS Core )
 find_package( Boost )
 
 atlas_add_component( ActsTrackReconstruction
-                     src/*.h src/*.cxx
+                     src/*.h src/*.cxx src/detail/*.h src/detail/*.cxx
                      src/components/*.cxx
 		     INCLUDE_DIRS
 		       ${Boost_INCLUDE_DIRS}
@@ -26,8 +26,8 @@ atlas_add_component( ActsTrackReconstruction
 		       BeamSpotConditionsData
 		       GaudiKernel
 		       GeoPrimitives
-			HGTD_PrepRawData
-			HGTD_RIO_OnTrack
+		       HGTD_PrepRawData
+		       HGTD_RIO_OnTrack
 		       Identifier
 		       InDetIdentifier
 		       InDetPrepRawData
@@ -54,6 +54,15 @@ atlas_add_component( ActsTrackReconstruction
 		       xAODInDetMeasurement
 		       xAODMeasurementBase
 		       xAODTracking
-			   PathResolver
+		       PathResolver
                      )
+		     
+atlas_add_test ( TrackFindingMeasurementsTest
+  SOURCES test/TrackFindingMeasurementsTest.cxx src/detail/TrackFindingMeasurements.cxx
+  LINK_LIBRARIES ActsEventLib xAODInDetMeasurement
+  POST_EXEC_SCRIPT nopost.sh )
 
+atlas_add_test ( DuplicateSeedDetectorTest
+  SOURCES test/DuplicateSeedDetectorTest.cxx src/detail/DuplicateSeedDetector.cxx
+  LINK_LIBRARIES ActsEventLib ActsEventCnvLib xAODInDetMeasurement
+  POST_EXEC_SCRIPT nopost.sh)
