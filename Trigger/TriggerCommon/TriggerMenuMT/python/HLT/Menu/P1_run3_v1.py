@@ -561,6 +561,9 @@ def addHeavyIonP1Signatures(chains):
     chainsP1['Calib'] = [
         #---- ID calib trigger with VTE to avoid busy tracking in central events
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1jJ30_VjTE200', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1VZDC_A_VZDC_C_jTE10_VjTE200', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1ZDC_XOR_jTE10_VjTE200', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L11ZDC_NZDC_jTE10_VjTE200', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
 
         # # 'ZDCCalib' stream
         # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_OR_LHCF', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['RATE:Calibration','BW:Detector']),
