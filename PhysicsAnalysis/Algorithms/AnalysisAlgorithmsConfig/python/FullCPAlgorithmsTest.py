@@ -15,6 +15,7 @@ triggerChainsPerYear = {
     '2017': ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_2g22_tight_L12EM15VHI', 'HLT_mu50'],
     '2018': ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_g35_medium_g25_medium_L12EM20VH', 'HLT_mu26_ivarmedium', 'HLT_2mu14'],
     '2022': ['HLT_e26_lhtight_ivarloose_L1EM22VHI || HLT_e60_lhmedium_L1EM22VHI || HLT_e140_lhloose_L1EM22VHI'],
+    '2023': ['HLT_e26_lhtight_ivarloose_L1EM22VHI || HLT_e60_lhmedium_L1EM22VHI || HLT_e140_lhloose_L1EM22VHI'],
 }
 triggerChains = [
     'HLT_2mu14',
@@ -395,9 +396,8 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
         configSeq.setOptionValue ('.outputName', 'OutTrackJets')
 
     # disabling comparisons for triggers, because the config blocks do a
-    # lot more than the sequences.  also disabling for Run 4, not sure
-    # what the issue with that is.
-    if not forCompare and geometry is not LHCPeriod.Run4:
+    # lot more than the sequences. Also disabling for Run 3+4, as there is no SF yet
+    if not forCompare and geometry is LHCPeriod.Run2:
         # Include, and then set up the trigger analysis sequence:
         configSeq += config.makeConfig( 'Trigger' )
         configSeq.setOptionValue ('.triggerChainsPerYear', triggerChainsPerYear )

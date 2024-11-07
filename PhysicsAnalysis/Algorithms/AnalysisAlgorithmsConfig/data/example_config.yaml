@@ -143,6 +143,8 @@ Trigger:
             - 'HLT_2mu14'
         '2022':
             - 'HLT_e26_lhtight_ivarloose_L1EM22VHI || HLT_e60_lhmedium_L1EM22VHI || HLT_e140_lhloose_L1EM22VHI'
+	'2023':
+            - 'HLT_e26_lhtight_ivarloose_L1EM22VHI || HLT_e60_lhmedium_L1EM22VHI || HLT_e140_lhloose_L1EM22VHI'
     noFilter: True
     electronID: 'Tight'
     electronIsol: 'Tight_VarRad'

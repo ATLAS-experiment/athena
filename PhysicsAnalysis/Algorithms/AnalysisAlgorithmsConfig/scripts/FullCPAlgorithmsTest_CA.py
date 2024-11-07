@@ -40,6 +40,9 @@ athArgsParser.add_argument('--no-systematics', dest='no_systematics',
 athArgsParser.add_argument('--physlite', dest='physlite',
                            action='store_true', default=False,
                            help='Run the job on physlite')
+athArgsParser.add_argument('--run', action='store', dest='run',
+                           default=2, type=int,
+                           help='Run number for the inputs')
 athArgsParser.add_argument('--only-nominal-or', dest='onlyNominalOR',
                            action='store_true', default=False,
                            help='Only run overlap removal for nominal (skip systematics)')
@@ -52,13 +55,23 @@ forCompare = athArgs.for_compare
 print(f"Running on data type: {dataType.value}")
 
 if athArgs.physlite:
-    inputfile = {DataType.Data:    'ASG_TEST_FILE_LITE_DATA',
-                 DataType.FullSim: 'ASG_TEST_FILE_LITE_MC',
-                 DataType.FastSim: 'ASG_TEST_FILE_LITE_MC_AFII'}
+    if athArgs.run==3:
+        inputfile = {DataType.Data:    'ASG_TEST_FILE_LITE_RUN3_DATA',
+                     DataType.FullSim: 'ASG_TEST_FILE_LITE_RUN3_MC',
+                     DataType.FastSim: 'ASG_TEST_FILE_LITE_RUN3_MC_FASTSIM'}
+    elif athArgs.run==2:
+        inputfile = {DataType.Data:    'ASG_TEST_FILE_LITE_DATA',
+                     DataType.FullSim: 'ASG_TEST_FILE_LITE_MC',
+                     DataType.FastSim: 'ASG_TEST_FILE_LITE_MC_FASTSIM'}
 else:
-    inputfile = {DataType.Data:    'ASG_TEST_FILE_DATA',
-                 DataType.FullSim: 'ASG_TEST_FILE_MC',
-                 DataType.FastSim: 'ASG_TEST_FILE_MC_AFII'}
+    if athArgs.run==3:
+        inputfile = {DataType.Data:    'ASG_TEST_FILE_RUN3_DATA',
+                     DataType.FullSim: 'ASG_TEST_FILE_RUN3_MC',
+                     DataType.FastSim: 'ASG_TEST_FILE_RUN3_MC_FASTSIM'}
+    elif athArgs.run==2:
+        inputfile = {DataType.Data:    'ASG_TEST_FILE_DATA',
+                     DataType.FullSim: 'ASG_TEST_FILE_MC',
+                     DataType.FastSim: 'ASG_TEST_FILE_MC_FASTSIM'}
 
 # Set up the reading of the input file:
 if athArgs.input_file:
