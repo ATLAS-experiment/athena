@@ -5,7 +5,7 @@
 #ifndef ACTSGEOMETRY_KALMANFITTER_H
 #define ACTSGEOMETRY_KALMANFITTER_H
 
-#include "FitterHelperFunctions.h"
+#include "src/detail/FitterHelperFunctions.h"
 
 #include "GaudiKernel/ToolHandle.h"
 
@@ -42,8 +42,7 @@
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 
-#include "MeasurementCalibrator.h"
-#include "OnTrackCalibrator.h"
+#include "src/detail/MeasurementCalibrator.h"
 
 // STL
 #include <string>
@@ -208,8 +207,8 @@ private:
 
     Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> m_kfExtensions;
 
-    ActsTrk::FitterHelperFunctions::ATLASOutlierFinder m_outlierFinder{0};
-    ActsTrk::FitterHelperFunctions::ReverseFilteringLogic m_reverseFilteringLogic{0};
+    ActsTrk::detail::FitterHelperFunctions::ATLASOutlierFinder m_outlierFinder{0};
+    ActsTrk::detail::FitterHelperFunctions::ReverseFilteringLogic m_reverseFilteringLogic{0};
 
   /// Private access to the logger
   const Acts::Logger& logger() const {

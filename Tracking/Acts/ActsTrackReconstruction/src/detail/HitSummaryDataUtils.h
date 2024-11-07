@@ -1,8 +1,9 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
+
 #ifndef ACTSTRK_HITSUMMARYDATAUTILS_H
-#define ACTSTRK_HITSUMMARYDATAUTILS_H 1
+#define ACTSTRK_HITSUMMARYDATAUTILS_H
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetIdentifier/PixelID.h"
@@ -17,7 +18,7 @@ namespace InDetDD {
    class SiDetectorElementCollection;
 }
 
-namespace ActsTrk {
+namespace ActsTrk::detail {
    /** @brief Helper to convert class enum into an integer.
     */
    template <typename T_EnumClass >

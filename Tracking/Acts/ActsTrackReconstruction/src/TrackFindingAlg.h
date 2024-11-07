@@ -49,7 +49,9 @@
 #include "StoreGate/CondHandleKeyArray.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h"
-#include "TrackFindingData.h"
+#include "src/detail/Definitions.h"
+#include "src/detail/DuplicateSeedDetector.h"
+#include "src/detail/TrackFindingMeasurements.h"
 
 namespace ActsTrk
 {

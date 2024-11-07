@@ -17,7 +17,8 @@
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 
-namespace ActsTrk::FitterHelperFunctions {
+namespace ActsTrk::detail::FitterHelperFunctions {
+  
   template<typename trajectory_t>
   Acts::Result<void> gainMatrixUpdate(const Acts::GeometryContext& gctx,
                     typename trajectory_t::TrackStateProxy trackState, 

@@ -1,14 +1,15 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
+
 #ifndef ACTSTRK_CURVILINEARCOVARIANCEHELPER_H
-#define ACTSTRK_CURVILINEARCOVARIANCEHELPER_H 1
+#define ACTSTRK_CURVILINEARCOVARIANCEHELPER_H
 
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Propagator/detail/JacobianEngine.hpp"
 
-namespace ActsTrk {
+namespace ActsTrk::detail {
    /** Helper function to compute dt/ds
     * Helper function to compute the derivative of the time as function of the path length
     */
@@ -84,4 +85,5 @@ namespace ActsTrk {
       }
    }
 }
+
 #endif

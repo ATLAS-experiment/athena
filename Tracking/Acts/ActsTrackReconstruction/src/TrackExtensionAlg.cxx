@@ -4,7 +4,7 @@
 #include "src/TrackExtensionAlg.h"
 #include "src/TrackFindingAlg.h"
 #include "Acts/Propagator/PropagatorOptions.hpp"
-#include "src/FitterHelperFunctions.h"
+#include "src/detail/FitterHelperFunctions.h"
 
 // Athena
 #include "AsgTools/ToolStore.h"
@@ -35,8 +35,8 @@
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsInterop/Logger.h"
 #include "ActsInterop/TableUtils.h"
-#include "AtlasMeasurementSelector.h"
-#include "src/OnTrackCalibrator.h"
+#include "src/detail/AtlasMeasurementSelector.h"
+#include "src/detail/OnTrackCalibrator.h"
 #include "ActsGeometry/SurfaceOfMeasurementUtil.h"
 
 // STL
@@ -136,9 +136,9 @@ namespace ActsTrk{
 
     detail::TrackFindingMeasurements measurements = collectMeasurements(context, **detectorElementToGeometryIdMap);
 
-    ActsTrk::UncalibSourceLinkAccessor slAccessor(measurements.measurementRanges());
-    Acts::SourceLinkAccessorDelegate<ActsTrk::UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
-    slAccessorDelegate.connect<&ActsTrk::UncalibSourceLinkAccessor::range>(&slAccessor);
+    ActsTrk::detail::UncalibSourceLinkAccessor slAccessor(measurements.measurementRanges());
+    Acts::SourceLinkAccessorDelegate<ActsTrk::detail::UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
+    slAccessorDelegate.connect<&ActsTrk::detail::UncalibSourceLinkAccessor::range>(&slAccessor);
 
     Acts::PropagatorPlainOptions plainOptions(tgContext, mfContext);
     plainOptions.maxSteps = 1000;
@@ -153,12 +153,12 @@ namespace ActsTrk{
                       plainOptions,
                       perigeeSurface.get());
 
-    auto calibrator = OnTrackCalibrator<detail::RecoTrackStateContainer>(
+    auto calibrator = detail::OnTrackCalibrator<detail::RecoTrackStateContainer>(
        *acts_tracking_geometry,
        **detectorElementToGeometryIdMap,
        m_pixelCalibTool,
        m_stripCalibTool);
-    options.extensions.calibrator.connect<&OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
+    options.extensions.calibrator.connect<&detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
     if ( not m_truthParticlesKey.empty() ) {
       auto truthHandle = SG::ReadHandle(m_truthParticlesKey, context);
       for ( auto truthParticle: *truthHandle ) {

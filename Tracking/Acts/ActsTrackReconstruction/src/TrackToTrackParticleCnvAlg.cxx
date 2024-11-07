@@ -18,9 +18,9 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
-#include "CurvilinearCovarianceHelper.h"
-#include "HitSummaryDataUtils.h"
-#include "ExpectedHitUtils.h"
+#include "src/detail/CurvilinearCovarianceHelper.h"
+#include "src/detail/HitSummaryDataUtils.h"
+#include "src/detail/ExpectedHitUtils.h"
 
 #include <tuple>
 #include <sstream>
@@ -91,13 +91,13 @@ namespace {
 
 namespace {
    // Create lut to map neasurement types (pixel and strips only) to hit summary types. 
-   std::array<unsigned short,ActsTrk::to_underlying(xAOD::UncalibMeasType::nTypes)> makeMeasurementToSummaryTypeMap() {
-      std::array<unsigned short,ActsTrk::to_underlying(xAOD::UncalibMeasType::nTypes)> ret;
+  std::array<unsigned short,ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::nTypes)> makeMeasurementToSummaryTypeMap() {
+    std::array<unsigned short,ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::nTypes)> ret;
       for (unsigned short &elm : ret) {
          elm = xAOD::numberOfTrackSummaryTypes;
       }
-      ret.at(ActsTrk::to_underlying(xAOD::UncalibMeasType::PixelClusterType)) = xAOD::numberOfPixelHits;
-      ret.at(ActsTrk::to_underlying(xAOD::UncalibMeasType::StripClusterType)) = xAOD::numberOfSCTHits;
+      ret.at(ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::PixelClusterType)) = xAOD::numberOfPixelHits;
+      ret.at(ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::StripClusterType)) = xAOD::numberOfSCTHits;
       return ret;
    }
 }
@@ -208,14 +208,14 @@ namespace ActsTrk
     std::shared_ptr<Acts::PerigeeSurface> perigee_surface = makePerigeeSurface(beamspot_data);    
     track_particles->reserve( nTracks );
 
-    std::array<const InDetDD::SiDetectorElementCollection *,to_underlying(xAOD::UncalibMeasType::nTypes)> siDetEleColl {};
+    std::array<const InDetDD::SiDetectorElementCollection *,ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::nTypes)> siDetEleColl {};
     for (unsigned int idx=0; idx <m_siDetEleCollToMeasurementType.size(); ++idx ) {
       SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> detHandle = SG::makeHandle( m_siDetEleCollKey[idx], ctx );
       ATH_CHECK(detHandle.isValid());
       siDetEleColl[m_siDetEleCollToMeasurementType[idx] ] = detHandle.cptr();
     }
 
-   static const std::array<unsigned short,to_underlying(xAOD::UncalibMeasType::nTypes)>
+    static const std::array<unsigned short, ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::nTypes)>
       measurementToSummaryType ATLAS_THREAD_SAFE (makeMeasurementToSummaryTypeMap());
 
 
@@ -226,7 +226,7 @@ namespace ActsTrk
     tmp_param_state_idx.reserve(30);
     Amg::Vector3D magnFieldVect;
     std::vector<std::vector<float>> parametersVec;
-    HitSummaryData hitInfo;
+    ActsTrk::detail::HitSummaryData hitInfo;
 
     unsigned int converted_track_states=0;
 
@@ -269,10 +269,10 @@ namespace ActsTrk
 	// @TODO add support for muons
 	
 	// xAOD::UncalibMeasType::underlying_type is expected to be the number of UncalibMeasTypes
-	std::array<std::array<uint8_t,to_underlying(HitCategory::N)>,
-		   to_underlying(xAOD::UncalibMeasType::nTypes)> specialHitCounts{};
+	std::array<std::array<uint8_t, ActsTrk::detail::to_underlying(ActsTrk::detail::HitCategory::N)>,
+		   ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::nTypes)> specialHitCounts{};
 	
-	SumOfValues chi2_stat;
+	ActsTrk::detail::SumOfValues chi2_stat;
 	gatherTrackSummaryData(*tracksContainer,
 			       track,
 			       siDetEleColl,
@@ -291,68 +291,67 @@ namespace ActsTrk
 	
 	// pixel summaries
 	std::array< std::tuple< uint8_t, uint8_t, uint8_t, bool >, 4> copy_summary {
-          std::make_tuple(static_cast<uint8_t>(HitSummaryData::pixelTotal),
+          std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelTotal),
                           static_cast<uint8_t>(xAOD::numberOfContribPixelLayers),
                           static_cast<uint8_t>(xAOD::numberOfPixelHits),
                           false),
 	  
-          std::make_tuple(static_cast<uint8_t>(HitSummaryData::pixelBarrelFlat),
+          std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat),
                           static_cast<uint8_t>(xAOD::numberOfContribPixelBarrelFlatLayers),
                           static_cast<uint8_t>(xAOD::numberOfPixelBarrelFlatHits),
                           true),
 
-          std::make_tuple(static_cast<uint8_t>(HitSummaryData::pixelBarrelInclined),
+          std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelBarrelInclined),
                           static_cast<uint8_t>(xAOD::numberOfContribPixelBarrelInclinedLayers),
                           static_cast<uint8_t>(xAOD::numberOfPixelBarrelInclinedHits),
                           true),
 
-          std::make_tuple(static_cast<uint8_t>(HitSummaryData::pixelEndcap),
+          std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelEndcap),
                           static_cast<uint8_t>(xAOD::numberOfContribPixelEndcap),
                           static_cast<uint8_t>(xAOD::numberOfPixelEndcapHits),\
                           true) };
 	
 	for (auto [src_region, dest_xaod_summary_layer, dest_xaod_summary_hits, add_outlier] : copy_summary ) {
           setSummaryValue(*track_particle,
-                          hitInfo.contributingLayers( static_cast<HitSummaryData::DetectorRegion>(src_region)),
+                          hitInfo.contributingLayers( static_cast<ActsTrk::detail::HitSummaryData::DetectorRegion>(src_region)),
                           static_cast<xAOD::SummaryType>(dest_xaod_summary_layer));
           setSummaryValue(*track_particle,
-			  hitInfo.contributingHits(static_cast<HitSummaryData::DetectorRegion>(src_region))
+			  hitInfo.contributingHits(static_cast<ActsTrk::detail::HitSummaryData::DetectorRegion>(src_region))
                           + ( add_outlier
-                              ? hitInfo.contributingOutlierHits(static_cast<HitSummaryData::DetectorRegion>(src_region))
+                              ? hitInfo.contributingOutlierHits(static_cast<ActsTrk::detail::HitSummaryData::DetectorRegion>(src_region))
                               : 0),
                           static_cast<xAOD::SummaryType>(dest_xaod_summary_hits));
 	}
 	setSummaryValue(*track_particle,
-                        hitInfo.sum<HitSummaryData::Hit>(HitSummaryData::pixelEndcap,0)
-			+hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,0),
+                        hitInfo.sum<ActsTrk::detail::HitSummaryData::Hit>(ActsTrk::detail::HitSummaryData::pixelEndcap,0)
+			+hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelEndcap,0),
 			xAOD::numberOfInnermostPixelLayerEndcapHits);
 	setSummaryValue(*track_particle,
-			hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,0),
+			hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelEndcap,0),
 			xAOD::numberOfInnermostPixelLayerEndcapOutliers);
 	setSummaryValue(*track_particle,
-                        hitInfo.sum<HitSummaryData::Hit>(HitSummaryData::pixelEndcap,1)
-			+hitInfo.sum<HitSummaryData::Hit>(HitSummaryData::pixelEndcap,2)
-			+hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,1)
-			+hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,2),
+                        hitInfo.sum<ActsTrk::detail::HitSummaryData::Hit>(ActsTrk::detail::HitSummaryData::pixelEndcap,1)
+			+hitInfo.sum<ActsTrk::detail::HitSummaryData::Hit>(ActsTrk::detail::HitSummaryData::pixelEndcap,2)
+			+hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelEndcap,1)
+			+hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelEndcap,2),
 			xAOD::numberOfNextToInnermostPixelLayerEndcapHits);
 	setSummaryValue(*track_particle,
-                        hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,1)
-			+hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,2),
+                        hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelEndcap,1)
+			+hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelEndcap,2),
 			xAOD::numberOfNextToInnermostPixelLayerEndcapOutliers);
 	setSummaryValue(*track_particle,
-			hitInfo.contributingOutlierHits(HitSummaryData::pixelTotal),
-			//                       specialHitCounts[to_underlying(xAOD::UncalibMeasType::PixelClusterType)][HitCategory::Outlier],
+			hitInfo.contributingOutlierHits(ActsTrk::detail::HitSummaryData::pixelTotal),
 			xAOD::numberOfPixelOutliers);
 	setSummaryValue(*track_particle,
-			specialHitCounts[to_underlying(xAOD::UncalibMeasType::PixelClusterType)][HitCategory::Hole],
+			specialHitCounts[ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::PixelClusterType)][ActsTrk::detail::HitCategory::Hole],
 			xAOD::numberOfPixelHoles);
 	// do not expect pixel hits if there are not contributing pixel hits in the flat barrel and expectIfPixelContributes is true
 	std::array<unsigned int,4> expect_layer_pattern = ((   !m_expectIfPixelContributes.value()
-							       || hitInfo.contributingLayers(HitSummaryData::pixelTotal))
-							   ? expectedLayerPattern(ctx,
-										  *m_extrapolationTool,
-										  perigeeParam,
-										  m_pixelExpectLayerPathLimitInMM.value() * Acts::UnitConstants::mm)
+							       || hitInfo.contributingLayers(ActsTrk::detail::HitSummaryData::pixelTotal))
+							   ? detail::expectedLayerPattern(ctx,
+											  *m_extrapolationTool,
+											  perigeeParam,
+											  m_pixelExpectLayerPathLimitInMM.value() * Acts::UnitConstants::mm)
 							   : std::array<unsigned int,4> {0u,0u, 0u,0u} );
 	
 	// @TODO consider end-caps  for inner most pixel hits ?
@@ -363,28 +362,27 @@ namespace ActsTrk
 			static_cast<uint8_t>((expect_layer_pattern[0] & (1<<1)) != 0 ),
 			xAOD::expectNextToInnermostPixelLayerHit);
 	setSummaryValue(*track_particle,
-			static_cast<unsigned int >(hitInfo.sum<HitSummaryData::Hit>(HitSummaryData::pixelBarrelFlat,0)),
+			static_cast<unsigned int >(hitInfo.sum<ActsTrk::detail::HitSummaryData::Hit>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat,0)),
 			xAOD::numberOfInnermostPixelLayerHits);
 	setSummaryValue(*track_particle,
-			static_cast<unsigned int >(hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelBarrelFlat,0)),
+			static_cast<unsigned int >(hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat,0)),
 			xAOD::numberOfInnermostPixelLayerOutliers);
 	setSummaryValue(*track_particle,
-			static_cast<unsigned int >(hitInfo.sum<HitSummaryData::Hit>(HitSummaryData::pixelBarrelFlat,1)),
+			static_cast<unsigned int >(hitInfo.sum<ActsTrk::detail::HitSummaryData::Hit>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat,1)),
 			xAOD::numberOfNextToInnermostPixelLayerHits);
 	setSummaryValue(*track_particle,
-			static_cast<unsigned int >(hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelBarrelFlat,1)),
+			static_cast<unsigned int >(hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat,1)),
 			xAOD::numberOfNextToInnermostPixelLayerOutliers);
 	
 	// Strip summaries
 	setSummaryValue(*track_particle,
-			hitInfo.contributingHits( HitSummaryData::stripTotal ),
+			hitInfo.contributingHits( ActsTrk::detail::HitSummaryData::stripTotal ),
 			xAOD::numberOfSCTHits);
 	setSummaryValue(*track_particle,
-			hitInfo.contributingOutlierHits( HitSummaryData::stripTotal ),
-			//                       specialHitCounts[to_underlying(xAOD::UncalibMeasType::StripClusterType)][HitCategory::Outlier],
+			hitInfo.contributingOutlierHits( ActsTrk::detail::HitSummaryData::stripTotal ),
 			xAOD::numberOfSCTOutliers);
 	setSummaryValue(*track_particle,
-			specialHitCounts[to_underlying(xAOD::UncalibMeasType::StripClusterType)][HitCategory::Hole],
+			specialHitCounts[ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::StripClusterType)][ActsTrk::detail::HitCategory::Hole],
 			xAOD::numberOfSCTHoles);
 	
 	double biased_chi2_variance = chi2_stat.biasedVariance();
@@ -395,8 +393,8 @@ namespace ActsTrk
 			xAOD::standardDeviationOfChi2OS);
 	
 	setSummaryValue(*track_particle,
-                        hitInfo.contributingOutlierHits( HitSummaryData::pixelTotal )
-			+hitInfo.contributingOutlierHits( HitSummaryData::stripTotal ),
+                        hitInfo.contributingOutlierHits( ActsTrk::detail::HitSummaryData::pixelTotal )
+			+hitInfo.contributingOutlierHits( ActsTrk::detail::HitSummaryData::stripTotal ),
 			xAOD::numberOfOutliersOnTrack);
 	
 	
@@ -440,7 +438,7 @@ namespace ActsTrk
                 magnFieldVect *= 1000_T;
              }
 
-             auto curvilinear_cov_result = convertActsBoundCovToCurvilinearParam(tgContext, actsParam, magnFieldVect, hypothesis);
+             auto curvilinear_cov_result = ActsTrk::detail::convertActsBoundCovToCurvilinearParam(tgContext, actsParam, magnFieldVect, hypothesis);
              if (curvilinear_cov_result.has_value()) {
                 Acts::BoundSquareMatrix &curvilinear_cov = curvilinear_cov_result.value();
 

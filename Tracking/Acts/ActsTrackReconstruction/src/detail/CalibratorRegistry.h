@@ -4,7 +4,8 @@
 #ifndef CALIBRATORREGISTRY_H
 #define CALIBRATORREGISTRY_H
 
-#include "MakeDerivedVariant.h"
+#include "src/detail/MakeDerivedVariant.h"
+
 // Helper class to store and retrieve calibrators for a certain measurement type and measurement dimension
 // this class only provides calibrators for types and associated dimension which are defined by the measurement container
 // and the associated dimension. The template parameter is assumed to be:
@@ -53,7 +54,7 @@ private:
       using type = Calibrator< T_ContainerWithDimension::dimension() , std::remove_cv_t<std::remove_pointer_t< value_type<T_ContainerWithDimension> > > >;
    };
 
-   using CalibratorVariant = MakeDerivedVariant::MakeVariant< CalibratorType, measurement_container_variant_t >::variant_type;
+  using CalibratorVariant = ActsTrk::detail::MakeDerivedVariant::MakeVariant< CalibratorType, measurement_container_variant_t >::variant_type;
 
    std::array< CalibratorVariant, std::variant_size_v<measurement_container_variant_t> > m_calibrators;
 
@@ -74,7 +75,7 @@ CalibratorRegistry<MeasurementTypeTraits, bound_track_parameters_t, measurement_
       return calibrator_arr[0];
    }
    else {
-      using Container = std::remove_cv_t<std::remove_pointer_t<decltype( MakeDerivedVariant::lvalue(std::get<N-1>(measurement_container_variant_t{})))> >;
+     using Container = std::remove_cv_t<std::remove_pointer_t<decltype( ActsTrk::detail::MakeDerivedVariant::lvalue(std::get<N-1>(measurement_container_variant_t{})))> >;
       // Container should be ContainerWithDimension<T>, needed is ContainerWithDimension<T>::contaienr_type
       using ElementType = typename MeasurementTypeTraits::template MeassurementContainerValueType<typename Container::container_type>;
       using BaseElementType = typename std::remove_cv_t<std::remove_pointer_t< ElementType > >;

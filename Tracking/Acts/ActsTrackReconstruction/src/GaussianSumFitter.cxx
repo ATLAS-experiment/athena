@@ -89,7 +89,7 @@ StatusCode GaussianSumFitter::initialize() {
 
   }
 
-  m_gsfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::MutableTrackStateBackend>>();
+  m_gsfExtensions.updater.connect<&ActsTrk::detail::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::MutableTrackStateBackend>>();
   m_calibrator = std::make_unique<TrkMeasurementCalibrator>(*m_ATLASConverterTool);
   m_gsfExtensions.calibrator.connect<&TrkMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(m_calibrator.get());
 
@@ -98,7 +98,7 @@ StatusCode GaussianSumFitter::initialize() {
   m_gsfExtensions.mixtureReducer.connect<&Acts::reduceMixtureWithKLDistance>();
   
   m_outlierFinder.StateChiSquaredPerNumberDoFCut = m_option_outlierChi2Cut;
-  m_gsfExtensions.outlierFinder.connect<&ActsTrk::FitterHelperFunctions::ATLASOutlierFinder::operator()<ActsTrk::MutableTrackStateBackend>>(&m_outlierFinder);
+  m_gsfExtensions.outlierFinder.connect<&ActsTrk::detail::FitterHelperFunctions::ATLASOutlierFinder::operator()<ActsTrk::MutableTrackStateBackend>>(&m_outlierFinder);
   if(m_option_componentMergeMethod == "eMean")
     m_componentMergeMethod = Acts::ComponentMergeMethod::eMean;
   else if(m_option_componentMergeMethod == "eMaxWeight"){

@@ -2,16 +2,15 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ONTRACKCALIBRATOR_H
-#define ONTRACKCALIBRATOR_H
+#ifndef ACTSTRACKRECONSTRUCTION_ONTRACKCALIBRATOR_H
+#define ACTSTRACKRECONSTRUCTION_ONTRACKCALIBRATOR_H
 
+#include "GaudiKernel/ToolHandle.h"
 
-#include <GaudiKernel/ToolHandle.h>
-
-#include "MeasurementCalibrator.h"
+#include "src/detail/MeasurementCalibrator.h"
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 
-namespace ActsTrk {
+namespace ActsTrk::detail {
 
 template <typename traj_t>
 class OnTrackCalibrator : MeasurementCalibratorBase {
@@ -34,8 +33,8 @@ public:
 				      const xAOD::StripCluster&,
 				      const TrackStateProxy&)>;
 
-    PixelCalibrator pixel_calibrator;
-    StripCalibrator strip_calibrator;
+    PixelCalibrator pixelCalibrator;
+    StripCalibrator stripCalibrator;
 
     static OnTrackCalibrator
     NoCalibration(const Acts::TrackingGeometry &trackingGeometry,
@@ -62,12 +61,12 @@ private:
 		const TrackStateProxy& state) const;
 
     // Helper to locate surfaces
-    const Acts::TrackingGeometry *m_trackingGeometry;
-    const ActsTrk::DetectorElementToActsGeometryIdMap *m_detectorElementToGeoId;
+    const Acts::TrackingGeometry *m_trackingGeometry {nullptr};
+    const ActsTrk::DetectorElementToActsGeometryIdMap *m_detectorElementToGeoId {nullptr};
 };
 
 } // namespace ActsTrk
 
-#include "OnTrackCalibrator.icc"
+#include "src/detail/OnTrackCalibrator.icc"
 
 #endif
