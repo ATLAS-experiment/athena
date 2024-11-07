@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Efficient pythonic CoraCool bindings
@@ -177,7 +177,7 @@ CoraCoolFolderPtr fetch_coracool_folder(IDatabasePtr cooldb, const string & fold
     CoraCoolDatabasePtr   coradb      = corasvc.openDatabase(
                                             cooldb->databaseId(), cooldb, true);
                                             
-    return coradb->getFolder(folder.c_str());
+    return coradb->getFolder(folder);
 }
 
 const cool::RecordSpecification 

@@ -485,8 +485,8 @@ public:
   reference( const reference& r ) : m_name(r.m_name), m_file(r.m_file), m_run(r.m_run) { } 
 
   
-  std::string name() const { return m_name; }
-  std::string file() const { return m_file; }
+  const std::string& name() const { return m_name; }
+  const std::string& file() const { return m_file; }
 
   int run() const { return m_run; }
 
