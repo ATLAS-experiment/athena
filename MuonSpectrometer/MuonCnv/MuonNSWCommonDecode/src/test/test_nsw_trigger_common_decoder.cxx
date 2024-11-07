@@ -379,6 +379,7 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
       // resize vectors
       unsigned int n_elinks = nsw_trigger_decoder.get_elinks().size();
       data.b_STGL1A_pad_BCID.resize(n_elinks);
+      data.b_STGL1A_pad_header.resize(n_elinks);
       data.b_STGL1A_pad_bandID_0.resize(n_elinks);
       data.b_STGL1A_pad_bandID_1.resize(n_elinks);
       data.b_STGL1A_pad_bandID_2.resize(n_elinks);
@@ -408,6 +409,7 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
       resize_segment(data.b_STGL1A_merge_RIndex_segments);
 
       data.b_STGL1A_merge_BCID.resize(n_elinks);
+      data.b_STGL1A_merge_header.resize(n_elinks);
       data.b_STGL1A_merge_sectorID.resize(n_elinks);
 
       resize_segment(data.b_STGL1A_mm_monitor_segments);
@@ -419,8 +421,11 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
       resize_segment(data.b_STGL1A_mm_RIndex_segments);
 
       data.b_STGL1A_mm_BCID.resize(n_elinks);
-
-      uint i = 0;
+      data.b_STGL1A_mm_header.resize(n_elinks);
+      uint i_pad   = 0;
+      uint i_mm    = 0;
+      uint i_merge = 0;
+      uint i_elink = 0;
       for (const auto& baseLink : nsw_trigger_decoder.get_elinks()) {
         const auto link = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerSTGL1AElink>(baseLink);
         data.b_STGL1A_ROD_sourceID.push_back(sid);
@@ -459,55 +464,72 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
         // pad block
         const auto& pad_packets = link->pad_packets();
         for (auto packet : pad_packets) {
-          data.b_STGL1A_pad_BCID[i].push_back(packet.BCID());
-          data.b_STGL1A_pad_bandID_0[i].push_back(packet.BandID(0));
-          data.b_STGL1A_pad_bandID_1[i].push_back(packet.BandID(1));
-          data.b_STGL1A_pad_bandID_2[i].push_back(packet.BandID(2));
-          data.b_STGL1A_pad_bandID_3[i].push_back(packet.BandID(3));
-          data.b_STGL1A_pad_phiID_0[i].push_back(packet.PhiID(0));
-          data.b_STGL1A_pad_phiID_1[i].push_back(packet.PhiID(1));
-          data.b_STGL1A_pad_phiID_2[i].push_back(packet.PhiID(2));
-          data.b_STGL1A_pad_coincidence_wedge[i].push_back(packet.CoincidenceWedge());
-          data.b_STGL1A_pad_phiID_3[i].push_back(packet.PhiID(3));
-          data.b_STGL1A_pad_idleFlag[i].push_back(packet.PadIdleFlag());
+          data.b_STGL1A_pad_BCID[i_pad].push_back(packet.BCID());
+          data.b_STGL1A_pad_header[i_pad].push_back(i_elink);
+          data.b_STGL1A_pad_bandID_0[i_pad].push_back(packet.BandID(0));
+          data.b_STGL1A_pad_bandID_1[i_pad].push_back(packet.BandID(1));
+          data.b_STGL1A_pad_bandID_2[i_pad].push_back(packet.BandID(2));
+          data.b_STGL1A_pad_bandID_3[i_pad].push_back(packet.BandID(3));
+          data.b_STGL1A_pad_phiID_0[i_pad].push_back(packet.PhiID(0));
+          data.b_STGL1A_pad_phiID_1[i_pad].push_back(packet.PhiID(1));
+          data.b_STGL1A_pad_phiID_2[i_pad].push_back(packet.PhiID(2));
+          data.b_STGL1A_pad_coincidence_wedge[i_pad].push_back(packet.CoincidenceWedge());
+          data.b_STGL1A_pad_phiID_3[i_pad].push_back(packet.PhiID(3));
+          data.b_STGL1A_pad_idleFlag[i_pad].push_back(packet.PadIdleFlag());
         }
         
         const auto& segment_packets = link->segment_packet();
         for (auto packet : segment_packets) {
-          data.b_STGL1A_merge_LUT_choiceSelection[i].push_back(packet.LUT_ChoiceSelection());
-          data.b_STGL1A_merge_nsw_segmentSelector[i].push_back(packet.NSW_SegmentSelector());
-          data.b_STGL1A_merge_valid_segmentSelector[i].push_back(packet.ValidSegmentSelector());
+          data.b_STGL1A_merge_LUT_choiceSelection[i_merge].push_back(packet.LUT_ChoiceSelection());
+          data.b_STGL1A_merge_nsw_segmentSelector[i_merge].push_back(packet.NSW_SegmentSelector());
+          data.b_STGL1A_merge_valid_segmentSelector[i_merge].push_back(packet.ValidSegmentSelector());
 
           for (std::size_t i_seg = 0; i_seg < Muon::nsw::STGTPSegments::num_segments; ++i_seg) {
-            data.b_STGL1A_merge_monitor_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).monitor);
-            data.b_STGL1A_merge_spare_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).spare);
-            data.b_STGL1A_merge_lowRes_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).lowRes);
-            data.b_STGL1A_merge_phiRes_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).phiRes);
-            data.b_STGL1A_merge_dTheta_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).dTheta);
-            data.b_STGL1A_merge_phiID_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).phiID);
-            data.b_STGL1A_merge_RIndex_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).rIndex);
+            data.b_STGL1A_merge_monitor_segments.at(i_seg).at(i_merge).push_back(packet.Segment(i_seg).monitor);
+            data.b_STGL1A_merge_spare_segments.at(i_seg).at(i_merge).push_back(packet.Segment(i_seg).spare);
+            data.b_STGL1A_merge_lowRes_segments.at(i_seg).at(i_merge).push_back(packet.Segment(i_seg).lowRes);
+            data.b_STGL1A_merge_phiRes_segments.at(i_seg).at(i_merge).push_back(packet.Segment(i_seg).phiRes);
+            data.b_STGL1A_merge_dTheta_segments.at(i_seg).at(i_merge).push_back(packet.Segment(i_seg).dTheta);
+            data.b_STGL1A_merge_phiID_segments.at(i_seg).at(i_merge).push_back(packet.Segment(i_seg).phiID);
+            data.b_STGL1A_merge_RIndex_segments.at(i_seg).at(i_merge).push_back(packet.Segment(i_seg).rIndex);
           }
 
-          data.b_STGL1A_merge_BCID[i].push_back(packet.BCID());
-          data.b_STGL1A_merge_sectorID[i].push_back(packet.SectorID());
+          data.b_STGL1A_merge_BCID[i_merge].push_back(packet.BCID());
+          data.b_STGL1A_merge_header[i_merge].push_back(i_elink);
+          data.b_STGL1A_merge_header[i_merge].push_back(i_elink);
+          data.b_STGL1A_merge_sectorID[i_merge].push_back(packet.SectorID());
 
         }  // end of merge packets
 
         const auto& mm_packets = link->mm_packet();
         for (auto packet : mm_packets) {
           for (std::size_t i_seg = 0; i_seg < Muon::nsw::STGTPMMData::num_mm; ++i_seg) {
-            data.b_STGL1A_mm_monitor_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).monitor);
-            data.b_STGL1A_mm_spare_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).spare);
-            data.b_STGL1A_mm_lowRes_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).lowRes);
-            data.b_STGL1A_mm_phiRes_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).phiRes);
-            data.b_STGL1A_mm_dTheta_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).dTheta);
-            data.b_STGL1A_mm_phiID_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).phiID);
-            data.b_STGL1A_mm_RIndex_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).rIndex);
+            data.b_STGL1A_mm_monitor_segments.at(i_seg).at(i_mm).push_back(packet.Segment(i_seg).monitor);
+            data.b_STGL1A_mm_spare_segments.at(i_seg).at(i_mm).push_back(packet.Segment(i_seg).spare);
+            data.b_STGL1A_mm_lowRes_segments.at(i_seg).at(i_mm).push_back(packet.Segment(i_seg).lowRes);
+            data.b_STGL1A_mm_phiRes_segments.at(i_seg).at(i_mm).push_back(packet.Segment(i_seg).phiRes);
+            data.b_STGL1A_mm_dTheta_segments.at(i_seg).at(i_mm).push_back(packet.Segment(i_seg).dTheta);
+            data.b_STGL1A_mm_phiID_segments.at(i_seg).at(i_mm).push_back(packet.Segment(i_seg).phiID);
+            data.b_STGL1A_mm_RIndex_segments.at(i_seg).at(i_mm).push_back(packet.Segment(i_seg).rIndex);
           }
-          data.b_STGL1A_mm_BCID[i].push_back(packet.BCID());
-
+          data.b_STGL1A_mm_BCID[i_mm].push_back(packet.BCID());
+          data.b_STGL1A_mm_header[i_mm].push_back(i_elink);
         }  // end of mm packets
-        i++;
+
+        //// indeces /////
+        if (pad_packets.size() > 0)
+        {
+           i_pad++;
+        }
+        if (segment_packets.size() > 0)
+        {
+           i_merge++;
+        }
+        if (mm_packets.size() > 0)
+        {
+           i_mm++;
+        }
+        i_elink++;
       }  // end of stgc elink loop
     }  // end of stgc l1a block
 
@@ -741,7 +763,6 @@ int test_nsw_trigger_common_decoder_loop_txt(Params& params, Statistics& statist
 
 
 int test_nsw_trigger_common_decoder_loop(Params& params, Statistics& statistics) {
-
   outBranches data;
 
   for (const std::string& filename : params.file_names) {
