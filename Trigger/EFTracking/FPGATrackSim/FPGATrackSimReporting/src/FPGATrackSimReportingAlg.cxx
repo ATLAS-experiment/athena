@@ -276,18 +276,27 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGARoads(SG::ReadHandle<FPGAT
         for (unsigned int i = 0; i < road.getNLayers(); ++i)
         {
             hitCounter = 0;
-            const std::vector <std::shared_ptr<const FPGATrackSimHit>>& hits = road.getHits(i);
+            const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits = road.getHits(i);
             for (auto const& hit : hits)
             {
-                ++hitCounter;
-                mainTable += std::format("|        | {:>9} | {:>6} | {:>8} | {:>13} | {:>13} | {:>13} | {:>7} |\n",
-                    (hit->isMapped() ? hit->getLayer() : 9999),
-                    hitCounter,
-                    (hit->isPixel() ? "Pixel" : hit->isStrip() ? "Strip" : "FAILED"),
-                    hit->getX(),
-                    hit->getY(),
-                    hit->getZ(),
-                    hit->isReal());
+                if (!hit) {
+                    ATH_MSG_WARNING("Null pointer for FPGATrackSimHit");
+                    continue;
+                }
+                try {
+                    ++hitCounter;
+                    mainTable += std::format("|        | {:>9} | {:>6} | {:>8} | {:>13} | {:>13} | {:>13} | {:>7} |\n",
+                        (hit->isMapped() ? hit->getLayer() : 9999),
+                        hitCounter,
+                        (hit->isPixel() ? "Pixel" : hit->isStrip() ? "Strip" : "FAILED"),
+                        hit->getX(),
+                        hit->getY(),
+                        hit->getZ(),
+                        hit->isReal());
+                } catch (const std::exception& e) {
+                    ATH_MSG_ERROR("Exception while processing FPGATrackSimHit: " << e.what());
+                }
+
             }
         }
         mainTable += "|--------------------------------------------------------------------------------------------------|\n";
@@ -315,7 +324,6 @@ void FPGATrackSim::FPGATrackSimReportingAlg::processFPGATracks(SG::ReadHandle<FP
 
 void FPGATrackSim::FPGATrackSimReportingAlg::printFPGATracks(SG::ReadHandle<FPGATrackSimTrackCollection>& FPGATracks) const
 {
-
     std::string maintable = "\n|--------------------------------------------------------------------------------------------------|\n";
     unsigned int trackCounter = 0;
     for (auto const& track : *FPGATracks)
@@ -324,14 +332,22 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGATracks(SG::ReadHandle<FPGA
         maintable += "|      # |     Eta      |     Phi      |       D0     |       Z0     |    QOverPt   |   chi2/ndf   |\n"
                      "|--------------------------------------------------------------------------------------------------|\n";
 
-        maintable += std::format("| {:>6} | {:>12.8f} | {:>12.8f} | {:>12.8f} | {:>12.5f} | {:>12.9f} | {:>12.8f} |\n",
-        trackCounter,
-        track.getEta(),
-        track.getPhi(),
-        track.getD0(),
-        track.getZ0(),
-        track.getQOverPt(),
-        track.getChi2ndof());
+        try
+        {
+            maintable += std::format("| {:>6} | {:>12.8f} | {:>12.8f} | {:>12.8f} | {:>12.5f} | {:>12.9f} | {:>12.8f} |\n",
+            trackCounter,
+            track.getEta(),
+            track.getPhi(),
+            track.getD0(),
+            track.getZ0(),
+            track.getQOverPt(),
+            track.getChi2ndof());
+        }
+        catch (const std::exception& e)
+        {
+            ATH_MSG_ERROR("Exception while processing FPGATrackSimTrack: " << e.what());
+            continue;
+        }
 
         maintable += "|__________________________________________________________________________________________________|\n"
                      "|        |    ##  |   type   | layer |             Global coordinates    | isReal |     HashID     |\n"
@@ -341,16 +357,20 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGATracks(SG::ReadHandle<FPGA
         unsigned int hitCounter = 0;
         for (auto const& hit : hits)
         {
-            ++hitCounter;
-            maintable += std::format("|        | {:>6} | {:>8} | {:>5} | {:>9.3f} | {:>9.3f} | {:>9.3f} | {:>6} | {:>14} |\n",
-            hitCounter,
-            (hit.isPixel() ? "Pixel" : hit.isStrip() ? "Strip" : "FAILED"),
-            hit.getLayer(),
-            hit.getX(),
-            hit.getY(),
-            hit.getZ(),
-            hit.isReal(),
-            hit.getIdentifierHash());
+            try {
+                ++hitCounter;
+                maintable += std::format("|        | {:>6} | {:>8} | {:>5} | {:>9.3f} | {:>9.3f} | {:>9.3f} | {:>6} | {:>14} |\n",
+                hitCounter,
+                (hit.isPixel() ? "Pixel" : hit.isStrip() ? "Strip" : "FAILED"),
+                hit.getLayer(),
+                hit.getX(),
+                hit.getY(),
+                hit.getZ(),
+                hit.isReal(),
+                hit.getIdentifierHash());
+            } catch (const std::exception& e) {
+                ATH_MSG_ERROR("Exception while processing FPGATrackSimHits: " << e.what());
+            }
         }
         maintable += "|--------------------------------------------------------------------------------------------------|\n";
     }

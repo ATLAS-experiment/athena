@@ -489,7 +489,7 @@ if __name__ == "__main__":
    
            # Reporting algorithm (used for debugging - can be disabled)
            from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
-           acc.merge(FPGATrackSimReportingCfg(flags,perEventReports=False))
+           acc.merge(FPGATrackSimReportingCfg(flags,perEventReports=True))
            
            # IDTPM running
            from InDetTrackPerfMon.InDetTrackPerfMonConfig import InDetTrackPerfMonCfg
