@@ -349,6 +349,8 @@ def MUON1Cfg(flags):
     StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData]   
     StaticContent += ["xAOD::VertexContainer#Muon1JpsiCandidates"]
     StaticContent += ["xAOD::VertexAuxContainer#Muon1JpsiCandidatesAux."+excludedVertexAuxData]
+    StaticContent += ["CaloCellContainer#DFMUONCellContainer"]
+    StaticContent += ["CaloClusterCellLinkContainer#MuonClusterCollection_links"]
     
     MUON1SlimmingHelper.StaticContent = StaticContent
     
@@ -379,6 +381,8 @@ def MUON1Cfg(flags):
     # Truth content
     if flags.Input.isMC:
         MUON1SlimmingHelper.AllVariables += ["TruthEvents", "TruthParticles", "TruthVertices", "MuonTruthParticles"]
+
+    MUON1SlimmingHelper.AllVariables += ["MuonClusterCollection"]
 
     # Trigger content
     MUON1SlimmingHelper.IncludeTriggerNavigation = False
