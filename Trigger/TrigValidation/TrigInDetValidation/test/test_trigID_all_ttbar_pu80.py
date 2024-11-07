@@ -38,7 +38,6 @@ Input   = 'ttbar_pu80'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 
 # the conditions override is needed because the RDO was produced with a single beamspot
-# preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDV_singlebeamspot.py'
 # postinclude_file = 'RAWtoALL:TrigInDetValidation.TIDV_singlebeamspot'
 
 # perhaps need to have these implemented ...
