@@ -11,6 +11,7 @@
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "xAODInDetMeasurement/PixelCluster.h"
 #include "xAODInDetMeasurement/StripCluster.h"
+#include "xAODInDetMeasurement/HGTDCluster.h"
 
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
@@ -54,6 +55,10 @@ namespace ActsTrk {
          for (unsigned int vol_id : strip_vol) {
             setMeasurementTypeForVolumeId(vol_id, xAOD::UncalibMeasType::StripClusterType );
          }
+         std::vector<unsigned int> hgtd_vol {2, 25};
+         for (unsigned int vol_id : hgtd_vol) {
+            setMeasurementTypeForVolumeId(vol_id, xAOD::UncalibMeasType::HGTDClusterType );
+         }
       }
 
       template <std::size_t DIM>
@@ -61,7 +66,11 @@ namespace ActsTrk {
                                      [[maybe_unused]] const Acts::CalibrationContext&,
                                      const Acts::Surface &surface) const {
          // @TODO make interface measurement type aware ?
-         if constexpr(DIM==2) {
+         if constexpr(DIM==3) {
+            assert( measurementTypeFromVolumeId(surface.geometryId().volume()) == xAOD::UncalibMeasType::HGTDClusterType );
+            return s_hgtdSubspaceIndices;
+         }
+         else if constexpr(DIM==2) {
             assert( measurementTypeFromVolumeId(surface.geometryId().volume()) == xAOD::UncalibMeasType::PixelClusterType );
             return s_pixelSubspaceIndices;
          }
@@ -84,7 +93,9 @@ namespace ActsTrk {
       constexpr static Acts::SubspaceIndices<2> s_pixelSubspaceIndices = {
         Acts::eBoundLoc0, Acts::eBoundLoc1
       };
-
+      constexpr static Acts::SubspaceIndices<3> s_hgtdSubspaceIndices = {
+         Acts::eBoundLoc0, Acts::eBoundLoc1, Acts::eTime
+      };
    };
 
    struct MeasurementCalibrator2 {
@@ -104,10 +115,20 @@ namespace ActsTrk {
                                        const Acts::CalibrationContext&,
                                        const xAOD::StripCluster &,
                                        const Acts::BoundTrackParameters &)>;
+      using hgtdPos = xAOD::MeasVector<3>;
+      using hgtdCov = xAOD::MeasMatrix<3>;
+      using HGTDCalibrator = Acts::Delegate<
+         std::pair<hgtdPos, hgtdCov>(const Acts::GeometryContext&,
+                                       const Acts::CalibrationContext&,
+                                       const xAOD::HGTDCluster &,
+                                       const Acts::BoundTrackParameters &)>;
+
       PixelCalibrator pixel_postCalibrator;
       StripCalibrator strip_postCalibrator;
+      HGTDCalibrator hgtd_postCalibrator;
       PixelCalibrator pixel_preCalibrator;
       StripCalibrator strip_preCalibrator;
+      HGTDCalibrator hgtd_preCalibrator;
 
       MeasurementCalibrator2(const IOnBoundStateCalibratorTool *pixelTool)
       {
@@ -122,12 +143,15 @@ namespace ActsTrk {
             pixel_preCalibrator.template connect<&MeasurementCalibrator2::passthrough<2, xAOD::PixelCluster>>(this);
          }
          strip_preCalibrator.template connect<&MeasurementCalibrator2::passthrough<1, xAOD::StripCluster>>(this);
+         hgtd_preCalibrator.template connect<&MeasurementCalibrator2::passthrough<3, xAOD::HGTDCluster>>(this);
       }
 
       const PixelCalibrator &pixelPostCalibrator() const  { return pixel_postCalibrator; }
       const StripCalibrator &stripPostCalibrator() const { return strip_postCalibrator; }
+      const HGTDCalibrator &hgtdPostCalibrator() const { return hgtd_postCalibrator; }
       const PixelCalibrator &pixelPreCalibrator() const { return pixel_preCalibrator; }
       const StripCalibrator &stripPreCalibrator() const { return strip_preCalibrator; }
+      const HGTDCalibrator &hgtdPreCalibrator() const { return hgtd_preCalibrator; }   
 
 
       template <std::size_t Dim, typename Cluster>

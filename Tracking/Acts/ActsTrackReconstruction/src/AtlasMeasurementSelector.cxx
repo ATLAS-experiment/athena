@@ -24,6 +24,7 @@
 #include "ActsEvent/TrackContainer.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "xAODInDetMeasurement/HGTDClusterContainer.h"
 
 #include "AtlasUncalibSourceLinkAccessor.h"
 #include "IMeasurementSelector.h"
@@ -298,12 +299,15 @@ namespace {
          if constexpr( s_fullPreCalibration) {
             m_measurementSelector.template setPreCalibrator<2,xAOD::PixelCluster>(m_calibrator.pixelPreCalibrator());
             m_measurementSelector.template setPreCalibrator<1,xAOD::StripCluster>(m_calibrator.stripPreCalibrator());
+            m_measurementSelector.template setPreCalibrator<3,xAOD::HGTDCluster>(m_calibrator.hgtdPreCalibrator());
             m_measurementSelector.template setCalibrator<2,xAOD::PixelCluster>(m_calibrator.pixelPostCalibrator());
             m_measurementSelector.template setCalibrator<1,xAOD::StripCluster>(m_calibrator.stripPostCalibrator());
+            m_measurementSelector.template setCalibrator<3,xAOD::HGTDCluster>(m_calibrator.hgtdPostCalibrator());
          }
          else {
             m_measurementSelector.template setCalibrator<2,xAOD::PixelCluster>(m_calibrator.pixelPostCalibrator());
             m_measurementSelector.template setCalibrator<1,xAOD::StripCluster>(m_calibrator.stripPostCalibrator());
+            m_measurementSelector.template setCalibrator<3,xAOD::HGTDCluster>(m_calibrator.hgtdPostCalibrator());
          }
       }
 

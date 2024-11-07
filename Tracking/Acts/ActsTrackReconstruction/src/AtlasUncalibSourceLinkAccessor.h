@@ -8,6 +8,7 @@
 
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "xAODInDetMeasurement/HGTDClusterContainer.h"
 
 
 // #include "MakeDerivedVariant.h"
@@ -178,7 +179,8 @@ namespace ActsTrk {
 
   class AtlasMeasurementContainerList : public MeasurementContainerListWithDimension< AtlasMeasurementContainerList,
                                                                                       ContainerRefWithDim<xAOD::PixelClusterContainer,2>,
-                                                                                      ContainerRefWithDim<xAOD::StripClusterContainer,1> >
+                                                                                      ContainerRefWithDim<xAOD::StripClusterContainer,1>,
+                                                                                      ContainerRefWithDim<xAOD::HGTDClusterContainer,3> >
   {
   public:
 

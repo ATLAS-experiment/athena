@@ -26,6 +26,8 @@ atlas_add_component( ActsTrackReconstruction
 		       BeamSpotConditionsData
 		       GaudiKernel
 		       GeoPrimitives
+			HGTD_PrepRawData
+			HGTD_RIO_OnTrack
 		       Identifier
 		       InDetIdentifier
 		       InDetPrepRawData
