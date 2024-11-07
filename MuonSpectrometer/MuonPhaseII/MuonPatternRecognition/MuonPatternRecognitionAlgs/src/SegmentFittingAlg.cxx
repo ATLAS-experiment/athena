@@ -87,7 +87,7 @@ namespace MuonR4 {
                 auto drawFinalReco = [this, &segments, &gctx, &ctx,&seed](const std::string& nameTag) {
                     PrimitiveVec segmentLines{};
                     double yLegend{0.85};
-                    segmentLines.push_back(drawLabel(std::format("# segments: {:d}",  segments.size()), 0.15, yLegend, 14));
+                    segmentLines.push_back(drawLabel(std::format("# segments: {:d}",  segments.size()), 0.12, yLegend, 14));
                     yLegend-=0.04;
                     for (const std::unique_ptr<Segment>& seg : segments) {
                         const Parameters pars = localSegmentPars(*gctx, *seg);
@@ -97,13 +97,13 @@ namespace MuonR4 {
                         std::stringstream signStream{};
                         signStream<<"#chi^{2}/nDoF: "<<std::format("{:.2f}", seg->chi2() / seg->nDoF())<<"("<<seg->nDoF()<<"), ";
                         signStream<<"y_{0}="<<std::format("{:.2f}",pars[toInt(ParamDefs::y0)])<<", ";
-                        signStream<<std::format("#theta={:.1f}", pars[toInt(ParamDefs::theta)]/ Gaudi::Units::deg )<<", ";
+                        signStream<<std::format("#theta={:.2f}", pars[toInt(ParamDefs::theta)]/ Gaudi::Units::deg )<<", ";
                         for (const Segment::MeasType& m : seg->measurements()) {
                             if (m->type() == xAOD::UncalibMeasType::MdtDriftCircleType && m->fitState() == CalibratedSpacePoint::State::Valid) {
                                 signStream<<(SegmentFitHelpers::driftSign(locPos, locDir, *m, msgStream()) == -1 ? "L" : "R");
                             }
                         }
-                        segmentLines.push_back(drawLabel(signStream.str(), 0.15, yLegend, 12));
+                        segmentLines.push_back(drawLabel(signStream.str(), 0.12, yLegend, 12));
                         yLegend-=0.03;
                     }
 

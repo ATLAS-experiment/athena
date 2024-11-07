@@ -9,6 +9,8 @@
 #include <EventPrimitives/EventPrimitivesHelpers.h>
 
 #include <Acts/Utilities/Enumerate.hpp>
+
+#include <Acts/Utilities/Enumerate.hpp>
 #include <CxxUtils/sincos.h>
 #include <format>
 
@@ -140,16 +142,8 @@ namespace MuonR4{
                             <<" -- next bottom hit: "<<m_lowerLayer<<", hit: "<<m_lowerHitIndex
                             <<" ("<<lower.size()<<"), topHit " <<m_upperLayer<<", "<<m_upperHitIndex
                             <<" ("<<upper.size()<<") - ambiguity "<<s_signCombos[m_signComboIndex]);
-            /** Force that the hits are from different multilayers if there're two  */
-            const SpacePoint* topHit{upper[m_upperHitIndex]};
-            const SpacePoint* bottomHit{lower[m_lowerHitIndex]};
-            const MdtIdHelper& idHelper{topHit->msSector()->idHelperSvc()->mdtIdHelper()};
-            if (false && idHelper.numberOfMultilayers(topHit->identify()) == 2 && 
-                topHit->primaryMeasurement()->identifierHash() == bottomHit->primaryMeasurement()->identifierHash()) {
-                m_lowerLayer= m_upperLayer;
-                return std::nullopt;
-            }
-            found = buildSeed(ctx, topHit, bottomHit, s_signCombos[m_signComboIndex]);
+
+            found = buildSeed(ctx, upper.at(m_upperHitIndex), lower.at(m_lowerHitIndex), s_signCombos.at(m_signComboIndex));
             /// Increment for the next candidate
             moveToNextCandidate();
             /// If a candidate is built return it. Otherwise continue the process

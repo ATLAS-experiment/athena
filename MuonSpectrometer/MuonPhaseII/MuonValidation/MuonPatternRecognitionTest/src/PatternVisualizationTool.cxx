@@ -328,9 +328,14 @@ namespace MuonValR4 {
             if (!drawHits(bucket, bucket, primitives, canvasDim, view)) {
                 continue;
             }
+            bool drawnTrueLabel{false};
             for (const xAOD::MuonSegment* segment : truthSegs) {
                 primitives.push_back(drawLine(localSegmentPars(*segment), canvasDim[Edges::zLow], canvasDim[Edges::zHigh],
                                            truthColor, kDotted, view));
+                if (!drawnTrueLabel) {
+                    primitives.push_back(drawLabel(std::format("true parameters: {:}",makeLabel(localSegmentPars(*segment))),0.2, 0.91,14));
+                    drawnTrueLabel = true;
+                }
             }
             
             std::stringstream legendLabel{};
@@ -340,7 +345,7 @@ namespace MuonValR4 {
             if (!extraLabel.empty()) {
                 legendLabel<<" ("<<extraLabel<<")";
             }
-            primitives.push_back(drawLabel(legendLabel.str(), 0.4, 0.96));
+            primitives.push_back(drawLabel(legendLabel.str(), 0.2, 0.96));
             auto can = makeCanvas(ctx , canvasDim, view);
             for (PrimitivePtr& prim : primitives) {
                 prim->Draw();
