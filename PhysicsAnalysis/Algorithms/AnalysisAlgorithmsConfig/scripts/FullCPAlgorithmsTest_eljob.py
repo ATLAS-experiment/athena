@@ -58,6 +58,9 @@ parser.add_option( '--for-compare', dest='for_compare',
 parser.add_option( '--physlite', dest='physlite',
                    action = 'store_true', default = False,
                    help = 'Configure the job for physlite' )
+parser.add_option('--run', action='store', dest='run',
+                    default=2, type=int,
+                    help='Run number for the inputs')
 parser.add_option( '--force-mc', dest='forceMC',
                    action = 'store_true', default = False,
                    help = 'Force the job to treat input as MC' )
@@ -84,13 +87,23 @@ forCompare = options.for_compare
 print(f"Running on data type: {dataType.value}")
 
 if options.physlite:
-    inputfile = {DataType.Data:    'ASG_TEST_FILE_LITE_DATA',
-                 DataType.FullSim: 'ASG_TEST_FILE_LITE_MC',
-                 DataType.FastSim: 'ASG_TEST_FILE_LITE_MC_AFII'}
+    if options.run==3:
+        inputfile = {DataType.Data:    'ASG_TEST_FILE_LITE_RUN3_DATA',
+                     DataType.FullSim: 'ASG_TEST_FILE_LITE_RUN3_MC',
+                     DataType.FastSim: 'ASG_TEST_FILE_LITE_RUN3_MC_FASTSIM'}
+    elif options.run==2:
+        inputfile = {DataType.Data:    'ASG_TEST_FILE_LITE_DATA',
+                     DataType.FullSim: 'ASG_TEST_FILE_LITE_MC',
+                     DataType.FastSim: 'ASG_TEST_FILE_LITE_MC_FASTSIM'}
 else:
-    inputfile = {DataType.Data:    'ASG_TEST_FILE_DATA',
-                 DataType.FullSim: 'ASG_TEST_FILE_MC',
-                 DataType.FastSim: 'ASG_TEST_FILE_MC_AFII'}
+    if options.run==3:
+        inputfile = {DataType.Data:    'ASG_TEST_FILE_RUN3_DATA',
+                     DataType.FullSim: 'ASG_TEST_FILE_RUN3_MC',
+                     DataType.FastSim: 'ASG_TEST_FILE_RUN3_MC_FASTSIM'}
+    elif options.run==2:
+        inputfile = {DataType.Data:    'ASG_TEST_FILE_DATA',
+                     DataType.FullSim: 'ASG_TEST_FILE_MC',
+                     DataType.FastSim: 'ASG_TEST_FILE_MC_FASTSIM'}
 
 # No R24 FastSim recommendations for EGamma yet
 forceEGammaFullSimConfig = True
