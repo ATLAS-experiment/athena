@@ -84,6 +84,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
                                            "BTagging_AntiKt4UFOCSSK",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                            "AntiKt4EMPFlowJets_FTAG",
+                                           "BTagging_AntiKt4EMPFlowByVertex",
                                           ]
 
     if flags.GeoModel.Run >= LHCPeriod.Run4:
@@ -187,10 +188,13 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     FtagBaseContent.trigger_setup(FTAG1SlimmingHelper, trigger_option)
     FtagBaseContent.trigger_matching(FTAG1SlimmingHelper, TriggerListsHelper, flags)
 
-    jetOutputList = ["AntiKt4UFOCSSKJets"]
+    jetOutputList = ["AntiKt4UFOCSSKJets", "AntiKt4EMPFlowByVertexJets"]
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
     addJetsToSlimmingTool(FTAG1SlimmingHelper, jetOutputList, FTAG1SlimmingHelper.SmartCollections)
-
+    
+    # Flavour tagging (Mario)
+    from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
+    acc.merge(FtagJetCollectionsCfg(flags,["AntiKt4EMPFlowByVertexJets"]))
 
     # Output stream    
     FTAG1ItemList = FTAG1SlimmingHelper.GetItemList()
@@ -380,10 +384,45 @@ def FTAG1ExtraContentCfg(flags):
     from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSK
     jetList += [AntiKt4UFOCSSK]
 
+    from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track, AntiKt4EMPFlowByVertex 
+
+    #======================================= 
+    # R = 0.4 track-jets (needed for Rtrk) 
+    #=======================================
+    jetList += [AntiKt4PV0Track]
+
+    #======================================= 
+    # R = 0.4 by-vertex jets 
+    #=======================================
+    jetList += [AntiKt4EMPFlowByVertex]
 
     for jd in jetList:
         acc.merge(JetRecCfg(flags,jd))
 
+    #=======================================
+    # More detailed truth information
+    #=======================================
+
+    if flags.Input.isMC:
+        from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTopQuarkAndDownstreamParticlesCfg
+        acc.merge(AddTopQuarkAndDownstreamParticlesCfg(flags, generations=4, rejectHadronChildren=True))
+
+    #=======================================
+    # Add Run-2 jet trigger collections
+    # Only needed for Run-2 due to different aux container type (JetTrigAuxContainer) which required special wrapper for conversion to AuxContainerBase
+    # In Run-3, the aux. container type is directly JetAuxContainer (no conversion needed)
+    #=======================================
+
+    if flags.Trigger.EDMVersion == 2:
+        triggerNames = ["JetContainer_a4tcemsubjesFS", "JetContainer_a4tcemsubjesISFS", "JetContainer_a10tclcwsubjesFS", "JetContainer_GSCJet"]
+
+        for trigger in triggerNames:
+            wrapperName = trigger+'AuxWrapper'
+            auxContainerName = 'HLT_xAOD__'+trigger+'Aux'
+
+            acc.addEventAlgo(CompFactory.xAODMaker.AuxStoreWrapper( wrapperName, SGKeys = [ auxContainerName+"." ] ))
+
     return acc
+
 
 
