@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 // Use CloneTree(0) to get the structure of the tree, then copy events one event at a time from old to new tree 
@@ -47,9 +47,12 @@ void compression_tool(const char* input_filename, const char* output_filename, i
     }
 
     if (comp_level == -1) {
-        if (comp_alg == ROOT::kZLIB) comp_level = ROOT::RCompressionSetting::ELevel::kDefaultZLIB;
-        else if (comp_alg == ROOT::kLZMA) comp_level = ROOT::RCompressionSetting::ELevel::kDefaultLZMA;
-        else if (comp_alg == ROOT::kLZ4) comp_level = ROOT::RCompressionSetting::ELevel::kDefaultLZ4;
+       if( comp_alg == ROOT::RCompressionSetting::EAlgorithm::kZLIB )
+           comp_level = ROOT::RCompressionSetting::ELevel::kDefaultZLIB;
+        else if( comp_alg == ROOT::RCompressionSetting::EAlgorithm::kLZMA) 
+           comp_level = ROOT::RCompressionSetting::ELevel::kDefaultLZMA;
+        else if( comp_alg == ROOT::RCompressionSetting::EAlgorithm::kLZ4 )
+           comp_level = ROOT::RCompressionSetting::ELevel::kDefaultLZ4;
         else comp_level = ROOT::RCompressionSetting::ELevel::kUseMin;
     }
 
