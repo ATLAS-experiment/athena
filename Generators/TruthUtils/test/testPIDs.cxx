@@ -104,11 +104,9 @@ int main(int argc, char** argv) {
         TEST_FUNCTION(SUSY::isRGlueball)
         TEST_FUNCTION(SUSY::isRHadron) // 70
         TEST_FUNCTION(SUSY::isRMeson)
-        TEST_FUNCTION(SUSY::isSBaryon)
         TEST_FUNCTION(SUSY::isSLepton)
         TEST_FUNCTION(isSMLepton)
         TEST_FUNCTION(isSMNeutrino)
-        TEST_FUNCTION(SUSY::isSMeson)
         TEST_FUNCTION(isTetraquark)
         TEST_FUNCTION(isTopBaryon)
         TEST_FUNCTION(isTopHadron)
@@ -116,6 +114,7 @@ int main(int argc, char** argv) {
         TEST_FUNCTION(isTrajectory)
         TEST_FUNCTION(leadingQuark)
         TEST_FUNCTION(SUSY::spin)
+        TEST_FUNCTION(SUSY::isSquark)
         if  (myline!=current) { printf("reference :%s\ncalculated:%s\n",myline.c_str(),current.c_str()); return 1; }
         //printf("%s\n",current.c_str());
         processed=true;
