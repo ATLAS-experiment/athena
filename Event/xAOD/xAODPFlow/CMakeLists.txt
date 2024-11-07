@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( xAODPFlow )
@@ -20,23 +20,18 @@ atlas_add_xaod_smart_pointer_dicts(
       OUTPUT _selectionFile
       CONTAINERS "xAOD::PFOContainer_v1" "xAOD::TrackCaloClusterContainer_v1"  "xAOD::FlowElementContainer_v1")
 
-if(  XAOD_ANALYSIS AND NOT XAOD_STANDALONE )
-
+if( NOT XAOD_ANALYSIS )
+   atlas_add_dictionary( xAODPFlowDict
+      xAODPFlow/xAODPFlowAthenaDict.h
+      ${_selectionFile}
+      LINK_LIBRARIES AthLinks xAODCore xAODPFlow
+      EXTRA_FILES Root/dict/*.cxx )
+else()
    atlas_add_dictionary( xAODPFlowDict
       xAODPFlow/xAODPFlowDict.h
       ${_selectionFile}
       LINK_LIBRARIES AthLinks xAODCore xAODPFlow
       EXTRA_FILES Root/dict/*.cxx )
 endif()
-
-if( NOT XAOD_ANALYSIS )
-
-   atlas_add_dictionary( xAODPFlowDict
-      xAODPFlow/xAODPFlowAthenaDict.h
-      ${_selectionFile}
-      LINK_LIBRARIES AthLinks xAODCore xAODPFlow
-      EXTRA_FILES Root/dict/*.cxx )
-endif()
-
 
 atlas_generate_cliddb( xAODPFlow)
