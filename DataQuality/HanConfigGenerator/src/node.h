@@ -6,7 +6,6 @@
 //  
 //      
 //
-//   $Id: node.h, v0.0   Fri  8 Apr 2016 00:57:16 CEST sutt $
 
 
 #ifndef  NODE_H
@@ -38,13 +37,13 @@ public:
   void               name( const std::string& n)  { mname=n; }
   const std::string& name() const { return mname; }
   
-  void        path(const std::string& p) { mpath=p; }
-  std::string path() const               { return mpath; }
+  void               path(const std::string& p) { mpath=p; }
+  const std::string& path() const               { return mpath; }
   
   node*       parent()       { return mparent; }
   const node* parent() const { return mparent; }
 
-  std::string depth() const { return mdepth; }
+  const std::string& depth() const { return mdepth; }
 
   void type(TYPE t)         { mtype=t; }
   virtual TYPE type() const { return mtype; }
