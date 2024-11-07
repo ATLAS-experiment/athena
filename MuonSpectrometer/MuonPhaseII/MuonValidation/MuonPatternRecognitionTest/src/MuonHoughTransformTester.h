@@ -79,9 +79,7 @@ namespace MuonValR4{
 
     void fillChamberInfo(const MuonGMR4::SpectrometerSector* chamber);
 
-    void fillTruthInfo(const ActsGeometryContext& gctx,
-                       const MuonGMR4::SpectrometerSector* chamber, 
-                       const xAOD::MuonSegment* truthSegment);
+    void fillTruthInfo(const xAOD::MuonSegment* truthSegment);
     
     void fillSeedInfo(const ObjectMatching& obj);            
     void fillSegmentInfo(const ActsGeometryContext& gctx, const ObjectMatching& obj);  

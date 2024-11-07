@@ -94,15 +94,14 @@ namespace MuonR4 {
             ATH_MSG_WARNING("Invalid channel "<< m_idHelperSvc->toStringGasGap(hitId)<<", channel: "<<prdWireNum);
             return false;
         }
-        ATH_MSG_VERBOSE("Convert simulated hit "<<m_idHelperSvc->toString(digitId)<<" located at "
-                      <<Amg::toString(locSimHitPos, 2)<<" wire group number: "<<prdWireNum
-                      <<" wiregroup pos "<<Amg::toString(design.center(prdWireNum).value_or(Amg::Vector2D::Zero()), 2));
-
         
         if (!passDeadTime(digitId, hitTime(timedHit), m_deadTime, deadTimes)) {
             ATH_MSG_VERBOSE("Reject hit due to dead map constraint");
             return false;
         }
+        ATH_MSG_VERBOSE("Convert simulated hit "<<m_idHelperSvc->toString(digitId)<<" located at "
+                      <<Amg::toString(locSimHitPos, 2)<<" wire group number: "<<prdWireNum<<", time: "<<hitTime(timedHit)
+                      <<" wiregroup pos "<<Amg::toString(design.center(prdWireNum).value_or(Amg::Vector2D::Zero()), 2));
         outColl.push_back(std::make_unique<TgcDigit>(digitId, associateBCIdTag(ctx, timedHit)));
         ++m_acceptedHits[false];    
         return true;
@@ -186,15 +185,12 @@ namespace MuonR4 {
             return false;
         }
 
-        double& lastHitTime{deadTimes[digitId]};
-        if (hitTime(timedHit) - lastHitTime < m_deadTime) {
+        if (!passDeadTime(digitId, hitTime(timedHit), m_deadTime, deadTimes)) {
             ATH_MSG_VERBOSE("Reject hit due to dead time constraint.");
             return false;
         }
-        lastHitTime = hitTime(timedHit);
-
         ATH_MSG_VERBOSE("Convert simulated hit "<<m_idHelperSvc->toString(digitId)<<" located at "
-                        <<Amg::toString(locSimHitPos, 2)<<" phi strip number: "<<digitStripNum
+                        <<Amg::toString(locSimHitPos, 2)<<" phi strip number: "<<digitStripNum<<", time: "<<hitTime(timedHit)
                         <<" strip position "<<Amg::toString(design.center(digitStripNum).value_or(Amg::Vector2D::Zero()), 2));
 
         outColl.push_back(std::make_unique<TgcDigit>(digitId, associateBCIdTag(ctx, timedHit)));
@@ -218,14 +214,13 @@ namespace MuonR4 {
         xAOD::ChamberViewer viewer{hitsToDigit, m_idHelperSvc.get()};
         do {
             DeadTimeMap deadTimes{};
-            for (const TimedHit& simHit : hitsToDigit) {
+            for (const TimedHit& simHit : viewer) {
                 /// ignore radiation for now
                 if (m_digitizeMuonOnly && std::abs(simHit->pdgId()) != 13) {
                     continue;
                 }
                 TgcDigitCollection* outColl = fetchCollection(simHit->identify(), digitCache);
-
-                
+ 
                 const bool digitizedEta = digitizeWireHit(ctx,simHit, efficiencyMap,*outColl, rndEngine, deadTimes);
                 const bool digitizedPhi = digitizeStripHit(ctx, simHit, efficiencyMap,*outColl, rndEngine, deadTimes);
                 

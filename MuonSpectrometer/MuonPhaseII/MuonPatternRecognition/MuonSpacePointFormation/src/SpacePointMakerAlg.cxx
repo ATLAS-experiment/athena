@@ -106,6 +106,7 @@ template <>
             return false;
         }
         const MuonGMR4::TgcReadoutElement* re = etaHits[0]->readoutElement();
+        ATH_MSG_VERBOSE("Collected "<<etaHits.size()<<"/"<<phiHits.size()<<" hits in "<<m_idHelperSvc->toStringGasGap(etaHits[0]->identify()));
         return ((1.*etaHits.size()) / ((1.*re->numChannels(etaHits[0]->measurementHash())))) < m_maxOccTgcEta &&
                ((1.*phiHits.size()) / ((1.*re->numChannels(phiHits[0]->measurementHash())))) < m_maxOccTgcPhi;
     }
@@ -116,6 +117,7 @@ template <>
             return false;
         }
         const MuonGMR4::RpcReadoutElement* re = etaHits[0]->readoutElement();
+        ATH_MSG_VERBOSE("Collected "<<etaHits.size()<<"/"<<phiHits.size()<<" hits in "<<m_idHelperSvc->toStringGasGap(etaHits[0]->identify()));
         return ((1.*etaHits.size()) / (1.*re->nEtaStrips())) < m_maxOccRpcEta &&
                ((1.*phiHits.size()) / (1.*re->nPhiStrips())) < m_maxOccRpcPhi;
     }
@@ -170,6 +172,7 @@ template <class ContType>
             std::vector<EtaPhiHits> hitsPerGasGap{};
             for (const PrdType prd : viewer) {
                 ATH_MSG_VERBOSE("Create space point from "<<m_idHelperSvc->toString(prd->identify())<<", hash: "<<prd->identifierHash());
+                
                 unsigned int gapIdx = prd->gasGap() -1;
                 if constexpr (std::is_same_v<ContType, xAOD::RpcMeasurementContainer>) {
                     gapIdx = prd->readoutElement()->createHash(0, prd->gasGap(), prd->doubletPhi(), false);
@@ -185,7 +188,7 @@ template <class ContType>
                     /// Wires measure the phi coordinate
                     measPhi = prd->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire;
                 } else {
-                    /// Rpcs have the measuresPhi property
+                    /// Tgc & Rpcs have the measuresPhi property
                     measPhi = prd->measuresPhi();
                 }
 
@@ -221,20 +224,10 @@ template <class ContType>
                 std::vector<std::shared_ptr<unsigned>> etaCounts{matchCountVec(etaHits.size())}, 
                                                        phiCounts{matchCountVec(phiHits.size())};
                 pointsInChamb.etaHits.reserve(etaHits.size()*phiHits.size());
-
-                /// Flag whether an isolated phi hit which cannot be combined with others exists 
-                bool hasIsolatedPhi{false};
-                /// Flag whether an eta-phi space point has been made
-                bool hasCombinedSpacePoint{false};
                 /// Simple combination by taking the cross-product
                 for (unsigned int etaP = 0; etaP < etaHits.size(); ++etaP) {
                     /// There's no valid combination with another phi hit
-                    for (unsigned int phiP = 0; phiP < phiHits.size(); ++ phiP){
-                        /// The phi space point will never be combined 
-                        if (!phiCounts[phiP]) {
-                            hasIsolatedPhi = true;
-                            continue;
-                        }
+                    for (unsigned int phiP = 0; phiP < phiHits.size(); ++ phiP) {
                         /** Tgc measurements with different bunch crossing tags cannot be combined */
                         if constexpr(std::is_same<xAOD::TgcStripContainer, ContType>::value) {
                             if (!(etaHits[etaP]->bcBitMap() & phiHits[phiP]->bcBitMap())){
@@ -245,7 +238,6 @@ template <class ContType>
                         ATH_MSG_VERBOSE("Create new spacepoint from "<<m_idHelperSvc->toString(etaHits[etaP]->identify())
                         <<" & "<<m_idHelperSvc->toString(phiHits[phiP]->identify())<<" at "<<Amg::toString(spacePoint.positionInChamber()));
                         spacePoint.setInstanceCounts(etaCounts[etaP], phiCounts[phiP]);
-                        hasCombinedSpacePoint = true;
                     }
                     if (!(*etaCounts[etaP])) {
                         pointsInChamb.etaHits.emplace_back(*gctx, etaHits[etaP]);
@@ -254,11 +246,9 @@ template <class ContType>
                 }
                 /// If there's a phi measuremnt which cannot be combined with the others 
                 /// or no eta measurement is suitable, then manually push_back the phi hits
-                if (!hasCombinedSpacePoint || hasIsolatedPhi) {
-                    for (unsigned int phiP = 0; phiP < phiHits.size(); ++ phiP){
-                        if (!hasCombinedSpacePoint || !phiCounts[phiP]) {
-                            pointsInChamb.phiHits.emplace_back(*gctx, phiHits[phiP]);
-                        }
+                for (unsigned int phiP = 0; phiP < phiHits.size(); ++ phiP){
+                    if (!(*phiCounts[phiP])) {
+                        pointsInChamb.phiHits.emplace_back(*gctx, phiHits[phiP]);
                     }
                 }
             }

@@ -218,23 +218,17 @@ namespace MuonValR4 {
         m_out_stationEta = msSector->side();
         m_out_stationPhi = msSector->stationPhi();
     }                
-    void MuonHoughTransformTester:: fillTruthInfo(const ActsGeometryContext& gctx,
-                                                  const MuonGMR4::SpectrometerSector* muonChamber, 
-                                                  const xAOD::MuonSegment* segment) {
+    void MuonHoughTransformTester:: fillTruthInfo(const xAOD::MuonSegment* segment) {
         if (!segment) return; 
         m_out_hasTruth = true; 
-        Amg::Vector3D segPos{segment->position()}; 
-        Amg::Vector3D segDir{segment->direction()};
+
+        const Amg::Vector3D segDir{segment->direction()};
         static const SG::Accessor<float> acc_pt{"pt"};
         // eta is interpreted as the eta-location 
         m_out_gen_Eta = segDir.eta();
         m_out_gen_Phi = segDir.phi();
         m_out_gen_Pt  = acc_pt(*segment);
-
-        //transform from local (w.r.t tube's frame) to global (ATLAS frame) and then to chamber's frame
-        auto toChamber = muonChamber->globalToLocalTrans(gctx);
-        const Amg::Vector3D chamberPos{toChamber * segPos};
-        Amg::Vector3D chamberDir = toChamber.linear() * segDir;
+        const auto [chamberPos, chamberDir] = SegmentFit::makeLine(SegmentFit::localSegmentPars(*segment));
         
         m_out_gen_nHits = segment->nPrecisionHits()+segment->nPhiLayers() + segment->nTrigEtaLayers(); 
        
@@ -322,12 +316,10 @@ namespace MuonValR4 {
         m_out_segment_err_tantheta = segment->covariance()(toInt(ParamDefs::theta), toInt(ParamDefs::theta));
         m_out_segment_err_tanphi   = segment->covariance()(toInt(ParamDefs::phi), toInt(ParamDefs::phi));
         m_out_segment_err_time = segment->covariance()(toInt(ParamDefs::time), toInt(ParamDefs::time));
-        const Amg::Transform3D trf{segment->msSector()->globalToLocalTrans(gctx)};
         for (const double c2 : segment->chi2PerMeasurement()){
             m_out_segment_chi2_measurement.push_back(c2); 
         }
-        const Amg::Vector3D locPos = trf * segment->position();
-        const Amg::Vector3D locDir = trf.linear()* segment->direction();
+        const auto [locPos, locDir] = makeLine(localSegmentPars(gctx, *segment));
         m_out_segment_tanphi   = houghTanPhi(locDir);
         m_out_segment_tantheta = houghTanTheta(locDir);
         m_out_segment_y0 = locPos.y();
@@ -386,7 +378,7 @@ namespace MuonValR4 {
         for (const ObjectMatching& obj : objects) {
             fillChamberInfo(obj.chamber);
             m_out_gen_bestMatch = obj.bestTruthMatch;
-            fillTruthInfo(gctx, obj.chamber, obj.truthSegment);
+            fillTruthInfo(obj.truthSegment);
             fillSeedInfo(obj);
             fillSegmentInfo(gctx, obj);
             ATH_CHECK(m_tree.fill(ctx));
