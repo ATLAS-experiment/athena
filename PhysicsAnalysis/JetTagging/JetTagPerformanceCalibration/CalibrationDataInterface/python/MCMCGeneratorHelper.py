@@ -41,6 +41,7 @@ GN2v01_MC20_Generator_dict = {
 GN2v01_MC23_Generator_dict = {
     "default": "default",
     "Pythia8": "default",
+    "Herwig721": "601414",
     "Herwig723": "601414",
     "Sherpa2212": "700808",
     "Sherpa2214": "700808",
@@ -64,7 +65,7 @@ def MCMC_generator_map(generatorDict, tagger='GN2v01'):
             generator = 'Herwig'+generatorDict['Herwig7'].replace('.', '')
     else:
         if 'Herwig7' in generatorDict:
-            generator = 'Herwig'+generatorDict['Herwig7'].replace('.', '')
+            generator = 'Herwig'+generatorDict['Herwig7'].replace('.', '')[:3]
         elif 'Pythia8' in generatorDict:
             generator = 'Pythia8'
     if 'Sherpa' in generatorDict:
