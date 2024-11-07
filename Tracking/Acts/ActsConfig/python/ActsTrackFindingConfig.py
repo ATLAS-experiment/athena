@@ -11,12 +11,15 @@ from math import pi as M_PI
 def isdet(flags,
           *,
           pixel: list = None,
-          strip: list = None) -> list:
+          strip: list = None,
+          hgtd: list = None) -> list:
     keys = []
     if flags.Detector.EnableITkPixel and pixel is not None:
         keys += pixel
     if flags.Detector.EnableITkStrip and strip is not None:
         keys += strip
+    if flags.Acts.useHGTDClusterInTrackFinding and hgtd is not None:
+        keys += hgtd
     return keys
 
 def seedOrder(flags,
@@ -66,7 +69,7 @@ def ActsMainTrackFindingAlgCfg(flags,
     kwargs.setdefault("EstimatedTrackParametersKeys", seedOrder(flags, pixel=["ActsPixelEstimatedTrackParams"], strip=["ActsStripEstimatedTrackParams"]))
     kwargs.setdefault("SeedContainerKeys", seedOrder(flags, pixel=["ActsPixelSeeds"], strip=["ActsStripSeeds"]))
 
-    kwargs.setdefault("UncalibratedMeasurementContainerKeys", isdet(flags, pixel=["ITkPixelClusters_Cached" if flags.Acts.useCache else "ITkPixelClusters"], strip=["ITkStripClusters_Cached" if flags.Acts.useCache else "ITkStripClusters"]))
+    kwargs.setdefault("UncalibratedMeasurementContainerKeys", isdet(flags, pixel=["ITkPixelClusters_Cached" if flags.Acts.useCache else "ITkPixelClusters"], strip=["ITkStripClusters_Cached" if flags.Acts.useCache else "ITkStripClusters"], hgtd=["HGTD_Clusters"]))
 
     kwargs.setdefault('ACTSTracksLocation', 'ActsTracks')
 
@@ -185,6 +188,7 @@ def ActsTrackFindingCfg(flags,
         dataPrepPrefix = 'ITk'
     pixelClusters = f'{dataPrepPrefix}PixelClusters'
     stripClusters = f'{dataPrepPrefix}StripClusters'    
+    hgtdClusters = 'HGTD_Clusters'
     # If cache is activated the keys have "_Cached" as postfix
     if flags.Acts.useCache:
         pixelClusters += '_Cached'
@@ -214,7 +218,7 @@ def ActsTrackFindingCfg(flags,
         stripParameterKeys = None
     
     kwargs.setdefault('ACTSTracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
-    kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=[pixelClusters], strip=[stripClusters]))
+    kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=[pixelClusters], strip=[stripClusters], hgtd=[hgtdClusters]))
     kwargs.setdefault('SeedLabels', seedOrder(flags, pixel=pixelSeedLabels, strip=stripSeedLabels))
     kwargs.setdefault('SeedContainerKeys', seedOrder(flags, pixel=pixelSeedKeys, strip=stripSeedKeys))
     kwargs.setdefault('EstimatedTrackParametersKeys', seedOrder(flags, pixel=pixelParameterKeys, strip=stripParameterKeys))

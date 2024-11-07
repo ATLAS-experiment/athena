@@ -77,6 +77,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.doTwoWayCKF', True) # run CKF twice, first with forward propagation with smoothing, then with backward propagation
     actscf.addFlag('Acts.useStripSeedsFirst', False) # switch order of seed collections
     actscf.addFlag('Acts.reverseTrackFindingForStrips', False) # track finding starts going inward for strip seeds
+    actscf.addFlag('Acts.useHGTDClusterInTrackFinding', False) # use HGTD cluster in track finding  // TO-DO: instead false, lambda pcf: pcf.Detector.EnableHGTD
 
     actscf.addFlag('Acts.doAmbiguityResolution', True)
     actscf.addFlag('Acts.AmbiguitySolverStrategy', AmbiguitySolverStrategy.Greedy, type=AmbiguitySolverStrategy)  # Define Ambiguity Solver Strategy

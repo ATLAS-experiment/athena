@@ -7,6 +7,7 @@
 // Athena
 #include "TrkParameters/TrackParameters.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 
 // ACTS
@@ -396,6 +397,11 @@ namespace ActsTrk
                            m_compareMeasurementTransforms);
         }
       }
+    }
+    else if (measurement->type() == xAOD::UncalibMeasType::HGTDClusterType) {
+      const auto loc3D = measurement->localPosition<3>().cast<double>();
+      const std::tuple<Acts::Vector2, Amg::Vector2D, int, int> locTup = {Acts::Vector2{loc3D.head<2>()}, Amg::Vector2D{loc3D.head<2>()}, -1, -1};
+      printMeasurement(tgContext, surface_ptr, locTup, m_compareMeasurementTransforms);
     }
     std::cout << '\n';
   }

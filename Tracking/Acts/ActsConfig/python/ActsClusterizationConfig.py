@@ -245,6 +245,7 @@ def ActsMainClusterizationCfg(flags,
     
     kwargs.setdefault('processPixels', flags.Detector.EnableITkPixel)
     kwargs.setdefault('processStrips', flags.Detector.EnableITkStrip)
+    kwargs.setdefault('processHGTD', flags.Acts.useHGTDClusterInTrackFinding and not flags.Tracking.ActiveConfig.isSecondaryPass)
     kwargs.setdefault('runCacheCreation', flags.Acts.useCache)
     kwargs.setdefault('runReconstruction', True)
     kwargs.setdefault('runPreparation', flags.Acts.useCache)    
@@ -264,6 +265,9 @@ def ActsMainClusterizationCfg(flags,
             acc.merge(ActsStripClusterizationAlgCfg(flags,
                                                     RoIs=RoIs,
                                                     **extractChildKwargs(prefix='StripClusterizationAlg.', **kwargs)))
+        if kwargs['processHGTD']:
+            acc.merge(ActsHgtdClusterizationAlgCfg(flags,
+                                                   **extractChildKwargs(prefix='HgtdClusterizationAlg.', **kwargs)))
     # Step (3)
     if kwargs['runPreparation']:
         if kwargs['processPixels']:
@@ -297,10 +301,12 @@ def ActsClusterizationCfg(flags,
                       
     processPixels = flags.Detector.EnableITkPixel
     processStrips = flags.Detector.EnableITkStrip
+    processHGTD = flags.Acts.useHGTDClusterInTrackFinding and not flags.Tracking.ActiveConfig.isSecondaryPass
 
     kwargs = dict()
     kwargs.setdefault('processPixels', processPixels)
     kwargs.setdefault('processStrips', processStrips)
+    kwargs.setdefault('processHGTD', processHGTD)
 
     # Clusterization is a three step process at maximum:
     #   (1) Cache Creation
@@ -369,6 +375,12 @@ def ActsClusterizationCfg(flags,
             if flags.Tracking.ActiveConfig.isSecondaryPass and previousActsExtension is not None:
                 kwargs.setdefault('StripClusterizationAlg.ExtraInputs', {('ActsTrk::PrepRawDataAssociation', f'StoreGateSvc+{previousActsExtension}PrdMap')})
 
+        if kwargs['processHGTD']:
+            kwargs.setdefault('HgtdClusterizationAlg.name', f'{flags.Tracking.ActiveConfig.extension}HgtdClusterizationAlg')
+            if flags.Tracking.ActiveConfig.isSecondaryPass and previousActsExtension is not None:
+                kwargs.setdefault('HgtdClusterizationAlg.ExtraInputs', {('ActsTrk::PrepRawDataAssociation', f'StoreGateSvc+{previousActsExtension}PrdMap')})
+
+
     # Configuration for (3)
     if kwargs['runPreparation']:
         if kwargs['processPixels']:
@@ -417,6 +429,11 @@ def ActsClusterizationCfg(flags,
             kwargs.setdefault('StripClusterAnalysisAlg.MonGroupName', f'{flags.Tracking.ActiveConfig.extension}ClusterAnalysisAlg')
             kwargs.setdefault('StripClusterAnalysisAlg.ClusterContainerKey', kwargs['StripClusterPreparationAlg.OutputCollection'] if kwargs['runPreparation'] else kwargs['StripClusterizationAlg.ClustersKey'])
                 
+        if kwargs['processHGTD']:
+            kwargs.setdefault('HgtdClusterAnalysisAlg.name', f'{flags.Tracking.ActiveConfig.extension}HgtdClusterAnalysisAlg')
+            kwargs.setdefault('HgtdClusterAnalysisAlg.extension', flags.Tracking.ActiveConfig.extension)
+            kwargs.setdefault('HgtdClusterAnalysisAlg.MonGroupName', f'{flags.Tracking.ActiveConfig.extension}ClusterAnalysisAlg')
+
     acc.merge(ActsMainClusterizationCfg(flags, RoIs=roisName, **kwargs))
     return acc
 

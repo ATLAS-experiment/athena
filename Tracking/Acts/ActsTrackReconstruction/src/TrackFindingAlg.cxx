@@ -12,9 +12,11 @@
 #include "TrkTrackSummary/TrackSummary.h"
 #include "InDetPrepRawData/PixelClusterCollection.h"
 #include "InDetPrepRawData/SCT_ClusterCollection.h"
+#include "HGTD_PrepRawData/HGTD_ClusterCollection.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
 #include "InDetRIO_OnTrack/SCT_ClusterOnTrack.h"
+#include "HGTD_RIO_OnTrack/HGTD_ClusterOnTrack.h"
 
 // ACTS
 #include "Acts/Definitions/Units.hpp"
