@@ -11,7 +11,7 @@ def SetupMuonStandaloneConfigFlags( default_input = ['/cvmfs/atlas-nightlies.cer
     flags = initConfigFlags()
     flags.Detector.GeometryMDT   = True 
     flags.Detector.GeometryTGC   = True
-    flags.Detector.GeometryCSC   = True     
+    
     flags.Detector.GeometryRPC   = True
     # TODO: disable these for now, to be determined if needed
     flags.Detector.GeometryCalo  = False
@@ -52,6 +52,9 @@ def SetupMuonStandaloneCA(args,flags):
     if flags.Input.Format is Format.POOL:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         cfg.merge(PoolReadCfg(flags))
+    else:
+        from MuonConfig.MuonBytestreamDecodeConfig import MuonByteStreamDecodersCfg
+        cfg.merge(MuonByteStreamDecodersCfg(flags))
 
     if flags.Input.isMC:
         from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
