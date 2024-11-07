@@ -27,22 +27,22 @@ Description: 2DMassToMeanSigma
 # Efficiency Plots
 #
 ---
-Input : ['MuonPhysics/Muons/Z/Muons_Z_Medium_eff', 'MuonPhysics/Muons/Z/Muons_Z_Origin_eta_phi']
+Input : ['MuonPhysics/Muons/Z/Muons_Z_eta_phi_medium', 'MuonPhysics/Muons/Z/Muons_Z_Origin_eta_phi']
 Output : ['MuonPhysics/Muons/Z/Muons_Z_Medium_eff']
 Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
 Description: EtaPhiMediumEfficiency
 ---
-Input : ['MuonPhysics/Muons/Z/Muons_Z_Tight_eff', 'MuonPhysics/Muons/Z/Muons_Z_Origin_eta_phi']
+Input : ['MuonPhysics/Muons/Z/Muons_Z_eta_phi_tight', 'MuonPhysics/Muons/Z/Muons_Z_Origin_eta_phi']
 Output : ['MuonPhysics/Muons/Z/Muons_Z_Tight_eff']
 Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
 Description: EtaPhiTightEfficiency
 ---
-Input : ['MuonPhysics/Muons/Jpsi/Muons_Jpsi_Medium_eff', 'MuonPhysics/Muons/Jpsi/Muons_Jpsi_Origin_eta_phi']
+Input : ['MuonPhysics/Muons/Jpsi/Muons_Jpsi_eta_phi_medium', 'MuonPhysics/Muons/Jpsi/Muons_Jpsi_Origin_eta_phi']
 Output : ['MuonPhysics/Muons/Jpsi/Muons_Jpsi_Medium_eff']
 Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
 Description: EtaPhiMediumEfficiency
 ---
-Input : ['MuonPhysics/Muons/Jpsi/Muons_Jpsi_Tight_eff', 'MuonPhysics/Muons/Jpsi/Muons_Jpsi_Origin_eta_phi']
+Input : ['MuonPhysics/Muons/Jpsi/Muons_Jpsi_eta_phi_tight', 'MuonPhysics/Muons/Jpsi/Muons_Jpsi_Origin_eta_phi']
 Output : ['MuonPhysics/Muons/Jpsi/Muons_Jpsi_Tight_eff']
 Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
 Description: EtaPhiTightEfficiency

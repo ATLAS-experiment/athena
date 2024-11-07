@@ -26,7 +26,7 @@ def TrigTRTMonCfg(flags):
     monAccess = getHLTMonitoringAccess(flags)
     chains = getMinBiasChains(monAccess, 'HLT_noalg_L1TRT_FILLED|HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TRT_VjTE20|HLT_noalg_L1TRT_VjTE50')
 
-    ref_chains = ['HLT_mb_sptrk_hi_FgapC5_L1VjTE200', 'HLT_mb_sptrk_hi_FgapA5_L1VjTE200',
+    ref_chains = ['HLT_mb_sptrk_L1ZDC_XOR_VjTE200', 'HLT_mb_sptrk_hi_FgapC5_L1VjTE200', 'HLT_mb_sptrk_hi_FgapA5_L1VjTE200',
         'HLT_noalg_L1RD0_FILLED', 'HLT_mb_sptrk_L1VTE50',
         'HLT_mb_sptrk_hi_FgapA5_L1VZDC_A_ZDC_C_VTE200', 'HLT_mb_sptrk_hi_FgapC5_L1ZDC_A_VZDC_C_VTE200']
 
