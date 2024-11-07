@@ -478,13 +478,20 @@ def ActsSeedingCfg(flags) -> ComponentAccumulator:
             
     acc.merge(ActsMainSeedingCfg(flags, **kwargs))        
 
-    if flags.Tracking.ActiveConfig.storeTrackSeeds:   
-        acc.merge(ActsSeedToTrackCnvAlgCfg(flags))
+    if flags.Tracking.ActiveConfig.storeTrackSeeds:
+        # For the time being this only saves Pixel Seeds. Will add the Strip Seed case later
+        seedKey = f'{flags.Tracking.ActiveConfig.extension}PixelSeeds'
+        trackKey = f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}Tracks'
+        particleKey = f'SiSPSeedSegments{flags.Tracking.ActiveConfig.extension}'
+        acc.merge(ActsSeedToTrackCnvAlgCfg(flags, 
+                                           name=f"{flags.Tracking.ActiveConfig.extension}SeedToTrackCnvAlg"),
+                                           SeedContainerKey=seedKey,
+                                           ACTSTracksLocation=trackKey)
         from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
         acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, 
-                                                    name="ActsTracksSeedToTrackParticleCnv",
-                                                    TrackParticlesOutKey=f"SiSPSeedSegments{flags.Tracking.ActiveConfig.extension}",
-                                                    ACTSTracksLocation=[f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}Tracks']))
+                                                    name=f"{flags.Tracking.ActiveConfig.extension}TracksSeedToTrackParticleCnvAlg",
+                                                    TrackParticlesOutKey=particleKey,
+                                                    ACTSTracksLocation=[trackKey]))
     return acc
 
 
@@ -501,8 +508,9 @@ def ActsSeedToTrackCnvAlgCfg(flags,
 
     kwargs.setdefault('ACTSTracksLocation', f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}Tracks') # This uses the same naming convention than the legacy code
 
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault('TrackingGeometryTool', acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault('TrackingGeometryTool', acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.SeedToTrackCnvAlg(name, **kwargs), primary=True)
     return acc
