@@ -19,6 +19,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "ActsEvent/Seed.h"
+#include "ActsEvent/SeedContainer.h"
 
 #include "BeamSpotConditionsData/BeamSpotData.h"
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"

@@ -6,6 +6,7 @@
 #define ACTSTRKSEEDINGTOOL_SEEDINGTOOL_H
 
 
+
 // gcc12 gives false positive warnings from copying boost::small_vector.
 #if __GNUC__ >= 12
 # pragma GCC diagnostic ignored "-Wstringop-overread"
@@ -16,6 +17,7 @@
 #include "ActsToolInterfaces/ISeedingTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ActsInterop/Logger.h"
+#include "ActsEvent/SeedContainer.h"
 
 // ACTS CORE
 #include "Acts/Definitions/Units.hpp"

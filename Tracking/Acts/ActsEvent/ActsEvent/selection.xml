@@ -1,14 +1,6 @@
 <!-- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
 
-  <class name="Seed" />
-  <class name="SeedContainer"
-	 id="936BD24D-A0FE-4684-9C95-6C895E38B56E" /> 
-
-  <class name="BoundTrackParameters" />
-  <class name="BoundTrackParametersContainer"
-	 id="07B10B02-CEF7-4FF9-91D5-569F506C46AE" />
-
   <class name="SG::GenericElementLinkBase<ActsTrk::TrackContainer::IndexingPolicy>" />
   <class name="ElementLink<ActsTrk::TrackContainer>" />
   <read sourceClass="ElementLink<ActsTrk::TrackContainer>" version="[1-]"

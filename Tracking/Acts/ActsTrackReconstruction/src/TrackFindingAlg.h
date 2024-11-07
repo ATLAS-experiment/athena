@@ -24,6 +24,7 @@
 // ActsTrk
 #include "ActsEvent/Seed.h"
 #include "ActsEvent/TrackParameters.h"
+#include "ActsEvent/TrackParametersContainer.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"

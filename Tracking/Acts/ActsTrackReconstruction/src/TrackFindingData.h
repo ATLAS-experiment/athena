@@ -27,6 +27,7 @@
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/SurfaceOfMeasurementUtil.h"
 #include "src/TrackStatePrinter.h"
+#include "ActsEvent/SeedContainer.h"
 
 // STL
 #include <unordered_map>
