@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # TriggerMatchingCommonConfig.py
@@ -37,6 +37,7 @@ def getDataYear(flags):
             Campaign.MC20e: 2018,
             Campaign.MC21a: 2022,
             Campaign.MC23a: 2022, 
+            Campaign.MC23c: 2023,
             Campaign.MC23d: 2023,
             Campaign.MC23e: 2024,
             Campaign.PhaseII: 2030,
@@ -87,14 +88,14 @@ def AddjFexRoIsToSlimmingHelper(**kwargs):
     slimmingHelper.AllVariables += ["L1_jFexSRJetRoI"]
 
 
-def TriggerMatchingCommonRun2Cfg(ConfigFlags, name, **kwargs):
+def TriggerMatchingCommonRun2Cfg(flags, name, **kwargs):
     """Configure the common trigger matching for run 2 DAODs using the run 2 analysis formalism (matching happens during derivation)"""
 
     acc = ComponentAccumulator()
  
     # Create trigger matching decorations
     from DerivationFrameworkTrigger.TriggerMatchingToolConfig import TriggerMatchingToolCfg
-    PhysCommonTriggerMatchingTool = acc.getPrimaryAndMerge(TriggerMatchingToolCfg(ConfigFlags, name=name, **kwargs))
+    PhysCommonTriggerMatchingTool = acc.getPrimaryAndMerge(TriggerMatchingToolCfg(flags, name=name, **kwargs))
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     outputContainerPrefix = kwargs['OutputContainerPrefix']
     acc.addEventAlgo(CommonAugmentation(f"{outputContainerPrefix}TriggerMatchingKernel",
@@ -102,12 +103,12 @@ def TriggerMatchingCommonRun2Cfg(ConfigFlags, name, **kwargs):
 
     return(acc)
 
-def TriggerMatchingCommonRun2ToRun3Cfg(ConfigFlags, **kwargs):
+def TriggerMatchingCommonRun2ToRun3Cfg(flags, **kwargs):
     """Covert run 2 trigger navigation data these data into the run 3 formalism (matching happens from DAOD)"""
 
     acc = ComponentAccumulator()
 
-    if not ConfigFlags.Trigger.doEDMVersionConversion:
+    if not flags.Trigger.doEDMVersionConversion:
         return(acc)
 
     from AthenaCommon.Logging import logging
@@ -118,17 +119,17 @@ def TriggerMatchingCommonRun2ToRun3Cfg(ConfigFlags, **kwargs):
 
     # And then run the run 3 slimming on the output of NavConverter
     triggerList = kwargs['TriggerList']
-    acc.merge(NavConverterCfg(ConfigFlags, chainsList = triggerList))
+    acc.merge(NavConverterCfg(flags, chainsList = triggerList))
     from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTDerivationCfg
-    acc.merge(TrigNavSlimmingMTDerivationCfg(ConfigFlags,chainsFilter=triggerList))
+    acc.merge(TrigNavSlimmingMTDerivationCfg(flags,chainsFilter=triggerList))
 
     return(acc)
 
 
-def TriggerMatchingCommonRun3Cfg(ConfigFlags, **kwargs):
+def TriggerMatchingCommonRun3Cfg(flags, **kwargs):
     """Configure the common trigger matching for run 3 DAODs using the run 3 formalism (matching happens from DAOD)"""
     
-    if ConfigFlags.Trigger.EDMVersion != 3:
+    if flags.Trigger.EDMVersion != 3:
         raise ValueError('This configuration can only be used for Run 3 trigger navigation')
 
     triggerList = kwargs['TriggerList']
@@ -137,8 +138,6 @@ def TriggerMatchingCommonRun3Cfg(ConfigFlags, **kwargs):
 
     # Run 3 trigger navigation slimming proposal for in-DAOD trigger matching.
     from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTDerivationCfg
-    acc.merge(TrigNavSlimmingMTDerivationCfg(ConfigFlags,chainsFilter=triggerList))
+    acc.merge(TrigNavSlimmingMTDerivationCfg(flags,chainsFilter=triggerList))
 
     return(acc)
-
-
