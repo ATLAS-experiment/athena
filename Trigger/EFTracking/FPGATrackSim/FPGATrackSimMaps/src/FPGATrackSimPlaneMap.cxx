@@ -267,7 +267,9 @@ void FPGATrackSimPlaneMap::map(FPGATrackSimHit & hit) const
     // technically this returns a success/fail but I'm not sure we need it?
     // This should only happen if the hit is not already mapped.
     if (!hit.isMapped()){
-        m_moduleRelabel->remap(hit);
+        if(!hit.isRemapped()){
+            m_moduleRelabel->remap(hit);
+        }
     }
     const LayerSection &pinfo = getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer());
     hit.setSection(pinfo.section);

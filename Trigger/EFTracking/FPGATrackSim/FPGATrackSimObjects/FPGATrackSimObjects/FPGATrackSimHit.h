@@ -180,6 +180,10 @@ public:
 
     friend std::ostream& operator<<(std::ostream&, const FPGATrackSimHit&);
 
+    //remap interface
+    bool isRemapped() const;
+    void setRemap();
+
 protected:
 
     // --- Hit Type ---
@@ -201,7 +205,9 @@ protected:
     // isMapped() should return true to access these members
     int m_layer = -1;   // Logical layer this hit is on
     int m_section = -1; // Index of detector element in the logical layer (see FPGATrackSimPlaneMap.h)
-
+    
+    // --- Map Tag
+    bool m_isRemapped = false;
     // --- Local Coordinates ---
     int m_phiIndex = -1; // phi index for pixel, strip for strip
     int m_etaIndex = -1; // eta index for pixel, row for strip

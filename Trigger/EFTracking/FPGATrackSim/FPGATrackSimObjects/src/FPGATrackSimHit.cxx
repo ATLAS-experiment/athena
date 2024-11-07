@@ -17,7 +17,14 @@ bool FPGATrackSimHit::isMapped() const
     }
     return false;
 }
-
+bool FPGATrackSimHit::isRemapped() const
+{
+    return m_isRemapped;
+}
+void FPGATrackSimHit::setRemap() 
+{
+    m_isRemapped=true;
+}
 bool FPGATrackSimHit::isClustered() const
 {
     switch (m_hitType)

@@ -6,8 +6,7 @@ export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrad
 
 RDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/RDO/reg0_singlemu.root"
 RDO_EVT=200
-#MAPS="maps_9L/"
-MAPS="maps_9L/OtherFPGAPipelines/v0.20"
+MAPS="maps_9L/OtherFPGAPipelines/v0.21"
 
 echo "... Banks generation"
 python -m FPGATrackSimBankGen.FPGATrackSimBankGenConfig \

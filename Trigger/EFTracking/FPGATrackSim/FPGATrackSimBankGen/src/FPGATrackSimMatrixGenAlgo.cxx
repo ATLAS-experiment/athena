@@ -520,16 +520,15 @@ bool FPGATrackSimMatrixGenAlgo::filterSectorHits(std::vector<FPGATrackSimHit> co
   const FPGATrackSimRegionMap* rmap_1st = m_FPGATrackSimMapping->SubRegionMap();
 
   for (FPGATrackSimHit const & hit : all_hits) {
-    int layer = hit.getLayer();
-    if (layer<0){
+    if (!hit.isMapped()){
         continue;
     }
-    //CHECK WHIT 
     // Sanity check. make sure the hit is actually in the first stage?
     // If the hit falls within the boundaries of ANY subregion in the first stage, it's 1st stage.
     if (rmap_1st->getRegions(hit).size() == 0) {
       continue;
     }
+    int layer = hit.getLayer();
 
     if (layer_count[layer] == 0){
       layer_count[layer]++;
