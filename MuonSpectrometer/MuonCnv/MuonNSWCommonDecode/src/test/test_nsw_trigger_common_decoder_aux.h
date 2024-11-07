@@ -214,6 +214,8 @@ struct outBranches
   std::vector<std::vector<uint32_t>> b_STGL1A_pad_bandID_1 = {};
   std::vector<std::vector<uint32_t>> b_STGL1A_pad_bandID_0 = {};
   std::vector<std::vector<uint32_t>> b_STGL1A_pad_BCID = {};
+  std::vector<std::vector<uint32_t>> b_STGL1A_pad_header = {};
+
   std::vector<std::vector<uint32_t>> b_STGL1A_pad_idleFlag = {};
   std::vector<std::vector<uint32_t>> b_STGL1A_merge_LUT_choiceSelection = {};
   std::vector<std::vector<uint32_t>> b_STGL1A_merge_nsw_segmentSelector = {};
@@ -227,6 +229,7 @@ struct outBranches
   std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPSegments::num_segments> b_STGL1A_merge_RIndex_segments{};
   std::vector<std::vector<uint32_t>> b_STGL1A_merge_BCID = {};
   std::vector<std::vector<uint32_t>> b_STGL1A_merge_sectorID = {};
+  std::vector<std::vector<uint32_t>> b_STGL1A_merge_header = {};
 
   std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPMMData::num_mm> b_STGL1A_mm_monitor_segments{};
   std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPMMData::num_mm> b_STGL1A_mm_spare_segments{};
@@ -236,6 +239,7 @@ struct outBranches
   std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPMMData::num_mm> b_STGL1A_mm_phiID_segments{};
   std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPMMData::num_mm> b_STGL1A_mm_RIndex_segments{};
   std::vector<std::vector<uint32_t>> b_STGL1A_mm_BCID = {};
+  std::vector<std::vector<uint32_t>> b_STGL1A_mm_header = {};
 
   std::vector<uint32_t> b_STGL1A_trailer_CRC = {} ;
 };
@@ -418,6 +422,7 @@ int test_nsw_trigger_common_decoder_init_tree (TTree &outtree, outBranches &data
     outtree.Branch( "STGL1A_pad_bandID_0", &data.b_STGL1A_pad_bandID_0);
     
     outtree.Branch( "STGL1A_pad_BCID", &data.b_STGL1A_pad_BCID);
+    outtree.Branch( "STGL1A_pad_header", &data.b_STGL1A_pad_header);
     outtree.Branch( "STGL1A_pad_idleFlag", &data.b_STGL1A_pad_idleFlag);
     
     outtree.Branch( "STGL1A_merge_LUT_choiceSelection", &data.b_STGL1A_merge_LUT_choiceSelection);
@@ -435,6 +440,7 @@ int test_nsw_trigger_common_decoder_init_tree (TTree &outtree, outBranches &data
     }
     
     outtree.Branch( "STGL1A_merge_BCID", &data.b_STGL1A_merge_BCID);
+    outtree.Branch( "STGL1A_merge_header", &data.b_STGL1A_merge_header);
     outtree.Branch( "STGL1A_merge_sectorID", &data.b_STGL1A_merge_sectorID);
 
 
@@ -449,6 +455,7 @@ int test_nsw_trigger_common_decoder_init_tree (TTree &outtree, outBranches &data
     }
 
     outtree.Branch( "STGL1A_mm_BCID", &data.b_STGL1A_mm_BCID);
+    outtree.Branch( "STGL1A_mm_header", &data.b_STGL1A_mm_header);
 
     outtree.Branch( "STGL1A_trailer_CRC", &data.b_STGL1A_trailer_CRC);
   }
