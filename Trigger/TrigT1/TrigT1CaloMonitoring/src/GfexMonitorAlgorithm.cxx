@@ -122,16 +122,27 @@ StatusCode GfexMonitorAlgorithm::fillJetHistograms(const std::string& handleKey,
 		float phi = gFexJetRoI->phi();
 		jetPt  = gFexJetRoI->gFexTobEt();
 			
-		if(jetPt > ptCutValue){
+		if(jetPt > ptCutValue){		
 			jetEta = eta;
-			jetPhi = phi;
-			binNumber = getBinNumberJet(eta,phi,0,0);
-			fill(m_packageName,jetEta,jetPhi,jetPt);
-			fill(m_packageName,lumiNumber,binNumber);
-			
-		}
-		
-	}
+			if (std::abs(eta) >= 3.1 ){
+				jetPhi = (phi > 0.0) ? phi + 0.1 : phi - 0.1;
+				float phi_new = (phi > 0.0) ? phi + 0.1 : phi - 0.1;	
+				binNumber = getBinNumberJet(eta,phi_new,0,0);
+				fill(m_packageName,jetEta,jetPhi,jetPt);
+				fill(m_packageName,lumiNumber,binNumber);
+				jetPhi = phi;
+				binNumber = getBinNumberJet(eta,phi,0,0);
+				fill(m_packageName,jetEta,jetPhi,jetPt);
+				fill(m_packageName,lumiNumber,binNumber);
+			}
+			else {
+				jetPhi = phi;
+				jetEta = eta;
+				binNumber = getBinNumberJet(eta,phi,0,0);
+				fill(m_packageName,jetEta,jetPhi,jetPt);
+				fill(m_packageName,lumiNumber,binNumber);
+			}
+		}}
 	return StatusCode::SUCCESS;
 }
 
