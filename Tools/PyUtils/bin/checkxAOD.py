@@ -53,6 +53,7 @@ if __name__ == "__main__":
         "HGTD"     : ["^HGTD"],
         "InDet"    : ["^InDet", "^PrimaryVertices", "^ComTime_TRT", "^Pixel", "^TRT", "^SCT", "^BCM", "^CTP", "^Tracks", "^ResolvedForwardTracks", "^SplitClusterAmbiguityMap", "^SoftBVrt","^BLMHits", "^FourLeptonVertices"],
         "ITk"      : ["^ITk"],
+        "ACTS"     : [".*Acts.*"],
         "Jet"      : ["^CamKt", "^AntiKt", "^Jet(?!.*ParticleFlowObjects$)","^LCOriginTopoClusters","^EMOriginTopoClusters"],
         "CaloTopo" : ["CaloCalTopoCluster", "CaloCalFwdTopoTowers"],
         "Calo"     : ["^LAr", "^AllCalo", "^AODCellContainer", "^MBTSContainer", "^CaloCompactCellContainer", "^CaloEntryLayer", "^E4prContainer", "^TileHitVec", "^TileCellVec", "^TileDigits", "^MBTSHits"],
