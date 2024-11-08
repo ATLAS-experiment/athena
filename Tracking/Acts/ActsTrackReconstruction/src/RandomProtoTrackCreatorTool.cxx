@@ -1,19 +1,22 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
   */
-#include "RandomProtoTrackCreator.h"
+
+#include "src/RandomProtoTrackCreatorTool.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 
 
-ActsTrk::RandomProtoTrackCreator::RandomProtoTrackCreator(const std::string& type, 
-		const std::string& name,
-		const IInterface* parent): base_class(type,name,parent){
-}
-StatusCode ActsTrk::RandomProtoTrackCreator::findProtoTracks(const EventContext& ctx,
-                  const xAOD::PixelClusterContainer & pixelContainer,
-                  const xAOD::StripClusterContainer & stripContainer,
-                  std::vector<ActsTrk::ProtoTrack> & foundProtoTracks ) const {
+ActsTrk::RandomProtoTrackCreatorTool::RandomProtoTrackCreatorTool(const std::string& type, 
+								  const std::string& name,
+								  const IInterface* parent)
+  : base_class(type,name,parent)
+{}
+
+StatusCode ActsTrk::RandomProtoTrackCreatorTool::findProtoTracks(const EventContext& ctx,
+								 const xAOD::PixelClusterContainer & pixelContainer,
+								 const xAOD::StripClusterContainer & stripContainer,
+								 std::vector<ActsTrk::ProtoTrack> & foundProtoTracks ) const {
     // Sample N random hits for example
     std::vector<ActsTrk::ATLASUncalibSourceLink> dummyPoints;  
     size_t nPix = 1; 
@@ -41,7 +44,7 @@ StatusCode ActsTrk::RandomProtoTrackCreator::findProtoTracks(const EventContext&
     return StatusCode::SUCCESS;
 }
 
-Amg::Vector3D ActsTrk::RandomProtoTrackCreator::getMeasurementPos(const xAOD::UncalibratedMeasurement* theMeas) const{
+Amg::Vector3D ActsTrk::RandomProtoTrackCreatorTool::getMeasurementPos(const xAOD::UncalibratedMeasurement* theMeas) const {
     if (theMeas->type() == xAOD::UncalibMeasType::PixelClusterType) {
       return dynamic_cast <const xAOD::PixelCluster*>(theMeas)->globalPosition().cast<double>();
     } else if (theMeas->type() == xAOD::UncalibMeasType::StripClusterType){
@@ -51,7 +54,7 @@ Amg::Vector3D ActsTrk::RandomProtoTrackCreator::getMeasurementPos(const xAOD::Un
 }
 
 
-std::unique_ptr<Acts::BoundTrackParameters> ActsTrk::RandomProtoTrackCreator::makeDummyParams (const ActsTrk::ATLASUncalibSourceLink & firstPRD) const{
+std::unique_ptr<Acts::BoundTrackParameters> ActsTrk::RandomProtoTrackCreatorTool::makeDummyParams (const ActsTrk::ATLASUncalibSourceLink & firstPRD) const{
 
   const xAOD::UncalibratedMeasurement* measurement = &getUncalibratedMeasurement(firstPRD);
   using namespace Acts::UnitLiterals;

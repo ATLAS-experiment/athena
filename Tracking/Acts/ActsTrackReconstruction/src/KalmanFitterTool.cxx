@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "KalmanFitter.h"
+#include "src/KalmanFitterTool.h"
 
 // ATHENA
 #include "Acts/EventData/Types.hpp"
@@ -166,12 +166,13 @@ const Acts::Surface* PRDSourceLinkSurfaceAccessor::operator()(const Acts::Source
   return &actsSrf;
 }
 
-KalmanFitter::KalmanFitter(const std::string& t,const std::string& n,
-			   const IInterface* p) :
+KalmanFitterTool::KalmanFitterTool(const std::string& t,
+				   const std::string& n,
+				   const IInterface* p) :
   base_class(t,n,p)
 {}
 
-StatusCode KalmanFitter::initialize() {
+StatusCode KalmanFitterTool::initialize() {
 
   ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
   ATH_CHECK(m_trackingGeometryTool.retrieve());
@@ -224,10 +225,10 @@ StatusCode KalmanFitter::initialize() {
 // refit a track
 // -------------------------------------------------------
 std::unique_ptr<Trk::Track>
-KalmanFitter::fit(const EventContext& ctx,
-		  const Trk::Track& inputTrack,
-		  const Trk::RunOutlierRemoval /*runOutlier*/,
-		  const Trk::ParticleHypothesis /*prtHypothesis*/) const
+KalmanFitterTool::fit(const EventContext& ctx,
+		      const Trk::Track& inputTrack,
+		      const Trk::RunOutlierRemoval /*runOutlier*/,
+		      const Trk::ParticleHypothesis /*prtHypothesis*/) const
 {
   std::unique_ptr<Trk::Track> track = nullptr;
   ATH_MSG_VERBOSE ("--> enter KalmanFitter::fit(Track,,)    with Track from author = "
@@ -307,11 +308,11 @@ KalmanFitter::fit(const EventContext& ctx,
 // fit a set of MeasurementBase objects
 // --------------------------------
 std::unique_ptr<Trk::Track>
-KalmanFitter::fit(const EventContext& ctx,
-		  const Trk::MeasurementSet& inputMeasSet,
-		  const Trk::TrackParameters& estimatedStartParameters,
-		  const Trk::RunOutlierRemoval /*runOutlier*/,
-		  const Trk::ParticleHypothesis /*matEffects*/) const
+KalmanFitterTool::fit(const EventContext& ctx,
+		      const Trk::MeasurementSet& inputMeasSet,
+		      const Trk::TrackParameters& estimatedStartParameters,
+		      const Trk::RunOutlierRemoval /*runOutlier*/,
+		      const Trk::ParticleHypothesis /*matEffects*/) const
 {
   std::unique_ptr<Trk::Track> track = nullptr;
 
@@ -372,11 +373,11 @@ KalmanFitter::fit(const EventContext& ctx,
 // fit a set of PrepRawData objects
 // --------------------------------
 std::unique_ptr<Trk::Track>
-KalmanFitter::fit(const EventContext& ctx,
-		  const Trk::PrepRawDataSet& inputPRDColl,
-		  const Trk::TrackParameters& estimatedStartParameters,
-		  const Trk::RunOutlierRemoval /*runOutlier*/,
-		  const Trk::ParticleHypothesis /*prtHypothesis*/) const
+KalmanFitterTool::fit(const EventContext& ctx,
+		      const Trk::PrepRawDataSet& inputPRDColl,
+		      const Trk::TrackParameters& estimatedStartParameters,
+		      const Trk::RunOutlierRemoval /*runOutlier*/,
+		      const Trk::ParticleHypothesis /*prtHypothesis*/) const
 {
     ATH_MSG_DEBUG("--> entering KalmanFitter::fit(PRDS,TP,)");
     
@@ -442,14 +443,14 @@ KalmanFitter::fit(const EventContext& ctx,
 // fit a set of PrepRawData objects
 // --------------------------------
 std::unique_ptr< ActsTrk::MutableTrackContainer >
-KalmanFitter::fit(const EventContext&,
-      const std::vector< ActsTrk::ATLASUncalibSourceLink> & clusterList,
-      const Acts::BoundTrackParameters& initialParams,
-      const Acts::GeometryContext& tgContext,
-      const Acts::MagneticFieldContext& mfContext,
-      const Acts::CalibrationContext& calContext,
-      const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
-      const Acts::Surface* targetSurface) const{
+KalmanFitterTool::fit(const EventContext&,
+		      const std::vector< ActsTrk::ATLASUncalibSourceLink> & clusterList,
+		      const Acts::BoundTrackParameters& initialParams,
+		      const Acts::GeometryContext& tgContext,
+		      const Acts::MagneticFieldContext& mfContext,
+		      const Acts::CalibrationContext& calContext,
+		      const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
+		      const Acts::Surface* targetSurface) const{
   ATH_MSG_DEBUG("--> entering KalmanFitter::fit(xAODMeasure...things,TP,)");
        
   std::vector<Acts::SourceLink> sourceLinks;
@@ -518,11 +519,11 @@ KalmanFitter::fit(const EventContext&,
 // mem efficient and stable way
 // --------------------------------
 std::unique_ptr<Trk::Track>
-KalmanFitter::fit(const EventContext& ctx,
-		  const Trk::Track& inputTrack,
-		  const Trk::MeasurementSet& addMeasColl,
-		  const Trk::RunOutlierRemoval /*runOutlier*/,
-		  const Trk::ParticleHypothesis /*matEffects*/) const
+KalmanFitterTool::fit(const EventContext& ctx,
+		      const Trk::Track& inputTrack,
+		      const Trk::MeasurementSet& addMeasColl,
+		      const Trk::RunOutlierRemoval /*runOutlier*/,
+		      const Trk::ParticleHypothesis /*matEffects*/) const
 {
   ATH_MSG_VERBOSE ("--> enter KalmanFitter::fit(Track,Meas'BaseSet,,)");
   ATH_MSG_VERBOSE ("    with Track from author = " << inputTrack.info().dumpInfo());
@@ -593,11 +594,11 @@ KalmanFitter::fit(const EventContext& ctx,
 // extend a track fit to include an additional set of PrepRawData objects
 // --------------------------------
 std::unique_ptr<Trk::Track>
-KalmanFitter::fit(const EventContext& /*ctx*/,
-		  const Trk::Track& /*inputTrack*/,
-		  const Trk::PrepRawDataSet& /*addPrdColl*/,
-		  const Trk::RunOutlierRemoval /*runOutlier*/,
-		  const Trk::ParticleHypothesis /*matEffects*/) const
+KalmanFitterTool::fit(const EventContext& /*ctx*/,
+		      const Trk::Track& /*inputTrack*/,
+		      const Trk::PrepRawDataSet& /*addPrdColl*/,
+		      const Trk::RunOutlierRemoval /*runOutlier*/,
+		      const Trk::ParticleHypothesis /*matEffects*/) const
 {
   ATH_MSG_DEBUG("Fit of Track with additional PrepRawDataSet not yet implemented");
   return nullptr;
@@ -606,11 +607,11 @@ KalmanFitter::fit(const EventContext& /*ctx*/,
 // combined fit of two tracks
 // --------------------------------
 std::unique_ptr<Trk::Track>
-KalmanFitter::fit(const EventContext& ctx,
-		  const Trk::Track& intrk1,
-		  const Trk::Track& intrk2,
-		  const Trk::RunOutlierRemoval /*runOutlier*/,
-		  const Trk::ParticleHypothesis /*matEffects*/) const
+KalmanFitterTool::fit(const EventContext& ctx,
+		      const Trk::Track& intrk1,
+		      const Trk::Track& intrk2,
+		      const Trk::RunOutlierRemoval /*runOutlier*/,
+		      const Trk::ParticleHypothesis /*matEffects*/) const
 {
   ATH_MSG_VERBOSE ("--> enter KalmanFitter::fit(Track,Track,)");
   ATH_MSG_VERBOSE ("    with Tracks from #1 = " << intrk1.info().dumpInfo()
@@ -692,10 +693,11 @@ KalmanFitter::fit(const EventContext& ctx,
 }
 
 std::unique_ptr<Trk::Track>
-KalmanFitter::makeTrack(const EventContext& ctx,
-			Acts::GeometryContext& tgContext,
-			ActsTrk::MutableTrackContainer& tracks,
-			Acts::Result<ActsTrk::MutableTrackContainer::TrackProxy, std::error_code>& fitResult, bool SourceLinkType) const {
+KalmanFitterTool::makeTrack(const EventContext& ctx,
+			    Acts::GeometryContext& tgContext,
+			    ActsTrk::MutableTrackContainer& tracks,
+			    Acts::Result<ActsTrk::MutableTrackContainer::TrackProxy, std::error_code>& fitResult,
+			    bool SourceLinkType) const {
   
   if (not fitResult.ok()) 
     return nullptr;    
@@ -875,13 +877,13 @@ KalmanFitter::makeTrack(const EventContext& ctx,
 }
 
 std::unique_ptr< ActsTrk::MutableTrackContainer >
-KalmanFitter::fit(const EventContext& ctx,
-		  const ActsTrk::Seed &seed,
-		  const Acts::BoundTrackParameters& initialParams,
-		  const Acts::GeometryContext& tgContext,
-		  const Acts::MagneticFieldContext& mfContext,
-		  const Acts::CalibrationContext& calContext,
-		  const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap) const
+KalmanFitterTool::fit(const EventContext& ctx,
+		      const ActsTrk::Seed &seed,
+		      const Acts::BoundTrackParameters& initialParams,
+		      const Acts::GeometryContext& tgContext,
+		      const Acts::MagneticFieldContext& mfContext,
+		      const Acts::CalibrationContext& calContext,
+		      const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap) const
 {
   const Acts::TrackingGeometry *
      actsTrackingGeometry = m_trackingGeometryTool->trackingGeometry().get();

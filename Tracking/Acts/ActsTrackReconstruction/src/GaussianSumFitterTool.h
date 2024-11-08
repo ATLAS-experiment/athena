@@ -2,10 +2,8 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSGEOMETRY_GAUSSIANSUMFITTER_H
-#define ACTSGEOMETRY_GAUSSIANSUMFITTER_H
-
-
+#ifndef ACTSTRACKRECONSTRUCTION_GAUSSIANSUMFITTERTOOL_H
+#define ACTSTRACKRECONSTRUCTION_GAUSSIANSUMFITTERTOOL_H
 
 // ATHENA 
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -41,11 +39,12 @@
 
 namespace ActsTrk {
 
-class GaussianSumFitter : public extends<AthAlgTool, Trk::ITrackFitter> {
+class GaussianSumFitterTool
+  : public extends<AthAlgTool, Trk::ITrackFitter> {
 public:
   
-  GaussianSumFitter(const std::string&, const std::string&, const IInterface*);
-  virtual ~GaussianSumFitter() = default;
+  GaussianSumFitterTool(const std::string&, const std::string&, const IInterface*);
+  virtual ~GaussianSumFitterTool() = default;
 
   // standard Athena methods
   virtual StatusCode initialize() override;
@@ -166,15 +165,15 @@ private:
 
   /// Type erased track fitter function.
   using Fitter = Acts::GaussianSumFitter< Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::Navigator>,
-                                                        Acts::AtlasBetheHeitlerApprox<6, 5>,
-                                                        ActsTrk::MutableTrackStateBackend>;
-
+					  Acts::AtlasBetheHeitlerApprox<6, 5>,
+					  ActsTrk::MutableTrackStateBackend >;
+  
   std::unique_ptr<TrkMeasurementCalibrator> m_calibrator;
   std::unique_ptr<Fitter> m_fitter;
 
   using DirectFitter = Acts::GaussianSumFitter< Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::DirectNavigator>,
-                                                        Acts::AtlasBetheHeitlerApprox<6, 5>,
-                                                        ActsTrk::MutableTrackStateBackend>;
+						Acts::AtlasBetheHeitlerApprox<6, 5>,
+						ActsTrk::MutableTrackStateBackend >;
   std::unique_ptr<DirectFitter> m_directFitter;
 
 

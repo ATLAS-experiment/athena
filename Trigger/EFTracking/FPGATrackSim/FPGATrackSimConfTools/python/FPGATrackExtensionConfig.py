@@ -29,8 +29,8 @@ def FPGATrackExtensionAlgCfg(flags,enableTrackStatePrinter=False, **kwargs):
                                                                            ReverseFilteringPt=0,
                                                                            OutlierChi2Cut=30)))
     if enableTrackStatePrinter:
-        from ActsConfig.ActsTrackFindingConfig import ActsTrackStatePrinterCfg
-        printerTool = acc.popToolsAndMerge(ActsTrackStatePrinterCfg(flags))
+        from ActsConfig.ActsTrackFindingConfig import ActsTrackStatePrinterToolCfg
+        printerTool = acc.popToolsAndMerge(ActsTrackStatePrinterToolCfg(flags))
         kwargs["TrackStatePrinter"] = printerTool 
 
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg

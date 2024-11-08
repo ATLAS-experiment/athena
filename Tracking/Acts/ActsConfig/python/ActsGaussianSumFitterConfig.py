@@ -3,9 +3,9 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def ActsGaussianSumFitterCfg(flags,
-                             name: str = "ActsGaussianSumFitter",
-                             **kwargs) -> ComponentAccumulator:
+def ActsGaussianSumFitterToolCfg(flags,
+                                 name: str = "ActsGaussianSumFitterTool",
+                                 **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     kwargs.setdefault("RefitOnly", True) # Track summary will be added in the algorithm
@@ -36,7 +36,7 @@ def ActsGaussianSumFitterCfg(flags,
             from InDetConfig.InDetBoundaryCheckToolConfig import InDetBoundaryCheckToolCfg
             kwargs.setdefault("BoundaryCheckTool", acc.popToolsAndMerge(InDetBoundaryCheckToolCfg(flags)))
 
-    acc.setPrivateTools(CompFactory.ActsTrk.GaussianSumFitter(name, **kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.GaussianSumFitterTool(name, **kwargs))
     return acc
 
 

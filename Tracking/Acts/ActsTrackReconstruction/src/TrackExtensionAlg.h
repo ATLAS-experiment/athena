@@ -38,7 +38,7 @@
 #include "src/detail/Definitions.h"
 #include "src/detail/DuplicateSeedDetector.h"
 #include "src/detail/TrackFindingMeasurements.h"
-#include "src/TrackStatePrinter.h"
+#include "src/TrackStatePrinterTool.h"
 
 /**
  * @class TrackExtensionAlg
@@ -83,7 +83,7 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
   ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>>
       m_stripCalibTool{this, "StripCalibrator", "",
                        "Opt. strip measurement calibrator"};
-  ToolHandle<ActsTrk::TrackStatePrinter> m_trackStatePrinter{
+  ToolHandle<ActsTrk::TrackStatePrinterTool> m_trackStatePrinter{
       this, "TrackStatePrinter", "", "optional track state printer"};
   ToolHandle<ActsTrk::IFitterTool> m_actsFitter{
       this, "ActsFitter", "", "Choice of Acts Fitter (Kalman by default)"};

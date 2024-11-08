@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "src/TrackStatePrinter.h"
+#include "src/TrackStatePrinterTool.h"
 
 // Athena
 #include "TrkParameters/TrackParameters.h"
@@ -39,7 +39,7 @@ namespace ActsTrk
   /// TrackStatePrinter class method definitions comes later.
   /// =========================================================================
 
-  std::string TrackStatePrinter::trackStateName(Acts::ConstTrackStateType trackStateType)
+  std::string TrackStatePrinterTool::trackStateName(Acts::ConstTrackStateType trackStateType)
   {
     static constexpr std::array<std::tuple<bool, Acts::TrackStateFlag, char>, 6> trackStateNames{{
         {false, Acts::TrackStateFlag::ParameterFlag, '-'},
@@ -59,7 +59,7 @@ namespace ActsTrk
   }
 
   // compact surface/boundary name
-  std::string TrackStatePrinter::actsSurfaceName(const Acts::Surface &surface)
+  std::string TrackStatePrinterTool::actsSurfaceName(const Acts::Surface &surface)
   {
     std::string name = surface.name();
     if (name.compare(0, 6, "Acts::") == 0)
@@ -339,12 +339,12 @@ namespace ActsTrk
   }
 
   void
-  TrackStatePrinter::printMeasurementAssociatedSpacePoint(const Acts::GeometryContext &tgContext,
-                                                          const Acts::TrackingGeometry &tracking_geometry,
-                                                          const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
-                                                          const xAOD::UncalibratedMeasurement *measurement,
-                                                          const std::vector<small_vector<const xAOD::SpacePoint *>> &measToSp,
-                                                          size_t offset) const
+  TrackStatePrinterTool::printMeasurementAssociatedSpacePoint(const Acts::GeometryContext &tgContext,
+							      const Acts::TrackingGeometry &tracking_geometry,
+							      const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
+							      const xAOD::UncalibratedMeasurement *measurement,
+							      const std::vector<small_vector<const xAOD::SpacePoint *>> &measToSp,
+							      size_t offset) const
   {
     if (!measurement)
       return;
@@ -406,7 +406,9 @@ namespace ActsTrk
     std::cout << '\n';
   }
 
-  void TrackStatePrinter::printParameters(const Acts::Surface &surface, const Acts::GeometryContext &tgContext, const Acts::BoundVector &bound)
+  void TrackStatePrinterTool::printParameters(const Acts::Surface &surface,
+					      const Acts::GeometryContext &tgContext,
+					      const Acts::BoundVector &bound)
   {
     auto p = Acts::transformBoundToFreeParameters(surface, tgContext, bound);
     std::cout << std::fixed
@@ -425,14 +427,13 @@ namespace ActsTrk
   /// TrackStatePrinter class method definitions
   /// =========================================================================
 
-  TrackStatePrinter::TrackStatePrinter(const std::string &type,
-                                       const std::string &name,
-                                       const IInterface *parent)
-      : AthAlgTool(type, name, parent)
-  {
-  }
+  TrackStatePrinterTool::TrackStatePrinterTool(const std::string &type,
+					       const std::string &name,
+					       const IInterface *parent)
+    : AthAlgTool(type, name, parent)
+  {}
 
-  StatusCode TrackStatePrinter::initialize()
+  StatusCode TrackStatePrinterTool::initialize()
   {
     ATH_MSG_DEBUG("Initializing " << name() << "...");
     ATH_MSG_DEBUG("Properties Summary:");
@@ -446,12 +447,12 @@ namespace ActsTrk
   }
 
   void
-  TrackStatePrinter::printSeed(const Acts::GeometryContext &tgContext,
-                               const ActsTrk::Seed &seed,
-                               const Acts::BoundTrackParameters &initialParameters,
-                               const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &offset,
-                               size_t iseed,
-                               bool isKF) const
+  TrackStatePrinterTool::printSeed(const Acts::GeometryContext &tgContext,
+				   const ActsTrk::Seed &seed,
+				   const Acts::BoundTrackParameters &initialParameters,
+				   const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &offset,
+				   size_t iseed,
+				   bool isKF) const
   {
     if (!isKF)
       printHeader(1);
@@ -485,10 +486,10 @@ namespace ActsTrk
   }
 
   void
-  TrackStatePrinter::printMeasurements(const EventContext &ctx,
-                                       const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,
-                                       const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
-                                       const std::vector<size_t> &offsets) const
+  TrackStatePrinterTool::printMeasurements(const EventContext &ctx,
+					   const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,
+					   const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
+					   const std::vector<size_t> &offsets) const
   {
     const Acts::TrackingGeometry *
        acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
@@ -518,12 +519,12 @@ namespace ActsTrk
     std::cout << std::flush;
   }
 
-  std::vector<std::vector<TrackStatePrinter::small_vector<const xAOD::SpacePoint *>>>
-  TrackStatePrinter::addSpacePoints(const EventContext &ctx,
-                                    const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,
-                                    const std::vector<size_t> &offsets) const
+  std::vector<std::vector<TrackStatePrinterTool::small_vector<const xAOD::SpacePoint *>>>
+  TrackStatePrinterTool::addSpacePoints(const EventContext &ctx,
+					const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,
+					const std::vector<size_t> &offsets) const
   {
-    std::vector<std::vector<TrackStatePrinter::small_vector<const xAOD::SpacePoint *>>> measToSp{clusterContainers.size()};
+    std::vector<std::vector<TrackStatePrinterTool::small_vector<const xAOD::SpacePoint *>>> measToSp{clusterContainers.size()};
     for (std::size_t icontainer = 0; icontainer < clusterContainers.size(); ++icontainer)
     {
       measToSp[icontainer].resize(clusterContainers[icontainer]->size());

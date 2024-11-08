@@ -2,8 +2,8 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRACKRECONSTRUCTION_TRUTHGUIDEDPROTOTRACKCREATOR__H
-#define ACTSTRACKRECONSTRUCTION_TRUTHGUIDEDPROTOTRACKCREATOR__H
+#ifndef ACTSTRACKRECONSTRUCTION_TRUTHGUIDEDPROTOTRACKCREATORTOOL_H
+#define ACTSTRACKRECONSTRUCTION_TRUTHGUIDEDPROTOTRACKCREATORTOOL_H
 
 #include "ActsToolInterfaces/IProtoTrackCreatorTool.h"
 
@@ -13,14 +13,14 @@
 
 namespace ActsTrk {
 
-  class TruthGuidedProtoTrackCreator :
+  class TruthGuidedProtoTrackCreatorTool :
     public extends<AthAlgTool, ActsTrk::IProtoTrackCreatorTool> {
   public:
     
-    TruthGuidedProtoTrackCreator(const std::string& type, 
-		const std::string& name,
-		const IInterface* parent);
-    virtual ~TruthGuidedProtoTrackCreator() = default;
+    TruthGuidedProtoTrackCreatorTool(const std::string& type, 
+				     const std::string& name,
+				     const IInterface* parent);
+    virtual ~TruthGuidedProtoTrackCreatorTool() = default;
     
 
     virtual StatusCode  initialize() override;

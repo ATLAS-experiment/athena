@@ -38,9 +38,9 @@ def egammaTrkRefitterToolCfg(flags,
     acc = ComponentAccumulator()
     if "FitterTool" not in kwargs:
         if flags.Acts.useActsGsfInEgamma:
-            from ActsConfig.ActsGaussianSumFitterConfig import ActsGaussianSumFitterCfg
+            from ActsConfig.ActsGaussianSumFitterConfig import ActsGaussianSumFitterToolCfg
             kwargs["FitterTool"] = acc.popToolsAndMerge(
-                ActsGaussianSumFitterCfg(flags, name="ActsGSFTrackFitter"))
+                ActsGaussianSumFitterToolCfg(flags, name="ActsGSFTrackFitter"))
         else:
             from TrkConfig.TrkGaussianSumFilterConfig import GaussianSumFitterCfg
             kwargs["FitterTool"] = acc.popToolsAndMerge(

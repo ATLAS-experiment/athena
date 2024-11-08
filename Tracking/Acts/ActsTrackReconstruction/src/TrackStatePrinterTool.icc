@@ -2,11 +2,6 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRACKRECONSTRUCTION_TRACKSTATEPRINTER_ICC
-#define ACTSTRACKRECONSTRUCTION_TRACKSTATEPRINTER_ICC 1
-
-#include "src/TrackStatePrinter.h"
-
 // ATHENA
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 #include "ActsGeometry/ATLASSourceLink.h"
@@ -45,10 +40,10 @@ namespace ActsTrk
 
   template <typename track_container_t>
   void
-  TrackStatePrinter::printTrack(const Acts::GeometryContext &tgContext,
-                                const track_container_t &tracks,
-                                const typename track_container_t::TrackProxy &track,
-                                const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offset) const
+  TrackStatePrinterTool::printTrack(const Acts::GeometryContext &tgContext,
+				    const track_container_t &tracks,
+				    const typename track_container_t::TrackProxy &track,
+				    const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offset) const
   {
     const auto lastMeasurementIndex = track.tipIndex();
     // to print track states from inside outward, we need to reverse the order of visitBackwards().
@@ -102,10 +97,10 @@ namespace ActsTrk
 
   template <typename track_state_proxy_t>
   void
-  TrackStatePrinter::printTrackState(const Acts::GeometryContext &tgContext,
-                                     const track_state_proxy_t &state,
-                                     const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offsets,
-                                     bool useFiltered) const
+  TrackStatePrinterTool::printTrackState(const Acts::GeometryContext &tgContext,
+					 const track_state_proxy_t &state,
+					 const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offsets,
+					 bool useFiltered) const
   {
     if (!m_printFilteredStates && useFiltered)
       return;
@@ -161,4 +156,3 @@ namespace ActsTrk
 
 }  // namespace ActsTrk
 
-#endif

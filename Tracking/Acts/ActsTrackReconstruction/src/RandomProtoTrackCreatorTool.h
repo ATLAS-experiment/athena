@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_RANDOMPROTOTRACKCREATOR__H
-#define ACTSTRACKRECONSTRUCTION_RANDOMPROTOTRACKCREATOR__H 1
+#define ACTSTRACKRECONSTRUCTION_RANDOMPROTOTRACKCREATOR__H
 
 #include "ActsToolInterfaces/IProtoTrackCreatorTool.h"
 
@@ -12,14 +12,14 @@
 
 namespace ActsTrk {
 
-  class RandomProtoTrackCreator :
+  class RandomProtoTrackCreatorTool :
     public extends<AthAlgTool, ActsTrk::IProtoTrackCreatorTool> {
   public:
     
-    RandomProtoTrackCreator(const std::string& type, 
-		const std::string& name,
-		const IInterface* parent);
-    virtual ~RandomProtoTrackCreator() = default;
+    RandomProtoTrackCreatorTool(const std::string& type, 
+				const std::string& name,
+				const IInterface* parent);
+    virtual ~RandomProtoTrackCreatorTool() = default;
     
       /// @brief EF-style pattern recognition to create prototracks 
       /// @param ctx: Event context

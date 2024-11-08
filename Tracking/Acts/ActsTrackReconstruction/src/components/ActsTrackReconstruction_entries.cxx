@@ -7,16 +7,18 @@
 #include "src/ScoreBasedAmbiguityResolutionAlg.h"
 #include "src/ReFitterAlg.h"
 #include "src/TrackToTrackParticleCnvAlg.h"
-// Tools
-#include "src/ITkAnalogueClusteringTool.h"
-#include "src/TrackStatePrinter.h"
-#include "src/KalmanFitter.h"
-#include "src/GaussianSumFitter.h"
 #include "src/ProtoTrackCreationAndFitAlg.h"
 #include "src/TrackExtensionAlg.h"
 #include "src/ProtoTrackReportingAlg.h"
-#include "src/RandomProtoTrackCreator.h"
-#include "src/TruthGuidedProtoTrackCreator.h"
+
+// Tools
+#include "src/ITkAnalogueClusteringTool.h"
+#include "src/TrackStatePrinterTool.h"
+#include "src/KalmanFitterTool.h"
+#include "src/GaussianSumFitterTool.h"
+#include "src/RandomProtoTrackCreatorTool.h"
+#include "src/TruthGuidedProtoTrackCreatorTool.h"
+
 // Algs
 DECLARE_COMPONENT( ActsTrk::TrackFindingAlg )
 DECLARE_COMPONENT( ActsTrk::ReFitterAlg )
@@ -29,8 +31,8 @@ DECLARE_COMPONENT( ActsTrk::TrackToTrackParticleCnvAlg )
 
 // Tools
 DECLARE_COMPONENT( ActsTrk::ITkAnalogueClusteringTool )
-DECLARE_COMPONENT( ActsTrk::TrackStatePrinter )
-DECLARE_COMPONENT( ActsTrk::KalmanFitter )
-DECLARE_COMPONENT( ActsTrk::GaussianSumFitter )
-DECLARE_COMPONENT( ActsTrk::RandomProtoTrackCreator )
-DECLARE_COMPONENT( ActsTrk::TruthGuidedProtoTrackCreator )
+DECLARE_COMPONENT( ActsTrk::TrackStatePrinterTool )
+DECLARE_COMPONENT( ActsTrk::KalmanFitterTool )
+DECLARE_COMPONENT( ActsTrk::GaussianSumFitterTool )
+DECLARE_COMPONENT( ActsTrk::RandomProtoTrackCreatorTool )
+DECLARE_COMPONENT( ActsTrk::TruthGuidedProtoTrackCreatorTool )
