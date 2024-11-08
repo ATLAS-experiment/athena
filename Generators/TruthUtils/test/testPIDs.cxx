@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
         TEST_FUNCTION(isTopMeson) // 80
         TEST_FUNCTION(isTrajectory)
         TEST_FUNCTION(leadingQuark)
-        TEST_FUNCTION(SUSY::spin)
+        TEST_FUNCTION(SUSY::spin2)
         TEST_FUNCTION(SUSY::isSquark)
         if  (myline!=current) { printf("reference :%s\ncalculated:%s\n",myline.c_str(),current.c_str()); return 1; }
         //printf("%s\n",current.c_str());
