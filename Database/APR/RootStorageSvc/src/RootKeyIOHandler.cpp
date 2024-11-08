@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -14,16 +14,13 @@
 #include "TClass.h"
 #include "TROOT.h"
 #include "TBufferFile.h"
+#include "RZip.h"
 #define G__DICTIONARY
 #include "RtypesImp.h"
 #include "CxxUtils/checker_macros.h"
 #include "CxxUtils/no_sanitize_undefined.h"
 
 #include <iostream>
-
-extern "C" void R__zip (Int_t cxlevel, Int_t *nin, char *bufin, Int_t *lout, char *bufout, Int_t *nout);
-extern "C" void R__unzip(Int_t *nin, UChar_t *bufin, Int_t *lout, char *bufout, Int_t *nout);
-static const Int_t kMAXBUF = 0xffffff;
 
 namespace pool {
 
@@ -63,7 +60,7 @@ namespace pool {
       Int_t cxlevel = gFile->GetCompressionLevel();
       if (cxlevel && fObjlen > 256) {
         if (cxlevel == 2) cxlevel--;
-        Int_t nbuffers = fObjlen/kMAXBUF;
+        Int_t nbuffers = fObjlen/kMAXZIPBUF;
         Int_t buflen = TMath::Max(512,fKeylen + fObjlen + 9*nbuffers + 8); //add 8 bytes in case object is placed in a deleted gap
         fBuffer = new char[buflen];
         char *objbuf = fBufferRef->Buffer() + fKeylen;
@@ -72,8 +69,9 @@ namespace pool {
         nzip   = 0;
         for (Int_t i=0;i<=nbuffers;i++) {
           if (i == nbuffers) bufmax = fObjlen -nzip;
-          else               bufmax = kMAXBUF;
-          R__zip(cxlevel, &bufmax, objbuf, &bufmax, bufcur, &nout);
+          else               bufmax = kMAXZIPBUF;
+          R__zipMultipleAlgorithm(cxlevel, &bufmax, objbuf, &bufmax, bufcur, &nout,
+                                  ROOT::RCompressionSetting::EAlgorithm::kUseGlobal);
           if (nout == 0 || nout >= fObjlen) { //this happens when the buffer cannot be compressed
               fBuffer = fBufferRef->Buffer();
               Create(fObjlen);
@@ -83,8 +81,8 @@ namespace pool {
           }
           bufcur += nout;
           noutot += nout;
-          objbuf += kMAXBUF;
-          nzip   += kMAXBUF;
+          objbuf += kMAXZIPBUF;
+          nzip   += kMAXZIPBUF;
         }
         Create(noutot);
         fBufferRef->SetBufferOffset(0);
@@ -159,7 +157,7 @@ namespace pool {
         while (loop) {
           nin  = 9 + ((Int_t)bufcur[3] | ((Int_t)bufcur[4] << 8) | ((Int_t)bufcur[5] << 16));
           nbuf = (Int_t)bufcur[6] | ((Int_t)bufcur[7] << 8) | ((Int_t)bufcur[8] << 16);
-          R__unzip(&nin, bufcur, &nbuf, objbuf, &nout);
+          R__unzip(&nin, bufcur, &nbuf, (unsigned char*)objbuf, &nout);
           if (!nout) {
             break;
           }
