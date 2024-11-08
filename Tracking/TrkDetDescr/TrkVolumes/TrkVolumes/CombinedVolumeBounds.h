@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -82,7 +82,7 @@ class CombinedVolumeBounds final : public VolumeBounds {
   bool intersection() const;
 
   /**This method returns bounds orientation*/
-  std::vector<bool> boundsOrientation() const;
+  const std::vector<bool>& boundsOrientation() const;
 
   /** Output Method for MsgStream*/
   virtual MsgStream& dump(MsgStream& sl) const override final;
@@ -125,7 +125,7 @@ inline ObjectAccessor CombinedVolumeBounds::boundarySurfaceAccessor(
   return Trk::ObjectAccessor(m_objectAccessor);
 }
 
-inline std::vector<bool> CombinedVolumeBounds::boundsOrientation() const {
+inline const std::vector<bool>& CombinedVolumeBounds::boundsOrientation() const {
   return (m_boundsOrientation);
 }
 
