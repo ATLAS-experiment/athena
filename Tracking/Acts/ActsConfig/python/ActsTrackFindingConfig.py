@@ -31,9 +31,9 @@ def seedOrder(flags,
         keys.reverse()
     return keys
 
-def ActsTrackStatePrinterCfg(flags,
-                             name: str = "ActsTrackStatePrinterTool",
-                             **kwargs) -> ComponentAccumulator:
+def ActsTrackStatePrinterToolCfg(flags,
+                                 name: str = "ActsTrackStatePrinterTool",
+                                 **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     kwargs.setdefault("InputSpacePoints", isdet(flags, pixel=["ITkPixelSpacePoints"], strip=["ITkStripSpacePoints", "ITkStripOverlapSpacePoints"]))
@@ -45,7 +45,7 @@ def ActsTrackStatePrinterCfg(flags,
             acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
         )
 
-    acc.setPrivateTools(CompFactory.ActsTrk.TrackStatePrinter(name, **kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.TrackStatePrinterTool(name, **kwargs))
     return acc
 
 # ACTS only algorithm
@@ -140,7 +140,7 @@ def ActsMainTrackFindingAlgCfg(flags,
     if flags.Acts.doPrintTrackStates and 'TrackStatePrinter' not in kwargs:
         kwargs.setdefault(
             "TrackStatePrinter",
-            acc.popToolsAndMerge(ActsTrackStatePrinterCfg(flags)),
+            acc.popToolsAndMerge(ActsTrackStatePrinterToolCfg(flags)),
         )
  
     if 'FitterTool' not in kwargs:

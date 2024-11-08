@@ -8,7 +8,7 @@ def ActsTruthGuidedProtoTrackCreatorToolCfg(flags,
                                             **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault('PRD_MultiTruthCollections', ["PRD_MultiTruthITkPixel","PRD_MultiTruthITkStrip"])
-    acc.setPrivateTools(CompFactory.ActsTrk.TruthGuidedProtoTrackCreator(name, **kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.TruthGuidedProtoTrackCreatorTool(name, **kwargs))
     return acc
 
 def ActsProtoTackCreationAndFitAlgCfg(flags,

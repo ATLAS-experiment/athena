@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -6,7 +6,7 @@ from ActsConfig.ActsConfigFlags import TrackFitterType
 from ActsInterop import UnitConstants
 
 def ActsFitterCfg(flags,
-                  name: str = "ActsKalmanFitter",
+                  name: str = "ActsFitterTool",
                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
@@ -51,10 +51,10 @@ def ActsFitterCfg(flags,
             kwargs.setdefault("BoundaryCheckTool",acc.popToolsAndMerge(InDetBoundaryCheckToolCfg(flags)))
 
     if flags.Acts.trackFitterType is TrackFitterType.KalmanFitter:    # This flag is by default set to KalmanFitter
-        acc.setPrivateTools(CompFactory.ActsTrk.KalmanFitter(name, **kwargs))
+        acc.setPrivateTools(CompFactory.ActsTrk.KalmanFitterTool(name, **kwargs))
     elif flags.Acts.trackFitterType is TrackFitterType.GaussianSumFitter:
         name = name.replace("KalmanFitter", "GaussianSumFitter")
-        acc.setPrivateTools(CompFactory.ActsTrk.GaussianSumFitter(name, **kwargs))
+        acc.setPrivateTools(CompFactory.ActsTrk.GaussianSumFitterTool(name, **kwargs))
 
     return acc
 

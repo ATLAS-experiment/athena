@@ -1,27 +1,29 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
   */
-#include "TruthGuidedProtoTrackCreator.h"
+
+#include "src/TruthGuidedProtoTrackCreatorTool.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "TruthUtils/AtlasPID.h"
 
 
-ActsTrk::TruthGuidedProtoTrackCreator::TruthGuidedProtoTrackCreator(const std::string& type, 
-		const std::string& name,
-		const IInterface* parent): base_class(type,name,parent){
+ActsTrk::TruthGuidedProtoTrackCreatorTool::TruthGuidedProtoTrackCreatorTool(const std::string& type, 
+									    const std::string& name,
+									    const IInterface* parent)
+  : base_class(type,name,parent)
+{}
 
-}
-
-StatusCode  ActsTrk::TruthGuidedProtoTrackCreator::initialize()
+StatusCode  ActsTrk::TruthGuidedProtoTrackCreatorTool::initialize()
 {
     ATH_CHECK( m_prdMultiTruthCollectionNames.initialize() );
     return StatusCode::SUCCESS;
 }
-StatusCode ActsTrk::TruthGuidedProtoTrackCreator::findProtoTracks(const EventContext& ctx,
-                  const xAOD::PixelClusterContainer & pixelContainer,
-                  const xAOD::StripClusterContainer & stripContainer,
-                  std::vector<ActsTrk::ProtoTrack> & foundProtoTracks ) const {
+
+StatusCode ActsTrk::TruthGuidedProtoTrackCreatorTool::findProtoTracks(const EventContext& ctx,
+								      const xAOD::PixelClusterContainer & pixelContainer,
+								      const xAOD::StripClusterContainer & stripContainer,
+								      std::vector<ActsTrk::ProtoTrack> & foundProtoTracks ) const {
 
     // Read the PRD information
     std::vector<const PRD_MultiTruthCollection*> prdMultiTruthCollections;        
@@ -123,7 +125,8 @@ StatusCode ActsTrk::TruthGuidedProtoTrackCreator::findProtoTracks(const EventCon
 }
 
 
-std::unique_ptr<Acts::BoundTrackParameters> ActsTrk::TruthGuidedProtoTrackCreator::makeDummyParams (const HepMC::ConstGenParticlePtr& truthParticle) const{
+std::unique_ptr<Acts::BoundTrackParameters>
+ActsTrk::TruthGuidedProtoTrackCreatorTool::makeDummyParams (const HepMC::ConstGenParticlePtr& truthParticle) const{
 
   using namespace Acts::UnitLiterals;
   std::shared_ptr<const Acts::Surface> actsSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(

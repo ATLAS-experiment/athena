@@ -2,8 +2,8 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRACKRECONSTRUCTION_TRACKSTATEPRINTER_H
-#define ACTSTRACKRECONSTRUCTION_TRACKSTATEPRINTER_H 1
+#ifndef ACTSTRACKRECONSTRUCTION_TRACKSTATEPRINTERTOOL_H
+#define ACTSTRACKRECONSTRUCTION_TRACKSTATEPRINTERTOOL_H
 
 // Base
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -43,12 +43,13 @@ namespace Acts
 
 namespace ActsTrk
 {
-  class TrackStatePrinter : virtual public AthAlgTool
+  class TrackStatePrinterTool : virtual public AthAlgTool
   {
   public:
-    TrackStatePrinter(const std::string &type, const std::string &name,
-                      const IInterface *parent);
-    virtual ~TrackStatePrinter() = default;
+    TrackStatePrinterTool(const std::string &type,
+			  const std::string &name,
+			  const IInterface *parent);
+    virtual ~TrackStatePrinterTool() = default;
 
     // standard Athena methods
     virtual StatusCode initialize() override;
@@ -123,8 +124,6 @@ namespace ActsTrk
 
 } // namespace
 
-#ifndef ACTSTRACKRECONSTRUCTION_TRACKSTATEPRINTER_ICC
-#include "src/TrackStatePrinter.icc"
-#endif
+#include "src/TrackStatePrinterTool.icc"
 
 #endif
