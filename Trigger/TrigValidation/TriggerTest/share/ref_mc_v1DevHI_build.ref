@@ -2609,6 +2609,8 @@ HLT_mb_sptrk_pc_L1ZDC_A_C_VTE50:
   eventCount: 0
 HLT_mb_sptrk_pc_L1ZDC_A_C_VjTE50:
   eventCount: 0
+HLT_mb_sptrk_pt1_L1jTAU1_TRT_ZDC_XOR_VjTE200:
+  eventCount: 0
 HLT_mu10_L1MU5VF:
   eventCount: 10
   stepCounts:
