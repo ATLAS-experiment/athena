@@ -376,7 +376,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2024()
   
   m_deltaTSample = 3.125;
   m_numSample = 24;
-  m_lowGainMode = ZDCPulseAnalyzer::LGModeForceLG;
+  m_lowGainMode = ZDCPulseAnalyzer::LGModeRefitLG;
 
   ZDCDataAnalyzer::ZDCModuleIntArray peak2ndDerivMinSamples = {{{12, 12, 12, 12}, {12, 12, 12, 12}}};
 
@@ -398,7 +398,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2024()
 
   const float deltaTcutLow = -10;
   const float deltaTcutHigh = 10;
-  const float chisqDivAmpCutVal = 10;
+  const float chisqDivAmpCutVal = 100;
 
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
@@ -795,12 +795,12 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeInjectorpp2024()
   m_deltaTSample = 3.125;
   m_numSample = 24;
   
-  const int deriv2ndThreshDSHG = -25;
+  const int deriv2ndThreshDSHG = -10;
   const int deriv2ndThreshDSLG = -10;
   const unsigned int peakSample = 10;
 
-  const float deltaTcutLow = -10;
-  const float deltaTcutHigh = 10;
+  const float deltaTcutLow = -50;
+  const float deltaTcutHigh = 50;
   const float chisqDivAmpCutHGVal = 30;
   const float chisqDivAmpCutLGVal = 50;
 
@@ -847,7 +847,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeInjectorpp2024()
                   peak2ndDerivMinThresholdsLG,
                   ZDCPulseAnalyzer::LGModeRefitLG));
   zdcDataAnalyzer->set2ndDerivStep(2);
-  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(3);
+  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(10);
 
   ZDCDataAnalyzer::ZDCModuleFloatArray gainsHG = {{{1.0, 1.0,  1.0,  1.0}, {1.0, 1.0, 1.0, 1.0}}};
   ZDCDataAnalyzer::ZDCModuleFloatArray gainsLG = {{{1.0, 1.0,  1.0,  1.0}, {1.0, 1.0, 1.0, 1.0}}};
@@ -872,16 +872,6 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeInjectorpp2024()
   zdcDataAnalyzer->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0HG, t0LG);
   zdcDataAnalyzer->SetCutValues(chisqDivAmpCutHG, chisqDivAmpCutLG, deltaT0CutLow, deltaT0CutHigh, deltaT0CutLow, deltaT0CutHigh);
   
-  // Enable two-pass analysis                                                                                 
-  //                                                                                                          
-  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassHG = {{{-20, -20, -20, -20},
-                   {-20, -20, -20, -20},}};
-  
-  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassLG = {{{-8, -8, -8, -8},
-                   {-8, -8, -8, -8}}};
-  
-  zdcDataAnalyzer->enableRepass(peak2ndDerivMinRepassHG, peak2ndDerivMinRepassLG);
-
   // Turn on exclusion of early and late samples to address OOT pileup
   //
   zdcDataAnalyzer->enablePreExclusion(4, 500, 200);
@@ -951,8 +941,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeInjectorPbPb2024()
   
   ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {{{5.5, 5.5, 5.5, 5.5}, {5.5, 5.5, 5.5, 5.5}}};
   
-  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{31.25, 31.25, 31.25, 31.25}, {31.25, 31.25, 31.25, 31.25}}};
-  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{31.25, 31.25, 31.25, 31.25}, {31.25, 31.25, 31.25, 31.25}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{33.25, 33, 29.5, 33}, {31.5, 32.5, 32, 32.25}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{30.5, 30, 26.75, 30}, {29.5, 32.5, 29.5, 29}}};
     
   ATH_MSG_DEBUG( "PbPb2023: delta t cut, value low = " << deltaT0CutLow[0][0] << ", high = " << deltaT0CutHigh[0][0] );
 
