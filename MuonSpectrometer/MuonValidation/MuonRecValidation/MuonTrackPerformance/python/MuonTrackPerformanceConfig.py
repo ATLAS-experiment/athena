@@ -10,7 +10,7 @@ def TrajectoryBuilderCfg(flags, name = "MuonDecayTruthTrajectoryBuilder", **kwar
 def MuonTrackTruthToolCfg(flags, name = "MuonTrackTruthTool", **kwargs):
     result = ComponentAccumulator()
     from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
-    kwargs.setdefault("Printer", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags)))
+    kwargs.setdefault("Printer", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)))
     kwargs.setdefault("TruthTrajectoryBuilder", result.popToolsAndMerge(TrajectoryBuilderCfg(flags)))    
     the_tool = CompFactory.Muon.MuonTrackTruthTool(name, **kwargs)
     result.setPrivateTools(the_tool)
@@ -19,7 +19,7 @@ def MuonTrackTruthToolCfg(flags, name = "MuonTrackTruthTool", **kwargs):
 def MuonTrackPerformanceAlgCfg(flags, name = "MuonTrackPerformanceAlg", **kwargs):
     result = ComponentAccumulator()
     from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg, MuonTrackSummaryHelperToolCfg
-    kwargs.setdefault("Printer", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags)))
+    kwargs.setdefault("Printer", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)))
     kwargs.setdefault("TrackTruthTool", result.popToolsAndMerge(MuonTrackTruthToolCfg(flags)))
     kwargs.setdefault("SummaryHelperTool", result.popToolsAndMerge(MuonTrackSummaryHelperToolCfg(flags)))
     kwargs.setdefault("DoTruth", flags.Input.isMC)
