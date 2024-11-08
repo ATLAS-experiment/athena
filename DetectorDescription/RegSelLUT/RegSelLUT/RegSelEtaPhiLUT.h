@@ -1,6 +1,6 @@
 // emacs: this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //
 //   @file    RegSelEtaPhiLUT.h        
@@ -27,7 +27,6 @@
 //  
 //                
 //
-//   $Id: RegSelEtaPhiLUT.h, v0.0   Sat 25 Jun 2011 18:47:25 BST sutt $
 
 
 #ifndef REGSELETAPHILUT_H
@@ -109,8 +108,8 @@ private:
       moduleset::const_iterator rpend=tower.payload().end();
 
       while ( rpitr!=rpend ) { 
-	if ( virtual_roi.overlap( *rpitr ) ) modules.insert( *rpitr );
-	rpitr++;
+        if ( virtual_roi.overlap( *rpitr ) ) modules.insert( *rpitr );
+        ++rpitr;
       }      
     }
   }
@@ -162,8 +161,8 @@ inline std::ostream& operator<<( std::ostream& s, const RegSelEtaPhiLUT& f ) {
       RegSelEtaPhiLUT::moduleset::const_iterator rpend=tower.payload().end();
 
       while ( rpitr!=rpend ) { 
-	s << "\t" << (EtaPhiBase)(*rpitr); 
-       	rpitr++;
+        s << "\t" << (EtaPhiBase)(*rpitr);
+       	++rpitr;
       }
       
       s << std::endl;

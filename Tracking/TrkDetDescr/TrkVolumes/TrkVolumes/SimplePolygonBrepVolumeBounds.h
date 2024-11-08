@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -47,11 +47,11 @@ class SimplePolygonBrepVolumeBounds final: public VolumeBounds {
   SimplePolygonBrepVolumeBounds();
 
   /**Constructor - generic case (from float)*/
-  SimplePolygonBrepVolumeBounds(std::vector<std::pair<float, float> > xyvtx,
+  SimplePolygonBrepVolumeBounds(const std::vector<std::pair<float, float> >& xyvtx,
                                 float hlengthz);
 
   /**Constructor - generic case (from double)*/
-  SimplePolygonBrepVolumeBounds(std::vector<std::pair<double, double> > xyvtx,
+  SimplePolygonBrepVolumeBounds(const std::vector<std::pair<double, double> >& xyvtx,
                                 double hlengthz);
 
   /**Copy Constructor */
@@ -80,7 +80,7 @@ class SimplePolygonBrepVolumeBounds final: public VolumeBounds {
       const Amg::Vector3D& gp, const Amg::Vector3D& dir,
       bool forceInside = false) const override final;
   /**This method returns the set of xy generating vertices*/
-  std::vector<std::pair<double, double> > xyVertices() const;
+  const std::vector<std::pair<double, double> >& xyVertices() const;
   /**This method returns the halflength in local z*/
   double halflengthZ() const;
 
@@ -143,7 +143,7 @@ inline SimplePolygonBrepVolumeBounds* SimplePolygonBrepVolumeBounds::clone()
     const {
   return new SimplePolygonBrepVolumeBounds(*this);
 }
-inline std::vector<std::pair<double, double> >
+inline const std::vector<std::pair<double, double> >&
 SimplePolygonBrepVolumeBounds::xyVertices() const {
   return m_xyVtx;
 }

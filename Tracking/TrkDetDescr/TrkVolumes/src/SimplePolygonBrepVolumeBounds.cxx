@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -40,7 +40,7 @@ Trk::SimplePolygonBrepVolumeBounds::SimplePolygonBrepVolumeBounds()
 }
 
 Trk::SimplePolygonBrepVolumeBounds::SimplePolygonBrepVolumeBounds(
-  std::vector<std::pair<float, float>> xyVtx,
+  const std::vector<std::pair<float, float>>& xyVtx,
   float halez)
   : VolumeBounds()
   , m_halfX(0.)
@@ -82,7 +82,7 @@ Trk::SimplePolygonBrepVolumeBounds::SimplePolygonBrepVolumeBounds(
 }
 
 Trk::SimplePolygonBrepVolumeBounds::SimplePolygonBrepVolumeBounds(
-  std::vector<std::pair<double, double>> xyVtx,
+  const std::vector<std::pair<double, double>>& xyVtx,
   double halez)
   : VolumeBounds()
   , m_halfX(0.)

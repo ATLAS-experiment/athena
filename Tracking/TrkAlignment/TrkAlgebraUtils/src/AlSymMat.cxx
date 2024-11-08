@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/StatusCode.h"
@@ -130,7 +130,7 @@ void AlSymMat::copy(const AlSpaMat& m)
   //Convert Storage System
   long int      i, j;
   const_mapiterator pos;
-  for (pos = m.ptrMap()->begin(); pos!=m.ptrMap()->end(); pos++) {
+  for (pos = m.ptrMap()->begin(); pos!=m.ptrMap()->end(); ++pos) {
     m.elem(pos->first, i, j);
     AlSymMat::elemr(i,j) = pos->second;
   }

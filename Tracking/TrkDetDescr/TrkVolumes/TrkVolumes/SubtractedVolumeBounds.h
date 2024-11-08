@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ class SubtractedVolumeBounds final: public VolumeBounds {
   Volume* inner();
 
   /**This method returns bounds orientation*/
-  std::vector<bool> boundsOrientation() const;
+  const std::vector<bool>& boundsOrientation() const;
 
   /** Output Method for MsgStream*/
   MsgStream& dump(MsgStream& sl) const override;
@@ -121,7 +121,7 @@ inline ObjectAccessor SubtractedVolumeBounds::boundarySurfaceAccessor(
   return Trk::ObjectAccessor(m_objectAccessor);
 }
 
-inline std::vector<bool> SubtractedVolumeBounds::boundsOrientation() const {
+inline const std::vector<bool>& SubtractedVolumeBounds::boundsOrientation() const {
   return (m_boundsOrientation);
 }
 

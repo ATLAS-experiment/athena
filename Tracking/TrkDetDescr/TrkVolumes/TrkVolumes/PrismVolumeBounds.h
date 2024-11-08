@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -80,7 +80,7 @@ class PrismVolumeBounds final: public VolumeBounds {
       bool forceInside = false) const override final;
 
   /**This method returns the set of xy generating vertices*/
-  std::vector<std::pair<double, double> > xyVertices() const;
+  const std::vector<std::pair<double, double> >& xyVertices() const;
 
   /**This method returns the halflength in local z*/
   double halflengthZ() const;
@@ -117,7 +117,7 @@ inline PrismVolumeBounds* PrismVolumeBounds::clone() const {
   return new PrismVolumeBounds(*this);
 }
 
-inline std::vector<std::pair<double, double> > PrismVolumeBounds::xyVertices()
+inline const std::vector<std::pair<double, double> >& PrismVolumeBounds::xyVertices()
     const {
   return m_xyVtx;
 }

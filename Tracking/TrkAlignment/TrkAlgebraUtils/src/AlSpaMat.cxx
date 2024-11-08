@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Original Author: Anthony Morley  (15Jan2007)
@@ -257,7 +257,7 @@ AlSpaMat&  AlSpaMat::operator=(const AlMat& m)
 AlSpaMat&  AlSpaMat::operator=(const double& d)
 {
   mapiterator pos;
-  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); pos++)
+  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); ++pos)
     pos->second = d;
 
   return *this;
@@ -272,7 +272,7 @@ AlSpaMat AlSpaMat::operator+(const AlSpaMat& m) const
 
   AlSpaMat b(m);
   const_mapiterator pos;
-  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); pos++)
+  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); ++pos)
     b.m_ptr_map[pos->first] += pos->second;
   b.m_nele = b.m_ptr_map.size();
 
@@ -287,7 +287,7 @@ AlSpaMat&  AlSpaMat::operator+=(const AlSpaMat& m)
   }
 
   const_mapiterator pos;
-  for (pos = m.m_ptr_map.begin(); pos!=m.m_ptr_map.end(); pos++)
+  for (pos = m.m_ptr_map.begin(); pos!=m.m_ptr_map.end(); ++pos)
     (*this).m_ptr_map[pos->first] += pos->second;
   m_nele = m_ptr_map.size();
 
@@ -303,7 +303,7 @@ AlSpaMat AlSpaMat::operator-(const AlSpaMat& m) const
 
   AlSpaMat b(m);
   const_mapiterator pos;
-  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); pos++)
+  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); ++pos)
     b.m_ptr_map[pos->first] -= pos->second;
   b.m_nele = b.m_ptr_map.size();
 
@@ -318,7 +318,7 @@ AlSpaMat&  AlSpaMat::operator-=(const AlSpaMat& m)
   }
 
   const_mapiterator pos;
-  for (pos = m.m_ptr_map.begin(); pos!=m.m_ptr_map.end(); pos++)
+  for (pos = m.m_ptr_map.begin(); pos!=m.m_ptr_map.end(); ++pos)
     (*this).m_ptr_map[pos->first] -= pos->second;
   m_nele = m_ptr_map.size();
 
@@ -382,7 +382,7 @@ AlVec AlSpaMat::operator*(const AlVec& v) const
 AlSpaMat&  AlSpaMat::operator*=(const double& d)
 {
   mapiterator pos;
-  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); pos++)
+  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); ++pos)
     pos->second *= d;
 
   return *this;
@@ -393,7 +393,7 @@ AlSpaMat  AlSpaMat::operator*(const double& d) const
 {
   AlSpaMat a(size());
   const_mapiterator pos;
-  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); pos++)
+  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); ++pos)
     a.m_ptr_map.insert(std::make_pair(pos->first, (pos->second)*d));
 
   return a;
@@ -423,7 +423,7 @@ int AlSpaMat::SolveWithEigen(AlVec& RHS){
   tripletList.reserve(m_nele);
   long int      i, j;
   mapiterator pos;
-  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); pos++){
+  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); ++pos){
     elem(pos->first, i, j);
     tripletList.emplace_back(i,j,pos->second);
     if(i!=j) tripletList.emplace_back(j,i,pos->second);
@@ -499,7 +499,7 @@ void AlSpaMat::RemoveDoF(int index, int nelem)
   long int n=index+nelem-1;
   mapiterator pos;
   mapiterator pos_obs=m_ptr_map.end();
-  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); pos++) {
+  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); ++pos) {
 
     if( pos_obs!=m_ptr_map.end() )
       m_ptr_map.erase(pos_obs);
@@ -635,7 +635,7 @@ void AlSpaMat::reSize(long int n)
     m_size = n;
     long int i, j;
     mapiterator pos;
-    for (pos = m.m_ptr_map.begin(); pos!=m.m_ptr_map.end(); pos++) {
+    for (pos = m.m_ptr_map.begin(); pos!=m.m_ptr_map.end(); ++pos) {
       m.elem(pos->first, i, j);
       if( i<n && j<n )
         m_ptr_map.insert(*pos);
@@ -695,7 +695,7 @@ StatusCode AlSpaMat::Write(const std::string &filename, bool binary,
   int32_t i, j;
 
   mapiterator pos;
-  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); pos++) {
+  for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); ++pos) {
     melem = pos->second;
     elem(pos->first, ii, jj);   i=ii;  j=jj;     // just a type conversion
     if(binary) {
@@ -872,7 +872,7 @@ TMatrixDSparse* AlSpaMat::makeTMatrix()
   long int      i, j;
   long int counter(0);
   const_mapiterator pos = m_ptr_map.begin();
-  for(pos=m_ptr_map.begin(); pos!=m_ptr_map.end(); pos++){
+  for(pos=m_ptr_map.begin(); pos!=m_ptr_map.end(); ++pos){
     i = pos->first.first;
     j = pos->first.second;
     *(val+counter)=pos->second;
