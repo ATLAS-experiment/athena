@@ -673,22 +673,13 @@ namespace SUSY {
 
   template<class T> inline bool isSquark(const T& p);
   template<> inline bool isSquark(const DecodedPID& p){
-    if (p.ndigits() == 7 && (p(0) == 1 || p(0) == 2)) { // APID SUSY case
-      auto pp = p.shift(1);
-      return ( pp.ndigits() == 1 && isQuark(pp) );
-    }
-    return false;
+    auto pp = p.shift(1); return isSUSY(p) && isQuark(pp);
   }
   template<> inline bool isSquark(const int& p){ auto value_digits = DecodedPID(p); return isSquark(value_digits);}
 
   template<class T> inline bool hasSquark(const T& p, const int& q);
   template<> inline bool hasSquark(const DecodedPID& p, const int& q){
-    if (p.ndigits() == 7 && (p(0) == 1 || p(0) == 2)) { // APID SUSY case
-      auto pp = p.shift(1);
-      if ( pp.ndigits() == 2) { return false; } // skip boson super-partners
-      return (pp(0) == q); // The second non-zero digit in the pdg_id represents the flavour of the Squark in Squark and RHadron pdg_ids
-    }
-    return false;
+    auto pp = p.shift(1); return isSUSY(p) && pp.ndigits() != 2 && pp(0) == q; // skip lepton and boson super-partners by vetoing ndigits==2
   }
   template<> inline bool hasSquark(const int& p, const int& q){ auto value_digits = DecodedPID(p); return hasSquark(value_digits, q);}
 
