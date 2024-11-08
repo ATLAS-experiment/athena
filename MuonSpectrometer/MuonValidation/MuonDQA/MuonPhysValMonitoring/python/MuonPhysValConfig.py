@@ -30,7 +30,7 @@ def PhysValMuonCfg(flags, name="muphysval", **kwargs):
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
     kwargs.setdefault("MuonSelector", acc.popToolsAndMerge(MuonSelectionToolCfg(flags)))
     from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
-    edmprinter = acc.popToolsAndMerge(MuonEDMPrinterToolCfg(flags))
+    edmprinter = acc.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags))
     kwargs.setdefault("MuonPrinter", CompFactory.Rec.MuonPrintingTool(MuonStationPrinter=edmprinter))
     kwargs.setdefault("EnableLumi", False)
     from AthenaCommon.Constants import WARNING
