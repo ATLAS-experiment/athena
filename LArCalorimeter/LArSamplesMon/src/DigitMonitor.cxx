@@ -524,13 +524,15 @@ bool DigitMonitor::residualParams(int lwb, int upb, CovMatrix& k, TVectorD& mean
 }
 
 
-int DigitMonitor::combine(SimpleShape*& shape, SimpleShape*& ref, const TString& selection, bool timeAligned) const
+int DigitMonitor::combine(SimpleShape*& pshape, SimpleShape*& pref, const TString& selection, bool timeAligned) const
 {
   FilterParams f;
   if (!f.set(selection)) return 0;
   int n = 0;
-  shape = ref = nullptr;
-  
+  pshape = pref = nullptr;
+  //don't change existing interface, use these internally
+  std::unique_ptr<SimpleShape> shape;
+  std::unique_ptr<SimpleShape> ref;
   double maxSum = 0;
   
   for (unsigned int i = 0; i < nChannels(); i++) {  
@@ -542,22 +544,24 @@ int DigitMonitor::combine(SimpleShape*& shape, SimpleShape*& ref, const TString&
       maxSum += history->data(j)->maxValue();
       cout << "Adding pulse (" << n+1 << ") at hash " << i << ", index " << j << ", max = " << maxSum/(n+1) << endl;
       //cout << i << " " << j << endl;
-      SimpleShape* thisData = new SimpleShape(*history->data(j));
-      SimpleShape* thisRef =  history->referenceShape(j);
+      auto thisData = std::make_unique<SimpleShape>(*history->data(j));
+      auto thisRef =  std::unique_ptr<SimpleShape>(history->referenceShape(j));
       if (timeAligned) {
         if (!SimpleShape::scaleAndShift(thisData, 1, -history->data(j)->ofcTime())) return -1;
         if (!SimpleShape::scaleAndShift(thisRef,  1, -history->data(j)->ofcTime())) return -1;
       }
-      if (!SimpleShape::add(shape, thisData)) return -1;
-      delete thisData;
-      if (!SimpleShape::add(ref, thisRef)) return -1;      
-      delete thisRef;
+      if (!SimpleShape::add(shape, *thisData)) return -1;
+      if (!SimpleShape::add(ref, *thisRef)) return -1;      
       n++;
     }
   }
+ 
   if (n==0) return -1;
   if (!SimpleShape::scaleAndShift(shape, 1.0/n)) return -1;
   if (!SimpleShape::scaleAndShift(ref,   1.0/n)) return -1;
+   //hand these back in existing interface
+  pshape = shape.release();
+  pref = ref.release();
   return n;
 }
 
