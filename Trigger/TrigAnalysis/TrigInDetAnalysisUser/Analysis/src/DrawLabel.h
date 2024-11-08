@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Sun 11 Nov 2012 01:18:14 GMT 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -41,8 +41,7 @@ public:
       tt->DrawLatex(m_x, m_y, m_text.c_str() );
   }
 
-  std::string& text()       { return m_text; } 
-  std::string  text() const { return m_text; } 
+  const std::string& text() const { return m_text; }
 
 private:
 

@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Fri  7 Aug 2015 10:27:38 CEST 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -30,7 +30,7 @@ public:
 
   virtual ~VertexAnalysis() { } 
 
-  std::string name() const { return m_name; }
+  const std::string& name() const { return m_name; }
   
   virtual void initialise() = 0;
   
@@ -44,8 +44,8 @@ public:
 
   void addHistogram( TProfile* h ) {  m_profs.push_back( h ); }
 
-  std::vector<TH1*>       objects() { return m_histos; }
-  std::vector<TProfile*>  profs()   { return m_profs; }
+  const std::vector<TH1*>&       objects() const { return m_histos; }
+  const std::vector<TProfile*>&  profs() const { return m_profs; }
 
 protected:
 

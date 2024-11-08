@@ -5,9 +5,7 @@
  **   @author  sutt
  **   @date    Fri 14 Sep 2018
  **
- **   $Id: TrigObjectMatcher.h, v0.0   Fri 14 Sep 2018 15:55:41 CEST sutt $
- **
- **   Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 #ifndef  TRIGOBJECTMATCHER_H
@@ -73,7 +71,7 @@ public:
 
   void print( std::ostream& s ) const { 
     s << "TrigObjectMatch size: " << m_objectmap.size();
-    for ( map_type::const_iterator itr = m_objectmap.begin() ; itr!=m_objectmap.end() ; itr++ ) { 
+    for ( map_type::const_iterator itr = m_objectmap.begin() ; itr!=m_objectmap.end() ; ++itr ) {
       s << "\n[ id: 0x" << std::hex << itr->first << std::dec << "  ::  " << *(itr->second) << " ]";
     }
   }
