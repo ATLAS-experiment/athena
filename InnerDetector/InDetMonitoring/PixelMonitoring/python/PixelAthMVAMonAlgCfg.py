@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -66,10 +66,10 @@ vartree', path=path, treedef='pixmvamontool_lb/i:status_vec/vector<float>\
                     #A1_0 -> S0_M1A
                     newx = 'S'+ x[3] + x[2] + 'M' + x[1] + x[0]
                     #S14 -> B14
-                    newy = 'B'+ y[1:]
+                    newy = 'B'+ y[1:3]
                     hname += '_' + newy + '_' + newx
                 else:
-                    hname += '_' + y + '_' + x
+                    hname += '_' + y[0:6] + '_' + x
                 hnames.append(hname)
         modArray.append(helper.addArray([len(hnames)], alg, layer, path+'Modules/'))
         for postfix, tool in modArray[i].Tools.items():

@@ -79,7 +79,19 @@ def getChainPrecisionSeqName(chainPart) -> str:
     return ret
 
 
-def useBuiltInTauJetRNNScore(chainPart) -> bool:
+def useBuiltInTauJetRNNScore(tau_id: str, precision_sequence: str) -> bool:
     '''Check if the TauJet's built-in RNN score and WP variables have to be used, instead of the decorator-based variables'''
-    if getChainPrecisionSeqName(chainPart) in ['MVA', 'LLP', 'LRT'] and chainPart['selection'] in rnn_wps: return True
+    # Support for "legacy" algorithms, where the scores are stored in the built-in TauJet aux variables
+    if (tau_id == 'DeepSet' and precision_sequence == 'MVA') or (tau_id == 'RNNLLP' and precision_sequence in ['LLP', 'LRT']):
+        return True
+
     return False
+
+
+def getTauIDScoreVariables(tau_id: str, precision_sequence: str) -> tuple[str, str]:
+    '''Return the (score, score_sig_trans) variable name pair for a given TauID/Sequence configuration'''
+    # Support for "legacy" algorithms, where the scores are stored in the built-in TauJet aux variables
+    if useBuiltInTauJetRNNScore(tau_id, precision_sequence):
+        return ('RNNJetScore', 'RNNJetScoreSigTrans')
+
+    return (f'{tau_id}_Score', f'{tau_id}_ScoreSigTrans')
