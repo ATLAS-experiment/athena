@@ -114,6 +114,8 @@ StatusCode TrigT1Run3ZDC::initialize() {
 
 StatusCode TrigT1Run3ZDC::execute() {
 
+  const EventContext &ctx = Gaudi::Hive::currentContext();
+
   // create uints to hold trigger averages
   unsigned int trigAvgAHG = 0;
   unsigned int trigAvgCHG = 0;
@@ -133,7 +135,7 @@ StatusCode TrigT1Run3ZDC::execute() {
   // access LUCROD data
 
   // use readhandle to retrive lucrodCollection
-  SG::ReadHandle<ZdcLucrodDataContainer> lucrodCollection(m_zldContainerName);
+  SG::ReadHandle<ZdcLucrodDataContainer> lucrodCollection(m_zldContainerName,ctx);
   
   for (const ZdcLucrodData *zld : *lucrodCollection) {
 
@@ -251,7 +253,7 @@ StatusCode TrigT1Run3ZDC::execute() {
   word1 += (binlg[2] << 30);
 
   // form CTP obejct
-  SG::WriteHandle<ZdcCTP> zdcCTP = SG::makeHandle(m_zdcCTPLocation);
+  SG::WriteHandle<ZdcCTP> zdcCTP = SG::makeHandle(m_zdcCTPLocation,ctx);
 
   // record CTP object
   ATH_CHECK(zdcCTP.record(std::make_unique<ZdcCTP>(word0, word1)));
