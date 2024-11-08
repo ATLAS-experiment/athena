@@ -13,7 +13,6 @@
 #include "CxxUtils/checker_macros.h"
 
 // PerfMon includes
-#include "PerfMonEvent/mallinfo.h"
 
 // STL includes
 #include <dlfcn.h>     // for dlsym
@@ -425,7 +424,7 @@ inline double PMonMT::get_malloc_kb ATLAS_NOT_THREAD_SAFE () {
 #ifndef __linux
   return 0.0;
 #else
-  PerfMon::mallinfo_t m=PerfMon::mallinfo();
+  struct mallinfo2 m = mallinfo2();
   return (m.uordblks+m.hblkhd)/1024.0;
 #endif
 }

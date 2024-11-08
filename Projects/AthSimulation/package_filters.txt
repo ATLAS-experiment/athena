@@ -48,9 +48,7 @@
 + Control/GaudiSequencer
 + Control/IOVSvc
 + Control/Navigation
-+ Control/PerformanceMonitoring/PerfMonAna
 + Control/PerformanceMonitoring/PerfMonComps
-+ Control/PerformanceMonitoring/PerfMonEvent
 + Control/PerformanceMonitoring/PerfMonKernel
 + Control/PyKernel
 + Control/RngComps

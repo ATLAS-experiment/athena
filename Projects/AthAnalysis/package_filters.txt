@@ -178,7 +178,6 @@
 + Control/RootUtils
 + Control/PerformanceMonitoring/PerfMonKernel
 + Control/PerformanceMonitoring/PerfMonComps
-+ Control/PerformanceMonitoring/PerfMonEvent
 + Control/PerformanceMonitoring/PerfMonGPerfTools
 + Control/Navigation
 

@@ -7,4 +7,5 @@ atlas_subdir( PerfMonKernel )
 atlas_add_library( PerfMonKernel
                    src/*.cxx
                    PUBLIC_HEADERS PerfMonKernel
-                   LINK_LIBRARIES GaudiKernel )
+                   LINK_LIBRARIES GaudiKernel)
+
