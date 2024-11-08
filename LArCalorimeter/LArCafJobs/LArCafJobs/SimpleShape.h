@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -14,7 +14,7 @@
 #include "LArCafJobs/AbsShape.h"
 #include <vector>
 #include "CxxUtils/checker_macros.h"
-
+#include <memory>
 class TH1D;
 class TGraph;
 
@@ -60,13 +60,13 @@ namespace LArSamples {
     SimpleShape* createEmpty() const;
     TH1D* histogram(const char* name = "shape", const char* title = "", bool timeInUnitOfSamples = false) const;
 
-    static bool add(SimpleShape*& s1, const AbsShape* s2);
-    static bool scaleAndShift(SimpleShape*& s1, double scale, double shift = 0);
+    static bool add(std::unique_ptr<SimpleShape>& s1, const AbsShape& s2);
+    static bool scaleAndShift(std::unique_ptr<SimpleShape>& s1, double scale, double shift = 0);
 
   private:
       
     std::vector<double> m_values, m_errors;
-    double m_timeInterval, m_startTime;
+    double m_timeInterval{}, m_startTime{};
 
     SimpleShape& operator= (const SimpleShape&);
   };

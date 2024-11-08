@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCafJobs/SimpleShape.h"
@@ -7,9 +7,7 @@
 #include "TMath.h"
 #include "LArCafJobs/ShapeInfo.h"
 
-#include <iostream>
-using std::cout;
-using std::endl;
+
 
 using namespace LArSamples;
 
@@ -123,27 +121,22 @@ TH1D* SimpleShape::histogram(const char* name, const char* title, bool timeInUni
 }
 
 
-bool SimpleShape::add(SimpleShape*& s1, const AbsShape* s2)
+bool SimpleShape::add(std::unique_ptr<SimpleShape>& s1, const AbsShape& s2)
 {
-  if (!s2) return false;
   if (!s1) {
-    s1 = new SimpleShape(*s2);
+    s1.reset(new SimpleShape(s2));
     return true;
   }
-  SimpleShape* sum = s1->add(*s2);
+  SimpleShape* sum = s1->add(s2);
   if (!sum) return false;
-  
-  delete s1;
-  s1 = sum;
+  s1.reset(sum);
   return true;
 }
 
 
-bool SimpleShape::scaleAndShift(SimpleShape*& s1, double scale, double shift)
+bool SimpleShape::scaleAndShift(std::unique_ptr<SimpleShape>& s1, double scale, double shift)
 {
-  if (!s1) return 0;
-  SimpleShape* newShape = new SimpleShape(*s1, scale, shift);
-  delete s1;
-  s1 = newShape;
+  if (!s1) return false;
+  s1.reset(new SimpleShape(*s1, scale, shift));
   return true;
 }
