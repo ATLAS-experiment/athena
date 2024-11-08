@@ -51,8 +51,9 @@ class TrigT1Run3ZDC : public AthAlgorithm {
   // These are the functions inherited from Algorithm
   virtual StatusCode initialize() override;
   virtual StatusCode execute() override;
+  virtual bool isClonable() const override final { return true; }
 
- private:
+private:
   /* Input handles */
   SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleCalibEnergyKey{
       this, "ZdcModuleCalibEnergyKey", "ZdcModules.CalibEnergy",

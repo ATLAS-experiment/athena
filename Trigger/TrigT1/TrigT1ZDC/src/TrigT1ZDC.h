@@ -45,8 +45,9 @@ namespace LVL1 {
   // These are the functions inherited from Algorithm
    virtual StatusCode initialize() override;
    virtual StatusCode execute() override;
+   virtual bool isClonable() const override final { return true; }
 
-  private :
+ private:
    /* Input handles */
    SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleKey{
        this, "ZdcModuleLocation", TrigT1CaloDefs::xAODZdcModuleLocation,
