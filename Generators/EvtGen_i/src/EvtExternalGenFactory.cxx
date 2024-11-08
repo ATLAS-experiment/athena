@@ -1,6 +1,6 @@
 
 /***********************************************************************
-* Copyright 1998-2022 CERN for the benefit of the EvtGen authors       *
+* Copyright 1998-2024 CERN for the benefit of the EvtGen authors       *
 *                                                                      *
 * This file is part of EvtGen.                                         *
 *                                                                      *
@@ -59,7 +59,7 @@ EvtExternalGenFactory* EvtExternalGenFactory::getInstance_mutable ATLAS_NOT_THRE
     return const_cast<EvtExternalGenFactory*>(getInstance());
 }
 
-void EvtExternalGenFactory::definePythiaGenerator( std::string xmlDir,
+void EvtExternalGenFactory::definePythiaGenerator( const std::string& xmlDir,
                                                    bool convertPhysCodes,
                                                    bool useEvtGenRandom )
 {
@@ -86,7 +86,7 @@ void EvtExternalGenFactory::definePythiaGenerator( std::string xmlDir,
     m_extGenMap[genId] = pythiaGenerator;
 }
 
-void EvtExternalGenFactory::definePhotosGenerator( std::string photonType,
+void EvtExternalGenFactory::definePhotosGenerator( const std::string& photonType,
                                                    bool useEvtGenRandom )
 {
     int genId = EvtExternalGenFactory::PhotosGenId;

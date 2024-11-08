@@ -1,6 +1,6 @@
 
 /***********************************************************************
-* Copyright 1998-2022 CERN for the benefit of the EvtGen authors       *
+* Copyright 1998-2024 CERN for the benefit of the EvtGen authors       *
 *                                                                      *
 * This file is part of EvtGen.                                         *
 *                                                                      *
@@ -32,8 +32,8 @@
 class EvtExternalGenList {
   public:
     EvtExternalGenList( bool convertPythiaCodes = false,
-                        std::string pythiaXmlDir = "",
-                        std::string photonType = "gamma",
+                        const std::string& pythiaXmlDir = "",
+                        const std::string& photonType = "gamma",
                         bool useEvtGenRandom = true ) ATLAS_NOT_THREAD_SAFE;
 
     virtual ~EvtExternalGenList();

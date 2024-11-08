@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /* Author: Andrii Verbytskyi andrii.verbytskyi@mpp.mpg.de */
 
@@ -33,7 +33,7 @@ inline Polarization polarization(const T& a) {
     bool is_defined = phi_A && theta_A;
     return Polarization(theta, phi, is_defined);
 }
-template<class T> inline void  set_polarization( T& a,  Polarization b) {
+template<class T> inline void  set_polarization( T& a, const Polarization& b) {
     a->add_attribute("phi",std::make_shared<HepMC3::DoubleAttribute>(b.phi()));
     a->add_attribute("theta",std::make_shared<HepMC3::DoubleAttribute>(b.theta()));
 }
@@ -41,7 +41,7 @@ template<class T> inline void  set_polarization( T& a,  Polarization b) {
 #else
 #include "HepMC/Polarization.h"
 namespace HepMC {
-template <class T> inline void set_polarization( T& a,  Polarization b) {
+template <class T> inline void set_polarization( T& a, const Polarization& b) {
     a->set_polarization(b);
 }
 template <class T> inline Polarization polarization(const T& a) {

@@ -253,7 +253,7 @@ void BB4LPowhegLesHouchesFileReader::doinit  () {
     // are we reading the SLHA block
     if(readingSLHA) {
       // reached the end?
-      if(line.find("</slha") == 0 ) {
+      if(line.starts_with("</slha")) {
 	readingSLHA = false;
 	break;
       }
@@ -304,7 +304,7 @@ void BB4LPowhegLesHouchesFileReader::doinit  () {
 	}; 
       }
       // found a decay block
-      else if(line.find("decay") == 0) {
+      else if(line.starts_with("decay")) {
 	// get PGD code and width
 	istringstream iss(line);
 	string dummy;
@@ -974,7 +974,7 @@ bool BB4LPowhegLesHouchesFileReader::doReadEvent  () {
 	  pos++;
 	  string wgt = sub.substr(pos);
 	  pos = wgt.find("<");
-	  wgt = wgt.substr(0,pos);
+	  wgt.resize(pos);
 	  weightValue = atof(wgt.c_str());
 	}
 	++wi;
