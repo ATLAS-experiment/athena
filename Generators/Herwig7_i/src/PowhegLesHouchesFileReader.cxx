@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 // -*- C++ -*-
 //
@@ -235,7 +235,7 @@ void powhegLesHouchesFileReader::doinit() {
     // are we reading the SLHA block
     if(readingSLHA) {
       // reached the end?
-      if(line.find("</slha") == 0 ) {
+      if(line.starts_with("</slha")) {
 	readingSLHA = false;
 	break;
       }
@@ -286,7 +286,7 @@ void powhegLesHouchesFileReader::doinit() {
 	}; 
       }
       // found a decay block
-      else if(line.find("decay") == 0) {
+      else if(line.starts_with("decay")) {
 	// get PGD code and width
 	istringstream iss(line);
 	string dummy;

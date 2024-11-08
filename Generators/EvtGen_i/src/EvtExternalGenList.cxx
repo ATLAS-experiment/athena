@@ -1,6 +1,6 @@
 
 /***********************************************************************
-* Copyright 1998-2022 CERN for the benefit of the EvtGen authors       *
+* Copyright 1998-2024 CERN for the benefit of the EvtGen authors       *
 *                                                                      *
 * This file is part of EvtGen.                                         *
 *                                                                      *
@@ -41,8 +41,8 @@
 using namespace Belle2;
 
 EvtExternalGenList::EvtExternalGenList( bool convertPythiaCodes,
-                                        std::string pythiaXmlDir,
-                                        std::string photonType,
+                                        const std::string& pythiaXmlDir,
+                                        const std::string& photonType,
                                         bool useEvtGenRandom ) ATLAS_NOT_THREAD_SAFE
 {
     // Instantiate the external generator factory
@@ -51,17 +51,18 @@ EvtExternalGenList::EvtExternalGenList( bool convertPythiaCodes,
     // Define the external generator "engines" here
     extFactory->definePhotosGenerator( photonType, useEvtGenRandom );
 
-    if ( pythiaXmlDir.size() < 1 ) {
+    std::string xmlDir = pythiaXmlDir;
+    if ( pythiaXmlDir.empty() ) {
         // If we have no string defined, check the value of the
         // PYTHIA8DATA environment variable which should be set to the
         // xmldoc Pythia directory
         char* pythiaDataDir = getenv( "PYTHIA8DATA" );
         if ( pythiaDataDir != 0 ) {
-            pythiaXmlDir = pythiaDataDir;
+            xmlDir = pythiaDataDir;
         }
     }
 
-    extFactory->definePythiaGenerator( pythiaXmlDir, convertPythiaCodes,
+    extFactory->definePythiaGenerator( xmlDir, convertPythiaCodes,
                                        useEvtGenRandom );
 
     extFactory->defineTauolaGenerator( useEvtGenRandom );

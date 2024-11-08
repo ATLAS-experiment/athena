@@ -41,17 +41,16 @@ private:
   Event m_workEventJet;
 
 public:
-  mergingDJRs() {
+  mergingDJRs() :
+    // ROOT histograms and the output file where to save them
+    m_HistDjr(std::make_unique<TH1F>("HistDjr", "The first DJR", 100, 0.0, 3.0)),
+    m_HistDjr2(std::make_unique<TH1F>("HistDjr2", "The second DJR", 100, 0.0, 3.0)),
+    m_outFile(std::make_unique<TFile>("hist-DJR.root", "RECREATE")) {
+
     // Slowjet pointer
     m_slowJet = std::make_unique<Pythia8::SlowJet>(
         m_power, m_radius, m_pTjetMin, m_etaMax, m_nSel, m_massSetIn,
         m_sjHookPtrIn, m_useFJcoreIn, m_useStandardRin);
-
-    // ROOT histograms and the output file where to save them
-    m_HistDjr = std::make_unique<TH1F>("HistDjr", "The first DJR", 100, 0.0, 3.0);
-    m_HistDjr2 =
-        std::make_unique<TH1F>("HistDjr2", "The second DJR", 100, 0.0, 3.0);
-    m_outFile = std::make_unique<TFile>("hist-DJR.root", "RECREATE");
 
     std::cout << "**********************************************************"
               << std::endl;

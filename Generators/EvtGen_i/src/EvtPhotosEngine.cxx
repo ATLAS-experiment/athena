@@ -1,6 +1,6 @@
 
 /***********************************************************************
-* Copyright 1998-2022 CERN for the benefit of the EvtGen authors       *
+* Copyright 1998-2024 CERN for the benefit of the EvtGen authors       *
 *                                                                      *
 * This file is part of EvtGen.                                         *
 *                                                                      *
@@ -36,12 +36,12 @@
 
 using std::endl;
 
-EvtPhotosEngine::EvtPhotosEngine( std::string photonType, bool useEvtGenRandom )
+EvtPhotosEngine::EvtPhotosEngine( const std::string& photonType, bool useEvtGenRandom ) :
+  m_photonType(photonType),
+  m_gammaId(EvtId( -1, -1 )),
+  m_gammaPDG(22),    // default photon pdg integer
+  m_mPhoton(0.0)
 {
-    m_photonType = photonType;
-    m_gammaId = EvtId( -1, -1 );
-    m_gammaPDG = 22;    // default photon pdg integer
-    m_mPhoton = 0.0;
 
     EvtGenReport( EVTGEN_INFO, "EvtGen" ) << "Setting up PHOTOS." << endl;
 

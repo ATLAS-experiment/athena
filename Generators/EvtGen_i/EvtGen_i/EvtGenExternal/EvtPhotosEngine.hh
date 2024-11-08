@@ -1,6 +1,6 @@
 
 /***********************************************************************
-* Copyright 1998-2022 CERN for the benefit of the EvtGen authors       *
+* Copyright 1998-2024 CERN for the benefit of the EvtGen authors       *
 *                                                                      *
 * This file is part of EvtGen.                                         *
 *                                                                      *
@@ -44,7 +44,7 @@
 
 class EvtPhotosEngine : public EvtAbsExternalGen {
   public:
-    EvtPhotosEngine( std::string photonType = "gamma",
+    EvtPhotosEngine( const std::string& photonType = "gamma",
                      bool useEvtGenRandom = true );
 
     bool doDecay( EvtParticle* theMother ) override;

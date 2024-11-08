@@ -1,6 +1,6 @@
 
 /***********************************************************************
-* Copyright 1998-2022 CERN for the benefit of the EvtGen authors       *
+* Copyright 1998-2024 CERN for the benefit of the EvtGen authors       *
 *                                                                      *
 * This file is part of EvtGen.                                         *
 *                                                                      *
@@ -46,9 +46,9 @@ class EvtExternalGenFactory {
 
     void initialiseAllGenerators();
 
-    void definePythiaGenerator( std::string xmlDir, bool convertPhysCodes,
+    void definePythiaGenerator( const std::string& xmlDir, bool convertPhysCodes,
                                 bool useEvtGenRandom = true );
-    void definePhotosGenerator( std::string photonType = "gamma",
+    void definePhotosGenerator( const std::string& photonType = "gamma",
                                 bool useEvtGenRandom = true );
     void defineTauolaGenerator( bool useEvtGenRandom = true );
 

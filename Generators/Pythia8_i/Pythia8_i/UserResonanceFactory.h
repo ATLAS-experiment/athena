@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATOR_PYTHIA8_USER_RESONANCE_FACTORY_H
@@ -42,8 +42,8 @@ namespace Pythia8_UserResonance{
     class Creator: public ICreator{
       
     public:
-      Creator(const std::string &name){
-        m_name = name;
+      Creator(const std::string &name) :
+        m_name(name){
         UserResonanceFactory::s_creators()[name] = this;
       }
       
