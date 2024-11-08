@@ -121,7 +121,7 @@ using std::string;
 egammaEnergyCorrectionTool::egammaEnergyCorrectionTool()
     : asg::AsgMessaging("egammaEnergyCorrectionTool"),
       m_rootFileName(
-          PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v32/"
+          PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v33/"
                                     "egammaEnergyCorrectionData.root")),
       m_esmodel(egEnergyCorr::UNDEFINED) {
 
@@ -924,6 +924,7 @@ int egammaEnergyCorrectionTool::initialize() {
              m_esmodel == egEnergyCorr::es2017_R21_v0 or
              m_esmodel == egEnergyCorr::es2017_R21_v1 or
              m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+             m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 or
              m_esmodel == egEnergyCorr::es2018_R21_v0 or
              m_esmodel == egEnergyCorr::es2018_R21_v1 or
              m_esmodel == egEnergyCorr::es2022_R22_PRE or
@@ -933,6 +934,7 @@ int egammaEnergyCorrectionTool::initialize() {
     m_use_new_resolution_model = true;
     if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
         m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+        m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 ||
         m_esmodel == egEnergyCorr::es2018_R21_v0 ||
         m_esmodel == egEnergyCorr::es2018_R21_v1 ||
         m_esmodel == egEnergyCorr::es2022_R22_PRE ||
@@ -946,6 +948,7 @@ int egammaEnergyCorrectionTool::initialize() {
         m_esmodel == egEnergyCorr::es2017_R21_v0 or
         m_esmodel == egEnergyCorr::es2017_R21_v1 or
         m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+        m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 or 
         m_esmodel == egEnergyCorr::es2018_R21_v0 ||
         m_esmodel == egEnergyCorr::es2022_R22_PRE) {
       m_aPSNom.reset(checked_own_cast<TH1*>(
@@ -1040,6 +1043,13 @@ int egammaEnergyCorrectionTool::initialize() {
           rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalk")));
       m_zeeFwdb.reset(checked_own_cast<TH1*>(
           rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalb")));
+    } else if (m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0) {
+      m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get(
+          "Scales/es2024_Run3_ofc0_v0/alphaZee_errStat")));
+      m_zeeFwdk.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalk")));
+      m_zeeFwdb.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalb")));
     } else if (m_esmodel == egEnergyCorr::es2018_R21_v0) {
 
       m_zeeNom.reset(checked_own_cast<TH1*>(
@@ -1116,6 +1126,9 @@ int egammaEnergyCorrectionTool::initialize() {
     } else if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1) {
       m_zeeSyst.reset(checked_own_cast<TH1*>(
           rootFile->Get("Scales/es2017_R21_ofc0_v1/alphaZee_errSyst")));
+    } else if (m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0) {
+      m_zeeSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2024_Run3_ofc0_v0/alphaZee_errSyst")));
     } else if (m_esmodel == egEnergyCorr::es2018_R21_v0) {
       m_zeeSyst.reset(checked_own_cast<TH1*>(
           rootFile->Get("Scales/es2018_R21_v0/alphaZee_errSyst")));
@@ -1154,6 +1167,10 @@ int egammaEnergyCorrectionTool::initialize() {
     } else if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1) {
       m_resNom.reset(checked_own_cast<TH1*>(
           rootFile->Get("Resolution/es2017_R21_ofc0_v1/ctZee_errStat")));
+    } else if (m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0) {
+      // use same resolution smearing as run 2 ofc0 recommendation
+      m_resNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2017_R21_ofc0_v1/ctZee_errStat")));
     } else if (m_esmodel == egEnergyCorr::es2018_R21_v0) {
       m_resNom.reset(checked_own_cast<TH1*>(
           rootFile->Get("Resolution/es2018_R21_v0/ctZee_errStat")));
@@ -1187,6 +1204,10 @@ int egammaEnergyCorrectionTool::initialize() {
       m_resSyst.reset(checked_own_cast<TH1*>(
           rootFile->Get("Resolution/es2017_R21_v1/ctZee_errSyst")));
     } else if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1) {
+      m_resSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2017_R21_ofc0_v1/ctZee_errSyst")));
+    } else if (m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0) {
+      // use same resolution smearing syst as run 2 ofc0 recommendataion
       m_resSyst.reset(checked_own_cast<TH1*>(
           rootFile->Get("Resolution/es2017_R21_ofc0_v1/ctZee_errSyst")));
     } else if (m_esmodel == egEnergyCorr::es2018_R21_v0) {
@@ -1305,6 +1326,7 @@ int egammaEnergyCorrectionTool::initialize() {
 
     if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
         m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+        m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 ||
         m_esmodel == egEnergyCorr::es2018_R21_v0 ||
         m_esmodel == egEnergyCorr::es2018_R21_v1 ||
         m_esmodel == egEnergyCorr::es2022_R22_PRE ||
@@ -1474,6 +1496,7 @@ int egammaEnergyCorrectionTool::initialize() {
       m_esmodel == egEnergyCorr::es2017_R21_v0 or
       m_esmodel == egEnergyCorr::es2017_R21_v1 or
       m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+      m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 or
       m_esmodel == egEnergyCorr::es2017_R21_PRE or
       m_esmodel == egEnergyCorr::es2015_5TeV or
       m_esmodel == egEnergyCorr::es2018_R21_v0 or
@@ -1510,6 +1533,7 @@ int egammaEnergyCorrectionTool::initialize() {
       m_esmodel == egEnergyCorr::es2017_R21_v0 or
       m_esmodel == egEnergyCorr::es2017_R21_v1 or
       m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+      m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 or
       m_esmodel == egEnergyCorr::es2017_R21_PRE or
       m_esmodel == egEnergyCorr::es2015_5TeV or
       m_esmodel == egEnergyCorr::es2018_R21_v0 or
@@ -1652,6 +1676,7 @@ int egammaEnergyCorrectionTool::initialize() {
 
   if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
       m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+      m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 ||
       m_esmodel == egEnergyCorr::es2018_R21_v0 ||
       m_esmodel == egEnergyCorr::es2018_R21_v1 ||
       m_esmodel == egEnergyCorr::es2022_R22_PRE ||
@@ -1702,6 +1727,7 @@ int egammaEnergyCorrectionTool::initialize() {
   // ... new material distortions from release 21 parameterizations
   if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
       m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+      m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 ||
       m_esmodel == egEnergyCorr::es2018_R21_v0 ||
       m_esmodel == egEnergyCorr::es2018_R21_v1 ||
       m_esmodel == egEnergyCorr::es2022_R22_PRE ||
@@ -1774,6 +1800,7 @@ int egammaEnergyCorrectionTool::initialize() {
         rootFile->Get("FastSim/es2017/ph_conv_scale_full_fast_peak_gaussian")));
   } else if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
              m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+             m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 ||
              m_esmodel == egEnergyCorr::es2018_R21_v0 ||
              m_esmodel == egEnergyCorr::es2018_R21_v1 ||
              m_esmodel == egEnergyCorr::es2022_R22_PRE ||
@@ -1801,6 +1828,7 @@ int egammaEnergyCorrectionTool::initialize() {
       m_esmodel != egEnergyCorr::es2017_R21_v0 and
       m_esmodel != egEnergyCorr::es2017_R21_v1 and
       m_esmodel != egEnergyCorr::es2017_R21_ofc0_v1 and
+      m_esmodel != egEnergyCorr::es2024_Run3_ofc0_v0 and
       m_esmodel != egEnergyCorr::es2018_R21_v0 and
       m_esmodel != egEnergyCorr::es2018_R21_v1 and
       m_esmodel != egEnergyCorr::es2022_R22_PRE and
@@ -1941,6 +1969,7 @@ double egammaEnergyCorrectionTool::getCorrectedEnergy(
         (m_esmodel == egEnergyCorr::es2017_R21_v0 ||
          m_esmodel == egEnergyCorr::es2017_R21_v1 ||
          m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+         m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 ||
          m_esmodel == egEnergyCorr::es2018_R21_v0 ||
          m_esmodel == egEnergyCorr::es2018_R21_v1 ||
          m_esmodel == egEnergyCorr::es2022_R22_PRE ||
@@ -1956,6 +1985,7 @@ double egammaEnergyCorrectionTool::getCorrectedEnergy(
         }
         if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
             m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+            m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 ||
             m_esmodel == egEnergyCorr::es2018_R21_v0 ||
             m_esmodel == egEnergyCorr::es2018_R21_v1 ||
             m_esmodel == egEnergyCorr::es2022_R22_PRE ||
@@ -2028,6 +2058,7 @@ double egammaEnergyCorrectionTool::getAlphaValue(
        m_esmodel == egEnergyCorr::es2017_R21_v0 or
        m_esmodel == egEnergyCorr::es2017_R21_v1 or
        m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+       m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 or
        m_esmodel == egEnergyCorr::es2018_R21_v0 or
        m_esmodel == egEnergyCorr::es2018_R21_v1 or
        m_esmodel == egEnergyCorr::es2022_R22_PRE or
@@ -2052,6 +2083,7 @@ double egammaEnergyCorrectionTool::getAlphaValue(
        m_esmodel == egEnergyCorr::es2017_R21_v0 or
        m_esmodel == egEnergyCorr::es2017_R21_v1 or
        m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+       m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 or
        m_esmodel == egEnergyCorr::es2018_R21_v0 or
        m_esmodel == egEnergyCorr::es2018_R21_v1 or
        m_esmodel == egEnergyCorr::es2022_R22_PRE or
@@ -2145,6 +2177,7 @@ double egammaEnergyCorrectionTool::getAlphaValue(
   if (ptype != PATCore::ParticleType::Electron &&
       (m_esmodel != egEnergyCorr::es2017_R21_v1 &&
        m_esmodel != egEnergyCorr::es2017_R21_ofc0_v1 &&
+       m_esmodel != egEnergyCorr::es2024_Run3_ofc0_v0 &&
        m_esmodel != egEnergyCorr::es2018_R21_v0 &&
        m_esmodel != egEnergyCorr::es2018_R21_v1 &&
        m_esmodel != egEnergyCorr::es2022_R22_PRE &&
@@ -2294,6 +2327,7 @@ double egammaEnergyCorrectionTool::getAlphaValue(
     // distortions
     if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
         m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+        m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 ||
         m_esmodel == egEnergyCorr::es2018_R21_v0 ||
         m_esmodel == egEnergyCorr::es2018_R21_v1 ||
         m_esmodel == egEnergyCorr::es2022_R22_PRE ||
@@ -2358,6 +2392,7 @@ double egammaEnergyCorrectionTool::getAlphaValue(
       (m_esmodel == egEnergyCorr::es2017_R21_v0 ||
        m_esmodel == egEnergyCorr::es2017_R21_v1 ||
        m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+       m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 ||
        m_esmodel == egEnergyCorr::es2018_R21_v0 ||
        m_esmodel == egEnergyCorr::es2018_R21_v1 ||
        m_esmodel == egEnergyCorr::es2022_R22_PRE ||
@@ -2857,6 +2892,7 @@ double egammaEnergyCorrectionTool::resolution(
         m_esmodel == egEnergyCorr::es2017_R21_v0 or
         m_esmodel == egEnergyCorr::es2017_R21_v1 or
         m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+        m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 or
         m_esmodel == egEnergyCorr::es2018_R21_v0 or
         m_esmodel == egEnergyCorr::es2018_R21_v1 or
         m_esmodel == egEnergyCorr::es2022_R22_PRE or
@@ -2867,6 +2903,7 @@ double egammaEnergyCorrectionTool::resolution(
 
       if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
           m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+          m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 ||
           m_esmodel == egEnergyCorr::es2018_R21_v0 ||
           m_esmodel == egEnergyCorr::es2018_R21_v1 ||
           m_esmodel == egEnergyCorr::es2022_R22_PRE ||
@@ -3057,6 +3094,7 @@ double egammaEnergyCorrectionTool::applyAFtoG4(
       m_esmodel == egEnergyCorr::es2017_R21_v0 or
       m_esmodel == egEnergyCorr::es2017_R21_v1 or
       m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+      m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 or
       m_esmodel == egEnergyCorr::es2018_R21_v0 or
       m_esmodel == egEnergyCorr::es2018_R21_v1 or
       m_esmodel == egEnergyCorr::es2022_R22_PRE or
@@ -3064,6 +3102,7 @@ double egammaEnergyCorrectionTool::applyAFtoG4(
 
     if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
         m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+        m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 ||
         m_esmodel == egEnergyCorr::es2018_R21_v0 ||
         m_esmodel == egEnergyCorr::es2018_R21_v1 ||
         m_esmodel == egEnergyCorr::es2022_R22_PRE ||
@@ -3180,6 +3219,11 @@ double egammaEnergyCorrectionTool::getAlphaZee(
   if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 && runnumber > 347847) {
     int ieta = std::as_const(*m_zeeNom_data2018).GetXaxis()->FindBin(eta);
     value = m_zeeNom_data2018->GetBinContent(ieta);
+  }
+
+  if (m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0) {
+    int ieta = std::as_const(*m_zeeNom).GetXaxis()->FindBin(eta);
+    value = m_zeeNom->GetBinContent(ieta);
   }
 
   if ((m_esmodel == egEnergyCorr::es2017 or
@@ -3301,6 +3345,8 @@ double egammaEnergyCorrectionTool::getAlphaZee(
     if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 && runnumber > 347847) {
       h = m_zeeNom_data2018.get();
     }
+    //egEnergyCorr::es2024_Run3_ofc0_v0 noting to do (have only m_zeeNom)
+    
     if ((m_esmodel == egEnergyCorr::es2018_R21_v0 ||
          m_esmodel == egEnergyCorr::es2018_R21_v1 or
          m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) &&
@@ -4102,6 +4148,7 @@ double egammaEnergyCorrectionTool::getMaterialNonLinearity(
   if ((ptype != PATCore::ParticleType::Electron &&
        (m_esmodel != egEnergyCorr::es2017_R21_v1 &&
         m_esmodel != egEnergyCorr::es2017_R21_ofc0_v1 &&
+        m_esmodel != egEnergyCorr::es2024_Run3_ofc0_v0 &&
         m_esmodel != egEnergyCorr::es2018_R21_v0 &&
         m_esmodel != egEnergyCorr::es2018_R21_v1 &&
         m_esmodel != egEnergyCorr::es2022_R22_PRE &&
@@ -4122,6 +4169,7 @@ double egammaEnergyCorrectionTool::getMaterialNonLinearity(
   if (std::abs(cl_eta) > 1.52 &&
       (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
        m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+       m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 ||
        m_esmodel == egEnergyCorr::es2018_R21_v0 ||
        m_esmodel == egEnergyCorr::es2018_R21_v1 ||
        m_esmodel == egEnergyCorr::es2022_R22_PRE ||
@@ -4144,6 +4192,7 @@ double egammaEnergyCorrectionTool::getMaterialNonLinearity(
 
   if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
       m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+      m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 ||
       m_esmodel == egEnergyCorr::es2018_R21_v0 ||
       m_esmodel == egEnergyCorr::es2018_R21_v1 ||
       m_esmodel == egEnergyCorr::es2022_R22_PRE ||
@@ -4498,6 +4547,7 @@ double egammaEnergyCorrectionTool::getAlphaPedestal(
                m_esmodel == egEnergyCorr::es2017_R21_v0 or
                m_esmodel == egEnergyCorr::es2017_R21_v1 or
                m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+               m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 or
                m_esmodel == egEnergyCorr::es2018_R21_v0 or
                m_esmodel == egEnergyCorr::es2018_R21_v1 or
                m_esmodel == egEnergyCorr::es2022_R22_PRE or
@@ -4594,6 +4644,7 @@ double egammaEnergyCorrectionTool::pileUpTerm(double energy, double eta,
   if (m_esmodel == egEnergyCorr::es2017_R21_v0 or
       m_esmodel == egEnergyCorr::es2017_R21_v1 or
       m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+      m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 or
       m_esmodel == egEnergyCorr::es2018_R21_v0 or
       m_esmodel == egEnergyCorr::es2018_R21_v1 or
       m_esmodel == egEnergyCorr::es2022_R22_PRE or
@@ -4760,8 +4811,8 @@ void egammaEnergyCorrectionTool::getResolution_systematics(
           sigmaZ = deltaNoise / 40000.;   // sigmaE/E for Z->ee electrons
                                           // (absorbed in smearing correction)
         }
-        // no pileup noise uncertainty for es2017_R21_ofc0_v1
-        else if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1) {
+        // no pileup noise uncertainty for es2017_R21_ofc0_v1 and egEnergyCorr::es2024_Run3_ofc0_v0
+        else if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 || m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0) {
           sigmaPileUp = 0.;
           sigmaZ = 0.;
         } else {
@@ -4793,6 +4844,7 @@ void egammaEnergyCorrectionTool::getResolution_systematics(
                 m_esmodel == egEnergyCorr::es2017_R21_v0 or
                 m_esmodel == egEnergyCorr::es2017_R21_v1 or
                 m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+                m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 or
                 m_esmodel == egEnergyCorr::es2018_R21_v0 or
                 m_esmodel == egEnergyCorr::es2018_R21_v1 or
                 m_esmodel == egEnergyCorr::es2022_R22_PRE or
@@ -4816,6 +4868,7 @@ void egammaEnergyCorrectionTool::getResolution_systematics(
                 m_esmodel == egEnergyCorr::es2017_R21_v0 or
                 m_esmodel == egEnergyCorr::es2017_R21_v1 or
                 m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+                m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 or
                 m_esmodel == egEnergyCorr::es2018_R21_v0 or
                 m_esmodel == egEnergyCorr::es2018_R21_v1 or
                 m_esmodel == egEnergyCorr::es2022_R22_PRE or
@@ -4836,6 +4889,7 @@ void egammaEnergyCorrectionTool::getResolution_systematics(
       else if (isys == 9 &&
                (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
                 m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+                m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 ||
                 m_esmodel == egEnergyCorr::es2018_R21_v0 ||
                 m_esmodel == egEnergyCorr::es2018_R21_v1 ||
                 m_esmodel == egEnergyCorr::es2022_R22_PRE ||
