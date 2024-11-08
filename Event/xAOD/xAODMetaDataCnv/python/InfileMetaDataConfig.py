@@ -246,18 +246,10 @@ def SetupMetaDataForStreamCfg(
         createMetadata = []
     createMetadata += [MetadataCategory.EventStreamInfo]
 
-    disablePropagationOf = []
-    # the following is needed to avoid propagation of EventStreamInfo metadata in merge jobs
-    inputStream = flags.Input.ProcessingTags[0].removeprefix('Stream') if flags.Input.ProcessingTags else None
-    if inputStream == streamName:
-        disablePropagationOf += [MetadataCategory.EventStreamInfo]
-
     helperLists = MetaDataHelperLists()
 
     if propagateMetadataFromInput:
         for mdCategory in MetadataCategory:
-            if mdCategory in disablePropagationOf:
-                continue
             lists, caConfig = propagateMetaData(
                 flags,
                 streamName,

@@ -49,6 +49,8 @@ public:
 
   /// Increase Event Counter
   void addEvent(unsigned int number = 1);
+  /// Set number of events
+  void setNumberOfEvents(unsigned int number);
   /// Insert new Run Number into a set.
   /// @param run [IN] the Run Number to be inserted.
   void insertRunNumber(unsigned int run);
@@ -68,6 +70,8 @@ public:
 
   /// Print a EventStreamInfo to the log file.
   void print(MsgStream& log) const;
+  // Reset the EventStreamInfo payload (clear all sets and set number of events to 0)
+  void reset();
 private:
   unsigned int m_numberOfEvents;   // Number of Events
   std::set<unsigned int> m_runNumbers; // Run#

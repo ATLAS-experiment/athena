@@ -445,6 +445,7 @@ SimplePoolFile_xAOD.root                            DEBUG ---->Class:DataHeaderF
 SimplePoolFile_xAOD.root                            DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 MetaDataSvc                                         DEBUG MetaDataSvc will handle EventStreamInfo ClassID: 167728019
+Str...StreamWritexAODElectrons_MakeEventStreamInfo  DEBUG Resetting the EventStreamInfo payload at the first event
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967297, run #1 1 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.

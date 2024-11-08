@@ -61,8 +61,8 @@ private:
    ServiceHandle<IAthMetaDataSvc> m_metaDataSvc{this, "MetaDataSvc", "MetaDataSvc"};
    ServiceHandle<StoreGateSvc> m_eventStore{this, "StoreGateSvc", "StoreGateSvc"};
 
-   /// Check if the EventStreamInfo was filled with event-specific information
-   bool m_filledEvent{false};
+   /// Counter of the events in the stream
+   std::atomic<unsigned int> m_eventCounter{0};
 
 };
 #endif
