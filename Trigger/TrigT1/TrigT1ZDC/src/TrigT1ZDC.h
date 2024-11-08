@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "AthContainers/DataVector.h"
@@ -35,7 +35,7 @@
 
 namespace LVL1 {
   /** @brief level 1 ZDC trigger simulation */
-  class TrigT1ZDC : public AthReentrantAlgorithm {
+  class TrigT1ZDC : public AthAlgorithm {
 
   public:
 
@@ -44,7 +44,7 @@ namespace LVL1 {
 
   // These are the functions inherited from Algorithm
    virtual StatusCode initialize() override;
-   virtual StatusCode execute(const EventContext& ctx) const override;
+   virtual StatusCode execute() override;
 
   private :
    /* Input handles */
