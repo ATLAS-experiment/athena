@@ -1409,11 +1409,11 @@ void gFexInputByteStreamTool::getEtaPhi ( float &Eta, float &Phi, int iEta, int 
     float s_centralPhiWidth = (2*M_PI)/32; //In central region, gFex has 32 bins in phi
     float s_forwardPhiWidth = (2*M_PI)/16; //In forward region, gFex has 16 bins in phi (before rearranging bins)
 
-    const std::vector<float> s_EtaCenter = { -4.7, -4.2, -3.7, -3.4, -3.2, -3, 
-                                             -2.8, -2.6, -2.35, -2.1, -1.9, -1.7, -1.5, -1.3, -1.1, -0.9,  
-                                             -0.7, -0.5, -0.3, -0.1, 0.1, 0.3, 0.5, 0.7, 0.9, 1.1,                                                 
-                                             1.3, 1.5, 1.7, 1.9, 2.1, 2.35, 2.6, 2.8, 3.0,
-                                             3.2, 3.4, 3.7, 4.2, 4.7};
+    const std::vector<float> s_EtaCenter = { -4.5, -3.8, -3.38, -3.18, -3.15, -3, 
+                                            -2.8, -2.6, -2.35, -2.1, -1.9, -1.7, -1.5, -1.3, -1.1, -0.9,  
+                                            -0.7, -0.5, -0.3, -0.1, 0.1, 0.3, 0.5, 0.7, 0.9, 1.1,                                                 
+                                            1.3, 1.5, 1.7, 1.9, 2.1, 2.35, 2.6, 2.8, 3.0,
+                                            3.15, 3.18, 3.38, 3.8, 4.5};
 
     // Transform Eta and Phi indices for the most forward towers into the "original" indices, 
     // as before rearranging the towers such that the forward region is 12(ieta)x32(iphi).
