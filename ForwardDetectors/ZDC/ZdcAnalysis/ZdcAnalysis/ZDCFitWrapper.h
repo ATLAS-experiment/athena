@@ -468,7 +468,7 @@ private:
   float m_tau2{0};
   float m_timeCorr{0};
 
-  double m_preNorm;
+  double m_preNorm{1.};
   
   std::shared_ptr<TF1> m_expFermiLHCfFunc = 0;
   std::shared_ptr<TF1> m_expFermiPreFunc = 0;
@@ -674,7 +674,6 @@ private:
   float m_tau1{0};
   float m_tau2{0};
   float m_timeCorr{0};
-  double m_preNorm;
   
   std::shared_ptr<TF1> m_expFermiLHCfFunc{};
   std::shared_ptr<TF1> m_expFermiLHCfPreFunc{};
