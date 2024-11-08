@@ -1,227 +1,229 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+from typing import Any
+
+from AthenaCommon.SystemOfUnits import GeV
+
+from .TrigTauHypoMonitoring import getTrigTauPrecisionIDHypoToolMonitoring, getTrigTauPrecisionDiKaonHypoToolMonitoring
+
 from AthenaCommon.Logging import logging
-log = logging.getLogger('TrigL2TauHypoTool')
+log = logging.getLogger('TrigHLTTauHypoTool')
 
+#============================================================================================
+# Precision step hypothesis tool
+#============================================================================================
+def TrigTauPrecisionHypoToolFromDict(flags, chainDict):
+    chainPart = chainDict['chainParts'][0]
+
+    from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getChainIDConfigName
+    identification = getChainIDConfigName(chainPart)
+
+    if identification == 'MesonCuts':
+        # Meson cut-based triggers (ATR-22644)
+        return TrigTauPrecisionDiKaonHypoToolFromDict(flags, chainDict)
+    else:
+        # Everything else
+        return TrigTauPrecisionIDHypoToolFromDict(flags, chainDict)
+
+#-----------------------------------------------------------------
+# Standard tau triggers configuration
+#-----------------------------------------------------------------
+class TauCuts:
+    def __init__(self, chain_part: dict[str, Any]):
+        self._chain_part = chain_part
+
+    @property
+    def n_track_max(self) -> int: return 3
+
+    @property
+    def n_iso_track_max(self) -> int: return 999 if self._chain_part['selection'] == 'idperf' else 1
+
+    @property
+    def pt_min(self) -> float: return float(self._chain_part['threshold']) * GeV
+
+    @property
+    def id_wp(self) -> int:
+        sel = self._chain_part['selection']
+
+        if sel == 'perf' or sel == 'idperf': return -1  # disabled
+        elif sel.startswith('veryloose'): return 0
+        elif sel.startswith('loose'): return 1
+        elif sel.startswith('medium'): return 2
+        elif sel.startswith('tight'): return 3
+        
+        raise ValueError(f'Invalid selection: {sel}')
+
+def TrigTauPrecisionIDHypoToolFromDict(flags, chainDict):
+    '''TrigTauPrecisionIDHypoTool configuration for the standard Tau triggers'''
+    name = chainDict['chainName']
+    chainPart = chainDict['chainParts'][0]
+    cuts = TauCuts(chainPart)
+
+    # Setup the Hypothesis tool
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    currentHypo = CompFactory.TrigTauPrecisionIDHypoTool(
+        name,
+        PtMin=cuts.pt_min,
+        NTracksMax=cuts.n_track_max,
+        NIsoTracksMax=cuts.n_iso_track_max,
+        IDWP=cuts.id_wp,
+    )
+
+    from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getChainIDConfigName, getChainPrecisionSeqName, useBuiltInTauJetRNNScore, getPrecisionSequenceTauIDs, getTauIDScoreVariables
+
+    id_score_monitoring = {}
+    
+    precision_seq_name = getChainPrecisionSeqName(chainPart)
+    identification = getChainIDConfigName(chainPart)
+    if identification in ['perf', 'idperf']:
+        if identification == 'idperf':
+            currentHypo.AcceptAll = True
+
+        # Monitor all the included algorithms
+        used_builtin_rnnscore = False
+        for tau_id in getPrecisionSequenceTauIDs(precision_seq_name):
+            # Skip algs without inference scores
+            if tau_id in ['MesonCuts']: continue
+
+            # We can only have at most one alg. using the built-in TauJet RNN score variables
+            if useBuiltInTauJetRNNScore(tau_id, precision_seq_name):
+                if used_builtin_rnnscore:
+                    raise ValueError('Cannot have two TauID algorithms with scores stored in the built-in TauJet RNN score variables')
+                used_builtin_rnnscore = True
+
+            id_score_monitoring[tau_id] = getTauIDScoreVariables(tau_id, precision_seq_name)
+                
+    else:
+        if useBuiltInTauJetRNNScore(identification, precision_seq_name):
+            # To support the legacy tracktwoMVA/LLP/LRT chains, only in those cases we store the
+            # ID score and passed WPs in the native TauJet variables
+            currentHypo.IDMethod = 1 # TauJet built-in RNN score
+        else:
+            # Decorator-based triggers
+            currentHypo.IDMethod = 2 # Use decorators
+            currentHypo.IDWPNames = [f'{identification}_{wp}' for wp in getattr(flags.Trigger.Offline.Tau, identification).WPNames]
+
+        # Monitor this algorithm only
+        id_score_monitoring[identification] = getTauIDScoreVariables(identification, precision_seq_name)
+
+    # For any triggers following the tracktwo reconstruction (2023 DeepSet)
+    if chainPart['reconstruction'] == 'tracktwoMVA':
+        currentHypo.TrackPtCut = 1.5*GeV
+        currentHypo.HighPtSelectionLooseIDThr = 200*GeV
+        currentHypo.HighPtSelectionJetThr = 430*GeV
+
+    # Only monitor chains with the 'tauMon:online' groups
+    if 'tauMon:online' in chainDict['monGroups']:
+        currentHypo.MonTool = getTrigTauPrecisionIDHypoToolMonitoring(flags, name, id_score_monitoring.keys())
+
+    # TauID Score monitoring
+    currentHypo.MonitoredIDScores = id_score_monitoring
+
+    return currentHypo
+
+
+#-----------------------------------------------------------------
+# Meson cut-based triggers configuration (ATR-22644 + ATR-23239)
+#-----------------------------------------------------------------
 from collections import namedtuple
 
-# Here we need a large repository of configuration values
-# The meaning of the configuration values is as follows:
-# ('Id working point', 'pt threshold': ['Maximum number of tracks[0]', 'etmincalib[1]', 'Id level[2]'])
-TauCuts = namedtuple('TauCuts','numTrackMax numWideTrackMax EtCalibMin level')
-thresholdsEF = {
-    ('looseRNN', 20): TauCuts(3, 1, 20000.0, 1),
-    ('looseRNN', 25): TauCuts(3, 1, 25000.0, 1),
-    ('looseRNN', 35): TauCuts(3, 1, 35000.0, 1),
-    ('looseRNN', 40): TauCuts(3, 1, 40000.0, 1),
-    ('looseRNN', 60): TauCuts(3, 1, 60000.0, 1),
-    ('looseRNN', 80): TauCuts(3, 1, 80000.0, 1), 
-    ('looseRNN', 160): TauCuts(3, 1, 160000.0, 1),
-    ('looseRNN', 200): TauCuts(3, 1, 200000.0, 1),
-    ('mediumRNN', 0): TauCuts(3, 1, 0.0, 2),
-    ('mediumRNN', 20): TauCuts(3, 1, 20000.0, 2),
-    ('mediumRNN', 25): TauCuts(3, 1, 25000.0, 2),
-    ('mediumRNN', 30): TauCuts(3, 1, 30000.0, 2),
-    ('mediumRNN', 35): TauCuts(3, 1, 35000.0, 2),
-    ('mediumRNN', 40): TauCuts(3, 1, 40000.0, 2),
-    ('mediumRNN', 50): TauCuts(3, 1, 50000.0, 2),
-    ('mediumRNN', 60): TauCuts(3, 1, 60000.0, 2),
-    ('mediumRNN', 80): TauCuts(3, 1,  80000.0, 2),
-    ('mediumRNN', 100): TauCuts(3, 1, 100000.0, 2),
-    ('mediumRNN', 160): TauCuts(3, 1, 160000.0, 2), 
-    ('mediumRNN', 180): TauCuts(3, 1, 180000.0, 2), 
-    ('mediumRNN', 200): TauCuts(3, 1, 200000.0, 2),
-    ('tightRNN', 20): TauCuts(3, 1, 20000.0, 3),
-    ('tightRNN', 25): TauCuts(3, 1, 25000.0, 3),
-    ('tightRNN', 35): TauCuts(3, 1, 35000.0, 3),
-    ('tightRNN', 40): TauCuts(3, 1, 40000.0, 3),
-    ('tightRNN', 60): TauCuts(3, 1, 60000.0, 3),
-    ('tightRNN', 80): TauCuts(3, 1, 80000.0, 3),
-    ('tightRNN', 160): TauCuts(3, 1, 160000.0, 3),
-    ('tightRNN', 180): TauCuts(3, 1, 180000.0, 3),
-    ('tightRNN', 200): TauCuts(3, 1, 200000.0, 3),
-    ('perf',0)       : TauCuts(3, 1,0.,-1),
-    ('perf',20)      : TauCuts(3, 1,20000.,-1),
-    ('perf',25)      : TauCuts(3, 1,25000.,-1),
-    ('perf',30)      : TauCuts(3, 1,30000.,-1),
-    ('perf',35)      : TauCuts(3, 1,35000.,-1),
-    ('perf',160)  : TauCuts(3, 1,160000.,-1),
-    ('perf',200)  : TauCuts(3, 1,200000.,-1),
-    ('idperf',0)     : TauCuts(3,999, 0.,-1),
-    ('idperf',20)    : TauCuts(3,999,20000.,-1),
-    ('idperf',25)    : TauCuts(3,999,25000.,-1),
-    ('idperf',30)    : TauCuts(3,999,30000.,-1),
-    ('idperf',35)    : TauCuts(3,999,35000.,-1),
-    ('idperf',80)    : TauCuts(3,999,80000.,-1),
-    ('idperf',160): TauCuts(3,999,160000.,-1),    
-    ('idperf',200): TauCuts(3,999,200000.,-1)
-    }    
+DiKaonCuts = namedtuple('DiKaonCuts', 'massTrkSysMin massTrkSysMax massTrkSysKaonMin massTrkSysKaonMax massTrkSysKaonPiMin massTrkSysKaonPiMax targetMassTrkSysKaonPi leadTrkPtMin PtMin EMPOverTrkSysPMax')
+thresholds_dikaon = {
+    ('dikaonmass', 25): DiKaonCuts(0.0*GeV,   1000.0*GeV,  0.987*GeV, 1.060*GeV,   0.0*GeV,  1000.0*GeV, 0.0*GeV,   15.0*GeV, 25.0*GeV, 1.5),
+    ('dikaonmass', 35): DiKaonCuts(0.0*GeV,   1000.0*GeV,  0.987*GeV, 1.060*GeV,   0.0*GeV,  1000.0*GeV, 0.0*GeV,   25.0*GeV, 35.0*GeV, 1.5),
 
-# ATR-22644 + ATR-23239
-GeV = 1000.0
-DiKaonCuts = namedtuple('DiKaonCuts','massTrkSysMin massTrkSysMax massTrkSysKaonMin massTrkSysKaonMax massTrkSysKaonPiMin massTrkSysKaonPiMax targetMassTrkSysKaonPi leadTrkPtMin EtCalibMin EMPOverTrkSysPMax')
-thresholdsEF_dikaon = {
-    ('dikaonmass', 25):      DiKaonCuts(0.0*GeV, 1000.0*GeV,  0.987*GeV, 1.060*GeV, 0.0*GeV, 1000.0*GeV, 0.0*GeV,   15.0*GeV, 25.0*GeV, 1.5),
-    ('dikaonmass', 35):      DiKaonCuts(0.0*GeV, 1000.0*GeV,  0.987*GeV, 1.060*GeV, 0.0*GeV, 1000.0*GeV, 0.0*GeV,   25.0*GeV, 35.0*GeV, 1.5),
-    ('kaonpi1', 25):         DiKaonCuts(0.0*GeV, 1000.0*GeV,  0.0*GeV, 1000.0*GeV,  0.79*GeV, 0.99*GeV,  0.89*GeV,  15.0*GeV, 25.0*GeV, 1.0),
-    ('kaonpi1', 35):         DiKaonCuts(0.0*GeV, 1000.0*GeV,  0.0*GeV, 1000.0*GeV,  0.79*GeV, 0.99*GeV,  0.89*GeV,  25.0*GeV, 35.0*GeV, 1.0),
-    ('kaonpi2', 25):         DiKaonCuts(0.0*GeV, 1000.0*GeV,  0.0*GeV, 1000.0*GeV,  1.8*GeV, 1.93*GeV,   1.865*GeV, 15.0*GeV, 25.0*GeV, 1.0),
-    ('kaonpi2', 35):         DiKaonCuts(0.0*GeV, 1000.0*GeV,  0.0*GeV, 1000.0*GeV,  1.8*GeV, 1.93*GeV,   1.865*GeV, 25.0*GeV, 35.0*GeV, 1.0),
-    ('dipion1', 25):         DiKaonCuts(0.475*GeV, 1.075*GeV, 0.0*GeV, 1000.0*GeV,  0.0*GeV, 1000.0*GeV, 0.0*GeV,   15.0*GeV, 25.0*GeV, 1.0),
-    ('dipion2', 25):         DiKaonCuts(0.460*GeV, 0.538*GeV, 0.0*GeV, 1000.0*GeV,  0.0*GeV, 1000.0*GeV, 0.0*GeV,   15.0*GeV, 25.0*GeV, 1.0),
-    ('dipion3', 25):         DiKaonCuts(0.279*GeV, 0.648*GeV, 0.0*GeV, 1000.0*GeV,  0.0*GeV, 1000.0*GeV, 0.0*GeV,   25.0*GeV, 25.0*GeV, 2.2),
-    ('dipion4', 25):         DiKaonCuts(0.460*GeV, 1.075*GeV, 0.0*GeV, 1000.0*GeV,  0.0*GeV, 1000.0*GeV, 0.0*GeV,   15.0*GeV, 25.0*GeV, 1.0),
-}
-SinglePionCuts = namedtuple('SinglePionCuts','leadTrkPtMin EtCalibMin nTrackMax nWideTrackMax dRmaxMax etOverPtLeadTrkMin etOverPtLeadTrkMax')
-thresholdsEF_singlepion = {
-    ('singlepion', 25): SinglePionCuts(30.0*GeV, 25.0*GeV, 1, 0, 0.06, 0.4, 0.85)
+    ('kaonpi1',    25): DiKaonCuts(0.0*GeV,   1000.0*GeV,  0.0*GeV,   1000.0*GeV,  0.79*GeV, 0.99*GeV,   0.89*GeV,  15.0*GeV, 25.0*GeV, 1.0),
+    ('kaonpi1',    35): DiKaonCuts(0.0*GeV,   1000.0*GeV,  0.0*GeV,   1000.0*GeV,  0.79*GeV, 0.99*GeV,   0.89*GeV,  25.0*GeV, 35.0*GeV, 1.0),
+
+    ('kaonpi2',    25): DiKaonCuts(0.0*GeV,   1000.0*GeV,  0.0*GeV,   1000.0*GeV,  1.8*GeV,  1.93*GeV,   1.865*GeV, 15.0*GeV, 25.0*GeV, 1.0),
+    ('kaonpi2',    35): DiKaonCuts(0.0*GeV,   1000.0*GeV,  0.0*GeV,   1000.0*GeV,  1.8*GeV,  1.93*GeV,   1.865*GeV, 25.0*GeV, 35.0*GeV, 1.0),
+
+    ('dipion1',    25): DiKaonCuts(0.475*GeV, 1.075*GeV,   0.0*GeV,   1000.0*GeV,  0.0*GeV,  1000.0*GeV, 0.0*GeV,   15.0*GeV, 25.0*GeV, 1.0),
+    ('dipion2',    25): DiKaonCuts(0.460*GeV, 0.538*GeV,   0.0*GeV,   1000.0*GeV,  0.0*GeV,  1000.0*GeV, 0.0*GeV,   15.0*GeV, 25.0*GeV, 1.0),
+    ('dipion3',    25): DiKaonCuts(0.279*GeV, 0.648*GeV,   0.0*GeV,   1000.0*GeV,  0.0*GeV,  1000.0*GeV, 0.0*GeV,   25.0*GeV, 25.0*GeV, 2.2),
+    ('dipion4',    25): DiKaonCuts(0.460*GeV, 1.075*GeV,   0.0*GeV,   1000.0*GeV,  0.0*GeV,  1000.0*GeV, 0.0*GeV,   15.0*GeV, 25.0*GeV, 1.0),
 }
 
-def TrigEFTauMVHypoToolFromDict( flags, chainDict ):
+SinglePionCuts = namedtuple('SinglePionCuts', 'leadTrkPtMin PtMin NTracksMax NIsoTracksMax dRmaxMax etOverPtLeadTrkMin etOverPtLeadTrkMax')
+thresholds_singlepion = {
+    ('singlepion', 25): SinglePionCuts(30.0*GeV, 25.0*GeV, 1, 0, 0.06, 0.4, 0.85),
+}
 
+def TrigTauPrecisionDiKaonHypoToolFromDict(flags, chainDict):
+    '''TrigTauPrecisionDiKaonHypoTool configuration for the meson cut-based Tau triggers (ATR-22644)'''
     name = chainDict['chainName']
-
     chainPart = chainDict['chainParts'][0]
 
-    criteria  = chainPart['selection']
-    threshold = chainPart['threshold']
-
+    # Setup the Hypothesis tool
     from AthenaConfiguration.ComponentFactory import CompFactory
-    if criteria in ['verylooseRNN', 'looseRNN', 'mediumRNN', 'tightRNN', 'idperf', 'perf'] :
-    
-        currentHypo = CompFactory.TrigEFTauMVHypoTool(name)
+    currentHypo = CompFactory.TrigTauPrecisionDiKaonHypoTool(name)
 
-        # Only monitor chains with the 'tauMon:online' groups
-        if 'tauMon:online' in chainDict['monGroups']:
-            monTool = GenericMonitoringTool(flags, f'MonTool_{name}')
-            monTool.HistPath = f'TrigTauRecMerged_TrigEFTauMVHypo/{name}'
-
-            # Define quantities to be monitored
-            monTool.defineHistogram('nInputTaus', path='EXPERT', type='TH1F', title='Input Taus (before selection); N Taus; Entries', xbins=10, xmin=0, xmax=10) 
-
-            labels = ['Initial', 'p_{T}', 'NTracks & NWideTracks', 'ID']
-            monTool.defineHistogram('CutCounter', path='EXPERT', type='TH1I', title='Passed Tau cuts; Cut; Entries', xbins=10, xmin=0, xmax=10, xlabels=labels)
-
-            monTool.defineHistogram('ptAccepted', path='EXPERT', type='TH1F', title='Accepted Tau p_{T}; p_{T} [GeV]; Entries', xbins=80, xmin=0, xmax=800)
-            monTool.defineHistogram('nTrackAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Tracks; N Tracks; Entries', xbins=10, xmin=0, xmax=10)
-            monTool.defineHistogram('nWideTrackAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Wide Tracks; N Wide Tracks; Entries', xbins=10, xmin=0, xmax=10)       
-
-            monTool.defineHistogram('RNNJetScoreAccepted_0p', path='EXPERT', type='TH1F', title='Accepted 0-prong Tau ID score; Score; Entries', xbins=40, xmin=0, xmax=1)
-            monTool.defineHistogram('RNNJetScoreSigTransAccepted_0p', path='EXPERT', type='TH1F', title='Accepted 0-prong Tau ID transformed score; Transformed Signal Score; Entries', xbins=40, xmin=0, xmax=1)
-
-            monTool.defineHistogram('RNNJetScoreAccepted_1p', path='EXPERT', type='TH1F', title='Accepted 1-prong Tau ID score; Score; Entries', xbins=40, xmin=0, xmax=1)
-            monTool.defineHistogram('RNNJetScoreSigTransAccepted_1p', path='EXPERT', type='TH1F', title='Accepted 1-prong Tau ID transformed score; Transformed Signal Score; Entries', xbins=40, xmin=0, xmax=1)
-
-            monTool.defineHistogram('RNNJetScoreAccepted_mp', path='EXPERT', type='TH1F', title='Accepted multi-prong Tau ID score; Score; Entries', xbins=40, xmin=0, xmax=1)
-            monTool.defineHistogram('RNNJetScoreSigTransAccepted_mp', path='EXPERT', type='TH1F', title='Accepted multi-prong Tau ID transformed score; Transformed Signal Score; Entries', xbins=40, xmin=0, xmax=1)
-
-            currentHypo.MonTool = monTool
-
- 
-        # Setup the Hypo parameter
-        theThresh = thresholdsEF[(criteria, int(threshold))]
-        currentHypo.PtMin           = theThresh.EtCalibMin
-        currentHypo.NTrackMax       = theThresh.numTrackMax
-        currentHypo.NWideTrackMax   = theThresh.numWideTrackMax
-        currentHypo.IDMethod        = 1 # RNN Score
-        currentHypo.IDWP            = theThresh.level
-     
-        if 'idperf' in criteria: 
-            currentHypo.AcceptAll   = True
-
-        # 2023 DeepSet triggers
-        if chainPart['reconstruction'] == 'tracktwoMVA':
-            currentHypo.HighPtSelectionLooseIDThr = 200e3
-            currentHypo.HighPtSelectionJetThr = 430e3
-            currentHypo.TrackPtCut = 1.5e3
-
-    elif criteria in ['dikaonmass', 'kaonpi1', 'kaonpi2', 'dipion1', 'dipion2', 'dipion3', 'dipion4', 'singlepion']: # ATR-22644
-        currentHypo = CompFactory.TrigEFTauDiKaonHypoTool(name)
-        monTool = GenericMonitoringTool(flags, f'MonTool_{name}')
-        monTool.HistPath = 'ComboHypo/' + name.replace('leg001_', '')
-
-        monTool.defineHistogram('nInputTaus', path='EXPERT', type='TH1F', title='Input Taus (before selection); N Taus; Entries', xbins=10, xmin=0, xmax=10) 
-
-        monTool.defineHistogram('ptAccepted', path='EXPERT', type='TH1F', title='Accepted Tau p_{T}; p_{T} [GeV]; Entries', xbins=80, xmin=0, xmax=800)
-        monTool.defineHistogram('nTrackAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Tracks; N Tracks; Entries', xbins=10, xmin=0, xmax=10)
-        monTool.defineHistogram('nWideTrackAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Wide Tracks; N Wide Tracks; Entries', xbins=10, xmin=0, xmax=10)       
-
-        monTool.defineHistogram('dRAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Maximum #DeltaR(Tau, Tracks); Maximum #DeltaR(Tau, Tracks); Entries', xbins=40, xmin=0, xmax=0.4)
-        monTool.defineHistogram('massTrkSysAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Di-pion system Mass; m_{#pi#pi} [GeV]; Entries', xbins=50, xmin=0, xmax=3)
-        monTool.defineHistogram('massTrkSysKaonAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Di-kaon system Mass; m_{KK} [GeV]; Entries', xbins=50, xmin=0, xmax=3)
-        monTool.defineHistogram('massTrkSysKaonPiAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Kaon+Pion system Mass; m_{K#pi} [GeV]; Entries', xbins=50, xmin=0, xmax=3)
-        monTool.defineHistogram('leadTrkPtAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Leading Track p_{T}; Leading Track p_{T} [GeV]; Entries', xbins=50, xmin=0, xmax=300)
-        monTool.defineHistogram('etOverPtLeadTrkAccepted', path='EXPERT', type='TH1F', title='Accepted Tau (E_{T}^{EM} + E_{T}^{Had}) / p_{T}^{lead trk.}; (E_{T}^{EM} + E_{T}^{Had}) / p_{T}^{lead trk.}; Entries', xbins=50, xmin=0, xmax=5)
-        monTool.defineHistogram('EMOverTrkSysPAccepted', path='EXPERT', type='TH1F', title='Accepted Tau E_{T}^{EM} over Track system p_{T}; E_{T}^{EM} / p_{T}^{trk sys}; Entries', xbins=50, xmin=0, xmax=5)
-
-        currentHypo.MonTool = monTool
-
-        if criteria in [ 'dikaonmass', 'kaonpi1', 'kaonpi2', 'dipion1', 'dipion2', 'dipion3', 'dipion4']:
-            theThresh = thresholdsEF_dikaon[(criteria, int(threshold))]
-            currentHypo.PtMin                  = theThresh.EtCalibMin 
-            currentHypo.leadTrkPtMin           = theThresh.leadTrkPtMin
-            currentHypo.massTrkSysMin          = theThresh.massTrkSysMin          
-            currentHypo.massTrkSysMax          = theThresh.massTrkSysMax          
-            currentHypo.massTrkSysKaonMin      = theThresh.massTrkSysKaonMin      
-            currentHypo.massTrkSysKaonMax      = theThresh.massTrkSysKaonMax      
-            currentHypo.massTrkSysKaonPiMin    = theThresh.massTrkSysKaonPiMin    
-            currentHypo.massTrkSysKaonPiMax    = theThresh.massTrkSysKaonPiMax    
-            currentHypo.targetMassTrkSysKaonPi = theThresh.targetMassTrkSysKaonPi 
-            currentHypo.EMPOverTrkSysPMax      = theThresh.EMPOverTrkSysPMax      
-            
-        elif criteria in ['singlepion']:
-            theThresh = thresholdsEF_singlepion[(criteria, int(threshold))]
-            currentHypo.PtMin              = theThresh.EtCalibMin 
-            currentHypo.leadTrkPtMin       = theThresh.leadTrkPtMin
-            currentHypo.nTrackMax          = theThresh.nTrackMax              
-            currentHypo.nWideTrackMax      = theThresh.nWideTrackMax          
-            currentHypo.dRmaxMax           = theThresh.dRmaxMax               
-            currentHypo.etOverPtLeadTrkMin = theThresh.etOverPtLeadTrkMin     
-            currentHypo.etOverPtLeadTrkMax = theThresh.etOverPtLeadTrkMax     
+    key = (chainPart['selection'], int(chainPart['threshold']))
+    if key in thresholds_dikaon:
+        thr = thresholds_dikaon[key]
+        currentHypo.PtMin                  = thr.PtMin
+        currentHypo.leadTrkPtMin           = thr.leadTrkPtMin
+        currentHypo.massTrkSysMin          = thr.massTrkSysMin
+        currentHypo.massTrkSysMax          = thr.massTrkSysMax
+        currentHypo.massTrkSysKaonMin      = thr.massTrkSysKaonMin
+        currentHypo.massTrkSysKaonMax      = thr.massTrkSysKaonMax
+        currentHypo.massTrkSysKaonPiMin    = thr.massTrkSysKaonPiMin
+        currentHypo.massTrkSysKaonPiMax    = thr.massTrkSysKaonPiMax
+        currentHypo.targetMassTrkSysKaonPi = thr.targetMassTrkSysKaonPi
+        currentHypo.EMPOverTrkSysPMax      = thr.EMPOverTrkSysPMax
         
+    elif key in thresholds_singlepion:
+        thr = thresholds_singlepion[key]
+        currentHypo.PtMin              = thr.PtMin
+        currentHypo.NTracksMax         = thr.NTracksMax
+        currentHypo.NIsoTracksMax      = thr.NIsoTracksMax
+        currentHypo.leadTrkPtMin       = thr.leadTrkPtMin
+        currentHypo.dRmaxMax           = thr.dRmaxMax
+        currentHypo.etOverPtLeadTrkMin = thr.etOverPtLeadTrkMin
+        currentHypo.etOverPtLeadTrkMax = thr.etOverPtLeadTrkMax
+
+    currentHypo.MonTool = getTrigTauPrecisionDiKaonHypoToolMonitoring(flags, name)
+
     return currentHypo
 
-def TrigTauTrackHypoToolFromDict( flags, chainDict ):
 
+
+#============================================================================================
+# Precision Tracking step hypothesis tool (without selection)
+#============================================================================================
+def TrigTauPrecTrackHypoToolFromDict(chainDict):
     name = chainDict['chainName']
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    currentHypo = CompFactory.TrigTrackPreSelHypoTool(name)
+    currentHypo = CompFactory.TrigTauPrecTrackHypoTool(name)
 
     return currentHypo
 
-def TrigTrkPrecHypoToolFromDict( chainDict ):
 
+
+#============================================================================================
+# FTF steps hypothesis tools (without selection)
+#============================================================================================
+def TrigTauFastTrackHypoToolFromDict(chainDict):
     name = chainDict['chainName']
-    chainPart = chainDict['chainParts'][0]
-
-    criteria  = chainPart['selection']
-    threshold = chainPart['threshold']
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    currentHypo = CompFactory.TrigTrkPrecHypoTool(name)
-    currentHypo.MonTool = ""
-
-    if criteria == 'cosmic':
-      currentHypo.LowerPtCut      = int(threshold)*1000.
-      currentHypo.TracksInCoreCut = 9999
-      currentHypo.TracksInIsoCut  = 9999
-      currentHypo.DeltaZ0Cut      = 9999.
+    currentHypo = CompFactory.TrigTauFastTrackHypoTool(name)
 
     return currentHypo
 
 
-def TrigL2TauHypoToolFromDict( chainDict ):
 
+#============================================================================================
+# CaloMVA step hypothesis tool
+#============================================================================================
+def TrigTauCaloMVAHypoToolFromDict(chainDict):
     name = chainDict['chainName']
-    chainPart = chainDict['chainParts'][0]
+    threshold = float(chainDict['chainParts'][0]['threshold'])
 
-    threshold = chainPart['threshold']
     from AthenaConfiguration.ComponentFactory import CompFactory
-    currentHypo = CompFactory.TrigTauGenericHypo(name)
-    currentHypo.MonTool  = ""
-    currentHypo.Details  = [int(-1)]
-    currentHypo.Formulas = ['y > '+threshold+'*1000.0']
+    currentHypo = CompFactory.TrigTauCaloHypoTool(name)
+    currentHypo.PtMin = threshold * GeV
 
     return currentHypo
+

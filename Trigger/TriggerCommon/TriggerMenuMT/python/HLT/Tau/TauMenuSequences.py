@@ -49,7 +49,7 @@ def tauCaloMVAMenuSequenceGenCfg(flags, is_probe_leg=False):
     recoAcc.mergeReco(tauTopoClusteringCfg(flags, RoIs=RoIs))
 
     # Create new RoIs with an updated position, based on the central axis of the clusters
-    from TrigTauHypo.TrigTauHypoConfig import tauCaloRoiUpdaterCfg
+    from TrigTauHypo.TrigTauRoIToolsConfig import tauCaloRoiUpdaterCfg
     recoAcc.mergeReco(tauCaloRoiUpdaterCfg(flags, inputRoIs=RoIs, clusters='HLT_TopoCaloClustersLC'))
 
     # Construct the calo-only TauJet (with BRT calibration)
@@ -70,13 +70,13 @@ def tauCaloMVAMenuSequenceGenCfg(flags, is_probe_leg=False):
 
     # Hypothesis:
     # The Hypotools in the Hypo algorithm will execute the BRT-calibrated Tau pT cut
-    selAcc.addHypoAlgo(CompFactory.TrigTauCaloHypoAlg('TauCaloMVAHypoAlg', taujets='HLT_TrigTauRecMerged_CaloMVAOnly'))
+    selAcc.addHypoAlgo(CompFactory.TrigTauCaloHypoAlg('TauCaloMVAHypoAlg', TauJetsKey='HLT_TrigTauRecMerged_CaloMVAOnly'))
 
 
     # Menu sequence, connecting everything internally for the step, and configuring the tools for the Hypo alg.
     # based on the partDict for each chain tau leg
-    from TrigTauHypo.TrigTauHypoTool import TrigL2TauHypoToolFromDict
-    menuSeq = MenuSequence(flags, selAcc, HypoToolGen=TrigL2TauHypoToolFromDict)
+    from TrigTauHypo.TrigTauHypoTool import TrigTauCaloMVAHypoToolFromDict
+    menuSeq = MenuSequence(flags, selAcc, HypoToolGen=TrigTauCaloMVAHypoToolFromDict)
 
     return menuSeq
 
@@ -158,10 +158,10 @@ def _ftfCoreSeq(flags, name, is_probe_leg=False):
     # Create new RoIs for the next tracking steps (FTFIso and PrecTrack), based on the found tracks
     TrackCollection = flags.Tracking.ActiveConfig.trkTracks_FTF
     if name == 'Core':
-        from TrigTauHypo.TrigTauHypoConfig import tauTrackRoiUpdaterCfg
+        from TrigTauHypo.TrigTauRoIToolsConfig import tauTrackRoiUpdaterCfg
         recoAcc.mergeReco(tauTrackRoiUpdaterCfg(flags, inputRoIs=RoIs, tracks=TrackCollection))
     elif name == 'LRT':
-        from TrigTauHypo.TrigTauHypoConfig import tauLRTRoiUpdaterCfg
+        from TrigTauHypo.TrigTauRoIToolsConfig import tauLRTRoiUpdaterCfg
         recoAcc.mergeReco(tauLRTRoiUpdaterCfg(flags, inputRoIs=RoIs, tracks=TrackCollection))
 
 
@@ -180,17 +180,17 @@ def _ftfCoreSeq(flags, name, is_probe_leg=False):
 
     # Hypothesis:
     # The hypothesis algorithm/tool does not perform any action (online monitoring of tracks only)
-    selAcc.addHypoAlgo(CompFactory.TrigTrackPreSelHypoAlg(
+    selAcc.addHypoAlgo(CompFactory.TrigTauFastTrackHypoAlg(
         f'TauFastTrackHypoAlg_PassBy{name}',
         RoIForIDReadHandleKey='UpdatedTrackLRTRoI' if name == 'LRT' else '',
-        trackcollection=TrackCollection
+        FastTracksKey=TrackCollection
     ))
 
 
     # Menu sequence, connecting everything internally for the step, and configuring the tools for the Hypo alg.
     # based on the partDict for each chain tau leg
-    from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
-    menuSeq = MenuSequence(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
+    from TrigTauHypo.TrigTauHypoTool import TrigTauFastTrackHypoToolFromDict
+    menuSeq = MenuSequence(flags, selAcc, HypoToolGen=TrigTauFastTrackHypoToolFromDict)
 
     return menuSeq
 
@@ -279,16 +279,16 @@ def _ftfTauIsoSeq(flags, name, is_probe_leg=False):
 
     # Hypothesis:
     # The hypothesis algorithm/tool does not perform any action (debug logging of number of tracks only)
-    selAcc.addHypoAlgo(CompFactory.TrigTrackPreSelHypoAlg(
+    selAcc.addHypoAlgo(CompFactory.TrigTauFastTrackHypoAlg(
         f'TauFastTrackHypoAlg_PassBy{name}',
-        trackcollection=flags.Tracking.ActiveConfig.trkTracks_FTF,
+        FastTracksKey=flags.Tracking.ActiveConfig.trkTracks_FTF,
     ))
 
 
     # Menu sequence, connecting everything internally for the step, and configuring the tools for the Hypo alg.
     # based on the partDict for each chain tau leg
-    from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
-    menuSeq = MenuSequence(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
+    from TrigTauHypo.TrigTauHypoTool import TrigTauFastTrackHypoToolFromDict
+    menuSeq = MenuSequence(flags, selAcc, HypoToolGen=TrigTauFastTrackHypoToolFromDict)
 
     return menuSeq
 
@@ -359,17 +359,17 @@ def _precTrackSeq(flags, name, is_probe_leg=False):
 
     # Hypothesis:
     # The hypothesis algorithm/tool does not perform any action (debug logging of number of tracks only)
-    selAcc.addHypoAlgo(CompFactory.TrigTrkPrecHypoAlg(
+    selAcc.addHypoAlgo(CompFactory.TrigTauPrecTrackHypoAlg(
         f'TauPrecTrackHypoAlg_PassBy{name}',
-        trackparticles=flags.Tracking.ActiveConfig.tracks_IDTrig, 
+        TracksKey=flags.Tracking.ActiveConfig.tracks_IDTrig, 
         RoIForIDReadHandleKey='',
     ))
 
 
     # Menu sequence, connecting everything internally for the step, and configuring the tools for the Hypo alg.
     # based on the partDict for each chain tau leg
-    from TrigTauHypo.TrigTauHypoTool import TrigTrkPrecHypoToolFromDict
-    menuSeq = MenuSequence(flags, selAcc, HypoToolGen=TrigTrkPrecHypoToolFromDict)
+    from TrigTauHypo.TrigTauHypoTool import TrigTauPrecTrackHypoToolFromDict
+    menuSeq = MenuSequence(flags, selAcc, HypoToolGen=TrigTauPrecTrackHypoToolFromDict)
 
     return menuSeq
 
@@ -451,16 +451,16 @@ def _tauPrecisionSeq(flags, name, tau_ids: list[str], output_name=None, is_probe
     # Hypothesis:
     # The Hypotools in the Hypo algorithm will execute the calibrated Tau pT cut,
     # NTrack cut, NWideTrack cut, and ID WP selections (or meson variable cuts)
-    selAcc.addHypoAlgo(CompFactory.TrigEFTauMVHypoAlg(
+    selAcc.addHypoAlgo(CompFactory.TrigTauPrecisionHypoAlg(
         f'TauPrecisionHypoAlg_{name}',
-        taujetcontainer=f'HLT_TrigTauRecMerged_{output_name if output_name else name}'
+        TauJetsKey=f'HLT_TrigTauRecMerged_{output_name if output_name else name}'
     ))
 
 
     # Menu sequence, connecting everything internally for the step, and configuring the tools for the Hypo alg.
     # based on the partDict for each chain tau leg
-    from TrigTauHypo.TrigTauHypoTool import TrigEFTauMVHypoToolFromDict
-    menuSeq = MenuSequence(flags, selAcc, HypoToolGen=TrigEFTauMVHypoToolFromDict)
+    from TrigTauHypo.TrigTauHypoTool import TrigTauPrecisionHypoToolFromDict
+    menuSeq = MenuSequence(flags, selAcc, HypoToolGen=TrigTauPrecisionHypoToolFromDict)
 
     return menuSeq
 

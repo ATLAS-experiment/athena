@@ -1,23 +1,31 @@
-#include "../TrigTauCaloRoiUpdater.h"
-#include "../TrigTauGenericHypo.h"
 #include "../TrigTauCaloHypoAlg.h"
+#include "../TrigTauCaloHypoTool.h"
+
+#include "../TrigTauFastTrackHypoAlg.h"
+#include "../TrigTauFastTrackHypoTool.h"
+
+#include "../TrigTauPrecTrackHypoAlg.h"
+#include "../TrigTauPrecTrackHypoTool.h"
+
+#include "../TrigTauPrecisionHypoAlg.h"
+#include "../TrigTauPrecisionIDHypoTool.h"
+#include "../TrigTauPrecisionDiKaonHypoTool.h"
+
+#include "../TrigTauCaloRoiUpdater.h"
 #include "../TrigTauTrackRoiUpdater.h"
-#include "../TrigTrackPreSelHypoAlg.h"
-#include "../TrigTrackPreSelHypoTool.h"
-#include "../TrigEFTauMVHypoTool.h"
-#include "../TrigEFTauMVHypoAlg.h"
-#include "../TrigTrkPrecHypoAlg.h"
-#include "../TrigTrkPrecHypoTool.h"
-#include "../TrigEFTauDiKaonHypoTool.h"
+
+DECLARE_COMPONENT( TrigTauCaloHypoAlg )
+DECLARE_COMPONENT( TrigTauCaloHypoTool )
+
+DECLARE_COMPONENT( TrigTauFastTrackHypoAlg )
+DECLARE_COMPONENT( TrigTauFastTrackHypoTool )
+
+DECLARE_COMPONENT( TrigTauPrecTrackHypoAlg )
+DECLARE_COMPONENT( TrigTauPrecTrackHypoTool )
+
+DECLARE_COMPONENT( TrigTauPrecisionHypoAlg )
+DECLARE_COMPONENT( TrigTauPrecisionIDHypoTool )
+DECLARE_COMPONENT( TrigTauPrecisionDiKaonHypoTool )
 
 DECLARE_COMPONENT( TrigTauCaloRoiUpdater )
-DECLARE_COMPONENT( TrigTauGenericHypo )
-DECLARE_COMPONENT( TrigTauCaloHypoAlg )
 DECLARE_COMPONENT( TrigTauTrackRoiUpdater )
-DECLARE_COMPONENT( TrigTrackPreSelHypoAlg )
-DECLARE_COMPONENT( TrigTrackPreSelHypoTool )
-DECLARE_COMPONENT( TrigTrkPrecHypoTool )
-DECLARE_COMPONENT( TrigTrkPrecHypoAlg )
-DECLARE_COMPONENT( TrigEFTauMVHypoAlg )
-DECLARE_COMPONENT( TrigEFTauMVHypoTool )
-DECLARE_COMPONENT( TrigEFTauDiKaonHypoTool )

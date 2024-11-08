@@ -476,9 +476,6 @@ ZDCFitExpFermiLHCfPreExp::ZDCFitExpFermiLHCfPreExp(const std::string& tag, float
   m_expFermiLHCfFunc->SetParameter(7, 1.5);
   m_expFermiLHCfFunc->SetParameter(8, 0.01);
 
-  m_norm = 1. / m_expFermiLHCfFunc->GetMaximum();
-  m_timeCorr = m_tau1 * std::log(m_tau2 / m_tau1 - 1.0);
-
   // Now set up the actual TF1
   //
   std::shared_ptr<TF1> theTF1 = ZDCFitWrapper::GetWrapperTF1();
@@ -565,15 +562,15 @@ void ZDCFitExpFermiLHCfPreExp::SetT0FitLimits(float t0Min, float t0Max)
 }
 
 ZDCFitExpFermiLHCfPrePulse::ZDCFitExpFermiLHCfPrePulse(const std::string& tag, float tmin, float tmax, float tau1, float tau2) :
-  ZDCPrePulseFitWrapper(std::make_shared<TF1>(("ExpFermiLHCfPrePulse" + tag).c_str(), this, tmin, tmax, 5)),
+  ZDCPrePulseFitWrapper(std::make_shared<TF1>(("ExpFermiLHCfPrePulse" + tag).c_str(), this, tmin, tmax, 7)),
   m_tau1(tau1), m_tau2(tau2)
 {
   // Create the reference function that we use to evaluate ExpFermiFit more efficiently
   //
   std::string funcNameRefFunc = "ExpFermiLHCfPrePulseRefFunc" + tag;
+  std::string funcNamePreFunc = "ExpFermiLHCfPrePulsePreFunc" + tag;
 
   m_expFermiLHCfFunc = std::make_shared<TF1>(funcNameRefFunc.c_str(), ZDCFermiExpFitRefl, tmin, tmax, 9);
-
   m_expFermiLHCfFunc->SetParameter(0, 1);
   m_expFermiLHCfFunc->SetParameter(1, 0);
   m_expFermiLHCfFunc->SetParameter(2, m_tau1);
@@ -583,24 +580,37 @@ ZDCFitExpFermiLHCfPrePulse::ZDCFitExpFermiLHCfPrePulse(const std::string& tag, f
   m_expFermiLHCfFunc->SetParameter(6, 0.2);
   m_expFermiLHCfFunc->SetParameter(7, 1.5);
   m_expFermiLHCfFunc->SetParameter(8, 0.01);
-  
-  m_norm = 1. / m_expFermiLHCfFunc->GetMaximum();
-  m_timeCorr = m_tau1 * std::log(m_tau2 / m_tau1 - 1.0);
+
+  m_expFermiPreFunc = std::make_shared<TF1>(funcNamePreFunc.c_str(), ZDCFermiExpFit, tmin, tmax, 9);
+
+  m_expFermiPreFunc->SetParameter(0, 1);
+  m_expFermiPreFunc->SetParameter(1, 0);
+  m_expFermiPreFunc->SetParameter(2, m_tau1);
+  m_expFermiPreFunc->SetParameter(3, m_tau2);
+  m_expFermiPreFunc->SetParameter(4, 0);
+  m_preNorm = 1. / m_expFermiPreFunc->GetMaximum();
 
   // Now set up the actual TF1
   //
-   std::shared_ptr<TF1> theTF1 = ZDCFitWrapper::GetWrapperTF1();
+  std::shared_ptr<TF1> theTF1 = ZDCFitWrapper::GetWrapperTF1();
+
+  // The actual paerameters we fit
+  //
+  theTF1->SetParName(0, "Amp");
+  theTF1->SetParName(1, "T0");
+  theTF1->SetParName(2, "tau1");
+  theTF1->SetParName(3, "tau2");
+  theTF1->SetParName(4, "Amp_{pre}");
+  theTF1->SetParName(5, "T0_{pre}");
+  theTF1->SetParName(6, "C");
 
   // BAC, parameter 0 limits now is set in DoInitialize
   theTF1->SetParLimits(1, tmin, tmax);
-  theTF1->SetParLimits(2, 1, 8196); // Increase the upper range to 2 times of ADC range to deal with large exponential tail case of pre-pulse.
-  theTF1->SetParLimits(3, -20, 10);
+  theTF1->SetParLimits(2, 1.0, 2);
+  theTF1->SetParLimits(3, 3.5, 5.5);
+  theTF1->SetParLimits(4, 1, 8196); // Increase the upper range to 2 times of ADC range to deal with large exponential tail case of pre-pulse.
+  theTF1->SetParLimits(5, -20, 10);
 
-  theTF1->SetParName(0, "Amp");
-  theTF1->SetParName(1, "T0");
-  theTF1->SetParName(2, "Amp_{pre}");
-  theTF1->SetParName(3, "T0_{pre}");
-  theTF1->SetParName(4, "C");
 }
 
 void ZDCFitExpFermiLHCfPrePulse::ConstrainFit()
@@ -609,28 +619,28 @@ void ZDCFitExpFermiLHCfPrePulse::ConstrainFit()
   //
   std::shared_ptr<TF1> theTF1 = GetWrapperTF1();
 
-  theTF1->FixParameter(2, 0);
   theTF1->FixParameter(4, 0);
+  theTF1->FixParameter(6, 0);
 }
 void ZDCFitExpFermiLHCfPrePulse::UnconstrainFit()
 {
   std::shared_ptr<TF1> theTF1 = GetWrapperTF1();
-  theTF1->ReleaseParameter(2);
   theTF1->ReleaseParameter(4);
+  theTF1->ReleaseParameter(6);
 
-  theTF1->SetParLimits(2, 1, 8196); // Increase the upper range to 2 times of ADC range to deal with large exponential tail case of pre-pulse.
+  theTF1->SetParLimits(4, 1, 8196); // Increase the upper range to 2 times of ADC range to deal with large exponential tail case of pre-pulse.
 }
 
 void ZDCFitExpFermiLHCfPrePulse::SetPrePulseT0Range(float tmin, float tmax)
 {
   if (tmin > GetTMin()) {
     m_preT0Min = tmin;
-    GetWrapperTF1()->ReleaseParameter(3);
-    GetWrapperTF1()->SetParLimits(3, tmin, tmax);
+    GetWrapperTF1()->ReleaseParameter(5);
+    GetWrapperTF1()->SetParLimits(5, tmin, tmax);
   }
   else {
     m_preT0Min = -25;
-    GetWrapperTF1()->SetParLimits(3, -25, tmax);
+    GetWrapperTF1()->SetParLimits(5, -25, tmax);
   }
   m_preT0Max = tmax;
 }
@@ -639,7 +649,11 @@ void ZDCFitExpFermiLHCfPrePulse::DoInitialize(float initialAmp, float initialT0,
 {
   GetWrapperTF1()->SetParameter(0, initialAmp);
   GetWrapperTF1()->SetParameter(1, initialT0);
-  GetWrapperTF1()->SetParameter(2, 5);
+  GetWrapperTF1()->SetParameter(2, m_tau1);
+  GetWrapperTF1()->SetParameter(3, m_tau2);
+  GetWrapperTF1()->SetParameter(4, 5);
+  GetWrapperTF1()->SetParameter(5, -10);
+  GetWrapperTF1()->SetParameter(6, 0);
   
   GetWrapperTF1()->SetParLimits(0, ampMin, ampMax);
   // Set parameter errors for fit step size
@@ -647,9 +661,11 @@ void ZDCFitExpFermiLHCfPrePulse::DoInitialize(float initialAmp, float initialT0,
   double ampStep = std::min(0.05*initialAmp, std::abs(ampMax - initialAmp)/2.);
   GetWrapperTF1()->SetParError(0, ampStep);
   GetWrapperTF1()->SetParError(1, 1.0);
-  GetWrapperTF1()->SetParError(2, 2);
-  GetWrapperTF1()->SetParError(3, 1.0);
-  GetWrapperTF1()->SetParError(4, 1.0);
+  GetWrapperTF1()->SetParError(2, 0.05);
+  GetWrapperTF1()->SetParError(3, 1);
+  GetWrapperTF1()->SetParError(4, 5.0);
+  GetWrapperTF1()->SetParError(5, 1.0);
+  GetWrapperTF1()->SetParError(6, 2.0);
 }
 
 void ZDCFitExpFermiLHCfPrePulse::SetT0FitLimits(float t0Min, float t0Max)
