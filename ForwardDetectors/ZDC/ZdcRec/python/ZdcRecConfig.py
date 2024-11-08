@@ -41,9 +41,11 @@ def GenerateConfigTagDict():
     
     zdcConfigMap['data24_refcomm'] = {}
     zdcConfigMap['data24_refcomm']['default'] = 'pp2024'
+    zdcConfigMap['data24_refcomm']['calibration_ZdcInjCalib'] = 'Injectorpp2024'
 
     zdcConfigMap['data24_hicomm'] = {}
-    zdcConfigMap['data24_hicomm']['default'] = 'pp2024'
+    zdcConfigMap['data24_hicomm']['default'] = 'PbPb2024'
+    zdcConfigMap['data24_hicomm']['calibration_ZdcInjCalib'] = 'InjectorPbPb2024'
 
     zdcConfigMap['data24_hi'] = {}
     zdcConfigMap['data24_hi']['default']="PbPb2024"
@@ -54,7 +56,7 @@ def SetConfigTag(flags):
     if flags.Input.TriggerStream == "calibration_ZDCInjCalib" or flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # calibration_DcmDummyProcessor is the "trigger stream" in the data we record in the standalone partition that is NOT LED data                
         config = "Injectorpp2024" # default config tag for injector pulse
 
-        if flags.Input.ProjectName == "data24_hi":
+        if flags.Input.ProjectName == "data24_hi" or flags.Input.ProjectName == "data24_hicomm":
             config = "InjectorPbPb2024"
     else:
         config = "PbPb2023" # default config tag
@@ -221,7 +223,16 @@ def ZdcRecRun3Cfg(flags):
     ForceCalibLB = 814
     
     if flags.Input.TriggerStream != "calibration_ZDCInjCalib" and flags.Input.TriggerStream != "calibration_DcmDummyProcessor":
-        if flags.Input.ProjectName == "data23_comm":
+        if flags.Common.isOnline: # calibration file for ongoing run not available - copy calib file from eos & hard code the run + lb
+            doCalib = True
+            doTimeCalib = True
+            if flags.Input.ProjectName == "data24_5p36TeV" or flags.Input.ProjectName == "data24_refcomm":
+                ForceCalibRun = 488239
+                ForceCalibLB = 1
+            elif flags.Input.ProjectName == "data24_hi" or flags.Input.ProjectName == "data24_hicomm":
+                ForceCalibRun = 488980 # place holder available at point1 - replace with a 2024 run during data taking
+                ForceCalibLB = 80
+        elif flags.Input.ProjectName == "data23_comm":
             doCalib = True
         elif flags.Input.ProjectName == "data23_hi": # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
             doCalib = True
@@ -229,15 +240,6 @@ def ZdcRecRun3Cfg(flags):
         elif flags.Input.ProjectName == "data24_hi": # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
             doCalib = True
             doTimeCalib = True
-        elif flags.Common.isOnline: # calibration file for ongoing run not available - copy calib file from eos & hard code the run + lb
-            doCalib = True
-            doTimeCalib = True
-            if flags.Input.ProjectName == "data24_5p36TeV":
-                ForceCalibRun = 488239
-                ForceCalibLB = 1
-            elif flags.Input.ProjectName == "data24_hi":
-                ForceCalibRun = 463427 # place holder available at point1 - replace with a 2024 run during data taking
-                ForceCalibLB = 500
 
 
     doRPD = flags.Detector.EnableZDC_RPD
@@ -403,7 +405,7 @@ def ZdcLEDTrigCfg(flags):
     acc = ComponentAccumulator()
 
     # suggested by Tim Martin
-    tdmv = CompFactory.TrigDec.TrigDecisionMakerValidator()			 
+    tdmv = CompFactory.TrigDec.TrigDecisionMakerValidator()          
     tdmv.errorOnFailure = True
     tdmv.TrigDecisionTool = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
     tdmv.NavigationKey = getRun3NavigationContainerFromInput(flags)
@@ -436,6 +438,7 @@ def ZdcRecCfg(flags):
         acc.merge(ZdcRecOutputCfg(flags))
 
     return acc
+
 
 if __name__ == '__main__':
 
@@ -481,7 +484,7 @@ if __name__ == '__main__':
     # check for LED / calibration data running, and configure appropriately
     isLED = (flags.Input.TriggerStream == "calibration_ZDCLEDCalib")
     isInj = (flags.Input.TriggerStream == "calibration_ZDCInjCalib")
-    isCalib = (flags.Input.TriggerStream == "calibration_ZDCCalib" or flags.Input.TriggerStream == "physics_MinBias" or flags.Input.TriggerStream == "express_express")
+    isCalib = (flags.Input.TriggerStream == "calibration_ZDCCalib" or flags.Input.TriggerStream == "physics_MinBias" or flags.Input.TriggerStream == "express_express" or flags.Input.TriggerStream == "physics_UCC")
     if flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # standalone data: do we want to run calibration or LED?
         if args.runCalibForStandaloneData == "Calib" or args.runCalibForStandaloneData == "calib":
             isCalib = True
@@ -554,7 +557,6 @@ if __name__ == '__main__':
     if isInj: # should be able to run both if in standalone data
         acc.merge(ZdcRecCfg(flags))
 
-
     if not flags.Input.isMC:
         if (isLED):
             from ZdcMonitoring.ZdcLEDMonitorAlgorithm import ZdcLEDMonitoringConfig
@@ -573,6 +575,7 @@ if __name__ == '__main__':
             from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig            
             zdcMonitorAcc = ZdcMonitoringConfig(flags)
             acc.merge(zdcMonitorAcc)
+            # zdcMonitorAcc.getEventAlgo('ZdcMonAlg').OutputLevel = 2 # turn on DEBUG messages
             acc.merge(ZdcInjNtupleCfg(flags))            
     else:
         acc.merge(ZdcNtupleLocalCfg(flags))
