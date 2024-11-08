@@ -5,6 +5,7 @@ import re
 from fnmatch import fnmatchcase
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.AthConfigFlags import isGaudiEnv
+from PyUtils.PoolFile import isRNTuple
 from ROOT import gSystem
 
 msg = logging.getLogger('MetaReader')
@@ -165,7 +166,6 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
             meta_dict[filename]['file_comp_alg'] = current_file.GetCompressionAlgorithm()
             meta_dict[filename]['file_comp_level'] = current_file.GetCompressionLevel()
 
-            from PyUtils.PoolFile import isRNTuple
             if isRNTuple( current_file.Get(PoolOpts.RNTupleNames.MetaData) ):
                 msg.warning(
                     "Reading in-file metadata from RNTuple is currently of limited support"
@@ -1605,7 +1605,7 @@ def dataheader_nentries(infile):
             # check early to avoid scary ROOT read errors
             if ROOT.gROOT.GetVersionInt() < 63100:
                 raise RuntimeError("ROOT ver. 6.31/01 or greater needed to read RNTuple files")
-            if isinstance(obj, ROOT.Experimental.RNTuple):
+            if isRNTuple(obj):
                 return ROOT.Experimental.RNTupleReader.Open(obj).GetNEntries()
             else:
                 raise NotImplementedError(f"Keys of type {type(obj)!r} not supported")
