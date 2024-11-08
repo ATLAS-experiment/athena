@@ -44,6 +44,18 @@ static const std::array<int,TABLESIZE> triple_charge = {
   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0
 };
+static const std::array<int,TABLESIZE> double_spin = {
+  +0, +1, +1, +1, +1, +1, +1, +1, +1, +0,
+  +0, +1, +1, +1, +1, +1, +1, +1, +1, +0,
+  +2, +2, +2, +2, +2, +0, +0, +0, +0, +0,
+  +0, +0, +2, +2, +2, +0, +0, +0, +0, +4,
+  +0, +0, -1, +0, +0, +0, +0, +0, +0, +0,
+  +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+  +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+  +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+  +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+  +0, +0, +0, +0, +0, +0, +0, +0, +0, +0
+};
 
 
 static const int UQUARK = 1;
@@ -656,8 +668,33 @@ namespace SUSY {
   template<> inline bool isSMeson(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isMeson(pp);}
   template<> inline bool isSMeson(const int& p){ auto value_digits = DecodedPID(p); return isSMeson(value_digits);}
 
-  template<class T> inline bool spin(const T& p) { return spin(p->pdg_id()); }
-  template<> inline bool spin(const int& p) { return p%10; }
+  // APID: Intended to return 2J
+  // Useful for G4ParticleDefinition constructor
+  template<class T> inline int spin2(const T& p) { return spin2(p->pdg_id()); }
+  template<> inline int spin2(const DecodedPID& p) {
+    if (isSUSY(p)) {
+      auto pp = p.shift(1);
+      auto ap = std::abs(pp.pid());
+      if (ap < TABLESIZE ) { return std::abs(double_spin.at(ap)-1); } // sparticles (0->1, 1 -> 0,  2->1,  4->3)
+      return p.last()-1; // R-Hadrons (p.last() == 2J +1)
+    }
+  auto ap = std::abs(p.pid());
+  if (ap == K0S) { return 0; }
+  if (ap == K0L) { return 0; }
+  if (ap == MAVTOP) { return 1; } // TODO check this
+  if (ap == DARKPHOTON) { return 2; } // TODO check this
+  if (ap < TABLESIZE ) { return double_spin.at(ap); } // fundamental particles
+  if (isHadron(p)) { return p.last()-1; } // Hadrons (p.last == 2J+1 - special cases handled above)
+  if (isMonopole(p)) { return 0; } // PDG 11i - For now no spin information is provided. Also matches the definition in the G4Extensions/Monopole package.
+  if (isGenericMultichargedParticle(p)) { return 0; } // APID Matches the definition in the G4Extensions/Monopole package.
+  if (isNucleus(p)) { return 1; }  // TODO need to explicitly deal with nuclei
+  return p.last() > 0 ? 1 : 0; //  Anything else - best guess
+ }
+  template<> inline int spin2(const int& p){ auto value_digits = DecodedPID(p); return spin2(value_digits);}
+
+  template<class T> inline double spin(const T& p) { return spin(p->pdg_id()); }
+  template<> inline double spin(const DecodedPID& p) { return 1.0*spin2(p)/2.0; }
+  template<> inline double spin(const int& p){ auto value_digits = DecodedPID(p); return spin(value_digits);}
 
   inline std::vector<int> containedQuarks(int p) {
     auto pp = DecodedPID(p);
