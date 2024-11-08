@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 
 from __future__ import print_function
@@ -524,7 +524,117 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         # TODO: add info string
         self.addOption ('configFileOverride', None, type=str,
             info="")
+        self.addOption ('systematicsModelJER', "Full", type=str) # this is the test for JER
+        self.addOption ('runJERsystematicsOnData', False, type=bool,
+            info="whether to run the All/Full JER model variations also on data samples. Expert option!")
+        # Adding these options to override the jet uncertainty config file when we have new recommendations
+        # Calibration tool options
+        self.addOption ('calibToolConfigFile', None, type=str,
+            info="name (str) of the config file to use for the jet calibration "
+            "tool. Expert option to override JetETmiss recommendations. The "
+            "default is None.")
+        self.addOption ('calibToolCalibArea', None, type=str,
+            info="name (str) of the CVMFS area to use for the jet calibration "
+            "tool. Expert option to override JetETmiss recommendations. The "
+            "default is None.")
+        self.addOption ('calibToolCalibSeq', None, type=str,
+            info="name (str) of the sequence to use for the jet calibration "
+            "tool (e.g. 'JetArea_Residual_EtaJES_GSC'). Expert option to override "
+            "JetETmiss recommendations. The default is None.")
+        # Uncertainties tool options
+        self.addOption ('uncertToolConfigPath', None, type=str,
+            info="name (str) of the config file to use for the jet uncertainty "
+            "tool. Expert option to override JetETmiss recommendations. The "
+            "default is None.")
+        self.addOption ('uncertToolCalibArea', None, type=str,
+            info="name (str) of the CVMFS area to use for the jet uncertainty "
+            "tool. Expert option to override JetETmiss recommendations. The "
+            "default is None.")
+        self.addOption ('uncertToolMCType', None, type=str,
+                info="data type (str) to use for the jet uncertainty tool (e.g. "
+                "'AF3' or 'MC16'). Expert option to override JetETmiss "
+                "recommendations. The default is None.")
 
+    def getUncertaintyToolSettings(self, config):
+        # Retrieve appropriate JES/JER recommendations for the JetUncertaintiesTool.
+        # We do this separately from the tool declaration, as we may need to set uo
+        # two such tools, but they have to be private.
+
+        # Config file:
+        config_file = None
+        if self.systematicsModelJER in ["Simple", "Full"] and not config.isPhyslite():
+            config_file = "R10_CategoryJES_{0}JER_FullJMS.config".format(self.systematicsModelJER)
+        else:
+            raise ValueError(
+                "Invalid request for systematicsModelJER settings: "
+                "systematicsModelJER: {0}".format(self.systematicsModelJER) )
+
+        # Calibration area:
+        calib_area = None
+        if self.uncertToolCalibArea is not None:
+            calib_area = self.uncertToolCalibArea
+
+        # Expert override for config path:
+        if self.uncertToolConfigPath is not None:
+            config_file = self.uncertToolConfigPath
+        else:
+            if config.geometry() in [LHCPeriod.Run2, LHCPeriod.Run3]:
+                config_file = "rel22/Winter2024_PreRec/" + config_file
+            else:
+                log = logging.getLogger('LargeRJetAnalysisConfig')
+                log.warning("Uncertainties for UFO jets are not for Run 4!")
+                
+        # MC type:
+        if self.uncertToolMCType is not None:
+            mc_type = self.uncertToolMCType
+        else:
+            if config.dataType() is DataType.FastSim and config.geometry() is LHCPeriod.Run2:
+                # not supported for Run 3 yet!
+                mc_type = "AF3"
+            else:
+                if config.geometry() is LHCPeriod.Run2:
+                    mc_type = "MC20"
+                else:
+                    mc_type = "MC23"
+
+        return config_file, calib_area, mc_type
+
+    def createUncertaintyTool(self, jetUncertaintiesAlg, config, jetCollectionName, doPseudoData=False):
+
+        # Create an instance of JetUncertaintiesTool, following JetETmiss recommendations.
+        # To run Jet Energy Resolution (JER) uncertainties in the "Full" or "All" schemes,
+        # we need two sets of tools: one configured as normal (MC), the other with the
+        # exact same settings but pretending to run on data (pseudo-data).
+        # This is achieved by passing "isPseudoData=True" to the arguments.
+
+        # Retrieve the common configuration settings
+        configFile, calibArea, mcType = self.getUncertaintyToolSettings(config)
+
+        # The main tool for all JER combinations
+        config.addPrivateTool( 'uncertaintiesTool', 'JetUncertaintiesTool' )
+        jetUncertaintiesAlg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
+        jetUncertaintiesAlg.uncertaintiesTool.ConfigFile = configFile
+        if calibArea is not None:
+            jetUncertaintiesAlg.uncertaintiesTool.CalibArea = calibArea
+        jetUncertaintiesAlg.uncertaintiesTool.MCType = mcType
+        jetUncertaintiesAlg.uncertaintiesTool.IsData = (config.dataType() is DataType.Data)
+        jetUncertaintiesAlg.uncertaintiesTool.PseudoDataJERsmearingMode = False
+
+        # JER smearing on data 
+        if config.dataType() is DataType.Data and not (config.isPhyslite() and doPseudoData and self.runJERsystematicsOnData):
+            # we don't want any systematics on data if we're not using the right JER model!
+            jetUncertaintiesAlg.affectingSystematicsFilter = '.*'
+
+        if config.dataType() is not (DataType.Data and config.isPhyslite()) and doPseudoData and not self.runJERsystematicsOnData:
+            # The secondary tool for pseudo-data JER smearing
+            config.addPrivateTool( 'uncertaintiesToolPD', 'JetUncertaintiesTool' )
+            jetUncertaintiesAlg.uncertaintiesToolPD.JetDefinition = jetCollectionName[:-4]
+            jetUncertaintiesAlg.uncertaintiesToolPD.ConfigFile = configFile
+            if calibArea is not None:
+                jetUncertaintiesAlg.uncertaintiesToolPD.CalibArea = calibArea
+            jetUncertaintiesAlg.uncertaintiesToolPD.MCType = mcType
+            jetUncertaintiesAlg.uncertaintiesToolPD.IsData = True
+            jetUncertaintiesAlg.uncertaintiesToolPD.PseudoDataJERsmearingMode = True
 
     def makeAlgs (self, config) :
 
@@ -556,7 +666,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             configFile = _largeLCTopoConfigFile(config, self)
 
         if self.jetInput == "UFO":
-            configFile = "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_10Mar2023.config"
+            configFile = "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_02Aug2024.config"
 
         if not config.isPhyslite() or self.recalibratePhyslite:
             # Prepare the jet calibration algorithm
@@ -572,14 +682,33 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             if self.jetInput == "TrackCaloCluster" or self.jetInput == "UFO" or config.dataType() is DataType.FullSim:
                 alg.calibrationTool.CalibSequence = "EtaJES_JMS"
             elif config.dataType() is DataType.Data:
-                alg.calibrationTool.CalibSequence = "EtaJES_JMS_Insitu_InsituCombinedMass"
+                alg.calibrationTool.CalibSequence = "EtaJES_JMS_Insitu"
             alg.calibrationTool.IsData = (config.dataType() is DataType.Data)
             alg.jets = config.readName (self.containerName)
 
         # Jet uncertainties
+        if self.jetInput == "UFO" and config.dataType() is (DataType.FullSim or DataType.FastSim):
+            alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+self.containerName )
+            config.addPrivateTool( 'uncertaintiesTool', 'JetUncertaintiesTool' )
+            self.createUncertaintyTool(alg, config, jetCollectionName, doPseudoData=( self.systematicsModelJER in ["Full","All"] ))
+            # R=1.0 jets have a validity range
+            alg.outOfValidity = 2 # SILENT
+            alg.outOfValidityDeco = 'outOfValidity'
+            alg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
+            alg.uncertaintiesTool.ConfigFile = (
+                "rel22/Winter2024_PreRec/R10_CategoryJES_FullJER_FullJMS.config"
+            )
 
-        if self.jetInput == "UFO":
-            log.warning("Uncertainties for UFO jets are not yet released!")
+            log.warning("Uncertainties for UFO jets are test only! This {0} is not for physics analysis! ".format(alg.uncertaintiesTool.ConfigFile))
+            if config.dataType() is DataType.FastSim:
+                log.warning("You are applying UFO FS uncertainty on AF3! This {0} is only for test purpose and not for physics analysis! ".format(alg.uncertaintiesTool.ConfigFile))
+
+            alg.uncertaintiesTool.MCType = "MC20"
+            alg.uncertaintiesTool.IsData = config.dataType() is DataType.Data
+
+            alg.jets = config.readName (self.containerName)
+            alg.jetsOut = config.copyName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
 
         if self.jetInput != "UFO":
             alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+self.containerName )
@@ -600,10 +729,6 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             config.addSelection (self.containerName, '', 'outOfValidity')
 
         config.addOutputVar (self.containerName, 'm', 'm')
-
-
-
-
 
 # These algorithms set up the jet recommendations as-of 04/02/2019.
 # Jet calibration recommendations
