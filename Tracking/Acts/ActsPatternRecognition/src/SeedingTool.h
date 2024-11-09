@@ -281,12 +281,14 @@ namespace ActsTrk {
     /// logging instance
     std::unique_ptr<const Acts::Logger> m_logger {nullptr};
 
+    static constexpr float m_ExpCutrMin = 45.;
+    
     static inline bool itkFastTrackingSPselect(const value_type& sp) {
       // At small r we remove points beyond |z| > 200.
       float r = sp.radius();
       float zabs = std::abs(sp.z());
 
-      if (zabs > 200. && r < 50.) {
+      if (zabs > 200. && r < m_ExpCutrMin) {
 	return false;
       }
             
@@ -298,7 +300,22 @@ namespace ActsTrk {
       }
       return true;
     }
+
+    static inline bool itkFastDoubletCut(float bottomRadius, float cotTheta) {
+      //float fastTrackingRMin = m_ExpCutrMin;
+      float fastTrackingCotThetaMax = 1.5;
+      
+      //if (bottomRadius < fastTrackingRMin and
+      if (bottomRadius < m_ExpCutrMin and
+	  (cotTheta > fastTrackingCotThetaMax or
+	   cotTheta < -fastTrackingCotThetaMax)) {
+	return false;
+      }
+      return true;
+    }
   };
+
+  
   
 } // namespace
 

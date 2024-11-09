@@ -424,20 +424,10 @@ namespace ActsTrk {
       // This function will be applied to select space points during grid filling
       m_finderCfg.spacePointSelector
         .connect<itkFastTrackingSPselect>();
+
+      m_finderCfg.experimentCuts
+        .connect<itkFastDoubletCut>();
       
-      m_finderCfg.experimentCuts.connect(
-					 [](const void*, float bottomRadius, float cotTheta) -> bool {
-					   
-					   float fastTrackingRMin = 50.;
-					   float fastTrackingCotThetaMax = 1.5;
-					   
-					   if (bottomRadius < fastTrackingRMin and
-					       (cotTheta > fastTrackingCotThetaMax or
-						cotTheta < -fastTrackingCotThetaMax)) {
-					     return false;
-					   }
-					   return true;
-					 });
     }
     
     // Configuration for Acts::SeedFilter (used by FinderCfg)

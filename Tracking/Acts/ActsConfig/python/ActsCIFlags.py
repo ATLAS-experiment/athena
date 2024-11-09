@@ -1,3 +1,4 @@
+
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Flags used in CI tests
 
@@ -8,6 +9,15 @@ def actsAloneWorkflowFlags(flags) -> None:
     flags.Reco.EnableHGTDExtension = False
     flags.Acts.doAmbiguityResolution = True
     flags.Tracking.recoChain = [TrackingComponent.ActsChain]
+    
+
+def actsAloneFastWorkflowFlags(flags) -> None:
+    """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence"""
+    flags.Reco.EnableHGTDExtension = False
+    flags.Acts.doAmbiguityResolution = True
+    flags.Tracking.doITkFastTracking = True
+    flags.Tracking.recoChain = [TrackingComponent.ActsFastChain]
+        
 
 def actsAloneScoreBasedAmbiguityWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence"""

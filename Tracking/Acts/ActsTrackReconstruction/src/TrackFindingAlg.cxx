@@ -89,6 +89,8 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_absEtaMax);
     ATH_MSG_DEBUG("   " << m_ptMin);
     ATH_MSG_DEBUG("   " << m_ptMax);
+    ATH_MSG_DEBUG("   " << m_z0Min);
+    ATH_MSG_DEBUG("   " << m_z0Max);
     ATH_MSG_DEBUG("   " << m_minMeasurements);
     ATH_MSG_DEBUG("   " << m_maxHoles);
     ATH_MSG_DEBUG("   " << m_maxOutliers);
@@ -196,6 +198,10 @@ namespace ActsTrk
       setCut(cfg.etaMax, m_etaMax, cutIndex);
       setCut(cfg.ptMin, m_ptMin, cutIndex);
       setCut(cfg.ptMax, m_ptMax, cutIndex);
+      setCut(cfg.loc0Min, m_d0Min, cutIndex);
+      setCut(cfg.loc0Max, m_d0Max, cutIndex);
+      setCut(cfg.loc1Min, m_z0Min, cutIndex);
+      setCut(cfg.loc1Max, m_z0Max, cutIndex);
       setCut(cfg.minMeasurements, m_minMeasurements, cutIndex);
       setCut(cfg.maxHoles, m_maxHoles, cutIndex);
       setCut(cfg.maxOutliers, m_maxOutliers, cutIndex);

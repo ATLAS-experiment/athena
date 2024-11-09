@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
 
-from TrkConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkConversionTrackingPassFlags, createITkHeavyIonTrackingPassFlags, createITkLargeD0TrackingPassFlags, createITkLowPtTrackingPassFlags
+from TrkConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkFastTrackingPassFlags, createITkConversionTrackingPassFlags, createITkHeavyIonTrackingPassFlags, createITkLargeD0TrackingPassFlags, createITkLowPtTrackingPassFlags
 
 def deactivateAthenaComponents(icf):
     icf.doAthenaCluster = False
@@ -28,6 +28,24 @@ def createActsTrackingPassFlags():
     icf.doActsAmbiguityResolution = lambda pcf: pcf.Acts.doAmbiguityResolution
 
     return icf
+
+def createActsFastTrackingPassFlags():
+    icf = createITkFastTrackingPassFlags()
+    icf.extension = "ActsFast"
+    deactivateAthenaComponents(icf)
+    icf.doActsCluster = True
+    icf.doActsSpacePoint = True
+    icf.doActsSeed = True
+    icf.doActsTrack = True
+    # Ambiguity resolution can follow if ActsTrack is 
+    # enabled. Ambi. can be activated/deactivated with 
+    # the flag: Acts.doAmbiguityResolution
+    icf.doActsAmbiguityResolution = lambda pcf: pcf.Acts.doAmbiguityResolution
+
+    return icf
+
+
+
 
 def createActsHeavyIonTrackingPassFlags():
     icf = createITkHeavyIonTrackingPassFlags()
