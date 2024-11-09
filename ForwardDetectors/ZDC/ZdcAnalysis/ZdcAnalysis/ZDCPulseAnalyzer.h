@@ -182,6 +182,11 @@ private:
   std::vector<float> m_nonLinCorrParamsHG;
   std::vector<float> m_nonLinCorrParamsLG;
 
+  bool m_haveFADCCorrections{false};
+  bool m_FADCCorrPerSample{false};
+  std::unique_ptr<const TH1> m_FADCCorrHG{};
+  std::unique_ptr<const TH1> m_FADCCorrLG{};
+  
   // Histogram used to perform the fits and function wrappers
   //
   mutable std::unique_ptr<TH1> m_fitHist;
@@ -364,6 +369,8 @@ private:
                   );
 
 
+  double getAmplitudeCorrection(bool highGain);
+    
   static std::vector<float> Calculate2ndDerivative(const std::vector <float>& inputData, unsigned int step);
   static std::vector<float> CalculateDerivative(const std::vector <float>& inputData, unsigned int step);
   static float obtainDelayedBaselineCorr(const std::vector<float>& samples);
@@ -525,6 +532,12 @@ public:
     m_haveNonlinCorr = true;
   }
 
+  // Provide a historam that provides per-ADC channel correction factors for integral and differential
+  //   non-linearities
+  //
+  void enableFADCCorrections(bool correctPerSample, std::unique_ptr<const TH1>& correHistHG, std::unique_ptr<const TH1>& correHistLG);
+  void disableFADCCorrections() {m_haveFADCCorrections = false;}
+  
   bool LoadAndAnalyzeData(const std::vector<float>& ADCSamplesHG, const std::vector<float>& ADCSamplesLG);
 
   bool LoadAndAnalyzeData(const std::vector<float>& ADCSamplesHG, const std::vector<float>& ADCSamplesLG,

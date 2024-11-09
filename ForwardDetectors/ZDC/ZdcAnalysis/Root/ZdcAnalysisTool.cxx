@@ -50,6 +50,9 @@ ZdcAnalysisTool::ZdcAnalysisTool(const std::string& name)
     declareProperty("ForceCalibRun", m_forceCalibRun = -1); // last run of Pb+Pb 2015
     declareProperty("ForceCalibLB", m_forceCalibLB = 814); // last LB of Pb+Pb 2015
 
+    declareProperty("DoFADCCorr", m_doFADCCorr = false); 
+    declareProperty("DoFADCCorrPerSample", m_doFADCCorrPerSample = false); 
+    
     // The following parameters are primarily used for the "default" configuration, but also may be
     //   use to modify/tailor other configurations
     //
@@ -2376,6 +2379,91 @@ void ZdcAnalysisTool::setTimeCalibrations(unsigned int runNumber)
         ATH_MSG_WARNING("No time calibration file " << filename);
     }
 }
+
+void ZdcAnalysisTool::setFADCCorrections(unsigned int runNumber)
+{
+  std::string filename;
+  
+  if (m_LHCRun==3) {
+    std::string runString;
+    
+    if (runNumber == 0) runString = "ZdcFADCCorr_" + m_configuration + "_default.root";
+    else runString = ("ZdcFADCCorr_Run"+TString::Itoa(runNumber,10)+".root").Data();
+    
+    filename = PathResolverFindCalibFile("ZdcAnalysis/" + runString );
+  }
+  else {
+    ATH_MSG_WARNING("setFADCCorrections: FADC corrections not implemented for Run 2");
+    return;
+  }
+  
+  ATH_MSG_INFO("Opening FADC corrections file " << filename);
+  std::unique_ptr<TFile> fFADCCorr(TFile::Open(filename.c_str(), "READ"));
+  
+  if (!fFADCCorr->IsOpen()) {
+    ATH_MSG_INFO ("setFADCCorrections: failed to open file: " << filename);
+    throw std::runtime_error ("ZdcAnalysisTool failed to open FADCCorrections file " + filename);
+  }
+  
+  // Attempt to read histograms with corrections from file
+  //
+  bool readSuccess = true;
+  std::array<std::array<std::unique_ptr<const TH1>, 4>, 2> histogramsHG;
+  std::array<std::array<std::unique_ptr<const TH1>, 4>, 2> histogramsLG;
+  
+  for (size_t side : {0, 1}) {
+    for (int module : {0, 1, 2, 3}) {
+      std::string histNameHG = "ZDC_FADCCorr_s" + std::to_string(side) + "_m_HG" + std::to_string(module);
+      std::string histNameLG = "ZDC_FADCCorr_s" + std::to_string(side) + "_m_LG" + std::to_string(module);
+
+      ATH_MSG_DEBUG("setFADCCorrections: Searching for histograms HG and LG: " << histNameHG << ", " << histNameLG);
+      
+      TH1* histHG_ptr = static_cast<TH1*>(fFADCCorr->GetObjectChecked(histNameHG.c_str(), "TH1"));
+      TH1* histLG_ptr = static_cast<TH1*>(fFADCCorr->GetObjectChecked(histNameLG.c_str(), "TH1"));
+
+      if (!histHG_ptr || !histLG_ptr) {
+	std::string errMsg = "setFADCCorrections: unable to read FADC correction histogram(s) ";
+	if (!histHG_ptr) errMsg += histNameHG + " ";
+	if (!histLG_ptr) errMsg += histNameLG;
+
+	ATH_MSG_ERROR(errMsg);
+	readSuccess = false;
+	break;
+      }
+      else {
+	//
+	//  Check for valid range
+	//
+	if (std::abs(histHG_ptr->GetXaxis()->GetXmin()) > 1e-3 || std::abs(histHG_ptr->GetXaxis()->GetXmax() - 4096) > 1e-3) {
+	  ATH_MSG_ERROR("setFADCCorrections: invalid axis range for HG FADC corrections in histogram with name " << histNameHG);
+	  readSuccess = false;
+	  break;
+	}
+	if (std::abs(histLG_ptr->GetXaxis()->GetXmin()) > 1e-3 || std::abs(histLG_ptr->GetXaxis()->GetXmax() - 4096) > 1e-3) {
+	  ATH_MSG_ERROR("setFADCCorrections: invalid axis range for HG FADC corrections in histogram with name " << histNameLG);
+	  readSuccess = false;
+	  break;
+	}
+	
+	histogramsHG[side][module].reset(histHG_ptr);
+	histogramsLG[side][module].reset(histLG_ptr);
+      }
+    }
+  }
+    
+  fFADCCorr->Close();
+
+  if (readSuccess) {
+    m_zdcDataAnalyzer->enableFADCCorrections(m_doFADCCorrPerSample, histogramsHG, histogramsLG);
+  }
+  else {
+    ATH_MSG_ERROR("setFADCCorrections: due to at least one error, FADC corrections are not implemented");
+    m_doFADCCorr = false;
+  }
+  
+  return;
+}
+
 
 StatusCode ZdcAnalysisTool::reprocessZdc()
 {

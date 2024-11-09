@@ -175,9 +175,15 @@ public:
   void SetModuleAmpFractionLG(const ZDCDataAnalyzer::ZDCModuleFloatArray& moduleAmpFractionLG);
 
 
-  void enableTimeSigCut(bool AND, float sigCut, const std::string& TF1String,
+  void enableTimeSigCut(bool AND, float sigCut, const std::string TF1String,
 			const std::array<std::array<std::vector<double>, 4>, 2>& parsHGArr, 
 			const std::array<std::array<std::vector<double>, 4>, 2>& parsLGArr);
+
+  void enableFADCCorrections(bool correctPerSample,
+			     std::array<std::array<std::unique_ptr<const TH1>, 4>, 2>& correHistHG,
+			     std::array<std::array<std::unique_ptr<const TH1>, 4>, 2>& correHistLG);
+
+  void disableFADCCorrections();
 
   void LoadEnergyCalibrations(std::array<std::array<std::unique_ptr<TSpline>, 4>, 2>& calibSplines)
   {
