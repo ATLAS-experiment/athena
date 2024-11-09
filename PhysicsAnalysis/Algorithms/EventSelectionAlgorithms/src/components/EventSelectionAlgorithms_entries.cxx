@@ -17,6 +17,7 @@
 #include <EventSelectionAlgorithms/DileptonOSSFInvariantMassWindowSelectorAlg.h>
 #include <EventSelectionAlgorithms/SumNElNMuPtSelectorAlg.h>
 #include <EventSelectionAlgorithms/JetNGhostSelectorAlg.h>
+#include <EventSelectionAlgorithms/RunNumberSelectorAlg.h>
 
 DECLARE_COMPONENT (CP::ChargeSelectorAlg)
 DECLARE_COMPONENT (CP::MissingETPlusTransverseMassSelectorAlg)
@@ -31,3 +32,4 @@ DECLARE_COMPONENT (CP::NLargeRJetMassWindowSelectorAlg)
 DECLARE_COMPONENT (CP::DileptonOSSFInvariantMassWindowSelectorAlg)
 DECLARE_COMPONENT (CP::SumNElNMuPtSelectorAlg)
 DECLARE_COMPONENT (CP::JetNGhostSelectorAlg)
+DECLARE_COMPONENT (CP::RunNumberSelectorAlg)

@@ -21,5 +21,6 @@
 #include <EventSelectionAlgorithms/DileptonOSSFInvariantMassWindowSelectorAlg.h>
 #include <EventSelectionAlgorithms/SumNElNMuPtSelectorAlg.h>
 #include <EventSelectionAlgorithms/JetNGhostSelectorAlg.h>
+#include <EventSelectionAlgorithms/RunNumberSelectorAlg.h>
 
 #endif
