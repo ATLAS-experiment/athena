@@ -46,7 +46,7 @@ StatusCode FPGATrackSimDataFlowTool::calculateDataFlow(FPGATrackSimDataFlowInfo*
                                               const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_2nd, std::vector<FPGATrackSimTrack> const & tracks_2nd)
 {
     info->nMappedHits_1st_layer.resize(m_nLayers_1st);
-    for (int i=0; header_1st->towers().at(0).nHits(); i++) {
+    for (int i=0; i<header_1st->towers().at(0).nHits(); i++) {
         info->nMappedHits_1st_total++;
     }
 

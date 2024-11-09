@@ -381,8 +381,6 @@ def runDataPrepChain():
     flags.PhysVal.IDTPM.TrkAnaDoubleRatio.TrigTrkKey = f"{FinalDataPrepTrackChainxAODTracksKeyPrefix}TrackParticles"
 
     flags.PhysVal.doExample = False
-    
-    flags.PhysVal.doExample = False
     ############################################
     flags.Concurrency.NumThreads=1
     flags.Scheduler.ShowDataDeps=True

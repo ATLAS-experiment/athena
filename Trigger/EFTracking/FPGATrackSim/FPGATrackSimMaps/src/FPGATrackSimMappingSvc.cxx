@@ -28,15 +28,15 @@ StatusCode FPGATrackSimMappingSvc::checkInputs()
 
 StatusCode FPGATrackSimMappingSvc::checkAllocs()
 {
-    if (!(m_pmap_vector_1st.size()>0))
+    if (m_pmap_vector_1st.empty())
     {
         ATH_MSG_FATAL("Error using 1st stage plane map no elements of vector made: " << m_pmap_vector_1st);
     }
     if (!m_numberOfPmaps)
         ATH_MSG_FATAL("Error with declared number of plane maps: " << m_pmap_path);
-    if (m_numberOfPmaps != int(m_pmap_vector_1st.size()))
+    if (m_numberOfPmaps != (m_pmap_vector_1st.size()))
         ATH_MSG_FATAL("Error using number of declared plane maps does not equal number of loaded plane maps: " << m_pmap_path<<"=/="<<m_pmap_vector_1st.size());
-    for (int a = 0 ; a < int(m_pmap_vector_1st.size()) ;a++)
+    for (size_t a = 0 ; a < m_pmap_vector_1st.size() ;a++)
     {
         if(!m_pmap_vector_1st.at(a))
             ATH_MSG_FATAL("Error using 1st stage plane map for slice: " << a <<" of "<< m_pmap_vector_1st.size());
@@ -93,9 +93,9 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         fin.close();
         fin.open(filepath);
         ATH_MSG_DEBUG("Creating the 1st stage plane map");
-        for (int i = 0; i<m_numberOfPmaps; i++)
+        for (size_t i = 0; i<m_numberOfPmaps; i++)
         {
-            m_pmap_vector_1st.push_back(std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(fin, m_EvtSel->getRegionID(), 1, m_layerOverrides)));
+            m_pmap_vector_1st.emplace_back(std::make_unique<FPGATrackSimPlaneMap>(fin, m_EvtSel->getRegionID(), 1, m_layerOverrides));
         }
         
         fin.close();
@@ -108,7 +108,7 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         m_rmap_1st = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_rmap_path.value())));
 
         fin.open(filepath);
-        m_pmap_vector_2nd.push_back(std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(fin, m_EvtSel->getRegionID(), 1, m_layerOverrides)));
+        m_pmap_vector_2nd.emplace_back(std::make_unique<FPGATrackSimPlaneMap>(fin, m_EvtSel->getRegionID(), 1, m_layerOverrides));
         fin.close();
 
         ATH_MSG_DEBUG("Creating the 2nd stage region map");

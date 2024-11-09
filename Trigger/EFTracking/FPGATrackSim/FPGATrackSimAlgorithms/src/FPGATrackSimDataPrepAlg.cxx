@@ -320,7 +320,6 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
     m_logicEventHeader_precluster->reset();
     ATH_CHECK(m_hitMapTool->convert(1, m_eventHeader, *m_logicEventHeader));
 
-    //ATH_CHECK(m_hitMapTool->getUnmapped(m_hits_miss));
     for (const FPGATrackSimHit& hit : m_hits_miss) FPGAHitUnmapped->push_back(hit);
 
 

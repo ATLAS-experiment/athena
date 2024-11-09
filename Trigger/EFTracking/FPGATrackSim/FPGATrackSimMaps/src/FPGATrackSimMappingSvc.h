@@ -61,7 +61,7 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
         std::unique_ptr<FPGATrackSimRegionMap> m_subrmap_2nd = nullptr;
         std::unique_ptr<FPGATrackSimNNMap>     m_NNmap = nullptr;
 
-        int m_numberOfPmaps = 0;
+        size_t m_numberOfPmaps = 0;
         // Helpers
         int readPmapSize(std::ifstream& fileIn);
         int countPmapSize(std::ifstream& fileIn);
