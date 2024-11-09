@@ -670,13 +670,7 @@ namespace ActsTrk
         ++event_stat[category_i][kNOutputTracks];
 
         // copy selected tracks into output tracksContainer
-        auto isValidEta = [&](const detail::RecoTrackContainer::TrackProxy &track) {
-          // Protect against eta=nan, which currently crashes in Acts::TrackSelector::isValidTrack().
-          // Can remove once this is fixed in Acts Core.
-          return track.theta() > 0.0 && track.theta() < M_PI;
-        };
-
-        if (isValidEta(track) && trackFinder().trackSelector.isValidTrack(track)) {
+        if (trackFinder().trackSelector.isValidTrack(track)) {
           auto destProxy = tracksContainer.getTrack(tracksContainer.addTrack());
           destProxy.copyFrom(track, true);  // make sure we copy track states!
           ++event_stat[category_i][kNSelectedTracks];
