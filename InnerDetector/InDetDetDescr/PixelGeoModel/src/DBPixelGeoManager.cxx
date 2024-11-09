@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DBPixelGeoManager.h"
@@ -88,7 +88,8 @@ DBPixelGeoManager::init()
   // Get version tag and node for InnerDetector.
   DecodeVersionKey indetVersionKey(geoDbTag,"InnerDetector");
 
-  m_versionTag = rdbSvc->getChildTag("Pixel", versionKey.tag(), versionKey.node());
+  if(geoDbTag->getParamSvcName().starts_with("RDB"))
+    m_versionTag = rdbSvc->getChildTag("Pixel", versionKey.tag(), versionKey.node());
 
 /////////////////////////////////////////////////////////
 //

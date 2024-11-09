@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELGEOMODEL_DBPIXELGEOMANAGER_H
@@ -139,7 +139,7 @@ class DBPixelGeoManager : public PixelGeometryManager {
   PixelLegacyManager * m_legacyManager;
 
   // version tag
-  std::string m_versionTag;
+  std::string m_versionTag{};
 
   // top level placements
   TopLevelPlacements * m_placements = nullptr;
