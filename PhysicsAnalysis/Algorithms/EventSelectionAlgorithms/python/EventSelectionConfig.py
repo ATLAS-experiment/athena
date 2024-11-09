@@ -2,6 +2,8 @@
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeEventCutFlowConfig
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+
 
 class EventSelectionMergerConfig(ConfigBlock):
     """ConfigBlock for merging the output of various selection streams"""
@@ -158,6 +160,8 @@ class EventSelectionConfig(ConfigBlock):
             self.add_EVENTFLAG(text, cfg)
         elif "GLOBALTRIGMATCH" in text.split():
             self.add_GLOBALTRIGMATCH(text, cfg)
+        elif "RUN_NUMBER" in text.split():
+            self.add_RUNNUMBER(text, cfg)
         else:
             raise ValueError (f"[EventSelectionConfig] The following selection cut is not recognised! --> {text}")
 
@@ -801,6 +805,21 @@ class EventSelectionConfig(ConfigBlock):
         else:
             postfix = self.check_string(items[1])
             self.setDecorationName(None, config, f"globalTriggerMatch{postfix}_%SYS%,as_char")
+        return
+
+    def add_RUNNUMBER(self, text, config):
+        items = text.split()
+        if items[0] != "RUN_NUMBER":
+            self.raise_misconfig(text, "RUN_NUMBER")
+        if len(items) != 3:
+            self.raise_misconfig(text, "number of arguments")
+        thisalg = f'{self.name}_RUN_NUMBER_{self.step}'
+        alg = config.createAlgorithm('CP::RunNumberSelectorAlg', thisalg)
+        alg.sign = self.check_sign(items[1])
+        alg.runNumber = self.check_int(items[2])
+        alg.useRandomRunNumber = config.dataType() is not DataType.Data
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
+        self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
 
     def add_SAVE(self, text, config):

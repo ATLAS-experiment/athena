@@ -14,6 +14,7 @@
   <class name="CP::DileptonOSSFInvariantMassWindowSelectorAlg" />
   <class name="CP::SumNElNMuPtSelectorAlg" />
   <class name="CP::JetNGhostSelectorAlg" />
+  <class name="CP::RunNumberSelectorAlg" />
 
 </lcgdict>
 
