@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_ZDCPulseAnalyzer_h
@@ -252,8 +252,18 @@ private:
   int m_usedPresampIdx{};
   float m_preSample{};
 
-  float m_maxADCValue{};
-  float m_minADCValue{};
+  float m_minADCHG{};
+  float m_maxADCHG{};
+  int m_minADCSampleHG;
+  int m_maxADCSampleHG;
+  
+  float m_maxADCLG{};
+  float m_minADCLG{};
+  int m_minADCSampleLG;
+  int m_maxADCSampleLG;
+
+  float m_ADCPeakHG{};
+  float m_ADCPeakLG{};
 
   float m_maxDelta{};
   float m_minDelta{};
@@ -616,13 +626,31 @@ public:
     else return 0;
   }
 
-  float GetPresample() const {return m_preSample;}
-  float GetMaxADC() const {return m_maxADCValue;}
-  float GetMinADC() const {return m_minADCValue;}
+  float getPresample() const {return m_preSample;}
+  float getMaxADCHG() const {return m_maxADCHG;}
+  float getMaxADCLG() const {return m_maxADCLG;}
+  float getMinADCHG() const {return m_minADCHG;}
+  float getMinADCLG() const {return m_minADCLG;}
 
-  int GetMaxADCSample() const {return m_maxSampl;}
-  int GetMinADCSample() const {return m_minSampl;}
+  float getMaxADCSub() const {
+    float maxADCNosub = m_useLowGain ? m_maxADCLG : m_maxADCHG;
+    return maxADCNosub - m_pedestal - m_preSample;
+  }
+  
+  float getMinADCSub() const {
+    float minADCNosub = m_useLowGain ? m_minADCLG : m_minADCHG;
+    return minADCNosub - m_pedestal - m_preSample;
+  }
 
+  int getMaxADCSampleHG() const {return m_maxADCSampleHG;}
+  int getMinADCSampleHG() const {return m_minADCSampleHG;}
+
+  int getMaxADCSampleLG() const {return m_maxADCSampleLG;}
+  int getMinADCSampleLG() const {return m_minADCSampleLG;}
+
+  float getADCPeakHG() const {return m_ADCPeakHG;}
+  float getADCPeakLG() const {return m_ADCPeakLG;}
+  
   float GetMaxDelta() const {return m_maxDelta;}
   float GetMinDelta() const {return m_minDelta;}
 

@@ -206,7 +206,11 @@ private:
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModulePreSampleAmp{this, "ZdcModulePreSampleAmp", "", "ZDC module presample amplitude"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModulePresample{this, "ZdcModulePresample", "", "ZDC module presample"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleMinDeriv2nd{this, "ZdcModuleMinDeriv2nd", "", "ZDC module min 2nd derivative"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleMaxADC{this, "ZdcModuleMaxADC", "", "ZDC module max ADC, minus pedestal"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleMaxADC{this, "ZdcModuleMaxADC", "", "ZDC module max ADC, minus pre-sample"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleMaxADCHG{this, "ZdcModuleMaxADCHG", "", "ZDC module HG max ADC, unsubtracted"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleMaxADCLG{this, "ZdcModuleMaxADCLG", "", "ZDC module LG max ADC, unsubtracted"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModulePeakADCSubHG{this, "ZdcModulePeakADCSubHG", "", "ZDC module peak sample ADC HG, subtracted"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModulePeakADCSubLG{this, "ZdcModulePeakADCSubLG", "", "ZDC module peak sample ADC LG, subtracted"};
 
   // LG refit data
   // 

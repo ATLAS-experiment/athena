@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcAnalysis/ZDCPulseAnalyzer.h"
@@ -239,6 +239,19 @@ void ZDCPulseAnalyzer::Reset(bool repass)
     m_backToHG_pre      = false;
     m_fixPrePulse       = false;
 
+    m_minADCLG = -1;
+    m_maxADCLG = -1;
+    m_minADCHG = -1;
+    m_maxADCHG = -1;
+    
+    m_minADCSampleHG = -1;
+    m_maxADCSampleHG = -1;
+    m_minADCSampleLG = -1;
+    m_maxADCSampleLG = -1;
+
+    m_ADCPeakHG = -1;
+    m_ADCPeakLG = -1;
+    
     int sampleVecSize = m_Nsample;
     if (m_useDelayed) sampleVecSize *= 2;
 
@@ -696,6 +709,12 @@ bool ZDCPulseAnalyzer::ScanAndSubtractSamples()
 
   // Now do pedestal subtraction and check for overflows
   //
+  m_minADCHG = m_HGOverflowADC;
+  m_minADCLG = m_LGOverflowADC;
+
+  m_maxADCHG = 0;
+  m_maxADCLG = 0;
+
   for (size_t isample = 0; isample < m_NSamplesAna; isample++) {
     float ADCHG = m_ADCSamplesHG[isample];
     float ADCLG = m_ADCSamplesLG[isample];
@@ -706,6 +725,24 @@ bool ZDCPulseAnalyzer::ScanAndSubtractSamples()
     //
     m_ADCSamplesHGSub[isample] = ADCHG - m_pedestal;
     m_ADCSamplesLGSub[isample] = ADCLG - m_pedestal;
+
+    if (ADCHG > m_maxADCHG) {
+      m_maxADCHG = ADCHG;
+      m_maxADCSampleHG = isample;
+    }
+    else if (ADCHG < m_minADCHG) {
+      m_minADCHG = ADCHG;
+      m_minADCSampleHG = isample;
+    }
+	     
+    if (ADCLG > m_maxADCLG) {
+      m_maxADCLG = ADCLG;
+      m_maxADCSampleLG = isample;
+    }
+    else if (ADCLG < m_minADCLG) {
+      m_minADCLG = ADCLG;
+      m_minADCSampleLG = isample;
+    }
 
     if (m_useSampleHG[isample]) {
       if (m_enablePreExcl) {
@@ -1055,18 +1092,6 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
   //
   std::for_each(m_samplesSub.begin(), m_samplesSub.end(), [ = ] (float & adcUnsub) {return adcUnsub -= m_preSample;} );
 
-  // Find maximum and minimum values, not necessarily those of the actual pulse
-  //
-  std::pair<SampleCIter, SampleCIter> minMaxIters = std::minmax_element(m_samplesSub.cbegin() + m_minSampleEvt, m_samplesSub.cbegin() + m_maxSampleEvt);
-  SampleCIter minIter = minMaxIters.first;
-  SampleCIter maxIter = minMaxIters.second;
-
-  m_maxADCValue = *maxIter;
-  m_minADCValue = *minIter;
-
-  m_maxSampl = std::distance(m_samplesSub.cbegin(), maxIter);
-  m_minSampl = std::distance(m_samplesSub.cbegin(), minIter);
-
   // Calculate the second derivatives using step size m_2ndDerivStep
   //
   m_samplesDeriv2nd = Calculate2ndDerivative(m_samplesSub, m_2ndDerivStep);
@@ -1100,7 +1125,17 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
     m_havePulse = false;
   }
 
-
+  // save the low and high gain ADC values at the peak -- if we have a pulse, at m_minDeriv2ndIndex
+  //   otherwise at m_peak2ndDerivMinSample
+  //
+  if (m_havePulse) {
+    m_ADCPeakHG = m_ADCSamplesHG.at(m_minDeriv2ndIndex);
+    m_ADCPeakLG = m_ADCSamplesLG.at(m_minDeriv2ndIndex);
+  }
+  else {
+    m_ADCPeakHG = m_ADCSamplesHG.at(m_peak2ndDerivMinSample);
+    m_ADCPeakLG = m_ADCSamplesLG.at(m_peak2ndDerivMinSample);
+  }
   
   // Now decide whether we have a preceeding pulse or not. There are two possible kinds of preceeding pulses:
   //   1) exponential tail from a preceeding pulse
@@ -1383,8 +1418,10 @@ void ZDCPulseAnalyzer::DoFit(bool refitLG)
     fitAmpMin = m_fitAmpMinLG;
     fitAmpMax = m_fitAmpMaxLG;
     t0Initial = m_nominalT0LG;
+    ampInitial = m_ADCPeakLG;
   }
   else {
+    ampInitial = m_ADCPeakHG;
     fitAmpMin = m_fitAmpMinHG;
     fitAmpMax = m_fitAmpMaxHG;
     t0Initial = m_nominalT0HG;
@@ -1392,11 +1429,9 @@ void ZDCPulseAnalyzer::DoFit(bool refitLG)
 
   if (refitLG) {
     hist_p = m_fitHistLGRefit.get();
-    ampInitial = (m_maxADCValue - m_minADCValue)*m_gainFactorHG/m_gainFactorLG;
   }
   else {
     hist_p = m_fitHist.get();
-    ampInitial = m_maxADCValue - m_minADCValue;
   }
   if (ampInitial < fitAmpMin) ampInitial = fitAmpMin * 1.5;
 
@@ -1550,13 +1585,15 @@ void ZDCPulseAnalyzer::DoFitCombined(bool refitLG)
     delayedHist_p = m_delayedHist.get();
   }
   
-  float fitAmpMin, fitAmpMax, t0Initial;
+  float fitAmpMin, fitAmpMax, t0Initial, ampInitial;
   if (fitLG) {
+    ampInitial = m_ADCPeakLG;
     fitAmpMin = m_fitAmpMinLG;
     fitAmpMax = m_fitAmpMaxLG;
     t0Initial = m_nominalT0LG;
   }
   else {
+    ampInitial = m_ADCPeakHG;
     fitAmpMin = m_fitAmpMinHG;
     fitAmpMax = m_fitAmpMaxHG;
     t0Initial = m_nominalT0HG;
@@ -1564,7 +1601,6 @@ void ZDCPulseAnalyzer::DoFitCombined(bool refitLG)
 
   // Set the initial values
   //
-  float ampInitial = m_maxADCValue - m_minADCValue;
   if (ampInitial < fitAmpMin) ampInitial = fitAmpMin * 1.5;
 
   ZDCFitWrapper* fitWrapper = m_defaultFitWrapper.get();
