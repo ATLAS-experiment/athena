@@ -19,7 +19,7 @@
 #include <vector>
 
 #include "AthContainers/DataVector.h"
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "PathResolver/PathResolver.h"
@@ -42,7 +42,7 @@
 
 namespace LVL1 {
 /** @brief level 1 ZDC trigger simulation */
-class TrigT1Run3ZDC : public AthReentrantAlgorithm {
+class TrigT1Run3ZDC : public AthAlgorithm {
 
  public:
   // This is a standard algorithm constructor
@@ -50,9 +50,10 @@ class TrigT1Run3ZDC : public AthReentrantAlgorithm {
 
   // These are the functions inherited from Algorithm
   virtual StatusCode initialize() override;
-  virtual StatusCode execute(const EventContext& ctx) const override;
+  virtual StatusCode execute() override;
+  virtual bool isClonable() const override final { return true; }
 
- private:
+private:
   /* Input handles */
   SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleCalibEnergyKey{
       this, "ZdcModuleCalibEnergyKey", "ZdcModules.CalibEnergy",

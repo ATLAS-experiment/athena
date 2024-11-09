@@ -16,7 +16,7 @@ namespace LVL1 {
  //--------------------------------
 
  TrigT1ZDC::TrigT1ZDC (const std::string& name, ISvcLocator* pSvcLocator)
-  : AthReentrantAlgorithm( name, pSvcLocator ) {}
+  : AthAlgorithm( name, pSvcLocator ) {}
 
  //---------------------------------
  // initialise()
@@ -63,12 +63,14 @@ namespace LVL1 {
  // execute() method called once per event
  //----------------------------------------------
 
- StatusCode TrigT1ZDC::execute(const EventContext &ctx) const
+ StatusCode TrigT1ZDC::execute() 
  {
+    
+   const EventContext &ctx = Gaudi::Hive::currentContext();
    // access ZDC modules
-   SG::ReadHandle<xAOD::ZdcModuleContainer> zdcModules(m_zdcModuleKey, ctx);
+   SG::ReadHandle<xAOD::ZdcModuleContainer> zdcModules(m_zdcModuleKey,ctx);
    // access ZDC aux data 
-   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleCalibEnergyHandle( m_zdcModuleCalibEnergyKey, ctx);
+   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleCalibEnergyHandle( m_zdcModuleCalibEnergyKey,ctx);
    // create vector to store module CalibEnergy
    std::vector<float> moduleEnergy = {0., 0., 0., 0., 0., 0., 0., 0.};
 
@@ -119,7 +121,7 @@ namespace LVL1 {
    word0 += (bin[2] << 27);
 
    // form CTP obejct
-   SG::WriteHandle<ZdcCTP> zdcCTP = SG::makeHandle(m_zdcCTPLocation, ctx);
+   SG::WriteHandle<ZdcCTP> zdcCTP = SG::makeHandle(m_zdcCTPLocation,ctx);
 
    //record CTP object
    ATH_CHECK(zdcCTP.record(std::make_unique<ZdcCTP>(word0)));
