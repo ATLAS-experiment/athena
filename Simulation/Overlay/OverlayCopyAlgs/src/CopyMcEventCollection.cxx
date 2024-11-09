@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CopyMcEventCollection.h"
@@ -62,8 +62,17 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
   }
   ATH_MSG_DEBUG("Recorded output McEventCollection container " << outputContainer.name() << " in store " << outputContainer.store());
 
+  unsigned int droppedSeparatorGenEvents{0};
+  int backupPileUpType{0};
+  int backupBunchCrossingTime{0};
   // Copy signal GenEvents
   for (McEventCollection::const_iterator it = signalContainer->begin(); it != signalContainer->end(); ++it) {
+    if ( (*it)->event_number() == -1 ) {
+      ++droppedSeparatorGenEvents;
+      ATH_MSG_VERBOSE("Signal: Skipping a separator GenEvent. " << droppedSeparatorGenEvents << " skipped so far.");
+      backupBunchCrossingTime+=25; // NB This is a bit of a hack, but better than having everything in-time
+      continue;
+    }
     HepMC::GenEvent* copiedEvent = new HepMC::GenEvent(**it);
     HepMC::fillBarcodesAttribute(copiedEvent);
 #ifdef HEPMC3
@@ -71,9 +80,16 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
     if (bunchCrossingTime) {
       copiedEvent->add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime->value()));
     }
+    else {
+      copiedEvent->add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(backupBunchCrossingTime));
+    }
     auto pileupType = (*it)->attribute<HepMC3::IntAttribute>("PileUpType");
     if (pileupType) {
       copiedEvent->add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(pileupType->value()));
+    }
+    else {
+      copiedEvent->add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(backupPileUpType));
+      if (backupPileUpType == 0) { backupPileUpType = 1; } // ignore the possibility for cavern background for this back-up case
     }
 #endif
     if (!copiedEvent->heavy_ion() && (*it)->heavy_ion()) {
@@ -89,6 +105,7 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
     outputContainer->push_back(copiedEvent);
   }
 
+  backupBunchCrossingTime = 0;
   // Copy background GenEvents if configured
   if (!m_bkgInputKey.key().empty()) {
     McEventCollection::const_iterator it = bkgContainerPtr->begin();
@@ -97,6 +114,12 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
       ++it;
     }
     for ( ; it != bkgContainerPtr->end(); ++it) {
+      if ( (*it)->event_number() == -1 ) {
+        ++droppedSeparatorGenEvents;
+        ATH_MSG_VERBOSE("Background: Skipping a separator GenEvent. " << droppedSeparatorGenEvents << " skipped so far.");
+        backupBunchCrossingTime+=25; // NB This is a bit of a hack, but better than having everything in-time
+        continue;
+      }
       HepMC::GenEvent* copiedEvent = new HepMC::GenEvent(**it);
       HepMC::fillBarcodesAttribute(copiedEvent);
 #ifdef HEPMC3
@@ -104,9 +127,16 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
       if (bunchCrossingTime) {
         copiedEvent->add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime->value()));
       }
+      else {
+        copiedEvent->add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(backupBunchCrossingTime));
+      }
       auto pileupType = (*it)->attribute<HepMC3::IntAttribute>("PileUpType");
       if (pileupType) {
         copiedEvent->add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(pileupType->value()));
+      }
+      else {
+        copiedEvent->add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(backupPileUpType));
+        if (backupPileUpType == 0) { backupPileUpType = 1; } // ignore the possibility for cavern background for this back-up case
       }
 #endif
       if (!copiedEvent->heavy_ion() && (*it)->heavy_ion()) {
@@ -122,7 +152,7 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
       outputContainer->push_back(copiedEvent);
     }
   }
-
+  ATH_MSG_VERBOSE("output size: " << outputContainer->size() << ", Signal Input size: " << signalContainer->size() << ", Bkg Input size: " << bkgContainerPtr->size() << ", dropped neutrino GenEvents: " << (m_removeBkgHardScatterTruth ? 1 : 0) << " , dropped Separator GenEvents: " << droppedSeparatorGenEvents);
   // dump McEventCollection in debug mode to confirm everything is as expected
   if (msgLvl(MSG::DEBUG)) {
     if (!outputContainer->empty()) {
