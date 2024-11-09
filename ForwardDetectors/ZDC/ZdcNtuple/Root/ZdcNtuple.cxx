@@ -180,7 +180,12 @@ StatusCode ZdcNtuple :: initialize ()
 	m_outputTree->Branch("zdc_ZdcLucrodTriggerAmp",&t_ZdcLucrodTriggerAmp,"zdc_ZdcLucrodTriggerAmp[2][4]/S");
 	m_outputTree->Branch("zdc_ZdcLucrodTriggerAmpLG",&t_ZdcLucrodTriggerAmpLG,"zdc_ZdcLucrodTriggerAmpLG[2][4]/S");
 	m_outputTree->Branch("zdc_ZdcModuleMaxADC",&t_ZdcModuleMaxADC,"zdc_ZdcModuleMaxADC[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleMaxADCHG",&t_ZdcModuleMaxADCHG,"zdc_ZdcModuleMaxADCHG[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleMaxADCLG",&t_ZdcModuleMaxADCLG,"zdc_ZdcModuleMaxADCLG[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModulePeakADCHG",&t_ZdcModulePeakADCHG,"zdc_ZdcModulePeakADCHG[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModulePeakADCLG",&t_ZdcModulePeakADCLG,"zdc_ZdcModulePeakADCLG[2][4]/F");
 	m_outputTree->Branch("zdc_ZdcModuleAmpLGRefit", &t_ZdcModuleAmpLGRefit, "zdc_ZdcModuleAmpLGRefit[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleAmpCorrLGRefit", &t_ZdcModuleAmpCorrLGRefit, "zdc_ZdcModuleAmpCorrLGRefit[2][4]/F");
 	m_outputTree->Branch("zdc_ZdcModuleT0LGRefit", &t_ZdcModuleT0LGRefit, "zdc_ZdcModuleT0LGRefit[2][4]/F");
 	m_outputTree->Branch("zdc_ZdcModuleT0SubLGRefit", &t_ZdcModuleT0SubLGRefit, "zdc_ZdcModuleT0SubLGRefit[2][4]/F");
 	m_outputTree->Branch("zdc_ZdcModuleChisqLGRefit", &t_ZdcModuleChisqLGRefit, "zdc_ZdcModuleChisqLGRefit[2][4]/F");
@@ -653,7 +658,9 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	  t_ZdcModuleFitT0[iside][imod] = 0; t_ZdcModuleBkgdMaxFraction[iside][imod] = 0; t_ZdcModuleAmpError[iside][imod] = 0;
 	  t_ZdcModuleMinDeriv2nd[iside][imod] = 0; t_ZdcModulePresample[iside][imod] = 0; t_ZdcModulePreSampleAmp[iside][imod] = 0;
 	  t_ZdcLucrodTriggerAmp[iside][imod] = 0;t_ZdcLucrodTriggerAmpLG[iside][imod] = 0;
-	  t_ZdcModuleMaxADC[iside][imod] = 0; t_ZdcModuleAmpLGRefit[iside][imod] = 0; 
+	  t_ZdcModuleMaxADC[iside][imod] = 0; t_ZdcModuleMaxADCHG[iside][imod] = 0; t_ZdcModuleMaxADCLG[iside][imod] = 0;
+	  t_ZdcModulePeakADCHG[iside][imod] = 0; t_ZdcModulePeakADCLG[iside][imod] = 0;
+	  t_ZdcModuleAmpLGRefit[iside][imod] = 0; t_ZdcModuleAmpCorrLGRefit[iside][imod] = 0; 
 	  t_ZdcModuleT0LGRefit[iside][imod] = 0; t_ZdcModuleT0SubLGRefit[iside][imod] = 0; t_ZdcModuleChisqLGRefit[iside][imod] = 0;
 	  
 	  if (enableOutputSamples)
@@ -891,6 +898,16 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	      if (zdcMod->isAvailable<float>("MaxADC"))
 		t_ZdcModuleMaxADC[iside][imod] = zdcMod->auxdataConst<float>("MaxADC");
 	      
+	      if (zdcMod->isAvailable<float>("MaxADCHG"))
+		t_ZdcModuleMaxADCHG[iside][imod] = zdcMod->auxdataConst<float>("MaxADCHG");
+	      if (zdcMod->isAvailable<float>("MaxADCLG"))
+		t_ZdcModuleMaxADCLG[iside][imod] = zdcMod->auxdataConst<float>("MaxADCLG");
+
+	      if (zdcMod->isAvailable<float>("PeakADCHG"))
+		t_ZdcModulePeakADCHG[iside][imod] = zdcMod->auxdataConst<float>("PeakADCHG");
+	      if (zdcMod->isAvailable<float>("PeakADCLG"))
+		t_ZdcModulePeakADCLG[iside][imod] = zdcMod->auxdataConst<float>("PeakADCLG");
+
 	      if (enableOutputSamples && !zdcErr)
 		{
 		  for (unsigned int isamp = 0; isamp < nsamplesZdc; isamp++) // 7 samples

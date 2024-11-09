@@ -634,7 +634,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2024()
   m_deltaTSample = 3.125;
   m_numSample = 24;
   
-  const int deriv2ndThreshDSHG = -25;
+  const int deriv2ndThreshDSHG = -45;
   const int deriv2ndThreshDSLG = -10;
   const unsigned int peakSample = 10;
 
@@ -655,8 +655,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2024()
   
   ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {{{4.4, 4.7, 4.5, 4.6}, {4.8, 4.6, 4.4, 4.2}}};
   
-  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{31.25, 31.25, 31.25, 31.25}, {31.25, 31.25, 31.25, 31.25}}};
-  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{28, 28, 28, 28}, {28, 28, 28, 28}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{34.5, 33.0, 33, 34.0}, {31.5, 31.5, 29.5, 30.5}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{32.4, 33.5, 30.5, 31.4}, {32.25, 32.0, 30.5, 30.5}}};
     
   ATH_MSG_DEBUG( "PbPb2024: delta t cut, value low = " << deltaT0CutLow[0][0] << ", high = " << deltaT0CutHigh[0][0] );
 
@@ -688,7 +688,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2024()
   zdcDataAnalyzer->set2ndDerivStep(2);
   zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(3);
 
-  ZDCDataAnalyzer::ZDCModuleFloatArray gainsHG = {{{1.042, 1.078, 1.008, 1.066},{1.047, 1.060, 1.010, 0.99}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray gainsHG = {{{1, 1, 1, 1},{1, 1, 1, 1.0}}};
   ZDCDataAnalyzer::ZDCModuleFloatArray gainsLG = {{{10, 10, 10, 10}, {10, 10, 10, 10}}};
 
   zdcDataAnalyzer->SetGainFactorsHGLG(gainsHG, gainsLG); // a gain adjustment of 10 applied to LG ADC, 1 to HG ADC values
@@ -696,8 +696,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2024()
   // These noise sigmas we read off from the ch_x_BaselineStdev monitoring histograms with our 
   //   final readout configuration for the Pb+Pb run by BAC on 25-09-2023
   //
-  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasLG = {{{1.0, 1.0,  1.0,  1.0}, {1.0, 1.0, 1.0, 1.0}}};
-  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasHG = {{{1.5, 1.7, 3, 1.7}, {1.7, 1.6, 2.2, 1.8}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasLG = {{{1.5, 1.5,  1.5,  1.5}, {1.5, 1.5, 1.5, 1.5}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasHG = {{{10, 10, 10, 10}, {10, 10, 10, 10}}};
   
   zdcDataAnalyzer->SetNoiseSigmas(noiseSigmasHG, noiseSigmasLG);
 
@@ -713,8 +713,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2024()
   
   // Enable two-pass analysis                                                                                 
   //                                                                                                          
-  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassHG = {{{-20, -20, -20, -20},
-								   {-20, -20, -20, -20},}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassHG = {{{-30, -30, -30, -30},
+								   {-30, -30, -30, -30},}};
   
   ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassLG = {{{-8, -8, -8, -8},
 								   {-8, -8, -8, -8}}};
@@ -976,7 +976,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeInjectorPbPb2024()
                   ZDCPulseAnalyzer::LGModeRefitLG));
 
   zdcDataAnalyzer->set2ndDerivStep(2);
-  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(1);
+  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(3);
 
   ZDCDataAnalyzer::ZDCModuleFloatArray gainsHG = {{{1.0, 1.0,  1.0,  1.0}, {1.0, 1.0, 1.0, 1.0}}};
   ZDCDataAnalyzer::ZDCModuleFloatArray gainsLG = {{{10, 10, 10, 10}, {10, 10, 10, 10}}};
@@ -1906,6 +1906,17 @@ StatusCode ZdcAnalysisTool::initialize()
     m_zdcModuleMaxADC = m_zdcModuleContainerName+".MaxADC"+m_auxSuffix;
     ATH_CHECK( m_zdcModuleMaxADC.initialize());
 
+    m_zdcModuleMaxADCHG = m_zdcModuleContainerName+".MaxADCHG"+m_auxSuffix;
+    ATH_CHECK( m_zdcModuleMaxADCHG.initialize());
+    m_zdcModuleMaxADCLG = m_zdcModuleContainerName+".MaxADCLG"+m_auxSuffix;
+    ATH_CHECK( m_zdcModuleMaxADCLG.initialize());
+
+    m_zdcModulePeakADCSubHG = m_zdcModuleContainerName+".PeakADCSubHG"+m_auxSuffix;
+    ATH_CHECK( m_zdcModulePeakADCSubHG.initialize());
+    m_zdcModulePeakADCSubLG = m_zdcModuleContainerName+".PeakADCSubLG"+m_auxSuffix;
+    ATH_CHECK( m_zdcModulePeakADCSubLG.initialize());
+
+
     // LG refit data
     //
     m_zdcModuleAmpLGRefit = m_zdcModuleContainerName+".AmpLGRefit"+m_auxSuffix;
@@ -2141,6 +2152,10 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModulePresample(m_zdcModulePresample);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleMinDeriv2nd(m_zdcModuleMinDeriv2nd);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleMaxADC(m_zdcModuleMaxADC);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleMaxADCHG(m_zdcModuleMaxADCHG);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleMaxADCLG(m_zdcModuleMaxADCLG);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModulePeakADCSubHG(m_zdcModulePeakADCSubHG);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModulePeakADCSubLG(m_zdcModulePeakADCSubLG);
 
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleAmpLGRefit(m_zdcModuleAmpLGRefit);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleT0LGRefit(m_zdcModuleT0LGRefit);
@@ -2185,9 +2200,9 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	    zdcModuleFitT0(*zdcModule) = pulseAna_p->GetFitT0();
 	    zdcModuleBkgdMaxFraction(*zdcModule) = pulseAna_p->GetBkgdMaxFraction();
 	    zdcModulePreSampleAmp(*zdcModule) = pulseAna_p->GetPreSampleAmp();
-	    zdcModulePresample(*zdcModule) = pulseAna_p->GetPresample();
+	    zdcModulePresample(*zdcModule) = pulseAna_p->getPresample();
 	    zdcModuleMinDeriv2nd(*zdcModule) = pulseAna_p->GetMinDeriv2nd();
-	    zdcModuleMaxADC(*zdcModule) = pulseAna_p->GetMaxADC();
+	    zdcModuleMaxADC(*zdcModule) = pulseAna_p->getMaxADCSub();
 	    
 	    zdcModuleAmpLGRefit(*zdcModule) = pulseAna_p->getRefitLGAmp();
 	    zdcModuleT0LGRefit(*zdcModule) = pulseAna_p->getRefitLGTime();
