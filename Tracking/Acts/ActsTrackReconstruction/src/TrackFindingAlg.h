@@ -122,6 +122,11 @@ namespace ActsTrk
     Gaudi::Property<double> m_absEtaMax{this, "absEtaMax", std::numeric_limits<double>::max(), "TrackSelector: absEtaMax"};
     Gaudi::Property<std::vector<double>> m_ptMin{this, "ptMin", {}, "TrackSelector: ptMin"};
     Gaudi::Property<std::vector<double>> m_ptMax{this, "ptMax", {}, "TrackSelector: ptMax"};
+    Gaudi::Property<std::vector<double>> m_d0Min{this, "d0Min", {}, "TrackSelector: d0Min"};
+    Gaudi::Property<std::vector<double>> m_d0Max{this, "d0Max", {}, "TrackSelector: d0Max"};
+    Gaudi::Property<std::vector<double>> m_z0Min{this, "z0Min", {}, "TrackSelector: z0Min"};
+    Gaudi::Property<std::vector<double>> m_z0Max{this, "z0Max", {}, "TrackSelector: z0Max"};
+    
     Gaudi::Property<std::vector<std::size_t>> m_minMeasurements{this, "minMeasurements", {}, "TrackSelector: minMeasurements"};
     Gaudi::Property<std::vector<std::size_t>> m_maxHoles{this, "maxHoles", {}, "TrackSelector: maxHoles"};
     Gaudi::Property<std::vector<std::size_t>> m_maxOutliers{this, "maxOutliers", {}, "TrackSelector: maxOutliers"};

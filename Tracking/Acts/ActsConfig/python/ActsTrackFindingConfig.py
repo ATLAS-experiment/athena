@@ -112,6 +112,11 @@ def ActsMainTrackFindingAlgCfg(flags,
     if flags.Acts.trackFindingTrackSelectorConfig > 0:
         kwargs.setdefault("absEtaMax", flags.Tracking.ActiveConfig.maxEta)
         kwargs.setdefault("ptMin", [p / Units.GeV * UnitConstants.GeV for p in tolist(flags.Tracking.ActiveConfig.minPT)])
+        # z0 cut is the same for all eta bins. I use the size of the eta bins limits minus one to find the number of bins.
+        kwargs.setdefault("z0Min", [-flags.Tracking.ActiveConfig.maxZImpactSeed / Units.mm * UnitConstants.mm for etabin in flags.Tracking.ActiveConfig.etaBins[:-1]])
+        kwargs.setdefault("z0Max", [ flags.Tracking.ActiveConfig.maxZImpactSeed / Units.mm * UnitConstants.mm for etabin in flags.Tracking.ActiveConfig.etaBins[:-1]])
+        kwargs.setdefault("d0Min", [-d0 / Units.mm * UnitConstants.mm for d0 in tolist(flags.Tracking.ActiveConfig.maxPrimaryImpact)])
+        kwargs.setdefault("d0Max", [ d0 / Units.mm * UnitConstants.mm for d0 in tolist(flags.Tracking.ActiveConfig.maxPrimaryImpact)])
         kwargs.setdefault("minMeasurements", tolist(flags.Tracking.ActiveConfig.minClusters))
         kwargs.setdefault("maxHoles", tolist(flags.Tracking.ActiveConfig.maxHoles))
         if flags.Acts.useDefaultActsMeasurementSelector:

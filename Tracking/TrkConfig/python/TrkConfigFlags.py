@@ -43,6 +43,7 @@ class PixelClusterSplittingType(FlagEnum):
 class TrackingComponent(FlagEnum):
     AthenaChain = "AthenaChain"  # full Athena Chain (default)
     ActsChain = "ActsChain"  # full Acts Chain
+    ActsFastChain = "ActsFastChain" # fast tracking Acts Chain
     ActsHeavyIon = "ActsHeavyIon"
     # Validation options
     ActsValidateClusters = "ActsValidateClusters"
@@ -555,6 +556,7 @@ def createTrackingConfigFlags():
     # Acts
     from ActsConfig.ActsTrackingPassFlags import (
         createActsTrackingPassFlags,
+        createActsFastTrackingPassFlags,
         createActsLargeRadiusTrackingPassFlags,
         createActsConversionTrackingPassFlags,
         createActsLowPtTrackingPassFlags,
@@ -570,6 +572,8 @@ def createTrackingConfigFlags():
 
     icf.addFlagsCategory ("Tracking.ITkActsPass",
                           createActsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsFastPass",
+                          createActsFastTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsLargeRadiusPass",
                           createActsLargeRadiusTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ('Tracking.ITkActsConversionPass',

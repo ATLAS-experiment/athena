@@ -264,7 +264,8 @@ def createITkFastTrackingPassFlags():
          0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale])
     icf.maxZImpact            = [150.0 * Units.mm]
     icf.minPixel              = [3]
-    icf.nHolesMax             = [1]
+    icf.maxHoles              = [1]
+    icf.nHolesMax             = icf.maxHoles
     icf.nHolesGapMax          = [1]
     icf.minPTSeed             = lambda pcf: (
         1.0 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
