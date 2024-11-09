@@ -50,7 +50,8 @@ public:
 
   void setEnergyCalibrations(unsigned int runNumber);
   void setTimeCalibrations(unsigned int runNumber);
-
+  void setFADCCorrections(unsigned int runNumber = 0);
+  
   float getModuleSum(int side);
 
   float getCalibModuleSum(int side);
@@ -65,7 +66,6 @@ public:
 
   double getTriggerEfficiency(int side);
   double getTriggerEfficiencyUncertainty(int side);
-  bool m_doTimeCalib;
 
   const ZDCDataAnalyzer* getDataAnalyzer() {return m_zdcDataAnalyzer.get();}
 
@@ -151,9 +151,12 @@ private:
   const xAOD::ZdcModuleContainer* m_zdcSums {nullptr};
   bool m_flipEMDelay;
   unsigned int m_lowGainMode;
-  bool m_combineDelay;
-  bool m_doCalib;
-  bool m_doTrigEff;
+  bool m_combineDelay{false};
+  bool m_doCalib{false};
+  bool m_doTrigEff{false};
+  bool m_doTimeCalib{false};
+  bool m_doFADCCorr{false};
+  bool m_doFADCCorrPerSample{false};
   int m_forceCalibRun;
   int m_forceCalibLB;
   std::string m_calibVersion;
