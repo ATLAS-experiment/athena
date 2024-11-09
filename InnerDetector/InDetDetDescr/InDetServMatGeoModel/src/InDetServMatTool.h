@@ -5,17 +5,16 @@
 #ifndef INDETSERVMATGEOMODEL_INDETSERVMATTOOL_H
 #define INDETSERVMATGEOMODEL_INDETSERVMATTOOL_H
 
+#include "InDetServMatAthenaComps.h"
 #include "GeoModelUtilities/GeoModelTool.h"
-
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 
-#include <string>
+#include "GeometryDBSvc/IGeometryDBSvc.h"
+#include "GeoModelInterfaces/IGeoDbTagSvc.h"
+#include "InDetGeoModelUtils/IInDetServMatBuilderTool.h"
 
-class InDetServMatAthenaComps;
-class IGeoDbTagSvc;
-class IGeometryDBSvc;
-class IInDetServMatBuilderTool;
+#include <string>
 
 namespace InDetDD {
   class InDetServMatManager;
@@ -27,20 +26,19 @@ class InDetServMatTool final : public GeoModelTool {
   // Standard Constructor
   InDetServMatTool( const std::string& type, const std::string& name, const IInterface* parent );
   // Standard Destructor
-  virtual ~InDetServMatTool() override;
+  virtual ~InDetServMatTool() override = default;
   
   virtual StatusCode create() override;
   virtual StatusCode clear() override;
 
  private:
-  ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc;
-  ServiceHandle< IGeometryDBSvc > m_geometryDBSvc;
-  ToolHandle<IInDetServMatBuilderTool> m_builderTool;
+  ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc{this,"GeoDbTagSvc","GeoDbTagSvc"};
+  ServiceHandle< IGeometryDBSvc > m_geometryDBSvc{this,"GeometryDBSvc","InDetGeometryDBSvc"};
+  ToolHandle<IInDetServMatBuilderTool> m_builderTool{this,"ServiceBuilderTool",""};
+  StringProperty m_overrideVersionName{this,"OverrideVersionName",""};
 
-  bool m_devVersion{false};
-  std::string m_overrideVersionName{};
   const InDetDD::InDetServMatManager* m_manager{nullptr};
-  InDetServMatAthenaComps * m_athenaComps{nullptr};
+  InDetServMatAthenaComps m_athenaComps{};
 };
 
 #endif // INDETSERVMATGEOMODEL_INDETSERVMATTOOL_H
