@@ -156,6 +156,11 @@ namespace CP {
 	    ANA_MSG_WARNING("Not enough charged leptons in the event to run the MMC!");
 	  }
 
+    if ((*met)["Final"] == nullptr) {
+        ANA_MSG_ERROR("The MET term " << "Final" << " doesn't exist! Aborting.");
+        return StatusCode::FAILURE;
+      }
+
 	ANA_CHECK(m_mmc->apply(*evtInfo, vis1, vis2, (*met)["Final"], nJets));
 
 	// retrieve the output variables and decorate them

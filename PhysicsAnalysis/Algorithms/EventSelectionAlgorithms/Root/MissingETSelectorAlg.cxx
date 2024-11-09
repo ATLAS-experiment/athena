@@ -43,6 +43,10 @@ namespace CP {
       ANA_CHECK(m_metHandle.retrieve(met, sys));
 
       // calculate decision
+      if ((*met)[m_metTerm.value()] == nullptr) {
+        ANA_MSG_ERROR("The MET term " << m_metTerm.value() << " doesn't exist! Aborting.");
+        return StatusCode::FAILURE;
+      }
       float etmiss = (*met)[m_metTerm.value()]->met();
       bool decision = SignEnum::checkValue(m_metref.value(), m_signEnum, etmiss);
       m_decoration.setBool(*evtInfo, decision, sys);

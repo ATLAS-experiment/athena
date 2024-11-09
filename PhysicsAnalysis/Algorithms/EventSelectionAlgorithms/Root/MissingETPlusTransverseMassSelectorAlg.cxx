@@ -55,6 +55,10 @@ namespace CP {
 	ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
 
       // compute the W boson transverse mass
+      if ((*met)[m_metTerm.value()] == nullptr) {
+        ANA_MSG_ERROR("The MET term " << m_metTerm.value() << " doesn't exist! Aborting.");
+        return StatusCode::FAILURE;
+      }
       float etmiss_pt = (*met)[m_metTerm.value()]->met();
       float etmiss_phi = (*met)[m_metTerm.value()]->phi();
       float lep_pt, lep_phi;
