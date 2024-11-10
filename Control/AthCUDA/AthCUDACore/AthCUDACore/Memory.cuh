@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ATHCUDACORE_MEMORY_CUH
 #define ATHCUDACORE_MEMORY_CUH
@@ -93,6 +93,9 @@ namespace AthCUDA {
       /// Destructor
       ATHCUDA_HOST_AND_DEVICE
       ~array();
+
+      // No copy constructor.
+      array( const array& ) = delete;
 
       /// Move operator
       ATHCUDA_HOST_AND_DEVICE
