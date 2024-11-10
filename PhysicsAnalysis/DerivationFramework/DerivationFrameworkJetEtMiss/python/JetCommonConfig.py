@@ -122,6 +122,23 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     from DerivationFrameworkTau.TauCommonConfig import AddTauAugmentationCfg
     acc.merge(AddTauAugmentationCfg(ConfigFlags, prefix="JetCommon", doLoose=True))
 
+    # The overlap removal algorithm presents difficulties.
+    # It leaves decorations unlocked.
+    # Further, configurations may schedule multiple overlap removal algorithms,
+    # sometimes outside of this file, which then overwrite each other's
+    # results.  So to get decoration locking to work properly, we need
+    # to first group all the event cleaning algorithms together,
+    # immediately followed by LockDecorations algorithms to lock the
+    # decorations produced by overlap.  To accomplish this, we create
+    # two sequences, one for event cleaning and one for decoration locking
+    # and add the algorithms there.  By default, these sequences will
+    # be scheduled at the current point in the global algorithm sequence,
+    # but if another fragment adds additional overlap removal, it may need
+    # to move the sequences later.
+    # All this is of course not MT-safe.
+    acc.addSequence(CompFactory.AthSequencer('EventCleanSeq', Sequential=True))
+    acc.addSequence(CompFactory.AthSequencer('EventCleanLockSeq', Sequential=True))
+
     # Overlap for EMTopo
     from AssociationUtils.AssociationUtilsConfig import OverlapRemovalToolCfg
     outputLabel_legacy = 'DFCommonJets_passOR'
@@ -135,7 +152,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
                                                 TauLabel=tauLabel,
                                                 BJetLabel=bJetLabel
                                                 )
-    acc.addEventAlgo(algOR_legacy)
+    acc.addEventAlgo(algOR_legacy, 'EventCleanSeq')
 
     # Overlap for EMPFlow
     outputLabel = 'DFCommonJets_passOR'
@@ -145,13 +162,9 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
                                                 OverlapRemovalTool=orTool,
                                                 TauLabel=tauLabel,
                                                 BJetLabel=bJetLabel)
-    acc.addEventAlgo(algOR)
+    acc.addEventAlgo(algOR, 'EventCleanSeq')
 
     # Explictly lock the decorations produced by overlap removal.
-    # This is problematic to do inside the overlap removal algorithm
-    # itself, because we schedule two of them above --- the second
-    # overwriting most of the decorations produced by the first.
-    # This is not MT-safe.
     lockOR = CompFactory.DerivationFramework.LockDecorations \
         ('OverlapRemovalLockDecorAlg',
          Decorations = [
@@ -168,12 +181,12 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
              'TauJets.selected',
              'TauJets.' + outputLabel,
          ])
-    acc.addEventAlgo(lockOR)
+    acc.addEventAlgo(lockOR, 'EventCleanLockSeq')
 
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     from DerivationFrameworkMuons.MuonsToolsConfig import MuonJetDrToolCfg
     muonJetDrTool = acc.getPrimaryAndMerge(MuonJetDrToolCfg(ConfigFlags, "MuonJetDrTool"))
-    acc.addEventAlgo(CommonAugmentation("DFCommonMuonsKernel2", AugmentationTools = [muonJetDrTool]))
+    acc.addEventAlgo(CommonAugmentation("DFCommonMuonsKernel2", AugmentationTools = [muonJetDrTool]), 'EventCleanSeq')
 
     from JetSelectorTools.JetSelectorToolsConfig import EventCleaningToolCfg,JetCleaningToolCfg
     
@@ -220,7 +233,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
                                                              EventCleanPrefix=prefix,
                                                              CleaningLevel=cleaningLevel,
                                                              doEvent=True) # Only store event-level flags for Loose and LooseLLP
-            acc.addEventAlgo(eventCleanAlg_legacy)
+            acc.addEventAlgo(eventCleanAlg_legacy, 'EventCleanSeq')
 
         ## For PFlow
         if doEvent_PFlow:
@@ -241,7 +254,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
                                                              EventCleanPrefix=prefix,
                                                              CleaningLevel=cleaningLevel,
                                                              doEvent=True) # for PFlow we use Loose and Tight
-            acc.addEventAlgo(eventCleanAlg)
+            acc.addEventAlgo(eventCleanAlg, 'EventCleanSeq')
 
     return acc
 
