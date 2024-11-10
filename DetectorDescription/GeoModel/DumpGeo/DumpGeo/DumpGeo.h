@@ -48,7 +48,7 @@ class ATLAS_NOT_THREAD_SAFE DumpGeo: public AthAlgorithm
   Gaudi::Property<std::string> m_outFileName{this, "OutSQLiteFileName", "", "The name of the output SQLite file"}; 
   Gaudi::Property<std::vector<std::string>> m_user_filterDetManagersList
                                           { this, "UserFilterDetManager", {}, "Doc", "OrderedSet<T>"};
-  Gaudi::Property<bool> m_showTreetopContent{this, "ShowTreetopContent", "", "Show the content of the Treetops; by default, only the list of Treetops is shown."}; 
+  Gaudi::Property<bool> m_showTreetopContent{this, "ShowTreetopContent", false, "Show the content of the Treetops; by default, only the list of Treetops is shown."}; 
 };
 
 #endif
