@@ -7,7 +7,7 @@ atlas_subdir( RecJobTransforms )
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Install scripts
-atlas_install_runtime( scripts/*.py )
+atlas_install_scripts( scripts/*.py )
 
 # For backward compatibility:
 atlas_add_alias( HLTHistMerge_tf.py "HISTMerge_tf.py" )
