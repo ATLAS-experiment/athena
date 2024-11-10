@@ -5,7 +5,7 @@
 #define MUONREADOUTGEOMETRY_TGCREADOUTELEMENT_ICC
 
 namespace MuonGM {
-    inline std::string TgcReadoutElement::readOutName() const { return m_readout_name; }
+    inline const std::string& TgcReadoutElement::readOutName() const { return m_readout_name; }
 
     
     inline bool TgcReadoutElement::isEndcap() const { return getStationType()[2] == 'E'; }

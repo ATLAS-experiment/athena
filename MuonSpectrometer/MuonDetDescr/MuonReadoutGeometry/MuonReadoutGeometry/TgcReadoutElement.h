@@ -224,7 +224,7 @@ namespace MuonGM {
         void setFrameThickness(const double frameH, const double frameAB);
 
        // Access to readout parameters
-        std::string readOutName() const;
+        const std::string& readOutName() const;
 
         const TgcReadoutParams* getReadoutParams() const;
 
