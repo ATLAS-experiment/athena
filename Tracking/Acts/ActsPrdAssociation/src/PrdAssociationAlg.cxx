@@ -7,6 +7,7 @@
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
 #include <utility>
+#include "ActsInterop/TableUtils.h"
 
 namespace ActsTrk {
 
@@ -26,6 +27,18 @@ namespace ActsTrk {
     return StatusCode::SUCCESS;
   }
 
+  StatusCode PrdAssociationAlg::finalize()
+  {
+    ATH_MSG_INFO("Prd Map statistics" << std::endl << makeTable(m_stat,
+								std::array<std::string, kNStat>{
+								  "N. Tracks",
+								  "N. Pixel Measurements",
+								  "N. Strip Measurements",
+								  "N. Hgtd Measurements"
+								}).columnWidth(10));
+    return StatusCode::SUCCESS;
+  }
+  
   StatusCode PrdAssociationAlg::execute(const EventContext& ctx) const
   {
     ATH_MSG_DEBUG("Executing " << name() << " ...");
@@ -35,7 +48,8 @@ namespace ActsTrk {
     ATH_CHECK( trackHandle.isValid() );
     const ActsTrk::TrackContainer *tracks = trackHandle.cptr();
     ATH_MSG_DEBUG("   \\__ Number of retrieved tracks: " << tracks->size());
-
+    m_stat[kNTracks] += tracks->size();
+    
     const ActsTrk::PrepRawDataAssociation *inputPrdMap = nullptr;
     if (not m_inputPrdMap.empty()) {
       ATH_MSG_DEBUG("Retrieving Prd map from previous Acts Tracking Pass with key: " << m_inputPrdMap.key());
@@ -61,7 +75,7 @@ namespace ActsTrk {
     
     for (std::size_t i(0ul); i<tracks->size(); ++i) {
       tracks->trackStateContainer().visitBackwards(tracks->getTrack(i).tipIndex(),
-						   [&prdMap, &nMeasurements, &status]
+						   [&prdMap, &nMeasurements, &status, this]
 						   (const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy state) -> bool
 						   {
 						     // only consider measurements
@@ -78,7 +92,22 @@ namespace ActsTrk {
 						       status = RecordStatus::NULLSOURCELINK;
 						       return false;
 						     }
-						     const xAOD::UncalibratedMeasurement &uncalibMeas = ActsTrk::getUncalibratedMeasurement(sl);						     
+						     const xAOD::UncalibratedMeasurement &uncalibMeas = ActsTrk::getUncalibratedMeasurement(sl);
+
+						     switch(uncalibMeas.type()) {
+						     case xAOD::UncalibMeasType::PixelClusterType:
+						       ++m_stat[kNPixelMeasurements];
+						       break;
+						     case xAOD::UncalibMeasType::StripClusterType:
+						       ++m_stat[kNStripMeasurements];
+						       break;
+						     case xAOD::UncalibMeasType::HGTDClusterType:
+						       ++m_stat[kNHgtdMeasurements];
+						       break;
+						     default:
+						       break;
+						     };
+
 						     // Store the identifier
 						     const auto& [itr, inserted] = prdMap->markAsUsed(uncalibMeas.identifier());
 						     if (not inserted) {

@@ -22,7 +22,8 @@ public:
 
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& ctx) const override;
-
+  virtual StatusCode finalize() override;
+  
 private:
   SG::ReadHandleKey< ActsTrk::TrackContainer > m_inputTrackCollections {this, "InputTrackCollection", "",
       "Input Acts Tracks"};
@@ -32,6 +33,17 @@ private:
   
   SG::WriteHandleKey< ActsTrk::PrepRawDataAssociation > m_outputPrdMap {this, "OutputPrdMap", "",
       "Map of used measurements"};
+
+private:
+  enum EStat {
+    kNTracks,
+    kNPixelMeasurements,
+    kNStripMeasurements,
+    kNHgtdMeasurements,
+    kNStat
+  };
+  
+  mutable std::array<std::atomic<unsigned int>, kNStat> m_stat ATLAS_THREAD_SAFE {}; 
 };
 
 }
