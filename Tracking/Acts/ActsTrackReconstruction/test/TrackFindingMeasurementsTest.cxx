@@ -19,6 +19,8 @@
 
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 
+#include "../src/detail/TrackFindingMeasurements.cxx"
+
 template <typename std::size_t N>
 void checkList(const ActsTrk::detail::TrackFindingMeasurements& measurements,
 	       const std::array<std::size_t, N>& entries,
