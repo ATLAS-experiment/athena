@@ -46,6 +46,16 @@ def DataModelTestFlags (infile = None, evtMax = 20, **kw):
     flags.Input.isMC = True
     flags.IOVDb.GlobalTag = ''
     flags.Input.MCCampaign = Campaign.Unknown
+    flags.fillFromArgs()
+
+    if flags.Output.StorageTechnology.EventData == 'ROOTRNTUPLE':
+        def to_rntup (s):
+            return s.replace ('.root', '.rntup.root')
+        flags.Input.Files = [to_rntup(f) for f in flags.Input.Files]
+        for k, v in flags.Output.asdict().items():
+            if k.endswith ('FileName'):
+                setattr (flags.Output, k, to_rntup (v))
+    
     return flags
 
 
@@ -93,6 +103,8 @@ def DataModelTestCfg (flags, testName,
         cfg.merge (LoadReadDictsCfg (flags))
 
     # Prevent races when we run tests in parallel in the same directory.
+    if flags.Output.StorageTechnology.EventData == 'ROOTRNTUPLE':
+        testName = testName + '_rntup'
     fileCatalog = testName + '_catalog.xml'
     from AthenaPoolCnvSvc.PoolCommonConfig import PoolSvcCfg
     kw = {'WriteCatalog' : 'file:' + fileCatalog}
@@ -127,7 +139,6 @@ def TestOutputCfg (flags, stream, itemList, typeNames = [], metaItemList = []):
             DataHeaderKey = f'Stream{stream}') ]
         metaItemList = [ f'xAOD::EventFormat#EventFormat{stream}' ] + metaItemList
     acc.merge (OutputStreamCfg (flags, stream,
-                                disableEventTag = True,
                                 ItemList = itemList,
                                 HelperTools = helperTools,
                                 MetadataItemList = metaItemList))
@@ -191,3 +202,11 @@ def LoadReadDictsCfg (flags):
     acc = ComponentAccumulator()
     acc.addEventAlgo (LoadReadDicts())
     return acc
+
+
+def rnt (flags):
+    is_rntuple = flags.Output.StorageTechnology.EventData == 'ROOTRNTUPLE'
+    if is_rntuple:
+        return True, lambda k: ''
+    return False, lambda k:k
+

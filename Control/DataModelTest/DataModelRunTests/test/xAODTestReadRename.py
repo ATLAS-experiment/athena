@@ -1,5 +1,5 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
 # File: DataModelRunTests/test/xAODTestReadRename.py
 # Author: snyder@bnl.gov
@@ -9,17 +9,20 @@
 
 
 from DataModelRunTests.DataModelTestConfig import \
-    DataModelTestFlags, DataModelTestCfg, TestOutputCfg
+    DataModelTestFlags, DataModelTestCfg, TestOutputCfg, rnt
 
 
 def xAODTestReadRenameCfg (flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
 
+    is_rntuple, rntkey = rnt (flags)
+
     from AthenaConfiguration.ComponentFactory import CompFactory
     DMTest = CompFactory.DMTest
     acc.addEventAlgo (DMTest.xAODTestReadCVec ('xAODTestReadCVec',
-                                               CVecKey = 'cvec_renamed'))
+                                               CVecKey = 'cvec_renamed',
+                                               TestDecorSE = not is_rntuple))
     acc.addEventAlgo (DMTest.xAODTestReadDecor ('xAODTestReadDecor',
                                                 CVecName = 'cvec_renamed',
                                                 DecorName = 'dInt1_renamed'))

@@ -10,37 +10,44 @@
 
 
 from DataModelRunTests.DataModelTestConfig import \
-    DataModelTestFlags, DataModelTestCfg, TestOutputCfg
+    DataModelTestFlags, DataModelTestCfg, TestOutputCfg, rnt
 
 
 def xAODTestRead3Cfg (flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
 
+    is_rntuple, rntkey = rnt (flags)
+
     from AthenaConfiguration.ComponentFactory import CompFactory
     DMTest = CompFactory.DMTest
-    acc.addEventAlgo (DMTest.xAODTestReadCVec ("xAODTestReadCVec"))
+    acc.addEventAlgo (DMTest.xAODTestReadCVec ("xAODTestReadCVec",
+                                               TestDecorSE = not is_rntuple))
     acc.addEventAlgo (DMTest.xAODTestReadCInfo ("xAODTestReadCInfo"))
     acc.addEventAlgo (DMTest.xAODTestRead ("xAODTestRead",
                                            GVecReadKey = ''))
-    acc.addEventAlgo (DMTest.xAODTestReadCView ('xAODTestReadCView'))
-    acc.addEventAlgo (DMTest.xAODTestReadHVec ("xAODTestReadHVec"))
+    if not is_rntuple:
+        acc.addEventAlgo (DMTest.xAODTestReadCView ('xAODTestReadCView'))
+    acc.addEventAlgo (DMTest.xAODTestReadHVec ("xAODTestReadHVec",
+                                               HViewKey = rntkey ('hview')))
     acc.addEventAlgo (DMTest.xAODTestReadCVec ("xAODTestReadCVec_copy",
-                                               CVecKey = "copy_cvec"))
+                                               CVecKey = "copy_cvec",
+                                               TestDecorSE = not is_rntuple))
     acc.addEventAlgo (DMTest.xAODTestReadCInfo ("xAODTestReadCInfo_copy",
                                                 CInfoKey = "copy_cinfo"))
     acc.addEventAlgo (DMTest.xAODTestRead ("xAODTestRead_copy",
                                            CTrigReadKey = 'copy_ctrig',
                                            GVecReadKey = '',
                                            CVecWDReadKey = 'copy_cvecWD'))
-    acc.addEventAlgo (DMTest.xAODTestReadCView ("xAODTestReadCView_copy",
-                                                CViewKey = "copy_cview"))
-    acc.addEventAlgo (DMTest.xAODTestReadPVec ("xAODTestReadPVec"))
-    acc.addEventAlgo (DMTest.xAODTestReadPVec ("xAODTestReadPVec_copy",
-                                               PVecKey = "copy_pvec"))
+    if not is_rntuple:
+        acc.addEventAlgo (DMTest.xAODTestReadCView ("xAODTestReadCView_copy",
+                                                    CViewKey = "copy_cview"))
+        acc.addEventAlgo (DMTest.xAODTestReadPVec ("xAODTestReadPVec"))
+        acc.addEventAlgo (DMTest.xAODTestReadPVec ("xAODTestReadPVec_copy",
+                                                   PVecKey = "copy_pvec"))
     acc.addEventAlgo (DMTest.xAODTestReadHVec ("xAODTestReadHVec_copy",
                                                HVecKey = "copy_hvec",
-                                               HViewKey = "copy_hview"))
+                                               HViewKey = rntkey("copy_hview")))
 
     acc.addEventAlgo (DMTest.xAODTestReadJVec ('xAODTestReadJVec'))
     acc.addEventAlgo (DMTest.xAODTestReadPLinks ('xAODTestReadPLinks'))

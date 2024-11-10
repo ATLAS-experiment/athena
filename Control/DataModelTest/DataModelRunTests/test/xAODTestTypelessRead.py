@@ -9,17 +9,22 @@
 
 
 from DataModelRunTests.DataModelTestConfig import \
-    DataModelTestFlags, DataModelTestCfg, TestOutputCfg
+    DataModelTestFlags, DataModelTestCfg, TestOutputCfg, rnt
 
 
 def xAODTestTypelessReadCfg (flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
 
+    is_rntuple, rntkey = rnt (flags)
+
     from AthenaConfiguration.ComponentFactory import CompFactory
     DMTest = CompFactory.DMTest
     acc.addEventAlgo (DMTest.xAODTestTypelessRead ("xAODTestTypelessRead",
-                                                   WritePrefix = "copy_"))
+                                                   WritePrefix = "copy_",
+                                                   CViewKey = rntkey ('cview'),
+                                                   HViewKey = rntkey ('hview'),
+                                                   PVecKey = rntkey ('pvec')))
 
     itemList = [ 'DMTest::CVec#cvec',
                  'DMTest::CAuxContainer#cvecAux.',

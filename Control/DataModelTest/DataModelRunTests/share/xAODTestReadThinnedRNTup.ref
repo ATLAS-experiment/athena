@@ -1,0 +1,822 @@
+Tue Sep 24 20:51:56 EDT 2024
+Preloading libexcabort.so
+ApplicationMgr    SUCCESS 
+====================================================================================================================================
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
+                                          running on karma on Tue Sep 24 20:51:57 2024
+====================================================================================================================================
+ApplicationMgr       INFO Application Manager Configured successfully
+CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 14(Alarm clock) 
+AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
+ClassIDSvc           INFO getRegistryEntries: read 6380 CLIDRegistry entries for module ALL
+PyComponentMgr       INFO Initializing PyComponentMgr...
+LoadWriteDicts       INFO Initializing LoadWriteDicts...
+PoolSvc              INFO Set connectionsvc retry/timeout/IDLE timeout to  'ConnectionRetrialPeriod':300/ 'ConnectionRetrialTimeOut':3600/ 'ConnectionTimeOut':5 seconds with connection cleanup disabled
+PoolSvc              INFO Frontier compression level set to 5
+DBReplicaSvc         INFO Read replica configuration from /home/sss/atlas/dvtest/build/share/dbreplica.config
+DBReplicaSvc         INFO No specific match for domain found - use default fallback
+DBReplicaSvc         INFO Total of 1 servers found for host karma [atlas_dd ]
+PoolSvc              INFO Successfully setup replica sorting algorithm
+PoolSvc              INFO Setting up APR FileCatalog and Streams
+PoolSvc              INFO POOL WriteCatalog is file:xAODTestReadThinned_catalog.xml
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
+EventSelector        INFO EventSelection with query 
+PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] BF012F5D-24ED-4D8F-2F0B-0FF0FF0FF0FF
+Domain[ROOT_All]     INFO                           xaodthinned1.root
+RootDatabase.open    INFO xaodthinned1.root File version:63204
+xaodthinned1.root    INFO Database being retired...
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] BF012F5D-24ED-4D8F-2F0B-0FF0FF0FF0FF
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
+PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] BF012F5D-24ED-4D8F-2F0B-0FF0FF0FF0FF
+Domain[ROOT_All]     INFO                           xaodthinned1.root
+RootDatabase.open    INFO xaodthinned1.root File version:63204
+xaodthinned1.root    INFO Database being retired...
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] BF012F5D-24ED-4D8F-2F0B-0FF0FF0FF0FF
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 2F58CCCB-5DC8-E746-9183-46C104545D4F
+Domain[ROOT_All]     INFO                           xaodthinned1.root
+RootDatabase.open    INFO xaodthinned1.root File version:63204
+AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
+ApplicationMgr       INFO Application Manager Initialized successfully
+xaodthinned1.root    INFO Database being retired...
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 2F58CCCB-5DC8-E746-9183-46C104545D4F
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 2F58CCCB-5DC8-E746-9183-46C104545D4F
+Domain[ROOT_All]     INFO                           xaodthinned1.root
+RootDatabase.open    INFO xaodthinned1.root File version:63204
+ApplicationMgr       INFO Application Manager Started successfully
+ClassIDSvc           INFO getRegistryEntries: read 9541 CLIDRegistry entries for module ALL
+EventP...stencySvc   INFO Added successfully Conversion service AthenaPoolCnvSvc
+TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
+AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) 
+xAODTestReadCLinks   INFO   (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) 
+xAODTestReadCVec2    INFO cvec2 201 202 203 205 206 207 209 210 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: []  fvec: [200.5]  svec: ['str450' 'str451']  lvec: [(:0) (:0) (:0)]
+xAODTestReadJVec     INFO   decorJVec: [300.5 301.5]
+xAODTestReadJVec     INFO   ivec: [102 103]  fvec: [202.5 203.5 204.5]  svec: ['str452' 'str453' 'str454' 'str455']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [302.5 303.5 304.5 305.5]
+xAODTestReadJVec     INFO   ivec: [104 105 106 107]  fvec: []  svec: ['str454']  lvec: [(:0) (:0)]
+xAODTestReadJVec     INFO   decorJVec: [304.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
+ClassIDSvc           INFO getRegistryEntries: read 103 CLIDRegistry entries for module ALL
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dVar1' (id=310 typename=float) has different type than the branch: vector<int>  Marking for schema evolution.
+xAODTestReadCVec     INFO  anInt1 301 aFloat: 600 anInt2: 901 dVar1: 1351 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 305 aFloat: 600.4 anInt2: 905 dVar1: 1355 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 309 aFloat: 600.8 anInt2: 909 dVar1: 1359 cEL: [0]
+
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (:0) (:0) (cvec:1) (:0) (:0) (:0) (cvec:2) (:0) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (:0) (:0) (cvec:1) (:0) (:0) (:0) (cvec:2) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (cvec:2) (:0) (cvec:1) (:0) (cvec:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (cvec:1) links: (cvec:1) (:0) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (cvec:0) (:inv) (:inv) (:inv) (cvec:1) (:inv) (:inv) (:inv) (cvec:2) (:inv) 
+xAODTestReadCLinks   INFO   (:inv) (cvec:2) (:inv) (:inv) (:inv) (cvec:1) (:inv) (:inv) (:inv) (cvec:0) 
+xAODTestReadCVec2    INFO cvec2 301 302 303 305 306 307 309 310 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [103 104 105]  fvec: [203.5 204.5 205.5 206.5]  svec: []  lvec: [(:0)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (ctrig) 
+xAODTestReadPLinks   INFO   link: (ctrig:1)  links: (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:1) decorVLinks: (:inv) (:inv) (ctrig:7) (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links:
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (:inv) (ctrig:0) (:inv)
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #0 2 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #0 2 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCVec     INFO  anInt1 402 aFloat: 800.1 anInt2: 1202 dVar1: 1802 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 406 aFloat: 800.5 anInt2: 1206 dVar1: 1806 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 410 aFloat: 800.9 anInt2: 1210 dVar1: 1810 cEL: [0]
+
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:0) (:0) (:0) (:0) (cvec:1) (:0) (:0) (:0) (cvec:2) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:0) (:0) (:0) (:0) (cvec:1) (:0) (:0) (:0) (cvec:2) 
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (cvec:1) (:0) (cvec:2) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:1) (:0) (cvec:0) (:0) (:0) (:0) (:0) (:0) (cvec:2) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (cvec:0) (cvec:1) (cvec:2) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:2) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (:inv) (cvec:0) (:inv) (:inv) (:inv) (cvec:1) (:inv) (:inv) (:inv) (cvec:2) 
+xAODTestReadCLinks   INFO   (cvec:2) (:inv) (:inv) (:inv) (cvec:1) (:inv) (:inv) (:inv) (cvec:0) (:inv) 
+xAODTestReadCVec2    INFO cvec2 401 402 403 405 406 407 409 410 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [102 103]  fvec: [202.5 203.5 204.5]  svec: ['str452' 'str453' 'str454' 'str455']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [302.5 303.5 304.5 305.5]
+xAODTestReadJVec     INFO   ivec: [103 104 105]  fvec: [203.5 204.5 205.5 206.5]  svec: []  lvec: [(:0)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [104 105 106 107]  fvec: []  svec: ['str454']  lvec: [(:0) (cvec:1)]
+xAODTestReadJVec     INFO   decorJVec: [304.5]
+xAODTestReadJVec     INFO   ivec: [106]  fvec: [206.5 207.5]  svec: ['str456' 'str457' 'str458']  lvec: [(:0) (:0) (:0) (cvec:2)]
+xAODTestReadJVec     INFO   decorJVec: [306.5 307.5 308.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (ctrig:4) (:inv) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (ctrig:7)
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #0 3 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #4, run #0 3 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (:inv) links: 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (:inv) links: 
+xAODTestReadCLinks   INFO   link: (:inv) links: 
+xAODTestReadCLinks   INFO   link: (:inv) links: 
+xAODTestReadCLinks   INFO   link: (:inv) links: 
+xAODTestReadCLinks   INFO   link: (:inv) links: 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   
+xAODTestReadCLinks   INFO   
+xAODTestReadCVec2    INFO cvec2 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [104 105 106 107]  fvec: []  svec: ['str454']  lvec: [(:inv) (:inv)]
+xAODTestReadJVec     INFO   decorJVec: [304.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [205.5]  svec: ['str455' 'str456']  lvec: [(:inv) (:inv) (:inv)]
+xAODTestReadJVec     INFO   decorJVec: [305.5 306.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (:inv) (:inv) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (:inv) (:inv) (:inv) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (:inv) (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (:inv) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #0 4 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #5, run #0 4 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCVec     INFO  anInt1 603 aFloat: 1200.2 anInt2: 1803 dVar1: 2703 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 607 aFloat: 1200.6 anInt2: 1807 dVar1: 2707 cEL: [0]
+
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (cvec:0) (:0) (:0) (:0) (cvec:1) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (cvec:0) (:0) (:0) (:0) (cvec:1) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (cvec:1) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (:inv) (:inv) (cvec:0) (:inv) (:inv) (:inv) (cvec:1) (:inv) (:inv) (:inv) 
+xAODTestReadCLinks   INFO   (:inv) (:inv) (:inv) (cvec:1) (:inv) (:inv) (:inv) (cvec:0) (:inv) (:inv) 
+xAODTestReadCVec2    INFO cvec2 601 602 605 606 609 610 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [104 105 106 107]  fvec: []  svec: ['str454']  lvec: [(:0) (:0)]
+xAODTestReadJVec     INFO   decorJVec: [304.5]
+xAODTestReadJVec     INFO   ivec: [108 109 110]  fvec: [208.5 209.5 210.5 211.5]  svec: []  lvec: [(:0)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) 
+xAODTestReadPLinks   INFO   link: (cvec:1)  links: (ctrig:7)
+xAODTestReadPLinks   INFO   decorLink: (cvec:1) decorVLinks: (ctrig:0) (:inv) (cvec:0) (ctrig:3)
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #5, run #0 5 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #6, run #0 5 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCVec     INFO  anInt1 701 aFloat: 1400 anInt2: 2101 dVar1: 3151 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 703 aFloat: 1400.2 anInt2: 2103 dVar1: 3153 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 705 aFloat: 1400.4 anInt2: 2105 dVar1: 3155 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 707 aFloat: 1400.6 anInt2: 2107 dVar1: 3157 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 709 aFloat: 1400.8 anInt2: 2109 dVar1: 3159 cEL: [0]
+
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (cvec:1) (:0) (cvec:2) (:0) (cvec:3) (:0) (cvec:4) (:0) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (cvec:1) (:0) (cvec:2) (:0) (cvec:3) (:0) (cvec:4) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (cvec:1) links: (cvec:1) (:0) (cvec:4) (:0) (cvec:2) (:0) (cvec:0) (:0) (cvec:3) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (cvec:2) links: (cvec:2) (:0) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (cvec:0) (:inv) (cvec:1) (:inv) (cvec:2) (:inv) (cvec:3) (:inv) (cvec:4) (:inv) 
+xAODTestReadCLinks   INFO   (:inv) (cvec:4) (:inv) (cvec:3) (:inv) (cvec:2) (:inv) (cvec:1) (:inv) (cvec:0) 
+xAODTestReadCVec2    INFO cvec2 701 702 705 706 709 710 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (ctrig) (cvec) 
+xAODTestReadPLinks   INFO   link: (:inv)  links:
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (:inv) (ctrig:0) (:inv)
+xAODTestReadPLinks   INFO   link: (ctrig:7)  links: (:inv) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:7) decorVLinks:
+xAODTestReadPLinks   INFO   link: (:inv)  links: (ctrig:0) (:inv) (cvec:1) (ctrig:3)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (ctrig:3) (:inv)
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #6, run #0 6 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #7, run #0 6 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCVec     INFO  anInt1 802 aFloat: 1600.1 anInt2: 2402 dVar1: 3602 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 803 aFloat: 1600.2 anInt2: 2403 dVar1: 3603 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 806 aFloat: 1600.5 anInt2: 2406 dVar1: 3606 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 807 aFloat: 1600.6 anInt2: 2407 dVar1: 3607 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 810 aFloat: 1600.9 anInt2: 2410 dVar1: 3610 cEL: [0]
+
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:0) (cvec:1) (:0) (:0) (cvec:2) (cvec:3) (:0) (:0) (cvec:4) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:0) (cvec:1) (:0) (:0) (cvec:2) (cvec:3) (:0) (:0) (cvec:4) 
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (cvec:2) (:0) (cvec:4) 
+xAODTestReadCLinks   INFO   link: (cvec:1) links: (cvec:1) (cvec:2) (:0) (cvec:0) (:0) (:0) (:0) (:0) (cvec:3) (cvec:4) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (cvec:0) (cvec:2) (cvec:4) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:4) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (:inv) (cvec:0) (cvec:1) (:inv) (:inv) (cvec:2) (cvec:3) (:inv) (:inv) (cvec:4) 
+xAODTestReadCLinks   INFO   (cvec:4) (:inv) (:inv) (cvec:3) (cvec:2) (:inv) (:inv) (cvec:1) (cvec:0) (:inv) 
+xAODTestReadCVec2    INFO cvec2 801 802 805 806 809 810 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [106]  fvec: [206.5 207.5]  svec: ['str456' 'str457' 'str458']  lvec: [(cvec:3) (:0) (:0) (cvec:4)]
+xAODTestReadJVec     INFO   decorJVec: [306.5 307.5 308.5]
+xAODTestReadJVec     INFO   ivec: [107 108]  fvec: [207.5 208.5 209.5]  svec: ['str457' 'str458' 'str459' 'str460']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [307.5 308.5 309.5 310.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [210.5]  svec: ['str460' 'str461']  lvec: [(:0) (cvec:0) (cvec:1)]
+xAODTestReadJVec     INFO   decorJVec: [310.5 311.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (ctrig) 
+xAODTestReadPLinks   INFO   link: (ctrig:7)  links: (:inv) (cvec:4)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:7) decorVLinks:
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:4) (ctrig:0) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:1)
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #7, run #0 7 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #8, run #0 7 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCVec     INFO  anInt1 901 aFloat: 1800 anInt2: 2701 dVar1: 4051 cEL: cvec[7]
+
+xAODTestReadCVec     INFO  anInt1 902 aFloat: 1800.1 anInt2: 2702 dVar1: 4052 cEL: cvec[6]
+
+xAODTestReadCVec     INFO  anInt1 903 aFloat: 1800.2 anInt2: 2703 dVar1: 4053 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 905 aFloat: 1800.4 anInt2: 2705 dVar1: 4055 cEL: cvec[4]
+
+xAODTestReadCVec     INFO  anInt1 906 aFloat: 1800.5 anInt2: 2706 dVar1: 4056 cEL: cvec[3]
+
+xAODTestReadCVec     INFO  anInt1 907 aFloat: 1800.6 anInt2: 2707 dVar1: 4057 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 909 aFloat: 1800.8 anInt2: 2709 dVar1: 4059 cEL: cvec[1]
+
+xAODTestReadCVec     INFO  anInt1 910 aFloat: 1800.9 anInt2: 2710 dVar1: 4060 cEL: cvec[0]
+
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (cvec:1) (cvec:2) (:0) (cvec:3) (cvec:4) (cvec:5) (:0) (cvec:6) (cvec:7) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (cvec:1) (cvec:2) (:0) (cvec:3) (cvec:4) (cvec:5) (:0) (cvec:6) (cvec:7) 
+xAODTestReadCLinks   INFO   link: (cvec:1) links: (cvec:1) (:0) (cvec:4) (:0) (cvec:7) 
+xAODTestReadCLinks   INFO   link: (cvec:2) links: (cvec:2) (cvec:4) (cvec:6) (cvec:1) (cvec:3) (:0) (cvec:0) (:0) (cvec:5) (cvec:7) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (cvec:1) (cvec:4) (cvec:7) 
+xAODTestReadCLinks   INFO   link: (cvec:3) links: (cvec:3) (cvec:7) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (cvec:0) (cvec:1) (cvec:2) (:inv) (cvec:3) (cvec:4) (cvec:5) (:inv) (cvec:6) (cvec:7) 
+xAODTestReadCLinks   INFO   (cvec:7) (cvec:6) (:inv) (cvec:5) (cvec:4) (cvec:3) (:inv) (cvec:2) (cvec:1) (cvec:0) 
+xAODTestReadCVec2    INFO cvec2 901 902 905 906 909 910 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [108 109 110]  fvec: [208.5 209.5 210.5 211.5]  svec: []  lvec: [(cvec:6)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (ctrig) (cvec) 
+xAODTestReadPLinks   INFO   link: (ctrig:7)  links: (:inv) (cvec:7)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:7) decorVLinks:
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:7) (ctrig:0) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:2)
+xAODTestReadPLinks   INFO   link: (cvec:7)  links: (ctrig:0) (:inv) (cvec:2) (ctrig:3)
+xAODTestReadPLinks   INFO   decorLink: (cvec:7) decorVLinks: (ctrig:3) (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:2)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:4) (ctrig:6) (:inv) (cvec:6)
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #8, run #0 8 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #9, run #0 8 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCVec     INFO  anInt1 1004 aFloat: 2000.3 anInt2: 3004 dVar1: 4504 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 1008 aFloat: 2000.7 anInt2: 3008 dVar1: 4508 cEL: [0]
+
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (cvec:0) (:0) (:0) (:0) (cvec:1) (:0) (:0) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (cvec:0) (:0) (:0) (:0) (cvec:1) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:0) (:0) (cvec:1) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) (cvec:1) (:0) (cvec:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (cvec:1) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (:inv) (:inv) (:inv) (cvec:0) (:inv) (:inv) (:inv) (cvec:1) (:inv) (:inv) 
+xAODTestReadCLinks   INFO   (:inv) (:inv) (cvec:1) (:inv) (:inv) (:inv) (cvec:0) (:inv) (:inv) (:inv) 
+xAODTestReadCVec2    INFO cvec2 1001 1002 1003 1004 1005 1006 1007 1008 1009 1010 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [108 109 110]  fvec: [208.5 209.5 210.5 211.5]  svec: []  lvec: [(:0)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: []  fvec: [210.5]  svec: ['str460' 'str461']  lvec: [(:0) (:0) (:0)]
+xAODTestReadJVec     INFO   decorJVec: [310.5 311.5]
+xAODTestReadJVec     INFO   ivec: [111]  fvec: [211.5 212.5]  svec: ['str461' 'str462' 'str463']  lvec: [(:0) (:0) (cvec:0) (:0)]
+xAODTestReadJVec     INFO   decorJVec: [311.5 312.5 313.5]
+xAODTestReadJVec     INFO   ivec: [112 113]  fvec: [212.5 213.5 214.5]  svec: ['str462' 'str463' 'str464' 'str465']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [312.5 313.5 314.5 315.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (:inv) (ctrig:6) (:inv) (:inv)
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #9, run #0 9 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #10, run #0 9 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCVec     INFO  anInt1 1101 aFloat: 2200 anInt2: 3301 dVar1: 4951 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 1104 aFloat: 2200.3 anInt2: 3304 dVar1: 4954 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 1105 aFloat: 2200.4 anInt2: 3305 dVar1: 4955 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 1108 aFloat: 2200.7 anInt2: 3308 dVar1: 4958 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 1109 aFloat: 2200.8 anInt2: 3309 dVar1: 4959 cEL: [0]
+
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (:0) (cvec:1) (cvec:2) (:0) (:0) (cvec:3) (cvec:4) (:0) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (:0) (cvec:1) (cvec:2) (:0) (:0) (cvec:3) (cvec:4) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:1) (:0) (cvec:3) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (cvec:4) (:0) (cvec:2) (cvec:3) (cvec:0) (cvec:1) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (cvec:1) links: (cvec:1) (cvec:3) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (cvec:2) links: (cvec:2) (:0) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (cvec:0) (:inv) (:inv) (cvec:1) (cvec:2) (:inv) (:inv) (cvec:3) (cvec:4) (:inv) 
+xAODTestReadCLinks   INFO   (:inv) (cvec:4) (cvec:3) (:inv) (:inv) (cvec:2) (cvec:1) (:inv) (:inv) (cvec:0) 
+xAODTestReadCVec2    INFO cvec2 1101 1102 1103 1104 1105 1106 1107 1108 1109 1110 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [111]  fvec: [211.5 212.5]  svec: ['str461' 'str462' 'str463']  lvec: [(:0) (:0) (cvec:1) (cvec:2)]
+xAODTestReadJVec     INFO   decorJVec: [311.5 312.5 313.5]
+xAODTestReadJVec     INFO   ivec: [112 113]  fvec: [212.5 213.5 214.5]  svec: ['str462' 'str463' 'str464' 'str465']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [312.5 313.5 314.5 315.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (ctrig:0) (:inv) (:inv) (ctrig:3)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (ctrig:3) (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (ctrig:3) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks   INFO   link: (ctrig:3)  links: (:inv) (:inv) (ctrig:6)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:3) decorVLinks: (:inv)
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #10, run #0 10 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #11, run #0 10 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCVec     INFO  anInt1 1202 aFloat: 2400.1 anInt2: 3602 dVar1: 5402 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 1204 aFloat: 2400.3 anInt2: 3604 dVar1: 5404 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 1206 aFloat: 2400.5 anInt2: 3606 dVar1: 5406 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 1208 aFloat: 2400.7 anInt2: 3608 dVar1: 5408 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 1210 aFloat: 2400.9 anInt2: 3610 dVar1: 5410 cEL: [0]
+
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:0) (:0) (cvec:1) (:0) (cvec:2) (:0) (cvec:3) (:0) (cvec:4) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:0) (:0) (cvec:1) (:0) (cvec:2) (:0) (cvec:3) (:0) (cvec:4) 
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (cvec:1) (cvec:2) (cvec:3) (cvec:4) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:2) (:0) (cvec:0) (:0) (cvec:3) (:0) (cvec:1) (:0) (cvec:4) 
+xAODTestReadCLinks   INFO   link: (cvec:1) links: (cvec:1) (cvec:3) (cvec:0) (cvec:2) (cvec:4) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:4) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (:inv) (cvec:0) (:inv) (cvec:1) (:inv) (cvec:2) (:inv) (cvec:3) (:inv) (cvec:4) 
+xAODTestReadCLinks   INFO   (cvec:4) (:inv) (cvec:3) (:inv) (cvec:2) (:inv) (cvec:1) (:inv) (cvec:0) (:inv) 
+xAODTestReadCVec2    INFO cvec2 1201 1202 1203 1204 1205 1206 1207 1208 1209 1210 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: []  fvec: [210.5]  svec: ['str460' 'str461']  lvec: [(:0) (cvec:0) (:0)]
+xAODTestReadJVec     INFO   decorJVec: [310.5 311.5]
+xAODTestReadJVec     INFO   ivec: [111]  fvec: [211.5 212.5]  svec: ['str461' 'str462' 'str463']  lvec: [(cvec:0) (:0) (cvec:1) (:0)]
+xAODTestReadJVec     INFO   decorJVec: [311.5 312.5 313.5]
+xAODTestReadJVec     INFO   ivec: [112 113]  fvec: [212.5 213.5 214.5]  svec: ['str462' 'str463' 'str464' 'str465']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [312.5 313.5 314.5 315.5]
+xAODTestReadJVec     INFO   ivec: [113 114 115]  fvec: [213.5 214.5 215.5 216.5]  svec: []  lvec: [(cvec:1)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [114 115 116 117]  fvec: []  svec: ['str464']  lvec: [(:0) (cvec:2)]
+xAODTestReadJVec     INFO   decorJVec: [314.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (ctrig) 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:2) (ctrig:6) (:inv) (:inv)
+xAODTestReadPLinks   INFO   link: (ctrig:3)  links: (:inv) (cvec:2) (ctrig:6)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:3) decorVLinks: (:inv)
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #11, run #0 11 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #12, run #0 11 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCVec     INFO  anInt1 1301 aFloat: 2600 anInt2: 3901 dVar1: 5851 cEL: cvec[7]
+
+xAODTestReadCVec     INFO  anInt1 1302 aFloat: 2600.1 anInt2: 3902 dVar1: 5852 cEL: cvec[6]
+
+xAODTestReadCVec     INFO  anInt1 1304 aFloat: 2600.3 anInt2: 3904 dVar1: 5854 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 1305 aFloat: 2600.4 anInt2: 3905 dVar1: 5855 cEL: cvec[4]
+
+xAODTestReadCVec     INFO  anInt1 1306 aFloat: 2600.5 anInt2: 3906 dVar1: 5856 cEL: cvec[3]
+
+xAODTestReadCVec     INFO  anInt1 1308 aFloat: 2600.7 anInt2: 3908 dVar1: 5858 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 1309 aFloat: 2600.8 anInt2: 3909 dVar1: 5859 cEL: cvec[1]
+
+xAODTestReadCVec     INFO  anInt1 1310 aFloat: 2600.9 anInt2: 3910 dVar1: 5860 cEL: cvec[0]
+
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (cvec:1) (:0) (cvec:2) (cvec:3) (cvec:4) (:0) (cvec:5) (cvec:6) (cvec:7) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (cvec:1) (:0) (cvec:2) (cvec:3) (cvec:4) (:0) (cvec:5) (cvec:6) (cvec:7) 
+xAODTestReadCLinks   INFO   link: (cvec:1) links: (cvec:1) (cvec:2) (cvec:4) (cvec:5) (cvec:7) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:4) (cvec:6) (cvec:1) (cvec:3) (cvec:5) (cvec:0) (cvec:2) (:0) (cvec:7) 
+xAODTestReadCLinks   INFO   link: (cvec:2) links: (cvec:2) (cvec:5) (cvec:1) (cvec:4) (cvec:7) 
+xAODTestReadCLinks   INFO   link: (cvec:3) links: (cvec:3) (cvec:7) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (cvec:0) (cvec:1) (:inv) (cvec:2) (cvec:3) (cvec:4) (:inv) (cvec:5) (cvec:6) (cvec:7) 
+xAODTestReadCLinks   INFO   (cvec:7) (cvec:6) (cvec:5) (:inv) (cvec:4) (cvec:3) (cvec:2) (:inv) (cvec:1) (cvec:0) 
+xAODTestReadCVec2    INFO cvec2 1301 1302 1303 1304 1305 1306 1307 1308 1309 1310 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [112 113]  fvec: [212.5 213.5 214.5]  svec: ['str462' 'str463' 'str464' 'str465']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [312.5 313.5 314.5 315.5]
+xAODTestReadJVec     INFO   ivec: [113 114 115]  fvec: [213.5 214.5 215.5 216.5]  svec: []  lvec: [(cvec:2)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [114 115 116 117]  fvec: []  svec: ['str464']  lvec: [(cvec:3) (cvec:4)]
+xAODTestReadJVec     INFO   decorJVec: [314.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:4) (ctrig:6) (:inv) (cvec:6)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (ctrig:3) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:4) (ctrig:6) (:inv) (cvec:6)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:6) (ctrig:9)
+xAODTestReadPLinks   INFO   link: (cvec:4)  links:
+xAODTestReadPLinks   INFO   decorLink: (cvec:4) decorVLinks: (ctrig:9) (:inv) (cvec:1)
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #12, run #0 12 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #13, run #0 12 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCVec     INFO  anInt1 1403 aFloat: 2800.2 anInt2: 4203 dVar1: 6303 cEL: cvec[3]
+
+xAODTestReadCVec     INFO  anInt1 1404 aFloat: 2800.3 anInt2: 4204 dVar1: 6304 cEL: cvec[2]
+
+xAODTestReadCVec     INFO  anInt1 1407 aFloat: 2800.6 anInt2: 4207 dVar1: 6307 cEL: cvec[1]
+
+xAODTestReadCVec     INFO  anInt1 1408 aFloat: 2800.7 anInt2: 4208 dVar1: 6308 cEL: cvec[0]
+
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (cvec:0) (cvec:1) (:0) (:0) (cvec:2) (cvec:3) (:0) (:0) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (cvec:0) (cvec:1) (:0) (:0) (cvec:2) (cvec:3) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:1) (:0) (cvec:3) (:0) 
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (:0) (:0) (:0) (cvec:3) (:0) (cvec:1) (cvec:2) (:0) 
+xAODTestReadCLinks   INFO   link: (cvec:1) links: (cvec:1) (cvec:3) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (:inv) (:inv) (cvec:0) (cvec:1) (:inv) (:inv) (cvec:2) (cvec:3) (:inv) (:inv) 
+xAODTestReadCLinks   INFO   (:inv) (:inv) (cvec:3) (cvec:2) (:inv) (:inv) (cvec:1) (cvec:0) (:inv) (:inv) 
+xAODTestReadCVec2    INFO cvec2 1401 1402 1404 1405 1406 1408 1409 1410 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [112 113]  fvec: [212.5 213.5 214.5]  svec: ['str462' 'str463' 'str464' 'str465']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [312.5 313.5 314.5 315.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [215.5]  svec: ['str465' 'str466']  lvec: [(:0) (cvec:2) (cvec:3)]
+xAODTestReadJVec     INFO   decorJVec: [315.5 316.5]
+xAODTestReadJVec     INFO   ivec: [116]  fvec: [216.5 217.5]  svec: ['str466' 'str467' 'str468']  lvec: [(cvec:2) (cvec:3) (:0) (:0)]
+xAODTestReadJVec     INFO   decorJVec: [316.5 317.5 318.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (:inv) (ctrig:6) (:inv) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (:inv) (ctrig:9)
+xAODTestReadPLinks   INFO   link: (:inv)  links:
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (ctrig:9) (:inv) (:inv)
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #13, run #0 13 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #14, run #0 13 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCVec     INFO  anInt1 1501 aFloat: 3000 anInt2: 4501 dVar1: 6751 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 1503 aFloat: 3000.2 anInt2: 4503 dVar1: 6753 cEL: cvec[5]
+
+xAODTestReadCVec     INFO  anInt1 1504 aFloat: 3000.3 anInt2: 4504 dVar1: 6754 cEL: cvec[4]
+
+xAODTestReadCVec     INFO  anInt1 1505 aFloat: 3000.4 anInt2: 4505 dVar1: 6755 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 1507 aFloat: 3000.6 anInt2: 4507 dVar1: 6757 cEL: cvec[2]
+
+xAODTestReadCVec     INFO  anInt1 1508 aFloat: 3000.7 anInt2: 4508 dVar1: 6758 cEL: cvec[1]
+
+xAODTestReadCVec     INFO  anInt1 1509 aFloat: 3000.8 anInt2: 4509 dVar1: 6759 cEL: [0]
+
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (cvec:1) (cvec:2) (cvec:3) (:0) (cvec:4) (cvec:5) (cvec:6) (:0) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (cvec:1) (cvec:2) (cvec:3) (:0) (cvec:4) (cvec:5) (cvec:6) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:2) (:0) (cvec:5) (:0) 
+xAODTestReadCLinks   INFO   link: (cvec:1) links: (cvec:1) (:0) (cvec:6) (:0) (cvec:3) (cvec:5) (cvec:0) (cvec:2) (cvec:4) (:0) 
+xAODTestReadCLinks   INFO   link: (cvec:2) links: (cvec:2) (cvec:5) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (cvec:3) links: (cvec:3) (:0) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (cvec:0) (:inv) (cvec:1) (cvec:2) (cvec:3) (:inv) (cvec:4) (cvec:5) (cvec:6) (:inv) 
+xAODTestReadCLinks   INFO   (:inv) (cvec:6) (cvec:5) (cvec:4) (:inv) (cvec:3) (cvec:2) (cvec:1) (:inv) (cvec:0) 
+xAODTestReadCVec2    INFO cvec2 1501 1502 1504 1505 1506 1508 1509 1510 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [116]  fvec: [216.5 217.5]  svec: ['str466' 'str467' 'str468']  lvec: [(cvec:4) (cvec:5) (cvec:6) (:0)]
+xAODTestReadJVec     INFO   decorJVec: [316.5 317.5 318.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (ctrig) (cvec) 
+xAODTestReadPLinks   INFO   link: (ctrig:3)  links: (:inv) (:inv) (ctrig:6)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:3) decorVLinks: (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links:
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (ctrig:9) (:inv) (:inv)
+xAODTestReadPLinks   INFO   link: (ctrig:6)  links: (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:6) decorVLinks: (:inv) (:inv) (ctrig:2) (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:6) (ctrig:9)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #14, run #0 14 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #15, run #0 14 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCVec     INFO  anInt1 1602 aFloat: 3200.1 anInt2: 4802 dVar1: 7202 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 1603 aFloat: 3200.2 anInt2: 4803 dVar1: 7203 cEL: cvec[5]
+
+xAODTestReadCVec     INFO  anInt1 1604 aFloat: 3200.3 anInt2: 4804 dVar1: 7204 cEL: cvec[4]
+
+xAODTestReadCVec     INFO  anInt1 1606 aFloat: 3200.5 anInt2: 4806 dVar1: 7206 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 1607 aFloat: 3200.6 anInt2: 4807 dVar1: 7207 cEL: cvec[2]
+
+xAODTestReadCVec     INFO  anInt1 1608 aFloat: 3200.7 anInt2: 4808 dVar1: 7208 cEL: cvec[1]
+
+xAODTestReadCVec     INFO  anInt1 1610 aFloat: 3200.9 anInt2: 4810 dVar1: 7210 cEL: [0]
+
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:0) (cvec:1) (cvec:2) (:0) (cvec:3) (cvec:4) (cvec:5) (:0) (cvec:6) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:0) (cvec:1) (cvec:2) (:0) (cvec:3) (cvec:4) (cvec:5) (:0) (cvec:6) 
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (cvec:2) (cvec:3) (cvec:5) (cvec:6) 
+xAODTestReadCLinks   INFO   link: (cvec:1) links: (cvec:1) (cvec:3) (:0) (cvec:0) (:0) (cvec:5) (:0) (cvec:2) (cvec:4) (cvec:6) 
+xAODTestReadCLinks   INFO   link: (cvec:2) links: (cvec:2) (cvec:5) (cvec:0) (cvec:3) (cvec:6) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:6) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (:inv) (cvec:0) (cvec:1) (cvec:2) (:inv) (cvec:3) (cvec:4) (cvec:5) (:inv) (cvec:6) 
+xAODTestReadCLinks   INFO   (cvec:6) (:inv) (cvec:5) (cvec:4) (cvec:3) (:inv) (cvec:2) (cvec:1) (cvec:0) (:inv) 
+xAODTestReadCVec2    INFO cvec2 1601 1602 1604 1605 1606 1608 1609 1610 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [114 115 116 117]  fvec: []  svec: ['str464']  lvec: [(:0) (cvec:3)]
+xAODTestReadJVec     INFO   decorJVec: [314.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [215.5]  svec: ['str465' 'str466']  lvec: [(cvec:3) (cvec:4) (cvec:5)]
+xAODTestReadJVec     INFO   decorJVec: [315.5 316.5]
+xAODTestReadJVec     INFO   ivec: [117 118]  fvec: [217.5 218.5 219.5]  svec: ['str467' 'str468' 'str469' 'str470']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [317.5 318.5 319.5 320.5]
+xAODTestReadJVec     INFO   ivec: [118 119 120]  fvec: [218.5 219.5 220.5 221.5]  svec: []  lvec: [(:0)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks   INFO   link: (cvec:3)  links:
+xAODTestReadPLinks   INFO   decorLink: (cvec:3) decorVLinks: (ctrig:9) (:inv) (cvec:0)
+xAODTestReadPLinks   INFO   link: (ctrig:6)  links: (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:6) decorVLinks: (:inv) (cvec:0) (ctrig:2) (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (:inv) (ctrig:9)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #15, run #0 15 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #16, run #0 15 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCVec     INFO  anInt1 1701 aFloat: 3400 anInt2: 5101 dVar1: 7651 cEL: cvec[9]
+
+xAODTestReadCVec     INFO  anInt1 1702 aFloat: 3400.1 anInt2: 5102 dVar1: 7652 cEL: cvec[8]
+
+xAODTestReadCVec     INFO  anInt1 1703 aFloat: 3400.2 anInt2: 5103 dVar1: 7653 cEL: cvec[7]
+
+xAODTestReadCVec     INFO  anInt1 1704 aFloat: 3400.3 anInt2: 5104 dVar1: 7654 cEL: cvec[6]
+
+xAODTestReadCVec     INFO  anInt1 1705 aFloat: 3400.4 anInt2: 5105 dVar1: 7655 cEL: cvec[5]
+
+xAODTestReadCVec     INFO  anInt1 1706 aFloat: 3400.5 anInt2: 5106 dVar1: 7656 cEL: cvec[4]
+
+xAODTestReadCVec     INFO  anInt1 1707 aFloat: 3400.6 anInt2: 5107 dVar1: 7657 cEL: cvec[3]
+
+xAODTestReadCVec     INFO  anInt1 1708 aFloat: 3400.7 anInt2: 5108 dVar1: 7658 cEL: cvec[2]
+
+xAODTestReadCVec     INFO  anInt1 1709 aFloat: 3400.8 anInt2: 5109 dVar1: 7659 cEL: cvec[1]
+
+xAODTestReadCVec     INFO  anInt1 1710 aFloat: 3400.9 anInt2: 5110 dVar1: 7660 cEL: cvec[0]
+
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (cvec:1) (cvec:2) (cvec:3) (cvec:4) (cvec:5) (cvec:6) (cvec:7) (cvec:8) (cvec:9) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (cvec:1) (cvec:2) (cvec:3) (cvec:4) (cvec:5) (cvec:6) (cvec:7) (cvec:8) (cvec:9) 
+xAODTestReadCLinks   INFO   link: (cvec:1) links: (cvec:1) (cvec:3) (cvec:5) (cvec:7) (cvec:9) 
+xAODTestReadCLinks   INFO   link: (cvec:2) links: (cvec:2) (cvec:5) (cvec:8) (cvec:1) (cvec:4) (cvec:7) (cvec:0) (cvec:3) (cvec:6) (cvec:9) 
+xAODTestReadCLinks   INFO   link: (cvec:3) links: (cvec:3) (cvec:7) (cvec:1) (cvec:5) (cvec:9) 
+xAODTestReadCLinks   INFO   link: (cvec:4) links: (cvec:4) (cvec:9) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (cvec:0) (cvec:1) (cvec:2) (cvec:3) (cvec:4) (cvec:5) (cvec:6) (cvec:7) (cvec:8) (cvec:9) 
+xAODTestReadCLinks   INFO   (cvec:9) (cvec:8) (cvec:7) (cvec:6) (cvec:5) (cvec:4) (cvec:3) (cvec:2) (cvec:1) (cvec:0) 
+xAODTestReadCVec2    INFO cvec2 1701 1702 1704 1705 1706 1708 1709 1710 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [116]  fvec: [216.5 217.5]  svec: ['str466' 'str467' 'str468']  lvec: [(cvec:6) (cvec:7) (cvec:8) (cvec:9)]
+xAODTestReadJVec     INFO   decorJVec: [316.5 317.5 318.5]
+xAODTestReadJVec     INFO   ivec: [118 119 120]  fvec: [218.5 219.5 220.5 221.5]  svec: []  lvec: [(cvec:8)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks   INFO   link: (cvec:5)  links:
+xAODTestReadPLinks   INFO   decorLink: (cvec:5) decorVLinks: (ctrig:9) (:inv) (cvec:1)
+xAODTestReadPLinks   INFO   link: (ctrig:6)  links: (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:6) decorVLinks: (:inv) (cvec:1) (ctrig:2) (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:8) (ctrig:9)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks   INFO   link: (cvec:8)  links: (ctrig:9) (:inv) (cvec:1)
+xAODTestReadPLinks   INFO   decorLink: (cvec:8) decorVLinks: (ctrig:2)
+xAODTestReadPLinks   INFO   link: (ctrig:9)  links: (:inv) (cvec:1) (ctrig:2) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:9) decorVLinks: (:inv) (cvec:4)
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #16, run #0 16 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #17, run #0 16 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) 
+xAODTestReadCLinks   INFO   (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) (:inv) 
+xAODTestReadCVec2    INFO cvec2 1801 1802 1803 1805 1806 1807 1809 1810 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [116]  fvec: [216.5 217.5]  svec: ['str466' 'str467' 'str468']  lvec: [(:0) (:0) (:0) (:0)]
+xAODTestReadJVec     INFO   decorJVec: [316.5 317.5 318.5]
+xAODTestReadJVec     INFO   ivec: [118 119 120]  fvec: [218.5 219.5 220.5 221.5]  svec: []  lvec: [(:0)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: []  fvec: [220.5]  svec: ['str470' 'str471']  lvec: [(:0) (:0) (:0)]
+xAODTestReadJVec     INFO   decorJVec: [320.5 321.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #17, run #0 17 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #18, run #0 17 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCVec     INFO  anInt1 1901 aFloat: 3800 anInt2: 5701 dVar1: 8551 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 1905 aFloat: 3800.4 anInt2: 5705 dVar1: 8555 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 1909 aFloat: 3800.8 anInt2: 5709 dVar1: 8559 cEL: [0]
+
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (:0) (:0) (cvec:1) (:0) (:0) (:0) (cvec:2) (:0) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (:0) (:0) (cvec:1) (:0) (:0) (:0) (cvec:2) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (cvec:2) (:0) (cvec:1) (:0) (cvec:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) 
+xAODTestReadCLinks   INFO   link: (cvec:1) links: (cvec:1) (:0) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (cvec:0) (:inv) (:inv) (:inv) (cvec:1) (:inv) (:inv) (:inv) (cvec:2) (:inv) 
+xAODTestReadCLinks   INFO   (:inv) (cvec:2) (:inv) (:inv) (:inv) (cvec:1) (:inv) (:inv) (:inv) (cvec:0) 
+xAODTestReadCVec2    INFO cvec2 1901 1902 1903 1905 1906 1907 1909 1910 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [119 120 121 122]  fvec: []  svec: ['str469']  lvec: [(:0) (cvec:0)]
+xAODTestReadJVec     INFO   decorJVec: [319.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:2) (ctrig:9)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks   INFO   link: (:inv)  links: (ctrig:2)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (ctrig:5) (:inv) (:inv) (ctrig:8)
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #18, run #0 18 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #19, run #0 18 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCVec     INFO  anInt1 2002 aFloat: 4000.1 anInt2: 6002 dVar1: 9002 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 2006 aFloat: 4000.5 anInt2: 6006 dVar1: 9006 cEL: [0]
+
+xAODTestReadCVec     INFO  anInt1 2010 aFloat: 4000.9 anInt2: 6010 dVar1: 9010 cEL: [0]
+
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:0) (:0) (:0) (:0) (cvec:1) (:0) (:0) (:0) (cvec:2) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:0) (:0) (:0) (:0) (cvec:1) (:0) (:0) (:0) (cvec:2) 
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (cvec:1) (:0) (cvec:2) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:1) (:0) (cvec:0) (:0) (:0) (:0) (:0) (:0) (cvec:2) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (cvec:0) (cvec:1) (cvec:2) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:2) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (:inv) (cvec:0) (:inv) (:inv) (:inv) (cvec:1) (:inv) (:inv) (:inv) (cvec:2) 
+xAODTestReadCLinks   INFO   (cvec:2) (:inv) (:inv) (:inv) (cvec:1) (:inv) (:inv) (:inv) (cvec:0) (:inv) 
+xAODTestReadCVec2    INFO cvec2 2001 2002 2003 2005 2006 2007 2009 2010 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [118 119 120]  fvec: [218.5 219.5 220.5 221.5]  svec: []  lvec: [(:0)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [119 120 121 122]  fvec: []  svec: ['str469']  lvec: [(cvec:2) (:0)]
+xAODTestReadJVec     INFO   decorJVec: [319.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [220.5]  svec: ['str470' 'str471']  lvec: [(:0) (cvec:0) (:0)]
+xAODTestReadJVec     INFO   decorJVec: [320.5 321.5]
+xAODTestReadJVec     INFO   ivec: [122 123]  fvec: [222.5 223.5 224.5]  svec: ['str472' 'str473' 'str474' 'str475']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [322.5 323.5 324.5 325.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (ctrig) 
+xAODTestReadPLinks   INFO   link: (ctrig:9)  links: (:inv) (cvec:0) (ctrig:2) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:9) decorVLinks: (:inv) (:inv)
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #19, run #0 19 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #20, run #0 19 events processed so far  <<<===
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+xAODTestReadCVec     INFO  anInt1 2101 aFloat: 4200 anInt2: 6301 dVar1: 9451 cEL: cvec[5]
+
+xAODTestReadCVec     INFO  anInt1 2102 aFloat: 4200.1 anInt2: 6302 dVar1: 9452 cEL: cvec[4]
+
+xAODTestReadCVec     INFO  anInt1 2105 aFloat: 4200.4 anInt2: 6305 dVar1: 9455 cEL: cvec[3]
+
+xAODTestReadCVec     INFO  anInt1 2106 aFloat: 4200.5 anInt2: 6306 dVar1: 9456 cEL: cvec[2]
+
+xAODTestReadCVec     INFO  anInt1 2109 aFloat: 4200.8 anInt2: 6309 dVar1: 9459 cEL: cvec[1]
+
+xAODTestReadCVec     INFO  anInt1 2110 aFloat: 4200.9 anInt2: 6310 dVar1: 9460 cEL: cvec[0]
+
+xAODTestReadCLinks   INFO clinks
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (cvec:1) (:0) (:0) (cvec:2) (cvec:3) (:0) (:0) (cvec:4) (cvec:5) 
+xAODTestReadCLinks   INFO clinksContainer
+xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (cvec:1) (:0) (:0) (cvec:2) (cvec:3) (:0) (:0) (cvec:4) (cvec:5) 
+xAODTestReadCLinks   INFO   link: (cvec:1) links: (cvec:1) (:0) (cvec:3) (:0) (cvec:5) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:3) (cvec:4) (cvec:1) (cvec:2) (:0) (cvec:0) (:0) (:0) (cvec:5) 
+xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (cvec:1) (cvec:3) (cvec:5) 
+xAODTestReadCLinks   INFO   link: (cvec:2) links: (cvec:2) (cvec:5) 
+xAODTestReadCLinks   INFO clinksAOD
+xAODTestReadCLinks   INFO   (cvec:0) (cvec:1) (:inv) (:inv) (cvec:2) (cvec:3) (:inv) (:inv) (cvec:4) (cvec:5) 
+xAODTestReadCLinks   INFO   (cvec:5) (cvec:4) (:inv) (:inv) (cvec:3) (cvec:2) (:inv) (:inv) (cvec:1) (cvec:0) 
+xAODTestReadCVec2    INFO cvec2 2101 2102 2103 2105 2106 2107 2109 2110 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: []  fvec: [220.5]  svec: ['str470' 'str471']  lvec: [(cvec:0) (cvec:1) (:0)]
+xAODTestReadJVec     INFO   decorJVec: [320.5 321.5]
+xAODTestReadJVec     INFO   ivec: [121]  fvec: [221.5 222.5]  svec: ['str471' 'str472' 'str473']  lvec: [(cvec:1) (:0) (:0) (cvec:2)]
+xAODTestReadJVec     INFO   decorJVec: [321.5 322.5 323.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (ctrig) 
+xAODTestReadPLinks   INFO   link: (ctrig:9)  links: (:inv) (cvec:1) (ctrig:2) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:9) decorVLinks: (:inv) (cvec:2)
+xAODTestReadPLinks   INFO   link: (:inv)  links:
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:2) (ctrig:5) (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:2) (ctrig:5) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (:inv)
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
+xaodthinned1.root    INFO Database being retired...
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 2F58CCCB-5DC8-E746-9183-46C104545D4F
+ApplicationMgr       INFO Application Manager Stopped successfully
+LoadWriteDicts       INFO Finalizing LoadWriteDicts...
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
+AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
+AthenaPoolCnvSvc     INFO PerfStats Timing Measurements for AthenaPoolCnvSvc
+AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
+AthenaPoolCnvSvc     INFO PerfStats | cObjR_ALL       |              68 ms |
+AthenaPoolCnvSvc     INFO PerfStats | cObj_ALL        |             210 ms |
+AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
+PyComponentMgr       INFO Finalizing PyComponentMgr...
+ApplicationMgr       INFO Application Manager Finalized successfully
+ApplicationMgr       INFO Application Manager Terminated successfully
+Py:Athena            INFO leaving with code 0: "successful run"

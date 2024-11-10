@@ -9,21 +9,26 @@
 
 
 from DataModelRunTests.DataModelTestConfig import \
-    DataModelTestFlags, DataModelTestCfg, TestOutputCfg
+    DataModelTestFlags, DataModelTestCfg, TestOutputCfg, rnt
 
 
 def xAODTestWriteCfg (flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
 
+    is_rntuple, rntkey = rnt (flags)
+
     from AthenaConfiguration.ComponentFactory import CompFactory
     DMTest = CompFactory.DMTest
     acc.addEventAlgo (DMTest.xAODTestWriteCVec ('xAODTestWriteCVec'))
-    acc.addEventAlgo (DMTest.xAODTestWritePVec ('xAODTestWritePVec'))
-    acc.addEventAlgo (DMTest.xAODTestWriteHVec ('xAODTestWriteHVec'))
-    acc.addEventAlgo (DMTest.xAODTestWriteCView ('xAODTestWriteCView'))
+    if not is_rntuple:
+        acc.addEventAlgo (DMTest.xAODTestWritePVec ('xAODTestWritePVec'))
+        acc.addEventAlgo (DMTest.xAODTestWriteCView ('xAODTestWriteCView'))
+    acc.addEventAlgo (DMTest.xAODTestWriteHVec ('xAODTestWriteHVec',
+                                                HViewKey = rntkey ('hview')))
     acc.addEventAlgo (DMTest.xAODTestWriteCInfo ('xAODTestWriteCInfo'))
-    acc.addEventAlgo (DMTest.xAODTestWrite ('xAODTestWrite'))
+    acc.addEventAlgo (DMTest.xAODTestWrite ('xAODTestWrite',
+                                            GVecKey = rntkey ('gvec')))
     acc.addEventAlgo (DMTest.xAODTestWriteCVecConst ('xAODTestWriteCVecConst'))
     acc.addEventAlgo (DMTest.xAODTestDecor ('xAODTestDecor'))
     acc.addEventAlgo (DMTest.xAODTestWriteSymlinks ('xAODTestWriteSymlinks'))
@@ -101,7 +106,6 @@ def xAODTestWriteCfg (flags):
 
 
 flags = DataModelTestFlags (Stream1 = 'xaoddata.root')
-flags.fillFromArgs()
 flags.lock()
 
 cfg = DataModelTestCfg (flags, 'xAODTestWrite', loadWriteDicts = True,
