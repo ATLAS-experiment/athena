@@ -15,6 +15,8 @@
 #include <vector>
 #include <ranges>
 
+#include "../src/detail/DuplicateSeedDetector.cxx"
+
 ActsTrk::SeedContainer createSeeds(const xAOD::SpacePointContainer& spacePoints) {
   ActsTrk::SeedContainer seedContainer;
   for (std::size_t i(0ul); i<spacePoints.size(); i+=3ul) {

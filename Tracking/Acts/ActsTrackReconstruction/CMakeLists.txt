@@ -58,11 +58,11 @@ atlas_add_component( ActsTrackReconstruction
                      )
 		     
 atlas_add_test ( TrackFindingMeasurementsTest
-  SOURCES test/TrackFindingMeasurementsTest.cxx src/detail/TrackFindingMeasurements.cxx
+  SOURCES test/TrackFindingMeasurementsTest.cxx
   LINK_LIBRARIES ActsEventLib xAODInDetMeasurement
   POST_EXEC_SCRIPT nopost.sh )
 
 atlas_add_test ( DuplicateSeedDetectorTest
-  SOURCES test/DuplicateSeedDetectorTest.cxx src/detail/DuplicateSeedDetector.cxx
+  SOURCES test/DuplicateSeedDetectorTest.cxx
   LINK_LIBRARIES ActsEventLib ActsEventCnvLib xAODInDetMeasurement
   POST_EXEC_SCRIPT nopost.sh)
