@@ -9,21 +9,25 @@
 
 
 from DataModelRunTests.DataModelTestConfig import \
-    DataModelTestFlags, DataModelTestCfg, TestOutputCfg
+    DataModelTestFlags, DataModelTestCfg, TestOutputCfg, rnt
 
 
 def xAODTestReadThinnedCfg (flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
 
+    is_rntuple, rntkey = rnt (flags)
+
     from AthenaConfiguration.ComponentFactory import CompFactory
     DMTest = CompFactory.DMTest
 
-    acc.addEventAlgo (DMTest.xAODTestReadCVec ('xAODTestReadCVec'))
+    acc.addEventAlgo (DMTest.xAODTestReadCVec ('xAODTestReadCVec',
+                                               TestDecorSE = not is_rntuple))
     acc.addEventAlgo (DMTest.xAODTestReadCLinks ('xAODTestReadCLinks'))
     acc.addEventAlgo (DMTest.xAODTestReadCVec ('xAODTestReadCVec2',
                                                CVecKey = 'cvec2',
-                                               Brief = True))
+                                               Brief = True,
+                                               TestDecorSE = not is_rntuple))
     acc.addEventAlgo (DMTest.xAODTestReadJVec ('xAODTestReadJVec',
                                                JVecInfoKey = ''))
     acc.addEventAlgo (DMTest.xAODTestReadPLinks ('xAODTestReadPLinks',

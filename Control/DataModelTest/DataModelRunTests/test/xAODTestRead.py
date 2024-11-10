@@ -9,30 +9,36 @@
 
 
 from DataModelRunTests.DataModelTestConfig import \
-    DataModelTestFlags, DataModelTestCfg, TestOutputCfg
+    DataModelTestFlags, DataModelTestCfg, TestOutputCfg, rnt
 
 
 def xAODTestReadCfg (flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
 
+    is_rntuple, rntkey = rnt (flags)
+
     from AthenaConfiguration.ComponentFactory import CompFactory
     DMTest = CompFactory.DMTest
     acc.addEventAlgo (DMTest.xAODTestReadCVec ('xAODTestReadCVec',
-                                               WriteKey = 'copy_cvec'))
+                                               WriteKey = 'copy_cvec',
+                                               TestDecorSE = not is_rntuple))
     acc.addEventAlgo (DMTest.xAODTestReadCInfo ('xAODTestReadCInfo',
                            WriteKey = 'copy_cinfo'))
     acc.addEventAlgo (DMTest.xAODTestRead ('xAODTestRead',
                                            CTrigWriteKey = 'copy_ctrig',
-                                           GVecWriteKey = 'copy_gvec',
+                                           GVecReadKey = rntkey ('gvec'),
+                                           GVecWriteKey = rntkey ('copy_gvec'),
                                            CVecWDWriteKey = 'copy_cvecWD'))
-    acc.addEventAlgo (DMTest.xAODTestReadCView ('xAODTestReadCView',
-                                                WriteKey = 'copy_cview'))
-    acc.addEventAlgo (DMTest.xAODTestReadPVec ('xAODTestReadPVec',
-                                               WriteKey = 'copy_pvec'))
+    if not is_rntuple:
+        acc.addEventAlgo (DMTest.xAODTestReadCView ('xAODTestReadCView',
+                                                    WriteKey = 'copy_cview'))
+        acc.addEventAlgo (DMTest.xAODTestReadPVec ('xAODTestReadPVec',
+                                                   WriteKey = 'copy_pvec'))
     acc.addEventAlgo (DMTest.xAODTestReadHVec ('xAODTestReadHVec',
-                                               VecWriteKey = 'copy_hvec',
-                                               ViewWriteKey = 'copy_hview'))
+                                               VecWriteKey = rntkey ('copy_hvec'),
+                                               HViewKey = rntkey ('hview'),
+                                               ViewWriteKey = rntkey ('copy_hview')))
 
     acc.addEventAlgo (DMTest.xAODTestDecor ('AuxDataTestDecor1',
                                             DecorName = 'dInt100',
@@ -47,7 +53,8 @@ def xAODTestReadCfg (flags):
                                             Offset = 300))
 
     acc.addEventAlgo (DMTest.xAODTestReadCVec ('xAODTestReadFwdLink',
-                                           CVecKey = 'CVecFwdLink'))
+                                               CVecKey = 'CVecFwdLink',
+                                               TestDecorSE = not is_rntuple))
 
     acc.addEventAlgo (DMTest.xAODTestReadJVec ('xAODTestReadJVec'))
     acc.addEventAlgo (DMTest.xAODTestReadPLinks ('xAODTestReadPLinks'))

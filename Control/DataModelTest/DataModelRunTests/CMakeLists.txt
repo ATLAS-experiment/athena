@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DataModelRunTests )
@@ -10,7 +10,7 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Tests in the package:
 function (datamodel_run_test testName)
-  cmake_parse_arguments( ARG "MT" "DEPENDS;COMMAND;ARG;EXTRA_IGNORE" "" ${ARGN} )
+  cmake_parse_arguments( ARG "MT;RNTUPLE" "DEPENDS;COMMAND;ARG;EXTRA_IGNORE" "" ${ARGN} )
 
   if( ARG_COMMAND )
     set( _command ${ARG_COMMAND} )
@@ -29,6 +29,11 @@ function (datamodel_run_test testName)
     set( _command "${_command} --threads=1 " )
   endif()
 
+  if( ARG_RNTUPLE )
+    set( testName "${testName}RNTup" )
+    set( _command "${_command} Output.StorageTechnology.EventData='ROOTRNTUPLE' " )
+  endif()
+
   atlas_add_test( ${testName}
                   SCRIPT ${_command} ${_arg}
                   PROPERTIES TIMEOUT 600
@@ -40,7 +45,7 @@ endfunction (datamodel_run_test)
 datamodel_run_test (DataModelTestWrite)
 datamodel_run_test (DataModelTestRead DEPENDS DataModelTestWrite)
 datamodel_run_test (DataModelTestRead2 DEPENDS DataModelTestRead)
-datamodel_run_test (xAODTestWrite) # in:xaoddata.root
+datamodel_run_test (xAODTestWrite) # o:xaoddata.root
 datamodel_run_test (xAODTestRead DEPENDS xAODTestWrite) #i:xaoddata.root o:xaoddata2.root
 datamodel_run_test (xAODTestRead2 DEPENDS xAODTestRead) #i:xaoddata2.root o:xaoddata2x.root
 datamodel_run_test (xAODTestTypelessRead DEPENDS xAODTestWrite)
@@ -136,6 +141,21 @@ datamodel_run_test (RootAllocTestReadAllocWithoutAlloc
                     COMMAND python
                     ARG RootAllocTestReadAllocWithoutAlloc_t.py
                     DEPENDS AllocTestWriteWithAlloc)
+
+
+##############################################################################
+# RNtuple
+#
+
+datamodel_run_test (xAODTestWrite RNTUPLE) # o:xaoddata.rntuple.root
+datamodel_run_test (xAODTestRead RNTUPLE DEPENDS xAODTestWriteRNTup) #i:xaoddata.rntuple.root o:xaoddata2.rntuple.root
+datamodel_run_test (xAODTestRead2 RNTUPLE DEPENDS xAODTestReadRNTup) #i:xaoddata2.rntuple.root o:xaoddata2x.rntuple.root
+datamodel_run_test (xAODTestTypelessRead RNTUPLE DEPENDS xAODTestWriteRNTup)
+datamodel_run_test (xAODTestRead3 RNTUPLE DEPENDS xAODTestTypelessReadRNTup)
+datamodel_run_test (xAODTestReadRename RNTUPLE DEPENDS xAODTestWriteRNTup)
+datamodel_run_test (xAODTestReadFilter RNTUPLE DEPENDS xAODTestWriteRNTup)
+datamodel_run_test (xAODTestWriteThinned RNTUPLE)
+datamodel_run_test (xAODTestReadThinned RNTUPLE DEPENDS xAODTestWriteThinnedRNTup)
 
 
 ##############################################################################
