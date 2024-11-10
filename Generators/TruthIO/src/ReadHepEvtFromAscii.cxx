@@ -75,8 +75,7 @@ bool ReadHepEvtFromAscii::read_hepevt_particle( int i)
 }
 
 ReadHepEvtFromAscii::ReadHepEvtFromAscii(const std::string& name, ISvcLocator* pSvcLocator) 
-  :  AthAlgorithm(name, pSvcLocator),
-     m_sgSvc(0)
+  :  AthAlgorithm(name, pSvcLocator)
 {
   // Set users' request
   declareProperty("McEventKey",  m_key        = "GEN_EVENT");
@@ -87,12 +86,6 @@ StatusCode ReadHepEvtFromAscii::initialize(){
 
   msg(MSG::INFO) << ">>> ReadHepEvtFromAscii from Initialize" << endmsg;
 
-  StatusCode sc = service("StoreGateSvc", m_sgSvc);
-    
-  if (sc.isFailure()) {
-    msg(MSG::ERROR) << "Could not find StoreGateSvc" << endmsg;
-    return sc;
-  }
 #ifdef HEPMC3
 //These things are not present
 #else
@@ -114,13 +107,13 @@ StatusCode ReadHepEvtFromAscii::execute() {
   
   McEventCollection* mcEvtColl;
 
-  if ( m_sgSvc->contains<McEventCollection>(m_key) && m_sgSvc->retrieve(mcEvtColl, m_key).isSuccess() ) {
+  if ( evtStore()->contains<McEventCollection>(m_key) && evtStore()->retrieve(mcEvtColl, m_key).isSuccess() ) {
     if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "found an McEventCollecion in store" << endmsg;
   } else {
     // McCollection doesn't exist. Create it (empty)
     if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "create new McEventCollecion in store" << endmsg;
     mcEvtColl = new McEventCollection;
-    StatusCode status = m_sgSvc->record( mcEvtColl, m_key );
+    StatusCode status = evtStore()->record( mcEvtColl, m_key );
     if (status.isFailure()) {
       msg(MSG::ERROR) << "Could not record McEventCollection" << endmsg;
       return status;

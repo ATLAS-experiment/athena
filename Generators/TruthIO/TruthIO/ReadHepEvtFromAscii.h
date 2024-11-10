@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaBaseComps/AthAlgorithm.h"
@@ -10,15 +10,13 @@ class StoreGateSvc;
 class ReadHepEvtFromAscii:public AthAlgorithm {
 public:
   ReadHepEvtFromAscii(const std::string& name, ISvcLocator* pSvcLocator);
-  StatusCode initialize();
-  StatusCode execute();
-  StatusCode finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute() override;
+  virtual StatusCode finalize() override;
 
 private:
 
-  StoreGateSvc* m_sgSvc;
-  
-  // Setable Properties:-
+  // Settable Properties:-
   std::string m_key; 
   std::string m_input_file;
   std::ifstream m_file;
