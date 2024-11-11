@@ -937,8 +937,8 @@ def TauCombinedTESCfg(flags):
 def TauAODMuonRemovalCfg(flags):
     result = ComponentAccumulator()   
     _name = flags.Tau.ActiveConfig.prefix + 'MuonRemoval'
-    TauAODLeptonRemovalTool = CompFactory.getComp("TauAODLeptonRemovalTool")
-    myMuonRemoval = TauAODLeptonRemovalTool(    name                   = _name,
+    TauAODMuonRemovalTool = CompFactory.getComp("TauAODMuonRemovalTool")
+    myMuonRemoval = TauAODMuonRemovalTool(      name                   = _name,
                                                 Key_MuonInputContainer = 'Muons',
                                                 doMuonTrkRm            = True,
                                                 doMuonClsRm            = True,
