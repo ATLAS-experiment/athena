@@ -95,6 +95,13 @@ ActsTrackFindingAlg                                               INFO Ratios
 |                                 3.0- 3.5 |   0.942103 |          0 |   0.942103 |
 |                                 3.5-+inf |   0.960328 |          0 |   0.960328 |
 |------------------------------------------|------------|------------|------------|
+ActsPrdAssociationAlg                                             INFO Prd Map statistics
+|-----------------------|------------|
+| N. Tracks             |       9547 |
+| N. Pixel Measurements |     102086 |
+| N. Strip Measurements |      40068 |
+| N. Hgtd Measurements  |          0 |
+|-----------------------|------------|
 ActsLargeRadiusPixelClusterizationAlg                             INFO Clusterization statistics
 |----------|------------|
 | RDOs     |          0 |
@@ -176,6 +183,13 @@ ActsLargeRadiusTrackFindingAlg                                    INFO Ratios
 |                                 3.0- 3.5 |          0 |          0 |
 |                                 3.5-+inf |          0 |          0 |
 |------------------------------------------|------------|------------|
+ActsLargeRadiusPrdAssociationAlg                                  INFO Prd Map statistics
+|-----------------------|------------|
+| N. Tracks             |         85 |
+| N. Pixel Measurements |        486 |
+| N. Strip Measurements |        799 |
+| N. Hgtd Measurements  |          0 |
+|-----------------------|------------|
 ActsConversionPixelClusterizationAlg                              INFO Clusterization statistics
 |----------|------------|
 | RDOs     |          0 |
@@ -252,6 +266,13 @@ ActsConversionTrackFindingAlg                                     INFO Ratios
 |                                 3.0- 3.5 |          0 |          0 |
 |                                 3.5-+inf |          0 |          0 |
 |------------------------------------------|------------|------------|
+ActsConversionPrdAssociationAlg                                   INFO Prd Map statistics
+|-----------------------|------------|
+| N. Tracks             |          0 |
+| N. Pixel Measurements |          0 |
+| N. Strip Measurements |          0 |
+| N. Hgtd Measurements  |          0 |
+|-----------------------|------------|
 ActsLowPtPixelClusterizationAlg                                   INFO Clusterization statistics
 |----------|------------|
 | RDOs     |          0 |
@@ -349,3 +370,10 @@ ActsLowPtTrackFindingAlg                                          INFO Ratios
 |                                 3.0- 3.5 |  0.0210526 |          0 |  0.0210526 |
 |                                 3.5-+inf |  0.0657895 |          0 |  0.0657895 |
 |------------------------------------------|------------|------------|------------|
+ActsLowPtPrdAssociationAlg                                        INFO Prd Map statistics
+|-----------------------|------------|
+| N. Tracks             |        509 |
+| N. Pixel Measurements |       3848 |
+| N. Strip Measurements |       4217 |
+| N. Hgtd Measurements  |          0 |
+|-----------------------|------------|
