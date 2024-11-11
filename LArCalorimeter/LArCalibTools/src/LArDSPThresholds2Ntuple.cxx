@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArDSPThresholds2Ntuple.h"
@@ -59,7 +59,7 @@ StatusCode LArDSPThresholds2Ntuple::stop() {
   StatusCode sc;
    
    const LArDSPThresholdsComplete *dc = nullptr;
-   const LArDSPThresholdsFlat *df = nullptr;
+   std::unique_ptr<LArDSPThresholdsFlat> df{};
    const AthenaAttributeList* attrList=nullptr;
    if(m_doFlat) {
       sc=detStore()->retrieve(attrList,m_folder);
@@ -74,7 +74,7 @@ StatusCode LArDSPThresholds2Ntuple::stop() {
         return StatusCode::SUCCESS;
       }
       
-      df=new LArDSPThresholdsFlat(attrList);
+      df=std::make_unique< LArDSPThresholdsFlat>(attrList);
 
    } else {
       sc=m_detStore->retrieve(dc);
@@ -96,7 +96,6 @@ StatusCode LArDSPThresholds2Ntuple::stop() {
      }
      
      fillFromIdentifier(hwid);
-     //ATH_MSG_INFO("hwid: "<<hwid.getString()<<" "<<tQThr<<" : "<<samplesThr<<" : "<<trigThr);
      
      sc=ntupleSvc()->writeRecord(m_nt);      
      if (sc!=StatusCode::SUCCESS) {
