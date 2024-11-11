@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum,HIMode
@@ -214,6 +214,8 @@ def createTrackingConfigFlags():
 
     # Control cuts and settings for different lumi to limit CPU and disk space
     icf.addFlag("Tracking.cutLevel", cutLevel)
+
+    icf.addFlag("Tracking.TRTStandalone.startArOriginalPerigee", False)
 
     # Turn on InDetRecStatistics
     icf.addFlag("Tracking.doStats", False)
