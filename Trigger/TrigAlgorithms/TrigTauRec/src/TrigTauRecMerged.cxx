@@ -31,10 +31,11 @@
 
 
 TrigTauRecMerged::TrigTauRecMerged(const std::string& name, ISvcLocator* pSvcLocator)
-    :AthReentrantAlgorithm(name, pSvcLocator)
+    : AthReentrantAlgorithm(name, pSvcLocator)
 {
     
 }
+
 
 StatusCode TrigTauRecMerged::initialize()
 {
@@ -65,26 +66,35 @@ StatusCode TrigTauRecMerged::initialize()
     ATH_CHECK(m_tauJetOutputKey.initialize());
     ATH_CHECK(m_tauTrackOutputKey.initialize());
 
+    for(const auto& [key, p] : m_monitoredIdScores) {
+        m_monitoredIdAccessors.emplace(
+            key,
+            std::make_pair(SG::AuxElement::ConstAccessor<float>(p.first), SG::AuxElement::ConstAccessor<float>(p.second))
+        );
+    }
+
+
     return StatusCode::SUCCESS;
 }
 
+
 StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
 {
-    //-------------------------------------------------------------------------
+    //===============================================================================
     // Initialize monitoring variables
-    //-------------------------------------------------------------------------
+    //===============================================================================
 
     // Common CaloOnly and Precision monitored variables:
-    auto n_taus                     = Monitored::Scalar<int>("nCand", 0);
+    auto n_taus                     = Monitored::Scalar<int>("NTauCandidates", 0);
 
-    auto pT                         = Monitored::Scalar<float>("EtFinal", 0);
-    auto eta                        = Monitored::Scalar<float>("EtaEF", -99.9);
-    auto phi                        = Monitored::Scalar<float>("PhiEF", -99.9);
+    auto pT                         = Monitored::Scalar<float>("Pt", 0);
+    auto eta                        = Monitored::Scalar<float>("Eta", -99.9);
+    auto phi                        = Monitored::Scalar<float>("Phi", -99.9);
 
-    auto etaRoI                     = Monitored::Scalar<float>("EtaL1", -99.9);
-    auto phiRoI                     = Monitored::Scalar<float>("PhiL1", -99.9);
-    auto dEta_RoI                   = Monitored::Scalar<float>("dEtaEFTau_RoI", -10);
-    auto dPhi_RoI                   = Monitored::Scalar<float>("dPhiEFTau_RoI", -10);
+    auto etaRoI                     = Monitored::Scalar<float>("EtaRoI", -99.9);
+    auto phiRoI                     = Monitored::Scalar<float>("PhiRoI", -99.9);
+    auto dEta_RoI                   = Monitored::Scalar<float>("dEtaTau_RoI", -10);
+    auto dPhi_RoI                   = Monitored::Scalar<float>("dPhiTau_RoI", -10);
 
     auto mEflowApprox               = Monitored::Scalar<float>("mEflowApprox", -99.9);
     auto ptRatioEflowApprox         = Monitored::Scalar<float>("ptRatioEflowApprox", -99.9);
@@ -93,14 +103,14 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
     auto ptDetectorAxis             = Monitored::Scalar<float>("ptDetectorAxis", -99.9);
     auto ptDetectorAxis_log         = Monitored::Scalar<float>("ptDetectorAxis_log", -99.9);
 
-    auto n_cells                    = Monitored::Scalar<int>("nRoI_EFTauCells", 0);
+    auto n_cells                    = Monitored::Scalar<int>("NCaloCells", 0);
     auto EMRadius                   = Monitored::Scalar<float>("EMRadius", -0.099);
     auto HadRadius                  = Monitored::Scalar<float>("HadRadius", -0.099);
     auto EtHad                      = Monitored::Scalar<float>("EtHad", -10);
     auto EtEm                       = Monitored::Scalar<float>("EtEm", -10);
     auto EMFrac                     = Monitored::Scalar<float>("EMFrac", -10);
     auto IsoFrac                    = Monitored::Scalar<float>("IsoFrac", -1);
-    auto CentFrac                   = Monitored::Scalar<float>("centFrac", -10);
+    auto CentFrac                   = Monitored::Scalar<float>("CentFrac", -10);
 
     auto clustersMeanCenterLambda   = Monitored::Scalar<float>("clustersMeanCenterLambda", 0);
     auto clustersMeanFirstEngDens   = Monitored::Scalar<float>("clustersMeanFirstEngDens", 0);
@@ -108,7 +118,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
     auto clustersMeanSecondLambda   = Monitored::Scalar<float>("clustersMeanSecondLambda", 0);
     auto clustersMeanPresamplerFrac = Monitored::Scalar<float>("clustersMeanPresamplerFrac", 0);
 
-    auto n_clusters                     = Monitored::Scalar<int>("RNN_clusternumber", 0); 
+    auto n_clusters                     = Monitored::Scalar<int>("NClusters", 0); 
     std::vector<float> cluster_et_log, cluster_dEta, cluster_dPhi;
     std::vector<float> cluster_log_SECOND_R, cluster_SECOND_LAMBDA, cluster_CENTER_LAMBDA;
     auto mon_cluster_et_log             = Monitored::Collection("cluster_et_log", cluster_et_log);
@@ -121,8 +131,8 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
     auto mon_calo_errors                = Monitored::Collection("calo_errors", calo_errors);
 
     // Precision monitored variables
-    auto n_core_tracks              = Monitored::Scalar<int>("NTrk", -10);
-    auto n_wide_tracks              = Monitored::Scalar<int>("nWideTrk", -10);
+    auto n_tracks                   = Monitored::Scalar<int>("NTracks", -10);
+    auto n_iso_tracks               = Monitored::Scalar<int>("NIsoTracks", -10);
 
     auto ipSigLeadTrk               = Monitored::Scalar<float>("ipSigLeadTrk", -1000);
     auto trFlightPathSig            = Monitored::Scalar<float>("trFlightPathSig", -10);
@@ -138,7 +148,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
     auto vertex_y                   = Monitored::Scalar<float>("vertex_y", -999.9); 
     auto vertex_z                   = Monitored::Scalar<float>("vertex_z", -999.9);
 
-    auto n_tracks                   = Monitored::Scalar<int>("RNN_tracknumber", 0);
+    auto n_all_tracks                           = Monitored::Scalar<int>("NAllTracks", 0);
     std::vector<float> track_pt_log, track_dEta, track_dPhi;
     std::vector<float> track_d0_abs_log, track_z0sinthetaTJVA_abs_log;
     std::vector<float> track_nPixelHitsPlusDeadSensors, track_nSCTHitsPlusDeadSensors;
@@ -152,47 +162,53 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
     std::vector<unsigned char> track_errors;
     auto mon_track_errors                       = Monitored::Collection("track_errors", track_errors);
 
-    auto IDScore_0p                 = Monitored::Scalar<float>("RNNJetScore_0p", -999);
-    auto IDScoreSigTrans_0p         = Monitored::Scalar<float>("RNNJetScoreSigTrans_0p", -999);  
-    auto IDScore_1p                 = Monitored::Scalar<float>("RNNJetScore_1p", -999);
-    auto IDScoreSigTrans_1p         = Monitored::Scalar<float>("RNNJetScoreSigTrans_1p", -999);
-    auto IDScore_mp                 = Monitored::Scalar<float>("RNNJetScore_mp", -999);
-    auto IDScoreSigTrans_mp         = Monitored::Scalar<float>("RNNJetScoreSigTrans_mp", -999);
+    std::map<std::string, Monitored::Scalar<float>> monitoredIdVariables;
+    for(const auto& [key, p] : m_monitoredIdScores) {
+        monitoredIdVariables.emplace(key + "_TauJetScore_0p", Monitored::Scalar<float>(key + "_TauJetScore_0p", -1));
+        monitoredIdVariables.emplace(key + "_TauJetScoreTrans_0p", Monitored::Scalar<float>(key + "_TauJetScoreTrans_0p", -1));
+        monitoredIdVariables.emplace(key + "_TauJetScore_1p", Monitored::Scalar<float>(key + "_TauJetScore_1p", -1));
+        monitoredIdVariables.emplace(key + "_TauJetScoreTrans_1p", Monitored::Scalar<float>(key + "_TauJetScoreTrans_1p", -1));
+        monitoredIdVariables.emplace(key + "_TauJetScore_mp", Monitored::Scalar<float>(key + "_TauJetScore_mp", -1));
+        monitoredIdVariables.emplace(key + "_TauJetScoreTrans_mp", Monitored::Scalar<float>(key + "_TauJetScoreTrans_mp", -1));
+    }
 
-    auto monitorIt = Monitored::Group(m_monTool,
-                                        n_taus,
-                                        pT, eta, phi,
-                                        etaRoI, phiRoI, dEta_RoI, dPhi_RoI,
-                                        mEflowApprox, ptRatioEflowApprox, pt_jetseed_log, 
-                                        etaDetectorAxis, ptDetectorAxis, ptDetectorAxis_log,
-                                        n_cells,
-                                        EMRadius, HadRadius, EtHad, EtEm, EMFrac, IsoFrac, CentFrac,
-                                        clustersMeanCenterLambda, clustersMeanFirstEngDens, clustersMeanEMProbability,
-                                        clustersMeanSecondLambda, clustersMeanPresamplerFrac,
-                                        n_clusters, mon_cluster_et_log, mon_cluster_dEta, mon_cluster_dPhi,
-                                        mon_cluster_log_SECOND_R, mon_cluster_SECOND_LAMBDA, mon_cluster_CENTER_LAMBDA,
-                                        mon_calo_errors, 
-                                        n_core_tracks, n_wide_tracks,
-                                        ipSigLeadTrk, trFlightPathSig, massTrkSys, dRmax, trkAvgDist, innerTrkAvgDist, 
-                                        etovPtLead, PSSFraction, EMPOverTrkSysP, ChPiEMEOverCaloEME,
-                                        vertex_x, vertex_y, vertex_z,
-                                        n_tracks, mon_track_pt_log, mon_track_dEta, mon_track_dPhi,
-                                        mon_track_d0_abs_log, mon_track_z0sinthetaTJVA_abs_log, 
-                                        mon_track_nPixelHitsPlusDeadSensors, mon_track_nSCTHitsPlusDeadSensors,
-                                        mon_track_errors,
-                                        IDScore_0p, IDScoreSigTrans_0p, IDScore_1p, IDScoreSigTrans_1p, IDScore_mp, IDScoreSigTrans_mp); 
+    std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>> monVars = {
+        std::ref(n_taus),
+        std::ref(pT), std::ref(eta), std::ref(phi),
+        std::ref(etaRoI), std::ref(phiRoI), std::ref(dEta_RoI), std::ref(dPhi_RoI),
+        std::ref(mEflowApprox), std::ref(ptRatioEflowApprox), std::ref(pt_jetseed_log),
+        std::ref(etaDetectorAxis), std::ref(ptDetectorAxis), std::ref(ptDetectorAxis_log),
+        std::ref(n_cells),
+        std::ref(EMRadius), std::ref(HadRadius), std::ref(EtHad), std::ref(EtEm), std::ref(EMFrac), std::ref(IsoFrac), std::ref(CentFrac),
+        std::ref(clustersMeanCenterLambda), std::ref(clustersMeanFirstEngDens), std::ref(clustersMeanEMProbability),
+        std::ref(clustersMeanSecondLambda), std::ref(clustersMeanPresamplerFrac),
+        std::ref(n_clusters), std::ref(mon_cluster_et_log), std::ref(mon_cluster_dEta), std::ref(mon_cluster_dPhi),
+        std::ref(mon_cluster_log_SECOND_R), std::ref(mon_cluster_SECOND_LAMBDA), std::ref(mon_cluster_CENTER_LAMBDA),
+        std::ref(mon_calo_errors),
+        std::ref(n_tracks), std::ref(n_iso_tracks),
+        std::ref(ipSigLeadTrk), std::ref(trFlightPathSig), std::ref(massTrkSys), std::ref(dRmax), std::ref(trkAvgDist), std::ref(innerTrkAvgDist),
+        std::ref(etovPtLead), std::ref(PSSFraction), std::ref(EMPOverTrkSysP), std::ref(ChPiEMEOverCaloEME),
+        std::ref(vertex_x), std::ref(vertex_y), std::ref(vertex_z),
+        std::ref(n_all_tracks), std::ref(mon_track_pt_log), std::ref(mon_track_dEta), std::ref(mon_track_dPhi),
+        std::ref(mon_track_d0_abs_log), std::ref(mon_track_z0sinthetaTJVA_abs_log),
+        std::ref(mon_track_nPixelHitsPlusDeadSensors), std::ref(mon_track_nSCTHitsPlusDeadSensors),
+        std::ref(mon_track_errors)
+    };
+    for(auto& [key, var] : monitoredIdVariables) monVars.push_back(std::ref(var));
+    auto monitorIt = Monitored::Group(m_monTool, monVars);
 
 
     ATH_MSG_DEBUG("Executing TrigTauRecMerged");
 
-    //-------------------------------------------------------------------------
+    //===============================================================================
     // Main TauJet object:
-    //-------------------------------------------------------------------------
+    //===============================================================================
     xAOD::TauJet* tau = nullptr;
 
-    //-------------------------------------------------------------------------
+
+    //===============================================================================
     // Retrieve RoI
-    //-------------------------------------------------------------------------
+    //===============================================================================
     SG::ReadHandle<TrigRoiDescriptorCollection> roisHandle = SG::makeHandle(m_roiInputKey, ctx);
     if(!roisHandle.isValid()) {
         ATH_MSG_ERROR("No RoIHandle found");
@@ -214,31 +230,11 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
     }
 
 
-    //-------------------------------------------------------------------------
-    // Prepare Input/Output TauJet and TauTrack containers
-    //-------------------------------------------------------------------------
+    //===============================================================================
+    // Prepare Output TauJet and TauTrack containers
+    //===============================================================================
     
-    // Main TauJet and TauTrack input containers
-    const xAOD::TauJetContainer *inputTauContainer = nullptr;
-    const xAOD::TauTrackContainer *inputTauTrackContainer = nullptr;
-
-    // Get input TauJet and TauTrack containers from SG, if available
-    if(!doCaloMVAStep()) {
-        if(!m_tauJetInputKey.key().empty()) {
-            SG::ReadHandle<xAOD::TauJetContainer> tauInputHandle(m_tauJetInputKey, ctx);
-            inputTauContainer = tauInputHandle.cptr();
-            ATH_MSG_DEBUG("Input TauJet Container size: " << inputTauContainer->size());
-        }
-
-        if(!m_tauTrackInputKey.key().empty() && m_clustersInputKey.key().empty()) {
-            SG::ReadHandle<xAOD::TauTrackContainer> tauTrackInputHandle(m_tauTrackInputKey, ctx);
-            inputTauTrackContainer = tauTrackInputHandle.cptr();
-            ATH_MSG_DEBUG("Tau Track Container Size " << inputTauTrackContainer->size());
-        }
-    }
-
-    // Create and register the output containers
-    // TauJetContainer:
+    // Create and register the output TauJetContainer
     std::unique_ptr<xAOD::TauJetContainer> outputContainer = std::make_unique<xAOD::TauJetContainer>();
     std::unique_ptr<xAOD::TauJetAuxContainer> outputAuxContainer = std::make_unique<xAOD::TauJetAuxContainer>();
     outputContainer->setStore(outputAuxContainer.get());
@@ -246,34 +242,26 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
     SG::WriteHandle<xAOD::TauJetContainer> outputTauHandle(m_tauJetOutputKey, ctx);
     ATH_CHECK(outputTauHandle.record(std::move(outputContainer), std::move(outputAuxContainer)));
 
-    ATH_CHECK(deepCopy(outputTauHandle, inputTauContainer));
-
-    // TauTrackContainer:
+    // Create and register the output TauTrackContainer
     std::unique_ptr<xAOD::TauTrackContainer> outputTrackContainer = std::make_unique<xAOD::TauTrackContainer>();
     std::unique_ptr<xAOD::TauTrackAuxContainer> outputTrackAuxContainer = std::make_unique<xAOD::TauTrackAuxContainer>();
     outputTrackContainer->setStore(outputTrackAuxContainer.get());
 
     SG::WriteHandle<xAOD::TauTrackContainer> tauTrackHandle(m_tauTrackOutputKey, ctx);
     ATH_CHECK(tauTrackHandle.record(std::move(outputTrackContainer), std::move(outputTrackAuxContainer)));
+    
 
-    ATH_CHECK(deepCopy(tauTrackHandle, inputTauTrackContainer));
-
-
-    // Now retrieve the main TauJet object, if available (the recently created copy of the input TauJet)
-    if(!doCaloMVAStep() && !outputTauHandle->empty()) {
-        tau = outputTauHandle->back();
-
-        // Clear all previous TauTrack links (if any), since we will run the
-        // TauTrackFinder tool (and the associated InDet helpers) in the
-        // Presel and Precision steps, refilling the tracks
-        if(!m_tauTrackInputKey.key().empty()) tau->clearTauTrackLinks();
-    }
-
-   
-    //-------------------------------------------------------------------------
-    // Calo-only reconstruction from clusters (CaloMVA step)
-    //-------------------------------------------------------------------------
-    if(doCaloMVAStep()) {
+    //===============================================================================
+    // Initial TauJet calo-reco / input-retrieval
+    //===============================================================================
+    // We now have two options for the TauJet reconstruction:
+    //  1) Reconstruct the TauJet from scratch, using the bare calo-clusters (1st trigger step)
+    //  2) Fetch a preceding TauJet (and dummy TauTracks), and use them to seed the current reconstruction
+    
+    //-------------------------------------------------------------------------------
+    // Option 1: Calorimeter-only reconstruction from clusters (CaloMVA step)
+    //-------------------------------------------------------------------------------
+    if(doCaloReconstruction()) {
         // Retrieve Calocluster container
         SG::ReadHandle<xAOD::CaloClusterContainer> CCContainerHandle = SG::makeHandle(m_clustersInputKey, ctx);
         ATH_CHECK(CCContainerHandle.isValid());
@@ -328,27 +316,65 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
         
         // If we're running calo-clustering, that means we just started the HLT reco,
         // and there's no input TauJet container to this step. Create one instead!
-        if(!tau) {
-            outputTauHandle->push_back(std::make_unique<xAOD::TauJet>());
-            tau = outputTauHandle->back();
-            tau->setROIWord(roiDescriptor->roiWord());
-        }
+        outputTauHandle->push_back(std::make_unique<xAOD::TauJet>());
+        tau = outputTauHandle->back();
+        tau->setROIWord(roiDescriptor->roiWord());
 
         // Using the new Jet collection, setup the tau candidate structure
         tau->setJet(outputTauSeedJetHandle.ptr(), jet);
 
         // Fix eta, phi in case the jet's energy is negative
         if(jet->e() <= 0) {
-            ATH_MSG_DEBUG("Changing (eta, phi) back to the RoI center due to energy: " << jet->e());
+            ATH_MSG_DEBUG("Changing (eta, phi) back to the RoI center due to negative energy: " << jet->e());
             tau->setP4(tau->pt(), roiDescriptor->eta(), roiDescriptor->phi(), tau->m());		
             ATH_MSG_DEBUG("Roi: " << roiDescriptor->roiId() << ", tau eta: " << tau->eta() << ", tau phi: " << tau->phi() );
         }
     }
 
-    // Check if jetLink is valid for all taus
-    ATH_CHECK(tau->jetLink().isValid());
 
-    // Get Vertex Container
+    //-------------------------------------------------------------------------------
+    // Option 2: Use input TauJet (and TauTracks) as seeds (non calo-only reco)
+    //-------------------------------------------------------------------------------
+    if(!doCaloReconstruction()) {
+        // Retrieve input TauJet container
+        if(!m_tauJetInputKey.key().empty()) {
+            SG::ReadHandle<xAOD::TauJetContainer> tauInputHandle(m_tauJetInputKey, ctx);
+            const xAOD::TauJetContainer* inputTauContainer = tauInputHandle.cptr();
+            ATH_MSG_DEBUG("Input TauJet Container size: " << inputTauContainer->size());
+
+            // Copy the input TauJets to the output container
+            ATH_CHECK(deepCopy(outputTauHandle, inputTauContainer));
+        }
+
+        // Retrieve input TauTrack container
+        if(!m_tauTrackInputKey.key().empty()) {
+            SG::ReadHandle<xAOD::TauTrackContainer> tauTrackInputHandle(m_tauTrackInputKey, ctx);
+            const xAOD::TauTrackContainer* inputTauTrackContainer = tauTrackInputHandle.cptr();
+            ATH_MSG_DEBUG("Tau Track Container Size " << inputTauTrackContainer->size());
+
+            // Copy the input TauTracks to the output container
+            ATH_CHECK(deepCopy(tauTrackHandle, inputTauTrackContainer));
+        }
+
+
+        // Now retrieve the main TauJet object, if available (the recently created copy of the input TauJet)
+        if(!outputTauHandle->empty()) {
+            tau = outputTauHandle->back();
+            
+            // Check if the tau has a valid jetLink
+            ATH_CHECK(tau->jetLink().isValid());
+
+            // Clear all previous TauTrack links (if any), since we will run the
+            // TauTrackFinder tool (and the associated InDet helpers) in the
+            // Presel and Precision steps, refilling the tracks
+            if(!m_tauTrackInputKey.key().empty()) tau->clearTauTrackLinks();
+        }
+    }
+   
+
+    //===============================================================================
+    // Get Vertex Container (optional)
+    //===============================================================================
     const xAOD::VertexContainer* RoIVxContainer = nullptr;
     if(!m_vertexInputKey.key().empty()){
         SG::ReadHandle<xAOD::VertexContainer> VertexContainerHandle = SG::makeHandle(m_vertexInputKey, ctx);
@@ -362,13 +388,16 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
         }
     }
 
+
     ATH_MSG_DEBUG("roiDescriptor roiWord: " << roiDescriptor->roiWord() << ", saved in TauJet: " << tau->ROIWord());
 
-    //-------------------------------------------------------------------------
+
+    //===============================================================================
     // Loop over all booked tau tools:
-    // VertexFinderTools -> CommonToolsBeforeTF -> TrackFinderTools -> CommonTools -> VertexVarsTools -> IDTools
-    //-------------------------------------------------------------------------
+    //===============================================================================
     StatusCode processStatus = StatusCode::SUCCESS;
+
+    // Sequence: VertexFinderTools -> CommonToolsBeforeTF -> TrackFinderTools -> CommonTools -> VertexVarsTools -> IDTools
   
     for(const auto& tool : m_vertexFinderTools) {
         ATH_MSG_DEBUG("Starting Tool: " << tool->name());
@@ -457,6 +486,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
 
     ATH_MSG_DEBUG("This tau has " << tau->allTracks() << " tracks linked");
 
+
     // Cleanup in case any of the tools failed (rejected Tau)
     if(!processStatus.isSuccess()) {
         ATH_MSG_DEBUG("The tau object has NOT been registered in the tau container");
@@ -468,11 +498,12 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
         outputTauHandle->pop_back();
 
         ATH_MSG_DEBUG("Clean up done after jet seed");  
+
     } else {
         // Check that the seed-jet energy is positive
         // Otherwise, try to salvage it by replacing the tau position with the RoI's
         float fJetEnergy = (*tau->jetLink())->e();
-        ATH_MSG_DEBUG("Seed jet E: "<< fJetEnergy);
+        ATH_MSG_DEBUG("Seed jet E: " << fJetEnergy);
 	      
         if(fJetEnergy < 0.00001) {
             ATH_MSG_DEBUG("Changing tau's (eta,phi) to RoI ones due to negative energy (PxPyPzE flips eta and phi)");
@@ -485,9 +516,9 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
         }
 
 
-        //-------------------------------------------------------------------------
+        //===============================================================================
         // Monitor tau variables
-        //-------------------------------------------------------------------------
+        //===============================================================================
         
         pT = tau->pt()/Gaudi::Units::GeV;
         eta = tau->eta();
@@ -533,7 +564,6 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
 
         // Monitor BRT variables
         float tmp = 0;
-
         bool test = tau->detail(xAOD::TauJetParameters::ClustersMeanCenterLambda, tmp);
         if(test) clustersMeanCenterLambda = tmp;
         test = tau->detail(xAOD::TauJetParameters::ClustersMeanFirstEngDens, tmp);
@@ -572,8 +602,9 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
         }
 
 
-        n_core_tracks = tau->nTracks();
-        n_wide_tracks = tau->nTracksIsolation();
+        // Tracks summary monitoring
+        n_tracks = tau->nTracks();
+        n_iso_tracks = tau->nTracksIsolation();
         tau->detail(xAOD::TauJetParameters::ipSigLeadTrk, ipSigLeadTrk);
         if(tau->nTracks() > 0) ipSigLeadTrk = std::abs(tau->track(0)->d0SigTJVA()); // TODO: Is this needed?
         tau->detail(xAOD::TauJetParameters::trFlightPathSig, trFlightPathSig);
@@ -595,7 +626,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
 
 
         // Track variables monitoring 
-        n_tracks = tau->allTracks().size();
+        n_all_tracks = tau->allTracks().size();
         for(const xAOD::TauTrack* track : tau->allTracks()) {
             track_pt_log.push_back(std::log10(track->pt()));
             track_dEta.push_back(track->eta() - tau->eta()); 
@@ -618,39 +649,45 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
             track_nSCTHitsPlusDeadSensors.push_back(nSCTHitsPlusDeadSensors);
         }
 
-	      
-        // ID scores monitoring
-        
-        if(tau->hasDiscriminant(xAOD::TauJetParameters::RNNJetScore)){
-            if(tau->nTracks() == 0) IDScore_0p = tau->discriminant(xAOD::TauJetParameters::RNNJetScore);
-            else if (tau->nTracks() == 1) IDScore_1p = tau->discriminant(xAOD::TauJetParameters::RNNJetScore);
-            else IDScore_mp = tau->discriminant(xAOD::TauJetParameters::RNNJetScore);
+
+        // TauID Score monitoring
+        for(const auto& [key, p] : m_monitoredIdAccessors) {
+            if(p.first.isAvailable(*tau)) {
+                if(tau->nTracks() == 0) {
+                    monitoredIdVariables.at(key + "_TauJetScore_0p") = p.first(*tau);
+                } else if(tau->nTracks() == 1) {
+                    monitoredIdVariables.at(key + "_TauJetScore_1p") = p.first(*tau);
+                } else { // MP tau
+                    monitoredIdVariables.at(key + "_TauJetScore_mp") = p.first(*tau);
+                }
+            }
+
+            if(p.second.isAvailable(*tau)) {
+                if(tau->nTracks() == 0) {
+                    monitoredIdVariables.at(key + "_TauJetScoreTrans_0p") = p.second(*tau);
+                } else if(tau->nTracks() == 1) {
+                    monitoredIdVariables.at(key + "_TauJetScoreTrans_1p") = p.second(*tau);
+                } else { // MP tau
+                    monitoredIdVariables.at(key + "_TauJetScoreTrans_mp") = p.second(*tau);
+                }
+            }
         }
-   
-        if(tau->hasDiscriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans)){
-            if(tau->nTracks() == 0) IDScoreSigTrans_0p = tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
-            else if (tau->nTracks() == 1) IDScoreSigTrans_1p = tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
-            else IDScoreSigTrans_mp = tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
-        }
- 
+
 
         ++n_taus;
 
 
-        ATH_MSG_DEBUG("Roi: " << roiDescriptor->roiId()
+        ATH_MSG_DEBUG("RoI: " << roiDescriptor->roiId()
 	    	  << ", Tau pT (GeV): " << pT << ", Tau eta: " << eta << ", Tau phi: " << phi
 	    	  << ", wrt RoI dEta: " << dEta_RoI << ", dPhi: " << dPhi_RoI);
     }
 
-    //-------------------------------------------------------------------------
-    // All done, register the tau Container in TDS
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------
+    // All done!
+    //-------------------------------------------------------------------------------
     
     ATH_MSG_DEBUG("Output TauJetContainer size: " << outputTauHandle->size());
     ATH_MSG_DEBUG("Output TauJetTrackContainer size: " << tauTrackHandle->size());
-    
-    ATH_MSG_DEBUG("Recorded a tau container: " << outputTauHandle.name());
-    ATH_MSG_DEBUG("The tau object has been registered in the tau container");
     
     return StatusCode::SUCCESS;
 }

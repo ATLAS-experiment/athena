@@ -209,9 +209,16 @@ DisTrkBDTSelVars = '.'.join(DisTrkBDTSelToKeep)
 L1TopoErrorFlagVars = '.'.join(['hasGenericRoiError', 'hasGenericDaqError', 'hasCrcTobError', 'hasCrcFibreError',
                                 'hasCrcDaqError', 'hasRoibDaqDifference', 'hasRoibCtpDifference', 'hasDaqCtpDifference'])
 # ===========
-# === TAU ===
-TauTrackToKeep = ['pt', 'eta', 'phi', 'flagSet', 'trackLinks', 'd0TJVA', 'd0SigTJVA', 'z0sinthetaTJVA', 'z0sinthetaSigTJVA']
-TauTrackVars = '.'.join(TauTrackToKeep)
+# === Tau ===
+def getTauIDVars(name: str) -> list[str]:
+    # Default list of variables required for all triggers, according to the naming convention
+    return [f'{name}_{sfx}' for sfx in ['Score', 'ScoreSigTrans', 'VeryLoose', 'Loose', 'Medium', 'Tight']]
+
+TauJet_vars = []
+TauJet_vars_str = '.'.join(TauJet_vars)
+
+TauTrack_vars = ['pt', 'eta', 'phi', 'flagSet', 'trackLinks', 'd0TJVA', 'd0SigTJVA', 'z0sinthetaTJVA', 'z0sinthetaSigTJVA']
+TauTrack_vars_str = '.'.join(TauTrack_vars)
 
 # ===========
 # === LLP ===
@@ -957,25 +964,25 @@ TriggerHLTListRun3 = [
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersFSAux.nCells', 'BS ESD', 'Calo'),
 
     # tau
-    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_CaloMVAOnly',                         'BS ESD AODFULL', 'Tau', [InViews('tauCaloMVAViews')]),
-    ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_CaloMVAOnlyAux.',                  'BS ESD AODFULL', 'Tau'),
+    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_CaloMVAOnly',                      'BS ESD AODFULL',         'Tau', [InViews('tauCaloMVAViews')]),
+    ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_CaloMVAOnlyAux.',               'BS ESD AODFULL',         'Tau'),
 
-    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_MVA',                     'BS ESD AODFULL AODSLIM', 'Tau', [InViews('precMVATauViews'), InViews('tauPrecisionReco_MVAViews')]),
-    ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_MVAAux.',              'BS ESD AODFULL AODSLIM', 'Tau'),
+    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_MVA',                              'BS ESD AODFULL AODSLIM', 'Tau', [InViews('precMVATauViews'), InViews('tauPrecisionReco_MVAViews')]),
+    ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_MVAAux.'+TauJet_vars_str,       'BS ESD AODFULL AODSLIM', 'Tau'),
 
-    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_LLP',                     'BS ESD AODFULL AODSLIM', 'Tau', [InViews('precLLPTauViews'), InViews('tauPrecisionReco_LLPViews')]),
-    ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_LLPAux.',              'BS ESD AODFULL AODSLIM', 'Tau'),
+    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_LLP',                              'BS ESD AODFULL AODSLIM', 'Tau', [InViews('precLLPTauViews'), InViews('tauPrecisionReco_LLPViews')]),
+    ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_LLPAux.',                       'BS ESD AODFULL AODSLIM', 'Tau'),
 
-    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_LRT',                     'BS ESD AODFULL AODSLIM', 'Tau', [InViews('precLRTTauViews'), InViews('tauPrecisionReco_LRTViews')]),
-    ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_LRTAux.',              'BS ESD AODFULL AODSLIM', 'Tau'),
+    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_LRT',                              'BS ESD AODFULL AODSLIM', 'Tau', [InViews('precLRTTauViews'), InViews('tauPrecisionReco_LRTViews')]),
+    ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_LRTAux.',                       'BS ESD AODFULL AODSLIM', 'Tau'),
 
     # tau tracks
-    ('xAOD::TauTrackContainer#HLT_tautrack_MVA',                           'BS ESD AODFULL AODSLIM', 'Tau', [InViews('precMVATauViews'), InViews('tauPrecisionReco_MVAViews')]),
-    ('xAOD::TauTrackAuxContainer#HLT_tautrack_MVAAux.'+TauTrackVars,       'BS ESD AODFULL AODSLIM', 'Tau'),
-    ('xAOD::TauTrackContainer#HLT_tautrack_LLP',                           'BS ESD AODFULL AODSLIM', 'Tau', [InViews('precLLPTauViews'), InViews('tauPrecisionReco_LLPViews')]),
-    ('xAOD::TauTrackAuxContainer#HLT_tautrack_LLPAux.'+TauTrackVars,       'BS ESD AODFULL AODSLIM', 'Tau'),
-    ('xAOD::TauTrackContainer#HLT_tautrack_LRT',                           'BS ESD AODFULL AODSLIM', 'Tau', [InViews('precLRTTauViews'), InViews('tauPrecisionReco_LRTViews')]),
-    ('xAOD::TauTrackAuxContainer#HLT_tautrack_LRTAux.'+TauTrackVars,       'BS ESD AODFULL AODSLIM', 'Tau'),
+    ('xAOD::TauTrackContainer#HLT_tautrack_MVA',                                'BS ESD AODFULL AODSLIM', 'Tau', [InViews('precMVATauViews'), InViews('tauPrecisionReco_MVAViews')]),
+    ('xAOD::TauTrackAuxContainer#HLT_tautrack_MVAAux.'+TauTrack_vars_str,       'BS ESD AODFULL AODSLIM', 'Tau'),
+    ('xAOD::TauTrackContainer#HLT_tautrack_LLP',                                'BS ESD AODFULL AODSLIM', 'Tau', [InViews('precLLPTauViews'), InViews('tauPrecisionReco_LLPViews')]),
+    ('xAOD::TauTrackAuxContainer#HLT_tautrack_LLPAux.'+TauTrack_vars_str,       'BS ESD AODFULL AODSLIM', 'Tau'),
+    ('xAOD::TauTrackContainer#HLT_tautrack_LRT',                                'BS ESD AODFULL AODSLIM', 'Tau', [InViews('precLRTTauViews'), InViews('tauPrecisionReco_LRTViews')]),
+    ('xAOD::TauTrackAuxContainer#HLT_tautrack_LRTAux.'+TauTrack_vars_str,       'BS ESD AODFULL AODSLIM', 'Tau'),
 
     # bjet RoI Descriptor used for EventView creation
     ('TrigRoiDescriptorCollection#HLT_Roi_Bjet',                   'BS ESD AODFULL', 'Bjet'),

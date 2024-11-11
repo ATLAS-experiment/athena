@@ -49,12 +49,12 @@ def tauCaloMVAMenuSequenceGenCfg(flags, is_probe_leg=False):
     recoAcc.mergeReco(tauTopoClusteringCfg(flags, RoIs=RoIs))
 
     # Create new RoIs with an updated position, based on the central axis of the clusters
-    from TrigTauHypo.TrigTauRoIToolsConfig import tauCaloRoiUpdaterCfg
+    from TrigTauRec.TrigTauRoIToolsConfig import tauCaloRoiUpdaterCfg
     recoAcc.mergeReco(tauCaloRoiUpdaterCfg(flags, inputRoIs=RoIs, clusters='HLT_TopoCaloClustersLC'))
 
     # Construct the calo-only TauJet (with BRT calibration)
-    from TrigTauRec.TrigTauRecConfig import trigTauRecMergedCaloOnlyMVACfg
-    recoAcc.mergeReco(trigTauRecMergedCaloOnlyMVACfg(flags))
+    from TrigTauRec.TrigTauRecConfig import trigTauRecMergedCaloMVACfg
+    recoAcc.mergeReco(trigTauRecMergedCaloMVACfg(flags))
 
 
     # Calo ROB prefetching, to reduce number of calls to the readout
@@ -158,10 +158,10 @@ def _ftfCoreSeq(flags, name, is_probe_leg=False):
     # Create new RoIs for the next tracking steps (FTFIso and PrecTrack), based on the found tracks
     TrackCollection = flags.Tracking.ActiveConfig.trkTracks_FTF
     if name == 'Core':
-        from TrigTauHypo.TrigTauRoIToolsConfig import tauTrackRoiUpdaterCfg
+        from TrigTauRec.TrigTauRoIToolsConfig import tauTrackRoiUpdaterCfg
         recoAcc.mergeReco(tauTrackRoiUpdaterCfg(flags, inputRoIs=RoIs, tracks=TrackCollection))
     elif name == 'LRT':
-        from TrigTauHypo.TrigTauRoIToolsConfig import tauLRTRoiUpdaterCfg
+        from TrigTauRec.TrigTauRoIToolsConfig import tauLRTRoiUpdaterCfg
         recoAcc.mergeReco(tauLRTRoiUpdaterCfg(flags, inputRoIs=RoIs, tracks=TrackCollection))
 
 
@@ -437,8 +437,10 @@ def _tauPrecisionSeq(flags, name, tau_ids: list[str], output_name=None, is_probe
     recoAcc.mergeReco(trigTauRecMergedPrecisionMVACfg(
         flags,
         name,
-        inputRoIs=RoIs,
-        tracks=flags.Tracking.ActiveConfig.tracks_IDTrig,
+        tau_ids=tau_ids,
+        input_rois=RoIs,
+        input_tracks=flags.Tracking.ActiveConfig.tracks_IDTrig,
+        output_name=output_name,
     ))
 
 

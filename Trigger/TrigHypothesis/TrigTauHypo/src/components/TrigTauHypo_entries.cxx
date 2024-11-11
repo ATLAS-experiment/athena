@@ -11,9 +11,6 @@
 #include "../TrigTauPrecisionIDHypoTool.h"
 #include "../TrigTauPrecisionDiKaonHypoTool.h"
 
-#include "../TrigTauCaloRoiUpdater.h"
-#include "../TrigTauTrackRoiUpdater.h"
-
 DECLARE_COMPONENT( TrigTauCaloHypoAlg )
 DECLARE_COMPONENT( TrigTauCaloHypoTool )
 
@@ -26,6 +23,3 @@ DECLARE_COMPONENT( TrigTauPrecTrackHypoTool )
 DECLARE_COMPONENT( TrigTauPrecisionHypoAlg )
 DECLARE_COMPONENT( TrigTauPrecisionIDHypoTool )
 DECLARE_COMPONENT( TrigTauPrecisionDiKaonHypoTool )
-
-DECLARE_COMPONENT( TrigTauCaloRoiUpdater )
-DECLARE_COMPONENT( TrigTauTrackRoiUpdater )
