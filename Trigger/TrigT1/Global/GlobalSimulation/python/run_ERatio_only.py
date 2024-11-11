@@ -137,7 +137,9 @@ if __name__ == '__main__':
         acc.merge(hltCaloCellSeedlessMakerCfg(flags, roisKey=''))
 
     # add in the Algortihm to build a  LArStrip Neighborhood container
-    from Egamma1_LArStrip_FexCfg import Egamma1_LArStrip_FexCfg
+    from  GlobalSimulation.Egamma1_LArStrip_FexCfg import (
+        Egamma1_LArStrip_FexCfg,
+        )
     acc.merge(Egamma1_LArStrip_FexCfg(flags,
                                       OutputLevel=DEBUG,
                                       makeCaloCellContainerChecks=False,
@@ -145,7 +147,7 @@ if __name__ == '__main__':
                                       dumpTerse=True))
 
     # add in the ERatio Algorithm to be run
-    from GlobalSimAlgCfg_ERatio  import GlobalSimulationAlgCfg
+    from GlobalSimulation.GlobalSimAlgCfg_ERatio  import GlobalSimulationAlgCfg
     acc.merge(GlobalSimulationAlgCfg(flags,
                                      OutputLevel=DEBUG,
                                      dump=True))
