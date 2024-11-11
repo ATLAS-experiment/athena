@@ -65,6 +65,18 @@ def ITkTrackingSiPatternCfg(flags,
                 from InDetConfig.SiSPSeededTrackFinderConfig import ITkSiSPSeededTrackFinderCfg
                 acc.merge(ITkSiSPSeededTrackFinderCfg(flags, TracksLocation=SiSPSeededTrackCollectionKey))
 
+            # Store some collections for persistification
+            # Used for validation and studies
+
+            # Persistify Seed
+            if flags.Tracking.doStoreTrackSeeds:
+                from InDetConfig.ITkPersistificationConfig import ITkTrackSeedsFinalCfg
+                acc.merge(ITkTrackSeedsFinalCfg(flags))
+            #Persistify Track from Track Finding
+            if flags.Tracking.doStoreSiSPSeededTracks:
+                from InDetConfig.ITkPersistificationConfig import ITkSiSPSeededTracksFinalCfg
+                acc.merge(ITkSiSPSeededTracksFinalCfg(flags))
+                        
         # GNN Track
         if flags.Tracking.ActiveConfig.doGNNTrack:
             from InDetGNNTracking.InDetGNNTrackingConfig import GNNTrackMakerCfg

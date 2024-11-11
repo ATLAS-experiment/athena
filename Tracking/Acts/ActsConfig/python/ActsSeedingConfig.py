@@ -484,9 +484,9 @@ def ActsSeedingCfg(flags) -> ComponentAccumulator:
         trackKey = f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}Tracks'
         particleKey = f'SiSPSeedSegments{flags.Tracking.ActiveConfig.extension}'
         acc.merge(ActsSeedToTrackCnvAlgCfg(flags, 
-                                           name=f"{flags.Tracking.ActiveConfig.extension}SeedToTrackCnvAlg"),
+                                           name=f"{flags.Tracking.ActiveConfig.extension}SeedToTrackCnvAlg",
                                            SeedContainerKey=seedKey,
-                                           ACTSTracksLocation=trackKey)
+                                           ACTSTracksLocation=trackKey))
         from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
         acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, 
                                                     name=f"{flags.Tracking.ActiveConfig.extension}TracksSeedToTrackParticleCnvAlg",
