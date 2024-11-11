@@ -47,7 +47,6 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 
 
 	unsigned int nTowers = 0;
-	//ATH_MSG_INFO("gTOWER" << "    Eta " << "   Eta Index" << "  Phi " << "   Phi index " );
 	for(const xAOD::gFexTower* gfexTowerRoI : *gFexTowerContainer){
 
 		Toweret=gfexTowerRoI->towerEt();
@@ -57,16 +56,18 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 		float eta = gfexTowerRoI->eta();
 		float phi = gfexTowerRoI->phi();
 
-						
+		if (eta < -3.17 && eta > -3.25){ eta = -3.225;}
+		if (eta < 3.3 && eta > 3.17){ eta = 3.275;}
+
+		Towereta = eta;	
+			
 		if(gfexTowerRoI->towerEt() >= 200 ){
 			nTowers++;
 		}
 
-		Towereta = eta; 
-
 		//GREATER THAN 2GEV
 		if (gfexTowerRoI->towerEt() >= 10){
-			if (std::abs(eta) >= 3.1 ){
+			if (std::abs(eta) >= 3.2 ){
 				Towerphi = phi- 0.1;
 				binNumber = getBinNumberTower(eta,phi-0.1,0,0);
 				fill("highEtgTowers",Towereta,Towerphi);
@@ -85,7 +86,7 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 		}
       //only for h_gTower_coldtowers_etaphimap
 		else if (gfexTowerRoI->towerEt() <= -10){
-			if (std::abs(eta) >= 3.1 ){
+			if (std::abs(eta) >= 3.2){
 				Towerphi = phi- 0.1;
 				binNumber = getBinNumberTower(eta,phi-0.1,0,0);
 				fill("lowEtgTowers",Towereta,Towerphi);
