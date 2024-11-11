@@ -5,6 +5,7 @@
 #include "HgtdClusterizationAlg.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
 #include "AthenaMonitoringKernel/Monitored.h"
+#include "ActsInterop/TableUtils.h"
 
 namespace ActsTrk {
 
@@ -26,6 +27,16 @@ namespace ActsTrk {
 
   }
 
+  StatusCode HgtdClusterizationAlg::finalize() {
+    ATH_MSG_INFO("Clusterization statistics" << std::endl << makeTable(m_stat,
+								       std::array<std::string, kNStat>{
+									 "RDOs",
+									 "Clusters"
+								       }).columnWidth(10));
+    
+    return StatusCode::SUCCESS;    
+  }
+  
   StatusCode HgtdClusterizationAlg::execute(const EventContext& ctx) const
   {
     ATH_MSG_DEBUG("Executing " << name() << " ...");
@@ -38,7 +49,7 @@ namespace ActsTrk {
         ATH_MSG_ERROR("Failed to retrieve HGTD RDO container");
         return StatusCode::FAILURE;
     }
-
+      
     SG::WriteHandle<xAOD::HGTDClusterContainer> clusterContainer = SG::makeHandle(m_clusterContainerKey, ctx);
     ATH_CHECK(clusterContainer.record(std::make_unique<xAOD::HGTDClusterContainer>(),
 				      std::make_unique<xAOD::HGTDClusterAuxContainer>()));
@@ -47,10 +58,12 @@ namespace ActsTrk {
         if (rdoCollection->empty()) {
             continue;
         }
-
+	m_stat[kNRdo] += rdoCollection->size();
         ATH_CHECK(m_clusteringTool->clusterize(ctx, *rdoCollection, *clusterContainer));
     }
 
+    m_stat[kNClusters] += clusterContainer->size();
+    ATH_MSG_DEBUG("Clusters produced size: "<<clusterContainer->size());  
     return StatusCode::SUCCESS;
   }
   

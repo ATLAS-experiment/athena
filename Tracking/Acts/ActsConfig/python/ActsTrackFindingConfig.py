@@ -188,12 +188,12 @@ def ActsTrackFindingCfg(flags,
     acc = ComponentAccumulator()
 
     # Define Uncalibrated Measurement keys
-    dataPrepPrefix = f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}'
+    dataPrepPrefix = f'{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}'
     if not flags.Tracking.ActiveConfig.isSecondaryPass:
-        dataPrepPrefix = 'ITk'
-    pixelClusters = f'{dataPrepPrefix}PixelClusters'
-    stripClusters = f'{dataPrepPrefix}StripClusters'    
-    hgtdClusters = 'HGTD_Clusters'
+        dataPrepPrefix = ''
+    pixelClusters = f'ITk{dataPrepPrefix}PixelClusters'
+    stripClusters = f'ITk{dataPrepPrefix}StripClusters'    
+    hgtdClusters = f'{dataPrepPrefix}HGTD_Clusters'
     # If cache is activated the keys have "_Cached" as postfix
     if flags.Acts.useCache:
         pixelClusters += '_Cached'

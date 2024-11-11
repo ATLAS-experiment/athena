@@ -13,7 +13,6 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
-#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
 #include "ActsEvent/PrepRawDataAssociation.h"
 
@@ -26,10 +25,12 @@
 
 namespace ActsTrk {
 
-  template <typename external_collection_t, bool useCache>
+  template <typename external_collection_t,
+	    typename external_detector_element_collection_t,
+	    bool useCache>
     class DataPreparationAlg
     : public AthReentrantAlgorithm {
-  private:
+  public:
     using object_t = typename external_collection_t::base_value_type;
     using input_collection_t = external_collection_t;
     using output_collection_t = ConstDataVector<input_collection_t>;
@@ -37,7 +38,6 @@ namespace ActsTrk {
     using cache_read_handle_key_t = typename ActsTrk::Cache::Handles<object_t>::ReadHandleKey;
     using cache_read_handle_t = typename ActsTrk::Cache::Handles<object_t>::ReadHandle;
     
-  public:
     DataPreparationAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~DataPreparationAlg() override = default;
     
@@ -46,8 +46,12 @@ namespace ActsTrk {
     virtual StatusCode finalize() override;
     
   protected:
-    virtual xAOD::DetectorIDHashType retrieveDetectorIDHash(const object_t& obj) const;
+    virtual inline xAOD::DetectorIDHashType retrieveDetectorIDHash(const object_t& obj) const;
 
+    // Common way of fetching the hash ids from the RoI(s)
+    virtual StatusCode fetchIdHashes(const EventContext& ctx,
+				     std::set<IdentifierHash>& hashes) const;
+    
   private:
     // Different ways of filling the output collection
     StatusCode fill(const EventContext& ctx,
@@ -56,20 +60,16 @@ namespace ActsTrk {
     StatusCode fill(const EventContext& ctx,
 		    output_collection_t& outputCollection) const
       requires (useCache == true);
-    
-    // Common way of fetching the hash ids from the RoI(s)
-    StatusCode fetchIdHashes(const EventContext& ctx,
-			     std::set<IdentifierHash>& hashes) const;
-    
-  private:
+        
+  protected:
     ToolHandle< GenericMonitoringTool > m_monTool {this, "MonTool", "",
 	"Monitoring tool"};
 
     ToolHandle<IRegSelTool> m_regionSelector {this, "RegSelTool", "",
       "Region selector tool"};
 
-    SG::ReadCondHandleKey< InDetDD::SiDetectorElementCollection > m_detEleCollKey {this, "DetectorElements", "",
-      "Key of input SiDetectorElementCollection"};
+    SG::ReadCondHandleKey< external_detector_element_collection_t > m_detEleCollKey {this, "DetectorElements", "",
+      "Key of input DetectorElementCollection"};
     
     SG::ReadHandleKey< input_collection_t > m_inputCollectionKey {this, "InputCollection", "",
 	"Input Collection that will go throug selection process"};
