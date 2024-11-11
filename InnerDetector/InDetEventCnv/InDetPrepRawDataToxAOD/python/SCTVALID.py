@@ -71,7 +71,11 @@ def SCTVALIDKernelCfg(flags, name='SCTVALIDKernel', **kwargs):
                                                                                       PixelClusters = "PixelClusters",
                                                                                       SCTClusterContainer = "SCT_Clusters",
                                                                                       TRTDriftCircleContainer = "TRT_DriftCircles"))
-#
+
+    from DerivationFrameworkJetEtMiss.JetToolConfig import DistanceInTrainToolCfg
+    distanceInTrainTool = acc.getPrimaryAndMerge(DistanceInTrainToolCfg(flags))
+    augmentationTools.append(distanceInTrainTool)
+    
     from DerivationFrameworkInDet.InDetToolsConfig import UnassociatedHitsDecoratorCfg
     unassociatedHitsDecorator = acc.getPrimaryAndMerge(UnassociatedHitsDecoratorCfg(flags, 
                                                                                     name='SCTxAOD_unassociatedHitsDecorator',
