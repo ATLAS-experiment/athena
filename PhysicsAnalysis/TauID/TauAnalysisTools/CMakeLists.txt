@@ -12,29 +12,34 @@ find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 if( XAOD_STANDALONE )
    atlas_add_library( TauAnalysisToolsLib
       TauAnalysisTools/*.h Root/*.cxx
-	  PUBLIC_HEADERS TauAnalysisTools
-      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODEgamma xAODMuon xAODJet
-      xAODTau xAODTracking xAODTruth TruthUtils PATCoreLib PATInterfaces
-      tauRecToolsLib MCTruthClassifierLib AsgAnalysisInterfaces
-      PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver TruthUtils )
+      PUBLIC_HEADERS TauAnalysisTools
+      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
+      LINK_LIBRARIES ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} 
+                     AsgTools xAODEgamma xAODMuon xAODJet xAODTau xAODTracking 
+                     xAODTruth TruthUtils PATCoreLib PATInterfaces tauRecToolsLib 
+                     MCTruthClassifierLib AsgAnalysisInterfaces
+                     xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib
+      PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver )
 else()
    atlas_add_library( TauAnalysisToolsLib
       TauAnalysisTools/*.h Root/*.cxx
-	  PUBLIC_HEADERS TauAnalysisTools
-      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODEgamma xAODMuon xAODJet
-      xAODTau xAODTracking xAODTruth TruthUtils PATCoreLib PATInterfaces
-      ElectronPhotonSelectorToolsLib tauRecToolsLib MCTruthClassifierLib
-      AsgAnalysisInterfaces
-      PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver TruthUtils )
+      PUBLIC_HEADERS TauAnalysisTools
+      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
+      LINK_LIBRARIES ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} 
+                     AsgTools xAODEgamma xAODMuon xAODJet xAODTau xAODTracking 
+                     xAODTruth TruthUtils PATCoreLib PATInterfaces 
+                     ElectronPhotonSelectorToolsLib tauRecToolsLib 
+                     MCTruthClassifierLib AsgAnalysisInterfaces GaudiKernel 
+                     xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib
+      PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver )
 endif()
 
 if( NOT XAOD_STANDALONE )
    atlas_add_component( TauAnalysisTools
       src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES AthenaBaseComps AsgTools xAODTau GaudiKernel
-      TauAnalysisToolsLib )
+      INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
+      LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} AthenaBaseComps AsgTools xAODTau GaudiKernel
+      TauAnalysisToolsLib xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib)
 endif()
 
 atlas_add_dictionary( TauAnalysisToolsDict
