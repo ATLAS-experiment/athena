@@ -74,7 +74,7 @@ private:
     Gaudi::Property<std::string> m_UCCtriggerHELT35{this, "triggerUCCHELT35", "L1_ZDC_HELT35_jTE4000", "UCC trigger requiring ZDC hadronic energy be less than 35 TeV"};
     Gaudi::Property<std::string> m_UCCtriggerHELT50{this, "triggerUCCHELT50", "L1_ZDC_HELT50_jTE4000", "UCC trigger requiring ZDC hadronic energy be less than 50 TeV"};
     
-    float m_timingCutsInjectorPulse [2][4][2] = {{{32, 34}, {31.5, 33}, {28, 30}, {31.5, 33.5}}, {{30, 32.5}, {30.5, 33}, {30.5, 33}, {30.5, 33}}}; // Timing cuts (array of dimension 2 * 4 * 2) for event to enter reco-amp-vs-input-voltage histograms in the injector pulse stream
+    float m_timingCutsInjectorPulse [2][4][2] = {{{30, 38}, {30, 38}, {28, 38}, {30, 38}}, {{30, 38}, {30, 38}, {30, 38}, {30, 38}}}; // Timing cuts (array of dimension 2 * 4 * 2) for event to enter reco-amp-vs-input-voltage histograms in the injector pulse stream
     Gaudi::Property<float> m_minAmpRequiredInjectorPulse {this, "MinAmpRequiredInjectorPulse", 20, "Minimum amplitude required for event to enter reco-amp-vs-input-voltage histograms in the injector pulse stream"};
 
 
@@ -134,11 +134,15 @@ private:
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleStatusKey {this, "ZdcModuleStatusKey", m_zdcModuleContainerName + ".Status" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleAmplitudeKey {this, "ZdcModuleAmplitudeKey", m_zdcModuleContainerName + ".Amplitude" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleTimeKey {this, "ZdcModuleTimeKey", m_zdcModuleContainerName + ".Time" + m_auxSuffix};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleAmpNoNonLinKey {this, "ZdcModuleAmpNoNonLinKey", m_zdcModuleContainerName + ".AmpNoNonLin" + m_auxSuffix};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleFitAmpKey {this, "ZdcModuleFitAmpKey", m_zdcModuleContainerName + ".FitAmp" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleFitT0Key {this, "ZdcModuleFitT0Key", m_zdcModuleContainerName + ".FitT0" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleChisqKey {this, "ZdcModuleChisqKey", m_zdcModuleContainerName + ".Chisq" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleCalibEnergyKey {this, "ZdcModuleCalibEnergyKey", m_zdcModuleContainerName + ".CalibEnergy" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleCalibTimeKey {this, "ZdcModuleCalibTimeKey", m_zdcModuleContainerName + ".CalibTime" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleMaxADCKey {this, "ZdcModuleMaxADCKey", m_zdcModuleContainerName + ".MaxADC" + m_auxSuffix};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleMaxADCHGKey {this, "ZdcModuleMaxADCHGKey", m_zdcModuleContainerName + ".MaxADCHG" + m_auxSuffix};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleMaxADCLGKey {this, "ZdcModuleMaxADCLGKey", m_zdcModuleContainerName + ".MaxADCLG" + m_auxSuffix};
     
     // LG refit data
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleAmpLGRefitKey{this, "ZdcModuleAmpLGRefitKey", m_zdcModuleContainerName + ".AmpLGRefit" + m_auxSuffix, "ZDC module fit amp LG refit"};

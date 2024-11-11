@@ -202,6 +202,7 @@ private:
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleStatus{this, "ZdcModuleStatus", "", "ZDC module fit status"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleTime{this, "ZdcModuleTime", "", "ZDC module time"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleChisq{this, "ZdcModuleChisq", "", "ZDC module fit chisq"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleAmpNoNonLin{this, "ZdcModuleAmpNoNonLin", "", "ZDC module amplitude with gain factor applied but no nonlinear correction"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleFitAmp{this, "ZdcModuleFitAmp", "", "ZDC module fit amp"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleFitAmpError{this, "ZdcModuleFitAmpError", "", "ZDC module fit amp error"};  
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleFitT0{this, "ZdcModuleFitT0", "", "ZDC module fit t0"};
@@ -212,12 +213,12 @@ private:
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleMaxADC{this, "ZdcModuleMaxADC", "", "ZDC module max ADC, minus pre-sample"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleMaxADCHG{this, "ZdcModuleMaxADCHG", "", "ZDC module HG max ADC, unsubtracted"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleMaxADCLG{this, "ZdcModuleMaxADCLG", "", "ZDC module LG max ADC, unsubtracted"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModulePeakADCSubHG{this, "ZdcModulePeakADCSubHG", "", "ZDC module peak sample ADC HG, subtracted"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModulePeakADCSubLG{this, "ZdcModulePeakADCSubLG", "", "ZDC module peak sample ADC LG, subtracted"};
 
   // LG refit data
   // 
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleAmpLGRefit{this, "ZdcModuleAmpLGRefit", "", "ZDC module fit amp LG refit"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleFitAmpLGRefit{this, "ZdcModuleAmpLGRefit", "", "ZDC module fit amp LG refit, with no gain factor or nonlinear correction applied"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleAmpLGRefit{this, "ZdcModuleAmpLGRefit", "", "ZDC module amp LG refit, with gain factor applied but no nonlinear correction"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleAmpCorrLGRefit{this, "ZdcModuleAmpCorrLGRefit", "", "ZDC module amp LG refit, with both gain factor and nonlinear correction applied"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleT0LGRefit{this, "ZdcModuleT0LGRefit", "", "ZDC module fit t0 LG refit"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleT0SubLGRefit{this, "ZdcModuleT0SubLGRefit", "", "ZDC module subtracted t0 LG refit"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleChisqLGRefit{this, "ZdcModuleChisqLGRefit", "", "ZDC module LG refit chi square"};

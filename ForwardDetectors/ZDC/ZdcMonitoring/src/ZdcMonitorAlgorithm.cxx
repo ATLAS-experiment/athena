@@ -102,11 +102,15 @@ StatusCode ZdcMonitorAlgorithm::initialize() {
     ATH_CHECK( m_ZdcModuleStatusKey.initialize(m_enableZDC) );
     ATH_CHECK( m_ZdcModuleAmplitudeKey.initialize(m_enableZDC) );
     ATH_CHECK( m_ZdcModuleTimeKey.initialize(m_enableZDC) );
+    ATH_CHECK( m_ZdcModuleAmpNoNonLinKey.initialize(m_enableZDC) );
+    ATH_CHECK( m_ZdcModuleFitAmpKey.initialize(m_enableZDC) );
     ATH_CHECK( m_ZdcModuleFitT0Key.initialize(m_enableZDC) );
     ATH_CHECK( m_ZdcModuleChisqKey.initialize(m_enableZDC) );
     ATH_CHECK( m_ZdcModuleCalibEnergyKey.initialize(m_enableZDC) );
     ATH_CHECK( m_ZdcModuleCalibTimeKey.initialize(m_enableZDC) );
     ATH_CHECK( m_ZdcModuleMaxADCKey.initialize(m_enableZDC) );
+    ATH_CHECK( m_ZdcModuleMaxADCHGKey.initialize(m_enableZDC) );
+    ATH_CHECK( m_ZdcModuleMaxADCLGKey.initialize(m_enableZDC) );
 
     ATH_CHECK( m_ZdcModuleAmpLGRefitKey.initialize(m_enableZDC) );
     ATH_CHECK( m_ZdcModuleT0LGRefitKey.initialize(m_enableZDC) );
@@ -451,11 +455,15 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> zdcModuleStatusHandle(m_ZdcModuleStatusKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleAmplitudeHandle(m_ZdcModuleAmplitudeKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleTimeHandle(m_ZdcModuleTimeKey, ctx);
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleAmpNoNonLinHandle(m_ZdcModuleAmpNoNonLinKey, ctx);
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleFitAmpHandle(m_ZdcModuleFitAmpKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleFitT0Handle(m_ZdcModuleFitT0Key, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleChisqHandle(m_ZdcModuleChisqKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleCalibEnergyHandle(m_ZdcModuleCalibEnergyKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleCalibTimeHandle(m_ZdcModuleCalibTimeKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleMaxADCHandle(m_ZdcModuleMaxADCKey, ctx);
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleMaxADCHGHandle(m_ZdcModuleMaxADCHGKey, ctx);
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleMaxADCLGHandle(m_ZdcModuleMaxADCLGKey, ctx);
     
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleAmpLGRefitHandle(m_ZdcModuleAmpLGRefitKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleT0LGRefitHandle(m_ZdcModuleT0LGRefitKey, ctx);
@@ -463,7 +471,10 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleChisqLGRefitHandle(m_ZdcModuleChisqLGRefitKey, ctx);
 
     auto zdcModuleAmp = Monitored::Scalar<float>("zdcModuleAmp", -1000.0);
+    auto zdcModuleFitAmp = Monitored::Scalar<float>("zdcModuleFitAmp", -1000.0);
     auto zdcModuleMaxADC = Monitored::Scalar<float>("zdcModuleMaxADC", -1000.0);
+    auto zdcModuleMaxADCHG = Monitored::Scalar<float>("zdcModuleMaxADCHG", -1000.0);
+    auto zdcModuleMaxADCLG = Monitored::Scalar<float>("zdcModuleMaxADCLG", -1000.0);
     auto zdcModuleAmpToMaxADCRatio = Monitored::Scalar<float>("zdcModuleAmpToMaxADCRatio", -1000.0);
     auto zdcModuleFract = Monitored::Scalar<float>("zdcModuleFract", -1000.0);
     auto zdcUncalibSumCurrentSide = Monitored::Scalar<float>("zdcUncalibSumCurrentSide", -1000.0);
@@ -498,6 +509,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     auto zdcModuleChisqLGRefit = Monitored::Scalar<float>("zdcModuleChisqLGRefit", -1000.0);
 
     auto zdcModuleHGtoLGAmpRatio = Monitored::Scalar<float>("zdcModuleHGtoLGAmpRatio", -1000.0);
+    auto zdcModuleHGtoLGAmpRatioNoNonlinCorr = Monitored::Scalar<float>("zdcModuleHGtoLGAmpRatioNoNonlinCorr", -1000.0);
     auto zdcModuleHGtoLGT0Diff = Monitored::Scalar<float>("zdcModuleHGtoLGT0Diff", -1000.0);
 
     auto rpdChannelSubAmp = Monitored::Scalar<float>("RPDChannelSubAmp", -1000.0);
@@ -526,16 +538,12 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     bool injectedPulseFineScan = false;
     bool injectedPulseCoarseScan = false;
 
-    if (m_isInjectedPulse){
-        if (m_isStandalone){
-            injectedPulseInputVoltage = zdcModuleAmp * 1. / 25000.; // no LB in standalone --> fill dummy histograms
-        }else{
-            injectedPulseInputVoltage = m_zdcInjPulserAmpMap->getPulserAmplitude(lumiBlock);
-            injectedPulseFineScan = injectedPulseInputVoltage < 0.1;
-            injectedPulseCoarseScan = !injectedPulseFineScan;
-            if (injectedPulseInputVoltage > 0){ // LB > startLB
-                ATH_MSG_DEBUG("Lumi block: " << lumiBlock << "; pulser amplitude: " << injectedPulseInputVoltage);        
-            }
+    if (m_isInjectedPulse && (!m_isStandalone)){
+        injectedPulseInputVoltage = m_zdcInjPulserAmpMap->getPulserAmplitude(lumiBlock);
+        injectedPulseFineScan = injectedPulseInputVoltage < 0.1;
+        injectedPulseCoarseScan = !injectedPulseFineScan;
+        if (injectedPulseInputVoltage > 0){ // LB > startLB
+            ATH_MSG_DEBUG("Lumi block: " << lumiBlock << "; pulser amplitude: " << injectedPulseInputVoltage);        
         }
     }
 
@@ -568,7 +576,11 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
 
                     if ((status & 1 << ZDCPulseAnalyzer::PulseBit) != 0){ // has pulse
                         zdcModuleAmp = zdcModuleAmplitudeHandle(*zdcMod);
+                        float zdcModuleAmpNoNonLin = zdcModuleAmpNoNonLinHandle(*zdcMod); // module fit amplitude (without gain factor or nonlinear corrections applied)
+                        zdcModuleFitAmp = zdcModuleFitAmpHandle(*zdcMod); // module fit amplitude (without gain factor or nonlinear corrections applied)
                         zdcModuleMaxADC = zdcModuleMaxADCHandle(*zdcMod);
+                        zdcModuleMaxADCHG = zdcModuleMaxADCHGHandle(*zdcMod);
+                        zdcModuleMaxADCLG = zdcModuleMaxADCLGHandle(*zdcMod);
                         zdcModuleAmpToMaxADCRatio = (zdcModuleMaxADC == 0)? -1000. : zdcModuleAmp / zdcModuleMaxADC;
                         zdcModuleTime = zdcModuleTimeHandle(*zdcMod);
                         zdcModuleFitT0 = zdcModuleFitT0Handle(*zdcMod);
@@ -586,7 +598,8 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                             zdcModuleFract = (zdcUncalibSumCurrentSide == 0)? -1000. : zdcModuleAmp / zdcUncalibSumCurrentSide; // use uncalibrated amplitudes + amplitude sum
                         }
 
-                        zdcModuleChisqOverAmp = (zdcModuleAmp == 0)? -1000. : zdcModuleChisq / zdcModuleAmp;
+                        // use fit amplitude for chisq over amplitude: neither fit amplitude nor chisq has gain factor applied
+                        zdcModuleChisqOverAmp = (zdcModuleFitAmp == 0)? -1000. : zdcModuleChisq / zdcModuleFitAmp;
                         zdcModuleLG = (status & 1 << ZDCPulseAnalyzer::LowGainBit);
                         zdcModuleHGValid = !(status & 1 << ZDCPulseAnalyzer::HGOverflowBit) && !(status & 1 << ZDCPulseAnalyzer::HGUnderflowBit); // HG neither overflow nor underflow
 
@@ -604,6 +617,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                         zdcModuleLGAmp = (zdcModuleHGValid)? zdcModuleAmpLGRefit * 1. : zdcModuleAmp * 1.;
                         
                         zdcModuleHGtoLGAmpRatio = (!zdcModuleHGValid || zdcModuleAmpLGRefit == 0)? -1000. : zdcModuleAmp * 1. / zdcModuleAmpLGRefit; // HG/LG ratio if HG is valid and LG-refit amplitude is nonzero (shouldn't be)
+                        zdcModuleHGtoLGAmpRatioNoNonlinCorr = (!zdcModuleHGValid || zdcModuleAmpLGRefit == 0)? -1000. : zdcModuleAmpNoNonLin * 1. / zdcModuleAmpLGRefit; // HG/LG ratio if HG is valid and LG-refit amplitude is nonzero (shouldn't be)
                         zdcModuleHGtoLGT0Diff = (!zdcModuleHGValid)? -1000. : zdcModuleFitT0 - zdcModuleT0LGRefit;
 
                         zdcModuleChisqEventWeight = calculate_inverse_bin_width(zdcModuleChisq, "module chisq", m_ZdcModuleChisqBinEdges);
@@ -635,9 +649,10 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                         zdcLGInjPulseValidCoarseScan = zdcLGInjPulseValid && injectedPulseCoarseScan;
 
                         if (m_isInjectedPulse){
-                            fill(m_tools[m_ZDCModuleToolIndices.at(side_str).at(module_str)], zdcModuleAmp, zdcModuleMaxADC, zdcModuleAmpToMaxADCRatio, zdcModuleFract, zdcUncalibSumCurrentSide, zdcEnergySumCurrentSide, zdcModuleTime, zdcModuleFitT0, zdcModuleChisq, zdcModuleChisqOverAmp, zdcModuleChisqEventWeight, zdcModuleChisqOverAmpEventWeight, zdcModuleCalibAmp, zdcModuleCalibTime, zdcModuleLG, zdcModuleHGValid, zdcModuleAmpLGRefit, zdcModuleT0LGRefit, zdcModuleT0SubLGRefit, zdcModuleChisqLGRefit, zdcModuleLGAmp, zdcModuleHGtoLGAmpRatio, zdcModuleHGtoLGT0Diff, zdcModuleFractionValid, zdcModuleTimeValid, zdcModuleHGTimeValid, zdcModuleLGTimeValid, injectedPulseInputVoltage, zdcHGInjPulseValidFineScan, zdcHGInjPulseValidCoarseScan, zdcLGInjPulseValidFineScan, zdcLGInjPulseValidCoarseScan, lumiBlock, bcid);
+                            if (m_isStandalone) injectedPulseInputVoltage = zdcModuleAmp * 1. / 25000.; // no LB in standalone --> fill dummy histograms 
+                            fill(m_tools[m_ZDCModuleToolIndices.at(side_str).at(module_str)], zdcModuleAmp, zdcModuleMaxADC, zdcModuleMaxADCHG, zdcModuleMaxADCLG, zdcModuleAmpToMaxADCRatio, zdcModuleFract, zdcUncalibSumCurrentSide, zdcEnergySumCurrentSide, zdcModuleTime, zdcModuleFitT0, zdcModuleChisq, zdcModuleChisqOverAmp, zdcModuleChisqEventWeight, zdcModuleChisqOverAmpEventWeight, zdcModuleCalibAmp, zdcModuleCalibTime, zdcModuleLG, zdcModuleHGValid, zdcModuleAmpLGRefit, zdcModuleT0LGRefit, zdcModuleT0SubLGRefit, zdcModuleChisqLGRefit, zdcModuleLGAmp, zdcModuleHGtoLGAmpRatio, zdcModuleHGtoLGAmpRatioNoNonlinCorr, zdcModuleHGtoLGT0Diff, zdcModuleFractionValid, zdcModuleTimeValid, zdcModuleHGTimeValid, zdcModuleLGTimeValid, injectedPulseInputVoltage, zdcHGInjPulseValidFineScan, zdcHGInjPulseValidCoarseScan, zdcLGInjPulseValidFineScan, zdcLGInjPulseValidCoarseScan, lumiBlock, bcid);
                         }else{
-                            fill(m_tools[m_ZDCModuleToolIndices.at(side_str).at(module_str)], zdcModuleAmp, zdcModuleMaxADC, zdcModuleAmpToMaxADCRatio, zdcModuleFract, zdcUncalibSumCurrentSide, zdcEnergySumCurrentSide, zdcAbove20NCurrentSide, zdcEnergyAboveModuleFractCut, zdcModuleTime, zdcModuleFitT0, zdcModuleChisq, zdcModuleChisqOverAmp, zdcModuleChisqEventWeight, zdcModuleChisqOverAmpEventWeight, zdcModuleCalibAmp, zdcModuleCalibTime, zdcModuleLG, zdcModuleHGValid, zdcModuleAmpLGRefit, zdcModuleT0LGRefit, zdcModuleT0SubLGRefit, zdcModuleChisqLGRefit, zdcModuleHGtoLGAmpRatio, zdcModuleHGtoLGT0Diff, zdcModuleFractionValid, zdcModuleTimeValid, zdcModuleHGTimeValid, zdcModuleLGTimeValid, lumiBlock, bcid);
+                            fill(m_tools[m_ZDCModuleToolIndices.at(side_str).at(module_str)], zdcModuleAmp, zdcModuleMaxADC, zdcModuleMaxADCHG, zdcModuleMaxADCLG, zdcModuleAmpToMaxADCRatio, zdcModuleFract, zdcUncalibSumCurrentSide, zdcEnergySumCurrentSide, zdcAbove20NCurrentSide, zdcEnergyAboveModuleFractCut, zdcModuleTime, zdcModuleFitT0, zdcModuleChisq, zdcModuleChisqOverAmp, zdcModuleChisqEventWeight, zdcModuleChisqOverAmpEventWeight, zdcModuleCalibAmp, zdcModuleCalibTime, zdcModuleLG, zdcModuleHGValid, zdcModuleAmpLGRefit, zdcModuleT0LGRefit, zdcModuleT0SubLGRefit, zdcModuleChisqLGRefit, zdcModuleHGtoLGAmpRatio, zdcModuleHGtoLGAmpRatioNoNonlinCorr, zdcModuleHGtoLGT0Diff, zdcModuleFractionValid, zdcModuleTimeValid, zdcModuleHGTimeValid, zdcModuleLGTimeValid, lumiBlock, bcid);
                         }
                     }
                 } 

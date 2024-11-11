@@ -538,14 +538,14 @@ double ZDCPulseAnalyzer::getAmplitudeCorrection(bool highGain)
     float invNLCorr = 1.0;
     float nlPolyArg = (amplCorr - m_nonLinCorrRefADC) / m_nonLinCorrRefScale;
 	
-    if (m_useLowGain) {
+    if (highGain) {
       for (size_t power = 1; power <= m_nonLinCorrParamsHG.size(); power++) {
-	invNLCorr += m_nonLinCorrParamsHG[power - 1]*pow(nlPolyArg, power);
+	      invNLCorr += m_nonLinCorrParamsHG[power - 1]*pow(nlPolyArg, power);
       }
     }
     else {
       for (size_t power = 1; power <= m_nonLinCorrParamsLG.size(); power++) {
-	invNLCorr += m_nonLinCorrParamsLG[power - 1]*pow(nlPolyArg, power);
+	      invNLCorr += m_nonLinCorrParamsLG[power - 1]*pow(nlPolyArg, power);
       }
     }
 
@@ -1616,8 +1616,9 @@ void ZDCPulseAnalyzer::DoFit(bool refitLG)
   }
   else {
     m_evtLGRefit = true;
-    m_refitLGAmpl = fitWrapper->GetAmplitude();
-    m_refitLGAmpError = fitWrapper->GetAmpError();
+    m_refitLGFitAmpl = fitWrapper->GetAmplitude();
+    m_refitLGAmpl = fitWrapper->GetAmplitude() * m_gainFactorLG;
+    m_refitLGAmpError = fitWrapper->GetAmpError() * m_gainFactorLG;
     m_refitLGChisq = result_ptr->Chi2();
     m_refitLGTime = fitWrapper->GetTime();
     m_refitLGTimeSub = m_refitLGTime - t0Initial;
@@ -1882,8 +1883,9 @@ void ZDCPulseAnalyzer::DoFitCombined(bool refitLG)
   }
   else {
     m_evtLGRefit = true;
-    m_refitLGAmpl = fitWrapper->GetAmplitude();
-    m_refitLGAmpError = fitWrapper->GetAmpError();
+    m_refitLGFitAmpl = fitWrapper->GetAmplitude();
+    m_refitLGAmpl = fitWrapper->GetAmplitude() * m_gainFactorLG;
+    m_refitLGAmpError = fitWrapper->GetAmpError() * m_gainFactorLG;
     m_refitLGChisq = chi2;
     m_refitLGTime = fitWrapper->GetTime();
     m_refitLGTimeSub = m_refitLGTime - t0Initial;
