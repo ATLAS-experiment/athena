@@ -6,7 +6,7 @@ if __name__=="__main__":
     parser.add_argument("--noMonitorPlots", help="If set to true, there're no monitoring plots", default = False,
                                             action='store_true')
     parser.set_defaults(nEvents = -1)
-    parser.set_defaults(noMM=True)
+    #parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)
     parser.set_defaults(outRootFile="HoughTransformTester.root")
     #parser.set_defaults(condTag="CONDBR2-BLKPA-2023-02")
