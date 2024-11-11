@@ -124,18 +124,22 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
 
     # decorate the eFEX TOBs 
     if flags.Trigger.L1.doeFex and isNotPool:
-        from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import eFexTOBDecoratorCfg
         # Temporary fix to ensure the L1 TOBs are decoded by the Trigger
         from TrigDecisionTool.TrigDecisionToolConfig import getRun3NavigationContainerFromInput
         ExtraInputs = [('xAOD::TrigCompositeContainer', 'StoreGateSvc+'+getRun3NavigationContainerFromInput(flags))]
-        DecoratorAlgo = eFexTOBDecoratorCfg(flags,'eFexTOBDecorator','L1_eEMRoI','L1_eTauRoI',ExtraInputs)
-        acc.merge(DecoratorAlgo)
-        DecoratorAlgoSim = eFexTOBDecoratorCfg(flags,'eFexTOBDecoratorSim','L1_eEMRoISim','L1_eTauRoIAltSim')
-        acc.merge(DecoratorAlgoSim)
+        acc.addEventAlgo( CompFactory.LVL1.eFexTOBDecorator('eFexTOBDecorator',
+                                                            eFexEMRoIContainer = 'L1_eEMRoI',
+                                                            eFexTauRoIContainer = 'L1_eTauRoI',
+                                                            ExtraInputs=ExtraInputs) )
+        acc.addEventAlgo( CompFactory.LVL1.eFexTOBDecorator('eFexTOBDecoratorSim',
+                                                            eFexEMRoIContainer = 'L1_eEMRoISim',
+                                                            eFexTauRoIContainer = 'L1_eTauRoIAltSim',
+                                                            ExtraInputs=[]) )
     
-    if fillSuperCells :   
-        from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import eFexTOBSuperCellDecoratorCfg    
-        acc.merge(eFexTOBSuperCellDecoratorCfg(flags,'eFexTOBSuperCellDecoratorSim','L1_eEMRoISim','L1_eTauxRoISim'))
+    if fillSuperCells :
+        acc.addEventAlgo( CompFactory.LVL1.eFexTOBSuperCellDecorator('eFexTOBSuperCellDecoratorSim',
+                                                                     eFexEMRoIContainer = 'L1_eEMRoISim',
+                                                                     eFexTauRoIContainer = 'L1_eTauxRoISim') )
 
     # set up the slimming helper
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
