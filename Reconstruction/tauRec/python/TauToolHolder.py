@@ -61,7 +61,7 @@ def TauAxisCfg(flags):
     TauAxisSetter = CompFactory.getComp("TauAxisSetter")
     TauAxisSetter = TauAxisSetter(  name = _name,
                                     ClusterCone = 0.2,
-                                    VertexCorrection = True )
+                                    VertexCorrection = flags.Tau.doVertexCorrection )
 
     result.setPrivateTools(TauAxisSetter)
     return result
@@ -108,8 +108,6 @@ def TauTrackFinderCfg(flags):
                                     Key_LargeD0TrackInputContainer = (flags.Tau.ActiveConfig.LargeD0TrackCollection if flags.Tau.associateLRT else ""),
                                     TrackToVertexIPEstimator = result.popToolsAndMerge(AtlasTrackToVertexIPEstimatorCfg(flags)),
                                     inEleRM = flags.Tau.ActiveConfig.inTauEleRM,
-                                    #maxDeltaZ0wrtLeadTrk = 2, #in mm
-                                    #removeTracksOutsideZ0wrtLeadTrk = True
     )
     result.setPrivateTools(TauTrackFinder)
     return result
@@ -200,7 +198,7 @@ def CellVariablesCfg(flags):
 
     TauCellVariables = CompFactory.getComp("TauCellVariables")
     TauCellVariables = TauCellVariables(name = _name,
-                                        VertexCorrection = True)
+                                        VertexCorrection = flags.Tau.doVertexCorrection)
 
     result.setPrivateTools(TauCellVariables)
     return result
@@ -215,7 +213,7 @@ def ElectronVetoVarsCfg(flags):
 
     TauElectronVetoVariables = CompFactory.getComp("TauElectronVetoVariables")
     TauElectronVetoVariables = TauElectronVetoVariables(name = _name,
-                                                        VertexCorrection = True,
+                                                        VertexCorrection = flags.Tau.doVertexCorrection,
                                                         ParticleCaloExtensionTool = result.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags)),
                                                         tauEVParticleCache = getParticleCache(flags))
 
@@ -694,7 +692,7 @@ def MvaTESVariableDecoratorCfg(flags):
     MvaTESVariableDecorator = MvaTESVariableDecorator(name = _name,
                                                       Key_vertexInputContainer = flags.Tau.ActiveConfig.VertexCollection,
                                                       EventShapeKey = flags.Tau.ActiveConfig.EventShapeCollection,
-                                                      VertexCorrection = True)
+                                                      VertexCorrection = flags.Tau.doVertexCorrection)
     result.setPrivateTools(MvaTESVariableDecorator)
     return result
 
@@ -718,7 +716,7 @@ def TauIDVarCalculatorCfg(flags):
 
     TauIDVarCalculator = CompFactory.getComp("TauIDVarCalculator")    
     myTauIDVarCalculator = TauIDVarCalculator(name=_name,
-                                              VertexCorrection = True)
+                                              VertexCorrection = flags.Tau.doVertexCorrection)
 
     result.setPrivateTools(myTauIDVarCalculator)
     return result
@@ -738,7 +736,7 @@ def TauJetRNNEvaluatorCfg(flags):
                                               MaxTracks = 10,
                                               MaxClusters = 6,
                                               MaxClusterDR = 1.0,
-                                              VertexCorrection = True,
+                                              VertexCorrection = flags.Tau.doVertexCorrection,
                                               InputLayerScalar = "scalar",
                                               InputLayerTracks = "tracks",
                                               InputLayerClusters = "clusters",
@@ -793,7 +791,7 @@ def TauGNNEvaluatorCfg(flags, version=0):
                                               MaxClusters = flags.Tau.GNTauMaxClusters[version],
                                               MaxClusterDR = 15.0,
                                               MinTauPt = flags.Tau.MinPtDAOD,
-                                              VertexCorrection = True,
+                                              VertexCorrection = flags.Tau.doVertexCorrection,
                                               DecorateTracks = False,
                                               InputLayerScalar = "tau_vars",
                                               InputLayerTracks = "track_vars",
@@ -837,7 +835,7 @@ def TauEleRNNEvaluatorCfg(flags):
                                               MaxTracks = 10,
                                               MaxClusters = 6,
                                               MaxClusterDR = 1.0,
-                                              VertexCorrection = True,
+                                              VertexCorrection = flags.Tau.doVertexCorrection,
                                               InputLayerScalar = "scalar",
                                               InputLayerTracks = "tracks",
                                               InputLayerClusters = "clusters",
