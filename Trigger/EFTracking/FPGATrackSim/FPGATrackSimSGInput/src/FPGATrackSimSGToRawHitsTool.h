@@ -80,7 +80,7 @@ private:
   Gaudi::Property<bool>        m_readTruthTracks { this, "ReadTruthTracks", true, "flag to enable the truth tracking save" }; 
   Gaudi::Property<bool>        m_readOfflineTracks { this, "ReadOfflineTracks", true, "flag to enable the offline tracking save" };
   Gaudi::Property<bool>        m_UseNominalOrigin { this, "UseNominalOrigin", false, "if true truth values are always with respect to (0,0,0)" };
-  Gaudi::Property<double>      m_maxEta { this, "maxEta", 3.3 };
+  Gaudi::Property<double>      m_maxEta { this, "maxEta", 5.0 };
   Gaudi::Property<double>      m_minPt { this, "minPt", .8*CLHEP::GeV };
 
   //internal pointers

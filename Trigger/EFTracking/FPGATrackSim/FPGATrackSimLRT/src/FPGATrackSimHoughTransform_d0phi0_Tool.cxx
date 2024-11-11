@@ -60,7 +60,7 @@ StatusCode FPGATrackSimHoughTransform_d0phi0_Tool::initialize()
   // Retrieve info
   ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
   ATH_CHECK(m_FPGATrackSimMapping.retrieve());
-  m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers();
+  m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
 
   // Error checking
   bool ok = false;
@@ -396,7 +396,7 @@ void FPGATrackSimHoughTransform_d0phi0_Tool::matchIdealGeoSector(FPGATrackSimRoa
       std::unique_ptr<FPGATrackSimHit> wcHit = std::unique_ptr<FPGATrackSimHit>(new FPGATrackSimHit());
       wcHit->setHitType(HitType::wildcard);
       wcHit->setLayer(il);
-      wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st()->getDetType(il));
+      wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st(0)->getDetType(il));
       r.setHits(il,std::vector<std::shared_ptr<const FPGATrackSimHit>>({std::move(wcHit)}));
 
     }

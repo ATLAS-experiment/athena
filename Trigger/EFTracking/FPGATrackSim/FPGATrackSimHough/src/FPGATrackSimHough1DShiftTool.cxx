@@ -56,7 +56,7 @@ StatusCode FPGATrackSimHough1DShiftTool::initialize()
     // Retrieve info
     if (m_idealGeoRoads || m_useSectors) ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
-    m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers();
+    m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
 
     // Error checking
     if (m_phiMin >= m_phiMax || m_phiBins == 0u) {
@@ -523,7 +523,7 @@ void FPGATrackSimHough1DShiftTool::matchIdealGeoSector(FPGATrackSimRoad & r) con
             std::unique_ptr<FPGATrackSimHit> wcHit = std::make_unique<FPGATrackSimHit>();
             wcHit->setHitType(HitType::wildcard);
             wcHit->setLayer(il);
-            wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st()->getDetType(il));
+            wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st(0)->getDetType(il));
             std::vector<std::shared_ptr<const FPGATrackSimHit>> wcHits;
             wcHits.push_back(std::move(wcHit));
             r.setHits(il,std::move(wcHits));

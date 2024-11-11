@@ -46,7 +46,7 @@ StatusCode FPGATrackSimEtaPatternFilterTool::initialize()
     // Retrieve info
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
     if (m_doEtaPatternConsts) ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
-    m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers();
+    m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
 
     // Check inputs
     if (m_pattern_file_path.empty())
@@ -278,7 +278,7 @@ FPGATrackSimRoad FPGATrackSimEtaPatternFilterTool::buildRoad(std::pair<EtaPatter
         if (r.getNHits_layer().at(lyr) == 0) {
             std::shared_ptr<FPGATrackSimHit> wcHit = std::make_shared<FPGATrackSimHit>();
             wcHit->setHitType(HitType::wildcard);
-            wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st()->getDetType(lyr));
+            wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st(0)->getDetType(lyr));
             wcHit->setLayer(lyr);
             r.setHits(lyr, std::vector<std::shared_ptr<const FPGATrackSimHit>>{wcHit});
         }

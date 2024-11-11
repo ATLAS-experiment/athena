@@ -55,7 +55,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
             ATH_MSG_INFO('\t' << line);
         }
     }
-
     ATH_CHECK(m_roadFinderTool.retrieve());
     ATH_CHECK(m_LRTRoadFilterTool.retrieve(EnableTool{m_doLRT}));
     ATH_CHECK(m_LRTRoadFinderTool.retrieve(EnableTool{m_doLRT}));
@@ -175,7 +174,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     auto mon_nroads_1st = Monitored::Scalar<unsigned>("nroads_1st", roads_1st.size());
     for (auto const &road : roads_1st) {
       unsigned bitmask = road->getHitLayers();
-      for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers(); l++) {
+      for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers(); l++) {
         if (bitmask & (1 << l)) {
             auto mon_layerIDs_1st = Monitored::Scalar<unsigned>("layerIDs_1st",l);
             Monitored::Group(m_monTool,mon_layerIDs_1st);

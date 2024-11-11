@@ -5,9 +5,10 @@ GEO_TAG="ATLAS-P2-RUN4-03-00-00"
 RDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/RDO/reg0_singlemu.root"
 
 # instructions on how to change version of files can be found in https://twiki.cern.ch/twiki/bin/view/Atlas/EFTrackingSoftware
-MAP_VERSION="v0.11"
+MAP_VERSION="v0.21"
 export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/:$CALIBPATH
-MAPS="maps_9L/DataPreparation/${MAP_VERSION}/"
+MAPS="maps_9L/OtherFPGAPipelines/${MAP_VERSION}"
+
 
 if [ -z $1 ]; then
     xAODOutput="FPGATrackSimCITestAOD.root"

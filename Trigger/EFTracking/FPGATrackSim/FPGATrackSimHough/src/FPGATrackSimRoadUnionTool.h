@@ -17,6 +17,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "FPGATrackSimHough/IFPGATrackSimRoadFinderTool.h"
+#include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 
 
 // This class is merely a lightweight wrapper around multiple road finder tools.
@@ -41,10 +42,14 @@ class FPGATrackSimRoadUnionTool : public extends <AthAlgTool, IFPGATrackSimRoadF
 
         ToolHandleArray<IFPGATrackSimRoadFinderTool> const & tools() const { return m_tools; }
 
+        virtual int getSubRegion() const override{return -1;}
     private:
 
         ///////////////////////////////////////////////////////////////////////
         // Handles
+        
+        ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
+
 
         ToolHandleArray<IFPGATrackSimRoadFinderTool> m_tools;
 };

@@ -55,7 +55,7 @@ StatusCode FPGATrackSimConstGenAlgo::initialize()
     ATH_MSG_DEBUG("initialize()");
     ATH_MSG_DEBUG("Are we going to dump missing hist constants? " << m_dumpMissingHitsConstants);
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
-    m_pmap = (m_isSecondStage ? m_FPGATrackSimMapping->PlaneMap_2nd() : m_FPGATrackSimMapping->PlaneMap_1st() );
+    m_pmap = (m_isSecondStage ? m_FPGATrackSimMapping->PlaneMap_2nd() : m_FPGATrackSimMapping->PlaneMap_1st(0) );
 
     ATH_CHECK(m_tHistSvc.retrieve());
     if (m_Monitor) ATH_CHECK(bookHistograms());
@@ -78,8 +78,8 @@ StatusCode FPGATrackSimConstGenAlgo::initialize()
 
     if (static_cast<size_t>(m_nLayers) == m_FPGATrackSimMapping->PlaneMap_2nd()->getNLogiLayers())
         m_pmap = m_FPGATrackSimMapping->PlaneMap_2nd();
-    else if (static_cast<size_t>(m_nLayers) == m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers())
-        m_pmap = m_FPGATrackSimMapping->PlaneMap_1st();
+    else if (static_cast<size_t>(m_nLayers) == m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers())
+        m_pmap = m_FPGATrackSimMapping->PlaneMap_1st(0);
     else
         ATH_MSG_ERROR("nLayers " << m_nLayers << " doesn't match any pmap");
 

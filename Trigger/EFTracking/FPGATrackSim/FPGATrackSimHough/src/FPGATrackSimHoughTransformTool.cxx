@@ -59,7 +59,7 @@ StatusCode FPGATrackSimHoughTransformTool::initialize()
   // Retrieve info
   if (m_idealGeoRoads || m_useSectors) ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
   ATH_CHECK(m_FPGATrackSimMapping.retrieve());
-  m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers();
+  m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
 
   // Error checking
   // TODO check bounds are set correctly
@@ -140,19 +140,24 @@ StatusCode FPGATrackSimHoughTransformTool::getRoads(const std::vector<std::share
 {
   roads.clear();
   m_roads.clear();
-
   m_image = createImage(hits);
   if (!m_conv.empty()) m_image = convolute(m_image);
 
   for (unsigned y = 0; y < m_imageSize_y; y++)
+  {
     for (unsigned x = 0; x < m_imageSize_x; x++)
+    {
       if (passThreshold(m_image, x, y)) {
 	      if (m_traceHits)
+          {
 	        addRoad(m_image(y, x).second, x, y);
-	      else
+          }
+	      else{
 	        addRoad(hits, x, y);
+          }
 	    }
-    
+    }
+  } 
   roads.reserve(m_roads.size());
   for (FPGATrackSimRoad & r : m_roads) roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
     
@@ -167,13 +172,6 @@ FPGATrackSimHoughTransformTool::Image FPGATrackSimHoughTransformTool::createLaye
     {
       if (std::find(layers.begin(), layers.end(), hit->getLayer()) == layers.end()) continue;
 
-      if (m_subRegion >= 0) {
-        // NOTE: uncomment middle piece if we port over 2nd stage functionality.
-        auto* subrmap = /*(m_2ndStage) ? m_FPGATrackSimMapping->SubRegionMap_2nd() :*/ m_FPGATrackSimMapping->SubRegionMap();
-        if (!(subrmap->isInRegion(m_subRegion, *hit))) {
-          continue;
-        }
-      }
 
       // This scans over y (pT) because that is more efficient in memory, in C.
       // Unknown if firmware will want to scan over x instead.
@@ -401,7 +399,7 @@ void FPGATrackSimHoughTransformTool::matchIdealGeoSector(FPGATrackSimRoad & r) c
       std::shared_ptr<FPGATrackSimHit> wcHit = std::make_shared<FPGATrackSimHit>();
       wcHit->setHitType(HitType::wildcard);
       wcHit->setLayer(il);
-      wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st()->getDetType(il));
+      wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st(0)->getDetType(il));
       std::vector<std::shared_ptr<const FPGATrackSimHit>> wcHits;
       wcHits.emplace_back(std::move(wcHit));
       r.setHits(il,std::move(wcHits));
@@ -472,8 +470,6 @@ void FPGATrackSimHoughTransformTool::addRoad(const std::vector<std::shared_ptr<c
   layer_bitmask_t hitLayers = 0;
   for (const auto & hit : hits)
     {
-      if (m_subRegion >= 0 && !m_FPGATrackSimMapping->SubRegionMap()->isInRegion(m_subRegion, *hit)) continue;
-
       // Find the min/max y bins (after scaling)
       unsigned int y_bin_min = (y / m_binScale[hit->getLayer()]) * m_binScale[hit->getLayer()];
       unsigned int y_bin_max = y_bin_min + m_binScale[hit->getLayer()];

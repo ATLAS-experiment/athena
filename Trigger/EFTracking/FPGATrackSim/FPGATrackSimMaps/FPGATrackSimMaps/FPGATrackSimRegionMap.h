@@ -65,7 +65,7 @@ class FPGATrackSimRegionMap
         ///////////////////////////////////////////////////////////////////////
         // Constructors/Initialization
 
-        FPGATrackSimRegionMap(FPGATrackSimPlaneMap const * pmap, std::string const & filepath);
+        FPGATrackSimRegionMap(const std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> & pmaps, std::string const & filepath);
 
         void loadModuleIDLUT(std::string const & filepath);
 
@@ -74,7 +74,7 @@ class FPGATrackSimRegionMap
         ///////////////////////////////////////////////////////////////////////
         // Simple Getters/Setters
 
-        const FPGATrackSimPlaneMap* getPlaneMap() const { return m_pmap; }
+        const FPGATrackSimPlaneMap* getPlaneMap(int iRegion) const { return m_pmaps.at(iRegion).get(); }
 
         int getNRegions() const { return m_nregions; }
 
@@ -103,8 +103,8 @@ class FPGATrackSimRegionMap
         const std::vector<double>& getAvgRadii(unsigned region) const { return m_radii_map.at(region); };
 
     private:
-
-        const FPGATrackSimPlaneMap *m_pmap = nullptr;
+        std::string m_filepath;
+        std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> const & m_pmaps  ;
         int m_nregions = 0;
 
         std::vector<std::vector<std::vector<FPGATrackSimRegionBoundaries>>> m_map;
@@ -118,7 +118,6 @@ class FPGATrackSimRegionMap
 
         ///////////////////////////////////////////////////////////////////////
         // Helper Functions
-
         void allocateMap(std::ifstream & fin);
         void readRegion(std::ifstream & fin, int expected_region);
 };

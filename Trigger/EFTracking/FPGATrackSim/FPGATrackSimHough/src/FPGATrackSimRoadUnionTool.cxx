@@ -9,7 +9,22 @@
 
 
 #include "FPGATrackSimRoadUnionTool.h"
+//one of the includes are needed below or all of them dont know for sure
+#include "FPGATrackSimObjects/FPGATrackSimTypes.h"
+#include "FPGATrackSimObjects/FPGATrackSimConstants.h"
+#include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
+#include "FPGATrackSimObjects/FPGATrackSimHit.h"
+#include "FPGATrackSimObjects/FPGATrackSimConstants.h"
+#include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
+#include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
+#include "FPGATrackSimMaps/FPGATrackSimRegionMap.h"
+#include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"
+#include "FPGATrackSimBanks/FPGATrackSimSectorBank.h"
+#include "FPGATrackSimHoughTransformTool.h"
 
+#include <sstream>
+#include <cmath>
+#include <algorithm>
 
 FPGATrackSimRoadUnionTool::FPGATrackSimRoadUnionTool(const std::string& algname, const std::string &name, const IInterface *ifc) :
     base_class(algname, name, ifc),
@@ -33,16 +48,40 @@ StatusCode FPGATrackSimRoadUnionTool::initialize()
     return StatusCode::SUCCESS;
 }
 
-
+//TODO this tool should be fither
 StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) 
 {
+    
+    ATH_CHECK(m_FPGATrackSimMapping.retrieve());
+    //makes a vector of slices that have a vector of hits assiociated with that slice
+    std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> sliceHits(m_tools.size());
+
+    const FPGATrackSimPlaneMap *pmap = nullptr;
+    int toolNum = 0;//same as sliceNum
+    for (auto & tool : m_tools)
+    {
+        pmap = m_FPGATrackSimMapping->PlaneMap_1st(toolNum);
+        auto* subrmap = m_FPGATrackSimMapping->SubRegionMap();
+        for (auto & iHit:hits)
+        {
+            
+            std::shared_ptr<FPGATrackSimHit> hitCopy = std::make_shared<FPGATrackSimHit>(*iHit);
+            pmap->map(*hitCopy);
+            if ((subrmap->isInRegion(tool->getSubRegion(), *hitCopy))) {
+                sliceHits[toolNum].push_back(hitCopy);
+            }
+
+        }   
+        toolNum++;  
+    }
     roads.clear();
     for (auto & tool : m_tools)
     {
         std::vector<std::shared_ptr<const FPGATrackSimRoad>> r;
-        ATH_CHECK(tool->getRoads(hits, r));
+        ATH_CHECK(tool->getRoads(sliceHits[tool->getSubRegion()], r));
         roads.insert(roads.end(), std::make_move_iterator(r.begin()), std::make_move_iterator(r.end()));
     }
+
 
     return StatusCode::SUCCESS;
 }

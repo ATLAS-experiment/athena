@@ -116,7 +116,7 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
                 continue;
             }
         }
-        else if (m_FPGATrackSimMapping->PlaneMap_1st()->isPixel(layer)) {
+        else if (m_FPGATrackSimMapping->PlaneMap_1st(initial_road->getSubRegion())->isPixel(layer)) {
             continue;
         }
 
@@ -214,7 +214,7 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
             if (strip_hits_in.size() == 0 || strip_hits_out.size() == 0) {
                 std::unique_ptr<FPGATrackSimHit> wcHit = std::make_unique<FPGATrackSimHit>();
                 wcHit->setHitType(HitType::wildcard);
-                wcHit->setDetType(m_isSecondStage ? m_FPGATrackSimMapping->PlaneMap_2nd()->getDetType(layer) : m_FPGATrackSimMapping->PlaneMap_1st()->getDetType(layer));
+                wcHit->setDetType(m_isSecondStage ? m_FPGATrackSimMapping->PlaneMap_2nd()->getDetType(layer) : m_FPGATrackSimMapping->PlaneMap_1st(new_road.getSubRegion())->getDetType(layer));
                 if (strip_hits_in.size() == 0) {
                     wildcard_layer = layer;
                     wcHit->setLayer(wildcard_layer);

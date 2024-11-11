@@ -23,7 +23,9 @@ FPGATrackSimModuleRelabel::FPGATrackSimModuleRelabel(std::string geokey, bool re
 }
 
 bool FPGATrackSimModuleRelabel::remap(FPGATrackSimHit& hit) const {
-
+    if(hit.isRemapped()){
+        return false;
+    }
     // Quick sanity check, if we get here somehow without configuring a valid geokey.
     if (not m_ringIndex) {
         ATH_MSG_ERROR("No configured ring index relabel for geometry " << m_geoKey);
@@ -47,6 +49,7 @@ bool FPGATrackSimModuleRelabel::remap(FPGATrackSimHit& hit) const {
         }
 
     }
+    hit.setRemap();
     return true;
 }
 

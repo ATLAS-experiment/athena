@@ -152,7 +152,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
 
   // for calculating the truth for the entire combination, not just an individual hit
   std::vector<FPGATrackSimMultiTruth> mtv;
-  mtv.reserve( m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers());
+  mtv.reserve( m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers());
 
 
   // now we loop over all the roads. The tree is stored per combination, not per event, so there is an tree index
@@ -172,7 +172,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
 	mtv.clear();
 	
         std::vector<int> const & hit_indices = combs[icomb]; // size nLayers
-        for (unsigned layer = 0; layer < m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers(); layer++)
+        for (unsigned layer = 0; layer < m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers(); layer++)
 	  {
 	    if (hit_indices[layer] >= 0) {
 	      std::shared_ptr<const FPGATrackSimHit> hit = road->getHits(layer)[hit_indices[layer]];

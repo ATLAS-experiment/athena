@@ -6,9 +6,9 @@ GEO_TAG="ATLAS-P2-RUN4-03-00-00"
 export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/:$CALIBPATH
 WRP_EVT=200
 WRAPPER="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/Wrappers/v0.10/FPGATrackSimWrapper.root"
-BANKS="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/banks_9L/v0.10/"
+BANKS="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/banks_9L/v0.20/"
 
-MAPS="maps_9L/OtherFPGAPipelines/v0.10/"
+MAPS="maps_9L/OtherFPGAPipelines/v0.21/"
 
 
 echo "... analysis on wrapper"

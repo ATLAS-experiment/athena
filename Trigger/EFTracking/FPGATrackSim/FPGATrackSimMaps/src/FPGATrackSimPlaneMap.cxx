@@ -23,21 +23,18 @@ using namespace std;
 // Constructor/Desctructor
 ///////////////////////////////////////////////////////////////////////////////
 
-
 FPGATrackSimPlaneMap::FPGATrackSimPlaneMap(const std::string & filepath, unsigned region, unsigned stage, std::vector<int> layerOverrides) :
     m_map(static_cast<int>(SiliconTech::nTechs),
           vector<vector<LayerSection>>(static_cast<int>(DetectorZone::nZones))
     ),
     m_layerOverrides(std::move(layerOverrides))
 {
-    ANA_MSG_INFO("Reading " << filepath);
     ifstream fin(filepath);
     if (!fin.is_open())
     {
         ANA_MSG_FATAL("Couldn't open " << filepath);
         throw ("FPGATrackSimPlaneMap Couldn't open " + filepath);
     }
-
     // Reads the header of the file to resize all the vector members
     allocateMap(fin, stage);
 
@@ -59,7 +56,32 @@ FPGATrackSimPlaneMap::FPGATrackSimPlaneMap(const std::string & filepath, unsigne
     ANA_MSG_INFO("Using " << m_nLogiLayers << " logical layers and " << m_nCoords << " coordinates");
 }
 
+FPGATrackSimPlaneMap::FPGATrackSimPlaneMap(std::ifstream& fin, unsigned region, unsigned stage, std::vector<int> layerOverrides) :
+    m_map(static_cast<int>(SiliconTech::nTechs),
+          vector<vector<LayerSection>>(static_cast<int>(DetectorZone::nZones))
+    ),
+    m_layerOverrides(std::move(layerOverrides))
+{
+    // Reads the header of the file to resize all the vector members
+    allocateMap(fin, stage);
 
+    // Seek to the correct region
+    seek(fin, region);
+
+    // Reads the rest of the file to populate all the member vectors
+    readLayers(fin, stage);
+
+    // Postprocessing on coordinate indices
+    for (uint32_t l = 0; l < m_nLogiLayers; l++)
+    {
+        m_coordOffset[l] = m_nCoords;
+        m_nCoords += m_dimension[l];
+        for (uint32_t i = 0; i < m_dimension[l]; i++)
+            m_coordLayer.push_back(l);
+    }
+
+    ANA_MSG_DEBUG("Using " << m_nLogiLayers << " logical layers and " << m_nCoords << " coordinates");
+}
 // Reads the header of the file to resize all the vector members
 void FPGATrackSimPlaneMap::allocateMap(ifstream & fin, uint32_t stage)
 {
@@ -67,15 +89,18 @@ void FPGATrackSimPlaneMap::allocateMap(ifstream & fin, uint32_t stage)
     vector<int> layerCounts((int)SiliconTech::nTechs * static_cast<int>(DetectorZone::nZones)); // pixel_barrel, pixel_EC, SCT_barrel, SCT_EC
     std::string line, silicon, detReg, layerKey, geoKey;
     bool ok = true;
-
     // Read Geometry Version
     ok = ok && getline(fin, line);
+    while (line.empty() || line[0] == '!')
+    {
+        ok = ok && getline(fin, line);
+    }
     ANA_MSG_VERBOSE(line);
     istringstream sline(line);
     ok = ok && (sline >> geoKey);
     m_diskIndex = Remappings::diskIndices(geoKey);
 
-    ANA_MSG_INFO("Allocating map for geometry " << geoKey <<" diskIndex size="<<m_diskIndex.size());
+    ANA_MSG_DEBUG("Allocating map for geometry " << geoKey <<" diskIndex size="<<m_diskIndex.size());
     m_moduleRelabel = std::make_unique<FPGATrackSimModuleRelabel>(geoKey, false);
 
 
@@ -117,6 +142,7 @@ void FPGATrackSimPlaneMap::allocateMap(ifstream & fin, uint32_t stage)
         ok = ok && ( (i < (nHeaderLines/2) && silicon == "pixel") || (i >= (nHeaderLines/2) && silicon == "SCT") );
         ok = ok && ( (i % (nHeaderLines/2) == 0 && detReg == "barrel") || (i % (nHeaderLines/2) != 0 && (detReg == "endcap+" || detReg == "endcap-")) );
     }
+    
     if (!ok) ANA_MSG_FATAL("Error reading layer counts");
     m_nDetLayers = std::accumulate(layerCounts.begin(), layerCounts.end(), 0);
 
@@ -221,7 +247,6 @@ void FPGATrackSimPlaneMap::readLayers(ifstream & fin, uint32_t stage)
             m_map[sil][BEC][physLayer].section = m_layerInfo[logiLayer].size(); // i.e. index into m_layerInfo[logiLayer] entry below
             m_layerInfo[logiLayer].push_back({ siTech, zone, physLayer, physDisk, stereo});
         }
-
         if (m_nDetLayers == linesRead) break;
     }
 
@@ -236,17 +261,28 @@ void FPGATrackSimPlaneMap::readLayers(ifstream & fin, uint32_t stage)
 
 void FPGATrackSimPlaneMap::map(FPGATrackSimHit & hit) const
 {
-    if (hit.isMapped()) return;
+    //TODO WW check of isMapped commented out this might work?
     
     // re-assign layers in the pixel endcap to be each individual disk
     // technically this returns a success/fail but I'm not sure we need it?
-    m_moduleRelabel->remap(hit);
-
+    // This should only happen if the hit is not already mapped.
+    if (!hit.isMapped()){
+        if(!hit.isRemapped()){
+            m_moduleRelabel->remap(hit);
+        }
+    }
     const LayerSection &pinfo = getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer());
     hit.setSection(pinfo.section);
     hit.setLayer(pinfo.layer);
     if (!hit.isMapped()) // failsafe if for some reason someone calls this on a clustered hit again, or something
         hit.setHitType(HitType::mapped);
+
+    // Special case if this is a spacepoint (now possible because slicing engine happens after SP formation).
+    if (hit.getHitType() == HitType::spacepoint) {
+        const LayerSection &pinfo_sp = getLayerSection(hit.getPairedDetType(), hit.getPairedDetZone(), hit.getPairedPhysLayer());
+        hit.setPairedSection(pinfo_sp.section);
+        hit.setPairedLayer(pinfo_sp.layer);
+    }
 }
 
 

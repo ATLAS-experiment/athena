@@ -122,6 +122,13 @@ public:
     unsigned getPairedPhiModule() const { return m_pairedPhiModule; }
     unsigned getPairedSection() const { return m_pairedSection; }
     unsigned getPairedLayer() const { return m_pairedLayer; }
+    unsigned getPairedPhysLayer() const { return m_pairedPhysLayer; }
+    DetectorZone getPairedDetZone() const { return m_pairedDetZone; }
+    SiliconTech getPairedDetType() const { return m_pairedDetType; }
+
+    // These setters are used by FPGATrackSimPlaneMap to map hits that are SPs.
+    void setPairedLayer(unsigned v) { m_pairedLayer = v; }
+    void setPairedSection(unsigned v) { m_pairedSection = v; }
 
     // --- Global Coordinates ---
     void setX(float v) { m_originalX = m_x; m_x = v; }
@@ -173,6 +180,10 @@ public:
 
     friend std::ostream& operator<<(std::ostream&, const FPGATrackSimHit&);
 
+    //remap interface
+    bool isRemapped() const;
+    void setRemap();
+
 protected:
 
     // --- Hit Type ---
@@ -194,7 +205,9 @@ protected:
     // isMapped() should return true to access these members
     int m_layer = -1;   // Logical layer this hit is on
     int m_section = -1; // Index of detector element in the logical layer (see FPGATrackSimPlaneMap.h)
-
+    
+    // --- Map Tag
+    bool m_isRemapped = false;
     // --- Local Coordinates ---
     int m_phiIndex = -1; // phi index for pixel, strip for strip
     int m_etaIndex = -1; // eta index for pixel, row for strip
@@ -215,6 +228,13 @@ protected:
     // These are the coordinates of the inner layer in a SP
     unsigned m_pairedPhiModule = -1;
     int m_pairedEtaModule = -1;
+
+    // These are the unmapped / physical detector coordinates of the SP inner layer.
+    DetectorZone m_pairedDetZone = DetectorZone::undefined; // barrel / posEC / negEC (0,1,2)
+    SiliconTech m_pairedDetType = SiliconTech::undefined;        // strip / pixel
+    unsigned m_pairedPhysLayer = 0;
+
+    // These are the mapped versions of the inner layer in a SP.
     unsigned m_pairedSection = 0;
     unsigned m_pairedLayer = 0;
 
@@ -242,7 +262,7 @@ protected:
 
     int m_roadID = 0;
 
-    ClassDefNV(FPGATrackSimHit, 8);
+    ClassDefNV(FPGATrackSimHit, 9);
 };
 
 // Container of <FPGATrackSimHit const *>

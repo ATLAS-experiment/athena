@@ -30,7 +30,7 @@ StatusCode FPGATrackSimDataFlowTool::initialize()
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
     ATH_CHECK(m_evtSel.retrieve());
 
-    m_nLayers_1st = m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers();
+    m_nLayers_1st = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
 
     m_dataFlowTxt.open(m_dataFlowTxtName);
     m_dataFlowTeX.open(m_dataFlowTeXName);
@@ -46,16 +46,12 @@ StatusCode FPGATrackSimDataFlowTool::calculateDataFlow(FPGATrackSimDataFlowInfo*
                                               const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_2nd, std::vector<FPGATrackSimTrack> const & tracks_2nd)
 {
     info->nMappedHits_1st_layer.resize(m_nLayers_1st);
-    for (FPGATrackSimHit const & hit : header_1st->towers().at(0).hits()) {
-        info->nMappedHits_1st_layer[hit.getLayer()]++;
+    for (int i=0; i<header_1st->towers().at(0).nHits(); i++) {
         info->nMappedHits_1st_total++;
     }
 
     info->nClusters_1st_layer.resize(m_nLayers_1st);
-    for (FPGATrackSimCluster const & cluster : clusters_1st) {
-        info->nClusters_1st_layer[cluster.getClusterEquiv().getLayer()]++;
-        info->nClusters_1st_total = clusters_1st.size();
-    }
+    info->nClusters_1st_total = clusters_1st.size();
 
     info->nRoads_1st_total = roads_1st.size();
     for (const auto & r : roads_1st) {

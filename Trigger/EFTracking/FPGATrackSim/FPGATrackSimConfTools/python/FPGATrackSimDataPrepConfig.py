@@ -161,7 +161,7 @@ def FPGATrackSimMappingCfg(flags):
     mappingSvc.mappingType = "FILE"
     mappingSvc.rmap = flags.Trigger.FPGATrackSim.mapsDir+"/"+getBaseName(flags)+".rmap" # we need more configurability here i.e. file choice should depend on some flag
     mappingSvc.subrmap =  flags.Trigger.FPGATrackSim.mapsDir+"/"+getBaseName(flags)+".subrmap" # presumably also here we want to be able to change the slices definition file
-    mappingSvc.pmap = flags.Trigger.FPGATrackSim.mapsDir+"/pmap"
+    mappingSvc.pmap = flags.Trigger.FPGATrackSim.mapsDir+"/"+getBaseName(flags)+".pmap"
     mappingSvc.modulemap = flags.Trigger.FPGATrackSim.mapsDir+"/moduleidmap"
     mappingSvc.radiiFile = flags.Trigger.FPGATrackSim.mapsDir + "/"+getBaseName(flags)+"_radii.txt"
     mappingSvc.NNmap = ""
@@ -381,7 +381,6 @@ def runDataPrepChain():
     flags.PhysVal.IDTPM.TrkAnaDoubleRatio.TrigTrkKey = f"{FinalDataPrepTrackChainxAODTracksKeyPrefix}TrackParticles"
 
     flags.PhysVal.doExample = False
-    
     ############################################
     flags.Concurrency.NumThreads=1
     flags.Scheduler.ShowDataDeps=True

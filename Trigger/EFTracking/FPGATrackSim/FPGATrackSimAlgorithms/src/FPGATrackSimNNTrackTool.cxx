@@ -53,7 +53,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(const std::vector<std::shared_ptr<
     layer_bitmask_t missing_mask = 0;
 
     // Just used to get number of layers considered
-    const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_1st();
+    const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_1st(0);
 
     // Create a template track with common parameters filled already for
     // initializing below
@@ -194,7 +194,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(const std::vector<std::shared_ptr<
 // Borrowed same code from TrackFitter - probably a nicer way to inherit instead
 void FPGATrackSimNNTrackTool::compute_truth(FPGATrackSimTrack &t) const {
   std::vector<FPGATrackSimMultiTruth> mtv;
-  const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_1st();
+  const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_1st(0);
 
   for (unsigned layer = 0; layer < planeMap->getNLogiLayers(); layer++) {
     if (t.getHitMap() & (1 << planeMap->getCoordOffset(layer)))

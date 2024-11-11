@@ -248,6 +248,34 @@ StatusCode FPGATrackSimMapMakerAlg::writePmapAndRmap(std::vector<FPGATrackSimHit
     m_pmap.close();
     m_rmap.close();
 
+    // Step 1: Read the entire contents of the file
+    std::ifstream inputFile(pmap_path);
+    if (!inputFile) {
+        ATH_MSG_ERROR("Error: Unable to open file for reading: " << pmap_path);
+        return StatusCode::FAILURE;
+    }
+
+    std::ostringstream buffer;
+    buffer << inputFile.rdbuf();  // Reading the entire file into the stringstream
+    std::string fileContent = buffer.str();
+    inputFile.close();
+
+    // Step 2: Concatenate the content n times
+    std::string newContent;
+    for (int i = 0; i < m_nSlices; ++i) {
+        newContent += fileContent;
+        newContent += '\n';
+    }
+
+    // Step 3: Write the new content back to the same file
+    std::ofstream outputFile(pmap_path);
+    if (!outputFile) {
+        ATH_MSG_ERROR("Error: Unable to open file for writing: " << pmap_path);
+        return StatusCode::FAILURE;
+    }
+
+    outputFile << newContent;
+    outputFile.close();
 
     return StatusCode::SUCCESS;
 }

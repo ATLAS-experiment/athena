@@ -26,26 +26,26 @@ using namespace asg::msgUserCode;
 ///////////////////////////////////////////////////////////////////////////////
 
 
-FPGATrackSimRegionMap::FPGATrackSimRegionMap(const FPGATrackSimPlaneMap *pmap, std::string const & filepath) :
-    m_pmap(pmap)
+FPGATrackSimRegionMap::FPGATrackSimRegionMap(const std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> & pmaps, std::string const & filepath ) :
+    m_pmaps(pmaps)
 {
     // Open the file
-    ANA_MSG_INFO("Reading " << filepath);
     ifstream fin(filepath);
     if (!fin.is_open())
     {
         ANA_MSG_FATAL("Couldn't open " << filepath);
         throw ("FPGATrackSimRegionMap Couldn't open " + filepath);
     }
+    m_filepath=filepath;
 
     // Reads the header of the file to resize all the vector members
     allocateMap(fin);
 
     // Read all the region data
-    for (int region = 0; region < m_nregions; region++) readRegion(fin, region);
+    for (int region = 0; region < m_nregions; region++){
+        readRegion(fin, region);
+    }
 }
-
-
 // Reads the header of the file to resize all the vector members
 void FPGATrackSimRegionMap::allocateMap(ifstream & fin)
 {
@@ -58,15 +58,22 @@ void FPGATrackSimRegionMap::allocateMap(ifstream & fin)
     istringstream sline(line);
     ok = ok && (sline >> towerKey >> m_nregions);
     ok = ok && (towerKey == "towers");
-
+    if((m_filepath.size()-7)==m_filepath.find("subrmap")){
+        if(int(m_pmaps.size())!= m_nregions){
+            ANA_MSG_FATAL("Error Pmap slice size does not match Rmap: PMAP_SIZE:"<<m_pmaps.size()<<"  RMAP_SIZE:"<<m_nregions);
+            throw ("Pmap slice size does not match Rmap:" );
+        }
+    }
+    
 
     if (!ok) ANA_MSG_FATAL("Error reading header");
 
     m_map.resize(m_nregions);
-    for (auto & vv : m_map)
+    
+    for (int iRegion=0; iRegion<int(m_map.size()); iRegion++)
     {
-        vv.resize(m_pmap->getNLogiLayers());
-        for (size_t l = 0; l < vv.size(); l++) vv[l].resize(m_pmap->getNSections(l));
+        m_map.at(iRegion).resize(m_pmaps.at(0)->getNLogiLayers());
+        for (size_t l = 0; l < m_map.at(iRegion).size(); l++) m_map.at(iRegion).at(l).resize(m_pmaps.at(iRegion)->getNSections(l));
     }
 }
 
@@ -74,6 +81,7 @@ void FPGATrackSimRegionMap::allocateMap(ifstream & fin)
 // Reads one region from file.
 void FPGATrackSimRegionMap::readRegion(ifstream & fin, int expected_region)
 {
+
     string line, dummy;
     bool ok = true;
     int region = -1;
@@ -97,14 +105,14 @@ void FPGATrackSimRegionMap::readRegion(ifstream & fin, int expected_region)
             //should check these are within sensible limits after they are read
             ok = ok && (sline >> isPix >> BEC >> physLayer >> phi_min >> phi_max >> phi_tot >> eta_min >> eta_max >> eta_tot);
             if (!ok) break;
-
-            int logiLayer = m_pmap->getLayerSection(static_cast<SiliconTech>(isPix), static_cast<DetectorZone>(BEC), physLayer).layer;
-            int section   = m_pmap->getLayerSection(static_cast<SiliconTech>(isPix), static_cast<DetectorZone>(BEC), physLayer).section;
+            //region WW
+            int logiLayer = m_pmaps.at(region)->getLayerSection(static_cast<SiliconTech>(isPix), static_cast<DetectorZone>(BEC), physLayer).layer;
+            int section   = m_pmaps.at(region)->getLayerSection(static_cast<SiliconTech>(isPix), static_cast<DetectorZone>(BEC), physLayer).section;
 
             if (logiLayer > -1)
                 m_map[region][logiLayer][section] = { phi_min, phi_max, eta_min, eta_max };
 
-            if (++linesRead == m_pmap->getNDetLayers()) break;
+            if (++linesRead == m_pmaps.at(region)->getNDetLayers()) break;
         }
     }
 
@@ -128,7 +136,7 @@ void FPGATrackSimRegionMap::loadModuleIDLUT(std::string const & filepath)
     }
 
     m_global_local_map.clear();
-    m_global_local_map.resize(m_nregions, vector<map<uint32_t, uint32_t>>(m_pmap->getNLogiLayers()));
+    m_global_local_map.resize(m_nregions, vector<map<uint32_t, uint32_t>>(m_pmaps.at(0)->getNLogiLayers()));
 
     string line;
     while (getline(fin, line))
@@ -138,7 +146,7 @@ void FPGATrackSimRegionMap::loadModuleIDLUT(std::string const & filepath)
 
         if (!(sline >> region >> layer >> globalID >> localID))
             ANA_MSG_WARNING("Error reading module LUT");
-        else if (region >= m_global_local_map.size() || layer >= m_pmap->getNLogiLayers())
+        else if (region >= m_global_local_map.size() || layer >= m_pmaps.at(0)->getNLogiLayers())
             ANA_MSG_WARNING("loadModuleIDLUT() bad region=" << region << " or layer=" << layer);
         else
             m_global_local_map[region][layer][globalID] = localID;
@@ -151,7 +159,7 @@ void FPGATrackSimRegionMap::loadRadiiFile(std::string const & filepath)
 
     // Resize the radius structure  appropriately.
     m_radii_map.clear();
-    m_radii_map.resize(m_nregions, std::vector<double>(m_pmap->getNLogiLayers()));
+    m_radii_map.resize(m_nregions, std::vector<double>(m_pmaps.at(0)->getNLogiLayers()));
 
     // Open the file
     std::ifstream fin(filepath);
@@ -186,7 +194,7 @@ void FPGATrackSimRegionMap::loadRadiiFile(std::string const & filepath)
             continue;
         }
 
-        for (unsigned layer = 0; layer < m_pmap->getNLogiLayers(); layer++) {
+        for (unsigned layer = 0; layer < m_pmaps.at(0)->getNLogiLayers(); layer++) {
             ok = ok && (sline >> r);
             if (!ok) break;
             if (r<=0) {
@@ -216,13 +224,28 @@ void FPGATrackSimRegionMap::loadRadiiFile(std::string const & filepath)
 
 bool FPGATrackSimRegionMap::isInRegion(uint32_t region, const FPGATrackSimHit &hit) const
 {
-    // To avoid confusion and double-counting, by convention, always use the coordinates of the inner hit
+    // If the hit is unmapped, then instead of calling hit.getLayer(), use the (relevant) pmap
+    // Also, to avoid confusion and double-counting, by convention, always use the coordinates of the inner hit
     // when testing if a spacepoint is in a (sub)region.
-    if (hit.getHitType() == HitType::spacepoint) {
-        return isInRegion(region, hit.getPairedLayer(), hit.getPairedSection(), hit.getPairedEtaModule(), hit.getPairedPhiModule());
+    uint32_t layer;
+    uint32_t section;
+    if (hit.isMapped()) {
+        layer = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedLayer() : hit.getLayer();
+        section = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedSection() : hit.getSection();
     } else {
-        return isInRegion(region, hit.getLayer(), hit.getSection(), hit.getEtaModule(), hit.getPhiModule());
+        LayerSection ls;
+        if (hit.getHitType() == HitType::spacepoint) {
+            ls = m_pmaps.at(region)->getLayerSection(hit.getPairedDetType(), hit.getPairedDetZone(), hit.getPairedPhysLayer());
+        } else {
+            ls = m_pmaps.at(region)->getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer());
+        }
+        layer = ls.layer;
+        section = ls.section;
     }
+
+    int etamod = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedEtaModule() : hit.getEtaModule();
+    unsigned phimod = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedPhiModule() : hit.getPhiModule();
+    return isInRegion(region, layer, section, etamod, phimod);
 }
 
 
@@ -259,9 +282,10 @@ bool FPGATrackSimRegionMap::isInRegion(uint32_t region, uint32_t layer, uint32_t
 std::vector<uint32_t> FPGATrackSimRegionMap::getRegions(const FPGATrackSimHit &hit) const
 {
     std::vector<uint32_t> regions;
-    for (uint32_t region = 0; region < m_map.size(); region++)
+    for (uint32_t region = 0; region < m_map.size(); region++) {
         if (isInRegion(region, hit))
             regions.push_back(region);
+    }
     return regions;
 }
 
@@ -333,7 +357,7 @@ uint32_t FPGATrackSimRegionMap::getLocalID(uint32_t region, uint32_t layer, uint
 
 uint32_t FPGATrackSimRegionMap::getGlobalID(uint32_t region, uint32_t layer, uint32_t localModuleID) const
 {
-    if (region >= m_global_local_map.size() || layer >= m_pmap->getNLogiLayers())
+    if (region >= m_global_local_map.size() || layer >= m_pmaps.at(0)->getNLogiLayers())
     {
         ANA_MSG_ERROR("getGlobalID() bad region=" << region << " or layer=" << layer);
         return -1;
@@ -348,7 +372,7 @@ uint32_t FPGATrackSimRegionMap::getGlobalID(uint32_t region, uint32_t layer, uin
 
 double FPGATrackSimRegionMap::getAvgRadius(unsigned region, unsigned layer) const {
 
-    if (region >= m_radii_map.size() || layer >= m_pmap->getNLogiLayers())
+    if (region >= m_radii_map.size() || layer >= m_pmaps.at(0)->getNLogiLayers())
     {
         ANA_MSG_ERROR("getAvgRadius() bad region=" << region << " or layer=" << layer);
         return -1;
