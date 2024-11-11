@@ -41,7 +41,6 @@ namespace MuonCalib {
         m_sort_by(sort_by),
         m_adc_sort_by(adc_sort_by) {
        
-        m_settings = std::make_unique<T0MTSettings>();   
         std::string HistoFileName = "T0MT_" + m_name + ".root";
         m_file = std::make_unique<TFile>(HistoFileName.c_str(), "recreate");
         m_regiondir = m_file->mkdir(m_name.c_str());
