@@ -47,6 +47,7 @@ DECLARE_COMPONENT(ActsTrk::Cache::CreatorAlg)
 //
 DECLARE_COMPONENT(ActsTrk::PixelClusterDataPreparationAlg)
 DECLARE_COMPONENT(ActsTrk::StripClusterDataPreparationAlg)
+DECLARE_COMPONENT(ActsTrk::HgtdClusterDataPreparationAlg)
 DECLARE_COMPONENT(ActsTrk::SpacePointDataPreparationAlg)
 DECLARE_COMPONENT(ActsTrk::PixelClusterCacheDataPreparationAlg)
 DECLARE_COMPONENT(ActsTrk::StripClusterCacheDataPreparationAlg)

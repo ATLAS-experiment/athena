@@ -227,6 +227,27 @@ def ActsStripClusterPreparationAlgCfg(flags,
         acc.addEventAlgo(CompFactory.ActsTrk.StripClusterCacheDataPreparationAlg(name, **kwargs))
     return acc
 
+
+def ActsHgtdClusterPreparationAlgCfg(flags,
+                                     name: str = 'ActsHgtdClusterPreparationAlg',
+                                     *,
+                                     useCache: bool = False,
+                                     **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault('InputCollection', 'HGTDClusters')
+    kwargs.setdefault('DetectorElements', 'HGTD_DetectorElementCollection')
+
+    # For the time being the HGTD Regional Selector tool does not exist
+    
+    if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
+        from ActsConfig.ActsMonitoringConfig import ActsDataPreparationMonitoringToolCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsDataPreparationMonitoringToolCfg(flags,
+                                                                                               name = "ActsHgtdClusterPreparationMonitoringTool")))
+
+    acc.addEventAlgo(CompFactory.ActsTrk.HgtdClusterDataPreparationAlg(name, **kwargs))
+    return acc
+
+
 def ActsMainClusterizationCfg(flags,
                               *,
                               RoIs: str = "ActsRegionOfInterest",
@@ -245,7 +266,7 @@ def ActsMainClusterizationCfg(flags,
     
     kwargs.setdefault('processPixels', flags.Detector.EnableITkPixel)
     kwargs.setdefault('processStrips', flags.Detector.EnableITkStrip)
-    kwargs.setdefault('processHGTD', flags.Acts.useHGTDClusterInTrackFinding and not flags.Tracking.ActiveConfig.isSecondaryPass)
+    kwargs.setdefault('processHGTD', flags.Acts.useHGTDClusterInTrackFinding and flags.Detector.EnableHGTD)
     kwargs.setdefault('runCacheCreation', flags.Acts.useCache)
     kwargs.setdefault('runReconstruction', True)
     kwargs.setdefault('runPreparation', flags.Acts.useCache)    
@@ -279,6 +300,11 @@ def ActsMainClusterizationCfg(flags,
             acc.merge(ActsStripClusterPreparationAlgCfg(flags,
                                                         RoIs=RoIs,
                                                         **extractChildKwargs(prefix='StripClusterPreparationAlg.', **kwargs)))
+
+        if kwargs['processHGTD']:
+            acc.merge(ActsHgtdClusterPreparationAlgCfg(flags,
+                                                       RoIs=RoIs,
+                                                       **extractChildKwargs(prefix='HgtdClusterPreparationAlg.', **kwargs)))
             
     # Analysis extensions
     if flags.Acts.doAnalysis:
@@ -301,7 +327,7 @@ def ActsClusterizationCfg(flags,
                       
     processPixels = flags.Detector.EnableITkPixel
     processStrips = flags.Detector.EnableITkStrip
-    processHGTD = flags.Acts.useHGTDClusterInTrackFinding and not flags.Tracking.ActiveConfig.isSecondaryPass
+    processHGTD = flags.Acts.useHGTDClusterInTrackFinding and flags.Detector.EnableHGTD
 
     kwargs = dict()
     kwargs.setdefault('processPixels', processPixels)
@@ -345,13 +371,17 @@ def ActsClusterizationCfg(flags,
     # We also define the same collection from the main ACTS pass (primary)
     primaryPixelClustersName = 'ITkPixelClusters'
     primaryStripClustersName = 'ITkStripClusters'
+    primaryHgtdClustersName = 'HGTD_Clusters'
     pixelClustersName = primaryPixelClustersName
     stripClustersName = primaryStripClustersName
+    hgtdClustersName = primaryHgtdClustersName
 
     # If the workflow is not a primary pass, then change the name of the cluster collections adding that information
     if flags.Tracking.ActiveConfig.isSecondaryPass:
-        pixelClustersName = f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}PixelClusters'
-        stripClustersName = f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}StripClusters'
+        keyPrefix = flags.Tracking.ActiveConfig.extension.replace("Acts", "")
+        pixelClustersName = f'ITk{keyPrefix}PixelClusters'
+        stripClustersName = f'ITk{keyPrefix}StripClusters'
+        hgtdClustersName = f'{keyPrefix}HGTD_Clusters'
     
     # Configuration for (1)
     if kwargs['runCacheCreation']:
@@ -377,6 +407,8 @@ def ActsClusterizationCfg(flags,
 
         if kwargs['processHGTD']:
             kwargs.setdefault('HgtdClusterizationAlg.name', f'{flags.Tracking.ActiveConfig.extension}HgtdClusterizationAlg')
+            # HGTD algo has different convention ... need to use the same
+            kwargs.setdefault('HgtdClusterizationAlg.ClusterContainerName', hgtdClustersName)
             if flags.Tracking.ActiveConfig.isSecondaryPass and previousActsExtension is not None:
                 kwargs.setdefault('HgtdClusterizationAlg.ExtraInputs', {('ActsTrk::PrepRawDataAssociation', f'StoreGateSvc+{previousActsExtension}PrdMap')})
 
@@ -412,6 +444,14 @@ def ActsClusterizationCfg(flags,
             # Prd Map for removing previously used measurements
             if flags.Tracking.ActiveConfig.isSecondaryPass and previousActsExtension is not None:
                 kwargs.setdefault('StripClusterPreparationAlg.InputPrdMap', f'{previousActsExtension}PrdMap')
+
+        if kwargs['processHGTD']:
+            kwargs.setdefault('HgtdClusterPreparationAlg.name', f'{flags.Tracking.ActiveConfig.extension}HgtdClusterPreparationAlg')
+            kwargs.setdefault('HgtdClusterPreparationAlg.OutputCollection', f'{hgtdClustersName}_Cached' if kwargs['runReconstruction'] else hgtdClustersName)
+            kwargs.setdefault('HgtdClusterPreparationAlg.InputCollection', hgtdClustersName if kwargs['runReconstruction'] else primaryHgtdClustersName)
+            kwargs.setdefault('HgtdClusterPreparationAlg.InputIDC', '')
+            if flags.Tracking.ActiveConfig.isSecondaryPass and previousActsExtension is not None:
+                kwargs.setdefault('HgtdClusterPreparationAlg.InputPrdMap', f'{previousActsExtension}PrdMap')
 
     # Analysis algo(s)
     if flags.Acts.doAnalysis:

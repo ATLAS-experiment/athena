@@ -26,6 +26,7 @@ public:
 
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
+    virtual StatusCode finalize() override;
     
 private:
   ToolHandle< IHGTDClusteringTool > m_clusteringTool {this, "ClusteringTool", "", "The Clustering Tool"};
@@ -33,6 +34,15 @@ private:
 
   SG::ReadHandleKey<HGTD_RDO_Container> m_rdoContainerKey{this, "RDOContainerName", "", "Name of the HGTD_RDO container"};
   SG::WriteHandleKey<xAOD::HGTDClusterContainer> m_clusterContainerKey{this, "ClusterContainerName", "", "Name of the HGTD cluster container"}; 
+
+private:
+  enum EStat {
+    kNRdo,
+    kNClusters,
+    kNStat
+  };
+  
+  mutable std::array<std::atomic<unsigned int>, kNStat> m_stat ATLAS_THREAD_SAFE {}; 
 };
 
 } // namespace ActsTrk

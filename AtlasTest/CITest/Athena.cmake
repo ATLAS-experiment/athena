@@ -344,8 +344,12 @@ atlas_add_citest( ACTS_CheckObjectCounts_Workflow
   SCRIPT CheckCountTest.sh ActsCheckObjectCounts
   LOG_IGNORE_PATTERN "Acts.*FindingAlg.*ERROR Propagation reached the step count limit|Acts.*FindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|Acts.*FindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|Acts.*FindingAlg.Acts.*ERROR.*SurfaceError:1|Acts.*FindingAlg.*ERROR.*failed.*to.*extrapolate.*track" )
 
-atlas_add_citest( ACTS_ActsCheckObjectCounts_WorkflowCached
+atlas_add_citest( ACTS_CheckObjectCounts_WorkflowCached
   SCRIPT CheckCountTest.sh ActsCheckObjectCountsCached
+  LOG_IGNORE_PATTERN "Acts.*FindingAlg.*ERROR Propagation reached the step count limit|Acts.*FindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|Acts.*FindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|Acts.*FindingAlg.Acts.*ERROR.*SurfaceError:1|Acts.*FindingAlg.*ERROR.*failed.*to.*extrapolate.*track" )
+
+atlas_add_citest( ACTS_CheckObjectCounts_WorkflowHgtd
+  SCRIPT CheckCountTest.sh ActsCheckObjectCountsHgtd
   LOG_IGNORE_PATTERN "Acts.*FindingAlg.*ERROR Propagation reached the step count limit|Acts.*FindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|Acts.*FindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|Acts.*FindingAlg.Acts.*ERROR.*SurfaceError:1|Acts.*FindingAlg.*ERROR.*failed.*to.*extrapolate.*track" )
 
 #################################################################################

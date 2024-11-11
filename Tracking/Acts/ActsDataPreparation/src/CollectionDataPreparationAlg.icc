@@ -14,6 +14,27 @@ namespace ActsTrk {
   xAOD::DetectorIDHashType StripClusterDataPreparationAlg::retrieveDetectorIDHash(const xAOD::StripCluster& obj) const
   { return obj.identifierHash(); }
 
+  // Hgtd Clusters
+  inline
+  xAOD::DetectorIDHashType HgtdClusterDataPreparationAlg::retrieveDetectorIDHash(const xAOD::HGTDCluster& obj) const
+  { return obj.identifierHash(); }
+
+  inline
+  StatusCode HgtdClusterDataPreparationAlg::fetchIdHashes(const EventContext& ctx,
+							  std::set<IdentifierHash>& hashes) const
+  {
+    ATH_MSG_DEBUG("Retrieving Input Collection with key `" << m_inputCollectionKey.key() << "` for retrieving all idHashes");
+    SG::ReadHandle< input_collection_t > inputHandle = SG::makeHandle(  m_inputCollectionKey, ctx );
+    ATH_CHECK(inputHandle.isValid());
+    const input_collection_t* inputCollection = inputHandle.cptr();
+
+    for (const xAOD::HGTDCluster* cluster : *inputCollection) {
+      hashes.insert( retrieveDetectorIDHash(*cluster) );
+    }
+
+    return StatusCode::SUCCESS;
+  }
+  
   // SpacePoints
   inline
   xAOD::DetectorIDHashType SpacePointDataPreparationAlg::retrieveDetectorIDHash(const xAOD::SpacePoint& obj) const

@@ -7,14 +7,18 @@
 
 namespace ActsTrk {
 
-  template <typename external_collection_t, bool useCache>
-  DataPreparationAlg<external_collection_t, useCache>::DataPreparationAlg(const std::string& name,
-									  ISvcLocator* pSvcLocator)
+  template <typename external_collection_t,
+	    typename external_detector_element_collection_t,
+	    bool useCache>
+  DataPreparationAlg<external_collection_t, external_detector_element_collection_t, useCache>::DataPreparationAlg(const std::string& name,
+														  ISvcLocator* pSvcLocator)
     : AthReentrantAlgorithm(name, pSvcLocator)
   {}
 
-  template <typename external_collection_t, bool useCache>
-  StatusCode DataPreparationAlg<external_collection_t, useCache>::initialize()
+  template <typename external_collection_t,
+	    typename external_detector_element_collection_t,
+	    bool useCache>
+  StatusCode DataPreparationAlg<external_collection_t, external_detector_element_collection_t, useCache>::initialize()
   {
     ATH_MSG_INFO("Initializing " << name() << " ...");
 
@@ -31,13 +35,15 @@ namespace ActsTrk {
     
     // Tools
     ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
-    ATH_CHECK(m_regionSelector.retrieve());
+    ATH_CHECK(m_regionSelector.retrieve(EnableTool{not m_regionSelector.empty()}));
 
     return StatusCode::SUCCESS;
   }
 
-  template <typename external_collection_t, bool useCache>
-  StatusCode DataPreparationAlg<external_collection_t, useCache>::finalize()
+  template <typename external_collection_t,
+	    typename external_detector_element_collection_t,
+	    bool useCache>
+  StatusCode DataPreparationAlg<external_collection_t, external_detector_element_collection_t, useCache>::finalize()
   {
     ATH_MSG_INFO("Data Prep statistics" << std::endl << makeTable(m_stat,
 								       std::array<std::string, kNStat>{
@@ -48,9 +54,11 @@ namespace ActsTrk {
     return StatusCode::SUCCESS;
   }
   
-  template <typename external_collection_t, bool useCache>
+  template <typename external_collection_t,
+	    typename external_detector_element_collection_t,
+	    bool useCache>
   StatusCode
-  DataPreparationAlg<external_collection_t, useCache>::execute(const EventContext& ctx) const
+  DataPreparationAlg<external_collection_t, external_detector_element_collection_t, useCache>::execute(const EventContext& ctx) const
   {
     ATH_MSG_DEBUG("Executing " << name() << " ...");
     auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
@@ -68,10 +76,12 @@ namespace ActsTrk {
     return StatusCode::SUCCESS;
   }
 
-  template <typename external_collection_t, bool useCache>
+  template <typename external_collection_t,
+	    typename external_detector_element_collection_t,
+	    bool useCache>
   StatusCode
-  DataPreparationAlg<external_collection_t, useCache>::fill(const EventContext& ctx,
-							    output_collection_t& outputCollection) const
+  DataPreparationAlg<external_collection_t, external_detector_element_collection_t, useCache>::fill(const EventContext& ctx,
+												    output_collection_t& outputCollection) const
   {
     ATH_MSG_DEBUG("Filling output collection from container");
     
@@ -96,9 +106,9 @@ namespace ActsTrk {
     }
     
     ATH_MSG_DEBUG("Retrieving SiDetectorElementCollection with key `" << m_detEleCollKey.key() << "`");
-    SG::ReadCondHandle< InDetDD::SiDetectorElementCollection > detEleHandle = SG::makeHandle( m_detEleCollKey, ctx );
+    SG::ReadCondHandle< external_detector_element_collection_t > detEleHandle = SG::makeHandle( m_detEleCollKey, ctx );
     ATH_CHECK(detEleHandle.isValid());    
-    const InDetDD::SiDetectorElementCollection* detElements = detEleHandle.cptr();
+    const external_detector_element_collection_t* detElements = detEleHandle.cptr();
 
     // Selection
     // For the time being we simply insert data given the idHash
@@ -149,10 +159,12 @@ namespace ActsTrk {
     return StatusCode::SUCCESS;
   }
 
-  template <typename external_collection_t, bool useCache>
+  template <typename external_collection_t,
+	    typename external_detector_element_collection_t,
+	    bool useCache>
   StatusCode
-  DataPreparationAlg<external_collection_t, useCache>::fill(const EventContext& ctx,
-							    output_collection_t& outputCollection) const
+  DataPreparationAlg<external_collection_t, external_detector_element_collection_t, useCache>::fill(const EventContext& ctx,
+												    output_collection_t& outputCollection) const
     requires (useCache == true)
   {
     ATH_MSG_DEBUG("Filling output collection from cache");
@@ -207,11 +219,19 @@ namespace ActsTrk {
     return StatusCode::SUCCESS;
   }
   
-  template <typename external_collection_t, bool useCache>
+  template <typename external_collection_t,
+	    typename external_detector_element_collection_t,
+	    bool useCache>
   StatusCode
-  DataPreparationAlg<external_collection_t, useCache>::fetchIdHashes(const EventContext& ctx,
-							   std::set<IdentifierHash>& hashes) const
-  {    
+  DataPreparationAlg<external_collection_t, external_detector_element_collection_t, useCache>::fetchIdHashes(const EventContext& ctx,
+													     std::set<IdentifierHash>& hashes) const
+  {
+    // Check Regional Selection Tool is enabled
+    if ( m_regionSelector.empty() ) {
+      ATH_MSG_ERROR("Regional Selector Tool must be enabled in order to fetch the id hashes!");
+      return StatusCode::FAILURE;
+    }
+    
     ATH_MSG_DEBUG("Retrieving RoIs with key `" << m_roiCollectionKey.key() << "`");
     SG::ReadHandle< TrigRoiDescriptorCollection > roiHandle = SG::makeHandle( m_roiCollectionKey, ctx );
     ATH_CHECK(roiHandle.isValid());
@@ -227,9 +247,11 @@ namespace ActsTrk {
     return StatusCode::SUCCESS;
   }
 
-  template <typename external_collection_t, bool useCache>
-  xAOD::DetectorIDHashType
-  DataPreparationAlg<external_collection_t, useCache>::retrieveDetectorIDHash(const object_t&) const
+  template <typename external_collection_t,
+	    typename external_detector_element_collection_t,
+	    bool useCache>
+  inline xAOD::DetectorIDHashType
+  DataPreparationAlg<external_collection_t, external_detector_element_collection_t, useCache>::retrieveDetectorIDHash(const object_t&) const
   { return 0; }
   
 } // namespace
