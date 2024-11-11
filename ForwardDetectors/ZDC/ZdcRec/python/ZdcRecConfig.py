@@ -330,8 +330,9 @@ def ZdcNtupleRun3Cfg(flags,**kwargs):
                            enableOutputSamples = True,
                            enableOutputTree = True,
                            writeOnlyTriggers = False,
-                           enableRPD = flags.Input.TriggerStream != "calibration_ZDCInjCalib" and flags.Input.TriggerStream != "calibration_DcmDummyProcessor",
-                           enableCentroid = flags.Input.TriggerStream != "calibration_ZDCInjCalib" and flags.Input.TriggerStream != "calibration_DcmDummyProcessor",
+                           enableRPD = flags.Detector.EnableZDC_RPD,
+                           enableRPDAmp = flags.Detector.EnableZDC_RPD,
+                           enableCentroid = flags.Detector.EnableZDC_RPD,
                            reprocZdc = False,
                            **kwargs))
 
