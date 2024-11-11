@@ -4,8 +4,9 @@
 *:*Dict.cxx
 
 # We generally ignore externals, but in a LCG "dev" nightly, LCG_RELEASE_BASE points to
-# directories using symlinks. So we ignore the nightlies area explicitly:
+# other directories using symlinks. So we ignore the LCG areas explicitly:
 *:/cvmfs/sft-nightlies.cern.ch/lcg/*
+*:/cvmfs/sft.cern.ch/lcg/*
 
 # It's common to use assert with side-effects in unit tests. Don't warn about those.
 assignmentInAssert:*_test.*
