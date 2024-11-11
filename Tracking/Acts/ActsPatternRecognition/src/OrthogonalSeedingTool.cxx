@@ -83,6 +83,9 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_seedConfForwardMaxZOrigin);
     ATH_MSG_DEBUG("   " << m_seedConfForwardMinImpact);
 
+    // Make the logger And Propagate to ACTS routines
+    m_logger = makeActsAthenaLogger(this, "Acts");
+
     ATH_CHECK( prepareConfiguration() );
 
     return StatusCode::SUCCESS;
@@ -158,7 +161,7 @@ namespace ActsTrk {
     filterCfg.forwardSeedConfirmationRange.minImpactSeedConf = m_seedConfForwardMinImpact;
     
     // Configuration Acts::SeedFinderOrthogonal
-    m_finderCfg.seedFilter = std::make_shared<Acts::SeedFilter<value_type>>(filterCfg.toInternalUnits()); 
+    m_finderCfg.seedFilter = std::make_shared<Acts::SeedFilter<value_type>>(filterCfg.toInternalUnits(), logger().cloneWithSuffix("Filter")); 
     m_finderCfg.cotThetaMax = m_cotThetaMax;
     m_finderCfg.deltaRMinTopSP = m_deltaRMinTopSP;
     m_finderCfg.deltaRMaxTopSP = m_deltaRMaxTopSP;
@@ -216,7 +219,7 @@ namespace ActsTrk {
     
     m_finderCfg = m_finderCfg.toInternalUnits();
 
-    m_finder = Acts::SeedFinderOrthogonal<value_type>(m_finderCfg);
+    m_finder = Acts::SeedFinderOrthogonal<value_type>(m_finderCfg, logger().cloneWithSuffix("Finder"));
 
     return StatusCode::SUCCESS;
   }
