@@ -29,7 +29,7 @@ private:
     Gaudi::Property<float> m_dRForCenter {this, "dRForCenter", 0.2, "Maximum CaloCluster Delta R from the center of RoI"};
 
     SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roIInputKey {this, "RoIInputKey", "", "RoI input collection key"};
-    SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clustersKey {this, "CaloClustersKey", "", "caloclusters in view key"};
+    SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clustersKey {this, "CaloClustersKey", "", "CaloClusters in view key"};
     SG::WriteHandleKey<TrigRoiDescriptorCollection> m_roIOutputKey {this,"RoIOutputKey", "", "Output RoI collection key"};
 };
 
