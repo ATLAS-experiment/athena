@@ -86,13 +86,6 @@ namespace ActsTrk {
                 }
                 ATH_MSG_VERBOSE("Processing " << childNode.nodeName);
                 const GeoShape* shape = childNode.volume->getLogVol()->getShape();
-                if(shape->typeID() == GeoSimplePolygonBrep::getClassTypeID() or 
-                   shape->typeID() == GeoShapeUnion::getClassTypeID() or
-                   shape->typeID() == GeoShapeShift::getClassTypeID() or
-                   shape->typeID() == GeoShapeSubtraction::getClassTypeID()){
-                    //Skip these for now until https://github.com/acts-project/acts/pull/3713 is merged in
-                    continue;
-                }
                 const GeoMaterial* geoMaterial = childNode.volume->getLogVol()->getMaterial();
                 const Acts::Material aMat = Acts::GeoModel::geoMaterialConverter(*geoMaterial);
                 std::shared_ptr<Acts::HomogeneousVolumeMaterial> material = std::make_shared<Acts::HomogeneousVolumeMaterial>(aMat);
@@ -162,7 +155,7 @@ namespace ActsTrk {
                                                                                             chamber->localToGlobalTrans(*gctx), 
                                                                                             bounds, readoutElements.second, 
                                                                                             readoutElements.first, 
-                                                                                            Acts::Experimental::tryRootVolumes(), 
+                                                                                            Acts::Experimental::tryAllSubVolumes(), 
                                                                                             Acts::Experimental::tryAllPortalsAndSurfaces());
 
             detectorVolume->assignGeometryId(Acts::GeometryIdentifier{}.setLayer(numChambers--));
@@ -210,7 +203,7 @@ namespace ActsTrk {
         volumePtr msDetectorVolume = Acts::Experimental::DetectorVolumeFactory::construct(
                     portalGenerator, gctx->context(), "Muon Spectrometer Envelope", 
                     Acts::Transform3::Identity(), std::move(msBounds), surfaces, 
-                    detectorVolumeBoundingVolumes, Acts::Experimental::tryRootVolumes(), 
+                    detectorVolumeBoundingVolumes, Acts::Experimental::tryAllSubVolumes(), 
                     Acts::Experimental::tryAllPortalsAndSurfaces());
         msDetectorVolume->assignGeometryId(Acts::GeometryIdentifier{}.setVolume(15));
 
@@ -230,7 +223,7 @@ namespace ActsTrk {
         return Acts::Experimental::DetectorComponent{
         {detectorVolumeBoundingVolumes},
         portalContainer,
-        {{msDetectorVolume}, Acts::Experimental::tryRootVolumes()}};
+        {{msDetectorVolume}, Acts::Experimental::tryAllSubVolumes()}};
     }
 
 std::pair<std::vector<volumePtr>,std::vector<surfacePtr>> 
