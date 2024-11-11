@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -50,10 +50,22 @@ namespace DerivationFramework {
     SG::ReadHandleKey<xAOD::JetContainer>m_truthJetsKey{this, "TruthJetCollectionName", "AntiKt4TruthWZJets"};
     SG::ReadHandleKey<xAOD::JetContainer>m_truthFatJetsKey{this, "TruthFatJetCollectionName", "AntiKt10TruthJets"};
 
-    SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_mcReadDecor{this, "TruthClassKey",""};
+    SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_mcReadDecor{this, "TruthClassKey",m_mcKey,"classifierParticleOrigin"};
     
 
     SG::WriteDecorHandleKeyArray<xAOD::EventInfo> m_decorKeys{this, "DecorationKeys", {} , "Decorations added to the eventinfo"};
+
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_dec_genFiltHTKey
+      { this, "GenFiltHTKey", m_eventInfoKey, "GenFiltHT", "GenFiltHT EventInfo decoration name" };
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_dec_genFiltHTinclNuKey
+      { this, "GenFiltHTinclNuKey", m_eventInfoKey, "GenFiltHTinclNu", "GenFiltHTinclNu EventInfo decoration name" };
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_dec_genFiltMETKey
+      { this, "GenFiltMET", m_eventInfoKey, "GenFiltMET", "GenFiltMET EventInfo decoration name" };
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_dec_genFiltPTZKey
+      { this, "GenFiltPTZ", m_eventInfoKey, "GenFiltPTZ", "GenFiltPTZ EventInfo decoration name" };
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_dec_genFiltFatJKey
+      { this, "GenFiltFatJ", m_eventInfoKey, "GenFiltFatJ", "GenFiltFatJ EventInfo decoration name" };
+
     Gaudi::Property<float> m_MinJetPt{this, "MinJetPt", 35.* Gaudi::Units::GeV};  //!< Min pT for the truth jets
     Gaudi::Property<float> m_MaxJetEta{this, "MaxJetEta", 2.5}; //!< Max eta for the truth jets
     Gaudi::Property<float> m_MinLepPt{this,"MinLeptonPt", 25.*Gaudi::Units::GeV};  //!< Min pT for the truth leptons
