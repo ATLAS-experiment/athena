@@ -114,6 +114,10 @@ def ITkRecPreProcessingSiliconCfg(flags,
         from InDetConfig.InDetPrepRawDataFormationConfig import (
             AthenaTrkClusterizationCfg)
         acc.merge(AthenaTrkClusterizationCfg(flags))
+        # if we require HGTD clusters in the ACTS Track reconstruction we have to create the clusters here
+        if flags.Acts.useHGTDClusterInTrackFinding and flags.Detector.EnableHGTD:
+            from HGTD_Config.HGTD_PrepRawDataFormationConfig import PadClusterizationCfg
+            acc.merge(PadClusterizationCfg(flags))
         
     if flags.Tracking.ActiveConfig.doActsCluster:
         # If ACTS clusterization is activated, then schedule RoI creator
@@ -139,7 +143,12 @@ def ITkRecPreProcessingSiliconCfg(flags,
         from InDetConfig.InDetPrepRawDataFormationConfig import (
             ITkInDetToXAODClusterConversionCfg)
         acc.merge(ITkInDetToXAODClusterConversionCfg(flags))
+        # if we need HGTD clusters, we convert them as well
+        if flags.Acts.useHGTDClusterInTrackFinding and flags.Detector.EnableHGTD:
+            from InDetConfig.InDetPrepRawDataFormationConfig import HGTDInDetToXAODClusterConversionCfg
+            acc.merge(HGTDInDetToXAODClusterConversionCfg(flags))
 
+        
     if flags.Tracking.ActiveConfig.doActsToAthenaCluster:
         #
         # --- xAOD -> InDet Cluster EDM converter
