@@ -13,6 +13,7 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.doEarlyStopping", True)
 
     # Switches for enabling/disabling some tools
+    tau_cfg.addFlag("Tau.doVertexCorrection", True)
     tau_cfg.addFlag("Tau.doTJVA", True)
     tau_cfg.addFlag("Tau.doPi0Clus", True)
     tau_cfg.addFlag("Tau.doPanTau", True)
@@ -26,7 +27,6 @@ def createTauConfigFlags():
     # Settings common to Run2 and Run3
     tau_cfg.addFlag("Tau.SeedMinPt", 0.0*Units.GeV)
     tau_cfg.addFlag("Tau.SeedMaxEta", lambda prevFlags: 2.5 if prevFlags.GeoModel.Run <= LHCPeriod.Run3 else 4.0)
-    # FIXME: MaxNTracks is not used, drop at the next occasion
     tau_cfg.addFlag("Tau.MaxNTracks", -1)
     tau_cfg.addFlag("Tau.RemoveDupeCoreTracks", True)
     tau_cfg.addFlag("Tau.useGhostTracks", True)
