@@ -29,51 +29,6 @@ def L1CaloGTowerDecoratorCfg(flags, name, gTowersReadKey = 'L1_gFexDataTowers'):
 
     return acc
 
-def eFexTOBDecoratorCfg(flags, name, eFexEMRoIContainer = "L1_eEMRoI", eFexTauRoIContainer = "L1_eTauRoI", ExtraInputs = []):
-    """
-    Configure the eFEX TOB decorator algorithm
-    Requires the eFEXTOBEtTool
-    """
-    acc = ComponentAccumulator()
-
-    decorator = CompFactory.LVL1.eFexTOBDecorator(name, eFexEMRoIContainer = eFexEMRoIContainer, eFexTauRoIContainer = eFexTauRoIContainer)
-
-    # in case the TOB containers are different from default we also have to change the write handles
-    if eFexEMRoIContainer != "L1_eEMRoI":
-        decorator.RetaCoreDecDecorKey = eFexEMRoIContainer+".RetaCoreDec"
-        decorator.RetaEnvDecDecorKey = eFexEMRoIContainer+".RetaEnvDec"
-        decorator.RetaEMDecDecorKey = eFexEMRoIContainer+".RhadEMDec"
-        decorator.RhadHadDecDecorKey = eFexEMRoIContainer+".RhadHadDec"
-        decorator.WstotDenDecDecorKey = eFexEMRoIContainer+".WstotDenDec"
-        decorator.WstotNumDecDecorKey = eFexEMRoIContainer+".WstotNumDec"
-        decorator.ClusterSCellEtSumsDecorKey = eFexEMRoIContainer+".ClusterSCellEtSums"
-
-    if eFexEMRoIContainer != "L1_eTauRoI":
-        decorator.RCoreDecorKey = eFexTauRoIContainer+".RCoreDec"
-        decorator.REnvDecorKey = eFexTauRoIContainer+".REnvDec"
-        decorator.REMCoreDecorKey = eFexTauRoIContainer+".REMCoreDec"
-        decorator.REMHadDecorKey = eFexTauRoIContainer+".REMHadDec"
-
-    decorator.ExtraInputs = ExtraInputs
-
-    acc.addEventAlgo(decorator)
-
-    return acc
-    
-
-def eFexTOBSuperCellDecoratorCfg(flags, name, eFexEMRoIContainer = "L1_eEMRoI", eFexTauRoIContainer = "L1_eTauxRoI"):
-    """
-    Configure the eFEX TOB decorator algorithm
-    Requires the eFEXTOBEtTool
-    """
-    acc = ComponentAccumulator()
-
-    decorator = CompFactory.LVL1.eFexTOBSuperCellDecorator(name, eFexEMRoIContainer = eFexEMRoIContainer, eFexTauRoIContainer = eFexTauRoIContainer)
-        
-    acc.addEventAlgo(decorator)
-
-    return acc
-    
 
 
 if __name__ == '__main__':
@@ -237,13 +192,11 @@ if __name__ == '__main__':
 
     # Decorate eFEX RoIs
     if 'eTOBs' in args.outputs:
-        DecoratorAlgo = eFexTOBDecoratorCfg(flags,'eFexTOBDecorator')
-        acc.merge(DecoratorAlgo)
+        acc.addEventAlgo( CompFactory.LVL1.eFexTOBDecorator('eFexTOBDecorator') )
         
     #Decorate eFEX SCs for ML
     if 'eTOBsML' in args.outputs:
-        DecoratorAlgo = eFexTOBSuperCellDecoratorCfg(flags,'eFexTOBSuperCellDecorator')
-        acc.merge(DecoratorAlgo)
+        acc.addEventAlgo( CompFactory.LVL1.eFexTOBDecorator('eFexTOBSuperCellDecorator') )
 
     # Uses SCell to decorate the gTowers
     if 'gTowers' in args.outputs:

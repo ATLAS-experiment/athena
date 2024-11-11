@@ -328,9 +328,29 @@ void ZDCDataAnalyzer::SetNonlinCorrParams(float refADC, float refScale,
   }
 }
 
-void ZDCDataAnalyzer::enableTimeSigCut(bool AND, float sigCut, const std::string& TF1String,
-			const std::array<std::array<std::vector<double>, 4>, 2>& parsHGArr, 
-			const std::array<std::array<std::vector<double>, 4>, 2>& parsLGArr)
+void ZDCDataAnalyzer::enableFADCCorrections(bool correctPerSample,
+					    std::array<std::array<std::unique_ptr<const TH1>, 4>, 2>& corrHistHG,
+					    std::array<std::array<std::unique_ptr<const TH1>, 4>, 2>& corrHistLG)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->enableFADCCorrections(correctPerSample, corrHistHG[side][module], corrHistLG[side][module]);
+    }
+  }
+}
+
+void ZDCDataAnalyzer::disableFADCCorrections()
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->disableFADCCorrections();
+    }
+  }
+}
+
+void ZDCDataAnalyzer::enableTimeSigCut(bool AND, float sigCut, const std::string TF1String,
+				       const std::array<std::array<std::vector<double>, 4>, 2>& parsHGArr, 
+				       const std::array<std::array<std::vector<double>, 4>, 2>& parsLGArr)
 {
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {

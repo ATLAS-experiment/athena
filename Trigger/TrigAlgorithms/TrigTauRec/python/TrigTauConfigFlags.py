@@ -1,48 +1,65 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from tauRec.TauConfigFlags import createTauConfigFlags
 
 def createTrigTauConfigFlags():
     flags = AthConfigFlags()
+
+    # Some additional flags defined here only exists in the Trigger context, but 'cloneAndReplace' in 'addFlagsCategory'
+    # assumes a 'Trigger.Offline.Tau' structure, so we need all flags there
     flags.join(createTauConfigFlags(), prefix='Trigger.Offline')
 
+    # All config files will be located at: /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/TrigTauRec/
+    # To copy new files, please contact the Tau Trigger coordinators
     flags.Trigger.Offline.Tau.tauRecToolsCVMFSPath = 'TrigTauRec/00-11-02'
 
+    # BRT TES pT calibration for all tau triggers
     flags.Trigger.Offline.Tau.MvaTESConfig = 'OnlineMvaTES_BRT_MC23a_v2.weights.root'
 
-    flags.Trigger.Offline.Tau.TauJetRNNConfig = ['DeepSetID_MC23_v2_0p.json',
-                                                 'DeepSetID_MC23_v2_1p.json',
-                                                 'DeepSetID_MC23_v2_mp.json']
 
-    flags.Trigger.Offline.Tau.TauJetRNNWPConfig = ['DeepSetID_MC23_v2_newPerf_flat_0p.root',
-                                                   'DeepSetID_MC23_v2_newPerf_flat_1p.root',
-                                                   'DeepSetID_MC23_v2_newPerf_flat_mp.root']
+    #####################################################################################
+    # DeepSet Nominal ID (xxxxxRNN/perf/idperf_tracktwoMVA chains)
+    #####################################################################################
+    # Using LVNN inference
 
-    # these flags only exists in the trigger, but 'cloneAndReplace' in 'addFlagsCategory'
-    # assumes a 'Trigger.Offline.Tau' structure
+    flags.addFlag('Trigger.Offline.Tau.DeepSet.NetworkConfig', ['DeepSetID_MC23_v2_0p.json',
+                                                                'DeepSetID_MC23_v2_1p.json',
+                                                                'DeepSetID_MC23_v2_mp.json'])
+    flags.addFlag('Trigger.Offline.Tau.DeepSet.MaxTracks', 10)
+    flags.addFlag('Trigger.Offline.Tau.DeepSet.MaxClusters', 6)
+    flags.addFlag('Trigger.Offline.Tau.DeepSet.ScoreFlatteningConfig', ['DeepSetID_MC23_v2_newPerf_flat_0p.root',
+                                                                        'DeepSetID_MC23_v2_newPerf_flat_1p.root',
+                                                                        'DeepSetID_MC23_v2_newPerf_flat_mp.root'])
+    flags.addFlag('Trigger.Offline.Tau.DeepSet.WPNames', ['VeryLoose', 'Loose', 'Medium', 'Tight'])
+    flags.addFlag('Trigger.Offline.Tau.DeepSet.TargetEff', [[0.98,  0.90, 0.65,  0.50],  # 0p WPs: VL, L, M, T
+                                                            [0.992, 0.99, 0.97,  0.94],  # 1p WPs: VL, L, M, T
+                                                            [0.99,  0.94, 0.895, 0.80]]) # mp WPs: VL, L, M, T
 
-    flags.addFlag("Trigger.Offline.Tau.TauJetRNNTargetEff", [ [0.98,  0.90, 0.65,  0.50],    # 0p WPs: VL, L, M, T
-                                                              [0.992, 0.99, 0.97,  0.94],    # 1p WPs: VL, L, M, T
-                                                              [0.99,  0.94, 0.895, 0.80] ] ) # mp WPs: VL, L, M, T
 
-    flags.addFlag("Trigger.Offline.Tau.TauJetRNNConfigLLP", ['llpdev/net_experimental_llz_0p.json',
-                                                             'llpdev/net_experimental_llz_1p.json',
-                                                             'llpdev/net_experimental_llz_mp.json'])
+    #####################################################################################
+    # RNN LLP ID (xxxxxRNN/perf/idperf_tracktwoLLP chains)
+    #####################################################################################
+    # Using LVNN inference
 
-    flags.addFlag("Trigger.Offline.Tau.TauJetRNNWPConfigLLP", ['llpdev/rnnid_flat_llp_llz0p_050621-v1.root',
-                                                               'llpdev/rnnid_flat_llp_llz1p_050621-v1.root',
-                                                               'llpdev/rnnid_flat_llp_llzmp_050621-v1.root'])
-
-    flags.addFlag("Trigger.Offline.Tau.TauJetRNNLLPTargetEff", [ [0.98,  0.90, 0.65,  0.50],    # 0p WPs: VL, L, M, T
-                                                                 [0.992, 0.99, 0.965, 0.94],    # 1p WPs: VL, L, M, T
-                                                                 [0.99,  0.98, 0.865, 0.80] ] ) # mp WPs: VL, L, M, T
+    flags.addFlag('Trigger.Offline.Tau.RNNLLP.NetworkConfig', ['llpdev/net_experimental_llz_0p.json',
+                                                               'llpdev/net_experimental_llz_1p.json',
+                                                               'llpdev/net_experimental_llz_mp.json'])
+    flags.addFlag('Trigger.Offline.Tau.RNNLLP.MaxTracks', 10)
+    flags.addFlag('Trigger.Offline.Tau.RNNLLP.MaxClusters', 6)
+    flags.addFlag('Trigger.Offline.Tau.RNNLLP.ScoreFlatteningConfig', ['llpdev/rnnid_flat_llp_llz0p_050621-v1.root',
+                                                                       'llpdev/rnnid_flat_llp_llz1p_050621-v1.root',
+                                                                       'llpdev/rnnid_flat_llp_llzmp_050621-v1.root'])
+    flags.addFlag('Trigger.Offline.Tau.RNNLLP.WPNames', ['VeryLoose', 'Loose', 'Medium', 'Tight'])
+    flags.addFlag('Trigger.Offline.Tau.RNNLLP.TargetEff', [[0.98,  0.90, 0.65,  0.50],  # 0p WPs: VL, L, M, T
+                                                           [0.992, 0.99, 0.965, 0.94],  # 1p WPs: VL, L, M, T
+                                                           [0.99,  0.98, 0.865, 0.80]]) # mp WPs: VL, L, M, T
 
 
     return flags
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags = initConfigFlags()
@@ -51,7 +68,7 @@ if __name__ == "__main__":
     flags.lock()
     flags.Tau.MvaTESConfig
     flags.Trigger.doLVL1
-    flags.dump("Tau|Trigger")
+    flags.dump('Tau|Trigger')
 
-    assert flags.Tau.MvaTESConfig != flags.Trigger.Offline.Tau.MvaTESConfig, "No difference between trigger customization"
-    flags.dump("Tau|Trigger")
+    assert flags.Tau.MvaTESConfig != flags.Trigger.Offline.Tau.MvaTESConfig, 'No difference between trigger customization'
+    flags.dump('Tau|Trigger')

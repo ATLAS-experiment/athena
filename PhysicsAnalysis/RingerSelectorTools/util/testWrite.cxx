@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: testWrite.cxx 770805 2016-08-30 14:03:33Z ssnyder $
@@ -390,7 +390,7 @@ int main( /*int argc, char* argv[]*/){
     TrackCalPatTypeSegmentation >("basicEtEtaTrackCalPatTypeDepPPWrapper.root",
         etaDepBounderies,
         etDepBounderies);
-  if (basicEtaEtTrackCalDepPPWrapper) basicEtaEtTrackCalPatTypeDepPPWrapper->releaseMemory();
+  if (basicEtaEtTrackCalPatTypeDepPPWrapper) basicEtaEtTrackCalPatTypeDepPPWrapper->releaseMemory();
   delete basicEtaEtTrackCalPatTypeDepPPWrapper;
   msg << MSG::INFO << BREAKER << endmsg;
 

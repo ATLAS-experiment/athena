@@ -304,10 +304,14 @@ class MonitorDef:
                 "L1_MU5VF_AFP_A_OR_C",
                 # Legacy L1Calo
                 # Phase-I L1Calo
+                "L1_eEM1", "L1_eEM2",
                 "L1_eEM5", "L1_eEM9", "L1_eEM12", "L1_eEM15",
                 "L1_eEM18", "L1_eEM18L",
                 "L1_eEM26", "L1_eEM26M",
                 "L1_2eEM18",
+                "L1_eTAU1",
+                "L1_DPHI-2eEM1", "L1_DPHI-2eTAU1",
+                "L1_DPHI-2eEM1_VjTE200",
                 #
                 "L1_jJ20", "L1_jJ30", "L1_jJ40", "L1_jJ50",
                 "L1_jJ55", "L1_jJ60", "L1_jJ90",
@@ -317,9 +321,18 @@ class MonitorDef:
                 #
                 "L1_gLJ80p0ETA25", "L1_gXEJWOJ100",
                 #
+                "L1_jTE3", "L1_jTE4","L1_jTE5", "L1_jTE10", "L1_jTE20", "L1_jTE50",
                 "L1_jTE200",
                 #
+                "L1_VjTE10", "L1_VjTE200",
+                #
+                "L1_TRT_VjTE20", "L1_eEM1_TRT_VjTE100",
+                #
+                "L1_gTE3", "L1_gTE5",
+                #
                 "L1_eEM9_AFP_A_AND_C", #"L1_eEM9_AFP_A_OR_C",
+                #
+                "L1_TRT_FILLED", "L1_TRT_EMPTY",
                 ]
 
             # Add triggers that are not in the MC menu

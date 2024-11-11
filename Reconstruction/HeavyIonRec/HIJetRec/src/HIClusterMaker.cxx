@@ -37,10 +37,12 @@ StatusCode HIClusterMaker::execute(const EventContext &ctx) const
   //retrieve the tower container from store
   const INavigable4MomentumCollection* navInColl = 0;
   SG::ReadHandle<INavigable4MomentumCollection>  readHandleTower ( m_towerContainerKey, ctx );
+  ATH_CHECK( readHandleTower.isValid() );
   navInColl = readHandleTower.cptr();
 
   const CaloCellContainer * cellColl ;
   SG::ReadHandle<CaloCellContainer>  readHandleCell ( m_cellContainerKey, ctx );
+  ATH_CHECK( readHandleCell.isValid() );
   cellColl = readHandleCell.cptr();
 
   //make the container

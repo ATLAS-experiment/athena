@@ -6,6 +6,7 @@
 #define TRIGTAUREC_TRIGTAURECMERGED_H
 
 #include "GaudiKernel/ToolHandle.h"
+#include "Gaudi/Parsers/Factory.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -62,7 +63,9 @@ private:
     const ToolHandleArray<ITauToolBase> m_idTools {this, "IDTools", {}, "Vertex Variables tools"};
 
     // Monitoring tool
-    const ToolHandle< GenericMonitoringTool > m_monTool {this, "MonTool", "", "Monitoring tool"};
+    const ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "", "Monitoring tool"};
+    Gaudi::Property<std::map<std::string, std::pair<std::string, std::string>>> m_monitoredIdScores {this, "MonitoredIDScores", {}, "Pairs of the TauID score and signal-transformed scores for each TauID algorithm to be monitored"};
+    std::map<std::string, std::pair<SG::AuxElement::ConstAccessor<float>, SG::AuxElement::ConstAccessor<float>>> m_monitoredIdAccessors;
 
     // Inputs
     SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiInputKey {this, "InputRoIs", "", "Input RoI name"};
@@ -77,7 +80,7 @@ private:
     SG::WriteHandleKey<xAOD::TauTrackContainer> m_tauTrackOutputKey {this, "OutputTauTrackContainer", "", "Output TauTrack container"};
 
     // Helper methods
-    bool doCaloMVAStep() const { return m_tauJetInputKey.key().empty() && !m_clustersInputKey.key().empty(); }
+    bool doCaloReconstruction() const { return m_tauJetInputKey.key().empty() && !m_clustersInputKey.key().empty(); }
 };
 
 // Function to perform deep copy on container

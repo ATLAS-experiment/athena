@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -17,17 +17,18 @@ namespace xAOD {
 
   /// Constants used in converting to ATLAS units
   const float gFexJetRoI_v1::s_PhiWidth = (2*M_PI)/32; //In central region, gFex has 32 bins in phi
-  const std::vector<float> gFexJetRoI_v1::s_EtaEdge     = { -4.9, -4.45, -4.0, -3.5, -3.3, -3.1, 
+  const float gFexJetRoI_v1::s_PhiWidthFR = (2*M_PI)/16; //In central region, gFex has 32 bins in phi
+  const std::vector<float> gFexJetRoI_v1::s_EtaEdge     = { -4.9, -4.1, -3.5, -3.25, -3.2, -3.1, 
                                                             -2.9, -2.7, -2.5, -2.2, -2.0, -1.8, -1.6, -1.4, -1.2, -1.0,  
                                                             -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0,                                                 
                                                             1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.5, 2.7, 2.9,
-                                                            3.1, 3.3, 3.5, 4.0, 4.45, 4.9 }; //Indices 0-3 and 37-40 are niot currently used in hardware (don't receive energy info)
+                                                            3.1,3.25, 3.3, 3.5, 4.1, 4.9 }; //Indices 0-3 and 37-40 are niot currently used in hardware (don't receive energy info)
   
-  const std::vector<float> gFexJetRoI_v1::s_EtaCenter   = { -4.7, -4.2, -3.7, -3.4, -3.2, -3, 
+  const std::vector<float> gFexJetRoI_v1::s_EtaCenter   = { -4.5, -3.8, -3.38, -3.18, -3.15, -3, 
                                                             -2.8, -2.6, -2.35, -2.1, -1.9, -1.7, -1.5, -1.3, -1.1, -0.9,  
                                                             -0.7, -0.5, -0.3, -0.1, 0.1, 0.3, 0.5, 0.7, 0.9, 1.1,                                                 
                                                             1.3, 1.5, 1.7, 1.9, 2.1, 2.35, 2.6, 2.8, 3.0,
-                                                            3.2, 3.4, 3.7, 4.2, 4.7};
+                                                            3.15, 3.18, 3.38, 3.8, 4.5};
 
 
   //vector<float> gFexJetRoI_v1::s_maxEta = {}; 
@@ -160,9 +161,30 @@ namespace xAOD {
 
 
   // Floating point coordinates. Return the center of Eta. 
+  
   float gFexJetRoI_v1::eta() const {
     if (gFexType() != gRho){
-      return s_EtaCenter[iEta()];
+      int new_iEtaFR = 0;
+      // Remapping in the extreme FR
+      if (iEta() < 4 || iEta() > 35){
+        if (iEta() == 2){
+          new_iEtaFR = (int(iPhi())%2 == 0) ? 0 : 1 ;
+        }
+        if (iEta() == 3){
+          new_iEtaFR = (int(iPhi())%2 == 0) ? 2 : 3 ;
+        }
+        if (iEta() == 36){
+          new_iEtaFR = (int(iPhi())%2 == 0) ? 37 : 36 ;
+        }
+        if (iEta() == 37){
+          new_iEtaFR = (int(iPhi())%2 == 0) ? 39 : 38 ;
+        }
+        return s_EtaCenter[new_iEtaFR];
+      }
+      //No remapping for central region |eta| < 3.0
+      else{
+        return s_EtaCenter[iEta()];
+      }
     } 
     return 0;
    }
@@ -170,15 +192,55 @@ namespace xAOD {
    /// Floating point coordinates. Return he minimum Eta and he maximum Eta of the Eta range. 
   float gFexJetRoI_v1::etaMin() const {
     if (gFexType() != gRho){
-      return s_EtaEdge[iEta()];
-    } 
+      int new_iEtaFR = 0;
+      // Remapping in the extreme FR
+      if (iEta() < 4 || iEta() > 35){
+        if (iEta() == 2){
+          new_iEtaFR = (int(iPhi())%2 == 0) ? 0 : 1 ;
+        }
+        if (iEta() == 3){
+          new_iEtaFR = (int(iPhi())%2 == 0) ? 2 : 3 ;
+        }
+        if (iEta() == 36){
+          new_iEtaFR = (int(iPhi())%2 == 0) ? 37 : 36 ;
+        }
+        if (iEta() == 37){
+          new_iEtaFR = (int(iPhi())%2 == 0) ? 39 : 38 ;
+        }
+        return s_EtaEdge[new_iEtaFR];
+      }
+      //No remapping for central region |eta| < 3.0
+      else{
+        return s_EtaEdge[iEta()];
+      }
+    }
     return 0;
   }
    
   float gFexJetRoI_v1::etaMax() const {
     if (gFexType() != gRho){
-      return s_EtaEdge[iEta()+1];
-    } 
+      int new_iEtaFR = 0;
+      // Remapping in the extreme FR
+      if (iEta() < 4 || iEta() > 35){
+        if (iEta() == 2){
+          new_iEtaFR = (int(iPhi())%2 == 0) ? 0 : 1 ;
+        }
+        if (iEta() == 3){
+          new_iEtaFR = (int(iPhi())%2 == 0) ? 2 : 3 ;
+        }
+        if (iEta() == 36){
+          new_iEtaFR = (int(iPhi())%2 == 0) ? 37 : 36 ;
+        }
+        if (iEta() == 37){
+          new_iEtaFR = (int(iPhi())%2 == 0) ? 39 : 38 ;
+        }
+        return s_EtaEdge[new_iEtaFR + 1];
+      }
+      //No remapping for central region |eta| < 3.0
+      else{
+        return s_EtaEdge[iEta() + 1];
+      }
+    }
     return 0;
   }
 
@@ -186,10 +248,26 @@ namespace xAOD {
 
   // Floating point coordinates using gFex convention [0, 2pi].
   // Returns the centre phi coordinate.
+  // Note that for iEta = 0,1,2,3,36,37,38,39 - there are only 16 bins in phi (otherwise 32)
   float gFexJetRoI_v1::phi_gFex() const {
     float phi_out = 0;
     if (gFexType() != gRho){
+      float phi_idx;
+      if (iEta() < 4 || iEta() > 35){
+        // take the even iphi() and divide by 2 to get a continuous range (0-15)
+        if (int(iPhi()%2) == 0 ){ 
+          phi_idx = iPhi()/2;
+          phi_out = (phi_idx * s_PhiWidthFR) + (s_PhiWidthFR/2);
+          }
+          // take the odd iphi() and get a continuous range (0,15)
+        else { 
+          phi_idx = (iPhi()-1)/2;
+          phi_out = (phi_idx * s_PhiWidthFR) + (s_PhiWidthFR/2);}
+      }
+      else{
         phi_out = (iPhi() * s_PhiWidth) + (s_PhiWidth/2);
+      }
+        
     } 
     return phi_out; 
   }
@@ -200,7 +278,7 @@ namespace xAOD {
   float gFexJetRoI_v1::phiMin_gFex() const {
     float phi_out = 0;
     if (gFexType() != gRho){
-        phi_out = iPhi() * s_PhiWidth;
+      phi_out = iPhi() * s_PhiWidth;
     } 
     return phi_out; 
   }
@@ -210,7 +288,7 @@ namespace xAOD {
   float gFexJetRoI_v1::phiMax_gFex() const {
     float phi_out = 0;
     if (gFexType() != gRho){
-        phi_out = iPhi() * s_PhiWidth + s_PhiWidth;
+      phi_out = iPhi() * s_PhiWidth + s_PhiWidth;
     } 
     return phi_out; 
   }

@@ -88,7 +88,7 @@ def GfexMonitoringConfig(flags):
 
                 # 2D histograms
                 if gPath == "gJ":
-                    helper.defineHistogram(f"{containerKey}Eta{ptCutString},{containerKey}Phi{ptCutString};h_etaphiMap{containerKey}{ptCutString}", title="{} {} #eta vs #phi ; #eta; #phi".format(tobTypeStr, ptStrTitle),
+                    helper.defineHistogram(f"{containerKey}Eta{ptCutString},{containerKey}Phi{ptCutString};h_etaphiMap{containerKey}{ptCutString}", title="{} {} #eta vs #phi ; #eta; #phi; Number of TOBs".format(tobTypeStr, ptStrTitle),
                     type='TH2F',fillGroup=groupName, path=f"{expertPath}{gPath}/",
                     hanConfig={
                         "algorithm": "Gfex_etaPhiMapFilled_gJ",
@@ -109,7 +109,7 @@ def GfexMonitoringConfig(flags):
                            opt=['kAddBinsDynamically','kAlwaysCreate'],merge="merge")
 
                 if (gPath == "gLJ"):
-                    helper.defineHistogram(f"{containerKey}Eta{ptCutString},{containerKey}Phi{ptCutString};h_etaphiMap{containerKey}{ptCutString}", title="{} {} #eta vs #phi ; #eta; #phi".format(tobTypeStr, ptStrTitle),
+                    helper.defineHistogram(f"{containerKey}Eta{ptCutString},{containerKey}Phi{ptCutString};h_etaphiMap{containerKey}{ptCutString}", title="{} {} #eta vs #phi ; #eta; #phi; Number of TOBs".format(tobTypeStr, ptStrTitle),
                     type='TH2F',fillGroup=groupName, path=f"{expertPath}{gPath}/",
                     hanConfig={
                         "algorithm": "Gfex_etaPhiMapFilled_gLJ",

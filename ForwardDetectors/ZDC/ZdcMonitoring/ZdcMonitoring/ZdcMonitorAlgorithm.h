@@ -22,10 +22,19 @@
 
 class ZdcMonitorAlgorithm : public AthMonitorAlgorithm {
 public:
-    enum{
+    enum DecodingErrors{
         NoDecodingErrorBit  = 0,
         ZDCDecodingErrorBit = 1,
         RPDDecodingErrorBit = 2
+    };
+    enum UCCTriggers{
+        UCCTrigEnabledBit   = 0,
+        TrigHELT50Bit       = 1,
+        TrigHELT35Bit       = 2,
+        TrigHELT25Bit       = 3,
+        TrigHELT20Bit       = 4,
+        TrigHELT15Bit       = 5,
+        UCCTrigDisabledBit  = 6
     };
 
     ZdcMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
@@ -57,12 +66,23 @@ private:
     // single side triggers - less error-prone if defined as separate properties then in a vector (where order would be crucial)
     Gaudi::Property<std::string> m_triggerSideA{this, "triggerSideA", "L1_ZDC_A", "Trigger on side A, needed for 1N-peak monitoring on side C"};
     Gaudi::Property<std::string> m_triggerSideC{this, "triggerSideC", "L1_ZDC_C", "Trigger on side C, needed for 1N-peak monitoring on side A"};
+    
+    // ZDC UCC trigger - ultra-central event selection requiring energy sum in ZDC hadronic modules be below different thresholds
+    Gaudi::Property<std::string> m_UCCtriggerHELT15{this, "triggerUCCHELT15", "L1_ZDC_HELT15_jTE4000", "UCC trigger requiring ZDC hadronic energy be less than 15 TeV"};
+    Gaudi::Property<std::string> m_UCCtriggerHELT20{this, "triggerUCCHELT20", "L1_ZDC_HELT20_jTE4000", "UCC trigger requiring ZDC hadronic energy be less than 20 TeV"};
+    Gaudi::Property<std::string> m_UCCtriggerHELT25{this, "triggerUCCHELT25", "L1_ZDC_HELT25_jTE4000", "UCC trigger requiring ZDC hadronic energy be less than 25 TeV"};
+    Gaudi::Property<std::string> m_UCCtriggerHELT35{this, "triggerUCCHELT35", "L1_ZDC_HELT35_jTE4000", "UCC trigger requiring ZDC hadronic energy be less than 35 TeV"};
+    Gaudi::Property<std::string> m_UCCtriggerHELT50{this, "triggerUCCHELT50", "L1_ZDC_HELT50_jTE4000", "UCC trigger requiring ZDC hadronic energy be less than 50 TeV"};
+    
+    float m_timingCutsInjectorPulse [2][4][2] = {{{30, 38}, {30, 38}, {28, 38}, {30, 38}}, {{30, 38}, {30, 38}, {30, 38}, {30, 38}}}; // Timing cuts (array of dimension 2 * 4 * 2) for event to enter reco-amp-vs-input-voltage histograms in the injector pulse stream
+    Gaudi::Property<float> m_minAmpRequiredInjectorPulse {this, "MinAmpRequiredInjectorPulse", 20, "Minimum amplitude required for event to enter reco-amp-vs-input-voltage histograms in the injector pulse stream"};
 
 
     static const int m_nSides = 2;
     static const int m_nModules = 4;
     static const int m_nChannels = 16;
     static const int m_nDecodingErrorBits = 3;
+    static const int m_nUCCTrigBits = 7;
     static const int m_nZdcStatusBits = 18;
     static const int m_nRpdStatusBits = 15;
     static const int m_nRpdCentroidStatusBits = 21;
@@ -83,7 +103,8 @@ private:
     // input to constructor: owner, name, value, title = "" (by default)
     Gaudi::Property<bool> m_isOnline {this,"IsOnline",false};
     Gaudi::Property<bool> m_CalInfoOn {this,"CalInfoOn",false};
-    Gaudi::Property<bool> m_enableTrigger {this,"EnableTrigger",true};
+    Gaudi::Property<bool> m_EnableZDCSingleSideTriggers {this,"EnableZDCSingleSideTriggers",true};
+    Gaudi::Property<bool> m_EnableUCCTriggers {this,"EnableUCCTriggers",false};
     Gaudi::Property<bool> m_isPPMode {this,"IsPPMode",true};
     Gaudi::Property<bool> m_isInjectedPulse {this,"IsInjectedPulse",false};
     Gaudi::Property<bool> m_isStandalone {this,"IsStandalone",false}; // determine if standalone via metadata
@@ -113,11 +134,15 @@ private:
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleStatusKey {this, "ZdcModuleStatusKey", m_zdcModuleContainerName + ".Status" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleAmplitudeKey {this, "ZdcModuleAmplitudeKey", m_zdcModuleContainerName + ".Amplitude" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleTimeKey {this, "ZdcModuleTimeKey", m_zdcModuleContainerName + ".Time" + m_auxSuffix};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleAmpNoNonLinKey {this, "ZdcModuleAmpNoNonLinKey", m_zdcModuleContainerName + ".AmpNoNonLin" + m_auxSuffix};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleFitAmpKey {this, "ZdcModuleFitAmpKey", m_zdcModuleContainerName + ".FitAmp" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleFitT0Key {this, "ZdcModuleFitT0Key", m_zdcModuleContainerName + ".FitT0" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleChisqKey {this, "ZdcModuleChisqKey", m_zdcModuleContainerName + ".Chisq" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleCalibEnergyKey {this, "ZdcModuleCalibEnergyKey", m_zdcModuleContainerName + ".CalibEnergy" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleCalibTimeKey {this, "ZdcModuleCalibTimeKey", m_zdcModuleContainerName + ".CalibTime" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleMaxADCKey {this, "ZdcModuleMaxADCKey", m_zdcModuleContainerName + ".MaxADC" + m_auxSuffix};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleMaxADCHGKey {this, "ZdcModuleMaxADCHGKey", m_zdcModuleContainerName + ".MaxADCHG" + m_auxSuffix};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleMaxADCLGKey {this, "ZdcModuleMaxADCLGKey", m_zdcModuleContainerName + ".MaxADCLG" + m_auxSuffix};
     
     // LG refit data
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleAmpLGRefitKey{this, "ZdcModuleAmpLGRefitKey", m_zdcModuleContainerName + ".AmpLGRefit" + m_auxSuffix, "ZDC module fit amp LG refit"};

@@ -51,6 +51,9 @@ ZdcAnalysisTool::ZdcAnalysisTool(const std::string& name)
     declareProperty("ForceCalibRun", m_forceCalibRun = -1); // last run of Pb+Pb 2015
     declareProperty("ForceCalibLB", m_forceCalibLB = 814); // last LB of Pb+Pb 2015
 
+    declareProperty("DoFADCCorr", m_doFADCCorr = false); 
+    declareProperty("DoFADCCorrPerSample", m_doFADCCorrPerSample = false); 
+    
     // The following parameters are primarily used for the "default" configuration, but also may be
     //   use to modify/tailor other configurations
     //
@@ -377,7 +380,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2024()
   
   m_deltaTSample = 3.125;
   m_numSample = 24;
-  m_lowGainMode = ZDCPulseAnalyzer::LGModeForceLG;
+  m_lowGainMode = ZDCPulseAnalyzer::LGModeRefitLG;
 
   ZDCDataAnalyzer::ZDCModuleIntArray peak2ndDerivMinSamples = {{{12, 12, 12, 12}, {12, 12, 12, 12}}};
 
@@ -399,7 +402,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2024()
 
   const float deltaTcutLow = -10;
   const float deltaTcutHigh = 10;
-  const float chisqDivAmpCutVal = 10;
+  const float chisqDivAmpCutVal = 100;
 
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
@@ -632,7 +635,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2024()
   m_deltaTSample = 3.125;
   m_numSample = 24;
   
-  const int deriv2ndThreshDSHG = -25;
+  const int deriv2ndThreshDSHG = -45;
   const int deriv2ndThreshDSLG = -10;
   const unsigned int peakSample = 10;
 
@@ -653,8 +656,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2024()
   
   ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {{{4.4, 4.7, 4.5, 4.6}, {4.8, 4.6, 4.4, 4.2}}};
   
-  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{31.25, 31.25, 31.25, 31.25}, {31.25, 31.25, 31.25, 31.25}}};
-  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{28, 28, 28, 28}, {28, 28, 28, 28}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{31.5, 31.5, 29.5, 30.5}, {34.5, 33.0, 33, 34.0}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{32.25, 32.0, 30.5, 30.5}, {32.4, 33.5, 30.5, 31.4}}};
     
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
@@ -686,16 +689,16 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2024()
   zdcDataAnalyzer->set2ndDerivStep(2);
   zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(3);
 
-  ZDCDataAnalyzer::ZDCModuleFloatArray gainsHG = {{{1.042, 1.078, 1.008, 1.066},{1.047, 1.060, 1.010, 0.99}}};
-  ZDCDataAnalyzer::ZDCModuleFloatArray gainsLG = {{{10, 10, 10, 10}, {10, 10, 10, 10}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray gainsHG = {{{1, 1, 1, 1},{1, 1, 1, 1.0}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray gainsLG = {{{9.36, 9.7, 10.95, 10.5}, {9.9, 10.5, 11.2, 10.4}}};
 
   zdcDataAnalyzer->SetGainFactorsHGLG(gainsHG, gainsLG); // a gain adjustment of 10 applied to LG ADC, 1 to HG ADC values
 
   // These noise sigmas we read off from the ch_x_BaselineStdev monitoring histograms with our 
   //   final readout configuration for the Pb+Pb run by BAC on 25-09-2023
   //
-  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasLG = {{{1.0, 1.0,  1.0,  1.0}, {1.0, 1.0, 1.0, 1.0}}};
-  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasHG = {{{1.5, 1.7, 3, 1.7}, {1.7, 1.6, 2.2, 1.8}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasLG = {{{1.5, 1.5,  1.5,  1.5}, {1.5, 1.5, 1.5, 1.5}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasHG = {{{10, 10, 10, 10}, {10, 10, 10, 10}}};
   
   zdcDataAnalyzer->SetNoiseSigmas(noiseSigmasHG, noiseSigmasLG);
 
@@ -711,8 +714,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2024()
   
   // Enable two-pass analysis                                                                                 
   //                                                                                                          
-  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassHG = {{{-20, -20, -20, -20},
-								   {-20, -20, -20, -20},}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassHG = {{{-30, -30, -30, -30},
+								   {-30, -30, -30, -30},}};
   
   ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassLG = {{{-8, -8, -8, -8},
 								   {-8, -8, -8, -8}}};
@@ -780,7 +783,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2024()
   timeCorrCoefficLG[1][2] = {0.015+3.25, -0.141721, 0.023936, 0.099657, -0.188526};
   timeCorrCoefficLG[1][3] = {0.01+3.25, -0.152589, 0.016122, -0.086580, 0.563625};
 
-  zdcDataAnalyzer->SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrLog, 0, 700, timeCorrCoefficHG, timeCorrCoefficLG);
+  // Commenting out the timing correlation for PbPb2024: re-calibraton needed
+  // zdcDataAnalyzer->SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrLog, 0, 700, timeCorrCoefficHG, timeCorrCoefficLG);
   
   // Set the amplitude fit range limits                                                                       
   //                                                                                                          
@@ -796,12 +800,12 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeInjectorpp2024()
   m_deltaTSample = 3.125;
   m_numSample = 24;
   
-  const int deriv2ndThreshDSHG = -25;
+  const int deriv2ndThreshDSHG = -10;
   const int deriv2ndThreshDSLG = -10;
   const unsigned int peakSample = 10;
 
-  const float deltaTcutLow = -10;
-  const float deltaTcutHigh = 10;
+  const float deltaTcutLow = -50;
+  const float deltaTcutHigh = 50;
   const float chisqDivAmpCutHGVal = 30;
   const float chisqDivAmpCutLGVal = 50;
 
@@ -848,7 +852,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeInjectorpp2024()
                   peak2ndDerivMinThresholdsLG,
                   ZDCPulseAnalyzer::LGModeRefitLG));
   zdcDataAnalyzer->set2ndDerivStep(2);
-  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(3);
+  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(10);
 
   ZDCDataAnalyzer::ZDCModuleFloatArray gainsHG = {{{1.0, 1.0,  1.0,  1.0}, {1.0, 1.0, 1.0, 1.0}}};
   ZDCDataAnalyzer::ZDCModuleFloatArray gainsLG = {{{1.0, 1.0,  1.0,  1.0}, {1.0, 1.0, 1.0, 1.0}}};
@@ -873,16 +877,6 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeInjectorpp2024()
   zdcDataAnalyzer->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0HG, t0LG);
   zdcDataAnalyzer->SetCutValues(chisqDivAmpCutHG, chisqDivAmpCutLG, deltaT0CutLow, deltaT0CutHigh, deltaT0CutLow, deltaT0CutHigh);
   
-  // Enable two-pass analysis                                                                                 
-  //                                                                                                          
-  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassHG = {{{-20, -20, -20, -20},
-                   {-20, -20, -20, -20},}};
-  
-  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassLG = {{{-8, -8, -8, -8},
-                   {-8, -8, -8, -8}}};
-  
-  zdcDataAnalyzer->enableRepass(peak2ndDerivMinRepassHG, peak2ndDerivMinRepassLG);
-
   // Turn on exclusion of early and late samples to address OOT pileup
   //
   zdcDataAnalyzer->enablePreExclusion(4, 500, 200);
@@ -906,15 +900,15 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeInjectorpp2024()
   //    made at the same time to match the timing shift of the LG channels 
   //
   // ---
-  timeCorrCoefficLG[0][0] = {0.035+3.25, -0.126189, 0.022724, 0.039116, -0.098255};
-  timeCorrCoefficLG[0][1] = {0.022+3.25, -0.165988, -0.014125, 0.057323, -0.205109};
-  timeCorrCoefficLG[0][2] = {0.01+3.25, -0.136087, -0.007248, -0.014452, -0.060469};
-  timeCorrCoefficLG[0][3] = {0.0+3.25, -0.131067, 0.025579, 0.059994, -0.065595};
+  timeCorrCoefficLG[0][0] = {0.035f+3.25f, -0.126189, 0.022724, 0.039116, -0.098255};
+  timeCorrCoefficLG[0][1] = {0.022f+3.25f, -0.165988, -0.014125, 0.057323, -0.205109};
+  timeCorrCoefficLG[0][2] = {0.01f+3.25f, -0.136087, -0.007248, -0.014452, -0.060469};
+  timeCorrCoefficLG[0][3] = {0.0f+3.25f, -0.131067, 0.025579, 0.059994, -0.065595};
   
-  timeCorrCoefficLG[1][0] = {0.076+3.25, -0.300587, -0.041827, 0.641108, -0.594157};
-  timeCorrCoefficLG[1][1] = {0.057+3.25, -0.223443, -0.125013, -0.176900, 0.348081};
-  timeCorrCoefficLG[1][2] = {0.015+3.25, -0.141721, 0.023936, 0.099657, -0.188526};
-  timeCorrCoefficLG[1][3] = {0.01+3.25, -0.152589, 0.016122, -0.086580, 0.563625};
+  timeCorrCoefficLG[1][0] = {0.076f+3.25f, -0.300587, -0.041827, 0.641108, -0.594157};
+  timeCorrCoefficLG[1][1] = {0.057f+3.25f, -0.223443, -0.125013, -0.176900, 0.348081};
+  timeCorrCoefficLG[1][2] = {0.015f+3.25f, -0.141721, 0.023936, 0.099657, -0.188526};
+  timeCorrCoefficLG[1][3] = {0.01f+3.25f, -0.152589, 0.016122, -0.086580, 0.563625};
 
   zdcDataAnalyzer->SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrLog, 0, 700, timeCorrCoefficHG, timeCorrCoefficLG);
   
@@ -952,8 +946,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeInjectorPbPb2024()
   
   ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {{{5.5, 5.5, 5.5, 5.5}, {5.5, 5.5, 5.5, 5.5}}};
   
-  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{31.25, 31.25, 31.25, 31.25}, {31.25, 31.25, 31.25, 31.25}}};
-  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{31.25, 31.25, 31.25, 31.25}, {31.25, 31.25, 31.25, 31.25}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{33.25, 33, 29.5, 33}, {31.5, 32.5, 32, 32.25}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{30.5, 30, 26.75, 30}, {29.5, 32.5, 29.5, 29}}};
     
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
@@ -984,7 +978,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeInjectorPbPb2024()
                   ZDCPulseAnalyzer::LGModeRefitLG));
 
   zdcDataAnalyzer->set2ndDerivStep(2);
-  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(1);
+  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(3);
 
   ZDCDataAnalyzer::ZDCModuleFloatArray gainsHG = {{{1.0, 1.0,  1.0,  1.0}, {1.0, 1.0, 1.0, 1.0}}};
   ZDCDataAnalyzer::ZDCModuleFloatArray gainsLG = {{{10, 10, 10, 10}, {10, 10, 10, 10}}};
@@ -1897,6 +1891,8 @@ StatusCode ZdcAnalysisTool::initialize()
     ATH_CHECK( m_zdcModuleTime.initialize());
     m_zdcModuleChisq = m_zdcModuleContainerName+".Chisq"+m_auxSuffix;
     ATH_CHECK( m_zdcModuleChisq.initialize());
+    m_zdcModuleAmpNoNonLin = m_zdcModuleContainerName+".AmpNoNonLin"+m_auxSuffix;
+    ATH_CHECK( m_zdcModuleAmpNoNonLin.initialize());
     m_zdcModuleFitAmp = m_zdcModuleContainerName+".FitAmp"+m_auxSuffix;
     ATH_CHECK( m_zdcModuleFitAmp.initialize());
     m_zdcModuleFitAmpError = m_zdcModuleContainerName+".FitAmpError"+m_auxSuffix;
@@ -1914,10 +1910,19 @@ StatusCode ZdcAnalysisTool::initialize()
     m_zdcModuleMaxADC = m_zdcModuleContainerName+".MaxADC"+m_auxSuffix;
     ATH_CHECK( m_zdcModuleMaxADC.initialize());
 
+    m_zdcModuleMaxADCHG = m_zdcModuleContainerName+".MaxADCHG"+m_auxSuffix;
+    ATH_CHECK( m_zdcModuleMaxADCHG.initialize());
+    m_zdcModuleMaxADCLG = m_zdcModuleContainerName+".MaxADCLG"+m_auxSuffix;
+    ATH_CHECK( m_zdcModuleMaxADCLG.initialize());
+
     // LG refit data
     //
+    m_zdcModuleFitAmpLGRefit = m_zdcModuleContainerName+".FitAmpLGRefit"+m_auxSuffix;
+    ATH_CHECK(m_zdcModuleFitAmpLGRefit.initialize());
     m_zdcModuleAmpLGRefit = m_zdcModuleContainerName+".AmpLGRefit"+m_auxSuffix;
     ATH_CHECK(m_zdcModuleAmpLGRefit.initialize());
+    m_zdcModuleAmpCorrLGRefit = m_zdcModuleContainerName+".AmpCorrLGRefit"+m_auxSuffix;
+    ATH_CHECK(m_zdcModuleAmpCorrLGRefit.initialize());
     m_zdcModuleT0LGRefit = m_zdcModuleContainerName+".T0LGRefit"+m_auxSuffix;
     ATH_CHECK(m_zdcModuleT0LGRefit.initialize());
     m_zdcModuleT0SubLGRefit = m_zdcModuleContainerName+".T0SubLGRefit"+m_auxSuffix;
@@ -2147,6 +2152,7 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> zdcModuleStatus(m_zdcModuleStatus);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleTime(m_zdcModuleTime);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleChisq(m_zdcModuleChisq);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleAmpNoNonLin(m_zdcModuleAmpNoNonLin);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleFitAmp(m_zdcModuleFitAmp);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleFitAmpError(m_zdcModuleFitAmpError);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleFitT0(m_zdcModuleFitT0);
@@ -2155,8 +2161,12 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModulePresample(m_zdcModulePresample);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleMinDeriv2nd(m_zdcModuleMinDeriv2nd);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleMaxADC(m_zdcModuleMaxADC);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleMaxADCHG(m_zdcModuleMaxADCHG);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleMaxADCLG(m_zdcModuleMaxADCLG);
 
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleAmpLGRefit(m_zdcModuleAmpLGRefit);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleFitAmpLGRefit(m_zdcModuleFitAmpLGRefit);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleAmpCorrLGRefit(m_zdcModuleAmpCorrLGRefit);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleT0LGRefit(m_zdcModuleT0LGRefit);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleT0SubLGRefit(m_zdcModuleT0SubLGRefit);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleChisqLGRefit(m_zdcModuleChisqLGRefit);
@@ -2165,6 +2175,7 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     // Status
     // Time
     // Chisq
+    // AmpNoNonLin
     // FitAmp
     // FitAmpError
     // FitT0
@@ -2194,16 +2205,21 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	    
 	    const ZDCPulseAnalyzer* pulseAna_p = m_zdcDataAnalyzer->GetPulseAnalyzer(side, mod);
 	    zdcModuleChisq(*zdcModule) = pulseAna_p->GetChisq();
-	    zdcModuleFitAmp(*zdcModule) = pulseAna_p->GetFitAmplitude();
+	    zdcModuleAmpNoNonLin(*zdcModule) = pulseAna_p->GetAmpNoNonLin();
+      zdcModuleFitAmp(*zdcModule) = pulseAna_p->GetFitAmplitude();
 	    zdcModuleFitAmpError(*zdcModule) =  pulseAna_p->GetAmpError();
 	    zdcModuleFitT0(*zdcModule) = pulseAna_p->GetFitT0();
 	    zdcModuleBkgdMaxFraction(*zdcModule) = pulseAna_p->GetBkgdMaxFraction();
 	    zdcModulePreSampleAmp(*zdcModule) = pulseAna_p->GetPreSampleAmp();
-	    zdcModulePresample(*zdcModule) = pulseAna_p->GetPresample();
+	    zdcModulePresample(*zdcModule) = pulseAna_p->getPresample();
 	    zdcModuleMinDeriv2nd(*zdcModule) = pulseAna_p->GetMinDeriv2nd();
-	    zdcModuleMaxADC(*zdcModule) = pulseAna_p->GetMaxADC();
+	    zdcModuleMaxADC(*zdcModule) = pulseAna_p->getMaxADCSub();
+      zdcModuleMaxADCHG(*zdcModule) = pulseAna_p->getMaxADCHG();
+      zdcModuleMaxADCLG(*zdcModule) = pulseAna_p->getMaxADCLG();
 	    
 	    zdcModuleAmpLGRefit(*zdcModule) = pulseAna_p->getRefitLGAmp();
+      zdcModuleFitAmpLGRefit(*zdcModule) = pulseAna_p->getRefitLGFitAmp();
+      zdcModuleAmpCorrLGRefit(*zdcModule) = pulseAna_p->getRefitLGAmpCorr();
 	    zdcModuleT0LGRefit(*zdcModule) = pulseAna_p->getRefitLGTime();
 	    zdcModuleT0SubLGRefit(*zdcModule) = pulseAna_p->getRefitLGTimeSub();
 	    zdcModuleChisqLGRefit(*zdcModule) = pulseAna_p->getRefitLGChisq();
@@ -2393,6 +2409,91 @@ void ZdcAnalysisTool::setTimeCalibrations(unsigned int runNumber)
         ATH_MSG_WARNING("No time calibration file " << filename);
     }
 }
+
+void ZdcAnalysisTool::setFADCCorrections(unsigned int runNumber)
+{
+  std::string filename;
+  
+  if (m_LHCRun==3) {
+    std::string runString;
+    
+    if (runNumber == 0) runString = "ZdcFADCCorr_" + m_configuration + "_default.root";
+    else runString = ("ZdcFADCCorr_Run"+TString::Itoa(runNumber,10)+".root").Data();
+    
+    filename = PathResolverFindCalibFile("ZdcAnalysis/" + runString );
+  }
+  else {
+    ATH_MSG_WARNING("setFADCCorrections: FADC corrections not implemented for Run 2");
+    return;
+  }
+  
+  ATH_MSG_INFO("Opening FADC corrections file " << filename);
+  std::unique_ptr<TFile> fFADCCorr(TFile::Open(filename.c_str(), "READ"));
+  
+  if (!fFADCCorr->IsOpen()) {
+    ATH_MSG_INFO ("setFADCCorrections: failed to open file: " << filename);
+    throw std::runtime_error ("ZdcAnalysisTool failed to open FADCCorrections file " + filename);
+  }
+  
+  // Attempt to read histograms with corrections from file
+  //
+  bool readSuccess = true;
+  std::array<std::array<std::unique_ptr<const TH1>, 4>, 2> histogramsHG;
+  std::array<std::array<std::unique_ptr<const TH1>, 4>, 2> histogramsLG;
+  
+  for (size_t side : {0, 1}) {
+    for (int module : {0, 1, 2, 3}) {
+      std::string histNameHG = "ZDC_FADCCorr_s" + std::to_string(side) + "_m_HG" + std::to_string(module);
+      std::string histNameLG = "ZDC_FADCCorr_s" + std::to_string(side) + "_m_LG" + std::to_string(module);
+
+      ATH_MSG_DEBUG("setFADCCorrections: Searching for histograms HG and LG: " << histNameHG << ", " << histNameLG);
+      
+      TH1* histHG_ptr = static_cast<TH1*>(fFADCCorr->GetObjectChecked(histNameHG.c_str(), "TH1"));
+      TH1* histLG_ptr = static_cast<TH1*>(fFADCCorr->GetObjectChecked(histNameLG.c_str(), "TH1"));
+
+      if (!histHG_ptr || !histLG_ptr) {
+	std::string errMsg = "setFADCCorrections: unable to read FADC correction histogram(s) ";
+	if (!histHG_ptr) errMsg += histNameHG + " ";
+	if (!histLG_ptr) errMsg += histNameLG;
+
+	ATH_MSG_ERROR(errMsg);
+	readSuccess = false;
+	break;
+      }
+      else {
+	//
+	//  Check for valid range
+	//
+	if (std::abs(histHG_ptr->GetXaxis()->GetXmin()) > 1e-3 || std::abs(histHG_ptr->GetXaxis()->GetXmax() - 4096) > 1e-3) {
+	  ATH_MSG_ERROR("setFADCCorrections: invalid axis range for HG FADC corrections in histogram with name " << histNameHG);
+	  readSuccess = false;
+	  break;
+	}
+	if (std::abs(histLG_ptr->GetXaxis()->GetXmin()) > 1e-3 || std::abs(histLG_ptr->GetXaxis()->GetXmax() - 4096) > 1e-3) {
+	  ATH_MSG_ERROR("setFADCCorrections: invalid axis range for HG FADC corrections in histogram with name " << histNameLG);
+	  readSuccess = false;
+	  break;
+	}
+	
+	histogramsHG[side][module].reset(histHG_ptr);
+	histogramsLG[side][module].reset(histLG_ptr);
+      }
+    }
+  }
+    
+  fFADCCorr->Close();
+
+  if (readSuccess) {
+    m_zdcDataAnalyzer->enableFADCCorrections(m_doFADCCorrPerSample, histogramsHG, histogramsLG);
+  }
+  else {
+    ATH_MSG_ERROR("setFADCCorrections: due to at least one error, FADC corrections are not implemented");
+    m_doFADCCorr = false;
+  }
+  
+  return;
+}
+
 
 StatusCode ZdcAnalysisTool::reprocessZdc()
 {

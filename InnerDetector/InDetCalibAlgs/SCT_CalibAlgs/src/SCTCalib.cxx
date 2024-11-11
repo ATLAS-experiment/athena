@@ -1055,7 +1055,7 @@ StatusCode SCTCalib::getDeadStrip ATLAS_NOT_THREAD_SAFE () { // Thread unsafe SC
             double meanOccExceptDeadChip{totalHitsInWafer/(n_effectiveEvents-n_stripPerChip*n_deadChipInWafer)};
             double numHitsInStripOnlineOrder[n_stripPerChip*n_chipPerSide] = {0};
             for (int j{0}; j<n_stripPerChip*n_chipPerSide; j++) {
-               numHitsInStripOnlineOrder[j] = side==0 ? numHitsInStrip[j] : numHitsInStrip[n_stripPerChip*n_chipPerSide-j];
+               numHitsInStripOnlineOrder[j] = side==0 ? numHitsInStrip[j] : numHitsInStrip[n_stripPerChip*n_chipPerSide-1-j];
                isDead=false;
                if (numHitsInStripOnlineOrder[j]==0 || !m_deadNotQuiet) {
                   double sum_binomial{ROOT::Math::binomial_cdf(0, meanOccExceptDeadChip, m_numberOfEvents)};
