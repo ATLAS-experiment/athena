@@ -50,6 +50,6 @@ namespace ActsTrk {
         return Acts::Experimental::DetectorComponent{
         {cylinderDetectorVolume},
         std::move(portalContainer),
-        {{cylinderDetectorVolume}, Acts::Experimental::tryRootVolumes()}};
+        {{cylinderDetectorVolume}, Acts::Experimental::tryAllSubVolumes()}};
     }
 }
