@@ -855,13 +855,13 @@ class PoolFile(object):
                 print("is meaningless...")
         return
 
-    def detailedDump(self, bufferName = sys.stdout.name ):
+    def detailedDump(self, bufferName = None ):
         if self.poolFile is None or \
            self.keys is None:
             print("Can't perform a detailedDump with a shelve file as input !")
             return
                   
-        if bufferName == sys.stdout.name:
+        if bufferName is None:
             bufferName = "/dev/stdout"
         out = open( bufferName, "w" )
         sys.stdout.flush()
