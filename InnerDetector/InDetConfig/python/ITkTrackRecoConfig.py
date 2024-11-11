@@ -398,71 +398,6 @@ def ITkTrackFinalCfg(flags,
     return result
 
 
-def ITkTrackSeedsFinalCfg(flags):
-    result = ComponentAccumulator()
-
-    # get list of extensions requesting track seeds.
-    # Add always the Primary Pass.
-    listOfExtensionsRequesting = [
-        e for e in _extensions_list
-        if (e == '' or flags.Tracking[f"ITk{e}Pass"].storeTrackSeeds) ]
-
-    for extension in listOfExtensionsRequesting:
-        TrackContainer = "SiSPSeedSegments"+extension
-
-        if flags.Tracking.doTruth:
-            from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
-            result.merge(ITkTrackTruthCfg(
-                flags,
-                Tracks=TrackContainer,
-                DetailedTruth=f"{TrackContainer}DetailedTruth",
-                TracksTruth=f"{TrackContainer}TruthCollection"))
-
-        from xAODTrackingCnv.xAODTrackingCnvConfig import (
-            ITkTrackParticleCnvAlgCfg)
-        result.merge(ITkTrackParticleCnvAlgCfg(
-            flags,
-            name=f"{TrackContainer}CnvAlg",
-            TrackContainerName=TrackContainer,
-            xAODTrackParticlesFromTracksContainerName=(
-                f"{TrackContainer}TrackParticles")))
-
-    return result
-
-
-def ITkSiSPSeededTracksFinalCfg(flags):
-    result = ComponentAccumulator()
-
-    primaryPassExtension = flags.Tracking[f"{flags.Tracking.ITkPrimaryPassConfig.value}Pass"].extension
-
-    # get list of extensions requesting track candidates.
-    # Add always the Primary Pass.
-    listOfExtensionsRequesting = [
-        e for e in _extensions_list
-        if (e=='' or flags.Tracking[f"ITk{e}Pass"].storeSiSPSeededTracks) ]
-
-    for extension in listOfExtensionsRequesting:
-        AssociationMapNameKey="PRDtoTrackMapMerge_CombinedITkTracks"
-        if 'Acts' in extension:
-            AssociationMapNameKey="PRDtoTrackMapMerge_CombinedITkTracks"
-        elif not (extension == primaryPassExtension):
-            AssociationMapNameKey = f"ITkPRDtoTrackMap{extension}"
-
-        from xAODTrackingCnv.xAODTrackingCnvConfig import (
-            ITkTrackParticleCnvAlgCfg)
-        result.merge(ITkTrackParticleCnvAlgCfg(
-            flags,
-            name = f"SiSPSeededTracks{extension}CnvAlg",
-            TrackContainerName = f"SiSPSeeded{extension}Tracks",
-            xAODTrackParticlesFromTracksContainerName=(
-                f"SiSPSeededTracks{extension}TrackParticles"),
-            AssociationMapName=
-            "" if flags.Tracking.doITkFastTracking else 
-            AssociationMapNameKey))
-
-    return result
-
-
 def ITkStatsCfg(flags, StatTrackCollections=None,
                   StatTrackTruthCollections=None):
     result = ComponentAccumulator()
@@ -631,14 +566,6 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
         result.merge(ITkActsTrackFinalCfg(flags,
                                           InputCombinedITkTracks=InputCombinedActsTracks,
                                           ActsTrackContainerName=ActsTrackContainerName))
-
-    # Store some collections for persistification
-    # Used for validation and studies
-    if flags.Tracking.doStoreTrackSeeds:
-        result.merge(ITkTrackSeedsFinalCfg(flags))
-
-    if flags.Tracking.doStoreSiSPSeededTracks:
-        result.merge(ITkSiSPSeededTracksFinalCfg(flags))
 
     # Perform vertex finding
     if flags.Tracking.doVertexFinding:
