@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <numbers>
@@ -233,7 +233,7 @@ RpdSubtractCentroidTool::SubstepStatus RpdSubtractCentroidTool::readAOD(xAOD::Zd
 
   ATH_MSG_DEBUG("Processing modules");
 
-  for (auto const& zdcModule : moduleContainer) {
+  for (auto const zdcModule : moduleContainer) {
     unsigned int const side = RPDUtils::ZDCSideToSideIndex(zdcModule->zdcSide());
     if (zdcModule->zdcType() == RPDUtils::ZDCModuleZDCType && zdcModule->zdcModule() == RPDUtils::ZDCModuleEMModule) {
       // this is a ZDC module and this is an EM module
@@ -275,7 +275,7 @@ RpdSubtractCentroidTool::SubstepStatus RpdSubtractCentroidTool::readAOD(xAOD::Zd
     }
   }
 
-  for (auto const& zdcSum: moduleSumContainer) {
+  for (auto const zdcSum: moduleSumContainer) {
     if (zdcSum->zdcSide() == RPDUtils::ZDCSumsGlobalZDCSide) {
       // skip global sum (it's like the side between sides)
       continue;
@@ -454,7 +454,7 @@ void RpdSubtractCentroidTool::writeAOD(xAOD::ZdcModuleContainer const& moduleSum
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> reactionPlaneAngleHandle(m_reactionPlaneAngleKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> cosDeltaReactionPlaneAngleHandle(m_cosDeltaReactionPlaneAngleKey);
 
-  for (auto const& zdcSum: moduleSumContainer) {
+  for (auto const zdcSum: moduleSumContainer) {
     if (zdcSum->zdcSide() == RPDUtils::ZDCSumsGlobalZDCSide) {
       // global sum container
       // event status is bool, but stored as char to save disk space
