@@ -63,7 +63,7 @@ def AthenaMPCfg(flags):
     mpevtloop.CollectSubprocessLogs = flags.MP.CollectSubprocessLogs
     mpevtloop.PollingInterval = flags.MP.PollingInterval
     mpevtloop.MemSamplingInterval = flags.MP.MemSamplingInterval
-    mpevtloop.IsPileup = flags.Common.ProductionStep in [ProductionStep.Digitization, ProductionStep.PileUpPresampling] and flags.Digitization.PileUp
+    mpevtloop.IsPileup = flags.Common.ProductionStep in [ProductionStep.Digitization, ProductionStep.PileUpPresampling, ProductionStep.FastChain] and flags.Digitization.PileUp
     mpevtloop.EventsBeforeFork = 0 if flags.MP.Strategy == 'EventService' else flags.MP.EventsBeforeFork
 
     # Configure Gaudi File Manager
