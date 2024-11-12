@@ -17,10 +17,12 @@
 /// -----------------------
 IDTPM::DuplicateRatePlots::DuplicateRatePlots(
     PlotMgr* pParent, const std::string& dirName, 
-    const std::string& anaTag, const std::string& trackType, bool doGlobalPlots ) :
+    const std::string& anaTag, const std::string& trackType,
+    bool doGlobalPlots, bool doTruthMuPlots ) :
         PlotMgr( dirName, anaTag, pParent ), 
         m_trackType( trackType ),
-        m_doGlobalPlots( doGlobalPlots ) { }
+        m_doGlobalPlots( doGlobalPlots ),
+        m_doTruthMuPlots( doTruthMuPlots ) { }
 
 
 /// ---------------------------
@@ -58,14 +60,15 @@ StatusCode IDTPM::DuplicateRatePlots::bookPlots()
   ATH_CHECK( retrieveAndBook( m_duplnum_nonzero_vs_z0,   "duplnum_nonzero_vs_"+m_trackType+"_z0" ) );
 
   if( m_doGlobalPlots ) {
-    ATH_CHECK( retrieveAndBook( m_duplrate_vs_truthMu,  "duplrate_vs_truthMu" ) );
-    ATH_CHECK( retrieveAndBook( m_duplrate_vs_actualMu, "duplrate_vs_actualMu" ) );
-
-    ATH_CHECK( retrieveAndBook( m_duplnum_vs_truthMu,   "duplnum_vs_truthMu" ) );
-    ATH_CHECK( retrieveAndBook( m_duplnum_vs_actualMu,  "duplnum_vs_actualMu" ) );
-
-    ATH_CHECK( retrieveAndBook( m_duplnum_nonzero_vs_truthMu,   "duplnum_nonzero_vs_truthMu" ) );
+    ATH_CHECK( retrieveAndBook( m_duplrate_vs_actualMu,         "duplrate_vs_actualMu" ) );
+    ATH_CHECK( retrieveAndBook( m_duplnum_vs_actualMu,          "duplnum_vs_actualMu" ) );
     ATH_CHECK( retrieveAndBook( m_duplnum_nonzero_vs_actualMu,  "duplnum_nonzero_vs_actualMu" ) );
+
+    if( m_doTruthMuPlots ) {
+      ATH_CHECK( retrieveAndBook( m_duplrate_vs_truthMu,          "duplrate_vs_truthMu" ) );
+      ATH_CHECK( retrieveAndBook( m_duplnum_vs_truthMu,           "duplnum_vs_truthMu" ) );
+      ATH_CHECK( retrieveAndBook( m_duplnum_nonzero_vs_truthMu,   "duplnum_nonzero_vs_truthMu" ) );
+    }
   }
 
   return StatusCode::SUCCESS;
@@ -112,15 +115,14 @@ StatusCode IDTPM::DuplicateRatePlots::fillPlots(
   }
 
   if( m_doGlobalPlots ) {
-    ATH_CHECK( fill( m_duplrate_vs_truthMu,   truthMu,  (nMatched>1), weight ) );
     ATH_CHECK( fill( m_duplrate_vs_actualMu,  actualMu, (nMatched>1), weight ) );
+    ATH_CHECK( fill( m_duplnum_vs_actualMu,   actualMu, nMatched, weight ) );
+    if( nMatched > 0 ) ATH_CHECK( fill( m_duplnum_nonzero_vs_actualMu,  actualMu, nMatched, weight ) );
 
-    ATH_CHECK( fill( m_duplnum_vs_truthMu,   truthMu,  nMatched, weight ) );
-    ATH_CHECK( fill( m_duplnum_vs_actualMu,  actualMu, nMatched, weight ) );
-
-    if( nMatched > 0 ) {
-      ATH_CHECK( fill( m_duplnum_nonzero_vs_truthMu,   truthMu,  nMatched, weight ) );
-      ATH_CHECK( fill( m_duplnum_nonzero_vs_actualMu,  actualMu, nMatched, weight ) );
+    if( m_doTruthMuPlots ) {
+      ATH_CHECK( fill( m_duplrate_vs_truthMu,   truthMu,  (nMatched>1), weight ) );
+      ATH_CHECK( fill( m_duplnum_vs_truthMu,    truthMu,  nMatched, weight ) );
+      if( nMatched > 0 ) ATH_CHECK( fill( m_duplnum_nonzero_vs_truthMu,   truthMu,  nMatched, weight ) );
     }
   }
 

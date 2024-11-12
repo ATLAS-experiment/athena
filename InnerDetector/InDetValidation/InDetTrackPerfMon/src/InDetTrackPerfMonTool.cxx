@@ -74,11 +74,10 @@ StatusCode InDetTrackPerfMonTool::initialize() {
   ATH_CHECK( m_truthParticleName.initialize( 
       m_trkAnaDefSvc->useTruth() and not m_truthParticleName.key().empty() ) );
   ATH_CHECK( m_truthEventName.initialize(
-      m_trkAnaDefSvc->useTruth() and not m_truthEventName.key().empty() and
-      m_trkAnaDefSvc->pileupSwitch() == "HardScatter" ) );
+      m_trkAnaDefSvc->useTruth() and not m_truthEventName.key().empty() ) );
   ATH_CHECK( m_truthPileUpEventName.initialize(
       m_trkAnaDefSvc->useTruth() and not m_truthPileUpEventName.key().empty() and
-      m_trkAnaDefSvc->pileupSwitch() == "PileUp" ) );
+      m_trkAnaDefSvc->hasFullPileupTruth() ) );
 
   ATH_CHECK( m_trkAnaInfoKey.initialize() );
 
@@ -310,9 +309,9 @@ StatusCode InDetTrackPerfMonTool::procHistograms() {
 StatusCode InDetTrackPerfMonTool::loadCollections( IDTPM::TrackAnalysisCollections& trkAnaColls ) {
 
   ATH_MSG_INFO( "Loading collections" );
-  ATH_CHECK( trkAnaColls.fillEventInfo( m_eventInfoContainerName ) );
-  ATH_CHECK( trkAnaColls.fillTruthPartContainer(
-      m_truthParticleName, m_truthEventName, m_truthPileUpEventName ) );
+  ATH_CHECK( trkAnaColls.fillEventInfo(
+      m_eventInfoContainerName, m_truthEventName, m_truthPileUpEventName ) );
+  ATH_CHECK( trkAnaColls.fillTruthPartContainer( m_truthParticleName ) );
   ATH_CHECK( trkAnaColls.fillOfflTrackContainer( m_offlineTrkParticleName ) );
   ATH_CHECK( trkAnaColls.fillTrigTrackContainer( m_triggerTrkParticleName ) );
 

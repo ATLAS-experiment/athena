@@ -27,7 +27,8 @@ namespace IDTPM {
         const std::string& anaTag,
         const std::string& trackType,
         bool doTrigger = false,
-        bool doGlobalPlots = false );
+        bool doGlobalPlots = false,
+        bool doTruthMuPlots = false );
 
     /// Destructor
     virtual ~NtracksPlots() = default;
@@ -53,6 +54,7 @@ namespace IDTPM {
     std::string m_trackType;
     bool m_doTrigger;
     bool m_doGlobalPlots;
+    bool m_doTruthMuPlots;
 
     std::string m_counterName[ NCOUNTERS ] = {
       "all", "selected", "selectedInRoI", "matched"

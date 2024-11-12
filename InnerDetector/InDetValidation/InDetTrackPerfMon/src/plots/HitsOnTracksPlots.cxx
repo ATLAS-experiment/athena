@@ -21,10 +21,11 @@ IDTPM::HitsOnTracksPlots::HitsOnTracksPlots(
     const std::string& anaTag,
     const std::string& testType,
     const std::string& refType,
-    bool isITk, bool doGlobalPlots, bool do1D ) :
+    bool isITk, bool doGlobalPlots, bool doTruthMuPlots, bool do1D ) :
         PlotMgr( dirName, anaTag, pParent ),
         m_testType( testType ), m_refType( refType ),
-        m_isITk( isITk ), m_doGlobalPlots( doGlobalPlots ), m_do1D( do1D )
+        m_isITk( isITk ), m_doGlobalPlots( doGlobalPlots ),
+        m_doTruthMuPlots( doTruthMuPlots ), m_do1D( do1D )
 {
   /// TODO - dynamically switch b/w NHITPARAMSBASE or NHITPARAMSTOT based on plot detail level
   m_NHITPARAMS = NHITPARAMSBASE;
@@ -40,10 +41,11 @@ IDTPM::HitsOnTracksPlots::HitsOnTracksPlots(
     const std::string& dirName,
     const std::string& anaTag,
     const std::string& trackType,
-    bool isITk, bool doGlobalPlots ) :
+    bool isITk, bool doGlobalPlots, bool doTruthMuPlots ) :
         PlotMgr( dirName, anaTag, pParent ),
         m_testType( trackType ), m_refType( trackType ),
-        m_isITk( isITk ), m_doGlobalPlots( doGlobalPlots ), m_do1D( true )
+        m_isITk( isITk ), m_doGlobalPlots( doGlobalPlots ),
+        m_doTruthMuPlots( doTruthMuPlots ), m_do1D( true )
 {
   /// TODO - dynamically switch b/w NHITPARAMSBASE or NHITPARAMSTOT based on plot detail level
   m_NHITPARAMS = NHITPARAMSBASE;
@@ -115,6 +117,7 @@ StatusCode IDTPM::HitsOnTracksPlots::bookPlots()
 
   if( m_doGlobalPlots ) {
     for( unsigned int i=0; i<NPARAMSMU; i++ ) {
+      if( not m_doTruthMuPlots and i==TRUTHMU ) continue;
       if( m_do1D ) {
         /// TProfile plots vs mu (truth and actual)
         /// e.g. "offl_nPixelHits_vs_actualMu"
@@ -240,6 +243,7 @@ StatusCode IDTPM::HitsOnTracksPlots::fillPlots(
 
   if( m_doGlobalPlots ) {
     for( unsigned int i=0; i<NPARAMSMU; i++ ) {
+      if( not m_doTruthMuPlots and i==TRUTHMU ) continue;
       if( m_do1D ) {
         /// TProfile plots vs mu (truth and actual)
         for( unsigned int ih=0; ih<m_NHITPARAMS; ih++ ) {

@@ -55,7 +55,8 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   if( m_trkAnaDefSvc->plotTrackMultiplicities() ) {
     m_plots_nTracks_test = std::make_unique< NtracksPlots >(
         this, "Tracks/Multiplicities", m_anaTag, m_trkAnaDefSvc->testTag(),
-        m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger(), true );
+        m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger(),
+        true, m_trkAnaDefSvc->hasFullPileupTruth() );
     m_plots_nTracks_ref = std::make_unique< NtracksPlots >(
         this, "Tracks/Multiplicities", m_anaTag, m_trkAnaDefSvc->referenceTag(),
         m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() );
@@ -66,7 +67,8 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
     m_plots_eff_vsTest = std::make_unique< EfficiencyPlots >(
         this, "Tracks/Efficiencies", m_anaTag, m_trkAnaDefSvc->testTag() );
     m_plots_eff_vsRef = std::make_unique< EfficiencyPlots >(
-        this, "Tracks/Efficiencies", m_anaTag, m_trkAnaDefSvc->referenceTag(), true );
+        this, "Tracks/Efficiencies", m_anaTag, m_trkAnaDefSvc->referenceTag(),
+        true, m_trkAnaDefSvc->hasFullPileupTruth() );
     if( m_trkAnaDefSvc->matchingType() == "EFTruthMatch" ) {
       m_plots_eff_vsTruth = std::make_unique< EfficiencyPlots >(
           this, "Tracks/Efficiencies", m_anaTag, "truth" );
@@ -78,7 +80,8 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
     m_plots_tech_eff_vsTest = std::make_unique< EfficiencyPlots >(
         this, "Tracks/Efficiencies/Technical", m_anaTag, m_trkAnaDefSvc->testTag());
     m_plots_tech_eff_vsRef = std::make_unique< EfficiencyPlots >(
-        this, "Tracks/Efficiencies/Technical", m_anaTag, m_trkAnaDefSvc->referenceTag(), true );
+        this, "Tracks/Efficiencies/Technical", m_anaTag, m_trkAnaDefSvc->referenceTag(),
+        true, m_trkAnaDefSvc->hasFullPileupTruth() );
     if( m_trkAnaDefSvc->matchingType() == "EFTruthMatch" ) {
       m_plots_tech_eff_vsTruth = std::make_unique< EfficiencyPlots >(
           this, "Tracks/Efficiencies/Technical", m_anaTag, "truth" );
@@ -96,17 +99,20 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   /// Fake Rate plots (only if reference is Truth)
   if( m_trkAnaDefSvc->plotFakeRates() and m_trkAnaDefSvc->isReferenceTruth() ) {
     m_plots_fakeRate = std::make_unique< FakeRatePlots >(
-        this, "Tracks/FakeRates", m_anaTag, m_trkAnaDefSvc->testTag(), true );
+        this, "Tracks/FakeRates", m_anaTag, m_trkAnaDefSvc->testTag(),
+        true, m_trkAnaDefSvc->hasFullPileupTruth() );
     if ( not m_trkAnaDefSvc->unlinkedAsFakes() ) {
       m_plots_missingTruth = std::make_unique< FakeRatePlots >(
-          this, "Tracks/FakeRates/Unlinked", m_anaTag, m_trkAnaDefSvc->testTag(), true );
+          this, "Tracks/FakeRates/Unlinked", m_anaTag, m_trkAnaDefSvc->testTag(),
+          true, m_trkAnaDefSvc->hasFullPileupTruth() );
     }
   }
 
   /// Duplicate Rate plots
   if( m_trkAnaDefSvc->plotDuplicateRates() ) {
     m_plots_duplRate = std::make_unique< DuplicateRatePlots >(
-        this, "Tracks/Duplicates", m_anaTag, m_trkAnaDefSvc->referenceTag(), true );
+        this, "Tracks/Duplicates", m_anaTag, m_trkAnaDefSvc->referenceTag(),
+        true, m_trkAnaDefSvc->hasFullPileupTruth() );
   }
 
   /// Hits on tracks plots
@@ -114,7 +120,8 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   if( m_trkAnaDefSvc->plotHitsOnTracks() and not m_trkAnaDefSvc->isTestTruth() ) {
     m_plots_hitsOnTrk_vsTest = std::make_unique< HitsOnTracksPlots >(
         this, "Tracks/HitsOnTracks", m_anaTag,
-        m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(), true );
+        m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(),
+        true, m_trkAnaDefSvc->hasFullPileupTruth() );
   }
   if( m_trkAnaDefSvc->plotHitsOnTracksReference() and not m_trkAnaDefSvc->isReferenceTruth() ) {
     m_plots_hitsOnTrk_vsRef = std::make_unique< HitsOnTracksPlots >(
@@ -125,7 +132,8 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   if( m_trkAnaDefSvc->plotHitsOnMatchedTracks() and not m_trkAnaDefSvc->isTestTruth() ) {
     m_plots_hitsOnMatchedTrk = std::make_unique< HitsOnTracksPlots >(
         this, "Tracks/Resolutions/HitsOnTracks", m_anaTag,
-        m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(), true );
+        m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(),
+        true, m_trkAnaDefSvc->hasFullPileupTruth() );
     m_plots_hitsOnMatchedTrk_vsRef = std::make_unique< HitsOnTracksPlots >(
         this, "Tracks/Resolutions/HitsOnTracks", m_anaTag,
         m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->referenceTag(), m_trkAnaDefSvc->isITk() );
@@ -134,11 +142,13 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   if( m_trkAnaDefSvc->plotHitsOnFakeTracks() and m_trkAnaDefSvc->isReferenceTruth() ) {
     m_plots_hitsOnFakeTrk = std::make_unique< HitsOnTracksPlots >(
         this, "Tracks/FakeRates/HitsOnTracks", m_anaTag,
-        m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(), true );
+        m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(),
+        true, m_trkAnaDefSvc->hasFullPileupTruth() );
     if ( not m_trkAnaDefSvc->unlinkedAsFakes() ) {
       m_plots_hitsOnUnlinkedTrk = std::make_unique< HitsOnTracksPlots >(
           this, "Tracks/FakeRates/Unlinked/HitsOnTracks", m_anaTag,
-          m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(), true );
+          m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(),
+          true, m_trkAnaDefSvc->hasFullPileupTruth() );
     }
   }
 
@@ -166,8 +176,9 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fill(
     TrackAnalysisCollections& trkAnaColls, float weight )
 {
   float actualMu = trkAnaColls.eventInfo() ?
-                   trkAnaColls.eventInfo()->actualInteractionsPerCrossing() : 0.;
-  float truthMu = 0.; // TODO - do proper calculation
+                   trkAnaColls.eventInfo()->actualInteractionsPerCrossing() : -1.;
+  float truthMu = trkAnaColls.truthPileupEventContainer() ?
+                  static_cast< float >( trkAnaColls.truthPileupEventContainer()->size() ) : -1.;
 
   /// Plots w.r.t. test tracks quantities
   if( m_trkAnaDefSvc->isTestTruth() ) {

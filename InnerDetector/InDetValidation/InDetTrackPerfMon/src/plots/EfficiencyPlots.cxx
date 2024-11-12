@@ -17,10 +17,12 @@
 /// -----------------------
 IDTPM::EfficiencyPlots::EfficiencyPlots(
     PlotMgr* pParent, const std::string& dirName, 
-    const std::string& anaTag, const std::string& trackType, bool doGlobalPlots ) :
+    const std::string& anaTag, const std::string& trackType,
+    bool doGlobalPlots, bool doTruthMuPlots ) :
         PlotMgr( dirName, anaTag, pParent ), 
         m_trackType( trackType ),
-        m_doGlobalPlots( doGlobalPlots ) { }
+        m_doGlobalPlots( doGlobalPlots ),
+        m_doTruthMuPlots( doTruthMuPlots ) { }
 
 
 /// ---------------------------
@@ -55,8 +57,8 @@ StatusCode IDTPM::EfficiencyPlots::bookPlots()
   ATH_CHECK( retrieveAndBook( m_eff_vs_z0sin_vs_d0, "eff_vs_"+m_trackType+"_z0sin_vs_d0" ) );
 
   if( m_doGlobalPlots ) {
-    ATH_CHECK( retrieveAndBook( m_eff_vs_truthMu, "eff_vs_truthMu" ) );
     ATH_CHECK( retrieveAndBook( m_eff_vs_actualMu, "eff_vs_actualMu" ) );
+    if( m_doTruthMuPlots ) ATH_CHECK( retrieveAndBook( m_eff_vs_truthMu, "eff_vs_truthMu" ) );
   }
 
   return StatusCode::SUCCESS;
@@ -70,7 +72,7 @@ template< typename PARTICLE >
 StatusCode IDTPM::EfficiencyPlots::fillPlots(
     const PARTICLE& particle, bool isMatched, float truthMu, float actualMu, float weight )
 {
-  /// Compute track parameters - TODO: add more...
+  /// Compute track parameters
   float ppt    = pT( particle ) / Gaudi::Units::GeV;
   float peta   = eta( particle );
   float pphi   = phi( particle );
@@ -97,8 +99,8 @@ StatusCode IDTPM::EfficiencyPlots::fillPlots(
   ATH_CHECK( fill( m_eff_vs_z0sin_vs_d0, pz0*std::sin(ptheta), pd0, isMatched, weight ) );
 
   if( m_doGlobalPlots ) {
-    ATH_CHECK( fill( m_eff_vs_truthMu, truthMu, isMatched, weight ) );
     ATH_CHECK( fill( m_eff_vs_actualMu, actualMu, isMatched, weight ) );
+    if( m_doTruthMuPlots ) ATH_CHECK( fill( m_eff_vs_truthMu, truthMu, isMatched, weight ) );
   }
 
   return StatusCode::SUCCESS;
