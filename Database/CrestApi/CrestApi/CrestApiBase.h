@@ -31,6 +31,33 @@ namespace Crest
 
 class CrestApiBase {
 
+private:
+
+   inline static const std::string s_CREST_CLIENT_VERSION = "5.0";
+  
+protected:
+
+/**
+ *  This method method calculates the hash for string. 
+ * @param str - string.
+ * @return hash for a given string.
+ */
+    std::string getHash(std::string_view str);
+
+/**
+ *  This method method calculates the hash for a file. 
+ * @param file - path to the file with the file name..
+ * @return hash for a given file.
+ */
+    std::string getHashForFile(const std::string &file);
+
+/**
+ * This method returns the full CrestApi version.
+ * @return CrestApi library version.
+ */
+    std::string getClientVersion();
+
+
 public:
     virtual ~CrestApiBase() = default;
     // GlobaTag methods
@@ -328,6 +355,13 @@ public:
  * @return payload meta info as PayloadDto.
  */
     virtual PayloadDto getPayloadMeta(const std::string& hash) = 0;
+
+/**
+ * This method returns the full CREST Server version.
+ * @return CREST server version.
+ */
+    virtual std::string getCrestVersion() = 0;
+
 
 };
 

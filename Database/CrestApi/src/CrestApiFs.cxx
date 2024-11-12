@@ -719,12 +719,6 @@ namespace Crest
     return buf;
   }
 
-  std::string CrestFsClient::getHash(std::string_view str)
-  {
-    std::string hash_hex_str = picosha2::hash256_hex_string(str.begin(), str.end());
-    return hash_hex_str;
-  }
-
   std::string CrestFsClient::getFirstLetters(const std::string &str)
   {
     std::string result = str.substr(0, s_FS_PREFIX_LENGTH);
@@ -853,28 +847,6 @@ namespace Crest
     }
   }
 
-  std::string CrestFsClient::getHashForFile(const std::string &file)
-  {
-    std::ifstream ifs(file);
-    if (!ifs)
-    {
-      throw CrestException(
-          "ERROR in CrestFsClient::getHashForFile cannot open file \"" + file + "\".");
-    }
-
-    picosha2::hash256_one_by_one hasher;
-    std::vector<char> buffer(1024 * 1024); // use 1M memory
-    while (ifs.read(buffer.data(), static_cast<std::streamsize>(buffer.size())))
-    {
-      hasher.process(buffer.begin(), buffer.end());
-    }
-    // process remains
-    hasher.process(buffer.begin(), buffer.begin() + static_cast<int>(ifs.gcount()));
-    hasher.finish();
-
-    std::string hash = picosha2::get_hash_hex_string(hasher);
-    return hash;
-  }
 
   // Payload methods
 
@@ -1134,6 +1106,12 @@ namespace Crest
   bool CrestFsClient::isMatch(std::string word, std::string pattern)
   {
     return isMatch(word, 0, pattern, 0);
+  }
+
+  std::string CrestFsClient::getCrestVersion()
+  {
+    throw CrestException(
+      "ERROR in CrestFsClient::getCrestVersion: cannot get the CREST server version for file storage.");
   }
 
 } // namespace Crest
