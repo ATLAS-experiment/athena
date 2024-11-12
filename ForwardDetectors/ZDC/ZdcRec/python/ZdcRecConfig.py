@@ -331,7 +331,6 @@ def ZdcNtupleRun3Cfg(flags,**kwargs):
                            enableOutputTree = True,
                            writeOnlyTriggers = False,
                            enableRPD = flags.Detector.EnableZDC_RPD,
-                           enableRPDAmp = flags.Detector.EnableZDC_RPD,
                            enableCentroid = flags.Detector.EnableZDC_RPD,
                            reprocZdc = False,
                            **kwargs))
