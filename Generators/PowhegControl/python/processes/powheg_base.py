@@ -130,7 +130,10 @@ class PowhegBase(Configurable):
         ldpath = os.getenv('LD_LIBRARY_PATH')
         powhegpath = os.getenv('POWHEGPATH')
         librarypath = glob.glob(powhegpath+librarypath)
-        ldpath_new = ldpath+ ":" + librarypath[0]
+        if (len(librarypath)>0):
+          ldpath_new = ldpath+ ":" + librarypath[0]
+        else:
+          ldpath_new = ldpath
         os.environ['LD_LIBRARY_PATH'] = ldpath_new
         logger.debug("LD_LIBRARY_PATH (after) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
 
