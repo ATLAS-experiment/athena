@@ -15,9 +15,10 @@ def MuonR4SegmentCnvAlgCfg(flags, name="MuonR4SegmentCnvAlg", **kwargs):
     if not flags.Detector.GeometryMM: kwargs.setdefault("MmKey" ,"")
     if not flags.Detector.GeometrysTGC: kwargs.setdefault("sTgcKey" ,"")
 
-    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg, MdtDriftCircleOnTrackCreatorCfg
+    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg, MdtDriftCircleOnTrackCreatorCfg, TriggerChamberClusterOnTrackCreatorCfg
     kwargs.setdefault("MdtRotCreator", result.popToolsAndMerge(MdtDriftCircleOnTrackCreatorCfg(flags)))
     kwargs.setdefault("ClusterRotCreator",    result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags)))
+    kwargs.setdefault("CompetingRotCreator", result.getPrimaryAndMerge(TriggerChamberClusterOnTrackCreatorCfg(flags)))
     from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
     kwargs.setdefault("printerTool", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)))
     the_alg = CompFactory.MuonR4.SegmentCnvAlg(name, **kwargs)

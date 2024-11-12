@@ -16,6 +16,7 @@
 
 #include "MuonRecToolInterfaces/IMdtDriftCircleOnTrackCreator.h"
 #include "MuonRecToolInterfaces/IMuonClusterOnTrackCreator.h"
+#include "MuonRecToolInterfaces/IMuonCompetingClustersOnTrackCreator.h"
 #include "MuonRecHelperTools/MuonEDMPrinterTool.h"
 
 namespace MuonR4{
@@ -32,13 +33,18 @@ namespace MuonR4{
             StatusCode execute(const EventContext& ctx) const override final;
     
         private:
-            
+            /** @brief Convert the R4 segment and fill the converted segment into the SegmentCollection
+             *  @param ctx: EventContext to access the alignment & calibration constants
+             *  @param segment: Reference to the segment to convert
+             *  @param outContainer: Reference to the output container to parse */
+            StatusCode convert(const EventContext& ctx,
+                               const MuonR4::Segment& segment,
+                               Trk::SegmentCollection& outContainer) const;
             /** @brief Loads a container from the StoreGate and returns whether the retrieval is successful.
              *         If the key is empty a nullptr is assigned and the code returns success
              *  @param ctx: EventContext of the current Event
              *  @param key: Container key to retrieve
-             *  @param contPtr: Pointer to which the retievec container will be assigned to
-             */
+             *  @param contPtr: Pointer to which the retievec container will be assigned to */
             template <class ContType> 
                 StatusCode retrieveContainer(const EventContext& ctx,
                                              const SG::ReadHandleKey<ContType>& key,
@@ -46,21 +52,17 @@ namespace MuonR4{
             /*** @brief Fetches a MuonPrepData object from the PrepData container by matching the parsed Identifier.
                *        Nullptr is returned if the object does not exist and an error message is printed
                * @param prdId: Identifier of the measurement to fetch
-               * @param prdContainer: Pointer to the MuonPrepData container to fetch the object from.  
-               */
+               * @param prdContainer: Pointer to the MuonPrepData container to fetch the object from.  */
             template <class PrdType> 
                 const PrdType* fetchPrd(const Identifier& prdId,
                                         const Muon::MuonPrepDataContainerT<PrdType>* prdContainer) const;
-            
-            StatusCode convert(const EventContext& ctx,
-                               const MuonR4::Segment& segment,
-                               Trk::SegmentCollection& outContainer) const;
 
+            using RotVec = std::vector<std::unique_ptr<Trk::RIO_OnTrack>>;
             template <class PrdType>
                 StatusCode convertMeasurement(const MuonR4::Segment& segment,
                                               const CalibratedSpacePoint& spacePoint,
                                               const Muon::MuonPrepDataContainerT<PrdType>* prdContainer,
-                                              DataVector<const Trk::MeasurementBase>& convMeasVec) const;
+                                              RotVec& convMeasVec) const;
 
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", 
                                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
@@ -85,6 +87,7 @@ namespace MuonR4{
             ToolHandle<Muon::IMdtDriftCircleOnTrackCreator> m_mdtCreator{this,"MdtRotCreator",""};  //<! pointer to mdt rio ontrack creator
             ToolHandle<Muon::IMuonClusterOnTrackCreator> m_clusterCreator{this,"ClusterRotCreator",""};
 
+            ToolHandle<Muon::IMuonCompetingClustersOnTrackCreator> m_compClusterCreator{this, "CompetingRotCreator", ""};  //<! competing clusters rio ontrack creator
 
     };
 
