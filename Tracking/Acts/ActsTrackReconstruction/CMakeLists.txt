@@ -66,3 +66,14 @@ atlas_add_test ( DuplicateSeedDetectorTest
   SOURCES test/DuplicateSeedDetectorTest.cxx
   LINK_LIBRARIES ActsEventLib ActsEventCnvLib xAODInDetMeasurement
   POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test ( MeasurementCalibratorBaseTest
+  SOURCES test/MeasurementCalibratorBaseTest.cxx
+  LINK_LIBRARIES ActsCore ActsEventLib xAODInDetMeasurement ActsGeometryInterfacesLib
+  POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test ( TrkMeasurementCalibratorTest
+  SOURCES test/TrkMeasurementCalibratorTest.cxx
+  LINK_LIBRARIES ActsCore ActsEventCnvLib TestTools AthenaBaseComps
+  DEPENDS MeasurementCalibratorBaseTest
+  POST_EXEC_SCRIPT nopost.sh )

@@ -90,8 +90,8 @@ StatusCode GaussianSumFitterTool::initialize() {
   }
 
   m_gsfExtensions.updater.connect<&ActsTrk::detail::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::MutableTrackStateBackend>>();
-  m_calibrator = std::make_unique<TrkMeasurementCalibrator>(*m_ATLASConverterTool);
-  m_gsfExtensions.calibrator.connect<&TrkMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(m_calibrator.get());
+  m_calibrator = std::make_unique<ActsTrk::detail::TrkMeasurementCalibrator>(*m_ATLASConverterTool);
+  m_gsfExtensions.calibrator.connect<&ActsTrk::detail::TrkMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(m_calibrator.get());
 
   m_surfaceAccessor.m_converterTool = &(*m_ATLASConverterTool);
   m_gsfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&m_surfaceAccessor);

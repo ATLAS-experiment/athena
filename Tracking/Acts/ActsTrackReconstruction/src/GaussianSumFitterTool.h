@@ -30,12 +30,14 @@
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "src/detail/FitterHelperFunctions.h"
-#include "src/detail/MeasurementCalibrator.h"
+#include "src/detail/TrkMeasurementCalibrator.h"
 #include "ActsGeometry/ATLASSourceLinkSurfaceAccessor.h"
 
 // STL
 #include <string>
 #include <memory>
+
+
 
 namespace ActsTrk {
 
@@ -165,16 +167,16 @@ private:
 
   /// Type erased track fitter function.
   using Fitter = Acts::GaussianSumFitter< Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::Navigator>,
-					  Acts::AtlasBetheHeitlerApprox<6, 5>,
-					  ActsTrk::MutableTrackStateBackend >;
-  
-  std::unique_ptr<TrkMeasurementCalibrator> m_calibrator;
-  std::unique_ptr<Fitter> m_fitter;
+                                                        Acts::AtlasBetheHeitlerApprox<6, 5>,
+                                                        ActsTrk::MutableTrackStateBackend >;
+
+  std::unique_ptr<ActsTrk::detail::TrkMeasurementCalibrator> m_calibrator {nullptr};
+  std::unique_ptr<Fitter> m_fitter {nullptr};
 
   using DirectFitter = Acts::GaussianSumFitter< Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::DirectNavigator>,
 						Acts::AtlasBetheHeitlerApprox<6, 5>,
 						ActsTrk::MutableTrackStateBackend >;
-  std::unique_ptr<DirectFitter> m_directFitter;
+  std::unique_ptr<DirectFitter> m_directFitter {nullptr};
 
 
   ATLASSourceLinkSurfaceAccessor m_surfaceAccessor{};
@@ -183,7 +185,7 @@ private:
   ActsTrk::detail::FitterHelperFunctions::ATLASOutlierFinder m_outlierFinder{0};
 
   /// logging instance
-  std::unique_ptr<const Acts::Logger> m_logger;
+  std::unique_ptr<const Acts::Logger> m_logger {nullptr};
 
 }; // end of namespace
 

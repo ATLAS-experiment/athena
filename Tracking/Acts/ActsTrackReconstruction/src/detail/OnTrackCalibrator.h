@@ -7,8 +7,12 @@
 
 #include "GaudiKernel/ToolHandle.h"
 
-#include "src/detail/MeasurementCalibrator.h"
+#include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
+#include "src/detail/MeasurementCalibratorBase.h"
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
+
+#include "xAODInDetMeasurement/PixelCluster.h"
+#include "xAODInDetMeasurement/StripCluster.h"
 
 namespace ActsTrk::detail {
 
