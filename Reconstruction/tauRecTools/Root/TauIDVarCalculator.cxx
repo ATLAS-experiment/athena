@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -27,30 +27,30 @@ TauIDVarCalculator::TauIDVarCalculator(const std::string& name):
 
 
 StatusCode TauIDVarCalculator::execute(xAOD::TauJet& tau) const {
-  static const SG::AuxElement::Accessor<float> acc_absipSigLeadTrk("absipSigLeadTrk");
+  static const SG::Accessor<float> acc_absipSigLeadTrk("absipSigLeadTrk");
   acc_absipSigLeadTrk(tau) = (tau.nTracks()>0) ? std::abs(tau.track(0)->d0SigTJVA()) : 0.;
   
   if(inTrigger()) return StatusCode::SUCCESS;
   
   //everything below is just for EleBDT!
-  static const SG::AuxElement::Accessor<float> acc_absEtaLead("ABS_ETA_LEAD_TRACK"); 
-  static const SG::AuxElement::Accessor<float> acc_absDeltaEta("TAU_ABSDELTAETA");
-  static const SG::AuxElement::Accessor<float> acc_absDeltaPhi("TAU_ABSDELTAPHI");
-  static const SG::AuxElement::ConstAccessor<float> acc_sumEMCellEtOverLeadTrkPt("sumEMCellEtOverLeadTrkPt");
-  static const SG::AuxElement::ConstAccessor<float> acc_etHadAtEMScale("etHadAtEMScale");
-  static const SG::AuxElement::ConstAccessor<float> acc_etEMAtEMScale("etEMAtEMScale");
-  static const SG::AuxElement::Accessor<float> acc_EMFractionAtEMScaleMOVEE3("EMFRACTIONATEMSCALE_MOVEE3");
-  static const SG::AuxElement::Accessor<float> acc_seedTrkSecMaxStripEtOverPt("TAU_SEEDTRK_SECMAXSTRIPETOVERPT");
-  static const SG::AuxElement::ConstAccessor<float> acc_secMaxStripEt("secMaxStripEt");
-  static const SG::AuxElement::ConstAccessor<float> acc_centFrac("centFrac");
+  static const SG::Accessor<float> acc_absEtaLead("ABS_ETA_LEAD_TRACK"); 
+  static const SG::Accessor<float> acc_absDeltaEta("TAU_ABSDELTAETA");
+  static const SG::Accessor<float> acc_absDeltaPhi("TAU_ABSDELTAPHI");
+  static const SG::ConstAccessor<float> acc_sumEMCellEtOverLeadTrkPt("sumEMCellEtOverLeadTrkPt");
+  static const SG::ConstAccessor<float> acc_etHadAtEMScale("etHadAtEMScale");
+  static const SG::ConstAccessor<float> acc_etEMAtEMScale("etEMAtEMScale");
+  static const SG::Accessor<float> acc_EMFractionAtEMScaleMOVEE3("EMFRACTIONATEMSCALE_MOVEE3");
+  static const SG::Accessor<float> acc_seedTrkSecMaxStripEtOverPt("TAU_SEEDTRK_SECMAXSTRIPETOVERPT");
+  static const SG::ConstAccessor<float> acc_secMaxStripEt("secMaxStripEt");
+  static const SG::ConstAccessor<float> acc_centFrac("centFrac");
 
   // Will: Fixed variables for R21
-  static const SG::AuxElement::Accessor<float> acc_EMFracFixed("EMFracFixed");
-  static const SG::AuxElement::Accessor<float> acc_hadLeakFracFixed("hadLeakFracFixed");
-  static const SG::AuxElement::Accessor<float> acc_etHotShotDR1("etHotShotDR1"); // replace secMaxStripEt
-  static const SG::AuxElement::Accessor<float> acc_etHotShotWin("etHotShotWin"); // replace secMaxStripEt
-  static const SG::AuxElement::Accessor<float> acc_etHotShotDR1OverPtLeadTrk("etHotShotDR1OverPtLeadTrk"); // replace TAU_SEEDTRK_SECMAXSTRIPETOVERPT
-  static const SG::AuxElement::Accessor<float> acc_etHotShotWinOverPtLeadTrk("etHotShotWinOverPtLeadTrk"); // replace TAU_SEEDTRK_SECMAXSTRIPETOVERPT
+  static const SG::Accessor<float> acc_EMFracFixed("EMFracFixed");
+  static const SG::Accessor<float> acc_hadLeakFracFixed("hadLeakFracFixed");
+  static const SG::Accessor<float> acc_etHotShotDR1("etHotShotDR1"); // replace secMaxStripEt
+  static const SG::Accessor<float> acc_etHotShotWin("etHotShotWin"); // replace secMaxStripEt
+  static const SG::Accessor<float> acc_etHotShotDR1OverPtLeadTrk("etHotShotDR1OverPtLeadTrk"); // replace TAU_SEEDTRK_SECMAXSTRIPETOVERPT
+  static const SG::Accessor<float> acc_etHotShotWinOverPtLeadTrk("etHotShotWinOverPtLeadTrk"); // replace TAU_SEEDTRK_SECMAXSTRIPETOVERPT
 
 
   // EMFracFixed and eHad1AtEMScaleFixed (for acc_hadLeakFracFixed)

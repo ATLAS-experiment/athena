@@ -150,7 +150,7 @@ TauVertexFinder::getPV_TJVA(const xAOD::TauJet& pTau,
           tracksForTJVA.push_back(xTrack); 
       } 
       else {
-        static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::TrackParticleContainer>> acc_originalTrack("ERMOriginalTrack");
+        static const SG::ConstAccessor<ElementLink<xAOD::TrackParticleContainer>> acc_originalTrack("ERMOriginalTrack");
         if (!acc_originalTrack.isAvailable(*xTrack)) {
           ATH_MSG_WARNING("Original ERM track link is not available, skipping track");
           continue;

@@ -75,10 +75,10 @@ StatusCode TauGNNEvaluator::initialize() {
 
 StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
   // Output variable Decorators
-  const SG::AuxElement::Accessor<float> output(m_output_varname);
-  const SG::AuxElement::Accessor<float> out_ptau(m_output_ptau);
-  const SG::AuxElement::Accessor<float> out_pjet(m_output_pjet);
-  const SG::AuxElement::Decorator<char> out_trkclass("GNTau_TrackClass");
+  const SG::Accessor<float> output(m_output_varname);
+  const SG::Accessor<float> out_ptau(m_output_ptau);
+  const SG::Accessor<float> out_pjet(m_output_pjet);
+  const SG::Decorator<char> out_trkclass("GNTau_TrackClass");
   // Set default score and overwrite later
   output(tau) = -1111.0f;
   out_ptau(tau) = -1111.0f;

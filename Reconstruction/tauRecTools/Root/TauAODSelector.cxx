@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // local include(s)
@@ -26,7 +26,7 @@ StatusCode TauAODSelector::execute(xAOD::TauJet& tau) const {
     if (tau.pt() < m_minTauPt) passThinning = false;
   }
 
-  static const SG::AuxElement::Accessor<char> acc_passThinning("passThinning");
+  static const SG::Accessor<char> acc_passThinning("passThinning");
   acc_passThinning(tau) = passThinning;
 
   if (m_doEarlyStopping && !passThinning) return StatusCode::FAILURE;

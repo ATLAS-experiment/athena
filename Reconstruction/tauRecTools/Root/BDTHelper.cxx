@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/BDTHelper.h"
@@ -124,7 +124,7 @@ std::vector<float> BDTHelper::getInputVariables(const xAOD::TauJet& tau) const {
       name = name(name.Last('.')+1, name.Length()-name.Last('.')-1);
     }
   
-    SG::AuxElement::ConstAccessor<float> accessor(name.Data());
+    SG::ConstAccessor<float> accessor(name.Data());
     float value = accessor(tau);
     values.push_back(value);
   }

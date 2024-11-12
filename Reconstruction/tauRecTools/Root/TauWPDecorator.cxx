@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauWPDecorator.h"
@@ -182,7 +182,7 @@ StatusCode TauWPDecorator::initialize() {
   ATH_CHECK(storeLimits(3));  
     
   for (size_t wpIndex=0; wpIndex < m_decorWPs.size(); ++wpIndex) {
-    m_charDecors.emplace_back(SG::AuxElement::Accessor<char>( m_decorWPs[wpIndex] ));
+    m_charDecors.emplace_back(SG::Accessor<char>( m_decorWPs[wpIndex] ));
   }
 
   return StatusCode::SUCCESS;
@@ -197,7 +197,7 @@ StatusCode TauWPDecorator::execute(xAOD::TauJet& tau) const {
   // y variable is |eta| of leading track in electron mode, and pileup in other cases
   double yVariable = 0.0;
   if (m_useAbsEta) {
-    static const SG::AuxElement::ConstAccessor<float> acc_absEta("ABS_ETA_LEAD_TRACK");
+    static const SG::ConstAccessor<float> acc_absEta("ABS_ETA_LEAD_TRACK");
     yVariable = std::abs(acc_absEta(tau));
   } 
   else {
@@ -256,7 +256,7 @@ StatusCode TauWPDecorator::execute(xAOD::TauJet& tau) const {
   bool gotLow = false; // whether lower bounday is found
   bool gotHigh = false; // whether upper bounday is found
   
-  const SG::AuxElement::ConstAccessor<float> acc_score(m_scoreName);
+  const SG::ConstAccessor<float> acc_score(m_scoreName);
   double score = acc_score(tau); // original score (BDT/RNN)
   
   // Loop over all histograms to find the lower and upper bounary of the score and corresponding efficiency
@@ -292,7 +292,7 @@ StatusCode TauWPDecorator::execute(xAOD::TauJet& tau) const {
     scoreTrans = transformScore(score, cuts[0], effs[0], cuts[1], effs[1]);
   }
 
-  const SG::AuxElement::Accessor<float> acc_scoreTrans(m_scoreNameTrans);
+  const SG::Accessor<float> acc_scoreTrans(m_scoreNameTrans);
   acc_scoreTrans(tau) = scoreTrans;
   
   if(m_defineWPs) {
@@ -313,7 +313,7 @@ StatusCode TauWPDecorator::execute(xAOD::TauJet& tau) const {
     }
     // Decorate other WPs
     for (size_t wpIndex=0; wpIndex < m_decorWPs.size(); ++wpIndex) {
-      const SG::AuxElement::Accessor<char>& decorator = m_charDecors[wpIndex];
+      const SG::Accessor<char>& decorator = m_charDecors[wpIndex];
 
       if(nProng == 0) {
         decorator(tau) = scoreTrans > (1-m_decorWPEffs0p[wpIndex]);

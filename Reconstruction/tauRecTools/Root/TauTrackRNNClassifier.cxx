@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauTrackRNNClassifier.h"
@@ -101,8 +101,8 @@ StatusCode TauTrackRNNClassifier::executeTrackClassifier(xAOD::TauJet& xTau, xAO
   xTau.setDetail(xAOD::TauJetParameters::nIsolatedTracks, (int) xTau.nTracks(xAOD::TauJetParameters::classifiedIsolation));
 
   // decorations for now, may be turned into Aux
-  static const SG::AuxElement::Accessor<int> nTrkConv("nConversionTracks");
-  static const SG::AuxElement::Accessor<int> nTrkFake("nFakeTracks");
+  static const SG::Accessor<int> nTrkConv("nConversionTracks");
+  static const SG::Accessor<int> nTrkFake("nFakeTracks");
   nTrkConv(xTau) = (int) xTau.nTracks(xAOD::TauJetParameters::classifiedConversion);
   nTrkFake(xTau) = (int) xTau.nTracks(xAOD::TauJetParameters::classifiedFake);
 
@@ -167,10 +167,10 @@ StatusCode TrackRNN::classifyTracks(std::vector<xAOD::TauTrack*>& vTracks,
     return StatusCode::SUCCESS;
   }
 
-  static const SG::AuxElement::Accessor<float> idScoreCharged("rnn_chargedScore");
-  static const SG::AuxElement::Accessor<float> idScoreIso("rnn_isolationScore");
-  static const SG::AuxElement::Accessor<float> idScoreConv("rnn_conversionScore");
-  static const SG::AuxElement::Accessor<float> idScoreFake("rnn_fakeScore");
+  static const SG::Accessor<float> idScoreCharged("rnn_chargedScore");
+  static const SG::Accessor<float> idScoreIso("rnn_isolationScore");
+  static const SG::Accessor<float> idScoreConv("rnn_conversionScore");
+  static const SG::Accessor<float> idScoreFake("rnn_fakeScore");
 
   // don't classify tracks, set default decorations
   if(skipTracks) {
