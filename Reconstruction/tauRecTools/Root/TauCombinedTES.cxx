@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauCombinedTES.h"
@@ -146,10 +146,10 @@ StatusCode TauCombinedTES::execute(xAOD::TauJet& tau) const {
     combinedP4 = getCombinedP4(tau, variables);
   }
 
-  static const SG::AuxElement::Accessor<float> decPtCombined("ptCombined");
-  static const SG::AuxElement::Accessor<float> decEtaCombined("etaCombined");
-  static const SG::AuxElement::Accessor<float> decPhiCombined("phiCombined");
-  static const SG::AuxElement::Accessor<float> decMCombined("mCombined");
+  static const SG::Accessor<float> decPtCombined("ptCombined");
+  static const SG::Accessor<float> decEtaCombined("etaCombined");
+  static const SG::Accessor<float> decPhiCombined("phiCombined");
+  static const SG::Accessor<float> decMCombined("mCombined");
 
   decPtCombined(tau) = combinedP4.Pt();
   decEtaCombined(tau) = combinedP4.Eta();
@@ -157,14 +157,14 @@ StatusCode TauCombinedTES::execute(xAOD::TauJet& tau) const {
   decMCombined(tau) = combinedP4.M();
 
   if (m_addCalibrationResultVariables){
-    static const SG::AuxElement::Accessor<float> decPtConstituent("pt_constituent");
-    static const SG::AuxElement::Accessor<float> decPtTauRecCalibrated("pt_tauRecCalibrated");
-    static const SG::AuxElement::Accessor<float> decPtWeighted("pt_weighted");
-    static const SG::AuxElement::Accessor<float> decWeightWeighted("weight_weighted");
-    static const SG::AuxElement::Accessor<float> decSigmaCompatibility("sigma_compatibility");
-    static const SG::AuxElement::Accessor<float> decSigmaTaurec("sigma_tauRec");
-    static const SG::AuxElement::Accessor<float> decSigmaConstituent("sigma_constituent");
-    static const SG::AuxElement::Accessor<float> decCorrelationCoefficient("correlation_coefficient");
+    static const SG::Accessor<float> decPtConstituent("pt_constituent");
+    static const SG::Accessor<float> decPtTauRecCalibrated("pt_tauRecCalibrated");
+    static const SG::Accessor<float> decPtWeighted("pt_weighted");
+    static const SG::Accessor<float> decWeightWeighted("weight_weighted");
+    static const SG::Accessor<float> decSigmaCompatibility("sigma_compatibility");
+    static const SG::Accessor<float> decSigmaTaurec("sigma_tauRec");
+    static const SG::Accessor<float> decSigmaConstituent("sigma_constituent");
+    static const SG::Accessor<float> decCorrelationCoefficient("correlation_coefficient");
 
     decPtConstituent(tau) = variables.pt_constituent;
     decPtTauRecCalibrated(tau) = variables.pt_tauRecCalibrated;

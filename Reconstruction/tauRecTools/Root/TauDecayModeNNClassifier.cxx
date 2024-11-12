@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // local include(s)
@@ -147,7 +147,7 @@ StatusCode TauDecayModeNNClassifier::execute(xAOD::TauJet &xTau) const
     itMax = std::max_element(probs.cbegin(), probs.cend());
   }
 
-  const SG::AuxElement::Accessor<int> accDecayMode(m_outputName);
+  const SG::Accessor<int> accDecayMode(m_outputName);
   accDecayMode(xTau) = std::distance(probs.cbegin(), itMax);
 
   if (m_decorateProb)
@@ -155,7 +155,7 @@ StatusCode TauDecayModeNNClassifier::execute(xAOD::TauJet &xTau) const
     for (std::size_t i = 0; i < probs.size(); ++i)
     {
       const std::string probName = m_probPrefix + DMVar::sModeNames[i];
-      const SG::AuxElement::Accessor<float> accProb(probName);
+      const SG::Accessor<float> accProb(probName);
       accProb(xTau) = probs[i];
     }
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 */
 
 #include "TauThinningAlg.h"
@@ -86,7 +86,7 @@ StatusCode TauThinningAlg::execute (const EventContext& ctx) const
     shotCellLinksOpt->thinAll();
   }
 
-  static const SG::AuxElement::ConstAccessor<char> acc_passThinning("passThinning");
+  static const SG::ConstAccessor<char> acc_passThinning("passThinning");
 
   for (const xAOD::TauJet* tau : *taus) {
 

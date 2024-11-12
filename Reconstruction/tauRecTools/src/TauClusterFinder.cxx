@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ATHLYSIS
@@ -37,7 +37,7 @@ StatusCode TauClusterFinder::execute(xAOD::TauJet& tau) const {
       continue;
     }
     if (inEleRM()){
-      static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::CaloClusterContainer>> acc_originalObject("ERMOriginalCaloCluster");
+      static const SG::ConstAccessor<ElementLink<xAOD::CaloClusterContainer>> acc_originalObject("ERMOriginalCaloCluster");
       auto original_cluster_link = acc_originalObject(*cluster);
         if (!original_cluster_link.isValid()){
             ATH_MSG_ERROR("Original ERM cluster link is not valid");

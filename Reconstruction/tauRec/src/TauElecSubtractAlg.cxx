@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 */
 
 #include "TauElecSubtractAlg.h"
@@ -99,7 +99,7 @@ StatusCode TauElecSubtractAlg::execute (const EventContext& ctx) const
             tracksOutputContainer->push_back(new_track);
             *new_track = *old_track;
             auto link = ElementLink< xAOD::TrackParticleContainer >( *tracksInput, old_track->index() );
-            static const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer>> acc_originalObjectDecor("ERMOriginalTrack");
+            static const SG::Accessor<ElementLink<xAOD::TrackParticleContainer>> acc_originalObjectDecor("ERMOriginalTrack");
             acc_originalObjectDecor(*new_track) = link;
         }
     }
@@ -114,7 +114,7 @@ StatusCode TauElecSubtractAlg::execute (const EventContext& ctx) const
             clustersOutputContainer->push_back(new_cluster);
             *new_cluster = *old_cluster;
             auto link = ElementLink< xAOD::CaloClusterContainer >( *clustersInput, old_cluster->index() );
-            static const SG::AuxElement::Accessor<ElementLink<xAOD::CaloClusterContainer>> acc_originalObjectDecor("ERMOriginalCaloCluster");
+            static const SG::Accessor<ElementLink<xAOD::CaloClusterContainer>> acc_originalObjectDecor("ERMOriginalCaloCluster");
             acc_originalObjectDecor(*new_cluster) = link;
         }
     }

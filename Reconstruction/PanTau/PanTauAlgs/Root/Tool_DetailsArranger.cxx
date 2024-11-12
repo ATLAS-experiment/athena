@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODTau/TauJet.h"
@@ -313,7 +313,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
       pfo_link_vector.push_back(vec_pi0pfos.at(itlv).at(ipfo));
     }
 
-    static const SG::AuxElement::Accessor<std::vector< ElementLink< xAOD::PFOContainer > > > accPi0PFOLinks("pi0PFOLinks");
+    static const SG::Accessor<std::vector< ElementLink< xAOD::PFOContainer > > > accPi0PFOLinks("pi0PFOLinks");
     accPi0PFOLinks(*p) = pfo_link_vector;
 
     ElementLink< xAOD::IParticleContainer > linkToPi0;

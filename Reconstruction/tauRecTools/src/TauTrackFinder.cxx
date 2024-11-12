@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -104,7 +104,7 @@ StatusCode TauTrackFinder::executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrack
   for (auto trk : *trackParticleCont){
     if (!inEleRM()) { vecTrks.push_back(trk); }
     else{
-      static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::TrackParticleContainer>> acc_originalObject("ERMOriginalTrack");
+      static const SG::ConstAccessor<ElementLink<xAOD::TrackParticleContainer>> acc_originalObject("ERMOriginalTrack");
       auto original_id_track_link = acc_originalObject(*trk);
       if (!original_id_track_link.isValid()) {
           ATH_MSG_ERROR("Original track link is not valid");
@@ -301,10 +301,10 @@ StatusCode TauTrackFinder::executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrack
 
 
   // this could be replaced with TauTrack::setDetail
-  static const SG::AuxElement::Accessor<float> dec_d0TJVA("d0TJVA");
-  static const SG::AuxElement::Accessor<float> dec_z0sinthetaTJVA("z0sinthetaTJVA");
-  static const SG::AuxElement::Accessor<float> dec_d0SigTJVA("d0SigTJVA");
-  static const SG::AuxElement::Accessor<float> dec_z0sinthetaSigTJVA("z0sinthetaSigTJVA");
+  static const SG::Accessor<float> dec_d0TJVA("d0TJVA");
+  static const SG::Accessor<float> dec_z0sinthetaTJVA("z0sinthetaTJVA");
+  static const SG::Accessor<float> dec_d0SigTJVA("d0SigTJVA");
+  static const SG::Accessor<float> dec_z0sinthetaSigTJVA("z0sinthetaSigTJVA");
 
   for(const ElementLink<xAOD::TauTrackContainer>& trackLink : pTau.allTauTrackLinks())
   {
@@ -388,7 +388,7 @@ void TauTrackFinder::getTauTracksFromPV( const xAOD::TauJet& pTau,
   // in EleRM reco, we need the original track particles
   if (inEleRM()){
     for (uint i = 0; i < ghostTracks.size(); i++){
-      static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::TrackParticleContainer>> acc_originalTrack("ERMOriginalTrack");
+      static const SG::ConstAccessor<ElementLink<xAOD::TrackParticleContainer>> acc_originalTrack("ERMOriginalTrack");
       auto original_id_track_link = acc_originalTrack(*(ghostTracks[i]));
       if (!original_id_track_link.isValid()) {
           ATH_MSG_ERROR("Original track link is not valid");

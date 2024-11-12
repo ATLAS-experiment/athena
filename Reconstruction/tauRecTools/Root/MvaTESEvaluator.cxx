@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // local include(s)
@@ -84,7 +84,7 @@ StatusCode MvaTESEvaluator::execute(xAOD::TauJet& xTau) const {
   }
 
   // Retrieve average pileup
-  static const SG::AuxElement::ConstAccessor<float> acc_mu("mu");
+  static const SG::ConstAccessor<float> acc_mu("mu");
   vars.mu = acc_mu(xTau);
 
   // Retrieve cluster moments
@@ -94,11 +94,11 @@ StatusCode MvaTESEvaluator::execute(xAOD::TauJet& xTau) const {
   xTau.detail(xAOD::TauJetParameters::ClustersMeanSecondLambda, vars.second_lambda);
   xTau.detail(xAOD::TauJetParameters::ClustersMeanPresamplerFrac, vars.presampler_frac);
 
-  static const SG::AuxElement::ConstAccessor<float> acc_ptIntermediateAxisEM("ptIntermediateAxisEM");
+  static const SG::ConstAccessor<float> acc_ptIntermediateAxisEM("ptIntermediateAxisEM");
   float ptEM = acc_ptIntermediateAxisEM(xTau);
 
   if (!inTrigger()) {
-    static const SG::AuxElement::ConstAccessor<float> acc_ptCombined("ptCombined");
+    static const SG::ConstAccessor<float> acc_ptCombined("ptCombined");
     float ptCombined = acc_ptCombined(xTau);
 
     if (ptCombined==0.) {
@@ -108,10 +108,10 @@ StatusCode MvaTESEvaluator::execute(xAOD::TauJet& xTau) const {
       return StatusCode::SUCCESS;
     }
 
-    static const SG::AuxElement::ConstAccessor<int> acc_nVtxPU("nVtxPU");
+    static const SG::ConstAccessor<int> acc_nVtxPU("nVtxPU");
     vars.nVtxPU = acc_nVtxPU(xTau);
 
-    static const SG::AuxElement::ConstAccessor<float> acc_rho("rho");
+    static const SG::ConstAccessor<float> acc_rho("rho");
     vars.rho = acc_rho(xTau);
     
     float ptLC = xTau.ptIntermediateAxis();
@@ -128,10 +128,10 @@ StatusCode MvaTESEvaluator::execute(xAOD::TauJet& xTau) const {
       vars.logPtCombined = std::log(ptCombined);
       vars.ptSeed_D_ptCombined = xTau.ptJetSeed() / ptCombined;
 
-      static const SG::AuxElement::ConstAccessor<float> acc_UpsilonCluster("UpsilonCluster");
+      static const SG::ConstAccessor<float> acc_UpsilonCluster("UpsilonCluster");
       vars.upsilon_cluster = acc_UpsilonCluster(xTau);
 
-      static const SG::AuxElement::ConstAccessor<float> acc_LeadClusterFrac("LeadClusterFrac");
+      static const SG::ConstAccessor<float> acc_LeadClusterFrac("LeadClusterFrac");
       vars.lead_cluster_frac = acc_LeadClusterFrac(xTau);
 
       xTau.detail(xAOD::TauJetParameters::centFrac, vars.centFrac);
@@ -143,9 +143,9 @@ StatusCode MvaTESEvaluator::execute(xAOD::TauJet& xTau) const {
       vars.ptConstituent_D_ptCombined = ptConstituent / ptCombined;
 
       // Retrieve substructure info
-      static const SG::AuxElement::ConstAccessor<float> acc_PanTauBDT_1p0n_vs_1p1n("PanTau_BDTValue_1p0n_vs_1p1n");
-      static const SG::AuxElement::ConstAccessor<float> acc_PanTauBDT_1p1n_vs_1pXn("PanTau_BDTValue_1p1n_vs_1pXn");
-      static const SG::AuxElement::ConstAccessor<float> acc_PanTauBDT_3p0n_vs_3pXn("PanTau_BDTValue_3p0n_vs_3pXn");
+      static const SG::ConstAccessor<float> acc_PanTauBDT_1p0n_vs_1p1n("PanTau_BDTValue_1p0n_vs_1p1n");
+      static const SG::ConstAccessor<float> acc_PanTauBDT_1p1n_vs_1pXn("PanTau_BDTValue_1p1n_vs_1pXn");
+      static const SG::ConstAccessor<float> acc_PanTauBDT_3p0n_vs_3pXn("PanTau_BDTValue_3p0n_vs_3pXn");
       // BDT values are initialised to -1111, while actual scores (when evaluated) are within [-5,1], so take max between BDT score and -5-epsilon
       vars.PanTauBDT_1p0n_vs_1p1n = std::max(acc_PanTauBDT_1p0n_vs_1p1n(xTau), -5.1f);
       vars.PanTauBDT_1p1n_vs_1pXn = std::max(acc_PanTauBDT_1p1n_vs_1pXn(xTau), -5.1f);
@@ -174,10 +174,10 @@ StatusCode MvaTESEvaluator::execute(xAOD::TauJet& xTau) const {
     vars.ptEM_D_ptLC = ptEM / xTau.ptDetectorAxis();
     vars.ptDetectorAxis_D_ptJetSeed = xTau.ptDetectorAxis() / xTau.ptJetSeed();
 
-    static const SG::AuxElement::ConstAccessor<float> acc_UpsilonCluster("UpsilonCluster");
-    static const SG::AuxElement::ConstAccessor<float> acc_LeadClusterFrac("LeadClusterFrac");
-    static const SG::AuxElement::ConstAccessor<float> acc_SecondClusterFrac("SecondClusterFrac");
-    static const SG::AuxElement::ConstAccessor<float> acc_ThirdClusterFrac("ThirdClusterFrac");
+    static const SG::ConstAccessor<float> acc_UpsilonCluster("UpsilonCluster");
+    static const SG::ConstAccessor<float> acc_LeadClusterFrac("LeadClusterFrac");
+    static const SG::ConstAccessor<float> acc_SecondClusterFrac("SecondClusterFrac");
+    static const SG::ConstAccessor<float> acc_ThirdClusterFrac("ThirdClusterFrac");
 
     vars.upsilon_cluster = acc_UpsilonCluster(xTau);
     vars.lead_cluster_frac = acc_LeadClusterFrac(xTau);

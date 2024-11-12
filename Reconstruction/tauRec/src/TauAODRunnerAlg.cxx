@@ -65,8 +65,8 @@ StatusCode TauAODRunnerAlg::execute (const EventContext& ctx) const {
   ATH_CHECK(outputTauHandle.record(std::make_unique<xAOD::TauJetContainer>(), std::make_unique<xAOD::TauJetAuxContainer>()));
   xAOD::TauJetContainer *newTauCon = outputTauHandle.ptr();
 
-  static const SG::AuxElement::Accessor<ElementLink<xAOD::TauJetContainer>> acc_ori_tau_link("originalTauJet");
-  static const SG::AuxElement::Accessor<char> acc_modified("ModifiedInAOD");
+  static const SG::Accessor<ElementLink<xAOD::TauJetContainer>> acc_ori_tau_link("originalTauJet");
+  static const SG::Accessor<char> acc_modified("ModifiedInAOD");
 
   for (const xAOD::TauJet *tau : *pTauContainer) {
     // deep copy the tau container
@@ -173,6 +173,6 @@ StatusCode TauAODRunnerAlg::execute (const EventContext& ctx) const {
 
 //helper 
 bool TauAODRunnerAlg::isTauModified(const xAOD::TauJet* newtau) {
-  static const SG::AuxElement::ConstAccessor<char> acc_modified("ModifiedInAOD");
+  static const SG::ConstAccessor<char> acc_modified("ModifiedInAOD");
   return acc_modified(*newtau);
 }

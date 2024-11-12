@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // local include(s)
@@ -42,7 +42,7 @@ StatusCode MvaTESVariableDecorator::execute(xAOD::TauJet& xTau) const {
     // convert from float to int to ignore peculiar values used in MC
     mu = (int)eventInfoDecorHandle(0);
   }
-  static const SG::AuxElement::Accessor<float> acc_mu("mu");  
+  static const SG::Accessor<float> acc_mu("mu");  
   acc_mu(xTau) = mu;
 
   if (!m_vertexContainerKey.empty()) {
@@ -58,7 +58,7 @@ StatusCode MvaTESVariableDecorator::execute(xAOD::TauJet& xTau) const {
         ++nVtxPU;
       }
     }
-    static const SG::AuxElement::Accessor<int> acc_nVtxPU("nVtxPU");
+    static const SG::Accessor<int> acc_nVtxPU("nVtxPU");
     acc_nVtxPU(xTau) = nVtxPU;
   }
 
@@ -71,7 +71,7 @@ StatusCode MvaTESVariableDecorator::execute(xAOD::TauJet& xTau) const {
     else if (!eventShape->getDensity(xAOD::EventShape::Density, rho)) {
       ATH_MSG_WARNING ("Could not retrieve rho.");
     }
-    static const SG::AuxElement::Accessor<float> acc_rho("rho");
+    static const SG::Accessor<float> acc_rho("rho");
     acc_rho(xTau) = (float)rho;
   }
 
@@ -180,22 +180,22 @@ StatusCode MvaTESVariableDecorator::execute(xAOD::TauJet& xTau) const {
   xTau.setDetail(xAOD::TauJetParameters::ClustersMeanSecondLambda, (float) mean_second_lambda);
   xTau.setDetail(xAOD::TauJetParameters::ClustersMeanPresamplerFrac, (float) mean_presampler_frac);
 
-  static const SG::AuxElement::Accessor<float> acc_ClusterTotalEnergy("ClusterTotalEnergy");
+  static const SG::Accessor<float> acc_ClusterTotalEnergy("ClusterTotalEnergy");
   acc_ClusterTotalEnergy(xTau) = (float) Etot;
 
-  static const SG::AuxElement::Accessor<float> acc_ptIntermediateAxisEM("ptIntermediateAxisEM");
+  static const SG::Accessor<float> acc_ptIntermediateAxisEM("ptIntermediateAxisEM");
   acc_ptIntermediateAxisEM(xTau) = (float) tauIntermediateAxisEM.Pt();
 
   // online-specific, not defined in TauDefs enum
-  static const SG::AuxElement::Accessor<float> acc_LeadClusterFrac("LeadClusterFrac");
-  static const SG::AuxElement::Accessor<float> acc_UpsilonCluster("UpsilonCluster");
+  static const SG::Accessor<float> acc_LeadClusterFrac("LeadClusterFrac");
+  static const SG::Accessor<float> acc_UpsilonCluster("UpsilonCluster");
   acc_LeadClusterFrac(xTau) = (float) lead_cluster_frac;
   acc_UpsilonCluster(xTau) = (float) upsilon_cluster;
 
   if (inTrigger()) {
     // for now only used by trigger, but could be used by offline 0p in the 2022 reprocessing
-    static const SG::AuxElement::Accessor<float> acc_SecondClusterFrac("SecondClusterFrac");
-    static const SG::AuxElement::Accessor<float> acc_ThirdClusterFrac("ThirdClusterFrac");
+    static const SG::Accessor<float> acc_SecondClusterFrac("SecondClusterFrac");
+    static const SG::Accessor<float> acc_ThirdClusterFrac("ThirdClusterFrac");
     acc_SecondClusterFrac(xTau) = (float) second_cluster_frac;
     acc_ThirdClusterFrac(xTau) = (float) third_cluster_frac;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauJetRNNEvaluator.h"
@@ -132,7 +132,7 @@ StatusCode TauJetRNNEvaluator::initialize() {
 
 StatusCode TauJetRNNEvaluator::execute(xAOD::TauJet &tau) const {
   // Output variable accessor
-  const SG::AuxElement::Accessor<float> output(m_output_varname);
+  const SG::Accessor<float> output(m_output_varname);
 
   // Set default score and overwrite later
   output(tau) = -1111.0f;
