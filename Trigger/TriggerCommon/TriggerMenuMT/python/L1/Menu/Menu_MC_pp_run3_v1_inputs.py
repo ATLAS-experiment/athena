@@ -75,6 +75,7 @@ def defineInputsMenu():
                                 #                                                                                           '3DR28-MU8Fab-eTAU30ab' ]) #ATR-30170
                                     TopoMenuDef( '3DR99-MU8Fab-eTAU30ab', outputbits = 2),
                                     TopoMenuDef( '3DR28-MU8Fab-eTAU30ab', outputbits = 3),
+                                    TopoMenuDef( '3DR30-MU8Fab-eTAU30ab', outputbits = 4),
                             ]
 
     #----------------------------------------------

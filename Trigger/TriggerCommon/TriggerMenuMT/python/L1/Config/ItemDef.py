@@ -2125,6 +2125,7 @@ class ItemDef:
 
             #ATR-30179
             MenuItem('L1_cTAU30M_3DR99-MU8F-eTAU30').setLogic( d.cTAU30M & d.TOPO_3DR99_MU8Fab_eTAU30ab & physcond)
+            MenuItem('L1_cTAU30M_3DR30-MU8F-eTAU30').setLogic( d.cTAU30M & d.TOPO_3DR30_MU8Fab_eTAU30ab & physcond)
             MenuItem('L1_cTAU30M_3DR28-MU8F-eTAU30').setLogic( d.cTAU30M & d.TOPO_3DR28_MU8Fab_eTAU30ab & physcond)
 
             
