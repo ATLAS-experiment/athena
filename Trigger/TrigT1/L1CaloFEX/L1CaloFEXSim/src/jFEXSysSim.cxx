@@ -85,6 +85,10 @@ namespace LVL1 {
     ATH_CHECK(m_xTobOutKey_jTau.initialize());
     ATH_CHECK(m_xTobOutKey_jEM.initialize());    
     
+    // Decorations
+    ATH_CHECK(m_TobDecorKey_jJ_seedET.initialize());    
+    ATH_CHECK(m_xTobDecorKey_jJ_seedET.initialize());    
+    
     ATH_CHECK(m_l1MenuKey.initialize());
 
     return StatusCode::SUCCESS;
@@ -911,9 +915,22 @@ namespace LVL1 {
     std::unique_ptr< xAOD::jFexSRJetRoIAuxContainer > tobAuxContainer_jJ = std::make_unique<xAOD::jFexSRJetRoIAuxContainer> ();
     tobContainer_jJ->setStore(tobAuxContainer_jJ.get());
     
+    SG::WriteDecorHandle<xAOD::jFexSRJetRoIContainer, int > tobDec_jJ_seedET (m_TobDecorKey_jJ_seedET);
+    
     auto xtobContainer_jJ = std::make_unique<xAOD::jFexSRJetRoIContainer> ();
     std::unique_ptr< xAOD::jFexSRJetRoIAuxContainer > xtobAuxContainer_jJ = std::make_unique<xAOD::jFexSRJetRoIAuxContainer> ();
     xtobContainer_jJ->setStore(xtobAuxContainer_jJ.get());
+    
+    SG::WriteDecorHandle<xAOD::jFexSRJetRoIContainer, int > xtobDec_jJ_seedET (m_xTobDecorKey_jJ_seedET);
+
+    
+    SG::WriteHandle<xAOD::jFexSRJetRoIContainer> output_Tob_jJ(m_TobOutKey_jJ/*, ctx*/);
+    ATH_MSG_DEBUG("  write: " << output_Tob_jJ.key() << " = " << "..." );
+    ATH_CHECK(output_Tob_jJ.record(std::move(tobContainer_jJ),std::move(tobAuxContainer_jJ)));
+    
+    SG::WriteHandle<xAOD::jFexSRJetRoIContainer> output_xTob_jJ(m_xTobOutKey_jJ/*, ctx*/);
+    ATH_MSG_DEBUG("  write: " << output_xTob_jJ.key() << " = " << "..." );
+    ATH_CHECK(output_xTob_jJ.record(std::move(xtobContainer_jJ),std::move(xtobAuxContainer_jJ)));
     
     // iterate over all SRJEt Tobs and fill EDM with them   m_allSmallRJetTobs
     for( auto const& [jfex, fpga] : m_allSmallRJetTobs ) {
@@ -930,22 +947,15 @@ namespace LVL1 {
                 // Just sending 7 SRjets to L1Topo and HLT chain
                 if(it<7){
                     istob = 1;
-                    ATH_CHECK(fillSRJetEDM(tobs.at(it)->getjFex(),tobs.at(it)->getFpga(),tobs.at(it)->getWord(),istob,tobs.at(it)->getRes(), eta, phi, tobContainer_jJ)); 
+                    ATH_CHECK(fillSRJetEDM(tobs.at(it), istob, eta, phi, output_Tob_jJ)); 
+                    tobDec_jJ_seedET( *(output_Tob_jJ->back()) ) = tobs.at(it)->getSeedEt();
                 }
-                ATH_CHECK(fillSRJetEDM(tobs.at(it)->getjFex(),tobs.at(it)->getFpga(),tobs.at(it)->getWord(),istob,tobs.at(it)->getRes(), eta, phi, xtobContainer_jJ));
-                
+                ATH_CHECK(fillSRJetEDM(tobs.at(it), istob, eta, phi, output_xTob_jJ));
+                xtobDec_jJ_seedET( *(output_xTob_jJ->back()) ) = tobs.at(it)->getSeedEt();
             }
         }
     }
     
-    SG::WriteHandle<xAOD::jFexSRJetRoIContainer_v1> output_Tob_jJ(m_TobOutKey_jJ/*, ctx*/);
-    ATH_MSG_DEBUG("  write: " << output_Tob_jJ.key() << " = " << "..." );
-    ATH_CHECK(output_Tob_jJ.record(std::move(tobContainer_jJ),std::move(tobAuxContainer_jJ)));
-    
-    SG::WriteHandle<xAOD::jFexSRJetRoIContainer_v1> output_xTob_jJ(m_xTobOutKey_jJ/*, ctx*/);
-    ATH_MSG_DEBUG("  write: " << output_xTob_jJ.key() << " = " << "..." );
-    ATH_CHECK(output_xTob_jJ.record(std::move(xtobContainer_jJ),std::move(xtobAuxContainer_jJ)));
-
     //---LRJet EDM
     auto tobContainer_jLJ = std::make_unique<xAOD::jFexLRJetRoIContainer> ();
     std::unique_ptr< xAOD::jFexLRJetRoIAuxContainer > tobAuxContainer_jLJ = std::make_unique<xAOD::jFexLRJetRoIAuxContainer> ();
@@ -954,6 +964,15 @@ namespace LVL1 {
     auto xtobContainer_jLJ = std::make_unique<xAOD::jFexLRJetRoIContainer> ();
     std::unique_ptr< xAOD::jFexLRJetRoIAuxContainer > xtobAuxContainer_jLJ = std::make_unique<xAOD::jFexLRJetRoIAuxContainer> ();
     xtobContainer_jLJ->setStore(xtobAuxContainer_jLJ.get());
+    
+
+    SG::WriteHandle<xAOD::jFexLRJetRoIContainer_v1> output_Tob_jLJ(m_TobOutKey_jLJ/*, ctx*/);
+    ATH_MSG_DEBUG("  write: " << output_Tob_jLJ.key() << " = " << "..." );
+    ATH_CHECK(output_Tob_jLJ.record(std::move(tobContainer_jLJ),std::move(tobAuxContainer_jLJ)));
+
+    SG::WriteHandle<xAOD::jFexLRJetRoIContainer_v1> output_xTob_jLJ(m_xTobOutKey_jLJ/*, ctx*/);
+    ATH_MSG_DEBUG("  write: " << output_xTob_jLJ.key() << " = " << "..." );
+    ATH_CHECK(output_xTob_jLJ.record(std::move(xtobContainer_jLJ),std::move(xtobAuxContainer_jLJ)));
     
     // iterate over all LRJEt Tobs and fill EDM with them
     for(auto const& [jfex, fpga] : m_allLargeRJetTobs ) {
@@ -970,21 +989,12 @@ namespace LVL1 {
                 // Just sending 1 LRjets to L1Topo and HLT chain
                 if(it<1){
                     istob=1;
-                   ATH_CHECK(fillLRJetEDM(tobs.at(it)->getjFex(),tobs.at(it)->getFpga(),tobs.at(it)->getWord(),istob,tobs.at(it)->getRes(), eta, phi, tobContainer_jLJ)); 
+                   ATH_CHECK(fillLRJetEDM(tobs.at(it), istob, eta, phi, output_Tob_jLJ)); 
                 }
-                ATH_CHECK(fillLRJetEDM(tobs.at(it)->getjFex(),tobs.at(it)->getFpga(),tobs.at(it)->getWord(),istob,tobs.at(it)->getRes(), eta, phi, xtobContainer_jLJ));
+                ATH_CHECK(fillLRJetEDM(tobs.at(it), istob, eta, phi, output_xTob_jLJ));
             }
         }
     }
-
-    SG::WriteHandle<xAOD::jFexLRJetRoIContainer_v1> output_Tob_jLJ(m_TobOutKey_jLJ/*, ctx*/);
-    ATH_MSG_DEBUG("  write: " << output_Tob_jLJ.key() << " = " << "..." );
-    ATH_CHECK(output_Tob_jLJ.record(std::move(tobContainer_jLJ),std::move(tobAuxContainer_jLJ)));
-
-    SG::WriteHandle<xAOD::jFexLRJetRoIContainer_v1> output_xTob_jLJ(m_xTobOutKey_jLJ/*, ctx*/);
-    ATH_MSG_DEBUG("  write: " << output_xTob_jLJ.key() << " = " << "..." );
-    ATH_CHECK(output_xTob_jLJ.record(std::move(xtobContainer_jLJ),std::move(xtobAuxContainer_jLJ)));
-    
     //---Tau EDM
     auto tobContainer_jTau = std::make_unique<xAOD::jFexTauRoIContainer> ();
     std::unique_ptr< xAOD::jFexTauRoIAuxContainer > tobAuxContainer_jTau = std::make_unique<xAOD::jFexTauRoIAuxContainer> ();
@@ -993,6 +1003,15 @@ namespace LVL1 {
     auto xtobContainer_jTau = std::make_unique<xAOD::jFexTauRoIContainer> ();
     std::unique_ptr< xAOD::jFexTauRoIAuxContainer > xtobAuxContainer_jTau = std::make_unique<xAOD::jFexTauRoIAuxContainer> ();
     xtobContainer_jTau->setStore(xtobAuxContainer_jTau.get());
+    
+    SG::WriteHandle<xAOD::jFexTauRoIContainer_v1> output_Tob_jTau(m_TobOutKey_jTau/*, ctx*/);
+    ATH_MSG_DEBUG("  write: " << output_Tob_jTau.key() << " = " << "..." );
+    ATH_CHECK(output_Tob_jTau.record(std::move(tobContainer_jTau),std::move(tobAuxContainer_jTau)));
+
+    SG::WriteHandle<xAOD::jFexTauRoIContainer_v1> output_xTob_jTau(m_xTobOutKey_jTau/*, ctx*/);
+    ATH_MSG_DEBUG("  write: " << output_xTob_jTau.key() << " = " << "..." );
+    ATH_CHECK(output_xTob_jTau.record(std::move(xtobContainer_jTau),std::move(xtobAuxContainer_jTau)));
+        
     //iterate over all Tau Tobs and fill EDM with 
     for( auto const& [jfex, fpga] : m_alltauTobs ) {
         for(auto const& tobs : fpga){
@@ -1008,22 +1027,14 @@ namespace LVL1 {
                 // Just sending 6 Taus to L1Topo and HLT chain
                 if(it<6){
                     istob=1;
-                    ATH_CHECK(fillTauEDM(tobs.at(it)->getjFex() ,tobs.at(it)->getFpga() ,tobs.at(it)->getWord() ,istob ,tobs.at(it)->getRes(), eta, phi, tobContainer_jTau)); 
+                    ATH_CHECK(fillTauEDM(tobs.at(it), istob, eta, phi, output_Tob_jTau)); 
                 }
-                ATH_CHECK(fillTauEDM(tobs.at(it)->getjFex() ,tobs.at(it)->getFpga() ,tobs.at(it)->getWord() ,istob ,tobs.at(it)->getRes(), eta, phi, xtobContainer_jTau));           
+                ATH_CHECK(fillTauEDM(tobs.at(it), istob, eta, phi, output_xTob_jTau));           
             }
         }
 
     }
 
-    SG::WriteHandle<xAOD::jFexTauRoIContainer_v1> output_Tob_jTau(m_TobOutKey_jTau/*, ctx*/);
-    ATH_MSG_DEBUG("  write: " << output_Tob_jTau.key() << " = " << "..." );
-    ATH_CHECK(output_Tob_jTau.record(std::move(tobContainer_jTau),std::move(tobAuxContainer_jTau)));
-
-    SG::WriteHandle<xAOD::jFexTauRoIContainer_v1> output_xTob_jTau(m_xTobOutKey_jTau/*, ctx*/);
-    ATH_MSG_DEBUG("  write: " << output_xTob_jTau.key() << " = " << "..." );
-    ATH_CHECK(output_xTob_jTau.record(std::move(xtobContainer_jTau),std::move(xtobAuxContainer_jTau)));
-    
     //---Forward Elec EDM
     auto tobContainer_jEM = std::make_unique<xAOD::jFexFwdElRoIContainer> ();
     std::unique_ptr< xAOD::jFexFwdElRoIAuxContainer > tobAuxContainer_jEM = std::make_unique<xAOD::jFexFwdElRoIAuxContainer> ();
@@ -1033,6 +1044,14 @@ namespace LVL1 {
     std::unique_ptr< xAOD::jFexFwdElRoIAuxContainer > xtobAuxContainer_jEM = std::make_unique<xAOD::jFexFwdElRoIAuxContainer> ();
     xtobContainer_jEM->setStore(xtobAuxContainer_jEM.get());
 
+    SG::WriteHandle<xAOD::jFexFwdElRoIContainer_v1> output_Tob_jEM(m_TobOutKey_jEM/*, ctx*/);
+    ATH_MSG_DEBUG("  write: " << output_Tob_jEM.key() << " = " << "..." );
+    ATH_CHECK(output_Tob_jEM.record(std::move(tobContainer_jEM),std::move(tobAuxContainer_jEM)));
+
+    SG::WriteHandle<xAOD::jFexFwdElRoIContainer_v1> output_xTob_jEM(m_xTobOutKey_jEM/*, ctx*/);
+    ATH_MSG_DEBUG("  write: " << output_xTob_jEM.key() << " = " << "..." );
+    ATH_CHECK(output_xTob_jEM.record(std::move(xtobContainer_jEM),std::move(xtobAuxContainer_jEM)));
+    
     //iterate over all Forward Elec Tobs and fill EDM 
     for( auto const& [jfex, MODULE_tobs] : m_allfwdElTobs ) {
         const int fpga_map[4]={0,1,3,2}; // No FPGA info available in FWD EL TOB
@@ -1053,54 +1072,46 @@ namespace LVL1 {
                 
                 if(it<5){
                     istob=1;
-                    ATH_CHECK(fillFwdElEDM(jfex,fpga_map[fpgaNum], FPGA_tob.at(it).at(0),istob, jFwdElResolution, eta, phi, tobContainer_jEM));
+                    ATH_CHECK(fillFwdElEDM(jfex,fpga_map[fpgaNum], FPGA_tob.at(it).at(0),istob, jFwdElResolution, eta, phi, output_Tob_jEM));
                 }
-                ATH_CHECK(fillFwdElEDM(jfex,fpga_map[fpgaNum], FPGA_tob.at(it).at(0),istob, jFwdElResolution, eta, phi, xtobContainer_jEM));
+                ATH_CHECK(fillFwdElEDM(jfex,fpga_map[fpgaNum], FPGA_tob.at(it).at(0),istob, jFwdElResolution, eta, phi, output_xTob_jEM));
             }
             fpgaNum++;
         }
 
     }
 
-    SG::WriteHandle<xAOD::jFexFwdElRoIContainer_v1> output_Tob_jEM(m_TobOutKey_jEM/*, ctx*/);
-    ATH_MSG_DEBUG("  write: " << output_Tob_jEM.key() << " = " << "..." );
-    ATH_CHECK(output_Tob_jEM.record(std::move(tobContainer_jEM),std::move(tobAuxContainer_jEM)));
-
-    SG::WriteHandle<xAOD::jFexFwdElRoIContainer_v1> output_xTob_jEM(m_xTobOutKey_jEM/*, ctx*/);
-    ATH_MSG_DEBUG("  write: " << output_xTob_jEM.key() << " = " << "..." );
-    ATH_CHECK(output_xTob_jEM.record(std::move(xtobContainer_jEM),std::move(xtobAuxContainer_jEM)));
-    
     //---SumET EDM
     auto tobContainer_jTE = std::make_unique<xAOD::jFexSumETRoIContainer> ();
     std::unique_ptr< xAOD::jFexSumETRoIAuxContainer > tobAuxContainer_jTE = std::make_unique<xAOD::jFexSumETRoIAuxContainer> ();
     tobContainer_jTE->setStore(tobAuxContainer_jTE.get());    
     
-    for( auto const& [jfex, tobs] : m_allsumEtTobs ) {
-        
-        for(auto const& t : tobs) {
-            ATH_CHECK(fillSumEtEDM(t->getjFex(),t->getFpga(),t->getWord(),t->getRes(),tobContainer_jTE));
-        }
-    } 
-
     SG::WriteHandle<xAOD::jFexSumETRoIContainer_v1> output_Tob_jTE(m_TobOutKey_jTE/*, ctx*/);
     ATH_MSG_DEBUG("  write: " << output_Tob_jTE.key() << " = " << "..." );
     ATH_CHECK(output_Tob_jTE.record(std::move(tobContainer_jTE),std::move(tobAuxContainer_jTE)));    
     
+    for( auto const& [jfex, tobs] : m_allsumEtTobs ) {
+        
+        for(auto const& t : tobs) {
+            ATH_CHECK(fillSumEtEDM(t, output_Tob_jTE));
+        }
+    } 
+
     //---MET EDM 
     auto tobContainer_jXE = std::make_unique<xAOD::jFexMETRoIContainer> ();
     std::unique_ptr< xAOD::jFexMETRoIAuxContainer > tobAuxContainer_jXE = std::make_unique<xAOD::jFexMETRoIAuxContainer> ();
     tobContainer_jXE->setStore(tobAuxContainer_jXE.get());    
 
-    for( auto const& [jfex, tobs] : m_allMetTobs ) {
-         
-        for(auto const& t : tobs) {
-            ATH_CHECK(fillMetEDM(t->getjFex(),t->getFpga(),t->getWord(),t->getRes(),tobContainer_jXE));
-        }       
-    }     
-
     SG::WriteHandle<xAOD::jFexMETRoIContainer_v1> output_Tob_jXE(m_TobOutKey_jXE/*, ctx*/);
     ATH_MSG_DEBUG("  write: " << output_Tob_jXE.key() << " = " << "..." );
     ATH_CHECK(output_Tob_jXE.record(std::move(tobContainer_jXE),std::move(tobAuxContainer_jXE)));   
+
+    for( auto const& [jfex, tobs] : m_allMetTobs ) {
+         
+        for(auto const& t : tobs) {
+            ATH_CHECK(fillMetEDM(t, output_Tob_jXE));
+        }       
+    }     
 
 
 
@@ -1114,32 +1125,32 @@ namespace LVL1 {
   }
 
 
-    StatusCode jFEXSysSim::fillSRJetEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexSRJetRoIContainer > &jContainer) const {
+    StatusCode jFEXSysSim::fillSRJetEDM(const std::unique_ptr<jFEXTOB>& internalTob, char istob, float_t eta, float_t phi, SG::WriteHandle<xAOD::jFexSRJetRoIContainer_v1> &jContainer) const {
 
         xAOD::jFexSRJetRoI* my_EDM = new xAOD::jFexSRJetRoI();
         jContainer->push_back( my_EDM );
 
-        my_EDM->initialize(jFexNum, fpgaNumber, tobWord ,istob , resolution, eta, phi);
+        my_EDM->initialize(internalTob->getjFex(), internalTob->getFpga(), internalTob->getWord(), istob, internalTob->getRes(), eta, phi);
 
         ATH_MSG_DEBUG(" setting SRJet jFEX Number:  " << +my_EDM->jFexNumber() << " et: " << my_EDM->et() << " eta: " << my_EDM->eta() <<" / "<< eta <<  " phi: " << my_EDM->phi()<<" / "<< phi  );
-
+        
         return StatusCode::SUCCESS;
     }
       
       
-    StatusCode jFEXSysSim::fillTauEDM(uint8_t jFexNum,uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexTauRoIContainer > &jContainer) const {
+    StatusCode jFEXSysSim::fillTauEDM(const std::unique_ptr<jFEXTOB>& internalTob, char istob, float_t eta, float_t phi, SG::WriteHandle< xAOD::jFexTauRoIContainer > &jContainer) const {
 
         xAOD::jFexTauRoI* my_EDM = new xAOD::jFexTauRoI();
         jContainer->push_back( my_EDM );
 
-        my_EDM->initialize(jFexNum, fpgaNumber, tobWord ,istob , resolution, eta, phi);
+        my_EDM->initialize(internalTob->getjFex(), internalTob->getFpga(), internalTob->getWord(), istob, internalTob->getRes(), eta, phi);
 
         ATH_MSG_DEBUG(" setting tau jFEX Number:  " << +my_EDM->jFexNumber() << " et: " << my_EDM->et() << " eta: " << my_EDM->eta() <<" / "<< eta <<  " phi: " << my_EDM->phi()<<" / "<< phi  );
 
         return StatusCode::SUCCESS;
     }
 
-  StatusCode jFEXSysSim::fillFwdElEDM(uint8_t jFexNum,uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexFwdElRoIContainer > &jContainer) const {
+  StatusCode jFEXSysSim::fillFwdElEDM(uint8_t jFexNum,uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, SG::WriteHandle< xAOD::jFexFwdElRoIContainer > &jContainer) const {
 
     xAOD::jFexFwdElRoI* my_EDM = new xAOD::jFexFwdElRoI();
     jContainer->push_back( my_EDM );
@@ -1151,36 +1162,36 @@ namespace LVL1 {
     return StatusCode::SUCCESS;
   }
 
-    StatusCode jFEXSysSim::fillLRJetEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexLRJetRoIContainer > &jContainer) const {
+    StatusCode jFEXSysSim::fillLRJetEDM(const std::unique_ptr<jFEXTOB>& internalTob, char istob, float_t eta, float_t phi, SG::WriteHandle< xAOD::jFexLRJetRoIContainer > &jContainer) const {
 
         xAOD::jFexLRJetRoI* my_EDM = new xAOD::jFexLRJetRoI();
         jContainer->push_back( my_EDM );
 
-        my_EDM->initialize(jFexNum, fpgaNumber, tobWord ,istob , resolution, eta, phi);
+        my_EDM->initialize(internalTob->getjFex(), internalTob->getFpga(), internalTob->getWord(), istob, internalTob->getRes(), eta, phi);
 
         ATH_MSG_DEBUG(" setting LRJet jFEX Number:  " << +my_EDM->jFexNumber() << " et: " << my_EDM->et() << " eta: " << my_EDM->eta() <<" / "<< eta <<  " phi: " << my_EDM->phi()<<" / "<< phi  );
 
         return StatusCode::SUCCESS;
     }
 
-    StatusCode jFEXSysSim::fillSumEtEDM(uint8_t jFexNum,uint8_t fpgaNumber, uint32_t tobWord, int resolution, std::unique_ptr< xAOD::jFexSumETRoIContainer > &jContainer) const {
+    StatusCode jFEXSysSim::fillSumEtEDM(const std::unique_ptr<jFEXTOB>& internalTob, SG::WriteHandle< xAOD::jFexSumETRoIContainer > &jContainer) const {
 
         xAOD::jFexSumETRoI* my_EDM = new xAOD::jFexSumETRoI();
         jContainer->push_back( my_EDM );
         
-        my_EDM->initialize(jFexNum, fpgaNumber, tobWord, resolution);
+        my_EDM->initialize(internalTob->getjFex(), internalTob->getFpga(), internalTob->getWord(), internalTob->getRes());
         
         ATH_MSG_DEBUG(" setting SumET jFEX Number:  " << +my_EDM->jFexNumber() << " Et_up: " << my_EDM->tobEt_upper() << " Et_down: " << my_EDM->tobEt_lower() <<  " sat_up: " << my_EDM->tobSat_upper()<<  " sat_low: " << my_EDM->tobSat_lower());
         
         return StatusCode::SUCCESS;
     }
 
-    StatusCode jFEXSysSim::fillMetEDM(uint8_t jFexNum,uint8_t fpgaNumber, uint32_t tobWord, int resolution, std::unique_ptr< xAOD::jFexMETRoIContainer > &jContainer) const {
+    StatusCode jFEXSysSim::fillMetEDM(const std::unique_ptr<jFEXTOB>& internalTob, SG::WriteHandle< xAOD::jFexMETRoIContainer > &jContainer) const {
 
         xAOD::jFexMETRoI* my_EDM = new xAOD::jFexMETRoI();
         jContainer->push_back( my_EDM );
 
-        my_EDM->initialize(jFexNum, fpgaNumber, tobWord, resolution);
+        my_EDM->initialize(internalTob->getjFex(), internalTob->getFpga(), internalTob->getWord(), internalTob->getRes());
 
         ATH_MSG_DEBUG(" setting MET jFEX Number:  " << +my_EDM->jFexNumber() << " Et_x: " << my_EDM->tobEx() << " Et_y: " << my_EDM->tobEy() <<  " sat: " << my_EDM->tobSat()<<  " res: " << my_EDM->tobRes() );
         

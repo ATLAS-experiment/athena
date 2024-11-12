@@ -42,6 +42,7 @@ namespace LVL1 {
     virtual unsigned int getTTowerET(unsigned int TTID ) const override;
     virtual void buildSeeds() override; 
     virtual bool isSeedLocalMaxima(int seedThreshold) override; 
+    virtual unsigned int getSeedET() const override;
     virtual unsigned int getSmallClusterET() const override;
     virtual unsigned int getSmallETRing() const override;
     virtual unsigned int getTTIDcentre() const override;
