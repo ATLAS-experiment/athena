@@ -248,6 +248,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
     
     int srJet_seedThresholdMeV = thr_jJ.seedThresholdMeV(m_jfex_string[m_jfexid]); //jFEX internal granularity, i.e., 25 MeV/count
     
+    
     //Central region algorithms
     if(m_jfexid > 0 && m_jfexid < 5) {
         m_jFEXSmallRJetAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
@@ -305,18 +306,20 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
                     //getting the energies
                     int SRj_Et = m_jFEXSmallRJetAlgoTool->getSmallClusterET();
                     int LRj_Et = m_jFEXLargeRJetAlgoTool->getLargeClusterET(SRj_Et,m_jFEXLargeRJetAlgoTool->getRingET());
+                    int seed_Et = m_jFEXSmallRJetAlgoTool->getSeedET();
                     
                     bool SRj_Sat = m_jFEXSmallRJetAlgoTool->getSRjetSat();
                     bool LRj_Sat = SRj_Sat || m_jFEXLargeRJetAlgoTool->getLRjetSat();
                     
                     int meta_LM = meta;
                     int mphi_LM = mphi;
-
+                    
+                    
                     //Creating SR TOB
                     uint32_t SRJet_tobword = m_IjFEXFormTOBsTool->formSRJetTOB(m_jfexid, mphi_LM, meta_LM, SRj_Et, SRj_Sat, thr_jJ.resolutionMeV(), thr_jJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]), jetCalibrationParameters);
                     
                     std::unique_ptr<jFEXTOB> jJ_tob = std::make_unique<jFEXTOB>(); 
-                    jJ_tob->initialize(m_id,m_jfexid,SRJet_tobword,thr_jJ.resolutionMeV(),m_jTowersIDs_Thin[mphi_LM][meta_LM]);              
+                    jJ_tob->initialize(m_id,m_jfexid,SRJet_tobword,thr_jJ.resolutionMeV(),m_jTowersIDs_Thin[mphi_LM][meta_LM],seed_Et);              
                     if ( SRJet_tobword != 0 ){
                         m_SRJet_tobwords.push_back(std::move(jJ_tob));
                     } 
@@ -325,7 +328,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
                     uint32_t LRJet_tobword = m_IjFEXFormTOBsTool->formLRJetTOB(m_jfexid, mphi_LM, meta_LM, LRj_Et, LRj_Sat, thr_jLJ.resolutionMeV(), thr_jLJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
 
                     std::unique_ptr<jFEXTOB> jLJ_tob = std::make_unique<jFEXTOB>(); 
-                    jLJ_tob->initialize(m_id,m_jfexid,LRJet_tobword,thr_jLJ.resolutionMeV(),m_jTowersIDs_Thin[mphi_LM][meta_LM]);              
+                    jLJ_tob->initialize(m_id,m_jfexid,LRJet_tobword,thr_jLJ.resolutionMeV(),m_jTowersIDs_Thin[mphi_LM][meta_LM],seed_Et);              
                     if ( LRJet_tobword != 0 ) m_LRJet_tobwords.push_back(std::move(jLJ_tob));                    
                     
                 }
@@ -374,13 +377,14 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
             int ieta = FCALJets.getCentreLocalTTEta();
             m_SRJetET = FCALJets.getSeedET() + FCALJets.getFirstEnergyRingET();
             m_LRJetET = m_SRJetET + FCALJets.getSecondEnergyRingET();
+            int seedET = FCALJets.getSeedET();
             
             bool SRJ_sat = FCALJets.getSRjetSat();
             
             uint32_t SRFCAL_Jet_tobword = m_IjFEXFormTOBsTool->formSRJetTOB(m_jfexid, iphi, ieta, m_SRJetET, SRJ_sat, thr_jJ.resolutionMeV(), thr_jJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]), jetCalibrationParameters);
             
             std::unique_ptr<jFEXTOB> jJ_tob = std::make_unique<jFEXTOB>(); 
-            jJ_tob->initialize(m_id,m_jfexid,SRFCAL_Jet_tobword,thr_jJ.resolutionMeV(),TTID);   
+            jJ_tob->initialize(m_id,m_jfexid,SRFCAL_Jet_tobword,thr_jJ.resolutionMeV(),TTID,seedET);   
             
             if ( SRFCAL_Jet_tobword != 0 ){
                 m_SRJet_tobwords.push_back(std::move(jJ_tob));
@@ -567,6 +571,7 @@ std::vector <std::unique_ptr<jFEXTOB>> jFEXFPGA::getLargeRJetTOBs()
     return tobsSort;    
 
 }
+
 
   std::vector <std::vector <uint32_t>> jFEXFPGA::getFwdElTOBs()
   {

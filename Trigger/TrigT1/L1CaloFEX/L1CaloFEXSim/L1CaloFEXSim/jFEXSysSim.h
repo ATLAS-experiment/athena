@@ -18,6 +18,7 @@
 #include "L1CaloFEXCond/jFEXDBCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 #include "L1CaloFEXSim/jFEXSim.h"
 #include "L1CaloFEXSim/jTower.h"
@@ -103,6 +104,12 @@ namespace LVL1 {
     SG::WriteHandleKey< xAOD::jFexTauRoIContainer>   m_xTobOutKey_jTau {this,"Key_xTobOutKey_jTau" ,"L1_jFexTauxRoI"  ,"Output jFexEDM xTOBs tau container"};
     SG::WriteHandleKey< xAOD::jFexFwdElRoIContainer> m_xTobOutKey_jEM  {this,"Key_xTobOutKey_jEM"  ,"L1_jFexFwdElxRoI","Output jFexEDM xTOBs fwdEl container"};    
 
+    // decoration handles for sim-only quantities
+    SG::WriteDecorHandleKey<xAOD::jFexSRJetRoIContainer> m_TobDecorKey_jJ_seedET  { this, "Key_tobDecor_jJ_seedET"  , m_TobOutKey_jJ   , "seedETMeV"  , "jJet seed ET value in MeV" };
+    SG::WriteDecorHandleKey<xAOD::jFexSRJetRoIContainer> m_xTobDecorKey_jJ_seedET { this, "Key_xTobDecor_jJ_seedET" , m_xTobOutKey_jJ  , "seedETMeV"  , "jJet seed ET value in MeV" };
+    
+
+
     std::unordered_map<int,jTower> m_jTowersColl;
 
     std::unordered_map<uint8_t, std::vector<std::vector<std::vector<uint32_t>>> > m_allfwdElTobs;
@@ -115,12 +122,13 @@ namespace LVL1 {
     
     
     // Create and fill a new EDMs object
-    StatusCode fillSRJetEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexSRJetRoIContainer > &jContainer) const;
-    StatusCode fillLRJetEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexLRJetRoIContainer > &jContainer) const;
-    StatusCode fillTauEDM  (uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexTauRoIContainer   > &jContainer) const;
-    StatusCode fillFwdElEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexFwdElRoIContainer > &jContainer) const;
-    StatusCode fillSumEtEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, int resolution, std::unique_ptr< xAOD::jFexSumETRoIContainer > &jContainer) const;
-    StatusCode fillMetEDM  (uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, int resolution, std::unique_ptr< xAOD::jFexMETRoIContainer   > &jContainer) const;
+    
+    StatusCode fillSRJetEDM(const std::unique_ptr<jFEXTOB>& internalTob, char istob, float_t eta, float_t phi, SG::WriteHandle<xAOD::jFexSRJetRoIContainer> &jContainer) const;
+    StatusCode fillLRJetEDM(const std::unique_ptr<jFEXTOB>& internalTob, char istob, float_t eta, float_t phi, SG::WriteHandle< xAOD::jFexLRJetRoIContainer > &jContainer) const;
+    StatusCode fillTauEDM  (const std::unique_ptr<jFEXTOB>& internalTob, char istob, float_t eta, float_t phi, SG::WriteHandle< xAOD::jFexTauRoIContainer   > &jContainer) const;
+    StatusCode fillFwdElEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, SG::WriteHandle< xAOD::jFexFwdElRoIContainer > &jContainer) const; //for fwdEl no "internal" jFEXTOB is created, thus more plain signature
+    StatusCode fillSumEtEDM(const std::unique_ptr<jFEXTOB>& internalTob, SG::WriteHandle< xAOD::jFexSumETRoIContainer > &jContainer) const;
+    StatusCode fillMetEDM  (const std::unique_ptr<jFEXTOB>& internalTob, SG::WriteHandle< xAOD::jFexMETRoIContainer   > &jContainer) const;
        
   };
   
