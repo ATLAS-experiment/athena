@@ -589,13 +589,15 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
 
 
     if flags.Tracking.doStats:
-        result.merge(ITkStatsCfg(
-            flags_set[0], # Use cuts from primary pass
-            StatTrackCollections=StatTrackCollections,
-            StatTrackTruthCollections=StatTrackTruthCollections))
-
+        if InputCombinedITkTracks:
+            result.merge(ITkStatsCfg(
+                flags_set[0], # Use cuts from primary pass
+                StatTrackCollections=StatTrackCollections,
+                StatTrackTruthCollections=StatTrackTruthCollections))
+            
     if flags.Tracking.writeExtendedSi_PRDInfo:
-        result.merge(ITkExtendedPRDInfoCfg(flags))
+        if InputCombinedITkTracks:
+            result.merge(ITkExtendedPRDInfoCfg(flags))
 
 
     # output
