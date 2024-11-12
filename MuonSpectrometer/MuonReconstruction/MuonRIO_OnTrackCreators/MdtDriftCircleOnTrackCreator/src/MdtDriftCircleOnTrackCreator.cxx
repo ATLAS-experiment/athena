@@ -91,8 +91,6 @@ StatusCode MdtDriftCircleOnTrackCreator::initialize() {
             ss << " ErrAtPos";
         if (m_errorStrategy.creationParameter(MuonDriftCircleErrorStrategy::T0Refit))
             ss << " T0";
-        if (m_errorStrategy.creationParameter(MuonDriftCircleErrorStrategy::WireSagGeomCorrection))
-            ss << " WireG";
         if (m_errorStrategy.creationParameter(MuonDriftCircleErrorStrategy::TofCorrection))
             ss << " TOF";
         if (m_errorStrategy.creationParameter(MuonDriftCircleErrorStrategy::PropCorrection))
@@ -101,8 +99,6 @@ StatusCode MdtDriftCircleOnTrackCreator::initialize() {
             ss << " Temp";
         if (m_errorStrategy.creationParameter(MuonDriftCircleErrorStrategy::MagFieldCorrection))
             ss << " Mag";
-        if (m_errorStrategy.creationParameter(MuonDriftCircleErrorStrategy::WireSagTimeCorrection))
-            ss << " WireT";
         if (m_errorStrategy.creationParameter(MuonDriftCircleErrorStrategy::SlewCorrection))
             ss << " Slew";
         if (m_errorStrategy.creationParameter(MuonDriftCircleErrorStrategy::BackgroundCorrection))

@@ -64,8 +64,6 @@ TimingMode in the job options.
    JobOptions Flags:
    - doMDT: switch on/off ROT creation (default = true)
    - TimingMode: select timing mode (default = ATLTIME)
-   - DoWireSag: Flag to turn on application of geometrical wire sagging
-correstions (default = false)
    - CreateTubeHit: Flag to turn on the creation of tube hits (default = false)
 */
 class MdtDriftCircleOnTrackCreator: public AthAlgTool, public IMdtDriftCircleOnTrackCreator {
