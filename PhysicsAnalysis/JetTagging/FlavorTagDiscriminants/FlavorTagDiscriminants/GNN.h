@@ -20,6 +20,7 @@
 #include "FlavorTagDiscriminants/DataPrepUtilities.h"
 #include "FlavorTagDiscriminants/TracksLoader.h"
 #include "FlavorTagDiscriminants/IParticlesLoader.h"
+#include "FlavorTagDiscriminants/HitsLoader.h"
 
 // EDM includes
 #include "xAODBTagging/BTaggingFwd.h"
