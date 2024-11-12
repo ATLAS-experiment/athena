@@ -231,10 +231,6 @@ namespace Crest
         return version;
     }
 
-    std::string CrestClient::getClientVersion()
-    {
-        return s_CREST_CLIENT_VERSION;
-    }
 
     int CrestClient::getMajorVersion(std::string &str)
     {
@@ -772,6 +768,7 @@ namespace Crest
         std::string retv;
         nlohmann::json js = nullptr;
         retv = m_request.performRequest(current_path, Action::GET, js, method_name);
+	checkHash(hash, retv, method_name);
         return retv;
     }
 
@@ -794,5 +791,15 @@ namespace Crest
         // Only one element is expected:
         return v[0];
     }
+
+    void CrestClient::checkHash(const std::string &hash, const std::string &str, const char* method_name)
+    {
+      std::string calculatedHash = getHash(str);
+      if (hash != calculatedHash) {
+	throw CrestException("ERROR in " + (std::string)method_name + ": payload is corrupted.");
+      }
+      return;
+    }
+
 } // namespace Crest
 

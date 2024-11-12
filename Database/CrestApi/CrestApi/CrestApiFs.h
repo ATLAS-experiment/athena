@@ -396,6 +396,12 @@ namespace Crest
  */
     PayloadDto getPayloadMeta(const std::string &hash) override;
 
+/**
+ * This method returns the full CREST Server version.
+ * @return CREST server version.
+ */
+        std::string getCrestVersion() override;
+
     
   private:
     std::string getDateAndTime();
@@ -408,22 +414,6 @@ namespace Crest
  * @return - string with first letters
  */
     std::string getFirstLetters(const std::string &str);
-
-    // Methods to calculate hash code.
-
-/**
- *  This method method calculates the hash for string. 
- * @param str - string.
- * @return hash for a given string.
- */
-    std::string getHash(std::string_view str);
-
-/**
- *  This method method calculates the hash for a file. 
- * @param file - path to the file with the file name..
- * @return hash for a given file.
- */
-    std::string getHashForFile(const std::string &file);
 
     // auxiliary methods to extract a single page of the data:
     nlohmann::json getPage(nlohmann::json data, int size, int page);

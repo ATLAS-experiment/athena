@@ -9,7 +9,7 @@ find_package(nlohmann_json)
 find_package(CURL)
 find_package(Boost COMPONENTS system thread filesystem unit_test_framework regex timer)
 
-set(SOURCES src/CrestApi.cxx src/CrestRequest.cxx src/CrestApiFs.cxx src/CrestModel.cxx src/CrestContainer.cxx)
+set(SOURCES src/CrestApi.cxx src/CrestRequest.cxx src/CrestApiFs.cxx src/CrestModel.cxx src/CrestContainer.cxx src/CrestApiBase.cxx)
 
 # Component(s) in the package.
 atlas_add_library( CrestApiLib

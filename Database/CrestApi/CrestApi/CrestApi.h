@@ -90,17 +90,12 @@ namespace Crest
  */
         nlohmann::json getMgmtInfo();
 
-/**
- * This method returns the full CrestApi version.
- * @return CrestApi library version.
- */
-        std::string getClientVersion();
 
 /**
  * This method returns the full CREST Server version.
  * @return CREST server version.
  */
-        std::string getCrestVersion();
+        std::string getCrestVersion() override;
 
 /**
  * This is an auxiliary method to extract a major version number from 
@@ -131,6 +126,15 @@ namespace Crest
  * @param str - the text (a std::string ) to be cleared.
  */
         std::string removeCR(const std::string &str) const;
+
+/**
+ * This checks the hash of payload from IOV (hash) with 
+ * the hash calculated for the payload in the std::string (str)
+ * (It is an auxiliary method to check the payload.)
+ * @param hash - the hash from an IOV.
+ * @param str - the payload in std::string.
+ */
+      void checkHash(const std::string &hash, const std::string &str, const char* method_name);
 
 
     public:
