@@ -10,6 +10,7 @@
 #   - InDet tracks/particles
 #   - ["TruthEvents", "TruthParticles", "TruthVertices", "AntiKt4TruthJets","AntiKt4TruthWZJets"]
 #   - Calo clusters
+# * Nov 2024 update: added JET-M1 containers
 
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -32,6 +33,15 @@ def STDM6KernelCfg(flags, name='STDM6Kernel', **kwargs):
         TriggerListsHelper     = kwargs['TriggerListsHelper'], 
         TauJets_EleRM_in_input = kwargs['TauJets_EleRM_in_input']
     ))
+
+    from DerivationFrameworkInDet.InDetToolsConfig import InDetTrackSelectionToolWrapperCfg
+    DFCommonTrackSelection = acc.getPrimaryAndMerge(InDetTrackSelectionToolWrapperCfg(
+        flags,
+        name           = "DFJETM1CommonTrackSelectionLoose",
+        CutLevel       = "Loose",
+        DecorationName = "DFJETM1Loose"))
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("JETM1CommonKernel", AugmentationTools = [DFCommonTrackSelection]))
 
     # Thinning tools
     # These are set up in PhysCommonThinningConfig. Only thing needed here the list of tools to schedule 
@@ -58,6 +68,97 @@ def STDM6KernelCfg(flags, name='STDM6Kernel', **kwargs):
     # The kernel algorithm itself
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name, ThinningTools = thinningTools))       
+    
+    # not using the thinning from the JET-M1 derivation!
+    
+    # From JET-M1 - extra jet content:
+    acc.merge(JETM1ExtraContentCfg(flags))
+
+    return acc
+
+def JETM1ExtraContentCfg(flags):
+
+    acc = ComponentAccumulator()
+
+    from JetRecConfig.JetRecConfig import JetRecCfg, getModifier
+    from JetRecConfig.StandardJetMods import stdJetModifiers
+    from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track, AntiKt4EMPFlow, AntiKt4EMPFlowNoPtCut, AntiKt4EMTopoNoPtCut
+
+    #=======================================
+    # Schedule additional jet decorations
+    #=======================================
+    bJVTTool = getModifier(AntiKt4EMPFlow, stdJetModifiers['bJVT'], stdJetModifiers['bJVT'].modspec, flags=flags)
+    acc.addEventAlgo(CompFactory.JetDecorationAlg(name='bJVTAlg',
+                                                  JetContainer='AntiKt4EMPFlowJets', 
+                                                  Decorators=[bJVTTool]))
+
+    #======================================= 
+    # R = 0.4 track-jets (needed for Rtrk) 
+    #=======================================
+    jetList = [AntiKt4PV0Track]
+
+    #=======================================
+    # SCHEDULE SMALL-R JETS WITH NO PT CUT
+    #=======================================
+    if flags.Input.isMC:
+        jetList += [AntiKt4EMPFlowNoPtCut, AntiKt4EMTopoNoPtCut]
+
+    #=======================================
+    # CSSK R = 0.4 UFO jets
+    #=======================================
+    if flags.Input.isMC:
+        from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSKNoPtCut
+        AntiKt4UFOCSSKNoPtCut_JETM1 = AntiKt4UFOCSSKNoPtCut.clone(
+            modifiers = AntiKt4UFOCSSKNoPtCut.modifiers+("NNJVT",)
+        )
+        jetList += [AntiKt4UFOCSSKNoPtCut_JETM1]
+    else:
+        from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSK
+        AntiKt4UFOCSSK_JETM1 = AntiKt4UFOCSSK.clone(
+            modifiers = AntiKt4UFOCSSK.modifiers+("NNJVT",)
+        )
+        jetList += [AntiKt4UFOCSSK_JETM1]
+
+
+    for jd in jetList:
+        acc.merge(JetRecCfg(flags,jd))
+
+    #=======================================
+    # UFO CSSK event shape 
+    #=======================================
+
+    from JetRecConfig.JetRecConfig import getConstitPJGAlg
+    from JetRecConfig.StandardJetConstits import stdConstitDic as cst
+    from JetRecConfig.JetInputConfig import buildEventShapeAlg
+
+    acc.addEventAlgo(buildEventShapeAlg(cst.UFOCSSK,'', suffix=None))
+    acc.addEventAlgo(getConstitPJGAlg(cst.UFOCSSK, suffix='Neut'))
+    acc.addEventAlgo(buildEventShapeAlg(cst.UFOCSSK,'', suffix='Neut'))
+
+    #=======================================
+    # More detailed truth information
+    #=======================================
+
+    if flags.Input.isMC:
+        from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTopQuarkAndDownstreamParticlesCfg
+        acc.merge(AddTopQuarkAndDownstreamParticlesCfg(flags, generations=4,rejectHadronChildren=True))
+
+    #=======================================
+    # Add Run-2 jet trigger collections
+    # Only needed for Run-2 due to different aux container type (JetTrigAuxContainer) which required special wrapper for conversion to AuxContainerBase
+    # In Run-3, the aux. container type is directly JetAuxContainer (no conversion needed)
+    #=======================================
+
+    if flags.Trigger.EDMVersion == 2:
+        triggerNames = ["JetContainer_a4tcemsubjesFS", "JetContainer_a4tcemsubjesISFS", "JetContainer_GSCJet",
+                        "JetContainer_a10tclcwsubjesFS", "JetContainer_a10tclcwsubFS", "JetContainer_a10ttclcwjesFS"]
+
+        for trigger in triggerNames:
+            wrapperName = trigger+'AuxWrapper'
+            auxContainerName = 'HLT_xAOD__'+trigger+'Aux'
+
+            acc.addEventAlgo(CompFactory.xAODMaker.AuxStoreWrapper( wrapperName, SGKeys = [ auxContainerName+"." ] ))
+
     return acc
 
 
@@ -104,6 +205,8 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
                                            "InDetTrackParticles",
                                            "AntiKt4EMTopoJets",
                                            "AntiKt4EMPFlowJets",
+                                           "AntiKt10UFOCSSKJets",
+                                           "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                            "BTagging_AntiKt4EMPFlow",
                                            "BTagging_AntiKtVR30Rmax4Rmin02Track",
                                            "MET_Baseline_AntiKt4EMTopo",
@@ -122,7 +225,6 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
     # STDM6 needs additionally full info on: 
     # - AFP
     # - Calo clusters
-    # TODO: check if there's enough info on InDetTrackParticles in the smart collections
     STDM6SlimmingHelper.AllVariables += [ "AFPSiHitContainer",
                                          "AFPToFHitContainer",
                                          "AFPSiHitsClusterContainer",
@@ -133,8 +235,12 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
                                          "CaloCalTopoClusters",
     ]
 
+    # additional contenct from JET-M1
+    # Maciej LewickiL: I'd rather keep it the way it is because it will be easier to keep up with any future changes in JET-M1
+    STDM6SlimmingHelper.AllVariables += ["MuonSegments", "EventInfo",
+                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape",
+                                         "AntiKt4EMPFlowJets"]
 
-    
     excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
     StaticContent = []
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Tight_Vertices"]
@@ -159,6 +265,16 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
     if TauJets_EleRM_in_input:
         STDM6SlimmingHelper.ExtraVariables += ["TauJets_EleRM.dRmax.etOverPtLeadTrk"]
 
+    # additional content from JET-M1
+    # Maciej Lewicki: I'd rather keep it the way it is because it will be easier to keep up with any future changes in JET-M1
+    STDM6SlimmingHelper.ExtraVariables  += ["AntiKt4EMTopoJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1",
+                                           "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1",
+                                           "AntiKt4EMPFlowJets.passOnlyBJVT.DFCommonJets_bJvt.isJvtHS.isJvtPU",
+                                           "InDetTrackParticles.truthMatchProbability",
+                                           "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.zg.rg.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.EnergyPerSampling.GhostTrack",
+                                           "AntiKt10UFOCSSKJets.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.EnergyPerSampling.GhostTrack"]
+
+
     # FTAG Xbb extra content
     extraList = []
     for tagger in ["GN2Xv00", "GN2XWithMassv00", "GN2Xv01"]:
@@ -176,6 +292,11 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(STDM6SlimmingHelper)
+        
+        # coming from the JET-M1 derivation
+        STDM6SlimmingHelper.AppendToDictionary.update({'TruthParticles': 'xAOD::TruthParticleContainer',
+                                                       'TruthParticlesAux': 'xAOD::TruthParticleAuxContainer'})
+
         STDM6SlimmingHelper.AllVariables += ['TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
         STDM6SlimmingHelper.AllVariables += ["TruthEvents", "TruthParticles", "TruthVertices", "AntiKt4TruthJets","AntiKt4TruthWZJets"]
         STDM6SlimmingHelper.ExtraVariables += ["Electrons.TruthLink",
@@ -188,9 +309,20 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
                                               "PrimaryVertices.x.y.z.covariance.trackWeights.vertexType.sumPt2",
                                               ]
 
+        # Maciej Lewicki: coming from the JET-M1 derivation
+        STDM6SlimmingHelper.SmartCollections += ["AntiKt4TruthWZJets"]
+        STDM6SlimmingHelper.AllVariables += ["TruthTopQuarkWithDecayParticles","TruthTopQuarkWithDecayVertices",
+                                             "AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets", "TruthParticles"]
+        STDM6SlimmingHelper.ExtraVariables += ["TruthVertices.barcode.z"]
+
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg
         acc.merge(AddTauAndDownstreamParticlesCfg(flags))
         STDM6SlimmingHelper.AllVariables += ['TruthTausWithDecayParticles','TruthTausWithDecayVertices']
+
+    STDM6SlimmingHelper.AppendToDictionary.update({'Kt4UFOCSSKEventShape':'xAOD::EventShape',
+                                                   'Kt4UFOCSSKEventShapeAux':'xAOD::EventShapeAuxInfo',
+                                                   'Kt4UFOCSSKNeutEventShape':'xAOD::EventShape',
+                                                   'Kt4UFOCSSKNeutEventShapeAux':'xAOD::EventShapeAuxInfo'})
 
     ## Higgs content - 4l vertex and Higgs STXS truth variables
     from DerivationFrameworkHiggs.HiggsPhysContent import  setupHiggsSlimmingVariables
@@ -198,7 +330,8 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
    
     # Trigger content
     STDM6SlimmingHelper.IncludeTriggerNavigation = False
-    STDM6SlimmingHelper.IncludeJetTriggerContent = False
+    # modification from JET-M1 derivation:
+    STDM6SlimmingHelper.IncludeJetTriggerContent = True
     STDM6SlimmingHelper.IncludeMuonTriggerContent = False
     STDM6SlimmingHelper.IncludeEGammaTriggerContent = False
     STDM6SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
@@ -218,10 +351,21 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = STDM6SlimmingHelper, 
                                          OutputContainerPrefix = "TrigMatch_",
                                          TriggerList = TriggerListsHelper.Run2TriggerNamesNoTau)
+        triggerNames = ["a4tcemsubjesFS", "a4tcemsubjesISFS", "a10tclcwsubjesFS", "a10tclcwsubFS", "a10ttclcwjesFS", "GSCJet"]
+        for trigger in triggerNames:
+            STDM6SlimmingHelper.FinalItemList.append('xAOD::AuxContainerBase!#HLT_xAOD__JetContainer_'+trigger+'Aux.pt.eta.phi.m')
+
     # Run 3, or Run 2 with navigation conversion
     if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(STDM6SlimmingHelper)
+
+    jetOutputList = ["AntiKt4PV0TrackJets", "AntiKt4UFOCSSKJets"]
+    if flags.Input.isMC:
+        jetOutputList = ["AntiKt4PV0TrackJets","AntiKt4UFOCSSKNoPtCutJets","AntiKt4EMPFlowNoPtCutJets","AntiKt4EMTopoNoPtCutJets"]
+    from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
+    addJetsToSlimmingTool(STDM6SlimmingHelper, jetOutputList, STDM6SlimmingHelper.SmartCollections)
+
 
     # Output stream    
     STDM6ItemList = STDM6SlimmingHelper.GetItemList()
