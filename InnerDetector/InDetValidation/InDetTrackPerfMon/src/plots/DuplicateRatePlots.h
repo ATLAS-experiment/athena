@@ -26,7 +26,8 @@ namespace IDTPM {
         const std::string& dirName,
         const std::string& anaTag,
         const std::string& trackType,
-        bool doGlobalPlots = false );
+        bool doGlobalPlots = false,
+        bool doTruthMuPlots = false );
 
     /// Destructor
     virtual ~DuplicateRatePlots() = default;
@@ -51,6 +52,7 @@ namespace IDTPM {
 
     std::string m_trackType;
     bool m_doGlobalPlots;
+    bool m_doTruthMuPlots;
     
     TEfficiency*  m_duplrate_vs_pt;
     TEfficiency*  m_duplrate_vs_eta;

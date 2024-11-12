@@ -91,6 +91,8 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
     kwargs.setdefault( "RefType",  flags.PhysVal.IDTPM.currentTrkAna.RefType )
 
     kwargs.setdefault( "pileupSwitch",  flags.PhysVal.IDTPM.currentTrkAna.pileupSwitch )
+    kwargs.setdefault( "hasFullPileupTruth",
+                        ( "xAOD::TruthPileupEventContainer#TruthPileupEvents" in flags.Input.TypedCollections ) )
 
     from InDetTrackPerfMon.ConfigUtils import getTag
     kwargs.setdefault( "TestTag", getTag( flags, flags.PhysVal.IDTPM.currentTrkAna.TestType ) )

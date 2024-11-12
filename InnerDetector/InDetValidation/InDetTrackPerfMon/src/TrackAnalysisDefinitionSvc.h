@@ -63,6 +63,7 @@ public:
   virtual const std::vector<float>& etaBins() const override { return m_etaBins; };
   virtual const std::vector<unsigned int>& minSilHits() const override { return m_minSilHits; };
   virtual const std::string& pileupSwitch() const override { return m_pileupSwitch; };
+  virtual bool hasFullPileupTruth() const { return m_hasFullPileupTruth.value(); };
 
   virtual bool plotTrackParameters() const override { return m_plotTrackParameters.value(); };
   virtual bool plotTrackMultiplicities() const override { return m_plotTrackMultiplicities.value(); };
@@ -105,6 +106,7 @@ private:
   FloatArrayProperty m_etaBins { this, "EtaBins", {}, "Eta bins for determination of reconstructable particle" };
   UnsignedIntegerArrayProperty m_minSilHits { this, "MinSilHits", {}, "Minimum number of Si hits for determination of reconstructable particle" };
   StringProperty m_pileupSwitch { this, "pileupSwitch", "HardScatter", "Type of truth particles to consider (HardScatter, PileUp, All)" }; 
+  BooleanProperty m_hasFullPileupTruth { this, "hasFullPileupTruth", false, "Is full PileUp truth information available" };
 
   /// histogram properties
   BooleanProperty m_sortPlotsByChain { this, "sortPlotsByChain", false, "Save plots in <mainDir>/<chain>/<subDir/TrkAnaName>/... instead of the default <mainDir>/<subDir/TrkAnaName>/<chain>/..." };

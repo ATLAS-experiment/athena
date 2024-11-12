@@ -59,6 +59,7 @@ public:
   virtual const std::vector<float>& etaBins() const = 0;
   virtual const std::vector<unsigned int>& minSilHits() const = 0;
   virtual const std::string& pileupSwitch() const = 0;
+  virtual bool hasFullPileupTruth() const = 0;
 
   /// histogram properties
   virtual bool plotTrackParameters() const = 0;

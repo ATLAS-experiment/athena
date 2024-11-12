@@ -17,10 +17,12 @@
 /// -----------------------
 IDTPM::FakeRatePlots::FakeRatePlots(
     PlotMgr* pParent, const std::string& dirName, 
-    const std::string& anaTag, const std::string& trackType, bool doGlobalPlots ) :
+    const std::string& anaTag, const std::string& trackType,
+    bool doGlobalPlots, bool doTruthMuPlots ) :
         PlotMgr( dirName, anaTag, pParent ), 
         m_trackType( trackType ),
-        m_doGlobalPlots( doGlobalPlots ) { }
+        m_doGlobalPlots( doGlobalPlots ),
+        m_doTruthMuPlots( doTruthMuPlots ) { }
 
 
 /// ---------------------------
@@ -45,8 +47,8 @@ StatusCode IDTPM::FakeRatePlots::bookPlots()
   ATH_CHECK( retrieveAndBook( m_fakerate_vs_d0,   "fakerate_vs_"+m_trackType+"_d0" ) );
   ATH_CHECK( retrieveAndBook( m_fakerate_vs_z0,   "fakerate_vs_"+m_trackType+"_z0" ) );
   if( m_doGlobalPlots ) {
-    ATH_CHECK( retrieveAndBook( m_fakerate_vs_truthMu, "fakerate_vs_truthMu" ) );
     ATH_CHECK( retrieveAndBook( m_fakerate_vs_actualMu, "fakerate_vs_actualMu" ) );
+    if( m_doTruthMuPlots ) ATH_CHECK( retrieveAndBook( m_fakerate_vs_truthMu, "fakerate_vs_truthMu" ) );
   }
   return StatusCode::SUCCESS;
 }
@@ -74,8 +76,8 @@ StatusCode IDTPM::FakeRatePlots::fillPlots(
   ATH_CHECK( fill( m_fakerate_vs_z0,  pz0,  isFake, weight ) );
 
   if( m_doGlobalPlots ) {
-    ATH_CHECK( fill( m_fakerate_vs_truthMu, truthMu, isFake, weight ) );
     ATH_CHECK( fill( m_fakerate_vs_actualMu, actualMu, isFake, weight ) );
+    if( m_doTruthMuPlots ) ATH_CHECK( fill( m_fakerate_vs_truthMu, truthMu, isFake, weight ) );
   }
 
   return StatusCode::SUCCESS;

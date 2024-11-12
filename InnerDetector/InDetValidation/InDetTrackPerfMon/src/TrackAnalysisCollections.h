@@ -67,13 +67,13 @@ namespace IDTPM {
 
     /// fill event info
     StatusCode fillEventInfo(
-        const SG::ReadHandleKey<xAOD::EventInfo>& handleKey );
+        const SG::ReadHandleKey<xAOD::EventInfo>& eventInfoHandleKey,
+        const SG::ReadHandleKey< xAOD::TruthEventContainer >& truthEventHandleKey,
+        const SG::ReadHandleKey< xAOD::TruthPileupEventContainer >& truthPUEventHandleKey );
 
     /// fill FULL collections and vectors
     StatusCode fillTruthPartContainer(
-        const SG::ReadHandleKey< xAOD::TruthParticleContainer >& truthPartHandleKey,
-        const SG::ReadHandleKey< xAOD::TruthEventContainer >& truthEventHandleKey,
-        const SG::ReadHandleKey< xAOD::TruthPileupEventContainer >& truthPUEventHandleKey );
+        const SG::ReadHandleKey< xAOD::TruthParticleContainer >& truthPartHandleKey );
 
     StatusCode fillOfflTrackContainer(
         const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey );
@@ -133,6 +133,8 @@ namespace IDTPM {
 
     /// get event info
     const xAOD::EventInfo* eventInfo() { return m_eventInfo; }
+    const xAOD::TruthEventContainer* truthEventContainer() { return m_truthEventContainer; }
+    const xAOD::TruthPileupEventContainer* truthPileupEventContainer() { return m_truthPUEventContainer; }
 
     /// get full TEST containers
     const xAOD::TruthParticleContainer* testTruthContainer();
@@ -182,8 +184,10 @@ namespace IDTPM {
     SmartIF<ITrackAnalysisDefinitionSvc> m_trkAnaDefSvc;
 
     /// --- Collections class variables ---
-    /// EventInfo
+    /// EventInfo, TruthEvent, and TruthPUEvent
     const xAOD::EventInfo* m_eventInfo{nullptr};
+    const xAOD::TruthEventContainer* m_truthEventContainer{nullptr};
+    const xAOD::TruthPileupEventContainer* m_truthPUEventContainer{nullptr};
 
     /// Full collections
     const xAOD::TruthParticleContainer* m_truthPartContainer{nullptr};

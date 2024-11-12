@@ -58,16 +58,37 @@ StatusCode IDTPM::TrackAnalysisCollections::initialize()
 /// ----- Fill Event Info -----
 /// ---------------------------
 StatusCode IDTPM::TrackAnalysisCollections::fillEventInfo(
-  const SG::ReadHandleKey<xAOD::EventInfo>& handleKey )
+  const SG::ReadHandleKey<xAOD::EventInfo>& eventInfoHandleKey,
+  const SG::ReadHandleKey< xAOD::TruthEventContainer >& truthEventHandleKey,
+  const SG::ReadHandleKey< xAOD::TruthPileupEventContainer >& truthPUEventHandleKey )
 {
-  SG::ReadHandle< xAOD::EventInfo > pie( handleKey );
+  m_eventInfo = nullptr;
+  m_truthEventContainer = nullptr;
+  m_truthPUEventContainer = nullptr;
 
+  /// EventInfo
+  SG::ReadHandle< xAOD::EventInfo > pie( eventInfoHandleKey );
   if( not pie.isValid() ) {
     ATH_MSG_WARNING( "Shouldn't happen. EventInfo is buggy" );
-    m_eventInfo = nullptr;
-  }
+  } else m_eventInfo = pie.ptr();
 
-  m_eventInfo = pie.ptr();
+  if( not m_trkAnaDefSvc->useTruth() ) return StatusCode::SUCCESS;
+
+  /// TruthEvent
+  SG::ReadHandle< xAOD::TruthEventContainer > pTruthEventCont( truthEventHandleKey );
+  if( not pTruthEventCont.isValid() ) {
+    ATH_MSG_WARNING( "Non valid truth event collection: " << truthEventHandleKey.key() );
+  }
+  else m_truthEventContainer = pTruthEventCont.ptr();
+
+  /// TruthPileupEvent
+  if( m_trkAnaDefSvc->hasFullPileupTruth() ) {
+    SG::ReadHandle< xAOD::TruthPileupEventContainer > pTruthPUEventCont( truthPUEventHandleKey );
+    if( not pTruthPUEventCont.isValid() ) {
+      ATH_MSG_WARNING( "Non valid truth pile up event collection: " << truthPUEventHandleKey.key() );
+    }
+    else m_truthPUEventContainer = pTruthPUEventCont.ptr();
+  }
 
   return StatusCode::SUCCESS;
 }
@@ -78,9 +99,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillEventInfo(
 /// ----------------------------
 /// Truth particles
 StatusCode IDTPM::TrackAnalysisCollections::fillTruthPartContainer(
-  const SG::ReadHandleKey< xAOD::TruthParticleContainer >& truthPartHandleKey,
-  const SG::ReadHandleKey< xAOD::TruthEventContainer >& truthEventHandleKey,
-  const SG::ReadHandleKey< xAOD::TruthPileupEventContainer >& truthPUEventHandleKey )
+  const SG::ReadHandleKey< xAOD::TruthParticleContainer >& truthPartHandleKey )
 {
   if( m_trkAnaDefSvc->useTruth() ) {
     ATH_MSG_DEBUG( "Loading collection: " << truthPartHandleKey.key() );
@@ -103,33 +122,23 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTruthPartContainer(
 
     /// Grab only truth particles from Hard Scatter
     } else if( m_trkAnaDefSvc->pileupSwitch() == "HardScatter" ) {
-      if( not truthEventHandleKey.empty() ) {
-        SG::ReadHandle< xAOD::TruthEventContainer > pTruthEventCont( truthEventHandleKey );
-        if( not pTruthEventCont.isValid() ) {
-          ATH_MSG_WARNING( "Non valid truth event collection: " << truthEventHandleKey.key() );
-        } else {
-          const xAOD::TruthEvent* event = pTruthEventCont->at(0);
-          const auto& links = event->truthParticleLinks();
-          for( const auto& link : links ) {
-            if( link.isValid() ) m_truthPartVec[ FULL ].push_back( *link );
-          }
+      if( m_truthEventContainer ) {
+        const xAOD::TruthEvent* event = m_truthEventContainer->at(0);
+        const auto& links = event->truthParticleLinks();
+        for( const auto& link : links ) {
+          if( link.isValid() ) m_truthPartVec[ FULL ].push_back( *link );
         }
       }
 
     /// Grab only truth particles from Pile Up
     } else if( m_trkAnaDefSvc->pileupSwitch() == "PileUp" ) {
-      if( not truthPUEventHandleKey.empty() ) {
-        SG::ReadHandle< xAOD::TruthPileupEventContainer > pTruthPUEventCont( truthPUEventHandleKey );
-        if( not pTruthPUEventCont.isValid() ) {
-          ATH_MSG_WARNING( "Non valid truth pile up event collection: " << truthPUEventHandleKey.key() );
-        } else {
-          // loop over all pile up events
-          for( size_t ipu=0; ipu < pTruthPUEventCont->size(); ipu++ ) {
-            const xAOD::TruthPileupEvent* eventPU = pTruthPUEventCont->at(ipu);
-            const auto& links = eventPU->truthParticleLinks();
-            for( const auto& link : links ) {
-              if( link.isValid() ) m_truthPartVec[ FULL ].push_back( *link );
-            }
+      if( m_truthPUEventContainer ) {
+        // loop over all pile up events
+        for( size_t ipu=0; ipu < m_truthPUEventContainer->size(); ipu++ ) {
+          const xAOD::TruthPileupEvent* eventPU = m_truthPUEventContainer->at( ipu );
+          const auto& links = eventPU->truthParticleLinks();
+          for( const auto& link : links ) {
+            if( link.isValid() ) m_truthPartVec[ FULL ].push_back( *link );
           }
         }
       }

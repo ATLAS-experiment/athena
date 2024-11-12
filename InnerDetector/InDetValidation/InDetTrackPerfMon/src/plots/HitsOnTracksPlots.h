@@ -31,6 +31,7 @@ namespace IDTPM {
         const std::string& refType,
         bool isITk,
         bool doGlobalPlots = false,
+        bool doTruthMuPlots = false,
         bool do1D = false );
 
     /// Constructor B
@@ -42,7 +43,8 @@ namespace IDTPM {
         const std::string& anaTag,
         const std::string& trackType,
         bool isITk,
-        bool doGlobalPlots = false );
+        bool doGlobalPlots = false,
+        bool doTruthMuPlots = false );
 
     /// Destructor
     virtual ~HitsOnTracksPlots() = default;
@@ -74,6 +76,7 @@ namespace IDTPM {
     std::string m_refType;
     bool m_isITk;
     bool m_doGlobalPlots;
+    bool m_doTruthMuPlots;
     bool m_do1D;
 
     enum HitParam {

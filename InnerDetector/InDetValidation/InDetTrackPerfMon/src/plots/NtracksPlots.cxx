@@ -18,11 +18,12 @@
 IDTPM::NtracksPlots::NtracksPlots(
     PlotMgr* pParent, const std::string& dirName, 
     const std::string& anaTag, const std::string& trackType,
-    bool doTrigger, bool doGlobalPlots ) :
+    bool doTrigger, bool doGlobalPlots, bool doTruthMuPlots ) :
         PlotMgr( dirName, anaTag, pParent ), 
         m_trackType( trackType ),
         m_doTrigger( doTrigger ),
-        m_doGlobalPlots( doGlobalPlots ) { }
+        m_doGlobalPlots( doGlobalPlots ),
+        m_doTruthMuPlots( doTruthMuPlots ) { }
 
 
 /// ---------------------------
@@ -54,8 +55,8 @@ StatusCode IDTPM::NtracksPlots::bookPlots()
     /// N.B.  These plots are filled always filled with counts[ INROI ] ,
     ///       which for offline-like analyses is by construction = counts[ FS ] .
     ///       Regardless the name of these plots will always have m_counterName[ FS ] = "selected"
-    ATH_CHECK( retrieveAndBook( m_nTracks_vs_truthMu,  "num_"+m_trackType+"_"+m_counterName[ FS ]+"_vs_truthMu" ) );
     ATH_CHECK( retrieveAndBook( m_nTracks_vs_actualMu, "num_"+m_trackType+"_"+m_counterName[ FS ]+"_vs_actualMu" ) );
+    if( m_doTruthMuPlots ) ATH_CHECK( retrieveAndBook( m_nTracks_vs_truthMu,  "num_"+m_trackType+"_"+m_counterName[ FS ]+"_vs_truthMu" ) );
   }
 
   return StatusCode::SUCCESS;
@@ -85,8 +86,8 @@ StatusCode IDTPM::NtracksPlots::fillPlots(
   }
 
   if( m_doGlobalPlots ) {
-    ATH_CHECK( fill( m_nTracks_vs_truthMu,   truthMu,  counts[ INROI ], weight ) );
     ATH_CHECK( fill( m_nTracks_vs_actualMu,  actualMu, counts[ INROI ], weight ) );
+    if( m_doTruthMuPlots ) ATH_CHECK( fill( m_nTracks_vs_truthMu,   truthMu,  counts[ INROI ], weight ) );
   }
 
   return StatusCode::SUCCESS;
