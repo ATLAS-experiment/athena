@@ -356,8 +356,9 @@ class PtEtaSelectionBlock (ConfigBlock):
             info="low end of the |eta| gap. No default value.")
         self.addOption ('etaGapHigh', None, type=float,
             info="high end of the |eta| gap. No default value.")
-        self.addOption ('selectionDecoration', 'selectPtEta', type=str,
-            info="the name of the decoration to set.")
+        self.addOption ('selectionDecoration', None, type=str,
+            info="the name of the decoration to set. If 'None', will be set "
+            "to 'selectPtEta' followed by the selection name.")
         self.addOption ('useClusterEta', False, type=bool,
             info="whether to use the cluster eta (etaBE(2)) instead of the object "
             "eta (for electrons and photons). The default is False.")
@@ -382,6 +383,8 @@ class PtEtaSelectionBlock (ConfigBlock):
             alg.selectionTool.etaGapLow = self.etaGapLow
         if self.etaGapHigh is not None:
             alg.selectionTool.etaGapHigh = self.etaGapHigh
+        if self.selectionDecoration is None:
+            self.selectionDecoration = 'selectPtEta' + (f'_{self.selectionName}' if self.selectionName else '')
         alg.selectionTool.useClusterEta = self.useClusterEta
         alg.selectionTool.useDressedProperties = self.useDressedProperties
         alg.selectionDecoration = self.selectionDecoration
