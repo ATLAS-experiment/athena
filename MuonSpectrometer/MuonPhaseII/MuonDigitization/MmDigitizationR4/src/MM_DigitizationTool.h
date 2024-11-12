@@ -44,7 +44,8 @@ namespace MuonR4{
  
   private:
 
-    MM_ElectronicsToolInput combinedStripResponseAllHits(const std::vector<MM_ElectronicsToolInput>& v_stripDigitOutput) const;
+    MM_ElectronicsToolInput combinedStripResponseAllHits(const EventContext&ctx,
+                                                         const std::vector<MM_ElectronicsToolInput>& v_stripDigitOutput) const;
     SG::WriteHandleKey<MmDigitContainer> m_writeKey{this, "OutputObjectName", "MM_DIGITS"};
 
     SG::ReadCondHandleKey<Muon::DigitEffiData> m_effiDataKey{this, "EffiDataKey", "MmDigitEff", "Efficiency constants of the individual MM gasGaps"};
