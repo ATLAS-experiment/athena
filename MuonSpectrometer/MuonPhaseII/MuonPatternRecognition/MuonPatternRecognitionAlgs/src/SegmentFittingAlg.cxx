@@ -352,7 +352,8 @@ namespace MuonR4 {
         
         /** If no degree of freedom is in the segment fit then try to plug the holes  */
         if (data.nDoF<=0 || data.calibMeasurements.empty()) {
-            ATH_MSG_VERBOSE("No degree of freedom available. What shall be removed?!");
+            ATH_MSG_VERBOSE("No degree of freedom available. What shall be removed?!. nDoF: "
+                            <<data.nDoF<<", n-meas: "<<data.calibMeasurements);
             return false;
         }
 
@@ -541,6 +542,10 @@ namespace MuonR4 {
                                                 }
                                                 return true;
                                                 }), candidate.calibMeasurements.end());
+
+        std::ranges::sort(candidate.calibMeasurements, [](const Segment::MeasType& a, const Segment::MeasType& b){
+            return a->positionInChamber().z() < b->positionInChamber().z();
+        });
         const MuonGMR4::SpectrometerSector* chamber{nullptr};
         for (const auto& hit : candidate.calibMeasurements) {
             if (hit->type() != xAOD::UncalibMeasType::Other){
