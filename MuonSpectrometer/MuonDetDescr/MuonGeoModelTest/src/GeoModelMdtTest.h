@@ -47,7 +47,6 @@ class GeoModelMdtTest : public AthHistogramAlgorithm {
     Gaudi::Property<std::vector<std::string>> m_selectStat{
         this, "TestStations", {"BIL1A3"}};
 
-    Gaudi::Property<bool> m_dumpSurfaces{this, "dumpSurfaces", false, "Adds the bounds and surfaces of each tube to the dump"};
 
    
     /// Write a TTree for validation purposes
@@ -91,13 +90,6 @@ class GeoModelMdtTest : public AthHistogramAlgorithm {
 
     /// Position of the readout
     MuonVal::ThreeVectorBranch m_roPos{m_tree, "readOutPos"};
-
-    /// Distorted transformations
-    MuonVal::VectorBranch<unsigned short>& m_layDistTubeLay{m_tree.newVector<unsigned short>("DistTubeLayer")};
-    MuonVal::VectorBranch<unsigned short>& m_layDistTubeNum{m_tree.newVector<unsigned short>("DistTubeNumber")};
-    MuonVal::VectorBranch<double>& m_layDistPosAlongWire{m_tree.newVector<double>("DistPosAlongTube")};
-    MuonVal::CoordSystemsBranch m_layDist{m_tree, "DistLayer"};
-
     /// Alignment parameters
     MuonVal::ScalarBranch<float>& m_ALineTransS{m_tree.newScalar<float>("ALineTransS", 0.)};
     MuonVal::ScalarBranch<float>& m_ALineTransT{m_tree.newScalar<float>("ALineTransT", 0.)};
