@@ -73,6 +73,7 @@ std::unique_ptr<egGain::GainTool> gainToolFactory(egEnergyCorr::ESModel model) {
     case egEnergyCorr::es2018_R21_v1:
     case egEnergyCorr::es2022_R22_PRE:
     case egEnergyCorr::es2023_R22_Run2_v0:
+    case egEnergyCorr::es2024_Run3_ofc0_v0:
       return nullptr;
     default:
       return nullptr;
@@ -116,6 +117,7 @@ std::string egammaMVAToolFolder(egEnergyCorr::ESModel model) {
     case egEnergyCorr::es2018_R21_v0:
     case egEnergyCorr::es2018_R21_v1:
     case egEnergyCorr::es2022_R22_PRE:
+    case egEnergyCorr::es2024_Run3_ofc0_v0:
       folder = "egammaMVACalib/offline/v7";
       break;
     case egEnergyCorr::es2023_R22_Run2_v0:
@@ -163,6 +165,7 @@ std::unique_ptr<egammaLayerRecalibTool> egammaLayerRecalibToolFactory(
     case egEnergyCorr::es2017_R21_ofc0_v1:
     case egEnergyCorr::es2018_R21_v0:
     case egEnergyCorr::es2022_R22_PRE:
+    case egEnergyCorr::es2024_Run3_ofc0_v0:
       tune = "es2017_21.0_v0";
       break;
     case egEnergyCorr::es2018_R21_v1:
@@ -210,6 +213,7 @@ bool use_intermodule_correction(egEnergyCorr::ESModel model) {
     case egEnergyCorr::es2018_R21_v1:
     case egEnergyCorr::es2022_R22_PRE:
     case egEnergyCorr::es2023_R22_Run2_v0:
+    case egEnergyCorr::es2024_Run3_ofc0_v0:
       return true;
     case egEnergyCorr::UNDEFINED:  // TODO: find better logic
       return false;
@@ -255,6 +259,7 @@ bool is_run2(egEnergyCorr::ESModel model) {
     case egEnergyCorr::es2018_R21_v1:
     case egEnergyCorr::es2022_R22_PRE:
     case egEnergyCorr::es2023_R22_Run2_v0:
+    case egEnergyCorr::es2024_Run3_ofc0_v0:
       return true;
     case egEnergyCorr::UNDEFINED:  // TODO: find better logic
       return false;
@@ -397,6 +402,8 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
     m_TESModel = egEnergyCorr::es2022_R22_PRE;
   } else if (m_ESModel == "es2023_R22_Run2_v0") {
     m_TESModel = egEnergyCorr::es2023_R22_Run2_v0;
+  } else if (m_ESModel == "es2024_Run3_ofc0_v0") {
+    m_TESModel = egEnergyCorr::es2024_Run3_ofc0_v0;
   } else if (m_ESModel.empty()) {
     ATH_MSG_ERROR("you must set ESModel property");
     return StatusCode::FAILURE;
@@ -735,7 +742,7 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
         m_useCaloDistPhiUnifCorrection == 1) {
       m_useCaloDistPhiUnifCorrection = 1;
       std::string phiUnifCorrfileName = PathResolverFindCalibFile(
-          "ElectronPhotonFourMomentumCorrection/v32/"
+          "ElectronPhotonFourMomentumCorrection/v33/"
           "egammaEnergyCorrectionData.root");
       std::unique_ptr<TFile> fCorr(
           TFile::Open(phiUnifCorrfileName.c_str(), "READ"));
@@ -1254,6 +1261,7 @@ void EgammaCalibrationAndSmearingTool::setupSystematics() {
     if (m_TESModel == egEnergyCorr::es2017_R21_v0 or
         m_TESModel == egEnergyCorr::es2017_R21_v1 or
         m_TESModel == egEnergyCorr::es2017_R21_ofc0_v1 or
+        m_TESModel == egEnergyCorr::es2024_Run3_ofc0_v0 or
         m_TESModel == egEnergyCorr::es2018_R21_v0 or
         m_TESModel == egEnergyCorr::es2018_R21_v1 or
         m_TESModel == egEnergyCorr::es2022_R22_PRE or
@@ -1280,6 +1288,7 @@ void EgammaCalibrationAndSmearingTool::setupSystematics() {
         m_TESModel == egEnergyCorr::es2017_R21_v0 or
         m_TESModel == egEnergyCorr::es2017_R21_v1 or
         m_TESModel == egEnergyCorr::es2017_R21_ofc0_v1 or
+        m_TESModel == egEnergyCorr::es2024_Run3_ofc0_v0 or
         m_TESModel == egEnergyCorr::es2018_R21_v0 or
         m_TESModel == egEnergyCorr::es2018_R21_v1 or
         m_TESModel == egEnergyCorr::es2022_R22_PRE) {
@@ -1327,6 +1336,7 @@ void EgammaCalibrationAndSmearingTool::setupSystematics() {
     if (m_TESModel == egEnergyCorr::es2017_R21_v0 ||
         m_TESModel == egEnergyCorr::es2017_R21_v1 ||
         m_TESModel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+        m_TESModel == egEnergyCorr::es2024_Run3_ofc0_v0 || 
         m_TESModel == egEnergyCorr::es2018_R21_v0 ||
         m_TESModel == egEnergyCorr::es2018_R21_v1 ||
         m_TESModel == egEnergyCorr::es2022_R22_PRE) {
@@ -1410,6 +1420,7 @@ void EgammaCalibrationAndSmearingTool::setupSystematics() {
         m_TESModel == egEnergyCorr::es2017_R21_v0 or
         m_TESModel == egEnergyCorr::es2017_R21_v1 or
         m_TESModel == egEnergyCorr::es2017_R21_ofc0_v1 or
+        m_TESModel == egEnergyCorr::es2024_Run3_ofc0_v0 or
         m_TESModel == egEnergyCorr::es2018_R21_v0 or
         m_TESModel == egEnergyCorr::es2018_R21_v1 or
         m_TESModel == egEnergyCorr::es2022_R22_PRE or
@@ -1429,6 +1440,7 @@ void EgammaCalibrationAndSmearingTool::setupSystematics() {
         m_TESModel == egEnergyCorr::es2017_R21_v0 or
         m_TESModel == egEnergyCorr::es2017_R21_v1 or
         m_TESModel == egEnergyCorr::es2017_R21_ofc0_v1 or
+        m_TESModel == egEnergyCorr::es2024_Run3_ofc0_v0 or
         m_TESModel == egEnergyCorr::es2018_R21_v0 or
         m_TESModel == egEnergyCorr::es2018_R21_v1 or
         m_TESModel == egEnergyCorr::es2022_R22_PRE or
@@ -1451,6 +1463,7 @@ void EgammaCalibrationAndSmearingTool::setupSystematics() {
         m_TESModel == egEnergyCorr::es2017_R21_v0 or
         m_TESModel == egEnergyCorr::es2017_R21_v1 or
         m_TESModel == egEnergyCorr::es2017_R21_ofc0_v1 or
+        m_TESModel == egEnergyCorr::es2024_Run3_ofc0_v0 or
         m_TESModel == egEnergyCorr::es2018_R21_v0 or
         m_TESModel == egEnergyCorr::es2018_R21_v1 or
         m_TESModel == egEnergyCorr::es2022_R22_PRE or
@@ -1526,6 +1539,7 @@ void EgammaCalibrationAndSmearingTool::setupSystematics() {
         m_TESModel != egEnergyCorr::es2017_R21_v0 and
         m_TESModel != egEnergyCorr::es2017_R21_v1 and
         m_TESModel != egEnergyCorr::es2017_R21_ofc0_v1 and
+        m_TESModel != egEnergyCorr::es2024_Run3_ofc0_v0 and 
         m_TESModel != egEnergyCorr::es2018_R21_v0 and
         m_TESModel != egEnergyCorr::es2018_R21_v1 and
         m_TESModel != egEnergyCorr::es2022_R22_PRE and
@@ -1695,6 +1709,7 @@ void EgammaCalibrationAndSmearingTool::setupSystematics() {
         m_TESModel == egEnergyCorr::es2017_R21_v0 or
         m_TESModel == egEnergyCorr::es2017_R21_v1 or
         m_TESModel == egEnergyCorr::es2017_R21_ofc0_v1 or
+        m_TESModel == egEnergyCorr::es2024_Run3_ofc0_v0 or
         m_TESModel == egEnergyCorr::es2018_R21_v0 or
         m_TESModel == egEnergyCorr::es2018_R21_v1 or
         m_TESModel == egEnergyCorr::es2022_R22_PRE or
@@ -1723,6 +1738,7 @@ void EgammaCalibrationAndSmearingTool::setupSystematics() {
         m_TESModel == egEnergyCorr::es2017_R21_v0 or
         m_TESModel == egEnergyCorr::es2017_R21_v1 or
         m_TESModel == egEnergyCorr::es2017_R21_ofc0_v1 or
+        m_TESModel == egEnergyCorr::es2024_Run3_ofc0_v0 or
         m_TESModel == egEnergyCorr::es2018_R21_v0 or
         m_TESModel == egEnergyCorr::es2018_R21_v1 or
         m_TESModel == egEnergyCorr::es2022_R22_PRE) {
@@ -1764,6 +1780,7 @@ void EgammaCalibrationAndSmearingTool::setupSystematics() {
         m_TESModel == egEnergyCorr::es2017_R21_v0 or
         m_TESModel == egEnergyCorr::es2017_R21_v1 or
         m_TESModel == egEnergyCorr::es2017_R21_ofc0_v1 or
+        m_TESModel == egEnergyCorr::es2024_Run3_ofc0_v0 or
         m_TESModel == egEnergyCorr::es2018_R21_v0 or
         m_TESModel == egEnergyCorr::es2018_R21_v1 or
         m_TESModel == egEnergyCorr::es2022_R22_PRE or
@@ -1852,6 +1869,7 @@ void EgammaCalibrationAndSmearingTool::setupSystematics() {
         m_TESModel == egEnergyCorr::es2017_R21_v0 or
         m_TESModel == egEnergyCorr::es2017_R21_v1 or
         m_TESModel == egEnergyCorr::es2017_R21_ofc0_v1 or
+        m_TESModel == egEnergyCorr::es2024_Run3_ofc0_v0 or
         m_TESModel == egEnergyCorr::es2018_R21_v0 or
         m_TESModel == egEnergyCorr::es2018_R21_v1 or
         m_TESModel == egEnergyCorr::es2022_R22_PRE or
@@ -1870,6 +1888,7 @@ void EgammaCalibrationAndSmearingTool::setupSystematics() {
           egEnergyCorr::Resolution::MaterialPP0Down;
       if (m_TESModel == egEnergyCorr::es2017_R21_v1 ||
           m_TESModel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+          m_TESModel == egEnergyCorr::es2024_Run3_ofc0_v0 ||
           m_TESModel == egEnergyCorr::es2018_R21_v0 ||
           m_TESModel == egEnergyCorr::es2018_R21_v1 ||
           m_TESModel == egEnergyCorr::es2022_R22_PRE ||
@@ -1970,6 +1989,7 @@ double EgammaCalibrationAndSmearingTool::intermodule_correction(
       m_TESModel == egEnergyCorr::es2017_R21_v0 ||
       m_TESModel == egEnergyCorr::es2017_R21_v1 ||
       m_TESModel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+      m_TESModel == egEnergyCorr::es2024_Run3_ofc0_v0 ||
       m_TESModel == egEnergyCorr::es2018_R21_v0 ||
       m_TESModel == egEnergyCorr::es2018_R21_v1 ||
       m_TESModel == egEnergyCorr::es2022_R22_PRE ||
@@ -2161,6 +2181,7 @@ double EgammaCalibrationAndSmearingTool::correction_phi_unif(double eta,
       m_TESModel == egEnergyCorr::es2017_R21_v0 ||
       m_TESModel == egEnergyCorr::es2017_R21_v1 or
       m_TESModel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+      m_TESModel == egEnergyCorr::es2024_Run3_ofc0_v0 ||
       m_TESModel == egEnergyCorr::es2018_R21_v0 ||
       m_TESModel == egEnergyCorr::es2018_R21_v1 ||
       m_TESModel == egEnergyCorr::es2022_R22_PRE ||

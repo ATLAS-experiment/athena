@@ -326,6 +326,8 @@ enum ESModel {
                        // low+high mu data
   es2022_R22_PRE,      // Pre-recommnedations for release 22, Run-3
   es2023_R22_Run2_v0,  // R22 Run-2 recommendations based on R21
+  es2024_Run3_ofc0_v0,  // for run 3 data recorded with LAR OFC(mu=0), based on es2017_R21_ofc0_v1 
+                        //  with extra uncertainty   (preliminary recommendation)
 
   UNDEFINED
 
