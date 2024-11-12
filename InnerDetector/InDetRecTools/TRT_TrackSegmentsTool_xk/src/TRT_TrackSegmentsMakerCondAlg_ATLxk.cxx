@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_TrackSegmentsMakerCondAlg_ATLxk.h"
@@ -28,18 +28,7 @@
 ///////////////////////////////////////////////////////////////////
 
 InDet::TRT_TrackSegmentsMakerCondAlg_ATLxk::TRT_TrackSegmentsMakerCondAlg_ATLxk(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthReentrantAlgorithm(name, pSvcLocator),
-    m_fieldmode ("MapSolenoid"),
-    m_propTool ("Trk::RungeKuttaPropagator"),
-    m_pTmin (500.),
-    m_nMom (70)
-
-{
-  declareProperty("PropagatorTool"         ,m_propTool     );
-  declareProperty("pTmin"                  ,m_pTmin        );
-  declareProperty("NumberMomentumChannel"  ,m_nMom         ); 
-
-}
+  : ::AthReentrantAlgorithm(name, pSvcLocator) { }
 
 ///////////////////////////////////////////////////////////////////
 // Initialisation

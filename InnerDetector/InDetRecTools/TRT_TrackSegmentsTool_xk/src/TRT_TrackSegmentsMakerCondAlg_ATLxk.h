@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -55,12 +55,15 @@ namespace InDet {
 
     const TRT_ID                         * m_trtid{}           ;
 
-    std::string                            m_fieldmode       ; // jobOption: Magnetic field mode
-    ToolHandle<Trk::IPropagator>           m_propTool        ; // Propagator            tool
+    StringProperty m_fieldmode{this, "MagneticFieldMode", "MapSolenoid",
+      "Mode of magnetic field"};
+    ToolHandle<Trk::IPropagator> m_propTool{this, "PropagatorTool",
+      "Trk::RungeKuttaPropagator"};
     Trk::MagneticFieldProperties           m_fieldprop       ; // Magnetic field properties
-    float                                  m_pTmin           ;
+    FloatProperty m_pTmin{this, "pTmin", 500.};
     float                                  m_Psi128{}          ;
-    int                                    m_nMom            ; // number momentum  channel
+    IntegerProperty m_nMom{this, "NumberMomentumChannel", 70,
+      "number momentum  channel"};
     float                                  m_A{}               ;
     float                                  m_Psi{}             ;
     int                                    m_nPhi{}            ; // number azimuthal channel

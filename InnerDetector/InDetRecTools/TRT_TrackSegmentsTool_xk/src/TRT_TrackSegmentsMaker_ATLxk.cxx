@@ -30,25 +30,9 @@
 
 InDet::TRT_TrackSegmentsMaker_ATLxk::TRT_TrackSegmentsMaker_ATLxk
 (const std::string& t,const std::string& n,const IInterface* p)
-  : AthAlgTool(t,n,p),
-  m_fieldmode    ("MapSolenoid"                                ),
-  m_removeNoise  (true                                         ),
-  m_clustersCut  (10                                           ),
-  m_pTmin        (500.                                         ),
-  m_sharedfrac   (0.3                                          ),
-  m_nPhi         (500                                          ),
-  m_nMom         (70                                           )
+  : AthAlgTool(t,n,p)
 {
   declareInterface<ITRT_TrackSegmentsMaker>(this);
-
-  declareProperty("MagneticFieldMode"      ,m_fieldmode    );
-  declareProperty("NumberAzimuthalChannel" ,m_nPhi         ); 
-  declareProperty("NumberMomentumChannel"  ,m_nMom         ); 
-  declareProperty("MinNumberDriftCircles"  ,m_clustersCut  );
-  declareProperty("RemoveNoiseDriftCircles",m_removeNoise  );
-  declareProperty("pTmin"                  ,m_pTmin        );
-  declareProperty("sharedFrac"             ,m_sharedfrac   );
-
 }
 
 ///////////////////////////////////////////////////////////////////
