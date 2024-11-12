@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef TAURECTOOLS_TAURECTOOLSDICT_H
 #define TAURECTOOLS_TAURECTOOLSDICT_H
@@ -20,6 +20,6 @@
 #include "tauRecTools/TauJetRNNEvaluator.h"
 #include "tauRecTools/TauDecayModeNNClassifier.h"
 #include "tauRecTools/TauAODSelector.h"
-#include "tauRecTools/TauAODLeptonRemovalTool.h"
+#include "tauRecTools/TauAODMuonRemovalTool.h"
 
 #endif // TAURECTOOLS_TAURECTOOLSDICT_H
