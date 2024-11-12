@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTRIGGER_VERSIONS_GFEXJETROI_V1_H
@@ -109,6 +109,7 @@ namespace xAOD {
 
       /// Constants used in converting to ATLAS units
       static const float s_PhiWidth;
+      static const float s_PhiWidthFR;
       static const std::vector<float> s_EtaEdge; 
       static const std::vector<float> s_EtaCenter;
 

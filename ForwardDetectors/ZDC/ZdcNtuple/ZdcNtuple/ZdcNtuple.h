@@ -222,7 +222,12 @@ public:
   unsigned short t_ZdcLucrodTriggerAmp[2][4];
   unsigned short t_ZdcLucrodTriggerAmpLG[2][4];
   float t_ZdcModuleMaxADC[2][4];
+  float t_ZdcModuleMaxADCHG[2][4];
+  float t_ZdcModuleMaxADCLG[2][4];
+  float t_ZdcModulePeakADCHG[2][4];
+  float t_ZdcModulePeakADCLG[2][4];
   float t_ZdcModuleAmpLGRefit[2][4];
+  float t_ZdcModuleAmpCorrLGRefit[2][4];
   float t_ZdcModuleT0LGRefit[2][4];
   float t_ZdcModuleT0SubLGRefit[2][4];
   float t_ZdcModuleChisqLGRefit[2][4];

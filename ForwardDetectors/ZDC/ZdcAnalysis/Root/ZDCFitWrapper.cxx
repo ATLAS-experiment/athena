@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcAnalysis/ZDCFitWrapper.h"
@@ -610,6 +610,7 @@ ZDCFitExpFermiLHCfPrePulse::ZDCFitExpFermiLHCfPrePulse(const std::string& tag, f
   theTF1->SetParLimits(3, 3.5, 5.5);
   theTF1->SetParLimits(4, 1, 8196); // Increase the upper range to 2 times of ADC range to deal with large exponential tail case of pre-pulse.
   theTF1->SetParLimits(5, -20, 10);
+  theTF1->SetParLimits(6, -50, 50);
 
 }
 
@@ -629,6 +630,7 @@ void ZDCFitExpFermiLHCfPrePulse::UnconstrainFit()
   theTF1->ReleaseParameter(6);
 
   theTF1->SetParLimits(4, 1, 8196); // Increase the upper range to 2 times of ADC range to deal with large exponential tail case of pre-pulse.
+  theTF1->SetParLimits(6, -50, 50);
 }
 
 void ZDCFitExpFermiLHCfPrePulse::SetPrePulseT0Range(float tmin, float tmax)

@@ -175,6 +175,11 @@ private:
   std::vector<float> m_nonLinCorrParamsHG;
   std::vector<float> m_nonLinCorrParamsLG;
 
+  bool m_haveFADCCorrections{false};
+  bool m_FADCCorrPerSample{false};
+  std::unique_ptr<const TH1> m_FADCCorrHG{};
+  std::unique_ptr<const TH1> m_FADCCorrLG{};
+  
   // Histogram used to perform the fits and function wrappers
   //
   mutable std::unique_ptr<TH1> m_fitHist;
@@ -245,8 +250,18 @@ private:
   int m_usedPresampIdx{};
   float m_preSample{};
 
-  float m_maxADCValue{};
-  float m_minADCValue{};
+  float m_minADCHG{};
+  float m_maxADCHG{};
+  int m_minADCSampleHG;
+  int m_maxADCSampleHG;
+  
+  float m_maxADCLG{};
+  float m_minADCLG{};
+  int m_minADCSampleLG;
+  int m_maxADCSampleLG;
+
+  float m_ADCPeakHG{};
+  float m_ADCPeakLG{};
 
   float m_maxDelta{};
   float m_minDelta{};
@@ -300,6 +315,7 @@ private:
 
   bool m_evtLGRefit{false};
   float m_refitLGAmpl{0};
+  float m_refitLGFitAmpl{0};
   float m_refitLGAmplCorr{0};
   float m_refitLGAmpError{0};
   float m_refitLGChisq{0};
@@ -357,6 +373,8 @@ private:
                   );
 
 
+  double getAmplitudeCorrection(bool highGain);
+    
   static std::vector<float> Calculate2ndDerivative(const std::vector <float>& inputData, unsigned int step);
   static std::vector<float> CalculateDerivative(const std::vector <float>& inputData, unsigned int step);
   static float obtainDelayedBaselineCorr(const std::vector<float>& samples);
@@ -518,6 +536,12 @@ public:
     m_haveNonlinCorr = true;
   }
 
+  // Provide a historam that provides per-ADC channel correction factors for integral and differential
+  //   non-linearities
+  //
+  void enableFADCCorrections(bool correctPerSample, std::unique_ptr<const TH1>& correHistHG, std::unique_ptr<const TH1>& correHistLG);
+  void disableFADCCorrections() {m_haveFADCCorrections = false;}
+  
   bool LoadAndAnalyzeData(const std::vector<float>& ADCSamplesHG, const std::vector<float>& ADCSamplesLG);
 
   bool LoadAndAnalyzeData(const std::vector<float>& ADCSamplesHG, const std::vector<float>& ADCSamplesLG,
@@ -585,6 +609,12 @@ public:
     else return 0;
   }
 
+  float getRefitLGFitAmp() const
+  {
+    if (m_evtLGRefit) return m_refitLGFitAmpl;
+    else return 0;
+  }
+
   float getRefitLGAmpCorr() const
   {
     if (m_evtLGRefit) return m_refitLGAmplCorr;
@@ -609,13 +639,31 @@ public:
     else return 0;
   }
 
-  float GetPresample() const {return m_preSample;}
-  float GetMaxADC() const {return m_maxADCValue;}
-  float GetMinADC() const {return m_minADCValue;}
+  float getPresample() const {return m_preSample;}
+  float getMaxADCHG() const {return m_maxADCHG;}
+  float getMaxADCLG() const {return m_maxADCLG;}
+  float getMinADCHG() const {return m_minADCHG;}
+  float getMinADCLG() const {return m_minADCLG;}
 
-  int GetMaxADCSample() const {return m_maxSampl;}
-  int GetMinADCSample() const {return m_minSampl;}
+  float getMaxADCSub() const {
+    float maxADCNosub = m_useLowGain ? m_maxADCLG : m_maxADCHG;
+    return maxADCNosub - m_pedestal - m_preSample;
+  }
+  
+  float getMinADCSub() const {
+    float minADCNosub = m_useLowGain ? m_minADCLG : m_minADCHG;
+    return minADCNosub - m_pedestal - m_preSample;
+  }
 
+  int getMaxADCSampleHG() const {return m_maxADCSampleHG;}
+  int getMinADCSampleHG() const {return m_minADCSampleHG;}
+
+  int getMaxADCSampleLG() const {return m_maxADCSampleLG;}
+  int getMinADCSampleLG() const {return m_minADCSampleLG;}
+
+  float getADCPeakHG() const {return m_ADCPeakHG;}
+  float getADCPeakLG() const {return m_ADCPeakLG;}
+  
   float GetMaxDelta() const {return m_maxDelta;}
   float GetMinDelta() const {return m_minDelta;}
 

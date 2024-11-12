@@ -67,6 +67,10 @@ def IDTIDEKernelCommonCfg(flags, name='IDTIDEKernel'):
 
     # ====================================================================
     # SKIMMING TOOLS
+    #
+    # the list of active triggers for a particular release & menu can be found in the
+    # menu file for example
+    # https://gitlab.cern.ch/atlas/athena/-/blob/24.0/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Menu/Physics_pp_run3_v1.py
     # ====================================================================
     skimmingTools = []
     if not flags.Input.isMC:
@@ -75,15 +79,26 @@ def IDTIDEKernelCommonCfg(flags, name='IDTIDEKernel'):
         sel_jet800 = 'AntiKt4EMPFlowJets.JetConstitScaleMomentum_pt >= 800.*GeV'
         sel_jet1000 = 'AntiKt4EMPFlowJets.JetConstitScaleMomentum_pt >= 1000.*GeV'
 
-        desd_jetA = '( HLT_j110_pf_ftf_preselj80_L1J30 || HLT_j175_pf_ftf_preselj140_L1J50 || HLT_j260_pf_ftf_preselj200_L1J75 )'
-        desd_jetC = '( HLT_j360_pf_ftf_preselj225_L1J100 )'
-        desd_jetD = '( HLT_j420_pf_ftf_preselj225_L1J100 && !HLT_j460_pf_ftf_preselj225_L1J100 )'
-        desd_jetE = '( HLT_j460_pf_ftf_preselj225_L1J100 )'
-        desd_jetF = '( HLT_j460_pf_ftf_preselj225_L1J100 && count(' + \
-            sel_jet600+')>0 && count('+sel_jet800+')==0 )'
-        desd_jetG = '( HLT_j460_pf_ftf_preselj225_L1J100 && count(' + \
-            sel_jet800+')>0 && count('+sel_jet1000+')==0 )'
-        desd_jetH = '( HLT_j460_pf_ftf_preselj225_L1J100 && count('+sel_jet1000+')>0 )'
+        #Phase1 Calo version of Jet triggers
+        jetA_ph1 = '( HLT_j110_pf_ftf_preselj80_L1jJ60 || HLT_j175_pf_ftf_preselj140_L1jJ90 || HLT_j260_pf_ftf_preselj200_L1jJ125 )'
+        jetC_ph1 = '( HLT_j360_pf_ftf_preselj225_L1jJ160 )'
+        jetD_ph1 = '( HLT_j400_pf_ftf_preselj225_L1jJ160 && !HLT_j460_pf_ftf_preselj225_L1jJ160 )'
+        jetE_ph1 = '( HLT_j460_pf_ftf_preselj225_L1jJ160 )'
+        jetF_ph1 = ' HLT_j460_pf_ftf_preselj225_L1jJ160 '
+        jetG_ph1 = ' HLT_j460_pf_ftf_preselj225_L1jJ160 '
+        jetH_ph1 = ' HLT_j460_pf_ftf_preselj225_L1jJ160 '
+
+        
+        desd_jetA = f'( HLT_j110_pf_ftf_preselj80_L1J30 || HLT_j175_pf_ftf_preselj140_L1J50 || HLT_j260_pf_ftf_preselj200_L1J75 ) || {jetA_ph1} '
+        desd_jetC = f'( HLT_j360_pf_ftf_preselj225_L1J100 ) || {jetC_ph1} '
+        desd_jetD = f'( HLT_j420_pf_ftf_preselj225_L1J100 && !HLT_j460_pf_ftf_preselj225_L1J100 ) || {jetD_ph1} '
+        desd_jetE = f'( HLT_j460_pf_ftf_preselj225_L1J100 ) || {jetE_ph1} '
+        desd_jetF = \
+            f'(( HLT_j460_pf_ftf_preselj225_L1J100 || {jetF_ph1} ) && count({sel_jet600})>0 && count({sel_jet800})==0 )'
+        desd_jetG = \
+            f'(( HLT_j460_pf_ftf_preselj225_L1J100 || {jetG_ph1} ) && count({sel_jet800})>0 && count({sel_jet1000})==0 )'
+        desd_jetH = f'(( HLT_j460_pf_ftf_preselj225_L1J100 || {jetH_ph1} ) && count({sel_jet1000})>0 )'
+
 
         prescaleA = 20
         prescaleC = 40

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -44,7 +44,7 @@ void testgFexJetRoI() {
    c.push_back( obj );
 
    std::cout << "Initializing test object: jet TOB" << std::endl;
-   uint32_t word = 205353989;
+   uint32_t word = 213742597;
    int scale = 200.;
    obj->initialize(word, scale);
 
@@ -56,9 +56,9 @@ void testgFexJetRoI() {
    
     
    SIMPLE_ASSERT( obj->et() == 688800 );
-   SIMPLE_ASSERT( obj->eta() == static_cast<float>(-3.4) );
-   SIMPLE_ASSERT( obj->etaMin() == static_cast<float>(-3.5) );
-   SIMPLE_ASSERT( obj->etaMax() == static_cast<float>(-3.3) );
+   SIMPLE_ASSERT( obj->eta() == static_cast<float>(-1.7) );
+   SIMPLE_ASSERT( obj->etaMin() == static_cast<float>(-1.8) );
+   SIMPLE_ASSERT( obj->etaMax() == static_cast<float>(-1.6) );
    SIMPLE_ASSERT( Athena_test::isEqual (obj->phi_gFex(), static_cast<float>(3*(2*M_PI/32)+(2*M_PI/(32*2))) ));
    SIMPLE_ASSERT( obj->phiMin_gFex() == static_cast<float>(3*(2*M_PI/32)) );
    SIMPLE_ASSERT( obj->phiMax_gFex() == static_cast<float>(3*(2*M_PI/32)+(2*M_PI/32)) );

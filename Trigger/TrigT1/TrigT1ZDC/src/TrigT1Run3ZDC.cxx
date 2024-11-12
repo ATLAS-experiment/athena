@@ -18,8 +18,8 @@ namespace LVL1 {
 // Constructors and destructors
 //--------------------------------
 
-TrigT1Run3ZDC::TrigT1Run3ZDC(const std::string& name, ISvcLocator* pSvcLocator)
-    : AthReentrantAlgorithm(name, pSvcLocator) {}
+TrigT1Run3ZDC::TrigT1Run3ZDC(const std::string &name, ISvcLocator *pSvcLocator)
+    : AthAlgorithm(name, pSvcLocator) {}
 
 //---------------------------------
 // initialise()
@@ -60,7 +60,7 @@ StatusCode TrigT1Run3ZDC::initialize() {
       data["LucrodLowGain"]["LUTs"]["comb"];
 
   // Access Raw Lucrod Data
-  const ZdcID* zdcId = nullptr;
+  const ZdcID *zdcId = nullptr;
   if (detStore()->retrieve(zdcId).isFailure()) {
     msg(MSG::ERROR)
         << "execute: Could not retrieve ZdcID object from the detector store"
@@ -112,7 +112,9 @@ StatusCode TrigT1Run3ZDC::initialize() {
 // execute() method called once per event
 //----------------------------------------------
 
-StatusCode TrigT1Run3ZDC::execute(const EventContext& ctx) const {
+StatusCode TrigT1Run3ZDC::execute() {
+
+  const EventContext &ctx = Gaudi::Hive::currentContext();
 
   // create uints to hold trigger averages
   unsigned int trigAvgAHG = 0;
@@ -133,10 +135,9 @@ StatusCode TrigT1Run3ZDC::execute(const EventContext& ctx) const {
   // access LUCROD data
 
   // use readhandle to retrive lucrodCollection
-  SG::ReadHandle<ZdcLucrodDataContainer> lucrodCollection(m_zldContainerName,
-                                                          ctx);
-
-  for (const ZdcLucrodData* zld : *lucrodCollection) {
+  SG::ReadHandle<ZdcLucrodDataContainer> lucrodCollection(m_zldContainerName,ctx);
+  
+  for (const ZdcLucrodData *zld : *lucrodCollection) {
 
     // get lucrod board number
     uint32_t lucrod_id = zld->GetLucrodID();
@@ -145,7 +146,7 @@ StatusCode TrigT1Run3ZDC::execute(const EventContext& ctx) const {
     for (size_t i = 0; i < zld->GetChanDataSize(); i++) {
 
       // create channel object
-      const ZdcLucrodChannel& zlc = zld->GetChanData(i);
+      const ZdcLucrodChannel &zlc = zld->GetChanData(i);
 
       // figure out which channel we are reading out (0,1)
       uint16_t lucrod_channel = zlc.id;
@@ -173,14 +174,14 @@ StatusCode TrigT1Run3ZDC::execute(const EventContext& ctx) const {
       // gain samples
       if (gain == 0) {
         unsigned int counter = 0;
-        for (const auto& sample : zlc.waveform) {
+        for (const auto &sample : zlc.waveform) {
           // fill low gain FADC samples
           FADCSamplesLG.at((side == 1)).at(module).at(counter) = sample;
           counter++;
         }
-      } else if(gain == 1) {
+      } else if (gain == 1) {
         unsigned int counter = 0;
-        for (const auto& sample : zlc.waveform) {
+        for (const auto &sample : zlc.waveform) {
           // fill high gain FADC samples
           FADCSamplesHG.at((side == 1)).at(module).at(counter) = sample;
           counter++;
@@ -196,7 +197,7 @@ StatusCode TrigT1Run3ZDC::execute(const EventContext& ctx) const {
         trigAvgCLG = zld->GetTrigAvgC();
       }
     }
-  }  // end lucrod loop
+  } // end lucrod loop
 
   // unpack FADC data into one long vector for both
   // high and low gain
@@ -230,13 +231,13 @@ StatusCode TrigT1Run3ZDC::execute(const EventContext& ctx) const {
   // convert int to bitset for ZDC ALT Trigggers
   std::bitset<3> binlg(wordOutLG);
 
-  // ZDC L1 items are located on CTPIN SLOT 9 
+  // ZDC L1 items are located on CTPIN SLOT 9
   // Each slot holds 4 connectors that each carry a 32 bit trigger word
-  // ZDC HG items are located on Connector 1 (CTPCAL) 
+  // ZDC HG items are located on Connector 1 (CTPCAL)
   // at bits 25, 26, 27
   // ZDC LG (UCC) items are located on Connector 3 (NIM3)
   // at bits 28, 29, 30
-  // for more info see 
+  // for more info see
   // twiki.cern.ch/twiki/bin/view/Atlas/LevelOneCentralTriggerSetup#CTPIN_Slot_9
 
   // load HG output into trigger word on correct bits
@@ -252,7 +253,7 @@ StatusCode TrigT1Run3ZDC::execute(const EventContext& ctx) const {
   word1 += (binlg[2] << 30);
 
   // form CTP obejct
-  SG::WriteHandle<ZdcCTP> zdcCTP = SG::makeHandle(m_zdcCTPLocation, ctx);
+  SG::WriteHandle<ZdcCTP> zdcCTP = SG::makeHandle(m_zdcCTPLocation,ctx);
 
   // record CTP object
   ATH_CHECK(zdcCTP.record(std::make_unique<ZdcCTP>(word0, word1)));
@@ -268,4 +269,4 @@ StatusCode TrigT1Run3ZDC::execute(const EventContext& ctx) const {
 
   return StatusCode::SUCCESS;
 }
-}  // namespace LVL1
+} // namespace LVL1

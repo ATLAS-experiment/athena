@@ -16,9 +16,6 @@
 #include "TrkTrack/TrackCollection.h"
 #include "TrkTrackSummary/TrackSummary.h"
 
-#include "PathResolver/PathResolver.h"
-#include "tauRecTools/HelperFunctions.h"
-
 TrigTauTrackRoiUpdater::TrigTauTrackRoiUpdater(const std::string& name, ISvcLocator* pSvcLocator)
     : AthReentrantAlgorithm(name, pSvcLocator)
 {
