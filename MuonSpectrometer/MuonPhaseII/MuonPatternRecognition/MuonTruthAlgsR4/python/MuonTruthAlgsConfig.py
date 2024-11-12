@@ -81,7 +81,7 @@ def PrdMultiTruthMakerCfg(flags):
         result.addEventAlgo(the_alg) 
     if flags.Detector.GeometrysTGC: 
         the_alg = CompFactory.MuonR4.PrdMultiTruthMaker("PrdMultiTruthMakerSTGC",
-                                                        PrdContainer = [prd for prd in prdContainer if "STGC" in prd], 
+                                                        PrdContainer = [prd for prd in prdContainer if "sTgc" in prd], 
                                                         WriteKey = "STGC_TruthMap")
         result.addEventAlgo(the_alg) 
     return result

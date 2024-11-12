@@ -7,7 +7,7 @@ if __name__=="__main__":
                                             action='store_true')
     parser.set_defaults(nEvents = -1)
     #parser.set_defaults(noMM=True)
-    parser.set_defaults(noSTGC=True)
+    #parser.set_defaults(noSTGC=True)
     parser.set_defaults(outRootFile="HoughTransformTester.root")
     #parser.set_defaults(condTag="CONDBR2-BLKPA-2023-02")
     parser.set_defaults(inputFile=[
