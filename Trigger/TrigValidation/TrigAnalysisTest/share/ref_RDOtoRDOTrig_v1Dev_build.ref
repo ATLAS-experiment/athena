@@ -18133,6 +18133,19 @@ HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1cTAU30M_3DR28-MU8F-eTAU3
     2: 10
     3: 10
     4: 3
+HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1cTAU30M_3DR30-MU8F-eTAU30:
+  eventCount: 0
+  stepCounts:
+    0: 6
+    1: 5
+    2: 5
+    3: 5
+  stepFeatures:
+    0: 16
+    1: 15
+    2: 12
+    3: 12
+    4: 4
 HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1cTAU30M_3DR99-MU8F-eTAU30:
   eventCount: 0
   stepCounts:
