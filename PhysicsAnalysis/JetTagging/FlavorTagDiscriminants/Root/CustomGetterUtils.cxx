@@ -5,6 +5,8 @@
 #include "FlavorTagDiscriminants/CustomGetterUtils.h"
 
 #include <optional>
+#include <TVector3.h>
+#include "GeoPrimitives/GeoPrimitives.h"
 
 namespace {
 
@@ -229,6 +231,7 @@ namespace {
   getterFromIParticles(const std::string& name)
   {
     using Jet = xAOD::Jet;
+
     if (name == "pt") {
       return CustomSeqGetter<T>([](const T& p, const Jet&) {
         return p.pt();
@@ -302,6 +305,61 @@ namespace {
     return std::nullopt;
   }
 
+
+  // Eigen::Vector3d getJab(const Eigen::Vector3d local_hits, const xAOD::Jet& j)
+  Eigen::Vector3d getJab(const float local_hitX, const float local_hitY, const float local_hitZ, const xAOD::Jet& j)
+  {
+    // I want to compute jab coordinates: jet projection, adjacent
+    // projection, beamline projection. The "adjacent" projection
+    // is defined to be orthogonal to the jet and beam, but this
+    // isn't a fully orthogonal basis. 
+
+    auto p4 = j.p4();
+    Eigen::Vector3d local_hits (local_hitX, local_hitY, local_hitZ);
+    Eigen::Vector3d bhat(0,0,1);
+    Eigen::Vector3d jet (p4.X(), p4.Y(), p4.Z());
+    Eigen::Vector3d jhat = jet.normalized();
+    Eigen::Vector3d a = bhat.cross(jhat);
+    Eigen::Vector3d ahat = a.normalized();
+    // build the matrix m that maps the jab displacement such that m*jab = detector
+    Eigen::Matrix3d m;
+    m << jhat, ahat, bhat;
+    // now solve this for jab = m^-1 * detector
+    Eigen::Vector3d jab = m.inverse() * local_hits;
+    return jab;
+  }
+
+
+  // Getters from general xAOD::TrackMeasurementValidation and derived classes
+  std::optional<SequenceGetterFunc<xAOD::TrackMeasurementValidation>>
+  getterFromHits(const std::string& name)
+  {
+    using Tmv = xAOD::TrackMeasurementValidation;
+    using Jet = xAOD::Jet;
+    
+    SG::AuxElement::ConstAccessor<float> local_hitX("HitsXRelToBeamspot");
+    SG::AuxElement::ConstAccessor<float> local_hitY("HitsYRelToBeamspot");
+    SG::AuxElement::ConstAccessor<float> local_hitZ("HitsZRelToBeamspot");
+
+    if (name == "j") {
+      return CustomSeqGetter<Tmv>([local_hitX, local_hitY, local_hitZ](const Tmv& tmv, const Jet& j) {
+        return getJab(local_hitX(tmv), local_hitY(tmv), local_hitZ(tmv), j)(0);
+      });
+    }
+    else if (name == "a") {
+      return CustomSeqGetter<Tmv>([local_hitX, local_hitY, local_hitZ](const Tmv& tmv, const Jet& j) {
+        return getJab(local_hitX(tmv), local_hitY(tmv), local_hitZ(tmv), j)(1);
+      });
+    }
+    else if (name == "b") {
+      return CustomSeqGetter<Tmv>([local_hitX, local_hitY, local_hitZ](const Tmv& tmv, const Jet& j) {
+        return getJab(local_hitX(tmv), local_hitY(tmv), local_hitZ(tmv), j)(2);
+      });
+    }
+    return std::nullopt;
+  }
+
+
 }
   namespace FlavorTagDiscriminants {
   namespace getter_utils {
@@ -337,8 +395,17 @@ namespace {
           return {*getter, {}};
         }
       }
-      if (auto getter = getterFromIParticles<T>(name)){
-        return {*getter, {}};
+
+      if constexpr (std::is_base_of_v<xAOD::IParticle, T>){
+        if (auto getter = getterFromIParticles<T>(name)){
+          return {*getter, {}};
+        }
+      }
+
+      if constexpr (std::is_same_v<T, xAOD::TrackMeasurementValidation>) {
+        if (auto getter = getterFromHits(name)){
+          return {*getter, {"HitsXRelToBeamspot", "HitsYRelToBeamspot", "HitsZRelToBeamspot"}};
+        }
       }
       throw std::logic_error("no match for custom getter " + name);
     }
@@ -458,8 +525,9 @@ namespace {
     }
 
 
-    // Explicit instantiations of supported types (IParticle, TrackParticle)
+    // Explicit instantiations of supported types (IParticle, TrackParticle, TrackMeasurementValidation)
     template class SeqGetter<xAOD::IParticle>;
     template class SeqGetter<xAOD::TrackParticle>;
+    template class SeqGetter<xAOD::TrackMeasurementValidation>;
   }
 }

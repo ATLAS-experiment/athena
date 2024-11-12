@@ -56,13 +56,10 @@ def mongroupsCfg(moniAccess, data_type):
 
 
         elif data_type is DQDataType.HeavyIon:
-                monitoring_electron_hi=['HLT_e13_etcut_ion_L1eEM12L','HLT_e15_lhmedium_nogsf_ion_L1eEM15']
-                monitoring_photon_hi=['HLT_g13_etcut_ion_L1eEM12L','HLT_g15_loose_ion_L1eEM15']
-                monitoring_bootstrap_hi = {'HLT_g18_etcut_L1EM10' : 'HLT_g18_etcut_L1EM10'}
-
-                mongroups['monitoring_electron_hi']     = monitoring_electron_hi + monitoring_electron
-                mongroups['monitoring_photon_hi']       = monitoring_photon_hi + monitoring_photon
-                mongroups['monitoring_bootstrap_hi']    = monitoring_bootstrap_hi
+                mongroups['monitoring_electron_hi'] = ['HLT_e15_etcut_ion_L1eEM15','HLT_e30_etcut_ion_L1eEM26','HLT_e15_lhloose_nogsf_ion_L1eEM15','HLT_e15_loose_nogsf_ion_L1eEM15']
+                mongroups['monitoring_electron_TP_hi'] = ['HLT_e20_lhloose_nogsf_ion_L1eEM18','HLT_e20_loose_nogsf_ion_L1eEM18']
+                mongroups['monitoring_photon_hi'] = ['HLT_g15_loose_ion_L1eEM12','HLT_g20_etcut_ion_L1eEM15','HLT_g50_loose_ion_L1eEM26']
+                mongroups['monitoring_bootstrap_hi']    = {'HLT_g18_etcut_ion_L1eEM12' : 'HLT_g18_etcut_ion_L1eEM12'}
 
         elif data_type is DQDataType.Cosmics:
                 monitoring_electron_cosmic=['HLT_e5_etcut_L1eEM5']

@@ -32,6 +32,8 @@ namespace LVL1{
       virtual std::unordered_map<int, jFEXForwardJetsInfo> FcalJetsTowerIDLists(int seedThreshold) =0;
       virtual std::unordered_map<int, jFEXForwardJetsInfo> calculateJetETs(int seedThreshold) =0;
       virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)   =0;
+      
+      virtual int SumEtSeed(unsigned int TTID) = 0;
 
    private:
 

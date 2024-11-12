@@ -3,7 +3,7 @@
 # Run this file in order to print out the empty slots
 
 from TriggerMenuMT.L1.Base.L1MenuFlags import L1MenuFlags
-from TriggerMenuMT.L1.Menu.MenuCommon import print_available, RequiredL1Items, FixedIDMap, defineCommonL1Flags
+from TriggerMenuMT.L1.Menu.MenuCommon import print_available, RequiredL1Items, defineCommonL1Flags
 
 def defineMenu():
 
@@ -332,11 +332,6 @@ def defineMenu():
 
     ]
 
-
-
-# Run this file as python python/L1/Menu_MC_HI_run3_v1.py to print out available IDs
-    
-    L1MenuFlags.CtpIdMap = FixedIDMap
 
 if __name__ == "__main__":
     defineMenu()

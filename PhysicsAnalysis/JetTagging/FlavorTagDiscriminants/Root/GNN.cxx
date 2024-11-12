@@ -60,11 +60,15 @@ namespace FlavorTagDiscriminants {
         lwt_config, o.flip_config, o.variable_remapping, o.track_link_type);
     for (auto config : constituents_configs){
       switch (config.type){
-      case ConstituentsType::TRACK:
+      using enum ConstituentsType;
+      case TRACK:
         m_constituentsLoaders.push_back(std::make_shared<TracksLoader>(config, options));
         break;
-      case ConstituentsType::IPARTICLE:
+      case IPARTICLE:
         m_constituentsLoaders.push_back(std::make_shared<IParticlesLoader>(config, options));
+        break;
+      case HIT:
+        m_constituentsLoaders.push_back(std::make_shared<HitsLoader>(config, options));
         break;
       }
     }

@@ -46,7 +46,9 @@ namespace LVL1 {
     virtual std::unordered_map<int, jFEXForwardJetsInfo> FcalJetsTowerIDLists(int seedThreshold) override;
     virtual std::unordered_map<int, jFEXForwardJetsInfo> calculateJetETs(int seedThreshold) override;
     virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
-
+    
+    virtual int SumEtSeed(unsigned int TTID) override;
+    
   protected:
 
   private:
@@ -81,7 +83,7 @@ namespace LVL1 {
         
         StatusCode ReadfromFile(const std::string& , std::unordered_map<unsigned int, std::vector<unsigned int> >&);
         
-        int SumEtSeed(unsigned int TTID);
+        
         int getEt(unsigned int TTID);
         bool isLM(unsigned int TTID);
         bool isLMabove(unsigned int TTID);

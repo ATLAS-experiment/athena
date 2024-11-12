@@ -105,6 +105,12 @@ namespace dqm_algorithms {
 		  }
 
 		TFitResultPtr fit_res = ge->Fit("pol0","QNS0");
+		if (!fit_res.Get())
+		  {
+		    result->status_ = dqm_core::Result::Yellow;
+		    return result;
+		  }
+		
 		double mean = fit_res->Value(0);
 
 		std::vector<int> yellowLBs;

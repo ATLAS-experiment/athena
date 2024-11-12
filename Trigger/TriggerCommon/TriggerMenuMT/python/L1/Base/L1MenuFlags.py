@@ -41,7 +41,6 @@ class L1MenuFlagsCont(object):
         "CTPVersion"              :  FlagArgs( int, 4,   val_check = lambda x: x in range(5), action = lambda x: Limits.setLimits(x) ),
         "BunchGroupPartitioning"  :  FlagArgs( Iterable, val_check = lambda x: len(list(filter(lambda y: y not in range(16), x)))==0 ),
         "BunchGroupNames"         :  FlagArgs( Iterable, val_check = lambda x: len(list(filter(lambda y: not isinstance(y, str), x)))==0),
-        "MenuPartitioning"        :  FlagArgs( Iterable, val_check = lambda x: len(list(filter(lambda y: y not in range(512), x)))==0 ),
         "items"                   :  FlagArgs( Iterable, val_check = lambda x: len(list(filter(lambda y: not isinstance(y, str), x)))==0),
         "boards"                  :  FlagArgs( OrderedDict, OrderedDict() ),
         "legacyBoards"            :  FlagArgs( OrderedDict, OrderedDict() ),
