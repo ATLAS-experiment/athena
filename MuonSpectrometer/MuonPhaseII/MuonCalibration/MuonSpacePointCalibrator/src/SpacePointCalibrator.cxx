@@ -234,4 +234,14 @@ namespace MuonR4{
         }
         return 0.;
     }
+    double SpacePointCalibrator::driftAcceleration(const EventContext& ctx,
+                                                   const CalibratedSpacePoint& spacePoint) const  {
+        if(spacePoint.type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
+            const MuonCalib::MdtFullCalibData* calibConsts = m_mdtCalibrationTool->getCalibConstants(ctx, spacePoint.spacePoint()->identify());
+            bool valid{false};
+            const double driftTime = calibConsts->rtRelation->tr()->tFromR(spacePoint.driftRadius(), valid);
+            return calibConsts->rtRelation->rt()->driftAcceleration(driftTime);
+        }
+        return 0.;
+    }
 }
