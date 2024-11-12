@@ -8,6 +8,7 @@
 #include "TrkParameters/TrackParameters.h"
 #include "TrkSurfaces/PlaneSurface.h"
 #include "TrkEventPrimitives/FitQuality.h"
+#include "MuonCompetingRIOsOnTrack/CompetingMuonClustersOnTrack.h"
 
 namespace MuonR4{
     
@@ -23,6 +24,7 @@ namespace MuonR4{
         ATH_CHECK(m_writeKey.initialize());
         ATH_CHECK(m_mdtCreator.retrieve());
         ATH_CHECK(m_clusterCreator.retrieve());
+        ATH_CHECK(m_compClusterCreator.retrieve(EnableTool{!m_keyTgc.empty() || !m_keyRpc.empty()}));
         ATH_CHECK(m_geoCtxKey.initialize());
         return StatusCode::SUCCESS;
     }
@@ -85,7 +87,7 @@ namespace MuonR4{
         StatusCode SegmentCnvAlg::convertMeasurement(const MuonR4::Segment& segment,
                                                      const CalibratedSpacePoint& spacePoint,
                                                      const Muon::MuonPrepDataContainerT<PrdType>* prdContainer,
-                                                     DataVector<const Trk::MeasurementBase>& convMeasVec) const {
+                                                     std::vector<std::unique_ptr<Trk::RIO_OnTrack>>& convMeasVec) const {
         bool added{false};
 
         for (const xAOD::UncalibratedMeasurement* uncalib: {spacePoint.spacePoint()->primaryMeasurement(), 
@@ -138,46 +140,78 @@ namespace MuonR4{
         ATH_CHECK(retrieveContainer(ctx, m_keyMdt, mdtPrds));
         ATH_CHECK(retrieveContainer(ctx, m_keyRpc, rpcPrds));
         ATH_CHECK(retrieveContainer(ctx, m_keyTgc, tgcPrds));
-    
         ATH_CHECK(retrieveContainer(ctx, m_keysTgc, stgcPrds));
         ATH_CHECK(retrieveContainer(ctx, m_keyMM, mmPrds));
 
         const ActsGeometryContext* gctx{nullptr};
         ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
         
-        DataVector<const Trk::MeasurementBase> measurements{};
+        std::vector<std::unique_ptr<Trk::RIO_OnTrack>> rots{};
         unsigned int nPrec{0};
         for (const Segment::MeasType& spacePoint : segment.measurements()){
             switch (spacePoint->type()) {
-                case xAOD::UncalibMeasType::MdtDriftCircleType:{
-                    ATH_CHECK(convertMeasurement(segment, *spacePoint, mdtPrds, measurements));
+                case xAOD::UncalibMeasType::MdtDriftCircleType: {
+                    ATH_CHECK(convertMeasurement(segment, *spacePoint, mdtPrds, rots));
                     ++nPrec;
                     break;
                 }
                 case xAOD::UncalibMeasType::RpcStripType: {
-                    ATH_CHECK(convertMeasurement(segment,*spacePoint, rpcPrds, measurements));
+                    ATH_CHECK(convertMeasurement(segment,*spacePoint, rpcPrds, rots));
                     break;
                 }
                 case xAOD::UncalibMeasType::TgcStripType: {
-                    ATH_CHECK(convertMeasurement(segment,*spacePoint, tgcPrds, measurements));
+                    ATH_CHECK(convertMeasurement(segment,*spacePoint, tgcPrds, rots));
                     break;
                 }
                 case xAOD::UncalibMeasType::MMClusterType:{
-                    ATH_CHECK(convertMeasurement(segment,*spacePoint, mmPrds, measurements));
+                    ATH_CHECK(convertMeasurement(segment,*spacePoint, mmPrds, rots));
                     ++nPrec;
                     break;
                 }
                 case xAOD::UncalibMeasType::sTgcStripType: {
-                    ATH_CHECK(convertMeasurement(segment,*spacePoint, stgcPrds, measurements));
+                    ATH_CHECK(convertMeasurement(segment,*spacePoint, stgcPrds, rots));
                     ++nPrec;
                     break;
                 }
                 case xAOD::UncalibMeasType::Other:
                     break;
                 default:
-                    ATH_MSG_WARNING("Unsupported measurement type");
+                    ATH_MSG_WARNING("Unsupported measurement type ");
             }
         }
+
+        DataVector<const Trk::MeasurementBase> measurements{};
+        auto makeCompetingROT = [this, &measurements](RotVec& rots) {
+            if (rots.empty()){
+                return;
+            }
+            std::list<const Trk::PrepRawData*> prds{};
+            for (const std::unique_ptr<Trk::RIO_OnTrack>& rot : rots) {
+                prds.push_back(rot->prepRawData());
+            }
+            measurements.push_back(m_compClusterCreator->createBroadCluster(std::move(prds),0.));
+            rots.clear();
+        };
+
+        RotVec etaPrds{}, phiPrds{};
+        for (std::unique_ptr<Trk::RIO_OnTrack>& rot : rots) {
+            const Trk::PrepRawData* prd = rot->prepRawData();
+            if (prd->type(Trk::PrepRawDataType::RpcPrepData) || prd->type(Trk::PrepRawDataType::TgcPrepData)) {
+                std::vector<std::unique_ptr<Trk::RIO_OnTrack>>& pushMe{m_idHelperSvc->measuresPhi(rot->identify())? phiPrds : etaPrds};
+                if (pushMe.size() && pushMe.back()->detectorElement() != rot->detectorElement()){
+                    makeCompetingROT(pushMe);
+                } else {
+                    pushMe.push_back(std::move(rot));
+                }
+            
+            } else {
+                makeCompetingROT(etaPrds);
+                makeCompetingROT(phiPrds);
+                measurements.push_back(std::move(rot));
+            }
+        }
+        makeCompetingROT(etaPrds);
+        makeCompetingROT(phiPrds);     
         if (!nPrec) {
             ATH_MSG_WARNING("No precision hit on "<<std::endl<<m_printer->print(measurements.stdcont())
                 <<". Do not convert segment due to potential puff.");
@@ -205,10 +239,12 @@ namespace MuonR4{
         covMatrix(3, 3) = segment.covariance()(toInt(ParamDefs::theta), toInt(ParamDefs::theta));
 
         auto legacySeg = std::make_unique<Muon::MuonSegment>(Amg::Vector2D::Zero(),std::move(segDir),
-                                                            std::move(covMatrix), segSurf.release(),
-                                                            std::move(measurements), fitQuality.release());
+                                                             std::move(covMatrix), segSurf.release(),
+                                                             std::move(measurements), fitQuality.release());
 
 
+        ATH_MSG_VERBOSE(m_printer->print(*legacySeg)<<", pos: "<<Amg::toString(legacySeg->globalPosition())<<" "
+                     <<Amg::toString(legacySeg->globalDirection())<<std::endl<<m_printer->print(legacySeg->containedMeasurements()));
         outContainer.push_back(std::move(legacySeg));
         return StatusCode::SUCCESS;
     }
