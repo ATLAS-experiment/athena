@@ -12,7 +12,7 @@ ATLAS_BUILDTYPE="RelWithDebInfo"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=104
                         -DLCG_VERSION_POSTFIX="d_ATLAS_7"
                         -DATLAS_ONNXRUNTIME_USE_CUDA=FALSE
-                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v38r0.003/Gaudi-v38r0.003.tar.gz;URL_MD5;85f00c880b20566baac647840f25af78")
+                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v38r0.004/Gaudi-v38r0.004.tar.gz;URL_MD5;245d7a6d173200060236ba7679688496")
 ATLAS_EXTRA_MAKE_ARGS=()
 
 # Let "the common script" do all the heavy lifting.
