@@ -183,7 +183,6 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
 
             m_tubeTransform.push_back(layTransf);
 
-            const Amg::Vector3D tubePos = layTransf.translation();
             const Amg::Vector3D roPos = readoutEle->ROPos(tube_id);
             m_roPos.push_back(roPos);
             m_activeTubeLength.push_back(readoutEle->getActiveTubeLength(lay,tube));
@@ -200,22 +199,6 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
                 m_cablingMROD.push_back(translation.mrod);
                 m_cablingTdcId.push_back(translation.tdcId);
                 m_cablingTdcCh.push_back(translation.channelId);
-
-
-            }
-            if (!m_dumpSurfaces) continue;
-            const Amg::Vector3D globalDir {(tubePos - roPos).unit()};
-            
-            const Trk::SaggedLineSurface& surf{readoutEle->surface(tube_id)};
-            for (double l = readoutEle->tubeLength(tube_id) /2; l > 0; l = l  -100. ) {
-                Amg::Vector2D lPos{Amg::Vector2D::Zero()};
-                surf.globalToLocal(roPos + l * globalDir,Amg::Vector3D::Zero(),lPos);
-                std::unique_ptr<Trk::StraightLineSurface> sagged{surf.correctedSurface(lPos)};                
-                m_layDistTubeLay.push_back(lay);
-                m_layDistTubeNum.push_back(tube);
-                m_layDistPosAlongWire.push_back(l);
-                const Amg::Transform3D layTransf{sagged->transform()};
-                m_layDist.push_back(layTransf);                
             }
         }
     }
