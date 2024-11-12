@@ -50,12 +50,6 @@ class L1Menu(object):
             self.items.menuName = smk_psk_Name["smkName"]
             self.items.pssName  = smk_psk_Name["pskName"]
 
-    @staticmethod
-    def partitioning():
-        first = L1MenuFlags.MenuPartitioning()
-        last = first[1:] + [ Limits.MaxTrigItems ]
-        partitioning = dict( zip([1,2,3],zip(first,last)) )
-        return partitioning
 
     def setBunchGroupSplitting(self, v = True):
         MenuItemsCollection.splitBunchGroups = v
@@ -559,3 +553,13 @@ class L1Menu(object):
                 if thrName not in all_ctpin:
                     raise RuntimeError(
                         f'checkItemsHaveInputs: Threshold {thrName} used by {item.name} is not on a board connected to CTP')
+
+    def checkHFmonitoring(self):
+        requiredItems = [
+            "L1_BCM_2A_FIRSTINTRAIN",
+            "L1_BCM_2C_FIRSTINTRAIN"
+        ]
+        missingItems = [item for item in requiredItems if self.items.items[item].monitorsHF == 0]
+        if missingItems:
+            raise RuntimeError(
+                f'The HF monitoring flags for {", ".join(missingItems)} are missing')
