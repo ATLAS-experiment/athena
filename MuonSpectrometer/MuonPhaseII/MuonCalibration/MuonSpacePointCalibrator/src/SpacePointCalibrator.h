@@ -56,6 +56,8 @@ namespace MuonR4{
 
             double driftVelocity(const EventContext& ctx,
                                  const CalibratedSpacePoint& spacePoint) const override final;
+            double driftAcceleration(const EventContext& ctx,
+                                     const CalibratedSpacePoint& spacePoint) const override final;
         private:
             /// access to the ACTS geometry context 
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"}; 
