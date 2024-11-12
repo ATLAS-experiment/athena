@@ -47,7 +47,8 @@ namespace FlavorTagDiscriminants {
     };
     enum class ConstituentsType {
         IPARTICLE,
-        TRACK
+        TRACK,
+        HIT
     };
 
     struct InputVariableConfig {

@@ -61,11 +61,15 @@ namespace FlavorTagDiscriminants {
 
     for (auto config : constituents_configs){
       switch (config.type){
-      case ConstituentsType::TRACK:
+      using enum ConstituentsType;
+      case TRACK:
         m_constituentsLoaders.push_back(std::make_shared<TracksLoader>(config, options));
         break;
-      case ConstituentsType::IPARTICLE:
+      case IPARTICLE:
         m_constituentsLoaders.push_back(std::make_shared<IParticlesLoader>(config, options));
+        break;
+      case HIT:
+        m_constituentsLoaders.push_back(std::make_shared<HitsLoader>(config, options));
         break;
       }
     }

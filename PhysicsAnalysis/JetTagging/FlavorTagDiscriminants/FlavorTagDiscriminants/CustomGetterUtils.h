@@ -27,6 +27,7 @@
 #include "xAODJet/JetFwd.h"
 #include "xAODTracking/TrackParticleFwd.h"
 #include "xAODBase/IParticle.h"
+#include "xAODTracking/TrackMeasurementValidationContainer.h"
 #include "AthContainers/AuxElement.h"
 #include "FlavorTagDiscriminants/DataPrepUtilities.h"
 
@@ -65,6 +66,7 @@ namespace FlavorTagDiscriminants {
      * It supports the following types of constituents:
      * - xAOD::IParticle
      * - xAOD::TrackParticle
+     * - xAOD::TrackMeasurementValidation
     */
     template <typename T>
     class SeqGetter {

@@ -48,6 +48,7 @@ set(FTDSource
   Root/ConstituentsLoader.cxx
   Root/TracksLoader.cxx
   Root/IParticlesLoader.cxx
+  Root/HitsLoader.cxx
   Root/CustomGetterUtils.cxx
   Root/StringUtils.cxx
 )
@@ -94,6 +95,8 @@ if (NOT XAOD_STANDALONE)
     src/BTagTrackLinkCopyAlg.cxx
     src/BTaggingBuilderAlg.cxx
     src/PoorMansIpAugmenterAlg.cxx
+    src/HitDecoratorAlg.cxx
+    src/JetHitAssociationAlg.cxx
     src/BTagConditionalDecoratorAlg.cxx
     src/JetTagConditionalDecoratorAlg.cxx
     src/TruthDecoratorHelpers.cxx
