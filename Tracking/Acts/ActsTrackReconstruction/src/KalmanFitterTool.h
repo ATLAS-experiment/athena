@@ -42,7 +42,7 @@
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 
-#include "src/detail/MeasurementCalibrator.h"
+#include "src/detail/TrkMeasurementCalibrator.h"
 
 // STL
 #include <string>
@@ -197,7 +197,7 @@ private:
   Gaudi::Property< double > m_option_seedCovarianceScale {this, "SeedCovarianceScale", 100.,
       "Scale factor for the input seed covariance when doing refitting"};
 
-  std::unique_ptr<TrkMeasurementCalibrator> m_calibrator;
+  std::unique_ptr<ActsTrk::detail::TrkMeasurementCalibrator> m_calibrator {nullptr};
 
   /// Type erased track fitter function.
     using Fitter = Acts::KalmanFitter<Acts::Propagator<Acts::SympyStepper, Acts::Navigator>, ActsTrk::MutableTrackStateBackend>;

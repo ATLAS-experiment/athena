@@ -209,7 +209,7 @@ StatusCode KalmanFitterTool::initialize() {
 						  logger().cloneWithSuffix("DirectKalmanFitter"));
 
   ///
-  m_calibrator = std::make_unique<TrkMeasurementCalibrator>(*m_ATLASConverterTool);
+  m_calibrator = std::make_unique<ActsTrk::detail::TrkMeasurementCalibrator>(*m_ATLASConverterTool);
   m_outlierFinder.StateChiSquaredPerNumberDoFCut = m_option_outlierChi2Cut;
   m_reverseFilteringLogic.momentumMax = m_option_ReverseFilteringPt;
 
@@ -217,7 +217,7 @@ StatusCode KalmanFitterTool::initialize() {
   m_kfExtensions.reverseFilteringLogic.connect<&ActsTrk::detail::FitterHelperFunctions::ReverseFilteringLogic::operator()<ActsTrk::MutableTrackStateBackend>>(&m_reverseFilteringLogic);
   m_kfExtensions.updater.connect<&ActsTrk::detail::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::MutableTrackStateBackend>>();
   m_kfExtensions.smoother.connect<&ActsTrk::detail::FitterHelperFunctions::mbfSmoother<ActsTrk::MutableTrackStateBackend>>();
-  m_kfExtensions.calibrator.connect<&TrkMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(m_calibrator.get());
+  m_kfExtensions.calibrator.connect<&ActsTrk::detail::TrkMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(m_calibrator.get());
 
   return StatusCode::SUCCESS;
 }
