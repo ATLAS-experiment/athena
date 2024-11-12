@@ -164,13 +164,10 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
   simulstate.set_E(0);
 
   int vox = 0;
-  for (const auto &element : binsInLayers) {
-    const int layer = element.first;
-    const TH2D *h = &element.second;
-
+  for (const auto &[layer, h] : binsInLayers) {
     // attempt to debug intermittent ci issues described in
     // https://its.cern.ch/jira/browse/ATLASSIM-7031
-    if (h->IsZombie()) {
+    if (h.IsZombie()) {
       ATH_MSG_INFO("Got truth state: ");
       truth->Print();
 
@@ -187,9 +184,9 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
       return false;
     }
 
-    const int xBinNum = h->GetNbinsX();
-    const int yBinNum = h->GetNbinsY();
-    const TAxis *x = h->GetXaxis();
+    const int xBinNum = h.GetNbinsX();
+    const int yBinNum = h.GetNbinsY();
+    const TAxis *x = h.GetXaxis();
 
     // If only one bin in r means layer is empty, no value should be added
     if (xBinNum == 1) {
@@ -232,13 +229,11 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
   }
 
   vox = 0;
-  for (const auto &element : binsInLayers) {
-    const int layer = element.first;
-    const TH2D *h = &element.second;
-    const int xBinNum = h->GetNbinsX();
-    const int yBinNum = h->GetNbinsY();
-    const TAxis *x = h->GetXaxis();
-    const TAxis *y = h->GetYaxis();
+  for (const auto &[layer, h] : binsInLayers) {
+    const int xBinNum = h.GetNbinsX();
+    const int yBinNum = h.GetNbinsY();
+    const TAxis *x = h.GetXaxis();
+    const TAxis *y = h.GetYaxis();
 
     simulstate.setAuxInfo<int>("GANlayer"_FCShash, layer);
     TFCSLateralShapeParametrizationHitBase::Hit hit;
@@ -311,8 +306,8 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
     const float eta_jakobi = TMath::Abs(2.0 * TMath::Exp(-center_eta) /
                                         (1.0 + TMath::Exp(-2 * center_eta)));
 
-    int nHitsAlpha;
-    int nHitsR;
+    int nHitsAlpha{};
+    int nHitsR{};
 
     // Now create hits
     for (int ix = 1; ix <= xBinNum; ++ix) {
@@ -349,7 +344,6 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
           } else {
             // d = 2*r*sin (a/2r) this distance at the upper r must be 1mm for
             // layer 1 or 5, 5mm otherwise.
-            const TAxis *y = h->GetYaxis();
             const double angle = y->GetBinUpEdge(iy) - y->GetBinLowEdge(iy);
             const double r = x->GetBinUpEdge(ix);
             const double d = 2 * r * sin(angle / 2 * r);
