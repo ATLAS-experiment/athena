@@ -31,6 +31,7 @@ class Scheduler(object):
         "quark colour fixer",
         "PHOTOS", 
         "reweighter", "NNLO reweighter",
+        "LHE ubexcess_correct weight updater",
         "LHE file nominal weight updater",
         "mu2tau",
         "mu2e",
@@ -81,6 +82,7 @@ class Scheduler(object):
         "gg4l_emu2all": partial(postprocessors.gg4l_emu2all, powheg_LHE_output=powheg_LHE_output),
         "LHE file cleaner": partial(postprocessors.lhe_cleaner, powheg_LHE_output=powheg_LHE_output),
         "LHE file nominal weight updater": partial(postprocessors.lhe_nominal_weight_updater, powheg_LHE_output=powheg_LHE_output),
+        "LHE ubexcess_correct weight updater": partial(postprocessors.lhe_ubexcess_correct_reweighter, powheg_LHE_output=powheg_LHE_output),
     }
 
     def __init__(self):
