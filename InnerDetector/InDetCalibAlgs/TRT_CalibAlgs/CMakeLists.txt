@@ -44,6 +44,11 @@ atlas_add_executable( TRTCalib_StrawStatusReport
     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
     LINK_LIBRARIES ${ROOT_LIBRARIES} PathResolver CxxUtils)
 
+atlas_add_executable( TRTCalib_StrawStatusPlots
+    scripts/TRTCalib_StrawStatusPlots.cxx
+    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+    LINK_LIBRARIES ${ROOT_LIBRARIES} PathResolver CxxUtils)
+
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( test/*.sh )
