@@ -51,8 +51,6 @@ StatusCode MakeEventStreamInfo::initialize() {
       m_dataHeaderKey.setValue(parentAlg->name());
    }
 
-   m_filledEvent = false;
-
    return(StatusCode::SUCCESS);
 }
 //___________________________________________________________________________
@@ -109,6 +107,11 @@ StatusCode MakeEventStreamInfo::postExecute() {
          return(StatusCode::FAILURE);
       }
    }
+   static std::once_flag resetNumberOfEventsFlag;
+   std::call_once(resetNumberOfEventsFlag, [this, pEventStream]() -> void {
+      ATH_MSG_DEBUG("Resetting the EventStreamInfo payload at the first event");
+      pEventStream->reset();
+   });
    pEventStream->addEvent();
    pEventStream->insertProcessingTag(dataHeader->getProcessTag());
    pEventStream->insertLumiBlockNumber( lumiN );
@@ -118,7 +121,7 @@ StatusCode MakeEventStreamInfo::postExecute() {
    }
    pEventStream->insertEventType( evtype );
 
-   m_filledEvent = true;
+   m_eventCounter++;
 
    return(StatusCode::SUCCESS);
 }
@@ -130,10 +133,22 @@ StatusCode MakeEventStreamInfo::preFinalize() {
     pEventStream = esinfo_up.get();
     ATH_CHECK(m_metaDataSvc->record(std::move(esinfo_up), m_key.value()));
   }
-  if (!m_filledEvent) {
-    // insert non-event information (processingTags)
-    // to EventStreamInfo if we have not processed any event
-
+  if (m_eventCounter > 0) {
+    if (pEventStream->getNumberOfEvents() != m_eventCounter) {
+         // The number of events in the EventStreamInfo object does not match
+         // the number of events that have been processed by MakeEventStreamInfo
+         // tool. This can happen if the EventStreamInfo object was updated by
+         // CopyEventStreamInfo, for example at beginning of reading the 2nd (or
+         // next) file.
+         ATH_MSG_DEBUG(
+             "Event count mismatch in EventStreamInfo (likely multi-file "
+             "processing). Setting number of events to what "
+             "MakeEventStreamInfo processed: "
+             << m_eventCounter);
+         pEventStream->setNumberOfEvents(m_eventCounter);
+    }
+  } else {
+    // Insert processing tags when no events have been processed
     pEventStream->insertProcessingTag(m_dataHeaderKey.value());
   }
   return (StatusCode::SUCCESS);

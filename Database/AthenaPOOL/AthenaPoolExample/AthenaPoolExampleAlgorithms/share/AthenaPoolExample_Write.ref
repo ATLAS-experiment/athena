@@ -223,6 +223,7 @@ POOLCollectionTree(MagicNumber)                     DEBUG Opened container POOLC
 SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLCollectionTree(MagicNumber) [202]  (a , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStream1.StreamStream1_MakeEventStreamInfo     DEBUG Resetting the EventStreamInfo payload at the first event
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREATE    [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1

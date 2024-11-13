@@ -486,6 +486,7 @@ SimplePoolFile3.root                                DEBUG ---->ClassID:BBACA313-
 SimplePoolFile3.root                                DEBUG DB Action Commit
 ClassIDSvc                                           INFO getRegistryEntries: read 26 CLIDRegistry entries for module ALL
 MetaDataSvc                                         DEBUG MetaDataSvc will handle EventStreamInfo ClassID: 167728019
+StreamReWrite.StreamReWrite_MakeEventStreamInfo     DEBUG Resetting the EventStreamInfo payload at the first event
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967297, run #1 1 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 3 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
