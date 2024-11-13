@@ -195,7 +195,7 @@ public:
     PayloadSpecDto(PayloadSpecDto const& copy):m_row(copy.getColumns()){}
     std::vector< std::pair<std::string,std::string> > getColumns()  const {return m_row;}
     size_t getSize() const {return m_row.size();}
-    void add(std::string id,std::string name);
+    void add(std::string name,std::string type);
     json to_json() const;
     static PayloadSpecDto from_json(const json &j);
 };
