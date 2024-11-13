@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1TopoInterfaces/AlgFactory.h" 
@@ -26,6 +26,7 @@
 #include "L1TopoCoreSim/CountingConnector.h"
 
 // c++ libraries
+#include <iostream>
 #include <iomanip>
 #include <string>
 
@@ -112,7 +113,7 @@ TopoSteering::initializeAlgorithms() {
 TCS::StatusCode
 TopoSteering::setHistSvc(std::shared_ptr<IL1TopoHistSvc> histSvc) {
    TRG_MSG_INFO("setting L1TopoHistSvc ");
-   m_histSvc = histSvc;
+   m_histSvc = std::move(histSvc);
    return TCS::StatusCode::SUCCESS;
 }
 
@@ -145,15 +146,15 @@ TopoSteering::executeEvent() {
    // execute all connectors
    TCS::StatusCode sc = TCS::StatusCode::SUCCESS;
    TRG_MSG_INFO("Going to execute " << m_structure.outputConnectors().size() << " decision connectors and " << m_structure.countConnectors().size() << " multiplicity connectors.");
-   for(auto outConn: m_structure.outputConnectors()) {
-      TRG_MSG_INFO("executing trigger line " << outConn.first);
-      sc |= executeConnector(outConn.second);
-      TRG_MSG_INFO("result of trigger line " << outConn.first << " : " << outConn.second->decision().decision());
+   for(const auto & [name, pConnector]: m_structure.outputConnectors()) {
+      TRG_MSG_INFO("executing trigger line " << name);
+      sc |= executeConnector(pConnector);
+      TRG_MSG_INFO("result of trigger line " << name << " : " << pConnector->decision().decision());
    }   
 
-   for(auto multConn: m_structure.countConnectors()) {
-      TRG_MSG_INFO("executing trigger line " << multConn.first);
-      sc |= executeConnector(multConn.second);
+   for(const auto & [name, pConnector]: m_structure.countConnectors()) {
+      TRG_MSG_INFO("executing trigger line " << name);
+      sc |= executeConnector(pConnector);
    } 
 
    sc |= m_simulationResult.collectResult(); 
@@ -454,9 +455,9 @@ TopoSteering::printDebugInfo() {
 
 void
 TopoSteering::printConfiguration(std::ostream & o) const {
-   o << "==========================" << endl
-     << "TopoSteering configuration" << endl
-     << "--------------------------" << endl;
+   o << "==========================\n" 
+     << "TopoSteering configuration\n" 
+     << "--------------------------\n";
    structure().print(o);
    o << "==========================" << endl;
 }
@@ -477,9 +478,7 @@ TopoSteering::setMsgLevel( TrigConf::MSGTC::Level lvl ) {
 
 void
 TopoSteering::setAlgMsgLevel( TrigConf::MSGTC::Level lvl ) {
-
    m_AlgMsgLvl = lvl;
-
    for( Connector * conn : m_structure.connectors() ) {
       const ConfigurableAlg * alg = conn->algorithm();
       if(alg==nullptr) continue;
@@ -488,18 +487,16 @@ TopoSteering::setAlgMsgLevel( TrigConf::MSGTC::Level lvl ) {
 }
 
 //----------------------------------------------------------
-void TopoSteering::setHardwareBits(const std::bitset<numberOfL1TopoBits> &triggerBits,
-                                   const std::bitset<numberOfL1TopoBits> &ovrflowBits)
-{
+void 
+TopoSteering::setHardwareBits(const std::bitset<numberOfL1TopoBits> &triggerBits,
+                              const std::bitset<numberOfL1TopoBits> &ovrflowBits){
     m_triggerHdwBits = triggerBits;
     m_ovrflowHdwBits = ovrflowBits;
 }
 //----------------------------------------------------------
-void TopoSteering::propagateHardwareBitsToAlgos()
-{
-   for(auto connector : m_structure.outputConnectors()) {
-       const string &connectorName = connector.first;
-       TCS::DecisionConnector *outCon = connector.second;
+void 
+TopoSteering::propagateHardwareBitsToAlgos(){
+   for(const auto & [connectorName, outCon] : m_structure.outputConnectors()) {
         outCon->decisionAlgorithm()->resetHardwareBits();
         unsigned int pos = 0; // for multi-output algorithms pos is the output index
         for(const TrigConf::TriggerLine &trigger : outCon->triggers()){
@@ -517,11 +514,9 @@ void TopoSteering::propagateHardwareBitsToAlgos()
    }
 }
 //----------------------------------------------------------
-void TopoSteering::setOutputAlgosFillBasedOnHardware(const bool &value)
-{
-   for(auto connector : m_structure.outputConnectors()) {
-       const string &connectorName = connector.first;
-       TCS::DecisionConnector *outCon = connector.second;
+void 
+TopoSteering::setOutputAlgosFillBasedOnHardware(const bool &value){
+   for(const auto & [connectorName, outCon] : m_structure.outputConnectors()) {
        if(outCon) {
            outCon->decisionAlgorithm()->setFillHistosBasedOnHardware(value);
        } else {
@@ -530,11 +525,9 @@ void TopoSteering::setOutputAlgosFillBasedOnHardware(const bool &value)
    }
 }
 //----------------------------------------------------------
-void TopoSteering::setOutputAlgosSkipHistograms(const bool &value)
-{
-   for(auto connector : m_structure.outputConnectors()) {
-       const string &connectorName = connector.first;
-       TCS::DecisionConnector *outCon = connector.second;
+void 
+TopoSteering::setOutputAlgosSkipHistograms(const bool &value){
+   for(const auto & [connectorName,outCon] : m_structure.outputConnectors()) {
        if(outCon) {
            outCon->decisionAlgorithm()->setSkipHistos(value);
        } else {

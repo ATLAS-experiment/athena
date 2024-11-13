@@ -1,15 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef L1TopoCoreSim_TopoSteering
 #define L1TopoCoreSim_TopoSteering
 
-#include <bitset>
-#include <iostream>
-#include <memory>
-#include <vector>
-#include <string>
+
 
 #include "CxxUtils/checker_macros.h"
 
@@ -23,6 +19,11 @@
 
 // Menu related dependencies
 #include "TrigConfData/L1Menu.h"
+#include <bitset>
+#include <iosfwd>
+#include <memory>
+#include <vector>
+#include <string>
 
 namespace TXC {
    class L1TopoMenu;
