@@ -44,10 +44,13 @@ namespace DerivationFramework{
           || (m_DSID>=411335 && m_DSID<=411337) //Powheg+H7.1.3 ttbar HT-filtered
           || m_DSID ==412116 || m_DSID == 412117 //amc@NLO+H7.1.3 ttbar 
           || m_DSID ==504329 || m_DSID == 504333 || m_DSID == 504341 //amc@NLO+H7.2.1 refined ttZ
-	  || (m_DSID >= 601239 && m_DSID <= 601240)
+          || (m_DSID >= 601239 && m_DSID <= 601240)
+          || m_DSID == 601668 || m_DSID == 603905 || m_DSID == 603906 // ttbb Powheg+H7 dilep, ljet, allhad
           ){
       m_GenUsed=HerwigPP;
-      if (m_DSID==410245 || (m_DSID >= 601239 && m_DSID <= 601240)){
+      if (m_DSID==410245 || (m_DSID >= 601239 && m_DSID <= 601240)
+          || m_DSID == 601668 || m_DSID == 603905 || m_DSID == 603906
+          ){
         m_ttbb=true;
       }
     }
@@ -57,7 +60,7 @@ namespace DerivationFramework{
           || (m_DSID>=410501 && m_DSID<=410508) //Powheg+P8 new main31, hdamp=1.5m // Boosted samples are included 410507 410508
           || (m_DSID>=410511 && m_DSID<=410524) //Powheg+P8 new main31, hdamp=1.5mt, radiation systematics
           || (m_DSID>=410531 && m_DSID<=410535) //Powheg+P8 allhad samples
-	  || (m_DSID>=346343 && m_DSID<=346345) //Powheg+P8 ttH
+          || (m_DSID>=346343 && m_DSID<=346345) //Powheg+P8 ttH
           || m_DSID==412123 // MG+P8 ttW
           || m_DSID==410155 // aMC@NlO+P8 ttW
           || m_DSID==410159 || m_DSID==410160 //aMC@NLO+P8, old settings
@@ -75,26 +78,34 @@ namespace DerivationFramework{
           || (m_DSID>=411068 && m_DSID<=411070) //Powheg+P8 ttbb
           || (m_DSID>=410265 && m_DSID<=410267) //aMC@NLO+P8 ttbb
           || (m_DSID>=411178 && m_DSID<=411180) || (m_DSID==411275) //Powheg+P8 ttbb OTF production - ATLMCPROD-7240
-	  || (m_DSID>=600791 && m_DSID<=600792) //Powheg+P8 ttbb - ATLMCPROD-9179
-	  || (m_DSID>=600737 && m_DSID<=600738) //Powheg+P8 ttbb - ATLMCPROD-9179
-	  || (m_DSID>=601226 && m_DSID<=601227) // Powheg+P8 ttbb bornzerodamp cut 5, ATLMCPROD-9694
+          || (m_DSID>=600791 && m_DSID<=600792) //Powheg+P8 ttbb - ATLMCPROD-9179
+          || (m_DSID>=600737 && m_DSID<=600738) //Powheg+P8 ttbb - ATLMCPROD-9179
+          || (m_DSID>=601226 && m_DSID<=601227) // Powheg+P8 ttbb bornzerodamp cut 5, ATLMCPROD-9694
           || (m_DSID>=407342 && m_DSID<=407344) //Powheg+P8 ttbar HT-filtered
           || (m_DSID>=407345 && m_DSID<=407347) //Powheg+P8 ttbar MET-filtered
           || (m_DSID>=407348 && m_DSID<=407350) //aMC@NLO+P8 ttbar HT-filtered
           ||  m_DSID==504330 || m_DSID==504331 || m_DSID==504332 || m_DSID==504334 || m_DSID==504335 || m_DSID==504336 || m_DSID==504338 || m_DSID==504342 || m_DSID==504343 || m_DSID==504344 || m_DSID==504346//aMC@NLO+P8 refined ttZ
           ||  m_DSID==601491 || m_DSID==601492  //Pow+Py8 ttbar pTHard variations - ATLMCPROD-10168
           || (m_DSID>=601495 && m_DSID<=601498) //Pow+Py8 ttbar pTHard variations - ATLMCPROD-10168
-	  || (m_DSID>=601783 && m_DSID<=601784) // Powheg+P8 ttbb bornzerodamp cut 5 pThard variations - ATLMCPROD-10527
-	    ){
+          || (m_DSID>=601229 && m_DSID<=601230) // mc23 ttbar dilep, singlelep
+          || m_DSID==601237 // mc23 ttbar allhad       
+          || (m_DSID>=601398 && m_DSID<=601399) // mc23 ttbar dilep, singlelep hdamp517p5
+          || m_DSID==601491 || m_DSID==601495 || m_DSID==601497 // mc23 ttbar pThard variations, dilep, singlelep, allhad    
+          || (m_DSID>=601783 && m_DSID<=601784) // Powheg+P8 ttbb bornzerodamp cut 5 pThard variations - ATLMCPROD-10527
+          || (m_DSID>=603003 && m_DSID<=603004) // Powheg+P8 ttbb nominal and pthard1 allhad
+          || (m_DSID>=603190 && m_DSID<=603193) // Powheg+P8 ttbb nominal and pthard1 dilep, ljet
+          ){
       m_GenUsed=Pythia8;
       if ( m_DSID==410244 //aMC@NLO+P8, ttbb (old)
           || (m_DSID>=411068 && m_DSID<=411070) //Powheg+P8 ttbb
           || (m_DSID>=410265 && m_DSID<=410267) //aMC@NLO+P8 ttbb
           || (m_DSID>=411178 && m_DSID<=411180) || (m_DSID==411275) //Powheg+P8 ttbb OTF production - ATLMCPROD-7240
           || (m_DSID>=600791 && m_DSID<=600792) // Powheg+P8 ttbb
-	  || (m_DSID>=600737 && m_DSID<=600738) // Powheg+P8 ttbb dipole recoil
-	  || (m_DSID>=601226 && m_DSID<=601227) // Powheg+P8 ttbb bornzerodamp cut 5
-	  || (m_DSID>=601783 && m_DSID<=601784) // Powheg+P8 ttbb bornzerodamp cut 5 pThard variations - ATLMCPROD-10527
+          || (m_DSID>=600737 && m_DSID<=600738) // Powheg+P8 ttbb dipole recoil
+          || (m_DSID>=601226 && m_DSID<=601227) // Powheg+P8 ttbb bornzerodamp cut 5
+          || (m_DSID>=601783 && m_DSID<=601784) // Powheg+P8 ttbb bornzerodamp cut 5 pThard variations - ATLMCPROD-10527
+          || (m_DSID>=603003 && m_DSID<=603004) // Powheg+P8 ttbb nominal and pthard1 allhad
+          || (m_DSID>=603190 && m_DSID<=603193) // Powheg+P8 ttbb nominal and pthard1 dilep, ljet
       ){
         m_ttbb=true;
       }
@@ -121,7 +132,8 @@ namespace DerivationFramework{
           || (m_DSID>=700051 && m_DSID<=700054) //Sherpa2.2.8 ttbb
           || (m_DSID>=700121 && m_DSID<=700124) //Sherpa2.2.10 ttbar
           || (m_DSID>=700164 && m_DSID<=700167) //Sherpa2.2.10 ttbb
-           ){
+          || (m_DSID>=700807 && m_DSID<=700809) //Sherpa2.2.14 ttbar
+          ){
       m_GenUsed=Sherpa;
       if( m_DSID==410051
           || (m_DSID>=410323 && m_DSID<=410325) || (m_DSID==410369)
