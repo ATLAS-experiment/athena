@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfStorage/SessionMgr.h"
@@ -39,7 +39,9 @@ SessionMgr::SessionMgr() :
 {}
 
 SessionMgr::~SessionMgr() {
-   closeSession();
+   try {
+      closeSession();
+   } catch (...) {}  // never throw in destructor
    // never delete the m_replicaSorter, we will have to live with that
    // one-time memory leak. The problem is the CORAL interface that
    // does keeps a reference to the replicaSorter and keeps using it
