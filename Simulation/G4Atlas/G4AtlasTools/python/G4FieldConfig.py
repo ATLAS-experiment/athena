@@ -93,8 +93,8 @@ def MuonsOnlyInCaloFieldManagerToolCfg(flags, name='MuonsOnlyInCaloFieldManager'
     #kwargs.setdefault('DeltaChord',         0.00000002)
     kwargs.setdefault('DeltaIntersection',  0.00000002)
     kwargs.setdefault('DeltaOneStep',       0.000001)
-    kwargs.setdefault('MaximumEpsilonStep', 0.0000009)
-    kwargs.setdefault('MinimumEpsilonStep', 0.000001)
+    kwargs.setdefault('MaximumEpsilonStep', 0.000001)
+    kwargs.setdefault('MinimumEpsilonStep', 0.0000009)
     kwargs.setdefault('MuonOnlyField',      True)
     return BasicDetectorFieldManagerToolCfg(flags, name, **kwargs)
 
@@ -103,8 +103,8 @@ def MuonFieldManagerToolCfg(flags, name='MuonFieldManager', **kwargs):
     #kwargs.setdefault('DeltaChord',         0.00000002)
     kwargs.setdefault('DeltaIntersection',  0.00000002)
     kwargs.setdefault('DeltaOneStep',       0.000001)
-    kwargs.setdefault('MaximumEpsilonStep', 0.0000009)
-    kwargs.setdefault('MinimumEpsilonStep', 0.000001)
+    kwargs.setdefault('MaximumEpsilonStep', 0.000001)
+    kwargs.setdefault('MinimumEpsilonStep', 0.0000009)
     return BasicDetectorFieldManagerToolCfg(flags, name, **kwargs)
 
 
