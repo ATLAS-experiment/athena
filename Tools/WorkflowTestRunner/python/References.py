@@ -11,12 +11,12 @@
 # Format is "test" : "version"
 references_map = {
     # Simulation
-    "s3761": "v16",
-    "s4005": "v10",
-    "s4006": "v18",
-    "s4007": "v17",
+    "s3761": "v17",
+    "s4005": "v11",
+    "s4006": "v19",
+    "s4007": "v18",
     "s4008": "v1",
-    "a913": "v12",
+    "a913": "v13",
     # Digi
     "d1920": "v5",
     # Overlay
