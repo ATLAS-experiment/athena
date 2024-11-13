@@ -63,7 +63,7 @@ CUDAKernelLaunchConfiguration GPUKernelSizeOptimizerSvc::get_launch_configuratio
 }
 
 
-StatusCode GPUKernelSizeOptimizerSvc::initialize()
+StatusCode GPUKernelSizeOptimizerSvc::initialize_CUDA()
 {
   m_dynpar_support = CaloRecGPU::CUDA_Helpers::supports_dynamic_parallelism();
   m_coopgroup_support = CaloRecGPU::CUDA_Helpers::supports_cooperative_launches();

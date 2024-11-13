@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -121,8 +121,8 @@ namespace CaloRecGPU
         }
       else
         {*/
-          return get_number(option);
-        /*}*/
+      return get_number(option);
+      /*}*/
     }
 
     constexpr int get_total_number() const
@@ -146,13 +146,22 @@ namespace CaloRecGPU
       carrier mask = 0xFFFFFFFFFFFFFFFFULL;
       if (i >= s_more_bits_begin)
         {
+          // coverity[overflow_const]
           mask = mask << (s_bits_per_offset * s_more_bits_begin);
+          // coverity[overflow_const]
           mask = mask << (s_bits_per_last_offset * (i - s_more_bits_begin));
         }
       else
         {
+          // coverity[overflow_const]
           mask = mask << (s_bits_per_offset * i);
         }
+
+      //Suppressing coverity errors here since
+      //adding zeros to the beginning of the mask
+      //and ignoring the higher level bits
+      //is precisely the desired behaviour.
+
       mask &= s_only_numbers_mask;
       return s_offset_delta_pattern & mask;
     }
@@ -228,7 +237,7 @@ namespace CaloRecGPU
       return ret;
     }
   };
-  
+
   struct NeighPairsArr
   {
     int cell_A[NExactPairs];
@@ -277,7 +286,7 @@ namespace CaloRecGPU
       //we could consider some sort of code generation...
       constexpr int s_PS_start[NumNeighOptions] = {173888, 358016, 541056, 723584, 1432784, 1954480, 2364410, 2438696, 2439336, 2500008, 2529160, 2559756};
       constexpr int s_HECIW_FCal_start[NumNeighOptions] = {183232, 367360, 550272, 732672, 1469392, 1954480, 2435450, 2438824, 2439720, 2500008, 2529160, 2559756};
-      
+
       if (limited_PS && opt_idx != limited_option)
         {
           if (pair >= s_PS_start[opt_idx] && pair < s_HECIW_FCal_start[opt_idx])

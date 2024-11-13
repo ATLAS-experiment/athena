@@ -20,9 +20,14 @@ BasicGPUClusterInfoCalculator::BasicGPUClusterInfoCalculator(const std::string &
   declareInterface<CaloClusterGPUProcessor> (this);
 }
 
-StatusCode BasicGPUClusterInfoCalculator::initialize()
+StatusCode BasicGPUClusterInfoCalculator::initialize_non_CUDA()
 { 
   ATH_CHECK( m_kernelSizeOptimizer.retrieve() );
+  return StatusCode::SUCCESS;
+}
+
+StatusCode BasicGPUClusterInfoCalculator::initialize_CUDA()
+{ 
   register_kernels( *(m_kernelSizeOptimizer.get()) );
   return StatusCode::SUCCESS;
 }
@@ -77,8 +82,3 @@ StatusCode BasicGPUClusterInfoCalculator::finalize()
   return StatusCode::SUCCESS;
 }
 
-
-BasicGPUClusterInfoCalculator::~BasicGPUClusterInfoCalculator()
-{
-  //Nothing!
-}

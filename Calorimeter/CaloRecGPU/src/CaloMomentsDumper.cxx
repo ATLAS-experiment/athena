@@ -156,9 +156,3 @@ StatusCode CaloMomentsDumper::execute (const EventContext & ctx, xAOD::CaloClust
   return StatusCode::SUCCESS;
 
 }
-
-
-CaloMomentsDumper::~CaloMomentsDumper()
-{
-  //Nothing!
-}

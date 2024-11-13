@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -35,14 +35,14 @@ GPUToAthenaImporterWithMoments::GPUToAthenaImporterWithMoments(const std::string
 
 StatusCode GPUToAthenaImporterWithMoments::initialize()
 {
-  ATH_CHECK( m_cellsKey.value().initialize() );
+  ATH_CHECK( m_cellsKey.initialize() );
 
   ATH_CHECK( detStore()->retrieve(m_calo_id, "CaloCell_ID") );
 
   ATH_CHECK(m_caloMgrKey.initialize());
 
-  ATH_CHECK(m_HVCablingKey.initialize());
-  ATH_CHECK(m_HVScaleKey.initialize());
+  ATH_CHECK(m_HVCablingKey.initialize(m_fillHVMoments));
+  ATH_CHECK(m_HVScaleKey.initialize(m_fillHVMoments));
 
   auto get_cluster_size_from_string = [](const std::string & str, bool & failed)
   {
@@ -214,7 +214,7 @@ StatusCode GPUToAthenaImporterWithMoments::initialize()
                      << " are not valid moments and will be ignored!" );
     }
 
-  m_doHVMoments =  m_momentsToDo[xAOD::CaloCluster::ENG_BAD_HV_CELLS] || m_momentsToDo[xAOD::CaloCluster::N_BAD_HV_CELLS];
+  m_doHVMoments = (m_momentsToDo[xAOD::CaloCluster::ENG_BAD_HV_CELLS] || m_momentsToDo[xAOD::CaloCluster::N_BAD_HV_CELLS]) && m_fillHVMoments;
   return StatusCode::SUCCESS;
 }
 
@@ -237,7 +237,7 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
   if ( !cell_collection.isValid() )
     {
       ATH_MSG_ERROR( " Cannot retrieve CaloCellContainer: " << cell_collection.name()  );
-      return StatusCode::RECOVERABLE;
+      return StatusCode::FAILURE;
     }
   const DataLink<CaloCellContainer> cell_collection_link (cell_collection.name(), ctx);
 
@@ -257,8 +257,6 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
 
   cell_links.reserve(ed.m_clusters->number);
 
-  size_t valid_clusters = 0;
-
   CaloRecGPU::CUDA_Helpers::GPU_synchronize();
 
   const auto clusters = clock_type::now();
@@ -272,7 +270,6 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
           cell_links.emplace_back(std::make_unique<CaloClusterCellLink>(cell_collection_link));
           cell_links.back()->reserve(256);
           //To be adjusted.
-          ++valid_clusters;
         }
       else
         {
@@ -284,18 +281,26 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
   std::vector<float> HV_energy(ed.m_clusters->number * m_doHVMoments, 0.f);
   std::vector<int>   HV_number(ed.m_clusters->number * m_doHVMoments, 0  );
 
-  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl(m_HVCablingKey, ctx);
-  const LArOnOffIdMapping * cabling = *cablingHdl;
-  SG::ReadCondHandle<ILArHVScaleCorr> hvScaleHdl(m_HVScaleKey, ctx);
-  const ILArHVScaleCorr * hvcorr = *hvScaleHdl;
-
+  const LArOnOffIdMapping * cabling = nullptr;
+  const ILArHVScaleCorr * hvcorr = nullptr;
+  
+  if (m_fillHVMoments)
+    {
+      SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl(m_HVCablingKey, ctx);
+      SG::ReadCondHandle<ILArHVScaleCorr> hvScaleHdl(m_HVScaleKey, ctx);
+      cabling = *cablingHdl;
+      hvcorr = *hvScaleHdl;
+    }
+  
   CaloRecGPU::CUDA_Helpers::GPU_synchronize();
 
   const auto cells = clock_type::now();
 
   ed.returnSomeMomentsToCPU(ed.m_clusters->number);
 
-  const auto process_cell = [&](const int cell_index)
+  //cell_index is the actual cell index in the full set of cells (identifier hash)
+  //cell_count is the cell position in the cell collection (what we want for the weight)
+  const auto process_cell = [&](const int cell_index, const int cell_count)
   {
     const ClusterTag this_tag = ed.m_cell_state->clusterTag[cell_index];
     if (this_tag.is_part_of_cluster())
@@ -316,7 +321,7 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
 
         if (cell_links[this_index])
           {
-            cell_links[this_index]->addCell(cell_index, this_weight);
+            cell_links[this_index]->addCell(cell_count, this_weight);
 
             if (cell_index == ed.m_clusters->seedCellID[this_index] && cell_links[this_index]->size() > 1)
               //Seed cells aren't shared,
@@ -345,7 +350,7 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
             const int other_index = this_tag.secondary_cluster_index();
             if (cell_links[other_index])
               {
-                cell_links[other_index]->addCell(cell_index, reverse_weight);
+                cell_links[other_index]->addCell(cell_count, reverse_weight);
               }
           }
 
@@ -374,10 +379,10 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
     {
       for (int cell_index = 0; cell_index < NCaloCells; ++cell_index)
         {
-          process_cell(cell_index);
+          process_cell(cell_index, cell_index);
         }
     }
-  else if (m_missingCellsToFill.size() > 0)
+  else if (cell_collection->isOrdered() && m_missingCellsToFill.size() > 0)
     {
       size_t missing_cell_count = 0;
       for (int cell_index = 0; cell_index < NCaloCells; ++cell_index)
@@ -387,7 +392,7 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
               ++missing_cell_count;
               continue;
             }
-          process_cell(cell_index);
+          process_cell(cell_index, cell_index - missing_cell_count);
         }
     }
   else
@@ -402,7 +407,7 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
           //const int cell_index = m_calo_id->calo_cell_hash(cell->ID());
           const int cell_index = cell->caloDDE()->calo_hash();
                  
-          process_cell(cell_index);
+          process_cell(cell_index, cell_count);
         }
     }
 
@@ -467,6 +472,15 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
 
           cluster->setE(ed.m_clusters->clusterEnergy[cluster_index]);
           cluster->setM(0.0);
+          
+          
+          if (m_saveUncalibrated)
+            {
+              cluster->setRawE(cluster->calE());
+              cluster->setRawEta(cluster->calEta());
+              cluster->setRawPhi(cluster->calPhi());
+              cluster->setRawM(cluster->calM());
+            }
 
           real_cluster_order.push_back(cluster_index);
         }
@@ -490,34 +504,34 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
       cluster->clearSamplingData();
 
       uint32_t sampling_pattern = 0;
-      for (int i = 0; i < NumSamplings; ++i)
+      for (int sampl = 0; sampl < NumSamplings; ++sampl)
         {
-          const int cells_per_sampling = ed.m_moments->nCellSampling[i][cluster_index];
+          const int cells_per_sampling = ed.m_moments->nCellSampling[sampl][cluster_index];
 
           if (cells_per_sampling > 0)
             {
-              sampling_pattern |= (0x1U << i);
+              sampling_pattern |= (0x1U << sampl);
             }
         }
       cluster->setSamplingPattern(sampling_pattern);
 
-      for (int i = 0; i < NumSamplings; ++i)
+      for (int sampl = 0; sampl < NumSamplings; ++sampl)
         {
-          const int cells_per_sampling = ed.m_moments->nCellSampling[i][cluster_index];
+          const int cells_per_sampling = ed.m_moments->nCellSampling[sampl][cluster_index];
 
           if (cells_per_sampling > 0)
             {
-              cluster->setEnergy  ((CaloSampling::CaloSample) i, ed.m_moments->energyPerSample [i][cluster_index]);
-              cluster->setEta     ((CaloSampling::CaloSample) i, ed.m_moments->etaPerSample    [i][cluster_index]);
-              cluster->setPhi     ((CaloSampling::CaloSample) i, ed.m_moments->phiPerSample    [i][cluster_index]);
-              cluster->setEmax    ((CaloSampling::CaloSample) i, ed.m_moments->maxEPerSample   [i][cluster_index]);
-              cluster->setEtamax  ((CaloSampling::CaloSample) i, ed.m_moments->maxEtaPerSample [i][cluster_index]);
-              cluster->setPhimax  ((CaloSampling::CaloSample) i, ed.m_moments->maxPhiPerSample [i][cluster_index]);
+              cluster->setEnergy  ((CaloSampling::CaloSample) sampl, ed.m_moments->energyPerSample [sampl][cluster_index]);
+              cluster->setEta     ((CaloSampling::CaloSample) sampl, ed.m_moments->etaPerSample    [sampl][cluster_index]);
+              cluster->setPhi     ((CaloSampling::CaloSample) sampl, ed.m_moments->phiPerSample    [sampl][cluster_index]);
+              cluster->setEmax    ((CaloSampling::CaloSample) sampl, ed.m_moments->maxEPerSample   [sampl][cluster_index]);
+              cluster->setEtamax  ((CaloSampling::CaloSample) sampl, ed.m_moments->maxEtaPerSample [sampl][cluster_index]);
+              cluster->setPhimax  ((CaloSampling::CaloSample) sampl, ed.m_moments->maxPhiPerSample [sampl][cluster_index]);
             }
 
           if (m_momentsToDo[xAOD::CaloCluster::NCELL_SAMPLING])
             {
-              cluster->setNumberCellsInSampling((CaloSampling::CaloSample) i, cells_per_sampling, false);
+              cluster->setNumberCellsInSampling((CaloSampling::CaloSample) sampl, cells_per_sampling, false);
             }
         }
 
@@ -567,11 +581,11 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
       CALORECGPU_MOMENTS_CONVERSION_HELPER(AVG_LAR_Q,         avgLArQ           );
       CALORECGPU_MOMENTS_CONVERSION_HELPER(AVG_TILE_Q,        avgTileQ          );
 
-      if (m_momentsToDo[xAOD::CaloCluster::ENG_BAD_HV_CELLS])
+      if (m_doHVMoments && m_momentsToDo[xAOD::CaloCluster::ENG_BAD_HV_CELLS])
         {
           cluster->insertMoment(xAOD::CaloCluster::ENG_BAD_HV_CELLS, HV_energy[cluster_index]);
         }
-      if (m_momentsToDo[xAOD::CaloCluster::N_BAD_HV_CELLS])
+      if (m_doHVMoments && m_momentsToDo[xAOD::CaloCluster::N_BAD_HV_CELLS])
         {
           cluster->insertMoment(xAOD::CaloCluster::N_BAD_HV_CELLS, HV_number[cluster_index]);
         }
@@ -667,10 +681,4 @@ StatusCode GPUToAthenaImporterWithMoments::finalize()
       print_times("Preprocessing Cluster_Number Clusters Cells Cell_Cycle Ordering Cluster_Creation Moments_Transfer Moments_Fill", 9);
     }
   return StatusCode::SUCCESS;
-}
-
-
-GPUToAthenaImporterWithMoments::~GPUToAthenaImporterWithMoments()
-{
-  //Nothing!
 }

@@ -479,7 +479,11 @@ namespace TASplitting
 
     CaloRecGPU::Helpers::CUDA_object<TopoAutomatonSplittingOptions> m_options_dev;
 
-    void allocate();
+    void allocate()
+    {
+      m_options.allocate();
+    }
+    
     void sendToGPU(const bool clear_CPU = false);
   };
 

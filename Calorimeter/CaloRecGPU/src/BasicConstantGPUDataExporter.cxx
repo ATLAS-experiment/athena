@@ -425,9 +425,3 @@ StatusCode BasicConstantGPUDataExporter::finalize()
     }
   return StatusCode::SUCCESS;
 }
-
-
-BasicConstantGPUDataExporter::~BasicConstantGPUDataExporter()
-{
-  //Nothing!
-}

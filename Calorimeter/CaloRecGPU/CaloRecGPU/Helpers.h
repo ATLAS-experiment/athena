@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -16,6 +16,7 @@
 #include <iostream>
 #include <thread>
 #include <mutex>
+#include <shared_mutex>
 #include <memory>
 #include <vector>
 #include <climits>
@@ -62,7 +63,7 @@ namespace CaloRecGPU
   {
     if (code != cudaSuccess)
       {
-        printf("GPU Error: %s (%s %d)\n", cudaGetErrorString(code), file, line);
+        printf("CUDA error: %s (%s %d)\n", cudaGetErrorString(code), file, line);
         if (abort)
           {
 #ifdef __CUDA_ARCH__
@@ -109,16 +110,15 @@ namespace CaloRecGPU
     {
       void * ptr = nullptr;
 
-
-      operator void * () const
-      {
-        return ptr;
-      }
-
-      template <class T>
-      operator T * () const
+      template <class T = const void>
+      constexpr operator T * () const
       {
         return (T *) ptr;
+      }
+
+      constexpr operator bool() const
+      {
+        return ptr != nullptr;
       }
 
       template <class T>
@@ -189,21 +189,21 @@ namespace CaloRecGPU
       \brief Synchronizes the \p stream. If called with no value, synchronizes with @c cudaStreamPerThread.
     */
     void GPU_synchronize(CUDAStreamPtrHolder stream = {});
-    
+
     /*!
       \brief Optimizes block and grid size according to @c cudaOccupancyMaxPotentialBlockSize.
     */
     void optimize_block_and_grid_size(void * func, int & block_size, int & grid_size, const int dynamic_memory = 0, const int block_size_limit = 0);
-    
+
     /*!
       \brief Optimizes block and grid size for a cooperative launch.
     */
     void optimize_block_and_grid_size_for_cooperative_launch(void * func, int & block_size, int & grid_size, const int dynamic_memory = 0, const int block_size_limit = 0);
-    
+
     bool supports_cooperative_launches();
-    
+
     bool supports_dynamic_parallelism();
-    
+
     std::string GPU_name();
   }
 
@@ -310,7 +310,7 @@ namespace CaloRecGPU
   inline constexpr T pi = std::numbers::pi_v<T>;
 
   template <class T>
-  inline constexpr T sqrt2 = std::numbers::sqrt2_v<T>
+  inline constexpr T sqrt2 = std::numbers::sqrt2_v<T>;
 #else
   template <class T>
   inline constexpr T pi = T(3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091456485669234603486104543266482133936072602491412737245870066063155881748815209209628292540917153643678925903600113305305488204665213841469519415116094330572703657595919530921861173819326117931051185480744623799627495673518857527248912279381830119491298336733624L);
@@ -1488,30 +1488,39 @@ namespace CaloRecGPU
       //pushing and popping instead of linear searching.
       //(But with constant memory -> no (de)allocations.)
 
-      std::mutex m_mutex;
+      mutable std::shared_mutex m_mutex;
+
+      T & add_one_and_return()
+      {
+        std::unique_lock<std::shared_mutex> lock(m_mutex);
+        m_held.emplace_back(std::make_unique<T>());
+        m_thread_equivs.emplace_back(std::this_thread::get_id());
+        return *(m_held.back());
+      }
 
      public:
       T & get_one()
       {
-        std::lock_guard<std::mutex> lock_guard(m_mutex);
-        std::thread::id this_id = std::this_thread::get_id();
-        const std::thread::id invalid_id{};
-        for (size_t i = 0; i < m_thread_equivs.size(); ++i)
-          {
-            if (m_thread_equivs[i] == invalid_id)
-              {
-                m_thread_equivs[i] = this_id;
-                return *(m_held[i]);
-              }
-          }
-        m_held.emplace_back(std::make_unique<T>());
-        m_thread_equivs.emplace_back(this_id);
-        return *(m_held.back());
+        {
+          std::shared_lock<std::shared_mutex> lock(m_mutex);
+          std::thread::id this_id = std::this_thread::get_id();
+          const std::thread::id invalid_id{};
+          for (size_t i = 0; i < m_thread_equivs.size(); ++i)
+            {
+              if (m_thread_equivs[i] == invalid_id)
+                {
+                  m_thread_equivs[i] = this_id;
+                  return *(m_held[i]);
+                }
+            }
+        }
+        return add_one_and_return();
       }
 
       ///\pre Assumes the thread already has an allocated object (through @p get_one).
       T & get_for_thread() const
       {
+        std::shared_lock<std::shared_mutex> lock(m_mutex);
         std::thread::id this_id = std::this_thread::get_id();
         for (size_t i = 0; i < m_thread_equivs.size(); ++i)
           {
@@ -1527,7 +1536,7 @@ namespace CaloRecGPU
 
       void release_one()
       {
-        std::lock_guard<std::mutex> lock_guard(m_mutex);
+        std::unique_lock<std::shared_mutex> lock(m_mutex);
         std::thread::id this_id = std::this_thread::get_id();
         const std::thread::id invalid_id{};
         for (size_t i = 0; i < m_thread_equivs.size(); ++i)
@@ -1541,7 +1550,7 @@ namespace CaloRecGPU
 
       void resize(const size_t new_size)
       {
-        std::lock_guard<std::mutex> lock_guard(m_mutex);
+        std::unique_lock<std::shared_mutex> lock(m_mutex);
         if (new_size < m_held.size())
           {
             m_held.resize(new_size);
@@ -1562,7 +1571,7 @@ namespace CaloRecGPU
       template <class F, class ... Args>
       void operate_on_all(F && f, Args && ... args)
       {
-        std::lock_guard<std::mutex> lock_guard(m_mutex);
+        std::unique_lock<std::shared_mutex> lock(m_mutex);
         for (std::unique_ptr<T> & obj : m_held)
           {
             f(*obj, std::forward<Args>(args)...);
@@ -1571,11 +1580,13 @@ namespace CaloRecGPU
 
       size_t held_size() const
       {
+        std::shared_lock<std::shared_mutex> lock(m_mutex);
         return m_held.size();
       }
 
       size_t available_size() const
       {
+        std::shared_lock<std::shared_mutex> lock(m_mutex);
         size_t count = 0;
         const std::thread::id invalid_id{};
         for (const auto & id : m_thread_equivs)
@@ -1590,7 +1601,17 @@ namespace CaloRecGPU
 
       size_t filled_size() const
       {
-        return this->held_size() - this->available_size();
+        std::shared_lock<std::shared_mutex> lock(m_mutex);
+        size_t count = 0;
+        const std::thread::id invalid_id{};
+        for (const auto & id : m_thread_equivs)
+          {
+            if (id == invalid_id)
+              {
+                ++count;
+              }
+          }
+        return m_held.size() - count;
       }
     };
 

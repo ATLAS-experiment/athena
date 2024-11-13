@@ -1,18 +1,19 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-#Outputs plots for comparing CPU and GPU growing.
+#Outputs plots and textual information
+#to compare CPU with GPU moments calculation.
 
 import CaloRecGPUTestingConfig
-
+    
 if __name__=="__main__":
 
     flags, testopts = CaloRecGPUTestingConfig.PrepareTest()
-    
+            
     flags.lock()
     
-    testopts.TestType = CaloRecGPUTestingConfig.TestTypes.Grow
+    testopts.TestType = CaloRecGPUTestingConfig.TestTypes.GrowSplitMoments
     
-    PlotterConfig = CaloRecGPUTestingConfig.PlotterConfigurator(["CPU_growing", "GPU_growing"], ["growing"])
+    PlotterConfig = CaloRecGPUTestingConfig.PlotterConfigurator(["CPU_moments", "GPU_moments"], ["growing", "moments"], DoMoments = True)
     
     CaloRecGPUTestingConfig.RunFullTestConfiguration(flags, testopts, plotter_configurator = PlotterConfig)
-
+    

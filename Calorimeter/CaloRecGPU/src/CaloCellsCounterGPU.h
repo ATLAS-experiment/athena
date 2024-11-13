@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -10,7 +10,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CaloRecGPU/CaloClusterGPUProcessor.h"
 #include <string>
-#include <mutex>
 #include <atomic>
 
 /**
@@ -32,7 +31,7 @@ class CaloCellsCounterGPU :
                               CaloRecGPU::EventDataHolder & event_data,
                               void * temporary_buffer) const override;
 
-  virtual ~CaloCellsCounterGPU();
+  virtual ~CaloCellsCounterGPU() = default;
 
  private:
 

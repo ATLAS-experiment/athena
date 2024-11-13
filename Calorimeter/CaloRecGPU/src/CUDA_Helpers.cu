@@ -51,25 +51,25 @@ void CaloRecGPU::CUDA_Helpers::GPU_to_GPU(void * dest, const void * const source
 
 void CaloRecGPU::CUDA_Helpers::GPU_to_CPU_async(void * dest, const void * const source, const size_t num, CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
   CUDA_ERRCHECK(cudaMemcpyAsync(dest, source, num, cudaMemcpyDeviceToHost, cudaStreamPerThread));
 }
 
 void CaloRecGPU::CUDA_Helpers::CPU_to_GPU_async(void * dest, const void * const source, const size_t num, CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
   CUDA_ERRCHECK(cudaMemcpyAsync(dest, source, num, cudaMemcpyHostToDevice, stream_to_use));
 }
 
 void CaloRecGPU::CUDA_Helpers::GPU_to_GPU_async(void * dest, const void * const source, const size_t num, CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
   CUDA_ERRCHECK(cudaMemcpyAsync(dest, source, num, cudaMemcpyDeviceToDevice, stream_to_use));
 }
 
 void CaloRecGPU::CUDA_Helpers::GPU_synchronize(CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
   CUDA_ERRCHECK(cudaStreamSynchronize(stream_to_use));
 }
 

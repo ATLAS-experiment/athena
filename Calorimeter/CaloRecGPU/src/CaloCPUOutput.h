@@ -40,7 +40,7 @@ class CaloCPUOutput :
   
   virtual StatusCode execute (const EventContext& ctx, xAOD::CaloClusterContainer* cluster_collection) const override;
 
-  virtual ~CaloCPUOutput();
+  virtual ~CaloCPUOutput() = default;
 
  private:
 
@@ -77,7 +77,7 @@ class CaloCPUOutput :
     /**
    * @brief vector of names of the cell containers to use as input.
    */
-  Gaudi::Property<SG::ReadHandleKey<CaloCellContainer>> m_cellsKey {this, "CellsName", "", "Name(s) of Cell Containers"};
+  SG::ReadHandleKey<CaloCellContainer> m_cellsKey {this, "CellsName", "", "Name(s) of Cell Containers"};
   
   /**
    * @brief Pointer to Calo ID Helper

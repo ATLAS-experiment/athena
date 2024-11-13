@@ -279,7 +279,11 @@ namespace TAGrowing
 
     CaloRecGPU::Helpers::CUDA_object<TopoAutomatonOptions> m_options_dev;
 
-    void allocate();
+    void allocate()
+    {
+      m_options.allocate();
+    }
+
     void sendToGPU(const bool clear_CPU = false);
   };
 

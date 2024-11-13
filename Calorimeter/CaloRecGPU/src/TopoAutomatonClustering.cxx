@@ -28,7 +28,7 @@ TopoAutomatonClustering::TopoAutomatonClustering(const std::string & type, const
   declareInterface<CaloClusterGPUProcessor> (this);
 }
 
-StatusCode TopoAutomatonClustering::initialize()
+StatusCode TopoAutomatonClustering::initialize_non_CUDA()
 {
 
   m_options.allocate();
@@ -237,14 +237,20 @@ StatusCode TopoAutomatonClustering::initialize()
   m_options.m_options->use_crosstalk = m_xtalkEM2;
   m_options.m_options->crosstalk_delta = m_xtalkDeltaT;
 
-  m_options.sendToGPU();
-
   ATH_CHECK( m_kernelSizeOptimizer.retrieve() );
-  register_kernels( *(m_kernelSizeOptimizer.get()) );
 
   return StatusCode::SUCCESS;
-
 }
+
+StatusCode TopoAutomatonClustering::initialize_CUDA()
+{
+  m_options.sendToGPU();
+  register_kernels( *(m_kernelSizeOptimizer.get()) );
+  
+  return StatusCode::SUCCESS;
+}
+
+
 
 StatusCode TopoAutomatonClustering::execute(const EventContext & ctx, const ConstantDataHolder & constant_data,
                                             EventDataHolder & event_data, void * /*temporary_buffer*/             ) const
@@ -300,8 +306,3 @@ StatusCode TopoAutomatonClustering::finalize()
   return StatusCode::SUCCESS;
 }
 
-
-TopoAutomatonClustering::~TopoAutomatonClustering()
-{
-  //Nothing!
-}

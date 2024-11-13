@@ -26,17 +26,6 @@
 
 #include <Gaudi/Parsers/Factory.h>
 
-namespace Gaudi
-{
-  namespace Parsers
-  {
-    template <typename Iterator, typename Skipper, class Enable>
-    struct Grammar_<Iterator, SG::ReadHandleKey<CaloCellContainer>, Skipper, Enable>
-    {
-      using Grammar = typename Grammar_<Iterator, std::string, Skipper, Enable>::Grammar;
-    };
-  }
-}
 //Suppress the warning that comes up from simply including Factory.h.
 
 //First, generic handling of tuples.
