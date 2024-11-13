@@ -10,8 +10,11 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CaloRecGPU/CaloClusterGPUProcessor.h"
 #include "CaloRecGPU/CaloGPUTimed.h"
+#include "CaloRecGPU/CaloGPUCUDAInitialization.h"
 #include "TopoAutomatonSplittingImpl.h"
 #include <string>
+
+#include "GaudiKernel/ServiceHandle.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
@@ -26,13 +29,20 @@
 
 
 class TopoAutomatonSplitting :
-  public AthAlgTool, virtual public CaloClusterGPUProcessor, public CaloGPUTimed
+  public AthAlgTool, virtual public CaloClusterGPUProcessor, public CaloGPUTimed, public CaloGPUCUDAInitialization
 {
  public:
 
   TopoAutomatonSplitting(const std::string & type, const std::string & name, const IInterface * parent);
 
-  virtual StatusCode initialize() override;
+  virtual StatusCode initialize() override
+  {
+    return CaloGPUCUDAInitialization::initialize();
+  }
+  
+  virtual StatusCode initialize_non_CUDA() override;
+  
+  virtual StatusCode initialize_CUDA() override;
 
   virtual StatusCode execute (const EventContext & ctx,
                               const CaloRecGPU::ConstantDataHolder & constant_data,
@@ -41,7 +51,7 @@ class TopoAutomatonSplitting :
 
   virtual StatusCode finalize() override;
 
-  virtual ~TopoAutomatonSplitting();
+  virtual ~TopoAutomatonSplitting() = default;
 
  private:
 

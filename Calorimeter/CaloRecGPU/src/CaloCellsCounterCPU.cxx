@@ -25,7 +25,7 @@ CaloCellsCounterCPU::CaloCellsCounterCPU(const std::string & type, const std::st
 StatusCode CaloCellsCounterCPU::initialize()
 {
   ATH_CHECK( m_noiseCDOKey.initialize() );
-  ATH_CHECK( m_cellsKey.value().initialize() );
+  ATH_CHECK( m_cellsKey.initialize() );
   ATH_CHECK( detStore()->retrieve(m_calo_id, "CaloCell_ID") );
   return StatusCode::SUCCESS;
 }
@@ -66,7 +66,7 @@ StatusCode CaloCellsCounterCPU::execute (const EventContext & ctx, xAOD::CaloClu
   if ( !cell_collection.isValid() )
     {
       ATH_MSG_ERROR( " Cannot retrieve CaloCellContainer: " << cell_collection.name()  );
-      return StatusCode::RECOVERABLE;
+      return StatusCode::FAILURE;
     }
 
 
@@ -304,8 +304,3 @@ StatusCode CaloCellsCounterCPU::execute (const EventContext & ctx, xAOD::CaloClu
 
 }
 
-
-CaloCellsCounterCPU::~CaloCellsCounterCPU()
-{
-  //Nothing!
-}

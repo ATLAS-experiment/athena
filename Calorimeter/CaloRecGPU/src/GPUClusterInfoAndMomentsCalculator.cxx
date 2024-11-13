@@ -17,7 +17,7 @@ GPUClusterInfoAndMomentsCalculator::GPUClusterInfoAndMomentsCalculator(const std
   declareInterface<CaloClusterGPUProcessor> (this);
 }
 
-StatusCode GPUClusterInfoAndMomentsCalculator::initialize()
+StatusCode GPUClusterInfoAndMomentsCalculator::initialize_non_CUDA()
 {
   m_options.allocate();
     
@@ -30,9 +30,15 @@ StatusCode GPUClusterInfoAndMomentsCalculator::initialize()
   m_options.m_options->min_l_longitudinal     = m_minLLongitudinal;
   m_options.m_options->min_r_lateral          = m_minRLateral;
   
-  m_options.sendToGPU();
   
   ATH_CHECK( m_kernelSizeOptimizer.retrieve() );
+  
+  return StatusCode::SUCCESS;
+}
+
+StatusCode GPUClusterInfoAndMomentsCalculator::initialize_CUDA()
+{
+  m_options.sendToGPU();
   register_kernels( *(m_kernelSizeOptimizer.get()) );
   
   return StatusCode::SUCCESS;
@@ -51,7 +57,3 @@ StatusCode GPUClusterInfoAndMomentsCalculator::finalize()
   return StatusCode::SUCCESS;
 }
 
-GPUClusterInfoAndMomentsCalculator::~GPUClusterInfoAndMomentsCalculator()
-{
-  //Nothing!
-}

@@ -36,7 +36,7 @@ class CaloGPUOutput :
                               CaloRecGPU::EventDataHolder & event_data,
                               void * temporary_buffer) const override;
 
-  virtual ~CaloGPUOutput();
+  virtual ~CaloGPUOutput() = default;
 
  private:
 

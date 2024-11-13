@@ -31,7 +31,7 @@ CaloGPUClusterAndCellDataMonitor::CaloGPUClusterAndCellDataMonitor(const std::st
 
 StatusCode CaloGPUClusterAndCellDataMonitor::initialize()
 {
-  ATH_CHECK( m_cellsKey.value().initialize() );
+  ATH_CHECK( m_cellsKey.initialize() );
 
   ATH_CHECK( detStore()->retrieve(m_calo_id, "CaloCell_ID") );
 
@@ -274,7 +274,7 @@ StatusCode CaloGPUClusterAndCellDataMonitor::convert_to_GPU_data_structures(cons
   if ( !cell_collection.isValid() )
     {
       ATH_MSG_ERROR( " Cannot retrieve CaloCellContainer: " << cell_collection.name()  );
-      return StatusCode::RECOVERABLE;
+      return StatusCode::FAILURE;
     }
 
   ret_info.allocate();
@@ -679,11 +679,6 @@ namespace
   static constexpr decltype(auto) suppress_warning(Arg && a)
   {
     return std::forward<Arg>(a);
-  }
-
-  static constexpr void suppress_warning()
-  {
-    return;
   }
 
   template <class F, class ... Types, class ... Args>
@@ -1099,11 +1094,6 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters_perfectly(sample_com
 
   return StatusCode::SUCCESS;
 
-}
-
-CaloGPUClusterAndCellDataMonitor::~CaloGPUClusterAndCellDataMonitor()
-{
-  //Nothing!
 }
 
 namespace

@@ -15,6 +15,7 @@
 #include "AthenaBaseComps/AthService.h"
 
 #include "CaloRecGPU/IGPUKernelSizeOptimizerSvc.h"
+#include "CaloRecGPU/CaloGPUCUDAInitialization.h"
 
 #include <nlohmann/json.hpp>
 
@@ -25,7 +26,7 @@
  * @brief .
  */
 
-class GPUKernelSizeOptimizerSvc : public extends <AthService, IGPUKernelSizeOptimizerSvc>
+class GPUKernelSizeOptimizerSvc : public extends <AthService, IGPUKernelSizeOptimizerSvc>, public CaloGPUCUDAInitialization
 {
  public:
 
@@ -43,21 +44,21 @@ class GPUKernelSizeOptimizerSvc : public extends <AthService, IGPUKernelSizeOpti
                                 const int * blocksize_hints,
                                 const int * gridsize_hints,
                                 const int * max_total_threads,
-                                const int offset = 0);
+                                const int offset = 0) override;
 
   /** @brief Retrieve the (hopefully optimal) kernel launch configuration.*/
   virtual CUDAKernelLaunchConfiguration get_launch_configuration(const std::string & name,
                                                                  const int number = 0,
-                                                                 const int dynamic_memory = 0) const;
+                                                                 const int dynamic_memory = 0) const override;
 
   /** @brief Whether the device + environment in use support cooperative groups. */
-  virtual bool can_use_cooperative_groups() const
+  virtual bool can_use_cooperative_groups() const override
   {
     return m_coopgroup_support;
   }
 
   /** @brief Whether the device + environment in use support dynamic parallelism. */
-  virtual bool can_use_dynamic_parallelism() const
+  virtual bool can_use_dynamic_parallelism() const override
   {
     return m_dynpar_support;
   }
@@ -70,9 +71,15 @@ class GPUKernelSizeOptimizerSvc : public extends <AthService, IGPUKernelSizeOpti
     return false;
   }
 
-  virtual StatusCode initialize() override;
+  virtual StatusCode initialize() override
+  {
+    return CaloGPUCUDAInitialization::initialize();
+  }
+  
+  virtual StatusCode initialize_CUDA() override;
+  
   virtual StatusCode finalize() override;
-
+  
  private:
 
   bool m_dynpar_support = false;

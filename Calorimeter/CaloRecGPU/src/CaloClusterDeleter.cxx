@@ -20,8 +20,3 @@ StatusCode CaloClusterDeleter::execute (const EventContext &, xAOD::CaloClusterC
 
 }
 
-
-CaloClusterDeleter::~CaloClusterDeleter()
-{
-  //Nothing!
-}
