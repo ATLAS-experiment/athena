@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -22,6 +22,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "InDetRecToolInterfaces/ITRT_TrackSegmentsMaker.h"
+#include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 
 #include "StoreGate/ReadHandleKey.h"
 #include "TrkEventUtils/PRDtoTrackMap.h"
@@ -37,7 +38,6 @@ class TF1;
 class TRT_ID;
 namespace InDet{
   class TRT_DriftCircle;
-  //  class TRT_DriftCircleContainer;
 }
 
 namespace InDetDD{
@@ -47,7 +47,6 @@ namespace InDetDD{
 namespace Trk{
   class TrackSegment;
   class Segment;
-  class IRIO_OnTrackCreator;
 }
 
 class PRD_MultiTruthCollection;
@@ -164,25 +163,41 @@ namespace InDet{
       // Protected data and methods
       ///////////////////////////////////////////////////////////////////
 
-      bool                                     m_phaseMode   ; //!< Switch to destinguish between phase calculation and full reco
+      BooleanProperty m_phaseMode{this, "Phase", false,
+	"Switch to destinguish between phase calculation and full reco"};
       const TRT_ID*                            m_trtid{}       ; 
 
       SG::ReadHandleKey<InDet::TRT_DriftCircleContainer> m_trtname{this,"TRT_ClustersContainer","TRT_DriftCircles","RHK to retrieve TRT_DriftCircles"}; //!< TRTs   container 
       SG::ReadHandleKey<Trk::PRDtoTrackMap>       m_prdToTrackMap
          {this,"PRDtoTrackMap",""};
 
-      ToolHandle<Trk::IRIO_OnTrackCreator>     m_riomakerD   ; //!< RI0_onTrack creator with drift information
-      ToolHandle<Trk::IRIO_OnTrackCreator>     m_riomakerN   ; //!< RI0_onTrack creator without drift information
+      ToolHandle<Trk::IRIO_OnTrackCreator> m_riomakerD
+	{this, "RIOonTrackToolYesDr",
+	 "InDet::TRT_DriftCircleOnTrackTool/TRT_DriftCircleOnTrackTool",
+	 "RI0_onTrack creator with drift information"};
+      ToolHandle<Trk::IRIO_OnTrackCreator> m_riomakerN
+	{this, "RIOonTrackToolNoDr",
+	 "InDet::TRT_DriftCircleOnTrackNoDriftTimeTool/TRT_DriftCircleOnTrackNoDriftTimeTool",
+	 "RI0_onTrack creator without drift information"};
 
-      bool                                     m_useDriftTime; //!< Shall the drifttime be used or only tube hits?
-      double                                   m_scaleTube   ; //!< Scalefactor for uncertainty of tube hits   
-      double                                   m_scaleFactorDrift ; //!< Scalefactor for uncertainty of drifttime hits   
-      double                                   m_scaleTubeNoise; //!< Scalefactor for uncertainty of tube hits flagged as noise
-      double                                   m_cutToTLoose ; //!< Loose cut on ToT (preselection)
-      double                                   m_cutToTTight ; //!< Hard cut on ToT (preselection)
-      double                                   m_cutToTUpper ; //!< Upper cut on ToT (preselection)
-      int                                      m_minDCSeed   ; //!< Minimum number of driftcircles to form a seed      
-      int                                      m_hitLimit    ; //!< Maximum number of good hits (i.e. after noise cut) in endcap
+      BooleanProperty m_useDriftTime{this, "UseDriftTime", false,
+	"Shall the drifttime be used or only tube hits?"};
+      DoubleProperty m_scaleTube{this, "ScaleFactorTube", 2.,
+	"Scalefactor for uncertainty of tube hits"};
+      DoubleProperty m_scaleFactorDrift{this, "ScaleFactorDrift", 1.,
+	"Scalefactor for uncertainty of drifttime hits"};
+      DoubleProperty m_scaleTubeNoise{this, "ScaleFactorTubeNoise", 1.,
+	"Scalefactor for uncertainty of tube hits flagged as noise"};
+      DoubleProperty m_cutToTLoose{this, "ToTCutLoose", 7.,
+	"Loose cut on ToT (preselection)"};
+      DoubleProperty m_cutToTTight{this, "ToTCutTight", 18.,
+	"Hard cut on ToT (preselection)"};
+      DoubleProperty m_cutToTUpper{this, "ToTCutUpper", 32.,
+	"Upper cut on ToT (preselection)"};
+      IntegerProperty m_minDCSeed{this, "MinDCperSeed", 7,
+	"Minimum number of driftcircles to form a seed"};
+      IntegerProperty m_hitLimit{this, "HitLimit", 2000,
+	"Maximum number of good hits (i.e. after noise cut) in endcap"};
 
       static std::mutex s_fitMutex;  // @TODO not sufficient need a global root lock
 

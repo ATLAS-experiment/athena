@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,7 +15,6 @@
 #include "TrkPseudoMeasurementOnTrack/PseudoMeasurementOnTrack.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "TrkEventPrimitives/FitQuality.h"
-#include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 #include "InDetPrepRawData/TRT_DriftCircleContainer.h"
 #include "RootUtils/WithRootErrorHandler.h"
@@ -35,34 +34,9 @@
 
 InDet::TRT_TrackSegmentsMaker_ECcosmics::TRT_TrackSegmentsMaker_ECcosmics
 (const std::string& t,const std::string& n,const IInterface* p)
-  : AthAlgTool(t,n,p),
-    m_phaseMode(false),
-    m_riomakerD ("InDet::TRT_DriftCircleOnTrackTool/TRT_DriftCircleOnTrackTool"                      ),
-    m_riomakerN ("InDet::TRT_DriftCircleOnTrackNoDriftTimeTool/TRT_DriftCircleOnTrackNoDriftTimeTool"),
-    m_useDriftTime(false),
-    m_scaleTube(2.0),
-    m_scaleFactorDrift(1.0),
-    m_scaleTubeNoise(1.0),
-    m_cutToTLoose(7.),
-    m_cutToTTight(18.),
-    m_cutToTUpper(32.),
-    m_minDCSeed(7)
+  : AthAlgTool(t,n,p)
 {
   declareInterface<ITRT_TrackSegmentsMaker>(this);
-
-  declareProperty("RIOonTrackToolYesDr"  ,m_riomakerD  );
-  declareProperty("RIOonTrackToolNoDr"   ,m_riomakerN  );
-  declareProperty("Phase",m_phaseMode);
-  declareProperty("UseDriftTime", m_useDriftTime);
-  declareProperty("ScaleFactorTube", m_scaleTube);
-  declareProperty("ScaleFactorDrift", m_scaleFactorDrift);
-  declareProperty("ScaleFactorTubeNoise", m_scaleTubeNoise);
-  declareProperty("ToTCutLoose",m_cutToTLoose);
-  declareProperty("ToTCutTight",m_cutToTTight);
-  declareProperty("ToTCutUpper",m_cutToTUpper);
-  declareProperty("MinDCperSeed",m_minDCSeed);
-  declareProperty("HitLimit",m_hitLimit=2000);
-
 }
 
 ///////////////////////////////////////////////////////////////////

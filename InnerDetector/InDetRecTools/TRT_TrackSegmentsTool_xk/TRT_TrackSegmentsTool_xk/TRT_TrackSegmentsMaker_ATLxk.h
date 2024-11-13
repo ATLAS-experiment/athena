@@ -134,8 +134,9 @@ namespace InDet{
       ///////////////////////////////////////////////////////////////////
       // Protected data and methods
       ///////////////////////////////////////////////////////////////////
-      
-      std::string                            m_fieldmode       ; // Mode of magnetic field
+
+      StringProperty m_fieldmode{this, "MagneticFieldMode", "MapSolenoid",
+       "Mode of magnetic field"};
       ToolHandle<ITRT_TrackExtensionTool>    m_extensionTool
          {this, "TrackExtensionTool", "InDet::TRT_TrackExtensionTool_xk"} ; // TRT track extension   tool
 
@@ -146,19 +147,22 @@ namespace InDet{
       SG::ReadHandleKey<Trk::PRDtoTrackMap>          m_prdToTrackMap
          {this,"PRDtoTrackMap",""};
 
-      bool                                   m_removeNoise     ;
+      BooleanProperty m_removeNoise{this, "RemoveNoiseDriftCircles", true};
+      IntegerProperty m_clustersCut{this, "MinNumberDriftCircles", 10};
+      FloatProperty m_pTmin{this, "pTmin", 500.};
+      FloatProperty m_sharedfrac{this, "sharedFrac", 0.3};
+      IntegerProperty m_nPhi{this, "NumberAzimuthalChannel", 500,
+	"number azimuthal channel"};
+      IntegerProperty m_nMom{this, "NumberMomentumChannel", 70,
+	"number momentum  channel"};
+
       int                                    m_outputlevel{}     ;
-      int                                    m_clustersCut     ;
       int                                    m_Ts{}              ;
       int                                    m_Ns128{}           ;
-      float                                  m_pTmin           ;
-      float                                  m_sharedfrac      ;
       float                                  m_Psi{}             ;
       float                                  m_Psi128{}          ;
       float                                  m_A{}               ;
       float                                  m_Ai{}              ;
-      int                                    m_nPhi            ; // number azimuthal channel
-      int                                    m_nMom            ; // number momentum  channel
       int                                    m_histsize{}        ; // histogram size
 
 

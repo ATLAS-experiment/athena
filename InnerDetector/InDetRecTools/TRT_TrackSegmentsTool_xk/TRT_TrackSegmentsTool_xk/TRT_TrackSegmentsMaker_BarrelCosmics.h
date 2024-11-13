@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -107,9 +107,10 @@ namespace InDet{
 
 
       SG::ReadHandleKey<InDet::TRT_DriftCircleContainer>     m_driftCirclesName{this,"TRT_ClustersContainer","TRT_DriftCircles","RHK to retrieve Drift Circles"} ;  //!< Container with TRT clusters
-      std::string                              m_TRTManagerName ; //!< Name of TRT det. manager
+      StringProperty m_TRTManagerName{this, "TrtManagerLocation", "TRT",
+        "Name of TRT det. manager"};
 
-      const TRT_ID*                            m_trtid       ;
+      const TRT_ID* m_trtid{nullptr};
 
     private:
 
@@ -140,17 +141,22 @@ namespace InDet{
 
       static void segFit(double *measx, double *measy, int nhits, double *residuals = 0, double *result = 0);
 
-      int m_maxTotalHits; // protect against high occupancy events
+      // protect against high occupancy events
+      // 21k corresponds to 20% occupancy
+      // if set to 0, this requirement is not used. total number of TRT barrel straws is 105088
+      IntegerProperty m_maxTotalHits{this, "MaxTotalNumberOfBarrelHits", 21000};
 
-      int m_minHitsForSeed; // 10-12 is good
-      int m_minHitsForSegment; // 20
-      int m_minHitsAboveTOT; // 15
-      int m_nBinsInX; // 100
-      int m_nBinsInPhi; // 10
+      IntegerProperty m_minHitsForSeed{this, "MinNumberOfHitsForSeed", -1};
+      IntegerProperty m_minHitsForSegment{this, "MinimalNumberOfTRTHits", 20};
+      IntegerProperty m_minHitsAboveTOT{this, "MinNumberOfHitsAboveTOT", -1};
+      IntegerProperty m_nBinsInX{this, "NbinsInX", 100};
+      IntegerProperty m_nBinsInPhi{this, "NbinsInPhi", 10};
 
-      double m_minSeedTOT; // minimal time over threshold for seed search - default ~ 10 ns
-      bool m_magneticField; // search for lines (if False) or circles (if True)
-      bool m_mergeSegments; // default: False, should not be turned on yet
+      DoubleProperty m_minSeedTOT{this, "MinimalTOTForSeedSearch", 10.,
+	"minimal time over threshold for seed search - default ~ 10 ns"};
+      BooleanProperty m_magneticField{this, "IsMagneticFieldOn", true,
+	"search for lines (if False) or circles (if True)"};
+      BooleanProperty m_mergeSegments{this, "MergeSegments", false}; // default: False, should not be turned on yet
 
   };
 

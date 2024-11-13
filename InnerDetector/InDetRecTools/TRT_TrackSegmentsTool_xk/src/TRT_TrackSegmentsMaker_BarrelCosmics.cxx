@@ -22,37 +22,9 @@
 
 InDet::TRT_TrackSegmentsMaker_BarrelCosmics::TRT_TrackSegmentsMaker_BarrelCosmics
 (const std::string& t,const std::string& n,const IInterface* p)
-  : AthAlgTool(t,n,p),
-    m_TRTManagerName("TRT"),
-    m_trtid(nullptr),
-    m_maxTotalHits(21000), // corresponds to 20% occupancy
-    m_minHitsForSeed(-1),
-    m_minHitsForSegment(20),
-    m_minHitsAboveTOT(-1),
-    m_nBinsInX(100),
-    m_nBinsInPhi(10),
-    m_minSeedTOT(10.),
-    m_magneticField(true),
-    m_mergeSegments(false)
-    //Endcap Trigger Hack
+  : AthAlgTool(t,n,p)
 {
-
   declareInterface<ITRT_TrackSegmentsMaker>(this);
-
-  declareProperty("MaxTotalNumberOfBarrelHits", m_maxTotalHits); // if set to 0, this requirement is not used. total number of TRT barrel straws is 105088
-
-  declareProperty("MinimalNumberOfTRTHits", m_minHitsForSegment);
-  declareProperty("MinNumberOfHitsForSeed", m_minHitsForSeed);
-  declareProperty("MinNumberOfHitsAboveTOT", m_minHitsAboveTOT);
-
-  declareProperty("NbinsInX", m_nBinsInX);
-  declareProperty("NbinsInPhi", m_nBinsInPhi);
-
-  declareProperty("MinimalTOTForSeedSearch", m_minSeedTOT);
-  declareProperty("IsMagneticFieldOn", m_magneticField);
-  declareProperty("TrtManagerLocation", m_TRTManagerName);
-  declareProperty("MergeSegments", m_mergeSegments);
-
 }
 
 StatusCode InDet::TRT_TrackSegmentsMaker_BarrelCosmics::initialize() {
