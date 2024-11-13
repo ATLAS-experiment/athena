@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -606,6 +606,7 @@ QString VP1ChannelManager::getIconLocation(const QString& channelname, const boo
 		return "";
 	cw->deleteControllers();
 	delete cw;
+	// cppcheck-suppress deallocuse
 	assert(m_d->channel_2_controller.find(cw)==m_d->channel_2_controller.end());
 
 	//Try again;
