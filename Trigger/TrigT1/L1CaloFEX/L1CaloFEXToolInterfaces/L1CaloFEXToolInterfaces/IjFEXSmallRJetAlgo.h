@@ -26,6 +26,7 @@ namespace LVL1{
       virtual bool isSeedLocalMaxima(int seedThreshold) = 0;
       virtual void buildSeeds() = 0;
       virtual unsigned int getTTowerET(unsigned int TTID ) const = 0;
+      virtual unsigned int getSeedET() const = 0;
       virtual unsigned int getSmallClusterET() const = 0;
       virtual unsigned int getSmallETRing() const = 0;
       virtual unsigned int getTTIDcentre() const = 0;

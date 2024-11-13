@@ -148,6 +148,11 @@ bool LVL1::jFEXSmallRJetAlgo::isSeedLocalMaxima(int seedThreshold) {
     return false;
 }
 
+unsigned int LVL1::jFEXSmallRJetAlgo::getSeedET() const {
+  // only valid after calling buildSeeds() !
+  return m_jFEXalgoSearchWindowSeedET[2][2];
+}
+
 
 //in this clustering func, the central TT in jet is the parameters
 unsigned int LVL1::jFEXSmallRJetAlgo::getSmallClusterET() const {

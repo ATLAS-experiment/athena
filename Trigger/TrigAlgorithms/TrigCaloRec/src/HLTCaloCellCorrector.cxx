@@ -64,9 +64,9 @@ StatusCode HLTCaloCellCorrector::execute(EventContext const& context) const {
     outputCells->push_back(std::move(copy));
   }
 
-  for (auto const id : { CaloCell_ID::LAREM, CaloCell_ID::LARHEC, CaloCell_ID::LARFCAL, CaloCell_ID::TILE, })
+  for (auto const id : { CaloCell_ID::LAREM, CaloCell_ID::LARHEC, CaloCell_ID::LARFCAL, CaloCell_ID::TILE })
     if (inputCellHandle->hasCalo(id))
-      outputCells->setHasCalo(CaloCell_ID::LAREM);
+      outputCells->setHasCalo(id);
 
   outputCells->updateCaloIterators();
 

@@ -77,6 +77,23 @@ namespace {
   }
 }
 
+  ConstituentsInputConfig get_hits_input_config(
+    const std::string& name,
+    const std::vector<std::string>& input_variables,
+    const TypeRegexes& type_regexes) {
+    ConstituentsInputConfig config;
+    config.name = name;
+    for (const auto& varname: input_variables) {
+      InputVariableConfig input;      
+      input.name = varname;
+      input.type = str::match_first(type_regexes, input.name,
+                                "hits type matching");
+      input.flip_sign = false;
+      config.inputs.push_back(input);
+    }
+    return config;
+  }
+
 namespace FlavorTagDiscriminants {
     //
     // Create a configuration for the constituents loaders
@@ -87,7 +104,11 @@ namespace FlavorTagDiscriminants {
       FlipTagConfig flip_config
     ){
       ConstituentsInputConfig config;
-
+      TypeRegexes hits_type_regexes {
+          // hits variables
+          // ConstituentsEDMType picked correspond to the first matching regex
+          {"(j|a|b)"_r, ConstituentsEDMType::CUSTOM_GETTER}
+      };
       TypeRegexes iparticle_type_regexes {
           // iparticle variables
           // ConstituentsEDMType picked correspond to the first matching regex
@@ -152,6 +173,13 @@ namespace FlavorTagDiscriminants {
           iparticle_type_regexes);
         config.type = ConstituentsType::IPARTICLE;
         config.output_name = "flows";
+      }
+      else if (name.find("hits") != std::string::npos){
+        config = get_hits_input_config(
+          name, input_variables,
+          hits_type_regexes);
+        config.type = ConstituentsType::HIT;
+        config.output_name = "hits";
       }
       else{
         throw std::runtime_error(

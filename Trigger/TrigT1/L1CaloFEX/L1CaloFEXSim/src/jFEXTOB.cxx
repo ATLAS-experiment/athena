@@ -17,17 +17,19 @@ jFEXTOB::jFEXTOB():
   m_jfex{0},
   m_word{0},
   m_res{0},
-  m_ttid{0}
+  m_ttid{0},
+  m_seedEt{0}
 {}
 
 
-void jFEXTOB::initialize(uint8_t fpga, uint8_t jfex, uint32_t word, uint res, uint ttid )
+void jFEXTOB::initialize(uint8_t fpga, uint8_t jfex, uint32_t word, uint res, uint ttid, int seedEt )
 {
-    setFpga (fpga);
-    setjFex (jfex);
-    setWord (word);
-    setRes  (res);
-    setTTID (ttid);
+    setFpga   (fpga);
+    setjFex   (jfex);
+    setWord   (word);
+    setRes    (res);
+    setTTID   (ttid);
+    setSeedEt (seedEt);
 
 }
     

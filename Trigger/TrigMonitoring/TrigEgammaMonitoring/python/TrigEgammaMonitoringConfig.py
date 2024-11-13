@@ -96,6 +96,7 @@ class TrigEgammaMonAlgBuilder:
         self.activate_photon=True
         self.activate_topo= False
     elif self.HI_mode or self.pPb_mode or self.cosmic_mode:
+      self.activate_zee=True
       self.activate_electron=True
       self.activate_photon=True
     else:
@@ -121,16 +122,20 @@ class TrigEgammaMonAlgBuilder:
 
     if self.data_type is DQDataType.MC:
       self.mc_mode = True
+      self.__logger.info('TrigEgammaMonitoring configured for mc_mode')
       return True
     elif self.data_type is DQDataType.Collisions:
       self.pp_mode = True
+      self.__logger.info('TrigEgammaMonitoring configured for pp_mode')
       return True
     elif self.data_type is DQDataType.HeavyIon:
       self.HI_mode = True
       self.pPb_mode = True
+      self.__logger.info('TrigEgammaMonitoring configured for hi_mode')
       return True
     elif self.data_type is DQDataType.Cosmics:
       self.cosmic_mode = True
+      self.__logger.info('TrigEgammaMonitoring configured for cosmic_mode')
       return True
     else:
       return False
@@ -144,13 +149,10 @@ class TrigEgammaMonAlgBuilder:
     if self.pp_mode:
       self.setDefaultProperties()
     elif self.cosmic_mode:
-      # This should be change in future
       self.setDefaultProperties()
     elif self.HI_mode or self.pPb_mode:
-      # This should be change in future
       self.setDefaultProperties()
     elif self.mc_mode:
-      # This should be change in future
       self.setDefaultProperties()
     else:
       self.__logger.info('No monitoring mode configured, use default')
@@ -190,6 +192,7 @@ class TrigEgammaMonAlgBuilder:
         self.bootstrapMap = mongroups['monitoring_bootstrap_cosmic']
     elif self.HI_mode or self.pPb_mode:
         self.electronList = mongroups['monitoring_electron_hi']
+        self.tpList       = mongroups['monitoring_electron_TP_hi']
         self.photonList   = mongroups['monitoring_photon_hi']
         self.bootstrapMap = mongroups['monitoring_bootstrap_hi']
     else:
