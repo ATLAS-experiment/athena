@@ -8,6 +8,7 @@
 #include <sstream>
 #include <atomic>
 #include <iostream>
+#include <unistd.h>
 #include "gpu_helpers.h"
 
 #include "tbb/concurrent_queue.h"

@@ -7,6 +7,7 @@
 
 #include <map>
 #include <atomic>
+#include <unistd.h>
 #include "TrigAccelEvent/WorkFactory.h"
 #include "TrigAccelEvent/TrigInDetAccelEDM.h"
 #include "TrigAccelEvent/TrigInDetAccelCodes.h"
