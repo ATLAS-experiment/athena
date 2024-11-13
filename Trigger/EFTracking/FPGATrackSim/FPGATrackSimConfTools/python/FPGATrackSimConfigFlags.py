@@ -1,4 +1,5 @@
 #Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+import AthenaCommon.Constants
 
 def createFPGATrackSimConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -24,12 +25,15 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('UseHitScaleFactor', False)
     cf.addFlag('missHitsConsts', False)
     cf.addFlag('tracking', False)
+    cf.addFlag('doOverlapRemoval', True)
     cf.addFlag('clustering', True)
     cf.addFlag('bankDir', '')
     cf.addFlag('spacePoints', True)
     cf.addFlag('outputMonitorFile',"monitoring.root")
     cf.addFlag('connectToToITkTracking',True)
-
+    cf.addFlag('loglevel', AthenaCommon.Constants.INFO)
+    cf.addFlag('singleTrackSample',  True)
+   
     def __httHough1DFlags():
         """Additional function delays import"""
         from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createHough1dFPGATrackSimConfigFlags
@@ -41,6 +45,12 @@ def createFPGATrackSimConfigFlags():
         from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createHoughFPGATrackSimConfigFlags
         return createHoughFPGATrackSimConfigFlags()
     cf.addFlagsCategory("Hough", __httHoughFlags, prefix=True )
+
+    def __httGenScanFlags():
+        """Additional function delays import"""
+        from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createGenScanFPGATrackSimConfigFlags
+        return createGenScanFPGATrackSimConfigFlags()
+    cf.addFlagsCategory("GenScan", __httGenScanFlags, prefix=True )
 
     def __httDev21_02_15Flags():
         """Additional function delays import"""
@@ -75,8 +85,11 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('houghRootoutput', False)
     cf.addFlag('hough', True)
     cf.addFlag('hough1D', False)
+    cf.addFlag('genScan', False)
+
     cf.addFlag('etaPatternFilter', False)
     cf.addFlag('phiRoadFilter', False)    
+
 
     # NN filtering
     cf.addFlag('trackNNAnalysis', False)
@@ -241,6 +254,13 @@ def createDev21_02_15_FPGATrackSimConfigFlags():
 
     return cf
 
+def createGenScanFPGATrackSimConfigFlags():
+    cf = createBasicFPGATrackSimConfigFlags()
+
+    cf.name = 'genScan'
+    cf.addFlag('genScanCuts','FPGATrackSimHough.FPGATrackSimGenScanCuts')
+
+    return cf
 
 
 

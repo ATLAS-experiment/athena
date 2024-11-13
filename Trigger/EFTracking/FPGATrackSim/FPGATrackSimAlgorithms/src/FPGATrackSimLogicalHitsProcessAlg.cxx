@@ -104,7 +104,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     std::chrono::time_point<std::chrono::steady_clock> t_0, t_1;
     t_0 = std::chrono::steady_clock::now();
 #endif
-
     const EventContext& ctx = getContext();
 
     // Get reference to hits from StoreGate.
@@ -122,7 +121,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         }
         return appMgr->stopRun();
     }
-
+ 
     // Set up write handles.
     SG::WriteHandle<FPGATrackSimRoadCollection> FPGARoads_1st (m_FPGARoadKey, ctx);
     SG::WriteHandle<FPGATrackSimHitContainer> FPGAHitsInRoads_1st (m_FPGAHitInRoadsKey, ctx);
@@ -135,13 +134,13 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     SG::WriteHandle<FPGATrackSimHitCollection> FPGAHitsFiltered_1st (m_FPGAHitFilteredKey, ctx);
     ATH_CHECK( FPGAHitsFiltered_1st.record (std::make_unique<FPGATrackSimHitCollection>()));
-
+ 
     // Query the event selection service to make sure this event passed cuts.
     if (!m_evtSel->getSelectedEvent()) {
         ATH_MSG_DEBUG("Event skipped by: " << m_evtSel->name());
         return StatusCode::SUCCESS;
     }
-
+ 
     // Event passes cuts, count it. technically, DataPrep does this now.
     m_evt++;
 
@@ -158,19 +157,19 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         ATH_MSG_ERROR("Could not find FPGA Truth Track Collection with key " << FPGATruthTracks.key());
         return StatusCode::FAILURE;
     }
-
+ 
     // Same for offline tracks.
     SG::ReadHandle<FPGATrackSimOfflineTrackCollection> FPGAOfflineTracks(m_FPGAOfflineTrackKey, ctx);
     if (!FPGAOfflineTracks.isValid()) {
         ATH_MSG_ERROR("Could not find FPGA Offline Track Collection with key " << FPGAOfflineTracks.key());
         return StatusCode::FAILURE;
     }
-
+ 
     // Get roads
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> prefilter_roads;
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st = prefilter_roads;
-    ATH_CHECK(m_roadFinderTool->getRoads(phits_1st, roads_1st));
-
+    ATH_CHECK(m_roadFinderTool->getRoads(phits_1st, roads_1st, *FPGATruthTracks));
+ 
     auto mon_nroads_1st = Monitored::Scalar<unsigned>("nroads_1st", roads_1st.size());
     for (auto const &road : roads_1st) {
       unsigned bitmask = road->getHitLayers();
@@ -191,10 +190,10 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         ATH_CHECK(m_roadFilterTool->filterRoads(roads_1st, postfilter_roads));
         roads_1st = postfilter_roads;
     }
-    ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(roads_1st));
+    if (m_doOverlapRemoval) ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(roads_1st));
     // Road Filter2
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> postfilter2_roads;
-    if (m_filterRoads2) {
+    if (m_filterRoads2) {   
         ATH_CHECK(m_roadFilterTool2->filterRoads(roads_1st, postfilter2_roads));
         roads_1st = postfilter2_roads;
     }
@@ -255,7 +254,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     TIME(m_ttracks);
 
     // Overlap removal
-    ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(tracks_1st));
+    if (m_doOverlapRemoval)  ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(tracks_1st));
     unsigned ntrackOLRChi2 = 0;
     for (const FPGATrackSimTrack& track : tracks_1st) {
         if (track.getChi2ndof() < m_trackScoreCut) {

@@ -93,6 +93,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         // Flags
         Gaudi::Property<bool> m_doSpacepoints {this, "Spacepoints", false, "flag to enable the spacepoint formation"};
         Gaudi::Property<bool> m_doTracking {this, "tracking", false, "flag to enable the tracking"};
+        Gaudi::Property<bool> m_doOverlapRemoval {this, "doOverlapRemoval", true , "flag to enable the overlap removal"}; // defaul true to not change functionality
         Gaudi::Property<bool> m_doMissingHitsChecks {this, "DoMissingHitsChecks", false};
         Gaudi::Property<bool> m_filterRoads  {this, "FilterRoads", false, "enable first road filter"};
         Gaudi::Property<bool> m_filterRoads2  {this, "FilterRoads2", false,  "enable second road filter"};

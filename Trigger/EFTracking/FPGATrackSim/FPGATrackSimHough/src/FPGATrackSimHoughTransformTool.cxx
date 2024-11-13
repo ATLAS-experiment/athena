@@ -140,7 +140,9 @@ StatusCode FPGATrackSimHoughTransformTool::getRoads(const std::vector<std::share
 {
   roads.clear();
   m_roads.clear();
+
   m_image = createImage(hits);
+
   if (!m_conv.empty()) m_image = convolute(m_image);
 
   for (unsigned y = 0; y < m_imageSize_y; y++)

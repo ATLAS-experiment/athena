@@ -526,5 +526,4 @@ private:
 
  }; 
 
-
 #endif // FPGATrackSimGenScanBinning_H

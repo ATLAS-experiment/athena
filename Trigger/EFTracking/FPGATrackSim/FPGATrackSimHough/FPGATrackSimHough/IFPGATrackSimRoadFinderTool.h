@@ -22,6 +22,7 @@
 
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
+#include "FPGATrackSimObjects/FPGATrackSimTruthTrack.h"
 
 #include <vector>
 
@@ -42,6 +43,20 @@ class IFPGATrackSimRoadFinderTool : virtual public IAlgTool
         DeclareInterfaceID(IFPGATrackSimRoadFinderTool, 2, 0);
         virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) = 0;
         virtual int getSubRegion() const = 0;
+
+        StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits,
+                        std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads,
+                        std::vector<FPGATrackSimTruthTrack> const &truthtracks)
+        {
+            m_truthtracks = &truthtracks;
+            return getRoads(hits, roads);
+        }
+
+        std::vector<FPGATrackSimTruthTrack> const *getTruthTracks() { return m_truthtracks; }
+
+    private:
+        std::vector<FPGATrackSimTruthTrack> const *m_truthtracks;
+
 };
 
 

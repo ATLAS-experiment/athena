@@ -324,7 +324,7 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
 
 
 
-    ATH_MSG_DEBUG("Hits conversion done");
+    ATH_MSG_DEBUG("Hits conversion done, #unmapped hists = " << m_hits_miss.size());
     // Random removal of hits
     if (m_doHitFiltering) {
         ATH_MSG_DEBUG("Running hits filtering");
