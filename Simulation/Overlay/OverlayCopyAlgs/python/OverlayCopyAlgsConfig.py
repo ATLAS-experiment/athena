@@ -348,6 +348,7 @@ def CopyTrackRecordCollectionAlgCfg(flags, collectionName, name="CopyTrackRecord
     kwargs.setdefault("collectionName", collectionName)
     kwargs.setdefault("SignalInputKey", flags.Overlay.SigPrefix + collectionName)
     kwargs.setdefault("OutputKey", collectionName)
+    kwargs.setdefault("ExtraInputs", flags.Overlay.ExtraInputs)
 
     if flags.Common.ProductionStep is not ProductionStep.FastChain:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
@@ -383,6 +384,7 @@ def CopyCaloCalibrationHitContainersCfg(flags, **kwargs):
     """Return overlay configuration for the CopyCalibrationHitContainer algorithms"""
 
     acc = ComponentAccumulator()
+    kwargs.setdefault("ExtraInputs", flags.Overlay.ExtraInputs)
 
     allowedContainers = [
         "LArCalibrationHitActive", "LArCalibrationHitDeadMaterial", "LArCalibrationHitInactive"
