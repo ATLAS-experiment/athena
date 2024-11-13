@@ -302,12 +302,23 @@ class PowhegControl(object):
         for algorithm in self.process.algorithms:
             self.scheduler.add(algorithm, *extra_args.get(algorithm, []))
 
-        if len(list(self.process.parameters_by_keyword("for_reweighting"))) == 1:
-            if list(self.process.parameters_by_keyword("for_reweighting"))[0].value == 1:
+        updated_xwgtup = False
+        if len(list(self.process.parameters_by_keyword("ubexcess_correct"))) == 1:
+            if list(self.process.parameters_by_keyword("ubexcess_correct"))[0].value == 1:
+                algorithm = "LHE ubexcess_correct weight updater"
+                self.scheduler.add(algorithm, *extra_args.get(algorithm, []))
                 algorithm = "LHE file nominal weight updater"
                 self.scheduler.add(algorithm, *extra_args.get(algorithm, []))
-                logger.info ("Since parameter for_reweighting was set to 1, virtual corrections are added at the reweighting stage only.")
-                logger.info ("Will run LHE file nominal weight updater so that XWGTUP value is updated with value of reweighted nominal weight.")
+                logger.info ("Since parameter ubexcess_correct was set to 1, event weights need to be modified by correction factor which is calculated during event generation.")
+                logger.info ("Will also run LHE file nominal weight updater so that XWGTUP value is updated with value of reweighted nominal weight.")        
+                updated_xwgtup = True
+        if not updated_xwgtup:
+            if len(list(self.process.parameters_by_keyword("for_reweighting"))) == 1:
+                if list(self.process.parameters_by_keyword("for_reweighting"))[0].value == 1:
+                    algorithm = "LHE file nominal weight updater"
+                    self.scheduler.add(algorithm, *extra_args.get(algorithm, []))
+                    logger.info ("Since parameter for_reweighting was set to 1, virtual corrections are added at the reweighting stage only.")
+                    logger.info ("Will run LHE file nominal weight updater so that XWGTUP value is updated with value of reweighted nominal weight.")
 
         # Output the schedule
         self.scheduler.print_structure()
