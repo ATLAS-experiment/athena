@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibMath/ConstantContentBinMaker.h"
@@ -98,6 +98,7 @@ bool ConstantContentBinMaker::binDataPoints(const unsigned int & bin_content,
         unsigned int nb_bins_so_far(m_bins.size());
         for (unsigned int k=0; k<nb_bins_so_far; k++) {
                 m_bins.push_back(m_bins[k]->splitBin(
+                                            // cppcheck-suppress containerOutOfBounds; false positive
                                             splitting_axis[axis_counter]));
                 axis_counter++;
                 if (axis_counter==splitting_axis.size()) {
