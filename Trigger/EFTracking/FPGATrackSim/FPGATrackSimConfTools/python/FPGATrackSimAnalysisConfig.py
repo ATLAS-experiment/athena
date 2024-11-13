@@ -1,9 +1,9 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import AthenaLogger
 from PathResolver import PathResolver
+import importlib
 
 log = AthenaLogger(__name__)
 
@@ -17,8 +17,7 @@ def getNSubregions(filePath):
         assert(fields.startswith('towers'))
         n = fields.split()[1]
         return int(n)
-
-
+    
 
 # Need to figure out if we have two output writers or somehow only one.
 def FPGATrackSimWriteOutputCfg(flags):
@@ -167,6 +166,49 @@ def FPGATrackSimRoadUnionTool1DCfg(flags):
     result.addPublicTool(RF, primary=True)
     return result
 
+
+
+def FPGATrackSimRoadUnionToolGenScanCfg(flags):
+    result=ComponentAccumulator()
+    
+    # make the monitoring class
+    Monitor = CompFactory.FPGATrackSimGenScanMonitoring("GenScanMonitoring")
+    Monitor.THistSvc = CompFactory.THistSvc()
+    Monitor.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+
+    # make the main tool
+    tool = CompFactory.FPGATrackSimGenScanTool("GenScanTool")
+    tool.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionCfg(flags))
+    tool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
+    tool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
+    tool.Monitoring = Monitor
+    tool.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+
+    # configure which filers and thresholds to apply
+    tool.applyPairFilter=True
+    tool.applyPairSetFilter=True
+    tool.threshold = 4
+
+    # configure the padding around the nominal region
+    tool.d0FractionalPadding =0.05
+    tool.z0FractionalPadding =0.05
+    tool.etaFractionalPadding =0.05
+    tool.phiFractionalPadding =0.05
+    tool.qOverPtFractionalPadding =0.05                
+
+    # read the cuts from a seperate python file specified by FPGATrackSim.GenScan.genScanCuts
+    cutset = importlib.import_module(flags.Trigger.FPGATrackSim.GenScan.genScanCuts)
+    for (cut,val) in cutset.cuts[flags.Trigger.FPGATrackSim.region].items():
+        setattr(tool,cut,val)
+
+    # even though we are not actually doing a Union, we need the 
+    # RoadUnionTool because mapping is now there
+    RoadUnion = CompFactory.FPGATrackSimRoadUnionTool()
+    RoadUnion.tools = [tool,]
+    result.addPublicTool(RoadUnion, primary=True)
+
+    return result
+
 def FPGATrackSimDataFlowToolCfg(flags):
     result=ComponentAccumulator()
     DataFlowTool = CompFactory.FPGATrackSimDataFlowTool()
@@ -256,6 +298,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHitsProcessAlg=CompFactory.FPGATrackSimLogicalHitsProcessAlg()
     theFPGATrackSimLogicalHitsProcessAlg.writeOutputData = flags.Trigger.FPGATrackSim.ActiveConfig.writeOutputData
     theFPGATrackSimLogicalHitsProcessAlg.tracking = flags.Trigger.FPGATrackSim.tracking
+    theFPGATrackSimLogicalHitsProcessAlg.doOverlapRemoval = flags.Trigger.FPGATrackSim.doOverlapRemoval
     theFPGATrackSimLogicalHitsProcessAlg.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
     theFPGATrackSimLogicalHitsProcessAlg.DoHoughRootOutput = flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput
     theFPGATrackSimLogicalHitsProcessAlg.DoNNTrack = False
@@ -271,11 +314,16 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
         result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
 
     if (flags.Trigger.FPGATrackSim.ActiveConfig.hough1D):
-      theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionTool1DCfg(flags))
+        theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionTool1DCfg(flags))
+    elif (flags.Trigger.FPGATrackSim.ActiveConfig.genScan):
+        theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolGenScanCfg(flags))
     else:
-      theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolCfg(flags))
+        theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolCfg(flags))
       
     if flags.Trigger.FPGATrackSim.ActiveConfig.etaPatternFilter:
+        theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolCfg(flags))
+
+    if (flags.Trigger.FPGATrackSim.ActiveConfig.etaPatternFilter):
         EtaPatternFilter = CompFactory.FPGATrackSimEtaPatternFilterTool()
         EtaPatternFilter.FPGATrackSimMappingSvc = FPGATrackSimMaping
         EtaPatternFilter.threshold = flags.Trigger.FPGATrackSim.Hough1D.threshold[0]
@@ -344,8 +392,10 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    
 
     flags = initConfigFlags()
+
     
     
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
@@ -442,7 +492,7 @@ if __name__ == "__main__":
            acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimHOUGHOUTPUT DATAFILE='HoughRootOutput.root', OPT='RECREATE'"]))
    
        acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='test.root', OPT='RECREATE'"]))
-   
+       acc.addService(CompFactory.THistSvc(Output = ["GENSCAN DATAFILE='genscan.root', OPT='RECREATE'"]))
        
        if not flags.Trigger.FPGATrackSim.wrapperFileName:
            from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg

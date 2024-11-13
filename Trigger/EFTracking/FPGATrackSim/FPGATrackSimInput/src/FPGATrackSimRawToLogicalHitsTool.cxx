@@ -72,7 +72,7 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
       for (unsigned int ireg=0;ireg!=m_towers.size();++ireg){
             // if the equivalent hit is compatible with this tower the hit is saved                            
             logicEventHeader.getTower( ireg )->addHit(hit);
-            ATH_MSG_VERBOSE ("Hit mapped to tower="<<ireg << ", nHits now=" << logicEventHeader.getTower(ireg)->nHits());
+            ATH_MSG_VERBOSE ("Hit mapped (" << hit.isMapped() << ") to tower="<<ireg << ", nHits now=" << logicEventHeader.getTower(ireg)->nHits());
       }
   } // end hit loop
   

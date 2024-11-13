@@ -248,9 +248,12 @@ def FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags):
     result = ComponentAccumulator()
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     monTool = GenericMonitoringTool(flags, 'MonTool')
-    nbin=100
+    nbin=1000
     low=-0.5
-    high=99.5
+    high=99999.5
+    if flags.Trigger.FPGATrackSim.singleTrackSample:
+        nbin=100
+        high=99.5
 
     etamins={0:0.1, 1:0.7, 2:1.2, 3: 2.0, 4: 3.2}
     etamaxs={0:0.3, 1:0.9, 2:1.4, 3: 2.2, 4: 3.4}
