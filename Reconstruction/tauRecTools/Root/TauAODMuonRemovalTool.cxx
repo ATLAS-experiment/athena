@@ -23,7 +23,7 @@ StatusCode TauAODMuonRemovalTool::execute(xAOD::TauJet& tau) const {
     }
     auto muon_container = muon_input_handle.cptr();
     //Add the Aux element as empty vector
-    const SG::AuxElement::Accessor<std::vector<ElementLink<xAOD::MuonContainer>>> acc_removed_muons("removedMuons");
+    const SG::Accessor<std::vector<ElementLink<xAOD::MuonContainer>>> acc_removed_muons("removedMuons");
     acc_removed_muons(tau).clear();
     //get the muon tracks and clusters
     auto muon_and_tracks   = decltype((getMuonAndTrk)(tau, *muon_container))();
@@ -54,7 +54,7 @@ StatusCode TauAODMuonRemovalTool::execute(xAOD::TauJet& tau) const {
     //notify the runner alg that the tau was modified
     if (!acc_removed_muons(tau).empty())
     {
-        const SG::AuxElement::Accessor<char> acc_modified("ModifiedInAOD");
+        const SG::Accessor<char> acc_modified("ModifiedInAOD");
         acc_modified(tau) = static_cast<char>(true);
     }
     return StatusCode::SUCCESS;
@@ -62,7 +62,7 @@ StatusCode TauAODMuonRemovalTool::execute(xAOD::TauJet& tau) const {
 
 //helpers
 std::vector<const xAOD::CaloCluster*> TauAODMuonRemovalTool::getOrignalTopoClusters(const xAOD::CaloCluster *cluster) const {
-    static const SG::AuxElement::Accessor<std::vector<ElementLink<xAOD::CaloClusterContainer>>> acc_origClusterLinks("constituentClusterLinks");
+    static const SG::Accessor<std::vector<ElementLink<xAOD::CaloClusterContainer>>> acc_origClusterLinks("constituentClusterLinks");
     std::vector< const xAOD::CaloCluster* > orig_cls;
     if(acc_origClusterLinks.isAvailable(*cluster)) {
         auto links = acc_origClusterLinks(*cluster);
@@ -77,7 +77,7 @@ std::vector<const xAOD::CaloCluster*> TauAODMuonRemovalTool::getOrignalTopoClust
 }
 
 const xAOD::TrackParticle* TauAODMuonRemovalTool::getOrignalTrackParticle(const xAOD::TrackParticle* trk) const {
-    static const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer>> acc_origTracks ("originalTrackParticle");
+    static const SG::Accessor<ElementLink<xAOD::TrackParticleContainer>> acc_origTracks ("originalTrackParticle");
     const xAOD::TrackParticle* orig_trk = nullptr;
     if(acc_origTracks.isAvailable(*trk)) {
         if (const auto & orig_link = acc_origTracks(*trk); orig_link.isValid()) {
