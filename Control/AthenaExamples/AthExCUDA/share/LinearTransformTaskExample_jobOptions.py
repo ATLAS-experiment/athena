@@ -23,8 +23,7 @@ algSequence = AlgSequence()
 from AthExCUDA.AthExCUDAConf import \
    AthCUDAExamples__LinearTransformTaskExampleAlg
 algSequence += AthCUDAExamples__LinearTransformTaskExampleAlg(
-   KernelRunnerSvc = ServiceMgr.CUDAKernelRunnerSvc,
-   Asynchronous = True )
+   KernelRunnerSvc = ServiceMgr.CUDAKernelRunnerSvc )
 
 # Run for some larger number of events.
 theApp.EvtMax = 10000
