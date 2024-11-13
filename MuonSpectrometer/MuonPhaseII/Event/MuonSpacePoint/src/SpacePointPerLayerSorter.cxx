@@ -49,6 +49,10 @@ namespace MuonR4 {
                 }
                 pushTo.push_back(hit);
                 ++m_nMdtHits;
+                if (!m_tubeLaySwitch && layer &&  
+                    m_mdtLayers[layer -1].front()->primaryMeasurement()->identifierHash() != hit->primaryMeasurement()->identifierHash()) {
+
+                }
             } else {
                 const Identifier layId = idHelperSvc->gasGapId(id);
                 const unsigned int layer = stripLayerCounting.insert(std::make_pair(layId, stripLayerCounting.size())).first->second;

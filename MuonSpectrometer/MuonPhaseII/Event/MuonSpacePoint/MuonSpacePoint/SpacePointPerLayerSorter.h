@@ -35,12 +35,21 @@ namespace MuonR4{
             unsigned int nStripHits() const {
               return m_nStripHits;
             }
-
+            /** @brief Returns the layer index with hits from the second multilayer  */
+            unsigned int firstLayerFrom2ndMl() const {
+              return m_tubeLaySwitch;
+            }
         private:
+            /** @brief Sorted Mdt hits per tube layer */
             HitLayVec m_mdtLayers{};
+            /** @brief Sorted Strip hits per  gasGap strip  */
             HitLayVec m_stripLayers{};
+            /** @brief Number of all Mdt tube hits  */
             unsigned int m_nMdtHits{0};
+            /** @brief Number of all strip hits */
             unsigned int m_nStripHits{0};
+            /** @brief Index of the first tube-layer from the second multilayer */
+            unsigned int m_tubeLaySwitch{0};
     
     };    
 

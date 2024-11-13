@@ -265,6 +265,9 @@ namespace MuonR4 {
                     chi2+= measChi2.back();
                 }
             }
+            if (msg.level() <= MSG::VERBOSE) {
+                msg<<MSG::VERBOSE<<" Overall chi2: "<<chi2<<"."<<endmsg;
+            }
             return std::make_pair(std::move(measChi2), chi2);
         }
     }
