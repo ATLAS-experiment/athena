@@ -315,14 +315,14 @@ private:
   struct bunchTrain_t {
     bunchTrain_t(bcid_type first, bcid_type last, unsigned ncoll) : 
       m_first(first),m_last(last),m_nColl(ncoll) {};
-    int m_first;      ///First BCID of this train
-    int m_last;       ///Last BCID of this train
-    unsigned m_nColl; ///Number of colliding bunches in this train
+    int m_first{};      ///First BCID of this train
+    int m_last{};       ///Last BCID of this train
+    unsigned m_nColl{}; ///Number of colliding bunches in this train
   };
 
   std::vector<bunchTrain_t> m_trains;
 
-  unsigned m_nTrains; //might be one less than the size of m_trains
+  unsigned m_nTrains{}; //might be one less than the size of m_trains
 
   ///Helper method to find the train of a bcid (nullptr if bcd is not in a train)
   const bunchTrain_t* findTrain(const bcid_type bcid) const;
