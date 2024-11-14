@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import print_function
 
@@ -139,7 +139,7 @@ class TransformErrorDiagnoser:
         the regular expression <acronymRE>.
         <diag> is a function taking an ErrorInfo as an argument and returning a boolean
         indicating if a diagnosis was found and written into the error object."""
-        if type(acronymRE) == str: acronymRE = re.compile(acronymRE)
+        if type(acronymRE) is str: acronymRE = re.compile(acronymRE)
         self._diagnosers[acronymRE] = diag
 
     def diagnoseError(self,error):
@@ -496,7 +496,7 @@ class TransformErrorHandler(TransformLogger):
         elif type(e) in (AttributeError,NameError,TypeError,SyntaxError):
             return self.handlePythonSyntaxError(e)
         elif isinstance(e,Exception):
-            if hasattr(e,'args') and type(e.args) == list and e.args:
+            if hasattr(e,'args') and type(e.args) is list and e.args:
                 args0 = e.args[0]
                 # test for some known strings
                 if isinstance(args0, str):
@@ -544,9 +544,9 @@ class TransformErrorHandler(TransformLogger):
     def handleRuntimeError(self,e):
         mess = ''
         if hasattr(e,'args'):
-            if type(e.args) == str:
+            if type(e.args) is str:
                 mess = e.args
-            elif type(e.args) in (list,tuple) and type(e.args[0]) == str:
+            elif type(e.args) in (list,tuple) and type(e.args[0]) is str:
                 mess = e.args[0]
         if 'C++ exception' in mess:
             return AtlasErrorCodes.ErrorInfo( acronym='ATH_EXC_CXX', severity = FATAL, message='%s: %s' % (e.__class__.__name__, e.args) )

@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # ----------------------------------------------------------------
 # Script : AtlRunQueryRoot.py
@@ -14,7 +14,6 @@
 # ROOT TTree making and plotting
 # ---------------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 import datetime, sys, os
 from array import array
 from CoolRunQuery.utils.AtlRunQueryUtils  import importroot
@@ -522,7 +521,7 @@ def makeLBPlotList( xvec, xvecStb, yvec, xtitle, ytitle, ylegend, histname, hist
 
     for i in range(len(xvec)):
         for iy,y in enumerate(yvec):
-            if type(y[i]) == tuple:
+            if type(y[i]) is tuple:
                 val,valerr = y[i]
             else:
                 val,valerr = y[i],0

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """End-user Fully specialised arguments that can be used in JobTransform implemenations."""
 
@@ -426,7 +426,7 @@ class JobOptionsArg(StringArg):
     def setValue(self,value):
         """Convert NONE value to all upper case"""
         self._fullFiles = []  # is redetermined on-demand
-        if type(value) == str:
+        if type(value) is str:
             #convert value to the correct case
             valUpper = value.upper()
             if valUpper == 'NONE' and value != 'NONE':
@@ -490,7 +490,7 @@ class JobConfigArg(JobOptionsArg):
     """Joboptions file with user settings, in particular the configuration settings"""
     def __init__(self,help='default',package='',name='default'):
         # split comma separated string into list
-        if type(package) == str: package = package.split(',')
+        if type(package) is str: package = package.split(',')
         # always add 'PyJobTransforms' package (which contain common jobConfig files)
         commonPack = 'PyJobTransforms'
         if commonPack not in package: package.append(commonPack)

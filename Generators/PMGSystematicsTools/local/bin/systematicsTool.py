@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 This module contains helper functions which allow users to manipluate multiple
@@ -114,13 +114,13 @@ def customReplacements(name, removeExtension=True, customReps=None):
   """
   if customReps is None: return name
   mydict = OrderedDict()
-  if type(customReps) == str:
+  if type(customReps) is str:
     f = open(customReps, 'r')
     for line in f.readlines():
       line = line.replace("\n", "")
       tokens = line.split("-->")
       mydict[str(tokens[0])] = str(tokens[1])
-  elif type(customReps) == OrderedDict:
+  elif type(customReps) is OrderedDict:
     mydict = customReps
   else:
     print("[ERROR], customReps must be either OrderedDict or path to a txt file, not ", type(OrderedDict))
@@ -935,7 +935,7 @@ def readFromROOT(filename, regexFilter=None, regexVeto=None):
       aoResult['xup'] = np.array([ao.GetX()[b] + ao.GetErrorXhigh(b) for b in binRange])
       aoResult['xdn'] = np.array([ao.GetX()[b] - ao.GetErrorXlow(b) for b in binRange])
       aoResult['nbins'] = len(binRange)
-    elif type(r.TTree) == type(ao):
+    elif type(r.TTree) is type(ao):
       aoResult['tree'] = ao.GetTree()
     else:
        continue

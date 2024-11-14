@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from scipy.stats import rv_discrete
 import test_statistics as TS
@@ -142,7 +142,7 @@ def power_of_test(data1, data2, rvs_func = 'rvs_pairs', tests = ['chi2_2samp'], 
         finally:
             client.close()
         return ret
-    if type(rvs_func) == str:
+    if type(rvs_func) is str:
         rvs_func = globals()[rvs_func]
     if type(tests) not in (list, tuple):
         tests = [tests]
