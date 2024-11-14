@@ -83,7 +83,7 @@ static const int HIGGSBOSON = 25;
 static const int GRAVITON = 39;
 static const int LEPTOQUARK = 42;
 
-/// PDG Ids for Mavtop madgraph UFO model found under DarkX. The 
+/// PDG Ids for Mavtop madgraph UFO model found under DarkX. The
 /// mavtop is a vector-like top partner with coupling to a dark photon.
 /// Theory paper: https://arxiv.org/abs/1904.05893
 /// Pheno paper: https://arxiv.org/pdf/2112.08425
@@ -263,7 +263,7 @@ template<> inline bool isGlueball(const DecodedPID& p) {
   return
     ( ( p.ndigits() == 3 && p(0) == COMPOSITEGLUON && p(1) == COMPOSITEGLUON && (p(2) == 1 || p(2) == 5) ) ||
       ( p.ndigits() == 4 && p(0) == COMPOSITEGLUON && p(1) == COMPOSITEGLUON && p(2) == COMPOSITEGLUON &&  (p(3) == 3 || p(3) == 7) )  );
- }
+}
 template<> inline bool isGlueball(const int& p) {  auto value_digits = DecodedPID(p); return isGlueball(value_digits); }
 
 /// PDG rule 11d
@@ -560,8 +560,8 @@ template<class T> inline double fractionalCharge(const T& p){return fractionalCh
 template<class T> inline double charge( const T& p){
   if (isGenericMultichargedParticle(p)) // BSM multi-charged particles might have a fractional charge that's not a multiple of 1/3
     return fractionalCharge(p);
-  else 
-    return 1.0*charge3(p)/3.0; 
+  else
+    return 1.0*charge3(p)/3.0;
 }
 template<class T> inline double threeCharge( const T& p){ return charge3(p);}
 template<class T> inline bool isCharged( const T& p){ return charge3(p) != 0;}
@@ -630,7 +630,7 @@ template<> inline double fractionalCharge(const DecodedPID& p) {
   if(!isGenericMultichargedParticle(p)) return 1.0*charge3(p)/3.0; // this method is written for multi-charged particles, still make sure other cases are handled properly
   double abs_charge = 0;
   if (p(0) == 1) abs_charge = p(3)*100. + p(4)*10. + p(5)*1 + p(6)*0.1; // multi-charged particle PDG ID is +/-100XXXY0, where the charge is XXX.Y
-  if (p(0) == 2) abs_charge = (p(3)*10. + p(4))/(p(5)*10.0 + p(6)); // multi-charged particle PDG ID is +/-200XXYY0, where the charge is XX/YY 
+  if (p(0) == 2) abs_charge = (p(3)*10. + p(4))/(p(5)*10.0 + p(6)); // multi-charged particle PDG ID is +/-200XXYY0, where the charge is XX/YY
   return p.pid() > 0 ? abs_charge : -1 * abs_charge;
 }
 template<> inline double fractionalCharge(const int& p){auto value_digits = DecodedPID(p); return fractionalCharge(value_digits);}
@@ -640,90 +640,75 @@ template<> inline bool isEMInteracting(const int& p) {return (isPhoton(p) || isZ
 
 template<class T> inline bool isParton(const T& p) { return isQuark(p)||isGluon(p);}
 
-namespace SUSY {
-  /// PDG rule 11g:
-  /// Within several scenarios of new physics, it is possible to have colored particles suﬃciently long-lived for color-singlet hadronic
-  /// states to form around them. In the context of supersymmetric scenarios, these states are called R-hadrons, since they carry odd
-  /// R- parity. R-hadron codes, deﬁned here, should be viewed as templates for corresponding codes also in other scenarios, for any
-  /// long-lived particle that is either an unﬂavored color octet or a ﬂavored color triplet. The R-hadron code is obtained by combining
-  /// the SUSY particle code with a code for the light degrees of freedom, with as many intermediate zeros removed from the former
-  /// as required to make place for the latter at the end. (To exemplify, a sparticle n00000n˜q combined with quarks q1 and q2
-  /// obtains code n00n˜qnq1 nq2 nJ .) Speciﬁcally, the new-particle spin decouples in the limit of large masses, so that the ﬁnal nJ
-  /// digit is deﬁned by the spin state of the light-quark system alone. An appropriate number of nq digits is used to deﬁne the
-  /// ordinary-quark content.  As usual, 9 rather than 21 is used to denote a gluon/gluino in composite states. The sign of the hadron
-  /// agrees with that of the constituent new particle (a color triplet) where there is a distinct new antiparticle, and else is deﬁned as
-  /// for normal hadrons. Particle names are R with the ﬂavor content as lower index.
+/// PDG rule 11g:
+/// Within several scenarios of new physics, it is possible to have colored particles suﬃciently long-lived for color-singlet hadronic
+/// states to form around them. In the context of supersymmetric scenarios, these states are called R-hadrons, since they carry odd
+/// R- parity. R-hadron codes, deﬁned here, should be viewed as templates for corresponding codes also in other scenarios, for any
+/// long-lived particle that is either an unﬂavored color octet or a ﬂavored color triplet. The R-hadron code is obtained by combining
+/// the SUSY particle code with a code for the light degrees of freedom, with as many intermediate zeros removed from the former
+/// as required to make place for the latter at the end. (To exemplify, a sparticle n00000n˜q combined with quarks q1 and q2
+/// obtains code n00n˜qnq1 nq2 nJ .) Speciﬁcally, the new-particle spin decouples in the limit of large masses, so that the ﬁnal nJ
+/// digit is deﬁned by the spin state of the light-quark system alone. An appropriate number of nq digits is used to deﬁne the
+/// ordinary-quark content.  As usual, 9 rather than 21 is used to denote a gluon/gluino in composite states. The sign of the hadron
+/// agrees with that of the constituent new particle (a color triplet) where there is a distinct new antiparticle, and else is deﬁned as
+/// for normal hadrons. Particle names are R with the ﬂavor content as lower index.
 
-  /// APID: Definition of R-Glueballs: 100099X (X=1,3), 100999Y (Y=1,5)
-  /// APID: NB In the current numbering scheme, some states with 2
-  /// gluinos + gluon or 2 gluons + gluino could have degenerate
-  /// PDG_IDs.
-  template<class T> inline bool isRGlueball(const T& p) { return isRGlueball(p->pdg_id()); }
-  template<> inline bool isRGlueball(const DecodedPID& p) {
-    if (p.ndigits() != 7) return false;
+/// APID: Definition of R-Glueballs: 100099X (X=1,3), 100999Y (Y=1,5)
+/// APID: NB In the current numbering scheme, some states with 2
+/// gluinos + gluon or 2 gluons + gluino could have degenerate
+/// PDG_IDs.
+template<class T> inline bool isRGlueball(const T& p) { return isRGlueball(p->pdg_id()); }
+template<> inline bool isRGlueball(const DecodedPID& p) {
+  if (p.ndigits() != 7) return false;
+  auto pp = p.shift(1);
+  return
+    ( ( pp.ndigits() == 3 && pp(0) == COMPOSITEGLUON && pp(1) == COMPOSITEGLUON && (pp(2) == 1 || pp(2) == 3) ) ||
+      ( pp.ndigits() == 4 && pp(0) == COMPOSITEGLUON && pp(1) == COMPOSITEGLUON && pp(2) == COMPOSITEGLUON &&  (pp(3) == 1 || pp(3) == 5) )  );
+}
+template<> inline bool isRGlueball(const int& p) {  auto value_digits = DecodedPID(p);  return isRGlueball(value_digits); }
+
+// APID Define R-Mesons as gluino-quark-antiquark and squark-antiquark bound states
+// NB Current models only allow gluino-quark-antiquark, stop-antiquark and sbottom-antiquark states
+template<class T> inline bool isRMeson(const T& p) { return isRMeson(p->pdg_id()); }
+template<> inline bool isRMeson(const DecodedPID& p) {
+  auto pp = p.shift(1);
+  return isSUSY(p) && (
+                       // Handle ~gluino-quark-antiquark states
+                       (pp.ndigits() == 4 && pp(0) == COMPOSITEGLUON  && pp.max_digit(1,3) < COMPOSITEGLUON  && pp(2) <= pp(1) && (pp.last() == 1 || pp.last() == 3)) ||
+                       // Handle squark-antiquark states (previously called Smeson/mesoninos)
+                       (pp.ndigits() == 3 && pp.max_digit(1,3) < COMPOSITEGLUON && pp(1) <= pp(0) && pp.last() == 2)
+                       );
+}
+template<> inline bool isRMeson(const int& p) { auto value_digits = DecodedPID(p); return isRMeson(value_digits); }
+
+// APID Define R-Baryons as gluino-quark-quark-quark and squark-quark-quark bound states
+// NB Current models only allow gluino-quark-quark-quark, stop-quark-quark and sbottom-quark-quark states
+template<class T> inline bool isRBaryon(const T& p) { return isRBaryon(p->pdg_id()); }
+template<> inline bool isRBaryon(const DecodedPID& p) {
+  auto pp = p.shift(1);
+  return isSUSY(p) && (
+                       // Handle ~gluino-quark-quark-quark states
+                       (pp.ndigits() == 5 && pp(0) == COMPOSITEGLUON && pp.max_digit(1,4) < COMPOSITEGLUON && pp(2) <= pp(1) && pp(3) <= pp(2) && (pp.last() == 2 || pp.last() == 4)) ||
+                       // Handle squark-quark-quark states (previously called Sbaryons)
+                       (pp.ndigits() == 4 && pp.max_digit(1,4) < COMPOSITEGLUON && pp(1) <= pp(0) && pp(2) <= pp(1) && (pp.last() == 1 || pp.last() == 3))
+                       );
+}
+template<> inline bool isRBaryon(const int& p) { auto value_digits = DecodedPID(p); return isRBaryon(value_digits); }
+
+template<class T> inline bool isSLepton(const T& p) { return isSLepton(p->pdg_id()); }
+template<> inline bool isSLepton(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isLepton(pp);}
+template<> inline bool isSLepton(const int& p){ auto value_digits = DecodedPID(p); return isSLepton(value_digits);}
+
+// APID: Intended to return 2J
+// Useful for G4ParticleDefinition constructor
+template<class T> inline int spin2(const T& p) { return spin2(p->pdg_id()); }
+template<> inline int spin2(const DecodedPID& p) {
+  if (isSUSY(p)) {
     auto pp = p.shift(1);
-    return
-      ( ( pp.ndigits() == 3 && pp(0) == COMPOSITEGLUON && pp(1) == COMPOSITEGLUON && (pp(2) == 1 || pp(2) == 3) ) ||
-        ( pp.ndigits() == 4 && pp(0) == COMPOSITEGLUON && pp(1) == COMPOSITEGLUON && pp(2) == COMPOSITEGLUON &&  (pp(3) == 1 || pp(3) == 5) )  );
+    auto ap = std::abs(pp.pid());
+    if (ap < TABLESIZE ) { return std::abs(double_spin.at(ap)-1); } // sparticles (0->1, 1 -> 0,  2->1,  4->3)
+    return p.last()-1; // R-Hadrons (p.last() == 2J +1)
   }
-  template<> inline bool isRGlueball(const int& p) {  auto value_digits = DecodedPID(p);  return isRGlueball(value_digits); }
-
-  // APID Define R-Mesons as gluino-quark-antiquark and squark-antiquark bound states
-  // NB Current models only allow gluino-quark-antiquark, stop-antiquark and sbottom-antiquark states
-  template<class T> inline bool isRMeson(const T& p) { return isRMeson(p->pdg_id()); }
-  template<> inline bool isRMeson(const DecodedPID& p) {
-    auto pp = p.shift(1);
-    return isSUSY(p) && (
-                         // Handle ~gluino-quark-antiquark states
-                         (pp.ndigits() == 4 && pp(0) == COMPOSITEGLUON  && pp.max_digit(1,3) < COMPOSITEGLUON  && pp(2) <= pp(1) && (pp.last() == 1 || pp.last() == 3)) ||
-                         // Handle squark-antiquark states (previously called Smeson/mesoninos)
-                         (pp.ndigits() == 3 && pp.max_digit(1,3) < COMPOSITEGLUON && pp(1) <= pp(0) && pp.last() == 2)
-                         );
-  }
-  template<> inline bool isRMeson(const int& p) { auto value_digits = DecodedPID(p); return isRMeson(value_digits); }
-
-  // APID Define R-Baryons as gluino-quark-quark-quark and squark-quark-quark bound states
-  // NB Current models only allow gluino-quark-quark-quark, stop-quark-quark and sbottom-quark-quark states
-  template<class T> inline bool isRBaryon(const T& p) { return isRBaryon(p->pdg_id()); }
-  template<> inline bool isRBaryon(const DecodedPID& p) {
-    auto pp = p.shift(1);
-    return isSUSY(p) && (
-                         // Handle ~gluino-quark-quark-quark states
-                         (pp.ndigits() == 5 && pp(0) == COMPOSITEGLUON && pp.max_digit(1,4) < COMPOSITEGLUON && pp(2) <= pp(1) && pp(3) <= pp(2) && (pp.last() == 2 || pp.last() == 4)) ||
-                          // Handle squark-quark-quark states (previously called Sbaryons)
-                         (pp.ndigits() == 4 && pp.max_digit(1,4) < COMPOSITEGLUON && pp(1) <= pp(0) && pp(2) <= pp(1) && (pp.last() == 1 || pp.last() == 3))
-                         );
-  }
-  template<> inline bool isRBaryon(const int& p) { auto value_digits = DecodedPID(p); return isRBaryon(value_digits); }
-
-  template<class T> inline bool isSLepton(const T& p) { return isSLepton(p->pdg_id()); }
-  template<> inline bool isSLepton(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isLepton(pp);}
-  template<> inline bool isSLepton(const int& p){ auto value_digits = DecodedPID(p); return isSLepton(value_digits);}
-
-  // APID Define S-Baryons as ~q q q bound states - TODO Remove deprecated definition
-  template<class T> inline bool isSBaryon(const T& p) { return isSBaryon(p->pdg_id()); }
-  template<> inline bool isSBaryon(const DecodedPID& p){
-    auto pp = p.shift(1); return isSUSY(p) && pp.ndigits() == 4 && ( pp(0) == TQUARK || pp(0) == BQUARK ); // TODO Generalise to all squarks?
-  }
-  template<> inline bool isSBaryon(const int& p){ auto value_digits = DecodedPID(p); return isSBaryon(value_digits);}
-
-  // APID Define S-Mesons as ~q qbar bound states (AKA Mesoninos?) - TODO Remove deprecated definition
-  template<class T> inline bool isSMeson(const T& p) { return isSMeson(p->pdg_id()); }
-  template<> inline bool isSMeson(const DecodedPID& p){
-    auto pp = p.shift(1); return isSUSY(p) && pp.ndigits() == 3 && ( pp(0) == TQUARK || pp(0) == BQUARK ); // TODO Generalise to all squarks?
-  }
-  template<> inline bool isSMeson(const int& p){ auto value_digits = DecodedPID(p); return isSMeson(value_digits);}
-
-  // APID: Intended to return 2J
-  // Useful for G4ParticleDefinition constructor
-  template<class T> inline int spin2(const T& p) { return spin2(p->pdg_id()); }
-  template<> inline int spin2(const DecodedPID& p) {
-    if (isSUSY(p)) {
-      auto pp = p.shift(1);
-      auto ap = std::abs(pp.pid());
-      if (ap < TABLESIZE ) { return std::abs(double_spin.at(ap)-1); } // sparticles (0->1, 1 -> 0,  2->1,  4->3)
-      return p.last()-1; // R-Hadrons (p.last() == 2J +1)
-    }
   auto ap = std::abs(p.pid());
   if (ap == K0S) { return 0; }
   if (ap == K0L) { return 0; }
@@ -735,46 +720,44 @@ namespace SUSY {
   if (isGenericMultichargedParticle(p)) { return 0; } // APID Matches the definition in the G4Extensions/Monopole package.
   if (isNucleus(p)) { return 1; }  // TODO need to explicitly deal with nuclei
   return p.last() > 0 ? 1 : 0; //  Anything else - best guess
- }
-  template<> inline int spin2(const int& p){ auto value_digits = DecodedPID(p); return spin2(value_digits);}
+}
+template<> inline int spin2(const int& p){ auto value_digits = DecodedPID(p); return spin2(value_digits);}
 
-  template<class T> inline double spin(const T& p) { return spin(p->pdg_id()); }
-  template<> inline double spin(const DecodedPID& p) { return 1.0*spin2(p)/2.0; }
-  template<> inline double spin(const int& p){ auto value_digits = DecodedPID(p); return spin(value_digits);}
+template<class T> inline double spin(const T& p) { return spin(p->pdg_id()); }
+template<> inline double spin(const DecodedPID& p) { return 1.0*spin2(p)/2.0; }
+template<> inline double spin(const int& p){ auto value_digits = DecodedPID(p); return spin(value_digits);}
 
-  template<class T> inline bool isRHadron(const T& p) { return isRHadron(p->pdg_id()); }
-  template<> inline bool isRHadron(const DecodedPID& p) {
-    return (isRBaryon(p) || isRMeson(p) || isRGlueball(p));
+template<class T> inline bool isRHadron(const T& p) { return isRHadron(p->pdg_id()); }
+template<> inline bool isRHadron(const DecodedPID& p) {
+  return (isRBaryon(p) || isRMeson(p) || isRGlueball(p));
+}
+template<> inline bool isRHadron(const int& p) { auto value_digits = DecodedPID(p); return isRHadron(value_digits); }
+
+inline std::vector<int> containedQuarks(int p) {
+  auto pp = DecodedPID(p);
+  if (isSUSY(pp)) {
+    pp = pp.shift(1);
+    if (pp.ndigits() > 2) pp = pp.shift(1);
   }
-  template<> inline bool isRHadron(const int& p) { auto value_digits = DecodedPID(p); return isRHadron(value_digits); }
+  std::vector<int> quarks;
+  for (int i = 1; i<=6; ++i)
+    if (hasQuark(pp, i)) quarks.push_back(i);
+  return quarks;
+}
 
-  inline std::vector<int> containedQuarks(int p) {
-    auto pp = DecodedPID(p);
-    if (isSUSY(pp)) {
-      pp = pp.shift(1);
-      if (pp.ndigits() > 2) pp = pp.shift(1);
-    }
-    std::vector<int> quarks;
-    for (int i = 1; i<=6; ++i)
-      if (hasQuark(pp, i)) quarks.push_back(i);
-    return quarks;
-  }
+template<class T> inline bool isSquark(const T& p);
+template<> inline bool isSquark(const DecodedPID& p){
+  auto pp = p.shift(1); return isSUSY(p) && isQuark(pp);
+}
+template<> inline bool isSquark(const int& p){ auto value_digits = DecodedPID(p); return isSquark(value_digits);}
 
-  template<class T> inline bool isSquark(const T& p);
-  template<> inline bool isSquark(const DecodedPID& p){
-    auto pp = p.shift(1); return isSUSY(p) && isQuark(pp);
-  }
-  template<> inline bool isSquark(const int& p){ auto value_digits = DecodedPID(p); return isSquark(value_digits);}
-
-  template<class T> inline bool hasSquark(const T& p, const int& q);
-  template<> inline bool hasSquark(const DecodedPID& p, const int& q){
-    auto pp = p.shift(1); return isSUSY(p) && pp.ndigits() != 2 && pp(0) == q; // skip lepton and boson super-partners by vetoing ndigits==2
-  }
-  template<> inline bool hasSquark(const int& p, const int& q){ auto value_digits = DecodedPID(p); return hasSquark(value_digits, q);}
-
-} // namespace SUSY
+template<class T> inline bool hasSquark(const T& p, const int& q);
+template<> inline bool hasSquark(const DecodedPID& p, const int& q){
+  auto pp = p.shift(1); return isSUSY(p) && pp.ndigits() != 2 && pp(0) == q; // skip lepton and boson super-partners by vetoing ndigits==2
+}
+template<> inline bool hasSquark(const int& p, const int& q){ auto value_digits = DecodedPID(p); return hasSquark(value_digits, q);}
 
 template<class T> inline bool isStrongInteracting(const T& p){return isStrongInteracting(p->pdg_id());}
-template<> inline bool isStrongInteracting(const int& p) { return (isGluon(p) || isQuark(p) || isDiquark(p) || isGlueball(p) || isLeptoQuark(p) || isHadron(p) || SUSY::isRHadron(p));} // APID: Glueballs and R-Hadrons are also strong-interacting
+template<> inline bool isStrongInteracting(const int& p) { return (isGluon(p) || isQuark(p) || isDiquark(p) || isGlueball(p) || isLeptoQuark(p) || isHadron(p) || isRHadron(p));} // APID: Glueballs and R-Hadrons are also strong-interacting
 
 #endif
