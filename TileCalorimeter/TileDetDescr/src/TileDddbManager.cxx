@@ -14,29 +14,11 @@
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 
-#include "GaudiKernel/MsgStream.h"
-
-#include <iostream>
-#include <stdexcept>
-
 TileDddbManager::TileDddbManager(IRDBAccessSvc* access,
                                  const std::string& version_tag,
                                  const std::string& version_node,
                                  bool sqliteInput)
         : AthMessaging ("TileDddbManager")
-        , m_n_cuts(0)
-        , m_n_saddle(0)
-        , m_currentTileGlob(0)
-        , m_currentTileMod(0)
-        , m_currentSection(0)
-        , m_currentGird(0)
-        , m_currentScin(0)
-        , m_currentTifg(0)
-        , m_currentTicg(0)
-        , m_currentTicl(0)
-        , m_currentCuts(0)
-        , m_currentSaddle(0)
-        , m_currentTiclInd(-1)
         , m_tag(version_tag)
         , m_node(version_node)
         , m_sqliteInput(sqliteInput)
@@ -47,37 +29,27 @@ TileDddbManager::TileDddbManager(IRDBAccessSvc* access,
   m_n_tiglob = m_tiglob->size();
   ATH_MSG_INFO( "n_tiglob = " << m_n_tiglob );
 
-  if (m_sqliteInput) {
+  if (m_sqliteInput || !access->getChildTag("TileModule",m_tag,m_node).empty()) {
     m_timod = access->getRecordsetPtr("TileModule",m_tag,m_node);
-  } else {
-    if (access->getChildTag("TileModule",m_tag,m_node)!="") {
-      m_timod = access->getRecordsetPtr("TileModule",m_tag,m_node);
-    } else {
-      m_timod = access->getRecordsetPtr("TileModules",m_tag,m_node);
-    }
+  }
+  else {
+    m_timod = access->getRecordsetPtr("TileModules",m_tag,m_node);
   }
   m_n_timod = m_timod->size();
   ATH_MSG_INFO( "n_timod = " << m_n_timod );
 
-  if (access->getChildTag("TileCuts",m_tag,m_node)!="")
-    { m_buildCuts = true;
-      m_cuts = access->getRecordsetPtr("TileCuts",m_tag,m_node);
-      m_n_cuts = m_cuts->size();
-      ATH_MSG_INFO( "n_cuts = " << m_n_cuts );
-
-    } else {
-    m_buildCuts = false;
+  if (m_sqliteInput || !access->getChildTag("TileCuts",m_tag,m_node).empty()) {
+    m_buildCuts = true;
+    m_cuts = access->getRecordsetPtr("TileCuts",m_tag,m_node);
+    m_n_cuts = m_cuts->size();
+    ATH_MSG_INFO( "n_cuts = " << m_n_cuts );
   }
 
-
-  if (access->getChildTag("TileSaddleSup",m_tag,m_node)!="")
-    { m_buildSaddle = true;
-      m_saddle = access->getRecordsetPtr("TileSaddleSup",m_tag,m_node);
-      m_n_saddle = m_saddle->size();
-      ATH_MSG_INFO( "n_saddle = " << m_n_saddle );
-
-    } else {
-    m_buildSaddle = false;
+  if (m_sqliteInput || !access->getChildTag("TileSaddleSup",m_tag,m_node).empty()) {
+    m_buildSaddle = true;
+    m_saddle = access->getRecordsetPtr("TileSaddleSup",m_tag,m_node);
+    m_n_saddle = m_saddle->size();
+    ATH_MSG_INFO( "n_saddle = " << m_n_saddle );
   }
 
   m_tile = access->getRecordsetPtr("TILE",m_tag,m_node);
@@ -104,12 +76,6 @@ TileDddbManager::TileDddbManager(IRDBAccessSvc* access,
   m_tileSwitches = access->getRecordsetPtr("TileSwitches",m_tag,m_node);
   m_n_tileSwitches = m_tileSwitches->size();
   ATH_MSG_INFO( "n_tileSwitches = " << m_n_tileSwitches );
-
-
-  m_EnvNum = 0;
-  m_EnvSize = 0;
-  m_EnvBegin = 0;
-  m_modTypes.clear();
 }
 
 // ---------- T I L E -------------
@@ -1069,12 +1035,10 @@ int TileDddbManager::SetCurrentCuts(const std::string& input)
 }
 
 bool TileDddbManager::BoolCuts()
-{ if (m_buildCuts)
-    { return m_buildCuts;
-    } else
-    { ATH_MSG_DEBUG( "TileDddbManager::BoolCuts() - return false" );
-      return false;
-    }
+{
+  ATH_MSG_DEBUG( "TileDddbManager::BoolCuts() - return "
+		 << std::boolalpha << m_buildCuts );
+  return m_buildCuts;
 }
 
 std::string TileDddbManager::CutsName() const

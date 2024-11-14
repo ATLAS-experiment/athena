@@ -39,7 +39,7 @@ class SCT_DetectorFactoryLite : public InDetDD::DetectorFactoryBase
 		      const SCT_Options & options);
 
   // Destructor
-  virtual ~SCT_DetectorFactoryLite() override = default;
+  virtual ~SCT_DetectorFactoryLite() = default;
 
   // Creation of geometry:
   virtual void create(GeoPhysVol *world) override;
