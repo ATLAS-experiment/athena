@@ -247,7 +247,7 @@ int main( int argc, char* argv[] ) {
   }
 
   //xsec DB
-  SUSY::CrossSectionDB *my_XsecDB(0);
+  SUSY::CrossSectionDB *my_XsecDB = nullptr;
   if (!isData){
     ANA_MSG_INFO(fileName);
     if      (isRun3 && fileName.Contains("mc21")) { my_XsecDB = new SUSY::CrossSectionDB(PathResolverFindCalibFile("dev/PMGTools/PMGxsecDB_mc21.txt"));}
@@ -383,7 +383,7 @@ int main( int argc, char* argv[] ) {
 
   // ============================================================================================
   ToolHandle<TauAnalysisTools::ITauTruthMatchingTool> T2MT = 0;
-  if (slices["tau"]) {
+  if (slices["tau"] && !isData) {
     // borrow the T2MT from SUSYTools
     T2MT = asg::ToolStore::get<TauAnalysisTools::ITauTruthMatchingTool>("ToolSvc.TauTruthMatch");
     ANA_CHECK(T2MT.retrieve());
