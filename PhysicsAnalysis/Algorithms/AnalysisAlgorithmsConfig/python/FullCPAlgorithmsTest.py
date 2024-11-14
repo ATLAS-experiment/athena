@@ -162,19 +162,16 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
 
     configSeq += config.makeConfig ('Jets.PtEtaSelection',
         containerName='AnaJets')
-    configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
     configSeq.setOptionValue ('.minPt', jetMinPt)
     configSeq.setOptionValue ('.maxEta', jetMaxEta)
     if largeRJets :
         configSeq += config.makeConfig ('Jets.PtEtaSelection',
             containerName='AnaLargeRJets')
-        configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
         configSeq.setOptionValue ('.minPt', jetMinPt)
         configSeq.setOptionValue ('.maxEta', jetMaxEta)
     if trackJets :
         configSeq += config.makeConfig ('Jets.PtEtaSelection',
             containerName='AnaTrackJets')
-        configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
         configSeq.setOptionValue ('.minPt', jetMinPt)
         configSeq.setOptionValue ('.maxEta', jetMaxEta)
 
@@ -203,7 +200,6 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
 
     configSeq += config.makeConfig ('Electrons.PtEtaSelection',
         containerName='AnaElectrons')
-    configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
     configSeq.setOptionValue ('.minPt', electronMinPt)
     configSeq.setOptionValue ('.maxEta', electronMaxEta)
 
@@ -227,7 +223,6 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
 
     configSeq += config.makeConfig ('Photons.PtEtaSelection',
         containerName='AnaPhotons')
-    configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
     configSeq.setOptionValue ('.minPt', photonMinPt)
     configSeq.setOptionValue ('.maxEta', photonMaxEta)
 
@@ -253,7 +248,6 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
 
     configSeq += config.makeConfig ('Muons.PtEtaSelection',
         containerName='AnaMuons')
-    configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
     configSeq.setOptionValue ('.minPt', muonMinPt)
     configSeq.setOptionValue ('.maxEta', muonMaxEta)
 
@@ -273,7 +267,6 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
 
     configSeq += config.makeConfig ('TauJets.PtEtaSelection',
         containerName='AnaTauJets')
-    configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
     configSeq.setOptionValue ('.minPt', tauMinPt)
     configSeq.setOptionValue ('.maxEta', tauMaxEta)
 

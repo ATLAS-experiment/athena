@@ -84,7 +84,6 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     # Jets.PtEtaSelection
     config.addBlock ('Jets.PtEtaSelection')
     config.setOptions (containerName='AnaJets')
-    config.setOptions (selectionDecoration='selectPtEta')
 
     # Electrons
     config.addBlock ('Electrons')
@@ -102,7 +101,6 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     # Electrons.PtEtaSelection
     config.addBlock ('Electrons.PtEtaSelection')
     config.setOptions (containerName='AnaElectrons')
-    config.setOptions (selectionDecoration='selectPtEta')
     config.setOptions (minPt=10000.0)
 
     # Photons
@@ -121,7 +119,6 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     # Photons.PtEtaSelection
     config.addBlock ('Photons.PtEtaSelection')
     config.setOptions (containerName='AnaPhotons')
-    config.setOptions (selectionDecoration='selectPtEta')
     config.setOptions (minPt=10000.0)
 
     # Muons
@@ -137,7 +134,6 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     # Muons.PtEtaSelection
     config.addBlock ('Muons.PtEtaSelection')
     config.setOptions (containerName='AnaMuons')
-    config.setOptions (selectionDecoration='selectPtEta')
 
     # TauJets
     config.addBlock ('TauJets', containerName='AnaTauJets')
@@ -149,7 +145,6 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     # TauJets.PtEtaSelection
     config.addBlock ('TauJets.PtEtaSelection')
     config.setOptions (containerName='AnaTauJets')
-    config.setOptions (selectionDecoration='selectPtEta')
 
     config.addBlock ('SystObjectLink')
     config.setOptions (containerName='AnaJets')
