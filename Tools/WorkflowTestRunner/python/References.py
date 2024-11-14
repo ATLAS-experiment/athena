@@ -34,9 +34,9 @@ references_map = {
     "data_PHYS_Run3": "v39",
     "data_PHYSLITE_Run3": "v20",
     "mc_PHYS_Run2": "v51",
-    "mc_PHYSLITE_Run2": "v22",
+    "mc_PHYSLITE_Run2": "v23",
     "mc_PHYS_Run3": "v52",
-    "mc_PHYSLITE_Run3": "v25",
+    "mc_PHYSLITE_Run3": "v26",
     "af3_PHYS_Run3": "v33",
-    "af3_PHYSLITE_Run3": "v26",
+    "af3_PHYSLITE_Run3": "v27",
 }
