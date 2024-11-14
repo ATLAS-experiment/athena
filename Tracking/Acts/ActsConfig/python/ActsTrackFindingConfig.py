@@ -98,9 +98,9 @@ def ActsMainTrackFindingAlgCfg(flags,
         # new default chi2 cuts optimise efficiency vs speed. Set same value as Athena's Xi2maxNoAdd.
         kwargs.setdefault("chi2CutOff", [25])
         kwargs.setdefault("chi2OutlierCutOff", [25])
-        if flags.Acts.trackFindingTrackSelectorConfig != 3:
-            kwargs.setdefault("branchStopperPtMinFactor", 0.9)
-            kwargs.setdefault("branchStopperAbsEtaMaxExtra", 0.1)
+    if flags.Acts.trackFindingTrackSelectorConfig > 0 and flags.Acts.trackFindingTrackSelectorConfig != 3:
+        kwargs.setdefault("branchStopperPtMinFactor", 0.9)
+        kwargs.setdefault("branchStopperAbsEtaMaxExtra", 0.1)
 
     kwargs.setdefault("numMeasurementsCutOff", [1])
 
@@ -119,6 +119,12 @@ def ActsMainTrackFindingAlgCfg(flags,
         kwargs.setdefault("d0Max", [ d0 / Units.mm * UnitConstants.mm for d0 in tolist(flags.Tracking.ActiveConfig.maxPrimaryImpact)])
         kwargs.setdefault("minMeasurements", tolist(flags.Tracking.ActiveConfig.minClusters))
         kwargs.setdefault("maxHoles", tolist(flags.Tracking.ActiveConfig.maxHoles))
+        if flags.Acts.trackFindingTrackSelectorConfig != 4:
+            kwargs.setdefault("minPixelHits", tolist(flags.Tracking.ActiveConfig.minPixel))
+            kwargs.setdefault("maxPixelHoles", tolist(flags.Tracking.ActiveConfig.maxPixelHoles))
+            kwargs.setdefault("maxStripHoles", tolist(flags.Tracking.ActiveConfig.maxSctHoles))
+        else:
+            kwargs.setdefault("addPixelStripCounts", False)
         if flags.Acts.useDefaultActsMeasurementSelector:
             # Acts default measurement selector counts most holes as outliers, so use the same cut for maxOutliers
             kwargs.setdefault("maxOutliers", tolist(flags.Tracking.ActiveConfig.maxHoles))

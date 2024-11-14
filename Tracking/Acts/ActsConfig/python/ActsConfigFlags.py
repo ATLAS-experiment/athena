@@ -73,7 +73,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.doRotCorrection', True)
     actscf.addFlag('Acts.doPrintTrackStates', False)
     actscf.addFlag('Acts.skipDuplicateSeeds', True)
-    actscf.addFlag('Acts.trackFindingTrackSelectorConfig', 1) # 0=no selection, 1=default track selection (chi2<25,25), 2=Athena chi2 cut (chi2<9,25), 3=no looser cuts in branch stopper
+    actscf.addFlag('Acts.trackFindingTrackSelectorConfig', 1) # 0=no selection, 1=default track selection (chi2<25,25), 2=Athena chi2 cut (chi2<9,25), 3=no looser cuts in branch stopper, 4=no pix hit/pix hole/str hole cuts
     actscf.addFlag('Acts.doTwoWayCKF', True) # run CKF twice, first with forward propagation with smoothing, then with backward propagation
     actscf.addFlag('Acts.useStripSeedsFirst', False) # switch order of seed collections
     actscf.addFlag('Acts.reverseTrackFindingForStrips', False) # track finding starts going inward for strip seeds
