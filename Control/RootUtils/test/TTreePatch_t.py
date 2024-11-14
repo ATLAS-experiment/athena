@@ -58,7 +58,7 @@ def dump_tree (name):
     import ROOT
     f = ROOT.TFile.Open (name)
     #f.tt.SetBranchStatus ('*', 0)
-    dump_tree1 (f.tt)
+    dump_tree1( f.Get("tt") )
     f.Close()
     return
 
