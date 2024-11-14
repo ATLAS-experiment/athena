@@ -19,7 +19,7 @@
 // ACTS
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "Acts/EventData/TrackContainer.hpp"
-#include "Acts/EventData/TrackProxy.hpp"
+#include "Acts/EventData/ProxyAccessor.hpp"
 
 // ActsTrk
 #include "ActsEvent/Seed.h"
@@ -133,6 +133,14 @@ namespace ActsTrk
     Gaudi::Property<std::vector<std::size_t>> m_maxSharedHits{this, "maxSharedHits", {}, "TrackSelector: maxSharedHits"};
     Gaudi::Property<std::vector<double>> m_maxChi2{this, "maxChi2", {}, "TrackSelector: maxChi2"};
 
+    Gaudi::Property<bool> m_addPixelStripCounts{this, "addPixelStripCounts", true, "keep separate pixel and strip counts and apply the following cuts"};
+    Gaudi::Property<std::vector<std::size_t>> m_minPixelHits{this, "minPixelHits", {}, "minimum number of pixel hits"};
+    Gaudi::Property<std::vector<std::size_t>> m_minStripHits{this, "minStripHits", {}, "minimum number of strip hits"};
+    Gaudi::Property<std::vector<std::size_t>> m_maxPixelHoles{this, "maxPixelHoles", {}, "maximum number of pixel holes"};
+    Gaudi::Property<std::vector<std::size_t>> m_maxStripHoles{this, "maxStripHoles", {}, "maximum number of strip holes"};
+    Gaudi::Property<std::vector<std::size_t>> m_maxPixelOutliers{this, "maxPixelOutliers", {}, "maximum number of pixel outliers"};
+    Gaudi::Property<std::vector<std::size_t>> m_maxStripOutliers{this, "maxStripOutliers", {}, "maximum number of strip outliers"};
+
     // configuration of statistics tables
     Gaudi::Property<std::vector<float>> m_statEtaBins{this, "StatisticEtaBins", {-4, -2.6, -2, 0, 2., 2.6, 4}, "Gather statistics separately for these bins."};
     Gaudi::Property<std::vector<std::string>> m_seedLabels{this, "SeedLabels", {}, "One label per seed key used in outputs"};
@@ -202,6 +210,26 @@ namespace ActsTrk
 
     std::unique_ptr<ActsTrk::IMeasurementSelector> m_measurementSelector;
     std::unique_ptr<CKF_pimpl> m_trackFinder;
+
+    static xAOD::UncalibMeasType measurementType (const detail::RecoTrackContainer::TrackStateProxy &trackState);
+
+    struct BranchState {
+      static constexpr Acts::ProxyAccessor<unsigned int> nPixelHits{Acts::hashString("nPixelHits")};
+      static constexpr Acts::ProxyAccessor<unsigned int> nStripHits{Acts::hashString("nStripHits")};
+      static constexpr Acts::ProxyAccessor<unsigned int> nPixelHoles{Acts::hashString("nPixelHoles")};
+      static constexpr Acts::ProxyAccessor<unsigned int> nStripHoles{Acts::hashString("nStripHoles")};
+      static constexpr Acts::ProxyAccessor<unsigned int> nPixelOutliers{Acts::hashString("nPixelOutliers")};
+      static constexpr Acts::ProxyAccessor<unsigned int> nStripOutliers{Acts::hashString("nStripOutliers")};
+    };
+    static constexpr BranchState s_branchState{};
+
+    static void addPixelStripCounts(detail::RecoTrackContainer& tracksContainer);
+    void initPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track) const;
+    void updatePixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track,
+                                Acts::ConstTrackStateType typeFlags,
+                                xAOD::UncalibMeasType detType) const;
+    void checkPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track) const;
+    std::array<bool, 3> selectPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track, double eta) const;
 
     // statistics
     void initStatTables();
