@@ -8,7 +8,7 @@ if __name__=="__main__":
     cfgFlags.Concurrency.NumThreads=1
     cfgFlags.Exec.MaxEvents=100
     cfgFlags.Input.isMC=True
-    cfgFlags.Input.Files= ["/Users/markhodgkinson/dataFiles/mc21_13p6TeV/ESDFiles/mc21_13p6TeV.601589.PhPy8EG_A14_ttbar_hdamp258p75_nonallhadron.recon.ESD.e8485_s3986_r14060/mc21_13p6TeV.601589.PhPy8EG_A14_ttbar_hdamp258p75_nonallhadron.recon.ESD.e8485_s3986_r14060.100Events.pool.root"]
+    cfgFlags.Input.Files= ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PFlowTests/mc21_13p6TeV/mc21_13p6TeV.601589.PhPy8EG_A14_ttbar_hdamp258p75_nonallhadron.recon.ESD.e8485_s3986_r14060/ESD.31373517._000035.pool.root.1"]
     cfgFlags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-10"
     cfgFlags.Output.AODFileName="output_AOD.root"
     cfgFlags.Output.doWriteAOD=True
@@ -47,11 +47,6 @@ if __name__=="__main__":
     cfg.merge(PFlowCalibHitDecoratorCfg(cfgFlags)) #
 
     cfg.getEventAlgo("PFlowCalibPFODecoratorAlgorithm").PFOWriteDecorHandleKey_NLeadingTruthParticles="GlobalNeutralParticleFlowObjects.calpfo_NLeadingTruthParticleBarcodeEnergyPairs"
-    cfg.getEventAlgo("PFlowCellCPDataDecoratorAlgorithm").PFOWriteDecorHandleKey_CellCPData="GlobalChargedParticleFlowObjects.cellCPData"
-    cfg.getEventAlgo("PFlowCellCPDataDecoratorAlgorithm").NeutralPFOReadHandleKey="GlobalNeutralParticleFlowObjects"
-
-    from JetRecConfig.JetConfigFlags import jetInternalFlags
-    jetInternalFlags.isRecoJob = True
 
     from JetRecConfig.StandardSmallRJets import AntiKt4Truth
     from JetRecConfig.JetRecConfig import JetRecCfg
