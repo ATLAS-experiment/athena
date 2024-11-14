@@ -46,3 +46,8 @@ atlas_add_test( FPGATrackSimDataPrepOnRDO_test
                 POST_EXEC_SCRIPT noerror.sh 
                 PROPERTIES TIMEOUT 240 )
 
+atlas_add_test( FPGATrackSimInsideOutOnRDO_test
+                SCRIPT FPGATrackSimInsideOutOnRDO.sh
+                POST_EXEC_SCRIPT noerror.sh 
+                PROPERTIES TIMEOUT 240 )
+                
