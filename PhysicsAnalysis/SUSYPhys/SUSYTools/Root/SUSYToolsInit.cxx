@@ -337,23 +337,22 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise JetTruthLabelingTool: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2019LargeR#AnalysisBase_21_2_114_and_newer
-    if(!isData()){
+    if(!isData()) {
       m_label_truthKey = fatjetcoll+"."+m_JetTruthLabelName;
       ATH_CHECK(m_label_truthKey.initialize());
+
+      if (!m_jetTruthLabelingTool.isUserConfigured()) {
+	m_jetTruthLabelingTool.setTypeAndName("JetTruthLabelingTool/ST_JetTruthLabelingTool");
+	ATH_CHECK( m_jetTruthLabelingTool.setProperty("RecoJetContainer", m_fatJets) );
+	ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthLabelName", m_JetTruthLabelName) );
+	ATH_CHECK( m_jetTruthLabelingTool.setProperty("UseTRUTH3", m_useTRUTH3) );                 // Set this to false only if you have the FULL !TruthParticles container in your input file
+	ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthParticleContainerName", "TruthParticles") );
+	ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthBosonContainerName", "TruthBoson") );  // Set this if you are using a TRUTH3 style truth boson container
+	ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthTopQuarkContainerName", "TruthTop") ); // Set this if you are using a TRUTH3 style truth top quark container
+	ATH_CHECK( m_jetTruthLabelingTool.setProperty("OutputLevel", this->msg().level()) );
+	ATH_CHECK( m_jetTruthLabelingTool.retrieve() );
+      } else if (m_jetTruthLabelingTool.isUserConfigured()) ATH_CHECK(m_jetTruthLabelingTool.retrieve());
     }
-
-    if (!m_jetTruthLabelingTool.isUserConfigured()) {
-      m_jetTruthLabelingTool.setTypeAndName("JetTruthLabelingTool/ST_JetTruthLabelingTool");
-      ATH_CHECK( m_jetTruthLabelingTool.setProperty("RecoJetContainer", m_fatJets) );
-      ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthLabelName", m_JetTruthLabelName) );
-      ATH_CHECK( m_jetTruthLabelingTool.setProperty("UseTRUTH3", m_useTRUTH3) );                 // Set this to false only if you have the FULL !TruthParticles container in your input file
-      ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthParticleContainerName", "TruthParticles") );
-      ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthBosonContainerName", "TruthBoson") );  // Set this if you are using a TRUTH3 style truth boson container
-      ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthTopQuarkContainerName", "TruthTop") ); // Set this if you are using a TRUTH3 style truth top quark container
-      ATH_CHECK( m_jetTruthLabelingTool.setProperty("OutputLevel", this->msg().level()) );
-      ATH_CHECK( m_jetTruthLabelingTool.retrieve() );
-    } else if (m_jetTruthLabelingTool.isUserConfigured()) ATH_CHECK(m_jetTruthLabelingTool.retrieve());
-
   }
 
   if (m_slices["jet"] || m_slices["fjet"]) {
@@ -531,7 +530,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise jet pileup labeling tool (required for labels used by JvtEfficiencyTools)
 
-    if(!m_jetPileupLabelingTool.isUserConfigured()){
+    if(!m_jetPileupLabelingTool.isUserConfigured() && !isData()) {
       toolName = "PileupLabelingTool";
       m_jetPileupLabelingTool.setTypeAndName("JetPileupLabelingTool/"+toolName);
       ATH_CHECK( m_jetPileupLabelingTool.setProperty("RecoJetContainer", m_defaultJets) );
@@ -747,24 +746,24 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise muon efficiency tools
-    if (!m_muonEfficiencySFTool.isUserConfigured() && m_muId != xAOD::Muon::VeryLoose) {
+    if (!m_muonEfficiencySFTool.isUserConfigured() && m_muId != xAOD::Muon::VeryLoose && !isData()) {
       toolName = "MuonEfficiencyScaleFactors_" + muQual;
       m_muonEfficiencySFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonEfficiencySFTool.setProperty("WorkingPoint", muQual) );
       ATH_CHECK( m_muonEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "240711_Preliminary_r24run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonEfficiencySFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonEfficiencySFTool.retrieve() );
-    } else  ATH_CHECK( m_muonEfficiencySFTool.retrieve() );
+    } else if (m_muonEfficiencySFTool.isUserConfigured()) ATH_CHECK( m_muonEfficiencySFTool.retrieve() );
 
 
-    if (!m_muonEfficiencyBMHighPtSFTool.isUserConfigured()){
+    if (!m_muonEfficiencyBMHighPtSFTool.isUserConfigured() && !isData()){
       toolName = "MuonEfficiencyScaleFactorsBMHighPt_" + muQual;
       m_muonEfficiencyBMHighPtSFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("WorkingPoint", "BadMuonVeto_HighPt") );
       ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("CalibrationRelease", m_isRun3? "220817_Preliminary_r22run3":"230213_Preliminary_r22run2") ); //BadMuonVeto_HighPt currently not available for 240711_Preliminary_r24run3
       ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.retrieve() );
-    } else  ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.retrieve() );
+    } else if (m_muonEfficiencyBMHighPtSFTool.isUserConfigured()) ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.retrieve() );
 
 
     if (m_doTTVAsf && m_mud0sig<0 && m_muz0<0){
@@ -772,7 +771,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       m_doTTVAsf=false;
     }
 
-    if (m_doTTVAsf && !m_muonTTVAEfficiencySFTool.isUserConfigured()) {
+    if (m_doTTVAsf && !m_muonTTVAEfficiencySFTool.isUserConfigured() && !isData()) {
       toolName = "MuonTTVAEfficiencyScaleFactors";
       m_muonTTVAEfficiencySFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("WorkingPoint", "TTVA") );
@@ -785,7 +784,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise muon isolation tool
-    if (!m_muonIsolationSFTool.isUserConfigured() && !m_muIso_WP.empty()) {
+    if (!m_muonIsolationSFTool.isUserConfigured() && !m_muIso_WP.empty() && !isData()) {
       toolName = "MuonIsolationScaleFactors_" + m_muIso_WP;
 
       std::string tmp_muIso_WP = m_muIso_WP;
@@ -815,7 +814,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     } else if (m_muonIsolationSFTool.isUserConfigured()) ATH_CHECK( m_muonIsolationSFTool.retrieve() );
 
 
-    if (!m_muonHighPtIsolationSFTool.isUserConfigured() && !m_muIsoHighPt_WP.empty()) {
+    if (!m_muonHighPtIsolationSFTool.isUserConfigured() && !m_muIsoHighPt_WP.empty() && !isData()) {
       toolName = "MuonHighPtIsolationScaleFactors_" + m_muIsoHighPt_WP;
 
       std::string tmp_muIsoHighPt_WP = m_muIsoHighPt_WP;
@@ -849,7 +848,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise muon trigger scale factor tools
 
-    if (!m_muonTriggerSFTool.isUserConfigured()) {
+    if (!m_muonTriggerSFTool.isUserConfigured() && !isData()) {
       toolName = "MuonTriggerScaleFactors_" + muQual;
       m_muonTriggerSFTool.setTypeAndName("CP::MuonTriggerScaleFactors/"+toolName);
       if ( muQual=="LowPt" ) {
@@ -862,9 +861,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_muonTriggerSFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonTriggerSFTool.retrieve() );
       m_muonTrigSFTools.push_back(m_muonTriggerSFTool.getHandle());
-    } else {
-          ATH_CHECK( m_muonTriggerSFTool.retrieve() );
-          m_muonTrigSFTools.push_back(m_muonTriggerSFTool.getHandle());
+    } else if (m_muonTriggerSFTool.isUserConfigured()) {
+      ATH_CHECK( m_muonTriggerSFTool.retrieve() );
+      m_muonTrigSFTools.push_back(m_muonTriggerSFTool.getHandle());
     }
   }
 
@@ -1512,7 +1511,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise tau efficiency tool
 
-    if (!m_tauEffTool.isUserConfigured()) {
+    if (!m_tauEffTool.isUserConfigured() && !isData()) {
       toolName = "TauEffTool_" + m_tauId;
       m_tauEffTool.setTypeAndName("TauAnalysisTools::TauEfficiencyCorrectionsTool/"+toolName);
       ATH_CHECK( m_tauEffTool.setProperty("PileupReweightingTool",m_prwTool.getHandle()) );
@@ -1556,7 +1555,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_tauEffTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_tauEffTool.setProperty("useFastSim", isAtlfast()) );
       ATH_CHECK( m_tauEffTool.retrieve() );
-    } else ATH_CHECK( m_tauEffTool.retrieve() );
+    } else if (m_tauEffTool.isUserConfigured()) ATH_CHECK( m_tauEffTool.retrieve() );
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1632,7 +1631,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise tau truth matching tool
 
-    if (!m_tauTruthMatch.isUserConfigured() && m_tauDoTTM) {
+    if (!m_tauTruthMatch.isUserConfigured() && m_tauDoTTM && !isData()) {
       m_tauTruthMatch.setTypeAndName("TauAnalysisTools::TauTruthMatchingTool/TauTruthMatch");
       ATH_CHECK( m_tauTruthMatch.setProperty("TruthJetContainerName", m_defaultTruthJets ) );
       ATH_CHECK( m_tauTruthMatch.setProperty("OutputLevel", this->msg().level()) );
@@ -1958,7 +1957,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Initialise trigGlobalEfficiencyCorrection tool
 
-  if (!m_trigGlobalEffCorrTool_diLep.isUserConfigured()) {
+  if (!m_trigGlobalEffCorrTool_diLep.isUserConfigured() && !isData()) {
 
     std::string no2e17("");
     if (m_trig2017combination_diLep.find("||2e17_lhvloose_nod0_L12EM15VHI") != std::string::npos) {
@@ -1990,10 +1989,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     ATH_CHECK( m_trigGlobalEffCorrTool_diLep.setProperty("NumberOfToys", m_trigNToys_diLep) );
     ATH_CHECK( m_trigGlobalEffCorrTool_diLep.setProperty("OutputLevel", this->msg().level()) );
     ATH_CHECK( m_trigGlobalEffCorrTool_diLep.initialize() );
-  } else  ATH_CHECK( m_trigGlobalEffCorrTool_diLep.initialize() );
+  } else if (m_trigGlobalEffCorrTool_diLep.isUserConfigured()) ATH_CHECK( m_trigGlobalEffCorrTool_diLep.retrieve() );
 
 
-  if (!m_trigGlobalEffCorrTool_multiLep.isUserConfigured()) {
+  if (!m_trigGlobalEffCorrTool_multiLep.isUserConfigured() && !isData()) {
 
     std::string no2e17("");
     if (m_trig2017combination_multiLep.find("||2e17_lhvloose_nod0_L12EM15VHI") != std::string::npos) {
@@ -2025,10 +2024,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     ATH_CHECK( m_trigGlobalEffCorrTool_multiLep.setProperty("NumberOfToys", m_trigNToys_multiLep) );
     ATH_CHECK( m_trigGlobalEffCorrTool_multiLep.setProperty("OutputLevel", this->msg().level()) );
     ATH_CHECK( m_trigGlobalEffCorrTool_multiLep.initialize() );
-  } else ATH_CHECK( m_trigGlobalEffCorrTool_multiLep.initialize() );
+  } else if (m_trigGlobalEffCorrTool_multiLep.isUserConfigured()) ATH_CHECK( m_trigGlobalEffCorrTool_multiLep.retrieve() );
 
 
-  if (!m_trigGlobalEffCorrTool_diPhoton.isUserConfigured()) {
+  if (!m_trigGlobalEffCorrTool_diPhoton.isUserConfigured() && !isData()) {
     m_trigGlobalEffCorrTool_diPhoton.setTypeAndName("TrigGlobalEfficiencyCorrectionTool/TrigGlobal_diPhoton");
     ATH_CHECK( m_trigGlobalEffCorrTool_diPhoton.setProperty("PhotonEfficiencyTools", m_photonTrigEffTools) );
     ATH_CHECK( m_trigGlobalEffCorrTool_diPhoton.setProperty("PhotonScaleFactorTools", m_photonTrigSFTools) );
@@ -2040,7 +2039,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     ATH_CHECK( m_trigGlobalEffCorrTool_diPhoton.setProperty("NumberOfToys", m_trigNToys_diPhoton) );
     ATH_CHECK( m_trigGlobalEffCorrTool_diPhoton.setProperty("OutputLevel", this->msg().level()) );
     ATH_CHECK( m_trigGlobalEffCorrTool_diPhoton.initialize() );
-  } else  ATH_CHECK( m_trigGlobalEffCorrTool_diPhoton.initialize() );
+  } else if (m_trigGlobalEffCorrTool_diPhoton.isUserConfigured()) ATH_CHECK( m_trigGlobalEffCorrTool_diPhoton.retrieve() );
 
 
   if (m_slices["ele"] || m_slices["pho"] || m_slices["mu"]) {
@@ -2251,20 +2250,20 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
 // /////////////////////////////////////////////////////////////////////////////////////////
 // Initialise PMG Tools
-  if (!m_pmgSHnjetWeighter.isUserConfigured()) {
+  if (!m_pmgSHnjetWeighter.isUserConfigured() && !isData()) {
     m_pmgSHnjetWeighter.setTypeAndName("PMGTools::PMGSherpa22VJetsWeightTool/PMGSHVjetReweighter");
     ATH_CHECK( m_pmgSHnjetWeighter.setProperty( "TruthJetContainer", "AntiKt4TruthJets"));
     ATH_CHECK( m_pmgSHnjetWeighter.setProperty("OutputLevel", this->msg().level()) );
     ATH_CHECK( m_pmgSHnjetWeighter.retrieve());
-  } else  ATH_CHECK( m_pmgSHnjetWeighter.retrieve());
+  } else if (m_pmgSHnjetWeighter.isUserConfigured()) ATH_CHECK( m_pmgSHnjetWeighter.retrieve());
 
 
-  if (!m_pmgSHnjetWeighterWZ.isUserConfigured()) {
+  if (!m_pmgSHnjetWeighterWZ.isUserConfigured() && !isData()) {
     m_pmgSHnjetWeighterWZ.setTypeAndName("PMGTools::PMGSherpa22VJetsWeightTool/PMGSHVjetReweighterWZ");
     ATH_CHECK( m_pmgSHnjetWeighterWZ.setProperty( "TruthJetContainer", "AntiKt4TruthWZJets"));
     ATH_CHECK( m_pmgSHnjetWeighterWZ.setProperty("OutputLevel", this->msg().level()) );
     ATH_CHECK( m_pmgSHnjetWeighterWZ.retrieve() );
-  } else  ATH_CHECK( m_pmgSHnjetWeighterWZ.retrieve() );
+  } else if (m_pmgSHnjetWeighterWZ.isUserConfigured()) ATH_CHECK( m_pmgSHnjetWeighterWZ.retrieve() );
 
 
   // prevent these initialiation snippets from being run again
