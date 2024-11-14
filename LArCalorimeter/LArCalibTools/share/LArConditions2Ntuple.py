@@ -52,7 +52,8 @@ if __name__=='__main__':
             "AC":"AutoCorr",
             "CALIWAVE":"CaliWave",
             "PHYSWAVE":"PhysWave",
-            "OFCCALI":"OFCCali"
+            "OFCCALI":"OFCCali",
+            "ACORR":"AutoCorr",    
           }
 
   objects=set()
@@ -167,12 +168,20 @@ if __name__=='__main__':
                                                       ))
                       
   if "AutoCorr" in objects:
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    if flags.LArCalib.isSC:
+       cfg.merge(addFolders(flags,'/LAR/ElecCalibOflSC/AutoCorrs/AutoCorr',modifiers='<key>LArAutoCorrSC</key>',className='LArAutoCorrComplete'))
+    else:   
+       cfg.merge(addFolders(flags,'/LAR/ElecCalibOfl/AutoCorrs/AutoCorr',className='LArAutoCorrComplete'))
     ckey="LArAutoCorrSC" if flags.LArCalib.isSC else "LArAutoCorr"
     cfg.addEventAlgo(CompFactory.LArAutoCorr2Ntuple(ContainerKey = "LArAutoCorrSym" if flags.Input.isMC else ckey,
                                                     AddFEBTempInfo = False, 
                                                     AddCalib = True,
                                                     isSC = flags.LArCalib.isSC,
-                                                    BadChanKey = bcKey
+                                                    ApplyCorrection = True,
+                                                    AddCorrUndo = True,
+                                                    BadChanKey = bcKey,
+
                                                   ))
   if "Ramp" in objects:
     ckey = "LArRampSC" if flags.LArCalib.isSC else "LArRamp"
@@ -186,6 +195,8 @@ if __name__=='__main__':
                                                  AddFEBTempInfo = False, 
                                                  AddCalib = True,
                                                  isSC = flags.LArCalib.isSC,
+                                                 ApplyCorr = True,
+                                                 AddCorrUndo = True,
                                                  BadChanKey = bcKey
                                                ))
   
