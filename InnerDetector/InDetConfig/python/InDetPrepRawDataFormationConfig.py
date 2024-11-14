@@ -222,16 +222,14 @@ def ITkTrigStripClusterizationCfg(flags, name="ITkTrigStripClusterization", rois
 
 def InDetTRT_RIO_MakerCfg(flags, name = "InDetTRT_RIO_Maker", **kwargs):
     acc = ComponentAccumulator()
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
-       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
-    else:
-       doTrackOverlay = flags.Overlay.doTrackOverlay
-    prefix = flags.Overlay.SigPrefix if doTrackOverlay or flags.Common.ProductionStep is ProductionStep.PileUpPretracking else ''
+    prefix = flags.Overlay.SigPrefix if flags.Common.ProductionStep is ProductionStep.PileUpPretracking else ''
     if "TRT_DriftCircleTool" not in kwargs:
         from InDetConfig.TRT_DriftCircleToolConfig import TRT_DriftCircleToolCfg
         kwargs.setdefault("TRT_DriftCircleTool", acc.popToolsAndMerge(
             TRT_DriftCircleToolCfg(flags)))
     kwargs.setdefault("TRTRIOLocation", 'TRT_DriftCircles')
+    #Backtracking is disable during the processing of pileup tracks,
+    #the standard TRT_RDOs are used for track overlay when overlaying with HS RDOs.
     kwargs.setdefault("TRTRDOLocation", prefix + 'TRT_RDOs')
 
     acc.addEventAlgo(CompFactory.InDet.TRT_RIO_Maker(prefix+name, **kwargs))
