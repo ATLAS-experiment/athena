@@ -443,8 +443,10 @@ int FitMatrices::setDimensions(std::vector<FitMeasurement*>& measurements,
 
   numberParameters = m_firstRowForParameter.size();
   m_lastRowForParameter = std::vector<int>(numberParameters, lastRow);
-  if (afterCalo)
+  if (afterCalo) {
+    // cppcheck-suppress containerOutOfBounds; false positive
     m_lastRowForParameter[4] = m_firstRowForParameter[5] + 1;
+  }
 
   // following loop puts any alignment info into the final rows
   if (numberAlignments) {
