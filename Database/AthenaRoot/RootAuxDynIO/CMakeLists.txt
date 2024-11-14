@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RootAuxDynIO )
@@ -16,3 +16,8 @@ atlas_add_library( RootAuxDynIO
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES}
                      AthContainers AthContainersInterfaces AthContainersRoot  RootUtils
                    )
+
+atlas_add_library( RootAuxDynIOHeaders
+                   RootAuxDynIO/RootAuxDynDefs.h
+                   INTERFACE
+                   PUBLIC_HEADERS RootAuxDynIO )
