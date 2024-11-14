@@ -425,7 +425,7 @@ namespace ST {
     float getSherpaVjetsNjetsWeight(const std::string& jetContainer) const override final;
 
     // Helper for b-tagging weights
-    int getMCShowerType(const std::string& sample_name="") const override final { return ST::getMCShowerType(sample_name); }
+    int getMCShowerType(const std::string& sample_name="", const std::string& tagger="") const override final { return ST::getMCShowerType(sample_name, tagger); }
 
 
   private:
@@ -669,6 +669,9 @@ namespace ST {
     double m_BtagMinPt;
     std::string m_BtagKeyOverride;
     std::string m_BtagSystStrategy;
+    std::string m_EigenvectorReductionB;
+    std::string m_EigenvectorReductionC;
+    std::string m_EigenvectorReductionLight;
     std::string m_BtagWP_trkJet;
     std::string m_BtagTagger_trkJet;
     double m_BtagMinPt_trkJet;

@@ -205,6 +205,9 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_BtagMinPt(-99.),
     m_BtagKeyOverride(""),
     m_BtagSystStrategy(""),
+    m_EigenvectorReductionB(""),
+    m_EigenvectorReductionC(""),
+    m_EigenvectorReductionLight(""),
     m_BtagWP_trkJet(""),
     m_BtagTagger_trkJet(""),
     m_BtagMinPt_trkJet(-99.),
@@ -1580,12 +1583,15 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_JMScalib, "Jet.JMSCalib", rEnv, false);
   //
   configFromFile(m_useBtagging, "Btag.enable", rEnv, true);
-  configFromFile(m_BtagTagger, "Btag.Tagger", rEnv, "DL1dv01");
-  configFromFile(m_BtagWP, "Btag.WP", rEnv, "FixedCutBEff_77");
+  configFromFile(m_BtagTagger, "Btag.Tagger", rEnv, "GN2v01");
+  configFromFile(m_BtagWP, "Btag.WP", rEnv, "Continuous");
   configFromFile(m_BtagMinPt, "Btag.MinPt", rEnv, -1.); // Not calibrated below 20
 
-  configFromFile(m_bTaggingCalibrationFilePath, "Btag.CalibPath", rEnv, m_isRun3 ? "xAODBTaggingEfficiency/13p6TeV/2023-22-13TeV-MC21-CDI-2023-09-13_v1.root": "xAODBTaggingEfficiency/13TeV/2023-22-13TeV-MC20-CDI-2023-09-13_v1.root");
+  configFromFile(m_bTaggingCalibrationFilePath, "Btag.CalibPath", rEnv, m_isRun3 ? "xAODBTaggingEfficiency/13p6TeV/MC23_2024-10-17_GN2v01_v1.root": "xAODBTaggingEfficiency/13TeV/MC20_2024-10-17_GN2v01_v1.root");
   configFromFile(m_BtagSystStrategy, "Btag.SystStrategy", rEnv, "SFEigen");
+  configFromFile(m_EigenvectorReductionB, "Btag.EigenvectorReductionB", rEnv, "Loose");
+  configFromFile(m_EigenvectorReductionC, "Btag.EigenvectorReductionC", rEnv, "Loose");
+  configFromFile(m_EigenvectorReductionLight, "Btag.EigenvectorReductionLight", rEnv, "Loose");
 
   configFromFile(m_useBtagging_trkJet, "BtagTrkJet.enable", rEnv, true);
   configFromFile(m_BtagTagger_trkJet, "BtagTrkJet.Tagger", rEnv, "DL1r");
