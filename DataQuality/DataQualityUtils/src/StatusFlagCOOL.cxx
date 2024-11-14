@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -69,7 +69,7 @@ namespace dqutils {
 
   void
   StatusFlagCOOL::
-   insert(cool::ChannelId channelId, int code, float dfrac, float thrust, std::string tag_name) {
+   insert(cool::ChannelId channelId, int code, float dfrac, float thrust, const std::string& tag_name) {
     try {
       cool::RecordSpecification spec = this->createSpec();
       coral::AttributeList payload = this->createPayload(code, dfrac, thrust, spec);
@@ -84,7 +84,7 @@ namespace dqutils {
 
   void
   StatusFlagCOOL::
-   insert(std::string channelName, int code, float dfrac, float thrust, std::string tag_name) {
+   insert(std::string channelName, int code, float dfrac, float thrust, const std::string& tag_name) {
     try {
       this->insert(this->getCoolFolder()->channelId(channelName), code, dfrac, thrust, tag_name);
     }
