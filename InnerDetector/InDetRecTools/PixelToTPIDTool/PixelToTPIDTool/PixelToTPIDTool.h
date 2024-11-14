@@ -59,6 +59,8 @@ namespace InDet {
       ServiceHandle<IIBLParameterSvc> m_IBLParameterSvc;
       const PixelID* m_pixelid;
       double m_conversionfactor;
+      
+      std::map<std::tuple<int, int, int>, float> m_scaleFactorMap; //Rebecca edits
 
       SG::ReadCondHandleKey<PixelChargeCalibCondData> m_moduleDataKey
       {this, "PixelChargeCalibCondData", "PixelChargeCalibCondData", "ChargeCalibration data, for ToT overflow setting"};

@@ -8,6 +8,13 @@
 #include "Identifier/Identifier.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 
+//Rebecca - includes
+#include <TFile.h>
+#include <TTree.h>
+#include <map>
+#include "StoreGate/StoreGateSvc.h"
+//Rebecca - end includes
+
 // Tracking:
 #include "TrkTrack/Track.h"
 #include "TrkTrack/TrackStateOnSurface.h"
@@ -44,19 +51,65 @@ InDet::PixelToTPIDTool::PixelToTPIDTool(const std::string& t, const std::string&
 
   //conversion Factor
   //{.025,.023,.020}; //{Old Planars,IBL_3Ds,IBL_Planars} the sensors thickness will be take into account in dEdx calculation
-
+  std::map<std::tuple<int, int, int>, float> m_scaleFactorMap; //Rebecca edits
   m_conversionfactor=energyPair/sidensity;
-
 }
 
 InDet::PixelToTPIDTool::~PixelToTPIDTool() = default;
 
-StatusCode InDet::PixelToTPIDTool::initialize() {
+StatusCode InDet::PixelToTPIDTool::initialize() { //Rebecca - modify this line to initalize SG that reads from root file!
+  // Retrieve StoreGate service
+    //StatusCode sc = service("StoreGateSvc", m_storeGate);
+    //if (sc.isFailure()) {
+    //  ATH_MSG_ERROR("Rebecca - Failed to retrieve StoreGate service");
+    //  return StatusCode::FAILURE;
+    //}
 
+    TFile *file = TFile::Open("/afs/cern.ch/user/r/rhicks/private/clusterPixeldEdx2Athena/test-cool-file.root");
+    if (!file || !file->IsOpen()) {
+      ATH_MSG_ERROR("Rebecca - Failed to open ROOT file");
+      return StatusCode::FAILURE;
+    }
+
+    // Retrieve the TTree from the ROOT file
+    TTree *tree = (TTree*)file->Get("MyTree");  // Replace with actual TTree name
+    if (!tree) {
+      ATH_MSG_ERROR("Rebecca - Failed to retrieve TTree from ROOT file");
+      return StatusCode::FAILURE;
+    }
+
+    // Define variables to store branch data
+    int rn,eta,layer;
+    float sf;
+
+    // Set the branch addresses
+    tree->SetBranchAddress("RunNumber", &rn);
+    tree->SetBranchAddress("scaleFactor", &sf);
+    tree->SetBranchAddress("layer", &layer);
+    tree->SetBranchAddress("eta", &eta);
+
+    // Create a map to store data, keyed by Run, Layer, and Eta
+    //std::map<std::tuple<int, int, int>, float> m_scaleFactorMap;
+    m_scaleFactorMap.clear();  // Ensure the map is empty before loading data
+
+    // Loop through the TTree and load data into the map
+    Long64_t nEntries = tree->GetEntries();
+    for (Long64_t i = 0; i < nEntries; ++i) {
+      tree->GetEntry(i);  // Get the data for this entry
+
+      // Store data in the map: key = (Run, Layer, Eta), value = ScaleFactor
+      m_scaleFactorMap[std::make_tuple(rn, layer, eta)] = sf;
+    }
+
+    // Close the file after loading data
+    file->Close();
+
+    ATH_MSG_INFO("Rebecca - Loaded ScaleFactor data into map with " << m_scaleFactorMap.size() << " entries.");
+
+  //Rebecca - End modifications 
   ATH_CHECK(AthAlgTool::initialize());
 
   ATH_CHECK(detStore()->retrieve(m_pixelid,"PixelID"));
-
   if (m_IBLParameterSvc.retrieve().isFailure()) {
     ATH_MSG_FATAL("Could not retrieve IBLParameterSvc");
     return StatusCode::FAILURE;
@@ -88,7 +141,12 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
 {
 
   ATH_MSG_INFO("Rebecca was here."); //Rebecca edits
-
+  int queryRun = 1;     // Example Run
+  int queryLayer = 1; // Example Layer
+  int queryEta = 1;   // Example Eta
+  auto key = std::make_tuple(queryRun, queryLayer, queryEta);
+  auto it = m_scaleFactorMap.find(key);
+  ATH_MSG_INFO(it->second); //Rebecca edits
   unsigned int pixelhits = 0;
   nUsedHits=0;
   nUsedIBLOverflowHits=0;
