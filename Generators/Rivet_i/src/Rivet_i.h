@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RIVET_I_H
@@ -17,6 +17,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 class ISvcLocator;
 class IxAODtoHepMCTool;
@@ -56,10 +57,10 @@ private:
 //  StatusCode regGraph(const AIDA::IDataPointSet& dps, const std::string& path);
 
   // Check and potentially modify events for correct units, beam particles, ...
-  const HepMC::GenEvent* checkEvent(const HepMC::GenEvent& event, const EventContext& ctx);
+  std::unique_ptr<HepMC::GenEvent> checkEvent(const HepMC::GenEvent& event, const EventContext& ctx);
 
   // Utility method to convert units of the event
-  void MeV2GeV(HepMC::GenEvent* event);
+  void MeV2GeV(HepMC::GenEvent& event);
 
   /// A pointer to the THistSvc
   //ServiceHandle<ITHistSvc> m_histSvc;
