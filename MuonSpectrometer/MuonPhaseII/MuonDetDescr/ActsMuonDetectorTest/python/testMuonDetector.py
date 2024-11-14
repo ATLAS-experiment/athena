@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon.Constants import VERBOSE
 
 def MuonDetectorNavTestCfg(flags, name = "MuonDetectorNavTest", **kwargs):
     result = ComponentAccumulator()
@@ -30,6 +31,8 @@ if __name__=="__main__":
     parser.add_argument("--dumpDetector", help="Save dump detector visualization", action='store_true', default=False )
     parser.add_argument("--dumpPassive", help="Save  detector visualization", action='store_true', default=False )
     parser.add_argument("--dumpDetectorVolumes", help="Save detector visualization", action='store_true', default=False )
+    parser.add_argument("--noSensitives", help="Do not use sensitive detectors", action='store_true', default=False )
+    parser.add_argument("--dumpMaterialSurfaces", help="Save material surfaces visualization", action='store_true', default=False )
 
 
     args = parser.parse_args()
@@ -43,8 +46,10 @@ if __name__=="__main__":
     cfg.merge(DetectorVolumeSvcCfg(flags))
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
     cfg.merge(AtlasFieldCacheCondAlgCfg(flags))
-    cfg.merge(MuonDetectorNavTestCfg(flags))
+    cfg.merge(MuonDetectorNavTestCfg(flags, OutputLevel=VERBOSE))
     cfg.getPublicTool("MuonDetectorBuilderTool").dumpDetector = args.dumpDetector
     cfg.getPublicTool("MuonDetectorBuilderTool").dumpPassive = args.dumpPassive
     cfg.getPublicTool("MuonDetectorBuilderTool").dumpDetectorVolumes = args.dumpDetectorVolumes
+    cfg.getPublicTool("MuonDetectorBuilderTool").BuildSensitives = not args.noSensitives
+    cfg.getPublicTool("MuonDetectorBuilderTool").dumpMaterialSurfaces = args.dumpMaterialSurfaces
     executeTest(cfg)

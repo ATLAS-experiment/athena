@@ -20,6 +20,8 @@
 #include "Acts/Detector/DetectorVolume.hpp"
 #include "Acts/Detector/PortalGenerators.hpp"
 #include "Acts/Material/HomogeneousVolumeMaterial.hpp"
+#include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
+#include "Acts/Material/MaterialSlab.hpp"
 #include "Acts/Navigation/DetectorVolumeFinders.hpp"
 #include "Acts/Navigation/InternalNavigation.hpp"
 #include "Acts/Navigation/NavigationDelegates.hpp"
@@ -30,11 +32,14 @@
 #include "Acts/Plugins/GeoModel/GeoModelMaterialConverter.hpp"
 #include "Acts/Plugins/GeoModel/GeoModelToDetectorVolume.hpp"
 #include "Acts/Surfaces/TrapezoidBounds.hpp"
+#include "Acts/Surfaces/RectangleBounds.hpp"
+#include "Acts/Surfaces/ConvexPolygonBounds.hpp"
+#include "Acts/Surfaces/PlaneSurface.hpp"
 
 #include <GeoModelKernel/GeoSimplePolygonBrep.h>
-#include <GeoModelKernel/GeoShapeShift.h>
 #include <GeoModelKernel/GeoShapeSubtraction.h>
-#include <GeoModelKernel/GeoShapeUnion.h>
+#include <GeoModelKernel/GeoBox.h>
+#include <GeoModelKernel/GeoTrd.h>
 #include "GeoModelHelpers/getChildNodesWithTrf.h"
 #include "ActsGeometryInterfaces/GeometryDefs.h"
 #include <set>
@@ -69,66 +74,6 @@ namespace ActsTrk {
         return StatusCode::SUCCESS;
     }
 
-    void MuonDetectorBuilderTool::getChamberPassives(const ActsGeometryContext& gctx, 
-                                                     const MuonGMR4::Chamber& chamber, 
-                                                     std::vector<volumePtr>& passiveVolumes) const {
-
-        for(const MuonGMR4::MuonReadoutElement* ele : chamber.readoutEles()){
-            const GeoVFullPhysVol* readOutVol = ele->getMaterialGeom();
-            PVConstLink parentVolume = readOutVol->getParent();
-            const Amg::Transform3D stationTransform = parentVolume->getX();
-            //Loop through the parent, skipping the fullphysvol which are the readOutElements
-            const std::vector<GeoChildNodeWithTrf> children = getChildrenWithRef(parentVolume, false);
-            for(const GeoChildNodeWithTrf& childNode : children){
-	            auto& childVol = *(childNode.volume);
-                if(typeid(childVol) == typeid(GeoFullPhysVol)){
-                    continue;
-                }
-                ATH_MSG_VERBOSE("Processing " << childNode.nodeName);
-                const GeoShape* shape = childNode.volume->getLogVol()->getShape();
-                const GeoMaterial* geoMaterial = childNode.volume->getLogVol()->getMaterial();
-                const Acts::Material aMat = Acts::GeoModel::geoMaterialConverter(*geoMaterial);
-                std::shared_ptr<Acts::HomogeneousVolumeMaterial> material = std::make_shared<Acts::HomogeneousVolumeMaterial>(aMat);
-                volumePtr passiveVolume = Acts::GeoModel::convertDetectorVolume(gctx.context(), *shape, "PASSIVE_"+childNode.nodeName+std::to_string(passiveVolumes.size()), childNode.transform * stationTransform, {});
-                passiveVolume->assignVolumeMaterial(material);
-                passiveVolume->assignGeometryId(Acts::GeometryIdentifier{}.setVolume(30).setSensitive(passiveVolumes.size()));
-                passiveVolumes.push_back(passiveVolume);
-            }
-        }
-    }
-
-    void MuonDetectorBuilderTool::processPassiveNodes(const ActsGeometryContext& gctx, 
-                                                      const GeoChildNodeWithTrf& node, 
-                                                      const std::string& name, 
-                                                      std::vector<volumePtr>& passiveVolumes, 
-                                                      const GeoTrf::Transform3D& transform) const {
-        std::vector<GeoChildNodeWithTrf> children = getChildrenWithRef(node.volume, false);
-        for(const GeoChildNodeWithTrf& childNode : children){
-            ATH_MSG_DEBUG("Child transform " << GeoTrf::toString(childNode.transform) << " Parent transform " << GeoTrf::toString(transform));
-            ATH_MSG_DEBUG("Combined transform " << GeoTrf::toString(transform * childNode.transform));
-            ATH_MSG_DEBUG("Child name " << name+"/"+childNode.nodeName);
-            processPassiveNodes(gctx, childNode, name+"/"+childNode.nodeName, passiveVolumes, transform * childNode.transform);
-        }
-        if (!children.empty()) return;
-        ATH_MSG_VERBOSE("Drawing volume named "<<name);
-        const GeoShape* shape = node.volume->getLogVol()->getShape();
-        if(shape->typeID() == GeoSimplePolygonBrep::getClassTypeID() or 
-            shape->typeID() == GeoShapeUnion::getClassTypeID() or
-            shape->typeID() == GeoShapeShift::getClassTypeID() or
-            shape->typeID() == GeoShapeSubtraction::getClassTypeID()){
-            //Skip these for now until https://github.com/acts-project/acts/pull/3713 is merged in
-            return;
-        }
-        const GeoMaterial* geoMaterial = node.volume->getLogVol()->getMaterial();
-        const Acts::Material aMat = Acts::GeoModel::geoMaterialConverter(*geoMaterial);
-        std::shared_ptr<Acts::HomogeneousVolumeMaterial> material = std::make_shared<Acts::HomogeneousVolumeMaterial>(aMat);
-        ATH_MSG_DEBUG("FINAL TRANSFORM " << GeoTrf::toString(transform));
-        volumePtr volume = Acts::GeoModel::convertDetectorVolume(gctx.context(), *shape, name + "_" + std::to_string(passiveVolumes.size()), transform, {});
-        volume->assignGeometryId(Acts::GeometryIdentifier{}.setVolume(30).setSensitive(passiveVolumes.size()));
-        volume->assignVolumeMaterial(material);
-        passiveVolumes.push_back(volume);
-    }
-
     Acts::Experimental::DetectorComponent MuonDetectorBuilderTool::construct(const Acts::GeometryContext& context) const{
         ATH_MSG_DEBUG("Building Muon Detector Volume");
         const MuonChamberSet chambers = m_detMgr->getAllChambers();
@@ -137,8 +82,8 @@ namespace ActsTrk {
         std::vector< volumePtr > detectorVolumePassiveVolumes{};
 
         detectorVolumeBoundingVolumes.reserve(chambers.size());
-        std::vector<surfacePtr> surfaces = {};
-        std::pair<std::vector<volumePtr>, std::vector<surfacePtr>> readoutElements; 
+        std::vector<surfacePtr> surfaces{};
+        std::vector<surfacePtr> materialSurfaces{};
 
         auto portalGenerator = Acts::Experimental::defaultPortalAndSubPortalGenerator();
         unsigned int numChambers = chambers.size();
@@ -146,9 +91,12 @@ namespace ActsTrk {
         for(const MuonGMR4::Chamber* chamber : chambers){
             unsigned int num = 0;
             //Gather the passives in each chamber
-            getChamberPassives(*gctx, *chamber, detectorVolumePassiveVolumes);
+            surfacePtr material{getChamberMaterial(*chamber, chamber->localToGlobalTrans(*gctx), materialSurfaces.size())};
             std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds = chamber->bounds();
-            readoutElements = constructElements(*gctx, *chamber, std::make_pair(numChambers,num));
+            materialSurfaces.push_back(material);
+            std::pair<std::vector<volumePtr>, std::vector<surfacePtr>> readoutElements = 
+                constructElements(*gctx, *chamber, std::make_pair(numChambers,num));
+            readoutElements.second.push_back(material);
             volumePtr detectorVolume = Acts::Experimental::DetectorVolumeFactory::construct(portalGenerator, 
                                                                                             gctx->context(), 
                                                                                             chamber->identString(),
@@ -171,6 +119,15 @@ namespace ActsTrk {
             readoutElements.second.clear();
         }
 
+        if(m_dumpMaterialSurfaces){
+            Acts::ObjVisualization3D helper;
+            for (const auto& surf : materialSurfaces){
+                Acts::GeometryView3D::drawSurface(helper, *surf, gctx->context());
+            }
+            helper.write("materialSurfaces.obj");
+            helper.clear();
+        }
+
         ATH_MSG_VERBOSE("Number of detector volumes: "<< detectorVolumeBoundingVolumes.size());
         ATH_MSG_VERBOSE("Number of chamber passives volumes: "<< detectorVolumePassiveVolumes.size());
         std::vector<GeoChildNodeWithTrf> childNodes = getChildrenWithRef(m_detMgr->getTreeTop(0), false);
@@ -182,7 +139,7 @@ namespace ActsTrk {
                 continue;
             }
             ATH_MSG_VERBOSE("Processing passive node "<<node.nodeName);
-            processPassiveNodes(*gctx, node, node.nodeName, detectorVolumePassiveVolumes, node.transform);
+            // processPassiveNodes(*gctx, node, node.nodeName, detectorVolumePassiveVolumes, node.transform);
         }
         ATH_MSG_VERBOSE("Number of total passive volumes: "<< detectorVolumePassiveVolumes.size());
 
@@ -300,6 +257,87 @@ std::pair<std::vector<volumePtr>,std::vector<surfacePtr>>
 
     return std::make_pair(std::move(readoutDetectorVolumes), std::move(readoutSurfaces));
 
+    }
+
+    float MuonDetectorBuilderTool::processSubtractionShape(const GeoShapeSubtraction* shape) const {
+        const GeoShape* subShape = shape->getOpA();
+        if(subShape->typeID() == GeoShapeSubtraction::getClassTypeID()){
+            return processSubtractionShape(dynamic_cast<const GeoShapeSubtraction*>(subShape));
+        }
+        //Returns a box everytime
+        if(subShape->typeID() != GeoBox::getClassTypeID()){
+            ATH_MSG_FATAL("Final shape is not a box.");
+            throw std::runtime_error("Final shape is not a box.");
+        }
+        const GeoBox* box = dynamic_cast<const GeoBox*>(subShape);
+        return 2 * box->getXHalfLength();
+        
+    }
+
+    surfacePtr MuonDetectorBuilderTool::getChamberMaterial(const MuonGMR4::Chamber& chamber, 
+                                                     const Amg::Transform3D& chamberTransform,
+                                                     const int& totalMaterials) const {
+        std::vector<Acts::MaterialSlab> slabs{};
+        std::shared_ptr<const Acts::PlanarBounds> bounds = std::make_shared<Acts::TrapezoidBounds>(chamber.halfXLong(), chamber.halfXShort(), chamber.halfY());
+        Amg::Transform3D transform = chamberTransform * GeoTrf::RotateZ3D(M_PI);
+        for(const MuonGMR4::MuonReadoutElement* ele : chamber.readoutEles()){
+            const GeoVFullPhysVol* readOutVol = ele->getMaterialGeom();
+            PVConstLink parentVolume = readOutVol->getParent();
+            const std::vector<GeoChildNodeWithTrf> children = getChildrenWithRef(parentVolume, false);
+            for(const GeoChildNodeWithTrf& childNode : children){
+	            auto& childVol = *(childNode.volume);
+                const GeoShape* shape = childVol.getLogVol()->getShape();
+                const GeoMaterial* geoMaterial = childVol.getLogVol()->getMaterial();
+                const Acts::Material aMat = Acts::GeoModel::geoMaterialConverter(*geoMaterial);
+                float thickness{0.};
+                if(shape->typeID() == GeoSimplePolygonBrep::getClassTypeID()){
+                    const GeoSimplePolygonBrep* simplePolygon = dynamic_cast<const GeoSimplePolygonBrep*>(shape);
+                    thickness = 2 * simplePolygon->getDZ();
+                }else if(shape->typeID() == GeoBox::getClassTypeID()){
+                    const GeoBox* box = dynamic_cast<const GeoBox*>(shape);
+                    thickness = 2 * box->getXHalfLength();
+                }else if(shape->typeID() == GeoTrd::getClassTypeID()){
+                    const GeoTrd* trd = dynamic_cast<const GeoTrd*>(shape);
+                    thickness = 2 * trd->getXHalfLength1();
+                }else if(shape->typeID() == GeoShapeSubtraction::getClassTypeID()){
+                    const GeoShapeSubtraction* subtraction = dynamic_cast<const GeoShapeSubtraction*>(shape);
+                    thickness = processSubtractionShape(subtraction);
+                }
+                slabs.push_back(Acts::MaterialSlab{aMat, thickness});
+            }
+        }
+        std::shared_ptr<Acts::PlaneSurface> surface = Acts::Surface::makeShared<Acts::PlaneSurface>(transform, bounds);
+        //Combines the thickness of all layers, and has one set of average material constants
+        Acts::MaterialSlab avgSlab = Acts::MaterialSlab::averageLayers(slabs);
+        std::shared_ptr<Acts::HomogeneousSurfaceMaterial> material = std::make_shared<Acts::HomogeneousSurfaceMaterial>(avgSlab);
+        surface->assignSurfaceMaterial(material);
+        surface->assignGeometryId(Acts::GeometryIdentifier{}.setVolume(29).setSensitive(totalMaterials));
+        return surface;
+    }
+
+    void MuonDetectorBuilderTool::processPassiveNodes(const ActsGeometryContext& gctx, 
+                                                      const GeoChildNodeWithTrf& node, 
+                                                      const std::string& name, 
+                                                      std::vector<volumePtr>& passiveVolumes, 
+                                                      const GeoTrf::Transform3D& transform) const {
+        std::vector<GeoChildNodeWithTrf> children = getChildrenWithRef(node.volume, false);
+        for(const GeoChildNodeWithTrf& childNode : children){
+            ATH_MSG_DEBUG("Child transform " << GeoTrf::toString(childNode.transform) << " Parent transform " << GeoTrf::toString(transform));
+            ATH_MSG_DEBUG("Combined transform " << GeoTrf::toString(transform * childNode.transform));
+            ATH_MSG_DEBUG("Child name " << name+"/"+childNode.nodeName);
+            processPassiveNodes(gctx, childNode, name+"/"+childNode.nodeName, passiveVolumes, transform * childNode.transform);
+        }
+        if (!children.empty()) return;
+        ATH_MSG_VERBOSE("Drawing volume named "<<name);
+        const GeoShape* shape = node.volume->getLogVol()->getShape();
+        const GeoMaterial* geoMaterial = node.volume->getLogVol()->getMaterial();
+        const Acts::Material aMat = Acts::GeoModel::geoMaterialConverter(*geoMaterial);
+        std::shared_ptr<Acts::HomogeneousVolumeMaterial> material = std::make_shared<Acts::HomogeneousVolumeMaterial>(aMat);
+        ATH_MSG_DEBUG("FINAL TRANSFORM " << GeoTrf::toString(transform));
+        volumePtr volume = Acts::GeoModel::convertDetectorVolume(gctx.context(), *shape, name + "_" + std::to_string(passiveVolumes.size()), transform, {});
+        volume->assignGeometryId(Acts::GeometryIdentifier{}.setVolume(30).setSensitive(passiveVolumes.size()));
+        volume->assignVolumeMaterial(material);
+        passiveVolumes.push_back(volume);
     }
 
 }
