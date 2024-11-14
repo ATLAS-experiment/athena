@@ -65,16 +65,18 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
   unsigned int droppedSeparatorGenEvents{0};
 #ifdef HEPMC3
   int backupPileUpType{0};
-#endif
   int backupBunchCrossingTime{0};
+#endif
   // Copy signal GenEvents
   for (McEventCollection::const_iterator it = signalContainer->begin(); it != signalContainer->end(); ++it) {
+#ifdef HEPMC3
     if ( (*it)->event_number() == -1 ) {
       ++droppedSeparatorGenEvents;
       ATH_MSG_VERBOSE("Signal: Skipping a separator GenEvent. " << droppedSeparatorGenEvents << " skipped so far.");
       backupBunchCrossingTime+=25; // NB This is a bit of a hack, but better than having everything in-time
       continue;
     }
+#endif
     HepMC::GenEvent* copiedEvent = new HepMC::GenEvent(**it);
     HepMC::fillBarcodesAttribute(copiedEvent);
 #ifdef HEPMC3
@@ -107,7 +109,9 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
     outputContainer->push_back(copiedEvent);
   }
 
+#ifdef HEPMC3
   backupBunchCrossingTime = 0;
+#endif
   // Copy background GenEvents if configured
   if (!m_bkgInputKey.key().empty()) {
     McEventCollection::const_iterator it = bkgContainerPtr->begin();
@@ -116,12 +120,14 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
       ++it;
     }
     for ( ; it != bkgContainerPtr->end(); ++it) {
+#ifdef HEPMC3
       if ( (*it)->event_number() == -1 ) {
         ++droppedSeparatorGenEvents;
         ATH_MSG_VERBOSE("Background: Skipping a separator GenEvent. " << droppedSeparatorGenEvents << " skipped so far.");
         backupBunchCrossingTime+=25; // NB This is a bit of a hack, but better than having everything in-time
         continue;
       }
+#endif
       HepMC::GenEvent* copiedEvent = new HepMC::GenEvent(**it);
       HepMC::fillBarcodesAttribute(copiedEvent);
 #ifdef HEPMC3
