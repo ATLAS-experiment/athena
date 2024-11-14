@@ -123,31 +123,6 @@ namespace met {
       xAOD::MissingETAssociationHelper& helper,
       bool doJetJVT) override final;
 
-    virtual StatusCode retrieveOverlapRemovedConstituents(
-      const xAOD::PFOContainer* cpfo,
-      const xAOD::PFOContainer* npfo,
-      xAOD::MissingETAssociationHelper& metHelper,
-      xAOD::PFOContainer* OR_cpfos,
-      xAOD::PFOContainer* OR_npfos,
-      bool retainMuon = false,
-      const xAOD::IParticleContainer* muonCollection = 0) override final; //,
-    // MissingETBase::UsageHandler::Policy p);
-
-    virtual StatusCode retrieveOverlapRemovedConstituents(
-      const xAOD::PFOContainer* pfo,
-      xAOD::MissingETAssociationHelper& metHelper,
-      const xAOD::PFOContainer** OR_pfos,
-      bool retainMuon,
-      const xAOD::IParticleContainer* muonCollection) override final;
-
-    virtual const xAOD::PFOContainer* retrieveOverlapRemovedConstituents(
-      const xAOD::PFOContainer* signals,
-      xAOD::MissingETAssociationHelper& helper,
-      bool retainMuon = false,
-      const xAOD::IParticleContainer* muonCollection = 0,
-      MissingETBase::UsageHandler::Policy p =
-        MissingETBase::UsageHandler::ParticleFlow) override final;
-
     virtual StatusCode rebuildTrackMET(xAOD::MissingET* metJet,
                                        const xAOD::JetContainer* jets,
                                        xAOD::MissingETAssociationHelper& helper,
@@ -170,10 +145,8 @@ namespace met {
 
 
     SG::ReadHandleKey<xAOD::VertexContainer>  m_PVkey;
-    // std::string m_pvcoll;
 
     // configurable accessors
-    std::unique_ptr<SG::AuxElement::ConstAccessor<float > > m_acc_jetJvtMoment;
     std::unique_ptr<SG::AuxElement::ConstAccessor<char > > m_acc_jetRejectionDec;
 
     // pT threshold for suppressing warnings of objects missing in association map
@@ -193,11 +166,6 @@ namespace met {
 
     std::string m_jetSelection;
     std::string m_JvtWP;
-    bool m_useR21JvtFallback;
-
-    // thresholds and Jvt cut values for Tenacious WP
-    double m_JvtCutTight, m_JvtTightPtMax;
-    double m_JvtCutMedium, m_JvtMediumPtMax;
 
     // Extra configurables for custom WP
     double m_customCenJetPtCut,m_customFwdJetPtCut;

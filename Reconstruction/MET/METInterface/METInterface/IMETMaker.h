@@ -104,31 +104,6 @@ public:
                                    const xAOD::MissingET* coreSoftTrk,
                                    bool doJetJVT) = 0;
 
-
-  ///////////////////////////////////////////////////////////////////
-  // Additional utility commands
-  ///////////////////////////////////////////////////////////////////
-
-  virtual StatusCode retrieveOverlapRemovedConstituents(const xAOD::PFOContainer* cpfo, const xAOD::PFOContainer* npfo,
-			  xAOD::MissingETAssociationHelper& metHelper,
-			  xAOD::PFOContainer *OR_cpfos,
-			  xAOD::PFOContainer *OR_npfos,
-			  bool retainMuon = false,
-			  const xAOD::IParticleContainer* muonCollection=0) = 0;//,  
-			  //MissingETBase::UsageHandler::Policy p); //jetOR
-
-  virtual StatusCode retrieveOverlapRemovedConstituents(const xAOD::PFOContainer* pfo,
-			  xAOD::MissingETAssociationHelper& metHelper,
-			  const xAOD::PFOContainer **OR_pfos,
-			  bool retainMuon,
-			  const xAOD::IParticleContainer* muonCollection=0) = 0;
-
-  virtual const xAOD::PFOContainer* retrieveOverlapRemovedConstituents(const xAOD::PFOContainer* signals,
-			  xAOD::MissingETAssociationHelper& helper,
-			  bool retainMuon = false,
-			  const xAOD::IParticleContainer* muonCollection=0, 
-			  MissingETBase::UsageHandler::Policy p=MissingETBase::UsageHandler::ParticleFlow) = 0; //jetOR
-
   virtual StatusCode markInvisible(const xAOD::IParticleContainer* collection,
 				   xAOD::MissingETAssociationHelper& helper,
 				   xAOD::MissingETContainer* metCont) = 0;
