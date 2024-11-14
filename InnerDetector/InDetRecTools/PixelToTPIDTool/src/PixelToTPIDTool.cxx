@@ -87,6 +87,8 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
                              int& nUsedIBLOverflowHits) const
 {
 
+  ATH_MSG_INFO("Rebecca was here."); //Rebecca edits
+
   unsigned int pixelhits = 0;
   nUsedHits=0;
   nUsedIBLOverflowHits=0;
