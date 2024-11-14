@@ -100,11 +100,11 @@ int main(int argc, char** argv) {
         TEST_FUNCTION(isKK)
         TEST_FUNCTION(isMonopole)
         TEST_FUNCTION(isPythia8Specific)
-        TEST_FUNCTION(SUSY::isRBaryon)
-        TEST_FUNCTION(SUSY::isRGlueball)
-        TEST_FUNCTION(SUSY::isRHadron) // 70
-        TEST_FUNCTION(SUSY::isRMeson)
-        TEST_FUNCTION(SUSY::isSLepton)
+        TEST_FUNCTION(isRBaryon)
+        TEST_FUNCTION(isRGlueball)
+        TEST_FUNCTION(isRHadron) // 70
+        TEST_FUNCTION(isRMeson)
+        TEST_FUNCTION(isSLepton)
         TEST_FUNCTION(isSMLepton)
         TEST_FUNCTION(isSMNeutrino)
         TEST_FUNCTION(isTetraquark)
@@ -113,8 +113,8 @@ int main(int argc, char** argv) {
         TEST_FUNCTION(isTopMeson) // 80
         TEST_FUNCTION(isTrajectory)
         TEST_FUNCTION(leadingQuark)
-        TEST_FUNCTION(SUSY::spin2)
-        TEST_FUNCTION(SUSY::isSquark)
+        TEST_FUNCTION(spin2)
+        TEST_FUNCTION(isSquark)
         if  (myline!=current) { printf("reference :%s\ncalculated:%s\n",myline.c_str(),current.c_str()); return 1; }
         //printf("%s\n",current.c_str());
         processed=true;
