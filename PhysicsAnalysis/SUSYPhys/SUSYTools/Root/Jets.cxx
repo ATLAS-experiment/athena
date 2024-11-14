@@ -753,11 +753,12 @@ namespace ST {
   int SUSYObjDef_xAOD::IsBJetContinuous(const xAOD::Jet& input) const {
     //////////////////////
     // Cheatsheet:
-    // returns 5 if between 60% and 0%
-    // returns 4 if between 70% and 60%
-    // returns 3 if between 77% and 70%
-    // returns 2 if between 85% and 77%
-    // returns 1 if between 100% and 85%
+    // returns 6 if between 65% and 0%
+    // returns 5 if between 70% and 65%
+    // returns 4 if between 77% and 70%
+    // returns 3 if between 85% and 77%
+    // returns 2 if between 90% and 85%
+    // returns 1 if between 100% and 90%
     // returns 0 if smaller than -1e4-> should never happen
     // return -1 if bigger than 1e4 or not in b-tagging acceptance
     //////////////////////

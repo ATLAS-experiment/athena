@@ -1654,9 +1654,8 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     }
 
     // print a warning if there is indication that the user supplied a CDI file not matching to the sample being processed
-    // for the GN2v00 tagger the Run 2 and Run 3 files are the same, so we skip this check
     // see --> https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagRel22HighLevelSummary
-    if( (m_bTaggingCalibrationFilePath.find(!m_isRun3 ? "MC20" : "MC21") == std::string::npos) && (m_BtagTagger.find("GN2v00") != std::string::npos) ) {
+    if( (m_bTaggingCalibrationFilePath.find(!m_isRun3 ? "MC20" : "MC23") == std::string::npos) && (m_bTaggingCalibrationFilePath.find(!m_isRun3 ? "MC20" : "MC21") == std::string::npos) ) {
       ATH_MSG_WARNING( "You are using a "<<(!m_isRun3 ? "Run3":"Run2")<<" CDI file while running on "<<(!m_isRun3 ? "Run2":"Run3")<<" sample; Please updates your CDI file to the correct version for "<<(!m_isRun3 ? "Run2":"Run3"));
     }
 
@@ -1728,21 +1727,69 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
    // Set MCshowerType for FTAG MC/MC SFs
     // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagCalibrationRecommendationsRelease21#MC_MC_Scale_Factors_for_Analysis
     std::string MCshowerID;
-    if(!m_isRun3){
-      MCshowerID= "default";                             // Powheg+Pythia8 (410470)  - PhPy8EG_A14
-      if (m_showerType == 1)      MCshowerID = "411233"; // PowhegHerwig7 
-      else if (m_showerType == 2) MCshowerID = "600666"; // PhH7EG_H7UE - 601414
-      else if (m_showerType == 3) MCshowerID = "410250"; // Sherpa_221
-      else if (m_showerType == 4) MCshowerID = "700122"; // Sh_2210
-      else if (m_showerType == 5) MCshowerID = "700122"; // Sh_2211
-      else if (m_showerType == 6) MCshowerID = "700660"; // Sh_2212 - 700660
-      else if (m_showerType == 7) MCshowerID = "410464"; // aMcAtNloPy8
-      else if (m_showerType == 8) MCshowerID = "412116"; // aMcAtNloHerwig7
+    if(m_showerType==-1){
+        ATH_MSG_ERROR( "Error! m_showerType=-1, which is an error case for FTAG MC/MC SFs." );
+        return StatusCode::FAILURE;
     }
-    else{
-      MCshowerID= "default";                              // Powheg+Pythia8 (601229)  - PhPy8EG_A14
-      if (m_showerType == 2)      MCshowerID = "601414";  // POWHEG+Herwig721         - PhH7EG_A14
-      else if (m_showerType == 6) MCshowerID = "700660";  // Sherpa 2.2.12            - Sh_2212
+    if(m_BtagTagger=="DL1dv01"){
+      if(!m_isRun3){
+        MCshowerID= "default";                             // Powheg+Pythia8 (410470)  - PhPy8EG_A14
+        if (m_showerType == 1)      MCshowerID = "411233"; // PowhegHerwig7 
+        else if (m_showerType == 2) MCshowerID = "600666"; // PhH7EG_H7UE - 601414
+        else if (m_showerType == 3) MCshowerID = "410250"; // Sherpa_221
+        else if (m_showerType == 4) MCshowerID = "700122"; // Sh_2210
+        else if (m_showerType == 5) MCshowerID = "700122"; // Sh_2211
+        else if (m_showerType == 6) MCshowerID = "700660"; // Sh_2212 - 700660
+        else if (m_showerType == 7) MCshowerID = "410464"; // aMcAtNloPy8
+        else if (m_showerType == 8) MCshowerID = "412116"; // aMcAtNloHerwig7
+        else if (m_showerType != 0){
+            ATH_MSG_WARNING("Unknown ShowerID detected! Using default FTAG MC-MC SFs (Powheg+Pythia8). Please check if these are applicable for this sample!");
+        }
+      }
+      else{
+        MCshowerID= "default";                              // Powheg+Pythia8 (601229)  - PhPy8EG_A14
+        if (m_showerType == 2)      MCshowerID = "601414";  // POWHEG+Herwig721         - PhH7EG_A14
+        else if (m_showerType == 6) MCshowerID = "700660";  // Sherpa 2.2.12            - Sh_2212
+        else if (m_showerType != 0){
+            ATH_MSG_WARNING("Unknown ShowerID detected! Using default FTAG MC-MC SFs (Powheg+Pythia8). Please check if these are applicable for this sample!");
+        }
+      }
+    } else if (m_BtagTagger=="GN2v01"){
+      if(!m_isRun3){
+        MCshowerID= "default";                              // PowhegPythia8EvtGen (410470)
+        if (m_showerType == 1)      MCshowerID = "410480";  // PYTHIA8EVTGEN517 (410480)
+        else if (m_showerType == 2) MCshowerID = "411233";  // POWHEGHERWIG7 - 411233
+        else if (m_showerType == 3) MCshowerID = "600666";  // PhH7EG_H7UE - 600666
+        else if (m_showerType == 4) MCshowerID = "700660"; // Sh_2210 FTAGAnalysisConfig uses this, but docs say only 11-16 can be used
+        else if (m_showerType == 5) MCshowerID = "700660"; // Sh_2211
+        else if (m_showerType == 6) MCshowerID = "700660"; // Sh_2212
+        else if (m_showerType == 7) MCshowerID = "700660"; // Sh_2214
+        else if (m_showerType == 8) {
+            ATH_MSG_WARNING("Unknown Sherpa version detected! Using FTAG MC-MC SFs for Sherpa 2.2.11-2.2.16. Please check if these are applicable for this sample!"); 
+            MCshowerID = "700660"; // Unknown Sherpa Version. This is to handle Sh_blank (e.g. DSID 701050). The examples I've found are all 2.2.16, but that's not guaranteed.
+        }
+        else if (m_showerType != 0){
+            ATH_MSG_WARNING("Unknown ShowerID detected! Using default FTAG MC-MC SFs (Powheg+Pythia8). Please check if these are applicable for this sample!");
+        }
+      }
+      else {
+        MCshowerID= "default";                              // PowhegPythia8EvtGen (601229)
+        if (m_showerType == 1)      MCshowerID = "601398";  // PYTHIA8EVTGEN517 (601398)
+        else if (m_showerType == 3) MCshowerID = "601414";  // PhH7EG_H7UE - 601414 
+        else if (m_showerType == 5) MCshowerID = "700808"; // Sh_2211
+        else if (m_showerType == 6) MCshowerID = "700808"; // Sh_2212
+        else if (m_showerType == 7) MCshowerID = "700808"; // Sh_2214
+        else if (m_showerType == 8) {
+            ATH_MSG_WARNING("Unknown Sherpa version detected! Using FTAG MC-MC SFs for Sherpa 2.2.11-2.2.16. Please check if these are applicable for this sample!");
+            MCshowerID = "700660"; // Unknown Sherpa Version
+        }
+        else if (m_showerType != 0){
+            ATH_MSG_WARNING("Unknown ShowerID detected! Using default FTAG MC-MC SFs (Powheg+Pythia8). Please check if these are applicable for this sample!");
+        }
+      }
+    } else {
+        ATH_MSG_WARNING("Unknown b-tagger detected! Only DL1dv01 and GN2v01 are supported. Falling back to default FTAG MC-MC SFs (Powheg+Pythia8). Please check if these are applicable for this sample!");
+        MCshowerID= "default";
     }
 
     // btagEfficiencyTool
@@ -1764,6 +1811,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_btagEffTool.setProperty("EfficiencyCCalibrations",     MCshowerID   ));
       ATH_CHECK( m_btagEffTool.setProperty("EfficiencyTCalibrations",     MCshowerID   ));
       ATH_CHECK( m_btagEffTool.setProperty("EfficiencyLightCalibrations", MCshowerID   ));
+      ATH_CHECK( m_btagEffTool.setProperty("EigenvectorReductionB", m_EigenvectorReductionB ));
+      ATH_CHECK( m_btagEffTool.setProperty("EigenvectorReductionC", m_EigenvectorReductionC ));
+      ATH_CHECK( m_btagEffTool.setProperty("EigenvectorReductionLight", m_EigenvectorReductionLight ));
       ATH_CHECK( m_btagEffTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_btagEffTool.retrieve() );
     } else ATH_CHECK( m_btagEffTool.retrieve() );
@@ -1788,6 +1838,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_CHECK( m_btagEffTool_trkJet.setProperty("EfficiencyCCalibrations",     MCshowerID   ));
         ATH_CHECK( m_btagEffTool_trkJet.setProperty("EfficiencyTCalibrations",     MCshowerID   ));
         ATH_CHECK( m_btagEffTool_trkJet.setProperty("EfficiencyLightCalibrations", MCshowerID   ));
+        ATH_CHECK( m_btagEffTool_trkJet.setProperty("EigenvectorReductionB", m_EigenvectorReductionB ));
+        ATH_CHECK( m_btagEffTool_trkJet.setProperty("EigenvectorReductionC", m_EigenvectorReductionC ));
+        ATH_CHECK( m_btagEffTool_trkJet.setProperty("EigenvectorReductionLight", m_EigenvectorReductionLight ));
         ATH_CHECK( m_btagEffTool_trkJet.setProperty("OutputLevel", this->msg().level()) );
         ATH_CHECK( m_btagEffTool_trkJet.retrieve() );
       } else if (m_btagEffTool_trkJet.isUserConfigured()) ATH_CHECK( m_btagEffTool_trkJet.retrieve() );

@@ -165,10 +165,11 @@ namespace ST {
     return "Unknown";
   }
 
-  static inline int getMCShowerType(const std::string& sample_name) {
+  static inline int getMCShowerType(const std::string& sample_name, const std::string& tagger="") {
     /** Get MC generator index for the b-tagging efficiency maps*/
     // This needs VERY careful syncing with m_showerType in SUSYToolsInit!  Change with care!
-    const static std::vector<TString> gen_mc_generator_keys = {"POWHEGHERWIG7","PHH7EG", "SHERPA_221_", "SHERPA_2210","SHERPA_2211","SHERPA_2212", "AMCATNLOPY8","AMCATNLOHERWIG7"};
+    const static std::vector<TString> gen_mc_generator_keys = {"PYTHIA8EVTGEN517","POWHEGHERWIG7","PHH7EG","SHERPA_2210","SHERPA_2211","SHERPA_2212","SHERPA_2214","SHERPA_UNKNOWN"};
+    const static std::vector<TString> gen_mc_generator_keys_dl1d = {"POWHEGHERWIG7","PHH7EG", "SHERPA_221_", "SHERPA_2210","SHERPA_2211","SHERPA_2212", "AMCATNLOPY8","AMCATNLOHERWIG7"};
 
     //pre-process sample name
     TString tmp_name(sample_name);
@@ -177,14 +178,26 @@ namespace ST {
     if(tmp_name.Contains("Pythia8") && !tmp_name.Contains("EvtGen")) tmp_name.ReplaceAll("Pythia8","PYTHIA8EVTGEN");
     if(tmp_name.Contains("Py8") && !tmp_name.Contains("EG")) tmp_name.ReplaceAll("Py8","PYTHIA8EVTGEN");
     if(tmp_name.Contains("Sh_2")) tmp_name.ReplaceAll("Sh_2","SHERPA_2");
+    if(tmp_name.Contains("Sh_") && !tmp_name.Contains("Sh_2")) tmp_name.ReplaceAll("Sh_","SHERPA_UNKNOWN_");
+    if(tmp_name.Contains("Sherpa_") && !tmp_name.Contains("Sherpa_2")) tmp_name.ReplaceAll("Sherpa_","SHERPA_UNKNOWN_"); //This is needed as some samples don't label the Sherpa version
     
     //capitalize the entire sample name
     tmp_name.ToUpper();
     //find shower type in name
     unsigned int ishower = 0;
-    for( const auto & gen : gen_mc_generator_keys ){
-      if( tmp_name.Contains(gen) ){return ishower+1;}
-      ishower++;
+    if (tagger=="DL1dv01"){
+      for( const auto & gen : gen_mc_generator_keys_dl1d ){
+        if( tmp_name.Contains(gen) ){return ishower+1;}
+        ishower++;
+      }
+    } else if (tagger=="GN2v01"){
+      for( const auto & gen : gen_mc_generator_keys ){
+        if( tmp_name.Contains(gen) ){return ishower+1;}
+        ishower++;
+      }
+    } else {
+        std::cout << "ST::getMCShowerType ERROR: Invalid tagger " << tagger << ". Supported values are GN2v01 and DL1dv01." << std::endl;
+        return -1;
     }  
     if( tmp_name.Contains("PYTHIA8EVTGEN") || tmp_name.Contains("PhPy8EG") ) return 0;
 
@@ -214,7 +227,7 @@ namespace ST {
     public:
     virtual StatusCode readConfig() = 0;
 
-    virtual int getMCShowerType(const std::string& sample_name) const = 0;
+    virtual int getMCShowerType(const std::string& sample_name, const std::string& tagger="") const = 0;
 
     // For checking the origin of the input
     virtual bool isData() const = 0;

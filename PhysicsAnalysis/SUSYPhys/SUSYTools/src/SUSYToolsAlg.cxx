@@ -690,7 +690,7 @@ StatusCode SUSYToolsAlg::execute() {
     ATH_MSG_DEBUG("Processing jets");
     jet_n_flow_nominal->Fill(Cut::all);
     bjet = false;
-    if ( ST::acc_bjet(*jet) == 1  ) bjet = true;
+    if ( ST::acc_bjet(*jet) >= 3  ) bjet = true;
     if (bjet) bjet_n_flow_nominal->Fill(Cut::all);
     //
     if ( ST::acc_baseline(*jet) == 1 ){
@@ -1144,7 +1144,7 @@ StatusCode SUSYToolsAlg::execute() {
         ATH_MSG_VERBOSE( " Jet passes OR ? "    << static_cast<int>(ST::acc_passOR(*jet)));
         if (ST::acc_passOR(*jet)) {
           if (m_slices["bjet"] && (isNominal || syst_affectsJets || syst_affectsBTag)) {
-            m_SUSYTools->IsBJet(*jet);
+            m_SUSYTools->IsBJetContinuous(*jet);
           }
           ATH_MSG_VERBOSE( " Jet is bjet ? "    << static_cast<int>(ST::acc_bjet(*jet)));
         }
