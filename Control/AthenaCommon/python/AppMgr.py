@@ -417,7 +417,7 @@ class AthAppMgr( AppMgr ):
          self._cppApp = GaudiAppMgr( outputlevel = self.outputLevel,
                                      joboptions  = None,
                                      selfoptions = selfOptions )
-         self.__dict__['state'] = getattr(self._cppApp, 'state')
+         self.__dict__['state'] = self._cppApp.state
          for k,v in selfOptions.items():
             setattr(self._cppApp,k,v)
          self.__dict__['CreateSvc'] = _createSvc
@@ -866,7 +866,7 @@ def auditor( self, auditor ):
    from GaudiAud import %s
    svcMgr.AuditorSvc += %s()""", auditor, auditor )
 
-   if type(auditor) == str:
+   if type(auditor) is str:
       from AthenaCommon import ConfigurableDb
       auditor = ConfigurableDb.getConfigurable( auditor )()
    self.__iadd__( auditor )
