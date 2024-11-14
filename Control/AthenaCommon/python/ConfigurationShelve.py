@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file: AthenaCommon/python/ConfigurationShelve.py
 # @author: Wim Lavrijsen (WLavrijsen@lbl.gov)
@@ -123,8 +123,7 @@ class ConfigurationJar( object ):
 
     # now handle jobproperties
       import AthenaCommon.JobProperties as JobProperties
-      setattr( JobProperties, 'jobproperties',  d['JobProperties'] )
-      pass
+      JobProperties.jobproperties = d['JobProperties']
 
    def __str__(self):
       import os
@@ -150,7 +149,7 @@ def storeJobOptionsCatalogue( cfg_fname ):
            v = str( v.toStringProperty() )
         elif hasattr( v, 'toString' ):
            v = str( v.toString() )
-        elif type (v) == float:
+        elif type (v) is float:
            # str(1.8e12) will give '1.8e+12' in py2
            # and `1800000000000.0' in py3.
            # Convert floats like this for consistency.
@@ -321,7 +320,7 @@ def saveToAscii(out, cfgName=None):
    if cfgName is None: cfgName = "Snapshot"
    content = ConfigurationJar( cfgName ).content()
 
-   if type(out) == str:
+   if type(out) is str:
       out = open( out, "w" )
    for v in content.values(): out.write( str(v) + os.linesep )
 
