@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RDBAccessSvc/IRDBAccessSvc.h"
@@ -85,7 +85,7 @@ EndcapFastSimDedicatedSD::EndcapFastSimDedicatedSD(StoreGateSvc* detStore)
 }
 
 // ProcessHitsMethod
-void EndcapFastSimDedicatedSD::ProcessSpot(const EnergySpot  & spot){
+void EndcapFastSimDedicatedSD::ProcessSpot(const EnergySpot  & spot, double weight){
 
   // Fill the identifier.
   Point3D<double> globalPosition=spot.GetPosition();
@@ -172,7 +172,7 @@ void EndcapFastSimDedicatedSD::ProcessSpot(const EnergySpot  & spot){
                        << etaIndex
                        << phiBin;
         // call process to add this to the collection 
-        SimpleHit(m_larID, spot.GetTime(), spot.GetEnergy());
+        SimpleHit(m_larID, spot.GetTime(), spot.GetEnergy()*weight);
         return;
       }
     }

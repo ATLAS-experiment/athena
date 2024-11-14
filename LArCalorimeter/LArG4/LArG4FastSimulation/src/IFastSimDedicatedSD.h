@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4FASTSIMULATION_IFASTSIMDEDICATEDSD_H
@@ -22,7 +22,7 @@ class IFastSimDedicatedSD : public LArG4SimpleSD {
   /// ProcessHitsMethod
   /** Process a single energy spot from a frozen shower.
       The appropriate region of the sensitive detector is calculated and a LArIdentifier is constructed*/
-  virtual void ProcessSpot(const EnergySpot & spot) = 0;
+  virtual void ProcessSpot(const EnergySpot & spot, double weight) = 0;
 
 };
 #endif //LARG4FASTSIMULATION_IFASTSIMDEDICATEDSD_H

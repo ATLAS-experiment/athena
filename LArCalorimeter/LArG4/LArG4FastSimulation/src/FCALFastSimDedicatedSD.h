@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4FASTSIMULATION_FCALFASTSIMDEDICATEDSD_H
@@ -29,7 +29,7 @@ public:
   ~FCALFastSimDedicatedSD() {}
 
   // ProcessHitsMethod
-  virtual void ProcessSpot(const EnergySpot & spot) override final;
+  virtual void ProcessSpot(const EnergySpot & spot, double weight) override final;
 
 private:
 
