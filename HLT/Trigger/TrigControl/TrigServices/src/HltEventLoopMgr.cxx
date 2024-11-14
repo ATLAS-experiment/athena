@@ -549,13 +549,13 @@ StatusCode HltEventLoopMgr::nextEvent(int /*maxevt*/)
   // variables must span beyond any I/O TBB task.
   ATH_MSG_DEBUG("Waiting for all I/O tasks and threads to return");
   m_parallelIOTaskGroup.wait();
-  m_inputThread.reset();
-  m_outputThread.reset();
+  m_inputThread->wait();
+  m_outputThread->wait();
 
   // Stop the event timer thread
   ATH_MSG_DEBUG("All I/O threads and tasks finished. Stopping the timeout thread");
   m_timeoutThread->stop();
-  m_timeoutThread.reset();
+  m_timeoutThread->wait();
   ATH_MSG_DEBUG("The timeout thread finished");
 
   ATH_MSG_INFO("Finished loop on events");
