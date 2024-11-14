@@ -40,7 +40,8 @@ class  LArBadChannel {
        deadSCACellBit = 20,
        badFirstSampleBit = 21,
        unflaggedByLADIeSBit = 22,
-       reflaggedByLADIeSBit = 23
+       reflaggedByLADIeSBit = 23,
+       badAutoCorrBit=24
     };
 
   };
@@ -128,6 +129,7 @@ class  LArBadChannel {
   bool badFirstSample() const {if(m_isSC) return false; else return statusBad( LArBadChannelEnum::badFirstSampleBit);}
   bool unflaggedByLADIeS() const {if(m_isSC) return statusBad( LArBadChannelSCEnum::unflaggedByLADIeSBit); else return statusBad( LArBadChannelEnum::unflaggedByLADIeSBit);}
   bool reflaggedByLADIeS() const {if(m_isSC) return statusBad( LArBadChannelSCEnum::reflaggedByLADIeSBit); else return statusBad( LArBadChannelEnum::reflaggedByLADIeSBit);}
+  bool badAutoCorr() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::badAutoCorrBit);}
 	
   bool reallyNoisy() const {return (highNoiseHG() || highNoiseMG() || highNoiseLG() ||
 				    unstableNoiseHG() || unstableNoiseMG() || unstableNoiseLG());}
