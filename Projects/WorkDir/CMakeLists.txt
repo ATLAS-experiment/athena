@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # Project file for building a selected set of packages against an
 # installed ATLAS release/nightly.
@@ -15,6 +15,10 @@ project( WorkDir )
 # capabilities anymore.
 set( CMAKE_CUDA_ARCHITECTURES "52" CACHE STRING
    "CUDA architectures to build code for" )
+
+# Disable FindBoost warnings:
+set( Boost_NO_WARN_NEW_VERSIONS TRUE CACHE BOOL
+   "Do not warn about incompatible Boost versions" )
 
 # Enable the CI tests in the CITest package in case the user wants to
 # run them locally:

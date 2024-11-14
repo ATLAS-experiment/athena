@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.10 )
@@ -18,6 +18,10 @@ if( CMAKE_CUDA_COMPILER )
    set( CMAKE_CUDA_ARCHITECTURES "52" CACHE STRING
       "CUDA architectures to build code for" )
 endif()
+
+# Disable FindBoost warnings:
+set( Boost_NO_WARN_NEW_VERSIONS TRUE CACHE BOOL
+   "Do not warn about incompatible Boost versions" )
 
 # Set the versions of the TDAQ externals to pick up for the build:
 if( NOT LCG_NIGHTLY )
