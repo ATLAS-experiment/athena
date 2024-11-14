@@ -59,8 +59,10 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   declareProperty("pbpb2023", pbpb2023 = true, "PbPb2023 config");
   declareProperty("zdcConfig", zdcConfig = "PbPb2018", "argument to configure ZdcAnalysisTool");
   declareProperty("doZdcCalib", doZdcCalib = false, "perform ZDC energy calibration");
-  declareProperty("enableRPD",enableRPD = false,"enable reading RPD decorations");
-  declareProperty("enableCentroid",enableCentroid = false,"enable reading centroid decorations");
+  declareProperty("enableZDC", enableZDC = true);
+  declareProperty("enableRPD",enableRPD = false,"enable reading any RPD decorations");
+  declareProperty("enableRPDAmp",enableRPDAmp = false,"enable reading RPD amplitudes (also requires enableRPD)");
+  declareProperty("enableCentroid",enableCentroid = false,"enable reading centroid decorations (also requires enableRPD)");
 
   declareProperty( "TrackSelectionTool", m_selTool );
 
@@ -128,123 +130,134 @@ StatusCode ZdcNtuple :: initialize ()
     m_outputTree->Branch("zdcDecodingError",&t_zdcDecodingError,"zdcDecodingError/b");
     m_outputTree->Branch("rpdDecodingError",&t_rpdDecodingError,"rpdDecodingError/b");
 
-    if (enableOutputSamples)
-    {
-      if (nsamplesZdc == 7)
+    if (enableZDC)
       {
-        ANA_MSG_INFO("Setting up for 7 samples");
-        m_outputTree->Branch("zdc_raw", &t_raw7, "zdc_raw[2][4][2][2][7]/s"); // 7 samples
+	if (enableOutputSamples)
+	  {
+	    if (nsamplesZdc == 7)
+	      {
+		ANA_MSG_INFO("Setting up for 7 samples");
+		m_outputTree->Branch("zdc_raw", &t_raw7, "zdc_raw[2][4][2][2][7]/s"); // 7 samples
+	      }
+	    
+	    if (nsamplesZdc == 15)
+	      {
+		ANA_MSG_INFO("Setting up for 15 samples");
+		m_outputTree->Branch("zdc_raw", &t_raw15, "zdc_raw[2][4][2][2][15]/s"); // 15 samples
+	      }
+	    
+	    if (nsamplesZdc == 24)
+	      {
+		ANA_MSG_INFO("Setting up forr 24 samples");
+		m_outputTree->Branch("zdc_raw", &t_raw24, "zdc_raw[2][4][2][2][24]/s"); // 24 samples
+		m_outputTree->Branch("rpd_raw", &t_rpdRaw, "rpd_raw[2][16][24]/s"); // 24 samples
+	      }
+	  }
+	
+	m_outputTree->Branch("zdc_ZdcAmp", &t_ZdcAmp, "zdc_ZdcAmp[2]/F");
+	m_outputTree->Branch("zdc_ZdcAmpErr", &t_ZdcAmpErr, "zdc_ZdcAmpErr[2]/F");
+	m_outputTree->Branch("zdc_ZdcEnergy", &t_ZdcEnergy, "zdc_ZdcEnergy[2]/F");
+	m_outputTree->Branch("zdc_ZdcEnergyErr", &t_ZdcEnergyErr, "zdc_ZdcEnergyErr[2]/F");
+	m_outputTree->Branch("zdc_ZdcTime", &t_ZdcTime, "zdc_ZdcTime[2]/F");
+	m_outputTree->Branch("zdc_ZdcStatus", &t_ZdcStatus, "zdc_ZdcStatus[2]/S");
+	m_outputTree->Branch("zdc_ZdcTrigEff", &t_ZdcTrigEff, "zdc_ZdcTrigEff[2]/F");
+	m_outputTree->Branch("zdc_ZdcModuleMask", &t_ZdcModuleMask, "zdc_ZdcModuleMask/i");
+	m_outputTree->Branch("zdc_ZdcLucrodTriggerSideAmp",&t_ZdcLucrodTriggerSideAmp,"zdc_ZdcLucrodTriggerSideAmp[2]/S");
+	m_outputTree->Branch("zdc_ZdcLucrodTriggerSideAmpLG",&t_ZdcLucrodTriggerSideAmpLG,"zdc_ZdcLucrodTriggerSideAmpLG[2]/S");
+	
+	m_outputTree->Branch("zdc_ZdcModuleAmp", &t_ZdcModuleAmp, "zdc_ZdcModuleAmp[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleTime", &t_ZdcModuleTime, "zdc_ZdcModuleTime[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleFitAmp", &t_ZdcModuleFitAmp, "zdc_ZdcModuleFitAmp[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleFitT0", &t_ZdcModuleFitT0, "zdc_ZdcModuleFitT0[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleStatus", &t_ZdcModuleStatus, "zdc_ZdcModuleStatus[2][4]/i");
+	m_outputTree->Branch("zdc_ZdcModuleChisq", &t_ZdcModuleChisq, "zdc_ZdcModuleChisq[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleCalibAmp", &t_ZdcModuleCalibAmp, "zdc_ZdcModuleCalibAmp[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleCalibTime", &t_ZdcModuleCalibTime, "zdc_ZdcModuleCalibTime[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleBkgdMaxFraction", &t_ZdcModuleBkgdMaxFraction, "zdc_ZdcModuleBkgdMaxFraction[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleAmpError", &t_ZdcModuleAmpError, "zdc_ZdcModuleAmpError[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleMinDeriv2nd", &t_ZdcModuleMinDeriv2nd, "zdc_ZdcModuleMinDeriv2nd[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModulePresample", &t_ZdcModulePresample, "zdc_ZdcModulePresample[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModulePreSampleAmp", &t_ZdcModulePreSampleAmp, "zdc_ZdcModulePreSampleAmp[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcLucrodTriggerAmp",&t_ZdcLucrodTriggerAmp,"zdc_ZdcLucrodTriggerAmp[2][4]/S");
+	m_outputTree->Branch("zdc_ZdcLucrodTriggerAmpLG",&t_ZdcLucrodTriggerAmpLG,"zdc_ZdcLucrodTriggerAmpLG[2][4]/S");
+	m_outputTree->Branch("zdc_ZdcModuleMaxADC",&t_ZdcModuleMaxADC,"zdc_ZdcModuleMaxADC[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleMaxADCHG",&t_ZdcModuleMaxADCHG,"zdc_ZdcModuleMaxADCHG[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleMaxADCLG",&t_ZdcModuleMaxADCLG,"zdc_ZdcModuleMaxADCLG[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModulePeakADCHG",&t_ZdcModulePeakADCHG,"zdc_ZdcModulePeakADCHG[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModulePeakADCLG",&t_ZdcModulePeakADCLG,"zdc_ZdcModulePeakADCLG[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleAmpLGRefit", &t_ZdcModuleAmpLGRefit, "zdc_ZdcModuleAmpLGRefit[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleAmpCorrLGRefit", &t_ZdcModuleAmpCorrLGRefit, "zdc_ZdcModuleAmpCorrLGRefit[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleT0LGRefit", &t_ZdcModuleT0LGRefit, "zdc_ZdcModuleT0LGRefit[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleT0SubLGRefit", &t_ZdcModuleT0SubLGRefit, "zdc_ZdcModuleT0SubLGRefit[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleChisqLGRefit", &t_ZdcModuleChisqLGRefit, "zdc_ZdcModuleChisqLGRefit[2][4]/F");
+	
+	if(m_isMC){
+	  //Modules
+	  m_outputTree->Branch("zdc_ZdcModuleTruthTotal",&t_ZdcModuleTruthTotal,"zdc_ZdcModuleTruthTotal[2][7]/F");
+	  m_outputTree->Branch("zdc_ZdcModuleTruthInvisible",&t_ZdcModuleTruthInvis,"zdc_ZdcModuleTruthInvisible[2][7]/F");
+	  m_outputTree->Branch("zdc_ZdcModuleTruthEM",&t_ZdcModuleTruthEM,"zdc_ZdcModuleTruthEM[2][7]/F");
+	  m_outputTree->Branch("zdc_ZdcModuleTruthNonEM",&t_ZdcModuleTruthNonEM,"zdc_ZdcModuleTruthNonEM[2][7]/F");
+	  m_outputTree->Branch("zdc_ZdcModuleTruthEscaped",&t_ZdcModuleTruthEscaped,"zdc_ZdcModuleTruthEscaped[2][7]/F");
+	  m_outputTree->Branch("zdc_ZdcModuleTruthNphotons",&t_ZdcModuleTruthNphotons,"zdc_ZdcModuleTruthNphotons[2][7]/i");
+	  m_outputTree->Branch("zdc_RpdModuleTruthNphotons",&t_RpdModuleTruthNphotons,"zdc_RpdModuleTruthNphotons[2][16]/i");
+	  
+	  //Sums
+	  m_outputTree->Branch("zdc_ZdcTruthTotal",&t_ZdcTruthTotal,"zdc_ZdcTruthTotal[2]/F");
+	  m_outputTree->Branch("zdc_ZdcTruthInvisible",&t_ZdcTruthInvis, "zdc_ZdcTruthInvisible[2]/F");
+	  m_outputTree->Branch("zdc_ZdcTruthEM",&t_ZdcTruthEM,"zdc_ZdcTruthEM[2]/F");
+	  m_outputTree->Branch("zdc_ZdcTruthNonEM",&t_ZdcTruthNonEM,"zdc_ZdcTruthNonEM[2]/F");
+	  m_outputTree->Branch("zdc_ZdcTruthEscaped",&t_ZdcTruthEscaped,"zdc_ZdcTruthEscaped[2]/F");
+	  
+	  //Event gen particles
+	  m_outputTree->Branch("zdc_ZdcTruthParticlePosx",&t_ZdcTruthParticlePosx);
+	  m_outputTree->Branch("zdc_ZdcTruthParticlePosy",&t_ZdcTruthParticlePosy);
+	  m_outputTree->Branch("zdc_ZdcTruthParticlePosz",&t_ZdcTruthParticlePosz);
+	  m_outputTree->Branch("zdc_ZdcTruthParticleTime",&t_ZdcTruthParticleTime);
+	  m_outputTree->Branch("zdc_ZdcTruthParticlePx",&t_ZdcTruthParticlePx);
+	  m_outputTree->Branch("zdc_ZdcTruthParticlePy",&t_ZdcTruthParticlePy);
+	  m_outputTree->Branch("zdc_ZdcTruthParticlePz",&t_ZdcTruthParticlePz);
+	  m_outputTree->Branch("zdc_ZdcTruthParticleEnergy",&t_ZdcTruthParticleEnergy);
+	}
       }
-
-      if (nsamplesZdc == 15)
-      {
-        ANA_MSG_INFO("Setting up for 15 samples");
-        m_outputTree->Branch("zdc_raw", &t_raw15, "zdc_raw[2][4][2][2][15]/s"); // 15 samples
-      }
-
-      if (nsamplesZdc == 24)
-      {
-        ANA_MSG_INFO("Setting up forr 24 samples");
-        m_outputTree->Branch("zdc_raw", &t_raw24, "zdc_raw[2][4][2][2][24]/s"); // 24 samples
-        m_outputTree->Branch("rpd_raw", &t_rpdRaw, "rpd_raw[2][16][24]/s"); // 24 samples
-      }
-    }
-
-    m_outputTree->Branch("zdc_ZdcAmp", &t_ZdcAmp, "zdc_ZdcAmp[2]/F");
-    m_outputTree->Branch("zdc_ZdcAmpErr", &t_ZdcAmpErr, "zdc_ZdcAmpErr[2]/F");
-    m_outputTree->Branch("zdc_ZdcEnergy", &t_ZdcEnergy, "zdc_ZdcEnergy[2]/F");
-    m_outputTree->Branch("zdc_ZdcEnergyErr", &t_ZdcEnergyErr, "zdc_ZdcEnergyErr[2]/F");
-    m_outputTree->Branch("zdc_ZdcTime", &t_ZdcTime, "zdc_ZdcTime[2]/F");
-    m_outputTree->Branch("zdc_ZdcStatus", &t_ZdcStatus, "zdc_ZdcStatus[2]/S");
-    m_outputTree->Branch("zdc_ZdcTrigEff", &t_ZdcTrigEff, "zdc_ZdcTrigEff[2]/F");
-    m_outputTree->Branch("zdc_ZdcModuleMask", &t_ZdcModuleMask, "zdc_ZdcModuleMask/i");
-    m_outputTree->Branch("zdc_ZdcLucrodTriggerSideAmp",&t_ZdcLucrodTriggerSideAmp,"zdc_ZdcLucrodTriggerSideAmp[2]/S");
-    m_outputTree->Branch("zdc_ZdcLucrodTriggerSideAmpLG",&t_ZdcLucrodTriggerSideAmpLG,"zdc_ZdcLucrodTriggerSideAmpLG[2]/S");
-
-    m_outputTree->Branch("zdc_ZdcModuleAmp", &t_ZdcModuleAmp, "zdc_ZdcModuleAmp[2][4]/F");
-    m_outputTree->Branch("zdc_ZdcModuleTime", &t_ZdcModuleTime, "zdc_ZdcModuleTime[2][4]/F");
-    m_outputTree->Branch("zdc_ZdcModuleFitAmp", &t_ZdcModuleFitAmp, "zdc_ZdcModuleFitAmp[2][4]/F");
-    m_outputTree->Branch("zdc_ZdcModuleFitT0", &t_ZdcModuleFitT0, "zdc_ZdcModuleFitT0[2][4]/F");
-    m_outputTree->Branch("zdc_ZdcModuleStatus", &t_ZdcModuleStatus, "zdc_ZdcModuleStatus[2][4]/i");
-    m_outputTree->Branch("zdc_ZdcModuleChisq", &t_ZdcModuleChisq, "zdc_ZdcModuleChisq[2][4]/F");
-    m_outputTree->Branch("zdc_ZdcModuleCalibAmp", &t_ZdcModuleCalibAmp, "zdc_ZdcModuleCalibAmp[2][4]/F");
-    m_outputTree->Branch("zdc_ZdcModuleCalibTime", &t_ZdcModuleCalibTime, "zdc_ZdcModuleCalibTime[2][4]/F");
-    m_outputTree->Branch("zdc_ZdcModuleBkgdMaxFraction", &t_ZdcModuleBkgdMaxFraction, "zdc_ZdcModuleBkgdMaxFraction[2][4]/F");
-    m_outputTree->Branch("zdc_ZdcModuleAmpError", &t_ZdcModuleAmpError, "zdc_ZdcModuleAmpError[2][4]/F");
-    m_outputTree->Branch("zdc_ZdcModuleMinDeriv2nd", &t_ZdcModuleMinDeriv2nd, "zdc_ZdcModuleMinDeriv2nd[2][4]/F");
-    m_outputTree->Branch("zdc_ZdcModulePresample", &t_ZdcModulePresample, "zdc_ZdcModulePresample[2][4]/F");
-    m_outputTree->Branch("zdc_ZdcModulePreSampleAmp", &t_ZdcModulePreSampleAmp, "zdc_ZdcModulePreSampleAmp[2][4]/F");
-    m_outputTree->Branch("zdc_ZdcLucrodTriggerAmp",&t_ZdcLucrodTriggerAmp,"zdc_ZdcLucrodTriggerAmp[2][4]/S");
-    m_outputTree->Branch("zdc_ZdcLucrodTriggerAmpLG",&t_ZdcLucrodTriggerAmpLG,"zdc_ZdcLucrodTriggerAmpLG[2][4]/S");
-    m_outputTree->Branch("zdc_ZdcModuleMaxADC",&t_ZdcModuleMaxADC,"zdc_ZdcModuleMaxADC[2][4]/F");
-    m_outputTree->Branch("zdc_ZdcModuleAmpLGRefit", &t_ZdcModuleAmpLGRefit, "zdc_ZdcModuleAmpLGRefit[2][4]/F");
-    m_outputTree->Branch("zdc_ZdcModuleT0LGRefit", &t_ZdcModuleT0LGRefit, "zdc_ZdcModuleT0LGRefit[2][4]/F");
-    m_outputTree->Branch("zdc_ZdcModuleT0SubLGRefit", &t_ZdcModuleT0SubLGRefit, "zdc_ZdcModuleT0SubLGRefit[2][4]/F");
-    m_outputTree->Branch("zdc_ZdcModuleChisqLGRefit", &t_ZdcModuleChisqLGRefit, "zdc_ZdcModuleChisqLGRefit[2][4]/F");
-    
-    if(m_isMC){
-      //Modules
-      m_outputTree->Branch("zdc_ZdcModuleTruthTotal",&t_ZdcModuleTruthTotal,"zdc_ZdcModuleTruthTotal[2][7]/F");
-      m_outputTree->Branch("zdc_ZdcModuleTruthInvisible",&t_ZdcModuleTruthInvis,"zdc_ZdcModuleTruthInvisible[2][7]/F");
-      m_outputTree->Branch("zdc_ZdcModuleTruthEM",&t_ZdcModuleTruthEM,"zdc_ZdcModuleTruthEM[2][7]/F");
-      m_outputTree->Branch("zdc_ZdcModuleTruthNonEM",&t_ZdcModuleTruthNonEM,"zdc_ZdcModuleTruthNonEM[2][7]/F");
-      m_outputTree->Branch("zdc_ZdcModuleTruthEscaped",&t_ZdcModuleTruthEscaped,"zdc_ZdcModuleTruthEscaped[2][7]/F");
-      m_outputTree->Branch("zdc_ZdcModuleTruthNphotons",&t_ZdcModuleTruthNphotons,"zdc_ZdcModuleTruthNphotons[2][7]/i");
-      m_outputTree->Branch("zdc_RpdModuleTruthNphotons",&t_RpdModuleTruthNphotons,"zdc_RpdModuleTruthNphotons[2][16]/i");
-
-      //Sums
-      m_outputTree->Branch("zdc_ZdcTruthTotal",&t_ZdcTruthTotal,"zdc_ZdcTruthTotal[2]/F");
-      m_outputTree->Branch("zdc_ZdcTruthInvisible",&t_ZdcTruthInvis, "zdc_ZdcTruthInvisible[2]/F");
-      m_outputTree->Branch("zdc_ZdcTruthEM",&t_ZdcTruthEM,"zdc_ZdcTruthEM[2]/F");
-      m_outputTree->Branch("zdc_ZdcTruthNonEM",&t_ZdcTruthNonEM,"zdc_ZdcTruthNonEM[2]/F");
-      m_outputTree->Branch("zdc_ZdcTruthEscaped",&t_ZdcTruthEscaped,"zdc_ZdcTruthEscaped[2]/F");
-
-      //Event gen particles
-      m_outputTree->Branch("zdc_ZdcTruthParticlePosx",&t_ZdcTruthParticlePosx);
-      m_outputTree->Branch("zdc_ZdcTruthParticlePosy",&t_ZdcTruthParticlePosy);
-      m_outputTree->Branch("zdc_ZdcTruthParticlePosz",&t_ZdcTruthParticlePosz);
-      m_outputTree->Branch("zdc_ZdcTruthParticleTime",&t_ZdcTruthParticleTime);
-      m_outputTree->Branch("zdc_ZdcTruthParticlePx",&t_ZdcTruthParticlePx);
-      m_outputTree->Branch("zdc_ZdcTruthParticlePy",&t_ZdcTruthParticlePy);
-      m_outputTree->Branch("zdc_ZdcTruthParticlePz",&t_ZdcTruthParticlePz);
-      m_outputTree->Branch("zdc_ZdcTruthParticleEnergy",&t_ZdcTruthParticleEnergy);
-    }
     if (enableRPD)
-    {
-      m_outputTree->Branch("zdc_RpdChannelBaseline",&t_RpdChannelBaseline,"zdc_RpdChannelBaseline[2][16]/F");
-      m_outputTree->Branch("zdc_RpdChannelPileupExpFitParams",&t_RpdChannelPileupExpFitParams,"zdc_RpdChannelPileupExpFitParams[2][16][2]/F");
-      m_outputTree->Branch("zdc_RpdChannelPileupStretchedExpFitParams",&t_RpdChannelPileupStretchedExpFitParams,"zdc_RpdChannelPileupStretchedExpFitParams[2][16][3]/F");
-      m_outputTree->Branch("zdc_RpdChannelPileupExpFitParamErrs",&t_RpdChannelPileupExpFitParamErrs,"zdc_RpdChannelPileupExpFitParamErrs[2][16][2]/F");
-      m_outputTree->Branch("zdc_RpdChannelPileupStretchedExpFitParamErrs",&t_RpdChannelPileupStretchedExpFitParamErrs,"zdc_RpdChannelPileupStretchedExpFitParamErrs[2][16][3]/F");
-      m_outputTree->Branch("zdc_RpdChannelPileupExpFitMSE",&t_RpdChannelPileupExpFitMSE,"zdc_RpdChannelPileupExpFitMSE[2][16]/F");
-      m_outputTree->Branch("zdc_RpdChannelPileupStretchedExpFitMSE",&t_RpdChannelPileupStretchedExpFitMSE,"zdc_RpdChannelPileupStretchedExpFitMSE[2][16]/F");
-      m_outputTree->Branch("zdc_RpdChannelAmplitude",&t_RpdChannelAmplitude,"zdc_RpdChannelAmplitude[2][16]/F");
-      m_outputTree->Branch("zdc_RpdChannelAmplitudeCalib",&t_RpdChannelAmplitudeCalib,"zdc_RpdChannelAmplitudeCalib[2][16]/F");
-      m_outputTree->Branch("zdc_RpdChannelMaxADC",&t_RpdChannelMaxADC,"zdc_RpdChannelMaxADC[2][16]/F");
-      m_outputTree->Branch("zdc_RpdChannelMaxADCCalib",&t_RpdChannelMaxADCCalib,"zdc_RpdChannelMaxADCCalib[2][16]/F");
-      m_outputTree->Branch("zdc_RpdChannelMaxSample",&t_RpdChannelMaxSample,"zdc_RpdChannelMaxSample[2][16]/i");
-      m_outputTree->Branch("zdc_RpdChannelStatus",&t_RpdChannelStatus,"zdc_RpdChannelStatus[2][16]/i");
-      m_outputTree->Branch("zdc_RpdChannelPileupFrac",&t_RpdChannelPileupFrac,"zdc_RpdChannelPileupFrac[2][16]/F");
-      m_outputTree->Branch("zdc_RpdSideStatus",&t_RpdSideStatus,"zdc_RpdSideStatus[2]/i");
-    }
+      {
+      if (enableRPDAmp) {
+	m_outputTree->Branch("zdc_RpdChannelBaseline",&t_RpdChannelBaseline,"zdc_RpdChannelBaseline[2][16]/F");
+	m_outputTree->Branch("zdc_RpdChannelPileupExpFitParams",&t_RpdChannelPileupExpFitParams,"zdc_RpdChannelPileupExpFitParams[2][16][2]/F");
+	m_outputTree->Branch("zdc_RpdChannelPileupStretchedExpFitParams",&t_RpdChannelPileupStretchedExpFitParams,"zdc_RpdChannelPileupStretchedExpFitParams[2][16][3]/F");
+	m_outputTree->Branch("zdc_RpdChannelPileupExpFitParamErrs",&t_RpdChannelPileupExpFitParamErrs,"zdc_RpdChannelPileupExpFitParamErrs[2][16][2]/F");
+	m_outputTree->Branch("zdc_RpdChannelPileupStretchedExpFitParamErrs",&t_RpdChannelPileupStretchedExpFitParamErrs,"zdc_RpdChannelPileupStretchedExpFitParamErrs[2][16][3]/F");
+	m_outputTree->Branch("zdc_RpdChannelPileupExpFitMSE",&t_RpdChannelPileupExpFitMSE,"zdc_RpdChannelPileupExpFitMSE[2][16]/F");
+	m_outputTree->Branch("zdc_RpdChannelPileupStretchedExpFitMSE",&t_RpdChannelPileupStretchedExpFitMSE,"zdc_RpdChannelPileupStretchedExpFitMSE[2][16]/F");
+	m_outputTree->Branch("zdc_RpdChannelAmplitude",&t_RpdChannelAmplitude,"zdc_RpdChannelAmplitude[2][16]/F");
+	m_outputTree->Branch("zdc_RpdChannelAmplitudeCalib",&t_RpdChannelAmplitudeCalib,"zdc_RpdChannelAmplitudeCalib[2][16]/F");
+	m_outputTree->Branch("zdc_RpdChannelMaxADC",&t_RpdChannelMaxADC,"zdc_RpdChannelMaxADC[2][16]/F");
+	m_outputTree->Branch("zdc_RpdChannelMaxADCCalib",&t_RpdChannelMaxADCCalib,"zdc_RpdChannelMaxADCCalib[2][16]/F");
+	m_outputTree->Branch("zdc_RpdChannelMaxSample",&t_RpdChannelMaxSample,"zdc_RpdChannelMaxSample[2][16]/i");
+	m_outputTree->Branch("zdc_RpdChannelStatus",&t_RpdChannelStatus,"zdc_RpdChannelStatus[2][16]/i");
+	m_outputTree->Branch("zdc_RpdChannelPileupFrac",&t_RpdChannelPileupFrac,"zdc_RpdChannelPileupFrac[2][16]/F");
+	m_outputTree->Branch("zdc_RpdSideStatus",&t_RpdSideStatus,"zdc_RpdSideStatus[2]/i");
+      }
     if (enableCentroid)
-    {
-      m_outputTree->Branch("zdc_centroidEventValid", &t_centroidEventValid, "zdc_centroidEventValid/B");
-      m_outputTree->Branch("zdc_centroidStatus", &t_centroidStatus, "zdc_centroidStatus[2]/i");
-      m_outputTree->Branch("zdc_RPDChannelSubtrAmp", &t_RPDChannelSubtrAmp, "zdc_RPDChannelSubtrAmp[2][16]/F");
-      m_outputTree->Branch("zdc_RPDSubtrAmpSum", &t_RPDSubtrAmpSum, "zdc_RPDSubtrAmpSum[2]/F");
-      m_outputTree->Branch("zdc_xCentroidPreGeomCorPreAvgSubtr", &t_xCentroidPreGeomCorPreAvgSubtr, "zdc_xCentroidPreGeomCorPreAvgSubtr[2]/F");
-      m_outputTree->Branch("zdc_yCentroidPreGeomCorPreAvgSubtr", &t_yCentroidPreGeomCorPreAvgSubtr, "zdc_yCentroidPreGeomCorPreAvgSubtr[2]/F");
-      m_outputTree->Branch("zdc_xCentroidPreAvgSubtr", &t_xCentroidPreAvgSubtr, "zdc_xCentroidPreAvgSubtr[2]/F");
-      m_outputTree->Branch("zdc_yCentroidPreAvgSubtr", &t_yCentroidPreAvgSubtr, "zdc_yCentroidPreAvgSubtr[2]/F");
-      m_outputTree->Branch("zdc_xCentroid", &t_xCentroid, "zdc_xCentroid[2]/F");
-      m_outputTree->Branch("zdc_yCentroid", &t_yCentroid, "zdc_yCentroid[2]/F");
-      m_outputTree->Branch("zdc_xRowCentroid", &t_xRowCentroid, "zdc_xRowCentroid[2][4]/F");
-      m_outputTree->Branch("zdc_yColCentroid", &t_yColCentroid, "zdc_yColCentroid[2][4]/F");
-      m_outputTree->Branch("zdc_reactionPlaneAngle", &t_reactionPlaneAngle, "zdc_reactionPlaneAngle[2]/F");
-      m_outputTree->Branch("zdc_cosDeltaReactionPlaneAngle", &t_cosDeltaReactionPlaneAngle, "zdc_cosDeltaReactionPlaneAngle/F");
+      {
+	m_outputTree->Branch("zdc_centroidAvailable", &t_centroidDecorationsAvailable);
+	m_outputTree->Branch("zdc_centroidEventValid", &t_centroidEventValid, "zdc_centroidEventValid/B");
+	m_outputTree->Branch("zdc_centroidStatus", &t_centroidStatus, "zdc_centroidStatus[2]/i");
+	m_outputTree->Branch("zdc_RPDChannelSubtrAmp", &t_RPDChannelSubtrAmp, "zdc_RPDChannelSubtrAmp[2][16]/F");
+	m_outputTree->Branch("zdc_RPDSubtrAmpSum", &t_RPDSubtrAmpSum, "zdc_RPDSubtrAmpSum[2]/F");
+	m_outputTree->Branch("zdc_xCentroidPreGeomCorPreAvgSubtr", &t_xCentroidPreGeomCorPreAvgSubtr, "zdc_xCentroidPreGeomCorPreAvgSubtr[2]/F");
+	m_outputTree->Branch("zdc_yCentroidPreGeomCorPreAvgSubtr", &t_yCentroidPreGeomCorPreAvgSubtr, "zdc_yCentroidPreGeomCorPreAvgSubtr[2]/F");
+	m_outputTree->Branch("zdc_xCentroidPreAvgSubtr", &t_xCentroidPreAvgSubtr, "zdc_xCentroidPreAvgSubtr[2]/F");
+	m_outputTree->Branch("zdc_yCentroidPreAvgSubtr", &t_yCentroidPreAvgSubtr, "zdc_yCentroidPreAvgSubtr[2]/F");
+	m_outputTree->Branch("zdc_xCentroid", &t_xCentroid, "zdc_xCentroid[2]/F");
+	m_outputTree->Branch("zdc_yCentroid", &t_yCentroid, "zdc_yCentroid[2]/F");
+	m_outputTree->Branch("zdc_xRowCentroid", &t_xRowCentroid, "zdc_xRowCentroid[2][4]/F");
+	m_outputTree->Branch("zdc_yColCentroid", &t_yColCentroid, "zdc_yColCentroid[2][4]/F");
+	m_outputTree->Branch("zdc_reactionPlaneAngle", &t_reactionPlaneAngle, "zdc_reactionPlaneAngle[2]/F");
+	m_outputTree->Branch("zdc_cosDeltaReactionPlaneAngle", &t_cosDeltaReactionPlaneAngle, "zdc_cosDeltaReactionPlaneAngle/F");
+      }
     }
-
+    
     if (!(zdcCalib || zdcLaser || zdcOnly || zdcInj))
     {
       m_outputTree->Branch("mbts_in_e", &t_mbts_in_e, "mbts_in_e[2][8]/F");
@@ -396,6 +409,8 @@ StatusCode ZdcNtuple :: initialize ()
   ANA_MSG_INFO("writeOnlyTriggers = " << writeOnlyTriggers);
   ANA_MSG_INFO("enableOutputSamples = " << enableOutputSamples);
   ANA_MSG_INFO("enableTrigger = " << enableTrigger);
+  ANA_MSG_INFO("enableRPD = " << enableRPD);
+  ANA_MSG_INFO("enableCentroid = " << enableCentroid);
   ANA_MSG_INFO("zdcCalib = " << zdcCalib);
   ANA_MSG_INFO("zdcInj = " << zdcInj);
   ANA_MSG_INFO("zdcLaser = " << zdcLaser);
@@ -416,7 +431,6 @@ StatusCode ZdcNtuple :: initialize ()
   ANA_MSG_INFO("lhcf2022 = " << lhcf2022);
   ANA_MSG_INFO("lhcf2022afp = " << lhcf2022afp);
   ANA_MSG_INFO("lhcf2022zdc = " << lhcf2022zdc);
-  ANA_MSG_INFO("pbpb2023 = " << pbpb2023);
   ANA_MSG_INFO("doZdcCalib = " << doZdcCalib);
 
   ANA_MSG_DEBUG("initialize: Initialize!");
@@ -490,6 +504,7 @@ StatusCode ZdcNtuple :: initialize ()
     ANA_MSG_INFO("Trying to initialize ZDC Analysis Tool!");
     ANA_CHECK(m_zdcAnalysisTool.initialize());
   }
+  
   if (zdcInj)
     {
       m_zdcInjPulserAmpMap = std::make_shared<ZdcInjPulserAmpMap>();
@@ -563,13 +578,13 @@ StatusCode ZdcNtuple :: execute ()
 
     // Global E_T quantities for centrality
 
-    ANA_CHECK(evtStore()->retrieve( m_caloSums, "CaloSums") );
-    ANA_CHECK(evtStore()->retrieve( m_eventShapes, "HIEventShape") );
+    //ANA_CHECK(evtStore()->retrieve( m_caloSums, "CaloSums") );
+    //ANA_CHECK(evtStore()->retrieve( m_eventShapes, "HIEventShape") );
 
     m_lvl1EnergySumRoI = 0;
-    ANA_CHECK(evtStore()->retrieve( m_lvl1EnergySumRoI, "LVL1EnergySumRoI") );
+    //ANA_CHECK(evtStore()->retrieve( m_lvl1EnergySumRoI, "LVL1EnergySumRoI") );
 
-    processFCal();
+    //processFCal();
 
     // MBTS quantities, but may require a derivation to be accessible (required STDM6 in pp)
     //ANA_CHECK(evtStore()->retrieve( m_mbtsInfo, "MBTSForwardEventInfo") );
@@ -578,18 +593,11 @@ StatusCode ZdcNtuple :: execute ()
     //ANA_CHECK(evtStore()->retrieve( m_trigT2MbtsBits, "HLT_xAOD__TrigT2MbtsBitsContainer_T2Mbts") );
     //processMBTS();
 
-    
     ANA_CHECK(evtStore()->retrieve( m_primaryVertices, "PrimaryVertices") );
     processInDet();
 
-    if (pbpb2023)
-      {
-	ANA_CHECK(evtStore()->retrieve( m_caloClusters, "SubtractedCaloCalTopoClusters"));
-      }
-    else
-      {
-	ANA_CHECK(evtStore()->retrieve( m_caloClusters, "CaloCalTopoClusters"));
-      }
+
+    ANA_CHECK(evtStore()->retrieve( m_caloClusters, "CaloCalTopoClusters"));
     processClusters();
 
     // Gaps will require some evaluation of Run 3 performance of the clusters
@@ -616,12 +624,12 @@ StatusCode ZdcNtuple :: execute ()
 
 void ZdcNtuple::processZdcNtupleFromModules()
 {
-
+  
   SG::ReadHandle<xAOD::ZdcModuleContainer> zdcModules (m_zdcModuleContainerName);
   SG::ReadHandle<xAOD::ZdcModuleContainer> zdcSums (m_zdcSumContainerName);
-
+  
   ANA_MSG_DEBUG ("copying already processed info!");
-
+  
   //Reset the truth separately since it has a different range
   for(int iside : {0,1}){
     for(int imod = 0; imod < 7; ++imod){
@@ -636,88 +644,92 @@ void ZdcNtuple::processZdcNtupleFromModules()
       t_RpdModuleTruthNphotons[iside][ch] = 0;
     }
   }
-
+  
   for (size_t iside = 0; iside < 2; iside++)
-  {
-    t_ZdcAmp[iside] = 0; t_ZdcEnergy[iside] = 0; t_ZdcTime[iside] = 0; t_ZdcStatus[iside] = 0;
-    t_ZdcTrigEff[iside] = 0;t_ZdcLucrodTriggerSideAmp[iside] = 0; t_ZdcLucrodTriggerSideAmpLG[iside] = 0; t_ZdcTruthTotal[iside] = 0;
-    t_ZdcTruthInvis[iside] = 0; t_ZdcTruthEM[iside] = 0; t_ZdcTruthNonEM[iside] = 0;
-    t_ZdcTruthEscaped[iside] = 0;
-    for (int imod = 0; imod < 4; imod++)
     {
-      t_ZdcModuleAmp[iside][imod] = 0; t_ZdcModuleTime[iside][imod] = 0; t_ZdcModuleStatus[iside][imod] = 0;
-
-      t_ZdcModuleCalibAmp[iside][imod] = 0; t_ZdcModuleCalibTime[iside][imod] = 0; t_ZdcModuleChisq[iside][imod] = 0; t_ZdcModuleFitAmp[iside][imod] = 0;
-      t_ZdcModuleFitT0[iside][imod] = 0; t_ZdcModuleBkgdMaxFraction[iside][imod] = 0; t_ZdcModuleAmpError[iside][imod] = 0;
-      t_ZdcModuleMinDeriv2nd[iside][imod] = 0; t_ZdcModulePresample[iside][imod] = 0; t_ZdcModulePreSampleAmp[iside][imod] = 0;
-      t_ZdcLucrodTriggerAmp[iside][imod] = 0;t_ZdcLucrodTriggerAmpLG[iside][imod] = 0;
-      t_ZdcModuleMaxADC[iside][imod] = 0; t_ZdcModuleAmpLGRefit[iside][imod] = 0; 
-      t_ZdcModuleT0LGRefit[iside][imod] = 0; t_ZdcModuleT0SubLGRefit[iside][imod] = 0; t_ZdcModuleChisqLGRefit[iside][imod] = 0;
-
-      if (enableOutputSamples)
+      t_ZdcAmp[iside] = 0; t_ZdcEnergy[iside] = 0; t_ZdcTime[iside] = 0; t_ZdcStatus[iside] = 0;
+      t_ZdcTrigEff[iside] = 0;t_ZdcLucrodTriggerSideAmp[iside] = 0; t_ZdcLucrodTriggerSideAmpLG[iside] = 0; t_ZdcTruthTotal[iside] = 0;
+      t_ZdcTruthInvis[iside] = 0; t_ZdcTruthEM[iside] = 0; t_ZdcTruthNonEM[iside] = 0;
+      t_ZdcTruthEscaped[iside] = 0;
+      for (int imod = 0; imod < 4; imod++)
 	{
-	  for (int ig=0;ig<2;ig++)
+	  t_ZdcModuleAmp[iside][imod] = 0; t_ZdcModuleTime[iside][imod] = 0; t_ZdcModuleStatus[iside][imod] = 0;
+	  
+	  t_ZdcModuleCalibAmp[iside][imod] = 0; t_ZdcModuleCalibTime[iside][imod] = 0; t_ZdcModuleChisq[iside][imod] = 0; t_ZdcModuleFitAmp[iside][imod] = 0;
+	  t_ZdcModuleFitT0[iside][imod] = 0; t_ZdcModuleBkgdMaxFraction[iside][imod] = 0; t_ZdcModuleAmpError[iside][imod] = 0;
+	  t_ZdcModuleMinDeriv2nd[iside][imod] = 0; t_ZdcModulePresample[iside][imod] = 0; t_ZdcModulePreSampleAmp[iside][imod] = 0;
+	  t_ZdcLucrodTriggerAmp[iside][imod] = 0;t_ZdcLucrodTriggerAmpLG[iside][imod] = 0;
+	  t_ZdcModuleMaxADC[iside][imod] = 0; t_ZdcModuleMaxADCHG[iside][imod] = 0; t_ZdcModuleMaxADCLG[iside][imod] = 0;
+	  t_ZdcModulePeakADCHG[iside][imod] = 0; t_ZdcModulePeakADCLG[iside][imod] = 0;
+	  t_ZdcModuleAmpLGRefit[iside][imod] = 0; t_ZdcModuleAmpCorrLGRefit[iside][imod] = 0; 
+	  t_ZdcModuleT0LGRefit[iside][imod] = 0; t_ZdcModuleT0SubLGRefit[iside][imod] = 0; t_ZdcModuleChisqLGRefit[iside][imod] = 0;
+	  
+	  if (enableOutputSamples)
 	    {
-	      for (int id=0;id<2;id++)
+	      for (int ig=0;ig<2;ig++)
 		{
-		  for (unsigned int isamp=0;isamp<nsamplesZdc;isamp++)
+		  for (int id=0;id<2;id++)
 		    {
-		      if (nsamplesZdc==7) t_raw7[iside][imod][ig][id][isamp]=0;
-		      if (nsamplesZdc==15) t_raw15[iside][imod][ig][id][isamp]=0;
-		      if (nsamplesZdc==24) t_raw24[iside][imod][ig][id][isamp]=0;
+		      for (unsigned int isamp=0;isamp<nsamplesZdc;isamp++)
+			{
+			  if (nsamplesZdc==7) t_raw7[iside][imod][ig][id][isamp]=0;
+			  if (nsamplesZdc==15) t_raw15[iside][imod][ig][id][isamp]=0;
+			  if (nsamplesZdc==24) t_raw24[iside][imod][ig][id][isamp]=0;
+			}
+		    }
+		}
+	      if (nsamplesZdc==24)
+		{
+		  for (int ch=0;ch<16;ch++)
+		    {
+		      for (unsigned int isamp=0;isamp<nsamplesZdc;isamp++)
+			{
+			  t_rpdRaw[iside][ch][isamp]=0;
+			}
 		    }
 		}
 	    }
-	  if (nsamplesZdc==24)
+	  if (enableRPD)
 	    {
-	      for (int ch=0;ch<16;ch++)
-                {
-		  for (unsigned int isamp=0;isamp<nsamplesZdc;isamp++)
-		    {
-		      t_rpdRaw[iside][ch][isamp]=0;
-		    }
-                }
+	      for (int ch = 0; ch < 16; ch++) {
+		t_RpdChannelBaseline[iside][ch] = 0;
+		std::fill(t_RpdChannelPileupExpFitParams[iside][ch], t_RpdChannelPileupExpFitParams[iside][ch] + 2, 0);
+		std::fill(t_RpdChannelPileupStretchedExpFitParams[iside][ch], t_RpdChannelPileupStretchedExpFitParams[iside][ch] + 3, 0);
+		std::fill(t_RpdChannelPileupExpFitParamErrs[iside][ch], t_RpdChannelPileupExpFitParamErrs[iside][ch] + 2, 0);
+		std::fill(t_RpdChannelPileupStretchedExpFitParamErrs[iside][ch], t_RpdChannelPileupStretchedExpFitParamErrs[iside][ch] + 3, 0);
+		t_RpdChannelPileupExpFitMSE[iside][ch] = 0;
+		t_RpdChannelPileupStretchedExpFitMSE[iside][ch] = 0;
+		t_RpdChannelAmplitude[iside][ch] = 0;
+		t_RpdChannelAmplitudeCalib[iside][ch] = 0;
+		t_RpdChannelMaxADC[iside][ch] = 0;
+		t_RpdChannelMaxADCCalib[iside][ch] = 0;
+		t_RpdChannelMaxSample[iside][ch] = 0;
+		t_RpdChannelStatus[iside][ch] = 0;
+		t_RpdChannelPileupFrac[iside][ch] = 0;
+	      }
+	      t_RpdSideStatus[iside] = 0;
+	    }
+	  if (enableCentroid)
+	    {
+	      t_centroidStatus[iside] = 0;
+	      std::fill(t_RPDChannelSubtrAmp[iside], t_RPDChannelSubtrAmp[iside] + 16, 0);
+	      t_RPDSubtrAmpSum[iside] = 0;
+	      t_xCentroidPreGeomCorPreAvgSubtr[iside] = 0;
+	      t_yCentroidPreGeomCorPreAvgSubtr[iside] = 0;
+	      t_xCentroidPreAvgSubtr[iside] = 0;
+	      t_yCentroidPreAvgSubtr[iside] = 0;
+	      t_xCentroid[iside] = 0;
+	      t_yCentroid[iside] = 0;
+	      std::fill(t_xRowCentroid[iside], t_xRowCentroid[iside] + 4, 0);
+	      std::fill(t_yColCentroid[iside], t_yColCentroid[iside] + 4, 0);
+	      t_reactionPlaneAngle[iside] = 0;
 	    }
 	}
-      if (enableRPD)
-	{
-	  for (int ch = 0; ch < 16; ch++) {
-	    t_RpdChannelBaseline[iside][ch] = 0;
-	    std::fill(t_RpdChannelPileupExpFitParams[iside][ch], t_RpdChannelPileupExpFitParams[iside][ch] + 2, 0);
-	    std::fill(t_RpdChannelPileupStretchedExpFitParams[iside][ch], t_RpdChannelPileupStretchedExpFitParams[iside][ch] + 3, 0);
-	    std::fill(t_RpdChannelPileupExpFitParamErrs[iside][ch], t_RpdChannelPileupExpFitParamErrs[iside][ch] + 2, 0);
-	    std::fill(t_RpdChannelPileupStretchedExpFitParamErrs[iside][ch], t_RpdChannelPileupStretchedExpFitParamErrs[iside][ch] + 3, 0);
-	    t_RpdChannelPileupExpFitMSE[iside][ch] = 0;
-	    t_RpdChannelPileupStretchedExpFitMSE[iside][ch] = 0;
-	    t_RpdChannelAmplitude[iside][ch] = 0;
-	    t_RpdChannelAmplitudeCalib[iside][ch] = 0;
-	    t_RpdChannelMaxADC[iside][ch] = 0;
-	    t_RpdChannelMaxADCCalib[iside][ch] = 0;
-	    t_RpdChannelMaxSample[iside][ch] = 0;
-	    t_RpdChannelStatus[iside][ch] = 0;
-	    t_RpdChannelPileupFrac[iside][ch] = 0;
-          }
-    t_RpdSideStatus[iside] = 0;
-	}
-      if (enableCentroid) {
-        t_centroidStatus[iside] = 0;
-        std::fill(t_RPDChannelSubtrAmp[iside], t_RPDChannelSubtrAmp[iside] + 16, 0);
-        t_RPDSubtrAmpSum[iside] = 0;
-        t_xCentroidPreGeomCorPreAvgSubtr[iside] = 0;
-        t_yCentroidPreGeomCorPreAvgSubtr[iside] = 0;
-        t_xCentroidPreAvgSubtr[iside] = 0;
-        t_yCentroidPreAvgSubtr[iside] = 0;
-        t_xCentroid[iside] = 0;
-        t_yCentroid[iside] = 0;
-        std::fill(t_xRowCentroid[iside], t_xRowCentroid[iside] + 4, 0);
-        std::fill(t_yColCentroid[iside], t_yColCentroid[iside] + 4, 0);
-        t_reactionPlaneAngle[iside] = 0;
-      }
     }
-  }
-
+  
   t_ZdcModuleMask = 0;
   if (enableCentroid) {
+    t_centroidDecorationsAvailable = false;
     t_centroidEventValid = false;
     t_cosDeltaReactionPlaneAngle = 0;
   }
@@ -730,70 +742,74 @@ void ZdcNtuple::processZdcNtupleFromModules()
     }
   */
 
-  SG::ConstAccessor<char> centroidEventValidAcc("centroidEventValid" + auxSuffix);
-  SG::ConstAccessor<float> cosDeltaReactionPlaneAngleAcc("cosDeltaReactionPlaneAngle" + auxSuffix);
-  SG::ConstAccessor<float> CalibEnergyAcc("CalibEnergy"+auxSuffix);
-  SG::ConstAccessor<float> CalibEnergyErrAcc("CalibEnergyErr"+auxSuffix);
-  SG::ConstAccessor<float> UncalibSumAcc("UncalibSum"+auxSuffix);
-  SG::ConstAccessor<float> UncalibSumErrAcc("UncalibSumErr"+auxSuffix);
-  SG::ConstAccessor<float> AverageTimeAcc("AverageTime"+auxSuffix);
-  SG::ConstAccessor<unsigned int> StatusAcc("Status"+auxSuffix);
-  SG::ConstAccessor<unsigned int> ModuleMaskAcc("ModuleMask"+auxSuffix);
-  SG::ConstAccessor<float> TruthTotalEnergyAcc("TruthTotalEnergy" + auxSuffix);
-  SG::ConstAccessor<float> TruthInvisibleEnergyAcc("TruthInvisibleEnergy" + auxSuffix);
-  SG::ConstAccessor<float> TruthEMEnergyAcc("TruthEMEnergy" + auxSuffix);
-  SG::ConstAccessor<float> TruthNonEMEnergyAcc("TruthNonEMEnergy" + auxSuffix);
-  SG::ConstAccessor<float> TruthEscapedEnergyAcc("TruthEscapedEnergy" + auxSuffix);
-  SG::ConstAccessor<unsigned int> centroidStatusAcc("centroidStatus" + auxSuffix);
-  SG::ConstAccessor<std::vector<float> > RPDChannelSubtrAmpAcc("RPDChannelSubtrAmp" + auxSuffix);
-  SG::ConstAccessor<float> RPDSubtrAmpSumAcc("RPDSubtrAmpSum" + auxSuffix);
-  SG::ConstAccessor<float> xCentroidPreGeomCorPreAvgSubtrAcc("xCentroidPreGeomCorPreAvgSubtr" + auxSuffix);
-  SG::ConstAccessor<float> yCentroidPreGeomCorPreAvgSubtrAcc("yCentroidPreGeomCorPreAvgSubtr" + auxSuffix);
-  SG::ConstAccessor<float> xCentroidPreAvgSubtrAcc("xCentroidPreAvgSubtr" + auxSuffix);
-  SG::ConstAccessor<float> yCentroidPreAvgSubtrAcc("yCentroidPreAvgSubtr" + auxSuffix);
-  SG::ConstAccessor<float> xCentroidAcc("xCentroid" + auxSuffix);
-  SG::ConstAccessor<float> yCentroidAcc("yCentroid" + auxSuffix);
-  SG::ConstAccessor<std::vector<float> > xRowCentroidAcc("xRowCentroid" + auxSuffix);
-  SG::ConstAccessor<std::vector<float> > yColCentroidAcc("yColCentroid" + auxSuffix);
-  SG::ConstAccessor<float> reactionPlaneAngleAcc("reactionPlaneAngle" + auxSuffix);
-  SG::ConstAccessor<unsigned int> RPDStatusAcc("RPDStatus" + auxSuffix);
-  SG::ConstAccessor<unsigned int> nPhotonsAcc("nPhotons" + auxSuffix);
-  SG::ConstAccessor<float> CalibTimeAcc("CalibTime" + auxSuffix);
-  SG::ConstAccessor<float> AmplitudeAcc("Amplitude" + auxSuffix);
-  SG::ConstAccessor<float> TimeAcc("Time" + auxSuffix);
-  SG::ConstAccessor<float> ChisqAcc("Chisq" + auxSuffix);
-  SG::ConstAccessor<float> FitAmpAcc("FitAmp" + auxSuffix);
-  SG::ConstAccessor<float> FitAmpErrorAcc("FitAmpError" + auxSuffix);
-  SG::ConstAccessor<float> FitT0Acc("FitT0" + auxSuffix);
-  SG::ConstAccessor<float> BkgdMaxFractionAcc("BkgdMaxFraction" + auxSuffix);
-  SG::ConstAccessor<float> MinDeriv2ndAcc("MinDeriv2nd" + auxSuffix);
-  SG::ConstAccessor<float> PresampleAcc("Presample" + auxSuffix);
-  SG::ConstAccessor<float> PreSampleAmpAcc("PreSampleAmp" + auxSuffix);
-  SG::ConstAccessor<float> RPDChannelBaselineAcc("RPDChannelBaseline" + auxSuffix);
-  SG::ConstAccessor<std::vector<float> > RPDChannelPileupExpFitParamsAcc("RPDChannelPileupExpFitParams" + auxSuffix);
-  SG::ConstAccessor<std::vector<float> > RPDChannelPileupExpFitParamErrsAcc("RPDChannelPileupExpFitParamErrs" + auxSuffix);
-  SG::ConstAccessor<std::vector<float> > RPDChannelPileupStretchedExpFitParamsAcc("RPDChannelPileupStretchedExpFitParams" + auxSuffix);
-  SG::ConstAccessor<std::vector<float> > RPDChannelPileupStretchedExpFitParamErrsAcc("RPDChannelPileupStretchedExpFitParamErrs" + auxSuffix);
-  SG::ConstAccessor<float> RPDChannelPileupExpFitMSEAcc("RPDChannelPileupExpFitMSE" + auxSuffix);
-  SG::ConstAccessor<float> RPDChannelPileupStretchedExpFitMSEAcc("RPDChannelPileupStretchedExpFitMSE" + auxSuffix);
-  SG::ConstAccessor<float> RPDChannelAmplitudeAcc("RPDChannelAmplitude" + auxSuffix);
-  SG::ConstAccessor<float> RPDChannelAmplitudeCalibAcc("RPDChannelAmplitudeCalib" + auxSuffix);
-  SG::ConstAccessor<float> RPDChannelMaxADCAcc("RPDChannelMaxADC" + auxSuffix);
-  SG::ConstAccessor<float> RPDChannelMaxADCCalibAcc("RPDChannelMaxADCCalib" + auxSuffix);
-  SG::ConstAccessor<unsigned int> RPDChannelMaxSampleAcc("RPDChannelMaxSample" + auxSuffix);
-  SG::ConstAccessor<unsigned int> RPDChannelStatusAcc("RPDChannelStatus" + auxSuffix);
-  SG::ConstAccessor<float> RPDChannelPileupFracAcc("RPDChannelPileupFrac" + auxSuffix);
-  SG::ConstAccessor<float> AmpLGRefitAcc("AmpLGRefit" + auxSuffix);
-  SG::ConstAccessor<float> T0LGRefitAcc("T0LGRefit" + auxSuffix);
-  SG::ConstAccessor<float> T0SubLGRefitAcc("T0SubLGRefit" + auxSuffix);
-  SG::ConstAccessor<float> ChisqLGRefitAcc("ChisqLGRefit" + auxSuffix);
+  static const SG::ConstAccessor<char> centroidEventValidAcc("centroidEventValid" + auxSuffix);
+  static const SG::ConstAccessor<float> cosDeltaReactionPlaneAngleAcc("cosDeltaReactionPlaneAngle" + auxSuffix);
+  static const SG::ConstAccessor<float> CalibEnergyAcc("CalibEnergy"+auxSuffix);
+  static const SG::ConstAccessor<float> CalibEnergyErrAcc("CalibEnergyErr"+auxSuffix);
+  static const SG::ConstAccessor<float> UncalibSumAcc("UncalibSum"+auxSuffix);
+  static const SG::ConstAccessor<float> UncalibSumErrAcc("UncalibSumErr"+auxSuffix);
+  static const SG::ConstAccessor<float> AverageTimeAcc("AverageTime"+auxSuffix);
+  static const SG::ConstAccessor<unsigned int> StatusAcc("Status"+auxSuffix);
+  static const SG::ConstAccessor<unsigned int> ModuleMaskAcc("ModuleMask"+auxSuffix);
+  static const SG::ConstAccessor<float> TruthTotalEnergyAcc("TruthTotalEnergy" + auxSuffix);
+  static const SG::ConstAccessor<float> TruthInvisibleEnergyAcc("TruthInvisibleEnergy" + auxSuffix);
+  static const SG::ConstAccessor<float> TruthEMEnergyAcc("TruthEMEnergy" + auxSuffix);
+  static const SG::ConstAccessor<float> TruthNonEMEnergyAcc("TruthNonEMEnergy" + auxSuffix);
+  static const SG::ConstAccessor<float> TruthEscapedEnergyAcc("TruthEscapedEnergy" + auxSuffix);
+  static const SG::ConstAccessor<unsigned int> centroidStatusAcc("centroidStatus" + auxSuffix);
+  static const SG::ConstAccessor<std::vector<float> > RPDChannelSubtrAmpAcc("RPDChannelSubtrAmp" + auxSuffix);
+  static const SG::ConstAccessor<float> RPDSubtrAmpSumAcc("RPDSubtrAmpSum" + auxSuffix);
+  static const SG::ConstAccessor<float> xCentroidPreGeomCorPreAvgSubtrAcc("xCentroidPreGeomCorPreAvgSubtr" + auxSuffix);
+  static const SG::ConstAccessor<float> yCentroidPreGeomCorPreAvgSubtrAcc("yCentroidPreGeomCorPreAvgSubtr" + auxSuffix);
+  static const SG::ConstAccessor<float> xCentroidPreAvgSubtrAcc("xCentroidPreAvgSubtr" + auxSuffix);
+  static const SG::ConstAccessor<float> yCentroidPreAvgSubtrAcc("yCentroidPreAvgSubtr" + auxSuffix);
+  static const SG::ConstAccessor<float> xCentroidAcc("xCentroid" + auxSuffix);
+  static const SG::ConstAccessor<float> yCentroidAcc("yCentroid" + auxSuffix);
+  static const SG::ConstAccessor<std::vector<float> > xRowCentroidAcc("xRowCentroid" + auxSuffix);
+  static const SG::ConstAccessor<std::vector<float> > yColCentroidAcc("yColCentroid" + auxSuffix);
+  static const SG::ConstAccessor<float> reactionPlaneAngleAcc("reactionPlaneAngle" + auxSuffix);
+  static const SG::ConstAccessor<unsigned int> RPDStatusAcc("RPDStatus" + auxSuffix);
+  static const SG::ConstAccessor<unsigned int> nPhotonsAcc("nPhotons" + auxSuffix);
+  static const SG::ConstAccessor<float> CalibTimeAcc("CalibTime" + auxSuffix);
+  static const SG::ConstAccessor<float> AmplitudeAcc("Amplitude" + auxSuffix);
+  static const SG::ConstAccessor<float> TimeAcc("Time" + auxSuffix);
+  static const SG::ConstAccessor<float> ChisqAcc("Chisq" + auxSuffix);
+  static const SG::ConstAccessor<float> FitAmpAcc("FitAmp" + auxSuffix);
+  static const SG::ConstAccessor<float> FitAmpErrorAcc("FitAmpError" + auxSuffix);
+  static const SG::ConstAccessor<float> FitT0Acc("FitT0" + auxSuffix);
+  static const SG::ConstAccessor<float> BkgdMaxFractionAcc("BkgdMaxFraction" + auxSuffix);
+  static const SG::ConstAccessor<float> MinDeriv2ndAcc("MinDeriv2nd" + auxSuffix);
+  static const SG::ConstAccessor<float> PresampleAcc("Presample" + auxSuffix);
+  static const SG::ConstAccessor<float> PreSampleAmpAcc("PreSampleAmp" + auxSuffix);
+  static const SG::ConstAccessor<float> RPDChannelBaselineAcc("RPDChannelBaseline" + auxSuffix);
+  static const SG::ConstAccessor<std::vector<float> > RPDChannelPileupExpFitParamsAcc("RPDChannelPileupExpFitParams" + auxSuffix);
+  static const SG::ConstAccessor<std::vector<float> > RPDChannelPileupExpFitParamErrsAcc("RPDChannelPileupExpFitParamErrs" + auxSuffix);
+  static const SG::ConstAccessor<std::vector<float> > RPDChannelPileupStretchedExpFitParamsAcc("RPDChannelPileupStretchedExpFitParams" + auxSuffix);
+  static const SG::ConstAccessor<std::vector<float> > RPDChannelPileupStretchedExpFitParamErrsAcc("RPDChannelPileupStretchedExpFitParamErrs" + auxSuffix);
+  static const SG::ConstAccessor<float> RPDChannelPileupExpFitMSEAcc("RPDChannelPileupExpFitMSE" + auxSuffix);
+  static const SG::ConstAccessor<float> RPDChannelPileupStretchedExpFitMSEAcc("RPDChannelPileupStretchedExpFitMSE" + auxSuffix);
+  static const SG::ConstAccessor<float> RPDChannelAmplitudeAcc("RPDChannelAmplitude" + auxSuffix);
+  static const SG::ConstAccessor<float> RPDChannelAmplitudeCalibAcc("RPDChannelAmplitudeCalib" + auxSuffix);
+  static const SG::ConstAccessor<float> RPDChannelMaxADCAcc("RPDChannelMaxADC" + auxSuffix);
+  static const SG::ConstAccessor<float> RPDChannelMaxADCCalibAcc("RPDChannelMaxADCCalib" + auxSuffix);
+  static const SG::ConstAccessor<unsigned int> RPDChannelMaxSampleAcc("RPDChannelMaxSample" + auxSuffix);
+  static const SG::ConstAccessor<unsigned int> RPDChannelStatusAcc("RPDChannelStatus" + auxSuffix);
+  static const SG::ConstAccessor<float> RPDChannelPileupFracAcc("RPDChannelPileupFrac" + auxSuffix);
+  static const SG::ConstAccessor<float> AmpLGRefitAcc("AmpLGRefit" + auxSuffix);
+  static const SG::ConstAccessor<float> T0LGRefitAcc("T0LGRefit" + auxSuffix);
+  static const SG::ConstAccessor<float> T0SubLGRefitAcc("T0SubLGRefit" + auxSuffix);
+  static const SG::ConstAccessor<float> ChisqLGRefitAcc("ChisqLGRefit" + auxSuffix);
 
   static const SG::ConstAccessor<uint16_t> LucrodTriggerAmpAcc("LucrodTriggerAmp");
-    static const SG::ConstAccessor<uint16_t> LucrodTriggerAmpLGAcc("LucrodTriggerAmpLG");
+  static const SG::ConstAccessor<uint16_t> LucrodTriggerAmpLGAcc("LucrodTriggerAmpLG");
   static const SG::ConstAccessor<uint16_t> LucrodTriggerSideAmpAcc("LucrodTriggerSideAmp");
   static const SG::ConstAccessor<uint16_t> LucrodTriggerSideAmpLGAcc("LucrodTriggerSideAmpLG");
   static const SG::ConstAccessor<float> Amplitude0Acc("Amplitude");
   static const SG::ConstAccessor<float> MaxADCAcc("MaxADC");
+  static const SG::ConstAccessor<float> MaxADCHGAcc("MaxADCHG");
+  static const SG::ConstAccessor<float> MaxADCLGAcc("MaxADCLG");
+  static const SG::ConstAccessor<float> PeakADCHGAcc("PeakADCHG");
+  static const SG::ConstAccessor<float> PeakADCLGAcc("PeakADCLG");
   static const SG::ConstAccessor<std::vector<uint16_t> > g0d0DataAcc("g0d0Data");
   static const SG::ConstAccessor<std::vector<uint16_t> > g0d1DataAcc("g0d1Data");
   static const SG::ConstAccessor<std::vector<uint16_t> > g1d0DataAcc("g1d0Data");
@@ -805,213 +821,251 @@ void ZdcNtuple::processZdcNtupleFromModules()
   bool zdcErr = m_eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::ZDCDECODINGERROR );
   t_rpdDecodingError = rpdErr;
   t_zdcDecodingError = zdcErr;
+  if (enableCentroid) {
+    // locate global sum (only if centroid is needed)
+    xAOD::ZdcModule const * globalSum = nullptr;
+    for (auto const * zdcSum : *zdcSums) {
+      if (zdcSum->zdcSide() == 0) {
+        globalSum = zdcSum;
+        break;
+      }
+    }
+    if (!globalSum) {
+      ANA_MSG_ERROR("unable to locate global ZdcSum (side = 0)");
+    }
+    t_centroidDecorationsAvailable = centroidStatusAcc(*globalSum);
+  }
+
   if (rpdErr||zdcErr) ANA_MSG_WARNING( "Decoding errors ZDC=" << zdcErr << " RPD=" << rpdErr );
 
   if (zdcSums.ptr())
-  {
-    ANA_MSG_DEBUG( "accessing ZdcSums" );
-    for (const auto zdcSum : *zdcSums)
     {
-      if (zdcSum->zdcSide()==0) {
-        // new global sum
-        t_centroidEventValid = centroidEventValidAcc(*zdcSum);
-        t_cosDeltaReactionPlaneAngle = cosDeltaReactionPlaneAngleAcc(*zdcSum);
-        continue;
-      }
-      int iside = 0;
-      if (zdcSum->zdcSide() > 0) iside = 1;
-
-      //static SG::AuxElement::ConstAccessor< float > acc( "CalibEnergy" );
-      //t_ZdcEnergy[iside] = acc(*zdcSum);
-
-      t_ZdcEnergy[iside] = CalibEnergyAcc(*zdcSum);
-      t_ZdcEnergyErr[iside] = CalibEnergyErrAcc(*zdcSum);
-
-      t_ZdcAmp[iside] = UncalibSumAcc(*zdcSum);
-      t_ZdcAmpErr[iside] = UncalibSumErrAcc(*zdcSum);
-      if (LucrodTriggerSideAmpAcc.isAvailable(*zdcSum))
-	t_ZdcLucrodTriggerSideAmp[iside] = LucrodTriggerSideAmpAcc(*zdcSum);
-      if (LucrodTriggerSideAmpLGAcc.isAvailable(*zdcSum))
-	t_ZdcLucrodTriggerSideAmpLG[iside] = LucrodTriggerSideAmpLGAcc(*zdcSum);
-
-      ANA_MSG_VERBOSE("processZdcNtupleFromModules: ZdcSum energy = " << t_ZdcEnergy[iside]);
-
-      t_ZdcTime[iside] = AverageTimeAcc(*zdcSum);
-      t_ZdcStatus[iside] = StatusAcc(*zdcSum);
-      t_ZdcModuleMask += (ModuleMaskAcc(*zdcSum) << 4 * iside);
-
-      if(m_isMC){
-        ANA_MSG_DEBUG("Filling sum truth");
-        t_ZdcTruthTotal  [iside] = TruthTotalEnergyAcc(*zdcSum);
-        t_ZdcTruthInvis  [iside] = TruthInvisibleEnergyAcc(*zdcSum);
-        t_ZdcTruthEM     [iside] = TruthEMEnergyAcc(*zdcSum);
-        t_ZdcTruthNonEM  [iside] = TruthNonEMEnergyAcc(*zdcSum);
-        t_ZdcTruthEscaped[iside] = TruthEscapedEnergyAcc(*zdcSum);
-      }
-
-      if (nsamplesZdc == 24) {
-        if (enableCentroid) {
-          t_centroidStatus[iside] = centroidStatusAcc(*zdcSum);
-          std::vector<float> const& rpdChannelSubtrAmp = RPDChannelSubtrAmpAcc(*zdcSum);
-          std::copy(rpdChannelSubtrAmp.begin(), rpdChannelSubtrAmp.end(), t_RPDChannelSubtrAmp[iside]);
-          t_RPDSubtrAmpSum[iside] = RPDSubtrAmpSumAcc(*zdcSum);
-          t_xCentroidPreGeomCorPreAvgSubtr[iside] = xCentroidPreGeomCorPreAvgSubtrAcc(*zdcSum);
-          t_yCentroidPreGeomCorPreAvgSubtr[iside] = yCentroidPreGeomCorPreAvgSubtrAcc(*zdcSum);
-          t_xCentroidPreAvgSubtr[iside] = xCentroidPreAvgSubtrAcc(*zdcSum);
-          t_yCentroidPreAvgSubtr[iside] = yCentroidPreAvgSubtrAcc(*zdcSum);
-          t_xCentroid[iside] = xCentroidAcc(*zdcSum);
-          t_yCentroid[iside] = yCentroidAcc(*zdcSum);
-          std::vector<float> const& xRowCentroid = xRowCentroidAcc(*zdcSum);
-          std::copy(xRowCentroid.begin(), xRowCentroid.end(), t_xRowCentroid[iside]);
-          std::vector<float> const& yColCentroid = yColCentroidAcc(*zdcSum);
-          std::copy(yColCentroid.begin(), yColCentroid.end(), t_yColCentroid[iside]);
-          t_reactionPlaneAngle[iside] = reactionPlaneAngleAcc(*zdcSum);
-        }
-        if (enableRPD) {
-          t_RpdSideStatus[iside] = RPDStatusAcc(*zdcSum);
-        }
-      }
-    }
-  }
-
-  ANA_MSG_DEBUG(  "accessing ZdcModules" );
-  if (zdcModules.ptr())
-  {
-    for (const auto zdcMod : *zdcModules)
-    {
-      int iside = 0;
-      if (zdcMod->zdcSide() > 0) iside = 1;
-      int imod = zdcMod->zdcModule();
-
-      if (m_isMC){
-        //Calib hits are only stored in channel 0 of the RPD
-        if(!(imod == 4 && zdcMod->zdcChannel() != 0)){
-          t_ZdcModuleTruthTotal  [iside][imod] = TruthTotalEnergyAcc(*zdcMod);
-          t_ZdcModuleTruthInvis  [iside][imod] = TruthInvisibleEnergyAcc(*zdcMod);
-          t_ZdcModuleTruthEM     [iside][imod] = TruthEMEnergyAcc(*zdcMod);
-          t_ZdcModuleTruthNonEM  [iside][imod] = TruthNonEMEnergyAcc(*zdcMod);
-          t_ZdcModuleTruthEscaped[iside][imod] = TruthEscapedEnergyAcc(*zdcMod);
-          t_ZdcModuleTruthNphotons[iside][imod] = nPhotonsAcc(*zdcMod);
-        }
-        //Calib hits are stored for all modules
-        //Other data is only valid for module 1-4
-        if(imod > 4) continue;
-      }
-
-      ANA_MSG_VERBOSE ("Module " << zdcMod->zdcSide() << " " << zdcMod->zdcModule() << " amp:" << Amplitude0Acc(*zdcMod));
-
-      if (zdcMod->zdcType() == 0) {
-        // this is the ZDC
-        t_ZdcModuleCalibAmp[iside][imod] = CalibEnergyAcc(*zdcMod);
-        t_ZdcModuleCalibTime[iside][imod] = CalibTimeAcc(*zdcMod);
-        t_ZdcModuleStatus[iside][imod] = StatusAcc(*zdcMod);
-        if (t_ZdcModuleAmp[iside][imod] != 0.)
-          Warning("processZdcNtupleFromModules", "overwriting side %d module %d!", iside, imod);
-        t_ZdcModuleAmp[iside][imod] = AmplitudeAcc(*zdcMod);
-        t_ZdcModuleTime[iside][imod] = TimeAcc(*zdcMod);
-
-        t_ZdcModuleChisq[iside][imod] = ChisqAcc(*zdcMod);
-        t_ZdcModuleFitAmp[iside][imod] = FitAmpAcc(*zdcMod);
-        t_ZdcModuleAmpError[iside][imod] = FitAmpErrorAcc(*zdcMod);
-        t_ZdcModuleFitT0[iside][imod] = FitT0Acc(*zdcMod);
-        t_ZdcModuleBkgdMaxFraction[iside][imod] = BkgdMaxFractionAcc(*zdcMod);
-        t_ZdcModuleMinDeriv2nd[iside][imod] = MinDeriv2ndAcc(*zdcMod);
-        t_ZdcModulePresample[iside][imod] = PresampleAcc(*zdcMod);
-        t_ZdcModulePreSampleAmp[iside][imod] = PreSampleAmpAcc(*zdcMod);
-
-	if (AmpLGRefitAcc.isAvailable(*zdcMod)) {
-	  t_ZdcModuleAmpLGRefit[iside][imod] = AmpLGRefitAcc(*zdcMod);
-	  t_ZdcModuleT0LGRefit[iside][imod] = T0LGRefitAcc(*zdcMod);
-	  t_ZdcModuleT0SubLGRefit[iside][imod] = T0SubLGRefitAcc(*zdcMod);
-	  t_ZdcModuleChisqLGRefit[iside][imod] = ChisqLGRefitAcc(*zdcMod);
-	}
-
-	if (LucrodTriggerAmpAcc.isAvailable(*zdcMod))
-	  t_ZdcLucrodTriggerAmp[iside][imod] = LucrodTriggerAmpAcc(*zdcMod);
-  if (LucrodTriggerAmpLGAcc.isAvailable(*zdcMod))
-	  t_ZdcLucrodTriggerAmpLG[iside][imod] = LucrodTriggerAmpLGAcc(*zdcMod);
-	if (MaxADCAcc.isAvailable(*zdcMod))
-	  t_ZdcModuleMaxADC[iside][imod] = MaxADCAcc(*zdcMod);
-
-        if (enableOutputSamples)
-          {
-            for (unsigned int isamp = 0; isamp < nsamplesZdc; isamp++) // 7 samples
-	      {
-		if (nsamplesZdc == 7)
-		  {
-		    t_raw7[iside][imod][0][0][isamp] = g0d0DataAcc(*zdcMod).at(isamp);
-		    t_raw7[iside][imod][0][1][isamp] = g0d1DataAcc(*zdcMod).at(isamp);
-		    t_raw7[iside][imod][1][0][isamp] = g1d0DataAcc(*zdcMod).at(isamp);
-		    t_raw7[iside][imod][1][1][isamp] = g1d1DataAcc(*zdcMod).at(isamp);
-		  }
-		
-		if (nsamplesZdc == 15)
-		  {
-		    t_raw15[iside][imod][0][0][isamp] = g0d0DataAcc(*zdcMod).at(isamp);
-		    t_raw15[iside][imod][0][1][isamp] = g0d1DataAcc(*zdcMod).at(isamp);
-		    t_raw15[iside][imod][1][0][isamp] = g1d0DataAcc(*zdcMod).at(isamp);
-		    t_raw15[iside][imod][1][1][isamp] = g1d1DataAcc(*zdcMod).at(isamp);
-		  }
-		
-		if (nsamplesZdc == 24)
-		  {
-		    t_raw24[iside][imod][0][0][isamp] = g0dataAcc(*zdcMod).at(isamp);
-		    t_raw24[iside][imod][1][0][isamp] = g1dataAcc(*zdcMod).at(isamp);
-		  }
+      ANA_MSG_DEBUG( "accessing ZdcSums" );
+      for (const auto zdcSum : *zdcSums)
+	{
+	  if (zdcSum->zdcSide()==0 && enableCentroid && t_centroidDecorationsAvailable)
+	    {
+	      // new global sum
+	      t_centroidEventValid = centroidEventValidAcc(*zdcSum);
+	      t_cosDeltaReactionPlaneAngle = cosDeltaReactionPlaneAngleAcc(*zdcSum);
+	      continue;
+	    }
+	  int iside = 0;
+	  if (zdcSum->zdcSide() > 0) iside = 1;
+	  
+	  //static SG::AuxElement::ConstAccessor< float > acc( "CalibEnergy" );
+	  //t_ZdcEnergy[iside] = acc(*zdcSum);
+	  
+	  if (enableZDC && !zdcErr)
+	    {
+	      t_ZdcEnergy[iside] = CalibEnergyAcc(*zdcSum);
+	      t_ZdcEnergyErr[iside] = CalibEnergyErrAcc(*zdcSum);
+	      
+	      t_ZdcAmp[iside] = UncalibSumAcc(*zdcSum);
+	      t_ZdcAmpErr[iside] = UncalibSumErrAcc(*zdcSum);
+	      if (LucrodTriggerSideAmpAcc.isAvailable(*zdcSum))
+		t_ZdcLucrodTriggerSideAmp[iside] = LucrodTriggerSideAmpAcc(*zdcSum);
+	      if (LucrodTriggerSideAmpLGAcc.isAvailable(*zdcSum))
+		t_ZdcLucrodTriggerSideAmpLG[iside] = LucrodTriggerSideAmpLGAcc(*zdcSum);
+	      
+	      ANA_MSG_VERBOSE("processZdcNtupleFromModules: ZdcSum energy = " << t_ZdcEnergy[iside]);
+	      
+	      t_ZdcTime[iside] = AverageTimeAcc(*zdcSum);
+	      t_ZdcStatus[iside] = StatusAcc(*zdcSum);
+	      t_ZdcModuleMask += ( ModuleMaskAcc(*zdcSum) << 4 * iside);
+	      
+	      if(m_isMC){
+		ANA_MSG_DEBUG("Filling sum truth");
+		t_ZdcTruthTotal  [iside] = TruthTotalEnergyAcc(*zdcSum);
+		t_ZdcTruthInvis  [iside] = TruthInvisibleEnergyAcc(*zdcSum);
+		t_ZdcTruthEM     [iside] = TruthEMEnergyAcc(*zdcSum);
+		t_ZdcTruthNonEM  [iside] = TruthNonEMEnergyAcc(*zdcSum);
+		t_ZdcTruthEscaped[iside] = TruthEscapedEnergyAcc(*zdcSum);
 	      }
-          }
-	
-      } else if (zdcMod->zdcType() == 1 && nsamplesZdc == 24) {
-        // this is the RPD
-	if (enableRPD)
-	  {
-	    t_RpdChannelBaseline[iside][zdcMod->zdcChannel()] = RPDChannelBaselineAcc(*zdcMod);
-	    std::vector<float> const &rpdChannelPileupExpFitParams = RPDChannelPileupExpFitParamsAcc(*zdcMod);
-	    std::copy(rpdChannelPileupExpFitParams.begin(), rpdChannelPileupExpFitParams.end(), t_RpdChannelPileupExpFitParams[iside][zdcMod->zdcChannel()]);
-	    std::vector<float> const &rpdChannelPileupExpFitParamErrs = RPDChannelPileupExpFitParamErrsAcc(*zdcMod);
-	    std::copy(rpdChannelPileupExpFitParamErrs.begin(), rpdChannelPileupExpFitParamErrs.end(), t_RpdChannelPileupExpFitParamErrs[iside][zdcMod->zdcChannel()]);
-	    std::vector<float> const &rpdChannelPileupStretchedExpFitParams = RPDChannelPileupStretchedExpFitParamsAcc(*zdcMod);
-	    std::copy(rpdChannelPileupStretchedExpFitParams.begin(), rpdChannelPileupStretchedExpFitParams.end(), t_RpdChannelPileupStretchedExpFitParams[iside][zdcMod->zdcChannel()]);
-	    std::vector<float> const &rpdChannelPileupStretchedExpFitParamErrs = RPDChannelPileupStretchedExpFitParamErrsAcc(*zdcMod);
-	    std::copy(rpdChannelPileupStretchedExpFitParamErrs.begin(), rpdChannelPileupStretchedExpFitParamErrs.end(), t_RpdChannelPileupStretchedExpFitParamErrs[iside][zdcMod->zdcChannel()]);
-	    t_RpdChannelPileupExpFitMSE[iside][zdcMod->zdcChannel()] = RPDChannelPileupExpFitMSEAcc(*zdcMod);
-	    t_RpdChannelPileupStretchedExpFitMSE[iside][zdcMod->zdcChannel()] = RPDChannelPileupStretchedExpFitMSEAcc(*zdcMod);
-	    t_RpdChannelAmplitude[iside][zdcMod->zdcChannel()] = RPDChannelAmplitudeAcc(*zdcMod);
-	    t_RpdChannelAmplitudeCalib[iside][zdcMod->zdcChannel()] = RPDChannelAmplitudeCalibAcc(*zdcMod);
-	    t_RpdChannelMaxADC[iside][zdcMod->zdcChannel()] = RPDChannelMaxADCAcc(*zdcMod);
-	    t_RpdChannelMaxADCCalib[iside][zdcMod->zdcChannel()] = RPDChannelMaxADCCalibAcc(*zdcMod);
-	    t_RpdChannelMaxSample[iside][zdcMod->zdcChannel()] = RPDChannelMaxSampleAcc(*zdcMod);
-	    t_RpdChannelStatus[iside][zdcMod->zdcChannel()] = RPDChannelStatusAcc(*zdcMod);
-	    t_RpdChannelPileupFrac[iside][zdcMod->zdcChannel()] = RPDChannelPileupFracAcc(*zdcMod);
-      if(m_isMC){
-        t_RpdModuleTruthNphotons[iside][zdcMod->zdcChannel()] = nPhotonsAcc(*zdcMod);
-      }
-	  }
-        if (enableOutputSamples)
-          {
-            std::vector<uint16_t> const &rpdChannelRaw = g0dataAcc(*zdcMod);
-            std::copy(rpdChannelRaw.begin(), rpdChannelRaw.end(), t_rpdRaw[iside][zdcMod->zdcChannel()]);
-          }
-      }
+	      
+	    }
+	  
+	  if (enableRPD)
+	    {
+	      if (enableRPDAmp && !rpdErr)
+		{
+		  t_RpdSideStatus[iside] = RPDStatusAcc(*zdcSum);
+		}
+	      if (enableCentroid && t_centroidDecorationsAvailable)
+		{
+		  t_centroidStatus[iside] = centroidStatusAcc(*zdcSum);
+		  std::vector<float> const& rpdChannelSubtrAmp = RPDChannelSubtrAmpAcc(*zdcSum);
+		  std::copy(rpdChannelSubtrAmp.begin(), rpdChannelSubtrAmp.end(), t_RPDChannelSubtrAmp[iside]);
+		  t_RPDSubtrAmpSum[iside] = RPDSubtrAmpSumAcc(*zdcSum);
+		  t_xCentroidPreGeomCorPreAvgSubtr[iside] = xCentroidPreGeomCorPreAvgSubtrAcc(*zdcSum);
+		  t_yCentroidPreGeomCorPreAvgSubtr[iside] = yCentroidPreGeomCorPreAvgSubtrAcc(*zdcSum);
+		  t_xCentroidPreAvgSubtr[iside] = xCentroidPreAvgSubtrAcc(*zdcSum);
+		  t_yCentroidPreAvgSubtr[iside] = yCentroidPreAvgSubtrAcc(*zdcSum);
+		  t_xCentroid[iside] = xCentroidAcc(*zdcSum);
+		  t_yCentroid[iside] = yCentroidAcc(*zdcSum);
+		  std::vector<float> const& xRowCentroid = xRowCentroidAcc(*zdcSum);
+		  std::copy(xRowCentroid.begin(), xRowCentroid.end(), t_xRowCentroid[iside]);
+		  std::vector<float> const& yColCentroid = yColCentroidAcc(*zdcSum);
+		  std::copy(yColCentroid.begin(), yColCentroid.end(), t_yColCentroid[iside]);
+		  t_reactionPlaneAngle[iside] = reactionPlaneAngleAcc(*zdcSum);
+		}
+	    }
+	}
     }
-  }
-  else
-  {
-    ANA_MSG_INFO("No ZdcModules" << auxSuffix << " when expected!");
-  }
-
-  if (msgLvl (MSG::VERBOSE))
-  {
-    std::ostringstream message;
-    message << "Dump zdc_ZdcModuleAmp: ";
-    for (int iside = 0; iside < 2; iside++)
+  
+  ANA_MSG_DEBUG(  "accessing ZdcModules" );
+  
+  if (zdcModules.ptr())
     {
-      for (int imod = 0; imod < 4; imod++)
-      {
-        message << t_ZdcModuleAmp[iside][imod] << " ";
-      }
+      for (const auto zdcMod : *zdcModules)
+	{
+	  int iside = 0;
+	  if (zdcMod->zdcSide() > 0) iside = 1;
+	  int imod = zdcMod->zdcModule();
+	  
+	  if (m_isMC){
+	    //Calib hits are only stored in channel 0 of the RPD
+	    if(!(imod == 4 && zdcMod->zdcChannel() != 0)){
+	      t_ZdcModuleTruthTotal  [iside][imod] = TruthTotalEnergyAcc(*zdcMod);
+	      t_ZdcModuleTruthInvis  [iside][imod] = TruthInvisibleEnergyAcc(*zdcMod);
+	      t_ZdcModuleTruthEM     [iside][imod] = TruthEMEnergyAcc(*zdcMod);
+	      t_ZdcModuleTruthNonEM  [iside][imod] = TruthNonEMEnergyAcc(*zdcMod);
+	      t_ZdcModuleTruthEscaped[iside][imod] = TruthEscapedEnergyAcc(*zdcMod);
+	      t_ZdcModuleTruthNphotons[iside][imod] = nPhotonsAcc(*zdcMod);
+	    }
+	    //Calib hits are stored for all modules
+	    //Other data is only valid for module 1-4
+	    if(imod > 4) continue;
+	  }
+	  
+	  ANA_MSG_VERBOSE ("Module " << zdcMod->zdcSide() << " " << zdcMod->zdcModule() << " amp:" << AmplitudeAcc(*zdcMod));
+	  
+	  if (zdcMod->zdcType() == 0 && !zdcErr)
+	    {
+	      // ZDC energy type modules
+	      t_ZdcModuleCalibAmp[iside][imod] = CalibEnergyAcc(*zdcMod);
+	      t_ZdcModuleCalibTime[iside][imod] = CalibTimeAcc(*zdcMod);
+	      t_ZdcModuleStatus[iside][imod] = StatusAcc(*zdcMod);
+	      if (t_ZdcModuleAmp[iside][imod] != 0.)
+		Warning("processZdcNtupleFromModules", "overwriting side %d module %d!", iside, imod);
+	      t_ZdcModuleAmp[iside][imod] = AmplitudeAcc(*zdcMod);
+	      t_ZdcModuleTime[iside][imod] = TimeAcc(*zdcMod);
+	      
+	      t_ZdcModuleChisq[iside][imod] = ChisqAcc(*zdcMod);
+	      t_ZdcModuleFitAmp[iside][imod] = FitAmpAcc(*zdcMod);
+	      t_ZdcModuleAmpError[iside][imod] = FitAmpErrorAcc(*zdcMod);
+	      t_ZdcModuleFitT0[iside][imod] = FitT0Acc(*zdcMod);
+	      t_ZdcModuleBkgdMaxFraction[iside][imod] = BkgdMaxFractionAcc(*zdcMod);
+	      t_ZdcModuleMinDeriv2nd[iside][imod] = MinDeriv2ndAcc(*zdcMod);
+	      t_ZdcModulePresample[iside][imod] = PresampleAcc(*zdcMod);
+	      t_ZdcModulePreSampleAmp[iside][imod] = PreSampleAmpAcc(*zdcMod);
+	      
+	      if (AmpLGRefitAcc.isAvailable(*zdcMod)) {
+		t_ZdcModuleAmpLGRefit[iside][imod] = AmpLGRefitAcc(*zdcMod);
+		t_ZdcModuleT0LGRefit[iside][imod] = T0LGRefitAcc(*zdcMod);
+		t_ZdcModuleT0SubLGRefit[iside][imod] = T0SubLGRefitAcc(*zdcMod);
+		t_ZdcModuleChisqLGRefit[iside][imod] = ChisqLGRefitAcc(*zdcMod);
+	      }
+	      
+	      if (LucrodTriggerAmpAcc.isAvailable(*zdcMod))
+		t_ZdcLucrodTriggerAmp[iside][imod] = LucrodTriggerAmpAcc(*zdcMod);
+	      if (LucrodTriggerAmpLGAcc.isAvailable(*zdcMod))
+		t_ZdcLucrodTriggerAmpLG[iside][imod] = LucrodTriggerAmpLGAcc(*zdcMod);
+
+	      if (MaxADCAcc.isAvailable(*zdcMod))
+		t_ZdcModuleMaxADC[iside][imod] = MaxADCAcc(*zdcMod);
+	      if (MaxADCHGAcc.isAvailable(*zdcMod))
+		t_ZdcModuleMaxADCHG[iside][imod] = MaxADCHGAcc(*zdcMod);
+	      if (MaxADCLGAcc.isAvailable(*zdcMod))
+		t_ZdcModuleMaxADCLG[iside][imod] = MaxADCLGAcc(*zdcMod);
+	      if (PeakADCHGAcc.isAvailable(*zdcMod))
+		t_ZdcModulePeakADCHG[iside][imod] = PeakADCHGAcc(*zdcMod);
+	      if (PeakADCLGAcc.isAvailable(*zdcMod))
+		t_ZdcModulePeakADCLG[iside][imod] = PeakADCLGAcc(*zdcMod);
+
+	      if (enableOutputSamples && !zdcErr)
+		{
+		  for (unsigned int isamp = 0; isamp < nsamplesZdc; isamp++) // 7 samples
+		    {
+		      if (nsamplesZdc == 7)
+			{
+			  t_raw7[iside][imod][0][0][isamp] = g0d0DataAcc(*zdcMod).at(isamp);
+			  t_raw7[iside][imod][0][1][isamp] = g0d1DataAcc(*zdcMod).at(isamp);
+			  t_raw7[iside][imod][1][0][isamp] = g1d0DataAcc(*zdcMod).at(isamp);
+			  t_raw7[iside][imod][1][1][isamp] = g1d1DataAcc(*zdcMod).at(isamp);
+			}
+		      
+		      if (nsamplesZdc == 15)
+			{
+			  t_raw15[iside][imod][0][0][isamp] = g0d0DataAcc(*zdcMod).at(isamp);
+			  t_raw15[iside][imod][0][1][isamp] = g0d1DataAcc(*zdcMod).at(isamp);
+			  t_raw15[iside][imod][1][0][isamp] = g1d0DataAcc(*zdcMod).at(isamp);
+			  t_raw15[iside][imod][1][1][isamp] = g1d1DataAcc(*zdcMod).at(isamp);
+			}
+		      
+		      if (nsamplesZdc == 24)
+			{
+			  t_raw24[iside][imod][0][0][isamp] = g0dataAcc(*zdcMod).at(isamp);
+			  t_raw24[iside][imod][1][0][isamp] = g1dataAcc(*zdcMod).at(isamp);
+			}
+		    }
+		}
+	    }
+	  else if (zdcMod->zdcType() == 1 && nsamplesZdc == 24)
+	    {
+	      // this is the RPD
+	      if (enableRPD)
+		{
+		  if (enableRPDAmp && !rpdErr)
+		    {
+		      t_RpdChannelBaseline[iside][zdcMod->zdcChannel()] = RPDChannelBaselineAcc(*zdcMod);
+		      std::vector<float> const &rpdChannelPileupExpFitParams = RPDChannelPileupExpFitParamsAcc(*zdcMod);
+		      std::copy(rpdChannelPileupExpFitParams.begin(), rpdChannelPileupExpFitParams.end(), t_RpdChannelPileupExpFitParams[iside][zdcMod->zdcChannel()]);
+		      std::vector<float> const &rpdChannelPileupExpFitParamErrs = RPDChannelPileupExpFitParamErrsAcc(*zdcMod);
+		      std::copy(rpdChannelPileupExpFitParamErrs.begin(), rpdChannelPileupExpFitParamErrs.end(), t_RpdChannelPileupExpFitParamErrs[iside][zdcMod->zdcChannel()]);
+		      std::vector<float> const &rpdChannelPileupStretchedExpFitParams = RPDChannelPileupStretchedExpFitParamsAcc(*zdcMod);
+		      std::copy(rpdChannelPileupStretchedExpFitParams.begin(), rpdChannelPileupStretchedExpFitParams.end(), t_RpdChannelPileupStretchedExpFitParams[iside][zdcMod->zdcChannel()]);
+		      std::vector<float> const &rpdChannelPileupStretchedExpFitParamErrs = RPDChannelPileupStretchedExpFitParamErrsAcc(*zdcMod);
+		      std::copy(rpdChannelPileupStretchedExpFitParamErrs.begin(), rpdChannelPileupStretchedExpFitParamErrs.end(), t_RpdChannelPileupStretchedExpFitParamErrs[iside][zdcMod->zdcChannel()]);
+		      t_RpdChannelPileupExpFitMSE[iside][zdcMod->zdcChannel()] = RPDChannelPileupExpFitMSEAcc(*zdcMod);
+		      t_RpdChannelPileupStretchedExpFitMSE[iside][zdcMod->zdcChannel()] = RPDChannelPileupStretchedExpFitMSEAcc(*zdcMod);
+		      t_RpdChannelAmplitude[iside][zdcMod->zdcChannel()] = RPDChannelAmplitudeAcc(*zdcMod);
+		      t_RpdChannelAmplitudeCalib[iside][zdcMod->zdcChannel()] = RPDChannelAmplitudeCalibAcc(*zdcMod);
+		      t_RpdChannelMaxADC[iside][zdcMod->zdcChannel()] = RPDChannelMaxADCAcc(*zdcMod);
+		      t_RpdChannelMaxADCCalib[iside][zdcMod->zdcChannel()] = RPDChannelMaxADCCalibAcc(*zdcMod);
+		      t_RpdChannelMaxSample[iside][zdcMod->zdcChannel()] = RPDChannelMaxSampleAcc(*zdcMod);
+		      t_RpdChannelStatus[iside][zdcMod->zdcChannel()] = RPDChannelStatusAcc(*zdcMod);
+		      t_RpdChannelPileupFrac[iside][zdcMod->zdcChannel()] = RPDChannelPileupFracAcc(*zdcMod);
+		      if(m_isMC){
+			t_RpdModuleTruthNphotons[iside][zdcMod->zdcChannel()] = nPhotonsAcc(*zdcMod);
+		      }
+		    }
+		  if (enableOutputSamples)
+		    {
+		      std::vector<uint16_t> const &rpdChannelRaw = g0dataAcc(*zdcMod);
+		      std::copy(rpdChannelRaw.begin(), rpdChannelRaw.end(), t_rpdRaw[iside][zdcMod->zdcChannel()]);
+		    }
+		}
+	    }
+	}
     }
-  }
+  else
+    {
+      ANA_MSG_INFO("No ZdcModules" << auxSuffix << " when expected!");
+    }
+  
+  if (msgLvl (MSG::VERBOSE))
+    {
+      std::ostringstream message;
+      message << "Dump zdc_ZdcModuleAmp: ";
+      for (int iside = 0; iside < 2; iside++)
+	{
+	  for (int imod = 0; imod < 4; imod++)
+	    {
+	      message << t_ZdcModuleAmp[iside][imod] << " ";
+	    }
+	}
+    }
 }
 
 void ZdcNtuple::processMCEventCollection(){
@@ -1230,8 +1284,6 @@ void ZdcNtuple::processInDet()
   t_vtx_sumpt2.clear();
   t_vtx_trk_index.clear();
 
-  if (!enableTracks) return;
-  
   if (m_primaryVertices)
     {
       ANA_MSG_DEBUG("processInDet: processing vertices");
@@ -1239,7 +1291,7 @@ void ZdcNtuple::processInDet()
       t_nvx = m_primaryVertices->size();
 
       static const SG::ConstAccessor<float> sumPt2Acc("sumPt2");
-
+      
       // start of new vertex representation
       t_nvtx = m_primaryVertices->size();
       for (const auto vertex : *m_primaryVertices)
@@ -1256,7 +1308,10 @@ void ZdcNtuple::processInDet()
 	  t_vtx_sumpt2.push_back(vtx_sumpt2 / 1e6);
 	  t_vtx_ntrk_all.push_back(vertex->nTrackParticles());
 
-          t_vtx_sumpt2_all.push_back(sumPt2Acc.withDefault(*vertex, -1));
+	  if (sumPt2Acc.isAvailable(*vertex))
+	    t_vtx_sumpt2_all.push_back(sumPt2Acc(*vertex));
+	  else
+	    t_vtx_sumpt2_all.push_back(-1);
 
 	  std::vector<int16_t> trk_index;
 	  if ( m_trackParticles && vertex->nTrackParticles() <= trackLimit )
@@ -1320,7 +1375,11 @@ void ZdcNtuple::processInDet()
 	}
       t_vxntrk = primary_vertex->nTrackParticles();
       static const SG::ConstAccessor<float> sumPt2Acc("sumPt2");
-      t_vxsumpt2 = sumPt2Acc.withDefault(*primary_vertex, 0);
+      if (sumPt2Acc.isAvailable(*primary_vertex))
+	t_vxsumpt2 = sumPt2Acc(*primary_vertex);
+      else
+	t_vxsumpt2 = 0;
+      
       t_vxtype = primary_vertex->vertexType();
       t_pvindex = pv_index;
       t_puvxz = max_pileup_z;
@@ -1468,6 +1527,7 @@ void ZdcNtuple::writeTrack(const xAOD::TrackParticle* track, const xAOD::Vertex*
   t_trk_nPixHoles.push_back(numberOfPixelHolesAcc(*track));
   t_trk_nTrtHits.push_back(numberOfTRTHitsAcc(*track));
   t_trk_nTrtOutliers.push_back(numberOfTRTOutliersAcc(*track));
+
   float pixeldEdx = 0;
   track->summaryValue(pixeldEdx, xAOD::SummaryType::pixeldEdx);
   t_trk_pixeldEdx.push_back(pixeldEdx);
@@ -1721,8 +1781,6 @@ void ZdcNtuple::processClusters()
   t_clusetaMax = 0;
   t_clusphiMax = 0;
 
-  if (!enableClusters) return;
-  
   for (const auto cluster : *m_caloClusters)
   {
     t_cc_pt.push_back(cluster->pt());
@@ -1883,73 +1941,64 @@ void ZdcNtuple::setupTriggerHistos()
 
   std::vector<std::string> triggers;
   std::vector<std::string> rerunTriggers;
-  bool zdc_triggers = zdcOnly||zdcCalib||zdcLaser;
+  bool zdc_triggers = true;
 
   // ZDC triggers
   if (zdc_triggers)
-    {
-      if (zdcCalib) // lists for calibration data
-	{
-	  if (lhcf2022)
-	    {
-	      triggers.push_back("HLT_noalg_ZDCPEB_L1LHCF");
-	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
-	    }
-	  
-	  if (pbpb2023)
-	    {
-	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
-	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR_EMPTY");
-	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR_UNPAIRED_NONISO");
-	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C");
-	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C_EMPTY");
-	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C_UNPAIRED_NONISO");
-	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A");
-	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_EMPTY");
-	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_UNPAIRED_NONISO");
-	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C");
-	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C_EMPTY");
-	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C_UNPAIRED_NONISO");
-	    }
-	}
-      else // lists for physics data
-	{
-	  if (lhcf2022)
-	    {
-	      triggers.push_back("HLT_noalg_L1LHCF");
-	    }
-	  if (lhcf2022afp)
-	    {
-	      triggers.push_back("HLT_noalg_AFPPEB_L1AFP_A");
-	      triggers.push_back("HLT_noalg_AFPPEB_L1AFP_C");
-	    }
-	  if (lhcf2022zdc)
-	    {
-	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
-	      triggers.push_back("HLT_noalg_ZDCPEB_L1LHCF");
-	      triggers.push_back("HLT_noalg_L1ZDC_OR");
-	      triggers.push_back("HLT_noalg_L1ZDC_XOR_E2");
-	      triggers.push_back("HLT_noalg_L1ZDC_XOR_E1_E3");
-	      triggers.push_back("HLT_noalg_L1ZDC_A_AND_C");
-	      triggers.push_back("HLT_mb_sptrk_L1ZDC_OR");
-	      triggers.push_back("HLT_mb_sptrk_L1ZDC_XOR_E2");
-	      triggers.push_back("HLT_mb_sptrk_L1ZDC_XOR_E1_E3");
-	      triggers.push_back("HLT_mb_sptrk_L1ZDC_A_AND_C");
-	      triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2");
-	      triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3");
-	      triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C");
-	    }
-	}
-    }
-  else // not ZDC-only triggers
-    {
-      if (pbpb2023)
-	{
-	  triggers.push_back("HLT_noalg_L1TE50_VTE600p0ETA49");
-	  triggers.push_back("HLT_mb_sptrk_pc_L1ZDC_A_C_VTE50");
-	  triggers.push_back("HLT_noalg_L1TE600p0ETA49");
-	}
-    }
+  {
+    if (zdcCalib) // lists for calibration data
+      {
+	if (lhcf2022)
+	  {
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1LHCF");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
+	  }
+
+	if (pbpb2023)
+	  {
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR_EMPTY");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR_UNPAIRED_NONISO");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C_EMPTY");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C_UNPAIRED_NONISO");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_EMPTY");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_UNPAIRED_NONISO");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C_EMPTY");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C_UNPAIRED_NONISO");
+	  }
+      }
+    else // lists for physics data
+      {
+	if (lhcf2022)
+          {
+            triggers.push_back("HLT_noalg_L1LHCF");
+          }
+	if (lhcf2022afp)
+          {
+            triggers.push_back("HLT_noalg_AFPPEB_L1AFP_A");
+            triggers.push_back("HLT_noalg_AFPPEB_L1AFP_C");
+          }
+	if (lhcf2022zdc)
+          {
+            triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
+            triggers.push_back("HLT_noalg_ZDCPEB_L1LHCF");
+            triggers.push_back("HLT_noalg_L1ZDC_OR");
+            triggers.push_back("HLT_noalg_L1ZDC_XOR_E2");
+            triggers.push_back("HLT_noalg_L1ZDC_XOR_E1_E3");
+            triggers.push_back("HLT_noalg_L1ZDC_A_AND_C");
+            triggers.push_back("HLT_mb_sptrk_L1ZDC_OR");
+            triggers.push_back("HLT_mb_sptrk_L1ZDC_XOR_E2");
+            triggers.push_back("HLT_mb_sptrk_L1ZDC_XOR_E1_E3");
+            triggers.push_back("HLT_mb_sptrk_L1ZDC_A_AND_C");
+            triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2");
+            triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3");
+            triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C");
+          }
+      }
+  }
 
   //char name[50];
   ANA_MSG_INFO("Adding trigger branches!");
