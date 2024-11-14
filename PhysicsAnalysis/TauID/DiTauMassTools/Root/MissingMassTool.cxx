@@ -64,7 +64,7 @@ StatusCode MissingMassTool::initialize()
   }
   m_MMC = new MissingMassCalculator(aset, m_param_file_path);
   // set properties if non negative
-  if (!m_float_stop) m_MMC->SetUseFloatStopping(false);
+  m_MMC->SetUseFloatStopping(m_float_stop);
   if (m_n_sigma_met>=0) m_MMC->SetNsigmaMETscan(m_n_sigma_met);
   if (m_tail_cleanup>=0) m_MMC->preparedInput.SetUseTailCleanup(m_tail_cleanup);
   if (m_use_verbose>=0) m_MMC->preparedInput.SetUseVerbose(m_use_verbose);
@@ -77,7 +77,7 @@ StatusCode MissingMassTool::initialize()
   if (m_use_mnu_probability) m_MMC->Prob->SetUseMnuProbability(m_use_mnu_probability);
   if (m_beam_energy) m_MMC->SetBeamEnergy(m_beam_energy);
   if (!m_lfv_leplep_refit) m_MMC->SetLFVLeplepRefit(false);
-  if (m_save_llh_histo) m_MMC->SaveLlhHisto(true);
+  m_MMC->SaveLlhHisto(m_save_llh_histo);
 
   // could be made a property but maybe not with the enum
   // What about a string argument ?

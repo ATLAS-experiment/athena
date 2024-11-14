@@ -84,7 +84,7 @@ MissingMassCalculator::MissingMassCalculator(
   preparedInput.m_fUseDefaults = 0; // use pre-set defaults for various configurations; if set it to 0
                                   // if need to study various options
   m_fUseEfficiencyRecovery = 0;     // no re-fit by default
-  m_fUseFloatStopping = 1;          // use floating stopping criterion by default
+  m_fUseFloatStopping = 0;
 
   preparedInput.m_METScanScheme = 1; // MET-scan scheme: 0- use JER; 1- use simple sumEt & missingHt
                                    // for Njet=0 events in (lep-had winter 2012)
@@ -97,6 +97,7 @@ MissingMassCalculator::MissingMassCalculator(
   m_iterTheta3d = 0;
   m_debugThisIteration = false;
   m_lfvLeplepRefit = true;
+  m_SaveLlhHisto = false;
 
   m_nsolmax = 4;
   m_nsolfinalmax = m_nsolmax * m_nsolmax;
@@ -132,68 +133,8 @@ MissingMassCalculator::MissingMassCalculator(
 
   m_fMfit_all = std::make_shared<TH1F>("MMC_h1", "M", hNbins, 0.0,
                                      hEmax); // all solutions
-  if(m_SaveLlhHisto){
-     m_fMEtP_all = std::make_shared<TH1F>("MEtP_h1", "M", hNbins, -100.0,
-                                     100.); // all solutions
-     m_fMEtL_all = std::make_shared<TH1F>("MEtL_h1", "M", hNbins, -100.0,
-                                     100.); // all solutions
-     m_fMnu1_all = std::make_shared<TH1F>("Mnu1_h1", "M", hNbins, 0.0,
-                                     hEmax); // all solutions
-     m_fMnu2_all = std::make_shared<TH1F>("Mnu2_h1", "M", hNbins, 0.0,
-                                     hEmax); // all solutions
-     m_fPhi1_all = std::make_shared<TH1F>("Phi1_h1", "M", hNbins, -10.0,
-                                     10.); // all solutions
-     m_fPhi2_all = std::make_shared<TH1F>("Phi2_h1", "M", hNbins, -10.0,
-                                     10.);     // all solutions
-     m_fMfit_allGraph = std::make_shared<TGraph>(); // all solutions
-  }
-
   m_fMfit_all->Sumw2(); // allow proper error bin calculation. Slightly slower but
                       // completely negligible
-  // these histograms are used for the floating stopping criterion
-  if (m_fUseFloatStopping) {
-    m_fMmass_split1 = std::make_shared<TH1F>("mass_h1_1", "M", hNbins, 0.0, hEmax);
-    m_fMEtP_split1 = std::make_shared<TH1F>("MEtP_h1_1", "M", hNbins, -100.0, 100.0);
-    m_fMEtL_split1 = std::make_shared<TH1F>("MEtL_h1_1", "M", hNbins, -100.0, 100.0);
-    m_fMnu1_split1 = std::make_shared<TH1F>("Mnu1_h1_1", "M", hNbins, 0.0, hEmax);
-    m_fMnu2_split1 = std::make_shared<TH1F>("Mnu2_h1_1", "M", hNbins, 0.0, hEmax);
-    m_fPhi1_split1 = std::make_shared<TH1F>("Phi1_h1_1", "M", hNbins, -10.0, 10.0);
-    m_fPhi2_split1 = std::make_shared<TH1F>("Phi2_h1_1", "M", hNbins, -10.0, 10.0);
-    m_fMmass_split2 = std::make_shared<TH1F>("mass_h1_2", "M", hNbins, 0.0, hEmax);
-    m_fMEtP_split2 = std::make_shared<TH1F>("MEtP_h1_2", "M", hNbins, -100.0, 100.0);
-    m_fMEtL_split2 = std::make_shared<TH1F>("MEtL_h1_2", "M", hNbins, -100.0, 100.0);
-    m_fMnu1_split2 = std::make_shared<TH1F>("Mnu1_h1_2", "M", hNbins, 0.0, hEmax);
-    m_fMnu2_split2 = std::make_shared<TH1F>("Mnu2_h1_2", "M", hNbins, 0.0, hEmax);
-    m_fPhi1_split2 = std::make_shared<TH1F>("Phi1_h1_2", "M", hNbins, -10.0, 10.0);
-    m_fPhi2_split2 = std::make_shared<TH1F>("Phi2_h1_2", "M", hNbins, -10.0, 10.0);
-  }
-
-  if(m_SaveLlhHisto){
-    m_fMEtP_all->Sumw2();
-    m_fMEtL_all->Sumw2();
-    m_fMnu1_all->Sumw2();
-    m_fMnu2_all->Sumw2();
-    m_fPhi1_all->Sumw2();
-    m_fPhi2_all->Sumw2();
-  }
-
-  // these histograms are used for the floating stopping criterion
-  if (m_fUseFloatStopping) {
-    m_fMmass_split1->Sumw2();
-    m_fMEtP_split1->Sumw2();
-    m_fMEtL_split1->Sumw2();
-    m_fMnu1_split1->Sumw2();
-    m_fMnu2_split1->Sumw2();
-    m_fPhi1_split1->Sumw2();
-    m_fPhi2_split1->Sumw2();
-    m_fMmass_split2->Sumw2();
-    m_fMEtP_split2->Sumw2();
-    m_fMEtL_split2->Sumw2();
-    m_fMnu1_split2->Sumw2();
-    m_fMnu2_split2->Sumw2();
-    m_fPhi1_split2->Sumw2();
-    m_fPhi2_split2->Sumw2();
-  }
 
   // histogram without weight. useful for debugging. negligibly slow until now
   m_fMfit_allNoWeight =
@@ -214,15 +155,6 @@ MissingMassCalculator::MissingMassCalculator(
 
   m_fMfit_all->SetDirectory(0);
 
-  if(m_SaveLlhHisto){
-     m_fMEtP_all->SetDirectory(0);
-     m_fMEtL_all->SetDirectory(0);
-     m_fMnu1_all->SetDirectory(0);
-     m_fMnu2_all->SetDirectory(0);
-     m_fPhi1_all->SetDirectory(0);
-     m_fPhi2_all->SetDirectory(0);
-  }
-
   m_fMfit_allNoWeight->SetDirectory(0);
   m_fPXfit1->SetDirectory(0);
   m_fPYfit1->SetDirectory(0);
@@ -230,24 +162,6 @@ MissingMassCalculator::MissingMassCalculator(
   m_fPXfit2->SetDirectory(0);
   m_fPYfit2->SetDirectory(0);
   m_fPZfit2->SetDirectory(0);
-
-  // these histograms are used for the floating stopping criterion
-  if (m_fUseFloatStopping) {
-    m_fMmass_split1->SetDirectory(0);
-    m_fMEtP_split1->SetDirectory(0);
-    m_fMEtL_split1->SetDirectory(0);
-    m_fMnu1_split1->SetDirectory(0);
-    m_fMnu2_split1->SetDirectory(0);
-    m_fPhi1_split1->SetDirectory(0);
-    m_fPhi2_split1->SetDirectory(0);
-    m_fMmass_split2->SetDirectory(0);
-    m_fMEtP_split2->SetDirectory(0);
-    m_fMEtL_split2->SetDirectory(0);
-    m_fMnu1_split2->SetDirectory(0);
-    m_fMnu2_split2->SetDirectory(0);
-    m_fPhi1_split2->SetDirectory(0);
-    m_fPhi2_split2->SetDirectory(0);
-  }
 
   // max hist fitting function
   m_fFitting =
@@ -3167,4 +3081,91 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
     PtEtaPhiMVector tauSum = preparedInput.m_vistau1 + preparedInput.m_vistau2;
     preparedInput.m_MetVec.SetXY(-tauSum.Px(), -tauSum.Py()); // WARNING this replace metvec by -mht
   }
+}
+
+void MissingMassCalculator::SaveLlhHisto(const bool val){
+  m_SaveLlhHisto=val;
+  if(!m_SaveLlhHisto) return;
+
+  float hEmax = 3000.0; // maximum energy (GeV)
+  int hNbins = 1500;
+  m_fMEtP_all = std::make_shared<TH1F>("MEtP_h1", "M", hNbins, -100.0,
+				       100.); // all solutions
+  m_fMEtL_all = std::make_shared<TH1F>("MEtL_h1", "M", hNbins, -100.0,
+				       100.); // all solutions
+  m_fMnu1_all = std::make_shared<TH1F>("Mnu1_h1", "M", hNbins, 0.0,
+				       hEmax); // all solutions
+  m_fMnu2_all = std::make_shared<TH1F>("Mnu2_h1", "M", hNbins, 0.0,
+				       hEmax); // all solutions
+  m_fPhi1_all = std::make_shared<TH1F>("Phi1_h1", "M", hNbins, -10.0,
+				       10.); // all solutions
+  m_fPhi2_all = std::make_shared<TH1F>("Phi2_h1", "M", hNbins, -10.0,
+				       10.);     // all solutions
+  m_fMfit_allGraph = std::make_shared<TGraph>(); // all solutions
+
+  m_fMEtP_all->Sumw2();
+  m_fMEtL_all->Sumw2();
+  m_fMnu1_all->Sumw2();
+  m_fMnu2_all->Sumw2();
+  m_fPhi1_all->Sumw2();
+  m_fPhi2_all->Sumw2();
+
+  m_fMEtP_all->SetDirectory(0);
+  m_fMEtL_all->SetDirectory(0);
+  m_fMnu1_all->SetDirectory(0);
+  m_fMnu2_all->SetDirectory(0);
+  m_fPhi1_all->SetDirectory(0);
+  m_fPhi2_all->SetDirectory(0);
+}
+
+void MissingMassCalculator::SetUseFloatStopping(const bool val){
+  m_fUseFloatStopping=val;
+  if(!m_fUseFloatStopping) return;
+
+  float hEmax = 3000.0; // maximum energy (GeV)
+  int hNbins = 1500;
+  m_fMmass_split1 = std::make_shared<TH1F>("mass_h1_1", "M", hNbins, 0.0, hEmax);
+  m_fMEtP_split1 = std::make_shared<TH1F>("MEtP_h1_1", "M", hNbins, -100.0, 100.0);
+  m_fMEtL_split1 = std::make_shared<TH1F>("MEtL_h1_1", "M", hNbins, -100.0, 100.0);
+  m_fMnu1_split1 = std::make_shared<TH1F>("Mnu1_h1_1", "M", hNbins, 0.0, hEmax);
+  m_fMnu2_split1 = std::make_shared<TH1F>("Mnu2_h1_1", "M", hNbins, 0.0, hEmax);
+  m_fPhi1_split1 = std::make_shared<TH1F>("Phi1_h1_1", "M", hNbins, -10.0, 10.0);
+  m_fPhi2_split1 = std::make_shared<TH1F>("Phi2_h1_1", "M", hNbins, -10.0, 10.0);
+  m_fMmass_split2 = std::make_shared<TH1F>("mass_h1_2", "M", hNbins, 0.0, hEmax);
+  m_fMEtP_split2 = std::make_shared<TH1F>("MEtP_h1_2", "M", hNbins, -100.0, 100.0);
+  m_fMEtL_split2 = std::make_shared<TH1F>("MEtL_h1_2", "M", hNbins, -100.0, 100.0);
+  m_fMnu1_split2 = std::make_shared<TH1F>("Mnu1_h1_2", "M", hNbins, 0.0, hEmax);
+  m_fMnu2_split2 = std::make_shared<TH1F>("Mnu2_h1_2", "M", hNbins, 0.0, hEmax);
+  m_fPhi1_split2 = std::make_shared<TH1F>("Phi1_h1_2", "M", hNbins, -10.0, 10.0);
+  m_fPhi2_split2 = std::make_shared<TH1F>("Phi2_h1_2", "M", hNbins, -10.0, 10.0);
+
+  m_fMmass_split1->Sumw2();
+  m_fMEtP_split1->Sumw2();
+  m_fMEtL_split1->Sumw2();
+  m_fMnu1_split1->Sumw2();
+  m_fMnu2_split1->Sumw2();
+  m_fPhi1_split1->Sumw2();
+  m_fPhi2_split1->Sumw2();
+  m_fMmass_split2->Sumw2();
+  m_fMEtP_split2->Sumw2();
+  m_fMEtL_split2->Sumw2();
+  m_fMnu1_split2->Sumw2();
+  m_fMnu2_split2->Sumw2();
+  m_fPhi1_split2->Sumw2();
+  m_fPhi2_split2->Sumw2();
+
+  m_fMmass_split1->SetDirectory(0);
+  m_fMEtP_split1->SetDirectory(0);
+  m_fMEtL_split1->SetDirectory(0);
+  m_fMnu1_split1->SetDirectory(0);
+  m_fMnu2_split1->SetDirectory(0);
+  m_fPhi1_split1->SetDirectory(0);
+  m_fPhi2_split1->SetDirectory(0);
+  m_fMmass_split2->SetDirectory(0);
+  m_fMEtP_split2->SetDirectory(0);
+  m_fMEtL_split2->SetDirectory(0);
+  m_fMnu1_split2->SetDirectory(0);
+  m_fMnu2_split2->SetDirectory(0);
+  m_fPhi1_split2->SetDirectory(0);
+  m_fPhi2_split2->SetDirectory(0);
 }
