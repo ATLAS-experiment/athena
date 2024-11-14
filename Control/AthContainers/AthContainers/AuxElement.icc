@@ -986,6 +986,25 @@ AuxElement::AuxElement ([[maybe_unused]] const AuxElement& other)
 inline
 AuxElement& AuxElement::operator= (const AuxElement& other)
 {
+  this->assign (other);
+  return *this;
+}
+
+
+/**
+ * @brief Assignment.
+ * @param other The object from which we're assigning.
+ * @param warnUnlocked If true, then warn when we skip unlocked decorations.
+ *
+ * We don't copy container/index, as assignment doesn't change where
+ * this object is.  However, if we have aux data, then we copy aux data
+ * if we're copying from an object that also has it; otherwise,
+ * if we're copying from an object with no aux data, then we clear ours.
+ */
+inline
+void AuxElement::assign (const AuxElement& other,
+                         bool warnUnlocked /*= false*/)
+{
   if (this != &other) {
     if (this->container()) {
       if (!other.container()) {
@@ -996,11 +1015,10 @@ AuxElement& AuxElement::operator= (const AuxElement& other)
       else {
         // Copying from an object with aux data.
         // Copy the aux data too.
-        this->copyAux (other);
+        this->copyAux (other, warnUnlocked);
       }
     }
   }
-  return *this;
 }
 
 
@@ -1396,6 +1414,7 @@ AuxElement::auxdecor (const std::string& name,
 /**
  * @brief Create a new private store for this object and copy aux data.
  * @param other The object from which aux data should be copied.
+ * @param warnUnlocked If true, then warn when we skip unlocked decorations.
  *
  * @c ExcBadPrivateStore will be thrown if this object is already
  * associated with a store.
@@ -1405,17 +1424,19 @@ AuxElement::auxdecor (const std::string& name,
  */
 template <class U1>
 inline
-void AuxElement::makePrivateStore (const U1& other)
+void AuxElement::makePrivateStore (const U1& other,
+                                   bool warnUnlocked /*=false*/)
 {
   // Dispatch to the proper overload depending on whether or not
   // other derives from AuxElement.
-  makePrivateStore1 (&other);
+  makePrivateStore1 (&other, warnUnlocked);
 }
 
 
 /**
  * @brief Create a new private store for this object and copy aux data.
  * @param other The object from which aux data should be copied.
+ * @param warnUnlocked If true, then warn when we skip unlocked decorations.
  *
  * @c ExcBadPrivateStore will be thrown if this object is already
  * associated with a store.
@@ -1425,11 +1446,12 @@ void AuxElement::makePrivateStore (const U1& other)
  */
 template <class U1>
 inline
-void AuxElement::makePrivateStore (const U1* other)
+void AuxElement::makePrivateStore (const U1* other,
+                                   bool warnUnlocked /*=false*/)
 {
   // Dispatch to the proper overload depending on whether or not
   // other derives from AuxElement.
-  makePrivateStore1 (other);
+  makePrivateStore1 (other, warnUnlocked);
 }
 
 
@@ -1509,7 +1531,7 @@ void AuxElement::setIndex (size_t index, SG::AuxVectorData* container)
  * This overload handles the case where @c other does not have aux data.
  */
 inline
-void AuxElement::makePrivateStore1 (const void*)
+void AuxElement::makePrivateStore1 (const void*, bool)
 {
   makePrivateStore();
 }
