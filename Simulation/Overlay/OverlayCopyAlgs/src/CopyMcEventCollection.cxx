@@ -63,7 +63,9 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
   ATH_MSG_DEBUG("Recorded output McEventCollection container " << outputContainer.name() << " in store " << outputContainer.store());
 
   unsigned int droppedSeparatorGenEvents{0};
+#ifdef HEPMC3
   int backupPileUpType{0};
+#endif
   int backupBunchCrossingTime{0};
   // Copy signal GenEvents
   for (McEventCollection::const_iterator it = signalContainer->begin(); it != signalContainer->end(); ++it) {
