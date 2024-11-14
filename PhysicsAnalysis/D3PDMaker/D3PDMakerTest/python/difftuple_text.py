@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: D3PDMakerTest/python/difftuple_text.py
@@ -1314,7 +1314,7 @@ def compare (o1, o2, thresh = 1e-6, ithresh = None, eltcmp = None):
     elif type(o2) in inttypes and isinstance(o1, float):
         o2 = float(o2)
 
-    if type(o1) != type(o2):
+    if type(o1) is not type(o2):
         return False
     if isinstance(o1, list):
         if len(o1) != len(o2):
@@ -1673,7 +1673,7 @@ def diff_branch (k, kb, v1, v2):
         elif type(b2) in inttypes and isinstance(b1, float):
             b2 = float(b2)
 
-        if type(b1) != type(b2):
+        if type(b1) is not type(b2):
             print (head, 'Type differs; new file: ', type(b1).__name__,
                    'reference file:', type(b2).__name__)
         elif not compare (b1, b2, thresh = thresh, ithresh = ithresh,
@@ -1720,15 +1720,15 @@ def diff_files (d1, d2):
         if k in d2.keys and not ignore_key_p (k):
             v1 = d1.keys[k]
             v2 = d2.keys[k]
-            if type(v1) != type(v2):
+            if type(v1) is not type(v2):
                 print ('Key', k, 'has type', type(v1).__name__,
                        'in new file, but type', type(v2).__name__,
                        'in reference file')
-            elif type(v1) == String:
+            elif type(v1) is String:
                 diff_string (k, v1, v2)
-            elif type(v1) == Tree:
+            elif type(v1) is Tree:
                 diff_tree (k, v1, v2)
-            elif type(v1) == Hist:
+            elif type(v1) is Hist:
                 diff_hist (k, v1, v2)
             else:
                 print ('Unknown type for diff:', type(v1).__name__)
