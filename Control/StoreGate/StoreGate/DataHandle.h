@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHandle.h
@@ -61,7 +61,7 @@ public:
   DataHandle& operator= (const DataHandle& h);
   DataHandle& operator= (const DATA& d) 
   { 
-    typename DataHandle<DATA>::pointer_type ptr = this->ptr();
+    typename DataHandle<DATA>::pointer_type ptr = m_ptr;
     if (ptr) {
       *ptr = d; 
     } else {
