@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -27,25 +27,28 @@
 
 // Return type (non-pointer)
 // Note: the Template XSec Defs *depends* on having included
-//  the TLorentzVector header *before* it is included -- it 
-//  uses the include guard from TLorentzVector to decide 
+//  the TLorentzVector header *before* it is included -- it
+//  uses the include guard from TLorentzVector to decide
 //  what is available
 #include "TLorentzVector.h"
 #include "TruthRivetTools/HiggsTemplateCrossSectionsDefs.h"
 
 #include "AtlasHepMC/GenEvent.h"
 
-class HiggsTruthCategoryTool 
-: public asg::AsgTool, 
-  public virtual IHiggsTruthCategoryTool 
-{ 
- public: 
+// System include(s).
+#include <memory>
+
+class HiggsTruthCategoryTool
+: public asg::AsgTool,
+  public virtual IHiggsTruthCategoryTool
+{
+ public:
    ASG_TOOL_CLASS( HiggsTruthCategoryTool , IHiggsTruthCategoryTool )
    HiggsTruthCategoryTool( const std::string& name );
-   ~HiggsTruthCategoryTool() { };
+
  public:
-   Rivet::AnalysisHandler *rivetAnaHandler; //!
-   Rivet::HiggsTemplateCrossSections *higgsTemplateCrossSections; //!
+   std::unique_ptr<Rivet::AnalysisHandler> m_rivetAnaHandler; //!
+   Rivet::HiggsTemplateCrossSections* m_higgsTemplateCrossSections; //!
    virtual StatusCode  initialize() override;
    StatusCode finalize () override;
    HTXS::HiggsClassification* getHiggsTruthCategoryObject(const HepMC::GenEvent& HepMCEvent, const HTXS::HiggsProdMode prodMode) const override;

@@ -20,6 +20,7 @@
 
 #include "Rivet/Rivet.hh"
 #include "Rivet/Analysis.hh"
+#include "Rivet/Config/RivetConfig.hh"
 #include "Rivet/Tools/RivetYODA.hh"
 
 
@@ -43,7 +44,7 @@ Rivet_i::Rivet_i(const std::string& name, ISvcLocator* pSvcLocator) :
   declareProperty("CrossSectionUncertainty", m_crossSection_uncert=0.0);
   declareProperty("Stream", m_stream="/Rivet");
   declareProperty("RunName", m_runname="");
-  declareProperty("HistoFile", m_file="Rivet.yoda");
+  declareProperty("HistoFile", m_file="Rivet.yoda.gz");
   declareProperty("HistoPreload", m_preload="");
   declareProperty("AnalysisPath", m_anapath="");
   declareProperty("IgnoreBeamCheck", m_ignorebeams=false);
@@ -125,10 +126,17 @@ StatusCode Rivet_i::initialize ATLAS_NOT_THREAD_SAFE () {
   // Set up analysis handler
   m_analysisHandler = new Rivet::AnalysisHandler(m_runname);
   assert(m_analysisHandler);
+
+  #if RIVET_VERSION_CODE >= 40000
+  m_analysisHandler->setCheckBeams(!m_ignorebeams); //< Whether to do beam ID/energy consistency checks
+  m_analysisHandler->matchWeightNames(m_matchWeights); //< Only run on a subset of the multi-weights
+  m_analysisHandler->unmatchWeightNames(m_unmatchWeights); //< Veto a subset of the multi-weights
+  #else
   m_analysisHandler->setIgnoreBeams(m_ignorebeams); //< Whether to do beam ID/energy consistency checks
-  m_analysisHandler->skipMultiWeights(m_skipweights); //< Only run on the nominal weight
   m_analysisHandler->selectMultiWeights(m_matchWeights); //< Only run on a subset of the multi-weights
   m_analysisHandler->deselectMultiWeights(m_unmatchWeights); //< Veto a subset of the multi-weights
+  #endif
+  m_analysisHandler->skipMultiWeights(m_skipweights); //< Only run on the nominal weight
   m_analysisHandler->setNominalWeightName(m_nominalWeightName);
   if (m_weightcap>0) m_analysisHandler->setWeightCap(m_weightcap);
 
@@ -169,7 +177,7 @@ StatusCode Rivet_i::execute() {
   m_needsConversion = !evtStore()->contains<McEventCollection>(m_genEventKey);
   ATH_MSG_DEBUG("Rivet_i needs xAOD::Truth to HepMC::GenEvent conversion? " << m_needsConversion);
 
-  const HepMC::GenEvent* checkedEvent;
+  std::unique_ptr<HepMC::GenEvent> checkedEvent;
   if (m_needsConversion) {
     const xAOD::TruthEventContainer* truthCollection;
     if (evtStore()->retrieve(truthCollection, "TruthEvents").isFailure()) {
@@ -225,8 +233,6 @@ StatusCode Rivet_i::execute() {
 
   // Analyse the event
   m_analysisHandler->analyze(*checkedEvent);
-
-  delete checkedEvent;
 
   return StatusCode::SUCCESS;
 }
@@ -284,8 +290,8 @@ inline std::vector<std::string> split(const std::string& input, const std::strin
     return {first, last};
 }
 
-const HepMC::GenEvent* Rivet_i::checkEvent(const HepMC::GenEvent& event, const EventContext& ctx) {
-  HepMC::GenEvent* modEvent = new HepMC::GenEvent(event);
+std::unique_ptr<HepMC::GenEvent> Rivet_i::checkEvent(const HepMC::GenEvent& event, const EventContext& ctx) {
+  auto modEvent = std::make_unique<HepMC::GenEvent>(event);
 
   if (!m_needsConversion) {
     // overwrite the HEPMC dummy event number with the proper ATLAS event number
@@ -406,25 +412,25 @@ const HepMC::GenEvent* Rivet_i::checkEvent(const HepMC::GenEvent& event, const E
     modEvent->set_beam_particles(b1, b2);
   }
   if (modEvent->beams().front()->momentum().e() > 50000.0) {
-    MeV2GeV(modEvent);
+    MeV2GeV(*modEvent);
   }
 #else
   modEvent->use_units(HepMC::Units::GEV, HepMC::Units::MM);
   if (modEvent->particles_size() == 1)  modEvent->set_beam_particles(*modEvent->particles_begin(), *modEvent->particles_begin());
   if (modEvent->beam_particles().first->momentum().e() > 50000.0) {
-    MeV2GeV(modEvent);
+    MeV2GeV(*modEvent);
   }
 #endif
 
   return modEvent;
 }
 
-void Rivet_i::MeV2GeV(HepMC::GenEvent* evt) {
+void Rivet_i::MeV2GeV(HepMC::GenEvent& evt) {
 #ifdef HEPMC3
-  for (auto& p: evt->particles()) {
+  for (auto& p: evt.particles()) {
     p->set_momentum(p->momentum()*0.001);
 #else
-  for (HepMC::GenParticlePtr p: *evt) {
+  for (HepMC::GenParticlePtr p: evt) {
     const HepMC::FourVector& mom = p->momentum();
     p->set_momentum(HepMC::FourVector (mom.px()*0.001,
                                        mom.py()*0.001,
@@ -434,4 +440,3 @@ void Rivet_i::MeV2GeV(HepMC::GenEvent* evt) {
     p->set_generated_mass(p->generated_mass()*0.001);
   }
 }
-
