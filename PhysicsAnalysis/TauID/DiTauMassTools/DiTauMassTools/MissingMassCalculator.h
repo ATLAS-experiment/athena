@@ -387,10 +387,10 @@ public:
   void SetNsigmaMETscan_hh(const double val) { m_nsigma_METscan_hh=val; } // number of sigma's for MET-scan in hh events
   void SetNsigmaMETscan(const double val) { m_nsigma_METscan=val; } // number of sigma's for MET-scan
 
-  void SetUseFloatStopping(const bool val) { m_fUseFloatStopping=val; } // switch for floating stopping criterion
+  void SetUseFloatStopping(const bool val); // switch for floating stopping criterion
   void SetBeamEnergy(const double val) { m_beamEnergy=val; }
   void SetLFVLeplepRefit(const bool val) { m_lfvLeplepRefit=val; }
-  void SaveLlhHisto(const bool val) { m_SaveLlhHisto=val; }
+  void SaveLlhHisto(const bool val);
 
   double GetmMaxError() const {return m_PrintmMaxError;}
   double GetmMeanError() const { return m_PrintmMeanError;}
