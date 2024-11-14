@@ -266,9 +266,6 @@ private:
   float m_maxDelta{};
   float m_minDelta{};
 
-  int m_maxSampl{};
-  int m_minSampl{};
-
   float m_initialExpAmp{};
   float m_minDeriv2nd{};
   int   m_minDeriv2ndIndex{};

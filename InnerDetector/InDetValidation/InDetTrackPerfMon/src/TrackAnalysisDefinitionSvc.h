@@ -63,7 +63,7 @@ public:
   virtual const std::vector<float>& etaBins() const override { return m_etaBins; };
   virtual const std::vector<unsigned int>& minSilHits() const override { return m_minSilHits; };
   virtual const std::string& pileupSwitch() const override { return m_pileupSwitch; };
-  virtual bool hasFullPileupTruth() const { return m_hasFullPileupTruth.value(); };
+  virtual bool hasFullPileupTruth() const override { return m_hasFullPileupTruth.value(); };
 
   virtual bool plotTrackParameters() const override { return m_plotTrackParameters.value(); };
   virtual bool plotTrackMultiplicities() const override { return m_plotTrackMultiplicities.value(); };

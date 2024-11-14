@@ -150,7 +150,7 @@ protected:
     struct StoredHit;  // stores hit, plus offsets from nominal bin trajectory
     struct BinEntry; // stores list of StoredHit for a bin
     class HitPair; // pair of StoredHit with methods to make variables to cut on
-    class HitPairSet; // group of HitPair with methods to make variables to cut on
+    struct HitPairSet; // group of HitPair with methods to make variables to cut on
 
     // Compute which bins are consistent with the (pT, eta, pho, d0, z0)
     // ranges given by the region definition defined by the eventselection
