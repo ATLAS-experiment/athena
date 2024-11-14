@@ -141,7 +141,10 @@ def SetupLocalSqliteGeometryDb(geometryFilePath,geometryTag):
     linkName = geometryTag + ".db"
     linkPath = os.path.join("Geometry",linkName)
     if not os.path.exists(linkPath):
-        os.symlink(geometryFilePath,linkPath)
+        try:
+           os.symlink(geometryFilePath,linkPath)
+        except FileExistsError:
+           pass
     if 'CALIBPATH' in os.environ.keys():
         os.environ['CALIBPATH']='.:'+ os.environ['CALIBPATH']
     else:
