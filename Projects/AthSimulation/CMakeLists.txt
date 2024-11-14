@@ -18,6 +18,10 @@ set( ATLAS_FLAKE8 flake8_atlas --isolated --select ATL,F,E101,E7,E9,W6
 set( ATLAS_PYTHON_CHECKER ${ATLAS_FLAKE8}
    CACHE STRING "Python checker command to run during Python module compilation" )
 
+# Disable FindBoost warnings:
+set( Boost_NO_WARN_NEW_VERSIONS TRUE CACHE BOOL
+   "Do not warn about incompatible Boost versions" )
+
 # Apply (compiler) settings from CxxUtils:
 set( CxxUtilsSettings_DIR
    "${CMAKE_SOURCE_DIR}/../../Control/CxxUtils/cmake" )

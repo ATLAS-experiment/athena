@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # This is the main CMakeLists.txt file for building the AnalysisBase
 # software release.
@@ -10,6 +10,10 @@ file( READ ${CMAKE_SOURCE_DIR}/version.txt _version )
 string( STRIP ${_version} _version )
 project( AnalysisBase VERSION ${_version} LANGUAGES C CXX )
 unset( _version )
+
+# Disable FindBoost warnings:
+set( Boost_NO_WARN_NEW_VERSIONS TRUE CACHE BOOL
+   "Do not warn about incompatible Boost versions" )
 
 # This project is built on top of AnalysisBaseExternals:
 find_package( AnalysisBaseExternals REQUIRED )

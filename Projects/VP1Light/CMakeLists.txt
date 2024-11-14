@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # This is the main CMakeLists.txt file for building the VP1Light
 # software release.
@@ -13,6 +13,10 @@ unset( _version )
 
 # HepMC3
 set( HEPMC3_USE TRUE CACHE BOOL "Build with HepMC3" )
+
+# Disable FindBoost warnings:
+set( Boost_NO_WARN_NEW_VERSIONS TRUE CACHE BOOL
+   "Do not warn about incompatible Boost versions" )
 
 # This project is built on top of VP1LightExternals:
 find_package( VP1LightExternals REQUIRED )
