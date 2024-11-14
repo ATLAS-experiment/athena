@@ -38,6 +38,7 @@ struct FastShowerConfigStruct
   int         m_detector_tag;                                   //!< name for the detector tag for the ShowerLibSvc
   std::string m_SensitiveDetectorName;
   std::string m_showerLibSvcName;
+  bool m_applyRRWeights;
   FastShowerConfigStruct() :
     m_e_FlagShowerLib  (false),
     m_e_MinEneShowerLib(0.0*CLHEP::GeV),
@@ -66,7 +67,8 @@ struct FastShowerConfigStruct
     m_generated_starting_points_ratio(0.02),
     m_detector_tag(0),
     m_SensitiveDetectorName(""),
-    m_showerLibSvcName("LArG4ShowerLibSvc")
+    m_showerLibSvcName("LArG4ShowerLibSvc"),
+    m_applyRRWeights(false)
   {
   }
 };

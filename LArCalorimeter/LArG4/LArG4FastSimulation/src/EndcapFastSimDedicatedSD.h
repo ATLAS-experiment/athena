@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4FASTSIMULATION_ENDCAPFASTSIMDEDICATEDSD_H
@@ -32,7 +32,7 @@ public:
   ~EndcapFastSimDedicatedSD() {}
 
   // ProcessHitsMethod
-  void ProcessSpot(const EnergySpot & spot) override final;
+  void ProcessSpot(const EnergySpot & spot, double weight) override final;
 
 private:
 
