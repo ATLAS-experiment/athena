@@ -50,6 +50,7 @@ ZdcAnalysisTool::ZdcAnalysisTool(const std::string& name)
     declareProperty("ForceCalibRun", m_forceCalibRun = -1); // last run of Pb+Pb 2015
     declareProperty("ForceCalibLB", m_forceCalibLB = 814); // last LB of Pb+Pb 2015
 
+    declareProperty("DoNonLinCorr", m_doNonLinCorr = true); // how we have run with 2023 and most of 2024 
     declareProperty("DoFADCCorr", m_doFADCCorr = false); 
     declareProperty("DoFADCCorrPerSample", m_doFADCCorrPerSample = false); 
     
@@ -589,7 +590,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   // Now use 1000 as the offset for the high gain non-linear correction due to the improved
   //  clarity in the high gain/low gain response change around the 10 bit mark with the new LG refit procedure
   //
-  zdcDataAnalyzer->SetNonlinCorrParams(1000, 1000, nonLinearCorrCoefficHG, nonLinearCorrCoefficLG);
+  if (m_doNonLinCorr)
+    zdcDataAnalyzer->SetNonlinCorrParams(1000, 1000, nonLinearCorrCoefficHG, nonLinearCorrCoefficLG);
 
   std::array<std::array<std::vector<float>, 4>, 2> timeCorrCoefficHG, timeCorrCoefficLG;
   timeCorrCoefficHG[0][0] = {0.07, -0.020672, 0.070206, 0.004961, -0.010821, -0.001835};
@@ -729,7 +731,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2024()
   // Set up non-linear corrections for the ZDC
   //
   std::array<std::array<std::vector<float>, 4>, 2> nonLinearCorrCoefficHG, nonLinearCorrCoefficLG;
-  
+
   nonLinearCorrCoefficHG[0][0] = {-0.0225871, 0.00702802, 0.00201155, -0.00675293, 0.00186212} ;
   nonLinearCorrCoefficHG[0][1] = {-0.0155562, 0.00594092, 0.00382112, -0.00665466, 0.00143384} ;
   nonLinearCorrCoefficHG[0][2] = {-0.0313621, 0.0134528, 0.00529013, -0.0111751, 0.0029913} ;
@@ -739,9 +741,9 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2024()
   nonLinearCorrCoefficHG[1][2] = {-0.0175283, 0.0127954, 0.000235749, -0.00769698, 0.00221995} ;;
   nonLinearCorrCoefficHG[1][3] = {-0.0279931, 0.0188122, 0.0126234, -0.0169907, 0.00398826} ;
   
-  // For now we don't use corrections on the LG as it's much harder to measure them
-  //
-  nonLinearCorrCoefficLG = {{ {{{0},
+
+  // Remove nonlinear corrections while we study the injector pulse
+  nonLinearCorrCoefficHG = {{ {{{0},
 				{0},
 				{0},
 				{0}}},
@@ -750,11 +752,11 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2024()
 				{0},
 				{0}}} }};
 
-  // Now use 1000 as the offset for the high gain non-linear correction due to the improved
-  //  clarity in the high gain/low gain response change around the 10 bit mark with the new LG refit procedure
   //
-  zdcDataAnalyzer->SetNonlinCorrParams(1000, 1000, nonLinearCorrCoefficHG, nonLinearCorrCoefficLG);
-
+  // We are disabling the old FADC correction moving forward
+  if (m_doNonLinCorr)
+    zdcDataAnalyzer->SetNonlinCorrParams(1000, 1000, nonLinearCorrCoefficHG, nonLinearCorrCoefficLG);
+  
   std::array<std::array<std::vector<float>, 4>, 2> timeCorrCoefficHG, timeCorrCoefficLG;
   timeCorrCoefficHG[0][0] = {0.07, -0.020672, 0.070206, 0.004961, -0.010821, -0.001835};
   timeCorrCoefficHG[0][1] = {0.04, -0.012961, 0.008204, 0.010771, 0.011593, 0.002045};
@@ -1131,8 +1133,9 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeMonteCarloPbPb2023()
 				{0},
 				{0},
 				{0}}} }};
-    
-  zdcDataAnalyzer->SetNonlinCorrParams(0, 1000, nonLinearCorrCoefficHG, nonLinearCorrCoefficLG);
+
+  if (m_doNonLinCorr)
+    zdcDataAnalyzer->SetNonlinCorrParams(0, 1000, nonLinearCorrCoefficHG, nonLinearCorrCoefficLG);
 
   std::array<std::array<std::vector<float>, 4>, 2> timeCorrCoefficHG, timeCorrCoefficLG;
   timeCorrCoefficHG[0][0] = {};
@@ -1644,7 +1647,7 @@ void ZdcAnalysisTool::initialize40MHz()
 			      {0},
 			      {0}}} }};
 
-    m_zdcDataAnalyzer_40MHz->SetNonlinCorrParams(500, 1000, moduleHGNonLinCorr, moduleLGNonLinCorr);
+    if (m_doNonLinCorr) m_zdcDataAnalyzer_40MHz->SetNonlinCorrParams(500, 1000, moduleHGNonLinCorr, moduleLGNonLinCorr);
     m_zdcDataAnalyzer_40MHz->SetSaveFitFunc(false);
 
 }
@@ -1764,7 +1767,7 @@ void ZdcAnalysisTool::initialize80MHz()
 			      {0},
 			      {0}}} }};
 
-    m_zdcDataAnalyzer_80MHz->SetNonlinCorrParams(500, 1000, moduleHGNonLinCorr, moduleLGNonLinCorr);
+    if (m_doNonLinCorr) m_zdcDataAnalyzer_80MHz->SetNonlinCorrParams(500, 1000, moduleHGNonLinCorr, moduleLGNonLinCorr);
     m_zdcDataAnalyzer_80MHz->SetSaveFitFunc(false);
 }
 
@@ -2007,6 +2010,13 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     ATH_CHECK(configureNewRun(thisRunNumber)); // ALWAYS check methods that return StatusCode
     
     ATH_MSG_DEBUG("Setting up calibrations");
+
+    if (m_doFADCCorr)
+    {
+      unsigned int calibRunNumber = thisRunNumber;
+      if (m_forceCalibRun > -1) calibRunNumber = m_forceCalibRun;
+      setFADCCorrections(calibRunNumber);
+    }
     
     if (m_doCalib) {
       //
@@ -2406,7 +2416,7 @@ void ZdcAnalysisTool::setTimeCalibrations(unsigned int runNumber)
 void ZdcAnalysisTool::setFADCCorrections(unsigned int runNumber)
 {
   std::string filename;
-  
+
   if (m_LHCRun==3) {
     std::string runString;
     
@@ -2436,8 +2446,8 @@ void ZdcAnalysisTool::setFADCCorrections(unsigned int runNumber)
   
   for (size_t side : {0, 1}) {
     for (int module : {0, 1, 2, 3}) {
-      std::string histNameHG = "ZDC_FADCCorr_s" + std::to_string(side) + "_m_HG" + std::to_string(module);
-      std::string histNameLG = "ZDC_FADCCorr_s" + std::to_string(side) + "_m_LG" + std::to_string(module);
+      std::string histNameHG = "ZDC_FADCCorr_s" + std::to_string(side) + "_m" + std::to_string(module)+"_HG";
+      std::string histNameLG = "ZDC_FADCCorr_s" + std::to_string(side) + "_m" + std::to_string(module)+"_LG";
 
       ATH_MSG_DEBUG("setFADCCorrections: Searching for histograms HG and LG: " << histNameHG << ", " << histNameLG);
       
@@ -2455,14 +2465,15 @@ void ZdcAnalysisTool::setFADCCorrections(unsigned int runNumber)
       }
       else {
 	//
-	//  Check for valid range
+	//  Check for valid range (Lion uses -0.5 to 4095.5)
 	//
-	if (std::abs(histHG_ptr->GetXaxis()->GetXmin()) > 1e-3 || std::abs(histHG_ptr->GetXaxis()->GetXmax() - 4096) > 1e-3) {
+	
+	if ( std::abs(histHG_ptr->GetXaxis()->GetXmin()+0.5) > 1e-3 || std::abs(histHG_ptr->GetXaxis()->GetXmax() - 4095.5) > 1e-3) {
 	  ATH_MSG_ERROR("setFADCCorrections: invalid axis range for HG FADC corrections in histogram with name " << histNameHG);
 	  readSuccess = false;
 	  break;
 	}
-	if (std::abs(histLG_ptr->GetXaxis()->GetXmin()) > 1e-3 || std::abs(histLG_ptr->GetXaxis()->GetXmax() - 4096) > 1e-3) {
+	if (std::abs(histLG_ptr->GetXaxis()->GetXmin()+0.5) > 1e-3 || std::abs(histLG_ptr->GetXaxis()->GetXmax() - 4095.5) > 1e-3) {
 	  ATH_MSG_ERROR("setFADCCorrections: invalid axis range for HG FADC corrections in histogram with name " << histNameLG);
 	  readSuccess = false;
 	  break;

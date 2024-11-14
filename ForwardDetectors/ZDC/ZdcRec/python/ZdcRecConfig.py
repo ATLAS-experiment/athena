@@ -108,7 +108,7 @@ def ZdcRecOutputCfg(flags):
     return acc
 
 
-def ZdcAnalysisToolCfg(flags, run, config="PbPb2023", DoCalib=False, DoTimeCalib=False, DoTrigEff=False, ForceCalibRun=-1, ForceCalibLB=814):
+def ZdcAnalysisToolCfg(flags, run, config="PbPb2023", DoCalib=False, DoFADCCorr=False, DoNonLinCorr=False, DoTimeCalib=False, DoTrigEff=False, ForceCalibRun=-1, ForceCalibLB=814):
     acc = ComponentAccumulator()
 
     print('ZdcAnalysisToolCfg: setting up ZdcAnalysisTool with config='+config)
@@ -117,6 +117,8 @@ def ZdcAnalysisToolCfg(flags, run, config="PbPb2023", DoCalib=False, DoTimeCalib
         name = 'ZdcAnalysisTool'+config, 
         Configuration = config,
         DoCalib = DoCalib,
+        DoFADCCorr = DoFADCCorr,
+        DoNonLinCorr = DoNonLinCorr,
         DoTimeCalib = DoTimeCalib,
         DoTrigEff = DoTrigEff,
         ForceCalibRun = ForceCalibRun,
@@ -180,7 +182,9 @@ def ZdcRecRun2Cfg(flags):
     doCalib = False
     doTimeCalib = False
     doTrigEff = False
-
+    doNonLinCorr = False
+    doFADCCorr = False
+    
     if flags.Input.ProjectName == "data15_hi":
         doCalib = True
         doTimeCalib = True
@@ -204,7 +208,7 @@ def ZdcRecRun2Cfg(flags):
     acc.addEventAlgo(CompFactory.ZdcByteStreamRawDataV2())
     acc.addEventAlgo(CompFactory.ZdcRecV3Decode())
 
-    anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,2,config,doCalib,doTimeCalib,doTrigEff))
+    anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,2,config,doCalib,doFADCCorr,doNonLinCorr,doTimeCalib,doTrigEff))
 
     acc.addEventAlgo(CompFactory.ZdcRecV3("ZdcRecV3",ZdcAnalysisTool=anaTool))
 
@@ -219,6 +223,8 @@ def ZdcRecRun3Cfg(flags):
     doCalib = False
     doTimeCalib = False
     doTrigEff = False
+    doFADCCorr = False
+    doNonLinCorr = True #default for 2023
     ForceCalibRun = -1
     ForceCalibLB = 814
     
@@ -240,14 +246,15 @@ def ZdcRecRun3Cfg(flags):
         elif flags.Input.ProjectName == "data24_hi": # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
             doCalib = True
             doTimeCalib = True
-
+            doFADCCorr = True
+            doNonLinCorr = False
 
     doRPD = flags.Detector.EnableZDC_RPD
 
     print('ZdcRecRun3Cfg: doCalib = '+str(doCalib)+' for project '+flags.Input.ProjectName)
     print('RPD enable flag is '+str(doRPD))
     
-    anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doTimeCalib,doTrigEff,ForceCalibRun,ForceCalibLB))
+    anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doFADCCorr,doNonLinCorr,doTimeCalib,doTrigEff,ForceCalibRun,ForceCalibLB))
 
     if (doRPD):
         rpdAnaTool = acc.popToolsAndMerge(RPDAnalysisToolCfg(flags, config))
