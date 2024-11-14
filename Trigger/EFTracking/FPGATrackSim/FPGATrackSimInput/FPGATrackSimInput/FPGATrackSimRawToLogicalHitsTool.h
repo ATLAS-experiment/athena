@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
 */
 
 #ifndef FPGATrackSimRAWTOLOGICALHITSTOOL_H
@@ -11,6 +11,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
+#include <vector>
 
 
 // Forward declaration

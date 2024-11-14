@@ -64,7 +64,7 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
     FPGATrackSimTowerInputHeader tower = FPGATrackSimTowerInputHeader(ireg);//default header, can eventually set eta/phi/deta/dphi
     logicEventHeader.addTower( tower);
   }
-  for (auto hit: eventHeader.hits()) { // hit loop
+  for (const auto & hit: eventHeader.hits()) { // hit loop
       // In the ITk geometry, some of the plane IDs are -1 if the layers are not yet being used.
       // This causes the code in this hit loop to crash. As a workaround for the moment, we currently
       // skip over hits in layers that are not included in the FPGATrackSim geometry, with plane = -1
