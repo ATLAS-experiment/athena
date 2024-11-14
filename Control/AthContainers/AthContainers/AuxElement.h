@@ -957,6 +957,19 @@ public:
 
 
   /**
+   * @brief Assignment.
+   * @param other The object from which we're assigning.
+   * @param warnUnlocked If true, then warn when we skip unlocked decorations.
+   *
+   * We don't copy container/index, as assignment doesn't change where
+   * this object is.  However, if we have aux data, then we copy aux data
+   * if we're copying from an object that also has it; otherwise,
+   * if we're copying from an object with no aux data, then we clear ours.
+   */
+  void assign (const AuxElement& other, bool warnUnlocked = false);
+
+
+  /**
    * @brief Destructor.
    *
    * Any private store is deleted.
@@ -1390,6 +1403,7 @@ public:
   /**
    * @brief Create a new private store for this object and copy aux data.
    * @param other The object from which aux data should be copied.
+   * @param warnUnlocked If true, then warn when we skip unlocked decorations.
    *
    * @c ExcBadPrivateStore will be thrown if this object is already
    * associated with a store.
@@ -1398,12 +1412,14 @@ public:
    * be copied; otherwise, nothing will be done.
    */
   template <class U1>
-  void makePrivateStore (const U1& other);
+  void makePrivateStore (const U1& other,
+                         bool warnUnlocked = false);
 
 
   /**
    * @brief Create a new private store for this object and copy aux data.
    * @param other The object from which aux data should be copied.
+   * @param warnUnlocked If true, then warn when we skip unlocked decorations.
    *
    * @c ExcBadPrivateStore will be thrown if this object is already
    * associated with a store.
@@ -1412,7 +1428,8 @@ public:
    * be copied; otherwise, nothing will be done.
    */
   template <class U1>
-  void makePrivateStore (const U1* other);
+  void makePrivateStore (const U1* other,
+                         bool warnUnlocked = false);
 
 
   /**
@@ -1617,25 +1634,28 @@ private:
   /**
    * @brief Create a new private store for this object and copy aux data.
    * @param other The object from which aux data should be copied.
+   * @param warnUnlocked If true, then warn when we skip unlocked decorations.
    *
    * @c ExcBadPrivateStore will be thrown if this object is already
    * associated with a store.
    *
    * This overload handles the case where @c other does not have aux data.
    */
-  void makePrivateStore1 (const void*);
+  void makePrivateStore1 (const void* other, bool warnUnlocked);
 
 
   /**
    * @brief Create a new private store for this object and copy aux data.
    * @param other The object from which aux data should be copied.
+   * @param warnUnlocked If true, then warn when we skip unlocked decorations.
    *
    * @c ExcBadPrivateStore will be thrown if this object is already
    * associated with a store.
    *
    * This overload handles the case where @c other does have aux data.
    */
-  void makePrivateStore1 (const AuxElement* other);
+  void makePrivateStore1 (const AuxElement* other,
+                          bool warnUnlocked);
 
 
   /**
@@ -1660,6 +1680,7 @@ private:
   /**
    * @brief Copy aux data from another object.
    * @param other The object from which to copy.
+   * @param warnUnlocked If true, then warn when we skip unlocked decorations.
    *
    * If this object has no associated store, this does nothing.
    * If the associated aux data is const, this throws @c ExcConstAuxData.
@@ -1669,13 +1690,15 @@ private:
    * in @c other are cleared.  (If @c other has no aux data, then all
    * aux data items for this object are cleared.)
    */
-  void copyAux (const ConstAuxElement& other);
+  void copyAux (const ConstAuxElement& other,
+                bool warnUnlocked = false);
 
 
 #ifdef ATHCONTAINERS_R21_COMPAT
   /**
    * @brief Copy aux data from another object.
    * @param other The object from which to copy.
+   * @param warnUnlocked If true, then warn when we skip unlocked decorations.
    *
    * If this object has no associated store, this does nothing.
    * If the associated aux data is const, this throws @c ExcConstAuxData.
@@ -1685,7 +1708,8 @@ private:
    * in @c other are cleared.  (If @c other has no aux data, then all
    * aux data items for this object are cleared.)
    */
-  void copyAux (const AuxElement& other);
+  void copyAux (const AuxElement& other,
+                bool warnUnlocked = false);
 
 
   /// The container of which this object is an element.

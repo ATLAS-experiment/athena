@@ -512,17 +512,19 @@ bool AuxElement::setIndexPrivate (size_t index, SG::AuxVectorData* container)
 /**
  * @brief Create a new private store for this object and copy aux data.
  * @param other The object from which aux data should be copied.
+ * @param warnUnlocked If true, then warn when we skip unlocked decorations.
  *
  * @c ExcBadPrivateStore will be thrown if this object is already
  * associated with a store.
  *
  * This overload handles the case where @c other does have aux data.
  */
-void AuxElement::makePrivateStore1 (const AuxElement* other)
+void AuxElement::makePrivateStore1 (const AuxElement* other,
+                                    bool warnUnlocked)
 {
   makePrivateStore();
   if (other)
-    this->copyAux (*other);
+    this->copyAux (*other, warnUnlocked);
 }
 
 
@@ -549,6 +551,7 @@ void AuxElement::clearAux()
 /**
  * @brief Copy aux data from another object.
  * @param other The object from which to copy.
+ * @param warnUnlocked If true, then warn when we skip unlocked decorations.
  *
  * If this object has no associated store, this does nothing.
  * If the associated aux data is const, this throws @c ExcConstAuxData.
@@ -558,7 +561,8 @@ void AuxElement::clearAux()
  * in @c other are cleared.  (If @c other has no aux data, then all
  * aux data items for this object are cleared.)
  */
-void AuxElement::copyAux (const ConstAuxElement& other)
+void AuxElement::copyAux (const ConstAuxElement& other,
+                          bool /*warnUnlocked = false*/)
 {
   if (!m_container) return;
   if (!m_container->hasStore()) return;
@@ -594,6 +598,7 @@ void AuxElement::copyAux (const ConstAuxElement& other)
 /**
  * @brief Copy aux data from another object.
  * @param other The object from which to copy.
+ * @param warnUnlocked If true, then warn when we skip unlocked decorations.
  *
  * If this object has no associated store, this does nothing.
  * If the associated aux data is const, this throws @c ExcConstAuxData.
@@ -603,7 +608,8 @@ void AuxElement::copyAux (const ConstAuxElement& other)
  * in @c other are cleared.  (If @c other has no aux data, then all
  * aux data items for this object are cleared.)
  */
-void AuxElement::copyAux (const AuxElement& other)
+void AuxElement::copyAux (const AuxElement& other,
+                          bool /*warnUnlocked = false*/)
 {
   if (!m_container) return;
   if (!m_container->hasStore()) return;
