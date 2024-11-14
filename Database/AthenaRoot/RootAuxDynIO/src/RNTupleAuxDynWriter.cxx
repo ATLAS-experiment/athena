@@ -12,6 +12,8 @@
 #include "TClass.h"
 #include "TVirtualCollectionProxy.h"
 
+#include "ROOT/RNTupleModel.hxx"
+
 #include <sstream>
 #include <iostream>
 

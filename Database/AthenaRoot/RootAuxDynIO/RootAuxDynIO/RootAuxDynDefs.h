@@ -1,10 +1,8 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
 #ifndef ROOTAUXDYN_DEFS_H
 #define ROOTAUXDYN_DEFS_H
-
 
 namespace RootAuxDynIO
 {
@@ -14,11 +12,11 @@ namespace RootAuxDynIO
    constexpr char   AUXDYN_POSTFIX[] = "Dyn.";
    constexpr size_t AUXDYN_POSTFIX_LEN = sizeof(AUXDYN_POSTFIX)-1;
 
-   /// check if a string ends with AUX_POSTFIX
-   inline bool endsWithAuxPostfix(std::string_view str) {
-      return str.size() >= AUX_POSTFIX_LEN and
-         str.compare(str.size()-AUX_POSTFIX_LEN, AUX_POSTFIX_LEN, AUX_POSTFIX) == 0;
-   }
+   /**
+   * @brief Check if a string ends with AUX_POSTFIX
+   * @param str the string to check
+   */
+   bool endsWithAuxPostfix(std::string_view str);
 
    /**
    * @brief Construct branch name for a given dynamic attribute
@@ -37,6 +35,13 @@ namespace RootAuxDynIO
 } // namespace
 
 
+/// check if a string ends with AUX_POSTFIX
+inline bool
+RootAuxDynIO::endsWithAuxPostfix(std::string_view str) {
+   return str.size() >= AUX_POSTFIX_LEN and
+      str.compare(str.size()-AUX_POSTFIX_LEN, AUX_POSTFIX_LEN, AUX_POSTFIX) == 0;
+}
+
 inline std::string
 RootAuxDynIO::auxBranchName(const std::string& attr_name, const std::string& baseBranchName)
 {
@@ -54,8 +59,5 @@ RootAuxDynIO::auxFieldName(const std::string& attr_name, const std::string& base
    field_name += ":" + attr_name;    // MN TODO <- find a good delimiter
    return field_name;
 }
-
-
-
 
 #endif
