@@ -8,7 +8,7 @@
 # Set up the variables necessary for the script doing the heavy lifting.
 ATLAS_PROJECT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 ATLAS_EXT_PROJECT_NAME="AthAnalysisExternals"
-ATLAS_BUILDTYPE="RelWithDebInfo"
+ATLAS_BUILDTYPE="Release"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=106
                         -DLCG_VERSION_POSTFIX="a_ATLAS_3"
                         -DATLAS_ONNXRUNTIME_USE_CUDA=FALSE

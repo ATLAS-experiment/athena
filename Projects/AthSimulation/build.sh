@@ -8,7 +8,7 @@
 # Set up the variables necessary for the script doing the heavy lifting.
 ATLAS_PROJECT_NAME="AthSimulation"
 ATLAS_PROJECT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
-ATLAS_BUILDTYPE="RelWithDebInfo"
+ATLAS_BUILDTYPE="Release"
 ATLAS_EXTRA_CMAKE_ARGS=(-DBoost_NO_WARN_NEW_VERSIONS=TRUE)
 ATLAS_EXTRA_MAKE_ARGS=()
 
