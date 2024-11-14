@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -846,12 +846,12 @@ StatusCode TileHitVecToCntTool::mergeEvent(const EventContext& ctx) {
 
     for (; iHit != lastHit; ++iHit) {
       TileHit *pHit = (*iHit);
-      TileHit *pHit_DigiHSTruth(nullptr);
-      if(m_doDigiTruth) pHit_DigiHSTruth = new TileHit(**iHit_DigiHSTruth);
+      std::unique_ptr<TileHit> pHit_DigiHSTruth;
+      if(m_doDigiTruth) pHit_DigiHSTruth = std::make_unique<TileHit>(**iHit_DigiHSTruth);
       if (pHit->size() > 1 || pHit->energy() != 0.0) {       // hit exists
         m_hits->push_back(pHit);   // store hit in container
         if(m_doDigiTruth){
-          m_hits_DigiHSTruth->push_back(pHit_DigiHSTruth);   // store hit in container
+          m_hits_DigiHSTruth->push_back(pHit_DigiHSTruth.release());   // store hit in container
         }
         ++nHitUni;
         eHitInTime += pHit->energy();
