@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloTriggerTool )
@@ -9,8 +9,8 @@ atlas_add_library( CaloTriggerToolLib
                    src/*.cxx
                    PUBLIC_HEADERS CaloTriggerTool
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES AthenaBaseComps AthenaKernel CaloIdentifier GaudiKernel Identifier StoreGateLib TrigT1CaloCalibConditions
-                   PRIVATE_LINK_LIBRARIES LArCablingLib LArIdentifier ${ROOT_LIBRARIES} )
+                   LINK_LIBRARIES AthenaBaseComps AthenaKernel CaloIdentifier CxxUtils Identifier TrigT1CaloCalibConditions
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel LArIdentifier StoreGateLib )
 
 atlas_add_component( CaloTriggerTool
                      src/components/*.cxx
