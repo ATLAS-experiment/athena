@@ -26,6 +26,8 @@ rdo=physval.RDO.root
 aod=physval.AOD.root
 idtide=DAOD_TIDE.pool.root
 
+conditionsTag=OFLCOND-MC23-SDR-RUN3-07
+
 run Digi_tf.py \
     --conditionsTag default:$conditionsTag \
     --digiSeedOffset1 100 --digiSeedOffset2 100 \
