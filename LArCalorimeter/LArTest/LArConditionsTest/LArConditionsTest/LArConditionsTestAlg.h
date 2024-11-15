@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -23,7 +23,6 @@
 **/
 
 #include "AthenaBaseComps/AthAlgorithm.h" 
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "CxxUtils/checker_macros.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
@@ -42,7 +41,6 @@ class ATLAS_NOT_THREAD_SAFE LArConditionsTestAlg : public AthAlgorithm
 
 public:
 
-
     LArConditionsTestAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~LArConditionsTestAlg();
 
@@ -50,31 +48,20 @@ public:
     virtual StatusCode execute() override;
     virtual StatusCode finalize() override;
 
-    StatusCode testCallBack1(IOVSVC_CALLBACK_ARGS ) ; 
-    StatusCode testCallBack2(IOVSVC_CALLBACK_ARGS ) ; 
-
 private:
 
     StatusCode createCompareObjects();
     StatusCode testCondObjects();
     StatusCode testEachCondObject ATLAS_NOT_THREAD_SAFE (const LArRampMC* ramps);
     StatusCode testChannelSet();
-    StatusCode printCondObjects();
-    StatusCode streamOutCondObjects();
-    StatusCode registerCondObjects();
-
-    StatusCode testFillIOVDb()  ; 
     StatusCode testDbObjectRead() ;
-    StatusCode testDCS_Objects() ; 
-    void printTable( const GenericDbTable* t) ;
 
     // Cache of compare data
     std::vector<LArRampPTmp>          m_rampCache;
     std::vector<LArRampPTmp>          m_rampCorrections;
 
     const LArOnlineID* m_onlineID; 
-    BooleanProperty    m_testFill; 
-    BooleanProperty    m_testCondObjs; 
+    BooleanProperty    m_testCondObjs;
     BooleanProperty    m_readCondObjs;
     BooleanProperty    m_writeCondObjs;
     BooleanProperty    m_writeCorrections;

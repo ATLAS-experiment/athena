@@ -32,7 +32,6 @@
 LArConditionsTestAlg::LArConditionsTestAlg(const std::string& name, ISvcLocator* pSvcLocator) :
 	AthAlgorithm(name,pSvcLocator),
 	m_onlineID(0),
-	m_testFill(false),
 	m_testCondObjs(false),
 	m_readCondObjs(false),
 	m_writeCondObjs(false),
@@ -48,7 +47,6 @@ LArConditionsTestAlg::LArConditionsTestAlg(const std::string& name, ISvcLocator*
     declareProperty("WriteCondObjs",    m_writeCondObjs);
     declareProperty("WriteCorrections", m_writeCorrections);
     declareProperty("ApplyCorrections", m_applyCorrections);
-    declareProperty("TestFill",         m_testFill);
     declareProperty("TestReadDBDirect", m_testReadDB) ;
     declareProperty("Testbeam",         m_TB) ;
     declareProperty("Tbin",         m_tbin) ;
@@ -72,15 +70,10 @@ StatusCode LArConditionsTestAlg::initialize()
     ATH_MSG_DEBUG ( " WriteCondObjs flag        = " << m_writeCondObjs );
     ATH_MSG_DEBUG ( " WriteCorrections flag     = " << m_writeCorrections );
     ATH_MSG_DEBUG ( " ApplyCorrections flag     = " << m_applyCorrections );
-    ATH_MSG_DEBUG ( " TestFill flag             = " << m_testFill );
     ATH_MSG_DEBUG ( " TestReadDBDirect flag     = " << m_testReadDB );
     ATH_MSG_DEBUG ( " Testbeam flag             = " << m_TB );
 
     ATH_CHECK( detStore()->retrieve(m_onlineID) );
-
-    // Need to load authentication for RDBMS
-    // log << MSG::INFO << "Loading XMLAuthenticationService " << endmsg;
-    // pool::POOLContext::loadComponent( "POOL/Services/XMLAuthenticationService" );
 
     const CaloCell_ID* calocell_id = nullptr;
     ATH_CHECK( detStore()->retrieve(calocell_id) );
@@ -128,16 +121,6 @@ StatusCode LArConditionsTestAlg::execute()
 	ATH_CHECK( detStore()->retrieve(ramp, "LArRamp") );
     } 
 
-/* 
-   log << MSG::DEBUG << " retrieve DataHandle<ExampleData>  in execute " <<endmsg;
-   const ExampleData* example = 0 ;
-   detStore()->retrieve( example );
-   if(!example) {
-   log<< MSG::ERROR<<" Failed to get ExampleData in execute " << endmsg;
-   }
-*/
-
-
     return StatusCode::SUCCESS;
 }
 
@@ -150,7 +133,6 @@ StatusCode LArConditionsTestAlg::execute()
 
 StatusCode LArConditionsTestAlg::finalize()
 {
-    if(m_testFill)    ATH_CHECK(testFillIOVDb());
     if(m_testReadDB)  ATH_CHECK(testDbObjectRead());
     return StatusCode::SUCCESS; 
 } 
@@ -1164,67 +1146,6 @@ LArConditionsTestAlg::testChannelSet()
 
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-
-StatusCode 
-LArConditionsTestAlg::printCondObjects()
-{
-  ATH_MSG_INFO ("in printCondObjects()" );
-  return StatusCode::SUCCESS; 
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-
-StatusCode 
-LArConditionsTestAlg::streamOutCondObjects()
-{
-  ATH_MSG_INFO ("in streamOutCondObjects()" );
-  return StatusCode::SUCCESS; 
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-
-StatusCode 
-LArConditionsTestAlg::registerCondObjects()
-{
-  ATH_MSG_INFO ("in registerCondObjects()" );
-  return StatusCode::SUCCESS; 
-}
-
-
-
-StatusCode  
-LArConditionsTestAlg::testCallBack1( int& i , std::list<std::string>& l  ) 
-{
-  
-    ATH_MSG_DEBUG ( " testing Call back function1 " );
-    ATH_MSG_DEBUG(" int =  " << i );
-    ATH_MSG_DEBUG(" list<string> size =  " << l.size() );
-
-//     if(m_testCondObject){ 
-// 	const ILArRamp* ramp = m_ramp; 
-// 	log<< MSG::DEBUG<<" Pointer to Ramp = " << ramp <<endmsg;
-//     }  
- 
-    return StatusCode::SUCCESS;
-}
-
-
-StatusCode  LArConditionsTestAlg::testCallBack2( int& i , std::list<std::string>& l  ) 
-{
-    ATH_MSG_DEBUG ( " testing Call back function2 " );
-    ATH_MSG_DEBUG(" int =  " << i );
-    ATH_MSG_DEBUG(" list<string> size =  " << l.size() );
-    return StatusCode::SUCCESS;
-}
-
-StatusCode LArConditionsTestAlg::testFillIOVDb()
-{
-    return StatusCode::SUCCESS;
-}
-
-
-
 
 StatusCode LArConditionsTestAlg::testDbObjectRead()
 {
@@ -1307,149 +1228,3 @@ StatusCode LArConditionsTestAlg::testDbObjectRead()
     return StatusCode::SUCCESS; 
 
 }
-
-
-StatusCode LArConditionsTestAlg::testDCS_Objects()
-{
-
-//      StatusCode sc;
-//      MsgStream log(msgSvc(), name());
-//      log << MSG::INFO <<"in testDCS_Objects()" <<endmsg;
-
-//      log << MSG::DEBUG << "RETRIEVING ALL CONDDBMYSQLOBJECT" << endmsg;
-
-//      const DataHandle<GenericDbTable> dh_b, dh_e;
-
-//      sc = detStore()->retrieve(dh_b, dh_e);
-//      if (sc.isFailure()) {
-//  	log << MSG::WARNING <<"Could not find GenericDbTable DetectorStore" <<endmsg;
-//  	return( StatusCode::SUCCESS);
-//      }
-
-//      for(; dh_b!=dh_e;++dh_b) {
-//  	const GenericDbTable* obj1 = dh_b;
-
-//  	//lets dump the object contents
-//  	int ncolumns = obj1->getNumColumns();
-//  	int nrows    = obj1->getNumRows();
-
-//  	log << MSG::INFO << " Object " << dh_b.ID() << " has "
-//  	    << obj1->getNumColumns() << " parameters and "
-//  	    << obj1->getNumRows() << " objects" << endmsg;
-
-//  	std::vector<std::string> dNames;
-//  	std::vector<GenericDbTable::dataTypes> dTypes;
-
-//  	obj1->getNames(dNames);
-//  	obj1->getTypes(dTypes);
-
-//  	if (!(dNames.size()))
-//  	    {
-//  		log << MSG::FATAL << "Esta tabela nao tem nada (This Table hasnothing =)" << endmsg;
-//  	    }
-
-//  	log << MSG::INFO << "X" << dNames.size() <<"X The parameters name/types are: |";
-//  	for (unsigned int i=0; i< dNames.size(); i++) { 
-//  	    log << dNames[i] << " / ";
-//  	    log << dTypes[i] << " | ";
-//  	    log << endmsg;
-//  	} 
-//  	printTable(obj1);
-
-//      }
-
-    return StatusCode::SUCCESS;
-}
-
-//  void LArConditionsTestAlg::printTable(const GenericDbTable *table)
-//  {
-//      //********* Function that prints the ICondDBTable table ******//
-//      //    It uses the proper methos to access to the data 
-//      //    that is in memory
-//      MsgStream log(msgSvc(), name());
-
-
-//      int ncolumns = table->getNumColumns();
-//      int nrows    = table->getNumRows();
-
-//    // Now we want to handle NULL values
-//      std::string nullVal;
-
-
-//      if (ncolumns && nrows) {
-//  	std::vector<std::string> names;                     //A vector for table names
-//  	std::vector<GenericDbTable::dataTypes> types;    //A vector for table types
-
-//  	table->getNames(names);                   //Retrieving column names
-//  	table->getTypes(types);                   //Retrieving column types
-      
-//  	log << MSG::INFO  << "-------------------  Table BEGIN  -------------" << endmsg;
-//  	log << MSG::INFO  << "Table [" << table->getNumRows() << "]x[" << table->getNumColumns() << "]" << endmsg; 
- 
-//  	for (unsigned int i=0; i< table->getNumRows(); i++){  //for each row, 
-
-	    
-//  	    log << MSG::INFO << "{ Row  " << i+1 << " Begin }" << endmsg;
-	
-//  	    std::vector<std::string> tmpStr;        // temporary vector for row storage
-	
-//  	    table->getRow(i, tmpStr);
-	
-//  	    long pos=0;                  //Set the position in the 
-//  	    //tmpSrt vector
-	
-//  	    for (unsigned columnNumber=0;columnNumber<names.size();columnNumber++){
-//  		log << MSG::INFO << "Column name: " << names[columnNumber]  << endmsg;
-	  
-//  		table->getNull(columnNumber, nullVal);
-//  		int n_vals;
-//  		if (GenericDbTable::kLongLong <types[columnNumber]){           //If the values in 
-//  		    //the column cells are 
-//  		    n_vals=atol(tmpStr[pos].c_str()); //arrays of some type
-//  		    pos++;                            //Incrementing the 
-//  		    //position 
-//  		    //in the tmpStr vector
-//  		}
-//  		else {
-//  		    n_vals=1;     //Otherwise, the number of values is only 1
-//  		}
-		
-//  		log << "Data in cell ["<<i+1<< "]x["<<columnNumber+1<< "]: ";
-//  		//printing the data for each cell
-//  		for (long c=pos; c< pos+n_vals; c++){
-//  		    if (tmpStr[c] != nullVal) {
-//  			log << tmpStr[c];
-//  		    }
-//  		    else {
-//  			log << "NULL";
-//  		    }
-//  		    if (n_vals!=1) log << " ; ";
-//  		}
-	  
-//  		pos+=n_vals;        //Incrementing the position in the 
-//  		//tmpStr vector
-//  		log << endmsg;
-//  	    }
-//  	    log << MSG::INFO << "{ Row  " << i +1  << " End }" << endmsg << endmsg;
-//  	}
-//  	log << MSG::INFO << "------------------ Table END  --------------------" << endmsg;
-      
-//      }
-//      else {
-//  	log << MSG::INFO << "Table empty" << endmsg;
-//      }
-    
-//  }
-
-
-
-
-
-
-
-
-
-
-
-
-
