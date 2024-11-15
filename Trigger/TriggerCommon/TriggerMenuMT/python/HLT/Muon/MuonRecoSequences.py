@@ -397,12 +397,8 @@ def VDVPrecMuTrkCfg(flags, name):
 
   vdvName = "VDVMuTrkLRT" if "LRT" in name else "VDVMuTrk"
   trkname = "LRT" if "LRT" in name else ''
-  LRT_suffix = "_LRT" if "LRT" in name else ''
   dataObjects = [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+getIDTracks(flags, trkname) ),
                  ( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks(flags, trkname) )]
-  # phase-ii EFCB muon flag here
-  if not flags.Muon.enableTrigIDtrackReuse:
-    dataObjects += [( 'xAOD::TrackParticleContainer', f'StoreGateSvc+HLT_IDTrack_MuonComb_FTF{LRT_suffix}')]
   
   # phase-ii EFCB muon flag here
   if flags.Muon.enableTrigIDtrackReuse:
