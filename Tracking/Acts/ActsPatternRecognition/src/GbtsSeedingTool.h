@@ -10,7 +10,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "InDetIdentifier/PixelID.h"
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
-
+#include "ActsInterop/Logger.h"
 
 // ACTS CORE
 #include "Acts/Geometry/TrackingGeometry.hpp"
@@ -213,6 +213,11 @@ namespace ActsTrk {
 
 
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey{this, "PixelDetectorElements", "ITkPixelDetectorElementCollection", "Key of input SiDetectorElementCollection for Pixel"}; 
+
+    /// Private access to the logger
+    const Acts::Logger &logger() const { return *m_logger; }
+    /// logging instance
+    std::unique_ptr<const Acts::Logger> m_logger {nullptr};
 
   };
   

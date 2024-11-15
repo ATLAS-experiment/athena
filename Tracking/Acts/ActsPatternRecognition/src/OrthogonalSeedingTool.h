@@ -8,6 +8,7 @@
 // ATHENA
 #include "ActsToolInterfaces/ISeedingTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "ActsInterop/Logger.h"
 
 // ACTS CORE
 #include "Acts/Utilities/KDTree.hpp"
@@ -182,6 +183,11 @@ namespace ActsTrk {
     Gaudi::Property< std::vector<std::vector<double>> > m_rRangeMiddleSP {this, "rRangeMiddleSP",  
        {{40.0, 90.0}, {40.0, 200.0}, {46.0, 200.0}, {46.0, 200.0}, {46.0, 250.0}, {46.0, 250.0}, {46.0, 250.0}, {46.0, 200.0}, {46.0, 200.0}, {40.0, 200.0}, {40.0, 90.0}},
        "radial range for middle SP"};
+
+    /// Private access to the logger
+    const Acts::Logger &logger() const { return *m_logger; }
+    /// logging instance
+    std::unique_ptr<const Acts::Logger> m_logger {nullptr};
   };
   
 } // namespace

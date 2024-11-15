@@ -23,6 +23,9 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("Properties Summary:");
     ATH_MSG_DEBUG(" *  Used by SeedFinderGbtsConfig");
 
+    // Make the logger And Propagate to ACTS routines
+    m_logger = makeActsAthenaLogger(this, "Acts");
+
     ATH_CHECK( prepareConfiguration() );
 
      // input trig vector
@@ -95,8 +98,11 @@ namespace ActsTrk {
 
     ATH_MSG_VERBOSE("Space points successfully assigned Gbts ID");
 
-    Acts::SeedFinderGbts<GbtsSeedingTool::GbtsSpacePoint> finder = Acts::SeedFinderGbts<GbtsSeedingTool::GbtsSpacePoint>(m_finderCfg,*m_gbtsGeo);  
-
+    Acts::SeedFinderGbts<GbtsSeedingTool::GbtsSpacePoint> finder =
+      Acts::SeedFinderGbts<GbtsSeedingTool::GbtsSpacePoint>(m_finderCfg,
+							    *m_gbtsGeo,
+							    logger().cloneWithSuffix("Finder"));
+    
     finder.loadSpacePoints(GbtsSpacePoints);
     //temporary solution until trigger ROIs implemented 
     Acts::RoiDescriptor internalRoi(0, -4.5, 4.5, 0, -std::numbers::pi, std::numbers::pi, 0, -150.0,150.0); //(eta,etaMinus,etaPlus,phi,phiMinus,Phiplus,z,zMinus,zPlus)
@@ -224,7 +230,8 @@ namespace ActsTrk {
     filterCfg.forwardSeedConfirmationRange.minImpactSeedConf = m_seedConfForwardMinImpact;
     
     // Configuration Acts::SeedFinderGbts
-    m_finderCfg.seedFilter = std::make_shared<Acts::SeedFilter<GbtsSeedingTool::GbtsSpacePoint>>(filterCfg.toInternalUnits()); 
+    m_finderCfg.seedFilter = std::make_shared<Acts::SeedFilter<GbtsSeedingTool::GbtsSpacePoint>>(filterCfg.toInternalUnits(),
+												 logger().cloneWithSuffix("Filter")); 
 
     m_finderCfg.minPt = m_minPt;
     m_finderCfg.sigmaScattering = m_sigmaScattering;
