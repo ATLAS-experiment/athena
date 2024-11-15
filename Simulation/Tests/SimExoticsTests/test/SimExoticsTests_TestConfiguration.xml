@@ -28,7 +28,7 @@
                 <doc>This transform calculates where the gluinos stop in the first step then simulates them starting from those positions in the second step.</doc>
                 <jobTransformJobName>StoppedGluinoSim</jobTransformJobName>
                 <jobTransformCmd>
-                    StoppedParticleG4_tf.py --conditionsTag OFLCOND-MC12-SIM-00 --physicsList QGSP_BERT --maxEvents 50 --outputHITSFile test.HITS.pool.root --inputEVNTFile root://eosatlas//eos/atlas/atlascerngroupdisk/proj-sit/simulation/validation/RTT/referenceFiles/18.X.0/StoppedGluino.EVNT.pool.root --geometryVersion ATLAS-GEO-20-00-01 --enableLooperKiller SPGenerator:False SPSim:True --randomSeed SPGenerator:9375655 SPSim:847433
+                    StoppedParticleG4_tf.py --conditionsTag OFLCOND-MC12-SIM-00 --physicsList QGSP_BERT --maxEvents 50 --outputHITSFile test.HITS.pool.root --inputEVNTFile root://eosatlas//eos/atlas/atlascerngroupdisk/proj-ascig/simulation/validation/RTT/referenceFiles/18.X.0/StoppedGluino.EVNT.pool.root --geometryVersion ATLAS-GEO-20-00-01 --enableLooperKiller SPGenerator:False SPSim:True --randomSeed SPGenerator:9375655 SPSim:847433
                 </jobTransformCmd>
                 <group>ExoticGenJobTransforms</group>
                 <queue>long</queue>
@@ -73,7 +73,7 @@ AtlasG4_tf.py --inputEVNTFile evgen.pool.root --outputHITSFile test.HITS.pool.ro
                  <chaindatasetName>evgen.pool.root</chaindatasetName>
                  <dataset_info>
                    <jobTransformData />
-                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-sit/simulation/validation/RTT/referenceFiles/18.X.0/StableRHadrons114865.EVNT.pool.root</datasetName>
+                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-ascig/simulation/validation/RTT/referenceFiles/18.X.0/StableRHadrons114865.EVNT.pool.root</datasetName>
                  </dataset_info>
                </chaindataset_info>
                <queue>long</queue>
@@ -120,7 +120,7 @@ AtlasG4_tf.py --inputEVNTFile evgen.pool.root --outputHITSFile test.HITS.pool.ro
                  <chaindatasetName>evgen.pool.root</chaindatasetName>
                  <dataset_info>
                    <jobTransformData />
-                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-sit/simulation/validation/RTT/referenceFiles/18.X.0/StableRHadrons114875.EVNT.pool.root</datasetName>
+                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-ascig/simulation/validation/RTT/referenceFiles/18.X.0/StableRHadrons114875.EVNT.pool.root</datasetName>
                  </dataset_info>
                </chaindataset_info>
                <queue>long</queue>
@@ -167,7 +167,7 @@ AtlasG4_tf.py --inputEVNTFile evgen.pool.root --outputHITSFile test.HITS.pool.ro
                  <chaindatasetName>evgen.pool.root</chaindatasetName>
                  <dataset_info>
                    <jobTransformData />
-                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-sit/simulation/validation/RTT/referenceFiles/18.X.0/StableRHadrons176089.EVNT.pool.root</datasetName>
+                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-ascig/simulation/validation/RTT/referenceFiles/18.X.0/StableRHadrons176089.EVNT.pool.root</datasetName>
                  </dataset_info>
                </chaindataset_info>
                <queue>long</queue>
@@ -213,7 +213,7 @@ Generate_trf.py ecmEnergy=8000 runNumber=114685 randomSeed=7744445 firstEvent=1 
                  <chaindatasetName>evgen.pool.root</chaindatasetName>
                  <dataset_info>
                    <jobTransformData />
-                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-sit/simulation/validation/RTT/referenceFiles/18.X.0/Gluino_decayinflight.EVNT.pool.root</datasetName>
+                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-ascig/simulation/validation/RTT/referenceFiles/18.X.0/Gluino_decayinflight.EVNT.pool.root</datasetName>
                  </dataset_info>
                </chaindataset_info>
                <queue>long</queue>
@@ -253,7 +253,7 @@ AtlasG4_tf.py --inputEVNTFile evgen.pool.root --outputHITSFile test.HITS.pool.ro
                  <chaindatasetName>evgen.pool.root</chaindatasetName>
                  <dataset_info>
                    <jobTransformData />
-                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-sit/simulation/validation/RTT/referenceFiles/18.X.0/AMSB_500GeV_Chargino_1ns.EVNT.pool.root</datasetName>
+                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-ascig/simulation/validation/RTT/referenceFiles/18.X.0/AMSB_500GeV_Chargino_1ns.EVNT.pool.root</datasetName>
                  </dataset_info>
                </chaindataset_info>
                <queue>long</queue>
@@ -301,7 +301,7 @@ AtlasG4_tf.py --inputEVNTFile evgen.pool.root --outputHITSFile test.HITS.pool.ro
                  <chaindatasetName>evgen.pool.root</chaindatasetName>
                  <dataset_info>
                    <jobTransformData />
-                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-sit/simulation/validation/RTT/referenceFiles/18.X.0/Monopole.EVNT.pool.root</datasetName>
+                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-ascig/simulation/validation/RTT/referenceFiles/18.X.0/Monopole.EVNT.pool.root</datasetName>
                  </dataset_info>
                </chaindataset_info>
                <queue>long</queue>

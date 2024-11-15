@@ -7,7 +7,7 @@ import os,sys,subprocess,datetime,time,shutil
 __author__ = "Renaud Bruneliere <Renaud.Bruneliere@cern.ch>"
 __doc__    = """Python script used by tct to run the Reco_Trf.py transform"""
 
-castortct = '/eos/atlas/atlascerngroupdisk/proj-sit/tct/rec_input'
+castortct = '/eos/atlas/atlascerngroupdisk/proj-ascig/tct/rec_input'
 #castortct = '/castor/cern.ch/atlas/atlascerngroupdisk/proj-sit/tct/rec_input'
 tct_stage_svcclass = 'atlasgroupdisk'
 fallbackfiles = {'IDCosmic':['/afs/cern.ch/atlas/offline/external/FullChainTest/tier0-vol3/rtt/fallbackfiles/data09_cos.00135664.physics_IDCosmic.daq.RAW._lb0000._SFO-2._0001.data','/afs/cern.ch/atlas/offline/external/FullChainTest/tier0-vol3/rtt/fallbackfiles/data09_cos.00135664.physics_IDCosmic.daq.RAW._lb0000._SFO-2._0002.data','/afs/cern.ch/atlas/offline/external/FullChainTest/tier0-vol3/rtt/fallbackfiles/data09_cos.00135664.physics_IDCosmic.daq.RAW._lb0000._SFO-2._0003.data'],
