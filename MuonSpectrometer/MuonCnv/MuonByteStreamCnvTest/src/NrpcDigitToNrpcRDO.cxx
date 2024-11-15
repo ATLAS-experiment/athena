@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonByteStreamCnvTest/NrpcDigitToNrpcRDO.h"
@@ -61,18 +61,18 @@ StatusCode NrpcDigitToNrpcRDO::execute(const EventContext& ctx) const {
         return StatusCode::FAILURE;
     }
     const MuonNRPC_CablingMap* cabling_ptr = readHandle_Cabling.cptr();
-    SG::ReadCondHandle<MuonGM::MuonDetectorManager> muonDetMgr{m_muonManagerKey, ctx};
+        SG::ReadCondHandle<MuonGM::MuonDetectorManager> muonDetMgr{m_muonManagerKey, ctx};
     if (!muonDetMgr.isValid()) {
         ATH_MSG_FATAL("Failed to retrieve the muon detector manager "<<m_muonManagerKey.fullKey());
         return StatusCode::FAILURE;
     }
-    
+
     ATH_MSG_DEBUG("Found MuonNRPC_CablingMap ");
 
     /// Record the output container
-    SG::WriteHandle<xAOD::NRPCRDOContainer> nrpcRdoHandle(m_NrpcContainerKey, ctx);
-    ATH_CHECK(nrpcRdoHandle.record(std::make_unique<xAOD::NRPCRDOContainer>(), std::make_unique<xAOD::NRPCRDOAuxContainer>()));
-    xAOD::NRPCRDOContainer* nrpcRdoData = nrpcRdoHandle.ptr();
+    SG::WriteHandle<xAOD::NRPCRDOContainer> nrpcRdoData(m_NrpcContainerKey, ctx);
+    ATH_CHECK(nrpcRdoData.record(std::make_unique<xAOD::NRPCRDOContainer>(), 
+                                 std::make_unique<xAOD::NRPCRDOAuxContainer>()));
     
 
     const IdContext rpcContext = m_idHelperSvc->rpcIdHelper().module_context();
@@ -88,7 +88,8 @@ StatusCode NrpcDigitToNrpcRDO::execute(const EventContext& ctx) const {
             ATH_MSG_WARNING("Failed to translate the "<<moduleHash<<" to a valid identifier");
             continue;
         }
-        if (!m_selectedStations.count(m_idHelperSvc->stationName(moduleId))) {
+        if (m_selectedStations.size() &&
+            !m_selectedStations.count(m_idHelperSvc->stationName(moduleId))) {
             ATH_MSG_DEBUG("Detector element "<<m_idHelperSvc->toString(moduleId)
                          <<" is not considered to be a small gap RPC");
             continue;
@@ -102,7 +103,7 @@ StatusCode NrpcDigitToNrpcRDO::execute(const EventContext& ctx) const {
             
             NrpcCablingData cabling_data{};
             /// Load the identifier into the cabling data
-            if (!cabling_ptr->convert(channelId, cabling_data)) {
+            if (!cabling_ptr->convert(channelId, cabling_data, false)) {
                 ATH_MSG_FATAL("Found a non NRPC identifier " << m_idHelperSvc->toString(channelId));
                 return StatusCode::FAILURE;
             }
@@ -113,21 +114,20 @@ StatusCode NrpcDigitToNrpcRDO::execute(const EventContext& ctx) const {
             }
             // Get the global position of RPC strip from MuonDetDesc
             const Amg::Vector3D pos = descriptor->stripPos(channelId);
-            
+             
             bool cabling = cabling_ptr->getOnlineId(cabling_data, msgStream());
             if (!cabling) {
                 ATH_MSG_ERROR("Offline to Online Id conversion for NRPC chamber.");
                 return StatusCode::FAILURE;
             }
             /// Correct for the time of flight
-            const float rdo_time = m_patch_for_rpc_time ? rpcDigit->time() - pos.mag()* inverseSpeedOfLight 
+             const float rdo_time = m_patch_for_rpc_time ? rpcDigit->time() - pos.mag()* inverseSpeedOfLight 
                                                         : rpcDigit->time();
 
             const float the_timeoverthr = rpcDigit->ToT();
             uint32_t the_bcid= rdo_time /25.;
 
-            xAOD::NRPCRDO* NrpcRdo = new xAOD::NRPCRDO();
-            nrpcRdoData->push_back(NrpcRdo);			            
+            xAOD::NRPCRDO* NrpcRdo = nrpcRdoData->push_back(std::make_unique<xAOD::NRPCRDO>());
             NrpcRdo->setBcid(the_bcid);
             NrpcRdo->setTime(rdo_time);
             NrpcRdo->setSubdetector(cabling_data.subDetector);

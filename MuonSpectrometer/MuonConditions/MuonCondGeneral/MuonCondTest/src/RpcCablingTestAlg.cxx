@@ -38,12 +38,11 @@ StatusCode RpcCablingTestAlg::execute(){
   }
   const RpcIdHelper& idHelper = m_idHelperSvc->rpcIdHelper();
   unsigned int n_elements{0}, n_success{0};
-  for (unsigned int hash = 0; hash < MuonGM::MuonDetectorManager::RpcRElMaxHash; ++hash){
-    const IdentifierHash id_hash{hash};
+  for (auto det_itr = idHelper.detectorElement_begin(); det_itr != idHelper.detectorElement_end(); ++det_itr){
 
-    const MuonGM::RpcReadoutElement* readEle = detectorMgr->getRpcReadoutElement(id_hash);
+    const MuonGM::RpcReadoutElement* readEle = detectorMgr->getRpcReadoutElement(*det_itr);
     if (!readEle) {
-        ATH_MSG_VERBOSE("Detector element "<<id_hash<<" does not exist. ");
+        ATH_MSG_VERBOSE("Detector element does not exist. ");
         continue;
     }
     if (!m_cabStat.empty() && !m_cabStat.count(m_idHelperSvc->stationName(readEle->identify()))){
@@ -54,7 +53,7 @@ StatusCode RpcCablingTestAlg::execute(){
     ATH_MSG_DEBUG("Check station "<<m_idHelperSvc->toString(station_id));
     
     for (bool measPhi : {true, false}) {
-      for (int gap = 1 ; gap <= readEle->NgasGaps(measPhi); ++gap) {
+      for (int gap = 1 ; gap <= readEle->numberOfLayers(measPhi); ++gap) {
         for (int strip = 1; strip <= readEle->Nstrips(measPhi); ++strip) {
           	  bool is_valid{false};
               const Identifier chanId = idHelper.channelID(station_id, 
@@ -69,7 +68,7 @@ StatusCode RpcCablingTestAlg::execute(){
   
               ++n_elements;
               CablingData cabl_data{};
-              if (!cabling->convert(chanId, cabl_data)){
+              if (!cabling->convert(chanId, cabl_data, false)){
                   ATH_MSG_ERROR("Invalid identifier "<<m_idHelperSvc->toString(chanId));
                   return StatusCode::FAILURE;
               }

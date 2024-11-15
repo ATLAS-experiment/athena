@@ -17,6 +17,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
+#include "nlohmann/json.hpp"
 
 
 class MuonNRPC_CablingAlg : public AthReentrantAlgorithm {
@@ -42,7 +43,7 @@ private:
         "Specify an external JSON file containing the cabling information."};
 
     StatusCode payLoadJSON(MuonNRPC_CablingMap& cabling_map,
-                           const std::string& theJSON) const;
+                           const nlohmann::json& payload) const;
 };
 
 #endif

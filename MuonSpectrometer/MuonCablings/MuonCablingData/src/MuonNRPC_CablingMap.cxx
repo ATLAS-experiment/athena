@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCablingData/MuonNRPC_CablingMap.h"
@@ -15,12 +15,11 @@ MuonNRPC_CablingMap::MuonNRPC_CablingMap() {
 
     // retrieve the RpcIdHelper
     ISvcLocator* svcLocator = Gaudi::svcLocator();
-    StoreGateSvc* detStore = nullptr;
-    StatusCode sc = svcLocator->service("DetectorStore", detStore);
-    if (sc != StatusCode::SUCCESS) {
+    SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+    if (!detStore) {
         throw std::runtime_error("Could not find the detctor store");
     }
-    sc = detStore->retrieve(m_rpcIdHelper, "RPCIDHELPER");
+    StatusCode sc = detStore->retrieve(m_rpcIdHelper, "RPCIDHELPER");
     if (sc != StatusCode::SUCCESS) {
         throw std::runtime_error("Could not retrieve the RpcIdHelper");
     }
@@ -37,17 +36,18 @@ bool MuonNRPC_CablingMap::convert(const NrpcCablingData& cabling_data,
                   cabling_data.stationIndex, cabling_data.eta, cabling_data.phi,
                   cabling_data.doubletR, cabling_data.doubletZ,
                   cabling_data.doubletPhi, cabling_data.gasGap,
-                  cabling_data.measPhi, cabling_data.strip, valid)
+                  cabling_data.measuresPhi(), cabling_data.strip, valid)
             : m_rpcIdHelper->channelID(
                   cabling_data.stationIndex, cabling_data.eta, cabling_data.phi,
                   cabling_data.doubletR, cabling_data.doubletZ,
                   cabling_data.doubletPhi, cabling_data.gasGap,
-                  cabling_data.measPhi, cabling_data.strip);
+                  cabling_data.measuresPhi(), cabling_data.strip);
     return valid;
 }
 
 bool MuonNRPC_CablingMap::convert(const Identifier& module_id,
-                                  NrpcCablingData& cabling_data) const {
+                                  NrpcCablingData& cabling_data,
+                                  bool setSideBit) const {
     if (!m_rpcIdHelper->is_rpc(module_id))
         return false;
     cabling_data.stationIndex = m_rpcIdHelper->stationName(module_id);
@@ -57,7 +57,7 @@ bool MuonNRPC_CablingMap::convert(const Identifier& module_id,
     cabling_data.doubletPhi = m_rpcIdHelper->doubletPhi(module_id);
     cabling_data.doubletZ = m_rpcIdHelper->doubletZ(module_id);
     cabling_data.gasGap = m_rpcIdHelper->gasGap(module_id);
-    cabling_data.measPhi = m_rpcIdHelper->measuresPhi(module_id);
+    cabling_data.setMeasPhiAndSide(m_rpcIdHelper->measuresPhi(module_id), setSideBit);
     cabling_data.strip = m_rpcIdHelper->strip(module_id);
     return true;
 }
@@ -218,6 +218,19 @@ const std::vector<IdentifierHash>& MuonNRPC_CablingMap::getChamberHashVec(
     static const std::vector<IdentifierHash> dummy;
     return dummy;
 }
+std::vector<IdentifierHash> MuonNRPC_CablingMap::getChamberHashVec(const ListOfROB& ROBs,
+                                                                  MsgStream& log) const {
+    std::unordered_set<IdentifierHash> hashSet{};
+    for (const uint32_t rob : ROBs) {
+        const std::vector<IdentifierHash>& hashFromROB = getChamberHashVec(rob, log);
+        hashSet.insert(hashFromROB.begin(), hashFromROB.end());
+    }
+    std::vector<IdentifierHash> hashVec{};
+    hashVec.insert(hashVec.end(), hashSet.begin(), hashSet.end());
+    return hashVec;
+
+}
+
 const MuonNRPC_CablingMap::ListOfROB& MuonNRPC_CablingMap::getAllROBId() const {
     return m_listOfROB;
 }

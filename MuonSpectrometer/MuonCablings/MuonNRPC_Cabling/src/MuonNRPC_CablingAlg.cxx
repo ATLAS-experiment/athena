@@ -18,7 +18,6 @@
 #include "MuonIdHelpers/RpcIdHelper.h"
 #include "PathResolver/PathResolver.h"
 #include "SGTools/TransientAddress.h"
-#include "nlohmann/json.hpp"
 
 MuonNRPC_CablingAlg::MuonNRPC_CablingAlg(const std::string& name,
                                          ISvcLocator* pSvcLocator)
@@ -63,10 +62,9 @@ StatusCode MuonNRPC_CablingAlg::execute(const EventContext& ctx) const {
                           << m_extJSONFile);
             return StatusCode::FAILURE;
         }
-        std::string json_content{};
-        while (std::getline(in_json, json_content)) {
-            ATH_CHECK(payLoadJSON(*writeCdo, json_content));
-        }
+        nlohmann::json payload;
+        in_json>>payload;
+        ATH_CHECK(payLoadJSON(*writeCdo, payload));
     } else {
         SG::ReadCondHandle<CondAttrListCollection> coolHandle{m_readKeyMap,
                                                               ctx};
@@ -78,9 +76,8 @@ StatusCode MuonNRPC_CablingAlg::execute(const EventContext& ctx) const {
         writeCablingHandle.addDependency(coolHandle);
         for (const auto& itr : **coolHandle) {
             const coral::AttributeList& atr = itr.second;
-            ATH_CHECK(
-                payLoadJSON(*writeCdo, *(static_cast<const std::string*>(
-                                           (atr["data"]).addressOfData()))));
+            nlohmann::json payload = nlohmann::json::parse(*(static_cast<const std::string*>((atr["data"]).addressOfData())));
+            ATH_CHECK(payLoadJSON(*writeCdo, payload));
         }
     }
     if (!writeCdo->finalize(msgStream()))
@@ -91,11 +88,10 @@ StatusCode MuonNRPC_CablingAlg::execute(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
 }
 StatusCode MuonNRPC_CablingAlg::payLoadJSON(MuonNRPC_CablingMap& cabling_map,
-                                            const std::string& theJSON) const {
-    if (theJSON.empty())
-        return StatusCode::SUCCESS;
-    nlohmann::json payload = nlohmann::json::parse(theJSON);
+                                            const nlohmann::json& payload) const {
 
+    constexpr int8_t phiBit = CablingData::measPhiBit;
+    constexpr int8_t sideBit = CablingData::stripSideBit;
     for (const auto& cabl_chan : payload.items()) {
         nlohmann::json cabl_payload = cabl_chan.value();
         CablingData cabl_data{};
@@ -106,7 +102,8 @@ StatusCode MuonNRPC_CablingAlg::payLoadJSON(MuonNRPC_CablingMap& cabling_map,
         cabl_data.doubletR = cabl_payload["doubletR"];
         cabl_data.doubletPhi = cabl_payload["doubletPhi"];
         cabl_data.doubletZ = cabl_payload["doubletZ"];
-        cabl_data.measPhi = cabl_payload["measPhi"];
+        const int8_t phiAndStrip = cabl_payload["measPhi"];
+        cabl_data.setMeasPhiAndSide(phiAndStrip & phiBit, phiAndStrip & sideBit);
         cabl_data.gasGap = cabl_payload["gasGap"];
         /// Online part
         cabl_data.subDetector = cabl_payload["subDetector"];
