@@ -7,10 +7,10 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "MuonCondInterface/ITGCCablingDbTool.h"
-#include "GaudiKernel/IChronoStatSvc.h"
 
-class IIOVSvc;
-class IChronoStatSvc;
+#include <string>
+#include <memory>
+#include <vector>
 
 class TGCCablingDbTool: public extends<AthAlgTool, ITGCCablingDbTool>
 {
@@ -22,8 +22,6 @@ class TGCCablingDbTool: public extends<AthAlgTool, ITGCCablingDbTool>
   
   /** Initilize */
   virtual StatusCode initialize() override;
-  /** Finalize */
-  virtual StatusCode finalize() override;
   /** Method to provide database */
   virtual std::vector<std::string>* giveASD2PP_DIFF_12() override;
   /** Get the folder name */
@@ -39,7 +37,7 @@ class TGCCablingDbTool: public extends<AthAlgTool, ITGCCablingDbTool>
   std::string m_Folder;
 
   /** Database as strings */
-  std::vector<std::string>* m_ASD2PP_DIFF_12;
+  std::unique_ptr<std::vector<std::string>> m_ASD2PP_DIFF_12;
 
   /** Flag for readASD2PP_DIFF_12FromText() */
   bool m_readASD2PP_DIFF_12FromText;

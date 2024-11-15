@@ -20,8 +20,7 @@ TGCCablingDbTool::TGCCablingDbTool(const std::string& type,
 				   const std::string& name,
 				   const IInterface* parent)
   : base_class(type, name, parent),
-    m_DataLocation ("keyTGC"),
-    m_ASD2PP_DIFF_12(nullptr)
+    m_DataLocation ("keyTGC")
 {
   declareProperty("Folder", m_Folder="/TGC/CABLING/MAP_SCHEMA");
 
@@ -30,18 +29,8 @@ TGCCablingDbTool::TGCCablingDbTool(const std::string& type,
   declareProperty("readASD2PP_DIFF_12FromText", m_readASD2PP_DIFF_12FromText=true);
 }
 
-StatusCode TGCCablingDbTool::initialize() { 
-  ATH_MSG_INFO("initialize");  
-  return StatusCode::SUCCESS;
-}
-
-StatusCode TGCCablingDbTool::finalize() {
-  ATH_MSG_INFO("finalize");
-
-  // Database is deleted if exists
-  delete m_ASD2PP_DIFF_12; 
-  m_ASD2PP_DIFF_12 = nullptr;
-
+StatusCode TGCCablingDbTool::initialize() {
+  ATH_MSG_INFO("initialize");
   return StatusCode::SUCCESS;
 }
 
@@ -66,8 +55,8 @@ StatusCode TGCCablingDbTool::readASD2PP_DIFF_12FromText() {
 
   // PathResolver finds the full path of the file (default file name is ASD2PP_diff_12.db) 
   std::string location = PathResolver::find_file(m_filename, "DATAPATH");
-  if(location=="") {
-    ATH_MSG_FATAL("Could not find " << m_filename.c_str());
+  if(location.empty()) {
+    ATH_MSG_ERROR("Could not find " << m_filename.c_str());
     return StatusCode::FAILURE; 
   }
   
@@ -75,16 +64,14 @@ StatusCode TGCCablingDbTool::readASD2PP_DIFF_12FromText() {
   std::ifstream inASDToPP;
   inASDToPP.open(location.c_str());
   if(inASDToPP.bad()) { 
-    ATH_MSG_FATAL("Could not open file " << location.c_str());
+    ATH_MSG_ERROR("Could not open file " << location.c_str());
     return StatusCode::FAILURE; 
   } 
   
   ATH_MSG_INFO("readTGCMap found file " << location.c_str());
   
-  // Old database is deleted if exists
-  delete m_ASD2PP_DIFF_12;
   // New database is created
-  m_ASD2PP_DIFF_12 = new std::vector<std::string>;
+  m_ASD2PP_DIFF_12.reset(new std::vector<std::string>);
 
   unsigned int nLines = 0;
   std::string buf; 
