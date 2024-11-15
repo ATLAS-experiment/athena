@@ -492,7 +492,9 @@ if __name__ == "__main__":
            acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimHOUGHOUTPUT DATAFILE='HoughRootOutput.root', OPT='RECREATE'"]))
    
        acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='test.root', OPT='RECREATE'"]))
-       acc.addService(CompFactory.THistSvc(Output = ["GENSCAN DATAFILE='genscan.root', OPT='RECREATE'"]))
+
+       if (flags.Trigger.FPGATrackSim.Hough.genScan):
+           acc.addService(CompFactory.THistSvc(Output = ["GENSCAN DATAFILE='genscan.root', OPT='RECREATE'"]))
        
        if not flags.Trigger.FPGATrackSim.wrapperFileName:
            from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
