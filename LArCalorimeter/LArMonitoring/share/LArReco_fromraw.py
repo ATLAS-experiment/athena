@@ -29,7 +29,7 @@ globalflags.InputFormat.set_Value_and_Lock('bytestream')
 globalflags.DataSource.set_Value_and_Lock('data')
 #globalflags.DatabaseInstance.set_Value_and_Lock('CONDBR2')
 # Not sure that this is correct
-athenaCommonFlags.BSRDOInput.set_Value_and_Lock(["/eos/atlas/atlascerngroupdisk/proj-sit/tct/rec_input/q431/data16_13TeV.00297447.physics_Main.daq.RAW._lb0555._SFO-1._0001.data"])
+athenaCommonFlags.BSRDOInput.set_Value_and_Lock(["/eos/atlas/atlascerngroupdisk/proj-ascig/tct/rec_input/q431/data16_13TeV.00297447.physics_Main.daq.RAW._lb0555._SFO-1._0001.data"])
 
 from RecExConfig.RecFlags import rec
 from RecExConfig.RecAlgsFlags import recAlgs

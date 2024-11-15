@@ -617,7 +617,7 @@ def main():
     ciMode          = options.ci_flag
     DiffExclusionListsDir    = options.diffExclusionListsDir
 
-#        tct_ESD = "root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/proj-sit/rtt/prod/tct/"+latest_nightly+"/"+release+"/"+platform+"/offline/Tier0ChainTests/"+q+"/myESD.pool.root"          
+#        tct_ESD = "root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/proj-ascig/rtt/prod/tct/"+latest_nightly+"/"+release+"/"+platform+"/offline/Tier0ChainTests/"+q+"/myESD.pool.root"          
 
 ########### Are we running in CI
     if ciMode:
