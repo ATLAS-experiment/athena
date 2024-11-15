@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCALIBUTILS_LAROFPEAKRECOTOOL_H
@@ -57,9 +57,6 @@ class LArOFPeakRecoTool: public AthAlgTool
 
   // initialize and finalize methods
   virtual StatusCode initialize();
-  virtual StatusCode finalize() {return StatusCode::SUCCESS ; } ;
-
-  // virtual StatusCode LoadCalibration(IOVSVC_CALLBACK_ARGS);
 
   enum { ERROR = -99999999 } ;
 

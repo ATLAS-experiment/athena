@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOREC_CALOTOPOTOWERBUILDERTOOL_H
@@ -50,8 +50,6 @@ class CaloTopoTowerBuilderTool : public CaloTopoTowerBuilderToolBase
   virtual StatusCode initializeTool() override;
 
   virtual void handle(const Incident&) override;
-
-  virtual StatusCode LoadCalibration(IOVSVC_CALLBACK_ARGS) override;
 
  protected:
 

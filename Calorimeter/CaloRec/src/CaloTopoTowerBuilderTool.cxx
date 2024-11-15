@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -309,17 +309,9 @@ StatusCode CaloTopoTowerBuilderTool::execute(const EventContext& ctx,
 }
 
 
-
-
 void CaloTopoTowerBuilderTool::handle(const Incident&) {
  
 }
-
-StatusCode CaloTopoTowerBuilderTool::LoadCalibration(IOVSVC_CALLBACK_ARGS)
-{
-  return StatusCode::SUCCESS;
-}
-
 
 
 const CaloCell2ClusterMap*
