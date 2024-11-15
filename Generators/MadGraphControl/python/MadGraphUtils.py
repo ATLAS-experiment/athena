@@ -7,6 +7,12 @@
 #  Attempts to remove path-dependence of MadGraph
 
 import os,time,subprocess,glob,re,sys
+# These Import lines are temporary for backwards compatibility of clients.
+from MCJobOptionUtils.JOsupport import check_reset_proc_number # noqa: F401
+from MCJobOptionUtils.LHAPDFsupport import get_LHAPDF_DATA_PATH # noqa: F401
+from MCJobOptionUtils.LHEsupport import remap_lhe_pdgids # noqa: F401
+from MCJobOptionUtils.LHAPDFsupport import get_lhapdf_id_and_name # noqa: F401
+from MCJobOptionUtils.LHAPDFsupport import get_LHAPDF_PATHS # noqa: F401
 from AthenaCommon import Logging
 mglog = Logging.logging.getLogger('MadGraphUtils')
 
@@ -325,7 +331,7 @@ def new_process(process='generate p p > t t~\noutput -f', plugin=None, keepJpegs
     in_config.close()
     for o in needed_options:
         if o not in option_paths:
-            mglog.info('Path for option '+o+' not found in original config')
+            mglog.warning('Path for option '+o+' not found in original config')
 
     mglog.info('Modifying config paths to avoid use of afs:')
     mglog.info(option_paths)
@@ -825,60 +831,6 @@ def setupFastjet(process_dir=None):
     return
 
 
-def get_LHAPDF_DATA_PATH():
-    return get_LHAPDF_PATHS()[1]
-
-
-def get_LHAPDF_PATHS():
-    LHADATAPATH=None
-    LHAPATH=None
-    for p in os.environ['LHAPATH'].split(':')+os.environ['LHAPDF_DATA_PATH'].split(':'):
-        if os.path.exists(p+"/../../lib/") and LHAPATH is None:
-            LHAPATH=p
-    for p in os.environ['LHAPDF_DATA_PATH'].split(':')+os.environ['LHAPATH'].split(':'):
-        if os.path.exists(p) and LHADATAPATH is None and p!=LHAPATH:
-            LHADATAPATH=p
-    if LHADATAPATH is None:
-        LHADATAPATH=LHAPATH
-    if LHAPATH is None:
-        mglog.error('Could not find path to LHAPDF installation')
-    return LHAPATH,LHADATAPATH
-
-
-# function to get lhapdf id and name from either id or name
-def get_lhapdf_id_and_name(pdf):
-    pdfname=''
-    pdfid=-999
-    LHADATAPATH=get_LHAPDF_DATA_PATH()
-    pdflist = open(LHADATAPATH+'/pdfsets.index','r')
-    if isinstance(pdf,int) or pdf.isdigit():
-        pdf=int(pdf)
-        pdfid=pdf
-        for line in pdflist:
-            splitline=line.split()
-            if int(splitline[0]) == pdfid:
-                pdfname=splitline[1]
-                break
-    else:
-        pdfname=pdf
-        for line in pdflist:
-            splitline=line.split()
-            if splitline[1] == pdfname:
-                pdfid=int(splitline[0])
-                break
-    pdflist.close()
-
-    if pdfname=='':
-        err='Couldn\'t find PDF name associated to ID %i in %s.'%(pdfid,LHADATAPATH+'/pdfsets.index')
-        mglog.error(err)
-        raise RuntimeError(err)
-    if pdfid<0:
-        err='Couldn\'t find PDF ID associated to name %s in %s.'%(pdfname,LHADATAPATH+'/pdfsets.index')
-        mglog.error(err)
-        raise RuntimeError(err)
-
-    return pdfid,pdfname
-
 
 def setupLHAPDF(process_dir=None, extlhapath=None, allow_links=True):
 
@@ -1040,12 +992,9 @@ def setNCores(process_dir, Ncores=None):
     modify_config_card(process_dir=process_dir,settings={'nb_core':my_Ncores,'run_mode':my_runMode,'automatic_html_opening':'False'})
 
 
-def resetLHAPDF(origLHAPATH='',origLHAPDF_DATA_PATH=''):
-    mglog.info('Restoring original LHAPDF env variables:')
-    os.environ['LHAPATH']=origLHAPATH
-    os.environ['LHAPDF_DATA_PATH']=origLHAPDF_DATA_PATH
-    mglog.info('LHAPATH='+os.environ['LHAPATH'])
-    mglog.info('LHAPDF_DATA_PATH='+os.environ['LHAPDF_DATA_PATH'])
+
+
+
 
 
 def get_mg5_executable():
@@ -1934,72 +1883,6 @@ def update_lhe_file(lhe_file_old,param_card_old=None,lhe_file_new=None,masses={}
     return lhe_file_new_tmp
 
 
-def remap_lhe_pdgids(lhe_file_old,lhe_file_new=None,pdgid_map={},delete_old_lhe=True):
-    """Update the PDG IDs used in an LHE file. This is a bit finicky, as we have to
-    both touch the LHE file metadata _and_ modify the events themselves. But since this
-    is "just" a remapping, it should be safe assuming Pythia8 is told the correct thing
-    afterwards and can get the showering right."""
-    # If we want to just use a temp file, then put in a little temp holder
-    lhe_file_new_tmp = lhe_file_new if lhe_file_new is not None else lhe_file_old+'.tmp'
-    # Make sure the LHE file is there
-    if not os.access(lhe_file_old,os.R_OK):
-        raise RuntimeError('Could not access old LHE file at '+str(lhe_file_old)+'. Please check the file location.')
-
-    # Convert the map into a str:str map, no matter what we started with
-    pdgid_map_str = { str(x) : str(pdgid_map[x]) for x in pdgid_map }
-    # Add anti-particles if they aren't already there
-    pdgid_map_str.update( { '-'+str(x) : '-'+str(pdgid_map[x]) for x in pdgid_map if '-'+str(x) not in pdgid_map } )
-
-    newlhe = open(lhe_file_new_tmp,'w')
-    blockName = None
-    eventRead = False
-    with open(lhe_file_old,'r') as fileobject:
-        for line in fileobject:
-            # In case we're reading the param section and we have a block, read the block name
-            if line.strip().upper().startswith('BLOCK') or line.strip().upper().startswith('DECAY')\
-                        and len(line.strip().split()) > 1:
-                pos = 0 if line.strip().startswith('DECAY') else 1
-                blockName = line.strip().upper().split()[pos]
-            elif '</slha>' in line:
-                blockName = None
-            # Check for comments - just write those and move on
-            if len(line.split('#')[0].strip())==0:
-                line_mod = line
-                for pdgid in pdgid_map_str:
-                    if pdgid in line_mod.split():
-                        line_mod = line_mod.replace( pdgid , pdgid_map_str[pdgid] )
-                newlhe.write(line_mod)
-                continue
-            # Replace the PDG ID in the mass block
-            if blockName=='MASS' and line.split()[0] in pdgid_map_str:
-                newlhe.write( line.replace( line.split()[0] , pdgid_map_str[ line.split()[0] ] , 1 ) )
-                continue
-            if blockName=='DECAY' and line.split()[1] in pdgid_map_str:
-                newlhe.write( line.replace( line.split()[1] , pdgid_map_str[ line.split()[1] ] , 1 ) )
-                continue
-            if blockName=='QNUMBERS' and line.split()[2] in pdgid_map_str:
-                newlhe.write( line.replace( line.split()[2] , pdgid_map_str[ line.split()[2] ] , 1 ) )
-                continue
-            if '<event>' in line:
-                eventRead = True
-            if eventRead and len(line.split())==13 and line.split()[0] in pdgid_map_str:
-                newlhe.write( line.replace( line.split()[0] , pdgid_map_str[ line.split()[0] ] , 1 ) )
-                continue
-
-            # Otherwise write the line again
-            newlhe.write(line)
-
-    # Move the new file to the old file location
-    if lhe_file_new is None:
-        os.remove(lhe_file_old)
-        shutil.move(lhe_file_new_tmp,lhe_file_old)
-        lhe_file_new_tmp = lhe_file_old
-    # Delete the old file if requested
-    elif delete_old_lhe:
-        os.remove(lhe_file_old)
-
-    return lhe_file_new_tmp
-
 
 def find_key_and_update(akey,dictionary):
     """ Helper function when looking at param cards
@@ -2259,7 +2142,7 @@ def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAP
             continue
         if settings_lower[asetting] is None:
             continue
-        mglog.info('Option '+asetting+' was not in the default run_card (normal for hidden options).  Adding by hand a setting to '+str(settings_lower[asetting]) )
+        mglog.warning('Option '+asetting+' was not in the default run_card.  Adding by hand a setting to '+str(settings_lower[asetting]) )
         newCard.write( ' '+str(settings_lower[asetting])+'   = '+str(asetting)+'\n')
     # close files
     oldCard.close()
@@ -2493,35 +2376,15 @@ def run_card_consistency_check(isNLO=False,process_dir='.'):
             modify_run_card(process_dir=process_dir,settings={'python_seed':mydict['iseed']},skipBaseFragment=True)
 
     # consistency check of 4/5 flavour shceme settings
-    # Note MG5_aMC default is 4-flavour scheme
     FS_updates={}
-    proton_5flav = False
-    jet_5flav = False
     with open(process_dir+'/Cards/proc_card_mg5.dat', 'r') as file:
         content = file.readlines()
-        for rawline in content:
-            line = rawline.split('#')[0]
-            if line.startswith("define p"):
-                if 'b' in line.split() and 'b~' in line.split():
-                    proton_5flav = True
-                if 'j' in line.split() and jet_5flav:
-                    proton_5flav = True
-            if line.startswith("define j"):
-                if 'b' in line.split() and 'b~' in line.split():
-                    jet_5flav = True
-                if 'p' in line.split() and proton_5flav:
-                    jet_5flav = True
-    if proton_5flav or jet_5flav:
-        FS_updates['asrwgtflavor'] = 5
-        if not proton_5flav:
-            mglog.warning('Found 5-flavour jets but 4-flavour proton. This is inconsistent - please pick one.')
-            mglog.warning('Will proceed assuming 5-flavour scheme.')
-        if not jet_5flav:
-            mglog.warning('Found 5-flavour protons but 4-flavour jets. This is inconsistent - please pick one.')
-            mglog.warning('Will proceed assuming 5-flavour scheme.')
-    else:
-        FS_updates['asrwgtflavor'] = 4
-
+        for line in content:
+            if line.startswith("define p") or line.startswith("define j"):
+                if "b" in line and "b~" in line:
+                    FS_updates['asrwgtflavor'] = 5
+                else:
+                    FS_updates['asrwgtflavor'] = 4
     if len(FS_updates)==0:
         mglog.warning(f'Could not identify 4- or 5-flavor scheme from process card {process_dir}/Cards/proc_card_mg5.dat')
 
@@ -2574,15 +2437,7 @@ def add_reweighting(run_name,reweight_card=None,process_dir=MADGRAPH_GRIDPACK_LO
     error_check(err,reweight.returncode)
     mglog.info('Finished reweighting')
 
-def check_reset_proc_number(opts):
-    if 'ATHENA_CORE_NUMBER' in os.environ and int(os.environ['ATHENA_CORE_NUMBER'])>0:
-        mglog.info('Noticed that you have run with an athena MT-like whole-node setup.  Will re-configure now to make sure that the remainder of the job runs serially.')
-        # Try to modify the opts underfoot
-        if not hasattr(opts,'nprocs'):
-            mglog.warning('Did not see option!')
-        else:
-            opts.nprocs = 0
-        mglog.debug(str(opts))
+
 
 
 def ls_dir(directory):
