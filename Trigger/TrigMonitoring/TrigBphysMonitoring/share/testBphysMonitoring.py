@@ -7,7 +7,7 @@ from RecExConfig.RecFlags import rec
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags as acf
 
 if not ('fileList' in dir()):
-  fileList=['root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/proj-sit/rtt/prod/rtt/rel_2/20.7.X.Y-VAL/x86_64-slc6-gcc49-opt/offline/TriggerTest/Bphysics_toAOD/AOD.pool.root']
+  fileList=['root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/proj-ascig/rtt/prod/rtt/rel_2/20.7.X.Y-VAL/x86_64-slc6-gcc49-opt/offline/TriggerTest/Bphysics_toAOD/AOD.pool.root']
 
 # allow this to work in RTT
 if not fileList == []:

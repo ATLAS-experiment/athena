@@ -14,12 +14,12 @@ from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 
 if athenaCommonFlags.FilesInput()==[]:
   athenaCommonFlags.FilesInput=[
-       "root://eosatlas//eos/atlas/atlascerngroupdisk/proj-sit/igrabows/TrigInDetValidation_minBias/mc10_7TeV.105012.J3_pythia_jetjet.digit.RDO.e574_s1023_d421_tid212390_00/RDO.212390._000284.pool.root.1",
-#       "root://eosatlas//eos/atlas/atlascerngroupdisk/proj-sit/igrabows/TrigInDetValidation_minBias/mc10_7TeV.105012.J3_pythia_jetjet.digit.RDO.e574_s1023_d421_tid212390_00/RDO.212390._000280.pool.root.1",
-#       "root://eosatlas//eos/atlas/atlascerngroupdisk/proj-sit/igrabows/TrigInDetValidation_minBias/mc10_7TeV.105012.J3_pythia_jetjet.digit.RDO.e574_s1023_d421_tid212390_00/RDO.212390._000182.pool.root.1",
-#       "root://eosatlas//eos/atlas/atlascerngroupdisk/proj-sit/vchavda/TrigInDetValidation_bjet5200/mc10_14TeV.105568.ttbar_Pythia.digit.RDO.e662_s1107_d459_tid254598_00/RDO.254598._000031.pool.root.1", 
-#       "root://eosatlas//eos/atlas/atlascerngroupdisk/proj-sit/vchavda/TrigInDetValidation_bjet5200/mc10_14TeV.105568.ttbar_Pythia.digit.RDO.e662_s1107_d459_tid254598_00/RDO.254598._000035.pool.root.1",
-#       "root://eosatlas//eos/atlas/atlascerngroupdisk/proj-sit/vchavda/TrigInDetValidation_bjet5200/mc10_14TeV.105568.ttbar_Pythia.digit.RDO.e662_s1107_d459_tid254598_00/RDO.254598._000046.pool.root.1",     
+       "root://eosatlas//eos/atlas/atlascerngroupdisk/proj-ascig/igrabows/TrigInDetValidation_minBias/mc10_7TeV.105012.J3_pythia_jetjet.digit.RDO.e574_s1023_d421_tid212390_00/RDO.212390._000284.pool.root.1",
+#       "root://eosatlas//eos/atlas/atlascerngroupdisk/proj-ascig/igrabows/TrigInDetValidation_minBias/mc10_7TeV.105012.J3_pythia_jetjet.digit.RDO.e574_s1023_d421_tid212390_00/RDO.212390._000280.pool.root.1",
+#       "root://eosatlas//eos/atlas/atlascerngroupdisk/proj-ascig/igrabows/TrigInDetValidation_minBias/mc10_7TeV.105012.J3_pythia_jetjet.digit.RDO.e574_s1023_d421_tid212390_00/RDO.212390._000182.pool.root.1",
+#       "root://eosatlas//eos/atlas/atlascerngroupdisk/proj-ascig/vchavda/TrigInDetValidation_bjet5200/mc10_14TeV.105568.ttbar_Pythia.digit.RDO.e662_s1107_d459_tid254598_00/RDO.254598._000031.pool.root.1", 
+#       "root://eosatlas//eos/atlas/atlascerngroupdisk/proj-ascig/vchavda/TrigInDetValidation_bjet5200/mc10_14TeV.105568.ttbar_Pythia.digit.RDO.e662_s1107_d459_tid254598_00/RDO.254598._000035.pool.root.1",
+#       "root://eosatlas//eos/atlas/atlascerngroupdisk/proj-ascig/vchavda/TrigInDetValidation_bjet5200/mc10_14TeV.105568.ttbar_Pythia.digit.RDO.e662_s1107_d459_tid254598_00/RDO.254598._000046.pool.root.1",     
        ]
 
 from TriggerMenu import useNewTriggerMenu

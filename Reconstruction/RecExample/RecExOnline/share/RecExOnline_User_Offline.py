@@ -45,7 +45,7 @@ fileName          = '/afs/cern.ch/work/y/yunju/public/GM_raw2016/data16_13TeV.00
 
 ##
 #fileName          = '/afs/cern.ch/user/k/koutsman/OnlineNightly/data/data12_8TeV.00208931.express_express.daq.RAW._lb0123._SFO-9._0001.data'
-#fileName          = 'root://eosatlas//eos/atlas/atlascerngroupdisk/proj-sit/tct/rec_input/00204416/express_express/data12_8TeV.00204416.express_express.merge.RAW._lb0015._SFO-ALL._0001.1'
+#fileName          = 'root://eosatlas//eos/atlas/atlascerngroupdisk/proj-ascig/tct/rec_input/00204416/express_express/data12_8TeV.00204416.express_express.merge.RAW._lb0015._SFO-ALL._0001.1'
 
 
 #beamType          = 'cosmics'
