@@ -89,7 +89,7 @@ class TextConfig(ConfigFactory):
     def configure(self):
         """Process YAML configuration file and confgure added algorithms."""
         def configureAlg(configSeq, block, blockConfig, containerName=None):
-            if type(blockConfig) != list:
+            if type(blockConfig) is not list:
                 blockConfig = [blockConfig]
 
             for options in blockConfig:

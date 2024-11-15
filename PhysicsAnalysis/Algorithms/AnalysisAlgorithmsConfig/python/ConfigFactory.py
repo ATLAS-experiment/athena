@@ -98,7 +98,7 @@ class FactoryBlock():
                     continue
                 else:
                     raise ValueError(f"{arg} is requried for {funcName}")
-            if type(func) == type(dict):
+            if type(func) is type(dict):
                 configSeq.append(func(**args))
             else:
                 func(**args)
@@ -121,14 +121,14 @@ class ConfigFactory():
         """Add class to list of available algorithms"""
         if not callable(alg):
             raise ValueError(f"{algName} is not a callable.")
-        if type(alg) == type(dict):
+        if type(alg) is type(dict):
             opts = getClassArgs(alg)
         else:
             opts = getFuncArgs(alg)    
 
         if superBlocks is None:
             superBlocks = [self.ROOTNAME]
-        elif type(superBlocks) != list:
+        elif type(superBlocks) is not list:
             superBlocks = [superBlocks]
 
         # add new alg block to subAlgs dict of super block
