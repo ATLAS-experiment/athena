@@ -1,17 +1,14 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_GeoModelTool_H
 #define AFP_GeoModelTool_H
 
 #include "GeoModelUtilities/GeoModelTool.h"
-#include "AthenaKernel/IIOVDbSvc.h"
-#include "AthenaKernel/IIOVSvc.h"
 #include "AFP_GeoModelFactory.h"
 #include "AFP_Geometry/AFP_Geometry.h"
 
-#define COOLFOLDER_BPM "/TDAQ/OLC/ALFA"
 
 class AFP_GeoModelTool final : public GeoModelTool
 {
@@ -26,7 +23,6 @@ class AFP_GeoModelTool final : public GeoModelTool
     AFP_CONFIGURATION m_CfgParams;
     AFP_Geometry* m_pGeometry;
     std::unique_ptr<AFP_GeoModelFactory> m_pAFPDetectorFactory;
-    ServiceHandle< IIOVDbSvc > m_iovSvc;
     AFP_SIDCONFIGURATION m_defsidcfg;
     std::vector<double> m_vecAFP00XStaggering, m_vecAFP00YStaggering;
     std::vector<double> m_vecAFP01XStaggering, m_vecAFP01YStaggering;
@@ -35,8 +31,6 @@ class AFP_GeoModelTool final : public GeoModelTool
     
  private:
     StatusCode checkPropertiesSettings();
-    //virtual StatusCode registerCallback(StoreGateSvc* detStore);
-    //virtual StatusCode align(IOVSVC_CALLBACK_ARGS);
 };
 
 #endif // AFP_GeoModelTool_H
