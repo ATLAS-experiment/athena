@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGSERVICES_EVENTLOOPUTILS_H
 #define TRIGSERVICES_EVENTLOOPUTILS_H
@@ -65,15 +65,7 @@ namespace HLT {
       m_thread(std::make_unique<std::thread>([this]{run();})) {}
 
     ~LoopThread() {
-      // Nothing to do if thread already finished
-      if (m_thread==nullptr || !m_thread->joinable()) {return;}
-      // Keep notifying the condition until the loop finishes
-      while (!m_finished) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(3));
-        m_cond.notify_all();
-      }
-      // Wait for the thread to return
-      m_thread->join();
+      wait();
     }
 
     // Copy and move not allowed
@@ -95,6 +87,19 @@ namespace HLT {
     void stop() {
       m_keepRunning=false;
       m_cond.notify_all();
+    }
+
+    /// Wait until main loop finishes
+    void wait() {
+      // Nothing to do if thread already finished
+      if (m_thread==nullptr || !m_thread->joinable()) {return;}
+      // Keep notifying the condition until the loop finishes
+      while (!m_finished) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(3));
+        m_cond.notify_all();
+      }
+      // Wait for the thread to return
+      m_thread->join();
     }
 
     std::condition_variable& cond() {return m_cond;}
