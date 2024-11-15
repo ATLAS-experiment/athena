@@ -26,6 +26,9 @@
 #include <stdexcept>
 #include <format>
 
+
+static const pool::Guid DHForm_p6_Guid("7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD");
+
 // cppcheck-suppress uninitMemberVar
 DataHeaderCnv::DataHeaderCnv(ISvcLocator* svcloc) :
       DataHeaderCnvBase(svcloc, "DataHeaderCnv")
@@ -251,11 +254,10 @@ StatusCode DataHeaderCnv::updateRepRefs(IOpaqueAddress* pAddress, DataObject* pO
          pObject is null if there is no new DHForm for this event - in this case the old
          one is used
       */
-      static const pool::Guid dhf_p6_guid("7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD");
       std::string dhid = pAddress->par()[1];
       if( pObject ) {
          this->setToken( pAddress->par()[0] );
-         if( !compareClassGuid( dhf_p6_guid ) ) {
+         if( !compareClassGuid( DHForm_p6_Guid ) ) {
             ATH_MSG_ERROR( "updateRepRefs called without DataHeaderForm" );
             return StatusCode::FAILURE;
          }
@@ -434,8 +436,29 @@ std::unique_ptr<DataHeader_p6> DataHeaderCnv::poolReadObject_p6()
    }
    std::unique_ptr<DataHeader_p6> header( reinterpret_cast<DataHeader_p6*>(voidPtr1) );
 
-   // see if the DataHeaderForm is already cached
    std::string dhFormToken =  header->dhFormToken();
+   Token formToken;
+   if( !dhFormToken.empty() and dhFormToken.find("[OID=") == std::string::npos) {
+      // OneForm format of Form Ref (without OID)
+      // we need to reconstruct the real Ref before checking in the Ref cache
+      Placement dhf_placement;
+      dhf_placement.fromString( dhFormToken );
+      formToken.setDb( m_i_poolToken->dbID() );
+      formToken.setCont( dhf_placement.containerName() );
+      formToken.setTechnology( dhf_placement.technology() );
+      formToken.setAuxString( dhf_placement.auxString() );
+      formToken.setClassID( DHForm_p6_Guid );
+      std::int64_t oid2 =  m_i_poolToken->oid().second;
+      oid2 >>= 32; oid2 <<= 32;
+      std::string swn = getSWNFromStr( dhFormToken );
+      // add the row number from the SHForm Ref
+      if( !swn.empty() ) oid2 += std::stoul( swn ) - 1;
+      formToken.setOid( {0,oid2} );
+      ATH_MSG_DEBUG("Constructed DHForm Ref=" << formToken.toString() << " from " << dhFormToken );
+      dhFormToken = formToken.toString();
+      header->setDhFormToken( dhFormToken );
+   }
+   // see if the DataHeaderForm is already cached
    if( dhFormToken.empty() || m_inputDHForms.find(dhFormToken) == m_inputDHForms.end() ) {
       // no cached DHForm
       size_t dbpos = dhFormToken.find("[DB=");
@@ -449,31 +472,13 @@ std::unique_ptr<DataHeader_p6> DataHeaderCnv::poolReadObject_p6()
       }
       // we need to read a new DHF
       void* voidPtr2 = nullptr;
-      Token formToken;
       if( dhFormToken.empty() ) {
          // Some technologies can't set DHF token, use DH token with new CLID.
          m_i_poolToken->setData(&formToken);
-         formToken.setClassID( Guid("7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD") );
-      } else if( dhFormToken.find("[OID=") != std::string::npos ) {
-         // This is a regular Token string (contains "[OID=]" fragment)
+         formToken.setClassID( DHForm_p6_Guid );
+      } else {
          formToken.fromString( dhFormToken );
          formToken.setAuxString( m_i_poolToken->auxString() );  // set PersSvc context
-      } else {
-         // Partial Ref without OID, needs to be recreated
-         Placement dhf_placement;
-         dhf_placement.fromString( dhFormToken );
-         formToken.setDb( m_i_poolToken->dbID() );
-         formToken.setCont( dhf_placement.containerName() );
-         formToken.setTechnology( dhf_placement.technology() );
-         formToken.setAuxString( dhf_placement.auxString() ); 
-         formToken.setClassID( Guid("7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD") );
-         std::int64_t oid2 =  m_i_poolToken->oid().second;
-         oid2 >>= 32; oid2 <<= 32;
-         std::string swn = getSWNFromStr( dhFormToken );
-         // add the row number from the SHForm Ref
-         if( !swn.empty() ) oid2 += std::stoul( swn ) - 1;
-         formToken.setOid( {0,oid2} );
-         ATH_MSG_DEBUG("Constructed DHForm Ref=" << formToken.toString());
       }
       if (formToken.classID() != Guid::null()) {
          try {
