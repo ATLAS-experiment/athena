@@ -79,6 +79,7 @@ const HWIdentifier LArHVIdMapping::getLArHVLineID(HWIdentifier& electrodeId) con
   // if the map exists, use the mapping object
 }
 
+
 //========================================================================================
 const std::vector<HWIdentifier>& LArHVIdMapping::getLArElectrodeIDvec(HWIdentifier &hvlineId) const
 //========================================================================================
@@ -96,303 +97,12 @@ const std::vector<HWIdentifier>& LArHVIdMapping::getLArElectrodeIDvec(HWIdentifi
     int cann = m_hvlineHelper->can_node(hvlineId);
     int hvli = m_hvlineHelper->hv_line(hvlineId);
     msg(MSG::WARNING) << "LArHVCablingSvc: getLArElectrodeIDvec didnot find electrode to hvline [" 
-     	<< part << "." << canl << "." << cann << "." << hvli << "]" << endmsg;
+        << part << "." << canl << "." << cann << "." << hvli << "]" << endmsg;
     */    
     return(m_invalid);
   }
   //return m_hvmapHelper->getLArElectrodeIDvec( hvlineId ); 
 }
-
-
-
-
-
-
-
-//==========================================================================
-void LArHVIdMapping::getElectrodeInCell( const Identifier& offId, std::vector<HWIdentifier> &electrodeIdVec ) const
-//============================================================================
-{//Start of getCellElectrodeIDvec
-  //ATH_MSG_VERBOSE("Entering getElectrodeInCell( offlineId ) " );
-  
-  // Get HV fields from offline fields
-  //===================================
-  int Detector = -1;
-  int Side     = -9;
-  int iGapMax  = -1;
-  if( m_caloHelper->is_em( offId ) ){
-    const int sampl = m_emHelper->sampling( offId );
-    const int bec   = m_emHelper->barrel_ec( offId);
-    if( bec > 0 ){ 
-      Side = 0;}
-    else{Side = 1;}
-    if( m_caloHelper->is_em_barrel(offId) && sampl != 0 ){
-      // EMB
-      Detector = 0;
-      iGapMax = 1;
-    }
-    if( m_caloHelper->is_em_barrel(offId) && sampl == 0 ){
-      // EMBPS
-      Detector = 1;
-      iGapMax  = 0;
-    }
-    if( m_caloHelper->is_em_endcap(offId) && sampl != 0 ){ 
-      // EMEC
-      Detector = 2;
-      iGapMax  = 1;
-    }
-    if( m_caloHelper->is_em_endcap(offId) && sampl == 0 ){ 
-      // EMECPS
-      Detector = 3;
-      iGapMax  = 0;
-    }
-  }
-  else if( m_caloHelper->is_hec( offId )  ){
-    const int bec   = m_hecHelper->pos_neg(offId);
-    if( bec > 0 ){ 
-      Side = 0;}
-    else{Side = 1;}
-    Detector = 4;
-    iGapMax  = 3;
-  }
-  else if( m_caloHelper->is_fcal( offId )  ){
-    const int bec   = m_fcalHelper->pos_neg(offId);
-    Detector = 5;
-    iGapMax  = 3;
-    if( bec > 0 ){ 
-      Side = 0;}
-    else{Side = 1;}
-  }
-
-  // ------------------------------------------------------------
-  // Get cell localisation information in terms of HV description
-  // ------------------------------------------------------------
-  const int Module = getCellModule( offId );
-  const int EtaBin = getCellEtaSector( offId );
-  const int PhiBin = getCellPhiSector( offId );
-  const int elecmin = getCellElectrodeMinMax(offId).first;
-  const int elecmax = getCellElectrodeMinMax(offId).second;
-  // commented out, until proper messaging will be added
-  /*
-  ATH_MSG_DEBUG("[getArHVLineID] ElectrodeId=["
-      << Detector << "." 
-      << Side << "." 
-      << Module << "." 
-      << PhiBin << "." 
-      << EtaBin << ".gap_max=" 
-      << iGapMax << ".min=" 
-      << elecmin << ".max="  
-      << elecmax << "]" );
-  */
-  for( int ielec=elecmin; ielec<elecmax+1; ielec++){
-    for( int iGap=0; iGap<iGapMax+1; iGap++){
-      const HWIdentifier electrodeId = 
-	m_electrodeHelper->ElectrodeId(Detector,Side,Module,PhiBin,EtaBin,iGap,ielec);
-      electrodeIdVec.push_back(electrodeId);
-    }
-  }
-  //ATH_MSG_DEBUG("vector size = " << electrodeIdVec.size() );
-}
-// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-// End of getElectrodeInCell()
-// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
-
-
-
-
-
-//==========================================================================
-void LArHVIdMapping::getHVLineInCell( const Identifier& offId, std::vector<HWIdentifier> &hvlineIdVec ) const
-//============================================================================
-{//Start of getHVLineInCell
-  //ATH_MSG_VERBOSE("Entering getHVLineInCell( offlineId ) " );
-
-  hvlineIdVec.clear();  
-
-  // Get HV fields from offline fields
-  //===================================
-  int Detector = -1;
-  int Side     = -9;
-  int iGapMax  = 0;
-  if( m_caloHelper->is_em( offId ) ){
-    const int sampl = m_emHelper->sampling( offId );
-    const int bec   = m_emHelper->barrel_ec( offId);
-    if( bec > 0 ){ 
-      Side = 0;}
-    else{Side = 1;
-    }
-    if( m_caloHelper->is_em_barrel(offId) && sampl != 0 ){
-      // EMB
-      Detector = 0;
-      iGapMax = 1;
-    }
-    if( m_caloHelper->is_em_barrel(offId) && sampl == 0 ){
-      // EMBPS
-      Detector = 1;
-      iGapMax  = 1;
-    }
-    if( m_caloHelper->is_em_endcap(offId) && sampl != 0 ){ 
-      // EMEC
-      Detector = 2;
-      iGapMax  = 1;
-    }
-    if( m_caloHelper->is_em_endcap(offId) && sampl == 0 ){ 
-      // EMECPS
-      Detector = 3;
-      iGapMax  = 0;
-    }
-  }
-  else if( m_caloHelper->is_hec( offId )  ){
-    const int bec   = m_hecHelper->pos_neg(offId);
-    if( bec > 0 ){ 
-      Side = 0;}
-    else{Side = 1;}
-    Detector = 4;
-    iGapMax  = 3;
-  }
-  else if( m_caloHelper->is_fcal( offId )  ){
-    const int bec   = m_fcalHelper->pos_neg(offId);
-    if( bec > 0 )
-      { Side = 0;}
-    else{Side = 1;}
-    Detector = 5;
-    iGapMax  = 3;
-  }
-
-  //ATH_MSG_DEBUG("[getHVLineInCell] identified detector det=" 
-  //    << Detector << " (0=EMB, 1=EMBPS, 2=EMEC, 3=EMECPS, 4=HEC 5=FCAL)" 
-  //    );
-
-
-  // ------------------------------------------------------------
-  // Get cell localisation information in terms of HV description
-  // ------------------------------------------------------------
-  const int Module = getCellModule( offId );
-  const int EtaBin = getCellEtaSector( offId );
-  const int PhiBin = getCellPhiSector( offId );
-  const int elecmin = getCellElectrodeMinMax(offId).first;
-  const int elecmax = getCellElectrodeMinMax(offId).second;
-  for( int ielec=elecmin; ielec<elecmax+1; ielec++){
-    // Loop over electrodes in cell
-    /*
-    ATH_MSG_VERBOSE("[getHVLineInCell] defining electrodeId: [det=" 
-		    << Detector << " sid="
-		    << Side << " mod=" 
-		    << Module << " phi="
-		    << PhiBin << " eta=" 
-		    << EtaBin << " ielec="
-		    << ielec  << "]" 
-		    );
-    */
-    for( int iGap=0; iGap<iGapMax+1; iGap++){ 
-      // Loop over gaps
-      const HWIdentifier electrodeId = 
-	m_electrodeHelper->ElectrodeId(Detector,Side,Module,PhiBin,EtaBin,iGap,ielec);
-      std::map<HWIdentifier,HWIdentifier>::const_iterator elecIt = 
-	m_electrode_hvline_map.find(electrodeId);
-      if(elecIt != m_electrode_hvline_map.end()){
-	// found corresponding HVline 
-	HWIdentifier hvlineId = (elecIt)->second;
-
-        // commented out, until proper messaging will be added
-        /*
-        const int dete = m_electrodeHelper->detector(electrodeId);
-        const int side = m_electrodeHelper->zside(electrodeId);
-        const int modu = m_electrodeHelper->module(electrodeId);
-        const int hvph = m_electrodeHelper->hv_phi(electrodeId);
-        const int hvet = m_electrodeHelper->hv_eta(electrodeId);
-        const int hvga = m_electrodeHelper->gap(electrodeId);
-        const int elec = m_electrodeHelper->electrode(electrodeId);
-	int part1 = m_hvlineHelper->partition(hvlineId);
-	int canl1 = m_hvlineHelper->can_line(hvlineId);
-	int cann1 = m_hvlineHelper->can_node(hvlineId);
-	int hvli1 = m_hvlineHelper->hv_line(hvlineId);
-
-	if (msgLvl(MSG::DEBUG)) {
-	  msg(MSG::DEBUG) << "[getHVLineInCell] input ElectrodeId=["
-			  << dete << "." << side << "." << modu << "." << hvph 
-			  << "." << hvet << "." << hvga << "." << elec << "]" 
-			  << " corresponding hvlineID=[" 
-			  << part1 << "." << canl1 << "." 
-			  << cann1 << "." << hvli1 << "] "  
-			  << endmsg;
-	}
-        */
-	if( hvlineIdVec.empty() ){
-	  //ATH_MSG_DEBUG("[getHVLineInCell] -> first fill of vector..." );
-	  hvlineIdVec.push_back(hvlineId);
-	}
-	else{
-	  bool foundHvId = false;	
-	  std::vector<HWIdentifier>::const_iterator hv = hvlineIdVec.begin();
-	  std::vector<HWIdentifier>::const_iterator hvEnd = hvlineIdVec.end(); 
-	  for(; hv!=hvEnd;++hv){
-	    HWIdentifier hvRef = *hv;
-            // commented out, until proper messaging will be added
-            /*
-	    int part = m_hvlineHelper->partition(hvRef);
-	    int canl = m_hvlineHelper->can_line(hvRef);
-	    int cann = m_hvlineHelper->can_node(hvRef);
-	    int hvli = m_hvlineHelper->hv_line(hvRef);
-            
-	    ATH_MSG_DEBUG("[getHVLineInCell] -> in loop : hvRef=[" 
-		<< part << "." << canl << "." 
-		<< cann << "." << hvli << "] " 
-		);
-            */
-	    if( hvlineId == hvRef ){
-	      foundHvId = true;
-	      //ATH_MSG_DEBUG("[getHVLineInCell] -> BREAK !" );
-	      break;
-	    }
-	  }
-	  if( !foundHvId ){
-	    hvlineIdVec.push_back(hvlineId);
-            /*
-	    ATH_MSG_DEBUG("[getHVLineInCell] -> new HV line added" 
-		<< "=[" 
-		<< part1 << "." << canl1 << "." 
-		<< cann1 << "." << hvli1 << "] size of vector=" 
-		<< hvlineIdVec.size()  
-		);
-            */
-	  }
-	  else{
-            /*
-	    ATH_MSG_DEBUG("[getHVLineInCell] -> HV line already IN" 
-		<< "=[" 
-		<< part1 << "." << canl1 << "." 
-		<< cann1 << "." << hvli1 << "] size of vector=" 
-		<< hvlineIdVec.size()  
-		);	    
-            */
-	  }	  
-	}
-      } 
-      else{
-         /*
-	msg(MSG::WARNING) << "[getHVLineInCell] couldnot find the electrodeID in map [" 
-	    << Detector << " Sid="
-	    << Side << " Mod="
-	    << Module << " phi="
-	    << PhiBin << " eta=" 
-	    << EtaBin << " Gap=" 
-	    << iGap   << " elec_min="
-	    << elecmin <<" elec_max=" 
-	    << elecmax << "]" 
-	    << endmsg;
-            */
-      }
-    } // Loop over gaps
-  }// Loop over electrodes in cell
-  //ATH_MSG_DEBUG("vector size = " << hvlineIdVec.size() );
-}
-// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-// End of getHVLineInCell()
-// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
 
 //=====================================================================
 int LArHVIdMapping::getCellModule( const Identifier &offId ) const
@@ -1395,7 +1105,7 @@ int LArHVIdMapping::getCellPhiSector( const Identifier &offId ) const
     // Note: not used 
     hvPhi = 0;
   }
-  //ATH_MSG_DEBUG("Closing getCellPhiSector ...." );
+  std::cout<<"Closing getCellPhiSector ...." << hvPhi <<std::endl;
   return hvPhi;
 }
 
@@ -1904,5 +1614,4 @@ std::pair<int,int> LArHVIdMapping::getCellElectrodeMinMax( const Identifier &off
   std::pair<int, int> electrodeMinMax( ElecMin, ElecMax); 
   return electrodeMinMax;
 }
-
 

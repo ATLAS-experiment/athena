@@ -25,6 +25,7 @@
 #include "LArTPCnv/LArNoisyROSummary_p3.h"
 #include "LArTPCnv/LArNoisyROSummary_p4.h"
 #include "LArTPCnv/LArNoisyROSummary_p5.h"
+#include "LArTPCnv/LArNoisyROSummary_p6.h"
 
 #include "LArTPCnv/LArLATOMEHeaderContainer_p1.h"
 

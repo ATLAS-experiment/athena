@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCELLREC_LARNOISYROALG_H
@@ -13,6 +13,8 @@
  Modified May, 2014 B.Trocme 
  - Remove saturated medium cut
  - Create a new weighted Std algorithm
+ Modified October 2024 P. Strizenec
+ - added noisy HV lines flagging
 
 */
 
@@ -21,10 +23,13 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "CaloInterface/ILArNoisyROTool.h"
+#include "CaloDetDescr/CaloDetDescrManager.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "LArRecConditions/LArBadChannelCont.h"
+#include "LArRecConditions/LArHVNMap.h"
+#include "LArRecConditions/LArHVIdMapping.h"
 #include "LArRecEvent/LArNoisyROSummary.h"
 #include "xAODEventInfo/EventInfo.h"
 
@@ -39,6 +44,7 @@ class LArNoisyROAlg : public AthReentrantAlgorithm
   virtual StatusCode execute (const EventContext& ctx) const override;   
   virtual StatusCode finalize() override;
 
+  typedef std::map<int, int> hvmap_type;
  
  private: 
   ToolHandle<ILArNoisyROTool> m_noisyROTool;
@@ -50,6 +56,9 @@ class LArNoisyROAlg : public AthReentrantAlgorithm
   SG::WriteHandleKey<LArNoisyROSummary> m_outputKey {this, "OutputKey", "LArNoisyROSummary", "output object key"};
   SG::ReadCondHandleKey<LArBadFebCont> m_knownBadFEBsVecKey {this, "BadFEBsKey", "LArKnownBadFEBs", "key to read the known Bad FEBs"};
   SG::ReadCondHandleKey<LArBadFebCont> m_knownMNBFEBsVecKey {this, "MNBFEBsKey", "LArKnownMNBFEBs", "key to read the known MNB FEBs"};
+  SG::ReadCondHandleKey<LArHVNMap> m_hvMapKey {this, "HVMapKey", "LArHVNcells", "key to read HVline Ncells map"};
+  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloDetDescrMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};
+  SG::ReadCondHandleKey<LArHVIdMapping> m_hvCablingKey {this, "LArHVIdMapping", "LArHVIdMap", "SG key for HV ID mapping"};
 
 };
 

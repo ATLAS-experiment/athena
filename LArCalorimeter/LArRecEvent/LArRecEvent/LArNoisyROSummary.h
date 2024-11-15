@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LArNoisyROSummary_h
@@ -20,6 +20,8 @@
 
 - May 2014 : modified b B.Trocmé to include a weighted bad FEBs flag 
 (see LArCellRec/LArNoisyROAlg for more details) 
+
+- October 2024 : modified by P. Strizenec to add info about noisy HV lines
 */
 
 class LArNoisyROSummary
@@ -70,6 +72,8 @@ class LArNoisyROSummary
   //** add noisy preamp as FEB id + first channel for preamp */
   void add_noisy_preamp(HWIdentifier febid, int channel);
 
+  //** add a HVline to the bad HVlines list */
+  void add_noisy_hvline(HWIdentifier hvid);
 
 
   //** set Partition bit pattern for bad FEB flagging **//
@@ -92,6 +96,10 @@ class LArNoisyROSummary
 
   //** Set Partition bit pattern for mini-noise-burst flagging (tight_psveto) **/
   void SetMNBTight_PsVetoFlaggedPartitions(uint8_t bitpattern) { m_MNBTight_PsVetoFlaggedPartitions=bitpattern; }
+
+  //** set Partition bit pattern for bad hvlines flagging **//
+  void SetBadHVlinesPartitions(uint8_t bitpattern) { m_BadHVlinesPartitions = bitpattern;}
+
 
   //** retrieve noisy FEBs by id */
   const std::vector<HWIdentifier>& get_noisy_febs() const;
@@ -129,6 +137,12 @@ class LArNoisyROSummary
   //** Partition bit map for mini-noise-burst flagging (tight_psveto) **//
   uint8_t MNBTight_PsVetoFlaggedPartitions() const {return m_MNBTight_PsVetoFlaggedPartitions;}
 
+  //** Partition bit map for HV line flagging **//
+  uint8_t HVlineFlaggedPartitions() const {return m_BadHVlinesPartitions;}
+
+  //** retrieve noisy HVlines  */
+  const std::vector<HWIdentifier>& get_noisy_hvlines() const;
+
 
  private:
 
@@ -147,6 +161,9 @@ class LArNoisyROSummary
   //** List of noisy preamps, for each FEB identifier via HWIdentifier keep the noisy preamps as the first channel number for that preamp */
   std::vector< std::pair<HWIdentifier, std::vector<int> > > m_noisy_preamps;
 
+  //** List of noisy HVlines */
+  std::vector<HWIdentifier> m_noisy_hvlines;
+
   uint8_t m_BadFEBFlaggedPartitions;
   uint8_t m_BadFEB_WFlaggedPartitions;
   uint8_t m_SatMediumFlaggedPartitions;
@@ -157,10 +174,14 @@ class LArNoisyROSummary
   uint8_t m_MNBTightFlaggedPartitions;
   uint8_t m_MNBTight_PsVetoFlaggedPartitions;
 
+
+  //** Flags for HV lines noise bursts
+  uint8_t m_BadHVlinesPartitions;
+
 };
 
 
-CLASS_DEF( LArNoisyROSummary , 112588521 , 3 )
+CLASS_DEF( LArNoisyROSummary , 112588521 , 4 )
 
 
 #endif

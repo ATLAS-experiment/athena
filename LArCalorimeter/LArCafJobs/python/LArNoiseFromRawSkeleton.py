@@ -73,6 +73,8 @@ def fromRunArgs(runArgs):
     processPostInclude(runArgs, flags, cfg)
     processPostExec(runArgs, flags, cfg)
 
+    cfg.getService("MessageSvc").defaultLimit=9999999
+
     # Run the final accumulator
     sc = cfg.run()
     sys.exit(not sc.isSuccess())

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// LArNoiseBursts
@@ -34,7 +34,6 @@
 #include "LArRawEvent/LArDigit.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawEvent/LArRawChannelContainer.h"
-#include "LArRecEvent/LArNoisyROSummary.h"
 #include "LArRecEvent/LArCollisionTime.h"
 #include "CaloConditions/CaloNoise.h"
  
@@ -118,33 +117,18 @@ LArNoiseBursts::LArNoiseBursts(const std::string& name,
     m_nt_stablebeams(0),
     m_nt_streamTagName(0),
     m_nt_streamTagType(0),
-    m_nt_larnoisyro(0),
-    m_nt_larnoisyro_opt(0),
-    m_nt_larnoisyro_satTwo(0),
-    m_nt_larmnbnoisy(0),
-    m_nt_larmnbnoisy_sat(0),
-//    m_nt_veto_mbts(0),
-//    //m_nt_veto_indet(0),
-//    m_nt_veto_bcm(0),
-//    m_nt_veto_lucid(0),
-//    m_nt_veto_pixel(0),
-//    m_nt_veto_sct(0),
-//    m_nt_veto_mbtstdHalo(0),
-//    m_nt_veto_mbtstdCol(0),
-//    m_nt_veto_lartdHalo(0),
-//    m_nt_veto_lartdCol(0),
-//    m_nt_veto_csctdHalo(0),
-//    m_nt_veto_csctdCol(0),
-//    m_nt_veto_bcmtHalo(0),
-//    m_nt_veto_bcmtCol(0),
-//    m_nt_veto_muontCol(0),
-//    m_nt_veto_muontCosmic(0),
     m_nt_larflag_badFEBs(false),
     m_nt_larflag_mediumSaturatedDQ(false),
     m_nt_larflag_tightSaturatedDQ(false),
     m_nt_larflag_noiseBurstVeto(false),
     m_nt_larflag_dataCorrupted(false),
     m_nt_larflag_dataCorruptedVeto(false),
+    m_nt_larflag_badFEBS_w(false),
+    m_nt_larflag_mnbLoose(false),
+    m_nt_larflag_mnbTight(false),
+    m_nt_larflag_mnbTight_psveto(false),
+    m_nt_larflag_badHVlines(false),
+    m_nt_badHVPartitions(0),
     m_nt_L1_J75(false),
     m_nt_L1_J10_EMPTY(false),
     m_nt_L1_J30_FIRSTEMPTY(false),
@@ -257,6 +241,7 @@ StatusCode LArNoiseBursts::initialize() {
   ATH_CHECK( m_BCKey.initialize() );
   ATH_CHECK( m_totalNoiseKey.initialize() );
   ATH_CHECK( m_bcDataKey.initialize() );
+  ATH_CHECK( m_NoisyROKey.initialize() );
 
   // Retrieve online ID helper
   const LArOnlineID* LArOnlineIDHelper = nullptr;
@@ -323,22 +308,6 @@ StatusCode LArNoiseBursts::initialize() {
   m_tree->Branch("ATLASIsReady",&m_nt_atlasready,"AtlasIsReady/I"); //check if atlas is ready for physics 
   m_tree->Branch("StableBeams",&m_nt_stablebeams,"StableBeams/I");//check stablebeams
 
-  // Background bits in EventInfo
-//  m_tree->Branch("vetoMBTS",&m_nt_veto_mbts,"vetoMBST/S"); //Beam/collision veto based on mbts
-//  m_tree->Branch("vetoPixel",&m_nt_veto_pixel,"vetoPixel/S"); //Beam/collision veto based on indet
-//  m_tree->Branch("vetoSCT",&m_nt_veto_sct,"vetoSCT/S"); //Beam/collision veto based on indet
-//  m_tree->Branch("vetoBcm",&m_nt_veto_bcm,"vetoBcm/S"); //Beam/collision veto based on bcm
-//  m_tree->Branch("vetoLucid",&m_nt_veto_lucid,"vetoLucid/S"); //Beam/collision veto based on lucid
-//  m_tree->Branch("vetoMBTSDtHalo",&m_nt_veto_mbtstdHalo,"vetoMBTSDtHalo/S");
-//  m_tree->Branch("vetoMBTSDtCol",&m_nt_veto_mbtstdCol,"vetoMBTSDtCol/S");
-//  m_tree->Branch("vetoLArDtHalo",&m_nt_veto_lartdHalo,"vetoLArDtHalo/S");
-//  m_tree->Branch("vetoLArDtCol",&m_nt_veto_lartdCol,"vetoLArDtCol/S");
-//  m_tree->Branch("vetoCSCDtHalo",&m_nt_veto_csctdHalo,"vetoCSCDtHalo/S");
-//  m_tree->Branch("vetoCSCDtCol",&m_nt_veto_csctdCol,"vetoCSCDtCol/S");
-//  m_tree->Branch("vetoBCMDtHalo",&m_nt_veto_bcmtHalo,"vetoBCMDtHalo/S");
-//  m_tree->Branch("vetoBCMDtCol",&m_nt_veto_bcmtCol,"vetoBCMDtCol/S");
-//  m_tree->Branch("vetoMuonTimmingCol", &m_nt_veto_muontCol,"vetoMuonTimmingCol/S");
-//  m_tree->Branch("vetoMuonTimmingCosmic",&m_nt_veto_muontCosmic,"vetoMuonTimmingCosmic/S");
 
   // LAr event bit info
   m_tree->Branch("larflag_badFEBs",&m_nt_larflag_badFEBs,"larflag_badFEBs/O");
@@ -347,6 +316,15 @@ StatusCode LArNoiseBursts::initialize() {
   m_tree->Branch("larflag_noiseBurstVeto",&m_nt_larflag_noiseBurstVeto,"larflag_noiseBurstVeto/O");
   m_tree->Branch("larflag_dataCorrupted",&m_nt_larflag_dataCorrupted,"larflag_dataCorrupted/O");
   m_tree->Branch("larflag_dataCorruptedVeto",&m_nt_larflag_dataCorruptedVeto,"larflag_dataCorruptedVeto/O");
+  m_tree->Branch("larflag_badFEBS_w",&m_nt_larflag_badFEBS_w,"larflag_badFEBS_w/O");
+  m_tree->Branch("larflag_mnbLoose",&m_nt_larflag_mnbLoose,"larflag_mnbLoose/O");
+  m_tree->Branch("larflag_mnbTight",&m_nt_larflag_mnbTight,"larflag_mnbTight/O");
+  m_tree->Branch("larflag_mnbTight_psveto",&m_nt_larflag_mnbTight_psveto,"larflag_mnbTight_psveto/O");
+  m_tree->Branch("larflag_badHVlines",&m_nt_larflag_badHVlines,"larflag_badHVlines/O");
+
+  m_tree->Branch("badHVlinesPartitions",&m_nt_badHVPartitions,"badHVlinesPartitions/b");
+  // Bad HVlines vector
+  m_tree->Branch("badHVlines",&m_nt_badHVlines);
 
   // trigger flags
   m_tree->Branch("L1_J75",&m_nt_L1_J75,"L1_J75/O");
@@ -386,12 +364,6 @@ StatusCode LArNoiseBursts::initialize() {
   //m_tree->Branch("PerCentNoisyCell",&m_nt_noisycellpercent,"PerCentNoisyCell/F"); // Yield of channels in 3sigma tails in whole LAr
   m_tree->Branch("PerCentNoisyCellPartition",&m_nt_noisycellpart); // Yield in each partition:0:embc 1:emba 2:emecc 3:emeca 4:fcalc 5:fcala 6:hecc 7:heca
 
-  // LArNoisyRO output
-  m_tree->Branch("LArNoisyRO_Std", &m_nt_larnoisyro,"LArNoisyRO_Std/S"); // standard flag (>5 FEB with more than 30 cells with q factor > 4000)
-  m_tree->Branch("LArNoisyRO_Std_optimized", &m_nt_larnoisyro_opt,"LArNoisyRO_Std_optimized/S"); // standard flag with a double weight for critical FEB (>5 FEB with more than 30 cells with q factor > 4000)
-  m_tree->Branch("LArNoisyRO_SatTight",&m_nt_larnoisyro_satTwo,"LArNoisyRO_SatTight/S"); // tight flag (> 20 cells with E>1000MeV and saturated q factor) 
-  m_tree->Branch("LArNoisyRO_MNB",&m_nt_larmnbnoisy,"LArNoisyRO_MNB/S");
-  m_tree->Branch("LArNoisyRO_MNB_Sat",&m_nt_larmnbnoisy_sat,"LArNoisyRO_MNB_Sat/S");
 
   // Properties of cells with fabs(energy/noise)>3
   m_tree->Branch("NoisyCellPartitionLayerIndex",&m_nt_cellpartlayerindex); /// NEW Identifier of the cell
@@ -476,32 +448,7 @@ StatusCode LArNoiseBursts::clear() {
   m_nt_bunchtime        = -1.0;
   m_nt_atlasready       = -1;
   m_nt_stablebeams      = -1;
-  m_nt_larnoisyro       = -1;
-  m_nt_larnoisyro_opt   = -1;
-  m_nt_larnoisyro_satTwo= -1;
-  m_nt_larmnbnoisy      = -1;
-  m_nt_larmnbnoisy_sat  = -1;
 
-  ATH_MSG_DEBUG ( "clearing event info veto variables " );
-
-  //clearing event info veto variables
-//  m_nt_veto_mbts        = -1;
-//  m_nt_veto_pixel       = -1;
-//  m_nt_veto_sct         = -1;
-//  m_nt_veto_bcm         = -1;
-//  m_nt_veto_lucid       = -1;
-//  m_nt_veto_mbtstdHalo  = -1;
-//  m_nt_veto_mbtstdCol   = -1;
-//  m_nt_veto_lartdHalo   = -1;
-//  m_nt_veto_lartdCol    = -1;
-//  m_nt_veto_csctdHalo   = -1;
-//  m_nt_veto_csctdCol    = -1;
-//  m_nt_veto_bcmtHalo    = -1;
-//  m_nt_veto_bcmtCol     = -1;
-//  m_nt_veto_muontCol    = -1;
-//  m_nt_veto_muontCosmic = -1;
-//
-//  mLog << MSG::DEBUG << "clearing LAr event flags " << endmsg;
 
   ATH_MSG_DEBUG ( "clearing LAr event flags " );
 
@@ -512,6 +459,14 @@ StatusCode LArNoiseBursts::clear() {
   m_nt_larflag_noiseBurstVeto = false;
   m_nt_larflag_dataCorrupted = false;
   m_nt_larflag_dataCorruptedVeto = false;
+  m_nt_larflag_badFEBS_w = false;
+  m_nt_larflag_mnbLoose = false;
+  m_nt_larflag_mnbTight = false;
+  m_nt_larflag_mnbTight_psveto = false;
+  m_nt_larflag_badHVlines = false;
+
+  m_nt_badHVPartitions = 0;
+  m_nt_badHVlines.clear();
 
   ATH_MSG_DEBUG ( "clearing Pixel variables " );
 
@@ -540,8 +495,6 @@ StatusCode LArNoiseBursts::clear() {
   m_nt_EF_j35_u0uchad_firstempty_LArNoiseBurst = false;
   m_nt_EF_j80_u0uchad_LArNoiseBurstT = false;
    
-  ATH_MSG_DEBUG ( "clearing trigger flags " );
-
   ATH_MSG_DEBUG ( "clearing noisy cells variables " );
 
   //Quantities for noisy cells
@@ -613,11 +566,11 @@ StatusCode LArNoiseBursts::execute() {
   
   if(!m_trigDec.empty()){
 
-  sc = doTrigger();
-  if(sc.isFailure()) {
-    ATH_MSG_WARNING ( "The method doTrigger() failed" );
-    return StatusCode::SUCCESS;
-  }
+     sc = doTrigger();
+     if(sc.isFailure()) {
+       ATH_MSG_WARNING ( "The method doTrigger() failed" );
+       return StatusCode::SUCCESS;
+     }
   }
 
   sc = doEventProperties();
@@ -815,55 +768,6 @@ StatusCode LArNoiseBursts::doEventProperties(){
     }
   }
   
-
-  ATH_MSG_DEBUG("CosmicCalo stream value: "<<m_CosmicCaloStream);
-
-  // Retrieve output of LArNoisyRO
-  bool larnoisyro = eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::BADFEBS);
-  bool larnoisyro_opt =eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::BADFEBS_W);
-  bool larnoisyro_satTwo = eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::TIGHTSATURATEDQ);
-  bool larmnbnoisy = eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::MININOISEBURSTLOOSE);
-  bool larmnbnoisy_sat = eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::MININOISEBURSTTIGHT);
-  m_nt_larnoisyro        = larnoisyro ? 1 : 0;
-  m_nt_larnoisyro_opt    = larnoisyro_opt ? 1 : 0;
-  m_nt_larnoisyro_satTwo = larnoisyro_satTwo ? 1 : 0;
-  m_nt_larmnbnoisy       = larmnbnoisy ? 1 : 0;
-  m_nt_larmnbnoisy_sat   = larmnbnoisy_sat ? 1 : 0;
-  
- // Retrieve output of EventInfo veto - COMMENTED NOW TO MAKE IT COMPLIANT WITH xAOD::EventInfo
-//  mLog << MSG::DEBUG <<"Background: MBTSBeamVeto "<<eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::MBTSBeamVeto)<<endmsg;
-//  mLog << MSG::DEBUG <<"Background: PixSPNonEmpty "<<eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::PixSPNonEmpty)<<endmsg;
-//  mLog << MSG::DEBUG <<"Background: SCTSPNonEmpty "<<eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::SCTSPNonEmpty)<<endmsg;
-//  mLog << MSG::DEBUG <<"Background: BCMBeamVeto "<<eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::BCMBeamVeto)<<endmsg;
-//  mLog << MSG::DEBUG <<"Background: LUCIDBeamVeto "<<eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::LUCIDBeamVeto)<<endmsg;
-//  mLog << MSG::DEBUG <<"Background: MBTSTimeDiffHalo "<<eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::MBTSTimeDiffHalo)<<endmsg; 
-//  mLog << MSG::DEBUG <<"Background: MBTSTimeDiffCol "<<eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::MBTSTimeDiffCol)<<endmsg;
-//  mLog << MSG::DEBUG <<"Background: LArECTimeDiffHalo "<<eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::LArECTimeDiffHalo)<<endmsg;
-//  mLog << MSG::DEBUG <<"Background: LArECTimeDiffCol "<<eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::LArECTimeDiffCol)<<endmsg;  
-//  mLog << MSG::DEBUG <<"Background: CSCTimeDiffHalo "<<eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::CSCTimeDiffHalo)<<endmsg;
-//  mLog << MSG::DEBUG <<"Background: CSCTimeDiffCol "<<eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::CSCTimeDiffCol)<<endmsg;
-//  mLog << MSG::DEBUG <<"Background: BCMTimeDiffHalo "<<eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::BCMTimeDiffHalo)<<endmsg;
-//  mLog << MSG::DEBUG <<"Background: BCMTimeDiffCol "<<eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::BCMTimeDiffCol)<<endmsg;
-//  mLog << MSG::DEBUG <<"Background: MuonTimmingCol "<<eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::MuonTimingCol)<<endmsg;
-//  mLog << MSG::DEBUG <<"Background: MuonTimmingCosmic "<<eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::MuonTimingCosmic)<<endmsg;
-//
-//  m_nt_veto_mbts      = eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::MBTSBeamVeto);
-//  m_nt_veto_pixel     = eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::PixSPNonEmpty);
-//  m_nt_veto_sct       = eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::SCTSPNonEmpty);
-//  m_nt_veto_bcm       = eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::BCMBeamVeto);
-//  m_nt_veto_lucid     = eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::LUCIDBeamVeto);
-//
-//  //more variables
-//  m_nt_veto_mbtstdHalo = eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::MBTSTimeDiffHalo); 
-//  m_nt_veto_mbtstdCol  = eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::MBTSTimeDiffCol);
-//  m_nt_veto_lartdHalo  = eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::LArECTimeDiffHalo);
-//  m_nt_veto_lartdCol   = eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::LArECTimeDiffCol);  
-//  m_nt_veto_csctdHalo  = eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::CSCTimeDiffHalo);
-//  m_nt_veto_csctdCol   = eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::CSCTimeDiffCol);
-//  m_nt_veto_bcmtHalo   = eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::BCMTimeDiffHalo);
-//  m_nt_veto_bcmtCol    = eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::BCMTimeDiffCol);
-//  m_nt_veto_muontCol   = eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::MuonTimingCol);
-//  m_nt_veto_muontCosmic= eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background,xAOD::EventInfo::MuonTimingCosmic);
  
    // LArEventInfo
 
@@ -877,6 +781,12 @@ StatusCode LArNoiseBursts::doEventProperties(){
   m_nt_larflag_noiseBurstVeto = eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::NOISEBURSTVETO);
   m_nt_larflag_dataCorrupted = eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::DATACORRUPTED);
   m_nt_larflag_dataCorruptedVeto = eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::DATACORRUPTEDVETO);
+  m_nt_larflag_badFEBS_w =eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::BADFEBS_W);
+  m_nt_larflag_mnbLoose = eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::MININOISEBURSTLOOSE);
+  m_nt_larflag_mnbTight = eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::MININOISEBURSTTIGHT);
+  m_nt_larflag_mnbTight_psveto = eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::MININOISEBURSTTIGHT_PSVETO);
+  m_nt_larflag_badHVlines = eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::BADHVLINES);
+  
 
   ///////////////////////////////////////end EventInfo variables/////////////////////////////////////////////////////////////////////////
 
@@ -957,9 +867,21 @@ StatusCode LArNoiseBursts::doLArNoiseBursts(){
      return StatusCode::SUCCESS;
   }
 
-  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
   ATH_CHECK(caloMgrHandle.isValid());
   const CaloDetDescrManager* caloMgr = *caloMgrHandle;
+
+ // first fill HVline from NoisyROSummary object
+  SG::ReadHandle<LArNoisyROSummary> noisyRO(m_NoisyROKey, ctx); 
+  if(noisyRO.isValid()) {
+     auto hwidlist = noisyRO->get_noisy_hvlines();
+     for (auto hw : hwidlist) {
+        m_nt_badHVlines.push_back(hw.get_identifier32().get_compact());
+     }
+     m_nt_badHVPartitions = noisyRO->HVlineFlaggedPartitions();
+  } else {
+     ATH_MSG_WARNING("Do not have LArNoisyROSummary object, no HVlines filled !!");
+  }
 
  // Retrieve LAr calocells container
  // or LArRawChannel container, whatsever available...
@@ -1098,13 +1020,13 @@ StatusCode LArNoiseBursts::doLArNoiseBursts(){
   bool store_condition = false;
   // CosmicCalo stream : Store detailed infos of cells only if Y3Sigma>1% or burst found by LArNoisyRO
   if(m_CosmicCaloStream){
-    if(checknoise==true || m_nt_larnoisyro==1 || m_nt_larnoisyro_satTwo==1){
+    if(checknoise==true || m_nt_larflag_badFEBs || m_nt_larflag_tightSaturatedDQ){
       store_condition = true;
     }
   }
   // Not cosmicCalo stream : Store detailed infos of cells only if burst found by LArNoisyRO
   if(!m_CosmicCaloStream){
-    if(m_nt_larnoisyro==1 || m_nt_larnoisyro_satTwo==1){
+    if(m_nt_larflag_badFEBs || m_nt_larflag_tightSaturatedDQ){
       store_condition = true;
     }
   }
@@ -1297,25 +1219,6 @@ StatusCode LArNoiseBursts::fillCell(HWIdentifier onlID
     }   
     return StatusCode::SUCCESS;
 }    
-//////////////////////////////////////////////////////////////////////////////////////
-///////////////////          doPhysicsObjects        ////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////
-StatusCode LArNoiseBursts::doPhysicsObjects(){
-  ATH_MSG_DEBUG ("in doPhysicsObjects ");
-
-//  const ElectronContainer* elecTES = 0;
-//  StatusCode sc=evtStore()->retrieve( elecTES, m_elecContainerName);
-//  if( sc.isFailure()  ||  !elecTES ) {
-//    ATH_MSG_WARNING ( "No ESD electron container found in StoreGate" );
-//    return StatusCode::SUCCESS;
-//  }
-//  ATH_MSG_DEBUG ( "ElectronContainer successfully retrieved. Size = " << elecTES->size() );
-
-  return StatusCode::SUCCESS;
-}
-
-
-//
 
 int LArNoiseBursts::GetPartitionLayerIndex(const Identifier& id)
 {

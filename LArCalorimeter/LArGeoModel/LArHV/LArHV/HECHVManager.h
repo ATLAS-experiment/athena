@@ -81,7 +81,8 @@ class HECHVManager
                      const std::vector<const CondAttrListCollection*>& attrLists) const;
   // Get hvLine for a subgap
   int hvLineNo(const HECHVSubgap& subgap
-               , const LArHVIdMapping* hvIdMapping) const;
+               , const LArHVIdMapping* hvIdMapping
+               , HWIdentifier *hvlId=nullptr) const;
 #endif
 
  private:

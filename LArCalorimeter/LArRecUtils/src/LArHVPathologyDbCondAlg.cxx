@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHVPathologyDbCondAlg.h" 
@@ -31,7 +31,7 @@
 
 
 LArHVPathologyDbCondAlg::LArHVPathologyDbCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthReentrantAlgorithm(name,pSvcLocator)
+  : AthReentrantAlgorithm(name,pSvcLocator), m_hvmapTool("LArHVMapTool",this)
 { }
 
 LArHVPathologyDbCondAlg::~LArHVPathologyDbCondAlg()
@@ -191,7 +191,7 @@ LArHVPathologyDbCondAlg::fillElectMap(const CaloDetDescrManager* calodetdescrmgr
   // loop over all EM Identifiers
   for (auto id: m_larem_id->channel_ids()) {
      hwlineId.clear();
-     hvCabling->getHVLineInCell(id,hwlineId);
+     m_hvmapTool->GetHVLines(id,calodetdescrmgr, hwlineId);
      // LAr EMB
      if (abs(m_larem_id->barrel_ec(id))==1 &&  m_larem_id->sampling(id) > 0)  {
        if (const EMBDetectorElement* embElement = dynamic_cast<const EMBDetectorElement*>(calodetdescrmgr->get_element(id))) {
@@ -274,7 +274,7 @@ LArHVPathologyDbCondAlg::fillElectMap(const CaloDetDescrManager* calodetdescrmgr
   // loop over all HEC Identifiers
   for (auto const& id: m_larhec_id->channel_ids()) {
      hwlineId.clear();
-     hvCabling->getHVLineInCell(id,hwlineId);
+     m_hvmapTool->GetHVLines(id,calodetdescrmgr,hwlineId);
      if (const HECDetectorElement* hecElement = dynamic_cast<const HECDetectorElement*>(calodetdescrmgr->get_element(id))) {
       const HECCellConstLink cell = hecElement->getHECCell();
       unsigned int nsubgaps = cell->getNumSubgaps();
@@ -295,7 +295,7 @@ LArHVPathologyDbCondAlg::fillElectMap(const CaloDetDescrManager* calodetdescrmgr
   // loop over all FCAL Identifiers
   for (auto const& id: m_larfcal_id->channel_ids()) {
      hwlineId.clear();
-     hvCabling->getHVLineInCell(id,hwlineId);
+     m_hvmapTool->GetHVLines(id,calodetdescrmgr, hwlineId);
      if (const FCALDetectorElement* fcalElement = dynamic_cast<const FCALDetectorElement*>(calodetdescrmgr->get_element(id))) {
        const FCALTile* tile = fcalElement->getFCALTile();
        unsigned int nlines = tile->getNumHVLines();

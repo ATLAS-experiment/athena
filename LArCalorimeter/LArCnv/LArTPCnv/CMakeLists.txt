@@ -66,6 +66,11 @@ atlas_add_test( LArNoisyROSummaryCnv_p5_test
                 test/LArNoisyROSummaryCnv_p5_test.cxx
                 LINK_LIBRARIES GaudiKernel LArTPCnv TestTools )
 
+atlas_add_test( LArNoisyROSummaryCnv_p6_test
+                SOURCES
+                test/LArNoisyROSummaryCnv_p6_test.cxx
+                LINK_LIBRARIES GaudiKernel LArTPCnv TestTools )
+
 atlas_add_test( LArRawChannelCnv_p2_test
                 SOURCES
                 test/LArRawChannelCnv_p2_test.cxx

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARHVPATHOLOGYDBCONDALG
@@ -13,6 +13,7 @@
 #include "LArRecConditions/LArHVPathology.h"
 #include "LArRecConditions/LArHVIdMapping.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
+#include "CaloInterface/ILArHVMapTool.h"
 
 #include<mutex>
 
@@ -47,6 +48,8 @@ class LArHVPathologyDbCondAlg: public AthReentrantAlgorithm
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};
 
   SG::WriteCondHandleKey<LArHVPathology> m_hvPathologyKey {this, "HVPAthologyKey", "LArHVPathology", "Key for HV pathologies in Cond. store"};
+
+  ToolHandle <ILArHVMapTool> m_hvmapTool;
 
   const LArEM_ID*       m_larem_id=nullptr;
   const LArHEC_ID*       m_larhec_id=nullptr;
