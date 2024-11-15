@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARHVIDMAPPING_H
@@ -31,15 +31,6 @@ class LArHVIdMapping {
    */ 
   const HWIdentifier getLArHVLineID(HWIdentifier& electrodeId) const;
 
-  // Returns a vector<electrodeID> given an input offlineID
-  //-------------------------------------------------------
-  void getElectrodeInCell(const Identifier& offId, std::vector<HWIdentifier> &elecId ) const;
-
-  /** Returns a vector<HVLineID> given an input offlineID
-   */
-  void getHVLineInCell( const Identifier& offId, std::vector<HWIdentifier> &hvlineId) const;
-
-
   /** Return a vector of LArElectrodeID corresponding to a given LArHVLineID
   */
   const std::vector<HWIdentifier>& getLArElectrodeIDvec(HWIdentifier& hvlineId) const;
@@ -51,7 +42,8 @@ class LArHVIdMapping {
   int getCellEtaSector(const Identifier& offId ) const;
   int getCellPhiSector(const Identifier& offId ) const;
   std::pair<int,int> getCellElectrodeMinMax(const Identifier& offId) const;
-  
+
+
  private:
 
   const CaloCell_ID*     m_caloHelper ;

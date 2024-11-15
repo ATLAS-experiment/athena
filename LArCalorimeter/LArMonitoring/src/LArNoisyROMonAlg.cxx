@@ -5,7 +5,6 @@
 #include "LArNoisyROMonAlg.h"
 
 #include "LArRecEvent/LArEventBitInfo.h"
-#include "LArIdentifier/LArOnlineID.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -24,6 +23,7 @@ StatusCode LArNoisyROMonAlg::initialize()
   ATH_CHECK(m_inputKey.initialize());
   ATH_CHECK(m_badFebKey.initialize());
   ATH_CHECK(m_MNBFebKey.initialize());
+  ATH_CHECK(m_hvMapKey.initialize());
   ATH_CHECK( m_eventInfoDecorKey.initialize() );
   
   m_histoGroups.reserve(m_SubDetNames.size());
@@ -103,6 +103,11 @@ StatusCode LArNoisyROMonAlg::fillHistograms(const EventContext& ctx) const {
     ATH_MSG_WARNING( "Can't retrieve LArNoisyROSummary " );
     return StatusCode::SUCCESS;
   }
+  SG::ReadCondHandle<LArHVIdMapping> hvidHdl(m_hvMapKey, ctx);
+  const LArHVIdMapping* hvid{*hvidHdl};
+  if(!hvid) {
+    ATH_MSG_WARNING( "Can't retrieve LArHVIdMapping, no per partition HVlines histograms ! " );
+  }
   
   unsigned int LBN = eventInfo->lumiBlock();
   bool burstveto = eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::NOISEBURSTVETO);
@@ -171,6 +176,10 @@ StatusCode LArNoisyROMonAlg::fillHistograms(const EventContext& ctx) const {
   {
     algo |= 0x40;
   }
+  if (eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::BADHVLINES))
+  {
+    algo |= 0x80;
+  }
 
   if ( algo != 0 ) {
     if ( burstveto ) algo |= 0x4;
@@ -222,8 +231,13 @@ StatusCode LArNoisyROMonAlg::fillHistograms(const EventContext& ctx) const {
 
   auto n_noisyFEB = Monitored::Scalar<int>("n_noisyFEBs",NbNoisyFEB);
   auto lb = Monitored::Scalar<int>("LBN",LBN);
-  fill(m_MonGroupName,n_noisyFEB,lb);
 
+  const std::vector<HWIdentifier>& noisyHVlines = noisyRO->get_noisy_hvlines();
+  unsigned int NbNoisyHVlines = noisyHVlines.size();
+  auto n_noisyHVlines = Monitored::Scalar<int>("n_noisyHVlines",NbNoisyHVlines);
+
+  fill(m_MonGroupName,n_noisyFEB,n_noisyHVlines,lb);
+;
   // Loop on all FEBs noisy in MNB-tight definition
   // And fill the 2D maps of fraction of fraction of noisy events
   // Fill two histograms with veto cut and all events
@@ -324,6 +338,20 @@ StatusCode LArNoisyROMonAlg::fillHistograms(const EventContext& ctx) const {
       }
     }
   } // End of test on RNB
+
+  uint8_t BadHVPartitions = noisyRO->HVlineFlaggedPartitions();
+  if ( BadHVPartitions != 0) {
+    auto LBHV = Monitored::Scalar<unsigned>("LBHV",LBN);
+    auto LBHV_Veto = Monitored::Scalar<unsigned>("LBHV_Veto",LBN);
+    for (size_t i= 0;i<m_partitions.size();i++){
+      if ( (BadHVPartitions & partMask[i]) != 0 ) {
+        fill(m_tools[m_histoGroups.at(i/2).at(m_partitions[i])],LBHV);
+	if ( ! burstveto ) {
+           fill(m_tools[m_histoGroups.at(i/2).at(m_partitions[i])],LBHV_Veto);
+        }
+      }
+    }
+  } // End of test on HVlines
 
   // event flagged by # of saturated quality cells
   uint8_t SatTightPartitions = noisyRO->SatTightFlaggedPartitions();

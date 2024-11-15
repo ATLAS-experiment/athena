@@ -23,7 +23,7 @@ def TrigLArNoiseBurstRecoAlgCfg(flags, cells_name):
     cfg.addEventAlgo( CompFactory.TrigLArNoiseBurstRecoAlg(
          CellContainerKey = cells_name,
          Tool = CompFactory.LArNoisyROTool(SaturatedCellTightCut=20, MNBLooseCut=5, MNBTightCut=17,
-         BadChanPerFEB=15), # check ATR-27613 for details
+         BadChanPerFEB=15, DoHVflag=False), # check ATR-27613 for details
          MonTool = monTool) )
 
     cfg.addCondAlgo( CompFactory.LArBadFebCondAlg(

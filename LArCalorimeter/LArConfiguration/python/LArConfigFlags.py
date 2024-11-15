@@ -87,6 +87,10 @@ def createLArConfigFlags():
     lcf.addFlag("LAr.NoisyRO.MNBTightCut", 17)
     # Number of channels to declare MNB-Tight wir PS veto
     lcf.addFlag("LAr.NoisyRO.MNBTight_PsVetoCut", [13,3])
+    # Number of noisy HVlines
+    lcf.addFlag("LAr.NoisyRO.BadHVCut", 3)
+    # Fraction of cells noisy on one HV line
+    lcf.addFlag("LAr.NoisyRO.BadHVlineFrac", 0.25)
 
     return lcf
 

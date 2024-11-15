@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArNoisyROTool.cxx 
@@ -13,13 +13,15 @@
 #include "LArRecEvent/LArNoisyROSummary.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "LArIdentifier/LArOnlineID.h" 
+#include "LArIdentifier/LArElectrodeID.h" 
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "StoreGate/ReadCondHandle.h"
+#include "LArRecConditions/LArHVNMap.h"
 
 LArNoisyROTool::LArNoisyROTool( const std::string& type, 
 				const std::string& name, 
 				const IInterface* parent ) : 
-  ::AthAlgTool  ( type, name, parent   ),
+  ::AthAlgTool  ( type, name, parent   ),m_hvMapTool("LArHVMapTool",this),
   m_calo_id(nullptr), m_onlineID(nullptr), 
   m_partitionMask({{LArNoisyROSummary::EMECAMask,LArNoisyROSummary::EMBAMask,LArNoisyROSummary::EMBCMask,LArNoisyROSummary::EMECCMask}}) //beware: The order matters! 
 {
@@ -36,6 +38,10 @@ LArNoisyROTool::LArNoisyROTool( const std::string& type,
   declareProperty( "SaturatedCellQualityCut", m_SaturatedCellQualityCut=65535);
   declareProperty( "SaturatedCellEnergyTightCut", m_SaturatedCellEnergyTightCut=1000.);
   declareProperty( "SaturatedCellTightCut", m_SaturatedCellTightCut=20);
+
+  declareProperty( "DoHVflag", m_doHVline=true );
+  declareProperty( "BadChanFracPerHVline", m_BadChanFracPerHVline=0.25 );
+  declareProperty( "BadHVCut", m_MinBadHV=3 );
 }
 
 // Destructor
@@ -59,6 +65,7 @@ StatusCode LArNoisyROTool::initialize() {
 
   ATH_CHECK(detStore()->retrieve(m_calo_id,"CaloCell_ID"));
   ATH_CHECK(detStore()->retrieve(m_onlineID,"LArOnlineID"));
+  ATH_CHECK(detStore()->retrieve(m_elecID,"LArElectrodeID"));
   ATH_CHECK( m_cablingKey.initialize() );
 
   // Fill the map between any EMB FEB and the same FT PS FEB
@@ -82,17 +89,24 @@ StatusCode LArNoisyROTool::initialize() {
 }
 
 
-std::unique_ptr<LArNoisyROSummary> LArNoisyROTool::process(const CaloCellContainer* cellContainer, const std::set<unsigned int>* knownBadFEBs, const std::vector<HWIdentifier>* knownMNBFEBs) const{
+std::unique_ptr<LArNoisyROSummary> LArNoisyROTool::process(const EventContext& ctx, const CaloCellContainer* cellContainer, const std::set<unsigned int>* knownBadFEBs, const std::vector<HWIdentifier>* knownMNBFEBs, const LArHVNMap* nCellsperLine, const CaloDetDescrManager* cddm, const LArHVIdMapping* hvid) const{
+
+  // sanity check
+  bool doHVline=m_doHVline;
+  if(doHVline && ( !nCellsperLine || !cddm || !hvid)) {
+     ATH_MSG_ERROR("HV line flagging asked, but missing ingrediences, switching off !!");
+     doHVline = false;
+  }
 
   std::unique_ptr<LArNoisyROSummary> noisyRO(new LArNoisyROSummary);
 
   if(!cellContainer) return noisyRO;
 
-  SG::ReadCondHandle<LArOnOffIdMapping> larCablingHdl(m_cablingKey);
+  SG::ReadCondHandle<LArOnOffIdMapping> larCablingHdl(m_cablingKey, ctx);
   const LArOnOffIdMapping* cabling=*larCablingHdl;
-
   
   FEBEvtStatMap FEBStats; //counter per FEB
+  HVlinesStatMap HVStats; //counter per HV line
 
   unsigned int NsaturatedTightCutBarrelA = 0;
   unsigned int NsaturatedTightCutBarrelC = 0;
@@ -145,6 +159,16 @@ std::unique_ptr<LArNoisyROSummary> LArNoisyROTool::process(const CaloCellContain
       unsigned int channel = m_onlineID->channel(hwid);    
       FEBStats[FEBindex].addBadChannel(channel);
     }
+
+    if(doHVline) {
+       //HVline, in all calos
+       std::vector<HWIdentifier> hvlines;
+       m_hvMapTool->GetHVLines(id, cddm,hvlines);
+       for(unsigned int i=0; i<hvlines.size(); ++i) {
+          if(HVStats.contains(hvlines[i])) HVStats[hvlines[i]] += 1; else HVStats[hvlines[i]]=1;
+       }
+    }
+
   }
 
   // Store the Saturated flag per partition
@@ -249,16 +273,14 @@ std::unique_ptr<LArNoisyROSummary> LArNoisyROTool::process(const CaloCellContain
   if ( NBadFEBEMBC  > m_MinBadFEB )  BadFEBPartitions |= LArNoisyROSummary::EMBCMask;
   if ( NBadFEBEMECA  > m_MinBadFEB )  BadFEBPartitions |= LArNoisyROSummary::EMECAMask;
   if ( NBadFEBEMECC  > m_MinBadFEB )  BadFEBPartitions |= LArNoisyROSummary::EMECCMask;
-  bool badFEBFlag = (BadFEBPartitions != 0);
-  if ( badFEBFlag ) noisyRO-> SetBadFEBFlaggedPartitions(BadFEBPartitions);
+  if ( BadFEBPartitions != 0  ) noisyRO-> SetBadFEBFlaggedPartitions(BadFEBPartitions);
 
   uint8_t BadFEBPartitions_W = 0;
   if ( NBadFEBEMBA_W  > m_MinBadFEB )  BadFEBPartitions_W |= LArNoisyROSummary::EMBAMask;
   if ( NBadFEBEMBC_W  > m_MinBadFEB )  BadFEBPartitions_W |= LArNoisyROSummary::EMBCMask;
   if ( NBadFEBEMECA_W  > m_MinBadFEB )  BadFEBPartitions_W |= LArNoisyROSummary::EMECAMask;
   if ( NBadFEBEMECC_W  > m_MinBadFEB )  BadFEBPartitions_W |= LArNoisyROSummary::EMECCMask;
-  bool badFEBFlag_W = (BadFEBPartitions_W != 0);
-  if ( badFEBFlag_W ) noisyRO-> SetBadFEB_WFlaggedPartitions(BadFEBPartitions_W);
+  if ( BadFEBPartitions_W != 0 ) noisyRO-> SetBadFEB_WFlaggedPartitions(BadFEBPartitions_W);
 
 
 
@@ -299,10 +321,68 @@ std::unique_ptr<LArNoisyROSummary> LArNoisyROTool::process(const CaloCellContain
     if (nTightMNBFEBSperPartition[iP]>0) MNBTightPartition |= m_partitionMask[iP];
     if (nTight_PsVetoMNBFEBSperPartition[iP]>0) MNBTight_PsVetoPartition |= m_partitionMask[iP];
   }// end loop over partitions      
-  
+ 
+
   noisyRO->SetMNBTightFlaggedPartitions(MNBTightPartition);
   noisyRO->SetMNBTight_PsVetoFlaggedPartitions(MNBTight_PsVetoPartition);
   noisyRO->SetMNBLooseFlaggedPartitions(MNBLoosePartition);
+
+  if(!hvid || !nCellsperLine ) return noisyRO; // do not have HVcells map
+
+  // Count noisy HVlines per partition
+  unsigned int NBadHVEMECA = 0;
+  unsigned int NBadHVEMECC = 0;
+  unsigned int NBadHVEMBA = 0; 
+  unsigned int NBadHVEMBC = 0; 
+  unsigned int NBadHVHECA = 0; 
+  unsigned int NBadHVHECC = 0; 
+  unsigned int NBadHVFCALA = 0; 
+  unsigned int NBadHVFCALC = 0; 
+
+  // loop over HVlines, to check if they are qualified as noisy
+  for ( HVlinesStatMap::const_iterator it = HVStats.begin(); it != HVStats.end(); ++it ) {
+    ATH_MSG_DEBUG(ctx.eventID().event_number()<<" candidate HVline " << it->first << " with " << it->second << " bad channels, out of "<<nCellsperLine->HVNcell(HWIdentifier(it->first))<<" channels");
+    if ( it->second >= m_BadChanFracPerHVline * nCellsperLine->HVNcell(it->first) ) {
+      HWIdentifier hwd(it->first); 
+      noisyRO->add_noisy_hvline(hwd);
+      const std::vector<HWIdentifier> elecVec = hvid->getLArElectrodeIDvec(hwd);
+      int side = m_elecID->zside(elecVec[0]);
+      int part = m_elecID->detector(elecVec[0]);
+      switch(side) {
+         case 1: { ATH_MSG_DEBUG("Elec. side: "<<side);
+                    switch(part){
+                    case 0: case 1:{NBadHVEMBC += 1; break;}
+                    case 2: case 3:{NBadHVEMECC += 1; break;}
+                    case 4:        {NBadHVHECC += 1; break;}
+                    case 5:        {NBadHVFCALC += 1; break;}
+                    default:       {ATH_MSG_WARNING("Wrong HV line detector "<<part); break;}
+                   };
+                   break; 
+                 }
+         case 0: { switch(part){
+                    case 0: case 1:{NBadHVEMBA += 1; break;}
+                    case 2: case 3:{NBadHVEMECA += 1; break;}
+                    case 4:        {NBadHVHECA += 1; break;}
+                    case 5:        {NBadHVFCALA += 1; break;}
+                    default:       {ATH_MSG_WARNING("Wrong HV line detector "<<part); break;}
+                   };
+                   break;               
+                 }
+      }
+    }// HVline is noisy
+  }// all hvlines 
+
+  uint8_t BadHVPartitions = 0;
+  if ( NBadHVEMBA  >= m_MinBadHV )  BadHVPartitions |= LArNoisyROSummary::EMBAMask;
+  if ( NBadHVEMBC  >= m_MinBadHV )  BadHVPartitions |= LArNoisyROSummary::EMBCMask;
+  if ( NBadHVEMECA  >= m_MinBadHV )  BadHVPartitions |= LArNoisyROSummary::EMECAMask;
+  if ( NBadHVEMECC  >= m_MinBadHV )  BadHVPartitions |= LArNoisyROSummary::EMECCMask;
+  if ( NBadHVHECA  >= m_MinBadHV )  BadHVPartitions |= LArNoisyROSummary::HECAMask;
+  if ( NBadHVHECC  >= m_MinBadHV )  BadHVPartitions |= LArNoisyROSummary::HECCMask;
+  if ( NBadHVFCALA  >= m_MinBadHV )  BadHVPartitions |= LArNoisyROSummary::FCALAMask;
+  if ( NBadHVFCALC  >= m_MinBadHV )  BadHVPartitions |= LArNoisyROSummary::FCALCMask;
+
+  if ( BadHVPartitions != 0 ) noisyRO-> SetBadHVlinesPartitions(BadHVPartitions);
 
   return noisyRO;
 }

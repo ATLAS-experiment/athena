@@ -296,7 +296,9 @@ HECHVManager::getData (const LArHVIdMapping& hvIdMapping,
 
 
 int HECHVManager::hvLineNo(const HECHVSubgap& subgap
-			   , const LArHVIdMapping* hvIdMapping) const {
+			   , const LArHVIdMapping* hvIdMapping\
+                           , HWIdentifier *hvlId) const {
+
   const HECHVModule& module   = subgap.getModule();
   int sideIndex      = module.getSideIndex();
   int phiIndex       = module.getPhiIndex();
@@ -340,6 +342,8 @@ int HECHVManager::hvLineNo(const HECHVSubgap& subgap
 
   // Get LArHVLineID corresponding to a given LArElectrodeId
   HWIdentifier id = hvIdMapping->getLArHVLineID(elecHWID);
+
+  if(hvlId) *hvlId=id;
 
   // Extract HV Line No
   return m_c->hvId->can_node(id)*1000 + m_c->hvId->hv_line(id);
