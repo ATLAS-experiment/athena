@@ -293,13 +293,18 @@ inline Amg::Transform3D getTranslate3D(const double X, const double Y, const dou
 inline Amg::Transform3D getTranslate3D(const Amg::Vector3D& v) {
     return Amg::Transform3D{Amg::Translation3D{v}};
 }
-
-
-/// Calculates the shortest distance between two lines
-///    posA: offset point of line A
-///    dirA: orientation of line A (unit length)
-///    posB: offset point of line B
-///    dirB: orientation of line B (unit length)
+/** @brief Constructs a direction vector from the azimuthal & polar angles
+ *  @param phi: Polar angle in the x-y plane
+ *  @param theta: Azimuthal angle in the r-z plane */
+inline Amg::Vector3D dirFromAngles(const double phi, const double theta) {
+    const CxxUtils::sincos thetaCS{theta}, phiCS{phi};
+    return Amg::Vector3D{phiCS.cs * thetaCS.sn, phiCS.sn* thetaCS.sn, thetaCS.cs};
+}
+/** @brief: Calculates the shortest distance between two lines
+    @param posA: offset point of line A
+    @param dirA: orientation of line A (unit length)
+    @param posB: offset point of line B
+    @param dirB: orientation of line B (unit length)  */
 template<int N> double lineDistance(const AmgVector(N)& posA,
                                     const AmgVector(N)& dirA,
                                     const AmgVector(N)& posB,
@@ -309,19 +314,18 @@ template<int N> double lineDistance(const AmgVector(N)& posA,
     const double divisor = (1. - dirDots * dirDots);
     const AmgVector(N) AminusB = posA - posB;
     if (std::abs(divisor) < std::numeric_limits<double>::epsilon()) {
-        const AmgVector(N) d = posA + dirA.dot(AminusB)*dirA;
+        const AmgVector(N) d = AminusB - dirA.dot(AminusB)*dirA;
         return std::sqrt(d.dot(d));
     }
     const AmgVector(N) lineTravel = AminusB.dot(dirA) * dirA -
                                     AminusB.dot(dirB) * dirB;
-    return std::sqrt(std::max(0., AminusB.dot(AminusB) - lineTravel.dot(lineTravel)) / divisor);
+    return std::sqrt(std::max(0., AminusB.dot(AminusB) - lineTravel.dot(lineTravel) / divisor));
 }
-/// Calculates the point of closest approach of two lines. 
-///    posA: offset point of line A
-///    dirA: orientation of line A (unit length)
-///    posB: offset point of line B
-///    dirB: orientation of line B (unit length)
-/// Returns the length to be travelled along line B
+/** @brief Calculates the point B' along the line B that's closest to a second line A 
+    @param posA: offset point of line A
+    @param dirA: orientation of line A (unit length)
+    @param posB: offset point of line B
+    @param dirB: orientation of line B (unit length) */
 template <int N> std::optional<double> intersect(const AmgVector(N)& posA, 
                                                  const AmgVector(N)& dirA, 
                                                  const AmgVector(N)& posB, 
