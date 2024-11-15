@@ -51,6 +51,7 @@ def createCaloConfigFlags():
     ccf.addFlag("Calo.TopoCluster.addCPData",False)
     ccf.addFlag("Calo.TopoCluster.skipWriteList", lambda prevFlags:
                 ["CaloCalTopoClusters", "CaloTopoClusters"] if prevFlags.Reco.HIMode is HIMode.HI else [])
+    ccf.addFlag("Calo.TopoCluster.UseGPUCompatibleCriteria", False)
 
     #### Cluster correction flags:
     # If true, then reweight cells to prevent double-counting between clusters.
