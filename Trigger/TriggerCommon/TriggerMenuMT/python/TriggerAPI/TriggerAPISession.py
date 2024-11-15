@@ -171,7 +171,7 @@ class TriggerAPISession:
         if len(self.dbQueries)>1:
             raise RuntimeError("Unsupported in multi-period TriggerAPI sessions (should only happen if using a period enum or an old json cache)")
 
-        if type(triggerType) != list: triggerType = [triggerType,TriggerType.UNDEFINED]
+        if type(triggerType) is not list: triggerType = [triggerType,TriggerType.UNDEFINED]
         if len(triggerType)==1: triggerType += [TriggerType.UNDEFINED]
         elif len(triggerType) > 2:
             raise RuntimeError("More than two trigger types not currently supported")
@@ -209,7 +209,7 @@ class TriggerAPISession:
         :return: set of lowest unprescaled (according to livefraction) triggers of given type
         """
 
-        if type(triggerType) != list: triggerType = [triggerType,TriggerType.UNDEFINED]
+        if type(triggerType) is not list: triggerType = [triggerType,TriggerType.UNDEFINED]
         if len(triggerType)==1: triggerType += [TriggerType.UNDEFINED]
         elif len(triggerType) > 2:
             raise RuntimeError("More than two trigger types not currently supported")
