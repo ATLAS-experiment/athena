@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOINTERFACE_ICALOTOWERBUILDERTOOLBASE_H
@@ -20,7 +20,6 @@
 
 #include "CaloEvent/CaloTowerSeg.h"
 #include "GaudiKernel/IAlgTool.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "CxxUtils/checker_macros.h"
 
 #include <string>

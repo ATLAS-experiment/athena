@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOINTERFACE_ICALOTOPOTOWERBUILDERTOOLBASE_H
@@ -19,7 +19,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "GaudiKernel/IAlgTool.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 
 #include <string>
 
@@ -29,37 +28,21 @@ class CaloCellContainer;
 class CaloClusterContainer;
 class EventContext;
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_ICaloTopoTowerBuilderToolBase("ICaloTopoTowerBuilderToolBase", 1 , 0); 
-
-class ICaloTopoTowerBuilderToolBase : virtual public IAlgTool
+class ICaloTopoTowerBuilderToolBase : virtual public extend_interfaces<IAlgTool>
 {
  public:
-  
+  DeclareInterfaceID(ICaloTopoTowerBuilderToolBase, 1 , 0);
+
   //Virtual destructor
   virtual ~ICaloTopoTowerBuilderToolBase() {}
-
-  /// common initialization
 
   /// execute is abstract
   virtual StatusCode execute(const EventContext& ctx,
                              CaloTopoTowerContainer* theContainer,const CaloCellContainer* theCell=0) const = 0;
-  virtual StatusCode initialize() =0;
 
   virtual StatusCode initializeTool() = 0;
 
   virtual void setTowerSeg(const CaloTowerSeg& theTowerSeg) = 0;
-
-  virtual StatusCode LoadCalibration(IOVSVC_CALLBACK_ARGS) = 0;
-
-  static const InterfaceID& interfaceID() {
-    static const InterfaceID IID("ICaloTopoTowerBuilderToolBase", 1 , 0);
-    return IID;
-  }
-
-
- protected:
-
 
 };
 #endif

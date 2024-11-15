@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOINTERFACE_ICLUSTERCLASSIFICATIONTOOL_H
 #define CALOINTERFACE_ICLUSTERCLASSIFICATIONTOOL_H
 /**
  * @class IClusterClassificationTool
- * @version \$Id: IClusterClassificationTool.h,v 1.1.1.1 2009-01-27 09:00:56 gunal Exp $
  * @author Sven Menke <menke@mppmu.mpg.de>
  * @date 27-September-2005
  * @brief Interface class for tools classifying CaloCluster objects.
@@ -15,11 +14,11 @@
  * the method: CaloRecoStatus::StatusIndicator classify(const
  * CaloCluster*) which typically should return the classification
  * according to this tool for the cluster pointed to in the classify
- * call.  */
+ * call.
+*/
 
 #include "GaudiKernel/IAlgTool.h"
 #include "CaloEvent/CaloRecoStatus.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "xAODCaloEvent/CaloClusterFwd.h"
 
 class IClusterClassificationTool : virtual public IAlgTool

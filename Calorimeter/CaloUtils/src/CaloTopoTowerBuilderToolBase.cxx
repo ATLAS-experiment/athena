@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloUtils/CaloTopoTowerBuilderToolBase.h"
@@ -7,9 +7,8 @@
 CaloTopoTowerBuilderToolBase::CaloTopoTowerBuilderToolBase(const std::string& name
 							   , const std::string& type
 							   , const IInterface* parent)
-  : AthAlgTool(name,type,parent)
+  : base_class(name,type,parent)
 {
-  declareInterface<ICaloTopoTowerBuilderToolBase>(this);
 }
 
 CaloTopoTowerBuilderToolBase::~CaloTopoTowerBuilderToolBase()
