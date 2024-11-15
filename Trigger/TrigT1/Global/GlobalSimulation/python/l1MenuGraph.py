@@ -16,8 +16,6 @@ logger = logging.getLogger(__name__)
 from AthenaCommon.Constants import VERBOSE
 logger.setLevel(VERBOSE)
 
-import pickle
-import os
 import pprint
 
 class AlgData():
@@ -55,16 +53,7 @@ def l1MenuGraph(flags, do_dot=False, verbose=False):
     object. These objects carry information needed to configure
     Athena components."""
 
-    L1Menu = None
-    if os.path.exists('L1Menu.pkl'):
-        with open('L1Menu.pkl', 'rb') as fh:
-            L1Menu = pickle.load(fh)
-            logger.info('L1Menu  from .pkl file')
-    else:
-        L1Menu = getMenu(flags)
-        with open('L1Menu.pkl', 'wb') as fh:
-            pickle.dump(L1Menu, fh)
-        logger.info('L1Menu  not from .pkl file')
+    L1Menu = getMenu(flags)
 
     logger.debug('menu object')
     logger.debug(L1Menu.printSummary())
