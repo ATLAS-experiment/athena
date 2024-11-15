@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef TGCNSWCoincidenceMap_h
@@ -12,8 +12,6 @@
 #include "AthenaBaseComps/AthMessaging.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrigT1TGC/TGCNumbering.h"
-
-class ITGCTriggerDbTool;
 
 namespace LVL1TGC {
 class NSWTrigOut;
@@ -68,9 +66,6 @@ private:
   TGCRegionType m_region;
   bool m_fullCW;
 
-
-
-  ToolHandle<ITGCTriggerDbTool> m_condDbTool;
   TGCArguments* m_tgcArgs;
 };
 

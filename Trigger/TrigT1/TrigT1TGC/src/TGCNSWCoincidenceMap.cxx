@@ -14,8 +14,6 @@
 #include "TrigT1TGC/TGCDatabaseManager.h"
 #include "PathResolver/PathResolver.h"
 
-#include "MuonCondInterface/ITGCTriggerDbTool.h"
-
 #include "TrigT1TGC/TGCArguments.h"
 
 namespace LVL1TGCTrigger {
@@ -27,7 +25,6 @@ namespace LVL1TGCTrigger {
      m_side(side),
      m_octant(oct),
      m_module(mod),
-     m_condDbTool("TGCTriggerDbTool"),
      m_tgcArgs(tgcargs)
   {
 

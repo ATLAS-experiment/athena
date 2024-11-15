@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TrigT1TGC_BIS78CoincidenceMap_H_
 #define TrigT1TGC_BIS78CoincidenceMap_H_
@@ -10,7 +10,6 @@
 
 #include "AthenaBaseComps/AthMessaging.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "MuonCondInterface/ITGCTriggerDbTool.h"
 #include "TrigT1TGC/TGCNumbering.h"
 
 namespace LVL1TGCTrigger {
@@ -52,7 +51,6 @@ class TGCBIS78CoincidenceMap : public AthMessaging {
 
   std::string m_verName;
 
-  ToolHandle<ITGCTriggerDbTool> m_condDbTool;
   LVL1TGCTrigger::TGCArguments* m_tgcArgs;
 };
 

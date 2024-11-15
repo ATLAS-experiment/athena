@@ -4,6 +4,7 @@
 atlas_subdir( TrigT1TGC )
 
 # External dependencies:
+find_package( tdaq-common COMPONENTS eformat )
 find_package( ROOT COMPONENTS Core MathCore )
 
 # Component(s) in the package:
@@ -11,9 +12,11 @@ atlas_add_library( TrigT1TGCLib
                    src/*.cxx
                    PUBLIC_HEADERS TrigT1TGC
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+                   PRIVATE_INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel ByteStreamData
-                                  GaudiKernel Identifier MuonCondSvcLib MuonDigitContainer MuonRDO MuonTGC_CablingLib StoreGateLib TileEvent TrigT1Interfaces TGCTriggerCondSvcLib xAODMuon
-		   PRIVATE_LINK_LIBRARIES AthenaPoolUtilities MuonCondInterface PathResolver TrigConfL1Data )
+                                  GaudiKernel Identifier MuonCondSvcLib MuonDigitContainer MuonRDO MuonTGC_CablingLib
+                                  StoreGateLib TileEvent TrigT1Interfaces TGCTriggerCondSvcLib xAODMuon
+                   PRIVATE_LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} AthenaPoolUtilities PathResolver TrigConfL1Data )
 
 atlas_add_component( TrigT1TGC
                      src/components/*.cxx
