@@ -1,12 +1,10 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCGoodMF.h"
 #include "TrigT1TGC/TGCNumbering.h"
 #include "PathResolver/PathResolver.h"
-
-#include "MuonCondInterface/ITGCTriggerDbTool.h"
 
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/Bootstrap.h"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -19,7 +19,6 @@ namespace LVL1TGC {
 TGCBIS78CoincidenceMap::TGCBIS78CoincidenceMap(LVL1TGCTrigger::TGCArguments* tgcargs, const std::string& version)
 : AthMessaging("TGCBIS78CoincidenceMap"),
   m_verName(version),
-  m_condDbTool("TGCTriggerDbTool"),
   m_tgcArgs(tgcargs)
 {
   setLevel(tgcArgs()->MSGLEVEL());
