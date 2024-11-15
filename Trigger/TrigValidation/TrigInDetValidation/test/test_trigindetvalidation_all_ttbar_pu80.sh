@@ -24,7 +24,7 @@
 export RTTJOBNAME=TrigInDetValidation_all_ttbar_pu80
 
 get_files -jo             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_AllSlices.py
-athena.py  -c 'ARTConfig=["/eos/atlas/atlascerngroupdisk/proj-sit/trigindet/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000001.pool.root.1"];	    EventMax=1000;runMergedChain=True;doIDNewTracking=True;rec.doFloatingPointException.set_Value_and_Lock(False)'             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_AllSlices.py
+athena.py  -c 'ARTConfig=["/eos/atlas/atlascerngroupdisk/proj-ascig/trigindet/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000001.pool.root.1"];	    EventMax=1000;runMergedChain=True;doIDNewTracking=True;rec.doFloatingPointException.set_Value_and_Lock(False)'             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_AllSlices.py
 JOBSTATUS_0=$?
 
 get_files -data TIDAdata11-rtt.dat

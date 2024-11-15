@@ -44,7 +44,7 @@ cmtConfigFileMacroName = '_TestConfiguration'
 
 distArea = '/afs/cern.ch/atlas/software/builds'
 
-eosProjSitRTTPath = '/eos/atlas/atlascerngroupdisk/proj-sit/rtt'
+eosProjSitRTTPath = '/eos/atlas/atlascerngroupdisk/proj-ascig/rtt'
 
 eosBinDir = '/afs/cern.ch/project/eos/installation/atlas/bin'
 eosLibDir = '/afs/cern.ch/project/eos/installation/atlas/lib64'

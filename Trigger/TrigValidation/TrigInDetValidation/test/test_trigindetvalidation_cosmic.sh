@@ -16,7 +16,7 @@
 export RTTJOBNAME=TrigInDetValidation_cosmic
 
 get_files -jo             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_CosmicSlice.py
-athena.py  -c 'ARTConfig=["/eos/atlas/atlascerngroupdisk/proj-sit/trigindet/mc14_cos.108865.CosSimPixVolSolOnTorOn.recon.RDO.s2111_r6258_tid05313290_00/RDO.05313290._000892.pool.root.1"];	    EventMax=5000;'             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_CosmicSlice.py
+athena.py  -c 'ARTConfig=["/eos/atlas/atlascerngroupdisk/proj-ascig/trigindet/mc14_cos.108865.CosSimPixVolSolOnTorOn.recon.RDO.s2111_r6258_tid05313290_00/RDO.05313290._000892.pool.root.1"];	    EventMax=5000;'             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_CosmicSlice.py
 JOBSTATUS_0=$?
 
 get_files -data TIDAcosmic-rtt.dat

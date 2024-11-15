@@ -17,7 +17,7 @@
 export RTTJOBNAME=TrigInDetValidation_el_Jpsiee_pu40
 
 get_files -jo            TrigInDetValidation/TrigInDetValidation_RTT_topOptions_ElectronSlice.py
-athena.py  -c 'ARTConfig=["/eos/atlas/atlascerngroupdisk/proj-sit/trigindet/mc15_13TeV.129190.Pythia8_AU2CTEQ6L1_ppToJpsie3e3.recon.RDO.e3802_s2608_s2183_r7042/RDO.06758877._000006.pool.root.1"];           EventMax=10000;runMergedChain=True'            TrigInDetValidation/TrigInDetValidation_RTT_topOptions_ElectronSlice.py
+athena.py  -c 'ARTConfig=["/eos/atlas/atlascerngroupdisk/proj-ascig/trigindet/mc15_13TeV.129190.Pythia8_AU2CTEQ6L1_ppToJpsie3e3.recon.RDO.e3802_s2608_s2183_r7042/RDO.06758877._000006.pool.root.1"];           EventMax=10000;runMergedChain=True'            TrigInDetValidation/TrigInDetValidation_RTT_topOptions_ElectronSlice.py
 JOBSTATUS_0=$?
 
 get_files -data TIDAdata11-rtt.dat

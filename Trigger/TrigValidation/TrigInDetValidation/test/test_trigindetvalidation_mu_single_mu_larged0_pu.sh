@@ -17,7 +17,7 @@
 export RTTJOBNAME=TrigInDetValidation_mu_single_mu_larged0_PU
 
 get_files -jo             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_MuonSlice.py
-athena.py  -c 'ARTConfig=["/eos/atlas/atlascerngroupdisk/proj-sit/trigindet/mc15_13TeV.107237.ParticleGenerator_mu_Pt4to100_vertxy20.recon.RDO.e3603_s2726_r7772/RDO.09945423._000001.pool.root.1"];            EventMax=15000;runMergedChain=True'             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_MuonSlice.py
+athena.py  -c 'ARTConfig=["/eos/atlas/atlascerngroupdisk/proj-ascig/trigindet/mc15_13TeV.107237.ParticleGenerator_mu_Pt4to100_vertxy20.recon.RDO.e3603_s2726_r7772/RDO.09945423._000001.pool.root.1"];            EventMax=15000;runMergedChain=True'             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_MuonSlice.py
 JOBSTATUS_0=$?
 
 get_files -data TIDAdata11-rtt-larged0.dat

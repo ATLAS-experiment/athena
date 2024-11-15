@@ -19,7 +19,7 @@
 export RTTJOBNAME=TrigInDetValidation_el_single_e_7-80_larged0
 
 get_files -jo             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_ElectronSlice.py
-athena.py  -c 'ARTConfig=["/eos/atlas/atlascerngroupdisk/proj-sit/trigindet/mc15_13TeV.159053.ParticleGenerator_e_Et7to80_vertxy20.recon.RDO.e3603_s2726_r7728/RDO.10240167._000001.pool.root.1"];	    EventMax=15000;runMergedChain=True'             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_ElectronSlice.py
+athena.py  -c 'ARTConfig=["/eos/atlas/atlascerngroupdisk/proj-ascig/trigindet/mc15_13TeV.159053.ParticleGenerator_e_Et7to80_vertxy20.recon.RDO.e3603_s2726_r7728/RDO.10240167._000001.pool.root.1"];	    EventMax=15000;runMergedChain=True'             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_ElectronSlice.py
 JOBSTATUS_0=$?
 
 get_files -data TIDAdata11-rtt-larged0-el.dat

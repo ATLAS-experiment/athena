@@ -4,7 +4,7 @@ pwd
 
 echo "args: $*"
 
-# BASEDIR=/eos/atlas/atlascerngroupdisk/proj-sit/trigindet
+# BASEDIR=/eos/atlas/atlascerngroupdisk/proj-ascig/trigindet
 BASEDIR=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 
 echo 

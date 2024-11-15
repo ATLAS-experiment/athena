@@ -47,7 +47,7 @@ AtlasG4_tf.py --inputEVNTFile evgen.pool.root --outputHITSFile test.HITS.pool.ro
                  <chaindatasetName>evgen.pool.root</chaindatasetName>
                  <dataset_info>
                    <jobTransformData />
-                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-sit/simulation/validation/RTT/referenceFiles/18.X.0/StableRHadrons114865.EVNT.pool.root</datasetName>
+                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-ascig/simulation/validation/RTT/referenceFiles/18.X.0/StableRHadrons114865.EVNT.pool.root</datasetName>
                  </dataset_info>
                </chaindataset_info>
                <queue>long</queue>
@@ -94,7 +94,7 @@ AtlasG4_tf.py --inputEVNTFile evgen.pool.root --outputHITSFile test.HITS.pool.ro
                  <chaindatasetName>evgen.pool.root</chaindatasetName>
                  <dataset_info>
                    <jobTransformData />
-                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-sit/simulation/validation/RTT/referenceFiles/18.X.0/StableRHadrons114875.EVNT.pool.root</datasetName>
+                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-ascig/simulation/validation/RTT/referenceFiles/18.X.0/StableRHadrons114875.EVNT.pool.root</datasetName>
                  </dataset_info>
                </chaindataset_info>
                <queue>long</queue>
@@ -141,7 +141,7 @@ AtlasG4_tf.py --inputEVNTFile evgen.pool.root --outputHITSFile test.HITS.pool.ro
                  <chaindatasetName>evgen.pool.root</chaindatasetName>
                  <dataset_info>
                    <jobTransformData />
-                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-sit/simulation/validation/RTT/referenceFiles/18.X.0/StableRHadrons176089.EVNT.pool.root</datasetName>
+                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-ascig/simulation/validation/RTT/referenceFiles/18.X.0/StableRHadrons176089.EVNT.pool.root</datasetName>
                  </dataset_info>
                </chaindataset_info>
                <queue>long</queue>
@@ -189,7 +189,7 @@ AtlasG4_tf.py --inputEVNTFile evgen.pool.root --outputHITSFile test.HITS.pool.ro
                  <chaindatasetName>evgen.pool.root</chaindatasetName>
                  <dataset_info>
                    <jobTransformData />
-                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-sit/simulation/validation/RTT/referenceFiles/18.X.0/AMSB_500GeV_Chargino_1ns.EVNT.pool.root</datasetName>
+                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-ascig/simulation/validation/RTT/referenceFiles/18.X.0/AMSB_500GeV_Chargino_1ns.EVNT.pool.root</datasetName>
                  </dataset_info>
                </chaindataset_info>
                <queue>long</queue>
@@ -237,7 +237,7 @@ AtlasG4_tf.py --inputEVNTFile evgen.pool.root --outputHITSFile test.HITS.pool.ro
                  <chaindatasetName>evgen.pool.root</chaindatasetName>
                  <dataset_info>
                    <jobTransformData />
-                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-sit/simulation/validation/RTT/referenceFiles/18.X.0/Monopole.EVNT.pool.root</datasetName>
+                   <datasetName>/eos/atlas/atlascerngroupdisk/proj-ascig/simulation/validation/RTT/referenceFiles/18.X.0/Monopole.EVNT.pool.root</datasetName>
                  </dataset_info>
                </chaindataset_info>
                <queue>long</queue>

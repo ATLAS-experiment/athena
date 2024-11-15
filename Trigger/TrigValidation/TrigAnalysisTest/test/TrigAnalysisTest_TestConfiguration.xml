@@ -779,7 +779,7 @@
                 </doc>
                 <displayName>RDO_ElectronSlice_xAOD</displayName>
                 <commandLineFlags>
-                    RunningRTT=TRUE;jp.AthenaCommonFlags.EvtMax.set_Value_and_Lock(1000);jp.Rec.OutputLevel=WARNING;LVL1OutputLevel=WARNING;HLTOutputLevel=WARNING;dsName='/eos/atlas/atlascerngroupdisk/proj-sit/trigindet/mc12_14TeV.147806.PowhegPythia8_AU2CT10_Zee.recon.RDO.e1564_s1682_s1691_r4710_tid01288183_00';fileRange=[1,10]
+                    RunningRTT=TRUE;jp.AthenaCommonFlags.EvtMax.set_Value_and_Lock(1000);jp.Rec.OutputLevel=WARNING;LVL1OutputLevel=WARNING;HLTOutputLevel=WARNING;dsName='/eos/atlas/atlascerngroupdisk/proj-ascig/trigindet/mc12_14TeV.147806.PowhegPythia8_AU2CT10_Zee.recon.RDO.e1564_s1682_s1691_r4710_tid01288183_00';fileRange=[1,10]
                 </commandLineFlags>
                 <options>testAthenaTrigRDO_ElectronSlice_MC.py</options>
                 <package>Trigger/TrigValidation/TrigAnalysisTest</package>

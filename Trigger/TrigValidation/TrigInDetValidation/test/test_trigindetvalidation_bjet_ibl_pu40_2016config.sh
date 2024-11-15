@@ -17,7 +17,7 @@
 export RTTJOBNAME=TrigInDetValidation_bjet_IBL_pu40_2016config
 
 get_files -jo             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_BjetSlice.py
-athena.py  -c 'ARTConfig=["/eos/atlas/atlascerngroupdisk/proj-sit/trigindet/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7193/RDO.06752771._000001.pool.root.1"];	    EventMax=900;runMergedChain=True;minVtxTrackpT=1000;bjetEtaHalfWidth=0.2;bjetPhiHalfWidth=0.2;splitZHalfWidth=20;globalTag="OFLCOND-RUN12-SDR-17"'             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_BjetSlice.py
+athena.py  -c 'ARTConfig=["/eos/atlas/atlascerngroupdisk/proj-ascig/trigindet/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7193/RDO.06752771._000001.pool.root.1"];	    EventMax=900;runMergedChain=True;minVtxTrackpT=1000;bjetEtaHalfWidth=0.2;bjetPhiHalfWidth=0.2;splitZHalfWidth=20;globalTag="OFLCOND-RUN12-SDR-17"'             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_BjetSlice.py
 JOBSTATUS_0=$?
 
 get_files -data TIDAdata11-rtt.dat
