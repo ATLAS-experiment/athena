@@ -550,7 +550,7 @@ def main():
     trigRun2Config  = options.trigRun2Config_flag    
     ciMode          = options.ci_flag
 
-#        tct_ESD = "root://eosatlas//eos/atlas/atlascerngroupdisk/proj-sit/rtt/prod/tct/"+latest_nightly+"/"+release+"/"+platform+"/offline/Tier0ChainTests/"+q+"/myESD.pool.root"          
+#        tct_ESD = "root://eosatlas//eos/atlas/atlascerngroupdisk/proj-ascig/rtt/prod/tct/"+latest_nightly+"/"+release+"/"+platform+"/offline/Tier0ChainTests/"+q+"/myESD.pool.root"          
 
 ########### Are we running in CI
     if ciMode:
