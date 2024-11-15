@@ -319,9 +319,6 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
         theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolGenScanCfg(flags))
     else:
         theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolCfg(flags))
-      
-    if flags.Trigger.FPGATrackSim.ActiveConfig.etaPatternFilter:
-        theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolCfg(flags))
 
     if (flags.Trigger.FPGATrackSim.ActiveConfig.etaPatternFilter):
         EtaPatternFilter = CompFactory.FPGATrackSimEtaPatternFilterTool()
