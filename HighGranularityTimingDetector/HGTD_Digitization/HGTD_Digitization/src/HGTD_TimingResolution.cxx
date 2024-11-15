@@ -358,7 +358,7 @@ float HGTD_TimingResolution::calculateTime(
   calculatePulse(pulse, pulseBins, t, E, max_hit, rndm_engine);
   for (auto &pulse : pulseBins) {
     if (pulse.second.second == 0) {
-      ATH_MSG_WARNING(
+      ATH_MSG_DEBUG(
           "HGTD_TimingResolution::calculateTime -> Energy goes zero, please "
           "have a check, energy * time = "
           << pulse.second.first << " while energy = " << pulse.second.second);
