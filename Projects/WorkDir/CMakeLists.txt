@@ -63,6 +63,14 @@ find_package( ${ATLAS_PROJECT} REQUIRED )
 # Set up the project with its version and baseline languages.
 project( WorkDir VERSION ${${ATLAS_PROJECT}_VERSION} LANGUAGES C CXX )
 
+# If the parent project build type was "Release" enable the generation of debug
+# symbols for local builds. If you absolutely do want to keep "Release", use a
+# different capitalization, e.g. "-DCMAKE_BUILD_TYPE=RELEASE".
+if( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" )
+   set( CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING
+      "Build mode for the release" FORCE )
+endif()
+
 # Set up any additional languages that may be available.
 include( CheckLanguage )
 check_language( Fortran )
