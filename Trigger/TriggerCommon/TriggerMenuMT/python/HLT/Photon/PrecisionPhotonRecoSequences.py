@@ -13,11 +13,12 @@ def precisionPhotonVDVCfg(flags, name, InViewRoIs, ion=False):
     caloClusters = TrigEgammaKeys.precisionPhotonCaloClusterContainer
     dataObjects = [( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % caloClusters ),
                               ( 'EgammaRecContainer', 'StoreGateSvc+%s' % TrigEgammaKeys.precisionPhotonSuperClusterCollection),
-                              ( 'CaloCellContainer' , 'StoreGateSvc+CaloCells' ),
                               ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
                               ]
     if ion:
         dataObjects += [( 'CaloCellContainer' , 'StoreGateSvc+CorrectedRoICaloCells' )]
+    else:
+        dataObjects += [( 'CaloCellContainer' , 'StoreGateSvc+CaloCells' )]
 
     precisionPhotonVDV = CompFactory.AthViews.ViewDataVerifier(name)
     precisionPhotonVDV.DataObjects = dataObjects
