@@ -10,7 +10,7 @@
 # Multiple files can be passed to the command
 #   CopyCIArtifact.sh FILE...
 # Files are copied to
-#   /eos/atlas/atlascerngroupdisk/proj-sit/gitlabci/MR<number>_<hash>/<test_name>
+#   /eos/atlas/atlascerngroupdisk/proj-ascig/gitlabci/MR<number>_<hash>/<test_name>
 #
 
 # exit on failure
@@ -36,7 +36,7 @@ if [[ -z ${1+x} ]]; then
 fi
 
 # check if we have EOS access
-base_folder="/eos/atlas/atlascerngroupdisk/proj-sit/gitlabci"
+base_folder="/eos/atlas/atlascerngroupdisk/proj-ascig/gitlabci"
 if [[ ! -d "${base_folder}" ]]; then
   echo "Error: CI artifacts area is not accessible" 1>&2
   exit 2
