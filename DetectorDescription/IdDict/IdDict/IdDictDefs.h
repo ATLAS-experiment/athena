@@ -318,7 +318,7 @@ public:
     IdDictLabel* find_label (const std::string& name) const;  
     void add_label (IdDictLabel* label);  
     size_t get_label_number () const;  
-    const std::string& get_label (size_t index) const;  
+    const std::string get_label (size_t index) const;  
     ExpandedIdentifier::element_type get_label_value (const std::string& name) const; 
     void resolve_references (const IdDictMgr& idd);  
     void generate_implementation (const IdDictMgr& idd, const std::string& tag = "");  
