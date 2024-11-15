@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONNRPC_CABLING_MUONNRPC_CABLINGMAP_H
@@ -39,8 +39,10 @@ class MuonNRPC_CablingMap {
     bool convert(const NrpcCablingData& cabling_data, Identifier& id,
                  bool check_valid = true) const;
     /** converts the identifier into a cabling data object. Returns false if the
-     * Identifier is not Nrpc */
-    bool convert(const Identifier& id, NrpcCablingData& cabling_data) const;
+     * Identifier is not Nrpc. */
+    bool convert(const Identifier& id, 
+                 NrpcCablingData& cabling_data,
+                 bool setSideBit) const;
 
     /// Inserts a cabling object into the map
     bool insertChannels(const NrpcCablingCoolData& cabling_data, MsgStream& log);
@@ -57,6 +59,10 @@ class MuonNRPC_CablingMap {
     /** return a HashId list for a  given ROD */
     const std::vector<IdentifierHash>& getChamberHashVec(const uint32_t ROBI,
                                                          MsgStream& log) const;
+    
+    std::vector<IdentifierHash> getChamberHashVec(const ListOfROB& ROBs,
+                                                  MsgStream& log) const;
+
     /** return the full list of ROD id */
     const ListOfROB& getAllROBId() const;
 

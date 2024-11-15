@@ -12,7 +12,8 @@ std::ostream& operator<<(std::ostream& ostr, const NrpcCablingOfflineID& obj) {
          << " doubletPhi: " << static_cast<int>(obj.doubletPhi)
          << " doubletZ: " << static_cast<int>(obj.doubletZ)
          << " gasGap: " << static_cast<int>(obj.gasGap)
-         << " measPhi: " << static_cast<int>(obj.measPhi);
+         << " measPhi: " << static_cast<int>(obj.measuresPhi())
+         << " stripSide: "<<static_cast<int>(obj.stripSide());
     return ostr;
 }
 std::ostream& operator<<(std::ostream& ostr, const NrpcCablingOnlineID& obj) {
