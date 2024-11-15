@@ -32,3 +32,15 @@ if( CLHEP_FOUND )
       GeoPrimitives/selection.xml
       LINK_LIBRARIES GeoPrimitives )
 endif()
+
+if( NOT XAOD_STANDALONE )
+   file(GLOB_RECURSE filesabc "test/*.cxx")
+   foreach(_exeFile ${filesabc})
+       get_filename_component(_theExec ${_exeFile} NAME_WE)
+       get_filename_component(_theLoc ${_exeFile} DIRECTORY)
+       atlas_add_test( ${_theExec} 
+                       SOURCES  ${_exeFile}
+                       LINK_LIBRARIES GeoPrimitives
+                       POST_EXEC_SCRIPT nopost.sh) 
+   endforeach()
+endif()
