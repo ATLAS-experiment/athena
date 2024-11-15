@@ -172,6 +172,7 @@ StatusCode TrigCaloTowerMaker::execute(const EventContext& ctx) const {
                 << " symlinked to  INavigable4MomentumCollection in StoreGate");
 
   auto caloCellContainer = SG::makeHandle(m_inputCellsKey, ctx);
+  ATH_CHECK( caloCellContainer.isValid() );
 
   // Get the last container in the vector. Should be th one produced by the
   // previous TrigCaloCellMaker.
