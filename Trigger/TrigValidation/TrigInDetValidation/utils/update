@@ -1,7 +1,7 @@
 #!/bin/csh
 
 
-### Run from directory /eos/atlas/atlascerngroupdisk/proj-sit/trigindet/TrigInDetValidationReference
+### Run from directory /eos/atlas/atlascerngroupdisk/proj-ascig/trigindet/TrigInDetValidationReference
 #set PROJECT=devval
 #set PROJECT=master
 #set PROJECT=21.1
@@ -13,7 +13,7 @@ set RELEASE=rel_2
 set DIR=$PWD
 
 set BASE=/afs/cern.ch/atlas/project/RTT/prod/Results/rtt/$RELEASE/$PROJECT/build/x86_64-slc6-gcc62-opt/$BUILD/TrigInDetValidation 
-set EOSBASE=/eos/atlas/atlascerngroupdisk/proj-sit/rtt/prod/rtt/$RELEASE/$PROJECT/x86_64-slc6-gcc62-opt/$BUILD/TrigInDetValidation 
+set EOSBASE=/eos/atlas/atlascerngroupdisk/proj-ascig/rtt/prod/rtt/$RELEASE/$PROJECT/x86_64-slc6-gcc62-opt/$BUILD/TrigInDetValidation 
 
 echo "basedir:      $BASE"
 echo "updating expert files ..."
