@@ -79,6 +79,8 @@ private:
                       const ElementLink<CaloCellContainer>& cellsEL,
                       const CaloTowerSeg::SubSeg* subseg) const;
 
+  void runTimeInit(const EventContext& ctx) const;
+
 
   /**
    * @brief Rebuild the cell lookup table.
@@ -93,8 +95,7 @@ private:
   const LArFCAL_ID* m_larFCalId;
 
   LArFCalTowerStore m_cellStore;
-  mutable std::mutex m_cellStoreMutex;
-  mutable std::atomic_bool m_cellStoreInit{false};
+  mutable std::once_flag m_onceFlag;
 
 };
 #endif
