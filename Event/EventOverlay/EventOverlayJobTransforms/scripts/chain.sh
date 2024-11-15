@@ -8,7 +8,7 @@ input="/afs/cern.ch/user/a/ahaas/temp/data16_13TeV/data16_13TeV.00297170.physics
 #input="/afs/cern.ch/user/a/ahaas/temp/data16_13TeV/data16_13TeV.00297170.physics_TauOverlay.merge.RAW._lb0251._SFO-ALL._0001.1"
 
 inputEVNT="/afs/cern.ch/user/a/ahaas/public/overlay/mu100.EVNT.pool.root"
-#inputEVNT="root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/proj-sit/overlay/mc15_13TeV.147407.PowhegPythia8_AZNLO_Zmumu.evgen.EVNT.e4032/EVNT.05685490._000002.pool.root.1"
+#inputEVNT="root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/proj-ascig/overlay/mc15_13TeV.147407.PowhegPythia8_AZNLO_Zmumu.evgen.EVNT.e4032/EVNT.05685490._000002.pool.root.1"
 #inputEVNT="pion.EVNT.pool.root"
 
 cond="CONDBR2-BLKPA-2016-12"
