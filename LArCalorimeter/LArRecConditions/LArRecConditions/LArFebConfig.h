@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRECCONDITIONS_LARFEBCONFIG_H
@@ -21,7 +21,6 @@ class LArFebConfig:  public AthMessaging {
   void add (HWIdentifier febid,
             const coral::AttributeList* attrList);
 
-  //Accessor methods from ILArFEBConfigReader
   short lowerGainThreshold(const HWIdentifier& id) const;
   short upperGainThreshold(const HWIdentifier& id) const;
   void thresholds (const HWIdentifier& chid, short& lower, short& upper) const;
