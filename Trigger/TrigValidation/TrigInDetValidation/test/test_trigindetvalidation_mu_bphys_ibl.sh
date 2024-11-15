@@ -17,7 +17,7 @@
 export RTTJOBNAME=TrigInDetValidation_mu_bphys_IBL
 
 get_files -jo             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_MuonSlice.py
-athena.py  -c 'ARTConfig=["/eos/atlas/atlascerngroupdisk/proj-sit/trigindet/mc15_13TeV.300401.Pythia8BPhotospp_A14_CTEQ6L1_Bs_Jpsimu3p5mu3p5_phi.recon.RDO.e4397_s2608_r6869/RDO.06461186._000001.pool.root.1"];	    EventMax=5000;runMergedChain=True'             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_MuonSlice.py
+athena.py  -c 'ARTConfig=["/eos/atlas/atlascerngroupdisk/proj-ascig/trigindet/mc15_13TeV.300401.Pythia8BPhotospp_A14_CTEQ6L1_Bs_Jpsimu3p5mu3p5_phi.recon.RDO.e4397_s2608_r6869/RDO.06461186._000001.pool.root.1"];	    EventMax=5000;runMergedChain=True'             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_MuonSlice.py
 JOBSTATUS_0=$?
 
 get_files -data TIDAdata11-rtt.dat

@@ -16,7 +16,7 @@
 export RTTJOBNAME=TrigInDetValidation_minBias_offline
 
 get_files -jo             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_MonitorSlice.py
-athena.py  -c 'ARTConfig=["/eos/atlas/atlascerngroupdisk/proj-sit/trigindet/mc15_13TeV.361036.Pythia8_A2MSTW2008LO_minbias_inelastic.recon.RDO.e3580_s2726_r7011/RDO.07344311._000057.pool.root.1"];	    EventMax=1000;doIDNewTracking=True'             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_MonitorSlice.py
+athena.py  -c 'ARTConfig=["/eos/atlas/atlascerngroupdisk/proj-ascig/trigindet/mc15_13TeV.361036.Pythia8_A2MSTW2008LO_minbias_inelastic.recon.RDO.e3580_s2726_r7011/RDO.07344311._000057.pool.root.1"];	    EventMax=1000;doIDNewTracking=True'             TrigInDetValidation/TrigInDetValidation_RTT_topOptions_MonitorSlice.py
 JOBSTATUS_0=$?
 
 get_files -data TIDAdata11-rtt-offline.dat

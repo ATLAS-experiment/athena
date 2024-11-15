@@ -4,7 +4,7 @@ pwd
 
 echo "args: $*"
 
-BASEDIR=/eos/atlas/atlascerngroupdisk/proj-sit/trigindet
+BASEDIR=/eos/atlas/atlascerngroupdisk/proj-ascig/trigindet
 
 echo 
 echo "copy reference file and run comparitor"

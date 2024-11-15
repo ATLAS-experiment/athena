@@ -161,7 +161,7 @@ for delFile in myDelFiles:
 myArchiveCastor=['AOD']
 for ff in myArchiveCastor:
     ff=ff.rstrip('\n')
-    castorbase="/eos/atlas/atlascerngroupdisk/proj-sit/fct/rec_output/"+fuid+"/"+ff
+    castorbase="/eos/atlas/atlascerngroupdisk/proj-ascig/fct/rec_output/"+fuid+"/"+ff
     print "Copying files of type "+ff+" to castor location "+castorbase
     for aa in os.popen("ls *"+ff+"*.root").readlines():
         aa=aa.rstrip('\n')

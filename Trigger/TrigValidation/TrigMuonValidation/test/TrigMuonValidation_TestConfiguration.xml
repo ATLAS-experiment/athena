@@ -16,8 +16,8 @@
 	  <package>Trigger/TrigValidation/TrigMuonValidation</package>
 	  <group>TrigMuonValidation</group>
 	  <queue>long</queue>
-	  <dataset>/eos/atlas/atlascerngroupdisk/proj-sit/trigindet/mc12_14TeV.147807.PowhegPythia8_AU2CT10_Zmumu.recon.RDO.e1564_s1499_s1504_r4033_tid01012184_00/RDO.01012184._000001.pool.root.1</dataset>
-	  <dataset>/eos/atlas/atlascerngroupdisk/proj-sit/trigindet/mc12_14TeV.147807.PowhegPythia8_AU2CT10_Zmumu.recon.RDO.e1564_s1499_s1504_r4033_tid01012184_00/RDO.01012184._000003.pool.root.1</dataset>
+	  <dataset>/eos/atlas/atlascerngroupdisk/proj-ascig/trigindet/mc12_14TeV.147807.PowhegPythia8_AU2CT10_Zmumu.recon.RDO.e1564_s1499_s1504_r4033_tid01012184_00/RDO.01012184._000001.pool.root.1</dataset>
+	  <dataset>/eos/atlas/atlascerngroupdisk/proj-ascig/trigindet/mc12_14TeV.147807.PowhegPythia8_AU2CT10_Zmumu.recon.RDO.e1564_s1499_s1504_r4033_tid01012184_00/RDO.01012184._000003.pool.root.1</dataset>
 
 	  <test position="1">
 	    <modulename>RttLibraryTools</modulename>
@@ -71,8 +71,8 @@
 	  <package>Trigger/TrigValidation/TrigMuonValidation</package>
 	  <group>TrigMuonValidation</group>
 	  <queue>long</queue>
-	  <dataset>/eos/atlas/atlascerngroupdisk/proj-sit/trigindet/mc12_14TeV.147807.PowhegPythia8_AU2CT10_Zmumu.recon.RDO.e1564_s1499_s1504_r4033_tid01012184_00/RDO.01012184._000001.pool.root.1</dataset>
-	  <dataset>/eos/atlas/atlascerngroupdisk/proj-sit/trigindet/mc12_14TeV.147807.PowhegPythia8_AU2CT10_Zmumu.recon.RDO.e1564_s1499_s1504_r4033_tid01012184_00/RDO.01012184._000003.pool.root.1</dataset>
+	  <dataset>/eos/atlas/atlascerngroupdisk/proj-ascig/trigindet/mc12_14TeV.147807.PowhegPythia8_AU2CT10_Zmumu.recon.RDO.e1564_s1499_s1504_r4033_tid01012184_00/RDO.01012184._000001.pool.root.1</dataset>
+	  <dataset>/eos/atlas/atlascerngroupdisk/proj-ascig/trigindet/mc12_14TeV.147807.PowhegPythia8_AU2CT10_Zmumu.recon.RDO.e1564_s1499_s1504_r4033_tid01012184_00/RDO.01012184._000003.pool.root.1</dataset>
 
 	  <test position="1">
 	    <modulename>RttLibraryTools</modulename>

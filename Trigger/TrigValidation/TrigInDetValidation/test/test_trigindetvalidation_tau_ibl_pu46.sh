@@ -17,7 +17,7 @@
 export RTTJOBNAME=TrigInDetValidation_tau_IBL_pu46
 
 get_files -jo            TrigInDetValidation/TrigInDetValidation_RTT_topOptions_TauSlice.py
-athena.py  -c 'ARTConfig=["/eos/atlas/atlascerngroupdisk/proj-sit/trigindet/mc15_13TeV.361108.PowhegPythia8EvtGen_AZNLOCTEQ6L1_Ztautau.recon.RDO.e3601_s2757_r7245/RDO.06885566._001556.pool.root.1"];           EventMax=4000;runMergedChain=True'            TrigInDetValidation/TrigInDetValidation_RTT_topOptions_TauSlice.py
+athena.py  -c 'ARTConfig=["/eos/atlas/atlascerngroupdisk/proj-ascig/trigindet/mc15_13TeV.361108.PowhegPythia8EvtGen_AZNLOCTEQ6L1_Ztautau.recon.RDO.e3601_s2757_r7245/RDO.06885566._001556.pool.root.1"];           EventMax=4000;runMergedChain=True'            TrigInDetValidation/TrigInDetValidation_RTT_topOptions_TauSlice.py
 JOBSTATUS_0=$?
 
 get_files -data TIDAdata11-rtt.dat
