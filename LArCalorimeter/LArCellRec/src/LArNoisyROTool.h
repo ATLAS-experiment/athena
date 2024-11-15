@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArNoisyROTool.h 
@@ -20,17 +20,21 @@
 // FrameWork includes
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CaloInterface/ILArNoisyROTool.h"
+#include "CaloInterface/ILArHVMapTool.h"
 
 #include "Identifier/HWIdentifier.h"
 #include "LArIdentifier/LArOnlineID.h"
 #include "AthenaKernel/IOVSvcDefs.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "LArRecConditions/LArHVIdMapping.h"
 
 class LArOnlineID;
 class CaloCell_ID;
 class LArOnOffIdMapping;
 class LArNoisyROSummary;
 class CaloCellContainer;
+class LArElectrodeID;
+class LArHVNMap;
 
 class LArNoisyROTool: 
   virtual public ILArNoisyROTool,
@@ -59,7 +63,7 @@ class LArNoisyROTool:
   virtual StatusCode  finalize();
 
   virtual 
-  std::unique_ptr<LArNoisyROSummary> process(const CaloCellContainer*, const std::set<unsigned int>*, const std::vector<HWIdentifier>*) const;
+  std::unique_ptr<LArNoisyROSummary> process(const EventContext&, const CaloCellContainer*, const std::set<unsigned int>*, const std::vector<HWIdentifier>*, const LArHVNMap*, const CaloDetDescrManager*, const LArHVIdMapping*) const;
 
  private: 
 
@@ -111,10 +115,15 @@ class LArNoisyROTool:
 
   std::unordered_map<unsigned int,unsigned int> m_mapPSFEB;
 
+  typedef std::unordered_map<HWIdentifier, unsigned int> HVlinesStatMap;
+
  private: 
+
+  ToolHandle<ILArHVMapTool> m_hvMapTool;
 
   const CaloCell_ID* m_calo_id;
   const LArOnlineID* m_onlineID;
+  const LArElectrodeID* m_elecID;
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey {this, "CablingKey", "LArOnOffIdMap", "key to read OnOff mapping"};
 
   //** Qfactor value above which a channel is considered bad */
@@ -152,6 +161,16 @@ class LArNoisyROTool:
 
   //** Count events with too many saturated Qfactor cells */
   unsigned int m_SaturatedCellTightCutEvents = 0U;
+
+  //** do HVline flagging
+  bool m_doHVline;
+
+  //** fraction of bad cells in one HV line
+  float m_BadChanFracPerHVline;
+
+  //** min. number of bad HV lines
+  unsigned int m_MinBadHV;
+
 
   unsigned int m_MNBLooseCut;
   unsigned int m_MNBTightCut;

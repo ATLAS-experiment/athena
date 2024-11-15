@@ -240,7 +240,7 @@ void LArFastShower::UseShowerLib(const G4FastTrack& fastTrack, G4FastStep& fastS
 #ifdef _TRACE_DOIT_
     G4cout << "Got shower (" << shower.size() << ") from shower lib" << G4endl;
 #endif
-
+    const double weight = (m_configuration.m_applyRRWeights) ? fastTrack.GetPrimaryTrack()->GetWeight() : 1.0;
     // loop over hits in shower
     for (const auto& a_spot : shower) {
 
@@ -249,7 +249,7 @@ void LArFastShower::UseShowerLib(const G4FastTrack& fastTrack, G4FastStep& fastS
              << a_spot.GetPosition().y() << " " << a_spot.GetPosition().z()
              << " " << a_spot.GetEnergy() << " " << a_spot.GetTime() << G4endl;
 #endif
-      fastShowerSD()->ProcessSpot(a_spot);
+      fastShowerSD()->ProcessSpot(a_spot, weight);
 
 #ifdef _TRACE_DOIT_
       G4cout << "Made Spot" << G4endl;

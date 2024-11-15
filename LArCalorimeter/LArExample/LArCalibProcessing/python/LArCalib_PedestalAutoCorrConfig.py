@@ -89,13 +89,31 @@ def LArPedestalAutoCorrCfg(flags):
 
     result.addEventAlgo(LArPedACBuilder)
 
-    #ROOT ntuple writing:
-    rootfile=flags.LArCalib.Output.ROOTFile
     if flags.LArCalib.isSC: 
        bcKey = "LArBadChannelSC" 
     else: 
        bcKey = "LArBadChannel"
 
+    if flags.LArCalib.CorrectBadChannels:
+        theLArAcorrPatcher=CompFactory.getComp("LArCalibPatchingAlg<LArAutoCorrComplete>")("LArAcorrPatch")
+        theLArAcorrPatcher.ContainerKey = "LArAutoCorr"
+        theLArAcorrPatcher.BadChanKey = bcKey 
+        theLArAcorrPatcher.SuperCells = flags.LArCalib.isSC 
+        theLArAcorrPatcher.PatchMethod="FEBNeighbor" ##take the first neigbour
+        #theLArAcorrPatcher.PatchMethod = "PhiAverage" ##do an aveage in phi after removing bad and empty event
+        if flags.LArCalib.isSC:
+           theLArAcorrPatcher.ProblemsToPatch = [ "problematicForUnknownReason","transmissionErrorFibre","badAutoCorr",]
+           theLArAcorrPatcher.OnOffMap="LArOnOffIdMapSC" 
+           theLArAcorrPatcher.CalibLineKey="LArCalibIdMapSC"
+        else:
+           theLArAcorrPatcher.ProblemsToPatch = [ "badAutoCorr", ]
+
+        theLArAcorrPatcher.UseCorrChannels=False
+        result.addEventAlgo(theLArAcorrPatcher)
+    pass
+
+    #ROOT ntuple writing:
+    rootfile=flags.LArCalib.Output.ROOTFile
     if rootfile != "":
         result.addEventAlgo(CompFactory.LArPedestals2Ntuple(ContainerKey = "Pedestal",
                                                             AddFEBTempInfo = False, 
@@ -111,6 +129,8 @@ def LArPedestalAutoCorrCfg(flags):
                                                            AddFEBTempInfo  = False, isSC = flags.LArCalib.isSC,
                                                            BadChanKey = bcKey,
                                                            OffId=True,
+                                                           ApplyCorrection = True,
+                                                           AddCorrUndo = True,
                                                            AddCalib = True
                                                        )
                         )
@@ -146,7 +166,6 @@ def LArPedestalAutoCorrCfg(flags):
 
     #RegistrationSvc    
     result.addService(CompFactory.IOVRegistrationSvc(RecreateFolders = False))
-
 
     #Validation (comparision with reference):
     if flags.LArCalib.doValidation:

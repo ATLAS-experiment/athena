@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -32,6 +32,9 @@ StatusCode LArNoisyROAlg::initialize() {
   ATH_CHECK(m_eventInfoDecorKey.initialize());
   ATH_CHECK(m_knownBadFEBsVecKey.initialize(!m_isMC) );
   ATH_CHECK(m_knownMNBFEBsVecKey.initialize(!m_isMC) );
+  ATH_CHECK(m_hvMapKey.initialize(!m_isMC));
+  ATH_CHECK(m_caloDetDescrMgrKey.initialize(!m_isMC));
+  ATH_CHECK(m_hvCablingKey.initialize(!m_isMC));
 
   return StatusCode::SUCCESS;
 }
@@ -46,7 +49,7 @@ StatusCode LArNoisyROAlg::execute (const EventContext& ctx) const
     const std::set<unsigned int> knownBadFEBs;
     const std::vector<HWIdentifier> knownMNBFEBs;
     SG::WriteHandle<LArNoisyROSummary> noisyRO(m_outputKey, ctx);
-    ATH_CHECK(noisyRO.record(m_noisyROTool->process(nullptr, &knownBadFEBs, &knownMNBFEBs)));
+    ATH_CHECK(noisyRO.record(m_noisyROTool->process(ctx,nullptr, &knownBadFEBs, &knownMNBFEBs, nullptr, nullptr, nullptr)));
 
     return StatusCode::SUCCESS;      
   } 
@@ -60,6 +63,9 @@ StatusCode LArNoisyROAlg::execute (const EventContext& ctx) const
   
   std::set<unsigned int> bf;
   std::vector<HWIdentifier> MNBfeb;
+  const LArHVNMap* hvmap=nullptr;
+  const CaloDetDescrManager* cddm=nullptr;
+  const LArHVIdMapping* hvid=nullptr;
   if (! m_isMC) {
     SG::ReadCondHandle<LArBadFebCont> badHdl(m_knownBadFEBsVecKey, ctx);
     const LArBadFebCont* badCont=*badHdl;
@@ -76,6 +82,30 @@ StatusCode LArNoisyROAlg::execute (const EventContext& ctx) const
         MNBfeb.emplace_back(i->first);
       } 
     }
+
+    SG::ReadCondHandle<LArHVNMap> hvMapHdl(m_hvMapKey, ctx);
+    if(!hvMapHdl.isValid()) {
+       ATH_MSG_WARNING( " Can not retrieve HVline nCells: " << m_hvMapKey.key());
+       ATH_MSG_WARNING( " Will not flag HV lines noise !");
+    } else {
+       hvmap = *hvMapHdl;
+    }
+
+    SG::ReadCondHandle<CaloDetDescrManager> cddmHdl(m_caloDetDescrMgrKey, ctx);
+    if(!cddmHdl.isValid()) {
+       ATH_MSG_WARNING( " Can not retrieve CaloDetDesrManager: " << m_caloDetDescrMgrKey.key());
+       ATH_MSG_WARNING( " Will not flag HV lines noise !");
+    } else {
+       cddm = *cddmHdl;
+    }
+
+    SG::ReadCondHandle<LArHVIdMapping> hvidHdl(m_hvCablingKey, ctx);
+    if(!hvidHdl.isValid()) {
+       ATH_MSG_WARNING( " Can not retrieve LArHVIdMapping: " << m_hvCablingKey.key());
+       ATH_MSG_WARNING( " Will not flag HV lines noise !");
+    } else {
+       hvid = *hvidHdl;
+    }
   }
 
   ATH_MSG_DEBUG("Number of known Bad FEBs: "<<bf.size());
@@ -84,7 +114,8 @@ StatusCode LArNoisyROAlg::execute (const EventContext& ctx) const
 
 
   SG::WriteHandle<LArNoisyROSummary> noisyRO(m_outputKey, ctx);
-  ATH_CHECK(noisyRO.record(m_noisyROTool->process(cellContainer.cptr(), &bf, &MNBfeb)));
+  ATH_CHECK(noisyRO.record(m_noisyROTool->process(ctx,cellContainer.cptr(), &bf, &MNBfeb, hvmap, cddm, hvid)));
+  ATH_MSG_DEBUG("Recorded LArNoisyROSummary with key: "<<m_outputKey.key());
 
 
   bool badFEBFlag=noisyRO->BadFEBFlaggedPartitions();
@@ -93,9 +124,10 @@ StatusCode LArNoisyROAlg::execute (const EventContext& ctx) const
   bool MNBLooseCut=noisyRO->MNBLooseFlaggedPartitions();
   bool MNBTightCut=noisyRO->MNBTightFlaggedPartitions();
   bool MNBTight_PsVetoCut=noisyRO->MNBTight_PsVetoFlaggedPartitions();
+  bool badHVlinesFlag=noisyRO->HVlineFlaggedPartitions();
   
   SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
-  if ( badFEBFlag || badFEBFlag_W || badSaturatedTightCut || MNBLooseCut || MNBTightCut || MNBTight_PsVetoCut) 
+  if ( badFEBFlag || badFEBFlag_W || badSaturatedTightCut || MNBLooseCut || MNBTightCut || MNBTight_PsVetoCut || badHVlinesFlag ) 
   {
     // retrieve EventInfo
     bool failSetWARN=false;
@@ -134,6 +166,11 @@ StatusCode LArNoisyROAlg::execute (const EventContext& ctx) const
     if ( MNBLooseCut ) { //FIXME Tight cut actually implies loose cut too
       failSetWARNREASON |=(!eventInfo->updateEventFlagBit(xAOD::EventInfo::LAr,LArEventBitInfo::MININOISEBURSTLOOSE));
     }
+
+    if ( badHVlinesFlag ) {
+      failSetWARN |= (!eventInfo->updateErrorState(xAOD::EventInfo::LAr,xAOD::EventInfo::Warning));
+      failSetWARNREASON |= (!eventInfo->updateEventFlagBit(xAOD::EventInfo::LAr,LArEventBitInfo::BADHVLINES));
+    }//endif badFEBFlag
 
     if (failSetWARN) ATH_MSG_WARNING( "Failure during EventInfo::setEventErrorState(EventInfo::LAR,EventInfo::WARNING)"  );
     if (failSetWARNREASON) ATH_MSG_WARNING( "Failure during setEventFlagBit(EventInfo::LAr,...)"  );

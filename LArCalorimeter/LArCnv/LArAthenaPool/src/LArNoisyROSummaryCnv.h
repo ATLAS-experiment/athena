@@ -6,12 +6,12 @@
 #define LArNoisyROSummaryCnv_h
 
 #include "LArRecEvent/LArNoisyROSummary.h"
-#include "LArTPCnv/LArNoisyROSummary_p5.h"
-#include "LArTPCnv/LArNoisyROSummaryCnv_p5.h"
+#include "LArTPCnv/LArNoisyROSummary_p6.h"
+#include "LArTPCnv/LArNoisyROSummaryCnv_p6.h"
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustomCnv.h"
 
 
-typedef LArNoisyROSummary_p5 LArNoisyROSummary_PERSISTENT;
+typedef LArNoisyROSummary_p6 LArNoisyROSummary_PERSISTENT;
 typedef T_AthenaPoolCustomCnv<LArNoisyROSummary,LArNoisyROSummary_PERSISTENT> LArNoisyROSummaryCnvBase;
  
 class LArNoisyROSummaryCnv : public LArNoisyROSummaryCnvBase 
@@ -23,7 +23,7 @@ public:
   virtual LArNoisyROSummary_PERSISTENT* createPersistent(LArNoisyROSummary*);
   private:
  
-  LArNoisyROSummaryCnv_p5 m_converter;
+  LArNoisyROSummaryCnv_p6 m_converter;
  
 };
  

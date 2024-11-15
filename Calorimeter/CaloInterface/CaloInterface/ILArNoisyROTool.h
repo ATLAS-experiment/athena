@@ -21,8 +21,12 @@
 class CaloCellContainer;
 class LArNoisyROSummary;
 class HWIdentifier;
+class EventContext;
+class LArHVNMap;
+class CaloDetDescrManager;
+class LArHVIdMapping;
 
-static const InterfaceID IID_ILArNoisyROTool("ILArNoisyROTool", 1, 0);
+static const InterfaceID IID_ILArNoisyROTool("ILArNoisyROTool", 2, 0);
 
 class ILArNoisyROTool
   : virtual public ::IAlgTool
@@ -35,7 +39,7 @@ class ILArNoisyROTool
   static const InterfaceID& interfaceID();
 
   virtual 
-  std::unique_ptr<LArNoisyROSummary> process(const CaloCellContainer*, const std::set<unsigned int>* knownBadFebs, const std::vector<HWIdentifier>* knownMNBFebs ) const =0;
+  std::unique_ptr<LArNoisyROSummary> process(const EventContext& ctx, const CaloCellContainer*, const std::set<unsigned int>* knownBadFebs, const std::vector<HWIdentifier>* knownMNBFebs, const LArHVNMap* hvmap=nullptr, const CaloDetDescrManager* cddm=nullptr, const LArHVIdMapping* hvid=nullptr) const =0;
 
 }; 
 

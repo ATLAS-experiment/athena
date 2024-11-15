@@ -33,6 +33,7 @@ StatusCode LArAutoCorr2Ntuple::stop() {
  StatusCode sc; 
  NTuple::Array<float> cov;
  NTuple::Item<long> gain, cellIndex;
+ NTuple::Item<long> corrUndo;
  sc=m_nt->addItem("gain",gain,0,3);
  if (sc!=StatusCode::SUCCESS) {
    ATH_MSG_ERROR( "addItem 'gain' failed" );
@@ -48,6 +49,12 @@ StatusCode LArAutoCorr2Ntuple::stop() {
  sc=m_nt->addItem("covr",m_nsamples-1,cov);
  if (sc!=StatusCode::SUCCESS) {
    ATH_MSG_ERROR( "addItem 'covr' failed" );
+   return StatusCode::FAILURE;
+ }
+
+ sc=m_nt->addItem("corrUndo",corrUndo,0,2);
+ if (sc!=StatusCode::SUCCESS) {
+   ATH_MSG_ERROR( "addItem 'corrUndo' failed" );
    return StatusCode::FAILURE;
  }
 
@@ -68,10 +75,27 @@ StatusCode LArAutoCorr2Ntuple::stop() {
        larAutoCorr = *acHdl;
     }
  }
+ 
  if(larAutoCorr==nullptr){
    ATH_MSG_ERROR( "Unable to retrieve ILArAutoCorr with key " << m_objKey.key() << " neither from DetectorStore neither from conditions" );
    return StatusCode::FAILURE;
  }
+
+ LArAutoCorrComplete* larAutoCorr_nc=nullptr;
+ if (m_applyCorr) {
+      if (!dynamic_cast<const LArAutoCorrComplete*>(larAutoCorr)->correctionsApplied()) {
+        larAutoCorr_nc=const_cast<LArAutoCorrComplete*>(dynamic_cast<const LArAutoCorrComplete*>(larAutoCorr));
+        sc=larAutoCorr_nc->applyCorrections();
+        if (sc.isFailure()) {
+          ATH_MSG_ERROR( "Failed to apply corrections to LArCaliWaveContainer!" );
+        }
+        else
+          ATH_MSG_INFO( "Applied corrections to LArCaliWaveContainer" );
+      }
+      else {
+        ATH_MSG_WARNING( "Corrections already applied. Can't apply twice!" );
+      }
+ }// end if applyCorr
 
  unsigned cellCounter=0;
  unsigned cellZeroCounter=0;
@@ -87,6 +111,7 @@ StatusCode LArAutoCorr2Ntuple::stop() {
        for(unsigned i=0;i<m_nsamples-1 && i<corr.size();i++)
          cov[i] = corr[i];
 
+       corrUndo=0;
        sc = ntupleSvc()->writeRecord(m_nt);
        if (sc!=StatusCode::SUCCESS) {
          ATH_MSG_ERROR( "writeRecord failed" );
@@ -97,6 +122,29 @@ StatusCode LArAutoCorr2Ntuple::stop() {
    }//end if loop over cells
  }//end if loop over gains
  
+ if (m_addCorrUndo) {
+    for ( unsigned igain=CaloGain::LARHIGHGAIN; 
+          igain<CaloGain::LARNGAIN ; ++igain ) {
+	LArAutoCorrComplete::ConstCorrectionIt itUndo=dynamic_cast<const LArAutoCorrComplete*>(larAutoCorr)->undoCorrBegin(igain);
+	LArAutoCorrComplete::ConstCorrectionIt itUndo_e=dynamic_cast<const LArAutoCorrComplete*>(larAutoCorr)->undoCorrEnd(igain);
+	for(;itUndo!=itUndo_e;itUndo++) {
+	  const HWIdentifier hwid(itUndo->first);
+	  const LArAutoCorrP1& ac = itUndo->second;
+
+          fillFromIdentifier(hwid); 
+          for(unsigned i=0;i<m_nsamples-1 && i<ac.m_vAutoCorr.size();i++) cov[i] = ac.m_vAutoCorr[i];
+          gain=igain;
+          corrUndo=1;
+          sc = ntupleSvc()->writeRecord(m_nt);
+          if (sc!=StatusCode::SUCCESS) {
+            ATH_MSG_ERROR( "writeRecord failed" );
+            return StatusCode::FAILURE;
+          }
+        }
+    }//gain
+ }//if m_corrUndo
+
+
  ATH_MSG_INFO( "LArAutoCorr2Ntuple has finished, " << cellCounter << "records written, " << cellZeroCounter << " zero length vectors" );
  return StatusCode::SUCCESS;
 }// end finalize-method.

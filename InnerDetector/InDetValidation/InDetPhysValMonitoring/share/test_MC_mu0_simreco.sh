@@ -120,6 +120,7 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
      -c ${dcubeshiftercfg_rec} \
      -r ${dcuberef_rec} \
      ${dcubemon_rec}
+   echo "art-result: $? dcube_rec"
    
    echo "compare with last build"
    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \

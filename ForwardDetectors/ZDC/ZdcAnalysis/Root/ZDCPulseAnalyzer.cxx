@@ -464,7 +464,7 @@ void ZDCPulseAnalyzer::enableFADCCorrections(bool correctPerSample, std::unique_
   };
   auto xmin= getXmin(correHistHG.get());
   auto xmax= getXmax(correHistHG.get());
-  if (std::abs(xmin) > 1e-3 || std::abs(xmax - 4096) > 1e-3) {
+  if (std::abs(xmin+0.5) > 1e-3 || std::abs(xmax - 4095.5) > 1e-3) {
     (*m_msgFunc_p)(ZDCMsg::Error, "ZDCPulseAnalyzer::enableFADCCorrections:: invalid high gain correction histogram range: xmin, xmax = " +
 				   std::to_string(xmin ) + ", " + std::to_string(xmax) );
   }
@@ -473,8 +473,8 @@ void ZDCPulseAnalyzer::enableFADCCorrections(bool correctPerSample, std::unique_
   }
   xmin= getXmin(correHistLG.get());
   xmax= getXmax(correHistLG.get());
-  if (std::abs(xmin) > 1e-3 ||
-      std::abs(xmax - 4096) > 1e-3) {
+  if (std::abs(xmin+0.5) > 1e-3 ||
+      std::abs(xmax - 4095.5) > 1e-3) {
     (*m_msgFunc_p)(ZDCMsg::Error, "ZDCPulseAnalyzer::enableFADCCorrections:: invalid low gain correction histogram range: xmin, xmax = " +
 				   std::to_string(xmin) + ", " + std::to_string(xmax) );
   }

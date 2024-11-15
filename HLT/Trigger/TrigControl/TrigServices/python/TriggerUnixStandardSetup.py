@@ -49,6 +49,7 @@ def commonServicesCfg(flags):
         StackTrace = True,       # then produce full stacktrace using gdb
         DumpCoreFile = True,     # also produce core file (if allowed by ulimit -c)
         FatalHandler = 0,        # no extra fatal handler
+        KillOnSigInt = False,    # let HLTMPPU handle Ctrl-C (ATR-30452)
         TimeOut = 120e9),        # timeout for stack trace generation changed to 120s (ATR-17112,ATR-25404)
                     create = True )    # always create the service
 

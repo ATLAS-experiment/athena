@@ -32,6 +32,11 @@ StatusCode LArCalibPatchingAlg<CONDITIONSCONTAINER>::initialize() {
     return StatusCode::SUCCESS;
   }
   else if (m_patchMethodProp=="PhiAverage") {
+    if (typeid(CONDITIONSCONTAINER)==typeid(LArAutoCorrComplete)) {
+      ATH_MSG_ERROR ( "PhiAverage not implemented for LArAutoCorrComlete." 
+                      << "Please choose other patching strategy" );
+      return StatusCode::FAILURE;
+    }
     m_patchMethod=PhiAverage;
     return StatusCode::SUCCESS;
   }
@@ -622,6 +627,53 @@ bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::getAverage(const HWIdentifier chi
   return true;
 }
 
+template<class CONDITIONSCONTAINER>
+bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::getAverage(const HWIdentifier chid, const int gain, LArAutoCorrP1& patch, const LArBadChannelCont* bcCont, const LArOnOffIdMapping* /*cabling*/, bool isphi) {
+
+  ATH_MSG_DEBUG ( "Starting getAverage for LArAutoCorr" );
+  if(isphi) { 
+    ATH_MSG_ERROR ( "No phi-average for AutoCorr!" );
+    return false;
+  }
+  std::vector<HWIdentifier>& symCells = getFEBChans(chid, bcCont);
+  if (symCells.empty()) {
+    ATH_MSG_ERROR ( "No symmetry cells found!" );
+    return false;
+  }
+  size_t s=m_contIn->get(symCells[0],gain).m_vAutoCorr.size();
+  patch.m_vAutoCorr.clear();
+  patch.m_vAutoCorr.resize(s);
+  unsigned nCells=0;
+  for (HWIdentifier hwid : symCells) {
+    const LArAutoCorrP1& ac=m_contIn->get(hwid,gain);
+    if (ac.m_vAutoCorr.size()==0) continue; //This one is empty...
+    if (ac.m_vAutoCorr.size()!=s) {
+        ATH_MSG_WARNING ("Cell with same FEB but different size of autocorr found!" );
+      continue;
+    }
+    msg() << MSG::DEBUG << "Adding cell 0x"<< std::hex << hwid.get_compact() << std::dec << " AC:";
+    for (size_t i=0;i<s;i++) {
+      patch.m_vAutoCorr[i]+=ac.m_vAutoCorr[i];
+      msg() << MSG::DEBUG << ac.m_vAutoCorr[i] << " ";
+    }
+    msg() << MSG::DEBUG << endmsg;
+    nCells++;
+  }
+  if (nCells==0) {
+      ATH_MSG_ERROR ( "No good autocorr with same FEB found!" );
+    return false;
+  }
+  for (size_t i=0;i<s;i++)
+   patch.m_vAutoCorr[i]=patch.m_vAutoCorr[i]/nCells;
+
+  //FIXME: We should somehow watch the rms....
+  msg() << MSG::INFO << "Patched autocorr (based on " << nCells << " channels):" ; 
+  for (size_t i=0;i<s;i++)
+    msg() << MSG::INFO << " " << patch.m_vAutoCorr[i];
+  msg() << MSG::INFO << endmsg;
+  return true;
+}
+
 #ifdef LARRAWCONDITIONS_LARMPHYSOVERMCALP
 template<class CONDITIONSCONTAINER>
 bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::getAverage(const HWIdentifier chid, const int gain, LArMphysOverMcalP1& patch, const LArBadChannelCont* bcCont, const LArOnOffIdMapping* cabling, bool isphi) {
@@ -713,6 +765,16 @@ bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::setZero(const HWIdentifier /*chid
   return false;
 }
 
+template<class CONDITIONSCONTAINER>
+bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::setZero(const HWIdentifier chid, const int gain, LArAutoCorrP1& patch) {
+
+  size_t s=m_contIn->get(chid,gain).m_vAutoCorr.size();
+  patch.m_vAutoCorr.clear();
+  patch.m_vAutoCorr.resize(s);
+  for (size_t i=0; i<s; ++i) patch.m_vAutoCorr[i] = 0.;
+  return true;
+}
+
 #ifdef LARRAWCONDITIONS_LARSINGLEFLOATP
 template<class CONDITIONSCONTAINER>
 bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::setZero(LArSingleFloatP& patch) {
@@ -739,6 +801,12 @@ StatusCode  LArCalibPatchingAlg<CONDITIONSCONTAINER>::setSymlink(const LArOFCCom
 template<class CONDITIONSCONTAINER>
 StatusCode  LArCalibPatchingAlg<CONDITIONSCONTAINER>::setSymlink(const LArMphysOverMcalComplete* ramp) const {
   ATH_CHECK( detStore()->symLink(ramp, (ILArMphysOverMcal*)ramp) );
+  return StatusCode::SUCCESS;
+}
+
+template<class CONDITIONSCONTAINER>
+StatusCode  LArCalibPatchingAlg<CONDITIONSCONTAINER>::setSymlink(const LArAutoCorrComplete* ac) const {
+  ATH_CHECK( detStore()->symLink(ac, (ILArAutoCorr*)ac) );
   return StatusCode::SUCCESS;
 }
 

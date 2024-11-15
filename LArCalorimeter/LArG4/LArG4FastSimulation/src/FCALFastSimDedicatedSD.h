@@ -29,7 +29,7 @@ public:
   ~FCALFastSimDedicatedSD() {}
 
   // ProcessHitsMethod
-  virtual void ProcessSpot(const EnergySpot & spot) override final;
+  virtual void ProcessSpot(const EnergySpot & spot, double weight) override final;
 
 private:
 

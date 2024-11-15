@@ -113,7 +113,7 @@ StatusCode TrigLArNoiseBurstRecoAlg::execute( const EventContext& context ) cons
   unsigned int flag = 0;
   bool pass=false;
   ATH_MSG_DEBUG ("Got cell container, will process it");
-  std::unique_ptr<LArNoisyROSummary> noisyRO = m_noisyROTool->process(cellsHandle.cptr(), &bf, &MNBfeb);
+  std::unique_ptr<LArNoisyROSummary> noisyRO = m_noisyROTool->process(context, cellsHandle.cptr(), &bf, &MNBfeb, nullptr);
   ATH_MSG_DEBUG("processed it");
   if ( monitor ) { // input
     auto bitWise = Monitored::Scalar<std::string>(bitWise_flags,"Input");

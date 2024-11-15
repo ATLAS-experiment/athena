@@ -11,6 +11,6 @@ find_package( ROOT COMPONENTS RIO Core )
 
 atlas_add_component( LArTools
                      src/*.cxx src/components/*.cxx 
-                     LINK_LIBRARIES AthenaBaseComps Identifier LArElecCalib
+                     LINK_LIBRARIES AthenaBaseComps Identifier LArElecCalib CaloInterfaceLib
 		     ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} CaloIdentifier AthenaPoolUtilities LArRecConditions )
 

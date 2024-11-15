@@ -124,6 +124,13 @@ LArFCalTowerBuilderTool::iterateSubSeg (CaloTowerContainer* towers,
 // Find Towers in FCal //
 /////////////////////////
 
+void LArFCalTowerBuilderTool::runTimeInit(const EventContext& ctx) const {
+    //cast alway const-ness, acceptable since this is protected under a std::call_once
+    LArFCalTowerBuilderTool* thisNC ATLAS_THREAD_SAFE = const_cast<LArFCalTowerBuilderTool*>(this);
+    if( thisNC->rebuildLookup(ctx)!=StatusCode::SUCCESS )
+       throw std::runtime_error("LArFCalTowerBuilderTool::runTimeInit rebuildLookup table failed");
+}
+
 StatusCode
 LArFCalTowerBuilderTool::execute(const EventContext& ctx,
                                  CaloTowerContainer* theTowers,
@@ -133,15 +140,7 @@ LArFCalTowerBuilderTool::execute(const EventContext& ctx,
 
   //Init internal structure m_cellStore on first invocation
   //Alignment updates are not taken into account! 
-  if (m_cellStoreInit.load() == false) {
-    //Aquire mutex before writing to m_cellStore
-    std::scoped_lock guard(m_cellStoreMutex);
-    //cast alway const-ness, acceptable since this is protected by a mutex
-    LArFCalTowerBuilderTool* thisNC ATLAS_THREAD_SAFE = const_cast<LArFCalTowerBuilderTool*>(this);
-    ATH_CHECK( thisNC->rebuildLookup(ctx) );
-    m_cellStoreInit.store(true);
-  }
-
+  std::call_once(m_onceFlag,&LArFCalTowerBuilderTool::runTimeInit,this,ctx);
 
   if (m_cellStore.size() == 0) {
     ATH_MSG_ERROR("Cell store not initialized.");
@@ -205,6 +204,7 @@ StatusCode LArFCalTowerBuilderTool::execute (const EventContext& ctx,
  */
 StatusCode LArFCalTowerBuilderTool::rebuildLookup(const EventContext& ctx)
 {
+//  std::cout << "rebuildLookup in context : " << ctx << std::endl;
   ATH_MSG_DEBUG("Building lookup table");
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle(m_caloMgrKey,ctx);
   const CaloDetDescrManager* theManager = *caloMgrHandle;

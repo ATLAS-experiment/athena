@@ -212,7 +212,7 @@ StatusCode LArADC2MeVCondAlg::execute(const EventContext& ctx) const{
 	  continue;
 	}
       
-        ATH_MSG_DEBUG(chid.get_identifier32().get_compact()
+        ATH_MSG_VERBOSE(chid.get_identifier32().get_compact()
                             << " gain (" << igain<< ") "
                             << " uA2MeV (" << uA2MeV << ") "
                             << " DAC2uA (" << DAC2uA << ") "

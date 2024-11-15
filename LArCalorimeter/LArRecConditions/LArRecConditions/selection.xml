@@ -13,5 +13,8 @@
   <class name="LArCalibLineMapping" />
   <class name="CondCont<LArCalibLineMapping>" />
 
+  <class name="LArHVNMap" />
+  <class name="CondCont<LArHVNMap>" />
+
 </lcgdict>
 

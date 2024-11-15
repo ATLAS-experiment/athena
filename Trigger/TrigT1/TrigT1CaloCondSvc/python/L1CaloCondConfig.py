@@ -36,7 +36,6 @@ def L1CaloCondAlgCfg(flags, readTest=False, Physics=True, Calib1=False, Calib2=F
         L1CaloFolders['PprChanStrategy'] = "/TRIGGER/L1Calo/V2/Configuration/PprChanStrategy"
         L1CaloFolders['PpmFineTimeRefs'] =  "/TRIGGER/L1Calo/V1/References/FineTimeReferences"
         L1CaloFolders['RunParameters'] = "/TRIGGER/L1Calo/V1/Conditions/RunParameters"
-        L1CaloFolders['PprChanStrategy'] = '/TRIGGER/Receivers/Conditions/Strategy'
         L1CaloFolders['DerivedRunPars'] =   '/TRIGGER/L1Calo/V1/Conditions/DerivedRunPars'
 
 

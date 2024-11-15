@@ -146,6 +146,14 @@ CaloTowerBuilderTool::iterateSubSeg (CaloTowerContainer* towers,
 ///////////////////
 
 
+void CaloTowerBuilderTool::runTimeInit(const EventContext& ctx) const {
+    //cast alway const-ness, acceptable since this is protected under a std::call_once
+    CaloTowerBuilderTool* thisNC ATLAS_THREAD_SAFE = const_cast<CaloTowerBuilderTool*>(this);
+    if( thisNC->rebuildLookup(ctx)!=StatusCode::SUCCESS )
+        throw std::runtime_error("LArFCalTowerBuilderTool::runTimeInit rebuildLookup table failed");
+    }
+
+
 /**
  * @brief Run tower building and add results to the tower container.
  *        If a cell container is provided, use that; otherwise, fetch
@@ -171,14 +179,7 @@ CaloTowerBuilderTool::execute(const EventContext& ctx,
 
   //Init internal structure m_cellStore on first invocation
   //Alignment updates are not taken into account! 
-  if (!m_cellStoreInit.load()) {
-    //Aquire mutex before writing to m_cellStore
-      std::scoped_lock guard(m_cellStoreMutex);
-      //cast alway const-ness, acceptable since this is protected by a mutex
-      CaloTowerBuilderTool* thisNC ATLAS_THREAD_SAFE = const_cast<CaloTowerBuilderTool*>(this);
-      ATH_CHECK( thisNC->rebuildLookup(ctx) );
-      m_cellStoreInit.store(true);
-  }
+  std::call_once(m_onceFlag,&CaloTowerBuilderTool::runTimeInit,this,ctx);
 
   // CaloCellContainer
   if (!theCells) {

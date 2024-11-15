@@ -215,13 +215,12 @@ def fromRunArgs(runArgs):
     tryError(command,"ERROR: Failed running TRTCalib_StrawStatusReport.cxx\n")
  
     ##################################################################################################
-    nextstep("Straw status plots (root macro)")
+    nextstep("Straw status plots (.cxx)")
     ##################################################################################################
        
-    from ROOT import PathResolver
-    command  = "root -l -b -q %s" % (PathResolver.FindCalibFile("TRT_CalibAlgs/TRTCalib_StrawStatusReport.C"))
+    command  = "TRTCalib_StrawStatusPlots"
     
-    tryError(command,"ERROR: Failed running root macro TRTCalib_StrawStatusReport.C\n")
+    tryError(command,"ERROR: Failed running root macro TRTCalib_StrawStatusPlots\n")
  
     ##################################################################################################
     nextstep("TAR'ing files")

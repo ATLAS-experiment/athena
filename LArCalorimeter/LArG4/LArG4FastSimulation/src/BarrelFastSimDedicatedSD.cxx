@@ -35,7 +35,7 @@ BarrelFastSimDedicatedSD::BarrelFastSimDedicatedSD(StoreGateSvc* detStore, bool 
 }
 
 // ProcessHitsMethod
-void BarrelFastSimDedicatedSD::ProcessSpot(const EnergySpot  & spot){
+void BarrelFastSimDedicatedSD::ProcessSpot(const EnergySpot  & spot, double weight){
 
   // Fill the identifier.
   Point3D<double> globalPosition=spot.GetPosition();
@@ -150,7 +150,7 @@ void BarrelFastSimDedicatedSD::ProcessSpot(const EnergySpot  & spot){
                 << etaIndex
                 << phiIndex;
         // call process to add this to the collection 
-        SimpleHit(m_larID, spot.GetTime(), spot.GetEnergy());
+        SimpleHit(m_larID, spot.GetTime(), spot.GetEnergy()*weight);
 
         return;
       }

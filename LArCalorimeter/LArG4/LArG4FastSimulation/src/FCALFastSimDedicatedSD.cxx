@@ -29,7 +29,7 @@ FCALFastSimDedicatedSD::FCALFastSimDedicatedSD(StoreGateSvc* detStore, bool verb
 }
 
 // ProcessHitsMethod
-void FCALFastSimDedicatedSD::ProcessSpot(const EnergySpot  & spot){
+void FCALFastSimDedicatedSD::ProcessSpot(const EnergySpot  & spot, double weight){
   // Fill the identifier.
 
   static const Transform3D xfNeg[3] = {
@@ -98,6 +98,6 @@ void FCALFastSimDedicatedSD::ProcessSpot(const EnergySpot  & spot){
   }
 
   // call process to add this to the collection 
-  SimpleHit(m_larID, spot.GetTime(), spot.GetEnergy());
+  SimpleHit(m_larID, spot.GetTime(), spot.GetEnergy()*weight);
   return;
 }

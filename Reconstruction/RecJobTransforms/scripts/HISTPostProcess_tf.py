@@ -53,15 +53,27 @@ def addMyArgs(parser):
                         type=trfArgClasses.argFactory(trfArgClasses.argHISTFile, io='output', countable=False), 
                         help='Output DQ monitoring file', group='HISTPostProcess_tf')
     
-    parser.add_argument('--excludeDir', help='Regex pattern for directories to exclude from merge',group='HISTPostProcess_tf')
+    parser.add_argument('--excludeDir', help='Regex pattern for directories to exclude from merge',group='HISTPostProcess_tf',
+                        type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True))
+                        
     parser.add_argument('--excludeHist', help='Regex pattern for histogram names to exclude from merge\n'
-                                            'Note that this is just the name - paths cannot be specified',group='HISTPostProcess_tf')
+                                            'Note that this is just the name - paths cannot be specified',group='HISTPostProcess_tf',
+                        type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True))
     
-    parser.add_argument('--run_post_processing', default=False, help='False/True/0/1 default=0',group='HISTPostProcess_tf')
-    parser.add_argument('--is_incremental_merge', default=False, help='False/True/0/1 default=0',group='HISTPostProcess_tf')
-    parser.add_argument("--servers",type=str, help="string with comma-separated server names to override normal config", group='HISTPostProcess_tf')
-    parser.add_argument("--doWebDisplay",default=False,help="Produce Webdisplay")
-    parser.add_argument("--allowCOOLUpload",default=False,help="allow upload of defects to database")
+    parser.add_argument('--run_post_processing', default=False, help='False/True/0/1 default=0',group='HISTPostProcess_tf',
+                        type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True))
+
+    parser.add_argument('--is_incremental_merge', default=False, help='False/True/0/1 default=0',group='HISTPostProcess_tf',
+                        type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True))
+                        
+    parser.add_argument("--servers", help="string with comma-separated server names to override normal config", group='HISTPostProcess_tf',
+                        type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True))
+                            
+    parser.add_argument("--doWebDisplay",default=False,help="Produce Webdisplay",
+                        type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True))
+    
+    parser.add_argument("--allowCOOLUpload",default=False,help="allow upload of defects to database",
+                        type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True))
 
 if __name__ == '__main__':
     main()

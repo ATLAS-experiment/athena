@@ -395,7 +395,8 @@ EMECHVManager::getData (const LArHVIdMapping& hvIdMapping,
 
 int EMECHVManager::hvLineNo(const EMECHVElectrode& electrode
 			    , int gap
-			    , const LArHVIdMapping* hvIdMapping) const
+			    , const LArHVIdMapping* hvIdMapping
+                            , HWIdentifier *hvlId) const
 {
   const EMECHVModule& module      = electrode.getModule();
   int etaIndex          = module.getEtaIndex();
@@ -464,7 +465,9 @@ int EMECHVManager::hvLineNo(const EMECHVElectrode& electrode
 
   // Get LArHVLineID corresponding to a given LArElectrodeId
   HWIdentifier id = hvIdMapping->getLArHVLineID(elecHWID);
-  
+
+  if(hvlId) *hvlId=id;
+
   // Extract HV Line No
   return m_c->hvId->can_node(id)*1000 + m_c->hvId->hv_line(id);
 }

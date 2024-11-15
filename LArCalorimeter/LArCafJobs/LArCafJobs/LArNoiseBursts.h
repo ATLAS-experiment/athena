@@ -23,6 +23,7 @@
 #include "LArIdentifier/LArElectrodeID.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloIdentifier/CaloCell_ID.h"
+#include "LArRecEvent/LArNoisyROSummary.h"
 
 // Trigger
 #include "TrigDecisionTool/TrigDecisionTool.h"
@@ -59,7 +60,6 @@ class ATLAS_NOT_THREAD_SAFE LArNoiseBursts : public AthAlgorithm  {
    LArNoiseBursts(const std::string& name, ISvcLocator* pSvcLocator);
    virtual ~LArNoiseBursts() = default;
 
-   //virtual StatusCode initializeBeforeEventLoop();
    virtual StatusCode initialize() override;
    virtual StatusCode finalize() override;
    virtual StatusCode execute() override;
@@ -71,7 +71,6 @@ class ATLAS_NOT_THREAD_SAFE LArNoiseBursts : public AthAlgorithm  {
    StatusCode doTrigger();
    StatusCode doEventProperties();
    StatusCode doLArNoiseBursts();  
-   StatusCode doPhysicsObjects();
 
    //functions
    int GetPartitionLayerIndex(const Identifier& id);
@@ -100,6 +99,7 @@ class ATLAS_NOT_THREAD_SAFE LArNoiseBursts : public AthAlgorithm  {
    /*Tools*/
    PublicToolHandle< Trig::TrigDecisionTool > m_trigDec{this, "TrigDecisionTool", "", "Handle to the TrigDecisionTool"};
 
+   SG::ReadHandleKey<LArNoisyROSummary> m_NoisyROKey { this, "LArNoisyROSummaryKey","LArNoisyROSummary","SG Key of LArNoisyROSummar object"};
    /*services*/
    const LArOnlineID* m_LArOnlineIDHelper;
    const LArHVLineID* m_LArHVLineIDHelper;
@@ -146,29 +146,6 @@ class ATLAS_NOT_THREAD_SAFE LArNoiseBursts : public AthAlgorithm  {
    unsigned int m_nt_stablebeams;
    std::vector<std::string> m_nt_streamTagName;
    std::vector<std::string> m_nt_streamTagType;
-   short  m_nt_larnoisyro;
-   short  m_nt_larnoisyro_opt;
-   short  m_nt_larnoisyro_satTwo;
-   short  m_nt_larmnbnoisy;
-   short  m_nt_larmnbnoisy_sat;
-
-   //event info veto variables
-//   short  m_nt_veto_mbts;
-//   //short  m_nt_veto_indet;
-//   short  m_nt_veto_bcm;
-//   short  m_nt_veto_lucid;
-//   short  m_nt_veto_pixel;
-//   short  m_nt_veto_sct;
-//   short  m_nt_veto_mbtstdHalo;
-//   short  m_nt_veto_mbtstdCol;
-//   short  m_nt_veto_lartdHalo;
-//   short  m_nt_veto_lartdCol;
-//   short  m_nt_veto_csctdHalo;
-//   short  m_nt_veto_csctdCol;
-//   short  m_nt_veto_bcmtHalo;
-//   short  m_nt_veto_bcmtCol;
-//   short  m_nt_veto_muontCol;
-//   short  m_nt_veto_muontCosmic;
 
    // LAr event bit info
    bool m_nt_larflag_badFEBs;
@@ -177,6 +154,15 @@ class ATLAS_NOT_THREAD_SAFE LArNoiseBursts : public AthAlgorithm  {
    bool m_nt_larflag_noiseBurstVeto;
    bool m_nt_larflag_dataCorrupted;
    bool m_nt_larflag_dataCorruptedVeto;
+   bool m_nt_larflag_badFEBS_w;
+   bool m_nt_larflag_mnbLoose;
+   bool m_nt_larflag_mnbTight;
+   bool m_nt_larflag_mnbTight_psveto;
+   bool m_nt_larflag_badHVlines;
+
+   uint8_t m_nt_badHVPartitions;
+   // bad HV lines
+   std::vector<unsigned int> m_nt_badHVlines;
 
    // NoiseBurst trigger
    bool m_nt_L1_J75;
@@ -232,13 +218,6 @@ class ATLAS_NOT_THREAD_SAFE LArNoiseBursts : public AthAlgorithm  {
    std::vector<int> m_nt_gain;
    std::vector<int> m_nt_isbadcell;
 
-   /*
-   std::vector<int> m_nt_isbarrel;
-   std::vector<int> m_nt_isendcap;
-   std::vector<int> m_nt_isfcal;
-   std::vector<int> m_nt_ishec;
-   */
-   
    std::vector<int>  m_nt_partition;
    std::vector<int>  m_nt_layer;
    
