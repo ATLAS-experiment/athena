@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <cstdlib>
 #include <atomic>
+#include <stdexcept>
+#include <format>
   
 
  
@@ -1158,21 +1160,13 @@ IdDictDictionary::pack32 (const ExpandedIdentifier& id,
             const IdDictFieldImplementation& impl = region.m_implementation[i]; 
  
             if (!impl.field().match (id[i]))  { 
-//                std::cout << "Region #" << region.m_index << 
-//  		  " field " << impl.range()->m_field_name << 
-//  		  " #" << i << " (" << (std::string) impl.field() << ") does not match " << 
-//  		  id[i] << std::endl; 
- 
                 selected = false; 
                 break; 
             } 
         } 
  
         if (selected) { 
-            size_t position = Identifier::NBITS;
- 
-//      	  std::cout << "Region #" << region.m_index << " selected" << std::endl; 
- 
+            size_t position = Identifier::NBITS; 
             // We have the proper region. 
             for (size_t i = index1; i <= index2; ++i) { 
                 const IdDictFieldImplementation& impl = region.m_implementation[i]; 
@@ -1927,9 +1921,15 @@ IdDictField::get_label_number () const {
   return m_labels.size (); 
 } 
  
-const std::string& 
+const std::string 
 IdDictField::get_label (size_t index) const { 
-  return m_labels.at(index)->m_name; 
+  std::string result;
+  try{
+    result = m_labels.at(index)->m_name;
+  } catch (std::out_of_range & e){
+    throw std::out_of_range(std::format("IdDictField::get_label : Attempt to access index {} in vector of size {}", index, m_labels.size()));
+  }
+  return result;
 } 
  
 ExpandedIdentifier::element_type 
@@ -2549,12 +2549,13 @@ IdDictRange::generate_implementation (const IdDictMgr& /*idd*/,
   impl.set_range(this); 
   if (m_field->m_index == 0)  { 
       m_field->m_index = region.m_implementation.size () - 1; 
-
   } else if (m_field->m_index != (region.m_implementation.size () - 1))  { 
       std::cout <<  "Bad field index for " << m_field_name 
 		<<  " index " << m_field->m_index 
 		<<  " in dictionary " << dictionary.m_name   
 		<<  " region #" << region.m_index 
+		<<  " group " << region.m_group
+		<<  " tag " <<region.m_tag
 		<<  " size " << (region.m_implementation.size () - 1)
 		<< std::endl; 
   } 
