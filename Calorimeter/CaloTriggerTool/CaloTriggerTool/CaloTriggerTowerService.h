@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOTRIGGERTOWERSERVICE_H
@@ -7,9 +7,6 @@
 
 // Gaudi
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/MsgStream.h"
-
-#include "AthenaKernel/IOVSvcDefs.h"
 
 #include <vector>
 #include <string>
@@ -29,7 +26,6 @@
 
 
 class Identifier;
-class HWIdentifier;
 class LArOnlineID;
 class LArEM_ID;
 class TTOnlineID;
@@ -55,12 +51,7 @@ class CaloTriggerTowerService : public AthAlgTool
   /** constructor */
   CaloTriggerTowerService( const std::string& type, const std::string& name, const IInterface* parent ) ;
 
-  StatusCode initialize( );
-  StatusCode finalize( );
-
-  bool is_initialized() const;
-
-  virtual StatusCode iovCallBack(IOVSVC_CALLBACK_ARGS);
+  virtual StatusCode initialize( ) override;
 
   //
   //======================= on-off mapping methods (Trigger Towers) ==================================
@@ -180,23 +171,24 @@ class CaloTriggerTowerService : public AthAlgTool
     const CaloTTPpmRxIdMap*  getCaloTTPpmRxIdMap() const;
 
     /** pointer to the LAr Online Id helper */
-    const LArOnlineID   * m_onlineHelper ;
+    const LArOnlineID   * m_onlineHelper{nullptr} ;
     /** pointer to the LArEM  offline Id helper */
-    const LArEM_ID      * m_emHelper ;
+    const LArEM_ID      * m_emHelper{nullptr};
     /** pointer to the Calo TT offline Id helper */
-    const CaloLVL1_ID   * m_lvl1Helper ;
+    const CaloLVL1_ID   * m_lvl1Helper{nullptr} ;
     /** pointer to the Calo TT online Id helper */
-    const TTOnlineID    * m_ttonlineHelper;
+    const TTOnlineID    * m_ttonlineHelper{nullptr};
 
     CxxUtils::CachedPointer<const LArTTCellMap>  m_TTCellMap;
     CxxUtils::CachedPointer<const CaloTTOnOffIdMap>  m_caloTTOnOffIdMap;
     CxxUtils::CachedPointer<const CaloTTOnAttrIdMap> m_caloTTOnAttrIdMap;
     CxxUtils::CachedPointer<const CaloTTPpmRxIdMap>  m_caloTTPpmRxIdMap;
 
-    std::string       m_TTCellMapKey;
-    std::string       m_caloTTOnOffIdMapKey;
-    std::string       m_caloTTOnAttrIdMapKey;
-    std::string       m_caloTTPpmRxIdMapKey;
+    Gaudi::Property<std::string> m_TTCellMapKey{this, "LArTTCellMapKey", "LArTTCellMapAtlas"};
+    Gaudi::Property<std::string> m_caloTTOnOffIdMapKey{this, "CaloTTOnOffIdMapKey", "CaloTTOnOffIdMapAtlas"};
+    Gaudi::Property<std::string> m_caloTTOnAttrIdMapKey{this, "CaloTTOnAttrIdMapKey", "CaloTTOnAttrIdMapAtlas"};
+    Gaudi::Property<std::string> m_caloTTPpmRxIdMapKey{this, "CaloTTPpmRxIdMapKey", "CaloTTPpmRxIdMapAtlas"};
+
 };
 
 #endif //CALOTRIGGERTOWERSERVICE_H
