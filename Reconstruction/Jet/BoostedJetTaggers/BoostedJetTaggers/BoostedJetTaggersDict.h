@@ -16,5 +16,7 @@
 #include "BoostedJetTaggers/JSSWTopTaggerANN.h"
 #include "BoostedJetTaggers/JetQGTagger.h"
 #include "BoostedJetTaggers/JetQGTaggerBDT.h"
+#include "BoostedJetTaggers/JSSMLTool.h"
+#include "BoostedJetTaggers/JSSTaggerUtils.h"
 
 #endif // BOOSTEDJETTAGGERS_BOOSTEDJETTAGGERSDICT_H
