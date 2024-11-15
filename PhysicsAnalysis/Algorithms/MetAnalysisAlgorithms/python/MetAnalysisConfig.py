@@ -114,7 +114,9 @@ class MetAnalysisConfig (ConfigBlock):
             config.addPrivateTool( 'significanceTool', 'met::METSignificance' )
             if self.muons != "" :
                 config.addPrivateTool( 'significanceTool.MuonCalibTool', 'CP::MuonCalibTool' )
-                alg.significanceTool.MuonCalibTool.calibMode = config._muonCalibMode
+                # Retrieve the calibMode from the container name.selections
+                alg.significanceTool.MuonCalibTool.calibMode = (
+                    config.calibMode(self.muons.split(".")[0]))
 
             alg.significanceTool.SoftTermParam = 0
             alg.significanceTool.TreatPUJets = self.treatPUJets

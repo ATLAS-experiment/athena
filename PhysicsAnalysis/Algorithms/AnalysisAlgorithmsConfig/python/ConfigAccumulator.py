@@ -50,10 +50,11 @@ class ContainerConfig :
     This tracks the naming of all temporary containers, as well as all the
     selection decorations."""
 
-    def __init__ (self, name, sourceName, *, originalName = None, noSysSuffix) :
+    def __init__ (self, name, sourceName, *, originalName = None, calibMode = None, noSysSuffix) :
         self.name = name
         self.sourceName = sourceName
         self.originalName = originalName
+        self.calibMode = calibMode
         self.noSysSuffix = noSysSuffix
         self.index = 0
         self.maxIndex = None
@@ -171,7 +172,6 @@ class ConfigAccumulator :
         self._selectionNameExpr = re.compile ('[A-Za-z_][A-Za-z_0-9]+')
         self.setSourceName ('EventInfo', 'EventInfo')
         self._eventcutflow = {}
-        self._muonCalibMode = -1
         self._hltSummary = hltSummary
 
         # If we are in an Athena environment with ComponentAccumulator configuration
@@ -315,7 +315,7 @@ class ConfigAccumulator :
 
 
     def setSourceName (self, containerName, sourceName,
-                       *, originalName = None) :
+                       *, originalName = None, calibMode = None) :
         """set the (default) name of the source/original container
 
         This is essentially meant to allow using e.g. the muon
@@ -328,9 +328,12 @@ class ConfigAccumulator :
         is mostly/exclusively used for jet containers, so that
         subsequent configurations know which jet container they
         operate on.
+
+        CalibMode can also be configured to pass it down to some algs which use this
+        information to be configured, like the METSignificance
         """
         if containerName not in self._containerConfig :
-            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName, noSysSuffix = self._noSysSuffix, originalName = originalName)
+            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName, noSysSuffix = self._noSysSuffix, originalName = originalName, calibMode = calibMode)
 
 
     def writeName (self, containerName, *, isMet=None) :
@@ -394,6 +397,15 @@ class ConfigAccumulator :
             raise Exception ("no original name for: " + containerName)
         return result
 
+    def calibMode (self, containerName) :
+        """get the calibration mode of the given container
+        """
+        if containerName not in self._containerConfig :
+            raise Exception ("container unknown: " + containerName)
+        result = self._containerConfig[containerName].calibMode
+        if result is None :
+            raise Exception ("no calibration mode for: " + containerName)
+        return result
 
     def isMetContainer (self, containerName) :
         """whether the given container is registered as a MET container

@@ -51,10 +51,9 @@ class MuonCalibrationConfig (ConfigBlock):
         else :
             raise ValueError ("invalid calibMode: \"" + self.calibMode + "\". Allowed values are correctData_CB, correctData_IDMS, notCorrectData_IDMS, notCorrectData_CB")
 
-        if config.isPhyslite() :
-            config.setSourceName (self.containerName, "AnalysisMuons")
-        else :
-            config.setSourceName (self.containerName, "Muons")
+        config.setSourceName (self.containerName,
+                              "AnalysisMuons" if config.isPhyslite() else "Muons",
+                              calibMode=calibMode)
 
         # Set up a shallow copy to decorate
         if config.wantCopy (self.containerName) :
@@ -80,8 +79,6 @@ class MuonCalibrationConfig (ConfigBlock):
 
         alg.calibrationAndSmearingTool.IsRun3Geo = config.geometry() >= LHCPeriod.Run3
         alg.calibrationAndSmearingTool.calibMode = calibMode
-        # To be used in MetAnalysisConfig
-        config._muonCalibMode = alg.calibrationAndSmearingTool.calibMode
         if config.geometry() is LHCPeriod.Run4:
             logging.warning("MuonCalibrationConfig: disabling NSW hits for Run4 geometry")
             alg.calibrationAndSmearingTool.ExcludeNSWFromPrecisionLayers = True
