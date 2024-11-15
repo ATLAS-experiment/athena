@@ -6,24 +6,15 @@
 #define MUONCONDINTERFACE_ITGCCABLINGDBTOOL_H
 
 // Includes for Gaudi
-#include "AthenaKernel/IAddressProvider.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "GaudiKernel/IAlgTool.h"
-
-// class TgcIdHelper;
 
 #include <string>
 #include <vector>
 
 
-
-class ITGCCablingDbTool : virtual public extend_interfaces<IAlgTool, IAddressProvider> {
+class ITGCCablingDbTool : virtual public extend_interfaces<IAlgTool> {
 public:
     DeclareInterfaceID(ITGCCablingDbTool, 1, 0);
-
-    virtual StatusCode loadParameters(IOVSVC_CALLBACK_ARGS) = 0;
-
-    virtual StatusCode loadASD2PP_DIFF_12(IOVSVC_CALLBACK_ARGS) = 0;
 
     virtual StatusCode readASD2PP_DIFF_12FromText() = 0;
 

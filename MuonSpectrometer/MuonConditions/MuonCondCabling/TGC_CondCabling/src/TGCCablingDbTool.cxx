@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TGCCablingDbTool.h" 
-
-#include "AthenaPoolUtilities/CondAttrListCollection.h"
+#include "TGCCablingDbTool.h"
 
 #include "PathResolver/PathResolver.h" // needed for readASD2PP_DIFF_12FromText()
 #include <fstream> // needed for readASD2PP_DIFF_12FromText()
@@ -21,12 +19,9 @@
 TGCCablingDbTool::TGCCablingDbTool(const std::string& type,
 				   const std::string& name,
 				   const IInterface* parent)
-  : AthAlgTool(type, name, parent),
-    m_DataLocation ("keyTGC"),
-    m_ASD2PP_DIFF_12(nullptr)
+  : base_class(type, name, parent),
+    m_DataLocation ("keyTGC")
 {
-  declareInterface<ITGCCablingDbTool>(this);
-  
   declareProperty("Folder", m_Folder="/TGC/CABLING/MAP_SCHEMA");
 
   // ASD2PP_diff_12.db is the text database for the TGCcabling12 package
@@ -34,35 +29,8 @@ TGCCablingDbTool::TGCCablingDbTool(const std::string& type,
   declareProperty("readASD2PP_DIFF_12FromText", m_readASD2PP_DIFF_12FromText=true);
 }
 
-
-//StatusCode TGCCablingDbTool::updateAddress(SG::TransientAddress* tad) {
-StatusCode TGCCablingDbTool::updateAddress(StoreID::type /*storeID*/,
-                                           SG::TransientAddress* tad,
-                                           const EventContext& /*ctx*/) {
-  CLID clid = tad->clID();
-  const std::string& key = tad->name();
-  // Need to add the CLID comparison 
-  if(/* ==clid && */m_DataLocation==key) {
-    ATH_MSG_DEBUG("updateAddress OK, clid = " << clid << " key = " << key);
-    return StatusCode::SUCCESS;
-  }
-  
-  ATH_MSG_FATAL("updateAddress failed, clid = " << clid << " key = " << key);
-  return StatusCode::FAILURE;
-}
-
-StatusCode TGCCablingDbTool::initialize() { 
-  ATH_MSG_INFO("initialize");  
-  return StatusCode::SUCCESS;
-}
-
-StatusCode TGCCablingDbTool::finalize() {
-  ATH_MSG_INFO("finalize");
-
-  // Database is deleted if exists
-  delete m_ASD2PP_DIFF_12; 
-  m_ASD2PP_DIFF_12 = nullptr;
-
+StatusCode TGCCablingDbTool::initialize() {
+  ATH_MSG_INFO("initialize");
   return StatusCode::SUCCESS;
 }
 
@@ -82,82 +50,13 @@ std::vector<std::string>* TGCCablingDbTool::giveASD2PP_DIFF_12() {
   return new std::vector<std::string> (*m_ASD2PP_DIFF_12);
 }
 
-StatusCode TGCCablingDbTool::loadParameters(IOVSVC_CALLBACK_ARGS_P(I, keys)) {
-  ATH_MSG_INFO("loadParameters from DB");
-
-  StatusCode sc;
-  std::list<std::string>::const_iterator itr = keys.begin();
-  std::list<std::string>::const_iterator itr_e = keys.end();
-  for(; itr!=itr_e; ++itr) {
-    ATH_MSG_INFO("loadParameters " << (*itr) << " I=" << I << " ");
-    if((*itr)==m_Folder) {
-      sc &= loadASD2PP_DIFF_12(I, keys);
-    }
-  }
-  
-  return sc;
-}
-
-StatusCode TGCCablingDbTool::loadASD2PP_DIFF_12(IOVSVC_CALLBACK_ARGS_P(/*I*/, /*keys*/)) {
-  ATH_MSG_INFO("loadTGCMap from DB");
-  
-  if(m_readASD2PP_DIFF_12FromText) {
-    ATH_MSG_INFO("m_readASD2PP_DIFF_12FromText is true. readASD2PP_DIFF_12FromText() will be executed with m_filename=" << m_filename.c_str());
-    StatusCode sc = readASD2PP_DIFF_12FromText();
-    if(sc.isFailure()) {
-      ATH_MSG_FATAL("could not retreive the CondAttrListCollection from DB folder " << m_Folder);
-      return sc;
-    }
-    return sc; 
-  }
-
-  // CondAttrListCollection is retrieved from COOL database 
-  const CondAttrListCollection* atrc;  
-  StatusCode sc = detStore()->retrieve(atrc, m_Folder);
-  if(sc.isFailure()) {
-    ATH_MSG_FATAL("could not retreive the CondAttrListCollection from DB folder " << m_Folder);
-    return sc;
-  } else {
-    ATH_MSG_INFO("CondAttrListCollection from DB folder have been obtained with size " << atrc->size());
-  }
-
-  // Old database is deleted if exists
-  delete m_ASD2PP_DIFF_12;
-  // New database is created
-  m_ASD2PP_DIFF_12 = new std::vector<std::string>;
-
-  // Database is copied from CondAttrListCollection to m_ASD2PP_DIFF_12 
-  CondAttrListCollection::const_iterator itr = atrc->begin();
-  CondAttrListCollection::const_iterator itr_e = atrc->end();
-  for(; itr!=itr_e; ++itr) {
-    const coral::AttributeList& atr=itr->second;
-    
-    std::string string_ASD2PP_DIFF_12;
-    string_ASD2PP_DIFF_12 = *(static_cast<const std::string*>((atr["data"]).addressOfData()));
-    ATH_MSG_DEBUG("Sequence load is \n" << string_ASD2PP_DIFF_12);
-
-    // string_ASD2PP_DIFF_12 has multiple newlines and will be separated into multiple lines (strings)
-    unsigned int length = string_ASD2PP_DIFF_12.length();
-    while(length>0) {
-      unsigned int newLine = string_ASD2PP_DIFF_12.find('\n');
-      if(length>newLine) {
-	m_ASD2PP_DIFF_12->push_back(string_ASD2PP_DIFF_12.substr(0, newLine));
-	string_ASD2PP_DIFF_12.erase(0, newLine+1); 
-      }
-      length = string_ASD2PP_DIFF_12.length();
-    };
-  }
-  
-  return StatusCode::SUCCESS; 
-}
-
 StatusCode TGCCablingDbTool::readASD2PP_DIFF_12FromText() {
   ATH_MSG_INFO("readTGCMap from text");
 
   // PathResolver finds the full path of the file (default file name is ASD2PP_diff_12.db) 
   std::string location = PathResolver::find_file(m_filename, "DATAPATH");
-  if(location=="") {
-    ATH_MSG_FATAL("Could not find " << m_filename.c_str());
+  if(location.empty()) {
+    ATH_MSG_ERROR("Could not find " << m_filename.c_str());
     return StatusCode::FAILURE; 
   }
   
@@ -165,16 +64,14 @@ StatusCode TGCCablingDbTool::readASD2PP_DIFF_12FromText() {
   std::ifstream inASDToPP;
   inASDToPP.open(location.c_str());
   if(inASDToPP.bad()) { 
-    ATH_MSG_FATAL("Could not open file " << location.c_str());
+    ATH_MSG_ERROR("Could not open file " << location.c_str());
     return StatusCode::FAILURE; 
   } 
   
   ATH_MSG_INFO("readTGCMap found file " << location.c_str());
   
-  // Old database is deleted if exists
-  delete m_ASD2PP_DIFF_12;
   // New database is created
-  m_ASD2PP_DIFF_12 = new std::vector<std::string>;
+  m_ASD2PP_DIFF_12.reset(new std::vector<std::string>);
 
   unsigned int nLines = 0;
   std::string buf; 

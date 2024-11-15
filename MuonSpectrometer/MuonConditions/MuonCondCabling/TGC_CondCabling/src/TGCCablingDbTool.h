@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDTOOL_TGCCABLINGDBTOOL_H
@@ -7,12 +7,12 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "MuonCondInterface/ITGCCablingDbTool.h"
-#include "GaudiKernel/IChronoStatSvc.h"
 
-class IIOVSvc;
-class IChronoStatSvc;
+#include <string>
+#include <memory>
+#include <vector>
 
-class TGCCablingDbTool: public AthAlgTool, public ITGCCablingDbTool
+class TGCCablingDbTool: public extends<AthAlgTool, ITGCCablingDbTool>
 {
  public:    
   /** Constructor */
@@ -20,26 +20,14 @@ class TGCCablingDbTool: public AthAlgTool, public ITGCCablingDbTool
 		   const std::string& name, 
 		   const IInterface* parent); 
   
-  /** Required by the IAddressProvider interface */
-  //  virtual StatusCode updateAddress(SG::TransientAddress* tad);
-  virtual StatusCode updateAddress(StoreID::type storeID,
-                                   SG::TransientAddress* tad,
-                                   const EventContext& ctx);
-
   /** Initilize */
-  virtual StatusCode initialize();
-  /** Finalize */
-  virtual StatusCode finalize();
+  virtual StatusCode initialize() override;
   /** Method to provide database */
-  virtual std::vector<std::string>* giveASD2PP_DIFF_12();
+  virtual std::vector<std::string>* giveASD2PP_DIFF_12() override;
   /** Get the folder name */
-  virtual std::string getFolderName() const;
-  /** Load parameters using IOV keys */
-  virtual StatusCode loadParameters(IOVSVC_CALLBACK_ARGS);
-  /** Load parameters using the folder name */
-  virtual StatusCode loadASD2PP_DIFF_12(IOVSVC_CALLBACK_ARGS);
+  virtual std::string getFolderName() const override;
   /** Load parameters from text database */
-  virtual StatusCode readASD2PP_DIFF_12FromText();
+  virtual StatusCode readASD2PP_DIFF_12FromText() override;
 
  private: 
 
@@ -49,7 +37,7 @@ class TGCCablingDbTool: public AthAlgTool, public ITGCCablingDbTool
   std::string m_Folder;
 
   /** Database as strings */
-  std::vector<std::string>* m_ASD2PP_DIFF_12;
+  std::unique_ptr<std::vector<std::string>> m_ASD2PP_DIFF_12;
 
   /** Flag for readASD2PP_DIFF_12FromText() */
   bool m_readASD2PP_DIFF_12FromText;
