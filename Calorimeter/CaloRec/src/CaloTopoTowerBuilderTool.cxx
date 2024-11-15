@@ -309,11 +309,6 @@ StatusCode CaloTopoTowerBuilderTool::execute(const EventContext& ctx,
 }
 
 
-void CaloTopoTowerBuilderTool::handle(const Incident&) {
- 
-}
-
-
 const CaloCell2ClusterMap*
 CaloTopoTowerBuilderTool::CreateCaloCell2ClusterMap(const CaloClusterContainer* clusColl) const
 {

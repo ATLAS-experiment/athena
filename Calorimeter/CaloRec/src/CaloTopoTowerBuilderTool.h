@@ -49,8 +49,6 @@ class CaloTopoTowerBuilderTool : public CaloTopoTowerBuilderToolBase
 
   virtual StatusCode initializeTool() override;
 
-  virtual void handle(const Incident&) override;
-
  protected:
 
   /////////////////////////////

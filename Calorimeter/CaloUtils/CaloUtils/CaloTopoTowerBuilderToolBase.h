@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOUTILS_CALOTOPOTOWERBUILDERTOOLBASE_H
@@ -16,9 +16,7 @@
 #include "CaloInterface/ICaloTopoTowerBuilderToolBase.h"
 #include "CaloEvent/CaloTowerSeg.h"
 
-class CaloTopoTowerBuilderToolBase : public AthAlgTool,
-				 virtual public ICaloTopoTowerBuilderToolBase,
-                                 public IIncidentListener
+class CaloTopoTowerBuilderToolBase : public extends<AthAlgTool, ICaloTopoTowerBuilderToolBase>
 {
  public:
   
