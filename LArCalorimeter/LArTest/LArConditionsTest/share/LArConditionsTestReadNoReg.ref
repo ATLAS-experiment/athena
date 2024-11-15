@@ -107,7 +107,6 @@ LArConditionsTe...  DEBUG  ReadCondObjs flag         =  'ReadCondObjs':True
 LArConditionsTe...  DEBUG  WriteCondObjs flag        =  'WriteCondObjs':False
 LArConditionsTe...  DEBUG  WriteCorrections flag     =  'WriteCorrections':False
 LArConditionsTe...  DEBUG  ApplyCorrections flag     =  'ApplyCorrections':True
-LArConditionsTe...  DEBUG  TestFill flag             =  'TestFill':False
 LArConditionsTe...  DEBUG  TestReadDBDirect flag     =  'TestReadDBDirect':False
 LArConditionsTe...  DEBUG  Testbeam flag             =  'Testbeam':False
 LArOnlineIDDetD...   INFO in createObj: creating a LArOnlineID helper object in the detector store
