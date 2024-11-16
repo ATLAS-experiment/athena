@@ -55,6 +55,7 @@ def defineMenu():
         # single jet 
         # new calo
         'L1_jJ500', 'L1_jJ500_LAR',
+        'L1_jJ5', 'L1_jJ10',
         'L1_jJ20', 'L1_jJ30',
         'L1_jJ40', 'L1_jJ50', 'L1_jJ55', 'L1_jJ60', 'L1_jJ80', 'L1_jJ90',
         'L1_jJ15p30ETA49', 'L1_jJ20p30ETA49',
@@ -163,6 +164,8 @@ def defineMenu():
         'L1_1ZDC_NZDC_gTE5_VjTE200','L1_5ZDC_A_5ZDC_C_gTE5_VjTE200',
         'L1_VZDC_A_VZDC_C_gTE5_VjTE200_UNPAIRED_ISO','L1_ZDC_XOR_gTE5_VjTE200_UNPAIRED_ISO',
         'L1_TRT_VZDC_A_VZDC_C_jTE5_VjTE200',
+        'L1_ZDC_XOR_jJ5_VjTE200', 'L1_1ZDC_NZDC_jJ5_VjTE200', 'L1_VZDC_A_VZDC_C_jJ5_VjTE200',
+        'L1_ZDC_XOR_jJ10_VjTE200', 'L1_1ZDC_NZDC_jJ10_VjTE200', 'L1_VZDC_A_VZDC_C_jJ10_VjTE200',
 
         #UPC hmt trk15
         'L1_MBTS_1_VZDC_A_ZDC_C_VjTE200', 'L1_MBTS_1_1ZDC_NZDC_VjTE200',

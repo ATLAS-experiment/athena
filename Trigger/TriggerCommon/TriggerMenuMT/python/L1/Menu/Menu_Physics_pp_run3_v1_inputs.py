@@ -182,9 +182,9 @@ def defineInputsMenu():
         "legacy" : False,
         "thresholds" : [ # Topo1B: jFex small-R jet, jFex large-R jet, combined eFex/jFex TAU, gFex+jFex EX, gFex+jFex SumET, jFex TAU
             # jJ thresholds for commissioning
+            ('jJ5',3), ('jJ10',3),
             ('jJ20',3), ('jJ30',3), ('jJ30p0ETA25',3), ('jJ40',3), ('jJ40p0ETA25',3),
             ('jJ50',3), ('jJ55',3), ('jJ55p0ETA23',3), ('jJ60',3),
-            ('jJSPARE1',3), ('jJSPARE2',3),
 
             (None,3),
 
@@ -195,7 +195,7 @@ def defineInputsMenu():
             'jJ40p30ETA49', 'jJ50p30ETA49', 'jJ60p30ETA49', 'jJ90p30ETA49', 'jJ125p30ETA49',
 
             # jJ thresholds for production
-            'jJSPARE3', 'jJSPARE4',
+            'jJSPARE1', 'jJSPARE2',
 
             None, None,
 

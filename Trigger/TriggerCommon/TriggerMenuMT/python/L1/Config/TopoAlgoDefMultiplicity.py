@@ -131,10 +131,10 @@ class TopoAlgoDefMultiplicity(object):
 
 
         jJThresholds_3bits = [ 
-            'jJ20', 'jJ30', 'jJ30p0ETA25', 'jJ40', 'jJ40p0ETA25', 'jJ50', 'jJ55', 'jJ55p0ETA23', 'jJ60',
+            'jJ5', 'jJ10', 'jJ20', 'jJ30', 'jJ30p0ETA25', 'jJ40', 'jJ40p0ETA25', 'jJ50', 'jJ55', 'jJ55p0ETA23', 'jJ60',
 
             # spares
-            'jJSPARE1', 'jJSPARE2',
+            #'jJSPARE1', 'jJSPARE2',
         ]
         jJThresholds_2bits = [ 
             'jJ70p0ETA23', 'jJ80', 'jJ80p0ETA25', 'jJ85p0ETA21',
@@ -145,7 +145,7 @@ class TopoAlgoDefMultiplicity(object):
             'jJ40p30ETA49', 'jJ50p30ETA49', 'jJ60p30ETA49', 'jJ90p30ETA49', 'jJ125p30ETA49',
 
             # spares
-            'jJSPARE3', 'jJSPARE4',
+            'jJSPARE1', 'jJSPARE2',
         ]
 
         for jJet in jJThresholds_3bits:

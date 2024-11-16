@@ -318,6 +318,7 @@ class MonitorDef:
                 "L1_eEM1_TRT_VZDC_A_VZDC_C_VjTE100", "L1_eTAU1_TRT_VZDC_A_VZDC_C_VjTE100",
                 "L1_eEM1_TRT_ZDC_XOR4_VjTE100", "L1_eTAU1_TRT_ZDC_XOR4_VjTE100",
                 #
+                "L1_jJ5", "L1_jJ10",
                 "L1_jJ20", "L1_jJ30", "L1_jJ40", "L1_jJ50",
                 "L1_jJ55", "L1_jJ60", "L1_jJ90", "L1_jJ125",
                 "L1_jJ500",
@@ -360,6 +361,9 @@ class MonitorDef:
                 "L1_VZDC_A_VZDC_C_gTE5_VjTE200","L1_ZDC_XOR_gTE5_VjTE200",
                 "L1_1ZDC_NZDC_gTE5_VjTE200","L1_5ZDC_A_5ZDC_C_gTE5_VjTE200",
                 "L1_TRT_VZDC_A_VZDC_C_jTE5_VjTE200", "L1_TRT_ZDC_XOR_jTE5_VjTE200",
+                #
+                "L1_ZDC_XOR_jJ5_VjTE200", "L1_ZDC_XOR_jJ10_VjTE200", "L1_1ZDC_NZDC_jJ5_VjTE200",
+                "L1_1ZDC_NZDC_jJ10_VjTE200", "L1_VZDC_A_VZDC_C_jJ5_VjTE200", "L1_VZDC_A_VZDC_C_jJ10_VjTE200",
                 #
                 "L1_gTE3", "L1_gTE5",
                 #
