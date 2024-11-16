@@ -18,21 +18,19 @@
 #include "FPGATrackSimObjects/FPGATrackSimMultiTruth.h"
 
 /////////////////////////////////////////////////////////////////////////////
-FPGATrackSimNNTrackTool::FPGATrackSimNNTrackTool(const std::string &algname,
-                               const std::string &name, const IInterface *ifc)
-    : AthAlgTool(algname, name, ifc) {}
+FPGATrackSimNNTrackTool::FPGATrackSimNNTrackTool(const std::string &algname, const std::string &name, const IInterface *ifc) : AthAlgTool(algname, name, ifc), OnnxRuntimeBase() {}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 StatusCode FPGATrackSimNNTrackTool::initialize() {
   ATH_CHECK(m_FPGATrackSimMapping.retrieve());
   ATH_CHECK(m_tHistSvc.retrieve());
+  OnnxRuntimeBase::initialize(m_FPGATrackSimMapping->getNNMapString());
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode FPGATrackSimNNTrackTool::getTracks(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads,
-                                     std::vector<FPGATrackSimTrack> &tracks,
-                                     const FPGATrackSimNNMap *nnMap) {
+StatusCode FPGATrackSimNNTrackTool::getTracks(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks) {
 
   int n_track = 0;
 
@@ -94,9 +92,14 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(const std::vector<std::shared_ptr<
 
           std::shared_ptr<const FPGATrackSimHit> hit = iroad->getHits(layer)[hit_indices[layer]];
           // Add this hit to the road
-          hit_list.push_back(hit);
+          if (hit->isReal()){
+            hit_list.push_back(hit);
+          }
         }
       }
+
+      // TODO: for now ignore roads with non-real hits, because the network needs all hits as input
+      if (hit_list.size() < 9) continue;
 
       // Sort the list by radial distance
       std::sort(hit_list.begin(), hit_list.end(),
@@ -106,30 +109,24 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(const std::vector<std::shared_ptr<
                   return rho1 < rho2;
                 });
 
-      // ECC - Input maps for lwtnn
-      std::map<std::string, std::map<std::string, double>> valMap;
-      std::map<std::string, std::map<std::string, std::vector<double>>>
-          vectorMap;
+      std::vector<float> inputTensorValues;
 
-      // Initalize to default
-      for (int i = 1; i <= 8; i++) {
-        TString indexStr = Form("%d", i);
-        valMap["dNN"][("hitX" + indexStr).Data()] = 0;
-        valMap["dNN"][("hitY" + indexStr).Data()] = 0;
-        valMap["dNN"][("hitZ" + indexStr).Data()] = 0;
-      }
 
       int index = 1;
       bool flipZ = false;
       double rotateAngle = 0;
+      bool gotSecondSP = false;
+      float tmp_xf;
+      float tmp_yf;
+      float tmp_zf;
 
       // Loop over all hits
       for (const auto &hit : hit_list) {
 
         // Need to rotate hits
-        double x0 = hit->getX();
-        double y0 = hit->getY();
-        double z0 = hit->getZ();
+        float x0 = hit->getX();
+        float y0 = hit->getY();
+        float z0 = hit->getZ();
         if (index == 1) {
           if (z0 < 0)
             flipZ = true;
@@ -138,24 +135,53 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(const std::vector<std::shared_ptr<
             rotateAngle += M_PI;
         }
 
-        double xf = x0 * std::cos(rotateAngle) - y0 * std::sin(rotateAngle);
-        double yf = x0 * std::sin(rotateAngle) + y0 * std::cos(rotateAngle);
-        double zf = z0;
-        if (flipZ)
-          zf = z0 * -1;
+        float xf = x0 * std::cos(rotateAngle) - y0 * std::sin(rotateAngle);
+        float yf = x0 * std::sin(rotateAngle) + y0 * std::cos(rotateAngle);
+        float zf = z0;
 
-        // Fill map for lwtnn
-        TString indexStr = Form("%d", index);
-        valMap["dNN"][("hitX" + indexStr).Data()] = xf / getXScale();
-        valMap["dNN"][("hitY" + indexStr).Data()] = yf / getYScale();
-        valMap["dNN"][("hitZ" + indexStr).Data()] = zf / getZScale();
-        index++;
+        if (flipZ) zf = z0 * -1;
+
+        // Get average of values for strip hit pairs
+        // TODO: this needs to be fixed in the future, for this to work for other cases
+        if (hit->isStrip()) {
+          if (!gotSecondSP) {
+            tmp_xf = xf;
+            tmp_yf = yf;
+            tmp_zf = zf;
+            gotSecondSP = true;
+          }
+          else {
+
+            float xf_scaled = (xf + tmp_xf) / (2.*getXScale());
+            float yf_scaled = (yf + tmp_yf) / (2.*getYScale());
+            float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
+
+            // Get average of two hits for strip hits 
+            inputTensorValues.push_back(xf_scaled);
+            inputTensorValues.push_back(yf_scaled);
+            inputTensorValues.push_back(zf_scaled);
+            index++;
+            gotSecondSP = false;
+          }
+        }
+        else {
+          float xf_scaled = (xf) / (getXScale());
+          float yf_scaled = (yf) / (getYScale());
+          float zf_scaled = (zf) / (getZScale());
+          inputTensorValues.push_back(xf_scaled);
+          inputTensorValues.push_back(yf_scaled);
+          inputTensorValues.push_back(zf_scaled);
+          index++;
+        }
       }
+      
+      std::vector<float> NNoutput = runONNXInference(inputTensorValues);
 
-      // Use NN filter to see if these set of hits comprise a good track
-      std::shared_ptr<lwt::LightweightGraph> lwnn_map = nnMap->getNNMap();
-      auto scoreMap = lwnn_map->compute(valMap, vectorMap);
-      float nn_val = scoreMap.at("NNScore");
+      ATH_MSG_DEBUG("NN InputTensorValues:");
+      ATH_MSG_DEBUG(inputTensorValues);
+      ATH_MSG_DEBUG("NN output:" << NNoutput);
+      
+      float nn_val = NNoutput[0];
 
       // Save all hits on this road if it passes our "good" criteria
       if (nn_val > m_NNCut) {
@@ -172,6 +198,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(const std::vector<std::shared_ptr<
         // Nominal chi2ndof cut is 40 and we want to use NN>0.0075 (or
         // NN<(1-0.0075) Nominal chi2ndof cut is 40 and we want to use NN>0.001
         // (or NN<(1-0.1)
+        // the 5 comes from the 5 dof we nominally get from a chi2
         double scale = m_chi2_scalefactor *
                        (track_cand.getNCoords() - track_cand.getNMissing() - 5);
         double chi2 = scale * (1 - nn_val);
@@ -184,9 +211,10 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(const std::vector<std::shared_ptr<
   }  // loop over roads
 
   // Add truth info
-  for (FPGATrackSimTrack &t : tracks)
+  for (FPGATrackSimTrack &t : tracks) {
     compute_truth(t);  // match the track to a geant particle using the
                        // channel-level geant info in the hit data.
+  }
 
   return StatusCode::SUCCESS;
 }

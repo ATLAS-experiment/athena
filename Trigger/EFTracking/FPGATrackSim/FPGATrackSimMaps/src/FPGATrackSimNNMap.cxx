@@ -27,20 +27,18 @@ FPGATrackSimNNMap::FPGATrackSimNNMap(const std::string & filepath)
 {
 
     // Open file with NN weights
-    std::string weightsFileName = filepath;
-    std::ifstream input_cfg(weightsFileName.c_str());
+    m_weightsFileName = filepath;
+    std::ifstream input_cfg(m_weightsFileName.c_str());
     if (input_cfg.is_open()) 
-      ANA_MSG_INFO("Opened file: " << weightsFileName);
+      ANA_MSG_INFO("Opened file: " << m_weightsFileName);
     else {
-        ANA_MSG_FATAL("Unable to open file: " << weightsFileName);
-        throw ("FPGATrackSimNNMap could not open " + weightsFileName);
+        ANA_MSG_FATAL("Unable to open file: " << m_weightsFileName);
+        throw ("FPGATrackSimNNMap could not open " + m_weightsFileName);
     }
 
-    auto cfg = lwt::parse_json_graph( input_cfg );
-    m_lwnn_map = std::shared_ptr<lwt::LightweightGraph> (new lwt::LightweightGraph( cfg ));
 }
 
 // Returns pointer to NN weighting map
 
-std::shared_ptr<lwt::LightweightGraph> FPGATrackSimNNMap::getNNMap() const {return m_lwnn_map;}
+std::string FPGATrackSimNNMap::getNNMap() const {return m_weightsFileName;}
 

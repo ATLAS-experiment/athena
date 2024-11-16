@@ -22,7 +22,7 @@
 #include <vector>
 
 class TrackFitter
-: public AthMessaging
+  : public AthMessaging
 {
     public:
 

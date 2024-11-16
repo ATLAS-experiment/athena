@@ -17,11 +17,9 @@
  * First_stage_sector_ID Second_stage_sector_ID_1 Second_stage_sector_ID_2 ... Second_stage_sector_ID_N
  */
 
-#include "lwtnn/LightweightGraph.hh"
-#include "lwtnn/parse_json.hh"
-
 #include <fstream>
 #include <string>
+#include <memory>
 
 class FPGATrackSimNNMap
 {
@@ -34,7 +32,7 @@ class FPGATrackSimNNMap
         ///////////////////////////////////////////////////////////////////////
         // Simple Getters/Setters
 
-	std::shared_ptr<lwt::LightweightGraph> getNNMap() const;
+        std::string getNNMap() const;
 
         ///////////////////////////////////////////////////////////////////////
         // Main Interface Functions
@@ -43,10 +41,7 @@ class FPGATrackSimNNMap
 
         ///////////////////////////////////////////////////////////////////////
         // Member Variables
-
-	// NN weighting map
-	std::shared_ptr<lwt::LightweightGraph> m_lwnn_map;
-
+        std::string m_weightsFileName;
 
         ///////////////////////////////////////////////////////////////////////
         // Helper Functions

@@ -225,8 +225,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     if (m_doTracking) {
         if (m_doNNTrack) {
             ATH_MSG_DEBUG("Performing NN tracking");
-            const FPGATrackSimNNMap* nnMap = m_FPGATrackSimMapping->NNMap();
-            ATH_CHECK(m_NNTrackTool->getTracks(roads_1st, tracks_1st, nnMap));
+            ATH_CHECK(m_NNTrackTool->getTracks(roads_1st, tracks_1st));
         }
         else {
             ATH_CHECK(m_trackFitterTool_1st->getTracks(roads_1st, tracks_1st));
