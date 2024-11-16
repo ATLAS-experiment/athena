@@ -55,12 +55,6 @@ StatusCode NrpcDigitToNrpcRDO::execute(const EventContext& ctx) const {
         return StatusCode::FAILURE;
     }
     const MuonNRPC_CablingMap* cabling_ptr = readHandle_Cabling.cptr();
-    SG::ReadCondHandle<MuonGM::MuonDetectorManager> muonDetMgr{m_muonManagerKey, ctx};
-    if (!muonDetMgr.isValid()) {
-        ATH_MSG_FATAL("Failed to retrieve the muon detector manager "<<m_muonManagerKey.fullKey());
-        return StatusCode::FAILURE;
-    }
-
     ATH_MSG_DEBUG("Found MuonNRPC_CablingMap ");
 
     /// Record the output container
@@ -101,22 +95,14 @@ StatusCode NrpcDigitToNrpcRDO::execute(const EventContext& ctx) const {
                 ATH_MSG_FATAL("Found a non NRPC identifier " << m_idHelperSvc->toString(channelId));
                 return StatusCode::FAILURE;
             }
-            const MuonGM::RpcReadoutElement* descriptor = muonDetMgr->getRpcReadoutElement(channelId);
-            if (!descriptor) {
-                ATH_MSG_FATAL("No detector element associated to "<<m_idHelperSvc->toString(channelId));
-                return StatusCode::FAILURE;
-            }
-            // Get the global position of RPC strip from MuonDetDesc
-            const Amg::Vector3D pos = descriptor->stripPos(channelId);
-             
+            
             bool cabling = cabling_ptr->getOnlineId(cabling_data, msgStream());
             if (!cabling) {
                 ATH_MSG_ERROR("Offline to Online Id conversion for NRPC chamber.");
                 return StatusCode::FAILURE;
             }
             /// Correct for the time of flight
-	    const float rdo_time = m_patch_for_rpc_time ? rpcDigit->time() - pos.mag()* inverseSpeedOfLight 
-                                                        : rpcDigit->time();
+            const float rdo_time = rpcDigit->time();
 
             const float the_timeoverthr = rpcDigit->ToT();
             uint32_t the_bcid= rdo_time / 25.;

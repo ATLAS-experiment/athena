@@ -40,12 +40,12 @@ LArNoisyROSummaryCnv::createTransient()
 
   if( compareClassGuid(guid_p6) ) {
      std::unique_ptr<LArNoisyROSummary_p6> col_vect( poolReadObject<LArNoisyROSummary_p6>() );
-     trans = m_converter.createTransient( col_vect.get(), log );
+     trans = m_converter.createTransient( col_vect.get(), msg() );
   }
   else if( compareClassGuid(guid_p5) ) {
      LArNoisyROSummaryCnv_p5   converter;
      std::unique_ptr<LArNoisyROSummary_p5> col_vect( poolReadObject<LArNoisyROSummary_p5>() );
-     trans = converter.createTransient( col_vect.get(), log );
+     trans = converter.createTransient( col_vect.get(), msg() );
   }
   else if( compareClassGuid(guid_p4) ) {
      LArNoisyROSummaryCnv_p4   converter;
