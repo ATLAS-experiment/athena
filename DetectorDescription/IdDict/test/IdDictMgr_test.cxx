@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_SUITE(IdDictMgrTest)
   BOOST_AUTO_TEST_CASE(IdDictMgrFromParser){
     IdDictParser parser;
     parser.register_external_entity("InnerDetector", sctDictFilename);
-    BOOST_CHECK_NO_THROW( IdDictMgr & [[maybe_unused]] idd = parser.parse ("IdDictParser/ATLAS_IDS.xml")); 
+    BOOST_CHECK_NO_THROW( [[maybe_unused]] IdDictMgr & idd = parser.parse ("IdDictParser/ATLAS_IDS.xml"));
   }
   
 BOOST_AUTO_TEST_SUITE_END()
