@@ -22,5 +22,10 @@ set( PowhegEnvironment_DIR ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}
 
 find_package( PowhegEnvironment )
 
+find_package( ggvvamp )
+find_package( chaplin )
+find_package( cln )
+find_package( ginac )
+
 
 
