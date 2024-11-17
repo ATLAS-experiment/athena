@@ -33,7 +33,7 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
         virtual const FPGATrackSimRegionMap* SubRegionMap()         const override { return m_subrmap.get();  }
         virtual const FPGATrackSimRegionMap* SubRegionMap_2nd()     const override { return m_subrmap_2nd.get(); }
         virtual const FPGATrackSimNNMap* NNMap()                    const override { return m_NNmap.get();    }
-        virtual std::string getNNMapString() const;
+        virtual std::string getNNMapString() const override;
 
     private:
 
