@@ -49,7 +49,6 @@ namespace xAOD::BTaggingUtilities {
    const ElementLink< xAOD::BTaggingContainer >&
    getBTaggingLink( const SG::AuxElement& part ) {
 
-     // cppcheck-suppress returnTempReference; false positive
      return DEFAULT_ACC( part );
    }
 

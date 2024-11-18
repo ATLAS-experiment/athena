@@ -554,7 +554,6 @@ AuxTypeRegistryImpl::addFactory (lock_t& /*lock*/,
   else
     m_factories.insert_or_assign (key, factory.release());
 
-  // cppcheck-suppress returnDanglingLifetime; false positive
   return fac;
 }
 

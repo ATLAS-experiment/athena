@@ -58,7 +58,6 @@ inline
 Decorator<T, ALLOC>::Decorator (const SG::auxid_t auxid)
   : Decorator (auxid, SG::AuxVarFlags::None)
 {
-  // cppcheck-suppress missingReturn; false positive
 }
 
 

@@ -91,7 +91,6 @@ namespace Rec {
     m_data(data),
     m_associationConeSize(coneSize) {
 
-    // cppcheck-suppress missingReturn; false positive
   }
 
 

@@ -1737,7 +1737,6 @@ namespace Trk {
           errors[1] = 10;
 
           pseudostate2->setMeasurementErrors(errors);
-          // cppcheck-suppress invalidLifetime; false positive
           outlierstates2.push_back(pseudostate2.get());
           trajectory.addMeasurementState(std::move(pseudostate2));
         }
@@ -5095,7 +5094,6 @@ namespace Trk {
     if (cache.m_fittercode != FitterStatusCode::Success) {
       ATH_MSG_DEBUG("Silicon cleaner failed, returning null...");
       if (finaltrajectory != &trajectory) {
-        // cppcheck-suppress autovarInvalidDeallocation; false positive
         delete finaltrajectory;
       }
       return nullptr;

@@ -56,13 +56,11 @@ public:
 
     reference operator*()
     {
-      // cppcheck-suppress returnTempReference; false positive
       return reinterpret_cast<reference> (pointer_list::iterator::operator*());
     }
 
     reference operator->()
     {
-      // cppcheck-suppress returnTempReference; false positive
       return reinterpret_cast<reference> (pointer_list::iterator::operator*());
     }
   };

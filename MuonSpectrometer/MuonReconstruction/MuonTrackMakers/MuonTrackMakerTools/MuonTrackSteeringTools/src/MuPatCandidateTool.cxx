@@ -154,7 +154,6 @@ namespace Muon {
         // loop over hits
         bool is_first_meas = true;
         for (const Trk::MeasurementBase* meas : measurements) {
-            // cppcheck-suppress invalidLifetime; false positive
             Identifier id = m_edmHelperSvc->getIdentifier(*meas);
             if (!id.is_valid()) {
                 fakePhiHits.push_back(meas);
@@ -241,25 +240,20 @@ namespace Muon {
                 // if selected create competing ROTs for trigger hits
                 if (createComp && (isRpc || isTgc)) {
                     if (measuresPhi && m_createCompetingROTsPhi) {
-                        // cppcheck-suppress invalidLifetime; false positive
                         addCluster(*meas, triggerHitsPhi);
                         continue;
                     } else if (!measuresPhi && m_createCompetingROTsEta) {
-                        // cppcheck-suppress invalidLifetime; false positive
                         addCluster(*meas, triggerHitsEta);
                         continue;
                     }
                 }
             }
 
-            // cppcheck-suppress invalidLifetime; false positive
             allHits.push_back(meas);
 
             if (measuresPhi) {
-                // cppcheck-suppress invalidLifetime; false positive
                 phiHits.push_back(meas);
             } else {
-                // cppcheck-suppress invalidLifetime; false positive
                 etaHits.push_back(meas);
             }
         }

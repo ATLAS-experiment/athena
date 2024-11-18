@@ -18,5 +18,4 @@ template< class CollectionT>
 // Constructor with IdentifiableCache:
 MuonPrepDataContainer<CollectionT>::MuonPrepDataContainer(EventContainers::IdentifiableCache<CollectionT> * cache):
   IdentifiableContainer<CollectionT>(cache)
-  // cppcheck-suppress missingReturn; false positive
 {}

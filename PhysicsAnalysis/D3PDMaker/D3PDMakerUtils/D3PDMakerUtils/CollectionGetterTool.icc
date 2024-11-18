@@ -80,7 +80,6 @@ CollectionGetterTool<CONT>::CollectionGetterTool (const std::string& type,
                                                   const IInterface* parent)
   : CollectionGetterToolImpl (type, name, parent)
 {
-  // cppcheck-suppress missingReturn; false positive
 }
 
 

@@ -217,7 +217,6 @@ IDScanZFinderInternal<SpacePoint>::IDScanZFinderInternal( const std::string& typ
   /// do not call that here
   ///  initializeInternal( m_IdScan_MaxNumLayers, m_IdScan_LastBrlLayer );
 
-  // cppcheck-suppress missingReturn; false positive
   m_Status = 0;
 }
   

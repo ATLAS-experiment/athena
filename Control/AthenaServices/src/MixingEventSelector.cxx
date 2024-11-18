@@ -423,7 +423,6 @@ IEvtSelector::Context& MixingEventSelector::Trigger::currentContext() const {
       throw GaudiException("MixingEventSelector::Trigger::currentContext(): can't create context",
 			   name(),StatusCode::FAILURE);
   }
-  // cppcheck-suppress nullPointerRedundantCheck; false positive
   //  createContext() sets m_current
   return *m_current;
 }

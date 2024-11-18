@@ -198,7 +198,6 @@ namespace TSU {
           // Do the fractional part
           if (F > 0) {
             unsigned frac = m_tvalue & ( (1ull<<F)-1ull );
-            // cppcheck-suppress shiftNegative; false positive
             res += static_cast<float>(frac) / (2ull<<(F-1ull));
           }
           return res;

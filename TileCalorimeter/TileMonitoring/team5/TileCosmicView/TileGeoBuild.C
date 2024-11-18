@@ -496,7 +496,6 @@ grTileCal::grTileCal(): grTileBase()
 		pcon->DefineSection(0, sector_tz[3]-sector_dz[3],2290,3850.0);
 
 	if (EBA_LBA > 0)
-                // cppcheck-suppress arrayIndexOutOfBoundsCond; false positive
 		pcon->DefineSection(1, sector_tz[0]+sector_dz[0],2290,3850.0);
 	else
 		pcon->DefineSection(1, sector_tz[2]+sector_dz[2],2290,3850.0);

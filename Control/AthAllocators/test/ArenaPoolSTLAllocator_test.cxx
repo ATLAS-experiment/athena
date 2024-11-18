@@ -38,7 +38,6 @@ struct Payload
   static std::vector<int> v ATLAS_THREAD_SAFE;
 };
 
-// cppcheck-suppress uninitMemberVar  // false positive
 Payload::Payload(int the_y)
 {
   x = n++;

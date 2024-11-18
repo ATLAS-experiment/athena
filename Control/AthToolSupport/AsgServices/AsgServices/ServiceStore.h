@@ -52,7 +52,6 @@ namespace asg
 
     /// Retrieve a service by name and interface.
     template< typename T >
-    // cppcheck-suppress constStatement; false positive
     static std::shared_ptr<T> get( const std::string& name )
     {
       return std::dynamic_pointer_cast< T >( get( name ) );

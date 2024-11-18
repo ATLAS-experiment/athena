@@ -280,7 +280,6 @@ void TGCDatabaseASDToPP::makeIndexDBIn(void)
 
 int TGCDatabaseASDToPP::convertIndexDBIn(int* indexIn) const
 {
-  // cppcheck-suppress uninitvar; false positive
   int converted = indexIn[0]-m_minIndexIn[0];
   for(int iIndexIn=1; iIndexIn<NIndexIn; iIndexIn++) {
     converted *= (m_maxIndexIn[iIndexIn]-m_minIndexIn[iIndexIn]+1);
@@ -311,7 +310,6 @@ void TGCDatabaseASDToPP::makeIndexDBOut(void)
 
 int TGCDatabaseASDToPP::convertIndexDBOut(int* indexOut) const
 {
-  // cppcheck-suppress uninitvar; false positive
   int converted = indexOut[0]-m_minIndexOut[0];
   for(int iIndexOut=1; iIndexOut<NIndexOut; iIndexOut++) {
     converted *= (m_maxIndexOut[iIndexOut]-m_minIndexOut[iIndexOut]+1);

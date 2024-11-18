@@ -1117,7 +1117,6 @@ std::vector<ModulePosition> HGTD_DetectorFactory::prepareModulePositionsInRowTwo
         }
         // the rest of the modules follow sequential, radius-dependent placement rules
         else {
-            // cppcheck-suppress containerOutOfBounds; false positive
             ModulePosition prev = modulePositions.back();
             double spacing = m_hgtdPars.moduleSpaceInner;
             // if the previous module was completely outside rMid, increase the spacing

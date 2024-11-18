@@ -282,7 +282,6 @@ namespace xAOD {
       bool isAvailable(const SG::AuxElement& p) const { return m_a.isAvailable(p);}
 
       // // forward calls to internal accessor. useful for performance critical code.
-      // cppcheck-suppress CastIntegerToAddressAtReturn // false positive
       const TYPE* operator()  (const SG::AuxElement& p)  const  { return getAttribute(p); }
       // TYPE& operator()(SG::AuxElement& p)  { LinkType &el=m_a(p); return *el;}
 

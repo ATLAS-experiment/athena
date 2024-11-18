@@ -41,7 +41,6 @@ void testCalo() {
       
       for( unsigned int isEntry = 0; isEntry < 2 ; ++isEntry ){
         bool entry = isEntry == 1;
-        // cppcheck-suppress uninitvar; false positive
         TrackParametersIdentifier id = helper.encode( static_cast<AtlasDetDescr::AtlasDetTechnology>(tech), 
                                                       static_cast<CaloSampling::CaloSample>(sample), entry );
         AtlasDetDescr::AtlasDetTechnology itech = helper.technology(id);

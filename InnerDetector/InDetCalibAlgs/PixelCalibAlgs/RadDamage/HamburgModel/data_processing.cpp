@@ -554,7 +554,6 @@ get_Profile(const string & filename)                                 // reads in
 
             if(input_file.eof())break;                          	// if end of file is reached: break the loop
 
-            // cppcheck-suppress constStatement; false positve
             limit_file_size_input--;
             if(limit_file_size_input==0)break;
         }

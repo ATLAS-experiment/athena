@@ -231,7 +231,6 @@ namespace DerivationFramework {
       } // for i
     } else {
       std::string f5 = std::format("Mismatch: nTracks: {} nVtap: {} nSelpat: {}\n",tracks.size(), vtap.size(), selpat.size());
-      // cppcheck-suppress ignoredReturnValue; false positive
       rstr.append(f5);
     } // if sizes
 
