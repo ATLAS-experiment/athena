@@ -169,14 +169,14 @@ BuildTruthTaus::buildTruthTausFromTruthParticles(TruthTausEvent& truthTausEvent)
 
       // Run classification
       auto pClassification = m_tMCTruthClassifier->particleTruthClassifier(xTruthTau);
-      static const SG::AuxElement::Accessor<unsigned int> decClassifierParticleType("classifierParticleType");
-      static const SG::AuxElement::Accessor<unsigned int> decClassifierParticleOrigin("classifierParticleOrigin");
+      static const SG::Accessor<unsigned int> decClassifierParticleType("classifierParticleType");
+      static const SG::Accessor<unsigned int> decClassifierParticleOrigin("classifierParticleOrigin");
       decClassifierParticleType(*xTruthTau) = pClassification.first;
       decClassifierParticleOrigin(*xTruthTau) = pClassification.second;
 
       // create link to the original TruthParticle
       ElementLink < xAOD::TruthParticleContainer > lTruthParticleLink(xTruthParticle, *truthTausEvent.m_xTruthParticleContainer);
-      static const SG::AuxElement::Accessor<ElementLink< xAOD::TruthParticleContainer > > accOriginalTruthParticle("originalTruthParticle");
+      static const SG::Accessor<ElementLink< xAOD::TruthParticleContainer > > accOriginalTruthParticle("originalTruthParticle");
       accOriginalTruthParticle(*xTruthTau) = lTruthParticleLink;
 
       truthTausEvent.m_xTruthTauContainer->push_back(xTruthTau);
@@ -228,15 +228,15 @@ StatusCode BuildTruthTaus::examineTruthTau(const xAOD::TruthParticle& xTruthPart
     printDecay(xTruthParticle);
   }
 
-  static const SG::AuxElement::Decorator<double> decPtVis("pt_vis");
-  static const SG::AuxElement::Decorator<double> decEtaVis("eta_vis");
-  static const SG::AuxElement::Decorator<double> decPhiVis("phi_vis");
-  static const SG::AuxElement::Decorator<double> decMVis("m_vis");
+  static const SG::Decorator<double> decPtVis("pt_vis");
+  static const SG::Decorator<double> decEtaVis("eta_vis");
+  static const SG::Decorator<double> decPhiVis("phi_vis");
+  static const SG::Decorator<double> decMVis("m_vis");
 
-  static const SG::AuxElement::Decorator<size_t> decNumCharged("numCharged");
-  static const SG::AuxElement::Decorator<size_t> decNumChargedPion("numChargedPion");
-  static const SG::AuxElement::Decorator<size_t> decNumNeutral("numNeutral");
-  static const SG::AuxElement::Decorator<size_t> decNumNeutralPion("numNeutralPion");
+  static const SG::Decorator<size_t> decNumCharged("numCharged");
+  static const SG::Decorator<size_t> decNumChargedPion("numChargedPion");
+  static const SG::Decorator<size_t> decNumNeutral("numNeutral");
+  static const SG::Decorator<size_t> decNumNeutralPion("numNeutralPion");
 
   decPtVis(xTruthParticle) = truthInfo.m_vTruthVisTLV.Pt();
   decEtaVis(xTruthParticle) = truthInfo.m_vTruthVisTLV.Eta();
@@ -248,16 +248,16 @@ StatusCode BuildTruthTaus::examineTruthTau(const xAOD::TruthParticle& xTruthPart
   decNumNeutral(xTruthParticle) = truthInfo.m_iNNeutralPions+truthInfo.m_iNNeutralOthers;
   decNumNeutralPion(xTruthParticle) = truthInfo.m_iNNeutralPions;
 
-  static const SG::AuxElement::Decorator<char> decIsHadronicTau("IsHadronicTau");
+  static const SG::Decorator<char> decIsHadronicTau("IsHadronicTau");
   decIsHadronicTau(xTruthParticle) = (char)truthInfo.m_bIsHadronicTau;
 
   if ( m_bWriteInvisibleFourMomentum )
   {
     TLorentzVector vTruthInvisTLV = xTruthParticle.p4() - truthInfo.m_vTruthVisTLV;
-    static const SG::AuxElement::Decorator<double> decPtInvis("pt_invis");
-    static const SG::AuxElement::Decorator<double> decEtaInvis("eta_invis");
-    static const SG::AuxElement::Decorator<double> decPhiInvis("phi_invis");
-    static const SG::AuxElement::Decorator<double> decMInvis("m_invis");
+    static const SG::Decorator<double> decPtInvis("pt_invis");
+    static const SG::Decorator<double> decEtaInvis("eta_invis");
+    static const SG::Decorator<double> decPhiInvis("phi_invis");
+    static const SG::Decorator<double> decMInvis("m_invis");
     decPtInvis(xTruthParticle)  = vTruthInvisTLV.Pt();
     decEtaInvis(xTruthParticle) = vTruthInvisTLV.Eta();
     decPhiInvis(xTruthParticle) = vTruthInvisTLV.Phi();
@@ -266,10 +266,10 @@ StatusCode BuildTruthTaus::examineTruthTau(const xAOD::TruthParticle& xTruthPart
 
   if ( m_bWriteVisibleChargedFourMomentum )
   {
-    static const SG::AuxElement::Decorator<double> decPtVisCharged("pt_vis_charged");
-    static const SG::AuxElement::Decorator<double> decEtaVisCharged("eta_vis_charged");
-    static const SG::AuxElement::Decorator<double> decPhiVisCharged("phi_vis_charged");
-    static const SG::AuxElement::Decorator<double> decMVisCharged("m_vis_charged");
+    static const SG::Decorator<double> decPtVisCharged("pt_vis_charged");
+    static const SG::Decorator<double> decEtaVisCharged("eta_vis_charged");
+    static const SG::Decorator<double> decPhiVisCharged("phi_vis_charged");
+    static const SG::Decorator<double> decMVisCharged("m_vis_charged");
     decPtVisCharged(xTruthParticle)  = truthInfo.m_vTruthVisTLVCharged.Pt();
     decEtaVisCharged(xTruthParticle) = truthInfo.m_vTruthVisTLVCharged.Eta();
     decPhiVisCharged(xTruthParticle) = truthInfo.m_vTruthVisTLVCharged.Phi();
@@ -278,10 +278,10 @@ StatusCode BuildTruthTaus::examineTruthTau(const xAOD::TruthParticle& xTruthPart
 
   if ( m_bWriteVisibleNeutralFourMomentum )
   {
-    static const SG::AuxElement::Decorator<double> decPtVisNeutral("pt_vis_neutral");
-    static const SG::AuxElement::Decorator<double> decEtaVisNeutral("eta_vis_neutral");
-    static const SG::AuxElement::Decorator<double> decPhiVisNeutral("phi_vis_neutral");
-    static const SG::AuxElement::Decorator<double> decMVisNeutral("m_vis_neutral");
+    static const SG::Decorator<double> decPtVisNeutral("pt_vis_neutral");
+    static const SG::Decorator<double> decEtaVisNeutral("eta_vis_neutral");
+    static const SG::Decorator<double> decPhiVisNeutral("phi_vis_neutral");
+    static const SG::Decorator<double> decMVisNeutral("m_vis_neutral");
     decPtVisNeutral(xTruthParticle)  = truthInfo.m_vTruthVisTLVNeutral.Pt();
     decEtaVisNeutral(xTruthParticle) = truthInfo.m_vTruthVisTLVNeutral.Eta();
     decPhiVisNeutral(xTruthParticle) = truthInfo.m_vTruthVisTLVNeutral.Phi();
@@ -290,25 +290,25 @@ StatusCode BuildTruthTaus::examineTruthTau(const xAOD::TruthParticle& xTruthPart
 
   if ( m_bWriteDecayModeVector )
   {
-    static const SG::AuxElement::Decorator<std::vector<int> > decDecayModeVector("DecayModeVector");
+    static const SG::Decorator<std::vector<int> > decDecayModeVector("DecayModeVector");
     decDecayModeVector(xTruthParticle) = truthInfo.m_vDecayMode;
   }
 
   if ( m_bWriteVertices )
   {
     // tau decay vertex
-    static const SG::AuxElement::Decorator<float> decDecayVertexX("decay_vertex_x");
-    static const SG::AuxElement::Decorator<float> decDecayVertexY("decay_vertex_y");
-    static const SG::AuxElement::Decorator<float> decDecayVertexZ("decay_vertex_z"); 
+    static const SG::Decorator<float> decDecayVertexX("decay_vertex_x");
+    static const SG::Decorator<float> decDecayVertexY("decay_vertex_y");
+    static const SG::Decorator<float> decDecayVertexZ("decay_vertex_z"); 
    
     decDecayVertexX(xTruthParticle) = truthInfo.m_vDecayVertex.X();
     decDecayVertexY(xTruthParticle) = truthInfo.m_vDecayVertex.Y();
     decDecayVertexZ(xTruthParticle) = truthInfo.m_vDecayVertex.Z();
  
     // tau production vertex
-    static const SG::AuxElement::Decorator<float> decProdVertexX("prod_vertex_x");
-    static const SG::AuxElement::Decorator<float> decProdVertexY("prod_vertex_y");
-    static const SG::AuxElement::Decorator<float> decProdVertexZ("prod_vertex_z");
+    static const SG::Decorator<float> decProdVertexX("prod_vertex_x");
+    static const SG::Decorator<float> decProdVertexY("prod_vertex_y");
+    static const SG::Decorator<float> decProdVertexZ("prod_vertex_z");
     
     decProdVertexX(xTruthParticle) = truthInfo.m_vProdVertex.X();
     decProdVertexY(xTruthParticle) = truthInfo.m_vProdVertex.Y();

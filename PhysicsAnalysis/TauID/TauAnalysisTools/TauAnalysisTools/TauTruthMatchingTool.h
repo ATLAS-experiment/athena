@@ -81,10 +81,10 @@ private:                        // steering variables
 
 private:                        // private helper variables
 
-  SG::AuxElement::ConstAccessor<double> m_accPtVis;
-  SG::AuxElement::ConstAccessor<double> m_accEtaVis;
-  SG::AuxElement::ConstAccessor<double> m_accPhiVis;
-  SG::AuxElement::ConstAccessor<double> m_accMVis;
+  SG::ConstAccessor<double> m_accPtVis;
+  SG::ConstAccessor<double> m_accEtaVis;
+  SG::ConstAccessor<double> m_accPhiVis;
+  SG::ConstAccessor<double> m_accMVis;
 
 }; // class TauTruthMatchingTool
 
