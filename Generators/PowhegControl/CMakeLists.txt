@@ -22,7 +22,9 @@ set( PowhegEnvironment_DIR ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}
 
 find_package( PowhegEnvironment )
 
-find_package( ggvvamp )
+if(NOT "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64")
+  find_package( ggvvamp )
+endif()
 find_package( chaplin )
 find_package( cln )
 find_package( ginac )
