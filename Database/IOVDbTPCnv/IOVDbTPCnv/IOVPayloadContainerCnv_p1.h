@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IOVDBDATAMODEL_IOVPAYLOADCONTAINERCNV_P1_H
@@ -49,7 +49,7 @@ private:
     std::map<std::string, unsigned int>    m_attributeTypeMap;
     std::vector<std::string>               m_attributeTypes;
 
-    unsigned int m_objIndexOffset[IOVPayloadContainer_p1::ATTR_TIME_STAMP+1];
+    unsigned int m_objIndexOffset[IOVPayloadContainer_p1::ATTR_TIME_STAMP+1] = {0};
 
 };
 
