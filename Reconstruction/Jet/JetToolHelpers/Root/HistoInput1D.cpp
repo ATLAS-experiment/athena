@@ -52,6 +52,29 @@ StatusCode HistoInput1D::initialize()
         return StatusCode::FAILURE;
     }
 
+    // Determine the histogram interpolation strategy
+    if (m_interpStr == "")
+    {
+        ATH_MSG_FATAL("No histogram interpolation type was specified. Aborting.");
+        return StatusCode::FAILURE;
+    }
+    else if (m_interpStr == "Full")
+        m_interpNum = InterpType::Full;
+    else if (m_interpStr == "None")
+        m_interpNum = InterpType::None;
+    else if (m_interpStr == "OnlyX")
+        m_interpNum = InterpType::OnlyX;
+    else if (m_interpStr == "OnlyY")
+    {
+        ATH_MSG_FATAL("Interpolation type " << m_interpStr << " not valid for 1D histogram.");
+        return StatusCode::FAILURE;
+    }
+    else
+    {
+        ATH_MSG_FATAL("Unrecognized interpolation type: " << m_interpStr << " --> options are None/Full/OnlyY/OnlyX");
+        return StatusCode::FAILURE;
+    }
+
     // TODO
     // We have both, set the dynamic range of the input variable according to histogram range
     // Low edge of first bin (index 1, as index 0 is underflow)
@@ -71,7 +94,21 @@ float HistoInput1D::getValue(const xAOD::Jet& jet, const JetContext& event) cons
     varValue = enforceAxisRange(*m_hist->GetXaxis(),varValue);
     
     // TODO Handle interpolation vs projected+cached interpolate vs bin content
-    return readFromHisto(varValue);
+    switch (m_interpNum)
+    {
+        // "Full" and "OnlyX" interpolation mean the same thing for 1D histogram
+        // Use the default HistoInputBase reading function
+        case InterpType::Full:
+        case InterpType::OnlyX:
+            return readFromHisto(varValue);
+        case InterpType::None:
+            // No interpolation at all
+            return m_hist->GetBinContent(m_hist->GetXaxis()->FindBin(varValue));
+        default:
+            // Should never get here due to previous checks
+            ATH_MSG_ERROR("Unsupported interpolation type for a 1D histogram");
+            return 0;
+    }
 }
 
 

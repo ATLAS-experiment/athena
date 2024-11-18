@@ -6,6 +6,7 @@
 #define JETTOOLHELPERS_HISTOINPUT2D_H
 
 #include "TH2.h"
+#include "TH1.h"
 #include "AsgTools/AsgTool.h"
 
 #include "JetToolHelpers/HistoInputBase.h"
@@ -38,7 +39,9 @@ class HistoInput2D : public HistoInputBase
         ToolHandle<IVarTool> m_varTool1 {this, "varTool1", "VarTool", "InputVariable 1 instance" };
         /// interface for jet InputVariable to be defined by user, correspond to axis Y of hist
         ToolHandle<IVarTool> m_varTool2 {this, "varTool2", "VarTool", "InputVariable 2 instance" };
-
+        // Variable and function to cache projections in case of 1-D interpolaton in 2-D
+        std::vector< std::unique_ptr<TH1> > m_cachedProj;
+        StatusCode cacheProjections();
 };
 } // namespace JetHelper
 #endif

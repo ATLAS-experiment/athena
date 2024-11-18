@@ -51,6 +51,32 @@ StatusCode HistoInput2D::initialize()
         return StatusCode::FAILURE;
     }
 
+    // Determine the histogram interpolation strategy
+    if (m_interpStr == "")
+    {
+        ATH_MSG_FATAL("No histogram interpolation type was specified. Aborting.");
+        return StatusCode::FAILURE;
+    }
+    else if (m_interpStr == "Full")
+        m_interpNum = InterpType::Full;
+    else if (m_interpStr == "None")
+        m_interpNum = InterpType::None;
+    else if (m_interpStr == "OnlyX")
+        m_interpNum = InterpType::OnlyX;
+    else if (m_interpStr == "OnlyY")
+        m_interpNum = InterpType::OnlyY;
+    else
+    {
+        ATH_MSG_FATAL("Unrecognized interpolation type: " << m_interpStr << " --> options are None/Full/OnlyY/OnlyX");
+        return StatusCode::FAILURE;
+    }
+
+    // Pre-cache the histogram file in 1D projections if relevant (depends on m_interpType)
+    if (m_interpNum == InterpType::OnlyX || m_interpNum == InterpType::OnlyY)
+    {
+        ATH_CHECK(cacheProjections());
+    }
+
     // TODO
     // We have both, set the dynamic range of the input variable according to histogram range
     // Low edge of first bin (index 1, as index 0 is underflow)
@@ -71,9 +97,71 @@ float HistoInput2D::getValue(const xAOD::Jet& jet, const JetContext& event) cons
 
     varValue2 = enforceAxisRange(*m_hist->GetYaxis(),varValue2);
     
-    return readFromHisto(varValue1,varValue2);
+    switch (m_interpNum)
+    {
+        case InterpType::OnlyX:
+            // Determine the y-bin and use the cached projection to interpolate x
+            return m_cachedProj.at(m_hist->GetYaxis()->FindBin(varValue2))->Interpolate(varValue1);
+        case InterpType::OnlyY:
+            // Determine the x-bin and use the cached projection to interpolate y
+            return m_cachedProj.at(m_hist->GetXaxis()->FindBin(varValue1))->Interpolate(varValue2);
+        case InterpType::Full:
+            // Full interpolation using default HistoInputBase reading function
+            return readFromHisto(varValue1,varValue2);
+        case InterpType::None:
+            // No interpolation at all
+            return m_hist->GetBinContent(m_hist->GetXaxis()->FindBin(varValue1),m_hist->GetYaxis()->FindBin(varValue2));
+        default:
+            // Should never get here due to previous checks
+            ATH_MSG_ERROR("Unsupported interpolation type");
+            return 0;
+    }
 }
 
+StatusCode HistoInput2D::cacheProjections()
+{
+    // Project histogram from 2D to 1D
+    // Intentionally include underflow and overflow bins
+    // This keeps the same indexing scheme as root
+    // Avoids confusion and problems later at cost of a small amount of RAM
+
+    //TH2* localHist = dynamic_cast<TH2*>(fullHistogram);
+    TH2* localHist = dynamic_cast<TH2*>(m_hist.get());
+    if (!localHist)
+    {
+        ATH_MSG_FATAL("Failed to convert histogram to a TH2, please check inputs.");
+        return StatusCode::FAILURE;
+    }
+    switch (m_interpNum)
+    {
+        case InterpType::OnlyX:
+            for (Long64_t binY = 0; binY < localHist->GetNbinsY()+1; ++binY)
+            {
+                // Single bin of Y, interpolate across X
+                m_cachedProj.emplace_back(localHist->ProjectionX(Form("projx_%lld",binY),binY,binY));
+            }
+            break;
+        case InterpType::OnlyY:
+            for (Long64_t binX = 0; binX < localHist->GetNbinsX()+1; ++binX)
+            {
+                // Single bin of X, interpolate across Y
+                m_cachedProj.emplace_back(localHist->ProjectionY(Form("projy_%lld",binX),binX,binX));
+            }
+            break;
+        default:
+            ATH_MSG_FATAL("The interpolation type is not supported for caching");
+            return StatusCode::FAILURE;
+    }
+
+    // Ensure that ROOT doesn't try to take posession
+    for (auto& hist : m_cachedProj)
+    {
+        hist->SetDirectory(nullptr);
+    }
+
+    // All done
+    return StatusCode::SUCCESS;
+}
 
 bool HistoInput2D::runUnitTests() const
 {
