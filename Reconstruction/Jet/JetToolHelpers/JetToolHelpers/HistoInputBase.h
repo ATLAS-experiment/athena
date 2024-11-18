@@ -46,6 +46,17 @@ class HistoInputBase :public asg::AsgTool, virtual public IVarTool
         double enforceAxisRange(const TAxis& axis, const double inputValue) const;
         /// This function evaluate the histogram using the TH1::Interpolate
         double readFromHisto(const double X, const double Y=0, const double Z=0) const;
+        // Interpolation strategies
+        Gaudi::Property<std::string> m_interpStr {this, "InterpType", "Full", "Interpolation to run: Full/OnlyX/OnlyY/None"};
+        enum class InterpType
+        {
+            UNKNOWN=0,  // Unknown/unset/etc
+            Full,       // Full interpolation
+            None,       // No interpolation
+            OnlyX,      // Interpolate only in the x dimension
+            OnlyY       // Interpolate only in the y dimension
+        };
+        InterpType m_interpNum;
     
 };
 } // namespace JetHelper
