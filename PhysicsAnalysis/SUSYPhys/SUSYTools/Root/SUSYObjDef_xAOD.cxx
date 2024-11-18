@@ -3073,8 +3073,9 @@ int SUSYObjDef_xAOD::treatAsYear(const int runNumber) const {
   else if (theRunNumber<320000) return 2016;
   else if (theRunNumber<342000) return 2017;
   else if (theRunNumber<400000) return 2018;
-  else if (theRunNumber<450000) return 2022;
-  return 2023;
+  else if (theRunNumber<445000) return 2022;
+  else if (theRunNumber<465000) return 2023;
+  return 2024;
 }
 
 SUSYObjDef_xAOD::~SUSYObjDef_xAOD() {
