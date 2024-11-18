@@ -21,7 +21,6 @@
 #include "Identifier/Identifier.h"
 #include "InDetIdentifier/PixelID.h"
 
-#include "PixelConditionsData/PixelOfflineCalibData.h"
 #include "PixelConditionsData/ITkPixelOfflineCalibData.h"
 #include "PixelConditionsData/PixelDistortionData.h"
 #include "InDetCondTools/ISiLorentzAngleTool.h"
