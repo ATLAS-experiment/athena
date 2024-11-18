@@ -662,8 +662,8 @@ class PoolFile(object):
             if isinstance(obj, self.ROOT.TTree):
                 name = obj.GetName()
             elif isRNTuple(obj):
-                reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
-                name = reader.GetDescriptor().GetName()
+                inspector = self.ROOT.Experimental.RNTupleInspector.Create(obj)
+                name = inspector.GetDescriptor().GetName()
 
             if PoolOpts.isDataHeader(name):
                 contName     = "DataHeader"
@@ -700,15 +700,13 @@ class PoolFile(object):
 
                     self.dataHeader = poolRecord
                 elif isRNTuple(obj):
-                    reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
-                    inspector = self.ROOT.Experimental.RNTupleInspector.Create(obj)
                     diskSize = inspector.GetCompressedSize() / Units.kb
                     memSize = inspector.GetUncompressedSize() / Units.kb
 
                     memSizeNoZip = 0.0
                     if diskSize < 0.001:
                         memSizeNoZip = memSize
-                    nEntries     = reader.GetNEntries()
+                    nEntries     = inspector.GetDescriptor().GetNEntries()
                     poolRecord = PoolRecord(contName, memSize, diskSize, memSizeNoZip,
                                             nEntries,
                                             dirType = "N")
@@ -731,9 +729,7 @@ class PoolFile(object):
                         self.augNames.add(poolRecord.augName)
                         self.data += [ poolRecord ]
                 elif isRNTuple(obj):
-                    reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
-                    descriptor = reader.GetDescriptor()
-                    inspector = self.ROOT.Experimental.RNTupleInspector.Create(obj)
+                    descriptor = inspector.GetDescriptor()
                     dirType = "N"
                     if name in {PoolOpts.RNTupleNames.EventData, PoolOpts.RNTupleNames.MetaData}:
                         dirType = "F"
@@ -743,7 +739,6 @@ class PoolFile(object):
                         fieldTreeInspector = inspector.GetFieldTreeInspector(fieldId)
                         diskSize = fieldTreeInspector.GetCompressedSize() / Units.kb
                         memSize = fieldTreeInspector.GetUncompressedSize() / Units.kb
-                        fieldDescriptor = fieldTreeInspector.GetDescriptor()
                         typeName = fieldDescriptor.GetTypeName()
                         fieldName = fieldDescriptor.GetFieldName()
                         poolRecord = PoolRecord(fieldName, memSize, diskSize, memSize,

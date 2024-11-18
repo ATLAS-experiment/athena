@@ -21,8 +21,12 @@ from optparse import OptionParser
 
 if __name__ == "__main__":
 
-    parser = OptionParser( usage = "usage: %prog [-f] my.xAOD.file.pool.root" )
+    parser = OptionParser( usage = "usage: %prog [OPTION]... my.xAOD.file.pool.root" )
     p = parser.add_option
+    p( "--si",
+       action="store_true", dest = "siUnits",
+       help = "print sizes in kB, i.e., in units of 1000 bytes"
+       " (default: print sizes in KiB, i.e., in units of 1024 bytes)" )
     p( "-f",
        "--file",
        dest = "fileName",
@@ -95,13 +99,19 @@ if __name__ == "__main__":
                "input file" )
         pass
 
+    import PyUtils.PoolFile as PF
+    if options.siUnits:
+        PF.Units.kb = 1000.
+        sizeUnits = "kB"
+    else:
+        sizeUnits = "KiB"
+
     # Pattern for a static/dynamic auxiliary variable identification
     auxvarptn = re.compile( r"Aux(?:Dyn)?(?:\.|:)" )
     # Loop over the specified file(s):
     for fileName in fileNames:
 
         # Open the file:
-        import PyUtils.PoolFile as PF
         poolFile = PF.PoolFile( fileName )
 
         # Loop over all the branches of the file, and sum up the information
@@ -146,13 +156,12 @@ if __name__ == "__main__":
 
         # Print a header:
         print( "" )
-        print( "=" * 80 )
+        print( "=" * 106 )
         print( "         Event data" )
-        print( "=" * 80 )
-        print( PF.PoolOpts.HDR_FORMAT %
-               ( "Mem Size", "Disk Size", "Size/Evt", "Compression",
-                 "Items", "Container Name (Type)" ) )
-        print( "-" * 80 )
+        print( "=" * 106 )
+        print(f'{"Mem Size":^16} {"Disk Size":^16} {"Size/Evt":^16} {"Compression":>12}'
+              f' {"Items":>8} Container Name (Type) [Category]')
+        print( "-" * 106 )
 
         # Now, let's print the event-wise info that we gathered:
         memSize = 0.0
@@ -223,24 +232,16 @@ if __name__ == "__main__":
                 pass
             pass
 
-            print( PF.PoolOpts.ROW_FORMAT %
-                   ( d.memSize,
-                     d.diskSize,
-                     ( d.diskSize / poolFile.dataHeader.nEntries ),
-                     ( d.memSize / d.diskSize ),
-                     d.nEntries,
-                     nameType ) )
+            print(f"{d.memSize:12.3f} {sizeUnits:3} {d.diskSize:12.3f} {sizeUnits:3}"
+                  f" {d.diskSize / poolFile.dataHeader.nEntries:12.3f} {sizeUnits:3}"
+                  f" {d.memSize / d.diskSize:12.3f} {d.nEntries:8d}  {nameType:s}")
             memSize = memSize + d.memSize
             diskSize = diskSize + d.diskSize
             pass
-        print( "-" * 80 )
-        print( PF.PoolOpts.ROW_FORMAT %
-               ( memSize,
-                 diskSize,
-                 ( diskSize / poolFile.dataHeader.nEntries ),
-                 0.0,
-                 poolFile.dataHeader.nEntries,
-                 "Total" ) )
+        print( "-" * 106 )
+        print(f"{memSize:12.3f} {sizeUnits:3} {diskSize:12.3f} {sizeUnits:3}"
+              f" {diskSize / poolFile.dataHeader.nEntries:12.3f} {sizeUnits:3}"
+              f" {memSize / diskSize:12.3f} {poolFile.dataHeader.nEntries:8d}  Total")
         print( "" )
 
         # Now print out the categorized information
@@ -252,7 +253,7 @@ if __name__ == "__main__":
         print( "=" * 80 )
         print( "         Categorized data" )
         print( "=" * 80 )
-        print( "     Disk Size         Fraction    Category Name" )
+        print(f'{"Disk Size/Evt":^16} {"Fraction":8} Category Name')
         print( "-" * 80 )
         totDiskSize = 0.0
         frac        = 0.0
@@ -261,15 +262,15 @@ if __name__ == "__main__":
         dsName = []
         for d in categorizedData:
             dsPerEvt     = d.diskSize / poolFile.dataHeader.nEntries
-            dsPerEvtFrac = d.diskSize / diskSize
+            dsPerCatFrac = d.diskSize / diskSize
             totDiskSize += dsPerEvt
-            frac        += dsPerEvtFrac
+            frac        += dsPerCatFrac
             ds          += [dsPerEvt]
-            dsFrac      += [dsPerEvtFrac]
+            dsFrac      += [dsPerCatFrac]
             dsName      += [d.name]
-            print( "%12.3f kb %12.3f       %s" % ( dsPerEvt, dsPerEvtFrac, d.name ) )
+            print(f"{dsPerEvt:12.3f} {sizeUnits:3} {dsPerCatFrac:8.3f}  {d.name:s}")
             pass
-        print( "%12.3f kb %12.3f       %s" % ( totDiskSize , frac, "Total" ) )
+        print(f"{totDiskSize:12.3f} {sizeUnits:3} {frac:8.3f}  Total")
         ds     += [totDiskSize]
         dsFrac += [frac]
         dsName += ["Total"]
@@ -290,7 +291,7 @@ if __name__ == "__main__":
         print( "=" * 80 )
         print( "         Meta data" )
         print( "=" * 80 )
-        print( "     Mem Size       Disk Size         Container Name" )
+        print(f'{"Mem Size":^16} {"Disk Size":^16} Container Name')
         print( "-" * 80 )
 
         # Now print the info about the metadata:
@@ -299,14 +300,12 @@ if __name__ == "__main__":
         for d in orderedData:
             mtlp = re.search( "_tlp.$", d.name ) or "DataHeader" in d.name
             if d.nEntries == poolFile.dataHeader.nEntries or mtlp: continue
-            print( "%12.3f kb %12.3f kb       %s" %
-                   ( d.memSize, d.diskSize, d.name ) )
+            print(f"{d.memSize:12.3f} {sizeUnits:3} {d.diskSize:12.3f} {sizeUnits:3}  {d.name:s}")
             memSize = memSize + d.memSize
             diskSize = diskSize + d.diskSize
             pass
         print( "-" * 80 )
-        print( "%12.3f kb %12.3f kb       %s" %
-               ( memSize, diskSize, "Total" ) )
+        print(f"{memSize:12.3f} {sizeUnits:3} {diskSize:12.3f} {sizeUnits:3}  Total")
         print( "=" * 80 )
 
         # Write out a CSV file if one was requested:
