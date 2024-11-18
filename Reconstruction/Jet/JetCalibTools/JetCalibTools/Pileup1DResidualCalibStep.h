@@ -5,8 +5,10 @@
 #ifndef JETCALIBTOOLS_JETPILEUP1DRESIDUALCALIBSTEP_H
 #define JETCALIBTOOLS_JETPILEUP1DRESIDUALCALIBSTEP_H 1
 
-/* Implementation of JetAreaSubtraction class
- * This class will apply the jet 1d residual pile up correction
+/* Pileup1DResidualCalibStep performs the 1 step of the jet calibration
+ *
+ *  - area subtraction in the form  pT_corr = pT - rho xpT_area 
+ *  - residual correction (1D version)
  *
  * Date: Jan  2024
  */

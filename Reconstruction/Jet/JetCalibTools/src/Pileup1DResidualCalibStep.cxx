@@ -134,12 +134,13 @@ StatusCode Pileup1DResidualCalibStep::calibrate(xAOD::JetContainer& jetCont) con
   static const double toGeV = 0.001;
   const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> areaAcc("ActiveArea4vec");  
   const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> puScaleMomAcc("JetPileupScaleMomentum");  
+  const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> cstScaleMomAcc("JetConstitScaleMomentum");  
   SG::AuxElement::Accessor<int> puCorrectedAcc("PileupCorrected");
  
   for( xAOD::Jet * jet : jetCont){
 
-    // Assume Jet start scale is ok (?)
-    xAOD::JetFourMom_t jetStartP4 = jet->jetP4();
+    
+    xAOD::JetFourMom_t jetStartP4 = cstScaleMomAcc.getAttribute(*jet);
     
     const double E_det = jetStartP4.e();
     const double pT_det = jetStartP4.pt();

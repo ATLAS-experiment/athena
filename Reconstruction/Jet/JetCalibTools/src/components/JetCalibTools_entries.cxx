@@ -1,6 +1,7 @@
 #include "JetCalibTools/JetCalibrationTool.h"
 #include "JetCalibTools/JetCalibTool.h"
 #include "JetCalibTools/PileupAreaCalibStep.h"
+#include "JetCalibTools/Pileup1DResidualCalibStep.h"
 #include "JetCalibTools/JESCalibStep.h"
 #include "JetCalibTools/SmearingCalibStep.h"
 #include "JetCalibTools/GSCCalibStep.h"
@@ -15,3 +16,4 @@ DECLARE_COMPONENT( SmearingCalibStep )
 DECLARE_COMPONENT( GSCCalibStep )
 DECLARE_COMPONENT( MuonInJetCorrectionTool )
 DECLARE_COMPONENT( BJetCorrectionTool )
+DECLARE_COMPONENT( Pileup1DResidualCalibStep )
