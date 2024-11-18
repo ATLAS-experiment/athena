@@ -100,7 +100,7 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
     jc.setValue("N90Constituents", N90Constituents);
     // get caloWIDTH
     double caloWIDTH = 0;
-    static const SG::ConstAccessor<double> WidthAcc ("Width");
+    static const SG::ConstAccessor<float> WidthAcc ("Width");
     if(WidthAcc.isAvailable(*jet))
     {
         caloWIDTH = WidthAcc(*jet);
@@ -134,13 +134,13 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
     ATH_MSG_DEBUG("TrkWidth Response: " <<getTrackWIDTHResponse(*jet, jc, etabin));
 
     getGSCCorrection*=1./getChargedFractionResponse(*jet, jc, etabin);
-    jet->setJetP4( jet->jetP4()*getGSCCorrection );
+    jet->setJetP4( startingP4*getGSCCorrection );
     getGSCCorrection*=1./getTile0Response(*jet, jc, etabin); 
-    jet->setJetP4( jet->jetP4()*getGSCCorrection );
+    jet->setJetP4( startingP4*getGSCCorrection );
     getGSCCorrection*=1./getEM3Response(*jet, jc, etabin);
-    jet->setJetP4( jet->jetP4()*getGSCCorrection );
+    jet->setJetP4( startingP4*getGSCCorrection );
     getGSCCorrection*=1./getNTrkResponse(*jet, jc, etabin);
-    jet->setJetP4( jet->jetP4()*getGSCCorrection );
+    jet->setJetP4( startingP4*getGSCCorrection );
     getGSCCorrection*=1./getTrackWIDTHResponse(*jet, jc, etabin);
 
     ATH_MSG_DEBUG("GSC full correction: " << getGSCCorrection);
