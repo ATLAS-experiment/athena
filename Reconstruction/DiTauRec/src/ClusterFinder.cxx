@@ -105,7 +105,7 @@ StatusCode ClusterFinder::execute(DiTauCandidateData * data,
     vec_f_core.at(i) = f_core;    
   }
 
-  const static SG::AuxElement::Decorator<std::vector<float>> mDecor("f_cluster_core");
+  const static SG::Decorator<std::vector<float>> mDecor("f_cluster_core");
   mDecor(*pDiTau) = std::move(vec_f_core);
 
   return StatusCode::SUCCESS;

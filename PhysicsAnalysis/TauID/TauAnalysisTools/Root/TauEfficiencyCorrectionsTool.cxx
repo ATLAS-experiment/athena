@@ -548,7 +548,7 @@ StatusCode TauEfficiencyCorrectionsTool::readRandomRunNumber()
 {
   if (m_bReadRandomRunNumber && m_iRunNumber == 0)
   {
-    static const SG::AuxElement::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
+    static const SG::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
     const xAOD::EventInfo* eventInfo = nullptr;
     if (!evtStore()->contains<xAOD::EventInfo>("EventInfo") || !evtStore()->retrieve(eventInfo, "EventInfo").isSuccess())
     {
