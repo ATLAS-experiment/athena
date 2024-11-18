@@ -50,6 +50,11 @@ def ITkSiSPSeededTracksFinalCfg(flags) -> ComponentAccumulator:
     elif not isPrimaryPass(flags):
         AssociationMapNameKey = f"ITkPRDtoTrackMap{extension}"
 
+    # The following is to accomodate an hack we have in one of our ACTS ART tests
+    # it will be removed
+    if extension == "" and not isPrimaryPass(flags):
+        AssociationMapNameKey="PRDtoTrackMapMerge_CombinedITkTracks"
+        
     from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
     acc.merge(ITkTrackParticleCnvAlgCfg(
         flags,

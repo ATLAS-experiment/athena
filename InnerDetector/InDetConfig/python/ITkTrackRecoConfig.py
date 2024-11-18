@@ -507,7 +507,8 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
 
         
         extension = current_flags.Tracking.ActiveConfig.extension
-        _extensions_list.append(extension)
+        if extension not in _actsExtensions:
+            _extensions_list.append(extension)
 
         # Data Preparation
         # According to the tracking pass we have different data preparation 
@@ -587,16 +588,49 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
                                                  TracksName=ActsTrackContainerName,
                                                  vxCandidatesOutputName=ActsPrimaryVertices))
 
+    # Post Processing
+    # This is mainly for validation support
+    print("-------- POST PROCESSING --------")
+    for current_flags in flags_set:
+        extension = current_flags.Tracking.ActiveConfig.extension
+        print(f"- Running post-processing for extension: {extension}")
+
+        # Persistify the Seeds
+        # This is done for the InDet EDM, while for ACTS seeds the persistification
+        # support is done while scheduling the seeding algorithms
+        # This means that here we only care about the legacy seeds, that are
+        # produced whem the legacy Track Finding is scheduled
+        # - flags.Tracking.ActiveConfig.doAthenaTrack
+        # This also covers the case of the Acts->InDet Seed conversion, since that
+        # runs the legacy track finding as well
+        #
+        # At the end of this we have a track collection (segments from the seeds)
+        # and the corresponding track particle collection
+        if current_flags.Tracking.ActiveConfig.doAthenaTrack:
+            if current_flags.Tracking.doStoreTrackSeeds:
+                from InDetConfig.ITkPersistificationConfig import ITkTrackSeedsFinalCfg
+                result.merge(ITkTrackSeedsFinalCfg(current_flags))
+        
+        # Persistify Track from Track Finding
+        # Currently this is only possible for Trk Tracks
+        # For legacy tracking passes the CKF Trk Tracks are always produced
+        # - flags.Tracking.ActiveConfig.doAthenaTrack
+        # For hybrid ACTS-Athena tracking passes they are produced only after Track EDM conversion
+        # - flags.Tracking.ActiveConfig.doActsToAthenaTrack
+        if current_flags.Tracking.ActiveConfig.doAthenaTrack or current_flags.Tracking.ActiveConfig.doActsToAthenaTrack:
+            if current_flags.Tracking.doStoreSiSPSeededTracks:
+                from InDetConfig.ITkPersistificationConfig import ITkSiSPSeededTracksFinalCfg
+                result.merge(ITkSiSPSeededTracksFinalCfg(current_flags))
 
     if flags.Tracking.doStats:
-        if InputCombinedITkTracks:
+        if _extensions_list:
             result.merge(ITkStatsCfg(
                 flags_set[0], # Use cuts from primary pass
                 StatTrackCollections=StatTrackCollections,
                 StatTrackTruthCollections=StatTrackTruthCollections))
             
     if flags.Tracking.writeExtendedSi_PRDInfo:
-        if InputCombinedITkTracks:
+        if _extensions_list:
             result.merge(ITkExtendedPRDInfoCfg(flags))
 
 
