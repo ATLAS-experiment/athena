@@ -68,7 +68,6 @@ SG::DataBucket<T>::DataBucket(T* data)
 
 template <typename T>
 template <typename U>
-// cppcheck-suppress uninitMemberVar ; false positive
 SG::DataBucket<T>::DataBucket(std::unique_ptr<U> data)
     // Rely on our caller to retain constness.
     // cppcheck 2.12 puts the identifier used for the argument here in the

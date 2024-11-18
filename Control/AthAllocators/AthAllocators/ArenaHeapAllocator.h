@@ -182,7 +182,6 @@ public:
    * @c destructor should be called on them if it was provided
    * (preceded by @c clear if provided and @c mustClear was set).
    */
-  // cppcheck-suppress virtualCallInConstructor ; false positive
   virtual void erase() override final;
 
 

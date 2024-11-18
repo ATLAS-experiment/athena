@@ -60,7 +60,6 @@ inline
 Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::Accessor (const SG::auxid_t auxid)
   : Base (auxid)
 {
-  // cppcheck-suppress missingReturn; false positive
 }
 
 

@@ -473,7 +473,6 @@ const std::string& ArenaPoolSTLAllocator<T*, VETO>::name() const
  *               allocator name.
  */
 template <class T>
-// cppcheck-suppress uninitMemberVar ; false positive
 ArenaPoolSTLAllocator<T, ATHVETO>::ArenaPoolSTLAllocator
  (size_t nblock /*= 1000*/, const std::string& name /*= ""*/)
     : m_nblock (nblock),

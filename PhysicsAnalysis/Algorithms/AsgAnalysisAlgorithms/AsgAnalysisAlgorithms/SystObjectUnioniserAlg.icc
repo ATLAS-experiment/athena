@@ -18,7 +18,6 @@ namespace CP
       : EL::AnaReentrantAlgorithm(name, pSvcLocator)
   {
 
-    // cppcheck-suppress missingReturn; false positive
   }
 
   template<class T, class C>

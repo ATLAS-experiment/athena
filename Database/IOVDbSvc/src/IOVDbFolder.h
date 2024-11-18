@@ -386,7 +386,6 @@ inline const IOVRange& IOVDbFolder::currentRange() const { return m_currange; }
 
 inline bool IOVDbFolder::cacheValid(const cool::ValidityKey reftime) const {
   const auto & [cacheStart, cacheStop]=m_iovs.getCacheBounds();
-  // cppcheck-suppress incorrectLogicOperator; cppcheck 2.6 false positive: it doesn't understand destructuring
   return ((reftime>cacheStart) and (reftime<cacheStop));
 }
 

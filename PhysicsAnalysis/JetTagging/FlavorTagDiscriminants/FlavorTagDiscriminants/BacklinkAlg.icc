@@ -18,7 +18,6 @@ namespace FlavorTagDiscriminants {
     const std::string& name, ISvcLocator* svcloc):
     AthReentrantAlgorithm(name, svcloc)
   {
-    // cppcheck-suppress missingReturn; false positive
   }
 
 

@@ -291,7 +291,6 @@ CHMIMPL::ConcurrentHashmapImpl (Updater_t&& updater,
   // Round up capacity to a power of 2.
   size_t capacity = round_up (capacity_in);
 
-  // cppcheck-suppress noDestructor // false positive
   m_table = new (capacity) Table (capacity, hasher, matcher);
   m_updater.update (std::unique_ptr<Table> (m_table), ctx);
 }

@@ -69,9 +69,7 @@ namespace TrigConf
       // HLT JSON object - contains HLT menus
       std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_hlt = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
       std::unique_ptr<xAOD::TriggerMenuJsonContainer> hlt = std::make_unique<xAOD::TriggerMenuJsonContainer>();
-      // cppcheck-suppress danglingLifetime; false positive
       m_menuJSON_hlt = hlt.get(); // Keep a cached pointer from which we can add to the output metastore
-      // cppcheck-suppress danglingLifetime; false positive
       m_menuJSON_hlt->setStore(aux_hlt.get());
 
       ATH_CHECK(m_metaStore->record(std::move(aux_hlt), m_metaNameJSON_hlt + "Aux."));
@@ -80,9 +78,7 @@ namespace TrigConf
       // HLT Monitoring JSON object - contains Monitoring groups for HLT menus
       std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_hltmonitoring = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
       std::unique_ptr<xAOD::TriggerMenuJsonContainer> hltmonitoring = std::make_unique<xAOD::TriggerMenuJsonContainer>();
-      // cppcheck-suppress danglingLifetime; false positive
       m_menuJSON_hltmonitoring = hltmonitoring.get(); // Keep a cached pointer from which we can add to the output metastore
-      // cppcheck-suppress danglingLifetime; false positive
       m_menuJSON_hltmonitoring->setStore(aux_hltmonitoring.get());
 
       ATH_CHECK(m_metaStore->record(std::move(aux_hltmonitoring), m_metaNameJSON_hltmonitoring + "Aux."));
@@ -91,9 +87,7 @@ namespace TrigConf
       // L1 JSON object - contains L1 menus
       std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_l1 = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
       std::unique_ptr<xAOD::TriggerMenuJsonContainer> l1 = std::make_unique<xAOD::TriggerMenuJsonContainer>();
-      // cppcheck-suppress danglingLifetime; false positive
       m_menuJSON_l1 = l1.get(); // Keep a cached pointer from which we can add to the output metastore
-      // cppcheck-suppress danglingLifetime; false positive
       m_menuJSON_l1->setStore(aux_l1.get());
 
       ATH_CHECK(m_metaStore->record(std::move(aux_l1), m_metaNameJSON_l1 + "Aux."));
@@ -102,9 +96,7 @@ namespace TrigConf
       // HLT PS JSON object - contains prescales sets for HLT menus
       std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_hltps = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
       std::unique_ptr<xAOD::TriggerMenuJsonContainer> hltps = std::make_unique<xAOD::TriggerMenuJsonContainer>();
-      // cppcheck-suppress danglingLifetime; false positive
       m_menuJSON_hltps = hltps.get(); // Keep a cached pointer from which we can add to the output metastore
-      // cppcheck-suppress danglingLifetime; false positive
       m_menuJSON_hltps->setStore(aux_hltps.get());
 
       ATH_CHECK(m_metaStore->record(std::move(aux_hltps), m_metaNameJSON_hltps + "Aux."));
@@ -113,9 +105,7 @@ namespace TrigConf
       // L1 PS JSON object - contains prescales sets for L1 menus
       std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_l1ps = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
       std::unique_ptr<xAOD::TriggerMenuJsonContainer> l1ps = std::make_unique<xAOD::TriggerMenuJsonContainer>();
-      // cppcheck-suppress danglingLifetime; false positive
       m_menuJSON_l1ps = l1ps.get(); // Keep a cached pointer from which we can add to the output metastore
-      // cppcheck-suppress danglingLifetime; false positive
       m_menuJSON_l1ps->setStore(aux_l1ps.get());
 
       ATH_CHECK(m_metaStore->record(std::move(aux_l1ps), m_metaNameJSON_l1ps + "Aux."));
@@ -124,9 +114,7 @@ namespace TrigConf
       // Bunchgroup JSON object - contains bungchgroup configuration
       std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_bg = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
       std::unique_ptr<xAOD::TriggerMenuJsonContainer> bg = std::make_unique<xAOD::TriggerMenuJsonContainer>();
-      // cppcheck-suppress danglingLifetime; false positive
       m_menuJSON_bg = bg.get(); // Keep a cached pointer from which we can add to the output metastore
-      // cppcheck-suppress danglingLifetime; false positive
       m_menuJSON_bg->setStore( aux_bg.get() );
 
       ATH_CHECK( m_metaStore->record(std::move(aux_bg), m_metaNameJSON_bg + "Aux." ) );

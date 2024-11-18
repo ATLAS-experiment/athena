@@ -481,7 +481,6 @@ StatusCode VectorFillerToolBase::Var::init (IAddVariable* tree,
   m_contptr = 0;
   return tree->addVariable (prefix + m_name,
                             *m_proxy->GetCollectionClass()->GetTypeInfo(),
-                            // cppcheck-suppress nullPointer; false positive
                             m_contptr,
                             m_docstring);
 }

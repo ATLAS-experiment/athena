@@ -74,7 +74,6 @@ namespace CxxUtils {
  */
 struct sincos
 {
-  // cppcheck-suppress uninitMemberVar  ; false positive
   /// Calculate sine and cosine of x.
   sincos (double x)
 #if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))

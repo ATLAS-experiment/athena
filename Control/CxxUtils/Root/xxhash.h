@@ -2531,15 +2531,10 @@ XXH_PUBLIC_API void XXH32_copyState(XXH32_state_t* dstState, const XXH32_state_t
 XXH_PUBLIC_API XXH_errorcode XXH32_reset(XXH32_state_t* statePtr, XXH32_hash_t seed)
 {
     XXH_ASSERT(statePtr != NULL);
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     memset(statePtr, 0, sizeof(*statePtr));
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->v[0] = seed + XXH_PRIME32_1 + XXH_PRIME32_2;
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->v[1] = seed + XXH_PRIME32_2;
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->v[2] = seed + 0;
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->v[3] = seed - XXH_PRIME32_1;
     return XXH_OK;
 }
@@ -2978,15 +2973,10 @@ XXH_PUBLIC_API void XXH64_copyState(XXH_NOESCAPE XXH64_state_t* dstState, const 
 XXH_PUBLIC_API XXH_errorcode XXH64_reset(XXH_NOESCAPE XXH64_state_t* statePtr, XXH64_hash_t seed)
 {
     XXH_ASSERT(statePtr != NULL);
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     memset(statePtr, 0, sizeof(*statePtr));
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->v[0] = seed + XXH_PRIME64_1 + XXH_PRIME64_2;
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->v[1] = seed + XXH_PRIME64_2;
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->v[2] = seed + 0;
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->v[3] = seed - XXH_PRIME64_1;
     return XXH_OK;
 }
@@ -3955,7 +3945,6 @@ XXH3_len_1to3_64b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXH64_h
         xxh_u8  const c3 = input[len - 1];
         xxh_u32 const combined = ((xxh_u32)c1 << 16) | ((xxh_u32)c2  << 24)
                                | ((xxh_u32)c3 <<  0) | ((xxh_u32)len << 8);
-        // cppcheck-suppress nullPointerArithmeticRedundantCheck; false positive
         xxh_u64 const bitflip = (XXH_readLE32(secret) ^ XXH_readLE32(secret+4)) + seed;
         xxh_u64 const keyed = (xxh_u64)combined ^ bitflip;
         return XXH64_avalanche(keyed);
@@ -5513,29 +5502,17 @@ XXH3_reset_internal(XXH3_state_t* statePtr,
     XXH_ASSERT(offsetof(XXH3_state_t, nbStripesPerBlock) > initStart);
     XXH_ASSERT(statePtr != NULL);
     /* set members from bufferedSize to nbStripesPerBlock (excluded) to 0 */
-    // cppcheck-suppress nullPointerArithmeticRedundantCheck; false positive
     memset((char*)statePtr + initStart, 0, initLength);
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->acc[0] = XXH_PRIME32_3;
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->acc[1] = XXH_PRIME64_1;
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->acc[2] = XXH_PRIME64_2;
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->acc[3] = XXH_PRIME64_3;
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->acc[4] = XXH_PRIME64_4;
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->acc[5] = XXH_PRIME32_2;
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->acc[6] = XXH_PRIME64_5;
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->acc[7] = XXH_PRIME32_1;
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->seed = seed;
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->useSeed = (seed != 0);
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     statePtr->extSecret = (const unsigned char*)secret;
     XXH_ASSERT(secretSize >= XXH3_SECRET_SIZE_MIN);
     statePtr->secretLimit = secretSize - XXH_STRIPE_LEN;
@@ -5660,7 +5637,6 @@ XXH3_update(XXH3_state_t* XXH_RESTRICT const state,
 
     XXH_ASSERT(state != NULL);
     {   const xxh_u8* const bEnd = input + len;
-        // cppcheck-suppress nullPointerRedundantCheck; false positive
         const unsigned char* const secret = (state->extSecret == NULL) ? state->customSecret : state->extSecret;
 #if defined(XXH3_STREAM_USE_STACK) && XXH3_STREAM_USE_STACK >= 1
         /* For some reason, gcc and MSVC seem to suffer greatly
@@ -5828,9 +5804,7 @@ XXH3_len_1to3_128b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXH64_
         xxh_u32 const combinedl = ((xxh_u32)c1 <<16) | ((xxh_u32)c2 << 24)
                                 | ((xxh_u32)c3 << 0) | ((xxh_u32)len << 8);
         xxh_u32 const combinedh = XXH_rotl32(XXH_swap32(combinedl), 13);
-        // cppcheck-suppress nullPointerArithmeticRedundantCheck; false positive
         xxh_u64 const bitflipl = (XXH_readLE32(secret) ^ XXH_readLE32(secret+4)) + seed;
-        // cppcheck-suppress nullPointerArithmeticRedundantCheck; false positive
         xxh_u64 const bitfliph = (XXH_readLE32(secret+8) ^ XXH_readLE32(secret+12)) - seed;
         xxh_u64 const keyed_lo = (xxh_u64)combinedl ^ bitflipl;
         xxh_u64 const keyed_hi = (xxh_u64)combinedh ^ bitfliph;
@@ -6417,7 +6391,6 @@ XXH3_generateSecret_fromSeed(XXH_NOESCAPE void* secretBuffer, XXH64_hash_t seed)
     XXH_ALIGN(XXH_SEC_ALIGN) xxh_u8 secret[XXH_SECRET_DEFAULT_SIZE];
     XXH3_initCustomSecret(secret, seed);
     XXH_ASSERT(secretBuffer != NULL);
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
     memcpy(secretBuffer, secret, XXH_SECRET_DEFAULT_SIZE);
 }
 

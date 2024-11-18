@@ -945,7 +945,6 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
 	      // myNextCell list it is a shared cell, added to the
 	      // list of shared cells and removed from the cluster it
 	      // first was added to
-              // cppcheck-suppress invalidContainer; false positive
 	      while ( !isRemoved && nextCellIter != nextCellIterEnd ) {
 		if ( (*nextCellIter) == neighborCell ) {
 		  nextCellIter = myNextCells.erase(nextCellIter);

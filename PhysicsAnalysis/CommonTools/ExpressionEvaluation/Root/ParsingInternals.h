@@ -290,7 +290,6 @@ namespace ExpressionParsing
 
 
       primary_expr =
-        // cppcheck-suppress compareBoolExpressionWithInt; false positive
         ('(' > expression > ')')
         |   (uint_ >> !char_('.')) | double_ | bool_ | identifier 
         ;

@@ -111,7 +111,6 @@ TrigDBConnectionConfig::TrigDBConnectionConfig(DBType type,
                                                const PSKeys& hltPsKeys)
   : TrigDBConnectionConfig(type, server, smKey)
 {
-  // cppcheck-suppress useInitializationList  --- false positive
   m_hltkeys = hltPsKeys;
 }
 

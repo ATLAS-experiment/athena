@@ -35,7 +35,6 @@ class Identifier
   
   operator value_type() const { return m_id; }
 
-  // cppcheck-suppress operatorEqVarError; false positive
   Identifier& operator = (const Identifier& old) {m_id=old;return (*this);};
   Identifier& operator = (value_type value) {m_id=value;return (*this);};
   bool operator == (const Identifier& other) const {return (m_id == other.m_id);}

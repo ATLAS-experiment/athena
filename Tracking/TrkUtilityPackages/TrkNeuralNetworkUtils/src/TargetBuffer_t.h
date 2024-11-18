@@ -33,7 +33,6 @@ namespace TTN {
         , m_bufferEnd(m_bufferStart + buffer.size())//assumed contiguous
 #endif
     {
-      // cppcheck-suppress missingReturn; false positive
     }
 
   protected:
@@ -47,7 +46,6 @@ namespace TTN {
       , m_bufferEnd(buffer.m_bufferEnd)
 #endif
     {
-      // cppcheck-suppress missingReturn; false positive
     }
 
     template <typename T1, typename T2,typename T3>

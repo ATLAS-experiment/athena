@@ -40,12 +40,10 @@ ConstAccessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::ConstAccessor (const std::string&
  */
 template <class PAYLOAD_T, class ALLOC>
 inline
-// cppcheck-suppress uninitDerivedMemberVar; false positive
 ConstAccessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::ConstAccessor
   (const std::string& name, const std::string& clsname)
   : ConstAccessor (name, clsname, AuxVarFlags::None)
 {
-  // cppcheck-suppress missingReturn; false positive
 }
 
 
@@ -101,7 +99,6 @@ inline
 ConstAccessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::ConstAccessor (const detail::LinkedVarAccessorBase& b)
   : detail::LinkedVarAccessorBase (b)
 {
-  // cppcheck-suppress missingReturn; false positive
 }
 
 

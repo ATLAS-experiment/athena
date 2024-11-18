@@ -24,7 +24,6 @@ BlockFillerTool<T>::BlockFillerTool (const std::string& type,
                                      const IInterface* parent)
   : BlockFillerToolImpl (type, name, parent)
 {
-  // cppcheck-suppress missingReturn; false positive
 }
 
 

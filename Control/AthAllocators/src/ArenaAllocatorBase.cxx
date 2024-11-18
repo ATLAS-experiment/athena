@@ -22,7 +22,6 @@ namespace SG {
 /**
  * @brief Constructor for a single statistic.
  */
-// cppcheck-suppress uninitMemberVar ; false positive
 ArenaAllocatorBase::Stats::Stat::Stat()
   : inuse (0),
     free (0),

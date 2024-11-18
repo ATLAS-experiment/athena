@@ -175,7 +175,6 @@ MultiAssociationTool<Types<T0>, Types<U0> >::MultiAssociationTool
    const IInterface* parent)
     : MultiAssociationTool<Types<T0>, U0> (type, name, parent)
 {
-  // cppcheck-suppress missingReturn; false positive
 }
 
 

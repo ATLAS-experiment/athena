@@ -146,7 +146,6 @@ const EMECHVManager& EMECDetectorManager::getHVManager (EMECHVManager::IOType io
       m_HVManager[io].set (&(manager->getEMECHVManager(io)));
     }
   }
-  // cppcheck-suppress nullPointerRedundantCheck; false positive
   return *(m_HVManager[io].get());
 }
 
@@ -159,6 +158,5 @@ const EMECPresamplerHVManager& EMECDetectorManager::getPresamplerHVManager () co
       m_presamplerHVManager.set (&(manager->getEMECPresamplerHVManager()));
     }
   }
-  // cppcheck-suppress nullPointerRedundantCheck; false positive
   return *m_presamplerHVManager.get();
 }

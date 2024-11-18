@@ -243,7 +243,6 @@ if (LVL1Passed && (m_localLVL2MuonCutOn || m_localLVL2ElectronCutOn))
                     ATH_MSG_DEBUG(" *** xAODBSignalFilter.cxx: B-signal found ***  ");
                     ATH_MSG_DEBUG(" ------------------------------------------ ");
                     ATH_MSG_DEBUG("");
-                    // cppcheck-suppress shiftNegative; false positive
                     ATH_MSG_DEBUG(" Event " << m_EventCnt << " --> B-hadron/B-meson (" << HadronName << ") " << part);
                     ATH_MSG_DEBUG("");
 

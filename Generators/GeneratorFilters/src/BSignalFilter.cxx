@@ -230,7 +230,6 @@ StatusCode BSignalFilter::filterEvent()
 		  ATH_MSG_DEBUG(" *** BSignalFilter.cxx: B-signal found ***  ");
 		  ATH_MSG_DEBUG(" ------------------------------------------ ");
 		  ATH_MSG_DEBUG("");
-                  // cppcheck-suppress shiftNegative; false positive
 		  ATH_MSG_DEBUG(" Event " << m_EventCnt << " --> B-hadron/B-meson (" << HadronName << ") " << part);
 		  ATH_MSG_DEBUG("");
 

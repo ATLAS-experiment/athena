@@ -60,7 +60,6 @@ inline
 Accessor<PackedLink<CONT>, ALLOC>::Accessor (const SG::auxid_t auxid)
   : Base (auxid)
 {
-  // cppcheck-suppress missingReturn; false positive
 }
 
 

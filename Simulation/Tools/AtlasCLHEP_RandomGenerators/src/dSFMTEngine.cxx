@@ -148,7 +148,6 @@ void dSFMTEngine::setSeeds(const long *seeds, int) {
       buf[i]=seeds[i];
       ++i;
     }
-    // cppcheck-suppress uninitvar; false positive
     int dum ATLAS_THREAD_SAFE [[maybe_unused]] = wrap_init_by_array(m_dsfmt,buf,i);
   } else {
     setSeed(1234567);

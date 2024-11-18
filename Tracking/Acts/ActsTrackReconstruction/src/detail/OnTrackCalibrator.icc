@@ -31,7 +31,6 @@ namespace ActsTrk::detail {
     if (stripTool.isEnabled()) {
       stripTool->connect(*this);
     } else {
-      // cppcheck-suppress missingReturn; false positive
       stripCalibrator.template connect<&OnTrackCalibrator<traj_t>::passthrough<1, xAOD::StripCluster>>(this);
     }
   }

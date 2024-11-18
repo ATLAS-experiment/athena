@@ -25,7 +25,6 @@ MultiAssociationToolTo<TO_T>::MultiAssociationToolTo
    const IInterface* parent)
     : MultiAssociationToolImpl (type, name, parent)
 {
-  // cppcheck-suppress missingReturn; false positive
 }
 
 
@@ -103,7 +102,6 @@ MultiAssociationTool<FROM_T, TO_T>::MultiAssociationTool
    const IInterface* parent)
     : MultiAssociationToolTo<TO_T> (type, name, parent)
 {
-  // cppcheck-suppress missingReturn; false positive
 }
 
 

@@ -1666,7 +1666,6 @@ void MuonCombinePatternTool::cleanCandidates(std::vector<CandidatePatPair>& cand
         }
         hitsMap.insert(std::make_pair((*it1), std::make_pair(etahits, phihits)));
     }
-    // cppcheck-suppress invalidContainer; false positive
     for (it1 = candidates.begin(); it1 != candidates.end(); ++it1) {
         std::pair<PrepDataSet, PrepDataSet>& hits1 = hitsMap[(*it1)];
         it2 = it1 + 1;

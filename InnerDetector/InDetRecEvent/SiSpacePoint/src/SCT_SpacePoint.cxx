@@ -59,7 +59,6 @@ void SCT_SpacePoint::setupLocalCovarianceSCT() {
   constexpr double elem11 = 1600. * deltaY;
   Amg::MatrixX cov(2, 2);
   cov << deltaY, offdiag,
-      // cppcheck-suppress constStatement; false positive
       offdiag, elem11;
 
   Trk::MeasurementBase::m_localCovariance = std::move(cov);

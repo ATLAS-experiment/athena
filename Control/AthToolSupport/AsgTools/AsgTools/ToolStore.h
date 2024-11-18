@@ -41,7 +41,6 @@ namespace asg {
 
       /// Retrieve a tool by name and interface.
       template< typename T >
-      // cppcheck-suppress constStatement; false positive
       static T* get( const std::string& name ) {
 
          return dynamic_cast< T* >( get( name ) );

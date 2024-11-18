@@ -18,7 +18,6 @@ MuonPrepDataCollection< PrepDataT >::MuonPrepDataCollection(const
   Identifiable(),
   m_idHash(idHash),
   m_id()
-  // cppcheck-suppress missingReturn; false positive
 {}
 
 template< class PrepDataT >

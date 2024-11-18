@@ -137,7 +137,6 @@ class AssociationMap
 
   /// \brief finding an object with allocation
   object_iterator findObject(const object_type* theObject) const
-    // cppcheck-suppress returnDanglingLifetime; false positive
     { return object_iterator(m_associationMap).find(theObject); }
 
   /// \brief testing if object is in store

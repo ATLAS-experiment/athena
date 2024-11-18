@@ -243,7 +243,6 @@ public:
   struct DeletePayload
   {
     /// Initialize with an explicit deletion function.
-    // cppcheck-suppress uninitMemberVar  // false positive
     DeletePayload (delete_function* delfcn)
       : m_delete (delfcn)
     {
@@ -256,7 +255,6 @@ public:
       delete reinterpret_cast<const U*>(p);
     }
     template <class U>
-    // cppcheck-suppress uninitMemberVar  // false positive
     DeletePayload (const std::default_delete<U>&)
     {
       m_delete = delfcn<U>;

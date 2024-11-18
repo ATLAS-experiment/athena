@@ -33,7 +33,6 @@ SGCollectionGetterTool<CONT>::SGCollectionGetterTool
   {
     REPORT_MESSAGE (MSG::ERROR) << "Can't set TypeName property for tool "
                                 << type << "/" << name;
-    // cppcheck-suppress missingReturn; false positive
   }
 }
 
