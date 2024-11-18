@@ -35,6 +35,11 @@ atlas_add_test( FPGATrackSimConfigFlags_test
                 SCRIPT python -m FPGATrackSimConfTools.FPGATrackSimConfigFlags
                 POST_EXEC_SCRIPT noerror.sh ) 
 
+atlas_add_test( FPGATrackSimMapGeneration_test 
+                SCRIPT FPGATrackSimMapGeneration.sh
+                POST_EXEC_SCRIPT noerror.sh 
+                PROPERTIES TIMEOUT 240)
+
 atlas_add_test( FPGATrackSimFromRDO_test
                 SCRIPT FPGATrackSimAnalysisOnRDO.sh
                 POST_EXEC_SCRIPT noerror.sh 
