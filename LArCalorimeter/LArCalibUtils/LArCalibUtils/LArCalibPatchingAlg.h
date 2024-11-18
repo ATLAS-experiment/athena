@@ -22,6 +22,7 @@
 #include "LArRecConditions/LArBadChannelMask.h"
 #include "LArRawConditions/LArMphysOverMcalComplete.h"
 #include "LArRawConditions/LArRampComplete.h"
+#include "LArRawConditions/LArAutoCorrComplete.h"
 #include "LArRawConditions/LArOFCComplete.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "LArRecConditions/LArBadChannelCont.h"
@@ -111,9 +112,18 @@ private:
    */
   bool getAverage(const HWIdentifier chid, const int gain, LArOFCP1& patch, const LArBadChannelCont* bcCont, const LArOnOffIdMapping* cabling, bool isphi=true); 
 
+ /**
+   * @brief Specialized method to average LArAutoCorr over a FEB
+   * @param chid Online identifier of the channel to be patched
+   * @param gain Gain in question
+   * @patch [OUT] Reference to be filled by the average
+   */
+  bool getAverage(const HWIdentifier chid, const int gain, LArAutoCorrP1& patch, const LArBadChannelCont* bcCont, const LArOnOffIdMapping* cabling, bool isphi=false); 
+
   bool setZero(const HWIdentifier chid, const int gain, LArRampP1& patch); 
   bool setZero(const HWIdentifier chid, const int gain, LArOFCP1& patch); 
   bool setZero(const HWIdentifier chid, const int gain, LArCaliWaveVec& patch); 
+  bool setZero(const HWIdentifier chid, const int gain, LArAutoCorrP1& patch); 
 
 
 
@@ -168,6 +178,7 @@ private:
   StatusCode setSymlink(const LArMphysOverMcalComplete* ramp) const;
   StatusCode setSymlink(const LArCaliWaveContainer* ) const 
   {return StatusCode::SUCCESS;};
+  StatusCode setSymlink(const LArAutoCorrComplete* ) const; 
 
   enum patchMethod{
     FEBNeighbor,

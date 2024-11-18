@@ -22,8 +22,8 @@ void TRTCalib_StrawStatusReport(){
 	int run = 0;
 	TNtuple *ntuple = new TNtuple("ntuple", "data", "side:phi:straw:status:hits:occ:htocc:eff:lay");;
 	
-	int var[15];
-	double par[5];
+	int var[15]{};
+	double par[5]{};
 	int count = 0;
 	
 	ifstream in;

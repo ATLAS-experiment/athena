@@ -35,7 +35,7 @@ public:
   EndcapFastSimDedicatedSD& operator= (const EndcapFastSimDedicatedSD&) = delete;
 
   // ProcessHitsMethod
-  void ProcessSpot(const EnergySpot & spot) override final;
+  void ProcessSpot(const EnergySpot & spot, double weight) override final;
 
 private:
 

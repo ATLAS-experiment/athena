@@ -246,6 +246,41 @@ def MC23NoPileUp(flags):
     flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
 
+def MC23aNoPileUp(flags):
+    """MC23a flags for MC without pile-up"""
+    MC23NoPileUp(flags)
+
+
+def MC23dNoPileUp(flags):
+    """MC23d flags for MC without pile-up"""
+    flags.Input.MCCampaign = Campaign.MC23d
+
+    flags.Beam.NumberOfCollisions = 0.
+    flags.Input.ConditionsRunNumber = 450000
+
+    from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
+    LArConfigRun3NoPileUp(flags)
+
+    # radiation damage
+    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
+    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
+
+
+def MC23eNoPileUp(flags):
+    """MC23e flags for MC without pile-up"""
+    flags.Input.MCCampaign = Campaign.MC23e
+
+    flags.Beam.NumberOfCollisions = 0.
+    flags.Input.ConditionsRunNumber = 470000
+
+    from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
+    LArConfigRun3NoPileUp(flags)
+
+    # radiation damage
+    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
+    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
+
+
 def MC23NoPileUpLowMuRun(flags):
     """MC23a flags for MC to match 2002 Low Mu data"""
     MC23NoPileUp(flags)

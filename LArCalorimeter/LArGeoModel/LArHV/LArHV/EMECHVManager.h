@@ -91,7 +91,8 @@ class EMECHVManager
   // Get hvLine for an electrode
   int hvLineNo(const EMECHVElectrode& electrode
 	       , int gap
-	       , const LArHVIdMapping* hvIdMapping) const;
+	       , const LArHVIdMapping* hvIdMapping
+               , HWIdentifier *hvlId=nullptr) const;
 #endif
 
  private:

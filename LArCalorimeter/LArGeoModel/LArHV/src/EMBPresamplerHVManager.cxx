@@ -283,7 +283,9 @@ EMBPresamplerHVManager::getData (const LArHVIdMapping& hvIdMapping,
 
 int EMBPresamplerHVManager::hvLineNo(const EMBPresamplerHVModule& module
 				     , int gap
-				     , const LArHVIdMapping* hvIdMapping) const {
+				     , const LArHVIdMapping* hvIdMapping
+                                     , HWIdentifier *hvlId ) const {
+
   int sideIndex         = module.getSideIndex();
   int phiIndex          = module.getPhiIndex();
   int etaIndex          = module.getEtaIndex();
@@ -319,6 +321,8 @@ int EMBPresamplerHVManager::hvLineNo(const EMBPresamplerHVModule& module
 
   // Get LArHVLineID corresponding to a given LArElectrodeId
   HWIdentifier id = hvIdMapping->getLArHVLineID(elecHWID);
+
+  if(hvlId) *hvlId = id;
 
   // Extract HV Line No
   return m_c->hvId->can_node(id)*1000 + m_c->hvId->hv_line(id);

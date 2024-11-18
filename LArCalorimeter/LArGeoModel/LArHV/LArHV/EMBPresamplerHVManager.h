@@ -80,7 +80,8 @@ class EMBPresamplerHVManager
   // Get hvLine for a module
   int hvLineNo(const EMBPresamplerHVModule& module
                , int gap
-               , const LArHVIdMapping* hvIdMapping) const;
+               , const LArHVIdMapping* hvIdMapping
+               , HWIdentifier *hvlId = nullptr) const;
 #endif
 
  private:

@@ -162,6 +162,9 @@ if __name__=='__main__':
    from AthenaCommon.Constants import INFO
    flags.Exec.OutputLevel = INFO
 
+   # testing Acorr patching
+   flags.LArCalib.CorrectBadChannels=True
+
    from AthenaConfiguration.Enums import LHCPeriod
    flags.GeoModel.Run = LHCPeriod.Run3
 
@@ -173,7 +176,7 @@ if __name__=='__main__':
 
    flags.lock()
    flags.dump(evaluate=True) 
-   
+   ''' 
    # create bad chan sqlite file
    cmdlinerm = (['/bin/rm', '-f', flags.LArCalib.BadChannelDB])
    if not flags.LArCalib.isSC:
@@ -198,7 +201,8 @@ if __name__=='__main__':
       sys.exit(-1)
    print((" ").join(cmdline))
    print(cp.stdout)
- 
+   '''
+
    cfg=MainServicesCfg(flags)
 
    cfg.merge(LArPedestalAutoCorrCfg(flags))

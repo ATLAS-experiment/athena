@@ -41,6 +41,7 @@
 using LArRampPatcher = LArCalibPatchingAlg<LArRampComplete>;
 using LArCaliWavePatcher = LArCalibPatchingAlg<LArCaliWaveContainer>;
 using LArMphysOverMcalPatcher = LArCalibPatchingAlg<LArMphysOverMcalComplete>;
+using LArACPatcher = LArCalibPatchingAlg<LArAutoCorrComplete>;
 
 //typedef LArCalibCopyAlg<LArPedestalComplete> LArPedestalCopyAlg;
 using LArPhysWaveCopyAlg = LArCalibCopyAlg<LArPhysWaveContainer>;
@@ -69,6 +70,7 @@ DECLARE_COMPONENT( LArDumpShapes )
 DECLARE_COMPONENT( LArRampCorr )
 DECLARE_COMPONENT( LArAccumulatedCalibDigitContSplitter )
 DECLARE_COMPONENT( LArRampPatcher )
+DECLARE_COMPONENT( LArACPatcher )
 DECLARE_COMPONENT( LArCaliWavePatcher )
 DECLARE_COMPONENT( LArOFPhaseFill )
 DECLARE_COMPONENT( LArOFPhasePicker )

@@ -4,6 +4,7 @@
 
 def LArNoisyROMonConfig(flags, inKey="", 
                               NoisyFEBDefStr="(>30 chan with Q>4000)", 
+                              NoisyHVlineDefStr="", 
                               MNBTightFEBDefStr="",
                               MNBTight_PsVetoFEBDefStr="",
                               MNBLooseFEBDefStr=""):
@@ -13,16 +14,19 @@ def LArNoisyROMonConfig(flags, inKey="",
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     NoisyFEBDefStr="(>"+str(flags.LAr.NoisyRO.BadChanPerFEB)+" chan with Q>"+str(flags.LAr.NoisyRO.CellQuality)+")"
+    NoisyHVlineDefStr="(>"+str(flags.LAr.NoisyRO.BadHVCut)+" HVlines with >"+str(flags.LAr.NoisyRO.BadHVlineFrac)+" channels with Q>"+str(flags.LAr.NoisyRO.CellQuality)+")"
+
     MNBTightFEBDefStr="(>"+str(flags.LAr.NoisyRO.MNBTightCut)+" chan with Q>"+str(flags.LAr.NoisyRO.CellQuality)+")"
     MNBTight_PsVetoFEBDefStr="(>"+str(flags.LAr.NoisyRO.MNBTight_PsVetoCut[0])+" chan with Q>"+str(flags.LAr.NoisyRO.CellQuality)+") + PS veto (<"+str(flags.LAr.NoisyRO.MNBTight_PsVetoCut[1])+" channels)"
     MNBLooseFEBDefStr="(>"+str(flags.LAr.NoisyRO.MNBLooseCut)+" chan with Q>"+str(flags.LAr.NoisyRO.CellQuality)+")"
 
-    return LArNoisyROMonConfigCore(helper,CompFactory.LArNoisyROMonAlg, flags, inKey, NoisyFEBDefStr, MNBTightFEBDefStr, MNBTight_PsVetoFEBDefStr, MNBLooseFEBDefStr)
+    return LArNoisyROMonConfigCore(helper,CompFactory.LArNoisyROMonAlg, flags, inKey, NoisyFEBDefStr, NoisyHVlineDefStr, MNBTightFEBDefStr, MNBTight_PsVetoFEBDefStr, MNBLooseFEBDefStr)
 
 
 def LArNoisyROMonConfigCore(helper,algoinstance,flags, 
                               inKey="", 
                               NoisyFEBDefStr="(>30 chan with Q>4000)", 
+                              NoisyHVlineDefStr="",
                               MNBTightFEBDefStr="",
                               MNBTight_PsVetoFEBDefStr="",
                               MNBLooseFEBDefStr=""):
@@ -108,6 +112,11 @@ def LArNoisyROMonConfigCore(helper,algoinstance,flags,
     #then global histo
     noisyROGroup.defineHistogram('n_noisyFEBs;NoisyFEB',
                                   title='Number of noisy FEB '+ NoisyFEBDefStr + '  per event;# of noisy FEB',
+                                  type='TH1I',
+                                  path=larNoisyRO_hist_path,
+                                  xbins=lArDQGlobals.noisyFEB_Bins,xmin=lArDQGlobals.noisyFEB_Min,xmax=lArDQGlobals.noisyFEB_Max)
+    noisyROGroup.defineHistogram('n_noisyHVlines;NoisyHVlines',
+                                  title='Number of noisy HVlines '+ NoisyHVlineDefStr + '  per event;# of noisy HVlines',
                                   type='TH1I',
                                   path=larNoisyRO_hist_path,
                                   xbins=lArDQGlobals.noisyFEB_Bins,xmin=lArDQGlobals.noisyFEB_Min,xmax=lArDQGlobals.noisyFEB_Max)
@@ -231,6 +240,17 @@ def LArNoisyROMonConfigCore(helper,algoinstance,flags,
                                  title='L1 term fired for RNB flagged events - {0} ; Special trigger fired', 
                                  xbins=l1siz+1,xmin=0.5,xmax=l1siz+1.5,
                                  xlabels=larNoisyROMonAlg.L1NoiseBurstTriggers.append("NONE"))
+    for subdet in range(0,4): 
+       darray1 = helper.addArray([lArDQGlobals.Partitions[2*subdet:2*subdet+2]],larNoisyROMonAlg,lArDQGlobals.SubDet[subdet],topPath='/')
+
+       darray1.defineHistogram('LBHV;HVlineNoisyEvent',type='TH1I', path=hist_path,
+                                 title='Yield of events flagged by HVlines flag - {0} ; Luminosity Block; Number of events', 
+                                 xbins=lArDQGlobals.LB_Bins,xmin=lArDQGlobals.LB_Min,xmax=lArDQGlobals.LB_Max)
+
+       darray1.defineHistogram('LBHV_Veto;HVlineNoisyEvent_TimeVeto',type='TH1I', path=hist_path,
+                                 title='Yield of events flagged by HVlines flag not vetoed by time window - {0} ; Luminosity Block', 
+                                 xbins=lArDQGlobals.LB_Bins,xmin=lArDQGlobals.LB_Min,xmax=lArDQGlobals.LB_Max)
+
 
     cfg.merge(helper.result())
     return cfg
@@ -239,9 +259,7 @@ def LArNoisyROMonConfigCore(helper,algoinstance,flags,
 if __name__=='__main__':
 
     # Setup logs
-    from AthenaCommon.Constants import DEBUG
-    from AthenaCommon.Logging import log
-    log.setLevel(DEBUG)
+    from AthenaCommon.Constants import INFO
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -258,7 +276,7 @@ if __name__=='__main__':
     
     flags.Output.HISTFileName = 'LArNoisyROMonitoringOutput.root'
 
-    flags.Exec.OutputLevel=DEBUG
+    flags.Exec.OutputLevel=INFO
     flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
@@ -275,6 +293,8 @@ if __name__=='__main__':
     cfg.merge(TileGMCfg(flags))
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
     cfg.merge(LArOnOffIdMappingCfg(flags))
+    from LArCalibUtils.LArHVScaleConfig import LArHVScaleCfg
+    cfg.merge(LArHVScaleCfg(flags))
     # then NoisyROSummary creator
     from LArCellRec.LArNoisyROSummaryConfig import LArNoisyROSummaryCfg
     noisyROSumm = LArNoisyROSummaryCfg(flags)
@@ -285,9 +305,5 @@ if __name__=='__main__':
     cfg.merge(noisemon) 
 
     flags.dump()
-    f=open("NoisyROMonMaker.pkl","wb")
-    cfg.store(f)
-    f.close()
    
     cfg.run(20) #use cfg.run() to run on all events
-    #cfg.run() #use cfg.run() to run on all events

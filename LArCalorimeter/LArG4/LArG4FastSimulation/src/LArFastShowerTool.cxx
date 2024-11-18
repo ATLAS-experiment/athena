@@ -43,6 +43,7 @@ LArFastShowerTool::LArFastShowerTool(const std::string& type, const std::string&
                   "Name of file for generated SPs. Do not touch until you want to produce a new library");
   declareProperty("GeneratedStartingPointsRatio", m_configuration.m_generated_starting_points_ratio = 0.02, "Ratio of SPs that goes to output");
   declareProperty("DetectorTag", m_configuration.m_detector_tag, "Which detector is this?");
+  declareProperty("ApplyRRWeights", m_configuration.m_applyRRWeights, "Should the weights set by NRR/PRR be applied to Frozen Shower Energy deposits?");
   declareProperty("SensitiveDetector" , m_fastSimDedicatedSD , "Fast sim dedicated SD for this setup");
   declareProperty("ShowerLibSvc" , m_showerLibSvc, "Handle on the shower library service");
   m_configuration.m_showerLibSvcName = m_showerLibSvc.name();

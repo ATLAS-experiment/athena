@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -33,6 +33,9 @@ class LArAutoCorr2Ntuple : public LArCond2NtupleBase
 
   // Key of the AutocorrComplete object
   SG::ReadCondHandleKey<ILArAutoCorr> m_objKey{this,"ContainerKey",""};
+
+  BooleanProperty m_applyCorr{this, "ApplyCorrection", false};
+  BooleanProperty m_addCorrUndo{this, "AddCorrUndo", true};
 
   // Number of samples
   unsigned  m_nsamples;

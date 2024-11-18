@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRecEvent/LArNoisyROSummary.h"
@@ -12,7 +12,8 @@ LArNoisyROSummary::LArNoisyROSummary():
   m_SatTightFlaggedPartitions(0),
   m_MNBLooseFlaggedPartitions(0),
   m_MNBTightFlaggedPartitions(0),
-   m_MNBTight_PsVetoFlaggedPartitions(0)
+  m_MNBTight_PsVetoFlaggedPartitions(0),
+  m_BadHVlinesPartitions(0)
 {
 }
 
@@ -33,6 +34,7 @@ void LArNoisyROSummary::clear()
   m_MNBLooseFlaggedPartitions = 0;
   m_MNBTightFlaggedPartitions = 0;
   m_MNBTight_PsVetoFlaggedPartitions = 0;
+  m_noisy_hvlines.clear();
 }
 
 
@@ -45,6 +47,11 @@ void LArNoisyROSummary::set_noisy_febs(const std::vector<HWIdentifier>& badfebs)
 void LArNoisyROSummary::add_noisy_feb(HWIdentifier febid)
 {
   m_noisy_febs.push_back(febid);
+}
+
+void LArNoisyROSummary::add_noisy_hvline(HWIdentifier hvid)
+{
+  m_noisy_hvlines.push_back(hvid);
 }
 
 void LArNoisyROSummary::set_MNBTight_febs(const std::vector<HWIdentifier>& badfebs)
@@ -130,3 +137,9 @@ const std::vector<std::pair<HWIdentifier,std::vector<int> > >& LArNoisyROSummary
 {
   return m_noisy_preamps;
 }
+
+const std::vector<HWIdentifier>& LArNoisyROSummary::get_noisy_hvlines() const
+{
+  return m_noisy_hvlines;
+}
+

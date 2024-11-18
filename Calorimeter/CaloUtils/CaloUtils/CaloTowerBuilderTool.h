@@ -88,6 +88,7 @@ protected:
   virtual std::vector<CaloCell_ID::SUBCALO> parseCalos
     (const std::vector<std::string>& includedCalos) const;
 
+  void runTimeInit(const EventContext& ctx) const;
 
 private:
 
@@ -108,8 +109,7 @@ private:
   /////////////////////////////
 
   CaloTowerStore m_cellStore;
-  mutable std::mutex m_cellStoreMutex;
-  mutable std::atomic_bool m_cellStoreInit{false};
+  mutable std::once_flag m_onceFlag;
 
   virtual StatusCode checkSetup(MsgStream& log);
   static void addTower (const CaloTowerStore::tower_iterator tower_it,

@@ -156,6 +156,7 @@ private:
   bool m_doTrigEff{false};
   bool m_doTimeCalib{false};
   bool m_doFADCCorr{false};
+  bool m_doNonLinCorr{false};
   bool m_doFADCCorrPerSample{false};
   int m_forceCalibRun;
   int m_forceCalibLB;

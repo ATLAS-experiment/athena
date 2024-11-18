@@ -31,6 +31,7 @@ LArBadChanBitPacking::LArBadChanBitPacking():LArBadChanBitPackingBase()
   addBit( LArBadChannel::LArBadChannelEnum::badFirstSampleBit, "badFirstSample", independent);
   addBit( LArBadChannel::LArBadChannelEnum::unflaggedByLADIeSBit, "unflaggedByLADIeS", independent);
   addBit( LArBadChannel::LArBadChannelEnum::reflaggedByLADIeSBit, "reflaggedByLADIeS", independent);
+  addBit( LArBadChannel::LArBadChannelEnum::badAutoCorrBit, "badAutoCorr", independent);
 
   for (unsigned int i=0; i<m_enumVec.size(); i++) {
     m_nameMap[m_nameVec[i]] = m_enumVec[i].first;

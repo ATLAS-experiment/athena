@@ -85,7 +85,7 @@ EndcapFastSimDedicatedSD::EndcapFastSimDedicatedSD(StoreGateSvc* detStore, bool 
 }
 
 // ProcessHitsMethod
-void EndcapFastSimDedicatedSD::ProcessSpot(const EnergySpot  & spot){
+void EndcapFastSimDedicatedSD::ProcessSpot(const EnergySpot  & spot, double weight){
 
   // Fill the identifier.
   Point3D<double> globalPosition=spot.GetPosition();
@@ -171,8 +171,8 @@ void EndcapFastSimDedicatedSD::ProcessSpot(const EnergySpot  & spot){
                        << regionIndex
                        << etaIndex
                        << phiBin;
-        // call process to add this to the collection
-        SimpleHit(m_larID, spot.GetTime(), spot.GetEnergy());
+        // call process to add this to the collection 
+        SimpleHit(m_larID, spot.GetTime(), spot.GetEnergy()*weight);
         return;
       }
     }
