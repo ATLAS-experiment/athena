@@ -122,6 +122,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
 
     def __init__ (self, containerName='', selectionName='') :
         super (MuonWorkingPointConfig, self).__init__ ()
+        self.setBlockName('MuonsWorkingPoint')
         self.addOption ('containerName', containerName, type=str,
             noneAction='error',
             info="the name of the input container.")

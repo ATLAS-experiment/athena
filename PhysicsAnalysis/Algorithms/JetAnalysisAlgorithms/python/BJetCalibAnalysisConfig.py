@@ -13,6 +13,7 @@ class BJetCalibAnalysisConfig (ConfigBlock) :
         self.setBlockName('BJetCalib')
         self.addDependency('FTag', required=False)
         self.addDependency('Muons', required=True)
+        self.addDependency('MuonsWorkingPoint', required=False)
         self.addOption ('containerName', containerName, type=str,
             noneAction='error',
             info="the name of the input jet container.")
