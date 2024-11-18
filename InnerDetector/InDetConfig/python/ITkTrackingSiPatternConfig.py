@@ -64,19 +64,7 @@ def ITkTrackingSiPatternCfg(flags,
             else:                
                 from InDetConfig.SiSPSeededTrackFinderConfig import ITkSiSPSeededTrackFinderCfg
                 acc.merge(ITkSiSPSeededTrackFinderCfg(flags, TracksLocation=SiSPSeededTrackCollectionKey))
-
-            # Store some collections for persistification
-            # Used for validation and studies
-
-            # Persistify Seed
-            if flags.Tracking.doStoreTrackSeeds:
-                from InDetConfig.ITkPersistificationConfig import ITkTrackSeedsFinalCfg
-                acc.merge(ITkTrackSeedsFinalCfg(flags))
-            #Persistify Track from Track Finding
-            if flags.Tracking.doStoreSiSPSeededTracks:
-                from InDetConfig.ITkPersistificationConfig import ITkSiSPSeededTracksFinalCfg
-                acc.merge(ITkSiSPSeededTracksFinalCfg(flags))
-                        
+                
         # GNN Track
         if flags.Tracking.ActiveConfig.doGNNTrack:
             from InDetGNNTracking.InDetGNNTrackingConfig import GNNTrackMakerCfg
@@ -111,7 +99,7 @@ def ITkTrackingSiPatternCfg(flags,
                                                TrackContainerLocation=f"{flags.Tracking.ActiveConfig.extension}Tracks",
                                                TrackCollectionKeys=[SiSPSeededTrackCollectionKey]))
 
-            
+                   
     from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
     if flags.Tracking.doTruth and runTruth:
         acc.merge(ITkTrackTruthCfg(
@@ -119,7 +107,7 @@ def ITkTrackingSiPatternCfg(flags,
             Tracks=SiSPSeededTrackCollectionKey,
             DetailedTruth=SiSPSeededTrackCollectionKey+"DetailedTruth",
             TracksTruth=SiSPSeededTrackCollectionKey+"TruthCollection"))
-
+        
     # ------------------------------------------------------------
     #
     # ---------- Ambiguity solving
@@ -172,7 +160,8 @@ def ITkTrackingSiPatternCfg(flags,
                                                ACTSTracksLocation=f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks",
                                                TracksLocation=ResolvedTrackCollectionKey))
             runTruth = False
-
+            
+            
     if flags.Tracking.doTruth and runTruth:
         acc.merge(ITkTrackTruthCfg(
             flags,
