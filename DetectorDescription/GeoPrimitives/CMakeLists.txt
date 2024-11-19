@@ -40,7 +40,7 @@ if( NOT XAOD_STANDALONE )
        get_filename_component(_theLoc ${_exeFile} DIRECTORY)
        atlas_add_test( ${_theExec} 
                        SOURCES  ${_exeFile}
-                       LINK_LIBRARIES GeoPrimitives
+                       LINK_LIBRARIES GeoPrimitives GaudiKernel
                        POST_EXEC_SCRIPT nopost.sh) 
    endforeach()
 endif()
