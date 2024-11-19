@@ -9,8 +9,12 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/ReadDecorHandleKey.h"
+#include "StoreGate/ReadCondHandleKey.h"
 #include "TRandom3.h"
 #include "array"
+
+#include "CoolKernel/IObject.h"
+#include "AthenaPoolUtilities/AthenaAttributeList.h"
 
 //---------------------------------------------------
 #include "xAODForward/ZdcModuleContainer.h"
@@ -47,6 +51,9 @@ private:
     void calculate_log_bin_edges(float min_value, float max_value, int num_bins, std::vector<float>& bin_edges);
     float calculate_inverse_bin_width(float event_value, std::string variable_name, const std::vector<float>& bin_edges) const;
     
+    Gaudi::Property<unsigned int> m_runNumber {this, "RunNumber", 0, "Run number for current job"};
+    ZdcInjPulserAmpMap::Token m_injMapRunToken{};
+    
     Gaudi::Property<std::string> m_zdcModuleContainerName {this, "ZdcModuleContainerName", "ZdcModules", "Location of ZDC processed data"};
     Gaudi::Property<std::string> m_zdcSumContainerName {this, "ZdcSumContainerName", "ZdcSums", "Location of ZDC processed sums"};
     Gaudi::Property<std::string> m_auxSuffix{this, "AuxSuffix", "", "Append this tag onto end of AuxData"};
@@ -75,7 +82,13 @@ private:
     Gaudi::Property<std::string> m_UCCtriggerHELT50{this, "triggerUCCHELT50", "L1_ZDC_HELT50_jTE4000", "UCC trigger requiring ZDC hadronic energy be less than 50 TeV"};
     
     float m_timingCutsInjectorPulse [2][4][2] = {{{30, 38}, {30, 38}, {28, 38}, {30, 38}}, {{30, 38}, {30, 38}, {30, 38}, {30, 38}}}; // Timing cuts (array of dimension 2 * 4 * 2) for event to enter reco-amp-vs-input-voltage histograms in the injector pulse stream
-    Gaudi::Property<float> m_minAmpRequiredInjectorPulse {this, "MinAmpRequiredInjectorPulse", 20, "Minimum amplitude required for event to enter reco-amp-vs-input-voltage histograms in the injector pulse stream"};
+    Gaudi::Property<unsigned int> m_nSecondsRejectStartofLBInjectorPulse {this, "NSecondsRejectStartofLBInjectorPulse", 3, "The number of seconds to reject at beginning of each LB in reco-amp-vs-input-voltage histograms in the injector pulse stream"};
+    Gaudi::Property<float> m_minAmpRequiredHGInjectorPulse {this, "MinAmpRequiredHGInjectorPulse", 20, "HG Minimum amplitude required for event to enter reco-amp-vs-input-voltage histograms in the injector pulse stream"};
+    Gaudi::Property<float> m_minAmpRequiredLGInjectorPulse {this, "MinAmpRequiredLGInjectorPulse", 20, "LG Minimum amplitude required for event to enter reco-amp-vs-input-voltage histograms in the injector pulse stream"};
+    Gaudi::Property<float> m_minVInjToImposeAmpRequirementHGInjectorPulse {this, "MinVInjToImposeAmpRequirementHGInjectorPulse", 0.002, "Minimum input voltage to impose HG minimum amplitude requirement in the injector pulse stream; set to negative value to cancel HG minimum-amplitude requirement"};
+    Gaudi::Property<float> m_minVInjToImposeAmpRequirementLGInjectorPulse {this, "MinVInjToImposeAmpRequirementLGInjectorPulse", 0.002, "Minimum input voltage to impose LG minimum amplitude requirement in the injector pulse stream; set to negative value to cancel LG minimum-amplitude requirement"};
+
+    Gaudi::Property<std::string > m_lbTimeCoolFolderName{ this, "LumiBlockTimeCoolFolderName", "/TRIGGER/LUMI/LBLB", "COOL folder in COOLONL_TRIGGER holding info about start and stop times for luminosity blocks" };
 
 
     static const int m_nSides = 2;
@@ -96,12 +109,14 @@ private:
     std::vector<float> m_ZdcModuleChisqOverAmpBinEdges;
 
     std::shared_ptr<ZdcInjPulserAmpMap> m_zdcInjPulserAmpMap;
+
     //---------------------------------------------------
     
     // see the standalone version of the Gaudi::Property class (a wrapper in AsgTools) at
     // athena/Control/AthToolSupport/AsgTools/AsgTools/PropertyWrapper.h
     // input to constructor: owner, name, value, title = "" (by default)
     Gaudi::Property<bool> m_isOnline {this,"IsOnline",false};
+    Gaudi::Property<bool> m_isSim {this,"IsSim",false}; // is simulation
     Gaudi::Property<bool> m_CalInfoOn {this,"CalInfoOn",false};
     Gaudi::Property<bool> m_EnableZDCSingleSideTriggers {this,"EnableZDCSingleSideTriggers",true};
     Gaudi::Property<bool> m_EnableUCCTriggers {this,"EnableUCCTriggers",false};
@@ -120,6 +135,8 @@ private:
     SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleContainerKey {this, "ZdcModuleContainerKey", "ZdcModules"};
     SG::ReadHandleKey<xAOD::HIEventShapeContainer> m_HIEventShapeContainerKey {this, "HIEventShapeContainerKey", "HIEventShape"};
     
+    SG::ReadCondHandleKey<AthenaAttributeList> m_LBLBFolderInputKey{ this, "LBLBFolderInputKey", "/TRIGGER/LUMI/LBLB" };
+
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_eventTypeKey {this, "ZdcEventTypeKey", m_zdcSumContainerName + ".EventType" + m_auxSuffix};
     // SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcBCIDKey {this, "ZdcBCIDKey", m_zdcSumContainerName + ".BCID" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_DAQModeKey {this, "ZdcDAQModeKey", m_zdcSumContainerName + ".DAQMode" + m_auxSuffix};
@@ -145,6 +162,7 @@ private:
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleMaxADCLGKey {this, "ZdcModuleMaxADCLGKey", m_zdcModuleContainerName + ".MaxADCLG" + m_auxSuffix};
     
     // LG refit data
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleFitAmpLGRefitKey{this, "ZdcModuleFitAmpLGRefitKey", m_zdcModuleContainerName + ".FitAmpLGRefit" + m_auxSuffix, "ZDC module fit amp LG refit"};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleAmpLGRefitKey{this, "ZdcModuleAmpLGRefitKey", m_zdcModuleContainerName + ".AmpLGRefit" + m_auxSuffix, "ZDC module fit amp LG refit"};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleT0LGRefitKey{this, "ZdcModuleT0LGRefitKey", m_zdcModuleContainerName + ".T0LGRefit" + m_auxSuffix, "ZDC module fit t0 LG refit"};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleT0SubLGRefitKey{this, "ZdcModuleT0SubLGRefitKey", m_zdcModuleContainerName + ".T0SubLGRefit" + m_auxSuffix, "ZDC module subtracted t0 LG refit"};

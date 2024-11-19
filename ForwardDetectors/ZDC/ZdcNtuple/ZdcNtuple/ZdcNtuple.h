@@ -45,10 +45,13 @@
 #include "xAODForward/AFPTrackContainer.h"
 #include <TLorentzVector.h>
 #include "StoreGate/ReadHandleKey.h"
-class ZdcInjPulserAmpMap;
+#include <ZdcConditions/ZdcInjPulserAmpMap.h>
 
 class ZdcNtuple : public EL::AnaAlgorithm
 {
+  unsigned int m_lastRunNumber{0};
+  ZdcInjPulserAmpMap::Token m_injMapRunToken{};
+
 public:
   bool slimmed; // assume slimmed output
   bool useGRL; // use a GRL (used by default)
@@ -419,6 +422,7 @@ public:
   ZdcNtuple (const std::string& name, ISvcLocator* pSvcLocator);
 
   void processEventInfo();
+  void processVInjInfo();
   bool processTriggerDecision();
   uint32_t acceptEvent();
   void processZdcNtupleFromModules(); // new version directly from output of ZdcAnalysisTool - which is much cleaner

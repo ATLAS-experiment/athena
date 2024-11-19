@@ -174,8 +174,8 @@ double ZDCPercentageThreshTests::calculatePercentage(const TH1 * hist, dqm_core:
     };
   }
   else if (m_name == "AboveThreshold"){ // if "bad" events are those with value above a user-specified threshold
-    hit_under_selection += hist->GetBinContent(hist->GetNbinsX());
-    int i = hist->GetNbinsX();
+    hit_under_selection += hist->GetBinContent(hist->GetNbinsX()+1); // include number of overflow events in the sum
+    int i = hist->GetNbinsX()+1;
     do{
       i--;
       if(i <= 0){
