@@ -12,6 +12,8 @@ GeneralTauPlots::GeneralTauPlots(PlotBase* pParent, const std::string& sDir, con
    PlotBase(pParent, sDir),
    m_oParamPlots(this, "", sTauJetContainerName),
    m_tauCharge(nullptr),
+   m_tauNChargedTracks(nullptr),
+   m_tauNIsolatedTracks(nullptr),
    m_tauNCoreTracks(nullptr),
    m_tauNWideTracks(nullptr),
    m_ptHighPt(nullptr),
@@ -38,6 +40,8 @@ GeneralTauPlots::~GeneralTauPlots()
 void GeneralTauPlots::initializePlots(){
 
    m_tauCharge      = Book1D("Charge",m_sTauJetContainerName + " Tau charge; charge; # Taus",7,-3.,4.);
+   m_tauNChargedTracks = Book1D("NChargedTracks", m_sTauJetContainerName + " Tau n charged tracks; nCharged; # Taus",10,0.,10.);
+   m_tauNIsolatedTracks = Book1D("NIsolatedTracks", m_sTauJetContainerName + " Tau n isolated tracks; nIsolated; # Taus",10,0.,10.);
    m_tauNCoreTracks = Book1D("NCoreTracks",m_sTauJetContainerName + " Tau n core tracks; nCore; # Taus",10,0.,10.);
    m_tauNWideTracks = Book1D("NWideTracks",m_sTauJetContainerName + " Tau n wide tracks; nWide; # Taus",10,0.,10.);
    m_ptHighPt = Book1D("ptHighPt", m_sTauJetContainerName+" HighPt"+"; pt; # Taus",20, 0.0, 1500.0);
@@ -58,8 +62,10 @@ void GeneralTauPlots::initializePlots(){
 void GeneralTauPlots::fill(const xAOD::TauJet& tau, float weight) {
   m_oParamPlots.fill(tau, weight);
   m_tauCharge->Fill(tau.charge(), weight); 
-  m_tauNCoreTracks->Fill(tau.nTracks(), weight);
-  m_tauNWideTracks->Fill(tau.nTracks(xAOD::TauJetParameters::classifiedIsolation), weight);
+  m_tauNChargedTracks->Fill(tau.nTracks(), weight);
+  m_tauNIsolatedTracks->Fill(tau.nTracks(xAOD::TauJetParameters::classifiedIsolation), weight);
+  m_tauNCoreTracks->Fill(tau.nTracks(xAOD::TauJetParameters::coreTrack), weight);
+  m_tauNWideTracks->Fill(tau.nTracks(xAOD::TauJetParameters::wideTrack), weight); 
   m_ptHighPt->Fill(tau.pt()/1000, weight);
 
   static const SG::ConstAccessor<float> acc_RNNEleScore("RNNEleScore");
@@ -72,12 +78,12 @@ void GeneralTauPlots::fill(const xAOD::TauJet& tau, float weight) {
      float rnnScore = acc_RNNEleScoreSigTrans(tau);
      m_RNNEleScoreSigTrans->Fill(rnnScore, weight);
   }
-  static const SG::AuxElement::ConstAccessor<float> acc_RNNJetScore("RNNJetScore");
+  static const SG::ConstAccessor<float> acc_RNNJetScore("RNNJetScore");
   if ( acc_RNNJetScore.isAvailable(tau) ) {
      float rnnScore = tau.discriminant(xAOD::TauJetParameters::RNNJetScore);
      if ( rnnScore > -2.0 ) m_RNNJetScore->Fill(rnnScore, weight);
   }
-  static const SG::AuxElement::ConstAccessor<float> acc_RNNJetScoreSigTrans("RNNJetScoreSigTrans");
+  static const SG::ConstAccessor<float> acc_RNNJetScoreSigTrans("RNNJetScoreSigTrans");
   if ( acc_RNNJetScoreSigTrans.isAvailable(tau) ) {
      float rnnScore = tau.discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
      m_RNNJetScoreSigTrans->Fill(rnnScore, weight);
