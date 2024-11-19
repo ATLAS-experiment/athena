@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( Identifier )
@@ -11,7 +11,7 @@ atlas_add_library( Identifier
    src/*.cxx
    PUBLIC_HEADERS Identifier
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} GaudiKernel )
+   LINK_LIBRARIES GaudiKernel )
 
 # Force Range.cxx to be compiled with optimization, even in a debug build.
 # This significantly speeds up some tests (for example MuonCondDump_TestMdtCablingDump).
