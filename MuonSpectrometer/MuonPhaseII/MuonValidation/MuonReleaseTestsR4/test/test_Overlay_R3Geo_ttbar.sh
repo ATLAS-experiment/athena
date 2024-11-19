@@ -16,13 +16,11 @@ geo_db="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R3-MU
 geo_tag="ATLAS-R3S-2021-03-02-00"
 validNTuple="MuonDigitNTuple.root"
 
-mkdir -p Geometry/
-ln -s ${geo_db} Geometry/${geo_tag}.db
-
 Overlay_tf.py \
     --CA \
     --multithreaded True \
     --geometrySQLite True \
+    --geometrySQLiteFullPath "${geo_db}" \
     --runNumber 601229 \
     --inputHITSFile ${HITS_FILE} \
     --inputRDO_BKGFile ${RDO_BKG_File} \
@@ -33,7 +31,7 @@ Overlay_tf.py \
     --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-07'\
     --geometryVersion "default:${geo_tag}" \
     --preInclude 'all:Campaigns.MC23a' \
-    --preExec "default:flags.Scheduler.CheckDependencies=True;flags.Scheduler.ShowDataDeps = True;flags.Scheduler.ShowDataFlow=True;flags.Scheduler.ShowControlFlow=True;flags.Detector.GeometrysTGC=False;from AtlasGeoModel import CommonGeoDB;CommonGeoDB.SetupLocalSqliteGeometryDb(\"${geo_db}\",flags.GeoModel.AtlasVersion);" \
+    --preExec "default:flags.Scheduler.CheckDependencies=True;flags.Scheduler.ShowDataDeps = True;flags.Scheduler.ShowDataFlow=True;flags.Scheduler.ShowControlFlow=True;flags.Detector.GeometrysTGC=False;" \
     --postExec "default:flags.dump(evaluate = True);from MuonPRDTestR4.MuonHitTestConfig import MuonDigiTestCfg;cfg.merge(MuonDigiTestCfg(flags,dumpSimHits=True,dumpDigits=True, outFile=\"${validNTuple}\"));cfg.getEventAlgo('EventInfoOverlay').ValidateBeamSpot = False;cfg.printConfig(withDetails=True, summariseProps=True);" \
     --imf False
 

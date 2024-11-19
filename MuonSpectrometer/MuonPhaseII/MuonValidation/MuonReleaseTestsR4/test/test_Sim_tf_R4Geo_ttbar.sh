@@ -13,19 +13,17 @@ geo_db="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R4-MU
 geo_tag="ATLAS-P2-RUN4-03-00-00"
 validNTuple="MuonSimHitNtuple.root"
 
-mkdir -p Geometry/
-ln -s ${geo_db} Geometry/${geo_tag}.db
-
 export ATHENA_PROC_NUMBER=8
 export ATHENA_CORE_NUMBER=8
 Sim_tf.py \
       --CA True \
       --multithreaded True \
       --geometrySQLite True \
+      --geometrySQLiteFullPath "${geo_db}" \
       --conditionsTag 'default:OFLCOND-MC21-SDR-RUN4-02' \
       --simulator 'FullG4MT_QS' \
       --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
-      --preExec "all:flags.Scheduler.CheckDependencies = True;flags.Scheduler.ShowDataDeps = True;flags.Scheduler.ShowDataFlow = True;flags.Scheduler.ShowControlFlow = True;from AtlasGeoModel import CommonGeoDB;CommonGeoDB.SetupLocalSqliteGeometryDb(\"Geometry/${geo_tag}.db\",flags.GeoModel.AtlasVersion);" \
+      --preExec "all:flags.Scheduler.CheckDependencies = True;flags.Scheduler.ShowDataDeps = True;flags.Scheduler.ShowDataFlow = True;flags.Scheduler.ShowControlFlow = True;" \
       --postExec "all:flags.dump(evaluate=True);from MuonPRDTestR4.MuonHitTestConfig import MuonHitTesterCfg;cfg.merge(MuonHitTesterCfg(flags,dumpSimHits=True, outFile=\"${validNTuple}\"));cfg.printConfig(withDetails=True, summariseProps=True);" \
       --geometryVersion "default:${geo_tag}" \
       --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1' \

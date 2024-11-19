@@ -9,14 +9,13 @@ import math
 if "__main__" == __name__:
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AtlasGeoModel import CommonGeoDB
 
     flags = initConfigFlags()
     args = flags.fillFromArgs()
     
     flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ActsEventCnv/q447_ESD.pool.root']
     flags.GeoModel.SQLiteDB = True
-    CommonGeoDB.SetupLocalSqliteGeometryDb(geoModelFileDefault(), flags.GeoModel.AtlasVersion)
+    flags.GeoModel.SQLiteDBFullPath = geoModelFileDefault()
 
     from AthenaConfiguration.TestDefaults import defaultConditionsTags
     flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC

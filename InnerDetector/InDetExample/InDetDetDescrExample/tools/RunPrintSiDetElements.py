@@ -53,8 +53,7 @@ if args.localgeo:
 elif args.sqlitefile:
     print("Using SQLite input")
     flags.GeoModel.SQLiteDB = True
-    from AtlasGeoModel import CommonGeoDB
-    CommonGeoDB.SetupLocalSqliteGeometryDb(args.sqlitefile,args.geometrytag)
+    flags.GeoModel.SQLiteDBFullPath = args.sqlitefile
 
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
 setupDetectorFlags(flags, args.detectors, toggle_geometry=True)
