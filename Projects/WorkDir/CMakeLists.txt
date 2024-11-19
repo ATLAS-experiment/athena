@@ -5,7 +5,7 @@
 #
 
 # Set up the project.
-cmake_minimum_required( VERSION 3.10 )
+cmake_minimum_required( VERSION 3.25 )
 # Note that there is a second `project` call further below to set
 # the version and languages.
 project( WorkDir )

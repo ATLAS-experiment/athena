@@ -1,9 +1,5 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-
-# This package needs CUDA to be handled as a "first class language" by CMake.
-cmake_minimum_required(VERSION 3.11)
-
 # Set the name of the package.
 atlas_subdir( CaloRecGPU )
 
