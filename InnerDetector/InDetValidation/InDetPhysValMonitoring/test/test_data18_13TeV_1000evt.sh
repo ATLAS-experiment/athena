@@ -1,6 +1,8 @@
 #!/bin/bash
 # art-description: Standard test for 2018 data
 # art-type: grid
+# art-cores: 4
+# art-memory: 4096
 # art-include: main/Athena
 # art-include: 24.0/Athena
 # art-output: physval*.root
