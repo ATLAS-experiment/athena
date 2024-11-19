@@ -614,6 +614,7 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
                                                   config_mva_unconverted));
       ATH_CHECK(config_mva_service.addPrivateTool("ConvertedPhotonTool",
                                                   config_mva_converted));
+      config_mva_service.setPropertyFromString("folder", m_MVAfolder);
       ATH_CHECK(
           config_mva_service.setProperty("OutputLevel", this->msg().level()));
       ATH_CHECK(config_mva_service.makeService(m_MVACalibSvc));

@@ -9,6 +9,10 @@
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/Photon.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
+#include "PathResolver/PathResolver.h"
+
+#include <TFile.h>
+#include <TObjString.h>
 
 
 StatusCode egammaMVASvc::initialize()
@@ -39,7 +43,55 @@ StatusCode egammaMVASvc::initialize()
     m_mvaConvertedPhoton.disable();
   }
 
+  ATH_CHECK(resolve_flags());
+
+  ATH_MSG_INFO(m_maxConvR);
+  ATH_MSG_INFO(m_removeTRTConvBarrel);
+
   return StatusCode::SUCCESS;
+}
+
+StatusCode egammaMVASvc::resolve_flags()
+{
+  if (m_removeTRTConvBarrel == -1) {
+    const bool removeTRTConvBarrelDefault = false;
+    if (!m_mvaConvertedPhoton.empty() and !m_folder.empty()) {
+      const std::string mva_filename = PathResolverFindCalibFile(m_folder + "/MVACalib_convertedPhoton.weights.root");
+      std::unique_ptr<TFile> f(TFile::Open(mva_filename.c_str()));
+      if (!f || f->IsZombie()) {
+        ATH_MSG_ERROR("Could not open file: " << mva_filename);
+        m_removeTRTConvBarrel = removeTRTConvBarrelDefault;
+      }
+      else {  // we have the MVA for converted photons
+        TObjString* conversionDefinitionObj = nullptr;
+        f->GetObject("conversionDefinition", conversionDefinitionObj);
+        if (conversionDefinitionObj) {
+          m_removeTRTConvBarrel = (conversionDefinitionObj->GetString() == "removeTRTConvBarrel");
+        } else {
+          // the conversion definition is not encoded in the file, this is true for the old ones
+          m_removeTRTConvBarrel = removeTRTConvBarrelDefault;
+        }
+      }
+    } else {  // we are running without converted
+      m_removeTRTConvBarrel = removeTRTConvBarrelDefault;
+    }
+  }
+  if (m_removeTRTConvBarrel == -1) {
+    ATH_MSG_ERROR("Could not determine if TRT converted photons should be removed in the barrel");
+    return StatusCode::FAILURE;
+  }
+  return StatusCode::SUCCESS;
+}
+
+bool egammaMVASvc::isConvCalib(const xAOD::Photon& ph) const
+{
+  bool isConvCalib = xAOD::EgammaHelpers::isConvertedPhoton(&ph) && 
+                     xAOD::EgammaHelpers::conversionRadius(&ph) < m_maxConvR;
+  if (m_removeTRTConvBarrel) {
+    // special case in Run3 to avoid TRT converted photons in the barrel
+    isConvCalib = isConvCalib && xAOD::EgammaHelpers::isConvertedPhoton(&ph, true);
+  }
+  return isConvCalib;
 }
 
 StatusCode egammaMVASvc::getEnergy(const xAOD::CaloCluster& cluster,
@@ -60,17 +112,8 @@ StatusCode egammaMVASvc::getEnergy(const xAOD::CaloCluster& cluster,
     }
   } else if (xAOD::EgammaHelpers::isPhoton(&eg)) {
     const xAOD::Photon* ph = static_cast<const xAOD::Photon*>(&eg);
-    bool isConvCalib = xAOD::EgammaHelpers::isConvertedPhoton(ph) && 
-                       xAOD::EgammaHelpers::conversionRadius(ph) < m_maxConvR;
-    if (m_removeTRTConvBarrel) {
-      // special case in Run3 to avoid TRT converted photons in the barrel
-      using enum xAOD::EgammaParameters::ConversionType;
-      const xAOD::EgammaParameters::ConversionType conversionType = xAOD::EgammaHelpers::conversionType(ph);
-      const bool isTRTConv = (conversionType == singleTRT) || (conversionType == doubleTRT); // 2 or 4
-      const bool isTRTEndcap = std::abs(ph->eta()) > 0.8;
-      isConvCalib = isConvCalib && (isTRTEndcap || !isTRTConv);
-    }
-    if (isConvCalib) {
+    const bool is_conv_calib = isConvCalib(*ph);
+    if (is_conv_calib) {
       if (!m_mvaConvertedPhoton.empty()) {
         mvaE = m_mvaConvertedPhoton->getEnergy(cluster, &eg);
       } else {

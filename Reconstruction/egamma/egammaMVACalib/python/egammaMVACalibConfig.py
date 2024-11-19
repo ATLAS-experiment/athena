@@ -16,12 +16,7 @@ def egammaMVASvcCfg(flags, name="egammaMVASvc", **kwargs):
 
     acc = ComponentAccumulator()
 
-    if "folder" not in kwargs:
-        folder = flags.Egamma.Calib.MVAVersion
-    else:
-        # we pop. As folder is not a property of
-        # egammaMVASvc but of the tools
-        folder = kwargs.pop("folder")
+    kwargs.setdefault("folder", flags.Egamma.Calib.MVAVersion)
 
     if "ElectronTool" not in kwargs:
         kwargs["ElectronTool"] = acc.popToolsAndMerge(
@@ -29,7 +24,7 @@ def egammaMVASvcCfg(flags, name="egammaMVASvc", **kwargs):
                 flags,
                 name="electronMVATool",
                 ParticleType=xAOD.EgammaParameters.electron,
-                folder=folder)
+                folder=kwargs['folder'])
         )
 
     if "UnconvertedPhotonTool" not in kwargs:
@@ -38,7 +33,7 @@ def egammaMVASvcCfg(flags, name="egammaMVASvc", **kwargs):
                 flags,
                 name="unconvertedPhotonMVATool",
                 ParticleType=xAOD.EgammaParameters.unconvertedPhoton,
-                folder=folder)
+                folder=kwargs['folder'])
         )
 
     if "ConvertedPhotonTool" not in kwargs:
@@ -47,7 +42,7 @@ def egammaMVASvcCfg(flags, name="egammaMVASvc", **kwargs):
                 flags,
                 name="convertedPhotonMVATool",
                 ParticleType=xAOD.EgammaParameters.convertedPhoton,
-                folder=folder)
+                folder=kwargs['folder'])
         )
 
     acc.addService(
