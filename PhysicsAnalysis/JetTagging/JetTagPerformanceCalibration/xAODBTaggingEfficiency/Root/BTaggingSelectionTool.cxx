@@ -40,7 +40,7 @@ using Analysis::None;
 using xAOD::IParticle;
 
 BTaggingSelectionTool::BTaggingSelectionTool( const std::string & name)
-  : asg::AsgTool( name ), m_acceptinfo( "JetSelection" )
+  : asg::AsgTool( name ), m_acceptinfo( "JetSelection" ), m_accessor_pb( "pb" ), m_accessor_pc( "pc" ), m_accessor_pu( "pu" ), m_accessor_ptau( "ptau" )
 {
   m_initialised = false;
   declareProperty( "MaxEta", m_maxEta = 2.5 );
@@ -54,6 +54,7 @@ BTaggingSelectionTool::BTaggingSelectionTool( const std::string & name)
   declareProperty( "ErrorOnTagWeightFailure",       m_ErrorOnTagWeightFailure=true, "optionally ignore cases where the tagweight cannot be retrived. default behaviour is to give an error, switching to false will turn it into a warning");
   declareProperty( "CutBenchmarksContinuousWP",     m_ContinuousBenchmarks="", "comma separated list of tag bins that will be accepted as tagged: 1,2,3 etc.. ");
   declareProperty( "useCTagging",                   m_useCTag=false, "Enabled only for FixedCut or Continuous WPs: define wether the cuts refer to b-tagging or c-tagging");
+  declareProperty( "readFromBTaggingObject",        m_readFromBTaggingObject=true,       "Enabled to access btagging scores from xAOD::BTagging object; Can be disabled for GN2v01 to access the scores from the jet itself.");
 }
 
 StatusCode BTaggingSelectionTool::initialize() {
@@ -218,6 +219,11 @@ StatusCode BTaggingSelectionTool::initialize() {
  m_acceptinfo.addCut( "Pt",  "Selection of jets according to their transverse momentum" );
  m_acceptinfo.addCut( "WorkingPoint",  "Working point for flavour-tagging of jets according to their b-tagging weight" );
  
+ m_accessor_pb = SG::AuxElement::ConstAccessor<float>(m_taggerName+ "_pb");
+ m_accessor_pc = SG::AuxElement::ConstAccessor<float>(m_taggerName+ "_pc");
+ m_accessor_pu = SG::AuxElement::ConstAccessor<float>(m_taggerName+ "_pu");
+ m_accessor_ptau = SG::AuxElement::ConstAccessor<float>(m_taggerName+ "_ptau");
+
  return StatusCode::SUCCESS;
 }
 
@@ -306,6 +312,7 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, dou
   if (taggerName == "GN2v00LegacyWP" || taggerName == "GN2v00NewAliasWP"){
       taggerName = "GN2v00";
   }
+  
   tagweight = -100.;
 
    if(!m_continuous2D && (getCTagW != m_useCTag) ){
@@ -330,34 +337,34 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, dou
     return  CorrectionCode::Ok;
   } //MV2
   else{ 
-    //DL1r or DL1
-  double dl1_pb(-10.);
-  double dl1_pc(-10.);
-  double dl1_pu(-10.);
-  double dl1_ptau(0.);
+    //DL1r or DL1 or GN2v01
+  double tagger_pb(-10.);
+  double tagger_pc(-10.);
+  double tagger_pu(-10.);
+  double tagger_ptau(0.);
 
-  const xAOD::BTagging* btag = xAOD::BTaggingUtilities::getBTagging( jet );
-
-  if ((!btag)){
-   ATH_MSG_ERROR("Failed to retrieve the BTagging information");
-   return CorrectionCode::Error;
+  const SG::AuxElement* btagInfo = &jet;
+  if(m_readFromBTaggingObject)
+      btagInfo = xAOD::BTaggingUtilities::getBTagging(jet);
+  
+  if(!btagInfo){
+      if(m_ErrorOnTagWeightFailure){
+          ATH_MSG_ERROR("Failed to retrieve "+taggerName+" weight!");
+          return CorrectionCode::Error;
+      }else{
+          ATH_MSG_WARNING("Failed to retrieve "+taggerName+" weight!");
+          return CorrectionCode::Ok;
+      }
   }
 
-  if ( (!btag->pb(taggerName, dl1_pb ))
-   || (!btag->pc(taggerName, dl1_pc ))
-   || (!btag->pu(taggerName, dl1_pu ))
-   || (taggerName=="GN2v01" && !btag->ptau(taggerName, dl1_ptau))){
+  tagger_pb = m_accessor_pb(*btagInfo);  
+  tagger_pc = m_accessor_pc(*btagInfo);  
+  tagger_pu = m_accessor_pu(*btagInfo);  
+  if(m_taggerName == "GN2v01")
+      tagger_ptau = m_accessor_ptau(*btagInfo);  
 
-     if(m_ErrorOnTagWeightFailure){
-       ATH_MSG_ERROR("Failed to retrieve "+taggerName+" weight!");
-       return CorrectionCode::Error;
-     }else{
-       ATH_MSG_WARNING("Failed to retrieve "+taggerName+" weight!");
-       return CorrectionCode::Ok;
-     }
-  }
 
-   return getTaggerWeight(dl1_pb, dl1_pc, dl1_pu, tagweight, getCTagW, dl1_ptau);
+   return getTaggerWeight(tagger_pb, tagger_pc, tagger_pu, tagweight, getCTagW, tagger_ptau);
 
   }
 

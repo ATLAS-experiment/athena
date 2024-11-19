@@ -353,6 +353,7 @@ private:
   /// if false, suppress any non-error/warning printout from the underlying tool
   /// 1D tagging only: define wether the cuts refer to b-tagging or c-tagging
   bool m_useCTag = false;
+  bool m_readFromBTaggingObject = true;
   /// if this string is empty, the onnx tool won't be created
   std::string m_pathToONNX;
   /// @}
