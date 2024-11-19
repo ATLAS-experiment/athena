@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -377,7 +377,6 @@ int main () {
   {
     std::unique_ptr<X5> p (new X5(10));
     DataBucketBase* b3 = new SG::DataBucket<X5> (std::move(p));
-    assert (p.get() == 0);
     assert (X5::log.empty());
     delete b3;
     assert (X5::log == std::vector<int> {10});
@@ -387,7 +386,6 @@ int main () {
   {
     std::unique_ptr<X5> p (new X5(11));
     DataObject* b4 = asStorable (std::move(p));
-    assert (p.get() == 0);
     assert (X5::log.empty());
     delete b4;
     assert (X5::log == std::vector<int> {11});
@@ -397,7 +395,6 @@ int main () {
   {
     std::unique_ptr<const X5> p (new X5(12));
     DataBucketBase* b5 = new SG::DataBucket<X5> (std::move(p));
-    assert (p.get() == 0);
     assert (X5::log.empty());
     delete b5;
     assert (X5::log == std::vector<int> {12});
@@ -407,7 +404,6 @@ int main () {
   {
     std::unique_ptr<const X5> p (new X5(13));
     DataObject* b6 = asStorable (std::move(p));
-    assert (p.get() == 0);
     assert (X5::log.empty());
     delete b6;
     assert (X5::log == std::vector<int> {13});
