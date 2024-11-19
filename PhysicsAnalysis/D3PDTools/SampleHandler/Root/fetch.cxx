@@ -39,6 +39,9 @@ namespace SH
     std::call_once (loaded, do_load);
 
     std::ostringstream command;
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,33,01)
+    command << "_anyresult = ";
+#endif
     command << "SampleHandler_QueryAmi([";
     for (std::size_t iter = 0, end = query.samples.size(); iter != end; ++ iter)
     {
@@ -47,9 +50,15 @@ namespace SH
       command << "'" << query.samples[iter].name << "'";
     }
     command << "])";
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,33,01)
+    std::any result;
+    TPython::Exec (command.str().c_str(), &result);
+    query = std::any_cast<MetaDataQuery>(result);
+#else
     MetaDataQuery* myquery = static_cast<MetaDataQuery*>
       ((void*) TPython::Eval (command.str().c_str()));
     query = *myquery;
+#endif
   }
 
 
