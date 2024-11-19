@@ -277,6 +277,17 @@ public:
   const SG::auxid_set_t& getAuxIDs() const;
 
 
+  /**
+   * @brief Return a set of identifiers for decorations for this object.
+   *
+   *        If this object has a private or standalone store, then information
+   *        from that will be returned.  Otherwise, if this element
+   *        is part of a container, then information for the container
+   *        will be returned.  Otherwise, return an empty set.
+   */
+  const SG::auxid_set_t& getDecorIDs() const;
+
+
 private:
   friend class AuxElement;
   friend class SG::AuxVectorBase;
@@ -886,6 +897,17 @@ public:
    *        will be returned.  Otherwise, return an empty set.
    */
   const SG::auxid_set_t& getAuxIDs() const;
+
+
+  /**
+   * @brief Return a set of identifiers for decorations for this object.
+   *
+   *        If this object has a private or standalone store, then information
+   *        from that will be returned.  Otherwise, if this element
+   *        is part of a container, then information for the container
+   *        will be returned.  Otherwise, return an empty set.
+   */
+  const SG::auxid_set_t& getDecorIDs() const;
 
 
   /**

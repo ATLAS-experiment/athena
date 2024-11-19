@@ -160,6 +160,25 @@ const SG::auxid_set_t& ConstAuxElement::getAuxIDs() const
 }
 
 
+/**
+ * @brief Return a set of identifiers for decorations for this object.
+ *
+ *        If this object has a private or standalone store, then information
+ *        from that will be returned.  Otherwise, if this element
+ *        is part of a container, then information for the container
+ *        will be returned.  Otherwise, return an empty set.
+ */
+const SG::auxid_set_t& ConstAuxElement::getDecorIDs() const
+{
+  if (havePrivateData())
+    return m_container->getConstStore()->getDecorIDs();
+  if (container())
+    return container()->getDecorIDs();
+  static const SG::auxid_set_t null_set;
+  return null_set;
+}
+
+
 //************************************************************************
 
 
@@ -343,6 +362,29 @@ const SG::auxid_set_t& AuxElement::getAuxIDs() const
   return null_set;
 #else
   return ConstAuxElement::getAuxIDs();
+#endif
+}
+
+
+/**
+ * @brief Return a set of identifiers for decorations for this object.
+ *
+ *        If this object has a private or standalone store, then information
+ *        from that will be returned.  Otherwise, if this element
+ *        is part of a container, then information for the container
+ *        will be returned.  Otherwise, return an empty set.
+ */
+const SG::auxid_set_t& AuxElement::getDecorIDs() const
+{
+#ifdef ATHCONTAINERS_R21_COMPAT
+  if (havePrivateData())
+    return m_container->getConstStore()->getDecorIDs();
+  if (container())
+    return container()->getDecorIDs();
+  static const SG::auxid_set_t null_set;
+  return null_set;
+#else
+  return ConstAuxElement::getDecorIDs();
 #endif
 }
 

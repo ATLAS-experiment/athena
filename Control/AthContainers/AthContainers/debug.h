@@ -45,7 +45,8 @@ void print_aux_var_name (SG::auxid_t id);
  * @brief Print the list of aux variables in a set.
  * @param auxids The set to print.
  */
-void print_aux_vars (const SG::auxid_set_t& auxids);
+void print_aux_vars (const SG::auxid_set_t& auxids,
+                     const SG::auxid_set_t& decors = SG::auxid_set_t());
 
 
 /**
