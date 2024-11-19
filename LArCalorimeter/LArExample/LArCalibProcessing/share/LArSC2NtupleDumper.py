@@ -97,14 +97,15 @@ if __name__=='__main__':
      flags.LArSCDump.acccalibdigitsKey="acccalibSC"
   else:   
      flags.LArSCDump.acccalibdigitsKey=""
-  CKeys=[]   
+
   flags.LArSCDump.digitsKey=""
+  CKeys=[]
+
   if not (args.accsamples or args.acccalibsamples):   
-     # autoconfig
+     #  autoconfig
      from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
      try:
         runinfo=getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
-        log.info("Got DT run info !")
      except Exception:
         log.warning("Could not get DT run info, using defaults !")
         flags.LArSCDump.doEt=True
@@ -136,7 +137,6 @@ if __name__=='__main__':
                     flags.LArSCDump.nSamples=runinfo.streamLengths()[i]
            elif args.samplesBas and runinfo.streamTypes()[i] ==  "ADC":
                  CKeys += ["SC_ADC_BAS"]
-                 flags.LArSCDump.doSamplesBas=True
                  if args.nsamp > 0:
                     flags.LArSCDump.nSamples=args.nsamp
                  else:
@@ -145,8 +145,7 @@ if __name__=='__main__':
            flags.LArSCDump.nSamples=args.nsamp
   
   # calib runs do not have info about accumulation
-  if args.accsamples:
-     flags.LArSCDump.accdigitsKey = "accSC"
+  if args.accsamples or args.acccalibsamples:
      flags.Input.OverrideRunNumber = True
 
   # now set flags according parsed options
