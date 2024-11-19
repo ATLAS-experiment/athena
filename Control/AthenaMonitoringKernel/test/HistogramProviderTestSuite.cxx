@@ -123,7 +123,7 @@ class LumiblockHistogramProviderTestSuite {
         const unsigned lumiBlock = get<0>(input);
         const string expectedAlias = get<1>(input);
 
-        m_gmTool->mock_lumiBlock = [&]() { return lumiBlock; };
+        m_gmTool->mock_lumiBlock = [lumiBlock]() { return lumiBlock; };
         m_histogramFactory->mock_create = [&](const HistogramDef& def) mutable {
           VALUE(def.alias) EXPECTED(expectedAlias);
           m_log << MSG::INFO << "Registering: " << def.alias << endmsg;
