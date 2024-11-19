@@ -4,7 +4,7 @@
 atlas_subdir( ITkPixelByteStreamCnv )
 
 # External dependencies:
-find_package( Boost )
+find_package( Boost COMPONENTS unit_test_framework )
 
 # Component(s) in the package:
 atlas_add_library( ITkPixelByteStreamCnvLib
