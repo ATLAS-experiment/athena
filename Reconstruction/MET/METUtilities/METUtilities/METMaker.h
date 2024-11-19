@@ -169,7 +169,7 @@ namespace met {
 
     // Extra configurables for custom WP
     double m_customCenJetPtCut,m_customFwdJetPtCut;
-    double m_customJvtCut,m_customJvtPtMax;
+    double m_customJvtPtMax;
     std::string m_customJvtWP;
 
     bool m_doPFlow;
