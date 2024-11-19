@@ -444,7 +444,7 @@ if __name__ == "__main__":
         print("You are trying to run an F-!* pipeline! I am going to run the Data Prep chain for you and nothing else!")
         FPGATrackSimDataPrepConfig.runDataPrepChain()
     elif (flags.Trigger.FPGATrackSim.pipeline.startswith('F-2')):
-        print("You are trying to run an F-2* pipeline! I am auto-configuring the 1D bitshift for you, iuncluding eta pattern filters and phi road filters")
+        print("You are trying to run an F-2* pipeline! I am auto-configuring the 1D bitshift for you, including eta pattern filters and phi road filters")
         flags.Trigger.FPGATrackSim.Hough.etaPatternFilter = True
         flags.Trigger.FPGATrackSim.Hough.phiRoadFilter = True
         flags.Trigger.FPGATrackSim.Hough.hough1D = True

@@ -26,7 +26,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('missHitsConsts', False)
     cf.addFlag('tracking', False)
     cf.addFlag('doOverlapRemoval', True)
-    cf.addFlag('clustering', True)
+    cf.addFlag('clustering', 1)
     cf.addFlag('bankDir', '')
     cf.addFlag('spacePoints', True)
     cf.addFlag('outputMonitorFile',"monitoring.root")

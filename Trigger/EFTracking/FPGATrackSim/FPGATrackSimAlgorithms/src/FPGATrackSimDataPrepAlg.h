@@ -84,7 +84,7 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
         Gaudi::Property<int> m_firstInputToolN {this, "FirstInputToolN", 1, "number of times to use event from first input tool"};
         Gaudi::Property<int> m_secondInputToolN {this, "SecondInputToolN", 0, "number of times to use event from second input tool"};
         Gaudi::Property<bool> m_doHitFiltering {this, "HitFiltering", false, "flag to enable hit/cluster filtering"};
-        Gaudi::Property<bool> m_clustering {this, "Clustering", false, "flag to enable the clustering"};
+        Gaudi::Property<int> m_clustering {this, "Clustering", 0, "int to enable the clustering and say how many times to run it"};
         Gaudi::Property<bool> m_doSpacepoints {this, "Spacepoints", false, "flag to enable the spacepoint formation"};
         Gaudi::Property<bool> m_writeOutputData  {this, "writeOutputData", true,"write the output TTree"};
         Gaudi::Property<bool> m_doEvtSel {this, "doEvtSel", true, "do event selection"};

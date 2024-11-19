@@ -64,7 +64,7 @@ StatusCode FPGATrackSimDataPrepAlg::initialize()
     ATH_CHECK(m_hitInputTool2.retrieve(EnableTool{m_secondInputToolN > 0 && !m_hitInputTool2.empty()}));
     ATH_CHECK(m_hitMapTool.retrieve());
     ATH_CHECK(m_hitFilteringTool.retrieve(EnableTool{m_doHitFiltering}));
-    ATH_CHECK(m_clusteringTool.retrieve(EnableTool{m_clustering}));
+    ATH_CHECK(m_clusteringTool.retrieve(EnableTool{m_clustering > 0}));
     ATH_CHECK(m_spacepointsTool.retrieve(EnableTool{m_doSpacepoints}));
     
     ATH_CHECK(m_writeOutputTool.retrieve());
@@ -335,18 +335,16 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
     *m_logicEventHeader_precluster = *m_logicEventHeader;
 
     // Clustering
-    if (m_clustering)
-    {
-        ATH_MSG_DEBUG("Running clustering");
-        ATH_CHECK(m_clusteringTool->DoClustering(*m_logicEventHeader, m_clusters));
-        m_clusters_original = m_clusters;
-
-        // I think I also want to pass m_clusters to random removal (but won't work currently)
-        if (m_doHitFiltering) ATH_CHECK(m_hitFilteringTool->DoRandomRemoval(*m_logicEventHeader, false));
-        for (const FPGATrackSimCluster& cluster : m_clusters_original) FPGAClusters->push_back(cluster);
-
+    for (int ic = 0; ic < m_clustering; ic++) {
+      ATH_MSG_DEBUG("Running clustering");
+      ATH_CHECK(m_clusteringTool->DoClustering(*m_logicEventHeader, m_clusters));
+      m_clusters_original = m_clusters;
+      
+      // I think I also want to pass m_clusters to random removal (but won't work currently)
+      if (m_doHitFiltering) ATH_CHECK(m_hitFilteringTool->DoRandomRemoval(*m_logicEventHeader, false));
+      for (const FPGATrackSimCluster& cluster : m_clusters_original) FPGAClusters->push_back(cluster);      
     }
-
+    
     // Filter hits/clusters (untested for hits, ie with m_clustering = false)
     if (m_doHitFiltering)
     {
