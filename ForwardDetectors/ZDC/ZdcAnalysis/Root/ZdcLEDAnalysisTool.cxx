@@ -14,6 +14,8 @@
 #include <AsgDataHandles/WriteHandle.h>
 #include <AsgDataHandles/WriteDecorHandle.h>
 #include "AthContainers/ConstAccessor.h"
+#include "PathResolver/PathResolver.h"
+#include <TFile.h>
 
 namespace ZDC
 {
@@ -21,10 +23,13 @@ namespace ZDC
     asg::AsgTool(name),
     m_name(name)
 {
+
+  
 #ifndef XAOD_STANDALONE
   declareInterface<IZdcAnalysisTool>(this);
 #endif
-
+    declareProperty("ForceCalibRun", m_forceCalibRun = -1); 
+    declareProperty("DoFADCCorr", m_doFADCCorr = false); 
 }
 
 ZdcLEDAnalysisTool::~ZdcLEDAnalysisTool()
@@ -121,6 +126,8 @@ StatusCode ZdcLEDAnalysisTool::initialize()
   m_ZdcLEDType = m_zdcSumContainerName + ".LEDType" + m_auxSuffix;
   ATH_CHECK( m_ZdcLEDType.initialize());
 
+  // prepare FADC correction per sample
+  
   m_init = true;
   return StatusCode::SUCCESS;
 }
@@ -178,7 +185,18 @@ StatusCode ZdcLEDAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& mo
       return StatusCode::SUCCESS;
     }
 
-  
+  unsigned int thisRunNumber = eventInfo->runNumber();
+  if (thisRunNumber != m_runNumber) {
+    ATH_MSG_INFO("ZDC LED analysis tool will be configured for run " << thisRunNumber << " m_doFADCCorr = " << m_doFADCCorr);
+    if (m_doFADCCorr)
+      {
+	unsigned int calibRunNumber = thisRunNumber;
+	if (m_forceCalibRun > -1) calibRunNumber = m_forceCalibRun;
+	ATH_MSG_INFO("FADC corrections will be configured for run " << calibRunNumber);
+	setFADCCorrections(calibRunNumber);
+      }
+    m_runNumber = thisRunNumber;
+  }
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> eventTypeHandle(m_eventTypeKey);
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> DAQModeHandle(m_DAQModeKey);
 
@@ -309,7 +327,7 @@ StatusCode ZdcLEDAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& mo
 
 
   return StatusCode::SUCCESS;
-}
+  }
 
 StatusCode ZdcLEDAnalysisTool::reprocessZdc()
 {
@@ -345,10 +363,10 @@ ZDCLEDModuleResults ZdcLEDAnalysisTool::processZDCModule(const xAOD::ZdcModule& 
   }
 
   if (doLG) {
-    return processModuleData(LGSamples, m_sampleAnaStartZDC, m_sampleAnaEndZDC, m_ZdcLowGainScale);
+    return processModuleData(module.zdcSide(),module.zdcModule(),LGSamples, m_sampleAnaStartZDC, m_sampleAnaEndZDC, m_ZdcLowGainScale);
   }
   else {
-    return processModuleData(HGSamples, m_sampleAnaStartZDC, m_sampleAnaEndZDC, 1);
+    return processModuleData(module.zdcSide(),module.zdcModule(),HGSamples, m_sampleAnaStartZDC, m_sampleAnaEndZDC, 1);
   }
 }
 
@@ -356,10 +374,10 @@ ZDCLEDModuleResults ZdcLEDAnalysisTool::processRPDModule(const xAOD::ZdcModule& 
 {
   ATH_MSG_DEBUG("Processing RPD side, channel = " << module.zdcSide() << ", " << module.zdcChannel());
   static const SG::ConstAccessor<std::vector<uint16_t> > g0dataAcc ("g0data");
-  return processModuleData(g0dataAcc (module), m_sampleAnaStartRPD, m_sampleAnaEndRPD, 1);
+  return processModuleData(-1,-1,g0dataAcc (module), m_sampleAnaStartRPD, m_sampleAnaEndRPD, 1);
 }
 
-ZDCLEDModuleResults ZdcLEDAnalysisTool::processModuleData(const std::vector<unsigned short>& data,
+ZDCLEDModuleResults ZdcLEDAnalysisTool::processModuleData(int iside, int imod, const std::vector<unsigned short>& data,
 							  unsigned int startSample, unsigned int endSample, float gainScale)
 {
 
@@ -367,7 +385,8 @@ ZDCLEDModuleResults ZdcLEDAnalysisTool::processModuleData(const std::vector<unsi
   int maxADCsub = -999;
   unsigned int maxSample = 0;
   float avgTime = 0.f;
-
+  bool highgain = (gainScale<1.1); // HG is 1 and LG is 10
+  
   if (startSample > m_numSamples || endSample > m_numSamples) {
     ATH_MSG_ERROR("Start or end sample number greater than number of samples");
     return ZDCLEDModuleResults();
@@ -376,7 +395,14 @@ ZDCLEDModuleResults ZdcLEDAnalysisTool::processModuleData(const std::vector<unsi
   int preFADC = data[m_preSample];
   
   for (unsigned int sample = startSample; sample <= endSample; sample++) {
+
     int FADCsub = data[sample] - preFADC;
+    if (m_doFADCCorr && (iside!=-1) ) // iside==-1 dummy to indicate RPD and ensure no FADC correction
+      {
+	float corr = getAmplitudeCorrection(iside,imod,highgain,FADCsub);
+	FADCsub *= corr;
+      }
+    
     float time = (sample + 0.5f)*m_deltaTSample;
     ADCSum += FADCsub;
     if (FADCsub > maxADCsub) {
@@ -394,7 +420,108 @@ ZDCLEDModuleResults ZdcLEDAnalysisTool::processModuleData(const std::vector<unsi
 
   return ZDCLEDModuleResults(preFADC, ADCSum*gainScale, maxADCsub*gainScale, maxSample, avgTime);
 }
- 
 
+// FADC corrections
+
+double ZdcLEDAnalysisTool::getAmplitudeCorrection(int iside, int imod, bool highGain, float fitAmp)
+{
+  double amplCorrFactor  = 1;
+
+  double fadcCorr = highGain ? m_FADCCorrHG[iside][imod]->Interpolate(fitAmp) : m_FADCCorrLG[iside][imod]->Interpolate(fitAmp);
+  amplCorrFactor *= fadcCorr;
+    
+  return amplCorrFactor;
+}
+
+void ZdcLEDAnalysisTool::setFADCCorrections(unsigned int runNumber)
+{
+  std::string filename;
+  std::string runString;
+  
+  if (runNumber == 0) runString = "ZdcFADCCorr_" + m_configuration + "_default.root";
+  else runString = ("ZdcFADCCorr_Run"+TString::Itoa(runNumber,10)+".root").Data();
+  
+  filename = PathResolverFindCalibFile("ZdcAnalysis/" + runString );
+
+  if (filename.empty())
+    {
+      ATH_MSG_INFO("No FADC corrections file - disabling correction");
+      m_doFADCCorr = false; // disable correction
+      return;
+    }
+  
+  ATH_MSG_INFO("Opening FADC corrections file " << filename);
+  std::unique_ptr<TFile> fFADCCorr(TFile::Open(filename.c_str(), "READ"));
+  
+  if (!fFADCCorr->IsOpen()) {
+    ATH_MSG_INFO ("setFADCCorrections: failed to open file: " << filename << ". Disabling correction.");
+    m_doFADCCorr = false; // disable correctio
+    return;
+    //throw std::runtime_error ("ZdcAnalysisTool failed to open FADCCorrections file " + filename);
+  }
+  
+  // Attempt to read histograms with corrections from file
+  //
+  bool readSuccess = true;
+  std::array<std::array<std::unique_ptr<const TH1>, 4>, 2> histogramsHG;
+  std::array<std::array<std::unique_ptr<const TH1>, 4>, 2> histogramsLG;
+  
+  for (size_t side : {0, 1}) {
+    for (int module : {0, 1, 2, 3}) {
+      std::string histNameHG = "ZDC_FADCCorr_s" + std::to_string(side) + "_m" + std::to_string(module)+"_HG";
+      std::string histNameLG = "ZDC_FADCCorr_s" + std::to_string(side) + "_m" + std::to_string(module)+"_LG";
+
+      ATH_MSG_DEBUG("setFADCCorrections: Searching for histograms HG and LG: " << histNameHG << ", " << histNameLG);
+      
+      TH1* histHG_ptr = static_cast<TH1*>(fFADCCorr->GetObjectChecked(histNameHG.c_str(), "TH1"));
+      TH1* histLG_ptr = static_cast<TH1*>(fFADCCorr->GetObjectChecked(histNameLG.c_str(), "TH1"));
+
+      if (!histHG_ptr || !histLG_ptr) {
+	std::string errMsg = "setFADCCorrections: unable to read FADC correction histogram(s) ";
+	if (!histHG_ptr) errMsg += histNameHG + " ";
+	if (!histLG_ptr) errMsg += histNameLG;
+
+	ATH_MSG_ERROR(errMsg);
+	readSuccess = false;
+	break;
+      }
+      else {
+	//
+	//  Check for valid range (Lion uses -0.5 to 4095.5)
+	//
+	
+	if ( std::abs(histHG_ptr->GetXaxis()->GetXmin()+0.5) > 1e-3 || std::abs(histHG_ptr->GetXaxis()->GetXmax() - 4095.5) > 1e-3) {
+	  ATH_MSG_ERROR("setFADCCorrections: invalid axis range for HG FADC corrections in histogram with name " << histNameHG);
+	  readSuccess = false;
+	  break;
+	}
+	if (std::abs(histLG_ptr->GetXaxis()->GetXmin()+0.5) > 1e-3 || std::abs(histLG_ptr->GetXaxis()->GetXmax() - 4095.5) > 1e-3) {
+	  ATH_MSG_ERROR("setFADCCorrections: invalid axis range for HG FADC corrections in histogram with name " << histNameLG);
+	  readSuccess = false;
+	  break;
+	}
+	ATH_MSG_INFO("Configuring FADC histos for side " << side << " mod " << module);
+	m_FADCCorrHG[side][module].reset(histHG_ptr);
+	m_FADCCorrLG[side][module].reset(histLG_ptr);
+	
+      }
+    }
+  }
+    
+  fFADCCorr->Close();
+
+  if (readSuccess) {
+    ATH_MSG_INFO("Successfully configured FADC correction");
+    m_doFADCCorr = true;
+  }
+  else {
+    ATH_MSG_ERROR("setFADCCorrections: due to at least one error, FADC corrections are not implemented");
+    m_doFADCCorr = false;
+  }
+  
+  return;
+}
+
+  
 } // namespace ZDC
 

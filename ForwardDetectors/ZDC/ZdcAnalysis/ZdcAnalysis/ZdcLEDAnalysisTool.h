@@ -19,6 +19,7 @@
 #include "ZdcUtils/ZdcEventInfo.h"
 #include "ZdcAnalysis/IZdcAnalysisTool.h"
 #include "ZdcAnalysis/ZDCMsg.h"
+#include <TH1.h>
 
 namespace ZDC
 {
@@ -30,7 +31,7 @@ class ZDCLEDModuleResults
   int m_maxADC;
   unsigned int m_maxSample;
   float m_avgTime;
-
+  
 public:
   ZDCLEDModuleResults(unsigned int presampleADC, unsigned int ADCsum, unsigned int maxADC, unsigned int maxSample, float avgTime) :
     m_presampleADC(presampleADC),
@@ -96,7 +97,7 @@ private:
   
   ZDCLEDModuleResults processZDCModule(const xAOD::ZdcModule& module);
   ZDCLEDModuleResults processRPDModule(const xAOD::ZdcModule& module);
-  ZDCLEDModuleResults processModuleData(const std::vector<unsigned short>& data,
+  ZDCLEDModuleResults processModuleData(int iside, int imod, const std::vector<unsigned short>& data,
 					unsigned int startSample, unsigned int endSample, float gainScale);
     
   bool m_init{false};
@@ -160,7 +161,20 @@ private:
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcLEDMaxADC{this, "ZdcLEDMaxADC", "", "ZDC LED pulse max FADC value"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcLEDMaxSample{this, "ZdcLEDMaxSample", "", "ZDC LED max FADC sample"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcLEDAvgTime{this, "ZdcLEDAvgTime", "", "ZDC LED average time"};
- 
+
+  // Provide a historam that provides per-ADC channel correction factors for integral and differential
+  //   non-linearities
+  //
+  bool m_doFADCCorr;
+  bool m_doFADCCorrPerSample;
+  bool m_haveFADCCorrections;
+  unsigned int m_runNumber;
+  int m_forceCalibRun;
+  std::array< std::array<std::unique_ptr<const TH1>,4>,2> m_FADCCorrHG;
+  std::array< std::array<std::unique_ptr<const TH1>,4>,2> m_FADCCorrLG;
+  double getAmplitudeCorrection(int iside, int imod, bool highGain, float fitAmp);
+  void setFADCCorrections(unsigned int runNumber);
+  
 };
 
 } // namespace ZDC

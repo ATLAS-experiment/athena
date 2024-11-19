@@ -126,12 +126,13 @@ def ZdcAnalysisToolCfg(flags, run, config="PbPb2023", DoCalib=False, DoFADCCorr=
         LHCRun = run ))
     return acc
 
-def ZdcLEDAnalysisToolCfg(flags, config = 'ppPbPb2023'):  
+def ZdcLEDAnalysisToolCfg(flags, config = 'ppPbPb2023', DoFADCCorr = True):  
     acc = ComponentAccumulator()
 
     print('ZdcAnalysisToolCfg: setting up ZdcAnalysisTool with config='+config)
     acc.setPrivateTools(CompFactory.ZDC.ZdcLEDAnalysisTool(name = 'ZdcLEDAnalysisTool'+config, 
-                                                           Configuration = config))
+                                                           Configuration = config,
+                                                           DoFADCCorr = DoFADCCorr))
     return acc
 
 
@@ -389,11 +390,15 @@ def ZdcLEDRecCfg(flags):
         
         config = 'ppPbPb2023'
         #config = 'ppALFA2023'
+        doFADCCorr = False
 
+        if (flags.GeoModel.Run == LHCPeriod.Run3):
+            doFADCCorr = True
+        
         acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
         acc.addEventAlgo(CompFactory.ZdcRecRun3Decode())
 
-        anaTool = acc.popToolsAndMerge(ZdcLEDAnalysisToolCfg(flags, config)) #anatool for zdcLED calibration  
+        anaTool = acc.popToolsAndMerge(ZdcLEDAnalysisToolCfg(flags, config, DoFADCCorr = doFADCCorr)) #anatool for zdcLED calibration  
     
         zdcTools = []
         zdcTools += [anaTool] # add trigTool after deocration migration
