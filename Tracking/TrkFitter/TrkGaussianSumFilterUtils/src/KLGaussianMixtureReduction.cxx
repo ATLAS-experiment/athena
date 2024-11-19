@@ -26,17 +26,19 @@
  * Implementation of KLGaussianMixtureReduction
  */
 namespace KLReductionFMV {
-//clang FMV needs a namedpace :/
+//clang FMV needs a namespace :/
 #if HAVE_FUNCTION_MULTIVERSIONING
-[[gnu::target("avx2")]]
-int vIdxOfMin(const float* distancesIn, int n) {
-  return vAlgs::vIdxOfMin<256>(distancesIn, n);
-}
 [[gnu::target("default")]]
 #endif
 int vIdxOfMin(const float* distancesIn, int n) {
   return vAlgs::vIdxOfMin<128>(distancesIn, n);
 }
+#if HAVE_FUNCTION_MULTIVERSIONING
+[[gnu::target("avx2")]]
+int vIdxOfMin(const float* distancesIn, int n) {
+  return vAlgs::vIdxOfMin<256>(distancesIn, n);
+}
+#endif
 }  // namespace KLReductionFMV
 
 namespace {

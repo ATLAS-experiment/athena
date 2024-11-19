@@ -13,10 +13,6 @@
 
 //Multiversion for the test
 #if HAVE_FUNCTION_MULTIVERSIONING
-[[gnu::target("avx2")]]
-int vIdxOfMin(const float* distancesIn, int n) {
-  return vAlgs::vIdxOfMin<256>(distancesIn, n);
-}
 [[gnu::target("default")]]
 #endif
 int vIdxOfMin(const float* distancesIn, int n) {
@@ -24,7 +20,7 @@ int vIdxOfMin(const float* distancesIn, int n) {
 }
 #if HAVE_FUNCTION_MULTIVERSIONING
 [[gnu::target("avx2")]]
-int vIdxOfMin(const double* distancesIn, int n) {
+int vIdxOfMin(const float* distancesIn, int n) {
   return vAlgs::vIdxOfMin<256>(distancesIn, n);
 }
 [[gnu::target("default")]]
@@ -32,6 +28,12 @@ int vIdxOfMin(const double* distancesIn, int n) {
 int vIdxOfMin(const double* distancesIn, int n) {
   return vAlgs::vIdxOfMin<128>(distancesIn, n);
 }
+#if HAVE_FUNCTION_MULTIVERSIONING
+[[gnu::target("avx2")]]
+int vIdxOfMin(const double* distancesIn, int n) {
+  return vAlgs::vIdxOfMin<256>(distancesIn, n);
+}
+#endif
 //constants
 constexpr size_t STRIDE = vAlgs::strideOfNumSIMDVec<256,float>(4);
 constexpr size_t ALIGNMENT = vAlgs::alignmentForArray<256>();
