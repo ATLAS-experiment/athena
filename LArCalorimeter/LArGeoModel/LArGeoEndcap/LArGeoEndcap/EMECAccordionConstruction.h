@@ -131,100 +131,100 @@ namespace LArGeo {
     };
 
     // Inner wheel accordion wave parameters
-    double m_innerWheelWidth;     // 514 mm
-    double m_innerLipWidth;       // 2 mm
-    double m_innerWaveZoneWidth;  // 514 - 2*2 = 510 mm
-    double m_innerWaveWidth;      // 510:6 = 85 mm
-    double m_innerHalfWaveWidth;
-    double m_innerQuaterWaveWidth;
+    double m_innerWheelWidth = 0;     // 514 mm
+    double m_innerLipWidth = 0;       // 2 mm
+    double m_innerWaveZoneWidth = 0;  // 514 - 2*2 = 510 mm
+    double m_innerWaveWidth = 0;      // 510:6 = 85 mm
+    double m_innerHalfWaveWidth = 0;
+    double m_innerQuaterWaveWidth = 0;
 
     // Outer wheel accordion wave parameters
-    double m_outerWheelWidth;     // 514 mm
-    double m_outerLipWidth;       // 2 mm
-    double m_outerWaveZoneWidth;  // 514 - 2*2 = 510 mm
-    double m_outerWaveWidth;      // 510:9 = 56.67 mm
-    double m_outerHalfWaveWidth;
-    double m_outerQuaterWaveWidth;
+    double m_outerWheelWidth = 0;     // 514 mm
+    double m_outerLipWidth = 0;       // 2 mm
+    double m_outerWaveZoneWidth = 0;  // 514 - 2*2 = 510 mm
+    double m_outerWaveWidth = 0;      // 510:9 = 56.67 mm
+    double m_outerHalfWaveWidth = 0;
+    double m_outerQuaterWaveWidth = 0;
 
     // Inner wheel thiknesses
-    double m_innerLeadThickness;
-    double m_innerSteelThickness;
-    double m_innerGlueThickness;
-    double m_innerAbsorberThickness;
-    double m_innerElectrodeThickness;
-    double m_innerGlueRatio;     // x-scale factor for glue in absorber
-    double m_innerLeadRatio;     // x-scale factor for lead in absorber
+    double m_innerLeadThickness = 0;
+    double m_innerSteelThickness = 0;
+    double m_innerGlueThickness = 0;
+    double m_innerAbsorberThickness = 0;
+    double m_innerElectrodeThickness = 0;
+    double m_innerGlueRatio = 0;     // x-scale factor for glue in absorber
+    double m_innerLeadRatio = 0;     // x-scale factor for lead in absorber
 
     // Outer wheel thiknesses
-    double m_outerLeadThickness;
-    double m_outerSteelThickness;
-    double m_outerGlueThickness;
-    double m_outerAbsorberThickness;
-    double m_outerElectrodeThickness;
-    double m_outerGlueRatio;     // x-scale factor for glue in absorber
-    double m_outerLeadRatio;     // x-scale factor for lead in absorber
+    double m_outerLeadThickness = 0;
+    double m_outerSteelThickness = 0;
+    double m_outerGlueThickness = 0;
+    double m_outerAbsorberThickness = 0;
+    double m_outerElectrodeThickness = 0;
+    double m_outerGlueRatio = 0;     // x-scale factor for glue in absorber
+    double m_outerLeadRatio = 0;     // x-scale factor for lead in absorber
 
     // Contraction factor
-    double m_kContraction;
+    double m_kContraction = 0;
 
     // Inner wheel parameters
-    std::array<double, 2> m_zWheelInner;
-    std::array<double, 2> m_rMinInner;
-    std::array<double, 2> m_rMaxInner;
+    std::array<double, 2> m_zWheelInner = {};
+    std::array<double, 2> m_rMinInner = {};
+    std::array<double, 2> m_rMaxInner = {};
 
     // Outer wheel parameters
-    std::array<double, 3>  m_zWheelOuter;
-    std::array<double, 3>  m_rMinOuter;
-    std::array<double, 3>  m_rMaxOuter;
+    std::array<double, 3>  m_zWheelOuter = {};
+    std::array<double, 3>  m_rMinOuter = {};
+    std::array<double, 3>  m_rMaxOuter = {};
 
     // Data for Inner wheel slices
-    std::array<double, s_innerNoBlades + 1> m_innerWheelZ;
-    std::array<double, s_innerNoBlades + 1> m_innerWheelRmin;
-    std::array<double, s_innerNoBlades + 1> m_innerWheelRmax;
-    double m_innerWheelRminIncrement;
-    double m_innerWheelRmaxIncrement;
-    double m_innerWheelZmin;
-    double m_innerWheelZmax;
+    std::array<double, s_innerNoBlades + 1> m_innerWheelZ = {};
+    std::array<double, s_innerNoBlades + 1> m_innerWheelRmin = {};
+    std::array<double, s_innerNoBlades + 1> m_innerWheelRmax = {};
+    double m_innerWheelRminIncrement = 0;
+    double m_innerWheelRmaxIncrement = 0;
+    double m_innerWheelZmin = 0;
+    double m_innerWheelZmax = 0;
 
     // Data for Outer wheel slices
-    std::array<double, s_outerNoBlades + 1> m_outerWheelZ;
-    std::array<double, s_outerNoBlades + 1> m_outerWheelRmin;
-    std::array<double, s_outerNoBlades + 1> m_outerWheelRmax;
-    std::array<double, 2> m_outerWheelRminIncrement;
-    std::array<double, 2> m_outerWheelRmaxIncrement;
-    double m_outerWheelZmin;
-    double m_outerWheelZmax;
+    std::array<double, s_outerNoBlades + 1> m_outerWheelZ = {};
+    std::array<double, s_outerNoBlades + 1> m_outerWheelRmin = {};
+    std::array<double, s_outerNoBlades + 1> m_outerWheelRmax = {};
+    std::array<double, 2> m_outerWheelRminIncrement = {};
+    std::array<double, 2> m_outerWheelRmaxIncrement = {};
+    double m_outerWheelZmin = 0;
+    double m_outerWheelZmax = 0;
 
     // Logical volumes for Inner wheel blades
     std::array<GeoPhysVol*, s_innerNoBlades> m_innerAbsorber  {{nullptr}};
     std::array<GeoPhysVol*, s_innerNoBlades> m_innerGlue      {{nullptr}};
     std::array<GeoPhysVol*, s_innerNoBlades> m_innerLead      {{nullptr}};
     std::array<GeoPhysVol*, s_innerNoBlades> m_innerElectrode {{nullptr}};
-    std::array<GeoThreeVector, s_innerNoBlades> m_innerAbsorberOffset;
-    std::array<GeoThreeVector, s_innerNoBlades> m_innerElectrodeOffset;
+    std::array<GeoThreeVector, s_innerNoBlades> m_innerAbsorberOffset = {};
+    std::array<GeoThreeVector, s_innerNoBlades> m_innerElectrodeOffset = {};
 
     // Logical volumes for Outer wheel blades
     std::array<GeoPhysVol*, s_outerNoBlades> m_outerAbsorber  {{nullptr}};
     std::array<GeoPhysVol*, s_outerNoBlades> m_outerGlue      {{nullptr}};
     std::array<GeoPhysVol*, s_outerNoBlades> m_outerLead      {{nullptr}};
     std::array<GeoPhysVol*, s_outerNoBlades> m_outerElectrode {{nullptr}};
-    std::array<GeoThreeVector, s_outerNoBlades> m_outerAbsorberOffset;
-    std::array<GeoThreeVector, s_outerNoBlades> m_outerElectrodeOffset;
+    std::array<GeoThreeVector, s_outerNoBlades> m_outerAbsorberOffset = {};
+    std::array<GeoThreeVector, s_outerNoBlades> m_outerElectrodeOffset = {};
 
     // Logical volumes for Inner wheel slices
     std::array<GeoPhysVol*, s_innerNoBlades> m_innerSlice     {{nullptr}};
-    std::array<GeoThreeVector, s_innerNoBlades> m_innerSliceOffset;
+    std::array<GeoThreeVector, s_innerNoBlades> m_innerSliceOffset = {};
 
     // Logical volumes for Outer wheel slices
 
     std::array<GeoPhysVol*, s_outerNoBlades> m_outerSlice     {{nullptr}};
-    std::array<GeoThreeVector, s_outerNoBlades> m_outerSliceOffset;
+    std::array<GeoThreeVector, s_outerNoBlades> m_outerSliceOffset = {};
 
     // Logical volumes for Inner wheel sectors
     std::array<GeoPhysVol*, s_innerNoBlades> m_innerSector    {{nullptr}};
 
     // Logical volumes for Outer wheel sectors
-    std::array<GeoPhysVol*, s_outerNoBlades> m_outerSector;
+    std::array<GeoPhysVol*, s_outerNoBlades> m_outerSector {{nullptr}};
   };
 
 } // namespace LArGeo
