@@ -20,6 +20,8 @@ class GeneralTauPlots: public PlotBase {
 
       Tau::ParamPlots m_oParamPlots;
       TH1* m_tauCharge;
+      TH1* m_tauNChargedTracks;
+      TH1* m_tauNIsolatedTracks;
       TH1* m_tauNCoreTracks;
       TH1* m_tauNWideTracks;
       TH1* m_ptHighPt;
