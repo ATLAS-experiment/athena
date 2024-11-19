@@ -363,6 +363,23 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                  doAssociateNonSelectedTracks= False))
     LLP1VrtSecInclusiveSuffixes.append(LepTrackSuffix)
 
+    # Small-d0 Muons VSI
+    BoostedMuonsSuffix = "_BoostedMuons"
+    acc.merge(VrtSecInclusiveCfg(flags,
+                                 name = "VrtSecInclusive_InDet"+BoostedMuonsSuffix,
+                                 AugmentingVersionString     = BoostedMuonsSuffix,
+                                 FillIntermediateVertices    = False,
+                                 TrackLocation               = MergedTrackCollection,
+                                 twoTrkVtxFormingD0Cut       = 0.0,
+                                 doSelectTracksFromMuons     = True,
+                                 doRemoveCaloTaggedMuons     = True,
+                                 doSelectTracksFromElectrons = False,
+                                 MuonLocation                = MergedMuonContainer,
+                                 do_PVvetoCut                = False,
+                                 DoTwoTrSoftBtag             = True,
+                                 TwoTrVrtMinDistFromPVCut    = 0.5))
+    LLP1VrtSecInclusiveSuffixes.append(BoostedMuonsSuffix)
+
     # bad jet cleaning
     jet_clean_prefix="DFCommonJets_"
     jet_clean_container="AntiKt4EMTopoJets"
