@@ -19,13 +19,10 @@
 #include "LArHV/FCALHVLine.h"
 #include "LArHV/FCALHVManager.h"
 
-
-
-
 LArHVMapTool::LArHVMapTool(const std::string& type, const std::string& name, const IInterface* parent)
-  : AthAlgTool(type,name,parent), m_caloIdMgr(nullptr), m_larem_id(nullptr), m_larhec_id(nullptr), m_larfcal_id(nullptr), m_hvmapping(nullptr)
-     {
-     }
+  : AthAlgTool(type,name,parent)
+{
+}
 
 StatusCode LArHVMapTool::initialize(){
 
@@ -59,7 +56,7 @@ StatusCode LArHVMapTool::initialize(){
   std::vector<int> hvlineVec;
   GetHVLines(offId, calodetdescrmgr, hvlineVec);
 
-   return StatusCode::SUCCESS;
+  return StatusCode::SUCCESS;
 }
 
 void LArHVMapTool::GetHVLines(const Identifier& id, const CaloDetDescrManager *calodetdescrmgr, 
