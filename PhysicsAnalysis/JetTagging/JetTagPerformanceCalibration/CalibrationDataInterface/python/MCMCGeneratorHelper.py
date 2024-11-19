@@ -36,6 +36,7 @@ GN2v01_MC20_Generator_dict = {
     "Sherpa2211": "700660",
     "Sherpa2212": "700660",
     "Sherpa2214": "700660",
+    "Sherpa2216": "700660",
 }
 
 GN2v01_MC23_Generator_dict = {
@@ -45,6 +46,7 @@ GN2v01_MC23_Generator_dict = {
     "Herwig723": "601414",
     "Sherpa2212": "700808",
     "Sherpa2214": "700808",
+    "Sherpa2216": "700808",
 }
 dict_tagger_generator = {
         ('DL1dv01', LHCPeriod.Run2): DL1dv01_MC20_Generator_dict,
