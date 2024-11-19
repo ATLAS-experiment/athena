@@ -7,12 +7,12 @@
 
 #include "tauRecTools/TauRecToolBase.h"
 
+#include "tauRecTools/TauGNN.h"
+
 #include "xAODTau/TauJet.h"
 #include "xAODCaloEvent/CaloVertexedTopoCluster.h"
 
 #include <memory>
-
-class TauGNN;
 
 /**
  * @brief Tool to calculate tau identification score from .onnx inputs
@@ -33,7 +33,11 @@ public:
     virtual StatusCode initialize() override;
     virtual StatusCode execute(xAOD::TauJet &tau) const override;
     // Getter for the underlying RNN implementation
-    const TauGNN* get_gnn() const;
+    inline const TauGNN* get_gnn_inclusive() const { return m_net_inclusive.get(); }
+    inline const TauGNN* get_gnn_0p() const { return m_net_0p.get(); }
+    inline const TauGNN* get_gnn_1p() const { return m_net_1p.get(); }
+    inline const TauGNN* get_gnn_2p() const { return m_net_2p.get(); }
+    inline const TauGNN* get_gnn_3p() const { return m_net_3p.get(); }
 
     // Selects tracks to be used as input to the network
     StatusCode get_tracks(const xAOD::TauJet &tau,
@@ -47,7 +51,14 @@ private:
     std::string m_output_varname;
     std::string m_output_ptau;
     std::string m_output_pjet;
-    std::string m_weightfile;
+
+    std::string m_weightfile_inclusive;
+    std::string m_weightfile_0p;
+    std::string m_weightfile_1p;
+    std::string m_weightfile_2p;
+    std::string m_weightfile_3p;
+    float m_min_prong_track_pt;
+
     int m_max_tracks;
     int m_max_clusters;
     float m_max_cluster_dr;
@@ -64,7 +75,13 @@ private:
     std::string m_outnode_jet;
 
     // Wrappers for lwtnn
-    std::unique_ptr<TauGNN> m_net; //!
+    std::unique_ptr<TauGNN> m_net_inclusive;
+    std::unique_ptr<TauGNN> m_net_0p;
+    std::unique_ptr<TauGNN> m_net_1p;
+    std::unique_ptr<TauGNN> m_net_2p;
+    std::unique_ptr<TauGNN> m_net_3p;
+
+    std::unique_ptr<TauGNN> load_network(const std::string& network_file, const TauGNN::Config& config) const;
 };
 
 #endif // TAURECTOOLS_TAUGNNEVALUATOR_H

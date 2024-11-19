@@ -858,7 +858,7 @@ def TauGNNEvaluatorCfg(flags, version=0):
     TauGNNEvaluator = CompFactory.getComp("TauGNNEvaluator")
     GNNConf = flags.Tau.TauGNNConfig[version]
     myTauGNNEvaluator = TauGNNEvaluator(name = _name,
-                                              NetworkFile = GNNConf,
+                                              NetworkFileInclusive = GNNConf,
                                               OutputVarname = flags.Tau.GNTauScoreName[version],
                                               OutputPTau = "GNTauProbTau",
                                               OutputPJet = "GNTauProbJet",
