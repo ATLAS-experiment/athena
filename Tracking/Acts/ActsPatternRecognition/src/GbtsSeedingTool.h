@@ -90,9 +90,8 @@ namespace ActsTrk {
       float z() const {return m_z;}
       float r() const {return m_r;}
       const std::vector<int>& sourceLinks() const {return SourceLinks;}
-      GbtsSpacePoint(float x, float y, float z, float r, const xAOD::SpacePoint* SP ) : m_x(x), m_y(y), m_z(z), m_r(r), input_SP(SP) {
+      GbtsSpacePoint(float x, float y, float z, float r, const xAOD::SpacePoint* SP ) : m_x(x), m_y(y), m_z(z), m_r(r), SourceLinks{1}, input_SP(SP) {
      
-        SourceLinks = {1} ; 
       }; 
     };
 
