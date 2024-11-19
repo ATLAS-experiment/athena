@@ -242,12 +242,12 @@ LArConditionsContainerBase::initGrouping()
 	std::vector<HWIdentifier>::const_iterator febIt  = m_onlineHelper->feb_begin();
 	std::vector<HWIdentifier>::const_iterator febEnd = m_onlineHelper->feb_end();
 
-	LArCondFEBIdChanMap::FEBIdVector emBarrel[2];
- 	LArCondFEBIdChanMap::FEBIdVector emBarrelPS[2];
-	LArCondFEBIdChanMap::FEBIdVector emEndcap[2]; 
-	LArCondFEBIdChanMap::FEBIdVector emEndcapPS[2]; 
-	LArCondFEBIdChanMap::FEBIdVector hec[2]; 
-	LArCondFEBIdChanMap::FEBIdVector fcal[2]; 
+	LArCondFEBIdChanMap::FEBIdVector emBarrel[2] = {};
+ 	LArCondFEBIdChanMap::FEBIdVector emBarrelPS[2] = {};
+	LArCondFEBIdChanMap::FEBIdVector emEndcap[2] = {};
+	LArCondFEBIdChanMap::FEBIdVector emEndcapPS[2] = {};
+	LArCondFEBIdChanMap::FEBIdVector hec[2] = {};
+	LArCondFEBIdChanMap::FEBIdVector fcal[2] = {};
 
 	for (; febIt != febEnd; ++febIt) {
             int iside = m_onlineHelper->pos_neg(*febIt);
