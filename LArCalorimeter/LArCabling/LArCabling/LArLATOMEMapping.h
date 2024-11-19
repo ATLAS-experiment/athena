@@ -63,7 +63,7 @@ inline HWIdentifier LArLATOMEMapping::getChannelID(const unsigned int sourceID, 
     return m_hwidEmpty;
   }
   const std::vector<HWIdentifier>& chanVec = it->second;
-  if (ATH_UNLIKELY(chan > chanVec.size())) {
+  if (ATH_UNLIKELY(chan >= chanVec.size())) {
     return m_hwidEmpty;
   }
   return chanVec[chan];
