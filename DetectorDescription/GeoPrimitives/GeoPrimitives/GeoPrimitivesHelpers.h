@@ -321,6 +321,24 @@ template<int N> double lineDistance(const AmgVector(N)& posA,
                                     AminusB.dot(dirB) * dirB;
     return std::sqrt(std::max(0., AminusB.dot(AminusB) - lineTravel.dot(lineTravel) / divisor));
 }
+/** @brief Calculates the signed distance between two lines in 3D space 
+    @param posA: offset point of line A
+    @param dirA: orientation of line A (unit length)
+    @param posB: offset point of line B
+    @param dirB: orientation of line B (unit length)  */
+inline double signedDistance(const Amg::Vector3D& posA,
+                             const Amg::Vector3D& dirA,
+                             const Amg::Vector3D& posB,
+                             const Amg::Vector3D& dirB) {
+    /** Project the first direction onto the second & renormalize to a unit vector */
+    const double dirDots = dirA.dot(dirB);
+    const Amg::Vector3D AminusB = posA - posB;
+    if (std::abs(dirDots -1.) < std::numeric_limits<float>::epsilon()){
+        return (AminusB - dirA.dot(AminusB)*dirA).mag();
+    }
+    const Amg::Vector3D projDir = (dirA - dirDots*dirB).unit();
+    return AminusB.cross(dirB).dot(projDir);
+}  
 /** @brief Calculates the point B' along the line B that's closest to a second line A 
     @param posA: offset point of line A
     @param dirA: orientation of line A (unit length)
