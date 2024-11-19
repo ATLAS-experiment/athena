@@ -19,9 +19,9 @@ def TRTSensitiveDetectorCfg(flags, name="TRTSensitiveDetector", **kwargs):
                                                     region)
 
     logicalVolumeNames = ["TRT::Gas"]
-    if flags.GeoModel.Run in [LHCPeriod.Run2]:
+    if flags.GeoModel.Run in [LHCPeriod.Run2] or flags.GeoModel.SQLiteDB:
         logicalVolumeNames += ["TRT::GasMA"]
-    if flags.GeoModel.Run in [LHCPeriod.Run2, LHCPeriod.Run3]:
+    if flags.GeoModel.Run in [LHCPeriod.Run2, LHCPeriod.Run3] and not flags.GeoModel.SQLiteDB:
         logicalVolumeNames += ["TRT::Gas_Ar", "TRT::GasMA_Ar"]
         # In the case that Krypton is used to fill some volumes then
         # logicalVolumeNames += ["TRT::Gas_Kr", TRT::GasMA_Kr"]

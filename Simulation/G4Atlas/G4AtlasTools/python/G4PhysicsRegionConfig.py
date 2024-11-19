@@ -153,7 +153,7 @@ def TRTPhysicsRegionToolCfg(flags, name='TRTPhysicsRegionTool', **kwargs):
     rangeCut = flags.Sim.TRTRangeCut
     kwargs.setdefault("RegionName", 'TRT')
     volumeList = ['TRT::Gas']
-    if flags.GeoModel.Run in [LHCPeriod.Run2]:
+    if flags.GeoModel.Run in [LHCPeriod.Run2] or flags.GeoModel.SQLiteDB:
         volumeList += ["TRT::GasMA"]
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", rangeCut)
