@@ -125,6 +125,10 @@ void test2()
   vp2[1] = 2.5;
   vp2[2] = 3.5;
 
+  dv.lock();
+  SG::auxid_t decor_id = r.getAuxID<int> ("decor");
+  store.getDecoration (decor_id, 3, 3);
+
   std::cout << "... set ...\n";
   SGdebug::print_aux_vars (store.getAuxIDs());
   std::cout << "... store ...\n";

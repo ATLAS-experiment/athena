@@ -122,6 +122,7 @@ void test1()
   assert (b.index() == 0);
   assert (b.container() == 0);
   assert (b.getAuxIDs().empty());
+  assert (b.getDecorIDs().empty());
   assert (b.trackIndices());
 
   assert (!ityp1.isAvailable(b));
@@ -161,6 +162,7 @@ void test1()
   auxids.insert (ityp1_id);
   auxids.insert (ftyp1_id);
   assert (b.getAuxIDs() == auxids);
+  assert (b.getDecorIDs().empty());
 
   assert (ityp1.auxid() == ityp1_id);
   assert (ftyp1.auxid() == ftyp1_id);
@@ -315,6 +317,7 @@ void test2()
   auxids.insert (ftyp1_id);
   auxids.insert (ityp2_id);
   assert (elt.getAuxIDs() == auxids);
+  assert (elt.getDecorIDs().empty());
 
   elt.x = 20;
   Elt elt3 (elt);
@@ -588,6 +591,15 @@ void test_decoration()
   v.lock();
   const SG::AuxElement& cb = b;
 
+  SG::auxid_set_t auxids;
+  SG::auxid_set_t decors;
+  auxids.insert (ityp1.auxid());
+  auxids.insert (ityp2.auxid());
+  assert (b.getAuxIDs() == auxids);
+  assert (b.getDecorIDs().empty());
+  assert (cb.getAuxIDs() == auxids);
+  assert (cb.getDecorIDs().empty());
+
   SG::Decorator<int> ityp3 ("anInt3");
   ityp3(cb) = 12;
   assert (ityp3.getDecorationArray (v)+5 == &ityp3(cb));
@@ -599,6 +611,13 @@ void test_decoration()
 
   cb.auxdecor<int> ("anInt3") = 19;
   assert (19 == ityp3(cb));
+
+  auxids.insert (ityp3.auxid());
+  decors.insert (ityp3.auxid());
+  assert (b.getAuxIDs() == auxids);
+  assert (b.getDecorIDs() == decors);
+  assert (cb.getAuxIDs() == auxids);
+  assert (cb.getDecorIDs() == decors);
 
   EXPECT_EXCEPTION (SG::ExcStoreLocked, ityp2(cb) = 14);
 
@@ -678,6 +697,7 @@ void test_const1()
   assert (b.index() == 0);
   assert (b.container() == 0);
   assert (b.getAuxIDs().empty());
+  assert (b.getDecorIDs().empty());
 
   assert (!ityp1_c.isAvailable(b));
 
@@ -704,6 +724,7 @@ void test_const1()
   SG::auxid_set_t auxids;
   auxids.insert (ityp1_id);
   assert (b2.getAuxIDs() == auxids);
+  assert (b2.getDecorIDs().empty());
   assert (ityp1_c.auxid() == ityp1_id);
 
   assert (ityp1_c(v, 5) == 123);

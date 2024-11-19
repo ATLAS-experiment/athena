@@ -57,7 +57,8 @@ void print_aux_var_name (SG::auxid_t id)
  * @brief Print the list of aux variables in a set.
  * @param auxids The set to print.
  */
-void print_aux_vars (const SG::auxid_set_t& auxids)
+void print_aux_vars (const SG::auxid_set_t& auxids,
+                     const SG::auxid_set_t& decors /*= SG::auxid_set_t()*/)
 {
   SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
   std::vector<SG::auxid_t> ids (auxids.begin(), auxids.end());
@@ -75,6 +76,9 @@ void print_aux_vars (const SG::auxid_set_t& auxids)
     if (flags & SG::AuxVarFlags::Linked) {
       std::cout << " (linked)";
     }
+    if (decors.test (id)) {
+      std::cout << " (decor)";
+    }
 
     std::cout << "]\n";
   }
@@ -87,7 +91,7 @@ void print_aux_vars (const SG::auxid_set_t& auxids)
  */
 void print_aux_vars (const SG::IConstAuxStore& store)
 {
-  print_aux_vars (store.getAuxIDs());
+  print_aux_vars (store.getAuxIDs(), store.getDecorIDs());
 }
 
 
@@ -107,7 +111,7 @@ void print_aux_vars (const SG::IConstAuxStore* store)
  */
 void print_aux_vars (const SG::AuxVectorData& vec)
 {
-  print_aux_vars (vec.getAuxIDs());
+  print_aux_vars (vec.getAuxIDs(), vec.getDecorIDs());
 }
 
 
@@ -127,7 +131,7 @@ void print_aux_vars (const SG::AuxVectorData* vec)
  */
 void print_aux_vars (const SG::AuxElement& elt)
 {
-  print_aux_vars (elt.getAuxIDs());
+  print_aux_vars (elt.getAuxIDs(), elt.getDecorIDs());
 }
 
 
