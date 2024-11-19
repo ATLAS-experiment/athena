@@ -110,8 +110,8 @@ namespace met {
     declareProperty("JetEtaForw",         m_JetEtaForw         = 2.5                 );
     declareProperty("CustomCentralJetPt", m_customCenJetPtCut  = 20e3                );
     declareProperty("CustomForwardJetPt", m_customFwdJetPtCut  = 20e3                );
-    declareProperty("CustomJetJvtCut",    m_customJvtCut       = 0.59                );
     declareProperty("CustomJetJvtPtMax",  m_customJvtPtMax     = 60e3                );
+    declareProperty("CustomJetJvtWP",     m_customJvtWP        = "FixedEffPt"        );
 
     declareProperty("DoMuonEloss",        m_muEloss            = false               );
     declareProperty("ORCaloTaggedMuons",  m_orCaloTaggedMuon   = true                );
