@@ -1116,6 +1116,7 @@
     <range field="phi_module" minvalue="0" maxvalue="31" wraparound="TRUE" />
     <range field="eta_module" value="9" />
     <range field="side" minvalue="0" maxvalue="1" />
+    <range field="row" value="0" />
     <range field="strip" minvalue="0" maxvalue="1535" />
   </region>
 
