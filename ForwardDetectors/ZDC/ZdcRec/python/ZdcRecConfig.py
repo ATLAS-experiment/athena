@@ -239,6 +239,9 @@ def ZdcRecRun3Cfg(flags):
             elif flags.Input.ProjectName == "data24_hi" or flags.Input.ProjectName == "data24_hicomm":
                 ForceCalibRun = 488980 # place holder available at point1 - replace with a 2024 run during data taking
                 ForceCalibLB = 80
+            else:
+                doCalib = False
+                doTimeCalib = False
         elif flags.Input.ProjectName == "data23_comm":
             doCalib = True
         elif flags.Input.ProjectName == "data23_hi": # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
