@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 # Package: MuonReadoutGeometryR4
@@ -12,7 +12,7 @@ set( extra_libs )
 
 if( NOT SIMULATIONBASE )
     find_package(Acts CONFIG COMPONENTS PluginGeoModel)
-    set( extra_libs MuonAlignmentDataR4 ActsPluginGeoModel)
+    set( extra_libs MuonAlignmentDataR4 ActsPluginGeoModel MuonAlignmentData)
 endif()
 
 # External dependencies:
