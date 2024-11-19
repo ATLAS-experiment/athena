@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -141,6 +141,7 @@ namespace Athena_test {
       hMove2 = sillyFunc(std::move(hMyR));
       assert(hMove2.isValid());
       assert(hMove2->m_i==3);
+      // cppcheck-suppress accessMoved; deliberate
       assert(hMyR==hMove2);
     }
     {
@@ -155,6 +156,7 @@ namespace Athena_test {
       hMove22 = sillyFunc(std::move(hMyU));
       assert(hMove22.isValid());
       assert(hMove22->m_i==3);
+      // cppcheck-suppress accessMoved; deliberate
       assert(hMyU==hMove22);
     }
 
