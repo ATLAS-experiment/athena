@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_DetDescrDB_ParameterInterface.h"
@@ -14,9 +14,12 @@
 #include "InDetGeoModelUtils/InDetDDAthenaComps.h"
 
 //_________________________________________________________________________________________
-TRT_DetDescrDB_ParameterInterface::TRT_DetDescrDB_ParameterInterface(InDetDD::AthenaComps * athenaComps) :
-  TRTParameterInterface(),  m_athenaComps(athenaComps), m_distortedMatManager(nullptr), m_placements(nullptr)
-{ SetValues(); }
+TRT_DetDescrDB_ParameterInterface::TRT_DetDescrDB_ParameterInterface(InDetDD::AthenaComps * athenaComps)
+  : TRTParameterInterface()
+  , m_athenaComps(athenaComps)
+{
+  SetValues();
+}
 
 //_________________________________________________________________________________________
 TRT_DetDescrDB_ParameterInterface::~TRT_DetDescrDB_ParameterInterface() {
@@ -48,8 +51,6 @@ TRT_DetDescrDB_ParameterInterface::~TRT_DetDescrDB_ParameterInterface() {
 
   delete m_distortedMatManager;
   delete m_placements;
-  
-
 }
 
 //_________________________________________________________________________________________
@@ -76,7 +77,8 @@ void TRT_DetDescrDB_ParameterInterface::SetValues() {
   /////////////////////////////////////////////////////////////////////////////////////////
   //                                  Version Information                                //
   /////////////////////////////////////////////////////////////////////////////////////////
-  versionTag = iAccessSvc->getChildTag("TRT", versionKey.tag(), versionKey.node());
+  if(m_athenaComps->geoDbTagSvc()->getParamSvcName().starts_with("RDB"))
+    versionTag = iAccessSvc->getChildTag("TRT", versionKey.tag(), versionKey.node());
 
   /////////////////////////////////////////////////////////////////////////////////////////
   //                                    Special Flags                                    //

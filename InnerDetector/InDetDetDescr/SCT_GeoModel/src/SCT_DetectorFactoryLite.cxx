@@ -1,16 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-//
-// SCT_DetectorFactoryLite: This is the top level node
-//
 
 
 #include "SCT_GeoModel/SCT_DetectorFactoryLite.h"
-
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-
 #include "DetDescrConditions/AlignableTransformContainer.h"
 
 //
@@ -37,8 +31,6 @@
 
 #include "GeoModelUtilities/StoredAlignX.h"
 #include "GeoModelUtilities/StoredPhysVol.h"
-#include "GeoModelUtilities/DecodeVersionKey.h"
-
 
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
 #include "ReadoutGeometryBase/SiCommonItems.h"
@@ -52,7 +44,6 @@
 #include "SCT_GeoModel/SCT_DataBase.h"
 #include "SCT_GeoModel/SCT_Forward.h"
 #include "SCT_GeoModel/SCT_GeneralParameters.h"
-#include "SCT_GeoModel/SCT_GeometryManager.h"
 #include "SCT_GeoModel/SCT_GeoModelAthenaComps.h"
 #include "SCT_GeoModel/SCT_Identifier.h"
 #include "SCT_GeoModel/SCT_MaterialManager.h"
@@ -72,21 +63,16 @@ using InDetDD::SCT_DetectorManager;
 using InDetDD::SiCommonItems; 
 
 SCT_DetectorFactoryLite::SCT_DetectorFactoryLite(GeoModelIO::ReadGeoModel *sqliteReader,
-     SCT_GeoModelAthenaComps * athenaComps,
-					 const SCT_Options & options)
+						 SCT_GeoModelAthenaComps * athenaComps,
+						 const SCT_Options & options)
   : InDetDD::DetectorFactoryBase(athenaComps),
-    m_sqliteReader (sqliteReader),
-    m_useDynamicAlignFolders(false)
+    m_sqliteReader (sqliteReader)
 { 
-  
   // Create the detector manager
   m_detectorManager = new SCT_DetectorManager(detStore());
   // Create the database
   m_db = std::make_unique<SCT_DataBase>(athenaComps);
   
-  // Create the material manager
-  m_materials=nullptr;
-
   // Create the Si common items
   std::unique_ptr<InDetDD::SiCommonItems> commonItems{std::make_unique<InDetDD::SiCommonItems>(athenaComps->getIdHelper())};
 
@@ -101,9 +87,8 @@ SCT_DetectorFactoryLite::SCT_DetectorFactoryLite(GeoModelIO::ReadGeoModel *sqlit
   m_useDynamicAlignFolders = options.dynamicAlignFolders();
   // Set Version information
   // Get the geometry tag
-  DecodeVersionKey versionKey(geoDbTagSvc(),"SCT");
   IRDBRecordset_ptr switchSet
-    = rdbAccessSvc()->getRecordsetPtr("SctSwitches", versionKey.tag(), versionKey.node());
+    = rdbAccessSvc()->getRecordsetPtr("SctSwitches", "");
   const IRDBRecord    *switches   = (*switchSet)[0];
   
   std::string layout = "Final";
@@ -114,12 +99,11 @@ SCT_DetectorFactoryLite::SCT_DetectorFactoryLite(GeoModelIO::ReadGeoModel *sqlit
   if (!switches->isFieldNull("DESCRIPTION")) {
     description = switches->getString("DESCRIPTION");
   }
-  std::string versionTag = rdbAccessSvc()->getChildTag("SCT", versionKey.tag(), versionKey.node());
   std::string versionName = switches->getString("VERSIONNAME");
   int versionMajorNumber = 3;
   int versionMinorNumber = 6;
   int versionPatchNumber = 0;
-  InDetDD::Version version(versionTag,
+  InDetDD::Version version("", // Redundant when GeoModel is read from SQLite
                            versionName, 
                            layout, 
                            description, 
@@ -128,23 +112,10 @@ SCT_DetectorFactoryLite::SCT_DetectorFactoryLite(GeoModelIO::ReadGeoModel *sqlit
                            versionPatchNumber);
   m_detectorManager->setVersion(version);
 
-  if (sqliteReader) {
-      
-      m_mapFPV = std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> (new std::map<std::string, GeoFullPhysVol*> (m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT")));
-        
-      m_mapAX  = std::shared_ptr< std::map<std::string, GeoAlignableTransform*>> (new std::map<std::string, GeoAlignableTransform *> (m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT")));
-      
-  }
-
+  m_mapFPV = std::shared_ptr<FPVMap>(new FPVMap(m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT")));
+  m_mapAXF = std::shared_ptr<AXFMap>(new AXFMap(m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT")));
 } 
  
- 
-SCT_DetectorFactoryLite::~SCT_DetectorFactoryLite()
-{ 
-  // NB the detector manager (m_detectorManager)is stored in the detector store by the
-  // Tool and so we don't delete it.
-} 
-
 void SCT_DetectorFactoryLite::create(GeoPhysVol*)
 { 
 
@@ -175,14 +146,14 @@ void SCT_DetectorFactoryLite::create(GeoPhysVol*)
     m_detectorManager->numerology().addBarrel(0);
 
     // Create the SCT Barrel
-    SCT_Barrel sctBarrel("SCT_Barrel", m_detectorManager, m_geometryManager.get(), nullptr, m_sqliteReader, m_mapFPV, m_mapAX);
+    SCT_Barrel sctBarrel("SCT_Barrel", m_detectorManager, m_geometryManager.get(), nullptr, m_sqliteReader, m_mapFPV, m_mapAXF);
       
     SCT_Identifier id{m_geometryManager->athenaComps()->getIdHelper()};
     id.setBarrelEC(0);
     //GeoVPhysVol * barrelPV =
     sctBarrel.build(id);
     GeoFullPhysVol *barrelPV = (*m_mapFPV)["SCT_Barrel"];
-    GeoAlignableTransform * barrelTransform = (*m_mapAX)["SCT_Barrel"];
+    GeoAlignableTransform * barrelTransform = (*m_mapAXF)["SCT_Barrel"];
     m_detectorManager->addTreeTop(barrelPV);
 
     // Store alignable transform
@@ -200,14 +171,14 @@ void SCT_DetectorFactoryLite::create(GeoPhysVol*)
     m_detectorManager->numerology().addEndcap(2);
 
     // Create the Forward
-    SCT_Forward sctForwardPlus("SCT_ForwardA", +2, m_detectorManager, m_geometryManager.get(), nullptr, m_sqliteReader, m_mapFPV, m_mapAX);
+    SCT_Forward sctForwardPlus("SCT_ForwardA", +2, m_detectorManager, m_geometryManager.get(), nullptr, m_sqliteReader, m_mapFPV, m_mapAXF);
     SCT_Identifier idFwdPlus{m_geometryManager->athenaComps()->getIdHelper()};
     idFwdPlus.setBarrelEC(2);
     //GeoVPhysVol * forwardPlusPV =
     sctForwardPlus.build(idFwdPlus);
     
     GeoFullPhysVol *forwardPlusPV = (*m_mapFPV)["SCT_ForwardPlus"];
-    GeoAlignableTransform * fwdGeoTransformPlus = (*m_mapAX)["SCT_ForwardPlus"];
+    GeoAlignableTransform * fwdGeoTransformPlus = (*m_mapAXF)["SCT_ForwardPlus"];
     
     m_detectorManager->addTreeTop(forwardPlusPV);
 
@@ -225,7 +196,7 @@ void SCT_DetectorFactoryLite::create(GeoPhysVol*)
 
     m_detectorManager->numerology().addEndcap(-2);
     
-    SCT_Forward sctForwardMinus("SCT_ForwardC", -2, m_detectorManager, m_geometryManager.get(), nullptr, m_sqliteReader, m_mapFPV, m_mapAX);
+    SCT_Forward sctForwardMinus("SCT_ForwardC", -2, m_detectorManager, m_geometryManager.get(), nullptr, m_sqliteReader, m_mapFPV, m_mapAXF);
 
     SCT_Identifier idFwdMinus{m_geometryManager->athenaComps()->getIdHelper()};
     idFwdMinus.setBarrelEC(-2);
@@ -233,7 +204,7 @@ void SCT_DetectorFactoryLite::create(GeoPhysVol*)
     sctForwardMinus.build(idFwdMinus);
       
     GeoFullPhysVol *forwardMinusPV = (*m_mapFPV)["SCT_ForwardMinus"];
-    GeoAlignableTransform * fwdGeoTransformMinus = (*m_mapAX)["SCT_ForwardMinus"];
+    GeoAlignableTransform * fwdGeoTransformMinus = (*m_mapAXF)["SCT_ForwardMinus"];
     m_detectorManager->addTreeTop(forwardMinusPV);
 
 

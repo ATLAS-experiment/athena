@@ -290,44 +290,44 @@ private:
   IRDBRecordset_ptr m_tileSwitches;
 
 
-  unsigned int m_n_tiglob;
-  unsigned int m_n_timod;
-  unsigned int m_n_tilb;
-  unsigned int m_n_tigr;
-  unsigned int m_n_scnt;
-  unsigned int m_n_tifg;
-  unsigned int m_n_ticg;
-  unsigned int m_n_ticl;
-  unsigned int m_EnvNum;
-  unsigned int m_EnvSize;
-  unsigned int m_EnvBegin;
-  unsigned int m_n_cuts;
-  unsigned int m_n_saddle;
+  unsigned int m_n_tiglob{0};
+  unsigned int m_n_timod{0};
+  unsigned int m_n_tilb{0};
+  unsigned int m_n_tigr{0};
+  unsigned int m_n_scnt{0};
+  unsigned int m_n_tifg{0};
+  unsigned int m_n_ticg{0};
+  unsigned int m_n_ticl{0};
+  unsigned int m_EnvNum{0};
+  unsigned int m_EnvSize{0};
+  unsigned int m_EnvBegin{0};
+  unsigned int m_n_cuts{0};
+  unsigned int m_n_saddle{0};
   unsigned int m_n_tileSwitches;
 
-  const IRDBRecord* m_currentTileGlob;
-  const IRDBRecord* m_currentTileMod;
-  const IRDBRecord* m_currentSection;
-  const IRDBRecord* m_currentGird;
-  const IRDBRecord* m_currentScin;
-  const IRDBRecord* m_currentTifg;
-  const IRDBRecord* m_currentTicg;
-  const IRDBRecord* m_currentTicl;
-  const IRDBRecord* m_currentCuts;
-  const IRDBRecord* m_currentSaddle;
+  const IRDBRecord* m_currentTileGlob{nullptr};
+  const IRDBRecord* m_currentTileMod{nullptr};
+  const IRDBRecord* m_currentSection{nullptr};
+  const IRDBRecord* m_currentGird{nullptr};
+  const IRDBRecord* m_currentScin{nullptr};
+  const IRDBRecord* m_currentTifg{nullptr};
+  const IRDBRecord* m_currentTicg{nullptr};
+  const IRDBRecord* m_currentTicl{nullptr};
+  const IRDBRecord* m_currentCuts{nullptr};
+  const IRDBRecord* m_currentSaddle{nullptr};
 
-  int m_currentTiclInd;   // Index of current TICL structure
+  int m_currentTiclInd{-1};   // Index of current TICL structure
 
-  std::string m_tag;
-  std::string m_node;
+  std::string m_tag{};
+  std::string m_node{};
 
-  bool m_sqliteInput;
+  bool m_sqliteInput{};
 
   std::vector<unsigned int> m_modTypes;
   void FillModTypes();
 
-  bool m_buildCuts;
-  bool m_buildSaddle;
+  bool m_buildCuts{false};
+  bool m_buildSaddle{false};
 };
 
 #endif

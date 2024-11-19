@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_GEOMODEL_TRTPARAMETERINTERFACE_H
@@ -17,7 +17,7 @@ class TRTParameterInterface  {
 
 protected:
   // This constructor should be called from the constructors of derived classes.
-  TRTParameterInterface();
+  TRTParameterInterface() = default;
 
   // Derived classes should implement this using calls to NOVA, Oracle or plain hardcoding, whatever they like.
   virtual void SetValues() = 0;
@@ -26,7 +26,7 @@ protected:
 public:
 
   void ShowValues();//fixme add dig object
-  virtual ~TRTParameterInterface() {};
+  virtual ~TRTParameterInterface() = default;
 
   ///////////////////////////////////////////////////////////
   //                 Top Level Placements                  //

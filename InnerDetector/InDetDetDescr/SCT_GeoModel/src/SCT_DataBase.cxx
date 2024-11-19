@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_GeoModel/SCT_DataBase.h"
@@ -16,9 +16,8 @@
 #include <iostream>
 
 SCT_DataBase::SCT_DataBase(SCT_GeoModelAthenaComps * athenaComps)
+  : m_athenaComps(athenaComps)
 {
-  m_athenaComps = athenaComps;
-
   const IGeoDbTagSvc * geoDbTag = m_athenaComps->geoDbTagSvc();
 
   // Get version tag and node for SCT
@@ -33,27 +32,21 @@ SCT_DataBase::SCT_DataBase(SCT_GeoModelAthenaComps * athenaComps)
   IRDBAccessSvc* rdbSvc = m_athenaComps->rdbAccessSvc();
 
   // SCT version tag
-  m_sctVersionTag = rdbSvc->getChildTag("SCT", versionKey.tag(), versionKey.node());
+  if(geoDbTag->getParamSvcName().starts_with("RDB"))
+    m_sctVersionTag = rdbSvc->getChildTag("SCT", versionKey.tag(), versionKey.node());
 
 
-/////////////////////////////////////////////////////////
-//
-// Gets the structures
-//
-/////////////////////////////////////////////////////////
-
-    msg(MSG::INFO) << "Retrieving Record Sets from database ..." << endmsg;
-    msg(MSG::DEBUG) << " Using version tag: " << versionTag << endmsg;
-    msg(MSG::DEBUG) << "           at node: " << versionNode << endmsg;
-    msg(MSG::DEBUG) << " SCT Version:       " << m_sctVersionTag << endmsg;
-
-  // ATLS - not sure I use it.
-  // General atlas parameters
-
+  /////////////////////////////////////////////////////////
   //
-  // SCT General
+  // Gets the structures
   //
-
+  /////////////////////////////////////////////////////////
+  
+  msg(MSG::INFO) << "Retrieving Record Sets from database ..." << endmsg;
+  msg(MSG::DEBUG) << " Using version tag: " << versionTag << endmsg;
+  msg(MSG::DEBUG) << "           at node: " << versionNode << endmsg;
+  msg(MSG::DEBUG) << " SCT Version:       " << m_sctVersionTag << endmsg;
+  
   // SCT TopLevel
   m_topLevel = rdbSvc->getRecordsetPtr("SctTopLevel", versionTag, versionNode);
   msg(MSG::DEBUG) << "Table SctTopLevel Fetched" << endmsg;
