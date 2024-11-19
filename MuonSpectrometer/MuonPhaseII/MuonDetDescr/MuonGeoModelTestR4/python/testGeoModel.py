@@ -129,8 +129,7 @@ def setupGeoR4TestCfg(args,  flags = None):
     flags.GeoModel.AtlasVersion = args.geoTag
     flags.IOVDb.GlobalTag = args.condTag
     flags.GeoModel.SQLiteDB = True
-    from AtlasGeoModel import CommonGeoDB
-    CommonGeoDB.SetupLocalSqliteGeometryDb(args.geoModelFile,args.geoTag)
+    flags.GeoModel.SQLiteDBFullPath = args.geoModelFile
     
     flags.Detector.GeometryBpipe = False
     ### Inner detector
