@@ -133,20 +133,21 @@ StatusCode MakeEventStreamInfo::preFinalize() {
     pEventStream = esinfo_up.get();
     ATH_CHECK(m_metaDataSvc->record(std::move(esinfo_up), m_key.value()));
   }
-  if (m_eventCounter > 0) {
-    if (pEventStream->getNumberOfEvents() != m_eventCounter) {
-         // The number of events in the EventStreamInfo object does not match
-         // the number of events that have been processed by MakeEventStreamInfo
-         // tool. This can happen if the EventStreamInfo object was updated by
-         // CopyEventStreamInfo, for example at beginning of reading the 2nd (or
-         // next) file.
-         ATH_MSG_DEBUG(
-             "Event count mismatch in EventStreamInfo (likely multi-file "
-             "processing). Setting number of events to what "
-             "MakeEventStreamInfo processed: "
-             << m_eventCounter);
-         pEventStream->setNumberOfEvents(m_eventCounter);
-    }
+  if (m_eventCounter > 0 &&
+      m_eventCounter < pEventStream->getNumberOfEvents()) {
+    // The number of events that have been processed by MakeEventStreamInfo
+    // tool is less than the number of events in already existing
+    // EventStreamInfo object. This can happen if the EventStreamInfo object was
+    // updated by CopyEventStreamInfo, for example at beginning of reading the
+    // 2nd (or next) file.
+    ATH_MSG_DEBUG(
+        "Event count mismatch in EventStreamInfo (likely due to "
+        "multi-file processing). MakeEventStreamInfo processed: "
+        << m_eventCounter << " events, existing EventStreamInfo object has "
+        << pEventStream->getNumberOfEvents()
+        << " events. Setting number of events to what "
+           "MakeEventStreamInfo processed.");
+    pEventStream->setNumberOfEvents(m_eventCounter);
   } else {
     // Insert processing tags when no events have been processed
     pEventStream->insertProcessingTag(m_dataHeaderKey.value());
