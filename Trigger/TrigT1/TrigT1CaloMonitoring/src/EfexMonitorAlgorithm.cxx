@@ -150,7 +150,7 @@ StatusCode EfexMonitorAlgorithm::fillEMHistograms(const std::string& groupName, 
       fill(groupName, TOBWstot_threshold);
       int iPhi = efexEmRoI->iPhi();
       if (iPhi>31) iPhi -= 64;
-      binNumber = (iPhi+32)*50 + 25 + efexEmRoI->iEta();
+      binNumber = (iPhi+32)*50 + 26 + efexEmRoI->iEta();
       fill(groupName,binNumber,lbn);
     }
   }
