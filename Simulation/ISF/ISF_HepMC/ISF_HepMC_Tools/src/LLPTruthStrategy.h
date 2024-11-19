@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// LLPTruthStrategy.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_TOOLS_LLPTRUTHSTRATEGY_H
 #define ISF_TOOLS_LLPTRUTHSTRATEGY_H 1
@@ -23,42 +19,38 @@
 namespace ISF {
 
   /** @class LLPTruthStrategy
-  
+
       An ISF truth strategy for recording long lived particles to
       the MC truth.
-  
+
       @author Elmar.Ritsch -at- cern.ch
-     */
+  */
   class LLPTruthStrategy final : public extends<AthAlgTool, ITruthStrategy> {
-      
-    public: 
-      /** Constructor with parameters */
-      LLPTruthStrategy( const std::string& t, const std::string& n, const IInterface* p );
 
-      /** Destructor */
-      ~LLPTruthStrategy();
+  public:
+    /** Constructor with parameters */
+    LLPTruthStrategy( const std::string& t, const std::string& n, const IInterface* p );
 
-      // Athena algtool's Hooks
-      virtual StatusCode  initialize() override;
-      virtual StatusCode  finalize() override;
+    /** Destructor */
+    ~LLPTruthStrategy() = default;
 
-      /** True if the ITruthStrategy implementationapplies to the given ITruthIncident */
-      virtual bool pass( ITruthIncident& incident) const override;
+    // Athena algtool's Hooks
+    virtual StatusCode  initialize() override;
 
-      virtual bool appliesToRegion(unsigned short geoID) const override;
+    /** True if the ITruthStrategy implementationapplies to the given ITruthIncident */
+    virtual bool pass( ITruthIncident& incident) const override;
 
-	private:
-      /** The process code range (low-high) and the category of processes that
-       *  should pass this strategy */
-      int  m_passProcessCodeRangeLow;
-      int  m_passProcessCodeRangeHigh;
-      int  m_passProcessCategory;
+    virtual bool appliesToRegion(unsigned short geoID) const override;
 
-      IntegerArrayProperty            m_regionListProperty;
+  private:
+    /** The process code range (low-high) and the category of processes that
+     *  should pass this strategy */
+    int  m_passProcessCodeRangeLow;
+    int  m_passProcessCodeRangeHigh;
+    int  m_passProcessCategory;
 
-      /** Returns true if the given |pdgID| is a SUSY particle */
-      bool isSUSYParticle(const int absPdgID) const;
-  }; 
+    IntegerArrayProperty            m_regionListProperty;
+  };
 
 }
 
