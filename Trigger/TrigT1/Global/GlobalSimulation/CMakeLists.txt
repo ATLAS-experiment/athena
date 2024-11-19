@@ -30,10 +30,12 @@ atlas_install_runtime(share/*.txt)
 
 atlas_add_test( testGlobalL1TopoSim
    SCRIPT python/GlobalL1TopoSimulation_ctest.py --evtMax 3
+   PRIVATE_WORKING_DIRECTORY
    POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( testEfex
    SCRIPT python/run_Egamma1_LArStrip_Fex.py --evtMax 10
+   PRIVATE_WORKING_DIRECTORY
    POST_EXEC_SCRIPT noerror.sh )
 
 
