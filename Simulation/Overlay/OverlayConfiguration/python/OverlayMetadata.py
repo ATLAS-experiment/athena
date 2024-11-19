@@ -3,26 +3,9 @@
 import re
 
 from AthenaCommon.Logging import logging
-from PyUtils.MetaReader import read_metadata
+from AthenaConfiguration.AllConfigFlags import GetFileMD
 
 logger = logging.getLogger("OverlayMetadataConfig")
-
-# Module level cache of file-metadata:
-_fileMetadata = dict()
-
-def _getFileMD(filenames):
-    if type(filenames) is list:
-        filename = filenames[0]
-    else:
-        filename = filenames
-
-    if filename not in _fileMetadata:
-        logger.info("Obtaining full metadata of %s", filename)
-
-        thisFileMD = read_metadata(filename, None, 'full')
-        _fileMetadata.update(thisFileMD)
-
-    return _fileMetadata[filename]
 
 
 def validateGeometryTag(logger, target, value):
@@ -200,9 +183,10 @@ def overlayMetadataCheck(flags):
         filesPileup = flags.Input.Files
 
     if files:
-        signalMetadata = _getFileMD(files)
-        signalSimulationMetadata = signalMetadata["/Simulation/Parameters"]
-        signalTagInfoMetadata = signalMetadata["/TagInfo"]
+        signalMetadata = GetFileMD(files, maxLevel="full")
+        signalSimulationMetadata = signalMetadata.get("/Simulation/Parameters", {})
+        signalTagInfoMetadata = signalMetadata.get("/TagInfo", {})
+        print(signalMetadata.metadata, signalSimulationMetadata, signalTagInfoMetadata)
         # signal check
         overlayInputMetadataCheck(flags, signalSimulationMetadata, signalTagInfoMetadata)
     else:
@@ -212,10 +196,10 @@ def overlayMetadataCheck(flags):
 
     # pile-up check
     if not flags.Overlay.DataOverlay and filesPileup:
-        pileupMetaDataCheck = _getFileMD(filesPileup)
-        pileupDigitizationMetadata = pileupMetaDataCheck["/Digitization/Parameters"]
-        pileupSimulationMetadata = pileupMetaDataCheck["/Simulation/Parameters"]
-        pileupTagInfoMetadata = pileupMetaDataCheck["/TagInfo"]
+        pileupMetaDataCheck = GetFileMD(filesPileup, maxLevel="full")
+        pileupDigitizationMetadata = pileupMetaDataCheck.get("/Digitization/Parameters", {})
+        pileupSimulationMetadata = pileupMetaDataCheck.get("/Simulation/Parameters", {})
+        pileupTagInfoMetadata = pileupMetaDataCheck.get("/TagInfo", {})
    
         logger.info("Checking Presampled pile-up metadata against Signal Simulation metadata...")
         simulationMetadataCheck(signalSimulationMetadata, pileupSimulationMetadata)
@@ -235,10 +219,10 @@ def fastChainOverlayMetadataCheck(flags):
 
     # pile-up check
     if not flags.Overlay.DataOverlay and filesPileup:
-        pileupMetaDataCheck = _getFileMD(filesPileup)
-        pileupDigitizationMetadata = pileupMetaDataCheck["/Digitization/Parameters"]
-        pileupSimulationMetadata = pileupMetaDataCheck["/Simulation/Parameters"]
-        pileupTagInfoMetadata = pileupMetaDataCheck["/TagInfo"]
+        pileupMetaDataCheck = GetFileMD(filesPileup, maxLevel="full")
+        pileupDigitizationMetadata = pileupMetaDataCheck.get("/Digitization/Parameters", {})
+        pileupSimulationMetadata = pileupMetaDataCheck.get("/Simulation/Parameters", {})
+        pileupTagInfoMetadata = pileupMetaDataCheck.get("/TagInfo", {})
 
         logger.info("Checking Presampled pile-up metadata against configuration of jobs (i.e. flags)...")
         overlayInputMetadataCheck(flags, pileupSimulationMetadata, pileupTagInfoMetadata)
