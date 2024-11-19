@@ -689,7 +689,6 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         # Jet uncertainties
         if self.jetInput == "UFO" and config.dataType() is (DataType.FullSim or DataType.FastSim):
             alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+self.containerName )
-            config.addPrivateTool( 'uncertaintiesTool', 'JetUncertaintiesTool' )
             self.createUncertaintyTool(alg, config, jetCollectionName, doPseudoData=( self.systematicsModelJER in ["Full","All"] ))
             # R=1.0 jets have a validity range
             alg.outOfValidity = 2 # SILENT
@@ -878,7 +877,7 @@ def makeLargeRJetAnalysisConfig( seq, containerName, jetCollection,
         jetInput -- The type of input used, read from the collection name.
         largeRMass -- Which large-R mass definition to use. Ignored if not running on large-R jets ("Comb", "Calo", "TA")
     """
-
     config = LargeRJetAnalysisConfig (containerName, jetCollection, jetInput)
     config.setOptionValue ('largeRMass', largeRMass)
     seq.append (config)
+
