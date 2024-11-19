@@ -6,7 +6,7 @@
 
 # Set the environment variable(s):
 
-set( ATLAS_POWHEGVER "07-06" CACHE STRING
+set( ATLAS_POWHEGVER "07-07" CACHE STRING
    "Version of the Powheg configuration files" )
 set( ATLAS_POWHEGPATH "/cvmfs/atlas.cern.ch/repo/sw/Generators/powheg/ATLASOTF-${ATLAS_POWHEGVER}-${CMAKE_HOST_SYSTEM_PROCESSOR}"
    CACHE PATH "Path to the Powheg configuration files" )
