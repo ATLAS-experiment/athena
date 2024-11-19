@@ -33,13 +33,7 @@ using namespace std;
 TrackVertexAssoTestAlg::TrackVertexAssoTestAlg( const std::string& name, 
 			  ISvcLocator* pSvcLocator ) : 
   ::AthAlgorithm( name, pSvcLocator )
-{
-  //
-  // Property declaration
-  // 
-  //declareProperty( "Property", m_nProperty );
-  declareProperty( "TVATool", m_TVATool );
-}
+{}
 
 // Destructor
 ///////////////

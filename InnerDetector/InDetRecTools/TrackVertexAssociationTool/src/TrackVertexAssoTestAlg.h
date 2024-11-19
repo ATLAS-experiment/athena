@@ -58,7 +58,7 @@ class TrackVertexAssoTestAlg
   /// Default constructor: 
   TrackVertexAssoTestAlg();
 
-  ToolHandle<CP::ITrackVertexAssociationTool> m_TVATool;
+  ToolHandle<CP::ITrackVertexAssociationTool> m_TVATool{this, "TVATool", ""};
 
   /// Containers
   
