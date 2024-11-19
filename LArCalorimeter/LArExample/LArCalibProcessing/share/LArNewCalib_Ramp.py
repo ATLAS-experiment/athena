@@ -86,6 +86,7 @@ if __name__=='__main__':
    flags.LArCalib.Input.Type = args.trig
    flags.LArCalib.Input.RunNumbers = [int(args.run),]
    flags.LArCalib.Input.Database = args.outpdir + "/" +args.inpsql
+   flags.LArCalib.Input.isRawData = args.rawdata
    if 'db' in args.inofcsql:
       flags.LArCalib.Input.Database2 = args.outpdir + "/" +args.inofcsql
    else:   
@@ -169,6 +170,22 @@ if __name__=='__main__':
    else:   
       flags.LArCalib.doValidation=True 
    
+   # patterns file searching
+   if args.rawdata:
+      pdir='/afs/cern.ch/user/l/lardaq/public/detlar/athena/P1CalibrationProcessing/run/Patterns/P1/'
+      if args.supercells:
+         pdir += 'LatomeRuns/'
+         if 'Emec' in args.partition:
+            pfile = pdir + 'emec-std/SC_HighRamp/parameters.dat'
+         else:   
+            pfile = pdir + 'barrel/Ramp_' + args.partition[:-4] + '/parameters.dat'
+
+         flags.LArCalib.Input.paramsFile = pfile
+      else:   
+         pdir += 'Delay/'
+         #FIXME create search also for main readout
+      pass
+
    #Define the global output Level:
    
    from AthenaCommon.Constants import INFO 
@@ -215,9 +232,15 @@ if __name__=='__main__':
 
    # ignore some channels ?
    if args.ignoreB:
-       cfg.getEventAlgo("LArRawSCCalibDataReadingAlg").LATOMEDecoder.IgnoreBarrelChannels=args.ignoreB
+      if args.rawdata:
+         cfg.getEventAlgo("LArRawSCDataReadingAlg").LATOMEDecoder.IgnoreBarrelChannels=args.ignoreB
+      else:
+         cfg.getEventAlgo("LArRawSCCalibDataReadingAlg").LATOMEDecoder.IgnoreBarrelChannels=args.ignoreB
    if args.ignoreE:
-       cfg.getEventAlgo("LArRawSCCalibDataReadingAlg").LATOMEDecoder.IgnoreEndcapChannels=args.ignoreE
+      if args.rawdata:
+         cfg.getEventAlgo("LArRawSCDataReadingAlg").LATOMEDecoder.IgnoreEndcapChannels=args.ignoreE
+      else:
+         cfg.getEventAlgo("LArRawSCCalibDataReadingAlg").LATOMEDecoder.IgnoreEndcapChannels=args.ignoreE
 
    cfg.getService("IOVDbSvc").DBInstance=""
 

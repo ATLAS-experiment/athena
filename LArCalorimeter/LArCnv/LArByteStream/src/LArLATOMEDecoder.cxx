@@ -44,6 +44,7 @@ StatusCode LArLATOMEDecoder::convert(const RawEvent* re, const LArLATOMEMapping*
                                      LArAccumulatedDigitContainer* accdigits, LArAccumulatedCalibDigitContainer* caccdigits,
                                      LArLATOMEHeaderContainer* header_coll) const {
 
+  if(!re) return StatusCode::FAILURE;;
   bool ret = false;
   // Check fragment validity:
   try {

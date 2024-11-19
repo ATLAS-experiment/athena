@@ -79,8 +79,14 @@ StatusCode LArCalibDigitsAccumulator::execute()
     ATH_MSG_INFO( "Processing event " << m_event_counter );
   ++m_event_counter;
   
-  SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapKey};
-  const LArCalibLineMapping *clcabling {*clHdl};
+  const LArCalibLineMapping *clcabling = nullptr;
+  if(m_isSC) {
+     SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapSCKey};
+     clcabling =*clHdl;
+  } else {
+     SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapKey};
+     clcabling =*clHdl;
+  }
   if(!clcabling) {
     ATH_MSG_WARNING( "Do not have calib line mapping from key " << m_calibMapKey.key() );
     return StatusCode::FAILURE;
@@ -260,7 +266,7 @@ StatusCode LArCalibDigitsAccumulator::execute()
 
       // trigger counter for each cell
       cellAccumulated.m_ntrigger++;
-      ATH_MSG_INFO( "chid = " << chid << ", trigger = " << cellAccumulated.m_ntrigger << ", DAC = " << digit->DAC()<<", Delay = "<<digit->delay()<<", isPulsed? "<<digit->isPulsed() );
+      ATH_MSG_DEBUG( "chid = " << chid << ", trigger = " << cellAccumulated.m_ntrigger << ", DAC = " << digit->DAC()<<", Delay = "<<digit->delay()<<", isPulsed? "<<digit->isPulsed() );
             
       // at first trigger, initialize vectors
       unsigned int sizeSamples = digit->samples().size();

@@ -85,8 +85,11 @@ def LArCalibDigitsMakerCfg(flags,DigitsKey=""):
                                                        BoardIDs = Boards)) 
 
     from AthenaCommon.SystemOfUnits import ns
+    scmap="LArOnOffIdMapSC" if flags.LArCalib.isSC else ""
+    scclmap="LArCalibIdMapSC" if flags.LArCalib.isSC else ""
     result.addEventAlgo(CompFactory.LArCalibDigitsAccumulator("LArCalibDigitsAccumulator", KeyList = [DigitsKey],
                                                              LArAccuCalibDigitContainerName = "", 
+                                                             CalibMapSCKey=scclmap, ScCablingKey=scmap,
                                                              DelayScale = (25./240.)*ns, SampleShift = 0,
                                                              KeepFullyPulsedSC = True, KeepOnlyPulsed = True,
                                                              isSC = flags.LArCalib.isSC, DropPercentTrig = 0))

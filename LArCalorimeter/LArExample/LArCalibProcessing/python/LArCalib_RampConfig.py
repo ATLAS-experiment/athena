@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -60,10 +60,8 @@ def LArRampCfg(flags):
        if flags.LArCalib.Input.isRawData:
           result.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(adcCollKey = digKey, adcBasCollKey = "", etCollKey = "",
                                                                etIdCollKey = "", LATOMEDecoder = theLArLATOMEDecoder))
-          result.addEventAlgo(CompFactory.LArDigitsAccumulator("LArDigitsAccumulator", KeyList = [digKey], 
-                                                             LArAccuDigitContainerName = "", NTriggersPerStep = 100,
-                                                             isSC = flags.LArCalib.isSC, DropPercentTrig = 0))
-
+          from LArCalibProcessing.LArCalib_CalibDigitsMakerConfig import LArCalibDigitsMakerCfg
+          result.merge(LArCalibDigitsMakerCfg(flags,digKey))
 
        else:   
           # this needs also legacy  maps
