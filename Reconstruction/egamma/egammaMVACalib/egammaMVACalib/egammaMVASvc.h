@@ -14,7 +14,11 @@
 #include "AsgServices/AsgService.h"
 #include "AsgTools/PropertyWrapper.h"
 
+#include "xAODEgamma/PhotonFwd.h"
+
+
 #include <string>
+
 
 class egammaMVASvc : public extends<asg::AsgService, IegammaMVASvc>
 {
@@ -69,9 +73,21 @@ private:
       "MaxConvRadius", 800.0,
       "The maximum conversion radius for a photon to be considered converted"};
 
-  Gaudi::Property<bool> m_removeTRTConvBarrel {this,
-      "RemoveTRTConvBarrel", false,
-      "Remove TRT converted photons in the barrel"};
+  Gaudi::Property<int> m_removeTRTConvBarrel {this,
+      "RemoveTRTConvBarrel", -1,
+      "Remove TRT converted photons in the barrel: no=0, yes=1, automatic=-1"};
+
+  Gaudi::Property<std::string> m_folder {this,
+      "folder", "", "folder for weight files"};
+
+
+  /**
+   * @brief Decide if the photon is converted or not
+   */
+  bool isConvCalib(const xAOD::Photon& ph) const;
+
+  StatusCode resolve_flags();
+
 
 };
 

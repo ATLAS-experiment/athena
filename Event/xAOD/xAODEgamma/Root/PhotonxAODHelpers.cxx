@@ -12,15 +12,16 @@
 
 // ==================================================================
 
-bool xAOD::EgammaHelpers::isConvertedPhoton(const xAOD::Photon *ph, bool excludeTRT){
-
-	bool isConv = ph && (ph->nVertices()>0);
-	if(excludeTRT) {
-  		bool isTRTConv = xAOD::EgammaHelpers::conversionType(ph) == 2 || xAOD::EgammaHelpers::conversionType(ph) == 4;
-  		bool isNewConv = isConv && (std::abs(ph->eta()) > 0.8 || !isTRTConv); 
-  		return isNewConv;
-  	}
-  	return isConv;
+bool xAOD::EgammaHelpers::isConvertedPhoton(const xAOD::Photon *ph, bool excludeTRT) {
+  const bool hasVertices = ph && (ph->nVertices() > 0);
+  if (excludeTRT) {
+    // special case for Run3: consider unconv if TRT Conv in the barrel
+    using enum xAOD::EgammaParameters::ConversionType;
+    const xAOD::EgammaParameters::ConversionType conversionType = xAOD::EgammaHelpers::conversionType(ph);
+    const bool isTRTConv = (conversionType == singleTRT) || (conversionType == doubleTRT);
+    return hasVertices && (std::abs(ph->eta()) > 0.8 || !isTRTConv); 
+  }
+  return hasVertices;
 }
 
 xAOD::EgammaParameters::ConversionType xAOD::EgammaHelpers::conversionType(const xAOD::Photon *ph){
