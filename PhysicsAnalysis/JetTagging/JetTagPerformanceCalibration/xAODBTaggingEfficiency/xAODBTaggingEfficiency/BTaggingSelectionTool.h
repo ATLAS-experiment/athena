@@ -73,6 +73,7 @@ private:
   bool m_continuous   = false; //Continuous1D
   bool m_continuous2D = false; //Continuous2D
   bool m_useCTag = false; //use c-tagging or b-tagging in 1D
+  bool m_readFromBTaggingObject = true; //use xAOD::BTagging object or not
   /// Object used to store the last decision
   asg::AcceptInfo m_acceptinfo;  
 
@@ -89,6 +90,11 @@ private:
 
   TFile *m_inf;
   std::vector<double> m_continuouscuts;
+
+  SG::AuxElement::ConstAccessor<float> m_accessor_pb;
+  SG::AuxElement::ConstAccessor<float> m_accessor_pc;
+  SG::AuxElement::ConstAccessor<float> m_accessor_pu;
+  SG::AuxElement::ConstAccessor<float> m_accessor_ptau;
 
   struct taggerproperties{
     std::string  name;

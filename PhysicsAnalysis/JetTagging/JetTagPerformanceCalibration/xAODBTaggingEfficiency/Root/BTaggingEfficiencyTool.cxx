@@ -158,6 +158,7 @@ BTaggingEfficiencyTool::BTaggingEfficiencyTool( const std::string & name) : asg:
   declareProperty("ExtendedFlavourLabel",                m_extFlavourLabel = false,     "specify whether or not to use an 'extended' flavour labelling (allowing for multiple HF hadrons or perhaps partons)");
   declareProperty("IgnoreOutOfValidityRange",            m_ignoreOutOfValidityRange = false, "ignore out-of-extrapolation-range errors as returned by the underlying tool");
   declareProperty( "useCTagging",                        m_useCTag=false,       "Enabled only for FixedCut or Continuous WPs: define wether the cuts refer to b-tagging or c-tagging");
+  declareProperty( "readFromBTaggingObject",             m_readFromBTaggingObject=true,       "Enabled to access btagging scores from xAOD::BTagging object; Can be disabled for GN2v01 to access the scores from the jet itself.");
   // if it is empty, the onnx tool won't be initialised
   declareProperty( "pathToONNX",                         m_pathToONNX = "",             "path to the onnx file that will be used for inference");
   // experimental options
@@ -690,6 +691,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
     ATH_CHECK( m_selectionTool.setProperty("JetAuthor",                    m_jetAuthor) );
     ATH_CHECK( m_selectionTool.setProperty("MinPt",                        m_minPt) );
     ATH_CHECK( m_selectionTool.setProperty("useCTagging",                  m_useCTag) );
+    ATH_CHECK( m_selectionTool.setProperty("readFromBTaggingObject",                  m_readFromBTaggingObject) );
     ATH_CHECK( m_selectionTool.retrieve() );
  }
 
@@ -1282,8 +1284,10 @@ BTaggingEfficiencyTool::fillVariables( const xAOD::Jet & jet, CalibrationDataVar
     x.jetTagWeight = m_selectionTool->getQuantile(jet)+0.5;
   }
   else if (m_isContinuous) {
-    const xAOD::BTagging* tagInfo = xAOD::BTaggingUtilities::getBTagging( jet );
-    if (!tagInfo) return false;
+    if(m_readFromBTaggingObject){
+        const xAOD::BTagging* tagInfo = xAOD::BTaggingUtilities::getBTagging( jet );
+        if (!tagInfo) return false;
+    }
     // For now, we defer the tag weight computation to the selection tool only in the case of DL1* (this is likely to be revisited)
     if (m_taggerName.find("DL1") != std::string::npos || m_taggerName.find("GN1") != std::string::npos || m_taggerName.find("GN2") != std::string::npos) {
       return (m_selectionTool->getTaggerWeight(jet, x.jetTagWeight, m_useCTag) == CP::CorrectionCode::Ok);
