@@ -1,6 +1,8 @@
 #!/bin/bash
 # art-description: Standard test for 2023 data
 # art-type: grid
+# art-cores: 4
+# art-memory: 4096
 # art-include: main/Athena
 # art-include: 24.0/Athena
 # art-output: physval*.root
@@ -16,7 +18,6 @@ relname="r24.0.67"
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 inputBS=${artdata}/CampaignInputs/data23/RAW/data23_13p6TeV.00452463.physics_Main.daq.RAW/540events.data23_13p6TeV.00452463.physics_Main.daq.RAW._lb0514._SFO-16._0004.data
-# Ref to be updated when available
 dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_data23_13p6TeV_1000evt.root 
 lastref_dir=last_results
 

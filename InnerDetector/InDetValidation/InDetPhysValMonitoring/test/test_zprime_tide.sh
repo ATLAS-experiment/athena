@@ -2,6 +2,7 @@
 # art-description: Standard test for MC23a zprime for IDTIDE
 # art-input: mc23_13p6TeV:mc23_13p6TeV.801271.Py8EG_A14NNPDF23LO_flatpT_Zprime.merge.HITS.e8514_e8528_s4159_s4114
 # art-input-nfiles: 1
+# art-cores: 4
 # art-memory: 4096
 # art-type: grid
 # art-include: main/Athena
