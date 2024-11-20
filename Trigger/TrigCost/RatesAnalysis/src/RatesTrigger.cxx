@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RatesAnalysis/RatesTrigger.h"
@@ -16,6 +16,8 @@ RatesTrigger::RatesTrigger(const std::string& name, IMessageSvc* msgSvc, const d
   m_rateAccumulator2(0.),
   m_rateExpressAccumulator(0.),
   m_rateExpressAccumulator2(0.),
+  m_ratesActive(0.),
+  m_ratesActive2(0.),
   m_CPSID(0),
   m_coherentFactor(0.),
   m_uniqueGroup(nullptr),

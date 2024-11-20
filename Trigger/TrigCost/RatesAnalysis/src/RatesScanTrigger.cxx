@@ -15,12 +15,10 @@ RatesScanTrigger::RatesScanTrigger( const std::string& name,
                                     const std::string& seedName, const double seedPrescale,
                                     const ExtrapStrat_t extrapolation) :
   RatesTrigger(name, msgSvc, prescale, -1, seedName, seedPrescale, /*base histograms*/false, extrapolation),
-  m_rateScanHist(nullptr), m_rateScanHistCachedPtr(nullptr), m_thresholdPassed(0), m_behaviour(behaviour)
+  m_rateScanHist(std::make_unique<TH1D>("", TString(name + ";Threshold;Rate [Hz]"), thresholdBins, thresholdMin, thresholdMax)),
+  m_rateScanHistCachedPtr(m_rateScanHist.get()), m_thresholdPassed(0), m_behaviour(behaviour)
   {
-    m_rateScanHist = std::make_unique<TH1D>("", TString(name + ";Threshold;Rate [Hz]"), thresholdBins, thresholdMin, thresholdMax);
     m_rateScanHist->Sumw2(true);
-
-    m_rateScanHistCachedPtr = m_rateScanHist.get();
   }
 
 RatesScanTrigger::RatesScanTrigger( const std::string& name, 

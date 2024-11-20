@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RATESANALYSIS_RATESANALYSISALG_H
@@ -130,7 +130,7 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
    * @brief Register some existing triggers based on wild-card match, e.g. "L1_.*" for all L1.
    * @param pattern Wild-card string to match in trigger name 
    */
-  StatusCode addExisting(const std::string pattern);
+  StatusCode addExisting(const std::string& pattern);
 
   /**
    * Set the pass/fail decision for an item.
