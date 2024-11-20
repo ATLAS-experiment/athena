@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_EventTPCnv/HGTD_Cluster_p1.h
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -24,13 +24,13 @@ public:
 private:
   IdType_t m_clus_id;
   std::vector<IdType_t> m_rdo_id_list;
-  float m_local_pos_x;
-  float m_local_pos_y;
-  float m_mat_00;
-  float m_mat_01;
-  float m_mat_11;
-  float m_time;
-  float m_time_resolution;
+  float m_local_pos_x{};
+  float m_local_pos_y{};
+  float m_mat_00{};
+  float m_mat_01{};
+  float m_mat_11{};
+  float m_time{};
+  float m_time_resolution{};
   std::vector<int> m_time_over_threshold;
   InDet::SiWidth_p2 m_width;
 };

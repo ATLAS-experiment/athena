@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RawData/test/test_HGTD_RDO.cxx
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -55,17 +55,19 @@ void testAssignment(const HGTD_RDO& rdo) {
 
 void testMoveCtor(HGTD_RDO rdo) {
   std::cout << "testMoveCtor\n";
-  HGTD_RDO copied_rdo(std::move(rdo));
+  HGTD_RDO orig_rdo(rdo);
+  HGTD_RDO moved_rdo(std::move(rdo));
 
-  compare(rdo, copied_rdo);
+  compare(orig_rdo, moved_rdo);
   std::cout << "testMoveCtor done\n";
 }
 
 void testMoveAssignment(HGTD_RDO rdo) {
   std::cout << "testMoveAssignment\n";
+  HGTD_RDO orig_rdo(rdo);
   HGTD_RDO move_assign_rdo = std::move(rdo);
 
-  compare(rdo, move_assign_rdo);
+  compare(orig_rdo, move_assign_rdo);
 
   std::cout << "testMoveAssignment done\n";
 }
