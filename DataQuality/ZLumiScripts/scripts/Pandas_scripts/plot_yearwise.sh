@@ -3,7 +3,7 @@
 # script to re-create all Z counting plots for a full year or run period
 # run as
 # ./plot_yearwise.sh [years]
-# where years is an optional list of data taking years (22, 23, 24) or 'run3'
+# where years is an optional list of data taking years (22, 23, 24, 25) or 'run3'
 
 indir="/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/CSVOutputs/"
 baseoutdir="/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/Plots/"

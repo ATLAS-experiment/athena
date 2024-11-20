@@ -1,14 +1,14 @@
 PATH=/cvmfs/sft.cern.ch/lcg/external/texlive/2023/bin/x86_64-linux:$PATH
 
 if [[ $# -lt 1 ]]; then
-    echo "ERROR: Need to give year to process: 22, 23, or 24"
+    echo "ERROR: Need to give year to process: 22, 23, 24, 25"
     exit 1
 fi
-if [[ $1 -ge 22 && $1 -le 24 ]]; then
+if [[ $1 -ge 22 && $1 -le 25 ]]; then
     year=$1
     echo "INFO: Preparing LaTeX beamer summary slides for year 20${year}"
 else
-    echo "ERROR: Bad year $1 given to process: use 22, 23, 24"
+    echo "ERROR: Bad year $1 given to process: use 22, 23, 24, 25"
     exit 1
 fi
 
