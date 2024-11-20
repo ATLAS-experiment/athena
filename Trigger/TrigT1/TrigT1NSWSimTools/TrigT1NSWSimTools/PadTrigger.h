@@ -25,19 +25,19 @@ namespace NSWL1 {
     */
     class PadTrigger {//S.I make this a proper class // needs a wrap-up
     public:
-        uint16_t m_bandid; ///< see bandId below
-        float m_eta;//eta of the centroid of the pad tower
-        float m_phi; // phi of the centroid of the pad tower
-        float m_etamin;//bounding rectangles in eta-phi for the pad tower
-        float m_etamax;
-        float m_phimin;
-        float m_phimax;
-        int   m_eta_id;//meaningless
-        int   m_phi_id;
-        int   m_multiplet_id;//meaningless as theres no single wedge triggers
-        int   m_isSmall;
-        int m_moduleIdInner;
-        int m_moduleIdOuter;
+        uint16_t m_bandid{0}; ///< see bandId below
+        float m_eta{0};//eta of the centroid of the pad tower
+        float m_phi{0}; // phi of the centroid of the pad tower
+        float m_etamin{0};//bounding rectangles in eta-phi for the pad tower
+        float m_etamax{0};
+        float m_phimin{0};
+        float m_phimax{0};
+        int   m_eta_id{0};//meaningless
+        int   m_phi_id{0};
+        int   m_multiplet_id{0};//meaningless as theres no single wedge triggers
+        int   m_isSmall{0};
+        int m_moduleIdInner{0};
+        int m_moduleIdOuter{0};
         std::vector<float> m_trglocalminYInner;
         std::vector<float> m_trglocalmaxYInner;
         std::vector<float> m_trglocalminYOuter;
@@ -54,11 +54,8 @@ namespace NSWL1 {
         std::vector< std::shared_ptr<PadData>> m_pads; ///!< digits contributing to this trigger primitive
         std::vector< std::shared_ptr<PadData>> m_padsInner; ///!< digits contributing to this trigger primitive
         std::vector< std::shared_ptr<PadData>> m_padsOuter; ///!< digits contributing to this trigger primitive
-        int m_triggerindex;
-        PadTrigger() : m_bandid(0), m_eta(0), m_phi(0),m_etamin(0),m_etamax(0),m_phimin(0),m_phimax(0)
-        ,m_eta_id(0), m_phi_id(0), m_multiplet_id(0),m_isSmall(0),m_moduleIdInner(0),m_moduleIdOuter(0) {
-        
-        }
+        int m_triggerindex{0};
+        PadTrigger() = default;
 
         std::shared_ptr<PadData> firstPad() const;
         std::shared_ptr<PadData> firstPadInner() const;

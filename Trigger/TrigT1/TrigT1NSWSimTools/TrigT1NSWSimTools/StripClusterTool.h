@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STRIPCLUSTERTOOL_H
@@ -87,7 +87,7 @@ namespace NSWL1 {
      * But we check in initialize() that this is only used in single-threaded mode.
      */
     TTree* m_tree{nullptr};                                 //!< ntuple for analysis
-    mutable int m_cl_n ATLAS_THREAD_SAFE;                   //!< number of STRIP hit delivered
+    mutable int m_cl_n ATLAS_THREAD_SAFE{0};                //!< number of STRIP hit delivered
     std::vector<int> *m_cl_charge ATLAS_THREAD_SAFE{nullptr};                          //!< charge of hit STRIPs
     std::vector<int> *m_cl_size ATLAS_THREAD_SAFE{nullptr};                            //!< charge of hit STRIPs
     std::vector<float> *m_cl_x ATLAS_THREAD_SAFE{nullptr};                             //!<global x position of cluster
