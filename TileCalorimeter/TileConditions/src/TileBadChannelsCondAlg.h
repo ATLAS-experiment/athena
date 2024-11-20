@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILEBADCHANNELSCONDALG_H
@@ -70,8 +70,8 @@ class TileBadChannelsCondAlg: public AthAlgorithm {
     std::vector<const TileBchDecoder*> m_tileBchDecoder;
 
 
-    bool m_useOnlBch;
-    bool m_useOflBch;
+    bool m_useOnlBch{true};
+    bool m_useOflBch{true};
 };
 
 
