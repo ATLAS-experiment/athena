@@ -36,6 +36,7 @@ def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
         acc.merge(V0ToolCfg(flags, augmentationTools=augmentationTools, tool_name_prefix=nametag, container_name_prefix="FTAG"))
 
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
+    #acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets", "AntiKt4EMPFlowByVertexJets"]))
     acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets"]))
 
     # thinning tools
@@ -195,6 +196,8 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     # Flavour tagging (Mario)
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
     acc.merge(FtagJetCollectionsCfg(flags,["AntiKt4EMPFlowByVertexJets"]))
+    #from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
+    #acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowByVertexJets"]))
 
     # Output stream    
     FTAG1ItemList = FTAG1SlimmingHelper.GetItemList()
