@@ -49,7 +49,7 @@ def EventInfoOverlayAlgCfg(flags, name="EventInfoOverlay", **kwargs):
     kwargs.setdefault("OutputKey", "EventInfo")
 
     kwargs.setdefault("DataOverlay", flags.Overlay.DataOverlay)
-    kwargs.setdefault("ValidateBeamSpot", not flags.Overlay.DataOverlay and flags.GeoModel.Run is LHCPeriod.Run3)
+    kwargs.setdefault("ValidateBeamSpot", not flags.Overlay.FastChain and not flags.Overlay.DataOverlay and flags.GeoModel.Run is LHCPeriod.Run3)
 
     if flags.Input.MCChannelNumber > 0:
         kwargs.setdefault("MCChannelNumber", flags.Input.MCChannelNumber)
@@ -91,13 +91,12 @@ def EventInfoOverlayCfg(flags, **kwargs):
 
         inputs.append(f"EventInfo#{flags.Overlay.SigPrefix}McEventInfo")
     else:
-        if not flags.Overlay.FastChain:
-            # Re-map signal address
-            from SGComps.AddressRemappingConfig import AddressRemappingCfg
-            acc.merge(AddressRemappingCfg([
-                f"xAOD::EventInfo#EventInfo->{flags.Overlay.SigPrefix}EventInfo",
-                f"xAOD::EventAuxInfo#EventInfoAux.->{flags.Overlay.SigPrefix}EventInfoAux.",
-            ]))
+        # Re-map signal address
+        from SGComps.AddressRemappingConfig import AddressRemappingCfg
+        acc.merge(AddressRemappingCfg([
+            f"xAOD::EventInfo#EventInfo->{flags.Overlay.SigPrefix}EventInfo",
+            f"xAOD::EventAuxInfo#EventInfoAux.->{flags.Overlay.SigPrefix}EventInfoAux.",
+        ]))
 
         inputs.append(f"xAOD::EventInfo#{flags.Overlay.SigPrefix}EventInfo")
 

@@ -58,8 +58,22 @@ def setOverlayInputFiles(runArgs, flags, log):
         log.info('Running MC+data overlay')
         flags.Overlay.DataOverlay = True
         flags.Input.isMC = False
-        flags.Input.Files = runArgs.inputHITSFile
+        if flags.Common.ProductionStep == ProductionStep.Overlay:
+            flags.Input.Files = runArgs.inputHITSFile
+        elif flags.Common.ProductionStep == ProductionStep.FastChain:
+            if not hasEVNT_Input:
+                raise RuntimeError('No input EVNT file defined')
+            else:
+                flags.Input.Files = runArgs.inputEVNTFile
+        else:
+            raise RuntimeError('No input files are defined')
+
         flags.Input.SecondaryFiles = runArgs.inputBS_SKIMFile
+
+        # take secondary metadata for some flags
+        # TODO: autoconfigure
+        flags.Input.RunNumbers = list(GetFileMD(flags.Input.SecondaryFiles).get("runNumbers", []))
+        flags.Input.LumiBlockNumbers = list(GetFileMD(flags.Input.SecondaryFiles).get("lumiBlockNumbers", []))
 
 
 def fromRunArgs(runArgs):
