@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_ZDCLEDANALYSISTOOL_H
@@ -166,8 +166,6 @@ private:
   //   non-linearities
   //
   bool m_doFADCCorr;
-  bool m_doFADCCorrPerSample;
-  bool m_haveFADCCorrections;
   unsigned int m_runNumber;
   int m_forceCalibRun;
   std::array< std::array<std::unique_ptr<const TH1>,4>,2> m_FADCCorrHG;
