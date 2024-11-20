@@ -7,7 +7,7 @@
  **   @author M.Sutton
  **   @date   Thu 30 Apr 2015 14:03:50 CEST 
  **
- **  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -30,27 +30,16 @@ public:
 
   ChainString& operator=(const ChainString&) = default;
 
-  std::string head()    const { return m_head;  }
-  std::string tail()    const { return m_tail;  }
-  std::string roi()     const { return m_roi;   }
-  std::string vtx()     const { return m_vtx;   }
-  std::string element() const { return m_element; }
-  std::string extra()   const { return m_extra; }
+  const std::string& head()    const { return m_head;  }
+  const std::string& tail()    const { return m_tail;  }
+  const std::string& roi()     const { return m_roi;   }
+  const std::string& vtx()     const { return m_vtx;   }
+  const std::string& element() const { return m_element; }
+  const std::string& extra()   const { return m_extra; }
 
   bool        passed()  const { return m_passed; }
 
-  // const std::string& head()    const { return m_head;    }
-
-  // const std::string& tail()    const { return m_tail;    }
-  // const std::string& roi()     const { return m_roi;     }
-  // const std::string& vtx()     const { return m_vtx;     }
-
-  // const std::string& element() const { return m_element; }
-  // const std::string& extra()   const { return m_extra;   }
-
-  //  const bool&        passed()  const { return m_passed;  }
-
-  std::string raw() const { return m_raw; }
+  const std::string& raw() const { return m_raw; }
   
   /// can't make this return a reference in case there 
   /// is no such key - could throw an exception then it 

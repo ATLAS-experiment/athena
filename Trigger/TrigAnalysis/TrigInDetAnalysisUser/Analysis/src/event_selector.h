@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    $Id: event_selector.h 513250 2012-08-10 14:35:11Z 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -22,7 +22,7 @@ class event_selector : public std::set<int> {
 public:
 
   template<class T>
-  event_selector(std::vector<T> e) { 
+  event_selector(const std::vector<T>& e) {
     for (unsigned int i=0 ; i<e.size() ; i++ ) insert(int(e[i]));
   } 
 

@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Sun 18 Jan 2009 19:08:11 GMT 
  **
- **     @copyright Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     @copyright Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -97,7 +97,7 @@ inline std::ostream& operator<<(std::ostream& s, const TIDA::Associator<T,S>& a 
 
     s << " ]" << std::endl;
 
-    mitr++;
+    ++mitr;
   }
 
   return s;

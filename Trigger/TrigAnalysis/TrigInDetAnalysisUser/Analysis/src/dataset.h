@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    2016-07-09 23:56:54 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -89,7 +89,7 @@ public:
 
   ~dataset() { } 
 
-  std::string directory() const { return m_directory; }
+  const std::string& directory() const { return m_directory; }
 
   const std::vector<std::string>& datafiles() { return *this; } 
 
