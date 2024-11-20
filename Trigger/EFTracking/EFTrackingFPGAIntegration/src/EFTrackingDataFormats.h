@@ -100,14 +100,14 @@ struct SpacePoint {
  * These data are required to create xAOD container from the FPGA output
  */
 struct Metadata {
-  unsigned int numOfStripClusters = 0;
-  unsigned int numOfPixelClusters = 0;
-  unsigned int numOfStripSpacePoints = 0;
+  unsigned long numOfStripClusters = 0;
+  unsigned long numOfPixelClusters = 0;
+  unsigned long numOfStripSpacePoints = 0;
   unsigned int numOfPixelSpacePoints = 0;
-  int scRdoIndex[1000] = {0};
-  int pcRdoIndex[1000] = {0};
-  int pcTotIndex[1000] = {0};
-  int pcChargeIndex[1000] = {0};
+  unsigned int scRdoIndex[500000] = {0};
+  unsigned int pcRdoIndex[500000] = {0};
+  unsigned int pcTotIndex[500000] = {0};
+  unsigned int pcChargeIndex[500000] = {0};
   unsigned int pcRdoIndexSize = 0;
   unsigned int scRdoIndexSize = 0;
   unsigned int pcTotIndexSize = 0;
