@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -343,17 +343,17 @@ class TileTBAANtuple: public AthAlgorithm {
 
     // The ntuple
     TTree* m_ntuplePtr{nullptr};
-    bool m_ntupleCreated;
+    bool m_ntupleCreated{false};
 
     // event number
-    int m_evtNr;
+    int m_evtNr{-1};
 
     // Trigger items
-    int m_evTime;
-    int m_run;
-    int m_evt;
-    int m_trigType;
-    int m_dspFlags;
+    int m_evTime{};
+    int m_run{};
+    int m_evt{};
+    int m_trigType{};
+    int m_dspFlags{};
 
     // 0 - Beam, 1 neg eta, 2 pos eta
     std::vector<int> m_l1ID;
@@ -363,143 +363,142 @@ class TileTBAANtuple: public AthAlgorithm {
     std::vector<int> m_frBCID;
 
     // Muon items
-    float m_muBackHit;
-    float m_muBackSum;
-    std::array<float,14> m_muBack; // MUON/MuBack
-    std::array<float,2> m_muCalib; // MUON/MuCalib
+    float m_muBackHit{};
+    float m_muBackSum{};
+    std::array<float,14> m_muBack{}; // MUON/MuBack
+    std::array<float,2> m_muCalib{}; // MUON/MuCalib
 
     // Ecal
-    std::array<float,8> m_ecal;
+    std::array<float,8> m_ecal{};
 
     // QDC
-    std::array<uint32_t,33> m_qdc;
+    std::array<uint32_t,33> m_qdc{};
 
     // laser items
-    int m_las_BCID;
+    int m_las_BCID{};
 
-    int m_las_Filt;
-    double m_las_ReqAmp;
-    double m_las_MeasAmp;
+    int m_las_Filt{};
+    double m_las_ReqAmp{};
+    double m_las_MeasAmp{};
 
-    int m_las_D1_ADC;
-    int m_las_D2_ADC;
-    int m_las_D3_ADC;
-    int m_las_D4_ADC;
+    int m_las_D1_ADC{};
+    int m_las_D2_ADC{};
+    int m_las_D3_ADC{};
+    int m_las_D4_ADC{};
 
-    double m_las_D1_Ped;
-    double m_las_D2_Ped;
-    double m_las_D3_Ped;
-    double m_las_D4_Ped;
+    double m_las_D1_Ped{};
+    double m_las_D2_Ped{};
+    double m_las_D3_Ped{};
+    double m_las_D4_Ped{};
 
-    double m_las_D1_Ped_RMS;
-    double m_las_D2_Ped_RMS;
-    double m_las_D3_Ped_RMS;
-    double m_las_D4_Ped_RMS;
+    double m_las_D1_Ped_RMS{};
+    double m_las_D2_Ped_RMS{};
+    double m_las_D3_Ped_RMS{};
+    double m_las_D4_Ped_RMS{};
 
-    double m_las_D1_Alpha;
-    double m_las_D2_Alpha;
-    double m_las_D3_Alpha;
-    double m_las_D4_Alpha;
+    double m_las_D1_Alpha{};
+    double m_las_D2_Alpha{};
+    double m_las_D3_Alpha{};
+    double m_las_D4_Alpha{};
 
-    double m_las_D1_Alpha_RMS;
-    double m_las_D2_Alpha_RMS;
-    double m_las_D3_Alpha_RMS;
-    double m_las_D4_Alpha_RMS;
+    double m_las_D1_Alpha_RMS{};
+    double m_las_D2_Alpha_RMS{};
+    double m_las_D3_Alpha_RMS{};
+    double m_las_D4_Alpha_RMS{};
 
-    double m_las_D1_AlphaPed;
-    double m_las_D2_AlphaPed;
-    double m_las_D3_AlphaPed;
-    double m_las_D4_AlphaPed;
+    double m_las_D1_AlphaPed{};
+    double m_las_D2_AlphaPed{};
+    double m_las_D3_AlphaPed{};
+    double m_las_D4_AlphaPed{};
 
-    double m_las_D1_AlphaPed_RMS;
-    double m_las_D2_AlphaPed_RMS;
-    double m_las_D3_AlphaPed_RMS;
-    double m_las_D4_AlphaPed_RMS;
+    double m_las_D1_AlphaPed_RMS{};
+    double m_las_D2_AlphaPed_RMS{};
+    double m_las_D3_AlphaPed_RMS{};
+    double m_las_D4_AlphaPed_RMS{};
 
-    int m_las_PMT1_ADC;
-    int m_las_PMT2_ADC;
+    int m_las_PMT1_ADC{};
+    int m_las_PMT2_ADC{};
 
-    int m_las_PMT1_TDC;
-    int m_las_PMT2_TDC;
+    int m_las_PMT1_TDC{};
+    int m_las_PMT2_TDC{};
 
-    double m_las_PMT1_Ped;
-    double m_las_PMT2_Ped;
+    double m_las_PMT1_Ped{};
+    double m_las_PMT2_Ped{};
 
-    double m_las_PMT1_Ped_RMS;
-    double m_las_PMT2_Ped_RMS;
+    double m_las_PMT1_Ped_RMS{};
+    double m_las_PMT2_Ped_RMS{};
 
-    double m_las_Temperature;
+    double m_las_Temperature{};
 
-    int m_lasFlag;
-    float m_las0;
-    float m_las1;
-    float m_las2;
-    float m_las3;
-    std::array<float, 4> m_lasExtra;
+    int m_lasFlag{};
+    float m_las0{};
+    float m_las1{};
+    float m_las2{};
+    float m_las3{};
+    std::array<float, 4> m_lasExtra{};
 
     // pattern Unit in common beam crate
-    int m_commonPU;
+    int m_commonPU{};
 
     // Adder items
-    int** m_adder;
-    //std::vector<int>* m_addx;
-    std::array<float, 16> m_eneAdd;
-    std::array<float, 16> m_timeAdd;
+    int** m_adder{};
+    std::array<float, 16> m_eneAdd{};
+    std::array<float, 16> m_timeAdd{};
 
     // Cispar
-    int m_cispar[16];
+    int m_cispar[16]{};
 
     // TDC/BEAM Items
-    uint32_t m_s1cou;
-    uint32_t m_s2cou;
-    uint32_t m_s3cou;
-    uint32_t m_cher1;
-    uint32_t m_cher2;
-    uint32_t m_cher3;
-    uint32_t m_muTag;
-    uint32_t m_muHalo;
-    uint32_t m_muVeto;
+    uint32_t m_s1cou{};
+    uint32_t m_s2cou{};
+    uint32_t m_s3cou{};
+    uint32_t m_cher1{};
+    uint32_t m_cher2{};
+    uint32_t m_cher3{};
+    uint32_t m_muTag{};
+    uint32_t m_muHalo{};
+    uint32_t m_muVeto{};
 
-    int m_s2extra;
-    int m_s3extra;
+    int m_s2extra{};
+    int m_s3extra{};
 
-    int m_sc1;
-    int m_sc2;
+    int m_sc1{};
+    int m_sc2{};
 
-    std::array<int, 16> m_tof;
-    std::array<int, 16> m_btdc1;
-    std::array<int, 16> m_btdc2;
-    std::array<int, 16> m_scaler;
-    std::vector<std::vector<int> > *m_btdc;
-    int m_tjitter;
-    int m_tscTOF;
-    int m_btdcNhit[16];
-    int m_btdcNchMultiHit[2];
+    std::array<int, 16> m_tof{};
+    std::array<int, 16> m_btdc1{};
+    std::array<int, 16> m_btdc2{};
+    std::array<int, 16> m_scaler{};
+    std::vector<std::vector<int> > *m_btdc{};
+    int m_tjitter{};
+    int m_tscTOF{};
+    int m_btdcNhit[16]{};
+    int m_btdcNchMultiHit[2]{};
 
-    float m_xChN2;
-    float m_yChN2;
-    float m_xChN1;
-    float m_yChN1;
-    float m_xCha0;
-    float m_yCha0;
+    float m_xChN2{};
+    float m_yChN2{};
+    float m_xChN1{};
+    float m_yChN1{};
+    float m_xCha0{};
+    float m_yCha0{};
 
-    float m_xCha1;
-    float m_yCha1;
-    float m_xCha2;
-    float m_yCha2;
-    float m_xCha1_0;
-    float m_yCha1_0;
-    float m_xCha2_0;
-    float m_yCha2_0;
-    float m_xImp;
-    float m_yImp;
+    float m_xCha1{};
+    float m_yCha1{};
+    float m_xCha2{};
+    float m_yCha2{};
+    float m_xCha1_0{};
+    float m_yCha1_0{};
+    float m_xCha2_0{};
+    float m_yCha2_0{};
+    float m_xImp{};
+    float m_yImp{};
 
-    float m_xImp_0;
-    float m_yImp_0;
-    float m_xImp_90;
-    float m_yImp_90;
-    float m_xImp_min90;
-    float m_yImp_min90;
+    float m_xImp_0{};
+    float m_yImp_0{};
+    float m_xImp_90{};
+    float m_yImp_90{};
+    float m_xImp_min90{};
+    float m_yImp_min90{};
     // Digi/Energy items
     std::vector<int> m_evtVec;
     std::vector<short> m_rodBCIDVec;
@@ -577,28 +576,28 @@ class TileTBAANtuple: public AthAlgorithm {
     std::vector<std::array<int, MAX_MINIDRAWER>> m_mdChargeTimeflxVec;
     std::vector<std::array<int, MAX_MINIDRAWER>> m_mdCapacitorflxVec;
 
-    std::array<float, 4> m_LarEne;
-    std::array<float, 3> m_BarEne;
-    std::array<float, 3> m_ExtEne;
-    std::array<float, 3> m_GapEne;
+    std::array<float, 4> m_LarEne{};
+    std::array<float, 3> m_BarEne{};
+    std::array<float, 3> m_ExtEne{};
+    std::array<float, 3> m_GapEne{};
 
-    std::array<unsigned int, 96> m_coincTrig1;
-    std::array<unsigned int, 96> m_coincTrig2;
-    std::array<unsigned int, 96> m_coincTrig3;
-    std::array<unsigned int, 96> m_coincTrig4;
-    std::array<unsigned int, 96> m_coincTrig5;
-    std::array<unsigned int, 96> m_coincTrig6;
-    std::array<unsigned int, 96> m_coincTrig7;
-    std::array<unsigned int, 96> m_coincTrig8;
+    std::array<unsigned int, 96> m_coincTrig1{};
+    std::array<unsigned int, 96> m_coincTrig2{};
+    std::array<unsigned int, 96> m_coincTrig3{};
+    std::array<unsigned int, 96> m_coincTrig4{};
+    std::array<unsigned int, 96> m_coincTrig5{};
+    std::array<unsigned int, 96> m_coincTrig6{};
+    std::array<unsigned int, 96> m_coincTrig7{};
+    std::array<unsigned int, 96> m_coincTrig8{};
 
-    int m_coincFlag1;
-    int m_coincFlag2;
-    int m_coincFlag3;
-    int m_coincFlag4;
-    int m_coincFlag5;
-    int m_coincFlag6;
-    int m_coincFlag7;
-    int m_coincFlag8;
+    int m_coincFlag1{};
+    int m_coincFlag2{};
+    int m_coincFlag3{};
+    int m_coincFlag4{};
+    int m_coincFlag5{};
+    int m_coincFlag6{};
+    int m_coincFlag7{};
+    int m_coincFlag8{};
 
     std::map<unsigned int, unsigned int, std::less<unsigned int> > m_drawerMap; // map for frag IDs -> index
     std::map<unsigned int, unsigned int, std::less<unsigned int> > m_drawerFlxMap; // map for frag IDs -> index for FELIX
@@ -607,9 +606,9 @@ class TileTBAANtuple: public AthAlgorithm {
     bool m_beamIdList[32]; // list of beam frag IDs to store in the ntuple
 
     //run number
-    int m_runNumber;
-    float m_eta;
-    float m_theta;
+    int m_runNumber{};
+    float m_eta{};
+    float m_theta{};
 
     //MC truth info
     std::vector<std::array<float, MAX_CHAN>> m_ehitVec;
@@ -617,7 +616,7 @@ class TileTBAANtuple: public AthAlgorithm {
     std::vector<std::array<float, MAX_CHAN>> m_ehitCnt;
     std::vector<std::array<float, MAX_CHAN>> m_thitCnt;
 
-    bool m_calibrateEnergyThisEvent;
+    bool m_calibrateEnergyThisEvent{false};
 
     TileRawChannelUnit::UNIT m_rchUnit;  //!< Unit for TileRawChannels (ADC, pCb, MeV)
     TileRawChannelUnit::UNIT m_dspUnit;  //!< Unit for TileRawChannels in DSP

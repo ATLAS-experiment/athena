@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -71,7 +71,7 @@ class TileTBDump: public AthAlgorithm {
 
   private:
 
-    int m_statFrag5[200];
+    int m_statFrag5[200]{};
 
     ServiceHandle<IROBDataProviderSvc> m_RobSvc;
 
