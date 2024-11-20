@@ -171,4 +171,5 @@
 #include "dqm_algorithms/ZDCPercentEvents_XthBin.h"
 #include "dqm_algorithms/ZDCPercentEvents_UnderThreshold.h"
 #include "dqm_algorithms/ZDCPercentEvents_AboveThreshold.h"
+#include "dqm_algorithms/EfficiencyRefComp.h"
 #endif // DQM_ALGORITHMS_DQM_ALGORITHMSDICT_H
