@@ -22,6 +22,7 @@ Reco_tf.py \
 --outputDAOD_L1CALO1File="myDAOD_L1CALO1.pool.root" \
 --outputDESDM_PHOJETFile="myDESDM_PHOJET.pool.root" \
 --outputDRAW_TAULHFile="myDRAW_TAULH.data" \
+--conditionsTag="CONDBR2-BLKPA-2022-15" \
 --imf False
 
 rc1=$?
