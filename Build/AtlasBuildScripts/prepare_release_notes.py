@@ -35,8 +35,8 @@ def main():
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-p', '--previous',
                         help='previous release wrt. which we diff')
-    parser.add_argument('-o', '--output', default='release_notes.md',
-                        help='where the notes are written')
+    parser.add_argument('-o', '--output', nargs='?', metavar='FILE', const='release_notes.md',
+                        help='write release notes to file [%(const)s]')
     parser.add_argument('-r', '--relaxed', action='store_true',
                         help='do not stop on dubious configurations')
     parser.add_argument('-s', '--sweep', action='store_true',
@@ -89,12 +89,11 @@ def main():
     # If possible, use Gitlab
     gl_project = None
     if args.token and gitlab_available:
-        print('Trying to connect to gitlab using the supplied token')
+        if verbose: print('Trying to connect to gitlab using the supplied token')
         gl = gitlab.Gitlab("https://gitlab.cern.ch", args.token)
         # Check that the token is valid before we get further
         try:
             gl.auth()
-            print('Authentication to gitlab was successful')
         except Exception as err:
             print(f"Authentication failed. {err=}, {type(err)=}")
             exit(1)
@@ -116,7 +115,7 @@ def main():
         optional_message = input(': ')
         if ticket:
             optional_message = optional_message + '\nRelease request ticket: '+ticket
-    print('About to fill release note template.')
+
     release_notes = fill_template(sweep_template() if args.sweep else default_template(),
                                   target_release, nightly_tag, optional_message, previous_release,
                                   merged_mrs, output_filename=args.output, verbose=verbose,
@@ -407,10 +406,10 @@ def fill_template(template, target_release, nightly_tag, optional_message, previ
                                          'previous_release': previous_release,
                                          'previous_release_link': formatted_tag_link(previous_release),
                                          'formatted_list_of_merge_requests': formatted_mrs})
-    out_file = open(output_filename, 'w')
-    out_file.write(filled_template)
-    out_file.close()
-    print("Release notes generated in '%s'" % output_filename)
+    if output_filename:
+        with open(output_filename, 'w') as f:
+            f.write(filled_template)
+            print("Release notes stored in '%s'" % output_filename)
     return filled_template
 
 if __name__ == '__main__':
