@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LARTSHAPERCOMPLETE_H
 #define LARRAWCONDITIONS_LARTSHAPERCOMPLETE_H
 
+#include "AthenaKernel/CLASS_DEF.h"
 #include "LArElecCalib/ILArTshaper.h" 
 #include "LArRawConditions/LArTshaperP.h"
 #include "LArRawConditions/LArConditionsContainer.h"

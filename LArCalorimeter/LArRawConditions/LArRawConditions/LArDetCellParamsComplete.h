@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LARDETCELLPARAMSCOMPLETE_H
 #define LARRAWCONDITIONS_LARDETCELLPARAMSCOMPLETE_H
 
+#include "AthenaKernel/CLASS_DEF.h"
 #include "LArElecCalib/ILArDetCellParams.h" 
 #include "LArRawConditions/LArDetCellParamsP.h"
 #include "LArRawConditions/LArConditionsContainer.h"

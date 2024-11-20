@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LARMINBIASAVERAGECOMPLETE_H
 #define LARRAWCONDITIONS_LARMINBIASAVERAGECOMPLETE_H
 
+#include "AthenaKernel/CLASS_DEF.h"
 #include "LArElecCalib/ILArMinBiasAverage.h" 
 #include "LArRawConditions/LArMinBiasAverageP.h"
 #include "LArRawConditions/LArConditionsContainer.h"
