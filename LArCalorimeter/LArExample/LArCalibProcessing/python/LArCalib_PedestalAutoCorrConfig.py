@@ -47,7 +47,17 @@ def LArPedestalAutoCorrCfg(flags):
     if not flags.LArCalib.isSC:
        digKey=gainStrMap[flags.LArCalib.Gain]
        if flags.LArCalib.Input.isRawData:
-          result.merge(RawCalibDataReadingCfg(flags, digKey))
+          result.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArDigitKey=digKey,
+                                                              LArFebHeaderKey="LArFebHeader",
+                                                              FailOnCorruption=False,
+                                                              SubCaloPreselection=flags.LArCalib.Input.SubDet,
+                                                              PosNegPreselection=flags.LArCalib.Preselection.Side,
+                                                              BEPreselection=flags.LArCalib.Preselection.BEC,
+                                                              FTNumPreselection=flags.LArCalib.Preselection.FT))
+
+          result.addEventAlgo(CompFactory.LArDigitsAccumulator("LArDigitsAccumulator", KeyList = [digKey], 
+                                                               LArAccuDigitContainerName = "", NTriggersPerStep = 100,
+                                                               isSC = flags.LArCalib.isSC, DropPercentTrig = 0))
        else:
           result.merge(AccCalibDataReadingCfg(flags, digKey))
 
@@ -254,6 +264,8 @@ def LArPedestalAutoCorrCfg(flags):
            theBadAutoCorr.CalibLineKey = "LArCalibIdMapSC" 
            theBadAutoCorr.BadChanKey = bcKey 
         result.addEventAlgo(theBadAutoCorr)
+
+    result.getService("IOVDbSvc").DBInstance=""
 
     from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
     result.merge(PerfMonMTSvcCfg(flags))

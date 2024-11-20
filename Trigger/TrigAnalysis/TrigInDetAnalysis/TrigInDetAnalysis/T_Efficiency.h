@@ -25,20 +25,14 @@ class T_Efficiency {
 
 public:
 
-  T_Efficiency(T* h, const std::string& n) {
+  T_Efficiency(T* h, const std::string& n) :
+    m_name(n.empty() ? std::string(h->GetName())+"_eff" : n) {
 
-    std::string effname = n;
-    if ( effname=="" )  { 
-      effname = std::string(h->GetName())+"_eff";
-    }
-    
-    m_name = effname;
+    m_hnumer = (T*)h->Clone( (m_name+"_n").c_str() );
+    m_hdenom = (T*)h->Clone( (m_name+"_d").c_str() );
+    m_heff   = (T*)h->Clone( m_name.c_str() );
 
-    m_hnumer = (T*)h->Clone( (effname+"_n").c_str() );
-    m_hdenom = (T*)h->Clone( (effname+"_d").c_str() );
-    m_heff   = (T*)h->Clone( effname.c_str() );
-
-    m_hmissed = (T*)h->Clone( (effname+"_missed").c_str() );
+    m_hmissed = (T*)h->Clone( (m_name+"_missed").c_str() );
 
     m_hnumer->Reset();
     m_hdenom->Reset();
@@ -48,17 +42,14 @@ public:
   } 
 
 
-  T_Efficiency(T* hnum, T* hden, const std::string& n, double  ) {
+  T_Efficiency(T* hnum, T* hden, const std::string& n, double  ) :
+    m_name(n+"_eff") {
 
-    std::string effname = n+"_eff";
-    
-    m_name = effname;
+    m_hnumer = (T*)hnum->Clone( (m_name+"_n").c_str() );
+    m_hdenom = (T*)hden->Clone( (m_name+"_d").c_str() );
+    m_heff   = (T*)hnum->Clone( m_name.c_str() );
 
-    m_hnumer = (T*)hnum->Clone( (effname+"_n").c_str() );
-    m_hdenom = (T*)hden->Clone( (effname+"_d").c_str() );
-    m_heff   = (T*)hnum->Clone( effname.c_str() );
-
-    m_hmissed = (T*)hnum->Clone( (effname+"_missed").c_str() );
+    m_hmissed = (T*)hnum->Clone( (m_name+"_missed").c_str() );
 
     m_heff->Reset();
     m_hmissed->Reset();
@@ -70,7 +61,7 @@ public:
 
   virtual ~T_Efficiency() { } 
 
-  std::string name() const { return m_name; } 
+  const std::string& name() const { return m_name; }
 
   T* Hist() { return m_heff; }
 

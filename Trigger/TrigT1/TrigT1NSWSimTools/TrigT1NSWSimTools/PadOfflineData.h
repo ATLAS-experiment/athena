@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PADOFFLINEDATA_H
@@ -70,7 +70,7 @@ namespace NSWL1 {
     void fillGeometricInformation();
 
 
-    float m_cornerXyz[4][3];
+    float m_cornerXyz[4][3]{};
   };  // end of PadOfflineData class
 
 } // namespace NSWL1

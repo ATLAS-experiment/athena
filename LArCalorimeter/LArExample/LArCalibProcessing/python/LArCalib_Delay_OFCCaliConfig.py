@@ -34,7 +34,12 @@ def LArDelay_OFCCaliCfg(flags):
     
 
     if not flags.LArCalib.isSC:
-       result.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArAccCalibDigitKey=digKey,
+       if flags.LArCalib.Input.isRawData:
+          result.addEventAlgo(CompFactory.LArRawDataReadingAlg(LArRawChannelKey="", LArDigitKey=digKey, LArFebHeaderKey="LArFebHeader"))
+          from LArCalibProcessing.LArCalib_CalibDigitsMakerConfig import LArCalibDigitsMakerCfg
+          result.merge(LArCalibDigitsMakerCfg(flags,digKey))
+       else:
+          result.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArAccCalibDigitKey=digKey,
                                                               LArFebHeaderKey="LArFebHeader",
                                                               SubCaloPreselection=flags.LArCalib.Input.SubDet,
                                                               PosNegPreselection=flags.LArCalib.Preselection.Side,
@@ -60,7 +65,6 @@ def LArDelay_OFCCaliCfg(flags):
           from LArCalibProcessing.LArCalib_CalibDigitsMakerConfig import LArCalibDigitsMakerCfg
           result.merge(LArCalibDigitsMakerCfg(flags,digKey))
 
-
        else:   
           # this needs also legacy  maps
           from LArCabling.LArCablingConfig import LArCalibIdMappingCfg,LArOnOffIdMappingCfg
@@ -78,11 +82,12 @@ def LArDelay_OFCCaliCfg(flags):
     theLArCaliWaveBuilder.KeyOutput="LArCaliWave"
     theLArCaliWaveBuilder.GroupingType     = flags.LArCalib.GroupingType
     theLArCaliWaveBuilder.SubtractPed      = True
+    theLArCaliWaveBuilder.NSteps           = flags.LArCalib.CaliWave.Nsteps
     theLArCaliWaveBuilder.CheckEmptyPhases = not flags.LArCalib.isSC 
     theLArCaliWaveBuilder.NBaseline        = 0 # to avoid the use of the baseline when Pedestal are missing
     theLArCaliWaveBuilder.UseDacAndIsPulsedIndex = False # should have an impact only for HEC
     theLArCaliWaveBuilder.RecAllCells      = False
-    theLArCaliWaveBuilder.isSC       = flags.LArCalib.isSC
+    theLArCaliWaveBuilder.isSC             = flags.LArCalib.isSC
     result.addEventAlgo(theLArCaliWaveBuilder)
     
 
@@ -161,24 +166,25 @@ def LArDelay_OFCCaliCfg(flags):
        result.addEventAlgo(theCaliWaveValidationAlg)
 
     
+    if flags.LArCalib.doOFCCali:
 
-    LArCaliOFCAlg = CompFactory.LArOFCAlg("LArCaliOFCAlg")
-    LArCaliOFCAlg.ReadCaliWave = True
-    LArCaliOFCAlg.KeyList   = [ "LArCaliWave" ]
-    LArCaliOFCAlg.Nphase    = 50
-    LArCaliOFCAlg.Dphase    = 1
-    LArCaliOFCAlg.Ndelay    = 24
-    LArCaliOFCAlg.Nsample   = 5
-    LArCaliOFCAlg.Normalize = True
-    LArCaliOFCAlg.TimeShift = False
-    LArCaliOFCAlg.TimeShiftByIndex = -1
-    LArCaliOFCAlg.Verify    = True
-    LArCaliOFCAlg.FillShape = False
-    #LArCaliOFCAlg.DumpOFCfile = "LArOFCCali.dat"
-    LArCaliOFCAlg.GroupingType = flags.LArCalib.GroupingType
-    LArCaliOFCAlg.isSC = flags.LArCalib.isSC
-    LArCaliOFCAlg.DecoderTool=CompFactory.LArAutoCorrDecoderTool(isSC=flags.LArCalib.isSC)
-    result.addEventAlgo(LArCaliOFCAlg)
+       LArCaliOFCAlg = CompFactory.LArOFCAlg("LArCaliOFCAlg")
+       LArCaliOFCAlg.ReadCaliWave = True
+       LArCaliOFCAlg.KeyList   = [ "LArCaliWave" ]
+       LArCaliOFCAlg.Nphase    = 50
+       LArCaliOFCAlg.Dphase    = 1
+       LArCaliOFCAlg.Ndelay    = 24
+       LArCaliOFCAlg.Nsample   = 5
+       LArCaliOFCAlg.Normalize = True
+       LArCaliOFCAlg.TimeShift = False
+       LArCaliOFCAlg.TimeShiftByIndex = -1
+       LArCaliOFCAlg.Verify    = True
+       LArCaliOFCAlg.FillShape = False
+       #LArCaliOFCAlg.DumpOFCfile = "LArOFCCali.dat"
+       LArCaliOFCAlg.GroupingType = flags.LArCalib.GroupingType
+       LArCaliOFCAlg.isSC = flags.LArCalib.isSC
+       LArCaliOFCAlg.DecoderTool=CompFactory.LArAutoCorrDecoderTool(isSC=flags.LArCalib.isSC)
+       result.addEventAlgo(LArCaliOFCAlg)
 
 
     #ROOT ntuple writing:
@@ -195,10 +201,10 @@ def LArDelay_OFCCaliCfg(flags):
                                                             BadChanKey = bcKey,
                                                             OffId=True,
                                                             AddCalib=True,
-                                                            SaveJitter=True
+                                                            SaveJitter=True if flags.LArCalib.CaliWave.Nsteps >= 24 else False
                                                         ))
 
-        if rootfile2 == "":
+        if rootfile2 == "" and flags.LArCalib.OFCCali:
            result.addEventAlgo(CompFactory.LArOFC2Ntuple(ContainerKey = "LArOFC",
                                                       AddFEBTempInfo  = False,
                                                       BadChanKey = bcKey,
@@ -214,7 +220,7 @@ def LArDelay_OFCCaliCfg(flags):
         result.setAppProperty("HistogramPersistency","ROOT")
         pass # end if ROOT ntuple writing
 
-    if rootfile2 != "":
+    if rootfile2 != "" and flags.LArCalib.doOFCCali:
         result.addEventAlgo(CompFactory.LArOFC2Ntuple(ContainerKey = "LArOFC",
                                                    AddFEBTempInfo  = False,
                                                    NtupleFile = "FILE2",
@@ -246,12 +252,14 @@ def LArDelay_OFCCaliCfg(flags):
     from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
     result.merge(OutputConditionsAlgCfg(flags,
                                         outputFile=flags.LArCalib.Output.POOLFile,
-                                        ObjectList=["LArCaliWaveContainer#LArCaliWave#"+flags.LArCalib.CaliWave.Folder,
-                                                    "LArOFCComplete#LArOFC#"+flags.LArCalib.OFCCali.Folder],
-                                        IOVTagList=[caliWaveTag,caliOFCTag],
+                                        ObjectList=["LArCaliWaveContainer#LArCaliWave#"+flags.LArCalib.CaliWave.Folder,],
+                                        IOVTagList=[caliWaveTag,],
                                         Run1=flags.LArCalib.IOVStart,
                                         Run2=flags.LArCalib.IOVEnd
                                     ))
+    if flags.LArCalib.doOFCCali:
+       result.getEventAlgo("OutputConditionsAlg").ObjectList += ["LArOFCComplete#LArOFC#"+flags.LArCalib.OFCCali.Folder]
+       result.getEventAlgo("OutputConditionsAlg").IOVTagList += [caliOFCTag]
 
     #RegistrationSvc    
     result.addService(CompFactory.IOVRegistrationSvc(RecreateFolders = False))
@@ -285,7 +293,7 @@ def LArDelay_OFCCali_PoolDumpCfg(flags):
                                                             ApplyCorrection = True,
                                                             BadChanKey = bcKey,
                                                             AddCalib=True,
-                                                            SaveJitter=True,
+                                                            SaveJitter=True if flags.LArCalib.CaliWave.Nsteps >= 24 else False,
                                                             isSC=flags.LArCalib.isSC
                                                         ))
 

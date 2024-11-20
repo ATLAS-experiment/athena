@@ -91,13 +91,13 @@ class MMT_Diamond : public AthMessaging {
 
   private:
     const MuonGM::MuonDetectorManager* m_detManager{};        //!< MuonDetectorManager
-    bool m_trapflag;
-    int m_uvfactor;
-    bool m_uvflag;
-    int m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV;
-    int m_xthr, m_uvthr;
-    int m_phi;
-    char m_sector;
+    bool m_trapflag{};
+    int m_uvfactor{};
+    bool m_uvflag{};
+    int m_roadSize{}, m_roadSizeUpX{}, m_roadSizeDownX{}, m_roadSizeUpUV{}, m_roadSizeDownUV{};
+    int m_xthr{}, m_uvthr{};
+    int m_phi{};
+    char m_sector{};
 
     std::vector<diamond_t> m_diamonds;
     std::vector<double> m_hitslopes;

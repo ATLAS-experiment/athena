@@ -205,7 +205,8 @@ def fillHLTmap( info, hltMap_prev , lbCount, run, grlblocks):
             for name,value in HLTPrescalesSetAccess(dbalias='TRIGGERDB_RUN3',hltpskey=lbrange[0]).prescales().items():
                 rerun=-1.0 # how to determine?
                 # key seems to be a float (from looking at type(list(getHLTPrescalesRun2("TRIGGERDB",3000).keys())[0]))
-                hltprescales[value["hash"]] = (value["prescale"],rerun)
+                # ATR-30554: There is at least one instance in smk:3393 hltpsk:11710 where the prescale is string encoded
+                hltprescales[value["hash"]] = (float(value["prescale"]),rerun)
         else:
             hltprescales = getHLTPrescalesRun2('oracle://ATLAS_CONFIG/ATLAS_CONF_TRIGGER_RUN2', lbrange[0])
         tmphltList.append(( lbstart, lbend,hltprescales) )

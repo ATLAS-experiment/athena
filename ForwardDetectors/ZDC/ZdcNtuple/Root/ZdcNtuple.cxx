@@ -534,6 +534,9 @@ StatusCode ZdcNtuple :: execute ()
 
   ANA_CHECK(evtStore()->retrieve( m_eventInfo, "EventInfo"));
   processEventInfo();
+  if (zdcInj){
+  	processVInjInfo();
+  }
 
   //tracks used to go here
 
@@ -833,7 +836,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
     if (!globalSum) {
       ANA_MSG_ERROR("unable to locate global ZdcSum (side = 0)");
     }
-    t_centroidDecorationsAvailable = centroidStatusAcc(*globalSum);
+    t_centroidDecorationsAvailable = centroidStatusAcc.isAvailable(*globalSum);
   }
 
   if (rpdErr||zdcErr) ANA_MSG_WARNING( "Decoding errors ZDC=" << zdcErr << " RPD=" << rpdErr );
@@ -1225,10 +1228,6 @@ void ZdcNtuple::processEventInfo()
   t_runNumber = m_eventInfo->runNumber();
   t_eventNumber = m_eventInfo->eventNumber();
   t_lumiBlock = m_eventInfo->lumiBlock();
-  if (zdcInj)
-    {
-      t_vInj = m_zdcInjPulserAmpMap->getPulserAmplitude(t_lumiBlock);
-    }
   t_bunchGroup = -1;
   t_extendedLevel1ID = m_eventInfo->extendedLevel1ID();
   t_timeStamp = m_eventInfo->timeStamp();
@@ -1244,6 +1243,31 @@ void ZdcNtuple::processEventInfo()
     ANA_MSG_INFO("Event# " << m_eventCounter << " Run " << m_eventInfo->runNumber() << " Event " << m_eventInfo->eventNumber() << " LB " << m_eventInfo->lumiBlock() );
   }
 
+}
+
+void ZdcNtuple::processVInjInfo(){
+	// Check for new run number
+  //
+  if (t_runNumber != m_lastRunNumber) {
+    //
+    // Get access to the injector pulse steps for this run
+    //
+    m_injMapRunToken = m_zdcInjPulserAmpMap->lookupRun(t_runNumber, true);
+    if (!m_injMapRunToken.isValid()) {
+      ANA_MSG_ERROR("Unable to obtain injector pulse steps for run " << t_runNumber);
+    }
+    else {
+      unsigned int startLB = m_zdcInjPulserAmpMap->getFirstLumiBlock(m_injMapRunToken);
+      unsigned int nsteps = m_zdcInjPulserAmpMap->getNumSteps(m_injMapRunToken);
+      ANA_MSG_DEBUG("Successfully obtained injector pulse steps for run " << t_runNumber
+		    << ", first LB = " << startLB << ", number of steps = " << nsteps);
+    }
+
+    // update the last run number to be the current run number
+    m_lastRunNumber = t_runNumber;
+  }
+  
+  t_vInj = m_zdcInjPulserAmpMap->getPulserAmplitude(m_injMapRunToken, t_lumiBlock);
 }
 
 void ZdcNtuple::processInDet()

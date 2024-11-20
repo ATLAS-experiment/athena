@@ -11,7 +11,7 @@
  **
  **   @date         Wed Jun  9 19:44:29 BST 2004
  **
- **   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **                   
  **                   
  **
@@ -61,9 +61,10 @@ public:
     return (*this);
   }
 
-  const char* c_str()     { return m_string.c_str(); }
-  operator const char*()  { return m_string.c_str(); }
-  operator std::string()  { return m_string; }
+  const char* c_str() const    { return m_string.c_str(); }
+  operator const char*() const { return m_string.c_str(); }
+  // cppcheck-suppress returnByReference; false positive
+  operator std::string() const { return m_string; }
 
 private:
 

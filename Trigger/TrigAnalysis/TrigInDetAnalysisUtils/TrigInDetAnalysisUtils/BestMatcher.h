@@ -9,7 +9,7 @@
  **     @author  mark sutton
  **     @date    Mon 10 Aug 2015 03:07:24 CEST 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -75,7 +75,7 @@ public:
     while ( mitr!=matched.end() ) {
       this->mmatched.insert(    typename TIDA::Associator<T,S>::map_type::value_type( ref[mitr->first],   test[mitr->second]) );
       this->mrevmatched.insert( typename TIDA::Associator<S,T>::map_type::value_type( test[mitr->second], ref[mitr->first] ) );
-      mitr++;
+      ++mitr;
     }  
 
   }
@@ -125,7 +125,7 @@ protected:
     
     double  chi2 = 0;
     
-    for ( ; mitr!=m.end() ; mitr++ ) { 
+    for ( ; mitr!=m.end() ; ++mitr ) {
 
       int rind = mitr->first();
       int tind = mitr->second();
@@ -158,7 +158,7 @@ protected:
     while ( mitr!=unique.end() ) {
       matches.insert( std::map<int, int>::value_type( mitr->first(), mitr->second() ) );
       //   std::cout << "\tbest match " << *mitr << "\t" <<  ref[mitr->first()] << "\t" << test[mitr->second()] << std::endl;
-      mitr++;
+      ++mitr;
     }  
  
     return matches;

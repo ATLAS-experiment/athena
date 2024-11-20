@@ -39,8 +39,6 @@ def LArPileUpAutoCorrCfg(flags):
        FolderTagResolver._defaultSuffix="-UPD3-00"
     rs=FolderTagResolver(dbname="sqlite://;schema=%s;dbname=CONDBR2"%flags.LArCalib.Input.Database)
     AutoCorrTag=rs.getFolderTag(flags.LArCalib.AutoCorr.Folder)
-    # FIXME these tags has to be re-enabled in 2024 also for main readout:
-    #if flags.LArCalib.isSC:
     PedestalTag=rs.getFolderTag(flags.LArCalib.Pedestal.Folder)
     RampTag=rs.getFolderTag(flags.LArCalib.Ramp.Folder)
     MpMcTag=rs.getFolderTag(flags.LArCalib.MphysOverMcal.Folder)
@@ -57,8 +55,6 @@ def LArPileUpAutoCorrCfg(flags):
 
     result.merge(addFolders(flags,flags.LArCalib.AutoCorr.Folder,detDb=flags.LArCalib.Input.Database, tag=AutoCorrTag, modifiers=chanSelStr(flags)+"<key>LArAutoCorr</key>", 
                             className="LArAutoCorrComplete"))
-    # FIXME these folders has to be re-enabled in 2024 also for Main readout:
-    #if flags.LArCalib.isSC:
     result.merge(addFolders(flags,flags.LArCalib.Pedestal.Folder,detDb=flags.LArCalib.Input.Database, tag=PedestalTag, modifiers=chanSelStr(flags)+"<key>LArPedestal</key>", 
                         className="LArPedestalComplete"))
     result.merge(addFolders(flags,flags.LArCalib.Ramp.Folder,detDb=flags.LArCalib.Input.Database, tag=RampTag, modifiers=chanSelStr(flags), 

@@ -217,7 +217,7 @@ private:
 
   // LG refit data
   // 
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleFitAmpLGRefit{this, "ZdcModuleAmpLGRefit", "", "ZDC module fit amp LG refit, with no gain factor or nonlinear correction applied"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleFitAmpLGRefit{this, "ZdcModuleFitAmpLGRefit", "", "ZDC module fit amp LG refit, with no gain factor or nonlinear correction applied"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleAmpLGRefit{this, "ZdcModuleAmpLGRefit", "", "ZDC module amp LG refit, with gain factor applied but no nonlinear correction"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleAmpCorrLGRefit{this, "ZdcModuleAmpCorrLGRefit", "", "ZDC module amp LG refit, with both gain factor and nonlinear correction applied"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleT0LGRefit{this, "ZdcModuleT0LGRefit", "", "ZDC module fit t0 LG refit"};

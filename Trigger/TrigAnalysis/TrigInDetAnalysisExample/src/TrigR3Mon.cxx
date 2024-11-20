@@ -6,7 +6,7 @@
  **     @author  Mark Sutton (sutt@cern.ch)
  **     @date    Tue  8 Feb 2022 09:08:26 GMT
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 #include "TrigInDetAnalysis/Filter_AcceptAll.h"
@@ -432,7 +432,7 @@ StatusCode TrigR3Mon::bookHistograms() {
 
       if ( probe.extra().find("probe")!=std::string::npos ) {
 
-	std::string probe_key = probe.extra().erase( probe.extra().find("probe"), 5 ) ;
+       std::string probe_key = std::string(probe.extra()).erase( probe.extra().find("probe"), 5 ) ;
 
 	for ( size_t j=0 ; j<allchains.size() ; j++ ) {
 
@@ -443,7 +443,7 @@ StatusCode TrigR3Mon::bookHistograms() {
 	  if ( tag.element() == probe.element() ) continue;
 	  if ( tag.extra().find("tag")==std::string::npos ) continue;
 
-	  std::string tag_key = tag.extra().erase( tag.extra().find("tag"), 3 ) ;
+	  std::string tag_key = std::string(tag.extra()).erase( tag.extra().find("tag"), 3 ) ;
 
 	  if ( tag_key != probe_key ) continue;
 	  

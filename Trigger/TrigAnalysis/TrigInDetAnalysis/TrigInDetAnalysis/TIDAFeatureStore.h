@@ -8,7 +8,7 @@
  **     @author  mark sutton
  **     @date    Fri  7 Aug 2015 15:00:32 CEST 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -86,7 +86,7 @@ inline std::ostream& operator<<( std::ostream& s, const TIDA::FeatureStore& f ) 
   while( itr!=iend ) { 
     if ( itr->first.size()>5 ) s << "\t[ " << itr->first << ":\t"   << itr->second << " ]\n";
     else                       s << "\t[ " << itr->first << ":\t\t" << itr->second << " ]\n";
-    itr++;
+    ++itr;
   }
   return s;
 }

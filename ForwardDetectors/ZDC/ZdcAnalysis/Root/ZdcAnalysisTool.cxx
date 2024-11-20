@@ -2016,7 +2016,14 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     {
       unsigned int calibRunNumber = thisRunNumber;
       if (m_forceCalibRun > -1) calibRunNumber = m_forceCalibRun;
-      setFADCCorrections(calibRunNumber);
+      try
+	{
+	  setFADCCorrections(calibRunNumber);
+	}
+      catch(std::runtime_error&)
+	{
+	  m_doFADCCorr = false;
+	}
     }
     
     if (m_doCalib) {
@@ -2025,8 +2032,15 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
       //
       unsigned int calibRunNumber = thisRunNumber;
       if (m_forceCalibRun > -1) calibRunNumber = m_forceCalibRun;
+      try
+	{
+	  setEnergyCalibrations(calibRunNumber);
+	}
+      catch(std::runtime_error&)
+	{
+	  m_doCalib = false;
+	}
       
-      setEnergyCalibrations(calibRunNumber);
       if (m_doTrigEff) initializeTriggerEffs(calibRunNumber); // if energy calibrations fail to load, then so will trigger efficiencies
       if (m_doTimeCalib) setTimeCalibrations(calibRunNumber);
     }
@@ -2436,6 +2450,13 @@ void ZdcAnalysisTool::setFADCCorrections(unsigned int runNumber)
     ATH_MSG_WARNING("setFADCCorrections: FADC corrections not implemented for Run 2");
     return;
   }
+
+  if (filename.empty())
+    {
+      ATH_MSG_INFO("FADC correction requested but no calibration file found");      
+      m_doFADCCorr = false;
+      return;
+    }
   
   ATH_MSG_INFO("Opening FADC corrections file " << filename);
   std::unique_ptr<TFile> fFADCCorr(TFile::Open(filename.c_str(), "READ"));

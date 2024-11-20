@@ -172,11 +172,11 @@ if __name__=='__main__':
       # additions for EMF
       flags.IOVDb.SqliteInput="/afs/cern.ch/user/p/pavol/public/EMF_otherCond.db"
       flags.IOVDb.SqliteFolders = ("/LAR/BadChannelsOfl/BadChannelsSC","/LAR/BadChannels/BadChannelsSC","/LAR/Identifier/OnOffIdMap","/LAR/BadChannelsOfl/MissingFEBs","/LAR/BadChannelsOfl/KnownMNBFEBs", "/LAR/BadChannelsOfl/KnownBADFEBs")
-      flags.LArCalib.doValidation=False
+      flags.LArCalib.doValidation = False
 
    flags.lock()
    flags.dump(evaluate=True) 
-   ''' 
+    
    # create bad chan sqlite file
    cmdlinerm = (['/bin/rm', '-f', flags.LArCalib.BadChannelDB])
    if not flags.LArCalib.isSC:
@@ -201,7 +201,7 @@ if __name__=='__main__':
       sys.exit(-1)
    print((" ").join(cmdline))
    print(cp.stdout)
-   '''
+   
 
    cfg=MainServicesCfg(flags)
 
@@ -217,7 +217,7 @@ if __name__=='__main__':
       fldrs=cfg.getService("IOVDbSvc").Folders   
       for i in range(0, len(fldrs)):
           if 'Align' in fldrs[i]: fldrs[i] += '<forceRunNumber>9999999</forceRunNumber>'
-          if 'LatomeMapping' in fldrs[i]: fldrs[i] +='<tag>LARIdentifierLatomeMapping-EMF</tag>'
+          if 'LatomeMapping' in fldrs[i]: fldrs[i] += '<tag>LARIdentifierLatomeMapping-EMF</tag>'   
 
    #run the application
    cfg.run() 
