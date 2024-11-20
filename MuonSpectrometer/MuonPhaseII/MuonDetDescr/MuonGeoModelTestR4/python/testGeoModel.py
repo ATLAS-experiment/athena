@@ -125,7 +125,7 @@ def setupGeoR4TestCfg(args,  flags = None):
                                                                 geoTag=args.geoTag))
                                 
         args.geoModelFile = "Geometry/{geoTag}.db".format(geoTag=args.geoTag)
-    
+    print ("Use geometry file: {geoFile}".format(geoFile = args.geoModelFile))
     flags.GeoModel.AtlasVersion = args.geoTag
     flags.IOVDb.GlobalTag = args.condTag
     flags.GeoModel.SQLiteDB = True
