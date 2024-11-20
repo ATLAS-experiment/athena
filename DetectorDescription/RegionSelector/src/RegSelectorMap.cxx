@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -330,7 +330,9 @@ void RegSelectorMap::regionSelector( long layNumber,
        break;
      ++it;
    }
-	(*it).selection( etaminIn, etamaxIn, phiminIn, phimaxIn, outset);
+   // cppcheck-suppress derefInvalidIteratorRedundantCheck; we assume the above loop
+   // always succeeds finding the layer, see also the comment in ::findPosition().
+   (*it).selection( etaminIn, etamaxIn, phiminIn, phimaxIn, outset);
 	
   for(itset = outset.begin(); itset != outset.end(); ++itset){
     outList.push_back(*itset);
@@ -593,7 +595,9 @@ void RegSelectorMap::regionSelectorRobIdUint( long layNumber,
        break;
      ++it;
    }
-	(*it).selectionRobIdUint( etaminIn, etamaxIn, phiminIn, phimaxIn, outset);
+   // cppcheck-suppress derefInvalidIteratorRedundantCheck; we assume the above loop
+   // always succeeds finding the layer, see also the comment in ::findPosition().
+   (*it).selectionRobIdUint( etaminIn, etamaxIn, phiminIn, phimaxIn, outset);
 	
   for(itset = outset.begin(); itset != outset.end(); ++itset){
     outList.push_back(*itset);
