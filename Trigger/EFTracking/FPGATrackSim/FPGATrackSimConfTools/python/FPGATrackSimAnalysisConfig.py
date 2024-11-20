@@ -273,7 +273,7 @@ def FPGATrackSimOverlapRemovalToolCfg(flags):
     OR_1st.NumOfHitPerGrouping = 5
     OR_1st.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     OR_1st.MinChi2 = flags.Trigger.FPGATrackSim.ActiveConfig.chi2cut    
-    if flags.Trigger.FPGATrackSim.ActiveConfig.hough:
+    if flags.Trigger.FPGATrackSim.ActiveConfig.hough or flags.Trigger.FPGATrackSim.ActiveConfig.hough1D:
         OR_1st.nBins_x = flags.Trigger.FPGATrackSim.ActiveConfig.xBins + 2 * flags.Trigger.FPGATrackSim.ActiveConfig.xBufferBins
         OR_1st.nBins_y = flags.Trigger.FPGATrackSim.ActiveConfig.yBins + 2 * flags.Trigger.FPGATrackSim.ActiveConfig.yBufferBins
         OR_1st.localMaxWindowSize = flags.Trigger.FPGATrackSim.ActiveConfig.localMaxWindowSize
@@ -463,16 +463,18 @@ if __name__ == "__main__":
        splitPipeline=flags.Trigger.FPGATrackSim.pipeline.split('-')
        trackingOption=9999999
        if (len(splitPipeline) > 1): trackingOption=int(splitPipeline[1])
-       if (trackingOption < 9999999):
+       if (trackingOption < 9999999):           
            trackingOptionMod = (trackingOption % 100)
            if (trackingOptionMod == 0):
                print("You are trying to run the linearized chi2 fit as part of a pipeline! I am going to enable this for you whether you want to or not")
                flags.Trigger.FPGATrackSim.tracking = True
-           elif (trackingOptionMod == 1):
-               raise AssertionError("ERROR You are trying to run the NN fake removal as part of a pipeline! This is not yet supported!")
+               flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis = False
+           elif (trackingOptionMod == 10):
+               print("You are trying to run the NN fake rejection as part of a pipeline! I am going to enable this for you whether you want to or not")               
+               flags.Trigger.FPGATrackSim.tracking = True
+               flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis = True
            else:
                raise AssertionError("ERROR Your tracking option for the pipeline = " + str(trackingOption) + " is not yet supported!")
-   
    
        if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
            log.info("wrapperFile is string, converting to list")
