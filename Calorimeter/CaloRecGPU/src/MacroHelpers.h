@@ -1,8 +1,10 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
+
+// cppcheck-suppress-file preprocessorErrorDirective; does not understand __VA_ARGS__
 
 #ifndef CALORECGPU_MACROHELPERS_H
 #define CALORECGPU_MACROHELPERS_H
