@@ -23,10 +23,7 @@ namespace {
 
 
 HistogramDefinitionSvc::HistogramDefinitionSvc(const std::string& name, ISvcLocator* pSvcLocator) :
-  base_class(name, pSvcLocator), m_format{UNKNOWN}, m_reader{} {
-  declareProperty("DefinitionSource", m_source);
-  declareProperty("DefinitionFormat", m_formatString = "text/plain");
-}
+  base_class(name, pSvcLocator), m_format{UNKNOWN}, m_reader{} {}
 
 HistogramDefinitionSvc::~HistogramDefinitionSvc() = default;
 

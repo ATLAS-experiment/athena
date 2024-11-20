@@ -46,8 +46,8 @@ public:
     std::string zTitle(const std::string &name, const std::string &dirName="") const final;
     
 private:
-    StringProperty m_source;
-    StringProperty m_formatString;
+    StringProperty m_source{this, "DefinitionSource"};
+    StringProperty m_formatString{this, "DefinitionFormat", "text/plain"};
     IHistogramDefinitionSvc::Formats m_format;
     std::map<std::string, SingleHistogramDefinition> m_histoDefMap;
     std::unique_ptr<IReadHistoDef> m_reader;

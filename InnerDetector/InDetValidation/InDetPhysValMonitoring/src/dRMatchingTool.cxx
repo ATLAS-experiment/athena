@@ -92,15 +92,8 @@ namespace { // Placing utility functions in anonymous namespace.
 
 
 dRMatchingTool::dRMatchingTool(const std::string& name) :
-  asg::AsgTool(name),
-  m_accept("dRMatching"),
-  m_numProcessed(0),
-  m_numPassed(0) {
+  asg::AsgTool(name) {
   declareInterface<IAsgSelectionTool>(this);
-
-  // Decleare cut properties, for access in job option.
-  declareProperty("dRmax", m_dRmax = -1);
-  declareProperty("pTResMax", m_pTResMax = -1);
 }
 
 dRMatchingTool::~dRMatchingTool() = default;

@@ -49,32 +49,38 @@ public:
 private:
   CutList<xAOD::TruthParticle> m_cutList;
   // Cut values;
-  float m_maxEta;
-  float m_maxPt;
-  float m_minPt;
-  bool m_requireOnlyPrimary;
-  bool m_requireCharged;
-  int m_selectedCharge;
-  bool m_requireStable;
-  int m_requireSiHit;
+  FloatProperty m_maxEta{this, "maxEta", 2.5};
+  FloatProperty m_maxPt{this, "maxPt", -1.};
+  FloatProperty m_minPt{this, "minPt", 400.};
+  BooleanProperty m_requireOnlyPrimary{this, "requireOnlyPrimary", true};
+  BooleanProperty m_requireCharged{this, "requireCharged", true};
+  IntegerProperty m_selectedCharge{this, "selectedCharge", 0};
+  BooleanProperty m_requireStable{this, "requireStable", true};
+  IntegerProperty m_requireSiHit{this, "requireSiHit", 0};
   // max decay radius for secondaries [mm];
   // set to within (Run2) pixel by default
-  double m_maxProdVertRadius;
-  int m_pdgId;
-  bool m_grandparent;
-  bool m_poselectronfromgamma;
-  std::vector<unsigned int> m_counters;
-  std::vector<int> m_ancestors;
+  FloatProperty m_maxProdVertRadius{this, "maxProdVertRadius", 110.};
+  IntegerProperty m_pdgId{this, "pdgId", -1};
+  BooleanProperty m_grandparent{this, "hasNoGrandparent", false};
+  BooleanProperty m_poselectronfromgamma{this, "poselectronfromgamma", false};
+  std::vector<unsigned int> m_counters{};
+  IntegerArrayProperty m_ancestors{this, "ancestorList", {}};
   
   /* \defgroup Selection on extrapolated particle to cylinder or disk surface
    * @{
    */
-  float m_radiusCylinder; ///< for cylinder topology: radius of cylinder
-  float m_minZCylinder; ///< for cylinder topology: minimum |z|
-  float m_maxZCylinder; ///< for cylinder topology: maximum |z|
-  float m_zDisc; ///< for disk topology: Z position of disk
-  float m_minRadiusDisc; ///< for disk topology: minimum radius
-  float m_maxRadiusDisc; ///< for disk topology: maximum radius
+  FloatProperty m_radiusCylinder{this, "radiusCylinder", -1.,
+    "Select truth particle based on extrapolated position on cylinder placed at this radius. Enabled if greater than 0."};
+  FloatProperty m_minZCylinder{this, "minZCylinder", 0.,
+    "Minimum |Z| on cylinder for accepting extrapolated truth particle to surface."};
+  FloatProperty m_maxZCylinder{this, "maxZCylinder", 0.,
+    "Maximum |Z| on cylinder for accepting extrapolated truth particle to surface."};
+  FloatProperty m_zDisc{this, "zDisc", -1.,
+    "Select truth particle based on extrapolated position on disks placed at +/- z positions. Enabled if greater than 0."};
+  FloatProperty m_minRadiusDisc{this, "minRadiusDisc", 0.,
+    "Minimum radius on disk for accepting extrapolated truth particle to surface."};
+  FloatProperty m_maxRadiusDisc{this, "maxRadiusDisc", 0.,
+    "Maximum radius on disk for accepting extrapolated truth particle to surface."};
 
   //cache surfaces
   std::unique_ptr<Trk::CylinderSurface> m_cylinder;

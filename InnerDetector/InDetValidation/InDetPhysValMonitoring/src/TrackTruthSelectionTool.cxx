@@ -10,20 +10,8 @@
 
 
 TrackTruthSelectionTool::TrackTruthSelectionTool(const std::string& name) :
-  asg::AsgTool(name)
-  , m_accept("TrackTruthSelection")
-  , m_numTruthProcessed(0)
-  , m_numTruthPassed(0) {
+  asg::AsgTool(name) {
   declareInterface<IAsgSelectionTool>(this);
-
-  declareProperty("maxEta", m_maxEta = 2.5);
-  declareProperty("minPt", m_minPt = 400);
-  declareProperty("maxPt", m_maxPt = -1);
-  declareProperty("requireOnlyPrimary", m_requireOnlyPrimary = true);
-  declareProperty("requireCharged", m_requireCharged = true);
-  declareProperty("requireStable", m_requireStable = true);
-  declareProperty("maxProdVertRadius", m_maxProdVertRadius = 110.);
-  declareProperty("pdgId", m_pdgId = -1);
 }
 
 TrackTruthSelectionTool::~TrackTruthSelectionTool() = default;

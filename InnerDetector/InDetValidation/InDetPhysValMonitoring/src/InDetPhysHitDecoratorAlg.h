@@ -19,18 +19,15 @@
 #include "StoreGate/WriteDecorHandle.h"
 #include "GaudiKernel/EventContext.h"
 #include "InDetCondTools/ISiLorentzAngleTool.h"
+#include "TrkToolInterfaces/ITrackHoleSearchTool.h"
+#include "TrkToolInterfaces/IUpdator.h"
+#include "TrkToolInterfaces/IResidualPullCalculator.h"
 
 class Identifier;
 class AtlasDetectorID;
 class PixelID;
 class SCT_ID;
 class TRT_ID;
-
-namespace Trk {
-  class IUpdator;
-  class ITrackHoleSearchTool;
-  class IResidualPullCalculator;
-}
 
 // class to decorate xAOD::TruthParticles with additional information required by validation
 class InDetPhysHitDecoratorAlg: public AthReentrantAlgorithm {
@@ -57,10 +54,14 @@ private:
                 std::vector< SG::WriteDecorHandle<xAOD::TrackParticleContainer,std::vector<int> > > &int_decor,
                 std::vector< SG::WriteDecorHandle<xAOD::TrackParticleContainer,std::vector<uint64_t> > > &uint64_decor) const;
 
-  ToolHandle<Trk::ITrackHoleSearchTool>    m_holeSearchTool;
-  ToolHandle<Trk::IUpdator>    m_updatorHandle; // !< Tool handle of updator for unbiased states
-  ToolHandle<Trk::IResidualPullCalculator>  m_residualPullCalculator;   // !< The residual and pull calculator tool
-                                                                        // handle
+  ToolHandle<Trk::ITrackHoleSearchTool> m_holeSearchTool
+    {this, "InDetTrackHoleSearchTool", "InDet::InDetTrackHoleSearchTool"};
+  ToolHandle<Trk::IUpdator> m_updatorHandle
+    {this, "Updator", "Trk::KalmanUpdator/TrkKalmanUpdator",
+     "Tool handle of updator for unbiased states"};
+  ToolHandle<Trk::IResidualPullCalculator> m_residualPullCalculator
+    {this, "ResidualPullCalculator",
+     "Trk::ResidualPullCalculator/ResidualPullCalculator"};
   ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "SiLorentzAngleTool", "Tool to retrieve Lorentz angle"};
 
   enum EIntDecorations {
@@ -104,10 +105,10 @@ private:
 
   mutable std::atomic<bool> m_alreadyWarned{false};
   // the following help identify a surface in the detector
-  const AtlasDetectorID* m_idHelper;
-  const PixelID* m_pixelID;
-  const SCT_ID* m_sctID;
-  const TRT_ID* m_trtID;
+  const AtlasDetectorID* m_idHelper{nullptr};
+  const PixelID* m_pixelID{nullptr};
+  const SCT_ID* m_sctID{nullptr};
+  const TRT_ID* m_trtID{nullptr};
 
   // private member functions
   bool decideDetectorRegion(const Identifier& id, Subdetector& det, Region& r, int& layer) const;
