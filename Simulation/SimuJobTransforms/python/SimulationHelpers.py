@@ -8,7 +8,7 @@ def getDetectorsFromRunArgs(flags, runArgs):
         detectors = runArgs.detectors
     else:
         from AthenaConfiguration.AutoConfigFlags import getDefaultDetectors
-        detectors = getDefaultDetectors(flags.GeoModel.AtlasVersion, flags.GeoModel.SQLiteDB, flags.GeoModel.SQLiteDBFullPath, includeForward=False)
+        detectors = set(getDefaultDetectors(flags.GeoModel.AtlasVersion, flags.GeoModel.SQLiteDB, flags.GeoModel.SQLiteDBFullPath, includeForward=False))
 
     # Support switching on Forward Detectors
     if hasattr(runArgs, 'LucidOn'):
