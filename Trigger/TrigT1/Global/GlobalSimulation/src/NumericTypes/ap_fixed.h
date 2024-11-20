@@ -5,25 +5,51 @@
 #ifndef GLOBALSIM_AP_FIXED_H
 #define GLOBALSIM_AP_FIXED_H
 
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // due to statics used for debugging
+
 #include <cstddef>
 #include <sstream>
 
 /*
- * representation of a fixed point floating point number
+ * representation of a fixed point number.
+ * A fixed point number has a fiexed width and precision.
+ * This implementation uses an C++ int type to store the bits.
+ * so allowing fast integer arithmetic.
  */
 
-namespace GlobalSim {
 
-  template <std::size_t m_dig,
+namespace GlobalSim {
+  
+  template<std::size_t width, typename T>
+  constexpr T max_to_overflow() {
+    T t{0};
+    static_assert(8*sizeof(t) >= width,  "ap_fixed underlying int to small");
+    for (std::size_t i = 0; i <= sizeof(t)*8-width; ++i){
+      T bit{1};
+      t = t+(bit<<i);
+    }
+
+    t = t << (width-1);
+    return t;
+  }
+
+  template <std::size_t width,
 	    std::size_t dp,
 	    typename T=int16_t,
 	    typename WS=int32_t>
   struct ap_fixed  {
   
     T m_value = T{0};
+    static constexpr T m_overflow_mask = max_to_overflow<width, T>();
+
+    static inline bool s_check_overflow{false};
+    static inline bool s_print_value{false};
+    static inline bool s_debug{s_check_overflow or s_print_value};
+    
     bool m_ovflw{false};
     friend std::ostream& operator<<(std::ostream& os,
-				    const ap_fixed<m_dig, dp, T, WS> ap) {
+				    const ap_fixed<width, dp, T, WS> ap) {
       os << ap.m_value << ' ' << double(ap);
       return os;
     }
@@ -67,7 +93,7 @@ namespace GlobalSim {
     }
 
     ap_fixed operator * (const ap_fixed& f) const {
-      return form((WS(this->value) * WS(f.m_value)) >> dp);
+      return form((WS(this->m_value) * WS(f.m_value)) >> dp);
     }
   
     const ap_fixed& operator *= (const ap_fixed& f) {
@@ -78,7 +104,7 @@ namespace GlobalSim {
 
       
     ap_fixed operator / (const ap_fixed& f) const {
-      return form((WS(this->value) << dp) / WS(f.m_value));
+      return form((WS(this->m_value) << dp) / WS(f.m_value));
     }
   
     const ap_fixed& operator /= (const ap_fixed& f) {
@@ -93,13 +119,13 @@ namespace GlobalSim {
     }
 
     void test_overflow() {
-      // FIXME very hack, assumes int16_t
+
       if (m_value > 0) {
-	if ((m_value & 0xFC00) > 0) {
+	if (m_value & m_overflow_mask) {
 	  m_ovflw=true;
 	}
       } else {
-	if ((-m_value & 0xFC00) > 0) {
+	if (-m_value & m_overflow_mask) {
 	  m_ovflw=true;
 	}
       }
@@ -111,8 +137,8 @@ namespace GlobalSim {
 	ss << "ap_fixed overflow. val: " 
 	   << m_value << " abs(val): " << val
 	   << ' ' << std::hex << val
-	   <<  " masked " << (val &  0xFC00);
-	throw std::runtime_error(ss.str());
+	   <<  " masked " << (val & m_overflow_mask);
+	throw std::out_of_range(ss.str());
       }
     }
   };
