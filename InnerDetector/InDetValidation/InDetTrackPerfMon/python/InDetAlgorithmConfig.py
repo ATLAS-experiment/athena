@@ -136,3 +136,9 @@ def OfflineObjectDecoratorAlgCfg( flags, name="OfflineObjectDecoratorAlg", **kwa
             acc.merge( OfflineTauRNN3prongDecoratorAlgCfg(flags) )
 
     return acc
+
+
+def TruthDecoratorAlgCfg( flags, name="TruthDecoratorAlg", **kwargs ):
+    acc = ComponentAccumulator()
+    acc.addEventAlgo( CompFactory.IDTPM.TruthDecoratorAlg( name, **kwargs ) )
+    return acc
