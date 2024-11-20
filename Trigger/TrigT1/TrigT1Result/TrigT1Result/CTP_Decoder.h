@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1_CTP_DECODER_H
@@ -17,8 +17,7 @@ class MsgStream;
 class CTP_BC {
   
   /**
-   *   $Date: 2007-07-10 14:58:38 $
-   * 
+   *
    *   @short Helper class to decode the CTP data for one
    *   bunch-crossing.
    *
@@ -221,7 +220,7 @@ public:
 
 private:
   //! The RDO member
-  const CTP_RDO* m_rdo;
+  const CTP_RDO* m_rdo{nullptr};
   //! Vector of BCs for the current event
   std::vector<CTP_BC> m_BCs;
 };
