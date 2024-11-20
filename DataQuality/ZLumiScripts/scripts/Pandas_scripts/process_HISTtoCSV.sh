@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
 if [[ $# -lt 1 ]]; then
-    echo "ERROR: Need to give year to process: 22, 23, or 24"
+    echo "ERROR: Need to give year to process: 22, 23, 24, or 25"
     exit 1
 fi
 if [[ $1 -ge 22 && $1 -le 24 ]]; then
     year=$1
 else
-    echo "ERROR: Bad year $1 given to process: use 22, 23, 24"
+    echo "ERROR: Bad year $1 given to process: use 22, 23, 24, 25"
     exit 1
 fi
 
@@ -27,9 +27,13 @@ elif [[ $year -eq 23 ]]; then
     lumitag=OflLumi-Run3-004
     tag=OflLumiAcct-Run3-004
 elif [[ $year -eq 24 ]]; then
-    grl=${indir}/latest_GRL.xml
+    grl=${GRLCVMFS}/data24_13p6TeV/20241118/data24_13p6TeV.periodsEtoO_DetStatus-v130-pro36-08_MERGED_PHYS_StandardGRL_All_Good_25ns.xml
     lumitag=OflLumi-Run3-005
     tag=OflLumiAcct-Run3-005
+elif [[ $year -eq 25 ]]; then
+    grl=${indir}/latest_GRL.xml
+    lumitag=OflLumi-Run3-006
+    tag=OflLumiAcct-Run3-006
 fi
 if [[ $# -ge 3 ]]; then
     grl=$3
