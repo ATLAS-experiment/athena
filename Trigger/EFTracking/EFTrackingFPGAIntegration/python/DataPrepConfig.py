@@ -9,28 +9,39 @@ def xAODContainerMakerCfg(flags, name = 'xAODContainerMaker', **kwarg):
     acc = ComponentAccumulator()
     
     kwarg.setdefault('name', name)
-    kwarg.setdefault('OutputStripName', 'ITkStripClusters')
-    kwarg.setdefault('OutputPixelName', 'ITkPixelClusters')
-    kwarg.setdefault('OutputStripSpacePointName', 'ITkStripSpacePoints')
-    kwarg.setdefault('OutputPixelSpacePointName', 'ITkPixelSpacePoints')
+    kwarg.setdefault('OutputStripName', 'FPGAStripClusters')
+    kwarg.setdefault('OutputPixelName', 'FPGAPixelClusters')
+    kwarg.setdefault('OutputStripSpacePointName', 'FPGAStripSpacePoints')
+    kwarg.setdefault('OutputPixelSpacePointName', 'FPGAPixelSpacePoints')
     
     acc.setPrivateTools(CompFactory.xAODContainerMaker(**kwarg))
+    return acc
+
+def PassThroughToolCfg(flags, name = 'PassThroughTool', **kwarg):
+        
+    acc = ComponentAccumulator()
+        
+    kwarg.setdefault('name', name)
+    kwarg.setdefault('StripClusterContainerKey', 'ITkStripClusters')
+    kwarg.setdefault('PixelClusterContainerKey', 'ITkPixelClusters')
+    kwarg.setdefault('RunSW', True)
+        
+    acc.setPrivateTools(CompFactory.PassThroughTool(**kwarg))
     return acc
 
 def DataPrepCfg(flags, name = "DataPreparationPipeline", **kwarg):
 
     acc = ComponentAccumulator()
     
-    tool = acc.popToolsAndMerge(xAODContainerMakerCfg(flags))
+    containerMakerTool = acc.popToolsAndMerge(xAODContainerMakerCfg(flags))
+    passThroughTool = acc.popToolsAndMerge(PassThroughToolCfg(flags))
     
     kwarg.setdefault('name', name)
-    kwarg.setdefault('xclbin', './xAODTransfer.xclbin')
-    kwarg.setdefault('KernelName', 'xAODTransfer')
-    kwarg.setdefault('xAODMaker', tool)
-    kwarg.setdefault('StripClusterContainerKey', 'FPGAITkStripClusters')
-    kwarg.setdefault('PixelClusterContainerKey', 'FPGAITkPixelClusters')
-    kwarg.setdefault('StripSpacePointContainerKey', 'FPGAITkStripSpacePoints')
-    kwarg.setdefault('PixelSpacePointContainerKey', 'FPGAITkPixelSpacePoints')
+    kwarg.setdefault('xclbin', '')
+    kwarg.setdefault('KernelName', '')
+    kwarg.setdefault('RunPassThrough', False)
+    kwarg.setdefault('xAODMaker', containerMakerTool)
+    kwarg.setdefault('PassThroughTool', passThroughTool)
 
     acc.addEventAlgo(CompFactory.DataPreparationPipeline(**kwarg))
     return acc
@@ -40,8 +51,8 @@ if __name__=="__main__":
 
     flags = initConfigFlags()
     flags.Concurrency.NumThreads = 1
-    # Use a dummy input file for the EventInfo
-    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1"]
+    # The input file should be specified by the user
+    flags.Input.Files = [""]
     flags.Output.AODFileName = "DataPrepAOD.pool.root"
 
     flags.lock()
@@ -61,10 +72,10 @@ if __name__=="__main__":
     # Add the AOD output stream
     # This is only for temporary development purposes
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
-    OutputItemList = ["xAOD::StripClusterContainer#ITkStripClusters",
-                     "xAOD::StripClusterAuxContainer#ITkStripClustersAux.",
-                     "xAOD::PixelClusterContainer#ITkPixelClusters",
-                     "xAOD::PixelClusterAuxContainer#ITkPixelClustersAux."
+    OutputItemList = ["xAOD::StripClusterContainer#FPGAStripClusters",
+                     "xAOD::StripClusterAuxContainer#FPGAStripClustersAux.",
+                     "xAOD::PixelClusterContainer#FPGAPixelClusters",
+                     "xAOD::PixelClusterAuxContainer#FPGAPixelClustersAux."
                      ]
    
     cfg.merge(addToAOD(flags, OutputItemList))

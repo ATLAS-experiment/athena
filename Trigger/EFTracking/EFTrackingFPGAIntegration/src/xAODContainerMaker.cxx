@@ -29,9 +29,8 @@ StatusCode xAODContainerMaker::initialize() {
 }
 
 StatusCode xAODContainerMaker::makeStripClusterContainer(
-    const int numClusters,
     const EFTrackingDataFormats::StripClusterAuxInput &scAux,
-    const EFTrackingDataFormats::Metadata *meta,
+    const EFTrackingDataFormats::Metadata *metadata,
     const EventContext &ctx) const {
   ATH_MSG_DEBUG("Making xAOD::StripClusterContainer");
 
@@ -44,7 +43,7 @@ StatusCode xAODContainerMaker::makeStripClusterContainer(
 
   int rdoIndex_counter = 0;
 
-  for (int i = 0; i < numClusters; i++) {
+  for (unsigned int i = 0; i < metadata->numOfStripClusters; i++) {
     // Puch back numClusters of StripCluster
     auto stripCl =
         stripClustersHandle->push_back(std::make_unique<xAOD::StripCluster>());
@@ -61,13 +60,13 @@ StatusCode xAODContainerMaker::makeStripClusterContainer(
         scAux.globalPosition.at(i * 3 + 2));
 
     std::vector<Identifier> RDOs;
-    RDOs.reserve(meta->scRdoIndex[i]);
+    RDOs.reserve(metadata->scRdoIndex[i]);
     // Cover RDO
-    for (int j = 0; j < meta->scRdoIndex[i]; ++j) {
+    for (unsigned int j = 0; j < metadata->scRdoIndex[i]; ++j) {
       RDOs.push_back(Identifier(scAux.rdoList.at(rdoIndex_counter + j)));
     }
 
-    rdoIndex_counter += meta->scRdoIndex[i];
+    rdoIndex_counter += metadata->scRdoIndex[i];
 
     stripCl->setMeasurement<1>(scAux.idHash.at(i), localPosition,
                                localCovariance);
@@ -81,9 +80,8 @@ StatusCode xAODContainerMaker::makeStripClusterContainer(
 }
 
 StatusCode xAODContainerMaker::makePixelClusterContainer(
-    const int numClusters,
     const EFTrackingDataFormats::PixelClusterAuxInput &pxAux,
-    const EFTrackingDataFormats::Metadata *meta,
+    const EFTrackingDataFormats::Metadata *metadata,
     const EventContext &ctx) const {
   ATH_MSG_DEBUG("Making xAOD::PixelClusterContainer");
 
@@ -101,7 +99,7 @@ StatusCode xAODContainerMaker::makePixelClusterContainer(
   int totListIndex_counter = 0;
   int chargeListIndex_counter = 0;
 
-  for (int i = 0; i < numClusters; i++) {
+  for (unsigned int i = 0; i < metadata->numOfPixelClusters; i++) {
     // Puch back numClusters of PixelCluster
     auto pixelCl =
         pixelClustersHandle->push_back(std::make_unique<xAOD::PixelCluster>());
@@ -117,27 +115,27 @@ StatusCode xAODContainerMaker::makePixelClusterContainer(
         pxAux.globalPosition.at(i * 3 + 2));
 
     std::vector<Identifier> RDOs;
-    RDOs.reserve(meta->pcRdoIndex[i]);
+    RDOs.reserve(metadata->pcRdoIndex[i]);
     // Cover RDO
-    for (int j = 0; j < meta->pcRdoIndex[i]; ++j) {
+    for (unsigned int j = 0; j < metadata->pcRdoIndex[i]; ++j) {
       RDOs.push_back(Identifier(pxAux.rdoList.at(rdoIndex_counter + j)));
     }
 
     std::vector<int> vec_totList;
-    vec_totList.reserve(meta->pcTotIndex[i]);
-    for (int j = 0; j < meta->pcTotIndex[i]; ++j) {
+    vec_totList.reserve(metadata->pcTotIndex[i]);
+    for (unsigned int j = 0; j < metadata->pcTotIndex[i]; ++j) {
       vec_totList.push_back(pxAux.totList.at(totListIndex_counter + j));
     }
 
     std::vector<float> vec_chargeList;
-    vec_chargeList.reserve(meta->pcChargeIndex[i]);
-    for (int k = 0; k < meta->pcChargeIndex[i]; ++k) {
+    vec_chargeList.reserve(metadata->pcChargeIndex[i]);
+    for (unsigned int k = 0; k < metadata->pcChargeIndex[i]; ++k) {
       vec_chargeList.push_back(pxAux.totList.at(chargeListIndex_counter + k));
     }
 
-    rdoIndex_counter += meta->pcRdoIndex[i];
-    totListIndex_counter += meta->pcTotIndex[i];
-    chargeListIndex_counter += meta->pcChargeIndex[i];
+    rdoIndex_counter += metadata->pcRdoIndex[i];
+    totListIndex_counter += metadata->pcTotIndex[i];
+    chargeListIndex_counter += metadata->pcChargeIndex[i];
 
     pixelCl->setMeasurement<2>(pxAux.idHash.at(i), localPosition,
                                localCovariance);
@@ -161,10 +159,10 @@ StatusCode xAODContainerMaker::makePixelClusterContainer(
 }
 
 StatusCode xAODContainerMaker::makePixelSpacePointContainer(
-    const int numPixelSpacePoints,
     const EFTrackingDataFormats::SpacePointAuxInput &psAux,
     const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>
         pixelsp_meas,
+    const EFTrackingDataFormats::Metadata *metadata,
     const EventContext &ctx) const {
   ATH_MSG_DEBUG("Making xAOD::SpacePointContainer");
 
@@ -178,7 +176,7 @@ StatusCode xAODContainerMaker::makePixelSpacePointContainer(
   ATH_CHECK(pixelSpacePointsHandle.isValid());
   ATH_MSG_DEBUG("Container '" << m_pixelSpacePointsKey << "' initialised");
 
-  for (int i = 0; i < numPixelSpacePoints; i++) {
+  for (unsigned int i = 0; i < metadata->numOfPixelSpacePoints; i++) {
     // Puch back numPixelSpacePoints of SpacePoint
     auto pxsp =
         pixelSpacePointsHandle->push_back(std::make_unique<xAOD::SpacePoint>());
@@ -199,10 +197,10 @@ StatusCode xAODContainerMaker::makePixelSpacePointContainer(
 }
 
 StatusCode xAODContainerMaker::makeStripSpacePointContainer(
-    const int numStripSpacePoints,
     const EFTrackingDataFormats::SpacePointAuxInput &sspAux,
     const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>
         stripsp_meas,
+    const EFTrackingDataFormats::Metadata *metadata,
     const EventContext &ctx) const {
   ATH_MSG_DEBUG("Making xAOD::SpacePointContainer");
 
@@ -216,7 +214,7 @@ StatusCode xAODContainerMaker::makeStripSpacePointContainer(
   ATH_CHECK(stripSpacePointsHandle.isValid());
   ATH_MSG_DEBUG("Container '" << m_stripSpacePointsKey << "' initialised");
 
-  for (int i = 0; i < numStripSpacePoints; i++) {
+  for (unsigned int i = 0; i < metadata->numOfStripSpacePoints; i++) {
     // Puch back numStripSpacePoints of SpacePoint
     auto ssp =
         stripSpacePointsHandle->push_back(std::make_unique<xAOD::SpacePoint>());
