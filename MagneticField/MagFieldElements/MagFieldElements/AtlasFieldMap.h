@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -98,7 +98,7 @@ private:
   // data members used in zone-finding
   std::vector<double> m_edge[3];            // zone boundaries in z, r, phi
   std::vector<int> m_edgeLUT[3];            // look-up table for zone edges
-  double m_invq[3];                         // 1/stepsize in m_edgeLUT
+  double m_invq[3]{};                       // 1/stepsize in m_edgeLUT
   std::vector<const BFieldZone*> m_zoneLUT; // look-up table for zones
   // more data members to speed up zone-finding
   double m_zmin{ 0 }; // minimum z

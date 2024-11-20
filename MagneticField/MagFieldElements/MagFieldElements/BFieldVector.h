@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -26,7 +26,7 @@ public:
     "Type for the BField Vector must be one of short or double");
 
   // Default
-  BFieldVector() = default;
+  BFieldVector() = default;  // cppcheck-suppress uninitMemberVar; m_B uninit on purpose
   BFieldVector(const BFieldVector&) = default;
   BFieldVector(BFieldVector&&) = default;
   BFieldVector& operator=(const BFieldVector&) = default;
