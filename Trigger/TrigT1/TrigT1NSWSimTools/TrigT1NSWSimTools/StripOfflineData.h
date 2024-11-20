@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STRIPOFFLINEDATA_H
@@ -35,25 +35,25 @@ namespace NSWL1 {
 
   private:
     const Identifier    m_id;            //!< offline identifier of the strip hit
-    const sTgcIdHelper* m_helper;        //!< helper for the identifier decoding
-    int                 m_trig_bcid;
-    int m_padTrigIndex;
-    float               m_strip_charge;
-    float               m_strip_time;
-    int                 m_strip_charge_10bit;
-    int                 m_strip_charge_6bit;
-    int                 m_band_id;
-    int                 m_phi_id;
-    float               m_x,m_y,m_z=0;
-    float               m_lx,m_ly,m_lz=0;
-    bool                m_read_strip;
+    const sTgcIdHelper* m_helper{};      //!< helper for the identifier decoding
+    int                 m_trig_bcid{};
+    int m_padTrigIndex{};
+    float               m_strip_charge{};
+    float               m_strip_time{};
+    int                 m_strip_charge_10bit{};
+    int                 m_strip_charge_6bit{};
+    int                 m_band_id{};
+    int                 m_phi_id{};
+    float               m_x{},m_y{},m_z{};
+    float               m_lx{},m_ly{},m_lz{};
+    bool                m_read_strip{};
     
-    int m_sideId;
-    int m_sectorType;
-    int m_sectorId;
-    int m_moduleId;
-    int m_wedgeId;
-    int m_layerId;
+    int m_sideId{};
+    int m_sectorType{};
+    int m_sectorId{};
+    int m_moduleId{};
+    int m_wedgeId{};
+    int m_layerId{};
 
   public:
     StripOfflineData(Identifier id, const sTgcIdHelper* helper, const sTgcDigit* digit);
