@@ -43,31 +43,10 @@ namespace {
 
 AthTruthSelectionTool::AthTruthSelectionTool(const std::string& type, const std::string& name,
                                              const IInterface* parent) :
-  AthAlgTool(type, name, parent),
-  m_counters{}
+  AthAlgTool(type, name, parent)
 {
   // declare interface from base class
   declareInterface<IAthSelectionTool>(this);
-  // declareProperty( "Property", m_nProperty ); set defaults
-  declareProperty("maxEta", m_maxEta = 2.5);
-  declareProperty("minPt", m_minPt = 400);
-  declareProperty("maxPt", m_maxPt = -1);
-  declareProperty("requireOnlyPrimary", m_requireOnlyPrimary = true);
-  declareProperty("requireCharged", m_requireCharged = true);
-  declareProperty("selectedCharge", m_selectedCharge = 0);
-  declareProperty("requireStable", m_requireStable = true);
-  declareProperty("requireSiHit", m_requireSiHit = 0);
-  declareProperty("maxProdVertRadius", m_maxProdVertRadius = 110.);
-  declareProperty("pdgId", m_pdgId = -1);
-  declareProperty("hasNoGrandparent", m_grandparent = false);
-  declareProperty("ancestorList", m_ancestors = {});
-  declareProperty("poselectronfromgamma", m_poselectronfromgamma = false);
-  declareProperty("radiusCylinder", m_radiusCylinder=-1, "Select truth particle based on extrapolated position on cylinder placed at this radius. Enabled if greater than 0.");
-  declareProperty("minZCylinder", m_minZCylinder=0.0, "Minimum |Z| on cylinder for accepting extrapolated truth particle to surface.");
-  declareProperty("maxZCylinder", m_maxZCylinder=0.0, "Maximum |Z| on cylinder for accepting extrapolated truth particle to surface.");
-  declareProperty("zDisc", m_zDisc=-1.0, "Select truth particle based on extrapolated position on disks placed at +/- z positions. Enabled if greater than 0.");
-  declareProperty("minRadiusDisc", m_minRadiusDisc=0.0, "Minimum radius on disk for accepting extrapolated truth particle to surface.");
-  declareProperty("maxRadiusDisc", m_maxRadiusDisc=0.0, "Maximum radius on disk for accepting extrapolated truth particle to surface.");
 }
 
 StatusCode

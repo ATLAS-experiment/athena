@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_TRACKTRUTHSELECTORTOOL_H
@@ -29,24 +29,24 @@ public:
   virtual asg::AcceptData accept(const xAOD::IParticle* p) const override;
   virtual asg::AcceptData accept(const xAOD::TruthParticle* p) const;
 private:
-  asg::AcceptInfo m_accept;
+  asg::AcceptInfo m_accept{"TrackTruthSelection"};
   std::vector<std::pair<std::string, std::string> > m_cuts;
-  mutable std::atomic<ULong64_t> m_numTruthProcessed; // !< a counter of the number of tracks proccessed
-  mutable std::atomic<ULong64_t> m_numTruthPassed; // !< a counter of the number of tracks that passed all cuts
+  mutable std::atomic<ULong64_t> m_numTruthProcessed{0}; // !< a counter of the number of tracks proccessed
+  mutable std::atomic<ULong64_t> m_numTruthPassed{0}; // !< a counter of the number of tracks that passed all cuts
   mutable std::vector<ULong64_t> m_numTruthPassedCuts ATLAS_THREAD_SAFE; // !< tracks the number of tracks that passed each cut family. Guarded by m_mutex
   mutable std::mutex m_mutex; // !< To guard m_numTruthPassedCuts
 
   // Cut values;
-  float m_maxEta;
-  float m_maxPt;
-  float m_minPt;
-  bool m_requireOnlyPrimary;
-  bool m_requireCharged;
-  bool m_requireStable;
+  FloatProperty m_maxEta{this, "maxEta", 2.5};
+  FloatProperty m_maxPt{this, "maxPt", -1.};
+  FloatProperty m_minPt{this, "minPt", 400.};
+  BooleanProperty m_requireOnlyPrimary{this, "requireOnlyPrimary", true};
+  BooleanProperty m_requireCharged{this, "requireCharged", true};
+  BooleanProperty m_requireStable{this, "requireStable", true};
   // max decay radius for secondaries [mm];
   // set to within (Run2) pixel by default; set to <0 for no cut
-  double m_maxProdVertRadius;
-  int m_pdgId;
+  FloatProperty m_maxProdVertRadius{this, "maxProdVertRadius", 110.};
+  IntegerProperty m_pdgId{this, "pdgId", -1};
 };
 
 #endif // > !INDETPHYSVALMONITORING_TRACKTRUTHSELECTORTOOL_H

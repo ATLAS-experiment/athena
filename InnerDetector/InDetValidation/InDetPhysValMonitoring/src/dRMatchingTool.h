@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_DRMATCHINGTOOL_H
@@ -213,21 +213,21 @@ protected:
 private:
   /// Data member(s).
   // AcceptInfo object.
-  asg::AcceptInfo m_accept;
+  asg::AcceptInfo m_accept{"dRMatching"};
   // Vector of stored cut names and descriptions.
   std::vector<std::pair<std::string, std::string> > m_cuts;
 
   // Counters.
-  mutable std::atomic<ULong64_t> m_numProcessed; // !< a counter of the number of tracks proccessed
-  mutable std::atomic<ULong64_t> m_numPassed; // !< a counter of the number of tracks that passed all cuts
+  mutable std::atomic<ULong64_t> m_numProcessed{0}; // !< a counter of the number of tracks proccessed
+  mutable std::atomic<ULong64_t> m_numPassed{0}; // !< a counter of the number of tracks that passed all cuts
   mutable std::vector<ULong64_t> m_numPassedCuts ATLAS_THREAD_SAFE; // !< tracks the number of tracks that passed each cut family. Guarded by m_mutex
   mutable std::mutex m_mutex; // !< To guard m_numPassedCuts and m_cache
 
   /// Cut vales.
   // The maximal dR-distance allowed for successful matching.
-  float m_dRmax;
+  FloatProperty m_dRmax{this, "dRmax", -1.};
   // The maximal pT-resolution allowed for successful matching.
-  float m_pTResMax;
+  FloatProperty m_pTResMax{this, "pTResMax", -1.};
 
   // Event cache
   mutable SG::SlotSpecificObj<CacheEntry> m_cache ATLAS_THREAD_SAFE; // Guarded by m_mutex

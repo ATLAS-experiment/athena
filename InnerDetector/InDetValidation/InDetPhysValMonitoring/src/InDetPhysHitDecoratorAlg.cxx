@@ -10,11 +10,8 @@
 #include "InDetPhysHitDecoratorAlg.h"
 #include "safeDecorator.h"
 #include "TrkParameters/TrackParameters.h" // Contains typedef to Trk::CurvilinearParameters
-#include "TrkToolInterfaces/ITrackHoleSearchTool.h"
-#include "TrkToolInterfaces/IUpdator.h"
 #include "InDetRIO_OnTrack/SiClusterOnTrack.h"
 #include "TrkEventPrimitives/ResidualPull.h"
-#include "TrkToolInterfaces/IResidualPullCalculator.h"
 #include "TrkTrack/TrackCollection.h"
 // for the identifiers
 #include "AtlasDetDescr/AtlasDetectorID.h"
@@ -28,18 +25,7 @@
 
 
 InDetPhysHitDecoratorAlg::InDetPhysHitDecoratorAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name,pSvcLocator),
-    m_holeSearchTool("InDet::InDetTrackHoleSearchTool"),
-    m_updatorHandle("Trk::KalmanUpdator/TrkKalmanUpdator"),
-    m_residualPullCalculator("Trk::ResidualPullCalculator/ResidualPullCalculator"),
-    m_idHelper(nullptr),
-    m_pixelID(nullptr),
-    m_sctID(nullptr),
-    m_trtID(nullptr) {
-    declareProperty("InDetTrackHoleSearchTool", m_holeSearchTool);
-    declareProperty("Updator", m_updatorHandle);
-    declareProperty("ResidualPullCalculator", m_residualPullCalculator);
-}
+  AthReentrantAlgorithm(name,pSvcLocator) {}
 
 InDetPhysHitDecoratorAlg::~InDetPhysHitDecoratorAlg () {
 }

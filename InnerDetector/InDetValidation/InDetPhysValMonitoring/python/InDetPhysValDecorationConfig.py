@@ -39,12 +39,12 @@ def InDetPhysHitDecoratorAlgCfg(
     if 'InDetTrackHoleSearchTool' not in kwargs:
         from InDetConfig.InDetTrackHoleSearchConfig import (
             InDetTrackHoleSearchToolCfg)
-        kwargs.setdefault("InDetTrackHoleSearchTool", acc.addPublicTool(
+        kwargs.setdefault("InDetTrackHoleSearchTool", acc.popToolsAndMerge(
             acc.popToolsAndMerge(InDetTrackHoleSearchToolCfg(flags))))
 
     if 'Updator' not in kwargs:
         from TrkConfig.TrkMeasurementUpdatorConfig import InDetUpdatorCfg
-        kwargs.setdefault("Updator", acc.addPublicTool(acc.popToolsAndMerge(InDetUpdatorCfg(flags))))
+        kwargs.setdefault("Updator", acc.popToolsAndMerge(InDetUpdatorCfg(flags)))
 
     if 'LorentzAngleTool' not in kwargs:
         from SiLorentzAngleTool.PixelLorentzAngleConfig import (
@@ -72,16 +72,12 @@ def ITkPhysHitDecoratorAlgCfg(flags, name="ITkPhysHitDecoratorAlg", **kwargs):
     if 'InDetTrackHoleSearchTool' not in kwargs:
         from InDetConfig.InDetTrackHoleSearchConfig import (
             ITkTrackHoleSearchToolCfg)
-        ITkTrackHoleSearchTool = acc.popToolsAndMerge(
-            ITkTrackHoleSearchToolCfg(flags))
-        acc.addPublicTool(ITkTrackHoleSearchTool)
-        kwargs.setdefault("InDetTrackHoleSearchTool", ITkTrackHoleSearchTool)
+        kwargs.setdefault("InDetTrackHoleSearchTool", acc.popToolsAndMerge(
+            ITkTrackHoleSearchToolCfg(flags)))
 
     if 'Updator' not in kwargs:
         from TrkConfig.TrkMeasurementUpdatorConfig import ITkUpdatorCfg
-        Updator = acc.popToolsAndMerge(ITkUpdatorCfg(flags))
-        acc.addPublicTool(Updator)
-        kwargs.setdefault("Updator", Updator)
+        kwargs.setdefault("Updator", acc.popToolsAndMerge(ITkUpdatorCfg(flags)))
 
     if 'LorentzAngleTool' not in kwargs:
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import (
