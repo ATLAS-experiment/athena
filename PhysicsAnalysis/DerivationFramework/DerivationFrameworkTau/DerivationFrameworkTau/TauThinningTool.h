@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORKTAU_TAUTHINNINGTOOL_H
 #define DERIVATIONFRAMEWORKTAU_TAUTHINNINGTOOL_H
 
-#include <string>
 #include <atomic>
 
 #include "AthenaBaseComps/AthAlgTool.h"
