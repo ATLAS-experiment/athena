@@ -149,9 +149,9 @@ class FPGATrackSimHough1DShiftTool : public extends <AthAlgTool, IFPGATrackSimRo
         ///////////////////////////////////////////////////////////////////////
         // Convenience
 
-        unsigned m_nLayers; // alias to m_FPGATrackSimMapping->PlaneMap1stStage()->getNLogiLayers();
+        unsigned m_nLayers = 0; // alias to m_FPGATrackSimMapping->PlaneMap1stStage()->getNLogiLayers();
 
-        float m_phiStep; // width of one phi bin
+        float m_phiStep = 0; // width of one phi bin
         std::vector<double> m_bins; // size == m_phiBins + 1.
             // Bin boundaries, where m_bins[i] is the lower bound of bin i.
             // These are calculated from m_phiMin/Max.

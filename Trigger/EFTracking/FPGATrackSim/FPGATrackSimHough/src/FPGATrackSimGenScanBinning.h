@@ -351,16 +351,16 @@ public:
   FPGATrackSimTrackPars keyParsToTrackPars(const KeyLyrPars &keypars) const;
 
   // find expected z hit position given a radius
-  double zExpected(KeyLyrPars keypars, double r) const;
+  double zExpected(const KeyLyrPars& keypars, double r) const;
 
   // find expected x position of a hit at given a radius in the rotated coordinate system
-  double xExpected(KeyLyrPars keypars, const FPGATrackSimHit *hit) const;
+  double xExpected(const KeyLyrPars& keypars, const FPGATrackSimHit *hit) const;
 
   // takes hit position and calculated what xm would be for track going through that hit
-  double xmForHit(KeyLyrPars keypars, const FPGATrackSimHit *hit) const;
+  double xmForHit(const KeyLyrPars& keypars, const FPGATrackSimHit *hit) const;
 
   // Find shift from nominal track to hit in the "x" direction 
-  double deltaX(KeyLyrPars keypars, const FPGATrackSimHit *hit) const;
+  double deltaX(const KeyLyrPars& keypars, const FPGATrackSimHit *hit) const;
 
   // accessors
   double R1() const {return m_R1;}

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPGATrackSimSPACEPOINTSTOOL_H
@@ -52,7 +52,7 @@ class FPGATrackSimSpacePointsTool : public extends<AthAlgTool, FPGATrackSimSpace
     unsigned m_adjacent_eta_sp = 0;
     unsigned m_adjacent_phi_sp = 0;
     unsigned m_diagonal_sp = 0;
-    TH1I*    m_spacepts_per_hit;
+    TH1I*    m_spacepts_per_hit = nullptr;
 
 };
 
