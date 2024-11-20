@@ -13,6 +13,7 @@ Reco_tf.py \
 --outputDESDM_ALLCELLSFile="myDESDM_EGZ.pool.root" \
 --outputDAOD_L1CALO1File="myDAOD_L1CALO1EGZ.pool.root" \
 --maxEvents 75 \
+--conditionsTag="CONDBR2-BLKPA-2022-15" \
 --imf False
 rc1=$?
 echo "art-result: $rc1 Reco DRAW_EGZ"
@@ -23,6 +24,7 @@ Reco_tf.py \
 --outputAODFile="myDAOD_ZMUMU.pool.root" \
 --outputDAOD_L1CALO1File="myDAOD_L1CALO1ZMM.pool.root" \
 --maxEvents 75 \
+--conditionsTag="CONDBR2-BLKPA-2022-15" \
 --imf False
 rc2=$?
 echo "art-result: $rc2 Reco DRAW_ZMUMU"
