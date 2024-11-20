@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -37,7 +37,7 @@ namespace EL
         TPython::LoadMacro (configFile.c_str());
         WorkerConfig config (&data);
         TPython::Bind (&config, "workerConfig");
-        TPython::Eval ("fillWorkerConfig (workerConfig)");
+        TPython::Exec ("fillWorkerConfig (workerConfig)");
         TPython::Bind (nullptr, "workerConfig");
       }
 
