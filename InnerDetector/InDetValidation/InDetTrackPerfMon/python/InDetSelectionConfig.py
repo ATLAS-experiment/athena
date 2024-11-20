@@ -140,33 +140,43 @@ def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwa
     truthMaxPt = flags.PhysVal.IDTPM.currentTrkAna.truthMaxPt
     truthPdgId = flags.PhysVal.IDTPM.currentTrkAna.truthPdgId
     truthIsHadron = flags.PhysVal.IDTPM.currentTrkAna.truthIsHadron
+    truthIsPion = flags.PhysVal.IDTPM.currentTrkAna.truthIsPion
 
     if "Muon" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject:
         truthPdgId = 13 
         if flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject == "highPTMuon": 
-            truthMinPt = 20000 
+            truthMinPt = 10000 
             truthMaxPt = -9999. 
         if flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject == "lowPTMuon": 
-            truthMinPt = 10000 
-            truthMaxPt = 20000 
+            truthMinPt = 1000 
+            truthMaxPt = 10000 
 
     elif "Hadron" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject:
         truthIsHadron = True
         if flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject == "highPTHadron": 
-            truthMinPt = 20000 
+            truthMinPt = 10000 
             truthMaxPt = -9999. 
         if flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject == "lowPTHadron": 
+            truthMinPt = 1000 
+            truthMaxPt = 10000 
+
+    elif "Pion" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject:
+        truthIsPion = True
+        if flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject == "highPTPion": 
             truthMinPt = 10000 
-            truthMaxPt = 20000 
+            truthMaxPt = -9999. 
+        if flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject == "lowPTHadron": 
+            truthMinPt = 1000 
+            truthMaxPt = 10000 
         
     elif "Electron" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject:
         truthPdgId = 11  
         if flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject == "highPTElectron": 
-            truthMinPt = 10000 
+            truthMinPt = 20000 
             truthMaxPt = -9999. 
         if flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject == "lowPTElectron": 
-            truthMinPt = 5000 
-            truthMaxPt = 10000
+            truthMinPt = 10000 
+            truthMaxPt = 20000
 
 
     # InDetRttTruthSelectionTool properties
@@ -194,6 +204,7 @@ def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwa
     kwargs.setdefault( "minQoPT", flags.PhysVal.IDTPM.currentTrkAna.truthMinQoPT )
     kwargs.setdefault( "maxQoPT", flags.PhysVal.IDTPM.currentTrkAna.truthMaxQoPT )
     kwargs.setdefault( "isHadron", truthIsHadron )
+    kwargs.setdefault( "isPion", truthIsPion )
     kwargs.setdefault( "minAbsEta", flags.PhysVal.IDTPM.currentTrkAna.truthMinAbsEta )
     kwargs.setdefault( "minAbsPhi", flags.PhysVal.IDTPM.currentTrkAna.truthMinAbsPhi )
     kwargs.setdefault( "maxAbsPhi", flags.PhysVal.IDTPM.currentTrkAna.truthMaxAbsPhi )

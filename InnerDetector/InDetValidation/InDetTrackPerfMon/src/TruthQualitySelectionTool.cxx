@@ -52,5 +52,6 @@ bool IDTPM::TruthQualitySelectionTool::accept(const xAOD::TruthParticle* truth) 
   if (m_minAbsQoPT!=-9999. and std::fabs(qOverPT(*truth)) < m_minAbsQoPT )  return false; 
   if (m_maxAbsQoPT!=-9999. and std::fabs(qOverPT(*truth)) > m_maxAbsQoPT )  return false; 
   if (m_isHadron    and not isHadron(*truth) )                    return false; 
+  if (m_isPion    and not isPion(*truth) )                    return false; 
   return true;
 }

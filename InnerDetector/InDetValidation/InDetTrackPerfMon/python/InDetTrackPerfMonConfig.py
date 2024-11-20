@@ -165,7 +165,9 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
     if ( ( "Truth" in flags.PhysVal.IDTPM.currentTrkAna.RefType ) or
          ( "Truth" in flags.PhysVal.IDTPM.currentTrkAna.TestType ) ):
         from InDetTrackPerfMon.InDetAlgorithmConfig import TruthHitDecoratorAlgCfg
+        from InDetTrackPerfMon.InDetAlgorithmConfig import TruthDecoratorAlgCfg
         acc.merge( TruthHitDecoratorAlgCfg( flags ) )
+        acc.merge( TruthDecoratorAlgCfg( flags ) )
 
     ## Offline track-object decorator
     if ( ( flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject ) and

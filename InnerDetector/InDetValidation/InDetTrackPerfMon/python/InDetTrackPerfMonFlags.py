@@ -123,6 +123,7 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "truthMaxAbsQoPT" , -9999., help="Apply maximum |q/pt| cut to truth particle" )
     icf.addFlag( "truthPdgId"   , -9999., help="Apply pdgId selection to truth particle" )
     icf.addFlag( "truthIsHadron", False, help="Select hadrons" )
+    icf.addFlag( "truthIsPion", False, help="Select pions" )
     # Histogram properties
     icf.addFlag( "plotTrackParameters"      , True )
     icf.addFlag( "plotTrackMultiplicities"  , True )

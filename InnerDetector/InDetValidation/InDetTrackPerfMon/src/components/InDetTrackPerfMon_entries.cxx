@@ -11,6 +11,7 @@
 #include "../OfflineElectronDecoratorAlg.h"
 #include "../OfflineMuonDecoratorAlg.h"
 #include "../OfflineTauDecoratorAlg.h"
+#include "../TruthDecoratorAlg.h"
 #include "../TrackObjectSelectionTool.h"
 #include "../OfflineTrackQualitySelectionTool.h"
 #include "../TrackTruthMatchingTool.h"
@@ -32,6 +33,7 @@ DECLARE_COMPONENT( IDTPM::TrackRoiSelectionTool )
 DECLARE_COMPONENT( IDTPM::OfflineElectronDecoratorAlg )
 DECLARE_COMPONENT( IDTPM::OfflineMuonDecoratorAlg )
 DECLARE_COMPONENT( IDTPM::OfflineTauDecoratorAlg )
+DECLARE_COMPONENT( IDTPM::TruthDecoratorAlg )
 DECLARE_COMPONENT( IDTPM::TrackObjectSelectionTool )
 DECLARE_COMPONENT( IDTPM::OfflineTrackQualitySelectionTool )
 DECLARE_COMPONENT( IDTPM::TrackTruthMatchingTool )

@@ -69,6 +69,7 @@ private:
   FloatProperty   m_minQoPT     { this, "minQoPT", -9999., "Lower cut on q/pt for truth particles" };
   FloatProperty   m_maxQoPT     { this, "maxQoPT", -9999., "Higher cut on q/pt for truth particles" };
   BooleanProperty m_isHadron    { this, "isHadron",false, "Select hadrons" };
+  BooleanProperty m_isPion      { this, "isPion",false, "Select pions" };
   
 };
 }

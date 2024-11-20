@@ -255,6 +255,32 @@ namespace IDTPM {
   template< class U >
   inline float isHadron( const U& p ) { return getIsHadron( p ); }
 
+  /// Accessor utility function for getting the value of isPion
+  inline float getIsPion( const xAOD::TrackParticle& ) { return 0; }
+  inline float getIsPion( const xAOD::TruthParticle& p ) { return (p.pdgId() == 111 or p.pdgId() == 211);}
+  template< class U >
+  inline float isPion( const U& p ) { return getIsPion( p ); }
+
+
+  /// Accessor utility function for getting the value of truthType
+  inline int getTruthType( const xAOD::TrackParticle& ) { return -9999; }
+  inline int getTruthType( const xAOD::TruthParticle& p ) {
+    SG::ConstAccessor<int> type( "Truth_truthType" );
+    return type.isAvailable(p) ? type(p) : -9999;
+  }
+  template< class U >
+  inline int truthType( const U& p ) { return getTruthType( p ); }
+
+  /// Accessor utility function for getting the value of truthOrigin
+  inline int getTruthOrigin( const xAOD::TrackParticle& ) { return -9999; }
+  inline int getTruthOrigin( const xAOD::TruthParticle& p ) {
+    SG::ConstAccessor<int> origin( "Truth_truthOrigin" );
+    return origin.isAvailable(p) ? origin(p) : -9999;
+  }
+  template< class U >
+  inline int truthOrigin( const U& p ) { return getTruthOrigin( p ); }
+
+
   /// Accessor utility function for getting the value of nInnerMostPixelHits
   inline float getNInnerMostPixelHits( const xAOD::TrackParticle& p ) {
     uint8_t iInnerMostPixelHits(0);
