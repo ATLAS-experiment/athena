@@ -190,7 +190,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         ATH_CHECK(m_roadFilterTool->filterRoads(roads_1st, postfilter_roads));
         roads_1st = postfilter_roads;
     }
-    if (m_doOverlapRemoval) ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(roads_1st));
+    if (m_doOverlapRemoval) ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(roads_1st));       
     // Road Filter2
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> postfilter2_roads;
     if (m_filterRoads2) {   
