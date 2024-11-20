@@ -215,7 +215,7 @@ class OutputAnalysisConfig (ConfigBlock):
             if containerName == 'EventInfo':
                 continue
 
-            selectionNames = config.getSelectionNames(containerName, excludeFrom={'or'})
+            selectionNames = config.getSelectionNames(containerName)
             for selectionName in selectionNames:
                 # skip default selection
                 if selectionName == '':
