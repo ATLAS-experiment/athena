@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 
@@ -22,12 +22,21 @@ def SCT_GeoModelCfg(flags):
 
 
 def SCT_AlignmentCfg(flags):
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    acc = ComponentAccumulator()
     if flags.GeoModel.Align.LegacyConditionsAccess:  # revert to old style CondHandle in case of simulation
         from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
-        return addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", "/Indet/Align")
+        if flags.GeoModel.Align.Dynamic:
+            acc.merge(addFoldersSplitOnline(flags, "INDET",
+                                            ["/Indet/Onl/AlignL1/ID", "/Indet/Onl/AlignL2/SCT"],
+                                            ["/Indet/AlignL1/ID", "/Indet/AlignL2/SCT"]))
+            acc.merge(addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/AlignL3", "/Indet/AlignL3"))
+        else:
+            acc.merge(addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", "/Indet/Align"))
     else:
         from SCT_ConditionsAlgorithms.SCT_ConditionsAlgorithmsConfig import SCT_AlignCondAlgCfg
-        return SCT_AlignCondAlgCfg(flags)
+        acc.merge(SCT_AlignCondAlgCfg(flags))
+    return acc
 
 
 @AccumulatorCache
