@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -12,7 +12,6 @@
 #include "DerivationFrameworkTau/TauSelectionWrapper.h"
 #include "xAODTau/TauJetContainer.h"
 #include <vector>
-#include <string>
 
 // Constructor
 DerivationFramework::TauSelectionWrapper::TauSelectionWrapper( const std::string& t,
