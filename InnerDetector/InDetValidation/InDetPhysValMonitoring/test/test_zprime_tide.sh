@@ -29,13 +29,14 @@ idtide=DAOD_TIDE.pool.root
 
 conditionsTag=OFLCOND-MC23-SDR-RUN3-07
 
+# Digi for MC23d HITS inputs
 run Digi_tf.py \
     --conditionsTag default:$conditionsTag \
     --digiSeedOffset1 100 --digiSeedOffset2 100 \
     --inputHITSFile=${ArtInFile} \
     --maxEvents -1 \
     --outputRDOFile $rdo \
-    --preInclude 'HITtoRDO:Campaigns.MC23NoPileUp' \
+    --preInclude 'HITtoRDO:Campaigns.MC23dNoPileUp' \
     --postInclude 'PyJobTransforms.UseFrontier'
 echo "art-result: $? digi"
 
