@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArAutoCorr2Ntuple.h"
@@ -23,13 +23,10 @@ StatusCode LArAutoCorr2Ntuple::initialize() {
    return LArCond2NtupleBase::initialize();
 }
 
-LArAutoCorr2Ntuple::~LArAutoCorr2Ntuple() 
-= default;
+
 
 StatusCode LArAutoCorr2Ntuple::stop() {
-  
  ATH_MSG_INFO( "LArAutoCorr2Ntuple in stop " << m_nt);
-
  StatusCode sc; 
  NTuple::Array<float> cov;
  NTuple::Item<long> gain, cellIndex;
@@ -80,37 +77,38 @@ StatusCode LArAutoCorr2Ntuple::stop() {
    ATH_MSG_ERROR( "Unable to retrieve ILArAutoCorr with key " << m_objKey.key() << " neither from DetectorStore neither from conditions" );
    return StatusCode::FAILURE;
  }
-
- LArAutoCorrComplete* larAutoCorr_nc=nullptr;
- if (m_applyCorr) {
-      if (!dynamic_cast<const LArAutoCorrComplete*>(larAutoCorr)->correctionsApplied()) {
-        larAutoCorr_nc=const_cast<LArAutoCorrComplete*>(dynamic_cast<const LArAutoCorrComplete*>(larAutoCorr));
-        sc=larAutoCorr_nc->applyCorrections();
-        if (sc.isFailure()) {
-          ATH_MSG_ERROR( "Failed to apply corrections to LArCaliWaveContainer!" );
-        }
-        else
-          ATH_MSG_INFO( "Applied corrections to LArCaliWaveContainer" );
+  auto * larAutoCorr_c = dynamic_cast<const LArAutoCorrComplete*>(larAutoCorr);
+  if (not larAutoCorr_c) {
+    ATH_MSG_ERROR("Dynamic cast failed in LArAutoCorr2Ntuple::stop");
+    return StatusCode::FAILURE;
+  }
+  if (m_applyCorr) {
+    if (not larAutoCorr_c->correctionsApplied()) {
+      //ouch; but we are only in 'stop'
+      auto larAutoCorr_nc ATLAS_THREAD_SAFE = const_cast<LArAutoCorrComplete*>(larAutoCorr_c);
+      sc=larAutoCorr_nc->applyCorrections();
+      if (sc.isFailure()) {
+        ATH_MSG_ERROR( "Failed to apply corrections to LArCaliWaveContainer!" );
+      } else {
+        ATH_MSG_INFO( "Applied corrections to LArCaliWaveContainer" );
       }
-      else {
-        ATH_MSG_WARNING( "Corrections already applied. Can't apply twice!" );
-      }
- }// end if applyCorr
+    } else {
+      ATH_MSG_WARNING( "Corrections already applied. Can't apply twice!" );
+    }
+  }// end if applyCorr
 
  unsigned cellCounter=0;
  unsigned cellZeroCounter=0;
- for ( unsigned igain=CaloGain::LARHIGHGAIN; 
-       igain<CaloGain::LARNGAIN ; ++igain ) {
+ for ( unsigned igain=CaloGain::LARHIGHGAIN; igain<CaloGain::LARNGAIN ; ++igain ) {
    for (HWIdentifier hwid : m_onlineId->channel_range()) {
      ILArAutoCorr::AutoCorrRef_t corr=larAutoCorr->autoCorr(hwid,igain);
-
      if (corr.size()>0) {
        fillFromIdentifier(hwid); 
        gain = igain;
        cellIndex = cellCounter;
-       for(unsigned i=0;i<m_nsamples-1 && i<corr.size();i++)
+       for(unsigned i=0;i<m_nsamples-1 && i<corr.size();i++){
          cov[i] = corr[i];
-
+       }
        corrUndo=0;
        sc = ntupleSvc()->writeRecord(m_nt);
        if (sc!=StatusCode::SUCCESS) {
@@ -122,25 +120,23 @@ StatusCode LArAutoCorr2Ntuple::stop() {
    }//end if loop over cells
  }//end if loop over gains
  
- if (m_addCorrUndo) {
-    for ( unsigned igain=CaloGain::LARHIGHGAIN; 
-          igain<CaloGain::LARNGAIN ; ++igain ) {
-	LArAutoCorrComplete::ConstCorrectionIt itUndo=dynamic_cast<const LArAutoCorrComplete*>(larAutoCorr)->undoCorrBegin(igain);
-	LArAutoCorrComplete::ConstCorrectionIt itUndo_e=dynamic_cast<const LArAutoCorrComplete*>(larAutoCorr)->undoCorrEnd(igain);
-	for(;itUndo!=itUndo_e;itUndo++) {
-	  const HWIdentifier hwid(itUndo->first);
-	  const LArAutoCorrP1& ac = itUndo->second;
-
-          fillFromIdentifier(hwid); 
-          for(unsigned i=0;i<m_nsamples-1 && i<ac.m_vAutoCorr.size();i++) cov[i] = ac.m_vAutoCorr[i];
-          gain=igain;
-          corrUndo=1;
-          sc = ntupleSvc()->writeRecord(m_nt);
-          if (sc!=StatusCode::SUCCESS) {
-            ATH_MSG_ERROR( "writeRecord failed" );
-            return StatusCode::FAILURE;
-          }
+  if (m_addCorrUndo) {
+    for ( unsigned igain=CaloGain::LARHIGHGAIN; igain<CaloGain::LARNGAIN ; ++igain ) {
+      LArAutoCorrComplete::ConstCorrectionIt itUndo=larAutoCorr_c->undoCorrBegin(igain);
+      LArAutoCorrComplete::ConstCorrectionIt itUndo_e=larAutoCorr_c->undoCorrEnd(igain);
+      for(;itUndo!=itUndo_e;++itUndo) {
+        const HWIdentifier hwid(itUndo->first);
+        const LArAutoCorrP1& ac = itUndo->second;
+        fillFromIdentifier(hwid); 
+        for(unsigned i=0;i<m_nsamples-1 && i<ac.m_vAutoCorr.size();i++) cov[i] = ac.m_vAutoCorr[i];
+        gain=igain;
+        corrUndo=1;
+        sc = ntupleSvc()->writeRecord(m_nt);
+        if (sc!=StatusCode::SUCCESS) {
+          ATH_MSG_ERROR( "writeRecord failed" );
+          return StatusCode::FAILURE;
         }
+      }
     }//gain
  }//if m_corrUndo
 

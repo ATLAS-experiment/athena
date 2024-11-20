@@ -22,12 +22,11 @@ class LArAutoCorr2Ntuple : public LArCond2NtupleBase
 {
  public:
   LArAutoCorr2Ntuple(const std::string & name, ISvcLocator * pSvcLocator);
-  ~LArAutoCorr2Ntuple();
+  virtual ~LArAutoCorr2Ntuple() = default;
 
   //standard algorithm methods
   virtual StatusCode stop();
   virtual StatusCode initialize();
-  StatusCode finalize(){return StatusCode::SUCCESS;}
  
  private:
 
@@ -38,7 +37,7 @@ class LArAutoCorr2Ntuple : public LArCond2NtupleBase
   BooleanProperty m_addCorrUndo{this, "AddCorrUndo", true};
 
   // Number of samples
-  unsigned  m_nsamples;
+  unsigned  m_nsamples{32};
 
 };
 
