@@ -214,7 +214,7 @@ class OverlapAnalysisConfig (ConfigBlock):
                                  outputLabel + '_%SYS%',
                                  select_or_decoration,
                                  noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection,
-                                 enabled=(selectionName != ''))
+                                 enabled=(selectionName != '' and not self.addPreselection))
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -230,7 +230,7 @@ class OverlapAnalysisConfig (ConfigBlock):
                                  outputLabel + '_%SYS%',
                                  select_or_decoration,
                                  noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection,
-                                 enabled=(selectionName != ''))
+                                 enabled=(selectionName != '' and not self.addPreselection))
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -246,7 +246,7 @@ class OverlapAnalysisConfig (ConfigBlock):
                                  outputLabel + '_%SYS%',
                                  select_or_decoration,
                                  noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection,
-                                 enabled=(selectionName != ''))
+                                 enabled=(selectionName != '' and not self.addPreselection))
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -262,7 +262,7 @@ class OverlapAnalysisConfig (ConfigBlock):
                                  outputLabel + '_%SYS%',
                                  select_or_decoration,
                                  noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection,
-                                 enabled=(selectionName != ''))
+                                 enabled=(selectionName != '' and not self.addPreselection))
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -278,7 +278,7 @@ class OverlapAnalysisConfig (ConfigBlock):
                                  outputLabel + '_%SYS%',
                                  select_or_decoration,
                                  noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection,
-                                 enabled=(selectionName != ''))
+                                 enabled=(selectionName != '' and not self.addPreselection))
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -294,7 +294,7 @@ class OverlapAnalysisConfig (ConfigBlock):
                                  outputLabel + '_%SYS%',
                                  select_or_decoration,
                                  noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection,
-                                 enabled=(selectionName != ''))
+                                 enabled=(selectionName != '' and not self.addPreselection))
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
