@@ -44,10 +44,7 @@ LArNoisyROTool::LArNoisyROTool( const std::string& type,
   declareProperty( "BadHVCut", m_MinBadHV=3 );
 }
 
-// Destructor
-///////////////
-LArNoisyROTool::~LArNoisyROTool()
-= default;
+
 
 // Athena algtool's Hooks
 ////////////////////////////
@@ -289,26 +286,27 @@ std::unique_ptr<LArNoisyROSummary> LArNoisyROTool::process(const EventContext& c
   uint8_t MNBTight_PsVetoPartition=0;
   uint8_t MNBLoosePartition=0;
   
-  std::array<unsigned,5> nTightMNBFEBSperPartition({{0,0,0,0,0}});
-  std::array<unsigned,5> nTight_PsVetoMNBFEBSperPartition({{0,0,0,0,0}});
-  std::array<unsigned,5> nLooseMNBFEBSperPartition({{0,0,0,0,0}});
+  std::array<unsigned,5> nTightMNBFEBSperPartition{};
+  std::array<unsigned,5> nTight_PsVetoMNBFEBSperPartition{};
+  std::array<unsigned,5> nLooseMNBFEBSperPartition{};
   for (HWIdentifier febid: *knownMNBFEBs) { //Loop over known MNB FEBs
-    //FEBEvtStatMapCstIt statIt=FEBStats.find(febid.get_identifier32().get_compact());
     FEBEvtStatMapCstIt statIt=FEBStats.find(febid.get_identifier32().get_compact());
     if (statIt!=FEBStats.end()) {
       if (statIt->second.badChannels()>=m_MNBLooseCut) {
-	(nLooseMNBFEBSperPartition[partitionNumber(febid)])++;
+	      (nLooseMNBFEBSperPartition[partitionNumber(febid)])++;
         // Tight_PsVeto MNBs
-	if ( statIt->second.badChannels() > m_MNBTight_PsVetoCut[0] ){
-	  unsigned int associatedPSFEB = m_mapPSFEB.find(statIt->first)->second;
-	  if (associatedPSFEB != 0){
-	    if (FEBStats.count(associatedPSFEB) == 0) (nTight_PsVetoMNBFEBSperPartition[partitionNumber(febid)])++;
-	    else if (FEBStats[associatedPSFEB].badChannels() < m_MNBTight_PsVetoCut[1]) (nTight_PsVetoMNBFEBSperPartition[partitionNumber(febid)])++;
-	  }
-	}
-	// Tight MNBs
-	if (statIt->second.badChannels()>=m_MNBTightCut)
-	  (nTightMNBFEBSperPartition[partitionNumber(febid)])++;
+	      if ( statIt->second.badChannels() > m_MNBTight_PsVetoCut[0] ){
+	        auto found = m_mapPSFEB.find(statIt->first);
+	        if (found != m_mapPSFEB.end()){
+	          if (unsigned int associatedPSFEB = found->second; associatedPSFEB != 0){
+	            if (FEBStats.count(associatedPSFEB) == 0) (nTight_PsVetoMNBFEBSperPartition[partitionNumber(febid)])++;
+	            else if (FEBStats[associatedPSFEB].badChannels() < m_MNBTight_PsVetoCut[1]) (nTight_PsVetoMNBFEBSperPartition[partitionNumber(febid)])++;
+	          }
+	        }
+	      }
+        // Tight MNBs
+        if (statIt->second.badChannels()>=m_MNBTightCut)
+          (nTightMNBFEBSperPartition[partitionNumber(febid)])++;
       }
     }//End FEB in list of bad-Q FEBs
   }//end loop over known MNB Febs
@@ -387,10 +385,5 @@ std::unique_ptr<LArNoisyROSummary> LArNoisyROTool::process(const EventContext& c
   return noisyRO;
 }
 
-
-StatusCode LArNoisyROTool::finalize() {
-
-  return StatusCode::SUCCESS;
-}
 
 
