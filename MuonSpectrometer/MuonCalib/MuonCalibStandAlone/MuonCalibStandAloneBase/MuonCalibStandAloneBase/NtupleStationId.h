@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef NtupleStationId_H
@@ -206,13 +206,13 @@ namespace MuonCalib {
         //=============================================================================
     private:
         //! id
-        int m_station, m_eta, m_phi, m_ml;
-        int m_author;
+        int m_station{}, m_eta{}, m_phi{}, m_ml{};
+        int m_author{};
         //! geo model information
-        int m_region_hash, m_n_ml, m_n_layer[2], m_n_tubes[2];
-        int m_layer_min[2], m_layer_max[2];
-        int m_tube_min[2], m_tube_max[2];
-        bool m_geom_ok;
+        int m_region_hash{}, m_n_ml{}, m_n_layer[2]{}, m_n_tubes[2]{};
+        int m_layer_min[2]{}, m_layer_max[2]{};
+        int m_tube_min[2]{}, m_tube_max[2]{};
+        bool m_geom_ok{};
     };
 
 }  // namespace MuonCalib
