@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef L1TopoCoreSim_Connector
 #define L1TopoCoreSim_Connector
@@ -108,9 +108,9 @@ namespace TCS {
       /**
          @brief whether the input data came with an overflow bit
        */
-      bool m_hasInputOverflow;
+      bool m_hasInputOverflow{false};
 
-      bool m_hasAmbiguity;
+      bool m_hasAmbiguity{false};
 
    private:
 
