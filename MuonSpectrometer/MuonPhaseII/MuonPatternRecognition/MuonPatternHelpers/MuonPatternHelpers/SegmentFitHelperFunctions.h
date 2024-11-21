@@ -104,7 +104,7 @@ namespace MuonR4{
                                const CalibratedSpacePoint& beamSpotMeas,
                                MsgStream& msg);
 
-      /** @brief Calculates whether a segement line travereses the tube measurements on the left (-1) or 
+      /** @brief Calculates whether a segment line travereses the tube measurements on the left (-1) or 
        *         right (1) side of the tube wire. Strip measurements & nullptrs are assigned with 0
         *  @param posInChamber: Position of the segment in the sector frame
         *  @param dirInChamber: Direction of flight of the  segment expressed in the sector frame
@@ -115,7 +115,17 @@ namespace MuonR4{
                                   const Amg::Vector3D& dirInChamber,
                                   const std::vector<const SpacePoint*>& uncalibHits,
                                   MsgStream& msg);
-      
+      /** @brief Calculates whether a segment line travereses the tube measurements on the left (-1) or 
+       *         right (1) side of the tube wire. Strip measurements & nullptrs are assigned with 0
+        *  @param posInChamber: Position of the segment in the sector frame
+        *  @param dirInChamber: Direction of flight of the  segment expressed in the sector frame
+        *  @param calibHits: List of calibrated measurements
+        *  @param msg: Reference to the callers msgStream. If the level is VERBOSE,
+        *              then all relevant parameters are printed */
+      std::vector<int> driftSigns(const Amg::Vector3D& posInChamber,
+                                  const Amg::Vector3D& dirInChamber,
+                                  const std::vector<std::unique_ptr<CalibratedSpacePoint>>& calibHits,
+                                  MsgStream& msg);
        /** @brief Calculates whether a segement line travereses the tube measurement on the left (-1) or 
         *         right (1) side of the tube wire. Strip measurements & nullptrs are assigned with 0
         *  @param posInChamber: Position of the segment in the sector frame

@@ -37,49 +37,52 @@ namespace MuonR4 {
         std::vector<MeasurementSet> segMeasurements{extractPrds(*resolved.front())};
 
         for (std::unique_ptr<Segment>& resolveMe : toResolve) {
-
+            /// Fetch first the Prds 
             MeasurementSet testMeas{extractPrds(*resolveMe)};
-
             Resolution reso{Resolution::noOverlap};
             unsigned int resolvedIdx{0};
             for (std::unique_ptr<Segment>& goodSeg : resolved) {
                 ATH_MSG_VERBOSE("Test against segment "<<toString(localSegmentPars(gctx, *goodSeg)));
                 MeasurementSet& resolvedM = segMeasurements[resolvedIdx];
                 std::vector<int>& existSigns{segmentSigns[resolvedIdx++]};
+                /// Check whether the two segments share hits at all
                 unsigned int shared = countShared(resolvedM, testMeas);
                 if (shared < m_cfg.sharedPrecHits) {
                     ATH_MSG_VERBOSE("Too few shared measurements "<<shared<<" (Required: "<<m_cfg.sharedPrecHits<<").");
                     continue;
                 }
+                /// Re-evaluate the drift signs of the accepted measurement w.r.t. good one
                 const std::vector<int> reEvaluatedSigns{driftSigns(gctx, *resolveMe, goodSeg->measurements())};
 
                 unsigned int sameSides{0};
                 for (unsigned int s =0 ; s < existSigns.size(); ++s) {
                     sameSides += (reEvaluatedSigns[s] == existSigns[s]);
                 }
-                if (sameSides != existSigns.size() && resolveMe->nDoF() == goodSeg->nDoF()) {
+                /// Left-right solutions differ & the two segments have the same nDOF
+                if (!m_cfg.remLeftRightAmbi && sameSides != existSigns.size() && resolveMe->nDoF() == goodSeg->nDoF()) {
                     ATH_MSG_VERBOSE("Reference signs: "<<existSigns<<" / re-evaluated: "<<reEvaluatedSigns);
                     continue;
                 }
-                reso = Resolution::subSet;
                 const double resolvedChi2  = redChi2(*goodSeg);
                 const double resolveMeChi2 = redChi2(*resolveMe);
+                reso = resolveMeChi2 < resolvedChi2 ? Resolution::superSet : Resolution::subSet;
+
                 ATH_MSG_VERBOSE("Chi2 good "<<resolvedChi2<<", candidate chi2: "<<resolveMeChi2);
                 /// Segments below that threshold are not considered for outlier removal
                 /// Take the one which has more degrees of freedom
-                if (resolveMeChi2 < m_cfg.selectByNDoFChi2 && resolvedChi2 < m_cfg.selectByNDoFChi2) {
-                    if (resolveMe->nDoF() > goodSeg->nDoF()){
-                        reso = Resolution::superSet;
-                    }
-                } else if (resolveMeChi2 < resolvedChi2) {
-                    reso = Resolution::superSet;
+                if (resolveMeChi2 < m_cfg.selectByNDoFChi2 && resolvedChi2 < m_cfg.selectByNDoFChi2 &&
+                    goodSeg->nDoF() > resolveMe->nDoF()) {
+                    reso = Resolution::subSet;
                 }
                 if (reso == Resolution::superSet) {
                     std::swap(goodSeg, resolveMe);
                     std::swap(resolvedM, testMeas);
                     existSigns = driftSigns(gctx, *resolveMe, resolveMe->measurements());
+                } else if (reso == Resolution::subSet) {
+                    break;
                 }
             }
+            /// No overlap detected thus far
             if (reso == Resolution::noOverlap) {
                 segMeasurements.push_back(std::move(testMeas));
                 segmentSigns.push_back(driftSigns(gctx, *resolveMe, resolveMe->measurements()));
@@ -91,18 +94,10 @@ namespace MuonR4 {
     std::vector<int> SegmentAmbiSolver::driftSigns(const ActsGeometryContext& gctx,
                                                    const Segment& segment,
                                                    const Segment::MeasVec& measurements) const {
-        std::vector<int> signs{};
-        signs.reserve(measurements.size());
         const auto [locPos, locDir] = makeLine(localSegmentPars(gctx, segment));
         ATH_MSG_VERBOSE("Fetch drift signs for segment "<<segment.msSector()->identString()<<" -- "<<Amg::toString(locPos)
                         <<Amg::toString(locDir));
-        for (const Segment::MeasVec::value_type& hit : measurements) {
-            if (!hit->spacePoint()) {
-                continue;
-            }
-            signs.push_back(SegmentFitHelpers::driftSign(locPos,locDir,*hit, msg()));
-        }
-        return signs;
+        return SegmentFitHelpers::driftSigns(locPos, locDir, measurements,  msg());
     }
     SegmentAmbiSolver::MeasurementSet 
         SegmentAmbiSolver::extractPrds(const Segment& segment) const {

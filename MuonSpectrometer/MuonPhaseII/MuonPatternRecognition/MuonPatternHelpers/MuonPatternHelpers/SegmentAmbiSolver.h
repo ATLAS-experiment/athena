@@ -16,11 +16,13 @@ namespace MuonR4{
     class SegmentAmbiSolver : public AthMessaging {
         public:
             struct Config{
-                /** If two overlapping segments have both the chi2 below the threshold, the one 
-                 *  with more degrees of freedom is chosen */
+                /** @brief If two overlapping segments have both the chi2 below the threshold, the one 
+                 *         with more degrees of freedom is chosen */
                 double selectByNDoFChi2{5.};
-                /** Cut on the number of shared precision hits */
+                /** @brief Cut on the number of shared precision hits */
                 unsigned int sharedPrecHits{3};
+                /** @brief Allow for left-right ambiguities */
+                bool remLeftRightAmbi{false};
             };
             
             SegmentAmbiSolver(const std::string&name,
