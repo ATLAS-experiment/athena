@@ -49,6 +49,7 @@ if DerivationFrameworkHasTruth and not doWZBosonsTruth:
 
 triggers = []
 if HIDerivationFlags.isPPb():
+    triggers += ['HLT_e15_lhloose']
     triggers += ['HLT_e15_lhloose_nod0']
     triggers += ['HLT_mu15']
     triggers += ['HLT_g10_loose']
@@ -157,6 +158,11 @@ HITrackSelector = InDet__InDetTrackSelectionTool("HION5InDetTrackSelectionTool")
 HITrackSelector.CutLevel = "Loose"
 HITrackSelector.maxNSiSharedModules = 100
 HITrackSelector.minPt = 900
+
+if HIDerivationFlags.ptCutOn():
+  HITrackSelector.minPt = 400
+  print "ptCutOn: minPt set to ", HITrackSelector.minPt, " MeV"
+
 ToolSvc += HITrackSelector
 
 # Create the private sequence
