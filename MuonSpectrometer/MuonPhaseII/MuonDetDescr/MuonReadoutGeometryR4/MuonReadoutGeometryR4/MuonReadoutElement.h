@@ -94,7 +94,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     /// element. Used for the retrieval of the chamber parameters
     ///   E.g. the chambers BOL1A8 & BOL2A8 are identical in terms of number of
     ///   tubes, dimensions etc.
-    std::string chamberDesign() const;
+    const std::string& chamberDesign() const;
 
     /// Returns the pointer to the muonIdHelperSvc
     const Muon::IMuonIdHelperSvc* idHelperSvc() const;

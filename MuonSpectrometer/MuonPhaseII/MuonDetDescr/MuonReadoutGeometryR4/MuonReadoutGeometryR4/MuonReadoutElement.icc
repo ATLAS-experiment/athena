@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELR4_MUONREADOUTELEMENT_ICC
 #define MUONGEOMODELR4_MUONREADOUTELEMENT_ICC
@@ -17,7 +17,7 @@ namespace MuonGMR4 {
 inline const GeoAlignableTransform* MuonReadoutElement::alignableTransform() const { return m_args.alignTransform; }
 inline Identifier MuonReadoutElement::identify() const { return m_args.detElId; }
 inline IdentifierHash MuonReadoutElement::identHash() const { return m_detElHash;}
-inline std::string MuonReadoutElement::chamberDesign() const { return m_args.chambDesign; }
+inline const std::string& MuonReadoutElement::chamberDesign() const { return m_args.chambDesign; }
 inline const Muon::IMuonIdHelperSvc* MuonReadoutElement::idHelperSvc() const { return m_idHelperSvc.get(); }
 inline Muon::MuonStationIndex::ChIndex MuonReadoutElement::chamberIndex() const { return m_chIdx; }
 inline int MuonReadoutElement::stationName() const { return m_stName; }
