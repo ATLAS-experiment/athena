@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_RodDecoder.h"
@@ -63,6 +63,7 @@ TRT_RodDecoder::TRT_RodDecoder(const std::string& type, const std::string& name,
   declareProperty("LoadCompressTableDB", m_loadCompressTableDB);
   declareProperty("ForceRodVersion", m_forceRodVersion);
   declareProperty("LoadCompressTableVersions", m_LoadCompressTableVersions);
+  declareProperty("SortCollections", m_sortCollections);
 }
 
 /* ----------------------------------------------------------
@@ -555,6 +556,16 @@ StatusCode TRT_RodDecoder::int_fillExpanded(
 
   }  // End of loop over all words in ROD
 
+  // Some workflows may require RDOs to be sorted
+  if (m_sortCollections) {
+    ATH_MSG_DEBUG( "Sorting the RDOs..." );
+    for (auto &[id, coll] : colls) {
+      std::stable_sort(coll->begin(), coll->end(), [](const TRT_RDORawData* a, const TRT_RDORawData* b) {
+        return a->identify() < b->identify();
+      });
+    }
+  }
+
   // add collections into IDC
   for (auto& p : colls) {
     ATH_CHECK(rdoIdc->addOrDelete(std::move(p.second), p.first));
@@ -777,6 +788,16 @@ StatusCode TRT_RodDecoder::int_fillMinimalCompress(
     theColl->push_back(rdo);
 
   }  //   End of loop over all words in ROD
+
+  // Some workflows may require RDOs to be sorted
+  if (m_sortCollections) {
+    ATH_MSG_DEBUG( "Sorting the RDOs..." );
+    for (auto &[id, coll] : colls) {
+      std::stable_sort(coll->begin(), coll->end(), [](const TRT_RDORawData* a, const TRT_RDORawData* b) {
+        return a->identify() < b->identify();
+      });
+    }
+  }
 
   // add collections into IDC
   for (auto& p : colls) {
@@ -1036,6 +1057,16 @@ StatusCode TRT_RodDecoder::int_fillFullCompress(
         }
       }  // if phase == 1
     }    //   End of loop over all words in ROD
+
+    // Some workflows may require RDOs to be sorted
+    if (m_sortCollections) {
+      ATH_MSG_DEBUG( "Sorting the RDOs..." );
+      for (auto &[id, coll] : colls) {
+        std::stable_sort(coll->begin(), coll->end(), [](const TRT_RDORawData* a, const TRT_RDORawData* b) {
+          return a->identify() < b->identify();
+        });
+      }
+    }
 
     // add collections into IDC
     for (auto& p : colls) {
