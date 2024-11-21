@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RPC_CondCabling/RPCchamber.h"
@@ -30,7 +30,7 @@ int RPCchamber::phi_connectors() const { return m_params.phiConnectors; }
 int RPCchamber::ijk_etaReadout() const { return m_params.ijk_EtaReadOut; }
 int RPCchamber::ijk_phiReadout() const { return m_params.ijk_PhiReadOut; }
 
-std::string RPCchamber::chamber_name() const { return m_params.chamberName; }
+const std::string& RPCchamber::chamber_name() const { return m_params.chamberName; }
 std::string RPCchamber::stationName() const { return m_params.chamberName.substr(0, 3); }
 int RPCchamber::stationEta() const { return m_params.stationEta; }
 int RPCchamber::doubletR() const { return m_params.doubletR; }
