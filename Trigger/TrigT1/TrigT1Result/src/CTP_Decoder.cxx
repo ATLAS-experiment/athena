@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -144,7 +144,8 @@ bool CTP_Decoder::checkTrigger(unsigned int itemNo,unsigned int pos)
 {
   if(pos >= m_BCs.size()) {
     ATH_MSG_WARNING("Trying to access bunch crossing no "
-                    << pos << ", but in the event are only " << m_BCs.size());
+                  << pos << ", but in the event are only " << m_BCs.size());
+    return false;
   }
   if(itemNo >= getBunchCrossing(pos).getTAV().size()) {
     ATH_MSG_WARNING("Checking item no " << itemNo
@@ -157,7 +158,8 @@ bool CTP_Decoder::checkTrigger(unsigned int itemNo,unsigned int pos)
 bool CTP_Decoder::checkTriggerAfterPrescale(unsigned int itemNo,unsigned int pos) {
    if(pos >= m_BCs.size()) {
      ATH_MSG_WARNING("Trying to access bunch crossing no "
-                     << pos << ", but in the event are only " << m_BCs.size());
+                   << pos << ", but in the event are only " << m_BCs.size());
+     return false;
    }
    if(itemNo >= getBunchCrossing(pos).getTAP().size()) {
      ATH_MSG_WARNING("Checking item no " << itemNo
