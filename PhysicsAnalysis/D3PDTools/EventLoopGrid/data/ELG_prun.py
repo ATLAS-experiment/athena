@@ -86,7 +86,8 @@ def ELG_prun(sample) :
                     'outDS',
                     'outputs',
                     'writeInputToTxt',
-                    'match']                    
+                    'match',
+                    'framework']
 
     for opt in internalOpts :
         value = sample.meta().castString('nc_' + opt)
