@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 ///
 ///    @author Vadim Kostyukhin <vadim.kostyukhin@cern.ch>
@@ -12,13 +12,14 @@
 #include  "AnalysisUtils/AnalysisMisc.h"
 #include  "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include  "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
-#include  "MVAUtils/BDT.h" 
+#include  "MVAUtils/BDT.h"
 
 #include  "boost/graph/bron_kerbosch_all_cliques.hpp"
 #include  "TMath.h"
 #include  "TH1.h"
 
 #include  <algorithm>
+#include  <ranges>
 //
 
 
@@ -158,14 +159,13 @@ namespace Rec{
       //for(auto ku : vrtWithCommonTrk)std::cout<<" nCom="<<ku.first<<" v1="<<ku.second.first<<" v2="<<ku.second.second<<'\n';
       //if(msgLvl(MSG::DEBUG))printWrkSet(wrkVrtSet.get(),"Overlapped  Vertex Cleaning");
       //===========================================
-      std::multimap<double,std::pair<int,int>>::reverse_iterator ovitr=vrtWithCommonTrk.rbegin();
-      for( ; ovitr!=vrtWithCommonTrk.rend(); ovitr++){
-         WrkVrt  & v1 = (*wrkVrtSet)[(*ovitr).second.first];
-         WrkVrt  & v2 = (*wrkVrtSet)[(*ovitr).second.second];
+      for( const auto& ov : std::ranges::reverse_view(vrtWithCommonTrk)) {
+         WrkVrt  & v1 = (*wrkVrtSet)[ov.second.first];
+         WrkVrt  & v2 = (*wrkVrtSet)[ov.second.second];
          if(!v1.Good)continue;   //----One of the vertices is already preocessed
          if(!v2.Good)continue;
          //--Recheck amount of common tracks
-         unsigned int nTCom=nTrkCommon( wrkVrtSet.get(), (*ovitr).second.first, (*ovitr).second.second);
+         unsigned int nTCom=nTrkCommon( wrkVrtSet.get(), ov.second.first, ov.second.second);
          if(nTCom<nTComMax)continue;    //----One of the vertices is already preocessed
          //--First check if one vertex is fully contained in another
          if( nTCom==v1.selTrk.size() || nTCom==v2.selTrk.size() ){
