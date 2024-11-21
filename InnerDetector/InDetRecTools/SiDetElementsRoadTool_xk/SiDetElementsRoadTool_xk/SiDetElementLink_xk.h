@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ class SiDetElementLink_xk {
     float m_distance;
   };
 
-  SiDetElementLink_xk();
+  SiDetElementLink_xk() = default;
   SiDetElementLink_xk(const InDetDD::SiDetectorElement*, const double*,
                       bool isITk = false);
   SiDetElementLink_xk(const SiDetElementLink_xk&) = default;
@@ -64,25 +64,18 @@ class SiDetElementLink_xk {
   bool intersectITk(const float*, const float*, float&) const;
 
  private:
-  const InDetDD::SiDetectorElement* m_detelement;  // note owning ptr
-  float m_phi;
-  float m_z;
-  float m_dz;
-  float m_geo[6];
-  float m_center[2];
-  float m_bound[4][3];
+  const InDetDD::SiDetectorElement* m_detelement = nullptr;  // note owning ptr
+  float m_phi = 0;
+  float m_z = 0;
+  float m_dz = 0;
+  float m_geo[6] = {};
+  float m_center[2] = {};
+  float m_bound[4][3] = {};
 };
 
 /////////////////////////////////////////////////////////////////////////////////
 // Inline methods
 /////////////////////////////////////////////////////////////////////////////////
-
-inline SiDetElementLink_xk::SiDetElementLink_xk() {
-  m_detelement = 0;
-  m_phi = 0.;
-  m_z = 0.;
-  m_dz = 0.;
-}
 
 inline InDet::SiDetElementLink_xk::SiDetElementLink_xk(
     const InDetDD::SiDetectorElement* el, const double* P, bool isITk) {
