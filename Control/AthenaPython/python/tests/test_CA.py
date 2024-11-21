@@ -41,6 +41,7 @@ class Test( unittest.TestCase ):
       cfg1.addEventAlgo( MyAlg(name='Alg1', px=1) )
       cfg2.addEventAlgo( MyAlg(name='Alg2', px=2) )
       cfg1.merge(cfg2)
+      cfg1.wasMerged()
 
    def test_merge_fail(self):
       cfg1 = ComponentAccumulator()
