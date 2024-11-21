@@ -90,7 +90,6 @@ struct ParallelFileMerger : public TObject
             TClass* cl = TClass::GetClass(branch->GetClassName());
             BranchDesc desc(cl);
             void* empty = desc.dummyAddr();
-            char buff[32];
             if (strlen(branch->GetClassName()) > 0) {
                newBranch = toTree->Branch(branch->GetName(), branch->GetClassName(), nullptr, branch->GetBasketSize(), branch->GetSplitLevel());
                newBranch->SetAddress(empty);
@@ -104,13 +103,12 @@ struct ParallelFileMerger : public TObject
                else if (type == "Long_t") type = attr + "/L";
                else if (type == "UInt_t") type = attr + "/i";
                else if (type == "UShort_t") type = attr + "/s";
-               else if (type == "UShort_t") type = attr + "/s";
                else if (type == "Float_t") type = attr + "/F";
                else if (type == "Double_t") type = attr + "/D";
                else if (type == "Char_t") type = attr + "/B";
                else if (type == "UChar_t") type = attr + "/b";
                else if (type == "Bool_t") type = attr + "/O";
-               newBranch = toTree->Branch(branch->GetName(), buff, type.c_str(), 2048);
+               newBranch = toTree->Branch(branch->GetName(), static_cast<void*>(nullptr), type.c_str(), 2048);
             }
             int nEntries = toTree->GetEntries();
             for (int m = 0; m < nEntries; ++m) {
