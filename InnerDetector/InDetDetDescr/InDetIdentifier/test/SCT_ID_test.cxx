@@ -12,7 +12,7 @@
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MAIN
-#define BOOST_TEST_MODULE TEST_SCT_ID
+#define BOOST_TEST_MODULE InDetIdentifier
 
 #include "IdDictParser/IdDictParser.h"  
 #include "InDetIdentifier/SCT_ID.h"
