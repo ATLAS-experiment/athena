@@ -534,6 +534,7 @@ doManagerStep (Detail::ManagerData& data) const
         meta.setString("nc_match", meta.castString("nc_grid_filter"));
         const std::string execstr = "runjob.sh " + (*s)->name();
         meta.setString("nc_exec", execstr);
+        meta.setString("nc_framework", "EventLoopGrid");
       }
 
       saveJobDef(jobDefFile, *data.job, sh);
