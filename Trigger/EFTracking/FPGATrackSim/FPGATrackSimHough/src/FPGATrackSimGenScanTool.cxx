@@ -8,27 +8,17 @@
  */
 
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
-#include "FPGATrackSimObjects/FPGATrackSimConstants.h"
-#include "FPGATrackSimObjects/FPGATrackSimTruthTrack.h"
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
-#include "FPGATrackSimObjects/FPGATrackSimConstants.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
 #include "FPGATrackSimMaps/FPGATrackSimRegionMap.h"
 #include "FPGATrackSimGenScanTool.h"
 #include "FPGATrackSimGenScanMonitoring.h"
 
-
 #include <sstream>
 #include <cmath>
 #include <algorithm>
-
-#include "TH1D.h"
-#include "TH2D.h"
-#include "TGraph.h"
-
-#include "GaudiKernel/ITHistSvc.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Debug Print Tools
@@ -117,7 +107,7 @@ StatusCode FPGATrackSimGenScanTool::initialize()
   {
     m_binning = new FPGATrackSimGenScanPhiSlicedKeyLyrBinning(m_rin, m_rout);
   }
-   else
+  else
   {
     ATH_MSG_FATAL("Unknown binning: " << m_parSet);
     return StatusCode::FAILURE;
@@ -131,15 +121,15 @@ StatusCode FPGATrackSimGenScanTool::initialize()
   // Configure Binning
   for (unsigned par = 0; par < FPGATrackSimGenScanBinningBase::NPars; par++)
   {    
-    m_binning->m_parMin.push_back(m_parMin[par]);
-    m_binning->m_parMax.push_back(m_parMax[par]);
-    m_binning->m_parBins.push_back(m_parBins[par]);
+    m_binning->m_parMin[par] = m_parMin[par];
+    m_binning->m_parMax[par] = m_parMax[par];
+    m_binning->m_parBins[par] = m_parBins[par];
     if (m_parBins[par] <= 0)
     {
       ATH_MSG_FATAL("Every dimension must be at least one bin");
       return StatusCode::FAILURE;
     }
-    m_binning->m_parStep.push_back((m_parMax[par] - m_parMin[par]) / m_parBins[par]);
+    m_binning->m_parStep[par] = (m_parMax[par] - m_parMin[par]) / m_parBins[par];
   }
 
   // Build Image
@@ -261,7 +251,7 @@ StatusCode FPGATrackSimGenScanTool::fillImage(const std::vector<std::shared_ptr<
     // according to the m_binning class
 
     // this will contain current bin idx as it is built from slices and scans
-    FPGATrackSimGenScanBinningBase::IdxSet idx(5);    
+    FPGATrackSimGenScanBinningBase::IdxSet idx;    
 
     // iterate over slices
     for (FPGATrackSimGenScanArray<int>::Iterator slicebin : m_validSlice)

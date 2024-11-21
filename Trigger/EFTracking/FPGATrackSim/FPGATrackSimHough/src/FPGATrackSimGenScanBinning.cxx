@@ -27,7 +27,7 @@ bool FPGATrackSimGenScanBinningBase::inRange(const ParSet &pars) const
 
 FPGATrackSimGenScanBinningBase::IdxSet FPGATrackSimGenScanBinningBase::binIdx(const ParSet &pars) const
 {
-    IdxSet retv(NPars);
+    IdxSet retv;
     for (unsigned i = 0; i < NPars; i++)
     {
         retv[i] = binIdx(i, pars[i]);
@@ -46,7 +46,7 @@ const FPGATrackSimGenScanBinningBase::IdxSet FPGATrackSimGenScanBinningBase::par
 
 FPGATrackSimGenScanBinningBase::ParSet FPGATrackSimGenScanBinningBase::center() const
 {
-    ParSet parset(NPars);
+    ParSet parset;
     for (unsigned i = 0; i < NPars; i++)
     {
         parset[i] = (m_parMin[i] + m_parMin[i]) / 2.0;
@@ -56,7 +56,7 @@ FPGATrackSimGenScanBinningBase::ParSet FPGATrackSimGenScanBinningBase::center() 
 
 FPGATrackSimGenScanBinningBase::ParSet FPGATrackSimGenScanBinningBase::binLowEdge(const IdxSet &idx) const
 {
-    ParSet parset(NPars);
+    ParSet parset;
     for (unsigned i = 0; i < NPars; i++)
     {
         parset[i] = binLowEdge(i, idx[i]);
@@ -66,7 +66,7 @@ FPGATrackSimGenScanBinningBase::ParSet FPGATrackSimGenScanBinningBase::binLowEdg
 
 FPGATrackSimGenScanBinningBase::ParSet FPGATrackSimGenScanBinningBase::binCenter(const IdxSet &idx) const
 {
-    ParSet parset(NPars);
+    ParSet parset;
     for (unsigned i = 0; i < NPars; i++)
     {
         parset[i] = binCenter(i, idx[i]);
@@ -74,7 +74,7 @@ FPGATrackSimGenScanBinningBase::ParSet FPGATrackSimGenScanBinningBase::binCenter
     return parset;
 }
 
-std::vector<unsigned> FPGATrackSimGenScanBinningBase::subVec(const std::vector<unsigned>& elems, const std::vector<unsigned>& invec) const
+std::vector<unsigned> FPGATrackSimGenScanBinningBase::subVec(const std::vector<unsigned>& elems, const IdxSet& invec) const
 {
     std::vector<unsigned> retv;
     for (auto elem : elems)

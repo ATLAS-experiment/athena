@@ -59,8 +59,11 @@
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "GaudiKernel/StatusCode.h"
 
+#include <initializer_list>
 #include <string>
 #include <vector>
+
+
 
 //-------------------------------------------------------------------------------------------------------
 // Binning base class
@@ -75,9 +78,36 @@
 class FPGATrackSimGenScanBinningBase
 {
 public:
-    typedef std::vector<double> ParSet;
-    typedef std::vector<unsigned int> IdxSet;
+  //--------------------------------------------------------------------------------------------------
+  //
+  // These just makes ParSet and IdxSet types that have 5 double or unsigned int
+  // for the 5-track parameters. The point of the structs is that they are fixed
+  // to the right length and can be converted back and forth to std::vector
+  // through cast operators and constructors
+  //
+  //--------------------------------------------------------------------------------------------------
 
+    struct ParSet : public std::array<double,5> {
+      using array<double,5>::array;
+      ParSet(const std::vector<double>& val) {
+        if (val.size() != 5) {
+          throw std::invalid_argument("Not enough parameters in ParSet initialization");  
+        } 
+        std::copy(val.begin(), val.end(), this->begin());
+      }
+      operator const std::vector<double>() const { return std::vector<double>(this->begin(),this->end());}
+    };
+    struct IdxSet : public std::array<unsigned, 5> {
+      using array<unsigned,5>::array;
+      IdxSet(const std::vector<unsigned>& val) {
+        if (val.size() != 5) {
+          throw std::invalid_argument("Not enough parameters in IdxSet initialization");  
+        } 
+        std::copy(val.begin(), val.end(), this->begin());
+      }
+      operator const std::vector<unsigned>() const { return std::vector<unsigned>(this->begin(),this->end());}
+    };
+  
     //--------------------------------------------------------------------------------------------------
     //
     // Virtual methods that are overloaded to define the binning
@@ -85,7 +115,8 @@ public:
     //--------------------------------------------------------------------------------------------------
 
     // Specification of parameters
-    virtual const std::string &parNames(unsigned i) const = 0;
+    virtual const std::string &
+    parNames(unsigned i) const = 0;
 
     // overloaded to define which parameters are slice, scan, and row
     // they return vectors which are the numbers of the parameters in the slice or scan
@@ -186,7 +217,7 @@ public:
     // Generic Utility for splitting in vector (e.g. idx or #bins 5-d vectors)
     // into subvectors (e.g. idx for just the scan parameters). Technically, for 
     // a list of parameter indices (elems) gives the subvector of the invec with just those indices
-    std::vector<unsigned> subVec(const std::vector<unsigned>& elems, const std::vector<unsigned>& invec) const;
+    std::vector<unsigned> subVec(const std::vector<unsigned>& elems, const IdxSet& invec) const;
 
     // Opposite of above subVec, this sets the subvector
     StatusCode setIdxSubVec(IdxSet &idx, const std::vector<unsigned>& subvecelems, const std::vector<unsigned>& subvecidx) const;
@@ -199,15 +230,17 @@ public:
     // Internal data
     //
     static constexpr unsigned NPars = 5;
-    std::vector<double> m_parMin;
-    std::vector<double> m_parMax;
-    std::vector<double> m_parStep;
-    std::vector<unsigned> m_parBins;
+    ParSet m_parMin;
+    ParSet m_parMax;
+    ParSet m_parStep;
+    IdxSet m_parBins;
 
     // invalid bin value, there is no way a true bin could be there
-    const std::vector<unsigned> m_invalidBin = {std::numeric_limits<unsigned>::max(),std::numeric_limits<unsigned>::max(),
-      std::numeric_limits<unsigned>::max(),std::numeric_limits<unsigned>::max(),std::numeric_limits<unsigned>::max()};
+    const IdxSet m_invalidBin{std::initializer_list<unsigned>({std::numeric_limits<unsigned>::max(),std::numeric_limits<unsigned>::max(),
+         std::numeric_limits<unsigned>::max(),std::numeric_limits<unsigned>::max(),std::numeric_limits<unsigned>::max()})};
 };
+
+
 
 //-------------------------------------------------------------------------------------------------------
 //
@@ -259,7 +292,7 @@ public:
 
   virtual const ParSet trackParsToParSet(const FPGATrackSimTrackPars &pars) const override
   {
-    return std::vector<double>({pars[FPGATrackSimTrackPars::IZ0], pars[FPGATrackSimTrackPars::IETA],
+    return ParSet({pars[FPGATrackSimTrackPars::IZ0], pars[FPGATrackSimTrackPars::IETA],
                                 pars[FPGATrackSimTrackPars::IHIP], pars[FPGATrackSimTrackPars::ID0], pars[FPGATrackSimTrackPars::IPHI]});
   }
   virtual const FPGATrackSimTrackPars parSetToTrackPars(const ParSet &parset) const override
