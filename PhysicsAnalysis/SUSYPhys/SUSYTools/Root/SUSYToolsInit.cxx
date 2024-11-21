@@ -1323,12 +1323,12 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
    if (!m_photonIsolationSFTool.isUserConfigured() && !isData()) {
      m_photonIsolationSFTool.setTypeAndName("AsgPhotonEfficiencyCorrectionTool/AsgPhotonEfficiencyCorrectionTool_isol" + m_photonIso_WP);
 
-     if (m_photonIso_WP != "FixedCutTight" && m_photonIso_WP != "FixedCutLoose" && m_photonIso_WP != "FixedCutTightCaloOnly") {
+     if (m_photonIso_WP != "FixedCutTight" && m_photonIso_WP != "FixedCutLoose" && m_photonIso_WP != "TightCaloOnly") {
        ATH_MSG_WARNING( "No Photon efficiency available for " << m_photonIso_WP);
      }
 
      ATH_CHECK( m_photonIsolationSFTool.setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map1.txt") );
-     ATH_CHECK( m_photonIsolationSFTool.setProperty("IsoKey", m_photonIso_WP.substr(8) ));    // Set isolation WP: Loose,Tight,TightCaloOnly
+     ATH_CHECK( m_photonIsolationSFTool.setProperty("IsoKey", m_photonIso_WP != "TightCaloOnly" ? m_photonIso_WP.substr(8) : m_photonIso_WP ));    // Set isolation WP: Loose,Tight,TightCaloOnly
      ATH_CHECK( m_photonIsolationSFTool.setProperty("ForceDataType", 1) ); // Set data type: 1 for FULLSIM, 3 for AF2
      ATH_CHECK( m_photonIsolationSFTool.setProperty("OutputLevel", this->msg().level()) );
      ATH_CHECK( m_photonIsolationSFTool.retrieve() );
