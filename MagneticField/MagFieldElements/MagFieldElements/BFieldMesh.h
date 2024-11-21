@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -125,19 +125,20 @@ public:
   int memSize() const;
 
 protected:
-  std::array<double, 3> m_min;
-  std::array<double, 3> m_max;
-  std::array<std::vector<double>, 3> m_mesh;
+  std::array<double, 3> m_min{};
+  std::array<double, 3> m_max{};
+  std::array<std::vector<double>, 3> m_mesh{};
 
 private:
   std::vector<BFieldVector<T>> m_field;
-  double m_scale = 1.0;
-  double m_nomScale; // nominal m_scale from the map
+  double m_scale{1.0};
+  double m_nomScale{1.0}; // nominal m_scale from the map
 
   // look-up table and related variables
-  std::array<std::vector<int>, 3> m_LUT;
-  std::array<double, 3> m_invUnit= {0, 0, 0}; // inverse unit size in the LUT
-  int m_roff = 0, m_zoff = 0;
+  std::array<std::vector<int>, 3> m_LUT{};
+  std::array<double, 3> m_invUnit{}; // inverse unit size in the LUT
+  int m_roff{0};
+  int m_zoff{0};
 };
 #include "MagFieldElements/BFieldMesh.icc"
 #endif

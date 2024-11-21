@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -122,7 +122,7 @@ private:
   const BFieldMeshZR* m_meshZR{ nullptr };
 
   /// Fast 2d field cell/cache
-  BFieldCacheZR m_cacheZR;
+  BFieldCacheZR m_cacheZR{};
 };
 
 } // namespace MagField
