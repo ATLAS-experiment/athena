@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_EventTPCnv/HGTD_ClusterContainerCnv_p1.h
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -26,7 +26,7 @@ class HGTD_ClusterContainerCnv_p1
     : public T_AthenaPoolTPCnvBase<HGTD_ClusterContainer,
                                    HGTD_ClusterContainer_p1> {
 public:
-  HGTD_ClusterContainerCnv_p1() : m_is_initialized(false){};
+  HGTD_ClusterContainerCnv_p1() = default;
 
   typedef HGTD_ClusterContainer_p1 Pers_t;
   typedef HGTD_ClusterContainer Trans_t;
@@ -42,9 +42,9 @@ public:
 private:
   StatusCode initialize(MsgStream& log);
 
-  const HGTD_ID* m_hgtd_idhelper;
+  const HGTD_ID* m_hgtd_idhelper{nullptr};
 
-  bool m_is_initialized;
+  bool m_is_initialized{false};
 };
 
 #endif
