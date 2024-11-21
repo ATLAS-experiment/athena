@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_ITAUTRUTHMATCHINGTOOL_H
@@ -16,6 +16,7 @@
 
 // EDM include(s):
 #include "xAODTau/TauJet.h"
+#include "xAODTau/TauJetContainer.h"
 
 // // local include(s)
 #include "IBuildTruthTaus.h"
@@ -65,6 +66,8 @@ public:
   // wrapper function to obtain truth version of xAOD::TauJetParameters::DecayMode
   virtual xAOD::TauJetParameters::DecayMode getDecayMode(const xAOD::TauJet& xTau) = 0;
   virtual xAOD::TauJetParameters::DecayMode getDecayMode(const xAOD::TruthParticle& xTruthTau) const = 0;
+
+  virtual StatusCode lockDecorations (const xAOD::TauJetContainer& taus) const = 0;
 
 }; // class ITauTruthMatchingTool
 

@@ -243,7 +243,8 @@ StatusCode PhysValTau::fillHistograms()
       }
     }
   }
-   
+
+  ATH_CHECK( m_truthTool->lockDecorations (*taus) );
   return StatusCode::SUCCESS;
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfData/LogicParser.h"
@@ -100,6 +100,7 @@ TrigConf::LogicParser::buildNode(const std::vector<std::string> & tokExpr, size_
    }
    front++;
 
+   // cppcheck-suppress accessMoved; false positive
    LogicOPS * logic = token=="&" ? static_cast<LogicOPS*>(new LogicAND(std::move(logicLeft))) : static_cast<LogicOPS*>(new LogicOR(std::move(logicLeft)));
 
    auto logicRight = buildNode(tokExpr, front, back);

@@ -149,21 +149,22 @@ def fromRunArgs(runArgs):
 
     cfg.merge(PoolReadCfg(flags))
 
-    # Simulation
     from BeamEffects.BeamEffectsAlgConfig import BeamEffectsAlgCfg
     cfg.merge(BeamEffectsAlgCfg(flags))
 
-    if not flags.Digitization.PileUp and ( (not flags.Overlay.FastChain and "xAOD::EventInfo#EventInfo" in flags.Input.TypedCollections) \
-                                           or (flags.Overlay.FastChain and "xAOD::EventInfo#EventInfo" in flags.Input.SecondaryTypedCollections) ):
+    if not flags.Digitization.PileUp and not flags.Overlay.FastChain:
         # Make sure signal EventInfo is rebuilt from event context
         # TODO: this is probably not needed, but keeping it to be in sync with standard simulation
         from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoUpdateFromContextAlgCfg
         cfg.merge(EventInfoUpdateFromContextAlgCfg(flags))
 
     if flags.Overlay.FastChain:
+        from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoOverlayCfg
+        cfg.merge(EventInfoOverlayCfg(flags))
         # CopyMcEventCollection should be before Kernel
-        from OverlayCopyAlgs.OverlayCopyAlgsConfig import CopyMcEventCollectionCfg
-        cfg.merge(CopyMcEventCollectionCfg(flags))
+        if not flags.Overlay.DataOverlay:
+            from OverlayCopyAlgs.OverlayCopyAlgsConfig import CopyMcEventCollectionCfg
+            cfg.merge(CopyMcEventCollectionCfg(flags))
 
     from ISF_Config.ISF_MainConfig import ISF_KernelCfg
     cfg.merge(ISF_KernelCfg(flags))

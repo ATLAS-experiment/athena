@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RATESANALYSIS_RATESHISTOBASE_H
@@ -110,12 +110,9 @@ class RatesHistoBase : public AthMessaging {
   std::unique_ptr<TH1> m_rateVsMu; //!< Histogram of rate as a fn. of the input event's mu
   std::unique_ptr<TH1> m_rateVsTrain; //!< Histogram of rate as a fn. of position in bunch train
   std::unique_ptr<TH1> m_data;  //!< Histogram of raw rates quantites, for when we need to normalise offline (e.g. grid processing)
-  TH1* m_rateVsMuCachedPtr; //!< Cached, non-owning pointer
-  TH1* m_rateVsTrainCachedPtr;  //!< Cached, non-owning pointer
-  TH1* m_dataCachedPtr; //!< Cached, non-owning pointer
-  bool  m_givenRateVsMu; //!< m_rateVsMu has been given to the THistSvc and should not be deleted
-  bool  m_givenRateVsTrain; //!< m_rateVsTrain has been given to the THistSvc and should not be deleted
-  bool  m_givenData; //!< m_data has been given to the THistSvc and should not be deleted
+  TH1* m_rateVsMuCachedPtr{}; //!< Cached, non-owning pointer
+  TH1* m_rateVsTrainCachedPtr{};  //!< Cached, non-owning pointer
+  TH1* m_dataCachedPtr{}; //!< Cached, non-owning pointer
 };
 
 #endif //> !RATESANALYSIS_RATESHISTOBASE_H

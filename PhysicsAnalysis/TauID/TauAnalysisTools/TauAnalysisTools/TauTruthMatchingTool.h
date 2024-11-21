@@ -66,6 +66,13 @@ public:                         // Wrapper functions
   virtual xAOD::TauJetParameters::DecayMode getDecayMode(const xAOD::TauJet& xTau) override final;
   virtual xAOD::TauJetParameters::DecayMode getDecayMode(const xAOD::TruthParticle& xTruthTau) const override final;
 
+  /// Decorations produced by an algorithm need to be locked; otherwise, they
+  /// will be ignored by deep copies.  The interfaces of this tool
+  /// take a single object at a time, so we can't do the locking there.
+  /// Instead, call this method after all taus in a container have been
+  /// processed.
+  virtual StatusCode lockDecorations (const xAOD::TauJetContainer& taus) const override final;
+
 private:                        // private helper functions
 
   StatusCode findTruthTau(const xAOD::TauJet& xTau,

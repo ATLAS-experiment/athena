@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef L1TopoCoreSim_SortingConnector
 #define L1TopoCoreSim_SortingConnector
@@ -48,7 +48,7 @@ namespace TCS {
 
    private:
 
-      SortingAlg* m_sortingAlgorithm;
+      SortingAlg* m_sortingAlgorithm { nullptr };
 
       // attached sorted data
       TOBArray const * m_outputData { nullptr };

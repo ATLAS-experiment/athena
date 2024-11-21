@@ -185,9 +185,9 @@ namespace FlavorTagDiscriminants {
         // Muon ID track IP information
         muon_ip = m_btag_track_aug.getSignedIp(*IDMuTrack, jet);
         muon_ip3d_d0 = muon_ip.ip3d_signed_d0;
-        muon_ip3d_z0 = muon_ip.ip3d_signed_z0;
+        muon_ip3d_z0 = muon_ip.ip3d_signed_z0_sin_theta;
         muon_ip3d_d0_significance = muon_ip.ip3d_signed_d0_significance;
-        muon_ip3d_z0_significance = muon_ip.ip3d_signed_z0_significance;
+        muon_ip3d_z0_significance = muon_ip.ip3d_signed_z0_sin_theta_significance;
         muon_ip3d_sigma_d0 = m_btag_track_aug.d0Uncertainty(*IDMuTrack);
         muon_ip3d_sigma_z0 = m_btag_track_aug.z0SinThetaUncertainty(*IDMuTrack);
 
