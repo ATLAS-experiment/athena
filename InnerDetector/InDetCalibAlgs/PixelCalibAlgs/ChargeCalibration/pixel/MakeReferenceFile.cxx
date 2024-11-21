@@ -124,7 +124,7 @@ public:
     cool::RecordSpecification foreignKeySpec();
     cool::RecordSpecification payloadSpec() const; //!< specification of the payload entries
     bool isSingleVersion() const;
-    std::string tag() const;
+    const std::string& tag() const;
     const cool::IFolderPtr &ptr() const;
     cool::IObjectIteratorPtr objectIterator(bool) const;
     std::vector<cool::ChannelId> channels() const;
@@ -185,7 +185,7 @@ Folder::payloadSpec() const
     return m_folderPtr->payloadSpecification();
 }
 
-std::string
+const std::string&
 Folder::tag() const
 {
     return m_folderSpec.tag;
