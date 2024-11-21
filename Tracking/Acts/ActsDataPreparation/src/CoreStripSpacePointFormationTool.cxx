@@ -535,13 +535,13 @@ namespace ActsTrk
       case (xAOD::UncalibMeasType::StripClusterType):
          loc[Acts::eBoundLoc0] = measurement->localPosition<1>()[Trk::locX];
          cov.topLeftCorner<1, 1>() =
-            measurement->localCovariance<1>().cast<Acts::ActsScalar>();
+            measurement->localCovariance<1>().cast<double>();
          break;
       case (xAOD::UncalibMeasType::PixelClusterType):
          loc[Acts::eBoundLoc0] = measurement->localPosition<2>()[Trk::locX];
          loc[Acts::eBoundLoc1] = measurement->localPosition<2>()[Trk::locY];
          cov.topLeftCorner<2, 2>() =
-            measurement->localCovariance<2>().cast<Acts::ActsScalar>();
+            measurement->localCovariance<2>().cast<double>();
          break;
       default:
          throw std::domain_error(
