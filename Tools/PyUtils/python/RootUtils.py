@@ -305,6 +305,12 @@ class RootFileDumper(object):
 
                 br = tree.GetBranch (br_name)
                 if br.GetClassName() != '':
+                    # Make sure dictionaries are completely loaded before
+                    # trying to fetch it from ROOT.  Otherwise we can run
+                    # into cling parse failures due to it synthesizing
+                    # incorrect forward declarations.
+                    # See ATEAM-1000.
+                    ROOT.TClass.GetClass (br.GetClassName())
                     val = getattr(tree, br_name)
                 else:
                     vals = [_getLeaf (l) for l in br.GetListOfLeaves()]
