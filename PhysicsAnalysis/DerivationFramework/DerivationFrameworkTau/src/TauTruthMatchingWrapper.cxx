@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -54,6 +54,7 @@ namespace DerivationFramework {
       truthTausEvent = m_tTauTruthMatchingTool->getEvent();
     for(auto xTau : *xTauContainer)
       m_tTauTruthMatchingTool->getTruth(*xTau, *truthTausEvent);
+    ATH_CHECK( m_tTauTruthMatchingTool->lockDecorations(*xTauContainer) );
     
     return StatusCode::SUCCESS;
   }  

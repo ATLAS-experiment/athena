@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s)
@@ -453,3 +453,25 @@ StatusCode TauTruthMatchingTool::checkTruthMatch (const xAOD::TauJet& xTau, cons
 
   return StatusCode::SUCCESS;
 }
+
+
+/**
+ * Decorations produced by an algorithm need to be locked; otherwise, they
+ * will be ignored by deep copies.  The interfaces of this tool
+ * take a single object at a time, so we can't do the locking there.
+ * Instead, call this method after all taus in a container have been
+ * processed.
+ */
+StatusCode
+TauTruthMatchingTool::lockDecorations (const xAOD::TauJetContainer& taus) const
+{
+  xAOD::TauJetContainer& taus_nc ATLAS_THREAD_SAFE = const_cast<xAOD::TauJetContainer&> (taus);
+  static const SG::Decorator<char> decIsTruthMatched("IsTruthMatched");
+  static const SG::Decorator< ElementLink< xAOD::JetContainer > > decTruthJetLink("truthJetLink");
+  static const SG::Decorator< ElementLink< xAOD::TruthParticleContainer > > decTruthParticleLink("truthParticleLink");
+  taus_nc.lockDecoration (decIsTruthMatched.auxid());
+  taus_nc.lockDecoration (decTruthJetLink.auxid());
+  taus_nc.lockDecoration (decTruthParticleLink.auxid());
+  return StatusCode::SUCCESS;
+}
+
