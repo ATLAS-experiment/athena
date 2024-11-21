@@ -42,7 +42,6 @@ dqm_core::Result* dqm_algorithms::EfficiencyRefComp::execute(const std::string& 
   if (histogram->GetEntries() < minstat ) {
     dqm_core::Result *result = new dqm_core::Result(dqm_core::Result::Undefined);
     result->tags_["InsufficientEffectiveEntries"] = histogram->GetEffectiveEntries();
-    delete histogram;
     return result;
   }
 
