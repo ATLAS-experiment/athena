@@ -11,6 +11,7 @@
 #include "GeoModelHelpers/throwExcept.h"
 #include "xAODMuonPrepData/MdtDriftCircle.h"
 #include "MuonSpacePoint/UtilFunctions.h"
+#include "MuonPatternHelpers/MatrixUtils.h"
 
 namespace{
     constexpr double  c_inv = 1. / Gaudi::Units::c_light;
@@ -53,8 +54,7 @@ namespace MuonR4 {
                         
             Amg::Vector2D residual{Amg::Vector2D::Zero()};
     
-            residual[Amg::y] = Amg::lineDistance<3>(mdtSP.positionInChamber(), mdtSP.directionInChamber(), 
-                                                    segPos, segDir) 
+            residual[Amg::y] = std::abs(Amg::signedDistance(mdtSP.positionInChamber(), mdtSP.directionInChamber(), segPos, segDir)) 
                              - mdtSP.driftRadius();
             const double chi2{residual.dot(mdtSP.covariance().inverse()* residual)};
             if (msg.level() <= printLvl) {
@@ -218,34 +218,42 @@ namespace MuonR4 {
             }            
             return signs;
         }
+        std::vector<int> driftSigns(const Amg::Vector3D& segPos, const Amg::Vector3D& segDir,
+                                    const std::vector<std::unique_ptr<CalibratedSpacePoint>>& calibHits,
+                                    MsgStream& msg) {
+            std::vector<int> signs{};
+            signs.reserve(calibHits.size());
+            for (const std::unique_ptr<CalibratedSpacePoint>& hit : calibHits) {
+                signs.push_back(driftSign(segPos,segDir, *hit, msg));
+            }
+            return signs;
+        }
         int driftSign(const Amg::Vector3D& segPos, const Amg::Vector3D& segDir,
                        const SpacePoint& sp, MsgStream& msg) {
             if (sp.type() != xAOD::UncalibMeasType::MdtDriftCircleType) {
                 return 0;
             }
-            const Amg::Vector3D deltaPos{segPos - sp.positionInChamber()};
-            const double signedDist = deltaPos.y() - (segDir.y() / segDir.z()) * deltaPos.z();
+            const double signedDist = Amg::signedDistance(segPos, segDir, sp.positionInChamber(), sp.directionInChamber());
             if (msg.level() <= printLvl) {
                 msg<<printLvl<<"Hit "<<sp.msSector()->idHelperSvc()->toString(sp.identify())<<" drift radius "<<sp.driftRadius()
                                 <<", signed distance: "<<signedDist<<", unsigned distance: "
                                 <<Amg::lineDistance<3>(segPos, segDir, sp.positionInChamber(), sp.directionInChamber())<<endmsg;
             }
-            return signedDist >0 ? 1 : -1;
+            return sign(signedDist);
         }
         int driftSign(const Amg::Vector3D& segPos, const Amg::Vector3D& segDir,
                       const CalibratedSpacePoint& calibHit,  MsgStream& msg) {
             if (calibHit.type() != xAOD::UncalibMeasType::MdtDriftCircleType){
                 return 0;
             }
-            const Amg::Vector3D deltaPos{segPos - calibHit.positionInChamber()};
-            const double signedDist = deltaPos.y() - (segDir.y() / segDir.z()) * deltaPos.z();
+            const double signedDist = Amg::signedDistance(segPos, segDir, calibHit.positionInChamber(), calibHit.directionInChamber());
             if (msg.level() <= printLvl) {
                 const SpacePoint* sp = calibHit.spacePoint();
                 msg<<printLvl<<"Hit "<<sp->msSector()->idHelperSvc()->toString(sp->identify())<<" drift radius "<<calibHit.driftRadius()
                                 <<", signed distance: "<<signedDist<<", unsigned distance: "
                                 <<Amg::lineDistance<3>(segPos, segDir, calibHit.positionInChamber(), calibHit.directionInChamber())<<endmsg;
             }
-            return signedDist >0 ? 1 : -1;
+            return sign(signedDist);
         }
         std::pair<std::vector<double>, double> postFitChi2PerMas(const SegmentFit::Parameters& segPars,
                                                                  std::optional<double> arrivalTime,
