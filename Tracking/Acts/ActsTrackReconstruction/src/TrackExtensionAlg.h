@@ -83,6 +83,9 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
   ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>>
       m_stripCalibTool{this, "StripCalibrator", "",
                        "Opt. strip measurement calibrator"};
+  ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>>
+      m_hgtdCalibTool{this, "HGTDCalibrator", "",
+                       "Opt. HGTD measurement calibrator"};                       
   ToolHandle<ActsTrk::TrackStatePrinterTool> m_trackStatePrinter{
       this, "TrackStatePrinter", "", "optional track state printer"};
   ToolHandle<ActsTrk::IFitterTool> m_actsFitter{

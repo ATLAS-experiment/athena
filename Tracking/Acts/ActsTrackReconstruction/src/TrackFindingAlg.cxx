@@ -136,6 +136,7 @@ namespace ActsTrk
     ATH_CHECK(m_fitterTool.retrieve());
     ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
     ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
+    ATH_CHECK(m_hgtdCalibTool.retrieve(EnableTool{not m_hgtdCalibTool.empty()}));
 
     m_logger = makeActsAthenaLogger(this, "Acts");
 
@@ -470,10 +471,11 @@ namespace ActsTrk
     // Therefore, passing them without checking if they are enabled is safe.
 
     auto calibrator = detail::OnTrackCalibrator<detail::RecoTrackStateContainer>(trackingGeometry,
-										 detectorElementToGeoId,
-										 m_pixelCalibTool,
-										 m_stripCalibTool);
-    
+                                                                         	 detectorElementToGeoId,
+                                                                         	 m_pixelCalibTool,
+                                                                         	 m_stripCalibTool,
+                                                                         	 m_hgtdCalibTool);
+
     if (m_useDefaultMeasurementSelector.value()) {
       // for default measurement selector need connect calibrator
       options.extensions.calibrator.connect<&detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);

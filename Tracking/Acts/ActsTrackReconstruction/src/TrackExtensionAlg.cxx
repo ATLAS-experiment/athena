@@ -65,6 +65,7 @@ namespace ActsTrk{
     ATH_CHECK(m_extrapolationTool.retrieve());
     ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
     ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
+    ATH_CHECK(m_hgtdCalibTool.retrieve(EnableTool{not m_hgtdCalibTool.empty()}));
     ATH_CHECK(m_truthParticlesKey.initialize(SG::AllowEmpty));
     ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
     ATH_CHECK(m_actsFitter.retrieve());
@@ -157,8 +158,10 @@ namespace ActsTrk{
        *acts_tracking_geometry,
        **detectorElementToGeometryIdMap,
        m_pixelCalibTool,
-       m_stripCalibTool);
+       m_stripCalibTool,
+       m_hgtdCalibTool);
     options.extensions.calibrator.connect<&detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
+
     if ( not m_truthParticlesKey.empty() ) {
       auto truthHandle = SG::ReadHandle(m_truthParticlesKey, context);
       for ( auto truthParticle: *truthHandle ) {

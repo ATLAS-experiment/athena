@@ -6,14 +6,13 @@
 #define ACTSTRACKRECONSTRUCTION_ONTRACKCALIBRATOR_H
 
 #include "GaudiKernel/ToolHandle.h"
-
 #include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
 #include "src/detail/MeasurementCalibratorBase.h"
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 
 #include "xAODInDetMeasurement/PixelCluster.h"
 #include "xAODInDetMeasurement/StripCluster.h"
-
+#include "xAODInDetMeasurement/HGTDCluster.h"
 namespace ActsTrk::detail {
 
 template <typename traj_t>
@@ -37,8 +36,18 @@ public:
 				      const xAOD::StripCluster&,
 				      const TrackStateProxy&)>;
 
+    using HgtdPos = xAOD::MeasVector<3>;
+    using HgtdCov = xAOD::MeasMatrix<3>;
+    using HGTDCalibrator = Acts::Delegate<
+  	std::pair<HgtdPos, HgtdCov>(const Acts::GeometryContext&,
+              			    const Acts::CalibrationContext&,
+              			    const xAOD::HGTDCluster &,
+              			    const TrackStateProxy&)>;
+
+
     PixelCalibrator pixelCalibrator;
     StripCalibrator stripCalibrator;
+    HGTDCalibrator hgtdCalibrator;
 
     static OnTrackCalibrator
     NoCalibration(const Acts::TrackingGeometry &trackingGeometry,
@@ -47,7 +56,8 @@ public:
     OnTrackCalibrator(const Acts::TrackingGeometry &trackingGeometry,
                       const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
                       const ToolHandle<IOnTrackCalibratorTool<traj_t>> &pixelTool,
-                      const ToolHandle<IOnTrackCalibratorTool<traj_t>> &stripTool);
+                      const ToolHandle<IOnTrackCalibratorTool<traj_t>> &stripTool,
+                      const ToolHandle<IOnTrackCalibratorTool<traj_t>> &hgtdTool);
 
     void calibrate(const Acts::GeometryContext& geoctx,
 		   const Acts::CalibrationContext& cctx,

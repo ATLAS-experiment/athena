@@ -49,6 +49,9 @@ namespace ActsTrk::detail {
     constexpr static Acts::BoundSubspaceIndices s_pixelSubspaceIndices = {
       Acts::eBoundLoc0, Acts::eBoundLoc1
     };
+   constexpr static Acts::BoundSubspaceIndices s_hgtdSubspaceIndices = {
+      Acts::eBoundLoc0, Acts::eBoundLoc1, Acts::eBoundTime
+    };
   };
   
 } // namespace ActsTrk::detail
