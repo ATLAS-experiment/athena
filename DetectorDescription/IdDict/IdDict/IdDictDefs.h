@@ -28,8 +28,7 @@ class IdDictRange;
 class IdDictReference; 
 class IdDictDictionaryRef; 
   
-class IdDictMgr  
-{  
+class IdDictMgr  {  
 public:  
     typedef std::map<std::string, IdDictDictionary*> dictionary_map; 
     typedef std::map<std::string, std::string>       metadata_map; 
@@ -93,8 +92,7 @@ private:
     bool                  m_do_neighbours;
 };  
   
-class IdDictDictionary  
-{  
+class IdDictDictionary  {  
 public:  
     typedef Identifier::value_type value_type;
     typedef Identifier::size_type size_type; 
@@ -325,7 +323,7 @@ public:
     void reset_implementation ();  
     bool verify () const;  
     void clear (); 
-    
+    //data members are public
     std::string                   m_name;  
     std::vector <IdDictLabel*>    m_labels; 
     size_t                        m_index{}; 
@@ -337,12 +335,11 @@ struct IdDictLabel {
     int m_value{};  
 };  
  
-class IdDictGroup
-{ 
+class IdDictGroup{ 
 public: 
     IdDictGroup (); 
     IdDictGroup (const std::string& name); 
-    virtual ~IdDictGroup (); 
+    ~IdDictGroup (); 
 
     const std::string&  name();
     const std::vector<IdDictDictEntry*>& entries();
@@ -350,7 +347,6 @@ public:
 
     ///  Get MultiRange for this group
     MultiRange build_multirange () const; 
-
     void add_dictentry (IdDictDictEntry* entry);
 
     void resolve_references (const IdDictMgr& idd,  
@@ -360,7 +356,6 @@ public:
                                   IdDictDictionary& dictionary, 
                                   const std::string& tag = "");
     void reset_implementation ();  
-
     bool verify () const;
     void sort   ();  
     void clear  (); 
@@ -374,18 +369,13 @@ private:
     bool m_generated_implementation;
 }; 
  
-class IdDictDictEntry 
-{ 
+class IdDictDictEntry { 
 public: 
     IdDictDictEntry (); 
     virtual ~IdDictDictEntry (); 
- 
     virtual Range build_range () const = 0; 
-    
     virtual std::string group_name () const = 0; 
-    
     virtual void set_index (size_t index) = 0;
-
     virtual void resolve_references (const IdDictMgr& idd,  
                                      IdDictDictionary& dictionary) = 0;  
     virtual void generate_implementation (const IdDictMgr& idd,  
@@ -393,23 +383,17 @@ public:
                                           const std::string& tag = "") = 0;
     virtual void reset_implementation () = 0;  
     virtual bool verify () const = 0;
- 
     virtual void clear () = 0; 
  
 }; 
  
-class IdDictAltRegions : public IdDictDictEntry
-{ 
+class IdDictAltRegions : public IdDictDictEntry{ 
 public: 
     IdDictAltRegions (); 
     ~IdDictAltRegions (); 
- 
     std::string group_name () const; 
-
     Range build_range () const; 
-
     void set_index (size_t index);
-
     void resolve_references (const IdDictMgr& idd, 
                              IdDictDictionary& dictionary);
     void generate_implementation (const IdDictMgr& idd, 
@@ -417,32 +401,25 @@ public:
                                   const std::string& tag = "");  
     void reset_implementation ();  
     bool verify () const;  
- 
     void clear (); 
-    
+    //data members are public
     typedef std::map<std::string, IdDictRegion* > map_type;
     typedef map_type::iterator                    map_iterator;
     typedef map_type::value_type                  value_type;
     map_type      m_regions;
-    IdDictRegion* m_selected_region;
+    IdDictRegion* m_selected_region{};
 
 }; 
 
 
-class IdDictRegion : public IdDictDictEntry
-{ 
+class IdDictRegion : public IdDictDictEntry{ 
 public: 
     IdDictRegion () = default; 
     virtual ~IdDictRegion () =  default; 
- 
     std::string group_name () const; 
-
     Range build_range () const; 
-
     void set_index (size_t index);
- 
     void add_entry (IdDictRegionEntry* entry); 
-  
     void resolve_references (const IdDictMgr& idd, 
                              IdDictDictionary& dictionary); 
     void generate_implementation (const IdDictMgr& idd, 
@@ -451,10 +428,9 @@ public:
     void find_neighbours (const IdDictDictionary& dictionary);
     void reset_implementation ();  
     bool verify () const;  
- 
-    void clear (); 
-    
- 
+    void clear ();
+    //
+    //data members are public
     std::vector <IdDictRegionEntry*>        m_entries; 
     std::vector <IdDictFieldImplementation> m_implementation; 
     size_t                                  m_index{}; 
@@ -484,11 +460,10 @@ protected:
     bool m_generated_implementation{};
 }; 
  
-class IdDictSubRegion : public IdDictRegion 
-{ 
+class IdDictSubRegion : public IdDictRegion { 
 public: 
     IdDictSubRegion (); 
-    ~IdDictSubRegion (); 
+    virtual ~IdDictSubRegion (); 
 
     // Dummy: never called - subregions are only generated via
     // IdDictReference where one already has a region which is passed in
@@ -509,11 +484,9 @@ public:
     IdDictRegionEntry () = default; 
     virtual ~IdDictRegionEntry () = default; 
     virtual void resolve_references (const IdDictMgr& ,  
-        IdDictDictionary& , IdDictRegion& ) {
-      /*default is noop*/}
+        IdDictDictionary& , IdDictRegion& ) {/*default is noop*/}
     virtual void generate_implementation (const IdDictMgr& ,  
-        IdDictDictionary& , IdDictRegion& , const std::string& ) {
-      /*default is noop*/}
+        IdDictDictionary& , IdDictRegion& , const std::string& ) {/*default is noop*/}
     virtual void reset_implementation (){ /*default is noop*/} 
     virtual bool verify () const{return true;}  
     virtual void clear () {/*default is noop*/}
@@ -524,7 +497,6 @@ class IdDictRange : public IdDictRegionEntry {
 public: 
     IdDictRange () = default; 
     ~IdDictRange () = default; 
- 
     void resolve_references (const IdDictMgr& idd,  
                              IdDictDictionary& dictionary, 
                              IdDictRegion& region);  
@@ -533,10 +505,10 @@ public:
                                   IdDictRegion& region,
                                   const std::string& tag = "");   
     Range build_range () const; 
-
+    //data members made public
     std::string m_field_name; 
     IdDictField* m_field{}; 
- 
+    
     enum specification_type{ 
         unknown, 
         by_value, 
@@ -553,9 +525,7 @@ public:
         has_both,
         wrap_around
     }; 
- 
     specification_type m_specification{unknown}; 
- 
     std::string m_tag; 
     std::string m_label; 
     int m_value{}; 
@@ -571,12 +541,10 @@ private:
     bool m_resolved_references{};
 }; 
  
-class IdDictRangeRef : public IdDictRegionEntry 
-{ 
+class IdDictRangeRef : public IdDictRegionEntry { 
 public: 
     IdDictRangeRef () = default; 
     ~IdDictRangeRef () = default; 
- 
     void resolve_references (const IdDictMgr& idd,  
                              IdDictDictionary& dictionary, 
                              IdDictRegion& region);  
@@ -586,19 +554,15 @@ public:
                                   const std::string& tag = "");  
     void reset_implementation ();  
     bool verify () const;  
- 
-    Range build_range () const; 
- 
-    IdDictRange* m_range{}; 
-
+    Range build_range () const;
+    //data member is public
+    IdDictRange* m_range{};
 }; 
   
-class IdDictReference : public IdDictRegionEntry 
-{ 
+class IdDictReference : public IdDictRegionEntry { 
 public: 
     IdDictReference (); 
     ~IdDictReference (); 
- 
     void resolve_references (const IdDictMgr& idd,  
                              IdDictDictionary& dictionary, 
                              IdDictRegion& region);  
@@ -608,22 +572,19 @@ public:
                                   const std::string& tag = "");  
     void reset_implementation ();  
     bool verify () const;  
- 
     Range build_range () const; 
- 
+    //data members made public
     std::string m_subregion_name; 
-    IdDictSubRegion* m_subregion; 
+    IdDictSubRegion* m_subregion{}; 
 
 private:
-    bool m_resolved_references;
+    bool m_resolved_references{};
 }; 
  
-class IdDictDictionaryRef : public IdDictRegionEntry 
-{ 
+class IdDictDictionaryRef : public IdDictRegionEntry { 
 public: 
     IdDictDictionaryRef (); 
     ~IdDictDictionaryRef (); 
- 
     void resolve_references (const IdDictMgr& idd,  
                              IdDictDictionary& dictionary, 
                              IdDictRegion& region);  
@@ -633,18 +594,17 @@ public:
                                   const std::string& tag = "");  
     void reset_implementation ();  
     bool verify () const;  
- 
     Range build_range () const; 
- 
+    //data members made public
     std::string m_dictionary_name; 
-    IdDictDictionary* m_dictionary; 
+    IdDictDictionary* m_dictionary{}; 
 
 private:
     // We allow to regenerate the implementation with a tag. However,
     // propagation of information should only be done once.
-    bool m_resolved_references;
-    bool m_generated_implementation;
-    bool m_propagated_information;
+    bool m_resolved_references{};
+    bool m_generated_implementation{};
+    bool m_propagated_information{};
 }; 
 
 
@@ -654,32 +614,28 @@ private:
  
 /// Access to file name
 inline const std::string&
-IdDictDictionary::file_name        (void) const
-{
+IdDictDictionary::file_name() const{
     return (m_file_name);
 }
 
     
 /// Access to the dictionary tag
 inline const std::string&
-IdDictDictionary::dict_tag         (void) const
-{
+IdDictDictionary::dict_tag( ) const{
     return (m_dict_tag);
 }
 
 
 /// Set file name
 inline void                
-IdDictDictionary::set_file_name    (const std::string& name)
-{
+IdDictDictionary::set_file_name(const std::string& name){
     m_file_name = name;
 }
 
    
 /// Set the dictionary tag
 inline void                
-IdDictDictionary::set_dict_tag     (const std::string& tag)
-{
+IdDictDictionary::set_dict_tag(const std::string& tag){
     m_dict_tag = tag;
 }
 

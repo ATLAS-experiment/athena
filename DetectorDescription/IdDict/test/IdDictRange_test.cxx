@@ -10,6 +10,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "IdDict/IdDictDefs.h"
 
+
 BOOST_AUTO_TEST_SUITE(IdDictRangeTest)
 BOOST_AUTO_TEST_CASE(IdDictRangeConstructors){
   BOOST_CHECK_NO_THROW(IdDictRange());

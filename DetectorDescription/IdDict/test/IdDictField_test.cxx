@@ -33,7 +33,13 @@ BOOST_AUTO_TEST_CASE(EmptyIdDictFieldAccessors){
 }
 
 BOOST_AUTO_TEST_CASE(IdDictSetAndGet){
+/**
+  Following remain untested, as they depend on IdDictMgr:
+    void resolve_references (const IdDictMgr& idd);  
+    void generate_implementation (const IdDictMgr& idd, const std::string& tag = "");   
+**/
   IdDictField f;
+  //the bool is "has value"
   auto lbl1 = new IdDictLabel {"label1", true, 2};
   BOOST_CHECK_NO_THROW(f.add_label(lbl1));
   //
@@ -42,7 +48,7 @@ BOOST_AUTO_TEST_CASE(IdDictSetAndGet){
   //special treatment for names which are numbers
   auto lbl3 = new IdDictLabel("+1000", true, 10);
   f.add_label(lbl3);
-  //
+  //Now we've added three labels.
   BOOST_TEST(f.get_label_number() == 3);
   BOOST_TEST(f.get_label(1) == "label2");
   //with check
@@ -52,6 +58,7 @@ BOOST_AUTO_TEST_CASE(IdDictSetAndGet){
   BOOST_TEST(f.get_label_value("label2") == 3);//??
   BOOST_TEST(f.get_label_value("1000") == 1000);//special treatment for numerical labels
   BOOST_TEST(f.get_label_value("nonsense") == 0);
+  BOOST_TEST(f.find_label("label1") == lbl1);
   BOOST_TEST(f.verify() == true);
   //f2 holds the same pointers as f1
   IdDictField f2(f);

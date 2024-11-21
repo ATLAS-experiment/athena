@@ -21,30 +21,22 @@ namespace{
   } 
 }
 
-//-----------------------------------------------------------------
-const IdDictRange*  IdDictFieldImplementation::range() const
-//-----------------------------------------------------------------
-{ return (m_range); } 
+const IdDictRange*  
+IdDictFieldImplementation::range() const{ return (m_range); } 
 
-//-----------------------------------------------------------------
-void  IdDictFieldImplementation::set_range        (const IdDictRange* range)
-//-----------------------------------------------------------------
-{
+void  
+IdDictFieldImplementation::set_range(const IdDictRange* range){
     m_range = range;
 }
 
-//-----------------------------------------------------------------
-void IdDictFieldImplementation::show             (void) const
-//-----------------------------------------------------------------
-{
+void 
+IdDictFieldImplementation::show() const{
     std::cout << show_to_string() << std::endl;
 }
 
-//-----------------------------------------------------------------
-std::string IdDictFieldImplementation::show_to_string   (void) const
-{
+std::string 
+IdDictFieldImplementation::show_to_string() const{
     std::stringstream str;
-
     unsigned int pos;
     unsigned int nchar;
     str	<< "decode " << m_decode_index;
@@ -89,7 +81,5 @@ std::string IdDictFieldImplementation::show_to_string   (void) const
     if (m_ored_field.isBounded()) str << "both_bounded  ";
     else if  (m_ored_field.isEnumerated()) str << "enumerated  ";
     else str << "unknown  ";
-    
-
     return (str.str());
 }

@@ -1,0 +1,30 @@
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MAIN
+#define BOOST_TEST_MODULE TEST_IdDict
+#include <boost/test/unit_test.hpp>
+namespace utf = boost::unit_test;
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
+
+#include "IdDict/IdDictDefs.h"
+
+
+BOOST_AUTO_TEST_SUITE(IdDictDictionaryRefTest)
+BOOST_AUTO_TEST_CASE(IdDictDictionaryRefConstructors){
+  BOOST_CHECK_NO_THROW(IdDictDictionaryRef());
+  IdDictDictionaryRef i1;
+  BOOST_CHECK_NO_THROW([[maybe_unused]] IdDictDictionaryRef i2(i1));
+  BOOST_CHECK_NO_THROW([[maybe_unused]] IdDictDictionaryRef i3(std::move(i1)));
+}
+
+
+BOOST_AUTO_TEST_CASE(IdDictDictionaryRefBuildRange){
+  IdDictDictionaryRef f;
+  auto pDictionary = std::make_unique<IdDictDictionary>(); 
+  f.m_dictionary = pDictionary.get();
+  BOOST_TEST(f.build_range() == Range());
+}
+
+BOOST_AUTO_TEST_SUITE_END()
