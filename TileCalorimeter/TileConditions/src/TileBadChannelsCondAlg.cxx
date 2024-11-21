@@ -1,6 +1,6 @@
 //Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -17,8 +17,7 @@
 
 
 TileBadChannelsCondAlg::TileBadChannelsCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator),
-  m_useOflBch(true)
+  AthAlgorithm(name, pSvcLocator)
 {
 }
 

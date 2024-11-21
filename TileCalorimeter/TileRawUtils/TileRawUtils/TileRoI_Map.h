@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERAWUTILS_TILEROI_MAP_H
@@ -121,13 +121,13 @@ class TileRoI_Map : public AthAlgTool {
 
   E_P_MAP m_epmap; 
  
-  const TileID*   m_tileID; 
-  const TileHWID* m_tileHWID; 
-  const TileDetDescrManager* m_tileMgr;
-  const TileCablingService* m_cablingSvc; 
+  const TileID*   m_tileID{nullptr};
+  const TileHWID* m_tileHWID{nullptr};
+  const TileDetDescrManager* m_tileMgr{nullptr};
+  const TileCablingService* m_cablingSvc{nullptr};
 
   TileFragHash m_idhash; 
-  bool m_print; 
+  Gaudi::Property<bool> m_print{this, "Print", false};
 };
   
 

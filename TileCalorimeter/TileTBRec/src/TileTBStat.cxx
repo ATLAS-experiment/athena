@@ -149,6 +149,7 @@ TileTBStat::TileTBStat(const std::string& name, ISvcLocator* pSvcLocator)
   , m_cis1st()
   , m_cisBeg()
   , m_cisEnd()
+  , m_nEventsPerTrigger()
 {
   m_runNo = m_evtMin =  m_evtMax = m_evtBegin = m_evtNo = 0;
 }
