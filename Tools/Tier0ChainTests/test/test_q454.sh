@@ -11,13 +11,13 @@
 
 Reco_tf.py \
 --CA 'all:True' \
---AMI=q445 \
+--AMI=q454 \
 --preExec "r2a:flags.DQ.Steering.HLT.doInDet=False; flags.Exec.FPE=500;" \
 --postExec "" \
 --multithreaded \
 --maxEvents=500 \
 --outputRDOFile=myRDO.pool.root --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root --outputHISTFile=myHIST.root \
---conditionsTag 'all:OFLCOND-MC21-SDR-RUN3-10' \
+--conditionsTag 'all:OFLCOND-MC23-SDR-RUN3-06' \
 --imf False
 
 rc1=$?
