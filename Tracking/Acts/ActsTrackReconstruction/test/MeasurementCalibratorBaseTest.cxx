@@ -28,10 +28,10 @@ void checkList(const typename Acts::MultiTrajectory<trajectory_t>::TrackStatePro
   assert( trackState.calibratedSize() == expectedCalibratedSize );
   std::cout << "- checking loc pos" << std::endl;
   assert( trackState.effectiveCalibrated().size() == expectedLocPos.size() );
-  assert( trackState.effectiveCalibrated() == expectedLocPos.template cast<Acts::ActsScalar>() );
+  assert( trackState.effectiveCalibrated() == expectedLocPos.template cast<double>() );
   std::cout << "- checking loc cov" << std::endl;
   assert( trackState.effectiveCalibratedCovariance().size() == expectedLocCov.size() );
-  assert( trackState.effectiveCalibratedCovariance() == expectedLocCov.template cast<Acts::ActsScalar>() );
+  assert( trackState.effectiveCalibratedCovariance() == expectedLocCov.template cast<double>() );
   std::cout << "- checking BoundSubspaceIndices" << std::endl;
   assert( trackState.boundSubspaceIndices() == expectedBoundSpaceIndices );
 }

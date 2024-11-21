@@ -42,8 +42,8 @@ namespace ActsTrk::detail {
   {
     trackState.allocateCalibrated(Dim);
     setProjector(measType, boundType, trackState);
-    trackState.template calibrated<Dim>() = locpos.template cast<Acts::ActsScalar>();
-    trackState.template calibratedCovariance<Dim>() = cov.template cast<Acts::ActsScalar>();
+    trackState.template calibrated<Dim>() = locpos.template cast<double>();
+    trackState.template calibratedCovariance<Dim>() = cov.template cast<double>();
   }
   
   template <class measurement_t,

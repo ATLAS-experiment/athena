@@ -132,7 +132,7 @@ struct MeasurementSelectorTraits<  AtlasMeasurementSelector<NMeasMax, traj_t, me
    using TrackStateProxy = typename traj_t::TrackStateProxy;
 
    // the value type usd for matrices
-   using MatrixFloatType = Acts::ActsScalar;
+   using MatrixFloatType = double;
    using BoundTrackParameters = Acts::BoundTrackParameters;
    using BoundMatrix = Acts::BoundMatrix;
 

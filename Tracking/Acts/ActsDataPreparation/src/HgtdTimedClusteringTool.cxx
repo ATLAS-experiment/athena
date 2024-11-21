@@ -17,7 +17,7 @@ namespace Hgtd {
   static inline int& getCellLabel(Hgtd::UnpackedHgtdRDO& cell)
   { return cell.NCL; }
 
-  static inline Acts::ActsScalar getCellTime(const Hgtd::UnpackedHgtdRDO& cell)
+  static inline double getCellTime(const Hgtd::UnpackedHgtdRDO& cell)
   { return cell.TOA; }
   
   static inline void clusterAddCell(ActsTrk::HgtdTimedClusteringTool::Cluster& cl,
