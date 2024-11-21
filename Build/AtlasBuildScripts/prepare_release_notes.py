@@ -29,6 +29,7 @@ try:
 except ImportError:
     gitlab_available = False
 
+repo = 'atlas/athena'  # change this for testing
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
@@ -87,6 +88,7 @@ def main():
         print('Are you running this script from within the athena/ directory?')
         exit(1)
     # If possible, use Gitlab
+    gl = None
     gl_project = None
     if args.token and gitlab_available:
         if verbose: print('Trying to connect to gitlab using the supplied token')
@@ -97,7 +99,7 @@ def main():
         except Exception as err:
             print(f"Authentication failed. {err=}, {type(err)=}")
             exit(1)
-        gl_project = gl.projects.get("atlas/athena")
+        gl_project = gl.projects.get(repo)
 
     print('Retrieving the list of MRs (run with --verbose to get more output while this is happening).')
     merged_mrs = parse_mrs_from_log(output_log['stdout'].decode("utf-8"),
@@ -132,7 +134,7 @@ def main():
             except Exception as err:
                 print(f"Failed to create tag or release. {err=}, {type(err)=}")
                 exit(1)
-            print('Just created the following release:', release)
+            print(f'Created the following release: https://gitlab.cern.ch/{repo}/-/releases/{release.name}')
 
     # Create a Draft sweep MR in GitLab
     if args.sweep and args.token and gitlab_available:
@@ -334,7 +336,7 @@ the previous release {previous_release_link:s}:
 Link to the full diff between {target_release_link:s} and
 {previous_release_link:s}
 is available at
-https://gitlab.cern.ch/atlas/athena/compare/{previous_release:s}...{target_release:s}
+https://gitlab.cern.ch/{repo:s}/compare/{previous_release:s}...{target_release:s}
 """
 
 def sweep_template():
@@ -395,7 +397,7 @@ def fill_template(template, target_release, nightly_tag, optional_message, previ
             [" * %s" % mr for mr in merged_mrs]) if merged_mrs else '* None'
 
     def formatted_tag_link(tag=''):
-        base_url = 'https://gitlab.cern.ch/atlas/athena/tags'
+        base_url = f'https://gitlab.cern.ch/{repo}/tags'
         return "[%s](%s)" % (tag, base_url+'/'+tag)
 
     filled_template = template.format(**{'target_release': target_release,
@@ -403,6 +405,7 @@ def fill_template(template, target_release, nightly_tag, optional_message, previ
                                          'nightly_tag': nightly_tag,
                                          'nightly_tag_link': formatted_tag_link(nightly_tag),
                                          'optional_message': optional_message,
+                                         'repo' : repo,
                                          'previous_release': previous_release,
                                          'previous_release_link': formatted_tag_link(previous_release),
                                          'formatted_list_of_merge_requests': formatted_mrs})
