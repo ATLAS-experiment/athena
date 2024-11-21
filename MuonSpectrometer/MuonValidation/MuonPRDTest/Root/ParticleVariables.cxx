@@ -11,8 +11,9 @@ namespace MuonPRDTest {
                                          const std::string& outName,
                                          MSG::Level msglvl) :
         PrdTesterModule(tree, "Particles"+ containerKey+outName, msglvl), 
-            m_key{containerKey} {
-                m_branch = std::make_shared<IParticleFourMomBranch>(tree, outName);
+        m_key{containerKey},
+        m_branch{std::make_shared<IParticleFourMomBranch>(tree, outName)}
+        {
         }
 
     bool ParticleVariables::fill(const EventContext& ctx) {
