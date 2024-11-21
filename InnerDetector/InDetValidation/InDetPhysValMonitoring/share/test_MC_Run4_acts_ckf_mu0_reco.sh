@@ -26,10 +26,10 @@ fi
 
 run () {
     name="${1}"
-    cmd="${@:2}"
+    cmd=("${@:2}")
     ############
     echo "Running ${name}..."
-    time ${cmd}
+    time "${cmd[@]}"
     rc=$?
     # Only report hard failures for comparison Acts-Trk since we know
     # they are different. We do not expect these tests to succeed
@@ -54,6 +54,7 @@ reco_rc=$?
 
 # Rename log
 mv log.RAWtoALL log.RAWtoALL.CKF
+mv acts-expert-monitoring.root acts-expert-monitoring.ckf.root
 
 # don't stop right away on an ERROR message ($?=68)
 if [[ $reco_rc != 0 && $reco_rc != 68 ]]; then
@@ -89,6 +90,7 @@ reco_rc=$?
 
 # Rename log
 mv log.RAWtoALL log.RAWtoALL.AMBI
+mv acts-expert-monitoring.root acts-expert-monitoring.ambi.root
 
 if [[ $reco_rc != 0 && $reco_rc != 68 ]]; then
     exit $reco_rc
@@ -104,17 +106,9 @@ run "IDPVM" \
     ${idpvmOpts[@]}
 
 ambi_rc=$?
-if [ $ckf_rc != 0 ]; then
-    exit_rc=$ckf_rc
-else
-    exit_rc=$ambi_rc
-fi
-if [[ $ckf_rc != 0 && $ambi_rc != 0 ]]; then
-    exit $exit_rc
-fi
 
-echo "Running Reconstruction-ambi-scored ..."
-time Reco_tf.py \
+run "Reconstruction-ambi-scored" \
+    Reco_tf.py \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateResolvedTracksFlags" \
     --preExec "flags.Acts.doMonitoring=True; \
@@ -149,6 +143,16 @@ if [ $ambi_scored_rc != 0 ]; then
     exit $ambi_scored_rc
 fi
 
+if [ $ckf_rc != 0 ]; then
+    exit_rc=$ckf_rc
+elif [ $ambi_rc != 0 ]; then
+    exit_rc=$ambi_rc
+else
+    exit_rc=$ambi_scored_rc
+fi
+if [ $ckf_rc != 0 -a $ambi_rc != 0 -a $ambi_scored_rc != 0 ]; then
+    exit $exit_rc
+fi
 
 echo "download latest result..."
 art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"

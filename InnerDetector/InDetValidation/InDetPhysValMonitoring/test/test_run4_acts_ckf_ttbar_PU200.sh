@@ -115,14 +115,6 @@ run "IDPVM-ambi" \
     --doExpertPlots
 
 ambi_rc=$?
-if [ $ckf_rc != 0 ]; then
-    exit_rc=$ckf_rc
-else
-    exit_rc=$ambi_rc
-fi
-if [ $ckf_rc != 0 -a $ambi_rc != 0 ]; then
-    exit $exit_rc
-fi
 
 run "Reconstruction-ambi-scored" \
     Reco_tf.py \
@@ -162,6 +154,16 @@ if [ $ambi_scored_rc != 0 ]; then
     exit $ambi_scored_rc
 fi
 
+if [ $ckf_rc != 0 ]; then
+    exit_rc=$ckf_rc
+elif [ $ambi_rc != 0 ]; then
+    exit_rc=$ambi_rc
+else
+    exit_rc=$ambi_scored_rc
+fi
+if [ $ckf_rc != 0 -a $ambi_rc != 0 -a $ambi_scored_rc != 0 ]; then
+    exit $exit_rc
+fi
 
 echo "download latest result..."
 art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"

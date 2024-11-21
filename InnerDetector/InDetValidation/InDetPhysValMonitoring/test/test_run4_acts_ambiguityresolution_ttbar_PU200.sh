@@ -24,10 +24,10 @@ fi
 
 run () {
     name="${1}"
-    cmd="${@:2}"
+    cmd=("${@:2}")
     ############
     echo "Running ${name}..."
-    time ${cmd}
+    time "${cmd[@]}"
     rc=$?
     # Only report hard failures for comparison Acts-Trk since we know
     # they are different. We do not expect these tests to succeed

@@ -25,10 +25,10 @@ fi
 
 run () {
     name="${1}"
-    cmd="${@:2}"
+    cmd=("${@:2}")
     ############
     echo "Running ${name}..."
-    time ${cmd}
+    time "${cmd[@]}"
     rc=$?
     echo "art-result: $rc ${name}"
     return $rc

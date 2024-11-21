@@ -24,10 +24,10 @@ fi
 
 run () {
     name="${1}"
-    cmd="${@:2}"
+    cmd=("${@:2}")
     ############
     echo "Running ${name}..."
-    time ${cmd}
+    time "${cmd[@]}"
     rc=$?
     # Only report hard failures for 21.9 vs master tests since both
     # branches are unlikely to ever match perfectly
