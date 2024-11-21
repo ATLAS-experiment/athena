@@ -745,13 +745,13 @@ inline std::vector<int> containedQuarks(int p) {
   return quarks;
 }
 
-template<class T> inline bool isSquark(const T& p);
+template<class T> inline bool isSquark(const T& p) { return isSquark(p->pdg_id()); }
 template<> inline bool isSquark(const DecodedPID& p){
   auto pp = p.shift(1); return isSUSY(p) && isQuark(pp);
 }
 template<> inline bool isSquark(const int& p){ auto value_digits = DecodedPID(p); return isSquark(value_digits);}
 
-template<class T> inline bool hasSquark(const T& p, const int& q);
+template<class T> inline bool hasSquark(const T& p, const int& q) { return hasSquark(p->pdg_id()); }
 template<> inline bool hasSquark(const DecodedPID& p, const int& q){
   auto pp = p.shift(1); return isSUSY(p) && pp.ndigits() != 2 && pp(0) == q; // skip lepton and boson super-partners by vetoing ndigits==2
 }
