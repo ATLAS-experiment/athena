@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -45,18 +45,14 @@ SiliconID::~SiliconID() = default;
 int
 SiliconID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   MsgStream log(m_msgSvc, "SiliconID");
-  if (m_msgSvc) log << MSG::INFO << "Initialize from dictionary" << endmsg;
-  else std::cout << " INFO SiliconID Initialize from dictionary" << std::endl;
+  log << MSG::INFO << "Initialize from dictionary" << endmsg;
   // Check whether this helper should be reinitialized
   if (!reinitialize(dict_mgr)) {
-    if (m_msgSvc) log << MSG::INFO << "Request to reinitialize not satisfied - tags have not changed" << endmsg;
-    else std::cout <<
-      " INFO SiliconID::initialize_from_dictionary - Request to reinitialize not satisfied - tags have not changed" <<
-      std::endl;
+    log << MSG::INFO << "Request to reinitialize not satisfied - tags have not changed" << endmsg;
+    
     return(0);
   } else {
-    if (m_msgSvc) log << MSG::DEBUG << "(Re)initialize" << endmsg;
-    else std::cout << " DEBUG SiliconID::initialize_from_dictionary - (Re)initialize" << std::endl;
+    log << MSG::DEBUG << "(Re)initialize" << endmsg;
   }
   // init base object
   if (AtlasDetectorID::initialize_from_dictionary(dict_mgr)) return(1);
@@ -100,16 +96,12 @@ int
 SiliconID::test_wafer_hashes(void) const {
   MsgStream log(m_msgSvc, "IdDictTest_SiliconID");
 
-  if (m_msgSvc) log << MSG::INFO << "test_wafer_packing: wafer hash max, pix, sct "
+  log << MSG::INFO << "test_wafer_packing: wafer hash max, pix, sct "
                     << wafer_hash_max() << " "
                     << m_pixel_helper->wafer_hash_max() << " "
                     << m_sct_helper->wafer_hash_max() << " "
                     << endmsg;
-  else std::cout << " INFO SiliconID::test_wafer_packing: wafer hash max, pix, sct "
-                 << wafer_hash_max() << " "
-                 << m_pixel_helper->wafer_hash_max() << " "
-                 << m_sct_helper->wafer_hash_max() << " "
-                 << std::endl;
+ 
 
   bool error = false;
 
@@ -123,25 +115,20 @@ SiliconID::test_wafer_hashes(void) const {
   for (unsigned int i = 0; i < wafer_hash_max(); ++i, ++nids) {
     Identifier id = wafer_id(i);
     if (i < 10) {
-      if (m_msgSvc) log << MSG::INFO << "test_wafer_packing: id "
+      log << MSG::INFO << "test_wafer_packing: id "
                         << show_to_string(id)
                         << endmsg;
-      else std::cout << " INFO SiliconID::test_wafer_packing: id "
-                     << show_to_string(id)
-                     << std::endl;
+     
     }
 
     // Check hash
     IdentifierHash hash = wafer_hash(id);
     if (hash != i) {
-      if (m_msgSvc) log << MSG::ERROR << "test_wafer_packing: wafer_hash not equal to i "
+      log << MSG::ERROR << "test_wafer_packing: wafer_hash not equal to i "
                         << "hash: " << hash << " i: " << i << " "
                         << show_to_string(id)
                         << endmsg;
-      else std::cout << " ERROR SiliconID::test_wafer_packing: wafer_hash not equal to i "
-                     << "hash: " << hash << " i: " << i << " "
-                     << show_to_string(id)
-                     << std::endl;
+     
       error = true;
     }
 
@@ -151,27 +138,21 @@ SiliconID::test_wafer_hashes(void) const {
       if (is_sct(id)) {
         nbars++;
         if (!m_sct_helper->is_barrel(id)) {
-          if (m_msgSvc) log << MSG::ERROR << "test_wafer_packing: is_barrel fails for sct. "
+          log << MSG::ERROR << "test_wafer_packing: is_barrel fails for sct. "
                             << "hash: " << hash << " i: " << i << " "
                             << show_to_string(id)
                             << endmsg;
-          else std::cout << " ERROR SiliconID::test_wafer_packing: is_barrel fails for sct. "
-                         << "hash: " << hash << " i: " << i << " "
-                         << show_to_string(id)
-                         << std::endl;
+        
           error = true;
         }
       } else {
         nbarp++;
         if (!m_pixel_helper->is_barrel(id)) {
-          if (m_msgSvc) log << MSG::ERROR << "test_wafer_packing: is_barrel fails for pixel. "
+          log << MSG::ERROR << "test_wafer_packing: is_barrel fails for pixel. "
                             << "hash: " << hash << " i: " << i << " "
                             << show_to_string(id)
                             << endmsg;
-          else std::cout << " ERROR SiliconID::test_wafer_packing: is_barrel fails for pixel. "
-                         << "hash: " << hash << " i: " << i << " "
-                         << show_to_string(id)
-                         << std::endl;
+          
           error = true;
         }
       }
@@ -181,25 +162,19 @@ SiliconID::test_wafer_hashes(void) const {
     if (is_blayer(id)) {
       nblay++;
       if (is_sct(id)) {
-        if (m_msgSvc) log << MSG::ERROR << "test_wafer_packing: is_blayer is sct. "
+        log << MSG::ERROR << "test_wafer_packing: is_blayer is sct. "
                           << "hash: " << hash << " i: " << i << " "
                           << show_to_string(id)
                           << endmsg;
-        else std::cout << " ERROR SiliconID::test_wafer_packing: is_blayer is sct. "
-                       << "hash: " << hash << " i: " << i << " "
-                       << show_to_string(id)
-                       << std::endl;
+        
         error = true;
       } else {
         if (!m_pixel_helper->is_blayer(id)) {
-          if (m_msgSvc) log << MSG::ERROR << "test_wafer_packing: is_blayer fails for pixel. "
+          log << MSG::ERROR << "test_wafer_packing: is_blayer fails for pixel. "
                             << "hash: " << hash << " i: " << i << " "
                             << show_to_string(id)
                             << endmsg;
-          else std::cout << " ERROR SiliconID::test_wafer_packing: is_blayer fails for pixel. "
-                         << "hash: " << hash << " i: " << i << " "
-                         << show_to_string(id)
-                         << std::endl;
+          
           error = true;
         }
       }
@@ -207,21 +182,18 @@ SiliconID::test_wafer_hashes(void) const {
 
     // Check is_pixel
     if (is_hash_pixel(i) != is_pixel(id)) {
-      if (m_msgSvc) log << MSG::ERROR << "test_wafer_packing: is_hash_pixel "
+      log << MSG::ERROR << "test_wafer_packing: is_hash_pixel "
                         << "hash: " << hash << " i: " << i << " "
                         << show_to_string(id)
                         << endmsg;
-      else std::cout << " ERROR SiliconID::test_wafer_packing: is_hash_pixel "
-                     << "hash: " << hash << " i: " << i << " "
-                     << show_to_string(id)
-                     << std::endl;
+     
       error = true;
     } else {
       nHashPix++;
     }
   }
 
-  if (m_msgSvc) {
+  
     log << MSG::INFO << "Looped over " << nids << " hashes "
         << endmsg;
     log << MSG::INFO << "Number of is_barrel (pix/sct): " << nbar
@@ -231,17 +203,7 @@ SiliconID::test_wafer_hashes(void) const {
         << endmsg;
     log << MSG::INFO << "Number of matching is_hash_pixel/is_pixel: " << nHashPix
         << endmsg;
-  } else {
-    std::cout << " INFO Looped over " << nids << " hashes "
-              << std::endl;
-    std::cout << " INFO Number of is_barrel (pix/sct): " << nbar
-              << " " << nbarp << " " << nbars
-              << std::endl;
-    std::cout << " INFO Number of is_blayer: " << nblay
-              << std::endl;
-    std::cout << " INFO Number of matching is_hash_pixel/is_pixel: " << nHashPix
-              << std::endl;
-  }
+  
 
 
   if (error) return(1);

@@ -307,7 +307,7 @@ private:
   typedef id_vec::const_iterator id_vec_it;
   typedef std::vector<IdentifierHash> hash_vec;
   typedef hash_vec::const_iterator hash_vec_it;
-  enum ExpandedIdIndices {INDET, SCT, BARREL_EC, LAYER_DISK, PHI, ETA, SIDE, STRIP,ROW, NUM_INDICES};
+  enum ExpandedIdIndices {INDET, SCT, BARREL_EC, LAYER_DISK, PHI, ETA, SIDE, ROW,STRIP, NUM_INDICES};
   std::array<std::function< IdentifierHash(const IdentifierHash & )>, 5> m_neighboursByEta;
   
   //this is a bit clumsy, but it reproduces the original messaging behaviour with/without Gaudi

@@ -27,7 +27,23 @@ atlas_add_test( SCT_ID_test
                 SOURCES
                 test/SCT_ID_test.cxx
                 INCLUDE_DIRS ${Boost_INCLUDE_DIRS}  
-                LINK_LIBRARIES ${Boost_LIBRARIES} IdDictParser Identifier InDetIdentifier
+                LINK_LIBRARIES  IdDictParser Identifier InDetIdentifier ${Boost_LIBRARIES} 
                 POST_EXEC_SCRIPT "nopost.sh"                
                 )
+ atlas_add_test( ITk_ID_test                
+                SOURCES
+                test/ITk_ID_test.cxx
+                INCLUDE_DIRS ${Boost_INCLUDE_DIRS}  
+                LINK_LIBRARIES  IdDictParser Identifier InDetIdentifier ${Boost_LIBRARIES} 
+                POST_EXEC_SCRIPT "nopost.sh"                
+                )
+atlas_add_test( PLR_ID_test                
+                SOURCES
+                test/PLR_ID_test.cxx
+                INCLUDE_DIRS ${Boost_INCLUDE_DIRS}  
+                LINK_LIBRARIES  IdDictParser Identifier InDetIdentifier ${Boost_LIBRARIES} 
+                POST_EXEC_SCRIPT "nopost.sh"                
+                )               
+                
 set_target_properties( InDetIdentifier_SCT_ID_test  PROPERTIES ENABLE_EXPORTS True )
+set_target_properties( InDetIdentifier_ITk_ID_test  PROPERTIES ENABLE_EXPORTS True )

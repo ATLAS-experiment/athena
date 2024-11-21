@@ -19,6 +19,15 @@
 #include <iostream>
 
 namespace{
+  std::ostream & operator<<(std::ostream & out, const MSG::Level l){
+    constexpr std::array<std::string_view, MSG::Level::NUM_LEVELS> lvl{"NIL ", "VERBOSE ",
+     "DEBUG ", "INFO ", "WARNING ", "ERROR ", "FATAL ", "ALWAYS "};
+    out<<lvl[l];
+    return out;
+  }
+}
+
+namespace{
   const IdentifierHash invalidHash;
   const std::array<IdentifierHash, 5> invalidHashes{invalidHash, invalidHash, invalidHash,
   invalidHash, invalidHash};
@@ -735,15 +744,14 @@ SCT_ID::get_hash(const Identifier& id,
 }
 void
 SCT_ID::localMessage(const std::string & msgTxt, const std::string &func, const MSG::Level & lvl) const{
-  const std::array<std::string, MSG::NUM_LEVELS> prefix={"","VERBOSE ", "DEBUG ", "INFO ", "WARNING ", "ERROR ", "FATAL "," "};
   if (m_msgSvc){
     MsgStream log(m_msgSvc, "SCT_ID");
     log << lvl << msgTxt << endmsg;
   } else {
     #ifdef NDEBUG
-    if (lvl > MSG::DEBUG) std::cout<<prefix[lvl]<<"SCT_ID::"<<func<<" "<<msgTxt<<std::endl;
+    if (lvl > MSG::DEBUG) std::cout<<lvl<<"SCT_ID::"<<func<<" "<<msgTxt<<std::endl;
     #else
-    std::cout<<prefix[lvl]<<"SCT_ID::"<<func<<" "<<msgTxt<<std::endl;
+    std::cout<<lvl<<"SCT_ID::"<<func<<" "<<msgTxt<<std::endl;
     #endif
   }
   

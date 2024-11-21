@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef INDETIDENTIFIER_PLR_ID_H
@@ -7,8 +7,6 @@
 /**
  * @file PLR_ID.h
  *
- * @brief This is an Identifier helper class for the PLR
- *  subdetector. This class inherits from PicelID
  */
 
 #include "InDetIdentifier/PixelID.h"
@@ -16,7 +14,7 @@
 /**
 **  @class PLR_ID
 **
-**  @brief This is an Identifier helper class for the PLR
+**  @brief This is a Identifier helper class for the PLR
 **  subdetector. This class inherits from PixelID.
 **/
 
