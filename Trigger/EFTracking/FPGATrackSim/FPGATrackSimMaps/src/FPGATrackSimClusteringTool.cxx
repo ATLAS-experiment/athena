@@ -31,6 +31,12 @@ StatusCode FPGATrackSimClusteringTool::DoClustering(FPGATrackSimLogicalEventInpu
 
         std::vector<std::vector<FPGATrackSimHit>> hitsPerModule;
         std::vector<FPGATrackSimCluster> towerClusters;
+
+	if (m_reduceCoordPrecision) {
+	  for (auto &hit : hits)
+	    reduceGlobalCoordPrecision(hit);
+	}
+
         splitAndSortHits(hits, hitsPerModule);
         SortedClustering(hitsPerModule, towerClusters);
         normaliseClusters(towerClusters);
@@ -42,9 +48,10 @@ StatusCode FPGATrackSimClusteringTool::DoClustering(FPGATrackSimLogicalEventInpu
         clusters.reserve(towerClusters.size());
         if(i > 1)
           ATH_MSG_WARNING("more than one tower, m_clusters is only going to contain those from the last one");
+
         unsigned cluster_count = 0;
         for ( auto &cluster: towerClusters){
-	  if (m_reduceClusterPrecision)
+	  if (m_reduceCoordPrecision)
 	    reduceGlobalCoordPrecision(cluster);
 
           FPGATrackSimHit cluster_as_FPGATrackSimhit = cluster.getClusterEquiv();
@@ -464,13 +471,25 @@ void FPGATrackSimClusteringTool::reduceGlobalCoordPrecision(FPGATrackSimCluster 
   FPGATrackSimHit clusterEquiv = cluster.getClusterEquiv();
   float pos[3] = { clusterEquiv.getR(), clusterEquiv.getGPhi(), clusterEquiv.getZ() };
 
-  pos[0] = std::trunc(pos[0] / m_clusterRPrecision) * m_clusterRPrecision;
-  pos[1] = std::trunc(pos[1] / m_clusterPhiPrecision) * m_clusterPhiPrecision;
-  pos[2] = std::trunc(pos[2] / m_clusterZPrecision) * m_clusterZPrecision;
+  pos[0] = std::trunc(pos[0] / m_coordRPrecision) * m_coordRPrecision;
+  pos[1] = std::trunc(pos[1] / m_coordPhiPrecision) * m_coordPhiPrecision;
+  pos[2] = std::trunc(pos[2] / m_coordZPrecision) * m_coordZPrecision;
 
   clusterEquiv.setX(pos[0] * std::cos(pos[1]));
   clusterEquiv.setY(pos[0] * std::sin(pos[1]));
   clusterEquiv.setZ(pos[2]);
 
   cluster.setClusterEquiv(clusterEquiv);
+}
+
+void FPGATrackSimClusteringTool::reduceGlobalCoordPrecision(FPGATrackSimHit &hit) const {
+  float pos[3] = { hit.getR(), hit.getGPhi(), hit.getZ() };
+
+  pos[0] = std::trunc(pos[0] / m_coordRPrecision) * m_coordRPrecision;
+  pos[1] = std::trunc(pos[1] / m_coordPhiPrecision) * m_coordPhiPrecision;
+  pos[2] = std::trunc(pos[2] / m_coordZPrecision) * m_coordZPrecision;
+
+  hit.setX(pos[0] * std::cos(pos[1]));
+  hit.setY(pos[0] * std::sin(pos[1]));
+  hit.setZ(pos[2]);
 }
