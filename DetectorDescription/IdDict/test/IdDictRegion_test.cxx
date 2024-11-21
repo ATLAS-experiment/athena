@@ -9,6 +9,7 @@ namespace utf = boost::unit_test;
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "IdDict/IdDictDefs.h"
+#include "Identifier/Range.h" 
 
 BOOST_AUTO_TEST_SUITE(IdDictRegionTest)
 BOOST_AUTO_TEST_CASE(IdDictRegionConstructors){
@@ -30,6 +31,17 @@ BOOST_AUTO_TEST_CASE(IdDictRegionModifyMembers){
   f.m_name = "sroe";
   f.m_group = "groupName";
   BOOST_TEST(f.group_name() == "groupName");
+  //IdDictRange _isa_ IdDictRegionEntry
+  IdDictRange * dRange= new  IdDictRange;
+  //by minmax
+  dRange->m_specification = IdDictRange::by_minmax;
+  dRange->m_minvalue = -1;
+  dRange->m_maxvalue = 5;
+  BOOST_CHECK_NO_THROW(f.add_entry(dRange));//what is the ownership policy?
+  BOOST_CHECK(f.m_entries.size() == 1);
+  Range r("-1:5");
+  BOOST_CHECK_NO_THROW([[maybe_unused]] auto s = f.build_range());
+  BOOST_TEST(r == f.build_range());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
