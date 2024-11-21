@@ -1926,12 +1926,12 @@ DvGraph::DvGraph(char *infile, string path, const string & folder, int det, int 
 class DGraph : public TGraph
 {
 public:
-    DGraph(char *, string, string, int, int, bool);
+    DGraph(char *, string, const string&, int, int, bool);
     // TH1F* hist;
     TGraph *rtgraph;
 };
 
-DGraph::DGraph(char *infile, string path, string folder, int det, int lay, bool isinverted)
+DGraph::DGraph(char *infile, string path, const string& folder, int det, int lay, bool isinverted)
 {
 
     this->SetName(Form("Dv_%i_%i", det, lay));

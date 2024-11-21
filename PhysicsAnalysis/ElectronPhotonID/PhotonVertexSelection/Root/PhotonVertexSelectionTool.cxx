@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -86,7 +86,7 @@ namespace CP {
 
   //____________________________________________________________________________
   //new additions for ONNX
-  float PhotonVertexSelectionTool::getScore(int nVars, std::vector<std::vector<float>> input_data, const std::shared_ptr<Ort::Session> sessionHandle, std::vector<int64_t> input_node_dims, std::vector<const char*> input_node_names, std::vector<const char*> output_node_names) const{
+  float PhotonVertexSelectionTool::getScore(int nVars, const std::vector<std::vector<float>>& input_data, const std::shared_ptr<Ort::Session> sessionHandle, std::vector<int64_t> input_node_dims, std::vector<const char*> input_node_names, std::vector<const char*> output_node_names) const{
      //*************************************************************************
      // score the model using sample data, and inspect values
      // loading input data
@@ -183,7 +183,7 @@ namespace CP {
   }
 
   //new additions for ONNX
-  std::tuple<std::shared_ptr<Ort::Session>, Ort::AllocatorWithDefaultOptions> PhotonVertexSelectionTool::setONNXSession(Ort::Env& env, std::string modelFilePath){
+  std::tuple<std::shared_ptr<Ort::Session>, Ort::AllocatorWithDefaultOptions> PhotonVertexSelectionTool::setONNXSession(Ort::Env& env, const std::string& modelFilePath){
     // Find the model file.
     const std::string modelFileName = PathResolverFindCalibFile( modelFilePath );
     ATH_MSG_INFO( "Using model file: " << modelFileName );
