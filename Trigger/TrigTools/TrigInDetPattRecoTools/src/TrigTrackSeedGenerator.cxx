@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -19,7 +19,15 @@ TrigTrackSeedGenerator::TrigTrackSeedGenerator(const TrigCombinatorialSettings& 
   : m_settings(tcs), 
     m_minDeltaRadius(10.0), 
     m_zTol(3.0), 
-    m_pStore(NULL)
+    m_pStore(NULL),
+    m_zMinus(0),
+    m_zPlus(0),
+    m_minCoord(10000.0),
+    m_maxCoord(-10000.0),
+    m_zMinusEndcap(0),
+    m_zPlusEndcap(0),
+    m_nInner(0),
+    m_nOuter(0)
 {
   m_maxDeltaRadius = m_settings.m_doublet_dR_Max;
   m_maxDeltaRadiusConf = m_settings.m_doublet_dR_Max_Confirm;

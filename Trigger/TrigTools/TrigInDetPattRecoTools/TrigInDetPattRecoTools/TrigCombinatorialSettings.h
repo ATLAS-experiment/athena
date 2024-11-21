@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETPATTRECOTOOLS_TRIG_COMBINATORIAL_SETTINGS_H
@@ -26,8 +26,11 @@ public:
     m_doubletD0Max         = 5.0;
 
     m_tripletD0Max      = 4.0; 
-    m_tripletD0_PPS_Max = 1.7; 
+    m_tripletD0_PPS_Max = 1.7;
+    m_doublet_dR_Max    = 270.0;
+    m_doublet_dR_Max_Confirm = 150.0;
     m_tripletPtMin      = 2500.0;//was 1000.0
+    m_seedRadBinWidth   = 2.0;
     m_tripletDoPSS      = false; // Allow Pixel SCT SCT seeds?
     m_tripletDoPPS      = true; // Allow Pixel Pixel SCT seeds?
     m_tripletDoConfirm  = false; // Use another Pixel spacepoint to confirm a triplet
@@ -72,8 +75,8 @@ public:
   bool m_LRTmode;
   bool m_useEtaBinning;
 
-  const FASTRACK_CONNECTOR* m_conn;
-  const TrigFTF_GNN_Geometry*       m_geo;
+  const FASTRACK_CONNECTOR* m_conn{nullptr};
+  const TrigFTF_GNN_Geometry*       m_geo{nullptr};
 
   std::vector<TrigInDetSiLayer> m_layerGeometry;
 
