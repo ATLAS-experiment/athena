@@ -20,8 +20,6 @@
 #include "GaudiKernel/ITHistSvc.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
-#include "TH1D.h"
-#include "TH2D.h"
 #include "TGraph.h"
 
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
@@ -30,6 +28,8 @@
 
 #include "FPGATrackSimGenScanBinning.h"
 #include "FPGATrackSimGenScanTool.h"
+
+
 
  class FPGATrackSimGenScanMonitoring : public AthAlgTool
  {
@@ -79,7 +79,7 @@
 
     // Counter Increments
     void incrementInputPerSlice(const std::vector<unsigned>& sliceidx) { m_inputhitsperslice[sliceidx]++; }
-    void incrementInputPerScan(const std::vector<unsigned>& idx, 
+    void incrementInputPerScan(const FPGATrackSimGenScanBinningBase::IdxSet& idx, 
         const std::pair<unsigned, unsigned>& rowRange, const FPGATrackSimHit* hit);
 
     // Error Checks

@@ -282,7 +282,7 @@ void FPGATrackSimGenScanMonitoring::pairFilterCheck(
 }
 
 void FPGATrackSimGenScanMonitoring::incrementInputPerScan(
-    const std::vector<unsigned>& idx,
+    const FPGATrackSimGenScanBinningBase::IdxSet& idx,
     const std::pair<unsigned, unsigned>& rowRange, const FPGATrackSimHit* hit) {
   if (rowRange.second > rowRange.first) {
     m_hitsLoadedPerLayer->Fill(double(hit->getLayer()));
