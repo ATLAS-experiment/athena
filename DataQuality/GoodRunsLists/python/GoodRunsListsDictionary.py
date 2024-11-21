@@ -5,9 +5,8 @@ def getGoodRunsLists():
     ## RUN 3
 
     # 2024
-    GRLDict['GRL2024_EtoI'] = ['GoodRunsLists/data24_13p6TeV/20240723/data24_13p6TeV.periodsEtoI_DetStatus-v123-pro36-04_MERGED_PHYS_StandardGRL_All_Good_25ns.xml']
-    GRLDict['GRL2024_EtoI_ignoreTrig_HLT_BSPOT_invalid'] = ['GoodRunsLists/data24_13p6TeV/20240723/data24_13p6TeV.periodsEtoI_DetStatus-v123-pro36-04_MERGED_PHYS_StandardGRL_All_Good_25ns_ignoreTRIG_HLT_IDT_BSPOT_INVALID_STATUS.xml']
-
+    GRLDict['GRL2024'] = ['GoodRunsLists/data24_13p6TeV/20241118/physics_25ns_data24.xml']
+    GRLDict['GRL2024_IgnoreBSPOT_INVALID'] = ['GoodRunsLists/data24_13p6TeV/20241118/physics_25ns_data24_IgnoreBSPOT_INVALID.xml']
     
     # 2023
     GRLDict['GRL2023'] = ['GoodRunsLists/data23_13p6TeV/20230828/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-06_MERGED_PHYS_StandardGRL_All_Good_25ns.xml']

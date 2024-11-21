@@ -23,7 +23,7 @@ def createPhysValConfigFlags():
     icf.addFlag("PhysVal.doLLPSecVtxLeptons", False)
 
     icf.addFlag("PhysVal.GRLs", ['GRL2015', 'GRL2016', 'GRL2017_Triggerno17e33prim', 'GRL2018_Triggerno17e33prim',
-                'GRL2022', 'GRL2023', 'GRL2024_EtoI'], help='List of GRL names to be used by PhysVal.')
+                'GRL2022', 'GRL2023', 'GRL2024'], help='List of GRL names to be used by PhysVal.')
     icf.addFlag("PhysVal.applyAllDataCleaning", False,
                 help='Apply all data cleaning cuts, (applyGRL, applyEventStatusSelection, and Photon OQ).')
     icf.addFlag("PhysVal.applyGRL", False,
