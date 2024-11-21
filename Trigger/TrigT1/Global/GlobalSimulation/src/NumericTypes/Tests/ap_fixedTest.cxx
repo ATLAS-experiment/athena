@@ -115,7 +115,7 @@ TEST(ap_fixedTester, addition) {
 
   constexpr int width{10};
   constexpr int prec{5};
-  constexpr double eps {std::pow(2.0, -prec)};
+  const double eps {std::pow(2.0, -prec)};
   using ap = GlobalSim::ap_fixed<width, prec>;
 
   ap ap_sum = ap(1) + ap(2);
@@ -137,7 +137,7 @@ TEST(ap_fixedTester, addition1) {
   
   constexpr int width{10};
   constexpr int prec{5};
-  constexpr double eps {std::pow(2.0, -prec)};
+  const double eps {std::pow(2.0, -prec)};
   using ap = GlobalSim::ap_fixed<width, prec>;
 
   ap ap_sum = ap(2) += 1;
@@ -160,7 +160,7 @@ TEST(ap_fixedTester, subtraction) {
 
   constexpr int width{10};
   constexpr int prec{5};
-  constexpr double eps {std::pow(2.0, -prec)};
+  const double eps {std::pow(2.0, -prec)};
   using ap = GlobalSim::ap_fixed<width, prec>;
 
   ap ap_diff = ap(1) - ap(2);
@@ -182,7 +182,7 @@ TEST(ap_fixedTester, subtraction1) {
 
   constexpr int width{10};
   constexpr int prec{5};
-  constexpr double eps {std::pow(2.0, -prec)};
+  const double eps {std::pow(2.0, -prec)};
   using ap = GlobalSim::ap_fixed<width, prec>;
 
   ap ap_diff = ap(1) -= 2;
@@ -206,7 +206,7 @@ TEST(ap_fixedTester, multiplication) {
 
   constexpr int width{10};
   constexpr int prec{5};
-  constexpr double eps {std::pow(2.0, -prec)};
+  const double eps {std::pow(2.0, -prec)};
   using ap = GlobalSim::ap_fixed<width, prec>;
 
   ap ap_prod = ap(1) * ap(2);
@@ -227,7 +227,7 @@ TEST(ap_fixedTester, multiplication) {
 TEST(ap_fixedTester, multiplication1) {
   constexpr int width{10};
   constexpr int prec{5};
-  constexpr double eps {std::pow(2.0, -prec)};
+  const double eps {std::pow(2.0, -prec)};
   using ap = GlobalSim::ap_fixed<width, prec>;
 
   ap ap_prod = ap(1) *= ap(2);
@@ -250,7 +250,7 @@ TEST(ap_fixedTester, division) {
 
   constexpr int width{10};
   constexpr int prec{5};
-  constexpr double eps {std::pow(2.0, -prec)};
+  const double eps {std::pow(2.0, -prec)};
   using ap = GlobalSim::ap_fixed<width, prec>;
 
   ap ap_div = ap(1)/ap(2);
@@ -273,7 +273,7 @@ TEST(ap_fixedTester, division1) {
 
   constexpr int width{10};
   constexpr int prec{5};
-  constexpr double eps {std::pow(2.0, -prec)};
+  const double eps {std::pow(2.0, -prec)};
   using ap = GlobalSim::ap_fixed<width, prec>;
 
   ap ap_div = ap(1)/=ap(2);
