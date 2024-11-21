@@ -26,9 +26,9 @@ BTagTrackIpAccessor::BTagTrackIpAccessor(const std::string& prefix):
   m_ip3d_gradeOfTracks("IP3D_gradeOfTracks"),
   m_ip2d_signed_d0("IP2D_signed_d0"),
   m_ip3d_signed_d0("IP3D_signed_d0"),
-  m_ip3d_signed_z0("IP3D_signed_z0"),
+  m_ip3d_signed_z0_sin_theta("IP3D_signed_z0"),
   m_ip3d_signed_d0_significance("IP3D_signed_d0_significance"),
-  m_ip3d_signed_z0_significance("IP3D_signed_z0_significance"),
+  m_ip3d_signed_z0_sin_theta_significance("IP3D_signed_z0_significance"),
   m_ip2d_grade("IP2D_grade"),
   m_ip3d_grade("IP3D_grade"),
   m_prefix(prefix)
@@ -65,9 +65,9 @@ BTagSignedIP BTagTrackIpAccessor::getSignedIp(const xAOD::TrackParticle &track, 
   ip.ip3d_signed_d0_significance = ip3d_signed_d0 / m_ip_d0_sigma(track);
 
   const double ip_z0 = z0SinTheta(track);
-  const double signed_z0 = std::copysign(ip_z0, (jet_threeVector.eta() - track_momentum.eta()) * ip_z0);
-  ip.ip3d_signed_z0 = signed_z0;
-  ip.ip3d_signed_z0_significance = signed_z0 / m_ip_z0_sigma(track);
+  const double signed_z0_sin_theta = std::copysign(ip_z0, (jet_threeVector.eta() - track_momentum.eta()) * ip_z0);
+  ip.ip3d_signed_z0_sin_theta = signed_z0_sin_theta;
+  ip.ip3d_signed_z0_sin_theta_significance = signed_z0_sin_theta / m_ip_z0_sigma(track);
   ip.ip2d_grade = 0;
   ip.ip3d_grade = 0;
   return ip;
@@ -99,8 +99,8 @@ void BTagTrackIpAccessor::augment_with_ip(const xAOD::TrackParticle &track, cons
   m_ip2d_signed_d0(track) = ip.ip2d_signed_d0;
   m_ip3d_signed_d0(track) = ip.ip3d_signed_d0;
   m_ip3d_signed_d0_significance(track) = ip.ip3d_signed_d0_significance;
-  m_ip3d_signed_z0(track) = ip.ip3d_signed_z0;
-  m_ip3d_signed_z0_significance(track) = ip.ip3d_signed_z0_significance;
+  m_ip3d_signed_z0_sin_theta(track) = ip.ip3d_signed_z0_sin_theta;
+  m_ip3d_signed_z0_sin_theta_significance(track) = ip.ip3d_signed_z0_sin_theta_significance;
 }
 void BTagTrackIpAccessor::augment_with_grades(const xAOD::TrackParticle &track, const xAOD::Jet &jet) const {
   int ip3d_grade = -1;

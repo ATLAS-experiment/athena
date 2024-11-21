@@ -93,15 +93,26 @@ namespace {
     using Tp = xAOD::TrackParticle;
     using Jet = xAOD::Jet;
 
+    // Note that we have two names for the lifetimeSigned variables
+    // here. We should eventually remove the ones with the `IP3D_*`
+    // prefix but they are used in quite a few models we're currently
+    // running. We keep both because the alternative is changing the
+    // metadata in every one of these models.
     BTagTrackIpAccessor a(prefix);
-    if (name == "IP3D_signed_d0_significance") {
+    if (
+      name == "IP3D_signed_d0_significance" ||
+      name == "lifetimeSignedD0Significance"
+      ) {
       return CustomSeqGetter<Tp>([a](const Tp& tp, const Jet& j){
         return a.getSignedIp(tp, j).ip3d_signed_d0_significance;
       });
     }
-    if (name == "IP3D_signed_z0_significance") {
+    if (
+      name == "IP3D_signed_z0_significance" ||
+      name == "lifetimeSignedZ0SinThetaSignificance"
+      ) {
       return CustomSeqGetter<Tp>([a](const Tp& tp, const Jet& j){
-        return a.getSignedIp(tp, j).ip3d_signed_z0_significance;
+        return a.getSignedIp(tp, j).ip3d_signed_z0_sin_theta_significance;
       });
     }
     if (name == "IP2D_signed_d0") {
@@ -109,14 +120,20 @@ namespace {
         return a.getSignedIp(tp, j).ip2d_signed_d0;
       });
     }
-    if (name == "IP3D_signed_d0") {
+    if (
+      name == "IP3D_signed_d0" ||
+      name == "lifetimeSignedD0"
+      ) {
       return CustomSeqGetter<Tp>([a](const Tp& tp, const Jet& j){
         return a.getSignedIp(tp, j).ip3d_signed_d0;
       });
     }
-    if (name == "IP3D_signed_z0") {
+    if (
+      name == "IP3D_signed_z0" ||
+      name == "lifetimeSignedZ0SinTheta"
+      ) {
       return CustomSeqGetter<Tp>([a](const Tp& tp, const Jet& j){
-        return a.getSignedIp(tp, j).ip3d_signed_z0;
+        return a.getSignedIp(tp, j).ip3d_signed_z0_sin_theta;
       });
     }
     if (name == "d0" || name == "btagIp_d0") {

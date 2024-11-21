@@ -19,9 +19,9 @@
 struct BTagSignedIP {
   double ip2d_signed_d0;
   double ip3d_signed_d0;
-  double ip3d_signed_z0;
+  double ip3d_signed_z0_sin_theta;
   double ip3d_signed_d0_significance;
-  double ip3d_signed_z0_significance;
+  double ip3d_signed_z0_sin_theta_significance;
   double ip2d_grade;
   double ip3d_grade;
 };
@@ -67,9 +67,9 @@ private:
   AE::ConstAccessor<std::vector<int> > m_ip3d_gradeOfTracks;
   AE::Decorator<float> m_ip2d_signed_d0;
   AE::Decorator<float> m_ip3d_signed_d0;
-  AE::Decorator<float> m_ip3d_signed_z0;
+  AE::Decorator<float> m_ip3d_signed_z0_sin_theta;
   AE::Decorator<float> m_ip3d_signed_d0_significance;
-  AE::Decorator<float> m_ip3d_signed_z0_significance;
+  AE::Decorator<float> m_ip3d_signed_z0_sin_theta_significance;
   AE::Decorator<int> m_ip2d_grade;
   AE::Decorator<int> m_ip3d_grade;
 
