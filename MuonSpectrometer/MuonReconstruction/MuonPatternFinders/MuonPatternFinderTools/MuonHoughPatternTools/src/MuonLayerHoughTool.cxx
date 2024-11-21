@@ -1897,6 +1897,7 @@ namespace Muon {
     void MuonLayerHoughTool::initializeSectorMapping(const EventContext& ctx) const{
         if (m_sectorSetup) return;
         std::lock_guard kuchen(m_mutex);
+        // cppcheck-suppress identicalConditionAfterEarlyExit; false positive
         if (m_sectorSetup) return;
         SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_muonManagerKey, ctx};
         m_collectionsPerSector.resize(MuonStationIndex::numberOfSectors());
