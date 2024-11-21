@@ -32,6 +32,7 @@ class FPGATrackSimSpacePointsTool : public extends<AthAlgTool, FPGATrackSimSpace
     void calcPosition(FPGATrackSimHit &hit_in, FPGATrackSimHit &hit_out, float &x, float &y, float &z);
     bool searchForMatch(FPGATrackSimHit& hit_in,std::vector<FPGATrackSimHit>& hits_outer,FPGATrackSimTowerInputHeader &tower, std::vector<FPGATrackSimCluster> &spacepoints);
     void addSpacePoints(FPGATrackSimHit hit_in, FPGATrackSimHit hit_out ,FPGATrackSimTowerInputHeader &tower, std::vector<FPGATrackSimCluster> &spacepoints);
+    void reduceGlobalCoordPrecision(FPGATrackSimHit &hit) const;
 
     //----------------------
     // Working Memory
@@ -44,6 +45,10 @@ class FPGATrackSimSpacePointsTool : public extends<AthAlgTool, FPGATrackSimSpace
     Gaudi::Property<bool> m_filterClose { this, "FilteringClosePoints", false, "Filter out single hits cloes to spacepoints" };
     Gaudi::Property<bool> m_sameModulesOnly { this, "SameModulesOnly", false, "Only use hits on the same physical (eta) module" };
     Gaudi::Property<bool> m_boundsCheck { this, "BoundsCheck", false, "Perform a module bounds check in the endcaps" };
+    Gaudi::Property<bool> m_reduceCoordPrecision {this, "ReduceCoordPrecision", false, "flag to enable reduc ing the precision of global coordinates" };
+    Gaudi::Property<float> m_coordRPrecision {this, "CoordRPrecision", 1./64., "fixed point precision of r coordinate" };
+    Gaudi::Property<float> m_coordPhiPrecision {this, "CoordPhiPrecision", 1./8192., "fixed point precision of phi coordinate" };
+    Gaudi::Property<float> m_coordZPrecision {this, "CoordZPrecision", 1./32., "fixed point precision of z coordinate" };
 
     // self monitoring
     unsigned m_inputhits = 0;
