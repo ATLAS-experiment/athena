@@ -44,10 +44,14 @@ StatusCode FPGATrackSimClusteringTool::DoClustering(FPGATrackSimLogicalEventInpu
           ATH_MSG_WARNING("more than one tower, m_clusters is only going to contain those from the last one");
         unsigned cluster_count = 0;
         for ( auto &cluster: towerClusters){
+	  if (m_reduceClusterPrecision)
+	    reduceGlobalCoordPrecision(cluster);
+
           FPGATrackSimHit cluster_as_FPGATrackSimhit = cluster.getClusterEquiv();
           cluster_as_FPGATrackSimhit.setHitType(HitType::clustered);
           cluster_as_FPGATrackSimhit.setParentageMask(cluster_count); // making use of unused m_parentageMask to keep track of cluster index
           tower.addHit(cluster_as_FPGATrackSimhit);
+
           //send back a copy for monitoring and to check when writing out hits in each road
           clusters.push_back(cluster);
           cluster_count++;
@@ -455,3 +459,18 @@ bool FPGATrackSimCLUSTERING::sortITkInputPhi(const FPGATrackSimHit& hitA, const 
   return hitA.getPhiIndex() < hitB.getPhiIndex();
 }
 
+/* Cap precision of the global coordinates in r, phi, z */
+void FPGATrackSimClusteringTool::reduceGlobalCoordPrecision(FPGATrackSimCluster &cluster) const {
+  FPGATrackSimHit clusterEquiv = cluster.getClusterEquiv();
+  float pos[3] = { clusterEquiv.getR(), clusterEquiv.getGPhi(), clusterEquiv.getZ() };
+
+  pos[0] = std::trunc(pos[0] / m_clusterRPrecision) * m_clusterRPrecision;
+  pos[1] = std::trunc(pos[1] / m_clusterPhiPrecision) * m_clusterPhiPrecision;
+  pos[2] = std::trunc(pos[2] / m_clusterZPrecision) * m_clusterZPrecision;
+
+  clusterEquiv.setX(pos[0] * std::cos(pos[1]));
+  clusterEquiv.setY(pos[0] * std::sin(pos[1]));
+  clusterEquiv.setZ(pos[2]);
+
+  cluster.setClusterEquiv(clusterEquiv);
+}

@@ -40,11 +40,17 @@ public:
 
  private:
 
+  Gaudi::Property<bool> m_reduceClusterPrecision {this, "ReduceClusterPrecision", false, "flag to enable reducing the precision of global coordinates of clusters" };
+  Gaudi::Property<float> m_clusterRPrecision {this, "ClusterRPrecision", 1./64., "fixed point precision of r coordinate of clusters" };
+  Gaudi::Property<float> m_clusterPhiPrecision {this, "ClusterPhiPrecision", 1./8192., "fixed point precision of phi coordinate of clusters" };
+  Gaudi::Property<float> m_clusterZPrecision {this, "ClusterZPrecision", 1./32., "fixed point precision of z coordinate of clusters" };
+
   //FPGATrackSim pixel clustering using the FPGATrackSim objects
   void SortedClustering(const std::vector<std::vector<FPGATrackSimHit> >& sorted_hits, std::vector<FPGATrackSimCluster> &) const;
   void Clustering(std::vector<FPGATrackSimHit>, std::vector<FPGATrackSimCluster> &) const ;
 
   // Other helper functions
+  void reduceGlobalCoordPrecision(FPGATrackSimCluster &cluster) const;
   void splitAndSortHits(std::vector<FPGATrackSimHit>& hits, std::vector<std::vector<FPGATrackSimHit> >& hitsPerModule, int& eta_phi) const;
   void splitAndSortHits(std::vector<FPGATrackSimHit>& hits, std::vector<std::vector<FPGATrackSimHit> >& hitsPerModule) const;
   void splitHitsToModules(std::vector<FPGATrackSimHit>& hits, std::vector<std::vector<FPGATrackSimHit> >& hitsPerModule) const;
