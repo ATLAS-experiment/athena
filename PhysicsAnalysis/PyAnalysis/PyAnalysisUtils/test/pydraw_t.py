@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: pydraw_t.py
@@ -282,12 +282,18 @@ def _regr_mung_expr_ids():
     >>> pydraw._globals = globals()
     >>> tt = Loop_Test()
     >>> tt.foo=[1,2,3,4]
+    >>> class Bar:
+    ...     pass
+    >>> tt.bar = Bar()
+    >>> tt.bar.foo = 10
     >>> from PyAnalysisUtils.pydraw import Draw_Cmd
     >>> c = Draw_Cmd ("tt.foo")
     >>> print (c._mung_expr_ids ("1+xyz+2"), c.errstr)
     1+xyz+2 None
     >>> print (c._mung_expr_ids ("1+foo+2"), c.errstr)
     1+_e_foo+2 None
+    >>> print (c._mung_expr_ids ("1+foo+bar.foo+2"), c.errstr)
+    1+_e_foo+_e_bar.foo+2 None
     >>> print (c._mung_expr_ids (None), c.errstr)
     None None
     """

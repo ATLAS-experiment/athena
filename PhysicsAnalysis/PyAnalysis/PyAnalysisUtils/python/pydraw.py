@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: pydraw.py
@@ -912,12 +912,19 @@ class Draw_Cmd(object):
 
         tlist = tokenize.generate_tokens (StringIO(s).readline)
         out = []
+        afterDot = False
         for tnum, val, a, b, c in tlist:
-            if tnum == token.NAME:
+            if tnum == token.NAME and not afterDot:
                 if hasattr (self.tuple_o, val):
                     val = self._mung_id (val)
                     #val = _evtvar + '.' + val
             out.append ((tnum, val))
+            # Don't mung names after a period.  We may have attributes
+            # with the same names as variables in the tuple.
+            if tnum == token.OP and val == '.':
+                afterDot = True
+            else:
+                afterDot = False
         return _untokenize (out)
 
 
