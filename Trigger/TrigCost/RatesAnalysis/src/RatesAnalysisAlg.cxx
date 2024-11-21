@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // RatesAnalysis includes
@@ -31,7 +31,8 @@ RatesAnalysisAlg::RatesAnalysisAlg( const std::string& name, ISvcLocator* pSvcLo
   m_weightedEventCounter(0),
   m_scalingHist(nullptr),
   m_bcidHist(nullptr),
-  m_metadataTree(nullptr)
+  m_metadataTree(nullptr),
+  m_weightingValues()
 {}
 
 RatesAnalysisAlg::~RatesAnalysisAlg() {}
@@ -151,20 +152,21 @@ StatusCode RatesAnalysisAlg::newTrigger(const std::string& name,
   if (m_doTriggerGroups) {
     for (const std::string& group : groups) {
       // Ignore BW and PS groups
-      if (group.find("BW") == 0 || group.find("PS") == 0 || group.find("STREAM:express") == 0) continue;
-      if (m_groups.count(group) == 0) {
-        m_groups.emplace(group, std::make_unique<RatesGroup>(group, msgSvc(), m_doHistograms, m_enableLumiExtrapolation));
+      if (group.starts_with("BW") || group.starts_with("PS") || group.starts_with("STREAM:express")) continue;
+
+      const auto [it, inserted] = m_groups.try_emplace(group, std::make_unique<RatesGroup>(group, msgSvc(), m_doHistograms, m_enableLumiExtrapolation));
+      if (inserted) {
         // As the group is formed from at least one active trigger - it must be active itself (counter example - CPS group of a PS=-1 trigger)
-        m_activeGroups.insert( m_groups.at(group).get() );
+        m_activeGroups.insert( it->second.get() );
       }
-      m_groups.at(group)->addToGroup( newTriggerPtr );
+      it->second->addToGroup( newTriggerPtr );
       // For CPS, we let the trigger know that it is special
       if (isCPS(group)) {
         if (newTriggerPtr->getCPSID() != 0) ATH_MSG_WARNING("Trigger " << name << " can only be in one coherent prescale group.");
         newTriggerPtr->setCPS(group); // This changes the CPSID
         const size_t CPSID = newTriggerPtr->getCPSID();
         // Find the lowest prescale of any member in this CPS group
-        if (m_lowestPrescale.count(CPSID) == 0) m_lowestPrescale[CPSID] = FLT_MAX;
+        m_lowestPrescale.try_emplace(CPSID, FLT_MAX);
         if (prescale < m_lowestPrescale[CPSID]) m_lowestPrescale[CPSID] = prescale;
       }
     }
@@ -191,7 +193,7 @@ StatusCode RatesAnalysisAlg::addAllExisting() {
   return addExisting(".*");
 }
 
-StatusCode RatesAnalysisAlg::addExisting(const std::string pattern) {
+StatusCode RatesAnalysisAlg::addExisting(const std::string& pattern) {
   // Check we have the TDT
   ATH_CHECK(checkGotTDT());
 

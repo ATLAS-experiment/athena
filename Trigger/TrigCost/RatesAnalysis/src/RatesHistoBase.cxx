@@ -10,8 +10,7 @@
 RatesHistoBase::RatesHistoBase(const std::string& name, IMessageSvc* msgSvc, const bool doHistograms) :
   AthMessaging(msgSvc, name),
   m_name(name),
-  m_doHistograms(doHistograms), m_rateVsMu(nullptr), m_rateVsTrain(nullptr), m_data(nullptr),
-  m_rateVsMuCachedPtr(nullptr), m_rateVsTrainCachedPtr(nullptr), m_dataCachedPtr(nullptr)
+  m_doHistograms(doHistograms)
 {
   if (doHistograms) {
     m_rateVsMu = std::make_unique<TH1D>("",TString(name + ";#mu;Rate / Unit #mu [Hz]"),226,-.5,225.5);
