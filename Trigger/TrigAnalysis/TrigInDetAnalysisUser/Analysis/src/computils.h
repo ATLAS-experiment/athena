@@ -5,8 +5,10 @@
  **     @author  mark sutton
  **     @date    Sat Aug 30 2014 14:38:03 CEST  
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
+
+// cppcheck-suppress-file stlIfStrFind; cannot use C++20 starts_with in this standalone code
 
 #ifndef COMPUTILS_H
 #define COMPUTILS_H
@@ -183,7 +185,7 @@ public:
       else if  ( keys[i]=="width" ) m_binwidth  = true;
       else if  ( keys[i]=="auto" )  m_autoset   = true;
       else if  ( keys[i]=="trim" )  m_trim      = true;
-      else if  ( keys[i].find("offset")==0  )  { 
+      else if  ( keys[i].find("offset")==0  )  {
 
 	std::cout << "offset:" << std::endl;
 	std::cout << "\tkey: " << keys[i] << std::endl;
@@ -241,7 +243,7 @@ public:
   
   /// accessors 
 
-  std::string tag() const { return m_tag; }
+  const std::string& tag() const { return m_tag; }
 
   bool   log()  const { return m_log; }
 
@@ -266,7 +268,7 @@ public:
   
   double binwidth() const { return m_binwidth; }
 
-  std::string c_str() const { return m_info; }
+  const std::string& c_str() const { return m_info; }
 
 
 public:
@@ -484,7 +486,7 @@ public:
   /// it is TOO STUPID to allow objects to be used as actual objects
   ~tPlotter() { } 
 
-  std::string plotfilename() const { return m_plotfilename; }
+  const std::string& plotfilename() const { return m_plotfilename; }
 
   void trim_errors(bool b) { m_trim_errors=b; } 
   
@@ -1270,7 +1272,7 @@ public:
 
   std::string  name() const { return m_details[0]; } 
 
-  std::string  detail() const { return m_extra; }
+  const std::string&  detail() const { return m_extra; }
 
   std::string  info() const { return m_details[1]; } 
 
@@ -1337,7 +1339,7 @@ public:
     m_nrows = m_nhist/m_ncols + (m_nhist%m_ncols ? 1 : 0 );
   }
 
-  std::string name() const { return m_name; }
+  const std::string& name() const { return m_name; }
 
   size_t size() const { return m_hist.size(); }
 

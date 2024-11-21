@@ -3,7 +3,7 @@
 # script to re-create all run-dependent Z counting plots for a full year
 # run as
 # ./plot_runwise.sh year [update]
-# where year is a required argument of the data taking year (22, 23, 24)
+# where year is a required argument of the data taking year (22, 23, 24, 25)
 # update=0/1 is an option to skip runs for with the plot directory exists
 
 baseindir="/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/CSVOutputs"
@@ -14,7 +14,7 @@ if [[ $# -ge 1 ]]; then
     echo "INFO: Redoing run-wise plots for Year $year"
 else
     echo "ERROR: Usage: ./plot_yearwise.sh year"
-    echo "ERROR: where year is a required argument of the data taking year (22, 23, 24)"
+    echo "ERROR: where year is a required argument of the data taking year (22, 23, 24, 25)"
     exit 1
 fi
 

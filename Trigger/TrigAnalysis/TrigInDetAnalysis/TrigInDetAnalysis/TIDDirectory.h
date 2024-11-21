@@ -10,7 +10,7 @@
  **
  **   @date         Wed May  4 17:54:25 BST 2005
  **
- **   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -86,11 +86,11 @@ public:
   void disable() {  }
   void restore() {  }
 
-  std::string name() const { return mname; }
+  const std::string& name() const { return mname; }
 
  protected:
   
-  std::string chop( std::string& s1, const std::string s2="/" ) { 
+  std::string chop( std::string& s1, const std::string& s2="/" ) {
     std::string s3 = "";
     std::string::size_type pos = s1.find(s2);
     if ( pos != std::string::npos ) {

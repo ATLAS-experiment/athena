@@ -13,7 +13,7 @@
  **
  **   @date         Mon Jun 21 18:35:22 BST 2004
  **
- **   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **                   
  **                   
  **
@@ -216,8 +216,6 @@ public:
     //   m_h1d      ( new TH1D(*(TH1D*)gDirectory->Get((name+"/1d").c_str()))    )
   { 
 
-    m_name     = name;
-
     m_Nentries = new TH1D(*(TH1D*)gDirectory->Get((name+"/fractional uncertainty").c_str()));
     m_mean     = new TH1D(*(TH1D*)gDirectory->Get((name+"/mean").c_str()));
     m_sigma    = new TH1D(*(TH1D*)gDirectory->Get((name+"/sigma").c_str()));
@@ -369,12 +367,12 @@ public:
   bool finalised() const { return m_finalised; }
 
   // and the fitted slices
-  std::vector<TH1D*> Slices() { return m_slices; }
+  const std::vector<TH1D*>& Slices() const { return m_slices; }
 
   // and the name of the fitted function 
   // NB. this is useful for setting plot paramaters
   // of the fit for plotting, such as the line colour etc 
-  const std::string FitName() const { return m_fitname; }
+  const std::string& FitName() const { return m_fitname; }
 
   // Static fit functions!!!!
   // NB. *Any* fit function can be used to fit the distributions
@@ -551,7 +549,7 @@ public:
 
   void setUniform(bool t=false) { m_uniform=t; }
 
-  static std::string version()      { return s_rversion; }
+  static const std::string& version()      { return s_rversion; }
   static bool setoldrms95(bool b)   { return s_oldrms95=b; }
   static bool setscalerms95(bool b) { return s_scalerms95=b; }
   static bool setnofit(bool b)      { return s_nofit=b; }

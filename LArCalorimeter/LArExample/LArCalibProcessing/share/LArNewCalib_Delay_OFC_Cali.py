@@ -34,6 +34,7 @@ if __name__=='__main__':
    parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Output sqlite file, in pool output dir.', type=str)
    parser.add_argument('--FW6', dest='fw6', default=False, help='Is it for fw v. 6', action='store_true')
    parser.add_argument('--EMF', dest='emf', default=False, help='Is it for EMF', action='store_true')
+   parser.add_argument('--pulseAll', dest='pulseall', default=False, help='Is it PulseAll run ?', action='store_true')
 
    args = parser.parse_args()
    if help in args and args.help is not None and args.help:
@@ -128,7 +129,11 @@ if __name__=='__main__':
    
    #Configure the Bad-Channel database we are reading 
    #(the AP typically uses a snapshot in an sqlite file
-   flags.LArCalib.BadChannelDB = args.outpdir + "/" + args.badsql
+
+   if args.badsql.startswith("/"):
+      flags.LArCalib.BadChannelDB =  args.badsql
+   else:        
+      flags.LArCalib.BadChannelDB = args.outpdir + "/" + args.badsql
    
    #Output of this job:
    OutputCaliWaveRootFileName = args.outrwaveprefix + "_" + args.run
@@ -163,6 +168,9 @@ if __name__=='__main__':
    #validation not working for SC because no reference in OFL DB
    if args.supercells:
       flags.LArCalib.doValidation=False
+      if args.pulseall:
+         flags.LArCalib.CaliWave.Nsteps=1
+         flags.LArCalib.doOFCCali=False
 
    #Other potentially useful flags-settings:
    
@@ -180,13 +188,12 @@ if __name__=='__main__':
             else:   
                pfile = pdir + 'barrel/Delay_' + args.partition[:-4] + '/parameters.dat'
  
-            flags.LArCalib.Input.paramsFile = pfile
          else:   
             pdir += 'Delay/'
             #FIXME create search also for main readout
       pass
-      flags.LArCalib.Input.paramsFile = pfile
 
+   flags.LArCalib.Input.paramsFile = pfile
 
    #Define the global output Level:
    from AthenaCommon.Constants import INFO
@@ -201,7 +208,8 @@ if __name__=='__main__':
    if args.emf:
       # additions for EMF
       flags.IOVDb.SqliteInput="/afs/cern.ch/user/p/pavol/public/EMF_otherCond.db"
-      flags.IOVDb.SqliteFolders = ("/LAR/BadChannelsOfl/BadChannelsSC","/LAR/BadChannels/BadChannelsSC","/LAR/Identifier/OnOffIdMap",)
+      flags.IOVDb.SqliteFolders = ("/LAR/BadChannelsOfl/BadChannelsSC","/LAR/BadChannels/BadChannelsSC","/LAR/Identifier/OnOffIdMap","/LAR/BadChannelsOfl/MissingFEBs","/LAR/BadChannelsOfl/KnownMNBFEBs","/LAR/BadChannelsOfl/KnownBADFEBs","/LAR/BadChannelsOfl/BadChannels",)
+      flags.LArCalib.CorrectBadChannels=False
       flags.LArCalib.doValidation=False
 
    flags.lock()
@@ -224,10 +232,11 @@ if __name__=='__main__':
       from IOVDbSvc.IOVDbSvcConfig import addOverride
       cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))   
 
-   if args.emf:   
+   if args.emf:
+      # additions for EMF
       from IOVDbSvc.IOVDbSvcConfig import addOverride
       cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-EMF"))   
-      fldrs=cfg.getService("IOVDbSvc").Folders   
+      fldrs=cfg.getService("IOVDbSvc").Folders
       for i in range(0, len(fldrs)):
           if 'Align' in fldrs[i]: fldrs[i] += '<forceRunNumber>9999999</forceRunNumber>'
 

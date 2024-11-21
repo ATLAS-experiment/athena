@@ -4,9 +4,10 @@
  **     @author  ben sowden
  **     @date    Mon 04 Aug 2014 10:45:00 BST
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
+// cppcheck-suppress-file stlIfStrFind; cannot use C++20 starts_with in this standalone code
 
 #include <stdlib.h>
 #include <sys/time.h>

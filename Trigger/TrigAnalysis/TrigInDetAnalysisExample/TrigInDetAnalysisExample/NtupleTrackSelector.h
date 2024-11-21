@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:06:38 CET 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -51,7 +51,7 @@ public:
     std::vector<TIDA::Track>::const_iterator trackend = tracks.end();
     while ( trackitr!=trackend ) { 
       selectTrack( *trackitr );
-      trackitr++;
+      ++trackitr;
     }
   }
 
@@ -61,9 +61,8 @@ public:
     std::vector<TIDA::Track*>::const_iterator trackitr = tracks.begin();
     std::vector<TIDA::Track*>::const_iterator trackend = tracks.end();
     while ( trackitr!=trackend ) { 
-      //      selectTrack( *(*trackitr) );
       selectTrack( *trackitr );
-      trackitr++;
+      ++trackitr;
     }
   }
 

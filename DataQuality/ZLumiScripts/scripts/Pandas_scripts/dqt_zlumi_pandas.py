@@ -310,11 +310,11 @@ for ibin in range(1, int(lbmax-lbmin)+1):
         try:
             z_m    = fin.Get(hname).Integral()
             z_merr = math.sqrt(z_m)
-        except AttributeError: 
+        except AttributeError:
             if channel == "Zee":
-                zee_missing_lbs.append(int(ibin+lbmin-0.5))
+                zee_missing_lbs.append(this_lb)
             elif channel == "Zmumu":
-                zmumu_missing_lbs.append(int(ibin+lbmin-0.5))                
+                zmumu_missing_lbs.append(this_lb)
 
             continue
 
@@ -421,7 +421,12 @@ for ibin in range(1, int(lbmax-lbmin)+1):
     error_index = len(out_dict['Zee'])-2
     zll_lumi = (out_dict['Zee'][lumi_index] + out_dict['Zmumu'][lumi_index])/2
     zll_lumi_err = 0.5 * math.sqrt( pow(out_dict['Zee'][error_index], 2) + pow(out_dict['Zmumu'][error_index], 2) )
-    out_write = [this_fill, runnumber, this_lb, lb_start_end[this_lb][0], lb_start_end[this_lb][1], loclivetime, lb_full[ibin], official_lum_zero[ibin], official_mu[ibin], passgrl] + out_dict["Zee"] + out_dict["Zmumu"] + [zll_lumi, zll_lumi_err]
+    try:
+        lb_start, lb_end = lb_start_end[this_lb][0], lb_start_end[this_lb][1]
+    except KeyError:
+        lb_start, lb_end = 0, 0
+        print("WARNING: database not filled completely for LB", this_lb)
+    out_write = [this_fill, runnumber, this_lb, lb_start, lb_end, loclivetime, lb_full[ibin], official_lum_zero[ibin], official_mu[ibin], passgrl] + out_dict["Zee"] + out_dict["Zmumu"] + [zll_lumi, zll_lumi_err]
     csvwriter.writerow(out_write)
 
 if (len(zee_missing_lbs) > 0 or len(zmumu_missing_lbs) > 0):

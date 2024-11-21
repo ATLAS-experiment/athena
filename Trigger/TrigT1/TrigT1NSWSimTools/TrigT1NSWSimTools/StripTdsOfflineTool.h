@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STRIPTDSOFFLINETOOL_H
@@ -113,7 +113,7 @@ namespace NSWL1 {
      * But we check in initialize() that this is only used in single-threaded mode.
      */
     TTree* m_tree ATLAS_THREAD_SAFE{nullptr};                                          //!< ntuple for analysis
-    mutable int m_nStripHits ATLAS_THREAD_SAFE;             //!< number of STRIP hit delivered
+    mutable int m_nStripHits ATLAS_THREAD_SAFE{0};             //!< number of STRIP hit delivered
     std::vector<float > *m_stripCharge ATLAS_THREAD_SAFE{nullptr};                   //!< charge of hit STRIPs
     std::vector<float > *m_stripCharge_6bit ATLAS_THREAD_SAFE{nullptr};              //!< charge of hit STRIPs 6 bit format
     std::vector<float > *m_stripCharge_10bit ATLAS_THREAD_SAFE{nullptr};             //!< charge of hit STRIPs 10 bit format

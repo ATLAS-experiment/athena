@@ -32,13 +32,14 @@ def get_grl(year, verbose=True):
     grl["18"] = CVMFS + "/data18_13TeV/20190708/data18_13TeV.periodAllYear_DetStatus-v105-pro22-13_Unknown_PHYS_StandardGRL_All_Good_25ns_Triggerno17e33prim.xml" 
     grl["22"] = CVMFS + "/data22_13p6TeV/20230207/data22_13p6TeV.periodAllYear_DetStatus-v109-pro28-04_MERGED_PHYS_StandardGRL_All_Good_25ns.xml"
     grl["23"] = CVMFS + "/data23_13p6TeV/20230828/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-06_MERGED_PHYS_StandardGRL_All_Good_25ns.xml"
-    grl["24"] = "/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/MergedOutputs/data24_13p6TeV/latest_GRL.xml"
+    grl["24"] = CVMFS + "/data24_13p6TeV/20241118/data24_13p6TeV.periodsEtoO_DetStatus-v130-pro36-08_MERGED_PHYS_StandardGRL_All_Good_25ns.xml"
+    grl["25"] = "/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/MergedOutputs/data25_13p6TeV/latest_GRL.xml"
 
-    if year != "24":
+    if year != "25":
         pipe = Popen(["grep", "RunList", grl[year]], stdout=PIPE, stderr=PIPE)
         runs = re.sub("[^0-9,]", "", str(pipe.communicate()[0])).split(",")
    
-    elif year == "24":
+    elif year == "25":
         # preliminary GRL does not include "RunList" field, concatenate <Run> fields
         runs=subprocess.check_output("grep '<Run>' "+grl[year]+" | tr -dc ' [:digit:] '", shell=True).decode('ascii').split()
     if verbose:

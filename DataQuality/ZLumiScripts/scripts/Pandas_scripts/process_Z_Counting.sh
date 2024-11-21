@@ -7,15 +7,14 @@
 # where 'update=1' will only process new files not processed before (default) and '0' will overwrite everything or create new GRL
 
 if [[ $# -ge 1 ]]; then
-    if [[ $1 -ge 24 && $number -le 24 ]]; then
-	year=$1
-	echo "Processing Z counting for year 20${year}"
-    else
-	echo "Bad year $1 given to process, so far only validated for 2024, use argument '24'"
+    year=$1
+    echo "Processing Z counting for year 20${year}"
+    if [[ $1 -ne 24 ]]; then
+	echo "Script unvalidated for years other than 2024 - remove this block later"
 	exit 1
     fi
 else
-    echo "Need to give year to process, so far only validated for 2024, use argument '24'"
+    echo "Need to give year to process: e.g. 24 (25, ...)"
     exit 1
 fi
 if [[ $# -lt 2 ]] || [[ $2 -gt 0 ]]; then
@@ -37,7 +36,7 @@ if [[ $# -lt 4 ]] || [[ $4 -gt 0 ]]; then
     echo "Will create new temporary GRL"
 else
     updateGRL=0
-    echo "Will reuse last GRL"
+    echo "Will use last/official GRL"
 fi
 
 dataset=data${year}_13p6TeV
@@ -163,7 +162,7 @@ if [[ $updateGRL == 1 ]]; then
     ln -s $grlname ${indir}latest_GRL.xml
     echo "GRL creation complete $grlname" 
     rm -rf ${tmpdir}/grls
+    ./process_HISTtoCSV.sh $year $updateC ${indir}latest_GRL.xml
+else
+    ./process_HISTtoCSV.sh $year $updateC
 fi
-
-./process_HISTtoCSV.sh $year $updateC ${indir}latest_GRL.xml
-

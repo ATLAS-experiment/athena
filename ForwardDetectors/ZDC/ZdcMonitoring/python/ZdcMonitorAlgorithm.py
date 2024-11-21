@@ -15,6 +15,12 @@
 
 import numpy as np
 
+module_FPGA_max_ADC = 4096 
+nominal_lg_gain_factor = 10
+nominal_lg_max_ADC = module_FPGA_max_ADC * nominal_lg_gain_factor
+
+
+
 def create_log_bins(min_value, max_value, num_bins):
     # Calculate the logarithmic bin edges
     log_min = np.log10(min_value)
@@ -24,6 +30,55 @@ def create_log_bins(min_value, max_value, num_bins):
 
     return bin_edges
 
+def create_vinj_bins():
+
+    # Define min, max, and step size for each range
+    min1, max1, step1 = 0, 0.01, 0.00025
+    min2, max2, step2 = 0.01, 0.3, 0.0025
+    min3, max3, step3 = 0.3, 2.50001, 0.025
+
+    # Generate each range using the defined variables
+    range1 = np.arange(min1, max1, step1)
+    range2 = np.arange(min2, max2, step2)
+    range3 = np.arange(min3, max3, step3)
+
+    # Concatenate the ranges into a single array
+    vinj_bins_array = np.concatenate((range1, range2, range3))
+
+    return vinj_bins_array.tolist()
+
+def create_hg_fit_amp_inj_bins():
+
+    # Define min, max, and step size for each range
+    min1, max1, step1 = 0, 280, 4 # up to the tail of 10mV 
+    min2, max2, step2 = 280, module_FPGA_max_ADC+1, 8
+
+    # Generate each range using the defined variables
+    range1 = np.arange(min1, max1, step1)
+    range2 = np.arange(min2, max2, step2)
+
+    # Concatenate the ranges into a single array
+    hg_amp_inj_bins_array = np.concatenate((range1, range2))
+
+    return hg_amp_inj_bins_array.tolist()
+
+def create_lg_fit_amp_inj_bins():
+
+    # Define min, max, and step size for each range
+    min1, max1, step1 = 0, 28, 0.4 # up to the tail of 10mV 
+    min2, max2, step2 = 28, 800, 0.8 # roughly correspond to 300mV - can fine tune with ntuple
+    min3, max3, step3 = 800, module_FPGA_max_ADC+1, 8
+
+
+    # Generate each range using the defined variables
+    range1 = np.arange(min1, max1, step1)
+    range2 = np.arange(min2, max2, step2)
+    range3 = np.arange(min3, max3, step3)
+
+    # Concatenate the ranges into a single array
+    lg_amp_inj_bins_array = np.concatenate((range1, range2, range3))
+
+    return lg_amp_inj_bins_array.tolist()
 
 def ZdcMonitoringConfig(inputFlags):
 
@@ -46,6 +101,12 @@ def ZdcMonitoringConfig(inputFlags):
     zdcMonAlg.IsStandalone = inputFlags.Input.TriggerStream == 'calibration_DcmDummyProcessor'
     zdcMonAlg.IsPPMode = 'pp' in config
     
+    zdcMonAlg.RunNumber = inputFlags.Input.RunNumbers[0] if len(inputFlags.Input.RunNumbers) > 0 else 0
+    if (len(inputFlags.Input.RunNumbers) == 0):
+        print ('ZdcMonitorAlgorithm.py:  WARNING the list in the input flag Input.RunNumbers is empty - run number not set! Likely to use default pulser setting')
+    elif (len(inputFlags.Input.RunNumbers) > 1):
+        print ('ZdcMonitorAlgorithm.py:  WARNING the list in the input flag Input.RunNumbers has more than one element - retrieving pulser-setting configuration using the first run number! May cause misconfiguration for the other run numbers')
+
     zdcMonAlg.EnableZDC = inputFlags.Detector.EnableZDC_ZDC
     zdcMonAlg.EnableZDCPhysics = zdcMonAlg.EnableZDC and not zdcMonAlg.IsInjectedPulse # no physical pulse (neutrons) for injector pulse
     zdcMonAlg.EnableRPD = inputFlags.Detector.EnableZDC_RPD and not zdcMonAlg.IsInjectedPulse
@@ -60,7 +121,7 @@ def ZdcMonitoringConfig(inputFlags):
 
     # (potentially run-type dependent) range settings
     lumi_block_max = 2000
-    n_lumi_block_bins_coarse = 200
+    n_lumi_block_bins_coarse = 400
     bcid_max = 3564
     n_energy_bins_default = 200
     n_fpga_bins = 204
@@ -78,6 +139,9 @@ def ZdcMonitoringConfig(inputFlags):
     module_chisq_over_amp_min = 0.01
     module_chisq_over_amp_max = 3000
     module_chisq_over_amp_nbins = 80
+    module_chisq_over_amp_linear_max = 50
+    module_chisq_over_amp_linear_nbins = 200
+
 
     # to ensure the logarithmic binning in C++ algorithm agrees with python
     # so that the inverse-bin-width weight calculation is correct
@@ -92,15 +156,7 @@ def ZdcMonitoringConfig(inputFlags):
     zdcMonAlg.triggerSideA = "L1_ZDC_PP_A" if zdcMonAlg.IsPPMode else "L1_ZDC_A"
     zdcMonAlg.triggerSideC = "L1_ZDC_PP_C" if zdcMonAlg.IsPPMode else "L1_ZDC_C"
 
-    pulse_voltage_max = 2.5
-    pulse_voltage_fine_scan_max = 0.1
-    nbins_inj_pulse_voltage_fine_scan = 100
-    module_FPGA_max_ADC = 4096. # For zoomed-in HG monitoring
-    module_ADC_inj_pulse_fine_scan_max = 1000 # For zoomed-in HG monitoring
     amp_LG_refit_max_ADC = module_FPGA_max_ADC
-
-    module_ADC_inj_pulse_LG_coarse_scan_max = 6000
-    nbins_inj_pulse_LG_coarse_scan = n_energy_bins_default
 
     fCal_single_side_min = -0.2
     fCal_single_side_max = 2.8
@@ -152,13 +208,11 @@ def ZdcMonitoringConfig(inputFlags):
         rpd_channel_amp_min = - 200. 
         rpd_amp_sum_xmax = 5000
         rpd_max_adc_sum_xmax = 5000
-        module_amp_xmax = 4096
+        module_amp_xmax = module_FPGA_max_ADC
         rpd_sum_adc_max = 5000.
         module_calib_amp_xmax = 5000
         module_amp_1Nmonitor_xmax = 2000 #about 5N / 4 * 2.7TeV
         module_calib_amp_1Nmonitor_xmax = 5000 #about 5N / 4 * 2.7TeV
-        module_ADC_inj_pulse_LG_coarse_scan_max = module_FPGA_max_ADC #for pp mode, LG has unit gain factor
-        nbins_inj_pulse_LG_coarse_scan = n_fpga_bins #for pp mode, LG has unit gain factor
 
     elif config == "PbPb2023" or config == "PbPb2024" or config == "InjectorPbPb2024":
         print ("looking at pbpb run")
@@ -176,7 +230,7 @@ def ZdcMonitoringConfig(inputFlags):
         rpd_channel_amp_min = - 2000. 
         rpd_amp_sum_xmax = 245760.0 #not the full range but a reasonable value
         rpd_max_adc_sum_xmax = 40960.0
-        module_amp_xmax = 40960.0
+        module_amp_xmax = nominal_lg_max_ADC
         rpd_sum_adc_max = 25000.
         module_calib_amp_xmax = 100000.0 #about the full dynamic range: 160 N / 4 * 2.5TeV
         module_amp_1Nmonitor_xmax = 1250.0 #about 5N / 4 * 2.7TeV
@@ -241,39 +295,76 @@ def ZdcMonitoringConfig(inputFlags):
                                 xbins=fCal_single_side_nbins,xmin=fCal_single_side_min,xmax=fCal_single_side_max,
                                 ybins=fCal_single_side_nbins,ymin=fCal_single_side_min,ymax=fCal_single_side_max)
 
-            genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcEnergySumTwoSidesTeV;zdcEnergySum_vs_fCalEt', type='TH2F', title=';Side {0} FCal Energy [TeV];Side {0} ZDC Energy [TeV]',
+            genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcEnergySumTwoSidesTeV;zdcEnergySum_vs_fCalEt', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
                                 path = '/EXPERT/Global/ZDCFcalCorr',
                                 opt='kAlwaysCreate',
                                 xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
                                 ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
 
+            genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcHadronicEnergySumTwoSidesTeV;zdcHadronicEnergySum_vs_fCalEt', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
+                                path = '/EXPERT/Global/ZDCHEFcalCorr',
+                                opt='kAlwaysCreate',
+                                xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
+                                ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
+
             if (zdcMonAlg.EnableUCCTriggers):
-                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcEnergySumTwoSidesTeV;zdcEnergySum_vs_fCalEt_passUCCTrig_HELT15', type='TH2F', title=';Side {0} FCal Energy [TeV];Side {0} ZDC Energy [TeV]',
+                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcEnergySumTwoSidesTeV;zdcEnergySum_vs_fCalEt_passUCCTrig_HELT15', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
                                     path = '/EXPERT/Global/ZDCFcalCorr',
                                     cutmask = 'passUCCTrig_HELT15',
                                     opt='kAlwaysCreate',
                                     xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
                                     ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
-                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcEnergySumTwoSidesTeV;zdcEnergySum_vs_fCalEt_passUCCTrig_HELT20', type='TH2F', title=';Side {0} FCal Energy [TeV];Side {0} ZDC Energy [TeV]',
+                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcEnergySumTwoSidesTeV;zdcEnergySum_vs_fCalEt_passUCCTrig_HELT20', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
                                     path = '/EXPERT/Global/ZDCFcalCorr',
                                     cutmask = 'passUCCTrig_HELT20',
                                     opt='kAlwaysCreate',
                                     xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
                                     ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
-                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcEnergySumTwoSidesTeV;zdcEnergySum_vs_fCalEt_passUCCTrig_HELT25', type='TH2F', title=';Side {0} FCal Energy [TeV];Side {0} ZDC Energy [TeV]',
+                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcEnergySumTwoSidesTeV;zdcEnergySum_vs_fCalEt_passUCCTrig_HELT25', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
                                     path = '/EXPERT/Global/ZDCFcalCorr',
                                     cutmask = 'passUCCTrig_HELT25',
                                     opt='kAlwaysCreate',
                                     xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
                                     ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
-                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcEnergySumTwoSidesTeV;zdcEnergySum_vs_fCalEt_passUCCTrig_HELT35', type='TH2F', title=';Side {0} FCal Energy [TeV];Side {0} ZDC Energy [TeV]',
+                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcEnergySumTwoSidesTeV;zdcEnergySum_vs_fCalEt_passUCCTrig_HELT35', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
                                     path = '/EXPERT/Global/ZDCFcalCorr',
                                     cutmask = 'passUCCTrig_HELT35',
                                     opt='kAlwaysCreate',
                                     xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
                                     ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
-                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcEnergySumTwoSidesTeV;zdcEnergySum_vs_fCalEt_passUCCTrig_HELT50', type='TH2F', title=';Side {0} FCal Energy [TeV];Side {0} ZDC Energy [TeV]',
+                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcEnergySumTwoSidesTeV;zdcEnergySum_vs_fCalEt_passUCCTrig_HELT50', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
                                     path = '/EXPERT/Global/ZDCFcalCorr',
+                                    cutmask = 'passUCCTrig_HELT50',
+                                    opt='kAlwaysCreate',
+                                    xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
+
+                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcHadronicEnergySumTwoSidesTeV;zdcHadronicEnergySum_vs_fCalEt_passUCCTrig_HELT15', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
+                                    path = '/EXPERT/Global/ZDCHEFcalCorr',
+                                    cutmask = 'passUCCTrig_HELT15',
+                                    opt='kAlwaysCreate',
+                                    xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
+                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcHadronicEnergySumTwoSidesTeV;zdcHadronicEnergySum_vs_fCalEt_passUCCTrig_HELT20', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
+                                    path = '/EXPERT/Global/ZDCHEFcalCorr',
+                                    cutmask = 'passUCCTrig_HELT20',
+                                    opt='kAlwaysCreate',
+                                    xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
+                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcHadronicEnergySumTwoSidesTeV;zdcHadronicEnergySum_vs_fCalEt_passUCCTrig_HELT25', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
+                                    path = '/EXPERT/Global/ZDCHEFcalCorr',
+                                    cutmask = 'passUCCTrig_HELT25',
+                                    opt='kAlwaysCreate',
+                                    xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
+                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcHadronicEnergySumTwoSidesTeV;zdcHadronicEnergySum_vs_fCalEt_passUCCTrig_HELT35', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
+                                    path = '/EXPERT/Global/ZDCHEFcalCorr',
+                                    cutmask = 'passUCCTrig_HELT35',
+                                    opt='kAlwaysCreate',
+                                    xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
+                genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcHadronicEnergySumTwoSidesTeV;zdcHadronicEnergySum_vs_fCalEt_passUCCTrig_HELT50', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
+                                    path = '/EXPERT/Global/ZDCHEFcalCorr',
                                     cutmask = 'passUCCTrig_HELT50',
                                     opt='kAlwaysCreate',
                                     xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
@@ -512,7 +603,7 @@ def ZdcMonitoringConfig(inputFlags):
     if (not zdcMonAlg.IsPPMode): # for PP mode data, LG never filled
         zdcModuleMonToolArr.defineHistogram('zdcModuleAmp;zdcModuleAmp_HG',title=';Module Amplitude HG [ADC Counts];Events',
                                 path='/EXPERT/ZDC/ZdcModule/ModuleAmp', 
-                                cutmask='zdcModuleHGValid',
+                                cutmask='zdcModuleHG',
                                 xbins=n_fpga_bins,xmin=0.0,xmax=module_FPGA_max_ADC)
 
         zdcModuleMonToolArr.defineHistogram('zdcModuleAmp;zdcModuleAmp_LG',title=';Module Amplitude LG [ADC Counts];Events',
@@ -523,7 +614,7 @@ def ZdcMonitoringConfig(inputFlags):
     if (zdcMonAlg.IsInjectedPulse):
         zdcModuleMonToolArr.defineHistogram('zdcModuleAmpLGRefit',title=';LG-Refit Amplitude [ADC Counts];Events',
                                 path='/EXPERT/ZDC/ZdcModule/ModuleAmp',
-                                cutmask='zdcModuleHGValid',
+                                cutmask='zdcModuleHG',
                                 xbins=n_fpga_bins,xmin=0.0,xmax=amp_LG_refit_max_ADC)
         
     if (not zdcMonAlg.IsOnline and not zdcMonAlg.IsInjectedPulse): # only offline
@@ -532,15 +623,28 @@ def ZdcMonitoringConfig(inputFlags):
                                 xbins=n_fpga_bins,xmin=0.0,xmax=module_amp_xmax / 2.)
     
 
-    if (zdcMonAlg.IsInjectedPulse):
-        zdcModuleMonToolArr.defineHistogram('zdcModuleMaxADC;zdcModuleMaxADC_HG',title=';Module Max ADC HG;Events',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleMaxADC', 
-                                cutmask='zdcModuleHGValid',
+    if (zdcMonAlg.IsInjectedPulse or not zdcMonAlg.IsOnline):
+        zdcModuleMonToolArr.defineHistogram('zdcModuleAmp,zdcModuleAmpToMaxADCRatio;zdcModuleAmpToMaxADCRatio_vs_zdcModuleMaxADC_HG_profile',type='TProfile',title=';Module Max ADC HG [ADC];Avg Amp/Max ADC',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpToMaxADCRatio', 
+                                cutmask='zdcModuleHG',
                                 xbins=n_fpga_bins,xmin=0.0,xmax=module_FPGA_max_ADC)
-        zdcModuleMonToolArr.defineHistogram('zdcModuleMaxADC,zdcModuleAmpToMaxADCRatio;zdcModuleAmpToMaxADCRatio_vs_zdcModuleMaxADC_profile',type='TProfile',title=';Module Max ADC HG;Avg Amp/Max ADC',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleMaxADC', 
-                                cutmask='zdcModuleHGValid',
-                                xbins=n_fpga_bins,xmin=0.0,xmax=module_FPGA_max_ADC)
+    
+        zdcModuleMonToolArr.defineHistogram('zdcModuleAmp,zdcModuleAmpToMaxADCRatio;zdcModuleAmpToMaxADCRatio_vs_zdcModuleMaxADC_HG',type='TH2F',title=';Module Max ADC HG [ADC];Avg Amp/Max ADC',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpToMaxADCRatio', 
+                                cutmask='zdcModuleHG',
+                                xbins=n_fpga_bins,xmin=0.0,xmax=module_FPGA_max_ADC,
+                                ybins=100,ymin=0.0,ymax=2.)
+
+        zdcModuleMonToolArr.defineHistogram('zdcModuleAmp,zdcModuleAmpToMaxADCRatio;zdcModuleAmpToMaxADCRatio_vs_zdcModuleMaxADC_LG_profile',type='TProfile',title=';Module Max ADC LG [ADC];Avg Amp/Max ADC',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpToMaxADCRatio', 
+                                cutmask='zdcModuleLG',
+                                xbins=n_fpga_bins,xmin=0.0,xmax=nominal_lg_max_ADC) #max ADC has no LG gain factor
+
+        zdcModuleMonToolArr.defineHistogram('zdcModuleAmp,zdcModuleAmpToMaxADCRatio;zdcModuleAmpToMaxADCRatio_vs_zdcModuleMaxADC_LG',type='TH2F',title=';Module Max ADC LG [ADC];Avg Amp/Max ADC',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpToMaxADCRatio', 
+                                cutmask='zdcModuleLG',
+                                xbins=n_fpga_bins,xmin=0.0,xmax=nominal_lg_max_ADC, #max ADC has no LG gain factor
+                                ybins=100,ymin=0.0,ymax=2./nominal_lg_gain_factor)
     
     # ---------------------------- ZDC-module amplitude fractions & correlations with energy deposits ---------------------------- 
     
@@ -586,104 +690,45 @@ def ZdcMonitoringConfig(inputFlags):
 
     # ---------------------------- ZDC-module reco amplitude versus input voltage ---------------------------- 
     if (zdcMonAlg.IsInjectedPulse):
-        # ---------------------------- HG coarse scan ----------------------------
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleAmp;zdcModuleAmpHG_vs_injectedPulseInputVoltage', type='TH2F', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
-                                cutmask='zdcHGInjPulseValidCoarseScan',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpHGVsInputVoltageCoarseScan',
-                                xbins=n_energy_bins_default,xmin=0.0,xmax=pulse_voltage_max,
-                                ybins=n_fpga_bins,ymin=0.0,ymax=module_FPGA_max_ADC)
+        # ---------------------------- HG response ----------------------------
+        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleFitAmp;zdcModuleAmpHG_vs_injectedPulseInputVoltage', type='TH2F', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
+                                cutmask='zdcHGInjPulseValid',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpHGVsInputVoltage',
+                                xbins=create_vinj_bins(),
+                                ybins=create_hg_fit_amp_inj_bins())
 
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleAmp;zdcModuleAmpHG_vs_injectedPulseInputVoltage_profile', type='TProfile', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
-                                cutmask='zdcHGInjPulseValidCoarseScan',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpHGVsInputVoltageCoarseScan',
-                                xbins=n_energy_bins_default,xmin=0.0,xmax=pulse_voltage_max)
+        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleFitAmp;zdcModuleAmpHG_vs_injectedPulseInputVoltage_profile', type='TProfile', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
+                                cutmask='zdcHGInjPulseValid',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpHGVsInputVoltage',
+                                xbins=create_vinj_bins())
         
-        # ---------------------------- HG coarse scan max ADC ----------------------------
+        # ---------------------------- HG response max ADC ----------------------------
 
         zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleMaxADCHG', type='TH2F', title=';Pulse amp [V];Max ADC HG',
-                                cutmask='zdcHGInjPulseValidCoarseScan',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleMaxADCHGVsInputVoltageCoarseScan',
-                                xbins=n_energy_bins_default,xmin=0.0,xmax=pulse_voltage_max,
-                                ybins=n_fpga_bins,ymin=0.0,ymax=module_FPGA_max_ADC)
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleMaxADCHG;zdcModuleMaxADCHG_vs_injectedPulseInputVoltage_profile', type='TProfile', title=';Pulse amp [V];Max ADC HG',
-                                cutmask='zdcHGInjPulseValidCoarseScan',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleMaxADCHGVsInputVoltageCoarseScan',
-                                xbins=n_energy_bins_default,xmin=0.0,xmax=pulse_voltage_max)
+                                cutmask='zdcHGInjPulseValid',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleMaxADCHGVsInputVoltage',
+                                xbins=create_vinj_bins(),
+                                ybins=create_hg_fit_amp_inj_bins())
 
-        # ---------------------------- HG fine scan ----------------------------
+        # ---------------------------- LG response ----------------------------
+        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleLGFitAmp;zdcModuleAmpLG_vs_injectedPulseInputVoltage', type='TH2F', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
+                                cutmask='zdcLGInjPulseValid',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpLGVsInputVoltage',
+                                xbins=create_vinj_bins(),
+                                ybins=create_lg_fit_amp_inj_bins())
 
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleAmp;zdcModuleAmpHG_vs_injectedPulseInputVoltage_fine_scan', type='TH2F', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
-                                cutmask='zdcHGInjPulseValidFineScan',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpHGVsInputVoltageFineScan',
-                                xbins=nbins_inj_pulse_voltage_fine_scan,xmin=0.0,xmax=pulse_voltage_fine_scan_max,
-                                ybins=nbins_inj_pulse_voltage_fine_scan,ymin=0.0,ymax=module_ADC_inj_pulse_fine_scan_max)
-
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleAmp;zdcModuleAmpHG_vs_injectedPulseInputVoltage_fine_scan_profile', type='TProfile', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
-                                cutmask='zdcHGInjPulseValidFineScan',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpHGVsInputVoltageFineScan',
-                                xbins=nbins_inj_pulse_voltage_fine_scan,xmin=0.0,xmax=pulse_voltage_fine_scan_max)
-
-        # ---------------------------- HG Fine scan max ADC ----------------------------
-
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleMaxADCHG', type='TH2F', title=';Pulse amp [V];Max ADC HG',
-                                cutmask='zdcHGInjPulseValidFineScan',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleMaxADCHGVsInputVoltageFineScan',
-                                xbins=nbins_inj_pulse_voltage_fine_scan,xmin=0.0,xmax=pulse_voltage_fine_scan_max,
-                                ybins=nbins_inj_pulse_voltage_fine_scan,ymin=0.0,ymax=module_ADC_inj_pulse_fine_scan_max)
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleMaxADCHG;zdcModuleMaxADCHG_vs_injectedPulseInputVoltage_profile', type='TProfile', title=';Pulse amp [V];Max ADC HG',
-                                cutmask='zdcHGInjPulseValidFineScan',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleMaxADCHGVsInputVoltageFineScan',
-                                xbins=nbins_inj_pulse_voltage_fine_scan,xmin=0.0,xmax=pulse_voltage_fine_scan_max)
-
-        # ---------------------------- LG coarse scan ----------------------------
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleLGAmp;zdcModuleAmpLG_vs_injectedPulseInputVoltage', type='TH2F', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
-                                cutmask='zdcLGInjPulseValidCoarseScan',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpLGVsInputVoltageCoarseScan',
-                                xbins=n_energy_bins_default,xmin=0.0,xmax=pulse_voltage_max,
-                                ybins=nbins_inj_pulse_LG_coarse_scan,ymin=0.0,ymax=module_ADC_inj_pulse_LG_coarse_scan_max)
-
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleLGAmp;zdcModuleAmpLG_vs_injectedPulseInputVoltage_profile', type='TProfile', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
-                                cutmask='zdcLGInjPulseValidCoarseScan',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpLGVsInputVoltageCoarseScan',
-                                xbins=n_energy_bins_default,xmin=0.0,xmax=pulse_voltage_max)
+        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleLGFitAmp;zdcModuleAmpLG_vs_injectedPulseInputVoltage_profile', type='TProfile', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
+                                cutmask='zdcLGInjPulseValid',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpLGVsInputVoltage',
+                                xbins=create_vinj_bins())
         
-        # ---------------------------- LG coarse scan max ADC ----------------------------
+        # ---------------------------- LG response max ADC ----------------------------
 
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleMaxADCLG', type='TH2F', title=';Pulse amp [V];Max ADC LG',
-                                cutmask='zdcLGInjPulseValidCoarseScan',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleMaxADCLGVsInputVoltageCoarseScan',
-                                xbins=n_energy_bins_default,xmin=0.0,xmax=pulse_voltage_max,
-                                ybins=n_fpga_bins,ymin=0.0,ymax=module_FPGA_max_ADC)
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleMaxADCLG;zdcModuleMaxADCLG_vs_injectedPulseInputVoltage_profile', type='TProfile', title=';Pulse amp [V];Max ADC LG',
-                                cutmask='zdcLGInjPulseValidCoarseScan',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleMaxADCLGVsInputVoltageCoarseScan',
-                                xbins=n_energy_bins_default,xmin=0.0,xmax=pulse_voltage_max)
-
-        # ---------------------------- LG fine scan ----------------------------
-
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleLGAmp;zdcModuleAmpLG_vs_injectedPulseInputVoltage_fine_scan', type='TH2F', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
-                                cutmask='zdcLGInjPulseValidFineScan',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpLGVsInputVoltageFineScan',
-                                xbins=nbins_inj_pulse_voltage_fine_scan,xmin=0.0,xmax=pulse_voltage_fine_scan_max,
-                                ybins=nbins_inj_pulse_voltage_fine_scan,ymin=0.0,ymax=module_ADC_inj_pulse_fine_scan_max)
-
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleLGAmp;zdcModuleAmpLG_vs_injectedPulseInputVoltage_fine_scan_profile', type='TProfile', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
-                                cutmask='zdcLGInjPulseValidFineScan',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpLGVsInputVoltageFineScan',
-                                xbins=nbins_inj_pulse_voltage_fine_scan,xmin=0.0,xmax=pulse_voltage_fine_scan_max)
-
-
-        # ---------------------------- LG Fine scan max ADC ----------------------------
-
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleMaxADCLG', type='TH2F', title=';Pulse amp [V];Max ADC LG',
-                                cutmask='zdcLGInjPulseValidFineScan',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleMaxADCLGVsInputVoltageFineScan',
-                                xbins=nbins_inj_pulse_voltage_fine_scan,xmin=0.0,xmax=pulse_voltage_fine_scan_max,
-                                ybins=nbins_inj_pulse_voltage_fine_scan,ymin=0.0,ymax=module_ADC_inj_pulse_fine_scan_max)
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleMaxADCLG;zdcModuleMaxADCLG_vs_injectedPulseInputVoltage_profile', type='TProfile', title=';Pulse amp [V];Max ADC LG',
-                                cutmask='zdcLGInjPulseValidFineScan',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleMaxADCLGVsInputVoltageFineScan',
-                                xbins=nbins_inj_pulse_voltage_fine_scan,xmin=0.0,xmax=pulse_voltage_fine_scan_max)
+        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleMaxADCLG;zdcModuleMaxADCLG_vs_injectedPulseInputVoltage', type='TH2F', title=';Pulse amp [V];Max ADC LG',
+                                cutmask='zdcLGInjPulseValid',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleMaxADCLGVsInputVoltage',
+                                xbins=create_vinj_bins(),
+                                ybins=create_hg_fit_amp_inj_bins()) # maxADC has no LG gain factor multiplied
 
     # ---------------------------- ZDC-module times ---------------------------- 
 
@@ -699,7 +744,7 @@ def ZdcMonitoringConfig(inputFlags):
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleTime;zdcModuleTime_HG',title=';Module Time [ns];Events',
                             path='/SHIFT/ZDC/ZdcModule/ModuleTime',
-                            cutmask='zdcModuleHGValid',
+                            cutmask='zdcModuleHG',
                             xbins=n_time_centroid_bins_default,xmin=-10.0,xmax=10.0)
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleFitT0',title=';Module FitT0 [ns];Events',
@@ -714,7 +759,7 @@ def ZdcMonitoringConfig(inputFlags):
 
         zdcModuleMonToolArr.defineHistogram('zdcModuleFitT0;zdcModuleFitT0_HG',title=';Module FitT0 HG [ns];Events',
                                 path='/EXPERT/ZDC/ZdcModule/ModuleFitT0',
-                                cutmask='zdcModuleHGValid',
+                                cutmask='zdcModuleHG',
                                 xbins=n_time_centroid_bins_default,xmin=0.0,xmax=time_in_data_buffer)
 
     
@@ -733,6 +778,10 @@ def ZdcMonitoringConfig(inputFlags):
                             path='/SHIFT/ZDC/ZdcModule/ModuleChisq',
                             weight='zdcModuleChisqOverAmpEventWeight',
                             xbins=create_log_bins(module_chisq_over_amp_min, module_chisq_over_amp_max, module_chisq_over_amp_nbins))
+    zdcModuleMonToolArr.defineHistogram('zdcModuleChisqOverAmp;zdcModuleChisqOverAmp_linear',title=';Module Chi-square / Amplitude;Events',
+                            path='/SHIFT/ZDC/ZdcModule/ModuleChisq',
+                            xbins=module_chisq_over_amp_linear_nbins,xmin=0.,xmax=module_chisq_over_amp_linear_max)
+
     if (not zdcMonAlg.IsOnline):
         zdcModuleMonToolArr.defineHistogram('zdcModuleAmp, zdcModuleChisqOverAmp',type='TH2F',title=';Module Amplitude [ADC Counts];Module Chi-square / Amplitude',
                                 path='/EXPERT/ZDC/ZdcModule/ModuleChisq',
@@ -744,50 +793,52 @@ def ZdcMonitoringConfig(inputFlags):
     # ---------------------------- LG & HG comparisons ---------------------------- 
     zdcModuleMonToolArr.defineHistogram('zdcModuleHGtoLGAmpRatio',title=';HG-to-LG Amplitude Raio;Events',
                             path='/SHIFT/ZDC/ZdcModule/ModuleHGLGCompr',
-                            cutmask='zdcModuleHGValid',
+                            cutmask='zdcModuleHG',
                             xbins=n_HG_LG_amp_ratio_bins,xmin=hg_lg_amp_ratio_min_nominal,xmax=hg_lg_amp_ratio_max_nominal)
 
-    zdcModuleMonToolArr.defineHistogram('zdcModuleHGtoLGAmpRatioNoNonlinCorr',title=';HG-to-LG Amplitude Raio;Events',
-                            path='/SHIFT/ZDC/ZdcModule/ModuleHGLGComprNoNonlinCorr',
-                            cutmask='zdcModuleHGValid',
-                            xbins=n_HG_LG_amp_ratio_bins,xmin=hg_lg_amp_ratio_min_nominal,xmax=hg_lg_amp_ratio_max_nominal)
+    if (not zdcMonAlg.IsInjectedPulse):
+        zdcModuleMonToolArr.defineHistogram('zdcModuleHGtoLGAmpRatioNoNonlinCorr',title=';HG-to-LG Amplitude Raio;Events',
+                                path='/SHIFT/ZDC/ZdcModule/ModuleHGLGComprNoNonlinCorr',
+                                cutmask='zdcModuleHG',
+                                xbins=n_HG_LG_amp_ratio_bins,xmin=hg_lg_amp_ratio_min_nominal,xmax=hg_lg_amp_ratio_max_nominal)
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleAmp, zdcModuleHGtoLGAmpRatio', type='TH2F', title=';ZDC HG Amplitude [ADC Counts];HG-to-LG Amplitude Raio;Events',
                             path='/EXPERT/ZDC/ZdcModule/ModuleHGLGCompr',
-                            cutmask='zdcModuleHGValid',
+                            cutmask='zdcModuleHG',
                             xbins=n_module_amp_fine_bins, xmin=0.0, xmax=module_FPGA_max_ADC,
                             ybins=n_HG_LG_amp_ratio_bins,ymin=hg_lg_amp_ratio_min_nominal,ymax=hg_lg_amp_ratio_max_nominal)
 
-    zdcModuleMonToolArr.defineHistogram('zdcModuleAmp, zdcModuleHGtoLGAmpRatioNoNonlinCorr', type='TH2F', title=';ZDC HG Amplitude [ADC Counts];HG-to-LG Amplitude Raio;Events',
-                            path='/EXPERT/ZDC/ZdcModule/ModuleHGLGComprNoNonlinCorr',
-                            cutmask='zdcModuleHGValid',
-                            xbins=n_module_amp_fine_bins, xmin=0.0, xmax=module_FPGA_max_ADC,
-                            ybins=n_HG_LG_amp_ratio_bins,ymin=hg_lg_amp_ratio_min_nominal,ymax=hg_lg_amp_ratio_max_nominal)
+    if (not zdcMonAlg.IsInjectedPulse):
+        zdcModuleMonToolArr.defineHistogram('zdcModuleAmp, zdcModuleHGtoLGAmpRatioNoNonlinCorr', type='TH2F', title=';ZDC HG Amplitude [ADC Counts];HG-to-LG Amplitude Raio;Events',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleHGLGComprNoNonlinCorr',
+                                cutmask='zdcModuleHG',
+                                xbins=n_module_amp_fine_bins, xmin=0.0, xmax=module_FPGA_max_ADC,
+                                ybins=n_HG_LG_amp_ratio_bins,ymin=hg_lg_amp_ratio_min_nominal,ymax=hg_lg_amp_ratio_max_nominal)
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleAmp, zdcModuleHGtoLGAmpRatio;zdcModuleHGtoLGAmpRatio_vs_zdcModuleAmp_profile', type='TProfile', title=';ZDC HG Amplitude [ADC Counts];Average HG-to-LG Amplitude Raio;Events',
                             path='/EXPERT/ZDC/ZdcModule/ModuleHGLGCompr',
-                            cutmask='zdcModuleHGValid',
+                            cutmask='zdcModuleHG',
                             xbins=n_module_amp_fine_bins, xmin=0.0, xmax=module_FPGA_max_ADC)
 
     if (not zdcMonAlg.IsOnline):
         zdcModuleMonToolArr.defineHistogram('zdcModuleAmpLGRefit, zdcModuleHGtoLGAmpRatio', type='TH2F', title=';ZDC LG-Refit Amplitude [ADC Counts];HG-to-LG Amplitude Raio;Events',
                                 path='/EXPERT/ZDC/ZdcModule/ModuleHGLGCompr',
-                                cutmask='zdcModuleHGValid',
+                                cutmask='zdcModuleHG',
                                 xbins=n_module_amp_fine_bins, xmin=0.0, xmax=amp_LG_refit_max_ADC,
                                 ybins=n_HG_LG_amp_ratio_bins,ymin=hg_lg_amp_ratio_min_nominal,ymax=hg_lg_amp_ratio_max_nominal)
         zdcModuleMonToolArr.defineHistogram('zdcModuleAmpLGRefit, zdcModuleHGtoLGAmpRatio;zdcModuleHGtoLGAmpRatio_vs_zdcModuleAmpLGRefit_profile', type='TProfile', title=';ZDC LG-Refit Amplitude [ADC Counts];Average HG-to-LG Amplitude Raio;Events',
                                 path='/EXPERT/ZDC/ZdcModule/ModuleHGLGCompr',
-                                cutmask='zdcModuleHGValid',
+                                cutmask='zdcModuleHG',
                                 xbins=n_module_amp_fine_bins, xmin=0.0, xmax=amp_LG_refit_max_ADC)
 
         zdcModuleMonToolArr.defineHistogram('zdcModuleHGtoLGT0Diff',title=';HG-LG T0 Difference [ns];Events',
                                 path='/EXPERT/ZDC/ZdcModule/ModuleHGLGCompr',
-                                cutmask='zdcModuleHGValid',
+                                cutmask='zdcModuleHG',
                                 xbins=n_HG_LG_time_diff_bins,xmin=-10.0,xmax=10.0)
 
         zdcModuleMonToolArr.defineHistogram('zdcModuleHGtoLGT0Diff, zdcModuleHGtoLGAmpRatio', type='TH2F', title=';HG-LG T0 Difference [ns];HG-to-LG Amplitude Raio;Events',
                                 path='/EXPERT/ZDC/ZdcModule/ModuleHGLGCompr',
-                                cutmask='zdcModuleHGValid',
+                                cutmask='zdcModuleHG',
                                 xbins=n_HG_LG_time_diff_bins,xmin=2.0,xmax=4.0, # zoomed in to see potential correlations
                                 ybins=n_HG_LG_amp_ratio_bins,ymin=hg_lg_amp_ratio_min_tight,ymax=hg_lg_amp_ratio_max_tight)
 
@@ -831,7 +882,7 @@ def ZdcMonitoringConfig(inputFlags):
                                 ybins=n_time_centroid_bins_default, ymin=-10.0, ymax=10.0)
         zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleTime;zdcModuleTime_HG_vs_lb', type='TH2F', title=';lumi block;Module Time [ns]',
                                 path='/EXPERT/ZDC/ZdcModule/ModuleTimeLBdep',
-                                cutmask='zdcModuleHGValid',
+                                cutmask='zdcModuleHG',
                                 xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                                 ybins=n_time_centroid_bins_default, ymin=-10.0, ymax=10.0)
     else: #online - coarse binnings
@@ -842,7 +893,7 @@ def ZdcMonitoringConfig(inputFlags):
                                 ybins=n_time_centroid_bins_default, ymin=-10.0, ymax=10.0)
         zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleTime;zdcModuleTime_HG_vs_lb', type='TH2F', title=';lumi block;Module Time [ns]',
                                 path='/EXPERT/ZDC/ZdcModule/ModuleTimeLBdep',
-                                cutmask='zdcModuleHGValid',
+                                cutmask='zdcModuleHG',
                                 xbins=n_lumi_block_bins_coarse,xmin=0.0,xmax=lumi_block_max,
                                 ybins=n_time_centroid_bins_default, ymin=-10.0, ymax=10.0)
 
@@ -871,7 +922,7 @@ def ZdcMonitoringConfig(inputFlags):
         rpdChannelMonToolArr.defineHistogram('RPDChannelMaxADC', title=';Max ADC [ADC Counts];Events',
                                 path='/EXPERT/RPD/RPDChannel/MaxADC',
                                 cutmask='RPDChannelValid',
-                                xbins=n_energy_bins_default,xmin=0.0,xmax=4096.0)
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=module_FPGA_max_ADC)
 
         if (not zdcMonAlg.IsOnline):
             rpdChannelMonToolArr.defineHistogram('RPDChannelSubAmp', title=';RPD Channel Subtracted Amplitude;Events',
@@ -885,7 +936,7 @@ def ZdcMonitoringConfig(inputFlags):
                                     path='/EXPERT/RPD/RPDChannel/MaxADCVsSumADC',
                                     cutmask='RPDChannelValid',
                                     xbins=n_rpd_amp_bins_full_range,xmin=rpd_channel_amp_min,xmax=rpd_sum_adc_max, #change to xmax=20000 for zoomed in
-                                    ybins=n_energy_bins_default,ymin=0.0,ymax=4096.0) # change to ymax=3000.0 for zoomed in
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=module_FPGA_max_ADC) # change to ymax=3000.0 for zoomed in
     # ---------------------------- timing (max sample) ---------------------------- 
         rpdChannelMonToolArr.defineHistogram('RPDChannelMaxSample', title=';Max Sample;Events',
                                 path='/EXPERT/RPD/RPDChannel/MaxSample',
@@ -915,7 +966,7 @@ def ZdcMonitoringConfig(inputFlags):
                                     path='/EXPERT/RPD/RPDChannel/MaxADCLBdep',
                                     cutmask='RPDChannelValid',
                                     xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                                    ybins=n_energy_bins_default,ymin=0.0,ymax=4096.0)
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=module_FPGA_max_ADC)
         else: #online
             rpdChannelMonToolArr.defineHistogram('lumiBlock, RPDChannelAmplitudeCalib;RPDChannelAmplitudeCalib_vs_lb', type='TH2F', title=';lumi block;RPD Channel Calibrated Amplitude',
                                     path='/EXPERT/RPD/RPDChannel/CalibAmpLBdep',
@@ -926,7 +977,7 @@ def ZdcMonitoringConfig(inputFlags):
                                     path='/EXPERT/RPD/RPDChannel/MaxADCLBdep',
                                     cutmask='RPDChannelValid',
                                     xbins=n_lumi_block_bins_coarse,xmin=0.0,xmax=lumi_block_max,
-                                    ybins=n_energy_bins_default,ymin=0.0,ymax=4096.0)
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=module_FPGA_max_ADC)
 
 
     ### STEP 6 ###

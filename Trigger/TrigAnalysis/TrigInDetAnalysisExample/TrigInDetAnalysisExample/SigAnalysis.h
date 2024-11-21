@@ -41,7 +41,7 @@ public:
     std::cout << "SigAnalysis::~SigAnalysis() " << name() << std::endl;
     std::map<std::string, TH1F*>::iterator hitr=m_histos.begin();
     std::map<std::string, TH1F*>::iterator hend=m_histos.end();
-    for ( ; hitr!=hend ; hitr++ ) delete hitr->second;     
+    for ( ; hitr!=hend ; ++hitr ) delete hitr->second;
 
     Efficiency1D* heff[4]    = {    m_eff_pt,    m_eff_eta,    m_eff_phi,    m_eff_z0 };
     Efficiency1D* hpurity[4] = { m_purity_pt, m_purity_eta, m_purity_phi, m_purity_z0 };

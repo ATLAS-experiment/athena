@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Mon  5 Nov 2012 00:07:15 GMT 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -43,8 +43,7 @@ public:
   void addChild(unsigned long id) { m_children.push_back(id); }
   
   const std::vector<unsigned long>&  children() const { return m_children; }
-  std::vector<unsigned long>         children()       { return m_children; }
-  
+
 private:
   
   /// parameters

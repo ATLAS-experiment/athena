@@ -49,7 +49,7 @@ public:
   TrackAnalysis& operator=(const TrackAnalysis&) = delete;
 
   /// return identifier
-  std::string name() const { return m_name; }  
+  const std::string& name() const { return m_name; }
     
   /// standard operation interface 
   virtual void initialise() = 0;

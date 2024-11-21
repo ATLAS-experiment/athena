@@ -122,7 +122,9 @@ def trigTauJetONNXEvaluatorCfg(flags, tau_id=''):
         name                = f'TrigTau_TauJetONNXEvaluator_{tau_id}',
 
         # Network config:
-        NetworkFile         = id_flags.ONNXConfig,
+        NetworkFile0P       = id_flags.ONNXConfig[0],
+        NetworkFile1P       = id_flags.ONNXConfig[1],
+        NetworkFile3P       = id_flags.ONNXConfig[2],
         InputLayerScalar    = 'tau_vars',
         InputLayerTracks    = 'track_vars',
         InputLayerClusters  = 'cluster_vars',
@@ -140,6 +142,9 @@ def trigTauJetONNXEvaluatorCfg(flags, tau_id=''):
         OutputVarname       = f'{tau_id}_Score',
         OutputPTau          = f'{tau_id}_ProbTau',
         OutputPJet          = f'{tau_id}_ProbJet',
+
+        # Tau prongness selection
+        MinProngTrackPt     = id_flags.MinProngTrackPt if hasattr(id_flags, 'MinProngTrackPt') else 0,
     ))
 
     return acc
