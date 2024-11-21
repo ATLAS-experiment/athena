@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LARCALIPULSEPARAMSCOMPLETE_H
 #define LARRAWCONDITIONS_LARCALIPULSEPARAMSCOMPLETE_H
 
+#include "AthenaKernel/CLASS_DEF.h"
 #include "LArElecCalib/ILArCaliPulseParams.h" 
 #include "LArRawConditions/LArCaliPulseParamsP.h"
 #include "LArRawConditions/LArConditionsContainer.h"

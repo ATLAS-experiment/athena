@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LARNOISECOMPLETE_H
 #define LARRAWCONDITIONS_LARNOISECOMPLETE_H
 
+#include "AthenaKernel/CLASS_DEF.h"
 #include "LArElecCalib/ILArNoise.h" 
 #include "LArRawConditions/LArNoiseP.h"
 #include "LArRawConditions/LArConditionsContainer.h"

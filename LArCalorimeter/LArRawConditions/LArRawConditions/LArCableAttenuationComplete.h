@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LARCABLEATTENUATIONCOMPLETE_H
 #define LARRAWCONDITIONS_LARCABLEATTENUATIONCOMPLETE_H
 
+#include "AthenaKernel/CLASS_DEF.h"
 #include "LArElecCalib/ILArCableAttenuation.h" 
 #include "LArRawConditions/LArCableAttenuationP.h"
 #include "LArRawConditions/LArConditionsContainer.h"
