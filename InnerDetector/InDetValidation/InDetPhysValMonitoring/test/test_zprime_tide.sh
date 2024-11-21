@@ -9,6 +9,7 @@
 # art-include: 24.0/Athena
 # art-output: physval*.root
 # art-output: *.xml
+# art-output: art_core_0
 # art-output: dcube*
 # art-html: dcube_idtide_last
 
