@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RPCCHAMBER_H
@@ -99,7 +99,7 @@ namespace RPC_CondCabling {
         int ijk_etaReadout() const;
         int ijk_phiReadout() const;
 
-        std::string chamber_name() const;
+        const std::string& chamber_name() const;
         std::string stationName() const;
         int stationEta() const;
         int doubletR() const;
