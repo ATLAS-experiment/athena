@@ -1,9 +1,28 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import print_function
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 def getMETMaker(name="METMaker", **kwargs):
+    kwargs.setdefault("DoPFlow", False)
+    kwargs.setdefault("JetSelection", "Tight")
+
+    if kwargs["JetSelection"]=="Tier0":
+        kwargs.setdefault("JvtSelTool", None)
+    elif kwargs["DoPFlow"]:
+        kwargs.setdefault("JvtSelTool", CompFactory.CP.NNJvtSelectionTool(
+            name="JvtSelTool",
+            JvtMomentName="NJvt",
+            WorkingPoint="FixedEffPt",
+            MaxPtForJvt=60e3))
+    else:
+        kwargs.setdefault("JvtSelTool", CompFactory.CP.JvtSelectionTool(
+            name="JvtSelTool",
+            JvtMomentName="Jvt",
+            WorkingPoint=kwargs["JetSelection"],
+            MaxPtForJvt=60e3,
+            IsPFlow=False))
+
     return CompFactory.getComp("met::METMaker")(name, **kwargs)
 
 def getMuonSelectionTool(name="MuonSelectionTool_METMakerAlg"):
