@@ -81,6 +81,8 @@ namespace ActsTrk
       this, "PixelCalibrator", "", "Opt. pixel measurement calibrator"};
     ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_stripCalibTool{
       this, "StripCalibrator", "", "Opt. strip measurement calibrator"};
+    ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_hgtdCalibTool{
+      this, "HGTDCalibrator", "", "Opt. HGTD measurement calibrator"};
 
     // Handle Keys
     // Seed collections. These 2 vectors must match element for element.

@@ -13,6 +13,7 @@
 
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "xAODInDetMeasurement/HGTDClusterContainer.h"
 
 namespace ActsTrk {
 
@@ -36,10 +37,25 @@ public:
                                        const Acts::CalibrationContext&,
                                        const xAOD::StripCluster &,
                                        const Acts::BoundTrackParameters &)>;
-  PixelCalibrator pixelCalibrator;
-  StripCalibrator stripCalibrator;
+
+      using HgtdPos = xAOD::MeasVector<3>;
+      using HgtdCov = xAOD::MeasMatrix<3>;
+      using HGTDCalibrator = Acts::Delegate<
+         std::pair<HgtdPos, HgtdCov>(const Acts::GeometryContext&,
+                                       const Acts::CalibrationContext&,
+                                       const xAOD::HGTDCluster &,
+                                       const Acts::BoundTrackParameters &)>;
+
+
+      // @TODO should pass through bound state
+
+      PixelCalibrator pixelCalibrator;
+      StripCalibrator stripCalibrator;
+      HGTDCalibrator hgtdCalibrator;
+
    virtual void connectPixelCalibrator([[maybe_unused]] PixelCalibrator &calibrator) const {}
    virtual void connectStripCalibrator([[maybe_unused]] StripCalibrator &calibrator) const {}
+   virtual void connectHGTDCalibrator([[maybe_unused]] HGTDCalibrator &calibrator) const {}
 
    virtual bool calibrateAfterMeasurementSelection() const =0;
 };

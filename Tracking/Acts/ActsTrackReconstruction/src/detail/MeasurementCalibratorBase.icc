@@ -20,6 +20,10 @@ namespace ActsTrk::detail {
       trackState.setBoundSubspaceIndices(s_pixelSubspaceIndices);
       break;
     }
+    case xAOD::UncalibMeasType::HGTDClusterType: {
+      trackState.setBoundSubspaceIndices(s_hgtdSubspaceIndices);
+      break;
+       }
     default:
       throw std::domain_error("Can only handle measurement type pixel or strip");
     }
@@ -64,6 +68,14 @@ namespace ActsTrk::detail {
 		  measurement.template localCovariance<2>().template topLeftCorner<2, 2>(),
 		  bound_type,
 		  trackState);
+      break;
+    }
+    case (xAOD::UncalibMeasType::HGTDClusterType): {
+     setState<3>(measurement.type(),
+                 measurement.template localPosition<3>(),
+                 measurement.template localCovariance<3>().template topLeftCorner<3, 3>(),
+                 bound_type,
+                 trackState);
       break;
     }
     default:

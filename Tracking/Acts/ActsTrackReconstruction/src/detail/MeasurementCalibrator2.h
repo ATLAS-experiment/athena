@@ -94,7 +94,7 @@ namespace ActsTrk {
         Acts::eBoundLoc0, Acts::eBoundLoc1
       };
       constexpr static Acts::SubspaceIndices<3> s_hgtdSubspaceIndices = {
-         Acts::eBoundLoc0, Acts::eBoundLoc1, Acts::eTime
+         Acts::eBoundLoc0, Acts::eBoundLoc1, Acts::eBoundTime
       };
    };
 

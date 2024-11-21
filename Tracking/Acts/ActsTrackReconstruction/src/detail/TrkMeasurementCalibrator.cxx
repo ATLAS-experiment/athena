@@ -16,6 +16,7 @@ namespace ActsTrk::detail {
     switch (m_measurement->localParameters().dimension()) {
     case 1: return xAOD::UncalibMeasType::StripClusterType;
     case 2:  return xAOD::UncalibMeasType::PixelClusterType;
+    case 3:  return xAOD::UncalibMeasType::HGTDClusterType;
     default: return xAOD::UncalibMeasType::Other;
     }
   }

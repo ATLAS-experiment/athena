@@ -11,14 +11,15 @@ namespace ActsTrk::detail {
 								     const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId)
   {
     ToolHandle<IOnTrackCalibratorTool<traj_t>> null(nullptr);
-    return OnTrackCalibrator<traj_t>(trackingGeometry, detectorElementToGeoId, null, null);
+    return OnTrackCalibrator<traj_t>(trackingGeometry, detectorElementToGeoId, null, null, null);
   }
   
   template <typename traj_t>
   OnTrackCalibrator<traj_t>::OnTrackCalibrator(const Acts::TrackingGeometry &trackingGeometry,
 					       const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
 					       const ToolHandle<IOnTrackCalibratorTool<traj_t>>& pixelTool,
-					       const ToolHandle<IOnTrackCalibratorTool<traj_t>>& stripTool)
+					       const ToolHandle<IOnTrackCalibratorTool<traj_t>>& stripTool,
+					       const ToolHandle<IOnTrackCalibratorTool<traj_t>>& hgtdTool)
     : m_trackingGeometry(&trackingGeometry),
       m_detectorElementToGeoId(&detectorElementToGeoId)
   {
@@ -32,6 +33,12 @@ namespace ActsTrk::detail {
       stripTool->connect(*this);
     } else {
       stripCalibrator.template connect<&OnTrackCalibrator<traj_t>::passthrough<1, xAOD::StripCluster>>(this);
+    }
+    if (hgtdTool.isEnabled()) {
+      hgtdTool->connect(*this);
+    } else {
+	// cppcheck-suppress missingReturn; false positive
+        hgtdCalibrator.template connect<&OnTrackCalibrator<traj_t>::passthrough<3, xAOD::HGTDCluster>>(this);
     }
   }
   
@@ -75,6 +82,21 @@ namespace ActsTrk::detail {
 		  surface->bounds().type(),
 		  state);
       break;
+    }
+    case xAOD::UncalibMeasType::HGTDClusterType: {
+      assert(hgtdCalibrator.connected());
+      auto [pos, cov] = hgtdCalibrator(
+        geoctx,
+        cctx,
+	*dynamic_cast<const xAOD::HGTDCluster*>(&measurement),
+        state);
+    setState<3>(
+        xAOD::UncalibMeasType::HGTDClusterType,
+        pos,
+	cov,
+	surface->bounds().type(),
+        state);
+    break;
     }
     default:
       throw std::domain_error("OnTrackCalibrator can only handle Pixel or Strip measurements");

@@ -11,6 +11,8 @@
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterAuxContainer.h"
+#include "xAODInDetMeasurement/HGTDClusterContainer.h"
+#include "xAODInDetMeasurement/HGTDClusterAuxContainer.h"
 
 template < typename trajectory_t,
 	   typename pos_t,
@@ -44,15 +46,21 @@ int main() {
   xAOD::StripClusterAuxContainer auxStripClusters;
   stripClusters.setStore( &auxStripClusters );
 
+  xAOD::HGTDClusterContainer hgtdClusters;
+  xAOD::HGTDClusterAuxContainer auxHgtdClusters;
+  hgtdClusters.setStore( &auxHgtdClusters );
+
+
   pixelClusters.push_back( new xAOD::PixelCluster() );
   stripClusters.push_back( new xAOD::StripCluster() );
   stripClusters.push_back( new xAOD::StripCluster() );
+  hgtdClusters.push_back( new xAOD::HGTDCluster() );
 
   std::cout << "Creating State Container ... " << std::endl;
   Acts::VectorMultiTrajectory trackStateBackend;
   assert( trackStateBackend.size() == 0ul );
-  
-  std::size_t nStates = 3ul;
+
+  std::size_t nStates = 4ul;
   for (std::size_t i(0); i<nStates; ++i) {
     trackStateBackend.addTrackState(Acts::TrackStatePropMask::All);
   }
@@ -68,13 +76,13 @@ int main() {
   calibrator.template setStateFromMeasurement<xAOD::PixelCluster, Acts::VectorMultiTrajectory>( *pixelClusters.front(),
 												Acts::SurfaceBounds::eCone,
 												pixelState );
-  
+
   checkList<Acts::VectorMultiTrajectory>(pixelState,
 					 2,
 					 pixelClusters.front()->template localPosition<2>(),
 					 pixelClusters.front()->template localCovariance<2>().template topLeftCorner<2, 2>(),
 					 Acts::BoundSubspaceIndices{ Acts::eBoundLoc0, Acts::eBoundLoc1 } );
-  
+
   std::cout << "Calling setStateFromMeasurement for strip cluster" << std::endl;
   typename Acts::MultiTrajectory<Acts::VectorMultiTrajectory>::TrackStateProxy stripState = trackStateBackend.getTrackState(1);
   assert(not stripState.hasCalibrated());
@@ -87,18 +95,31 @@ int main() {
                                          stripClusters.front()->template localPosition<1>(),
                                          stripClusters.front()->template localCovariance<1>().template topLeftCorner<1, 1>(),
                                          Acts::BoundSubspaceIndices{ Acts::eBoundLoc0 } );
-  
+
   std::cout << "Calling setStateFromMeasurement for strip cluster (Acts::SurfaceBounds::eAnnulus)" << std::endl;
   typename Acts::MultiTrajectory<Acts::VectorMultiTrajectory>::TrackStateProxy stripAnnulusState = trackStateBackend.getTrackState(2);
   assert(not stripAnnulusState.hasCalibrated());
   calibrator.template setStateFromMeasurement<xAOD::StripCluster, Acts::VectorMultiTrajectory>( *stripClusters.at(1),
                                                                                                 Acts::SurfaceBounds::eAnnulus,
                                                                                                 stripAnnulusState );
-  
+
   checkList<Acts::VectorMultiTrajectory>(stripAnnulusState,
                                          1,
                                          stripClusters.at(1)->template localPosition<1>(),
                                          stripClusters.at(1)->template localCovariance<1>().template topLeftCorner<1, 1>(),
                                          Acts::BoundSubspaceIndices{ Acts::eBoundLoc1 } );
 
+  std::cout << "Calling setStateFromMeasurement for HGTD cluster" << std::endl;
+
+  typename Acts::MultiTrajectory<Acts::VectorMultiTrajectory>::TrackStateProxy hgtdState = trackStateBackend.getTrackState(3);
+  assert(not hgtdState.hasCalibrated());
+  calibrator.template setStateFromMeasurement<xAOD::HGTDCluster, Acts::VectorMultiTrajectory>( *hgtdClusters.front(),
+                                                                                                Acts::SurfaceBounds::eCone,
+                                                                                                hgtdState );
+
+  checkList<Acts::VectorMultiTrajectory>(hgtdState,
+                                         3,
+                                         hgtdClusters.front()->template localPosition<3>(),
+                                         hgtdClusters.front()->template localCovariance<3>().template topLeftCorner<3, 3>(),
+                                         Acts::BoundSubspaceIndices{ Acts::eBoundLoc0, Acts::eBoundLoc1, Acts::eBoundTime } );
 }
