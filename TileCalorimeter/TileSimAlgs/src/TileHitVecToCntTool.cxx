@@ -754,7 +754,7 @@ StatusCode TileHitVecToCntTool::processAllSubEvents(const EventContext& ctx) {
     auto hitVectorHandles = m_hitVectorKeys.makeHandles(ctx);
     for (auto & inputHits : hitVectorHandles) {
       if (!inputHits.isValid()) {
-        ATH_MSG_ERROR("BAD HANDLE"); //FIXME improve error here
+        ATH_MSG_ERROR("Input Tile hit container is missing!");
         return StatusCode::FAILURE;
       }
       const double SubEvtTimeOffset(0.0);
