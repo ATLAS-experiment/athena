@@ -61,7 +61,12 @@ protected:
     SetUpGaudi();
   }
   ~GaudiFixture() {
-    TearDownGaudi();
+    try {
+      TearDownGaudi();
+    }
+    catch (...) {
+      std::abort();
+    }
   }
 
   void SetUpGaudi() {
