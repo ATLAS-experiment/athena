@@ -27,7 +27,6 @@ def PhysValMETCfg(flags, **kwargs):
     # for EMTopo jets no NNJvt is calculated so we need to fall back to Jvt (re-calculated in MissingEtDQA::PhysValMET as "NewJvt")
     kwargs.setdefault("METMakerTopo", getMETMaker(name="METMaker_AntiKt4Topo",
                                                   JetSelection="Loose",
-                                                  JetJvtMomentName="NewJvt",
                                                   DoPFlow=False) )
     kwargs.setdefault("METMakerPFlow", getMETMaker(name="METMaker_AntiKt4PFlow",
                                                    JetSelection="Loose",
