@@ -110,8 +110,8 @@
 
     ///////////////////////////////////////////////////////////////////////
     // Parsed truth/info
-    std::vector<FPGATrackSimTruthTrack> const *m_truthtracks;
-    bool m_isSingleParticle;
+    std::vector<FPGATrackSimTruthTrack> const *m_truthtracks{nullptr};
+    bool m_isSingleParticle = false;
     bool m_truthIsValid = false;
     FPGATrackSimTrackPars m_truthpars;
     FPGATrackSimGenScanBinningBase::IdxSet m_truthbin;
@@ -123,7 +123,7 @@
     void setBinPlotsActive(const FPGATrackSimGenScanBinningBase::IdxSet &idx) { 
         m_binPlotsActive = ((m_truthbin == idx) || (!m_isSingleParticle));}        
     // this flag governs if pair filter and pairset filter plots filled
-    bool m_binPlotsActive; 
+    bool m_binPlotsActive = false;
     
     ///////////////////////////////////////////////////////////////////////
     // Data Flow Counters

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimNNMap.cxx
@@ -23,11 +23,10 @@ using namespace asg::msgUserCode;
 
 
 
-FPGATrackSimNNMap::FPGATrackSimNNMap(const std::string & filepath) 
+FPGATrackSimNNMap::FPGATrackSimNNMap(const std::string & filepath) :
+    m_weightsFileName(filepath)
 {
-
     // Open file with NN weights
-    m_weightsFileName = filepath;
     std::ifstream input_cfg(m_weightsFileName.c_str());
     if (input_cfg.is_open()) 
       ANA_MSG_INFO("Opened file: " << m_weightsFileName);
@@ -38,7 +37,5 @@ FPGATrackSimNNMap::FPGATrackSimNNMap(const std::string & filepath)
 
 }
 
-// Returns pointer to NN weighting map
 
-std::string FPGATrackSimNNMap::getNNMap() const {return m_weightsFileName;}
-
+const std::string& FPGATrackSimNNMap::getNNMap() const {return m_weightsFileName;}

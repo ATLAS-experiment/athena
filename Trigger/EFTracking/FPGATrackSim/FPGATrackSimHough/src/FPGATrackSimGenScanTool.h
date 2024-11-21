@@ -249,7 +249,7 @@ protected:
         // Methods - name are hopefully clear
         int addPair(const HitPair &pair);
         const HitPair &lastpair() const { return pairList.back(); }
-        const HitPair &secondtolastpair() const { return pairList.end()[-2]; }
+        const HitPair &secondtolastpair() const { return *std::prev(pairList.end(), 2); }
 
         bool hasHit(const StoredHit *hit) const;
         bool hasLayer(int layer) const { return ((hitLayers & (0x1 << layer)) != 0); }

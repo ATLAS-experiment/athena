@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimSPACEPOINTROADFILTERTOOL_H
 #define FPGATrackSimSPACEPOINTROADFILTERTOOL_H
@@ -79,8 +79,8 @@ class FPGATrackSimSpacepointRoadFilterTool : public extends<AthAlgTool, IFPGATra
         ///////////////////////////////////////////////////////////////////////
         // Metadata and Monitoring
 
-        TH1I* m_inputRoads;
-        TH1I* m_badRoads;
+        TH1I* m_inputRoads{nullptr};
+        TH1I* m_badRoads{nullptr};
     
         ///////////////////////////////////////////////////////////////////////
         // Helpers

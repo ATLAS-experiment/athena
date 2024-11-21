@@ -330,13 +330,13 @@ FPGATrackSimTrackPars FPGATrackSimGenScanKeyLyrHelper::keyParsToTrackPars(const 
     return pars;
 }
 
-double FPGATrackSimGenScanKeyLyrHelper::zExpected(KeyLyrPars keypars, double r) const
+double FPGATrackSimGenScanKeyLyrHelper::zExpected(const KeyLyrPars& keypars, double r) const
 {
     return (keypars.z2 - keypars.z1) / (m_R2 - m_R1) * (r - m_R1) + keypars.z1;
 }
 
 // takes hit position and calculated what xm should be for that hit
-double FPGATrackSimGenScanKeyLyrHelper::xmForHit(KeyLyrPars keypars, const FPGATrackSimHit *hit) const
+double FPGATrackSimGenScanKeyLyrHelper::xmForHit(const KeyLyrPars& keypars, const FPGATrackSimHit *hit) const
 {
     auto rotated_coords = getRotatedConfig(keypars);
     auto xy1p = rotated_coords.xy1p;
@@ -360,7 +360,7 @@ double FPGATrackSimGenScanKeyLyrHelper::xmForHit(KeyLyrPars keypars, const FPGAT
 }
 
 // Find shift from nominal track to hit in the "x" direction 
-double FPGATrackSimGenScanKeyLyrHelper::deltaX(KeyLyrPars keypars, const FPGATrackSimHit *hit) const
+double FPGATrackSimGenScanKeyLyrHelper::deltaX(const KeyLyrPars& keypars, const FPGATrackSimHit *hit) const
 {
     auto rotated_coords = getRotatedConfig(keypars);
 
@@ -374,7 +374,7 @@ double FPGATrackSimGenScanKeyLyrHelper::deltaX(KeyLyrPars keypars, const FPGATra
 }
 
 // Find shift from nominal track to hit in the "x" direction 
-double FPGATrackSimGenScanKeyLyrHelper::xExpected(KeyLyrPars keypars, const FPGATrackSimHit *hit) const
+double FPGATrackSimGenScanKeyLyrHelper::xExpected(const KeyLyrPars& keypars, const FPGATrackSimHit *hit) const
 {
     auto rotated_coords = getRotatedConfig(keypars);
 
