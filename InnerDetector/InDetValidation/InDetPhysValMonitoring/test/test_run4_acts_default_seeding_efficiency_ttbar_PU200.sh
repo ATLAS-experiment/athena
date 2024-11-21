@@ -23,10 +23,10 @@ fi
 
 run () {
     name="${1}"
-    cmd="${@:2}"
+    cmd=("${@:2}")
     ############
     echo "Running ${name}..."
-    time ${cmd}
+    time "${cmd[@]}"
     rc=$?
     # Only report hard failures for comparison Acts-Trk since we know
     # they are different. We do not expect this test to succeed
@@ -37,8 +37,8 @@ run () {
 
 export ATHENA_CORE_NUMBER=8
 
-echo "Running Reconstruction-athena"
-time Reco_tf.py \
+run "Reconstruction-athena" \
+    Reco_tf.py \
      --CA \
      --inputRDOFile  ${input_rdo} \
      --outputAODFile AOD.athena.pool.root \
@@ -49,7 +49,6 @@ time Reco_tf.py \
      --multithreaded
 
 reco_rc=$?
-echo "art-result: ${reco_rc} Reconstruction-athena"
 if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
@@ -68,8 +67,8 @@ if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
 
-echo "Running Reconstruction-acts"
-time Reco_tf.py \
+run "Reconstruction-acts" \
+    Reco_tf.py \
      --CA \
      --inputRDOFile  ${input_rdo} \
      --outputAODFile AOD.acts.pool.root \
@@ -81,7 +80,6 @@ ValidateSeedsPass.storeSiSPSeededTracks=True;flags.Tracking.writeExtendedSi_PRDI
      --multithreaded
 
 reco_rc=$?
-echo "art-result: ${reco_rc} Reconstruction-acts"
 if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
