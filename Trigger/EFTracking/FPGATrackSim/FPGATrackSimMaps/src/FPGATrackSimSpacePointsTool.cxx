@@ -293,6 +293,9 @@ void FPGATrackSimSpacePointsTool::addSpacePoints(FPGATrackSimHit hit_in, FPGATra
     // Maybe it should return a new FPGATrackSimHit rather than modifying in place.
     hit_in.makeSpacepoint(x, y, z, phi_window, hit_out, new_truth);
 
+    if (m_reduceCoordPrecision)
+      reduceGlobalCoordPrecision(hit_in);
+
     // abusing hit type 'guessed' to be able to indentify it as spacepoint later on
     // Guessed is ambiguous with an actual guessed hit-- there is a spacepoint type which
     // should be used instead.
@@ -309,6 +312,10 @@ void FPGATrackSimSpacePointsTool::addSpacePoints(FPGATrackSimHit hit_in, FPGATra
 //      hit_out.setHitType(HitType::guessed);
 //      hit_out.setHitType(HitType::spacepoint);
       hit_out.makeSpacepoint(x, y, z, phi_window, hit_in, new_truth);
+
+      if (m_reduceCoordPrecision)
+        reduceGlobalCoordPrecision(hit_out);
+
       tower.addHit(hit_out);
     }
 
@@ -371,4 +378,16 @@ void FPGATrackSimSpacePointsTool::calcPosition(FPGATrackSimHit &hit_in, FPGATrac
     x = r_sp*cos(phi_sp);
     y = r_sp*sin(phi_sp);
     z = z_sp;
+}
+
+void FPGATrackSimSpacePointsTool::reduceGlobalCoordPrecision(FPGATrackSimHit &hit) const {
+  float pos[3] = { hit.getR(), hit.getGPhi(), hit.getZ() };
+
+  pos[0] = std::trunc(pos[0] / m_coordRPrecision) * m_coordRPrecision;
+  pos[1] = std::trunc(pos[1] / m_coordPhiPrecision) * m_coordPhiPrecision;
+  pos[2] = std::trunc(pos[2] / m_coordZPrecision) * m_coordZPrecision;
+
+  hit.setX(pos[0] * std::cos(pos[1]));
+  hit.setY(pos[0] * std::sin(pos[1]));
+  hit.setZ(pos[2]);
 }
