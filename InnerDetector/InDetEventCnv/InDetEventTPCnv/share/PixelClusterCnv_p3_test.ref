@@ -1,4 +1,4 @@
- INFO Initialize from dictionary
+PixelID              INFO Initialize from dictionary
  DEBUG (Re)initialize
 AtlasDetectorID      INFO initialize_from_dictionary - OK
  DEBUG decode index and bit fields for each level: 

@@ -10,7 +10,7 @@ AGDDtoGeoSvc         INFO  this is AGDDtoGeoSvc::initialize()
  Volume psdum3 not found: returning 0
  Volume pmdum2 not found: returning 0
  Volume pmdum3 not found: returning 0
- INFO Initialize from dictionary
+PixelID              INFO Initialize from dictionary
  DEBUG (Re)initialize
 AtlasDetectorID      INFO initialize_from_dictionary - OK
  DEBUG decode index and bit fields for each level: 
@@ -58,7 +58,7 @@ eta_index     7
  DEBUG Pixel range -> 2/1/0/0/0:21/-6:6/0:327/0:191 | 2/1/0/1/0:37/-6:6/0:327/0:143 | 2/1/0/2/0:51/-6:6/0:327/0:143 | 2/1/-2,2/0:2/0:47/0/0:327/0:143
 INFO SCT_ID::initialize_from_dictionary 
 AtlasDetectorID      INFO initialize_from_dictionary - OK
-INFO Initialize from dictionary cout 0
+TRT_ID               INFO Initialize from dictionary msgSvc 0
  DEBUG (Re)initialize
 AtlasDetectorID      INFO initialize_from_dictionary - OK
  DEBUG decode index and bit fields for each level: 
