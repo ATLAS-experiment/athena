@@ -81,6 +81,9 @@ namespace xAODMaker {
         ATH_CHECK(m_xaodTruthPUEventContainerKey.initialize(m_doAllPileUp || m_doInTimePileUp));
         ATH_CHECK(m_xaodTruthParticleContainerKey.initialize());
         ATH_CHECK(m_xaodTruthVertexContainerKey.initialize());
+        if (!m_lheTruthParticleContainerKey.empty()){
+          ATH_CHECK(m_lheTruthParticleContainerKey.initialize());
+        }
 
         ATH_CHECK(m_evtInfo.initialize());
 
@@ -90,9 +93,12 @@ namespace xAODMaker {
 
         ATH_MSG_DEBUG("AODContainerName = " << m_aodContainerKey.key() );
         ATH_MSG_DEBUG("xAOD TruthEventContainer name = " << m_xaodTruthEventContainerKey.key() );
-        ATH_MSG_DEBUG("xAOD TruthPileupEventContainer name = " << m_xaodTruthPUEventContainerKey.key());
+        ATH_MSG_DEBUG("xAOD TruthPileupEventContainer name = " << m_xaodTruthPUEventContainerKey.key() );
         ATH_MSG_DEBUG("xAOD TruthParticleContainer name = " << m_xaodTruthParticleContainerKey.key() );
         ATH_MSG_DEBUG("xAOD TruthVertexContainer name = " << m_xaodTruthVertexContainerKey.key() );
+        if (!m_lheTruthParticleContainerKey.empty()){
+          ATH_MSG_DEBUG("xAOD TruthLHEParticleContainer name = " << m_lheTruthParticleContainerKey.key() );
+        }
 
         if (m_doAllPileUp) ATH_MSG_INFO( "All pile-up truth (including out-of-time) will be written" );
         if (m_doInTimePileUp) ATH_MSG_INFO( "In-time pile-up truth (but not out-of-time) will be written" );
@@ -145,6 +151,9 @@ namespace xAODMaker {
         ATH_CHECK(xTruthVertexContainer.record(std::make_unique<xAOD::TruthVertexContainer>(),
                                                std::make_unique<xAOD::TruthVertexAuxContainer>()));
         ATH_MSG_DEBUG( "Recorded TruthVertexContainer with key: " << m_xaodTruthVertexContainerKey.key() );
+
+        // To keep track of whether we wrote an LHE event already or not
+        bool hadLHERecord = false;
 
         // ***********************************************************************************
         // Create the xAOD objects
@@ -346,6 +355,43 @@ namespace xAODMaker {
               xTruthEvent->setPdfInfoParameter((float)pdfInfo->pdf2(), xAOD::TruthEvent::XF2);
 #endif
             }
+
+            // Handle LHE particles, only supported for HEPMC3
+#ifdef HEPMC3
+            auto lhe_record_attribute = genEvt->attribute<HepMC::ShortEventAttribute>("LHERecord");
+
+            if (lhe_record_attribute && !hadLHERecord && !m_lheTruthParticleContainerKey.empty()){
+              hadLHERecord=true;
+              // The event had an LHE record, so let's record it. This will only happen once per event.
+              SG::WriteHandle<xAOD::TruthParticleContainer> xTruthLHEParticleContainer(m_lheTruthParticleContainerKey, ctx);
+              ATH_CHECK(xTruthLHEParticleContainer.record(std::make_unique<xAOD::TruthParticleContainer>(),
+                                                          std::make_unique<xAOD::TruthParticleAuxContainer>()));
+              ATH_MSG_DEBUG( "Recorded TruthLHEParticleContainer with key: " << m_lheTruthParticleContainerKey.key() );
+              // The LHE record is stored in a struct with old-style LHE format, so we have to re-encode it
+              for (int nPart=0;nPart<lhe_record_attribute->NUP;++nPart) {
+                // Create TruthParticle
+                xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
+                // Put particle into container;
+                xTruthLHEParticleContainer->push_back( xTruthParticle );
+                // Copy LHE info into the new particle; good description is in https://arxiv.org/abs/hep-ph/0609017
+                xTruthParticle->setPdgId( lhe_record_attribute->IDUP[nPart] );
+                xTruthParticle->setBarcode( nPart+1 );
+                xTruthParticle->setStatus( lhe_record_attribute->ISTUP[nPart] );
+                xTruthParticle->setPx( lhe_record_attribute->PUP[nPart][0] );
+                xTruthParticle->setPy( lhe_record_attribute->PUP[nPart][1] );
+                xTruthParticle->setPz( lhe_record_attribute->PUP[nPart][2] );
+                xTruthParticle->setE( lhe_record_attribute->PUP[nPart][3] );
+                xTruthParticle->setM( lhe_record_attribute->PUP[nPart][4] );
+              } // End of loop over particles
+            } // End of if we found the LHE record attribute
+            else if (hadLHERecord){
+              ATH_MSG_WARNING("Truth record appeared to have two LHE records; this should not be possible");
+            }
+#else
+            if (!m_lheTruthParticleContainerKey.empty()){
+              ATH_MSG_WARNING("HEPMC2 does not support LHE truth record storage. Skipping.");
+            }
+#endif
           }else{//not isSignalProcess
       xTruthPileupEventContainer->push_back( xTruthPileupEvent );
     }
@@ -419,7 +465,7 @@ namespace xAODMaker {
             if (productionVertex && productionVertex->parent_event() != nullptr) {
               VertexParticles& parts = vertexMap[productionVertex];
               if (parts.incoming.empty() && parts.outgoing.empty())
-          vertices.push_back (productionVertex);
+                vertices.push_back (productionVertex);
               parts.outgoingEL.push_back(eltp);
               parts.outgoing.push_back(xTruthParticle);
             }
@@ -431,7 +477,7 @@ namespace xAODMaker {
             if (decayVertex) {
               VertexParticles& parts = vertexMap[decayVertex];
               if (parts.incoming.empty() && parts.outgoing.empty())
-          vertices.push_back (decayVertex);
+                vertices.push_back (decayVertex);
               parts.incomingEL.push_back(eltp);
               parts.incoming.push_back(xTruthParticle);
             }
@@ -440,12 +486,12 @@ namespace xAODMaker {
 
           // (3) Loop over the map
           auto signalProcessVtx = HepMC::signal_process_vertex(genEvt); // Get the signal process vertex
-    xTruthVertexContainer->reserve(vertices.size());
+          xTruthVertexContainer->reserve(vertices.size());
           for (const auto&  vertex : vertices) {
             const auto& parts = vertexMap[vertex];
             // (a) create TruthVertex
             xAOD::TruthVertex* xTruthVertex = new xAOD::TruthVertex();
-      // (b) Put particle into container (so has store)
+            // (b) Put particle into container (so has store)
             xTruthVertexContainer->push_back( xTruthVertex );
             fillVertex(xTruthVertex, vertex); // (c) Copy HepMC info into the new vertex
             // (d) Build Event<->Vertex element link

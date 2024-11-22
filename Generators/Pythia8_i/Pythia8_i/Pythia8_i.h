@@ -163,6 +163,8 @@ private:
 
   PublicToolHandle<IPythia8Custom> m_athenaTool{this, "CustomInterface", ""};
 
+  BooleanProperty m_saveLHE{this, "SaveLHERecord", false};
+
   static int s_allowedTunes(double version);
 
   Pythia8::SuppressSmallPT *m_SuppressSmallPT;

@@ -32,14 +32,6 @@ def DFCommonTruthMuonToolCfg(flags):
                                    KeepNavigationInfo      = False,
                                    ParticleSelectionString = f"(abs(TruthParticles.pdgId) == 13) && (TruthParticles.status == 1) && TruthParticles.barcode < {flags.Sim.SimBarcodeOffset}")
 
-def DFCommonTruthLHEToolCfg(flags):
-    """LHE truth collection maker"""
-    return TruthCollectionMakerCfg(flags,
-                                   name                    = "DFCommonTruthLHETool",
-                                   NewCollectionName       = "TruthLHEParticles",
-                                   KeepNavigationInfo      = False,
-                                   ParticleSelectionString = "(TruthParticles.status == 1003)")
-
 def DFCommonTruthElectronToolCfg(flags):
     """Electron truth collection maker"""
     return TruthCollectionMakerCfg(flags,
