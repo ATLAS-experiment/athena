@@ -1,17 +1,21 @@
 #!/bin/bash
 set -e
 
-GEO_TAG="ATLAS-P2-RUN4-03-00-00"
-export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/:$CALIBPATH
+source FPGATrackSim_CommonEnv.sh
 
-RDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/RDO/reg0_singlemu.root"
-RDO_EVT=200
-MAPS="maps_9L/OtherFPGAPipelines/v0.21"
-
-echo "... Banks generation"
+echo "... 9L Banks generation"
 python -m FPGATrackSimBankGen.FPGATrackSimBankGenConfig \
     --filesInput=${RDO} \
     --evtMax=${RDO_EVT} \
-    Trigger.FPGATrackSim.mapsDir=${MAPS}
+    Trigger.FPGATrackSim.mapsDir=${MAPS_9L}
+ls -l
+echo "... 9L Banks generation, this part is done ..."
+
+echo "... Now generating 5L Banks"
+python -m FPGATrackSimBankGen.FPGATrackSimBankGenConfig \
+    --filesInput=${RDO} \
+    --evtMax=${RDO_EVT} \
+    Trigger.FPGATrackSim.Hough.genScan=True \
+    Trigger.FPGATrackSim.mapsDir=${MAPS_5L}
 ls -l
 echo "... Banks generation, this part is done ..."
