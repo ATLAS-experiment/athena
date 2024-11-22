@@ -1,6 +1,6 @@
 """Define methods to construct configured TRT overlay algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -12,8 +12,8 @@ def TRTDataOverlayExtraCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     # We need to convert BS to RDO for data overlay
-    from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConfig import TRTOverlayRawDataProviderAlgCfg
-    acc.merge(TRTOverlayRawDataProviderAlgCfg(flags))
+    from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConfig import TRTRawDataProviderCfg
+    acc.merge(TRTRawDataProviderCfg(flags))
 
     return acc
 

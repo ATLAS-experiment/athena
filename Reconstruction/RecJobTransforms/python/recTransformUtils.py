@@ -74,9 +74,6 @@ def addStandardRecoFiles(parser):
     parser.add_argument('--outputHIST_AODFile', 
                         type=trfArgClasses.argFactory(trfArgClasses.argHISTFile, io='output', countable=False), 
                         help='Output DQ monitoring file', group='Reco Files')
-    parser.add_argument('--inputEVNTFile', nargs='+', 
-                        type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='input'),
-                        help='Input EVNT file for NTUP_TRUTH making', group='Reco Files')
     parser.add_argument('--outputTXT_JIVEXMLTGZFile',
                         type = trfArgClasses.argFactory(trfArgClasses.argFile, io = 'output'),
                         help = 'Output JiveXML.tgz file', group = 'Reco Files')

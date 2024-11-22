@@ -33,17 +33,21 @@ def create_log_bins(min_value, max_value, num_bins):
 def create_vinj_bins():
 
     # Define min, max, and step size for each range
-    min1, max1, step1 = 0, 0.01, 0.00025
-    min2, max2, step2 = 0.01, 0.3, 0.0025
-    min3, max3, step3 = 0.3, 2.50001, 0.025
+    min1, max1, step1 = 0.0005 - 0.000001, 0.0025 - 0.000001, 0.00005
+    min2, max2, step2 = 0.0025 - 0.000001, 0.01   - 0.000001, 0.00025
+    min3, max3, step3 = 0.01   - 0.000001, 0.3    - 0.000001, 0.0025
+    min4, max4, step4 = 0.3    - 0.000001, 0.675  - 0.000001, 0.0125
+    min5, max5, step5 = 0.675  - 0.000001, 2.500001,          0.025
 
     # Generate each range using the defined variables
     range1 = np.arange(min1, max1, step1)
     range2 = np.arange(min2, max2, step2)
     range3 = np.arange(min3, max3, step3)
+    range4 = np.arange(min4, max4, step4)
+    range5 = np.arange(min5, max5, step5)
 
     # Concatenate the ranges into a single array
-    vinj_bins_array = np.concatenate((range1, range2, range3))
+    vinj_bins_array = np.concatenate((np.array([0.]), range1, range2, range3, range4, range5))
 
     return vinj_bins_array.tolist()
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured private Tile hit vector to container tool"""
 
@@ -96,9 +96,8 @@ def TileHitVecToCntToolCfg(flags, **kwargs):
         kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
     else:
         kwargs.setdefault("PileUpMergeSvc", '')
-    kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
-    TileHitVecToCntTool=CompFactory.TileHitVecToCntTool
-    acc.setPrivateTools(TileHitVecToCntTool(**kwargs))
+
+    acc.setPrivateTools(CompFactory.TileHitVecToCntTool(**kwargs))
 
     return acc
 
