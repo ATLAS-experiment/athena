@@ -99,6 +99,7 @@ class SlimmingHelper:
                 self.IncludeBJetTriggerByYearContent = False
                 self.IncludeBPhysTriggerContent = False
                 self.IncludeMinBiasTriggerContent = False
+                self.IncludeFullTriggerEDMLevel = "" # Specify an AllowedOutputFormat from TriggerEDM.py
                 self.OverrideJetTriggerContentWithTLAContent = False
                 # Choice of whether user provided a typed container list or not (CA vs non-CA) 
                 if "NamesAndTypes" in kwargs.keys(): self.NamesAndTypes = buildNamesAndTypes(kwargs["NamesAndTypes"])
@@ -220,6 +221,10 @@ class SlimmingHelper:
                 if (self.IncludeMinBiasTriggerContent is True):
                         triggerContent = True
                         self.SmartCollections.append("HLT_xAOD__TrigVertexCountsContainer_vertexcounts")
+
+                if (self.IncludeFullTriggerEDMLevel):
+                        triggerContent = True
+                        self.SmartCollections.append("HLT_FULL_EDM")
 
                 # Smart items
                 if len(self.SmartCollections)>0:
@@ -639,6 +644,9 @@ class SlimmingHelper:
                 elif collectionName=="HLT_BJetTriggerByYearContent":
                         from DerivationFrameworkTrigger.BJetTriggerByYearContent import getBJetTriggerContent
                         items.extend(getBJetTriggerContent(self.flags))
+                elif collectionName=="HLT_FULL_EDM":
+                        from DerivationFrameworkTrigger.TrigSlimmingHelper import addTrigEDMSetToOutput
+                        items.extend(addTrigEDMSetToOutput(self.flags, self, edmSet=self.IncludeFullTriggerEDMLevel))
 
                 else:
                         raise RuntimeError("Smart slimming container "+collectionName+" does not exist or does not have a smart slimming list")
