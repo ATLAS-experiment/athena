@@ -71,7 +71,7 @@ void PLRGmxInterface::addSensorType(const std::string& clas,
 {
   ATH_MSG_DEBUG("addSensorType called for class " << clas << ", typeName " << typeName);
   // only load the sensor type that the PLR will use
-  if (clas == "SingleChip_RD53" && typeName == "RD53_20x19_Single_25x100") {
+  if (clas == "SingleChip_RD53" && (typeName == "RD53_20x19_Single_25x100" || typeName == "PLR_20x19_Single_25x100")) {
     makePLRModule(typeName, parameters);
   }
 }
