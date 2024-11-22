@@ -117,6 +117,9 @@ def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
                 f"{outputStreamName(streamName)}_FileMetaDataCreatorTool",
                 OutputKey="FileMetaData",
                 StreamName=outputStreamName(streamName),
+                EventInfoKey=f"{flags.Overlay.BkgPrefix}EventInfo"
+                    if flags.Common.ProductionStep in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]
+                    else "EventInfo",
             )
         )
     elif category == MetadataCategory.EventStreamInfo:
@@ -125,7 +128,7 @@ def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
             Key=outputStreamName(streamName),
             DataHeaderKey=outputStreamName(streamName),
             EventInfoKey=f"{flags.Overlay.BkgPrefix}EventInfo"
-            if flags.Common.ProductionStep == ProductionStep.PileUpPresampling
+            if flags.Common.ProductionStep in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking]
             else "EventInfo",
         )
         tools.mdItems += [

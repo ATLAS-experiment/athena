@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 Run overlay between either presampled MC background RDO or zero-bias data RDO and hard scatter HITS
@@ -40,8 +40,9 @@ def main():
 
 def getTransform():
     executor_set = set()
-    from OverlayConfiguration.OverlayTransformHelpers import addOverlayArguments, addOverlaySubstep
+    from OverlayConfiguration.OverlayTransformHelpers import addOverlayArguments, addOverlaySubstep, addBStoRDOSubstep
     addOverlaySubstep(executor_set)
+    addBStoRDOSubstep(executor_set)
     trf = transform(executor=executor_set,
                     description='ATLAS Overlay transform. Inputs must be HITS. Outputs must be RDO.')
     addAthenaArguments(trf.parser)

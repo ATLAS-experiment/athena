@@ -47,7 +47,7 @@ def RpcBytestreamDecodeCfg(flags, name="RpcRawDataProvider", **kwargs):
 
 
     # Setup the RAW data provider tool
-    keyName = flags.Overlay.BkgPrefix + "RPCPAD" if flags.Common.isOverlay else "RPCPAD"
+    keyName = f"{flags.Overlay.BkgPrefix}RPCPAD" if flags.Overlay.DataOverlay else "RPCPAD"
     MuonRpcRawDataProviderTool = CompFactory.Muon.RPC_RawDataProviderToolMT(name    = "RPC_RawDataProviderToolMT",
                                                                  Decoder = RPCRodDecoder,
                                                                  RdoLocation = keyName )
@@ -111,7 +111,7 @@ def TgcBytestreamDecodeCfg(flags, name="TgcRawDataProvider", **kwargs):
 
 
     # Setup the RAW data provider tool
-    keyName = flags.Overlay.BkgPrefix + "TGCRDO" if flags.Common.isOverlay else "TGCRDO"
+    keyName = f"{flags.Overlay.BkgPrefix}TGCRDO" if flags.Overlay.DataOverlay else "TGCRDO"
     Muon__TGC_RawDataProviderToolMT=CompFactory.Muon.TGC_RawDataProviderToolMT
     MuonTgcRawDataProviderTool = Muon__TGC_RawDataProviderToolMT(name    = "TGC_RawDataProviderToolMT",
                                                                  Decoder = TGCRodDecoder,
@@ -156,7 +156,7 @@ def MdtBytestreamDecodeCfg(flags, name="MdtRawDataProvider", **kwargs):
 
 
     # Setup the RAW data provider tool
-    keyName = flags.Overlay.BkgPrefix + "MDTCSM" if flags.Common.isOverlay else "MDTCSM"
+    keyName = f"{flags.Overlay.BkgPrefix}MDTCSM" if flags.Overlay.DataOverlay else "MDTCSM"
     Muon__MDT_RawDataProviderToolMT=CompFactory.Muon.MDT_RawDataProviderToolMT
     MuonMdtRawDataProviderTool = Muon__MDT_RawDataProviderToolMT(name    = "MDT_RawDataProviderToolMT",
                                                                  Decoder = MDTRodDecoder,
@@ -196,7 +196,7 @@ def CscBytestreamDecodeCfg(flags, name="CscRawDataProvider", **kwargs):
 
 
     # Setup the RAW data provider tool
-    keyName = flags.Overlay.BkgPrefix + "CSCRDO" if flags.Common.isOverlay else "CSCRDO"
+    keyName = f"{flags.Overlay.BkgPrefix}CSCRDO" if flags.Overlay.DataOverlay else "CSCRDO"
     Muon__CSC_RawDataProviderToolMT=CompFactory.Muon.CSC_RawDataProviderToolMT
     MuonCscRawDataProviderTool = Muon__CSC_RawDataProviderToolMT(name    = "CSC_RawDataProviderToolMT",
                                                                  Decoder = CSCRodDecoder,
@@ -247,7 +247,7 @@ def sTgcBytestreamDecodeCfg(flags, name="sTgcRawDataProvider", **kwargs):
 
 
     # Setup the RAW data provider tool
-    keyName = flags.Overlay.BkgPrefix + "sTGCRDO" if flags.Common.isOverlay else "sTGCRDO"
+    keyName = f"{flags.Overlay.BkgPrefix}sTGCRDO" if flags.Overlay.DataOverlay else "sTGCRDO"
     Muon__STGC_RawDataProviderToolMT=CompFactory.Muon.STGC_RawDataProviderToolMT
     MuonsTgcRawDataProviderTool = Muon__STGC_RawDataProviderToolMT(name    = "sTgcRawDataProviderTool",
                                                                    Decoder = acc.popToolsAndMerge(sTgcRODDecoderCfg(flags)),
@@ -350,7 +350,7 @@ def MmBytestreamDecodeCfg(flags, name="MmRawDataProvider", **kwargs):
     acc.merge(MuonGeoModelCfg(flags)) 
    
     # Setup the RAW data provider tool
-    keyName = flags.Overlay.BkgPrefix + "MMRDO" if flags.Common.isOverlay else "MMRDO"
+    keyName = f"{flags.Overlay.BkgPrefix}MMRDO" if flags.Overlay.DataOverlay else "MMRDO"
     MuonMmRawDataProviderTool = CompFactory.Muon.MM_RawDataProviderToolMT(name  = "MM_RawDataProviderToolMT",
                                                               Decoder = acc.popToolsAndMerge(MmRDODDecoderCfg(flags)),
                                                               RdoLocation = keyName,

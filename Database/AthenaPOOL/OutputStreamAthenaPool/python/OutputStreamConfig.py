@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, ConfigurationError
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -13,7 +13,7 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
                     disableEventTag=False, trigNavThinningSvc=None, takeItemsFromInput=False,
                     extendProvenanceRecord=True, AcceptAlgs=[], HelperTools=[]):
    eventInfoKey = "EventInfo"
-   if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+   if flags.Common.ProductionStep in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:
       eventInfoKey = f"{flags.Overlay.BkgPrefix}EventInfo"
 
    msg = logging.getLogger("OutputStreamCfg")

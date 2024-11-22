@@ -46,6 +46,20 @@ def addMCOverlayTrfArgs(parser):
                         group='MCOverlay')
 
 
+def addDataOverlayBSTrfArgs(parser):
+    """Add MC overlay command-line parser arguments."""
+    parser.defineArgGroup('DataOverlayBS', 'Data overlay BS pre-processing')
+    parser.add_argument('--inputBSFile', nargs='+',
+                        type=argFactory(argBSFile, io='input'),
+                        help='Input minimum-bias BS for data+MC overlay',
+                        group='DataOverlayBS')
+    parser.add_argument('--outputRDO_BKGFile', nargs='+',
+                        type=argFactory(argRDOFile, io='output'),
+                        help='Output background RDO for data+MC overlay',
+                        group='DataOverlayBS')
+
+
+
 def addOverlayArguments(parser, in_reco_chain=False):
     """Add all overlay command-line parser arguments."""
     # TODO: are forward detectors really needed?
@@ -56,6 +70,7 @@ def addOverlayArguments(parser, in_reco_chain=False):
     addMCOverlayTrfArgs(parser)
     if not in_reco_chain:
         addDataOverlayTrfArgs(parser)
+        addDataOverlayBSTrfArgs(parser)
 
 
 def addOverlaySubstep(executor_set, in_reco_chain=False):
@@ -70,6 +85,18 @@ def addOverlaySubstep(executor_set, in_reco_chain=False):
     if in_reco_chain:
         executor.inData = []
         executor.outData = []
+
+    executor_set.add(executor)
+
+
+def addBStoRDOSubstep(executor_set):
+    executor = athenaExecutor(name='BStoRDO',
+                              skeletonCA='OverlayConfiguration.BStoRDO_Skeleton',
+                              substep='BStoRDO',
+                              tryDropAndReload=False,
+                              perfMonFile='ntuple.pmon.gz',
+                              inData=['BS'],
+                              outData=['RDO_BKG'])
 
     executor_set.add(executor)
 

@@ -48,8 +48,10 @@ class ProductionStep(FlagEnum):
     Simulation = 'Simulation'
     PileUpPresampling = 'PileUpPresampling'
     Overlay = 'Overlay'
+    MinbiasPreprocessing = 'MinbiasPreprocessing'
     FastChain = 'FastChain'
     Digitization = 'Digitization'
+    PileUpPretracking = 'PileUpPretracking'
     Reconstruction = 'Reconstruction'
     Derivation = 'Derivation'
 
