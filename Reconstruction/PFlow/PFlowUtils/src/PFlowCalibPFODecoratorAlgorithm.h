@@ -49,7 +49,7 @@ private:
   SG::ReadHandleKey<std::map<Identifier,std::vector<const CaloCalibrationHit*> > > m_mapIdentifierToCalibHitsReadHandleKey{this,"IdentifierToCalibHitsMapName","IdentifierToCalibHitsMap","ReadHandleKey for the map between Identifieirs and sets of calibration hits"};
 
   /** Write handle key to decorate PFO with threeN leading truth particle uniqueID and energy */
-  SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_pfoWriteDecorHandleKeyNLeadingTruthParticles{this,"PFOWriteDecorHandleKey_NLeadingTruthParticles","JetETMissNeutralParticleFlowObjects.calpfo_NLeadingTruthParticleBarcodeEnergyPairs"};
+  SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_pfoWriteDecorHandleKeyNLeadingTruthParticles{this,"PFOWriteDecorHandleKey_NLeadingTruthParticles","JetETMissNeutralParticleFlowObjects.calpfo_NLeadingTruthParticleBarcodeEnergyPairs"}; // TODO Update variable name to be consistent
   
   /** ToolHandle to a tool to create the calibration hit truth information that we need for the decoration */
   ToolHandle<ICaloCalibClusterTruthAttributerTool> m_truthAttributerTool{this,"TruthAttributerTool",""," ToolHandle to a tool to create the calibration hit truth information that we need for the decoration"};

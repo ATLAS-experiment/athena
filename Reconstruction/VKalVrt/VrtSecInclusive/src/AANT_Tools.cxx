@@ -322,7 +322,7 @@ namespace VKalVrtAthena {
               }
           }
       
-        m_ntupleVars->get< vector<int>    >( "SVTrk_barcode" ) .emplace_back( uniqueID );
+        m_ntupleVars->get< vector<int>    >( "SVTrk_barcode" ) .emplace_back( uniqueID ); // TODO Rename variable name to be consistent?
         m_ntupleVars->get< vector<double> >( "SVTrk_matchPr" ) .emplace_back( matchProb );
       
         ATH_MSG_DEBUG(" > fillAANT_SelectedBaseTracks: Sel Trk d0/pT/eta/match bc/pr "
