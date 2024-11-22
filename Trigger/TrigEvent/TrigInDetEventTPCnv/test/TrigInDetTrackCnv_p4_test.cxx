@@ -20,6 +20,7 @@
 #include "TestTools/leakcheck.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/MsgStream.h"
+#include "AthenaKernel/getMessageSvc.h"
 #include <cassert>
 #include <iostream>
 
@@ -126,7 +127,7 @@ void compare (const TrigInDetTrack& p1,
 
 void testit (const TrigInDetTrack& trans1)
 {
-  MsgStream log (0, "test");
+  MsgStream log (Athena::getMessageSvc(), "test");
   TrigInDetTrackCnv_p4 cnv;
   TrigInDetTrackCollectionCnv_tlp4 tlcnv;
   cnv.setRuntimeTopConverter (&tlcnv);
@@ -183,6 +184,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 void make_dd()
 {
   auto pix_id = std::make_unique<PixelID>();
+  pix_id->setMessageSvc(Athena::getMessageSvc());
   IdDictParser parser;
   parser.register_external_entity ("InnerDetector",
                                    "IdDictInnerDetector.xml");
