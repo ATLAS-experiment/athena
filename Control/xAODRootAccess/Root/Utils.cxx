@@ -2,7 +2,6 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-
 // STL include(s):
 #include <functional>
 #include <regex>
@@ -14,8 +13,9 @@
 #include "AthContainers/tools/error.h"
 
 // Local include(s):
-#include "xAODRootAccess/tools/Utils.h"
 #include "xAODRootAccess/tools/Message.h"
+#include "xAODRootAccess/tools/Utils.h"
+
 
 namespace {
 
@@ -134,7 +134,7 @@ namespace xAOD {
 
       /// This function is used to figure out what to name dynamic auxiliary
       /// branches coming from a container called <code>key</code>. It needs
-      /// to work in sync wiht how it is done in the offline code, so will
+      /// to work in sync with how it is done in the offline code, so will
       /// eventually probably end up in another package.
       ///
       /// @param key The key/branch name of the auxiliary container
@@ -155,6 +155,31 @@ namespace xAOD {
          // the end, and be done with it:
          else {
             result += "Dyn.";
+         }
+
+         return result;
+      }
+
+      /// This function is used to figure out what to name dynamic auxiliary
+      /// field coming from a container called <code>key</code>.
+      ///
+      /// @param key The key/field name of the auxiliary container
+      /// @returns The prefix of the dynamic variables created based on the
+      ///          contents of the object
+      ///
+      std::string dynFieldPrefix( const std::string& key ) {
+         // Make a copy of the key that we can modify:
+         std::string result = key;
+
+         // If it ends in a colon, then let's exchange that colon for
+         // "Dyn:":
+         if( result[ result.size() - 1 ] == ':' ) {
+            result.replace( result.size() - 1, 1, "Dyn:" );
+         }
+         // If it doesn't end in a colon, then let's just add "Dyn:" at
+         // the end:
+         else {
+            result += "Dyn:";
          }
 
          return result;
@@ -314,7 +339,14 @@ namespace xAOD {
          // Return the massaged name:
          return result;
       }
-
+      /// This function is used to search for a branch in a TTree that contains
+      /// a given substring. It returns the name of the first branch that contains the search term. 
+      /// If no branch is found, the function returns the search term itself. 
+      /// 
+      /// @param tree The TTree to search in
+      /// @param pre The search term
+      /// @returns The name of the first branch that contains the search term
+      ///
       std::string getFirstBranchMatch( TTree * tree,
                                         const std::string& pre ) {
          const TObjArray * pBranches = tree->GetListOfBranches();
@@ -331,6 +363,55 @@ namespace xAOD {
          return pre;
       }
 
-   } // namespace Utils
+      /// This function is used to search for a field in an RNTupleReader that
+      /// contains a given substring. It returns the name of the first field
+      /// that contains the search term. If no field is found, the function
+      /// returns the search term itself.
+      ///
+      /// @param ntupleReader The RNTupleReader to search in
+      /// @param pre The search term
+      /// @returns The name of the first field that contains the search term
+      ///
+      std::string getFirstFieldMatch(
+          RNTupleReader& ntupleReader,
+          const std::string& pre ) {
+         const std::regex pattern( ".*" + pre + ".*" );
+         ntupleReader.LoadEntry( 0 );
+         for( const auto& field :
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 33, 0 )
+              ntupleReader.GetModel().GetConstFieldZero()
+               ) {
+                  auto name = field.GetQualifiedFieldName();
+#else
+               ntupleReader.GetModel().GetFieldZero().GetSubFields()
+               ) {
+            auto name = field->GetQualifiedFieldName();
+#endif
+            if( std::regex_match( name, pattern ) ) {
+               return name;
+            }
+         }
+         return pre;
+      }
 
-} // namespace xAOD
+      /// This function is used to check if a field exists in an RNTupleReader.
+      ///
+      /// @param fieldName The name of the field to check
+      /// @param ntupleReader The RNTupleReader to check in
+      /// @returns True if the field exists, false otherwise
+      ///
+      ::Bool_t fieldExists(
+          std::string fieldName,
+          RNTupleReader& ntupleReader ) {
+         // If it cannot find a field id it will give the maximum value of
+         // unsigned long
+         if( ntupleReader.GetDescriptor().FindFieldId( fieldName ) ==
+             std::numeric_limits< unsigned long >::max() ) {
+            return kFALSE;
+         }
+         return kTRUE;
+      }
+
+   }  // namespace Utils
+
+}  // namespace xAOD
