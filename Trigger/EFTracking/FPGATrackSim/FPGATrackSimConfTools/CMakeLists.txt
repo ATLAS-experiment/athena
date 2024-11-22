@@ -55,4 +55,9 @@ atlas_add_test( FPGATrackSimInsideOutOnRDO_test
                 SCRIPT FPGATrackSimInsideOutOnRDO.sh
                 POST_EXEC_SCRIPT noerror.sh 
                 PROPERTIES TIMEOUT 240 )
-                
+
+atlas_add_test( FPGATrackSim_F200_test
+                SCRIPT FPGATrackSim_F200.sh
+                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters*" # ACTS CKF related errors
+                POST_EXEC_SCRIPT noerror.sh 
+                PROPERTIES TIMEOUT 240 )

@@ -65,6 +65,8 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('convertUnmappedHits', False)
     cf.addFlag('writeToAOD', False)
 
+    # ACTS Tracking
+    cf.addFlag('runCKF',True)
     return cf
 
 
