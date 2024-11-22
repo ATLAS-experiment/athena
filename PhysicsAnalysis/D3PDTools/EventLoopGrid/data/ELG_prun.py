@@ -122,12 +122,33 @@ def ELG_prun(sample) :
         try:
             out = subprocess.check_output(dummycmd, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e: 
-            print ("Command:")
-            print (e.cmd)
-            print ("failed with return code " , e.returncode)
-            print ("output was:")
-            print (e.output)
-            return 1
+            # Handle a case where we couldn't get the grid nickname in advance
+            if b'Need to generate a grid proxy' in e.output and any( ['%nickname%' in x for x in cmd ] ):
+                print('Detected nickname still undefined. Trying to replace it.')
+                try:
+                    from pandatools import PsubUtils
+                    nickname = PsubUtils.getNickname()
+                    dummycmd = [ x.replace('%nickname%',nickname) for x in dummycmd ]
+                    cmd = [ x.replace('%nickname%',nickname) for x in cmd ]
+                except Exception as e_rep:
+                    print(f'Nickname replacement failed with error {e_rep.returncode}: {e_rep.output}')
+                # Now try the job again
+                try:
+                    out = subprocess.check_output(dummycmd, stderr=subprocess.STDOUT)
+                except subprocess.CalledProcessError as e_take2:
+                    print ("Command:")
+                    print (e_take2.cmd)
+                    print ("failed with return code " , e_take2.returncode)
+                    print ("output was:")
+                    print (e_take2.output)
+                    return 1
+            else:
+                print ("Command:")
+                print (e.cmd)
+                print ("failed with return code " , e.returncode)
+                print ("output was:")
+                print (e.output)
+                return 1
 
     cmd += ["--inTarBall=jobcontents.tgz"]
 
