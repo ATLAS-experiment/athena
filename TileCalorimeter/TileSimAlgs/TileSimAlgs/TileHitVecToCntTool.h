@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //**************************************************************************
@@ -109,7 +109,7 @@ private:
   Gaudi::Property<bool> m_onlyUseContainerName{this, "OnlyUseContainerName", true, "Don't use the ReadHandleKey directly. Just extract the container name from it."};
   StringArrayProperty m_inputKeys{this, "TileHitVectors", {"TileHitVec"},
       "Name of input hit vectors (default=TileHitVec)" };  //!< vector with the names of TileHitVectors to use
-  SG::ReadHandleKeyArray<TileHitVector> m_hitVectorKeys;
+  SG::ReadHandleKeyArray<TileHitVector> m_hitVectorKeys{this, "TileHitVectorKeys", {}, "Do not set manually!"};
   std::vector<std::string> m_hitVectorNames{};
 
   SG::WriteHandleKey<TileHitContainer> m_hitContainerKey{this,"TileHitContainer","TileHitCnt",
