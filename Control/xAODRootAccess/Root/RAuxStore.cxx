@@ -1878,7 +1878,7 @@ namespace xAOD {
       }
 
       // Check if anything needs to be done:
-      if( ( entryLoaded == entryToLoad ) ) {
+      if( entryLoaded == entryToLoad ) {
          return 0;
       }
 
