@@ -751,49 +751,46 @@ namespace CaloRecGPU
       {
       }
 
-      SimpleContainer(const indexer sz)
+      SimpleContainer(const indexer sz) : m_size(sz)
       {
         m_array = Manager::template allocate<Context>(sz);
-        m_size = sz;
       }
 
       /*!
         \warning We assume the pointer is in a valid memory location!
       */
-      SimpleContainer(T * other_array, const indexer sz)
+      SimpleContainer(T * other_array, const indexer sz) : m_size(sz)
       {
         m_array = Manager::template allocate<Context>(sz);
         Manager::template copy<Context, Context>(m_array, other_array, sz);
-        m_size = sz;
       }
 
-      SimpleContainer(const SimpleContainer & other)
+      SimpleContainer(const SimpleContainer & other) : m_size(other.m_size)
       {
-        m_size = other.m_size;
         m_array = Manager::template allocate<Context>(m_size);
         Manager::template copy<Context, Context>(m_array, other.m_array, m_size);
       }
 
-      SimpleContainer(SimpleContainer && other)
+      SimpleContainer(SimpleContainer && other) : m_size(other.m_size)
       {
-        m_size = other.m_size;
         m_array = nullptr;
         Manager::template move<Context, Context>(m_array, other.m_array, m_size);
         other.m_size = 0;
       }
 
       template <class other_indexer, class other_context, bool other_hold>
-      SimpleContainer(const SimpleContainer<T, other_indexer, other_context, other_hold> & other)
+      SimpleContainer(const SimpleContainer<T, other_indexer, other_context, other_hold> & other) :
+        m_size(other.m_size)
       {
-        m_size = other.m_size;
+
         m_array = Manager::template allocate<Context>(m_size);
         Manager::template copy<Context, other_context>(m_array, other.m_array, m_size);
       }
 
       template <class other_indexer, class other_context>
-      SimpleContainer(SimpleContainer<T, other_indexer, other_context, true> && other)
+      SimpleContainer(SimpleContainer<T, other_indexer, other_context, true> && other) :
+        m_size(other.m_size)
       {
-        m_size = other.m_size;
         m_array = nullptr;
         Manager::template move<Context, other_context>(m_array, other.m_array, m_size);
         other.m_size = 0;
@@ -1005,10 +1002,10 @@ namespace CaloRecGPU
       template <class other_indexer, bool other_hold>
       // cppcheck-suppress  uninitMemberVar
       //Try to suppress the uninitialized member thing that is probably being thrown off by the CUDA_HOS_DEV macro...
-      CUDA_HOS_DEV SimpleContainer(const SimpleContainer<T, other_indexer, Context, other_hold> & other)
+      CUDA_HOS_DEV SimpleContainer(const SimpleContainer<T, other_indexer, Context, other_hold> & other) :
+        m_size(other.m_size),
+        m_array(other.m_array)
       {
-        m_size = other.m_size;
-        m_array = other.m_array;
       }
 
       // cppcheck-suppress  operatorEqVarError
