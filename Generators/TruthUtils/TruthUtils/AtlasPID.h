@@ -751,7 +751,7 @@ template<> inline bool isSquark(const DecodedPID& p){
 }
 template<> inline bool isSquark(const int& p){ auto value_digits = DecodedPID(p); return isSquark(value_digits);}
 
-template<class T> inline bool hasSquark(const T& p, const int& q) { return hasSquark(p->pdg_id()); }
+template<class T> inline bool hasSquark(const T& p, const int& q) { return hasSquark(p->pdg_id(), q); }
 template<> inline bool hasSquark(const DecodedPID& p, const int& q){
   auto pp = p.shift(1); return isSUSY(p) && pp.ndigits() != 2 && pp(0) == q; // skip lepton and boson super-partners by vetoing ndigits==2
 }
