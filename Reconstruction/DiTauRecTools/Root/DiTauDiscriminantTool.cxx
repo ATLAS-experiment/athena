@@ -9,7 +9,6 @@
 
 // EDM include(s):
 #include "xAODTau/DiTauJet.h"
-#include "xAODTau/DiTauJetContainer.h"
 
 #include "DiTauRecTools/HelperFunctions.h"
 #include "PathResolver/PathResolver.h"

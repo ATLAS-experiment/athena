@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  DITAURECTOOLS_DITAUIDVARCALCULATOR_H
@@ -17,20 +17,9 @@
 
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
-#include "AsgTools/AnaToolHandle.h"
-
-// Core include(s):
-// #include "TruthUtils/PIDHelpers.h"
-#include "fastjet/PseudoJet.hh"
-#include "fastjet/ClusterSequenceArea.hh"
 
 // EDM include(s):
 #include "xAODTau/TauxAODHelpers.h"
-#include "xAODTau/DiTauJetContainer.h"
-
-//#include "tauRecTools/TauEventData.h"
-
-// Selection Tools include:
 
 // Local include(s):
 #include "DiTauRecTools/IDiTauToolBase.h"
@@ -94,7 +83,6 @@ private:
   float m_dDefault;
   
   static StatusCode decorNtracks (const xAOD::DiTauJet& xDiTau);
-  //TauEventData m_data;
 }; // class DiTauIDVarCalculator
 
 }
