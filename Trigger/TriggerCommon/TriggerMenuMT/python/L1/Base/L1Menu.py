@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from .CTP import CTP
 from .Items import MenuItemsCollection
@@ -23,6 +23,8 @@ class L1Menu(object):
 
     def __init__(self, menuName, flags):
         self.menuName = menuName
+
+        self.menuFullName = L1MenuFlags.MenuSetup()
 
         # items in menu
         self.items = MenuItemsCollection()
@@ -81,7 +83,7 @@ class L1Menu(object):
 
 
     def setupCTPMonitoring(self):
-        self.ctp.setupMonitoring(self.menuName, self.items, self.thresholds, self.connectors)
+        self.ctp.setupMonitoring(self.menuName, self.items, self.thresholds, self.connectors, self.menuFullName)
         
     def check(self):
         log.info("Doing L1 Menu checks")

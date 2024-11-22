@@ -81,7 +81,7 @@ class MonitorDef:
                     'MBTS_A8', 'MBTS_A9', 'MBTS_A10', 'MBTS_A11', 'MBTS_A12', 'MBTS_A13', 'MBTS_A14', 'MBTS_A15',
                     'MBTS_C0', 'MBTS_C1', 'MBTS_C2',  'MBTS_C3',  'MBTS_C4',  'MBTS_C5',  'MBTS_C6',  'MBTS_C7',
                     'MBTS_C8', 'MBTS_C9', 'MBTS_C10', 'MBTS_C11', 'MBTS_C12', 'MBTS_C13', 'MBTS_C14', 'MBTS_C15',
-                    'BMA0', 'BMA1', 'BMA2', 'BMA3',"ZDC_0", "ZDC_1", "ZDC_2", "ZDC_ALT_0", "ZDC_ALT_1", "ZDC_ALT_2" 
+                    'BMA0', 'BMA1', 'BMA2', 'BMA3', "ZDC_0", "ZDC_1", "ZDC_2", "ZDC_ALT_0", "ZDC_ALT_1", "ZDC_ALT_2"
                    ]
 
         for mult in cThr:
@@ -93,7 +93,7 @@ class MonitorDef:
 
 
     @staticmethod
-    def applyItemCounter( menuName, items ):
+    def applyItemCounter( menuName, items, menuFullName ):
         """
         this functions marks the items that should be monitored by setting the corresponding monitoring flags
         e.g. to "LF:000|HF:111" for high frequency monitoring of TBP, TAP, and TAV.
@@ -116,7 +116,6 @@ class MonitorDef:
                 "L1_2MU3V", "L1_2MU3VF", "L1_2MU5VF",
                 "L1_MU5VF_2MU3V", "L1_MU8VF_2MU5VF",
                 "L1_3MU3V", "L1_MU5VF_3MU3VF", "L1_4MU3V",
-  
                 ## Phase-I
                 # L1Calo
                 "L1_eEM5", "L1_eEM9", "L1_eEM12L",
@@ -143,7 +142,7 @@ class MonitorDef:
                 "L1_jXEC100",
                 "L1_jTE200",
                 "L1_jTEC200", "L1_jTEFWD100", "L1_jTEFWDA100", "L1_jTEFWDC100",
-                "L1_gJ20p0ETA25", "L1_gJ20p25ETA49","L1_gJ20p0ETA25_EMPTY", "L1_gJ50p0ETA25",
+                "L1_gJ20p0ETA25", "L1_gJ20p25ETA49", "L1_gJ50p0ETA25",
                 "L1_gJ100p0ETA25", "L1_gJ400p0ETA25",
                 "L1_gLJ80p0ETA25", "L1_gLJ100p0ETA25", "L1_gLJ140p0ETA25", "L1_gLJ160p0ETA25",
                 #"L1_gXERHO70", "L1_gXERHO100",
@@ -153,7 +152,6 @@ class MonitorDef:
                 "L1_gMHT500",
                 # Combined
                 "L1_2eEM10L_MU8F", "L1_MU3V_jJ40",
-                
                 # L1Topo (Topo2 always in)
                 "L1_LLPDPHI-jXE40-jJ40",
                 "L1_BPH-0DR3-eEM9jJ40_MU5VF", "L1_BPH-0M9-eEM9-eEM7_MU5VF", "L1_BPH-0DR3-eEM9jJ40_2MU3V",
@@ -181,7 +179,7 @@ class MonitorDef:
                     # Detector items
                     # "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_AND",
                     "L1_LUCID_A", "L1_LUCID_C",
-                    "L1_CALREQ1","L1_CALREQ2",
+                    "L1_CALREQ1", "L1_CALREQ2",
                     "L1_TGC_BURST",
                     "L1_TRT_FILLED",
                     "L1_BPTX0_BGRP12", "L1_BPTX1_BGRP12",
@@ -205,7 +203,6 @@ class MonitorDef:
                     # Phase-I
                     "L1_AFP_A_AND_C_TOF_T0T1_jJ90",
                     "L1_jJ500_LAR",
-
                     # Other triggers disabled in MC
                     "L1_MU3VF", "L1_MU8F", "L1_MU8FC", "L1_MU8VF",
                     "L1_MU3VC", "L1_MU3EOF", "L1_MU4BO",
@@ -231,55 +228,18 @@ class MonitorDef:
                     "L1_eTAU20L", "L1_eTAU35", "L1_eTAU40HM",
                 ]
 
-        else: # HI menu
+        else: # HI L1 menu
             monItems[TBP|TAP|TAV] = [
                 # Random
                 "L1_RD0_FILLED",
                 # Forward
-                # AFP
-                #"L1_AFP_A_OR_C", "L1_AFP_A_AND_C",
-                # AFP combined
-                #"L1_AFP_A_AND_C_J12",
-                #"L1_AFP_A_AND_C_TOF_J20",
-                #"L1_AFP_A_AND_C_TOF_J30",
-                #"L1_AFP_A_AND_C_TOF_J50",
-                #"L1_AFP_A_AND_C_TOF_J75",
-                #"L1_AFP_A_AND_C_TOF_T0T1_J20",
-                #"L1_AFP_A_AND_C_TOF_T0T1_J30",
-                #"L1_AFP_A_AND_C_TOF_T0T1_J50",
-                #"L1_AFP_A_AND_C_TOF_T0T1_J75",
-                #"L1_AFP_A_AND_C_TOF_T0T1_jJ125",
-                #"L1_AFP_A_AND_C_TOF_T0T1_jJ50",
-                #"L1_AFP_A_AND_C_TOF_T0T1_jJ60",
-                #"L1_AFP_A_AND_C_TOF_T0T1_jJ90",
-                #"L1_AFP_A_AND_C_TOF_jJ125",
-                #"L1_AFP_A_AND_C_TOF_jJ50",
-                #"L1_AFP_A_AND_C_TOF_jJ60",
-                #"L1_AFP_A_AND_C_TOF_jJ90",
-                #"L1_AFP_A_AND_C_jJ20",
-                #"L1_AFP_A_AND_C_jJ30",
-                #"L1_AFP_A_OR_C_J12",
-                #"L1_AFP_A_OR_C_jJ20",
-                #"L1_AFP_A_OR_C_jJ30",
                 # ZDC
-                # Basic inputs
                 "L1_ZDC_BIT0", "L1_ZDC_BIT1", "L1_ZDC_BIT2",
                 "L1_ZDC_COMB0", "L1_ZDC_COMB1", "L1_ZDC_COMB2", "L1_ZDC_COMB3",
                 "L1_ZDC_COMB4", "L1_ZDC_COMB5", "L1_ZDC_COMB6", "L1_ZDC_COMB7",
-                "L1_VZDC_A_VZDC_C", "L1_1ZDC_A_VZDC_C", "L1_VZDC_A_1ZDC_C",
-                "L1_1ZDC_A_1ZDC_C", "L1_5ZDC_A_VZDC_C", "L1_VZDC_A_5ZDC_C",
-                "L1_ZDC_1XOR5", "L1_5ZDC_A_5ZDC_C",
-                #
                 "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C",
-                "L1_ZDC_XOR", "L1_ZDC_C_VZDC_A", "L1_ZDC_A_VZDC_C",
-                # ZDC items in pp
-                "L1_ZDC_A_AND_C",
-                "L1_ZDC_E1_AND_E1", "L1_ZDC_E2_AND_E2", "L1_ZDC_E2_AND_E3", "L1_ZDC_E3_AND_E3",
-                "L1_ZDC_E1_AND_E2ORE3",
+                "L1_VZDC_A_VZDC_C",
                 "L1_ZDC_OR",
-                "L1_ZDC_XOR_E1_E3", "L1_ZDC_XOR_E2",
-                "L1_ZDC_PP_A", "L1_ZDC_PP_C", "L1_ZDC_PP_OR", "L1_ZDC_PP_A_C",
-                "L1_ZDC_PP_A2", "L1_ZDC_PP_C2", "L1_ZDC_PP_OR2",
                 # LHCF
                 "L1_LHCF",
                 # MBTS
@@ -290,124 +250,39 @@ class MonitorDef:
                 "L1_MU3V", "L1_MU5VF",
                 "L1_MU8F", "L1_MU8VF",
                 "L1_MU14FCH",
-                "L1_MU3V_EMPTY",
-                "L1_MU3V_FIRSTEMPTY",
-                "L1_2MU5VF_EMPTY",
                 "L1_2MU3V", "L1_2MU5VF",
                 "L1_3MU3V",
                 "L1_2MU14FCH_OVERLAY",
-                # Mu+X
-                "L1_MU5VF_AFP_A_OR_C",
-                "L1_MU3V_jJ40",
-                # Legacy L1Calo
                 # Phase-I L1Calo
-                "L1_eEM1", "L1_eEM2",
                 "L1_eEM5", "L1_eEM9", "L1_eEM12", "L1_eEM15",
                 "L1_eEM18", "L1_eEM18L",
                 "L1_eEM26", "L1_eEM26M",
                 "L1_2eEM18",
-                "L1_eTAU1",
-                "L1_DPHI-2eEM1", "L1_DPHI-2eTAU1",
-                "L1_DPHI-2eEM1_VjTE200",
-                "L1_2eEM1_VjTE200", "L1_2eEM2_VjTE200", "L1_2eEM1_VjTE200_GAP_AANDC",
-                "L1_eEM5_VjTE200", "L1_eEM9_VjTE200",
-                "L1_eEM1_jTE4_VjTE200", "L1_eEM2_jTE4_VjTE200", "L1_eTAU1_jTE4_VjTE200",
-                "L1_2eTAU1_VjTE200", "L1_2eTAU1_VjTE200_GAP_AANDC",
-                "L1_eEM1_TRT_VjTE200", "L1_eTAU1_TRT_VjTE200",
-                "L1_eEM1_TRT_ZDC_XOR_VjTE200", "L1_eTAU1_TRT_ZDC_XOR_VjTE200", "L1_jTAU1_TRT_ZDC_XOR_VjTE200",
-                "L1_eEM1_TRT_VZDC_A_VZDC_C_VjTE100", "L1_eTAU1_TRT_VZDC_A_VZDC_C_VjTE100",
-                "L1_eEM1_TRT_ZDC_XOR4_VjTE100", "L1_eTAU1_TRT_ZDC_XOR4_VjTE100",
                 #
-                "L1_jJ5", "L1_jJ10",
                 "L1_jJ20", "L1_jJ30", "L1_jJ40", "L1_jJ50",
                 "L1_jJ55", "L1_jJ60", "L1_jJ90", "L1_jJ125",
                 "L1_jJ500",
                 "L1_jJ40p30ETA49", "L1_jJ50p30ETA49", "L1_jJ60p30ETA49",
                 "L1_jJ90p30ETA49",
                 #
-                "L1_gJ20p0ETA25","L1_gJ400p0ETA25",
+                "L1_gJ20p0ETA25", "L1_gJ400p0ETA25",
+                #
                 "L1_gLJ80p0ETA25", "L1_gXEJWOJ100",
                 #
-                "L1_jTE3", "L1_jTE4","L1_jTE5", "L1_jTE10", "L1_jTE20", "L1_jTE50",
-                "L1_jTE100","L1_jTE200","L1_jTE600", "L1_jTE1500","L1_jTE6500", "L1_jTE8300",
-                "L1_jTE9000", "L1_jTE10000", "L1_jTE12000",
-                "L1_jTE5_VjTE200", "L1_gTE5_VjTE200",
+                "L1_jTE200",
                 #
-                "L1_VjTE10", "L1_VjTE200", "L1_VjTE600", "L1_jTE50_VjTE600",
-                #
-                "L1_GAP_A", "L1_GAP_C", "L1_GAP_AANDC",
-                #
-                "L1_MU3V_VjTE50", "L1_MU3V_VjTE200",
-                #
-                "L1_TRT_VjTE20", "L1_eEM1_TRT_VjTE100",
-                "L1_TRT_ZDC_XOR_VjTE200", "L1_TRT_1ZDC_NZDC_VjTE200",
-                #
-                "L1_ZDC_A_C_VjTE10", "L1_ZDC_XOR_VjTE10", "L1_TRT_ZDC_A_C_VjTE10", "L1_TRT_ZDC_XOR_VjTE10",
-                "L1_TRT_ZDC_A_VjTE50", "L1_TRT_ZDC_C_VjTE50",
-                #
-                "L1_MBTS_2_VZDC_A_ZDC_C_VjTE200_GAP_A", "L1_MBTS_2_1ZDC_NZDC_VjTE200_GAP_A",
-                "L1_MBTS_2_ZDC_A_VZDC_C_VjTE200_GAP_C", "L1_MBTS_2_1ZDC_NZDC_VjTE200_GAP_C",
-                "L1_MBTS_1_VZDC_A_ZDC_C_jTE3_VjTE200", "L1_MBTS_1_ZDC_A_VZDC_C_jTE3_VjTE200",
-                "L1_MBTS_1_1ZDC_NZDC_jTE3_VjTE200",
-                "L1_MBTS_1_VZDC_A_ZDC_C_jTE3_VjTE200_GAP_A", "L1_MBTS_1_1ZDC_NZDC_jTE3_VjTE200_GAP_A",
-                "L1_MBTS_1_ZDC_A_VZDC_C_jTE3_VjTE200_GAP_C", "L1_MBTS_1_1ZDC_NZDC_jTE3_VjTE200_GAP_C",
-                #
-                "L1_1ZDC_A_1ZDC_C_VjTE200", "L1_ZDC_1XOR5_VjTE200",
-                "L1_ZDC_XOR_VjTE200",
-                "L1_VZDC_A_VZDC_C_jTE5_VjTE200","L1_ZDC_XOR_jTE5_VjTE200",
-                "L1_1ZDC_NZDC_jTE5_VjTE200","L1_5ZDC_A_5ZDC_C_jTE5_VjTE200",
-                "L1_VZDC_A_VZDC_C_jTE10_VjTE200","L1_ZDC_XOR_jTE10_VjTE200",
-                "L1_1ZDC_NZDC_jTE10_VjTE200",
-                "L1_VZDC_A_VZDC_C_gTE5_VjTE200","L1_ZDC_XOR_gTE5_VjTE200",
-                "L1_1ZDC_NZDC_gTE5_VjTE200","L1_5ZDC_A_5ZDC_C_gTE5_VjTE200",
-                "L1_TRT_VZDC_A_VZDC_C_jTE5_VjTE200", "L1_TRT_ZDC_XOR_jTE5_VjTE200",
-                #
-                "L1_ZDC_XOR_jJ5_VjTE200", "L1_ZDC_XOR_jJ10_VjTE200", "L1_1ZDC_NZDC_jJ5_VjTE200",
-                "L1_1ZDC_NZDC_jJ10_VjTE200", "L1_VZDC_A_VZDC_C_jJ5_VjTE200", "L1_VZDC_A_VZDC_C_jJ10_VjTE200",
-                #
-                "L1_gTE3", "L1_gTE5",
-                #
-                "L1_ZDC_HELT15_jTE4000", "L1_ZDC_HELT20_jTE4000", "L1_ZDC_HELT25_jTE4000",
-                "L1_ZDC_HELT35_jTE4000", "L1_ZDC_HELT50_jTE4000",
-                #
-                "L1_eEM9_AFP_A_AND_C", #"L1_eEM9_AFP_A_OR_C",
-                #
-                "L1_TRT_FILLED", "L1_TRT_EMPTY",
+                "L1_TRT_FILLED",
                 ]
 
-            # Add triggers that are not in the MC menu
+            # HI L1 menu: Add triggers that are not in the MC menu
             if "MC" not in menuName:
                 monItems[TBP|TAP|TAV] += [
                 # Detector
                 "L1_CALREQ0", "L1_CALREQ1", "L1_CALREQ2",
-                "L1_BPTX0_BGRP12","L1_BPTX1_BGRP12",
+                "L1_BPTX0_BGRP12", "L1_BPTX1_BGRP12",
                 "L1_TGC_BURST",
                 "L1_ZeroBias",
                 "L1_jJ500_LAR",
-                # Forward
-                # AFP
-                #"L1_AFP_A", "L1_AFP_C",
-                # AFP Calib
-                #"L1_AFP_FSA_BGRP12",
-                #"L1_AFP_FSA_TOF_T0_BGRP12",
-                #"L1_AFP_FSA_TOF_T1_BGRP12",
-                #"L1_AFP_FSA_TOF_T2_BGRP12",
-                #"L1_AFP_FSA_TOF_T3_BGRP12",
-                #"L1_AFP_FSC_BGRP12",
-                #"L1_AFP_FSC_TOF_T0_BGRP12",
-                #"L1_AFP_FSC_TOF_T1_BGRP12",
-                #"L1_AFP_FSC_TOF_T2_BGRP12",
-                #"L1_AFP_FSC_TOF_T3_BGRP12",
-                #"L1_AFP_NSA_BGRP12",
-                #"L1_AFP_NSC_BGRP12",
-                # AFP combined
-                #"L1_AFP_A_AND_C_MBTS_2",
-                #"L1_AFP_A_AND_C_TOF_T0T1",
-                #"L1_AFP_A_OR_C_FIRSTEMPTY",
-                #"L1_AFP_A_OR_C_EMPTY",
-                #"L1_AFP_A_OR_C_MBTS_2",
-                #"L1_AFP_A_OR_C_UNPAIRED_ISO",
-                #"L1_AFP_A_OR_C_UNPAIRED_NONISO",
                 # Background
                 "L1_BCM_Wide",
                 "L1_BCM_2A_FIRSTINTRAIN", "L1_BCM_2C_FIRSTINTRAIN",
@@ -417,14 +292,153 @@ class MonitorDef:
                 "L1_MBTS_A",
                 "L1_MBTS_C",
                 "L1_MBTS_1", "L1_MBTS_2", "L1_MBTS_1_1",
-                "L1_MBTS_1_EMPTY", "L1_MBTS_1_UNPAIRED_ISO",
-                "L1_MBTS_2_EMPTY", "L1_MBTS_2_UNPAIRED_ISO",
-                "L1_MBTS_1_1_EMPTY", "L1_MBTS_1_1_UNPAIRED_ISO",
-
                 ]
+
             topo3_monitems = []
 
+            if "lowMu" in menuFullName:
+                monItems[TBP|TAP|TAV].extend([
+                    # AFP
+                    "L1_AFP_A_OR_C", "L1_AFP_A_AND_C",
+                    # AFP combined
+                    "L1_AFP_A_AND_C_J12",
+                    "L1_AFP_A_AND_C_TOF_J20",
+                    "L1_AFP_A_AND_C_TOF_J30",
+                    "L1_AFP_A_AND_C_TOF_J50",
+                    "L1_AFP_A_AND_C_TOF_J75",
+                    "L1_AFP_A_AND_C_TOF_T0T1_J20",
+                    "L1_AFP_A_AND_C_TOF_T0T1_J30",
+                    "L1_AFP_A_AND_C_TOF_T0T1_J50",
+                    "L1_AFP_A_AND_C_TOF_T0T1_J75",
+                    "L1_AFP_A_AND_C_TOF_T0T1_jJ125",
+                    "L1_AFP_A_AND_C_TOF_T0T1_jJ50",
+                    "L1_AFP_A_AND_C_TOF_T0T1_jJ60",
+                    "L1_AFP_A_AND_C_TOF_T0T1_jJ90",
+                    "L1_AFP_A_AND_C_TOF_jJ125",
+                    "L1_AFP_A_AND_C_TOF_jJ50",
+                    "L1_AFP_A_AND_C_TOF_jJ60",
+                    "L1_AFP_A_AND_C_TOF_jJ90",
+                    "L1_AFP_A_AND_C_jJ20",
+                    "L1_AFP_A_AND_C_jJ30",
+                    "L1_AFP_A_OR_C_J12",
+                    "L1_AFP_A_OR_C_jJ20",
+                    "L1_AFP_A_OR_C_jJ30",
+                    # ZDC
+                    "L1_ZDC_A_AND_C",
+                    "L1_ZDC_E1_AND_E1", "L1_ZDC_E2_AND_E2", "L1_ZDC_E2_AND_E3", "L1_ZDC_E3_AND_E3",
+                    "L1_ZDC_E1_AND_E2ORE3",
+                    "L1_ZDC_XOR_E1_E3", "L1_ZDC_XOR_E2",
+                    # ZDC items in pp
+                    "L1_ZDC_PP_A", "L1_ZDC_PP_C", "L1_ZDC_PP_OR", "L1_ZDC_PP_A_C",
+                    "L1_ZDC_PP_A2", "L1_ZDC_PP_C2", "L1_ZDC_PP_OR2",
+                    # Mu+X
+                    "L1_MU5VF_AFP_A_OR_C",
+                    # Phase-I L1Calo
+                    "L1_eEM9_AFP_A_AND_C", #"L1_eEM9_AFP_A_OR_C",
+                ])
+
+                # lowMu HLT menu: Add triggers that are not in the MC menu
+                if "MC" not in menuName:
+                    monItems[TBP|TAP|TAV].extend([
+                        # Forward
+                        # AFP
+                        "L1_AFP_A", "L1_AFP_C",
+                        # AFP Calib
+                        "L1_AFP_FSA_BGRP12",
+                        "L1_AFP_FSA_TOF_T0_BGRP12",
+                        "L1_AFP_FSA_TOF_T1_BGRP12",
+                        "L1_AFP_FSA_TOF_T2_BGRP12",
+                        "L1_AFP_FSA_TOF_T3_BGRP12",
+                        "L1_AFP_FSC_BGRP12",
+                        "L1_AFP_FSC_TOF_T0_BGRP12",
+                        "L1_AFP_FSC_TOF_T1_BGRP12",
+                        "L1_AFP_FSC_TOF_T2_BGRP12",
+                        "L1_AFP_FSC_TOF_T3_BGRP12",
+                        "L1_AFP_NSA_BGRP12",
+                        "L1_AFP_NSC_BGRP12",
+                        # AFP combined
+                        "L1_AFP_A_AND_C_MBTS_2",
+                        "L1_AFP_A_AND_C_TOF_T0T1",
+                        "L1_AFP_A_OR_C_MBTS_2",
+                    ])
+
+            else: # HI HLT menu
+                monItems[TBP|TAP|TAV].extend([
+                    # Forward
+                    # ZDC
+                    # Basic inputs
+                    "L1_ZDC_XOR", "L1_ZDC_C_VZDC_A", "L1_ZDC_A_VZDC_C",
+                    "L1_1ZDC_A_VZDC_C", "L1_VZDC_A_1ZDC_C",
+                    "L1_1ZDC_A_1ZDC_C", "L1_5ZDC_A_VZDC_C", "L1_VZDC_A_5ZDC_C",
+                    "L1_ZDC_1XOR5", "L1_5ZDC_A_5ZDC_C",
+                    # Mu+X
+                    "L1_MU3V_jJ40",
+                    # Phase-I L1Calo
+                    "L1_eEM1", "L1_eEM2",
+                    "L1_eTAU1",
+                    "L1_DPHI-2eEM1", "L1_DPHI-2eTAU1",
+                    "L1_DPHI-2eEM1_VjTE200",
+                    "L1_2eEM1_VjTE200", "L1_2eEM2_VjTE200", "L1_2eEM1_VjTE200_GAP_AANDC",
+                    "L1_eEM5_VjTE200", "L1_eEM9_VjTE200",
+                    "L1_eEM1_jTE4_VjTE200", "L1_eEM2_jTE4_VjTE200", "L1_eTAU1_jTE4_VjTE200",
+                    "L1_2eTAU1_VjTE200", "L1_2eTAU1_VjTE200_GAP_AANDC",
+                    "L1_eEM1_TRT_VjTE200", "L1_eTAU1_TRT_VjTE200",
+                    "L1_eEM1_TRT_ZDC_XOR_VjTE200", "L1_eTAU1_TRT_ZDC_XOR_VjTE200", "L1_jTAU1_TRT_ZDC_XOR_VjTE200",
+                    "L1_eEM1_TRT_VZDC_A_VZDC_C_VjTE100", "L1_eTAU1_TRT_VZDC_A_VZDC_C_VjTE100",
+                    "L1_eEM1_TRT_ZDC_XOR4_VjTE100", "L1_eTAU1_TRT_ZDC_XOR4_VjTE100",
+                    #
+                    "L1_jJ5", "L1_jJ10",
+                    #
+                    "L1_jTE3", "L1_jTE4", "L1_jTE5", "L1_jTE10", "L1_jTE20", "L1_jTE50",
+                    "L1_jTE100", "L1_jTE600", "L1_jTE1500", "L1_jTE6500", "L1_jTE8300",
+                    "L1_jTE9000", "L1_jTE10000", "L1_jTE12000",
+                    "L1_jTE5_VjTE200", "L1_gTE5_VjTE200",
+                    #
+                    "L1_VjTE10", "L1_VjTE200", "L1_VjTE600", "L1_jTE50_VjTE600",
+                    #
+                    "L1_GAP_A", "L1_GAP_C", "L1_GAP_AANDC",
+                    #
+                    "L1_MU3V_VjTE50", "L1_MU3V_VjTE200",
+                    #
+                    "L1_TRT_VjTE20", "L1_eEM1_TRT_VjTE100",
+                    "L1_TRT_ZDC_XOR_VjTE200", "L1_TRT_1ZDC_NZDC_VjTE200",
+                    #
+                    "L1_ZDC_A_C_VjTE10", "L1_ZDC_XOR_VjTE10", "L1_TRT_ZDC_A_C_VjTE10", "L1_TRT_ZDC_XOR_VjTE10",
+                    "L1_TRT_ZDC_A_VjTE50", "L1_TRT_ZDC_C_VjTE50",
+                    #
+                    "L1_MBTS_2_VZDC_A_ZDC_C_VjTE200_GAP_A", "L1_MBTS_2_1ZDC_NZDC_VjTE200_GAP_A",
+                    "L1_MBTS_2_ZDC_A_VZDC_C_VjTE200_GAP_C", "L1_MBTS_2_1ZDC_NZDC_VjTE200_GAP_C",
+                    "L1_MBTS_1_VZDC_A_ZDC_C_jTE3_VjTE200", "L1_MBTS_1_ZDC_A_VZDC_C_jTE3_VjTE200",
+                    "L1_MBTS_1_1ZDC_NZDC_jTE3_VjTE200",
+                    "L1_MBTS_1_VZDC_A_ZDC_C_jTE3_VjTE200_GAP_A", "L1_MBTS_1_1ZDC_NZDC_jTE3_VjTE200_GAP_A",
+                    "L1_MBTS_1_ZDC_A_VZDC_C_jTE3_VjTE200_GAP_C", "L1_MBTS_1_1ZDC_NZDC_jTE3_VjTE200_GAP_C",
+                    #
+                    "L1_1ZDC_A_1ZDC_C_VjTE200", "L1_ZDC_1XOR5_VjTE200",
+                    "L1_ZDC_XOR_VjTE200",
+                    "L1_VZDC_A_VZDC_C_jTE5_VjTE200", "L1_ZDC_XOR_jTE5_VjTE200",
+                    "L1_1ZDC_NZDC_jTE5_VjTE200", "L1_5ZDC_A_5ZDC_C_jTE5_VjTE200",
+                    "L1_VZDC_A_VZDC_C_jTE10_VjTE200", "L1_ZDC_XOR_jTE10_VjTE200",
+                    "L1_1ZDC_NZDC_jTE10_VjTE200",
+                    "L1_VZDC_A_VZDC_C_gTE5_VjTE200", "L1_ZDC_XOR_gTE5_VjTE200",
+                    "L1_1ZDC_NZDC_gTE5_VjTE200", "L1_5ZDC_A_5ZDC_C_gTE5_VjTE200",
+                    "L1_TRT_VZDC_A_VZDC_C_jTE5_VjTE200", "L1_TRT_ZDC_XOR_jTE5_VjTE200",
+                    #
+                    "L1_ZDC_XOR_jJ5_VjTE200", "L1_ZDC_XOR_jJ10_VjTE200", "L1_1ZDC_NZDC_jJ5_VjTE200",
+                    "L1_1ZDC_NZDC_jJ10_VjTE200", "L1_VZDC_A_VZDC_C_jJ5_VjTE200", "L1_VZDC_A_VZDC_C_jJ10_VjTE200",
+                    #
+                    "L1_gTE3", "L1_gTE5",
+                    #
+                    "L1_ZDC_HELT15_jTE4000", "L1_ZDC_HELT20_jTE4000", "L1_ZDC_HELT25_jTE4000",
+                    "L1_ZDC_HELT35_jTE4000", "L1_ZDC_HELT50_jTE4000",
+                ])
+
+                # HI HLT menu: Add triggers that are not in the MC menu
+                if "MC" not in menuName:
+                    monItems[TBP|TAP|TAV].extend([
+                    ])
+
         monItems[TBP|TAP|TAV] += topo3_monitems
+
 
         # if any of the HF items are changed CTP and OLC shall be informed (via TrigOps)
         monItemsHF[TBP|TAP|TAV] = [
@@ -436,11 +450,23 @@ class MonitorDef:
         # total number of items for HF monitoring doubled from 8 to 16 for HI and pp-ref
         if "HI" in menuName:
             monItemsHF[TBP|TAP|TAV].extend([
-                "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C", # luminosity measurements
-                "L1_ZDC_OR", "L1_ZDC_XOR",            # luminosity measurements
-                "L1_ZDC_C_VZDC_A", "L1_ZDC_A_VZDC_C", "L1_5ZDC_A_5ZDC_C", # luminosity measurements
                 "L1_eEM15"      # luminosity measurements
             ])
+            if "lowMu" in menuFullName:
+                monItemsHF[TBP|TAP|TAV].extend([
+                    "L1_ZDC_PP_A", "L1_ZDC_PP_C", "L1_ZDC_PP_A_C", # luminosity measurements
+                    "L1_ZDC_PP_OR",                                # luminosity measurements
+                    "L1_ZDC_PP_A2", "L1_ZDC_PP_C2",                # luminosity measurements
+                    "L1_ZDC_PP_OR2",                               # luminosity measurements
+                ])
+            else: # HI HLT menu
+                monItemsHF[TBP|TAP|TAV].extend([
+                    "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C", # luminosity measurements
+                    "L1_ZDC_OR", "L1_ZDC_XOR",            # luminosity measurements
+                    "L1_ZDC_C_VZDC_A", "L1_ZDC_A_VZDC_C", "L1_5ZDC_A_5ZDC_C", # luminosity measurements
+                ])
+
+
 
 
         check = True
