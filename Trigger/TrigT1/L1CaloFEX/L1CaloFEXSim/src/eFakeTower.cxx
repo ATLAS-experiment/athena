@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1CaloFEXSim/eFakeTower.h"
@@ -182,7 +182,7 @@ StatusCode LVL1::eFakeTower::loadFPGA(int FPGAid) {
     ATH_MSG_ERROR( "Mapping for FPGA "<< FPGAid << " does not exist!");
     return StatusCode::FAILURE;
   }
-  std::vector<int>* Ets = loadBlock(m_inputfile + std::to_string(FPGAid) + txt, m_numberofevents);
+  std::unique_ptr<std::vector<int>> Ets{loadBlock(m_inputfile + std::to_string(FPGAid) + txt, m_numberofevents)};
 
   // check if the vector ETs have the same size as the mapping vector.
   if (Ets->size() != (*m_dict[FPGAid]).size()) {
@@ -190,8 +190,8 @@ StatusCode LVL1::eFakeTower::loadFPGA(int FPGAid) {
     return StatusCode::FAILURE;
   }
   std::unordered_map<int, unsigned int>* ETmap = new std::unordered_map<int, unsigned int>;
-  for (unsigned int i = 0; i < Ets->size(); i++) {
-    ETmap->insert(std::make_pair((*m_dict[FPGAid])[i], (*Ets)[i]));
+  for (size_t i{};const auto &thisEt : *Ets){
+    ETmap->emplace((*m_dict[FPGAid])[i++], thisEt);
   }
   m_alltowers[FPGAid] = ETmap;
   return StatusCode::SUCCESS;
