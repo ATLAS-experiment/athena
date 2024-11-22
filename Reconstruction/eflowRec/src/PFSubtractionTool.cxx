@@ -600,7 +600,7 @@ void PFSubtractionTool::addSubtractedCells(eflowCaloObject& thisEflowCaloObject,
       const CaloClusterCellLink* theCellLink = thisCluster->getCellLinks();
       CaloClusterCellLink::const_iterator theCell = theCellLink->begin();
       CaloClusterCellLink::const_iterator lastCell = theCellLink->end();
-      for (; theCell != lastCell; theCell++) thisTrack->addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theCell.index()),1./numTracks);
+      for (; theCell != lastCell; theCell++) thisTrack->addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theCell.index()),theCell.weight()/numTracks);
     }
   }
 }

@@ -103,7 +103,7 @@ eflowCellSubtractionFacilitator::annihilateClusters(
     CaloClusterCellLink::iterator theFirstCell = theCellLink->begin();
     CaloClusterCellLink::iterator theLastCell = theCellLink->end();
     for (; theFirstCell != theLastCell; ++theFirstCell){
-      if (addCPData) theTrack.addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theFirstCell.index()),1.0);
+      if (addCPData) theTrack.addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theFirstCell.index()),theFirstCell.weight());
       thisCluster->removeCell(*theFirstCell);
     }
     thisCluster->setCalE(0.0);
@@ -142,7 +142,7 @@ eflowCellSubtractionFacilitator::subtractPartialRings(
                     << " is changing weight of cell with energy " << cell->e()
                     << " from " << oldCellWeight << " to " << newCellWeight);
       theIterator.reweight(newCellWeight);
-      if (addCPData) theTrack.addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theIterator.index()),ringWeight);
+      if (addCPData) theTrack.addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theIterator.index()),newCellWeight);
     }
   }
 }
@@ -168,7 +168,7 @@ eflowCellSubtractionFacilitator::subtractFullRings(
                     << cluster->e() << " is removing cell with e "
                     << thisPair.first->e());
       CaloClusterCellLink::iterator theIterator = this->getCellIterator(cluster, thisPair.first);
-      if (addCPData) theTrack.addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theIterator.index()),1.0);
+      if (addCPData) theTrack.addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theIterator.index()),theIterator.weight());
       cluster->removeCell(thisPair.first);
     }
   }
@@ -269,7 +269,7 @@ eflowCellSubtractionFacilitator::subtractCaloCell(double& eSubtracted,
     double energyWeight = targetCellEnergy / oldCellEnergy;
     double newCellWeight = oldCellWeight * energyWeight;
     theIterator.reweight(newCellWeight);
-    if (addCPData) theTrack.addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theIterator.index()), energyWeight);
+    if (addCPData) theTrack.addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theIterator.index()), energyWeight*theIterator.weight());
 
     eSubtracted = eExpect;
 
@@ -279,7 +279,7 @@ eflowCellSubtractionFacilitator::subtractCaloCell(double& eSubtracted,
     return true;
 
   } else {
-    if (addCPData) theTrack.addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theIterator.index()),1.0);
+    if (addCPData) theTrack.addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theIterator.index()),theIterator.weight());
     cluster->removeCell(cell);
     eSubtracted += oldCellEnergy;
 
