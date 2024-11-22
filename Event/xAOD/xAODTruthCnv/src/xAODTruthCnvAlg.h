@@ -141,6 +141,8 @@ namespace xAODMaker {
       this, "xAODTruthVertexContainerName", "TruthVertices", "Output TruthVertices container"};
     SG::WriteHandleKey<xAODTruthParticleLinkVector> m_truthLinkContainerKey{
       this, "TruthLinks", "xAODTruthLinks", "Output xAODTruthLinks container"};
+    SG::WriteHandleKey<xAOD::TruthParticleContainer> m_lheTruthParticleContainerKey{
+      this, "xAODTruthLHEParticleContainerName", "", "Output TruthLHEParticles container"};
 
     /// Pile-up options
     Gaudi::Property<bool> m_doAllPileUp{this, "WriteAllPileUpTruth", false};

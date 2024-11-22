@@ -42,6 +42,11 @@ def GEN_AOD2xAODCfg(flags, name="GEN_AOD2xAOD", **kwargs):
         toAOD.append("xAOD::TruthPileupEventContainer#TruthPileupEvents")
         toAOD.append("xAOD::TruthPileupEventAuxContainer#TruthPileupEventsAux.")
 
+    if flags.Input.SpecialConfiguration.get("HasLHERecord", "False") == "True":
+        kwargs.setdefault('xAODTruthLHEParticleContainerName', 'TruthLHEParticles')
+        toAOD.append("xAOD::TruthParticleContainer#TruthLHEParticles")
+        toAOD.append("xAOD::TruthParticleContainer#TruthLHEParticlesAux.")
+
     toESD = []
 
     if flags.Output.doWriteESD:
