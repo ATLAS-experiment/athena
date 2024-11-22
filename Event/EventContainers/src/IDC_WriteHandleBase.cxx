@@ -22,19 +22,12 @@ void IDC_WriteHandleBase::ReleaseLock(){
 
 //Running code
    assert(m_atomic->load() != ABORTstate);
-#ifndef __cpp_lib_atomic_wait
-   typedef std::scoped_lock<decltype(m_mut->mutex)> lockguard;
-   lockguard lk(m_mut->mutex);
-   m_atomic->compare_exchange_strong(waitstate, ABORTstate);
-   m_mut->condition.notify_all();
-#else
    //If you have got here the ptr was not set so creation is being aborted
    //The hash is being set to the aborted flag
    //I think memory ordering can be relaxed here but to be safe we will use defaults.
    m_atomic->compare_exchange_strong(waitstate, ABORTstate);
    //Notify_all to wake up any threads waiting for this hash
    m_atomic->notify_all();
-#endif
 
    m_atomic = nullptr;
 }

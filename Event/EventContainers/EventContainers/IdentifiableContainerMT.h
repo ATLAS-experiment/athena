@@ -45,9 +45,6 @@ public:
            std::swap(a.m_IDC_ptr, b.m_IDC_ptr);
            std::swap(a.m_hashId, b.m_hashId);
            std::swap(a.m_atomic, b.m_atomic);
-#ifndef __cpp_lib_atomic_wait
-           std::swap(a.m_mut, b.m_mut);
-#endif
         }
         IDC_WriteHandle(IDC_WriteHandle&& other) : IDC_WriteHandle() {
            Swap(*this, other);
