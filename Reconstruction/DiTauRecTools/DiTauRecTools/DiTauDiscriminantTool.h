@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  DITAURECTOOLS_DITAUDISCRIMINANTTOOL_H
@@ -16,11 +16,6 @@
 
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
-
-// Core include(s):
-
-// EDM include(s):
-#include "xAODTau/DiTauJetContainer.h"
 
 // Local include(s):
 #include "DiTauRecTools/IDiTauToolBase.h"
@@ -64,8 +59,6 @@ private:
   StatusCode parseWeightsFile();
 
   void setIDVariables(const xAOD::DiTauJet& xDiTau);
-
-  // const xAOD::DiTauJetContainer* m_xDiTauContainer;
 
   // steering variables
   std::string m_sWeightsFile;

@@ -13,30 +13,11 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackParticle.h"
 
-#include "xAODJet/Jet.h"
-#include "xAODJet/JetContainer.h"
-#include "xAODJet/JetConstituentVector.h"
-
 #include "xAODTau/DiTauJet.h"
-#include "xAODTau/DiTauJetContainer.h"
-#include "xAODTau/DiTauJetAuxContainer.h"
-#include "xAODTau/TauJetContainer.h"
-
-#include "xAODEventInfo/EventInfo.h"
-
-// fastjet
-#include "fastjet/PseudoJet.hh"
-#include "fastjet/JetDefinition.hh"
-#include "fastjet/AreaDefinition.hh"
-#include "fastjet/ClusterSequenceArea.hh"
-#include "fastjet/tools/Filter.hh"
-#include "fastjet/tools/MassDropTagger.hh"
 
 using namespace DiTauRecTools;
-using namespace fastjet;
 
 using TrackParticleLinks_t = std::vector<ElementLink<xAOD::TrackParticleContainer>>;
-using JetLink_t = ElementLink<xAOD::JetContainer>;
 
 //=================================PUBLIC-PART==================================
 //______________________________________________________________________________
