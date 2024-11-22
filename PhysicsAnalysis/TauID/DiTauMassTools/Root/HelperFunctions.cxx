@@ -123,13 +123,9 @@ int DiTauMassTools::getLFVMode( const xAOD::IParticle* p1, const xAOD::IParticle
   int LFVMode = -1;
   if(p->type() == xAOD::Type::Muon) {
     // mu+tau mode
-    Info("DiTauMassTools", "Setting MMC to mu+tau mode");
-    //m_MMC->SetLFVmode(1);
     LFVMode = 1;
   } else {
     // e+tau mode
-    Info("DiTauMassTools", "Setting MMC to e+tau mode");
-    //m_MMC->SetLFVmode(0);
     LFVMode = 0;
   }
 
