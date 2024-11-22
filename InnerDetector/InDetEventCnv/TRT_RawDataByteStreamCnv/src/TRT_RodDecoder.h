@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_RAWDATABYTESTREAM_TRT_RODDECODER_H
@@ -112,6 +112,8 @@ public:
                                     // is incorrect.
 
    uint32_t m_escape_marker;           // Straw word that means escaped literal
+
+   bool m_sortCollections{};         // sort collections by identifiers if required
 
 #define CTABLE_FC_LENGTH 33
 #define CTABLE_LI_LENGTH 33
