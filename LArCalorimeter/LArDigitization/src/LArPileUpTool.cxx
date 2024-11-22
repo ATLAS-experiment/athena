@@ -335,7 +335,7 @@ StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx)
     auto hitVectorHandles = m_hitContainerKeys.makeHandles(ctx);
     for (auto & inputHits : hitVectorHandles) {
       if (!inputHits.isValid()) {
-        ATH_MSG_ERROR("BAD HANDLE"); //FIXME improve error here
+        ATH_MSG_ERROR("Input LAr hit container is missing!");
         return StatusCode::FAILURE;
       }
       bool isSignal(true);
