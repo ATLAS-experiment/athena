@@ -1,21 +1,23 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/LArShapeCompleteMaker.h"
+
+#include "CaloIdentifier/CaloGain.h"
+#include "LArCafJobs/DataStore.h"
+#include "LArSamplesMon/TreeShapeErrorGetter.h"
 
 #include "LArIdentifier/LArOnlineID.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "GaudiKernel/MsgStream.h"
 #include "LArRawConditions/LArShapeComplete.h"
-#include "LArSamplesMon/TreeShapeErrorGetter.h"
 #include "LArSamplesMon/ShapeErrorData.h"
-#include "LArCafJobs/DataStore.h"
 #include "LArCafJobs/DataContainer.h"
 #include "LArSamplesMon/History.h"
 #include "LArCafJobs/EventData.h"
-#include "StoreGate/ReadCondHandle.h"
+#include <memory>
 
 using namespace LArSamples;
 
@@ -57,7 +59,7 @@ StatusCode LArShapeCompleteMaker::execute()
   if (m_template) return StatusCode::SUCCESS;
   m_template = new DataStore();
 
-  LArShapeComplete* lsc = new LArShapeComplete();
+  auto lsc = std::make_unique<LArShapeComplete>();
 
   if (lsc->setGroupingType(m_groupingType, msg()).isFailure() || lsc->initialize().isFailure()) {
     ATH_MSG_ERROR("Unable to initialize LArShapeComplete");
@@ -66,7 +68,7 @@ StatusCode LArShapeCompleteMaker::execute()
 
   SG::ReadCondHandle<LArOnOffIdMapping> onOffMap (m_onOffMapKey);
 
-  TreeShapeErrorGetter* errorGetter = new TreeShapeErrorGetter(m_shapeErrorFileName);
+  auto errorGetter = std::make_unique<TreeShapeErrorGetter>(m_shapeErrorFileName);
   
   for (unsigned int k = 0; k < LArSamples::Definitions::nChannels; k++) {   
     
@@ -90,7 +92,7 @@ StatusCode LArShapeCompleteMaker::execute()
       events.push_back(new EventData(-1,-1,-1,-1));
       histCont->add(data);
     }
-    History* history = new History(*histCont, events, k, errorGetter);
+    History* history = new History(*histCont, events, k, errorGetter.get());
     
     for (unsigned int g = 0; g < 3; g++) {
       CaloGain::CaloGain gain = (CaloGain::CaloGain)g;
@@ -98,15 +100,12 @@ StatusCode LArShapeCompleteMaker::execute()
       if (history) sed = history->shapeErrorData(gain, LArSamples::BestShapeError);
       
       // The containers
-      std::vector<std::vector<float> > deltaVal, deltaDer;
       
       // Fill them with 0's to start with
-      std::vector<float> phaseVect(m_nSamples);
-      for (unsigned int j = 0; j < m_nSamples; j++) phaseVect[j] = 0;
-      for (unsigned int i = 0; i < m_nPhases; i++) {
-        deltaVal.push_back(phaseVect);
-        deltaDer.push_back(phaseVect);
-      }
+      std::vector<float> phaseVect(m_nSamples,0);
+      std::vector<std::vector<float> > deltaVal(m_nPhases, phaseVect);
+      std::vector<std::vector<float> > deltaDer(m_nPhases, phaseVect);
+      
 
       if (sed && sed->n() > m_minNPulses) {
        ATH_MSG_DEBUG("--> Setting channel " << k << ", id = " << channelID << ", gain = " << gain << ", size = " 
@@ -129,7 +128,7 @@ StatusCode LArShapeCompleteMaker::execute()
   //TFile* out = TFile::Open(m_outputFileName.c_str(), "RECREATE");
   //out->WriteObjectAny(lsc, "LArShapeComplete", "LArShape");
   //delete out;
-  if (detStore()->record(lsc, m_sgKey).isFailure()) {
+  if (detStore()->record(std::move(lsc), m_sgKey).isFailure()) {
     ATH_MSG_ERROR("Unable to write LArShapeComplete");
     return StatusCode::FAILURE;    
   };

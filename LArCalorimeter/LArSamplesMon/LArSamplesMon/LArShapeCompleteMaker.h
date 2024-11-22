@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,13 +13,7 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "LArCabling/LArOnOffIdMapping.h"
-#include "CaloIdentifier/LArEM_ID.h"
-#include "CaloIdentifier/LArHEC_ID.h"
-#include "CaloIdentifier/LArFCAL_ID.h"
-#include "CaloIdentifier/CaloGain.h"
 #include "LArCafJobs/ILArShapeDumperTool.h"
-#include "LArCafJobs/DataStore.h"
-#include "LArSamplesMon/TreeShapeErrorGetter.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include <string>
 
@@ -29,6 +23,9 @@ class ILArShape;
 class HWIdentifier;
 class Identifier;
 class LArOnlineID;
+namespace LArSamples{
+  class DataStore;
+}
 
 class ATLAS_NOT_THREAD_SAFE LArShapeCompleteMaker : public AthAlgorithm
 {
@@ -45,7 +42,7 @@ class ATLAS_NOT_THREAD_SAFE LArShapeCompleteMaker : public AthAlgorithm
    
   const LArOnlineID* m_onlineHelper = nullptr;  
 
-  LArSamples::DataStore* m_template;
+  LArSamples::DataStore* m_template{};
 
   ToolHandle<ILArShapeDumperTool> m_dumperTool;
   
