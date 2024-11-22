@@ -8,10 +8,10 @@
 #include<vector>
 #include<map>
 #include<algorithm>
+#include <memory>
+#include "GNN_FasTrackConnector.h"
+#include "TrigInDetPattRecoEvent/TrigInDetSiLayer.h"
 
-#include "FasTrackConnector.h"
-
-class TrigInDetSiLayer;
 
 class TrigFTF_GNN_Layer {
 public:
@@ -49,7 +49,7 @@ protected:
 
 class TrigFTF_GNN_Geometry {
 public:
-  TrigFTF_GNN_Geometry(const std::vector<TrigInDetSiLayer>&, const FASTRACK_CONNECTOR*);
+  TrigFTF_GNN_Geometry(const std::vector<TrigInDetSiLayer>&, const std::unique_ptr<GNN_FasTrackConnector>&);
   ~TrigFTF_GNN_Geometry();
   
   const TrigFTF_GNN_Layer* getTrigFTF_GNN_LayerByKey(unsigned int) const;

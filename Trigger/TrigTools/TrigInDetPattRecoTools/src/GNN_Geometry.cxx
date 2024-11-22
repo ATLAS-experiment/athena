@@ -1,14 +1,14 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TrigInDetEvent/TrigSiSpacePointBase.h"
-#include "TrigInDetPattRecoEvent/TrigInDetSiLayer.h"
-#include "TrigInDetPattRecoTools/GNN_Geometry.h"
+
+#include "GNN_Geometry.h"
 
 #include<cmath>
 #include<cstring>
 #include<algorithm>
+#include <iostream>
 
 TrigFTF_GNN_Layer::TrigFTF_GNN_Layer(const TrigInDetSiLayer& ls, float ew, int bin0) : m_layer(ls), m_etaBinWidth(ew) {
 
@@ -26,11 +26,11 @@ TrigFTF_GNN_Layer::TrigFTF_GNN_Layer(const TrigInDetSiLayer& ls, float ew, int b
   }
 
   float t1   = m_z1/m_r1;
-  float eta1 = -std::log(sqrt(1+t1*t1)-t1);
+  float eta1 = -std::log(std::sqrt(1+t1*t1)-t1);
 
 
   float t2   = m_z2/m_r2;
-  float eta2 = -std::log(sqrt(1+t2*t2)-t2);
+  float eta2 = -std::log(std::sqrt(1+t2*t2)-t2);
 
   m_minEta = eta1;
   m_maxEta = eta2;
@@ -216,7 +216,7 @@ TrigFTF_GNN_Layer::~TrigFTF_GNN_Layer() {
   m_bins.clear();
 }
 
-TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TrigInDetSiLayer>& layers, const FASTRACK_CONNECTOR* conn) : m_nEtaBins(0) {
+TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TrigInDetSiLayer>& layers, const std::unique_ptr<GNN_FasTrackConnector>& conn) : m_nEtaBins(0) {
 
   const float min_z0 = -168.0;
   const float max_z0 =  168.0;
@@ -230,11 +230,11 @@ TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TrigInDetSiLayer>& 
  
   //calculating bin tables in the connector...
 
-  for(std::map<int, std::vector<FASTRACK_CONNECTION*> >::const_iterator it = conn->m_connMap.begin();it!=conn->m_connMap.end();++it) {
+  for(std::map<int, std::vector<GNN_FASTRACK_CONNECTION*> >::const_iterator it = conn->m_connMap.begin();it!=conn->m_connMap.end();++it) {
 
-    const std::vector<FASTRACK_CONNECTION*>& vConn = (*it).second;
+    const std::vector<GNN_FASTRACK_CONNECTION*>& vConn = (*it).second;
 
-    for(std::vector<FASTRACK_CONNECTION*>::const_iterator cIt=vConn.begin();cIt!=vConn.end();++cIt) {
+    for(std::vector<GNN_FASTRACK_CONNECTION*>::const_iterator cIt=vConn.begin();cIt!=vConn.end();++cIt) {
       
       unsigned int src = (*cIt)->m_src;//n2 : the new connectors
       unsigned int dst = (*cIt)->m_dst;//n1

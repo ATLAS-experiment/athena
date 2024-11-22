@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TrigInDetPattRecoTools/FasTrackConnector.h"
+#include "GNN_FasTrackConnector.h"
 #include <iostream>
 #include <cstring>
 
@@ -10,11 +10,11 @@
 #include <set>
 #include <unordered_map>
 
-FasTrackConnection::FasTrackConnection(unsigned int s, unsigned int d) : m_src(s), m_dst(d) { 
+GNN_FasTrackConnection::GNN_FasTrackConnection(unsigned int s, unsigned int d) : m_src(s), m_dst(d) { 
 
 }
 
-FasTrackConnector::FasTrackConnector(std::ifstream& inFile, bool LRTmode) {
+GNN_FasTrackConnector::GNN_FasTrackConnector(std::ifstream& inFile, bool LRTmode) {
 
   m_connMap.clear();
   m_layerGroups.clear();
@@ -31,7 +31,7 @@ FasTrackConnector::FasTrackConnector(std::ifstream& inFile, bool LRTmode) {
 
     inFile >> lIdx >> stage >> src >> dst >> height >> width >> nEntries;
     
-    FASTRACK_CONNECTION* pC = new FASTRACK_CONNECTION(src, dst);
+    GNN_FASTRACK_CONNECTION* pC = new GNN_FASTRACK_CONNECTION(src, dst);
     
     int dummy;
 
@@ -56,19 +56,19 @@ FasTrackConnector::FasTrackConnector(std::ifstream& inFile, bool LRTmode) {
       }
     }
 
-    std::map<int, std::vector<FASTRACK_CONNECTION*> >::iterator it = m_connMap.find(stage);
+    std::map<int, std::vector<GNN_FASTRACK_CONNECTION*> >::iterator it = m_connMap.find(stage);
     
     if(it == m_connMap.end()) {
-      std::vector<FASTRACK_CONNECTION*> v = {pC};
+      std::vector<GNN_FASTRACK_CONNECTION*> v = {pC};
       m_connMap.insert(std::make_pair(stage, v));
     } else (*it).second.push_back(pC);
   }
 
   //re-arrange the connection stages
 
-  std::list<const FASTRACK_CONNECTION*> lConns;
+  std::list<const GNN_FASTRACK_CONNECTION*> lConns;
 
-  std::map<int, std::vector<const FASTRACK_CONNECTION*> > newConnMap;
+  std::map<int, std::vector<const GNN_FASTRACK_CONNECTION*> > newConnMap;
   
   for(const auto& conn : m_connMap) {
     std::copy(conn.second.begin(), conn.second.end(), std::back_inserter(lConns));
@@ -115,9 +115,9 @@ FasTrackConnector::FasTrackConnector(std::ifstream& inFile, bool LRTmode) {
 
     //remove connections which use zeroLayer as destination
 
-    std::vector<const FASTRACK_CONNECTION*> theStage;
+    std::vector<const GNN_FASTRACK_CONNECTION*> theStage;
 
-    std::list<const FASTRACK_CONNECTION*>::iterator cIt = lConns.begin();
+    std::list<const GNN_FASTRACK_CONNECTION*>::iterator cIt = lConns.begin();
 
     while(cIt!=lConns.end()) {
       if(zeroLayers.find((*cIt)->m_dst) != zeroLayers.end()) {//check if contains
@@ -137,23 +137,23 @@ FasTrackConnector::FasTrackConnector(std::ifstream& inFile, bool LRTmode) {
 
   //the doublet making is done using "outside-in" approach hence the reverse iterations
 
-  for(std::map<int, std::vector<const FASTRACK_CONNECTION*> >::reverse_iterator it = newConnMap.rbegin();it!=newConnMap.rend();++it, currentStage++) {
+  for(std::map<int, std::vector<const GNN_FASTRACK_CONNECTION*> >::reverse_iterator it = newConnMap.rbegin();it!=newConnMap.rend();++it, currentStage++) {
 
-    const std::vector<const FASTRACK_CONNECTION*> & vConn = (*it).second;
+    const std::vector<const GNN_FASTRACK_CONNECTION*> & vConn = (*it).second;
     
     //loop over links, extract all connections for the stage, group sources by L1 (dst) index
     
-    std::map<unsigned int, std::vector<const FASTRACK_CONNECTION*> > l1ConnMap;
+    std::map<unsigned int, std::vector<const GNN_FASTRACK_CONNECTION*> > l1ConnMap;
 
     for(const auto* conn : vConn) {
 
       unsigned int dst = conn->m_dst;
 
-      std::map<unsigned int, std::vector<const FASTRACK_CONNECTION*> >::iterator l1MapIt = l1ConnMap.find(dst);
+      std::map<unsigned int, std::vector<const GNN_FASTRACK_CONNECTION*> >::iterator l1MapIt = l1ConnMap.find(dst);
       if(l1MapIt != l1ConnMap.end()) 
 	(*l1MapIt).second.push_back(conn);
       else {
-	std::vector<const FASTRACK_CONNECTION*> v = {conn};
+	std::vector<const GNN_FASTRACK_CONNECTION*> v = {conn};
 	l1ConnMap.insert(std::make_pair(dst, v));
       } 
     }
@@ -173,14 +173,15 @@ FasTrackConnector::FasTrackConnector(std::ifstream& inFile, bool LRTmode) {
 
 }
 
-FasTrackConnector::~FasTrackConnector() {
+GNN_FasTrackConnector::~GNN_FasTrackConnector() {
+
   m_layerGroups.clear();
-  for(std::map<int, std::vector<FASTRACK_CONNECTION*> >::iterator it = m_connMap.begin();it!=m_connMap.end();++it) {
-    for(std::vector<FASTRACK_CONNECTION*>::iterator cIt=(*it).second.begin();cIt!=(*it).second.end();++cIt) {
-      delete (*cIt);
-    }
-    (*it).second.clear();
+
+  for(auto& conn : m_connMap) {
+    for(auto& link : conn.second) delete link;
+    conn.second.clear();
   }
+
   m_connMap.clear();
 
 }
