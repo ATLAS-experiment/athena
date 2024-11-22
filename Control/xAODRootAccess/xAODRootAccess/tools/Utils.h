@@ -11,25 +11,37 @@
 // System include(s):
 #include <string>
 #include <typeinfo>
+#include <stdexcept>
 extern "C" {
-#   include <stdint.h>
+#include <stdint.h>
 }
 
 // ROOT include(s):
 #include <TDataType.h>
 #include <TTree.h>
+// #include <xAODMetaData/FileMetaDataAuxInfo.h>
+// #include "AthContainers/AuxElement.h"
+
+
+#include <ROOT/RNTupleReader.hxx>
 
 #include "CxxUtils/sgkey_t.h"
 
 namespace xAOD {
 
    namespace Utils {
+      using RNTupleReader = ROOT::Experimental::RNTupleReader;
 
       /// Function creating a hash out of a "key name"
       SG::sgkey_t hash( const std::string& key );
 
       /// Get the dynamic auxiliary variable prefix based on a container name
+      /// (for TTree)
       std::string dynBranchPrefix( const std::string& key );
+
+      /// Get the dynamic auxiliary variable prefix based on a container name
+      /// (for RNTuple)
+      std::string dynFieldPrefix( const std::string& key );
 
       /// Get the type info of a primitive variable, as declared by ROOT
       const std::type_info& getTypeInfo( EDataType type );
@@ -43,8 +55,18 @@ namespace xAOD {
       /// Search for branches, returns search term on no result
       std::string getFirstBranchMatch( TTree* tree, const std::string& pre );
 
-   } // namespace Utils
+      /// Search for fields, returns search term on no result
+      std::string getFirstFieldMatch(
+          RNTupleReader& nupleReader,
+          const std::string& pre );
 
-} // namespace xAOD
+      /// Checks if a given field exists in the ntuple
+      ::Bool_t fieldExists(
+          std::string fieldName,
+          RNTupleReader& ntupleReader );
 
-#endif // XAODROOTACCESS_TOOLS_UTILS_H
+   }  // namespace Utils
+
+}  // namespace xAOD
+
+#endif  // XAODROOTACCESS_TOOLS_UTILS_H

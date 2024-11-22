@@ -10,7 +10,7 @@ if( NOT XAOD_STANDALONE )
 endif()
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree RIO Net MathCore )
+find_package( ROOT COMPONENTS Core Tree NTuple RIO Net MathCore ROOTNTuple ROOTNTupleUtil VDT)
 
 # Generate a CINT dictionary source file:
 atlas_add_root_dictionary( xAODRootAccess xAODRootAccessDictSource
@@ -27,10 +27,12 @@ atlas_add_library( xAODRootAccess
    xAODRootAccess/tools/*.h xAODRootAccess/tools/*.icc
    Root/*.h Root/*.cxx ${xAODRootAccessDictSource}
    PUBLIC_HEADERS xAODRootAccess
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers xAODCore xAODEventFormat
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} ${VDT_LIBRARIES} AthContainers xAODCore xAODEventFormat
    xAODRootAccessInterfaces AsgMessagingLib CxxUtils RootUtils ${extra_libs}
    )
+
+
 
 # Build a (Reflex) dictionary library:
 atlas_add_dictionary( xAODRootAccessDict
@@ -51,9 +53,10 @@ endif()
 # Build the executables of the package:
 foreach( exec xAODChecker xAODMerge xAODFileReadTest )
    atlas_add_executable( ${exec} util/${exec}.cxx
-      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess )
 endforeach()
+
+
 
 # Helper macro setting up the compiled tests of the package:
 macro( _add_test name )
@@ -82,6 +85,7 @@ _add_test( ut_xaodrootaccess_tauxstore_insertmove_test )
 _add_test( ut_xaodrootaccess_tfileaccesstracer_test )
 _add_test( ut_xaodrootaccess_tfilemerger_test )
 _add_test( ut_xaodrootaccess_tstore_test )
+_add_test( ut_xaodrootaccess_rauxstore_test )
 atlas_add_test( ut_xaodrootaccess_tpystore_test
    SCRIPT python
    ${CMAKE_CURRENT_SOURCE_DIR}/test/ut_xaodrootaccess_tpystore_test.py
