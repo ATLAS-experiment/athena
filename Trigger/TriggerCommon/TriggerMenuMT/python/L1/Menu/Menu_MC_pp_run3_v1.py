@@ -63,6 +63,10 @@ def defineMenu():
         'L1_6J15',
         # TOPO
         'L1_BTAG-MU5VFjJ90',
+        'L1_BTAG-MU8FjJ40_2jJ40p0ETA25'      , 
+        'L1_BTAG-MU8FjJ30_2jJ30p0ETA25_jJ50p0ETA25', 
+        'L1_BTAG-MU5VFjJ40_2jJ40p0ETA25'      , 
+        'L1_BTAG-MU5VFjJ30_2jJ30p0ETA25_jJ50p0ETA25', 
         'L1_BPH-0M9-EM7-EM5',
         'L1_BPH-0DR3-EM7J15',
 
