@@ -527,7 +527,7 @@ if __name__ == "__main__":
            from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGATruthDecorationCfg, FPGAProtoTrackFitCfg
            acc.merge(FPGAProtoTrackFitCfg(flags,stage='_1st')) # Run ACTS KF for 1st stage
            acc.merge(FPGATruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage='_1st')) # Run ACTS KF for 1st stage
-           if not flags.Trigger.FPGATrackSim.wrapperFileName:
+           if not flags.Trigger.FPGATrackSim.wrapperFileName and flags.Trigger.FPGATrackSim.runCKF:
                from FPGATrackSimConfTools.FPGATrackExtensionConfig import FPGATrackExtensionAlgCfg
                acc.merge(FPGATrackExtensionAlgCfg(flags, enableTrackStatePrinter=False, name="FPGATrackExtension", ProtoTracksLocation="ActsProtoTracks_1stFromFPGATrack")) # run CKF track extension on FPGA tracks
    
@@ -540,8 +540,8 @@ if __name__ == "__main__":
    
            # Reporting algorithm (used for debugging - can be disabled)
            from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
-           acc.merge(FPGATrackSimReportingCfg(flags,perEventReports=True))
-           
+           acc.merge(FPGATrackSimReportingCfg(flags,
+                                              perEventReports = (flags.Trigger.FPGATrackSim.sampleType != 'skipTruth') )) # disable perEventReports for ttbar
            # IDTPM running
            from InDetTrackPerfMon.InDetTrackPerfMonConfig import InDetTrackPerfMonCfg
            acc.merge( InDetTrackPerfMonCfg(flags) )
