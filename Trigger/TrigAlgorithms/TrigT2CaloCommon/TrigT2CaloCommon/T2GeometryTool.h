@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -155,39 +155,39 @@ private :
                 const int& nStripPhi,const double& energyEta, 
                 const double& energyPhi,const int index_size) override;
 	/** Normal cluster variables */
-	double m_CellEtaNorMin[7], m_CellEtaNorMax[7];
-	double m_CellPhiNorMin[7], m_CellPhiNorMax[7];
+    double m_CellEtaNorMin[7]{}, m_CellEtaNorMax[7]{};
+    double m_CellPhiNorMin[7]{}, m_CellPhiNorMax[7]{};
 	/** Narrow cluster variables */
-	double m_CellEtaNarMin[7], m_CellEtaNarMax[7];
-	double m_CellPhiNarMin[7], m_CellPhiNarMax[7];
+	double m_CellEtaNarMin[7]{}, m_CellEtaNarMax[7]{};
+	double m_CellPhiNarMin[7]{}, m_CellPhiNarMax[7]{};
 	/** Wider cluster variables */
-	double m_CellEtaWidMin[7], m_CellEtaWidMax[7];
-	double m_CellPhiWidMin[7], m_CellPhiWidMax[7];
+	double m_CellEtaWidMin[7]{}, m_CellEtaWidMax[7]{};
+	double m_CellPhiWidMin[7]{}, m_CellPhiWidMax[7]{};
 
 	/** Reference changed to vectors */
-	//int  m_nStripetaEM[4];// 0.075, 0.075, 0.075, 0.1
-	//int  m_nStripphiEM[4];// 0.2, 0.2, 0.175, 0.175;
+	//int  m_nStripetaEM[4]{};// 0.075, 0.075, 0.075, 0.1
+	//int  m_nStripphiEM[4]{};// 0.2, 0.2, 0.175, 0.175
 
-	//int  m_nStripetaHAD[3];  // 0.2, 0.2, 0.2
-	//int  m_nStripphiHAD[3];  // 0.2, 0.2, 0.2
+	//int  m_nStripetaHAD[3]{};  // 0.2, 0.2, 0.2
+	//int  m_nStripphiHAD[3]{};  // 0.2, 0.2, 0.2
 
-	int  m_nStripetaEMnar[4];// 0.075,0.075,0.075,0.1
-	int  m_nStripphiEMnar[4];  // 0.2, 0.2, 0.125, 0.2
+	int  m_nStripetaEMnar[4]{};// 0.075,0.075,0.075,0.1
+	int  m_nStripphiEMnar[4]{};  // 0.2, 0.2, 0.125, 0.2
 
-	int  m_nStripetaEMwid[4];// 0.2, 0.2, 0.175, 0.2
-	int  m_nStripphiEMwid[4];  // 0.2, 0.2, 0.175, 0.2
+	int  m_nStripetaEMwid[4]{};// 0.2, 0.2, 0.175, 0.2
+	int  m_nStripphiEMwid[4]{};  // 0.2, 0.2, 0.175, 0.2
 
-	int  m_nStripetaEMnor[4]; // 0.2, 0.2, 0.2, 0.2
-	int  m_nStripphiEMnor[4];  // 0.2, 0.2, 0.2, 0.2
+	int  m_nStripetaEMnor[4]{}; // 0.2, 0.2, 0.2, 0.2
+	int  m_nStripphiEMnor[4]{};  // 0.2, 0.2, 0.2, 0.2
 
-	int  m_nStripetaHADnar[3];  // 0.2, 0.2, 0.2
-	int  m_nStripphiHADnar[3];  // 0.2, 0.2, 0.2
+	int  m_nStripetaHADnar[3]{};  // 0.2, 0.2, 0.2
+	int  m_nStripphiHADnar[3]{};  // 0.2, 0.2, 0.2
 
-	int  m_nStripetaHADwid[3];  // 0.4, 0.4, 0.4
-	int  m_nStripphiHADwid[3];  // 0.4, 0.4, 0.4
+	int  m_nStripetaHADwid[3]{};  // 0.4, 0.4, 0.4
+	int  m_nStripphiHADwid[3]{};  // 0.4, 0.4, 0.4
 
-	int  m_nStripetaHADnor[3];  //0.4, 0.4, 0.4
-	int  m_nStripphiHADnor[3]; //0.4, 0.4, 0.4
+	int  m_nStripetaHADnor[3]{};  //0.4, 0.4, 0.4
+	int  m_nStripphiHADnor[3]{}; //0.4, 0.4, 0.4
 
     /** Granularity and eta ranges relevant for above energy sums */
     static const int m_netareg[7];

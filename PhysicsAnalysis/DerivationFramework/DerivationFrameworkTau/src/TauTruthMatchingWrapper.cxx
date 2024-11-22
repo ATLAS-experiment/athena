@@ -51,6 +51,7 @@ namespace DerivationFramework {
       truthTausEvent = m_tTauTruthMatchingTool->getEvent();
     for(auto xTau : *xTauContainer)
       m_tTauTruthMatchingTool->getTruth(*xTau, *truthTausEvent);
+    ATH_CHECK( m_tTauTruthMatchingTool->lockDecorations(*xTauContainer) );
     
     return StatusCode::SUCCESS;
   }  

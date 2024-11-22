@@ -114,7 +114,7 @@ def BeamEffectsAlgCfg(flags, name="BeamEffectsAlg", **kwargs):
     else:
         kwargs.setdefault("InputMcEventCollection", "GEN_EVENT")
 
-    if flags.Common.isOverlay and flags.Sim.DoFullChain:
+    if flags.Sim.DoFullChain and flags.Common.isOverlay and not flags.Overlay.DataOverlay:
         kwargs.setdefault('OutputMcEventCollection', f"{flags.Overlay.SigPrefix}TruthEvent")
     else:
         kwargs.setdefault('OutputMcEventCollection', 'BeamTruthEvent')

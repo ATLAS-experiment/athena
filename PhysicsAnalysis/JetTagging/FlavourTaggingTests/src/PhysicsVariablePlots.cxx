@@ -364,7 +364,7 @@ namespace FTAGValidation {
       if (chain != "") {
         BTagTrackIpAccessor accessor("btagIp_");
         float d0_signed_sig = accessor.getSignedIp(*trackParticle, *jet).ip3d_signed_d0_significance;
-        float z0_signed_sig = accessor.getSignedIp(*trackParticle, *jet).ip3d_signed_z0_significance;
+        float z0_signed_sig = accessor.getSignedIp(*trackParticle, *jet).ip3d_signed_z0_sin_theta_significance;
         ATH_CHECK( fillHistogram( chain+flavour+"track_sigd0_signed", d0_signed_sig) );
         ATH_CHECK( fillHistogram( chain+flavour+"track_sigz0_signed", z0_signed_sig) );
       }

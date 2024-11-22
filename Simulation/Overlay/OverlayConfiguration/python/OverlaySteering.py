@@ -32,7 +32,8 @@ def OverlayMainContentCfg(configFlags):
     acc = writeDigitizationParameters(configFlags)
 
     # Add event info overlay
-    acc.merge(EventInfoOverlayCfg(configFlags))
+    if not configFlags.Overlay.FastChain:
+        acc.merge(EventInfoOverlayCfg(configFlags))
 
     # Add truth overlay (needed downstream)
     if not configFlags.Overlay.FastChain and (getEnabledDetectors(configFlags) or configFlags.Digitization.EnableTruth):

@@ -45,6 +45,7 @@ namespace CP
           m_matchingTool->getTruth (*tau);
         }
       }
+      ANA_CHECK( m_matchingTool->lockDecorations (*taus) );
     }
     return StatusCode::SUCCESS;
   }
