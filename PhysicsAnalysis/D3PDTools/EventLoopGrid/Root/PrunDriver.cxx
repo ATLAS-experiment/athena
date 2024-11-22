@@ -180,8 +180,9 @@ static bool downloadContainer(const std::string& name,
 static Status::Enum submit(SH::Sample* const sample)
 {
   RCU_REQUIRE(sample);
+  using namespace EL::msgEventLoop;
 
-  std::cout << "Submitting " << sample->name() << "...\n";
+  ANA_MSG_INFO( "Submitting " << sample->name() << "..." );
 
   static bool loaded = false;
   if (not loaded) {
@@ -204,6 +205,9 @@ static Status::Enum submit(SH::Sample* const sample)
   }
 
   sample->meta()->setDouble("nc_jediTaskID", ret);
+
+  // Let's also tell people about their task ID
+  ANA_MSG_INFO( "Task submitted; jediTaskID=" << ret );
 
   return Status::DONE;
 }
@@ -369,15 +373,22 @@ static std::string formatOutputName(const SH::MetaObject& sampleMeta,
 {
   const std::string sampleName = sampleMeta.castString("sample_name");
   RCU_REQUIRE(not pattern.empty());
+  using namespace EL::msgEventLoop;
 
   static const std::string nickname = 
     gSystem->GetFromPipe(Form("python -c \"%s\" 2>/dev/null", 
 			      "from pandatools import PsubUtils;"
 			      "print(PsubUtils.getNickname());")).Data();
-    
+
   TString out = pattern.c_str();
 
-  out.ReplaceAll("%nickname%", nickname);
+  // Handle case of no proxy; will create a proxy later in the submission
+  if (nickname.length()>20){
+    ANA_MSG_WARNING( "No proxy available - cannot use nickname yet. Will try a late replacement.");
+  } else {
+    out.ReplaceAll("%nickname%", nickname);
+  }
+
   out.ReplaceAll("%in:name%", sampleName);
 
   std::stringstream ss(sampleName);
