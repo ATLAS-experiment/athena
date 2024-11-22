@@ -13,17 +13,38 @@
 #define MAX_SEG_PER_NODE 1000 //was 30
 #define N_SEG_CONNS  6 //was 6
 
-
-#include "TrigInDetEvent/TrigSiSpacePointBase.h"
+#include "TrkSpacePoint/SpacePoint.h"
 
 class TrigFTF_GNN_Geometry;
+
+
+struct TrigFTF_GNN_Node {
+
+  TrigFTF_GNN_Node(unsigned short l) : m_x(0), m_y(0), m_z(0), m_r(0), m_phi(0), m_layer(l), m_pSP(nullptr) {};
+
+  inline float x() const {return m_x;}
+  inline float y() const {return m_y;}
+  
+  inline float phi() const {return m_phi;}
+  inline float z() const {return m_z;}
+  inline float r() const {return m_r;}
+  inline unsigned short layer() const {return m_layer;}
+  
+  inline const Trk::SpacePoint* sp() const {return m_pSP;}
+  
+  float m_x, m_y, m_z, m_r, m_phi;
+  unsigned short m_layer{10000};
+  const Trk::SpacePoint* m_pSP{nullptr};
+  
+};
+
 
 class TrigFTF_GNN_EtaBin {
 public:
 
-   struct CompareByPhi {
+   struct CompareNodesByPhi {
 
-    bool operator()(const TrigSiSpacePointBase* n1, const TrigSiSpacePointBase* n2) {
+    bool operator()(const TrigFTF_GNN_Node* n1, const TrigFTF_GNN_Node* n2) {
       return n1->phi() < n2->phi();
     }
 
@@ -40,7 +61,7 @@ public:
   
   void generatePhiIndexing(float);
   
-  std::vector<const TrigSiSpacePointBase*> m_vn;//nodes of the graph
+  std::vector<const TrigFTF_GNN_Node*> m_vn;//nodes of the graph
   std::vector<std::pair<float, unsigned int> > m_vPhiNodes;
   std::vector<std::vector<unsigned int> > m_in;//vectors of incoming edges
   std::vector<std::array<float,5> > m_params;//node attributes: m_minCutOnTau, m_maxCutOnTau, m_phi, m_r, m_z;
@@ -51,7 +72,9 @@ public:
   TrigFTF_GNN_DataStorage(const TrigFTF_GNN_Geometry&);
   ~TrigFTF_GNN_DataStorage();
 
-  int addSpacePoint(const TrigSiSpacePointBase*, bool);
+  int loadPixelGraphNodes(short, const std::vector<TrigFTF_GNN_Node>&, bool);
+  int loadStripGraphNodes(short, const std::vector<TrigFTF_GNN_Node>&);
+  
   unsigned int numberOfNodes() const;
   void sortByPhi();
   void initializeNodes(bool);
@@ -80,17 +103,18 @@ public:
       return pS1->m_level > pS2->m_level;
     }
   };
-
-  TrigFTF_GNN_Edge(const TrigSiSpacePointBase* n1, const TrigSiSpacePointBase* n2, float p1, float p2, float p3) : m_n1(n1), m_n2(n2), m_level(1), m_next(1), m_nNei(0) {
+  
+  TrigFTF_GNN_Edge(const TrigFTF_GNN_Node* n1, const TrigFTF_GNN_Node* n2, float p1, float p2, float p3) : m_n1(n1), m_n2(n2), m_level(1), m_next(1), m_nNei(0) {
     m_p[0] = p1;
     m_p[1] = p2;
     m_p[2] = p3;
   }
   
   TrigFTF_GNN_Edge() : m_n1(nullptr), m_n2(nullptr), m_level(-1), m_next(-1), m_nNei(0) {};
-
-  const TrigSiSpacePointBase* m_n1{nullptr};
-  const TrigSiSpacePointBase* m_n2{nullptr};
+  
+  
+  const TrigFTF_GNN_Node* m_n1{nullptr};
+  const TrigFTF_GNN_Node* m_n2{nullptr};
 
   signed char m_level{-1}, m_next{-1};
 

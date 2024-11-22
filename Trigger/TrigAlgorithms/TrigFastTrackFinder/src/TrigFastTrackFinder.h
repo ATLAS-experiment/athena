@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -46,6 +46,7 @@
 
 #include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"
 #include "TrigInDetToolInterfaces/ITrigSpacePointConversionTool.h"
+#include "TrigInDetToolInterfaces/ITrigInDetTrackSeedingTool.h"
 
 // for UTT
 #include "TrigT1Interfaces/RecJetRoI.h"
@@ -275,10 +276,13 @@ protected:
   bool m_ITkMode;
   bool m_standaloneMode;
 
+  ToolHandle<ITrigInDetTrackSeedingTool> m_seedingTool{this, "TrackSeedingTool", ""};
+  
   Gaudi::Property<bool> m_useEtaBinning {this, "UseEtaBinning",   true, "Split layers into eta bins"};
   Gaudi::Property<bool> m_doCloneRemoval{this,  "doCloneRemoval", true, "Remove tracks sharing too many hits"};
   Gaudi::Property<bool> m_doTrackRefit  {this, "doTrackRefit",    true, "Refit tracks after the combinatorial track following"};
   Gaudi::Property<bool> m_useTracklets  {this, "UseTracklets",    false, "Use tracklet seeds from ITk track seeding"};
+
 };
 
 

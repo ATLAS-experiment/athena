@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -23,6 +23,7 @@
 #include "TrigInDetPattRecoEvent/TrigInDetTriplet.h"
 #include "TrigInDetToolInterfaces/TrigL2HitResidual.h"
 #include "TrigInDetEvent/TrigSiSpacePointBase.h"
+#include "TrigInDetPattRecoEvent/TrigInDetTracklet.h"
 #include "TrigInDetPattRecoTools/TrigTrackSeedGenerator.h"
 
 //
@@ -40,11 +41,6 @@
 #include "TrigInDetPattRecoTools/TrigInDetUtils.h"
 
 #include "PathResolver/PathResolver.h"
-
-//for Phase II
-#include "TrigInDetPattRecoTools/FasTrackConnector.h"
-#include "TrigInDetPattRecoTools/GNN_Geometry.h"
-#include "TrigInDetPattRecoTools/TrigTrackSeedGenerator_ITk.h"
 
 //for UTT
 #include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
@@ -159,7 +155,7 @@ TrigFastTrackFinder::TrigFastTrackFinder(const std::string& name, ISvcLocator* p
   declareProperty( "trigInDetTrackFitter",   m_trigInDetTrackFitter );
   declareProperty( "trigZFinder",   m_trigZFinder );
   declareProperty("TrackSummaryTool", m_trackSummaryTool);
-
+  
   // Accleration
   declareProperty("useGPU", m_useGPU = false,"Use GPU acceleration");
 
@@ -200,18 +196,20 @@ StatusCode TrigFastTrackFinder::initialize() {
 
   ATH_CHECK(m_beamSpotKey.initialize());
 
-
-
   ATH_MSG_DEBUG(" TrigFastTrackFinder : MinHits set to " << m_minHits);
 
   ATH_CHECK(m_numberingTool.retrieve());
 
-  ATH_CHECK(m_spacePointTool.retrieve());
-
+  if(!m_ITkMode) {
+    ATH_CHECK(m_spacePointTool.retrieve());
+  }
+  else {
+    m_spacePointTool.disable();
+  }
+  
   ATH_CHECK(m_trackMaker.retrieve());
 
   ATH_CHECK(m_trigInDetTrackFitter.retrieve());
-
   
   if (m_doZFinder) {
     ATH_CHECK(m_trigZFinder.retrieve());
@@ -221,7 +219,7 @@ StatusCode TrigFastTrackFinder::initialize() {
   } else {
     m_trigZFinder.disable();
   }
-
+  
   ATH_CHECK(m_trackSummaryTool.retrieve());
 
   //Get ID helper
@@ -283,20 +281,9 @@ StatusCode TrigFastTrackFinder::initialize() {
     }
   }
   if (m_ITkMode) {
-    //read data from layer connections file 
-    ATH_MSG_INFO("Opening connection file" << m_connectionFile);
-    std::string conn_fileName = PathResolver::find_file(m_connectionFile, "DATAPATH");    if (conn_fileName.empty()) {
-      ATH_MSG_FATAL("Cannot find layer connections file " << conn_fileName);
-      return StatusCode::FAILURE;
-    }
-    else {
-      ATH_MSG_INFO(conn_fileName);
-      std::ifstream ifs(conn_fileName.c_str());
-      
-      m_tcs.m_conn = new FASTRACK_CONNECTOR(ifs, m_LRTmode);
-      m_tcs.m_useEtaBinning = m_useEtaBinning;
-      ATH_MSG_INFO("Layer connections are initialized from file " << conn_fileName);
-    }
+    ATH_CHECK(m_seedingTool.retrieve());
+  } else {
+    m_seedingTool.disable();
   }
 
   // UTT tools
@@ -387,11 +374,6 @@ StatusCode TrigFastTrackFinder::start()
   if(m_useNewLayerNumberScheme) {
     const std::vector<TrigInDetSiLayer>* pVL = m_numberingTool->layerGeometry();
     std::copy(pVL->begin(),pVL->end(),std::back_inserter(m_tcs.m_layerGeometry));
-
-    if (m_ITkMode) {
-      TrigFTF_GNN_Geometry* pG = new TrigFTF_GNN_Geometry(m_tcs.m_layerGeometry, m_tcs.m_conn);
-      m_tcs.m_geo = pG;
-    }
   }
 
   m_tcs.m_tripletPtMin = m_tripletMinPtFrac*m_pTmin;
@@ -403,6 +385,7 @@ StatusCode TrigFastTrackFinder::start()
 StatusCode TrigFastTrackFinder::execute(const EventContext& ctx) const {
 
   SG::WriteHandle<TrackCollection> outputTracks(m_outputTracksKey, ctx);
+
   outputTracks = std::make_unique<TrackCollection>();
 
   const TrackCollection* inputTracks = nullptr;
@@ -488,44 +471,51 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
   mnt_roi_lastStageExecuted = 1;
 
   std::vector<TrigSiSpacePointBase> convertedSpacePoints;
+  
   convertedSpacePoints.reserve(5000);
 
   std::map<Identifier, std::vector<long int> > siClusterMap;
 
-  if (m_LRTmode) {
-    // In LRT mode read the input track collection and enter the clusters on track into the cluster map so these are not used for seeding
-    if (!m_inputTracksKey.key().empty()) {
-      ATH_MSG_DEBUG("LRT Mode: Got input track collection with "<<inputTracks->size()<< "tracks");
-      long int trackIndex=0;
-      for (auto t:*inputTracks) {
-	updateClusterMap(trackIndex++, t, siClusterMap);
-      }
-    }
-    ATH_CHECK(m_spacePointTool->getSpacePoints(roi, convertedSpacePoints, mnt_roi_nSPsPIX, mnt_roi_nSPsSCT, ctx, &siClusterMap));
-  } else {
-    ATH_CHECK(m_spacePointTool->getSpacePoints(roi, convertedSpacePoints, mnt_roi_nSPsPIX, mnt_roi_nSPsSCT, ctx));
-  }
+  if (!m_ITkMode) {
 
+    if (m_LRTmode) {
+      // In LRT mode read the input track collection and enter the clusters on track into the cluster map so these are not used for seeding
+      if (!m_inputTracksKey.key().empty()) {
+	ATH_MSG_DEBUG("LRT Mode: Got input track collection with "<<inputTracks->size()<< "tracks");
+	long int trackIndex=0;
+	for (auto t:*inputTracks) {
+	  updateClusterMap(trackIndex++, t, siClusterMap);
+	}
+      }
+      ATH_CHECK(m_spacePointTool->getSpacePoints(roi, convertedSpacePoints, mnt_roi_nSPsPIX, mnt_roi_nSPsSCT, ctx, &siClusterMap));
+    }
+    else {
+      ATH_CHECK(m_spacePointTool->getSpacePoints(roi, convertedSpacePoints, mnt_roi_nSPsPIX, mnt_roi_nSPsSCT, ctx));
+    }
+    
+  }
 
   mnt_timer_SpacePointConversion.stop();
   mnt_roi_nSPs    = mnt_roi_nSPsPIX + mnt_roi_nSPsSCT;
 
-  if( mnt_roi_nSPs >= m_minHits ) {
-    ATH_MSG_DEBUG("REGTEST / Found " << mnt_roi_nSPs << " space points.");
-    ATH_MSG_DEBUG("REGTEST / Found " << mnt_roi_nSPsPIX << " Pixel space points.");
-    ATH_MSG_DEBUG("REGTEST / Found " << mnt_roi_nSPsSCT << " SCT space points.");
-    ATH_MSG_DEBUG("REGTEST / converted space points size = " << convertedSpacePoints.size());
-    m_countRoIwithEnoughHits++;
+  if (!m_ITkMode) {
+    
+    if( mnt_roi_nSPs >= m_minHits ) {
+      ATH_MSG_DEBUG("REGTEST / Found " << mnt_roi_nSPs << " space points.");
+      ATH_MSG_DEBUG("REGTEST / Found " << mnt_roi_nSPsPIX << " Pixel space points.");
+      ATH_MSG_DEBUG("REGTEST / Found " << mnt_roi_nSPsSCT << " SCT space points.");
+      ATH_MSG_DEBUG("REGTEST / converted space points size = " << convertedSpacePoints.size());
+      m_countRoIwithEnoughHits++;
+    }
+    else {
+      ATH_MSG_DEBUG("No tracks found - too few hits in ROI to run " << mnt_roi_nSPs);
+      ATH_CHECK( createEmptyUTTEDMs(ctx) );
+      return StatusCode::SUCCESS;
+    }
   }
-  else {
-    ATH_MSG_DEBUG("No tracks found - too few hits in ROI to run " << mnt_roi_nSPs);
-    ATH_CHECK( createEmptyUTTEDMs(ctx) );
-    return StatusCode::SUCCESS;
-  }
-
+  
   mnt_roi_lastStageExecuted = 2;
-
-
+ 
   /// this uses move semantics so doesn't do a deep copy, so ...
   std::unique_ptr<TrigRoiDescriptor> tmpRoi = std::make_unique<TrigRoiDescriptor>(roi);
   /// need to disable managment of the constituents
@@ -583,33 +573,31 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
   mnt_timer_TripletMaking.start();
 
   std::vector<TrigInDetTriplet> triplets;
-  std::vector<GNN_TrigTracklet> tracklets;
+
+  std::vector<TrigInDetTracklet> new_tracklets;
 
   if(!m_useGPU) {
+
     if (m_ITkMode) {
-      TRIG_TRACK_SEED_GENERATOR_ITK seedGen(m_tcs);
-      seedGen.loadSpacePoints(convertedSpacePoints);
+ 
+      TrigInDetTrackSeedingResult seed_result = m_seedingTool->findSeeds(roi, new_tracklets, ctx);
+      
+      mnt_roi_nSPsPIX = seed_result.m_nPixelSPs;
+      mnt_roi_nSPsSCT = seed_result.m_nStripSPs;
+      mnt_roi_nSPs    = mnt_roi_nSPsPIX + mnt_roi_nSPsSCT;
 
-      if (m_doZFinder && m_doFastZVseeding) seedGen.createSeedsZv();
-      else {
-
-	std::vector<GNN_TrigTracklet> vGNN_Tracks;
-
-	seedGen.getTracklets(tmpRoi.get(), tracklets, !m_useTracklets);
-	vec_seedSize.reserve(tracklets.size());
-	for(auto& track : tracklets) {
-		vec_seedSize.push_back(track.m_track.size());
-	}
-	if(!m_useTracklets) {
-	  for(auto& track : tracklets) {
-	    for(auto& seed : track.m_seeds) {
-	      triplets.emplace_back(seed);
-	    }
-	    ATH_MSG_DEBUG("GNN tracklet has " << track.m_track.size()<<" spacepoints");
-	    vec_seedSize.push_back(track.m_seeds.size());
-	  }
-	}
+      if( mnt_roi_nSPs >= m_minHits ) {
+	ATH_MSG_DEBUG("REGTEST / Found " << mnt_roi_nSPs << " space points.");
+	ATH_MSG_DEBUG("REGTEST / Found " << mnt_roi_nSPsPIX << " Pixel space points.");
+	ATH_MSG_DEBUG("REGTEST / Found " << mnt_roi_nSPsSCT << " SCT space points.");
+	m_countRoIwithEnoughHits++;
       }
+      else {
+	ATH_MSG_DEBUG("No tracks found - too few hits in ROI to run " << mnt_roi_nSPs);
+	ATH_CHECK( createEmptyUTTEDMs(ctx) );
+	return StatusCode::SUCCESS;
+      }
+      
     } else {
       TRIG_TRACK_SEED_GENERATOR seedGen(m_tcs);
       
@@ -633,7 +621,7 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
     //GPU offloading ends ...
   }
 
-  unsigned int nTrackSeeds = m_useTracklets ? tracklets.size() : triplets.size();
+  unsigned int nTrackSeeds = m_useTracklets ? new_tracklets.size() : triplets.size();
   
   ATH_MSG_DEBUG("number of triplets: " << nTrackSeeds);
   
@@ -673,10 +661,8 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
 
     std::vector<const Trk::SpacePoint*> spVec;
   
-    if( m_useTracklets && (!tracklets.empty())) { //create an n-SP seed
-      for(const auto& sp : tracklets[seedIdx].m_track) {
-        spVec.push_back(sp->offlineSpacePoint());
-      }
+    if( m_useTracklets && (!new_tracklets.empty())) { //create an n-SP seed
+      spVec = new_tracklets[seedIdx].seed();
     }
     else {
     

@@ -9,8 +9,6 @@ class IRoiDescriptor;
 #include <vector>
 #include "TrigInDetPattRecoEvent/TrigInDetSiLayer.h"
 #include "TrigInDetPattRecoTools/TrigSeedML_LUT.h"
-#include "TrigInDetPattRecoTools/FasTrackConnector.h"
-#include "TrigInDetPattRecoTools/GNN_Geometry.h"
 
 typedef struct TrigCombinatorialSettings {
 public:
@@ -74,9 +72,6 @@ public:
   float m_zvErrorEndcap;
   bool m_LRTmode;
   bool m_useEtaBinning;
-
-  const FASTRACK_CONNECTOR* m_conn{nullptr};
-  const TrigFTF_GNN_Geometry*       m_geo{nullptr};
 
   std::vector<TrigInDetSiLayer> m_layerGeometry;
 

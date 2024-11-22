@@ -2,10 +2,12 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TrigInDetEvent/TrigSiSpacePointBase.h"
 #include "InDetPrepRawData/PixelCluster.h"
+#include "TrkSpacePoint/SpacePoint.h"
+#include "TrkSpacePoint/SpacePointCollection.h"
+
 #include "TrigInDetPattRecoEvent/TrigInDetSiLayer.h"
-#include "TrigInDetPattRecoTools/GNN_Geometry.h"
+#include "GNN_Geometry.h"
 #include "GNN_DataStorage.h"
 
 #include<cmath>
@@ -13,9 +15,11 @@
 #include<algorithm>
 
 TrigFTF_GNN_EtaBin::TrigFTF_GNN_EtaBin() {
+
   m_in.clear();
   m_vn.clear();
   m_params.clear();
+  m_vn.reserve(1000);
 }
 
 TrigFTF_GNN_EtaBin::~TrigFTF_GNN_EtaBin() {
@@ -25,26 +29,49 @@ TrigFTF_GNN_EtaBin::~TrigFTF_GNN_EtaBin() {
 }
 
 void TrigFTF_GNN_EtaBin::sortByPhi() {
-  std::sort(m_vn.begin(), m_vn.end(), TrigFTF_GNN_EtaBin::CompareByPhi());
+  
+  std::vector<std::pair<float, const TrigFTF_GNN_Node*> > phiBuckets[32];
+
+  int nBuckets = 31;
+
+  for(const auto& n : m_vn) {
+
+    int bIdx = (int)(0.5*nBuckets*(n->phi()/(float)M_PI + 1.0f));
+    phiBuckets[bIdx].push_back(std::make_pair(n->phi(), n));
+  }
+
+  for(auto& b : phiBuckets) {
+    std::sort(b.begin(), b.end());
+  }
+
+  int idx = 0;
+  for(const auto& b : phiBuckets) {
+    for(const auto& p : b) {
+      m_vn[idx++] = p.second;
+    }
+  }
+
 }
 
 void TrigFTF_GNN_EtaBin::initializeNodes() {
-
+  
   m_params.resize(m_vn.size());
+  
   m_in.resize(m_vn.size());
   
   for(unsigned int nIdx=0;nIdx<m_vn.size();nIdx++) {
     m_in[nIdx].reserve(50);//reasonably high number of incoming edges per node
     m_params[nIdx][0] = -100.0;//default cut on cot(theta)
     m_params[nIdx][1] = 100.0; //default cut on cot(theta)
-    m_params[nIdx][2] = m_vn[nIdx]->phi();
-    m_params[nIdx][3] = m_vn[nIdx]->r();
-    m_params[nIdx][4] = m_vn[nIdx]->z();
+    const TrigFTF_GNN_Node* pN = m_vn.at(nIdx);
+    m_params[nIdx][2] = pN->phi();
+    m_params[nIdx][3] = pN->r();
+    m_params[nIdx][4] = pN->z();
   }
 }
 
 void TrigFTF_GNN_EtaBin::generatePhiIndexing(float dphi) {
-  
+
   for(unsigned int nIdx=0;nIdx<m_vn.size();nIdx++) {
 
     float phi = m_params[nIdx][2];
@@ -64,73 +91,105 @@ void TrigFTF_GNN_EtaBin::generatePhiIndexing(float dphi) {
     if(phi >= -M_PI + dphi) break;
     m_vPhiNodes.push_back(std::pair<float, unsigned int>(phi + 2*M_PI, nIdx));
   }
+  
 }
 
 TrigFTF_GNN_DataStorage::TrigFTF_GNN_DataStorage(const TrigFTF_GNN_Geometry& g) : m_geo(g) {
   m_etaBins.resize(g.num_bins());
 }
 
-TrigFTF_GNN_DataStorage::~TrigFTF_GNN_DataStorage() {}
+TrigFTF_GNN_DataStorage::~TrigFTF_GNN_DataStorage() {
 
-int TrigFTF_GNN_DataStorage::addSpacePoint(const TrigSiSpacePointBase* sp, bool useML = false) {
+}
 
-  const TrigFTF_GNN_Layer* pL = m_geo.getTrigFTF_GNN_LayerByIndex(sp->layer());
+int TrigFTF_GNN_DataStorage::loadPixelGraphNodes(short layerIndex, const std::vector<TrigFTF_GNN_Node>& coll, bool useML) {
 
-  if(pL==nullptr) return -1;
+  int nLoaded = 0;
 
-  int binIndex = pL->getEtaBin(sp->z(), sp->r());
+  const TrigFTF_GNN_Layer* pL = m_geo.getTrigFTF_GNN_LayerByIndex(layerIndex);
 
-  if(binIndex == -1) {
-    return -2;
+  if(pL == nullptr) {
+    return -1;
   }
-
-  bool isStrip = sp->offlineSpacePoint()->clusterList().second != nullptr;
- 
-  if(isStrip) {
-    m_etaBins.at(binIndex).m_vn.push_back(sp);
-    return 0;
-  }
-
+  
   bool isBarrel = (pL->m_layer.m_type == 0);
+ 
+  for(const auto& node : coll) {
 
-  if(isBarrel) {
-    m_etaBins.at(binIndex).m_vn.push_back(sp);
-  }
-  else {
-    if (useML) {
-      const Trk::SpacePoint* osp = sp->offlineSpacePoint();
-      const InDet::PixelCluster* pCL = dynamic_cast<const InDet::PixelCluster*>(osp->clusterList().first);
-      float cluster_width = pCL->width().widthPhiRZ().y();
-      if(cluster_width > 0.2) return -3;
+    int binIndex = pL->getEtaBin(node.z(), node.r());
+
+    if(binIndex == -1) {
+      continue;
     }
-    m_etaBins.at(binIndex).m_vn.push_back(sp);
+    
+    if(isBarrel) {
+      m_etaBins.at(binIndex).m_vn.push_back(&node);
+    }
+    else {
+      if (useML) {
+	const InDet::PixelCluster* pCL = dynamic_cast<const InDet::PixelCluster*>(node.sp()->clusterList().first);
+	float cluster_width = pCL->width().widthPhiRZ().y();
+	if(cluster_width > 0.2) continue;
+      }
+      m_etaBins.at(binIndex).m_vn.push_back(&node);
+    }
+    
+    nLoaded++;
     
   }
-
-  return 0;
+  
+  return nLoaded;
 }
+
+int TrigFTF_GNN_DataStorage::loadStripGraphNodes(short layerIndex, const std::vector<TrigFTF_GNN_Node>& coll) {
+
+  int nLoaded = 0;
+
+  const TrigFTF_GNN_Layer* pL = m_geo.getTrigFTF_GNN_LayerByIndex(layerIndex);
+
+  if(pL == nullptr) {
+    return -1;
+  }
+   
+  for(const auto& node : coll) {
+
+    int binIndex = pL->getEtaBin(node.z(), node.r());
+
+    if(binIndex == -1) {
+      continue;
+    }
+
+    m_etaBins.at(binIndex).m_vn.push_back(&node);
+    nLoaded++;
+  }
+  
+  return nLoaded;
+}
+
 
 unsigned int TrigFTF_GNN_DataStorage::numberOfNodes() const {
 
   unsigned int n=0;
   
-  for(auto& b : m_etaBins) {
+  for(const auto& b : m_etaBins) {
     n += b.m_vn.size();
   }
   return n;
 }
 
 void TrigFTF_GNN_DataStorage::sortByPhi() {
+    
   for(auto& b : m_etaBins) b.sortByPhi();
 }
 
 void TrigFTF_GNN_DataStorage::initializeNodes(bool useML = false) {
+  
   for(auto& b : m_etaBins) {
     b.initializeNodes();
   }
   
   if(!useML) return;
-
+  
   unsigned int nL = m_geo.num_layers();
 
   for(unsigned int layerIdx=0;layerIdx<nL;layerIdx++) {
@@ -155,7 +214,7 @@ void TrigFTF_GNN_DataStorage::initializeNodes(bool useML = false) {
       
       for(unsigned int nIdx=0;nIdx<B.m_vn.size();nIdx++) {
         
-        const Trk::SpacePoint* osp = B.m_vn[nIdx]->offlineSpacePoint();
+        const Trk::SpacePoint* osp = B.m_vn[nIdx]->sp();
         const InDet::PixelCluster* pCL = dynamic_cast<const InDet::PixelCluster*>(osp->clusterList().first);
 
         float cluster_width = pCL->width().widthPhiRZ().y();
@@ -174,4 +233,6 @@ void TrigFTF_GNN_DataStorage::initializeNodes(bool useML = false) {
 void TrigFTF_GNN_DataStorage::generatePhiIndexing(float dphi) {
   for(auto& b : m_etaBins) b.generatePhiIndexing(dphi);
 }
+
+
 

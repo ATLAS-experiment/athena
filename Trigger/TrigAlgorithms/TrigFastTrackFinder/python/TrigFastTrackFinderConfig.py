@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
@@ -319,6 +319,37 @@ def ITkTrigSpacePointConversionToolCfg(flags: AthConfigFlags, **kwargs) -> Compo
 
   return acc
 
+def ITkTrigTrackSeedingToolCfg(flags: AthConfigFlags, **kwargs) -> ComponentAccumulator:
+
+  #acc = ComponentAccumulator()
+
+  from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+  acc = BeamSpotCondAlgCfg(flags)
+  
+  if "layerNumberTool" not in kwargs:
+      ntargs = {"UseNewLayerScheme" : True}
+      kwargs.setdefault("layerNumberTool",acc.popToolsAndMerge(ITkTrigL2LayerNumberToolCfg(flags,**ntargs)))
+  
+  kwargs.setdefault("DoPhiFiltering", flags.Tracking.ActiveConfig.DoPhiFiltering)
+  kwargs.setdefault("UseBeamTilt", False)
+  kwargs.setdefault("PixelSP_ContainerName", "ITkPixelTrigSpacePoints")
+  kwargs.setdefault("SCT_SP_ContainerName", "ITkStripTrigSpacePoints")
+  kwargs.setdefault("UsePixelSpacePoints", (not flags.Tracking.ActiveConfig.isLRT))
+  kwargs.setdefault("UseSctSpacePoints",flags.Tracking.ActiveConfig.isLRT)
+  kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT[0])
+  kwargs.setdefault("MaxGraphEdges", 1500000)
+  kwargs.setdefault("ConnectionFileName", "binTables_ITK_RUN4_LRT.txt" if flags.Tracking.ActiveConfig.isLRT else "binTables_ITK_RUN4.txt")
+
+  from RegionSelector.RegSelToolConfig import (regSelTool_ITkStrip_Cfg, regSelTool_ITkPixel_Cfg)
+  
+  kwargs.setdefault("RegSelTool_Pixel", acc.popToolsAndMerge( regSelTool_ITkPixel_Cfg( flags) ))
+
+  kwargs.setdefault("RegSelTool_SCT", acc.popToolsAndMerge( regSelTool_ITkStrip_Cfg( flags) ))
+  
+  acc.setPrivateTools(CompFactory.TrigInDetTrackSeedingTool(**kwargs))
+
+  return acc
+
 def ITkTrigSiTrackMaker_FTF_Cfg(flags, signature, layerNumberingTool) -> ComponentAccumulator:
   acc = ComponentAccumulator()
   
@@ -382,12 +413,18 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
 
   useNewLayerNumberScheme = True
 
-  if flags.Detector.GeometryITk:
+  seedingTool = None
 
-    spTool = acc.popToolsAndMerge(ITkTrigSpacePointConversionToolCfg(flags))
+  spTool = None
+  
+  if flags.Detector.GeometryITk:
+    
     numberingTool = acc.popToolsAndMerge(ITkTrigL2LayerNumberToolCfg(flags))
 
+    seedingTool   = acc.popToolsAndMerge(ITkTrigTrackSeedingToolCfg(flags))
+    
     acc.merge(ITkTrigSiTrackMaker_FTF_Cfg(flags, signature, numberingTool))
+
     TrackMaker_FTF = acc.getPublicTool("ITkTrigSiTrackMaker_FTF_"+signature)
 
     acc.addPublicTool( CompFactory.TrigInDetTrackFitter( "TrigInDetTrackFitter_"+signature ) )
@@ -444,7 +481,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
         useNewLayerNumberScheme = useNewLayerNumberScheme,
         LayerNumberTool = numberingTool,
         useGPU = flags.Trigger.InDetTracking.doGPU,
-        SpacePointProviderTool=spTool,
+        SpacePointProviderTool = spTool,        
         MinHits = 3 if flags.Detector.GeometryITk else 5, #Only process RoI with more than 5 (3) spacepoints for Run 3 (Run 4)
         Triplet_MinPtFrac = 0.8 if flags.Detector.GeometryITk else 1,
         Triplet_nMaxPhiSlice = 53 if "cosmics" not in flags.Tracking.ActiveConfig.name else 2,
@@ -475,6 +512,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
         ITkMode = flags.Detector.GeometryITk,
         UseTracklets = flags.Detector.GeometryITk,
         doTrackRefit = not flags.Detector.GeometryITk,
+        TrackSeedingTool = seedingTool
     )
     
   ftf.LRT_D0Min = flags.Tracking.ActiveConfig.LRT_D0Min
