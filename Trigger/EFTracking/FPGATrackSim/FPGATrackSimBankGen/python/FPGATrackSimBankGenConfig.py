@@ -10,7 +10,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimRoadUnionToolCfg,FPGATrackSimRoadUnionTool1DCfg
+from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimRoadUnionToolCfg,FPGATrackSimRoadUnionTool1DCfg,FPGATrackSimRoadUnionToolGenScanCfg
 from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimRawLogicCfg, FPGATrackSimMappingCfg
 from AthenaCommon.SystemOfUnits import GeV
 
@@ -75,11 +75,11 @@ def FPGATrackSimBankGenCfg(flags, **kwargs):
     theFPGATrackSimMatrixGenAlg.WCmax = 2
  
     theFPGATrackSimMatrixGenAlg.FPGATrackSimRawToLogicalHitsTool = acc.getPrimaryAndMerge(FPGATrackSimRawLogicCfg(flags))
-
-    if (flags.Trigger.FPGATrackSim.ActiveConfig.hough1D):
-      theFPGATrackSimMatrixGenAlg.RoadFinder = acc.getPrimaryAndMerge(FPGATrackSimRoadUnionTool1DCfg(flags))
+    if (flags.Trigger.FPGATrackSim.ActiveConfig.genScan):
+        theFPGATrackSimMatrixGenAlg.RoadFinder = acc.getPrimaryAndMerge(FPGATrackSimRoadUnionToolGenScanCfg(flags))
+    elif (flags.Trigger.FPGATrackSim.ActiveConfig.hough1D):
+        theFPGATrackSimMatrixGenAlg.RoadFinder = acc.getPrimaryAndMerge(FPGATrackSimRoadUnionTool1DCfg(flags))
     else:
-        
       theFPGATrackSimMatrixGenAlg.RoadFinder = acc.getPrimaryAndMerge(FPGATrackSimRoadUnionToolCfg(flags))
 
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg

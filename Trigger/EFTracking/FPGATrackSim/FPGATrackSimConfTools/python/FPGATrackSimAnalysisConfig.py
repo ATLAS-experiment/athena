@@ -55,11 +55,12 @@ def FPGATrackSimBankSvcCfg(flags):
         f'{pathBankSvc}corrgen_raw_13L_skipPlane5.gcon', 
         f'{pathBankSvc}corrgen_raw_13L_skipPlane6.gcon', 
         f'{pathBankSvc}corrgen_raw_13L_skipPlane7.gcon']
-    FPGATrackSimBankSvc.constants_1st = f'{pathBankSvc}corrgen_raw_9L_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.gcon'
+    layers="5L" if flags.Trigger.FPGATrackSim.ActiveConfig.genScan else "9L"
+    FPGATrackSimBankSvc.constants_1st = f'{pathBankSvc}corrgen_raw_{layers}_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.gcon'
     FPGATrackSimBankSvc.constants_2nd = f'{pathBankSvc}corrgen_raw_13L_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.gcon'
-    FPGATrackSimBankSvc.sectorBank_1st = f'{pathBankSvc}sectorsHW_raw_9L_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.patt'
+    FPGATrackSimBankSvc.sectorBank_1st = f'{pathBankSvc}sectorsHW_raw_{layers}_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.patt'
     FPGATrackSimBankSvc.sectorBank_2nd = f'{pathBankSvc}sectorsHW_raw_13L_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.patt'
-    FPGATrackSimBankSvc.sectorSlices = f'{pathBankSvc}slices_9L_reg{flags.Trigger.FPGATrackSim.region}.root'
+    FPGATrackSimBankSvc.sectorSlices = f'{pathBankSvc}slices_{layers}_reg{flags.Trigger.FPGATrackSim.region}.root'
     
     # These should be configurable. The tag system needs updating though.
     import FPGATrackSimConfTools.FPGATrackSimTagConfig as FPGATrackSimTagConfig
@@ -270,7 +271,7 @@ def FPGATrackSimOverlapRemovalToolCfg(flags):
     OR_1st = CompFactory.FPGATrackSimOverlapRemovalTool("FPGATrackSimOverlapRemovalTool_1st")
     OR_1st.ORAlgo = "Normal"
     OR_1st.doFastOR =flags.Trigger.FPGATrackSim.ActiveConfig.doFastOR
-    OR_1st.NumOfHitPerGrouping = 5
+    OR_1st.NumOfHitPerGrouping = 3
     OR_1st.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     OR_1st.MinChi2 = flags.Trigger.FPGATrackSim.ActiveConfig.chi2cut    
     if flags.Trigger.FPGATrackSim.ActiveConfig.hough or flags.Trigger.FPGATrackSim.ActiveConfig.hough1D:

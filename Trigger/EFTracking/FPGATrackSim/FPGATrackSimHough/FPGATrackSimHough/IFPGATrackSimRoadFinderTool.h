@@ -48,14 +48,14 @@ class IFPGATrackSimRoadFinderTool : virtual public IAlgTool
                         std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads,
                         std::vector<FPGATrackSimTruthTrack> const &truthtracks)
         {
-            m_truthtracks = &truthtracks;
+            m_truthtracks = truthtracks;
             return getRoads(hits, roads);
         }
 
-        std::vector<FPGATrackSimTruthTrack> const *getTruthTracks() { return m_truthtracks; }
+        std::vector<FPGATrackSimTruthTrack> const *getTruthTracks() { return &m_truthtracks; }
 
     private:
-        std::vector<FPGATrackSimTruthTrack> const *m_truthtracks;
+        std::vector<FPGATrackSimTruthTrack> m_truthtracks;
 
 };
 
