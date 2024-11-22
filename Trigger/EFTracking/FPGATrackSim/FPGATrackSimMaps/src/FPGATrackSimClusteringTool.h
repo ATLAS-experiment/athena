@@ -42,7 +42,7 @@ public:
 
   //FPGATrackSim pixel clustering using the FPGATrackSim objects
   void SortedClustering(const std::vector<std::vector<FPGATrackSimHit> >& sorted_hits, std::vector<FPGATrackSimCluster> &) const;
-  void Clustering(std::vector<FPGATrackSimHit>, std::vector<FPGATrackSimCluster> &) const ;
+  void Clustering(std::vector<FPGATrackSimHit>, std::vector<FPGATrackSimCluster> &) const;
 
   // Other helper functions
   void splitAndSortHits(std::vector<FPGATrackSimHit>& hits, std::vector<std::vector<FPGATrackSimHit> >& hitsPerModule, int& eta_phi) const;

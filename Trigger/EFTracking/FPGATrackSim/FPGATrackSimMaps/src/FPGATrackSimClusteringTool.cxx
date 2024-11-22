@@ -72,13 +72,17 @@ void FPGATrackSimClusteringTool::SortedClustering(const std::vector<std::vector<
 }
 
 void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleHits, std::vector<FPGATrackSimCluster> &moduleClusters) const {
+  std::vector<FPGATrackSimCluster> tempClusters;
+  FPGATrackSimHit clusterEquiv;
+  bool newCluster, newHit;
+
   //To hold the current cluster vars for comparison
   //loop over the hits that we have been passed for this module
   for( auto& hit: moduleHits){
     int is_clustered_hit =0;
-    // int nclustered =0;
+
     //Loop over the clusters we have already made, check if this hit should be added to them?
-    for( auto& cluster: moduleClusters){
+    for( auto& cluster: tempClusters){
       if(hit.isPixel()){
 	        is_clustered_hit = FPGATrackSimCLUSTERING::updatePixelCluster(cluster, hit, false);
       }
@@ -86,8 +90,9 @@ void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleH
 	        is_clustered_hit = FPGATrackSimCLUSTERING::updateStripCluster(cluster, hit, false);
       }
     }
+
     //If it is the first hit or a not clustered hit, then start a new cluster and add it to the output vector
-    if((is_clustered_hit==0) or (moduleClusters.size()==0)){
+    if((is_clustered_hit==0) or (tempClusters.size()==0)){
       FPGATrackSimCluster cluster;
       if(hit.isPixel()){
 	is_clustered_hit = FPGATrackSimCLUSTERING::updatePixelCluster(cluster, hit, true);
@@ -95,8 +100,92 @@ void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleH
 	is_clustered_hit = FPGATrackSimCLUSTERING::updateStripCluster(cluster, hit, true);
       }
       //Put this cluster into the output hits. Will update it in place.
-      moduleClusters.push_back(cluster);
+      tempClusters.push_back(cluster);
     }
+  }
+
+  // Merge overlapping clusters
+  for (auto& cluster : tempClusters) {
+    newCluster = true;
+
+    for (auto& finalCluster : moduleClusters) {
+      int cPhi = cluster.getClusterEquiv().getPhiIndex();
+      int cPhiWidth = cluster.getClusterEquiv().getPhiWidth();
+      int cEta = cluster.getClusterEquiv().getEtaIndex();
+      int cEtaWidth = cluster.getClusterEquiv().getEtaWidth();
+      int fCPhi = finalCluster.getClusterEquiv().getPhiIndex();
+      int fCPhiWidth = finalCluster.getClusterEquiv().getPhiWidth();
+      int fCEta = finalCluster.getClusterEquiv().getEtaIndex();
+      int fCEtaWidth = finalCluster.getClusterEquiv().getEtaWidth();
+
+      // check for overlap in phi
+      if ((fCPhi > cPhi + cPhiWidth - 1) ||
+	  (cPhi > fCPhi + fCPhiWidth - 1))
+	continue;
+
+      // check for overlap in eta
+      if ((fCEta > cEta + cEtaWidth - 1) ||
+	  (cEta > fCEta + fCEtaWidth - 1))
+	continue;
+
+      // remaining clusters are overlapping, merge them
+      newCluster = false;
+      clusterEquiv = finalCluster.getClusterEquiv();
+
+      // set new phi & phi width
+      if (cPhi < fCPhi) {
+        clusterEquiv.setPhiIndex(cPhi);
+        if (cPhi + cPhiWidth < fCPhi + fCPhiWidth)
+          clusterEquiv.setPhiWidth(fCPhiWidth + (fCPhi - cPhi));
+        else
+          clusterEquiv.setPhiWidth(cPhiWidth);
+      } else {
+        if (!(cPhi + cPhiWidth < fCPhi + fCPhiWidth))
+          clusterEquiv.setPhiWidth(cPhi + cPhiWidth - fCPhi);
+      }
+
+      // set new eta & eta width
+      if (cEta < fCEta) {
+        clusterEquiv.setEtaIndex(cEta);
+        if (cEta + cEtaWidth < fCEta + fCEtaWidth)
+          clusterEquiv.setEtaWidth(fCEtaWidth + (fCEta - cEta));
+        else
+          clusterEquiv.setEtaWidth(cEtaWidth);
+      } else {
+        if (!(cEta + cEtaWidth < fCEta + fCEtaWidth))
+          clusterEquiv.setEtaWidth(cEta + cEtaWidth - fCEta);
+      }
+
+      finalCluster.setClusterEquiv(clusterEquiv);
+
+      for (auto & hit : cluster.getHitList()) {
+        newHit = true;
+        for (auto & finalHit : finalCluster.getHitList()) {
+          if (hit.getEtaIndex() == finalHit.getEtaIndex() &&
+              hit.getPhiIndex() == finalHit.getPhiIndex())
+            newHit = false;
+        }
+        if (newHit) {
+          clusterEquiv = finalCluster.getClusterEquiv();
+          float xOld = clusterEquiv.getX();
+          float yOld = clusterEquiv.getY();
+          float zOld = clusterEquiv.getZ();
+          float xNew = hit.getX();
+          float yNew = hit.getY();
+          float zNew = hit.getZ();
+          int n = finalCluster.getHitList().size();
+          // n+1 because that is old + new now
+          clusterEquiv.setX((xOld*n + xNew) / (n+1));
+          clusterEquiv.setY((yOld*n + yNew) / (n+1));
+          clusterEquiv.setZ((zOld*n + zNew) / (n+1));
+          finalCluster.setClusterEquiv(clusterEquiv);
+          finalCluster.push_backHitList(hit);
+	}
+      }
+    }
+
+    if (newCluster)
+      moduleClusters.push_back(cluster);
   }
 }
 
@@ -175,10 +264,8 @@ void FPGATrackSimClusteringTool::normaliseClusters(std::vector<FPGATrackSimClust
       clusterEquiv.setPhiCoord(clusterEquiv.getPhiCoord()/fpgatracksim::scaleHitFactor);
       clusterEquiv.setPhiWidth(clusterEquiv.getPhiWidth()+1);
     } else {
-      clusterEquiv.setEtaCoord(clusterEquiv.getEtaCoord()/fpgatracksim::scaleHitFactor);
-      clusterEquiv.setEtaWidth(clusterEquiv.getEtaWidth()+1);
-      clusterEquiv.setPhiCoord(clusterEquiv.getPhiCoord()/fpgatracksim::scaleHitFactor);
-      clusterEquiv.setPhiWidth(clusterEquiv.getPhiWidth()+1);
+      // Nothing to normalise for pixel clusters
+      continue;
     }
     cluster.setClusterEquiv(clusterEquiv);
   }
@@ -269,17 +356,17 @@ void FPGATrackSimCLUSTERING::attachTruth(std::vector<FPGATrackSimHit> &hits){
 } //record truth for each raw channel in the cluster
 
 /*
- * This function is used in the FPGATrackSimClusteringTools to see if a new hit should be added to the current cluster under construction. It assumes double precision hits.
+ * This function is used in the FPGATrackSimClusteringTools to see if a new hit should be added to the current cluster under construction.
  * It checks if the hit is in a number of positions w.r.t. the cluster being formed: up/right, down/right, above, right, or inside a cluster that has formed a horseshoe.
  */
 bool FPGATrackSimCLUSTERING::updatePixelCluster(FPGATrackSimCluster &currentCluster, FPGATrackSimHit &incomingHit, bool newCluster){
 
   if(newCluster){
     FPGATrackSimHit newHit = incomingHit;
-    //Double the precision on the positions
-    //By doing this the hardware is able to handle clusters where the centre of the cluster is on a boundary between two clusters without needing a float
-    newHit.setEtaIndex(incomingHit.getEtaIndex()*fpgatracksim::scaleHitFactor);
-    newHit.setPhiIndex(incomingHit.getPhiIndex()*fpgatracksim::scaleHitFactor);
+    newHit.setEtaIndex(incomingHit.getEtaIndex());
+    newHit.setPhiIndex(incomingHit.getPhiIndex());
+    newHit.setEtaWidth(1);
+    newHit.setPhiWidth(1);
     //Set the initial clusterEquiv to be the incoming hit with double precision
     currentCluster.setClusterEquiv(newHit);
     //Add the current hit to the list of hits
@@ -297,55 +384,41 @@ bool FPGATrackSimCLUSTERING::updatePixelCluster(FPGATrackSimCluster &currentClus
     int clusterColWidth = clusterEquiv.getPhiWidth();
 
     //Looking for a neighbour in up/right position to the currentCluster
-    if((hitRow*fpgatracksim::scaleHitFactor == clusterRow+clusterRowWidth+fpgatracksim::scaleHitFactor) &&
-       (hitCol*fpgatracksim::scaleHitFactor == clusterCol+clusterColWidth+fpgatracksim::scaleHitFactor) ){
-      clusterRow++;
-      clusterRowWidth++;
-      clusterCol++;
+    if ((hitCol == clusterCol + clusterColWidth) && (hitRow == clusterRow + clusterRowWidth)) {
       clusterColWidth++;
-      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
-      return true;
-    }
-
-    //Looking for a neighbour in down right
-    else if((hitRow*fpgatracksim::scaleHitFactor == clusterRow-clusterRowWidth-fpgatracksim::scaleHitFactor) && //because row then col sorted data, i.e. col sorted.
-	    (hitCol*fpgatracksim::scaleHitFactor == clusterCol+clusterColWidth+fpgatracksim::scaleHitFactor) ){
-      clusterRow--; // important
       clusterRowWidth++;
-      clusterCol++;
-      clusterColWidth++;
-      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
-      return true;
-    }
 
-    //Looking for a neighbour above
-    else if((hitRow*fpgatracksim::scaleHitFactor == clusterRow+clusterRowWidth+fpgatracksim::scaleHitFactor) &&
-	    (hitCol*fpgatracksim::scaleHitFactor == clusterCol+clusterColWidth) ){
-      clusterRow++;
+      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+
+      return true;
+    } else if ((hitCol == clusterCol + clusterColWidth) && (hitRow == clusterRow - 1)) {
+      clusterColWidth++;
+      clusterRow--;
       clusterRowWidth++;
-      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
-      return true;
-    }
 
-    //Looking for a neighbour to the right
-    else if(((hitRow*fpgatracksim::scaleHitFactor >  clusterRow-clusterRowWidth-fpgatracksim::scaleHitFactor) && (hitRow*fpgatracksim::scaleHitFactor <  clusterRow+clusterRowWidth+fpgatracksim::scaleHitFactor)) &&
-	    (hitCol*fpgatracksim::scaleHitFactor == clusterCol+clusterColWidth+fpgatracksim::scaleHitFactor) ){
-      clusterCol++;
+      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+
+      return true;
+    } else if ((hitCol >= clusterCol) && (hitCol < clusterCol + clusterColWidth) && (hitRow == clusterRow + clusterRowWidth)) {
+      clusterRowWidth++;
+
+      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+
+      return true;
+    } else if ((hitCol == clusterCol + clusterColWidth) && (hitRow >= clusterRow) && (hitRow < clusterRow + clusterRowWidth)) {
       clusterColWidth++;
-      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
-      return true;
-    }
 
-    //Checking for hits inside the box
-    else if((hitRow*fpgatracksim::scaleHitFactor > clusterRow-clusterRowWidth-fpgatracksim::scaleHitFactor) &&
-	    (hitRow*fpgatracksim::scaleHitFactor < clusterRow+clusterRowWidth+fpgatracksim::scaleHitFactor) &&
-	    (hitCol*fpgatracksim::scaleHitFactor < clusterCol+clusterColWidth+fpgatracksim::scaleHitFactor) ){
-      //We still want to do this as we are not changing the position of the cluster, but we are adding to its hitlist
       FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+
       return true;
+    } else if ((hitCol >= clusterCol) && (hitCol < clusterCol + clusterColWidth) && (hitRow >= clusterRow) && (hitRow < clusterRow + clusterRowWidth)) {
+
+      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+
+      return true;
+    } else {
+      return false;
     }
-    //if we made it here then this cluster then start again
-    else return false;
   }
 }
 
