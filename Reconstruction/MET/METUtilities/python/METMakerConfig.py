@@ -12,7 +12,7 @@ def getMETMaker(name="METMaker", **kwargs):
     elif kwargs["DoPFlow"]:
         kwargs.setdefault("JvtSelTool", CompFactory.CP.NNJvtSelectionTool(
             name="JvtSelTool",
-            JvtMomentName="NJvt",
+            JvtMomentName="NNJvt",
             WorkingPoint="FixedEffPt",
             MaxPtForJvt=60e3))
     else:
