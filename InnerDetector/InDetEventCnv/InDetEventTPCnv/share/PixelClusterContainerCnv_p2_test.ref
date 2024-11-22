@@ -22,7 +22,7 @@ EventLoopMgr      WARNING No events will be processed from external input.
 HistogramPersis...WARNING Histograms saving not required.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
- INFO Initialize from dictionary
+PixelID              INFO Initialize from dictionary
  DEBUG (Re)initialize
 AtlasDetectorID      INFO initialize_from_dictionary - OK
  DEBUG decode index and bit fields for each level: 
