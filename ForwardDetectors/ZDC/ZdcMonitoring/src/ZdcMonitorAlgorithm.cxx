@@ -100,7 +100,7 @@ StatusCode ZdcMonitorAlgorithm::initialize() {
     ATH_CHECK( m_ZdcSumModuleMaskKey.initialize(m_enableZDC) );
 
     // access to conditions in cool database
-    ATH_CHECK( m_LBLBFolderInputKey.initialize(!m_isSim && m_isInjectedPulse) );
+    ATH_CHECK( m_LBLBFolderInputKey.initialize(!m_isSim && !m_isOnline && m_isInjectedPulse) );
 
     ATH_CHECK( m_ZdcModuleStatusKey.initialize(m_enableZDC) );
     ATH_CHECK( m_ZdcModuleAmplitudeKey.initialize(m_enableZDC) );
@@ -659,7 +659,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                         // ------------ throw away the first few seconds of each LB ------------
                         // get the start + end time of the event LB from the cool data
                         // copied from Trigger/TrigT1/TrigT1CTMonitoring/src/BSMonitoringAlg.cxx
-                        if (!m_isSim && m_isInjectedPulse) {
+                        if (!m_isSim && !m_isOnline && m_isInjectedPulse) {
                             uint64_t lb_stime = 0; // LB POSIX start time in seconds
                             uint64_t lb_etime = 0; // LB POSIX end time in seconds
                             bool retrievedLumiBlockTimes = false;
