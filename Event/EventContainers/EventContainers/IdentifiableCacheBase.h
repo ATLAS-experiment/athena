@@ -30,11 +30,6 @@ public:
 static constexpr uintptr_t INVALIDflag = UINTPTR_MAX;
 static constexpr uintptr_t ABORTEDflag = UINTPTR_MAX-1;
 
-#ifndef __cpp_lib_atomic_wait
-//Buckets are not necessary once we have atomic waiting
-//This code can be removed when C++20(+) is firmly adopted.
-static constexpr size_t s_defaultBucketSize =2;
-#endif
 
 typedef std::true_type thread_safe;
 
@@ -91,9 +86,6 @@ typedef std::true_type thread_safe;
   size_t numberOfHashes();
 
 protected:
-#ifndef __cpp_lib_atomic_wait
-  IdentifiableCacheBase (IdentifierHash maxHash, const IMaker* maker, size_t lockBucketSize);
-#endif
   IdentifiableCacheBase (IdentifierHash maxHash, const IMaker* maker);
   ~IdentifiableCacheBase();
   void clear (deleter_f* deleter);
@@ -108,11 +100,6 @@ private:
   typedef std::scoped_lock<mutex_t> lock_t;
   typedef std::unique_lock<mutex_t> uniqueLock;
   mutex_t m_mutex;
-#ifndef __cpp_lib_atomic_wait
-  ///Pool of mutexes used for waiting on completion if in a concurrent environment
-  std::unique_ptr<mutexPair[]> m_HoldingMutexes;
-  size_t m_NMutexes;
-#endif
   ///Holds the number of valid hashes in container, in concurrent use it is not guaranteed to be up to date.
   std::atomic<size_t> m_currentHashes;
 };
