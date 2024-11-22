@@ -19,7 +19,7 @@ from PyJobTransforms.trfExe import athenaExecutor
 from PyJobTransforms.trfArgs import addAthenaArguments, addDetectorArguments, addTriggerArguments
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
 from RecJobTransforms.recTransformUtils import addRecoSubsteps, addAllRecoArgs
-from SimuJobTransforms.simTrfArgs import addCommonSimTrfArgs, addBasicDigiArgs, addCommonSimDigTrfArgs, addTrackRecordArgs, addSim_tfArgs, addPileUpTrfArgs
+from SimuJobTransforms.simTrfArgs import addCommonSimTrfArgs, addBasicDigiArgs, addCommonSimDigTrfArgs, addTrackRecordArgs, addSim_tfArgs, addSimIOTrfArgs, addPileUpTrfArgs
 
 from PyJobTransforms.trfArgClasses import argFactory, argList, argRDOFile
 
@@ -42,18 +42,11 @@ def getTransform():
 
     addRecoSubsteps(executorSet)
 
-    # Sim + Digi - factor these out into an importable function in time
     executorSet.add(athenaExecutor(name = 'EVNTtoRDO',
                                    skeletonCA = 'FullChainTransforms.FastChainSkeleton',
                                    substep = 'simdigi', tryDropAndReload = False, perfMonFile = 'ntuple.pmon.gz',
                                    inData=['NULL','EVNT', 'RDO_BKG', 'BS_SKIM'],
-                                   outData=['RDO','NULL'] ))
-
-    # Sim + Overlay - execute with the argument --steering "doFCwOverlay"
-    executorSet.add(athenaExecutor(name = 'EVNTtoRDOwOverlay',
-                                   substep = 'simoverlay', tryDropAndReload = False, perfMonFile = 'ntuple.pmon.gz',
-                                   inData = ['NULL'], outData = ['NULL']))
-
+                                   outData=['RDO', 'HITS', 'NULL'] ))
 
     trf = transform(executor = executorSet, description = 'Fast chain ATLAS transform with ISF simulation, digitisation'
                     ' and reconstruction. Inputs can be EVNT, with outputs of RDO, ESD, AOD or DPDs.'
@@ -72,6 +65,7 @@ def getTransform():
     addCommonSimDigTrfArgs(trf.parser)
     addBasicDigiArgs(trf.parser)
     addSim_tfArgs(trf.parser)
+    addSimIOTrfArgs(trf.parser)
     # addForwardDetTrfArgs(trf.parser)
     addPileUpTrfArgs(trf.parser)
     addTrackRecordArgs(trf.parser)
