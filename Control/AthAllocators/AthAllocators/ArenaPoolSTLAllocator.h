@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthAllocators/ArenaPoolSTLAllocator.h
@@ -413,7 +413,7 @@ public:
 
 
 private:
-  size_t m_nblock;
+  size_t m_nblock = 0;
   std::string m_name;
 };
 
@@ -520,13 +520,13 @@ public:
 
 private:
   /// Saved hinted number of objects per block.
-  size_t m_nblock;
+  size_t m_nblock = 0;
 
   /// Saved allocator name.
   std::string m_name;
 
   /// Point at an underlying allocator from a different specialization.
-  const ArenaBlockAllocatorBase* m_poolptr;
+  const ArenaBlockAllocatorBase* m_poolptr = nullptr;
 };
 
 
