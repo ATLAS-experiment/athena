@@ -2004,7 +2004,8 @@ class argSubstep(argument):
     #  @param substep Executor substep nickname
     #  @param first Boolean flag set true if this is the first executor in the chain
     #  @param exe Executor instance, from which 'name', 'substep' and 'first' can be taken.  
-    def returnMyValue(self, name=None, substep=None, first=False, exe=None):
+    #  @param withoutAll Return without 'all'
+    def returnMyValue(self, name=None, substep=None, first=False, exe=None, withoutAll=False):
         if exe:
             name = exe.name
             substep = exe.substep
@@ -2031,7 +2032,7 @@ class argSubstep(argument):
         ## @note Defining all: for a key which is not composable (like a list)
         #  doesn't make much sense and, in this case, the specific value is allowed
         #  to trump the all:
-        if 'all' in self._value:
+        if not withoutAll and name != 'all' and 'all' in self._value:
             if value is None:
                 value = self._value['all']
             elif isinstance(value, list):

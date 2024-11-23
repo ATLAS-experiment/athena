@@ -31,7 +31,7 @@ endfunction( _add_test )
 foreach( test Echo_tf Sleep_tf
          transform TransformUtils trfAMI trfArgs trfEnv
          trfExceptions trfExe trfExitCodes trfGraph trfJobOptions trfLogger
-         trfMPTools trfReports trfReportsSignaledExit trfSignatures
+         trfMTMPTools trfReports trfReportsSignaledExit trfSignatures
          trfUtils trfUtilsDBRelease trfUtilsParallelJobProcessor trfUtilsParallelJobProcessorData
          trfValidation trfArgClasses trfValidateRootFile )
       _add_test( ${test} py 300 )

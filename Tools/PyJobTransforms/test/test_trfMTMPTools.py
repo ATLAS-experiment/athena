@@ -1,9 +1,8 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-## @Package test_trfMPTools.py
-#  @brief Unittests for trfMPTools.py
+#  @brief Unittests for Athena MT and MP support
 #  @author graeme.andrew.stewart@cern.ch
 
 import os
@@ -14,39 +13,188 @@ import logging
 msg = logging.getLogger(__name__)
 
 # Allowable to import * from the package for which we are the test suite
-from PyJobTransforms.trfMPTools import *
-from PyJobTransforms.trfArgClasses import argList, argSubstepList, argFile
+from PyJobTransforms.trfMTMPTools import detectAthenaThreadsProcesses, athenaMPOutputHandler, _threadsPerProcess
+from PyJobTransforms.trfArgClasses import argBool, argList, argSubstepList, argFile, argSubstepInt
 
 import PyJobTransforms.trfExceptions as trfExceptions
 
 
 ## Unit tests
-class AthenaMPProcTests(unittest.TestCase):
+class AthenaOptionsMTTests(unittest.TestCase):
     def setUp(self):
         os.environ.pop("ATHENA_CORE_NUMBER", "")
     
-    def test_noMP(self):
-        self.assertEqual(detectAthenaMPProcs(), 0)
+    def test_noMTMP(self):
+        self.assertEqual(detectAthenaThreadsProcesses(), (0, 0, 0))
+        
+    def test_noMTwithArgdict(self):
+        argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList(['some', 'random', 'values'])}
+        self.assertEqual(detectAthenaThreadsProcesses(argdict), (0, 0, 0))
+             
+    def test_MTfromArgdict(self):
+        argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList(['--threads=8', 'random', 'values'])}
+        self.assertEqual(detectAthenaThreadsProcesses(argdict), (8, 8, 0))
+
+    def test_MTfromArgdictStep(self):
+        argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList({'A': ['--threads=8', 'random', 'values']})}
+        step='A'
+        self.assertEqual(detectAthenaThreadsProcesses(argdict, step), (8, 8, 0))
+
+        argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList({'all': ['--threads=8', 'random', 'values']})}
+        step='A'
+        self.assertEqual(detectAthenaThreadsProcesses(argdict, step), (8, 8, 0))
+
+        argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList({'all': ['--threads=8', 'random', 'values'], 'A': ['--threads=4']})}
+        step='A'
+        self.assertEqual(detectAthenaThreadsProcesses(argdict, step), (4, 4, 0))
+
+        argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList({'A': ['--threads=4'], 'all': ['--threads=8', 'random', 'values']})}
+        step='A'
+        self.assertEqual(detectAthenaThreadsProcesses(argdict, step), (4, 4, 0))
+
+        argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList({'A': ['--threads=8', 'random', 'values']})}
+        step='B'
+        self.assertEqual(detectAthenaThreadsProcesses(argdict, step), (0, 0, 0))
+
+    def test_MTfromArgdictEmpty(self):
+        argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList(['--threads=0', 'random', 'values'])}
+        self.assertEqual(detectAthenaThreadsProcesses(argdict), (0, 0, 0))
+
+    def test_MTfromArgdictBad(self):
+        argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList(['--threads=-4', 'random', 'values'])}
+        self.assertRaises(trfExceptions.TransformExecutionException, detectAthenaThreadsProcesses, argdict)
+        argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList(['--threads=notAnInt', 'random', 'values'])}
+        self.assertRaises(trfExceptions.TransformExecutionException, detectAthenaThreadsProcesses, argdict)
+        argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList(['--threads=4', '--threads=8', 'values'])}
+        self.assertRaises(trfExceptions.TransformExecutionException, detectAthenaThreadsProcesses, argdict)
+
+    def test_MTMixed(self):
+        argdict={'multithreaded': argBool(True), 'athenaopts': argSubstepList({'A': ['--threads=2']})}
+        step='A'
+        self.assertEqual(detectAthenaThreadsProcesses(argdict, step), (2, 2, 0))
+
+    def test_MTMixedBad(self):
+        argdict={'multithreaded': argBool(True), 'athenaopts': argSubstepList(['--threads=2'])}
+        self.assertRaises(trfExceptions.TransformExecutionException, detectAthenaThreadsProcesses, argdict)
+        argdict={'multithreaded': argBool(True), 'athenaopts': argSubstepList({'all': ['--threads=2']})}
+        self.assertRaises(trfExceptions.TransformExecutionException, detectAthenaThreadsProcesses, argdict)
+
+
+class AthenaOptionsMPTests(unittest.TestCase):
+    def setUp(self):
+        os.environ.pop("ATHENA_CORE_NUMBER", "")
+    
+    def test_noMTMP(self):
+        self.assertEqual(detectAthenaThreadsProcesses(), (0, 0, 0))
         
     def test_noMPwithArgdict(self):
         argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList(['some', 'random', 'values'])}
-        self.assertEqual(detectAthenaMPProcs(argdict), 0)
+        self.assertEqual(detectAthenaThreadsProcesses(argdict), (0, 0, 0))
              
     def test_MPfromArgdict(self):
         argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList(['--nprocs=8', 'random', 'values'])}
-        self.assertEqual(detectAthenaMPProcs(argdict), 8)
+        self.assertEqual(detectAthenaThreadsProcesses(argdict), (0, 0, 8))
+
+    def test_MPfromArgdictStep(self):
+        argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList({'A': ['--nprocs=8', 'random', 'values']})}
+        step='A'
+        self.assertEqual(detectAthenaThreadsProcesses(argdict, step), (0, 0, 8))
+
+        argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList({'all': ['--nprocs=8', 'random', 'values']})}
+        step='A'
+        self.assertEqual(detectAthenaThreadsProcesses(argdict, step), (0, 0, 8))
+
+        argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList({'all': ['--nprocs=8', 'random', 'values'], 'A': ['--nprocs=4']})}
+        step='A'
+        self.assertEqual(detectAthenaThreadsProcesses(argdict, step), (0, 0, 4))
+
+        argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList({'A': ['--nprocs=4'], 'all': ['--nprocs=8', 'random', 'values']})}
+        step='A'
+        self.assertEqual(detectAthenaThreadsProcesses(argdict, step), (0, 0, 4))
+
+        argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList({'A': ['--nprocs=8', 'random', 'values']})}
+        step='B'
+        self.assertEqual(detectAthenaThreadsProcesses(argdict, step), (0, 0, 0))
 
     def test_MPfromArgdictEmpty(self):
         argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList(['--nprocs=0', 'random', 'values'])}
-        self.assertEqual(detectAthenaMPProcs(argdict), 0)
+        self.assertEqual(detectAthenaThreadsProcesses(argdict), (0, 0, 0))
 
     def test_MPfromArgdictBad(self):
         argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList(['--nprocs=-4', 'random', 'values'])}
-        self.assertRaises(trfExceptions.TransformExecutionException, detectAthenaMPProcs, argdict)
+        self.assertRaises(trfExceptions.TransformExecutionException, detectAthenaThreadsProcesses, argdict)
         argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList(['--nprocs=notAnInt', 'random', 'values'])}
-        self.assertRaises(trfExceptions.TransformExecutionException, detectAthenaMPProcs, argdict)
+        self.assertRaises(trfExceptions.TransformExecutionException, detectAthenaThreadsProcesses, argdict)
         argdict={'movealong': argList('nothing to see here'), 'athenaopts': argSubstepList(['--nprocs=4', '--nprocs=8', 'values'])}
-        self.assertRaises(trfExceptions.TransformExecutionException, detectAthenaMPProcs, argdict)
+        self.assertRaises(trfExceptions.TransformExecutionException, detectAthenaThreadsProcesses, argdict)
+
+    def test_MPMixed(self):
+        argdict={'multiprocess': argBool(True), 'athenaopts': argSubstepList({'A': ['--nprocs=2']})}
+        step='A'
+        self.assertEqual(detectAthenaThreadsProcesses(argdict, step), (0, 0, 2))
+
+    def test_MTMixedBad(self):
+        argdict={'multiprocess': argBool(True), 'athenaopts': argSubstepList(['--nprocs=2'])}
+        self.assertRaises(trfExceptions.TransformExecutionException, detectAthenaThreadsProcesses, argdict)
+        argdict={'multiprocess': argBool(True), 'athenaopts': argSubstepList({'all': ['--nprocs=2']})}
+        self.assertRaises(trfExceptions.TransformExecutionException, detectAthenaThreadsProcesses, argdict)
+
+
+class AthenaThreadsPerProcessTests(unittest.TestCase):
+    def setUp(self):
+        os.environ["ATHENA_CORE_NUMBER"] = '8'
+
+    def test_threadsPerProcess_notSet(self):
+        self.assertEqual(_threadsPerProcess(), 0)
+
+    def test_threadsPerProcess_setAll(self):
+        self.assertEqual(_threadsPerProcess({'threadsPerProcess': argSubstepInt(8)}), 8)
+
+    def test_threadsPerProcess_setMatching(self):
+        self.assertEqual(_threadsPerProcess({'threadsPerProcess': argSubstepInt({'A': 8})}, 'A'), 8)
+
+    def test_threadsPerProcess_setNotMatching(self):
+        self.assertEqual(_threadsPerProcess({'threadsPerProcess': argSubstepInt({'A': 8})}, 'B'), 0)
+
+
+class AthenaMTMPTests(unittest.TestCase):
+    def setUp(self):
+        os.environ["ATHENA_CORE_NUMBER"] = '8'
+
+    def test_MTStandard(self):
+        argdict={'multithreaded': argBool(True)}
+        self.assertEqual(detectAthenaThreadsProcesses(argdict), (8, 8, 0))
+
+    def test_MPStandard(self):
+        argdict={'multiprocess': argBool(True)}
+        self.assertEqual(detectAthenaThreadsProcesses(argdict), (0, 0, 8))
+
+    def test_HybridStandard(self):
+        argdict={'multithreaded': argBool(True), 'threadsPerProcess': argSubstepInt(4)}
+        step='A'
+        self.assertEqual(detectAthenaThreadsProcesses(argdict, step), (4, 4, 2))
+
+        argdict={'multithreaded': argBool(True), 'threadsPerProcess': argSubstepInt({'A': 4})}
+        step='A'
+        self.assertEqual(detectAthenaThreadsProcesses(argdict, step), (4, 4, 2))
+
+        argdict={'multithreaded': argBool(True), 'threadsPerProcess': argSubstepInt({'A': 4})}
+        step='B'
+        self.assertEqual(detectAthenaThreadsProcesses(argdict, step), (8, 8, 0))
+
+    def test_HybridAthenaopts(self):
+        argdict={'athenaopts': argSubstepList(['--nprocs=8', '--threads=2', 'random', 'values'])}
+        self.assertEqual(detectAthenaThreadsProcesses(argdict), (2, 2, 8))
+
+    def test_HybridMixed(self):
+        argdict={'multithreaded': argBool(True), 'athenaopts': argSubstepList({'A': ['--threads=2', '--nprocs=4']})}
+        step='A'
+        self.assertEqual(detectAthenaThreadsProcesses(argdict, step), (2, 2, 4))
+
+    def test_HybridBad(self):
+        argdict={'multiprocess': argBool(True), 'threadsPerProcess': argSubstepInt(2)}
+        self.assertRaises(trfExceptions.TransformExecutionException, detectAthenaThreadsProcesses, argdict)
+
 
 class AthenaMPOutputParseTests(unittest.TestCase):
     def setUp(self):

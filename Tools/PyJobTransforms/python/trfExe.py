@@ -27,8 +27,7 @@ from PyJobTransforms.trfUtils import asetupReport, asetupReleaseIsOlderThan, unp
 from PyJobTransforms.trfExeStepTools import commonExecutorStepName, executorStepSuffix
 from PyJobTransforms.trfExitCodes import trfExit
 from PyJobTransforms.trfLogger import stdLogLevels
-from PyJobTransforms.trfMPTools import detectAthenaMPProcs, athenaMPOutputHandler
-from PyJobTransforms.trfMTTools import detectAthenaMTThreads
+from PyJobTransforms.trfMTMPTools import detectAthenaThreadsProcesses, athenaMPOutputHandler
 
 import PyJobTransforms.trfExceptions as trfExceptions
 import PyJobTransforms.trfValidation as trfValidation
@@ -1062,13 +1061,16 @@ class athenaExecutor(scriptExecutor):
             # At least one of the parallel command-line flags has been provided but ATHENA_CORE_NUMBER environment has not been set
             msg.warning('either --multithreaded or --multiprocess argument used but ATHENA_CORE_NUMBER environment not set. Athena will continue in Serial mode')
         else:
-            # Try to detect AthenaMT mode, number of threads and number of concurrent events
-            if not self._disableMT:
-                self._athenaMT, self._athenaConcurrentEvents = detectAthenaMTThreads(self.conf.argdict, self.name, legacyThreadingRelease)
+            # Try to detect number of processes, number of threads and number of concurrent events for Athena
+            self._athenaMT, self._athenaConcurrentEvents, self._athenaMP = detectAthenaThreadsProcesses(self.conf.argdict, self.name, legacyThreadingRelease)
+            
+            # Disable MT if requested
+            if self._disableMT:
+                self._athenaMT, self._athenaConcurrentEvents = 0, 0
 
-            # Try to detect AthenaMP mode and number of workers
-            if not self._disableMP:
-                self._athenaMP = detectAthenaMPProcs(self.conf.argdict, self.name, legacyThreadingRelease)
+            # Disable MP if requested
+            if self._disableMP :
+                self._athenaMP = 0
 
             # Check that we actually support MT
             if self._onlyMP and self._athenaMT > 0:
@@ -1080,11 +1082,11 @@ class athenaExecutor(scriptExecutor):
 
             # Check that we actually support MP
             if self._onlyMT and self._athenaMP > 0:
-                    msg.info("This configuration does not support MP, using MT")
-                    if self._athenaMT == 0:
-                        self._athenaMT = self._athenaMP
-                        self._athenaConcurrentEvents = self._athenaMP
-                    self._athenaMP = 0
+                msg.info("This configuration does not support MP, using MT")
+                if self._athenaMT == 0:
+                    self._athenaMT = self._athenaMP
+                    self._athenaConcurrentEvents = self._athenaMP
+                self._athenaMP = 0
 
         # Small hack to detect cases where there are so few events that it's not worthwhile running in MP mode
         # which also avoids issues with zero sized files. Distinguish from the no-input case (e.g. evgen)

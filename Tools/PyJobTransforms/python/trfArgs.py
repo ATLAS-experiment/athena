@@ -128,6 +128,9 @@ def addAthenaArguments(parser, maxEventsDefaultSubstep='first', addValgrind=True
     parser.add_argument('--multiprocess', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
                         metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
                         help='Multiprocess mode active')
+    parser.add_argument('--threadsPerProcess', type=trfArgClasses.argFactory(trfArgClasses.argSubstepInt, runarg=False),
+                        metavar='N', group='Athena', nargs='+',
+                        help='Threads per process for hybrid MT/MP mode')
     parser.add_argument('--deleteIntermediateOutputfiles', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
                         metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
                         help='Remove intermediate input/output files of multi step TRF')
