@@ -9,12 +9,14 @@ from TrigEDMConfig.TriggerEDM import getTriggerEDMList
 def addTrigEDMSetToOutput(flags, helper: SlimmingHelper, edmSet: str, edmVersion: int = None):
     """Add a full trigger EDM set to the output slimming helper"""
 
+    returnList = []
+
     if edmVersion is None:
         edmVersion = flags.Trigger.EDMVersion
 
     # Do nothing if there is no trigger payload in the input file
     if edmVersion == -1:
-        return
+        return returnList
 
     edmList = getTriggerEDMList(flags, key=edmSet, runVersion=edmVersion)
     # This list is a mapping from container type to a list of required container names
@@ -31,7 +33,11 @@ def addTrigEDMSetToOutput(flags, helper: SlimmingHelper, edmSet: str, edmVersion
             # probably safe) then we just need to look at the aux names for this.
             interface_name, aux, auxitems = container.partition("Aux.")
             if aux:
-                helper.AllVariables += [interface_name]
+                returnList += [interface_name]
 
             if "xAOD::" not in cont_type:
                 helper.StaticContent += [f"{cont_type}#{container}"]
+
+    # The list of interface names is returned to the slimming helper within the lookup of smart-collections
+    return returnList
+

@@ -18,7 +18,6 @@ def JETM42KernelCfg(flags, name='JETM42Kernel', **kwargs):
     acc.merge(PhysCommonAugmentationsCfg(
         flags,
         TriggerListsHelper     = kwargs['TriggerListsHelper'],
-        TauJets_EleRM_in_input = kwargs['TauJets_EleRM_in_input']
     ))
 
     thinningToolsArgs = {
@@ -109,12 +108,12 @@ def JETM42KernelCfg(flags, name='JETM42Kernel', **kwargs):
     return acc
 
 
-def JETM42CoreCfg(flags, name, StreamName, TriggerListsHelper, TauJets_EleRM_in_input):
+def JETM42CoreCfg(flags, name, StreamName, TriggerListsHelper):
 
     acc = ComponentAccumulator()
     
     from DerivationFrameworkPhys.PHYS import PHYSCoreCfg
-    acc.merge(PHYSCoreCfg(flags, name, StreamName = StreamName, TriggerListsHelper = TriggerListsHelper, TauJets_EleRM_in_input=TauJets_EleRM_in_input))
+    acc.merge(PHYSCoreCfg(flags, name, StreamName = StreamName, TriggerListsHelper = TriggerListsHelper))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
@@ -141,8 +140,7 @@ def JETM42CoreCfg(flags, name, StreamName, TriggerListsHelper, TauJets_EleRM_in_
     addJetsToSlimmingTool(JETM42SlimmingHelper, jetOutputList, JETM42SlimmingHelper.SmartCollections)
 
     # Pass through all trigger content
-    from DerivationFrameworkTrigger.TrigSlimmingHelper import addTrigEDMSetToOutput
-    addTrigEDMSetToOutput(flags, helper=JETM42SlimmingHelper, edmSet="ESD")
+    JETM42SlimmingHelper.IncludeFullTriggerEDMLevel = "ESD"
 
     # Output stream    
     JETM42ItemList = JETM42SlimmingHelper.GetItemList()
@@ -165,15 +163,11 @@ def JETM42Cfg(flags):
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
     JETM42TriggerListsHelper = TriggerListsHelper(flags)
 
-    # for AOD produced before 24.0.17, the electron removal tau is not available
-    TauJets_EleRM_in_input = (flags.Input.TypedCollections.count('xAOD::TauJetContainer#TauJets_EleRM') > 0)
-
     # Common augmentations
     acc.merge(JETM42KernelCfg(flags,
         name= JETM42_name_tag + "Kernel", 
         StreamName = 'StreamDAOD_'+JETM42_name_tag,
         TriggerListsHelper = JETM42TriggerListsHelper,
-        TauJets_EleRM_in_input=TauJets_EleRM_in_input
         ))
     
     # PHYS content
@@ -181,7 +175,6 @@ def JETM42Cfg(flags):
         name=JETM42_name_tag,
         StreamName = 'StreamDAOD_'+JETM42_name_tag,
         TriggerListsHelper = JETM42TriggerListsHelper,
-        TauJets_EleRM_in_input=TauJets_EleRM_in_input
         ))
 
     return acc
