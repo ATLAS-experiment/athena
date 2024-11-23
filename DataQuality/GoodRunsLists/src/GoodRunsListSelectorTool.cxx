@@ -67,7 +67,7 @@ GoodRunsListSelectorTool::initialize()
   Root::TMsgLogger::SetMinLevel(static_cast<Root::TMsgLevel>(msgLevel()));
 
   /// reset pass-through mode
-  if (!m_goodrunslistVec.empty() || !m_blackrunslistVec.empty() || m_usecool)
+  if (!m_goodrunslistVec.empty() || !m_blackrunslistVec.empty())
     m_passthrough=false;
 
   /// warn about pass-thru mode
@@ -75,7 +75,7 @@ GoodRunsListSelectorTool::initialize()
 
   /// checking existence of goodrunslists / blacklists
   std::vector<std::string>::iterator itr;
-  for (itr=m_goodrunslistVec.begin(); itr!=m_goodrunslistVec.end() && !m_usecool; ++itr)  {
+  for (itr=m_goodrunslistVec.begin(); itr!=m_goodrunslistVec.end(); ++itr)  {
     //const char* fname;
     std::string fname;
     if ( itr->find("/")==0 || itr->find("$")==0 || itr->find(".")==0 || itr->find(":")!=string::npos )  {
@@ -89,7 +89,7 @@ GoodRunsListSelectorTool::initialize()
       return StatusCode::FAILURE;
     }
   }
-  for (itr=m_blackrunslistVec.begin(); itr!=m_blackrunslistVec.end() && !m_usecool; ++itr)  {
+  for (itr=m_blackrunslistVec.begin(); itr!=m_blackrunslistVec.end(); ++itr)  {
     //const char* fname;
     std::string fname;
     if ( itr->find("/")==0 || itr->find("$")==0 || itr->find(".")==0 || itr->find(":")!=string::npos )  {
@@ -106,7 +106,7 @@ GoodRunsListSelectorTool::initialize()
   /// start reading xml files
   if ( !m_goodrunslistVec.empty() ) {
     m_reader->Reset();
-    for (itr=m_goodrunslistVec.begin(); itr!=m_goodrunslistVec.end() && !m_usecool; ++itr) {
+    for (itr=m_goodrunslistVec.begin(); itr!=m_goodrunslistVec.end(); ++itr) {
       //const char* fname;
       std::string fname;
       if ( itr->find("/")==0 || itr->find("$")==0 || itr->find(".")==0 || itr->find(":")!=string::npos )  {
@@ -123,7 +123,7 @@ GoodRunsListSelectorTool::initialize()
   }
   if ( !m_blackrunslistVec.empty() ) {
     m_reader->Reset();
-    for (itr=m_blackrunslistVec.begin(); itr!=m_blackrunslistVec.end() && !m_usecool; ++itr) {
+    for (itr=m_blackrunslistVec.begin(); itr!=m_blackrunslistVec.end(); ++itr) {
       //const char* fname;
       std::string fname;
       if ( itr->find("/")==0 || itr->find("$")==0 || itr->find(".")==0 || itr->find(":")!=string::npos )  {
