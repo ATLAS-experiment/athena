@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PrimaryDPDMaker_CaloTimeFilterTool_H
@@ -32,8 +32,7 @@ class CaloTimeFilterTool : public asg::AsgTool, virtual public ICaloTimeFilterTo
   Gaudi::Property<float> m_timeCut{this, "timeDiffCut", 5.};
   Gaudi::Property<int>  m_mincellsperside{this, "MinCellsPerSide", 9.};
   Gaudi::Property<std::string> m_containerName{this,"ContainerName", "LArCollisionTime"};
-  int   m_nevt;
- 
+
 };
 
 #endif
