@@ -19,8 +19,7 @@ set( sources
    "src/EventInfoCnvTool.h" "src/EventInfoCnvTool.cxx"
    "src/EventInfoOverlay.h" "src/EventInfoOverlay.cxx"
    "src/EventInfoUpdateFromContextAlg.h" "src/EventInfoUpdateFromContextAlg.cxx"
-   "src/EventInfoReaderAlg.h" "src/EventInfoReaderAlg.cxx"
-   "src/EventInfoSelectorTool.h" "src/EventInfoSelectorTool.cxx" )
+   "src/EventInfoReaderAlg.h" "src/EventInfoReaderAlg.cxx" )
 if( NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
    list( APPEND sources
       "src/EventInfoBeamSpotDecoratorAlg.h"

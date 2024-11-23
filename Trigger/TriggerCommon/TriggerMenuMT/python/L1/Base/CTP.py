@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from collections import OrderedDict as odict
 
@@ -27,7 +27,7 @@ class CTP(object):
     def addBunchGroup(self, name, internalNumber, bunches):
         self.bunchGroupSet.addBunchGroup(name, internalNumber, bunches)
 
-    def setupMonitoring(self, menuName, menuItems, menuThresholds, connectors):
+    def setupMonitoring(self, menuName, menuItems, menuThresholds, connectors, menuFullName):
         ##  # add the CTPIN counters
         ##  for counter in MonitorDef.ctpinCounters( menuThresholds ):
         ##      self.counters.addCounter( counter )
@@ -41,7 +41,7 @@ class CTP(object):
             self.counters.addCounter( counter )
 
         # mark the L1 Items that they should be monitored
-        MonitorDef.applyItemCounter( menuName, menuItems )
+        MonitorDef.applyItemCounter( menuName, menuItems, menuFullName )
         pass
 
     def checkConnectorAvailability(self, availableConnectors, menuToLoad):

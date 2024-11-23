@@ -62,14 +62,16 @@ def TrigSCTRawDataProviderCfg(flags, suffix, RoIs):
 
 def SCTOverlayRawDataProviderCfg(flags, prefix="InDet", suffix="", **kwargs):
     """ Configures the main algorithm for SCT raw data decoding for data overlay """
-    kwargs.setdefault("RDOKey", flags.Overlay.BkgPrefix + "SCT_RDOs")
-    kwargs.setdefault("LVL1IDKey", flags.Overlay.BkgPrefix + "SCT_LVL1ID")
-    kwargs.setdefault("BCIDKey", flags.Overlay.BkgPrefix + "SCT_BCID")
+    kwargs.setdefault("RDOKey", f"{flags.Overlay.BkgPrefix}SCT_RDOs")
+    kwargs.setdefault("LVL1IDKey", f"{flags.Overlay.BkgPrefix}SCT_LVL1ID")
+    kwargs.setdefault("BCIDKey", f"{flags.Overlay.BkgPrefix}SCT_BCID")
     return SCTRawDataProviderCfg(flags, prefix, suffix, **kwargs)
 
 
 def SCTEventFlagWriterCfg(flags, prefix="InDet", suffix="", **kwargs):
     acc = ComponentAccumulator()
+    if flags.Overlay.DataOverlay:
+        kwargs.setdefault("xAODEventInfoKey", f"{flags.Overlay.BkgPrefix}EventInfo")
     acc.addEventAlgo(CompFactory.SCTEventFlagWriter(name=prefix+"SCTEventFlagWriter"+suffix,
                                                     **kwargs))
     return acc

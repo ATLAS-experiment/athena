@@ -177,6 +177,15 @@ def fromRunArgs(runArgs):
         from DigitizationConfig.DigitizationSteering import DigitizationMainContentCfg
         cfg.merge(DigitizationMainContentCfg(flags))
 
+    # Allow writing hits to output if requested
+    if flags.Output.HITSFileName:
+        from AthenaConfiguration.Enums import MetadataCategory
+        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+        from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList
+        from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+        cfg.merge(OutputStreamCfg(flags, "HITS", ItemList=getStreamHITS_ItemList(flags)))
+        cfg.merge(SetupMetaDataForStreamCfg(flags, "HITS", createMetadata=[MetadataCategory.IOVMetaData]))
+
     # Special message service configuration
     from DigitizationConfig.DigitizationSteering import DigitizationMessageSvcCfg
     cfg.merge(DigitizationMessageSvcCfg(flags))

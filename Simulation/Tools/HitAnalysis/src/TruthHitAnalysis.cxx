@@ -140,11 +140,11 @@ StatusCode TruthHitAnalysis::initialize() {
   m_h_n_generations->StatOverflows();
   CHECK(m_thistSvc->regHist(m_path + m_h_n_generations->GetName(), m_h_n_generations));
 
-  m_h_truth_px = new TH1D("h_turht_px","truth_px", 100,0, 4000);
+  m_h_truth_px = new TH1D("h_truth_px","truth_px", 100,0, 4000);
   m_h_truth_px->StatOverflows();
   CHECK(m_thistSvc->regHist(m_path + m_h_truth_px->GetName(), m_h_truth_px));
 
-  m_h_truth_py = new TH1D("h_turht_py","truth_py", 100,0, 4000);
+  m_h_truth_py = new TH1D("h_truth_py","truth_py", 100,0, 4000);
   m_h_truth_py->StatOverflows();
   CHECK(m_thistSvc->regHist(m_path + m_h_truth_py->GetName(), m_h_truth_py));
 

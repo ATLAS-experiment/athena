@@ -145,7 +145,7 @@ ZdcInjPulserAmpMap::Token ZdcInjPulserAmpMap::lookupRun(unsigned int runNumber, 
   float scaleFactor = 1;
   
   for ( auto rangeDescr : m_runRangeDescrs) {
-    if (runNumber >= std::get<0>(rangeDescr) && runNumber <= std::get<1>(rangeDescr)) {
+    if (runNumber >= std::get<0>(rangeDescr) && runNumber < std::get<1>(rangeDescr)) {
       configName = std::get<2>(rangeDescr);
       scaleFactor = std::get<3>(rangeDescr);
 

@@ -128,8 +128,8 @@ private:
   Gaudi::Property<bool> m_onlyUseContainerName{this, "OnlyUseContainerName", true, "Don't use the ReadHandleKey directly. Just extract the container name from it."};
   StringArrayProperty m_inputKeys{this, "InputHitContainers", {"LArHitEMB", "LArHitEMEC", "LArHitHEC", "LArHitFCAL"},
       "Name of input hit vectors (default=[LArHitEMB, LArHitEMEC, LArHitHEC, LArHitFCAL])" };
-  SG::ReadHandleKeyArray<LArHitContainer> m_hitContainerKeys;
-  SG::ReadHandleKeyArray<LArHitFloatContainer> m_hitFloatContainerKeys;
+  SG::ReadHandleKeyArray<LArHitContainer> m_hitContainerKeys{this, "InputHitContainerKeys", {}, "Do not set manually!"};
+  SG::ReadHandleKeyArray<LArHitFloatContainer> m_hitFloatContainerKeys{this, "InputHitFloatContainerKeys", {}, "Do not set manually!"};
   SG::ReadHandleKey<LArDigitContainer> m_inputDigitContainerKey{this, "InputDigitContainer", "",
       "Name of input digit container"}; // input digit container name
   SG::ReadHandleKey<CosTrigTime> m_timeKey{this,"CosTimeKey","CosTrigTime"};
