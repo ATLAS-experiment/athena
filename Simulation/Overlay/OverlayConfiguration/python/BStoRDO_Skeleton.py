@@ -85,10 +85,10 @@ def fromRunArgs(runArgs):
         cfg.merge(SCTDataOverlayExtraCfg(flags))
         itemList.append(f'SCT_RDO_Container#{flags.Overlay.BkgPrefix}SCT_RDOs')
 
-    # if flags.Detector.EnableTRT:
-    #     from InDetOverlay.TRTOverlayConfig import TRTDataOverlayExtraCfg
-    #     cfg.merge(TRTDataOverlayExtraCfg(flags))
-    #     itemList.append(f'TRT_RDO_Container#{flags.Overlay.BkgPrefix}TRT_RDOs')
+    if flags.Detector.EnableTRT:
+        from InDetOverlay.TRTOverlayConfig import TRTDataOverlayExtraCfg
+        cfg.merge(TRTDataOverlayExtraCfg(flags))
+        itemList.append(f'TRT_RDO_Container#{flags.Overlay.BkgPrefix}TRT_RDOs')
 
     if flags.Detector.EnableLAr:
         from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
