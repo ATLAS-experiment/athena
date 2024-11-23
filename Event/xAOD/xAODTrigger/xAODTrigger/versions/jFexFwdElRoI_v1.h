@@ -1,6 +1,6 @@
 //create
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODTRIGGER_VERSIONS_JFEXFWDELROI_V1_H
 #define XAODTRIGGER_VERSIONS_JFEXFWDELROI_V1_H
@@ -8,6 +8,7 @@
 // System include(s):
 extern "C" {
 #   include <stdint.h>
+#   include <math.h>
 }
 #include <vector>
 #include <string>
