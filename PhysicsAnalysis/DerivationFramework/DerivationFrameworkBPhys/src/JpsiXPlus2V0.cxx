@@ -292,7 +292,7 @@ namespace DerivationFramework {
       // Check the passed flag first
       const xAOD::Vertex* vtx = *vxcItr;
       bool passed = false;
-      for(auto name : m_vertexJXHypoNames) {
+      for(const std::string& name : m_vertexJXHypoNames) {
 	SG::AuxElement::Accessor<Char_t> flagAcc("passed_"+name);
 	if(flagAcc.isAvailable(*vtx) && flagAcc(*vtx)) {
 	  passed = true;
@@ -575,7 +575,10 @@ namespace DerivationFramework {
     ATH_CHECK( jxContainer.isValid() );
 
     for(auto cascade_info : cascadeinfoContainer) {
-      if(cascade_info==nullptr) ATH_MSG_ERROR("CascadeInfo is null");
+      if(cascade_info==nullptr) {
+        ATH_MSG_ERROR("CascadeInfo is null");
+        continue;
+      }
 
       const std::vector<xAOD::Vertex*> &cascadeVertices = cascade_info->vertices();
       if(cascadeVertices.size() != topoN) ATH_MSG_ERROR("Incorrect number of vertices");

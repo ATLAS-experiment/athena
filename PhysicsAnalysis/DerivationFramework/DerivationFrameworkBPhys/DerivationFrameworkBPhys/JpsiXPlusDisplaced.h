@@ -46,7 +46,7 @@ namespace DerivationFramework {
       V0Enum V0type = UNKNOWN;
       const xAOD::Vertex* V0vtx = nullptr;
       const xAOD::TrackParticle* track = nullptr;
-      double chi2NDF;
+      double chi2NDF = 0;
       TLorentzVector p4_V0track1;
       TLorentzVector p4_V0track2;
       TLorentzVector p4_disVtrack;
