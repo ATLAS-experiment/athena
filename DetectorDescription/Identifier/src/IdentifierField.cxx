@@ -47,18 +47,19 @@ ExpandedIdentifier::size_type IdentifierField::get_bits() const{
 //----------------------------------------------- 
 ExpandedIdentifier::size_type 
 IdentifierField::get_value_index(element_type value) const{
-  // Only both_bounded and enumerated are valid to calculate the index.
+  // Only both_bounded and enumerated are valid to calculate the
+  // index.
   // both_bounded if the more frequent case and so comes first.
   if (isBounded()) {
     return (value - m_minimum); 
   } 
-  const auto & v = get_values();
-  if (v.size()==1) return 0;
   if (not m_indexes.empty()) {
     // Table has been created, do simple lookup
+    assert (value >= m_minimum && value - m_minimum < (int)m_indexes.size());
     return (m_indexes.at(value - m_minimum));
   } else {
-    auto it = std::ranges::find(v, value);
+    const auto & v = get_values();
+    auto it = std::ranges::lower_bound(v, value);
     if (it != v.end()) return std::distance(v.begin(), it);
   }
   return 0;
@@ -66,13 +67,13 @@ IdentifierField::get_value_index(element_type value) const{
 
 //----------------------------------------------- 
 bool 
-IdentifierField::match(element_type value) const {
-  bool outOfRange =  (value<m_minimum) or (value>m_maximum);
-  if (outOfRange) return false;
-  if (isBounded()) return true;
+IdentifierField::match(element_type value) const {  
+  if (isBounded()) {
+    return ((value >= m_minimum) && (value <= m_maximum)); 
+  }
   if (m_empty) return true;
   const auto & v = get_values();
-  return (std::ranges::find(v, value) != v.end() );
+  return (std::ranges::binary_search(v, value));
 } 
 
 
@@ -252,12 +253,11 @@ IdentifierField::add_value(element_type value) {
     m_size = 1;
   } else {
     //check whether value already exists in the enumeration vector
-    if (std::ranges::find(*p, value) != p->end()) return;
+    if (std::ranges::binary_search(*p, value)) return;
     p->push_back(value); 
     std::ranges::sort(*p); 
     m_size = p->size();
   }
-  optimize();
   m_minimum = get_values().front(); 
   m_maximum = get_values().back(); 
   m_empty = false;
@@ -514,7 +514,6 @@ operator >> (std::istream &is, IdentifierField &idf){
     msg+=remains;
     throw std::invalid_argument(msg);
   }
-  idf.optimize();
   return is;
 }
   
