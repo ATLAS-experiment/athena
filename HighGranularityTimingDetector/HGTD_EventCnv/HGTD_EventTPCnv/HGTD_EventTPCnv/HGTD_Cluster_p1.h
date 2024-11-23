@@ -22,7 +22,7 @@ public:
   friend class HGTD_ClusterCnv_p1;
 
 private:
-  IdType_t m_clus_id;
+  IdType_t m_clus_id{};
   std::vector<IdType_t> m_rdo_id_list;
   float m_local_pos_x{};
   float m_local_pos_y{};
