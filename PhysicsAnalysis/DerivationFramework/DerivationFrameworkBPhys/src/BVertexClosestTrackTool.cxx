@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -222,7 +222,7 @@ namespace DerivationFramework {
         , vtap[i][7] , vtap[i][8] , vtap[i][9]
         , (vtap[i][7] < 0. ? -99. : sqrt(vtap[i][7]))
         , (vtap[i][8] < 0. ? -99. : sqrt(vtap[i][8]))
-        , (vtap[i][7]+vtap[i][8] > 0. ?
+        , ((vtap[i][7]+vtap[i][8] > 0.) ?
               log(vtap[i][5]*vtap[i][5]/(vtap[i][7]+vtap[i][8])) : -999.));
         std::string tstr = wrapLines(f4,
                                      std::string(f3str.length(), ' '));
