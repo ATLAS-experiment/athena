@@ -11,8 +11,6 @@ atlas_add_library( MuonDQAUtilsLib
                    src/*.cxx
                    PUBLIC_HEADERS MuonDQAUtils
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                   PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} AnalysisTriggerEvent AthenaBaseComps EventKernel GaudiKernel JetEvent JetTagEvent Particle ParticleEvent TrigMuonEvent egammaEvent muonEvent )
 
 atlas_add_component( MuonDQAUtils
