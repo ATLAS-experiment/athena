@@ -30,20 +30,29 @@ template <int DIM, class T>
 ParametersBase<DIM, T>::ParametersBase(
     const AmgVector(DIM) parameters,
     std::optional<AmgSymMatrix(DIM)>&& covariance, const T chargeDef)
-    : ParametersCommon<DIM, T>(parameters, std::move(covariance), chargeDef) {}
+    : ParametersCommon<DIM, T>(parameters, std::move(covariance), chargeDef)
+{
+  // cppcheck-suppress missingReturn; false positive
+}
 
 // Helper protected ctor
 template <int DIM, class T>
 ParametersBase<DIM, T>::ParametersBase(
     std::optional<AmgSymMatrix(DIM)>&& covariance)
-    : ParametersCommon<DIM, T>(std::move(covariance)) {}
+    : ParametersCommon<DIM, T>(std::move(covariance))
+{
+  // cppcheck-suppress missingReturn; false positive
+}
 
 // Protected Constructor with local arguments - persistency only
 template <int DIM, class T>
 ParametersBase<DIM, T>::ParametersBase(
     const AmgVector(DIM) & parameters,
     std::optional<AmgSymMatrix(DIM)>&& covariance)
-    : ParametersCommon<DIM, T>(parameters, std::move(covariance)) {}
+    : ParametersCommon<DIM, T>(parameters, std::move(covariance))
+{
+  // cppcheck-suppress missingReturn; false positive
+}
 
 
 template<int DIM, class T>
