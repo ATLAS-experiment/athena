@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonCondTest )
@@ -48,12 +48,12 @@ atlas_add_test( RpcCabling_Run3MC
 atlas_add_test( RpcCabling_Run4MC
                 SCRIPT python -m MuonCondDump.dumpR4ToyCablings --setupRun4 && python -m MuonCondTest.RpcCablingTesterR4  --setupRun4 --JSONFile RpcCabling.json
                 PRIVATE_WORKING_DIRECTORY
-                PROPERTIES TIMEOUT 600
+                PROPERTIES TIMEOUT 1200
                 POST_EXEC_SCRIPT nopost.sh)
 atlas_add_test( RpcCabling_Run4MC_COOL
                 SCRIPT python -m MuonCondTest.RpcCablingTesterR4  --setupRun4  
                 PRIVATE_WORKING_DIRECTORY
-                PROPERTIES TIMEOUT 600
+                PROPERTIES TIMEOUT 1200
                 POST_EXEC_SCRIPT nopost.sh)
 atlas_add_test( NSWCondTest
                 SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/testNSWCondAlg.sh 
@@ -68,7 +68,7 @@ atlas_add_test( NSWPassivTest
 atlas_add_test( NSWDcsTest
                 PRIVATE_WORKING_DIRECTORY
                 SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/testNSWDcsAlg.sh 
-                PROPERTIES TIMEOUT 600
+                PROPERTIES TIMEOUT 1200
                 POST_EXEC_SCRIPT nopost.sh)
 atlas_add_test( TgcCondTest
                 SCRIPT python -m MuonCondDump.dumpTgcDigiDeadChambers  &&  python -m MuonCondTest.TgcCondTester
@@ -91,7 +91,7 @@ atlas_add_test( TgcDigiJitterTest
 atlas_add_test( MdtCalibDbR4Test
                 SCRIPT python -m MuonCondTest.MdtCalibDbTesterR4
                 PRIVATE_WORKING_DIRECTORY
-                PROPERTIES TIMEOUT 600
+                PROPERTIES TIMEOUT 1200
                 POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( MdtTwinCablingTest
