@@ -523,6 +523,7 @@ namespace Prompt {
       const xAOD::TrackParticle *track = dynamic_cast<const xAOD::TrackParticle*>(part);
       if (!track) {
         ATH_MSG_ERROR("DecoratePLIT::execute - null track pointer");
+        continue;
       }
       
       float ptfrac = acc_ptfrac(*track);
@@ -806,6 +807,7 @@ namespace Prompt {
     for (const xAOD::TrackParticle *track: trackContainer) {
       if (!track) {
         ATH_MSG_ERROR("DecoratePLIT::fillParticles - null track pointer");
+        continue;
       }
       // check if track passed selection
       if (!passed_r22tracking_cuts(*track, ctx)) continue;
