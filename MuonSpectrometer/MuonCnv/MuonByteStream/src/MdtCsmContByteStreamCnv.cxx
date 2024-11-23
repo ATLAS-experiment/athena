@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonByteStream/MdtCsmContByteStreamCnv.h"
 
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include "AthenaKernel/StorableConversions.h"
+#include "GaudiKernel/IRegistry.h"
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
 #include "MuonMDT_CnvTools/IMDT_RDOtoByteStreamTool.h"
 #include "MuonRDO/MdtCsmContainer.h"

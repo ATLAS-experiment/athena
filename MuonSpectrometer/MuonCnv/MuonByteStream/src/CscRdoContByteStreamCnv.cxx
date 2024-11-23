@@ -6,6 +6,7 @@
 
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include "AthenaKernel/StorableConversions.h"
+#include "GaudiKernel/IRegistry.h"
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
 #include "MuonRDO/CscRawDataContainer.h"
 
