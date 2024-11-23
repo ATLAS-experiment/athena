@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonPRDTest )
@@ -11,7 +11,7 @@ atlas_add_library (MuonPRDTestLib
                    MuonPRDTest/*.h Root/*.cxx
                    PUBLIC_HEADERS MuonPRDTest
                    LINK_LIBRARIES AthenaBaseComps GeneratorObjects MuonDigitContainer MuonIdHelpersLib MuonReadoutGeometry MuonSimData MuonSimEvent 
-                                  MuonPrepRawData MuonRDO MuonCSC_CnvToolsLib MuonTesterTreeLib StoreGateLib TrackRecordLib MuonTGC_CablingLib
+                                  MuonPrepRawData MuonRDO MuonCSC_CnvToolsLib MuonTesterTreeLib StoreGateLib TrackRecordLib MuonTGC_CablingLib AsgAnalysisInterfaces
                    PRIVATE_LINK_LIBRARIES AthenaKernel AtlasHepMCLib )
 
 # Component(s) in the package:
