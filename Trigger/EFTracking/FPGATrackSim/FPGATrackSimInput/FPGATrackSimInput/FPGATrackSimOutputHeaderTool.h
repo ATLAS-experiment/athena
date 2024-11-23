@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPGATrackSim_READOUTPUTHEADERTOOL_H
@@ -36,8 +36,8 @@ public:
   virtual StatusCode finalize()   override;
 
   // Helpers to add branches for reading or writing.. Make this completely generic.
-  FPGATrackSimLogicalEventInputHeader* addInputBranch(std::string branchName, bool write = true);
-  FPGATrackSimLogicalEventOutputHeader* addOutputBranch(std::string branchName, bool write = true);
+  FPGATrackSimLogicalEventInputHeader* addInputBranch(const std::string& branchName, bool write = true);
+  FPGATrackSimLogicalEventOutputHeader* addOutputBranch(const std::string& branchName, bool write = true);
 
   // Helper function; part of initialize that actually sets up the branches for reading.
   StatusCode configureReadBranches();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPGATrackSimInput/FPGATrackSimOutputHeaderTool.h"
@@ -124,7 +124,7 @@ StatusCode FPGATrackSimOutputHeaderTool::initialize()
 
 // Create a new input or output branch and return a pointer to the header object so code can write to it.
 // These functions work for both reading and writing.
-FPGATrackSimLogicalEventInputHeader* FPGATrackSimOutputHeaderTool::addInputBranch(std::string branchName, bool write) {
+FPGATrackSimLogicalEventInputHeader* FPGATrackSimOutputHeaderTool::addInputBranch(const std::string& branchName, bool write) {
   m_eventInputHeaders.push_back(new FPGATrackSimLogicalEventInputHeader());
   FPGATrackSimLogicalEventInputHeader* inputHeader = m_eventInputHeaders.at(m_eventInputHeaders.size() - 1);
   m_branchNameIns.push_back(branchName);
@@ -134,7 +134,7 @@ FPGATrackSimLogicalEventInputHeader* FPGATrackSimOutputHeaderTool::addInputBranc
   return inputHeader;
 }
 
-FPGATrackSimLogicalEventOutputHeader* FPGATrackSimOutputHeaderTool::addOutputBranch(std::string branchName, bool write) {
+FPGATrackSimLogicalEventOutputHeader* FPGATrackSimOutputHeaderTool::addOutputBranch(const std::string& branchName, bool write) {
   m_eventOutputHeaders.push_back(new FPGATrackSimLogicalEventOutputHeader());
   FPGATrackSimLogicalEventOutputHeader* outputHeader = m_eventOutputHeaders.at(m_eventOutputHeaders.size() - 1);
   m_branchNameOuts.push_back(branchName);
@@ -240,12 +240,12 @@ StatusCode FPGATrackSimOutputHeaderTool::readData(bool &last)
   }
 
   // Read the objects. I removed some of the debug messages here, they could be readded.
-  for (std::string branchName : m_branchNameIns) {
+  for (const std::string& branchName : m_branchNameIns) {
     int statIn = m_EventTree->GetBranch(branchName.c_str())->GetEntry(m_event);
     if (statIn <= 0) ATH_MSG_WARNING("Error in reading from branch " << branchName);
   }
 
-  for (std::string branchName : m_branchNameOuts) {
+  for (const std::string& branchName : m_branchNameOuts) {
     int statOut = m_EventTree->GetBranch(branchName.c_str())->GetEntry(m_event);
     if (statOut <= 0) ATH_MSG_WARNING("Error in reading from branch " << branchName);
   }
