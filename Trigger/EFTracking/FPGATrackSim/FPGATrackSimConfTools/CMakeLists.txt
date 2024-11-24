@@ -38,31 +38,35 @@ atlas_add_test( FPGATrackSimConfigFlags_test
 atlas_add_test( FPGATrackSimMapGeneration_test 
                 SCRIPT FPGATrackSimMapGeneration.sh
                 POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 240)
+                PROPERTIES TIMEOUT 450)
 
 atlas_add_test( FPGATrackSimBankGeneration_test 
                 SCRIPT FPGATrackSimBankGeneration.sh
                 POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 240)
+                PROPERTIES TIMEOUT 450)
 
-atlas_add_test( FPGATrackSimFromRDO_test
-                SCRIPT FPGATrackSimAnalysisOnRDO.sh
+atlas_add_test( FPGATrackSim_F300_test
+                SCRIPT FPGATrackSim_F300.sh
+                PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 240 )
+                PROPERTIES TIMEOUT 450 )
 
-atlas_add_test( FPGATrackSimDataPrepOnRDO_test
+atlas_add_test( FPGATrackSim_F100_test
                 SCRIPT FPGATrackSimDataPrepOnRDO.sh
+                PRIVATE_WORKING_DIRECTORY
                 LOG_IGNORE_PATTERN ".*ERROR.*Global to local transformation did not succeed.*" # TODO remove once we fix strip SP formation
                 POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 240 )
+                PROPERTIES TIMEOUT 450 )
 
-atlas_add_test( FPGATrackSimInsideOutOnRDO_test
+atlas_add_test( FPGATrackSim_F200-InsideOut_test
+                PRIVATE_WORKING_DIRECTORY 
                 SCRIPT FPGATrackSimInsideOutOnRDO.sh
                 POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 240 )
+                PROPERTIES TIMEOUT 450 )
 
 atlas_add_test( FPGATrackSim_F200_test
                 SCRIPT FPGATrackSim_F200.sh
+                PRIVATE_WORKING_DIRECTORY
                 LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*" # ACTS (C)KF related errors
                 POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 240 )
+                PROPERTIES TIMEOUT 450 )

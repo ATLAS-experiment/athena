@@ -4,15 +4,8 @@ set -e
 source FPGATrackSim_CommonEnv.sh
 TEST_LABEL="F200"
 
-HERE=`pwd`
 if [ -z $1 ]; then
     xAODOutput="FPGATrackSim_${TEST_LABEL}_AOD.root"
-    if [ -d test_${TEST_LABEL} ]; then
-        rm test_$TEST_LABEL/*
-    else
-        mkdir test_$TEST_LABEL
-    fi
-    cd test_$TEST_LABEL
 else # this is useful when using the same script for ART
     xAODOutput=$1
 fi
@@ -40,5 +33,3 @@ if [ -z $ArtJobType ];then # skip file check for ART (this has already been done
     echo "... ${TEST_LABEL} pipeline on RDO, this part is done now checking the xAOD"
     checkxAOD.py $xAODOutput
 fi
-
-cd $HERE
