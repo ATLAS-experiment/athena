@@ -20,10 +20,10 @@ namespace {
 }
 namespace MuonGMR4 {
 MuonReadoutElement::~MuonReadoutElement() = default;
-MuonReadoutElement::MuonReadoutElement(defineArgs&& args)
+MuonReadoutElement::MuonReadoutElement(const defineArgs& args)
     : GeoVDetectorElement(args.physVol),
       AthMessaging("MuonReadoutElement"),
-      m_args{std::move(args)} {
+      m_args{args} {
     if (!m_idHelperSvc.retrieve().isSuccess()) {
         ATH_MSG_FATAL("Failed to retrieve the MuonIdHelperSvc");
     }
