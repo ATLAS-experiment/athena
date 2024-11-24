@@ -103,6 +103,7 @@ struct ParallelFileMerger : public TObject
                else if (type == "Long_t") type = attr + "/L";
                else if (type == "UInt_t") type = attr + "/i";
                else if (type == "UShort_t") type = attr + "/s";
+               else if (type == "ULong_t") type = attr + "/l";
                else if (type == "Float_t") type = attr + "/F";
                else if (type == "Double_t") type = attr + "/D";
                else if (type == "Char_t") type = attr + "/B";
