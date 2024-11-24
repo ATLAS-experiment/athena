@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -23,6 +23,8 @@
 
 #include <Inventor/fields/SoSFNode.h>
 #include <Inventor/actions/SoGetPrimitiveCountAction.h>
+
+#include <memory>
 
 class SbPolyhedron;
 
@@ -66,7 +68,7 @@ protected:
 protected:
   virtual ~SoPolyhedron();
 private:
-  SbPolyhedron* m_polyhedron;
+  std::unique_ptr<SbPolyhedron> m_polyhedron;
 
   //---------------//
 public:
@@ -75,10 +77,10 @@ public:
    float nor[3];
   } Vertex;
 
-  Vertex*  m_vertices;
-  long*    m_indices;
-  long     m_vcount;
-  long     m_icount;
+  Vertex*  m_vertices{nullptr};
+  long*    m_indices{nullptr};
+  long     m_vcount{0};
+  long     m_icount{0};
   long     hasVertex(Vertex* vertices, long len, Vertex& v);
   void     makeShape(SbPolyhedron*);
 public:

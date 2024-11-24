@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*-----------------------------HEPVis----------------------------------------*/
@@ -18,6 +18,8 @@
 #include <Inventor/fields/SoSFBool.h>
 #include <Inventor/fields/SoSFInt32.h>
 #include <Inventor/nodes/SoShape.h>
+
+#include <memory>
 
 class SoSFNode;
 
@@ -127,12 +129,6 @@ protected:
   //
   virtual SoChildList *getChildren() const;
 
-protected:
-  //
-  //! Destructor, required
-  //
-  virtual ~SoTubs();
-
 private:
 
   //
@@ -150,7 +146,7 @@ private:
   //
   //! ChildList. Required whenever the class has hidden children.
   //
-  SoChildList *m_children;
+  std::unique_ptr<SoChildList> m_children;
 
   //
   //! help with trigonometry.  increments sines an cosines by an angle.

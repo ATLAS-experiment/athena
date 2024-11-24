@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -55,7 +55,6 @@ void SoPolyhedron::initClass()
 //////////////////////////////////////////////////////////////////////////////
 SoPolyhedron::SoPolyhedron(
 )
-:m_polyhedron(0), m_vertices(0), m_indices(0), m_vcount(0), m_icount(0)
 //////////////////////////////////////////////////////////////////////////////
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
 {
@@ -69,7 +68,6 @@ SoPolyhedron::SoPolyhedron(
 SoPolyhedron::SoPolyhedron(
  const SbPolyhedron& aPolyhedron
 )
-:m_polyhedron(0), m_vertices(0), m_indices(0), m_vcount(0), m_icount(0)
 //////////////////////////////////////////////////////////////////////////////
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
 {
@@ -78,15 +76,14 @@ SoPolyhedron::SoPolyhedron(
   //  SO_NODE_ADD_FIELD(reducedWireFrame,(TRUE));
   SO_NODE_ADD_FIELD(alternateRep,(NULL));
 
-  m_polyhedron = new SbPolyhedron(aPolyhedron);
+  m_polyhedron = std::make_unique<SbPolyhedron>(aPolyhedron);
   setNodeType(EXTENSION);
-  makeShape(m_polyhedron);
+  makeShape(m_polyhedron.get());
 }
 //////////////////////////////////////////////////////////////////////////////
 SoPolyhedron::SoPolyhedron(
  const SbPolyhedron* aPolyhedron
 )
-:m_polyhedron(0), m_vertices(0), m_indices(0), m_vcount(0), m_icount(0)
 //////////////////////////////////////////////////////////////////////////////
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
 {
@@ -95,9 +92,9 @@ SoPolyhedron::SoPolyhedron(
   //  SO_NODE_ADD_FIELD(reducedWireFrame,(TRUE));
   SO_NODE_ADD_FIELD(alternateRep,(NULL));
 
-  m_polyhedron = new SbPolyhedron(*aPolyhedron);
+  m_polyhedron = std::make_unique<SbPolyhedron>(*aPolyhedron);
   setNodeType(EXTENSION);
-  makeShape(m_polyhedron);
+  makeShape(m_polyhedron.get());
 }
 //////////////////////////////////////////////////////////////////////////////
 SoPolyhedron::~SoPolyhedron(
@@ -105,7 +102,6 @@ SoPolyhedron::~SoPolyhedron(
 //////////////////////////////////////////////////////////////////////////////
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
 {
-  delete m_polyhedron;
   if(m_vertices)
    delete [] m_vertices;
   if(m_indices)
