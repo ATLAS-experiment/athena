@@ -315,6 +315,8 @@ private:
   std::map<std::string, std::string> m_EVReduction;
   /// semicolon-separated lists of MC efficiency parametrisation names
   std::map<std::string, std::string> m_EffNames;
+  // default value for all flavors, use this if specified
+  std::string m_effName;
   /// semicolon-separated list of uncertainties to be excluded from the eigenvector variation procedure for all flavours
   std::string m_excludeFromEV;
   /// semicolon-separated list of uncertainties to be excluded from the eigenvector variation procedure for b, c, and light-flavour jets
