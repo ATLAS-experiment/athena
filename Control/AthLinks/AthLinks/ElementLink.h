@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -757,7 +757,6 @@ namespace SG_detail {
  * For other index types, the the templated version below is used
  * (which doesn't allow remapping indices).
  */
-inline
 bool checkForRemap (IProxyDict* sg,
                     SG::sgkey_t sgkey_in,
                     size_t index_in,
