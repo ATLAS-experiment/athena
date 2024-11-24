@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/tools/DataProxyHolder.icc
@@ -154,22 +154,6 @@ void DataProxyHolder::storeObjpointer (const_pointer_t p)
   assert ((reinterpret_cast<unsigned long>(p) & 1) == 0);
   m_proxy = reinterpret_cast<SG::DataProxy*>
     (reinterpret_cast<unsigned long>(p) | 1);
-}
-
-
-/**
- * @brief Return the data source for this reference.
- *
- * If we're holding a pointer directly, rather than a proxy,
- * then return 0 rather than raising an exception.
- */
-inline
-IProxyDict* DataProxyHolder::source1()
-{
-  if (!m_proxy || isObjpointer()) {
-    return 0;
-  }
-  return m_proxy->store();
 }
 
 

@@ -621,4 +621,19 @@ void setDataProxyHolderInputRenameMap ATLAS_NOT_THREAD_SAFE
 }
 
 
+/**
+ * @brief Return the data source for this reference.
+ *
+ * If we're holding a pointer directly, rather than a proxy,
+ * then return 0 rather than raising an exception.
+ */
+IProxyDict* DataProxyHolder::source1()
+{
+  if (!m_proxy || isObjpointer()) {
+    return 0;
+  }
+  return m_proxy->store();
+}
+
+
 } // namespace SG
