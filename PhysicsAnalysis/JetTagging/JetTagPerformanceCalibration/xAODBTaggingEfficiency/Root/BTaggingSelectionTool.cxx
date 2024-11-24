@@ -8,6 +8,7 @@
 #include "CalibrationDataInterface/CalibrationDataInterfaceROOT.h"
 #include "CalibrationDataInterface/CalibrationDataVariables.h"
 #include "CalibrationDataInterface/CalibrationDataContainer.h"
+#include "xAODBTaggingEfficiency/ToolDefaults.h"
 
 #include "PATInterfaces/SystematicRegistry.h"
 #include "PathResolver/PathResolver.h"
@@ -42,14 +43,15 @@ using xAOD::IParticle;
 BTaggingSelectionTool::BTaggingSelectionTool( const std::string & name)
   : asg::AsgTool( name ), m_acceptinfo( "JetSelection" ), m_accessor_pb( "pb" ), m_accessor_pc( "pc" ), m_accessor_pu( "pu" ), m_accessor_ptau( "ptau" )
 {
+  namespace def = ftag::defaults;
   m_initialised = false;
   declareProperty( "MaxEta", m_maxEta = 2.5 );
-  declareProperty( "MinPt", m_minPt = -1 /*MeV*/);
+  declareProperty( "MinPt", m_minPt = 0 /*MeV*/);
   declareProperty( "MaxRangePt", m_maxRangePt = 3000000 /*MeV*/);
-  declareProperty( "FlvTagCutDefinitionsFileName", m_CutFileName = "", "name of the files containing official cut definitions (uses PathResolver)");
-  declareProperty( "TaggerName",                    m_taggerName="",    "tagging algorithm name");
+  declareProperty( "FlvTagCutDefinitionsFileName", m_CutFileName=def::cdi_path, "name of the files containing official cut definitions (uses PathResolver)");
+  declareProperty( "TaggerName",                    m_taggerName=def::tagger,    "tagging algorithm name");
   declareProperty( "OperatingPoint",                m_OP="",            "operating point");
-  declareProperty( "JetAuthor",                     m_jetAuthor="",     "jet collection");
+  declareProperty( "JetAuthor",                     m_jetAuthor=def::jet_collection,     "jet collection");
   declareProperty( "WorkingPointDefinitions",       m_wps_raw="FixedCutBEff_85,FixedCutBEff_77,FixedCutBEff_70,FixedCutBEff_60",       "Comma-separated list of tagger working points (in decreasing order of efficiency!) - required for 1D tagging purposes");
   declareProperty( "ErrorOnTagWeightFailure",       m_ErrorOnTagWeightFailure=true, "optionally ignore cases where the tagweight cannot be retrived. default behaviour is to give an error, switching to false will turn it into a warning");
   declareProperty( "CutBenchmarksContinuousWP",     m_ContinuousBenchmarks="", "comma separated list of tag bins that will be accepted as tagged: 1,2,3 etc.. ");

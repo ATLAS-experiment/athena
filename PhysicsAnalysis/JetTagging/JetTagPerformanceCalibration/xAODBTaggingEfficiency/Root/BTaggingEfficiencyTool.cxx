@@ -10,6 +10,8 @@
 #include "CalibrationDataInterface/CalibrationDataContainer.h"
 #include "CalibrationDataInterface/CDIReader.h"
 
+#include "xAODBTaggingEfficiency/ToolDefaults.h"
+
 // for the onnxtool
 #include "xAODBTaggingEfficiency/OnnxUtil.h"
 
@@ -124,11 +126,12 @@ namespace {
 }
 
 BTaggingEfficiencyTool::BTaggingEfficiencyTool( const std::string & name) : asg::AsgTool( name ), m_selectionTool("") {
-  declareProperty("TaggerName",                          m_taggerName="",               "tagging algorithm name as specified in CDI file");
-  declareProperty("OperatingPoint",                      m_OP="",                       "operating point as specified in CDI file");
-  declareProperty("JetAuthor",                           m_jetAuthor="",                "jet collection & JVF/JVT specification in CDI file");
-  declareProperty("MinPt",                               m_minPt=-1,                    "minimum jet pT cut");
-  declareProperty("ScaleFactorFileName",                 m_SFFile = "",                 "name of the official scale factor calibration CDI file (uses PathResolver)");
+  namespace def = ftag::defaults;
+  declareProperty("TaggerName",                          m_taggerName=def::tagger,               "tagging algorithm name as specified in CDI file");
+  declareProperty("OperatingPoint",                      m_OP=def::pcbt_op,                       "operating point as specified in CDI file");
+  declareProperty("JetAuthor",                           m_jetAuthor=def::jet_collection,                "jet collection & JVF/JVT specification in CDI file");
+  declareProperty("MinPt",                               m_minPt=0,                    "minimum jet pT cut");
+  declareProperty("ScaleFactorFileName",                 m_SFFile=def::cdi_path,                 "name of the official scale factor calibration CDI file (uses PathResolver)");
   declareProperty("UseDevelopmentFile",                  m_useDevFile = false,          "specify whether or not to use the (PathResolver) area for temporary scale factor calibration CDI files");
   declareProperty("EfficiencyFileName",                  m_EffFile = "",                "name of optional user-provided MC efficiency CDI file");
   declareProperty("EfficiencyConfig",                    m_EffConfigFile = "",           "name of config file specifying which efficiency map to use with a given samples DSID");
@@ -139,10 +142,11 @@ BTaggingEfficiencyTool::BTaggingEfficiencyTool( const std::string & name) : asg:
   declareProperty("EigenvectorReductionB",               m_EVReduction["B"] = "Loose",  "b-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'");
   declareProperty("EigenvectorReductionC",               m_EVReduction["C"] = "Loose",  "c-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'");
   declareProperty("EigenvectorReductionLight",           m_EVReduction["Light"] = "Loose", "light-flavour jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'");
-  declareProperty("EfficiencyBCalibrations",             m_EffNames["B"] = "default",   "(semicolon-separated) name(s) of b-jet efficiency object(s)");
-  declareProperty("EfficiencyCCalibrations",             m_EffNames["C"] = "default",   "(semicolon-separated) name(s) of c-jet efficiency object(s)");
-  declareProperty("EfficiencyTCalibrations",             m_EffNames["T"] = "default",   "(semicolon-separated) name(s) of tau-jet efficiency object(s)");
-  declareProperty("EfficiencyLightCalibrations",         m_EffNames["Light"] = "default", "(semicolon-separated) name(s) of light-flavour-jet efficiency object(s)");
+  declareProperty("EfficiencyCalibrations",             m_effName = "default",   "default for all flavors");
+  declareProperty("EfficiencyBCalibrations",             m_EffNames["B"] = "",   "(semicolon-separated) name(s) of b-jet efficiency object(s)");
+  declareProperty("EfficiencyCCalibrations",             m_EffNames["C"] = "",   "(semicolon-separated) name(s) of c-jet efficiency object(s)");
+  declareProperty("EfficiencyTCalibrations",             m_EffNames["T"] = "",   "(semicolon-separated) name(s) of tau-jet efficiency object(s)");
+  declareProperty("EfficiencyLightCalibrations",         m_EffNames["Light"] = "", "(semicolon-separated) name(s) of light-flavour-jet efficiency object(s)");
   declareProperty("UncertaintyBSuffix",                  m_uncertaintySuffixes["B"] = "","optional suffix for b-jet uncertainty naming");
   declareProperty("UncertaintyCSuffix",                  m_uncertaintySuffixes["C"] = "","optional suffix for c-jet uncertainty naming");
   declareProperty("UncertaintyTSuffix",                  m_uncertaintySuffixes["T"] = "","optional suffix for tau-jet uncertainty naming");
@@ -153,7 +157,7 @@ BTaggingEfficiencyTool::BTaggingEfficiencyTool( const std::string & name) : asg:
   declareProperty("ExcludeFromEigenVectorLightTreatment",m_excludeFlvFromEV["Light"] = "", "(semicolon-separated) names of uncertainties to be excluded from light-flavour-jet eigenvector decomposition (if used)");
   declareProperty("ExcludeRecommendedFromEigenVectorTreatment", m_useRecommendedEVExclusions = false, "specify whether or not to add recommended lists to the user specified eigenvector decomposition exclusion lists");
   // declareProperty("ExcludeJESFromEVTreatment",        m_excludeJESFromEV = true,     "specify whether or not to exclude JES uncertainties from eigenvector decomposition (if used)");
-  declareProperty("SystematicsStrategy",                 m_systStrategy = "SFEigen",    "name of systematics model; presently choose between 'SFEigen' and 'Envelope'");
+  declareProperty("SystematicsStrategy",                 m_systStrategy=def::strategy,    "name of systematics model; presently choose between 'SFEigen' and 'Envelope'");
   declareProperty("ConeFlavourLabel",                    m_coneFlavourLabel = true,     "specify whether or not to use the cone-based flavour labelling instead of the default ghost association based labelling");
   declareProperty("ExtendedFlavourLabel",                m_extFlavourLabel = false,     "specify whether or not to use an 'extended' flavour labelling (allowing for multiple HF hadrons or perhaps partons)");
   declareProperty("IgnoreOutOfValidityRange",            m_ignoreOutOfValidityRange = false, "ignore out-of-extrapolation-range errors as returned by the underlying tool");
@@ -192,6 +196,11 @@ StatusCode BTaggingEfficiencyTool::initialize() {
   ATH_MSG_INFO( " TaggerName = " << m_taggerName);
   ATH_MSG_INFO( " OP = " << m_OP);
   ATH_MSG_INFO( " m_systStrategy is " << m_systStrategy);
+
+  // set default MCMC map if they haven't been specified
+  for (auto& [k, v]: m_EffNames) {
+    if (v.size() == 0) v = m_effName;
+  }
 
   // Use the PathResolver to find the full pathname (behind the scenes this can also be used to download the file),
   // if the file cannot be found directly.

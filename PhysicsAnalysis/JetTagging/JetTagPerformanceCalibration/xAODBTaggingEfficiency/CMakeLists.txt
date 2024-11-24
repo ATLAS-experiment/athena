@@ -59,10 +59,19 @@ if( XAOD_ANALYSIS )
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODJet xAODBTagging PATInterfaces FTagAnalysisInterfacesLib )
 
+   atlas_add_executable(
+      BTaggingToolsExample
+      util/BTaggingToolsExample.cxx
+      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+      LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODJet xAODBTagging PATInterfaces FTagAnalysisInterfacesLib
+   )
+
    if( XAOD_STANDALONE )
       target_link_libraries( BTaggingToolsTester 
          PRIVATE xAODRootAccess )
       target_link_libraries( BTaggingSelectionToolTester
+         PRIVATE xAODRootAccess )
+      target_link_libraries( BTaggingToolsExample
          PRIVATE xAODRootAccess )
       target_link_libraries( BTaggingJsonToolsTester
          PRIVATE xAODRootAccess )
@@ -73,15 +82,24 @@ if( XAOD_ANALYSIS )
          PRIVATE POOLRootAccessLib )
       target_link_libraries( BTaggingSelectionToolTester
          PRIVATE POOLRootAccessLib )
+      target_link_libraries( BTaggingToolsExample
+         PRIVATE POOLRootAccessLib )
        target_link_libraries( BTaggingJsonToolsTester
          PRIVATE POOLRootAccessLib )
       target_link_libraries( SystematicStrategyComparison 
-         PRIVATE POOLRootAccessLib )
+        PRIVATE POOLRootAccessLib )
+
+      atlas_add_executable( BTaggingTruthTaggingTester
+        util/BTaggingTruthTaggingTester.cxx
+        LINK_LIBRARIES AsgTools xAODBTaggingEfficiencyLib POOLRootAccessLib AthAnalysisBaseCompsLib xAODEventInfo xAODRootAccess AsgMessagingLib FTagAnalysisInterfacesLib )
    endif()
 
-    atlas_add_executable( BTaggingTruthTaggingTester
-      util/BTaggingTruthTaggingTester.cxx
-      LINK_LIBRARIES AsgTools AsgMessagingLib FTagAnalysisInterfacesLib )
+   # Test for both AthAnalysis and AnalysisBase 
+   atlas_add_test( ut_BTaggingToolsExample
+      SCRIPT BTaggingToolsExample /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/DAOD_PHYS/p6491/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.deriv.DAOD_PHYS.e8514_e8528_s4162_s4114_r15540_r15516_p6491/DAOD_PHYS.41633384._000880.pool.root.1
+      # No post execution script 
+      POST_EXEC_SCRIPT nopost.sh
+   )
 endif()
 
 if( XAOD_STANDALONE )
@@ -95,6 +113,7 @@ if( XAOD_STANDALONE )
      SCRIPT BTaggingEfficiencyToolTester xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root GN2v00NewAliasWP FixedCutBEff_77
    )
 endif()
+
 
 # Install files from the package:
 atlas_install_runtime( share/*.root )
