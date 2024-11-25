@@ -17,6 +17,10 @@
 #include <ROOT/RNTupleReader.hxx>
 #include <ROOT/RNTupleView.hxx>
 
+#include <string>
+#include <vector>
+#include <memory>
+
 
 namespace SG {
    class IAuxTypeVector;
@@ -53,9 +57,9 @@ namespace xAOD {
       EStructMode structMode() const;
 
       /// Connect the object to an input RNTuple
-      StatusCode readFrom( std::string fileName, std::string ntupleName );
+      StatusCode readFrom(const  std::string & fileName, const std::string & ntupleName );
       /// Connect the object to an output RNTuple
-      StatusCode writeTo( std::string fileName, std::string ntupleName );
+      StatusCode writeTo( const std::string & fileName, const std::string & ntupleName );
       /// Get entry from the input RNTuple
       ::Int_t getEntry( ::Int_t getall );
       /// Reset the store
@@ -156,8 +160,8 @@ namespace xAOD {
       const std::type_info* auxFieldType( const std::string auxName,
                                           ::Bool_t staticField );
       /// Register one input field as an available auxiliary variable
-      StatusCode setupAuxField( std::string fieldName,
-                                const std::string auxName,
+      StatusCode setupAuxField( const std::string & fieldName,
+                                const std::string & auxName,
                                 ::Bool_t staticField );
       /// Check if this auxiliary variable needs to go to the output
       ::Bool_t isAuxIDSelected( auxid_t auxid ) const;
@@ -195,7 +199,7 @@ namespace xAOD {
       /// Object helping to select which auxiliary variables to write
       AuxSelection m_selection;
       /// Store for the in-memory-only variables
-      SG::AuxStoreInternal* m_transientStore;
+      SG::AuxStoreInternal* m_transientStore{};
 
       /// Internal list of variable IDs handled currently by the object
       auxid_set_t m_auxIDs;
@@ -203,7 +207,7 @@ namespace xAOD {
       /// Variables handled currently by the object
       std::vector< SG::IAuxTypeVector* > m_vecs;
       /// The current size of the container being described
-      std::size_t m_size;
+      std::size_t m_size{};
 
       /// Is this container locked?
       ::Bool_t m_locked;
@@ -260,9 +264,9 @@ namespace xAOD {
          /// The entry that was loaded from the ntuple
          ::Int_t entryLoaded;
          /// The pointer to the object in memory
-         void* object;
+         void* object{};
          /// The typeinfo of the object
-         std::type_info* typeInfo;
+         std::type_info* typeInfo{};
       };
 
       /// A way to acces an representation of a field with an auxid.

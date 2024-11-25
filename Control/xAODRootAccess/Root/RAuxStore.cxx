@@ -68,19 +68,14 @@ namespace xAOD {
          m_inModel( nullptr ),
          m_fields() {}
 
-   RAuxStore::~RAuxStore() {
-      if( m_transientStore ) {
-         delete m_transientStore;
-         m_transientStore = nullptr;
-      }
-      // Explicitly reset the unique_ptr members in m_fields
-      for( auto& fieldPair : m_fields ) {
-         if( fieldPair.second.field ) {
-            fieldPair.second.field.release();
-         }
-      }
-      m_fields.clear();  // Ensure m_fields is properly cleared
-   }
+  RAuxStore::~RAuxStore() {
+    delete m_transientStore;
+    m_transientStore = nullptr;
+    for( auto& fieldPair : m_fields ) {
+      fieldPair.second.field.release();//not a leak (coverity 17624)
+    }
+    m_fields.clear();  // Ensure m_fields is properly cleared
+  }
 
    /// This function gets the structure mode of the object.
    ///
@@ -98,8 +93,8 @@ namespace xAOD {
    /// @param ntupleName Name of the ntuple that is being read from
    /// @returns <code>kTRUE</code> if successful, <code>kFALSE</code> otherwise
    ///
-   StatusCode RAuxStore::readFrom( std::string fileName,
-                                   std::string ntupleName ) {
+   StatusCode RAuxStore::readFrom( const std::string & fileName,
+                                   const std::string & ntupleName ) {
 
       // Remember the file name:
       m_inFileName = fileName;
@@ -131,8 +126,8 @@ namespace xAOD {
    /// @param ntupleName Name of the ntuple that is being written to
    /// @returns <code>kTRUE</code> if successful, <code>kFALSE</code> otherwise
    ///
-   StatusCode RAuxStore::writeTo( std::string fileName,
-                                  std::string ntupleName ) {
+   StatusCode RAuxStore::writeTo( const std::string & fileName,
+                                  const std::string & ntupleName ) {
       // Look for any auxiliary fields that have not been connected to yet:
       RETURN_CHECK( "xAOD::RAuxStore::writeTo", scanInputNtuple() );
       m_outFileName = fileName;
@@ -197,17 +192,12 @@ namespace xAOD {
    /// This function resets the store to its initial state.
    ///
    void RAuxStore::reset() {
-
-      // Explicitly reset the unique_ptr members in m_fields
-      for( auto& fieldPair : m_fields ) {
-         if( fieldPair.second.field ) {
-            fieldPair.second.field.release();
-         }
-      }
-      m_fields.clear();  // Ensure m_fields is properly cleared
-
-      // Remember that the input RNTuple needs to be re-scanned:
-      m_inputScanned = kFALSE;
+     for( auto& fieldPair : m_fields ) {
+       fieldPair.second.field.release();//not a leak (coverity 17638)
+     }
+     m_fields.clear();  // Ensure m_fields is properly cleared
+     // Remember that the input RNTuple needs to be re-scanned:
+     m_inputScanned = kFALSE;
    }
 
    // SG::IConsRAuxStore functions
@@ -1053,7 +1043,7 @@ namespace xAOD {
       // Get the field's type:
       auto inspector =
           RNTupleInspector::Create( m_inputNtupleName, m_inFileName );
-      auto fieldInspector = inspector->GetFieldTreeInspector(
+      const auto & fieldInspector = inspector->GetFieldTreeInspector(
           Utils::getFirstFieldMatch( *m_inNtuple, fieldName.Data() ) );
 
       std::string typeName =
@@ -1460,8 +1450,8 @@ namespace xAOD {
    ///                     <code>kFALSE</code> if it's a dynamic one
    /// @returns <code>kTRUE</code> if successful, <code>kFALSE</code> if not
    ///
-   StatusCode RAuxStore::setupAuxField( std::string fieldName,
-                                        const std::string auxName,
+   StatusCode RAuxStore::setupAuxField( const std::string & fieldName,
+                                        const std::string & auxName,
                                         ::Bool_t isStaticField ) {
 
       std::string expectedClassName;
@@ -1662,13 +1652,13 @@ namespace xAOD {
 
       auto inspector =
           RNTupleInspector::Create( m_inputNtupleName, m_inFileName );
-      auto fieldInspector = inspector->GetFieldTreeInspector( fieldName );
+      const auto & fieldInspector = inspector->GetFieldTreeInspector( fieldName );
 
-      std::string typeName =
-          fieldInspector.GetDescriptor().GetTypeName().c_str();
+      const std::string & typeName =
+          fieldInspector.GetDescriptor().GetTypeName();
 
       const auto tClass = ::TClass::GetClass(
-          fieldInspector.GetDescriptor().GetTypeName().c_str() );
+          typeName.c_str() );
       const std::type_info* ti = tClass->GetTypeInfo();
 
       TClass* cl = TClass::GetClass( *ti );
