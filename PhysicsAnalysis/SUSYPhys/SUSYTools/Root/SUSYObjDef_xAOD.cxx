@@ -333,8 +333,8 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_jetUncertaintiesPDSmearTool(""),
     m_fatjetUncertaintiesTool(""),
     m_jetCleaningTool(""),
-    m_jetJvtUpdateTool(""),
     m_jetPileupLabelingTool(""),
+    m_jetJvtMomentTool(""),
     m_jetNNJvtMomentTool(""),
     m_jetNNJvtSelectionTool(""),
     m_jetNNJvtEfficiencyTool(""),
@@ -682,8 +682,8 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   m_ZTagjetUncertaintiesTool.declarePropertyFor( this, "ZJetUncertaintiesTool", "The JetUncertaintiesTool for large-R Z-tagged jets" );
   m_TopTagjetUncertaintiesTool.declarePropertyFor( this, "TopJetUncertaintiesTool", "The JetUncertaintiesTool for large-R Top-tagged jets" );
   m_jetCleaningTool.declarePropertyFor( this, "JetCleaningTool", "The JetCleaningTool" );
-  m_jetJvtUpdateTool.declarePropertyFor( this, "JetJvtUpdateTool", "The JetJvtUpdateTool" );
   m_jetPileupLabelingTool.declarePropertyFor( this, "JetPileupLabelingTool", "The JetPileupLabelingTool" );
+  m_jetJvtMomentTool.declarePropertyFor( this, "JetJvtMomentTool", "The JetJvtMomentTool" );
   m_jetNNJvtMomentTool.declarePropertyFor( this, "JetNNJvtMomentTool", "The JetNNJvtMomentTool" );
   m_jetNNJvtSelectionTool.declarePropertyFor( this, "JetNNJvtSelectionTool", "The JetNNJvtSelectionTool" );
   m_jetNNJvtEfficiencyTool.declarePropertyFor( this, "JetNNJvtEfficiencyTool", "The JetNNJvtEfficiencyTool" );
