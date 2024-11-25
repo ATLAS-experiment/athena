@@ -17,7 +17,7 @@ def createGeoModelConfigFlags(analysis=False):
 
     # Special handling of analysis releases where we only want AtlasVersion and Run
     if analysis:
-        def _deduct_LHCPeriod(prevFlags):
+        def _deduce_LHCPeriod(prevFlags):
             import logging
             log = logging.getLogger("GeoModelConfigFlags")
             log.info('Deducing LHC Run period from the geometry tag name "%s" as database access is not available in analysis releases', prevFlags.GeoModel.AtlasVersion)
@@ -31,16 +31,16 @@ def createGeoModelConfigFlags(analysis=False):
             elif prevFlags.GeoModel.AtlasVersion.startswith("ATLAS-R3"):
                 period = LHCPeriod.Run3
             else:
-                raise ValueError(f'Can not deduct LHC Run period from "{prevFlags.GeoModel.AtlasVersion}", please set "flags.GeoModel.Run" manually.')
+                raise ValueError(f'Can not deduce LHC Run period from "{prevFlags.GeoModel.AtlasVersion}", please set "flags.GeoModel.Run" manually.')
 
             log.info('Using LHC Run period "%s"', period.value)
             return period
 
-        gcf.addFlag("GeoModel.Run",  # Run deducted from other metadata
-                    _deduct_LHCPeriod, type=LHCPeriod, help='LHC Run period')
+        gcf.addFlag("GeoModel.Run",  # Run deduced from other metadata
+                    _deduce_LHCPeriod, type=LHCPeriod, help='LHC Run period')
         return gcf
 
-    def _deduct_LHCPeriod(prevFlags):
+    def _deduce_LHCPeriod(prevFlags):
         if prevFlags.GeoModel.AtlasVersion:
             return LHCPeriod(DetDescrInfo(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath)['Common']['Run'])
 
@@ -56,7 +56,7 @@ def createGeoModelConfigFlags(analysis=False):
 
         raise RuntimeError('Can not determine LHC period from the data project name')
 
-    gcf.addFlag("GeoModel.Run", _deduct_LHCPeriod, type=LHCPeriod, help='LHC Run period')
+    gcf.addFlag("GeoModel.Run", _deduce_LHCPeriod, type=LHCPeriod, help='LHC Run period')
 
     gcf.addFlag('GeoModel.Layout', 'atlas', help='Geometry layout') # replaces global.GeoLayout
 
@@ -65,8 +65,17 @@ def createGeoModelConfigFlags(analysis=False):
                 # TODO: dynamic alignment is for now enabled by default for data overlay
                 # to disable, add 'and prevFlags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.Overlay]'
 
-    gcf.addFlag("GeoModel.Align.LegacyConditionsAccess",
-                lambda prevFlags : prevFlags.Common.Project is Project.AthSimulation or prevFlags.Common.ProductionStep is ProductionStep.Simulation,
+    def _deduce_LegacyConditionsAccess(prevFlags):
+        if prevFlags.Common.Project is Project.AthSimulation:
+            return True
+        if prevFlags.Common.ProductionStep is not ProductionStep.Simulation:
+            return False
+        from SimulationConfig.SimEnums import LArParameterization
+        if prevFlags.Sim.ISF.Simulator.usesFastCaloSim() or prevFlags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+            return False
+        return True
+
+    gcf.addFlag("GeoModel.Align.LegacyConditionsAccess", _deduce_LegacyConditionsAccess,
                 help='Flag for using the legacy conditions access infrastructure')
                 # Mainly for G4 which still loads alignment on initialize
 
