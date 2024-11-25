@@ -310,8 +310,20 @@ class RootFileDumper(object):
                     # into cling parse failures due to it synthesizing
                     # incorrect forward declarations.
                     # See ATEAM-1000.
-                    ROOT.TClass.GetClass (br.GetClassName())
-                    val = getattr(tree, br_name)
+                    cl = ROOT.TClass.GetClass (br.GetClassName())
+                    try:
+                        val = getattr(tree, br_name)
+                    except BaseException:
+                        # Extra diagnostics for ATEAM-1000.
+                        import sys
+                        print (f'Exception retrieving value from branch {br_name} of type {br.GetClassName()} from tree {tree.GetName()}')
+                        if cl:
+                            print ('Retrieved class', cl.GetName())
+                        sys.stdout.flush()
+                        import cppyy
+                        cppyy.set_debug()
+                        val = getattr(tree, br_name)
+                        raise
                 else:
                     vals = [_getLeaf (l) for l in br.GetListOfLeaves()]
                     if len(vals) == 0:
