@@ -64,6 +64,7 @@ namespace pool {
      
      RootCollection::~RootCollection()
      {
+        // cppcheck-suppress throwInNoexceptFunction; FIXME: delayedFileOpen could throw
         if( m_open ) RootCollection::close();
         else cleanup();
      }
