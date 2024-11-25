@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*-----------------------------HEPVis---------------------------------------*/
@@ -49,15 +49,11 @@ SoCons::SoCons() {
   SO_NODE_ADD_FIELD(smoothDraw,          (TRUE));
   SO_NODE_ADD_FIELD(pOverrideNPhi,       (0));
   SO_NODE_ADD_FIELD(alternateRep,        (NULL));
-  m_children = new SoChildList(this);
+  m_children = std::make_unique<SoChildList>(this);
 
   setNodeType(EXTENSION);
 }
 
-// Destructor
-SoCons::~SoCons() {
-  delete m_children;
-}
 
 //____________________________________________________________________
 void SoCons::initClass()
@@ -235,7 +231,7 @@ void SoCons::generatePrimitives(SoAction *action) {
 
 // getChildren
 SoChildList *SoCons::getChildren() const {
-  return m_children;
+  return m_children.get();
 }
 
 

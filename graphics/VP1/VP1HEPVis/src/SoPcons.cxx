@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*-----------------------------Hepvis---------------------------------------*/
@@ -50,7 +50,7 @@ SoPcons::SoPcons() {
   SO_NODE_ADD_FIELD(alternateRep,        (NULL));
   SO_NODE_ADD_FIELD(drawEdgeLines,       (false));
 
-  m_children = new SoChildList(this);
+  m_children = std::make_unique<SoChildList>(this);
   
   float rMinDef[]={10.0,  15.0, 10.0};
   float rMaxDef[]={11.0,  17.0, 12.0};
@@ -60,11 +60,6 @@ SoPcons::SoPcons() {
   fRmax.setValues(0,2,rMaxDef);
   fDz.setValues(0,2,zDef);
   setNodeType(EXTENSION);
-}
-
-// Destructor
-SoPcons::~SoPcons() {
-  delete m_children;
 }
 
 
@@ -347,7 +342,7 @@ shapeVertex(&pv);
 
 // getChildren
 SoChildList *SoPcons::getChildren() const {
-  return m_children;
+  return m_children.get();
 }
 
 

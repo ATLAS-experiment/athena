@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*-----------------------------HEPVis----------------------------------------*/
@@ -18,6 +18,9 @@
 #include <Inventor/fields/SoSFNode.h>
 #include <Inventor/fields/SoSFBool.h>
 #include <Inventor/nodes/SoShape.h>
+
+#include <memory>
+
 
 class SoSFNode;
 //! SoCons - Inventor version of the G4Cons Geant Geometry entity
@@ -137,13 +140,6 @@ protected:
   //
   virtual SoChildList *getChildren() const;
 
-
-protected:
-  //
-  //! Destructor, required
-  //
-  virtual ~SoCons();
-
 private:
 
   //
@@ -161,7 +157,7 @@ private:
   //
   //! ChildList. Required whenever the class has hidden children.
   //
-  SoChildList *m_children;
+  std::unique_ptr<SoChildList> m_children;
 
   //
   //! help with trigonometry.  increments sines an cosines by an angle.

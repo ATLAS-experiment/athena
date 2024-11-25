@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*-----------------------------HEPVis---------------------------------------*/
@@ -53,14 +53,9 @@ SoTubs::SoTubs() {
   SO_NODE_ADD_FIELD(alternateRep,        (NULL));
   SO_NODE_ADD_FIELD(drawEdgeLines,       (false));
 
-  m_children = new SoChildList(this);
+  m_children = std::make_unique<SoChildList>(this);
 
   setNodeType(EXTENSION);
-}
-
-// Destructor
-SoTubs::~SoTubs() {
-  delete m_children;
 }
 
 
@@ -352,7 +347,7 @@ void SoTubs::generatePrimitives(SoAction *action) {
 
 // getChildren
 SoChildList *SoTubs::getChildren() const {
-  return m_children;
+  return m_children.get();
 }
 
 
