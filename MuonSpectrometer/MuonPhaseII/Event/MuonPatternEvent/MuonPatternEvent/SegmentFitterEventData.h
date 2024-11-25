@@ -33,10 +33,6 @@ namespace MuonR4{
          *  @param tanPhi: Tangent of the [x] to [z] axis
          *  @param tanTheta: Tangent of the [y] to [z] axis  */
         Amg::Vector3D dirFromTangents(const double tanPhi, const double tanTheta);
-        /** @brief Constructs a direction vector from the polar theta & phi angles 
-          * @param phi: Polar angle in the [x]-[y] plane
-          * @param theta: Azimuthal angle mesured from the positive [z]-axis */
-        Amg::Vector3D dirFromAngles(const double phi, const double theta);
         /** @brief Returns the localSegPars decoration from a xAODMuon::Segment*/
         Parameters localSegmentPars(const xAOD::MuonSegment& seg);
         /** @brief Returns the local segment parameters from a segment object

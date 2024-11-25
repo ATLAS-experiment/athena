@@ -183,7 +183,7 @@ namespace MuonR4{
         candidateSeed.parameters = m_segmentSeed->parameters();
         candidateSeed.parentBucket = m_segmentSeed->parentBucket();
         double theta{thetaTubes - std::asin(std::clamp(R / distTubes, -1., 1.))};
-        Amg::Vector3D seedDir = dirFromAngles(90.*Gaudi::Units::deg, theta);
+        Amg::Vector3D seedDir = Amg::dirFromAngles(90.*Gaudi::Units::deg, theta);
         double Y0 = bottomPos.y()*seedDir.z() - bottomPos.z()*seedDir.y() + signBot*bottomHit->driftRadius();
         double combDriftUncert{std::sqrt(bottomPrd->driftRadiusCov() + topPrd->driftRadiusCov())};
         if (m_cfg.recalibSeedCircles) {
@@ -199,7 +199,7 @@ namespace MuonR4{
             R = signBot * calibBottom->driftRadius() - signTop * calibTop->driftRadius();
             /// Recalculate the seed with the calibrated parameters
             theta =  thetaTubes - std::asin(std::clamp(R / distTubes, -1., 1.));
-            seedDir = dirFromAngles(90.*Gaudi::Units::deg, theta);
+            seedDir = Amg::dirFromAngles(90.*Gaudi::Units::deg, theta);
             Y0 = bottomPos.y()*seedDir.z() - bottomPos.z()*seedDir.y() + signBot*bottomHit->driftRadius();
             combDriftUncert = std::sqrt(driftCov(*calibBottom) + driftCov(*calibTop));
         }
@@ -333,7 +333,7 @@ namespace MuonR4{
   
         double theta = inSeed.parameters[toInt(ParamDefs::theta)];
         
-        Amg::Vector3D seedDir = dirFromAngles(90.* Gaudi::Units::deg, theta);
+        Amg::Vector3D seedDir = Amg::dirFromAngles(90.* Gaudi::Units::deg, theta);
 
         const double y0 = inSeed.parameters[toInt(ParamDefs::y0)] * seedDir.z();
 
