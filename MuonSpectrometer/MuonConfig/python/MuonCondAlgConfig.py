@@ -13,7 +13,7 @@ from AthenaConfiguration.Enums import LHCPeriod
 def MdtCondDbAlgCfg(flags, **kwargs):
     result  = ComponentAccumulator()
     folders = []
-    if flags.Common.isOnline:
+    if not flags.Muon.useMdtDcsData:
         return result ## avoid adding algo to the component accumulator
     else:
         kwargs["isOnline"] = False
@@ -348,7 +348,7 @@ def MuonStationIntersectCondAlgCfg(flags, name='MuonStationIntersectCondAlg',**k
     # Has dependency IdHelperTool (which we ignore for now)
     result = ComponentAccumulator()
     result.merge(MdtCondDbAlgCfg(flags))
-    if flags.Common.isOnline: kwargs.setdefault("MdtCondKey","")
+    if not flags.Muon.useMdtDcsData: kwargs.setdefault("MdtCondKey","")
     muon_station_intersect_condalg = CompFactory.MuonStationIntersectCondAlg(name=name, **kwargs)
     result.addCondAlgo(muon_station_intersect_condalg, primary=True)
     return result

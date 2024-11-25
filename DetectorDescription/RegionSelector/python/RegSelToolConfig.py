@@ -18,7 +18,7 @@ _log = logging.getLogger(__name__)
 def _condAlgName(detector):
     return "RegSelCondAlg_"+detector
 
-def _createRegSelCondAlg( detector,  CondAlgConstructor, isOnline, printTable=False ):
+def _createRegSelCondAlg( detector,  CondAlgConstructor, useMdtDcsData, printTable=False ):
     """
     Creates conditions alg that provides data to a RegSel Tool
     """
@@ -32,7 +32,7 @@ def _createRegSelCondAlg( detector,  CondAlgConstructor, isOnline, printTable=Fa
                                       PrintTable  = printTable,
                                       RegSelLUT = ("RegSelLUTCondData_"+detector) )
 
-    if detector == "MDT" and isOnline:
+    if detector == "MDT" and not useMdtDcsData:
          condAlg.Conditions = "" 
     elif detector == "Pixel":
         condAlg.DetEleCollKey = "PixelDetectorElementCollection"
@@ -89,9 +89,7 @@ def regSelToolCfg(flags, detector, algorithm, readout_geometry=None, conditions=
     if flags.hasFlag("PrintLUT"):
         printLUT = flags.PrintLUT
         
-    the_alg = _createRegSelCondAlg(detector, algorithm, flags.Common.isOnline, printTable=printLUT )
-    if detector == "MDT" and flags.Common.isOnline:
-        the_alg.Conditions = ""
+    the_alg = _createRegSelCondAlg(detector, algorithm, flags.Muon.useMdtDcsData, printTable=printLUT )
     ca.addCondAlgo(the_alg)
     return ca
 
@@ -141,7 +139,7 @@ def regSelTool_MDT_Cfg(flags):
     conditions = ComponentAccumulator()
     conditions.merge(MuonGeoModelCfg(flags))
     conditions.merge(MDTCablingConfigCfg(flags))
-    if not flags.Common.isOnline:
+    if flags.Muon.useMdtDcsData: #false for online and MDT calibration stream processing 
         conditions.merge(MdtCondDbAlgCfg(flags))
 
     return regSelToolCfg(flags, "MDT", CompFactory.MDT_RegSelCondAlg,
