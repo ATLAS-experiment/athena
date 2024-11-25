@@ -6,8 +6,6 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
 def PreTrackingCfg(flags):
    acc = MainServicesCfg(flags)
-   from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
-   acc.merge(IOVDbSvcCfg(flags))
 
    # ----------------------------------------------------------------
    # Pool input
@@ -42,5 +40,15 @@ def PreTrackingCfg(flags):
    acc.merge(OutputStreamCfg(flags, "RDO", ItemList=itemsToRecord, takeItemsFromInput=True))
    # Add in-file MetaData
    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-   acc.merge(SetupMetaDataForStreamCfg(flags, "RDO"))
+   from AthenaConfiguration.Enums import MetadataCategory
+
+   acc.merge(
+       SetupMetaDataForStreamCfg(
+           flags,
+           "RDO",
+           createMetadata=[
+                MetadataCategory.IOVMetaData,
+            ],
+        )
+    )
    return acc
