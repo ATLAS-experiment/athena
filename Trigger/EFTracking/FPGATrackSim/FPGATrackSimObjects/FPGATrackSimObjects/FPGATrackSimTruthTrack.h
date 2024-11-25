@@ -58,9 +58,10 @@ public:
   int getStatus() const { return m_status; }
   int status() const { return m_status; }
   HepMcParticleLink::barcode_type getBarcode() const { return m_barcode; }
-  HepMcParticleLink::barcode_type getUniqueID() const { return m_uniqueID; }
   HepMcParticleLink::barcode_type barcode() const { return m_barcode; }
-  
+  HepMcParticleLink::barcode_type getUniqueID() const { return m_uniqueID; }
+  HepMcParticleLink::barcode_type id() const { return m_uniqueID; }
+
   int getEventIndex() const { return m_evtindex; }
   double getBarcodeFracOffline() const { return m_barcode_frac_offline; }
 
