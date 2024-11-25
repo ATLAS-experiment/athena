@@ -680,25 +680,28 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
             {
                 TString totHistDirPath = modName + "/" + totHistName + "/A0/B0/C";
                 totHistDirPath += std::to_string(c);
-                
+
+                std::unique_ptr<TH2F> h2dTot;
                 TDirectoryFile* totHistDir(static_cast<TDirectoryFile*> (rodDir->Get(totHistDirPath)));
                 if(!totHistDir){
                     std::cout<<" Missing totHistDir in : " << totHistDirPath << endl;
                 }
-                
-                std::unique_ptr<TH2F> h2dTot(static_cast<TH2F*> ((static_cast<TKey*>(totHistDir->GetListOfKeys()->First()))->ReadObj()));
-                h2dTot->SetDirectory(0);
-                
+                else {
+                  h2dTot.reset(static_cast<TH2F*> ((static_cast<TKey*>(totHistDir->GetListOfKeys()->First()))->ReadObj()));
+                  h2dTot->SetDirectory(0);
+                }
+
+                unique_ptr<TH2F> h2dTotAux;
                 TDirectoryFile* totHistDirAux(static_cast<TDirectoryFile*>(rodDirAux->Get(totHistDirPath)));
                 if (!totHistDirAux)
                 {
                     std::cout<<" Missing totHistDir in : " << totHistDirPath << endl;
                     logout << " Missing totHistDir in : " << totHistDirPath << endl;
                 }
-                
-                unique_ptr<TH2F> h2dTotAux (static_cast<TH2F*> ((static_cast<TKey*>(totHistDirAux->GetListOfKeys()->First())->ReadObj())));    
-                h2dTotAux->SetDirectory(0);
-
+                else {
+                  h2dTotAux.reset(static_cast<TH2F*> ((static_cast<TKey*>(totHistDirAux->GetListOfKeys()->First())->ReadObj())));
+                  h2dTotAux->SetDirectory(0);
+                }
                 
                 TString totSigHistDirPath = modName + "/" + totSigHistName + "/A0/B0/C";
                 totSigHistDirPath += std::to_string(c);

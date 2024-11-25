@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TFCSLateralShapeParametrizationHitBase_h
@@ -47,7 +47,7 @@ public:
           m_center_phi(0.){}; // for hits with the same energy, m_E should
                               // normalized to E(layer)/nhit
     Hit(float eta, float phi, float E)
-        : m_eta_x(eta), m_phi_y(phi), m_E(E), m_useXYZ(false), m_center_r(0.),
+        : m_eta_x(eta), m_phi_y(phi), m_z(0.), m_E(E), m_useXYZ(false), m_center_r(0.),
           m_center_z(0.), m_center_eta(0.), m_center_phi(0.){};
     Hit(float x, float y, float z, float E)
         : m_eta_x(x), m_phi_y(y), m_z(z), m_E(E), m_useXYZ(true),

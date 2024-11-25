@@ -39,8 +39,9 @@ BOOST_AUTO_TEST_CASE(IdDictRangeBuildRange){
   BOOST_TEST(f.build_range() == Range("-1:5"));
   //enumerated
   f.m_specification = IdDictRange::by_values;
-  f.m_values = {0,1,2,3,4,5};
-  BOOST_TEST(f.build_range() == Range("0,1,2,3,4,5"));
+  //note: consecutive value _might_ be optimised to min/max
+  f.m_values = {0,1,2,4,5};
+  BOOST_TEST(f.build_range() == Range("0,1,2,4,5"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

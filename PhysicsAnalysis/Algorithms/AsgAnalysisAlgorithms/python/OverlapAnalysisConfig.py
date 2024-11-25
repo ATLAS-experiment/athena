@@ -90,6 +90,8 @@ class OverlapAnalysisConfig (ConfigBlock):
             info="whether to perform the overlap removal between electrons and large-R jets. The default is True.")
         self.addOption ('doJetFatJetOR', True, type=bool,
             info="whether to perform the overlap removal between jets and large-R jets. The default is True.")
+        self.addOption ('favourPhotonOverLepton', False, type=bool,
+            info="whether to give priority to photons in OR. The default is False.")
 
     def makeUnionPreselectionAlg(self, config, inputCollection):
         """
@@ -430,6 +432,8 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.PhoEleORT.OutputLabel = outputLabel
             alg.overlapTool.PhoEleORT.LinkOverlapObjects = self.linkOverlapObjects
             alg.overlapTool.PhoEleORT.OutputPassValue = True
+            if self.favourPhotonOverLepton:
+                alg.overlapTool.PhoEleORT.SwapContainerPrecedence = True
 
         # Set up the photon-muon overlap removal.
         if photons and muons and self.doPhMuOR:
@@ -439,6 +443,8 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.PhoMuORT.OutputLabel = outputLabel
             alg.overlapTool.PhoMuORT.LinkOverlapObjects = self.linkOverlapObjects
             alg.overlapTool.PhoMuORT.OutputPassValue = True
+            if self.favourPhotonOverLepton:
+                alg.overlapTool.PhoMuORT.SwapContainerPrecedence = True
 
         # Set up the photon-(narrow-)jet overlap removal.
         if photons and jets and self.doPhJetOR:

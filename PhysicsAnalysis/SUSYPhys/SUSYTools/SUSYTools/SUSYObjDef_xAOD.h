@@ -56,6 +56,7 @@
 #include "BoostedJetTaggers/JSSWTopTaggerDNN.h"
 #include "ParticleJetTools/JetTruthLabelingTool.h"
 #include "ParticleJetTools/JetPileupLabelingTool.h"
+#include "JetMomentTools/JetVertexTaggerTool.h"
 #include "JetMomentTools/JetVertexNNTagger.h"
 #include "JetAnalysisInterfaces/IJvtEfficiencyTool.h"
 #include "PATCore/IAsgSelectionTool.h"
@@ -69,7 +70,6 @@ class IJERTool;
 class IJERSmearingTool;
 class ICPJetUncertaintiesTool;
 class IJetSelector;
-class IJetUpdateJvt;
 class IJetModifier;
 
 class IAsgElectronLikelihoodTool;
@@ -821,9 +821,9 @@ namespace ST {
     asg::AnaToolHandle<ICPJetUncertaintiesTool> m_jetUncertaintiesPDSmearTool;
     asg::AnaToolHandle<ICPJetUncertaintiesTool> m_fatjetUncertaintiesTool;
     asg::AnaToolHandle<IJetSelector> m_jetCleaningTool;
-    asg::AnaToolHandle<IJetUpdateJvt> m_jetJvtUpdateTool;
 
     asg::AnaToolHandle<JetPileupLabelingTool>  m_jetPileupLabelingTool;
+    asg::AnaToolHandle<JetVertexTaggerTool> m_jetJvtMomentTool;
     asg::AnaToolHandle<JetPileupTag::JetVertexNNTagger>  m_jetNNJvtMomentTool;
     asg::AnaToolHandle<IAsgSelectionTool> m_jetNNJvtSelectionTool;
     asg::AnaToolHandle<CP::IJvtEfficiencyTool> m_jetNNJvtEfficiencyTool;

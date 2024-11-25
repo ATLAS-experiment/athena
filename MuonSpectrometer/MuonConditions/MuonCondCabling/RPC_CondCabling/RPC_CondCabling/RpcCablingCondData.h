@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
    */
 
 #ifndef RPCCABLINGCONDDATA_H
@@ -153,7 +153,7 @@ private:
     std::map<Identifier, int> m_lookup;
 
     std::vector<uint32_t> m_fullListOfRobIds;
-    int m_SectorMap[64];
+    int m_SectorMap[64]{};
     // array; for each sectorlogic type returns the SectorLogicSetup
     STvec m_SectorType;
     PRD_RDO_Map m_PRD_RDO_map;

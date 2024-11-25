@@ -52,7 +52,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     };
     
 
-    MuonReadoutElement(defineArgs&& args);
+    MuonReadoutElement(const defineArgs& args);
     virtual ~MuonReadoutElement();
     
     MuonReadoutElement()=delete;

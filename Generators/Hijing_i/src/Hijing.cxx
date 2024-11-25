@@ -98,6 +98,14 @@ StatusCode Hijing::genInitialize()
     }
     //BPK
     if( m_prand ) ATH_MSG_INFO( "===> Random Momentum Mirroring enabled" );
+    if( m_keepAllDecayVertices ) ATH_MSG_INFO( "===> Keeping all decay vertices" );
+    else ATH_MSG_INFO( "===> NOT keeping all decay vertices" );
+
+#ifdef HEPMC3
+    ATH_MSG_INFO( "===> HEPMC3 is used" );
+#else
+    ATH_MSG_INFO( "===> HEPMC3 is not used" );
+#endif
 
     //CLHEP::HepRandomEngine* engine
     p_Engine = getRandomEngineDuringInitialize(hijing_stream, m_randomSeed, m_dsid); // NOT THREAD-SAFE
@@ -771,7 +779,7 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
     {
       for (HepMC::GenParticle* p : *evt) {
         HepMC::ConstGenVertexPtr end_v = p->end_vertex();
-        if (p->status() == 2 && !end_v) p->production_vertex()->remove_particle(p);
+        if (p->status() == 2 && !end_v) delete p->production_vertex()->remove_particle(p);
       }
     }
 #endif

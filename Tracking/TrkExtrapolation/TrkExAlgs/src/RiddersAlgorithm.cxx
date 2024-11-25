@@ -382,7 +382,6 @@ StatusCode Trk::RiddersAlgorithm::execute()
   // --------------------- check if test propagation was successful ------------------------------
   if (trackParameters && optTransportJacobian){
 
-      // recSetep = 0
       unsigned int recStep = 0;
       const auto& transportJacobian = (*optTransportJacobian);
       // [0] Transport Jacobian -----------------------------------------------------
@@ -851,47 +850,44 @@ StatusCode Trk::RiddersAlgorithm::execute()
 
        // (R2)
        // Relative differences ----------------------------------------------------
-       if (recStep > 0){
-         m_loc1loc1[recStep]   = std::abs(m_loc1loc1[recStep-1]  ) > 1e-50 ?  -std::log10(std::abs(m_loc1loc1[recStep-1] )) : 0.;
-         m_loc1loc2[recStep]   = std::abs(m_loc1loc2[recStep-1]  ) > 1e-50 ?  -std::log10(std::abs(m_loc1loc2[recStep-1] )) : 0.;
-         m_loc1phi[recStep]    = std::abs(m_loc1phi[recStep-1]   ) > 1e-50 ?  -std::log10(std::abs(m_loc1phi[recStep-1]  )) : 0.;
-         m_loc1theta[recStep]  = std::abs(m_loc1theta[recStep-1] ) > 1e-50 ?  -std::log10(std::abs(m_loc1theta[recStep-1])) : 0.;
-         m_loc1qop[recStep]    = std::abs(m_loc1qop[recStep-1]   ) > 1e-50 ?  -std::log10(std::abs(m_loc1qop[recStep-1]  )) : 0.;
-         m_loc1steps[recStep]  = 5;
-         // fill the differences into the last one log (loc2)
-         m_loc2loc1[recStep]   = std::abs(m_loc2loc1[recStep-1]  ) > 1e-50 ?    -std::log10(std::abs(m_loc2loc1[recStep-1] )) : 0.;
-         m_loc2loc2[recStep]   = std::abs(m_loc2loc2[recStep-1]  ) > 1e-50 ?    -std::log10(std::abs(m_loc2loc2[recStep-1] )) : 0.;
-         m_loc2phi[recStep]    = std::abs(m_loc2phi[recStep-1]   ) > 1e-50 ?    -std::log10(std::abs(m_loc2phi[recStep-1]  )) : 0.;
-         m_loc2theta[recStep]  = std::abs(m_loc2theta[recStep-1] ) > 1e-50 ?    -std::log10(std::abs(m_loc2theta[recStep-1])) : 0.;
-         m_loc2qop[recStep]    = std::abs(m_loc2qop[recStep-1]   ) > 1e-50 ?    -std::log10(std::abs(m_loc2qop[recStep-1]  )) : 0.;
-         m_loc2steps[recStep]  = 5;
-         // fill the differences into the last one log (phi)
-         m_philoc1[recStep]    = std::abs(m_philoc1[recStep-1]  ) > 1e-50 ?      -std::log10(std::abs(m_philoc1[recStep-1] )) : 0.;
-         m_philoc2[recStep]    = std::abs(m_philoc2[recStep-1]  ) > 1e-50 ?      -std::log10(std::abs(m_philoc2[recStep-1] )) : 0.;
-         m_phiphi[recStep]     = std::abs(m_phiphi[recStep-1]   ) > 1e-50 ?      -std::log10(std::abs(m_phiphi[recStep-1]  )) : 0.;
-         m_phitheta[recStep]   = std::abs(m_phitheta[recStep-1] ) > 1e-50 ?      -std::log10(std::abs(m_phitheta[recStep-1])) : 0.;
-         m_phiqop[recStep]     = std::abs(m_phiqop[recStep-1]   ) > 1e-50 ?      -std::log10(std::abs(m_phiqop[recStep-1]  )) : 0.;
-         m_phisteps[recStep]   = 5;
-         // fill the differences into the last one log (theta)
-         m_thetaloc1[recStep]  = std::abs(m_thetaloc1[recStep-1]  ) > 1e-50 ?    -std::log10(std::abs(m_thetaloc1[recStep-1] )) : 0.;
-         m_thetaloc2[recStep]  = std::abs(m_thetaloc2[recStep-1]  ) > 1e-50 ?    -std::log10(std::abs(m_thetaloc2[recStep-1] )) : 0.;
-         m_thetaphi[recStep]   = std::abs(m_thetaphi[recStep-1]   ) > 1e-50 ?    -std::log10(std::abs(m_thetaphi[recStep-1]  )) : 0.;
-         m_thetatheta[recStep] = std::abs(m_thetatheta[recStep-1] ) > 1e-50 ?    -std::log10(std::abs(m_thetatheta[recStep-1])) : 0.;
-         m_thetaqop[recStep]   = std::abs(m_thetaqop[recStep-1]   ) > 1e-50 ?    -std::log10(std::abs(m_thetaqop[recStep-1]  )) : 0.;
-         m_thetasteps[recStep] = 5;
-         // fill the differences into the last one log (qop)
-         m_qoploc1[recStep]    = std::abs(m_qoploc1[recStep-1]  ) > 1e-50 ?     -std::log10( std::abs(m_qoploc1[recStep-1] ) ): 0.;
-         m_qoploc2[recStep]    = std::abs(m_qoploc2[recStep-1]  ) > 1e-50 ?     -std::log10( std::abs(m_qoploc2[recStep-1] ) ): 0.;
-         m_qopphi[recStep]     = std::abs(m_qopphi[recStep-1]   ) > 1e-50 ?     -std::log10( std::abs(m_qopphi[recStep-1]  ) ): 0.;
-         m_qoptheta[recStep]   = std::abs(m_qoptheta[recStep-1] ) > 1e-50 ?     -std::log10( std::abs(m_qoptheta[recStep-1]) ): 0.;
-         m_qopqop[recStep]     = std::abs(m_qopqop[recStep-1]   ) > 1e-50 ?     -std::log10( std::abs(m_qopqop[recStep-1]  ) ): 0.;
-         m_qopsteps[recStep]   = 5;
-       }
+       m_loc1loc1[recStep]   = std::abs(m_loc1loc1[recStep-1]  ) > 1e-50 ?  -std::log10(std::abs(m_loc1loc1[recStep-1] )) : 0.;
+       m_loc1loc2[recStep]   = std::abs(m_loc1loc2[recStep-1]  ) > 1e-50 ?  -std::log10(std::abs(m_loc1loc2[recStep-1] )) : 0.;
+       m_loc1phi[recStep]    = std::abs(m_loc1phi[recStep-1]   ) > 1e-50 ?  -std::log10(std::abs(m_loc1phi[recStep-1]  )) : 0.;
+       m_loc1theta[recStep]  = std::abs(m_loc1theta[recStep-1] ) > 1e-50 ?  -std::log10(std::abs(m_loc1theta[recStep-1])) : 0.;
+       m_loc1qop[recStep]    = std::abs(m_loc1qop[recStep-1]   ) > 1e-50 ?  -std::log10(std::abs(m_loc1qop[recStep-1]  )) : 0.;
+       m_loc1steps[recStep]  = 5;
+       // fill the differences into the last one log (loc2)
+       m_loc2loc1[recStep]   = std::abs(m_loc2loc1[recStep-1]  ) > 1e-50 ?    -std::log10(std::abs(m_loc2loc1[recStep-1] )) : 0.;
+       m_loc2loc2[recStep]   = std::abs(m_loc2loc2[recStep-1]  ) > 1e-50 ?    -std::log10(std::abs(m_loc2loc2[recStep-1] )) : 0.;
+       m_loc2phi[recStep]    = std::abs(m_loc2phi[recStep-1]   ) > 1e-50 ?    -std::log10(std::abs(m_loc2phi[recStep-1]  )) : 0.;
+       m_loc2theta[recStep]  = std::abs(m_loc2theta[recStep-1] ) > 1e-50 ?    -std::log10(std::abs(m_loc2theta[recStep-1])) : 0.;
+       m_loc2qop[recStep]    = std::abs(m_loc2qop[recStep-1]   ) > 1e-50 ?    -std::log10(std::abs(m_loc2qop[recStep-1]  )) : 0.;
+       m_loc2steps[recStep]  = 5;
+       // fill the differences into the last one log (phi)
+       m_philoc1[recStep]    = std::abs(m_philoc1[recStep-1]  ) > 1e-50 ?      -std::log10(std::abs(m_philoc1[recStep-1] )) : 0.;
+       m_philoc2[recStep]    = std::abs(m_philoc2[recStep-1]  ) > 1e-50 ?      -std::log10(std::abs(m_philoc2[recStep-1] )) : 0.;
+       m_phiphi[recStep]     = std::abs(m_phiphi[recStep-1]   ) > 1e-50 ?      -std::log10(std::abs(m_phiphi[recStep-1]  )) : 0.;
+       m_phitheta[recStep]   = std::abs(m_phitheta[recStep-1] ) > 1e-50 ?      -std::log10(std::abs(m_phitheta[recStep-1])) : 0.;
+       m_phiqop[recStep]     = std::abs(m_phiqop[recStep-1]   ) > 1e-50 ?      -std::log10(std::abs(m_phiqop[recStep-1]  )) : 0.;
+       m_phisteps[recStep]   = 5;
+       // fill the differences into the last one log (theta)
+       m_thetaloc1[recStep]  = std::abs(m_thetaloc1[recStep-1]  ) > 1e-50 ?    -std::log10(std::abs(m_thetaloc1[recStep-1] )) : 0.;
+       m_thetaloc2[recStep]  = std::abs(m_thetaloc2[recStep-1]  ) > 1e-50 ?    -std::log10(std::abs(m_thetaloc2[recStep-1] )) : 0.;
+       m_thetaphi[recStep]   = std::abs(m_thetaphi[recStep-1]   ) > 1e-50 ?    -std::log10(std::abs(m_thetaphi[recStep-1]  )) : 0.;
+       m_thetatheta[recStep] = std::abs(m_thetatheta[recStep-1] ) > 1e-50 ?    -std::log10(std::abs(m_thetatheta[recStep-1])) : 0.;
+       m_thetaqop[recStep]   = std::abs(m_thetaqop[recStep-1]   ) > 1e-50 ?    -std::log10(std::abs(m_thetaqop[recStep-1]  )) : 0.;
+       m_thetasteps[recStep] = 5;
+       // fill the differences into the last one log (qop)
+       m_qoploc1[recStep]    = std::abs(m_qoploc1[recStep-1]  ) > 1e-50 ?     -std::log10( std::abs(m_qoploc1[recStep-1] ) ): 0.;
+       m_qoploc2[recStep]    = std::abs(m_qoploc2[recStep-1]  ) > 1e-50 ?     -std::log10( std::abs(m_qoploc2[recStep-1] ) ): 0.;
+       m_qopphi[recStep]     = std::abs(m_qopphi[recStep-1]   ) > 1e-50 ?     -std::log10( std::abs(m_qopphi[recStep-1]  ) ): 0.;
+       m_qoptheta[recStep]   = std::abs(m_qoptheta[recStep-1] ) > 1e-50 ?     -std::log10( std::abs(m_qoptheta[recStep-1]) ): 0.;
+       m_qopqop[recStep]     = std::abs(m_qopqop[recStep-1]   ) > 1e-50 ?     -std::log10( std::abs(m_qopqop[recStep-1]  ) ): 0.;
+       m_qopsteps[recStep]   = 5;
        ++recStep;
 
-      m_steps = recStep;
-      m_validationTree->Fill();
-
+       m_steps = recStep;
+       m_validationTree->Fill();
   }
 
   // Code entered here will be executed once per event

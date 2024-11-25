@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -394,7 +394,7 @@ public:
     double m_bremMom{ 0. };
     double m_bremEmitThreshold{ 0. };
     double m_bremSampleThreshold{ 0. };
-    double m_P[45];
+    double m_P[45]{};
 
     const Trk::BinnedMaterial* m_binMat{ nullptr };
     //!< cache of TrackStateOnSurfaces

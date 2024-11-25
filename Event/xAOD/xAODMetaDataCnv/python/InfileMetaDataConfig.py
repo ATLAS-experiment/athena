@@ -119,7 +119,7 @@ def createEventStreamInfo(tools, result, flags, **kwargs):
             DataHeaderKey=outputStreamName(kwargs.get('streamName', '')),
             EventInfoKey=f"{flags.Overlay.BkgPrefix}EventInfo"
             if flags.Common.ProductionStep
-            in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking]
+            in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]
             else "EventInfo",
         )
         tools.mdItems += [

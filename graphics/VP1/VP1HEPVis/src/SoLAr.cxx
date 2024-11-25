@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*-----------------------------Hepvis---------------------------------------*/
@@ -45,7 +45,7 @@ SoLAr::SoLAr() {
   SO_NODE_ADD_FIELD(smoothDraw,          (TRUE));
   SO_NODE_ADD_FIELD(pOverrideNPhi,       (0));
   SO_NODE_ADD_FIELD(alternateRep,        (NULL));
-  m_children = new SoChildList(this);
+  m_children = std::make_unique<SoChildList>(this);
 
   float rMinDef[]={10.0,  15.0, 10.0};
   float rMaxDef[]={11.0,  17.0, 12.0};
@@ -57,10 +57,6 @@ SoLAr::SoLAr() {
   setNodeType(EXTENSION);
 }
 
-// Destructor
-SoLAr::~SoLAr() {
-  delete m_children;
-}
 
 //____________________________________________________________________
 void SoLAr::initClass()
@@ -265,7 +261,7 @@ void SoLAr::generatePrimitives(SoAction *action) {
 
 // getChildren
 SoChildList *SoLAr::getChildren() const {
-  return m_children;
+  return m_children.get();
 }
 
 

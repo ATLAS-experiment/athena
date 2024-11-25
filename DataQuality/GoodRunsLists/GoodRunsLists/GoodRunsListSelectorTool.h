@@ -77,7 +77,6 @@ class GoodRunsListSelectorTool : public extends<AthAlgTool, IGoodRunsListSelecto
 
   int  m_boolop;
   bool m_passthrough;
-  bool m_usecool;
   bool m_verbose;
   bool m_rejectanybrl;
   bool m_eventselectormode;

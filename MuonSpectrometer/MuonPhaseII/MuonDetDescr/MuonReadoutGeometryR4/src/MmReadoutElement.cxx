@@ -27,7 +27,7 @@ std::ostream& operator<<(std::ostream& ostr, const parameterBook& pars) {
 }
 
 MmReadoutElement::MmReadoutElement(defineArgs&& args): 
-    MuonReadoutElement(std::move(args)),
+    MuonReadoutElement(args),
       m_pars{std::move(args)} {
 }
 

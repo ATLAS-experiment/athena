@@ -62,6 +62,7 @@ RNTCollection::RNTCollection(
      
 RNTCollection::~RNTCollection()
 {
+   // cppcheck-suppress throwInNoexceptFunction; FIXME: delayedFileOpen could throw
    if( m_open ) RNTCollection::close();
    else cleanup();
 }

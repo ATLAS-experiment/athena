@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBCONDRUNPAR_TBCONDRUNPARTOOL_H
@@ -58,16 +58,16 @@ class TBCondRunParTool: public AthAlgTool {
   bool extractCool(const int run);
   bool extractCoolTest(const std::string& folder, int run) const;
 
-  int m_crun;
-  int m_cevent;
+  int m_crun{-1};
+  int m_cevent{-1};
   std::string m_runpfolder;
   // cached data
-  int m_status;
-  int m_run_number;
-  int m_trigger_type;
-  int m_det_mask;
-  int m_beam_type;
-  int m_beam_energy;
+  int m_status{-1};
+  int m_run_number{-1};
+  int m_trigger_type{-1};
+  int m_det_mask{-1};
+  int m_beam_type{-1};
+  int m_beam_energy{-1};
   std::string m_file_tag;
   std::string m_time_SOR;
 };

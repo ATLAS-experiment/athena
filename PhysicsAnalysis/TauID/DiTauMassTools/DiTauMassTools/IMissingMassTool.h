@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Asg wrapper around the MissingMassCalculator
@@ -20,9 +20,6 @@
 #include "xAODMissingET/MissingET.h"
 #include "xAODBase/IParticle.h"
 
-using ROOT::Math::PtEtaPhiMVector;
-using ROOT::Math::XYVector;
-
 class IMissingMassTool : public virtual asg::IAsgTool
 
 {
@@ -31,6 +28,8 @@ class IMissingMassTool : public virtual asg::IAsgTool
   ASG_TOOL_INTERFACE(IMissingMassTool)
 
   public:
+  using PtEtaPhiMVector = ROOT::Math::PtEtaPhiMVector;
+  using XYVector = ROOT::Math::XYVector;
 
   /// virtual destructor
   virtual ~IMissingMassTool() {};

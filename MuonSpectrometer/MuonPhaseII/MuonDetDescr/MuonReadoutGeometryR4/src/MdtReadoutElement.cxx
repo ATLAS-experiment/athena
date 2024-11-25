@@ -40,7 +40,7 @@ std::ostream& operator<<(std::ostream& ostr, const MuonGMR4::MdtReadoutElement::
 }
 MdtReadoutElement::~MdtReadoutElement() = default;
 MdtReadoutElement::MdtReadoutElement(defineArgs&& args)
-    : MuonReadoutElement(std::move(args)),
+    : MuonReadoutElement(args),
       m_pars{std::move(args)} {
 }
 const MdtReadoutElement::parameterBook& MdtReadoutElement::getParameters() const {return m_pars;}

@@ -53,13 +53,14 @@ IdentifierField::get_value_index(element_type value) const{
   if (isBounded()) {
     return (value - m_minimum); 
   } 
+  const auto & v = get_values();
+  if (v.size()==1) return 0;
   if (not m_indexes.empty()) {
     // Table has been created, do simple lookup
     assert (value >= m_minimum && value - m_minimum < (int)m_indexes.size());
     return (m_indexes.at(value - m_minimum));
   } else {
-    const auto & v = get_values();
-    auto it = std::ranges::lower_bound(v, value);
+    auto it = std::ranges::find(v, value);
     if (it != v.end()) return std::distance(v.begin(), it);
   }
   return 0;
@@ -73,7 +74,7 @@ IdentifierField::match(element_type value) const {
   }
   if (m_empty) return true;
   const auto & v = get_values();
-  return (std::ranges::binary_search(v, value));
+  return (std::ranges::find(v, value)!=v.end());
 } 
 
 

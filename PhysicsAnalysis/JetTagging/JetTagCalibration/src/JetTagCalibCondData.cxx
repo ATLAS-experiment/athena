@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetTagCalibration/JetTagCalibCondData.h"
@@ -40,7 +40,7 @@ void JetTagCalibCondData::clear() {
 
 void JetTagCalibCondData::addHisto(const unsigned int indexTagger, const std::string& name, std::unique_ptr<TH1> obj) {
   m_histos[indexTagger].insert(std::make_pair(name, std::move(obj)));
-  ATH_MSG_DEBUG("#BTAG# histo added " << name << " with pointer " << obj.get()
+  ATH_MSG_DEBUG("#BTAG# histo added " << name
                 << ", m_histos size " << m_histos.size());
 }
 

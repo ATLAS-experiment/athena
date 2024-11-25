@@ -230,9 +230,9 @@ StatusCode PhiHoughTransformAlg::execute(const EventContext& ctx) const {
                      <<", y0: "<<max->interceptY());
         if (m_visionTool.isEnabled() && msgLvl(MSG::VERBOSE)) {
             for (const auto& truth : m_visionTool->fetchTruthSegs(max->getHitsInMax())) {
-                Parameters truthPars = localSegmentPars(*truth);
+                const Parameters truthPars = localSegmentPars(*truth);
                 ATH_MSG_VERBOSE("Truth parameters "<<toString(truthPars)<<", tanPhi: "
-                            <<houghTanPhi(dirFromAngles(truthPars[toInt(ParamDefs::phi)],truthPars[toInt(ParamDefs::theta)])));
+                            <<houghTanPhi(Amg::dirFromAngles(truthPars[toInt(ParamDefs::phi)],truthPars[toInt(ParamDefs::theta)])));
             }
         }
         preProcessMaximum(*gctx, *max, eventData); 

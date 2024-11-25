@@ -24,7 +24,7 @@ std::ostream& operator<<(std::ostream& ostr, const parameterBook& pars) {
 }
 sTgcReadoutElement::~sTgcReadoutElement() = default;
 sTgcReadoutElement::sTgcReadoutElement(defineArgs&& args)
-    : MuonReadoutElement(std::move(args)),
+    : MuonReadoutElement(args),
       m_pars{std::move(args)} {
 }
 

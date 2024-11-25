@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_ONCRPCSERVERSVC_H
@@ -97,10 +97,10 @@ namespace JiveXML {
     EventStreamMap m_eventStreamMap;
 
     //A mutex (mutual exclusive) lock for the data map
-    mutable pthread_mutex_t m_accessLock ATLAS_THREAD_SAFE;
+    mutable pthread_mutex_t m_accessLock ATLAS_THREAD_SAFE{};
 
     //A handle to the server thread
-    pthread_t m_ServerThreadHandle;
+    pthread_t m_ServerThreadHandle{};
 
     //Once this flag is set to false, the thread will stop after handling its
     //last request
