@@ -40,6 +40,6 @@ namespace MuonR4{
     bool SegmentSeed::hasPhiExtension() const{ return m_hasPhiExt; }
     Amg::Vector3D SegmentSeed::positionInChamber() const{ return Amg::Vector3D{interceptX(), interceptY(),0.}; }
     Amg::Vector3D SegmentSeed::directionInChamber() const{ 
-        return dirFromAngles(m_pars[toInt(ParamDefs::phi)], m_pars[toInt(ParamDefs::theta)]);
+        return Amg::dirFromAngles(m_pars[toInt(ParamDefs::phi)], m_pars[toInt(ParamDefs::theta)]);
     }
 }

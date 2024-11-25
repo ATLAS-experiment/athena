@@ -23,15 +23,11 @@ namespace MuonR4{
         Amg::Vector3D dirFromTangents(const double tanPhi, const double tanTheta) {
             return Amg::Vector3D(tanPhi, tanTheta, 1.).unit();
         }
-        Amg::Vector3D dirFromAngles(const double phi, const double theta) {
-            const CxxUtils::sincos csPhi{phi}, csTheta{theta};
-            return Amg::Vector3D{csPhi.cs*csTheta.sn,csPhi.sn*csTheta.sn, csTheta.cs};
-        }
         std::pair<Amg::Vector3D, Amg::Vector3D> makeLine(const Parameters& pars) {
             return std::make_pair(Amg::Vector3D(pars[toInt(ParamDefs::x0)], 
                                                 pars[toInt(ParamDefs::y0)],0.),
-                                  dirFromAngles(pars[toInt(ParamDefs::phi)],
-                                                pars[toInt(ParamDefs::theta)]));
+                                  Amg::dirFromAngles(pars[toInt(ParamDefs::phi)],
+                                                     pars[toInt(ParamDefs::theta)]));
         }
         Parameters localSegmentPars(const xAOD::MuonSegment& seg) {
             static const SG::Accessor<xAOD::MeasVector<toInt(ParamDefs::nPars)>> acc{"localSegPars"};
