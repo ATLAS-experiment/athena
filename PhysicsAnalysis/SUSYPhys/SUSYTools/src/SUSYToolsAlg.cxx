@@ -538,6 +538,8 @@ StatusCode SUSYToolsAlg::execute() {
   bool isRun3Trig = false;
   if (m_mcCampaign.find("mc21") != std::string::npos || m_mcCampaign.find("mc23") != std::string::npos) isRun3Trig = true;
 
+  hist("Trigger/isMETTrigPassed")->Fill( m_SUSYTools->IsMETTrigPassed() );
+
   //--- Monitoring
   for (const auto& obj : m_objects) { for (const auto& lev : m_levels) { m_obj_count[obj][lev] = 0; } }
 
@@ -1391,6 +1393,7 @@ StatusCode SUSYToolsAlg::bookHistograms(void) {
        }
     }
   }
+  ATH_CHECK( book(TH1D("Trigger/isMETTrigPassed", "isMETTrigPassed", 2, -0.5, 1.5)) );
   #endif
   
   ATH_CHECK( book(TH1D("Trigger/el_trigmatch_eff_nominal", "Electron Trigger Matching Efficiency (Nominal);Electron Trigger Matching Efficiency (Nominal);N", getSize(m_triggers,"el"), 0, getSize(m_triggers,"el")) ) );
