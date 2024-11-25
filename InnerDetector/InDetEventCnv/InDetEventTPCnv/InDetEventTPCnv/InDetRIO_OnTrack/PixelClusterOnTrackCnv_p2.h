@@ -19,7 +19,6 @@
 
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkEventCnvTools/IEventCnvSuperTool.h"
-
 class MsgStream;
 class PixelID;
 class ErrorMatrixCnv_p1;

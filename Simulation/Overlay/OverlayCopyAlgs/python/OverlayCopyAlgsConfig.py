@@ -219,6 +219,18 @@ def CopyPixelClusterContainerAlgCfg(flags, **kwargs):
 
     return acc
 
+def CopyITkPixelClusterContainerAlgCfg(flags, **kwargs):
+    """Return a ComponentAccumulator for the CopyPixelClusterContainer algorithm"""
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("InputKey", "ITkPixelClusters")
+    kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix+"ITkPixelClusters")
+    kwargs.setdefault("ExtraInputs", [('InDetDD::SiDetectorElementCollection', 'ConditionStore+ITkPixelDetectorElementCollection')])
+
+    alg = CompFactory.CopyPixelClusterContainer("CopyPixelClusterContainer", **kwargs)
+    acc.addEventAlgo(alg)
+
+    return acc
 
 def CopySCT_ClusterContainerAlgCfg(flags, **kwargs):
     """Return a ComponentAccumulator for the CopySCT_ClusterContainer algorithm"""
@@ -233,6 +245,18 @@ def CopySCT_ClusterContainerAlgCfg(flags, **kwargs):
 
     return acc
 
+def CopyITkStripClusterContainerAlgCfg(flags, **kwargs):
+    """Return a ComponentAccumulator for the CopySCT_ClusterContainer algorithm"""
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("InputKey", "ITkStripClusters")
+    kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix+"ITkStripClusters")
+    kwargs.setdefault("ExtraInputs", [('InDetDD::SiDetectorElementCollection', 'ConditionStore+ITkStripDetectorElementCollection')])
+
+    alg = CompFactory.CopySCT_ClusterContainer("CopySCT_ClusterContainer", **kwargs)
+    acc.addEventAlgo(alg)
+
+    return acc
 
 def CopyTRT_DriftCircleContainerAlgCfg(flags, **kwargs):
     """Return a ComponentAccumulator for the CopyTRT_DriftCircleContainer algorithm"""
@@ -391,6 +415,16 @@ def CopyPixelClusterContainerCfg(flags, **kwargs):
 
     return acc
 
+def CopyITkPixelClusterContainerCfg(flags, **kwargs):
+    """Return overlay configuration for the CopyITkPixelClusterContainer algorithm"""
+    acc = CopyITkPixelClusterContainerAlgCfg(flags, **kwargs)
+    if flags.Output.doWriteRDO:
+        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+        acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
+            "InDet::PixelClusterContainer#Bkg_ITkPixelClusters"
+        ]))
+
+    return acc
 
 def CopySCT_ClusterContainerCfg(flags, **kwargs):
     """Return overlay configuration for the CopySCT_ClusterContainer algorithm"""
@@ -404,6 +438,17 @@ def CopySCT_ClusterContainerCfg(flags, **kwargs):
 
     return acc
 
+def CopyITkStripClusterContainerCfg(flags, **kwargs):
+    """Return overlay configuration for the CopySCT_ClusterContainer algorithm"""
+
+    acc = CopyITkStripClusterContainerAlgCfg(flags, **kwargs)
+    if flags.Output.doWriteRDO:
+        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+        acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
+            "InDet::SCT_ClusterContainer#Bkg_ITkStripClusters"
+        ]))
+
+    return acc
 
 def CopyTRT_DriftCircleContainerCfg(flags, **kwargs):
     """Return overlay configuration for the CopyTRT_DriftCircleContainer algorithm"""
@@ -470,6 +515,28 @@ def CopyTrackCollectionsCfg(flags, **kwargs):
 
     return acc
 
+def CopyITkTrackCollectionsCfg(flags, **kwargs):
+    """ Return overlay configuration for copying tracks"""
+
+    acc = ComponentAccumulator()
+
+    allowedContainers = [
+        "CombinedITkTracks",
+        "ResolvedConversionTracks"
+    ]
+    availableContainers = []
+    # Detect the list of track collections
+    if flags.Common.ProductionStep == ProductionStep.FastChain:
+        availableContainers = allowedContainers
+    else:
+        hardScatterInputCollections = flags.Input.Collections
+        for container in allowedContainers:
+            if container in hardScatterInputCollections:
+                availableContainers.append(container)
+    for container in availableContainers:
+        acc.merge(CopyTrackCollectionAlgCfg(flags, container, **kwargs))
+
+    return acc
 
 def CopyDetailedTrackTruthCollectionsCfg(flags, **kwargs):
     """ Return overlay configuration for copying detailed track truth"""

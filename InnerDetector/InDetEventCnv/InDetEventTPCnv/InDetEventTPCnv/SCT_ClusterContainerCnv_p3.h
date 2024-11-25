@@ -22,7 +22,11 @@ class StoreGateSvc;
 class SCT_ClusterContainerCnv_p3 : public T_AthenaPoolTPCnvBase<InDet::SCT_ClusterContainer, InDet::SCT_ClusterContainer_p3>
 {
  public:
-  SCT_ClusterContainerCnv_p3() : m_sctId{nullptr}, m_storeGate{nullptr}, m_SCTDetEleCollKey{"SCT_DetectorElementCollection"}, m_useDetectorElement{true}, m_isInitialized{false} {};
+  SCT_ClusterContainerCnv_p3() :
+    m_sctId{nullptr}, m_storeGate{nullptr},
+    m_SCTDetEleCollKey{"SCT_DetectorElementCollection"},
+    m_ITkStripDetEleCollKey{"ITkStripDetectorElementCollection"},
+    m_useDetectorElement{true}, m_isInitialized{false} {};
   
   virtual void transToPers(const InDet::SCT_ClusterContainer* transCont,
                            InDet::SCT_ClusterContainer_p3* persCont,
@@ -41,6 +45,7 @@ class SCT_ClusterContainerCnv_p3 : public T_AthenaPoolTPCnvBase<InDet::SCT_Clust
   const SCT_ID *m_sctId;
   StoreGateSvc *m_storeGate;
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCTDetEleCollKey;
+  SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_ITkStripDetEleCollKey;
   bool m_useDetectorElement;
   bool m_isInitialized;
   StatusCode initialize(MsgStream &log);

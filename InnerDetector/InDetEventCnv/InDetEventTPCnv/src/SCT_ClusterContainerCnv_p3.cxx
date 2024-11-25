@@ -124,11 +124,19 @@ void  SCT_ClusterContainerCnv_p3::persToTrans(const InDet::SCT_ClusterContainer_
 
     const InDetDD::SiDetectorElementCollection* elements(nullptr);
     if (m_useDetectorElement) {
-        SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> sctDetEleHandle(m_SCTDetEleCollKey);
-        elements = *sctDetEleHandle;
-        if (not sctDetEleHandle.isValid() or elements==nullptr) {
-            log << MSG::FATAL << m_SCTDetEleCollKey.fullKey() << " is not available." << endmsg;
-            return;
+       try {
+        SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> sctDetEleHandle1(m_SCTDetEleCollKey);
+        elements = sctDetEleHandle1.cptr();
+        } catch (const SG::ExcNoCondCont& e) {
+          log << MSG::DEBUG << m_SCTDetEleCollKey << " is not available - probably RUN4, trying "<<m_ITkStripDetEleCollKey<<" instead."<< endmsg;
+        // If the first key fails, try the second key
+	try {
+             SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> sctDetEleHandle2(m_ITkStripDetEleCollKey);
+             elements = sctDetEleHandle2.cptr();
+         } catch (const SG::ExcNoCondCont& e) {
+             log << MSG::FATAL << "No valid SCT detector element collection keys available." << endmsg;
+             return;
+            }
         }
     }
 
@@ -236,7 +244,7 @@ StatusCode SCT_ClusterContainerCnv_p3::initialize(MsgStream &log) {
    //   }
 
    CHECK(m_SCTDetEleCollKey.initialize(m_useDetectorElement));
-
+   CHECK(m_ITkStripDetEleCollKey.initialize(m_useDetectorElement));
    //    if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Converter initialized." << endmsg;
    return StatusCode::SUCCESS;
 }

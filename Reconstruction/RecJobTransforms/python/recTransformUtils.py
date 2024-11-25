@@ -86,6 +86,9 @@ def addStandardRecoFiles(parser):
     parser.add_argument('--outputDAOD_TLAEGAMPEBFile', nargs='+',
                         type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='output'),
                         help='Output DAOD_TLAEGAMPEB file', group='Reco Files')
+    parser.add_argument('--outputRDO_PUFile', nargs='+',
+                        type=trfArgClasses.argFactory(trfArgClasses.argRDOFile, io='output'),
+                        help='Output RDO pileup tracks file', group='Reco Files')
 
 ## @brief Add reconstruction substeps to a set object
 #  @note This is done in a separate function so that other transforms (full chain ones)
@@ -100,6 +103,10 @@ def addRecoSubsteps(executorSet):
                                    skeletonCA = 'RecJobTransforms.RAWtoALL_Skeleton',
                                    substep = 'r2a', inData = ['BS', 'RDO', 'DRAW_ZMUMU', 'DRAW_ZEE', 'DRAW_EMU', 'DRAW_RPVLL'], 
                                    outData = ['ESD', 'AOD', 'HIST_R2A', 'TXT_JIVEXMLTGZ'],))
+    executorSet.add(athenaExecutor(name = 'PUTracking',
+                                   skeletonCA = 'RecJobTransforms.PUTracks_Skeleton',
+                                   substep = 'r2rpu', inData = ['RDO'],
+                                   outData = ['RDO_PU'],))
     executorSet.add(athenaExecutor(name = 'RAWtoDAODTLA',
                                    skeletonCA = 'RecJobTransforms.RAWtoDAOD_TLA_Skeleton',
                                    substep = 'r2tla', inData = ['BS'], outData = ['DAOD_TLA'], ))

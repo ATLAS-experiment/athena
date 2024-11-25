@@ -87,6 +87,26 @@ def ITkStoreTrackSeparateContainerCfg(flags, TrackContainer="",
                                       ClusterSplitProbContainer=""):
     result = ComponentAccumulator()
     extension = flags.Tracking.ActiveConfig.extension
+    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
+    else:
+       doTrackOverlay = flags.Overlay.doTrackOverlay
+    
+    if doTrackOverlay:
+        # schedule merger to combine signal and background tracks
+        InputTracks = [flags.Overlay.SigPrefix+TrackContainer,
+                       flags.Overlay.BkgPrefix+TrackContainer]
+        AssociationMapName = ("PRDtoTrackMapResolved" +
+                              extension + "Tracks")
+        MergerOutputTracks = TrackContainer
+
+        from TrkConfig.TrkTrackCollectionMergerConfig import TrackCollectionMergerAlgCfg
+        result.merge(TrackCollectionMergerAlgCfg(
+            flags,
+            name="TrackCollectionMergerAlgCfg"+extension,
+            InputCombinedTracks=InputTracks,
+            OutputCombinedTracks=MergerOutputTracks,
+            AssociationMapName=AssociationMapName))
 
     if flags.Tracking.doTruth:
         from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
@@ -128,9 +148,15 @@ def ITkTrackRecoPassCfg(flags, extension="",
         StatTrackTruthCollections = []
 
     result = ComponentAccumulator()
+    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
+    else:
+       doTrackOverlay = flags.Overlay.doTrackOverlay
 
     TrackContainer = "Resolved" + extension + "Tracks"
     SiSPSeededTracks = "SiSPSeeded" + extension + "Tracks"
+    if doTrackOverlay and extension == "Conversion":
+        TrackContainer = flags.Overlay.SigPrefix + TrackContainer
 
     from InDetConfig.ITkTrackingSiPatternConfig import ITkTrackingSiPatternCfg
     result.merge(ITkTrackingSiPatternCfg(
@@ -142,6 +168,12 @@ def ITkTrackRecoPassCfg(flags, extension="",
     StatTrackCollections += [SiSPSeededTracks, TrackContainer]
     StatTrackTruthCollections += [SiSPSeededTracks+"TruthCollection",
                                   TrackContainer+"TruthCollection"]
+    if doTrackOverlay and extension == "Conversion":
+        TrackContainer = "Resolved" + extension + "Tracks"
+        result.merge(ITkStoreTrackSeparateContainerCfg(
+            flags,
+            TrackContainer=TrackContainer,
+            ClusterSplitProbContainer=ClusterSplitProbContainer))
 
     if flags.Tracking.ActiveConfig.storeSeparateContainer:
         result.merge(ITkStoreTrackSeparateContainerCfg(
@@ -172,8 +204,15 @@ def ITkTrackFinalCfg(flags,
         StatTrackTruthCollections = []
 
     result = ComponentAccumulator()
+    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
+    else:
+       doTrackOverlay = flags.Overlay.doTrackOverlay
 
     TrackContainer = "CombinedITkTracks"
+    if doTrackOverlay:
+        #schedule merge to combine signal and background tracks
+        InputCombinedITkTracks += [flags.Overlay.BkgPrefix + TrackContainer]
 
     from TrkConfig.TrkTrackCollectionMergerConfig import (
         ITkTrackCollectionMergerAlgCfg)

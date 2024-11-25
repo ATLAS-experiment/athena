@@ -2,7 +2,6 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format
 
-
 def InDetRecPreProcessingSiliconCfg(flags):
     acc = ComponentAccumulator()
     # ------------------------------------------------------------
@@ -30,8 +29,8 @@ def InDetRecPreProcessingSiliconCfg(flags):
     #
     if (flags.Detector.EnablePixel and
         (flags.Input.Format is Format.BS
-         or 'PixelRDOs' in flags.Input.Collections)):
-
+         or 'PixelRDOs' in flags.Input.Collections
+         or f'{flags.Overlay.BkgPrefix}PixelRDOs' in flags.Input.Collections)):
         #
         # --- PixelClusterization algorithm
         #
@@ -47,7 +46,8 @@ def InDetRecPreProcessingSiliconCfg(flags):
     #
     if (flags.Detector.EnableSCT and
         (flags.Input.Format is Format.BS
-         or 'SCT_RDOs' in flags.Input.Collections)):
+         or 'SCT_RDOs' in flags.Input.Collections
+         or f'{flags.Overlay.BkgPrefix}SCT_RDOs' in flags.Input.Collections)):
 
         #
         # --- SCT_Clusterization algorithm

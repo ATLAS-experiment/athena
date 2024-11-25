@@ -3,8 +3,9 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from LArBadChannelTool.LArBadFebsConfig import LArKnownBadFebCfg, LArKnownMNBFebCfg
+from AthenaConfiguration.Enums import ProductionStep
 
-def LArNoisyROSummaryCfg(configFlags):
+def LArNoisyROSummaryCfg(configFlags, **kwargs):
 
    result=ComponentAccumulator()
 
@@ -17,7 +18,8 @@ def LArNoisyROSummaryCfg(configFlags):
 
    # now configure the algorithm
    LArNoisyROAlg,LArNoisyROTool=CompFactory.getComps("LArNoisyROAlg","LArNoisyROTool")
-   
+   if configFlags.Common.ProductionStep is ProductionStep.PileUpPretracking:
+        kwargs.setdefault('EventInfoKey', "Bkg_EventInfo") 
 
    theLArNoisyROTool=LArNoisyROTool(CellQualityCut=configFlags.LAr.NoisyRO.CellQuality,
                                     BadChanPerFEB=configFlags.LAr.NoisyRO.BadChanPerFEB, 

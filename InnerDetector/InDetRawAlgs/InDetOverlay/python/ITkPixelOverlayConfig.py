@@ -40,6 +40,11 @@ def ITkPixelOverlayAlgCfg(flags, name="ITkPixelOverlay", **kwargs):
             f"PixelRDO_Container#{flags.Overlay.SigPrefix}ITkPixelRDOs"
         ]))
 
+    if flags.Overlay.doTrackOverlay:
+    #for track overlay, write out the signal RDOs because reco tracking will only run on them
+        acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
+        f"PixelRDO_Container#{flags.Overlay.SigPrefix}ITkPixelRDOs"]))
+
     return acc
 
 

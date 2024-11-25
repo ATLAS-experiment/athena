@@ -296,7 +296,10 @@ def TRTStandalonePassRecoCfg(flags,
 def StoreTrackSeparateContainerCfg(flags, TrackContainer="",
                                    ClusterSplitProbContainer=""):
     result = ComponentAccumulator()
-    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
+    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
+    else:
+       doTrackOverlay = flags.Overlay.doTrackOverlay
 
     # Dummy Merger to fill additional info
     # for PRD-associated pixel tracklets
@@ -305,7 +308,6 @@ def StoreTrackSeparateContainerCfg(flags, TrackContainer="",
 
     AssociationMapName = ""
     extension = flags.Tracking.ActiveConfig.extension
-    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
 
     if extension == "Disappearing" or doTrackOverlay:
         if extension == "Disappearing":
@@ -408,7 +410,10 @@ def TrackRecoPassCfg(flags, extension="",
                      StatTrackTruthCollections=None,
                      ClusterSplitProbContainer=""):
     result = ComponentAccumulator()
-    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
+    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
+    else:
+       doTrackOverlay = flags.Overlay.doTrackOverlay
     if InputCombinedInDetTracks is None:
         InputCombinedInDetTracks = []
     if InputExtendedInDetTracks is None:
@@ -508,7 +513,10 @@ def TrackFinalCfg(flags,
                   StatTrackCollections=None,
                   StatTrackTruthCollections=None):
     result = ComponentAccumulator()
-    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
+    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
+    else:
+       doTrackOverlay = flags.Overlay.doTrackOverlay
 
     if InputCombinedInDetTracks is None:
         InputCombinedInDetTracks = []
