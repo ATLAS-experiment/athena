@@ -52,16 +52,9 @@ bool SUSYObjDef_xAOD::IsMETTrigPassed(unsigned int runnumber, bool j400_OR) cons
   else if(year == 2017 && rn >= 332303 )                 return IsMETTrigPassed("HLT_xe110_pufit_L1XE50", false); // 2017 D6-(open)
   else if(year == 2018 && rn >= 348885 && rn <= 350013 ) return IsMETTrigPassed("HLT_xe110_pufit_xe70_L1XE50", false); // 2018 B-C5
   else if(year == 2018 && rn >= 350067 )                 return IsMETTrigPassed("HLT_xe110_pufit_xe65_L1XE50", false); // 2018 C5-(open)
-  else if(year == 2022)                                  return (IsMETTrigPassed("HLT_xe65_cell_xe90_pfopufit_L1XE50",false)
-                                                              || IsMETTrigPassed("HLT_xe80_cell_xe115_tcpufit_L1XE50 ",false)); // 2022
-  else if(year == 2023)                                  return (IsMETTrigPassed("HLT_xe55_cell_xe70_tcpufit_xe90_pfsum_vssk_L1XE50",false)
-                                                              || IsMETTrigPassed("HLT_xe55_cell_xe70_tcpufit_xe95_pfsum_cssk_L1XE50",false)
-                                                              || IsMETTrigPassed("HLT_xe60_cell_xe95_pfsum_cssk_L1XE50",false)
-                                                              || IsMETTrigPassed("HLT_xe65_cell_xe100_mhtpufit_pf_L1XE50",false)
-                                                              || IsMETTrigPassed("HLT_xe65_cell_xe105_mhtpufit_em_L1XE50",false)
-                                                              || IsMETTrigPassed("HLT_xe75_cell_xe65_tcpufit_xe90_trkmht_L1XE50",false)
-                                                              || IsMETTrigPassed("HLT_xe65_cell_xe90_pfopufit_L1XE50",false)
-                                                              || IsMETTrigPassed("HLT_xe80_cell_xe115_tcpufit_L1XE50 ",false)); // 2023
+  else if(year == 2022)                                  return IsMETTrigPassed("HLT_xe65_cell_xe90_pfopufit_L1XE50",false); // 2022
+  else if(year == 2023)                                  return IsMETTrigPassed("HLT_xe65_cell_xe90_pfopufit_L1XE50",false); // 2023
+  else if(year == 2024)                                  return IsMETTrigPassed("HLT_xe65_cell_xe105_nn_L1jXE100",false); // 2024
 
   return false; 
 }
