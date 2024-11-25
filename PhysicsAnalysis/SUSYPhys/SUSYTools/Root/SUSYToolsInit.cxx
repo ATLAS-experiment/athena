@@ -544,6 +544,21 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     } else if (m_jetPileupLabelingTool.isUserConfigured()) ATH_CHECK( m_jetPileupLabelingTool.retrieve() );
 
     ///////////////////////////////////////////////////////////////////////////////////////////
+    // Initialise jet Jvt moment tool
+
+    if (!m_jetJvtMomentTool.isUserConfigured()) {
+      toolName = "JvtMomentTool";
+      m_jetJvtMomentTool.setTypeAndName("JetVertexTaggerTool/"+toolName);
+      ATH_CHECK( m_jetJvtMomentTool.setProperty("JetContainer", m_defaultJets) );
+  #ifndef XAOD_STANDALONE
+      ATH_CHECK( m_jetJvtMomentTool.setProperty("SuppressInputDependence", true) );
+      ATH_CHECK( m_jetJvtMomentTool.setProperty("SuppressOutputDependence", true) );
+  #endif
+      ATH_CHECK( m_jetJvtMomentTool.setProperty("OutputLevel", this->msg().level()) );
+      ATH_CHECK( m_jetJvtMomentTool.retrieve() );
+    } else if (m_jetJvtMomentTool.isUserConfigured()) ATH_CHECK( m_jetJvtMomentTool.retrieve() );
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise jet NNJvt moment tool
 
     m_applyJVTCut = !m_JvtWP.empty();

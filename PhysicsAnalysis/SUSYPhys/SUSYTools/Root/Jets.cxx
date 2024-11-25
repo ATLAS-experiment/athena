@@ -126,6 +126,9 @@ namespace ST {
       ATH_CHECK(m_jetPileupLabelingTool->decorate(*copy));
     }
 
+    // Calculate Jvt scores (required by METSignificance)
+    ATH_CHECK(m_jetJvtMomentTool->decorate(*copy));
+
     // Re-calculate NNJvt scores
     if (m_applyJVTCut) ATH_CHECK(m_jetNNJvtMomentTool->decorate(*copy));
 
