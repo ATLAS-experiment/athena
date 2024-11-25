@@ -105,17 +105,6 @@ const HepGeom::Point3D<double> ALFA_GeometryReader::ms_NominalRPMainPoint=HepGeo
 const HepGeom::Point3D<double> ALFA_GeometryReader::ms_NominalAlfaRefPoint=HepGeom::Point3D<double>(-77.5*CLHEP::mm,-35.2*CLHEP::mm,114.0*CLHEP::mm);//-35.7
 const HepGeom::Point3D<double> ALFA_GeometryReader::ms_NominalDetPin1=HepGeom::Point3D<double>(-77.5*CLHEP::mm,-35.0*CLHEP::mm,114.0*CLHEP::mm);
 
-ALFA_GeometryReader::ALFA_GeometryReader()
-{
-    m_eFCoordSystem=EFCS_UNDEFINED;
-	m_eMetrologyType=EMT_UNDEFINED;
-    m_MapRPot.clear();
-}
-
-ALFA_GeometryReader::~ALFA_GeometryReader()
-{
-	m_MapRPot.clear();
-}
 
 void ALFA_GeometryReader::TransformFiberPositions(PFIBERPARAMS pFiberParams,eRPotName eRPName, const eFiberType eType, const eGeoSourceType eSourceType)
 {

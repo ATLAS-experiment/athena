@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_MUONGEOMETRYWRITER
@@ -167,7 +167,7 @@ namespace JiveXML
     bool equalLength(double a, double b) const ;
 
      /** Pointer to the muon detector manager (GeoModel) */
-    const MuonGM::MuonDetectorManager* m_muon_manager ;
+    const MuonGM::MuonDetectorManager* m_muon_manager{nullptr} ;
 
     /** Maximum deviation from the reference value before the station is considered different. */
     static const double m_smallAngle, m_smallDistance ;

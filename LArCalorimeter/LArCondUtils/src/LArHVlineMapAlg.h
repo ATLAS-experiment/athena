@@ -38,8 +38,8 @@ class LArHVlineMapAlg:public AthReentrantAlgorithm {
    SG::ReadCondHandleKey<LArHVIdMapping> m_hvCablingKey{this, "LArHVIdMapping", "LArHVIdMap", "SG key for HV ID mapping"};
    SG::WriteCondHandleKey<LArHVNMap> m_mapKey{this, "keyOutput", "LArHVNcells", "Output key for map of number of cells in HVline"}; 
 
-   const CaloCell_ID*     m_caloHelper ;
-   const LArHVLineID*     m_hvlineHelper;
+   const CaloCell_ID*     m_caloHelper{nullptr};
+   const LArHVLineID*     m_hvlineHelper{nullptr};
 
 };
 

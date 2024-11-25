@@ -7,7 +7,10 @@
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloIdentifier/CaloIdManager.h"
 
-LArHVlineMapAlg::LArHVlineMapAlg(const std::string& name, ISvcLocator* pSvcLocator):AthReentrantAlgorithm(name,pSvcLocator), m_hvmapTool("LArHVMapTool",this), m_caloHelper(nullptr){}
+LArHVlineMapAlg::LArHVlineMapAlg(const std::string& name, ISvcLocator* pSvcLocator) :
+  AthReentrantAlgorithm(name,pSvcLocator),
+  m_hvmapTool("LArHVMapTool",this)
+{}
 
 // intialize 
 StatusCode LArHVlineMapAlg::initialize()

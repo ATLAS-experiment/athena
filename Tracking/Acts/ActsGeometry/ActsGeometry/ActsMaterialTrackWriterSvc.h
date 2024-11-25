@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSMATERIALTRACKWRITERSVC_H
@@ -38,19 +38,19 @@ private:
   std::mutex m_writeMutex;
   std::thread m_writeThread;
   std::atomic<bool> m_doEnd;
-  TFile* p_tFile;
-  TTree* p_tree;
+  TFile* p_tFile{};
+  TTree* p_tree{};
 
-  float m_v_x;    ///< start global x
-  float m_v_y;    ///< start global y
-  float m_v_z;    ///< start global z
-  float m_v_px;   ///< start global momentum x
-  float m_v_py;   ///< start global momentum y
-  float m_v_pz;   ///< start global momentum z
-  float m_v_phi;  ///< start phi direction
-  float m_v_eta;  ///< start eta direction
-  float m_tX0;    ///< thickness in X0/L0
-  float m_tL0;    ///< thickness in X0/L0
+  float m_v_x{};    ///< start global x
+  float m_v_y{};    ///< start global y
+  float m_v_z{};    ///< start global z
+  float m_v_px{};   ///< start global momentum x
+  float m_v_py{};   ///< start global momentum y
+  float m_v_pz{};   ///< start global momentum z
+  float m_v_phi{};  ///< start phi direction
+  float m_v_eta{};  ///< start eta direction
+  float m_tX0{};    ///< thickness in X0/L0
+  float m_tL0{};    ///< thickness in X0/L0
 
   std::vector<float> m_step_sx;      ///< step x (start) position (optional)
   std::vector<float> m_step_sy;      ///< step y (start) position (optional)

@@ -32,6 +32,7 @@ BlockFillerTool<Types<T0> >::BlockFillerTool
   : BlockFillerToolImpl (type, name, parent),
     m_which (0)
 {
+  // cppcheck-suppress missingReturn; false positive
 }
 
 

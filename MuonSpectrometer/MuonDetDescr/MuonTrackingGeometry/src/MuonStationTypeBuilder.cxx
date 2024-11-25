@@ -1870,12 +1870,11 @@ std::unique_ptr<Trk::LayerArray> Muon::MuonStationTypeBuilder::processCSCTrdComp
         x_active.push_back(0);
     }
     // create layers
-    std::unique_ptr<Trk::OverlapDescriptor> od{};
     Trk::SharedObject<const Trk::SurfaceBounds>  bounds = std::make_unique<Trk::TrapezoidBounds>(minX, maxX, halfY);
     for (unsigned int iloop = 0; iloop < x_array.size(); iloop++) {
         Amg::Transform3D cTr = transf * Amg::getTranslateZ3D(x_array[iloop]);
         Trk::HomogeneousLayerMaterial cscMaterial(x_mat[iloop], 0.);
-        auto layer = std::make_unique<Trk::PlaneLayer>(cTr, bounds, cscMaterial, x_thickness[iloop], std::move(od));
+        auto layer = std::make_unique<Trk::PlaneLayer>(cTr, bounds, cscMaterial, x_thickness[iloop]);
         // make preliminary identification of active layers
         layer->setLayerType(x_active[iloop]);
         layers.push_back(std::move(layer));
@@ -1988,13 +1987,11 @@ std::unique_ptr<Trk::LayerArray>
         x_active.push_back(0);
     }
     // create layers
-    std::unique_ptr<Trk::OverlapDescriptor> od{};
     Trk::SharedObject<const Trk::DiamondBounds> dbounds = std::make_unique<Trk::DiamondBounds>(minX, medX, maxX, halfY1, halfY2);
     for (unsigned int iloop = 0; iloop < x_array.size(); iloop++) {
         Amg::Transform3D cTr = transf * Amg::getTranslateZ3D(x_array[iloop]);
         Trk::HomogeneousLayerMaterial cscMaterial(x_mat[iloop], 0.);
-        auto layer = std::make_unique<Trk::PlaneLayer>(cTr, dbounds, cscMaterial,
-                                                       x_thickness[iloop], std::move(od));
+        auto layer = std::make_unique<Trk::PlaneLayer>(cTr, dbounds, cscMaterial, x_thickness[iloop]);
         // make preliminary identification of active layers
         layer->setLayerType(x_active[iloop]);
         layers.push_back(std::move(layer));
@@ -2099,13 +2096,12 @@ std::unique_ptr<Trk::LayerArray> Muon::MuonStationTypeBuilder::processTGCCompone
     matTGC = Trk::MaterialProperties(activeThick, scale * matTGC.x0(), scale * matTGC.l0(),
                                      matTGC.averageA(), matTGC.averageZ(), matTGC.averageRho() / scale);
     // create layers
-    std::unique_ptr<Trk::OverlapDescriptor> od = nullptr;
     Trk::SharedObject<const Trk::SurfaceBounds> bounds = std::make_unique<Trk::TrapezoidBounds>(minX, maxX, halfY);
 
     for (unsigned int iloop = 0; iloop < x_array.size(); iloop++) {
         Amg::Transform3D cTr = Amg::getTranslateX3D(x_array[iloop]) * transf;
         Trk::HomogeneousLayerMaterial tgcMaterial(matTGC, 0.);
-        auto layer = std::make_unique<Trk::PlaneLayer>(cTr, bounds, tgcMaterial, x_thickness[iloop], std::move(od));
+        auto layer = std::make_unique<Trk::PlaneLayer>(cTr, bounds, tgcMaterial, x_thickness[iloop]);
         // make preliminary identification of active layers
         layer->setLayerType(1);
         layers.push_back(std::move(layer));

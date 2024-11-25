@@ -220,9 +220,10 @@ class ALFA_GeometryReader
 		static const HepGeom::Point3D<double> ms_NominalDetPin1; //in RP CS
 
 	private:
-		eFiberCoordSystem m_eFCoordSystem;
-		GEOMETRYCONFIGURATION m_ConfigOpts;
-		eMetrologyType m_eMetrologyType;
+
+		eFiberCoordSystem m_eFCoordSystem{EFCS_UNDEFINED};
+		GEOMETRYCONFIGURATION m_ConfigOpts{};
+		eMetrologyType m_eMetrologyType{EMT_UNDEFINED};
 
 	public:
 		std::map<eRPotName,RPPOSPARAMS> m_RPPosParams;
@@ -233,8 +234,8 @@ class ALFA_GeometryReader
 		std::list<eRPotName> m_ListExistingRPots;
 		
 	public:
-		ALFA_GeometryReader();
-		~ALFA_GeometryReader();
+		ALFA_GeometryReader() = default;
+		~ALFA_GeometryReader() = default;
 		
 	private:
 		bool InitializeDefault(const PGEOMETRYCONFIGURATION pConfig);

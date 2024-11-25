@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSPROPSTEPROOTWRITERSVC_H
@@ -69,9 +69,9 @@ private:
   //Gaudi::Property<bool> m_writePassive{this, "WritePassive", true, ""};
 
   // root branch storage
-    TFile*             m_outputFile;    ///< the output file
-    TTree*             m_outputTree;    ///< the output tree
-    int m_eventNum;
+    TFile*             m_outputFile{};    ///< the output file
+    TTree*             m_outputTree{};    ///< the output tree
+    int m_eventNum{};
     std::vector<float> m_s_pX;   ///< global position x of the step
     std::vector<float> m_s_pY;   ///< global position y of the step
     std::vector<float> m_s_pZ;   ///< global position z of the step
