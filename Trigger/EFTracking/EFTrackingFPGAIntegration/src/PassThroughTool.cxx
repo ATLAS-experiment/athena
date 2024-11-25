@@ -181,7 +181,13 @@ StatusCode PassThroughTool::runPassThrough(EFTrackingDataFormats::StripClusterAu
 
         // Before the spacepoint link problem is solved
         // we will stick with cluster-only version
-        ATH_CHECK(passThroughSW_clusterOnly(ef_stripClusters, ef_scOutput, ef_pixelClusters, ef_pcOutput, metadata));
+        if(m_clusterOnlyPassThrouth){
+            ATH_CHECK(passThroughSW_clusterOnly(ef_stripClusters, ef_scOutput, ef_pixelClusters, ef_pcOutput, metadata));
+        }
+        else{
+            ATH_MSG_ERROR("Full pass-through kernel is not implemented yet");
+            return StatusCode::FAILURE;
+        }
 
         // resize the vector to be the length of the cluster
         scLocalPosition.resize(metadata->numOfStripClusters);

@@ -10,9 +10,10 @@ def xAODContainerMakerCfg(flags, name = 'xAODContainerMaker', **kwarg):
     
     kwarg.setdefault('name', name)
     kwarg.setdefault('OutputStripName', 'FPGAStripClusters')
-    kwarg.setdefault('OutputPixelName', 'FPGAPixelClusters')
-    kwarg.setdefault('OutputStripSpacePointName', 'FPGAStripSpacePoints')
-    kwarg.setdefault('OutputPixelSpacePointName', 'FPGAPixelSpacePoints')
+    kwarg.setdefault('OutputPixelName', 'FPGAPixelClusters')    
+    # Spacepoints below will be further refined when the full pass-through kernel is ready
+    kwarg.setdefault('OutputStripSpacePointName', 'PlaceHolderStripSpacePoints') 
+    kwarg.setdefault('OutputPixelSpacePointName', 'PlaceHolderPixelSpacePoints')
     
     acc.setPrivateTools(CompFactory.xAODContainerMaker(**kwarg))
     return acc
@@ -24,7 +25,8 @@ def PassThroughToolCfg(flags, name = 'PassThroughTool', **kwarg):
     kwarg.setdefault('name', name)
     kwarg.setdefault('StripClusterContainerKey', 'ITkStripClusters')
     kwarg.setdefault('PixelClusterContainerKey', 'ITkPixelClusters')
-    kwarg.setdefault('RunSW', True)
+    kwarg.setdefault('RunSW', flags.FPGADataPrep.PassThrough.RunSoftware)
+    kwarg.setdefault('ClusterOnlyPassThrough', flags.FPGADataPrep.PassThrough.ClusterOnly)
         
     acc.setPrivateTools(CompFactory.PassThroughTool(**kwarg))
     return acc
@@ -39,7 +41,7 @@ def DataPrepCfg(flags, name = "DataPreparationPipeline", **kwarg):
     kwarg.setdefault('name', name)
     kwarg.setdefault('xclbin', '')
     kwarg.setdefault('KernelName', '')
-    kwarg.setdefault('RunPassThrough', False)
+    kwarg.setdefault('RunPassThrough', flags.FPGADataPrep.RunPassThrough)
     kwarg.setdefault('xAODMaker', containerMakerTool)
     kwarg.setdefault('PassThroughTool', passThroughTool)
 
@@ -47,15 +49,33 @@ def DataPrepCfg(flags, name = "DataPreparationPipeline", **kwarg):
     return acc
 
 if __name__=="__main__":
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from EFTrackingFPGAIntegration.IntegrationConfigFlag import addFPGADataPrepFlags
+    flags = addFPGADataPrepFlags()
 
-    flags = initConfigFlags()
     flags.Concurrency.NumThreads = 1
     # The input file should be specified by the user
     flags.Input.Files = [""]
     flags.Output.AODFileName = "DataPrepAOD.pool.root"
-
+    
+    # For pass-through kernel
+    flags.FPGADataPrep.RunPassThrough = True
+    flags.FPGADataPrep.PassThrough.RunSoftware = True
+    flags.FPGADataPrep.PassThrough.ClusterOnly = True
+    
+    # For Spacepoint formation
+    if flags.FPGADataPrep.PassThrough.ClusterOnly:
+        flags.Detector.EnableITkPixel = True
+        flags.Detector.EnableITkStrip = True
+        flags.Acts.useCache = False
+        flags.Tracking.ITkMainPass.doActsSeed=True
+    
+    flags.Debug.DumpEvtStore = True
+    
+    flags.fillFromArgs()
     flags.lock()
+    flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.MainPass", keepOriginal=True)
+    flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkMainPass", keepOriginal=True)
+
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
@@ -66,18 +86,35 @@ if __name__=="__main__":
     kwarg = {}
     kwarg["OutputLevel"] = DEBUG
 
-    acc = DataPrepCfg(flags, **kwarg)
-    cfg.merge(acc)
+    # The Data Preparation (F100) Pipeline on FPGA
+    cfg.merge(DataPrepCfg(flags, **kwarg))
     
-    # Add the AOD output stream
-    # This is only for temporary development purposes
+    # Connection to ACTS
+    from EFTrackingFPGAIntegration.DataPrepToActsConfig import DataPrepToActsCfg
+    cfg.merge(DataPrepToActsCfg(flags, **kwarg))
+    
+    # Prepare output
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    from AthenaConfiguration.Enums import MetadataCategory
+    cfg.merge(SetupMetaDataForStreamCfg(flags,"AOD", 
+                                        createMetadata=[
+                                        MetadataCategory.ByteStreamMetaData,
+                                        MetadataCategory.LumiBlockMetaData,
+                                        MetadataCategory.TruthMetaData,
+                                        MetadataCategory.IOVMetaData,],))
+
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
-    OutputItemList = ["xAOD::StripClusterContainer#FPGAStripClusters",
-                     "xAOD::StripClusterAuxContainer#FPGAStripClustersAux.",
-                     "xAOD::PixelClusterContainer#FPGAPixelClusters",
-                     "xAOD::PixelClusterAuxContainer#FPGAPixelClustersAux."
-                     ]
+    OutputItemList = [
+                    "xAOD::StripClusterContainer#FPGAStripClusters",
+                    "xAOD::StripClusterAuxContainer#FPGAStripClustersAux.",
+                    "xAOD::PixelClusterContainer#FPGAPixelClusters",
+                    "xAOD::PixelClusterAuxContainer#FPGAPixelClustersAux.",
+                    "xAOD::TrackParticleContainer#FPGATrackParticles",
+                    "xAOD::TrackParticleAuxContainer#FPGATrackParticlesAux."
+                    ]
    
     cfg.merge(addToAOD(flags, OutputItemList))
+    
+    cfg.printConfig()
 
-    cfg.run(1)
+    cfg.run(-1)

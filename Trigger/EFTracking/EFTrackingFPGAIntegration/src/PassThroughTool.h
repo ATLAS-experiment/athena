@@ -118,6 +118,8 @@ public:
 private:
     Gaudi::Property<bool> m_runSW{this, "RunSW", true, "Run software mode"};               //!< Software mode, not running on the FPGA
     Gaudi::Property<bool> m_doSpacepoints{this, "DoSpacepoints", false, "Do spacepoints"}; //!< Temporary flag before spacepoints are ready
+    Gaudi::Property<bool> m_clusterOnlyPassThrouth{this, "ClusterOnlyPassThrough", false,
+                                                   "Use the cluster-only pass-through kernel"}; //!< Use the cluster-only pass through tool
 
     SG::ReadHandleKey<xAOD::StripClusterContainer> m_stripClustersKey{
         this, "StripClusterContainerKey", "ITkStripClusters",
