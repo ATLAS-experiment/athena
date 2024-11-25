@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <MuonReadoutGeometryR4/TgcReadoutElement.h>
@@ -32,7 +32,7 @@ std::ostream& operator<<(std::ostream& ostr, const parameterBook& pars) {
 }
 TgcReadoutElement::~TgcReadoutElement() = default;
 TgcReadoutElement::TgcReadoutElement(defineArgs&& args)
-    : MuonReadoutElement(std::move(args)),
+    : MuonReadoutElement(args),
       m_pars{std::move(args)} {
 }
 

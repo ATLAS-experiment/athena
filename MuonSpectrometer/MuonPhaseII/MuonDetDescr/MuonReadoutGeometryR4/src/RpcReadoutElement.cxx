@@ -27,7 +27,7 @@ std::ostream& operator<<(std::ostream& ostr, const parameterBook& pars) {
 }
 RpcReadoutElement::~RpcReadoutElement() = default;
 RpcReadoutElement::RpcReadoutElement(defineArgs&& args)
-    : MuonReadoutElement(std::move(args)),
+    : MuonReadoutElement(args),
       m_pars{std::move(args)} {
 }
 
