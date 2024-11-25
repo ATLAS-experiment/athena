@@ -120,7 +120,7 @@ def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
         kwargs.setdefault("defaultT0", 40)
     else:
         kwargs.setdefault("defaultT0", 799)
-    if flags.Common.isOnline:
+    if not flags.Muon.useMdtDcsData:
         kwargs.setdefault("ReadKeyDCS", "" )
     kwargs.setdefault("UseMLRt",  flags.Muon.Calib.useMLRt )
     kwargs.setdefault("TimeSlewingCorrection", flags.Muon.Calib.correctMdtRtForTimeSlewing)
