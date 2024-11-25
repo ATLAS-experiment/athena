@@ -78,7 +78,7 @@ GoodRunsListSelectorTool::initialize()
   for (itr=m_goodrunslistVec.begin(); itr!=m_goodrunslistVec.end(); ++itr)  {
     //const char* fname;
     std::string fname;
-    if ( itr->find("/")==0 || itr->find("$")==0 || itr->find(".")==0 || itr->find(":")!=string::npos )  {
+    if ( itr->find('/')==0 || itr->find('$')==0 || itr->find('.')==0 || itr->find(':')!=string::npos )  {
       fname = gSystem->ExpandPathName( itr->c_str() );
     }
     else {
@@ -92,7 +92,7 @@ GoodRunsListSelectorTool::initialize()
   for (itr=m_blackrunslistVec.begin(); itr!=m_blackrunslistVec.end(); ++itr)  {
     //const char* fname;
     std::string fname;
-    if ( itr->find("/")==0 || itr->find("$")==0 || itr->find(".")==0 || itr->find(":")!=string::npos )  {
+    if ( itr->find('/')==0 || itr->find('$')==0 || itr->find('.')==0 || itr->find(':')!=string::npos )  {
       fname = gSystem->ExpandPathName( itr->c_str() );
     }
     else {
@@ -109,7 +109,7 @@ GoodRunsListSelectorTool::initialize()
     for (itr=m_goodrunslistVec.begin(); itr!=m_goodrunslistVec.end(); ++itr) {
       //const char* fname;
       std::string fname;
-      if ( itr->find("/")==0 || itr->find("$")==0 || itr->find(".")==0 || itr->find(":")!=string::npos )  {
+      if ( itr->find('/')==0 || itr->find('$')==0 || itr->find('.')==0 || itr->find(':')!=string::npos )  {
         fname = gSystem->ExpandPathName( itr->c_str() );
       }
       else {
@@ -126,7 +126,7 @@ GoodRunsListSelectorTool::initialize()
     for (itr=m_blackrunslistVec.begin(); itr!=m_blackrunslistVec.end(); ++itr) {
       //const char* fname;
       std::string fname;
-      if ( itr->find("/")==0 || itr->find("$")==0 || itr->find(".")==0 || itr->find(":")!=string::npos )  {
+      if ( itr->find('/')==0 || itr->find('$')==0 || itr->find('.')==0 || itr->find(':')!=string::npos )  {
         fname = gSystem->ExpandPathName( itr->c_str() );
       }
       else {
