@@ -394,8 +394,8 @@ StatusCode MetaDataSvc::transitionMetaDataFile(const std::string& outputConn, bo
 //__________________________________________________________________________
 StatusCode MetaDataSvc::io_reinit() {
    ATH_MSG_INFO("I/O reinitialization...");
-   ATH_MSG_INFO("Dumping InputMetaDataStore: " << m_inputDataStore->dump());
-   ATH_MSG_INFO("Dumping OutputMetaDataStore: " << m_outputDataStore->dump());
+   ATH_MSG_DEBUG("Dumping InputMetaDataStore: " << m_inputDataStore->dump());
+   ATH_MSG_DEBUG("Dumping OutputMetaDataStore: " << m_outputDataStore->dump());
    for (auto iter = m_metaDataTools.begin(),
  	     last = m_metaDataTools.end(); iter != last; iter++) {
       ATH_MSG_INFO("Attached MetaDataTool: " << (*iter)->name());
