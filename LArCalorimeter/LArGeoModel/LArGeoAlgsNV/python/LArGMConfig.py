@@ -2,13 +2,12 @@
 
 from AtlasGeoModel.GeoModelConfig import GeoModelCfg
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import LHCPeriod, ProductionStep, Project
+from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
 from IOVDbSvc.IOVDbSvcConfig import addFolders
 
 def LArGMCfg(flags):    
     result=GeoModelCfg(flags)
 
-    activateCondAlgs = flags.Common.Project is not Project.AthSimulation
     tool = CompFactory.LArDetectorToolNV(ApplyAlignments=flags.LAr.doAlign, EnableMBTS=flags.Detector.GeometryMBTS)
     if flags.Common.ProductionStep != ProductionStep.Simulation and flags.Common.ProductionStep != ProductionStep.FastChain:
         tool.GeometryConfig = "RECO"
@@ -18,7 +17,7 @@ def LArGMCfg(flags):
     if flags.LAr.doAlign:
         if flags.Input.isMC:
             #Monte Carlo case:
-            if activateCondAlgs:
+            if not flags.GeoModel.Align.LegacyConditionsAccess:
                 result.merge(addFolders(flags,"/LAR/Align","LAR_OFL",className="DetCondKeyTrans"))
                 result.merge(addFolders(flags,"/LAR/LArCellPositionShift","LAR_OFL",className="CaloRec::CaloCellPositionShift"))
             else:
@@ -28,7 +27,7 @@ def LArGMCfg(flags):
             result.merge(addFolders(flags,"/LAR/Align","LAR_ONL",className="DetCondKeyTrans"))
             result.merge(addFolders(flags,"/LAR/LArCellPositionShift","LAR_ONL",className="CaloRec::CaloCellPositionShift"))
 
-        if activateCondAlgs:
+        if not flags.GeoModel.Align.LegacyConditionsAccess:
             result.addCondAlgo(CompFactory.LArAlignCondAlg())
             result.addCondAlgo(CompFactory.CaloAlignCondAlg())
             AthReadAlg_ExtraInputs = set()
@@ -63,7 +62,7 @@ def LArGMCfg(flags):
                     result.addCondAlgo(AthReadAlg_CaloCellCont)
     else:
         # Build unalinged CaloDetDescrManager instance in the Condition Store
-        if activateCondAlgs:
+        if not flags.GeoModel.Align.LegacyConditionsAccess:
             result.addCondAlgo(CompFactory.CaloAlignCondAlg(LArAlignmentStore="",CaloCellPositionShiftFolder=""))
             if flags.GeoModel.Run >= LHCPeriod.Run3 and flags.Detector.GeometryTile and flags.Common.ProductionStep != ProductionStep.Overlay:
                 # TODO: avoid depending on Tile in SuperCell alignment

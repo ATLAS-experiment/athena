@@ -19,7 +19,7 @@ Amg::Vector2D sTGCAsBuiltData2::correctPosition(const Identifier& channelId, con
     Amg::Vector2D correctedPos = pos;
     Parameters pars = par_itr->second;
     constexpr double convScale = 1.e-3; // parameters are stored in um and mrad therefore dividing by 1000
-    correctedPos.x() = pos.x() + (pars.offset * convScale  + pars.rotation *convScale * pos.y() + pars.scale*convScale*pos.x()); 
+    correctedPos.x() = pos.x() + (pars.offset * convScale  + pars.rotation *convScale * pos.y() + pars.scale*convScale*pos.x() + pars.nonPara * convScale * convScale * pos.x()*pos.y()); 
     return correctedPos;
 }
 
