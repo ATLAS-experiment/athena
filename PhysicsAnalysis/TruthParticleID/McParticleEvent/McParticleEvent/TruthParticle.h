@@ -133,6 +133,12 @@ class TruthParticle : public ParticleImpl<
    */
   int barcode() const;
 
+#ifdef HEPMC3
+  /** Forwards the HepMC::GenParticle::id() information
+   */
+  int id() const;
+#endif
+
   /** Forwards the HepMC::GenParticle::barcode() information
    */
   long compressedExtBarCode() const { return 0; };
@@ -305,6 +311,13 @@ inline int TruthParticle::barcode() const
 {
   return HepMC::barcode(genParticle());
 }
+
+#ifdef HEPMC3
+inline int TruthParticle::id() const
+{
+  return genParticle()->id();
+}
+#endif
 
 inline unsigned int TruthParticle::nParents() const 
 { return m_mothers.size(); }
