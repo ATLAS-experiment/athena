@@ -12,9 +12,10 @@ export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrad
 MAPS_9L="maps_9L/OtherFPGAPipelines/${MAP_9L_VERSION}/"
 MAPS_5L="maps_5L/InsideOut/${MAP_5L_VERSION}/"
 
-BANKS_9L="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/banks_9L/${BANK_9L_VERSION}/"
-BANKS_5L="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/banks_5L/${BANK_5L_VERSION}/"
+BANKS_9L="banks_9L/${BANK_9L_VERSION}/"
+BANKS_5L="banks_5L/${BANK_5L_VERSION}/"
 
+ONNX_INPUT="${BANKS_9L}/ClassificationHT_v5.onnx"
 
 RUN_CKF=True
 
