@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloEvent/test/CaloCellContainerTestCommon.icc
@@ -34,6 +34,7 @@ void fill_cells1 (CellVector selected_cells[],
 }
 
 
+// cppcheck-suppress passedByValue; false positive
 void fill_cells2 (CellVector selected_cells[],
                   CellContainer& cont,
                   Athena_test::URNG& stlrand)
