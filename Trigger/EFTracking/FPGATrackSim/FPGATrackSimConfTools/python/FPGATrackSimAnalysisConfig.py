@@ -37,6 +37,7 @@ def FPGATrackSimBankSvcCfg(flags):
     result=ComponentAccumulator()
     FPGATrackSimBankSvc = CompFactory.FPGATrackSimBankSvc()
     pathBankSvc = flags.Trigger.FPGATrackSim.bankDir if flags.Trigger.FPGATrackSim.bankDir != '' else f'/eos/atlas/atlascerngroupdisk/det-htt/HTTsim/{flags.GeoModel.AtlasVersion}/21.9.16/'+FPGATrackSimDataPrepConfig.getBaseName(flags)+'/SectorBanks/'
+    pathBankSvc=PathResolver.FindCalibDirectory(pathBankSvc)
     FPGATrackSimBankSvc.constantsNoGuess_1st = [
         f'{pathBankSvc}corrgen_raw_8L_skipPlane0.gcon', 
         f'{pathBankSvc}corrgen_raw_8L_skipPlane1.gcon', 
