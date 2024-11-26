@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TruthUtils )
@@ -26,3 +26,6 @@ atlas_add_test( AtlasPIDTest
                 LINK_LIBRARIES TruthUtils
                 ENVIRONMENT "REFERENCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/share/AtlasPIDTest.ref"
                 POST_EXEC_SCRIPT nopost.sh )
+atlas_add_executable( pdgInfo
+                test/pdgInfo.cxx
+                LINK_LIBRARIES TruthUtils )
