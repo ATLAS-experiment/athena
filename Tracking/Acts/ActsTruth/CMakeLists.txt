@@ -30,5 +30,6 @@ atlas_add_component( ActsTruth
 		       xAODInDetMeasurement
 		       xAODMeasurementBase
 		       xAODTruth
+                       TruthUtils
                        PRIVATE_LINK_LIBRARIES
                        ${HEPPDT_LIBRARIES} )

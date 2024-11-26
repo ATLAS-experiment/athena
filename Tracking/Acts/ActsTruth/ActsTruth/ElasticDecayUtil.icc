@@ -3,6 +3,7 @@
 */
 #include "xAODTruth/TruthVertex.h"
 #include <sstream>
+#include "TruthUtils/HepMCHelpers.h"
 
 template <bool IsDebug>
 const xAOD::TruthParticle *ElasticDecayUtil<IsDebug>::getMother(const xAOD::TruthParticle &truth_particle, float max_energy_loss) const {
@@ -29,7 +30,7 @@ const xAOD::TruthParticle *ElasticDecayUtil<IsDebug>::getMother(const xAOD::Trut
       if (prod_vtx->nIncomingParticles() != 1) break;
       if (prod_vtx->nOutgoingParticles() > 2) break;
       const xAOD::TruthParticle *grand_parent = prod_vtx->incomingParticle(0u);
-      if (!grand_parent) break;
+      if (!grand_parent || !MC::isPhysical(grand_parent)) break;
       if (grand_parent->pdgId() != last_parent->pdgId()) break;
       if constexpr(IsDebug) {
          unsigned int particle_type_i = kNoSibling;
