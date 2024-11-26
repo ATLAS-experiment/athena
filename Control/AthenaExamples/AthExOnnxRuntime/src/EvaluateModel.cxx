@@ -63,7 +63,7 @@ namespace AthOnnx {
      	ATH_MSG_INFO("Label for the input test data: ");
    for(int ibatch = 0; ibatch < m_batchSize; ibatch++){
      	float max = -999;
-     	int max_index;
+     	int max_index = 0;
      	for (int i = 0; i < 10; i++){
        		ATH_MSG_DEBUG("Score for class "<< i <<" = "<<outputScores[i] << " in batch " << ibatch);
             int index = i + ibatch * 10;
