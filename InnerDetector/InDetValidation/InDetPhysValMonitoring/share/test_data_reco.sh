@@ -4,11 +4,12 @@
 #
 # Steering script for IDPVM ART jobs with Data Reco config
 
-inputBS=$1
-dcubeRef=$2
-lastref_dir=$3
-conditions=$4
-geotag=$5
+ArtProcess=$1
+ArtInFile=$2
+dcubeRef=$3
+lastref_dir=$4
+conditions=$5
+geotag=$6
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeShifterXml=${artdata}/InDetPhysValMonitoring/dcube/config/IDPVMPlots_data_baseline.xml
@@ -82,7 +83,7 @@ case $ArtProcess in
     unset  ATHENA_PROC_NUMBER
 
     Reco_tf.py \
-	--inputBSFile "$inputBS" \
+	--inputBSFile $x \
 	--maxEvents 1000 \
 	--autoConfiguration everything \
 	--conditionsTag   "$conditions" \
