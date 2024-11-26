@@ -58,7 +58,6 @@ def defineMenu():
         'L1_jJ5', 'L1_jJ10',
         'L1_jJ20', 'L1_jJ30',
         'L1_jJ40', 'L1_jJ50', 'L1_jJ55', 'L1_jJ60', 'L1_jJ80', 'L1_jJ90',
-        'L1_jJ15p30ETA49', 'L1_jJ20p30ETA49',
         'L1_jJ40p30ETA49', 'L1_jJ50p30ETA49', 'L1_jJ60p30ETA49', 'L1_jJ90p30ETA49', 'L1_jJ125p30ETA49',
         'L1_jJ30_VjTE200',
 

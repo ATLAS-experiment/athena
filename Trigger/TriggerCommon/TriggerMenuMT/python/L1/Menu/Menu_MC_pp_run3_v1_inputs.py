@@ -40,7 +40,14 @@ def defineInputsMenu():
                 # Add more decision algorithms
                 if conn["name"] == "Topo2El":
                     for group in conn["algorithmGroups"]:
-                        if group["fpga"]==0 and group["clock"]==1:
+                        if group["fpga"]==0 and group["clock"]==0:
+                            group["algorithms"] += [
+                                    TopoMenuDef( '0DR04-MU5VFab-CjJ30ab' , outputbits = 13), 
+                                    TopoMenuDef( '0DR04-MU5VFab-CjJ40ab' , outputbits = 14), 
+                                    TopoMenuDef( '0DR04-MU8Fab-CjJ30ab'  , outputbits = 15), 
+                                    TopoMenuDef( '0DR04-MU8Fab-CjJ40ab'  , outputbits = 16), 
+                            ]
+                        elif group["fpga"]==0 and group["clock"]==1:
                             group["algorithms"] += [
                                     TopoMenuDef( '0DR04-MU5VFab-CjJ90ab',     outputbits = 11), #Bjet, TODO: not a primary
                                     TopoMenuDef( '2DISAMB-jJ30ab-0DR10-eTAU20ab-eTAU12ab', outputbits = 12),
@@ -56,7 +63,7 @@ def defineInputsMenu():
                                                                                                                                    '0INVM70-2DR15-eEM12sl1-eEM12sl6']),   
                                                                                                                      
                                     TopoMenuDef( 'INVM_BOOSTDR_Ranges_Asymm_eEMsl6',                outputbits = (12,13), outputlines = ['0INVM30-2DR15-eEM12sl1-eEM9sl6', 
-                                                                                                                                         '25INVM70-13DR25-eEM12sl1-eEM9sl6']),   
+                                                                                                                                         '25INVM70-13DR25-eEM12sl1-eEM9sl6']),
                             ]
                 if conn["name"] == "Topo3El":
                     for group in conn["algorithmGroups"]:

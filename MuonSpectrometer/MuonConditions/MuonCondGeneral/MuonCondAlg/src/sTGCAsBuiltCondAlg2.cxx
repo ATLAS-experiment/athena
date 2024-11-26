@@ -92,6 +92,7 @@ StatusCode sTGCAsBuiltCondAlg2::parseDataFromJSON(const nlohmann::json& lines,
         pars.offset = line["offset"];
         pars.rotation = line["rotation"];
         pars.scale = line["scale"];
+        pars.nonPara = line["nonPara"];
 
         ATH_CHECK(effiData.setParameters(id, pars));
     }

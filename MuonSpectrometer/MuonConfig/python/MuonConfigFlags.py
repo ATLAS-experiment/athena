@@ -153,6 +153,9 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.MMClusterCalibRecoTool",  lambda prevFlags : MMClusterBuilderEnum.ClusterTimeProjection if prevFlags.Input.isMC else MMClusterBuilderEnum.Centroid, type=MMClusterBuilderEnum)
 
     mcf.addFlag("Muon.writexAODPRD", False) # Output new xAOD format from convertors (to be removed once the old format is deprecated)
+    # use the MDT DCS data to determine if a chamber is alive or not. This is used in the hole search and the region selector. Needs to be false if the job is running online or is the reconstruction of the MDT calib stream
+    mcf.addFlag("Muon.useMdtDcsData", lambda prevFlags : not prevFlags.Common.isOnline)
+
 
 
 
