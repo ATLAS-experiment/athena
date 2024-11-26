@@ -153,7 +153,9 @@ namespace xAODMaker {
         ATH_MSG_DEBUG( "Recorded TruthVertexContainer with key: " << m_xaodTruthVertexContainerKey.key() );
 
         // To keep track of whether we wrote an LHE event already or not
+#ifdef HEPMC3
         bool hadLHERecord = false;
+#endif
 
         // ***********************************************************************************
         // Create the xAOD objects
