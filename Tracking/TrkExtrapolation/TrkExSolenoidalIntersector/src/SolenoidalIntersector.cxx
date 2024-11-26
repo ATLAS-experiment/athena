@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -399,13 +399,13 @@ SolenoidalIntersector::newIntersection (const TrackSurfaceIntersection& isect,
 {
   const TrackSurfaceIntersection::IIntersectionCache* oldCache = isect.cache();
   std::unique_ptr<Constants> cache;
-  const Amg::Vector3D* lastPosition = nullptr;
+  Amg::Vector3D lastPosition;
 
   if (oldCache) {
       assert(typeid(*oldCache) == typeid(Constants));
       cache =
           std::make_unique<Constants>(*static_cast<const Constants*>(oldCache));
-      lastPosition = &cache->m_lastPosition;
+      lastPosition = cache->m_lastPosition;
   } else {
       cache = std::make_unique<Constants>(solpar, isect, qOverP);
   }
@@ -413,8 +413,8 @@ SolenoidalIntersector::newIntersection (const TrackSurfaceIntersection& isect,
   com = cache.get();
   auto newIsect =
       std::make_optional<TrackSurfaceIntersection>(isect, std::move(cache));
-  if (lastPosition) {
-    newIsect->position() = *lastPosition;
+  if (oldCache) {
+    newIsect->position() = lastPosition;
   }
   return newIsect;
 }
