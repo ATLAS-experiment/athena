@@ -85,6 +85,14 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.addBlock ('Jets.PtEtaSelection')
     config.setOptions (containerName='AnaJets')
 
+    # Large-R jets
+    config.addBlock('Jets')
+    config.setOptions (containerName='AnaLargeRJets')
+    config.setOptions (jetCollection='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets')
+    # Jets.PtEtaSelection
+    config.addBlock ('Jets.PtEtaSelection')
+    config.setOptions (containerName='AnaLargeRJets')
+
     # Electrons
     config.addBlock ('Electrons')
     config.setOptions (containerName='AnaElectrons')
@@ -148,6 +156,8 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
 
     config.addBlock ('SystObjectLink')
     config.setOptions (containerName='AnaJets')
+    config.addBlock ('SystObjectLink')
+    config.setOptions (containerName='AnaLargeRJets')
     config.addBlock ('SystObjectLink')
     config.setOptions (containerName='AnaElectrons')
     config.addBlock ('SystObjectLink')
@@ -218,6 +228,9 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.addBlock ('Thinning')
     config.setOptions (containerName='AnaJets')
     config.setOptions (outputName='OutJets')
+    config.addBlock ('Thinning')
+    config.setOptions (containerName='AnaLargeRJets')
+    config.setOptions (outputName='OutLargeRJets')
 
     config.addBlock ('Output')
     config.setOptions (treeName='analysis')
@@ -229,6 +242,7 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
         'ph_' : 'OutPhotons',
         'tau_': 'OutTauJets',
         'jet_': 'OutJets',
+        'larger_jet_': 'OutLargeRJets',
         'met_': 'AnaMET',
         '': 'EventInfo'}
     config.setOptions (containers=outputContainers)

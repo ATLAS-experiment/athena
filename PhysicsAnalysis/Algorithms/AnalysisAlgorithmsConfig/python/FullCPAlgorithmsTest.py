@@ -73,10 +73,7 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     vars = []
     metVars = []
 
-    # it seems the right containers are in the test input files so far
-    largeRJets = False
-    # there are no track jets in PHYSLITE, or in the sequence configuration
-    trackJets = not isPhyslite and not forCompare
+    largeRJets = True
 
     if autoconfigFromFlags is not None:
         if geometry is None:
@@ -146,6 +143,11 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
             configSeq.setOptionValue ('.btagger', btagger)
             configSeq.setOptionValue ('.btagWP', btagWP)
 
+    configSeq += config.makeConfig ('Jets.PtEtaSelection',
+        containerName='AnaJets')
+    configSeq.setOptionValue ('.minPt', jetMinPt)
+    configSeq.setOptionValue ('.maxEta', jetMaxEta)
+
     if largeRJets :
         configSeq += config.makeConfig( 'Jets',
             containerName='AnaLargeRJets',
@@ -154,24 +156,8 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
         if not forCompare :
             configSeq.setOptionValue ('.recalibratePhyslite', False)
 
-    if trackJets :
-        configSeq += config.makeConfig( 'Jets',
-            containerName='AnaTrackJets',
-            jetCollection='AntiKtVR30Rmax4Rmin02PV0TrackJets' )
-        outputContainers['track_jet_'] = 'OutTrackJets'
-
-    configSeq += config.makeConfig ('Jets.PtEtaSelection',
-        containerName='AnaJets')
-    configSeq.setOptionValue ('.minPt', jetMinPt)
-    configSeq.setOptionValue ('.maxEta', jetMaxEta)
-    if largeRJets :
         configSeq += config.makeConfig ('Jets.PtEtaSelection',
             containerName='AnaLargeRJets')
-        configSeq.setOptionValue ('.minPt', jetMinPt)
-        configSeq.setOptionValue ('.maxEta', jetMaxEta)
-    if trackJets :
-        configSeq += config.makeConfig ('Jets.PtEtaSelection',
-            containerName='AnaTrackJets')
         configSeq.setOptionValue ('.minPt', jetMinPt)
         configSeq.setOptionValue ('.maxEta', jetMaxEta)
 
@@ -275,8 +261,6 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     configSeq += config.makeConfig('SystObjectLink', containerName='AnaJets')
     if largeRJets:
         configSeq += config.makeConfig('SystObjectLink', containerName='AnaLargeRJets')
-    if trackJets:
-        configSeq += config.makeConfig('SystObjectLink', containerName='AnaTrackJets')
     configSeq += config.makeConfig('SystObjectLink', containerName='AnaElectrons')
     configSeq += config.makeConfig('SystObjectLink', containerName='AnaPhotons')
     configSeq += config.makeConfig('SystObjectLink', containerName='AnaMuons')
@@ -383,10 +367,6 @@ def makeTestSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
         configSeq += config.makeConfig ('Thinning',
             containerName='AnaLargeRJets')
         configSeq.setOptionValue ('.outputName', 'OutLargeRJets')
-    if trackJets :
-        configSeq += config.makeConfig ('Thinning',
-            containerName='AnaTrackJets')
-        configSeq.setOptionValue ('.outputName', 'OutTrackJets')
 
     # disabling comparisons for triggers, because the config blocks do a
     # lot more than the sequences. Also disabling for Run 3+4, as there is no SF yet

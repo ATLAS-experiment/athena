@@ -52,12 +52,16 @@ ELogMassEtaUncertaintyComponent* ELogMassEtaUncertaintyComponent::clone() const
 
 bool ELogMassEtaUncertaintyComponent::getValidityImpl(const xAOD::Jet& jet, const xAOD::EventInfo&) const
 {
-    return !m_validHist ? true : getValidBool(m_validHist->getValue(jet.e()*m_energyScale,log(getMassOverE(jet,m_massDef)),m_absEta ? fabs(jet.eta()) : jet.eta()));
+  double MassOverE = getMassOverE(jet,m_massDef);
+  if(!(MassOverE>0)) return false;
+  return !m_validHist ? true : getValidBool(m_validHist->getValue(jet.e()*m_energyScale,log(MassOverE),m_absEta ? std::abs(jet.eta()) : jet.eta()));
 }
 
 double ELogMassEtaUncertaintyComponent::getUncertaintyImpl(const xAOD::Jet& jet, const xAOD::EventInfo&) const
 {
-    return m_uncHist->getValue(jet.e()*m_energyScale,log(getMassOverE(jet,m_massDef)),m_absEta ? fabs(jet.eta()) : jet.eta());
+  double MassOverE = getMassOverE(jet,m_massDef);
+  if(!(MassOverE>0)) return JESUNC_ERROR_CODE;
+  return m_uncHist->getValue(jet.e()*m_energyScale,log(MassOverE),m_absEta ? std::abs(jet.eta()) : jet.eta());
 }
 
 } // end jet namespace

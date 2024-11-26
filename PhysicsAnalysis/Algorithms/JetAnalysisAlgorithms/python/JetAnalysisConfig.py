@@ -562,7 +562,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
 
         # Config file:
         config_file = None
-        if self.systematicsModelJER in ["Simple", "Full"] and not config.isPhyslite():
+        if self.systematicsModelJER in ["Simple", "Full"]:
             config_file = "R10_CategoryJES_{0}JER_FullJMS.config".format(self.systematicsModelJER)
         else:
             raise ValueError(
