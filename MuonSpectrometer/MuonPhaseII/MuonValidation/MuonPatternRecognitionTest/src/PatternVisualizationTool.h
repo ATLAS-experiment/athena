@@ -155,9 +155,15 @@ namespace MuonValR4 {
                 void writeChi2(const MuonR4::SegmentFit::Parameters& pars,
                               const std::vector<SpacePointType>& hits,
                               PrimitiveVec& primitivesToPush,
-                              const double legX = 0.15, double startLegY = 0.8, 
+                              const double legX = 0.2, double startLegY = 0.8, 
                               const double endLegY  = 0.3) const;
             
+            /** @brief Draw the various primitives onto the Canvas. If a TLine is amongst them it's automatically
+             *         adjusted to fit the canvas ranges
+             *  @param canvas: Reference to the canvas to draw the primitives on
+             *  @param prmitives: Primitives to draw onto the Canvas */
+            void drawPrimitives(const TCanvas& can,
+                                PrimitiveVec& primitives) const;
             /** @brief Maximum canvases to draw */
             Gaudi::Property<unsigned int> m_canvasLimit{this, "CanvasLimits", 5000};
             /** @brief If set to true each canvas is saved into a dedicated pdf file */ 
@@ -172,7 +178,7 @@ namespace MuonValR4 {
             /** @brief Display the surrounding hits from the bucket not part of the seed*/            
             Gaudi::Property<bool> m_displayBucket{this, "displayBucket", true};
             /** @brief Extra safety margin to zoom out from the Canvas */
-            Gaudi::Property<double> m_canvasExtraScale{this, "CanvasExtraScale" , 1.3};
+            Gaudi::Property<double> m_canvasExtraScale{this, "CanvasExtraScale" , 1.5};
             /** @brief Swtich toggling whether the accumulator view are in the eta or phi plane.
              *         Just affects the axis labels */
             Gaudi::Property<bool> m_accumlIsEta{this, "AccumulatorsInEtaPlane", true}; 
@@ -180,6 +186,12 @@ namespace MuonValR4 {
             Gaudi::Property<bool> m_doEtaBucketViews{this,"doEtaBucketViews", true};
             /** @brief Switch to visualize the phi view of the bucket event */
             Gaudi::Property<bool> m_doPhiBucketViews{this,"doPhiBucketViews", true};
+            /** @brief ATLAS label (Internal / Prelimnary / Simulation) */
+            Gaudi::Property<std::string> m_AtlasLabel{this, "AtlasLabel", "Internal"};
+            /** @brief Centre of mass energy label */
+            Gaudi::Property<std::string> m_sqrtSLabel{this, "SqrtSLabel", "14"};
+            /** @brief Luminosity label */
+            Gaudi::Property<std::string> m_lumiLabel{this, "LumiLabel", ""};
             /** @brief Declare dependency on the prep data containers */
             SG::ReadHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_prepContainerKeys{this, "PrdContainer", {}};
             /** @brief List of truth segment links to fetch */

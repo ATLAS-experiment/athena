@@ -49,11 +49,11 @@ namespace MuonR4{
 
         std::string makeLabel(const Parameters&pars) {
             std::stringstream sstr{};
-            sstr<<"x_{0}="<<std::format("{:.2f}", pars[toInt(ParamDefs::x0)])<<", ";
-            sstr<<"y_{0}="<<std::format("{:.2f}", pars[toInt(ParamDefs::y0)])<<", ";
-            sstr<<std::format("#theta={:.3f}", pars[toInt(ParamDefs::theta)] / Gaudi::Units::deg )<<", ";
-            sstr<<std::format("#phi={:.3f}", pars[toInt(ParamDefs::phi)] / Gaudi::Units::deg)<<", ";
-            sstr<<"t_{0}="<<std::format("{:.1f}", pars[toInt(ParamDefs::time)]);
+            sstr<<std::format("x_{{0}}={:.2f}", pars[toInt(ParamDefs::x0)])<<", ";
+            sstr<<std::format("y_{{0}}={:.2f}", pars[toInt(ParamDefs::y0)])<<", ";
+            sstr<<std::format("#theta={:.2f}^{{#circ}}", pars[toInt(ParamDefs::theta)] / Gaudi::Units::deg )<<", ";
+            sstr<<std::format("#phi={:.2f}^{{#circ}}", pars[toInt(ParamDefs::phi)] / Gaudi::Units::deg)<<", ";
+            sstr<<std::format("t_{{0}}={:.1f}", pars[toInt(ParamDefs::time)]);
             return sstr.str();
         }
         std::string toString(const Parameters& pars) {
