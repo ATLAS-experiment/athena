@@ -59,26 +59,42 @@ StatusCode InDetTrackPerfMonTool::initialize() {
 
   ATH_MSG_DEBUG( "Initializing sub-tools" );
 
-  ATH_CHECK( m_trigDecTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() } ) );
-  ATH_CHECK( m_roiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() } ) );
-  ATH_CHECK( m_trackRoiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger()} ) );
+  ATH_CHECK( m_trigDecTool.retrieve(
+      EnableTool{ m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() } ) );
+  ATH_CHECK( m_roiSelectionTool.retrieve(
+      EnableTool{ m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() } ) );
+  ATH_CHECK( m_trackRoiSelectionTool.retrieve(
+      EnableTool{ m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger()} ) );
   ATH_CHECK( m_trackMatchingTool.retrieve( EnableTool{ m_doMatch.value() } ) );
   ATH_CHECK( m_trkAnaInfoWriteTool.retrieve( EnableTool{ m_writeOut.value() } ) );
 
-  ATH_CHECK( m_eventInfoContainerName.initialize() );
+  ATH_MSG_DEBUG( "Initializing collections" );
 
-  ATH_CHECK( m_offlineTrkParticleName.initialize( 
-      m_trkAnaDefSvc->useOffline() and not m_offlineTrkParticleName.key().empty() ) );
-  ATH_CHECK( m_triggerTrkParticleName.initialize( 
-      m_trkAnaDefSvc->useTrigger() and not m_triggerTrkParticleName.key().empty() ) );
-  ATH_CHECK( m_truthParticleName.initialize( 
-      m_trkAnaDefSvc->useTruth() and not m_truthParticleName.key().empty() ) );
+  /// Events
+  ATH_CHECK( m_eventInfoContainerName.initialize() );
   ATH_CHECK( m_truthEventName.initialize(
       m_trkAnaDefSvc->useTruth() and not m_truthEventName.key().empty() ) );
   ATH_CHECK( m_truthPileUpEventName.initialize(
       m_trkAnaDefSvc->useTruth() and not m_truthPileUpEventName.key().empty() and
       m_trkAnaDefSvc->hasFullPileupTruth() ) );
 
+  /// Tracks
+  ATH_CHECK( m_offlineTrkParticleName.initialize(
+      m_trkAnaDefSvc->useOffline() and not m_offlineTrkParticleName.key().empty() ) );
+  ATH_CHECK( m_triggerTrkParticleName.initialize(
+      m_trkAnaDefSvc->useTrigger() and not m_triggerTrkParticleName.key().empty() ) );
+  ATH_CHECK( m_truthParticleName.initialize(
+      m_trkAnaDefSvc->useTruth() and not m_truthParticleName.key().empty() ) );
+
+  /// Vertex
+  ATH_CHECK( m_offlineVertexContainerName.initialize( 
+      m_trkAnaDefSvc->useOffline() and not m_offlineVertexContainerName.key().empty() ) );
+  ATH_CHECK( m_triggerVertexContainerName.initialize(
+      m_trkAnaDefSvc->useTrigger() and not m_triggerVertexContainerName.key().empty() ) );
+  ATH_CHECK( m_truthVertexContainerName.initialize(
+      m_trkAnaDefSvc->useTruth() and not m_truthVertexContainerName.key().empty() ) );
+
+  /// TrkAnaInfo for AOD_IDTPM output
   ATH_CHECK( m_trkAnaInfoKey.initialize() );
 
   /// Retrieving list of configured chains
@@ -169,13 +185,39 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
   /// ------------------------------
   /// --- Track quality selector ---
   /// ------------------------------
-  /// Track-quality-based selection
   ATH_CHECK( m_trackQualitySelectionTool->selectTracks( thisTrkAnaCollections ) );
 
   /// Check if overall test/reference track vectors are empty
   if( thisTrkAnaCollections.empty( IDTPM::TrackAnalysisCollections::FS ) ) {
     ATH_MSG_DEBUG( "Some collections are empty after quality selection." );
   }
+
+  /// -------------------------------
+  /// --- Vertex quality selector ---
+  /// -------------------------------
+  /// FIXME - for the time being, only copy veritces from FULL
+  /// will need selector tool, as for the tracks
+  if( m_trkAnaDefSvc->useOffline() ) {
+    ATH_CHECK( thisTrkAnaCollections.fillOfflVertexVec(
+        thisTrkAnaCollections.offlVertexVec( IDTPM::TrackAnalysisCollections::FULL ),
+        IDTPM::TrackAnalysisCollections::FS ) );
+  }
+
+  if( m_trkAnaDefSvc->useEFTrigger() ) {
+    ATH_CHECK( thisTrkAnaCollections.fillTrigVertexVec(
+        thisTrkAnaCollections.trigVertexVec( IDTPM::TrackAnalysisCollections::FULL ),
+        IDTPM::TrackAnalysisCollections::FS ) );
+  }
+
+  if( m_trkAnaDefSvc->useTruth() ) {
+    ATH_CHECK( thisTrkAnaCollections.fillTruthVertexVec(
+        thisTrkAnaCollections.truthVertexVec( IDTPM::TrackAnalysisCollections::FULL ),
+        IDTPM::TrackAnalysisCollections::FS ) );
+  }
+
+  /// Debug printout
+  ATH_MSG_DEBUG( "Vertices after initial FullScan copy: " << 
+      thisTrkAnaCollections.printVertexInfo( IDTPM::TrackAnalysisCollections::FS ) );
 
   /// -------------------------------------------
   /// -- Main loop over configured TrkAnalyses --
@@ -309,11 +351,20 @@ StatusCode InDetTrackPerfMonTool::procHistograms() {
 StatusCode InDetTrackPerfMonTool::loadCollections( IDTPM::TrackAnalysisCollections& trkAnaColls ) {
 
   ATH_MSG_INFO( "Loading collections" );
+
+  /// Events
   ATH_CHECK( trkAnaColls.fillEventInfo(
       m_eventInfoContainerName, m_truthEventName, m_truthPileUpEventName ) );
+
+  /// Tracks
   ATH_CHECK( trkAnaColls.fillTruthPartContainer( m_truthParticleName ) );
   ATH_CHECK( trkAnaColls.fillOfflTrackContainer( m_offlineTrkParticleName ) );
   ATH_CHECK( trkAnaColls.fillTrigTrackContainer( m_triggerTrkParticleName ) );
+
+  /// Vertices
+  ATH_CHECK( trkAnaColls.fillTruthVertexContainer( m_truthVertexContainerName ) );
+  ATH_CHECK( trkAnaColls.fillOfflVertexContainer( m_offlineVertexContainerName ) );
+  ATH_CHECK( trkAnaColls.fillTrigVertexContainer( m_triggerVertexContainerName ) );
 
   return StatusCode::SUCCESS;
 }

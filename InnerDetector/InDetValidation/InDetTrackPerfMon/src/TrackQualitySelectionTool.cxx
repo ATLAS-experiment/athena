@@ -74,7 +74,7 @@ StatusCode IDTPM::TrackQualitySelectionTool::selectTracks(
 
   /// Debug printout
   ATH_MSG_DEBUG( "Tracks after initial FullScan copy: " << 
-      trkAnaColls.printInfo( TrackAnalysisCollections::FS ) );
+      trkAnaColls.printInfo( TrackAnalysisCollections::FS, false ) );
 
   /// Offline track selection
   if( trkAnaDefSvc->useOffline() and m_doOfflSelection.value() ) {
@@ -93,7 +93,7 @@ StatusCode IDTPM::TrackQualitySelectionTool::selectTracks(
 
   /// Debug printout
   ATH_MSG_DEBUG( "Tracks after full quality selection: " << 
-      trkAnaColls.printInfo( TrackAnalysisCollections::FS ) );
+      trkAnaColls.printInfo( TrackAnalysisCollections::FS, false ) );
 
   return StatusCode::SUCCESS;
 }

@@ -68,7 +68,7 @@ private :
 
     /// Trigger TrackParticleContainer's name
     SG::ReadHandleKey< xAOD::TrackParticleContainer > m_triggerTrkParticleName {
-        this, "TriggerTrkParticleContainerName", "HLT_IDTrack_Electron_IDTrig", "Name of container of trigger tracks" };
+        this, "TriggerTrkParticleContainerName", "", "Name of container of trigger tracks" };
 
     /// TruthParticle container's name
     SG::ReadHandleKey< xAOD::TruthParticleContainer > m_truthParticleName {
@@ -85,6 +85,18 @@ private :
     /// EventInfo container name
     SG::ReadHandleKey< xAOD::EventInfo > m_eventInfoContainerName {
         this, "EventInfoContainerName", "EventInfo", "event info" };
+
+    /// Offline Primary vertex container's name
+    SG::ReadHandleKey< xAOD::VertexContainer > m_offlineVertexContainerName {
+        this, "OfflineVertexContainerName", "PrimaryVertices", "" };
+
+    /// Trigger Primary vertex container's name
+    SG::ReadHandleKey< xAOD::VertexContainer > m_triggerVertexContainerName {
+        this, "TriggerVertexContainerName", "", "" };
+
+    /// Truth vertex container's name
+    SG::ReadHandleKey< xAOD::TruthVertexContainer > m_truthVertexContainerName {
+        this, "TruthVertexContainerName",  "TruthVertices", "" };
 
     /// WriteHandle for trkAnaInfo for reprocessing
     SG::WriteHandleKey< xAOD::BaseContainer > m_trkAnaInfoKey {
