@@ -5,7 +5,7 @@
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
-# art-athena-mt: 4
+# art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.log
 # art-output: log.*
@@ -36,8 +36,8 @@ writeBS = ExecStep.ExecStep("WriteBS")
 writeBS.type = 'athenaHLT'
 writeBS.job_options = 'TriggerJobOpts.runHLT'
 writeBS.input = 'data'
-writeBS.threads = 4
-writeBS.concurrent_events = 4
+writeBS.threads = 8
+writeBS.concurrent_events = 8
 writeBS.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
                  'Trigger.doLVL1=True']
 writeBS.args = '-o output'

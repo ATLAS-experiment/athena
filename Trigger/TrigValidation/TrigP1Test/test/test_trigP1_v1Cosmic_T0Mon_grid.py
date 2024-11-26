@@ -3,7 +3,7 @@
 
 # art-description: Test of cosmic P1+Tier0 workflow, runs athenaHLT with Cosmic_run3_v1 menu followed by offline reco and monitoring
 # art-type: grid
-# art-athena-mt: 4
+# art-athena-mt: 8
 # art-include: main/Athena
 # art-include: 24.0/Athena
 # art-output: *.txt
@@ -28,8 +28,8 @@ hlt = ExecStep.ExecStep()
 hlt.type = 'athenaHLT'
 hlt.job_options = 'TriggerJobOpts.runHLT'
 hlt.forks = 1
-hlt.threads = 4
-hlt.concurrent_events = 4
+hlt.threads = 8
+hlt.concurrent_events = 8
 hlt.input = 'data_cos'
 hlt.max_events = 2000
 hlt.flags = [f'Trigger.triggerMenuSetup="{triggermenu}"',
@@ -72,6 +72,7 @@ tzrecoPreExec = ' '.join([
 
 tzreco = ExecStep.ExecStep('Tier0Reco')
 tzreco.type = 'Reco_tf'
+# TODO: check if we suffer from bad scaling vs number of threads (ATR-29610) when offline monitoring runs in RAWtoALL
 tzreco.threads = 4
 tzreco.concurrent_events = 4
 tzreco.input = ''

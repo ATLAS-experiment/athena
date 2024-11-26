@@ -5,7 +5,7 @@
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
-# art-athena-mt: 4
+# art-athena-mt: 8
 # art-memory: 4096
 # art-output: *.txt
 # art-output: *.log
@@ -32,8 +32,8 @@ rdo2aod = ExecStep.ExecStep('RDOtoAOD')
 rdo2aod.type = 'Reco_tf'
 rdo2aod.input = 'ttbar'
 rdo2aod.max_events = 800
-rdo2aod.threads = 4
-rdo2aod.concurrent_events = 4
+rdo2aod.threads = 8
+rdo2aod.concurrent_events = 8
 rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
 rdo2aod.args += ' --CA "all:True"'
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
@@ -44,7 +44,7 @@ dq = ExecStep.ExecStep('Run3DQ')
 dq.type = 'other'
 dq.executable = 'Run3DQTestingDriver.py'
 dq.input = ''
-# very bad scaling vs number of threads, the more threads, the slower...
+# very bad scaling vs number of threads, the more threads, the slower... (ATR-29610)
 dq.args = '--threads=2'
 dq.args += ' --dqOffByDefault'
 dq.args += ' Input.Files="[\'AOD.pool.root\']" DQ.Steering.doHLTMon=True Trigger.triggerMenuSetup=\'Dev_pp_run3_v1_TriggerValidation_prescale\''
