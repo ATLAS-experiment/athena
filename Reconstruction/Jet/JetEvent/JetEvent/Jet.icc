@@ -1,7 +1,7 @@
 // emacs, this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////                                                        /////////// 
@@ -71,10 +71,6 @@ inline Jet& Jet::operator=(const Jet& rJet)
   if(this != &rJet)
     copy_from_jet(&rJet, CopyAll); 
   return *this;
-}
-
-inline MsgStream& Jet::operator<<( MsgStream& out) {
-  return ( out << str() );
 }
 
 

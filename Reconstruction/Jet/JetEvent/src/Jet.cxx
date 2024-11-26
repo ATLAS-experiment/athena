@@ -25,6 +25,7 @@
 // externals
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "CLHEP/Vector/LorentzVector.h"
+#include "GaudiKernel/MsgStream.h"
 
 // Navigation
 #include "Navigation/Navigable.h"
@@ -1214,3 +1215,6 @@ void Jet::setEEtaPhiM( double a, double b, double c, double d ){
   set4Mom( P4EEtaPhiM(a,b,c,d) );
 }
 
+MsgStream& Jet::operator<<( MsgStream& out) {
+  return ( out << str() );
+}
