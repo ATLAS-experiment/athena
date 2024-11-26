@@ -142,7 +142,8 @@ namespace MuonValR4 {
         const double yLow = can.GetPad(0)->GetUymin();
         const double yHigh = can.GetPad(0)->GetUymax();
         for (auto& prim : primitives) {
-            if (typeid(*prim) == typeid(TLine)){
+            const TObject &primRef = *prim;
+            if (typeid(primRef) == typeid(TLine)){
                 TLine* line = static_cast<TLine*>(prim.get());
                 const Amg::Vector3D linePoint{line->GetX1(), line->GetY1(), 0.};
                 const Amg::Vector3D lineDir = Amg::Vector3D{(line->GetX2() - line->GetX1()) / (line->GetY2() - line->GetY1()), 1.,0.}.unit();
