@@ -65,6 +65,24 @@ namespace MuonValR4 {
                                       const double xPos, 
                                       const double yPos,
                                       const unsigned int fontSize = 18);
+    /** @brief Create a ATLAS label
+     *  @param xPos: x-position of the label on the Canvas
+     *  @param yPos: y-position of the label on the Canvas
+     *  @param status: ATLAS label status to be drawn */
+    std::unique_ptr<TLatex> drawAtlasLabel(const double xPos,
+                                           const double yPos,
+                                           const std::string& status = "Internal");
+    /** @brief Create a luminosity sqrtS label
+     *  @param xPos: x-position of the label on the Canvas
+     *  @param yPos: y-position of the label on the Canvas
+     *  @param sqrtS: Centre of mass energy [TeV]
+     *  @param lumi: Luminosity [fb^{-1}]. If less <0 not drawn */
+    std::unique_ptr<TLatex> drawLumiSqrtS(const double xPos,
+                                          const double yPos,
+                                          const std::string_view sqrtS="14",
+                                          const std::string_view lumi = "");
+
+
 
 
 }

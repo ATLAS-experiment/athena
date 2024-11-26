@@ -87,7 +87,7 @@ namespace MuonR4 {
                 auto drawFinalReco = [this, &segments, &gctx, &ctx,&seed](const std::string& nameTag) {
                     PrimitiveVec segmentLines{};
                     double yLegend{0.85};
-                    segmentLines.push_back(drawLabel(std::format("# segments: {:d}",  segments.size()), 0.12, yLegend, 14));
+                    segmentLines.push_back(drawLabel(std::format("# segments: {:d}",  segments.size()), 0.2, yLegend, 14));
                     yLegend-=0.04;
                     for (const std::unique_ptr<Segment>& seg : segments) {
                         const Parameters pars = localSegmentPars(*gctx, *seg);
@@ -95,15 +95,15 @@ namespace MuonR4 {
 
                         segmentLines.emplace_back(drawLine(pars, -Gaudi::Units::m, Gaudi::Units::m, kRed));
                         std::stringstream signStream{};
-                        signStream<<"#chi^{2}/nDoF: "<<std::format("{:.2f}", seg->chi2() / seg->nDoF())<<"("<<seg->nDoF()<<"), ";
-                        signStream<<"y_{0}="<<std::format("{:.2f}",pars[toInt(ParamDefs::y0)])<<", ";
-                        signStream<<std::format("#theta={:.2f}", pars[toInt(ParamDefs::theta)]/ Gaudi::Units::deg )<<", ";
+                        signStream<<std::format("#chi^{{2}}/nDoF: {:.2f} ({:}), ", seg->chi2() / seg->nDoF(), seg->nDoF());
+                        signStream<<std::format("y_{{0}}={:.2f}",pars[toInt(ParamDefs::y0)])<<", ";
+                        signStream<<std::format("#theta={:.2f}^{{#circ}}", pars[toInt(ParamDefs::theta)]/ Gaudi::Units::deg )<<", ";
                         for (const Segment::MeasType& m : seg->measurements()) {
                             if (m->type() == xAOD::UncalibMeasType::MdtDriftCircleType && m->fitState() == CalibratedSpacePoint::State::Valid) {
                                 signStream<<(SegmentFitHelpers::driftSign(locPos, locDir, *m, msgStream()) == -1 ? "L" : "R");
                             }
                         }
-                        segmentLines.push_back(drawLabel(signStream.str(), 0.12, yLegend, 12));
+                        segmentLines.push_back(drawLabel(signStream.str(), 0.2, yLegend, 13));
                         yLegend-=0.03;
                     }
 
@@ -288,7 +288,7 @@ namespace MuonR4 {
             while(auto s = drawMe.nextSeed(ctx)) {
                 seedLines.push_back(drawLine(s->parameters, -Gaudi::Units::m, Gaudi::Units::m, kViolet));
             }
-            seedLines.push_back(drawLabel(std::format("possible seeds: {:d}",  drawMe.numGenerated()), 0.15, 0.85, 14));
+            seedLines.push_back(drawLabel(std::format("possible seeds: {:d}",  drawMe.numGenerated()), 0.2, 0.85, 14));
             m_visionTool->visualizeSeed(ctx, *patternSeed, "pattern", std::move(seedLines));
         }
 
