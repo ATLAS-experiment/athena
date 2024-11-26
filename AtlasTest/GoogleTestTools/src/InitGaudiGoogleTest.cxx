@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GoogleTestTools/InitGaudiGoogleTest.h"
@@ -19,11 +19,14 @@ namespace Athena_test {
     propMgr( theApp ),
     svcLoc( theApp ),
     svcMgr( theApp ),
-    m_msgLevel( level ) {
+    toolSvc( svcLoc->service("ToolSvc") ),
+    m_msgLevel( level )
+  {
     EXPECT_TRUE( theApp != nullptr );
     EXPECT_TRUE( propMgr.isValid() );
     EXPECT_TRUE( svcLoc.isValid() );
     EXPECT_TRUE( svcMgr.isValid() );
+    EXPECT_TRUE( toolSvc.isValid() );
     // set the new ApplicationMgr as instance in Gaudi
     Gaudi::setInstance( theApp );
     EXPECT_TRUE( propMgr->setProperty( "JobOptionsType", "NONE" ).isSuccess() );

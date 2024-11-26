@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 // -*- mode: c++ -*-
 
@@ -21,6 +21,7 @@ method if needed.
 #include "GaudiKernel/IProperty.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/ISvcManager.h"
+#include "GaudiKernel/IToolSvc.h"
 
 #include "gtest/gtest.h"
 #include "CxxUtils/checker_macros.h"
@@ -49,6 +50,7 @@ namespace Athena_test {
     SmartIF<IProperty> propMgr;
     SmartIF<ISvcLocator> svcLoc;
     SmartIF<ISvcManager> svcMgr;
+    SmartIF<IToolSvc> toolSvc;
 
   private:
 
