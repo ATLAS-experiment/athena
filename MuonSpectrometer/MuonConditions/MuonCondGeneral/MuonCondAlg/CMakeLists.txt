@@ -7,6 +7,7 @@ atlas_subdir( MuonCondAlg )
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 find_package( nlohmann_json )
+find_package( Boost )
 
 # Component(s) in the package:
 atlas_add_library( MuonCondAlgLib
