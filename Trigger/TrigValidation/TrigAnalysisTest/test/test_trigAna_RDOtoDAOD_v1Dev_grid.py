@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
-# art-description: Test of transform RDO->RDO_TRIG->AOD with threads=4 and AOD->DAOD with multiprocess
+# art-description: Test of transform RDO->RDO_TRIG->AOD with threads=8 and AOD->DAOD with multiprocess
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
-# art-athena-mt: 4
+# art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.log
 # art-output: log.*
@@ -32,8 +32,8 @@ rdo2aod = ExecStep.ExecStep('RDOtoAOD')
 rdo2aod.type = 'Reco_tf'
 rdo2aod.input = 'ttbar'
 rdo2aod.max_events = 100
-rdo2aod.threads = 4
-rdo2aod.concurrent_events = 4
+rdo2aod.threads = 8
+rdo2aod.concurrent_events = 8
 rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
 rdo2aod.args += ' --CA "all:True"'
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
@@ -43,7 +43,7 @@ rdo2aod.args += ' --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-05"'
 aod2daod = ExecStep.ExecStep('AODtoDAOD')
 aod2daod.type = 'Derivation_tf'
 aod2daod.input = ''
-aod2daod.forks = 4
+aod2daod.forks = 8
 aod2daod.explicit_input = True
 aod2daod.args = '--inputAODFile=AOD.pool.root --outputDAODFile=DAOD.pool.root --formats=PHYS'
 aod2daod.args += ' --sharedWriter=True --athenaMPMergeTargetSize "DAOD_*:0"'
