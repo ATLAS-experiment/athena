@@ -23,6 +23,7 @@ namespace xAOD {
 }
 class TrackRecord;
 class HepMcParticleLink;
+class CaloCalibrationHit;
 
 enum EBC_SUPPRESSED_TRUTH : unsigned char {
   EBC_UNSUPPRESSED = 0, // Truth particle expected to be found in McEventCollection
@@ -98,6 +99,12 @@ namespace HepMC {
     else if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, xAOD::TruthParticle_v1> || std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, xAOD::TruthVertex_v1>) {
       return p->barcode();
     }
+    else if constexpr (std::is_same_v<T, CaloCalibrationHit>) {
+      return p.particleUID();
+    }
+    else if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, CaloCalibrationHit>) {
+      return p->particleUID();
+    }
     else if constexpr (std::is_pointer_v<T> || is_smart_ptr_v<T>){ //T is ptr
       return p->id();
     }
@@ -112,6 +119,12 @@ namespace HepMC {
     }
     else if constexpr (std::is_integral_v<std::remove_pointer_t<T>>) {
       return *p;
+    }
+    else if constexpr (std::is_same_v<T, CaloCalibrationHit>) {
+      return p.particleUID();
+    }
+    else if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, CaloCalibrationHit>) {
+      return p->particleUID();
     }
     else if constexpr (std::is_pointer_v<T> || is_smart_ptr_v<T>){ //T is ptr
       return p->barcode();
