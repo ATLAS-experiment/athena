@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCalibHitRec/CalibHitToCaloCellTool.h"
@@ -145,7 +145,7 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle() const
   for (unsigned int i=0; i<calibHitContainers.size(); i++) {
     for( const auto *const calibhit: *(calibHitContainers[i])) {
       //care only for deposits of the given truth particle
-      if (!MC::isSingleParticle((int)calibhit->particleID())) continue;
+      if (!MC::isSingleParticle(HepMC::barcode(calibhit))) continue;
 
       double Etot   = calibhit->energyTotal();
       double Eem    = calibhit->energy(0);

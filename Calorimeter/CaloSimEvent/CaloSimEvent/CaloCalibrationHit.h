@@ -152,10 +152,13 @@ class CaloCalibrationHit
       }
   }
 
-  /** @return primary particle identifier (barcode) which caused his hit */
+  /** @return primary particle identifier (barcode) which caused this hit */
   int particleID()      const { return m_barcode; }
 
-  /** @return primary particle identifier (barcode) which caused his hit */
+  /** @return primary particle identifier (barcode) which caused this hit (alias for helper functions) */
+  int barcode()      const { return particleID(); }
+
+  /** @return primary particle identifier (id) which caused this hit */
   int particleUID()      const { if (m_uniqueID == HepMC::INVALID_PARTICLE_ID && m_partLink) { return m_partLink->id(); } else  { return m_uniqueID;} }
 
   /** @return energy deposits by specifying input type, same as above method */
