@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -103,8 +103,8 @@ CompetingMuonClustersOnTrack::operator=(
   CompetingMuonClustersOnTrack&& compROT) noexcept
 {
   if (this != &compROT) {
-    Trk::CompetingRIOsOnTrack::operator=(std::move(compROT));
-    Trk::SurfacePtrHolderDetEl::operator=(std::move(compROT));
+    Trk::CompetingRIOsOnTrack::operator=(compROT);
+    Trk::SurfacePtrHolderDetEl::operator=(compROT);
     clearChildRotVector();
     m_containedChildRots.clear();
     m_containedChildRots = std::move(compROT.m_containedChildRots);
