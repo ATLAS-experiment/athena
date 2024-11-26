@@ -43,37 +43,33 @@ class LastUpdatedOrderedDict(OrderedDict):
             del self[key]
         OrderedDict.__setitem__(self, key, value)
 
-
-def find_line_in_file(pattern, filename):
+def get_num_from_checklog(filename):
     if not os.path.isfile(filename):
-        logging.warning("Cannot open file {}".format(filename))
+        logging.warning(f"Cannot open file {filename}")
         return None
     with open(filename) as logfile:
-        lines = re.findall("{}.*$".format(pattern), logfile.read(), re.MULTILINE)
-        if len(lines) == 0:
-            logging.warning("Could not find pattern \"{}\" in file {}".format(pattern, filename))
+        if re.search("No error/warning messages found in.*$", logfile.read(), re.MULTILINE) is not None:
+            logging.debug("Number of errors/warnings: 0")
+            return 0
+        logfile.seek(0)
+        match = re.search(r'Found (\d+) (\w+) message\(s\) in.*$', logfile.read(), re.MULTILINE)
+        if match is None:
+            logging.warning(f"Cannot extract number of messages from {filename}")
             return None
-        return lines[0]
-
-
-def get_num_from_checklog(filename):
-    line = find_line_in_file('Found messages in', filename)
-    if line is None:
-        logging.warning("Cannot extract number of messages from {}".format(filename))
-        return None
-    logging.debug("line: {}".format(line))
-    m = re.search(r'\((.+?)\):', line)
-    return m.group(1)
-
+        logging.debug(f"Number of {match[2]}s: {match[1]}")
+        return int(match[1])
 
 def get_num_histos(filename):
-    line = find_line_in_file('Total histograms:', filename)
-    if line is None:
-        logging.warning("Cannot extract number of histograms from {}".format(filename))
+    if not os.path.isfile(filename):
+        logging.warning(f"Cannot open file {filename}")
         return None
-    logging.debug("line: {}".format(line))
-    return line.split()[-1]
-
+    with open(filename) as logfile:
+        match = re.search(r"Total histograms:.* (\d+)$", logfile.read(), re.MULTILINE)
+        if match is None:
+            logging.warning("Cannot extract number of histograms from {}".format(filename))
+            return None
+        logging.debug(f"Found {match[1]} histograms")
+        return int(match[1])
 
 def convert_to_megabytes(number, unit):
     multipliers = {

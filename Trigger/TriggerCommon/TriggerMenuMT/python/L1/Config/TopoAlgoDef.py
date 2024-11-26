@@ -369,6 +369,7 @@ class TopoAlgoDef:
         #Mu+Tau dR cut
         algolist = [
             {"minDr": 3, "maxDr": 99, "mult": 1, "otype1" : "MU8Fab" ,  "otype2" : "eTAU", "ocut2" : 30, "olist2" : "ab",  }, #3DR99-MU8Fab-eTAU30ab
+            {"minDr": 3, "maxDr": 35, "mult": 1, "otype1" : "MU8Fab" ,  "otype2" : "eTAU", "ocut2" : 30, "olist2" : "ab",  }, #3DR35-MU8Fab-eTAU30ab
             {"minDr": 3, "maxDr": 30, "mult": 1, "otype1" : "MU8Fab" ,  "otype2" : "eTAU", "ocut2" : 30, "olist2" : "ab",  }, #3DR30-MU8Fab-eTAU30ab
             {"minDr": 3, "maxDr": 28, "mult": 1, "otype1" : "MU8Fab" ,  "otype2" : "eTAU", "ocut2" : 30, "olist2" : "ab",  }, #3DR28-MU8Fab-eTAU30ab
         ]

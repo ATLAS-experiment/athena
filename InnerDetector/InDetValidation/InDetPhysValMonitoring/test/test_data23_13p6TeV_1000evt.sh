@@ -29,4 +29,4 @@ geotag="ATLAS-R3S-2021-03-02-00"
 
 echo "Executing script ${script}"
 echo " "
-"$script" ${inputBS} ${dcubeRef} ${lastref_dir} ${conditions} ${geotag}
+"$script" ${ArtProcess} ${inputBS} ${dcubeRef} ${lastref_dir} ${conditions} ${geotag}
