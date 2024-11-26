@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ByteStreamData/RawEvent.h"
@@ -176,8 +176,8 @@ StatusCode RecMuCTPIByteStreamTool::convert( const ROBF* rob, MuCTPI_RIO*& resul
           << " : ROI=" << std::setw( 8 ) << roiWord);
 
       // reconstruct
-      LVL1::RecMuonRoI thisRoI( roiWord, m_rpcRoITool.isSet() ? m_rpcRoITool.operator->() : 0,
-                                m_tgcRoITool.isSet() ? m_tgcRoITool.operator->() : 0, l1menu );
+      LVL1::RecMuonRoI thisRoI( roiWord, m_rpcRoITool.isSet() ? m_rpcRoITool.get() : 0,
+                                m_tgcRoITool.isSet() ? m_tgcRoITool.get() : 0, l1menu );
 
       uint16_t pTVal = thisRoI.getThresholdValue();
       uint16_t pTNumber = thisRoI.getThresholdNumber();
