@@ -286,7 +286,7 @@ StatusCode IDTPM::TrackRoiSelectionTool::selectTracksInRoI(
 
   /// Debug printout
   ATH_MSG_DEBUG( "Tracks after RoI selection: " << 
-      trkAnaColls.printInfo( TrackAnalysisCollections::InRoI ) );
+      trkAnaColls.printInfo( TrackAnalysisCollections::InRoI, false ) );
  
   return StatusCode::SUCCESS;
 }

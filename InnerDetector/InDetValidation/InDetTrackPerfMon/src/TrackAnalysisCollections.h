@@ -27,6 +27,7 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "xAODTruth/TruthPileupEventContainer.h"
+#include "xAODTracking/VertexContainer.h"
 
 /// local includes
 #include "InDetTrackPerfMon/ITrackAnalysisDefinitionSvc.h"
@@ -37,6 +38,7 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
+#include <utility>
 
 
 namespace IDTPM {
@@ -71,7 +73,7 @@ namespace IDTPM {
         const SG::ReadHandleKey< xAOD::TruthEventContainer >& truthEventHandleKey,
         const SG::ReadHandleKey< xAOD::TruthPileupEventContainer >& truthPUEventHandleKey );
 
-    /// fill FULL collections and vectors
+    /// fill FULL track collections and vectors
     StatusCode fillTruthPartContainer(
         const SG::ReadHandleKey< xAOD::TruthParticleContainer >& truthPartHandleKey );
 
@@ -81,7 +83,7 @@ namespace IDTPM {
     StatusCode fillTrigTrackContainer(
         const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey );
 
-    /// fill TEST vectors
+    /// fill TEST track vectors
     StatusCode fillTestTruthVec(
         const std::vector< const xAOD::TruthParticle* >& vec,
         Stage stage = FULL );
@@ -90,7 +92,7 @@ namespace IDTPM {
         const std::vector< const xAOD::TrackParticle* >& vec,
         Stage stage = FULL );
 
-    /// fill REFERENCE vectors
+    /// fill REFERENCE track vectors
     StatusCode fillRefTruthVec(
         const std::vector< const xAOD::TruthParticle* >& vec,
         Stage stage = FULL );
@@ -99,7 +101,7 @@ namespace IDTPM {
         const std::vector< const xAOD::TrackParticle* >& vec,
         Stage stage = FULL );
 
-    /// get truth/offline/trigger track vector (TEST or REFERENCE)
+    /// fill truth/offline/trigger track vector (TEST or REFERENCE)
     StatusCode fillTruthPartVec(
         const std::vector< const xAOD::TruthParticle* >& vec,
         Stage stage = FULL );
@@ -110,6 +112,47 @@ namespace IDTPM {
 
     StatusCode fillTrigTrackVec(
         const std::vector< const xAOD::TrackParticle* >& vec,
+        Stage stage = FULL );
+
+    /// fill FULL vertex collections and vectors
+    StatusCode fillTruthVertexContainer(
+        const SG::ReadHandleKey< xAOD::TruthVertexContainer >& truthVertexHandleKey );
+
+    StatusCode fillOfflVertexContainer(
+        const SG::ReadHandleKey< xAOD::VertexContainer >& handleKey );
+
+    StatusCode fillTrigVertexContainer(
+        const SG::ReadHandleKey< xAOD::VertexContainer >& handleKey );
+
+    /// fill TEST vertex vectors
+    StatusCode fillTestTruthVertexVec(
+        const std::vector< const xAOD::TruthVertex* >& vec,
+        Stage stage = FULL );
+
+    StatusCode fillTestRecoVertexVec(
+        const std::vector< const xAOD::Vertex* >& vec,
+        Stage stage = FULL );
+
+    /// fill REFERENCE vertex vectors
+    StatusCode fillRefTruthVertexVec(
+        const std::vector< const xAOD::TruthVertex* >& vec,
+        Stage stage = FULL );
+
+    StatusCode fillRefRecoVertexVec(
+        const std::vector< const xAOD::Vertex* >& vec,
+        Stage stage = FULL );
+
+    /// fill truth/offline/trigger vertex vector (TEST or REFERENCE)
+    StatusCode fillTruthVertexVec(
+        const std::vector< const xAOD::TruthVertex* >& vec,
+        Stage stage = FULL );
+
+    StatusCode fillOfflVertexVec(
+        const std::vector< const xAOD::Vertex* >& vec,
+        Stage stage = FULL );
+
+    StatusCode fillTrigVertexVec(
+        const std::vector< const xAOD::Vertex* >& vec,
         Stage stage = FULL );
 
     /// --- Utility  methods ---
@@ -123,8 +166,11 @@ namespace IDTPM {
     /// copy content of FS vectors to InRoI vectors
     void copyFS();
 
-    /// print Information about tracks in the collection(s)
-    std::string printInfo( Stage stage = FULL ) const;
+    /// print information about tracks in the collection(s)
+    std::string printInfo( Stage stage = FULL, bool printVertex = true ) const;
+
+    /// print information about vertices in the collection(s)
+    std::string printVertexInfo( Stage stage = FULL ) const;
 
     /// --- Getter methods ---
 
@@ -136,11 +182,11 @@ namespace IDTPM {
     const xAOD::TruthEventContainer* truthEventContainer() { return m_truthEventContainer; }
     const xAOD::TruthPileupEventContainer* truthPileupEventContainer() { return m_truthPUEventContainer; }
 
-    /// get full TEST containers
+    /// get full TEST track containers
     const xAOD::TruthParticleContainer* testTruthContainer();
     const xAOD::TrackParticleContainer* testTrackContainer();
 
-    /// get full REFERENCE containers
+    /// get full REFERENCE track containers
     const xAOD::TruthParticleContainer* refTruthContainer();
     const xAOD::TrackParticleContainer* refTrackContainer();
 
@@ -168,16 +214,88 @@ namespace IDTPM {
     const std::vector< const xAOD::TrackParticle* >& trigTrackVec( Stage stage = FULL ) {
       return m_trigTrackVec[ stage ]; }
 
-    /// return matching information 
+    /// get full TEST vertex containers
+    const xAOD::TruthVertexContainer* testTruthVertexContainer();
+    const xAOD::VertexContainer*      testRecoVertexContainer();
+
+    /// get full REFERENCE vertex containers
+    const xAOD::TruthVertexContainer* refTruthVertexContainer();
+    const xAOD::VertexContainer*      refRecoVertexContainer();
+
+    /// get truth/offline/trigger vertex containers (TEST or REFERENCE)
+    const xAOD::TruthVertexContainer* truthVertexContainer() {
+      return m_truthVertexContainer; }
+    const xAOD::VertexContainer* offlVertexContainer() {
+      return m_offlVertexContainer; }
+    const xAOD::VertexContainer* trigVertexContainer() {
+      return m_trigVertexContainer; }
+
+    /// get TEST vertex vectors
+    const std::vector< const xAOD::TruthVertex* >&  testTruthVertexVec( Stage stage = FULL );
+    const std::vector< const xAOD::Vertex* >&       testRecoVertexVec( Stage stage = FULL );
+
+    /// get REFERENCE vertex vectors
+    const std::vector< const xAOD::TruthVertex* >&  refTruthVertexVec( Stage stage = FULL );
+    const std::vector< const xAOD::Vertex* >&       refRecoVertexVec( Stage stage = FULL );
+
+    /// get truth/offline/trigger vertex vector (TEST or REFERENCE)
+    const std::vector< const xAOD::TruthVertex* >& truthVertexVec( Stage stage = FULL ) {
+      return m_truthVertexVec[ stage ]; }
+    const std::vector< const xAOD::Vertex* >& offlVertexVec( Stage stage = FULL ) {
+      return m_offlVertexVec[ stage ]; }
+    const std::vector< const xAOD::Vertex* >& trigVertexVec( Stage stage = FULL ) {
+      return m_trigVertexVec[ stage ]; }
+
+    /// useful typedefs: pair of vector of vertex-associated tracks and their weights
+    typedef std::pair< std::vector< const xAOD::TruthParticle* >,
+                       std::vector< float > > truthWeightVecPair_t;
+    typedef std::pair< std::vector< const xAOD::TrackParticle* >,
+                       std::vector< float > > trackWeightVecPair_t;
+
+    /// Get truth/offline/trigger tracks associated with vertices
+    std::vector< truthWeightVecPair_t > getVertexTruthPartVecs(
+        Stage /*stage = InRoI*/, bool /*useSelected = false*/ ); // TODO: uncomment
+    std::vector< trackWeightVecPair_t > getVertexOfflTrackVecs(
+        Stage stage = InRoI, bool useSelected = false ) {
+      return getVertexTrackVecsBase( m_offlVertexVec[ stage ],
+                                     m_offlTrackVec[ stage ],
+                                     useSelected );
+    }
+    std::vector< trackWeightVecPair_t > getVertexTrigTrackVecs(
+        Stage stage = InRoI, bool useSelected = false ) {
+      return getVertexTrackVecsBase( m_trigVertexVec[ stage ],
+                                     m_trigTrackVec[ stage ],
+                                     useSelected );
+    }
+
+    /// Get TEST tracks associated with vertices
+    std::vector< truthWeightVecPair_t > getVertexTestTruthPartVecs(
+        Stage stage = InRoI, bool useSelected = false );
+    std::vector< trackWeightVecPair_t > getVertexTestTrackVecs(
+        Stage stage = InRoI, bool useSelected = false );
+
+    /// Get REFERENCE tracks associated with vertices
+    std::vector< truthWeightVecPair_t > getVertexRefTruthPartVecs(
+        Stage stage = InRoI, bool useSelected = false );
+    std::vector< trackWeightVecPair_t > getVertexRefTrackVecs(
+        Stage stage = InRoI, bool useSelected = false );
+
+    /// get track matching information 
     ITrackMatchingLookup& matches() { return *m_matches; }
 
-    /// print matching information
+    /// print track matching information
     std::string printMatchInfo();
 
     /// update chainRois map
     bool updateChainRois( const std::string& chainRoi, const std::string& roiStr );
 
   private:
+
+    /// general method to get vertex-associated tracks and their weights
+    std::vector< trackWeightVecPair_t > getVertexTrackVecsBase(
+      const std::vector< const xAOD::Vertex* >& vtxVec,
+      const std::vector< const xAOD::TrackParticle* >& trkVec,
+      bool useSelected );
 
     /// TrackAnalysis properties
     std::string m_anaTag;
@@ -189,7 +307,7 @@ namespace IDTPM {
     const xAOD::TruthEventContainer* m_truthEventContainer{nullptr};
     const xAOD::TruthPileupEventContainer* m_truthPUEventContainer{nullptr};
 
-    /// Full collections
+    /// Full track collections
     const xAOD::TruthParticleContainer* m_truthPartContainer{nullptr};
     const xAOD::TrackParticleContainer* m_offlTrackContainer{nullptr};
     const xAOD::TrackParticleContainer* m_trigTrackContainer{nullptr};
@@ -199,9 +317,22 @@ namespace IDTPM {
     std::vector<std::vector< const xAOD::TrackParticle* >> m_offlTrackVec{};
     std::vector<std::vector< const xAOD::TrackParticle* >> m_trigTrackVec{};
 
+    /// Full vertex collections
+    const xAOD::TruthVertexContainer* m_truthVertexContainer{nullptr};
+    const xAOD::VertexContainer*      m_offlVertexContainer{nullptr};
+    const xAOD::VertexContainer*      m_trigVertexContainer{nullptr};
+
+    /// vectors of reco/truth vertices at different stages of the selection/workflow
+    std::vector<std::vector< const xAOD::TruthVertex* >>  m_truthVertexVec{};
+    std::vector<std::vector< const xAOD::Vertex* >>       m_offlVertexVec{};
+    std::vector<std::vector< const xAOD::Vertex* >>       m_trigVertexVec{};
+    /// TODO - maybe add vectors for truth HS and PU vertices
+
     /// null vectors
     std::vector< const xAOD::TrackParticle* > m_nullTrackVec{};
     std::vector< const xAOD::TruthParticle* > m_nullTruthVec{};
+    std::vector< const xAOD::TruthVertex* >   m_nullTruthVertVec{};
+    std::vector< const xAOD::Vertex* >        m_nullRecoVertVec{};
 
     /// Lookup table for test-reference matching
     std::unique_ptr< ITrackMatchingLookup > m_matches;
