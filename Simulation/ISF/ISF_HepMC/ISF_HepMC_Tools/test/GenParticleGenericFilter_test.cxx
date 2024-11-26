@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,14 +15,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 // Google Test
 #include "gtest/gtest.h"
-
-// Framework includes
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/IAppMgrUI.h"
-#include "GaudiKernel/SmartIF.h"
-#include "GaudiKernel/IToolSvc.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/IProperty.h"
+#include "GoogleTestTools/InitGaudiGoogleTest.h"
 
 // tested AthAlgTool
 #include "../src/GenParticleGenericFilter.h"
@@ -35,70 +28,20 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 namespace ISFTesting {
 
-// Gaudi Test fixture that provides a clean Gaudi environment for
-// each individual test case
-class GaudiFixture {
-
-protected:
-  GaudiFixture() {
-    SetUpGaudi();
-  }
-
-  ~GaudiFixture() {
-    TearDownGaudi();
-  }
-
-  void SetUpGaudi() {
-    m_appMgr = Gaudi::createApplicationMgr();
-    ASSERT_TRUE( m_appMgr!=nullptr );
-
-    m_svcLoc = m_appMgr;
-    ASSERT_TRUE( m_svcLoc.isValid() );
-
-    m_svcMgr = m_appMgr;
-    ASSERT_TRUE( m_svcMgr.isValid() );
-
-    m_propMgr = m_appMgr;
-    ASSERT_TRUE( m_propMgr.isValid() );
-    ASSERT_TRUE( m_propMgr->setProperty("EvtSel", "NONE").isSuccess() );
-    ASSERT_TRUE( m_propMgr->setProperty("JobOptionsType", "NONE").isSuccess() );
-
-    m_toolSvc = m_svcLoc->service("ToolSvc");
-    ASSERT_TRUE( m_toolSvc.isValid() );
-
-    ASSERT_TRUE( m_appMgr->configure().isSuccess() );
-    ASSERT_TRUE( m_appMgr->initialize().isSuccess() );
-  }
-
-  void TearDownGaudi() {
-    ASSERT_TRUE( m_appMgr->finalize().isSuccess() );
-    ASSERT_TRUE( m_appMgr->terminate().isSuccess() );
-    Gaudi::setInstance( static_cast<IAppMgrUI*>(nullptr) );
-  }
-
-  // protected member variables for Core Gaudi components
-  IAppMgrUI*             m_appMgr = nullptr;
-  SmartIF<ISvcLocator>   m_svcLoc;
-  SmartIF<ISvcManager>   m_svcMgr;
-  SmartIF<IToolSvc>      m_toolSvc;
-  SmartIF<IProperty>     m_propMgr;
-};
-
-
 // Test fixture specifically for SimKernelMT AthAlgorithm
-class GenParticleGenericFilter_test: public ::testing::Test, public GaudiFixture {
+class GenParticleGenericFilter_test: public Athena_test::InitGaudiGoogleTest {
 
 protected:
   virtual void SetUp() override {
     // the tested tool
     IAlgTool* tool = nullptr;
-    EXPECT_TRUE( m_toolSvc->retrieveTool("ISF::GenParticleGenericFilter/TestGenParticleGenericFilter", tool).isSuccess() );
+    EXPECT_TRUE( toolSvc->retrieveTool("ISF::GenParticleGenericFilter/TestGenParticleGenericFilter", tool).isSuccess() );
     m_filterTool = dynamic_cast<ISF::GenParticleGenericFilter*>(tool);
   }
 
   virtual void TearDown() override {
     for (size_t refCount = m_filterTool->refCount(); refCount>0; refCount--) {
-      StatusCode sc = m_toolSvc->releaseTool(m_filterTool);
+      StatusCode sc = toolSvc->releaseTool(m_filterTool);
       ASSERT_TRUE( sc.isSuccess() );
     }
   }

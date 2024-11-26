@@ -8,6 +8,7 @@
 + AtlasGeometryCommon/GeoModelEnvelopes
 + AtlasGeometryCommon/SubDetectorEnvelopes
 + AtlasTest/CITest
++ AtlasTest/GoogleTestTools
 + AtlasTest/TestTools
 + Calorimeter/CaloCnv/CaloIdCnv
 + Calorimeter/CaloCnv/CaloSimEventAthenaPool
