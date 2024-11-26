@@ -19,6 +19,9 @@ Jets:
         btagWP: 'FixedCutBEff_65'
     JVT: {}
     PtEtaSelection: {}
+  - containerName: 'AnaLargeRJets'
+    jetCollection: 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'
+    PtEtaSelection: {}
 
 Electrons:
   - containerName: 'AnaElectrons'
@@ -67,6 +70,7 @@ TauJets:
 
 SystObjectLink:
   - containerName: 'AnaJets'
+  - containerName: 'AnaLargeRJets'
   - containerName: 'AnaElectrons'
   - containerName: 'AnaPhotons'
   - containerName: 'AnaMuons'
@@ -125,6 +129,8 @@ Thinning:
     selectionName: 'tight'
   - containerName: 'AnaJets'
     outputName: 'OutJets'
+  - containerName: 'AnaLargeRJets'
+    outputName: 'OutLargeRJets'
 
 # After configuring each container, many variables will be saved automatically.
 Output:
@@ -138,6 +144,7 @@ Output:
         ph_: 'OutPhotons'
         tau_: 'OutTauJets'
         jet_: 'OutJets'
+        larger_jet_: 'OutLargeRJets'
         met_: 'AnaMET'
         '': 'EventInfo'
     commands:
