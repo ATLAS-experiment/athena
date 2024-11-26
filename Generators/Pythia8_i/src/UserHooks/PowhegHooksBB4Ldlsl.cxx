@@ -334,7 +334,7 @@ namespace Pythia8 {
                         return m_atopresscale;
                     else if (e[iRes].id() == 24)
                         return m_wpresscale;
-                    else if (e[iRes].id() == 24)
+                    else if (e[iRes].id() == -24)
                         return m_wmresscale;
                     else
                         return 1e30;
