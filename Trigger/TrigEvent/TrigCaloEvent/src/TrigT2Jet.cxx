@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigCaloEvent/TrigT2Jet.h"
 #include "TrigCaloEvent/Trig3Momentum.h"
+#include "GaudiKernel/MsgStream.h"
 
 TrigT2Jet::TrigT2Jet():
   m_e(), m_ehad0(), m_eem0(), m_eta(), m_phi(), m_grid(0), m_roiWord(), m_nLeadingCells(), m_hecf(), m_jetQuality(), m_emf(), m_jetTimeCells() 

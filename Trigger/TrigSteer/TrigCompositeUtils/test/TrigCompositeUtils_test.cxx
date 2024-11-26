@@ -7,6 +7,7 @@
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "AthenaKernel/errorcheck.h"
+#include "AthenaKernel/ExtendedEventContext.h"
 #include "GaudiKernel/EventContext.h"
 #include "SGTools/TestStore.h"
 #include "TestTools/initGaudi.h"

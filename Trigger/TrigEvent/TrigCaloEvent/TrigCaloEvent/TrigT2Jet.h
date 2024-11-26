@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -24,6 +24,8 @@
 #include "EventKernel/INavigable4Momentum.h"
 
 #include <vector>
+
+class MsgStream;
 
 /** LVL2 Trigger Jet Class */
 class TrigT2Jet : public P4EEtaPhiMBase,  public NavigableTerminalNode ,

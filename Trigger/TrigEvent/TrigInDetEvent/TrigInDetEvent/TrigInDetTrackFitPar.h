@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETTRACKFITPAR_H
@@ -7,6 +7,7 @@
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthContainers/DataVector.h"
 #include <vector>
+#include <cmath>
 
 /** @class TrigInDetTrackFitPar
     encapsulates LVL2 track parameters and covariance matrix
