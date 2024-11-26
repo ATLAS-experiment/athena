@@ -53,8 +53,6 @@ using namespace Test;
 // an example input file is /afs/cern.ch/user/j/jreicher/public/fbtTestData.root
 int main(int argc, char* argv[])
 {
-  ANA_CHECK_SET_TYPE (int); // makes ANA_CHECK return ints if exiting function
-
   if(argc < 2){
     std::cerr << "No input file specified! Exiting." << std::endl;
     return EXIT_FAILURE;
@@ -64,6 +62,7 @@ int main(int argc, char* argv[])
   TString fileName = fileNameFullPath;
   
 #ifdef XAOD_STANDALONE
+  ANA_CHECK_SET_TYPE (int); // makes ANA_CHECK return ints if exiting function
 
   
   TFile *inFile = TFile::Open(fileName, "READ");
