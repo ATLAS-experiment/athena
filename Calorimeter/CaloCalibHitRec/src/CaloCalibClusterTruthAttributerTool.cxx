@@ -39,7 +39,7 @@ StatusCode CaloCalibClusterTruthAttributerTool::calculateTruthEnergies(const xAO
     std::vector<const CaloCalibrationHit*> theseCalibrationHits = (*identifierToCaloHitMapIterator).second;
 
     for (const auto *thisCalibrationHit : theseCalibrationHits){
-      int truthID = thisCalibrationHit->particleUID();
+      const int truthID = HepMC::uniqueID(thisCalibrationHit);
       double thisCalHitTruthEnergy = thisCalibrationHit->energyEM() + thisCalibrationHit->energyNonEM();
       if (true == m_fullTruthEnergy) thisCalHitTruthEnergy += (thisCalibrationHit->energyEscaped() + thisCalibrationHit->energyInvisible());
 

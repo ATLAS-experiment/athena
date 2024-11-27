@@ -300,7 +300,7 @@ StatusCode CaloHitAnalysis::execute() {
           double invEnergy = geoHit.energyInvisible();
           double escEnergy = geoHit.energyEscaped();
           double totEnergy = geoHit.energyTotal();
-          double particleID = (*hit_i).particleID();
+          double particleID = HepMC::barcode(*hit_i);
 
           m_h_calib_eta->Fill(eta);
           m_h_calib_phi->Fill(phi);

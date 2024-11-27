@@ -77,7 +77,7 @@ void PFSimulateTruthShowerTool::simulateShower(eflowCaloObject& thisEFlowCaloObj
 }
 
 void PFSimulateTruthShowerTool::fillMap(std::map<Identifier,double>& identifierToTruthEnergyMap, int barcode, const CaloCalibrationHit& thisCalibHit) const{
-  if ((int)thisCalibHit.particleID() == barcode) { // FIXME barcode-based
+  if (HepMC::barcode(thisCalibHit) == barcode) { // FIXME barcode-based until xAOD::TruthParticle supports id rather than barcode
         Identifier thisIdentifier = thisCalibHit.cellID();
         unsigned int count = identifierToTruthEnergyMap.count(thisIdentifier);
         if (0 == count) identifierToTruthEnergyMap[thisIdentifier] = thisCalibHit.energyEM() + thisCalibHit.energyNonEM();

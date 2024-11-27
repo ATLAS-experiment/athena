@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //================================================================//
@@ -94,7 +94,7 @@ StatusCode CaloCalibrationHitsTestTool::processEvent(){
     double invEnergy = geoHit.energyInvisible();
     double escEnergy = geoHit.energyEscaped();
     double totEnergy = geoHit.energyTotal();
-    double particleID = hit->particleID();
+    double particleID = HepMC::barcode(hit);
 
     m_eta->Fill(eta);
     m_phi->Fill(phi);
