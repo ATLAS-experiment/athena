@@ -164,6 +164,23 @@ private:
   double m_phiminDet, m_phimaxDet;
 
 
+protected:
+
+  /// internal lookup table access for full interface ... 
+  
+  virtual void HashIDList_internal( const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const;
+  
+  virtual void HashIDList_internal( long layer, const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const;
+
+  /// Rob identifier methods
+  
+  virtual void ROBIDList_internal( const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const;
+  
+  virtual void ROBIDList_internal( long layer, const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const;
+  
+
+  
+
 };
 
 #endif

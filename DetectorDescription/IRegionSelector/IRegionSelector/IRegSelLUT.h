@@ -68,6 +68,55 @@ public:
   virtual void ROBIDList( long layer, const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const = 0;   
    
   virtual ~IRegSelLUT(){};
+
+
+protected:
+
+  /// useful for removing duplicates if required ...
+  template<typename T>
+  static void removeDuplicates(std::vector<T>& vec) {
+    std::sort(vec.begin(), vec.end());
+    vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
+  }
+
+  
+  template<typename C, typename T> 
+  using handler = void (C::*)(const IRoiDescriptor& , std::vector<T>&  ) const; 
+
+  template<typename C, typename T>
+  void IDList( const IRoiDescriptor& roi, std::vector<T>& idlist, handler<C,T> lister )  const {
+        
+    if ( roi.composite() ) {
+      idlist.clear();
+      for ( unsigned iroi=roi.size() ; iroi-- ;  )  IDList<C>( *(roi.at(iroi)), idlist, lister );
+      if ( roi.size()>1 ) IRegSelLUT::removeDuplicates( idlist );
+      return;
+    }
+    
+    (dynamic_cast<const C*>(this)->*lister)( roi, idlist ); 
+    
+  }
+
+
+  template<typename C, typename T> 
+  using handler_layer = void (C::*)(long layer, const IRoiDescriptor& , std::vector<T>&  ) const; 
+
+  template<typename C, typename T>
+  void IDList_layer( long layer, const IRoiDescriptor& roi, std::vector<T>& idlist, handler_layer<C,T> lister )  const {
+    
+    if ( roi.composite() ) {
+      idlist.clear();
+      for ( unsigned iroi=roi.size() ; iroi-- ;  )  IDList_layer<C>( layer, *(roi.at(iroi)), idlist, lister );
+      if ( roi.size()>1 ) IRegSelLUT::removeDuplicates( idlist );
+      return;
+    }
+    
+    (dynamic_cast<const C*>(this)->*lister)( layer, roi, idlist ); 
+    
+  }
+
+
+  
 };
 
 

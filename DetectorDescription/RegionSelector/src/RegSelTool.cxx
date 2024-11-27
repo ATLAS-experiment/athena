@@ -42,6 +42,14 @@ const IRegSelLUT* RegSelTool::lookup() const {
 
 
 
+const IRegSelLUT* RegSelTool::lookup( const EventContext& ctx ) const {
+  if ( !m_initialised ) return nullptr; 
+  SG::ReadCondHandle<IRegSelLUTCondData> table_handle( m_tableKey, ctx ); 
+  return (*table_handle)->payload();
+}
+
+
+
 StatusCode RegSelTool::initialize() {
   ATH_MSG_DEBUG( "Initialising RegSelTool " << name() << "\ttable: " << m_tableKey );
   if ( !m_initialised ) { 
@@ -70,7 +78,7 @@ void RegSelTool::cleanup( std::vector<IdentifierHash>& idvec ) const {
 /// standard roi
 
 void RegSelTool::HashIDList( const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const {
-
+  
   if ( !m_initialised ) return; 
 
   if ( roi.composite() ) {
@@ -83,7 +91,7 @@ void RegSelTool::HashIDList( const IRoiDescriptor& roi, std::vector<IdentifierHa
   const IRegSelLUT* lookuptable = lookup();
   if ( lookuptable ) lookuptable->HashIDList( roi, idlist ); 
   if ( m_rpcflag ) cleanup( idlist );
-
+    
 }
 
 
@@ -119,7 +127,7 @@ void RegSelTool::HashIDList( long layer, const IRoiDescriptor& roi, std::vector<
 /// standard roi
 
 void RegSelTool::ROBIDList( const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const {
-
+  
   if ( !m_initialised ) return; 
 
   if ( roi.composite() ) { 
@@ -131,7 +139,7 @@ void RegSelTool::ROBIDList( const IRoiDescriptor& roi, std::vector<uint32_t>& ro
 
   const IRegSelLUT* lookuptable = lookup();
   if ( lookuptable ) lookuptable->ROBIDList( roi, roblist ); 
-
+  
 }
 
 
