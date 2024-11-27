@@ -66,7 +66,7 @@ std::unique_ptr<RegSelSiLUT> RPC_RegSelCondAlg::createTable( const EventContext&
 
   ATH_MSG_DEBUG("createTable()");
   
-  std::unique_ptr<RegSelSiLUT> lut = std::make_unique<RegSelSiLUT>();
+  std::unique_ptr<RegSelSiLUT> lut = std::make_unique<RegSelSiLUT>(RegSelSiLUT::RPC);
  
  
   //loop over modules (PrepRawData collections)

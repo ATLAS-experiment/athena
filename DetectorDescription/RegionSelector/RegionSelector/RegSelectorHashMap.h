@@ -56,6 +56,7 @@ public:
   virtual void ROBIDList( long layer, const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const override;  
 
   virtual ~RegSelectorHashMap() override = default;  
+
 public:
 
   double etaminValue() const ;
@@ -178,6 +179,24 @@ public:
 			 const int  iXBeg, const int  iXEnd, 
 			 const int  iYBeg, const int  iYEnd, 
 			 const int iPage) const;
+
+
+protected:
+  
+  /// internal implementation of the IRegSelUT interface
+  
+  /// hash id methods
+
+  virtual void HashIDList_internal( const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const;
+
+  virtual void HashIDList_internal( long layer, const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const;
+
+  /// rob methods
+  
+  virtual void ROBIDList_internal( const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const;
+  
+  virtual void ROBIDList_internal( long layer, const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const;  
+
 
 };
 #endif

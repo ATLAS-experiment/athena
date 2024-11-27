@@ -42,7 +42,7 @@ class RegSelSiLUT : public RegSelName, virtual public IRegSelLUT {
 
 public:
 
-  typedef enum { UNDEF, PIXEL, SCT, TRT, FTK, MM, sTGC } DET;
+  typedef enum { UNDEF, PIXEL, SCT, TRT, FTK, MM, sTGC, RPC } DET;
 
 public:
   
@@ -215,15 +215,6 @@ public:
     for ( unsigned i=0 ; i<m_SubDet.size() ; i++ )  m_SubDet[i].drawlayers(c);
   }
 
-public:
-
-  /// useful for removing duplicates if required ...
-  template<typename T>
-  static void removeDuplicates(std::vector<T>& vec) {
-    std::sort(vec.begin(), vec.end());
-    vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
-  }
-  
 protected:
 
   virtual void construct();
@@ -244,6 +235,75 @@ protected:
   std::vector<uint32_t>       m_allROBids;
 
   std::map<int, int> m_idmap; // hashID lookup table
+
+
+protected: 
+
+  /// annoying cleanup function specifically for the RPC, but we have to add it here
+  /// since we have abstracted everything to use identical code - perhaps consider
+  /// creating the RPC instance as a derived class ?
+  
+  static void cleanup( std::vector<IdentifierHash>& idvec ) {
+    for ( size_t i=idvec.size() ; i-- ; ) idvec[i] = IdentifierHash( ((unsigned)idvec[i]) & 0xfff );
+    RegSelSiLUT::removeDuplicates( idvec );
+  }
+  
+  
+  /// useful utility functions to simplify the interface extension
+
+  template<typename T> 
+  using handler = void (RegSelSiLUT::*)(const IRoiDescriptor& , std::vector<T>&  ) const; 
+
+  template<typename T>
+  void IDList( const IRoiDescriptor& roi, std::vector<T>& idlist, handler<T> lister )  const {
+    
+    if ( roi.composite() ) {
+      idlist.clear();
+      for ( unsigned iroi=roi.size() ; iroi-- ;  )  IDList( *(roi.at(iroi)), idlist, lister );
+      if ( roi.size()>1 ) RegSelSiLUT::removeDuplicates( idlist );
+      return;
+    }
+    
+    (this->*lister)( roi, idlist ); 
+    /// the RPC is annoyingly different - need to work out how best to do that
+    //   cleanup( idlist );
+  }
+  
+
+  template<typename T> 
+  using handler_layer = void (RegSelSiLUT::*)(long layer, const IRoiDescriptor& , std::vector<T>&  ) const; 
+  
+  
+  template<typename T>
+  void IDList_layer( long layer, const IRoiDescriptor& roi, std::vector<T>& idlist, handler_layer<T> lister )  const {
+    
+    if ( roi.composite() ) {
+      idlist.clear();
+      for ( unsigned iroi=roi.size() ; iroi-- ;  )  IDList_layer( layer, *(roi.at(iroi)), idlist, lister );
+      if ( roi.size()>1 ) RegSelSiLUT::removeDuplicates( idlist );
+      return;
+    }
+    
+    (this->*lister)( layer, roi, idlist ); 
+    /// the RPC is annoyingly different - need to work out how best to do that
+    //   cleanup( idlist );
+  }
+  
+
+
+  /// horrible interface stuff
+
+  virtual void HashIDList_internal( const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const;
+
+  virtual void HashIDList_internal( long layer, const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const;
+
+  /// rob methods                                                                                                                                                                      
+  virtual void ROBIDList_internal( const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const;
+
+  virtual void ROBIDList_internal( long layer, const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const;
+   
+
+
 
 };
 

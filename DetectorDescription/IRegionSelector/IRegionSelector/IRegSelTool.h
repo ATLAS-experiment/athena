@@ -12,7 +12,7 @@
 #define IREGIONSELECTOR_IREGSELTOOL_H
 
 #include "GaudiKernel/IAlgTool.h"
-
+#include "GaudiKernel/EventContext.h"
 
 #include "Identifier/IdentifierHash.h"
 #include <vector>
@@ -35,7 +35,12 @@ public:
   /// InterfaceID
   DeclareInterfaceID( IRegSelTool, 1, 0 ); 
 
-    
+  //! @method lookup, actually retrieve the lookup table as conditions data
+  /// did this ever work ?? It is the wrong class for the calorimeter tables 
+  virtual const IRegSelLUT* lookup() const = 0;                                                                                                                              
+
+  virtual const IRegSelLUT* lookup( const EventContext& ctx ) const = 0;
+
 };
 
 
