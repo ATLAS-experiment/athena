@@ -10,6 +10,7 @@
 #include "AthContainers/AuxElement.h"
 
 #include <stdexcept>
+#include <cmath>
 
 // helper functions
 namespace detail {
