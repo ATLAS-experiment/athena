@@ -135,6 +135,10 @@ template<class T> inline bool isQuark(const T& p) {return isQuark(p->pdg_id());}
 template<> inline bool isQuark(const int& p) { return p != 0 && (std::abs(p) <= 8 || std::abs(p) == MAVTOP);}
 template<> inline bool isQuark(const DecodedPID& p){ return isQuark(p.pid()); }
 
+template<class T> inline bool isSMQuark(const T& p) {return isSMQuark(p->pdg_id());}
+template<> inline bool isSMQuark(const int& p) { return p != 0 && std::abs(p) <= TQUARK;}
+template<> inline bool isSMQuark(const DecodedPID& p){ return isSMQuark(p.pid()); }
+
 template<class T> inline bool isStrange(const T& p) {return isStrange(p->pdg_id());}
 template<> inline bool isStrange(const int& p){ return std::abs(p) == 3;}
 
@@ -187,6 +191,16 @@ template<> inline bool isZ(const int& p){ return p == Z0BOSON; }
 
 template<class T> inline bool isW(const T& p){return isW(p->pdg_id());}
 template<> inline bool isW(const int& p){ return std::abs(p) == WPLUSBOSON; }
+
+/// PDG rule 9:
+/// Two-digit numbers in the range 21–30 are provided for the Standard
+/// Model gauge and Higgs bosons.
+/// PDG rule 11b:
+/// The graviton and the boson content of a two-Higgs-doublet scenario
+/// and of additional SU(2)×U(1) groups are found in the range 31–40.
+template<class T> inline bool isBoson(const T& p){return isBoson(p->pdg_id());}
+template<> inline bool isBoson(const int& p){ auto sp = std::abs(p); return sp > 20 && sp < 41; }
+template<> inline bool isBoson(const DecodedPID& p){ return isBoson(p.pid()); }
 
 /// PDG rule 11j:
 /// The nature of Dark Matter (DM) is not known, and therefore a definitive
@@ -695,9 +709,24 @@ template<> inline bool isRBaryon(const DecodedPID& p) {
 }
 template<> inline bool isRBaryon(const int& p) { auto value_digits = DecodedPID(p); return isRBaryon(value_digits); }
 
-template<class T> inline bool isSLepton(const T& p) { return isSLepton(p->pdg_id()); }
-template<> inline bool isSLepton(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isLepton(pp);}
-template<> inline bool isSLepton(const int& p){ auto value_digits = DecodedPID(p); return isSLepton(value_digits);}
+
+// APID: Super-partners of standard model leptons only
+template<class T> inline bool isSlepton(const T& p) { return isSlepton(p->pdg_id()); }
+template<> inline bool isSlepton(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isSMLepton(pp);}
+template<> inline bool isSlepton(const int& p){ auto value_digits = DecodedPID(p); return isSlepton(value_digits);}
+
+
+// APID: Super-partners of left-handed standard model leptons only
+template<class T> inline bool isSleptonLH(const T& p) { return isSleptonLH(p->pdg_id()); }
+template<> inline bool isSleptonLH(const DecodedPID& p){ return isSlepton(p) && (p(0) == 1); }
+template<> inline bool isSleptonLH(const int& p){ auto value_digits = DecodedPID(p); return isSleptonLH(value_digits);}
+
+
+// APID: Super-partners of right-handed standard model leptons only
+template<class T> inline bool isSleptonRH(const T& p) { return isSleptonRH(p->pdg_id()); }
+template<> inline bool isSleptonRH(const DecodedPID& p){ return isSlepton(p) && (p(0) == 2); }
+template<> inline bool isSleptonRH(const int& p){ auto value_digits = DecodedPID(p); return isSleptonRH(value_digits);}
+
 
 // APID: Intended to return 2J
 // Useful for G4ParticleDefinition constructor
@@ -745,17 +774,39 @@ inline std::vector<int> containedQuarks(int p) {
   return quarks;
 }
 
+// APID: Super-partners of standard model quarks only
 template<class T> inline bool isSquark(const T& p) { return isSquark(p->pdg_id()); }
 template<> inline bool isSquark(const DecodedPID& p){
-  auto pp = p.shift(1); return isSUSY(p) && isQuark(pp);
+  auto pp = p.shift(1); return isSUSY(p) && isSMQuark(pp);
 }
 template<> inline bool isSquark(const int& p){ auto value_digits = DecodedPID(p); return isSquark(value_digits);}
+
+// APID: Super-partners of left-handed standard model quarks only
+template<class T> inline bool isSquarkLH(const T& p) { return isSquarkLH(p->pdg_id()); }
+template<> inline bool isSquarkLH(const DecodedPID& p){
+  return isSquark(p) && (p(0) == 1);
+}
+template<> inline bool isSquarkLH(const int& p){ auto value_digits = DecodedPID(p); return isSquarkLH(value_digits);}
+
+// APID: Super-partners of right-handed standard model quarks only
+template<class T> inline bool isSquarkRH(const T& p) { return isSquarkRH(p->pdg_id()); }
+template<> inline bool isSquarkRH(const DecodedPID& p){
+  return isSquark(p) && (p(0) == 2);
+}
+template<> inline bool isSquarkRH(const int& p){ auto value_digits = DecodedPID(p); return isSquarkRH(value_digits);}
 
 template<class T> inline bool hasSquark(const T& p, const int& q) { return hasSquark(p->pdg_id(), q); }
 template<> inline bool hasSquark(const DecodedPID& p, const int& q){
   auto pp = p.shift(1); return isSUSY(p) && pp.ndigits() != 2 && pp(0) == q; // skip lepton and boson super-partners by vetoing ndigits==2
 }
 template<> inline bool hasSquark(const int& p, const int& q){ auto value_digits = DecodedPID(p); return hasSquark(value_digits, q);}
+
+// APID: Super-partners of gauge bosons including gravitons
+template<class T> inline bool isGaugino(const T& p) { return isGaugino(p->pdg_id()); }
+template<> inline bool isGaugino(const DecodedPID& p){
+  auto pp = p.shift(1); return isSUSY(p) && isBoson(pp.pid());
+}
+template<> inline bool isGaugino(const int& p){ auto value_digits = DecodedPID(p); return isGaugino(value_digits);}
 
 template<class T> inline bool isStrongInteracting(const T& p){return isStrongInteracting(p->pdg_id());}
 template<> inline bool isStrongInteracting(const int& p) { return (isGluon(p) || isQuark(p) || isDiquark(p) || isGlueball(p) || isLeptoQuark(p) || isHadron(p) || isRHadron(p));} // APID: Glueballs and R-Hadrons are also strong-interacting

@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isRHadron)
     TEST_FUNCTION(isRMeson)
     TEST_FUNCTION(isResonance)
-    TEST_FUNCTION(isSLepton) // 60
+    TEST_FUNCTION(isSlepton) // 60
     TEST_FUNCTION(isSMLepton)
     TEST_FUNCTION(isSMNeutrino)
     TEST_FUNCTION(isSUSY)

@@ -28,6 +28,7 @@ int main(int argc, char** argv) {
   TEST_FUNCTION_DOUBLE(charge)
   TEST_FUNCTION(charge3)
   TEST_FUNCTION_DOUBLE(fractionalCharge)
+  TEST_FUNCTION(isBoson)
   TEST_FUNCTION(isBSM)
   TEST_FUNCTION(isCharged)
   TEST_FUNCTION(isEMInteracting)
@@ -41,13 +42,28 @@ int main(int argc, char** argv) {
   TEST_FUNCTION(isResonance)
   TEST_FUNCTION(isSUSY)
   TEST_FUNCTION(isStrongInteracting)
-  TEST_FUNCTION(isTau)
   TEST_FUNCTION(isTrajectory)
   TEST_FUNCTION(isTransportable)
   TEST_FUNCTION(isValid)
   TEST_FUNCTION_DOUBLE(spin)
   TEST_FUNCTION(spin2)
   TEST_FUNCTION_DOUBLE(threeCharge)
+  std::cout << "========================================" << std::endl;
+  std::cout << ">>>>>>>>>> Quark properties <<<<<<<<<<" << std::endl;
+  TEST_FUNCTION(isBottom)
+  TEST_FUNCTION(isCharm)
+  TEST_FUNCTION(isStrange)
+  TEST_FUNCTION(isSMQuark)
+  TEST_FUNCTION(isTop)
+  std::cout << "========================================" << std::endl;
+  std::cout << ">>>>>>>>>> Lepton properties <<<<<<<<<<" << std::endl;
+  TEST_FUNCTION(isChLepton)
+  TEST_FUNCTION(isElectron)
+  TEST_FUNCTION(isMuon)
+  TEST_FUNCTION(isNeutrino)
+  TEST_FUNCTION(isSMLepton)
+  TEST_FUNCTION(isSMNeutrino)
+  TEST_FUNCTION(isTau)
   std::cout << "========================================" << std::endl;
   std::cout << ">>>>>>>>>> Boson properties <<<<<<<<<<" << std::endl;
   TEST_FUNCTION(isGluon)
@@ -57,14 +73,6 @@ int main(int argc, char** argv) {
   TEST_FUNCTION(isW)
   TEST_FUNCTION(isZ)
   std::cout << "========================================" << std::endl;
-  std::cout << ">>>>>>>>>> Lepton properties <<<<<<<<<<" << std::endl;
-  TEST_FUNCTION(isChLepton)
-  TEST_FUNCTION(isElectron)
-  TEST_FUNCTION(isMuon)
-  TEST_FUNCTION(isNeutrino)
-  TEST_FUNCTION(isSMLepton)
-  TEST_FUNCTION(isSMNeutrino)
-  std::cout << "========================================" << std::endl;
   std::cout << ">>>>>>>>>> Hadron properties <<<<<<<<<<" << std::endl;
   TEST_FUNCTION_VECTOR(containedQuarks)
   TEST_FUNCTION(hasBottom)
@@ -73,12 +81,10 @@ int main(int argc, char** argv) {
   TEST_FUNCTION(hasTop)
   TEST_FUNCTION(isBBbarMeson)
   TEST_FUNCTION(isBaryon)
-  TEST_FUNCTION(isBottom)
   TEST_FUNCTION(isBottomBaryon)
   TEST_FUNCTION(isBottomHadron)
   TEST_FUNCTION(isBottomMeson)
   TEST_FUNCTION(isCCbarMeson)
-  TEST_FUNCTION(isCharm)
   TEST_FUNCTION(isCharmBaryon)
   TEST_FUNCTION(isCharmHadron)
   TEST_FUNCTION(isCharmMeson)
@@ -93,24 +99,27 @@ int main(int argc, char** argv) {
   TEST_FUNCTION(isMeson)
   TEST_FUNCTION(isParton)
   TEST_FUNCTION(isPentaquark)
-  TEST_FUNCTION(isStrange)
   TEST_FUNCTION(isStrangeBaryon)
   TEST_FUNCTION(isStrangeHadron)
   TEST_FUNCTION(isStrangeMeson)
   TEST_FUNCTION(isTetraquark)
-  TEST_FUNCTION(isTop)
   TEST_FUNCTION(isTopBaryon)
   TEST_FUNCTION(isTopHadron)
   TEST_FUNCTION(isTopMeson)
   TEST_FUNCTION(leadingQuark)
   std::cout << "========================================" << std::endl;
   std::cout << ">>>>>>>>>> SUSY Properties <<<<<<<<<<" << std::endl;
+  TEST_FUNCTION(isGaugino)
   TEST_FUNCTION(isRBaryon)
   TEST_FUNCTION(isRGlueball)
   TEST_FUNCTION(isRHadron)
   TEST_FUNCTION(isRMeson)
-  TEST_FUNCTION(isSLepton)
+  TEST_FUNCTION(isSlepton)
+  TEST_FUNCTION(isSleptonLH)
+  TEST_FUNCTION(isSleptonRH)
   TEST_FUNCTION(isSquark)
+  TEST_FUNCTION(isSquarkLH)
+  TEST_FUNCTION(isSquarkRH)
   std::cout << "========================================" << std::endl;
   std::cout << ">>>>>>>>>> BSM Properties <<<<<<<<<<" << std::endl;
   TEST_FUNCTION(isDM)
