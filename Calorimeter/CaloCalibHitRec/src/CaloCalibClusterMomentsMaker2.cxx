@@ -377,18 +377,18 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
           int iClus = p.first;
           double weight = p.second;
           if(m_useParticleID){
-            const int uniqueID = hit->particleID(); // FIXME barcode-based until xAOD::TruthParticle supports id rather than barcode
+            const int uniqueID = HepMC::barcode(hit); // FIXME barcode-based until xAOD::TruthParticle supports id rather than barcode
             if (uniqueID == HepMC::INVALID_PARTICLE_ID) {
               ATH_MSG_ERROR("Invalid uniqueID (barcode) detected - this sample cannot be properly analysed.");
               break;
             }
-            clusInfoVec[iClus].Add(weight * hit->energyTotal(), nsmp, (unsigned int)(hit->particleID()));
+            clusInfoVec[iClus].Add(weight * hit->energyTotal(), nsmp, (unsigned int)(HepMC::barcode(hit)));
           }else{
             clusInfoVec[iClus].Add(weight * hit->energyTotal(), nsmp);
           }
         }
       }
-      if( m_useParticleID && hit->particleID() == HepMC::UNDEFINED_ID) {
+      if( m_useParticleID && HepMC::barcode(hit) == HepMC::UNDEFINED_ID) {
         nHitsWithoutParticleID++;
       }
       nHitsTotal++;
@@ -482,7 +482,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
             const CaloDetDescrElement* myCDDE = 
               calo_dd_man->get_element(myId);
             int uniqueID(HepMC::UNDEFINED_ID);
-            if(useParticleID) uniqueID = hit->particleID(); // FIXME barcode-based until xAOD::TruthParticle supports id rather than barcode
+            if(useParticleID) uniqueID = HepMC::barcode(hit); // FIXME barcode-based until xAOD::TruthParticle supports id rather than barcode
             if ( myCDDE ) {
               int jeO = (int)floor(m_n_eta_out*(myCDDE->eta()/m_out_eta_max));
               if ( jeO >= -m_n_eta_out && jeO < m_n_eta_out ) {
@@ -557,7 +557,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
           myCDDE = m_caloDmDescrManager->get_element(myId);
           if ( myCDDE ) {
             int uniqueID(HepMC::UNDEFINED_ID);
-            if(useParticleID) uniqueID = hit->particleID(); // FIXME barcode-based until xAOD::TruthParticle supports id rather than barcode
+            if(useParticleID) uniqueID = HepMC::barcode(hit); // FIXME barcode-based until xAOD::TruthParticle supports id rather than barcode
 
             int jeO = (int)floor(m_n_eta_out*(myCDDE->eta()/m_out_eta_max));
             if ( jeO >= -m_n_eta_out && jeO < m_n_eta_out ) {
