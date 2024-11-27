@@ -884,6 +884,7 @@ def getDevSignatures():
 
         #ATR-30179
         ChainProp(name='HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1cTAU30M_3DR99-MU8F-eTAU30', l1SeedThresholds=['MU8F','cTAU30M'], stream=[PhysicsStream], groups=SupportPhIGroup+MuonTauGroup),
+        ChainProp(name='HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1cTAU30M_3DR35-MU8F-eTAU30', l1SeedThresholds=['MU8F','cTAU30M'], stream=[PhysicsStream], groups=SupportPhIGroup+MuonTauGroup),
         ChainProp(name='HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1cTAU30M_3DR30-MU8F-eTAU30', l1SeedThresholds=['MU8F','cTAU30M'], stream=[PhysicsStream], groups=SupportPhIGroup+MuonTauGroup),
         ChainProp(name='HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1cTAU30M_3DR28-MU8F-eTAU30', l1SeedThresholds=['MU8F','cTAU30M'], stream=[PhysicsStream], groups=SupportPhIGroup+MuonTauGroup),
 

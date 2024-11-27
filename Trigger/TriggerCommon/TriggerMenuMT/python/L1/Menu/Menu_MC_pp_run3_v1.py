@@ -108,6 +108,7 @@ def defineMenu():
         'L1_MU8F_TAU20IM',
         #ATR-30179
         'L1_cTAU30M_3DR99-MU8F-eTAU30',
+        'L1_cTAU30M_3DR35-MU8F-eTAU30',
         'L1_cTAU30M_3DR30-MU8F-eTAU30',
         'L1_cTAU30M_3DR28-MU8F-eTAU30',
         #

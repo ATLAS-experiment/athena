@@ -27,4 +27,4 @@ script=test_data_reco_Run2.sh
 
 echo "Executing script ${script}"
 echo " "
-"$script" ${inputBS} ${dcubeRef} ${lastref_dir}
+"$script" ${ArtProcess} ${inputBS} ${dcubeRef} ${lastref_dir}

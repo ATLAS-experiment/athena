@@ -4,12 +4,13 @@
 #
 # Steering script for IDPVM ART jobs with Run 2 Data Reco config
 
-inputBS=$1
-dcubeRef=$2
-lastref_dir=$3
+ArtProcess=$1
+ArtInFile=$2
+dcubeRef=$3
+lastref_dir=$4
 conditions="CONDBR2-BLKPA-RUN2-11"
 geotag="ATLAS-R2-2016-01-00-01"
 
 script=test_data_reco.sh
 
-"$script" ${inputBS} ${dcubeRef} ${lastref_dir} ${conditions} ${geotag}
+"$script" ${ArtProcess} ${ArtInFile} ${dcubeRef} ${lastref_dir} ${conditions} ${geotag}

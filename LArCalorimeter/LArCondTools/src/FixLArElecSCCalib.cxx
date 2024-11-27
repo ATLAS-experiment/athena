@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -239,7 +239,7 @@ StatusCode FixLArElecSCCalib::fix2(const LArOnOffIdMapping *cabling, const LArCa
    coral::AttributeListSpecification* spec_calib = new coral::AttributeListSpecification();
    spec_calib->extend("OnlineHashToCalibIds", "blob");
    spec_calib->extend<unsigned>("version");
-   AthenaAttributeList* al_calib = new AthenaAttributeList(*spec_calib);
+   auto al_calib = std::make_unique<AthenaAttributeList>(*spec_calib);
    coral::Blob& blobCalib=(*al_calib)["OnlineHashToCalibIds"].data<coral::Blob>();
    (*al_calib)["version"].setValue(0U);
    blobCalib.resize(onlHashMax*sizeof(uint32_t)*5); //Bigger than necessary 
@@ -261,21 +261,24 @@ StatusCode FixLArElecSCCalib::fix2(const LArOnOffIdMapping *cabling, const LArCa
 
   for (uint32_t onlHash=0;onlHash<onlHashMax;++onlHash) {
     const HWIdentifier hwid=m_sonline_idhelper->channel_Id(onlHash);
-
     const std::vector<HWIdentifier>& calibIDs_tmp=cl->calibSlotLine(hwid);
     std::vector<HWIdentifier> calibIDs;
     for (unsigned i=0; i<calibIDs_tmp.size(); ++i) {
        if(std::find(calibIDs.begin(), calibIDs.end(), calibIDs_tmp[i]) == calibIDs.end()) calibIDs.push_back(calibIDs_tmp[i]);
     }
     // deduplicate
-    Identifier *id= new Identifier();
+    Identifier id{};
+    auto pLArIdBase = dynamic_cast<const LArOnlineID_Base*>(m_sonline_idhelper);
+    auto pCaloCellBase = dynamic_cast<const CaloCell_Base_ID*>(m_scell_idhelper);
+    if ((pLArIdBase == nullptr) or (pCaloCellBase==nullptr)){
+      ATH_MSG_ERROR("dynamic_cast failed in FixLArElecSCCalib::fix2");
+      return StatusCode::FAILURE;
+    }
     if (cabling->isOnlineConnected(hwid)) {
-       *id=cabling->cnvToIdentifier(hwid);
-       print(hwid,dynamic_cast<const LArOnlineID_Base*>(m_sonline_idhelper), dynamic_cast<const CaloCell_Base_ID*>(m_scell_idhelper),
-          id,&calibIDs,outfile);
+       id=cabling->cnvToIdentifier(hwid);
+       print(hwid,pLArIdBase, pCaloCellBase,&id,&calibIDs,outfile);
     } else {
-       print(hwid,dynamic_cast<const LArOnlineID_Base*>(m_sonline_idhelper), dynamic_cast<const CaloCell_Base_ID*>(m_scell_idhelper),
-          nullptr,&calibIDs,outfile);
+       print(hwid,pLArIdBase, pCaloCellBase,nullptr,&calibIDs,outfile);
     }
     const size_t nCalibLines=calibIDs.size();
     if (nCalibLines > calibHistMax ) calibHistMax=nCalibLines;
@@ -288,21 +291,15 @@ StatusCode FixLArElecSCCalib::fix2(const LArOnOffIdMapping *cabling, const LArCa
     for(uint32_t iCalib=0;iCalib<nCalibLines;++iCalib)
       pBlobCalib[calibIndex++]=calibIDs[iCalib].get_identifier32().get_compact();
   }
-
   blobCalib.resize(calibIndex*sizeof(uint32_t)); //Size down to actual size
-
-
   outfile.close();
-
   ATH_MSG_INFO( "calibHistMax: " << calibHistMax);
   ATH_MSG_INFO( "BlobSize CalibId:" << calibIndex);
   msg(MSG::INFO) << "nCalib[i] ";
   for (unsigned j=0;j<17;++j)
     msg() << calibHist[j] << "/";
   msg() << endmsg;
-
-  ATH_CHECK(detStore()->record(al_calib,"/LAR/IdentifierOfl/CalibIdMap_SC"));
-
+  ATH_CHECK(detStore()->record(std::move(al_calib),"/LAR/IdentifierOfl/CalibIdMap_SC"));
   return StatusCode::SUCCESS;
 }
 
