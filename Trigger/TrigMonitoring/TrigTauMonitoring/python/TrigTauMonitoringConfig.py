@@ -416,7 +416,7 @@ class TrigTauMonAlgBuilder:
   def bookIDInputScalar(self, mon_alg, base_path, trigger, n_prong, online):
     type_str = 'HLT' if online else 'Offline'
     mon_group_name = f'{trigger}_ID_{type_str}_InputScalar_{n_prong}'
-    mon_group_path = f'{base_path}/RNNVars/InputScalar_{n_prong}/{trigger}/{type_str}'
+    mon_group_path = f'{base_path}/TauIDVars/InputScalar_{n_prong}/{trigger}/{type_str}'
     mon_group = self.helper.addGroup(mon_alg, mon_group_name, mon_group_path)
 
     mon_group.defineHistogram('centFrac', title=f'Centrality Fraction ({n_prong}); centFrac; Events', xbins=50, xmin=-0.05, xmax=1.2, opt='kAlwaysCreate')
@@ -436,7 +436,7 @@ class TrigTauMonAlgBuilder:
   def bookIDInputTrack(self, mon_alg, base_path, trigger, online):
     type_str = 'HLT' if online else 'Offline'
     mon_group_name = f'{trigger}_ID_{type_str}_InputTrack'
-    mon_group_path = f'{base_path}/RNNVars/InputTrack/{trigger}/{type_str}'
+    mon_group_path = f'{base_path}/TauIDVars/InputTrack/{trigger}/{type_str}'
     mon_group = self.helper.addGroup(mon_alg, mon_group_name, mon_group_path)
 
     mon_group.defineHistogram('n_track', title='Number of tracks; N_{track}; Events', xbins=15, xmin=0, xmax=15, opt='kAlwaysCreate')
@@ -458,7 +458,7 @@ class TrigTauMonAlgBuilder:
   def bookIDInputCluster(self, mon_alg, base_path, trigger, online):
     type_str = 'HLT' if online else 'Offline'
     mon_group_name = f'{trigger}_ID_{type_str}_InputCluster'
-    mon_group_path = f'{base_path}/RNNVars/InputCluster/{trigger}/{type_str}'
+    mon_group_path = f'{base_path}/TauIDVars/InputCluster/{trigger}/{type_str}'
     mon_group = self.helper.addGroup(mon_alg, mon_group_name, mon_group_path)
 
     mon_group.defineHistogram('n_cluster', title='Number of clusters; N_{cluster}; Events', xbins=30, xmin=0, xmax=30, opt='kAlwaysCreate')
@@ -498,8 +498,8 @@ class TrigTauMonAlgBuilder:
       if tau_id in ['RNN', 'DeepSet', 'RNNLLP']: xbins, xmax = 20, 1
       else: xbins, xmax = 100, 5
 
-      mon_group.defineHistogram(f'{tau_id}_TauIDScore;RNNScore', title=f'{type_str} {tau_id} TauID score; TauID score; Events', xbins=xbins, xmin=0, xmax=xmax, opt='kAlwaysCreate')
-      mon_group.defineHistogram(f'{tau_id}_TauIDScoreSigTrans;RNNScoreSigTrans', title=f'{type_str} {tau_id} TauID score sig. transformed; TauID score sig. transformed; Events', xbins=xbins, xmin=0, xmax=xmax, opt='kAlwaysCreate')
+      mon_group.defineHistogram(f'{tau_id}_TauIDScore', title=f'{type_str} {tau_id} TauID score; TauID score; Events', xbins=xbins, xmin=0, xmax=xmax, opt='kAlwaysCreate')
+      mon_group.defineHistogram(f'{tau_id}_TauIDScoreSigTrans', title=f'{type_str} {tau_id} TauID score sig. transformed; TauID score sig. transformed; Events', xbins=xbins, xmin=0, xmax=xmax, opt='kAlwaysCreate')
 
 
   def bookBasicVars(self, mon_alg, base_path, trigger, n_prong, online):
@@ -517,7 +517,7 @@ class TrigTauMonAlgBuilder:
     mon_group.defineHistogram('Eta,Phi', type='TH2F', title=f'{type_str} #eta vs #phi; #eta; #phi', xbins=26, xmin=-2.6, xmax=2.6, ybins=16, ymin=-3.2, ymax=3.2, opt='kAlwaysCreate')
     mon_group.defineHistogram('Pt,Phi', type='TH2F',  title=f'{type_str} p_{{T}} vs #phi; p_{{T}} [GeV]; #phi', xbins=binning, ybins=16, ymin=-3.2, ymax=3.2, opt='kAlwaysCreate') 
     mon_group.defineHistogram('Pt,Eta', type='TH2F',  title=f'{type_str} p_{{T}} vs #eta; p_{{T}} [GeV]; #eta', xbins=binning, ybins=26, ymin=-2.6, ymax=2.6, opt='kAlwaysCreate')
-    mon_group.defineHistogram('nIsoTrack;nWideTrack', title=f'{type_str} Number of isolation tracks; N_{{track}}^{{iso}}; Events', xbins=10, xmin=0, xmax=10, opt='kAlwaysCreate')
+    mon_group.defineHistogram('nIsoTrack', title=f'{type_str} Number of isolation tracks; N_{{track}}^{{iso}}; Events', xbins=10, xmin=0, xmax=10, opt='kAlwaysCreate')
     mon_group.defineHistogram('averageMu', title=f'{type_str} Average #mu; #LT#mu$GT; Events', xbins=20, xmin=0, xmax=80, opt='kAlwaysCreate')
     mon_group.defineHistogram('TauVertexX', title=f'{type_str} Tau Vertex X; x [mm]; Events', xbins=100, xmin=-1, xmax=1, opt='kAlwaysCreate')
     mon_group.defineHistogram('TauVertexY', title=f'{type_str} Tau Vertex Y; y [mm]; Events', xbins=100, xmin=-2, xmax=0, opt='kAlwaysCreate')

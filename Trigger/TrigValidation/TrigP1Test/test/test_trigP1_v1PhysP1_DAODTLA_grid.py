@@ -4,7 +4,7 @@
 # art-description: Test of P1+Tier0 workflow, runs athenaHLT with PhysicsP1_pp_run3_v1 menu followed by offline reco and monitoring (incl. EDM)
 # art-type: grid
 # art-include: main/Athena
-# art-athena-mt: 4
+# art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.log
 # art-output: log.*
@@ -31,8 +31,8 @@ hlt = ExecStep.ExecStep()
 hlt.type = 'athenaHLT'
 hlt.job_options = 'TriggerJobOpts.runHLT'
 hlt.forks = 1
-hlt.threads = 4
-hlt.concurrent_events = 4
+hlt.threads = 8
+hlt.concurrent_events = 8
 hlt.input = 'data_Main'
 hlt.flags = [f'Trigger.triggerMenuSetup="{triggermenu}"',
              'Trigger.doLVL1=True']
@@ -50,8 +50,8 @@ tlarecoPreExec = f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\';"
 
 tlareco = ExecStep.ExecStep('Tier0Reco')
 tlareco.type = 'Reco_tf'
-tlareco.threads = 4
-tlareco.concurrent_events = 4
+tlareco.threads = 8
+tlareco.concurrent_events = 8
 tlareco.input = ''
 tlareco.explicit_input = True
 tlareco.args = '--inputBSFile=' + find_file('*.physics_TLA*._athenaHLT*.data')  # output of the previous step

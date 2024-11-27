@@ -4,7 +4,7 @@
 
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-
+from AthenaConfiguration.Enums import Format
 
 '''
 @file TileD3PDConfig.py
@@ -49,8 +49,9 @@ def TileD3PDCfg(flags, outputFile=None, saveCells=True, saveMBTS=True,
     alg = MakerAlgConfig(flags, acc, 'caloD3PD', outputFile, ExistDataHeader=False)
 
     if saveEventInfo:
+        excludeEventInfoBlocks = ['eventMu'] if flags.Input.Format is Format.BS else []
         from EventCommonD3PDMaker.EventInfoD3PDObject import EventInfoD3PDObject
-        alg += EventInfoD3PDObject(**_args(0, 'EventInfo', kwargs))
+        alg += EventInfoD3PDObject(**_args(0, 'EventInfo', kwargs), exclude=excludeEventInfoBlocks)
 
     from CaloSysD3PDMaker.TileDetailsD3PDObject import TileDetailsD3PDObject
     from CaloSysD3PDMaker.CaloInfoD3PDObject import CaloInfoD3PDObject
