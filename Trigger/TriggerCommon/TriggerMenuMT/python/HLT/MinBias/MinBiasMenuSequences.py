@@ -199,18 +199,22 @@ def MinBiasPixelTrkSequenceGenCfg(flags):
 
 def MinBiasMbtsSequenceGenCfg(flags):
     recoAcc = InEventRecoCA(name="Mbts")
+
     from TrigMinBias.MbtsConfig import MbtsFexCfg, MbtsSGInputCfg
+    recoAcc.mergeReco(MbtsSGInputCfg(flags))
+
     fex = MbtsFexCfg(flags, MbtsBitsKey = recordable("HLT_MbtsBitsContainer"))
     recoAcc.mergeReco(fex)
+
     selAcc = SelectionCA("MbtsSel")
-    hypo = CompFactory.MbtsHypoAlg("MbtsHypoAlg", MbtsBitsKey = fex.getPrimary().MbtsBitsKey)
     selAcc.mergeReco(recoAcc)
+
+    hypo = CompFactory.MbtsHypoAlg("MbtsHypoAlg", MbtsBitsKey = fex.getPrimary().MbtsBitsKey)
     selAcc.addHypoAlgo(hypo)
 
     return MenuSequence(flags,
                         selAcc,
-                        HypoToolGen = MbtsHypoToolGen,
-                        globalRecoCA = MbtsSGInputCfg(flags))
+                        HypoToolGen = MbtsHypoToolGen)
 
 
 if __name__ == "__main__":

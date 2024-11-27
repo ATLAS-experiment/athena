@@ -339,10 +339,6 @@ class EmptyMenuSequence:
         return self._maker
 
     @property
-    def globalRecoCA(self):
-        return None
-
-    @property
     def name(self):
         return self._name
 
@@ -378,9 +374,8 @@ class MenuSequence:
     """Class to group reco sequences with the Hypo.
     By construction it has one Hypo only, which gives the name to this class object"""
 
-    def __init__(self, flags, selectionCA, HypoToolGen, globalRecoCA=None):
+    def __init__(self, flags, selectionCA, HypoToolGen):
         self.ca = selectionCA
-        self._globalCA = globalRecoCA
         # separate the HypoCA to be merged later
         self.hypoAcc  = selectionCA.hypoAcc
 
@@ -424,12 +419,6 @@ class MenuSequence:
     def __del__(self):
         self.ca.wasMerged()
         self.hypoAcc.wasMerged()
-        if self._globalCA:
-            self._globalCA.wasMerged()
-
-    @property
-    def globalRecoCA(self):
-        return self._globalCA
 
     @property
     def name(self):

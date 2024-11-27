@@ -156,8 +156,6 @@ class CFSequence(object):
             except Exception as e:
                 log.error(f'Failed to merge into {self.stepReco.getName()}')
                 raise e
-            if menuseq.globalRecoCA:
-                self.ca.merge(menuseq.globalRecoCA)
 
     @lru_cache(None)
     def findComboHypoAlg(self):
