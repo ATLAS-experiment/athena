@@ -63,6 +63,7 @@ If for some reason, you do need to revert back to an older Rivet version, feel f
 
 | Rivet version | Athena release | Comments |
 | :----:  | :-------:| :----- |
+| v4.0.2 | `23.6.40,AthGeneration` | |
 | v4.0.1 | `23.6.38,AthGeneration` | |
 | v3.1.10 | `23.6.26,AthGeneration` | |
 | v3.1.9 | `23.6.22,AthGeneration` | |
@@ -409,6 +410,17 @@ Your help will be very appreciated to Rivet-ise your analysis!
 
 This section will be populated from the mailing list questions/answers.
 
+## EventInfo-related crashes in R22 or later
+
+`EventInfo` class got an overhaul in R22 and a conversion algorithm
+needs to be added to the JobOptions to from R22 onwards:
+```
+from xAODEventInfoCnv.xAODEventInfoCnvConf import xAODMaker__EventInfoCnvAlg
+job += xAODMaker__EventInfoCnvAlg()
+```
+The example JOs above have been updated accordingly.
+
+
 ## Converting YODA files to ROOT format
 
 An example is provided [here](examples/convert2root).
@@ -573,7 +585,7 @@ While `rivet-mkhtml` can plot the default weight, if the user needs to plot anot
 
 On the other hand, `--no-weights` flag will only plot the nominal.
 
-### How to add the ATLAS logo?
+### How to add the ATLAS logo in Rivet3?
 
 In the `.plot` file, you can add the following:
 
