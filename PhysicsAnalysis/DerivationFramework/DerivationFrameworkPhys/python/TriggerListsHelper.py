@@ -44,6 +44,8 @@ def getTapisSession(flags):
             yearStr = "2022"
         elif flags.Input.MCCampaign == Campaign.MC23c or flags.Input.MCCampaign == Campaign.MC23d:
             yearStr = "2023"
+        elif flags.Input.MCCampaign == Campaign.MC23e:
+            yearStr = "2024"
 
     session_files = {
         "2015": "TriggerAPISessions/tapis_data15_13TeV_20190708_PHYS_StandardGRL_All_Good_25ns.json",
@@ -53,6 +55,7 @@ def getTapisSession(flags):
         "2018": "TriggerAPISessions/tapis_data18_13TeV_20190708_PHYS_StandardGRL_All_Good_25ns_Triggerno17e33prim.json",
         "2022": "TriggerAPISessions/tapis_data22_13p6TeV_20230207_PHYS_StandardGRL_All_Good_25ns.json",
         "2023": "TriggerAPISessions/tapis_data23_13p6TeV_20230828_PHYS_StandardGRL_All_Good_25ns.json",
+        "2024": "TriggerAPISessions/tapis_data24_13p6TeV_20241118_PHYS_StandardGRL_All_Good_25ns.json",
     }
 
     if yearStr in session_files:
