@@ -62,8 +62,12 @@ RNTCollection::RNTCollection(
      
 RNTCollection::~RNTCollection()
 {
-   // cppcheck-suppress throwInNoexceptFunction; FIXME: delayedFileOpen could throw
-   if( m_open ) RNTCollection::close();
+   if( m_open ) try {
+      RNTCollection::close();
+   } catch( std::exception& exception ) {
+      m_poolOut << coral::Error << exception.what() << corENDL;
+      cleanup();
+   }
    else cleanup();
 }
 

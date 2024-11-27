@@ -64,8 +64,12 @@ namespace pool {
      
      RootCollection::~RootCollection()
      {
-        // cppcheck-suppress throwInNoexceptFunction; FIXME: delayedFileOpen could throw
-        if( m_open ) RootCollection::close();
+        if( m_open ) try {
+           RootCollection::close();
+        } catch( std::exception& exception ) {
+           m_poolOut << coral::Error << exception.what() << corENDL;
+           cleanup();
+        }
         else cleanup();
      }
 
