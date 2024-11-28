@@ -29,7 +29,7 @@ class MioctSectorGeometry {
 
 
       // setters
-    void addROI( MioctROIGeometry roi) {m_ROIs.push_back(roi);};
+    void addROI(const MioctROIGeometry& roi) {m_ROIs.push_back(roi);};
     void setName(const std::string& name) { m_name = name; };
     void setConnector(unsigned int id) { m_connector = id; };
     
