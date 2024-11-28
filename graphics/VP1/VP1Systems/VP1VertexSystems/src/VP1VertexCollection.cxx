@@ -52,7 +52,7 @@
 QList<VP1StdCollection*> VP1VertexCollection::createCollections(VertexSysController*controller)
 {
   QList<VP1StdCollection*> l;
-  for (QString key : VP1SGContentsHelper(controller->systemBase()).getKeys<VxContainer>()) {
+  for (const QString& key : VP1SGContentsHelper(controller->systemBase()).getKeys<VxContainer>()) {
     VP1VertexCollection * col = new VP1VertexCollection(controller,key);
     col->init();
     l << col;

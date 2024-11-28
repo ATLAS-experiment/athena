@@ -25,7 +25,7 @@
 QList<VP1StdCollection*> VP1MissingEtTruthHandle::createCollections(IVP1System*sys)
 {
   QList<VP1StdCollection*> l;
-  for (QString key : VP1SGContentsHelper(sys).getKeys<MissingEtTruth>()) {
+  for (const QString& key : VP1SGContentsHelper(sys).getKeys<MissingEtTruth>()) {
     VP1MissingEtTruthHandle * col = new VP1MissingEtTruthHandle(sys,key);
     col->init();
     l << col;

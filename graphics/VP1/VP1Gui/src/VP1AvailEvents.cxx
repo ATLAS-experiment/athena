@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -68,7 +68,7 @@ public:
 
 
 //____________________________________________________________________
-VP1AvailEvents::VP1AvailEvents(int timeCutForNew, QString td, int maxLocalFilesToKeep, QObject * parent)
+VP1AvailEvents::VP1AvailEvents(int timeCutForNew, const QString& td, int maxLocalFilesToKeep, QObject * parent)
   : QObject(parent), m_d(new Imp)
 {
   m_d->theclass = this;
@@ -101,7 +101,7 @@ int VP1AvailEvents::maxLocalFilesToKeep() const
 }
 
 //____________________________________________________________________
-QString VP1AvailEvents::tmpDir() const
+const QString& VP1AvailEvents::tmpDir() const
 {
   return m_d->tmpDir;
 }

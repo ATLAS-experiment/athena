@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -297,7 +297,7 @@ QButtonGroup * VP1Controller::defineRadioButtonGroup( QRadioButton * rb0, QRadio
 }
 
 //____________________________________________________________________
-QButtonGroup * VP1Controller::defineRadioButtonGroup( QList<QRadioButton *> l )
+QButtonGroup * VP1Controller::defineRadioButtonGroup( const QList<QRadioButton *>& l )
 {
   QRadioButton * rb_checked(0);
   for (QRadioButton *rb : l) {
@@ -384,7 +384,7 @@ void VP1Controller::connectToLastUpdateSlot(VP1ColorSelectButton* csb)
 }
 
 //____________________________________________________________________
-void VP1Controller::restoreSettings(QByteArray ba)
+void VP1Controller::restoreSettings(const QByteArray& ba)
 {
 	messageDebug("VP1Controller::restoreSettings()");
 

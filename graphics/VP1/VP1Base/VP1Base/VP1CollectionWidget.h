@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -42,24 +42,24 @@ public:
                                                                               //deleteGuiElements==true => the widgets supplied by
                                                                               //widgetsForGuiRow() will be deleted.
   void addStateInfo(const VP1CollStates&, bool overwritesExisting = true );
-  void setCollections(QList<VP1Collection*>, bool applySavedStates = true );//call at refresh cycle.
+  void setCollections(const QList<VP1Collection*>&, bool applySavedStates = true );//call at refresh cycle.
 
-  void addCollections(QList<VP1Collection*>, bool applySavedStates = true );//dynamically add new available collections (i.e. those appearing after refits)
+  void addCollections(const QList<VP1Collection*>&, bool applySavedStates = true );//dynamically add new available collections (i.e. those appearing after refits)
 
   VP1CollStates states() const;
 
-  QList<VP1Collection*> collections() const;
+  const QList<VP1Collection*>& collections() const;
 
   int appropriateFixedWidth() const;
 
   //Convenience:
   template <class collT>
-  void setCollections(QList<collT*> colls, bool applySavedStates = true ) {
+  void setCollections(const QList<collT*>& colls, bool applySavedStates = true ) {
     setCollections(VP1Collection::toBaseCollList(colls), applySavedStates);
   }
   //Convenience:
   template <class collT>
-  void addCollections(QList<collT*> colls, bool applySavedStates = true ) {
+  void addCollections(const QList<collT*>& colls, bool applySavedStates = true ) {
     addCollections(VP1Collection::toBaseCollList(colls), applySavedStates);
   }
 

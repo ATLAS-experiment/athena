@@ -104,7 +104,7 @@ public:
   template <class T>
   QList<TrackCollHandleBase*> createSpecificCollections() {
     QList<TrackCollHandleBase*> l;
-    for (QString name : T::availableCollections(theclass)) {
+    for (const QString& name : T::availableCollections(theclass)) {
       std::cout<<name.toStdString()<<std::endl;
       T * col = new T(common,name);
       col->init();

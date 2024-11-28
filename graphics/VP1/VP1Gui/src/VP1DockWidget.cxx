@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -192,7 +192,7 @@ void VP1DockWidget::ensureCWHasParent()
 }
 
 //______________________________________________________________________
-void VP1DockWidget::systemRefreshInfoChanged(QString sysrefreshing, int nsysOn, int nsysOnRefreshed)
+void VP1DockWidget::systemRefreshInfoChanged(const QString& sysrefreshing, int nsysOn, int nsysOnRefreshed)
 {
   assert(nsysOnRefreshed<=nsysOn);
   if (nsysOn==nsysOnRefreshed) {
@@ -284,7 +284,7 @@ void VP1DockWidget::contextMenuEvent ( QContextMenuEvent * event )
     menu_movechan.addAction("No other tabs available")->setEnabled(false);
   } else {
     QString thistab = m_d->tabmanager->channelToTab(m_d->channelwidget);
-    for (QString tab :  tablist) {
+    for (const QString& tab :  tablist) {
       if (tab!=thistab)
 	menu_movechan.addAction(tab)->setData("MOVECHAN");
     }

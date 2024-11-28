@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -162,11 +162,11 @@ std::map<SoCamera*,VP1CameraHelper*> VP1CameraHelper::Imp::helpers;
 //____________________________________________________________________
 //void VP1CameraHelper::setOutputImagesMode( SoQtRenderArea * ra,
 void VP1CameraHelper::setOutputImagesMode( VP1ExaminerViewer * ra,
-					   QString outputdir,
+					   const QString& outputdir,
 					   int width,
 					   int height,
 					   double fps,
-					   QString prefix )
+					   const QString& prefix )
 {
   if (!ra) {
     VP1Msg::messageDebug("VP1CameraHelper::setOutputImagesMode ERROR: Bad input. Null render area.");
@@ -790,7 +790,7 @@ void VP1CameraHelper::Imp::seeksensorCB(void * data, SoSensor * s)
 }
 
 //____________________________________________________________________
-void VP1CameraHelper::getLastAndNextFrameFileNames( QString outputdir,QString prefix,
+void VP1CameraHelper::getLastAndNextFrameFileNames( const QString& outputdir,const QString& prefix,
 						    QString& lastOfExistingFiles,
 						    QString& nextAvailableFile )
 {

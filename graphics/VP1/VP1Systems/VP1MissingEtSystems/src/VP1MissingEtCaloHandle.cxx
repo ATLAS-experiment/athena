@@ -31,7 +31,7 @@ QList<VP1StdCollection*> VP1MissingEtCaloHandle::createCollections(IVP1System*sy
   static const MissingET* met = 0;
 
   QList<VP1StdCollection*> l;
-  for (QString key : VP1SGContentsHelper(sys).getKeys<MissingEtCalo>()) {
+  for (const QString& key : VP1SGContentsHelper(sys).getKeys<MissingEtCalo>()) {
     //updated: for prevent loading zero length system
     met = 0;
     if(!VP1SGAccessHelper(sys).retrieve(met, key))

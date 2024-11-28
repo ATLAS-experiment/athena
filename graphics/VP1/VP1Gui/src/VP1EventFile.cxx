@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -161,13 +161,13 @@ bool VP1EventFile::isValid() const
 }
 
 //____________________________________________________________________
-QString VP1EventFile::fileName() const
+const QString& VP1EventFile::fileName() const
 {
   return m_d->fileName;
 }
 
 //____________________________________________________________________
-QString VP1EventFile::md5Sum() const
+const QString& VP1EventFile::md5Sum() const
 {
   return m_d->md5Sum;
 }

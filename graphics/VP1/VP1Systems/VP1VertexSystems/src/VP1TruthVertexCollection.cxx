@@ -43,7 +43,7 @@
 QList<VP1StdCollection*> VP1TruthVertexCollection::createCollections(VertexSysController*controller)
 {
   QList<VP1StdCollection*> l;
-  for (QString key : VP1SGContentsHelper(controller->systemBase()).getKeys<McEventCollection>()) {
+  for (const QString& key : VP1SGContentsHelper(controller->systemBase()).getKeys<McEventCollection>()) {
     VP1TruthVertexCollection * col = new VP1TruthVertexCollection(controller,key);
     col->init();
     l << col;

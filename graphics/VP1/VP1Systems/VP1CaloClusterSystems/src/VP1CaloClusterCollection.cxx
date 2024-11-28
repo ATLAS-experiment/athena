@@ -34,7 +34,7 @@
 QList<VP1CaloClusterCollection*> VP1CaloClusterCollection::createCollections(IVP1System*sys,CaloClusterSysController*controller)
 {
   QList<VP1CaloClusterCollection*> cols;
-  for (QString key : VP1SGContentsHelper(sys).getKeys<CaloClusterContainer>()) {
+  for (const QString& key : VP1SGContentsHelper(sys).getKeys<CaloClusterContainer>()) {
     VP1CaloClusterCollection * col = new VP1CaloClusterCollection(key,sys,controller);
     col->init();
     cols << col;

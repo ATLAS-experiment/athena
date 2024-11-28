@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -37,7 +37,7 @@ class VP1EventDisplayEditor : public QWidget {
 
 public:
 
-	VP1EventDisplayEditor(VP1MainWindow* mainWindow, QList<unsigned long long> listRunEventNumberTimestamp);
+	VP1EventDisplayEditor(VP1MainWindow* mainWindow, const QList<unsigned long long>& listRunEventNumberTimestamp);
 	virtual ~VP1EventDisplayEditor();
 
 //	QGraphicsView* getView();

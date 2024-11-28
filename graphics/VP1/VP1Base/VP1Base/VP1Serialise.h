@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -48,7 +48,7 @@ public:
   VP1Serialise(qint32 version, IVP1System * sys = 0);//sys!=0 for messages in gui
   virtual ~VP1Serialise();
 
-  QByteArray result();
+  const QByteArray& result();
   qint32 version() const;
 
   void ignoreWidget(const QWidget*);//Ignores widget and all children.

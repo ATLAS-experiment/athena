@@ -97,7 +97,7 @@ public:
   //  template <class T>
   //  QList<IParticleCollHandleBase*> createSpecificCollections(xAOD::Type::ObjectType type) {
   //    QList<IParticleCollHandleBase*> l;
-  //    for (QString name : T::availableCollections(theclass)) {
+  //    for (const QString& name : T::availableCollections(theclass)) {
   //      T * col = new T(common,name,type);
   //      col->init();
   //      l << col;
@@ -107,7 +107,7 @@ public:
   template <class T>
   QList<AODCollHandleBase*> createSpecificCollections(xAOD::Type::ObjectType type) {
     QList<AODCollHandleBase*> l;
-      for (QString name : T::availableCollections(theclass)) {
+      for (const QString& name : T::availableCollections(theclass)) {
         T * col = new T(common,name,type);
         col->init();
         l << col;
@@ -178,7 +178,7 @@ void VP1AODSystem::systemcreate(StoreGateSvc* /*detstore*/)
   availTools.addMonitoredType(tooltype);
   QStringList existingExtrapolators =  availTools.availableTools();
 
-  for (QString value :  existingExtrapolators)
+  for (const QString& value :  existingExtrapolators)
     messageVerbose(value);
 
   VP1ToolAccessHelper toolaccess(this);

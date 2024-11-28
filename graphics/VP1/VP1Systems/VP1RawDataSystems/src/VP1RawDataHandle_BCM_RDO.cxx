@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -41,7 +41,7 @@
 //____________________________________________________________________
 class VP1RawDataHandle_BCM_RDO::Imp {
 public:
-  static QStringList describeHit(const BCM_RawData * data, QString prefix = "")
+  static QStringList describeHit(const BCM_RawData * data, const QString& prefix = "")
   {
     QStringList l;
     l << "Word1: " + VP1RawDataHandleBase::unsignedToHex(data->getWord1());
@@ -57,7 +57,7 @@ public:
     if (prefix.isEmpty())
       return l;
     QStringList l2;
-    for (QString s : l)
+    for (const QString& s : l)
       l2 << (prefix + s);
     return l2;
   }
@@ -164,7 +164,7 @@ void VP1RawDataHandle_BCM_RDO::Imp::ensureInitModuleInfo()
 
 
 //____________________________________________________________________
-VP1RawDataHandle_BCM_RDO::VP1RawDataHandle_BCM_RDO(VP1RawDataCollBase* coll,int moduleID, QList<const BCM_RawData*>data)
+VP1RawDataHandle_BCM_RDO::VP1RawDataHandle_BCM_RDO(VP1RawDataCollBase* coll,int moduleID, const QList<const BCM_RawData*>& data)
   : VP1RawDataHandleBase(coll), m_moduleID(moduleID), m_nHighAttenuationHits(0), m_data(data)
 {
   Imp::ensureInitModuleInfo();

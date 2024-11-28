@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -51,7 +51,7 @@ public Q_SLOTS:
   void setPickMode();
   void setChangeViewMode();
   void setSeekMode();
-  void setShownView(QString);//Only relevant in multiview mode
+  void setShownView(const QString&);//Only relevant in multiview mode
 
 signals:
   void currentViewAboutToChange(VP1GraphicsView*);//Emitted just before the view changes. Parameter is the view which will be shown.

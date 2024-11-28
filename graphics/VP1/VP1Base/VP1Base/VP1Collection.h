@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -65,8 +65,8 @@ public:
   //  Static convenience methods for handling states:  //
   ///////////////////////////////////////////////////////
 
-  static VP1CollStates getStates(QList<VP1Collection*>);
-  static void applyStates(QList<VP1Collection*>, const VP1CollStates&);
+  static VP1CollStates getStates(const QList<VP1Collection*>&);
+  static void applyStates(const QList<VP1Collection*>&, const VP1CollStates&);
   static void updateStates(VP1CollStates& state, const VP1CollStates& newInfo);//Similar entries in newInfo will override those in state.
   template <class T>
   static QList<VP1Collection*> toBaseCollList( const QList<T*>& );

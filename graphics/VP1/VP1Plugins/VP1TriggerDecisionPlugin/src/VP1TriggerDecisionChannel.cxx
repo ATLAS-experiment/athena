@@ -121,7 +121,7 @@ void VP1TriggerDecisionChannel::cellActivated( int row, int /*column*/ )
 
     message("===== "+key+" ("+(type.isEmpty()? 0 :type)+"):");
 
-    for (QString line : info)
+    for (const QString& line : info)
             message(line);
 
 }

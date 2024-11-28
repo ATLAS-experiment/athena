@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -126,7 +126,7 @@ qint32 VP1Serialise::version() const
 
 
 //____________________________________________________________________
-QByteArray VP1Serialise::result()
+const QByteArray& VP1Serialise::result()
 {
   return m_d->byteArray;
 }

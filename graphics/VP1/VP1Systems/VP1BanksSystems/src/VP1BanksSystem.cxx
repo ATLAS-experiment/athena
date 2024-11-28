@@ -27,8 +27,7 @@ public:
   QStringList lastEmitted_types;
   QStringList lastEmitted_ids;
 
-  //  void emitIfChanged(const QStringList& keys, const QStringList& types, const QStringList& ids) {
-  void emitIfChanged(QStringList keys, QStringList types, QStringList ids) {
+  void emitIfChanged(const QStringList& keys, const QStringList& types, const QStringList& ids) {
     if (lastEmitted_keys==keys&&lastEmitted_types==types&&lastEmitted_ids==ids)
       return;
     lastEmitted_keys=keys;
@@ -128,7 +127,7 @@ void VP1BanksSystem::refreshList()
     if (!keys.isEmpty()) {
       QString typeName = m_d->idToName(id);
       QString idstr = QString::number(id);
-      for (QString key : keys) {
+      for (const QString& key : keys) {
 	entry_key << key;
 	entry_type << typeName;
 	entry_id << idstr;

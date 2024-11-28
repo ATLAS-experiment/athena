@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -353,7 +353,7 @@ void VP1GraphicsItemCollection::itemGotEventPrivate(QGraphicsItem*item,QEvent*ev
 }
 
 //____________________________________________________________________
-void VP1GraphicsItemCollection::selectionChangedPrivate(QList<QGraphicsItem*> items) const
+void VP1GraphicsItemCollection::selectionChangedPrivate(const QList<QGraphicsItem*>& items) const
 {
   selectionChanged(items);
 }

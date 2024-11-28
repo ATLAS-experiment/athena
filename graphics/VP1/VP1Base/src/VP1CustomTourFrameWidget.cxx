@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -75,7 +75,7 @@ void VP1CustomTourFrameWidget::Imp::init()
 
 //____________________________________________________________________
 VP1CustomTourFrameWidget::VP1CustomTourFrameWidget(bool camPerspective,
-						   QByteArray camState,
+						   const QByteArray& camState,
 						   QWidget * parent)
   : QFrame(parent), m_d(new Imp(this))
 {
@@ -85,7 +85,7 @@ VP1CustomTourFrameWidget::VP1CustomTourFrameWidget(bool camPerspective,
 }
 
 //____________________________________________________________________
-VP1CustomTourFrameWidget::VP1CustomTourFrameWidget( QByteArray serialisedFrame,
+VP1CustomTourFrameWidget::VP1CustomTourFrameWidget( const QByteArray& serialisedFrame,
 						    QWidget * parent )
   : QFrame(parent), m_d(new Imp(this))
 {
@@ -188,7 +188,7 @@ bool VP1CustomTourFrameWidget::camStateIsPerspective() const
 }
 
 //____________________________________________________________________
-QByteArray VP1CustomTourFrameWidget::camState() const
+const QByteArray& VP1CustomTourFrameWidget::camState() const
 {
   return m_d->camState;
 }

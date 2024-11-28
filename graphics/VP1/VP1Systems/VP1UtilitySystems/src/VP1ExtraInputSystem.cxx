@@ -190,7 +190,7 @@ void VP1ExtraInputSystem::restoreFromState(QByteArray ba){
   IVP13DSystemSimple::restoreFromState(state.restoreByteArray());
 
   state.restore(m_c->ui.toolBox);
-  for (QString fileName : state.restore<QStringList>())
+  for (const QString& fileName : state.restore<QStringList>())
     m_c->inputFile(this,fileName);
   state.restore(m_c->ui.baseLMButton,m_c->ui.phongLMButton);
   state.restore(m_c->ui.visibleCheckBox);

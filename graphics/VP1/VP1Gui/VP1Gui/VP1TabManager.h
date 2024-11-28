@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -36,10 +36,10 @@ public:
   VP1TabManager(QObject*parent, VP1TabWidget *,VP1ChannelManager*);
   ~VP1TabManager();
 
-  bool hasTab(QString) const;
-  bool showTab(QString);
-  bool showFirstChannelWithGivenBasename(QString basename);
-  QString suggestNewTabName(QString oldtabname) const;
+  bool hasTab(const QString&) const;
+  bool showTab(const QString&);
+  bool showFirstChannelWithGivenBasename(const QString& basename);
+  QString suggestNewTabName(const QString& oldtabname) const;
   QString currentTab() const;
   QString currentChannelUniqueName() const;
   IVP1ChannelWidget* selectedChannelWidget() const;
@@ -60,24 +60,24 @@ public:
   void launchStereoEditorCurrentTab();
 //  void setAntiAliasingCurrentTab(bool);
 
-  IVP1ChannelWidget * addChannelToTab( QString channelbasename, QString tabname );
+  IVP1ChannelWidget * addChannelToTab( const QString& channelbasename, const QString& tabname );
 public Q_SLOTS:
-  void addNewTab( QString, const int& index = -1 );
-  void renameTab( QString tabname, QString newtabname );
-  void removeTab( QString tabname );// -> Also removes channels obviously.
-  void removeChannel(QString channeluniquename);
-  void moveChannelToTab(QString channeluniquename,QString tabname);
-  void cloneChannelToTab(QString channeluniquename,QString tabname);
-  void cloneTab(QString oldtabname,QString newtabname);
+  void addNewTab( const QString&, const int& index = -1 );
+  void renameTab( const QString& tabname, const QString& newtabname );
+  void removeTab( const QString& tabname );// -> Also removes channels obviously.
+  void removeChannel(const QString& channeluniquename);
+  void moveChannelToTab(const QString& channeluniquename,const QString& tabname);
+  void cloneChannelToTab(const QString& channeluniquename,const QString& tabname);
+  void cloneTab(const QString& oldtabname,const QString& newtabname);
   void removeAllTabs();
 
 
-  void saveConfigurationToFile(QString filename,const bool& askonoverride=true);
-  void loadConfigurationFromFile(QString filename,const QMap<QString,QString>& availableplugins);
+  void saveConfigurationToFile(const QString& filename,const bool& askonoverride=true);
+  void loadConfigurationFromFile(const QString& filename,const QMap<QString,QString>& availableplugins);
 
   void showChannelFullScreen(IVP1ChannelWidget*);
   void showCurrentChannelFullScreen();
-  void showTabFullScreen(QString tabname);
+  void showTabFullScreen(const QString& tabname);
   void showCurrentTabFullScreen();
 
   void showNextTab();

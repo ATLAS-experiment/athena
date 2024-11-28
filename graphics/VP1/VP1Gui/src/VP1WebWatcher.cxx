@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -52,13 +52,13 @@ public:
     ~HttpThread() { /*delete m_http;*/ }
 
     //________________________________________
-    QString result() const { return m_result; }
+    const QString& result() const { return m_result; }
     //For special values, see static variables. All other values will
     //be the value of the "last-modified" value of the http response
     //header.
 
     //________________________________________
-    QString url() const { return m_url; }
+    const QString& url() const { return m_url; }
 
     //________________________________________
     int httpStartTime() const { return m_httpStartTime; }

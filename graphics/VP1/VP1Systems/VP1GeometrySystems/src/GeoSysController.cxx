@@ -486,7 +486,7 @@ VP1GeoFlags::MuonChamberAdaptionStyleFlags GeoSysController::muonChamberAdaption
 //  if (m_d->labelProvidingSystems.find(sys->name())!=m_d->labelProvidingSystems.end())
 //    return;
 //  QList<QCheckBox*> checkboxes;
-//  for(QString label : providedLabels) {
+//  for(const QString& label : providedLabels) {
 //    QCheckBox *checkbox = new QCheckBox(label, this);
 //    checkboxes.append(checkbox);
 //  }

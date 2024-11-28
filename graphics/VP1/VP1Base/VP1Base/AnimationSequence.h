@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1BASE_ANIMATIONSEQUENCE_H
@@ -58,7 +58,7 @@ class AnimationSequence {
 		bool variableSpeed = false, bool forceCircular = false, double clip=100.0  ) {//default upvec along y-axis
     m_sequence.push_back(Frame(reg, dir, SbVec3f(0,1,0), t, variableSpeed, forceCircular, clip));
   }
-  void addFrame(QByteArray camState, double t,
+  void addFrame(const QByteArray& camState, double t,
 		bool variableSpeed = true, bool forceCircular = false, double clip=100.0  ) {//default upvec along y-axis
     m_sequence.push_back(Frame(camState, t, variableSpeed, forceCircular, clip));
   }

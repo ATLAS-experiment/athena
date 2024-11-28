@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -108,7 +108,7 @@ private:
   void setTemporaryIgnoreMovable( const bool& );
   void itemPickedPrivate(QGraphicsItem*) const;
   void itemGotEventPrivate(QGraphicsItem*,QEvent*) const;
-  void selectionChangedPrivate(QList<QGraphicsItem*>) const;
+  void selectionChangedPrivate(const QList<QGraphicsItem*>&) const;
 };
 
 #endif

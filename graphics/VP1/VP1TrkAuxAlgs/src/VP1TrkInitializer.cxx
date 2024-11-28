@@ -76,9 +76,9 @@ void VP1TrkInitializer::initTools(QStringList& toolTypes, QString env)
   QStringList existingTools = availTools.availableTools();
 
 #if QTCORE_VERSION >= 0x050E00
-  for (QString key : VP1QtUtils::environmentVariableValue(env).split(';',Qt::SkipEmptyParts))
+  for (const QString& key : VP1QtUtils::environmentVariableValue(env).split(';',Qt::SkipEmptyParts))
 #else
-  for (QString key : VP1QtUtils::environmentVariableValue(env).split(';',QString::SkipEmptyParts))
+  for (const QString& key : VP1QtUtils::environmentVariableValue(env).split(';',QString::SkipEmptyParts))
 #endif
   {
     if (existingTools.contains(key))

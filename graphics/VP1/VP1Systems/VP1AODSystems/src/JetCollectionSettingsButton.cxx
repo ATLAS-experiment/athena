@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local
@@ -253,7 +253,7 @@ bool JetCollectionSettingsButton::is_bTaggingMaterialEnabled() const
 
 
 //____________________________________________________________________
-JetCollectionSettingsButton::JetCollectionSettingsButton(QWidget * parent,int dim, QString name)
+JetCollectionSettingsButton::JetCollectionSettingsButton(QWidget * parent,int dim, const QString& name)
 : VP1CollectionSettingsButtonBase(parent,0), m_d(new Imp)
 //: VP1CollectionSettingsButtonBase(parent,0,"VP1MaterialButton"), m_d(new Imp)
 {

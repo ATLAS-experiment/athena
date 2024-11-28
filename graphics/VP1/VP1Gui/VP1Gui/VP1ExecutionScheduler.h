@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -62,13 +62,13 @@ public:
 		             StoreGateSvc* detStore,
 				     ISvcLocator* svcLocator,
 					 IToolSvc*toolSvc,
-				     QStringList joboptions,
+				     const QStringList& joboptions,
 				     QString initialCruiseMode = "NONE",
 					 unsigned initialCruiseSeconds = 10,
-				     QString singleEventSource = "",
-				     QString singleEventLocalTmpDir = "",
+				     const QString& singleEventSource = "",
+				     const QString& singleEventLocalTmpDir = "",
 				     unsigned localFileCacheLimit = 10,
-				     QStringList availableLocalInputDirectories = QStringList() );
+				     const QStringList& availableLocalInputDirectories = QStringList() );
   static void cleanup(VP1ExecutionScheduler*);
 
   //Call when new event data are available (returns false when the user closes the program)
@@ -88,7 +88,7 @@ public:
   bool hasAllActiveSystemsRefreshed(IVP1ChannelWidget*) const;
 
   //For VP1Gui:
-  QString nextRequestedEventFile() const;
+  const QString& nextRequestedEventFile() const;
 
   //For use by whatever logic wants to determine the next event file
   //(probably VP1MainWindow):

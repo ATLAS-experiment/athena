@@ -141,7 +141,7 @@ public:
  * new version
  */
 //____________________________________________________________________
-VP1EventDisplayEditor::VP1EventDisplayEditor(VP1MainWindow* mainWindow, QList<unsigned long long> listRunEventNumberTimestamp)
+VP1EventDisplayEditor::VP1EventDisplayEditor(VP1MainWindow* mainWindow, const QList<unsigned long long>& listRunEventNumberTimestamp)
 //: QWidget(0,Qt::WindowStaysOnTopHint), d(new Imp)
 : QWidget(0), m_d(new Imp)
 {
@@ -435,7 +435,7 @@ void VP1EventDisplayEditor::addPixmapList(QList<QPixmap>& list, QStringList& lis
 	}
 
 	if (!listNames.isEmpty()) {
-		for (QString name : listNames) {
+		for (const QString& name : listNames) {
 			// add image name to the list
 			new QListWidgetItem(name, m_d->ui.listWidget);
 		}

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1BASE_ANIMATIONSEQUENCER_H
@@ -39,7 +39,7 @@ class AnimationSequencer : public QObject {
 
   //For frame-by-frame output:
   void setMovie(bool);
-  void setMovieParameters(QString outdir, QString frameFileNamePrefix, int fps, int width, int height);
+  void setMovieParameters(const QString& outdir, const QString& frameFileNamePrefix, int fps, int width, int height);
 
 signals:
   void animationFinishedSuccessfully();

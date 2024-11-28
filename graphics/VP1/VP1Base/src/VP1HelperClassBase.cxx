@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -91,10 +91,10 @@ void VP1HelperClassBase::messageVerbose( const QString& str ) const
 void VP1HelperClassBase::message(const QStringList& l, const QString& addtoend ) const
 {
   if (addtoend.isEmpty()) {
-    for (QString s :  l)
+    for (const QString& s :  l)
       message(s);
   } else {
-    for (QString s :  l)
+    for (const QString& s :  l)
       message(s+addtoend);
   }
 }
@@ -105,10 +105,10 @@ void VP1HelperClassBase::messageDebug(const QStringList& l, const QString& addto
   if (!VP1Msg::debug())
     return;
   if (addtoend.isEmpty()) {
-    for (QString s :  l)
+    for (const QString& s :  l)
       messageDebug(s);
   } else {
-    for (QString s :  l)
+    for (const QString& s :  l)
       messageDebug(s+addtoend);
   }
 }
@@ -119,10 +119,10 @@ void VP1HelperClassBase::messageVerbose(const QStringList& l, const QString& add
   if (!VP1Msg::verbose())
     return;
   if (addtoend.isEmpty()) {
-    for (QString s :  l)
+    for (const QString& s :  l)
       messageVerbose(s);
   } else {
-    for (QString s :  l)
+    for (const QString& s :  l)
       messageVerbose(s+addtoend);
   }
 }
@@ -135,10 +135,10 @@ void VP1HelperClassBase::message( const QString& addtostart, const QStringList& 
     return;
   }
   if (addtoend.isEmpty()) {
-    for (QString s :  l)
+    for (const QString& s :  l)
       message(addtostart+s);
   } else {
-    for (QString s :  l)
+    for (const QString& s :  l)
       message(addtostart+s+addtoend);
   }
 }
@@ -153,10 +153,10 @@ void VP1HelperClassBase::messageDebug(const QString& addtostart, const QStringLi
     return;
   }
   if (addtoend.isEmpty()) {
-    for (QString s :  l)
+    for (const QString& s :  l)
       messageDebug(addtostart+s);
   } else {
-    for (QString s :  l)
+    for (const QString& s :  l)
       messageDebug(addtostart+s+addtoend);
   }
 }
@@ -171,10 +171,10 @@ void VP1HelperClassBase::messageVerbose(const QString& addtostart, const QString
     return;
   }
   if (addtoend.isEmpty()) {
-    for (QString s :  l)
+    for (const QString& s :  l)
       messageVerbose(addtostart+s);
   } else {
-    for (QString s :  l)
+    for (const QString& s :  l)
       messageVerbose(addtostart+s+addtoend);
   }
 }

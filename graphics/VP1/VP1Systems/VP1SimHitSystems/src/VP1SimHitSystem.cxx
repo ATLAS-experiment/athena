@@ -184,7 +184,7 @@ void VP1SimHitSystem::buildEventSceneGraph(StoreGateSvc* sg, SoSeparator *root)
     return;
   }
 
-  for(QString detector : m_clockwork->checkBoxMap.keys())
+  for(const QString& detector : m_clockwork->checkBoxMap.keys())
   {
     // Add switch, off by default
     SoSwitch* sw = new SoSwitch();
@@ -500,7 +500,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
       // Generic:
       //
       message("Trying for Generic Muon (as many collections as can be found)");
-      for(QString key : VP1SGContentsHelper(this).getKeys<GenericMuonSimHitCollection>()) {
+      for(const QString& key : VP1SGContentsHelper(this).getKeys<GenericMuonSimHitCollection>()) {
         const GenericMuonSimHitCollection* generic_collection = nullptr;
         if(sg->retrieve( generic_collection,key.toStdString().c_str() )==StatusCode::SUCCESS)
         {
@@ -525,7 +525,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
       // Generic:
       //
       message("Trying for ForwardRegion (as many collections as can be found)");
-      for(QString key : VP1SGContentsHelper(this).getKeys<SimulationHitCollection>()) {
+      for(const QString& key : VP1SGContentsHelper(this).getKeys<SimulationHitCollection>()) {
         const SimulationHitCollection* generic_collection = nullptr;
         if(sg->retrieve( generic_collection,key.toStdString().c_str() )==StatusCode::SUCCESS)
         {

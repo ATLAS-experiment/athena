@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ public:
   QStringList userRequestedFiles();
   
 public Q_SLOTS:
-  void loadPluginFile(QString filename);
+  void loadPluginFile(const QString& filename);
 
   #ifdef BUILDVP1LIGHT
     void request_expertSettings();
@@ -116,14 +116,14 @@ public Q_SLOTS:
   void makeAllChannelsEventDisplay();
   void getAllChannelsIntoSnapshots(QList<QPixmap>& list, QStringList& listNames);
   QPixmap getSingleChannelCustomSnapshot(IVP1ChannelWidget* tab, int width = 0);
-  QPixmap getSingleChannelCustomSnapshot(QString tabName, int width = 0);
+  QPixmap getSingleChannelCustomSnapshot(const QString& tabName, int width = 0);
 
-  void tabListChanged(QStringList);
+  void tabListChanged(const QStringList&);
 
   void selectedChannelChanged(IVP1ChannelWidget*);
 
-  void loadConfigurationFromFile(QString file);
-  void replaceConfigurationFile(QString file);
+  void loadConfigurationFromFile(const QString& file);
+  void replaceConfigurationFile(const QString& file);
 
   void addToMessageBox( const QString&, const QString& extrastyleopts = "",
 			const QString& title = "", const QString& titleextrastyleopts = "" );

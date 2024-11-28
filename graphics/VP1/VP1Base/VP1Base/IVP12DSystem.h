@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -46,7 +46,7 @@ public:
   virtual void selectionChanged(VP1GraphicsItemCollection*,QList<QGraphicsItem*>);
 
   //This is for use by the channels:
-  QSet<VP1GraphicsItemCollection*> getItemCollections();
+  const QSet<VP1GraphicsItemCollection*>& getItemCollections();
 
   ////////////////////////////////////////////////////////////////////////
   ////////////  The rest of this file is just internal stuff  ////////////
@@ -67,7 +67,7 @@ private:
 private Q_SLOTS:
   void itemPickedPrivate(QGraphicsItem*);
   void itemGotEventPrivate(QGraphicsItem*,QEvent*);
-  void selectionChangedPrivate(QList<QGraphicsItem*>);
+  void selectionChangedPrivate(const QList<QGraphicsItem*>&);
 };
 
 #endif

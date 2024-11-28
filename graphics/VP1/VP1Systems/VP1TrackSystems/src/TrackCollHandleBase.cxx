@@ -307,7 +307,7 @@ void TrackCollHandleBase::setupSettingsFromController(TrackSystemController* con
 }
 
 //____________________________________________________________________
-QString TrackCollHandleBase::name() const
+const QString& TrackCollHandleBase::name() const
 {
   return m_d->name;
 }

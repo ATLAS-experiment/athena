@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -29,9 +29,9 @@ public:
   bool isValid() const { return m_valid; }
 
   Action action() const { return m_action; }
-  QString actioninfo() const { return m_actioninfo; }
-  QString message() const { return m_message; }
-  QString sender() const { return m_sender; }
+  const QString& actioninfo() const { return m_actioninfo; }
+  const QString& message() const { return m_message; }
+  const QString& sender() const { return m_sender; }
 
   QString serialize() const;
   VP1ExternalRequest(const QString& serialized);

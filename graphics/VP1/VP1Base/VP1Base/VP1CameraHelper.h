@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -78,13 +78,13 @@ public:
   //For outputting off-screen rendered frames to image files:
 //  void setOutputImagesMode(SoQtRenderArea * ra,
   void setOutputImagesMode(VP1ExaminerViewer * ra,
-			   QString outputdir,
+			   const QString& outputdir,
 			   int width = 1024,
 			   int height = 768,
 			   double fps = 24,
-			   QString prefix = "vp1_frame");
+			   const QString& prefix = "vp1_frame");
 
-  static void getLastAndNextFrameFileNames( QString outputdir,QString prefix,
+  static void getLastAndNextFrameFileNames( const QString& outputdir,const QString& prefix,
 					    QString& lastOfExistingFiles,//=> returned as empty string if no existing files
 					    QString& nextAvailableFile );
 

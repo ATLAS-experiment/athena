@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -72,7 +72,7 @@ QByteArray VP1CustomTourEditor::state() const
 }
 
 //____________________________________________________________________
-void VP1CustomTourEditor::setState(QByteArray ba)
+void VP1CustomTourEditor::setState(const QByteArray& ba)
 {
   for (VP1CustomTourFrameWidget*frame : m_d->frames)
     frame->deleteLater();
@@ -89,7 +89,7 @@ void VP1CustomTourEditor::setState(QByteArray ba)
 
   m_d->ui.widget_utilityZoomContents->setVisible(m_d->ui.groupBox_utilityZoom->isChecked());
 
-  for (QByteArray ba2 : frameStates)
+  for (const QByteArray& ba2 : frameStates)
     m_d->addFrame(new VP1CustomTourFrameWidget(ba2));
   m_d->updateFrameListVisuals();
   enabledFrameListChanged();

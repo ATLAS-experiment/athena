@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -30,16 +30,16 @@ public:
   friend class VP1LocalEvtRetriever;
 
   VP1AvailEvtsLocalDir( int timeCutForNew,
-			QString sourcedir,
-			QString tmpcopydir,
+			const QString& sourcedir,
+			const QString& tmpcopydir,
 			int maxLocalFilesToKeep = -1,
 			QObject * parent = 0 );
-  void setSourceDir(QString);
-  QString currentSourceDir() const;
+  void setSourceDir(const QString&);
+  const QString& currentSourceDir() const;
 
   //Just to let this class transport the info around:
-  void setAvailableSourceDirectories(QStringList);
-  QStringList availableSourceDirectories() const;
+  void setAvailableSourceDirectories(const QStringList&);
+  const QStringList& availableSourceDirectories() const;
 
   virtual ~VP1AvailEvtsLocalDir();
 

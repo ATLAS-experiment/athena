@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -30,7 +30,7 @@ public:
   ~VP1EvtsOnServerInfo();
 
   bool isValid() const;//Check if infofile parsed succesfully.
-  QString error() const;//When !isValid, this gives an explanation.
+  const QString& error() const;//When !isValid, this gives an explanation.
 
   QStringList print() const;
 

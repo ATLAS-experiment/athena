@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -60,7 +60,7 @@ public:
   void ensureSelected(const QList<AssociatedObjectHandleBase*>&);//Call with length==1 if in single mode.
   void deselectAll();
 
-  QList<AssociatedObjectHandleBase*> currentSelection() const;
+  const QList<AssociatedObjectHandleBase*>& currentSelection() const;
 
   SoSeparator* eventRoot();
 

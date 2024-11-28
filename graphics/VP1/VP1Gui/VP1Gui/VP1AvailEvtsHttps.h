@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -33,14 +33,14 @@ public:
   VP1AvailEvtsHttps(QString fileinfoUrl,
 		    int updateInterval,
 		    int timeCutForNew,
-		    QString tmpcopydir,
+		    const QString& tmpcopydir,
 		    int maxLocalFilesToKeep = -1,
 		    QObject * parent = 0);
   virtual ~VP1AvailEvtsHttps();
 
   virtual void init();
 
-  QString fileinfoLocation();
+  const QString& fileinfoLocation();
 
 public Q_SLOTS:
   void start(QNetworkAccessManager* netmanager);
