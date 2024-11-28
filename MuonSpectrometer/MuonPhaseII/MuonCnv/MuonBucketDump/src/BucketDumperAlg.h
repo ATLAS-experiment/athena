@@ -52,7 +52,7 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
     SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
     
     Gaudi::Property<bool> m_isMC{this, "isMC", true};
-    Gaudi::Property<double> m_fracToKeep{this,"dataFracToKeep", 0.055};
+    Gaudi::Property<double> m_fracToKeep{this,"dataFracToKeep", 1}; // 0.055 to balanced dataset without MC
     Gaudi::Property<std::string> m_streamName{this, "StreamName", ""};
     ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};
     CLHEP::HepRandomEngine* getRandomEngine(const EventContext&ctx) const;
@@ -63,6 +63,7 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<float>&           m_bucket_max{m_tree.newScalar<float>("bucket_max", -1)};
     MuonVal::ScalarBranch<uint16_t>&        m_bucket_spacePoints{m_tree.newScalar<uint16_t>("bucket_spacePoints", 0)};
     MuonVal::ScalarBranch<uint16_t>&        m_bucket_segments{m_tree.newScalar<uint16_t>("bucket_segments", 0)};
+    MuonVal::ScalarBranch<uint16_t>&        m_bucket_layers{m_tree.newScalar<uint16_t>("bucket_layers", 0)}; 
 
     MuonVal::ThreeVectorBranch              m_spoint_localPosition{m_tree, "localPosition"}; 
     MuonVal::ThreeVectorBranch              m_spoint_globalPosition{m_tree, "globalPosition"}; 

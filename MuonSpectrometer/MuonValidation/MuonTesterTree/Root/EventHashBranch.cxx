@@ -9,7 +9,7 @@ namespace MuonVal {
 EventHashBranch::EventHashBranch(TTree* tree, const std::string& evtKey):
     m_cache{tree, "CommonEventHash", 2},
     m_evtKey{evtKey} {}
-bool EventHashBranch::init() {return m_cache.init();}
+bool EventHashBranch::init() {return m_cache.init() && m_evtKey.initialize();}
 std::string EventHashBranch::name() const {return m_cache.name();}
 std::vector<EventHashBranch::DataDependency> EventHashBranch::data_dependencies() {
     return {&m_evtKey};
