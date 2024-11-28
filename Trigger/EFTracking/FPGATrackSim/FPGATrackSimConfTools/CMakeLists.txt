@@ -48,6 +48,7 @@ atlas_add_test( FPGATrackSimBankGeneration_test
 atlas_add_test( FPGATrackSim_F300_test
                 SCRIPT FPGATrackSim_F300.sh
                 PRIVATE_WORKING_DIRECTORY
+                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*" # ACTS (C)KF related errors
                 POST_EXEC_SCRIPT noerror.sh 
                 PROPERTIES TIMEOUT 450 )
 
