@@ -29,8 +29,8 @@ class OnnxRuntimeBase {
         std::vector<std::vector<float>> runONNXInference(NetworkBatchInput& inputTensorValues) const;
         std::map<int, Eigen::MatrixXf> runONNXInferenceMultilayerOutput(NetworkBatchInput& inputTensorValues) const;
 
-        std::vector<int64_t> getInputNodesDims(){return m_inputNodeDims;};
-        std::vector<int64_t> getOutputNodesDims(){return m_outputNodeDims;};
+        const std::vector<int64_t>& getInputNodesDims(){return m_inputNodeDims;};
+        const std::vector<int64_t>& getOutputNodesDims(){return m_outputNodeDims;};
 
     private:
         /// ONNX runtime session / model properties
