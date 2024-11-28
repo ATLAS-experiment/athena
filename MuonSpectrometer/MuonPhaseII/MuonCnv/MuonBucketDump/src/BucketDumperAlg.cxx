@@ -5,6 +5,7 @@
 #include "BucketDumperAlg.h"
 
 #include "StoreGate/ReadHandle.h"
+#include "MuonTesterTree/EventHashBranch.h"
 #include "MuonSpacePoint/SpacePointPerLayerSorter.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "xAODMuonPrepData/MdtDriftCircle.h"
@@ -27,9 +28,10 @@ namespace MuonR4{
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(m_inSegmentKey.initialize(!m_inSegmentKey.empty()));
+        m_tree.addBranch(std::make_shared<MuonVal::EventHashBranch>(m_tree.tree()));
         ATH_CHECK(m_tree.init(this));
         ATH_CHECK(m_idHelperSvc.retrieve());
-        ATH_MSG_DEBUG("Succesfully initialised");
+        ATH_MSG_DEBUG("Successfully initialized");
 
         return StatusCode::SUCCESS;
     }
@@ -120,7 +122,7 @@ namespace MuonR4{
                     m_bucket_spacePoints = bucket->size();
                     m_spoint_localPosition.push_back(sp->positionInChamber());
                     m_spoint_adc.push_back(dc->adc());
-                    m_spoint_adc.push_back(dc->tdc());
+                    m_spoint_tdc.push_back(dc->tdc());
                     m_spoint_covX.push_back(sp->covariance()(Amg::x, Amg::x));
                     m_spoint_covY.push_back(sp->covariance()(Amg::y, Amg::y));
                     m_spoint_covXY.push_back(sp->covariance()(Amg::x, Amg::y));
@@ -133,6 +135,7 @@ namespace MuonR4{
                     m_spoint_dimension.push_back(sp->dimension());
                     m_spoint_layer.push_back(layer);
                     m_spoint_isMdt.push_back(true);
+                    m_spoint_isStrip.push_back(false);
 
                     Amg::Vector3D globalPos = sp->msSector()->localToGlobalTrans(*gctx) * sp->positionInChamber();
                     m_spoint_globalPosition.push_back( globalPos );
@@ -154,8 +157,6 @@ namespace MuonR4{
                     m_spoint_id.push_back(sp->identify());
                     m_bucket_spacePoints = bucket->size();
                     m_spoint_localPosition.push_back(sp->positionInChamber());
-                    
-                    m_spoint_adc.push_back(0);
 
                     m_spoint_covX.push_back(sp->covariance()(Amg::x, Amg::x));
                     m_spoint_covY.push_back(sp->covariance()(Amg::y, Amg::y));
@@ -169,13 +170,20 @@ namespace MuonR4{
                     m_spoint_dimension.push_back(sp->dimension());
                     m_spoint_layer.push_back(layer);
                     m_spoint_isStrip.push_back(true);
+                    m_spoint_isMdt.push_back(false);
 
                     Amg::Vector3D globalPos = sp->msSector()->localToGlobalTrans(*gctx) * sp->positionInChamber();
                     m_spoint_globalPosition.push_back( globalPos );
 
+                    // check the technology to fill channel, adc and tdc... pushing back 0 for now
+                    m_spoint_adc.push_back(0); 
+                    m_spoint_tdc.push_back(0);
+
                 }
                 ++layer;
             }
+
+            m_bucket_layers = layer;
 
             if (!m_tree.fill(ctx)) return StatusCode::FAILURE; 
 
