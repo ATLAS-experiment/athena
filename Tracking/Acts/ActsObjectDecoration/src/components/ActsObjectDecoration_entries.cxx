@@ -3,5 +3,9 @@
 */
 
 #include "src/MeasurementToTrackParticleDecoration.h"
+#include "src/PixelClusterTruthDecorator.h"
+#include "src/StripClusterTruthDecorator.h"
 
 DECLARE_COMPONENT(ActsTrk::MeasurementToTrackParticleDecoration)
+DECLARE_COMPONENT(ActsTrk::PixelClusterTruthDecorator)
+DECLARE_COMPONENT(ActsTrk::StripClusterTruthDecorator)

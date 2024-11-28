@@ -38,11 +38,11 @@ namespace ActsTrk
    public:
       using container = boost::container::small_vector<std::pair<const xAOD::TruthParticle *, HitCounterArray >, NTruthParticlesPerTrack>;
 
-      /** vector with counts per associated truth particle
+      /** vector with counts per associated truth particle (read only)
        */
       const container &countsPerTruthParticle() const { return m_counts; }
 
-      /** vector with counts per associated truth particle (read only)
+      /** vector with counts per associated truth particle
        */
       container &countsPerTruthParticle()             { return m_counts; }
 

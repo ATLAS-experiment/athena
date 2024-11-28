@@ -420,6 +420,15 @@ def ITkStatsCfg(flags, StatTrackCollections=None,
     return result
 
 
+def ITkActsExtendedPRDInfoCfg(flags):
+    result = ComponentAccumulator()
+
+    #Add the truth origin to the truth particles
+    from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPixelPrepDataToxAODCfg
+    result.merge(ITkActsPixelPrepDataToxAODCfg(flags))
+
+    return result
+
 def ITkExtendedPRDInfoCfg(flags):
     result = ComponentAccumulator()
 
@@ -628,12 +637,17 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
                 flags_set[0], # Use cuts from primary pass
                 StatTrackCollections=StatTrackCollections,
                 StatTrackTruthCollections=StatTrackTruthCollections))
-            
+
+
+    ## ACTS Specific write PRDInfo
     if flags.Tracking.writeExtendedSi_PRDInfo:
         if _extensions_list:
             result.merge(ITkExtendedPRDInfoCfg(flags))
 
-
+            #Acts algorithm
+        else:
+            result.merge(ITkActsExtendedPRDInfoCfg(flags))
+            
     # output
     from InDetConfig.ITkTrackOutputConfig import ITkTrackRecoOutputCfg
     result.merge(ITkTrackRecoOutputCfg(flags, _extensions_list))

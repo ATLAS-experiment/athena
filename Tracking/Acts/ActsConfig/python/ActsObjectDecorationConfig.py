@@ -23,3 +23,37 @@ def ActsMeasurementToTrackParticleDecorationCfg(flags,
     acc.addEventAlgo(CompFactory.ActsTrk.MeasurementToTrackParticleDecoration(name, **kwargs))
     return acc
 
+
+def ActsPixelClusterTruthDecorator(flags,
+                                   name: str = "ActsPixelClusterTruthDecorator",
+                                   **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault("SiClusterContainer","ITkPixelClusters")
+    kwargs.setdefault("MC_Hits","PixelHits")
+    kwargs.setdefault("MC_SDOs","PixelSDO_Map")
+    kwargs.setdefault("PRD_MultiTruth","PRD_MultiTruthITkPixel")
+    kwargs.setdefault("InputTruthParticleLinks","xAODTruthLinks")
+    kwargs.setdefault("AssociationMapOut","ITkPixelClustersToTruthParticles")
+
+    #Using the same name of the xAOD::SiCluster causes bunch of warnings
+    kwargs.setdefault("OutputClusterContainer","ITkPixelClusters")
+
+
+    acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterTruthDecorator(name,**kwargs))
+    return acc
+
+
+def ActsStripClusterTruthDecorator(flags,
+                                   name: str = "ActsStripClusterTruthDecorator",
+                                   **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault("SiClusterContainer","ITkStripClusters")
+    kwargs.setdefault("MC_Hits","StripHits")
+    kwargs.setdefault("MC_SDOs","StripSDO_Map")
+    kwargs.setdefault("InputTruthParticleLinks","xAODTruthLinks")
+    kwargs.setdefault("AssociationMapOut","ITkStripClustersToTruthParticles")
+    kwargs.setdefault("OutputClusterContainer","ITkStripClusters")
+
+
+    acc.addEventAlgo(CompFactory.ActsTrk.StripClusterTruthDecorator(name,**kwargs))
+    return acc

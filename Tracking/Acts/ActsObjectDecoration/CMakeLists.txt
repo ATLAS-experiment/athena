@@ -16,4 +16,5 @@ atlas_add_component( ActsObjectDecoration
    xAODInDetMeasurement
    xAODMeasurementBase
    InDetReadoutGeometry
+   TrkTruthData
 )
