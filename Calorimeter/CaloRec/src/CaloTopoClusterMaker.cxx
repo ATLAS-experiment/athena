@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -346,6 +346,11 @@ StatusCode CaloTopoClusterMaker::initialize()
   }
 
   //ATH_CHECK( m_cablingKey.initialize() );
+
+  // silence possible warnings from AuxSelection (ATLASRECTS-7180)
+  xAOD::CaloCluster dummyCluster;
+  static const SG::ConstAccessor<ElementLink<CaloClusterCellLinkContainer> > accCellLinks("CellLink");
+  (void) accCellLinks.isAvailable(dummyCluster);
 
   return StatusCode::SUCCESS;
   

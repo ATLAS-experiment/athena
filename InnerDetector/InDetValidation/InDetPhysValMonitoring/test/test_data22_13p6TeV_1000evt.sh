@@ -1,6 +1,8 @@
 #!/bin/bash
 # art-description: Standard test for 2022 data
 # art-type: grid
+# art-input: data22_13p6TeV:data22_13p6TeV.00430536.physics_Main.daq.RAW
+# art-input-nfiles: 1
 # art-cores: 4
 # art-memory: 4096
 # art-include: main/Athena
@@ -18,9 +20,7 @@ run() { (set -x; exec "$@") }
 relname="r24.0.67"
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-inputBS=${artdata}/RecJobTransformTests/data22_13p6TeV/data22_13p6TeV.00430536.physics_Main.daq.RAW/data22_13p6TeV.00430536.physics_Main.daq.RAW._lb1015._SFO-20._0001.data
 dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_data22_13p6TeV_1000evt.root 
-lastref_dir=last_results
 
 script=test_data_reco.sh
 
@@ -29,4 +29,4 @@ geotag="ATLAS-R3S-2021-03-02-00"
 
 echo "Executing script ${script}"
 echo " "
-"$script" ${ArtProcess} ${inputBS} ${dcubeRef} ${lastref_dir} ${conditions} ${geotag}
+"$script" ${ArtProcess} ${ArtInFile} ${dcubeRef} ${conditions} ${geotag}

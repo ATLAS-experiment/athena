@@ -37,6 +37,36 @@
 /// hash id methods 
 
 void RegSelSiLUT::HashIDList( const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const {
+  //  RegSelSiLUT::IDList( roi, idlist, &RegSelSiLUT::HashIDList_internal );
+  IRegSelLUT::IDList<RegSelSiLUT>( roi, idlist, &RegSelSiLUT::HashIDList_internal );
+  if ( m_ID == RPC ) RegSelSiLUT::cleanup( idlist );
+}
+
+
+void RegSelSiLUT::HashIDList( long layer, const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const { 
+  RegSelSiLUT::IDList_layer( layer, roi, idlist, &RegSelSiLUT::HashIDList_internal );
+  if ( m_ID == RPC ) RegSelSiLUT::cleanup( idlist );
+}
+
+
+/// rob methods
+
+void RegSelSiLUT::ROBIDList( const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const {
+  RegSelSiLUT::IDList( roi, roblist, &RegSelSiLUT::ROBIDList_internal );
+}
+
+
+void RegSelSiLUT::ROBIDList( long layer, const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const {
+  RegSelSiLUT::IDList_layer( layer, roi, roblist, &RegSelSiLUT::ROBIDList_internal );
+}
+
+
+
+/// protected single Roi mathods
+
+/// hash id methods 
+
+void RegSelSiLUT::HashIDList_internal( const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const {
   if ( roi.isFullscan() ) return getHashList( idlist );
   RegSelRoI roitmp( roi.zedMinus(), roi.zedPlus(), roi.phiMinus(), roi.phiPlus(), roi.etaMinus(), roi.etaPlus() );
   getHashList( roitmp, idlist );
@@ -44,7 +74,7 @@ void RegSelSiLUT::HashIDList( const IRoiDescriptor& roi, std::vector<IdentifierH
 }
 
 
-void RegSelSiLUT::HashIDList( long layer, const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const { 
+void RegSelSiLUT::HashIDList_internal( long layer, const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const { 
   if ( roi.isFullscan() ) return getHashList( layer, idlist );
   RegSelRoI roitmp( roi.zedMinus(), roi.zedPlus(), roi.phiMinus(), roi.phiPlus(), roi.etaMinus(), roi.etaPlus() );
   getHashList( roitmp, layer, idlist );
@@ -53,14 +83,14 @@ void RegSelSiLUT::HashIDList( long layer, const IRoiDescriptor& roi, std::vector
 
 /// rob methods
 
-void RegSelSiLUT::ROBIDList( const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const {
+void RegSelSiLUT::ROBIDList_internal( const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const {
   if ( roi.isFullscan() ) return getRobList( roblist );
   RegSelRoI roitmp( roi.zedMinus(), roi.zedPlus(), roi.phiMinus(), roi.phiPlus(), roi.etaMinus(), roi.etaPlus() );
   getRobList( roitmp, roblist);
 }
 
 
-void RegSelSiLUT::ROBIDList( long layer, const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const {
+void RegSelSiLUT::ROBIDList_internal( long layer, const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const {
   if ( roi.isFullscan() ) return getRobList( layer, roblist );
   RegSelRoI roitmp( roi.zedMinus(), roi.zedPlus(), roi.phiMinus(), roi.phiPlus(), roi.etaMinus(), roi.etaPlus() );
   getRobList( roitmp, layer, roblist);
@@ -89,7 +119,7 @@ RegSelSiLUT::RegSelSiLUT(const std::string& s) :
 
 void RegSelSiLUT::construct() 
 {   
-  const std::string s[7] = { "", "pixel", "sct", "trt", "ftk", "mm", "stgc" };
+  const std::string s[8] = { "", "pixel", "sct", "trt", "ftk", "mm", "stgc", "rpc" };
   m_name = s[m_ID];
 }
 

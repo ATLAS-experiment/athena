@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKWRITEFASTSIM_StoppedParticleFastSim_h
@@ -28,9 +28,9 @@ public:
 protected:
 
   bool isSUSYParticle(const int) const;
-  TrackFastSimSD * m_fsSD;
-  bool m_init;
-  std::string m_fsSDname;
+  TrackFastSimSD * m_fsSD{};
+  bool m_init{false};
+  std::string m_fsSDname{""};
 };
 
 #endif // TRACKWRITEFASTSIM_StoppedParticleFastSim_h

@@ -12,26 +12,49 @@
 
 /// implementation of the IRegSelUT interface - intentionally inlined                                                                               
 
+
 /// hash id methods                                                                                                                                 
 
 void RegSelectorMap::HashIDList( const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const {
-  if ( roi.isFullscan() ) regionSelector( TILE, -4.9, 4.9, 0, 2*M_PI, idlist );
-  regionSelector( TILE, roi.etaMinus(), roi.etaPlus(), roi.phiMinus(), roi.phiPlus(), idlist );
+  IRegSelLUT::IDList<RegSelectorMap>( roi, idlist, &RegSelectorMap::HashIDList_internal );
 }
 
 void RegSelectorMap::HashIDList( long layer, const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const {;
-  if ( roi.isFullscan() ) regionSelector( layer, -4.9, 4.9, 0, 2*M_PI, idlist );
-  regionSelector( layer, roi.etaMinus(), roi.etaPlus(), roi.phiMinus(), roi.phiPlus(), idlist );
+  IRegSelLUT::IDList_layer<RegSelectorMap>( layer, roi, idlist, &RegSelectorMap::HashIDList_internal );
 }
 
 /// Rob identifier methods                                                                                                                          
 
 void RegSelectorMap::ROBIDList( const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const {
+  IRegSelLUT::IDList<RegSelectorMap>( roi, roblist, &RegSelectorMap::ROBIDList_internal );
+}
+
+void RegSelectorMap::ROBIDList( long layer, const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const {
+  IRegSelLUT::IDList_layer<RegSelectorMap>( layer, roi, roblist, &RegSelectorMap::ROBIDList_internal );
+}
+
+
+
+/// internal hash id methods                                                                                                                                 
+
+void RegSelectorMap::HashIDList_internal( const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const {
+  if ( roi.isFullscan() ) regionSelector( TILE, -4.9, 4.9, 0, 2*M_PI, idlist );
+  regionSelector( TILE, roi.etaMinus(), roi.etaPlus(), roi.phiMinus(), roi.phiPlus(), idlist );
+}
+
+void RegSelectorMap::HashIDList_internal( long layer, const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const {;
+  if ( roi.isFullscan() ) regionSelector( layer, -4.9, 4.9, 0, 2*M_PI, idlist );
+  regionSelector( layer, roi.etaMinus(), roi.etaPlus(), roi.phiMinus(), roi.phiPlus(), idlist );
+}
+
+/// internal Rob identifier methods                                                                                                                          
+
+void RegSelectorMap::ROBIDList_internal( const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const {
   if ( roi.isFullscan() ) regionSelectorRobIdUint( TILE, -4.9, 4.9, 0, 2*M_PI, roblist );
   regionSelectorRobIdUint( TILE, roi.etaMinus(), roi.etaPlus(), roi.phiMinus(), roi.phiPlus(), roblist );
 }
 
-void RegSelectorMap::ROBIDList( long layer, const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const {
+void RegSelectorMap::ROBIDList_internal( long layer, const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const {
   if ( roi.isFullscan() ) regionSelectorRobIdUint( layer, -4.9, 4.9, 0, 2*M_PI, roblist );
   regionSelectorRobIdUint( layer, roi.etaMinus(), roi.etaPlus(), roi.phiMinus(), roi.phiPlus(), roblist );
 }
