@@ -57,6 +57,7 @@ int main(int, char**)
   truth.setPDGCode(pdgcode);
   truth.setStatus(status);
   truth.setBarcode(barcode);
+  truth.setUniqueID(barcode);
   truth.setPX(px);
   truth.setPY(py);
   truth.setPZ(pz);
@@ -78,7 +79,8 @@ int main(int, char**)
 
   std::cout << "Truth pdg = " << header.optional().getTruthTracks()[0].getPDGCode() 
 	    << " status = " << header.optional().getTruthTracks()[0].getStatus() 
-	    << " and barcode = " << header.optional().getTruthTracks()[0].getBarcode() << std::endl;
+	    << " uniqueID = " << header.optional().getTruthTracks()[0].getUniqueID()
+            << " and barcode = " << header.optional().getTruthTracks()[0].getBarcode() << std::endl;
 
   std::cout << "Truth px = " << header.optional().getTruthTracks()[0].getPX() 
 	    << " and py = " <<  header.optional().getTruthTracks()[0].getPY() 
