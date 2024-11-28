@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelConditionsData/PixelClusterOnTrackErrorData.h"
@@ -221,7 +221,7 @@ void PixelClusterOnTrackErrorData::setParameters(const int n1, // number of clus
 						 const int n3,   // number of eta bins
 						 const int n4,   // number of incidence angle bins
 						 int offset, // start from c[offset]
-					         std::vector<float> c){  // vector with bin values
+					   const std::vector<float> & c){  // vector with bin values
 
   m_csx.clear();
   m_csy.clear();

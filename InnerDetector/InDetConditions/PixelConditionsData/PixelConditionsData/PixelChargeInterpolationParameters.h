@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -87,7 +87,7 @@ class PixelChargeInterpolationParameters {
     const std::vector<float>& getClusterSizeYBins() const{return m_csy;}
     
     void setParameters(const int ncsx, const int ncsy, const int neta, 
-                       const int nalpha, int offset, std::vector<float> constants);
+                       const int nalpha, int offset, const std::vector<float> & constants);
 
     void Print(const std::string& filename) const;
     void Load(const std::string& filename);

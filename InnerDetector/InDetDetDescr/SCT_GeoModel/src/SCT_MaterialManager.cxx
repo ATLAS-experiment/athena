@@ -12,10 +12,10 @@
 #include <iostream>
 
 // Constructor 
-SCT_MaterialManager::SCT_MaterialManager(SCT_DataBase* db)
+SCT_MaterialManager::SCT_MaterialManager(SCT_DataBase* db):
+  m_materialManager(std::make_unique<InDetMaterialManager>("SCT_MaterialManager", db->athenaComps()))
 {
   // Make my material manager.
-  m_materialManager = std::make_unique<InDetMaterialManager>("SCT_MaterialManager", db->athenaComps());
   m_materialManager->addWeightTable(db->weightTable(), "sct");
   m_materialManager->addScalingTable(db->scalingTable());
   

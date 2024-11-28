@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -61,26 +61,6 @@ namespace PixelCalib{
     m_csxbinsibl = 0;
     m_csybinsibl = 0;
 
-    /* IBL initial from DB 
-       int netaibl = 6; 
-       m_ibletabins.reserve(netaibl+1);
-       m_ibletabins.push_back(0.00);
-       m_ibletabins.push_back(0.55);
-       m_ibletabins.push_back(1.275);
-       m_ibletabins.push_back(1.725);
-       m_ibletabins.push_back(2.025);
-       m_ibletabins.push_back(2.25);
-       m_ibletabins.push_back(2.70);
-
-    // alfa (Rphi incidence angle) bins: [-15.47, 15.47]
-    float phimin = -15.47;
-    float phimax = 15.47;
-    int nalphaibl = 9;
-    m_ibletabins.reserve(nalphaibl+1);
-    for(int i=0; i<nalphaibl+1; i++){
-    m_iblphibins.push_back(phimin +i*(phimax-phimin)/(nalphaibl));
-    }
-     */
   }
 
   void PixelChargeInterpolationParameters::setVersion(int version){ m_version = version; }
@@ -92,7 +72,7 @@ namespace PixelCalib{
       const int n3,   // number of eta bins
       const int n4,   // number of incidence angle bins
       int offset,     // start from c[offset]
-      std::vector<float> c){  // vector with bin values
+      const std::vector<float> & c){  // vector with bin values
     m_csx.clear();
     m_csy.clear();
     m_etabins.clear();
