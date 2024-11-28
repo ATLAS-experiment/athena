@@ -93,7 +93,7 @@ class L1CaloCondAlg: public ::AthAlgorithm {
 
 
   template <typename T> StatusCode updateCond(SG::WriteCondHandleKey<T>& wkey,
-          std::vector<std::reference_wrapper<const SG::ReadCondHandleKey<CondAttrListCollection>>> rkeys,
+          const std::vector<std::reference_wrapper<const SG::ReadCondHandleKey<CondAttrListCollection>>>& rkeys,
           std::unique_ptr<T> obj = nullptr);
 
 
