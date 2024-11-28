@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTPTCNV_EVENTSTREAMINFOPTCNV_P3_H
@@ -17,11 +17,11 @@
 class EventStreamInfoPTCnv_p3 : EventStreamInfo_p3 {
 public:
     static unsigned int getNumberOfEvents (const ::EventStreamInfo_p3& esip) { return esip.m_numberOfEvents; };
-    static std::vector<unsigned int> runNumbers (const ::EventStreamInfo_p3& esip) { return esip.m_runNumbers; };
-    static std::vector<unsigned int> lumiBlockNumbers (const ::EventStreamInfo_p3& esip) { return esip.m_lumiBlockNumbers; };
-    static std::vector<std::string> processingTags (const ::EventStreamInfo_p3& esip) { return esip.m_processingTags; };
-    static std::vector<std::pair<unsigned int, std::string> > itemList (const ::EventStreamInfo_p3& esip) { return esip.m_itemList; };
-    static std::vector<EventType_p3> eventTypes (const ::EventStreamInfo_p3& esip) { return esip.m_eventTypes; };
+    static const std::vector<unsigned int>& runNumbers (const ::EventStreamInfo_p3& esip) { return esip.m_runNumbers; };
+    static const std::vector<unsigned int>& lumiBlockNumbers (const ::EventStreamInfo_p3& esip) { return esip.m_lumiBlockNumbers; };
+    static const std::vector<std::string>& processingTags (const ::EventStreamInfo_p3& esip) { return esip.m_processingTags; };
+    static const std::vector<std::pair<unsigned int, std::string> >& itemList (const ::EventStreamInfo_p3& esip) { return esip.m_itemList; };
+    static const std::vector<EventType_p3>& eventTypes (const ::EventStreamInfo_p3& esip) { return esip.m_eventTypes; };
 };
 
 #endif // EVENTPTCNV_EVENTSTREAMINFOPTCNV_P3_H

@@ -18,9 +18,9 @@ typedef std::map<uint32_t, ROBF*> ROBMAP;
 
 // Constructor.
 ByteStreamMergeOutputSvc::ByteStreamMergeOutputSvc(const std::string& name, ISvcLocator* svcloc) :
-   base_class(name,svcloc)
+   base_class(name,svcloc),
+   m_bsOutputStreamName(name)
 {
-   m_bsOutputStreamName = name;
 }
 
 // Destructor.
