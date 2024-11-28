@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGFPGATrackSimOBJECTS_FPGATrackSimOFFLINETRACK_H
@@ -34,7 +34,7 @@ public:
   //  handling hits
   const std::vector<FPGATrackSimOfflineHit>& getOfflineHits() const { return m_hits; }
   int   nHits() const { return m_hits.size(); }
-  void  addHit(FPGATrackSimOfflineHit s) { m_hits.push_back(s); }
+  void  addHit(const FPGATrackSimOfflineHit& s) { m_hits.push_back(s); }
 
 
 private:

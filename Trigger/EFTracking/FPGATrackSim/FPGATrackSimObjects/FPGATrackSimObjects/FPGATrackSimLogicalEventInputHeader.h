@@ -35,7 +35,7 @@ public:
     //  handling towers
     const std::vector<FPGATrackSimTowerInputHeader>& towers() const { return m_towers; }
     int                  nTowers() const { return m_towers.size(); }
-    void                 addTower(FPGATrackSimTowerInputHeader s) { m_towers.push_back(s); }
+    void                 addTower(const FPGATrackSimTowerInputHeader& s) { m_towers.push_back(s); }
     FPGATrackSimTowerInputHeader* getTower(size_t index) { return &m_towers[index]; } //get the pointer
     void                 reserveTowers(size_t size) { m_towers.reserve(size); }
     void                 addTowers(const std::vector<FPGATrackSimTowerInputHeader>& towers) { m_towers = towers; }
