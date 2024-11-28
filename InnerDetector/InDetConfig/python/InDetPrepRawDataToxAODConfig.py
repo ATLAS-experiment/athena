@@ -42,6 +42,23 @@ def InDetPixelPrepDataToxAODCfg(flags, name='InDetPixelPrepDataToxAOD', **kwargs
     acc.addEventAlgo(CompFactory.PixelPrepDataToxAOD(name, **kwargs))
     return acc
 
+
+def ITkActsPixelPrepDataToxAODCfg(flags, name="ITkActsPixelPrepDataToxAOD", **kwargs):
+
+    acc = ComponentAccumulator()
+
+    # need to decorate truth particles and clusters with same unique identified
+    # which is the origin truth particle index
+    if flags.Input.isMC:
+        
+        acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
+
+        from ActsConfig.ActsObjectDecorationConfig import ActsPixelClusterTruthDecorator,ActsStripClusterTruthDecorator
+        acc.merge(ActsPixelClusterTruthDecorator(flags))
+        acc.merge(ActsStripClusterTruthDecorator(flags))
+
+    return acc
+
 def InDetPixelPrepDataToxAOD_ExtraTruthCfg(flags, name='InDetPixelPrepDataToxAOD_ExtraTruth', **kwargs):
     kwargs.setdefault("WriteSDOs", True)
     kwargs.setdefault("WriteSiHits", True)
