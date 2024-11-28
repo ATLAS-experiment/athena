@@ -6,6 +6,7 @@
 
 // System include(s):
 #include <stdexcept>
+#include <numbers>
 
 // xAOD include(s):
 #include "xAODCore/AuxStoreAccessorMacros.h"
@@ -16,8 +17,9 @@
 namespace xAOD {
 
   /// Constants used in converting to ATLAS units
-  const float gFexJetRoI_v1::s_PhiWidth = (2*M_PI)/32; //In central region, gFex has 32 bins in phi
-  const float gFexJetRoI_v1::s_PhiWidthFR = (2*M_PI)/16; //In central region, gFex has 32 bins in phi
+  using std::numbers::pi;
+  const float gFexJetRoI_v1::s_PhiWidth = (2*pi)/32; //In central region, gFex has 32 bins in phi
+  const float gFexJetRoI_v1::s_PhiWidthFR = (2*pi)/16; //In central region, gFex has 32 bins in phi
   const std::vector<float> gFexJetRoI_v1::s_EtaEdge     = { -4.9, -4.1, -3.5, -3.25, -3.2, -3.1, 
                                                             -2.9, -2.7, -2.5, -2.2, -2.0, -1.8, -1.6, -1.4, -1.2, -1.0,  
                                                             -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0,                                                 
@@ -298,8 +300,8 @@ namespace xAOD {
   float gFexJetRoI_v1::phi() const {
     float phi_out = 0;
     if (gFexType() != gRho){
-      if (phi_gFex() < M_PI) phi_out = phi_gFex();
-      else phi_out = (phi_gFex() - 2*M_PI);
+      if (phi_gFex() < pi) phi_out = phi_gFex();
+      else phi_out = (phi_gFex() - 2*pi);
     }
     return phi_out; 
   }
@@ -309,8 +311,8 @@ namespace xAOD {
   float gFexJetRoI_v1::phiMax() const {
     float phi_out = 0;
     if (gFexType() != gRho){
-      if (phiMax_gFex() < M_PI) phi_out = phiMax_gFex();
-      else phi_out = (phiMax_gFex() - 2*M_PI);
+      if (phiMax_gFex() < pi) phi_out = phiMax_gFex();
+      else phi_out = (phiMax_gFex() - 2*pi);
     }
     return phi_out; 
   }
@@ -320,8 +322,8 @@ namespace xAOD {
   float gFexJetRoI_v1::phiMin() const {
     float phi_out = 0;
     if (gFexType() != gRho){
-      if (phiMin_gFex() < M_PI) phi_out = phiMin_gFex();
-      else phi_out = (phiMin_gFex() - 2*M_PI);
+      if (phiMin_gFex() < pi) phi_out = phiMin_gFex();
+      else phi_out = (phiMin_gFex() - 2*pi);
     }
     return phi_out; 
   }

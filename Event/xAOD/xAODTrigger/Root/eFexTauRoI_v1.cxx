@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
 // System include(s):
 #include <stdexcept>
+#include <numbers>
 
 // xAOD include(s):
 #include "xAODCore/AuxStoreAccessorMacros.h"
@@ -25,6 +26,7 @@ namespace xAOD {
    }
 
    void eFexTauRoI_v1::initialize( unsigned int eFexNumber, unsigned int shelf, uint32_t word0 ) {
+      using std::numbers::pi;
 
       // xTOBs will have eFEX and Shelf numbers in word 1 
       // To save space, use the second word of this object, which is not part of a TOB, to store these values
@@ -38,8 +40,8 @@ namespace xAOD {
       setEt( etTOB()*s_tobEtScale );
       float etaVal = computeEta();
       setEta( etaVal );
-      float phiVal = iPhi() * M_PI/32. + M_PI/64.;
-      if (phiVal > M_PI) phiVal = phiVal - 2.*M_PI;
+      float phiVal = iPhi() * pi/32. + pi/64.;
+      if (phiVal > pi) phiVal = phiVal - 2.*pi;
       setPhi( phiVal );
 
       /** If the object is a TOB then the isTOB should be true.
@@ -53,6 +55,8 @@ namespace xAOD {
 
    void eFexTauRoI_v1::initialize( uint32_t word0, uint32_t word1 ) {
 
+      using std::numbers::pi;
+
       // xTOBs will have eFEX and Shelf numbers in word 1 
       // So all we need to do is set the TOB words
       setWord0( word0 );
@@ -62,8 +66,8 @@ namespace xAOD {
       setEt( etTOB()*s_tobEtScale );
       float etaVal = computeEta();
       setEta( etaVal );
-      float phiVal = iPhi() * M_PI/32. + M_PI/64.;
-      if (phiVal > M_PI) phiVal = phiVal - 2.*M_PI;
+      float phiVal = iPhi() * pi/32. + pi/64.;
+      if (phiVal > pi) phiVal = phiVal - 2.*pi;
       setPhi( phiVal );
 
       /** If the object is a TOB then the isTOB should be true.
