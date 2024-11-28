@@ -417,7 +417,7 @@ namespace Crest
 
     // auxiliary methods to extract a single page of the data:
     nlohmann::json getPage(nlohmann::json data, int size, int page);
-    std::vector<std::string> getVectorPage(std::vector<std::string> data, int size, int page);
+    std::vector<std::string> getVectorPage(const std::vector<std::string>& data, int size, int page);
 
     // auxiliary method to get folder names:
     std::vector<std::string> nameList(std::string & folder, bool ascending = true);
@@ -430,8 +430,8 @@ namespace Crest
     nlohmann::json sortIOVJson(nlohmann::json js, bool order);
     
     // auxiliary methods to check if the string corresponds to the mask:
-    bool isMatch(std::string word, long unsigned int n, std::string pattern, long unsigned int m);
-    bool isMatch(std::string word, std::string pattern);
+    bool isMatch(const std::string& word, long unsigned int n, const std::string& pattern, long unsigned int m);
+    bool isMatch(const std::string& word, const std::string& pattern);
 
 /**
  * This auxiliary method finds all iovs for a given tag name. The result is a JSON object.

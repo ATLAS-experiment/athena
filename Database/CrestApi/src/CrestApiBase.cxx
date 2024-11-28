@@ -35,7 +35,7 @@ namespace Crest
     return hash_hex_str;
   }
 
-  std::string CrestApiBase::getClientVersion()
+  const std::string& CrestApiBase::getClientVersion()
   {
     return s_CREST_CLIENT_VERSION;
   }

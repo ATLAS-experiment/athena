@@ -55,7 +55,7 @@ protected:
  * This method returns the full CrestApi version.
  * @return CrestApi library version.
  */
-    std::string getClientVersion();
+    const std::string& getClientVersion();
 
 
 public:

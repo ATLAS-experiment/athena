@@ -143,7 +143,7 @@ public:
     std::string record;
     std::string label;
     // Ctor
-    GlobalTagMapDto(std::string tagName, std::string globalTagName, std::string record): 
+    GlobalTagMapDto(const std::string& tagName, const std::string& globalTagName, const std::string& record):
         tagName(tagName), globalTagName(globalTagName), record(record), label("none"){
         
     }
@@ -178,8 +178,8 @@ public:
 
     ChannelSetDto(){}
     ChannelSetDto(ChannelSetDto const& copy):m_channels(copy.getChannels()){}
-    void add(std::string id,std::string name);
-    std::vector< std::pair<std::string,std::string> > getChannels() const {return m_channels;}
+    void add(const std::string& id,const std::string& name);
+    const std::vector< std::pair<std::string,std::string> >& getChannels() const {return m_channels;}
     size_t getSize() const {return m_channels.size();}
     json to_json() const;
     static ChannelSetDto from_json(const json &j);
@@ -193,9 +193,9 @@ public:
     PayloadSpecDto& operator=(PayloadSpecDto&&) = default;
     PayloadSpecDto(){}
     PayloadSpecDto(PayloadSpecDto const& copy):m_row(copy.getColumns()){}
-    std::vector< std::pair<std::string,std::string> > getColumns()  const {return m_row;}
+    const std::vector< std::pair<std::string,std::string> >& getColumns()  const {return m_row;}
     size_t getSize() const {return m_row.size();}
-    void add(std::string name,std::string type);
+    void add(const std::string& name,const std::string& type);
     json to_json() const;
     static PayloadSpecDto from_json(const json &j);
 };
@@ -206,9 +206,9 @@ private:
     PayloadSpecDto m_payload_spec;
     ChannelSetDto m_channel_list;
 public:
-    TagInfoDto(std::string description):m_node_description(description){
+    TagInfoDto(const std::string& description):m_node_description(description){
     }
-    TagInfoDto(std::string description,PayloadSpecDto& payload_spec,ChannelSetDto& channel_list):
+    TagInfoDto(const std::string& description,PayloadSpecDto& payload_spec,ChannelSetDto& channel_list):
         m_node_description(description),m_payload_spec(payload_spec),m_channel_list(channel_list){
     }
     void setPayloadSpec(PayloadSpecDto& spec){
@@ -217,15 +217,15 @@ public:
     void setChannel(ChannelSetDto& ch){
         m_channel_list=ch;
     }
-    PayloadSpecDto getPayloadSpec()
+    const PayloadSpecDto& getPayloadSpec()
     {
         return m_payload_spec;
     }
-    ChannelSetDto getChannels()
+    const ChannelSetDto& getChannels()
     {
         return m_channel_list;
     }
-    std::string getFolderDescription(){ return m_node_description;}
+    const std::string& getFolderDescription(){ return m_node_description;}
     size_t getChannelSize() const {return m_channel_list.getSize();}
     size_t getColumnSize() const {return m_payload_spec.getSize();}
     json to_json() const;
@@ -242,7 +242,7 @@ public:
     std::optional<std::string> insertionTime;
     TagInfoDto tagInfo;
     // Ctor
-    TagMetaDto(std::string tagName, std::string description,  const TagInfoDto&  info): 
+    TagMetaDto(const std::string& tagName, const std::string& description,  const TagInfoDto&  info):
         tagName(tagName), description(description),  tagInfo(info){
     }
     // Default Ctor
@@ -272,7 +272,7 @@ public:
     std::optional<std::string> insertionTime;
     std::string payloadHash;
     // Ctor
-    IovDto(std::string tagName, uint64_t since, std::string payloadHash): 
+    IovDto(const std::string& tagName, uint64_t since, const std::string& payloadHash):
         tagName(tagName), since(since), payloadHash(payloadHash) {
     }
     // Default Ctor
@@ -306,12 +306,12 @@ public:
     std::string hash;
     std::string data;
     std::optional<std::string> insertionTime;
-    StoreDto(uint64_t l_since,  std::string l_data):
+    StoreDto(uint64_t l_since,  const std::string& l_data):
         since(l_since), hash(""), data(l_data){
 
     }
     // Ctor
-    StoreDto(uint64_t since, std::string hash, std::string data): 
+    StoreDto(uint64_t since, const std::string& hash, const std::string& data):
         since(since), hash(hash), data(data){
 
     }
