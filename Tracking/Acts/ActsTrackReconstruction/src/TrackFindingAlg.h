@@ -216,12 +216,12 @@ namespace ActsTrk
     static xAOD::UncalibMeasType measurementType (const detail::RecoTrackContainer::TrackStateProxy &trackState);
 
     struct BranchState {
-      static constexpr Acts::ProxyAccessor<unsigned int> nPixelHits{Acts::hashString("nPixelHits")};
-      static constexpr Acts::ProxyAccessor<unsigned int> nStripHits{Acts::hashString("nStripHits")};
-      static constexpr Acts::ProxyAccessor<unsigned int> nPixelHoles{Acts::hashString("nPixelHoles")};
-      static constexpr Acts::ProxyAccessor<unsigned int> nStripHoles{Acts::hashString("nStripHoles")};
-      static constexpr Acts::ProxyAccessor<unsigned int> nPixelOutliers{Acts::hashString("nPixelOutliers")};
-      static constexpr Acts::ProxyAccessor<unsigned int> nStripOutliers{Acts::hashString("nStripOutliers")};
+      static constexpr Acts::ProxyAccessor<unsigned int> nPixelHits{"nPixelHits"};
+      static constexpr Acts::ProxyAccessor<unsigned int> nStripHits{"nStripHits"};
+      static constexpr Acts::ProxyAccessor<unsigned int> nPixelHoles{"nPixelHoles"};
+      static constexpr Acts::ProxyAccessor<unsigned int> nStripHoles{"nStripHoles"};
+      static constexpr Acts::ProxyAccessor<unsigned int> nPixelOutliers{"nPixelOutliers"};
+      static constexpr Acts::ProxyAccessor<unsigned int> nStripOutliers{"nStripOutliers"};
     };
     static constexpr BranchState s_branchState{};
 
