@@ -7,9 +7,8 @@
 ArtProcess=$1
 ArtInFile=$2
 dcubeRef=$3
-lastref_dir=$4
-conditions=$5
-geotag=$6
+conditions=$4
+geotag=$5
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeShifterXml=${artdata}/InDetPhysValMonitoring/dcube/config/IDPVMPlots_data_baseline.xml

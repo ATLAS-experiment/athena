@@ -7,10 +7,9 @@
 ArtProcess=$1
 ArtInFile=$2
 dcubeRef=$3
-lastref_dir=$4
 conditions="CONDBR2-BLKPA-RUN2-11"
 geotag="ATLAS-R2-2016-01-00-01"
 
 script=test_data_reco.sh
 
-"$script" ${ArtProcess} ${ArtInFile} ${dcubeRef} ${lastref_dir} ${conditions} ${geotag}
+"$script" ${ArtProcess} ${ArtInFile} ${dcubeRef} ${conditions} ${geotag}
