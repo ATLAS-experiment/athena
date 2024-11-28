@@ -15,17 +15,11 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 // Framework
 #include "GaudiKernel/PhysicalConstants.h"
-//#include "GaudiKernel/DeclareFactoryEntries.h"
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/IProperty.h"
-#include "GaudiKernel/ISvcManager.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/IAppMgrUI.h"
 #include "GaudiKernel/SmartIF.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 // Framework testing
-#include "TestTools/initGaudi.h"
+#include "GoogleTestTools/InitGaudiGoogleTest.h"
 
 // Google Test
 #include "gtest/gtest.h"
@@ -77,47 +71,17 @@ class MockFilterTool : public AthAlgTool,
 DECLARE_COMPONENT( MockFilterTool )
 
 
-class InputConverter_test: public ::testing::Test {
+class InputConverter_test: public Athena_test::InitGaudiGoogleTest {
 
- protected:
-  virtual void SetUp() override {
-    m_appMgr = Gaudi::createApplicationMgr();
-    ASSERT_TRUE( m_appMgr!=nullptr );
-
-    m_svcLoc = m_appMgr;
-    ASSERT_TRUE( m_svcLoc.isValid() );
-
-    m_svcMgr = m_appMgr;
-    ASSERT_TRUE( m_svcMgr.isValid() );
-
-    m_propMgr = m_appMgr;
-    ASSERT_TRUE( m_propMgr.isValid() );
-    ASSERT_TRUE( m_propMgr->setProperty( "EvtSel",         "NONE" ).isSuccess() );
-    ASSERT_TRUE( m_propMgr->setProperty( "JobOptionsType", "FILE" ).isSuccess() );
-    ASSERT_TRUE( m_propMgr->setProperty( "JobOptionsPath", "InputConverter_test.txt" ).isSuccess() );
-
-    m_toolSvc = m_svcLoc->service("ToolSvc");
-    ASSERT_TRUE( m_toolSvc.isValid() );
-
-    ASSERT_TRUE( m_appMgr->configure().isSuccess() );
-    ASSERT_TRUE( m_appMgr->initialize().isSuccess() );
+public:
+  InputConverter_test() :
+    Athena_test::InitGaudiGoogleTest("InputConverter_test.txt") {
 
     // the tested AthenaService
-    SmartIF<IService>& serviceSmartPointer = m_svcLoc->service("ISF::InputConverter/InputConverter");
+    SmartIF<IService>& serviceSmartPointer = svcLoc->service("ISF::InputConverter/InputConverter");
     m_svc = dynamic_cast<ISF::InputConverter*>(serviceSmartPointer.get());
     EXPECT_NE(nullptr, m_svc);
-    ASSERT_TRUE( m_svc->configure().isSuccess() );
-  }
-
-  virtual void TearDown() override {
-    ASSERT_TRUE( m_svcMgr->removeService(m_svc).isSuccess() );
-    ASSERT_TRUE( m_svc->finalize().isSuccess() );
-    ASSERT_TRUE( m_svc->terminate().isSuccess() );
-    delete m_svc;
-
-    ASSERT_TRUE( m_appMgr->finalize().isSuccess() );
-    ASSERT_TRUE( m_appMgr->terminate().isSuccess() );
-    Gaudi::setInstance( static_cast<IAppMgrUI*>(nullptr)) ;
+    EXPECT_TRUE( m_svc->configure().isSuccess() );
   }
 
   //
@@ -138,17 +102,8 @@ class InputConverter_test: public ::testing::Test {
   ToolHandleArray<ISF::IGenParticleFilter>& getGenParticleFilters() const {
     return m_svc->m_genParticleFilters;
   }
-  //
-  // protected member variables
-  //
 
-  // Core Gaudi components
-  IAppMgrUI*             m_appMgr = nullptr;
-  SmartIF<ISvcLocator>   m_svcLoc;
-  SmartIF<ISvcManager>   m_svcMgr;
-  SmartIF<IToolSvc>      m_toolSvc;
-  SmartIF<IProperty>     m_propMgr;
-
+protected:
   ISF::InputConverter*   m_svc; // the tested AthenaService
 
 };  // InputConverter_test fixture
