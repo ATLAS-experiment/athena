@@ -20,7 +20,7 @@ StatusCode TestVectorTool::initialize()
 
 StatusCode TestVectorTool::prepareTV(const std::string inputFile, std::vector<uint64_t> &testVector) const
 {
-    ATH_MSG_DEBUG("Preparing input test vector");
+    ATH_MSG_DEBUG("Preparing input test vector from " << inputFile);
 
     // Check if the input file ends with .txt or .bin
     if (inputFile.find(".txt") == std::string::npos && inputFile.find(".bin") == std::string::npos)
