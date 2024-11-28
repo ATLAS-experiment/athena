@@ -13,6 +13,7 @@
 
 class GeoChildNodeWithTrf;
 class GeoShapeSubtraction;
+class GeoMaterial;
 
 namespace ActsTrk{
     class MuonDetectorBuilderTool: public extends<AthAlgTool,IDetectorVolumeBuilderTool> {
@@ -39,8 +40,6 @@ namespace ActsTrk{
                                 const Amg::Transform3D& chamberTransform,
                                 const int& totalMaterials) const;
 
-        float processSubtractionShape(const GeoShapeSubtraction* shape) const;
-
         const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
@@ -58,6 +57,14 @@ namespace ActsTrk{
         std::pair<std::vector<std::shared_ptr<Acts::Experimental::DetectorVolume>>,
                   std::vector<std::shared_ptr<Acts::Surface>>> constructElements(const ActsGeometryContext& gctx, 
                                                                                  const MuonGMR4::Chamber& mChamber, std::pair<unsigned int, unsigned int> chId) const;
+
+        bool checkDummyMaterial(const PVConstLink& vol) const;
+
+        void getMaterialContent(const PVConstLink& vol, std::vector<std::pair<const GeoMaterial*, double>>& materialContent) const;
+
+        std::pair<GeoIntrusivePtr<GeoMaterial>, double> getMaterial(const PVConstLink& vol) const;
+
+
     };
 }
 #endif
