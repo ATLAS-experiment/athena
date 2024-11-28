@@ -39,11 +39,20 @@ def DataPrepCfg(flags, name = "DataPreparationPipeline", **kwarg):
     passThroughTool = acc.popToolsAndMerge(PassThroughToolCfg(flags))
     
     kwarg.setdefault('name', name)
-    kwarg.setdefault('xclbin', '')
-    kwarg.setdefault('KernelName', '')
-    kwarg.setdefault('RunPassThrough', flags.FPGADataPrep.RunPassThrough)
     kwarg.setdefault('xAODMaker', containerMakerTool)
     kwarg.setdefault('PassThroughTool', passThroughTool)
+    # xclbin and kernels
+    kwarg.setdefault('xclbin', '')
+    kwarg.setdefault('PixelClusteringKernelName','')
+    kwarg.setdefault('SpacepointKernelName','')
+    kwarg.setdefault('PassThroughKernelName', '')
+    kwarg.setdefault('RunPassThrough', flags.FPGADataPrep.RunPassThrough)
+    # Test vectors
+    kwarg.setdefault('UseTV', flags.FPGADataPrep.FPGA.UseTV)
+    kwarg.setdefault('PixelClusterTV','')
+    kwarg.setdefault('PixelClusterRefTV','')
+    kwarg.setdefault('SpacepointTV','')
+    kwarg.setdefault('SpacepointRefTV','')
 
     acc.addEventAlgo(CompFactory.DataPreparationPipeline(**kwarg))
     return acc
@@ -58,7 +67,7 @@ if __name__=="__main__":
     flags.Output.AODFileName = "DataPrepAOD.pool.root"
     
     # For pass-through kernel
-    flags.FPGADataPrep.RunPassThrough = True
+    flags.FPGADataPrep.RunPassThrough = False
     flags.FPGADataPrep.PassThrough.RunSoftware = True
     flags.FPGADataPrep.PassThrough.ClusterOnly = True
     
@@ -69,7 +78,7 @@ if __name__=="__main__":
         flags.Acts.useCache = False
         flags.Tracking.ITkMainPass.doActsSeed=True
     
-    flags.Debug.DumpEvtStore = True
+    flags.Debug.DumpEvtStore = False
     
     flags.fillFromArgs()
     flags.lock()
@@ -90,8 +99,9 @@ if __name__=="__main__":
     cfg.merge(DataPrepCfg(flags, **kwarg))
     
     # Connection to ACTS
-    from EFTrackingFPGAIntegration.DataPrepToActsConfig import DataPrepToActsCfg
-    cfg.merge(DataPrepToActsCfg(flags, **kwarg))
+    if flags.FPGADataPrep.DoActs:
+        from EFTrackingFPGAIntegration.DataPrepToActsConfig import DataPrepToActsCfg
+        cfg.merge(DataPrepToActsCfg(flags, **kwarg))
     
     # Prepare output
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
@@ -117,4 +127,8 @@ if __name__=="__main__":
     
     cfg.printConfig()
 
-    cfg.run(-1)
+    # When we use test vectors, we only need to run once
+    if not flags.FPGADataPrep.RunPassThrough and flags.FPGADataPrep.FPGA.UseTV:
+        cfg.run(1)
+    else:    
+        cfg.run(-1)
