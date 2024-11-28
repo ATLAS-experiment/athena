@@ -241,7 +241,7 @@ namespace IOVDbNamespace{
 
 
   std::pair<uint64_t,uint64_t>
-  CrestFunctions::getSinceUntilPair(std::vector<uint64_t> v, const uint64_t since, const uint64_t until){
+  CrestFunctions::getSinceUntilPair(const std::vector<uint64_t>& v, const uint64_t since, const uint64_t until){
     uint64_t new_since = 0;
     uint64_t new_until = 0;
     std::pair<uint64_t,uint64_t> answer = std::make_pair(0,0);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -73,7 +73,7 @@ namespace IOVDbNamespace{
     getIovGroups(const std::string & tag);
 
     std::pair<uint64_t,uint64_t>
-    getSinceUntilPair(std::vector<uint64_t> v, const uint64_t since, const uint64_t until);
+    getSinceUntilPair(const std::vector<uint64_t>& v, const uint64_t since, const uint64_t until);
 
     int
     getTagSize(const std::string& tagname);
