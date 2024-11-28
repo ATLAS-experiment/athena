@@ -39,9 +39,15 @@ SessionMgr::SessionMgr() :
 {}
 
 SessionMgr::~SessionMgr() {
+   // Dtors are noexcept by default, so if closeSession() throws,
+   // std::terminate will be called.  However, cppcheck warns here
+   // about the uncaught exception, so do the std::terminate call
+   // explicitly.
    try {
-      closeSession();
-   } catch (...) {}  // never throw in destructor
+     closeSession();
+   } catch (...) {
+     std::terminate();
+   }
    // never delete the m_replicaSorter, we will have to live with that
    // one-time memory leak. The problem is the CORAL interface that
    // does keeps a reference to the replicaSorter and keeps using it
