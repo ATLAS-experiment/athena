@@ -151,8 +151,11 @@ void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleH
         else
           clusterEquiv.setPhiWidth(cPhiWidth);
       } else {
+        clusterEquiv.setPhiIndex(fCPhi);
         if (!(cPhi + cPhiWidth < fCPhi + fCPhiWidth))
-          clusterEquiv.setPhiWidth(cPhi + cPhiWidth - fCPhi);
+          clusterEquiv.setPhiWidth(cPhiWidth + (cPhi - fCPhi));
+	else
+          clusterEquiv.setPhiWidth(fCPhiWidth);
       }
 
       // set new eta & eta width
@@ -163,8 +166,11 @@ void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleH
         else
           clusterEquiv.setEtaWidth(cEtaWidth);
       } else {
+        clusterEquiv.setPhiIndex(fCEta);
         if (!(cEta + cEtaWidth < fCEta + fCEtaWidth))
-          clusterEquiv.setEtaWidth(cEta + cEtaWidth - fCEta);
+          clusterEquiv.setEtaWidth(cEtaWidth + (cEta - fCEta));
+	else
+          clusterEquiv.setEtaWidth(fCEtaWidth);
       }
 
       finalCluster.setClusterEquiv(clusterEquiv);
@@ -242,13 +248,25 @@ void FPGATrackSimClusteringTool::sortHitsOnModules(std::vector<std::vector<FPGAT
     if(etaOrPhi(module.at(0)) == true){
       //Sort by ETA first
       eta_phi = ETA;
-      if (module.size() > 1) std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputEta);
-      if (module.size() > 1) std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputPhi);
+      if (module.size() > 1) {
+        if (module.at(0).isStrip())
+          std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputEta);
+      }
+      if (module.size() > 1) {
+        if (module.at(0).isStrip())
+          std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputPhi);
+      }
     } else {
       //Sort by PHI first
       eta_phi = PHI;
-      if (module.size() > 1) std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputPhi);
-      if (module.size() > 1) std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputEta);
+      if (module.size() > 1) {
+        if (module.at(0).isStrip())
+          std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputPhi);
+      }
+      if (module.size() > 1) {
+        if (module.at(0).isStrip())
+          std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputEta);
+      }
     }
   }
 }
@@ -256,8 +274,14 @@ void FPGATrackSimClusteringTool::sortHitsOnModules(std::vector<std::vector<FPGAT
 void FPGATrackSimClusteringTool::sortHitsOnModules(std::vector<std::vector<FPGATrackSimHit> > &hitsPerModule) const{
   //Loop over the module separated hits
   for ( auto& module:hitsPerModule){
-    if (module.size() > 1) std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputEta);
-    if (module.size() > 1) std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputPhi);
+    if (module.size() > 1) {
+      if (module.at(0).isStrip())
+        std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputEta);
+    }
+    if (module.size() > 1) {
+      if (module.at(0).isStrip())
+        std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputPhi);
+    }
   }
 }
 
@@ -394,7 +418,6 @@ bool FPGATrackSimCLUSTERING::updatePixelCluster(FPGATrackSimCluster &currentClus
     int clusterCol = clusterEquiv.getPhiIndex();
     int clusterColWidth = clusterEquiv.getPhiWidth();
 
-    //Looking for a neighbour in up/right position to the currentCluster
     if ((hitCol == clusterCol + clusterColWidth) && (hitRow == clusterRow + clusterRowWidth)) {
       clusterColWidth++;
       clusterRowWidth++;
@@ -422,8 +445,38 @@ bool FPGATrackSimCLUSTERING::updatePixelCluster(FPGATrackSimCluster &currentClus
       FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
 
       return true;
-    } else if ((hitCol >= clusterCol) && (hitCol < clusterCol + clusterColWidth) && (hitRow >= clusterRow) && (hitRow < clusterRow + clusterRowWidth)) {
+    } else if ((hitCol >= clusterCol) && (hitCol < clusterCol + clusterColWidth) && (hitRow == clusterRow - 1)) {
+      clusterRow--;
+      clusterRowWidth++;
 
+      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+
+      return true;
+    } else if ((hitCol == clusterCol - 1) && (hitRow == clusterRow - 1)) {
+      clusterCol--;
+      clusterColWidth++;
+      clusterRow--;
+      clusterRowWidth++;
+
+      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+
+      return true;
+    } else if ((hitCol == clusterCol - 1) && (hitRow >= clusterRow) && (hitRow < clusterRow + clusterRowWidth)) {
+      clusterCol--;
+      clusterColWidth++;
+
+      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+
+      return true;
+    } else if ((hitCol == clusterCol - 1) && (hitRow == clusterRow + clusterRowWidth)) {
+      clusterCol--;
+      clusterColWidth++;
+      clusterRowWidth++;
+
+      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+
+      return true;
+    } else if ((hitCol >= clusterCol) && (hitCol < clusterCol + clusterColWidth) && (hitRow >= clusterRow) && (hitRow < clusterRow + clusterRowWidth)) {
       FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
 
       return true;
