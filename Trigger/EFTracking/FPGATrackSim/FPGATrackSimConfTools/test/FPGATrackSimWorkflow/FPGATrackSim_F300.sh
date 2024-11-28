@@ -1,23 +1,35 @@
 #!/bin/bash
 set -e
 
+source FPGATrackSim_CommonEnv.sh
+TEST_LABEL="F300"
 
-GEO_TAG="ATLAS-P2-RUN4-03-00-00"
-export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/:$CALIBPATH
-
-RDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/RDO/reg0_singlemu.root"
-RDO_EVT=200
-BANKS="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/banks_9L/"
-MAPS="maps_9L/OtherFPGAPipelines/v0.21"
-
-echo "... analysis on RDO"
+if [ -z $1 ]; then
+    xAODOutput="FPGATrackSim_${TEST_LABEL}_AOD.root"
+else # this is useful when using the same script for ART
+    xAODOutput=$1
+fi
+run_F300(){
 python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
-    --filesInput=${RDO} \
-    --evtMax=${RDO_EVT} \
-    Trigger.FPGATrackSim.mapsDir=${MAPS} \
+    --filesInput=${RDO_ANALYSIS} \
+    --evtMax=${RDO_EVT_ANALYSIS} \
+    Output.AODFileName=$xAODOutput \
+    Trigger.FPGATrackSim.doEDMConversion=True \
+    Trigger.FPGATrackSim.runCKF=$RUN_CKF \
+    Trigger.FPGATrackSim.mapsDir=${MAPS_9L} \
+    Trigger.FPGATrackSim.region=0 \
+    Trigger.FPGATrackSim.pipeline="F-300" \
+    Trigger.FPGATrackSim.spacePoints=True \
     Trigger.FPGATrackSim.tracking=True \
-    Trigger.FPGATrackSim.sampleType='singleMuons' \
-    Trigger.FPGATrackSim.bankDir=${BANKS}
+    Trigger.FPGATrackSim.writeToAOD=True \
+    Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
+    Trigger.FPGATrackSim.bankDir=${BANKS_9L} \
+    Trigger.FPGATrackSim.outputMonitorFile="monitoring${TEST_LABEL}.root"
+}
+
+
+echo "... Running ${TEST_LABEL} analysis"
+run_F300
 ls -l
 echo "... analysis on RDO, this part is done ..."
 
