@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -64,7 +64,7 @@ class PixelClusterOnTrackErrorData {
     float getPixelIBLPhiError(int ibin) const;
 
     void setParameters(const int ncsx, const int ncsy, const int neta, const int nalpha, 
-                       int offset, std::vector<float> constants);
+                       int offset, const std::vector<float> & constants);
     void setPixelBarrelPhiError(int ibin, double error){ 
              m_barrelphierror[ibin] = error; }
     void setPixelBarrelEtaError(int ibin, double error){ 

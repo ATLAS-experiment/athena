@@ -484,7 +484,7 @@ const std::string EfieldInterpolator::createInterpolationFromTCADtree(const std:
 }
 
 // Retrieve fluence values corresponding to a fixed voltage or viceversa if regular order == false
-int EfieldInterpolator::fillXYvectors(std::vector<double> vLoop, int ifix, const std::vector<std::vector<double> > & v2vsv1, std::vector<double>& xx, std::vector<double>& yy, bool regularOrder) {
+int EfieldInterpolator::fillXYvectors(const std::vector<double> & vLoop, int ifix, const std::vector<std::vector<double> > & v2vsv1, std::vector<double>& xx, std::vector<double>& yy, bool regularOrder) {
   yy.clear();
   xx.clear();
   int nfills = 0;

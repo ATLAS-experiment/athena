@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
 //======================================================================
 // PixelCalibIBL : Read calibration file, redo the fit.
 //
@@ -156,7 +160,7 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
     spec += "DEMOXCHECK_";
 #endif
 
-    TString StrFileName = spec.c_str() + scan;
+    TString StrFileName = spec + scan;
     TString rootFileName = Outdir + "/TotChargeCalib_" + StrFileName + ".root";
     TString logFileName = Outdir + "/ChargeCalib_" + StrFileName + ".log";
     TString dbFileName = Outdir + "/ChargeCalib_" + StrFileName + ".TXT";
