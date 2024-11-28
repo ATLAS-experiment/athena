@@ -11,8 +11,9 @@ atlas_add_library( egammaEvent
                    src/*.cxx
                    PUBLIC_HEADERS egammaEvent
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} CaloEvent CaloGeoHelpers CaloIdentifier AthContainers AthLinks Navigation AthenaKernel EventKernel FourMom NavFourMom ParticleEvent JetEvent Particle TrkParametersBase TrkParameters VxVertex
-                   PRIVATE_LINK_LIBRARIES GaudiKernel egammaConditions TrkSurfaces TrkMaterialOnTrack TrkNeutralParameters TrkParticleBase TrkTrack )
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} CaloEvent CaloGeoHelpers CaloIdentifier AthContainers AthLinks Navigation 
+                   AthenaKernel EventKernel FourMom NavFourMom ParticleEvent JetEvent Particle TrkParametersBase TrkParameters VxVertex
+                   PRIVATE_LINK_LIBRARIES GaudiKernel TrkSurfaces TrkMaterialOnTrack TrkNeutralParameters TrkParticleBase TrkTrack )
 
 atlas_add_dictionary( egammaEventDict
                       egammaEvent/egammaEventDict.h

@@ -7,14 +7,13 @@
 #include "egammaEvent/EMShower.h"
 #include "AthenaKernel/ClassName.h"
 #include "AthLinks/ElementLink.h"
-#include "TrkTrack/Track.h" 
+#include "TrkTrack/Track.h"
 #include "TrkParametersBase/ParametersBase.h"
 #include "TrkParticleBase/TrackParticleBase.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkNeutralParameters/NeutralParameters.h"
 #include "VxVertex/VxTrackAtVertex.h"
 #include "VxVertex/VxCandidate.h"
-#include "egammaConditions/EMClusterErrorsParametrizations.h"
 #include "AthenaKernel/BaseInfo.h"
 
 #include <cmath>
@@ -39,7 +38,7 @@ int EMErrorDetail::intParameter(egammaParameters::ParamDef key) const {
 
   int result = (int)egammaParameters::EgParamUndefined;
   std::vector<elParams>::const_iterator p = m_parametersInt.begin();
- 
+
   for (;p !=m_parametersInt.end(); ++p) {
     if ( (*p).first == key ){
       result = (*p).second;
@@ -60,7 +59,7 @@ double EMErrorDetail::parameter(egammaParameters::ParamDef key) const {
 
   double result = egammaParameters::EgParamUndefined;
   std::vector<elParams>::const_iterator p = m_parameters.begin();
- 
+
   for (;p !=m_parameters.end(); ++p) {
     if ( (*p).first == key ) {
       result = (*p).second;
@@ -77,7 +76,7 @@ void EMErrorDetail::set_parameterInt(egammaParameters::ParamDef key, int value, 
   using elParams = std::pair<egammaParameters::ParamDef, int>;
 
   std::vector<elParams>::iterator p = m_parametersInt.begin();
- 
+
   for (;p !=m_parametersInt.end(); ++p) {
     if ( (*p).first == key ) break;
   }
@@ -89,7 +88,7 @@ void EMErrorDetail::set_parameterInt(egammaParameters::ParamDef key, int value, 
     if ( overwrite ) {
       (*p).second = value;
     }
-    else {      
+    else {
       throw GaudiException("parameter not saved", "EMErrorDetail::set_parameter(...)", StatusCode::FAILURE);
     }
   }
@@ -104,7 +103,7 @@ void EMErrorDetail::set_parameter(egammaParameters::ParamDef key, double value, 
 
   using elParams = std::pair<egammaParameters::ParamDef, double>;
   std::vector<elParams>::iterator p = m_parameters.begin();
- 
+
   for (;p !=m_parameters.end(); ++p) {
     if ( (*p).first == key ) break;
   }
@@ -116,7 +115,7 @@ void EMErrorDetail::set_parameter(egammaParameters::ParamDef key, double value, 
     if ( overwrite ) {
       (*p).second = value;
     }
-    else {      
+    else {
       throw GaudiException("parameter not saved", "EMErrorDetail::set_parameter(...)", StatusCode::FAILURE);
     }
   }
@@ -124,104 +123,9 @@ void EMErrorDetail::set_parameter(egammaParameters::ParamDef key, double value, 
 }
 
 // =======================================================================
-bool EMErrorDetail::isElectron(const egamma* eg, bool forcePhoton) 
+bool EMErrorDetail::isElectron(const egamma* eg, bool forcePhoton)
 {
   return (!forcePhoton && ((eg->conversion() != nullptr) || (eg->trackParticle() != nullptr)));
-}
-
-// =======================================================================
-double EMErrorDetail::getClusterEtaPosError(const egamma* eg, 
-              const EMClusterErrorsParametrizations* pars,
-              bool forcePhoton) 
-{
-
-  EMClusterErrorsParametrizations::Type tp = isElectron(eg, forcePhoton) ? 
-  EMClusterErrorsParametrizations::ELECTRON : 
-  EMClusterErrorsParametrizations::PHOTON;
-
-  double clusterE = 1;
-  double eta = 0;
-  const CaloCluster* aCluster = eg->cluster();
-  if (aCluster) {
-    clusterE = eg->cluster()->e();
-    if (clusterE < 1) clusterE = 1;
-    eta = aCluster->eta();
-  }
-  if (!pars) {
-    return 0.30e-3*sqrt(100./(clusterE*0.001));
-  } 
-    const EMClusterEtaPosErrorsMatrix& mat = pars->getEtaPosMatrix(tp);
-    const double err = mat.getError(eta, clusterE);
-    if (err != -1.0) {
-      return err;
-    } 
-      // it actually was not found
-      // use old parametrization.
-      return 0.30e-3*sqrt(100./(clusterE*0.001));
-    
-  
-}
-
-
-// =======================================================================
-double EMErrorDetail::getClusterEnergyError(const egamma* eg, 
-              const EMClusterErrorsParametrizations* pars, 
-              bool forcePhoton ) 
-{
-
-  EMClusterErrorsParametrizations::Type tp = isElectron(eg, forcePhoton) ? 
-  EMClusterErrorsParametrizations::ELECTRON : 
-  EMClusterErrorsParametrizations::PHOTON;
-
-  const CaloCluster* aCluster = eg->cluster();
-  if (aCluster == nullptr || pars == nullptr) return 1e-3; // in merging, use cluster energy
-
-  // note, the parametrization is in cluster eta, not pointing eta 
-  return pars->getEnergyMatrix(tp).getError(aCluster->eta(), aCluster->energy());
-} 
-
-// =======================================================================
-double EMErrorDetail::getClusterEtaError(const egamma* eg, 
-           const EMClusterErrorsParametrizations* pars, 
-           bool forcePhoton ) 
-{
-
-  EMClusterErrorsParametrizations::Type tp = isElectron(eg, forcePhoton) ? 
-  EMClusterErrorsParametrizations::ELECTRON : 
-  EMClusterErrorsParametrizations::PHOTON;
-
-  const CaloCluster* aCluster = eg->cluster();
-  double eta = (aCluster) ?  caloEta(eg, aCluster->eta()) : 0;
-  if (fabs(eta) > 8) eta = 8.0;
-  if (pars == nullptr) {
-    // fall back to hardcoded old-style errors.
-    //    const double clusterEnergyGeV = aCluster->energy()/1000.0; //GeV
-    const double clusterEnergyGeV = 100.0; //GeV - just use 100 as the default
-    const double sigma_theta = 0.07 /sqrt(clusterEnergyGeV);
-    const double theta = 2.*atan(exp(eta));
-    return ( fabs(sigma_theta/sin(theta)) );
-  }
-  // the parametrization of theta error is only in energy; eta is used to convert
-  // between theta error and eta error
-  return pars->getEtaMatrix(tp).getError(eta, 
-                                         aCluster ? aCluster->energy(): 0);
-}
-
-// =======================================================================
-double EMErrorDetail::getClusterPhiError(const egamma* eg, 
-           const EMClusterErrorsParametrizations* pars, 
-           bool forcePhoton ) 
-{
-
-  EMClusterErrorsParametrizations::Type tp = isElectron(eg, forcePhoton) ? 
-  EMClusterErrorsParametrizations::ELECTRON : 
-  EMClusterErrorsParametrizations::PHOTON;
-
-  const CaloCluster* aCluster = eg->cluster();
-  if (aCluster == nullptr || pars == nullptr) return 1e10; // use track phi
-
-  // note, the parametrization is really only in energy; eta is ignored
-  return pars->getPhiMatrix(tp).getError(caloEta(eg, aCluster->eta()), aCluster->energy());
 }
 
 
@@ -231,9 +135,9 @@ double EMErrorDetail::caloEta(const egamma* eg, double clusterEta) {
   const double etaPointing = eg->detailValue(egammaParameters::etap);
   if ( fabs(etaPointing - clusterEta ) < 0.15 ) {
     return etaPointing;
-  } 
+  }
     return clusterEta;
-  
+
 }
 
 
@@ -247,62 +151,62 @@ AmgSymMatrix(3) EMErrorDetail::getEMPhotonErrorMatrix() const {
   // Fill the matrix E,eta,phi,M
   hepSymMatrix(1,1) = EMphoton_CovEclusEclus();
   hepSymMatrix(2,2) = EMphoton_Covetaeta();
-  hepSymMatrix(3,3) = EMphoton_Covphiphi(); 
+  hepSymMatrix(3,3) = EMphoton_Covphiphi();
 
   hepSymMatrix.fillSymmetric(1,2,EMphoton_CovetaEclus());
   hepSymMatrix.fillSymmetric(1,3,EMphoton_CovphiEclus());
   hepSymMatrix.fillSymmetric(2,3, EMphoton_Covetaphi());
-  
+
    return hepSymMatrix;
-   
+
 }
 
 // ====================================================================
-Amg::MatrixX EMErrorDetail::getCombinedErrorMatrix() const 
+Amg::MatrixX EMErrorDetail::getCombinedErrorMatrix() const
 {
   // see if combined matrix exists, if so, return it, otherwise,
   // it's an unconverted photon, so just return the photon error
   // matrix.
   if (EMtrack_comb_CovPP() == egammaParameters::EgParamUndefined) {
     return getEMPhotonErrorMatrix();
-  } 
+  }
     return getEMTrackCombinedErrorMatrix();
-  
+
 }
 
 // ====================================================================
-Amg::MatrixX EMErrorDetail::getUncombinedErrorMatrix() const 
+Amg::MatrixX EMErrorDetail::getUncombinedErrorMatrix() const
 {
   // this still looks for combined matrix to make the decision
   if (EMtrack_comb_CovPP() == egammaParameters::EgParamUndefined) {
     return getEMPhotonErrorMatrix();
-  } 
+  }
     return getEMTrackUncombinedErrorMatrix();
-  
+
 }
 
 // ====================================================================
-AmgSymMatrix(4) EMErrorDetail::get4x4CombinedErrorMatrix() const 
+AmgSymMatrix(4) EMErrorDetail::get4x4CombinedErrorMatrix() const
 {
   // see if combined matrix exists, if so, return it, otherwise,
   // it's an unconverted photon, so just return the photon error
   // matrix.
   if (EMtrack_comb_CovPP() == egammaParameters::EgParamUndefined) {
     return get4x4EMPhotonErrorMatrix();
-  } 
+  }
     return get4x4EMTrackCombinedErrorMatrix();
-  
+
 }
 
 // ====================================================================
-AmgSymMatrix(4) EMErrorDetail::get4x4UncombinedErrorMatrix() const 
+AmgSymMatrix(4) EMErrorDetail::get4x4UncombinedErrorMatrix() const
 {
   // this still looks for combined matrix to make the decision
   if (EMtrack_comb_CovPP() == egammaParameters::EgParamUndefined) {
     return get4x4EMPhotonErrorMatrix();
-  } 
+  }
     return get4x4EMTrackUncombinedErrorMatrix();
-  
+
 }
 
 // ====================================================================
@@ -330,8 +234,8 @@ AmgSymMatrix(5) EMErrorDetail::getEMTrackCombinedErrorMatrix() const {
   hepSymMatrix.fillSymmetric(2,3, EMtrack_comb_Covphieta());
   hepSymMatrix.fillSymmetric(2,4, EMtrack_comb_CovphiP());
   hepSymMatrix.fillSymmetric(3,4, EMtrack_comb_CovetaP());
-    
-  return hepSymMatrix;  
+
+  return hepSymMatrix;
 }
 
 // ====================================================================
@@ -367,8 +271,8 @@ AmgSymMatrix(5) EMErrorDetail::getEMTrackUncombinedErrorMatrix() const {
     jacob(3,3) = (-1./sin(EMtrack_perigee_theta()));     // deta/dtheta
     //similarity
     return  jacob*hepSymMatrix*jacob.transpose();
-    
-  } 
+
+  }
     AmgSymMatrix(5) hepSymMatrix;
     hepSymMatrix.setIdentity();
     // use cluster for energy and eta
@@ -390,7 +294,7 @@ AmgSymMatrix(5) EMErrorDetail::getEMTrackUncombinedErrorMatrix() const {
     hepSymMatrix.fillSymmetric(3,4,EMphoton_CovetaEclus());
 
     return hepSymMatrix;
-  
+
 
 }
 
@@ -431,9 +335,9 @@ AmgSymMatrix(4) EMErrorDetail::get4x4EMTrackUncombinedErrorMatrix() const {
     jacob.setIdentity();
     jacob(1,1) = (-1./sin(EMtrack_perigee_theta()));     // deta/dtheta
     //similarity
-    return  jacob*hepSymMatrix*jacob.transpose();  
-  } 
-    
+    return  jacob*hepSymMatrix*jacob.transpose();
+  }
+
     AmgSymMatrix(4) hepSymMatrix;
     hepSymMatrix.setZero();
     // use cluster for energy and eta
@@ -442,15 +346,15 @@ AmgSymMatrix(4) EMErrorDetail::get4x4EMTrackUncombinedErrorMatrix() const {
     hepSymMatrix(2,2) = EMtrack_perigee_Covphiphi();
 
     hepSymMatrix.fillSymmetric(0,1, EMphoton_CovetaEclus());
-  
+
     return hepSymMatrix;
-  
+
 
 }
 
 // ====================================================================
 AmgSymMatrix(4) EMErrorDetail::get4x4EMPhotonErrorMatrix() const {
-  
+
   // E,eta,phi,M representation.
   AmgSymMatrix(4) hepSymMatrix;
   hepSymMatrix.setZero();
@@ -463,7 +367,7 @@ AmgSymMatrix(4) EMErrorDetail::get4x4EMPhotonErrorMatrix() const {
 
   hepSymMatrix.fillSymmetric(0,1, EMphoton_CovetaEclus());
   hepSymMatrix.fillSymmetric(0,3, EMphoton_CovphiEclus());
-  
+
   return hepSymMatrix;
 
 }
@@ -471,12 +375,12 @@ AmgSymMatrix(4) EMErrorDetail::get4x4EMPhotonErrorMatrix() const {
 bool EMErrorDetail::hasIntParameter(egammaParameters::ParamDef key) const {
   switch(key) {
   case egammaParameters::linkIndex:
-  case egammaParameters::hasSiliconHits:               
+  case egammaParameters::hasSiliconHits:
     return true;
   default:
     return false;
   }
-}    
+}
 
 // =======================================================================
 bool EMErrorDetail::hasParameter(egammaParameters::ParamDef key) const {
@@ -484,63 +388,63 @@ bool EMErrorDetail::hasParameter(egammaParameters::ParamDef key) const {
   switch (key) {
   case egammaParameters::EMConvertedPhoton_d0:
   case egammaParameters::EMConvertedPhoton_phi0:
-  case egammaParameters::EMConvertedPhoton_z0:         
-  case egammaParameters::EMConvertedPhoton_theta:      
-  case egammaParameters::EMConvertedPhoton_eta:      
-  case egammaParameters::EMConvertedPhoton_momentum:  
-  case egammaParameters::EMConvertedPhoton_Covd0d0:    
-  case egammaParameters::EMConvertedPhoton_Covd0z0:    
-  case egammaParameters::EMConvertedPhoton_Covd0phi:   
-  case egammaParameters::EMConvertedPhoton_Covd0theta: 
-  case egammaParameters::EMConvertedPhoton_Covz0z0:    
-  case egammaParameters::EMConvertedPhoton_Covz0phi:   
-  case egammaParameters::EMConvertedPhoton_Covz0theta:  
-  case egammaParameters::EMConvertedPhoton_Covphiphi:  
-  case egammaParameters::EMConvertedPhoton_Covphitheta:  
-  case egammaParameters::EMConvertedPhoton_Covthetatheta:  
+  case egammaParameters::EMConvertedPhoton_z0:
+  case egammaParameters::EMConvertedPhoton_theta:
+  case egammaParameters::EMConvertedPhoton_eta:
+  case egammaParameters::EMConvertedPhoton_momentum:
+  case egammaParameters::EMConvertedPhoton_Covd0d0:
+  case egammaParameters::EMConvertedPhoton_Covd0z0:
+  case egammaParameters::EMConvertedPhoton_Covd0phi:
+  case egammaParameters::EMConvertedPhoton_Covd0theta:
+  case egammaParameters::EMConvertedPhoton_Covz0z0:
+  case egammaParameters::EMConvertedPhoton_Covz0phi:
+  case egammaParameters::EMConvertedPhoton_Covz0theta:
+  case egammaParameters::EMConvertedPhoton_Covphiphi:
+  case egammaParameters::EMConvertedPhoton_Covphitheta:
+  case egammaParameters::EMConvertedPhoton_Covthetatheta:
 
-  case egammaParameters::EMTrack_d0:         
-  case egammaParameters::EMTrack_phi0:       
-  case egammaParameters::EMTrack_z0:         
-  case egammaParameters::EMTrack_theta:      
-  case egammaParameters::EMTrack_eta:      
-  case egammaParameters::EMTrack_momentum:    
-  case egammaParameters::EMTrack_Covd0d0:    
-  case egammaParameters::EMTrack_Covd0z0:    
-  case egammaParameters::EMTrack_Covd0phi:   
-  case egammaParameters::EMTrack_Covd0theta: 
-  case egammaParameters::EMTrack_Covz0z0:    
-  case egammaParameters::EMTrack_Covz0phi:   
-  case egammaParameters::EMTrack_Covz0theta: 
-  case egammaParameters::EMTrack_Covphiphi:  
-  case egammaParameters::EMTrack_Covphitheta:  
-  case egammaParameters::EMTrack_Covthetatheta:  
+  case egammaParameters::EMTrack_d0:
+  case egammaParameters::EMTrack_phi0:
+  case egammaParameters::EMTrack_z0:
+  case egammaParameters::EMTrack_theta:
+  case egammaParameters::EMTrack_eta:
+  case egammaParameters::EMTrack_momentum:
+  case egammaParameters::EMTrack_Covd0d0:
+  case egammaParameters::EMTrack_Covd0z0:
+  case egammaParameters::EMTrack_Covd0phi:
+  case egammaParameters::EMTrack_Covd0theta:
+  case egammaParameters::EMTrack_Covz0z0:
+  case egammaParameters::EMTrack_Covz0phi:
+  case egammaParameters::EMTrack_Covz0theta:
+  case egammaParameters::EMTrack_Covphiphi:
+  case egammaParameters::EMTrack_Covphitheta:
+  case egammaParameters::EMTrack_Covthetatheta:
 
-  case egammaParameters::EMTrack_Combined_Covd0d0:    
-  case egammaParameters::EMTrack_Combined_Covd0z0:    
-  case egammaParameters::EMTrack_Combined_Covd0phi:   
-  case egammaParameters::EMTrack_Combined_Covd0eta: 
-  case egammaParameters::EMTrack_Combined_Covd0P: 
-  case egammaParameters::EMTrack_Combined_Covz0z0:    
-  case egammaParameters::EMTrack_Combined_Covz0phi:   
-  case egammaParameters::EMTrack_Combined_Covz0eta: 
-  case egammaParameters::EMTrack_Combined_Covz0P:  
-  case egammaParameters::EMTrack_Combined_Covphiphi:  
-  case egammaParameters::EMTrack_Combined_Covphieta:  
-  case egammaParameters::EMTrack_Combined_CovphiP:  
-  case egammaParameters::EMTrack_Combined_Covetaeta:  
-  case egammaParameters::EMTrack_Combined_CovetaP:  
+  case egammaParameters::EMTrack_Combined_Covd0d0:
+  case egammaParameters::EMTrack_Combined_Covd0z0:
+  case egammaParameters::EMTrack_Combined_Covd0phi:
+  case egammaParameters::EMTrack_Combined_Covd0eta:
+  case egammaParameters::EMTrack_Combined_Covd0P:
+  case egammaParameters::EMTrack_Combined_Covz0z0:
+  case egammaParameters::EMTrack_Combined_Covz0phi:
+  case egammaParameters::EMTrack_Combined_Covz0eta:
+  case egammaParameters::EMTrack_Combined_Covz0P:
+  case egammaParameters::EMTrack_Combined_Covphiphi:
+  case egammaParameters::EMTrack_Combined_Covphieta:
+  case egammaParameters::EMTrack_Combined_CovphiP:
+  case egammaParameters::EMTrack_Combined_Covetaeta:
+  case egammaParameters::EMTrack_Combined_CovetaP:
   case egammaParameters::EMTrack_Combined_CovPP:
-  
-  case egammaParameters::EMPhoton_eta:
-  case egammaParameters::EMPhoton_phi0:       
-  case egammaParameters::EMPhoton_Eclus:     
 
-  case egammaParameters::EMPhoton_Covetaeta:  
-  case egammaParameters::EMPhoton_Covetaphi:  
-  case egammaParameters::EMPhoton_CovetaEclus:  
-  case egammaParameters::EMPhoton_Covphiphi:  
-  case egammaParameters::EMPhoton_CovphiEclus:  
+  case egammaParameters::EMPhoton_eta:
+  case egammaParameters::EMPhoton_phi0:
+  case egammaParameters::EMPhoton_Eclus:
+
+  case egammaParameters::EMPhoton_Covetaeta:
+  case egammaParameters::EMPhoton_Covetaphi:
+  case egammaParameters::EMPhoton_CovetaEclus:
+  case egammaParameters::EMPhoton_Covphiphi:
+  case egammaParameters::EMPhoton_CovphiEclus:
   case egammaParameters::EMPhoton_CovEclusEclus:
     return true;
     // the following are depricated
@@ -558,9 +462,9 @@ bool EMErrorDetail::hasParameter(egammaParameters::ParamDef key) const {
   case egammaParameters::EMTrack_CovEclusEclus:
     return true;
   default:
-    return false;           
+    return false;
   }
-}  
+}
 
 
 /* Get parameters of unconverted photon */
@@ -731,7 +635,7 @@ int EMErrorDetail::hasSiliconHits()  const {return intParameter(egammaParameters
 void EMErrorDetail::set_hasSiliconHits (int x)  {set_parameterInt(egammaParameters::hasSiliconHits, x, true)  ;}
 
 
-AmgSymMatrix(5) EMErrorDetail::P5Jacobiand0z0PhiThetaE2d0z0PhiEtaE(const double theta) 
+AmgSymMatrix(5) EMErrorDetail::P5Jacobiand0z0PhiThetaE2d0z0PhiEtaE(const double theta)
 {
   AmgSymMatrix(5) m;
   m.setIdentity();
@@ -739,7 +643,7 @@ AmgSymMatrix(5) EMErrorDetail::P5Jacobiand0z0PhiThetaE2d0z0PhiEtaE(const double 
   return m;
 }
 
-AmgSymMatrix(4) EMErrorDetail::P4JacobiandEThetaPhiM2EEtaPhiM(const double theta) 
+AmgSymMatrix(4) EMErrorDetail::P4JacobiandEThetaPhiM2EEtaPhiM(const double theta)
 {
   AmgSymMatrix(4) m;
   m.setIdentity();
