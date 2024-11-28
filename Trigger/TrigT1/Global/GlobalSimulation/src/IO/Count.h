@@ -45,7 +45,7 @@ namespace GlobalSim {
      // TO-DO add function to get count bits for a determined position
      // TO-DO make ready for executing multiple algorithms in one instance
      
-     std::bitset<128> getCountBits() const { return m_count; }
+     const std::bitset<128>& getCountBits() const { return m_count; }
      unsigned int firstBit() const { return m_firstBit; }
      unsigned int lastBit() const { return m_firstBit + m_nBits - 1; }
      unsigned int nBits() const { return m_nBits; }
