@@ -213,7 +213,7 @@ bool TreeShapeErrorGetter::merge(const TString& listFile, const TString& outputF
 
 bool TreeShapeErrorGetter::merge(const std::vector<const TreeShapeErrorGetter*>& getters, const TString& outputFile)
 {
-  TreeShapeErrorGetter* output = new TreeShapeErrorGetter(outputFile, true);
+  auto output = std::make_unique<TreeShapeErrorGetter>(outputFile, true);
   for (unsigned int i = 0; i < Definitions::nChannels; i++) {
     for (unsigned int g = 0; g < 3; g++) {
       bool gotResult = false;
@@ -249,16 +249,14 @@ bool TreeShapeErrorGetter::merge(const std::vector<const TreeShapeErrorGetter*>&
       if (!gotResult) output->addRing(ResidualCalculator(), (CaloGain::CaloGain)g);
     }
   }
- 
-  delete output;
   return true; 
 }
 
 
 bool TreeShapeErrorGetter::compare(const TreeShapeErrorGetter& other, const TString& fileName, const Interface* tmpl) const
 {
-  TFile* f = TFile::Open(fileName, "RECREATE");
-  TTree* tree = new TTree("tree", "");
+  std::unique_ptr<TFile> f(TFile::Open(fileName, "RECREATE"));
+  auto tree = std::make_unique<TTree>("tree", "");
 
   int hash, gain, lwb1, lwb2, nSamples;
   double xi1[99], xi2[99], xip1[99], xip2[99];
@@ -301,28 +299,24 @@ bool TreeShapeErrorGetter::compare(const TreeShapeErrorGetter& other, const TStr
     }
     for (unsigned int g = 0; g < 3; g++) {
       gain = g;
-      ShapeErrorData* data1 = shapeErrorData(k, (CaloGain::CaloGain)g);
-      ShapeErrorData* data2 = other.shapeErrorData(k, (CaloGain::CaloGain)g);
+      std::unique_ptr<ShapeErrorData> data1(shapeErrorData(k, (CaloGain::CaloGain)g));
+      std::unique_ptr<ShapeErrorData> data2(other.shapeErrorData(k, (CaloGain::CaloGain)g));
 
       lwb1 = (data1 ? data1->lwb() : -1);
       lwb2 = (data2 ? data2->lwb() : -1);
       nSamples = (data1 ? data1->nSamples() : data2 ? data2->nSamples() : 0);
       int lwb = (lwb1 >= 0 ? lwb1 : lwb2);
-      
+      if (lwb<0) throw std::runtime_error("TreeShapeErrorGetter::compare() attempt to access arrays with negative index");
       for (int j = lwb; j < lwb + nSamples; j++) {
         xi1[j]  = (data1 ? data1->xi()(j)  : -999);
         xip1[j] = (data1 ? data1->xip()(j) : -999);
         xi2[j]  = (data2 && data2->isInRange(j) ? data2->xi()(j)  : -999);
         xip2[j] = (data2 && data2->isInRange(j) ? data2->xip()(j) : -999);
       }
-
       tree->Fill();
-      if (data1) delete data1;
-      if (data2) delete data2;
     }
   }
   f->cd();
   tree->Write();
-  delete f;
   return true;
 }

@@ -3,7 +3,7 @@
 
 # art-description: Test of P1+Tier0 workflow, runs athenaHLT with PhysicsP1_pp_run3_v1 menu followed by offline reco, DAOD production, monitoring and analysis step for EDM monitoring
 # art-type: grid
-# art-athena-mt: 4
+# art-athena-mt: 8
 # art-include: main/Athena
 # art-include: 24.0/Athena
 # art-output: *.txt
@@ -29,8 +29,8 @@ hlt = ExecStep.ExecStep()
 hlt.type = 'athenaHLT'
 hlt.job_options = 'TriggerJobOpts.runHLT'
 hlt.forks = 1
-hlt.threads = 4
-hlt.concurrent_events = 4
+hlt.threads = 8
+hlt.concurrent_events = 8
 hlt.input = 'data'
 hlt.flags = [f'Trigger.triggerMenuSetup="{triggermenu}"',
              'Trigger.doLVL1=True']
@@ -69,6 +69,7 @@ tzrecoPreExec = ' '.join([
 
 tzreco = ExecStep.ExecStep('Tier0Reco')
 tzreco.type = 'Reco_tf'
+# TODO: check if we suffer from bad scaling vs number of threads (ATR-29610) when offline monitoring runs in RAWtoALL
 tzreco.threads = 4
 tzreco.concurrent_events = 4
 tzreco.input = ''
@@ -82,7 +83,7 @@ tzreco.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
 aod2daod = ExecStep.ExecStep('AODtoDAOD')
 aod2daod.type = 'Derivation_tf'
 aod2daod.input = ''
-aod2daod.forks = 4
+aod2daod.forks = 8
 aod2daod.explicit_input = True
 aod2daod.args = '--inputAODFile=AOD.pool.root --outputDAODFile=DAOD.pool.root --formats=PHYS'
 aod2daod.args += ' --sharedWriter=True --athenaMPMergeTargetSize "DAOD_*:0"'

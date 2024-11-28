@@ -5,7 +5,6 @@
 # art-type: build
 # art-include: main/Athena
 # art-include: 24.0/Athena
-# art-athena-mt: 4
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
@@ -31,7 +30,8 @@ dq = ExecStep.ExecStep('Run3DQ')
 dq.type = 'other'
 dq.executable = 'Run3DQTestingDriver.py'
 dq.input = ''
-dq.args = '--threads=4'
+# very bad scaling vs number of threads, the more threads, the slower... (ATR-29610)
+dq.args = '--threads=2'
 dq.args += ' --dqOffByDefault'
 dq.args += ' Input.Files="[\'AOD.pool.root\']" DQ.Steering.doHLTMon=True Trigger.triggerMenuSetup=\'Dev_pp_run3_v1_TriggerValidation_prescale\''
 

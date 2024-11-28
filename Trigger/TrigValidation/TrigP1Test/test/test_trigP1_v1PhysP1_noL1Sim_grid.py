@@ -5,7 +5,7 @@
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
-# art-athena-mt: 4
+# art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.log
 # art-output: log.*
@@ -26,8 +26,8 @@ ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
 ex.job_options = 'TriggerJobOpts.runHLT'
 ex.input = 'data'
-ex.threads = 4
-ex.concurrent_events = 4
+ex.threads = 8
+ex.concurrent_events = 8
 ex.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_run3_v1_HLTReprocessing_prescale"',
             'Trigger.forceEnableAllChains=True',
             'Trigger.disableChains=\'["HLT_cosmic_id_L1MU3V_EMPTY","HLT_cosmic_id_L1MU8VF_EMPTY"]\'' # Temporary workaround for ATR-25459
