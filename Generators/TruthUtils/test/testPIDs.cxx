@@ -26,7 +26,11 @@ int main(int argc, char** argv) {
     std::getline (myfile, myline);
     if (!myline.size()||myline.at(0)=='*') continue;
     if (myline.substr(0,6)=="PDG_ID") {
-      if  (myline!=bottom) {return 2; }
+      if  (myline!=bottom) {
+        // uncomment when adding new helper functions
+        // printf("%s\n",bottom.c_str()); continue;
+        return 2;
+      }
       else continue;
     }
     int i = std::strtod(myline.substr(0,10).c_str(),nullptr);
@@ -41,7 +45,8 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isBBbarMeson)
     TEST_FUNCTION(isBSM)
     TEST_FUNCTION(isBaryon)
-    TEST_FUNCTION(isBottom) // 10
+    TEST_FUNCTION(isBoson) // 10
+    TEST_FUNCTION(isBottom)
     TEST_FUNCTION(isBottomBaryon)
     TEST_FUNCTION(isBottomHadron)
     TEST_FUNCTION(isBottomMeson)
@@ -50,18 +55,19 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isCharged)
     TEST_FUNCTION(isCharm)
     TEST_FUNCTION(isCharmBaryon)
-    TEST_FUNCTION(isCharmHadron)
-    TEST_FUNCTION(isCharmMeson) // 20
+    TEST_FUNCTION(isCharmHadron) // 20
+    TEST_FUNCTION(isCharmMeson)
     TEST_FUNCTION(isDM)
     TEST_FUNCTION(isDiquark)
     TEST_FUNCTION(isEMInteracting)
     TEST_FUNCTION(isElectron)
     TEST_FUNCTION(isExcited)
+    TEST_FUNCTION(isGaugino)
     TEST_FUNCTION(isGeantino)
     TEST_FUNCTION(isGenSpecific)
-    TEST_FUNCTION(isGenericMultichargedParticle)
+    TEST_FUNCTION(isGenericMultichargedParticle) // 30
     TEST_FUNCTION(isGlueball)
-    TEST_FUNCTION(isGluon) // 30
+    TEST_FUNCTION(isGluon)
     TEST_FUNCTION(isGraviton)
     TEST_FUNCTION(isHadron)
     TEST_FUNCTION(isHeavyBaryon)
@@ -69,9 +75,9 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isHeavyMeson)
     TEST_FUNCTION(isHiddenValley)
     TEST_FUNCTION(isHiggs)
-    TEST_FUNCTION(isKK)
+    TEST_FUNCTION(isKK) // 40
     TEST_FUNCTION(isLeptoQuark)
-    TEST_FUNCTION(isLepton) // 40
+    TEST_FUNCTION(isLepton)
     TEST_FUNCTION(isLightBaryon)
     TEST_FUNCTION(isLightHadron)
     TEST_FUNCTION(isLightMeson)
@@ -79,9 +85,9 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isMonopole)
     TEST_FUNCTION(isMuon)
     TEST_FUNCTION(isNeutral)
-    TEST_FUNCTION(isNeutrino)
+    TEST_FUNCTION(isNeutrino) // 50
     TEST_FUNCTION(isNucleus)
-    TEST_FUNCTION(isParton) // 50
+    TEST_FUNCTION(isParton)
     TEST_FUNCTION(isPentaquark)
     TEST_FUNCTION(isPhoton)
     TEST_FUNCTION(isPythia8Specific)
@@ -89,36 +95,41 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isRBaryon)
     TEST_FUNCTION(isRGlueball)
     TEST_FUNCTION(isRHadron)
-    TEST_FUNCTION(isRMeson)
+    TEST_FUNCTION(isRMeson) // 60
     TEST_FUNCTION(isResonance)
-    TEST_FUNCTION(isSlepton) // 60
+    TEST_FUNCTION(isSlepton)
+    TEST_FUNCTION(isSleptonLH)
+    TEST_FUNCTION(isSleptonRH)
     TEST_FUNCTION(isSMLepton)
     TEST_FUNCTION(isSMNeutrino)
     TEST_FUNCTION(isSUSY)
     TEST_FUNCTION(isSquark)
+    TEST_FUNCTION(isSquarkLH)
+    TEST_FUNCTION(isSquarkRH) // 70
     TEST_FUNCTION(isStrange)
     TEST_FUNCTION(isStrangeBaryon)
     TEST_FUNCTION(isStrangeHadron)
     TEST_FUNCTION(isStrangeMeson)
     TEST_FUNCTION(isStrongInteracting)
-    TEST_FUNCTION(isTau) // 70
+    TEST_FUNCTION(isTau)
     TEST_FUNCTION(isTechnicolor)
     TEST_FUNCTION(isTetraquark)
     TEST_FUNCTION(isTop)
-    TEST_FUNCTION(isTopBaryon)
+    TEST_FUNCTION(isTopBaryon) // 80
     TEST_FUNCTION(isTopHadron)
     TEST_FUNCTION(isTopMeson)
     TEST_FUNCTION(isTrajectory)
     TEST_FUNCTION(isTransportable)
     TEST_FUNCTION(isValid)
-    TEST_FUNCTION(isW) // 80
+    TEST_FUNCTION(isW)
     TEST_FUNCTION(isZ)
     TEST_FUNCTION(leadingQuark)
     TEST_FUNCTION(spin2)
-    TEST_FUNCTION(threeCharge)
-    if  (myline!=current) { printf("reference :%s\ncalculated:%s\n",myline.c_str(),current.c_str()); return 1; }
-    //printf("%s\n",current.c_str());
+    TEST_FUNCTION(threeCharge) // 90
     processed=true;
+    // uncomment when updating reference file
+    // printf("%s\n",current.c_str()); continue;
+    if  (myline!=current) { printf("reference :%s\ncalculated:%s\n",myline.c_str(),current.c_str()); return 1; }
   }
   return 0;
   //cat ../AtlasPID.h | grep template | grep class | tr -s ' '| sort | cut -f 5 -d' '| cut -f 1 -d'(' | sort | sed 's/^/TEST_FUNCTION(/' | sed 's/$/)/'
