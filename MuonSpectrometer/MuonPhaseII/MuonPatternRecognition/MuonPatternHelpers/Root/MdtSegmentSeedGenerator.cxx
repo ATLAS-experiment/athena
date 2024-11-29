@@ -221,7 +221,12 @@ namespace MuonR4{
         solCandidate.Y0 = seedPos[toInt(ParamDefs::y0)];
         solCandidate.theta = theta;
         /// d/dx asin(x) = 1 / sqrt(1- x*x)
-        solCandidate.dTheta =  combDriftUncert / std::sqrt(1. - std::pow(std::clamp(R / distTubes, -1., 1.), 2)) / distTubes;
+        double denomSquare =  1. - std::pow(R / distTubes, 2); 
+        if (denomSquare < std::numeric_limits<double>::epsilon()){
+            ATH_MSG_VERBOSE("Invalid seed, rejecting"); 
+            return std::nullopt; 
+        }
+        solCandidate.dTheta =  combDriftUncert / std::sqrt(denomSquare) / distTubes;
         solCandidate.dY0 =  std::hypot(-bottomPos.y()*seedDir.y() + bottomPos.z()*seedDir.z(), 1.) * solCandidate.dTheta;
         ATH_MSG_VERBOSE("Test new "<<solCandidate<<".");
 
