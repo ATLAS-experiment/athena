@@ -123,6 +123,10 @@ void PixelGmxInterface::makePixelModule(const std::string &typeName,
   int readoutSide{1};
   bool is3D{false};
 
+  bool phiSymmetric{true};
+  bool etaSymmetric{true};
+  bool depthSymmetric{true};
+
   // read parameters
   getParameter(typeName, parameters, "circuitsPerEta", circuitsPerEta);
   getParameter(typeName, parameters, "circuitsPerPhi", circuitsPerPhi);
@@ -140,6 +144,10 @@ void PixelGmxInterface::makePixelModule(const std::string &typeName,
   getParameter(typeName, parameters, "nEtaLongPerSide", nEtaLongPerSide);
   getParameter(typeName, parameters, "nPhiEndPerSide", nPhiEndPerSide);
   getParameter(typeName, parameters, "nEtaEndPerSide", nEtaEndPerSide);
+
+  checkParameter(typeName, parameters, "phiSymmetric", phiSymmetric);
+  checkParameter(typeName, parameters, "etaSymmetric", etaSymmetric);
+  checkParameter(typeName, parameters, "depthSymmetric", depthSymmetric);
 
   //
   // Make Module Design and add to DetectorManager
@@ -176,6 +184,7 @@ void PixelGmxInterface::makePixelModule(const std::string &typeName,
   }
 
   auto design = std::make_unique<PixelModuleDesign>(thickness,
+                                                    phiSymmetric, etaSymmetric, depthSymmetric,
                                                     circuitsPerPhi, circuitsPerEta,
                                                     columnsPerChip, rowsPerChip,
                                                     columnsPerChip, rowsPerChip,

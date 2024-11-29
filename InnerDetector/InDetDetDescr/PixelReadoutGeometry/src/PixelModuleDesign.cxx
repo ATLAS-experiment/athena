@@ -28,6 +28,9 @@ using std::abs;
 // Constructor with parameters:
 
 PixelModuleDesign::PixelModuleDesign(const double thickness,
+                                    const bool phiSymmetric,
+                                    const bool etaSymmetric,
+                                    const bool depthSymmetric,
                                     const int circuitsPerColumn,
                                     const int circuitsPerRow,
                                     const int cellColumnsPerCircuit,
@@ -41,7 +44,7 @@ PixelModuleDesign::PixelModuleDesign(const double thickness,
                                     InDetDD::DetectorType detectorType) :
 
   SiDetectorDesign(thickness, 
-		   true, true, true, // phi,eta,depth axes symmetric
+		   phiSymmetric, etaSymmetric, depthSymmetric,
 		   carrierType,
 		   readoutSide),
   m_diodeMap(std::move(matrix)),
@@ -51,6 +54,26 @@ PixelModuleDesign::PixelModuleDesign(const double thickness,
   m_bounds(),
   m_is3D(is3D),
   m_detectorType(detectorType)
+{
+}
+
+PixelModuleDesign::PixelModuleDesign(const double thickness,
+                                    const int circuitsPerColumn,
+                                    const int circuitsPerRow,
+                                    const int cellColumnsPerCircuit,
+                                    const int cellRowsPerCircuit,
+                                    const int diodeColumnsPerCircuit,
+                                    const int diodeRowsPerCircuit,
+                                    std::shared_ptr<const PixelDiodeMatrix> matrix,
+                                    InDetDD::CarrierType carrierType,
+                                    int readoutSide,
+                                    bool is3D,
+                                    InDetDD::DetectorType detectorType) :
+    PixelModuleDesign(thickness, 
+    true,true,true, //if symmetry not explicitly  set, assume fully symmetric
+    circuitsPerColumn,circuitsPerRow,cellColumnsPerCircuit,cellRowsPerCircuit,
+    diodeColumnsPerCircuit,diodeRowsPerCircuit,matrix,carrierType,readoutSide,
+    is3D,detectorType)
 {
 }
 
