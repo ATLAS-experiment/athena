@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,24 +10,18 @@
 #ifndef LArSamples_Data_H
 #define LArSamples_Data_H
 
-#include "LArCafJobs/Definitions.h"
-#include "LArCafJobs/AbsShape.h"
-#include "LArCafJobs/DataContainer.h"
-#include "LArCafJobs/ShapeInfo.h"
+#include "LArCafJobs/Definitions.h"//enum
+#include "LArCafJobs/AbsShape.h"//inheritance
+#include "LArCafJobs/DataContainer.h" //method implemented
+#include "LArRawEvent/LArFebErrorSummary.h"//enum
 
-#include "LArRawEvent/LArFebErrorSummary.h"
+#include "TString.h" //set default value
+#include "TVectorD.h" //typedef
 
 #include <vector>
-#include "TString.h"
-#include "TVectorD.h"
-#include "TMath.h"
-
-#include <iostream>
-#include <algorithm>
-#include <fstream>
+#include <atomic>
 
 class TH1D;
-
 
 namespace LArSamples {
   
@@ -35,6 +29,7 @@ namespace LArSamples {
   class History;
   class EventData;
   class ScaledErrorData;
+  class DataContainer;
 
   struct DataFuncArgs {
     DataFuncArgs() { init(); }

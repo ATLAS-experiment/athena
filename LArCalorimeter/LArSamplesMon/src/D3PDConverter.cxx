@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/D3PDConverter.h"
@@ -10,7 +10,7 @@
 #include "LArCafJobs/DataContainer.h"
 #include "LArCafJobs/HistoryContainer.h"
 #include "LArCafJobs/CellInfo.h"
-
+#include "LArSamplesMon/Interface.h"
 #include "LArSamplesMon/LArIdTranslatorHelper.h"
 
 #include "Identifier/IdentifierHash.h"
@@ -40,7 +40,6 @@ bool D3PDConverter::makeSamplesTuple(const TString& outputFileName)
     eventData->setRunData(runData);
     unsigned int eventIndex = samples->addEvent(eventData);
 
-    //cout << "Entry " << i << " nCells = " << cc_sel_n << endl;
     
     for (int j = 0; j < cc_sel_n; j++) {
       // skip Tile cells
@@ -88,11 +87,11 @@ bool D3PDConverter::makeSamplesTuple(const TString& outputFileName)
                           (*cc_sel_QCells)[j], eventIndex,
                             std::vector<float>(), (*cc_sel_Sigma)[j],
                             -1, -1, (*cc_sel_BadCells)[j]);
-      //cout << "Adding data to " << hash << " " << histCont->nDataContainers() << endl;
       histCont->add(data);
     }
   }
   samples->writeTrees(outputFileName);
+  delete samples;
   return true;
 }
 

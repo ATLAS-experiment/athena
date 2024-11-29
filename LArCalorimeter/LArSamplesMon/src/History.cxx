@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/History.h"
@@ -26,7 +26,9 @@
 #include "LArCafJobs/Geometry.h"
 #include "LArSamplesMon/Interface.h"
 #include "LArSamplesMon/ClassCounts.h"
+#include "LArCafJobs/HistoryContainer.h"
 
+#include "TString.h"
 #include "TMath.h"
 #include <iostream>
 
@@ -613,17 +615,14 @@ Residuals* History::residuals(CaloGain::CaloGain gain, double absResCut, bool co
 {
   Chi2Calc c2c;
   CovMatrix dummyErrors;
-  Residuals* residuals = new Residuals();
+  auto residuals = std::make_unique<Residuals>();
   for (unsigned int k = 0; k < nData(); k++) {
     if (gain != CaloGain::LARNGAIN && data(k)->gain() != gain) continue;
-    //if (goodForCorrOnly && !data(k)->goodForShapeCorr()) continue;    
-    Residual* res = residual(k, correct, zeroTime);
+    auto res = std::unique_ptr<Residual>(residual(k, correct, zeroTime));
     if (!res) { cout << "Error calculating residual for hash = " << m_hash << ", index = " << k << endl; return nullptr; }
     if (residuals->size() > 0 && !residuals->hasSameRange(*res)) {
       cout << "Warning for hash = " << m_hash << ", index = " << k << " : index interval changed from [" 
            << residuals->lwb() << ", " << residuals->upb() << "] to " << res->rangeStr() << endl;      
-      delete res;
-      delete residuals;
       return nullptr;
     }
     bool pass = true;
@@ -634,9 +633,8 @@ Residuals* History::residuals(CaloGain::CaloGain gain, double absResCut, bool co
       }
     }
     if (pass) residuals->add(*res);
-    delete res;
   }
-  return residuals;
+  return residuals.release();
 }
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,10 +10,9 @@
 #ifndef LArSamples_Splitter_H
 #define LArSamples_Splitter_H
 
-#include "LArCafJobs/CaloId.h"
-#include "TString.h"
 #include "CxxUtils/checker_macros.h"
 
+class TString;
 
 namespace LArSamples {
   

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArIdTranslatorHelper
@@ -12,9 +12,9 @@
 //
 
 #include "LArSamplesMon/LArIdTranslatorHelper.h"
-
 // ROOT includes
 #include "TMath.h"
+#include "TString.h"
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TH2I.h"
@@ -415,7 +415,6 @@ void LArIdTranslatorHelper::MakeTranslatorMapping(const char* inputtreefile,cons
       h2map[i][j] = new TH2I(name,"",nbinsx,xbins,nbinsy,ybins);
       sprintf(name,"%s_%s_counts",m_PartitionLayers[i].c_str(),m_HistCategories[j].c_str());
       h2count[i][j] = (TH2I*)h2map[i][j]->Clone(name);
-
       // initialize to -1
       for(ix=0;ix<nbinsx;ix++){
         for(iy=0;iy<nbinsy;iy++) h2map[i][j]->SetBinContent(ix+1,iy+1,-1);
@@ -463,7 +462,7 @@ void LArIdTranslatorHelper::MakeTranslatorMapping(const char* inputtreefile,cons
 
   // counters
   Int_t nchannels = 0;
-  Double_t emb1PhiGran = TMath::Pi()/(Double_t)32;
+  Double_t emb1PhiGran = M_PI/(Double_t)32;
   Int_t dupl = 0,dupl2 = 0;
   Int_t empt = 0;
   Int_t ntotal = 0;
@@ -606,7 +605,6 @@ void LArIdTranslatorHelper::MakeTranslatorMapping(const char* inputtreefile,cons
     ntotal += nbinsx*nbinsy;
     for(ix=0;ix<nbinsx;ix++){
       for(iy=0;iy<nbinsy;iy++){
-          
         if(h2count[i][0]->GetBinContent(ix+1,iy+1)>1){
           printf("LArIdTranslatorHelper::MakeTranslatorMapping : Duplicate at %s %d %d (last ft/sl/ch: %d %d %d) : [%+.4f,%+.4f]  [%+.4f,%+.4f]\n",m_PartitionLayers[i].c_str(),ix+1,iy+1,(int)h2map[i][0]->GetBinContent(ix+1,iy+1),(int)h2map[i][1]->GetBinContent(ix+1,iy+1),(int)h2map[i][2]->GetBinContent(ix+1,iy+1),h2map[i][0]->GetXaxis()->GetBinLowEdge(ix+1),h2map[i][0]->GetXaxis()->GetBinUpEdge(ix+1),h2map[i][0]->GetYaxis()->GetBinLowEdge(iy+1),h2map[i][0]->GetYaxis()->GetBinUpEdge(iy+1));
           dupl2+=1;
@@ -621,7 +619,8 @@ void LArIdTranslatorHelper::MakeTranslatorMapping(const char* inputtreefile,cons
   file->cd();
   tree->Write();
   for(i=0;i<m_nPartitionLayers;i++) for(j=0;j<m_nHistCategories;j++) h2map[i][j]->Write();
-  file->Close(); delete file; 
+  file->Close(); 
+  delete file; 
 
   printf("-------------------------------------------------------------------\n");
   printf("LArIdTranslatorHelper::MakeTranslatorMapping: Summary:\n");
@@ -629,8 +628,20 @@ void LArIdTranslatorHelper::MakeTranslatorMapping(const char* inputtreefile,cons
   printf("There were %d duplicates, %d empty, %d (%d) phi-shifted (HEC-FCAL), %d physical.\n",dupl2,empt,dupl,phishifts,ntotal-empt-dupl);
   printf("-------------------------------------------------------------------\n");
 
-  ifile->Close(); delete ifile;
-
+  ifile->Close();
+  for(int i=0;i!=m_nPartitionLayers;++i){
+    for (int j=0;j!=m_nHistCategories;++j){
+      delete h2count[i][j];
+      delete h2map[i][j];
+    }
+    delete[] h2count[i];
+    delete[] h2map[i];
+  }
+  delete[] h2count;
+  delete[] h2map;
+  delete[] h2;
+  delete fdqm;
+  delete ifile;
   return;
 }
 

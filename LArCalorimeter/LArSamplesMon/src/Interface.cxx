@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/Interface.h"
@@ -15,6 +15,8 @@
 #include "LArSamplesMon/DataTweaker.h"
 #include "LArSamplesMon/UniformShapeErrorGetter.h"
 #include "LArSamplesMon/TreeShapeErrorGetter.h"
+
+#include "TFile.h"
 #include "TObjString.h"
 #include "TSystem.h"
 #include "TObjArray.h"

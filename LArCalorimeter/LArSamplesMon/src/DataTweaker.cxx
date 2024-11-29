@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/DataTweaker.h"
@@ -83,8 +83,11 @@ Data* DataTweaker::tweak(const Data& data, int evtIndex) const
     SimpleShape* reference = data.referenceShape();
     const ScaledErrorData* sed = data.scaledErrorData();
     ShapeFitter fitter(m_fitParams);
-    double chi2;
-    if (!reference) return nullptr;
+    double chi2{};
+    if (!reference){
+      delete sed;
+      return nullptr;
+    } 
     bool result = fitter.fit(data, *reference, k, deltaT, chi2, sed);
     delete sed;
     if (!result) return nullptr;

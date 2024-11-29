@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,19 +11,13 @@
 #define LArSamples_History_H
 
 #include "LArCafJobs/Definitions.h"
-#include "LArCafJobs/HistoryContainer.h"
-#include "LArCafJobs/CellInfo.h"
-#include "LArSamplesMon/Chi2Calc.h"
-#include "LArSamplesMon/FilterParams.h"
-#include "LArCafJobs/EventData.h"
-#include "TH1D.h"
-#include "TString.h"
-#include "TArrayI.h"
-#include "TVectorD.h"
+#include "LArCafJobs/CellInfo.h"//member
+#include "LArSamplesMon/Chi2Calc.h" //for defaulted value
+#include "LArCafJobs/EventData.h"//implemented method
+#include "TVectorD.h" //typedef
 #include <vector>
-//#include <ext/hash_map>
 
-//namespace std { using namespace __gnu_cxx; }
+class TString;
 
 namespace LArSamples {
   
@@ -36,6 +30,7 @@ namespace LArSamples {
   class ScaledErrorData;
   class Residual;
   class Residuals;
+  class HistoryContainer;
   
   class ATLAS_NOT_THREAD_SAFE History {
   
@@ -119,7 +114,6 @@ namespace LArSamples {
      unsigned int m_hash;
      mutable const AbsShapeErrorGetter* m_shapeErrorGetter;
      mutable const Interface* m_interface = nullptr;
-     //mutable std::hash_map<int, std::pair<int, const Data*> > m_dataForEvent;
   };
 }
 #endif
