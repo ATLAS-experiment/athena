@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #include "TrigT1CaloCondSvc/L1CaloCondAlg.h"
 
@@ -86,7 +86,7 @@ StatusCode  L1CaloCondAlg:: initialize ()
 
 }
 
-template <typename T> StatusCode L1CaloCondAlg::updateCond(SG::WriteCondHandleKey<T>& wkey, std::vector<std::reference_wrapper<const SG::ReadCondHandleKey<CondAttrListCollection>>> rkeys, std::unique_ptr<T> obj) {
+template <typename T> StatusCode L1CaloCondAlg::updateCond(SG::WriteCondHandleKey<T>& wkey, const std::vector<std::reference_wrapper<const SG::ReadCondHandleKey<CondAttrListCollection>>>& rkeys, std::unique_ptr<T> obj) {
     if(wkey.empty()) return StatusCode::SUCCESS; // no creation to do
     SG::WriteCondHandle<T> wh{wkey};
     if(wh.isValid()) return StatusCode::SUCCESS; // condition already valid, no update needed

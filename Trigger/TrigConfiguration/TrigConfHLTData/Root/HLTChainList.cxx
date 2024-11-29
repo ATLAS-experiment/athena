@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfHLTData/HLTUtils.h"
@@ -128,7 +128,7 @@ TrigConf::HLTChainList::setL2LowerChainCounter(const CTPConfig* ctpcfg) {
       TrigConf::removeAllSpaces(low_chain_names);
       vector<string> low_chain_names_V = split(low_chain_names,",");
       std::vector<int> lccs;
-      for(string lowerChainName : low_chain_names_V)
+      for(const std::string& lowerChainName : low_chain_names_V)
          lccs.push_back(ctpFromName[lowerChainName]);
       ch->set_lower_chain_counter(low_chain_names_V.size()==1 ? lccs[0] : -1);
       ch->set_lower_chain_counters(lccs);
