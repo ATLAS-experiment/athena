@@ -2,34 +2,31 @@
 
 #include <string>
 #include <vector>
-
 #include "TLorentzVector.h"
+
 #include "xAODBPhys/BPhysHelper.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODEventInfo/EventInfo.h"
-
-// added to convert GSF trackparticles to ID trackparticles
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
-#include "RecoToolInterfaces/ITrackIsolationTool.h"
 #include "xAODEgamma/ElectronxAODHelpers.h"
-#include "xAODPrimitives/IsolationHelpers.h"  //For the definition of Iso::conesize
 
 using namespace std;
 namespace DerivationFramework {
 
-BKllIsoMultiplicityTool::BKllIsoMultiplicityTool(const std::string& t, const std::string& n, const IInterface* p)
+BKllIsoMultiplicityTool::BKllIsoMultiplicityTool(
+  const std::string& t, const std::string& n, const IInterface* p)
     : AthAlgTool(t, n, p),
-      m_trackContainerName("InDetTrackParticles"),
-      m_vertexContainerName("NONE"),
-      m_trkSelector("InDet::TrackSelectorTool"),
       m_cones(),
+      m_vertexContainerName("NONE"),
+      m_trackContainerName("InDetTrackParticles"),
+      m_trkSelector("InDet::TrackSelectorTool"),
       m_trackPtCut(500.),
-      m_trackEtaCut(999.),
+      m_trackEtaCut(-1.), // < 0 -> No eta cut applied!
       m_elContainerKey("Electrons"),
       m_elTrackContainerKey("GSFTrackParticles"),
       m_elTrackPtCut(5000.),
-      m_elTrackEtaCut(999.),
-      m_elLHCut("VeryLooseNod0"),
+      m_elTrackEtaCut(-1.), // < 0 -> No eta cut applied!
+      m_elLHCut("DFCommonElectronsLHVeryLoose"), // Use the name corresponding to the auxdata item on electrons.
       m_recordTrackMult(true),
       m_recordElMult(true),
       m_recordMuMult(true)
@@ -38,32 +35,32 @@ BKllIsoMultiplicityTool::BKllIsoMultiplicityTool(const std::string& t, const std
   declareInterface<DerivationFramework::IAugmentationTool>(this);
 
   // Declare tools
-  declareProperty("TrackContainer", m_trackContainerName);
-  declareProperty("InputVertexContainer", m_vertexContainerName);
-  declareProperty("TrackSelectorTool",m_trkSelector);
   declareProperty("IsolationCones", m_cones);
+  declareProperty("InputVertexContainer", m_vertexContainerName);
+  declareProperty("TrackContainer", m_trackContainerName);
+  declareProperty("TrackSelectorTool",m_trkSelector);
   declareProperty("TrackPtCut", m_trackPtCut);
   declareProperty("TrackEtaCut", m_trackEtaCut);
   declareProperty("ElectronContainerKey", m_elContainerKey);
   declareProperty("ElectronTrackContainerKey", m_elTrackContainerKey);
-  //declareProperty("MuonContainerKey", m_muContainerKey);
-  //declareProperty("MuonTrackContainerKey", m_muTrackContainerKey);
   declareProperty("ElectronTrackPtCut", m_elTrackPtCut);
   declareProperty("ElectronTrackEtaCut", m_elTrackEtaCut);
+  declareProperty("ElectronLikelihoodCut", m_elLHCut);
+  //declareProperty("MuonContainerKey", m_muContainerKey);
+  //declareProperty("MuonTrackContainerKey", m_muTrackContainerKey);
   //declareProperty("MuonTrackPtCut", m_muTrackPtCut);
   //declareProperty("MuonTrackEtaCut", m_muTrackEtaCut);
-  declareProperty("ElectronLikelihoodCut", m_elLHCut);
   declareProperty("RecordTrackMultiplicity", m_recordTrackMult);
   declareProperty("RecordElectronMultiplicity", m_recordElMult);
   declareProperty("RecordMuonMultiplicity", m_recordMuMult);
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// *******************************************************************
 
 StatusCode BKllIsoMultiplicityTool::initialize() {
 
   // Get the Track Selector Tool from ToolSvc
-  if ( m_trkSelector.retrieve().isFailure() ) {
+  if (m_trkSelector.retrieve().isFailure()) {
       ATH_MSG_FATAL("Failed to retrieve tool " << m_trkSelector);
       return StatusCode::FAILURE;
   } else {
@@ -83,19 +80,21 @@ StatusCode BKllIsoMultiplicityTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// *******************************************************************
 
 StatusCode BKllIsoMultiplicityTool::finalize() {
   // everything all right
   return StatusCode::SUCCESS;
 }
 
-bool BKllIsoMultiplicityTool::isTrackInVertex(const xAOD::Vertex* theVtx, const xAOD::TrackParticle* thePart) const {
+// *******************************************************************
+
+bool BKllIsoMultiplicityTool::isTrackInVertex( const xAOD::Vertex* theVtx, const xAOD::TrackParticle* thePart) const {
   for (unsigned int i = 0; i < theVtx->nTrackParticles(); i++){
     auto vertexTrack   = theVtx->trackParticle( i );
     auto originalTrack = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( vertexTrack );
     if ( originalTrack == NULL ){
-        if ( vertexTrack == thePart ) return true;
+        if ( vertexTrack   == thePart ) return true;
     } else {
         if ( originalTrack == thePart ) return true;
     }
@@ -103,7 +102,7 @@ bool BKllIsoMultiplicityTool::isTrackInVertex(const xAOD::Vertex* theVtx, const 
   return false;
 }
 
-bool BKllIsoMultiplicityTool::setIsoVar(const xAOD::Vertex* theVtx, std::vector<std::vector<float>> isolationsAllLegsAllCones, std::string isoName ) const {
+bool BKllIsoMultiplicityTool::setIsoVar( const xAOD::Vertex* theVtx, std::vector<std::vector<float>> isolationsAllLegsAllCones, std::string isoName ) const {
       for ( unsigned int iCone = 0; iCone < m_cones.size(); iCone ++ ){
         std::vector<float> perConeIsolation;
         for ( unsigned int iLeg = 0; iLeg < theVtx->nTrackParticles(); iLeg++ ){
@@ -111,11 +110,6 @@ bool BKllIsoMultiplicityTool::setIsoVar(const xAOD::Vertex* theVtx, std::vector<
         }
         std::string fullIsoName = isoName + "_c" + m_cones.at( iCone );
         SG::AuxElement::Decorator< std::vector<float> > isoDecorator( fullIsoName );
-        //std::cout<< "Decorating Isolation w/ Cone Size: " << m_cones.at( iCone ) << " w/ Name: " << fullIsoName << " | Isolation Values: " << std::endl;
-        //std::cout << "    0th Track: " << perConeIsolation.at(0) << std::endl;
-        //std::cout << "    1st Track: " << perConeIsolation.at(1) << std::endl;
-        //std::cout << "    2nd Track: " << perConeIsolation.at(2) << std::endl;
-        //std::cout << "    3rd Track: " << perConeIsolation.at(3) << std::endl;
         isoDecorator( *theVtx ) = perConeIsolation;
       }
       return true;
@@ -125,37 +119,13 @@ bool BKllIsoMultiplicityTool::setIsoVar(const xAOD::Vertex* theVtx, std::vector<
 
 StatusCode BKllIsoMultiplicityTool::addBranches() const {
 
-  const xAOD::TrackParticleContainer* idTrackParticleContainer = NULL;
   const xAOD::VertexContainer* vertexContainer = NULL;
+  const xAOD::TrackParticleContainer* idTrackParticleContainer = NULL;
   const xAOD::ElectronContainer* elContainer = NULL;
   //const xAOD::MuonContainer* muContainer = NULL;
   const xAOD::TrackParticleContainer* elTrackContainer = NULL;
   //const xAOD::TrackParticleContainer* muTrackContainer = NULL;
 
-  // Load the TrackParticles for Isolation 
-  if (evtStore()->contains<xAOD::TrackParticleContainer>(m_trackContainerName)) {
-    CHECK(evtStore()->retrieve(idTrackParticleContainer, m_trackContainerName));
-  } else {
-    ATH_MSG_ERROR("Failed loading TrackParticleContainer container!");
-    return StatusCode::FAILURE;
-  }
-
-  // Load the Electrons & Electron Track Particles
-  if ( m_recordElMult ){
-    if (evtStore()->contains<xAOD::ElectronContainer>(m_elContainerKey)) {
-      CHECK(evtStore()->retrieve(elContainer, m_elContainerKey));
-    } else {
-      ATH_MSG_ERROR("Failed loading Electron container!");
-      return StatusCode::FAILURE;
-    }
-    if (evtStore()->contains<xAOD::TrackParticleContainer>(m_elTrackContainerKey)) {
-      CHECK(evtStore()->retrieve(elTrackContainer, m_elTrackContainerKey));
-    } else {
-      ATH_MSG_ERROR("Failed loading Electron Track container!");
-      return StatusCode::FAILURE;
-    }
-  }
-  
   //	Load the Vertices
   if (evtStore()->contains<xAOD::VertexContainer>(m_vertexContainerName)) {
     CHECK(evtStore()->retrieve(vertexContainer, m_vertexContainerName));
@@ -164,11 +134,35 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
     return StatusCode::FAILURE;
   }
 
+  // Load the TrackParticles for Isolation 
+  if (evtStore()->contains<xAOD::TrackParticleContainer>(m_trackContainerName)) {
+    CHECK(evtStore()->retrieve(idTrackParticleContainer, m_trackContainerName));
+  } else {
+    ATH_MSG_ERROR("Failed loading TrackParticleContainer!");
+    return StatusCode::FAILURE;
+  }
+
+  // Load the Electrons & Electron Track Particles
+  if ( m_recordElMult ){
+    if (evtStore()->contains<xAOD::ElectronContainer>(m_elContainerKey)) {
+      CHECK(evtStore()->retrieve(elContainer, m_elContainerKey));
+    } else {
+      ATH_MSG_ERROR("Failed loading ElectronContainer!");
+      return StatusCode::FAILURE;
+    }
+    if (evtStore()->contains<xAOD::TrackParticleContainer>(m_elTrackContainerKey)) {
+      CHECK(evtStore()->retrieve(elTrackContainer, m_elTrackContainerKey));
+    } else {
+      ATH_MSG_ERROR("Failed loading TrackParticleContainer for Electrons!");
+      return StatusCode::FAILURE;
+    }
+  }
+ 
   // Load EventInfo
   const xAOD::EventInfo* eventInfo = evtStore()->retrieve<const xAOD::EventInfo>("EventInfo");
   if (!eventInfo && (m_recordTrackMult || m_recordElMult || m_recordMuMult )){
-    ATH_MSG_ERROR("Failed loading event info!");
-    return StatusCode::FAILURE;
+      ATH_MSG_ERROR("Failed loading event info!");
+      return StatusCode::FAILURE;
   }
 
   // Prepare TrackBags!
@@ -176,11 +170,11 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
   for ( auto track : *idTrackParticleContainer ) {
       if ( !m_trkSelector->decision(*track, 0) ) continue;  
       if ( track->p4().Pt() < m_trackPtCut ) continue;
-      if ( abs( track->p4().Eta() ) > m_trackEtaCut ) continue;
+      if ( ( m_trackEtaCut > 0 ) && abs( track->p4().Eta() ) > m_trackEtaCut ) continue;
       trackBag.push_back( track );
   }
   if ( m_recordTrackMult ) {
-    SG::AuxElement::Decorator<unsigned int> trackMultDecorator("trackMultiplicity");
+    SG::AuxElement::Decorator<unsigned int> trackMultDecorator("BKllTrackMultiplicity");
     trackMultDecorator( *eventInfo ) = trackBag.size();
   }
 
@@ -197,18 +191,23 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
         elTrack = *refittedTrackParticleLink(*el);
         if (!elTrack) continue;
       }
-      if ( m_elTrackContainerKey == "GSFTrackParticles" ) {
+      else if ( m_elTrackContainerKey == "GSFTrackParticles" ) {
         elTrack = el->trackParticle();
         if (!elTrack) continue;
       }
-      if ( m_elTrackContainerKey == "InDetTrackParticles" ) {
+      else if ( m_elTrackContainerKey == "InDetTrackParticles" ) {
         auto _elTrack =  el->trackParticle();
         if (!_elTrack ) continue;
         elTrack =  xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( _elTrack ); 
         if (!elTrack) continue;
       }
+      else{
+        ATH_MSG_ERROR("ElectronTrackContainerKey must be one of: GSFCaloContainer, GSFTrackParticles, InDetTrackParticles..." );
+        return StatusCode::FAILURE;
+      }
+      if ( !m_trkSelector->decision(*elTrack, 0) ) continue; 
       if ( elTrack->p4().Pt() < m_elTrackPtCut ) continue;
-      if ( abs( elTrack->p4().Eta() ) > m_elTrackEtaCut ) continue;
+      if ( ( m_elTrackEtaCut > 0 ) && abs( elTrack->p4().Eta() ) > m_elTrackEtaCut ) continue;
       elMult += 1;
     }
     SG::AuxElement::Decorator<unsigned int> elMultDecorator("electronMultiplicity");

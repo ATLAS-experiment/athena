@@ -5,7 +5,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
-#include "RecoToolInterfaces/ITrackIsolationTool.h"
+#include "xAODTracking/Vertex.h"
 #include <vector>
 
 namespace Trk {
@@ -29,10 +29,10 @@ namespace DerivationFramework {
  
     private:
 
-    ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;
     std::vector<std::string> m_cones;
-	  std::string m_trackContainerName;
 	  std::string m_vertexContainerName;
+	  std::string m_trackContainerName;
+    ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;
     float m_trackPtCut;
     float m_trackEtaCut;
     std::string  m_elContainerKey;
