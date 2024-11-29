@@ -493,8 +493,9 @@ namespace MuonR4{
             } else {
                 const AmgVector(nDim) gradDiff = (currGrad - prevGrad).block<nDim,1>(0,0);
                 const double gradDiffMag = gradDiff.mag2();
+                double denom = (gradDiffMag > std::numeric_limits<float>::epsilon() ? gradDiffMag : 1.); 
                 const double gamma = std::abs((currPars - prevPars).block<nDim,1>(0,0).dot(gradDiff))
-                                   / gradDiffMag > std::numeric_limits<float>::epsilon() ? gradDiffMag : 1.;
+                                   / denom;
                 ATH_MSG_VERBOSE("Hessian determinant invalid. Try deepest descent - \nprev parameters: "
                              <<toString(prevPars)<<",\nprevious gradient: "<<toString(prevGrad)<<", gamma: "<<gamma);
                 prevPars.block<nDim, 1>(0,0) = currPars.block<nDim, 1>(0,0);
