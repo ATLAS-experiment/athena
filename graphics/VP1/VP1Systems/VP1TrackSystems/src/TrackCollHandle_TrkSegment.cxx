@@ -60,7 +60,7 @@ QStringList TrackCollHandle_TrkSegment::availableCollections(IVP1System*sys)
 
   QStringList outkeys;
 
-  for (QString key : keysInSG) {
+  for (const QString& key : keysInSG) {
     if (!VP1JobConfigInfo::hasMuonGeometry() && needsMuonsPattern.exactMatch(key)) {
       sys->messageDebug("TrackCollHandle_TrkSegment::availableCollections: Ignoring key '"
 			+key+"' since muon geometry is not present in job.");

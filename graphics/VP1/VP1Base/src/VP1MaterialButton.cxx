@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -644,7 +644,7 @@ void VP1MaterialButton::reset()
 }
 
 //____________________________________________________________________
-QList<SoMaterial*> VP1MaterialButton::handledMaterials() const
+const QList<SoMaterial*>& VP1MaterialButton::handledMaterials() const
 {
   return m_d->handledmaterials;
 }

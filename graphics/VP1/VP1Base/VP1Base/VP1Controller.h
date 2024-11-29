@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -54,7 +54,7 @@ public:
   void initLastVars(); //call at end of derived controller (after all addUpdateSlot calls & connection setups)
 
   QByteArray saveSettings() const;
-  void restoreSettings(QByteArray);
+  void restoreSettings(const QByteArray&);
 
   // Need to be able to pass signals from customtoureditor to
   static void setCustomTourEditor(VP1CustomTourEditor* editor) { m_customTourEditor=editor;}
@@ -101,7 +101,7 @@ protected:
 					 QRadioButton * rb3 = 0,QRadioButton * rb4 = 0,QRadioButton * rb5 = 0,
 					 QRadioButton * rb6 = 0,QRadioButton * rb7 = 0,QRadioButton * rb8 = 0,
 					 QRadioButton * rb9 = 0 );
-  QButtonGroup * defineRadioButtonGroup( QList<QRadioButton *>);
+  QButtonGroup * defineRadioButtonGroup( const QList<QRadioButton *>&);
 
   //convenience:
   SoMaterial * getMaterial(VP1MaterialButton*) const;

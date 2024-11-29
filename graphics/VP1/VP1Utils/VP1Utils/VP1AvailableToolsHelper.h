@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -46,7 +46,7 @@ public:
   void removeMonitoredType(const QString&);
   void removeMonitoredTypes(const QStringList&);
   void clearMonitoredTypes(const QString&);
-  QStringList monitoredTypes() const;
+  const QStringList& monitoredTypes() const;
 
   /////////////////////////////////////////////////////////////////////
   //  Get list of available tools (calls update behind the scenes):  //

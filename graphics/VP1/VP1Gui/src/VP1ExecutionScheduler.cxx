@@ -83,10 +83,10 @@
 
 
 
-std::vector<std::string> qstringlistToVecString(QStringList list)
+std::vector<std::string> qstringlistToVecString(const QStringList& list)
 {
 	std::vector<std::string> vec;
-	for (QString str :  list) {
+	for (const QString& str :  list) {
 		vec.push_back(str.toStdString());
 	}
 	return vec;
@@ -351,13 +351,13 @@ VP1ExecutionScheduler* VP1ExecutionScheduler::init( StoreGateSvc* eventStore,
 		StoreGateSvc* detStore,
 		ISvcLocator* svcLocator,
 		IToolSvc*toolSvc,
-		QStringList joboptions,
+		const QStringList& joboptions,
 		QString initialCruiseMode,
 		unsigned initialCruiseSeconds,
-		QString singleEventSource,
-		QString singleEventLocalTmpDir,
+		const QString& singleEventSource,
+		const QString& singleEventLocalTmpDir,
 		unsigned localFileCacheLimit,
-		QStringList availableLocalInputDirectories )
+		const QStringList& availableLocalInputDirectories )
 {
 	//First we make sure the DISPLAY variable is set (importing ROOT in
 	//athena.py might cause it to be unset!).
@@ -440,7 +440,7 @@ VP1ExecutionScheduler* VP1ExecutionScheduler::init( StoreGateSvc* eventStore,
 		//scheduler->m_d->mainwindow->tabManager()->addNewTab("My Tab");
 	} else {
         qDebug() << "config files: " << joboptions; // DEBUG
-		for (QString opt : joboptions)
+		for (const QString& opt : joboptions)
     		  scheduler->m_d->mainwindow->loadConfigurationFromFile(opt);
 
 		if ( scheduler->m_d->batchMode ) {
@@ -575,7 +575,7 @@ void VP1ExecutionScheduler::updateProgressBarDuringRefresh()
 
 
 //___________________________________________________________________
-QString VP1ExecutionScheduler::nextRequestedEventFile() const
+const QString& VP1ExecutionScheduler::nextRequestedEventFile() const
 {
 	return m_d->nextRequestedEvent;
 }

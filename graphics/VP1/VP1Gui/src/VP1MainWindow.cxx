@@ -578,7 +578,7 @@ void VP1MainWindow::updateTcpIcon()
 }
 
 //_________________________________________________________________________________
-void VP1MainWindow::loadPluginFile(QString filename)
+void VP1MainWindow::loadPluginFile(const QString& filename)
 {
 	VP1Msg::messageDebug("loadPluginFile()");
 
@@ -603,7 +603,7 @@ void VP1MainWindow::request_addEmptyTab() {
 }
 
 //_________________________________________________________________________________
-void VP1MainWindow::tabListChanged(QStringList l) {
+void VP1MainWindow::tabListChanged(const QStringList& l) {
 	updateCentralStackWidget();
 	if (l.count()) {
 		m_actionSave_current_tabs->setEnabled(true);
@@ -777,7 +777,7 @@ QMap<QString,QString> VP1MainWindow::availableFiles(const QString& extension,
         VP1Msg::messageDebug("We're using Qt older than 5...");
         QStringList tmp = path.split(":",QString::SkipEmptyParts);//This 'tmp' is for SLC3 compilation.
 #endif
-        for (QString dir : tmp) {
+        for (const QString& dir : tmp) {
             vp1pluginpath << ( instareasubdir.isEmpty() ? dir : dir+QDir::separator()+instareasubdir );
         }
     }
@@ -806,7 +806,7 @@ QMap<QString,QString> VP1MainWindow::availableFiles(const QString& extension,
 
 	//Find all files with required extension in the directories (in case of duplicates - the ones appearing first are used):
 	QMap<QString,QString> plugins2fullpath;
-	for (QString plugindir : vp1pluginpath) {
+	for (const QString& plugindir : vp1pluginpath) {
 		QStringList plugins = QDir(plugindir).entryList((QStringList()<<("*"+extension)),QDir::CaseSensitive | QDir::Files | QDir::Readable,QDir::Name);
 		for (QString plugin : plugins) {
 			plugin = QFileInfo(plugin).fileName();
@@ -850,7 +850,7 @@ void VP1MainWindow::pluginDialogClosed() {
 
 	QStringList bns = m_channelmanager->channelsInPluginFile(filename);
 
-	for (QString bn : bns) {
+	for (const QString& bn : bns) {
 		while(m_channelmanager->basename2UniqueNames(bn).count()>0)
 			m_tabmanager->removeChannel(m_channelmanager->basename2UniqueNames(bn).value(0));
 	}
@@ -863,7 +863,7 @@ void VP1MainWindow::pluginDialogClosed() {
 //_________________________________________________________________________________
 void VP1MainWindow::unloadPlugin_continue()
 {
-	for (QString filename : m_currentunloadpluginfiles) {
+	for (const QString& filename : m_currentunloadpluginfiles) {
 		bool success = m_channelmanager->unloadPluginFile(filename);
 		if (!success)
 			QMessageBox::critical(0, "Error - problems unloading plugin file: "+filename,
@@ -1189,7 +1189,7 @@ QPixmap VP1MainWindow::getSingleChannelCustomSnapshot(IVP1ChannelWidget* tab, in
 	return snap;
 }
 //_________________________________________________________________________________
-QPixmap VP1MainWindow::getSingleChannelCustomSnapshot(QString tabName, int width)
+QPixmap VP1MainWindow::getSingleChannelCustomSnapshot(const QString& tabName, int width)
 {
 	QList<IVP1ChannelWidget*> allTabs = m_tabmanager->allChannels();
 
@@ -1407,12 +1407,12 @@ void VP1MainWindow::request_printChannel() {
 
 
 //_________________________________________________________________________________
-void VP1MainWindow::loadConfigurationFromFile(QString file) {
+void VP1MainWindow::loadConfigurationFromFile(const QString& file) {
 	m_tabmanager->loadConfigurationFromFile(file,availablePluginFiles());
 }
 
 //_________________________________________________________________________________
-void VP1MainWindow::replaceConfigurationFile(QString file)
+void VP1MainWindow::replaceConfigurationFile(const QString& file)
 {
 	VP1Msg::messageDebug("VP1MainWindow::replaceConfigurationFile() : " + file);
 	m_tabmanager->removeAllTabs();
@@ -1507,7 +1507,7 @@ void VP1MainWindow::showMenu_loadPlugin()
 	pluglist.sort();
 
 	QStringList currentpluginfiles = m_channelmanager->currentPluginFiles();
-	for(QString plug : pluglist) {
+	for(const QString& plug : pluglist) {
 		QAction * act = m_menu_loadPlugin->addAction(plug);
 		assert(plugins2fullpath.contains(plug));
 		QString fullpath = plugins2fullpath[plug];
@@ -1554,7 +1554,7 @@ void VP1MainWindow::showMenu_loadConfFile()
 	QStringList filelist(conffile2fullpath.keys());
 	filelist.sort();
 
-	for(QString file : filelist) {
+	for(const QString& file : filelist) {
 		QAction * act = m_menu_loadConfFile->addAction(file);
 		assert(conffile2fullpath.contains(file));
 		QString fullpath = conffile2fullpath[file];

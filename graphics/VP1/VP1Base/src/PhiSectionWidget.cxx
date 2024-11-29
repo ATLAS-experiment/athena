@@ -44,7 +44,7 @@ public:
   QVector<bool> sectorstatus;
   std::map<QGraphicsEllipseItem*,int> item2sector;
 
-  void approximateSectorStatusFromRanges( QList<VP1Interval> oldEnabledRanges, QVector<bool>& target );
+  void approximateSectorStatusFromRanges( const QList<VP1Interval>& oldEnabledRanges, QVector<bool>& target );
 
   QPoint dragStartPosition;
 
@@ -788,7 +788,7 @@ void PhiSectionWidget::setState(QByteArray ba)
 }
 
 //____________________________________________________________________
-void PhiSectionWidget::Imp::approximateSectorStatusFromRanges( QList<VP1Interval> oldEnabledRanges,
+void PhiSectionWidget::Imp::approximateSectorStatusFromRanges( const QList<VP1Interval>& oldEnabledRanges,
 							       QVector<bool>& target )
 {
   if (oldEnabledRanges.isEmpty()) {

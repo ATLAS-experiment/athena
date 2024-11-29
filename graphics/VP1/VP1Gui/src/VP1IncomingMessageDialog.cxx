@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -133,13 +133,13 @@ void VP1IncomingMessageDialog::updatependinginfo()
 {
   m_d->lcdNumber_pending->display(m_d->requestqueue->count());
   int nsender(0);
-  for (VP1ExternalRequest er : *(m_d->requestqueue)) {
+  for (const VP1ExternalRequest& er : *(m_d->requestqueue)) {
     if (er.sender()==m_d->request.sender())
       ++nsender;
   }
   m_d->lcdNumber_pendingsender->display(nsender);
   int nequal(0);
-  for (VP1ExternalRequest er : *(m_d->requestqueue)) {
+  for (const VP1ExternalRequest& er : *(m_d->requestqueue)) {
     if (m_d->request==er)
       ++nequal;
   }
@@ -174,11 +174,11 @@ void VP1IncomingMessageDialog::request_allblock()
 void VP1IncomingMessageDialog::request_senderclear()
 {
   QList<VP1ExternalRequest> tmp;
-  for (VP1ExternalRequest er : *(m_d->requestqueue)) {
+  for (const VP1ExternalRequest& er : *(m_d->requestqueue)) {
     if (!tmp.contains(er)&&er.sender()==m_d->request.sender())
       tmp<<er;
   }
-  for (VP1ExternalRequest er : tmp) {
+  for (const VP1ExternalRequest& er : tmp) {
     m_d->requestqueue->removeAll (er);
   }
   updatependinginfo();
@@ -195,11 +195,11 @@ void VP1IncomingMessageDialog::request_senderblock()
 void VP1IncomingMessageDialog::request_messageclear()
 {
   QList<VP1ExternalRequest> tmp;
-  for (VP1ExternalRequest er : *(m_d->requestqueue)) {
+  for (const VP1ExternalRequest& er : *(m_d->requestqueue)) {
     if (!tmp.contains(er)&&er==m_d->request)
       tmp<<er;
   }
-  for (VP1ExternalRequest er : tmp) {
+  for (const VP1ExternalRequest& er : tmp) {
     m_d->requestqueue->removeAll(er);
   }
   updatependinginfo();

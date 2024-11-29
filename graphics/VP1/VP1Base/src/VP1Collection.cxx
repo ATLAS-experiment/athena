@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -89,7 +89,7 @@ QString VP1Collection::sectionToolTip() const
 }
 
 //____________________________________________________________________
-VP1CollStates VP1Collection::getStates(QList<VP1Collection*> cols)
+VP1CollStates VP1Collection::getStates(const QList<VP1Collection*>& cols)
 {
 	VP1Msg::messageDebug("VP1Collection::getStates() - start...");
 
@@ -105,7 +105,7 @@ VP1CollStates VP1Collection::getStates(QList<VP1Collection*> cols)
 }
 
 //____________________________________________________________________
-void VP1Collection::applyStates(QList<VP1Collection*> cols, const VP1CollStates& states)
+void VP1Collection::applyStates(const QList<VP1Collection*>& cols, const VP1CollStates& states)
 {
 	VP1Msg::messageDebug("VP1Collection::applyStates() - start...");
         for (VP1Collection* col : cols)

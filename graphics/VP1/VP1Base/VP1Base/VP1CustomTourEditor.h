@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -31,7 +31,7 @@ public:
 
   VP1CustomTourEditor(VP1ExaminerViewer*);
 
-  void setState(QByteArray);
+  void setState(const QByteArray&);
   QByteArray state() const;
 
   virtual ~VP1CustomTourEditor();

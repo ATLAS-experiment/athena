@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //Fixme: cleanup includes.
@@ -169,7 +169,7 @@ public:
   template <class T>
   QList<PRDCollHandleBase*> createSpecificCollections() {
     QList<PRDCollHandleBase*> l;
-    for (QString name : T::availableCollections(theclass)) {
+    for (const QString& name : T::availableCollections(theclass)) {
       T * col = new T(common,name);
       col->init();
       l << col;
@@ -423,7 +423,7 @@ void VP1PrepRawDataSystem::userSelectedSingleNode(SoCooperativeSelection* sel, S
         VP1CameraHelper::animatedZoomToPath(*it,handle->collHandle()->collSep(),pickedPath,2.0,1.0);
     }
     if (m_d->controller->printInfoOnClick()) {
-      for (QString line :  handle->clicked())
+      for (const QString& line :  handle->clicked())
       message(line);
     }
   } else {

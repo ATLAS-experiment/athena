@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -30,7 +30,7 @@ public:
   VP1AvailEvtsHttp( QString fileinfoUrl,
 		    int updateInterval,
 		    int timeCutForNew,
-		    QString tmpcopydir,
+		    const QString& tmpcopydir,
 		    int maxLocalFilesToKeep = -1,
 		    QObject * parent = 0 );
   virtual ~VP1AvailEvtsHttp();

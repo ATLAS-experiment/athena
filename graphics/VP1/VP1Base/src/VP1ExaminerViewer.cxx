@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -326,11 +326,11 @@ public:
 
 	class StoredView {
 	public:
-		StoredView(QByteArray camState, bool camPerspective, QPixmap snapShot, QString name)
+		StoredView(const QByteArray& camState, bool camPerspective, QPixmap snapShot, const QString& name)
 	: m_camState(camState), m_camPerspective(camPerspective), m_snapShot(snapShot), m_name(name) {}
 		StoredView(QByteArray persistifiedState);
-		QString name() const { return m_name; }
-		QByteArray camState() const { return m_camState; }
+		const QString& name() const { return m_name; }
+		const QByteArray& camState() const { return m_camState; }
 		bool camStateIsPerspective() const { return m_camPerspective; }
 		QPixmap snapShot() const { return m_snapShot; }
 		QByteArray persistifiedState() const;
@@ -886,7 +886,7 @@ void VP1ExaminerViewer::restoreFromState(QByteArray ba_state)
 		m_d->storedViews.clear();
 		QList<QByteArray> persistifiedViews;
 		state >> persistifiedViews;
-		for(QByteArray ba_pv : persistifiedViews) {
+		for(const QByteArray& ba_pv : persistifiedViews) {
 			Imp::StoredView sv(ba_pv);
 			if (sv.isValid())
 				m_d->storedViews << sv;

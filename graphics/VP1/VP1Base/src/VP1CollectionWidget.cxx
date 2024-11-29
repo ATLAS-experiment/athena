@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -58,7 +58,7 @@ VP1CollectionWidget::~VP1CollectionWidget()
 }
 
 //____________________________________________________________________
-QList<VP1Collection*> VP1CollectionWidget::collections() const
+const QList<VP1Collection*>& VP1CollectionWidget::collections() const
 {
   return m_d->collections;
 }
@@ -130,7 +130,7 @@ void VP1CollectionWidget::Imp::repopulateGUIFromCollections()
   QList<QCheckBox*> firstColumnCheckBoxes;
 
   int gridmargins(0);
-  for  (QString section : sectionsSorted) {
+  for  (const QString& section : sectionsSorted) {
     //type section header:
     QLabel * sectionlabel(0);
     if (!nosectionlabels) {
@@ -234,7 +234,7 @@ void VP1CollectionWidget::Imp::repopulateGUIFromCollections()
 
 
 //____________________________________________________________________
-void VP1CollectionWidget::addCollections(QList<VP1Collection*> cols, bool applySavedStates )
+void VP1CollectionWidget::addCollections(const QList<VP1Collection*>& cols, bool applySavedStates )
 {
   messageVerbose("addCollections called with "+str(cols.count())+" new collections");
 
@@ -255,7 +255,7 @@ void VP1CollectionWidget::addCollections(QList<VP1Collection*> cols, bool applyS
 }
 
 //____________________________________________________________________
-void VP1CollectionWidget::setCollections(QList<VP1Collection*> cols,bool applySavedStates)
+void VP1CollectionWidget::setCollections(const QList<VP1Collection*>& cols, bool applySavedStates)
 {
   m_d->collections = cols;
 
@@ -362,12 +362,12 @@ void VP1CollectionWidget::ensureFirst(const QString& wildcard,QList<QString>& st
 {
   QRegExp rx(wildcard,Qt::CaseInsensitive,QRegExp::Wildcard);
   QList<QString> l;
-  for (QString str : strs)
+  for (const QString& str : strs)
     if (rx.exactMatch(str))
       l << str;
-  for (QString str : l)
+  for (const QString& str : l)
     strs.removeAll(str);
-  for (QString str : strs)
+  for (const QString& str : strs)
     l << str;
   strs = l;
 
@@ -378,10 +378,10 @@ void VP1CollectionWidget::ensureLast(const QString& wildcard,QList<QString>& str
 {
   QRegExp rx(wildcard,Qt::CaseInsensitive,QRegExp::Wildcard);
   QList<QString> l;
-  for(QString str : strs)
+  for(const QString& str : strs)
     if (rx.exactMatch(str))
       l << str;
-  for (QString str : l)
+  for (const QString& str : l)
     strs.removeAll(str);
   strs << l;
 }

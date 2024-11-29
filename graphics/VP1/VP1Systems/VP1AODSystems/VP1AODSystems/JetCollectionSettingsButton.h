@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1AODSYSTEMS_JETCOLLSETTINGSBUTTON_H
@@ -17,7 +17,7 @@ class JetCollectionSettingsButton : public VP1CollectionSettingsButtonBase {
 
 public:
   
-  JetCollectionSettingsButton(QWidget * parent = 0, int dim = 25, QString name = "");//dim<=0 => Won't change sizepolicy
+  JetCollectionSettingsButton(QWidget * parent = 0, int dim = 25, const QString& name = "");//dim<=0 => Won't change sizepolicy
   virtual ~JetCollectionSettingsButton();
   
   void setDimension(int dim);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -65,7 +65,7 @@ public:
 
   //Convenience:
   QMainWindow * channel2tab(IVP1ChannelWidget*cw);
-  QMainWindow * name2tab(QString tabname);//Returns 0 if not found
+  QMainWindow * name2tab(const QString& tabname);//Returns 0 if not found
 
   //The actual bookkeeping maps:
   std::map<QString,QMainWindow *> name_2_tab;
@@ -74,11 +74,11 @@ public:
 
   //For sanity checking input, and providing appropriate warnings.
   //Fixme: Check also max number of chars.
-  bool checkTabnameNotEmpty(QString tabname) const;
-  bool checkTabnameExists(QString tabname) const;
-  bool checkTabnameNotExists(QString tabname) const;
+  bool checkTabnameNotEmpty(const QString& tabname) const;
+  bool checkTabnameExists(const QString& tabname) const;
+  bool checkTabnameNotExists(const QString& tabname) const;
 
-  bool checkChannelNameExists(QString channelbasename, const bool& isuniquename, const bool& checkfornonexistance = false) const;
+  bool checkChannelNameExists(const QString& channelbasename, const bool& isuniquename, const bool& checkfornonexistance = false) const;
 
   bool dontEmitVisibilityChanges;
   QSet<IVP1ChannelWidget*> lastvisible;
@@ -155,7 +155,7 @@ void  VP1TabManager::launchStereoEditorCurrentTab(){
 
 
 //___________________________________________________________________________________
-bool  VP1TabManager::Imp::checkTabnameExists(QString tabname) const {
+bool  VP1TabManager::Imp::checkTabnameExists(const QString& tabname) const {
   if (!checkTabnameNotEmpty(tabname))
     return false;
   if (name_2_tab.find(tabname)==name_2_tab.end()) {
@@ -167,7 +167,7 @@ bool  VP1TabManager::Imp::checkTabnameExists(QString tabname) const {
 }
 
 //___________________________________________________________________________________
-bool  VP1TabManager::Imp::checkTabnameNotExists(QString tabname) const {
+bool  VP1TabManager::Imp::checkTabnameNotExists(const QString& tabname) const {
   if (!checkTabnameNotEmpty(tabname))
     return false;
   if (name_2_tab.find(tabname)!=name_2_tab.end()) {
@@ -179,7 +179,7 @@ bool  VP1TabManager::Imp::checkTabnameNotExists(QString tabname) const {
 }
 
 //___________________________________________________________________________________
-bool VP1TabManager::Imp::checkTabnameNotEmpty(QString tabname) const {
+bool VP1TabManager::Imp::checkTabnameNotEmpty(const QString& tabname) const {
   if (tabname.isEmpty()) {
     QMessageBox::critical(0, "Error - Empty tab name provided",
 			  "Empty tab name provided.",QMessageBox::Ok,QMessageBox::Ok);
@@ -189,7 +189,7 @@ bool VP1TabManager::Imp::checkTabnameNotEmpty(QString tabname) const {
 }
 
 //___________________________________________________________________________________
-bool VP1TabManager::Imp::checkChannelNameExists(QString channelname, const bool& isuniquename, const bool& checkfornonexistance) const {
+bool VP1TabManager::Imp::checkChannelNameExists(const QString& channelname, const bool& isuniquename, const bool& checkfornonexistance) const {
   if (channelname.isEmpty()) {
     QMessageBox::critical(0, "Error - Empty channel name provided",
 			  "Empty channel name provided.",QMessageBox::Ok,QMessageBox::Ok);
@@ -233,7 +233,7 @@ QStringList VP1TabManager::Imp::channelsInTab(const QString& tabname)
 
 
 //_______________________________________________________________________
-void VP1TabManager::addNewTab(QString tabname,const int& index)
+void VP1TabManager::addNewTab(const QString& tabname,const int& index)
 {
   if (!m_d->checkTabnameNotExists(tabname)) return;
   bool save = m_d->dontEmitVisibilityChanges;
@@ -392,7 +392,7 @@ QString VP1TabManager::currentChannelUniqueName() const
 }
 
 //___________________________________________________________________________________
-void VP1TabManager::showTabFullScreen(QString tabname)
+void VP1TabManager::showTabFullScreen(const QString& tabname)
 {
   int index = 0;
   for (; index < m_d->tabwidget->count(); ++index) {
@@ -467,7 +467,7 @@ IVP1ChannelWidget* VP1TabManager::selectedChannelWidget() const {
 }
 
 //_______________________________________________________________________
-IVP1ChannelWidget * VP1TabManager::addChannelToTab(QString channelbasename,QString tabname) {
+IVP1ChannelWidget * VP1TabManager::addChannelToTab(const QString& channelbasename,const QString& tabname) {
 
   #if defined BUILDVP1LIGHT
     bool checkDisallowMultipleChannels = VP1QtUtils::expertSettingIsOn("general","ExpertSettings/VP1_DISALLOW_MULTIPLE_CHANNELS");
@@ -521,7 +521,7 @@ IVP1ChannelWidget * VP1TabManager::addChannelToTab(QString channelbasename,QStri
 }
 
 //_______________________________________________________________________
-void VP1TabManager::renameTab( QString tabname, QString newtabname ) {
+void VP1TabManager::renameTab( const QString& tabname, const QString& newtabname ) {
   if (!m_d->checkTabnameExists(tabname)) return;
   if (!m_d->checkTabnameNotExists(newtabname)) return;
 
@@ -546,7 +546,7 @@ QStringList VP1TabManager::tabList() {
 
 
 //_______________________________________________________________________
-void VP1TabManager::removeTab( QString tabname ) {
+void VP1TabManager::removeTab( const QString& tabname ) {
 
   if (!m_d->checkTabnameExists(tabname)) return;
 
@@ -590,14 +590,14 @@ void VP1TabManager::removeTab( QString tabname ) {
 void VP1TabManager::removeAllTabs()
 {
 	VP1Msg::messageDebug("VP1TabManager::removeAllTabs()");
-	for(QString tab : tabList() ) {
+	for(const QString& tab : tabList() ) {
 		removeTab(tab);
 	}
 }
 
 
 //___________________________________________________________________________________
-void VP1TabManager::removeChannel(QString channeluniquename) {
+void VP1TabManager::removeChannel(const QString& channeluniquename) {
 
 	VP1Msg::messageDebug("VP1TabManager::removeChannel()");
 
@@ -670,7 +670,7 @@ QMainWindow * VP1TabManager::Imp::channel2tab(IVP1ChannelWidget*cw) {
 
 
 //___________________________________________________________________________________
-QMainWindow * VP1TabManager::Imp::name2tab(QString tabname)
+QMainWindow * VP1TabManager::Imp::name2tab(const QString& tabname)
 {
   if (name_2_tab.find(tabname)==name_2_tab.end())
     return 0;
@@ -680,7 +680,7 @@ QMainWindow * VP1TabManager::Imp::name2tab(QString tabname)
 //Fixme: check for empty input strings in all methods where applicable!
 
 //___________________________________________________________________________________
-void VP1TabManager::moveChannelToTab(QString channeluniquename,QString tabname) {
+void VP1TabManager::moveChannelToTab(const QString& channeluniquename,const QString& tabname) {
 
   if (!m_d->checkTabnameExists(tabname)) return;
   if (!m_d->checkChannelNameExists(channeluniquename, true)) return;
@@ -716,7 +716,7 @@ void VP1TabManager::moveChannelToTab(QString channeluniquename,QString tabname) 
 }
 
 //___________________________________________________________________________________
-void VP1TabManager::cloneChannelToTab(QString channeluniquename,QString tabname) {
+void VP1TabManager::cloneChannelToTab(const QString& channeluniquename,const QString& tabname) {
   if (!m_d->checkTabnameExists(tabname)) return;
   if (!m_d->checkChannelNameExists(channeluniquename, true)) return;
   IVP1ChannelWidget* cw = m_d->channelmanager->uniqueName2Channel(channeluniquename);
@@ -730,7 +730,7 @@ void VP1TabManager::cloneChannelToTab(QString channeluniquename,QString tabname)
 }
 
 //___________________________________________________________________________________
-void VP1TabManager::cloneTab(QString oldtabname,QString newtabname)
+void VP1TabManager::cloneTab(const QString& oldtabname,const QString& newtabname)
 {
   if (!m_d->checkTabnameExists(oldtabname)) return;
   if (!m_d->checkTabnameNotExists(newtabname)) return;
@@ -764,7 +764,7 @@ void VP1TabManager::cloneTab(QString oldtabname,QString newtabname)
 
 
 //___________________________________________________________________________________
-void VP1TabManager::saveConfigurationToFile(QString filename,const bool& askonoverride) {
+void VP1TabManager::saveConfigurationToFile(const QString& filename,const bool& askonoverride) {
   if (filename.isEmpty()) {
     QMessageBox::critical(0, "Error - Empty file name provided",
 			  "Empty file name provided.",QMessageBox::Ok,QMessageBox::Ok);
@@ -821,7 +821,7 @@ void VP1TabManager::saveConfigurationToFile(QString filename,const bool& askonov
 }
 
 //___________________________________________________________________________________
-void VP1TabManager::loadConfigurationFromFile(QString filename,const QMap<QString,QString>& availableplugins) {
+void VP1TabManager::loadConfigurationFromFile(const QString& filename,const QMap<QString,QString>& availableplugins) {
   if (filename.isEmpty()) {
     QMessageBox::critical(0, "Error - Empty file name provided",
 			  "Empty file name provided.",QMessageBox::Ok,QMessageBox::Ok);
@@ -924,7 +924,7 @@ void VP1TabManager::loadConfigurationFromFile(QString filename,const QMap<QStrin
 
   QString lastaddedtab;
 
-  for (QString newtabname_infile : tabs_orded) {
+  for (const QString& newtabname_infile : tabs_orded) {
     //Check format:
     if (!tab2channels.contains(newtabname_infile)||!tab2arrangements.contains(newtabname_infile)) {
       QMessageBox::critical(0, "Error - file not in correct format: "+filename,
@@ -1024,7 +1024,7 @@ void VP1TabManager::Imp::serializeTabAndChannelConfigInfo(QMap<QString,QMultiMap
 }
 
 //___________________________________________________________________________________
-QString VP1TabManager::suggestNewTabName(QString oldtabname) const {
+QString VP1TabManager::suggestNewTabName(const QString& oldtabname) const {
   QString newtabname=oldtabname;
   int i = 1;
   while (m_d->name_2_tab.find(newtabname)!=m_d->name_2_tab.end())
@@ -1075,7 +1075,7 @@ QMainWindow* VP1TabManager::Imp::previousTab(){
 }
 
 //___________________________________________________________________________________
-bool VP1TabManager::showTab(QString tabname){
+bool VP1TabManager::showTab(const QString& tabname){
   int itarget(-1);
   for (int i = 0; i < m_d->tabwidget->count(); ++i) {
     if (m_d->tabwidget->tabText(i)==tabname) {
@@ -1158,7 +1158,7 @@ void VP1TabManager::raiseTabBarContextMenu(int i,const QPoint & p) {
   if (chnls.empty()) {
     menu_addchan.addAction("No channels available")->setEnabled(false);
   } else {
-    for (QString chnl : chnls) {
+    for (const QString& chnl : chnls) {
       QString iconloc = m_d->channelmanager->getIconLocation(chnl, true);
       QAction* pChnlAct;
       if (iconloc.isEmpty())
@@ -1176,7 +1176,7 @@ void VP1TabManager::raiseTabBarContextMenu(int i,const QPoint & p) {
   if (chnls_rem.empty()) {
     menu_remchan.addAction("No channels in tab")->setEnabled(false);
   } else {
-    for (QString chnl : chnls_rem) {
+    for (const QString& chnl : chnls_rem) {
       QString iconloc = m_d->channelmanager->getIconLocation(chnl, false);
       QAction* pChnlAct;
       if (iconloc.isEmpty())
@@ -1418,13 +1418,13 @@ QString VP1TabManager::channelToTab(IVP1ChannelWidget*cw)
 }
 
 //___________________________________________________________________________________
-bool VP1TabManager::hasTab(QString tabname) const
+bool VP1TabManager::hasTab(const QString& tabname) const
 {
   return m_d->name_2_tab.find(tabname)!=m_d->name_2_tab.end();
 }
 
 //___________________________________________________________________________________
-bool VP1TabManager::showFirstChannelWithGivenBasename(QString basename) {
+bool VP1TabManager::showFirstChannelWithGivenBasename(const QString& basename) {
 
   std::set<IVP1ChannelWidget*>::const_iterator it2,it2E;
 
@@ -1575,6 +1575,6 @@ void VP1TabManager::unserializeChannelState(IVP1ChannelWidget*cw,ChanState state
       std::cout<<"VP1TabManager::unserializeChannelState Warning: Did not find state data for system "<<name.toStdString()<<std::endl;
     }
   }
-  for (QString name : storedSystems)
+  for (const QString& name : storedSystems)
     std::cout<<"VP1TabManager::unserializeChannelState Warning: Did not use stored configuration for system "<<name.toStdString()<<std::endl;
 }

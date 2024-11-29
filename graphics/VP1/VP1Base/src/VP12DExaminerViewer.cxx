@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -292,7 +292,7 @@ QString VP12DExaminerViewer::currentView() const
 }
 
 //____________________________________________________________________
-void VP12DExaminerViewer::setShownView(QString viewid)
+void VP12DExaminerViewer::setShownView(const QString& viewid)
 {
   if (m_d->singleviewmode)
     return;

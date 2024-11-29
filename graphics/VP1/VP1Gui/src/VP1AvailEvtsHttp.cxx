@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -52,7 +52,7 @@ unsigned VP1AvailEvtsHttp::Imp::ntmpdlcount = 0;
 VP1AvailEvtsHttp::VP1AvailEvtsHttp( QString fileinfoUrl,
 				    int updateInterval,
 				    int timeCutForNew,
-				    QString tmpcopydir,
+				    const QString& tmpcopydir,
 				    int maxLocalFilesToKeep,
 				    QObject * parent )
   : VP1AvailEvents(timeCutForNew,tmpcopydir,maxLocalFilesToKeep,parent), m_d(new Imp)

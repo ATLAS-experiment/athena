@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ void IVP12DSystem::registerItemCollection(VP1GraphicsItemCollection*ic)
 }
 
 //____________________________________________________________________
-QSet<VP1GraphicsItemCollection*> IVP12DSystem::getItemCollections()
+const QSet<VP1GraphicsItemCollection*>& IVP12DSystem::getItemCollections()
 {
   return m_d->collections;
 }
@@ -76,7 +76,7 @@ void IVP12DSystem::itemGotEventPrivate(QGraphicsItem*item,QEvent*event)
 }
 
 //____________________________________________________________________
-void IVP12DSystem::selectionChangedPrivate(QList<QGraphicsItem*> items)
+void IVP12DSystem::selectionChangedPrivate(const QList<QGraphicsItem*>& items)
 {
    VP1GraphicsItemCollection * ic = static_cast<VP1GraphicsItemCollection*>(sender());
    assert(ic&&ic->interactionMode()==VP1GraphicsItemCollection::SELECTIONS);

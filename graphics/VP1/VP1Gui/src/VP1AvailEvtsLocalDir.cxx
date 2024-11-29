@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -31,8 +31,8 @@ unsigned VP1AvailEvtsLocalDir::Imp::ntmpdlcount = 0;
 
 //____________________________________________________________________
 VP1AvailEvtsLocalDir::VP1AvailEvtsLocalDir(int timeCutForNew,
-					   QString sourcedir,
-					   QString tmpcopydir,
+					   const QString& sourcedir,
+					   const QString& tmpcopydir,
 					   int maxLocalFilesToKeep,
 					   QObject * parent )
   : VP1AvailEvents(timeCutForNew,tmpcopydir,maxLocalFilesToKeep,parent),
@@ -55,27 +55,27 @@ VP1AvailEvtsLocalDir::~VP1AvailEvtsLocalDir()
 }
 
 //____________________________________________________________________
-QString VP1AvailEvtsLocalDir::currentSourceDir() const
+const QString& VP1AvailEvtsLocalDir::currentSourceDir() const
 {
   return m_d->sourcedir;
 }
 
 //____________________________________________________________________
-void VP1AvailEvtsLocalDir::setSourceDir(QString dir)
+void VP1AvailEvtsLocalDir::setSourceDir(const QString& dir)
 {
   m_d->retriever->setSourceDir(dir);
   m_d->sourcedir = dir;
 }
 
 //____________________________________________________________________
-void VP1AvailEvtsLocalDir::setAvailableSourceDirectories(QStringList l)
+void VP1AvailEvtsLocalDir::setAvailableSourceDirectories(const QStringList& l)
 {
   m_d->availablesourcedirs = l;
 }
 
 
 //____________________________________________________________________
-QStringList VP1AvailEvtsLocalDir::availableSourceDirectories() const
+const QStringList& VP1AvailEvtsLocalDir::availableSourceDirectories() const
 {
   return m_d->availablesourcedirs;
 }

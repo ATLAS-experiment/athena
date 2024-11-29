@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -25,7 +25,7 @@ class IVP1System;
 class VP1MaterialButtonBase : public QPushButton, public VP1HelperClassBase{
   Q_OBJECT
   public:
-    VP1MaterialButtonBase(QWidget* parent, IVP1System * sys = 0, QString helpername = "")
+    VP1MaterialButtonBase(QWidget* parent, IVP1System * sys = 0, const QString& helpername = "")
      : QPushButton(parent),VP1HelperClassBase(sys,helpername){};
 
    virtual bool setMaterial(SoMaterial*)=0;
@@ -74,7 +74,7 @@ public:
 
   bool setMaterial(SoMaterial*);//calls copyValuesFromMaterial and handleMaterial in that order:
 
-  QList<SoMaterial*> handledMaterials() const;
+  const QList<SoMaterial*>& handledMaterials() const;
 
   void setText ( const QString &  );//Forbidden!! Only here since Designer generated code needs it in public.
 

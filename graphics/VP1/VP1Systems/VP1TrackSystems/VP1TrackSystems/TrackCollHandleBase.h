@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -75,7 +75,7 @@ public:
   ///////////////////////////////////////////////////////////
 
   //For use by the handles:
-  QString name() const;
+  const QString& name() const;
   TrackSysCommonData * common() const { return m_commonData; }
   //
   VP1ExtraSepLayerHelper * sephelper() const { return m_sephelper; }//For attaching/detaching. FIXME: TO BASE!!

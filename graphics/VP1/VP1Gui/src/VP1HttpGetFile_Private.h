@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -43,10 +43,10 @@ public:
   bool errors() const { m_mutex.lock(); bool err=!m_errorString.isEmpty(); m_mutex.unlock(); return err; }
   QString errorString() const { m_mutex.lock(); QString err = m_errorString; m_mutex.unlock(); return err; }
 
-  QString urltofile() const  { return m_urltofile; }
-  QString localtargetfile() const { return m_localtargetfile; }
-  QString expectedMD5Sum() const { return m_expectedMD5Sum; }
-  QString data() const { return m_data; }
+  const QString& urltofile() const  { return m_urltofile; }
+  const QString& localtargetfile() const { return m_localtargetfile; }
+  const QString& expectedMD5Sum() const { return m_expectedMD5Sum; }
+  const QString& data() const { return m_data; }
 
 protected:
   void run();

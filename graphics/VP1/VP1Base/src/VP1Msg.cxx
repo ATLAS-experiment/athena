@@ -93,10 +93,10 @@ void VP1Msg::messageVerbose( const QString& str )
 void VP1Msg::message(const QStringList& l, const QString& addtoend, IVP1System*sys )
 {
   if (addtoend.isEmpty()) {
-    for (QString s :  l)
+    for (const QString& s :  l)
       message(s,sys);
   } else {
-    for (QString s :  l)
+    for (const QString& s :  l)
       message(s+addtoend,sys);
   }
 }
@@ -108,10 +108,10 @@ void VP1Msg::messageDebug(const QStringList& l, const QString& addtoend )
     return;
   }
   if (addtoend.isEmpty()) {
-    for (QString s :  l)
+    for (const QString& s :  l)
       messageDebug(s);
   } else {
-    for (QString s :  l)
+    for (const QString& s :  l)
       messageDebug(s+addtoend);
   }
 }
@@ -123,10 +123,10 @@ void VP1Msg::messageVerbose(const QStringList& l, const QString& addtoend )
     return;
   }
   if (addtoend.isEmpty()) {
-    for (QString s :  l)
+    for (const QString& s :  l)
       messageVerbose(s);
   } else {
-    for (QString s :  l)
+    for (const QString& s :  l)
       messageVerbose(s+addtoend);
   }
 }
@@ -140,10 +140,10 @@ void VP1Msg::message(const QString& addtostart, const QStringList& l,
     return;
   }
   if (addtoend.isEmpty()) {
-    for (QString s :  l)
+    for (const QString& s :  l)
       message(addtostart+s,sys);
   } else {
-    for (QString s :  l)
+    for (const QString& s :  l)
       message(addtostart+s+addtoend,sys);
   }
 }
@@ -159,10 +159,10 @@ void VP1Msg::messageDebug(const QString& addtostart, const QStringList& l, const
     return;
   }
   if (addtoend.isEmpty()) {
-    for (QString s :  l)
+    for (const QString& s :  l)
       messageDebug(addtostart+s);
   } else {
-    for (QString s :  l)
+    for (const QString& s :  l)
       messageDebug(addtostart+s+addtoend);
   }
 }
@@ -178,10 +178,10 @@ void VP1Msg::messageVerbose(const QString& addtostart, const QStringList& l, con
     return;
   }
   if (addtoend.isEmpty()) {
-    for (QString s :  l)
+    for (const QString& s :  l)
       messageVerbose(addtostart+s);
   } else {
-    for (QString s :  l)
+    for (const QString& s :  l)
       messageVerbose(addtostart+s+addtoend);
   }
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -28,7 +28,7 @@ class VP1AvailEvents : public QObject {
 
 public:
 
-  VP1AvailEvents(int timeCutForNew, QString tmpdir, int maxLocalFilesToKeep = -1, QObject * parent = 0);//maxLocalFilesToKeep<=2 means keep all.
+  VP1AvailEvents(int timeCutForNew, const QString& tmpdir, int maxLocalFilesToKeep = -1, QObject * parent = 0);//maxLocalFilesToKeep<=2 means keep all.
   //timeCutForNew: <0 : no time Cut;
   //                0 : only newest is fresh
   //               >0 : time cut in seconds.
@@ -51,7 +51,7 @@ protected:
   QList<VP1EventFile> allEventFilesInDir(const QString& dir) const;
   QList<VP1EventFile> freshEvents(VP1EventFile newestEvt, const QList<VP1EventFile>&) const;//Given timecut and newestEvt, trim down
                                                                                             //list so we only get the "fresh events" left.
-  QString tmpDir() const;
+  const QString& tmpDir() const;
   QString tmpLocalFileDir() const;
   QString tmpActiveRetrievalDir();//attempts to create temporary subdirectory in tmpCopyDir which
                                  //can be used for temporary files while downloading/copying, etc.

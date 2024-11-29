@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Base/AnimationSequencer.h"
@@ -43,7 +43,7 @@ void AnimationSequencer::setMovie(bool b)
   m_c->movieEnabled = b;
 }
 
-void AnimationSequencer::setMovieParameters(QString outdir, QString frameFileNamePrefix, int fps, int width, int height)
+void AnimationSequencer::setMovieParameters(const QString& outdir, const QString& frameFileNamePrefix, int fps, int width, int height)
 {
   m_c->movieFPS = fps;
   m_c->movieWidth = width;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -23,7 +23,7 @@ class BCM_RawData;
 class VP1RawDataHandle_BCM_RDO : public VP1RawDataHandleBase {
 public:
 
-  VP1RawDataHandle_BCM_RDO(VP1RawDataCollBase*,int moduleID, QList<const BCM_RawData*>);
+  VP1RawDataHandle_BCM_RDO(VP1RawDataCollBase*,int moduleID, const QList<const BCM_RawData*>&);
   virtual ~VP1RawDataHandle_BCM_RDO();
 
   QStringList clicked(bool verbose) const;

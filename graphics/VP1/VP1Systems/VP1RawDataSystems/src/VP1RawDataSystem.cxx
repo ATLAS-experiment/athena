@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -41,7 +41,7 @@ public:
   template <class T>
   QList<VP1RawDataCollBase*> createSpecificCollections() {
     QList<VP1RawDataCollBase*> l;
-    for (QString name : T::availableCollections(theclass)) {
+    for (const QString& name : T::availableCollections(theclass)) {
       ensureInitCommonData();
       T * col = new T(common,name);
       col->init();

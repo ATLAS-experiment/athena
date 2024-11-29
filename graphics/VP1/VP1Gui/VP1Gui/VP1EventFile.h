@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -30,8 +30,8 @@ public:
   QDateTime time() const;
 
   //Where it is:
-  QString fileName() const;//base file name only. No '/' allowed!
-  QString md5Sum() const;
+  const QString& fileName() const;//base file name only. No '/' allowed!
+  const QString& md5Sum() const;
 
   bool isValid() const;//Internally, invalid instances are those with rawTime()==0.
   QString print() const;

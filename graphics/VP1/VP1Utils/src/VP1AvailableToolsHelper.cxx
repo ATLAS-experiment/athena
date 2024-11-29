@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -112,7 +112,7 @@ void VP1AvailableToolsHelper::addMonitoredType(const QString& mt, const QStringL
 void VP1AvailableToolsHelper::addMonitoredTypes(const QStringList& mts, const QStringList& ignoreList)
 {
   bool added(false);
-  for (QString mt : mts) {
+  for (const QString& mt : mts) {
     m_d->monitoredTypeToIgnoreList[mt] = ignoreList;
     if (!m_d->monitoredTypes.contains(mt)) {
       m_d->monitoredTypes << mt;
@@ -137,7 +137,7 @@ void VP1AvailableToolsHelper::removeMonitoredType(const QString& mt)
 void VP1AvailableToolsHelper::removeMonitoredTypes(const QStringList& mts)
 {
   bool removed(false);
-  for (QString mt : mts) {
+  for (const QString& mt : mts) {
     if (m_d->monitoredTypes.contains(mt)) {
       m_d->monitoredTypes.removeAll(mt);
       m_d->removeIgnoreList(mt);
@@ -159,7 +159,7 @@ void VP1AvailableToolsHelper::clearMonitoredTypes(const QString&)
 }
 
 //____________________________________________________________________
-QStringList VP1AvailableToolsHelper::monitoredTypes() const
+const QStringList& VP1AvailableToolsHelper::monitoredTypes() const
 {
   return m_d->monitoredTypes;
 }
@@ -169,7 +169,7 @@ QStringList VP1AvailableToolsHelper::Imp::actualCurrentlyAvailableTools()
 {
   QStringList l;
   if (toolsvc) {
-    for ( QString tooltype : monitoredTypes ) {
+    for ( const QString& tooltype : monitoredTypes ) {
       std::vector<std::string> instances;
       instances = toolsvc->getInstances( tooltype.toStdString() );
       if (!silent&&VP1Msg::verbose())
@@ -182,7 +182,7 @@ QStringList VP1AvailableToolsHelper::Imp::actualCurrentlyAvailableTools()
 	QStringList ignorelist = ignoreList(tooltype);
 	if (!ignorelist.isEmpty()) {
 	  bool ignore(false);
-	  for (QString ignorepattern : ignorelist) {
+	  for (const QString& ignorepattern : ignorelist) {
 	    if (QRegExp(ignorepattern,Qt::CaseSensitive,QRegExp::Wildcard).exactMatch(instance)) {
 	      ignore = true;
 	      break;

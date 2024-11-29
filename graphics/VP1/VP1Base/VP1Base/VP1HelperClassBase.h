@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -48,7 +48,7 @@ public:
   void messageVerbose(const QString& addtostart, const QStringList&, const QString& addtoend = "") const;
 
   IVP1System * systemBase() const { return m_system; }
-  QString helperClassName() const { return m_helpername; }
+  const QString& helperClassName() const { return m_helpername; }
 
   //Called by the framework at shutdown - cheap mem. leak check (in verbose mode):
   static void warnUndeletedInstances();

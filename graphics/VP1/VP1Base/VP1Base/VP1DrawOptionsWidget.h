@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -49,7 +49,7 @@ public:
   void setBaseLightingDisabled(bool b=true);//In case you don't need this
 
   QByteArray state() const;
-  void applyState(QByteArray);
+  void applyState(const QByteArray&);
 
   //We might need the complexity elsewhere:
   double complexity() const;

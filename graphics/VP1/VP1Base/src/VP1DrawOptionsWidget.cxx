@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -259,7 +259,7 @@ QByteArray VP1DrawOptionsWidget::state() const
 }
 
 //____________________________________________________________________
-void VP1DrawOptionsWidget::applyState(QByteArray ba)
+void VP1DrawOptionsWidget::applyState(const QByteArray& ba)
 {
   VP1Deserialise s(ba);
 

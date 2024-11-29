@@ -207,9 +207,9 @@ void TrackSystemController::Imp::ensureExtrapolatorsCreated(IVP1System * sys) {
 
   VP1ToolAccessHelper toolaccess(sys);
 #if QTCORE_VERSION >= 0x050E00
-  for (QString key : VP1QtUtils::environmentVariableValue("VP1_JOBCFG_EXTRA_VP1_EXTRAPOLATORS").split(';',Qt::SkipEmptyParts))
+  for (const QString& key : VP1QtUtils::environmentVariableValue("VP1_JOBCFG_EXTRA_VP1_EXTRAPOLATORS").split(';',Qt::SkipEmptyParts))
 #else
-  for (QString key : VP1QtUtils::environmentVariableValue("VP1_JOBCFG_EXTRA_VP1_EXTRAPOLATORS").split(';',QString::SkipEmptyParts))
+  for (const QString& key : VP1QtUtils::environmentVariableValue("VP1_JOBCFG_EXTRA_VP1_EXTRAPOLATORS").split(';',QString::SkipEmptyParts))
 #endif
   {
     if (existingExtrapolators.contains(key))
@@ -244,9 +244,9 @@ void TrackSystemController::Imp::ensureFittersCreated(IVP1System * sys) {
 
   VP1ToolAccessHelper toolaccess(sys);
 #if QTCORE_VERSION >= 0x050E00
-  for (QString instance : VP1QtUtils::environmentVariableValue("VP1_JOBCFG_EXTRA_VP1_FITTERS").split(';',Qt::SkipEmptyParts))
+  for (const QString& instance : VP1QtUtils::environmentVariableValue("VP1_JOBCFG_EXTRA_VP1_FITTERS").split(';',Qt::SkipEmptyParts))
 #else
-  for (QString instance : VP1QtUtils::environmentVariableValue("VP1_JOBCFG_EXTRA_VP1_FITTERS").split(';',QString::SkipEmptyParts))
+  for (const QString& instance : VP1QtUtils::environmentVariableValue("VP1_JOBCFG_EXTRA_VP1_FITTERS").split(';',QString::SkipEmptyParts))
 #endif
   {
     if (existingFitters.contains(instance))

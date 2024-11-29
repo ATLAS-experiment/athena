@@ -52,7 +52,7 @@ QStringList TrackCollHandle_TrkTrack::availableCollections(IVP1System*sys)
   }
 
   QStringList keysInSG;
-  for(QString key : VP1SGContentsHelper(sys).getKeys<TrackCollection>()) {
+  for(const QString& key : VP1SGContentsHelper(sys).getKeys<TrackCollection>()) {
     // if ( key=="CombinedInDetTracks") // Useful for debugging to limit to one collection
       keysInSG<<key;
   }
@@ -71,7 +71,7 @@ QStringList TrackCollHandle_TrkTrack::availableCollections(IVP1System*sys)
 
   QStringList outkeys;
 
-  for (QString key : keysInSG) {
+  for (const QString& key : keysInSG) {
     if (!VP1JobConfigInfo::hasMuonGeometry() && needsMuonsPattern.exactMatch(key)) {
       sys->messageDebug("TrackCollHandle_TrkTrack::availableCollections: Ignoring key '"
 			   +key+"' since muon geometry is not present in job.");

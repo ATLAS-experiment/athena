@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -26,8 +26,8 @@ class VP1CustomTourFrameWidget : public QFrame {
 
 public:
 
-  VP1CustomTourFrameWidget(bool camPerspective, QByteArray camState, QWidget * parent = 0);
-  VP1CustomTourFrameWidget(QByteArray serialisedFrame, QWidget * parent = 0);
+  VP1CustomTourFrameWidget(bool camPerspective, const QByteArray& camState, QWidget * parent = 0);
+  VP1CustomTourFrameWidget(const QByteArray& serialisedFrame, QWidget * parent = 0);
   QByteArray serialise() const;
 
   virtual ~VP1CustomTourFrameWidget();
@@ -42,7 +42,7 @@ public:
   double stayOnFrameTime() const;//in seconds
   double clipVolumePercentOfATLAS() const;//in percent
   bool camStateIsPerspective() const;
-  QByteArray camState() const;
+  const QByteArray& camState() const;
 
   void setSnapshot(QPixmap);//Call whenever updating the pixmap.
   static int snapShotWidth() { return 90; }

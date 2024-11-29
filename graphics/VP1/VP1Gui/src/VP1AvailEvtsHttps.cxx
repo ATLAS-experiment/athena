@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Gui/VP1AvailEvtsHttps.h"
@@ -121,7 +121,7 @@ void VP1AvailEvtsHttps::Imp::connectNetworkSignalsToSlots()
 VP1AvailEvtsHttps::VP1AvailEvtsHttps(QString fileinfoUrl,
 				     int updateInterval,
 				     int timeCutForNew,
-				     QString tmpcopydir,
+				     const QString& tmpcopydir,
 				     int maxLocalFilesToKeep,
 				     QObject * parent)
   : VP1AvailEvents(timeCutForNew,tmpcopydir,maxLocalFilesToKeep,parent)
@@ -145,7 +145,7 @@ void VP1AvailEvtsHttps::start(QNetworkAccessManager* netmanager)
   m_d->startTimer();
 }
 
-QString VP1AvailEvtsHttps::fileinfoLocation()
+const QString& VP1AvailEvtsHttps::fileinfoLocation()
 {
   return m_d->m_fileInfoUrl;
 }

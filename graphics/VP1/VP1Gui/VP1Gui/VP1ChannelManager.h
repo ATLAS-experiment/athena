@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ public:
 
   bool deleteChannel(QString channeluniquename);
 
-  IVP1ChannelWidget * getChannel( QString channelbasename, QString& err );//returns 0 if unsuccesful. Otherwise, 'err' contains an error message.
+  IVP1ChannelWidget * getChannel( const QString& channelbasename, QString& err );//returns 0 if unsuccesful. Otherwise, 'err' contains an error message.
   unsigned nActive( QString channelbasename ) const;
 
   IVP1ChannelWidget* uniqueName2Channel(QString uniquename) const;
