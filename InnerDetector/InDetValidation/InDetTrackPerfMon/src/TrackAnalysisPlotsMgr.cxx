@@ -327,9 +327,12 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
 
     /// fake rate plots (and hits on fake plots)
     bool isUnlinked = isUnlinkedTruth( *particle );
-    if( m_plots_missingTruth ) {
-      ATH_CHECK( m_plots_missingTruth->fillPlots( *particle, isUnlinked, truthMu, actualMu, weight ) );
-      if( m_plots_hitsOnUnlinkedTrk and isUnlinked ) {
+    bool notTruthMatched = getTruthMatchProb( *particle ) < 0.5;
+    if ( isUnlinked ) {
+      if( m_plots_missingTruth ) {
+        ATH_CHECK( m_plots_missingTruth->fillPlots( *particle, notTruthMatched, truthMu, actualMu, weight ) );
+      }
+      if( m_plots_hitsOnUnlinkedTrk ) {
         ATH_CHECK( m_plots_hitsOnUnlinkedTrk->fillPlots( *particle, truthMu, actualMu, weight ) ); 
       }
     }
