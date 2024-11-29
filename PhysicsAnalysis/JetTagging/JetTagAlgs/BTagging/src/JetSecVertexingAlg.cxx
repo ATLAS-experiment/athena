@@ -392,6 +392,7 @@ namespace Analysis {
       ATH_MSG_DEBUG("#BTAGJF# size vtxPosition "<<vtxPositions.size());
       std::vector< float > fittedPosition = std::vector<float>(nVtx+5,-1);
       std::vector< float > fittedCov = std::vector<float>(nVtx+5,-1); //only store the diagonal terms
+      if (fittedPosition.size() < 5) std::abort(); // suppress cppcheck warnings
       if(vtxPositions.rows()>4 ) {
         fittedPosition[0] = vtxPositions[Trk::jet_xv]; //position x,y,z of PV
         fittedPosition[1] = vtxPositions[Trk::jet_yv]; 
