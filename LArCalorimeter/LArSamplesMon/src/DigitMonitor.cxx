@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/DigitMonitor.h"
@@ -16,6 +16,7 @@
 #include "LArSamplesMon/Residual.h"
 #include "LArCafJobs/Geometry.h"
 
+#include "TFile.h"
 #include "TCanvas.h"
 #include "TF1.h"
 #include "TH1I.h"
@@ -62,11 +63,11 @@ TH1D* DigitMonitor::chi2Dist(const TString& name, int nBins, double max, double 
 {
   TH1D* h = new TH1D(name, "#chi^{2} distribution", nBins, 0, max);
   unsigned int nDofEff = 0, nDofLast = 0;
-  UniformShapeErrorGetter* kFactorGetter = nullptr;
-  CombinedShapeErrorGetter* shapeErrorGetter = nullptr;
+  std::unique_ptr<UniformShapeErrorGetter> kFactorGetter;
+  std::unique_ptr<CombinedShapeErrorGetter> shapeErrorGetter;
   if (kFactor > 0) {
-    kFactorGetter = new UniformShapeErrorGetter(kFactor);
-    shapeErrorGetter = new CombinedShapeErrorGetter();
+    kFactorGetter = std::make_unique<UniformShapeErrorGetter>(kFactor);
+    shapeErrorGetter = std::make_unique<CombinedShapeErrorGetter>();
     if (interface().shapeErrorGetter()) shapeErrorGetter->add(*interface().shapeErrorGetter());
     shapeErrorGetter->add(*kFactorGetter);
   }
@@ -74,7 +75,7 @@ TH1D* DigitMonitor::chi2Dist(const TString& name, int nBins, double max, double 
     if ((i+1) % 10000 == 0) cout << "Processing entry # " << i+1 << endl;
     const History* history = cellHistory(i);
     if (!history) continue;
-    if (shapeErrorGetter) history->setShapeErrorGetter(shapeErrorGetter); // Do it at history level so it doesn't "stick" afterwards,,,
+    if (shapeErrorGetter) history->setShapeErrorGetter(shapeErrorGetter.get()); // Do it at history level so it doesn't "stick" afterwards,,,
     for (unsigned int j = 0; j < history->nData(); j++) {
       h->Fill(history->chi2(j, lwb, upb, chi2Pars, shapeErrorType, &nDofEff));
       if (nDofLast > 0 && nDofLast != nDofEff) cout << "WARNING @ hash = " << i << ", index = " << j << " : nDof varied from " << nDofLast << " to " << nDofEff << endl;
@@ -86,17 +87,11 @@ TH1D* DigitMonitor::chi2Dist(const TString& name, int nBins, double max, double 
   h->Draw();
   if (fitMax < 0) return h;
   TF1* fChi2 = fitChi2(*h, "chi2", 0, max, nDof, 0, fitMax);  
-
   TPaveText* p = new TPaveText(0.6, 0.85, 0.85, 0.65, "NDC");
   p->AddText(Form("k = %.1f%%", kFactor*100));
   p->AddText(Form("Fit #chi^{2} = %.1f", fChi2->GetChisquare()));
   p->AddText(Form("Fit nDOF = %.1f", fChi2->GetParameter(1)));
   p->Draw();
-  
-  if (shapeErrorGetter) {
-    delete kFactorGetter;
-    delete shapeErrorGetter;
-  }
   return h;
 }
 

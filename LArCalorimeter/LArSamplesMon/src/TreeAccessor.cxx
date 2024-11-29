@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/TreeAccessor.h"
@@ -10,6 +10,8 @@
 #include "LArSamplesMon/FilterParams.h"
 #include "LArSamplesMon/DataTweaker.h"
 #include "LArSamplesMon/ClassCounts.h"
+#include "LArCafJobs/ShapeInfo.h"
+
 #include "TObjString.h"
 #include "TFile.h"
 #include "TTree.h"

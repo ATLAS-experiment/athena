@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/MultiTreeAccessor.h"
 
 #include "LArSamplesMon/TreeAccessor.h"
 #include "LArSamplesMon/Data.h"
+#include "LArCafJobs/ShapeInfo.h"
 #include "LArCafJobs/EventData.h"
 #include "TSystem.h"
 #include "TChain.h"

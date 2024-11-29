@@ -10,9 +10,10 @@
 #ifndef LArSamples_DataTweaker_H
 #define LArSamples_DataTweaker_H
 
-#include <map>
+
 #include "LArSamplesMon/Chi2Calc.h"
 #include "CxxUtils/checker_macros.h"
+#include <map>
 
 namespace LArSamples {
   

@@ -3,10 +3,10 @@
 */
 
 #include "LArSamplesMon/Data.h"
-#include "TMath.h"
 
 #include "LArCafJobs/SimpleShape.h"
 #include "LArSamplesMon/MonitorBase.h"
+#include "LArSamplesMon/ScaledErrorData.h"
 #include "LArSamplesMon/History.h"
 #include "LArCafJobs/CellInfo.h"
 #include "LArSamplesMon/ShapeFitter.h"
@@ -14,7 +14,7 @@
 #include "LArSamplesMon/ShapeErrorData.h"
 #include "LArSamplesMon/OFC.h"
 #include "LArSamplesMon/ClassCounts.h"
-
+#include "TMath.h"
 #include <iostream>
 #include <fstream>
 
@@ -232,11 +232,14 @@ double Data::_chi2_k(const DataFuncArgs& args) const
 bool Data::calcRefit(double& chi2, double& k, double& dT) const
 {
   ShapeFitter fitter;
-  //cout << "We're refitting " << _i << " of " << _history->cellInfo()->location(1) << endl;
   SimpleShape* reference = referenceShape();
   const ScaledErrorData* sed = scaledErrorData();
-  if (!reference) return false;
+  if (!reference){
+   delete sed;
+   return false;
+  }
   bool result = fitter.fit(*this, *reference, k, dT, chi2, sed);
+  delete sed;
   delete reference;
   return result;
 }

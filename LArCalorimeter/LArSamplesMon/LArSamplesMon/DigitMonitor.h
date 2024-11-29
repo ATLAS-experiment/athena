@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,23 +10,18 @@
 #ifndef LArSamples_DigitMonitor_H
 #define LArSamples_DigitMonitor_H
 
-#include "TArrayI.h"
-#include "TH1D.h"
-#include "TH2D.h"
-#include "TMatrixD.h"
-#include "TString.h"
+#include "TString.h"//value set as default
 
 #include "LArSamplesMon/MonitorBase.h"
-#include "LArSamplesMon/Chi2Calc.h"
-#include "LArSamplesMon/History.h"
-#include "LArSamplesMon/Data.h"
-#include "LArCafJobs/CaloId.h"
-#include "CaloIdentifier/CaloGain.h"
+#include "LArSamplesMon/Chi2Calc.h" //value set as default
+#include "LArCafJobs/CaloId.h" //enum
+#include "CaloIdentifier/CaloGain.h" //value set as default
 
 class TF1;
+class TH1D;
+class TH2D;
 
 namespace LArSamples {
-  
   class SimpleShape;
   class Residuals;
   

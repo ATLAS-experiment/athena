@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -9,20 +9,22 @@
 #ifndef LArSamples_LArIdTranslatorHelper_H
 #define LArSamples_LArIdTranslatorHelper_H
 
-#include "TTree.h"
-#include "TFile.h"
-#include "TCanvas.h"
-#include "TH1.h"
-#include "TH1F.h"
-#include "TH2.h"
-#include "TH2F.h"
-#include "TH2I.h"
-#include "TProfile.h"
-#include "TProfile2D.h"
-#include "TString.h"
+
 #include <vector>
 #include <cstdlib>
+#include <string>
+#include <memory>
+#include "RtypesCore.h" //ROOT data types, Int_t etc
 #include "CxxUtils/checker_macros.h"
+
+class TString;
+class TCanvas;
+class TH1;
+class TH2;
+class TTree;
+class TFile;
+class TH2I;
+
 
 class ATLAS_NOT_THREAD_SAFE LArIdTranslatorHelper
 {

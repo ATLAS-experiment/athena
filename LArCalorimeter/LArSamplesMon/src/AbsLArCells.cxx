@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/AbsLArCells.h"
 
 #include "LArSamplesMon/History.h"
 #include "LArCafJobs/CellInfo.h"
+#include "LArSamplesMon/FilterParams.h"
+
 
 #include <iostream>
 using std::cout;
