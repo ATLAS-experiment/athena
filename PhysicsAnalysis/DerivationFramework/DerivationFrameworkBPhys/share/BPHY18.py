@@ -360,6 +360,27 @@ BPHY18_Select_piK = DerivationFramework__Select_onia2mumu(
 ToolSvc += BPHY18_Select_piK
 print      BPHY18_Select_piK
 
+from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__BKllIsoMultiplicityTool
+BPHY18_IsoMultiplicityTool = DerivationFramework__BKllIsoMultiplicityTool(
+    TrackContainer             = "InDetTrackParticles",
+    InputVertexContainer       = "BeeKstCandidates",
+    IsolationCones             = [ "10", "20", "30", "40", "50" ],
+    TrackSelectorTool          = BPHY18_VertexTools.InDetTrackSelectorTool,
+    TrackPtCut                 = 500.,
+    TrackEtaCut                = 3.,
+    ElectronContainerKey       = "Electrons",
+    ElectronTrackContainerKey  = "GSFTrackParticles",
+    ElectronTrackPtCut         = 5000.,
+    ElectronTrackEtaCut        = -1.,
+    ElectronLikelihoodCut      = "DFCommonElectronsLHVeryLoosenod0",
+    RecordTrackMultiplicity    = True, 
+    RecordElectronMultiplicity = True, 
+    RecordMuonMultiplicity     = False 
+)
+
+ToolSvc += BPHY18_IsoMultiplicityTool
+print BPHY18_IsoMultiplicityTool
+
 if True:
     from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__xAODStringSkimmingTool
     BPHY18_SelectBeeKstEvent = DerivationFramework__xAODStringSkimmingTool(
@@ -463,7 +484,7 @@ if runGSFCalo:
 AugmentationToolList += [ ElectronPassLHvloosenod0,BPHY18DiElectronSelectAndWrite,  
                        BPHY18_Select_DiElectrons,
                        BPHY18BeeKstSelectAndWrite, BPHY18_Select_BeeKst, BPHY18_Select_BeeKstbar,
-                       BPHY18_diMeson_revertex, BPHY18_Select_Kpi, BPHY18_Select_piK ]
+                       BPHY18_diMeson_revertex, BPHY18_Select_Kpi, BPHY18_Select_piK, BPHY18_IsoMultiplicityTool ]
 
 from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramework__DerivationKernel
 DerivationFrameworkJob += CfgMgr.DerivationFramework__DerivationKernel(
