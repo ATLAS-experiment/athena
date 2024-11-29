@@ -5,8 +5,8 @@
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
-# art-input: valid1.901971.PG_mu_Pt4to100_vertxy20.recon.RDO.e8544_e8528_s4159_s4114_r14813_tid34085600_00
-# art-input-nfiles: 2
+# art-input: valid1.901971.PG_mu_Pt4to100_vertxy20.recon.RDO.e8544_e8528_s4369_s4370_r16210_tid42196789_00
+# art-input-nfiles: 4
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
