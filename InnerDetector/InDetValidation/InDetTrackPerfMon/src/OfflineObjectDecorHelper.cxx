@@ -52,7 +52,9 @@ namespace IDTPM {
   /// getTruthMatchProb
   float getTruthMatchProb( const xAOD::TrackParticle& track ) {
     static const SG::ConstAccessor< float > truthMatchProbabilityAcc( "truthMatchProbability" );
-    return truthMatchProbabilityAcc.withDefault( track, -1 );
+    float prob = truthMatchProbabilityAcc.withDefault( track, -1 );
+    if( std::isnan(prob) ) return -1;
+    return prob;
   }
 
   /// getLinkedTruth
