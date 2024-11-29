@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
 #ifndef ONNXUtils_h
 #define ONNXUtils_h
 
@@ -7,6 +10,7 @@
 #include <map>
 
 // Asg tool includes
+
 #include "PathResolver/PathResolver.h"
 
 // ONNX Library
@@ -50,7 +54,7 @@ class ONNXWrapper {
   public:
     // Constructor with parameters
 
-    ONNXWrapper(const std::string model_path);
+    ONNXWrapper(const std::string & model_path);
 
     std::map<std::string, std::vector<float>> Run(
       std::map<std::string,

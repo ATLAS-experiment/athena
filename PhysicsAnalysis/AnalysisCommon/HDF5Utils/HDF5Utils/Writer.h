@@ -147,7 +147,7 @@ namespace H5Utils {
     }
 
 
-    std::vector<SharedConsumer<I> > getConsumers() const;
+    const std::vector<SharedConsumer<I> > & getConsumers() const;
 
     using input_type = I;
     template <typename T>
@@ -175,7 +175,7 @@ namespace H5Utils {
   }
 
   template <typename I>
-  std::vector<SharedConsumer<I> > Consumers<I>::getConsumers() const {
+  const std::vector<SharedConsumer<I>> & Consumers<I>::getConsumers() const {
     return m_consumers;
   }
 

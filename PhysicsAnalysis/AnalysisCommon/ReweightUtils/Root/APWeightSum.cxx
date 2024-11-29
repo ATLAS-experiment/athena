@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #define APWeightSum_cxx
@@ -477,6 +477,6 @@ THnSparse* APWeightSum::GetUncertHistogram( APReweightBase* weighter ) {
   else return m_linear_uncert[temp_ID];
 }
 
-vector<THnSparse*> APWeightSum::GetAllUncertHistograms( ) {
+const vector<THnSparse*> & APWeightSum::GetAllUncertHistograms( ) {
   return m_linear_uncert;
 }

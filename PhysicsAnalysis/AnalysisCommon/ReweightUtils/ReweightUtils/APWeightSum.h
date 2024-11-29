@@ -47,7 +47,7 @@ public:
   unsigned long GetKUnweighted() const;                                          /*!< Returns the unweighted sum of entries. */
 
   THnSparse* GetUncertHistogram( APReweightBase* weighter );                     /*!< Returns THnSparse holding the uncertainties for given APReweightBase instance. */
-  std::vector<THnSparse*> GetAllUncertHistograms();                              /*!< Returns vector of THnSparses holding the uncertainties for all APReweight IDs. */
+  const std::vector<THnSparse*> & GetAllUncertHistograms();                              /*!< Returns vector of THnSparses holding the uncertainties for all APReweight IDs. */
 
   ClassDef(APWeightSum,1)
 

@@ -249,11 +249,11 @@ unsigned int APWeightEntry::GetID() const {
   return m_ID;
 }
 
-vector<int> APWeightEntry::GetCoords() const {
+const vector<int> & APWeightEntry::GetCoords() const {
   return m_coords;
 }
 
-vector< int > APWeightEntry::GetOriginalDimensions() const {
+const vector< int > & APWeightEntry::GetOriginalDimensions() const {
   return m_n_dim_origin;
 }
 
