@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_LocRec/ALFA_MDMultiple.h"
@@ -429,7 +429,7 @@ void ALFA_MDMultiple::Proj_Store(Int_t iFiberSide, Int_t (&iOver)[72000], Float_
 /************************************************/
 /*  Making projection and storing in an array   */
 /************************************************/
-void ALFA_MDMultiple::Proj_Store(std::vector<Int_t> FiberHit[ALFAPLATESCNT], Int_t (&iOver)[72000], Float_t fbRef, Int_t iSideFlag)
+void ALFA_MDMultiple::Proj_Store(const std::vector<Int_t> (&FiberHit)[ALFAPLATESCNT], Int_t (&iOver)[72000], Float_t fbRef, Int_t iSideFlag)
 {
 	ATH_MSG_DEBUG("ALFA_MDMultiple::Pro_Store()");
 
