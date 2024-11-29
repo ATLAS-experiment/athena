@@ -26,10 +26,10 @@ def HION4SkimmingToolCfg(flags):
     muonsRequirements = '(Muons.pt >= 2.0*GeV) && (abs(Muons.eta) < 2.6)'
     muonOnlySelection = 'count('+muonsRequirements+') >= 1'
    
-    electronsRequirements = '(Electrons.pt > 2.0*GeV) && (abs(Electrons.eta) < 2.6)'
+    electronsRequirements = '(Electrons.pt > 1.5*GeV) && (abs(Electrons.eta) < 2.6)'
     electronOnlySelection = 'count('+electronsRequirements+') >= 1'
     
-    photonsRequirements = '(Photons.pt >= 2.0*GeV)'
+    photonsRequirements = '(Photons.pt >= 1.5*GeV)'
     photonOnlySelection = 'count('+photonsRequirements+') >=2'
     
     electronPhotonSelection = '(count('+electronsRequirements+') + count('+photonsRequirements+')) >= 2'
