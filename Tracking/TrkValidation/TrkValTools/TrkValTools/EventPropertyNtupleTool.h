@@ -47,7 +47,7 @@ namespace Trk {
     /** @brief add branches to the tree
       Should be called once dunring the initialisation phase by the calling algorithm
       (usually Trk::TrackValidationNtupleWriter) */
-    virtual StatusCode addNtupleItems ( TTree*, const std::string );
+    virtual StatusCode addNtupleItems ( TTree*, const std::string &);
 
     //! calculate event-wide data and copy into TTree branches, but don't write the record yet.
     virtual StatusCode fillEventData ( );

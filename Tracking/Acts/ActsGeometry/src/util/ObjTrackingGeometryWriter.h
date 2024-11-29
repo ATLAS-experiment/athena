@@ -56,7 +56,7 @@ public:
 
   /// Framework name() method
   /// @return the name of the tool
-  std::string
+  const std::string &
   name() const;
 
   /// The write interface

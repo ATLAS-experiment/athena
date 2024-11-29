@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -14,10 +14,8 @@
 
 #include "TTree.h"
 //Gaudi
-// #include "GaudiKernel/SmartDataPtr.h"
 #include "GaudiKernel/ITHistSvc.h"
-// #include "GaudiKernel/ISvcLocator.h"
-// #include "GaudiKernel/PropertyMgr.h"
+
 #include "TrkValTools/EventPropertyNtupleTool.h"
 #include "CommissionEvent/ComTime.h"
 #include "EventInfo/EventInfo.h"
@@ -65,7 +63,7 @@ StatusCode Trk::EventPropertyNtupleTool::finalize() {
 }
 
 
-StatusCode Trk::EventPropertyNtupleTool::addNtupleItems( TTree* tree, const std::string ) {
+StatusCode Trk::EventPropertyNtupleTool::addNtupleItems( TTree* tree, const std::string & ) {
   if (!tree) return StatusCode::FAILURE;
   //-----------------
   // add items

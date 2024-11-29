@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // This file was largely imported from the Acts testing framework
@@ -68,7 +68,7 @@ public:
   ObjSurfaceWriter(const Config& cfg);
 
   /// Framework name() method
-  std::string
+  const std::string &
   name() const;
 
   /// The write interface

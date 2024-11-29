@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -63,7 +63,7 @@ void Trk::EventToTrackLinkNtupleTool::registerTrackCollections
   m_nTracksPerEvent.resize(m_trackCollections.size());
 }
 
-StatusCode Trk::EventToTrackLinkNtupleTool::addNtupleItems( TTree* tree, const std::string cbnt_prefix ) {
+StatusCode Trk::EventToTrackLinkNtupleTool::addNtupleItems( TTree* tree, const std::string & cbnt_prefix ) {
   if (!tree) return StatusCode::FAILURE;
   //-----------------
   // add items

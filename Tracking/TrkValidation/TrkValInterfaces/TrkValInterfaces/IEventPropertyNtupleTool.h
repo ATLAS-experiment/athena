@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -48,7 +48,7 @@ class IEventPropertyNtupleTool : virtual public IAlgTool {
       @param[in] tree is the TTree from the Trk::TrackValidationNtupleWriter or from CBNT
       @param[in] prefix is usually none, but allows a tracking-specific prefix when added to CBNT
     */
-  virtual StatusCode addNtupleItems( TTree* tree, const std::string prefix="" ) = 0;
+  virtual StatusCode addNtupleItems( TTree* tree, const std::string & prefix="" ) = 0;
 
   //! transfer of track-tree indices into event tree variables, to allow delayed writing by TV or CBNT
   virtual void setTrackTreeIndices( unsigned int, int, int) = 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file TrkExSolenoidalIntersector/test/SolenoidParametrization_test.cxx
@@ -63,7 +63,7 @@ void test1 (Trk::SolenoidParametrization& sol, const AtlasFieldCacheCondObj &fie
 
 std::unique_ptr<MagField::AtlasFieldMap> getFieldMap(const std::string& mapFile, double sol_current, double tor_current) {
        // find the path to the map file
-    std::string resolvedMapFile = PathResolver::find_file( mapFile.c_str(), "DATAPATH" );
+    std::string resolvedMapFile = PathResolver::find_file( mapFile, "DATAPATH" );
     assert ( !resolvedMapFile.empty() );
     // Do checks and extract root file to initialize the map
     assert ( resolvedMapFile.find(".root") != std::string::npos );
