@@ -389,7 +389,7 @@ SGAudSvc::SGGetCurrentAlg(){
 /*----------------------------------------------------------------------------*/
 
 void 
-SGAudSvc::getNobj(std::string name){
+SGAudSvc::getNobj(const std::string& name){
   std::vector<std::string>::iterator i;
   int index=0;
   for (i=m_vObj.begin();i<m_vObj.end();++i){

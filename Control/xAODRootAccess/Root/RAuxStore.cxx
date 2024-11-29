@@ -1379,7 +1379,7 @@ namespace xAOD {
    /// @param isStaticField <code>kTRUE</code> if this is a static field, and
    ///                     <code>kFALSE</code> if it's a dynamic one
    ///
-   const std::type_info* RAuxStore::auxFieldType( const std::string auxName,
+   const std::type_info* RAuxStore::auxFieldType( const std::string& auxName,
                                                   ::Bool_t isStaticField ) {
 
       auto inspector =

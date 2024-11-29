@@ -157,7 +157,7 @@ namespace xAOD {
       /// Scan the input RNTuple for auxiliary fields
       StatusCode scanInputNtuple();
       /// Find the type_info to use as the aux type for a given field.
-      const std::type_info* auxFieldType( const std::string auxName,
+      const std::type_info* auxFieldType( const std::string& auxName,
                                           ::Bool_t staticField );
       /// Register one input field as an available auxiliary variable
       StatusCode setupAuxField( const std::string & fieldName,

@@ -83,7 +83,7 @@ public:
   void SGAudRETRIEVE(std::string SGobject);
   void SGAudRECORD(std::string SGobject);
 
-  void getNobj(std::string name);
+  void getNobj(const std::string& name);
   void addRead();
   void addWrite();
 
