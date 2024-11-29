@@ -12,7 +12,7 @@ namespace DerivationFramework {
     // Configuration for Vertexing
     recordPropertyB( "runGSFCalo"          , true      ); // CLI Flag
     recordPropertyS( "JPsiFinderLegAndLeg" , "elAndEl" ); // CLI Flag
-    recordPropertyB( "BeeKstUseElMass"     , false     ); // CLI Flag
+    recordPropertyB( "BeeKstUseElMass"     , true      ); // CLI Flag // This default changes behavior wrt 21.2.181.0-!
 
     // Global Constants, in MeV if Relevant.
     /* 
