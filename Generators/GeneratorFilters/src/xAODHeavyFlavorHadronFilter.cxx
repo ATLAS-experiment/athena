@@ -6,6 +6,7 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "xAODJet/JetContainer.h"
 #include "CxxUtils/BasicTypes.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include <cmath>
 
 
@@ -119,7 +120,7 @@ StatusCode xAODHeavyFlavorHadronFilter::filterEvent() {
       // B hadrons
       // =========
       if (m_RequestBottom &&
-          isBwithWeakDK(part->pdgId()) &&
+          MC::isWeaklyDecayingBHadron(part) &&
           part->pt()>m_bottomPtMin &&
           std::abs(part->rapidity())<m_bottomEtaMax) {
         if (m_RequireTruthJet) {
@@ -136,7 +137,7 @@ StatusCode xAODHeavyFlavorHadronFilter::filterEvent() {
       // Charm Hadrons
       // ==============
       if (m_RequestCharm &&
-          isDwithWeakDK(part->pdgId()) &&
+          MC::isWeaklyDecayingCHadron(part) &&
           part->pt()>m_charmPtMin &&
           std::abs(part->rapidity())<m_charmEtaMax) {
         if (m_RequireTruthJet) {
@@ -180,35 +181,4 @@ StatusCode xAODHeavyFlavorHadronFilter::filterEvent() {
   setFilterPassed(pass);
 
   return StatusCode::SUCCESS;
-}
-
-
-bool xAODHeavyFlavorHadronFilter::isBwithWeakDK(const int pID) const {
-  int id = std::abs(pID);
-  return ( id == 511   || // B+
-           id == 521   || // B0
-           id == 531   || // Bs
-           id == 541   || // Bc
-           id == 5122  || // Lambda_B
-           id == 5132  || // Xi_b-
-           id == 5232  || // X_b0
-           id == 5112  || // Sigma_b-
-           id == 5212  || // Sigma_b0
-           id == 5222  || // Sigma_b+
-           id == 5332 );  // Omega_B
-}
-
-
-bool xAODHeavyFlavorHadronFilter::isDwithWeakDK(const int pID) const {
-  int id = std::abs(pID);
-  return ( id == 411   || // D+
-           id == 421   || // D0
-           id == 431   || // Ds
-           id == 4122  || // Lambda_C
-           id == 4132  || // Xi_C^0
-           id == 4232  || // Xi_C^+
-           id == 4212  || // Xi_C^0
-           id == 4322  || // Xi'_C+  This is in fact EM not weak
-           id == 4332); // Omega_C
-
 }

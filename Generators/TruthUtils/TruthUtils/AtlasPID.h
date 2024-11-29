@@ -569,6 +569,53 @@ template<class T> inline bool isBottomBaryon(const T& p) { return  leadingQuark(
 template<class T> inline bool isTopBaryon(const T& p) { return  leadingQuark(p) == TQUARK && isBaryon(p); }
 
 
+// APID: This function selects B-Hadrons which predominantly decay weakly. (Commonly used definition in GeneratorFilters package.)
+// 5[1-4]1 L = J = 0, S = 0
+// 5[1-4][1-4]2 J = 1/2, n_r = 0, n_L =0
+// TODO Initially matching what was in GeneratorFilters, but will add
+// all the lowest lying B hadrons including double heavy flavour
+// hadrons in a follow-up MR.
+template<class T> inline bool isWeaklyDecayingBHadron(const T& p) {return isWeaklyDecayingBHadron(p->pdg_id());}
+template<> inline bool isWeaklyDecayingBHadron(const int& p) {
+  const int pid = std::abs(p);
+  return ( pid == 511   || // B0
+           pid == 521   || // B+
+           pid == 531   || // Bs
+           pid == 541   || // Bc
+           pid == 5122  || // Lambda_B
+           pid == 5132  || // Xi_b-
+           pid == 5232  || // X_b0
+           pid == 5112  || // Sigma_b-
+           pid == 5212  || // Sigma_b0
+           pid == 5222  || // Sigma_b+
+           pid == 5332 );  // Omega_B
+}
+template<> inline bool isWeaklyDecayingBHadron(const DecodedPID& p){ return isWeaklyDecayingBHadron(p.pid()); }
+
+
+// APID: This function selects C-Hadrons which predominantly decay weakly. (Commonly used definition in GeneratorFilters package.)
+// 4[1-3]1 L = J = 0, S = 0
+// 4[1-3][1-3]2 J = 1/2, n_r = 0, n_L =0
+// TODO Initially matching what was in GeneratorFilters, but will
+// remove the Xi'_c+ in a follow-up MR since its lifetime is
+// essentially 0.  (There was an old version of Herwig that decayed it
+// weakly, but this was fixed in Herwig 7).
+template<class T> inline bool isWeaklyDecayingCHadron(const T& p) {return isWeaklyDecayingCHadron(p->pdg_id());}
+template<> inline bool isWeaklyDecayingCHadron(const int& p) {
+  const int pid = std::abs(p);
+  return ( pid == 411   || // D+
+           pid == 421   || // D0
+           pid == 431   || // Ds
+           pid == 4122  || // Lambda_C
+           pid == 4132  || // Xi_C^0
+           pid == 4232  || // Xi_C^+
+           pid == 4212  || // Xi_C^0
+           pid == 4322  || // Xi'_C+  This is in fact EM not weak
+           pid == 4332); // Omega_C
+}
+template<> inline bool isWeaklyDecayingCHadron(const DecodedPID& p){ return isWeaklyDecayingCHadron(p.pid()); }
+
+
 template<class T> inline int charge3( const T& p){return charge3(p->pdg_id());}
 template<class T> inline double fractionalCharge(const T& p){return fractionalCharge(p->pdg_id());}
 template<class T> inline double charge( const T& p){

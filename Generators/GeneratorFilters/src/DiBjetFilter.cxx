@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // -------------------------------------------------------------
@@ -23,6 +23,7 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "xAODJet/JetContainer.h"
 #include "CxxUtils/BasicTypes.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "TRandom3.h"
 #include "TLorentzVector.h"
 
@@ -125,7 +126,7 @@ StatusCode DiBjetFilter::filterEvent() {
     weight = genEvt->weights().front();
     std::vector<HepMC::ConstGenParticlePtr> bHadrons;
     for(const auto& pitr: *genEvt) {  
-      if( !isBwithWeakDK( pitr->pdg_id()) ) continue;
+      if( !MC::isWeaklyDecayingBHadron(pitr) ) continue;
       if( pitr->momentum().perp() < m_bottomPtMin ) continue;
       if( std::abs( pitr->momentum().pseudoRapidity() ) > m_bottomEtaMax) continue;
       bHadrons.push_back(pitr);     
@@ -164,22 +165,3 @@ StatusCode DiBjetFilter::filterEvent() {
   setFilterPassed(pass);
   return StatusCode::SUCCESS;
 }
-
-bool DiBjetFilter::isBwithWeakDK(const int pID) const
-{
-   int id = abs(pID);
-   if ( id == 511   ||    // B+
-	id == 521   ||    // B0
-	id == 531   ||    // Bs
-	id == 541   ||    // Bc
-	id == 5122  ||    // Lambda_B 
-	id == 5132  ||    // Xi_b-         
-	id == 5232  ||    // X_b0
-	id == 5112  ||    // Sigma_b-
-	id == 5212  ||    // Sigma_b0
-	id == 5222 )      // Sigma_b+
-       return true;
-  else
-       return false;
-}
-

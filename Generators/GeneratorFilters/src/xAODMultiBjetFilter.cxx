@@ -16,6 +16,7 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "xAODJet/JetContainer.h"
 #include "CxxUtils/BasicTypes.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "TLorentzVector.h"
 
 #include <fstream>
@@ -104,7 +105,7 @@ StatusCode xAODMultiBjetFilter::filterEvent() {
   for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
       const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
    
-      if( !isBwithWeakDK( part->absPdgId()) ) continue;
+      if( !MC::isWeaklyDecayingBHadron(part) ) continue;
       if( part->pt() < m_bottomPtMin ) continue;
       if( std::abs( part->abseta() ) > m_bottomEtaMax) continue;
       bHadrons.push_back(part);
@@ -141,22 +142,3 @@ StatusCode xAODMultiBjetFilter::filterEvent() {
   setFilterPassed(pass);
   return StatusCode::SUCCESS;
 }
-
-bool xAODMultiBjetFilter::isBwithWeakDK(const int pID) const
-{
-  int id = std::abs(pID);
-  if ( id == 511   ||    // B+
-       id == 521   ||    // B0
-       id == 531   ||    // Bs
-       id == 541   ||    // Bc
-       id == 5122  ||    // Lambda_B
-       id == 5132  ||    // Xi_b-
-       id == 5232  ||    // X_b0
-       id == 5112  ||    // Sigma_b-
-       id == 5212  ||    // Sigma_b0
-       id == 5222 )      // Sigma_b+
-    return true;
-  else
-    return false;
-}
-

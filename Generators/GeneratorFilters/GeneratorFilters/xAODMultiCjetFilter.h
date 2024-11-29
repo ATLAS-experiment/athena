@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 // Written by Dominik Derendarz (dominik.derendarz@cern.ch)
 // Based on MultiBjetFilter by Bill Balunas
@@ -53,11 +53,6 @@ private:
     int    m_Nevt;
     double m_SumOfWeights_Pass;
     double m_SumOfWeights_Evt;
-
-    bool isBwithWeakDK(const int pID) const;
-    bool isCwithWeakDK(const int pID) const;
-
-
 };
 
 #endif

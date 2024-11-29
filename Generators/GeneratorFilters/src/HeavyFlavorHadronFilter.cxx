@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/HeavyFlavorHadronFilter.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "xAODJet/JetContainer.h"
 #include "CxxUtils/BasicTypes.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include <cmath>
 
 
@@ -137,7 +138,7 @@ StatusCode HeavyFlavorHadronFilter::filterEvent() {
       // B hadrons
       // =========
       if (m_RequestBottom &&
-          isBwithWeakDK(part->pdg_id()) &&
+          MC::isWeaklyDecayingBHadron(part) &&
           part->momentum().perp()>m_bottomPtMin &&
           std::abs(part->momentum().pseudoRapidity())<m_bottomEtaMax) {
         if (m_RequireTruthJet) {
@@ -155,7 +156,7 @@ StatusCode HeavyFlavorHadronFilter::filterEvent() {
       // Charm Hadrons
       // ==============
       if (m_RequestCharm &&
-          isDwithWeakDK(part->pdg_id()) &&
+          MC::isWeaklyDecayingCHadron(part) &&
           part->momentum().perp()>m_charmPtMin &&
           std::abs(part->momentum().pseudoRapidity())<m_charmEtaMax) {
         if (m_RequireTruthJet) {
@@ -203,35 +204,4 @@ StatusCode HeavyFlavorHadronFilter::filterEvent() {
   setFilterPassed(pass);
 
   return StatusCode::SUCCESS;
-}
-
-
-bool HeavyFlavorHadronFilter::isBwithWeakDK(const int pID) const {
-  int id = std::abs(pID);
-  return ( id == 511   || // B+
-           id == 521   || // B0
-           id == 531   || // Bs
-           id == 541   || // Bc
-           id == 5122  || // Lambda_B
-           id == 5132  || // Xi_b-
-           id == 5232  || // X_b0
-           id == 5112  || // Sigma_b-
-           id == 5212  || // Sigma_b0
-           id == 5222  || // Sigma_b+
-           id == 5332 );  // Omega_B
-}
-
-
-bool HeavyFlavorHadronFilter::isDwithWeakDK(const int pID) const {
-  int id = std::abs(pID);
-  return ( id == 411   || // D+
-           id == 421   || // D0
-           id == 431   || // Ds
-           id == 4122  || // Lambda_C
-           id == 4132  || // Xi_C^0
-           id == 4232  || // Xi_C^+
-           id == 4212  || // Xi_C^0
-           id == 4322  || // Xi'_C+  This is in fact EM not weak
-           id == 4332); // Omega_C
-
 }

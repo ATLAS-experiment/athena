@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // --------------------------------------------------
@@ -52,10 +52,6 @@ private:
         double m_SumOfWeigths_Pass;
         double m_SumOfWeigths_Evt;
 	TRandom3* m_ranNumGen;
-
-        bool isBwithWeakDK(const int pID) const;
-
-
 };
 
 #endif
