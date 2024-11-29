@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -99,6 +99,12 @@ namespace CP
   public:
     void set (const SG::AuxElement& object, const T& value,
               const CP::SystematicSet& sys) const;
+
+    /// \brief lock the object decoration for the given systematic
+    ///        You should call this after all set() calls for a given object.
+  public:
+    void lock (const SG::AuxElement& object,
+               const CP::SystematicSet& sys) const;
 
 
 
