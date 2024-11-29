@@ -404,6 +404,8 @@ std::any ActsTrk::MutableMultiTrajectory::component_impl(
   switch (key) {
     case "previous"_hash:
       return &(to_const_ptr(m_trackStatesAux)->previous[istate]);
+    case "next"_hash:
+      return &(to_const_ptr(m_trackStatesAux)->next[istate]);
     case "chi2"_hash:
       return &(to_const_ptr(m_trackStatesAux)->chi2[istate]);
     case "pathLength"_hash:
@@ -433,7 +435,7 @@ std::any ActsTrk::MutableMultiTrajectory::component_impl(
     default: {
       for (auto& d : m_decorations) {
         if (d.hash == key) {
-          INSPECTCALL("getting dymaic variable " << d.name << " " << istate);
+          INSPECTCALL("getting dynamic variable " << d.name << " " << istate);
           return d.getter(m_trackStatesAux.get(), istate, d.auxid);
         }
       }
@@ -515,7 +517,7 @@ void ActsTrk::MutableMultiTrajectory::setUncalibratedSourceLink_impl(ActsTrk::In
 
   static const SG::Decorator<const xAOD::UncalibratedMeasurement*> decor{"uncalibratedMeasurement"};
   if (istate>= m_trackStatesAux->size()) {
-     throw std::range_error("istate out of range on TrackStates when attempting to acces uncalibrated measurements");
+     throw std::range_error("istate out of range on TrackStates when attempting to access uncalibrated measurements");
   }
   std::span<const xAOD::UncalibratedMeasurement*> uncalibratedMeasurements = createDecoration(*m_trackStatesAux, decor);
 
@@ -620,6 +622,8 @@ std::any ActsTrk::MultiTrajectory::component_impl(
   switch (key) {
     case "previous"_hash:
       return &(m_trackStatesAux->previous[istate]);
+    case "next"_hash:
+      return &(m_trackStatesAux->next[istate]);
     case "chi2"_hash:
       return &(m_trackStatesAux->chi2[istate]);
     case "pathLength"_hash:
@@ -663,6 +667,7 @@ bool ActsTrk::MultiTrajectory::hasColumn_impl(
   // TODO try using staticVariables set
   switch (key) {
     case "previous"_hash:
+    case "next"_hash:
     case "chi2"_hash:
     case "pathLength"_hash:
     case "predicted"_hash:
