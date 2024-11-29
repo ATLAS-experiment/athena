@@ -15,6 +15,7 @@
 #include "StoreGate/WriteHandle.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "TestTools/initGaudi.h"
 

@@ -22,6 +22,7 @@
 #include "GeneratorObjectsTPCnv/HepMcParticleLinkCnv_p2.h"
 #include "StoreGate/WriteHandle.h"
 #include "GeneratorObjects/McEventCollection.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "TestTools/initGaudi.h"
 

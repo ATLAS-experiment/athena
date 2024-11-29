@@ -20,6 +20,7 @@
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 
 #include "InDetGeoModelUtils/ExtraMaterial.h"
+#include "AthenaKernel/getMessageSvc.h"
 
 #include "GeoModelRead/ReadGeoModel.h"
 #include "GeoModelKernel/GeoTube.h"
