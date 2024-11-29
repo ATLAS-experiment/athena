@@ -1,24 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DiTauRec/SubjetBuilder.h"
-#include "DiTauRec/DiTauToolBase.h"
-#include "DiTauRec/DiTauCandidateData.h"
-
-#include "xAODJet/Jet.h"
-#include "xAODJet/JetContainer.h"
-#include "xAODJet/JetConstituentVector.h"
 
 // fastjet includes
-#include "fastjet/Selector.hh"
-#include "fastjet/PseudoJet.hh"
-#include "fastjet/JetDefinition.hh"
 #include "fastjet/ClusterSequenceArea.hh"
 #include "fastjet/AreaDefinition.hh"
-#include "fastjet/tools/Filter.hh"
-#include "fastjet/tools/Pruner.hh"
-
 
 SubjetBuilder::SubjetBuilder(const std::string& type,
 			     const std::string& name,

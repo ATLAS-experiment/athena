@@ -4,15 +4,6 @@
 
 
 #include "DiTauRec/CellFinder.h"
-#include "DiTauRec/DiTauToolBase.h"
-
-#include "DiTauRec/DiTauCandidateData.h"
-
-#include "CaloEvent/CaloClusterContainer.h"
-#include "CaloEvent/CaloCell.h"
-#include "CaloEvent/CaloCellContainer.h"
-
-#include "fastjet/PseudoJet.hh"
 
 CellFinder::CellFinder(const std::string& type,
 		       const std::string& name,

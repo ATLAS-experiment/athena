@@ -1,14 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DiTauRec/VertexFinder.h"
-#include "DiTauRec/DiTauToolBase.h"
-#include "DiTauRec/DiTauCandidateData.h"
-
-#include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/Vertex.h"
-#include "StoreGate/ReadHandle.h"
+//#include "StoreGate/ReadHandle.h"
 
 
 VertexFinder::VertexFinder(const std::string& type,

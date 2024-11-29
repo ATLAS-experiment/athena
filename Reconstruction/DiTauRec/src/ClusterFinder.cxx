@@ -4,10 +4,6 @@
 
 
 #include "DiTauRec/ClusterFinder.h"
-#include "DiTauRec/DiTauToolBase.h"
-#include "DiTauRec/DiTauCandidateData.h"
-#include "CaloEvent/CaloClusterContainer.h"
-#include "fastjet/PseudoJet.hh"
 
 ClusterFinder::ClusterFinder(const std::string& type,
 		       const std::string& name,

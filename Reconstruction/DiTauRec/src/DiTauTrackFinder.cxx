@@ -3,19 +3,9 @@
 */
 
 #include "DiTauRec/DiTauTrackFinder.h"
-#include "DiTauRec/DiTauToolBase.h"
-#include "DiTauRec/DiTauCandidateData.h"
-
-#include "xAODTracking/VertexContainer.h"
-
-#include "TrkToolInterfaces/ITrackSelectorTool.h"
-#include "TrkParametersIdentificationHelpers/TrackParametersIdHelper.h"
-#include "RecoToolInterfaces/IParticleCaloExtensionTool.h"
-
 #include "tauRecTools/TrackSort.h"
 #include "StoreGate/ReadHandle.h"
 
-#include "fastjet/PseudoJet.hh"
 
 
 DiTauTrackFinder::DiTauTrackFinder(const std::string& type,

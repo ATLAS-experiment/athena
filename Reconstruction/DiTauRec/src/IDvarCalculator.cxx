@@ -3,10 +3,6 @@
 */
 
 #include "DiTauRec/IDVarCalculator.h"
-#include "DiTauRec/DiTauToolBase.h"
-#include "DiTauRec/DiTauCandidateData.h"
-
-#include "fastjet/PseudoJet.hh"
 
 IDVarCalculator::IDVarCalculator(const std::string& type,
 				 const std::string& name,
