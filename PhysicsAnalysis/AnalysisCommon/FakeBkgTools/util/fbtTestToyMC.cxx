@@ -272,7 +272,7 @@ StatusCode Loop ATLAS_NOT_THREAD_SAFE(fbtTestToyMC_config config){
       h_lep_pt_eta_fkf =  new TH2F(hname.c_str(), hname.c_str(), 10, 0, 100, 10, -5, 5);
     }
 
-    float lep_pt, lep_eta;
+    float lep_pt = 0, lep_eta = 0;
   
     if (!config.test_merge) {
 
@@ -316,7 +316,7 @@ StatusCode Loop ATLAS_NOT_THREAD_SAFE(fbtTestToyMC_config config){
       if (config.test_save) {
 	for (int iSave = 0; iSave <= nSave; iSave++) {
 	  std:: string toolName = "LhoodMM_tools_save_" + std::to_string(icase) + "_" +  std::to_string(iSave);
-	  CP::LhoodMM_tools *lhmTool_is = new CP::LhoodMM_tools(toolName.c_str());
+	  CP::LhoodMM_tools *lhmTool_is = new CP::LhoodMM_tools(toolName);
 	  lhmTool_sav.push_back(lhmTool_is);
 	  ANA_CHECK( initialize(*lhmTool_sav[iSave], input, config.selection, config.process, config.verbose) );
 	  if (config.test_histo) {
@@ -325,7 +325,7 @@ StatusCode Loop ATLAS_NOT_THREAD_SAFE(fbtTestToyMC_config config){
 	    ANA_CHECK( lhmTool_is->register2DHistogram(h_lep_pt_eta_lhoodMM, &lep_pt, &lep_eta) );	
 	  }
 	  toolName = "LhoodMM_tools_FF_save_" + std::to_string(icase) + "_" + std::to_string(iSave);
-	  CP::LhoodMM_tools *lhmTool_FF_is = new CP::LhoodMM_tools(toolName.c_str());
+	  CP::LhoodMM_tools *lhmTool_FF_is = new CP::LhoodMM_tools(toolName);
 	  lhmTool_FF_sav.push_back(lhmTool_FF_is);
 	  ANA_CHECK( initialize(*lhmTool_FF_sav[iSave], input, config.selection, config.process, config.verbose) );
 	  ANA_CHECK( lhmTool_FF_sav[iSave]->setProperty("DoFakeFactorFit", true) );
@@ -336,7 +336,7 @@ StatusCode Loop ATLAS_NOT_THREAD_SAFE(fbtTestToyMC_config config){
 	  }
 
 	  toolName = "AsymptMatrixTool_save_" + std::to_string(icase) + "_" + std::to_string(iSave);
-	  CP::AsymptMatrixTool *asmTool_is = new CP::AsymptMatrixTool(toolName.c_str()); if (config.test_histo) {
+	  CP::AsymptMatrixTool *asmTool_is = new CP::AsymptMatrixTool(toolName); if (config.test_histo) {
 	    ANA_CHECK( asmTool_is->register1DHistogram(h_lep_pt_asm, &lep_pt) );
 	    ANA_CHECK( asmTool_is->register1DHistogram(h_lep_eta_asm, &lep_eta) );
 	    ANA_CHECK( asmTool_is->register2DHistogram(h_lep_pt_eta_asm, &lep_pt, &lep_eta) );	
@@ -345,7 +345,7 @@ StatusCode Loop ATLAS_NOT_THREAD_SAFE(fbtTestToyMC_config config){
 	  ANA_CHECK( initialize(*asmTool_sav[iSave], input, config.selection, config.process, config.verbose) );
 	  
 	  toolName = "ApplyFakeFactor_save_" + std::to_string(icase) + "_" + std::to_string(iSave);
-	  CP::ApplyFakeFactor *fkfTool_is = new CP::ApplyFakeFactor(toolName.c_str());
+	  CP::ApplyFakeFactor *fkfTool_is = new CP::ApplyFakeFactor(toolName);
 	  fkfTool_sav.push_back(fkfTool_is);
 	  ANA_CHECK( initialize(*fkfTool_sav[iSave], input, config.selection, config.process, config.verbose) );
 	  if (config.test_histo) {
