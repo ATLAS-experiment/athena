@@ -290,7 +290,7 @@ GlobalTagMapSetDto GlobalTagMapSetDto::from_fs_json(const json &j)
     return tagMapSet;
 }
 
-void ChannelSetDto::add(std::string id, std::string name)
+void ChannelSetDto::add(const std::string& id, const std::string& name)
 {
     m_channels.push_back(std::pair<std::string, std::string>(id, name));
 }
@@ -318,7 +318,7 @@ json ChannelSetDto::to_json() const
     }
     return chJson;
 }
-void PayloadSpecDto::add(std::string name, std::string type)
+void PayloadSpecDto::add(const std::string& name, const std::string& type)
 {
     m_row.push_back(std::pair<std::string, std::string>(name, type));
 }

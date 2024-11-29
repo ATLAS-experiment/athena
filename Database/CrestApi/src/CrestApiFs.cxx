@@ -190,7 +190,7 @@ namespace Crest
       std::vector<std::string> taglist = nameList(folder, ascending);
       std::vector<std::string> clearedTaglist;
 
-      for (std::string tag : taglist)
+      for (const std::string& tag : taglist)
       {
         std::string file_name = folder + "/" + tag + "/" + s_FS_GLOBALTAG_FILE;
 
@@ -211,7 +211,7 @@ namespace Crest
       }
 
       taglist = getVectorPage(clearedTaglist, size, page);
-      for (std::string tag : taglist)
+      for (const std::string& tag : taglist)
       {
         std::string file_name = folder + "/" + tag + "/" + s_FS_GLOBALTAG_FILE;
         GlobalTagDto dto = findGlobalTag(tag);
@@ -319,7 +319,7 @@ namespace Crest
       std::vector<std::string> taglist = nameList(folder, ascending);
       std::vector<std::string> clearedTaglist;
 
-      for (std::string tag : taglist)
+      for (const std::string& tag : taglist)
       {
         std::string file_name = folder + "/" + tag + "/" + s_FS_TAG_FILE;
 
@@ -340,7 +340,7 @@ namespace Crest
       }
 
       taglist = getVectorPage(clearedTaglist, size, page);
-      for (std::string tag : taglist)
+      for (const std::string& tag : taglist)
       {
         std::string file_name = folder + "/" + tag + "/" + s_FS_TAG_FILE;
         TagDto dto = findTag(tag);
@@ -946,7 +946,7 @@ namespace Crest
     return js;
   }
 
-  std::vector<std::string> CrestFsClient::getVectorPage(std::vector<std::string> data, int size, int page)
+  std::vector<std::string> CrestFsClient::getVectorPage(const std::vector<std::string>& data, int size, int page)
   {
     std::vector<std::string> res;
     int dataSize = data.size();
@@ -1070,7 +1070,7 @@ namespace Crest
     return respond;
   }
 
-  bool CrestFsClient::isMatch(std::string word, long unsigned int n, std::string pattern, long unsigned int m)
+  bool CrestFsClient::isMatch(const std::string& word, long unsigned int n, const std::string& pattern, long unsigned int m)
   {
     if (m == pattern.size())
     {
@@ -1103,7 +1103,7 @@ namespace Crest
     return false;
   }
 
-  bool CrestFsClient::isMatch(std::string word, std::string pattern)
+  bool CrestFsClient::isMatch(const std::string& word, const std::string& pattern)
   {
     return isMatch(word, 0, pattern, 0);
   }
