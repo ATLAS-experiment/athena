@@ -97,7 +97,7 @@ namespace Analysis {
     float    mass = 0, energyfrc = NAN, energyTrk = 0, dsttomatlayer = NAN;
     int  n2trk = 0, npsec = 0;
 
-    if(basename.find("MSV") != 0){ 
+    if(!basename.starts_with ("MSV")) {
       if (myVertexInfoVKal) {
 	std::vector<xAOD::Vertex*>::const_iterator verticesBegin = myVertexInfoVKal->vertices().begin(); 
 	std::vector<xAOD::Vertex*>::const_iterator verticesEnd   = myVertexInfoVKal->vertices().end(); 
@@ -238,6 +238,7 @@ namespace Analysis {
     }
     std::vector< float > fittedPosition = std::vector<float>(nVtx+5,-1);
     std::vector< float > fittedCov = std::vector<float>(nVtx+5,-1); //only store the diagonal terms
+    if (fittedPosition.size() < 5) std::abort(); // suppress cppcheck warnings
     if(vtxPositions.rows()>4 ) {
       fittedPosition[0] = vtxPositions[Trk::jet_xv]; //position x,y,z of PV
       fittedPosition[1] = vtxPositions[Trk::jet_yv];
