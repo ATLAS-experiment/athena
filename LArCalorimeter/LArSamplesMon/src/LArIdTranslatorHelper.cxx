@@ -93,6 +93,7 @@ bool LArIdTranslatorHelper::LoadIdTranslator(const TString& file)
   // Load Translator root file containing channel info and mapping.
 
   // info from single cells
+  delete m_file;//Solve cppcheck warning
   m_file = new TFile(file);
   if(!m_file || !m_file->IsOpen()){
     printf("LArIdTranslatorHelper::LoadIdTranslator : File %s could not be found (see above TFile message).\n",file.Data());
