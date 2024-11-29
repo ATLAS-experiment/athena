@@ -80,6 +80,24 @@ namespace InDetDD {
                         int readoutSide = -1,
                         bool is3D=false,
                         InDetDD::DetectorType detectorType = InDetDD::Undefined);
+
+//Allow also setting of symmetry parameters
+
+      PixelModuleDesign(const double thickness,
+                        const bool phiSymmetric,
+                        const bool etaSymmetric,
+                        const bool depthSymmetric,
+                        const int circuitsPerColumn,
+                        const int circuitsPerRow,
+                        const int cellColumnsPerCircuit,
+                        const int cellRowsPerCircuit,
+                        const int diodeColumnsPerCircuit,
+                        const int diodeRowsPerCircuit,
+                        std::shared_ptr<const PixelDiodeMatrix> matrix,
+                        InDetDD::CarrierType carrierType,
+                        int readoutSide = -1,
+                        bool is3D=false,
+                        InDetDD::DetectorType detectorType = InDetDD::Undefined);
     
       // Destructor:
       virtual ~PixelModuleDesign() = default;
