@@ -21,19 +21,19 @@ namespace MuonR4 {
     class SpacePointBucket;
     /** @brief Returns the MuonSimHit, if there's any, matched to the uncalibrated muon measurement. */
     const xAOD::MuonSimHit* getTruthMatchedHit(const xAOD::UncalibratedMeasurement& prdHit);
-    /** @brief: Returns all truth hits matched to a xAOD::MuonSegment */
-    std::unordered_set<const xAOD::MuonSimHit*> getTruthMatchedHits(const xAOD::MuonSegment& segment);
-    /** @brief Returns all truth hits that are matched to a collection of space points. For each spacepoint, the hit truth matching to
+    /** @brief: Returns all sim hits matched to a xAOD::MuonSegment */
+    std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const xAOD::MuonSegment& segment);
+    /** @brief Returns all sim hits that are matched to a collection of space points. For each spacepoint, the hit truth matching to
      *         the primary and secondary prd are retrieved. The secondary hit is only added if it's different from the primary one. */
-    std::unordered_set<const xAOD::MuonSimHit*> getTruthMatchedHits(const std::vector<const SpacePoint*>& spacePoints);
-    /** @brief Returns all truth hits that are matched to a collection of calibrated space points. */
-    std::unordered_set<const xAOD::MuonSimHit*> getTruthMatchedHits(const std::vector<const CalibratedSpacePoint*>& measurements);
-    /** @brief Returns all truth hits that are matched to the reconstructed segment */
-    std::unordered_set<const xAOD::MuonSimHit*> getTruthMatchedHits(const Segment& seg);
-    /** @brief Returns all truth hits that are matched to the segmentSeed */
-    std::unordered_set<const xAOD::MuonSimHit*> getTruthMatchedHits(const SegmentSeed& seed);
-    /** @brief Returns all truth hits that are matched to the spacePoint bucket */
-    std::unordered_set<const xAOD::MuonSimHit*> getTruthMatchedHits(const SpacePointBucket& bucket);
+    std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const std::vector<const SpacePoint*>& spacePoints);
+    /** @brief Returns all sim hits that are matched to a collection of calibrated space points. */
+    std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const std::vector<const CalibratedSpacePoint*>& measurements);
+    /** @brief Returns all sim hits that are matched to the reconstructed segment */
+    std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const Segment& seg);
+    /** @brief Returns all sim hits that are matched to the segmentSeed */
+    std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const SegmentSeed& seed);
+    /** @brief Returns all sim hits that are matched to the spacePoint bucket */
+    std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const SpacePointBucket& bucket);
 }
 
 #endif

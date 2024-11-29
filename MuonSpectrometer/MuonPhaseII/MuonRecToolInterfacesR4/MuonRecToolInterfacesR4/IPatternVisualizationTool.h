@@ -107,18 +107,17 @@ namespace MuonValR4{
                                           const std::string& extraLabel,
                                           PrimitiveVec&& extraPaints) const = 0;
 
-            /** @brief Returns whether the hit has been used in the truth-segment building
+            /** @brief Returns whether the hit has been used on the labeled segments we refer to (e.g. truth or data Zµµ)
              *  @param hit: Reference to the hit to check */
-            virtual bool isTruthMatched(const MuonR4::SpacePoint& hit) const = 0;
-            virtual bool isTruthMatched(const xAOD::UncalibratedMeasurement& hit) const = 0;
+            virtual bool isLabeled(const MuonR4::SpacePoint& hit) const = 0;
+            virtual bool isLabeled(const xAOD::UncalibratedMeasurement& hit) const = 0;
             
             
-            using TruthSegmentSet = std::unordered_set<const xAOD::MuonSegment*>;
-            /** @brief Fetches all truth segments where at least one measurement in the list was used to 
-             *         build them 
+            using LabeledSegmentSet = std::unordered_set<const xAOD::MuonSegment*>;
+            /** @brief Fetches all labeled (e.g. by truth or Zµµ reco) segments containing at least one measurement in the list passed as arg 
              *  @param hits: Vector of hits to search */
-            virtual TruthSegmentSet fetchTruthSegs(const std::vector<const MuonR4::SpacePoint*>& hits) const = 0;
-            virtual TruthSegmentSet fetchTruthSegs(const std::vector<const xAOD::UncalibratedMeasurement*>& hits) const = 0;
+            virtual LabeledSegmentSet getLabeledSegments(const std::vector<const MuonR4::SpacePoint*>& hits) const = 0;
+            virtual LabeledSegmentSet getLabeledSegments(const std::vector<const xAOD::UncalibratedMeasurement*>& hits) const = 0;
 
     };
 }
