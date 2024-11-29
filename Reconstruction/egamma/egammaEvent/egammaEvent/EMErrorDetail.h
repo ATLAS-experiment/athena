@@ -31,14 +31,14 @@ class EMErrorDetail : public egDetail
  public:
 
   /** @brief Default constructor*/
-  EMErrorDetail(); 
+  EMErrorDetail();
 
   /** @brief Destructor*/
   virtual ~EMErrorDetail() = default;
 
-  //void print() const; 
+  //void print() const;
   virtual const std::string& className() const;
-  
+
   /** @brief */
   virtual double parameter(egammaParameters::ParamDef) const ;
   /** @brief */
@@ -48,13 +48,13 @@ class EMErrorDetail : public egDetail
   /** @brief */
   virtual bool   hasIntParameter(egammaParameters::ParamDef) const ;
   /** @brief general set method for parameters */
-  void set_parameter(egammaParameters::ParamDef, double, bool overwrite=false) ; 
-  
+  void set_parameter(egammaParameters::ParamDef, double, bool overwrite=false) ;
+
   // obsolete @brief Fill the details of the object. This is the main function for building the detail*/
-  //template <int DIM, class T, class S> void fillEMErrorDetail(const egamma*, const Trk::ParametersT< DIM, T, S>*, 
-  //                                                            const EMClusterErrorsParametrizations*, 
+  //template <int DIM, class T, class S> void fillEMErrorDetail(const egamma*, const Trk::ParametersT< DIM, T, S>*,
+  //                                                            const EMClusterErrorsParametrizations*,
   //							      const Amg::Vector3D&);
-  
+
   // obsolete: Fill and get the track covariance matrix from the method where track and cluster information are combined*/
   //bool fillEMTrackCombinedErrorMatrix(const AmgSymMatrix(5)& combinedMatrix);
 
@@ -91,18 +91,18 @@ class EMErrorDetail : public egDetail
   /****************************************************************/
   /* Converted photon related parameters  :   Get Parameters*/
   /****************************************************************/
-  
+
   double EMconvertedphoton_perigee_d0 ()  const;
   double EMconvertedphoton_perigee_z0 ()  const;
-  double EMconvertedphoton_perigee_phi0 ()  const; 
+  double EMconvertedphoton_perigee_phi0 ()  const;
   double EMconvertedphoton_perigee_theta ()  const;
 //   double EMconvertedphoton_perigee_Eclus ()  const;
   double EMconvertedphoton_perigee_eta ()  const;
-  double EMconvertedphoton_perigee_momentum ()  const; 
+  double EMconvertedphoton_perigee_momentum ()  const;
 
-  double EMconvertedphoton_perigee_Covd0d0 ()  const;    
-  double EMconvertedphoton_perigee_Covd0z0 ()  const;    
-  double EMconvertedphoton_perigee_Covd0phi ()  const;  
+  double EMconvertedphoton_perigee_Covd0d0 ()  const;
+  double EMconvertedphoton_perigee_Covd0z0 ()  const;
+  double EMconvertedphoton_perigee_Covd0phi ()  const;
   double EMconvertedphoton_perigee_Covd0theta ()  const;
 //   double EMconvertedphoton_perigee_Covd0Eclus ()  const;
   double EMconvertedphoton_perigee_Covz0z0   ()  const;
@@ -123,15 +123,15 @@ class EMErrorDetail : public egDetail
 
   void EMconvertedphoton_perigee_d0 (double);
   void EMconvertedphoton_perigee_z0 (double);
-  void EMconvertedphoton_perigee_phi0 (double); 
+  void EMconvertedphoton_perigee_phi0 (double);
   void EMconvertedphoton_perigee_theta (double);
 //   void EMconvertedphoton_perigee_Eclus (double);
   void EMconvertedphoton_perigee_eta (double);
   void EMconvertedphoton_perigee_momentum (double);
-    
-  void EMconvertedphoton_perigee_Covd0d0 (double);    
-  void EMconvertedphoton_perigee_Covd0z0 (double) ;    
-  void EMconvertedphoton_perigee_Covd0phi (double) ;  
+
+  void EMconvertedphoton_perigee_Covd0d0 (double);
+  void EMconvertedphoton_perigee_Covd0z0 (double) ;
+  void EMconvertedphoton_perigee_Covd0phi (double) ;
   void EMconvertedphoton_perigee_Covd0theta (double) ;
 //   void EMconvertedphoton_perigee_Covd0Eclus (double) ;
   void EMconvertedphoton_perigee_Covz0z0   (double) ;
@@ -164,8 +164,8 @@ class EMErrorDetail : public egDetail
    /** @brief eta of the track fit */
   double EMtrack_perigee_eta    ()  const;
   /** @brief momentum of the track fit */
-  double EMtrack_perigee_momentum ()  const; 
-  
+  double EMtrack_perigee_momentum ()  const;
+
   /** @brief Covariance matrix item  (d0,d0)*/
   double EMtrack_perigee_Covd0d0         () const;
   /** @brief Covariance matrix item (d0,z0) */
@@ -197,7 +197,7 @@ class EMErrorDetail : public egDetail
 //   /** @brief Covariance matrix item (Eclus, Eclus) */
 //   double EMtrack_perigee_CovEclusEclus () const;
 
-      
+
   /***************************************************/
   /* Track related parameters  :   Set Parameters*/
   /***************************************************/
@@ -218,7 +218,7 @@ class EMErrorDetail : public egDetail
   /** @brief Set the theta of the track fit */
   void EMtrack_perigee_momentum (double)  ;
 
-  
+
   /** @brief Set the Covariance matrix item (d0,d0) */
   void EMtrack_perigee_Covd0d0         (double) ;
   /** @brief Set the Covariance matrix item (d0,z0) */
@@ -248,19 +248,19 @@ class EMErrorDetail : public egDetail
 //   /** @brief Set the Covariance matrix item (theta,Eclus) */
 //   void EMtrack_perigee_CovthetaEclus  (double) ;
 //   /** @brief Set the Covariance matrix item (Eclus,Eclus) */
-//   void EMtrack_perigee_CovEclusEclus (double) ; 
+//   void EMtrack_perigee_CovEclusEclus (double) ;
 
   /***************************************************/
   /* Photon related parameters : Get Parameters */
   /***************************************************/
-    
-  /** @brief  cluster eta */    
+
+  /** @brief  cluster eta */
   double EMphoton_eta ()  const;
   /**  @brief  cluster phi */
   double EMphoton_phi0 ()  const;
-  /** @brief  cluster energy */ 
+  /** @brief  cluster energy */
   double EMphoton_Eclus ()  const;
-   
+
 
   /** @brief Covariance matrix item (Eta,Eta) */
   double EMphoton_Covetaeta      () const;
@@ -281,13 +281,13 @@ class EMErrorDetail : public egDetail
   /* Photon related parameters : Set Parameters */
   /***************************************************/
 
-  /** @brief  Set cluster eta */    
+  /** @brief  Set cluster eta */
   void EMphoton_eta (double);
   /**  @brief  Set cluster phi */
   void EMphoton_phi0 (double);
-  /** @brief  Set cluster energy */ 
+  /** @brief  Set cluster energy */
   void EMphoton_Eclus (double);
-   
+
 
   /** @brief Set covariance matrix item (Eta,Eta) */
   void EMphoton_Covetaeta      (double);
@@ -337,17 +337,17 @@ class EMErrorDetail : public egDetail
   void EMtrack_comb_CovphiP    (double) ;
   void EMtrack_comb_Covetaeta   (double) ;
   void EMtrack_comb_CovetaP  (double) ;
-  void EMtrack_comb_CovPP (double) ; 
+  void EMtrack_comb_CovPP (double) ;
 
 
   /***************************************************/
   /* Link Index for tracks and vertices */
   /***************************************************/
- 
-  /** @brief  link index */    
+
+  /** @brief  link index */
   int linkIndex ()  const;
- 
-  /** @brief  Set link index */    
+
+  /** @brief  Set link index */
   void set_linkIndex (int);
 
   /** @brief  Does the track of vertex have silicon hits */
@@ -355,25 +355,16 @@ class EMErrorDetail : public egDetail
   /** @brief  set whether the track of vertex have silicon hits */
   void set_hasSiliconHits (int x);
 
-  /** @brief get the position eta error; since this is used by the 
-      EMExtrapolCaloConversion tool, it has to be public */
-  static double getClusterEtaPosError(const egamma*, 
-			       const EMClusterErrorsParametrizations*,
-			       bool forcePhoton = false) ;
-
 private:
 
-  void set_parameterInt(egammaParameters::ParamDef, int, bool overwrite=false) ; 
+  void set_parameterInt(egammaParameters::ParamDef, int, bool overwrite=false) ;
 
   /** @brief Get the error on cluster energy, eta and phi */
   static double caloEta(const egamma*, double clusterEta) ;
-  static double getClusterEnergyError(const egamma*, const EMClusterErrorsParametrizations*, bool forcePhoton = false) ;
-  static double getClusterEtaError(const egamma*, const EMClusterErrorsParametrizations*, bool forcePhoton = false) ;
-  static double getClusterPhiError(const egamma*, const EMClusterErrorsParametrizations*, bool forcePhoton = false) ;
 
-    
+
   /** Obsolete Fill the perigree parameter for converted photon */
-  //template <int DIM, class T, class S> bool fillConvertedPhotonMatrixElements(const Trk::ParametersT< DIM, T, S>* ); 
+  //template <int DIM, class T, class S> bool fillConvertedPhotonMatrixElements(const Trk::ParametersT< DIM, T, S>* );
 
   /** Obsolete Fill the perigree parameter for converted photon  */
   //bool fillConvertedPhotonErrorMatrix(const AmgSymMatrix(5)*);
@@ -385,7 +376,7 @@ private:
   //bool fillTrackPerigeeErrorMatrix(const AmgSymMatrix(5)*);
 
   /* Obsolete: Fill the photon parameter details */
-  //bool fillPhotonMatrixElements(const egamma*, const EMClusterErrorsParametrizations*, 
+  //bool fillPhotonMatrixElements(const egamma*, const EMClusterErrorsParametrizations*,
   //				const Amg::Vector3D&, bool forcePhoton=false);
   //Obsolete Fill the perigree error details */
   //bool fillPhotonErrorMatrix(const egamma*, const EMClusterErrorsParametrizations*, bool);
@@ -404,6 +395,6 @@ private:
 
 };
 
-#endif 
+#endif
 
 
