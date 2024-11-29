@@ -1,18 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DiTauRec/DiTauBuilder.h"
-#include "DiTauRec/DiTauToolBase.h"
-#include "DiTauRec/DiTauCandidateData.h"
-
-#include "xAODJet/JetContainer.h"
-#include "xAODTau/DiTauJetContainer.h"
-#include "xAODTau/DiTauJetAuxContainer.h"
-
-#include "StoreGate/WriteHandle.h"
-#include "StoreGate/ReadHandle.h"
-
 
 DiTauBuilder::DiTauBuilder( const std::string& name, ISvcLocator* pSvcLocator ) : 
   AthReentrantAlgorithm( name, pSvcLocator ),

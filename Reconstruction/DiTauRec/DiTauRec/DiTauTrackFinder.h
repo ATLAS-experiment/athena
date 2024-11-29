@@ -1,20 +1,16 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DITAUREC_DITAUTRACKFINDER_H
 #define DITAUREC_DITAUTRACKFINDER_H
 
 #include "DiTauToolBase.h"
-
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
-
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/TrackParticleContainer.h"
-
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
-
 
 class DiTauTrackFinder : public DiTauToolBase {
  public:
