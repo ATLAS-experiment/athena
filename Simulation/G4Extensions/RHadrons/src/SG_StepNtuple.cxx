@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SG_StepNtuple.h"
@@ -11,6 +11,8 @@
 #include "GaudiKernel/INTupleSvc.h"
 #include "GaudiKernel/NTuple.h"
 #include "GaudiKernel/SmartDataPtr.h"
+
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "SimHelpers/ServiceAccessor.h"
 
@@ -108,15 +110,17 @@ namespace G4UA
   void SG_StepNtuple::UserSteppingAction(const G4Step* aStep)
   {
     if(m_nsteps<50000){
-      int pdg = aStep->GetTrack()->GetDefinition()->GetPDGEncoding();
+      const int pdg_id = aStep->GetTrack()->GetDefinition()->GetPDGEncoding();
       bool rhad=false;
-      if (std::find(m_rhs.begin(),m_rhs.end(),std::abs(pdg))!=m_rhs.end()) {
+      if (std::find(m_rhs.begin(),m_rhs.end(),std::abs(pdg_id))!=m_rhs.end()) {
         rhad=true;
       }
 
       //
-      if (!rhad && isSUSYParticle(std::abs(pdg))){
-        std::cout<<"ACH139: SG_StepNtuple: other code thinks "<<pdg<<" is an Rhadron!"<<std::endl;
+      if (!rhad && (MC::isSquarkLH(pdg_id) ||
+                    pdg_id == 1000021 || // gluino
+                    MC::isRHadron(pdg_id))) {
+        ATH_MSG_DEBUG (" TruthUtils classifies "<<pdg_id<<" as an R-Hadron, gluino or LH Squark!");
         rhad=true;
       }
       //
@@ -141,20 +145,20 @@ namespace G4UA
         if (firstslow || aStep->GetTrack()->GetCurrentStepNumber()<=1 || aStep->GetPostStepPoint()->GetKineticEnergy()==0.){
 
           //
-          //int id = aStep->GetTrack()->GetDynamicParticle()->GetDefinition()->GetPDGEncoding();
-          int id = std::abs(aStep->GetTrack()->GetDynamicParticle()->GetDefinition()->GetPDGEncoding());
-          if (id>=1000000 && id<=1100000 && isSUSYParticle(id)){
-            m_rh[m_nsteps] = 1;//other code agrees it's an Rhadron
+          if (MC::isSquarkLH(pdg_id) ||
+           pdg_id == 1000021 || // gluino
+           MC::isRHadron(pdg_id)) {
+            m_rh[m_nsteps] = 1;// TruthUtils classifies this particle as an R-Hadron, gluino or LH squark
           }
           else{
-            m_rh[m_nsteps] = 0;//other code doesn't agree it's an Rhadron
+            m_rh[m_nsteps] = 0;// particle only passes the RHadronPDGIDList property check
           }
           //
 
           if (aStep->GetPreStepPoint()->GetGlobalTime()==0) m_rhadronIndex++;
           m_rhid[m_nsteps]=m_rhadronIndex;
 
-          m_pdg[m_nsteps]=aStep->GetTrack()->GetDefinition()->GetPDGEncoding();
+          m_pdg[m_nsteps]=pdg_id;
           m_charge[m_nsteps]=aStep->GetTrack()->GetDefinition()->GetPDGCharge();
           m_dep[m_nsteps]=aStep->GetTotalEnergyDeposit();
           m_mass[m_nsteps]=aStep->GetTrack()->GetDefinition()->GetPDGMass();
@@ -188,9 +192,9 @@ namespace G4UA
       } //rhad true
       else {
 
-        //KILL the particles here, so we don't waste time in GEANT tracking what happens to it!
-        if (std::abs(pdg)>1000000 && std::abs(pdg)<10000000){
-          std::cout<<"ACH129: SG_StepNtuple: Killing non-rh track with pdg "<<pdg<<std::endl;
+        //KILL the particles here, so we don't waste time in GEANT4 tracking what happens to it!
+        if (MC::isBSM(pdg_id)) { //  flag SUSY/BSM particles which are skipped
+          ATH_MSG_DEBUG ("UserSteppingAction(): Killing uninteresting track with pdg_id "<<pdg_id);
         }
         aStep->GetTrack()->SetTrackStatus(fKillTrackAndSecondaries);
         const G4TrackVector *tv = aStep->GetSecondary();
@@ -203,20 +207,6 @@ namespace G4UA
       } // not an rhad
 
     } //m_nsteps<50000
-  }
-
-  bool SG_StepNtuple::isSUSYParticle(const int id) const
-  {
-    if (id==1000021 || id==1000005 || id==1000006 || id==1000512 || id==1000522 || id==1000991 || id==1000993 ||
-        id==1000612 || id==1000622 || id==1000632 || id==1000642 || id==1000652 || id==1005211 ||
-        id==1006113 || id==1006211 || id==1006213 || id==1006223 || id==1006311 ||
-        id==1006313 || id==1006321 || id==1006323 || id==1006333 ||
-        id==1009111 || id==1009113 || id==1009211 || id==1009213 || id==1009311 ||
-        id==1009313 || id==1009321 || id==1009323 || id==1009223 || id==1009333 ||
-        id==1092112 || id==1091114 || id==1092114 || id==1092212 || id==1092214 || id==1092224 ||
-        id==1093114 || id==1093122 || id==1093214 || id==1093224 || id==1093314 || id==1093324 || id==1093334)
-      return true;
-    return false;
   }
 
 } // namespace G4UA

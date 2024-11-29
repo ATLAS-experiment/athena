@@ -27,7 +27,6 @@ public:
 
 protected:
 
-  bool isSUSYParticle(const int) const;
   TrackFastSimSD * m_fsSD{};
   bool m_init{false};
   std::string m_fsSDname{""};
