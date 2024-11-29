@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackWriteFastSim/StoppedParticleFastSim.h"
@@ -20,8 +20,6 @@
 
 StoppedParticleFastSim::StoppedParticleFastSim(const std::string& name, const std::string& fsSDname)
   : G4VFastSimulationModel(name)
-  , m_fsSD(nullptr)
-  , m_init(false)
   , m_fsSDname(fsSDname)
 {
 }
@@ -35,7 +33,7 @@ G4bool StoppedParticleFastSim::ModelTrigger(const G4FastTrack& fastTrack)
 {
   // Trigger if the energy is below our threshold or if the time is over 150 ns
   int id = fastTrack.GetPrimaryTrack()->GetDynamicParticle()->GetDefinition()->GetPDGEncoding();
-  if (id<1000000 || id>1100000) return true;
+  if (id<1000000 || id>1100000) return true; // skip SM particles and super-partners of RH-fermions
   else if (isSUSYParticle(id)){
     G4Material * mat = fastTrack.GetPrimaryTrack()->GetMaterial();
     double minA=1500000.;
@@ -58,16 +56,22 @@ void StoppedParticleFastSim::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
 
     G4SDManager *sdm = G4SDManager::GetSDMpointer();
     G4VSensitiveDetector * vsd = sdm->FindSensitiveDetector( m_fsSDname );
-    if (!vsd) {
-      G4cout << "StoppedParticleFastSim::DoIt WARNING Could not get TrackFastSimSD sensitive detector.  If you are not writing track records this is expected." << G4endl;
+    if (vsd) {
       m_fsSD = dynamic_cast<TrackFastSimSD*>(vsd);
       if (!m_fsSD) {
-        G4cout << "StoppedParticleFastSim::DoIt WARNING Could not cast the SD.  If you are not writing track records this is expected." << G4endl;
+        G4ExceptionDescription description;
+        description << "DoIt: Could not cast the SD into an instance of TrackFasSimSD.";
+        G4Exception("StoppedParticleFastSim", "MissingTrackFastSimSD", FatalException, description);
+        abort();
       }
-    } // found the SD
+    }
+    else {
+      G4cout << "StoppedParticleFastSim::DoIt INFO Could not get TrackFastSimSD sensitive detector.  If you are not writing track records this is expected." << G4endl;
+    }
+    // found the SD
   } // End of lazy init
 
-  if (isSUSYParticle(fastTrack.GetPrimaryTrack()->GetDynamicParticle()->GetDefinition()->GetPDGEncoding()) &&
+  if (m_fsSD && isSUSYParticle(fastTrack.GetPrimaryTrack()->GetDynamicParticle()->GetDefinition()->GetPDGEncoding()) &&
       m_fsSD) {
     m_fsSD->WriteTrack( fastTrack.GetPrimaryTrack() , false , true );
   }

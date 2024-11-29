@@ -5,25 +5,25 @@ from SimulationConfig.SimEnums import CalibrationRun, CavernBackground, LArParam
 def getDetectorsFromRunArgs(flags, runArgs):
     """Generate detector list based on runtime arguments."""
     if hasattr(runArgs, 'detectors'):
-        detectors = runArgs.detectors
+        detectors = set(runArgs.detectors)
     else:
         from AthenaConfiguration.AutoConfigFlags import getDefaultDetectors
         detectors = set(getDefaultDetectors(flags.GeoModel.AtlasVersion, flags.GeoModel.SQLiteDB, flags.GeoModel.SQLiteDBFullPath, includeForward=False))
 
     # Support switching on Forward Detectors
     if hasattr(runArgs, 'LucidOn'):
-        detectors = detectors.add('Lucid')
+        detectors.add('Lucid')
     if hasattr(runArgs, 'ZDCOn'):
-        detectors = detectors.add('ZDC')
+        detectors.add('ZDC')
     if hasattr(runArgs, 'AFPOn'):
-        detectors = detectors.add('AFP')
+        detectors.add('AFP')
     if hasattr(runArgs, 'ALFAOn'):
-        detectors = detectors.add('ALFA')
+        detectors.add('ALFA')
     if hasattr(runArgs, 'FwdRegionOn'):
-        detectors = detectors.add('FwdRegion')
+        detectors.add('FwdRegion')
     # TODO here support switching on Cavern geometry
     # if hasattr(runArgs, 'CavernOn'):
-    #     detectors = detectors.add('Cavern')
+    #     detectors.add('Cavern')
 
     # Fatras does not support simulating the BCM, so have to switch that off
     if flags.Sim.ISF.Simulator.usesFatras():

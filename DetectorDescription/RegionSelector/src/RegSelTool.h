@@ -69,10 +69,14 @@ public:
    
 protected:
 
-  //! @method lookup, actually retrieve the lookup table as conditions data - might combine with handle()
-  //  const RegSelSiLUT* lookup() const;
-  const IRegSelLUT* lookup() const;
+  //! @method lookup, actually retrieve the lookup table as conditions data
 
+  const IRegSelLUT* lookup( const EventContext& ctx ) const override;
+
+  /// old version kept in for validation ...
+  const IRegSelLUT* lookup() const override;
+
+  
 protected:
 
   void cleanup( std::vector<IdentifierHash>& idvec ) const;
