@@ -101,8 +101,8 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4159_s4114_r14838_tid34171429_00/RDO.34171429._000005.pool.root.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4159_s4114_r14838_tid34171429_00/RDO.34171429._000019.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4369_s4370_r16210_tid42196707_00/RDO.42196707._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4369_s4370_r16210_tid42196707_00/RDO.42196707._000002.pool.root.1"
         ]
     },
     "ttbar_pu80": {
@@ -202,36 +202,40 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.601190.PhPy8EG_AZNLO_Zmumu.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34171425_00/RDO.34171425._000009.pool.root.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.601190.PhPy8EG_AZNLO_Zmumu.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34171425_00/RDO.34171425._000013.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.601190.PhPy8EG_AZNLO_Zmumu.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42133939_00/RDO.42133939._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.601190.PhPy8EG_AZNLO_Zmumu.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42133939_00/RDO.42133939._000002.pool.root.1"
         ]
     },
     "Single_mu": {
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.901970.PG_mu_Pt4to100.recon.RDO.e8544_e8528_s4159_s4114_r14815_tid34085703_00/RDO.34085703._000009.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.901970.PG_mu_Pt4to100.recon.RDO.e8544_e8528_s4369_s4370_r16210_tid42196786_00/RDO.42196786._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.901970.PG_mu_Pt4to100.recon.RDO.e8544_e8528_s4369_s4370_r16210_tid42196786_00/RDO.42196786._000002.pool.root.1"
         ]
     },
     "Single_mu_pu": {
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.901970.PG_mu_Pt4to100.recon.RDO.e8544_e8528_s4159_s4114_r14814_tid34085690_00/RDO.34085690._000007.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.901970.PG_mu_Pt4to100.recon.RDO.e8544_e8528_s4369_s4370_r16083_tid42190407_00/RDO.42190407._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.901970.PG_mu_Pt4to100.recon.RDO.e8544_e8528_s4369_s4370_r16083_tid42190407_00/RDO.42190407._000002.pool.root.1"
         ]
     },
     "Single_mu_larged0": {
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.901971.PG_mu_Pt4to100_vertxy20.recon.RDO.e8544_e8528_s4159_s4114_r14815_tid34085705_00/RDO.34085705._000010.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.901971.PG_mu_Pt4to100_vertxy20.recon.RDO.e8544_e8528_s4369_s4370_r16210_tid42196789_00/RDO.42196789._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.901971.PG_mu_Pt4to100_vertxy20.recon.RDO.e8544_e8528_s4369_s4370_r16210_tid42196789_00/RDO.42196789._000002.pool.root.1"
         ]
     },
     "Single_mu_larged0_pu": {
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.901971.PG_mu_Pt4to100_vertxy20.recon.RDO.e8544_e8528_s4159_s4114_r14814_tid34085693_00/RDO.34085693._000004.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.901971.PG_mu_Pt4to100_vertxy20.recon.RDO.e8544_e8528_s4369_s4370_r16083_tid42190413_00/RDO.42190413._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.901971.PG_mu_Pt4to100_vertxy20.recon.RDO.e8544_e8528_s4369_s4370_r16083_tid42190413_00/RDO.42190413._000002.pool.root.1"
         ]
     },
     "Single_mu_Run4": {
@@ -245,52 +249,56 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.801921.P8B_A14_CTEQ6L1_Bs_Jpsim3p5mu3p5_phi.recon.RDO.e8542_e8528_s4159_s4114_r14799_tid34182692_00/RDO.34182692._000001.pool.root.1",
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.801921.P8B_A14_CTEQ6L1_Bs_Jpsim3p5mu3p5_phi.recon.RDO.e8542_e8528_s4159_s4114_r14799_tid34182692_00/RDO.34182692._000020.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.801921.P8B_A14_CTEQ6L1_Bs_Jpsim3p5mu3p5_phi.recon.RDO.e8542_e8528_s4369_s4370_r16083_tid42150380_00/RDO.42150380._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.801921.P8B_A14_CTEQ6L1_Bs_Jpsim3p5mu3p5_phi.recon.RDO.e8542_e8528_s4369_s4370_r16083_tid42150380_00/RDO.42150380._000002.pool.root.1"
 	]	
     },
     "Zee": {
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.601189.PhPy8EG_AZNLO_Zee.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34171423_00/RDO.34171423._000001.pool.root.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.601189.PhPy8EG_AZNLO_Zee.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34171423_00/RDO.34171423._000009.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.601189.PhPy8EG_AZNLO_Zee.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42133937_00/RDO.42133937._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.601189.PhPy8EG_AZNLO_Zee.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42133937_00/RDO.42133937._000002.pool.root.1"
         ]
     },
     "Jpsiee": {
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.801272.P8B_A14_CTEQ6L1_Jpsie3e3.recon.RDO.e8542_e8528_s4159_s4114_r14799_tid34184203_00/RDO.34184203._000009.pool.root.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.801272.P8B_A14_CTEQ6L1_Jpsie3e3.recon.RDO.e8542_e8528_s4159_s4114_r14799_tid34184203_00/RDO.34184203._000015.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.801272.P8B_A14_CTEQ6L1_Jpsie3e3.recon.RDO.e8542_e8586_s4369_s4370_r16083_tid42150424_00/RDO.42150424._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.801272.P8B_A14_CTEQ6L1_Jpsie3e3.recon.RDO.e8542_e8586_s4369_s4370_r16083_tid42150424_00/RDO.42150424._000002.pool.root.1"
         ]
     },
     "Single_el": {
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.901968.PG_e_Et7to80.recon.RDO.e8544_e8528_s4159_s4114_r14815_tid34085699_00/RDO.34085699._000001.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.901968.PG_e_Et7to80.recon.RDO.e8544_e8528_s4369_s4370_r16210_tid42196781_00/RDO.42196781._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.901968.PG_e_Et7to80.recon.RDO.e8544_e8528_s4369_s4370_r16210_tid42196781_00/RDO.42196781._000002.pool.root.1"
         ]
     },
     "Single_el_pu40": {
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.901968.PG_e_Et7to80.recon.RDO.e8544_e8528_s4159_s4114_r14814_tid34085684_00/RDO.34085684._000002.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.901968.PG_e_Et7to80.recon.RDO.e8544_e8528_s4369_s4370_r16083_tid42190395_00/RDO.42190395._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.901968.PG_e_Et7to80.recon.RDO.e8544_e8528_s4369_s4370_r16083_tid42190395_00/RDO.42190395._000002.pool.root.1"
         ]
     },
     "Single_el_larged0": {
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.901969.PG_e_Et7to80_vertxy20.recon.RDO.e8544_e8528_s4159_s4114_r14815_tid34085701_00/RDO.34085701._000007.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.901969.PG_e_Et7to80_vertxy20.recon.RDO.e8544_e8528_s4369_s4370_r16210_tid42196784_00/RDO.42196784._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.901969.PG_e_Et7to80_vertxy20.recon.RDO.e8544_e8528_s4369_s4370_r16210_tid42196784_00/RDO.42196784._000002.pool.root.1"
         ]
     },
     "Single_el_larged0_pu40": {
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.901969.PG_e_Et7to80_vertxy20.recon.RDO.e8544_e8528_s4159_s4114_r14814_tid34085687_00/RDO.34085687._000001.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.901969.PG_e_Et7to80_vertxy20.recon.RDO.e8544_e8528_s4369_s4370_r16083_tid42190401_00/RDO.42190401._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.901969.PG_e_Et7to80_vertxy20.recon.RDO.e8544_e8528_s4369_s4370_r16083_tid42190401_00/RDO.42190401._000002.pool.root.1"
         ]
     },
     "Single_el_Run4": {
@@ -304,36 +312,32 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.601191.PhPy8EG_AZNLO_Ztautau.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34171427_00/RDO.34171427._000002.pool.root.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.601191.PhPy8EG_AZNLO_Ztautau.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34171427_00/RDO.34171427._000013.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.601191.PhPy8EG_AZNLO_Ztautau.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42134185_00/RDO.42134185._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.601191.PhPy8EG_AZNLO_Ztautau.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42134185_00/RDO.42134185._000002.pool.root.1"
         ]
     },
     "StauStau": {
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.516640.MGPy8EG_A14NNPDF23LO_StauStauLLP_100_0_1ns.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34171435_00/RDO.34171435._000004.pool.root.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.516640.MGPy8EG_A14NNPDF23LO_StauStauLLP_100_0_1ns.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34171435_00/RDO.34171435._000011.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.516640.MGPy8EG_A14NNPDF23LO_StauStauLLP_100_0_1ns.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42134894_00/RDO.42134894._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.516640.MGPy8EG_A14NNPDF23LO_StauStauLLP_100_0_1ns.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42134894_00/RDO.42134894._000002.pool.root.1"
         ]
     },
     "SelSel": {
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.516757.MGPy8EG_A14NNPDF23LO_SelSelLLP_100_0_1ns.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34200263_00/RDO.34200263._000001.pool.root.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.516757.MGPy8EG_A14NNPDF23LO_SelSelLLP_100_0_1ns.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34200263_00/RDO.34200263._000002.pool.root.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.516757.MGPy8EG_A14NNPDF23LO_SelSelLLP_100_0_1ns.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34200263_00/RDO.34200263._000005.pool.root.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.516757.MGPy8EG_A14NNPDF23LO_SelSelLLP_100_0_1ns.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34200263_00/RDO.34200263._000006.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.516757.MGPy8EG_A14NNPDF23LO_SelSelLLP_100_0_1ns.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42135009_00/RDO.42135009._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.516757.MGPy8EG_A14NNPDF23LO_SelSelLLP_100_0_1ns.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42135009_00/RDO.42135009._000002.pool.root.1"
         ]
     },
     "SmuSmu": {
         "source": "mc",
         "format": "RDO",
         "paths": [
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.516697.MGPy8EG_A14NNPDF23LO_SmuSmuLLP_100_0_1ns.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34200261_00/RDO.34200261._000007.pool.root.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.516697.MGPy8EG_A14NNPDF23LO_SmuSmuLLP_100_0_1ns.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34200261_00/RDO.34200261._000008.pool.root.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.516697.MGPy8EG_A14NNPDF23LO_SmuSmuLLP_100_0_1ns.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34200261_00/RDO.34200261._000009.pool.root.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.516697.MGPy8EG_A14NNPDF23LO_SmuSmuLLP_100_0_1ns.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34200261_00/RDO.34200261._000010.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.516697.MGPy8EG_A14NNPDF23LO_SmuSmuLLP_100_0_1ns.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42135007_00/RDO.42135007._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.516697.MGPy8EG_A14NNPDF23LO_SmuSmuLLP_100_0_1ns.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42135007_00/RDO.42135007._000002.pool.root.1"
         ]
     },
     "SlepSlep": {
@@ -349,7 +353,8 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.545836.MGPy8EG_A14NNPDF23LO_TT_RPVdirectBL_2400_tau_3ns.recon.RDO.e8582_e8528_s4418_s4370_r16025_tid41380573_00/RDO.41380573._000002.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.545836.MGPy8EG_A14NNPDF23LO_TT_RPVdirectBL_2400_tau_3ns.recon.RDO.e8582_e8528_s4418_s4370_r16083_tid42189726_00/RDO.42189726._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/valid1.545836.MGPy8EG_A14NNPDF23LO_TT_RPVdirectBL_2400_tau_3ns.recon.RDO.e8582_e8528_s4418_s4370_r16083_tid42189726_00/RDO.42189726._000002.pool.root.1"
         ]
     },
     "ttbar_stau_bphys": {
