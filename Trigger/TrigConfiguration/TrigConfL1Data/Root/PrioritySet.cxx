@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfL1Data/PrioritySet.h"
@@ -12,13 +12,6 @@ TrigConf::PrioritySet::PrioritySet()
    : L1DataBaseclass(),m_Priorities(N_PRIORITIES,"LOW")
 {}
   
-void
-TrigConf::PrioritySet::setPriorities(const std::string p[], const unsigned int size) {
-   if (size > N_PRIORITIES) std::cerr 
-      << "setPriorities >> number of priorities too high: " << size << std::endl;
-   for (unsigned int i=0; i<size; i++) m_Priorities.at(i) = p[i];
-}
-
 void
 TrigConf::PrioritySet::setPriorities(const std::vector<std::string>& vec) {
    if (vec.size() > N_PRIORITIES) std::cerr 

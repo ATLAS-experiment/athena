@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_PrioritySet
@@ -22,7 +22,6 @@ namespace TrigConf {
 
       // Accessors
       const std::vector<std::string>& priorities() const { return m_Priorities; }
-      void setPriorities( const std::string p[], const unsigned int size);
       void setPriorities(const std::vector<std::string>& vec);
 
       virtual void print(const std::string& indent="", unsigned int detail=1) const override;
