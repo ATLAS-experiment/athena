@@ -46,9 +46,9 @@ private:
   std::string m_crest_folder_desc;
   cool::ValidityKey m_vkey;
 public:
-  CoolCrestCompare(std::string& cool_str,std::string& gTagCrest,std::string& gTagCool, std::string& folder, cool::ValidityKey vkey):m_msgSvc("msgSvc","test"),
+  CoolCrestCompare(std::string& cool_str,std::string& crest_str,std::string& gTagCrest,std::string& gTagCool, std::string& folder, cool::ValidityKey vkey):m_msgSvc("msgSvc","test"),
   m_cool_con_str(cool_str),
-  m_crest_str("http://crest-03.cern.ch:8090"),
+  m_crest_str(crest_str),
   m_gTagCrest(gTagCrest),
   m_gTagCool(gTagCool),
   m_folder(folder),
@@ -137,6 +137,7 @@ int main(int argc, char ** argv)
     description.add_options()
 	( "help,h", "produce help message" )
 	( "coolsource,c", boost::program_options::value<std::string>(), "COOL connection string" )
+	( "crestsource,C", boost::program_options::value<std::string>(), "CREST URL string" )
         ( "globalTagCrest,g", boost::program_options::value<std::string>(), "Global tag for CREST" )
 	( "globalTagCool,G", boost::program_options::value<std::string>(), "Global tag for COOL" )
 	( "folder,f", boost::program_options::value<std::string>(), "name of Folder" )
@@ -163,6 +164,7 @@ int main(int argc, char ** argv)
     std::string globalTagCrest;
     std::string globalTagCool;
     std::string conStr="";
+    std::string crestStr="";
     cool::ValidityKey vkey;
     if (arguments.count("folder")) {
       folder = arguments["folder"].as<std::string>();
@@ -192,6 +194,13 @@ int main(int argc, char ** argv)
       std::cerr <<"Error do not define COOL connection string"<<std::endl;
       return -1;
     }
+    if (arguments.count("crestsource")) {
+      crestStr = arguments["crestsource"].as<std::string>();
+    }
+    else{
+      std::cerr <<"Error do not define CREST URL string"<<std::endl;
+      return -1;
+    }
     if (arguments.count("timestamp")) {
       vkey = arguments["timestamp"].as<uint64_t>();
     }
@@ -199,7 +208,7 @@ int main(int argc, char ** argv)
       std::cerr <<"Error do not define timestamp"<<std::endl;
       return -1;
     }
-    CoolCrestCompare pr(conStr,globalTagCrest,globalTagCool,folder,vkey);
+    CoolCrestCompare pr(conStr,crestStr,globalTagCrest,globalTagCool,folder,vkey);
     pr.startCrest();
     pr.startCool();
     pr.compareFiles();
