@@ -12,15 +12,13 @@
 
 namespace Athena_test {
 
-  InitGaudiGoogleTest::InitGaudiGoogleTest( MSG::Level level ) :
+  InitGaudiGoogleTest::InitGaudiGoogleTest( const std::string& jobOptsPath, MSG::Level level ) :
     // create a new ApplicationMgr w/o singleton behaviour
-    theApp( Gaudi::createApplicationMgrEx( "GaudiCoreSvc", 
-					   "ApplicationMgr" ) ),
+    theApp( Gaudi::createApplicationMgrEx( "GaudiCoreSvc", "ApplicationMgr" ) ),
     propMgr( theApp ),
     svcLoc( theApp ),
     svcMgr( theApp ),
-    toolSvc( svcLoc->service("ToolSvc") ),
-    m_msgLevel( level )
+    toolSvc( svcLoc->service("ToolSvc") )
   {
     EXPECT_TRUE( theApp != nullptr );
     EXPECT_TRUE( propMgr.isValid() );
@@ -29,25 +27,16 @@ namespace Athena_test {
     EXPECT_TRUE( toolSvc.isValid() );
     // set the new ApplicationMgr as instance in Gaudi
     Gaudi::setInstance( theApp );
-    EXPECT_TRUE( propMgr->setProperty( "JobOptionsType", "NONE" ).isSuccess() );
-    EXPECT_TRUE( propMgr->setProperty( "OutputLevel", 
-				       std::to_string( m_msgLevel ) ).isSuccess() );
-    bool lconfig= false;
-    // Configure ApplicationMgr
-    if( m_msgLevel == MSG::ALWAYS ) {
-      // Redirect cout to /dev/null around configure() to get rid of Gaudi 
-      // messages in unit tests
-      std::streambuf* coutbuf= std::cout.rdbuf(); // save std::cout buf
-      std::ofstream out( "/dev/null" );
-      std::cout.rdbuf( out.rdbuf() ); // redirect std::cout
-      lconfig= theApp->configure().isSuccess();
-      std::cout.rdbuf( coutbuf ); // restore std::cout
+
+    EXPECT_TRUE( propMgr->setProperty( "OutputLevel", std::to_string( level ) ).isSuccess() );
+    if (jobOptsPath.empty()) {
+      EXPECT_TRUE( propMgr->setProperty( "JobOptionsType", "NONE" ).isSuccess() );
     }
     else {
-      // just configure()
-      lconfig= theApp->configure().isSuccess();
+      EXPECT_TRUE( propMgr->setProperty( "JobOptionsType", "FILE" ).isSuccess() );
+      EXPECT_TRUE( propMgr->setProperty( "JobOptionsPath", jobOptsPath ).isSuccess() );
     }
-    EXPECT_TRUE( lconfig ) << "InitGaudiGoogleTest: theApp->configure() failure";
+    EXPECT_TRUE( theApp->configure().isSuccess() );
     EXPECT_TRUE( theApp->initialize().isSuccess() );
   }
 
@@ -58,6 +47,12 @@ namespace Athena_test {
     EXPECT_TRUE( theApp->finalize().isSuccess() );
     EXPECT_TRUE( theApp->terminate().isSuccess() );
   }
+
+  InitGaudiGoogleTest::InitGaudiGoogleTest( const std::string& jobOptsPath ) :
+    InitGaudiGoogleTest(jobOptsPath, MSG::INFO) {}
+
+  InitGaudiGoogleTest::InitGaudiGoogleTest( MSG::Level level ) :
+    InitGaudiGoogleTest({}, level) {}
 
 }
 

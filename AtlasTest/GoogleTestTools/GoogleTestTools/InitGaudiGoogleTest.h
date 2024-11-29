@@ -34,27 +34,31 @@ namespace Athena_test {
   public:
 
     /**
-    @brief Ctor parameter: 
-    @param level controls MessageSvc
-    */
+     * @brief Create GoogleTest fixture
+     * @param level MessageSvc OutputLevel
+     */
+    InitGaudiGoogleTest( MSG::Level level=MSG::INFO );
 
-    InitGaudiGoogleTest( MSG::Level level=MSG::ALWAYS );
+    /**
+     * @brief Create GoogleTest fixture
+     * @param jobOptsPath Path to job options
+     */
+    InitGaudiGoogleTest( const std::string& jobOptsPath );
 
     /** @brief dtor */
-
     virtual ~InitGaudiGoogleTest();
 
-    /** @brief public members are visible in tests */
-
+    /** @brief public members are visible in tests
+     **@{*/
     IAppMgrUI* theApp;
     SmartIF<IProperty> propMgr;
     SmartIF<ISvcLocator> svcLoc;
     SmartIF<ISvcManager> svcMgr;
     SmartIF<IToolSvc> toolSvc;
+    /**@}*/
 
   private:
-
-    MSG::Level m_msgLevel;
+    InitGaudiGoogleTest( const std::string& jobOptsPath, MSG::Level level );
  
  };
 

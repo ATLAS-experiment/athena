@@ -18,16 +18,11 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 // Framework
 #include "GaudiKernel/PhysicalConstants.h"
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/IProperty.h"
-#include "GaudiKernel/ISvcManager.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/IAppMgrUI.h"
 #include "GaudiKernel/SmartIF.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 // Framework testing
-#include "TestTools/initGaudi.h"
+#include "GoogleTestTools/InitGaudiGoogleTest.h"
 
 // Google Test
 #include "gtest/gtest.h"
@@ -51,10 +46,6 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 // STL includes
 #include <cstdlib> // quick_exit
 
-#if __GNUC__ >= 12
-// gcc12 gives maybe-uninitialized warnings about uses of testing::_.
-# pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
 
 namespace ISFTesting {
 
@@ -143,56 +134,18 @@ namespace ISFTesting {
   };
 
 
-  class TruthSvc_test: public ::testing::Test {
+  class TruthSvc_test: public Athena_test::InitGaudiGoogleTest {
 
-  protected:
-    virtual void SetUp() override {
-      m_appMgr = Gaudi::createApplicationMgr();
-      ASSERT_TRUE( m_appMgr!=nullptr );
-
-      m_svcLoc = m_appMgr;
-      ASSERT_TRUE( m_svcLoc.isValid() );
-
-      m_svcMgr = m_appMgr;
-      ASSERT_TRUE( m_svcMgr.isValid() );
-
-      m_propMgr = m_appMgr;
-      ASSERT_TRUE( m_propMgr.isValid() );
-      ASSERT_TRUE( m_propMgr->setProperty( "EvtSel", "NONE" ).isSuccess() );
-      ASSERT_TRUE( m_propMgr->setProperty( "JobOptionsType", "FILE" ).isSuccess() );
-      ASSERT_TRUE( m_propMgr->setProperty( "JobOptionsPath", "TruthSvc_test.txt" ).isSuccess() );
-
-      m_toolSvc = m_svcLoc->service("ToolSvc");
-      ASSERT_TRUE( m_toolSvc.isValid() );
-
-      ASSERT_TRUE( m_appMgr->configure().isSuccess() );
-      ASSERT_TRUE( m_appMgr->initialize().isSuccess() );
+  public:
+    TruthSvc_test() :
+      Athena_test::InitGaudiGoogleTest("TruthSvc_test.txt") {
 
       // the tested AthenaService
-      const auto& truthSvcTypeAndName = "ISF::TruthSvc/TruthSvc";
-      SmartIF<IService> svc = m_svcLoc->service(truthSvcTypeAndName);
+      SmartIF<IService> svc = svcLoc->service("ISF::TruthSvc/TruthSvc");
       m_svc = dynamic_cast<ISF::TruthSvc*>(svc.get());
-      ASSERT_NE(nullptr, m_svc);
+      EXPECT_NE(nullptr, m_svc);
 
-      ASSERT_TRUE( m_svc->configure().isSuccess() );
-    }
-
-    virtual void TearDown() override {
-      ASSERT_TRUE( m_svcMgr->removeService(m_svc).isSuccess() );
-      ASSERT_TRUE( m_svc->finalize().isSuccess() );
-      ASSERT_TRUE( m_svc->terminate().isSuccess() );
-      ReleaseSmartIFComponent(m_svc);
-
-      ASSERT_TRUE( m_appMgr->finalize().isSuccess() );
-      ASSERT_TRUE( m_appMgr->terminate().isSuccess() );
-      Gaudi::setInstance( static_cast<IAppMgrUI*>(nullptr)) ;
-    }
-
-    void ReleaseSmartIFComponent(IInterface* comp) {
-      size_t finalRefCount = 1; // keep one reference for the SmartIF destructor
-      for (size_t refCount = comp->refCount(); refCount>finalRefCount; refCount--) {
-        comp->release();
-      }
+      EXPECT_TRUE( m_svc->configure().isSuccess() );
     }
 
     //
@@ -220,23 +173,10 @@ namespace ISFTesting {
       return m_svc->m_geoStrategies[AtlasDetDescr::fAtlasID];
     }
 
-
-    // Core Gaudi components
-    IAppMgrUI*             m_appMgr = nullptr;
-    SmartIF<ISvcLocator>   m_svcLoc;
-    SmartIF<ISvcManager>   m_svcMgr;
-    SmartIF<IToolSvc>      m_toolSvc;
-    SmartIF<IProperty>     m_propMgr;
-
+  protected:
     ISF::TruthSvc*   m_svc; // the tested AthenaService
 
   };  // TruthSvc_test fixture
-
-
-  // cppcheck-suppress syntaxError
-  TEST_F(TruthSvc_test, initialize_empty) {
-    ASSERT_TRUE( m_svc->initialize().isSuccess() );
-  }
 
 
   TEST_F(TruthSvc_test, createGenVertexFromTruthIncident) {
