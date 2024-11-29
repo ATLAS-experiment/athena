@@ -9,6 +9,9 @@ def ListRemaps():
         InputRenameCfg ('xAOD::CaloClusterContainer','CaloCalTopoClusters','CaloCalTopoClusters_renamed'),
         InputRenameCfg ('xAOD::CaloClusterAuxContainer','CaloCalTopoClustersAux.','CaloCalTopoClusters_renamedAux.'),
         InputRenameCfg ('CaloClusterCellLinkContainer', 'CaloCalTopoClusters_links', 'CaloCalTopoClusters_links_renamed'),
+        #rename topotowers
+        InputRenameCfg ('xAOD::CaloTowerContainer','CaloCalFwdTopoTowers','CaloCalFwdTopoTowers_renamed'),
+        InputRenameCfg ('xAOD::CaloTowerAuxContainer','CaloCalFwdTopoTowersAux.','CaloCalFwdTopoTowers_renamedAux.'),
         InputRenameCfg ('xAOD::CaloClusterContainer','LCOriginTopoClusters','LCOriginTopoClusters_renamed'),
         InputRenameCfg ('xAOD::ShallowAuxContainer', 'LCOriginTopoClustersAux.', 'LCOriginTopoClusters_renamedAux.'),
         InputRenameCfg ('xAOD::CaloClusterContainer','EMOriginTopoClusters','EMOriginTopoClusters_renamed'),

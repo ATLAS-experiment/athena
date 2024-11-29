@@ -116,6 +116,7 @@ def CaloFwdTopoTowerCfg(flags,**kwargs):
     towerMaker                    = CompFactory.CaloTopoTowerMaker(baseName+"Alg")
     towerMaker.TowersOutputName   = towerContainerKey
     towerMaker.TowerMakerTool     = towerBuilder
+    towerMaker.UseLCWCalibration = towerBuilder.PrepareLCW
 
     from CaloBadChannelTool.CaloBadChanToolConfig import CaloBadChanToolCfg
     caloBadChanTool = result.popToolsAndMerge( CaloBadChanToolCfg(flags) )
@@ -132,7 +133,7 @@ def CaloFwdTopoTowerCfg(flags,**kwargs):
         towerCalibrator = CompFactory.CaloTopoTowerFromClusterCalibrator(towerCalName)
         towerCalibrator.OrderClusterByPt = orderbyPt
 
-    towerMaker.TowerCalibratorTool = towerCalibrator
+        towerMaker.TowerCalibratorTool = towerCalibrator
 
     result.addEventAlgo(towerMaker)
 
