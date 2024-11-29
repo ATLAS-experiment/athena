@@ -28,4 +28,7 @@ def createPFConfigFlags():
     #before eventually removing the old tool entirely.
     pfConfigFlags.addFlag("PF.useLegacyEOverPRun4",False)
 
+    #Toggle whether to use topoclusters or combined topoclusters + topotowers container
+    pfConfigFlags.addFlag("PF.useTopoTowers",False)
+
     return pfConfigFlags

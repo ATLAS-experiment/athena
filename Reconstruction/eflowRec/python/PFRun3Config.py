@@ -40,9 +40,11 @@ def PFFullCfg(inputFlags,runTauReco=False,**kwargs):
     #PFlow requires tracks, electrons, photons, muons and taus in order to have valid links to them. So lets add these objects to the AOD and ESD                                            
     #PFlow also requires calo clusters for links to work, but these are added to output streams elsewhere already
     toESDAndAOD = ["xAOD::TrackParticleContainer#InDetTrackParticles","xAOD::TrackParticleAuxContainer#InDetTrackParticlesAux."]
-    toESDAndAOD += ["xAOD::ElectronContainer#Electrons","xAOD::ElectronAuxContainer#ElectronsAux."]
-    toESDAndAOD += ["xAOD::PhotonContainer#Photons","xAOD::PhotonAuxContainer#PhotonsAux."]
-    toESDAndAOD += ["xAOD::MuonContainer#Muons","xAOD::MuonAuxContainer#MuonsAux."]
+    if inputFlags.PF.useElPhotLinks:
+      toESDAndAOD += ["xAOD::ElectronContainer#Electrons","xAOD::ElectronAuxContainer#ElectronsAux."]
+      toESDAndAOD += ["xAOD::PhotonContainer#Photons","xAOD::PhotonAuxContainer#PhotonsAux."]
+    if inputFlags.PF.useMuLinks:
+      toESDAndAOD += ["xAOD::MuonContainer#Muons","xAOD::MuonAuxContainer#MuonsAux."]
     #If we rerun tau reco then it adds taus to the output itself, which results in an error message
     #because you cannot mix +ve and -ve aux attributes (the below is considered +ve as a default).
     if not runTauReco:
