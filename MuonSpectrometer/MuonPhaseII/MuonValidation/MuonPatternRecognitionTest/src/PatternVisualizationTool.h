@@ -76,17 +76,17 @@ namespace MuonValR4 {
                                           PrimitiveVec&& extraPaints) const override final;
 
 
-            using TruthSegmentSet = std::unordered_set<const xAOD::MuonSegment*>;
-            /** @brief Fetches all truth segments where at least one measurement in the list was used to 
-             *         build them 
+            using LabeledSegmentSet = std::unordered_set<const xAOD::MuonSegment*>;
+
+            /** @brief Returns whether the hit has been used on the labeled segments we refer to (e.g. truth or data Zµµ)
              *  @param hits: Vector of hits to search */
-            virtual TruthSegmentSet fetchTruthSegs(const std::vector<const MuonR4::SpacePoint*>& hits) const override final;
-            virtual TruthSegmentSet fetchTruthSegs(const std::vector<const xAOD::UncalibratedMeasurement*>& hits) const override final;
+            virtual LabeledSegmentSet getLabeledSegments(const std::vector<const MuonR4::SpacePoint*>& hits) const override final;
+            virtual LabeledSegmentSet getLabeledSegments(const std::vector<const xAOD::UncalibratedMeasurement*>& hits) const override final;
             
-            /** @brief Returns whether the hit has been used in the truth-segment building
+            /** @brief Fetches all labeled (e.g. by truth or Zµµ reco) segments containing at least one measurement in the list passed as arg 
              *  @param hit: Reference to the hit to check */
-            virtual bool isTruthMatched(const MuonR4::SpacePoint& hit) const override final;
-            virtual bool isTruthMatched(const xAOD::UncalibratedMeasurement& hit) const override final;
+            virtual bool isLabeled(const MuonR4::SpacePoint& hit) const override final;
+            virtual bool isLabeled(const xAOD::UncalibratedMeasurement& hit) const override final;
         private:
             /** @brief Closes the summary canvas & closes the associated ROOT file */ 
             void closeSummaryCanvas() const;

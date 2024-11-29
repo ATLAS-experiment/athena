@@ -54,7 +54,7 @@ namespace {
 namespace MuonValR4 {
     using namespace MuonR4;
     using namespace SegmentFit;
-    using TruthSegmentSet = PatternVisualizationTool::TruthSegmentSet;
+    using LabeledSegmentSet = PatternVisualizationTool::LabeledSegmentSet;
     std::mutex PatternVisualizationTool::s_mutex{};
     PatternVisualizationTool::PatternVisualizationTool(const std::string& type, const std::string& name, const IInterface* parent):
             base_class{type,name,parent} {}
@@ -105,18 +105,18 @@ namespace MuonValR4 {
         closeSummaryCanvas();
         return StatusCode::SUCCESS;
     }
-    bool PatternVisualizationTool::isTruthMatched(const MuonR4::SpacePoint& hit) const {
-        return isTruthMatched(*hit.primaryMeasurement()) || 
-              (hit.secondaryMeasurement() && isTruthMatched(*hit.secondaryMeasurement()));
+    bool PatternVisualizationTool::isLabeled(const MuonR4::SpacePoint& hit) const {
+        return isLabeled(*hit.primaryMeasurement()) || 
+              (hit.secondaryMeasurement() && isLabeled(*hit.secondaryMeasurement()));
     }
-    bool PatternVisualizationTool::isTruthMatched(const xAOD::UncalibratedMeasurement& hit) const {
+    bool PatternVisualizationTool::isLabeled(const xAOD::UncalibratedMeasurement& hit) const {
         return std::find_if(m_truthLinkDecors.begin(), m_truthLinkDecors.end(),
                             [&hit](const SegLinkDecor_t& decor){
                                 return !decor(hit).empty();
                             }) != m_truthLinkDecors.end();
     }
 
-    TruthSegmentSet PatternVisualizationTool::fetchTruthSegs(const std::vector<const MuonR4::SpacePoint*>& hits) const {
+    LabeledSegmentSet PatternVisualizationTool::getLabeledSegments(const std::vector<const MuonR4::SpacePoint*>& hits) const {
         std::vector<const xAOD::UncalibratedMeasurement*> measurements{};
         measurements.reserve(2* hits.size());
         for (const SpacePoint* hit: hits) {
@@ -125,10 +125,10 @@ namespace MuonValR4 {
                 measurements.push_back(hit->secondaryMeasurement());
             }
         }
-        return fetchTruthSegs(measurements);
+        return getLabeledSegments(measurements);
     }
-    TruthSegmentSet PatternVisualizationTool::fetchTruthSegs(const std::vector<const xAOD::UncalibratedMeasurement*>& hits) const {
-        TruthSegmentSet truthSegs{};
+    LabeledSegmentSet PatternVisualizationTool::getLabeledSegments(const std::vector<const xAOD::UncalibratedMeasurement*>& hits) const {
+        LabeledSegmentSet truthSegs{};
         for (const xAOD::UncalibratedMeasurement* hit : hits) {
             for (const SegLinkDecor_t& decor: m_truthLinkDecors) {
                 for (const SegLink_t& link : decor(*hit)) {
@@ -205,7 +205,7 @@ namespace MuonValR4 {
             accHisto->SetBinContent(xBin+1, yBin+1, accumulator.nHits(bin));
         }
 
-        const TruthSegmentSet truthSegs{fetchTruthSegs(spacePointsInAcc)};
+        const LabeledSegmentSet truthSegs{getLabeledSegments(spacePointsInAcc)};
         if (truthSegs.empty() && m_displayOnlyTruth) {
             return;
         }
@@ -269,7 +269,7 @@ namespace MuonValR4 {
             return;
         }
 
-        const TruthSegmentSet truthSegs{fetchTruthSegs(seed.getHitsInMax())};
+        const LabeledSegmentSet truthSegs{getLabeledSegments(seed.getHitsInMax())};
         if (truthSegs.empty() && m_displayOnlyTruth) {
             return;
         }
@@ -345,7 +345,7 @@ namespace MuonValR4 {
             return;
         }
         std::array<double, 4> canvasDim{};        
-        TruthSegmentSet truthSegs{fetchTruthSegs(stripSmartPtr(bucket))};
+        LabeledSegmentSet truthSegs{getLabeledSegments(stripSmartPtr(bucket))};
         if (truthSegs.empty() && m_displayOnlyTruth) {
             return;
         }
@@ -415,7 +415,7 @@ namespace MuonValR4 {
         if (m_canvCounter >= m_canvasLimit) {
             return;
         }
-        const TruthSegmentSet truthSegs{fetchTruthSegs(segment.parent()->getHitsInMax())};
+        const LabeledSegmentSet truthSegs{getLabeledSegments(segment.parent()->getHitsInMax())};
         if (truthSegs.empty() && m_displayOnlyTruth) {
             return;
         }
@@ -529,19 +529,19 @@ namespace MuonValR4 {
                 primitives.push_back(drawDriftCircle(hit.positionInChamber(), dc->readoutElement()->innerTubeRadius(), 
                                                      kBlack, hollowFilling));
 
-                const int circColor = isTruthMatched(*dc) ? truthColor : kBlue;                    
+                const int circColor = isLabeled(*dc) ? truthColor : kBlue;                    
                 primitives.push_back(drawDriftCircle(hit.positionInChamber(), hit.driftRadius(), circColor, fillStyle));
                 break;
             } case xAOD::UncalibMeasType::RpcStripType: {
                 const auto* meas{static_cast<const xAOD::RpcMeasurement*>(underlyingSp->primaryMeasurement())};
-                const int boxColor = isTruthMatched(*meas) ? truthColor : kGreen +2;
+                const int boxColor = isLabeled(*meas) ? truthColor : kGreen +2;
                 const double boxWidth = 0.5*std::sqrt(12)*underlyingSp->uncertainty()[view];
                 primitives.push_back(drawBox(hit.positionInChamber(), boxWidth, 0.5*meas->readoutElement()->gasGapPitch(),
                                              boxColor, fillStyle));
                 break; 
             } case xAOD::UncalibMeasType::TgcStripType: {
                 const auto* meas{static_cast<const xAOD::TgcStrip*>(underlyingSp->primaryMeasurement())};
-                const int boxColor = isTruthMatched(*meas) ? truthColor : kCyan + 2;
+                const int boxColor = isLabeled(*meas) ? truthColor : kCyan + 2;
                 const double boxWidth = 0.5*std::sqrt(12)*underlyingSp->uncertainty()[view];
                 primitives.push_back(drawBox(hit.positionInChamber(), boxWidth, 0.5*meas->readoutElement()->gasGapPitch(),
                                              boxColor, fillStyle));
