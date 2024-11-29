@@ -19,7 +19,7 @@ atlas_add_library( TrackWriteFastSimLib
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} StoreGateLib G4AtlasToolsLib TrackRecordLib
-                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} GaudiKernel G4AtlasInterfaces MCTruth )
+                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} GaudiKernel G4AtlasInterfaces MCTruth TruthUtils )
 set_target_properties( TrackWriteFastSimLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_library(TrackWriteFastSim

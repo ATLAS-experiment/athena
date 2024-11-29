@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef SG_StepNtuple_H
-#define SG_StepNtuple_H
+#ifndef RHADRONS_SG_StepNtuple_H
+#define RHADRONS_SG_StepNtuple_H
 
 #include <set>
 
@@ -31,8 +31,6 @@ namespace G4UA
     virtual void UserSteppingAction(const G4Step*) override;
 
   private:
-
-    bool isSUSYParticle(const int id) const;
 
     NTuple::Item<long>     m_nsteps, m_evtid;
     NTuple::Array<int>     m_pdg, m_charge, m_baryon;

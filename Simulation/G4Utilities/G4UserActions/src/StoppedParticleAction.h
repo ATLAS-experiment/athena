@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4UserActions_StoppedParticleAction_h
@@ -22,7 +22,6 @@ namespace G4UA
       StoppedParticleAction();
       virtual void UserSteppingAction(const G4Step*) override;
     private:
-      bool isSUSYParticle(const int) const;
       TrackFastSimSD * m_fsSD;
       bool m_init;
   }; // class StoppedParticleAction
