@@ -322,17 +322,12 @@ HLT_2g10_medium_EgammaPEBTLA_L12DR15-M70-2eEM9L:
     3: 1
 HLT_2g13_loose_EgammaPEBTLA_L113DR25-25M70-2eEM12L:
   eventCount: 0
-  stepCounts:
-    0: 1
-  stepFeatures:
-    0: 2
-    1: 1
 HLT_2g13_loose_EgammaPEBTLA_L12DR15-0M30-2eEM12L:
   eventCount: 0
   stepCounts:
     0: 1
   stepFeatures:
-    0: 4
+    0: 2
     1: 1
 HLT_2g13_loose_EgammaPEBTLA_L12DR15-M70-2eEM12L:
   eventCount: 0
@@ -343,17 +338,12 @@ HLT_2g13_loose_EgammaPEBTLA_L12DR15-M70-2eEM12L:
     1: 1
 HLT_2g13_loose_L113DR25-25M70-2eEM12L:
   eventCount: 0
-  stepCounts:
-    0: 1
-  stepFeatures:
-    0: 2
-    1: 1
 HLT_2g13_loose_L12DR15-0M30-2eEM12L:
   eventCount: 0
   stepCounts:
     0: 1
   stepFeatures:
-    0: 4
+    0: 2
     1: 1
 HLT_2g13_medium_EgammaPEBTLA_L12DR15-M70-2eEM12L:
   eventCount: 0
