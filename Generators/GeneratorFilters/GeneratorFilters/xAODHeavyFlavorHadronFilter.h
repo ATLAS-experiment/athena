@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // --------------------------------------------------
@@ -64,14 +64,6 @@ private:
         int    m_NBHadronPass;
         int    m_NDHadronPass;
         int    m_NPDGIDPass;
-
-	// Private Methods:=
-
-        // decide whether given particle is a B-hadron
-        bool isBwithWeakDK(const int pID) const;
-        // decide whether given particle is a D-hadron
-        bool isDwithWeakDK(const int pID) const;
-
 };
 
 #endif

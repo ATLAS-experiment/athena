@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 // Written by Bill Balunas (balunas@cern.ch)
 // Based on DiBjetFilter by Stephen Bienek
@@ -51,10 +51,6 @@ private:
     int    m_Nevt;
     double m_SumOfWeights_Pass;
     double m_SumOfWeights_Evt;
-
-    bool isBwithWeakDK(const int pID) const;
-
-
 };
 
 #endif
