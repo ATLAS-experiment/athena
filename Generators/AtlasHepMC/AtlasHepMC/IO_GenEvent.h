@@ -20,13 +20,14 @@ typedef HepMC3::ReaderAsciiHepMC2   ReaderAsciiHepMC2;
 class IO_GenEvent {
 public:
     IO_GenEvent( const std::string& filename="IO_GenEvent.dat",
-                 std::ios::openmode mode=std::ios::out ) {
+                 std::ios::openmode mode=std::ios::out ) :
+        m_writer(std::make_unique<HepMC3::WriterAsciiHepMC2>(filename))
+    {
         if (mode!=std::ios::out) printf("In AtlasHepMC/IO_GenEvent.h in IO_GenEvent(filename,mode) mode should be std::ios::out\n");
-        m_writer=std::make_unique<HepMC3::WriterAsciiHepMC2>(filename);
     }
-    IO_GenEvent( std::ostream & os ) {
-        m_writer=std::make_unique<HepMC3::WriterAsciiHepMC2>(os);
-    }
+    IO_GenEvent( std::ostream & os ) :
+        m_writer(std::make_unique<HepMC3::WriterAsciiHepMC2>(os))
+    {}
     ~IO_GenEvent() {
         m_writer->close();
     }
