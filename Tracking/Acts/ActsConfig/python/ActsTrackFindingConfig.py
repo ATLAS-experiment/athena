@@ -86,8 +86,8 @@ def ActsMainTrackFindingAlgCfg(flags,
     # bins in |eta|, used for both MeasurementSelectorCuts and TrackSelector::EtaBinnedConfig
     if flags.Detector.GeometryITk:
         kwargs.setdefault("etaBins", flags.Tracking.ActiveConfig.etaBins)
-    if flags.Acts.useDefaultActsMeasurementSelector or flags.Acts.trackFindingTrackSelectorConfig <= 0:
-        # Only a single chi2 cut-off exists for the default Acts measurement selector.
+    if flags.Acts.trackFindingTrackSelectorConfig <= 0:
+        # clusters with chi2 above this value will be treated as outliers
         kwargs.setdefault("chi2CutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNoAdd))
     elif flags.Acts.trackFindingTrackSelectorConfig == 2:
         # clusters with chi2 above this value will be treated as outliers
