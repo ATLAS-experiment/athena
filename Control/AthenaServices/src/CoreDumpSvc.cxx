@@ -653,7 +653,10 @@ void CoreDumpSvc::setAltStack()
     ss.ss_sp = stack.data();
     ss.ss_flags = 0;
     ss.ss_size = stack.size();
-    sigaltstack (&ss, nullptr);
+    int ret = sigaltstack (&ss, nullptr);
+    if ( ret!=0 ) {
+      ATH_MSG_WARNING("Error on setting alternative stack! ");
+    }
   }
 }
 
