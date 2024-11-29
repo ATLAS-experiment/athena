@@ -5,8 +5,7 @@ atlas_subdir( IdDict )
 
 # Component(s) in the package:
 atlas_add_library( IdDict
-                   src/IdDictMgr.cxx
-                   src/IdDictFieldImplementation.cxx
+                   src/*.cxx
                    PUBLIC_HEADERS IdDict
                    LINK_LIBRARIES Identifier )
 
