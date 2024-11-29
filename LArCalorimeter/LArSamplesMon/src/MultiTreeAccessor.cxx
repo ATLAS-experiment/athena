@@ -6,6 +6,7 @@
 
 #include "LArSamplesMon/TreeAccessor.h"
 #include "LArSamplesMon/Data.h"
+#include "LArCafJobs/ShapeInfo.h"
 #include "LArCafJobs/EventData.h"
 #include "TSystem.h"
 #include "TChain.h"

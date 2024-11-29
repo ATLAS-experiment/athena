@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # This file defines the default input files for trigger validation tests
 # and keywords to retrieve them in test configuration
@@ -8,7 +8,6 @@
 Common way to configure input samples for Trigger ART tests
 '''
 
-import os
 import json
 
 from TrigValTools.TrigValSteering.Common import get_logger, find_file_in_path
@@ -47,8 +46,9 @@ class TrigValInput(object):
         else:
             self.paths = []
             for path in paths:
-                if not os.path.isfile(path):
-                    self.log.error('Cannot access file: %s', path)
+                # for files on EOS, use xrootd rather than fuse mount
+                if '/eos' in path:
+                    self.paths.append(f'root://eosatlas.cern.ch/{path}')
                 else:
                     self.paths.append(path)
             if len(self.paths) == 0:

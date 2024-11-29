@@ -4,7 +4,7 @@
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-memory: 3999
-# art-include: 24./Athena
+# art-include: 24.0/Athena
 # art-include: main/Athena
 # art-output: mc20d_presampling.RDO.pool.root
 # art-output: log.*

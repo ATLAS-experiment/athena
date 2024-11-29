@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,15 +12,14 @@
 
 #include "LArSamplesMon/AbsShapeErrorGetter.h"
 
-#include "TFile.h"
-#include "TTree.h"
-#include "TString.h"
-#include "TVectorD.h"
-#include "LArCafJobs/Definitions.h"
+
 #include <vector>
 #include "CxxUtils/checker_macros.h"
 
 class TH2D;
+class TFile;
+class TTree;
+class TString;
 
 namespace LArSamples {
 

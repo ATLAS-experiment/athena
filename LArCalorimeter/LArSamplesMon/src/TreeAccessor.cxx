@@ -10,6 +10,8 @@
 #include "LArSamplesMon/FilterParams.h"
 #include "LArSamplesMon/DataTweaker.h"
 #include "LArSamplesMon/ClassCounts.h"
+#include "LArCafJobs/ShapeInfo.h"
+
 #include "TObjString.h"
 #include "TFile.h"
 #include "TTree.h"
