@@ -346,9 +346,9 @@ protected:
   }
 
 
-  auto getMaxNegDeriv2nds() const {return m_maxNegDeriv2nd;}
-  auto getMaxADCs() const {return m_maxADC;}
-  auto getBaselines() const {return m_baseline;}
+  const auto& getMaxNegDeriv2nds() const {return m_maxNegDeriv2nd;}
+  const auto& getMaxADCs() const {return m_maxADC;}
+  const auto& getBaselines() const {return m_baseline;}
 };
 
 
