@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////
@@ -44,8 +44,8 @@ public:
   TH1F* GetPDF();                                                                /*!< Returns the calculated PDF. */
   unsigned int GetID() const;                                                    /*!< Returns the internal ID (used by APReweight/APReweight2D/APReweight3D/APReweightND). */
   
-  std::vector< int > GetCoords() const;                                          /*!< Returns the coordinates of the current entry in the original histogram. */
-  std::vector< int > GetOriginalDimensions() const;                              /*!< Returns the dimensions and amounts of bins for each dimension of the original histogram. */
+  const std::vector< int > & GetCoords() const;                                          /*!< Returns the coordinates of the current entry in the original histogram. */
+  const std::vector< int > & GetOriginalDimensions() const;                              /*!< Returns the dimensions and amounts of bins for each dimension of the original histogram. */
   
   bool IsNaN() const;                                                            /*!< Returns true if instance is NaN. */
   bool IsTrig() const;                                                           /*!< Returns true if instance is trigger based. */

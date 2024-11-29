@@ -1,13 +1,15 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
 #include <ONNXUtils/ONNXWrapper.h>
 
-ONNXWrapper::ONNXWrapper(const std::string model_path) {
-    
-    // Use the path resolver to find the location of the network .onnx file
-    m_modelPath = PathResolverFindCalibFile(model_path);
-
-    //  init onnx envi
-    m_onnxEnv = std::make_unique< Ort::Env >(ORT_LOGGING_LEVEL_WARNING, "");
-
+// Constructor:
+// Use the path resolver to find the location of the network .onnx file
+// initialise onnx environment
+ONNXWrapper::ONNXWrapper(const std::string & model_path):
+  m_modelPath(PathResolverFindCalibFile(model_path)),
+  m_onnxEnv(std::make_unique< Ort::Env >(ORT_LOGGING_LEVEL_WARNING, "")) {
+   
     // initialize session options if needed
     m_session_options.SetIntraOpNumThreads(1);
     m_session_options.SetGraphOptimizationLevel(
