@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/getMessageSvc.h"
@@ -51,6 +51,7 @@
 
 
 #include <fstream>
+#include <format>
 #include <iomanip>
 #include <vector>
 #include <stdexcept>
@@ -575,9 +576,7 @@ namespace MuonGM {
                     }
                 }
 
-                char chswidth[32];
-                sprintf(chswidth, "%i", int(10 * c->dx1));
-                key += chswidth;
+                key += std::to_string(int(10 * c->dx1));
                 xfaligncomponent = (*m_mapAXF)[key+"_"+std::to_string(zi)+"_"+std::to_string(fi)];
 
                 lvt = (*m_mapFPV)[key+"_"+std::to_string(zi)+"_"+std::to_string(fi)];
@@ -1064,10 +1063,7 @@ namespace MuonGM {
             throw std::runtime_error(" MuonChamberLite::setTgcReadoutGeom position not found ");
         }
 
-        char index[2];
-        sprintf(index, "%i", cc->index);
-
-        re->setReadOutName(stName.substr(0, 4) + '_' + index);
+        re->setReadOutName(stName.substr(0, 4) + '_' + std::to_string(cc->index));
         re->setReadOutParams(mysql.GetTgcRPars(tname_index));
 
         const TGC *thist = dynamic_cast<const TGC*>(mysql.GetTechnology(tname));
