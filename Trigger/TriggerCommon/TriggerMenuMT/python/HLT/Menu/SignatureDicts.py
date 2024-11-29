@@ -294,8 +294,10 @@ JetChainParts = {
        'preselZ128XX4c85',
        'preselZ219XX6c20',
        'preselZ197XX6c20',
+       'preselZ182XX6c20',
        'preselZ142XX5c20',
-       'preselZ134XX5c20'
+       'preselZ134XX5c20',
+       'preselZ124XX5c20'
      ],
     # Hypo information
     #   If hypoScenario is 'simple', then hypo configuration is handled based on the
@@ -372,8 +374,10 @@ JetChainParts = {
                       'Z120XX10c40',
                       'Z219XX6c20',
                       'Z197XX6c20',
+                      'Z182XX6c20',
                       'Z142XX5c20',
                       'Z134XX5c20',
+                      'Z124XX5c20',
                       # 'MULT' hypoScenario applies a cut on the number of jets
                       # in the input container after filtering on pt, eta.
                       'MULT0mult11XX10ptXX0eta490', # Heavy Ions
