@@ -64,7 +64,7 @@ void testit (const PRD_MultiTruthCollection& trans1)
 }
 
 
-void test1(std::vector<HepMC::GenParticlePtr> genPartVector)
+void test1(const std::vector<HepMC::GenParticlePtr> & genPartVector)
 {
   std::cout << "test1\n";
 

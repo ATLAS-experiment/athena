@@ -19,7 +19,7 @@ Acts::ObjTrackingGeometryWriter::ObjTrackingGeometryWriter(
 {
 }
 
-std::string
+const std::string &
 Acts::ObjTrackingGeometryWriter::name() const
 {
   return m_cfg.name;

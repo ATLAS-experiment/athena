@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // This file was largely imported from the Acts testing framework
@@ -65,7 +65,7 @@ Acts::ObjSurfaceWriter::ObjSurfaceWriter(
   (*(m_cfg.outputStream)) << m_cfg.filePrefix << '\n';
 }
 
-std::string
+const std::string &
 Acts::ObjSurfaceWriter::name() const
 {
   return m_cfg.name;
