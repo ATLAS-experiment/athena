@@ -499,7 +499,7 @@ template<class T> inline bool hasQuark(const T& p, const int& q);
 template<> inline bool hasQuark(const DecodedPID& p, const int& q){
   if (isQuark(p.pid())) { return (std::abs(p.pid()) == q );}
   if (isMeson(p)) { return *(p.second.rbegin() + 1) == q ||*(p.second.rbegin()+2) ==q;}
-  if (isDiquark(p)) { auto i = std::find(p.second.rbegin() + 1,p.second.rbegin()+3,q); return (i!=p.second.rbegin()+3);}
+  if (isDiquark(p)) { auto i = std::find(p.second.rbegin() + 2,p.second.rbegin()+4,q); return (i!=p.second.rbegin()+4);}
   if (isBaryon(p)) { auto i = std::find(p.second.rbegin() + 1,p.second.rbegin()+4,q); return (i!=p.second.rbegin()+4);}
   if (isTetraquark(p)) { auto i = std::find(p.second.rbegin() + 1,p.second.rbegin()+5,q); return (i!=p.second.rbegin()+5);}
   if (isPentaquark(p)) { auto i = std::find(p.second.rbegin() + 1,p.second.rbegin()+6,q); return (i!=p.second.rbegin()+6);}
@@ -518,7 +518,7 @@ template<class T> inline int leadingQuark(const T& p) {return leadingQuark(p->pd
 template<> inline int leadingQuark(const DecodedPID& p){
   if (isQuark(p.pid())) { return std::abs(p.pid());}
   if (isMeson(p)) { return p.max_digit(1,3);}
-  if (isDiquark(p)) { return p.max_digit(1,3);}
+  if (isDiquark(p)) { return p.max_digit(2,4);}
   if (isBaryon(p)) { return p.max_digit(1,4);}
   if (isTetraquark(p)) { return p.max_digit(1,5);}
   if (isPentaquark(p)) { return p.max_digit(1,6);}
@@ -809,17 +809,29 @@ template<> inline bool isRHadron(const DecodedPID& p) {
 }
 template<> inline bool isRHadron(const int& p) { auto value_digits = DecodedPID(p); return isRHadron(value_digits); }
 
-inline std::vector<int> containedQuarks(int p) {
+// APID: Returns an unordered list of the quarks contained by the current particle
+template<class T> inline std::vector<int> containedQuarks(const T& p) { return containedQuarks(p->pdg_id()); }
+template<> inline std::vector<int> containedQuarks(const int& p) {
   auto pp = DecodedPID(p);
-  if (isSUSY(pp)) {
-    pp = pp.shift(1);
-    if (pp.ndigits() > 2) pp = pp.shift(1);
-  }
   std::vector<int> quarks;
-  for (int i = 1; i<=6; ++i)
-    if (hasQuark(pp, i)) quarks.push_back(i);
+  if (isQuark(pp.pid())) { quarks.push_back(std::abs(pp.pid())); }
+  else if (isDiquark(pp)) { quarks.push_back(pp(0)); quarks.push_back(pp(1)); }
+  else if (isMeson(pp)) { quarks.push_back(*(pp.second.rbegin() + 1)); quarks.push_back(*(pp.second.rbegin()+2)); }
+  else if (isBaryon(pp)) { for (size_t digit = 1; digit < 4; ++digit) { quarks.push_back(*(pp.second.rbegin() + digit)); } }
+  else if (isTetraquark(pp)) { for (size_t digit = 1; digit < 5; ++digit) { quarks.push_back(*(pp.second.rbegin() + digit)); } }
+  else if (isPentaquark(pp)) { for (size_t digit = 1; digit < 6; ++digit) { quarks.push_back(*(pp.second.rbegin() + digit)); } }
+  else if (isNucleus(pp)) { quarks.push_back(2); quarks.push_back(1); } // FIXME Updates for nuclei will be done in a follow-up MR
+  else if (isSUSY(pp)) { // APID SUSY case
+    pp = pp.shift(1);
+    if ( pp.ndigits() > 1 ) { // skip squarks
+      if ( pp.ndigits() == 3 ) { pp = DecodedPID(pp(1)); } // Handle ~q qbar pairs
+      if ( pp.ndigits()  > 3 ) { pp = pp.shift(1); } // Drop gluinos and squarks
+      return containedQuarks(pp.pid());
+    }
+  }
   return quarks;
 }
+template<> inline std::vector<int> containedQuarks(const DecodedPID& p) { return containedQuarks(p.pid()); }
 
 // APID: Super-partners of standard model quarks only
 template<class T> inline bool isSquark(const T& p) { return isSquark(p->pdg_id()); }
