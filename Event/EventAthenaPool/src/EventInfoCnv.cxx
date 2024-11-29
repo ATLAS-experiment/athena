@@ -33,9 +33,9 @@ EventInfoCnv::EventInfoCnv(ISvcLocator* svcloc)
   m_evtsPerLumiBlock(0),
   m_lbEvtCounter(0),
   m_timeStamp(0),
-  m_timeStampInterval(0)
+  m_timeStampInterval(0),
+  m_evtIdModSvc(svcloc->service("EvtIdModifierSvc", /*createif*/false))
 {
-  m_evtIdModSvc = svcloc->service("EvtIdModifierSvc", /*createif*/false);
 }
 
 EventInfo_PERS* EventInfoCnv::createPersistent(EventInfo* transObj) {

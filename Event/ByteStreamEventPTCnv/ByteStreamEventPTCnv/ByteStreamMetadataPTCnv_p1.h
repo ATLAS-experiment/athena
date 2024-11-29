@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMEVENTPTCNV_BYTESTREAMMETADATAPTCNV_P1_H
@@ -25,11 +25,11 @@ public:
     static uint64_t getDetectorMask2 (const ::ByteStreamMetadata_p1& bsmdp) { return bsmdp.m_detectorMask2; };
     static unsigned int getBeamType (const ::ByteStreamMetadata_p1& bsmdp) { return bsmdp.m_beamType; };
     static unsigned int getBeamEnergy (const ::ByteStreamMetadata_p1& bsmdp) { return bsmdp.m_beamEnergy; };
-    static std::string getGuid (const ::ByteStreamMetadata_p1& bsmdp) { return bsmdp.m_guid; };
-    static std::string getStream (const ::ByteStreamMetadata_p1& bsmdp) { return bsmdp.m_stream; };
-    static std::string getProject (const ::ByteStreamMetadata_p1& bsmdp) { return bsmdp.m_project; };
+    static const std::string& getGuid (const ::ByteStreamMetadata_p1& bsmdp) { return bsmdp.m_guid; };
+    static const std::string& getStream (const ::ByteStreamMetadata_p1& bsmdp) { return bsmdp.m_stream; };
+    static const std::string& getProject (const ::ByteStreamMetadata_p1& bsmdp) { return bsmdp.m_project; };
     static unsigned int getLumiBlock (const ::ByteStreamMetadata_p1& bsmdp) { return bsmdp.m_lumiBlock; };
-    static std::vector<std::string> getFreeMetaDataStrings (const ::ByteStreamMetadata_p1& bsmdp) { return bsmdp.m_freeMetaDataStrings; };
+    static const std::vector<std::string>& getFreeMetaDataStrings (const ::ByteStreamMetadata_p1& bsmdp) { return bsmdp.m_freeMetaDataStrings; };
 };
 
 #endif // BYTESTREAMEVENTPTCNV_BYTESTREAMMETADATAPTCNV_P1_H
