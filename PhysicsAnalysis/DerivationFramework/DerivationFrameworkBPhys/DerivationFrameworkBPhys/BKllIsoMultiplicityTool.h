@@ -33,6 +33,8 @@ namespace DerivationFramework {
 
     std::string m_name;
     std::vector<std::string> m_cones;
+    bool m_onlyInVertex;
+    std::vector<std::string> m_vertexPassFlags;
 	  std::string m_vertexContainerName;
 	  std::string m_trackContainerName;
     ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;

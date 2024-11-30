@@ -19,6 +19,8 @@ BKllIsoMultiplicityTool::BKllIsoMultiplicityTool(
     : AthAlgTool(t, n, p),
       m_name("BKllIsoMultTool"),
       m_cones(),
+      m_onlyInVertex(false),
+      m_vertexPassFlags(),
       m_vertexContainerName("NONE"),
       m_trackContainerName("InDetTrackParticles"),
       m_trkSelector("InDet::TrackSelectorTool"),
@@ -47,6 +49,8 @@ BKllIsoMultiplicityTool::BKllIsoMultiplicityTool(
   // Declare tools
   declareProperty("BKllIsoMultiplicityToolName", m_name);
   declareProperty("IsolationCones", m_cones);
+  declareProperty("OnlyInVertex", m_onlyInVertex);
+  declareProperty("VertexPassFlags", m_vertexPassFlags);
   declareProperty("InputVertexContainer", m_vertexContainerName);
   declareProperty("TrackContainer", m_trackContainerName);
   declareProperty("TrackSelectorTool",m_trkSelector);
@@ -249,6 +253,34 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
   unsigned int selectedTrackMult = 0;
   for ( auto track : *idTrackParticleContainer ) {
     bool isSelected = true;
+    bool vertexCheck = m_onlyInVertex ? false : true;
+    if ( m_onlyInVertex ){
+      for ( auto vertex : *vertexContainer ){
+        bool goodVtx = m_vertexPassFlags.size() == 0 ? true : false;
+        for ( unsigned int flagItr = 0; flagItr < m_vertexPassFlags.size(); flagItr++ ) {
+            SG::AuxElement::Accessor<Char_t> flagAcc(m_vertexPassFlags.at(flagItr));
+            if(flagAcc.isAvailable(*vertex) && flagAcc(*vertex) != 0) {
+              goodVtx = true;
+              break;
+            }
+        }
+        if (!goodVtx) continue;
+        for ( unsigned int iVtxTrack = 0; iVtxTrack < vertex->nTrackParticles(); iVtxTrack++  ){
+          if ( track == vertex->trackParticle( iVtxTrack ) ){
+            vertexCheck = true;
+            break;
+          } else {
+            auto origVtxTrack = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( vertex->trackParticle( iVtxTrack ) ); 
+            if ( origVtxTrack == track ){
+              vertexCheck = true;
+              break;
+            }
+          }
+        }
+        if ( vertexCheck ) break;
+      }
+    }
+    if ( m_onlyInVertex && !vertexCheck ) continue;
     if ( !m_trkSelector->decision(*track, 0) ) continue;  
     for (unsigned int iSel = 0; iSel < m_addTrkSelTools.size(); iSel++ ){
       if (!m_addTrkSelTools.at( iSel )->accept( track ) ) {

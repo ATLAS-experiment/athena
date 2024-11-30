@@ -39,6 +39,7 @@ BPHY18cf                     = BPhysEnsureAttributes( BPHY18MetaDataTool )
 BPHY18cf.runGSFCalo          = vars().get( "BPHY18_runGSFCalo"          , BPHY18cf.runGSFCalo          )
 BPHY18cf.JPsiFinderLegAndLeg = vars().get( "BPHY18_JPsiFinderLegAndLeg" , BPHY18cf.JPsiFinderLegAndLeg )
 BPHY18cf.BeeKstUseElMass     = vars().get( "BPHY18_BeeKstUseElMass"     , BPHY18cf.BeeKstUseElMass     )
+BPHY18cf.isoMultOnlyInVertex = vars().get( "BPHY18_isoMultOnlyInVertex" , BPHY18cf.isoMultOnlyInVertex )
 
 ToolSvc  += BPHY18MetaDataTool
 pprint ( BPHY18MetaDataTool.properties() )
@@ -432,6 +433,8 @@ BPHY18_IsoMultiplicityTool = DerivationFramework__BKllIsoMultiplicityTool(
     TrackContainer             = "InDetTrackParticles",
     InputVertexContainer       = "BeeKstCandidates",
     IsolationCones             = [ "10", "20", "30", "40", "50" ],
+    OnlyInVertex               = BPHY18cf.isoMultOnlyInVertex,
+    VertexPassFlags            =  ["passed_Bd", "passed_Bdbar"], 
     TrackSelectorTool          = BPHY18_VertexTools.InDetTrackSelectorTool,
     AddTrackSelectionCuts      = [ "Loose" ],
     TrackPtCut                 = BPHY18cf.BeeKstPreFitMesonTrackPtCut,

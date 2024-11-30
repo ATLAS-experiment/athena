@@ -81,6 +81,9 @@ namespace DerivationFramework {
     recordPropertyD( "BeeKstChi2NDoFCut" ,  15.0 );
     recordPropertyD( "BeeKstChi2Cut"     ,  30.0 );
     recordPropertyD( "KstChi2Cut"        , 100.0 );
+
+    // Configuration for Isolation/Multiplicity Calculation
+    recordPropertyB( "isoMultOnlyInVertex", false );
   }
   //--------------------------------------------------------------------------
 } // namespace
