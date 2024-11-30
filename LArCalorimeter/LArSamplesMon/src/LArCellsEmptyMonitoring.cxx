@@ -44,6 +44,7 @@
 #include <array>
 #include <map>
 #include <cstdio>//fopen, fprintf
+#include <fstream>
 #include <iostream>
 
 using namespace std;

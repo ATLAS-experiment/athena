@@ -5,9 +5,9 @@
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
-# art-input: valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4159_s4114_r14838_tid34200062_00
-# art-input-nfiles: 2
-# art-athena-mt: 4
+# art-input: valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4369_s4370_r16210_tid42196707_00
+# art-input-nfiles: 1
+# art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
 # art-output: *.log

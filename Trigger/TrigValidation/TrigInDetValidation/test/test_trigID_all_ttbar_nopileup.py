@@ -3,12 +3,12 @@
 
 # Elliot - This test is a duplicate of test_trigID_all_ttbar_nopileup.py which will use CA for the RDOtoRDOTrigger step. Included to ensure that results for non-CA and CA implementations are consistent, intended so that this duplicate will be deleted once all tests are migrated to use CA for the RDOtoRDOTrigger step. Confirmed with ID trigger coordinators.
 
-# art-description: art job for all_ttbar_nopileup_CA
+# art-description: art job for all_ttbar_nopileup
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
-# art-input: valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4159_s4114_r14838_tid34200062_00
-# art-input-nfiles: 2
+# art-input: valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4369_s4370_r16210_tid42196707_00
+# art-input-nfiles: 1
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt

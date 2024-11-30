@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,13 +11,16 @@
 #define LArSamples_D3PDConverter_H
 
 #include "LArSamplesMon/CaloD3PDClass.h"
-#include "LArSamplesMon/Interface.h"
-#include "TString.h"
 #include "CxxUtils/checker_macros.h"
+
+class TString;
 
 #include <map>
 
+
 namespace LArSamples {
+  class Interface;
+
 
   class ATLAS_NOT_THREAD_SAFE D3PDConverter : public CaloD3PDClass
   {

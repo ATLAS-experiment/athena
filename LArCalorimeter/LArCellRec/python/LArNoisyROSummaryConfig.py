@@ -32,7 +32,7 @@ def LArNoisyROSummaryCfg(configFlags, **kwargs):
                                     DoHVflag=not isMC
                                     )
 
-   theLArNoisyROAlg=LArNoisyROAlg(isMC=isMC,Tool=theLArNoisyROTool, **kwargs)
+   theLArNoisyROAlg=LArNoisyROAlg(isMC=isMC,Tool=theLArNoisyROTool)
    if not isMC:
       theLArNoisyROAlg.HVMapKey="LArHVNcells"
    result.addEventAlgo(theLArNoisyROAlg)

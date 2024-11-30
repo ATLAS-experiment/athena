@@ -15,6 +15,8 @@
 #include "LArSamplesMon/DataTweaker.h"
 #include "LArSamplesMon/UniformShapeErrorGetter.h"
 #include "LArSamplesMon/TreeShapeErrorGetter.h"
+
+#include "TFile.h"
 #include "TObjString.h"
 #include "TSystem.h"
 #include "TObjArray.h"
