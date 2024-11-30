@@ -17,6 +17,7 @@ namespace DerivationFramework {
 BKllIsoMultiplicityTool::BKllIsoMultiplicityTool(
   const std::string& t, const std::string& n, const IInterface* p)
     : AthAlgTool(t, n, p),
+      m_name("BKllIsoMultTool"),
       m_cones(),
       m_vertexContainerName("NONE"),
       m_trackContainerName("InDetTrackParticles"),
@@ -44,6 +45,7 @@ BKllIsoMultiplicityTool::BKllIsoMultiplicityTool(
   declareInterface<DerivationFramework::IAugmentationTool>(this);
 
   // Declare tools
+  declareProperty("BKllIsoMultiplicityToolName", m_name);
   declareProperty("IsolationCones", m_cones);
   declareProperty("InputVertexContainer", m_vertexContainerName);
   declareProperty("TrackContainer", m_trackContainerName);
@@ -243,24 +245,36 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
 
   // Prepare TrackBags!
   std::vector<const xAOD::TrackParticle*> trackBag;
+  std::vector<bool> isSelectedTrackBag;
+  unsigned int selectedTrackMult = 0;
   for ( auto track : *idTrackParticleContainer ) {
-      if ( !m_trkSelector->decision(*track, 0) ) continue;  
-      for (unsigned int iSel = 0; iSel < m_addTrkSelTools.size(); iSel++ ){
-        if (!m_addTrkSelTools.at( iSel )->accept( track ) ) continue;
+    bool isSelected = true;
+    if ( !m_trkSelector->decision(*track, 0) ) continue;  
+    for (unsigned int iSel = 0; iSel < m_addTrkSelTools.size(); iSel++ ){
+      if (!m_addTrkSelTools.at( iSel )->accept( track ) ) {
+        isSelected = false;
+        break;
       }
-      if ( track->p4().Pt() < m_trackPtCut ) continue;
-      if ( ( m_trackEtaCut > 0 ) && abs( track->p4().Eta() ) > m_trackEtaCut ) continue;
-      trackBag.push_back( track );
+    }
+    if ( track->p4().Pt() < m_trackPtCut ) continue;
+    if ( ( m_trackEtaCut > 0 ) && abs( track->p4().Eta() ) > m_trackEtaCut ) continue;
+    trackBag.push_back( track );
+    if ( isSelected ) selectedTrackMult += 1;
+    isSelectedTrackBag.push_back( isSelected );
   }
   if ( m_recordTrackMult ) {
-    SG::AuxElement::Decorator<unsigned int> trackMultDecorator("BKllTrackMultiplicity");
+    SG::AuxElement::Decorator<unsigned int> trackMultDecorator( m_name + "TrackMultiplicity" );
+    SG::AuxElement::Decorator<unsigned int> selectedTrackMultDecorator( m_name + "SelectedTrackMultiplicity" );
     trackMultDecorator( *eventInfo ) = trackBag.size();
+    selectedTrackMultDecorator( *eventInfo ) = selectedTrackMult;
   }
 
   // Electron Multiplicity
   if ( m_recordElMult ){
     unsigned int elMult = 0;
+    unsigned int selectedElMult = 0;
     for ( auto el : *elContainer ) {
+      bool isSelected = true;
       if ( m_elLHCut != "None" ){
           SG::AuxElement::Accessor<char> elLikelihoodAcc( m_elLHCut );
           if (! elLikelihoodAcc( *el ) ) continue;
@@ -288,20 +302,28 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
       }
       if ( !m_trkSelector->decision(*elTrack, 0) ) continue; 
       for (unsigned int iSel = 0; iSel < m_addElTrkSelTools.size(); iSel++ ){
-        if (!m_addElTrkSelTools.at( iSel )->accept( elTrack ) ) continue;
+        if (!m_addElTrkSelTools.at( iSel )->accept( elTrack ) ) {
+          isSelected = false;
+          break;
+        }
       }
       if ( elTrack->p4().Pt() < m_elTrackPtCut ) continue;
       if ( ( m_elTrackEtaCut > 0 ) && abs( elTrack->p4().Eta() ) > m_elTrackEtaCut ) continue;
       elMult += 1;
+      if ( isSelected ) selectedElMult += 1;
     }
-    SG::AuxElement::Decorator<unsigned int> elMultDecorator("electronMultiplicity");
+    SG::AuxElement::Decorator<unsigned int> elMultDecorator( m_name + "ElectronMultiplicity" );
+    SG::AuxElement::Decorator<unsigned int> selectedElMultDecorator( m_name + "SelectedElectronMultiplicity" );
     elMultDecorator( *eventInfo ) = elMult;
+    selectedElMultDecorator( *eventInfo ) = selectedElMult;
   }
 
   // Muon Multiplicity 
   if ( m_recordMuMult ){
     unsigned int muMult = 0;
+    unsigned int selectedMuMult = 0;
     for ( auto mu : *muContainer ) {
+      bool isSelected = 0;
       if( m_muQualityCut >= 0 ){
           if (!(m_muSelectionTool->getQuality(*mu) <= m_muQualityCut) ) continue;
       }
@@ -320,14 +342,20 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
       }
       if ( !m_trkSelector->decision(*muTrack, 0) ) continue; 
       for (unsigned int iSel = 0; iSel < m_addMuTrkSelTools.size(); iSel++ ){
-        if (!m_addMuTrkSelTools.at( iSel )->accept( muTrack ) ) continue;
+        if (!m_addMuTrkSelTools.at( iSel )->accept( muTrack ) ) {
+          isSelected = false;
+          break;
+        }
       }
       if ( muTrack->p4().Pt() < m_muTrackPtCut ) continue;
       if ( ( m_muTrackEtaCut > 0 ) && abs( muTrack->p4().Eta() ) > m_muTrackEtaCut ) continue;
       muMult += 1;
+      if ( isSelected ) selectedMuMult += 1;
     }
-    SG::AuxElement::Decorator<unsigned int> muMultDecorator("muonMultiplicity");
+    SG::AuxElement::Decorator<unsigned int> muMultDecorator( m_name + "MuonMultiplicity");
+    SG::AuxElement::Decorator<unsigned int> selectedMuMultDecorator( m_name + "SelectedMonMultiplicity");
     muMultDecorator( *eventInfo ) = muMult;
+    selectedMuMultDecorator( *eventInfo ) = selectedMuMult;
   }
 
   // Loop Over Vertices
@@ -338,15 +366,20 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
 
     // Loop Over Tracks to Create Temporarily Updated TrackBag
     std::vector<const xAOD::TrackParticle*> vTrackBag;
+    std::vector<bool> isSelectedVTrackBag;
     for (unsigned int iTrack = 0; iTrack < trackBag.size(); iTrack++ ) {
       auto track = trackBag.at( iTrack ); 
       if ( isTrackInVertex( vertex, track ) ) continue;
       vTrackBag.push_back( track );
+      isSelectedVTrackBag.push_back( isSelectedTrackBag.at( iTrack ) );
     }
     // Loop Over Legs 
     std::vector<std::vector<float>> isolationsOrigAllLegs;
     std::vector<std::vector<float>> isolationsRefitAllLegs;
     std::vector<std::vector<float>> isolationsOrigInDetAllLegs;
+    std::vector<std::vector<float>> selectedIsolationsOrigAllLegs;
+    std::vector<std::vector<float>> selectedIsolationsRefitAllLegs;
+    std::vector<std::vector<float>> selectedIsolationsOrigInDetAllLegs;
     for (unsigned int iLeg = 0; iLeg < vertex->nTrackParticles(); iLeg++ ){
         auto vertexTrack = vertex->trackParticle( iLeg );
 
@@ -362,24 +395,43 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
         std::vector<float> isolationsOrig      (m_cones.size(), 0.);
         std::vector<float> isolationsRefit     (m_cones.size(), 0.);
         std::vector<float> isolationsOrigInDet (m_cones.size(), 0.);
+        std::vector<float> selectedIsolationsOrig      (m_cones.size(), 0.);
+        std::vector<float> selectedIsolationsRefit     (m_cones.size(), 0.);
+        std::vector<float> selectedIsolationsOrigInDet (m_cones.size(), 0.);
         // Loop Over Cones
         for (unsigned int iCone = 0; iCone < m_cones.size(); iCone++){
           float thrDeltaR = std::stof( m_cones.at( iCone ) ) * 0.01;
           // Loop Over Tracks 
           for ( unsigned int iTrack = 0; iTrack < vTrackBag.size(); iTrack++ ){
+            bool isSelected = isSelectedVTrackBag.at( iTrack );
               auto trackMomentum = vTrackBag.at( iTrack )->p4();
-              if ( legMomentumOrig.DeltaR( trackMomentum ) <= thrDeltaR ) isolationsOrig.at( iCone ) += trackMomentum.Pt(); 
-              if ( legMomentumRefit.DeltaR( trackMomentum ) <= thrDeltaR ) isolationsRefit.at( iCone ) += trackMomentum.Pt();
-              if ( legMomentumOrigInDet.DeltaR( trackMomentum ) <= thrDeltaR ) isolationsOrigInDet.at( iCone ) += trackMomentum.Pt();
+              if ( legMomentumOrig.DeltaR( trackMomentum ) <= thrDeltaR ) {
+                isolationsOrig.at( iCone ) += trackMomentum.Pt(); 
+                if ( isSelected ) selectedIsolationsOrig.at( iCone ) += trackMomentum.Pt();
+              }
+              if ( legMomentumRefit.DeltaR( trackMomentum ) <= thrDeltaR ) {
+                isolationsRefit.at( iCone ) += trackMomentum.Pt();
+                if ( isSelected ) selectedIsolationsRefit.at( iCone ) += trackMomentum.Pt();
+              }
+              if ( legMomentumOrigInDet.DeltaR( trackMomentum ) <= thrDeltaR ) {
+                isolationsOrigInDet.at( iCone ) += trackMomentum.Pt();
+                if ( isSelected ) selectedIsolationsOrigInDet.at( iCone ) += trackMomentum.Pt();
+              }
           }
         }
         isolationsOrigAllLegs.push_back( isolationsOrig );
         isolationsRefitAllLegs.push_back( isolationsRefit );
         isolationsOrigInDetAllLegs.push_back( isolationsOrigInDet );
+        selectedIsolationsOrigAllLegs.push_back( selectedIsolationsOrig );
+        selectedIsolationsRefitAllLegs.push_back( selectedIsolationsRefit );
+        selectedIsolationsOrigInDetAllLegs.push_back( selectedIsolationsOrigInDet );
       }
-      setIsoVar( vertex, isolationsOrigAllLegs, "trackIsoOrig" );
-      setIsoVar( vertex, isolationsRefitAllLegs, "trackIsoRefit" );
-      setIsoVar( vertex, isolationsOrigInDetAllLegs, "trackIsoOrigInDet" );
+      setIsoVar( vertex, isolationsOrigAllLegs, m_name + "TrackIsoOrig" );
+      setIsoVar( vertex, isolationsRefitAllLegs, m_name + "TrackIsoRefit" );
+      setIsoVar( vertex, isolationsOrigInDetAllLegs, m_name + "TrackIsoOrigInDet" );
+      setIsoVar( vertex, selectedIsolationsOrigAllLegs, m_name + "SelectedTrackIsoOrig" );
+      setIsoVar( vertex, selectedIsolationsRefitAllLegs, m_name + "SelectedTrackIsoRefit" );
+      setIsoVar( vertex, selectedIsolationsOrigInDetAllLegs, m_name + "SelectedTrackIsoOrigInDet" );
     }
   return StatusCode::SUCCESS;
 }

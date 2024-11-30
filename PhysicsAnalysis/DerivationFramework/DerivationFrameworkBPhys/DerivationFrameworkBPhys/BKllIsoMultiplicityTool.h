@@ -31,6 +31,7 @@ namespace DerivationFramework {
  
     private:
 
+    std::string m_name;
     std::vector<std::string> m_cones;
 	  std::string m_vertexContainerName;
 	  std::string m_trackContainerName;

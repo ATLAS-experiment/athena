@@ -428,6 +428,7 @@ print      BPHY18_Select_piK
 
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__BKllIsoMultiplicityTool
 BPHY18_IsoMultiplicityTool = DerivationFramework__BKllIsoMultiplicityTool(
+    BKllIsoMultiplicityToolName = "BPHY18",
     TrackContainer             = "InDetTrackParticles",
     InputVertexContainer       = "BeeKstCandidates",
     IsolationCones             = [ "10", "20", "30", "40", "50" ],
