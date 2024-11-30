@@ -6,6 +6,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "xAODTracking/Vertex.h"
+#include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
+#include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
 #include <vector>
 
 namespace Trk {
@@ -33,16 +35,30 @@ namespace DerivationFramework {
 	  std::string m_vertexContainerName;
 	  std::string m_trackContainerName;
     ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;
+    std::vector<std::string> m_trkSelectionCuts;
     float m_trackPtCut;
     float m_trackEtaCut;
     std::string  m_elContainerKey;
     std::string  m_elTrackContainerKey;
+    std::vector<std::string> m_elTrkSelectionCuts;
     float  m_elTrackPtCut;
     float  m_elTrackEtaCut;
     std::string  m_elLHCut;
+    std::string  m_muContainerKey;
+    std::string m_muTrackContainerKey;
+    std::vector<std::string> m_muTrkSelectionCuts;
+    float m_muTrackPtCut;
+    float m_muTrackEtaCut;
+    int m_muQualityCut; 
+    ToolHandle<CP::IMuonSelectionTool> m_muSelectionTool;
     bool  m_recordTrackMult;
     bool  m_recordElMult;
     bool  m_recordMuMult;
+    
+    std::vector< InDet::InDetTrackSelectionTool* > m_addTrkSelTools;
+    std::vector< InDet::InDetTrackSelectionTool* > m_addElTrkSelTools;
+    std::vector< InDet::InDetTrackSelectionTool* > m_addMuTrkSelTools;
+
   }; 
 }
 

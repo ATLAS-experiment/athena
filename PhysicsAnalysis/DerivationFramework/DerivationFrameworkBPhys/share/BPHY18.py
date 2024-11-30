@@ -432,16 +432,24 @@ BPHY18_IsoMultiplicityTool = DerivationFramework__BKllIsoMultiplicityTool(
     InputVertexContainer       = "BeeKstCandidates",
     IsolationCones             = [ "10", "20", "30", "40", "50" ],
     TrackSelectorTool          = BPHY18_VertexTools.InDetTrackSelectorTool,
+    AddTrackSelectionCuts      = [ "Loose" ],
     TrackPtCut                 = BPHY18cf.BeeKstPreFitMesonTrackPtCut,
     TrackEtaCut                = BPHY18cf.BeeKstPreFitMesonTrackEtaCut,
     ElectronContainerKey       = "Electrons",
     ElectronTrackContainerKey  = electronTrackParticleCollection,
+    AddElectronTrackSelectionCuts = [ "Loose", "LooseElectron" ],
     ElectronTrackPtCut         = BPHY18cf.JPsiPreFitElPtCut,
     ElectronTrackEtaCut        = -1.,
     ElectronLikelihoodCut      = "DFCommonElectronsLHVeryLoosenod0",
+    MuonContainerKey           = "Muons",
+    MuonTrackContainerKey      = "InDetTrackParticles",
+    AddMuonTrackSelectionCuts  = [ "Loose" ],
+    MuonTrackPtCut             = 5000.,
+    MuonTrackEtaCut            = -1.,
+    MuonQualityCut             = 1,
     RecordTrackMultiplicity    = True, 
     RecordElectronMultiplicity = True, 
-    RecordMuonMultiplicity     = False 
+    RecordMuonMultiplicity     = True
 )
 
 ToolSvc += BPHY18_IsoMultiplicityTool
