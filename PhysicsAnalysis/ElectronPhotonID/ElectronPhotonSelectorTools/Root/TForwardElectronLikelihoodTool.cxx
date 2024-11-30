@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TForwardElectronLikelihoodTool.h"
 #include "TROOT.h"
 #include "TSystem.h"
 #include <cmath>
+#include <format>
 
 const double Root::TForwardElectronLikelihoodTool::fIpBounds[IP_FBINS + 1] = {
   0.,
@@ -171,18 +172,11 @@ Root::TForwardElectronLikelihoodTool::loadVarHistograms(const std::string& vstr,
           // boundaries unsigned int eta_tmp = (eta > 0) ? eta-1 : eta ;
           unsigned int eta_tmp = eta;
           unsigned int et_tmp = et;
-          char binname[200];
-          getBinName(binname, et_tmp, eta_tmp, ip, m_ipBinning);
+          std::string binname = getBinName(et_tmp, eta_tmp, ip, m_ipBinning);
 
-          char pdfdir[500];
-          snprintf(pdfdir, 500, "%s/%s", vstr.c_str(), sig_bkg.c_str());
-          char pdf[500];
-          snprintf(pdf,
-                   500,
-                   "%s_%s_smoothed_hist_from_KDE_%s",
-                   vstr.c_str(),
-                   sig_bkg.c_str(),
-                   binname);
+          const std::string pdfdir = std::format("{}/{}", vstr, sig_bkg);
+          std::string pdf = std::format("{}_{}_smoothed_hist_from_KDE_{}",
+                                        vstr, sig_bkg, binname);
 
           if (!m_pdfFile->GetListOfKeys()->Contains(vstr.c_str())) {
             ATH_MSG_INFO("Warning: skipping variable "
@@ -197,23 +191,19 @@ Root::TForwardElectronLikelihoodTool::loadVarHistograms(const std::string& vstr,
             return 1;
           }
           // Use the first Et bin given in the root file for all Et ranges below
-          if (et == 0 && !((TDirectory*)m_pdfFile->Get(pdfdir))
+          if (et == 0 && !((TDirectory*)m_pdfFile->Get(pdfdir.c_str()))
                             ->GetListOfKeys()
-                            ->Contains(pdf)) {
+                            ->Contains(pdf.c_str())) {
             ATH_MSG_INFO("using lowest GeV bin in place of all below.");
-            getBinName(binname, et_tmp + 1, eta_tmp, ip, m_ipBinning);
-            snprintf(pdf,
-                     500,
-                     "%s_%s_smoothed_hist_from_KDE_%s",
-                     vstr.c_str(),
-                     sig_bkg.c_str(),
-                     binname);
+            binname = getBinName(et_tmp + 1, eta_tmp, ip, m_ipBinning);
+            pdf = std::format("{}_{}_smoothed_hist_from_KDE_{}",
+                              vstr, sig_bkg, binname);
           }
-          if (((TDirectory*)m_pdfFile->Get(pdfdir))
+          if (((TDirectory*)m_pdfFile->Get(pdfdir.c_str()))
                 ->GetListOfKeys()
-                ->Contains(pdf)) {
+                ->Contains(pdf.c_str())) {
             TH1F* hist =
-              (TH1F*)(((TDirectory*)m_pdfFile->Get(pdfdir))->Get(pdf));
+              (TH1F*)(((TDirectory*)m_pdfFile->Get(pdfdir.c_str()))->Get(pdf.c_str()));
             fPDFbins[s_or_b][ip][et][eta][varIndex] =
               new EGSelectors::SafeTH1(hist);
             delete hist;
@@ -510,9 +500,8 @@ Root::TForwardElectronLikelihoodTool::getLikelihoodEtHistBin(double eT)
 
 // Gets the bin name. Given the HISTOGRAM bin  naming used in the input file
 // which seems to be lower bound oriented ...
-void
+std::string
 Root::TForwardElectronLikelihoodTool::getBinName(
-  char* buffer,
   int etbin,
   int etabin,
   int ipbin,
@@ -522,15 +511,12 @@ Root::TForwardElectronLikelihoodTool::getBinName(
                                      3.0, 3.1, 3.16, 3.35, 3.6 };
   int et_bounds[s_fnEtBinsHist] = { 20, 30, 40, 50 };
   if (!iptype.empty()) {
-    snprintf(buffer,
-             200,
-             "%s%det%02deta%0.2f",
-             iptype.c_str(),
-             int(fIpBounds[ipbin]),
-             et_bounds[etbin],
-             eta_bounds[etabin]);
+    return std::format("{}{}et{:02}eta{:.2f}",
+                       iptype, int(fIpBounds[ipbin]),
+                       et_bounds[etbin], eta_bounds[etabin]);
   } else {
-    snprintf(buffer, 200, "et%deta%0.2f", et_bounds[etbin], eta_bounds[etabin]);
+    return std::format("et{:02}eta{:.2f}",
+                       et_bounds[etbin], eta_bounds[etabin]);
   }
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -247,11 +247,10 @@ private:
                                 [s_fnVariables]{};
 
   static unsigned int getIpBin(double ip) ;
-  static void getBinName(char* buffer,
-                  int etbin,
-                  int etabin,
-                  int ipbin,
-                  const std::string& iptype) ;
+  static std::string getBinName(int etbin,
+                                int etabin,
+                                int ipbin,
+                                const std::string& iptype) ;
 };
 
 } // namespace Root
