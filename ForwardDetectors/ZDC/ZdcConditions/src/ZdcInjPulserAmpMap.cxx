@@ -73,7 +73,7 @@ bool ZdcInjPulserAmpMap::parseJsonFile(std::ifstream& ifs)
     
     // Now loop over the configurations and save
     //
-    for (json::iterator configIt = stepConfigIter->begin(); configIt != stepConfigIter->end(); configIt++) {
+    for (json::iterator configIt = stepConfigIter->begin(); configIt != stepConfigIter->end(); ++configIt) {
       std::string confName = configIt.key();
       
       // First we make a spot in the map

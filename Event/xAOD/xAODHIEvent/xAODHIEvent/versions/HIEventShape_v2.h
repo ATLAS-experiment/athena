@@ -19,14 +19,15 @@ namespace xAOD {
 
    /// Interface class for the HI reconstruction EDM
    ///
-   /// This class describes the output of the Heavy-Ion reconstruction,
-   /// saving the reconstructed properties.
+   /// This class describes the underlying event shape in calorimeter slices
+   /// The description can be of varying granularity.
+   /// The most granular form is when energy and azimuthal modulations
+   ///   are calculated for slices of eta for each calorimeter layer.
+   /// The tool responsible for filling this information is HIEventShapeFillerTool.
    ///
    /// @author Aaron Angerami <angerami@cern.ch>
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
-   /// $Revision: 693494 $
-   /// $Date: 2015-09-07 16:59:45 +0200 (Mon, 07 Sep 2015) $
    ///
    class HIEventShape_v2 : public SG::AuxElement {
 
@@ -37,24 +38,24 @@ namespace xAOD {
       /// @name Energy density information
       /// @{
 
-      /// Transverse energy reconstructed
+      /// Transverse energy reconstructed on the slice
       float et() const;
       /// Set the reconstructed transverse energy
       void setEt( float value );
 
-      /// @todo Write documentation
+      /// obtain the area of the eta slice 
       float area() const;
-      /// @todo Write documentation
+      /// set the area of the eta slice
       void setArea( float value );
 
-      /// @todo Write documentation
+      /// energy density (et/area)
       float rho() const;
-      /// @todo Write documentation
+      /// set the rho value
       void setRho( float value );
 
-      /// @todo Write documentation
+      /// number of cells that were summed in slice
       int nCells() const;
-      /// @todo Write documentation
+      /// set the number of cells summed in slice
       void setNCells( int value );
 
       /// @}
@@ -62,18 +63,22 @@ namespace xAOD {
       /// @name Harmonic modulation
       /// @{
 
-      /// @todo Write documentation
+      /// cosine (y) part of the harmonic modulation strength
+      /// Following convention is used: index 0 is first harmonic, 1 is the second one etc.
+      /// The other of harmonics is arbitrary and depends on the code filling it.
+      /// The modulation is et weighted.
       const std::vector< float >& etCos() const;
-      /// @todo Write documentation
+      /// read write accessor for cosine modulation
       std::vector< float >& etCos();
-      /// @todo Write documentation
+      /// set the cosine harmonic modulation
       void setEtCos( const std::vector< float >& value );
 
-      /// @todo Write documentation
+      /// sine (x) part of the harmonic modulation strength
+      /// @see etCos
       const std::vector<float>& etSin() const;
-      /// @todo Write documentation
+      /// read-write accessor for since modulation
       std::vector<float>& etSin();
-      /// @todo Write documentation
+      /// set the sine harmonic modulation
       void setEtSin( const std::vector< float >& value );
 
       /// @}
@@ -81,19 +86,21 @@ namespace xAOD {
       /// @name Information about the slice
       /// @{
 
-      /// @todo Write documentation
+      /// eta slice "left" edge
       float etaMin() const;
-      /// @todo Write documentation
+      /// set eta slice "left" edge
       void setEtaMin( float value );
 
-      /// @todo Write documentation
+      /// eta slice "right" edge
       float etaMax() const;
-      /// @todo Write documentation
+      /// set eta slice "right" edge
       void setEtaMax( float value );
 
-      /// @todo Write documentation
+      /// calorimeter layer for which the quantities were calculated
+      /// 0 - all calorimeter depth
+      /// others numbers are calorimeter layers ID 
       int layer() const;
-      /// @todo Write documentation
+      /// set layer information
       void setLayer( int value );
 
       /// @}
