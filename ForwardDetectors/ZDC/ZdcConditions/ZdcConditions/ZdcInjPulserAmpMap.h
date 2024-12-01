@@ -109,7 +109,7 @@ public:
 
   static const ZdcInjPulserAmpMap* getInstance();
 
-  std::string getFilePath() const {return m_filePath;}
+  const std::string& getFilePath() const {return m_filePath;}
 
   Token lookupRun(unsigned int runNumber, bool allowDefault = false);
     
