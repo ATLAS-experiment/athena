@@ -102,7 +102,7 @@ void VP13DCocktailChannel::init()
     addSystem(new VP1GeometrySystem(VP1GeoFlags::None,n),IVP13DStandardChannelWidget::StartDisabled);
   for (const QString& n : VP1SysConf::extraTrackSystems())
     addSystem(new VP1TrackSystem(n),IVP13DStandardChannelWidget::StartDisabled);
-  for (const QString& [[maybe_unused]] n : VP1SysConf::extraGuideSystems())
+  for ([[maybe_unused]] const QString& n : VP1SysConf::extraGuideSystems())
     addSystem(new VP1GuideLineSystem(),IVP13DStandardChannelWidget::StartDisabled);
 
   VP1SysConf::setupStandardConnectionsAndOptions( guidelinesystem,geosys,tracksys,prdsys,0,VP1SysConf::EVENTSTUDIES );
