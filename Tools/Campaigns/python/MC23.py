@@ -384,10 +384,11 @@ def MC23dSimulationLowMuLowB(flags):
     # B-field configuration
     flags.BField.configuredSolenoidFieldScale = 0.4
 
-    
+
 def MC23SimulationSingleIoV(flags):
     """MC23 flags for simulation"""
     MC23SimulationNoIoV(flags)
+    flags.Input.MCCampaign = Campaign.MC23a
 
     flags.Input.RunNumbers = [410000]
     flags.Input.OverrideRunNumber = True
@@ -397,6 +398,7 @@ def MC23SimulationSingleIoV(flags):
 def MC23aSimulationMultipleIoV(flags):
     """MC23 flags for simulation"""
     MC23SimulationNoIoV(flags)
+    flags.Input.MCCampaign = Campaign.MC23a
 
     flags.Input.OverrideRunNumber = True
 
@@ -408,6 +410,7 @@ def MC23aSimulationMultipleIoV(flags):
 def MC23cSimulationMultipleIoV(flags):
     """MC23 flags for simulation"""
     MC23SimulationNoIoV(flags)
+    flags.Input.MCCampaign = Campaign.MC23c
 
     flags.Input.OverrideRunNumber = True
 
@@ -419,6 +422,7 @@ def MC23cSimulationMultipleIoV(flags):
 def MC23eSimulationMultipleIoV(flags):
     """MC23 flags for simulation"""
     MC23SimulationNoIoV(flags)
+    flags.Input.MCCampaign = Campaign.MC23e
 
     flags.Input.OverrideRunNumber = True
 
