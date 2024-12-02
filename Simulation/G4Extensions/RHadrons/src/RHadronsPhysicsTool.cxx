@@ -126,9 +126,7 @@ void RHadronsPhysicsTool::ConstructProcess()
         handled.push_back(particle->GetPDGEncoding());
         ATH_MSG_VERBOSE ( particle->GetParticleName() << " (" << particle->GetPDGEncoding() << ") " << " is a Custom Particle. Attempting to add a decay process." );
         G4ProcessManager *processMgr = particle->GetProcessManager();
-        if (particle->GetParticleType()=="rhadron"  ||
-           particle->GetParticleType()=="mesonino" ||
-           particle->GetParticleType()=="sbaryon"  ) {
+        if (particle->GetParticleType()=="rhadron") {
           processMgr->AddDiscreteProcess(new FullModelHadronicProcess());
           if (theDecayProcess->IsApplicable(*particle)) {
             ATH_MSG_VERBOSE ( "Adding decay..." );

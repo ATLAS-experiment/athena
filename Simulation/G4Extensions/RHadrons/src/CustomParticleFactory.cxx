@@ -11,9 +11,11 @@
 #include <map>
 #include <set>
 
-#include "CustomPDGParser.h"
 #include "CustomParticle.h"
 #include "CustomParticleFactory.h"
+
+#include "TruthUtils/HepMCHelpers.h"
+
 #include "G4DecayTable.hh"
 #include "G4ParticleTable.hh"
 #include "G4PhaseSpaceDecayChannel.hh"
@@ -81,13 +83,11 @@ std::set<G4ParticleDefinition *> CustomParticleFactory::load()
     }
 
     pType="custom";
-    if (CustomPDGParser::s_isRHadron(pdgCode)) pType = "rhadron";
-    if (CustomPDGParser::s_isSLepton(pdgCode)) pType = "sLepton";
-    if (CustomPDGParser::s_isMesonino(pdgCode)) pType = "mesonino";
-    if (CustomPDGParser::s_isSbaryon(pdgCode)) pType = "sbaryon";
+    if (MC::isRHadron(pdgCode)) pType = "rhadron";
+    if (MC::isSlepton(pdgCode)) pType = "sLepton";
 
     G4cout<<"pType: "<<pType<<G4endl;
-    G4cout<<"Charge of "<<name<<" is "<<CustomPDGParser::s_charge(pdgCode)<<G4endl;
+    G4cout<<"Charge of "<<name<<" is "<<MC::charge(pdgCode)<<G4endl;
 
     G4ParticleDefinition* previousDefinition = theParticleTable->FindParticle(pdgCode);
     // if the particle has somehow already been added to the G4ParticleTable remove it
@@ -99,8 +99,8 @@ std::set<G4ParticleDefinition *> CustomParticleFactory::load()
     }
 
     CustomParticle *particle  = new CustomParticle(
-                                                   name,           mass * CLHEP::GeV ,        0.0*CLHEP::MeV,       CLHEP::eplus* CustomPDGParser::s_charge(pdgCode),
-                                                   (int)CustomPDGParser::s_spin(pdgCode)-1,              +1,             0,
+                                                   name,           mass * CLHEP::GeV ,        0.0*CLHEP::MeV,       CLHEP::eplus * MC::charge(pdgCode),
+                                                   MC::spin2(pdgCode),              +1,             0,
                                                    0,              0,             0,
                                                    pType,               0,            +1, pdgCode,
                                                    true,            -1.0,          NULL );
