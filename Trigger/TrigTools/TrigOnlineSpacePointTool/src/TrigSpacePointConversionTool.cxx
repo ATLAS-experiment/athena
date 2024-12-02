@@ -119,11 +119,8 @@ StatusCode TrigSpacePointConversionTool::getSpacePoints(const IRoiDescriptor& in
   std::vector<IdentifierHash> listOfPixIds;
   std::vector<IdentifierHash> listOfSctIds;
         
-  //  m_regionSelector->DetHashIDList(PIXEL, internalRoI, listOfPixIds); 
-  //  m_regionSelector->DetHashIDList(SCT, internalRoI, listOfSctIds); 
-
-  m_regsel_pix->HashIDList( internalRoI, listOfPixIds );
-  m_regsel_sct->HashIDList( internalRoI, listOfSctIds );
+  m_regsel_pix->lookup(ctx)->HashIDList( internalRoI, listOfPixIds );
+  m_regsel_sct->lookup(ctx)->HashIDList( internalRoI, listOfSctIds );
 
  
   int offsets[3];

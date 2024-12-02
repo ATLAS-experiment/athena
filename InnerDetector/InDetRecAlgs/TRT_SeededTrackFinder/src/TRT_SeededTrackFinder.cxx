@@ -196,7 +196,9 @@ InDet::TRT_SeededTrackFinder::execute(const EventContext& ctx) const{
     }
     std::vector<IdentifierHash> listOfSCTIds;
     std::vector<IdentifierHash> listOfPixIds;
-    m_regionSelector->HashIDList(*roiComp, listOfSCTIds );
+    
+    m_regionSelector->lookup(ctx)->HashIDList( *roiComp, listOfSCTIds );
+
     event_data_p = m_trackmaker->newRegion(ctx, combinatorialData, listOfPixIds, listOfSCTIds);
   } else {
     event_data_p = m_trackmaker->newEvent(ctx, combinatorialData);

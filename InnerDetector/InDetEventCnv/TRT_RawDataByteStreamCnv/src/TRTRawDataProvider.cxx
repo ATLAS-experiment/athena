@@ -94,7 +94,9 @@ StatusCode TRTRawDataProvider::execute(const EventContext& ctx) const
       for (; roi!=roiE; ++roi) {
         superRoI.push_back(*roi);
       }
-      m_regionSelector->ROBIDList( superRoI, listOfRobs );
+
+      m_regionSelector->lookup(ctx)->ROBIDList( superRoI, listOfRobs );
+
   }
   std::vector<const ROBFragment*> listOfRobf;
   m_robDataProvider->getROBData( ctx, listOfRobs, listOfRobf);

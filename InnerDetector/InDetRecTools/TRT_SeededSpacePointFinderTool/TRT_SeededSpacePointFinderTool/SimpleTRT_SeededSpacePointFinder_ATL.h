@@ -142,7 +142,7 @@ namespace InDet{
                                 const Trk::SpacePoint*>& relevantSpacePoints) const;
 
        /** obtains the hashes of modules in the ROI */ 
-       void getHashesInROI(const Trk::TrackParameters& directionTRT, std::set<IdentifierHash>& setOfSCT_Hashes) const;
+      void getHashesInROI(const EventContext& ctx, const Trk::TrackParameters& directionTRT, std::set<IdentifierHash>& setOfSCT_Hashes) const;
 
        /** builds pairs of SP according to the kook-up table */
        void combineSpacePoints(const std::multimap<int,const Trk::SpacePoint*>& relevantSpacePoints,
