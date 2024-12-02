@@ -37,12 +37,15 @@ namespace MuonR4 {
         std::vector<MeasurementSet> segMeasurements{extractPrds(*resolved.front())};
 
         for (std::unique_ptr<Segment>& resolveMe : toResolve) {
+            ATH_MSG_VERBOSE("Try to resolve new segment "<<toString(localSegmentPars(gctx, *resolveMe))
+                          <<" redChi2: "<<redChi2(*resolveMe)<<" nDoF: "<<resolveMe->nDoF());
             /// Fetch first the Prds 
             MeasurementSet testMeas{extractPrds(*resolveMe)};
             Resolution reso{Resolution::noOverlap};
             unsigned int resolvedIdx{0};
             for (std::unique_ptr<Segment>& goodSeg : resolved) {
-                ATH_MSG_VERBOSE("Test against segment "<<toString(localSegmentPars(gctx, *goodSeg)));
+                ATH_MSG_VERBOSE("Test against segment "<<toString(localSegmentPars(gctx, *goodSeg))
+                        <<" redChi2: "<<redChi2(*goodSeg)<<" nDoF: "<<goodSeg->nDoF());
                 MeasurementSet& resolvedM = segMeasurements[resolvedIdx];
                 std::vector<int>& existSigns{segmentSigns[resolvedIdx++]};
                 /// Check whether the two segments share hits at all
@@ -70,9 +73,8 @@ namespace MuonR4 {
                 ATH_MSG_VERBOSE("Chi2 good "<<resolvedChi2<<", candidate chi2: "<<resolveMeChi2);
                 /// Segments below that threshold are not considered for outlier removal
                 /// Take the one which has more degrees of freedom
-                if (resolveMeChi2 < m_cfg.selectByNDoFChi2 && resolvedChi2 < m_cfg.selectByNDoFChi2 &&
-                    goodSeg->nDoF() > resolveMe->nDoF()) {
-                    reso = Resolution::subSet;
+                if (resolveMeChi2 < m_cfg.selectByNDoFChi2 && resolvedChi2 < m_cfg.selectByNDoFChi2) {
+                    reso =  goodSeg->nDoF() > resolveMe->nDoF() ? Resolution::subSet : Resolution::superSet;
                 }
                 if (reso == Resolution::superSet) {
                     std::swap(goodSeg, resolveMe);

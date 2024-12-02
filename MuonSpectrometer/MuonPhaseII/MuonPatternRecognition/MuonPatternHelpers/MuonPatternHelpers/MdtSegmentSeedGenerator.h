@@ -54,6 +54,8 @@ namespace MuonR4 {
                 const ISpacePointCalibrator* calibrator{nullptr};
                 /** @brief Toggle whether the seed is rapidly refitted */
                 bool fastSeedFit{true};
+                /** @brief Toggle whether an initial t0 fit shall be executed */
+                bool fastSegFitWithT0{false};
                 /** @brief Maximum number of iterations in the fast segment fit */
                 unsigned int nMaxIter{100};
                 /** @brief Precision cut off in the fast segment fit */
@@ -127,16 +129,74 @@ namespace MuonR4 {
              *  @param bottomHit: Hit candidate from the lower layer
              *  @param sign: Object encoding whether the tangent is left / right  */
             std::optional<DriftCircleSeed> buildSeed(const EventContext& ctx,
-                                                     const HoughHitType & topHit, 
-                                                     const HoughHitType & bottomHit, 
+                                                     const HoughHitType& topHit, 
+                                                     const HoughHitType& bottomHit, 
                                                      const SignComboType& signs); 
-            
+            /** @brief Auxillary struct to calculate fit constants */
+            struct SeedFitAuxilliaries {
+                /** @brief Tube position center weigthed with inverse covariances */
+                Amg::Vector3D centerOfGrav{Amg::Vector3D::Zero()};
+                /** @brief Vector of inverse covariances */
+                std::vector<double> invCovs{};
+                /** @brief Vector of drfit signs */
+                std::vector<int> driftSigns{};
+                /** @brief Covariance norm */
+                double covNorm{0.};
+                /** @brief Expectation value of T_{z}^{2} - T_{y}^{2} */
+                double T_zzyy{0.};
+                /** @brief Expectation value of T_{y} * T_{z} */
+                double T_yz{0.}; 
+                /** @brief Expectation value of T_{z} * r  */
+                double T_rz{0.};
+                /** @brief Expectation value of T_{y} * r  */
+                double T_ry{0.};
+                /** @brief Prediced y0 given as the expection value of the radii
+                 *         divided by the inverse covariance sum. */
+                double fitY0{0.};
+            };
+
+            struct SeedFitAuxWithT0: public SeedFitAuxilliaries{
+                /** @brief Constructor */
+                SeedFitAuxWithT0(SeedFitAuxilliaries&& parent):
+                    SeedFitAuxilliaries{std::move(parent)}{}
+                    /** @brief Expectation value of T_{y} * v */
+                    double T_vy{0.};
+                    /** @brief Expectation value of T_{z} * v */
+                    double T_vz{0.};
+                    /** @brief Expectation value of T_{y} * a */
+                    double T_ay{0.};
+                    /** @brief Expectation value of T_{z} * a */
+                    double T_az{0.};
+                    /** @brief Expectation value of r * v */
+                    double R_vr{0.};
+                    /** @brief Expectation value of v * v */
+                    double R_vv{0.};
+                    /** @brief Expectation value of r * a */
+                    double R_va{0.};
+                    /** @brief First derivative of the fitted Y0 */
+                    double fitY0Prime{0.};
+                    /** @brief Second derivative of the ftted Y0 */
+                    double fitY0TwoPrime{0.};
+            };
+
+            /** @brief Helper function to estimate the auxillary variables that remain constant
+             *         during the fit.
+             *  @param seed: Reference to the seed to calculate the variables from */
+            SeedFitAuxilliaries estimateAuxillaries(const DriftCircleSeed& seed) const;  
+            /** @brief Helper function to estimate the auxillary variables that remain constants
+             *          during the fit with t0
+             *  @param ctx: EventContext to recalibrate the hits
+             *  @param seed: Reference to the seed to calculate the variables from */
+            SeedFitAuxWithT0 estimateAuxillaries(const EventContext& ctx,
+                                                 const DriftCircleSeed& seed) const;          
             /** @brief Refine the seed by performing a fast Mdt segment fit. 
-             *         If the fit converged, the fit parameters and its errors are returned
-             *         as optional. Otherwise nullopt is returned
              *  @param seed: Seed built from the tangent adjacent to the two seed circles */
             void fitDriftCircles(DriftCircleSeed& seed) const;
-            
+            /** @brief Refine the seed by performing a fast Mdt segment fit with t0 constraint
+             *  @param ctx: EventContext to recalibrate the hits
+             *  @param seed: Seed built from the tangent adjacent to the two seed circles */
+            void fitDriftCirclesWithT0(const EventContext& ctx,
+                                       DriftCircleSeed& seed) const;            
             /** @brief Prepares the generator to generate the seed from the next pair of drift circles */
             void moveToNextCandidate();
             Config m_cfg{};
@@ -153,9 +213,9 @@ namespace MuonR4 {
             std::size_t m_lowerHitIndex{0};
             /** @brief Explicit hit to pick in the selected top layer */
             std::size_t m_upperHitIndex{0};
-            /** @brief Explicit hit to pick in the selected top layer */
+            /** @brief Index of the left-right ambiguity between the circles */
             std::size_t m_signComboIndex{0};
-
+            /** @brief Vector caching equivalent solutions to avoid double seeding */
             std::vector<SeedSolution> m_seenSolutions{};
             /** Counter on how many seeds have been generated */
             unsigned int m_nGenSeeds{0};

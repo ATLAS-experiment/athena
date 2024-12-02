@@ -91,26 +91,38 @@ namespace MuonR4{
     inline void MdtSegmentSeedGenerator::moveToNextCandidate() {
         const HitVec& lower = m_hitLayers.mdtHits()[m_lowerLayer];
         const HitVec& upper = m_hitLayers.mdtHits()[m_upperLayer];
-        /// All 8 sign combinations are tried. 
-        if (++m_signComboIndex >= s_signCombos.size()){
-            m_signComboIndex = 0; 
-            /// Get the next lower hit & check whether boundary is exceeded
-            if (++m_lowerHitIndex >= lower.size()){
-                m_lowerHitIndex=0;
-                /// Same for the hit in the upper layer
-                if (++m_upperHitIndex >= upper.size()) {
-                    m_upperHitIndex = 0;
-                    /// All combinations of hits & lines in both layers are processed
-                    /// Switch to the next lowerLayer. But skip the busy ones. For now  place a cut on 3 hits
-                    while (m_lowerLayer < m_upperLayer && m_hitLayers.mdtHits()[++m_lowerLayer].size() > m_cfg.busyLayerLimit){
-                    } 
-                    if (m_lowerLayer >= m_upperLayer){
-                        m_lowerLayer = 0; 
-                        while (m_lowerLayer < m_upperLayer && m_hitLayers.mdtHits()[--m_upperLayer].size() > m_cfg.busyLayerLimit){
-                        }
-                    }
-                }
-            }
+        /// Vary the left-right solutions 
+        if (++m_signComboIndex < s_signCombos.size()) {
+            return;
+        }
+        m_signComboIndex = 0; 
+        
+        /// Move to the next hit in the lower layer
+         if (++m_lowerHitIndex < lower.size()) {
+            return;
+        }
+        m_lowerHitIndex=0;
+        /// Move to the next hit in the upper layer
+        if (++m_upperHitIndex < upper.size()) {
+            return;
+        }
+         m_upperHitIndex = 0;
+        /// All combinations of hits & lines in both layers are processed
+        /// Switch to the next lowerLayer. But skip the busy ones according to the configuration
+        while (m_lowerLayer < m_upperLayer && m_hitLayers.mdtHits()[++m_lowerLayer].size() > m_cfg.busyLayerLimit) {
+        } 
+        
+        if (m_lowerLayer < m_upperLayer) {
+            return;
+        }
+        /** Abort the loop if we parsed the multi-layer boundary */
+        if (m_lowerLayer >= m_hitLayers.firstLayerFrom2ndMl() && numGenerated()){
+            m_lowerLayer = m_upperLayer;
+            return;
+        }
+        m_lowerLayer = 0; 
+        while (m_lowerLayer < m_upperLayer && m_hitLayers.mdtHits()[--m_upperLayer].size() > m_cfg.busyLayerLimit){
+    
         }
     }
     std::optional<MdtSegmentSeedGenerator::DriftCircleSeed> 
@@ -155,18 +167,19 @@ namespace MuonR4{
     }
     std::optional<MdtSegmentSeedGenerator::DriftCircleSeed>  
         MdtSegmentSeedGenerator::buildSeed(const EventContext& ctx,
-                                           const HoughHitType & topHit, 
-                                           const HoughHitType & bottomHit, 
+                                           const HoughHitType& topHit, 
+                                           const HoughHitType& bottomHit, 
                                            const SignComboType& signs) {
         
         const auto* bottomPrd = static_cast<const xAOD::MdtDriftCircle*>(bottomHit->primaryMeasurement()); 
         const auto* topPrd = static_cast<const xAOD::MdtDriftCircle*>(topHit->primaryMeasurement());
         if (bottomPrd->status() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime ||
             topPrd->status() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime) {
+                /// All other sign combinations will also get stuck -> force the measurement selector to get another combo
+                m_signComboIndex = s_signCombos.size();
                 return std::nullopt;
         }
-        const int signTop = signs[0];
-        const int signBot = signs[1];
+        const auto&[signTop, signBot] = signs;
         double R = signBot *bottomHit->driftRadius() - signTop * topHit->driftRadius(); 
         const Amg::Vector3D& bottomPos{bottomHit->positionInChamber()};
         const Amg::Vector3D& topPos{topHit->positionInChamber()};
@@ -186,16 +199,17 @@ namespace MuonR4{
         Amg::Vector3D seedDir = Amg::dirFromAngles(90.*Gaudi::Units::deg, theta);
         double Y0 = bottomPos.y()*seedDir.z() - bottomPos.z()*seedDir.y() + signBot*bottomHit->driftRadius();
         double combDriftUncert{std::sqrt(bottomPrd->driftRadiusCov() + topPrd->driftRadiusCov())};
+        std::unique_ptr<CalibratedSpacePoint> calibBottom{}, calibTop{};
         if (m_cfg.recalibSeedCircles) {
             candidateSeed.parameters[toInt(ParamDefs::theta)] = theta;
             candidateSeed.parameters[toInt(ParamDefs::y0)] = Y0 / seedDir.z();
             /// Create a new line position & direction which also takes the
             /// potential phi estimates into account
             const auto [linePos, lineDir] = makeLine(candidateSeed.parameters);
-            auto calibBottom = m_cfg.calibrator->calibrate(ctx, bottomHit, linePos, lineDir, 
-                                                           candidateSeed.parameters[toInt(ParamDefs::time)]);
-            auto calibTop = m_cfg.calibrator->calibrate(ctx, topHit, linePos, lineDir, 
-                                                        candidateSeed.parameters[toInt(ParamDefs::time)]);
+            calibBottom = m_cfg.calibrator->calibrate(ctx, bottomHit, linePos, lineDir, 
+                                                      candidateSeed.parameters[toInt(ParamDefs::time)]);
+            calibTop = m_cfg.calibrator->calibrate(ctx, topHit, linePos, lineDir, 
+                                                   candidateSeed.parameters[toInt(ParamDefs::time)]);
             R = signBot * calibBottom->driftRadius() - signTop * calibTop->driftRadius();
             /// Recalculate the seed with the calibrated parameters
             theta =  thetaTubes - std::asin(std::clamp(R / distTubes, -1., 1.));
@@ -215,38 +229,53 @@ namespace MuonR4{
         const Amg::Vector3D seedPos = Y0 / seedDir.z() * Amg::Vector3D::UnitY();
 
         assert(std::abs(topPos.y()*seedDir.z() - topPos.z() * seedDir.y() + signTop*topHit->driftRadius() - Y0) < std::numeric_limits<float>::epsilon() );
-        ATH_MSG_VERBOSE("Candidate seed theta: "<<theta<<", tanTheta: "<<(seedDir.y() / seedDir.z())<<", y0: "<<Y0/seedDir.z());
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Candidate seed theta: "<<theta<<", tanTheta: "<<(seedDir.y() / seedDir.z())<<", y0: "<<Y0/seedDir.z());
 
         SeedSolution solCandidate{};
         solCandidate.Y0 = seedPos[toInt(ParamDefs::y0)];
         solCandidate.theta = theta;
         /// d/dx asin(x) = 1 / sqrt(1- x*x)
-        double denomSquare =  1. - std::pow(R / distTubes, 2); 
+        const double denomSquare =  1. - std::pow(R / distTubes, 2); 
         if (denomSquare < std::numeric_limits<double>::epsilon()){
             ATH_MSG_VERBOSE("Invalid seed, rejecting"); 
             return std::nullopt; 
         }
         solCandidate.dTheta =  combDriftUncert / std::sqrt(denomSquare) / distTubes;
         solCandidate.dY0 =  std::hypot(-bottomPos.y()*seedDir.y() + bottomPos.z()*seedDir.z(), 1.) * solCandidate.dTheta;
-        ATH_MSG_VERBOSE("Test new "<<solCandidate<<".");
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Test new "<<solCandidate<<". "<<m_seenSolutions.size());
 
+
+        if (std::ranges::find_if(m_seenSolutions,
+                        [&solCandidate, this] (const SeedSolution& seen) {
+                            const double deltaY = std::abs(seen.Y0 - solCandidate.Y0);
+                            const double limitY = std::hypot(seen.dY0, solCandidate.dY0);
+                            const double dTheta = std::abs(seen.theta - solCandidate.theta);
+                            const double limitTh = std::hypot(seen.dTheta, solCandidate.dTheta);
+                            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": "<<seen
+                                    <<std::format(" delta Y: {:.2f} {:} {:.2f}", deltaY, deltaY < limitY ? '<' : '>', limitY)
+                                    <<std::format(" delta theta: {:.2f} {:} {:.2f}", dTheta, dTheta < limitTh ? '<' : '>', limitTh) );
+                            return deltaY < limitY && dTheta < limitTh;;
+                        }) != m_seenSolutions.end()){
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Reject due to similarity");
+            return std::nullopt;
+        }
         using CalibSpacePointPtr = ISpacePointCalibrator::CalibSpacePointPtr;
         unsigned int nMdt{0};
         /** Collect all hits close to the seed line */
         for (const auto& [layerNr,  hitsInLayer] : Acts::enumerate(m_hitLayers.mdtHits())) {
             ATH_MSG_VERBOSE( hitsInLayer.size()<<" hits in layer "<<(layerNr +1));
+            bool hadGoodHit{false};
             for (const HoughHitType testMe : hitsInLayer){
-                CalibSpacePointPtr calibHit = m_cfg.calibrator->calibrate(ctx,testMe, seedPos, seedDir, 0.);
-                if (!calibHit || calibHit->fitState() != CalibratedSpacePoint::State::Valid) {
-                    continue;
-                }
-                const double pull = std::sqrt(SegmentFitHelpers::chiSqTermMdt(seedPos, seedDir, *calibHit, msg()));            
+                const double pull = std::sqrt(SegmentFitHelpers::chiSqTermMdt(seedPos, seedDir, *testMe, msg()));            
                 ATH_MSG_VERBOSE("Test hit "<<idHelperSvc->toString(testMe->identify())
                             <<" "<<Amg::toString(testMe->positionInChamber())<<", pull: "<<pull);              
                 if (pull < m_cfg.hitPullCut) {
-                    solCandidate.seedHits.emplace_back(calibHit->spacePoint());
-                    candidateSeed.measurements.push_back(std::move(calibHit));
+                    hadGoodHit = true;
+                    solCandidate.seedHits.emplace_back(testMe);
                     ++nMdt;
+                }/// what ever comes after is not matching onto the segment 
+                else if (hadGoodHit) {
+                    break;
                 } 
             }
         }
@@ -264,7 +293,7 @@ namespace MuonR4{
                 const SeedSolution& accepted = m_seenSolutions[a];
                 unsigned int nOverlap{0};
                 std::vector<int> corridor = driftSigns(seedPos, seedDir, accepted.seedHits,  msg());                
-                ATH_MSG_VERBOSE("Test seed against accepted "<<accepted<<", updated signs: "<<corridor);
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Test seed against accepted "<<accepted<<", updated signs: "<<corridor);
                 /// All seed hits are of the same size
                 for (unsigned int l = 0; l < accepted.seedHits.size(); ++l){
                     nOverlap  += corridor[l] == accepted.solutionSigns[l];
@@ -272,18 +301,21 @@ namespace MuonR4{
                 /// Including the places where no seed hit was assigned. Both solutions match in terms of 
                 /// left-right solutions. It's very likely that they're converging to the same segment.
                 if (nOverlap == corridor.size() && accepted.seedHits.size() >= solCandidate.seedHits.size()) {
-                    ATH_MSG_VERBOSE("Same set of hits collected within the same corridor");
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Same set of hits collected within the same corridor");
                     return std::nullopt;
                 }
             }
-        } else if (std::ranges::find_if(m_seenSolutions,
-                        [&solCandidate] (const SeedSolution& seen) {
-                            return std::abs(seen.Y0 - solCandidate.Y0) < std::hypot(seen.dY0, solCandidate.dY0) &&
-                                   std::abs(seen.theta - solCandidate.theta) < std::hypot(seen.dTheta, solCandidate.dTheta);
-                        }) != m_seenSolutions.end()){
-            return std::nullopt;
         }
-        
+        /// Seed candidate is 
+        for (const HoughHitType& hit : solCandidate.seedHits){
+            if (hit == bottomHit && calibBottom) {
+                candidateSeed.measurements.emplace_back(std::move(calibBottom));
+            } else if (hit == topHit && calibTop) {
+                candidateSeed.measurements.emplace_back(std::move(calibTop));
+            } else {
+                candidateSeed.measurements.emplace_back(m_cfg.calibrator->calibrate(ctx, hit, seedPos, seedDir, 0.));
+            }
+        }
         /// Add the solution to the list. That we don't iterate twice over it
         m_seenSolutions.emplace_back(std::move(solCandidate));
         /** If we found a long Mdt seed, then ensure that all
@@ -291,15 +323,14 @@ namespace MuonR4{
         if (m_cfg.tightenHitCut) {
             m_cfg.nMdtHitCut = std::max(m_cfg.nMdtHitCut, nMdt);
         }
-        /** Let's find out whether they're topological connected by comparing the tube numbers
-          *
-         */
-        
-        ++m_nGenSeeds;
-        
+        ++m_nGenSeeds;        
         ATH_MSG_VERBOSE("In event "<<ctx.eventID().event_number()<<" found new seed solution "<<toString(candidateSeed.parameters));
         if (m_cfg.fastSeedFit) {
-            fitDriftCircles(candidateSeed);
+            if (!m_cfg.fastSegFitWithT0) {
+                fitDriftCircles(candidateSeed);
+            } else {
+                fitDriftCirclesWithT0(ctx, candidateSeed);
+            }
         }
 
         // Combine the seed with the phi estimate
@@ -334,65 +365,80 @@ namespace MuonR4{
         }
         return candidateSeed;
     }
-    void MdtSegmentSeedGenerator::fitDriftCircles(DriftCircleSeed& inSeed) const {
-  
-        double theta = inSeed.parameters[toInt(ParamDefs::theta)];
-        
-        Amg::Vector3D seedDir = Amg::dirFromAngles(90.* Gaudi::Units::deg, theta);
+    inline MdtSegmentSeedGenerator::SeedFitAuxilliaries 
+        MdtSegmentSeedGenerator::estimateAuxillaries(const DriftCircleSeed& seed) const {
 
-        const double y0 = inSeed.parameters[toInt(ParamDefs::y0)] * seedDir.z();
+        SeedFitAuxilliaries aux{};
+        /// Seed direction vector
+        const Amg::Vector3D seedDir = Amg::dirFromAngles(90.*Gaudi::Units::deg, 
+                                                         seed.parameters[toInt(ParamDefs::theta)]);
+        /// y0Prime = y0 * cos(theta)
+        const double y0 = seed.parameters[toInt(ParamDefs::y0)] * seedDir.z();
 
-        double norm{0.}, fitY0{0.};
-        Amg::Vector3D centerOfGravity{Amg::Vector3D::Zero()};
-        std::vector<int> driftSigns{};
-        std::vector<double> invCovs{};
-        driftSigns.reserve(inSeed.measurements.size());
-        invCovs.reserve(inSeed.measurements.size());
-        for (const std::unique_ptr<CalibratedSpacePoint>& hit : inSeed.measurements) {
+        aux.invCovs.reserve(seed.measurements.size());
+        aux.driftSigns.reserve(seed.measurements.size());
+        double norm{0.};
+        /// Calculate the centre of gravity
+        for (const std::unique_ptr<CalibratedSpacePoint>& hit : seed.measurements) {
             const double invCov = 1./ driftCov(*hit);
-            norm += invCov;
             const Amg::Vector3D& pos{hit->positionInChamber()};
-            centerOfGravity+= invCov * pos;
-            invCovs.push_back(invCov);
             const int sign = y0  - pos.y() * seedDir.z() + pos.z()* seedDir.y() > 0 ? 1 : -1;
-            fitY0 +=  invCov * sign * hit->driftRadius();
-            driftSigns.push_back(sign);
-        }
-        /// Calculate the coefficients to minimize the chi2
-        const double invNorm = 1./ norm;
-        fitY0*= invNorm;
-        centerOfGravity *= invNorm;
 
-        double Tzzyy{0.}, Tyz{0.}, Trz{0.}, Try{0.};
-        for (const auto&[covIdx, hit] : Acts::enumerate(inSeed.measurements)) {
-            const double invCov = invCovs[covIdx]*invNorm;
-            const int sign = driftSigns[covIdx];
-            const Amg::Vector3D pos  = hit->positionInChamber() - centerOfGravity;
-            Tzzyy += invCov * (std::pow(pos.z(), 2) - std::pow(pos.y(), 2));
-            Tyz   += invCov * pos.y()*pos.z();
-            Trz   += invCov * sign*pos.z() * hit->driftRadius();
-            Try   += invCov * sign*pos.y() * hit->driftRadius();
+            aux.centerOfGrav+= invCov * pos;
+            aux.invCovs.push_back(invCov);
+            aux.driftSigns.push_back(sign);
+
+            norm += invCov;
         }
+        ///
+        aux.covNorm = 1./ norm;
+        aux.centerOfGrav *= aux.covNorm;
+        /// Calculate the fit constants
+        for (const auto&[covIdx, hit] : Acts::enumerate(seed.measurements)) {
+            const double& invCov = aux.invCovs[covIdx];
+            const int& sign = aux.driftSigns[covIdx];
+            const Amg::Vector3D pos = hit->positionInChamber() - aux.centerOfGrav;
+            const double signedCov = invCov * sign;
+            aux.T_zzyy += invCov * (std::pow(pos.z(), 2) - std::pow(pos.y(), 2));
+            aux.T_yz   += invCov * pos.y()*pos.z();
+            aux.T_rz   += signedCov * pos.z() * hit->driftRadius();
+            aux.T_ry   += signedCov * pos.y() * hit->driftRadius();
+            aux.fitY0  += signedCov * aux.covNorm * hit->driftRadius();
+        }
+        ATH_MSG_VERBOSE("Estimated T_zzyy: "<<aux.T_zzyy<<", T_yz: "<<aux.T_yz<<", T_rz: "<<aux.T_rz
+                     <<", T_ry: "<<aux.T_ry<<", centre "<<Amg::toString(aux.centerOfGrav)<<", y0: "<<aux.fitY0
+                     <<", norm: "<<aux.covNorm<<"/"<<norm);
+        return aux;
+    }
+    void MdtSegmentSeedGenerator::fitDriftCircles(DriftCircleSeed& inSeed) const {
+
+        const SeedFitAuxilliaries auxVars = estimateAuxillaries(inSeed);
+        
+        double theta = inSeed.parameters[toInt(ParamDefs::theta)];
         /// Now it's time to use the guestimate
-        const double thetaMin =  - (Tzzyy  - Try) / (4* Tyz + Trz);
-        const double thetaDet =  std::pow(Tzzyy -Try,2) + 4*(Tyz + Trz)*(2*Tyz + 0.5*Trz);
-        const double thetaGuess =  thetaMin  + (theta > thetaMin ? 1. : -1.)*std::sqrt(thetaDet) / (4*Tyz + Trz);
-        // const double thetaGuess = std::atan2( 2.*(Tyz - Trz), Tzzyy) / 2.;
+        const double thetaMin =  - (auxVars.T_zzyy  - auxVars.T_ry) / (4* auxVars.T_yz + auxVars.T_rz);
+        const double thetaDet =  std::pow(auxVars.T_zzyy -auxVars.T_ry,2) + 4*(auxVars.T_yz + auxVars.T_rz)*(2*auxVars.T_yz + 0.5*auxVars.T_rz);
+        const double thetaGuess =  thetaMin  + (theta > thetaMin ? 1. : -1.)*std::sqrt(thetaDet) / (4*auxVars.T_yz + auxVars.T_rz);
+        // const double thetaGuess = std::atan2( 2.*(T_yz - T_rz), T_zzyy) / 2.;
 
         ATH_MSG_VERBOSE("Start fast fit seed: "<<theta<<", guess: "<<thetaGuess
-                    <<", y0: "<<y0<<", fitY0: "<<fitY0<<", centre: "<<Amg::toString(centerOfGravity));
+                    <<", y0: "<<inSeed.parameters[toInt(ParamDefs::y0)]
+                    <<", fitY0: "<<auxVars.fitY0<<", centre: "<<Amg::toString(auxVars.centerOfGrav));
         //// 
         theta = thetaGuess;
+        CxxUtils::sincos thetaCS{theta};
         bool converged{false};
         while (!converged && inSeed.nIter++ <= m_cfg.nMaxIter) {
             const CxxUtils::sincos twoTheta{2.*theta};
-            const double thetaPrime = 0.5*Tzzyy *twoTheta.sn - Tyz * twoTheta.cs - Trz * seedDir.z() - Try * seedDir.y();
+            const double thetaPrime = 0.5*auxVars.T_zzyy *twoTheta.sn - auxVars.T_yz * twoTheta.cs 
+                                    - auxVars.T_rz * thetaCS.cs - auxVars.T_ry * thetaCS.sn;
             if (std::abs(thetaPrime) < m_cfg.precCutOff){
                 converged = true;
                 break;
             }
 
-            const double thetaTwoPrime =  Tzzyy * twoTheta.cs + 2* Tyz * twoTheta.sn + Trz * seedDir.y() - Try * seedDir.z();
+            const double thetaTwoPrime =  auxVars.T_zzyy * twoTheta.cs + 2.* auxVars.T_yz * twoTheta.sn 
+                                       + auxVars.T_rz * thetaCS.sn - auxVars.T_ry * thetaCS.cs;
             const double update = thetaPrime / thetaTwoPrime;
             ATH_MSG_VERBOSE("Fit iteration #"<<inSeed.nIter<<" -- theta: "<<theta<<", thetaPrime: "<<thetaPrime
                         <<", thetaTwoPrime: "<<thetaTwoPrime<<" -- "<<std::format("{:.8f}", update)
@@ -403,16 +449,84 @@ namespace MuonR4{
                 break;
             }
             theta -= update;
-            const CxxUtils::sincos thetaUpdate{theta};
-            seedDir.y() = thetaUpdate.sn;
-            seedDir.z() = thetaUpdate.cs;
+            thetaCS = CxxUtils::sincos{theta};
         }
         if (!converged) {
            return;
         }
+        double fitY0 = (auxVars.centerOfGrav.y() *thetaCS.cs - auxVars.centerOfGrav.z() * thetaCS.sn + auxVars.fitY0) / thetaCS.cs;
+        ATH_MSG_VERBOSE("Drift circle fit converged within "<<inSeed.nIter<<" iterations giving "<<toString(inSeed.parameters)<<", chi2: "<<inSeed.chi2
+                        <<" - theta: "<<theta / Gaudi::Units::deg<<", y0: "<<fitY0);
         inSeed.parameters[toInt(ParamDefs::theta)] = theta;
-        inSeed.parameters[toInt(ParamDefs::y0)] = (centerOfGravity.y() *seedDir.z() - centerOfGravity.z() * seedDir.y() + fitY0) / std::cos(theta);
-        ATH_MSG_VERBOSE("Drift circle fit converged within "<<inSeed.nIter<<" iterations giving "<<toString(inSeed.parameters)<<", chi2: "<<inSeed.chi2);
+        inSeed.parameters[toInt(ParamDefs::y0)] = fitY0;
+    }
+
+    inline MdtSegmentSeedGenerator::SeedFitAuxWithT0 
+        MdtSegmentSeedGenerator::estimateAuxillaries(const EventContext& ctx,
+                                                     const DriftCircleSeed& seed) const {
+        SeedFitAuxWithT0 aux{estimateAuxillaries(seed)};
+        for (const auto& [idx, hit] : Acts::enumerate(seed.measurements)){
+            const double signedCov = aux.driftSigns[idx] * aux.invCovs[idx];
+            const double weight = aux.covNorm * signedCov;
+            const double velocity = m_cfg.calibrator->driftVelocity(ctx, *hit); 
+            const double acceleration = m_cfg.calibrator->driftAcceleration(ctx, *hit);
+            const Amg::Vector3D pos = hit->positionInChamber() - aux.centerOfGrav;
+            aux.fitY0Prime+= weight * velocity;
+            aux.fitY0TwoPrime+= weight * acceleration;
+
+            aux.T_vz += signedCov * pos.z()*velocity;
+            aux.T_vy += signedCov * pos.y()*velocity;
+            aux.T_az += signedCov * pos.z()*acceleration;
+            aux.T_ay += signedCov * pos.y()*acceleration;
+
+            aux.R_vr += signedCov * hit->driftRadius() * velocity;
+            aux.R_va += signedCov * hit->driftRadius() * acceleration;
+            aux.R_vv += signedCov * velocity * velocity;
+        }
+        ATH_MSG_VERBOSE("Estimated T_vz: "<<aux.T_vz<<", T_vy: "<<aux.T_vy
+                     <<", T_az: "<<aux.T_az<<", T_ay: "<<aux.T_ay<<" --- R_vr: "<<aux.R_vr
+                     <<", R_va: "<<aux.R_va<<", R_vv: "<<aux.R_vv<<" -- Y0^{'}: "<<aux.fitY0Prime
+                     <<", Y0^{''}: "<<aux.fitY0TwoPrime);
+        return aux;
+    }
+
+    void MdtSegmentSeedGenerator::fitDriftCirclesWithT0(const EventContext& ctx, DriftCircleSeed& inSeed) const {
+        ///
+        SeedFitAuxWithT0 auxVars{estimateAuxillaries(ctx, inSeed)};
+        
+
+        bool converged{false};
+        AmgSymMatrix(2) cov{AmgSymMatrix(2)::Zero()};
+        AmgVector(2) grad{AmgVector(2)::Zero()};
+        AmgVector(2) pars{inSeed.parameters[toInt(ParamDefs::theta)], 
+                          inSeed.parameters[toInt(ParamDefs::time)]};
+        
+
+        while (!converged && inSeed.nIter++ <= m_cfg.nMaxIter) {
+
+            const CxxUtils::sincos thetaCS{pars[0]};
+            const CxxUtils::sincos twoTheta{2.*pars[0]};
+            /// d^{2}chi^{2} / d^{2}theta
+            cov(0,0) = auxVars.T_zzyy * twoTheta.cs + 2.* auxVars.T_yz * twoTheta.sn 
+                     + auxVars.T_rz * thetaCS.sn - auxVars.T_ry * thetaCS.cs;
+
+            // cov(1,0) =  cov(0,1) = auxVars.T_vz * thetaCS.cs + auxVars.T_vy * thetaCS.sn;
+            cov(1,1) = - auxVars.fitY0Prime *auxVars.fitY0Prime  - auxVars.fitY0Prime * auxVars.fitY0TwoPrime 
+                     - auxVars.T_az * thetaCS.sn - auxVars.T_ay * thetaCS.cs + auxVars.R_vv + auxVars.R_va;
+
+            grad[0] =0.5*auxVars.T_zzyy *twoTheta.sn - auxVars.T_yz * twoTheta.cs 
+                                    - auxVars.T_rz * thetaCS.cs - auxVars.T_ry * thetaCS.sn;
+            grad[1] = auxVars.fitY0 * auxVars.fitY0Prime - auxVars.R_vr  + auxVars.T_vz * thetaCS.sn - auxVars.T_vy * thetaCS.cs;
+
+            
+            const AmgVector(2) update = cov.inverse()* grad;
+            ATH_MSG_VERBOSE("Iteration: "<<inSeed.nIter<<", theta: "<<pars[0] / Gaudi::Units::deg<<", time: "<< 
+                        pars[1]<<" gradient: ("<<(grad[0])<<", "<<grad[1]<<"), covariance:" 
+                        <<std::endl<<Amg::toString(cov)<<std::endl<<" update: ("<<update[0] / Gaudi::Units::deg
+                        <<", "<<update[1]<<").");
+            pars -= update;
+        }
+
     }
   
 }

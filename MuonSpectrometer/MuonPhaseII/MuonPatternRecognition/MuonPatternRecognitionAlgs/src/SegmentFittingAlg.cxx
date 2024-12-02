@@ -276,6 +276,7 @@ namespace MuonR4 {
         genCfg.hitPullCut = m_seedHitChi2;
         genCfg.recalibSeedCircles = m_recalibSeed;
         genCfg.fastSeedFit = m_refineSeed;
+        genCfg.fastSegFitWithT0 = m_doT0Fit;
         genCfg.calibrator = m_calibTool.get();
         
 
@@ -290,6 +291,7 @@ namespace MuonR4 {
             }
             seedLines.push_back(drawLabel(std::format("possible seeds: {:d}",  drawMe.numGenerated()), 0.2, 0.85, 14));
             m_visionTool->visualizeSeed(ctx, *patternSeed, "pattern", std::move(seedLines));
+
         }
 
         MdtSegmentSeedGenerator seedGen{name(), patternSeed, std::move(genCfg)};
@@ -338,10 +340,7 @@ namespace MuonR4 {
         finalSeg->setParUncertainties(std::move(data.segmentParErrs));
         if (data.timeFit) {
             finalSeg->setSegmentT0(data.segmentPars[toInt(ParamDefs::time)]);
-            
         }
-
-
         return finalSeg;
     }
 
