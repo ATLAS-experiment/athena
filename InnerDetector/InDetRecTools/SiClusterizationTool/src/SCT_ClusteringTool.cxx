@@ -676,8 +676,8 @@ namespace InDet {
       int firstStrip = idHelper.strip(clusterId);
       double width = stripPitch;
       InDetDD::SiLocalPosition centre;
-      if (m_useRowInformation) {
-        int row = idHelper.row(clusterId);
+      if (m_useRowInformation || m_doSimplePosWidth) {
+        int row = idHelper.row(clusterId); //This is always 0 - should consider dropping
         centre = element->rawLocalPositionOfCell(design->strip1Dim(firstStrip, row));
         if (nStrips > 1) {
           InDetDD::SiLocalPosition lastStripPos(element->rawLocalPositionOfCell(design->strip1Dim(firstStrip+nStrips-1, row)));
