@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Configuration for the Hive Algorithm Scheduler.
 #
@@ -61,6 +61,7 @@ class AlgScheduler:
         self.PrecedenceSvc.OutputLevel = INFO
         self.SchedulerSvc.CheckDependencies = True
         self.SchedulerSvc.ThreadPoolSize = jps.ConcurrencyFlags.NumThreads()
+        self.SchedulerSvc.NumOffloadThreads = 0  # we don't support configuring this in legacy job options
 
         self.log.info("setting up " + self.SchedulerSvc.getFullName() + " with " + str(jps.ConcurrencyFlags.NumThreads()) + " threads")
 
