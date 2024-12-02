@@ -176,7 +176,7 @@ std::string getSWNFromStr(const std::string& str) { return getValForKey(str, "[S
 inline
 std::string getFILEFromStr(const std::string& str) { return getValForKey(str, "[FILE="); }
 
-std::string makeKeyValStr(const std::string key, const std::string val) {
+std::string makeKeyValStr(const std::string &key, const std::string & val) {
    return std::format("[{}={}]", key, val);
 }
 

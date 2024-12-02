@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLEXAMPLECONVERTER_EXAMPLEHIT_P0_H
@@ -35,7 +35,7 @@ public: // Non-static members
    double getZ() const { return(m_z); }
 
    /// @return the detector string.
-   const std::string getDetector() const { return(m_detector); }
+   const std::string & getDetector() const { return(m_detector); }
 
 private:
    std::string m_detector;
