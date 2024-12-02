@@ -169,7 +169,7 @@ namespace InDet
 
     const InDet::SiDetectorElementStatus *pixelDetElStatus = getPixelDetElStatus(ctx);
     
-    IInDetConditionsTool::IDCCacheEntry* cacheEntry = m_summaryTool->getCacheEntryOut(ctx);
+    IInDetConditionsTool::IDCCacheEntry* cacheEntry = (pixelDetElStatus ? nullptr : m_summaryTool->getCacheEntryOut(ctx));
     for(const auto *const rdo : collection) {
       const Identifier rdoID = rdo->identify();
 
