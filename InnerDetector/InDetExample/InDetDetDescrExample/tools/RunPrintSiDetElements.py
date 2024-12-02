@@ -97,6 +97,7 @@ if flags.Detector.EnableITkStrip:
     PrintStripDetElements = CompFactory.PrintSiElements('PrintStripDetElements')
     PrintStripDetElements.OutputLevel = 5
     PrintStripDetElements.DetectorManagerNames = ["ITkStrip"]
+    PrintStripDetElements.ModulesOnly = False
     PrintStripDetElements.OutputFile = "StripGeometry.dat"
     acc.addEventAlgo(PrintStripDetElements)
 
