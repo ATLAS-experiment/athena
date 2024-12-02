@@ -105,6 +105,7 @@ class SCT_ClusteringTool final
   BooleanProperty m_majority01X{this, "majority01X", false};
   BooleanProperty m_useRowInformation{this, "useRowInformation", false};
   BooleanProperty m_doFastClustering{this, "doFastClustering", true};
+  BooleanProperty m_doSimplePosWidth{this, "doSimplePositionWidthCalculation", false, "Always use the simpler position and width calculation in fast clustering"};
   //@}
 
   /**
