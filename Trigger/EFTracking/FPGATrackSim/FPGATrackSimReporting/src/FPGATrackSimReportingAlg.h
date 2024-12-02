@@ -19,6 +19,8 @@
 #include "FPGATrackSimObjects/FPGATrackSimTrackCollection.h"
 #include "ActsEvent/ProtoTrackCollection.h"
 #include "ActsEvent/TrackContainer.h"
+#include "ActsEvent/SeedContainer.h"
+#include "ActsEvent/TrackParametersContainer.h"
 
 #include "src/FPGATrackSimActsTrackInspectionTool.h"
 
@@ -70,6 +72,11 @@ namespace FPGATrackSim {
 
                 SG::ReadHandleKeyArray<ActsTrk::TrackContainer> m_ActsTrackCollections{this, "FPGAActsTracks",{},"Acts track collections from (C)KF"};
 
+                SG::ReadHandleKeyArray<ActsTrk::SeedContainer> m_ActsSeedCollections{this, "FPGAActsSeeds",{},"Acts Seeds collections from (C)KF"};
+
+                SG::ReadHandleKeyArray<ActsTrk::BoundTrackParametersContainer> m_ActsSeedParamCollections{this, "FPGAActsSeedsParam",{},"Acts Seeds param collections from (C)KF"};
+
+
                 //_________________________________________________________________________________________________________________________              
                 // Tools
                 ToolHandle<FPGATrackSim::ActsTrackInspectionTool> m_ActsInspectionTool {this, "ActsInspectionTool", "FPGATrackSim::ActsTrackInspectionTool/ActsTrackInspectionTool", "Monitoring tool for acts tracks"};
@@ -92,6 +99,12 @@ namespace FPGATrackSim {
                 void processFPGATracks(SG::ReadHandle<FPGATrackSimTrackCollection> &FPGATracks) const;
                 void printFPGATracks(SG::ReadHandle<FPGATrackSimTrackCollection> &FPGATracks) const;
                 
+                void processFPGASeeds(SG::ReadHandle<ActsTrk::SeedContainer> &FPGASeeds) const;
+                void printFPGASeeds(SG::ReadHandle<ActsTrk::SeedContainer> &FPGASeeds) const;
+
+                void processFPGASeedsParam(SG::ReadHandle<ActsTrk::BoundTrackParametersContainer> &FPGASeedsParam) const;
+                void printFPGASeedsParam(SG::ReadHandle<ActsTrk::BoundTrackParametersContainer> &FPGASeedsParam) const;
+
                 void processFPGAPrototracks(SG::ReadHandle<ActsTrk::ProtoTrackCollection> &FPGAPrototracks) const;
                 void printFPGAPrototracks(SG::ReadHandle<ActsTrk::ProtoTrackCollection> &FPGAPrototracks) const;
                 
