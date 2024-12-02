@@ -93,10 +93,10 @@ StatusCode TrigCaloDataAccessSvc::loadCollections ( const EventContext& context,
     // this has to be guarded because getTT called on the LArCollection bu other threads updates internal map
     std::lock_guard<std::mutex> getCollClock{ m_hLTCaloSlot.get( context )->mutex };       
     switch ( detID ) {
-    case TTEM: {m_regionSelector_TTEM->HashIDList( sampling, roi, requestHashIDs ); break; }
-    case TTHEC: {m_regionSelector_TTHEC->HashIDList( sampling, roi, requestHashIDs ); break; }
-    case FCALEM: {m_regionSelector_FCALEM->HashIDList( sampling, roi, requestHashIDs ); break; }
-    case FCALHAD: {m_regionSelector_FCALHAD->HashIDList( sampling, roi, requestHashIDs ); break; }
+    case TTEM: {m_regionSelector_TTEM->lookup(context)->HashIDList( sampling, roi, requestHashIDs ); break; }
+    case TTHEC: {m_regionSelector_TTHEC->lookup(context)->HashIDList( sampling, roi, requestHashIDs ); break; }
+    case FCALEM: {m_regionSelector_FCALEM->lookup(context)->HashIDList( sampling, roi, requestHashIDs ); break; }
+    case FCALHAD: {m_regionSelector_FCALHAD->lookup(context)->HashIDList( sampling, roi, requestHashIDs ); break; }
     default: break;
     }
   }
@@ -134,7 +134,7 @@ StatusCode TrigCaloDataAccessSvc::loadCollections ( const EventContext& context,
   {
     // this has to be guarded because getTT called on the LArCollection bu other threads updates internal map
     std::lock_guard<std::mutex> getCollClock{ m_hLTCaloSlot.get( context )->mutex };
-    m_regionSelector_TILE->HashIDList( roi, requestHashIDs );
+    m_regionSelector_TILE->lookup(context)->HashIDList( roi, requestHashIDs );
   }
   ATH_MSG_DEBUG( "requestHashIDs.size() in LoadColl = " << requestHashIDs.size()  << " hash checksum "
                  << std::accumulate( requestHashIDs.begin(), requestHashIDs.end(), IdentifierHash( 0 ),
@@ -308,17 +308,17 @@ unsigned int TrigCaloDataAccessSvc::lateInit(const EventContext& context) { // n
   std::vector<uint32_t> vrodid32tile;
   std::vector<IdentifierHash> rIdstile;
   // TTEM
-  m_regionSelector_TTEM->ROBIDList(-1,tmproi,vrodid32em);
+  m_regionSelector_TTEM->lookup(context)->ROBIDList(-1,tmproi,vrodid32em);
   // TTHEC
-  m_regionSelector_TTHEC->ROBIDList(0,tmproi,vrodid32hec0);
-  m_regionSelector_TTHEC->ROBIDList(1,tmproi,vrodid32hec1);
-  m_regionSelector_TTHEC->ROBIDList(2,tmproi,vrodid32hec2);
-  m_regionSelector_TTHEC->ROBIDList(3,tmproi,vrodid32hec3);
+  m_regionSelector_TTHEC->lookup(context)->ROBIDList(0,tmproi,vrodid32hec0);
+  m_regionSelector_TTHEC->lookup(context)->ROBIDList(1,tmproi,vrodid32hec1);
+  m_regionSelector_TTHEC->lookup(context)->ROBIDList(2,tmproi,vrodid32hec2);
+  m_regionSelector_TTHEC->lookup(context)->ROBIDList(3,tmproi,vrodid32hec3);
   // FCALHAD
-  m_regionSelector_FCALEM->ROBIDList(-1,tmproi,vrodid32fcalem);
-  m_regionSelector_FCALHAD->ROBIDList(-1,tmproi,vrodid32fcalhad);
-  m_regionSelector_TILE->ROBIDList(tmproi,vrodid32tile);
-  m_regionSelector_TILE->HashIDList(tmproi,rIdstile);
+  m_regionSelector_FCALEM->lookup(context)->ROBIDList(-1,tmproi,vrodid32fcalem);
+  m_regionSelector_FCALHAD->lookup(context)->ROBIDList(-1,tmproi,vrodid32fcalhad);
+  m_regionSelector_TILE->lookup(context)->ROBIDList(tmproi,vrodid32tile);
+  m_regionSelector_TILE->lookup(context)->HashIDList(tmproi,rIdstile);
 
   m_vrodid32tile.resize( vrodid32tile.size() );
   m_rIdstile.resize(rIdstile.size() );
@@ -646,10 +646,10 @@ unsigned int TrigCaloDataAccessSvc::prepareLArCollections( const EventContext& c
   {
     std::lock_guard<std::mutex> dataPrepLock { m_dataPrepMutex };
     switch ( detector ) {
-    case TTEM: {m_regionSelector_TTEM->ROBIDList( sampling, roi, requestROBs ); break; }
-    case TTHEC: {m_regionSelector_TTHEC->ROBIDList( sampling, roi, requestROBs ); break; }
-    case FCALEM: {m_regionSelector_FCALEM->ROBIDList( sampling, roi, requestROBs ); break; }
-    case FCALHAD: {m_regionSelector_FCALHAD->ROBIDList( sampling, roi, requestROBs ); break; }
+    case TTEM: {m_regionSelector_TTEM->lookup(context)->ROBIDList( sampling, roi, requestROBs ); break; }
+    case TTHEC: {m_regionSelector_TTHEC->lookup(context)->ROBIDList( sampling, roi, requestROBs ); break; }
+    case FCALEM: {m_regionSelector_FCALEM->lookup(context)->ROBIDList( sampling, roi, requestROBs ); break; }
+    case FCALHAD: {m_regionSelector_FCALHAD->lookup(context)->ROBIDList( sampling, roi, requestROBs ); break; }
     default: break;
     }
 
@@ -707,8 +707,8 @@ unsigned int TrigCaloDataAccessSvc::prepareTileCollections( const EventContext& 
   std::vector<IdentifierHash> rIds;
   {
     std::lock_guard<std::mutex> dataPrepLock { m_dataPrepMutex };
-    m_regionSelector_TILE->ROBIDList( 0, roi, requestROBs ); 
-    m_regionSelector_TILE->HashIDList(roi, rIds);
+    m_regionSelector_TILE->lookup(context)->ROBIDList( 0, roi, requestROBs ); 
+    m_regionSelector_TILE->lookup(context)->HashIDList(roi, rIds);
     m_robDataProvider->addROBData( context, requestROBs );
   }
 
