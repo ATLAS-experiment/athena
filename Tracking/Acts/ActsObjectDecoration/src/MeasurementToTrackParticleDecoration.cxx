@@ -25,6 +25,8 @@ namespace ActsTrk {
         ATH_CHECK(m_measurementRegionKey.initialize());
 	ATH_CHECK(m_measurementDetectorKey.initialize());
         ATH_CHECK(m_measurementLayerKey.initialize());
+	ATH_CHECK(m_chi2HitPredictedKey.initialize());
+	ATH_CHECK(m_chi2HitFilteredKey.initialize());
         ATH_CHECK(m_measurementTypeKey.initialize());
         ATH_CHECK(m_measurementPhiWidthKey.initialize());
         ATH_CHECK(m_measurementEtaWidthKey.initialize());
@@ -56,6 +58,9 @@ namespace ActsTrk {
 	SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<int>> measurementDetectorHandle(m_measurementDetectorKey, ctx);
 	SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<int>> measurementLayerHandle(m_measurementLayerKey, ctx);
 	SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<int>> measurementTypeHandle(m_measurementTypeKey, ctx);
+	SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> chi2HitPredictedHandle(m_chi2HitPredictedKey, ctx);
+	SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> chi2HitFilteredHandle(m_chi2HitFilteredKey, ctx);
+	
 	SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<int>> measurementPhiWidthHandle(m_measurementPhiWidthKey, ctx);
 	SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<int>> measurementEtaWidthHandle(m_measurementEtaWidthKey, ctx);
 	
@@ -104,7 +109,12 @@ namespace ActsTrk {
             layers.reserve(track.nMeasurements());
             std::vector<int>& types{measurementTypeHandle(*track_particle)};
             types.reserve(track.nMeasurements());
-            std::vector<int>& sizesPhi{measurementPhiWidthHandle(*track_particle)};
+	    std::vector<float>& predchi2s{chi2HitPredictedHandle(*track_particle)};
+	    predchi2s.reserve(track.nMeasurements());
+	    std::vector<float>& filtchi2s{chi2HitFilteredHandle(*track_particle)};
+	    filtchi2s.reserve(track.nMeasurements());
+	    
+	    std::vector<int>& sizesPhi{measurementPhiWidthHandle(*track_particle)};
             sizesPhi.reserve(track.nMeasurements());
             std::vector<int>& sizesEta{measurementEtaWidthHandle(*track_particle)};
             sizesEta.reserve(track.nMeasurements());
@@ -144,25 +154,27 @@ namespace ActsTrk {
                 }
 
 		// starting with invalid values and setting them where needed.
-		// TODO:: I don't like too much having pulls/residuals/localParameters at -1 because those are valid values. Change it to -999? 
-                int detector = -1;
-		int region = -1;
-		int layer = -1;
-		int type = -1;
-		int sizePhi = -1;
-		int sizeEta = -1;
-                float residualLocX = -1.;
-		float pullLocX = -1.;
-		float measurementLocX = -1.;
-		float trackParameterLocX = -1.;
-		float measurementLocCovX = -1.;
-		float trackParameterLocCovX = -1;
-                float residualLocY = -1.;
-		float pullLocY = -1.;
-		float measurementLocY = -1.;
-		float trackParameterLocY = -1.;
-		float measurementLocCovY = -1.;
-		float trackParameterLocCovY = -1;
+
+                int detector = -999;
+		int region = -999;
+		int layer = -999;
+		int type = -999;
+		float chi2_hit_predicted = -999.;
+		float chi2_hit_filtered = -999.;
+		int sizePhi = -999;
+		int sizeEta = -999;
+                float residualLocX = -999.;
+		float pullLocX = -999.;
+		float measurementLocX = -999.;
+		float trackParameterLocX = -999.;
+		float measurementLocCovX = -999.;
+		float trackParameterLocCovX = -999;
+                float residualLocY = -999.;
+		float pullLocY = -999.;
+		float measurementLocY = -999.;
+		float trackParameterLocY = -999.;
+		float measurementLocCovY = -999.;
+		float trackParameterLocCovY = -999.;
 		bool isAnnulusBound = false;
 		
 		// Get the measurement type
@@ -176,7 +188,7 @@ namespace ActsTrk {
 		  type = MeasurementType::HIT;
 		  ATH_MSG_DEBUG("--- This is a hit");
                 }
-
+		
 		// Check the location of the state
 		if (state.hasReferenceSurface() and state.referenceSurface().associatedDetectorElement()) {
 		    const ActsDetectorElement * detectorElement = dynamic_cast<const ActsDetectorElement *>(state.referenceSurface().associatedDetectorElement());
@@ -218,10 +230,22 @@ namespace ActsTrk {
                     } else ATH_MSG_WARNING("--- Missing silicon detector element!");
                 } else ATH_MSG_WARNING("--- Missing reference surface or associated detector element!");
 
-		// If I have a measurement (hit or outlier) then proceed with computing the residuals / pulls
 
+		
+		// If I have a measurement (hit or outlier) then proceed with computing the residuals / pulls
+		
 		if (type == MeasurementType::OUTLIER || type == MeasurementType::HIT) {
+
+		  //Get the Chi2 computation
 		  
+		  if (type == MeasurementType::HIT) {
+		    chi2_hit_filtered = state.chi2();
+		  }
+		  
+		  if (state.hasUncalibratedSourceLink()) {
+		    chi2_hit_predicted = getChi2Contribution(state);
+		  }
+		  		  
 		  // Skip all states without smoothed parameters or without projector
 		  if (!state.hasSmoothed() || !state.hasProjector())
 		    continue;
@@ -300,6 +324,14 @@ namespace ActsTrk {
 		  }
 		  
 		} // hit or outliers
+
+		else if (type == MeasurementType::HOLE) {
+		  
+		  // Get the predicted position on sensor
+		  auto pred = state.predicted();
+		  trackParameterLocX = pred[Acts::eBoundLoc0];
+		  trackParameterLocY = pred[Acts::eBoundLoc1];
+		}
 		
 		// Always fill with this information
 		
@@ -307,6 +339,8 @@ namespace ActsTrk {
                 detectors.push_back(detector);
                 layers.push_back(layer);
                 types.push_back(type);
+		predchi2s.push_back(chi2_hit_predicted);
+		filtchi2s.push_back(chi2_hit_filtered);
                 sizesPhi.push_back(sizePhi);
                 sizesEta.push_back(sizeEta);
                 residualsLocX.push_back(residualLocX);
@@ -321,6 +355,7 @@ namespace ActsTrk {
                 trackParametersLocY.push_back(trackParameterLocY);
                 measurementsLocCovY.push_back(measurementLocCovY);
                 trackParametersLocCovY.push_back(trackParameterLocCovY);
+	
 		
             } // loop on states
 	    
@@ -328,7 +363,24 @@ namespace ActsTrk {
 
         return StatusCode::SUCCESS;
     }
+  
+  float MeasurementToTrackParticleDecoration::getChi2Contribution(const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) const {
+    
+    auto pred  = state.predicted();
+    auto H = state.effectiveProjector();
+    auto predC = state.predictedCovariance();
 
+    const auto calibrated    = state.effectiveCalibrated();
+    const auto calibratedCov = state.effectiveCalibratedCovariance();
+    
+    auto residual = (H * pred - calibrated).eval();
+    auto rescov   = (H * predC * H.transpose() + calibratedCov).eval();
+
+    return ((residual.transpose() * rescov.inverse() * residual).eval())(0,0);
+        
+  }
+
+  
   std::pair<Acts::BoundVector, Acts::BoundMatrix>
   MeasurementToTrackParticleDecoration::getUnbiasedTrackParameters(const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state,
 								   bool useSmoothed) const {
@@ -339,8 +391,8 @@ namespace ActsTrk {
     Acts::BoundVector tp = useSmoothed ? state.smoothed() : state.filtered();
     Acts::BoundMatrix C  = useSmoothed ? state.smoothedCovariance() : state.filteredCovariance();
 
-    const auto &calibratedParameters = state.effectiveCalibrated();
-    const auto &calibratedCovariance = state.effectiveCalibratedCovariance();
+    const auto calibratedParameters = state.effectiveCalibrated();
+    const auto calibratedCovariance = state.effectiveCalibratedCovariance();
     
     ATH_MSG_DEBUG( "--- Getting effectiveCalibrated...");
     auto m = calibratedParameters;
