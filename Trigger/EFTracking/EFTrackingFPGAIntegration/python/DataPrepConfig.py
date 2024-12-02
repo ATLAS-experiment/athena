@@ -2,7 +2,26 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaCommon.Constants import DEBUG
+
+def FPGATrackSimReportingCfg(flags, name='FPGATrackSimReportingAlg',**kwargs):    
+
+    kwargs.setdefault('perEventReports', False)
+    kwargs.setdefault('xAODPixelClusterContainers',["ITkPixelClusters" ,"FPGAPixelClusters"])
+    kwargs.setdefault('xAODStripClusterContainers',["ITkStripClusters" ,"FPGAStripClusters"])
+    kwargs.setdefault('xAODSpacePointContainersFromFPGA',["FPGAPixelSpacePoints","FPGAStripSpacePoints", "FPGAStripOverlapSpacePoints", "ITkPixelSpacePoints","ITkStripSpacePoints", "ITkStripOverlapSpacePoints"])
+    kwargs.setdefault('FPGATrackSimTracks','FPGATracks_1st')
+    kwargs.setdefault('FPGATrackSimRoads','FPGARoads_1st')
+    kwargs.setdefault('FPGATrackSimProtoTracks',["ActsProtoTracks_1stFromFPGATrack"])
+    kwargs.setdefault('FPGAActsTracks',["FPGAActsTracks"])
+    kwargs.setdefault('FPGAActsSeeds',['FPGAPixelSeeds','FPGAStripSeeds'])
+    kwargs.setdefault('FPGAActsSeedsParam',['FPGAPixelEstimatedTrackParams','FPGAStripEstimatedTrackParams'])
+    
+    acc = ComponentAccumulator()
+    from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
+    acc.merge(FPGATrackSimReportingCfg(flags, name=name,**kwargs))
+
+    return acc
+
 
 def xAODContainerMakerCfg(flags, name = 'xAODContainerMaker', **kwarg):
     
@@ -61,7 +80,6 @@ if __name__=="__main__":
     from EFTrackingFPGAIntegration.IntegrationConfigFlag import addFPGADataPrepFlags
     flags = addFPGADataPrepFlags()
 
-    flags.Concurrency.NumThreads = 1
     # The input file should be specified by the user
     flags.Input.Files = [""]
     flags.Output.AODFileName = "DataPrepAOD.pool.root"
@@ -71,6 +89,10 @@ if __name__=="__main__":
     flags.FPGADataPrep.PassThrough.RunSoftware = True
     flags.FPGADataPrep.PassThrough.ClusterOnly = True
     
+    # ensure that the xAOD SP and cluster containers are available
+    flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
+    flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
+
     # For Spacepoint formation
     if flags.FPGADataPrep.PassThrough.ClusterOnly:
         flags.Detector.EnableITkPixel = True
@@ -78,8 +100,28 @@ if __name__=="__main__":
         flags.Acts.useCache = False
         flags.Tracking.ITkMainPass.doActsSeed=True
     
-    flags.Debug.DumpEvtStore = False
+    # Disable calo for this test
+    flags.Detector.EnableCalo = False
+
+    ###########################################
+    # IDTPM flags
+    from InDetTrackPerfMon.InDetTrackPerfMonFlags import initializeIDTPMConfigFlags, initializeIDTPMTrkAnaConfigFlags
+    flags = initializeIDTPMConfigFlags(flags)
     
+    flags.PhysVal.IDTPM.outputFilePrefix = "myIDTPM_CA"
+    flags.PhysVal.IDTPM.plotsDefFileList = "InDetTrackPerfMon/PlotsDefFileList_default.txt" # default value - not needed
+    flags.PhysVal.IDTPM.plotsCommonValuesFile = "InDetTrackPerfMon/PlotsDefCommonValues.json" # default value - not needed
+    flags.PhysVal.OutputFileName = flags.PhysVal.IDTPM.outputFilePrefix + '.HIST.root' # automatically set in IDTPM config - not needed
+    flags.Output.doWriteAOD_IDTPM = True
+    flags.Output.AOD_IDTPMFileName = flags.PhysVal.IDTPM.outputFilePrefix + '.AOD_IDTPM.pool.root' # automatically set in IDTPM config - not needed
+    flags.PhysVal.IDTPM.trkAnaCfgFile = "InDetTrackPerfMon/EFTrkAnaConfig_example.json"
+    
+    flags = initializeIDTPMTrkAnaConfigFlags(flags)
+    ## override respective configurations from trkAnaCfgFile (in case something changes in the config file)
+    flags.PhysVal.IDTPM.TrkAnaEF.TrigTrkKey = "FPGATrackParticles"
+    flags.PhysVal.IDTPM.TrkAnaDoubleRatio.TrigTrkKey = "FPGATrackParticles"
+
+
     flags.fillFromArgs()
     flags.lock()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.MainPass", keepOriginal=True)
@@ -92,9 +134,16 @@ if __name__=="__main__":
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(flags))
     
-    kwarg = {}
-    kwarg["OutputLevel"] = DEBUG
+    #Truth
+    if flags.Input.isMC:
+        from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
+        cfg.merge(GEN_AOD2xAODCfg(flags))
 
+    # Standard reco
+    from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
+    cfg.merge(ITkTrackRecoCfg(flags))
+
+    kwarg = {}
     # The Data Preparation (F100) Pipeline on FPGA
     cfg.merge(DataPrepCfg(flags, **kwarg))
     
@@ -103,6 +152,13 @@ if __name__=="__main__":
         from EFTrackingFPGAIntegration.DataPrepToActsConfig import DataPrepToActsCfg
         cfg.merge(DataPrepToActsCfg(flags, **kwarg))
     
+    cfg.merge(FPGATrackSimReportingCfg(flags))
+
+    # IDTPM running
+    from InDetTrackPerfMon.InDetTrackPerfMonConfig import InDetTrackPerfMonCfg
+    cfg.merge( InDetTrackPerfMonCfg(flags) )
+
+
     # Prepare output
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from AthenaConfiguration.Enums import MetadataCategory

@@ -17,6 +17,8 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::initialize()
     ATH_CHECK(m_FPGAProtoTrackCollections.initialize(!m_isDataPrep));
     ATH_CHECK(m_FPGATracksKey.initialize(!m_isDataPrep));
     ATH_CHECK(m_ActsTrackCollections.initialize(!m_isDataPrep));
+    ATH_CHECK(m_ActsSeedCollections.initialize(!m_isDataPrep));
+    ATH_CHECK(m_ActsSeedParamCollections.initialize(!m_isDataPrep));
 
     ATH_CHECK(m_ActsInspectionTool.retrieve());
     return StatusCode::SUCCESS;
@@ -29,8 +31,8 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::execute(const EventContext& c
     for (SG::ReadHandle<xAOD::PixelClusterContainer>& clusterContainer : xAODPixelClusterContainers)
     {
         if (!clusterContainer.isValid()) {
-            ATH_MSG_ERROR("Invalid SG key " << clusterContainer.key());
-            return StatusCode::FAILURE;
+            ATH_MSG_WARNING("SG key not available " << clusterContainer.key());
+            continue;
         }
         processxAODClusters<xAOD::PixelCluster>(clusterContainer);
     }
@@ -39,8 +41,8 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::execute(const EventContext& c
     for (SG::ReadHandle<xAOD::StripClusterContainer>& clusterContainer : xAODStripClusterContainers)
     {
         if (!clusterContainer.isValid()) {
-            ATH_MSG_ERROR("Invalid SG key " << clusterContainer.key());
-            return StatusCode::FAILURE;
+            ATH_MSG_WARNING("SG key not available  " << clusterContainer.key());
+            continue;
         }
         processxAODClusters<xAOD::StripCluster>(clusterContainer);
     }
@@ -49,34 +51,33 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::execute(const EventContext& c
     for (SG::ReadHandle<xAOD::SpacePointContainer>& spContainer : xAODSpacePointContainers)
     {
         if (!spContainer.isValid()) {
-            ATH_MSG_WARNING("Invalid SG key " << spContainer.key());
+            ATH_MSG_WARNING("SG key not available  " << spContainer.key());
         }
         else {processxAODSpacePoints(spContainer);}
     }
     if (!m_isDataPrep.value()) {
         // Process FPGATrackSim Roads
         SG::ReadHandle<FPGATrackSimRoadCollection> FPGATrackSimRoads(m_FPGARoadsKey, ctx);
-        if (!FPGATrackSimRoads.isValid()) {
-            ATH_MSG_ERROR("Could not find FPGA Roads Collection with key " << FPGATrackSimRoads.key());
-            return StatusCode::FAILURE;
-        }
+        if (FPGATrackSimRoads.isValid()) {
         processFPGARoads(FPGATrackSimRoads);
+        }
+        else ATH_MSG_WARNING("Could not find FPGA Roads Collection with key " << FPGATrackSimRoads.key());
+
 
         // Process FPGATrackSim Tracks
         SG::ReadHandle<FPGATrackSimTrackCollection> FPGATrackSimTracks(m_FPGATracksKey, ctx);
-        if (!FPGATrackSimTracks.isValid()) {
-            ATH_MSG_ERROR("Could not find FPGA Track Collection with key " << FPGATrackSimTracks.key());
-            return StatusCode::FAILURE;
+        if (FPGATrackSimTracks.isValid()) {
+            processFPGATracks(FPGATrackSimTracks);
         }
-        processFPGATracks(FPGATrackSimTracks);
+        else ATH_MSG_WARNING("Could not find FPGA Track Collection with key " << FPGATrackSimTracks.key());
 
         // Process FPGATrackSim Prototracks
         std::vector<SG::ReadHandle<ActsTrk::ProtoTrackCollection>> FPGATrackSimProtoTracks = m_FPGAProtoTrackCollections.makeHandles(ctx);
         for (SG::ReadHandle<ActsTrk::ProtoTrackCollection>& prototrackContainer : FPGATrackSimProtoTracks)
         {
             if (!prototrackContainer.isValid()) {
-                ATH_MSG_ERROR("Invalid SG key " << prototrackContainer.key());
-                return StatusCode::FAILURE;
+                ATH_MSG_WARNING("SG key not available " << prototrackContainer.key());
+                continue;
             }
             processFPGAPrototracks(prototrackContainer);
         }
@@ -117,6 +118,30 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::execute(const EventContext& c
             }
             if (m_printoutForEveryEvent) ATH_MSG_INFO(m_ActsInspectionTool->getPrintoutActsEventTracks(m_allActsTracks[actsTrackContainer.key()].back()));
         }
+    
+        std::vector<SG::ReadHandle<ActsTrk::SeedContainer>> FPGAActsSeeds = m_ActsSeedCollections.makeHandles(ctx);
+
+        for (SG::ReadHandle<ActsTrk::SeedContainer>& actsTrackContainer : FPGAActsSeeds)
+        {
+            if (!actsTrackContainer.isValid()) {
+                ATH_MSG_WARNING("SG key not available " << actsTrackContainer.key());
+                continue;
+            }
+            processFPGASeeds(actsTrackContainer);
+        }
+
+
+        std::vector<SG::ReadHandle<ActsTrk::BoundTrackParametersContainer>> FPGAActsSeedsParam = m_ActsSeedParamCollections.makeHandles(ctx);
+
+        for (SG::ReadHandle<ActsTrk::BoundTrackParametersContainer>& actsTrackContainer : FPGAActsSeedsParam)
+        {
+            if (!actsTrackContainer.isValid()) {
+                ATH_MSG_WARNING("SG key not available " << actsTrackContainer.key());
+                continue;
+            }
+            processFPGASeedsParam(actsTrackContainer);
+        }
+    
     } // if it's not the data preparation chain
     return StatusCode::SUCCESS;
 }
@@ -242,6 +267,74 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printxAODSpacePoints(SG::ReadHandle
     mainTable += "|=========================================================================================|";
     ATH_MSG_INFO("Printout of xAOD space points coming from " << spContainer.key() << mainTable );
 }
+
+
+void FPGATrackSim::FPGATrackSimReportingAlg::processFPGASeeds(SG::ReadHandle<ActsTrk::SeedContainer>& spContainer) const
+{
+    if (m_printoutForEveryEvent) printFPGASeeds(spContainer);
+}
+
+void FPGATrackSim::FPGATrackSimReportingAlg::printFPGASeeds(SG::ReadHandle<ActsTrk::SeedContainer>& seedContainer) const
+{
+    std::string mainTable = "\n"
+        "|=====================================================================================|\n"
+        "|      # | seed   |             Global coordinates             |     element ID list  |\n"
+        "|        | i      |       x      |       y      |       z      |                      |\n"
+        "|-------------------------------------------------------------------------------------|\n";
+    unsigned int counter = 0;
+    for (const auto& thisTrack : *seedContainer)
+    {
+        auto spList = thisTrack->sp();
+        ++counter;
+        for(int i = 0; i < 3; i++)
+        {
+            auto sp = spList.at(i);
+            mainTable += std::format("| {:>6} | {:>6} | {:>12} | {:>12} | {:>12} | {:>9}, {:>9} |\n",
+                counter,
+                i,
+                sp->globalPosition().x(),
+                sp->globalPosition().y(),
+                sp->globalPosition().z(),
+                sp->elementIdList()[0],
+                sp->elementIdList().size() == 2 ? sp->elementIdList()[1] : 0);
+        }
+
+    }
+    mainTable += "|=========================================================================================|";
+    ATH_MSG_INFO("Printout of ACTS seeds coming from " << seedContainer.key() << mainTable );
+}
+
+
+void FPGATrackSim::FPGATrackSimReportingAlg::processFPGASeedsParam(SG::ReadHandle<ActsTrk::BoundTrackParametersContainer>& spContainer) const
+{
+    if (m_printoutForEveryEvent) printFPGASeedsParam(spContainer);
+}
+
+void FPGATrackSim::FPGATrackSimReportingAlg::printFPGASeedsParam(SG::ReadHandle<ActsTrk::BoundTrackParametersContainer>& seedContainer) const
+{
+    std::string mainTable = "\n"
+        "|=============================================================================================|\n"
+        "|      # |      QopT      |     Theta      |       Phi      |        d0      |        z0      |\n"
+        "|---------------------------------------------------------------------------------------------|\n";
+    unsigned int counter = 0;
+    for (const auto& paramSet : *seedContainer)
+    {
+        ++counter;
+        auto parameters = paramSet->parameters();
+        mainTable += std::format("| {:>6} | {:>14.10f} | {:>14.10f} | {:>14.10f} | {:>14.10f} | {:>14.10f} |\n",
+        counter,
+        parameters[Acts::eBoundQOverP],
+        parameters[Acts::eBoundTheta],
+        parameters[Acts::eBoundPhi],
+        parameters[Acts::eBoundLoc0],
+        parameters[Acts::eBoundLoc1]);
+    }
+    mainTable += "|=========================================================================================|";
+    ATH_MSG_INFO("Printout of ACTS seeds Param coming from " << seedContainer.key() << mainTable );
+}
+
+
+
 
 
 void FPGATrackSim::FPGATrackSimReportingAlg::processFPGARoads(SG::ReadHandle<FPGATrackSimRoadCollection>& FPGARoads) const

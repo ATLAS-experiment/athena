@@ -384,7 +384,7 @@ StatusCode PassThroughTool::getInputClusterData(
         cache.localPosition[0] = pc->at(i)->localPosition<2>()(0, 0);
         cache.localPosition[1] = pc->at(i)->localPosition<2>()(1, 0);
         cache.localCovariance[0] = pc->at(i)->localCovariance<2>()(0, 0);
-        cache.localCovariance[1] = pc->at(i)->localCovariance<2>()(1, 0);
+        cache.localCovariance[1] = pc->at(i)->localCovariance<2>()(1, 1);
         cache.globalPosition[0] = pc->at(i)->globalPosition()[0];
         cache.globalPosition[1] = pc->at(i)->globalPosition()[1];
         cache.globalPosition[2] = pc->at(i)->globalPosition()[2];
