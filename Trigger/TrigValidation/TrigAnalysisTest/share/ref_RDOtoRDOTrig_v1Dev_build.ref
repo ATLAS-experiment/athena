@@ -712,6 +712,30 @@ HLT_2j20_mb_afprec_afpdijet_L1RD0_FILLED:
   stepFeatures:
     0: 220
     1: 20
+HLT_2j20_pf_ftf_presel3c45_PhysicsTLA_L13jJ40p0ETA25:
+  eventCount: 16
+  stepCounts:
+    0: 16
+    1: 16
+    2: 16
+    3: 16
+  stepFeatures:
+    0: 16
+    1: 200
+    2: 200
+    3: 16
+HLT_2j20_pf_ftf_presel3c45_PhysicsTLA_L1jJ85p0ETA21_3jJ40p0ETA25:
+  eventCount: 15
+  stepCounts:
+    0: 15
+    1: 15
+    2: 15
+    3: 15
+  stepFeatures:
+    0: 15
+    1: 169
+    2: 169
+    3: 15
 HLT_2j235c_j115c_pf_ftf_presel2j180XXj80_L1J100:
   eventCount: 0
 HLT_2j235c_j115c_pf_ftf_presel2j180XXj80_L1jJ160:
@@ -14224,6 +14248,82 @@ HLT_j20_calratiovar_j70_j50a_j0_DJMASS900j50dphi260x200deta_roiftf_preselj20emf7
   eventCount: 0
 HLT_j20_calratiovar_roiftf_preselj20emf24_L1LLPDPHI-jXE40-jJ40:
   eventCount: 0
+HLT_j20_j20_pf_ftf_presel3c20XX1c20bgtwo85_PhysicsTLA_L13jJ40p0ETA25:
+  eventCount: 18
+  stepCounts:
+    0: 18
+    1: 18
+    2: 18
+    3: 18
+    4: 18
+  stepFeatures:
+    0: 36
+    1: 36
+    2: 414
+    3: 414
+    4: 36
+HLT_j20_j20_pf_ftf_presel3c20XX1c20bgtwo85_PhysicsTLA_L1jJ85p0ETA21_3jJ40p0ETA25:
+  eventCount: 16
+  stepCounts:
+    0: 16
+    1: 16
+    2: 16
+    3: 16
+    4: 16
+  stepFeatures:
+    0: 32
+    1: 32
+    2: 344
+    3: 344
+    4: 32
+HLT_j20_j20_pf_ftf_preselj140XX2j45_PhysicsTLA_L13jJ40p0ETA25:
+  eventCount: 4
+  stepCounts:
+    0: 4
+    1: 4
+    2: 4
+    3: 4
+  stepFeatures:
+    0: 8
+    1: 106
+    2: 106
+    3: 8
+HLT_j20_j20_pf_ftf_preselj140XX2j45_PhysicsTLA_L1jJ85p0ETA21_3jJ40p0ETA25:
+  eventCount: 4
+  stepCounts:
+    0: 4
+    1: 4
+    2: 4
+    3: 4
+  stepFeatures:
+    0: 8
+    1: 106
+    2: 106
+    3: 8
+HLT_j20_j20_pf_ftf_preselj80XX2j45_PhysicsTLA_L13jJ40p0ETA25:
+  eventCount: 16
+  stepCounts:
+    0: 16
+    1: 16
+    2: 16
+    3: 16
+  stepFeatures:
+    0: 32
+    1: 400
+    2: 400
+    3: 32
+HLT_j20_j20_pf_ftf_preselj80XX2j45_PhysicsTLA_L1jJ85p0ETA21_3jJ40p0ETA25:
+  eventCount: 15
+  stepCounts:
+    0: 15
+    1: 15
+    2: 15
+    3: 15
+  stepFeatures:
+    0: 30
+    1: 338
+    2: 338
+    3: 30
 HLT_j20_n041pileuprmn015_j70_j50a_j0_DJMASS900j50dphi260x200deta_L1MJJ-500-NFF:
   eventCount: 0
 HLT_j20_pf_ftf_presel4j85_PhysicsTLA_L13J50:
