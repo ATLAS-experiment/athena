@@ -89,9 +89,12 @@ def ActsStripClusteringToolCfg(flags,
         from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)))
 
-    if 'conditionsTool' not in kwargs:
-        from SCT_ConditionsTools.ITkStripConditionsToolsConfig import ITkStripConditionsSummaryToolCfg
-        kwargs.setdefault("conditionsTool", acc.popToolsAndMerge(ITkStripConditionsSummaryToolCfg(flags)))
+    kwargs.setdefault("conditionsTool",None)
+    if "StripDetElStatus" not in kwargs :
+        from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import  (
+            ITkStripDetectorElementStatusAlgCfg)
+        acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
+        kwargs.setdefault("StripDetElStatus", "ITkStripDetectorElementStatus")
 
     # Disable noisy modules suppression
     kwargs.setdefault("maxFiredStrips", 0)

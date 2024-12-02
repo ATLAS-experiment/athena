@@ -1,9 +1,10 @@
 """Define a function to configure ITkPixelConditionsSummaryCfg
 
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentFactory import CompFactory
-
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.Enums import Format
 from PixelConditionsAlgorithms.ITkPixelConditionsConfig import (
     ITkPixelDCSCondStateAlgCfg, ITkPixelDCSCondStatusAlgCfg, ITkPixelDeadMapCondAlgCfg
 )
@@ -26,4 +27,21 @@ def ITkPixelConditionsSummaryCfg(flags, name="ITkPixelConditionsSummary", **kwar
     kwargs.setdefault("UseByteStreamRD53", False) # Turned off until BS format is defined
 
     acc.setPrivateTools(CompFactory.PixelConditionsSummaryTool(name=name + "Tool", **kwargs))
+    return acc
+
+
+def ITkByteStreamErrorDetectorElementStatusToolCfg(flags, name = "ITkByteStreamErrorDetectorElementStatusTool",**kwargs) :
+    # @TODO bytestream errors for ITk have not been defined yet.
+    acc = ComponentAccumulator()
+    kwargs.setdefault("PixelReadoutManager","ITkPixelReadoutManager")
+    kwargs.setdefault("PixelDetEleCollKey","ITkPixelDetectorElementCollection") # @TODO do we need the DetEleColl for the Acts chain ?
+    if not flags.Input.isMC and not flags.Overlay.DataOverlay and flags.Input.Format is Format.BS :
+        kwargs.setdefault("PixelByteStreamErrs", "PixelByteStreamErrs")
+        kwargs.setdefault("UseByteStreamFEI4",   True)
+        kwargs.setdefault("UseByteStreamFEI3",   True)
+        kwargs.setdefault("ActiveOnly",          False)
+        acc.setPrivateTools( CompFactory.PixelByteStreamErrorDetectorElementStatusTool(name, **kwargs) )
+    else :
+        kwargs.pop("ActiveOnly",False)
+        acc.setPrivateTools( CompFactory.PixelDetectorElementStatusCloneTool(name, **kwargs) )
     return acc

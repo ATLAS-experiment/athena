@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of SiCombinatorialTrackFinderTool_xk package
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -251,21 +251,23 @@ def ITkSiCombinatorialTrackFinder_xkCfg(
     kwargs.setdefault("BoundaryCheckTool", acc.popToolsAndMerge(
         ITkBoundaryCheckToolCfg(flags)))
 
+    kwargs.setdefault("PixelSummaryTool", None) # SCTDetElStatus is used instead
     if flags.Detector.EnableITkPixel:
-        from PixelConditionsTools.ITkPixelConditionsSummaryConfig import (
-            ITkPixelConditionsSummaryCfg)
-        kwargs.setdefault("PixelSummaryTool", acc.popToolsAndMerge(
-            ITkPixelConditionsSummaryCfg(flags)))
-    else:
-        kwargs.setdefault("PixelSummaryTool", None)
+        if "PixelDetElStatus" not in kwargs:
+            if not flags.Trigger.doHLT :
+                from PixelConditionsAlgorithms.ITkPixelConditionsConfig import (
+                    ITkPixelDetectorElementStatusAlgCfg)
+                acc.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
+            kwargs.setdefault("PixelDetElStatus", "ITkPixelDetectorElementStatus")
 
+    kwargs.setdefault("SctSummaryTool", None) # SCTDetElStatus is used instead
     if flags.Detector.EnableITkStrip:
-        from SCT_ConditionsTools.ITkStripConditionsToolsConfig import (
-            ITkStripConditionsSummaryToolCfg)
-        kwargs.setdefault("SctSummaryTool", acc.popToolsAndMerge(
-            ITkStripConditionsSummaryToolCfg(flags)))
-    else:
-        kwargs.setdefault("SctSummaryTool", None)
+        if "SCTDetElStatus" not in kwargs :
+            if not flags.Trigger.doHLT :
+                from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import  (
+                    ITkStripDetectorElementStatusAlgCfg)
+                acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
+            kwargs.setdefault("SCTDetElStatus","ITkStripDetectorElementStatus")
 
     # Protection against FPEs
     kwargs.setdefault("MinFinalPtCut",

@@ -219,10 +219,13 @@ def ITkStripClusterizationCfg(flags, name="ITkStripClusterization", **kwargs):
     
     prefix = clusterizationInputPrefix(flags)
 
-    if "conditionsTool" not in kwargs:
-        from SCT_ConditionsTools.ITkStripConditionsToolsConfig import ITkStripConditionsSummaryToolCfg
-        kwargs.setdefault("conditionsTool", acc.popToolsAndMerge(
-            ITkStripConditionsSummaryToolCfg(flags)))
+    kwargs.setdefault("conditionsTool",None) # SCTDetElStatus is used instead
+    if "SCTDetElStatus" not in kwargs :
+        if not flags.Trigger.doHLT :
+            from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import  (
+                ITkStripDetectorElementStatusAlgCfg)
+            acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
+        kwargs.setdefault("SCTDetElStatus", "ITkStripDetectorElementStatus")
 
     if "clusteringTool" not in kwargs:
         from InDetConfig.SiClusterizationToolConfig import ITKStrip_SCT_ClusteringToolCfg

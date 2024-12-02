@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetTestPixelLayer package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -99,11 +99,16 @@ def CombinedMuonTrigPixelLayerToolCfg(
 
 def ITkTestPixelLayerToolCfg(flags, name="ITkTestPixelLayerTool", **kwargs):
     result = ComponentAccumulator()
-    if 'PixelSummaryTool' not in kwargs:
-        from PixelConditionsTools.ITkPixelConditionsSummaryConfig import (
-            ITkPixelConditionsSummaryCfg)
-        kwargs.setdefault("PixelSummaryTool", result.popToolsAndMerge(
-            ITkPixelConditionsSummaryCfg(flags)))
+    kwargs.setdefault("PixelSummaryTool", None) # PixelDetElStatus is used instead
+
+    if "PixelDetElStatus" not in kwargs :
+        if not hasattr(flags,"Trigger.triggerMenuSetup") :
+            from PixelConditionsAlgorithms.ITkPixelConditionsConfig import (
+                ITkPixelDetectorElementStatusAlgCfg)
+            result.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
+        kwargs.setdefault("PixelDetElStatus", "ITkPixelDetectorElementStatus")
+
+    kwargs.setdefault("PixelReadoutManager","ITkPixelReadoutManager")
 
     if 'Extrapolator' not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg

@@ -47,11 +47,15 @@ def precisionTracks_GSFRefitted(flags, RoIs, ion=False, variant=''):
         dataObjects.append(( 'InDet::TRT_DriftCircleContainerCache' , 
                              f'StoreGateSvc+{flags.Trigger.InDetTracking.TRT_DriftCircleCacheKey}' ))
 
+    from TrigInDetConfig.TrigInDetConfig import InDetExtraDataObjectsFromDataPrep
+    InDetExtraDataObjectsFromDataPrep(flags,dataObjects)
+
     precisionGsfVDV.DataObjects =  dataObjects
 
     acc.addEventAlgo(precisionGsfVDV)
 
     from TriggerMenuMT.HLT.Electron.TrigEMBremCollectionBuilder import TrigEMBremCollectionBuilderCfg
+
 
     ## TrigEMBremCollectionBuilder ##
 
