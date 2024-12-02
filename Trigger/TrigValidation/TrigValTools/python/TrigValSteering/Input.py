@@ -47,7 +47,7 @@ class TrigValInput(object):
             self.paths = []
             for path in paths:
                 # for files on EOS, use xrootd rather than fuse mount
-                if '/eos' in path:
+                if '/eos/' in path:
                     self.paths.append(f'root://eosatlas.cern.ch/{path}')
                 else:
                     self.paths.append(path)
