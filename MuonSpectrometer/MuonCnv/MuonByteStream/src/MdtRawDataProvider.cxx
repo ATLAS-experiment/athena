@@ -50,7 +50,7 @@ StatusCode Muon::MdtRawDataProvider::execute(const EventContext& ctx) const {
         for (auto roi : *muonRoI) {
             ATH_MSG_DEBUG("Get ROBs for RoI " << *roi);
             // get list of ROBs from region selector
-            m_regsel_mdt->ROBIDList(*roi, robs);
+            m_regsel_mdt->lookup(ctx)->ROBIDList(*roi, robs);
 
             // decode the ROBs
             if (m_rawDataTool->convert(robs, ctx).isFailure()) { ATH_MSG_ERROR("RoI seeded BS conversion into RDOs failed"); }

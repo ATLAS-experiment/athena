@@ -56,7 +56,7 @@ StatusCode Muon::CscRawDataProvider::execute(const EventContext& ctx) const {
         for (auto roi : *muonRoI) {
             ATH_MSG_DEBUG("Get has IDs for RoI " << *roi);
             // get list of hash IDs from region selection
-            m_regsel_csc->HashIDList(*roi, csc_hash_ids);
+            m_regsel_csc->lookup(ctx)->HashIDList(*roi, csc_hash_ids);
 
             // decode the ROBs
             if (m_rawDataTool->convert(csc_hash_ids, ctx).isFailure()) { ATH_MSG_ERROR("RoI seeded BS conversion into RDOs failed"); }

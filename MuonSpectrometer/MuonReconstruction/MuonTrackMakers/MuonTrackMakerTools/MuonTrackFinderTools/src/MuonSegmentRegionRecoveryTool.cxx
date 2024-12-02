@@ -99,7 +99,7 @@ namespace Muon {
          3) Compare collected Hashes with the ones already on track
          4) Recover segments on the missing chambers by launching the SeededSegmentFinder
       */
-    std::unique_ptr<Trk::Track> MuonSegmentRegionRecoveryTool::recover(const Trk::Track& track, const EventContext& ctx) const {
+  std::unique_ptr<Trk::Track> MuonSegmentRegionRecoveryTool::recover(const Trk::Track& track, const EventContext& ctx) const {
         // Welcome into the implementation of the recovery method
         ATH_MSG_VERBOSE(" Entering segment recovery method " << m_printer->print(track) << std::endl << m_printer->printStations(track));
 
@@ -143,7 +143,7 @@ namespace Muon {
         fillOnTrackChambers(*chRecTrack, muonData);
 
         // collect the hashes not in track close to the track
-        collectCrossedChambers(*chRecTrack, muonData);
+        collectCrossedChambers( ctx, *chRecTrack, muonData);
 
         // 3b) compare the two std::sets and make a final std::set of not-yet-on-track Hashes
         std::unique_ptr<Trk::Track> triggerRecTrack = addMissingChambers(ctx, *chRecTrack, muonData, false);
@@ -162,19 +162,19 @@ namespace Muon {
 
     //// NO, NO, NO, should pass in an IRoiDescriptor
     // void MuonSegmentRegionRecoveryTool::addHashes( DETID type, double etamin, double etamax, double phimin, double phimax,
-    void MuonSegmentRegionRecoveryTool::addHashes(DETID type, const IRoiDescriptor& roi, std::set<IdentifierHash>& hashes,
-                                                  const std::set<IdentifierHash>& exclusion) const {
+  void MuonSegmentRegionRecoveryTool::addHashes( const EventContext& ctx, DETID type, const IRoiDescriptor& roi, std::set<IdentifierHash>& hashes,
+						 const std::set<IdentifierHash>& exclusion) const {
         // if only looking at EO, skip all but MDT chambers
         if (m_onlyEO && type != MDT) return;
 
         std::vector<IdentifierHash> crossed;
 
-        if (type == MDT) m_regsel_mdt->HashIDList(roi, crossed);
-        if (type == CSC) m_regsel_csc->HashIDList(roi, crossed);
-        if (type == RPC) m_regsel_rpc->HashIDList(roi, crossed);
-        if (type == TGC) m_regsel_tgc->HashIDList(roi, crossed);
-        if (type == STGC) m_regsel_stgc->HashIDList(roi, crossed);
-        if (type == MM) m_regsel_mm->HashIDList(roi, crossed);
+        if (type == MDT) m_regsel_mdt->lookup(ctx)->HashIDList(roi, crossed);
+        if (type == CSC) m_regsel_csc->lookup(ctx)->HashIDList(roi, crossed);
+        if (type == RPC) m_regsel_rpc->lookup(ctx)->HashIDList(roi, crossed);
+        if (type == TGC) m_regsel_tgc->lookup(ctx)->HashIDList(roi, crossed);
+        if (type == STGC) m_regsel_stgc->lookup(ctx)->HashIDList(roi, crossed);
+        if (type == MM) m_regsel_mm->lookup(ctx)->HashIDList(roi, crossed);
 
         for (std::vector<IdentifierHash>::iterator it = crossed.begin(); it != crossed.end(); ++it) {
             if (!exclusion.count(*it) && !hashes.count(*it)) {
@@ -216,8 +216,8 @@ namespace Muon {
         }
     }
 
-    void MuonSegmentRegionRecoveryTool::collectCrossedChambers(const Trk::Track& track,
-                                                               MuonSegmentRegionRecoveryTool::MuonData& data) const {
+  void MuonSegmentRegionRecoveryTool::collectCrossedChambers( const EventContext& ctx, const Trk::Track& track,
+							      MuonSegmentRegionRecoveryTool::MuonData& data) const {
         ATH_MSG_VERBOSE(" Collecting all crossed chambers");
 
         const Trk::TrackStates* states = track.trackStateOnSurfaces();
@@ -285,12 +285,12 @@ namespace Muon {
 
         RoiDescriptor roi(etamin, etamax, phimin, phimax);
 
-        if (m_idHelperSvc->hasMDT()) addHashes(MDT, roi, data.mdt, data.mdtTrack);
-        if (m_idHelperSvc->hasRPC()) addHashes(RPC, roi, data.rpc, data.rpcTrack);
-        if (m_idHelperSvc->hasTGC()) addHashes(TGC, roi, data.tgc, data.tgcTrack);
-        if (m_regsel_csc.isEnabled()) addHashes(CSC, roi, data.csc, data.cscTrack);
-        if (m_recoverSTGC) addHashes(STGC, roi, data.stgc, data.stgcTrack);
-        if (m_recoverMM) addHashes(MM, roi, data.mm, data.mmTrack);
+        if (m_idHelperSvc->hasMDT())  addHashes( ctx, MDT, roi, data.mdt, data.mdtTrack);
+        if (m_idHelperSvc->hasRPC())  addHashes( ctx, RPC, roi, data.rpc, data.rpcTrack);
+        if (m_idHelperSvc->hasTGC())  addHashes( ctx, TGC, roi, data.tgc, data.tgcTrack);
+        if (m_regsel_csc.isEnabled()) addHashes( ctx, CSC, roi, data.csc, data.cscTrack);
+        if (m_recoverSTGC) addHashes( ctx, STGC, roi, data.stgc, data.stgcTrack);
+        if (m_recoverMM) addHashes( ctx, MM, roi, data.mm, data.mmTrack);
 
         std::set<IdentifierHash>::iterator hsit = data.mdt.begin();
         std::set<IdentifierHash>::iterator hsit_end = data.mdt.end();
