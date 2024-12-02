@@ -18,6 +18,7 @@
 
 #include "Identifier/IdentifierHash.h"
 #include <vector>
+#include <algorithm>
 #include <stdint.h>
 #include <algorithm>
 

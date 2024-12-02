@@ -129,6 +129,7 @@ namespace InDet{
       }
     }
     else {//enter RoI-seeded mode
+      
       SG::ReadHandle<TrigRoiDescriptorCollection> roiCollection(m_roiCollectionKey, ctx);
       ATH_CHECK(roiCollection.isValid());
 
@@ -139,8 +140,9 @@ namespace InDet{
       for (; roi!=roiE; ++roi) {
         
         listOfPixIds.clear();//Prevents needless memory reallocations
-        m_regionSelector->HashIDList( **roi, listOfPixIds);
-        ATH_MSG_VERBOSE(**roi);
+        m_regionSelector->lookup(ctx)->HashIDList( **roi, listOfPixIds );
+
+	ATH_MSG_VERBOSE(**roi);
         ATH_MSG_VERBOSE( "REGTEST: Pixel : Roi contains " 
 		     << listOfPixIds.size() << " det. Elements" );
         for (auto & listOfPixId : listOfPixIds) {
