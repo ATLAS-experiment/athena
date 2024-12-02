@@ -95,7 +95,7 @@ std::string MuonAGDDToolHelper::GetAGDD(const bool dumpIt, const std::string& ta
      detectorNode = "ATLAS"  ;
    }
 
-   IRDBRecordset_ptr recordsetAGDD = m_rdbAccessSvc->getRecordsetPtr(tableName.c_str(),detectorKey,detectorNode);
+   IRDBRecordset_ptr recordsetAGDD = m_rdbAccessSvc->getRecordsetPtr(tableName,detectorKey,detectorNode);
    if(!recordsetAGDD) return "";
 
    const IRDBRecord *recordAGDD =  (*recordsetAGDD)[0];

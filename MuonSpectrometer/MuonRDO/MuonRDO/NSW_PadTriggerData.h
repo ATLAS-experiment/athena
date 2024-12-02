@@ -1,9 +1,16 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
 #ifndef MUONRDO_NSW_PADTRIGGERDATA
 #define MUONRDO_NSW_PADTRIGGERDATA
 
 #include "GaudiKernel/MsgStream.h"
 
-#include <sstream>
+#include <iosfwd>
+#include <string>
+#include <tuple>
+#include <vector>
+#include <cstdint>
 
 namespace Muon {
 
@@ -96,7 +103,7 @@ public:
 private:
 
     static std::tuple< uint32_vt, uint32_vt, uint32_vt >
-      filterNonNulls(uint32_vt bandids, uint32_vt phiids, uint32_vt bcids) ;
+      filterNonNulls(const uint32_vt & bandids, const uint32_vt & phiids, const uint32_vt & bcids) ;
 
     uint32_t m_sourceid{0};
     uint32_t m_flags{0};

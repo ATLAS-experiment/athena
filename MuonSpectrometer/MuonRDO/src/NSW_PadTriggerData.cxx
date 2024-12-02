@@ -1,4 +1,8 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
 #include "MuonRDO/NSW_PadTriggerData.h"
+#include <iostream>
 
 namespace Muon {
 NSW_PadTriggerData::NSW_PadTriggerData(uint32_t sourceid,
@@ -86,7 +90,7 @@ std::string NSW_PadTriggerData::string() const {
 }
 
 std::tuple< uint32_vt, uint32_vt, uint32_vt >
-NSW_PadTriggerData::filterNonNulls(uint32_vt bandids, uint32_vt phiids, uint32_vt bcids) {
+NSW_PadTriggerData::filterNonNulls(const uint32_vt & bandids, const uint32_vt & phiids, const uint32_vt & bcids) {
   uint32_vt bandidsFiltered{}, phiidsFiltered{}, bcidsFiltered{};
   for (size_t it = 0; it < bandids.size(); ++it) {
     if (bandids.at(it) == NULL_BANDID and phiids.at(it) == NULL_PHIID) {
