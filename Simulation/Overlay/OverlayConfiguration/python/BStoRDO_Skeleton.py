@@ -2,7 +2,7 @@
 
 import sys
 
-from AthenaConfiguration.Enums import MetadataCategory, ProductionStep
+from AthenaConfiguration.Enums import ProductionStep
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 
@@ -134,7 +134,7 @@ def fromRunArgs(runArgs):
     cfg.merge(OutputStreamCfg(flags, 'RDO', itemList))
 
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    cfg.merge(SetupMetaDataForStreamCfg(flags, 'RDO', createMetadata=[MetadataCategory.IOVMetaData]))
+    cfg.merge(SetupMetaDataForStreamCfg(flags, 'RDO'))
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)
