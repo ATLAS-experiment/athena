@@ -127,7 +127,9 @@ namespace ST {
     }
 
     // Calculate Jvt scores (required by METSignificance)
-    ATH_CHECK(m_jetJvtMomentTool->decorate(*copy));
+    for (const auto& jet : *copy) {
+      dec_jvt(*jet) = m_jetJvtMomentTool->updateJvt(*jet);
+    }
 
     // Re-calculate NNJvt scores
     if (m_applyJVTCut) ATH_CHECK(m_jetNNJvtMomentTool->decorate(*copy));
