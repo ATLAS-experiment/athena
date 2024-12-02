@@ -21,8 +21,12 @@ namespace MuonR4 {
         if (hits.empty()) return;
 
         /// Sort space points by z
-        std::ranges::sort(hits, [](const SpacePoint* a, const SpacePoint*b){
-                        return a->positionInChamber().z() < b->positionInChamber().z();
+        std::ranges::stable_sort(hits, [](const SpacePoint* a, const SpacePoint*b){
+                        const double dZ = a->positionInChamber().z() < b->positionInChamber().z(); 
+                        if (std::abs(dZ) > 50.*Gaudi::Units::micrometer) {
+                            return dZ < 0.;
+                        }
+                        return a->positionInChamber().y() < b->positionInChamber().y();
         });
         const Muon::IMuonIdHelperSvc* idHelperSvc{hits.front()->msSector()->idHelperSvc()};
         m_mdtLayers.reserve(8);
