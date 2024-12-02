@@ -15,6 +15,7 @@ atlas_add_component( TrigGepPerf
 		     CaloDetDescrLib
 		     CaloIdentifier
 		     GaudiKernel
+                     PathResolver
 		     TrigT1Interfaces
 		     TrigEFMissingETLib
 		     xAODEventInfo

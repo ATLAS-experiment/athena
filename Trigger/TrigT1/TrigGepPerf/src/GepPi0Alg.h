@@ -42,8 +42,8 @@
 class GepPi0Alg: public AthReentrantAlgorithm { 
  public:
 
-  using CellVectors = std::vector<std::vector<const CaloCell*>>;
-  using PathsSignif = std::vector<std::vector<float>>;
+  typedef std::vector<std::vector<const CaloCell*>> CellVectors;
+  typedef std::vector<std::vector<float>> PathsSignif;
 
   
   GepPi0Alg(const std::string& name, ISvcLocator* pSvcLocator);

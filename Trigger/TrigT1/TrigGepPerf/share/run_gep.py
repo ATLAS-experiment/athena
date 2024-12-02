@@ -268,12 +268,22 @@ if __name__ == '__main__':
         caloClustersKey = caloclustercolls.get((cluster_alg, doLCCalib), None)
         if caloClustersKey is None:
             from TrigGepPerf.GepClusteringAlgConfig import GepClusteringAlgCfg
-            
+
+            # Defining the Energy encoding scheme used in GEP
+            NumberOfEnergyBits = 6 # Two bits for energy range, rest to encode energy
+            ValueOfLeastSignificantBit = 10 # in MeV
+            ValueG = 4 # Multiplier for high energy ranges
+
+            gepEnergyEncodingScheme = str(NumberOfEnergyBits)+"-"+str(ValueOfLeastSignificantBit)+"-"+str(ValueG)            
+
             caloClustersKey='GEP'+cluster_alg+'Clusters'
             gepclustering_cfg = GepClusteringAlgCfg(
                 flags,
                 TopoClAlg=cluster_alg,
                 outputCaloClustersKey=caloClustersKey,
+                GEPEnergyEncodingScheme = gepEnergyEncodingScheme,
+                HardwareStyleEnergyEncoding = True,
+                TruncationOfOverflowingFEBs = True,
                 OutputLevel=gepAlgs_output_level)
 
 

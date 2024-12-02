@@ -9,12 +9,12 @@
 #include <string>
 
 #include "./Cluster.h"
-#include "./CustomCaloCell.h"
+#include "./GepCaloCell.h"
 
 #include <memory>
 
-using  GepCellMap = std::map<unsigned int,Gep::CustomCaloCell>;
-using  pGepCellMap = std::unique_ptr<GepCellMap>;
+typedef std::map<unsigned int,Gep::GepCaloCell> GepCellMap;
+typedef std::unique_ptr<GepCellMap> pGepCellMap;
 
 namespace Gep{
   class IClusterMaker

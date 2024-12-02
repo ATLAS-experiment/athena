@@ -16,11 +16,10 @@ Gep::WFSClusterMaker::makeClusters(const pGepCellMap& caloCellsMap) const {
 	if (!isSeedCell(cell_itr.second)) continue;
 
 	// Clustering
-        std::vector<Gep::CustomCaloCell> cluster_cells = clusterFromCells(cell_itr.second, caloCellsMap);
+        std::vector<Gep::GepCaloCell> cluster_cells = clusterFromCells(cell_itr.second, caloCellsMap);
 	
         Gep::Cluster cluster = getClusterFromListOfCells(cluster_cells);
         clusters.push_back(cluster);
-
   }
 
   // Order topo clusters according to their et
@@ -30,7 +29,7 @@ Gep::WFSClusterMaker::makeClusters(const pGepCellMap& caloCellsMap) const {
 }
 
 
-bool Gep::WFSClusterMaker::isSeedCell (const Gep::CustomCaloCell& cell) const {
+bool Gep::WFSClusterMaker::isSeedCell (const Gep::GepCaloCell& cell) const {
 
   if (cell.isBadCell()) return false;
   if (fabs(cell.sigma) < m_seed_threshold) return false;
@@ -59,13 +58,13 @@ bool Gep::WFSClusterMaker::isNewCell(unsigned int id, const std::vector<unsigned
 }
 
 
-std::vector<Gep::CustomCaloCell>
-Gep::WFSClusterMaker::clusterFromCells(const Gep::CustomCaloCell& seed,
+std::vector<Gep::GepCaloCell>
+Gep::WFSClusterMaker::clusterFromCells(const Gep::GepCaloCell& seed,
 					  const pGepCellMap& caloCellsMap) const {
 
-  std::vector<Gep::CustomCaloCell> v_clusterCells;
+  std::vector<Gep::GepCaloCell> v_clusterCells;
 
-  std::vector<Gep::CustomCaloCell> cellsNextLayer, cellsThisLayer;
+  std::vector<Gep::GepCaloCell> cellsNextLayer, cellsThisLayer;
   std::vector<unsigned int> seenCells;
 
   // Fill seed into supporting vectors
@@ -86,7 +85,12 @@ Gep::WFSClusterMaker::clusterFromCells(const Gep::CustomCaloCell& seed,
 
                 // Go through list of neighbouring cells and check whether they are part of the cluster
                 for (unsigned int i_neighbour = 0; i_neighbour < (cellsThisLayer[i_cell]).neighbours.size(); ++i_neighbour) {
-			Gep::CustomCaloCell neighbour = caloCellsMap->at((cellsThisLayer[i_cell]).neighbours[i_neighbour]);
+
+			// Check whether this neighbouring cell was sent to the GEP
+			auto const& nghbr_itr = caloCellsMap->find((cellsThisLayer[i_cell]).neighbours[i_neighbour]);
+			if (nghbr_itr == caloCellsMap->end()) continue;
+
+			Gep::GepCaloCell neighbour = nghbr_itr->second;//caloCellsMap->at((cellsThisLayer[i_cell]).neighbours[i_neighbour]);
 
                         // reject if bad cell
                         if (neighbour.isBadCell()) continue;
@@ -112,7 +116,7 @@ Gep::WFSClusterMaker::clusterFromCells(const Gep::CustomCaloCell& seed,
 }
 
 
-Gep::Cluster Gep::WFSClusterMaker::getClusterFromListOfCells(const std::vector<Gep::CustomCaloCell>& cells) const {
+Gep::Cluster Gep::WFSClusterMaker::getClusterFromListOfCells(const std::vector<Gep::GepCaloCell>& cells) const {
 
   Gep::Cluster cluster;
 
@@ -125,11 +129,12 @@ Gep::Cluster Gep::WFSClusterMaker::getClusterFromListOfCells(const std::vector<G
 
   double seed_phi = cells[0].phi;
   for (unsigned int i_cell = 0; i_cell < cells.size(); ++i_cell) {
-        cluster_e += cells[i_cell].e;
-        abs_e += fabs(cells[i_cell].e);
+	float cell_e = cells[i_cell].et * TMath::CosH(cells[i_cell].eta);
+        cluster_e += cell_e;
+        abs_e += fabs(cell_e);
         v_cellIDs.push_back(cells[i_cell].id);
-        etaSum += fabs(cells[i_cell].e) * cells[i_cell].eta;
-        phiSum += fabs(cells[i_cell].e) * getDeltaPhi(cells[i_cell].phi, seed_phi);
+        etaSum += fabs(cell_e) * cells[i_cell].eta;
+        phiSum += fabs(cell_e) * getDeltaPhi(cells[i_cell].phi, seed_phi);
         if (fabs(cells[i_cell].sigma) > m_seed_threshold) weight += 1.0;
   }
 
