@@ -1,18 +1,18 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef TRIGL0GEPPERF_CUSTOMCALOCELL_H
-#define TRIGL0GEPPERF_CUSTOMCALOCELL_H
+#ifndef TRIGL0GEPPERF_GEPCALOCELL_H
+#define TRIGL0GEPPERF_GEPCALOCELL_H
 
 #include <vector>
 #include <string>
 
 namespace Gep{
-  struct CustomCaloCell
+  struct GepCaloCell
   {
-    CustomCaloCell() {}
-    ~CustomCaloCell() {}
+    GepCaloCell() {}
+    ~GepCaloCell() {}
     
     float e{};
     float et{};
@@ -51,6 +51,11 @@ namespace Gep{
     unsigned int sampling{};
     unsigned int id{};
     std::string detName;
+    std::string FEB;
+    int channel{};
+    int fiber{};
+    std::string connection_type;
+    int connection_number{};
     std::vector<unsigned int> neighbours;
     
     bool isBadCell() const {return isBad;}
@@ -61,4 +66,4 @@ namespace Gep{
   };
 }
 
-#endif //TRIGL0GEPPERF_CUSTOMCALOCELL_H
+#endif //TRIGL0GEPPERF_GEPCALOCELL_H

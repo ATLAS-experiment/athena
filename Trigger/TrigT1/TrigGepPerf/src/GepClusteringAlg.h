@@ -30,7 +30,7 @@ class GepClusteringAlg: public ::AthReentrantAlgorithm {
     this,
     "CaloCellHandler",
     "",
-    "create cont of Gep::CustomCaloCells"};
+    "create cont of Gep::GepCaloCells"};
 
   SG::ReadHandleKey<CaloCellContainer> m_caloCellsKey {
     this, "caloCells", "AllCalo", "key to read in a CaloCell constainer"};
