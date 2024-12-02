@@ -133,20 +133,20 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::getMdtHits(const TrigRoiDescriptor* 
 
     const IRoiDescriptor* iroi = (IRoiDescriptor*) p_roids;
 
-    m_regionSelector->HashIDList(*iroi, mdtHashList);
+    m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(*iroi, mdtHashList);
     ATH_MSG_DEBUG("mdtHashList.size()=" << mdtHashList.size());
 
-    m_regionSelector->ROBIDList(*iroi, v_robIds);
+    m_regionSelector->lookup( Gaudi::Hive::currentContext() )->ROBIDList(*iroi, v_robIds);
 
   } else {
 
     ATH_MSG_DEBUG("Use full data access");
 
     TrigRoiDescriptor fullscan_roi( true );
-    m_regionSelector->HashIDList(fullscan_roi, mdtHashList);
+    m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, mdtHashList);
     ATH_MSG_DEBUG("mdtHashList.size()=" << mdtHashList.size());
 
-    m_regionSelector->ROBIDList(fullscan_roi, v_robIds);
+    m_regionSelector->lookup( Gaudi::Hive::currentContext() )->ROBIDList(fullscan_roi, v_robIds);
   }
 
   ATH_CHECK( collectMdtHitsFromPrepData(mdtHashList, mdtHits_normal, muonRoad, muDetMgr) );

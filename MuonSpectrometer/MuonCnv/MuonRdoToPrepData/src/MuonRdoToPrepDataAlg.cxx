@@ -32,9 +32,9 @@ StatusCode MuonRdoToPrepDataAlg::execute(const EventContext& ctx)  const {
         ATH_CHECK(muonRoI.isPresent());
         for (const auto *roi : *muonRoI) {
             if (m_robDecoding) {
-                    m_regsel->ROBIDList(*roi, robs);
+                    m_regsel->lookup(ctx)->ROBIDList(*roi, robs);
             } else {
-                m_regsel->HashIDList(*roi, toDecode);
+                m_regsel->lookup(ctx)->HashIDList(*roi, toDecode);
             }               
             if (!robs.empty()) {
                 ATH_CHECK(m_tool->decode(ctx, robs));

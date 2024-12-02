@@ -61,7 +61,7 @@ PEBInfoWriterToolBase::PEBInfo RoIPEBInfoWriterTool::createPEBInfo(const PEBInfo
 
   for (const auto& tool : m_regionSelectorTools) {
     std::vector<uint32_t> detROBs;
-    tool->ROBIDList(roiForPEB, detROBs);
+    tool->lookup(Gaudi::Hive::currentContext())->ROBIDList(roiForPEB, detROBs);
     pebi.robs.insert(detROBs.begin(),detROBs.end());
   }
 

@@ -115,7 +115,7 @@ bool TrigL2MuonSA::MuCalStreamerTool::isStreamOpen() {return m_circ!=nullptr;}
  							      TrigL2MuonSA::TgcHits& tgcHits,
 							       // int calBufferSize,
 							       bool doDataScouting,
-							       bool &updateTriggerElement, const EventContext&                        ctx) const
+							       bool &updateTriggerElement, const EventContext& ctx) const
  {
 
    // create the fragment
@@ -167,7 +167,7 @@ bool TrigL2MuonSA::MuCalStreamerTool::isStreamOpen() {return m_circ!=nullptr;}
    TrigRoiDescriptor roiDescr( roi->eta(), etaMin, etaMax, phi_roi, phiMin, phiMax );
   
    const IRoiDescriptor* iroi = (IRoiDescriptor*) &roiDescr;
-   m_regSel_MDT->ROBIDList(*iroi,robIdList_MDT);
+   m_regSel_MDT->lookup( ctx )->ROBIDList(*iroi,robIdList_MDT);
 
    // dump the list of robs for debugging 
    ATH_MSG_DEBUG("Size of the MDT rob list: " << robIdList_MDT.size());
@@ -179,7 +179,7 @@ bool TrigL2MuonSA::MuCalStreamerTool::isStreamOpen() {return m_circ!=nullptr;}
 
    // get the list of TGC robs
    std::vector<uint32_t> robIdList_TGC;
-   m_regSel_TGC->ROBIDList(*iroi,robIdList_TGC);
+   m_regSel_TGC->lookup(ctx)->ROBIDList(*iroi,robIdList_TGC);
    ATH_MSG_DEBUG("Size of the TGC rob list: " << robIdList_TGC.size());
 
 

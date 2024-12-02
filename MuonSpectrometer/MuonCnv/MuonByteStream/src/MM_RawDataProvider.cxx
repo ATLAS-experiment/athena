@@ -42,7 +42,7 @@ StatusCode Muon::MM_RawDataProvider::execute(const EventContext& ctx) const {
         for (auto roi : *muonRoI) {
             ATH_MSG_DEBUG("Getting ROBs for RoI " << *roi);
             // Get ROB IDs from region selector
-            m_regsel_mm->ROBIDList(*roi, robs);
+            m_regsel_mm->lookup(ctx)->ROBIDList(*roi, robs);
         }
 
         // Call decoding tool, passing the ROB IDs

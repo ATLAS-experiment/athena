@@ -112,15 +112,15 @@ namespace Muon {
         /** methods used by recover*/
 
         // Collect hashes through extrapolation
-        void collectCrossedChambers(const Trk::Track& track, MuonData& data) const;
+        void collectCrossedChambers( const EventContext& ctx, const Trk::Track& track, MuonData& data) const;
 
         // Fill already on track chamber std::set
         void fillOnTrackChambers(const Trk::Track& theTrack, MuonData& data) const;
         // Select hashes of chambers not yet on track
         std::unique_ptr<Trk::Track> addMissingChambers(const EventContext& ctx, const Trk::Track& track, MuonData& data, bool addMdt) const;
 
-        void addHashes(DETID type, const IRoiDescriptor& roi, std::set<IdentifierHash>& hashes,
-                       const std::set<IdentifierHash>& exclusion) const;
+        void addHashes( const EventContext& ctx, DETID type, const IRoiDescriptor& roi, std::set<IdentifierHash>& hashes,
+			const std::set<IdentifierHash>& exclusion) const;
 
         std::unique_ptr<Trk::Track> findHoles(const EventContext& ctx, const Trk::Track& track, MuonData& data) const;
 
