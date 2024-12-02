@@ -196,6 +196,7 @@ JetChainParts = {
        # Multiple threshold
        'preselj60XXj40',
        'preselj140XXj45',
+       'preselj140XX2j45',
        'preselj80XX2j45',
        'presel2j180XXj80',
        # Nonstandard eta regions
