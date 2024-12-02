@@ -58,5 +58,7 @@ namespace MuonR4{
     void CalibratedSpacePoint::setFitState(State st) {
         m_state = st;
     }
-
+    unsigned CalibratedSpacePoint::dimension() const {
+        return measuresEta() + measuresPhi();
+    }
 }

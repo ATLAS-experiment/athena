@@ -229,7 +229,7 @@ namespace MuonR4 {
             return signs;
         }
         int driftSign(const Amg::Vector3D& segPos, const Amg::Vector3D& segDir,
-                       const SpacePoint& sp, MsgStream& msg) {
+                      const SpacePoint& sp, MsgStream& msg) {
             if (sp.type() != xAOD::UncalibMeasType::MdtDriftCircleType) {
                 return 0;
             }

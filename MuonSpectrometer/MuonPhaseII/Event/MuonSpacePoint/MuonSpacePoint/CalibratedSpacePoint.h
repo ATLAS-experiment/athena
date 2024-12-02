@@ -74,6 +74,8 @@ namespace MuonR4{
             State fitState() const;
             /** @brief Set the state of the calibrated space point */
             void setFitState(State st);
+            /** @brief Returns the local dimension of the measurement */
+            unsigned dimension() const;
         private:
             const SpacePoint* m_parent{nullptr};
             Amg::Vector3D m_posInChamber{Amg::Vector3D::Zero()};
