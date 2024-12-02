@@ -538,7 +538,7 @@ StatusCode SUSYToolsAlg::execute() {
   bool isRun3Trig = false;
   if (m_mcCampaign.find("mc21") != std::string::npos || m_mcCampaign.find("mc23") != std::string::npos) isRun3Trig = true;
 
-  hist("Trigger/isMETTrigPassed")->Fill( m_SUSYTools->IsMETTrigPassed() );
+  hist("Trigger/isMETTrigPassed")->Fill( double(m_SUSYTools->IsMETTrigPassed()) );
 
   //--- Monitoring
   for (const auto& obj : m_objects) { for (const auto& lev : m_levels) { m_obj_count[obj][lev] = 0; } }
@@ -1380,8 +1380,8 @@ StatusCode SUSYToolsAlg::bookHistograms(void) {
      }
   }
 
-  #ifdef XAOD_STANDALONE  
   //// Trigger histograms
+  #ifdef XAOD_STANDALONE
   for (std::string obj : {"el","mu","ph"}) {
     for (auto trg : m_triggers[obj]) {
        for (std::string var : {"pt","eta","phi"} ) {
@@ -1393,8 +1393,8 @@ StatusCode SUSYToolsAlg::bookHistograms(void) {
        }
     }
   }
-  ATH_CHECK( book(TH1D("Trigger/isMETTrigPassed", "isMETTrigPassed", 2, -0.5, 1.5)) );
   #endif
+  ATH_CHECK( book(TH1D("Trigger/isMETTrigPassed", "isMETTrigPassed", 2, -0.5, 1.5)) );
   
   ATH_CHECK( book(TH1D("Trigger/el_trigmatch_eff_nominal", "Electron Trigger Matching Efficiency (Nominal);Electron Trigger Matching Efficiency (Nominal);N", getSize(m_triggers,"el"), 0, getSize(m_triggers,"el")) ) );
   ATH_CHECK( book(TH1D("Trigger/ph_trigmatch_eff_nominal", "Photon Trigger Matching Efficiency (Nominal);Photon Trigger Matching Efficiency (Nominal);N", getSize(m_triggers,"ph"), 0, getSize(m_triggers,"ph")) ) );
