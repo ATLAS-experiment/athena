@@ -21,6 +21,7 @@ class SpacePointStrategy(FlagEnum):
 class TrackFitterType(FlagEnum):
     KalmanFitter = 'KalmanFitter' # default ACTS fitter to choose
     GaussianSumFitter = 'GaussianSumFitter' # new experimental implementation
+    GlobalChiSquareFitter = 'GlobalChiSquareFitter' # new experimental implementation
 
 # Flag for pixel calibration strategy during track finding
 # - use cluster as is (Uncalibrated)

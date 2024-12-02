@@ -107,3 +107,8 @@ def actsValidateGSFFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use GaussianSumFitter"""
     from ActsConfig.ActsConfigFlags import TrackFitterType
     flags.Acts.trackFitterType = TrackFitterType.GaussianSumFitter
+
+def actsValidateGX2FFlags(flags) -> None:
+    """flags for Reco_tf with CA used in CI tests: use GlobalChiSquareFitter"""
+    from ActsConfig.ActsConfigFlags import TrackFitterType
+    flags.Acts.trackFitterType = TrackFitterType.GlobalChiSquareFitter
