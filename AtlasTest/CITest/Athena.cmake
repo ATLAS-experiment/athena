@@ -301,6 +301,9 @@ atlas_add_citest( ACTS_ValidateAmbiguityResolution
 
 atlas_add_citest( ACTS_WorkflowWithScoreBasedAmbiguity
    SCRIPT ActsWorkflowWithScoreBasedAmbiguity.sh )
+
+atlas_add_citest( ACTS_ActsGx2fRefitting
+   SCRIPT ActsGx2fRefitting.sh )
    
 atlas_add_citest( ACTS_ActsKfRefitting
    SCRIPT ActsKfRefitting.sh )

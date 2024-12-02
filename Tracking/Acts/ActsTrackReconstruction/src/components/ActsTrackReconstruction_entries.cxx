@@ -16,6 +16,7 @@
 #include "src/TrackStatePrinterTool.h"
 #include "src/KalmanFitterTool.h"
 #include "src/GaussianSumFitterTool.h"
+#include "src/GlobalChiSquareFitterTool.h"
 #include "src/RandomProtoTrackCreatorTool.h"
 #include "src/TruthGuidedProtoTrackCreatorTool.h"
 
@@ -34,5 +35,6 @@ DECLARE_COMPONENT( ActsTrk::ITkAnalogueClusteringTool )
 DECLARE_COMPONENT( ActsTrk::TrackStatePrinterTool )
 DECLARE_COMPONENT( ActsTrk::KalmanFitterTool )
 DECLARE_COMPONENT( ActsTrk::GaussianSumFitterTool )
+DECLARE_COMPONENT( ActsTrk::GlobalChiSquareFitterTool )
 DECLARE_COMPONENT( ActsTrk::RandomProtoTrackCreatorTool )
 DECLARE_COMPONENT( ActsTrk::TruthGuidedProtoTrackCreatorTool )

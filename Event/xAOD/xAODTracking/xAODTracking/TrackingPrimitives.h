@@ -47,7 +47,7 @@ namespace xAOD {
       KalmanFitter       = 3,
       ///Tracks from Gaussian Sum Filter
       GaussianSumFilter      = 4,
-      ///Track's from Thijs' global chi^2 fitter
+      ///Track's from Thijs' global chi^2 fitter or the ACTS implementation
       GlobalChi2Fitter       = 5,
       ///Fast Kalman filter from HLT with simplified material effects
       DistributedKalmanFilter    = 6,

@@ -55,6 +55,9 @@ def ActsFitterCfg(flags,
     elif flags.Acts.trackFitterType is TrackFitterType.GaussianSumFitter:
         name = name.replace("KalmanFitter", "GaussianSumFitter")
         acc.setPrivateTools(CompFactory.ActsTrk.GaussianSumFitterTool(name, **kwargs))
+    elif flags.Acts.trackFitterType is TrackFitterType.GlobalChiSquareFitter:
+        name = name.replace("KalmanFitter", "GlobalChiSquareFitter")
+        acc.setPrivateTools(CompFactory.ActsTrk.GlobalChiSquareFitterTool(name, OutputLevel=1, **kwargs))
 
     return acc
 
