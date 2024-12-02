@@ -90,7 +90,7 @@ StatusCode ROBPrefetchingAlg::execute(const EventContext& eventContext) const {
 
       for (const auto& tool : m_regionSelectorTools) {
         robsInRoI.clear();
-        tool->ROBIDList(roi, robsInRoI);
+        tool->lookup(eventContext)->ROBIDList( roi, robsInRoI );
         robsToPrefetch.insert(robsInRoI.begin(),robsInRoI.end());
       }
     }

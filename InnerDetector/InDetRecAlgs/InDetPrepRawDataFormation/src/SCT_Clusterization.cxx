@@ -234,7 +234,9 @@ namespace InDet {
         std::vector<IdentifierHash> listOfSCTIds;
         for (; roi != roiE; ++roi) {
           listOfSCTIds.clear();  // Prevents needless memory reallocations
-          m_regionSelector->HashIDList(**roi, listOfSCTIds);
+
+          m_regionSelector->lookup(ctx)->HashIDList( **roi, listOfSCTIds );
+
           ATH_MSG_VERBOSE(**roi);
           ATH_MSG_VERBOSE("REGTEST: SCT : Roi contains " << listOfSCTIds.size()
                                                          << " det. Elements");

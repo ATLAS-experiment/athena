@@ -80,7 +80,7 @@ public:
   bool getRoIData(const RegSelRoI& r, std::vector<const RegSelModule*>& modules, double x, double y) const;
   bool getRoIData(const RegSelRoI& r, unsigned subdetector, unsigned layer, std::vector<const RegSelModule*>& modules, double x, double y) const;
 
-
+  
   DET ID() const { return m_ID; } 
 
   // reset (empty) the lookup table, back to 
@@ -248,51 +248,11 @@ protected:
     RegSelSiLUT::removeDuplicates( idvec );
   }
   
+
+  /// horrible internal interface methods
+
+  /// hashid methods
   
-  /// useful utility functions to simplify the interface extension
-
-  template<typename T> 
-  using handler = void (RegSelSiLUT::*)(const IRoiDescriptor& , std::vector<T>&  ) const; 
-
-  template<typename T>
-  void IDList( const IRoiDescriptor& roi, std::vector<T>& idlist, handler<T> lister )  const {
-    
-    if ( roi.composite() ) {
-      idlist.clear();
-      for ( unsigned iroi=roi.size() ; iroi-- ;  )  IDList( *(roi.at(iroi)), idlist, lister );
-      if ( roi.size()>1 ) RegSelSiLUT::removeDuplicates( idlist );
-      return;
-    }
-    
-    (this->*lister)( roi, idlist ); 
-    /// the RPC is annoyingly different - need to work out how best to do that
-    //   cleanup( idlist );
-  }
-  
-
-  template<typename T> 
-  using handler_layer = void (RegSelSiLUT::*)(long layer, const IRoiDescriptor& , std::vector<T>&  ) const; 
-  
-  
-  template<typename T>
-  void IDList_layer( long layer, const IRoiDescriptor& roi, std::vector<T>& idlist, handler_layer<T> lister )  const {
-    
-    if ( roi.composite() ) {
-      idlist.clear();
-      for ( unsigned iroi=roi.size() ; iroi-- ;  )  IDList_layer( layer, *(roi.at(iroi)), idlist, lister );
-      if ( roi.size()>1 ) RegSelSiLUT::removeDuplicates( idlist );
-      return;
-    }
-    
-    (this->*lister)( layer, roi, idlist ); 
-    /// the RPC is annoyingly different - need to work out how best to do that
-    //   cleanup( idlist );
-  }
-  
-
-
-  /// horrible interface stuff
-
   virtual void HashIDList_internal( const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const;
 
   virtual void HashIDList_internal( long layer, const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const;
@@ -302,8 +262,6 @@ protected:
 
   virtual void ROBIDList_internal( long layer, const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const;
    
-
-
 
 };
 

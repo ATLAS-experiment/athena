@@ -156,7 +156,7 @@ InDet::SimpleTRT_SeededSpacePointFinder_ATL::find2Sp(const EventContext& ctx,
   if (m_useROI)
     {
       // fill IdHashes in ROI
-      getHashesInROI(directionTRT,setOfSCT_Hashes);
+      getHashesInROI(ctx,directionTRT,setOfSCT_Hashes);
       msg(MSG::VERBOSE) << "Retrieved " << setOfSCT_Hashes.size() << " potentially interesting detector elements." << endmsg;
     }
 
@@ -206,7 +206,7 @@ InDet::SimpleTRT_SeededSpacePointFinder_ATL::find2Sp(const EventContext& ctx,
 
 //=====================================================================================================
 
-void InDet::SimpleTRT_SeededSpacePointFinder_ATL::getHashesInROI(const Trk::TrackParameters& directionTRT, std::set<IdentifierHash>& setOfSCT_Hashes) const
+void InDet::SimpleTRT_SeededSpacePointFinder_ATL::getHashesInROI(const EventContext& ctx, const Trk::TrackParameters& directionTRT, std::set<IdentifierHash>& setOfSCT_Hashes) const
 {
   /** This Method finds the IdHashes of SCT modules inside a Region Of Interest around the TRT track parameter. 
       First the allowed tolerance in phi and eta is inquired, then a vector with the relevant hashes is retrieved from the RegionSelectorService.
@@ -231,7 +231,7 @@ void InDet::SimpleTRT_SeededSpacePointFinder_ATL::getHashesInROI(const Trk::Trac
   //// AAAARGH!!! No checking that you are within the correct phi range???
   RoiDescriptor roi(  eta-deltaEta, eta+deltaEta, phi-deltaPhi, phi+deltaPhi);
 
-  m_pRegionSelector->HashIDList( roi, listOfSCT_Hashes );
+  m_pRegionSelector->lookup(ctx)->HashIDList( roi, listOfSCT_Hashes );
 
   // copy Hashes into Set to be able to search them
   for (auto listOfSCT_Hashe : listOfSCT_Hashes)

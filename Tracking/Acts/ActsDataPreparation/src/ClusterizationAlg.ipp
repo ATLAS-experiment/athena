@@ -76,7 +76,7 @@ StatusCode ClusterizationAlg<IClusteringTool>::execute(const EventContext& ctx) 
     std::vector<IdentifierHash> listOfIds;
     for (const auto* roi : *roiCollection) {
       listOfIds.clear();
-      m_regionSelector->HashIDList(*roi, listOfIds);
+      m_regionSelector->lookup(ctx)->HashIDList(*roi, listOfIds);
       // We'd need to first check the id hashes have not already been processed beforehand, and only then
       // add it to the list of ids to be processed.
       for (const IdentifierHash id : listOfIds) {
