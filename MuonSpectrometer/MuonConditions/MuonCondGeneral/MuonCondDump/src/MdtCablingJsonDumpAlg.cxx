@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MdtCablingJsonDumpAlg.h"
 #include "StoreGate/ReadCondHandle.h"
@@ -92,9 +92,7 @@ StatusCode MdtCablingJsonDumpAlg::execute() {
                 return StatusCode::FAILURE;
               }
               const TdcIdentifier tdc_id{cabling_data};
-              if (chamber_mezz.find(tdc_id) == chamber_mezz.end()) {
-                chamber_mezz[tdc_id] = make_array<uint8_t,24>(MdtMezzanineCard::NOTSET);
-              }
+              chamber_mezz.try_emplace(tdc_id,make_array<uint8_t,24>(MdtMezzanineCard::NOTSET));
               chamber_mezz[tdc_id][cabling_data.channelId] = dummy_card.tubeNumber(layer, tubeInLayer);
          }
     }
