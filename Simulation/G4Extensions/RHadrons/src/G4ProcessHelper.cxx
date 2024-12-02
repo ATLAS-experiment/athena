@@ -4,8 +4,7 @@
 
 #include "G4ProcessHelper.hh"
 #include "CustomParticle.h"
-#include "CustomPDGParser.h"
-#include "TruthUtils/HepMCHelpers.h" // TODO migrate G4ProcessHelper back to using HepMCHelpers functions once they are ready
+#include "TruthUtils/HepMCHelpers.h"
 #include "G4ParticleTable.hh"
 #include "G4DecayTable.hh"
 #include "CLHEP/Random/RandFlat.h"
@@ -188,69 +187,64 @@ G4double G4ProcessHelper::GetInclusiveCrossSection(const G4DynamicParticle *aPar
   //We really do need a dedicated class to handle the cross sections. They might not always be constant
 
   //Disassemble the PDG-code
-  G4int thePDGCode = aParticle->GetDefinition()->GetPDGEncoding();
-  double boost = (aParticle->GetKineticEnergy()+aParticle->GetMass())/aParticle->GetMass();
+  const G4int thePDGCode = aParticle->GetDefinition()->GetPDGEncoding();
+  const double boost = (aParticle->GetKineticEnergy()+aParticle->GetMass())/aParticle->GetMass();
   G4double theXsec = 0;
   G4String name = aParticle->GetDefinition()->GetParticleName();
 
-  if(!reggemodel){
-      //Flat cross section
-      if(CustomPDGParser::s_isRGlueball(thePDGCode)) {
-        theXsec = 24 * CLHEP::millibarn;
-      } else {
-        std::vector<G4int> nq=CustomPDGParser::s_containedQuarks(thePDGCode);
-        for (std::vector<G4int>::iterator it = nq.begin();
-             it != nq.end();
-             ++it)
-          {
-            // 12 mb taken from asymptotic pion-nucleon scattering cross sections
-            if (*it == 1 || *it == 2) theXsec += 12 * CLHEP::millibarn;
-            // 6 mb taken from asymptotic kaon-nucleon scattering cross sections
-            // No data for D or B, so setting to behave like a kaon
-            if (*it == 3 || *it == 4 || *it == 5) theXsec += 6 * CLHEP::millibarn;
-          }
+  if (!reggemodel) {
+    // Flat cross section
+    if (MC::isRGlueball(thePDGCode)) {
+      theXsec = 24 * CLHEP::millibarn;
+    } else {
+      std::vector<G4int> nq=MC::containedQuarks(thePDGCode);
+      for (const G4int & quark : nq) {
+        // 12 mb taken from asymptotic pion-nucleon scattering cross sections
+        if (quark == MC::DQUARK || quark == MC::UQUARK) theXsec += 12 * CLHEP::millibarn;
+        // 6 mb taken from asymptotic kaon-nucleon scattering cross sections
+        // No data for D or B, so setting to behave like a kaon
+        if (MC::isStrange(quark) || MC::isCharm(quark) || MC::isBottom(quark)) theXsec += 6 * CLHEP::millibarn;
       }
+    }
   } else {
     // From Eur. Phys. J. C (2010) 66: 493-501
     // DOI 10.1140/epjc/s10052-010-1262-1
     double R = Regge(boost);
     double P = Pom(boost);
-    if(thePDGCode>0)
-      {
-        if(CustomPDGParser::s_isMesonino(thePDGCode)) theXsec=(P+R)*CLHEP::millibarn;
-        if(CustomPDGParser::s_isSbaryon(thePDGCode)) theXsec=2*P*CLHEP::millibarn;
-        if(CustomPDGParser::s_isRMeson(thePDGCode)||CustomPDGParser::s_isRGlueball(thePDGCode)) theXsec=(R+2*P)*CLHEP::millibarn;
-        if(CustomPDGParser::s_isRBaryon(thePDGCode)) theXsec=3*P*CLHEP::millibarn;
+    const bool containsSquark(MC::hasSquark(thePDGCode, MC::BQUARK) || MC::hasSquark(thePDGCode, MC::TQUARK));
+    if (containsSquark) {
+      if (MC::isRBaryon(thePDGCode)) { // ~q q q
+        theXsec = (thePDGCode > 0) ? 2*P*CLHEP::millibarn : (2*(P+R)+30/sqrt(boost))*CLHEP::millibarn;
       }
-    else
-      {
-        if(CustomPDGParser::s_isMesonino(thePDGCode)) theXsec=P*CLHEP::millibarn;
-        if(CustomPDGParser::s_isSbaryon(thePDGCode)) theXsec=(2*(P+R)+30/sqrt(boost))*CLHEP::millibarn;
-        if(CustomPDGParser::s_isRMeson(thePDGCode)||CustomPDGParser::s_isRGlueball(thePDGCode)) theXsec=(R+2*P)*CLHEP::millibarn;
-        if(CustomPDGParser::s_isRBaryon(thePDGCode)) theXsec=3*P*CLHEP::millibarn;
+      else if  (MC::isRMeson(thePDGCode)) { // ~q qbar
+        theXsec = (thePDGCode > 0) ? (P+R)*CLHEP::millibarn : P*CLHEP::millibarn;
       }
+    }
+    else {
+      if (MC::isRBaryon(thePDGCode)) { theXsec=3*P*CLHEP::millibarn; } // ~g q q q
+      else if (MC::isRMeson(thePDGCode) || MC::isRGlueball(thePDGCode)) { theXsec=(R+2*P)*CLHEP::millibarn; } //  ~g q qbar or ~g g or ~g g g
+    }
   }
 
 
 
   //Adding resonance
 
-  if(resonant)
-    {
+  if (resonant) {
     // Described in Section 5.1 of http://r-hadrons.web.cern.ch/r-hadrons/download/mackeprang_thesis.pdf
     // mentioned but dismissed in Section 3.3 of https://arxiv.org/pdf/hep-ex/0404001.pdf
-      double e_0 = ek_0 + aParticle->GetDefinition()->GetPDGMass(); //Now total energy
+    double e_0 = ek_0 + aParticle->GetDefinition()->GetPDGMass(); //Now total energy
 
-      e_0 = sqrt(aParticle->GetDefinition()->GetPDGMass()*aParticle->GetDefinition()->GetPDGMass()
-                 + theProton->GetPDGMass()*theProton->GetPDGMass()
-                 + 2.*e_0*theProton->GetPDGMass());
-      double sqrts=sqrt(aParticle->GetDefinition()->GetPDGMass()*aParticle->GetDefinition()->GetPDGMass()
-                        + theProton->GetPDGMass()*theProton->GetPDGMass() + 2*aParticle->GetTotalEnergy()*theProton->GetPDGMass());
+    e_0 = sqrt(aParticle->GetDefinition()->GetPDGMass()*aParticle->GetDefinition()->GetPDGMass()
+               + theProton->GetPDGMass()*theProton->GetPDGMass()
+               + 2.*e_0*theProton->GetPDGMass());
+    const double sqrts=sqrt(aParticle->GetDefinition()->GetPDGMass()*aParticle->GetDefinition()->GetPDGMass()
+                            + theProton->GetPDGMass()*theProton->GetPDGMass() + 2*aParticle->GetTotalEnergy()*theProton->GetPDGMass());
 
-      double res_result = amplitude*(gamma*gamma/4.)/((sqrts-e_0)*(sqrts-e_0)+(gamma*gamma/4.));//Non-relativistic Breit Wigner
+    const double res_result = amplitude*(gamma*gamma/4.)/((sqrts-e_0)*(sqrts-e_0)+(gamma*gamma/4.));//Non-relativistic Breit Wigner
 
-      theXsec += res_result;
-    }
+    theXsec += res_result;
+  }
 
 
   return theXsec * pow(anElement->GetN(),0.7)*1.25 * xsecmultiplier;// * 0.523598775598299;
@@ -286,22 +280,22 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
       NumberOfNucleons += NbOfAtomsPerVolume[elm]*(*theElementVector)[elm]->GetN();
     }
 
-  const ReactionMap* reactionMap;
-  if(CLHEP::RandFlat::shoot()<NumberOfProtons/NumberOfNucleons){
-      reactionMap = &pReactionMap;
-      aTarget = theProton;
+  const ReactionMap* reactionMap{};
+  if (CLHEP::RandFlat::shoot()<NumberOfProtons/NumberOfNucleons) {
+    reactionMap = &pReactionMap;
+    aTarget = theProton;
   } else {
     reactionMap = &nReactionMap;
     aTarget = theNeutron;
   }
 
   G4int theIncidentPDG = aDynamicParticle->GetDefinition()->GetPDGEncoding();
-
-  if(reggemodel
-     &&CustomPDGParser::s_isMesonino(theIncidentPDG)
-     &&CLHEP::RandFlat::shoot()*mixing>0.5
-     &&aDynamicParticle->GetDefinition()->GetPDGCharge()==0.
-     )
+  const bool containsSquark(MC::hasSquark(theIncidentPDG, MC::BQUARK) || MC::hasSquark(theIncidentPDG, MC::TQUARK));
+  if (reggemodel
+      && MC::isRMeson(theIncidentPDG) && containsSquark
+      && CLHEP::RandFlat::shoot()*mixing>0.5
+      && aDynamicParticle->GetDefinition()->GetPDGCharge()==0.
+      )
     {
       //      G4cout<<"Oscillating..."<<G4endl;
       theIncidentPDG *= -1;
@@ -310,17 +304,15 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
 
   bool baryonise=false;
 
-  if(!baryonize_failed
-     && reggemodel
-     && CLHEP::RandFlat::shoot()>0.9
-     && (
-        (CustomPDGParser::s_isMesonino(theIncidentPDG)&&theIncidentPDG>0)
-        ||
-        CustomPDGParser::s_isRMeson(theIncidentPDG)
-        )
-     ){
-    baryonise=true;
-  }
+  if (!baryonize_failed
+      && reggemodel
+      && CLHEP::RandFlat::shoot()>0.9
+      && MC::isRMeson(theIncidentPDG) &&
+      ( (theIncidentPDG > 0) || !containsSquark )
+      )
+    {
+      baryonise=true;
+    }
 
   // Reference directly to the ReactionProductList we are looking at. Makes life easier :-)
   const ReactionProductList&  aReactionProductList = reactionMap->at(theIncidentPDG);
@@ -339,28 +331,24 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
   std::vector<bool> theChargeChangeList;
 
   for (const ReactionProduct& prod : aReactionProductList) {
-    G4int secondaries = prod.size();
+    const G4int secondaries = prod.size();
     // If the reaction is not possible we will not consider it
     /*    if(ReactionIsPossible(*prod_it,aDynamicParticle)
           &&(
           !baryonise||(baryonise&&ReactionGivesBaryon(*prod_it))
           ))*/
-    if(ReactionIsPossible(prod,*aTarget,aDynamicParticle)
-       &&(
-          (baryonise&&ReactionGivesBaryon(prod))
-          ||
-          (!baryonise&&!ReactionGivesBaryon(prod))
-          ||
-          (CustomPDGParser::s_isSbaryon(theIncidentPDG))
-          ||
-          (CustomPDGParser::s_isRBaryon(theIncidentPDG))
-          ||!reggemodel
-          )
-       )
+    if (ReactionIsPossible(prod,*aTarget,aDynamicParticle) &&
+        (
+         (baryonise && ReactionGivesBaryon(prod)) ||
+         (!baryonise && !ReactionGivesBaryon(prod)) ||
+         MC::isRBaryon(theIncidentPDG) ||
+         !reggemodel
+         )
+        )
       {
         // The reaction is possible. Let's store and count it
         theReactionProductList.push_back(prod);
-        if (secondaries == 2){
+        if (secondaries == 2) {
           N22++;
         } else if (secondaries ==3) {
           N23++;
@@ -370,7 +358,7 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
       }
   }
 
-  if (theReactionProductList.size()==0 && baryonize_failed){
+  if (theReactionProductList.size()==0 && baryonize_failed) {
     G4Exception("G4ProcessHelper", "NoProcessPossible", FatalException,
                 "GetFinalState: No process could be selected from the given list.");
   } else if (theReactionProductList.size()==0 && !baryonize_failed) {
@@ -380,13 +368,12 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
   }
 
   // For the Regge model no phase space considerations. We pick a process at random
-  if(reggemodel)
-    {
-      int n_rps = theReactionProductList.size();
-      int select = (int)(CLHEP::RandFlat::shoot()*n_rps);
-      //      G4cout<<"Possible: "<<n_rps<<", chosen: "<<select<<G4endl;
-      return theReactionProductList[select];
-    }
+  if (reggemodel) {
+    const int n_rps = theReactionProductList.size();
+    const int select = static_cast<int>(CLHEP::RandFlat::shoot()*n_rps);
+    //      G4cout<<"Possible: "<<n_rps<<", chosen: "<<select<<G4endl;
+    return theReactionProductList[select];
+  }
 
   // Fill a probability map. Remember total probability
   // 2->2 is 0.15*1/n_22 2->3 uses phase space
@@ -466,20 +453,20 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
 
 G4double G4ProcessHelper::ReactionProductMass(const ReactionProduct& aReaction,const G4ParticleDefinition& aTarget,const G4DynamicParticle* aDynamicParticle) const{
   // Incident energy:
-  G4double E_incident = aDynamicParticle->GetTotalEnergy();
+  const G4double E_incident = aDynamicParticle->GetTotalEnergy();
   //G4cout<<"Total energy: "<<E_incident<<" Kinetic: "<<aDynamicParticle->GetKineticEnergy()<<G4endl;
   // sqrt(s)= sqrt(m_1^2 + m_2^2 + 2 E_1 m_2)
-  G4double m_1 = aDynamicParticle->GetDefinition()->GetPDGMass();
-  G4double m_2 = aTarget.GetPDGMass();
+  const G4double m_1 = aDynamicParticle->GetDefinition()->GetPDGMass();
+  const G4double m_2 = aTarget.GetPDGMass();
   //G4cout<<"M_R: "<<m_1/CLHEP::GeV<<" GeV, M_np: "<<m_2/CLHEP::GeV<<" GeV"<<G4endl;
-  G4double sqrts = sqrt(m_1*m_1 + m_2*(m_2 + 2 * E_incident));
+  const G4double sqrts = sqrt(m_1*m_1 + m_2*(m_2 + 2 * E_incident));
   //G4cout<<"sqrt(s) = "<<sqrts/CLHEP::GeV<<" GeV"<<G4endl;
   // Sum of rest masses after reaction:
   G4double M_after = 0;
-  for (ReactionProduct::const_iterator r_it = aReaction.begin(); r_it !=aReaction.end(); ++r_it){
-    //G4cout<<"Mass contrib: "<<(particleTable->FindParticle(*r_it)->GetPDGMass())/CLHEP::MeV<<" MeV"<<G4endl;
+  for (const auto& product_pdg_id : aReaction) {
+    //G4cout<<"Mass contrib: "<<(particleTable->FindParticle(production_pdg_id)->GetPDGMass())/CLHEP::MeV<<" MeV"<<G4endl;
     auto table ATLAS_THREAD_SAFE = particleTable;  // safe because table has been loaded by now
-    M_after += table->FindParticle(*r_it)->GetPDGMass();
+    M_after += table->FindParticle(product_pdg_id)->GetPDGMass();
   }
   //G4cout<<"Intending to return this ReactionProductMass: " << sqrts << " - " <<  M_after << " MeV"<<G4endl;
   return sqrts - M_after;
@@ -491,15 +478,16 @@ G4bool G4ProcessHelper::ReactionIsPossible(const ReactionProduct& aReaction,cons
 }
 
 G4bool G4ProcessHelper::ReactionGivesBaryon(const ReactionProduct& aReaction) const{
-  for (ReactionProduct::const_iterator it = aReaction.begin();it!=aReaction.end();++it)
-    if(CustomPDGParser::s_isSbaryon(*it)||CustomPDGParser::s_isRBaryon(*it)) return true;
+  for (const auto& product_pdg_id : aReaction) {
+    if (MC::isRBaryon(product_pdg_id)) return true;
+  }
   return false;
 }
 
 G4double G4ProcessHelper::PhaseSpace(const ReactionProduct& aReaction,const G4ParticleDefinition& aTarget,const G4DynamicParticle* aDynamicParticle) const {
-  G4double qValue = ReactionProductMass(aReaction,aTarget,aDynamicParticle);
+  const G4double qValue = ReactionProductMass(aReaction,aTarget,aDynamicParticle);
   // Eq 4 of https://arxiv.org/pdf/hep-ex/0404001.pdf
-  G4double phi = sqrt(1+qValue/(2*0.139*CLHEP::GeV))*pow(qValue/(1.1*CLHEP::GeV),3./2.);
+  const G4double phi = sqrt(1+qValue/(2*0.139*CLHEP::GeV))*pow(qValue/(1.1*CLHEP::GeV),3./2.);
   return (phi/(1+phi));
 }
 
@@ -537,9 +525,9 @@ double G4ProcessHelper::Regge(const double boost) const
 {
   // https://link.springer.com/content/pdf/10.1140%2Fepjc%2Fs10052-010-1262-1.pdf Eq 1
   // Originally from https://arxiv.org/pdf/0710.3930.pdf
-  double a=2.165635078566177;
-  double b=0.1467453738547229;
-  double c=-0.9607903711871166;
+  const double a=2.165635078566177;
+  const double b=0.1467453738547229;
+  const double c=-0.9607903711871166;
   return 1.5*exp(a+b/boost+c*log(boost));
 }
 
@@ -548,9 +536,9 @@ double G4ProcessHelper::Pom(const double boost) const
 {
   // https://link.springer.com/content/pdf/10.1140%2Fepjc%2Fs10052-010-1262-1.pdf Eq 2
   // Originally from https://arxiv.org/pdf/0710.3930.pdf
-  double a=4.138224000651535;
-  double b=1.50377557581421;
-  double c=-0.05449742257808247;
-  double d=0.0008221235048211401;
+  const double a=4.138224000651535;
+  const double b=1.50377557581421;
+  const double c=-0.05449742257808247;
+  const double d=0.0008221235048211401;
   return a + b*sqrt(boost) + c*boost + d*pow(boost,1.5);
 }
