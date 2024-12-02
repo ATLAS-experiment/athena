@@ -54,6 +54,7 @@ namespace ActsTrk {
 	    INVALID_MEASUREMENT=-1, HIT, OUTLIER, HOLE, BIASED, UNBIASED
         };
 
+      float getChi2Contribution(const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) const ;
       std::pair<Acts::BoundVector, Acts::BoundMatrix> getUnbiasedTrackParameters(const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state, bool useSmoothed=true) const;
 
       float evaluatePull(const float residual,
@@ -77,6 +78,12 @@ namespace ActsTrk {
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_measurementLayerKey{
 	this, "MeasurementLayerKey", m_trackParticlesKey,"measurement_iLayer",
 	"Decorate track particle with measurement layer"};
+      SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_chi2HitPredictedKey{
+	this, "Chi2HitPredictedKey", m_trackParticlesKey,"chi2_hit_predicted",
+	"Predicted Chi2 contribution for each hit"};
+      SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_chi2HitFilteredKey{
+	this, "Chi2HitFilteredKey", m_trackParticlesKey,"chi2_hit_filtered",
+	"Filtered Chi2 contribution for each hit"};
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_measurementTypeKey{
 	this, "MeasurementTypeKey", m_trackParticlesKey,"measurement_type",
 	"Decorate track particle with type of track state (outlier,hole, biased/unbiased)"};
