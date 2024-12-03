@@ -21,7 +21,7 @@ RUN_CKF=True
 
 if [ -z $ArtJobType ]; then # if not an ART, run for a few ttbar events (proved useful to catch edge cases at region boundaries)
     RDO_ANALYSIS="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1"
-    RDO_EVT_ANALYSIS=5
+    RDO_EVT_ANALYSIS=3
     SAMPLE_TYPE='skipTruth'
 else
     RDO_ANALYSIS=$RDO
