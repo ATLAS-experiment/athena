@@ -4,7 +4,6 @@
 # art-description: Compares results of a slice chains when running in full menu and when running alone with other slices disabled by doXYZFlag=False
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
 # art-output: *.txt
 # art-output: *.log
 # art-output: log.*

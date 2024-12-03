@@ -4,7 +4,6 @@
 # art-description: Trigger BS->RDO_TRIG athena test of the Cosmic_run3_v1 menu on express stream from a cosmic run
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
 # art-athena-mt: 4
 # art-output: *.txt
 # art-output: *.log

@@ -3,7 +3,6 @@
 # art-description: art job for tauLRT_staustau
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
 # art-input: valid1.516640.MGPy8EG_A14NNPDF23LO_StauStauLLP_100_0_1ns.recon.RDO.e8514_e8528_s4159_s4114_r14844_tid34200275_00
 # art-input-nfiles: 3
 # art-athena-mt: 8
