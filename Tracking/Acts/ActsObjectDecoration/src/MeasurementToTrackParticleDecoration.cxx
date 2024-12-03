@@ -11,6 +11,7 @@
 #include "xAODInDetMeasurement/StripCluster.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "Acts/Surfaces/AnnulusBounds.hpp"
+#include "Acts/Utilities/TrackHelpers.hpp"
 
 
 namespace ActsTrk {
@@ -281,7 +282,7 @@ namespace ActsTrk {
 		  }
 		  
 		  const auto& [unbiasedParameters, unbiasedCovariance] =
-		    evaluateUnbiased ? getUnbiasedTrackParameters(state,true) :  std::make_pair(state.parameters(), state.covariance());
+		    evaluateUnbiased ? Acts::calculateUnbiasedParametersCovariance(state) : std::make_pair(state.parameters(), state.covariance());
 		  
 		  measurementLocX = calibratedParameters[Acts::eBoundLoc0];
 		  measurementLocCovX = calibratedCovariance(Acts::eBoundLoc0, Acts::eBoundLoc0);
@@ -367,51 +368,31 @@ namespace ActsTrk {
   float MeasurementToTrackParticleDecoration::getChi2Contribution(const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) const {
     
     auto pred  = state.predicted();
-    auto H = state.effectiveProjector();
     auto predC = state.predictedCovariance();
 
-    const auto calibrated    = state.effectiveCalibrated();
-    const auto calibratedCov = state.effectiveCalibratedCovariance();
-    
-    auto residual = (H * pred - calibrated).eval();
-    auto rescov   = (H * predC * H.transpose() + calibratedCov).eval();
+    return Acts::visit_measurement(
+      state.calibratedSize(),
+      [&]<std::size_t measdim>(std::integral_constant<std::size_t, measdim>) {
+        Acts::FixedBoundSubspaceHelper<measdim> subspaceHelper =
+            state.template projectorSubspaceHelper<measdim>();
 
-    return ((residual.transpose() * rescov.inverse() * residual).eval())(0,0);
+        // TODO use subspace helper for projection instead
+        auto H = subspaceHelper.projector();
+
+        const auto calibrated    = state.template calibrated<measdim>();
+        const auto calibratedCov = state.template calibratedCovariance<measdim>();
+        
+        auto residual = (H * pred - calibrated).eval();
+        auto rescov   = (H * predC * H.transpose() + calibratedCov).eval();
+
+        return ((residual.transpose() * rescov.inverse() * residual).eval())(0,0);
+    });
+
+
         
   }
 
   
-  std::pair<Acts::BoundVector, Acts::BoundMatrix>
-  MeasurementToTrackParticleDecoration::getUnbiasedTrackParameters(const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state,
-								   bool useSmoothed) const {
-    // calculate the unbiased track parameters (i.e. fitted track
-    // parameters with this measurement removed) using Eq.(12a)-Eq.(12c)
-    // of NIMA 262, 444 (1987)
-    
-    Acts::BoundVector tp = useSmoothed ? state.smoothed() : state.filtered();
-    Acts::BoundMatrix C  = useSmoothed ? state.smoothedCovariance() : state.filteredCovariance();
-
-    const auto calibratedParameters = state.effectiveCalibrated();
-    const auto calibratedCovariance = state.effectiveCalibratedCovariance();
-    
-    ATH_MSG_DEBUG( "--- Getting effectiveCalibrated...");
-    auto m = calibratedParameters;
-    ATH_MSG_DEBUG( "--- Getting effectiveProjector...");
-    auto H = state.effectiveProjector();
-    ATH_MSG_DEBUG( "--- Getting effectiveCalibratedCovariance...");
-    auto V = calibratedCovariance;
-    
-    ATH_MSG_DEBUG( "--- Evaluating K... ");
-    auto K = (C * H.transpose() *
-	      (H * C * H.transpose() - V).inverse()).eval();
-    
-    ATH_MSG_DEBUG( "--- Evaluating unbiased parameters... ");
-    Acts::BoundVector unbiasedParameters = tp + K * (m - H * tp);
-    ATH_MSG_DEBUG( "--- Evaluating unbiased covariance... ");
-    Acts::BoundMatrix unbiasedCovariance = C - K * H * C;
-    return std::make_pair(unbiasedParameters, unbiasedCovariance);
-  }
-
   float MeasurementToTrackParticleDecoration::evaluatePull(const float residual,
 							   const float measurementCovariance,
 							   const float trackParameterCovariance,

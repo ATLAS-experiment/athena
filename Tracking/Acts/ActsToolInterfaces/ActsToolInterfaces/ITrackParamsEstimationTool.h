@@ -37,8 +37,7 @@ namespace ActsTrk {
                               const ActsTrk::Seed& seed,
                               const Acts::GeometryContext& geoContext,
                               const Acts::Surface& surface,
-                              const Acts::Vector3& bField,
-                              double bFieldMin) const = 0;
+                              const Acts::Vector3& bField) const = 0;
   };
   
 } // namespace 

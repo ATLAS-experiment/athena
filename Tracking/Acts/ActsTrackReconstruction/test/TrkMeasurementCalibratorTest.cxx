@@ -196,5 +196,5 @@ int main() {
   assert( trackStateBackend.getTrackState(0).effectiveCalibratedCovariance().size() == 4 );
   std::cout << "- checking BoundSubspaceIndices" << std::endl;
   Acts::BoundSubspaceIndices expectedBoundSpaceIndices{ Acts::eBoundLoc0, Acts::eBoundLoc1 };
-  assert( trackStateBackend.getTrackState(0).boundSubspaceIndices() == expectedBoundSpaceIndices );
+  assert( trackStateBackend.getTrackState(0).projectorSubspaceIndices() == expectedBoundSpaceIndices );
 }

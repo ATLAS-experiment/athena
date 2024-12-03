@@ -133,7 +133,7 @@ void PRDSourceLinkCalibratorGX2F::calibrate(
     } else {
       subspaceIndices = {Acts::eBoundLoc0};  // x coordinate is l0
     }
-    trackState.setBoundSubspaceIndices(subspaceIndices);
+    trackState.setProjectorSubspaceIndices(subspaceIndices);
   } else if (dim == 2) {
     trackState.template calibrated<2>() =
         (*rot).localParameters().template head<2>();
@@ -141,7 +141,7 @@ void PRDSourceLinkCalibratorGX2F::calibrate(
         (*rot).localCovariance().template topLeftCorner<2, 2>();
     Acts::BoundSubspaceIndices subspaceIndices = {Acts::eBoundLoc0,
                                                   Acts::eBoundLoc1};
-    trackState.setBoundSubspaceIndices(subspaceIndices);
+    trackState.setProjectorSubspaceIndices(subspaceIndices);
   } else {
     throw std::runtime_error("Dim " + std::to_string(dim) +
                              " currently not supported.");

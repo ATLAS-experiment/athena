@@ -33,7 +33,7 @@ void checkList(const typename Acts::MultiTrajectory<trajectory_t>::TrackStatePro
   assert( trackState.effectiveCalibratedCovariance().size() == expectedLocCov.size() );
   assert( trackState.effectiveCalibratedCovariance() == expectedLocCov.template cast<double>() );
   std::cout << "- checking BoundSubspaceIndices" << std::endl;
-  assert( trackState.boundSubspaceIndices() == expectedBoundSpaceIndices );
+  assert( trackState.projectorSubspaceIndices() == expectedBoundSpaceIndices );
 }
 
 

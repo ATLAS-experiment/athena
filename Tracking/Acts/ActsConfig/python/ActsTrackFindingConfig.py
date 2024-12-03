@@ -265,8 +265,15 @@ def ActsMainScoreBasedAmbiguityResolutionAlgCfg(flags,
     kwargs.setdefault('PhiMax', M_PI)
     kwargs.setdefault('EtaMin', -5.0)
     kwargs.setdefault('EtaMax', 5.0)
-    kwargs.setdefault('UseAmbiguityFunction', False)
+    kwargs.setdefault('UseAmbiguityFunction', True)
     kwargs.setdefault('jsonFileName', 'ActsAmbiguityConfig.json')
+
+    if 'InDetEtaDependentCutsSvc' not in kwargs:
+        from InDetConfig.InDetEtaDependentCutsConfig import (
+            ITkEtaDependentCutsSvcCfg)
+        acc.merge(ITkEtaDependentCutsSvcCfg(flags))
+        kwargs.setdefault("InDetEtaDependentCutsSvc", acc.getService(
+            "ITkEtaDependentCutsSvc"+flags.Tracking.ActiveConfig.extension))
 
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsAmbiguityResolutionMonitoringToolCfg

@@ -4,24 +4,25 @@
 
 #include "ScoreBasedAmbiguityResolutionAlg.h"
 
+#include "ScoreBasedSolverCutsImpl.h"
+
 // Athena
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "PathResolver/PathResolver.h"
 
 // ACTS
+#include <fstream>
+#include <iostream>
+#include <vector>
+
 #include "Acts/AmbiguityResolution/ScoreBasedAmbiguityResolution.hpp"
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
+#include "Acts/Plugins/Json/AmbiguityConfigJsonConverter.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsInterop/Logger.h"
-#include "Acts/Plugins/Json/AmbiguityConfigJsonConverter.hpp"
-
-#include <fstream> 
-#include <iostream>
-#include <vector>
-
 
 namespace {
 std::size_t sourceLinkHash(const Acts::SourceLink &slink) {
@@ -42,6 +43,7 @@ bool sourceLinkEquality(const Acts::SourceLink &a, const Acts::SourceLink &b) {
 
   return uncalibMeas_a.identifier() == uncalibMeas_b.identifier();
 }
+
 }  // namespace
 
 namespace ActsTrk {
@@ -56,7 +58,8 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::initialize() {
     Acts::ConfigPair configPair;
     nlohmann::json json_file;
 
-    std::string fileName = PathResolver::find_file( "ActsConfig/ActsAmbiguityConfig.json", "DATAPATH" );
+    std::string fileName = PathResolver::find_file(
+        "ActsConfig/ActsAmbiguityConfig.json", "DATAPATH");
 
     std::ifstream file(fileName.c_str());
     if (!file.is_open()) {
@@ -81,7 +84,7 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::initialize() {
     cfg.etaMin = m_etaMin;
     cfg.etaMax = m_etaMax;
     cfg.useAmbiguityFunction = m_useAmbiguityFunction;
-    
+
     m_ambi = std::make_unique<Acts::ScoreBasedAmbiguityResolution>(
         std::move(cfg), makeActsAthenaLogger(this, "Acts"));
     assert(m_ambi);
@@ -107,27 +110,51 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::execute(
       SG::makeHandle(m_tracksKey, ctx);
   ATH_CHECK(trackHandle.isValid());
 
-  std::vector<std::vector<Acts::ScoreBasedAmbiguityResolution::MeasurementInfo>>
-      measurementsPerTracks;
+  // creates mutable tracks from the input tracks to add summary information
+  // NOTE: this operation likely needs to moved outside ambiguity resolution
+  ActsTrk::MutableTrackContainer updatedTracks =
+      ScoreBasedSolverCutsImpl::addSummaryInformation(*trackHandle);
 
-  std::vector<std::vector<Acts::ScoreBasedAmbiguityResolution::TrackFeatures>>
-      trackFeaturesVectors;
-      
-  measurementsPerTracks = m_ambi->computeInitialState(*trackHandle, &sourceLinkHash,
-                              &sourceLinkEquality, trackFeaturesVectors);
+  // create the optional cuts for the ambiguity resolution
+  Acts::ScoreBasedAmbiguityResolution::OptionalCuts<
+      ActsTrk::MutableTrackContainer::ConstTrackProxy>
+      optionalCuts;
 
+  using TrackProxyType = Acts::TrackProxy<ActsTrk::MutableTrackSummaryContainer,
+                                          ActsTrk::MutableMultiTrajectory,
+                                          Acts::detail::ValueHolder, true>;
+
+  // Eta based optional cuts is added as a lambda function inorder to access the
+  // m_etaDependentCutsSvc private variable
+  optionalCuts.cuts.push_back([this](const TrackProxyType &track) {
+    // Access m_etaDependentCutsSvc through this
+    return ScoreBasedSolverCutsImpl::etaDependentCuts(
+        track, this->m_etaDependentCutsSvc);
+  });
+
+  // Add other optional cuts and scores
+  optionalCuts.cuts.push_back(ScoreBasedSolverCutsImpl::doubleHolesFilter);
+  optionalCuts.scores.push_back(
+      ScoreBasedSolverCutsImpl::innermostPixelLayerHitsScore);
+  optionalCuts.scores.push_back(
+      ScoreBasedSolverCutsImpl::ContribPixelLayersScore);
+  optionalCuts.hitSelections.push_back(
+      ScoreBasedSolverCutsImpl::patternTrackHitSelection);
+
+  // Call the ambiguity resolution algorithm with the optional cuts on the
+  // updated tracks
   std::vector<int> goodTracks = m_ambi->solveAmbiguity(
-      *trackHandle, measurementsPerTracks, trackFeaturesVectors);
+      updatedTracks, &sourceLinkHash, &sourceLinkEquality, optionalCuts);
 
   ATH_MSG_DEBUG("Resolved to " << goodTracks.size() << " tracks from "
-                               << trackHandle->size());
+                               << updatedTracks.size());
 
   ActsTrk::MutableTrackContainer solvedTracks;
-  solvedTracks.ensureDynamicColumns(*trackHandle);
+  solvedTracks.ensureDynamicColumns(updatedTracks);
 
   for (auto iTrack : goodTracks) {
     auto destProxy = solvedTracks.getTrack(solvedTracks.addTrack());
-    destProxy.copyFrom(trackHandle->getTrack(iTrack));
+    destProxy.copyFrom(updatedTracks.getTrack(iTrack));
   }
   std::unique_ptr<ActsTrk::TrackContainer> outputTracks =
       m_resolvedTracksBackendHandles.moveToConst(

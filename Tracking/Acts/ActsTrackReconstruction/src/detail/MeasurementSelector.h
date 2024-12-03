@@ -388,7 +388,7 @@ protected:
 
          trackState.setReferenceSurface(boundParams.referenceSurface().getSharedPtr());
 
-         trackState.setBoundSubspaceIndices(subspaceIndices);
+         trackState.setProjectorSubspaceIndices(subspaceIndices);
 
          Acts::TrackStateType typeFlags = trackState.typeFlags();
          if (trackState.referenceSurface().surfaceMaterial() != nullptr) {

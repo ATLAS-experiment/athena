@@ -33,6 +33,7 @@ atlas_add_component( ActsTrackReconstruction
 		       InDetPrepRawData
 		       InDetRIO_OnTrack
 		       InDetReadoutGeometry
+		       InDetRecToolInterfaces
 		       MagFieldConditions
 		       MagFieldElements
 		       PixelConditionsData

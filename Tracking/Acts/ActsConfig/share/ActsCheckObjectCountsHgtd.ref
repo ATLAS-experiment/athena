@@ -42,13 +42,13 @@ ActsTrackFindingAlg                                               INFO statistic
 |-----------------------------------|------------|------------|------------|
 | Input seeds                       |     123542 |      24791 |     148333 |
 | No track parameters               |          0 |          0 |          0 |
-| Used   seeds                      |      78100 |      15624 |      93724 |
-| Cannot find track                 |      63275 |      11851 |      75126 |
-| Duplicate seeds                   |      45442 |       9167 |      54609 |
-| CKF tracks                        |      14825 |       3773 |      18598 |
+| Used   seeds                      |      78100 |      15627 |      93727 |
+| Cannot find track                 |      63276 |      11851 |      75127 |
+| Duplicate seeds                   |      45442 |       9164 |      54606 |
+| CKF tracks                        |      14824 |       3776 |      18600 |
 | Rejected refined parameters       |          0 |          0 |          0 |
-| selected tracks                   |      13389 |        831 |      14220 |
-| Stopped tracks reaching max holes |      60861 |      11356 |      72217 |
+| selected tracks                   |      13389 |        832 |      14221 |
+| Stopped tracks reaching max holes |      60862 |      11356 |      72218 |
 | Seeds with more than one branch   |          0 |          0 |          0 |
 | Tracks failing second CKF         |          0 |          0 |          0 |
 | Stopped tracks below pT cut       |       2414 |        495 |       2909 |
@@ -58,18 +58,18 @@ ActsTrackFindingAlg                                               INFO Ratios
 |------------------------------------------|------------|------------|------------|
 |                                          | PPP        | SSS        | ALL        |
 |------------------------------------------|------------|------------|------------|
-| failed / seeds                           |   0.512174 |   0.478036 |   0.506469 |
-| duplication / seeds                      |   0.367826 |   0.369771 |   0.368151 |
+| failed / seeds                           |   0.512182 |   0.478036 |   0.506475 |
+| duplication / seeds                      |   0.367826 |    0.36965 |   0.368131 |
 | Rejected refined params / seeds          |          0 |          0 |          0 |
-| selected / CKF tracks                    |   0.903137 |   0.220249 |   0.764598 |
-| selected tracks / used seeds             |   0.171434 |  0.0531874 |   0.151722 |
+| selected / CKF tracks                    |   0.903198 |   0.220339 |    0.76457 |
+| selected tracks / used seeds             |   0.171434 |  0.0532412 |   0.151728 |
 | branched tracks / used seeds             |          0 |          0 |          0 |
 | no 2nd CKF / CKF tracks                  |          0 |          0 |          0 |
 |------------------------------------------|------------|------------|------------|
 | selected / CKF tracks           0.0- 0.5 |   0.890205 |   0.124352 |   0.711259 |
-|                                 0.5- 1.0 |   0.913315 |   0.256262 |   0.739419 |
-|                                 1.0- 1.5 |   0.885971 |   0.216418 |   0.704992 |
-|                                 1.5- 2.0 |    0.79267 |   0.240154 |   0.563561 |
+|                                 0.5- 1.0 |   0.913255 |   0.257692 |   0.739419 |
+|                                 1.0- 1.5 |    0.88605 |   0.216418 |   0.705141 |
+|                                 1.5- 2.0 |   0.793103 |   0.239784 |    0.56338 |
 |                                 2.0- 2.5 |    0.94335 |   0.215251 |   0.697326 |
 |                                 2.5- 3.0 |   0.882635 |          0 |   0.882282 |
 |                                 3.0- 3.5 |   0.936117 |          0 |   0.936117 |
@@ -120,25 +120,25 @@ ActsLargeRadiusTrackFindingAlg                                    INFO statistic
 | Input seeds                       |       9681 |       9681 |
 | No track parameters               |          0 |          0 |
 | Used   seeds                      |       9494 |       9494 |
-| Cannot find track                 |       8540 |       8540 |
+| Cannot find track                 |       8539 |       8539 |
 | Duplicate seeds                   |        187 |        187 |
-| CKF tracks                        |        954 |        954 |
+| CKF tracks                        |        955 |        955 |
 | Rejected refined parameters       |          0 |          0 |
 | selected tracks                   |        113 |        113 |
-| Stopped tracks reaching max holes |       6655 |       6655 |
+| Stopped tracks reaching max holes |       6653 |       6653 |
 | Seeds with more than one branch   |          0 |          0 |
 | Tracks failing second CKF         |          0 |          0 |
-| Stopped tracks below pT cut       |       1885 |       1885 |
+| Stopped tracks below pT cut       |       1886 |       1886 |
 | Stopped tracks above max eta      |          0 |          0 |
 |-----------------------------------|------------|------------|
 ActsLargeRadiusTrackFindingAlg                                    INFO Ratios
 |------------------------------------------|------------|------------|
 |                                          | SSS        | ALL        |
 |------------------------------------------|------------|------------|
-| failed / seeds                           |    0.88214 |    0.88214 |
+| failed / seeds                           |   0.882037 |   0.882037 |
 | duplication / seeds                      |  0.0193162 |  0.0193162 |
 | Rejected refined params / seeds          |          0 |          0 |
-| selected / CKF tracks                    |   0.118449 |   0.118449 |
+| selected / CKF tracks                    |   0.118325 |   0.118325 |
 | selected tracks / used seeds             |  0.0119023 |  0.0119023 |
 | branched tracks / used seeds             |          0 |          0 |
 | no 2nd CKF / CKF tracks                  |          0 |          0 |
@@ -146,7 +146,7 @@ ActsLargeRadiusTrackFindingAlg                                    INFO Ratios
 | selected / CKF tracks           0.0- 0.5 |   0.169014 |   0.169014 |
 |                                 0.5- 1.0 |   0.214286 |   0.214286 |
 |                                 1.0- 1.5 |   0.228261 |   0.228261 |
-|                                 1.5- 2.0 |   0.102941 |   0.102941 |
+|                                 1.5- 2.0 |   0.102689 |   0.102689 |
 |                                 2.0- 2.5 |  0.0668896 |  0.0668896 |
 |                                 2.5- 3.0 |          0 |          0 |
 |                                 3.0- 3.5 |          0 |          0 |

@@ -141,14 +141,14 @@ void PRDSourceLinkCalibrator::calibrate(const Acts::GeometryContext& gctx,
         } else {
           subspaceIndices = {Acts::eBoundLoc0}; // x coordinate is l0
         }
-        trackState.setBoundSubspaceIndices(subspaceIndices);
+        trackState.setProjectorSubspaceIndices(subspaceIndices);
       }
       else if (dim == 2)
         {
           trackState.template calibrated<2>() = (*rot).localParameters().template head<2>();
           trackState.template calibratedCovariance<2>() = (*rot).localCovariance().template topLeftCorner<2, 2>();
           Acts::BoundSubspaceIndices subspaceIndices = {Acts::eBoundLoc0, Acts::eBoundLoc1};
-          trackState.setBoundSubspaceIndices(subspaceIndices);
+          trackState.setProjectorSubspaceIndices(subspaceIndices);
         }
       else
       {

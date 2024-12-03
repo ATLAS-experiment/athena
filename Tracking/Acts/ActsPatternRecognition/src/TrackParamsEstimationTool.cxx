@@ -19,7 +19,6 @@ namespace ActsTrk {
     ATH_MSG_INFO( "Initializing " << name() << "..." );
 
     ATH_MSG_DEBUG( "Properties Summary:" );
-    ATH_MSG_DEBUG( "   " << m_bFieldMin );
     ATH_MSG_DEBUG( "   " << m_sigmaLoc0 );
     ATH_MSG_DEBUG( "   " << m_sigmaLoc1 );
     ATH_MSG_DEBUG( "   " << m_sigmaPhi );
@@ -58,8 +57,7 @@ namespace ActsTrk {
 				   seed,
 				   geoContext,
 				   surface,
-				   bField,
-				   m_bFieldMin);
+				   bField);
   }
 
   std::optional<Acts::BoundTrackParameters>
@@ -67,35 +65,28 @@ namespace ActsTrk {
 						     const ActsTrk::Seed& seed,
 						     const Acts::GeometryContext& geoContext,
 						     const Acts::Surface& surface,
-						     const Acts::Vector3& bField,
-						     double bFieldMin) const 
+						     const Acts::Vector3& bField) const 
   {
     // Get SPs
     const auto& sp_collection = seed.sp();
     if ( sp_collection.size() < 3 ) return std::nullopt;
     
     // Compute Bound parameters at surface
-    std::optional<Acts::BoundVector> params_opt = m_useTopSp ?
+    auto params_result = m_useTopSp ?
       Acts::estimateTrackParamsFromSeed(geoContext,
-                                        sp_collection.rbegin(),
-                                        sp_collection.rend(),
+                                        std::ranges::views::reverse(sp_collection),
                                         surface,
-                                        bField,
-                                        bFieldMin,
-					logger()) :
+                                        bField) :
       Acts::estimateTrackParamsFromSeed(geoContext,
-                                        sp_collection.begin(),
-                                        sp_collection.end(),
+                                        sp_collection,
                                         surface,
-                                        bField,
-                                        bFieldMin,
-					logger());
+                                        bField);
     
-    if ( not params_opt.has_value() ) {
+    if ( not params_result.ok() ) {
       return std::nullopt;
     }
 
-    auto& params = params_opt.value();
+    auto& params = params_result.value();
 
     if (m_useTopSp) {
       // reverse direction so momentum vector pointing outwards
