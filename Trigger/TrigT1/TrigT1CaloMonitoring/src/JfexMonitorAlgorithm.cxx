@@ -3,6 +3,7 @@
 */
 
 #include "JfexMonitorAlgorithm.h"
+#include "AsgMessaging/MessageCheck.h"
 #include "TMath.h"
 #include "JfexMapForwardEmptyBins.h"
 
@@ -87,6 +88,7 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
     }
 
     // variables for histograms
+    auto lbn = Monitored::Scalar<int>("LBN",GetEventInfo(ctx)->lumiBlock());
     // jJ
     auto jFexSRJetModule  = Monitored::Scalar<int>  ("jJ_jFexNumber",0);
     auto jFexSRJetFPGA    = Monitored::Scalar<int>  ("jJ_fpgaNumber",0);
@@ -95,6 +97,7 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
     auto jFexSRJetphi     = Monitored::Scalar<float>("jJ_Phi",0.0);
     auto jFexSRJeteta_glo = Monitored::Scalar<float>("jJ_GlobalEta",0.0);
     auto jFexSRJetphi_glo = Monitored::Scalar<float>("jJ_GlobalPhi",0.0);
+    auto jFexSRJetBinNumber = Monitored::Scalar<int>("jJ_binNumber",0);
 
     // jLJ
     auto jFexLRJetModule  = Monitored::Scalar<int>  ("jLJ_jFexNumber",0);
@@ -115,6 +118,7 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
     auto jFexTauphi     = Monitored::Scalar<float>("jTau_Phi",0.0);
     auto jFexTaueta_glo = Monitored::Scalar<float>("jTau_GlobalEta",0.0);
     auto jFexTauphi_glo = Monitored::Scalar<float>("jTau_GlobalPhi",0.0);
+    auto jFexTauBinNumber = Monitored::Scalar<int>("jTau_binNumber",0);
 
     // jEM
     auto jFexEMModule  = Monitored::Scalar<int>  ("jEM_jFexNumber",0);
@@ -127,6 +131,7 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
     auto jFexEMIso     = Monitored::Scalar<int>  ("jEM_Iso",0);
     auto jFexEMf1      = Monitored::Scalar<int>  ("jEM_f1",0);
     auto jFexEMf2      = Monitored::Scalar<int>  ("jEM_f2",0);
+    auto jFexEMBinNumber = Monitored::Scalar<int>("jEM_binNumber",0);
 
     // jXE
     auto jFexMETX   = Monitored::Scalar<int>  ("jXE_X",0);
@@ -176,54 +181,63 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
         }
     }
 
-    if(!jJ_isInValid) {
-        for(const xAOD::jFexSRJetRoI* jFexSRJetRoI : *jFexSRJetContainer) {
-            if(jFexSRJetRoI->tobWord()==0) continue; //remove empty TOBs
-            jFexSRJetModule=jFexSRJetRoI->jFexNumber();
-            jFexSRJetFPGA=jFexSRJetRoI->fpgaNumber();
-            jFexSRJetEt=jFexSRJetRoI->tobEt();
-            float eta = jFexSRJetRoI->eta();
-            float phi = jFexSRJetRoI->phi();
-            jFexSRJeteta=eta;
-            jFexSRJetphi=phi;
-            jFexSRJeteta_glo=jFexSRJetRoI->globalEta();
-            jFexSRJetphi_glo=jFexSRJetRoI->globalPhi();
-            fill(m_Grouphist,jFexSRJetModule,jFexSRJetFPGA,jFexSRJetEt,jFexSRJeteta,jFexSRJetphi,jFexSRJeteta_glo,jFexSRJetphi_glo);
-            if (abs(eta) > 2.5 && abs(eta) < 3.1) {
-                jFexSRJetphi = phi - M_PI/64;
-                fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
-                if (jFexSRJetRoI->et() >= 20000)
-                    fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,weight);
-                jFexSRJetphi = phi + M_PI/64;
-                fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
-                if (jFexSRJetRoI->et() >= 20000)
-                    fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,weight);
-            } else if (abs(eta) > 3.1 && abs(eta) < 3.2) {
-                uint8_t localEta = jFexSRJetRoI->tobLocalEta();
-                bool isFCAL = localEta >= 13;
-                if (isFCAL) {
-                    jFexSRJeteta = eta > 0 ? 3.175 : -3.175;
-                    jFexSRJetphi = phi;
-                    fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
-                    if (jFexSRJetRoI->et() >= 20000)
-                        fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,weight);
-                } else {
-                    jFexSRJeteta = eta > 0 ? 3.125 : -3.125;
-                    jFexSRJetphi = phi - M_PI/64;
-                    fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
-                    if (jFexSRJetRoI->et() >= 20000)
-                        fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,weight);
-                    jFexSRJetphi = phi + M_PI/64;
-                    fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
-                    if (jFexSRJetRoI->et() >= 20000)
-                        fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,weight);
-                }
-            } else {
-                fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
-                if (jFexSRJetRoI->et() >= 20000)
-                    fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,weight);
-            }
-        }
+    if (!jJ_isInValid) {
+      for (const xAOD::jFexSRJetRoI *jFexSRJetRoI : *jFexSRJetContainer) {
+        if (jFexSRJetRoI->tobWord() == 0)
+          continue; // remove empty TOBs
+        jFexSRJetModule = jFexSRJetRoI->jFexNumber();
+        jFexSRJetFPGA = jFexSRJetRoI->fpgaNumber();
+        jFexSRJetEt = jFexSRJetRoI->tobEt();
+        jFexSRJeteta = jFexSRJetRoI->eta();
+        jFexSRJetphi = jFexSRJetRoI->phi();
+        jFexSRJeteta_glo = jFexSRJetRoI->globalEta();
+        jFexSRJetphi_glo = jFexSRJetRoI->globalPhi();
+        fill(m_Grouphist, jFexSRJetModule, jFexSRJetFPGA, jFexSRJetEt,
+             jFexSRJeteta, jFexSRJetphi, jFexSRJeteta_glo, jFexSRJetphi_glo);
+
+        ANA_CHECK(fillJetMaps(jFexSRJetRoI, jFexSRJeteta, jFexSRJetphi,
+                              jFexSRJetBinNumber, lbn, weight));
+      }
+    }
+
+    if (!jTau_isInValid) {
+      for (const xAOD::jFexTauRoI *jFexTauRoI : *jFexTauContainer) {
+        if (jFexTauRoI->tobWord() == 0)
+          continue; // remove empty TOBs
+        jFexTauModule = jFexTauRoI->jFexNumber();
+        jFexTauFPGA = jFexTauRoI->fpgaNumber();
+        jFexTauEt = jFexTauRoI->tobEt();
+        jFexTauIso = jFexTauRoI->tobIso();
+        jFexTaueta = jFexTauRoI->eta();
+        jFexTauphi = jFexTauRoI->phi();
+        jFexTaueta_glo = jFexTauRoI->globalEta();
+        jFexTauphi_glo = jFexTauRoI->globalPhi();
+        ANA_CHECK(fillMapsCentralAndFCAL(jFexTauRoI, jFexTaueta, jFexTauphi,
+                                         jFexTauBinNumber, lbn, m_jTauEtaBins,
+                                         weight));
+      }
+    }
+
+    if (!jEM_isInValid) {
+      for (const xAOD::jFexFwdElRoI *jFexFwdElRoI : *jFexEMContainer) {
+        if (jFexFwdElRoI->tobWord() == 0)
+          continue; // remove empty TOBs
+        jFexEMModule = jFexFwdElRoI->jFexNumber();
+        jFexEMFPGA = jFexFwdElRoI->fpgaNumber();
+        jFexEMEt = jFexFwdElRoI->tobEt();
+        jFexEMeta = jFexFwdElRoI->eta();
+        jFexEMphi = jFexFwdElRoI->phi();
+        jFexEMeta_glo = jFexFwdElRoI->globalEta();
+        jFexEMphi_glo = jFexFwdElRoI->globalPhi();
+        jFexEMIso = jFexFwdElRoI->tobEMIso();
+        jFexEMf1 = jFexFwdElRoI->tobEMf1();
+        jFexEMf2 = jFexFwdElRoI->tobEMf2();
+        fill(m_Grouphist, jFexEMModule, jFexEMFPGA, jFexEMEt, jFexEMeta,
+             jFexEMphi, jFexEMeta_glo, jFexEMphi_glo, jFexEMIso, jFexEMf1,
+             jFexEMf2);
+        ANA_CHECK(fillEMMaps(jFexFwdElRoI, jFexEMeta, jFexEMphi, jFexEMBinNumber,
+                             lbn, weight));
+      }
     }
 
     if(!jLJ_isInValid) {
@@ -238,56 +252,6 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
             jFexLRJetphi_glo=jFexLRJetRoI->globalPhi();
             fill(m_Grouphist,jFexLRJetModule,jFexLRJetFPGA,jFexLRJetEt,jFexLRJeteta,jFexLRJetphi,jFexLRJeteta_glo,jFexLRJetphi_glo);
         }
-    }
-
-    if(!jTau_isInValid) {
-        for(const xAOD::jFexTauRoI* jFexTauRoI : *jFexTauContainer) {
-            if(jFexTauRoI->tobWord()==0) continue; //remove empty TOBs
-            jFexTauModule =jFexTauRoI->jFexNumber();
-            jFexTauFPGA =jFexTauRoI->fpgaNumber();
-            jFexTauEt =jFexTauRoI->tobEt();
-            jFexTauIso=jFexTauRoI->tobIso();
-            jFexTaueta=jFexTauRoI->eta();
-            jFexTauphi=jFexTauRoI->phi();
-            jFexTaueta_glo=jFexTauRoI->globalEta();
-            jFexTauphi_glo=jFexTauRoI->globalPhi();
-            fill(m_Grouphist,jFexTauModule,jFexTauFPGA,jFexTauEt,jFexTauIso,jFexTaueta,jFexTauphi,jFexTaueta_glo,jFexTauphi_glo);
-            if (jFexTauRoI->et() >= 10000)
-                fill(m_GroupmapsHighPt,jFexTaueta,jFexTauphi);
-        }
-    }
-
-    if(!jEM_isInValid){
-        for(const xAOD::jFexFwdElRoI* jFexFwdElRoI : *jFexEMContainer) {
-            if(jFexFwdElRoI->tobWord()==0) continue; //remove empty TOBs
-            jFexEMModule =jFexFwdElRoI->jFexNumber();
-            jFexEMFPGA =jFexFwdElRoI->fpgaNumber();
-            jFexEMEt =jFexFwdElRoI->tobEt();
-            float eta = jFexFwdElRoI->eta();
-            float phi = jFexFwdElRoI->phi();
-            jFexEMeta=eta;
-            jFexEMphi=phi;
-            jFexEMeta_glo=jFexFwdElRoI->globalEta();
-            jFexEMphi_glo=jFexFwdElRoI->globalPhi();
-            jFexEMIso=jFexFwdElRoI->tobEMIso();
-            jFexEMf1 =jFexFwdElRoI->tobEMf1();
-            jFexEMf2 =jFexFwdElRoI->tobEMf2();
-            fill(m_Grouphist,jFexEMModule,jFexEMFPGA,jFexEMEt,jFexEMeta,jFexEMphi,jFexEMeta_glo,jFexEMphi_glo,jFexEMIso,jFexEMf1,jFexEMf2);
-            if (abs(eta) > 2.5 && abs(eta) < 3.2) {
-                jFexEMphi = phi - M_PI/64;
-                fill(m_Groupmaps,jFexEMeta,jFexEMphi,weight);
-                if (jFexFwdElRoI->et() >= 10000)
-                    fill(m_GroupmapsHighPt,jFexEMeta,jFexEMphi,weight);
-                jFexEMphi = phi + M_PI/64;
-                fill(m_Groupmaps,jFexEMeta,jFexEMphi,weight);
-                if (jFexFwdElRoI->et() >= 10000)
-                    fill(m_GroupmapsHighPt,jFexEMeta,jFexEMphi,weight);
-            } else {
-                fill(m_Groupmaps,jFexEMeta,jFexEMphi,weight);
-                if (jFexFwdElRoI->et() >= 10000)
-                    fill(m_GroupmapsHighPt,jFexEMeta,jFexEMphi,weight);
-            }
-        }    
     }
 
     if(!jXE_isInValid){
@@ -324,7 +288,147 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
         }    
     }
 
+  return StatusCode::SUCCESS;
+}
 
+StatusCode JfexMonitorAlgorithm::fillJetMaps(
+    const xAOD::jFexSRJetRoI *tob, Monitored::Scalar<float> &eta,
+    Monitored::Scalar<float> &phi, Monitored::Scalar<int> &binNumber,
+    Monitored::Scalar<int> &lbn, Monitored::Scalar<float> &weight) const {
+  if (abs(eta) > 2.5 && abs(eta) < 3.1) {
+    ANA_CHECK(
+        fillMapsEndcap(tob, eta, phi, binNumber, lbn, m_jJEtaBins, weight));
+  } else if (abs(eta) > 3.1 && abs(eta) < 3.2) {
+    ANA_CHECK(
+        fillMapsOverlap(tob, eta, phi, binNumber, lbn, m_jJEtaBins, weight));
+  } else {
+    ANA_CHECK(fillMapsCentralAndFCAL(tob, eta, phi, binNumber, lbn, m_jJEtaBins,
+                                     weight));
+  }
 
-    return StatusCode::SUCCESS;
+  return StatusCode::SUCCESS;
+}
+
+StatusCode JfexMonitorAlgorithm::fillEMMaps(
+    const xAOD::jFexFwdElRoI *tob, Monitored::Scalar<float> &eta,
+    Monitored::Scalar<float> &phi, Monitored::Scalar<int> &binNumber,
+    Monitored::Scalar<int> &lbn, Monitored::Scalar<float> &weight) const {
+  if (abs(eta) > 2.5 && abs(eta) < 3.2) {
+    ANA_CHECK(
+        fillMapsEndcap(tob, eta, phi, binNumber, lbn, m_jEMEtaBins, weight));
+  } else {
+    ANA_CHECK(fillMapsCentralAndFCAL(tob, eta, phi, binNumber, lbn,
+                                     m_jEMEtaBins, weight));
+  }
+  return StatusCode::SUCCESS;
+}
+
+template <typename TOB>
+StatusCode JfexMonitorAlgorithm::fillMapsCentralAndFCAL(
+    TOB tob, Monitored::Scalar<float> &eta, Monitored::Scalar<float> &phi,
+    Monitored::Scalar<int> &binNumber, Monitored::Scalar<int> &lbn,
+    std::vector<float> etaBinBorders, Monitored::Scalar<float> &weight) const {
+  binNumber = binNumberFromCoordinates(eta, phi, etaBinBorders);
+  fill(m_Groupmaps, eta, phi, lbn, binNumber, weight);
+  if (passesEnergyCut(tob))
+    fill(m_GroupmapsHighPt, eta, phi, lbn, binNumber, weight);
+  return StatusCode::SUCCESS;
+}
+
+template <typename TOB>
+StatusCode JfexMonitorAlgorithm::fillMapsEndcap(
+    TOB tob, Monitored::Scalar<float> &eta, Monitored::Scalar<float> &phi,
+    Monitored::Scalar<int> &binNumber, Monitored::Scalar<int> &lbn,
+    std::vector<float> etaBinBorders, Monitored::Scalar<float> &weight) const {
+  float originalPhi = phi;
+  phi = originalPhi - M_PI / 64;
+  fill(m_Groupmaps, eta, phi, weight);
+  binNumber = binNumberFromCoordinates(eta, phi, etaBinBorders);
+  fill(m_Groupmaps, lbn, binNumber);
+  if (passesEnergyCut(tob))
+    fill(m_GroupmapsHighPt, eta, phi, lbn, binNumber, weight);
+  phi = originalPhi + M_PI / 64;
+  fill(m_Groupmaps, eta, phi, weight);
+  binNumber = binNumberFromCoordinates(eta, phi, etaBinBorders);
+  fill(m_Groupmaps, lbn, binNumber);
+  if (passesEnergyCut(tob))
+    fill(m_GroupmapsHighPt, eta, phi, lbn, binNumber, weight);
+
+  return StatusCode::SUCCESS;
+}
+
+StatusCode JfexMonitorAlgorithm::fillMapsOverlap(
+    const xAOD::jFexSRJetRoI *tob, Monitored::Scalar<float> &eta,
+    Monitored::Scalar<float> &phi, Monitored::Scalar<int> &binNumber,
+    Monitored::Scalar<int> &lbn, std::vector<float> etaBinBorders,
+    Monitored::Scalar<float> &weight) const {
+  binNumber = binNumberFromCoordinates(eta, phi, etaBinBorders);
+  fill(m_Groupmaps, lbn, binNumber);
+  float originalPhi = phi;
+  uint8_t localEta = tob->tobLocalEta();
+  bool isFCAL = localEta >= 13;
+  if (isFCAL) {
+    eta = eta > 0 ? 3.175 : -3.175;
+    fill(m_Groupmaps, eta, phi, weight);
+    if (passesEnergyCut(tob))
+      fill(m_GroupmapsHighPt, eta, phi, lbn, binNumber, weight);
+  } else {
+    eta = eta > 0 ? 3.125 : -3.125;
+    phi = originalPhi - M_PI / 64;
+    fill(m_Groupmaps, eta, phi, weight);
+    if (passesEnergyCut(tob))
+      fill(m_GroupmapsHighPt, eta, phi, lbn, binNumber, weight);
+    phi = originalPhi + M_PI / 64;
+    fill(m_Groupmaps, eta, phi, weight);
+    if (passesEnergyCut(tob))
+      fill(m_GroupmapsHighPt, eta, phi, lbn, binNumber, weight);
+  }
+  return StatusCode::SUCCESS;
+}
+
+bool JfexMonitorAlgorithm::passesEnergyCut(
+    const xAOD::jFexSRJetRoI *tob) const {
+  return tob->et() >= 20000;
+}
+
+bool JfexMonitorAlgorithm::passesEnergyCut(
+    const xAOD::jFexFwdElRoI *tob) const {
+  return tob->et() >= 10000;
+}
+
+bool JfexMonitorAlgorithm::passesEnergyCut(const xAOD::jFexTauRoI *tob) const {
+  return tob->et() >= 10000;
+}
+
+int JfexMonitorAlgorithm::binNumberFromCoordinates(
+    float eta, float phi, std::vector<float> etaBinBorders) const {
+  if (etaBinBorders.size() == 0) {
+    ANA_MSG_ERROR("List of eta bin borders is empty!");
+    return 0;
+  }
+
+  int iEta = 0;
+  int iPhi = 0;
+
+  for (size_t i = 0; i < etaBinBorders.size() - 1; ++i) {
+    if (etaBinBorders.at(i) <= eta && etaBinBorders.at(i + 1) > eta) {
+      iEta = i;
+      break;
+    }
+  }
+
+  // 64 regular bins from -pi to pi
+  constexpr float phiBinWidth = 2 * M_PI / 64;
+  for (int i = 0; i < 64 - 1; i++) {
+    if (i * phiBinWidth - M_PI <= phi && (i + 1) * phiBinWidth - M_PI > phi) {
+      iPhi = i;
+      break;
+    }
+  }
+
+  // following ROOT's convention of lowest bin being number 1
+  iPhi++;
+
+  int binNumber = iEta * 64 + iPhi;
+  return binNumber;
 }
