@@ -520,7 +520,8 @@ namespace MuonR4{
                         }
                         break;
                     } default:
-                        ATH_MSG_WARNING("MdtSegmentFitter() - Unsupported measurment type" <<typeid(*hit->spacePoint()->primaryMeasurement()).name());
+                        const auto &measurement = *hit->spacePoint()->primaryMeasurement();
+                        ATH_MSG_WARNING("MdtSegmentFitter() - Unsupported measurment type" <<typeid(measurement).name());
                 }
     
                 ATH_MSG_VERBOSE("Update derivatives for hit "<< (hit->spacePoint() ? idHelperSvc->toString(hit->spacePoint()->identify()) : "beamspot"));
