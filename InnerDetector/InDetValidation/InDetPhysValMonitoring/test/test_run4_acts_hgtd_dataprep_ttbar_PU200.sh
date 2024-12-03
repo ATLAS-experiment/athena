@@ -30,6 +30,9 @@ run () {
     rc=$?
     # Only report hard failures for comparison Acts-Trk since we know
     # they are different. We do not expect this test to succeed
+    if [[ "${name}" == "dcube-acts-space-timed" && ${rc} -ne 255 ]]; then
+        rc=0
+    fi
     echo "art-result: $rc ${name}"
     return $rc
 }
