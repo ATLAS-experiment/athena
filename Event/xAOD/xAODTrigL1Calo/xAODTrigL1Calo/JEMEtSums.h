@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTRIGL1CALO_JEMETSUMS_H
@@ -8,6 +8,7 @@
 // Local include(s):
 #include "xAODTrigL1Calo/versions/JEMEtSums_v1.h"
 #include "xAODTrigL1Calo/versions/JEMEtSums_v2.h"
+#include <map>
 
 /// Namespace holding all the xAOD EDM classes
 namespace xAOD {
