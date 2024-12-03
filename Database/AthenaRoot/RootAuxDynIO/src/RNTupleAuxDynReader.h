@@ -12,6 +12,7 @@
 #include "ROOT/RNTupleView.hxx"
 
 #include <map>
+#include <optional>
 #include <string>
 
 namespace ROOT::Experimental {
@@ -43,9 +44,9 @@ namespace RootAuxDynIO
          std::string   attribName;
          std::string   fieldName;
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 33, 0 )
-         std::unique_ptr< RNTupleView<void> > view_p;  // pointer because lack of default xtor
+         std::optional< RNTupleView<void> > view;
 #else
-         std::unique_ptr< RNTupleView<void, true> > view_p;  // pointer because lack of default xtor
+         std::optional< RNTupleView<void, true> > view;
 #endif
       };
 
@@ -69,7 +70,7 @@ namespace RootAuxDynIO
       virtual void resetBytesRead() override final;
 
       /// get field informatino for @c auxid
-      const FieldInfo& getFieldInfo(const SG::auxid_t& auxid, const SG::AuxStoreInternal& store);
+      FieldInfo& getFieldInfo(const SG::auxid_t& auxid, const SG::AuxStoreInternal& store);
 
       RNTupleReader* getNativeReader();
 
