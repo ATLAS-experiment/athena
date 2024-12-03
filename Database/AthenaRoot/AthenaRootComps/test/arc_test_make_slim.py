@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
 
 import ROOT
@@ -29,8 +29,8 @@ def write_derived (fout, egamma, nder):
 
 def ntuple_slim (infile, outfile, nder):
     fin = ROOT.TFile.Open (infile)
-    CollectionTree = fin.CollectionTree
-    egamma = fin.egamma
+    CollectionTree = fin['CollectionTree']
+    egamma = fin['egamma']
     egamma.SetBranchStatus ('*', 0)
     egamma.SetBranchStatus ('RunNumber', 1)
     egamma.SetBranchStatus ('EventNumber', 1)
@@ -48,8 +48,10 @@ def ntuple_slim (infile, outfile, nder):
     fout = ROOT.TFile.Open (outfile, 'recreate')
     CollectionTree_new = CollectionTree.CloneTree()
     CollectionTree_new.Write()
+    ROOT.SetOwnership (CollectionTree_new, False) # owned by the file.
     egamma_new = egamma.CloneTree()
     egamma_new.Write()
+    ROOT.SetOwnership (egamma_new, False) # owned by the file.
 
     if nder > 0:
         write_derived (fout, egamma, nder)
