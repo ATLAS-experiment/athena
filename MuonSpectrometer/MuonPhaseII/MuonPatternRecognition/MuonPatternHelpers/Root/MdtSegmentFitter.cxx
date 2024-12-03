@@ -43,8 +43,8 @@ namespace MuonR4{
             constexpr double timeTange = 25 * Gaudi::Units::ns;
             rng[toInt(ParamDefs::y0)] = std::array{-spatRang, spatRang};
             rng[toInt(ParamDefs::x0)] = std::array{-spatRang, spatRang};
-            rng[toInt(ParamDefs::phi)] = std::array{-180.* Gaudi::Units::deg, 180. * Gaudi::Units::deg};
-            rng[toInt(ParamDefs::theta)] = std::array{-90. * Gaudi::Units::deg,  90. * Gaudi::Units::deg};
+            rng[toInt(ParamDefs::phi)] = std::array{-175.* Gaudi::Units::deg, 175. * Gaudi::Units::deg};
+            rng[toInt(ParamDefs::theta)] = std::array{-85. * Gaudi::Units::deg,  85. * Gaudi::Units::deg};
             rng[toInt(ParamDefs::time)] = std::array{-timeTange, timeTange};            
             return rng;
     }
@@ -572,7 +572,6 @@ namespace MuonR4{
             } else if (paramUpdate == UpdateStatus::allOkay) {
                 noChangeIter = 0;
             } else if (paramUpdate == UpdateStatus::outOfBounds){
-               fitResult.chi2PerMeasurement.resize(fitResult.calibMeasurements.size(), -1.); 
                return fitResult;
             }
         }
@@ -587,16 +586,15 @@ namespace MuonR4{
         std::optional<double> toF = fitResult.timeFit ? std::make_optional<double>((localToGlobal * segPos).mag() * c_inv) : std::nullopt;
         /** Sort the measurements by ascending z */
         std::ranges::stable_sort(fitResult.calibMeasurements, [](const HitType&a, const HitType& b){
-                return a->positionInChamber().z() > b->positionInChamber().z();
+                return a->positionInChamber().z() < b->positionInChamber().z();
         });
+
         /*** Remove the drift sign again */
+        fitResult.chi2 =0.;
         for (const HitType& hit : fitResult.calibMeasurements) {
             hit->setDriftRadius(std::abs(hit->driftRadius()));
+            fitResult.chi2 +=SegmentFitHelpers::chiSqTerm(segPos, segDir, fitResult.segmentPars[toInt(ParamDefs::time)], toF, *hit, msg());
         }
-        
-        auto [chi2Term, chi2] = SegmentFitHelpers::postFitChi2PerMas(fitResult.segmentPars, toF, fitResult.calibMeasurements, msg());
-        fitResult.chi2PerMeasurement = std::move(chi2Term);
-        fitResult.chi2 = chi2;
         /// Update the covariance
         if (!fitResult.nPhiMeas&& !fitResult.timeFit) {
             blockCovariance<2>(std::move(hessian), /* std::move(gradient), std::move(prevGrad), */ fitResult.segmentParErrs);

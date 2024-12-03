@@ -248,18 +248,18 @@ namespace MuonR4 {
                 data.segmentPars[p] = xs[p];
                 data.segmentParErrs(p,p) = errs[p];
             }
-            std::optional<double> timeOfArrival{std::nullopt};
+            std::optional<double> ToF{std::nullopt};
             const auto [locPos, locDir] = data.makeLine();
             if (data.timeFit) {
-                timeOfArrival = std::make_optional<double>((locToGlob*locPos).mag() * inv_c);
+                ToF = std::make_optional<double>((locToGlob*locPos).mag() * inv_c);
             }
             data.nIter = minimizer.NCalls();
             data.calibMeasurements = c2f.release(xs);
 
-            auto [chiPerMeas, finalChi2] = SegmentFitHelpers::postFitChi2PerMas(data.segmentPars, timeOfArrival, 
-                                                                                data.calibMeasurements, msgStream());
-            data.chi2PerMeasurement = std::move(chiPerMeas);
-            data.chi2 = finalChi2;
+            data.chi2 = std::accumulate(data.calibMeasurements.begin(),data.calibMeasurements.end(),0.,
+                                         [this,&locPos,&locDir, &ToF, &xs]( double chi2, const auto& hit) {
+                                            return SegmentFitHelpers::chiSqTerm(locPos, locDir, xs[toInt(ParamDefs::time)], ToF, *hit, msg()) + chi2;
+                                         });
             data.converged = true;
         }
         return data;
@@ -336,7 +336,6 @@ namespace MuonR4 {
                                                   patternSeed, std::move(data.calibMeasurements),
                                                   data.chi2, data.nDoF);
         finalSeg->setCallsToConverge(data.nIter);
-        finalSeg->setChi2PerMeasurement(std::move(data.chi2PerMeasurement));
         finalSeg->setParUncertainties(std::move(data.segmentParErrs));
         if (data.timeFit) {
             finalSeg->setSegmentT0(data.segmentPars[toInt(ParamDefs::time)]);
@@ -452,7 +451,7 @@ namespace MuonR4 {
             beforeRecov.calibMeasurements.insert(beforeRecov.calibMeasurements.end(), 
                                                  std::make_move_iterator(candidateHits.begin()),
                                                  std::make_move_iterator(candidateHits.end()));
-            eraseWrongHits(gctx, beforeRecov);
+            eraseWrongHits(beforeRecov);
             return beforeRecov.nDoF > 0;
         }
    
@@ -474,7 +473,7 @@ namespace MuonR4 {
                 hit->setFitState(CalibratedSpacePoint::State::Outlier);
                 beforeRecov.calibMeasurements.push_back(std::move(hit));
             }
-            eraseWrongHits(gctx, beforeRecov);
+            eraseWrongHits(beforeRecov);
             return true;
         }
         ATH_MSG_VERBOSE("Chi2, nDOF before:"<<beforeRecov.chi2<<", "<<beforeRecov.nDoF<<" after recovery: "<<recovered.chi2<<", "<<recovered.nDoF);
@@ -491,11 +490,19 @@ namespace MuonR4 {
                 if (m_doBeamspotConstraint) {
                     removeBeamSpot(copied);
                 }
-                for (unsigned int m = 0; m < beforeRecov.calibMeasurements.size(); ++m) {
-                    if (beforeRecov.calibMeasurements[m]->fitState() == CalibratedSpacePoint::State::Outlier && 
-                        std::sqrt(beforeRecov.chi2PerMeasurement[m]) < m_recoveryPull) {
-                        copied[m]->setFitState(CalibratedSpacePoint::State::Valid);
-                        runAnotherTrial = true;
+                const auto [beforePos, beforeDir] = beforeRecov.makeLine();
+                for (HitVec::value_type& copyHit : copied) {
+                    if (copyHit->fitState() != CalibratedSpacePoint::State::Outlier) {
+                        continue;
+                    }
+                    copyHit->setFitState(CalibratedSpacePoint::State::Valid);
+                    bool append = std::sqrt(SegmentFitHelpers::chiSqTerm(beforePos, beforeDir, 
+                                                                        beforeRecov.segmentPars[toInt(ParamDefs::time)], 
+                                                                        std::nullopt, *copyHit, msgStream())) < m_recoveryPull;
+                    if (append) {
+                        runAnotherTrial = true;    
+                    } else {
+                        copyHit->setFitState(CalibratedSpacePoint::State::Outlier);
                     }
                 }
                 if (!runAnotherTrial) {
@@ -517,7 +524,7 @@ namespace MuonR4 {
                 }
             }
             /** Finally remove all hits from the calib measurements which are obvious outliers */
-            eraseWrongHits(gctx, beforeRecov);
+            eraseWrongHits(beforeRecov);
         } else{
             for (HitVec::value_type& hit : copiedCandidates) {
                 hit->setFitState(CalibratedSpacePoint::State::Outlier);
@@ -526,7 +533,7 @@ namespace MuonR4 {
         }
         return true;
     }
-    void SegmentFittingAlg::eraseWrongHits(const ActsGeometryContext& gctx, SegmentFitResult& candidate) const {
+    void SegmentFittingAlg::eraseWrongHits(SegmentFitResult& candidate) const {
         auto [segPos, segDir] = makeLine(candidate.segmentPars);
         candidate.calibMeasurements.erase(std::remove_if(candidate.calibMeasurements.begin(), candidate.calibMeasurements.end(),
                                                 [&segPos, &segDir](const HitVec::value_type& hit){
@@ -545,19 +552,6 @@ namespace MuonR4 {
         std::ranges::sort(candidate.calibMeasurements, [](const Segment::MeasType& a, const Segment::MeasType& b){
             return a->positionInChamber().z() < b->positionInChamber().z();
         });
-        const MuonGMR4::SpectrometerSector* chamber{nullptr};
-        for (const auto& hit : candidate.calibMeasurements) {
-            if (hit->type() != xAOD::UncalibMeasType::Other){
-                chamber = hit->spacePoint()->msSector();
-                break;
-            }
-        }
-        std::optional<double> timeOfFlight = candidate.timeFit ? std::make_optional<double>((chamber->localToGlobalTrans(gctx)*segPos).mag() * inv_c) 
-                                                                : std::nullopt;
-        auto [updatedMeasChi2, updateChi2] = SegmentFitHelpers::postFitChi2PerMas(candidate.segmentPars, timeOfFlight, 
-                                                                                  candidate.calibMeasurements, msgStream());
-        ATH_MSG_VERBOSE("The measurements before "<<candidate.chi2PerMeasurement<<", after: "<<updatedMeasChi2<<", chi2: "<<updateChi2);
-        candidate.chi2PerMeasurement = std::move(updatedMeasChi2);
     }
     void SegmentFittingAlg::resolveAmbiguities(const ActsGeometryContext& gctx,
                                                std::vector<std::unique_ptr<Segment>>& segmentCandidates) const {

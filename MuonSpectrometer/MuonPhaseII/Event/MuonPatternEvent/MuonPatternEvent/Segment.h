@@ -27,8 +27,7 @@ namespace MuonR4{
              *  @param parent: Seed out of which the segment has been built
              *  @param constMeas: Measurements building up the segment
              *  @param chi2: Chi2 of the segment fit
-             *  @param nDoF: Degrees of freedom
-             */
+             *  @param nDoF: Degrees of freedom */
             Segment(Amg::Vector3D&& globPos,
                     Amg::Vector3D&& globDir,
                     const SegmentSeed* parent,
@@ -58,8 +57,6 @@ namespace MuonR4{
             const SegmentSeed* parent() const { return m_parent; }
             /** @brief Returns the uncertainties of the defining parameters */
             const SegmentFit::Covariance& covariance() const { return m_cov; }
-            /** @brief Returns the chi2 per measurement vector */
-            const std::vector<double>& chi2PerMeasurement() const { return m_chi2PerMeasurement; }
             /** @brief Returns how many iterations the fitter needed to make the segment converge */ 
             unsigned int nFitIterations() const { return m_nCalls; }
             /** @brief has the time been fitted */
@@ -72,10 +69,6 @@ namespace MuonR4{
             void setSegmentT0(double t0) {
                 m_t0 = std::make_optional<double>(t0);             
             }
-            /** @brief Set the chi2 per measurement */
-            void setChi2PerMeasurement(std::vector<double> && chi2vals){
-                m_chi2PerMeasurement = chi2vals; 
-            }
             /** @brief Set how many iteration the fitter needed to reach convergence */
             void setCallsToConverge(unsigned int nCalls) {
                 m_nCalls = nCalls;
@@ -87,20 +80,25 @@ namespace MuonR4{
 
 
         private: 
+            /** @brief Global position of the segment at the chamber centre */
             Amg::Vector3D m_globPos{Amg::Vector3D::Zero()};
+            /** @brief Global direction of the segment */
             Amg::Vector3D m_globDir{Amg::Vector3D::Zero()};
+            /** @brief Seed from which the segment is stemming */
             const SegmentSeed* m_parent{nullptr};
+            /** @brief List of associated measurements */
             MeasVec m_measurements{};
+            /*** @brief Chi2 of the segment fit */
             double m_chi2{0.};
+            /** @brief Number of degrees of freedom in the fit */
             unsigned int m_nDoF{0};
-
+            /** @brief Fitted time of arrival at the chamber centre */
             std::optional<double> m_t0{std::nullopt};
-
-            std::vector<double> m_chi2PerMeasurement{};
+            /** @brief Number of calls to reach the minimum */
             unsigned int m_nCalls{0};
+            /** @brief Covariance matrix of the fit  */
             SegmentFit::Covariance m_cov{SegmentFit::Covariance::Identity()};
     };
-    // placeholder - later will be xAOD EDM 
 }
 
 #endif

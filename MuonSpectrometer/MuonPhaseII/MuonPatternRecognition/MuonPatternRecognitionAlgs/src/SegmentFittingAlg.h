@@ -85,10 +85,8 @@ namespace MuonR4{
                            SegmentFitResult& toRecover) const;
             /** @brief Removes all hits from the segment which are obvious outliers. E.g. tubes 
              *         which cannot be crossed by the segment. 
-             *  @param gctx: Geometry context needed to calculate the nominal time of arrival,
-             *               if the time fit is activated
              *  @param candidate: Reference of the segment candidate to prune. */
-            void eraseWrongHits(const ActsGeometryContext& gctx, SegmentFitResult& candidate) const;            
+            void eraseWrongHits(SegmentFitResult& candidate) const;            
             /** @brief Converts the fit result into a segment object
              *  @param locToGlobTrf: Local to global transform to translate the segment parameters into
              *                       global parameters

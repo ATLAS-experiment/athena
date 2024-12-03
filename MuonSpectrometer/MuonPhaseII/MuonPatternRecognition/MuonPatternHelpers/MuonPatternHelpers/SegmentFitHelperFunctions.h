@@ -149,18 +149,6 @@ namespace MuonR4{
                     const Amg::Vector3D& dirInChamber,
                     const CalibratedSpacePoint& calibHit,
                     MsgStream& msg);
-
-      /** @brief Calculates the chi2 per measurement and the chi2 itself after the fit is finished. Outlier hits have a non-vanishing entry
-       *         in the chi2 per measurements but do not contribute to the overall chi2. Hits which cannot be calibrated do not contribute. 
-       *  @param segPars: Predicted segment parameters to which the chi2 is evaluated
-       *  @param arrivalTime: Nominal time of arrival at the chamber centre,
-       *  @param hits: Vector of calibrated hits
-       *  @param msg: Reference to the callers msgStream. If the level is VERBOSE,
-       *               then all relevant parameters are printed */
-      std::pair<std::vector<double>, double> postFitChi2PerMas(const SegmentFit::Parameters& segPars,
-                                                               std::optional<double> arrivalTime,
-                                                               std::vector<std::unique_ptr<CalibratedSpacePoint>>& hits,
-                                                               MsgStream& msg);
     }
 }
 
