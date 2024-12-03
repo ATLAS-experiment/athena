@@ -39,6 +39,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 class AtlasDetectorID;
 class PixelID;
@@ -75,6 +76,18 @@ private:
   const PixelID*                        m_pixelID{};
   const SCT_ID*                         m_sctID{}; 
   const TRT_ID*                         m_trtID{}; 
+
+  // Building Tool Maps for the Hit Maps 
+  static const int m_nSiBlayers{4}; 
+  static const int m_nSCTEClayers{9}; 
+  std::vector<int> m_measurements_vs_Eta_Phi_pix_b;
+  std::vector<int> m_measurements_vs_Eta_Phi_pix_ec;
+  std::vector<int> m_measurements_vs_Eta_Phi_sct_b_s0;
+  std::vector<int> m_measurements_vs_Eta_Phi_sct_b_s1;
+  std::vector<int> m_measurements_vs_Eta_Phi_sct_eca_s0;
+  std::vector<int> m_measurements_vs_Eta_Phi_sct_eca_s1;
+  std::vector<int> m_measurements_vs_Eta_Phi_sct_ecc_s0;
+  std::vector<int> m_measurements_vs_Eta_Phi_sct_ecc_s1;
   
   bool  m_extendedPlots{};
   float m_d0Range{};

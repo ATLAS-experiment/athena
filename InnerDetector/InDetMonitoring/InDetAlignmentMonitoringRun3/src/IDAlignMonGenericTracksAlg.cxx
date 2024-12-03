@@ -124,6 +124,16 @@ StatusCode IDAlignMonGenericTracksAlg::initialize()
   ATH_CHECK(m_tracksName.initialize());
   ATH_CHECK(m_tracksKey.initialize());
 
+  // Building Tool Maps for the Hit Maps 
+  m_measurements_vs_Eta_Phi_pix_b = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_pix_b", m_nSiBlayers);
+  m_measurements_vs_Eta_Phi_pix_ec = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_pix_ec", 2);
+  m_measurements_vs_Eta_Phi_sct_b_s0 = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_sct_b_s0", m_nSiBlayers);
+  m_measurements_vs_Eta_Phi_sct_b_s1 = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_sct_b_s1", m_nSiBlayers);
+  m_measurements_vs_Eta_Phi_sct_eca_s0 = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_sct_eca_s0", m_nSCTEClayers);
+  m_measurements_vs_Eta_Phi_sct_eca_s1 = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_sct_eca_s1", m_nSCTEClayers);
+  m_measurements_vs_Eta_Phi_sct_ecc_s0 = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_sct_ecc_s0", m_nSCTEClayers);
+  m_measurements_vs_Eta_Phi_sct_ecc_s1 = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_sct_ecc_s1", m_nSCTEClayers); 
+
   ATH_MSG_DEBUG("Initialize -- completed --");
   return AthMonitorAlgorithm::initialize();
 }
@@ -233,7 +243,6 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     fill(genericTrackGroup, mu_m);
   }
   
-
   if (m_doIP) {
     auto handle_vxContainer = SG::makeHandle(m_VxPrimContainerName, ctx);
     
@@ -300,6 +309,10 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     float beamX          = 0;
     float beamY          = 0;
     float d0bscorr       = -999;
+    int   layerDisk  = 99;
+    int   sctSide = 99;
+    int   modEta = 9999;
+    int   modPhi = 9999;
  
     // get fit quality and chi2 probability of track
     const Trk::FitQuality* fitQual = trksItr->fitQuality();
@@ -308,7 +321,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     const AmgSymMatrix(5)* covariance = measPer ? measPer->covariance() : nullptr;
 
     std::unique_ptr<Trk::ImpactParametersAndSigma> myIPandSigma=nullptr;
-    
+
 
     if (m_doIP){
 
@@ -374,7 +387,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     for (const Trk::TrackStateOnSurface* tsos : *trksItr->trackStateOnSurfaces()) {
       //check that we have track parameters defined for the surface (pointer is not null)
       if(!(tsos->trackParameters())) {
-	ATH_MSG_DEBUG(" hit skipped because no associated track parameters");
+	      ATH_MSG_DEBUG(" hit skipped because no associated track parameters");
         continue;
       }
       
@@ -387,7 +400,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
       else continue; 
 
       if ( tsos->type(Trk::TrackStateOnSurface::Measurement) ){   
-	//hit quality cuts for Si hits if tool is configured - default is NO CUTS
+	      //hit quality cuts for Si hits if tool is configured - default is NO CUTS
         if (m_idHelper->is_pixel(surfaceID) || m_idHelper->is_sct(surfaceID)) {
           if (m_doHitQuality) {
             ATH_MSG_DEBUG("applying hit quality cuts to Silicon hit...");
@@ -404,7 +417,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
           }
         } // hit is Pixel or SCT
 	
-        // --- pixel
+        // --- pixel hit count
         if (m_idHelper->is_pixel(surfaceID)){
           if(m_pixelID->barrel_ec(surfaceID)      ==  0){
             nhpixB++;
@@ -412,7 +425,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
           else if(m_pixelID->barrel_ec(surfaceID) ==  2)  nhpixECA++;
           else if(m_pixelID->barrel_ec(surfaceID) == -2) nhpixECC++;
         }
-        // --- sct
+        // --- sct hit count
         else if (m_idHelper->is_sct(surfaceID)){
           if(m_sctID->barrel_ec(surfaceID)      ==  0){
             nhsctB++;
@@ -420,7 +433,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
           else if(m_sctID->barrel_ec(surfaceID) ==  2) nhsctECA++;
           else if(m_sctID->barrel_ec(surfaceID) == -2) nhsctECC++;
         }
-        // --- trt
+        // --- trt hit count
         if (m_idHelper->is_trt(surfaceID)){
           int barrel_ec      = m_trtID->barrel_ec(surfaceID);
           if(barrel_ec == 1 || barrel_ec == -1 ) {
@@ -432,8 +445,60 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
             nhtrtECC++;
           }
         }
-      }
+        // filling hit maps 
+        if (m_idHelper->is_pixel(surfaceID)){
+          layerDisk = m_pixelID -> layer_disk(surfaceID);
+          modEta = m_pixelID->eta_module(surfaceID); 
+          modPhi = m_pixelID->phi_module(surfaceID);
+          auto modEta_m = Monitored::Scalar<int>( "m_modEta", modEta );
+          auto modPhi_m = Monitored::Scalar<int>( "m_modPhi", modPhi );    
+          auto layerDisk_m = Monitored::Scalar<float>("m_layerDisk", layerDisk);
+          
+          if(m_pixelID->barrel_ec(surfaceID)      ==  0){ //pixel barrel hit
+            fill(m_tools[m_measurements_vs_Eta_Phi_pix_b[layerDisk]], modEta_m, modPhi_m);
+          }
+          else if(m_pixelID->barrel_ec(surfaceID) ==  2){ //pixel endcap A hit
+            fill(m_tools[m_measurements_vs_Eta_Phi_pix_ec[0]], layerDisk_m, modPhi_m);
+          }
+          else if(m_sctID->barrel_ec(surfaceID) == -2){ //pixel endcap C hit
+            fill(m_tools[m_measurements_vs_Eta_Phi_pix_ec[1]], layerDisk_m, modPhi_m);
+          }
+        } 
+        else if (m_idHelper->is_sct(surfaceID)){ 
+          layerDisk = m_sctID->layer_disk(surfaceID);
+          modEta = m_sctID->eta_module(surfaceID); 
+          modPhi = m_sctID->phi_module(surfaceID);
+          sctSide = m_sctID->side(surfaceID);
+          auto modEta_m = Monitored::Scalar<int>( "m_modEta", modEta );
+          auto modPhi_m = Monitored::Scalar<int>( "m_modPhi", modPhi );    
+          auto layerDisk_m = Monitored::Scalar<float>("m_layerDisk", layerDisk);
+
+          if(m_sctID->barrel_ec(surfaceID)      ==  0){ //SCT barrel hit
+            if (sctSide == 0) {
+              fill(m_tools[m_measurements_vs_Eta_Phi_sct_b_s0[layerDisk]], modEta_m, modPhi_m);
+            } else {
+              fill(m_tools[m_measurements_vs_Eta_Phi_sct_b_s1[layerDisk]], modEta_m, modPhi_m);
+            }
+          }
+          else if(m_sctID->barrel_ec(surfaceID) ==  2){ //SCT endcap A hit
+            if (sctSide == 0) {
+              fill(m_tools[m_measurements_vs_Eta_Phi_sct_eca_s0[layerDisk]], modEta_m, modPhi_m);
+            } else {
+              fill(m_tools[m_measurements_vs_Eta_Phi_sct_eca_s1[layerDisk]], modEta_m, modPhi_m);
+            }
+          }
+          else if(m_sctID->barrel_ec(surfaceID) == -2){ //SCT endcap C hit
+            if (sctSide == 0) {
+              fill(m_tools[m_measurements_vs_Eta_Phi_sct_ecc_s0[layerDisk]], modEta_m, modPhi_m);
+            } else {
+              fill(m_tools[m_measurements_vs_Eta_Phi_sct_ecc_s1[layerDisk]], modEta_m, modPhi_m);
+            }
+          }
+        }
+
+      } 
     }
+
     int nhpix= nhpixB +nhpixECA + nhpixECC;
     int nhsct= nhsctB +nhsctECA + nhsctECC;
     int nhtrt= nhtrtB +nhtrtECA + nhtrtECC;
@@ -511,7 +576,6 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     
     auto p_m = Monitored::Scalar<float>( "m_p", trkP );
     fill(genericTrackGroup, p_m);
-
   } //
   // end of loop on trks
   //

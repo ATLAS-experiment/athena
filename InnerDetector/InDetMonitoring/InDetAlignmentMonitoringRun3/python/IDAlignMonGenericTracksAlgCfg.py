@@ -26,6 +26,17 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     m_d0Range = 2
     m_z0Range = 70.
     m_d0BsRange = 0.05
+
+    m_EtaModulesPix = [20, 13, 13, 13]
+    m_EtaModulesMinPix = [-10.5, -6.5, -6.5, -6.5]
+    m_EtaModulesMaxPix = [9.5, 6.5, 6.5, 6.5]
+    m_PhiModules = [14, 22, 38, 52]
+    m_PhiModulesPerRing = 48
+    m_EtaModulesSCTEC = 3
+    m_PhiModulesSCTEC = 52
+    m_EtaModulesSCT = 13
+    m_EtaModulesMinSCT = -6.5
+    m_EtaModulesMaxSCT = 6.5   
      
     # Set a folder name from the user options
     folderName = "ExtendedTracks"
@@ -128,8 +139,8 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     varName = 'm_ntrthits_per_track_ecc;Ntrthits_per_track_ecc'
     title = 'Number of TRT hits per track (ECC);TRT hits in EndCap C;Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangeTRTHits+1, xmin=-0.5, xmax=m_rangeTRTHits +0.5)
-
-    # Eta vs Nhits
+   
+    ## Eta vs Nhits
     varName = 'm_eta,m_npixelhits_per_track;Npixhits_vs_eta'
     title = "Number of Pixel hits vs track #eta; Track #eta;Pixel hits (PIX+IBL)"
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_etaBins, xmin=-m_etaRange, xmax=m_etaRange, ybins=m_rangePixHits+1, ymin=-0.5, ymax=m_rangePixHits +0.5)
@@ -146,7 +157,7 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     title = 'chi2oDoF;#chi^{2} / NDoF;Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=50, xmin=0, xmax=5.)
 
-    # Track params
+    ## Track params
     varName = 'm_eta;eta'
     title = '#eta;Track #eta;Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_etaBins, xmin=-m_etaRange, xmax=m_etaRange)
@@ -247,6 +258,78 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     title = 'd_{0} (BS) Vs #phi_{0} (ECC);Track #phi_{0} [rad];d_{0} (BS) [mm]'
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange, cutmask='isTrackECC')
    
+    ## Eta-ID vs Phi-ID vs hits 
+    ### Pixel barrel and endcap
+    layersPix = ['0', '1', '2', '3']
+    layersName = ['IBL','B-layer','1','2']
+    pixBhitmeasArray = helper.addArray([len(layersPix)], alg, 'measurements_vs_Eta_Phi_pix_b', topPath=pathtrack)
+    for postfix, tool in pixBhitmeasArray.Tools.items():
+        layer = layersPix[int( postfix.split('_')[1] )]
+        title = ('Number of hits vs Module Eta-Phi-ID Pixel Barrel layer %s; Mod Eta; Mod Phi; Pixel hits (PIX+IBL)' % layersName[int(layer)]) 
+        name = 'm_modEta,m_modPhi;measurements_vs_Eta_Phi_pix_b' + layer
+        tool.defineHistogram(name, title = title, type = 'TH2F', xbins = m_EtaModulesPix[int(layer)], xmin = m_EtaModulesMinPix[int(layer)], xmax = m_EtaModulesMaxPix[int(layer)],
+                                                  ybins = m_PhiModules[int(layer)], ymin = -0.5, ymax = m_PhiModules[int(layer)] - 0.5)
+     
+    endcapsPix = ['a', 'c']
+    pixEChitmeAsrray = helper.addArray([len(endcapsPix)], alg, 'measurements_vs_Eta_Phi_pix_ec', topPath = pathtrack)
+    for postfix, tool in pixEChitmeAsrray.Tools.items():
+        layer = endcapsPix[int(postfix.split('_')[1])]
+        title = ('Number of hits vs Module Eta-Phi-ID Pixel EndCap %s; Disk; Mod Phi; Pixel hits (PIX+IBL)' %  layer.upper()) 
+        name = 'm_layerDisk,m_modPhi;measurements_vs_Eta_Phi_pix_ec' + layer
+        tool.defineHistogram(name, title = title, type = 'TH2F', xbins = 3, xmin = - 0.5, xmax = 3 - 0.5,
+                                                  ybins = m_PhiModulesPerRing, ymin = -0.5, ymax = m_PhiModulesPerRing - 0.5)
+    
+    ### SCT barrel and endcap
+    layersSCTB = ['0', '1', '2', '3']
+    sctBhitmeasArray = helper.addArray([len(layersSCTB)], alg, 'measurements_vs_Eta_Phi_sct_b_s0', topPath = pathtrack)
+    for postfix, tool in sctBhitmeasArray.Tools.items():
+        layer = layersSCTB[int( postfix.split('_')[1] )]
+        title = ('Number of hits vs Module Eta-Phi-ID SCT Barrel layer %s side 0; Mod Eta; Mod Phi; SCT hits ' % layer) 
+        name = 'm_modEta,m_modPhi;measurements_vs_Eta_Phi_sct_b' + layer + '_s0'
+        tool.defineHistogram(name, title = title, type = 'TH2F', xbins = m_EtaModulesSCT, xmin = m_EtaModulesMinSCT, xmax = m_EtaModulesMaxSCT,
+                                                   ybins = m_PhiModules[int(layer)], ymin = -0.5, ymax = m_PhiModules[int(layer)] - 0.5)
+
+    sctBhitmeasArray = helper.addArray([len(layersSCTB)], alg, 'measurements_vs_Eta_Phi_sct_b_s1', topPath = pathtrack)
+    for postfix, tool in sctBhitmeasArray.Tools.items():
+        layer = layersSCTB[int( postfix.split('_')[1] )]
+        title = ('Number of hits vs Module Eta-Phi-ID SCT Barrel layer %s side 1; Mod Eta; Mod Phi; SCT hits ' % layer) 
+        name = 'm_modEta,m_modPhi;measurements_vs_Eta_Phi_sct_b' + layer + '_s1'
+        tool.defineHistogram(name, title = title, type = 'TH2F', xbins = m_EtaModulesSCT, xmin = m_EtaModulesMinSCT, xmax = m_EtaModulesMaxSCT,
+                                                   ybins = m_PhiModules[int(layer)], ymin = -0.5, ymax = m_PhiModules[int(layer)] - 0.5)
+
+    layersSCTEC = ['0', '1', '2', '3', '4', '5', '6', '7', '8']
+    sctECAs0hitmeasArray = helper.addArray([len(layersSCTEC)], alg, 'measurements_vs_Eta_Phi_sct_eca_s0', topPath = pathtrack)
+    for postfix, tool in sctECAs0hitmeasArray.Tools.items():
+        layer = layersSCTEC[int( postfix.split('_')[1] )]
+        title = ('Number of hits vs Module Eta-Phi-ID SCT EndCap A Disk %s side 0; Mod Eta; Mod Phi; SCT hits EndCap A s0 ' % layer)
+        name = 'm_modEta,m_modPhi;measurements_vs_Eta_Phi_sct_eca' + layer + '_s0'
+        tool.defineHistogram(name, title = title, type = 'TH2F', xbins = m_EtaModulesSCTEC, xmin = -0.5, xmax = m_EtaModulesSCTEC - 0.5,
+                                                   ybins = m_PhiModulesSCTEC, ymin = -0.5, ymax = m_PhiModulesSCTEC - 0.5)
+
+    sctECAs1hitmeasArray = helper.addArray([len(layersSCTEC)], alg, 'measurements_vs_Eta_Phi_sct_eca_s1', topPath = pathtrack)
+    for postfix, tool in sctECAs1hitmeasArray.Tools.items():
+        layer = layersSCTEC[int( postfix.split('_')[1] )]
+        title = ('Number of hits vs Module Eta-Phi-ID SCT EndCap A Disk %s side 1; Mod Eta; Mod Phi; SCT hits EndCap A s1 ' % layer)
+        name = 'm_modEta,m_modPhi;measurements_vs_Eta_Phi_sct_eca' + layer + '_s1'
+        tool.defineHistogram(name, title = title, type = 'TH2F', xbins = m_EtaModulesSCTEC, xmin = -0.5, xmax = m_EtaModulesSCTEC - 0.5,
+                                                   ybins = m_PhiModulesSCTEC, ymin = -0.5, ymax = m_PhiModulesSCTEC - 0.5)
+
+    sctECCs0hitmeasArray = helper.addArray([len(layersSCTEC)], alg, 'measurements_vs_Eta_Phi_sct_ecc_s0', topPath = pathtrack)
+    for postfix, tool in sctECCs0hitmeasArray.Tools.items():
+        layer = layersSCTEC[int( postfix.split('_')[1] )]
+        title = ('Number of hits vs Module Eta-Phi-ID SCT EndCap C Disk %s side 0; Mod Eta; Mod Phi; SCT hits EndCap C s0 ' % layer)
+        name = 'm_modEta,m_modPhi;measurements_vs_Eta_Phi_sct_ecc' + layer + '_s0'
+        tool.defineHistogram(name, title = title, type = 'TH2F', xbins = m_EtaModulesSCTEC, xmin = -0.5, xmax = m_EtaModulesSCTEC - 0.5,
+                                                   ybins = m_PhiModulesSCTEC, ymin = -0.5, ymax = m_PhiModulesSCTEC - 0.5)
+
+    sctECCs1hitmeasArray = helper.addArray([len(layersSCTEC)], alg, 'measurements_vs_Eta_Phi_sct_ecc_s1', topPath = pathtrack)
+    for postfix, tool in sctECCs1hitmeasArray.Tools.items():
+        layer = layersSCTEC[int( postfix.split('_')[1] )]
+        title = ('Number of hits vs Module Eta-Phi-ID SCT EndCap C Disk %s side 1; Mod Eta; Mod Phi; SCT hits EndCap C s1 ' % layer)
+        name = 'm_modEta,m_modPhi;measurements_vs_Eta_Phi_sct_ecc' + layer + '_s1'
+        tool.defineHistogram(name, title = title, type = 'TH2F', xbins = m_EtaModulesSCTEC, xmin = -0.5, xmax = m_EtaModulesSCTEC - 0.5,
+                                                   ybins = m_PhiModulesSCTEC, ymin = -0.5, ymax = m_PhiModulesSCTEC - 0.5)
+    
     # end histograms
 
 
