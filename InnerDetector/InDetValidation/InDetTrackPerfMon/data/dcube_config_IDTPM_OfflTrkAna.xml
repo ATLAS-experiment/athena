@@ -91,8 +91,6 @@
         <hist1D name="num_truth_all" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="num_truth_selected" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="num_truth_matched" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist1D name="num_offl_selected_vs_truthMu" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist1D name="num_offl_selected_vs_actualMu" type="TH2F" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="Resolutions">
         <hist1D name="pull_pt" type="TH1D" plotopts="" tests="KSnorm"/>
@@ -261,7 +259,6 @@
         <graph name="eff_vs_truth_eta_vs_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="eff_vs_truth_z0_vs_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="eff_vs_truth_z0sin_vs_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_truthMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="eff_vs_actualMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="FakeRates">
@@ -271,7 +268,6 @@
          <graph name="fakerate_vs_offl_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
          <graph name="fakerate_vs_offl_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
          <graph name="fakerate_vs_offl_z0" type="TEfficiency" plotopts="" tests="KSnorm"/>
-         <graph name="fakerate_vs_truthMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
          <graph name="fakerate_vs_actualMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
         </TDirectory>
         <graph name="fakerate_vs_offl_pt" type="TEfficiency" plotopts="" tests="KSnorm"/>
@@ -279,7 +275,6 @@
         <graph name="fakerate_vs_offl_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="fakerate_vs_offl_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="fakerate_vs_offl_z0" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="fakerate_vs_truthMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="fakerate_vs_actualMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
        </TDirectory>
       </TDirectory>
@@ -331,8 +326,6 @@
         <hist1D name="num_truth_all" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="num_truth_selected" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="num_truth_matched" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist1D name="num_offl_selected_vs_truthMu" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist1D name="num_offl_selected_vs_actualMu" type="TH2F" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="Resolutions">
         <hist1D name="pull_pt" type="TH1D" plotopts="" tests="KSnorm"/>
@@ -501,7 +494,6 @@
         <graph name="eff_vs_truth_eta_vs_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="eff_vs_truth_z0_vs_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="eff_vs_truth_z0sin_vs_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_truthMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="eff_vs_actualMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="FakeRates">
@@ -511,7 +503,6 @@
          <graph name="fakerate_vs_offl_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
          <graph name="fakerate_vs_offl_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
          <graph name="fakerate_vs_offl_z0" type="TEfficiency" plotopts="" tests="KSnorm"/>
-         <graph name="fakerate_vs_truthMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
          <graph name="fakerate_vs_actualMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
         </TDirectory>
         <graph name="fakerate_vs_offl_pt" type="TEfficiency" plotopts="" tests="KSnorm"/>
@@ -519,7 +510,6 @@
         <graph name="fakerate_vs_offl_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="fakerate_vs_offl_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="fakerate_vs_offl_z0" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="fakerate_vs_truthMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="fakerate_vs_actualMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
        </TDirectory>
       </TDirectory>

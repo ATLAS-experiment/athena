@@ -173,8 +173,6 @@
         <graph name="eff_vs_truth_z0" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="eff_vs_truth_prodR" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="eff_vs_truth_prodZ" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_truthMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_actualMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
        </TDirectory>
       </TDirectory>
      </TDirectory>
@@ -307,8 +305,6 @@
         <graph name="eff_vs_truth_z0" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="eff_vs_truth_prodR" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="eff_vs_truth_prodZ" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_truthMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_actualMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
        </TDirectory>
       </TDirectory>
      </TDirectory>
