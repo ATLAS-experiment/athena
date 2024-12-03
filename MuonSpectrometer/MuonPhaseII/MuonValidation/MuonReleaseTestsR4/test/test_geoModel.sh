@@ -2,8 +2,9 @@
 #
 # art-description: test muon geometry model (Run 4)
 #
-# art-type: local
+# art-type: grid
 # art-include: main/Athena
+# art-athena-mt: 8
 # art-output: run_MuonGeoModelTestR4_testGeoModel.log
 # art-output: out_MuonGeoModelTestR4_testGeoModel.root
 

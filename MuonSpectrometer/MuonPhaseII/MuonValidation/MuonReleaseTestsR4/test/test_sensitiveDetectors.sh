@@ -2,8 +2,9 @@
 #
 # art-description: test muon sensitive detectors (Run 4)
 #
-# art-type: local
+# art-type: grid
 # art-include: main/Athena
+# art-athena-mt: 8
 # art-output: run_MuonGeoModelTestR4_testSensitiveDetectors.log
 # art-output: out_MuonGeoModelTestR4_testGeoModel.pool.root
 
@@ -22,7 +23,7 @@ mkdir $file; cd $file
 log_file="run_${package}_${file}.log"
 out_file="out_${package}_${file}.pool.root"
 
-python -m $package.$file --nEvents $nevents --outRootFile ${out_file} > $log_file 2>&1
+python -m $package.$file --threads 8 --nEvents $nevents --outRootFile ${out_file} > $log_file 2>&1
 
 # save return code and write to art-results output 
 rc1=${PIPESTATUS[0]}
