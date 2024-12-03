@@ -164,8 +164,7 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
     ## Truth-Hit decorator
     if ( ( "Truth" in flags.PhysVal.IDTPM.currentTrkAna.RefType ) or
          ( "Truth" in flags.PhysVal.IDTPM.currentTrkAna.TestType ) ):
-        from InDetTrackPerfMon.InDetAlgorithmConfig import TruthHitDecoratorAlgCfg
-        from InDetTrackPerfMon.InDetAlgorithmConfig import TruthDecoratorAlgCfg
+        from InDetTrackPerfMon.InDetAlgorithmConfig import TruthHitDecoratorAlgCfg, TruthDecoratorAlgCfg
         acc.merge( TruthHitDecoratorAlgCfg( flags ) )
         acc.merge( TruthDecoratorAlgCfg( flags ) )
 

@@ -7,10 +7,10 @@
 
 /**
  * @file TruthDecoratorAlg.h
- * @brief Algorithm to decorate offline tracks with the corresponding
- *        offline muon object (if required for trigger analysis) 
- * @author Marco Aparo <marco.aparo@cern.ch>
- * @date 25 September 2023
+ * @brief Algorithm to decorate truth particles with their
+ *        origin and type classes from MCTruthClassifier
+ * @author Federica Piazza <federica.piazza@cern.ch>, Marco Aparo <marco.aparo@cern.ch>
+ * @date 1 November 2024
  **/
 
 /// Athena includes
@@ -18,7 +18,6 @@
 #include "MCTruthClassifier/IMCTruthClassifier.h"
 
 /// xAOD includes
-#include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 
 
@@ -37,8 +36,6 @@ namespace IDTPM {
 
   public:
 
-    //typedef ElementLink<xAOD::MuonContainer> ElementMuonLink_t;
-
     TruthDecoratorAlg( const std::string& name, ISvcLocator* pSvcLocator );
 
     virtual ~TruthDecoratorAlg() = default;
@@ -56,12 +53,13 @@ namespace IDTPM {
 
     StatusCode decorateTruthParticle(
         const xAOD::TruthParticle& truth,
-        std::vector< IDTPM::OptionalDecoration< xAOD::TruthParticleContainer, int >> &truth_decor) const;
+        std::vector< IDTPM::OptionalDecoration< xAOD::TruthParticleContainer, int >>& truth_decor ) const;
 
 
     enum TruthDecorations : size_t {
-      truthType,
-      truthOrigin
+      Type,
+      Origin,
+      NDecorations
     };
 
     const std::vector< std::string > m_decor_truth_names {
@@ -73,8 +71,8 @@ namespace IDTPM {
                                               int > > m_decor_truth{};
 
 
-    PublicToolHandle<IMCTruthClassifier> m_truthClassifier {this,"MCTruthClassifier","MCTruthClassifier/MCTruthClassifier",""};
-
+    PublicToolHandle< IMCTruthClassifier > m_truthClassifier {
+        this, "MCTruthClassifier", "MCTruthClassifier/MCTruthClassifier", "Truth classification tool" };
 
   };
 

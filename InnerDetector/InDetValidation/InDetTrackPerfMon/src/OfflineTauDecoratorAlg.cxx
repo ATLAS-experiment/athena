@@ -66,6 +66,13 @@ StatusCode IDTPM::OfflineTauDecoratorAlg::execute( const EventContext& ctx ) con
     return StatusCode::FAILURE;
   }
 
+  /// check if ALL required decorations exist already. If so return SUCCESS
+  if( IDTPM::decorationsAllExist( *ptracks, m_decor_tau ) ) {
+    ATH_MSG_INFO( "All decorations already exist. Exiting gracefully" );
+    return StatusCode::SUCCESS;
+  }
+
+  /// Creating decorators (for non-yet-existing decorations)
   std::vector< IDTPM::OptionalDecoration<xAOD::TrackParticleContainer, ElementTauLink_t> >
       tau_decor( IDTPM::createDecoratorsIfNeeded( *ptracks, m_decor_tau, ctx ) );
 
