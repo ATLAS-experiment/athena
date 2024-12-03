@@ -336,6 +336,18 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track
     bool hasPredefinedDecay = (dynPart && (nullptr!=(dynPart->GetPreAssignedDecayProducts())));
     status = (hasPredefinedDecay)? 2 : 1;
   }
+  // Treat particles with a pre-defined decay which have survived an
+  // interaction differently for now.
+  if (this->interactionClassification() == ISF::QS_SURV_VTX) {
+    status = status%HepMC::SIM_STATUS_INCREMENT;
+    // Such particles were previously assigned barcodes below
+    // HepMC::SIM_BARCODE_OFFSET and therefore
+    // HepMC::is_simulation_particle(barcode) would return false. Not
+    // applying HepMC::SIM_STATUS_INCREMENT means that
+    // HepMC::is_simulation_particle(status) will also return false.
+    // TODO This should be revisited in the future should we decide
+    // that we want to be able to easily identify such particles.
+  }
   HepMC::GenParticlePtr newParticle = HepMC::newGenParticlePtr(fourMomentum, pdgCode, status);
 
 #ifndef HEPMC3
