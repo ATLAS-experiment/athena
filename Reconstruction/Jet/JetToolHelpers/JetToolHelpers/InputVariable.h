@@ -51,7 +51,7 @@ class InputVariable : public IInputVariable
         }
 
         /// This function return the name of the variable
-        std::string getName() const { return m_name;   }
+        const std::string& getName() const { return m_name;   }
         /// This function return the scale of the variable
         float getScale() const { return m_scale;  }
         /// This function set the scale of the variable
