@@ -2,6 +2,8 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "TreeTesterAlg.h"
+#include <memory>
+#include <vector>
 
 namespace MuonVal{
     namespace MuonTester{
@@ -9,7 +11,11 @@ namespace MuonVal{
         StatusCode TreeTestAlg::initialize(){
             auto arrayTest = std::make_unique<ArrayBranch<unsigned>>(m_tree.tree(), "testArray", 2);
             m_arrayTest = arrayTest.get();
-            m_tree.addBranch(std::move(arrayTest));
+            bool ok = m_tree.addBranch(std::move(arrayTest));
+            if (not ok){
+              ATH_MSG_ERROR("addBranch failed in TreeTestAlg::initialize");
+              return StatusCode::FAILURE;
+            }
             ATH_CHECK(m_tree.init(this));
             return StatusCode::SUCCESS;
         }
