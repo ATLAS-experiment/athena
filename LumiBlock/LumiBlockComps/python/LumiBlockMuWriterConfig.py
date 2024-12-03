@@ -21,8 +21,19 @@ def LumiBlockMuWriterCfg (flags, name = 'LumiBlockMuWriter', seqName="AthAlgSeq"
         result.merge (LuminosityCondAlgCfg (flags))
         condkey = result.getCondAlgo ('LuminosityCondAlg').LuminosityOutputKey
 
+    from AthenaConfiguration.Enums import ProductionStep
+    kwargs={}
+    if flags.Common.ProductionStep in [ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:
+        actualLumiKey=f"{flags.Overlay.BkgPrefix}EventInfo.actualInteractionsPerCrossing"
+        averageLumiKey=f"{flags.Overlay.BkgPrefix}EventInfo.averageInteractionsPerCrossing"
+
+        kwargs.update({"actualInteractionsPerCrossingKey" : actualLumiKey,
+                       "averageInteractionsPerCrossingKey": averageLumiKey})
+
     LumiBlockMuWriter = CompFactory.LumiBlockMuWriter # LumiBlockComps
-    alg = LumiBlockMuWriter (name, LumiDataKey = condkey)
+    alg = LumiBlockMuWriter (name,
+                             LumiDataKey = condkey,
+                             **kwargs)
     #In the HLT we want to run LumiBlockMuWriter as a normal EventAlgo, but in a pre-event sequence (HLTBeginSeq)
     if  flags.Trigger.doHLT:
          result.addEventAlgo(alg)
