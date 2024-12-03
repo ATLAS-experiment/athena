@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Mdt.h"
@@ -373,8 +373,8 @@ namespace MuonGM {
 	  }
 	  if (i == 0 && xmin > xminChamber) {
 	    // we start with a full slice without cutout
-	    nonCutoutXSteps.push_back(std::make_pair(xminChamber, lowerX));
-	    nonCutoutYSteps.push_back(std::make_pair(yminChamber, ymaxChamber));
+	    nonCutoutXSteps.emplace_back(xminChamber, lowerX);
+	    nonCutoutYSteps.emplace_back(yminChamber, ymaxChamber);
 	  }
 	  double upperX = round(c->dx + c->widthXs / 2, 2);
 	  double xmax = (upperX >= xmaxChamber) ? xmaxChamber : upperX;
@@ -384,17 +384,17 @@ namespace MuonGM {
 	  
 	  if (latestXMax < xmin) {
 	    // there is a full slice between latestXMax and xmin
-	    nonCutoutXSteps.push_back(std::make_pair(latestXMax, xmin));
-	    nonCutoutYSteps.push_back(std::make_pair(yminChamber, ymaxChamber));
+	    nonCutoutXSteps.emplace_back(latestXMax, xmin);
+	    nonCutoutYSteps.emplace_back(yminChamber, ymaxChamber);
 	  }
 	  
-	  nonCutoutXSteps.push_back(std::make_pair(xmin, xmax));
-	  nonCutoutYSteps.push_back(std::make_pair(ymin, ymax));
+	  nonCutoutXSteps.emplace_back(xmin, xmax);
+	  nonCutoutYSteps.emplace_back(ymin, ymax);
 	  
 	  if (i == Ncuts - 1 && xmax < xmaxChamber) {
 	    // we end with a full slice without cutout
-	    nonCutoutXSteps.push_back(std::make_pair(xmax, xmaxChamber));
-	    nonCutoutYSteps.push_back(std::make_pair(yminChamber, ymaxChamber));
+	    nonCutoutXSteps.emplace_back(xmax, xmaxChamber);
+	    nonCutoutYSteps.emplace_back(yminChamber, ymaxChamber);
 	  }
 	  
 	  latestXMax = xmax;
