@@ -32,8 +32,8 @@ namespace xAOD{
     
     /** @brief Returns the associated readout element to the measurement*/
     const MuonGMR4::MuonReadoutElement* readoutElement(const UncalibratedMeasurement* meas);
-    /** @brief Returns the associated identifier */
-    Identifier identify(const UncalibratedMeasurement* meas);
+    /** @brief Returns the associated identifier from the muon measurement */
+    const Identifier& identify(const UncalibratedMeasurement* meas);
 }
 
 #endif

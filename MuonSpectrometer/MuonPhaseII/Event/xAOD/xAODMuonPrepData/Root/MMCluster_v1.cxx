@@ -23,8 +23,11 @@ IdentifierHash MMCluster_v1::measurementHash() const {
 IdentifierHash MMCluster_v1::layerHash() const {
     return MuonGMR4::MmReadoutElement::createHash(gasGap(), 0);
 }
-Identifier MMCluster_v1::identify() const {
-   return readoutElement()->measurementId(measurementHash());
+const Identifier& MMCluster_v1::identify() const {
+    if (!m_identifier.isValid()){
+        m_identifier.set(readoutElement()->measurementId(measurementHash()));
+    }
+    return (*m_identifier.ptr());
 }
 IMPLEMENT_SETTER_GETTER(MMCluster_v1, uint16_t, time, setTime)
 IMPLEMENT_SETTER_GETTER(MMCluster_v1, uint32_t, charge, setCharge)

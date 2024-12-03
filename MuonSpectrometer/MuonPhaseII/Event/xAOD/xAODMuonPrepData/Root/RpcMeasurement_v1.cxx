@@ -37,8 +37,11 @@ namespace xAOD {
     IdentifierHash RpcMeasurement_v1::layerHash() const {
         return MuonGMR4::RpcReadoutElement::createHash(0, gasGap(), doubletPhi(), measuresPhi());
     }
-    Identifier RpcMeasurement_v1::identify() const {
-        return readoutElement()->measurementId(measurementHash());
+    const Identifier& RpcMeasurement_v1::identify() const {
+        if (!m_identifier.isValid()){
+            m_identifier.set(readoutElement()->measurementId(measurementHash()));
+        }
+        return (*m_identifier.ptr());
     }
     Amg::Vector3D RpcMeasurement_v1::localMeasurementPos() const {
         Amg::Vector3D lPos{Amg::Vector3D::Zero()};

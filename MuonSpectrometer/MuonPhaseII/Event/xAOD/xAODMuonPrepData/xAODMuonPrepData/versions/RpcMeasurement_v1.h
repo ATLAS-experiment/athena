@@ -32,7 +32,7 @@ class RpcMeasurement_v1 : public UncalibratedMeasurement_v1 {
     }
     /** @brief: Returns the Athena identifier of the measurement It's constructed from the measurementHash
      *          which is passed to the associated readoutElement */
-    Identifier identify() const;
+    const Identifier& identify() const;
     /** @brief Returns the local position of the measurement */
     Amg::Vector3D localMeasurementPos() const;
     
@@ -94,8 +94,10 @@ class RpcMeasurement_v1 : public UncalibratedMeasurement_v1 {
     /// Down cast the memory of the readoutElement cache if the object is stored to disk 
     ///  to arrive at the same memory layout between Athena & CLING
     char m_readoutEle[sizeof(CxxUtils::CachedValue<const MuonGMR4::RpcReadoutElement*>)]{};
+    char m_identifier[sizeof(CxxUtils::CachedValue<Identifier>)]{};
 #else
     CxxUtils::CachedValue<const MuonGMR4::RpcReadoutElement*> m_readoutEle{};
+    CxxUtils::CachedValue<Identifier> m_identifier{};
 #endif
 
 };
