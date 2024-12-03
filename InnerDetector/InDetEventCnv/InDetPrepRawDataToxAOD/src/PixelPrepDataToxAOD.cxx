@@ -102,7 +102,7 @@ StatusCode PixelPrepDataToxAOD::initialize()
   ATH_CHECK(m_readKeyTemp.initialize());
   ATH_CHECK(m_readKeyHV.initialize());
 
-  ATH_CHECK(m_pixelSummary.retrieve());
+  ATH_CHECK(m_pixelSummary.retrieve(DisableTool{!m_writeRDOinformation} ));
 
   ATH_CHECK(m_lorentzAngleTool.retrieve());
 
