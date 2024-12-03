@@ -18,6 +18,7 @@
 
 #ifndef XAOD_STANDALONE
 #   include "GaudiKernel/ThreadLocalContext.h"
+#   include "AthenaKernel/ExtendedEventContext.h"
 #endif // not XAOD_STANDALONE
 
 #include "CxxUtils/as_const_ptr.h"
