@@ -1,5 +1,28 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
+def configureMetaDataForPFlowCfg(cfgFlags):
+
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    cfg = ComponentAccumulator()
+
+    from AthenaConfiguration.Enums import MetadataCategory
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+
+    cfg.merge(
+        SetupMetaDataForStreamCfg(
+            cfgFlags,
+            "AOD",
+            createMetadata=[
+                MetadataCategory.ByteStreamMetaData,
+                MetadataCategory.LumiBlockMetaData,
+                MetadataCategory.TruthMetaData,
+                MetadataCategory.IOVMetaData,
+            ],
+        )
+    )
+
+    return cfg
+
 def configureRecoForPFlowCfg(cfgFlags):
 
     #Given we rebuild topoclusters from the ESD, we should also redo the matching between topoclusters and muon clusters.
@@ -48,23 +71,9 @@ def configureRecoForPFlowCfg(cfgFlags):
     from TrkEventCnvTools.TrkEventCnvToolsConfig import TrkEventCnvSuperToolCfg
     cfg.merge(TrkEventCnvSuperToolCfg(cfgFlags))
 
-    #Add metadata data to xAOD such that we can create physval.root from the output AOD
-    from AthenaConfiguration.Enums import MetadataCategory
-    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-
-    cfg.merge(
-        SetupMetaDataForStreamCfg(
-            cfgFlags,
-            "AOD",
-            createMetadata=[
-                MetadataCategory.ByteStreamMetaData,
-                MetadataCategory.LumiBlockMetaData,
-                MetadataCategory.TruthMetaData,
-                MetadataCategory.IOVMetaData,
-            ],
-        )
-    )
-
+    #Add metadata data to xAOD such that we can run workflows such as creating physval.root 
+    # from the output AOD or making ntuples from the output AOD
+    cfg.merge( configureMetaDataForPFlowCfg(cfgFlags) )
 
     return cfg
 
