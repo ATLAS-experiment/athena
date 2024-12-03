@@ -207,14 +207,10 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
             return Error;
          }
          for( auto& dsc : m_fieldDescs ) {
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 33, 0 )
-            dsc.view_p = std::make_unique<RNTupleView<void>>( m_ntupleReader->GetView<void>(dsc.fieldname, nullptr) );
-#else
-            dsc.view_p = std::make_unique<RNTupleView<void,true>>( m_ntupleReader->GetView<void>(dsc.fieldname, nullptr) );
-#endif
+            dsc.view = m_ntupleReader->GetView<void>(dsc.fieldname, nullptr);
             if( dsc.hasAuxStore() ) {
                // Attach RNTuple Reader (owned by the DB)
-               const std::string type_name = dsc.view_p->GetField().GetTypeName();
+               const std::string type_name = dsc.view->GetField().GetTypeName();
                dsc.auxdyn_reader = RootAuxDynIO::getNTupleAuxDynReader( dsc.fieldname, type_name, m_ntupleReader );
                // If we set up a reader, then disable aging
                // for this file.  That will prevent POOL from
@@ -415,12 +411,12 @@ DbStatus RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
          }
          if( !p.ptr ) {
             // create the object for the user and pass ownership to them
-            p.ptr = dsc.view_p->GetField().CreateObject<void>().release();
+            p.ptr = dsc.view->GetField().CreateObject<void>().release();
             *obj_p = p.ptr;
          }
-         dsc.view_p->BindRawPtr( p.ptr );
+         dsc.view->BindRawPtr( p.ptr );
          // read into the object
-         (*dsc.view_p)(evt_id);
+         (*dsc.view)(evt_id);
          numBytes += 1;
 
          // case DbColumn::BLOB:

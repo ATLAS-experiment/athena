@@ -17,6 +17,7 @@
 #include "StorageSvc/DbDatabase.h"
 #include <vector>
 #include <memory>
+#include <optional>
 #include <string>
 
 // Forward declarations
@@ -52,9 +53,9 @@ class RNTupleContainer : public DbContainerImp
   {
     std::string fieldname;
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 33, 0 )
-    std::unique_ptr< RNTupleView<void> > view_p;  // pointer because lack of default xtor
+    std::optional< RNTupleView<void> > view;
 #else
-    std::unique_ptr< RNTupleView<void, true> > view_p;  // pointer because lack of default xtor
+    std::optional< RNTupleView<void, true> > view;
 #endif
     std::string sgkey;
     TClass*     clazz = nullptr;
