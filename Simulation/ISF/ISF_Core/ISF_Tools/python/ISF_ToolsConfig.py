@@ -115,7 +115,8 @@ def CosmicEventFilterToolCfg(flags, name="ISF_CosmicEventFilter", **kwargs):
     return acc
 
 
-def StoppedParticleFilterToolCfg(flags, name="ISF_StoppedParticleFilter", **kwargs):
+def StoppedParticleEventFilterToolCfg(flags, name="ISF_StoppedParticleFilter", **kwargs):
+    # Possibly obsolete, was previously added to the SimKernel.EventFilterTools ToolHandleArray
     kwargs.setdefault("VolumeNames", ["StoppingPositions"])
     acc = ComponentAccumulator()
     acc.setPrivateTools(CompFactory.ISF.CosmicEventFilterTool(name, **kwargs))

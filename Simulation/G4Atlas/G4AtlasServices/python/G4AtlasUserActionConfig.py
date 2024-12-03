@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, LHCPeriod
 from CaloG4Sim.CaloG4SimConfig import CalibrationDefaultProcessingToolCfg
 from SimulationConfig.SimEnums import CalibrationRun, CavernBackground, SimulationFlavour
-from G4CosmicFilter.G4CosmicFilterConfig import CosmicFilterToolCfg
+from G4CosmicFilter.G4CosmicFilterConfig import CosmicFilterToolCfg, StoppedParticleFilterToolCfg
 from G4UserActions.G4UserActionsConfig import (
     AthenaStackingActionToolCfg, AthenaTrackingActionToolCfg,
     G4SimTimerToolCfg, G4TrackCounterToolCfg, HitWrapperToolCfg,
@@ -17,7 +17,6 @@ from ISF_Services.ISF_ServicesCoreConfig import ATLFAST_GeoIDSvcCfg, GeoIDSvcCfg
 from ISF_Services.ISF_ServicesConfig import (
     ATLFAST_ParticleBrokerSvcCfg, ParticleBrokerSvcCfg, TruthServiceCfg
 )
-from ISF_Tools.ISF_ToolsConfig import StoppedParticleFilterToolCfg
 from MCTruthBase.MCTruthBaseConfig import MCTruthSteppingActionToolCfg
 
 
