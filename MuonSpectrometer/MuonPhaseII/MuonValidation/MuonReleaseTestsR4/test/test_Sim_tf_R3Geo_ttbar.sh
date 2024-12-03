@@ -2,6 +2,7 @@
 #
 # art-description: Simulation test with R3 MS geometry + ID
 # art-type: grid
+# art-include: main/Athena
 # art-architecture:  '#x86_64-intel'
 # art-athena-mt: 8
 # art-output: log.*

@@ -1,9 +1,10 @@
 #!/bin/bash
 #
-# art-description: Digitization R3 geometry test with ID + MS
 # art-type: grid
-# art-architecture:  '#x86_64-intel'
+# art-include: main/Athena
 # art-athena-mt: 8
+# art-description: Digitization R3 geometry test with ID + MS
+# art-architecture:  '#x86_64-intel'
 # art-output: log.*
 # art-output: MuonDigitNTuple.root
 # art-output: myRDO.pool.root

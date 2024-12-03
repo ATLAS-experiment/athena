@@ -2,8 +2,9 @@
 #
 # art-description: Simulation test with R4 MS geometry + ITK
 # art-type: grid
-# art-architecture:  '#x86_64-intel'
+# art-include: main/Athena
 # art-athena-mt: 8
+# art-architecture:  '#x86_64-intel'
 # art-output: log.*
 # art-output: MuonSimHitNtuple.root
 # art-output: SimHitsR4.pool.root
