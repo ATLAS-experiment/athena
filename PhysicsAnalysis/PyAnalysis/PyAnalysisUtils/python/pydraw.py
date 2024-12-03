@@ -1106,14 +1106,7 @@ def _get_hist (ndim, args, hname, htitle):
     # Delete any old object of the same name.
     hold = ROOT.gROOT.FindObject (hname)
     if hold:
-        # n.b. TObject::Delete() doesn't work reliably for objects
-        # created via reflex.  (reflex doesn't handle custom
-        # new/delete, so TStorage won't be called to allocate
-        # the object, so IsOnHeap might return false for it.)
-        # Force the issue by doing a C++ delete directly.
-        ROOT.gROOT.ProcessLine ("delete (%s*)%d" %
-                                (hold.__class__.__cpp_name__,
-                                 ROOT.AddressOf(hold)[0]))
+        ROOT.gROOT.Remove (hold)
 
     # Create the histogram.
     if profile:
