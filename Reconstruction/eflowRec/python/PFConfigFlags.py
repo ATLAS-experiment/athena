@@ -31,4 +31,7 @@ def createPFConfigFlags():
     #Toggle whether to use topoclusters or combined topoclusters + topotowers container
     pfConfigFlags.addFlag("PF.useTopoTowers",False)
 
+    #Toggle thinning on and off
+    pfConfigFlags.addFlag("PF.doThinning",True)
+
     return pfConfigFlags

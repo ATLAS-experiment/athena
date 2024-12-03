@@ -10,6 +10,7 @@ if __name__=="__main__":
     cfgFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PFlowTests/mc21_13p6TeV/mc21_13p6TeV.601589.PhPy8EG_A14_ttbar_hdamp258p75_nonallhadron.recon.ESD.e8485_s3986_r14060/ESD.31373517._000035.pool.root.1"]
     cfgFlags.Output.AODFileName="output_AOD.root"
     cfgFlags.Output.doWriteAOD=True
+    cfgFlags.PF.doThinning=False
     cfgFlags.PF.EOverPMode=True
     cfgFlags.lock()
 
@@ -26,5 +27,9 @@ if __name__=="__main__":
     list_remaps=ListRemaps()
     for mapping in list_remaps:
         cfg.merge(mapping)    
+
+    #Add metadata which is required for AOD->ntuple step of e/p derivation.
+    from PFlowUtils.configureRecoForPFlow import configureMetaDataForPFlowCfg
+    cfg.merge(configureMetaDataForPFlowCfg(cfgFlags))
 
     cfg.run()

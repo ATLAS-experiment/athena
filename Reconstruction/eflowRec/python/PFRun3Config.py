@@ -120,10 +120,9 @@ def PFCfg(inputFlags,**kwargs):
     result.merge(addToESD(inputFlags, toESDAndAOD))
     result.merge(addToAOD(inputFlags, toESDAndAOD))
 
-    #If we read an ESD then we cannot run the thinning because e.g electrons in the ESD
-    #have links to the neutral particle flow objects. If we run the thinning, then those
-    #links become invalid. 
-    if "StreamESD" not in inputFlags.Input.ProcessingTags:
+    #In some workflows we may need to disable this
+    #e.g if running in e/p mode where the standard containers are not produced
+    if inputFlags.PF.doThinning:
       from ThinningUtils.ThinNegativeEnergyNeutralPFOCfg import ThinNegativeEnergyNeutralPFOCfg
       result.merge(ThinNegativeEnergyNeutralPFOCfg(inputFlags))
 
