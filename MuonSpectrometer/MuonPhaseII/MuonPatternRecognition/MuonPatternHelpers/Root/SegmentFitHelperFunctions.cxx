@@ -255,28 +255,5 @@ namespace MuonR4 {
             }
             return sign(signedDist);
         }
-        std::pair<std::vector<double>, double> postFitChi2PerMas(const SegmentFit::Parameters& segPars,
-                                                                 std::optional<double> arrivalTime,
-                                                                 std::vector<std::unique_ptr<CalibratedSpacePoint>>& hits,
-                                                                 MsgStream& msg) {
-
-            std::vector<double> measChi2{};
-            double chi2{0.};
-            const auto [segPos, segDir] = SegmentFit::makeLine(segPars);
-            for (std::unique_ptr<CalibratedSpacePoint>& hit : hits) {
-                if (hit->fitState() == State::Outlier){
-                    hit->setFitState(State::Valid);
-                    measChi2.push_back(chiSqTerm(segPos,segDir, segPars[toInt(ParamDefs::time)],arrivalTime, *hit, msg));
-                    hit->setFitState(State::Outlier);
-                } else {
-                    measChi2.push_back(chiSqTerm(segPos,segDir, segPars[toInt(ParamDefs::time)],arrivalTime, *hit, msg));
-                    chi2+= measChi2.back();
-                }
-            }
-            if (msg.level() <= MSG::VERBOSE) {
-                msg<<MSG::VERBOSE<<" Overall chi2: "<<chi2<<"."<<endmsg;
-            }
-            return std::make_pair(std::move(measChi2), chi2);
-        }
     }
 }

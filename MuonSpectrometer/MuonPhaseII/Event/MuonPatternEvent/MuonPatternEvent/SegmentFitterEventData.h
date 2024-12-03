@@ -62,8 +62,6 @@ namespace MuonR4{
         Covariance segmentParErrs{Covariance::Identity()};
         /** @brief Calibrated measurements used in the fit */
         HitVec calibMeasurements{};
-        /** @brief Chis per measurement to identify outliers */
-        std::vector<double> chi2PerMeasurement{};
         /** @brief chi2 of the fit */
         double chi2{0.};
         /** @brief degrees of freedom */
