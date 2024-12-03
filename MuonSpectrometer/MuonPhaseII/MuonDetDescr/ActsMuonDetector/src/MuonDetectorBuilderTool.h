@@ -6,13 +6,13 @@
 
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <ActsGeometryInterfaces/IDetectorVolumeBuilderTool.h>
+#include <ActsGeoUtils/SurfaceBoundSet.h>
 #include <AthenaBaseComps/AthAlgTool.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <Acts/Surfaces/PlanarBounds.hpp>
 #include <Acts/Surfaces/Surface.hpp>
 
 class GeoChildNodeWithTrf;
-class GeoShapeSubtraction;
 class GeoMaterial;
 
 namespace ActsTrk{
@@ -36,9 +36,12 @@ namespace ActsTrk{
                                  std::vector<std::shared_ptr<Acts::Experimental::DetectorVolume>>& passiveVolumes, 
                                  const GeoTrf::Transform3D& transform) const;
 
+        
+        using BlendedBoundSet = ActsTrk::SurfaceBoundSet<Acts::TrapezoidBounds>;
         std::shared_ptr<Acts::Surface> getChamberMaterial(const MuonGMR4::Chamber& chamber, 
-                                const Amg::Transform3D& chamberTransform,
-                                const int& totalMaterials) const;
+                                                          const Amg::Transform3D& chamberTransform,                                                          
+                                                          const int totalMaterials,
+                                                          BlendedBoundSet& boundSet) const;
 
         const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
@@ -60,9 +63,10 @@ namespace ActsTrk{
 
         bool checkDummyMaterial(const PVConstLink& vol) const;
 
-        void getMaterialContent(const PVConstLink& vol, std::vector<std::pair<const GeoMaterial*, double>>& materialContent) const;
+        using MaterialPtr = GeoIntrusivePtr<const GeoMaterial>;
+        void getMaterialContent(const PVConstLink& vol, std::vector<std::pair<MaterialPtr, double>>& materialContent) const;
 
-        std::pair<GeoIntrusivePtr<GeoMaterial>, double> getMaterial(const PVConstLink& vol) const;
+        std::pair<MaterialPtr, double> getMaterial(const PVConstLink& vol) const;
 
 
     };

@@ -88,10 +88,11 @@ namespace ActsTrk {
         auto portalGenerator = Acts::Experimental::defaultPortalAndSubPortalGenerator();
         unsigned int numChambers = chambers.size();
 
+        BlendedBoundSet materialBounds{};
         for(const MuonGMR4::Chamber* chamber : chambers){
             unsigned int num = 0;
             //Gather the passives in each chamber
-            surfacePtr material{getChamberMaterial(*chamber, chamber->localToGlobalTrans(*gctx), materialSurfaces.size())};
+            surfacePtr material{getChamberMaterial(*chamber, chamber->localToGlobalTrans(*gctx), materialSurfaces.size(), materialBounds)};
             std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds = chamber->bounds();
             materialSurfaces.push_back(material);
             std::pair<std::vector<volumePtr>, std::vector<surfacePtr>> readoutElements = 
@@ -260,16 +261,16 @@ std::pair<std::vector<volumePtr>,std::vector<surfacePtr>>
     }
 
     surfacePtr MuonDetectorBuilderTool::getChamberMaterial(const MuonGMR4::Chamber& chamber, 
-                                                     const Amg::Transform3D& chamberTransform,
-                                                     const int& totalMaterials) const {
-        std::shared_ptr<const Acts::PlanarBounds> bounds = std::make_shared<Acts::TrapezoidBounds>(chamber.halfXLong(), chamber.halfXShort(), chamber.halfY());
+                                                           const Amg::Transform3D& chamberTransform,
+                                                           const int totalMaterials,
+                                                           BlendedBoundSet& boundSet) const {
+        std::shared_ptr<const Acts::PlanarBounds> bounds = boundSet.make_bounds(chamber.halfXShort(), chamber.halfXLong(), chamber.halfY());
         const float thickness = chamber.halfZ() * 2;
         PVConstLink parentVolume = chamber.readoutEles().front()->getMaterialGeom()->getParent();
-        std::pair<GeoIntrusivePtr<GeoMaterial>, double> geoMaterials = getMaterial(parentVolume);
+        std::pair<MaterialPtr, double> geoMaterials = getMaterial(parentVolume);
         const Acts::Material aMat = Acts::GeoModel::geoMaterialConverter(*geoMaterials.first);
         //rotate about the z axis
-        const Amg::Transform3D transform = chamberTransform * GeoTrf::RotateZ3D(M_PI);
-        std::shared_ptr<Acts::PlaneSurface> surface = Acts::Surface::makeShared<Acts::PlaneSurface>(transform, bounds);
+        std::shared_ptr<Acts::PlaneSurface> surface = Acts::Surface::makeShared<Acts::PlaneSurface>(chamberTransform, bounds);
         Acts::MaterialSlab slab{aMat, thickness};
         std::shared_ptr<Acts::HomogeneousSurfaceMaterial> material = std::make_shared<Acts::HomogeneousSurfaceMaterial>(slab);
         surface->assignSurfaceMaterial(material);
@@ -277,8 +278,9 @@ std::pair<std::vector<volumePtr>,std::vector<surfacePtr>>
         return surface;
     }
 
-    std::pair<GeoIntrusivePtr<GeoMaterial>,double> MuonDetectorBuilderTool::getMaterial(const PVConstLink& vol) const {
-        std::vector<std::pair<const GeoMaterial*, double>> materialContent{};
+    std::pair<MuonDetectorBuilderTool::MaterialPtr, double> 
+        MuonDetectorBuilderTool::getMaterial(const PVConstLink& vol) const {
+        std::vector<std::pair<MaterialPtr, double>> materialContent{};
         getMaterialContent(vol, materialContent);
 
         //blend the material
@@ -290,7 +292,7 @@ std::pair<std::vector<volumePtr>,std::vector<surfacePtr>>
         }
 
         //create the new GeoMaterial object
-        GeoIntrusivePtr<GeoMaterial> blendedMaterial = make_intrusive<GeoMaterial>("BlendedMaterial", totalMass/totalVolume);
+        auto blendedMaterial = make_intrusive<GeoMaterial>("BlendedMaterial", totalMass/totalVolume);
         for(const auto& [material, volume] : materialContent){
             blendedMaterial->add(material, material->getDensity() * volume / totalMass);
         }
@@ -298,7 +300,7 @@ std::pair<std::vector<volumePtr>,std::vector<surfacePtr>>
         return {blendedMaterial, totalVolume};
     }
 
-    void MuonDetectorBuilderTool::getMaterialContent(const PVConstLink& vol, std::vector<std::pair<const GeoMaterial*, double>>& materialContent) const {
+    void MuonDetectorBuilderTool::getMaterialContent(const PVConstLink& vol, std::vector<std::pair<MaterialPtr, double>>& materialContent) const {
         double volume{0.};
         if(!checkDummyMaterial(vol)) volume = vol->getLogVol()->getShape()->volume();
         for(std::size_t c=0; c < vol->getNChildVols(); ++c){
