@@ -2,7 +2,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 import math
-from ROOT import TFile, TH1D, TH2D, gRandom
+from ROOT import TFile, TH1D, TH2D, gRandom, SetOwnership
 
 def fillBin(h, xlabel, ylabel, n):
   h.SetBinContent(h.GetXaxis().FindBin(xlabel), h.GetYaxis().FindBin(ylabel), n)
@@ -13,9 +13,12 @@ def makeTestFile(fileName, seed):
 
   total = TH1D("total", "", 10, 0, 10)
   total.FillRandom("gaus", nTotal)
+  SetOwnership (total, False)
 
   chains = TH2D("chains", "chainschainstep", 3, 0, 3, 6, 0, 6)
   decisions = TH2D("decisions", "decisionschainstep", 3, 0, 3, 6, 0, 6)
+  SetOwnership (chains, False)
+  SetOwnership (decisions, False)
   for h in [chains, decisions]:
     h.GetXaxis().SetBinLabel(1, "HLT_testChain1")
     h.GetXaxis().SetBinLabel(2, "HLT_testChain2")
