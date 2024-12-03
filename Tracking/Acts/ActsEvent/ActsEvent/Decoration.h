@@ -74,7 +74,7 @@ static Decoration decoration(std::string_view n, GetterType g, CopierType c,
                           SetterType s = static_cast<SetterType>(nullptr)) {
   Decoration dec;
   dec.name = n;
-  dec.hash = Acts::hashString(n);
+  dec.hash = Acts::hashStringDynamic(n);
   dec.auxid = SG::AuxTypeRegistry::instance().getAuxID<T>(dec.name);
   if (dec.auxid == SG::null_auxid)
     throw std::runtime_error("ActsTrk::Decoration Aux ID for " + dec.name +

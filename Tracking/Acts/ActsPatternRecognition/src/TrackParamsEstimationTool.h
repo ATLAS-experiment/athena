@@ -37,16 +37,13 @@ namespace ActsTrk {
 			      const ActsTrk::Seed& seed,
 			      const Acts::GeometryContext& geoContext,
 			      const Acts::Surface& surface,
-			      const Acts::Vector3& bField,
-			      double bFieldMin) const override;
+			      const Acts::Vector3& bField) const override;
     
     // *********************************************************************
     // *********************************************************************
 
   private:
     // Properties
-    Gaudi::Property< double > m_bFieldMin {this, "bFieldMin", 0.1 * Acts::UnitConstants::T,
-        "The minimum magnetic field to trigger the track parameters estimation"};
     Gaudi::Property< double > m_sigmaLoc0 {this, "sigmaLoc0", 1 * Acts::UnitConstants::mm,
         "Constant term of the loc0 resolution"};
     Gaudi::Property< double > m_sigmaLoc1 {this, "sigmaLoc1", 1 * Acts::UnitConstants::mm,

@@ -18,7 +18,7 @@ using namespace Acts::HashedStringLiteral;
 const std::set<Acts::HashedString> ActsTrk::TrackSummaryContainer::staticVariableHashes = [](){
   std::set<Acts::HashedString> result;
   for (const auto& s: ActsTrk::TrackSummaryContainer::staticVariables) {
-    result.insert(Acts::hashString(s));
+    result.insert(Acts::hashStringDynamic(s));
   }
   return result;
 }();

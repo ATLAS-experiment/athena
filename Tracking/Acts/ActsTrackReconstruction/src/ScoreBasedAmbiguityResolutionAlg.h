@@ -24,6 +24,8 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "InDetRecToolInterfaces/IInDetEtaDependentCutsSvc.h"
+
 
 // Handle Keys
 #include <memory>
@@ -92,7 +94,11 @@ class ScoreBasedAmbiguityResolutionAlg : public AthReentrantAlgorithm {
       this, "jsonFileName", "ScoreBasedAmbiguity_Config.json",
       "Name of the JSON file that contains the config file."};
 
-  std::unique_ptr<Acts::ScoreBasedAmbiguityResolution> m_ambi {nullptr};
+  std::unique_ptr<Acts::ScoreBasedAmbiguityResolution> m_ambi{nullptr};
+
+  /** ITk eta-dependent cuts*/
+  ServiceHandle<InDet::IInDetEtaDependentCutsSvc> m_etaDependentCutsSvc{
+      this, "InDetEtaDependentCutsSvc", ""};
 };
 
 }  // namespace ActsTrk

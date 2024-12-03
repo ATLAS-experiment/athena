@@ -121,3 +121,32 @@ void ActsTrk::MutableMultiTrajectory::addColumn_impl(std::string_view name) {
     throw std::runtime_error("Can't add decoration of this type to MutableMultiTrajectory");
   }
 }
+
+template <typename val_t, typename cov_t>
+void ActsTrk::MutableMultiTrajectory::allocateCalibrated_impl(IndexType istate,
+                              const Eigen::DenseBase<val_t>& val,
+                              const Eigen::DenseBase<cov_t>& cov)
+
+  requires(Eigen::PlainObjectBase<val_t>::RowsAtCompileTime > 0 &&
+            Eigen::PlainObjectBase<val_t>::RowsAtCompileTime <= Acts::eBoundSize &&
+            Eigen::PlainObjectBase<val_t>::RowsAtCompileTime ==
+                Eigen::PlainObjectBase<cov_t>::RowsAtCompileTime &&
+            Eigen::PlainObjectBase<cov_t>::RowsAtCompileTime ==
+                Eigen::PlainObjectBase<cov_t>::ColsAtCompileTime)
+{
+  constexpr std::size_t measdim = val_t::RowsAtCompileTime;
+
+  m_trackStatesAux->measDim[istate] = measdim;
+  auto idx = m_trackStatesAux->calibrated[istate];
+  m_trackMeasurementsAux->meas[idx].resize(measdim);
+  m_trackMeasurementsAux->covMatrix[idx].resize(measdim*measdim);
+
+  double* measPtr = m_trackMeasurementsAux->meas[idx].data();
+  Eigen::Map<Acts::ActsVector<measdim>> valMap(measPtr);
+  valMap = val;
+
+  double* covPtr = m_trackMeasurementsAux->covMatrix[idx].data();
+  Eigen::Map<Acts::ActsSquareMatrix<measdim>> covMap(covPtr);
+  covMap = cov;
+}
+

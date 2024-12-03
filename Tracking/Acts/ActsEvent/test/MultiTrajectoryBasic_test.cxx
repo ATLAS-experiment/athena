@@ -810,9 +810,9 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProjector, EmptyMTJ) {
   // Set and test subspace
   Acts::BoundSubspaceIndices subspace = {Acts::eBoundLoc0, Acts::eBoundLoc0, Acts::eBoundPhi, 
                                          Acts::eBoundTheta, Acts::eBoundQOverP, Acts::eBoundTime};
-  ts.setBoundSubspaceIndices(subspace);
+  ts.setProjectorSubspaceIndices(subspace);
 
-  BOOST_CHECK(ts.boundSubspaceIndices() == subspace);
+  BOOST_CHECK(ts.projectorSubspaceIndices() == subspace);
 }
 
 BOOST_FIXTURE_TEST_CASE(TrackStateProxyStorage, EmptyMTJ) {

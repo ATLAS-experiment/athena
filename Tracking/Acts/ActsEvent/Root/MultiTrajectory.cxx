@@ -496,14 +496,6 @@ void ActsTrk::MutableMultiTrajectory::clear_impl() {
 }
 
 
-void ActsTrk::MutableMultiTrajectory::allocateCalibrated_impl(ActsTrk::IndexType istate, std::size_t measdim) {
-  m_trackStatesAux->measDim[istate] = measdim;
-  auto idx = m_trackStatesAux->calibrated[istate];
-  m_trackMeasurementsAux->meas[idx].resize(measdim);
-  m_trackMeasurementsAux->covMatrix[idx].resize(measdim*measdim);
-}
-
-
 ActsTrk::IndexType ActsTrk::MutableMultiTrajectory::calibratedSize_impl(ActsTrk::IndexType istate) const {
   // Retrieve the calibrated measurement size
   // INSPECTCALL(istate << " " << trackMeasurements().size());

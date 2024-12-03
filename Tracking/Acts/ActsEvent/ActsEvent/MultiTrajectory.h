@@ -306,7 +306,16 @@ class MutableMultiTrajectory final
   /**
    * Implementation of allocation of calibrated measurements
    */
-  void allocateCalibrated_impl(ActsTrk::IndexType istate, std::size_t measdim);
+  template <typename val_t, typename cov_t>
+  void allocateCalibrated_impl(IndexType istate,
+                               const Eigen::DenseBase<val_t>& val,
+                               const Eigen::DenseBase<cov_t>& cov)
+    requires(Eigen::PlainObjectBase<val_t>::RowsAtCompileTime > 0 &&
+             Eigen::PlainObjectBase<val_t>::RowsAtCompileTime <= Acts::eBoundSize &&
+             Eigen::PlainObjectBase<val_t>::RowsAtCompileTime ==
+                 Eigen::PlainObjectBase<cov_t>::RowsAtCompileTime &&
+             Eigen::PlainObjectBase<cov_t>::RowsAtCompileTime ==
+                 Eigen::PlainObjectBase<cov_t>::ColsAtCompileTime);
 
   /**
    * Implementation of calibrated size

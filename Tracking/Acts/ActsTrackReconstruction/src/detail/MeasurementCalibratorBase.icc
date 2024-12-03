@@ -13,15 +13,15 @@ namespace ActsTrk::detail {
     switch (measType) {
     case xAOD::UncalibMeasType::StripClusterType: {
       const std::size_t projector_idx  = boundType == Acts::SurfaceBounds::eAnnulus;
-      trackState.setBoundSubspaceIndices(s_stripSubspaceIndices[projector_idx]);
+      trackState.setProjectorSubspaceIndices(s_stripSubspaceIndices[projector_idx]);
       break;
     }
     case xAOD::UncalibMeasType::PixelClusterType: {
-      trackState.setBoundSubspaceIndices(s_pixelSubspaceIndices);
+      trackState.setProjectorSubspaceIndices(s_pixelSubspaceIndices);
       break;
     }
     case xAOD::UncalibMeasType::HGTDClusterType: {
-      trackState.setBoundSubspaceIndices(s_hgtdSubspaceIndices);
+      trackState.setProjectorSubspaceIndices(s_hgtdSubspaceIndices);
       break;
        }
     default:

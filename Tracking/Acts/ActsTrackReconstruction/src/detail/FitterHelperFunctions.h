@@ -65,6 +65,8 @@ namespace ActsTrk::detail::FitterHelperFunctions {
     [&] (auto N) -> bool {
       constexpr size_t kMeasurementSize = decltype(N)::value;
 
+      auto subspaceHelper = state.template projectorSubspaceHelper<kMeasurementSize>();
+
       typename Acts::TrackStateTraits<kMeasurementSize, true>::Calibrated calibrated{
         state.template calibrated<Acts::MultiTrajectoryTraits::MeasurementSizeMax>().data()};
       
@@ -72,10 +74,8 @@ namespace ActsTrk::detail::FitterHelperFunctions {
         calibratedCovariance{state.template calibratedCovariance<Acts::MultiTrajectoryTraits::MeasurementSizeMax>().data()};
       
       // Take the projector (measurement mapping function)
-            const auto H =
-                state.projector()
-                    .template topLeftCorner<kMeasurementSize, Acts::BoundIndices::eBoundSize>()
-                    .eval();
+      // TODO use the subspace helper directly
+      const auto H = subspaceHelper.projector();
       
       const auto residual = calibrated - H * state.predicted();
       double chi2 = (residual.transpose() * (calibratedCovariance + H * state.predictedCovariance() * H.transpose()).inverse() * residual).value();     
