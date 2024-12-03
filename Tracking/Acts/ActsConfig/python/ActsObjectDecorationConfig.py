@@ -29,9 +29,6 @@ def ActsPixelClusterTruthDecorator(flags,
                                    **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault("SiClusterContainer","ITkPixelClusters")
-    kwargs.setdefault("MC_Hits","PixelHits")
-    kwargs.setdefault("MC_SDOs","PixelSDO_Map")
-    kwargs.setdefault("PRD_MultiTruth","PRD_MultiTruthITkPixel")
     kwargs.setdefault("InputTruthParticleLinks","xAODTruthLinks")
     kwargs.setdefault("AssociationMapOut","ITkPixelClustersToTruthParticles")
 
@@ -48,9 +45,6 @@ def ActsStripClusterTruthDecorator(flags,
                                    **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault("SiClusterContainer","ITkStripClusters")
-    kwargs.setdefault("MC_Hits","StripHits")
-    kwargs.setdefault("MC_SDOs","StripSDO_Map")
-    kwargs.setdefault("InputTruthParticleLinks","xAODTruthLinks")
     kwargs.setdefault("AssociationMapOut","ITkStripClustersToTruthParticles")
     kwargs.setdefault("OutputClusterContainer","ITkStripClusters")
 
