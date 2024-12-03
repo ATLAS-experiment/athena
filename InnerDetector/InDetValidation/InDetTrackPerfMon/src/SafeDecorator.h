@@ -108,6 +108,30 @@ namespace IDTPM {
     }
   }*/
 
+  /// check if all the required decorations exist
+  template< class T_Cont, class T >
+  bool decorationsAllExist(
+      const T_Cont& container,
+      const std::vector< WriteKeyAccessorPair<T_Cont, T > >& keys,
+      bool verbose=false )
+  {
+    bool all_available = true;
+    if( !container.empty() ) {
+      std::vector<bool> decorate;
+      decorate.reserve( keys.size() );
+      for( const WriteKeyAccessorPair< T_Cont, T >& a_key : keys ) {
+        decorate.push_back( !a_key.second.isAvailable( *container[0] ) );
+        all_available &= !decorate.back();
+        if( verbose && !decorate.back() ) {
+          std::cout << "WARNING IDTPM::decorationsAllExist: Decoration "
+                    << a_key.first.key() << " already exists; reject update."
+                    << std::endl;
+        } // close if( verbose && !decorate.back() )
+      } // close WriteKeyAccessorPair loop
+    } // close if( !container.empty() )
+    return all_available;
+  }
+
   /// create/book the decorations if they do not exist already
   template< class T_Cont, class T >
   std::vector< OptionalDecoration< T_Cont,T > >
