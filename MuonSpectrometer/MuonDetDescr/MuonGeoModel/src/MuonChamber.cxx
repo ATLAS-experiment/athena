@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -927,7 +927,7 @@ namespace MuonGM {
                 }
 
                 char chswidth[32];
-                sprintf(chswidth, "%i", int(10 * c->dx1));
+                sprintf(chswidth, "%i", static_cast<int>(10 * c->dx1));
                 key += chswidth;
 
                 GeoVPhysVol *fpv = m_FPVMAP->GetDetector(key);
