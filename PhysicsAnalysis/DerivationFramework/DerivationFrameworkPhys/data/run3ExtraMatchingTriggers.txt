@@ -83,9 +83,18 @@ HLT_g35_medium_tau25_dipion3_tracktwoMVA_L1TAU12_60invmAB_L1EM22VHI
 # Photon triggers   #
 #####################
 
-#####################
-# Tau triggers      #
-#####################
+#########################################################################
+# Tau triggers                                                          #
+# Lowest unprescaled di-tau items in physics_Main are listed explicitly #
+# as the algorithmic determined items only feed the delayed stream.     #
+# Also include legacy as for egamma, above                              #
+#########################################################################
+
+HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55
+HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB30_L1DR-TAU20ITAU12I-J25
+HLT_tau160_mediumRNN_tracktwoMVA_L1eTAU140
+HLT_tau80_mediumRNN_tracktwoMVA_tau60_mediumRNN_tracktwoMVA_03dRAB_L1eTAU80_2eTAU60
+HLT_tau80_mediumRNN_tracktwoMVA_tau60_mediumRNN_tracktwoMVA_03dRAB_L1TAU60_2TAU40
 
 #####################
 # Jet triggers      #
