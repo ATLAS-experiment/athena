@@ -11,13 +11,11 @@
 namespace {
    struct TdcIdentifier: public MdtCablingOnData {
         uint8_t tdcId{0};
-        /// Equality operator
-        bool operator==(const TdcIdentifier& other) const {
+        ///Equality operator
+        bool operator==(const TdcIdentifier& other) const noexcept{
             return this->MdtCablingOnData::operator==(other) && tdcId == other.tdcId;
         }
-        /// Equal operator
-        bool operator!=(const TdcIdentifier& other) const { return !((*this) == other); }
-        bool operator<(const TdcIdentifier& other) const {
+        bool operator<(const TdcIdentifier& other) const noexcept {
           if (this->MdtCablingOnData::operator!=(other)) return this->MdtCablingOnData::operator<(other);
         return tdcId < other.tdcId;
      }
@@ -61,7 +59,7 @@ StatusCode MdtCablingJsonDumpAlg::execute() {
  
   std::vector<MdtMezzanineCard> cached_cards{};
   std::set<MdtCablingData> cached_chnls{};
-
+  constexpr auto unsetArray{make_array<uint8_t,24>(MdtMezzanineCard::NOTSET)};
   for (auto det_itr = idHelper.detectorElement_begin(); det_itr != idHelper.detectorElement_end(); ++det_itr){
     const MuonGM::MdtReadoutElement* readEle = detectorMgr->getMdtReadoutElement(*det_itr);
     if (!readEle) {
@@ -72,12 +70,14 @@ StatusCode MdtCablingJsonDumpAlg::execute() {
     ATH_MSG_DEBUG("Check station "<<m_idHelperSvc->toString(station_id));   
     /// Struct to perform the mapping between online offline tube
     MdtMezzanineCard dummy_card(Mapping{}, readEle->getNLayers(), -1);
-    
     std::map<TdcIdentifier, Mapping> chamber_mezz{};
-    for (int layer = 1 ; layer <= readEle->getNLayers(); ++layer){         
-      for (int tubeInLayer = 1 ; tubeInLayer <= readEle->getNtubesperlayer(); ++tubeInLayer) {
+    const int nLayers{readEle->getNLayers()};
+    const int nTubes{readEle->getNtubesperlayer()};
+    const int multiLayer{readEle->getMultilayer()};
+    for (int layer = 1 ; layer <= nLayers; ++layer){
+      for (int tubeInLayer = 1 ; tubeInLayer <= nTubes; ++tubeInLayer) {
           bool is_valid{false};
-          const Identifier tube_id = idHelper.channelID(station_id, readEle->getMultilayer(), 
+          const Identifier tube_id = idHelper.channelID(station_id, multiLayer, 
                                                         layer, tubeInLayer, is_valid);
               if (!is_valid) {
                 ATH_MSG_VERBOSE("Invalid element");
@@ -92,7 +92,7 @@ StatusCode MdtCablingJsonDumpAlg::execute() {
                 return StatusCode::FAILURE;
               }
               const TdcIdentifier tdc_id{cabling_data};
-              chamber_mezz.try_emplace(tdc_id,make_array<uint8_t,24>(MdtMezzanineCard::NOTSET));
+              chamber_mezz.try_emplace(tdc_id,unsetArray);
               chamber_mezz[tdc_id][cabling_data.channelId] = dummy_card.tubeNumber(layer, tubeInLayer);
          }
     }
@@ -156,7 +156,7 @@ StatusCode MdtCablingJsonDumpAlg::execute() {
           return StatusCode::FAILURE;
         }
         summary<<"Extracted "<<cached_cards.size()<<" mezzanine card layouts and "
-              <<cached_chnls.size()<<" chamber channels. "<<std::endl<<std::endl<<std::endl;
+              <<cached_chnls.size()<<" chamber channels. \n\n\n";
         for (const MdtMezzanineCard& card : cached_cards) {
           summary<<card;
           MdtCablingOffData chamb{};
@@ -173,8 +173,8 @@ StatusCode MdtCablingJsonDumpAlg::execute() {
               }
               summary<<static_cast<int>(cabling.tdcId)<<", ";
           }
-          summary<<std::endl<<std::endl
-                  <<"##############################################################"<<std::endl;
+          summary<<"\n\n"
+                  <<"##############################################################\n";
         }
     }
     /// Write mezzanine file
@@ -187,18 +187,18 @@ StatusCode MdtCablingJsonDumpAlg::execute() {
       mezz_json<<"["<<std::endl;
       for (size_t i = 0; i < cached_cards.size() ; ++i) {
          const MdtMezzanineCard& card  = cached_cards[i];
-         mezz_json<<"     {"<<std::endl;
-         mezz_json<<"       \"mezzId\": "<<static_cast<int>(card.id())<<","<<std::endl;
-         mezz_json<<"       \"nTubeLayer\": "<<static_cast<int>(card.numTubeLayers())<<","<<std::endl;
+         mezz_json<<"     {\n";
+         mezz_json<<"       \"mezzId\": "<<static_cast<int>(card.id())<<",\n";
+         mezz_json<<"       \"nTubeLayer\": "<<static_cast<int>(card.numTubeLayers())<<",\n";
          mezz_json<<"       \"tdcToTubeMap\": [";
          for (size_t ch = 0 ; ch < card.tdcToTubeMap().size(); ++ch) {
            mezz_json<<static_cast<int>(card.tdcToTubeMap()[ch]);
            if (ch + 1 != card.tdcToTubeMap().size())mezz_json<<",";
          }
-         mezz_json<<"]"<<std::endl;
+         mezz_json<<"]\n";
          mezz_json<<"     }";
          if (i +1 != cached_cards.size()) mezz_json<<",";
-         mezz_json<<std::endl;
+         mezz_json<<"\n";
       }
       mezz_json<<"]";
     }
@@ -208,23 +208,23 @@ StatusCode MdtCablingJsonDumpAlg::execute() {
          ATH_MSG_FATAL("Failed to write "<<m_cablingJSON);
          return StatusCode::FAILURE;
       }
-      chamb_json<<"["<<std::endl;
+      chamb_json<<"[\n";
       size_t i =0;
       for (const MdtCablingData& chamb : cached_chnls){ 
-        chamb_json<<"    {"<<std::endl;
-        chamb_json<<"     \"station\": \""<<idHelper.stationNameString(chamb.stationIndex)<<"\","<<std::endl;
-        chamb_json<<"     \"eta\": "<<static_cast<int>(chamb.eta)<<","<<std::endl;
-        chamb_json<<"     \"phi\": "<<static_cast<int>(chamb.phi)<<","<<std::endl;
-        chamb_json<<"     \"ml\": "<<static_cast<int>(chamb.multilayer)<<","<<std::endl;
-        chamb_json<<"     \"subDet\": "<<static_cast<int>(chamb.subdetectorId)<<","<<std::endl;
-        chamb_json<<"     \"csm\": "<<static_cast<int>(chamb.csm)<<","<<std::endl;
-        chamb_json<<"     \"mrod\": "<<static_cast<int>(chamb.mrod)<<","<<std::endl;
-        chamb_json<<"     \"tdcId\": "<<static_cast<int>(chamb.tdcId)<<","<<std::endl;
-        chamb_json<<"     \"mezzId\": "<<static_cast<int>(chamb.mezzanine_type)<<","<<std::endl;
-        chamb_json<<"     \"tubeZero\": "<<static_cast<int>(chamb.tube)<<std::endl;
+        chamb_json<<"    {\n";
+        chamb_json<<"     \"station\": \""<<idHelper.stationNameString(chamb.stationIndex)<<"\",\n";
+        chamb_json<<"     \"eta\": "<<static_cast<int>(chamb.eta)<<",\n";
+        chamb_json<<"     \"phi\": "<<static_cast<int>(chamb.phi)<<",\n";
+        chamb_json<<"     \"ml\": "<<static_cast<int>(chamb.multilayer)<<",\n";
+        chamb_json<<"     \"subDet\": "<<static_cast<int>(chamb.subdetectorId)<<",\n";
+        chamb_json<<"     \"csm\": "<<static_cast<int>(chamb.csm)<<",\n";
+        chamb_json<<"     \"mrod\": "<<static_cast<int>(chamb.mrod)<<",\n";
+        chamb_json<<"     \"tdcId\": "<<static_cast<int>(chamb.tdcId)<<",\n";
+        chamb_json<<"     \"mezzId\": "<<static_cast<int>(chamb.mezzanine_type)<<",\n";
+        chamb_json<<"     \"tubeZero\": "<<static_cast<int>(chamb.tube)<<"\n";
         chamb_json<<"    }";
         if (i +1 != cached_chnls.size()) chamb_json<<",";
-        chamb_json<<std::endl;
+        chamb_json<<"\n";
         ++i;
       }
       chamb_json<<"]"<<std::endl;

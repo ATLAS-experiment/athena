@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonABLineJsonDumpAlg.h"
 #include "StoreGate/ReadCondHandle.h"
@@ -33,55 +33,55 @@ StatusCode MuonABLineJsonDumpAlg::execute(){
      ATH_MSG_FATAL("Failed to create output file "<<m_jsonFile);
      return StatusCode::FAILURE;
   }
-  ostr<<"["<<std::endl;
+  ostr<<"[\n";
   unsigned int nLines{0};
   for (const ALinePar& aLine : **aLineContainer) {
     ++nLines;
-    ostr<<"    {"<<std::endl;
+    ostr<<"    {\n";
     /// Identifier of the A Line
-    ostr<<"     \"typ\": \""<<aLine.AmdbStation()<<"\","<<std::endl;
-    ostr<<"     \"jzz\": "<<aLine.AmdbEta()<<", "<<std::endl;
-    ostr<<"     \"jff\": "<<aLine.AmdbPhi()<<", "<<std::endl;
-    ostr<<"     \"job\": "<<aLine.AmdbJob()<<", "<<std::endl;
+    ostr<<"     \"typ\": \""<<aLine.AmdbStation()<<"\",\n";
+    ostr<<"     \"jzz\": "<<aLine.AmdbEta()<<", \n";
+    ostr<<"     \"jff\": "<<aLine.AmdbPhi()<<", \n";
+    ostr<<"     \"job\": "<<aLine.AmdbJob()<<", \n";
     /// ALine parameter
     using APar = ALinePar::Parameter;
-    ostr<<"     \"svalue\": "<<aLine.getParameter(APar::transS)<<", "<<std::endl;
-    ostr<<"     \"zvalue\": "<<aLine.getParameter(APar::transZ)<<", "<<std::endl;
-    ostr<<"     \"tvalue\": "<<aLine.getParameter(APar::transT)<<", "<<std::endl;
-    ostr<<"     \"tsv\": "<<aLine.getParameter(APar::rotS)<<", "<<std::endl;
-    ostr<<"     \"tzv\": "<<aLine.getParameter(APar::rotZ)<<", "<<std::endl;
+    ostr<<"     \"svalue\": "<<aLine.getParameter(APar::transS)<<", \n";
+    ostr<<"     \"zvalue\": "<<aLine.getParameter(APar::transZ)<<", \n";
+    ostr<<"     \"tvalue\": "<<aLine.getParameter(APar::transT)<<", \n";
+    ostr<<"     \"tsv\": "<<aLine.getParameter(APar::rotS)<<", \n";
+    ostr<<"     \"tzv\": "<<aLine.getParameter(APar::rotZ)<<", \n";
     ostr<<"     \"ttv\": "<<aLine.getParameter(APar::rotT);
     /// BLine parameter
     BLineContainer::const_iterator itr = bLineContainer->find(aLine.identify());
     if (itr == bLineContainer->end()) {
       /// Check that the last entry does not have a comma
-      ostr<<std::endl<<"    }"<< (nLines != aLineContainer->size() ? "," : "")<<std::endl;
+      ostr<<"\n    }"<< (nLines != aLineContainer->size() ? "," : "")<<"\n";
       continue;
     }
-    ostr<<","<<std::endl;
+    ostr<<",\n";
     using BPar = BLinePar::Parameter;
     const BLinePar& bLine = (*itr);
-    ostr<<"     \"bz\": "<<bLine.getParameter(BPar::bz)<<","<<std::endl;
-    ostr<<"     \"bp\": "<<bLine.getParameter(BPar::bp)<<","<<std::endl;
-    ostr<<"     \"bn\": "<<bLine.getParameter(BPar::bn)<<","<<std::endl;
-    ostr<<"     \"sp\": "<<bLine.getParameter(BPar::sp)<<","<<std::endl;
-    ostr<<"     \"sn\": "<<bLine.getParameter(BPar::sn)<<","<<std::endl;
-    ostr<<"     \"tw\": "<<bLine.getParameter(BPar::tw)<<","<<std::endl;
-    ostr<<"     \"pg\": "<<bLine.getParameter(BPar::pg)<<","<<std::endl;
-    ostr<<"     \"tr\": "<<bLine.getParameter(BPar::tr)<<","<<std::endl;
-    ostr<<"     \"eg\": "<<bLine.getParameter(BPar::eg)<<","<<std::endl;
-    ostr<<"     \"ep\": "<<bLine.getParameter(BPar::ep)<<","<<std::endl;
-    ostr<<"     \"en\": "<<bLine.getParameter(BPar::en)<<","<<std::endl;
+    ostr<<"     \"bz\": "<<bLine.getParameter(BPar::bz)<<",\n";
+    ostr<<"     \"bp\": "<<bLine.getParameter(BPar::bp)<<",\n";
+    ostr<<"     \"bn\": "<<bLine.getParameter(BPar::bn)<<",\n";
+    ostr<<"     \"sp\": "<<bLine.getParameter(BPar::sp)<<",\n";
+    ostr<<"     \"sn\": "<<bLine.getParameter(BPar::sn)<<",\n";
+    ostr<<"     \"tw\": "<<bLine.getParameter(BPar::tw)<<",\n";
+    ostr<<"     \"pg\": "<<bLine.getParameter(BPar::pg)<<",\n";
+    ostr<<"     \"tr\": "<<bLine.getParameter(BPar::tr)<<",\n";
+    ostr<<"     \"eg\": "<<bLine.getParameter(BPar::eg)<<",\n";
+    ostr<<"     \"ep\": "<<bLine.getParameter(BPar::ep)<<",\n";
+    ostr<<"     \"en\": "<<bLine.getParameter(BPar::en)<<",\n";
     /// No idea what xAtlas & yAtlas are in this parameter book
-    ostr<<"     \"xAtlas\": 0 ,"<<std::endl;
-    ostr<<"     \"yAtlas\": 0 ,"<<std::endl;
+    ostr<<"     \"xAtlas\": 0 ,\n";
+    ostr<<"     \"yAtlas\": 0 ,\n";
     ostr<<"     \"hwElement\": \"";
     ostr<<m_idHelperSvc->stationNameString(bLine.identify());
     const int stEta = m_idHelperSvc->stationEta(bLine.identify());
     ostr<<std::abs(stEta)<<(stEta > 0 ? "A" : "C");
     ostr<<m_idHelperSvc->stationPhi(bLine.identify());
-    ostr<<"\""<<std::endl;
-    ostr<<"    }"<< (nLines != aLineContainer->size() ? "," : "")<<std::endl;
+    ostr<<"\"\n";
+    ostr<<"    }"<< (nLines != aLineContainer->size() ? "," : "")<<"\n";
   }
   ostr<<"]"<<std::endl;
   ostr.close();
