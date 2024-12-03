@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHLINKS_ELEMENTLINKVECTOR_H
@@ -19,6 +19,8 @@
 #include "AthLinks/ElementLink.h"
 #include "AthLinks/tools/SGELVRef.h"
 #include "AthLinks/tools/selection_ns.h"
+#include "AthenaKernel/getMessageSvc.h"
+#include "GaudiKernel/MsgStream.h"
 
 
 // Forward declaration(s):

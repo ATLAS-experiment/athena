@@ -17,6 +17,7 @@
 #include <atomic>
 #include "GaudiKernel/IRegistry.h"
 #include "GaudiKernel/ClassID.h"
+#include "GaudiKernel/EventContext.h"
 #include "AthenaKernel/getMessageSvc.h" /*Athena::IMessageSvcHolder*/
 #include "AthenaKernel/IRegisterTransient.h"
 #include "SGTools/TransientAddress.h"
