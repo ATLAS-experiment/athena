@@ -212,9 +212,7 @@ if __name__=="__main__":
                                      TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"],
                                      ExcludeStations = [ch for ch in chambToExclude if ch[0] == "B" or ch[0] == "E"],
                                      ReadoutSideXML="ReadoutSides.xml",
-                                     ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' ),
-                                                  #( 'Trk::TrackingGeometry' , 'ConditionStore+AtlasTrackingGeometry' ) 
-                                                ]))
+                                     ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
 
     if flags.Detector.GeometryRPC: 
         cfg.merge(GeoModelRpcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "B"],

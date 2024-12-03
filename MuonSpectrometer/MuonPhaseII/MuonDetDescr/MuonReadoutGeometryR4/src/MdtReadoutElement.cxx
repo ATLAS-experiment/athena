@@ -252,7 +252,7 @@ Amg::Vector3D MdtReadoutElement::wireEndpointAsBuilt(const MdtAsBuiltPar&  param
    
    const int tubeLayer = layerNumber(tubeHash);
    const int tube = tubeNumber(tubeHash);
-   const int layer_delta = ml == multilayer_t::ML1 ?  numLayers() + 1 - tubeLayer : tubeLayer;
+   const int layer_delta = ml == multilayer_t::ML1 ?  numLayers() - tubeLayer : tubeLayer +1;
 
 
    // Get the As-Built parameters for this ML and side of the chamber
@@ -264,29 +264,32 @@ Amg::Vector3D MdtReadoutElement::wireEndpointAsBuilt(const MdtAsBuiltPar&  param
    const double z0 = params.z0(ml, side);
 
    const Amg::Transform3D planeRot{Amg::getRotateX3D(-alpha)};
+   ATH_MSG_VERBOSE("Rotation angle "<<(alpha/Gaudi::Units::deg));
 
    // Find the vector from the reference_point to the endplug
    // 0 for layer 1 and 3, 1 for layer 2 and 4
-   const double offset_stagg = 0.5 * zpitch * stagg * ( (layer_delta - 1) % 2);
-   const Amg::Vector3D end_plug = planeRot * Amg::Vector3D{0., 
-                                                            (tube - 1.0) * zpitch + offset_stagg, 
-                                                            (layer_delta - 1) * ypitch};
+   const double offset_stagg = 0.5 * zpitch * stagg * ( (layer_delta-1)  % 2);
+   const Amg::Vector3D endPlug = planeRot * Amg::Vector3D{0., 
+                                                            tube* zpitch + offset_stagg, 
+                                                            (layer_delta-1) * ypitch};
 
    // Calculate x position, which varies for endcap chambers
    const double xshift = sideSign*(uncutTubeLength(tubeHash) - uncutTubeLength(refLayer));
+   ATH_MSG_VERBOSE("Off set staggering "<<offset_stagg<<", layer_delta: "<<layer_delta<<", zpitch: "<<zpitch<<", ypitch: "<<ypitch
+                 <<", xshift: "<<xshift);
 
    Amg::Vector3D ret(reference_point.x() + xshift, 
-                     reference_point.y() + z0 + end_plug.y(),
-                     reference_point.z() + y0 + end_plug.z());
+                     reference_point.y() + z0 + endPlug.y(),
+                     reference_point.z() + y0 + endPlug.z());
 
    
    if ((ret - wireEnd).mag() > 3. * Gaudi::Units::mm) {
          ATH_MSG_WARNING( "Large as-built correction for chamber " << idHelperSvc()->toString(measurementId(tubeHash))
                         << ", side "<< (side == tubeSide_t::POS ? "positive" : "negative") 
-                        << ", Delta " << Amg::toString(ret - wireEnd) );
+                        << ", endpoint "<<Amg::toString(wireEnd)<<", return: "<<Amg::toString(ret));
    }
    ATH_MSG_VERBOSE((side == tubeSide_t::POS ? "positive" : "negative")<<" wire end has moved from "
-                  <<Amg::toString(wireEnd)<<" to "<<Amg::toString(ret));
+                   <<Amg::toString(wireEnd)<<" to "<<Amg::toString(ret)<<" End plug: "<<Amg::toString(endPlug));
    return ret;
 }
 
