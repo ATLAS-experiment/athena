@@ -58,8 +58,11 @@ namespace xAOD{
         THROW_EXCEPTION("Something went wrong with measurement "<<typeid(*meas).name());
         return nullptr;
     }
-    Identifier identify(const UncalibratedMeasurement* meas) {
-        if (!meas) return Identifier{};
+    const Identifier& identify(const UncalibratedMeasurement* meas) {
+        static const Identifier defId{};
+        if (!meas) {
+            return defId;
+        }
         switch (meas->type()) {
             case UncalibMeasType::MdtDriftCircleType :{
                 return static_cast<const MdtDriftCircle*>(meas)->identify();
@@ -71,11 +74,14 @@ namespace xAOD{
                 return static_cast<const MMCluster*>(meas)->identify();
             } case UncalibMeasType::sTgcStripType: {
                 return static_cast<const sTgcMeasurement*>(meas)->identify();
-            } default:
+            } default: {
+#ifndef NDEBUG
                 THROW_EXCEPTION("Unsupported measurement given "<<typeid(*meas).name());
+#endif
+                break;
+            }
         }
-        THROW_EXCEPTION("Something went wrong with measurement "<<typeid(*meas).name());
-        return Identifier{};
+        return defId;
     }
     Amg::Vector3D positionInChamber(const ActsGeometryContext& gctx,
                                     const UncalibratedMeasurement* meas){

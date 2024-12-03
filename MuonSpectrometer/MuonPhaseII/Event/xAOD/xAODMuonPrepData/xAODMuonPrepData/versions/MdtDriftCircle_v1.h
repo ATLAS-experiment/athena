@@ -33,7 +33,7 @@ class MdtDriftCircle_v1 : public UncalibratedMeasurement_v1 {
     }
     /** @brief: Returns the Athena identifier of the drift circle. It's constructed 
      *          from the measurementHash which's passed to the associated readoutElement */
-    Identifier identify() const;
+    const Identifier& identify() const;
     /** @brief: Return the measurement's position vector in the local frame. If the
      *          measurement is an ordinary 1D drift circle, the Zero vector is returned.
      *          Otherwise the local position along z */
@@ -84,8 +84,10 @@ class MdtDriftCircle_v1 : public UncalibratedMeasurement_v1 {
     /// Down cast the memory of the readoutElement cache if the object is stored to disk 
     ///  to arrive at the same memory layout between Athena & CLING
     char m_readoutEle[sizeof(CxxUtils::CachedValue<const MuonGMR4::MdtReadoutElement *>)]{};
+    char m_identifier[sizeof(CxxUtils::CachedValue<Identifier>)]{};
 #else
     CxxUtils::CachedValue<const MuonGMR4::MdtReadoutElement *> m_readoutEle{};
+    CxxUtils::CachedValue<Identifier> m_identifier{};
 #endif
 
 };

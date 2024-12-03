@@ -132,13 +132,13 @@ namespace MuonR4{
         return primaryMeasurement()->type();
     }
     bool SpacePoint::measuresPhi() const {
-        return secondaryMeasurement() ||  chamber()->idHelperSvc()->measuresPhi(identify());
+        return secondaryMeasurement() || !m_measEta;
     }
     bool SpacePoint::measuresEta() const {
-        return secondaryMeasurement() ||  !chamber()->idHelperSvc()->measuresPhi(identify());
+        return secondaryMeasurement() || m_measEta;
     }
     const Identifier& SpacePoint::identify() const {
-        return m_id;
+        return xAOD::identify(m_primaryMeas);
     }
     double SpacePoint::driftRadius() const { 
         return m_primaryMeas->type() == xAOD::UncalibMeasType::MdtDriftCircleType ?  

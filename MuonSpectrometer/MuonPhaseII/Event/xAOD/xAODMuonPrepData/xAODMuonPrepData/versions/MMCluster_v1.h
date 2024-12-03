@@ -31,7 +31,7 @@ class MMCluster_v1 : public UncalibratedMeasurement_v1 {
     }
     /** @brief: Returns the Athena identifier of the micro mega cluster 
      *          It's constructed from the measurementHash & passed to the associated readoutElement */
-    Identifier identify() const;
+    const Identifier& identify() const;
     unsigned int numDimensions() const override final { return 1; }
 
     /** @brief  Returns the gas gap number to which the clsuter*/
@@ -119,8 +119,10 @@ class MMCluster_v1 : public UncalibratedMeasurement_v1 {
     /// Down cast the memory of the readoutElement cache if the object is stored to disk 
     ///  to arrive at the same memory layout between Athena & CLING
     char m_readoutEle[sizeof(CxxUtils::CachedValue<const MuonGMR4::MmReadoutElement *>)]{};
+    char m_identifier[sizeof(CxxUtils::CachedValue<Identifier>)]{};
 #else
     CxxUtils::CachedValue<const MuonGMR4::MmReadoutElement *> m_readoutEle{};
+    CxxUtils::CachedValue<Identifier> m_identifier{};
 #endif
 
 

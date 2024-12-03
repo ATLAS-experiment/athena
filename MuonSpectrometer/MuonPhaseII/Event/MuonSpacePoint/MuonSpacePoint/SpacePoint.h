@@ -74,10 +74,10 @@ namespace MuonR4 {
             const xAOD::UncalibratedMeasurement* m_primaryMeas{nullptr};
             const xAOD::UncalibratedMeasurement* m_secondaryMeas{nullptr};
 
-            Identifier m_id{xAOD::identify(m_primaryMeas)};
             const MuonGMR4::Chamber* m_chamber{xAOD::readoutElement(m_primaryMeas)->chamber()};
             const MuonGMR4::SpectrometerSector* m_msSector{m_chamber->parent()};
-
+            /** @brief Flag indicating that the measurement is an eta measurement */
+            bool m_measEta{!m_msSector->idHelperSvc()->measuresPhi(identify())};
             Amg::Vector3D m_pos{Amg::Vector3D::Zero()};
             Amg::Vector3D m_dir{Amg::Vector3D::Zero()};
             Amg::Vector3D m_normal{Amg::Vector3D::Zero()};

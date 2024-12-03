@@ -36,8 +36,11 @@ Amg::Vector3D MdtDriftCircle_v1::localCirclePosition() const {
     }
     return localPosition<2>()[Trk::locZ] * Amg::Vector3D::UnitZ(); 
 }
-Identifier MdtDriftCircle_v1::identify() const {
-    return readoutElement()->measurementId(measurementHash());
+const Identifier& MdtDriftCircle_v1::identify() const {
+    if (!m_identifier.isValid()){
+        m_identifier.set(readoutElement()->measurementId(measurementHash()));
+    }
+    return (*m_identifier.ptr());
 }
 float MdtDriftCircle_v1::driftRadius() const {
     return numDimensions() == 1 ? localPosition<1>()[Trk::locR] 
