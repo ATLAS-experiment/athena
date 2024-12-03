@@ -15,13 +15,15 @@
 
 #include "InDetPhysValMonitoring/ResolutionHelper.h"
 
-#include <iostream>
-
 #include "TFile.h"
 #include "TSystem.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TObject.h"
+
+#include <iostream>
+#include <memory>
+#include <string>
 
 using namespace std;
 
@@ -114,17 +116,17 @@ int postProcessDir(TDirectory* dir, IDPVM::ResolutionHelper & theHelper){
   dir->cd();
   auto *keys = dir->GetListOfKeys();
   for (auto *const key : *keys){
-    TObject* gotIt = dir->Get(key->GetName()); 
+    std::unique_ptr<TObject> gotIt(dir->Get(key->GetName()));
     
     // if we encounter a directory, descend into it and repeat the process
-    TDirectory* theDir = dynamic_cast<TDirectory*>(gotIt);
+    TDirectory* theDir = dynamic_cast<TDirectory*>(gotIt.get());
     if (theDir){
       outcome |= postProcessDir(theDir, theHelper); 
     }
     
     // if we encounter a histogram that could be a resolution input, post-process it 
-    if (isResolutionHelper(gotIt)){
-      outcome |= postProcessHistos(gotIt, theHelper); 
+    if (isResolutionHelper(gotIt.get())){
+      outcome |= postProcessHistos(gotIt.get(), theHelper); 
     }
   }
   theCWD->cd();
@@ -136,14 +138,13 @@ int pproc_file(const std::string & p_infile) {
 
     IDPVM::ResolutionHelper theHelper; 
 
-    TFile* infile = TFile::Open(p_infile.c_str(),"UPDATE"); 
-    if (!infile ) {
-    std::cerr << "could not open input file "<<p_infile<<" for updating "<< std::endl;
-    return 1;
+    std::unique_ptr<TFile> infile(TFile::Open(p_infile.c_str(),"UPDATE"));
+    if (!infile || infile->IsZombie()) {
+      std::cerr << "could not open input file "<<p_infile<<" for updating "<< std::endl;
+      return 1;
     }
 
-    int res = postProcessDir(gDirectory,theHelper); // recursively post-process the directory tree, starting from the root.  
-    infile->Close();
+    int res = postProcessDir(infile.get(), theHelper); // recursively post-process the directory tree, starting from the root.  
     return res;
 }
 
