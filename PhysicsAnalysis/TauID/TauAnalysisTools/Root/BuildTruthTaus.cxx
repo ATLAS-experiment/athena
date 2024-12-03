@@ -9,6 +9,7 @@
 
 // Core include(s):
 #include "AthLinks/ElementLink.h"
+#include "AthContainers/Accessor.h"
 
 // EDM include(s):
 #include "xAODTruth/TruthVertex.h"
@@ -154,21 +155,42 @@ StatusCode BuildTruthTaus::retrieveTruthTaus(TruthTausEvent& truthTausEvent) con
 StatusCode
 BuildTruthTaus::buildTruthTausFromTruthParticles(TruthTausEvent& truthTausEvent) const
 {
+  static const SG::Accessor<char> dressedPhotonAcc ("dressedPhoton");
+
+  bool copyDressedPhotons = false;
+
   for (auto xTruthParticle : *truthTausEvent.m_xTruthParticleContainer)
   {
     if ( xTruthParticle->isTau() )
     {
-      xAOD::TruthParticle* xTruthTau = new xAOD::TruthParticle();
+      auto xTruthTau = std::make_unique<xAOD::TruthParticle>();
       xTruthTau->makePrivateStore( *xTruthParticle );
 
       if ( examineTruthTau(*xTruthTau).isFailure() )
       {
-        delete xTruthTau;
         continue;
       }
 
+      // The dressedPhoton decoration will likely be unlocked and thus will
+      // not be copied by the above.  Copy it explicitly in that case.
+      // See ATLASRECTS-8008.
+      // First time through the loop we check to see if the decoration
+      // needs to be copied and remember for subsequent iterations
+      // (during which the destination decoration will have already
+      // been created).
+      if (truthTausEvent.m_xTruthTauContainer->empty() &&
+          dressedPhotonAcc.isAvailable ( *xTruthParticle ) &&
+          !dressedPhotonAcc.isAvailable ( *xTruthTau ))
+      {
+        copyDressedPhotons = true;
+      }
+      if (copyDressedPhotons)
+      {
+        dressedPhotonAcc( *xTruthTau ) = dressedPhotonAcc( *xTruthParticle );
+      }
+
       // Run classification
-      auto pClassification = m_tMCTruthClassifier->particleTruthClassifier(xTruthTau);
+      auto pClassification = m_tMCTruthClassifier->particleTruthClassifier(xTruthTau.get());
       static const SG::Accessor<unsigned int> decClassifierParticleType("classifierParticleType");
       static const SG::Accessor<unsigned int> decClassifierParticleOrigin("classifierParticleOrigin");
       decClassifierParticleType(*xTruthTau) = pClassification.first;
@@ -179,7 +201,7 @@ BuildTruthTaus::buildTruthTausFromTruthParticles(TruthTausEvent& truthTausEvent)
       static const SG::Accessor<ElementLink< xAOD::TruthParticleContainer > > accOriginalTruthParticle("originalTruthParticle");
       accOriginalTruthParticle(*xTruthTau) = lTruthParticleLink;
 
-      truthTausEvent.m_xTruthTauContainer->push_back(xTruthTau);
+      truthTausEvent.m_xTruthTauContainer->push_back(std::move(xTruthTau));
     }
   }
   return StatusCode::SUCCESS;
