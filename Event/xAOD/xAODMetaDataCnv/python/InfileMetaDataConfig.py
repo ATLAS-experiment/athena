@@ -128,7 +128,7 @@ def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
             Key=outputStreamName(streamName),
             DataHeaderKey=outputStreamName(streamName),
             EventInfoKey=f"{flags.Overlay.BkgPrefix}EventInfo"
-            if flags.Common.ProductionStep in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking]
+            if flags.Common.ProductionStep in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]
             else "EventInfo",
         )
         tools.mdItems += [
