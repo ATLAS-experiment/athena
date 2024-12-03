@@ -135,7 +135,6 @@ StatusCode CaloCellsHandlerTool::getGepCellMap(const CaloCellContainer& cells,
   const CaloNoise* totalNoiseCDO = *totalNoiseHdl;
 
   int idx = -1;
-  int ncells = 0;
   std::map<std::string,std::vector<Gep::GepCaloCell>> gepCellsPerFEB;
 
   for(const auto *cell: cells){
@@ -151,8 +150,6 @@ StatusCode CaloCellsHandlerTool::getGepCellMap(const CaloCellContainer& cells,
 	// In the future this might change, for now just setting FEB value to a dummy
 	caloCell.FEB = "Tile";
     }
-
-    ++ncells;
 
     float electronicNoise = electronicNoiseCDO->getNoise(cell->ID(), cell->gain());
     float totalNoise = totalNoiseCDO->getNoise(cell->ID(), cell->gain());
