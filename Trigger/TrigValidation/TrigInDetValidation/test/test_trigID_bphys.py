@@ -4,7 +4,6 @@
 # art-description: art job for bphys
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
 # art-input: valid1.801921.P8B_A14_CTEQ6L1_Bs_Jpsim3p5mu3p5_phi.recon.RDO.e8542_e8528_s4159_s4114_r14844_tid34183318_00
 # art-input-nfiles: 3
 # art-athena-mt: 8

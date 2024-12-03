@@ -4,7 +4,6 @@
 # art-description: art job for el_singlee_7-80_pu40
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
 # art-input: valid1.901968.PG_e_Et7to80.recon.RDO.e8544_e8528_s4159_s4114_r14800_tid34086065_00
 # art-input-nfiles: 10
 # art-athena-mt: 8

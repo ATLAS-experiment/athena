@@ -4,7 +4,6 @@
 # art-description: Test of transform RDO->RDO_TRIG->AOD with threads=4 and AOD->DAOD with multiprocess
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
 # art-athena-mt: 4
 # art-output: *.txt
 # art-output: *.log

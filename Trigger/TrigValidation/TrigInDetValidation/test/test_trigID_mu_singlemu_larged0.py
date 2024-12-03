@@ -4,7 +4,6 @@
 # art-description: art job for mu_singlemu_larged0
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
 # art-input: valid1.901971.PG_mu_Pt4to100_vertxy20.recon.RDO.e8544_e8528_s4159_s4114_r14813_tid34085600_00
 # art-input-nfiles: 2
 # art-athena-mt: 8

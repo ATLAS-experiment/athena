@@ -4,7 +4,6 @@
 # art-description: art job for cosmic data
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
