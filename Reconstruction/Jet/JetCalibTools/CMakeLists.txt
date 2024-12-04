@@ -15,7 +15,7 @@ atlas_add_library( JetCalibToolsLib
    PUBLIC_HEADERS JetCalibTools
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${LWTNN_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} AsgTools AsgServicesLib xAODEventInfo xAODEventShape
-   xAODJet xAODTracking PATInterfaces JetInterface AsgDataHandlesLib AthOnnxInterfaces AsgServicesLib JetToolHelpersLib MuonAnalysisInterfacesLib
+   xAODJet xAODTracking PATInterfaces JetInterface AsgDataHandlesLib AthOnnxInterfaces AsgServicesLib JetToolHelpersLib MuonAnalysisInterfacesLib JetAnalysisInterfacesLib
    PRIVATE_LINK_LIBRARIES xAODMuon PathResolver )
 
 if( NOT XAOD_STANDALONE )
