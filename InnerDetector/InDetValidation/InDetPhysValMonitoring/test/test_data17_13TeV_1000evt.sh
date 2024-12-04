@@ -1,15 +1,11 @@
 #!/bin/bash
 # art-description: Standard test for 2017 data
 # art-type: grid
-# art-input: data17_13TeV:data17_13TeV.00324910.physics_Main.daq.RAW
-# art-input-nfiles: 1
-# art-cores: 4
 # art-memory: 4096
 # art-include: main/Athena
 # art-include: 24.0/Athena
 # art-output: physval*.root
 # art-output: *.xml
-# art-output: art_core_0
 # art-output: dcube*
 # art-html: dcube_shifter_last
 
@@ -20,6 +16,7 @@ run() { (set -x; exec "$@") }
 relname="r24.0.65"
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
+inputBS=${artdata}/RecJobTransformTests/data17_13TeV.00324910.physics_Main.daq.RAW._lb0713._SFO-6._0001.data 
 dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_data17_13TeV_1000evt.root
 
 
@@ -27,4 +24,4 @@ script=test_data_reco_Run2.sh
 
 echo "Executing script ${script}"
 echo " "
-"$script" ${ArtProcess} ${ArtInFile} ${dcubeRef}
+"$script" ${inputBS} ${dcubeRef}
