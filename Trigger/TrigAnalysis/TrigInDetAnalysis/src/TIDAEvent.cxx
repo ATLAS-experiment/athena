@@ -7,7 +7,7 @@
  **     @author  mark sutton
  **     @date    Tue  2 Feb 2010 00:09:33 GMT 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 #include "TrigInDetAnalysis/TIDAEvent.h"
@@ -19,7 +19,8 @@ TIDA::Event::Event() :
   m_event_number(0), 
   m_lumi_block(0),
   m_time_stamp(0),
-  m_bunch_crossing_id(0)
+  m_bunch_crossing_id(0),
+  m_mu(0)
 { }
 
 TIDA::Event::~Event() { } 
