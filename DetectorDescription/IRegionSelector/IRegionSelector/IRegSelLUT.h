@@ -20,7 +20,6 @@
 #include <vector>
 #include <algorithm>
 #include <stdint.h>
-#include <algorithm>
 
 #include "IRegionSelector/IRoiDescriptor.h"
 
