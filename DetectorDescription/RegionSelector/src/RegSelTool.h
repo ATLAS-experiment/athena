@@ -50,37 +50,12 @@ public:
   //! @method initialize, loads lookup tables for retrieve %Identifier %Hash and ROBID 
   virtual StatusCode initialize() override;
 
-  /// IRegSlTool interface ...
-
-  // Interface inherited from IRegSelTool service
-
-
-  void HashIDList( const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const override;
-
-
-  void HashIDList( long layer, const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist) const override;
-
-
-  void ROBIDList( const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const override;
-
-
-  void ROBIDList( long layer, const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const override;
-
-   
 protected:
 
   //! @method lookup, actually retrieve the lookup table as conditions data
 
   const IRegSelLUT* lookup( const EventContext& ctx ) const override;
-
-  /// old version kept in for validation ...
-  const IRegSelLUT* lookup() const override;
-
-  
-protected:
-
-  void cleanup( std::vector<IdentifierHash>& idvec ) const;
-  
+    
 private:
 
   //! Flag to determine whether it has yet been initialised
@@ -91,14 +66,6 @@ private:
 
   SG::ReadCondHandleKey<IRegSelLUTCondData> m_tableKey{ this, "RegSelLUT", "Tool_Not_Initalised", "Region Selector lookup table" };
 
-  /// flag to avoid the need for a separate rpc lookup table class
-  /// FixMe: this flag may be replaced by custom derived RegSelTool 
-  ///        class for the RPC. The tools are retrieved only via  
-  ///        the IRegSelTool interface so this would also be 
-  ///        transaprent to the user
-
-  bool m_rpcflag; 
-  
 };
 
 #endif // REGIONSELECTOR_REGSELTOOL_H
