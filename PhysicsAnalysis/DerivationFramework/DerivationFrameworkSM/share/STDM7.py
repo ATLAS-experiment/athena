@@ -112,20 +112,26 @@ if globalflags.DataSource()=='geant4':
 # SKIMMING TOOL 
 #====================================================================
 
-filterVal = derivationFlags.WriteDAOD_STDM7Stream.nChFilter
+filterVal_min = derivationFlags.WriteDAOD_STDM7Stream.nChFilter_min
+filterVal_max = derivationFlags.WriteDAOD_STDM7Stream.nChFilter_max
 
 muonsRequirements = '(Muons.pt >= 4*GeV) && (abs(Muons.eta) < 2.6) && (Muons.DFCommonMuonsPreselection) && (Muons.DFCommonGoodMuon)'
 electronsRequirements = '(Electrons.pt > 11*GeV) && (abs(Electrons.eta) < 2.6) && (Electrons.DFCommonElectronsLHLoose)'
-chargedParticleRequirements = '(TruthParticles.pt > 500) && (TruthParticles.barcode < 200000) && (TruthParticles.status == 1) && (TruthParticles.charge != 0) && (TruthParticles.theta > 0.163803) && (TruthParticles.theta < 2.97779) && (TruthParticles.HSBool)' #the theta cuts correspond to |eta|<2.5.  Often, theta = 0 or pi, so using eta directly causes and Floating Point Exception
+chargedParticleRequirements = '(TruthParticles.pt > 500) && (TruthParticles.barcode < 200000) && (TruthParticles.status == 1) && (TruthParticles.charge != 0) && (abs(TruthParticles.eta) < 2.5) && (TruthParticles.HSBool)'
 muonOnlySelection = 'count('+muonsRequirements+') >=2'
 electronOnlySelection = 'count('+electronsRequirements+') >= 2'
 electronMuonSelection = '(count('+electronsRequirements+') + count('+muonsRequirements+')) >= 2'
 
-if filterVal > -1 and globalflags.DataSource()=='geant4':
-    chargedParticleSelection = 'count('+chargedParticleRequirements+') < '+str(filterVal)
-    offlineexpression = '(('+muonOnlySelection+' || '+electronOnlySelection+' || '+electronMuonSelection+') && ('+chargedParticleSelection+'))'
-else:
-    offlineexpression = '('+muonOnlySelection+' || '+electronOnlySelection+' || '+electronMuonSelection+')'
+chargedParticleSelection_max = 'true'
+chargedParticleSelection_min = 'true'
+
+if (filterVal_min is not None) and globalflags.DataSource()=='geant4':
+    chargedParticleSelection_min = 'count('+chargedParticleRequirements+') >= '+str(filterVal_min)
+if (filterVal_max is not None) and globalflags.DataSource()=='geant4':
+    chargedParticleSelection_max = 'count('+chargedParticleRequirements+') < '+str(filterVal_max)
+
+offlineexpression = '(('+muonOnlySelection+' || '+electronOnlySelection+' || '+electronMuonSelection+') && ('+chargedParticleSelection_min+' && '+chargedParticleSelection_max+'))'
+
 
 MuonTriggerRequirement=['HLT_2mu6_bUpsimumu_L1BPH-8M15-2MU6_BPH-0DR22-2MU6', 'HLT_2mu10', 'HLT_2mu14', 'HLT_2mu6_10invm30_pt2_z10', 'HLT_mu4_iloose_mu4_11invm60_noos', 'HLT_mu4_iloose_mu4_11invm60_noos_novtx', 'HLT_mu4_iloose_mu4_7invm9_noos', 'HLT_mu4_iloose_mu4_7invm9_noos_novtx', 'HLT_mu6_iloose_mu6_11invm24_noos', 'HLT_mu6_iloose_mu6_11invm24_noos_novtx', 'HLT_mu6_iloose_mu6_24invm60_noos', 'HLT_mu6_iloose_mu6_24invm60_noos_novtx', 'HLT_mu18_mu8noL1', 'HLT_mu20_iloose_L1MU15', 'HLT_2mu6_bBmumu', 'HLT_mu6_mu4_bBmumu', 'HLT_2mu4_bUpsimumu', 'HLT_mu6_mu4_bUpsimumu', 'HLT_2mu6_bUpsimumu', 'HLT_mu4_iloose_mu4_11invm60_noos_L1_MU6_2MU4', 'HLT_mu4_iloose_mu4_11invm60_noos_novtx_L1_MU6_2MU4', 'HLT_mu4_iloose_mu4_7invm9_noos_L1_MU6_2MU4', 'HLT_mu4_iloose_mu4_7invm9_noos_novtx_L1_MU6_2MU4', 'HLT_mu24_imedium', 'HLT_mu26_ivarmedium', 'HLT_mu50', 'HLT_mu24_iloose', 'HLT_mu24_iloose_L1MU15', 'HLT_mu24_ivarloose', 'HLT_mu20_iloose_L1MU15_OR_HLT_mu50', 'HLT_mu24_ivarmedium_OR_HLT_mu50', 'HLT_2mu10_nomucomb', 'HLT_3mu6', 'HLT_3mu6_msonly', 'HLT_mu18_2mu4noL1', 'HLT_3mu4', 'HLT_mu11_nomucomb_2mu4noL1_nscan03_L1MU11_2MU6', 'HLT_mu20_2mu4noL1', 'HLT_mu6_2mu4', 'HLT_2mu4_bJpsimumu_noL2', 'HLT_mu18_bJpsi_Trkloose']
 

@@ -896,7 +896,8 @@ class WriteDAOD_STDM7Stream (JobProperty):
     FileName = ''
     isVirtual = False
     DPDMakerScript = "DerivationFrameworkSM/STDM7.py"
-    nChFilter = -2
+    nChFilter_min = None
+    nChFilter_max = None
     pass
 jobproperties.DerivationFrameworkProdFlags.add_JobProperty(WriteDAOD_STDM7Stream)
 listAODtoDPD.append(WriteDAOD_STDM7Stream.StreamName)
