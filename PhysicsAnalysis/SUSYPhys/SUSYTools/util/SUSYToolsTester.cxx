@@ -75,9 +75,9 @@
 #include "TrigDecisionTool/ChainGroup.h"
 
 // ConstAccessors
-const static SG::AuxElement::ConstAccessor<size_t> acc_TruthProng("TruthProng");
-const static SG::AuxElement::ConstAccessor<int> acc_TruthCharge("TruthCharge");
-const static SG::AuxElement::ConstAccessor<char> acc_IsTruthMatched("IsTruthMatched");
+const static SG::ConstAccessor<size_t> acc_TruthProng("TruthProng");
+const static SG::ConstAccessor<int> acc_TruthCharge("TruthCharge");
+const static SG::ConstAccessor<char> acc_IsTruthMatched("IsTruthMatched");
 
 const size_t Ncuts = 10;
 const char *cut_name[] =

@@ -40,22 +40,22 @@
 
 namespace ST {
 
-  const static SG::AuxElement::Decorator<char>      dec_passSignalID("passSignalID");
-  const static SG::AuxElement::ConstAccessor<char>  acc_passSignalID("passSignalID");
+  const static SG::Decorator<char>      dec_passSignalID("passSignalID");
+  const static SG::ConstAccessor<char>  acc_passSignalID("passSignalID");
 
-  const static SG::AuxElement::Decorator<char>      dec_passChID("passChID");
-  const static SG::AuxElement::ConstAccessor<char>  acc_passChID("passChID");
-  const static SG::AuxElement::Decorator<double>    dec_ecisBDT("ecisBDT");
+  const static SG::Decorator<char>      dec_passChID("passChID");
+  const static SG::ConstAccessor<char>  acc_passChID("passChID");
+  const static SG::Decorator<double>    dec_ecisBDT("ecisBDT");
 
-  const static SG::AuxElement::Decorator<float>     dec_sfChIDEff("chargeIDEffiSF"); //tools' default
-  const static SG::AuxElement::ConstAccessor<float> acc_sfChIDEff("chargeIDEffiSF"); //tools' default
+  const static SG::Decorator<float>     dec_sfChIDEff("chargeIDEffiSF"); //tools' default
+  const static SG::ConstAccessor<float> acc_sfChIDEff("chargeIDEffiSF"); //tools' default
 
-  const static SG::AuxElement::Decorator<float>     dec_z0sinTheta("z0sinTheta");
-  const static SG::AuxElement::Decorator<float>     dec_d0sig("d0sig");
-  const static SG::AuxElement::Decorator<char> dec_isLRT("isLRT");
-  const static SG::AuxElement::ConstAccessor<char> acc_isLRT("isLRT");
+  const static SG::Decorator<float>     dec_z0sinTheta("z0sinTheta");
+  const static SG::Decorator<float>     dec_d0sig("d0sig");
+  const static SG::Decorator<char> dec_isLRT("isLRT");
+  const static SG::ConstAccessor<char> acc_isLRT("isLRT");
 
-  const static SG::AuxElement::ConstAccessor<char> acc_passECIDS("DFCommonElectronsECIDS"); // Loose 97% WP
+  const static SG::ConstAccessor<char> acc_passECIDS("DFCommonElectronsECIDS"); // Loose 97% WP
 
 
 StatusCode SUSYObjDef_xAOD::MergeElectrons(const xAOD::ElectronContainer & electrons, xAOD::ElectronContainer* outputCol, const std::set<const xAOD::Electron *> &ElectronsToRemove) const{

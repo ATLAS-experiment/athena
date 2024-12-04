@@ -38,18 +38,18 @@
 
 namespace ST {
 
-  const static SG::AuxElement::Decorator<char>      dec_passedHighPtCuts("passedHighPtCuts");
+  const static SG::Decorator<char>      dec_passedHighPtCuts("passedHighPtCuts");
 
-  const static SG::AuxElement::Decorator<char>      dec_passSignalID("passSignalID");
-  const static SG::AuxElement::ConstAccessor<char>  acc_passSignalID("passSignalID");
+  const static SG::Decorator<char>      dec_passSignalID("passSignalID");
+  const static SG::ConstAccessor<char>  acc_passSignalID("passSignalID");
 
-  const static SG::AuxElement::Decorator<float>     dec_DFCommonJetDr("DFCommonJetDr");
-  const static SG::AuxElement::ConstAccessor<float> acc_DFCommonJetDr("DFCommonJetDr");
-  const static SG::AuxElement::Decorator<float>     dec_dRJet("dRJet");
-  const static SG::AuxElement::Decorator<float>     dec_z0sinTheta("z0sinTheta");
-  const static SG::AuxElement::Decorator<float>     dec_d0sig("d0sig");
-  const static SG::AuxElement::Decorator<char>      dec_isLRT("isLRT");
-  const static SG::AuxElement::Decorator<char>      dec_cosmic("cosmic");
+  const static SG::Decorator<float>     dec_DFCommonJetDr("DFCommonJetDr");
+  const static SG::ConstAccessor<float> acc_DFCommonJetDr("DFCommonJetDr");
+  const static SG::Decorator<float>     dec_dRJet("dRJet");
+  const static SG::Decorator<float>     dec_z0sinTheta("z0sinTheta");
+  const static SG::Decorator<float>     dec_d0sig("d0sig");
+  const static SG::Decorator<char>      dec_isLRT("isLRT");
+  const static SG::Decorator<char>      dec_cosmic("cosmic");
 
 
 StatusCode SUSYObjDef_xAOD::MergeMuons(const xAOD::MuonContainer & muons, const std::vector<bool> &writeMuon, xAOD::MuonContainer* outputCol) const{
@@ -401,10 +401,10 @@ bool SUSYObjDef_xAOD::IsHighPtMuon(const xAOD::Muon& input) const
 
 bool SUSYObjDef_xAOD::IsBadMuon(const xAOD::Muon& input, float qopcut) const
 {
-  const static SG::AuxElement::Decorator<char> dec_bad("bad");
+  const static SG::Decorator<char> dec_bad("bad");
   dec_bad(input) = false;
 
-  const static SG::AuxElement::Decorator<char> dec_bad_highPt("bad_highPt");
+  const static SG::Decorator<char> dec_bad_highPt("bad_highPt");
   dec_bad_highPt(input) = false;
 
   const xAOD::TrackParticle* track;

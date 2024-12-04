@@ -73,7 +73,7 @@ int main( int argc, char* argv[] ) {
   }
 
   ///
-  static SG::AuxElement::Accessor<int> acc_susyid("SUSY_procID");
+  static SG::Accessor<int> acc_susyid("SUSY_procID");
 
   // Initialise the application:
   //ANA_CHECK( xAOD::Init( APP_NAME ) );  //NOT WORKING? //MT,WB

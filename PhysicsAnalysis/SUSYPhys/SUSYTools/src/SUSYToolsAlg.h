@@ -38,14 +38,14 @@ namespace TauAnalysisTools {
 
 // Define ConstAccessors
 namespace STAlg {
-  const static SG::AuxElement::ConstAccessor<float> acc_ptvarcone30_TTVA_LooseCone("ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000");
-  const static SG::AuxElement::ConstAccessor<float> acc_ptvarcone30_TTVA("ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000");
-  const static SG::AuxElement::ConstAccessor<float> acc_topoetcone20("topoetcone20");
-  const static SG::AuxElement::ConstAccessor<float> acc_topoetcone40("topoetcone40");
-  const static SG::AuxElement::ConstAccessor<float> acc_ptcone20("ptcone20");
-  const static SG::AuxElement::ConstAccessor<char> acc_IsTruthMatched("IsTruthMatched");
-  const static SG::AuxElement::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> acc_truthParticleLink("truthParticleLink");
-  const static SG::AuxElement::ConstAccessor<float> acc_RNNJetScoreSigTrans("RNNJetScoreSigTrans");
+  const static SG::ConstAccessor<float> acc_ptvarcone30_TTVA_LooseCone("ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000");
+  const static SG::ConstAccessor<float> acc_ptvarcone30_TTVA("ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000");
+  const static SG::ConstAccessor<float> acc_topoetcone20("topoetcone20");
+  const static SG::ConstAccessor<float> acc_topoetcone40("topoetcone40");
+  const static SG::ConstAccessor<float> acc_ptcone20("ptcone20");
+  const static SG::ConstAccessor<char> acc_IsTruthMatched("IsTruthMatched");
+  const static SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> acc_truthParticleLink("truthParticleLink");
+  const static SG::ConstAccessor<float> acc_RNNJetScoreSigTrans("RNNJetScoreSigTrans");
 }
 
 class SUSYToolsAlg : public EL::AnaAlgorithm {
