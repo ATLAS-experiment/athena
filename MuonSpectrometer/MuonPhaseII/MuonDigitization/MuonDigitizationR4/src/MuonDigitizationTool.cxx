@@ -5,7 +5,7 @@
 
 #include <xAODMuonSimHit/MuonSimHitAuxContainer.h>
 #include <AthenaKernel/RNGWrapper.h>
-#include <GeoModelHelpers/throwExcept.h>
+#include <GeoModelKernel/throwExcept.h>
 
 namespace MuonR4{
 

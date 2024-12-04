@@ -8,7 +8,7 @@
 
 #include <xAODMeasurementBase/MeasurementDefs.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
-#include <GeoModelHelpers/throwExcept.h>
+#include <GeoModelKernel/throwExcept.h>
 
 #define BUILD_TRAIT(traitName, conceptPass) \
     template <typename T> struct traitName{}; \

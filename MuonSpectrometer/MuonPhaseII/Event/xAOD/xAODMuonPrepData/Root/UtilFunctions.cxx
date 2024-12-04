@@ -2,7 +2,7 @@
    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODMuonPrepData/UtilFunctions.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 
 #include "MuonReadoutGeometryR4/MdtReadoutElement.h"
 #include "MuonReadoutGeometryR4/RpcReadoutElement.h"

@@ -3,7 +3,7 @@
 */
 
 #include "MuonCalibMath/BaseFunctionFitter.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 #include <cmath>
 
 namespace MuonCalib {

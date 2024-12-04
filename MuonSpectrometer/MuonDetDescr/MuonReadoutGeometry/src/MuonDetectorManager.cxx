@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 #include "MuonAlignmentData/ALinePar.h"
 #include "MuonAlignmentData/BLinePar.h"
 #include "MuonReadoutGeometry/CscReadoutElement.h"

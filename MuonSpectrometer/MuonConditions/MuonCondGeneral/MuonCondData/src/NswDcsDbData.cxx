@@ -14,7 +14,7 @@
 #include "MuonNSWCommonDecode/MapperSTG.h"
 #include "MuonNSWCommonDecode/MapperMMG.h"
 
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 
 
 

@@ -4,7 +4,7 @@
 
 #include "MuonCondData/MdtCondDbData.h"
 #include "MuonIdHelpers/MdtIdHelper.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 
 using DcsConstants = MdtCondDbData::DcsConstants;
 // --- writing identifiers -------

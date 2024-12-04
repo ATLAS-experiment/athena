@@ -13,7 +13,7 @@
 #include <limits>
 #include <iostream>
 #include <GeoPrimitives/CLHEPtoEigenConverter.h>
-#include <GeoModelHelpers/throwExcept.h>
+#include <GeoModelKernel/throwExcept.h>
 #include <xAODMuonSimHit/MuonSimHitAuxContainer.h>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <StoreGate/ReadHandle.h>

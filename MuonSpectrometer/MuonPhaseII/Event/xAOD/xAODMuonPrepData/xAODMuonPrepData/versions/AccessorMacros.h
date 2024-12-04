@@ -3,7 +3,7 @@
 */
 #ifndef XAODMUONPREPDATA_ACCESSOR_MACROS_H
 #define XAODMUONPREPDATA_ACCESSOR_MACROS_H
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 /**
  *  Macros to implement the scalar variables of the xAOD::MuonPrepData objects
 */

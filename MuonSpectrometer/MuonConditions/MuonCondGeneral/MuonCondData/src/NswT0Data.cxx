@@ -6,7 +6,7 @@
 #include "MuonIdHelpers/sTgcIdHelper.h"
 #include "Identifier/Identifier.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 
 
 NswT0Data::NswT0Data(const Muon::IMuonIdHelperSvc* idHelperSvc): 

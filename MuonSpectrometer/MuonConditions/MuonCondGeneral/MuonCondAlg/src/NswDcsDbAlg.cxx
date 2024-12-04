@@ -10,7 +10,7 @@
 #include <regex>
 #include "nlohmann/json.hpp"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 
 // Initialize
 StatusCode

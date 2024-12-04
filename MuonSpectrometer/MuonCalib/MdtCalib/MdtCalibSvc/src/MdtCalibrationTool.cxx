@@ -22,7 +22,7 @@
 #include "MagFieldElements/AtlasFieldCache.h"
 #include "MuonCalibEvent/MdtCalibHit.h"
 
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 namespace {
   static double const twoBySqrt12 = 2/std::sqrt(12);
 }

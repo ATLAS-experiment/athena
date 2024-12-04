@@ -39,7 +39,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 // Random Numbers
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandExponential.h"

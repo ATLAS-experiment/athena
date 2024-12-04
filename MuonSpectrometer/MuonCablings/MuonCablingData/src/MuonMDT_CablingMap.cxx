@@ -11,7 +11,7 @@
 #include "CxxUtils/ArrayHelper.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "Identifier/Identifier.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 
 namespace {
 /// Four mezzanine channels explicitly break the cabling schema in the legacy

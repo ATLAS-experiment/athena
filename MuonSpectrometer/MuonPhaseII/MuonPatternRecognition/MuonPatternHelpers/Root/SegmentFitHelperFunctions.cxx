@@ -8,7 +8,7 @@
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "AthenaBaseComps/AthMessaging.h"
 #include "GaudiKernel/PhysicalConstants.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 #include "xAODMuonPrepData/MdtDriftCircle.h"
 #include "MuonSpacePoint/UtilFunctions.h"
 #include "MuonPatternHelpers/MatrixUtils.h"

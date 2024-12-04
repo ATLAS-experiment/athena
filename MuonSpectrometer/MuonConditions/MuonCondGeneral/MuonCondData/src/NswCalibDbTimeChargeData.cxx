@@ -5,7 +5,7 @@
 #include "MuonCondData/NswCalibDbTimeChargeData.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "Identifier/Identifier.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 
 std::ostream& operator<<(std::ostream& ostr, const NswCalibDbTimeChargeData::CalibConstants& obj) {
     ostr<<"slope: "<<std::setprecision(15)<<obj.slope;//<<" pm "<<std::setprecision(15)<<obj.slopeError;
