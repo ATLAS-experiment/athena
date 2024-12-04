@@ -90,15 +90,17 @@ void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleH
   //To hold the current cluster vars for comparison
   //loop over the hits that we have been passed for this module
   for( auto& hit: moduleHits){
-    int is_clustered_hit =0;
+    bool is_clustered_hit = false;
 
     //Loop over the clusters we have already made, check if this hit should be added to them?
     for( auto& cluster: tempClusters){
       if(hit.isPixel()){
-	        is_clustered_hit = FPGATrackSimCLUSTERING::updatePixelCluster(cluster, hit, false);
+        if (FPGATrackSimCLUSTERING::updatePixelCluster(cluster, hit, false))
+          is_clustered_hit = true;
       }
       if(hit.isStrip()){
-	        is_clustered_hit = FPGATrackSimCLUSTERING::updateStripCluster(cluster, hit, false);
+        if (FPGATrackSimCLUSTERING::updateStripCluster(cluster, hit, false))
+          is_clustered_hit = true;
       }
     }
 
@@ -106,9 +108,10 @@ void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleH
     if((is_clustered_hit==0) or (tempClusters.size()==0)){
       FPGATrackSimCluster cluster;
       if(hit.isPixel()){
-	is_clustered_hit = FPGATrackSimCLUSTERING::updatePixelCluster(cluster, hit, true);
+	// No need to check the return code here
+	FPGATrackSimCLUSTERING::updatePixelCluster(cluster, hit, true);
       } else if(hit.isStrip()){
-	is_clustered_hit = FPGATrackSimCLUSTERING::updateStripCluster(cluster, hit, true);
+	FPGATrackSimCLUSTERING::updateStripCluster(cluster, hit, true);
       }
       //Put this cluster into the output hits. Will update it in place.
       tempClusters.push_back(cluster);
@@ -139,8 +142,26 @@ void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleH
 	  (cEta > fCEta + fCEtaWidth - 1))
 	continue;
 
-      // remaining clusters are overlapping, merge them
+      // remaining clusters are overlapping, check if clusters share hits
+      unsigned int sharedhits = 0;
+      for (auto & hit : cluster.getHitList()) {
+        newHit = true;
+        for (auto & finalHit : finalCluster.getHitList()) {
+          if (hit.getEtaIndex() == finalHit.getEtaIndex() &&
+              hit.getPhiIndex() == finalHit.getPhiIndex())
+            newHit = false;
+        }
+        if (!newHit) {
+	  sharedhits++;
+	}
+      }
+
+      if (sharedhits == 0)
+        continue;
+
+      // Merge the clusters
       newCluster = false;
+
       clusterEquiv = finalCluster.getClusterEquiv();
 
       // set new phi & phi width
@@ -166,7 +187,7 @@ void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleH
         else
           clusterEquiv.setEtaWidth(cEtaWidth);
       } else {
-        clusterEquiv.setPhiIndex(fCEta);
+        clusterEquiv.setEtaIndex(fCEta);
         if (!(cEta + cEtaWidth < fCEta + fCEtaWidth))
           clusterEquiv.setEtaWidth(cEtaWidth + (cEta - fCEta));
 	else
