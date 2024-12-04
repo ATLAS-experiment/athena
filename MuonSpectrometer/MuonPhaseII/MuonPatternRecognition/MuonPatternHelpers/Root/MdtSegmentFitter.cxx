@@ -104,7 +104,7 @@ namespace MuonR4{
             fitResult.nTimeMeas+=hit->measuresTime();              
         }
         if (!fitResult.nDoF) {
-            ATH_MSG_WARNING("TSCHUUUUUUUUSS Measurements...");
+            ATH_MSG_VERBOSE("Measurements rejected.");
             return false;
         }
         if (!fitResult.nPhiMeas) {
@@ -686,7 +686,7 @@ namespace MuonR4{
             unsigned int nOutOfBound{0};
             for (unsigned int p =0; p< nDim; ++p) {
                 if (m_cfg.ranges[p][0] > currPars[p] || m_cfg.ranges[p][1]< currPars[p]) {
-                    ATH_MSG_WARNING("The "<<p<<"-th parameter "<<toString(static_cast<ParamDefs>(p))<<" is out of range "<<currPars[p]
+                    ATH_MSG_VERBOSE("The "<<p<<"-th parameter "<<toString(static_cast<ParamDefs>(p))<<" is out of range "<<currPars[p]
                                     <<"["<<m_cfg.ranges[p][0]<<"-"<<m_cfg.ranges[p][1]<<"]");
                     ++nOutOfBound;
                 }
