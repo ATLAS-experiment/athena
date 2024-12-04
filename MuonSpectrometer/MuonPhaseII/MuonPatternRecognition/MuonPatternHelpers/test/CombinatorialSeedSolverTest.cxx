@@ -13,7 +13,7 @@
 
 #include "MuonPatternHelpers/CombinatorialSeedSolver.h"
 #include "GaudiKernel/SystemOfUnits.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 
 #include <iostream>
 #include <stdlib.h>

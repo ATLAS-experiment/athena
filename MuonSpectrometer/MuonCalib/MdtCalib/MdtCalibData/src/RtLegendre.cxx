@@ -3,7 +3,7 @@
 */
 #include "MdtCalibData/RtLegendre.h"
 #include "MuonCalibMath/LegendrePoly.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 using namespace MuonCalib;
 
 RtLegendre::RtLegendre(const ParVec& vec) : 

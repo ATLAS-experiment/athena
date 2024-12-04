@@ -5,7 +5,7 @@
 #ifndef GEOMODELUTILITIES_TRANSFORMMAP_ICC
 #define GEOMODELUTILITIES_TRANSFORMMAP_ICC
 
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 #include "CxxUtils/inline_hints.h"
 
 

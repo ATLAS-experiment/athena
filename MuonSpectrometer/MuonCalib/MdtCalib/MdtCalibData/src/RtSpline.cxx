@@ -9,7 +9,7 @@
 #include "MdtCalibData/RtSpline.h"
 
 // root
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/IMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"

@@ -3,7 +3,7 @@
 */
 #include <MuonAlignmentDataR4/MdtAlignmentStore.h>
 
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 MdtAlignmentStore::MdtAlignmentStore(const Muon::IMuonIdHelperSvc* idHelperSvc):
     m_idHelperSvc{idHelperSvc}{
     /// Reserve enough space in the vector

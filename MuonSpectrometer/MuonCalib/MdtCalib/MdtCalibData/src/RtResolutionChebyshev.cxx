@@ -3,7 +3,7 @@
 */
 #include "MdtCalibData/RtResolutionChebyshev.h"
 #include "MuonCalibMath/ChebychevPoly.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 
 using namespace MuonCalib;
 

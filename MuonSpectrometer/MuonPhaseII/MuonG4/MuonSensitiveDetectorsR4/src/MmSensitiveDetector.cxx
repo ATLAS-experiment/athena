@@ -14,7 +14,7 @@
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "xAODMuonSimHit/MuonSimHitAuxContainer.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 

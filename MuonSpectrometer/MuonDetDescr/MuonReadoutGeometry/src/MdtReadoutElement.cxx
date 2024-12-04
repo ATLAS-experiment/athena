@@ -17,7 +17,7 @@
 #include "GeoModelUtilities/GeoGetIds.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 #include "GeoModelHelpers/TransformToStringConverter.h"
 #include "GeoModelHelpers/GeoShapeUtils.h"
 

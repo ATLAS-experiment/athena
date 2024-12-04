@@ -4,7 +4,7 @@
 
 #include "ActsGeometry/ActsDetectorElement.h"
 
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 
 // ATHENA
 #include "ActsInterop/IdentityHelper.h"

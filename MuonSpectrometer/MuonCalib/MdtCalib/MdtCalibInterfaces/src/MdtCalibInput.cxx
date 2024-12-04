@@ -16,7 +16,7 @@
 #include <MuonDigitContainer/MdtDigit.h>
 #include <MuonPrepRawData/MdtPrepData.h>
 #include <TrkSurfaces/StraightLineSurface.h>
-#include <GeoModelHelpers/throwExcept.h>
+#include <GeoModelKernel/throwExcept.h>
 
 std::ostream& operator<<(std::ostream& ostr, const MdtCalibInput& input){
    ostr<<"adc: "<<input.adc()<<", ";

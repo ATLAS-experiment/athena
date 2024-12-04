@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonCondData/DigitEffiData.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 
 namespace Muon{
     DigitEffiData::DigitEffiData(const Muon::IMuonIdHelperSvc* idHelperSvc, double defaultEffi):

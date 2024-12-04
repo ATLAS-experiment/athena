@@ -2,7 +2,7 @@
    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonSpacePoint/UtilFunctions.h>
-#include <GeoModelHelpers/throwExcept.h>
+#include <GeoModelKernel/throwExcept.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 #include <GaudiKernel/SystemOfUnits.h>
 namespace MuonR4{

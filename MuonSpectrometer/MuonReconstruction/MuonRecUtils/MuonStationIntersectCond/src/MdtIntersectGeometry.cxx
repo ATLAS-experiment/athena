@@ -15,7 +15,7 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "TrkDriftCircleMath/MdtChamberGeometry.h"
 #include "TrkDriftCircleMath/MdtId.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 // maxNTubesPerLayer is included via MdtChamberGeometry.h -> DriftCircle.h
 
 namespace Muon {

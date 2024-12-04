@@ -3,7 +3,7 @@
 */
 
 #include "MuonPRDTestR4/TesterModuleBase.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/StoreGateSvc.h"
 

@@ -23,7 +23,7 @@
 #include "G4ReflectionFactory.hh"
 #include "G4LogicalBorderSurface.hh"
 #include "G4OpticalSurface.hh"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 
 #include <map>
 #include <iostream>

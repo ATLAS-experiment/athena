@@ -9,7 +9,7 @@
 #include "MdtCalibData/IRtRelation.h"
 #include "MuonCalibMath/BaseFunctionFitter.h"
 #include "MuonCalibMath/LegendrePolynomial.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 #include "cmath"
 
 using namespace MuonCalib;

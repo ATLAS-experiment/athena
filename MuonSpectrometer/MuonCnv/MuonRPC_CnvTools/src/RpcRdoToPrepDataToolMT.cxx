@@ -13,7 +13,7 @@
 #include "TrkSurfaces/Surface.h"
 #include "xAODMuonPrepData/RpcStripAuxContainer.h"
 #include "MuonIdHelpers/IdentifierByDetElSorter.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 using namespace MuonGM;
 using namespace Trk;
 namespace Muon{

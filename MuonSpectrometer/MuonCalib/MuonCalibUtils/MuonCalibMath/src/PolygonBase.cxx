@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cstdlib>
 #include "MuonCalibMath/PolygonBase.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 using namespace MuonCalib;
 
 PolygonBase::PolygonBase(const std::vector<double> & x) {

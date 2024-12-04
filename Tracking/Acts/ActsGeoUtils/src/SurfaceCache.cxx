@@ -5,7 +5,7 @@
 #include <ActsGeoUtils/SurfaceCache.h>
 #ifndef SIMULATIONBASE
 #include <Acts/Surfaces/Surface.hpp>
-#include <GeoModelHelpers/throwExcept.h>
+#include <GeoModelKernel/throwExcept.h>
 
 namespace ActsTrk{
 

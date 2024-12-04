@@ -3,7 +3,7 @@
 */
 #include "MdtCalibData/RtChebyshev.h"
 #include "MuonCalibMath/ChebychevPoly.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 using namespace MuonCalib;
 
 RtChebyshev::RtChebyshev(const ParVec& vec) : 

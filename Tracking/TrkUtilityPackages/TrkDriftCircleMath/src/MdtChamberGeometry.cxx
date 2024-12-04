@@ -10,7 +10,7 @@
 #include "TrkDriftCircleMath/SortDcsByY.h"
 #include <AthenaKernel/getMessageSvc.h>
 #include <MuonReadoutGeometry/MdtReadoutElement.h>
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 
 namespace {
     constexpr int maxNTubesPerLayer = MdtIdHelper::maxNTubesPerLayer;

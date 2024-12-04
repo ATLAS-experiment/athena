@@ -8,7 +8,7 @@
 #include <AthenaKernel/IOVInfiniteRange.h>
 #include <PathResolver/PathResolver.h>
 #include <CxxUtils/StringUtils.h>
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 
 MdtAsBuiltCondAlg::MdtAsBuiltCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
         AthReentrantAlgorithm{name, pSvcLocator} {}

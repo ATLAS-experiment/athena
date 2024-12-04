@@ -1,6 +1,6 @@
 #include "MuonCondData/NswErrorCalibData.h"
 #include <sstream>
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 
 using errorParametrizer = NswErrorCalibData::errorParametrizer;
 using Input = NswErrorCalibData::Input;

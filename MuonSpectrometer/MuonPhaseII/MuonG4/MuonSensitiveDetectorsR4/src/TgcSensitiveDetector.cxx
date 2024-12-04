@@ -16,7 +16,7 @@
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "xAODMuonSimHit/MuonSimHitAuxContainer.h"
 #include "GaudiKernel/SystemOfUnits.h"
-#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelKernel/throwExcept.h"
 
 using namespace ActsTrk;
 
