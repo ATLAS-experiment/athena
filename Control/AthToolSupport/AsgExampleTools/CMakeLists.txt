@@ -91,6 +91,13 @@ if( XAOD_STANDALONE )
       POST_EXEC_SCRIPT nopost.sh )
    set_tests_properties (AsgExampleTools_gt_MessageCheck_ctest PROPERTIES LABELS "AsgTools;AsgExampleTools" )
 
+   atlas_add_test( gt_PropertyWrapper
+      SOURCES test/gt_PropertyWrapper.cxx
+      INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+      LINK_LIBRARIES ${GTEST_LIBRARIES} AsgTools AsgExampleToolsLib AsgTestingLib
+      POST_EXEC_SCRIPT nopost.sh )
+   set_tests_properties (AsgExampleTools_gt_PropertyWrapper_ctest PROPERTIES LABELS "AsgTools;AsgExampleTools" )
+
    atlas_add_test( gt_TProperty
       SOURCES test/gt_TProperty.cxx
       INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}

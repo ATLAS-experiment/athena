@@ -12,6 +12,7 @@
 
 #ifdef XAOD_STANDALONE
 
+#include <AsgTools/PropertyMgr.h>
 #include <iosfwd>
 #include <string>
 #include <utility>
@@ -61,8 +62,18 @@ namespace Gaudi
     template<typename T2> decltype(auto) operator [] (const T2& index) const {
       return m_value[index];}
 
+    // the property we created.  this is used for debugging output and
+    // includes the name for that reason.  it is maybe a bit hacky, but
+    // it allows us to give proper printout (with proper meaning it
+    // matches Athena).
+  public:
+    auto *getProperty () const {return m_property;}
+
   private:
     T m_value;
+
+  private:
+    const PropertyMgr::PropMap_t::value_type *m_property = nullptr;
   };
 
 
@@ -77,6 +88,11 @@ namespace Gaudi
     : m_value (value)
   {
     owner->declareProperty (name, m_value, title);
+    if (auto iter = owner->getPropertyMgr()->getProperties().find(name);
+        iter != owner->getPropertyMgr()->getProperties().end())
+      m_property = &*iter;
+    else
+      throw std::logic_error ("PropertyWrapper::Property - property not found");
   }
 
 
@@ -88,6 +104,11 @@ namespace Gaudi
     : m_value (std::move (value))
   {
     owner->declareProperty (name, m_value, title);
+    if (auto iter = owner->getPropertyMgr()->getProperties().find(name);
+        iter != owner->getPropertyMgr()->getProperties().end())
+      m_property = &*iter;
+    else
+      throw std::logic_error ("PropertyWrapper::Property - property not found");
   }
 
 
@@ -147,7 +168,10 @@ namespace Gaudi
   template<typename T>
   std::ostream& operator << (std::ostream& str, const Property<T>& property)
   {
-    return str << property.value();
+    std::string propertyString;
+    if (property.getProperty()->second->getString (propertyString).isFailure())
+      throw std::runtime_error ("PropertyWrapper::operator << - no string conversion available");
+    return str << "'" << property.getProperty()->first << "': " << propertyString;
   }
 }
 
