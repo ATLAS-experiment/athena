@@ -1,0 +1,10 @@
+<lcgdict>
+  <class name="std::vector<char, std::pmr::polymorphic_allocator<char> >"/>
+  <class name="std::vector<unsigned char, std::pmr::polymorphic_allocator<unsigned char> >"/>
+  <class name="std::vector<short, std::pmr::polymorphic_allocator<short> >"/>
+  <class name="std::vector<unsigned short, std::pmr::polymorphic_allocator<unsigned short> >"/>
+  <class name="std::vector<int, std::pmr::polymorphic_allocator<int> >"/>
+  <class name="std::vector<unsigned int, std::pmr::polymorphic_allocator<unsigned int> >"/>
+  <class name="std::vector<float, std::pmr::polymorphic_allocator<float> >"/>
+  <class name="std::vector<double, std::pmr::polymorphic_allocator<double> >"/>
+</lcgdict>

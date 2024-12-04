@@ -1,0 +1,87 @@
+<lcgdict>
+  <class name="SG::ConstAccessor<char>"/>
+  <class name="SG::ConstAccessor<unsigned char>"/>
+  <class name="SG::ConstAccessor<int>"/>
+  <class name="SG::ConstAccessor<short>"/>
+  <class name="SG::ConstAccessor<long>"/>
+  <class name="SG::ConstAccessor<unsigned int>"/>
+  <class name="SG::ConstAccessor<unsigned short>"/>
+  <class name="SG::ConstAccessor<unsigned long>"/>
+  <class name="SG::ConstAccessor<unsigned long long>"/>
+  <class name="SG::ConstAccessor<float>"/>
+  <class name="SG::ConstAccessor<double>"/>
+  <class name="SG::ConstAccessor<bool>"/>
+  <class name="SG::ConstAccessor<std::string>"/>
+
+  <class name="SG::ConstAccessor<std::vector<char> >"/>
+  <class name="SG::ConstAccessor<std::vector<unsigned char> >"/>
+  <class name="SG::ConstAccessor<std::vector<int> >"/>
+  <class name="SG::ConstAccessor<std::vector<short> >"/>
+  <class name="SG::ConstAccessor<std::vector<long> >"/>
+  <class name="SG::ConstAccessor<std::vector<unsigned int> >"/>
+  <class name="SG::ConstAccessor<std::vector<unsigned short> >"/>
+  <class name="SG::ConstAccessor<std::vector<unsigned long> >"/>
+  <class name="SG::ConstAccessor<std::vector<unsigned long long> >"/>
+  <class name="SG::ConstAccessor<std::vector<float> >"/>
+  <class name="SG::ConstAccessor<std::vector<double> >"/>
+  <class name="SG::ConstAccessor<std::vector<bool> >"/>
+  <class name="SG::ConstAccessor<std::vector<std::string> >"/>
+
+  <class name="SG::AtomicConstAccessor<unsigned int>"/>
+
+  <class name="SG::Accessor<char>"/>
+  <class name="SG::Accessor<unsigned char>"/>
+  <class name="SG::Accessor<int>"/>
+  <class name="SG::Accessor<short>"/>
+  <class name="SG::Accessor<long>"/>
+  <class name="SG::Accessor<unsigned int>"/>
+  <class name="SG::Accessor<unsigned short>"/>
+  <class name="SG::Accessor<unsigned long>"/>
+  <class name="SG::Accessor<unsigned long long>"/>
+  <class name="SG::Accessor<float>"/>
+  <class name="SG::Accessor<double>"/>
+  <class name="SG::Accessor<bool>"/>
+  <class name="SG::Accessor<std::string>"/>
+
+  <class name="SG::Accessor<std::vector<char> >"/>
+  <class name="SG::Accessor<std::vector<unsigned char> >"/>
+  <class name="SG::Accessor<std::vector<int> >"/>
+  <class name="SG::Accessor<std::vector<short> >"/>
+  <class name="SG::Accessor<std::vector<long> >"/>
+  <class name="SG::Accessor<std::vector<unsigned int> >"/>
+  <class name="SG::Accessor<std::vector<unsigned short> >"/>
+  <class name="SG::Accessor<std::vector<unsigned long> >"/>
+  <class name="SG::Accessor<std::vector<unsigned long long> >"/>
+  <class name="SG::Accessor<std::vector<float> >"/>
+  <class name="SG::Accessor<std::vector<double> >"/>
+  <class name="SG::Accessor<std::vector<bool> >"/>
+  <class name="SG::Accessor<std::vector<std::string> >"/>
+
+  <class name="SG::Decorator<char>"/>
+  <class name="SG::Decorator<unsigned char>"/>
+  <class name="SG::Decorator<int>"/>
+  <class name="SG::Decorator<short>"/>
+  <class name="SG::Decorator<long>"/>
+  <class name="SG::Decorator<unsigned int>"/>
+  <class name="SG::Decorator<unsigned short>"/>
+  <class name="SG::Decorator<unsigned long>"/>
+  <class name="SG::Decorator<unsigned long long>"/>
+  <class name="SG::Decorator<float>"/>
+  <class name="SG::Decorator<double>"/>
+  <class name="SG::Decorator<bool>"/>
+  <class name="SG::Decorator<std::string>"/>
+
+  <class name="SG::Decorator<std::vector<char> >"/>
+  <class name="SG::Decorator<std::vector<unsigned char> >"/>
+  <class name="SG::Decorator<std::vector<int> >"/>
+  <class name="SG::Decorator<std::vector<short> >"/>
+  <class name="SG::Decorator<std::vector<long> >"/>
+  <class name="SG::Decorator<std::vector<unsigned int> >"/>
+  <class name="SG::Decorator<std::vector<unsigned short> >"/>
+  <class name="SG::Decorator<std::vector<unsigned long> >"/>
+  <class name="SG::Decorator<std::vector<unsigned long long> >"/>
+  <class name="SG::Decorator<std::vector<float> >"/>
+  <class name="SG::Decorator<std::vector<double> >"/>
+  <class name="SG::Decorator<std::vector<bool> >"/>
+  <class name="SG::Decorator<std::vector<std::string> >"/>
+</lcgdict>
