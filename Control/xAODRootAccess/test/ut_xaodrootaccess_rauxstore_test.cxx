@@ -59,12 +59,15 @@ StatusCode test_linked() {
        r.getAuxID< int >( "ltest1", "", SG::AuxVarFlags::Linked );
    SG::auxid_t auxid2 =
        r.getAuxID< float >( "ltest2", "", SG::AuxVarFlags::None, auxid1 );
-   auto model = RNTupleModel::Create();
-   auto ntuple =
-       RNTupleWriter::Recreate( std::move( model ), ntupleName, fileName );
+   // Inside it's own scope to ensure it is not open when we try to read from it
+   {
+      auto model = RNTupleModel::Create();
+      auto ntuple =
+         RNTupleWriter::Recreate( std::move( model ), ntupleName, fileName );
+   }
 
    xAOD::RAuxStore s( "fooAux:" );
-   RETURN_CHECK( APP_NAME, s.readFrom( ntupleName, fileName ) );
+   RETURN_CHECK( APP_NAME, s.readFrom( fileName, ntupleName ) );
    int* vp1 = reinterpret_cast< int* >( s.getData( auxid1, 10, 10 ) );
    float* vp2 = reinterpret_cast< float* >( s.getData( auxid2, 3, 3 ) );
 
@@ -119,12 +122,14 @@ StatusCode test_linked() {
       const SG::IAuxTypeVector* vi = cs.linkedVector( auxid2 );
       assert( vi != nullptr );
    }
-
-   auto model2 = RNTupleModel::Create();
-   auto ntuple2 =
-       RNTupleWriter::Recreate( std::move( model2 ), ntupleName, fileName2 );
+   // Inside it's own scope to ensure it is not open when we try to read from it
+   {
+      auto model2 = RNTupleModel::Create();
+      auto ntuple2 =
+         RNTupleWriter::Recreate( std::move( model2 ), ntupleName, fileName2 );
+   }
    xAOD::RAuxStore s2( "fooAux:" );
-   RETURN_CHECK( APP_NAME, s2.readFrom( ntupleName, fileName2 ); );
+   RETURN_CHECK( APP_NAME, s2.readFrom( fileName2, ntupleName ); );
 
    (void)s2.getData( auxid2, 6, 6 );
    (void)s2.getData( auxid1, 4, 4 );
@@ -182,14 +187,15 @@ StatusCode test_insertmove() {
        SG::AuxTypeRegistry::instance().getAuxID< int >( "anInt4" );
    SG::auxid_t mtyp1 =
        SG::AuxTypeRegistry::instance().getAuxID< MoveTest >( "moveTest" );
-
-   auto model = RNTupleModel::Create();
-   auto ntuple =
-       RNTupleWriter::Recreate( std::move( model ), ntupleName, fileName );
-
+   // Inside it's own scope to ensure it is not open when we try to read from it
+   {
+      auto model = RNTupleModel::Create();
+      auto ntuple =
+         RNTupleWriter::Recreate( std::move( model ), ntupleName, fileName );
+   }
    xAOD::RAuxStore s1( "fooAux:" );
 
-   RETURN_CHECK( APP_NAME, s1.readFrom( ntupleName, fileName ) );
+   RETURN_CHECK( APP_NAME, s1.readFrom( fileName, ntupleName ) );
    s1.resize( 5 );
 
    int* i1 = reinterpret_cast< int* >( s1.getData( ityp1, 5, 20 ) );
@@ -444,8 +450,6 @@ int main() {
    outputNtuple->PrintInfo();
 
    // It should have 2 top level fields (var1 and decoration).
-   // This can only be done with ROOT 6.33.0 and later, since RFieldBase 
-   // does not have a GetSubFields() method in earlier versions.
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 33, 0 )
    SIMPLE_ASSERT(
        outputNtuple->GetModel().GetConstFieldZero().GetSubFields().size() ==

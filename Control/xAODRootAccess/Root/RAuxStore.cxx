@@ -93,8 +93,8 @@ namespace xAOD {
    /// @param ntupleName Name of the ntuple that is being read from
    /// @returns <code>kTRUE</code> if successful, <code>kFALSE</code> otherwise
    ///
-   StatusCode RAuxStore::readFrom( const std::string & fileName,
-                                   const std::string & ntupleName ) {
+   StatusCode RAuxStore::readFrom( const std::string& fileName,
+                                   const std::string& ntupleName ) {
 
       // Remember the file name:
       m_inFileName = fileName;
@@ -1233,8 +1233,12 @@ namespace xAOD {
          // The registry:
          SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
 
-         // Create the new object:
-         m_vecs[auxid] = reg.makeVector( auxid, m_size, m_size ).release();
+         // Inside it's own scope to ensure that the lock is released
+         {
+            std::lock_guard<std::mutex> lock(m_mutex1);
+            // Create the new object:
+            m_vecs[auxid] = reg.makeVector(auxid, m_size, m_size).release();
+         }
          void* ptr = m_vecs[auxid]->toPtr();
          if( !ptr ) {
             ::Error( "xAOD::RAuxStore::setupOutputData",
@@ -1385,7 +1389,7 @@ namespace xAOD {
       auto inspector =
           RNTupleInspector::Create( m_inputNtupleName, m_inFileName );
       auto fieldName = Utils::getFirstFieldMatch( *m_inNtuple, auxName );
-      auto fieldInspector = inspector->GetFieldTreeInspector( fieldName );
+      const auto& fieldInspector = inspector->GetFieldTreeInspector( fieldName );
 
       std::string typeName =
           fieldInspector.GetDescriptor().GetTypeName().c_str();
@@ -1484,7 +1488,7 @@ namespace xAOD {
          std::string linkedFieldName =
              SG::AuxTypeRegistry::linkedName( fieldName );
          const std::type_info* linkedTi = nullptr;
-         if( Utils::fieldExists( linkedFieldName, *m_inNtuple ) ) {
+         if( Utils::fieldExists(  std::move(linkedFieldName), *m_inNtuple ) ) {
             linkedTi = auxFieldType( linkedAttr.c_str(), isStaticField );
          }
          if( linkedTi ) {
@@ -1774,7 +1778,7 @@ namespace xAOD {
    ::Bool_t RAuxStore::isPrimitiveField( std::string fieldName ) {
       auto inspector =
           RNTupleInspector::Create( m_inputNtupleName, m_inFileName );
-      auto fieldInspector = inspector->GetFieldTreeInspector( fieldName );
+      const auto& fieldInspector = inspector->GetFieldTreeInspector( fieldName );
 
       std::string typeName =
           fieldInspector.GetDescriptor().GetTypeName().c_str();

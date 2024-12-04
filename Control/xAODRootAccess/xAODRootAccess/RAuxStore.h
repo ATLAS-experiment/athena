@@ -57,9 +57,9 @@ namespace xAOD {
       EStructMode structMode() const;
 
       /// Connect the object to an input RNTuple
-      StatusCode readFrom(const  std::string & fileName, const std::string & ntupleName );
+      StatusCode readFrom( const std::string& fileName, const std::string& ntupleName );
       /// Connect the object to an output RNTuple
-      StatusCode writeTo( const std::string & fileName, const std::string & ntupleName );
+      StatusCode writeTo( const std::string& fileName, const std::string& ntupleName );
       /// Get entry from the input RNTuple
       ::Int_t getEntry( ::Int_t getall );
       /// Reset the store
