@@ -626,8 +626,6 @@ template<class T> inline double charge( const T& p){
 }
 template<class T> inline double threeCharge( const T& p){ return charge3(p);}
 template<class T> inline bool isCharged( const T& p){ return charge3(p) != 0;}
-template<class T> inline bool isNeutral( const T& p){ return charge3(p) == 0;}
-
 
 
 template<> inline int charge3(const DecodedPID& p) {
@@ -686,6 +684,12 @@ template<> inline int charge3(const int& p){
   auto value_digits = DecodedPID(p);
   return charge3(value_digits);
 }
+
+
+template<class T> inline bool isNeutral( const T& p){ return p->pdg_id() != 0 && charge3(p) == 0;}
+template<> inline bool isNeutral(const DecodedPID& p){ return p.pid() != 0 && charge3(p) == 0;}
+template<> inline bool isNeutral(const int& p){ auto value_digits = DecodedPID(p); return isNeutral(value_digits);}
+
 
 template<> inline double fractionalCharge(const DecodedPID& p) {
   if(!isGenericMultichargedParticle(p)) return 1.0*charge3(p)/3.0; // this method is written for multi-charged particles, still make sure other cases are handled properly
