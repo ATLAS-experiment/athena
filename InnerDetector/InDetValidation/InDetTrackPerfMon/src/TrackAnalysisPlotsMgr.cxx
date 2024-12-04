@@ -13,6 +13,7 @@
 #include "TrackAnalysisCollections.h"
 #include "ITrackMatchingLookup.h"
 #include "OfflineObjectDecorHelper.h"
+#include "TrackParametersHelper.h"
 
 /// Gaudi include(s)
 #include "GaudiKernel/ISvcLocator.h"
@@ -53,11 +54,11 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
 
   /// Track multiplicity plots
   if( m_trkAnaDefSvc->plotTrackMultiplicities() ) {
-    m_plots_nTracks_test = std::make_unique< NtracksPlots >(
+    m_plots_nTracks_vsTest = std::make_unique< NtracksPlots >(
         this, "Tracks/Multiplicities", m_anaTag, m_trkAnaDefSvc->testTag(),
         m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger(),
         true, m_trkAnaDefSvc->hasFullPileupTruth() );
-    m_plots_nTracks_ref = std::make_unique< NtracksPlots >(
+    m_plots_nTracks_vsRef = std::make_unique< NtracksPlots >(
         this, "Tracks/Multiplicities", m_anaTag, m_trkAnaDefSvc->referenceTag(),
         m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() );
   }
@@ -162,6 +163,29 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
     }
   }
 
+  /// Vertex parameters plots
+  if( m_trkAnaDefSvc->plotVertexParameters() ) {
+    /// Vertices parameters plots
+    m_plots_vtxParam_vsTest = std::make_unique< VertexParametersPlots >(
+        this, "Vertices/AllPrimary/Parameters", m_anaTag,
+        m_trkAnaDefSvc->testTag(),
+        not m_trkAnaDefSvc->isTestTruth() ); // do associated tracks plots for reco only
+    m_plots_vtxParam_vsRef = std::make_unique< VertexParametersPlots >(
+        this, "Vertices/AllPrimary/Parameters", m_anaTag,
+        m_trkAnaDefSvc->referenceTag(),
+        not m_trkAnaDefSvc->isReferenceTruth() ); // do associated tracks plots for reco only
+
+    /// Vertices multiplicity plots
+    m_plots_nVtxParam_vsTest = std::make_unique< VertexParametersPlots >(
+        this, "Vertices/AllPrimary/Parameters", m_anaTag,
+        m_trkAnaDefSvc->testTag(), false,
+        true, m_trkAnaDefSvc->hasFullPileupTruth() );
+    m_plots_nVtxParam_vsRef = std::make_unique< VertexParametersPlots >(
+        this, "Vertices/AllPrimary/Parameters", m_anaTag,
+        m_trkAnaDefSvc->referenceTag(), false,
+        true, m_trkAnaDefSvc->hasFullPileupTruth() );
+  } 
+
   /// intialize PlotBase
   ATH_CHECK( PlotMgr::initialize() );
 
@@ -184,22 +208,30 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fill(
   if( m_trkAnaDefSvc->isTestTruth() ) {
     ATH_CHECK( fillPlotsTest(
         trkAnaColls.testTruthVec( TrackAnalysisCollections::InRoI ),
-        trkAnaColls.matches(), truthMu, actualMu, weight ) );
+        trkAnaColls.matches(),
+        trkAnaColls.testTruthVertexVec( TrackAnalysisCollections::InRoI ),
+        truthMu, actualMu, weight ) );
   } else {
     ATH_CHECK( fillPlotsTest(
         trkAnaColls.testTrackVec( TrackAnalysisCollections::InRoI ),
-        trkAnaColls.matches(), truthMu, actualMu, weight ) );
+        trkAnaColls.matches(),
+        trkAnaColls.testRecoVertexVec( TrackAnalysisCollections::InRoI ),
+        truthMu, actualMu, weight ) );
   } 
 
   /// Plots w.r.t. reference tracks quantities
   if( m_trkAnaDefSvc->isReferenceTruth() ) {
     ATH_CHECK( fillPlotsReference(
         trkAnaColls.refTruthVec( TrackAnalysisCollections::InRoI ),
-        trkAnaColls.matches(), truthMu, actualMu, weight ) );
+        trkAnaColls.matches(),
+        trkAnaColls.refTruthVertexVec( TrackAnalysisCollections::InRoI ),
+        truthMu, actualMu, weight ) );
   } else {
     ATH_CHECK( fillPlotsReference(
         trkAnaColls.refTrackVec( TrackAnalysisCollections::InRoI ),
-        trkAnaColls.matches(), truthMu, actualMu, weight ) );
+        trkAnaColls.matches(),
+        trkAnaColls.refRecoVertexVec( TrackAnalysisCollections::InRoI ),
+        truthMu, actualMu, weight ) );
   } 
 
   /// Plots w.r.t. truth quantities (for EFTruthMatch only)
@@ -208,11 +240,12 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fill(
         trkAnaColls.testTrackVec( TrackAnalysisCollections::InRoI ),
         trkAnaColls.refTrackVec( TrackAnalysisCollections::InRoI ),
         trkAnaColls.truthPartVec( TrackAnalysisCollections::InRoI ),
-        trkAnaColls.matches(), truthMu, actualMu, weight ) );
+        trkAnaColls.matches(),
+        truthMu, actualMu, weight ) );
   }
 
   /// Track multiplicity plots
-  if( m_plots_nTracks_test ) {
+  if( m_plots_nTracks_vsTest ) {
     std::vector< unsigned int > countsTest( NtracksPlots::NCOUNTERS, 0 );
     countsTest[ NtracksPlots::ALL ] = m_trkAnaDefSvc->isTestTruth() ?
           trkAnaColls.testTruthVec( TrackAnalysisCollections::FULL ).size() :
@@ -225,10 +258,10 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fill(
           trkAnaColls.testTrackVec( TrackAnalysisCollections::InRoI ).size();
     countsTest[ NtracksPlots::MATCHED ] = trkAnaColls.matches().getNmatches();
 
-    ATH_CHECK( m_plots_nTracks_test->fillPlots( countsTest, truthMu, actualMu, weight ) );
+    ATH_CHECK( m_plots_nTracks_vsTest->fillPlots( countsTest, truthMu, actualMu, weight ) );
   }
 
-  if( m_plots_nTracks_ref ) {
+  if( m_plots_nTracks_vsRef ) {
     std::vector< unsigned int > countsRef( NtracksPlots::NCOUNTERS, 0 );
     countsRef[ NtracksPlots::ALL ] = m_trkAnaDefSvc->isReferenceTruth() ?
           trkAnaColls.refTruthVec( TrackAnalysisCollections::FULL ).size() :
@@ -241,7 +274,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fill(
           trkAnaColls.refTrackVec( TrackAnalysisCollections::InRoI ).size();
     countsRef[ NtracksPlots::MATCHED ] = trkAnaColls.matches().getNmatches( true );
 
-    ATH_CHECK( m_plots_nTracks_ref->fillPlots( countsRef, truthMu, actualMu, weight ) );
+    ATH_CHECK( m_plots_nTracks_vsRef->fillPlots( countsRef, truthMu, actualMu, weight ) );
   }
 
   return StatusCode::SUCCESS;
@@ -251,13 +284,14 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fill(
 /// ------------------------------
 /// --- Fill plots w.r.t. test ---
 /// ------------------------------
-template< typename PARTICLE >
+template< typename PARTICLE, typename VERTEX >
 StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
     const std::vector< const PARTICLE* >& particles,
     const ITrackMatchingLookup& matches,
+    const std::vector< const VERTEX* >& vertices,
     float truthMu, float actualMu, float weight )
 {
-
+  /// Selected particles loop
   for( const PARTICLE* particle : particles ) {
     /// track parameters plots
     if( m_plots_trkParam_vsTest ) {
@@ -279,14 +313,18 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
 
     /// technical efficiency plots 
     if( m_plots_tech_eff_vsTest ) {
-      if (  m_trkAnaDefSvc->isTestTruth() and 
-            isReconstructable( *particle, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() )) {
+      if (  m_trkAnaDefSvc->isTestTruth() and
+            isReconstructable( *particle,
+                               m_trkAnaDefSvc->minSilHits(),
+                               m_trkAnaDefSvc->etaBins() ) ) {
         ATH_CHECK( m_plots_tech_eff_vsTest->fillPlots(
             *particle, isMatched, truthMu, actualMu, weight ) );
       }
-      else if (  m_trkAnaDefSvc->isReferenceTruth() ) { 
-        bool isTechMatched = isMatched ? 
-            isReconstructable( *(matches.getMatchedRefTruth( *particle )), m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) : false;
+      else if (  m_trkAnaDefSvc->isReferenceTruth() ) {
+        bool isTechMatched = isMatched ?
+            isReconstructable( *(matches.getMatchedRefTruth( *particle )),
+                               m_trkAnaDefSvc->minSilHits(),
+                               m_trkAnaDefSvc->etaBins() ) : false;
         ATH_CHECK( m_plots_tech_eff_vsTest->fillPlots(
             *particle, isTechMatched, truthMu, actualMu, weight ) );
       }
@@ -294,7 +332,9 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
         const xAOD::TruthParticle* linkedTruth = getLinkedTruth(
           *particle, m_trkAnaDefSvc->truthProbCut() );
         bool isTechMatched = isMatched ? 
-            isReconstructable( *linkedTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) : false;
+            isReconstructable( *linkedTruth,
+                               m_trkAnaDefSvc->minSilHits(),
+                               m_trkAnaDefSvc->etaBins() ) : false;
         ATH_CHECK( m_plots_tech_eff_vsTest->fillPlots(
             *particle, isTechMatched, truthMu, actualMu, weight ) );
       }
@@ -359,29 +399,65 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
 
   } // close loop over particles
 
+  /// Selected vertices loop
+  int nGoodVertices(0);
+  for( const VERTEX* vertex : vertices ) {
+    /// skip dummy vertex
+    if( vertexType( *vertex ) == xAOD::VxType::NoVtx ) {
+      ATH_MSG_DEBUG( "Found Dummy vertex. Skipping" );
+      continue;
+    }
+    nGoodVertices++;
+
+    /// getting vertex-associated tracks and their weights
+    std::vector< const PARTICLE* > vtxTracks{};
+    std::vector< float > vtxTrackWeights{};
+    if( not getVertexTracksAndWeights(
+          *vertex, vtxTracks, vtxTrackWeights,
+          particles, m_trkAnaDefSvc->useSelectedVertexTracks() ) ) {
+      ATH_MSG_WARNING( "Problem when retrieving vertex-assocciated tracks" );
+      if( not vtxTracks.empty() ) {
+        ATH_MSG_WARNING( "Invalid associated track links found. Check your input format." );
+      }
+    }
+
+    /// vertex parameters plots
+    if( m_plots_vtxParam_vsTest ) {
+      ATH_CHECK( m_plots_vtxParam_vsTest->fillPlots( *vertex, vtxTracks, vtxTrackWeights, weight ) );
+    }
+  } /// close loop over vertices
+
+  /// Vertices multiplicity plots
+  if( m_plots_nVtxParam_vsTest ) {
+    ATH_CHECK( m_plots_nVtxParam_vsTest->fillPlots( nGoodVertices, truthMu, actualMu, weight ) );
+  }
+
   return StatusCode::SUCCESS;
 }
 
 template StatusCode
-IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest< xAOD::TrackParticle >(
+IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest< xAOD::TrackParticle, xAOD::Vertex >(
     const std::vector< const xAOD::TrackParticle* >& particles,
     const ITrackMatchingLookup& matches,
+    const std::vector< const xAOD::Vertex* >& vertices,
     float truthMu, float actualMu, float weight );
 
 template StatusCode
-IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest< xAOD::TruthParticle >(
+IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest< xAOD::TruthParticle, xAOD::TruthVertex >(
     const std::vector< const xAOD::TruthParticle* >& particles,
     const ITrackMatchingLookup& matches,
+    const std::vector< const xAOD::TruthVertex* >& vertices,
     float truthMu, float actualMu, float weight );
 
 
 /// -----------------------------------
 /// --- Fill plots w.r.t. reference ---
 /// -----------------------------------
-template< typename PARTICLE >
+template< typename PARTICLE, typename VERTEX >
 StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
     const std::vector< const PARTICLE* >& particles,
     const ITrackMatchingLookup& matches,
+    const std::vector< const VERTEX* >& vertices,
     float truthMu, float actualMu, float weight )
 {
 
@@ -461,19 +537,54 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
 
   } // close loop over particles
 
+  /// Selected vertices loop
+  int nGoodVertices(0);
+  for( const VERTEX* vertex : vertices ) {
+    /// skip dummy vertex
+    if( vertexType( *vertex ) == xAOD::VxType::NoVtx ) {
+      ATH_MSG_DEBUG( "Found Dummy vertex. Skipping" );
+      continue;
+    }
+    nGoodVertices++;
+
+    /// getting vertex-associated tracks and their weights
+    std::vector< const PARTICLE* > vtxTracks{};
+    std::vector< float > vtxTrackWeights{};
+    if( not getVertexTracksAndWeights(
+          *vertex, vtxTracks, vtxTrackWeights,
+          particles, m_trkAnaDefSvc->useSelectedVertexTracks() ) ) {
+      ATH_MSG_WARNING( "Problem when retrieving vertex-assocciated tracks" );
+      if( not vtxTracks.empty() ) {
+        ATH_MSG_WARNING( "Invalid associated track links found. Check your input format." );
+      }
+    }
+
+    /// vertex parameters plots
+    if( m_plots_vtxParam_vsRef ) {
+      ATH_CHECK( m_plots_vtxParam_vsRef->fillPlots( *vertex, vtxTracks, vtxTrackWeights, weight ) );
+    }
+  } /// close loop over vertices
+
+  /// Vertices multiplicity plots
+  if( m_plots_nVtxParam_vsRef ) {
+    ATH_CHECK( m_plots_nVtxParam_vsRef->fillPlots( nGoodVertices, truthMu, actualMu, weight ) );
+  }
+
   return StatusCode::SUCCESS;
 }
 
 template StatusCode
-IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference< xAOD::TrackParticle >(
+IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference< xAOD::TrackParticle, xAOD::Vertex >(
     const std::vector< const xAOD::TrackParticle* >& particles,
     const ITrackMatchingLookup& matches,
+    const std::vector< const xAOD::Vertex* >& vertices,
     float truthMu, float actualMu, float weight );
 
 template StatusCode
-IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference< xAOD::TruthParticle >(
+IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference< xAOD::TruthParticle, xAOD::TruthVertex >(
     const std::vector< const xAOD::TruthParticle* >& particles,
     const ITrackMatchingLookup& matches,
+    const std::vector< const xAOD::TruthVertex* >& vertices,
     float truthMu, float actualMu, float weight );
 
 

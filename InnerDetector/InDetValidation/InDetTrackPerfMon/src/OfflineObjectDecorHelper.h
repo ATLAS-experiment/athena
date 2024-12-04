@@ -15,10 +15,12 @@
 
 /// xAOD includes
 #include "xAODTracking/TrackParticle.h"
+#include "xAODTracking/Vertex.h"
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODMuon/MuonContainer.h"
 #include "xAODTau/TauJetContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "xAODTruth/TruthVertex.h"
 
 /// STL includes
 #include <string>
@@ -80,11 +82,30 @@ namespace IDTPM {
   inline const xAOD::TruthParticle* getLinkedTruth(
       const xAOD::TruthParticle&, const float ) { return nullptr; }; // dummy - to avoid compilation errors
 
-  bool isFakeTruth( const xAOD::TrackParticle& track, const float truthProbCut=0., const bool unlinkedAsFakes=false );
-  inline bool isFakeTruth( const xAOD::TruthParticle&, const float, const bool ) { return false; }; // dummy - to avoid compilation errors
+  bool isFakeTruth( const xAOD::TrackParticle& track,
+                    const float truthProbCut=0., const bool unlinkedAsFakes=false );
+  inline bool isFakeTruth( const xAOD::TruthParticle&,
+                           const float, const bool ) { return false; }; // dummy - to avoid compilation errors
 
-  bool isReconstructable( const xAOD::TruthParticle& truth, const std::vector<unsigned int>& minSilHits, const std::vector<float>& etaBins);
-  inline bool isReconstructable( const xAOD::TrackParticle&, const std::vector<unsigned int>& , const std::vector<float>& ) { return false; }; // dummy - to avoid compilation errors
+  bool isReconstructable( const xAOD::TruthParticle& truth,
+                          const std::vector< unsigned int >& minSilHits,
+                          const std::vector< float >& etaBins);
+  inline bool isReconstructable( const xAOD::TrackParticle&,
+                                 const std::vector< unsigned int >& ,
+                                 const std::vector< float >& ) { return false; }; // dummy - to avoid compilation errors
+
+  /// For vertices (truth and reco)
+  /// get vertex-associated tracks and their weights
+  bool getVertexTracksAndWeights( const xAOD::Vertex& vtx,
+                                  std::vector< const xAOD::TrackParticle* >& vtxTracks,
+                                  std::vector< float >& vtxTrackWeights,
+                                  const std::vector< const xAOD::TrackParticle* >& selTracks = {},
+                                  bool useSelected = false );
+  inline bool getVertexTracksAndWeights( const xAOD::TruthVertex&,
+                                         std::vector< const xAOD::TruthParticle* >&,
+                                         std::vector< float >&,
+                                         const std::vector< const xAOD::TruthParticle* >& /*selTracks*/ = {},
+                                         bool /*useSelected*/ = false ) { return true; } // TODO: Change to get (outgoing?) truth particles
 
 } // namespace IDTPM
 

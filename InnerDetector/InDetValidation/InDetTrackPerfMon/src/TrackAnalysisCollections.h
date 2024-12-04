@@ -246,40 +246,6 @@ namespace IDTPM {
     const std::vector< const xAOD::Vertex* >& trigVertexVec( Stage stage = FULL ) {
       return m_trigVertexVec[ stage ]; }
 
-    /// useful typedefs: pair of vector of vertex-associated tracks and their weights
-    typedef std::pair< std::vector< const xAOD::TruthParticle* >,
-                       std::vector< float > > truthWeightVecPair_t;
-    typedef std::pair< std::vector< const xAOD::TrackParticle* >,
-                       std::vector< float > > trackWeightVecPair_t;
-
-    /// Get truth/offline/trigger tracks associated with vertices
-    std::vector< truthWeightVecPair_t > getVertexTruthPartVecs(
-        Stage /*stage = InRoI*/, bool /*useSelected = false*/ ); // TODO: uncomment
-    std::vector< trackWeightVecPair_t > getVertexOfflTrackVecs(
-        Stage stage = InRoI, bool useSelected = false ) {
-      return getVertexTrackVecsBase( m_offlVertexVec[ stage ],
-                                     m_offlTrackVec[ stage ],
-                                     useSelected );
-    }
-    std::vector< trackWeightVecPair_t > getVertexTrigTrackVecs(
-        Stage stage = InRoI, bool useSelected = false ) {
-      return getVertexTrackVecsBase( m_trigVertexVec[ stage ],
-                                     m_trigTrackVec[ stage ],
-                                     useSelected );
-    }
-
-    /// Get TEST tracks associated with vertices
-    std::vector< truthWeightVecPair_t > getVertexTestTruthPartVecs(
-        Stage stage = InRoI, bool useSelected = false );
-    std::vector< trackWeightVecPair_t > getVertexTestTrackVecs(
-        Stage stage = InRoI, bool useSelected = false );
-
-    /// Get REFERENCE tracks associated with vertices
-    std::vector< truthWeightVecPair_t > getVertexRefTruthPartVecs(
-        Stage stage = InRoI, bool useSelected = false );
-    std::vector< trackWeightVecPair_t > getVertexRefTrackVecs(
-        Stage stage = InRoI, bool useSelected = false );
-
     /// get track matching information 
     ITrackMatchingLookup& matches() { return *m_matches; }
 
@@ -291,15 +257,9 @@ namespace IDTPM {
 
   private:
 
-    /// general method to get vertex-associated tracks and their weights
-    std::vector< trackWeightVecPair_t > getVertexTrackVecsBase(
-      const std::vector< const xAOD::Vertex* >& vtxVec,
-      const std::vector< const xAOD::TrackParticle* >& trkVec,
-      bool useSelected );
-
     /// TrackAnalysis properties
     std::string m_anaTag;
-    SmartIF<ITrackAnalysisDefinitionSvc> m_trkAnaDefSvc;
+    SmartIF< ITrackAnalysisDefinitionSvc > m_trkAnaDefSvc;
 
     /// --- Collections class variables ---
     /// EventInfo, TruthEvent, and TruthPUEvent
@@ -326,7 +286,6 @@ namespace IDTPM {
     std::vector<std::vector< const xAOD::TruthVertex* >>  m_truthVertexVec{};
     std::vector<std::vector< const xAOD::Vertex* >>       m_offlVertexVec{};
     std::vector<std::vector< const xAOD::Vertex* >>       m_trigVertexVec{};
-    /// TODO - maybe add vectors for truth HS and PU vertices
 
     /// null vectors
     std::vector< const xAOD::TrackParticle* > m_nullTrackVec{};

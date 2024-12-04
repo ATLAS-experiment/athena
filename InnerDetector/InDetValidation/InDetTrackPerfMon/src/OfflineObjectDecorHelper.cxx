@@ -69,7 +69,9 @@ namespace IDTPM {
   }
 
   /// isFake
-  bool isFakeTruth( const xAOD::TrackParticle& track, const float truthProbCut, const bool unlinkedAsFakes )
+  bool isFakeTruth( const xAOD::TrackParticle& track,
+                    const float truthProbCut,
+                    const bool unlinkedAsFakes )
   {
     /// if fakes include unlinked, return true if isUnlinked is true
     if( unlinkedAsFakes and isUnlinkedTruth( track ) ) return true;
@@ -80,7 +82,9 @@ namespace IDTPM {
   }
 
   /// isReconstructable
-  bool isReconstructable( const xAOD::TruthParticle& truth, const std::vector<unsigned int>& minSilHits, const std::vector<float>& etaBins)
+  bool isReconstructable( const xAOD::TruthParticle& truth,
+                          const std::vector<unsigned int>& minSilHits,
+                          const std::vector<float>& etaBins)
   {
     // Get eta bin
     float absEta = std::abs(truth.eta());
@@ -88,6 +92,53 @@ namespace IDTPM {
     const auto pVal =  std::lower_bound(etaBins.begin(), etaBins.end(), absEta);
     const unsigned int bin = std::distance(etaBins.begin(), pVal) - 1;
     return ( nSiHits(truth) >= minSilHits.at( bin ) );
+  }
+
+  /// getVertexTracksAndWeights
+  bool getVertexTracksAndWeights( const xAOD::Vertex& vtx,
+                                  std::vector< const xAOD::TrackParticle* >& vtxTracks,
+                                  std::vector< float >& vtxTrackWeights,
+                                  const std::vector< const xAOD::TrackParticle* >& selTracks,
+                                  bool useSelected )
+  {
+    bool success( true );
+
+    /// clear output vectors
+    vtxTracks.clear();
+    vtxTrackWeights.clear();
+
+    /// dummy vertices -> no associated tracks. return
+    if( vtx.vertexType() == xAOD::VxType::NoVtx ) return success;
+
+    /// getting associated tracks and track weights
+    size_t nTracks = vtx.nTrackParticles();
+    xAOD::Vertex::TrackParticleLinks_t elVec = vtx.trackParticleLinks();
+    std::vector< float > wVec = vtx.trackWeights();
+
+    /// check if sizes match
+    if( not( nTracks == elVec.size() and nTracks == wVec.size() ) ) return false; // shouldn't happen
+
+    /// Loop over associated tracks
+    for( size_t it=0 ; it<nTracks ; it++ ) {
+      /// skipping non-valid track ElementLinks
+      if( not elVec[ it ].isValid() ) {
+        success = false; // shouldn't happen
+        continue;
+      }
+
+      const xAOD::TrackParticle* thisTrk = *elVec[ it ];
+      float thisTrkW = wVec[ it ];
+
+      /// if requested, skip if associated track is not in selected track vector
+      if( useSelected and
+          std::find( selTracks.begin(), selTracks.end(), thisTrk ) == selTracks.end() ) continue;
+
+      /// Filling associated track and track weight vectors
+      vtxTracks.push_back( thisTrk );
+      vtxTrackWeights.push_back( thisTrkW );
+    } // close associated tracks loop
+
+    return success;
   }
 
 } // namespace IDTPM

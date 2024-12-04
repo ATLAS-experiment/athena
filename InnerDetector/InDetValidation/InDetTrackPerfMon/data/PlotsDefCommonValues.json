@@ -20,6 +20,7 @@
     "EXPNTRKMAX"   : [ "2000",    "Expected maximum number of tracks" ],
     "PixHITMAX"    : [ "10",      "Expected maximum number of pixel hits" ],
     "SCTHITMAX"    : [ "20",      "Expected maximum number of SCT hits" ],
-    "TRTHITMAX"    : [ "40",      "Expected maximum number of SCT hits" ],
+    "SIHITMAX"     : [ "20",      "Expected maximum number of Silicon hits" ],
+    "TRTHITMAX"    : [ "40",      "Expected maximum number of TRT hits" ],
     "ETABINS2D"    : [ "160",     "Number of bins for eta 2D plots" ]
 }
