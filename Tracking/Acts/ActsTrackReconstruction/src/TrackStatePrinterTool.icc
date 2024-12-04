@@ -96,14 +96,15 @@ namespace ActsTrk
   }
 
   template <typename track_state_proxy_t>
-  void
+  bool
   TrackStatePrinterTool::printTrackState(const Acts::GeometryContext &tgContext,
-					 const track_state_proxy_t &state,
-					 const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offsets,
-					 bool useFiltered) const
+                                         const track_state_proxy_t &state,
+                                         const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offsets,
+                                         bool useFiltered,
+                                         bool newLine) const
   {
     if (!m_printFilteredStates && useFiltered)
-      return;
+      return false;
 
     ptrdiff_t index = -1;
 
@@ -151,7 +152,10 @@ namespace ActsTrk
               << std::setw(6) << std::setprecision(1) << state.pathLength() << ' '
               << std::setw(7) << std::setprecision(1) << state.chi2() << ' '
               << std::defaultfloat << std::setprecision(-1)
-              << std::setw(Acts::TrackStateFlag::NumTrackStateFlags) << trackStateName(state.typeFlags()) << '\n';
+              << std::setw(Acts::TrackStateFlag::NumTrackStateFlags) << trackStateName(state.typeFlags());
+    if (newLine)
+      std::cout << '\n';
+    return true;
   }
 
 }  // namespace ActsTrk

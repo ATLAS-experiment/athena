@@ -76,11 +76,12 @@ namespace ActsTrk
                const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &offset) const;
 
     template <typename track_state_proxy_t>
-    void
+    bool
     printTrackState(const Acts::GeometryContext &tgContext,
                     const track_state_proxy_t &state,
                     const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offset,
-                    bool useFiltered = false) const;
+                    bool useFiltered = false,
+                    bool newLine = true) const;
 
     using MeasurementInfo = std::tuple<size_t,
                                        const ATLASUncalibSourceLink *,

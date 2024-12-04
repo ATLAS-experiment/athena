@@ -225,11 +225,13 @@ namespace ActsTrk
     };
     static constexpr BranchState s_branchState{};
 
-    static void addPixelStripCounts(detail::RecoTrackContainer& tracksContainer);
-    void initPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track) const;
-    void updatePixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track,
-                                Acts::ConstTrackStateType typeFlags,
-                                xAOD::UncalibMeasType detType) const;
+    static void addPixelStripCounts(detail::RecoTrackContainer &tracksContainer);
+    static void initPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track);
+    static void updatePixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track,
+                                       Acts::ConstTrackStateType typeFlags,
+                                       xAOD::UncalibMeasType detType);
+    static void copyPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track,
+                                     const detail::RecoTrackContainer::TrackProxy &other);
     void checkPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track) const;
     std::array<bool, 3> selectPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track, double eta) const;
 

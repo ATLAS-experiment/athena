@@ -776,45 +776,51 @@ namespace ActsTrk
           }
 
           if (firstMeasurement.has_value()) {
-            Acts::BoundTrackParameters secondInitialParameters(
-                firstMeasurement->referenceSurface().getSharedPtr(),
-                firstMeasurement->parameters(), firstMeasurement->covariance(),
-                initialParameters->particleHypothesis());
+            Acts::BoundTrackParameters secondInitialParameters = firstTrack.createParametersFromState(*firstMeasurement);
 
-            auto secondResult = trackFinder().ckf.findTracks(secondInitialParameters, *secondOptions, tracksContainerTemp);
-
-            if (not secondResult.ok()) {
-              ATH_MSG_WARNING("Second track finding failed for " << seedType << " seed " << iseed << " track " << nfirst << " with error" << secondResult.error());
+            if (!secondInitialParameters.referenceSurface().insideBounds(secondInitialParameters.localPosition())) {  // #3751
+              ATH_MSG_DEBUG("Smoothing of first pass fit produced out-of-bounds parameters relative to the surface, '"
+                            << secondInitialParameters.referenceSurface().name()
+                            << "'. Skipping second pass for " << seedType << " seed " << iseed << " track " << nfirst);
             } else {
+              auto rootBranch = tracksContainerTemp.makeTrack();
+              rootBranch.copyFrom(firstTrack, false);  // #3534
+              if (m_addPixelStripCounts)
+                copyPixelStripCounts(rootBranch, firstTrack);
+              auto secondResult = trackFinder().ckf.findTracks(secondInitialParameters, *secondOptions, tracksContainerTemp, rootBranch);
 
-              // store the original previous state to restore it later
-              auto originalFirstMeasurementPrevious = firstMeasurement->previous();
+              if (not secondResult.ok()) {
+                ATH_MSG_WARNING("Second track finding failed for " << seedType << " seed " << iseed << " track " << nfirst << " with error" << secondResult.error());
+              } else {
+                // store the original previous state to restore it later
+                auto originalFirstMeasurementPrevious = firstMeasurement->previous();
 
-              auto &secondTracksForSeed = secondResult.value();
-              for (auto &secondTrack : secondTracksForSeed) {
-                secondTrack.reverseTrackStates(true);
+                auto &secondTracksForSeed = secondResult.value();
+                for (auto &secondTrack : secondTracksForSeed) {
+                  secondTrack.reverseTrackStates(true);
 
-                firstMeasurement->previous() = secondTrack.outermostTrackState().index();
-                secondTrack.tipIndex() = firstTrack.tipIndex();
+                  firstMeasurement->previous() = secondTrack.outermostTrackState().index();
+                  secondTrack.tipIndex() = firstTrack.tipIndex();
 
-                if (reverseSearch) {
-                  // smooth the full track
-                  auto secondSmoothingResult = Acts::smoothTrack(tgContext, secondTrack, logger());
-                  if (!secondSmoothingResult.ok()) {
-                    ATH_MSG_WARNING("Second smoothing for seed " << iseed << " and track " << secondTrack.index() << " failed with error " << secondSmoothingResult.error());
-                    continue;
+                  if (reverseSearch) {
+                    // smooth the full track
+                    auto secondSmoothingResult = Acts::smoothTrack(tgContext, secondTrack, logger());
+                    if (!secondSmoothingResult.ok()) {
+                      ATH_MSG_WARNING("Second smoothing for seed " << iseed << " and track " << secondTrack.index() << " failed with error " << secondSmoothingResult.error());
+                      continue;
+                    }
+
+                    secondTrack.reverseTrackStates(true);
                   }
 
-                  secondTrack.reverseTrackStates(true);
+                  addTrack(secondTrack);
+
+                  ++nsecond;
                 }
 
-                addTrack(secondTrack);
-
-                ++nsecond;
+                // restore the original previous state for the first track
+                firstMeasurement->previous() = originalFirstMeasurementPrevious;
               }
-
-              // restore the original previous state for the first track
-              firstMeasurement->previous() = originalFirstMeasurementPrevious;
             }
           }
         }
@@ -894,7 +900,7 @@ namespace ActsTrk
   }
 
   void
-  TrackFindingAlg::initPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track) const
+  TrackFindingAlg::initPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track)
   {
     s_branchState.nPixelHits(track) = 0;
     s_branchState.nStripHits(track) = 0;
@@ -902,12 +908,12 @@ namespace ActsTrk
     s_branchState.nStripHoles(track) = 0;
     s_branchState.nPixelOutliers(track) = 0;
     s_branchState.nStripOutliers(track) = 0;
-  };
+  }
 
   void
   TrackFindingAlg::updatePixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track,
                                           Acts::ConstTrackStateType typeFlags,
-                                          xAOD::UncalibMeasType detType) const
+                                          xAOD::UncalibMeasType detType)
   {
     if (detType == xAOD::UncalibMeasType::PixelClusterType) {
       if (typeFlags.test(Acts::TrackStateFlag::HoleFlag)) {
@@ -926,7 +932,19 @@ namespace ActsTrk
         s_branchState.nStripHits(track)++;
       }
     }
-  };
+  }
+
+  void
+  TrackFindingAlg::copyPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track,
+                                        const detail::RecoTrackContainer::TrackProxy &other)
+  {
+    s_branchState.nPixelHits(track) = s_branchState.nPixelHits(other);
+    s_branchState.nStripHits(track) = s_branchState.nStripHits(other);
+    s_branchState.nPixelHoles(track) = s_branchState.nPixelHoles(other);
+    s_branchState.nStripHoles(track) = s_branchState.nStripHoles(other);
+    s_branchState.nPixelOutliers(track) = s_branchState.nPixelOutliers(other);
+    s_branchState.nStripOutliers(track) = s_branchState.nStripOutliers(other);
+  }
 
   void
   TrackFindingAlg::checkPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track) const
@@ -934,15 +952,15 @@ namespace ActsTrk
     // This check will fail if there are other types (HGTD, MS?) of hits, holes, or outliers.
     // The check can be removed when it is no longer appropriate.
     if (track.nMeasurements() != s_branchState.nPixelHits(track) + s_branchState.nStripHits(track))
-      ATH_MSG_WARNING("CkfBranchStopper: mismatched hit count: total (" << track.nMeasurements()
+      ATH_MSG_WARNING("mismatched hit count: total (" << track.nMeasurements()
                       << ") != pixel (" << s_branchState.nPixelHits(track)
                       << ") + strip (" << s_branchState.nStripHits(track) << ")");
     if (track.nHoles() < s_branchState.nPixelHoles(track) + s_branchState.nStripHoles(track))  // allow extra HGTD holes
-      ATH_MSG_WARNING("CkfBranchStopper: mismatched hole count: total (" << track.nHoles()
+      ATH_MSG_WARNING("mismatched hole count: total (" << track.nHoles()
                       << ") < pixel (" << s_branchState.nPixelHoles(track)
                       << ") + strip (" << s_branchState.nStripHoles(track) << ")");
     if (track.nOutliers() != s_branchState.nPixelOutliers(track) + s_branchState.nStripOutliers(track))
-      ATH_MSG_WARNING("CkfBranchStopper: mismatched outlier count: total (" << track.nOutliers()
+      ATH_MSG_WARNING("mismatched outlier count: total (" << track.nOutliers()
                       << ") != pixel (" << s_branchState.nPixelOutliers(track)
                       << ") + strip (" << s_branchState.nStripOutliers(track) << ")");
   };
