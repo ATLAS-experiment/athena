@@ -88,3 +88,10 @@ atlas_add_test(IdDictMgr_test
   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils IdDict IdDictParser
   POST_EXEC_SCRIPT nopost.sh 
 )
+
+atlas_add_test(get_bits_test
+  SOURCES test/get_bits_test.cxx src/get_bits.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils IdDict IdDictParser
+  POST_EXEC_SCRIPT nopost.sh 
+)

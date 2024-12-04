@@ -78,8 +78,8 @@ IdDictRange::generate_implementation (const IdDictMgr& /*idd*/,
   IdDictFieldImplementation& impl = region.m_implementation.back (); 
   impl.set_range(this); 
   if (m_field->m_index == 0)  { 
-      m_field->m_index = region.m_implementation.size () - 1; 
-  } else if (m_field->m_index != (region.m_implementation.size () - 1))  { 
+      m_field->m_index = region.fieldSize() - 1; 
+  } else if (m_field->m_index != (region.fieldSize() - 1))  { 
       std::cout <<  "Bad field index for " << m_field_name 
 		<<  " index " << m_field->m_index 
 		<<  " in dictionary " << dictionary.m_name   
@@ -93,7 +93,7 @@ IdDictRange::generate_implementation (const IdDictMgr& /*idd*/,
   size_t index = region.m_implementation.size () - 1;
   if (region.m_implementation.size () <= index) {
       std::cout << "IdDictRange::generate_implementation: index >= impl size - "
-		<< index << " " << region.m_implementation.size ()
+		<< index << " " << region.fieldSize ()
 		<< std::endl;
       return;
   }
@@ -107,15 +107,11 @@ IdDictRange::generate_implementation (const IdDictMgr& /*idd*/,
     } 
     case by_values: 
     case by_labels: { 
-      Range::field::element_vector v;
-      v.insert(v.end(), m_values.begin(), m_values.end());
-      field.set(v);
-      impl.set_field(field); 
+      impl.set_field(Range::field(m_values)); 
     } 
     break; 
     case by_minmax: 
-        field.set (m_minvalue, m_maxvalue); 
-        impl.set_field(field); 
+        impl.set_field(Range::field(m_minvalue, m_maxvalue)); 
         break; 
     case unknown: 
         break; 
@@ -135,9 +131,7 @@ IdDictRange::build_range () const {
     }
     case by_values: 
     case by_labels:{ 
-      Range::field::element_vector v; 
-      v.insert(v.end(), m_values.begin(), m_values.end());
-      field.set (v); 
+      field.set (m_values); 
       break;
     }
     case by_minmax:{

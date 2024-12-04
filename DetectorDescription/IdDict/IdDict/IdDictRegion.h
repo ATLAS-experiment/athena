@@ -34,6 +34,8 @@ public:
     void reset_implementation ();  
     bool verify () const;  
     void clear ();
+    size_t fieldSize() const; 
+    size_t size() const;
     //
     //data members are public
     std::vector <IdDictRegionEntry*>        m_entries; 
