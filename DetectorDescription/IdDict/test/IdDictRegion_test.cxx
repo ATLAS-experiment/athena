@@ -38,7 +38,8 @@ BOOST_AUTO_TEST_CASE(IdDictRegionModifyMembers){
   dRange->m_minvalue = -1;
   dRange->m_maxvalue = 5;
   BOOST_CHECK_NO_THROW(f.add_entry(dRange));//what is the ownership policy?
-  BOOST_CHECK(f.m_entries.size() == 1);
+  BOOST_CHECK(f.size() == 1);
+  BOOST_TEST(f.fieldSize() == 0);
   Range r("-1:5");
   BOOST_CHECK_NO_THROW([[maybe_unused]] auto s = f.build_range());
   BOOST_TEST(r == f.build_range());

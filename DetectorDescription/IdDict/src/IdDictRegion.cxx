@@ -134,6 +134,16 @@ IdDictRegion::clear () {
     }  
   m_entries.clear (); 
 } 
+
+size_t 
+IdDictRegion::fieldSize() const{
+  return m_implementation.size();
+}
+
+size_t 
+IdDictRegion::size() const{
+  return m_entries.size();
+}
   
 Range 
 IdDictRegion::build_range () const {
