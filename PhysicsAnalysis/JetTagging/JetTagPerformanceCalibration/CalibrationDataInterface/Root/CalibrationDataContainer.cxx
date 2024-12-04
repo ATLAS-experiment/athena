@@ -85,7 +85,7 @@ ClassImp(CalibrationDataContainer)
 
 //________________________________________________________________________________
 CalibrationDataContainer::CalibrationDataContainer(const char* name) :
-  TMap(), m_objResult(0), m_objSystematics(0), m_restrict(false)
+  TMap(), m_objResult(0), m_objSystematics(0), m_vars(), m_restrict(false)
 {
   // default constructor
   SetName(name);
