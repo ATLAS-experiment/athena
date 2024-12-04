@@ -17,11 +17,13 @@
 /// xAOD includes
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTruth/TruthParticle.h"
-#include "xAODTruth/TruthVertex.h"
 
 /// STD includes
 #include <vector>
 #include <cmath> // std::fabs, std::copysign
+
+/// local includes
+#include "VertexParametersHelper.h"
 
 
 namespace IDTPM {
@@ -423,6 +425,15 @@ namespace IDTPM {
   }
   template< class U >
   inline float nSiHits( const U& p ) { return getNSiHits( p ); }
+
+  /// Accessor utility function for getting the value of nSiHoles
+  template< class U >
+  inline float nSiHoles( const U& p ) {
+    if( nPixelHoles(p)<0 or nSCTHoles(p)<0 ) return -9999.;
+    float pnPixelHoles = ( nPixelHoles(p) >= 0 ) ? nPixelHoles(p) : 0.;
+    float pnSCTHoles =   ( nSCTHoles(p) >= 0 ) ? nSCTHoles(p) : 0.;
+    return ( pnPixelHoles + pnSCTHoles );
+  }
 
   /// Accessor utility function for getting the value of nTRTHits
   inline float getNTRTHits( const xAOD::TrackParticle& p ) {

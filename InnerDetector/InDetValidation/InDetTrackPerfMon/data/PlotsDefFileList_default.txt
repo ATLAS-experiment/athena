@@ -5,4 +5,5 @@ InDetTrackPerfMon/ResPlotsDef.json
 InDetTrackPerfMon/FakeRatePlotsDef.json
 InDetTrackPerfMon/DuplicateRatePlotsDef.json
 InDetTrackPerfMon/HitsOnTracksPlotsDef.json
+InDetTrackPerfMon/VertexParamPlotsDef.json
 InDetTrackPerfMon/OfflElePlotsDef.json

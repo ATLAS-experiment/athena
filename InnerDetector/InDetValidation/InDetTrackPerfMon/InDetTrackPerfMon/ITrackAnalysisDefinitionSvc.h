@@ -74,6 +74,8 @@ public:
   virtual bool plotHitsOnTracksReference() const = 0;
   virtual bool plotHitsOnMatchedTracks() const = 0;
   virtual bool plotHitsOnFakeTracks() const = 0;
+  virtual bool plotVertexParameters() const = 0;
+  virtual bool useSelectedVertexTracks() const = 0;
   virtual bool plotOfflineElectrons() const = 0;
   virtual unsigned int resolutionMethod() const = 0;
   virtual bool isITk() const = 0;

@@ -33,9 +33,12 @@ def __createIDTPMTrkAnaConfigFlags():
     # Test-Reference collections properties
     icf.addFlag( "TestType", "Offline" )
     icf.addFlag( "RefType", "Truth" )
-    icf.addFlag( "TrigTrkKey"    , "HLT_IDTrack_Electron_IDTrig" )
+    icf.addFlag( "TrigTrkKey"    , "" )
     icf.addFlag( "OfflineTrkKey" , "InDetTrackParticles" )
     icf.addFlag( "TruthPartKey"  , "TruthParticles" )
+    icf.addFlag( "TrigVtxKey"    , "" )
+    icf.addFlag( "OfflineVtxKey" , "PrimaryVertices" )
+    icf.addFlag( "TruthVtxKey"  , "TruthVertices" )
     icf.addFlag( "pileupSwitch"  , "HardScatter" )
     # Matching properties
     icf.addFlag( "MatchingType"    , "DeltaRMatch" )
@@ -137,6 +140,8 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "plotHitsOnTracksReference", False )
     icf.addFlag( "plotHitsOnMatchedTracks"  , False )
     icf.addFlag( "plotHitsOnFakeTracks"     , False )
+    icf.addFlag( "plotVertexParameters"     , True )
+    icf.addFlag( "useSelectedVertexTracks"  , False )
     icf.addFlag( "plotOfflineElectrons"     , False )
     icf.addFlag( "ResolutionMethod"         , "iterRMS" )
     

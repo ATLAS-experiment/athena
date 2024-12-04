@@ -28,6 +28,7 @@
 #include "plots/DuplicateRatePlots.h"
 #include "plots/HitsOnTracksPlots.h"
 #include "plots/NtracksPlots.h"
+#include "plots/VertexParametersPlots.h"
 
 /// STD includes
 #include <string>
@@ -67,18 +68,22 @@ namespace IDTPM {
 
     /// Fill all plots w.r.t. test tracks quantities for a specific
     /// collection (trigger tracks, offline tracks, truth particles)
-    template< typename PARTICLE > 
+    /// also including vertices for the test collection
+    template< typename PARTICLE, typename VERTEX >
     StatusCode fillPlotsTest(
         const std::vector< const PARTICLE* >& particles,
         const ITrackMatchingLookup& matches,
+        const std::vector< const VERTEX* >& vertices,
         float truthMu=0., float actualMu=0., float weight=1.0 );
 
     /// Fill all plots w.r.t. reference tracks quantities for a specific
     /// collection (trigger tracks, offline tracks, truth particles)
-    template< typename PARTICLE > 
+    /// also including vertices for the reference collection
+    template< typename PARTICLE, typename VERTEX >
     StatusCode fillPlotsReference(
         const std::vector< const PARTICLE* >& particles,
         const ITrackMatchingLookup& matches,
+        const std::vector< const VERTEX* >& vertices,
         float truthMu=0., float actualMu=0., float weight=1.0 );
 
     /// Fill efficiency plots w.r.t. truth (for EFTruthMatch only)
@@ -96,7 +101,7 @@ namespace IDTPM {
     std::string m_directory;
 
     /// TrackAnalysis definition service to "hold" the histograms configurations/flags
-    SmartIF<ITrackAnalysisDefinitionSvc> m_trkAnaDefSvc;
+    SmartIF< ITrackAnalysisDefinitionSvc > m_trkAnaDefSvc;
 
     /// Plot categories
     /// plots w.r.t. test tracks parameters
@@ -105,14 +110,14 @@ namespace IDTPM {
     std::unique_ptr< EfficiencyPlots >       m_plots_tech_eff_vsTest;
     std::unique_ptr< HitsOnTracksPlots >     m_plots_hitsOnTrk_vsTest;
     std::unique_ptr< HitsOnTracksPlots >     m_plots_hitsOnMatchedTrk;
-    std::unique_ptr< NtracksPlots >          m_plots_nTracks_test;
+    std::unique_ptr< NtracksPlots >          m_plots_nTracks_vsTest;
     /// plots w.r.t. reference tracks parameters
     std::unique_ptr< TrackParametersPlots >  m_plots_trkParam_vsRef;
     std::unique_ptr< EfficiencyPlots >       m_plots_eff_vsRef;
     std::unique_ptr< EfficiencyPlots >       m_plots_tech_eff_vsRef;
     std::unique_ptr< HitsOnTracksPlots >     m_plots_hitsOnTrk_vsRef;
     std::unique_ptr< HitsOnTracksPlots >     m_plots_hitsOnMatchedTrk_vsRef;
-    std::unique_ptr< NtracksPlots >          m_plots_nTracks_ref;
+    std::unique_ptr< NtracksPlots >          m_plots_nTracks_vsRef;
     /// plots w.r.t. efficiency plots w.r.t. truth (for EFTruthMatch only)
     std::unique_ptr< EfficiencyPlots >       m_plots_eff_vsTruth;
     std::unique_ptr< EfficiencyPlots >       m_plots_tech_eff_vsTruth;
@@ -128,6 +133,12 @@ namespace IDTPM {
     /// plots w.r.t. reference offline electron
     std::unique_ptr< OfflineElectronPlots >  m_plots_offEle;
     std::unique_ptr< OfflineElectronPlots >  m_plots_eff_vsOffEle;
+    /// plots w.r.t. test vertices parameters
+    std::unique_ptr< VertexParametersPlots >  m_plots_vtxParam_vsTest;
+    std::unique_ptr< VertexParametersPlots >  m_plots_nVtxParam_vsTest;
+    /// plots w.r.t. reference vertices parameters
+    std::unique_ptr< VertexParametersPlots >  m_plots_vtxParam_vsRef;
+    std::unique_ptr< VertexParametersPlots >  m_plots_nVtxParam_vsRef;
 
   }; // class TrackAnalysisPlotsMgr
 

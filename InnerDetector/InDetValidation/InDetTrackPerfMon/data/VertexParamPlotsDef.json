@@ -1,0 +1,124 @@
+{
+    "$VTXTAG_vtx_x" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$VTXTYPE X [mm]", "nBins" : "200", "low" : "-1.", "high" : "1." },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_y" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$VTXTYPE Y [mm]", "nBins" : "200", "low" : "-1.", "high" : "1." },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_z" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$VTXTYPE Z [mm]", "nBins" : "100", "low" : "-300.", "high" : "300." },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_time" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$VTXTYPE time [ns]", "nBins" : "40", "low" : "-0.4", "high" : "0.4" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_x_err" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$VTXTYPE #sigma(X) [mm]", "nBins" : "100", "low" : "0.", "high" : "0.2" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_y_err" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$VTXTYPE #sigma(Y) [mm]", "nBins" : "100", "low" : "0.", "high" : "0.2" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_z_err" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$VTXTYPE #sigma(Z) [mm]", "nBins" : "100", "low" : "0.", "high" : "1." },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_time_err" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$VTXTYPE #sigma(time) [ns]", "nBins" : "40", "low" : "0.", "high" : "0.05" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_chi2OverNdof" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$VTXTYPE #chi^{2}/ndf", "nBins" : "50", "low" : "0.", "high" : "10." },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_type" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$VTXTYPE #chi^{2}/ndf", "nBins" : "7", "low" : "0.", "high" : "7." },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_nTracks" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE at $VTXTYPE", "nBins" : "150", "low" : "0.", "high" : "150." },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_track_weight" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE weights at $VTXTYPE", "nBins" : "100", "low" : "0.", "high" : "1.55555" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_track_pt" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV] at $VTXTYPE", "nBins" : "100", "low" : "0.", "high" : "20." },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_track_eta" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE #eta at $VTXTYPE", "nBins" : "100", "low" : "-$ETAMAX", "high" : "$ETAMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_track_nSiHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE N. Si Hits at $VTXTYPE", "nBins" : "$SIHITMAX", "low" : "0.", "high" : "$SIHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_track_nSiHoles" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE N. Si Holes at $VTXTYPE", "nBins" : "5.", "low" : "0.", "high" : "5." },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_track_d0" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE d_{0} [mm] at $VTXTYPE", "nBins" : "100", "low" : "-2.", "high" : "2." },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_track_z0" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "($TRKTYPE z_{0} - $VTXTYPE z) [mm] at $VTXTYPE", "nBins" : "100", "low" : "-10.", "high" : "10." },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_track_d0_err" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE #sigma(d_{0}) [mm] at $VTXTYPE", "nBins" : "50", "low" : "0.", "high" : "1." },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_vtx_track_z0_err" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE #sigma(z_{0}) [mm] at $VTXTYPE", "nBins" : "50", "low" : "0.", "high" : "5." },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_nVtx_vs_actualMu_2D" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "N. $VTXTYPE", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "zAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_nVtx_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "N. $VTXTYPE", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" }
+    },
+    "$VTXTAG_nVtx_vs_truthMu_2D" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "N. $VTXTYPE", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "zAxis" : { "title" : "Entries" }
+    },
+    "$VTXTAG_nVtx_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "N. $VTXTYPE", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" }
+    }
+}

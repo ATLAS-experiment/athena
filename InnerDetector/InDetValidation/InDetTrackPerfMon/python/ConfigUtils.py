@@ -203,23 +203,41 @@ def getPlotsDefList( flags ):
     if flags.PhysVal.IDTPM.currentTrkAna.MatchingType == "EFTruthMatch":
         trkLabels.append( getLabel( flags, "Truth" ) )
 
+    ## First loop to replace track tags and labels
     plotsDefStrList = []
     for plotsDefStr in plotsDefStrList_v2 :
-        plotsDefStr = plotsDefStr.replace( "$TESTTYPE", testLabel[0] ).replace( "$TESTTAG", testLabel[1] )
-        plotsDefStr = plotsDefStr.replace( "$REFTYPE", refLabel[0] ).replace( "$REFTAG", refLabel[1] )
+        plotsDefStr = plotsDefStr.replace( "$TESTTYPE", testLabel[1] ).replace( "$TESTTAG", testLabel[0] )
+        plotsDefStr = plotsDefStr.replace( "$REFTYPE", refLabel[1] ).replace( "$REFTAG", refLabel[0] )
         if ( "$TRKTAG" not in plotsDefStr ) and ( "$TRKTYPE" not in plotsDefStr ) :
             plotsDefStrList.append( plotsDefStr )
             continue
         for trkLabel in trkLabels :
-            newPlotsDefStr = plotsDefStr.replace( "$TRKTYPE", trkLabel[0] ).replace( "$TRKTAG", trkLabel[1] )
+            newPlotsDefStr = plotsDefStr.replace( "$TRKTYPE", trkLabel[1] ).replace( "$TRKTAG", trkLabel[0] )
             if ( "$TRK2TAG" not in newPlotsDefStr ) and ( "$TRK2TYPE" not in newPlotsDefStr ) :
                 plotsDefStrList.append( newPlotsDefStr )
                 continue
             for trk2Label in trkLabels :
-                newPlotsDefStr2 = newPlotsDefStr.replace( "$TRK2TYPE", trk2Label[0] ).replace( "$TRK2TAG", trk2Label[1] )
+                newPlotsDefStr2 = newPlotsDefStr.replace( "$TRK2TYPE", trk2Label[1] ).replace( "$TRK2TAG", trk2Label[0] )
                 plotsDefStrList.append( newPlotsDefStr2 )
 
-    return plotsDefStrList
+    ## Second loop to replace vertex tags and labels
+    plotsDefStrList_v2 = []
+    for plotsDefStr in plotsDefStrList :
+        plotsDefStr = plotsDefStr.replace( "$TESTVTXTYPE", testLabel[2] ).replace( "$TESTVTXTAG", testLabel[0] )
+        plotsDefStr = plotsDefStr.replace( "$REFVTXTYPE", refLabel[2] ).replace( "$REFVTXTAG", refLabel[0] )
+        if ( "$VTXTAG" not in plotsDefStr ) and ( "$VTXTYPE" not in plotsDefStr ) :
+            plotsDefStrList_v2.append( plotsDefStr )
+            continue
+        for trkLabel in trkLabels :
+            newPlotsDefStr = plotsDefStr.replace( "$VTXTYPE", trkLabel[2] ).replace( "$VTXTAG", trkLabel[0] )
+            if ( "$VTX2TAG" not in newPlotsDefStr ) and ( "$VTX2TYPE" not in newPlotsDefStr ) :
+                plotsDefStrList_v2.append( newPlotsDefStr )
+                continue
+            for trk2Label in trkLabels :
+                newPlotsDefStr2 = newPlotsDefStr.replace( "$VTX2TYPE", trk2Label[2] ).replace( "$VTX2TAG", trk2Label[0] )
+                plotsDefStrList_v2.append( newPlotsDefStr2 )
+
+    return plotsDefStrList_v2
 
 
 def getLabel( flags, key ) :
@@ -227,23 +245,24 @@ def getLabel( flags, key ) :
         if "Truth" not in flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject:
             key += flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject
     trkLabelsDict = {
-        "EFTrigger"           : [ "EF Trigger track",  "eftrig" ],
-        "Trigger"             : [ "Trigger track",  "trig" ],
-        "Offline"             : [ "Offline track",              "offl" ],
-        "OfflineElectron"     : [ "Offline e^{#pm} track",      "offEle" ],
-        "OfflineMuon"         : [ "Offline #mu^{#pm} track",    "offMu" ],
-        "OfflineTau"          : [ "Offline #tau^{#pm} track",   "offTau" ],
-        "Truth"               : [ "Truth particle",     "truth" ],
-        "TruthElectron"       : [ "Truth e^{#pm}",      "truthEle" ],
-        "TruthMuon"           : [ "Truth #mu^{#pm}",    "truthMu" ],
-        "TruthTau"            : [ "Truth #tau^{#pm}",   "truthEle" ],
+        # key                 : [ trk/vtx_tag,  track_type,                 vertex_type                 ]
+        "EFTrigger"           : [ "eftrig",     "EF Trigger track",         "EF Trigger vertex"         ],
+        "Trigger"             : [ "trig",       "Trigger track",            "Trigger vertex"            ],
+        "Offline"             : [ "offl",       "Offline track",            "Offline vertex"            ],
+        "OfflineElectron"     : [ "offEle",     "Offline e^{#pm} track",    "Offline e^{#pm} vertex"    ],
+        "OfflineMuon"         : [ "offMu",      "Offline #mu^{#pm} track",  "Offline #mu^{#pm} vertex"  ],
+        "OfflineTau"          : [ "offTau",     "Offline #tau^{#pm} track", "Offline #tau^{#pm} vertex" ],
+        "Truth"               : [ "truth",      "Truth particle",           "Truth vertex"              ],
+        "TruthElectron"       : [ "truthEle",   "Truth e^{#pm}",            "Truth e^{#pm} vertex"      ],
+        "TruthMuon"           : [ "truthMu",    "Truth #mu^{#pm}",          "Truth #mu^{#pm} vertex"    ],
+        "TruthTau"            : [ "truthTau",   "Truth #tau^{#pm}",         "Truth #tau^{#pm} vertex"   ]
     }
     return trkLabelsDict[ key ]
 
 
 def getTag( flags, key ) :
     labels = getLabel( flags, key )
-    return labels[1]
+    return labels[0]
 
 
 def updateResolutionPlots( myPlotsDefDict ) :

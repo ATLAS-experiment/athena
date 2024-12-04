@@ -77,6 +77,8 @@ public:
   virtual bool plotHitsOnTracksReference() const override { return m_plotHitsOnTracksReference.value(); };
   virtual bool plotHitsOnMatchedTracks() const override { return m_plotHitsOnMatchedTracks.value(); };
   virtual bool plotHitsOnFakeTracks() const override { return m_plotHitsOnFakeTracks.value(); };
+  virtual bool plotVertexParameters() const override { return m_plotVertexParameters.value(); };
+  virtual bool useSelectedVertexTracks() const override { return m_useSelectedVertexTracks.value(); };
   virtual bool plotOfflineElectrons() const override { return m_plotOfflineElectrons.value(); };
   virtual unsigned int resolutionMethod() const override;
   virtual bool isITk() const override { return m_isITk.value(); };
@@ -122,6 +124,8 @@ private:
   BooleanProperty m_plotHitsOnTracksReference { this, "plotHitsOnTracksReference", false, "Book/fill hits on reference tracks histograms" };
   BooleanProperty m_plotHitsOnMatchedTracks { this, "plotHitsOnMatchedTracks", false, "Book/fill hits on matched tracks histograms" };
   BooleanProperty m_plotHitsOnFakeTracks { this, "plotHitsOnFakeTracks", false, "Book/fill hits on fake and unlinked tracks histograms" };
+  BooleanProperty m_plotVertexParameters { this, "plotVertexParameters", true, "Book/fill vertex parameters histograms" };
+  BooleanProperty m_useSelectedVertexTracks { this, "useSelectedVertexTracks", false, "Get only vertex-associated tracks which pass the track selection" };
   BooleanProperty m_plotOfflineElectrons { this, "plotOfflineElectrons", false, "Book/fill reference offline electrons histograms" };
   StringProperty m_resolMethod { this, "ResolutionMethod", "iterRMS", "Type of computation method for resolutions" };
   BooleanProperty m_isITk { this, "isITk", true, "Use ITk configuration for plots, etc." };

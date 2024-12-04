@@ -117,6 +117,8 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
     kwargs.setdefault( "plotHitsOnTracksReference", flags.PhysVal.IDTPM.currentTrkAna.plotHitsOnTracksReference )
     kwargs.setdefault( "plotHitsOnMatchedTracks", flags.PhysVal.IDTPM.currentTrkAna.plotHitsOnMatchedTracks )
     kwargs.setdefault( "plotHitsOnFakeTracks", flags.PhysVal.IDTPM.currentTrkAna.plotHitsOnFakeTracks )
+    kwargs.setdefault( "plotVertexParameters", flags.PhysVal.IDTPM.currentTrkAna.plotVertexParameters )
+    kwargs.setdefault( "useSelectedVertexTracks", flags.PhysVal.IDTPM.currentTrkAna.useSelectedVertexTracks )
     kwargs.setdefault( "plotOfflineElectrons", flags.PhysVal.IDTPM.currentTrkAna.plotOfflineElectrons )
     kwargs.setdefault( "ResolutionMethod", flags.PhysVal.IDTPM.currentTrkAna.ResolutionMethod )
     kwargs.setdefault( "isITk", flags.Detector.GeometryITk )
@@ -139,6 +141,11 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
                        flags.PhysVal.IDTPM.currentTrkAna.OfflineTrkKey )
     kwargs.setdefault( "TruthParticleContainerName",
                        flags.PhysVal.IDTPM.currentTrkAna.TruthPartKey )
+
+    kwargs.setdefault( "OfflineVertexContainerName",
+                       flags.PhysVal.IDTPM.currentTrkAna.OfflineVtxKey )
+    kwargs.setdefault( "TruthVertexContainerName",
+                       flags.PhysVal.IDTPM.currentTrkAna.TruthVtxKey )
 
     kwargs.setdefault( "AnaTag", flags.PhysVal.IDTPM.currentTrkAna.anaTag )
 
@@ -187,7 +194,12 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
         kwargs.setdefault( "TriggerTrkParticleContainerName",
                            flags.PhysVal.IDTPM.currentTrkAna.TrigTrkKey )
 
-        if ( "EFTrigger" not in flags.PhysVal.IDTPM.currentTrkAna.TestType and "EFTrigger" not in flags.PhysVal.IDTPM.currentTrkAna.RefType ):
+        kwargs.setdefault( "TriggerVertexContainerName",
+                           flags.PhysVal.IDTPM.currentTrkAna.TrigVtxKey )
+
+        if ( "EFTrigger" not in flags.PhysVal.IDTPM.currentTrkAna.TestType and
+             "EFTrigger" not in flags.PhysVal.IDTPM.currentTrkAna.RefType ):
+
             if "TrigDecisionTool" not in kwargs:
                 from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
                 kwargs.setdefault( "TrigDecisionTool", 

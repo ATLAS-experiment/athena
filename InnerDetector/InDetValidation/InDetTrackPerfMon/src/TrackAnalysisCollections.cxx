@@ -9,7 +9,7 @@
 
 /// local includes
 #include "TrackAnalysisCollections.h"
-#include "TrackParametersHelper.h"
+#include "TrackParametersHelper.h" // also includes VertexParametersHelper.h
 #include "TrackMatchingLookup.h"
 
 /// STD include(s)
@@ -949,148 +949,6 @@ IDTPM::TrackAnalysisCollections::refRecoVertexVec(
   return m_nullRecoVertVec;
 }
 
-/// -------------------------------------------
-/// --- Get tracks associated with vertices ---
-/// -------------------------------------------
-/// Get (outgoing?) truth particles from truth Vertices
-std::vector< IDTPM::TrackAnalysisCollections::truthWeightVecPair_t >
-IDTPM::TrackAnalysisCollections::getVertexTruthPartVecs(
-  IDTPM::TrackAnalysisCollections::Stage /*stage*/, bool /*useSelected*/ ) // TODO: uncomment
-{
-  /// TODO: For the time being just reurn empty vectors.
-  ///       Later on, change to reurn (selected) truth particles
-  ///       (out?)going from each truth vertex
-  std::vector< truthWeightVecPair_t > outVec{};
-  return outVec;
-}
-
-/// general method to get vertex-associated tracks and their weights
-std::vector< IDTPM::TrackAnalysisCollections::trackWeightVecPair_t >
-IDTPM::TrackAnalysisCollections::getVertexTrackVecsBase(
-  const std::vector< const xAOD::Vertex* >& vtxVec,
-  const std::vector< const xAOD::TrackParticle* >& trkVec,
-  bool useSelected )
-{
-  std::vector< trackWeightVecPair_t > outVec;
-
-  /// Loop over vertices
-  for( const xAOD::Vertex* thisVtx : vtxVec ) {
-    std::vector< const xAOD::TrackParticle* > vtxTracks{};
-    std::vector< float > vtxTrackWeights{};
-
-    /// skipping dummy vertices (should be already rejected)
-    if( thisVtx->vertexType() == xAOD::VxType::NoVtx ) {
-      ATH_MSG_DEBUG( "Found dummy vertex" ); /// FIXME - change to WARNING
-      outVec.push_back( std::make_pair( vtxTracks, vtxTrackWeights ) ); // empty vectors
-      continue;
-    }
-
-    /// getting associated tracks and track weights
-    size_t nTracks = thisVtx->nTrackParticles();
-    xAOD::Vertex::TrackParticleLinks_t elVec = thisVtx->trackParticleLinks();
-    std::vector< float > wVec = thisVtx->trackWeights();
-
-    /// check if sizes match
-    if( not( nTracks == elVec.size() and nTracks == wVec.size() ) ) {
-      ATH_MSG_DEBUG( "Vertex-associated tracks and their weights don't match. Skipping" );
-      continue;
-    }
-
-    /// Loop over associated tracks
-    for( size_t it=0 ; it<nTracks ; it++ ) {
-      /// checking if ElementLink is valid
-      if( not elVec[ it ].isValid() ) {
-        ATH_MSG_WARNING( "Skipping non-valid associated track link. Please check your input format." );
-        continue;
-      }
-
-      const xAOD::TrackParticle* thisTrk = *elVec[ it ];
-      float thisTrkW = wVec[ it ];
-
-      /// if required, check if associated track is selected at required stage
-      if( useSelected and
-          std::find( trkVec.begin(), trkVec.end(),
-                     thisTrk ) == trkVec.end() ) {
-        ATH_MSG_DEBUG( "Skipping non-selected associated track" );
-        continue;
-      }
-
-      /// Filling associated track and track weight vectors
-      vtxTracks.push_back( thisTrk );
-      vtxTrackWeights.push_back( thisTrkW );
-    } // close associated tracks loop
-
-    /// filling outVec
-    outVec.push_back( std::make_pair( vtxTracks, vtxTrackWeights ) );
-  } // close vertices loop
-
-  return outVec;
-}
-
-/// TEST = Truth
-std::vector< IDTPM::TrackAnalysisCollections::truthWeightVecPair_t >
-IDTPM::TrackAnalysisCollections::getVertexTestTruthPartVecs(
-  IDTPM::TrackAnalysisCollections::Stage stage, bool useSelected )
-{
-  if( m_trkAnaDefSvc->isTestTruth() ) {
-    return getVertexTruthPartVecs( stage, useSelected );
-  }
-
-  ATH_MSG_DEBUG( "No Test truth vertex-associated tracks found" );
-  std::vector< IDTPM::TrackAnalysisCollections::truthWeightVecPair_t > nullVec{};
-  return nullVec;
-}
-
-/// TEST = Reco
-std::vector< IDTPM::TrackAnalysisCollections::trackWeightVecPair_t >
-IDTPM::TrackAnalysisCollections::getVertexTestTrackVecs(
-  IDTPM::TrackAnalysisCollections::Stage stage, bool useSelected )
-{
-  if( m_trkAnaDefSvc->isTestOffline() ) {
-    return getVertexOfflTrackVecs( stage, useSelected );
-  }
-
-  if( m_trkAnaDefSvc->isTestTrigger() ) {
-    return getVertexTrigTrackVecs( stage, useSelected );
-  }
-
-  ATH_MSG_DEBUG( "No Test reco vertex-associated tracks found" );
-  std::vector< IDTPM::TrackAnalysisCollections::trackWeightVecPair_t > nullVec{};
-  return nullVec;
-}
-
-/// REFERENCE = Truth
-std::vector< IDTPM::TrackAnalysisCollections::truthWeightVecPair_t >
-IDTPM::TrackAnalysisCollections::getVertexRefTruthPartVecs(
-  IDTPM::TrackAnalysisCollections::Stage stage, bool useSelected )
-{
-  if( m_trkAnaDefSvc->isReferenceTruth() ) {
-    return getVertexTruthPartVecs( stage, useSelected );
-  }
-
-  ATH_MSG_DEBUG( "No Reference truth vertex-associated tracks found" );
-  std::vector< IDTPM::TrackAnalysisCollections::truthWeightVecPair_t > nullVec{};
-  return nullVec;
-}
-
-/// REFERENCE = Reco
-std::vector< IDTPM::TrackAnalysisCollections::trackWeightVecPair_t >
-IDTPM::TrackAnalysisCollections::getVertexRefTrackVecs(
-  IDTPM::TrackAnalysisCollections::Stage stage, bool useSelected )
-{
-  if( m_trkAnaDefSvc->isReferenceOffline() ) {
-    return getVertexOfflTrackVecs( stage, useSelected );
-  }
-
-  if( m_trkAnaDefSvc->isReferenceTrigger() ) {
-    return getVertexTrigTrackVecs( stage, useSelected );
-  }
-
-  ATH_MSG_DEBUG( "No Reference reco vertex-associated tracks found" );
-  std::vector< IDTPM::TrackAnalysisCollections::trackWeightVecPair_t > nullVec{};
-  return nullVec;
-}
-
 /// -----------------------------------------
 /// --- Print collection info (for debug) ---
 /// -----------------------------------------
@@ -1159,7 +1017,7 @@ std::string IDTPM::TrackAnalysisCollections::printVertexInfo(
   size_t it(0);
   for( const xAOD::Vertex* thisOfflineVertex : m_offlVertexVec[ stage ] ) {
     ss << "Offline vertex"
-       << " : z = "  << thisOfflineVertex->z()
+       << " : z = "  << posZ( *thisOfflineVertex )
        << std::endl;
     if( it > 20 ) { ss << "et al...." << std::endl; break; }
     it++;
@@ -1171,7 +1029,7 @@ std::string IDTPM::TrackAnalysisCollections::printVertexInfo(
   it = 0;
   for( const xAOD::TruthVertex* thisTruthVertex : m_truthVertexVec[ stage ] ) {
     ss << "Truth vertex"
-       << " : z = "  << thisTruthVertex->z()
+       << " : z = "  << posZ( *thisTruthVertex )
        << std::endl;
     if( it > 20 ) { ss << "et al...." << std::endl; break; }
     it++;
@@ -1183,7 +1041,7 @@ std::string IDTPM::TrackAnalysisCollections::printVertexInfo(
   it = 0;
   for( const xAOD::Vertex* thisTriggerVertex : m_trigVertexVec[ stage ] ) {
     ss << "Trigger vertex"
-       << " : z = "  << thisTriggerVertex->z()
+       << " : z = "  << posZ( *thisTriggerVertex )
        << std::endl;
     if( it > 20 ) { ss << "et al...." << std::endl; break; }
     it++;
