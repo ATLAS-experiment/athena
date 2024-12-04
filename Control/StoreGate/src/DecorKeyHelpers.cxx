@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/src/DecorKeyHelpers.cxx
@@ -70,10 +70,14 @@ std::string makeContDecorKey(const std::string& cont, const std::string& decor)
  *
  * Construct the StoreGate key from the associated container and the
  * decoration name passed in @c key. If the latter also contains the container
- * name, an exception will be raised.
+ * name, an exception will be raised.  Returns an empty string if @c key
+ * is empty.
  */
 std::string makeContDecorKey(const VarHandleKey& contKey, const std::string& key)
 {
+  if (key.empty() || key.ends_with ('+')) {
+    return "";
+  }
   if (key.find('.') != std::string::npos) {
     throw SG::ExcBadHandleKey(key + " (DecorHandleKey has been declared with a parent container. "
                               "Its value should not contain any container name.)");
