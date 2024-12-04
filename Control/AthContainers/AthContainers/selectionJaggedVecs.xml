@@ -1,0 +1,26 @@
+<lcgdict>
+  <class name="SG::JaggedVecEltBase"/>
+  <class name="SG::JaggedVecElt<char>"/>
+  <class name="SG::JaggedVecElt<unsigned char>"/>
+  <class name="SG::JaggedVecElt<short>"/>
+  <class name="SG::JaggedVecElt<unsigned short>"/>
+  <class name="SG::JaggedVecElt<int>"/>
+  <class name="SG::JaggedVecElt<unsigned int>"/>
+  <class name="SG::JaggedVecElt<long>"/>
+  <class name="SG::JaggedVecElt<unsigned long>"/>
+  <class name="SG::JaggedVecElt<float>"/>
+  <class name="SG::JaggedVecElt<double>"/>
+  <class name="SG::JaggedVecElt<std::string>"/>
+
+  <class name="std::vector<SG::JaggedVecElt<char> >"/>
+  <class name="std::vector<SG::JaggedVecElt<unsigned char> >"/>
+  <class name="std::vector<SG::JaggedVecElt<short> >"/>
+  <class name="std::vector<SG::JaggedVecElt<unsigned short> >"/>
+  <class name="std::vector<SG::JaggedVecElt<int> >"/>
+  <class name="std::vector<SG::JaggedVecElt<unsigned int> >"/>
+  <class name="std::vector<SG::JaggedVecElt<long> >"/>
+  <class name="std::vector<SG::JaggedVecElt<unsigned long> >"/>
+  <class name="std::vector<SG::JaggedVecElt<float> >"/>
+  <class name="std::vector<SG::JaggedVecElt<double> >"/>
+  <class name="std::vector<SG::JaggedVecElt<std::string> >"/>
+</lcgdict>

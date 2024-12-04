@@ -58,92 +58,6 @@
 
   <class name="SG::PackedLinkBase"/>
 
-  <class name="SG::ConstAccessor<char>"/>
-  <class name="SG::ConstAccessor<unsigned char>"/>
-  <class name="SG::ConstAccessor<int>"/>
-  <class name="SG::ConstAccessor<short>"/>
-  <class name="SG::ConstAccessor<long>"/>
-  <class name="SG::ConstAccessor<unsigned int>"/>
-  <class name="SG::ConstAccessor<unsigned short>"/>
-  <class name="SG::ConstAccessor<unsigned long>"/>
-  <class name="SG::ConstAccessor<unsigned long long>"/>
-  <class name="SG::ConstAccessor<float>"/>
-  <class name="SG::ConstAccessor<double>"/>
-  <class name="SG::ConstAccessor<bool>"/>
-  <class name="SG::ConstAccessor<std::string>"/>
-
-  <class name="SG::ConstAccessor<std::vector<char> >"/>
-  <class name="SG::ConstAccessor<std::vector<unsigned char> >"/>
-  <class name="SG::ConstAccessor<std::vector<int> >"/>
-  <class name="SG::ConstAccessor<std::vector<short> >"/>
-  <class name="SG::ConstAccessor<std::vector<long> >"/>
-  <class name="SG::ConstAccessor<std::vector<unsigned int> >"/>
-  <class name="SG::ConstAccessor<std::vector<unsigned short> >"/>
-  <class name="SG::ConstAccessor<std::vector<unsigned long> >"/>
-  <class name="SG::ConstAccessor<std::vector<unsigned long long> >"/>
-  <class name="SG::ConstAccessor<std::vector<float> >"/>
-  <class name="SG::ConstAccessor<std::vector<double> >"/>
-  <class name="SG::ConstAccessor<std::vector<bool> >"/>
-  <class name="SG::ConstAccessor<std::vector<std::string> >"/>
-
-  <class name="SG::AtomicConstAccessor<unsigned int>"/>
-
-  <class name="SG::Accessor<char>"/>
-  <class name="SG::Accessor<unsigned char>"/>
-  <class name="SG::Accessor<int>"/>
-  <class name="SG::Accessor<short>"/>
-  <class name="SG::Accessor<long>"/>
-  <class name="SG::Accessor<unsigned int>"/>
-  <class name="SG::Accessor<unsigned short>"/>
-  <class name="SG::Accessor<unsigned long>"/>
-  <class name="SG::Accessor<unsigned long long>"/>
-  <class name="SG::Accessor<float>"/>
-  <class name="SG::Accessor<double>"/>
-  <class name="SG::Accessor<bool>"/>
-  <class name="SG::Accessor<std::string>"/>
-
-  <class name="SG::Accessor<std::vector<char> >"/>
-  <class name="SG::Accessor<std::vector<unsigned char> >"/>
-  <class name="SG::Accessor<std::vector<int> >"/>
-  <class name="SG::Accessor<std::vector<short> >"/>
-  <class name="SG::Accessor<std::vector<long> >"/>
-  <class name="SG::Accessor<std::vector<unsigned int> >"/>
-  <class name="SG::Accessor<std::vector<unsigned short> >"/>
-  <class name="SG::Accessor<std::vector<unsigned long> >"/>
-  <class name="SG::Accessor<std::vector<unsigned long long> >"/>
-  <class name="SG::Accessor<std::vector<float> >"/>
-  <class name="SG::Accessor<std::vector<double> >"/>
-  <class name="SG::Accessor<std::vector<bool> >"/>
-  <class name="SG::Accessor<std::vector<std::string> >"/>
-
-  <class name="SG::Decorator<char>"/>
-  <class name="SG::Decorator<unsigned char>"/>
-  <class name="SG::Decorator<int>"/>
-  <class name="SG::Decorator<short>"/>
-  <class name="SG::Decorator<long>"/>
-  <class name="SG::Decorator<unsigned int>"/>
-  <class name="SG::Decorator<unsigned short>"/>
-  <class name="SG::Decorator<unsigned long>"/>
-  <class name="SG::Decorator<unsigned long long>"/>
-  <class name="SG::Decorator<float>"/>
-  <class name="SG::Decorator<double>"/>
-  <class name="SG::Decorator<bool>"/>
-  <class name="SG::Decorator<std::string>"/>
-
-  <class name="SG::Decorator<std::vector<char> >"/>
-  <class name="SG::Decorator<std::vector<unsigned char> >"/>
-  <class name="SG::Decorator<std::vector<int> >"/>
-  <class name="SG::Decorator<std::vector<short> >"/>
-  <class name="SG::Decorator<std::vector<long> >"/>
-  <class name="SG::Decorator<std::vector<unsigned int> >"/>
-  <class name="SG::Decorator<std::vector<unsigned short> >"/>
-  <class name="SG::Decorator<std::vector<unsigned long> >"/>
-  <class name="SG::Decorator<std::vector<unsigned long long> >"/>
-  <class name="SG::Decorator<std::vector<float> >"/>
-  <class name="SG::Decorator<std::vector<double> >"/>
-  <class name="SG::Decorator<std::vector<bool> >"/>
-  <class name="SG::Decorator<std::vector<std::string> >"/>
-
   <class name="SG::PackedParameters"/> 
 
   <enum name="SG::OwnershipPolicy"/>
@@ -151,70 +65,9 @@
   <class name="SG::IAuxSetOption"/>
   <class name="SG::AuxDataOption"/>
 
-  <class name="SG::PackedContainer<char>"/>
-  <class name="SG::PackedContainer<unsigned char>"/>
-  <class name="SG::PackedContainer<short>"/>
-  <class name="SG::PackedContainer<unsigned short>"/>
-  <class name="SG::PackedContainer<int>"/>
-  <class name="SG::PackedContainer<unsigned int>"/>
-  <class name="SG::PackedContainer<float>"/>
-  <class name="SG::PackedContainer<double>"/>
-
-  <class name="SG::PackedContainer<std::vector<char> >"/>
-  <class name="SG::PackedContainer<std::vector<unsigned char> >"/>
-  <class name="SG::PackedContainer<std::vector<short> >"/>
-  <class name="SG::PackedContainer<std::vector<unsigned short> >"/>
-  <class name="SG::PackedContainer<std::vector<int> >"/>
-  <class name="SG::PackedContainer<std::vector<unsigned int> >"/>
-  <class name="SG::PackedContainer<std::vector<float> >"/>
-  <class name="SG::PackedContainer<std::vector<double> >"/>
-
-  <class name="SG::PackedContainer<std::vector<std::vector<char> > >"/>
-  <class name="SG::PackedContainer<std::vector<std::vector<unsigned char> > >"/>
-  <class name="SG::PackedContainer<std::vector<std::vector<short> > >"/>
-  <class name="SG::PackedContainer<std::vector<std::vector<unsigned short> > >"/>
-  <class name="SG::PackedContainer<std::vector<std::vector<int> > >"/>
-  <class name="SG::PackedContainer<std::vector<std::vector<unsigned int> > >"/>
-  <class name="SG::PackedContainer<std::vector<std::vector<float> > >"/>
-  <class name="SG::PackedContainer<std::vector<std::vector<double> > >"/>
-
   <function name="SGdebug::aux_var_name"/>
   <function name="SGdebug::print_aux_var_name"/>
   <function name="SGdebug::aux_var_as_string"/>
   <function name="SGdebug::print_aux_vars"/>
   <function name="SGdebug::dump_aux_vars"/>
-
-  <class name="std::vector<char, std::pmr::polymorphic_allocator<char> >"/>
-  <class name="std::vector<unsigned char, std::pmr::polymorphic_allocator<unsigned char> >"/>
-  <class name="std::vector<short, std::pmr::polymorphic_allocator<short> >"/>
-  <class name="std::vector<unsigned short, std::pmr::polymorphic_allocator<unsigned short> >"/>
-  <class name="std::vector<int, std::pmr::polymorphic_allocator<int> >"/>
-  <class name="std::vector<unsigned int, std::pmr::polymorphic_allocator<unsigned int> >"/>
-  <class name="std::vector<float, std::pmr::polymorphic_allocator<float> >"/>
-  <class name="std::vector<double, std::pmr::polymorphic_allocator<double> >"/>
-
-  <class name="SG::JaggedVecEltBase"/>
-  <class name="SG::JaggedVecElt<char>"/>
-  <class name="SG::JaggedVecElt<unsigned char>"/>
-  <class name="SG::JaggedVecElt<short>"/>
-  <class name="SG::JaggedVecElt<unsigned short>"/>
-  <class name="SG::JaggedVecElt<int>"/>
-  <class name="SG::JaggedVecElt<unsigned int>"/>
-  <class name="SG::JaggedVecElt<long>"/>
-  <class name="SG::JaggedVecElt<unsigned long>"/>
-  <class name="SG::JaggedVecElt<float>"/>
-  <class name="SG::JaggedVecElt<double>"/>
-  <class name="SG::JaggedVecElt<std::string>"/>
-
-  <class name="std::vector<SG::JaggedVecElt<char> >"/>
-  <class name="std::vector<SG::JaggedVecElt<unsigned char> >"/>
-  <class name="std::vector<SG::JaggedVecElt<short> >"/>
-  <class name="std::vector<SG::JaggedVecElt<unsigned short> >"/>
-  <class name="std::vector<SG::JaggedVecElt<int> >"/>
-  <class name="std::vector<SG::JaggedVecElt<unsigned int> >"/>
-  <class name="std::vector<SG::JaggedVecElt<long> >"/>
-  <class name="std::vector<SG::JaggedVecElt<unsigned long> >"/>
-  <class name="std::vector<SG::JaggedVecElt<float> >"/>
-  <class name="std::vector<SG::JaggedVecElt<double> >"/>
-  <class name="std::vector<SG::JaggedVecElt<std::string> >"/>
 </lcgdict>

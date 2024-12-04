@@ -31,7 +31,32 @@ atlas_add_dictionary( AthContainersDict
    AthContainers/selection.xml
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers
-   EXTRA_FILES Root/dict/*.cxx )
+   EXTRA_FILES Root/dict/ViewVectorBaseStreamer.cxx )
+
+atlas_add_dictionary( AthContainersAccessorsDict
+   AthContainers/AthContainersAccessorsDict.h
+   AthContainers/selectionAccessors.xml
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers )
+
+atlas_add_dictionary( AthContainersPackedContainersDict
+   AthContainers/AthContainersPackedContainersDict.h
+   AthContainers/selectionPackedContainers.xml
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers 
+   EXTRA_FILES Root/dict/PackedContainerStreamer.cxx )
+
+atlas_add_dictionary( AthContainersJaggedVecsDict
+   AthContainers/AthContainersJaggedVecsDict.h
+   AthContainers/selectionJaggedVecs.xml
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers )
+
+atlas_add_dictionary( AthContainersPmrDict
+   AthContainers/AthContainersPmrDict.h
+   AthContainers/selectionPmr.xml
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers )
 
 # Helper function setting up the test(s) in the package:
 function( _add_test name )
