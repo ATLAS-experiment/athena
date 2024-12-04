@@ -33,43 +33,43 @@
 
 namespace ST {
 
-  const static SG::AuxElement::Decorator<char>     dec_bad("bad");
+  const static SG::Decorator<char>     dec_bad("bad");
 
-  const static SG::AuxElement::Decorator<char>      dec_passJvt("passJvt");
-  const static SG::AuxElement::ConstAccessor<char>  acc_passJvt("passJvt");
-  const static SG::AuxElement::Decorator<char>      dec_passFJvt("passFJvt");
-  const static SG::AuxElement::ConstAccessor<char>  acc_passFJvt("passFJvt");
+  const static SG::Decorator<char>      dec_passJvt("passJvt");
+  const static SG::ConstAccessor<char>  acc_passJvt("passJvt");
+  const static SG::Decorator<char>      dec_passFJvt("passFJvt");
+  const static SG::ConstAccessor<char>  acc_passFJvt("passFJvt");
 
-  const static SG::AuxElement::Decorator<float> dec_jvt("Jvt");
-  const static SG::AuxElement::ConstAccessor<float> acc_jvt("NNJvt");
-  const static SG::AuxElement::Decorator<float> dec_fjvt("fJvt");
-  const static SG::AuxElement::ConstAccessor<float> acc_fjvt("DFCommonJets_fJvt");
+  const static SG::Decorator<float> dec_jvt("Jvt");
+  const static SG::ConstAccessor<float> acc_jvt("NNJvt");
+  const static SG::Decorator<float> dec_fjvt("fJvt");
+  const static SG::ConstAccessor<float> acc_fjvt("DFCommonJets_fJvt");
 
-  const static SG::AuxElement::Decorator<char> dec_bjet("bjet");
+  const static SG::Decorator<char> dec_bjet("bjet");
 
-  const static SG::AuxElement::Decorator<char> dec_bjet_jetunc("bjet_jetunc"); //added for JetUncertainties usage
-  const static SG::AuxElement::Decorator<char> dec_bjet_loose("bjet_loose");
+  const static SG::Decorator<char> dec_bjet_jetunc("bjet_jetunc"); //added for JetUncertainties usage
+  const static SG::Decorator<char> dec_bjet_loose("bjet_loose");
 
-  const static SG::AuxElement::Decorator<double> dec_btag_weight("btag_weight");
-  const static SG::AuxElement::Decorator<float> dec_btag_pb("btag_pb");
-  const static SG::AuxElement::Decorator<float> dec_btag_pc("btag_pc");
-  const static SG::AuxElement::Decorator<float> dec_btag_pu("btag_pu");
-  const static SG::AuxElement::Decorator<float> dec_btag_ptau("btag_ptau");
+  const static SG::Decorator<double> dec_btag_weight("btag_weight");
+  const static SG::Decorator<float> dec_btag_pb("btag_pb");
+  const static SG::Decorator<float> dec_btag_pc("btag_pc");
+  const static SG::Decorator<float> dec_btag_pu("btag_pu");
+  const static SG::Decorator<float> dec_btag_ptau("btag_ptau");
   // for backwards compatibility
-  const static SG::AuxElement::Decorator<float> dec_btag_dl1pb("btag_dl1pb");
-  const static SG::AuxElement::Decorator<float> dec_btag_dl1pc("btag_dl1pc");
-  const static SG::AuxElement::Decorator<float> dec_btag_dl1pu("btag_dl1pu");
+  const static SG::Decorator<float> dec_btag_dl1pb("btag_dl1pb");
+  const static SG::Decorator<float> dec_btag_dl1pc("btag_dl1pc");
+  const static SG::Decorator<float> dec_btag_dl1pu("btag_dl1pu");
 
 
-  const static SG::AuxElement::Decorator<float> dec_VRradius("VRradius");
-  const static SG::AuxElement::ConstAccessor<float> acc_VRradius("VRradius");
+  const static SG::Decorator<float> dec_VRradius("VRradius");
+  const static SG::ConstAccessor<float> acc_VRradius("VRradius");
 
-  const static SG::AuxElement::Decorator<char> dec_passDRcut("passDRcut");
-  const static SG::AuxElement::ConstAccessor<char> acc_passDRcut("passDRcut");
+  const static SG::Decorator<char> dec_passDRcut("passDRcut");
+  const static SG::ConstAccessor<char> acc_passDRcut("passDRcut");
 
-  const static SG::AuxElement::Decorator<int> dec_wtagged("wtagged");
-  const static SG::AuxElement::Decorator<int> dec_ztagged("ztagged");
-  const static SG::AuxElement::Decorator<int> dec_toptagged("toptagged");
+  const static SG::Decorator<int> dec_wtagged("wtagged");
+  const static SG::Decorator<int> dec_ztagged("ztagged");
+  const static SG::Decorator<int> dec_toptagged("toptagged");
 
   StatusCode SUSYObjDef_xAOD::GetJets(xAOD::JetContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, bool recordSG, const std::string& jetkey, const xAOD::JetContainer* containerToBeCopied)
   {

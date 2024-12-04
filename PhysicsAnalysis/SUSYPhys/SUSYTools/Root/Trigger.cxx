@@ -25,7 +25,7 @@
 
 namespace ST {
 
-  const static SG::AuxElement::Decorator<char> dec_trigmatched("trigmatched");
+  const static SG::Decorator<char> dec_trigmatched("trigmatched");
 
 bool SUSYObjDef_xAOD::IsMETTrigPassed(unsigned int runnumber, bool j400_OR) const {
 
@@ -243,7 +243,7 @@ void SUSYObjDef_xAOD::TrigMatch(const xAOD::IParticle* p, std::initializer_list<
   for(const auto *it = i1; it != i2; ++it) {
     auto result = static_cast<int>(this->IsTrigMatched(p, *it));
     dec_trigmatched(*p) += result;
-    const SG::AuxElement::Decorator<char> dec(*it);
+    const SG::Decorator<char> dec(*it);
     dec(*p) = result;
   }
 }
@@ -260,7 +260,7 @@ void SUSYObjDef_xAOD::TrigMatch(const xAOD::IParticle* p, const std::vector<std:
   for(const auto& item: items) {
     auto result = static_cast<int>(this->IsTrigMatched(p, item));
     dec_trigmatched(*p) += result;
-    const SG::AuxElement::Decorator<char> dec(item);
+    const SG::Decorator<char> dec(item);
     dec(*p) = result;
   }
 }

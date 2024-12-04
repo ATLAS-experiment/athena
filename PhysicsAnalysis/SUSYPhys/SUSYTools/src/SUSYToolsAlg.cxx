@@ -1542,13 +1542,13 @@ void SUSYToolsAlg::stdHistsForObj(xAOD::IParticle *obj, const std::string& objty
    }
 
    //
-   const static SG::AuxElement::ConstAccessor<bool> acc_topValidPtRangeLow(config["ToptaggerKey"]+"_ValidPtRangeLow");
-   const static SG::AuxElement::ConstAccessor<bool> acc_topValidPtRangeHigh(config["ToptaggerKey"]+"_ValidPtRangeHigh");
-   const static SG::AuxElement::ConstAccessor<bool> acc_topValidEtaRange(config["ToptaggerKey"]+"_ValidEtaRange");
-   const static SG::AuxElement::ConstAccessor<bool> acc_wtagged(config["WtaggerKey"]+"_Tagged");
-   const static SG::AuxElement::ConstAccessor<bool> acc_ztagged(config["ZtaggerKey"]+"_Tagged");
-   const static SG::AuxElement::ConstAccessor<bool> acc_toptagged(config["ToptaggerKey"]+"_Tagged");
-   const static SG::AuxElement::ConstAccessor<float> acc_topscore(config["ToptaggerKey"]+"_Score");
+   const static SG::ConstAccessor<bool> acc_topValidPtRangeLow(config["ToptaggerKey"]+"_ValidPtRangeLow");
+   const static SG::ConstAccessor<bool> acc_topValidPtRangeHigh(config["ToptaggerKey"]+"_ValidPtRangeHigh");
+   const static SG::ConstAccessor<bool> acc_topValidEtaRange(config["ToptaggerKey"]+"_ValidEtaRange");
+   const static SG::ConstAccessor<bool> acc_wtagged(config["WtaggerKey"]+"_Tagged");
+   const static SG::ConstAccessor<bool> acc_ztagged(config["ZtaggerKey"]+"_Tagged");
+   const static SG::ConstAccessor<bool> acc_toptagged(config["ToptaggerKey"]+"_Tagged");
+   const static SG::ConstAccessor<float> acc_topscore(config["ToptaggerKey"]+"_Score");
 
    if (objtype=="fatjet" && acc_topValidPtRangeLow.isAvailable(*obj) && acc_topValidPtRangeHigh.isAvailable(*obj) && acc_topValidEtaRange.isAvailable(*obj)) {
      bool kin = acc_topValidPtRangeLow(*obj) && acc_topValidPtRangeHigh(*obj) && acc_topValidEtaRange(*obj);

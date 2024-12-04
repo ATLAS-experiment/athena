@@ -977,62 +977,62 @@ namespace ST {
     std::string m_photonIdDFName;
     std::string m_jetCleanDFName;
     //
-    SG::AuxElement::ConstAccessor<char> m_acc_eleIdBaseline;
-    SG::AuxElement::ConstAccessor<char> m_acc_eleId;
-    SG::AuxElement::ConstAccessor<char> m_acc_photonIdBaseline;
-    SG::AuxElement::ConstAccessor<char> m_acc_photonId;
-    SG::AuxElement::ConstAccessor<char> m_acc_jetClean;
+    SG::ConstAccessor<char> m_acc_eleIdBaseline;
+    SG::ConstAccessor<char> m_acc_eleId;
+    SG::ConstAccessor<char> m_acc_photonIdBaseline;
+    SG::ConstAccessor<char> m_acc_photonId;
+    SG::ConstAccessor<char> m_acc_jetClean;
 
   }; // Class SUSYObjDef_xAOD
 
   // decorators
-  const static SG::AuxElement::Decorator<unsigned> dec_isEM("isEM");
-  const static SG::AuxElement::Decorator<char> dec_baseline("baseline");
-  const static SG::AuxElement::Decorator<char> dec_selected("selected"); //for priority-aware OR of baseline objects
-  const static SG::AuxElement::Decorator<char> dec_signal("signal");
-  const static SG::AuxElement::Decorator<char> dec_isol("isol");
-  const static SG::AuxElement::Decorator<char> dec_isolHighPt("isolHighPt"); // use different WPs for low-pt and high-pt
-  const static SG::AuxElement::Decorator<char> dec_passOR("passOR");
-  const static SG::AuxElement::Decorator<double> dec_effscalefact("effscalefact");
-  const static SG::AuxElement::Decorator<char> dec_signal_less_JVT("signal_less_JVT"); //!< Decorator for signal jets without a JVT requirement
-  const static SG::AuxElement::Decorator<char> dec_lrtFilter("passLRTFilter");
+  const static SG::Decorator<unsigned> dec_isEM("isEM");
+  const static SG::Decorator<char> dec_baseline("baseline");
+  const static SG::Decorator<char> dec_selected("selected"); //for priority-aware OR of baseline objects
+  const static SG::Decorator<char> dec_signal("signal");
+  const static SG::Decorator<char> dec_isol("isol");
+  const static SG::Decorator<char> dec_isolHighPt("isolHighPt"); // use different WPs for low-pt and high-pt
+  const static SG::Decorator<char> dec_passOR("passOR");
+  const static SG::Decorator<double> dec_effscalefact("effscalefact");
+  const static SG::Decorator<char> dec_signal_less_JVT("signal_less_JVT"); //!< Decorator for signal jets without a JVT requirement
+  const static SG::Decorator<char> dec_lrtFilter("passLRTFilter");
 
 
   // const accessors for reading decorations that we set
-  const static SG::AuxElement::ConstAccessor<char> acc_baseline("baseline");
-  const static SG::AuxElement::ConstAccessor<char> acc_selected("selected"); //for priority-aware OR of baseline objects
-  const static SG::AuxElement::ConstAccessor<char> acc_signal("signal");
-  const static SG::AuxElement::ConstAccessor<char> acc_isol("isol");
-  const static SG::AuxElement::ConstAccessor<char> acc_isolHighPt("isolHighPt"); // use different WPs for low-pt and high-pt
-  const static SG::AuxElement::ConstAccessor<char> acc_passOR("passOR");
-  const static SG::AuxElement::ConstAccessor<char> acc_signal_less_JVT("signal_less_JVT"); //!< Accessor for signal jets without a JVT requirement
-  const static SG::AuxElement::ConstAccessor<char> acc_bjet("bjet");
-  const static SG::AuxElement::ConstAccessor<double> acc_btag_weight("btag_weight");
-  const static SG::AuxElement::ConstAccessor<float> acc_btag_dl1pb("btag_dl1pb");
-  const static SG::AuxElement::ConstAccessor<float> acc_btag_dl1pc("btag_dl1pc");
-  const static SG::AuxElement::ConstAccessor<float> acc_btag_dl1pu("btag_dl1pu");
-  const static SG::AuxElement::ConstAccessor<int> acc_wtagged("wtagged");
-  const static SG::AuxElement::ConstAccessor<int> acc_ztagged("ztagged");
-  const static SG::AuxElement::ConstAccessor<int> acc_toptagged("toptagged");
-  const static SG::AuxElement::ConstAccessor<char> acc_bad("bad");
-  const static SG::AuxElement::ConstAccessor<char> acc_trigmatched("trigmatched");
-  const static SG::AuxElement::ConstAccessor<double> acc_effscalefact("effscalefact");
-  const static SG::AuxElement::ConstAccessor<char> acc_lrtFilter("passLRTFilter");
-  const static SG::AuxElement::ConstAccessor<float> acc_d0sig("d0sig");
-  const static SG::AuxElement::ConstAccessor<float> acc_z0sinTheta("z0sinTheta");
-  const static SG::AuxElement::ConstAccessor<char> acc_cosmic("cosmic");
-  const static SG::AuxElement::ConstAccessor<char> acc_passedHighPtCuts("passedHighPtCuts");
+  const static SG::ConstAccessor<char> acc_baseline("baseline");
+  const static SG::ConstAccessor<char> acc_selected("selected"); //for priority-aware OR of baseline objects
+  const static SG::ConstAccessor<char> acc_signal("signal");
+  const static SG::ConstAccessor<char> acc_isol("isol");
+  const static SG::ConstAccessor<char> acc_isolHighPt("isolHighPt"); // use different WPs for low-pt and high-pt
+  const static SG::ConstAccessor<char> acc_passOR("passOR");
+  const static SG::ConstAccessor<char> acc_signal_less_JVT("signal_less_JVT"); //!< Accessor for signal jets without a JVT requirement
+  const static SG::ConstAccessor<char> acc_bjet("bjet");
+  const static SG::ConstAccessor<double> acc_btag_weight("btag_weight");
+  const static SG::ConstAccessor<float> acc_btag_dl1pb("btag_dl1pb");
+  const static SG::ConstAccessor<float> acc_btag_dl1pc("btag_dl1pc");
+  const static SG::ConstAccessor<float> acc_btag_dl1pu("btag_dl1pu");
+  const static SG::ConstAccessor<int> acc_wtagged("wtagged");
+  const static SG::ConstAccessor<int> acc_ztagged("ztagged");
+  const static SG::ConstAccessor<int> acc_toptagged("toptagged");
+  const static SG::ConstAccessor<char> acc_bad("bad");
+  const static SG::ConstAccessor<char> acc_trigmatched("trigmatched");
+  const static SG::ConstAccessor<double> acc_effscalefact("effscalefact");
+  const static SG::ConstAccessor<char> acc_lrtFilter("passLRTFilter");
+  const static SG::ConstAccessor<float> acc_d0sig("d0sig");
+  const static SG::ConstAccessor<float> acc_z0sinTheta("z0sinTheta");
+  const static SG::ConstAccessor<char> acc_cosmic("cosmic");
+  const static SG::ConstAccessor<char> acc_passedHighPtCuts("passedHighPtCuts");
 
   // more decorations that are set externally
-  const static SG::AuxElement::ConstAccessor<unsigned int> acc_OQ("OQ");
-  const static SG::AuxElement::ConstAccessor<int> acc_truthType("truthType");
-  const static SG::AuxElement::ConstAccessor<int> acc_truthOrigin("truthOrigin");
-  const static SG::AuxElement::ConstAccessor<int> acc_bkgTruthOrigin("bkgTruthOrigin");
-  const static SG::AuxElement::ConstAccessor<char> acc_passPhCleaning("DFCommonPhotonsCleaning");
-  const static SG::AuxElement::ConstAccessor<char> acc_passPhCleaningNoTime("DFCommonPhotonsCleaningNoTime");
-  const static SG::AuxElement::ConstAccessor<char> acc_passCrackVetoCleaning("DFCommonCrackVetoCleaning");
-  const static SG::AuxElement::ConstAccessor<unsigned int> randomrunnumber("RandomRunNumber");
-  const static SG::AuxElement::ConstAccessor<float> acc_DetEta("DetectorEta");
+  const static SG::ConstAccessor<unsigned int> acc_OQ("OQ");
+  const static SG::ConstAccessor<int> acc_truthType("truthType");
+  const static SG::ConstAccessor<int> acc_truthOrigin("truthOrigin");
+  const static SG::ConstAccessor<int> acc_bkgTruthOrigin("bkgTruthOrigin");
+  const static SG::ConstAccessor<char> acc_passPhCleaning("DFCommonPhotonsCleaning");
+  const static SG::ConstAccessor<char> acc_passPhCleaningNoTime("DFCommonPhotonsCleaningNoTime");
+  const static SG::ConstAccessor<char> acc_passCrackVetoCleaning("DFCommonCrackVetoCleaning");
+  const static SG::ConstAccessor<unsigned int> randomrunnumber("RandomRunNumber");
+  const static SG::ConstAccessor<float> acc_DetEta("DetectorEta");
 
 
 } // namespace ST

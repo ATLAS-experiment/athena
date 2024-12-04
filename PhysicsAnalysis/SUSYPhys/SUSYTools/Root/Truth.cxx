@@ -319,7 +319,7 @@ bool SUSYObjDef_xAOD::IsTruthBJet(const xAOD::Jet& input) const {
     isBjet = std::abs(truthlabel) == 5;
   }
 
-  const static SG::AuxElement::Decorator<char> dec_bjet_jetunc("bjet_jetunc"); //added for JetUncertainties usage
+  const static SG::Decorator<char> dec_bjet_jetunc("bjet_jetunc"); //added for JetUncertainties usage
   dec_bjet_jetunc(input) = isBjet;
 
   return isBjet;
