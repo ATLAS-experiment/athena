@@ -220,7 +220,7 @@ TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TrigInDetSiLayer>& 
 
   const float min_z0 = -168.0;
   const float max_z0 =  168.0;
-
+  
   m_etaBinWidth = conn->m_etaBin;
 
   for(const auto& layer : layers) {
@@ -229,7 +229,10 @@ TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TrigInDetSiLayer>& 
   }
  
   //calculating bin tables in the connector...
+  //calculate bin pairs for graph edge building
 
+  int lastBin1 = -1;
+  
   for(std::map<int, std::vector<GNN_FASTRACK_CONNECTION*> >::const_iterator it = conn->m_connMap.begin();it!=conn->m_connMap.end();++it) {
 
     const std::vector<GNN_FASTRACK_CONNECTION*>& vConn = (*it).second;
@@ -260,11 +263,25 @@ TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TrigInDetSiLayer>& 
 	  if(!pL1->verifyBin(pL2, b1, b2, min_z0, max_z0)) continue;
 	  int address = b1 + b2*nDstBins;
 	  (*cIt)->m_binTable.at(address) = 1;
+
+	   int bin1_idx = pL1->m_bins.at(b1);
+	   int bin2_idx = pL2->m_bins.at(b2);
+	   
+	   if(bin1_idx != lastBin1) {//adding a new group
+
+	     std::vector<int> v2(1, bin2_idx);
+	     m_binGroups.push_back(std::make_pair(bin1_idx, v2));
+
+	   }
+	   else {//extend the last group
+	     (*m_binGroups.rbegin()).second.push_back(bin2_idx);
+	   }
 	}
       }
     }
   }
 }
+	  
 
 TrigFTF_GNN_Geometry::~TrigFTF_GNN_Geometry() {
   for(std::vector<TrigFTF_GNN_Layer*>::iterator it =  m_layArray.begin();it!=m_layArray.end();++it) {
