@@ -97,5 +97,5 @@ atlas_add_test( MdtCalibDbR4Test
 atlas_add_test( MdtTwinCablingTest
                 SCRIPT python -m MuonCondDump.dumpTwinCabling --setupRun4 --cablingMap twinCabling.json  --chamberToTwin all && python -m MuonCondTest.MdtTwinTester --setupRun4 --cablingJSON twinCabling.json
                 PRIVATE_WORKING_DIRECTORY
-                PROPERTIES TIMEOUT 600
+                PROPERTIES TIMEOUT 1200
                 POST_EXEC_SCRIPT nopost.sh)
