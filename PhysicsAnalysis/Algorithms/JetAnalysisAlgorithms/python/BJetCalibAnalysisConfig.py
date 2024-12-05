@@ -58,3 +58,7 @@ class BJetCalibAnalysisConfig (ConfigBlock) :
 
         if self.doPtCorr:
             config.addPrivateTool('bJetTool', 'BJetCorrectionTool')
+
+        # (re-)decorate jets with the updated energy
+        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecoratorBJetCalib' + self.containerName )
+        alg.particles = config.readName (self.containerName)
