@@ -29,7 +29,6 @@ def ActsPixelClusterTruthDecorator(flags,
                                    **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault("SiClusterContainer","ITkPixelClusters")
-    kwargs.setdefault("InputTruthParticleLinks","xAODTruthLinks")
     kwargs.setdefault("AssociationMapOut","ITkPixelClustersToTruthParticles")
 
     #Using the same name of the xAOD::SiCluster causes bunch of warnings
