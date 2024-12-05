@@ -59,15 +59,15 @@ StatusCode TrigL2MuonSA::MmDataPreparator::prepareData(const TrigRoiDescriptor* 
 
     ATH_MSG_DEBUG("Use RoI based data access");
     const IRoiDescriptor* iroi = (IRoiDescriptor*) p_roids;
-    if (iroi) m_regionSelector->HashIDList(*iroi, mmHashList);
+    if (iroi) m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(*iroi, mmHashList);
     else {
       TrigRoiDescriptor fullscan_roi( true );
-      m_regionSelector->HashIDList(fullscan_roi, mmHashList);
+      m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, mmHashList);
     }
     ATH_MSG_DEBUG("mmHashList.size()=" << mmHashList.size());
 
     std::vector<uint32_t> mmRobList;
-    m_regionSelector->ROBIDList(*iroi, mmRobList);
+    m_regionSelector->lookup( Gaudi::Hive::currentContext() )->ROBIDList(*iroi, mmRobList);
 
     if (!mmHashList.empty()) {
 

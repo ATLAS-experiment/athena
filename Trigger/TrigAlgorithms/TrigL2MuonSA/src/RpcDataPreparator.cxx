@@ -75,25 +75,25 @@ StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const TrigRoiDescriptor*
 
      ATH_MSG_DEBUG("Use RoI based data access");
      
-     if (iroi) m_regionSelector->HashIDList(*iroi, rpcHashList);
+     if (iroi) m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(*iroi, rpcHashList);
      else {
        TrigRoiDescriptor fullscan_roi( true );
-       m_regionSelector->HashIDList(fullscan_roi, rpcHashList);
+       m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, rpcHashList);
      }
      ATH_MSG_DEBUG("rpcHashList.size()=" << rpcHashList.size());
 
      std::vector<uint32_t> rpcRobList;
-     m_regionSelector->ROBIDList(*iroi, rpcRobList);
+     m_regionSelector->lookup( Gaudi::Hive::currentContext() )->ROBIDList(*iroi, rpcRobList);
    } else {
      
      ATH_MSG_DEBUG("Use full data access");
      
      TrigRoiDescriptor fullscan_roi( true );
-     m_regionSelector->HashIDList(fullscan_roi, rpcHashList);
+     m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, rpcHashList);
      ATH_MSG_DEBUG("rpcHashList.size()=" << rpcHashList.size());
      
      std::vector<uint32_t> rpcRobList;
-     m_regionSelector->ROBIDList(fullscan_roi, rpcRobList);
+     m_regionSelector->lookup( Gaudi::Hive::currentContext() )->ROBIDList(fullscan_roi, rpcRobList);
      
    }
    
@@ -253,10 +253,10 @@ StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const TrigRoiDescriptor*
 
      ATH_MSG_DEBUG("Use RoI based data access");
      
-     if (iroi) m_regionSelector->HashIDList(*iroi, rpcHashList);
+     if (iroi) m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(*iroi, rpcHashList);
      else {
        TrigRoiDescriptor fullscan_roi( true );
-       m_regionSelector->HashIDList(fullscan_roi, rpcHashList);
+       m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, rpcHashList);
      }
      ATH_MSG_DEBUG("rpcHashList.size()=" << rpcHashList.size());
      
@@ -265,7 +265,7 @@ StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const TrigRoiDescriptor*
      ATH_MSG_DEBUG("Use full data access");
      
      TrigRoiDescriptor fullscan_roi( true );
-     m_regionSelector->HashIDList(fullscan_roi, rpcHashList);
+     m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, rpcHashList);
      ATH_MSG_DEBUG("rpcHashList.size()=" << rpcHashList.size());
      
    }

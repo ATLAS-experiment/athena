@@ -37,14 +37,13 @@
 /// hash id methods 
 
 void RegSelSiLUT::HashIDList( const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const {
-  //  RegSelSiLUT::IDList( roi, idlist, &RegSelSiLUT::HashIDList_internal );
   IRegSelLUT::IDList<RegSelSiLUT>( roi, idlist, &RegSelSiLUT::HashIDList_internal );
   if ( m_ID == RPC ) RegSelSiLUT::cleanup( idlist );
 }
 
 
 void RegSelSiLUT::HashIDList( long layer, const IRoiDescriptor& roi, std::vector<IdentifierHash>& idlist ) const { 
-  RegSelSiLUT::IDList_layer( layer, roi, idlist, &RegSelSiLUT::HashIDList_internal );
+  IRegSelLUT::IDList_layer<RegSelSiLUT>( layer, roi, idlist, &RegSelSiLUT::HashIDList_internal );
   if ( m_ID == RPC ) RegSelSiLUT::cleanup( idlist );
 }
 
@@ -52,12 +51,12 @@ void RegSelSiLUT::HashIDList( long layer, const IRoiDescriptor& roi, std::vector
 /// rob methods
 
 void RegSelSiLUT::ROBIDList( const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const {
-  RegSelSiLUT::IDList( roi, roblist, &RegSelSiLUT::ROBIDList_internal );
+  IRegSelLUT::IDList<RegSelSiLUT>( roi, roblist, &RegSelSiLUT::ROBIDList_internal );
 }
 
 
 void RegSelSiLUT::ROBIDList( long layer, const IRoiDescriptor& roi, std::vector<uint32_t>& roblist ) const {
-  RegSelSiLUT::IDList_layer( layer, roi, roblist, &RegSelSiLUT::ROBIDList_internal );
+  IRegSelLUT::IDList_layer<RegSelSiLUT>( layer, roi, roblist, &RegSelSiLUT::ROBIDList_internal );
 }
 
 

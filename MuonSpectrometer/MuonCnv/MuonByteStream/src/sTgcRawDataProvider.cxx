@@ -53,7 +53,7 @@ StatusCode Muon::sTgcRawDataProvider::execute(const EventContext& ctx) const {
         for (auto roi : *muonRoI) {
             ATH_MSG_DEBUG("Getting ROBs for RoI " << *roi);
             // Get ROB IDs from region selector
-            m_regsel_stgc->ROBIDList(*roi, robs);
+            m_regsel_stgc->lookup(ctx)->ROBIDList(*roi, robs);
         }
 
         if (!m_rawDataTool->convert(robs, ctx).isSuccess()) {

@@ -16,7 +16,7 @@ StatusCode RegSelToolTester::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode RegSelToolTester::execute(const EventContext& /*eventContext*/) const {
+StatusCode RegSelToolTester::execute(const EventContext& eventContext) const {
   constexpr static std::array<std::string_view,3> roiNames{"FullScan","Central","Forward"};
   const std::array<RoiDescriptor,3> rois{
     RoiDescriptor{RoiDescriptor::FULLSCAN},
@@ -29,10 +29,10 @@ StatusCode RegSelToolTester::execute(const EventContext& /*eventContext*/) const
   for (const auto& tool : m_regionSelectorTools) {
     for (size_t iroi=0; iroi<3; ++iroi) {
       ids.clear();
-      tool->HashIDList(rois[iroi], ids);
+      tool->lookup(eventContext)->HashIDList(rois[iroi], ids);
       ATH_MSG_INFO(roiNames[iroi] << " RoI " << rois[iroi] << " mapped to " << ids.size() << " hash IDs");
       robs.clear();
-      tool->ROBIDList(rois[iroi], robs);
+      tool->lookup(eventContext)->ROBIDList(rois[iroi], robs);
       ATH_MSG_INFO(roiNames[iroi] << " RoI " << rois[iroi] << " mapped to " << robs.size() << " ROB IDs");
     }
   }

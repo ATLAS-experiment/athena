@@ -188,10 +188,10 @@ StatusCode TrigL2MuonSA::ClusterRoadDefiner::defineRoad(const LVL1::RecMuonRoI* 
 
     const IRoiDescriptor* iroi = (IRoiDescriptor*) roi;
 
-    if (iroi) m_regionSelector->HashIDList(*iroi, mdtHashList);
+    if (iroi) m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(*iroi, mdtHashList);
     else {
       TrigRoiDescriptor fullscan_roi( true );
-      m_regionSelector->HashIDList(fullscan_roi, mdtHashList);
+      m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, mdtHashList);
     }
 
     if(roi) delete roi;
@@ -427,10 +427,10 @@ StatusCode TrigL2MuonSA::ClusterRoadDefiner::defineRoad(const xAOD::MuonRoI*    
 
     const IRoiDescriptor* iroi = (IRoiDescriptor*) roi;
 
-    if (iroi) m_regionSelector->HashIDList(*iroi, mdtHashList);
+    if (iroi) m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(*iroi, mdtHashList);
     else {
       TrigRoiDescriptor fullscan_roi( true );
-      m_regionSelector->HashIDList(fullscan_roi, mdtHashList);
+      m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, mdtHashList);
     }
 
     if(roi) delete roi;

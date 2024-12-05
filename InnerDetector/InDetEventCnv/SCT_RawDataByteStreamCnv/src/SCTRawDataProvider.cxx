@@ -107,8 +107,10 @@ StatusCode SCTRawDataProvider::execute(const EventContext& ctx) const
     for (const TrigRoiDescriptor* roi : *roiCollection) {
       superRoI.push_back(roi);
     }
-    m_regionSelector->ROBIDList(superRoI, listOfROBs);
-    m_regionSelector->HashIDList(superRoI, hashIDs);
+
+    m_regionSelector->lookup(ctx)->ROBIDList(superRoI, listOfROBs );
+    m_regionSelector->lookup(ctx)->HashIDList(superRoI, hashIDs );
+
     m_robDataProvider->getROBData(ctx, listOfROBs, vecROBFrags);
   }
 

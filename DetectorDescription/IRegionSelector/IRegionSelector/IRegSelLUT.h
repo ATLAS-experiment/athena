@@ -18,8 +18,8 @@
 
 #include "Identifier/IdentifierHash.h"
 #include <vector>
-#include <stdint.h>
 #include <algorithm>
+#include <stdint.h>
 
 #include "IRegionSelector/IRoiDescriptor.h"
 

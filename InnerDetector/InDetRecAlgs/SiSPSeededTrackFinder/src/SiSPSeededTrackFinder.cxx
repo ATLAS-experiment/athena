@@ -606,8 +606,8 @@ StatusCode InDet::SiSPSeededTrackFinder::itkConvStrategy(const EventContext& ctx
   std::vector<IdentifierHash> listOfStripIds;
   std::vector<IdentifierHash> listOfPixIds;
 
-  m_regsel_strip->HashIDList( *roiComp, listOfStripIds );
-
+  m_regsel_strip->lookup(ctx)->HashIDList( *roiComp, listOfStripIds );
+  
   /// set up the seed maker for first pass
   m_seedsmaker->newRegion(ctx, seedEventData, listOfPixIds, listOfStripIds);
   std::list<Trk::Vertex> vertexList;
