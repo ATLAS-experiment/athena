@@ -203,7 +203,8 @@ StatusCode ComboHypo::execute(const EventContext& context ) const {
 
       Combo::LegDecisionsMap::const_iterator it = dmap.find(requiredDecisionIDLeg);
       if ( it == dmap.end() ) {
-        continue;
+        overallDecision = false;
+        break;
       }
 
       // Check the total number of decision objects we have available on this leg from which to satisfy its multiplicity requirement
