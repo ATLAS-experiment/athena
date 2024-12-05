@@ -32,7 +32,6 @@
 #include "StoreGate/WriteHandleKey.h"
 
 #include "GaudiKernel/SystemOfUnits.h"
-using Gaudi::Units::GeV;
 
 namespace InDet {
 
@@ -82,7 +81,7 @@ namespace InDet {
         {this, "MinNumDriftCircles", 15,
 	  "Minimum number of drift circles for TRT segment tracks"};
       DoubleProperty m_minPt
-        {this, "MinPt", 1.0 * GeV,
+        {this, "MinPt", 1.0 * Gaudi::Units::GeV,
 	 "Minimum pt cut for TRT only (used in preselection * 0.9)"};
       BooleanProperty m_oldLogic
         {this, "OldTransitionLogic", true,
