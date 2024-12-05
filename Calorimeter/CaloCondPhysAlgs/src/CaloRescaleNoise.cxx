@@ -7,6 +7,11 @@
 #include "CaloIdentifier/CaloGain.h"
 #include "CaloEvent/CaloCell.h"
 #include "Identifier/Identifier.h"
+#include "CaloIdentifier/CaloCell_ID.h"
+
+#include "TTree.h"
+#include <cstdio>
+
 
 
 //Constructor
@@ -91,8 +96,7 @@ StatusCode CaloRescaleNoise::stop()
      return StatusCode::FAILURE;
   }
 
-  FILE* fp = fopen("calonoise.txt","w");
-
+  FILE* fp = std::fopen("calonoise.txt","w");
 
   SG::ReadCondHandle<ILArHVScaleCorr> scaleCorr (m_scaleCorrKey, ctx);
   SG::ReadCondHandle<ILArHVScaleCorr> onlineScaleCorr (m_onlineScaleCorrKey, ctx);
@@ -100,7 +104,11 @@ StatusCode CaloRescaleNoise::stop()
   SG::ReadCondHandle<CaloNoise> elecNoise   (m_elecNoiseKey,   ctx);
   SG::ReadCondHandle<CaloNoise> pileupNoise (m_pileupNoiseKey, ctx);
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
-  ATH_CHECK(caloMgrHandle.isValid());
+  if( not caloMgrHandle.isValid()){
+    std::fclose(fp);
+    ATH_MSG_ERROR("CaloRescaleNoise::stop: caloMgrHandle invalid.");
+    return StatusCode::FAILURE;
+  }
   const CaloDetDescrManager* calodetdescrmgr = *caloMgrHandle;
 
   int ncell=m_calo_id->calo_cell_hash_max();
@@ -209,7 +217,7 @@ StatusCode CaloRescaleNoise::stop()
 
   }        // loop over cells
 
-  fclose(fp);
+  std::fclose(fp);
   return StatusCode::SUCCESS;
  }
 

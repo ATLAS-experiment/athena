@@ -8,7 +8,7 @@
 #ifndef CALOCONDPHYSALGS_CALORESCALENOISE_H
 #define CALOCONDPHYSALGS_CALORESCALENOISE_H
 
-#include <string>
+
 
 // Gaudi includes
 
@@ -16,16 +16,17 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
-#include "CaloIdentifier/CaloCell_ID.h"
 #include "LArElecCalib/ILArHVScaleCorr.h"
 #include "StoreGate/ReadCondHandleKey.h"  
 
 #include "LArCabling/LArOnOffIdMapping.h"
-
 #include "GaudiKernel/ITHistSvc.h"
-#include "TTree.h"
+
+#include <string>
 
 class CaloNoise;
+class TTree;
+class CaloCell_ID;
 
 class CaloRescaleNoise : public AthAlgorithm {
 
@@ -52,7 +53,7 @@ class CaloRescaleNoise : public AthAlgorithm {
   //---------------------------------------------------
   ServiceHandle<ITHistSvc> m_thistSvc{this,"THistSvc","THistSvc"};
 
-  const CaloCell_ID*       m_calo_id;
+  const CaloCell_ID*       m_calo_id{};
 
   SG::ReadCondHandleKey<CaloNoise> m_totalNoiseKey
     { this, "TotalNoiseKey", "totalNoise", "SG key for total noise" };
@@ -71,19 +72,19 @@ class CaloRescaleNoise : public AthAlgorithm {
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey
     { this, "CaloDetDescrManager", "CaloDetDescrManager", "SG Key for CaloDetDescrManager in the Condition Store" };
 
-  int m_iCool;
-  int m_SubHash;
-  int m_Hash;
-  int m_OffId;
-  float m_eta;
-  float m_phi;
-  int m_layer;
-  int m_Gain;
-  float m_noise;
-  float m_elecNoise;
-  float m_pileupNoise; 
-  float m_elecNoiseRescaled;
-  TTree* m_tree;
-  bool m_absScaling;
+  int m_iCool{};
+  int m_SubHash{};
+  int m_Hash{};
+  int m_OffId{};
+  float m_eta{};
+  float m_phi{};
+  int m_layer{};
+  int m_Gain{};
+  float m_noise{};
+  float m_elecNoise{};
+  float m_pileupNoise{}; 
+  float m_elecNoiseRescaled{};
+  TTree* m_tree{};
+  bool m_absScaling{};
 };
 #endif
