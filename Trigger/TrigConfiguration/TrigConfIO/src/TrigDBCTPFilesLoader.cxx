@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #include "./TrigDBHelper.h"
 #include "TrigConfIO/TrigDBCTPFilesLoader.h"
@@ -53,7 +53,7 @@ TrigConf::TrigDBCTPFilesLoader::TrigDBCTPFilesLoader(const std::string & connect
       // in version 6 this field (ctp core switchmatrix) was added
       auto q = m_ctpfiles_queries[3];
       q.extendOutput<coral::Blob>( "L1CF_SMX" );
-      m_ctpfiles_queries[6] = q;
+      m_ctpfiles_queries[6] = std::move(q);
    }
 
    { // ctp smx
@@ -311,7 +311,7 @@ TrigConf::TrigDBCTPFilesLoader::loadMUCTPI(L1CTPFiles & ctpfiles, std::unique_pt
          keys.erase( std::find(keys.begin(), keys.end(), L1CTPFiles::s_keyMap.at(k)) );
          std::vector<uint32_t> v;
          v.reserve(200);
-         for( auto x : *dv ) {
+         for( const auto & x : *dv ) {
             v.push_back(std::stoul(x.getValue<std::string>(), nullptr, 0));
          }
          ctpfiles.set_Muctpi(k, std::move(v));

@@ -404,7 +404,7 @@ testL1Menu_Extrainfo(const TrigConf::L1Menu & l1menu)
       cout << "    working point Medium at eta = 20:" << ex.isolation(TrigConf::Selection::WP::LOOSE,20) << endl;
 
       for( int ieta : { -30, -20, -10, 0, 10, 20, 30 } ) {
-         auto iso_loose  = ex.isolation(TrigConf::Selection::WP::LOOSE, ieta);
+         const auto & iso_loose  = ex.isolation(TrigConf::Selection::WP::LOOSE, ieta);
          int reta_loose_fw = iso_loose.reta_fw();
          int rhad_loose_fw = iso_loose.rhad_fw();
          int wstot_loose_fw = iso_loose.wstot_fw();
@@ -727,7 +727,7 @@ int main(int argc, char** argv) {
          currentParameter = "";
          // check the boolean parameters
          if(paramName == "h" || paramName == "help" ) { help = true; continue; }
-         currentParameter = paramName;
+         currentParameter = std::move(paramName);
          continue;
       }
 
@@ -771,7 +771,7 @@ int main(int argc, char** argv) {
             string testFN = p + "/TriggerMenuMT/L1Menu_Dev_pp_run3_v1_" + string(env_AV) + ".json";
             struct stat buffer;
             if (stat (testFN.c_str(), &buffer) == 0) {
-               filename = testFN;
+               filename = std::move(testFN);
                break;
             }
          }

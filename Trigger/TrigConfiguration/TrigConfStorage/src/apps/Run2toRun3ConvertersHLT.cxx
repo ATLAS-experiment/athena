@@ -15,6 +15,8 @@
 #include "TrigConfHLTData/HLTTriggerElement.h"
 #include "TrigCompositeUtils/ChainNameParser.h"
 #include "TrigConfIO/JsonFileWriterHLT.h"
+#include "TrigConfData/HLTPrescalesSet.h"
+
 
 template<typename COLL>
 boost::property_tree::ptree asArray( const COLL& data) {

@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfIO/JsonFileWriterHLT.h"
-
+#include "TrigConfData/HLTMenu.h"
+#include "TrigConfData/HLTPrescalesSet.h"
 #include <iomanip>
 #include <fstream>
 #include <algorithm>
@@ -66,16 +67,16 @@ TrigConf::JsonFileWriterHLT::writeJsonFile(const std::string & filename, const H
          jSig["logics"] = ToVector<int>(chain, "signature.logics");
          jSig["labels"] = ToVector<std::string>(chain, "signature.labels");
          jSig["outputTEs"] = ToVectorVector<std::string>(chain, "signature.outputTEs");
-         jChain["signature"] = jSig;
+         jChain["signature"] = std::move(jSig);
       }
 
-      chains[chain.name()] = jChain;
+      chains[chain.name()] = std::move(jChain);
    }
 
    json sequencers({});
    for ( const auto& [seqName, algsList]: menu.sequencers() ) {
       json jSeq( algsList );
-      sequencers[seqName] = jSeq;
+      sequencers[seqName] = std::move(jSeq);
    }
    json streams({});
    for ( const auto& stream: menu.streams() ) {
@@ -84,16 +85,16 @@ TrigConf::JsonFileWriterHLT::writeJsonFile(const std::string & filename, const H
       jStream["type"] = stream["type"];
       jStream["obeyLB"] = stream.getAttribute<bool>("obeyLB");
       jStream["forceFullEventBuilding"] = stream.getAttribute<bool>("forceFullEventBuilding");
-      streams[stream["name"]] = jStream;
+      streams[stream["name"]] = std::move(jStream);
    }
 
 
    json j({});
    j["filetype"] = "hltmenu";
    j["name"] = menu.name();
-   j["chains"] = chains;
-   j["sequencers"] = sequencers;
-   j["streams"] = streams;
+   j["chains"] = std::move(chains);
+   j["sequencers"] = std::move(sequencers);
+   j["streams"] = std::move(streams);
 
    // Optional Run2 payload
    if (menu.hasChild("sequence_run2")) {
@@ -101,7 +102,7 @@ TrigConf::JsonFileWriterHLT::writeJsonFile(const std::string & filename, const H
       jSequence["outputTEs"] = ToVector<std::string>(menu, "sequence_run2.outputTEs");
       jSequence["inputTEs"] = ToVectorVector<std::string>(menu, "sequence_run2.inputTEs");
       jSequence["algorithms"] = ToVectorVector<std::string>(menu, "sequence_run2.algorithms");
-      j["sequence_run2"] = jSequence;
+      j["sequence_run2"] = std::move(jSequence);
    }
 
    std::ofstream outfile(filename);
@@ -121,12 +122,12 @@ TrigConf::JsonFileWriterHLT::writeJsonFile(const std::string & filename, const H
       jChain["hash"] = chain.namehash();
       jChain["prescale"] = ps.prescale(chain.name()).prescale;
       jChain["enabled"] = ps.prescale(chain.name()).enabled;
-      chains[chain.name()] = jChain;
+      chains[chain.name()] = std::move(jChain);
    }
    json j({});
    j["filetype"] = "hltprescale";
    j["name"] = ps.name();
-   j["prescales"] = chains;
+   j["prescales"] = std::move(chains);
    std::ofstream outfile(filename);
    outfile << std::setw(4) << j << std::endl;
 

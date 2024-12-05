@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,10 +11,11 @@
 #define TRIGCONFSTORAGE_JSONFILEWRITERHLT_H
 
 #include "TrigConfBase/TrigConfMessaging.h"
-#include "TrigConfData/HLTMenu.h"
-#include "TrigConfData/HLTPrescalesSet.h"
+#include <string>
 
 namespace TrigConf {
+  class HLTMenu;
+  class HLTPrescalesSet;
 
    /**
     * @brief Loader of trigger configurations from Json files
