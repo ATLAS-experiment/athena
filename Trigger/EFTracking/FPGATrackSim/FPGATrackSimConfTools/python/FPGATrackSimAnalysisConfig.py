@@ -248,6 +248,11 @@ def NNTrackToolCfg(flags):
     NNTrackTool = CompFactory.FPGATrackSimNNTrackTool()
     NNTrackTool.THistSvc = CompFactory.THistSvc()
     NNTrackTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
+    NNTrackTool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
+    NNTrackTool.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
+    NNTrackTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints
+    NNTrackTool.SPRoadFilterTool = getSPRoadFilterTool(flags)
+    
     result.setPrivateTools(NNTrackTool)
     return result
 
@@ -264,6 +269,9 @@ def FPGATrackSimTrackFitterToolCfg(flags):
     TF_1st.nHits_noRecovery = flags.Trigger.FPGATrackSim.ActiveConfig.nHitsNoRecovery
     TF_1st.DoDeltaGPhis = flags.Trigger.FPGATrackSim.ActiveConfig.doDeltaGPhis
     TF_1st.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
+    TF_1st.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
+    TF_1st.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints
+    TF_1st.SPRoadFilterTool = getSPRoadFilterTool(flags)
     result.addPublicTool(TF_1st, primary=True)
     return result
 
@@ -287,6 +295,22 @@ def FPGATrackSimOverlapRemovalToolCfg(flags):
 def prepareFlagsForFPGATrackSimLogicalHitsProcessAlg(flags):
     newFlags = flags.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + flags.Trigger.FPGATrackSim.algoTag)
     return newFlags
+
+def getSPRoadFilterTool(flags,secondStage=False):
+    name="FPGATrackSimSpacepointRoadFilterTool_1st"
+    if secondStage:
+        name="FPGATrackSimSpacepointRoadFilterTool_2st"
+    SPRoadFilter = CompFactory.FPGATrackSimSpacepointRoadFilterTool(name)
+    SPRoadFilter.filtering = flags.Trigger.FPGATrackSim.ActiveConfig.spacePointFiltering
+    SPRoadFilter.minSpacePlusPixel = flags.Trigger.FPGATrackSim.minSpacePlusPixel
+    SPRoadFilter.isSecondStage = secondStage
+    # TODO guard here against threshold being more than one value?
+    if (flags.Trigger.FPGATrackSim.ActiveConfig.hough1D):
+        SPRoadFilter.threshold = flags.Trigger.FPGATrackSim.Hough1D.threshold[0]
+    else:
+        SPRoadFilter.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold[0]
+    SPRoadFilter.setSectors = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
+    return SPRoadFilter
 
 def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
 
@@ -358,17 +382,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
 
     # Create SPRoadFilterTool if spacepoints are turned on. TODO: make things configurable?
     if flags.Trigger.FPGATrackSim.spacePoints:
-        SPRoadFilter = CompFactory.FPGATrackSimSpacepointRoadFilterTool("FPGATrackSimSpacepointRoadFilterTool_1st")
-        SPRoadFilter.filtering = flags.Trigger.FPGATrackSim.ActiveConfig.spacePointFiltering
-        SPRoadFilter.minSpacePlusPixel = flags.Trigger.FPGATrackSim.minSpacePlusPixel
-        # TODO guard here against threshold being more than one value?
-        if (flags.Trigger.FPGATrackSim.ActiveConfig.hough1D):
-          SPRoadFilter.threshold = flags.Trigger.FPGATrackSim.Hough1D.threshold[0]
-        else:
-          SPRoadFilter.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold[0]
-        SPRoadFilter.setSectors = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
-
-        theFPGATrackSimLogicalHitsProcessAlg.SPRoadFilterTool = SPRoadFilter
+        theFPGATrackSimLogicalHitsProcessAlg.SPRoadFilterTool = getSPRoadFilterTool(flags)
         theFPGATrackSimLogicalHitsProcessAlg.Spacepoints = True
 
 

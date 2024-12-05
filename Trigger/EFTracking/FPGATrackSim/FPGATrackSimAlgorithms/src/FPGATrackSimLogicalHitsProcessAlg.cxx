@@ -197,24 +197,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         ATH_CHECK(m_roadFilterTool2->filterRoads(roads_1st, postfilter2_roads));
         roads_1st = postfilter2_roads;
     }
-    // Spacepoint road filter tool. Needed when fitting to spacepoints.
-    std::vector<std::shared_ptr<const FPGATrackSimRoad>> postfilter3_roads;
-    if (m_doSpacepoints) {
-        ATH_CHECK(m_spRoadFilterTool->filterRoads(roads_1st, postfilter3_roads));
-        roads_1st = postfilter3_roads;
-    }
-
-    for (auto const &road:roads_1st){
-        std::vector<FPGATrackSimHit> road_hits;
-        ATH_MSG_DEBUG("Hough Road X Y: " << road->getX() << " " << road->getY());
-        for (size_t l = 0; l < road->getNLayers(); ++l) {
-            for (const auto &layerH : road->getHits(l)) {
-                road_hits.push_back(*layerH);
-            }
-        }
-        FPGAHitsInRoads_1st->push_back(road_hits);
-        FPGARoads_1st->push_back(*road);
-    }
 
     auto mon_nroads_1st_postfilter = Monitored::Scalar<unsigned>("nroads_1st_postfilter", roads_1st.size());
     Monitored::Group(m_monTool, mon_nroads_1st_postfilter);
@@ -228,6 +210,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
             ATH_CHECK(m_NNTrackTool->getTracks(roads_1st, tracks_1st));
         }
         else {
+            ATH_MSG_DEBUG("Performing Linear tracking");
             ATH_CHECK(m_trackFitterTool_1st->getTracks(roads_1st, tracks_1st));
             float bestchi2 = 1.e15;
             for (const FPGATrackSimTrack& track : tracks_1st) {
@@ -241,12 +224,28 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         }
     }
     else { // we are not doing tracking so get the number of combinations for monitoring
+        ATH_MSG_DEBUG("No tracking. Adding dummy tracks...");
       int ntrackDummy = 0;
       for (const std::shared_ptr<const FPGATrackSimRoad>& road : roads_1st) {
 	ntrackDummy += road->getNHitCombos();
       }
       tracks_1st.resize(ntrackDummy); // just filled with dummy tracks for monitoring
     }
+
+    // loop over roads and store them in SG (This better be done after track finding to also copy the sector information)
+    for (auto const &road:roads_1st){
+        std::vector<FPGATrackSimHit> road_hits;
+        ATH_MSG_DEBUG("Hough Road X Y: " << road->getX() << " " << road->getY());
+        for (size_t l = 0; l < road->getNLayers(); ++l) {
+            for (const auto &layerH : road->getHits(l)) {
+                road_hits.push_back(*layerH);
+            }
+        }
+        FPGAHitsInRoads_1st->push_back(road_hits);
+        FPGARoads_1st->push_back(*road);
+    }
+
+
     auto mon_ntracks_1st = Monitored::Scalar<unsigned>("ntrack_1st", tracks_1st.size());
     Monitored::Group(m_monTool,mon_ntracks_1st);
     

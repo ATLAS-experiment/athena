@@ -40,9 +40,6 @@ class FPGATrackSimWindowExtensionTool : public extends <AthAlgTool, IFPGATrackSi
                                         const std::vector<std::shared_ptr<const FPGATrackSimTrack>> & tracks,
                                         std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) override;
 
-        // Deduplicate, fold into sector bank.
-        void matchIdealGeoSector(FPGATrackSimRoad & r) const;
-
     private:
 
         ServiceHandle<IFPGATrackSimBankSvc> m_FPGATrackSimBankSvc {this, "FPGATrackSimBankSvc", "FPGATrackSimBankSvc"};

@@ -18,20 +18,22 @@
 #include "FPGATrackSimObjects/FPGATrackSimMultiTruth.h"
 
 /////////////////////////////////////////////////////////////////////////////
-FPGATrackSimNNTrackTool::FPGATrackSimNNTrackTool(const std::string &algname, const std::string &name, const IInterface *ifc) : AthAlgTool(algname, name, ifc), OnnxRuntimeBase() {}
+FPGATrackSimNNTrackTool::FPGATrackSimNNTrackTool(const std::string &algname, const std::string &name, const IInterface *ifc) : FPGATrackSimTrackingToolBase(algname, name, ifc), OnnxRuntimeBase() {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 StatusCode FPGATrackSimNNTrackTool::initialize() {
   ATH_CHECK(m_FPGATrackSimMapping.retrieve());
   ATH_CHECK(m_tHistSvc.retrieve());
+  if (m_useSpacePoints) ATH_CHECK(m_spRoadFilterTool.retrieve(EnableTool{m_spRoadFilterTool}));
   OnnxRuntimeBase::initialize(m_FPGATrackSimMapping->getNNMapString());
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode FPGATrackSimNNTrackTool::getTracks(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks) {
+StatusCode FPGATrackSimNNTrackTool::getTracks(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks) {
 
+  ATH_CHECK(setRoadSectors(roads));
   int n_track = 0;
 
   // Loop over roads
@@ -51,7 +53,9 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(const std::vector<std::shared_ptr<
     layer_bitmask_t missing_mask = 0;
 
     // Just used to get number of layers considered
-    const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_1st(0);
+    const FPGATrackSimPlaneMap *planeMap = nullptr;
+    if (!m_do2ndStage) planeMap = m_FPGATrackSimMapping->PlaneMap_1st(0);
+    else planeMap = m_FPGATrackSimMapping->PlaneMap_2nd();
 
     // Create a template track with common parameters filled already for
     // initializing below
@@ -222,7 +226,10 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(const std::vector<std::shared_ptr<
 // Borrowed same code from TrackFitter - probably a nicer way to inherit instead
 void FPGATrackSimNNTrackTool::compute_truth(FPGATrackSimTrack &t) const {
   std::vector<FPGATrackSimMultiTruth> mtv;
-  const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_1st(0);
+
+  const FPGATrackSimPlaneMap* planeMap = nullptr;
+  if (!m_do2ndStage) planeMap = m_FPGATrackSimMapping->PlaneMap_1st(0);
+  else planeMap = m_FPGATrackSimMapping->PlaneMap_2nd();
 
   for (unsigned layer = 0; layer < planeMap->getNLogiLayers(); layer++) {
     if (t.getHitMap() & (1 << planeMap->getCoordOffset(layer)))

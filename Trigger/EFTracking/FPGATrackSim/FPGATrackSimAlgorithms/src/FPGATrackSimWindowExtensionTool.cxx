@@ -165,11 +165,6 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
             // set hit layers and hits
             road.setHitLayers(hitLayers);
             road.setHits(std::move(road_hits));
-
-            // set the sector ID. TODO make this its own function in FPGATrackSimFunctions or something.
-            if (m_idealGeoRoads) {
-                matchIdealGeoSector(road);
-            }
         }
     }
 
@@ -182,69 +177,3 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
 
     return StatusCode::SUCCESS;
 }
-
-void FPGATrackSimWindowExtensionTool::matchIdealGeoSector(FPGATrackSimRoad & r) const
-{
-
-  // TODO: move this function into the sector bank class somehow.
-
-  // We now look up the binning information in the sector bank.
-  const FPGATrackSimSectorBank* sectorbank = m_FPGATrackSimBankSvc->SectorBank_2nd();
-
-  // Look up q/pt (or |q/pt|) from the Hough road, convert to MeV.
-  double qoverpt = r.getY()*0.001;
-  if (sectorbank->isAbsQOverPtBinning()) {
-      qoverpt = abs(qoverpt);
-  }
-
-  int sectorbin = 0;
-
-  // Retrieve the bin boundaries from the sector bank; map this onto them.
-  std::vector<double> qoverpt_bins = sectorbank->getQOverPtBins();
-  auto bounds = std::equal_range(qoverpt_bins.begin(), qoverpt_bins.end(), qoverpt);
-
-  sectorbin = fpgatracksim::QPT_SECTOR_OFFSET*(bounds.first - qoverpt_bins.begin() - 1);
-
-  if (sectorbin < 0) sectorbin = 0;
-  if ((sectorbin / 10) > static_cast<int>(qoverpt_bins.size() - 2))sectorbin = 10*(qoverpt_bins.size() - 2);
-
-  if (m_doRegionalMapping){
-    int subregion = r.getSubRegion();
-    sectorbin += subregion*fpgatracksim::SUBREGION_SECTOR_OFFSET;
-  }
-  std::vector<module_t> modules;
-  for (unsigned int il = 0; il < r.getNLayers(); il++) {
-    if (r.getNHits_layer()[il] == 0) {
-      modules.push_back(-1);
-
-      layer_bitmask_t wc_layers = r.getWCLayers();
-      wc_layers |= (0x1 << il);
-      r.setWCLayers(wc_layers);
-
-      std::shared_ptr<FPGATrackSimHit> wcHit = std::make_shared<FPGATrackSimHit>();
-      wcHit->setHitType(HitType::wildcard);
-      wcHit->setLayer(il);
-      wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_2nd()->getDetType(il));
-      std::vector<std::shared_ptr<const FPGATrackSimHit>> wcHits;
-      wcHits.push_back(std::move(wcHit));
-      r.setHits(il,std::move(wcHits));
-    }
-    else {
-      modules.push_back(sectorbin);
-    }
-  }
-
-  // If we are using eta patterns. We need to first run the roads through the road filter.
-  // Then the filter will be responsible for setting the actual sector.
-  // As a hack, we can store the sector bin ID in the road for now.
-  // This is fragile! If we want to store a different ID for each layer, it will break.
-
-  // Similarly, we do the same thing for spacepoints. this probably means we can't combine the two.
-  // maybe better to store the module array instead of just a number?
-
-  r.setSectorBin(sectorbin);
-  if (!m_doEtaPatternConsts && !m_useSpacePoints) {
-      r.setSector(sectorbank->findSector(modules));
-  }
-}
-

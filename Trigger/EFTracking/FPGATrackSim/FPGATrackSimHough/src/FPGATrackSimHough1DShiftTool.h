@@ -191,7 +191,6 @@ class FPGATrackSimHough1DShiftTool : public extends <AthAlgTool, IFPGATrackSimRo
         std::vector<boost::dynamic_bitset<>> makeHitMasks(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits);
 
         FPGATrackSimRoad makeRoad(const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits, int bin_track, size_t iShift);
-        void matchIdealGeoSector(FPGATrackSimRoad & r) const;
         bool passThreshold(std::vector<boost::dynamic_bitset<>>& binHits, int bin ) const;
         void printHitMasks(std::vector<boost::dynamic_bitset<>> const & hitMasks) const;
 

@@ -346,21 +346,22 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGARoads(SG::ReadHandle<FPGAT
 {
     std::string mainTable = "\n"
         "|--------------------------------------------------------------------------------------------------|\n"
-        "|      # |  SubRegion  |    xBin    |    yBin    |       X      |       Y      |       RoadID      |\n"
+        "|      # |  SubRegion  |    xBin  |    yBin  |       X      |       Y      |   RoadID   |  Sector  |\n"
         "|--------------------------------------------------------------------------------------------------|\n";
     
     unsigned int roadCounter = 0, hitCounter = 0;
     for (const FPGATrackSimRoad& road : *FPGARoads)
     {
         ++roadCounter;
-        mainTable += std::format("| {:>6} | {:>11} | {:>10} | {:>10} | {:>12} | {:>12} | {:>12} |\n",
+        mainTable += std::format("| {:>6} | {:>11} | {:>8} | {:>8} | {:>12} | {:>12} | {:>10} | {:>8} |\n",
         roadCounter,
         road.getSubRegion(),
         road.getXBin(),
         road.getYBin(),
         road.getX(),
         road.getY(),
-        road.getRoadID());
+        road.getRoadID(),
+        road.getSector());
         mainTable +=
             "|        __________________________________________________________________________________________|\n"
             "|        |   layer   |    ##  |   type   |             Global coordinates                |  isReal |\n"

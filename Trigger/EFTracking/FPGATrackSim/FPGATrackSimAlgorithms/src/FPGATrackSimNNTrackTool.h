@@ -25,6 +25,8 @@
 
 #include "GaudiKernel/ITHistSvc.h"
 
+#include "FPGATrackSimTrackingToolBase.h"
+
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
@@ -32,28 +34,28 @@
 
 class IFPGATrackSimMappingSvc;
 
-class FPGATrackSimNNTrackTool : public AthAlgTool, public OnnxRuntimeBase
+class FPGATrackSimNNTrackTool : public FPGATrackSimTrackingToolBase, public OnnxRuntimeBase
 {
   using OnnxRuntimeBase::OnnxRuntimeBase;
 
   public:
 
-        ///////////////////////////////////////////////////////////////////////
-        // AthAlgTool
+	///////////////////////////////////////////////////////////////////////
+	// AthAlgTool
 
-        FPGATrackSimNNTrackTool(const std::string&, const std::string&, const IInterface*);
+	FPGATrackSimNNTrackTool(const std::string&, const std::string&, const IInterface*);
 
-        virtual StatusCode initialize() override;
-        StatusCode getTracks(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
-  
-        static float getXScale() { return 1015.;};
-        static float getYScale() { return 1015.;};
-        static float getZScale() { return 3000.;};
+	virtual StatusCode initialize() override;
+	StatusCode getTracks(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
+
+	static float getXScale() { return 1015.;};
+	static float getYScale() { return 1015.;};
+	static float getZScale() { return 3000.;};
 
 	// Flags
 
-        Gaudi::Property <double> m_NNCut { this, "NNCut", 0.2, " NN output value to cut on when selecting good tracks"};
-	Gaudi::Property <double> m_chi2_scalefactor { this, "Chi2ScaleFactor", 40/(1-0.1), "Scale factor to use in converting to a chi2, Nominal chi2ndof cut is 40 and we want to use NN>0.0075 (or NN<(1-0.0075)"};
+	Gaudi::Property <double> m_NNCut{ this, "NNCut", 0.2, " NN output value to cut on when selecting good tracks" };
+	Gaudi::Property <double> m_chi2_scalefactor{ this, "Chi2ScaleFactor", 40 / (1 - 0.1), "Scale factor to use in converting to a chi2, Nominal chi2ndof cut is 40 and we want to use NN>0.0075 (or NN<(1-0.0075)" };
 
 
   private:
@@ -88,9 +90,9 @@ class FPGATrackSimNNTrackTool : public AthAlgTool, public OnnxRuntimeBase
 
 	//////////////////////////////////////////////////////////////////
 	// NN stuff
-        std::vector<const char*> m_input_node_names;
-        std::vector<int64_t> m_input_node_dims;
-        std::vector<const char*> m_output_node_names;
+	std::vector<const char*> m_input_node_names;
+	std::vector<int64_t> m_input_node_dims;
+	std::vector<const char*> m_output_node_names;
 
     void compute_truth(FPGATrackSimTrack & newtrk) const;
 
