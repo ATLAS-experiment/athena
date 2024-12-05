@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1UtilitySystems )
@@ -24,3 +24,6 @@ atlas_add_library( VP1UtilitySystems VP1UtilitySystems/*.h src/*.h src/*.cxx src
                    LINK_LIBRARIES VP1Base GL Qt5::PrintSupport
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${COIN3D_LIBRARIES} )
 
+# Enable Qt support for cppcheck:
+set_property( TARGET VP1UtilitySystems
+   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1AODSystems )
@@ -25,6 +25,10 @@ if(NOT BUILDVP1LIGHT)
        PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES} GeoPrimitives EventPrimitives
        xAODBase xAODCaloEvent xAODJet xAODMissingET PathResolver TrkExInterfaces
        VP1HEPVis VP1Utils Qt5::Gui )
+
+    # Enable Qt support for cppcheck:
+    set_property( TARGET VP1AODSystems
+       APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
 else()
     # Component(s) in the package:
     atlas_add_library( VP1AODSystems

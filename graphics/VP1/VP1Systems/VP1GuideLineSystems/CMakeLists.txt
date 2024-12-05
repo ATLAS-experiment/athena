@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1GuideLineSystems )
@@ -24,6 +24,11 @@ atlas_add_library( VP1GuideLineSystems VP1GuideLineSystems/*.h src/*.cxx src/*.q
    PRIVATE_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}
    PRIVATE_LINK_LIBRARIES GaudiKernel VP1HEPVis )
 endif()
+
+# Enable Qt support for cppcheck:
+set_property( TARGET VP1GuideLineSystems
+   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+
 if(BUILDVP1LIGHT)
 # Component(s) in the package:
 atlas_add_library( VP1GuideLineSystems VP1GuideLineSystems/*.h src/*.cxx src/*.qrc

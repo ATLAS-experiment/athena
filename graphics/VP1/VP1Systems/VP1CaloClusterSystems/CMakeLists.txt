@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1CaloClusterSystems )
@@ -25,3 +25,6 @@ atlas_add_library( VP1CaloClusterSystems VP1CaloClusterSystems/*.h src/*.h src/*
                    LINK_LIBRARIES VP1Base GL
                    PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES} ${CLHEP_LIBRARIES} CaloEvent VP1HEPVis VP1Utils )
 
+# Enable Qt support for cppcheck:
+set_property( TARGET VP1CaloClusterSystems
+   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )

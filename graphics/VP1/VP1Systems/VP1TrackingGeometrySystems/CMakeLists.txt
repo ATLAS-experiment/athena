@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1TrackingGeometrySystems )
@@ -25,3 +25,7 @@ atlas_add_library( VP1TrackingGeometrySystems VP1TrackingGeometrySystems/*.h src
                    PRIVATE_INCLUDE_DIRS ${COIN3D_INCLUDE_DIRS}
                    LINK_LIBRARIES ${GEOMODEL_LIBRARIES} TrkVolumes VP1Base GL
                    PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES} GeoPrimitives GaudiKernel StoreGateLib TrkDetDescrInterfaces TrkDetDescrUtils TrkGeometry VP1HEPVis VP1Utils )
+
+# Enable Qt support for cppcheck:
+set_property( TARGET VP1TrackingGeometrySystems
+   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )

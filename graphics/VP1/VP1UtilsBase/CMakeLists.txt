@@ -12,6 +12,10 @@ atlas_add_library( VP1UtilsBase
    PUBLIC_HEADERS VP1UtilsBase
    PRIVATE_LINK_LIBRARIES Qt5::Core )
 
+# Enable Qt support for cppcheck:
+set_property( TARGET VP1UtilsBase
+   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+
 # Install files from the package:
 atlas_install_runtime( share/*.vp1 ) # default VP1 config files for batch mode
 atlas_install_runtime( share/*.png ) # ATLAS logo

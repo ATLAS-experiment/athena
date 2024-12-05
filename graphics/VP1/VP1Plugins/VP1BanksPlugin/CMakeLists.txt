@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1BanksPlugin )
@@ -21,3 +21,6 @@ atlas_add_library( VP1BanksPlugin VP1BanksPlugin/*.h src/*.cxx
    LINK_LIBRARIES Qt5::Core Qt5::Gui Qt5::Widgets
    PRIVATE_LINK_LIBRARIES VP1Base VP1PlugUtils VP1GeometrySystems VP1BanksSystems )
 
+# Enable Qt support for cppcheck:
+set_property( TARGET VP1BanksPlugin
+   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
