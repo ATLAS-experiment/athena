@@ -27,6 +27,7 @@
 #include "AthContainers/normalizedTypeinfoName.h"
 #ifndef XAOD_STANDALONE
 #   include "SGTools/CurrentEventStore.h"
+#   include "SGTools/DataProxy.h"
 #endif // not XAOD_STANDALONE
 #include "CxxUtils/no_sanitize_undefined.h"
 

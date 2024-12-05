@@ -8,6 +8,7 @@
 #include "AthContainersInterfaces/IAuxStore.h"
 #include "AthContainersInterfaces/IConstAuxStore.h"
 #include "xAODCore/AuxContainerBase.h"
+#include <any>
 
 namespace ActsTrk {
 using IndexType = std::uint32_t;  // TODO take from a common header
