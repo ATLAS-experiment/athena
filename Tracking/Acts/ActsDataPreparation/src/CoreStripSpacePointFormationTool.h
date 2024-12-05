@@ -60,9 +60,9 @@ namespace ActsTrk {
 
     StatusCode fillSpacePoints(const EventContext& ctx,
 			      std::shared_ptr<Acts::SpacePointBuilder<StripSP>> spBuilder,
-			      std::array<const InDetDD::SiDetectorElement*,nNeighbours> neighbourElements,
-			      std::array<std::vector<std::pair<ATLASUncalibSourceLink, size_t>>,nNeighbours> neighbourSourceLinks,
-			      std::array<double, 14> overlapExtents,
+			      const std::array<const InDetDD::SiDetectorElement*,nNeighbours>& neighbourElements,
+			      const std::array<std::vector<std::pair<ATLASUncalibSourceLink, size_t>>,nNeighbours>& neighbourSourceLinks,
+			      const std::array<double, 14>& overlapExtents,
 			      const Amg::Vector3D& beamSpotVertex,
 			      std::vector<StripSP>& spacePoints,
 			      std::vector<StripSP>& overlapSpacePoints ) const;
