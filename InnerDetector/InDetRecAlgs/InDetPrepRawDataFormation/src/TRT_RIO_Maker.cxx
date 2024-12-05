@@ -106,7 +106,7 @@ namespace InDet {
       for(const TrigRoiDescriptor* roi : *roiCollection){
          
          listOfTRTIds.clear(); //Prevents needless memory reallocations
-         m_regionSelector->HashIDList( *roi, listOfTRTIds);
+         m_regionSelector->lookup(ctx)->HashIDList( *roi, listOfTRTIds);
          for(auto &id : listOfTRTIds){
             const InDetRawDataCollection<TRT_RDORawData>* RDO_Collection (rdoContainer->indexFindPtr(id));
             if (!RDO_Collection) continue;

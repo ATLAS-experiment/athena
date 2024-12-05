@@ -39,6 +39,10 @@ class JfexMonitorAlgorithm : public AthMonitorAlgorithm {
         StringProperty m_Grouphist{this,"Grouphist","JfexMonitor","group name for histograming"};
         StringProperty m_Groupmaps{this,"Groupmaps","jFEXMaps","group name for jFEX TOB maps"};
         StringProperty m_GroupmapsHighPt{this,"GroupmapsHighPt","jFEXMapsHighPt","group name for jFEX TOB maps with higher energy thresholds"};
+        Gaudi::Property<std::vector<float>> m_jJEtaBins{this,"jJEtaBins"};
+        Gaudi::Property<std::vector<float>> m_jTauEtaBins{this,"jTauEtaBins"};
+        Gaudi::Property<std::vector<float>> m_jEMEtaBins{this,"jEMEtaBins"};
+
 
         // container keys including this, steering parameter, default value and help description
         SG::ReadHandleKey< xAOD::jFexSRJetRoIContainer > m_jFexSRJetContainerKey {this,"jFexSRJetRoIContainer","L1_jFexSRJetRoI","SG key of the input jFex SR Jet Roi container"};
@@ -47,5 +51,50 @@ class JfexMonitorAlgorithm : public AthMonitorAlgorithm {
         SG::ReadHandleKey< xAOD::jFexFwdElRoIContainer > m_jFexFwdElContainerKey {this,"jFexFwdElRoIContainer","L1_jFexFwdElRoI","SG key of the input jFex EM Roi container"};
         SG::ReadHandleKey< xAOD::jFexMETRoIContainer   > m_jFexMETContainerKey   {this,"jFexMETRoIContainer"  ,"L1_jFexMETRoI"  ,"SG key of the input jFex MET Roi container"};
         SG::ReadHandleKey< xAOD::jFexSumETRoIContainer > m_jFexSumEtContainerKey {this,"jFexSumETRoIContainer","L1_jFexSumETRoI","SG key of the input jFex SumEt Roi container"};
+
+        int binNumberFromCoordinates(float eta, float phi, std::vector<float> etaBinBorders) const;
+
+        StatusCode fillJetMaps(const xAOD::jFexSRJetRoI *tob,
+                             Monitored::Scalar<float> &eta,
+                             Monitored::Scalar<float> &phi,
+                             Monitored::Scalar<int> &binNumber,
+                             Monitored::Scalar<int> &lbn,
+                             Monitored::Scalar<float> &weight) const;
+        StatusCode fillEMMaps(const xAOD::jFexFwdElRoI *tob,
+                             Monitored::Scalar<float> &eta,
+                             Monitored::Scalar<float> &phi,
+                             Monitored::Scalar<int> &binNumber,
+                             Monitored::Scalar<int> &lbn,
+                             Monitored::Scalar<float> &weight) const;
+        // for filling maps where phi binning is ~0.1
+        template<typename TOB>
+        StatusCode fillMapsCentralAndFCAL(TOB tob,
+                             Monitored::Scalar<float> &eta,
+                             Monitored::Scalar<float> &phi,
+                             Monitored::Scalar<int> &binNumber,
+                             Monitored::Scalar<int> &lbn,
+                             std::vector<float> etaBinBorders,
+                             Monitored::Scalar<float> &weight) const;
+        // for faking ~0.2 phi binning in endcap
+        template<typename TOB>
+        StatusCode fillMapsEndcap(TOB tob,
+                             Monitored::Scalar<float> &eta,
+                             Monitored::Scalar<float> &phi,
+                             Monitored::Scalar<int> &binNumber,
+                             Monitored::Scalar<int> &lbn,
+                             std::vector<float> etaBinBorders,
+                             Monitored::Scalar<float> &weight) const;
+        // special handling for jets in endcap/FCAL overlap
+        StatusCode fillMapsOverlap(const xAOD::jFexSRJetRoI* tob,
+                             Monitored::Scalar<float> &eta,
+                             Monitored::Scalar<float> &phi,
+                             Monitored::Scalar<int> &binNumber,
+                             Monitored::Scalar<int> &lbn,
+                             std::vector<float> etaBinBorders,
+                             Monitored::Scalar<float> &weight) const;
+
+        bool passesEnergyCut(const xAOD::jFexSRJetRoI *tob) const;
+        bool passesEnergyCut(const xAOD::jFexFwdElRoI *tob) const;
+        bool passesEnergyCut(const xAOD::jFexTauRoI *tob) const;
 };
 #endif

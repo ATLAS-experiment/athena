@@ -40,6 +40,9 @@ inline std::string makeContDecorKey(const std::string& cont, const std::string& 
 
 inline std::string makeContDecorKey(const VarHandleKey& contKey, const std::string& key)
 {
+  if (key.empty() || key.ends_with ('+')) {
+    return "";
+  }
   return makeContDecorKey( contKey.key(), key);
 }
 

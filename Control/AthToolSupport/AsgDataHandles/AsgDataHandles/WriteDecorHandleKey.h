@@ -95,7 +95,10 @@ public:
    * @param decorKey name The decoration name.
    * @param doc Documentation string.
    *
-   * will associate the named Property with this WDHK via declareProperty
+   * Will associate the named Property with this WDHK via declareProperty
+   * The container part of the decoration key will be taken from @c contKey,
+   * while @c decorKey gives the name of the decoration itself.
+   * If @c decorKey is blank, then the overall key will be blank.
    */
   template <class OWNER>
   WriteDecorHandleKey (OWNER* owner,
@@ -138,6 +141,18 @@ public:
    *             Instead of normal initialization, the key will be cleared.
    */
   StatusCode initialize (bool used = true);
+
+
+  /**
+   * @brief If this object is used as a property, then this should be called
+   *        during the initialize phase.  This variant will allow the key
+   *        to be blank.
+   * @param Flag to select this variant.  Call like
+   *@code
+   *  ATH_CHECK( key.initialize (SG::AllowEmpty) );
+   @endcode
+   */
+  StatusCode initialize (AllowEmptyEnum);
 
 
   /**

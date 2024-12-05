@@ -159,6 +159,9 @@ BuildTruthTaus::buildTruthTausFromTruthParticles(TruthTausEvent& truthTausEvent)
 
   bool copyDressedPhotons = false;
 
+  static const SG::Accessor<char> dressedPhotonAcc ("dressedPhoton");
+
+  bool copyDressedPhotons = false;
   for (auto xTruthParticle : *truthTausEvent.m_xTruthParticleContainer)
   {
     if ( xTruthParticle->isTau() )
