@@ -39,7 +39,7 @@
 
 // ISF includes
 #include "ISF_Event/ISFParticle.h"
-
+#include <limits>
 /*
   Comments:
   what about parent particle surviving (e.g. bremstrahlung)
@@ -391,20 +391,22 @@ void iGeant4::Geant4TruthIncident::prepareChildren() {
 ISF::InteractionClass_t iGeant4::Geant4TruthIncident::interactionClassification() const {
   G4Track* track=m_step->GetTrack();
   const G4DynamicParticle* dynPart = track->GetDynamicParticle();
+  const double preAsgnDecPropTime = dynPart->GetPreAssignedDecayProperTime();
+  const double trackPropTime = track->GetProperTime();
   bool parentIsQuasiStable = (nullptr!=(dynPart->GetPreAssignedDecayProducts()));
   const G4VProcess *process = m_step->GetPostStepPoint()->GetProcessDefinedStep();
   const int processType = process->GetProcessType();
-  const int processSubType = process->GetProcessSubType();
   ISF::InteractionClass_t classification(ISF::STD_VTX);
   if(parentIsQuasiStable) {
     if(this->parentSurvivesIncident()) {
       classification = ISF::QS_SURV_VTX;
     }
-    else if(processType==6 && (processSubType==DECAY || processSubType==DECAY_External)) { // 201 or 231
-      classification = ISF::QS_PREDEF_VTX;
+    else if(processType==6 && (trackPropTime-preAsgnDecPropTime) < -std::numeric_limits<double>::epsilon()) {
+      // Particle decayed before its expected pre-defined decay time
+      classification = ISF::QS_DEST_VTX;
     }
     else {
-      classification = ISF::QS_DEST_VTX;
+      classification = ISF::QS_PREDEF_VTX;
     }
   }
   return classification;
