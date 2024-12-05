@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,11 +11,13 @@
 #define TRIGCONFSTORAGE_JSONFILEWRITERL1_H
 
 #include "TrigConfBase/TrigConfMessaging.h"
-#include "TrigConfData/L1Menu.h"
-#include "TrigConfData/L1BunchGroupSet.h"
-#include "TrigConfData/L1PrescalesSet.h"
+
+
 
 namespace TrigConf {
+  class L1Menu;
+  class L1BunchGroupSet;
+  class L1PrescalesSet;
 
    /**
     * @brief Loader of trigger configurations from Json files

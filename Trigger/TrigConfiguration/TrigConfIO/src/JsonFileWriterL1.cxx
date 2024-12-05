@@ -2,6 +2,10 @@
 
 #include "TrigConfIO/JsonFileWriterL1.h"
 
+#include "TrigConfData/L1Menu.h"
+#include "TrigConfData/L1BunchGroupSet.h"
+#include "TrigConfData/L1PrescalesSet.h"
+
 #include <iomanip>
 #include <fstream>
 #include <algorithm>
@@ -326,11 +330,11 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
             jThr["value"] = int(gTEThr.thrValue());
          } catch(std::bad_cast&) {};
 
-         jThresholsByType[thr->name()] = jThr;
+         jThresholsByType[thr->name()] = std::move(jThr);
       };
       json jThrType({});
       if(thrType != "internal") {
-         jThrType["thresholds"] = jThresholsByType;
+         jThrType["thresholds"] = std::move(jThresholsByType);
       }
       jThrType["type"] = thrType;
 
@@ -674,9 +678,9 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
 
       std::vector<std::string> legacyCalo = {"EM", "JET", "TAU", "XE", "TE", "XS", "ZB", "JB", "JF", "JE", "R2TOPO"};
       if( std::any_of(begin(legacyCalo), end(legacyCalo), [&thrType](const std::string &c) { return c==thrType; }) ) {
-         thresholds["legacyCalo"][thrType] = jThrType;
+         thresholds["legacyCalo"][thrType] = std::move(jThrType);
       } else {
-         thresholds[thrType] = jThrType;
+         thresholds[thrType] = std::move(jThrType);
       }
    };
 
@@ -721,7 +725,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
              jConn["triggerlines"] += json({ {"name", tl.name()}, {"nbits",tl.nbits()}, {"startbit", tl.startbit()}, {"flatindex", tl.flatindex()} });
           }
       }
-      connectors[cname] = jConn;
+      connectors[cname] = std::move(jConn);
    }
 
    json ctp = json::object_t{};
@@ -825,7 +829,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
                   jalg["variableParameters"] += jVPar;
                }
             }
-            jtopo[topoCat][algTypeNames[alg.type()]][algName] = jalg;
+            jtopo[topoCat][algTypeNames[alg.type()]][algName] = std::move(jalg);
          }
       }
    }
@@ -834,12 +838,12 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
    j["filetype"] = "l1menu";
    j["run"] = l1menu.run();
    j["name"] = l1menu.name();
-   j["items"] = items;
-   j["thresholds"] = thresholds;
-   j["topoAlgorithms"] = jtopo;
-   j["boards"] = boards;
-   j["connectors"] = connectors;
-   j["ctp"] = ctp;
+   j["items"] = std::move(items);
+   j["thresholds"] = std::move(thresholds);
+   j["topoAlgorithms"] = std::move(jtopo);
+   j["boards"] = std::move(boards);
+   j["connectors"] = std::move(connectors);
+   j["ctp"] = std::move(ctp);
 
    std::ofstream outfile(filename);
    outfile << std::setw(4) << j << std::endl;
@@ -870,10 +874,10 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const Tr
          train["length"] = len;
          trains.push_back(train);
       }
-      jgroup["bcids"] = trains;
-      groups["BGRP"+std::to_string(group->id())] = jgroup;
+      jgroup["bcids"] = std::move(trains);
+      groups["BGRP"+std::to_string(group->id())] = std::move(jgroup);
    }
-   j["bunchGroups"] = groups;
+   j["bunchGroups"] = std::move(groups);
    std::ofstream outfile(filename);
    outfile << std::setw(4) << j << std::endl;
    TRG_MSG_INFO("Saved file " << filename);
@@ -890,9 +894,9 @@ bool TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, con
       cut["cut"] = ps.cut;
       cut["enabled"] = ps.enabled;
       cut["info"] = "prescale: " + std::to_string(ps.prescale);
-      cuts[itemName] = cut;
+      cuts[itemName] = std::move(cut);
    }
-   j["cutValues"] = cuts;
+   j["cutValues"] = std::move(cuts);
    std::ofstream outfile(filename);
    outfile << std::setw(4) << j << std::endl;
    TRG_MSG_INFO("Saved file " << filename);

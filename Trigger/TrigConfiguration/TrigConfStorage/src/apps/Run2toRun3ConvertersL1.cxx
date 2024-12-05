@@ -10,6 +10,7 @@
 #include "TrigConfData/L1BunchGroupSet.h"
 #include "TrigConfData/DataStructure.h"
 #include "TrigConfData/L1PrescalesSet.h"
+#include "TrigConfData/L1Menu.h"
 #define BOOST_BIND_GLOBAL_PLACEHOLDERS // Needed to silence Boost pragma message
 #include <boost/property_tree/json_parser.hpp>
 #include "TrigConfL1Data/CTPConfig.h"
