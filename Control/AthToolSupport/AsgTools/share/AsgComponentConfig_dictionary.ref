@@ -1,5 +1,5 @@
 hadd Target file: AsgComponentConfig-output1.root
-hadd compression setting for all output: 1
+hadd compression setting for all output: 101
 hadd Source file 1: AsgComponentConfig-input1.root
 hadd Source file 2: AsgComponentConfig-input2.root
 hadd Target path: AsgComponentConfig-output1.root:/
