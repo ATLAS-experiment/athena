@@ -303,9 +303,9 @@ namespace ActsTrk
 
   StatusCode CoreStripSpacePointFormationTool::fillSpacePoints(const EventContext &ctx,
 							       std::shared_ptr<Acts::SpacePointBuilder<StripSP>> spBuilder,
-							       std::array<const InDetDD::SiDetectorElement *,nNeighbours> elements,
-							       std::array<std::vector<std::pair<ATLASUncalibSourceLink, size_t>>,nNeighbours> sourceLinks,
-							       std::array<double, 14> overlapExtents,
+							       const std::array<const InDetDD::SiDetectorElement *,nNeighbours>& elements,
+							       const std::array<std::vector<std::pair<ATLASUncalibSourceLink, size_t>>,nNeighbours>& sourceLinks,
+							       const std::array<double, 14>& overlapExtents,
 							       const Amg::Vector3D &beamSpotVertex,
 							       std::vector<StripSP>& spacePoints,
 							       std::vector<StripSP>& overlapSpacePoints ) const
