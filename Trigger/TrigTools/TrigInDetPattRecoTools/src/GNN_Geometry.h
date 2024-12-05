@@ -57,7 +57,8 @@ public:
 
   int num_bins() const {return m_nEtaBins;}
   unsigned int num_layers() const {return m_layArray.size();}
-
+  const std::vector<std::pair<int, std::vector<int> > >& bin_groups() const {return m_binGroups;}
+  
 protected:
 
   const TrigFTF_GNN_Layer* addNewLayer(const TrigInDetSiLayer&, int);
@@ -66,9 +67,11 @@ protected:
 
   std::map<unsigned int, TrigFTF_GNN_Layer*> m_layMap;
   std::vector<TrigFTF_GNN_Layer*> m_layArray;
-
+  
   int m_nEtaBins;
 
+  std::vector<std::pair<int, std::vector<int> > > m_binGroups;
+  
 };
 
 

@@ -14,7 +14,7 @@
 #include<cstring>
 #include<algorithm>
 
-TrigFTF_GNN_EtaBin::TrigFTF_GNN_EtaBin() {
+TrigFTF_GNN_EtaBin::TrigFTF_GNN_EtaBin() : m_minRadius(0), m_maxRadius(0) {
 
   m_in.clear();
   m_vn.clear();
@@ -54,6 +54,8 @@ void TrigFTF_GNN_EtaBin::sortByPhi() {
 }
 
 void TrigFTF_GNN_EtaBin::initializeNodes() {
+
+  if(m_vn.empty()) return;
   
   m_params.resize(m_vn.size());
   
@@ -68,6 +70,11 @@ void TrigFTF_GNN_EtaBin::initializeNodes() {
     m_params[nIdx][3] = pN->r();
     m_params[nIdx][4] = pN->z();
   }
+  
+  auto [min_iter, max_iter] = std::minmax_element(m_vn.begin(), m_vn.end(),
+						  [](const TrigFTF_GNN_Node* s, const TrigFTF_GNN_Node* s1) { return (s->r() < s1->r()); });
+  m_maxRadius = (*max_iter)->r();
+  m_minRadius = (*min_iter)->r();
 }
 
 void TrigFTF_GNN_EtaBin::generatePhiIndexing(float dphi) {
