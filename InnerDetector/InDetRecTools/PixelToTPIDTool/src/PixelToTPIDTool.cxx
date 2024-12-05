@@ -65,7 +65,7 @@ StatusCode InDet::PixelToTPIDTool::initialize() { //Rebecca - modify this line t
     //  return StatusCode::FAILURE;
     //}
 
-    TFile *file = TFile::Open("/afs/cern.ch/user/r/rhicks/private/clusterPixeldEdx2Athena/test-cool-file.root");
+    TFile *file = TFile::Open("/afs/cern.ch/user/r/rhicks/private/clusterPixeldEdx2Athena/test-cool-file-v2.root");
     if (!file || !file->IsOpen()) {
       ATH_MSG_ERROR("Rebecca - Failed to open ROOT file");
       return StatusCode::FAILURE;
@@ -104,7 +104,7 @@ StatusCode InDet::PixelToTPIDTool::initialize() { //Rebecca - modify this line t
     // Close the file after loading data
     file->Close();
 
-    ATH_MSG_INFO("Rebecca - Loaded ScaleFactor data into map with " << m_scaleFactorMap.size() << " entries.");
+    ATH_MSG_INFO("Rebecca - Loaded ScaleFactor data  v2 into map with " << m_scaleFactorMap.size() << " entries.");
 
   //Rebecca - End modifications 
   ATH_CHECK(AthAlgTool::initialize());
@@ -140,13 +140,13 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
                              int& nUsedIBLOverflowHits) const
 {
 
-  ATH_MSG_INFO("Rebecca was here."); //Rebecca edits
+  //ATH_MSG_INFO("Rebecca was here."); //Rebecca edits
   int queryRun = 1;     // Example Run
-  int queryLayer = 1; // Example Layer
-  int queryEta = 1;   // Example Eta
-  auto key = std::make_tuple(queryRun, queryLayer, queryEta);
-  auto it = m_scaleFactorMap.find(key);
-  ATH_MSG_INFO(it->second); //Rebecca edits
+  //int queryLayer = 1; // Example Layer
+  //int queryEta = 1;   // Example Eta
+  //auto key = std::make_tuple(queryRun, queryLayer, queryEta);
+  //auto it = m_scaleFactorMap.find(key);
+  //ATH_MSG_INFO(it->second); //Rebecca edits
   unsigned int pixelhits = 0;
   nUsedHits=0;
   nUsedIBLOverflowHits=0;
@@ -189,7 +189,17 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
           int bec=m_pixelid->barrel_ec(pixclus->identify());
           int layer=m_pixelid->layer_disk(pixclus->identify());
           int eta_module=m_pixelid->eta_module(pixclus->identify());//check eta module to select thickness
-
+          // ATH_MSG_INFO("What are the eta and layer values? - Rebecca ");
+          // ATH_MSG_INFO(layer);
+          // ATH_MSG_INFO(eta_module);
+          int queryLayer = layer; // Example Layer
+          int queryEta = abs(eta_module);   // Example Eta 
+          auto key = std::make_tuple(queryRun, queryLayer, queryEta); //Rebecca Edits
+          auto it = m_scaleFactorMap.find(key);
+          float scaleFactor = it->second;
+          ATH_MSG_INFO("Rebecca - Yup, here it is: ");
+          ATH_MSG_INFO(scaleFactor);
+           //End of REbecca edits
           float dotProd = (*tsosIter)->trackParameters()->momentum().dot(
             (*tsosIter)->trackParameters()->associatedSurface().normal());
           float cosalpha =
@@ -197,7 +207,7 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
 
           if (std::abs(cosalpha)<0.16) { continue; }
 
-          float charge=pixclus->prepRawData()->totalCharge()*cosalpha;
+          float charge=pixclus->prepRawData()->totalCharge()*cosalpha*scaleFactor;
 
           //keep track if this is an ibl cluster with overflow
           int iblOverflow=0;
@@ -224,7 +234,7 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
                 (fabs(locy) < 10. &&
                  (locx > -8.33 &&
                   locx < 8.3))) { // check if IBL 3D and good cluster selection
-              dEdxValue = charge * m_conversionfactor / IBL_3D_sensorthickness;
+              dEdxValue = charge * m_conversionfactor/IBL_3D_sensorthickness;
               dEdxMap.insert(std::pair<float, int>(dEdxValue, iblOverflow));
               pixelhits++;
               if (iblOverflow == 1) {
@@ -236,7 +246,7 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
                          locx < 8.3))) { // check if IBL planar and good cluster
                                          // selection
               dEdxValue =
-                charge * m_conversionfactor / IBL_PLANAR_sensorthickness;
+                charge * m_conversionfactor/ IBL_PLANAR_sensorthickness;
               dEdxMap.insert(std::pair<float, int>(dEdxValue, iblOverflow));
               pixelhits++;
               if (iblOverflow == 1) {
