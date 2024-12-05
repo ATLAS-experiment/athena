@@ -47,7 +47,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
   if(argc<2) {
     std::cerr << "usage: " << argv[0] << " [-s, --showsize] [-c, --checkevents] [-l, --listevents] [-m, --maxevents] files ..." 
 	      << std::endl;
-    std::exit(1);
+    return 1;
   }
 
   uint64_t totalSize=0;
@@ -89,7 +89,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
 
   if (!fileNames.size()) {
     std::cout << "ERROR: No file names set" << std::endl;
-    return -1;
+    return 1;
   }
 
   //start loop over files
@@ -98,12 +98,13 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
     std::unique_ptr<EventStorage::DataReader> pDR(pickDataReader(fName));
 
     if(!pDR) {
-      std::cout << "Problem opening or reading this file!\n";
-      return -1;
+      std::cerr << "Problem opening or reading this file!\n";
+      return 1;
     }
 
     if(!pDR->good()) {
       std::cout << "No events in file "<< fName << std::endl;
+      return 1;
     }
 
     //Print file summary
@@ -135,8 +136,8 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
       DRError ecode = pDR->getData(eventSize,&buf);
       std::unique_ptr<uint32_t[]> fragment(reinterpret_cast<uint32_t*>(buf));
       if(DROK != ecode) {
-	      std::cout << "Can't read from file!" << std::endl;
-	      break;
+	      std::cerr << "Can't read from file!" << std::endl;
+	      return 1;
       }
       
       // make a fragment with eformat 3.0 and check it's validity
@@ -158,8 +159,13 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
 	  fragment = std::move(newFragment);
 	}
 	FullEventFragment<const uint32_t*> fe(fragment.get());
-      
-	if (checkevents) fe.check_tree();
+
+  if (checkevents) {
+    if (!fe.check_tree()) {
+      std::cerr << "Event " << eventCounter << " failed check_tree" << std::endl;
+      return 1;
+    }
+  }
 	totalSize+=fe.readable_payload_size_word()*sizeof(uint32_t);
 	const uint64_t eventNo=fe.global_id();
 	const uint32_t runNo=fe.run_no();
@@ -194,16 +200,21 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
 	}//end if showSizes
       }
       catch (eformat::Issue& ex) {
-	std::cerr << "Uncaught eformat issue: " << ex.what() << std::endl;
+        std::cerr << "Uncaught eformat issue: " << ex.what() << std::endl;
+        return 1;
       }
       catch (ers::Issue& ex) {
-	std::cerr << "Uncaught ERS issue: " << ex.what() << std::endl;
+        std::cerr << "Uncaught ERS issue: " << ex.what() << std::endl;
+        return 1;
+
       }
       catch (std::exception& ex) {
-	std::cerr << "Uncaught std exception: " << ex.what() << std::endl;
+        std::cerr << "Uncaught std exception: " << ex.what() << std::endl;
+        return 1;
       }
       catch (...) {
-	std::cerr << std::endl << "Uncaught unknown exception" << std::endl;
+        std::cerr << std::endl << "Uncaught unknown exception" << std::endl;
+        return 1;
       }
       
       // end event processing 
