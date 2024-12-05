@@ -18,7 +18,7 @@ namespace ActsTrk {
 
    using DetectorElementKey=unsigned int;
    constexpr unsigned int DETELEMENT_TYPE_SHIFT = 28;
-   constexpr unsigned int DETELEMENT_HASH_MASK = ~(1<<31|1<<30|1<<29|1<<28);
+   constexpr unsigned int DETELEMENT_HASH_MASK = ~(1u<<31|1u<<30|1u<<29|1u<<28);
    inline
    DetectorElementKey makeDetectorElementKey(xAOD::UncalibMeasType meas_type, unsigned int identifier_hash) {
       assert( sizeof(xAOD::UncalibMeasType) <= sizeof(std::size_t) );
