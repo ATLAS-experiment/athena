@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1MissingEtSystems )
@@ -26,3 +26,6 @@ atlas_add_library( VP1MissingEtSystems VP1MissingEtSystems/*.h src/*.h src/*.cxx
                    LINK_LIBRARIES ${COIN3D_LIBRARIES} VP1Base GL
                    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} MissingETEvent VP1Utils )
 
+# Enable Qt support for cppcheck:
+set_property( TARGET VP1MissingEtSystems
+   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )

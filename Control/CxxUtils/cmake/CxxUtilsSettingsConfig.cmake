@@ -47,9 +47,7 @@ set( CMAKE_CPPCHECK_DEFAULT
    "--library=googletest"
    "--library=posix"
    "--library=python"
-   "--library=qt"
+   # Athena-specific config and suppression file
+   "--library=${_baseDir}/cppcheck_athena.cfg"
+   "--suppressions-list=${_baseDir}/cppcheck_suppress.txt"
    CACHE STRING "cppcheck command line options" FORCE )
-
-# Athena-specific config and suppression file:
-list( APPEND CMAKE_CPPCHECK_DEFAULT "--library=${_baseDir}/cppcheck_athena.cfg" )
-list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppressions-list=${_baseDir}/cppcheck_suppress.txt" )

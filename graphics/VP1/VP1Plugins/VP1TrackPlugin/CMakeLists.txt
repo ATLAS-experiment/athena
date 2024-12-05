@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1TrackPlugin )
@@ -17,3 +17,7 @@ atlas_add_library( VP1TrackPlugin VP1TrackPlugin/*.h src/*.cxx
    LINK_LIBRARIES Qt5::Core Qt5::Gui Qt5::Widgets
    PRIVATE_LINK_LIBRARIES VP1Base VP1PlugUtils VP1GeometrySystems VP1GuideLineSystems VP1PRDSystems VP1RawDataSystems VP1SimHitSystems VP1TrackSystems VP1VertexSystems
 )
+
+# Enable Qt support for cppcheck:
+set_property( TARGET VP1TrackPlugin
+   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )

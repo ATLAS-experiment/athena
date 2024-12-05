@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1GeometrySystems )
@@ -37,6 +37,11 @@ atlas_add_library( VP1GeometrySystems
    INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
    LINK_LIBRARIES ${COIN3D_LIBRARIES} ${GEOMODEL_LIBRARIES} MuonReadoutGeometry TruthUtils xAODTruth VP1Base GL Qt5::Core Qt5::Widgets
    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} GeoModelUtilities VP1HEPVis VP1Utils Qt5::Gui )
+
+# Enable Qt support for cppcheck:
+set_property( TARGET VP1GeometrySystems
+   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+
 endif()
 if(BUILDVP1LIGHT)
 # Files

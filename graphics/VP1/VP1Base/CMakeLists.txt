@@ -37,3 +37,7 @@ atlas_add_library( VP1Base VP1Base/*.h src/*.cxx src/*.qrc
    PRIVATE_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}
    LINK_LIBRARIES ${QT5_LIBRARIES} ${SOQT_LIBRARIES} ${COIN3D_LIBRARIES} ${GEOMODEL_LIBRARIES} GeoPrimitives xAODBase
    PRIVATE_LINK_LIBRARIES VP1HEPVis )
+
+# Enable Qt support for cppcheck:
+set_property( TARGET VP1Base
+   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )

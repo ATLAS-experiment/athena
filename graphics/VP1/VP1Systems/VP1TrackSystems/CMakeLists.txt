@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1TrackSystems )
@@ -22,3 +22,7 @@ atlas_add_library( VP1TrackSystems VP1TrackSystems/*.h src/*.cxx
    PRIVATE_INCLUDE_DIRS ${COIN3D_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}
    LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AtlasHepMCLib GaudiKernel GeneratorObjects GeoPrimitives TrackRecordLib TrkDetDescrInterfaces TrkEventPrimitives TrkParameters TrkSurfaces VP1Base VP1Utils xAODTracking Qt5::Core Qt5::Gui
    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} ${COIN3D_LIBRARIES} ActsEventLib AthContainers AtlasDetDescr EventPrimitives ForwardRegion_SimEv InDetIdentifier InDetPrepRawData InDetRIO_OnTrack InDetReadoutGeometry InDetSimEvent MuonChamberT0s MuonIdHelpersLib MuonPrepRawData MuonRIO_OnTrack MuonReadoutGeometry MuonRecHelperToolsLib MuonSegment MuonSimEvent Particle PixelReadoutGeometryLib SCT_ReadoutGeometry StoreGateLib TRT_ReadoutGeometry TrkCompetingRIOsOnTrack TrkDetElementBase TrkExInterfaces TrkFitterInterfaces TrkMaterialOnTrack TrkMeasurementBase TrkPrepRawData TrkPseudoMeasurementOnTrack TrkRIO_OnTrack TrkSegment TrkTrack TrkTrackSummary TrkVolumes VP1GuideLineSystems VP1HEPVis VP1PRDSystems )
+
+# Enable Qt support for cppcheck:
+set_property( TARGET VP1TrackSystems
+   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )

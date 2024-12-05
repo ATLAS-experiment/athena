@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1Utils )
@@ -32,6 +32,11 @@ atlas_add_library( VP1Utils VP1Utils/*.h src/*.cxx src/*.cpp
    InDetReadoutGeometry PixelReadoutGeometryLib SCT_ReadoutGeometry TRT_ReadoutGeometry InDetRIO_OnTrack LArReadoutGeometry
    MuonReadoutGeometry MuonRIO_OnTrack TileDetDescr TrkSurfaces
    TrkRIO_OnTrack VP1HEPVis )
+
+# Enable Qt support for cppcheck:
+set_property( TARGET VP1Utils
+   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+
 endif()
 if(BUILDVP1LIGHT)
 # Files

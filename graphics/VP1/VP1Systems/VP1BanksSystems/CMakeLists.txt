@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1BanksSystems )
@@ -18,3 +18,7 @@ atlas_add_library( VP1BanksSystems
    PRIVATE_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}
    LINK_LIBRARIES VP1Base
    PRIVATE_LINK_LIBRARIES AthenaKernel GaudiKernel VP1Utils )
+
+# Enable Qt support for cppcheck:
+set_property( TARGET VP1BanksSystems
+   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
