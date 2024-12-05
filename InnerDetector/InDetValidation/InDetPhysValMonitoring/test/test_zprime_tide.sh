@@ -45,7 +45,6 @@ run Digi_tf.py \
     --maxEvents -1 \
     --outputRDOFile $rdo \
     --preInclude 'HITtoRDO:Campaigns.MC23dNoPileUp' \
-    --preInclude 'HITtoRDO:Campaigns.MC23NoPileUp' \
     --postInclude 'PyJobTransforms.UseFrontier'
 echo "art-result: $? digi"
 
@@ -73,7 +72,7 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
   echo "compare with fixed reference"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_idtide \
-    -c ${dcubeXml_idtide} \
+    -c ${dcubeXmlAbsPath} \
     -r ${dcubeRef_idtide} \
     physval_idtide.ntuple.root
   echo "art-result: $? shifter_plots_idtide"
@@ -81,7 +80,7 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
   echo "compare with last build"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_idtide_last \
-    -c ${dcubeXml_idtide} \
+    -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/physval_idtide.ntuple.root \
     physval_idtide.ntuple.root
   echo "art-result: $? shifter_plots_idtide_last"
