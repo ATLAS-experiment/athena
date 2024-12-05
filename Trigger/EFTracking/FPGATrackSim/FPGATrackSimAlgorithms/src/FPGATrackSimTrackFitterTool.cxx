@@ -11,8 +11,10 @@
 #include <fstream>
 
 /////////////////////////////////////////////////////////////////////////////
-FPGATrackSimTrackFitterTool::FPGATrackSimTrackFitterTool(const std::string& algname, const std::string& name, const IInterface *ifc) :
-  AthAlgTool(algname,name,ifc)
+FPGATrackSimTrackFitterTool::FPGATrackSimTrackFitterTool(const std::string& type,
+							const std::string& name,
+							const IInterface* parent)
+  : FPGATrackSimTrackingToolBase(type, name, parent)
 {
 }
 
@@ -24,6 +26,7 @@ StatusCode FPGATrackSimTrackFitterTool::initialize()
 
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
     ATH_CHECK(m_FPGATrackSimBank.retrieve());
+    if (m_useSpacePoints) ATH_CHECK(m_spRoadFilterTool.retrieve(EnableTool{m_spRoadFilterTool}));
 
     const FPGATrackSimFitConstantBank* nominalbank;
     std::vector<const FPGATrackSimFitConstantBank*> bankvec;
@@ -78,9 +81,9 @@ StatusCode FPGATrackSimTrackFitterTool::initialize()
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-StatusCode FPGATrackSimTrackFitterTool::getTracks(const std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads, std::vector<FPGATrackSimTrack>& tracks) {
+StatusCode FPGATrackSimTrackFitterTool::getTracks(std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads, std::vector<FPGATrackSimTrack>& tracks) {
     // elaborate the next event
-
+    ATH_CHECK(setRoadSectors(roads));
     int status = m_tfpobj->fitTracks(roads,tracks);
     if (status != FITTRACKS_OK) return StatusCode::FAILURE;
 

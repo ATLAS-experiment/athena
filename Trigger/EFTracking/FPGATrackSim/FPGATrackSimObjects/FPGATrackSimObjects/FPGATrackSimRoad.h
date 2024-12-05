@@ -97,7 +97,7 @@ public:
     int getEtaPatternID() const { return m_etaPatternID; }
 
     const std::vector<std::shared_ptr<const FPGATrackSimHit>> &getHits(size_t layer) const { return m_hits_trans.at(layer); }
-
+    const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> &getAllHits() const { return m_hits_trans; }
     std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> getHits_flat() const;
 
     ///////////////////////////////////////////////////////////////////////
