@@ -946,7 +946,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::fillRelevantFeatures(ConvProxySet_t &co
     if (proxy->te != nullptr)
     {
 
-      for (HLT::TriggerElement::FeatureAccessHelper helper : proxy->te->getFeatureAccessHelpers())
+      for (const HLT::TriggerElement::FeatureAccessHelper& helper : proxy->te->getFeatureAccessHelpers())
       {
         auto [sgKey, sgCLID, sgName] = getSgKey(run2Nav, helper);
         if (sgKey != 0)
@@ -1032,7 +1032,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::fillRelevantTracks(ConvProxySet_t &conv
 {
   for (auto &proxy : convProxies)
   {
-    for (HLT::TriggerElement::FeatureAccessHelper helper : proxy->te->getFeatureAccessHelpers())
+    for (const HLT::TriggerElement::FeatureAccessHelper& helper : proxy->te->getFeatureAccessHelpers())
     {
       if (helper.getCLID() == m_TrackParticleContainerCLID || helper.getCLID() == m_TauTrackContainerCLID)
       {
