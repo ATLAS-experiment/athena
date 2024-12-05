@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHEXSTOREGATEEXAMPLE_TUTORIAL_MYDATAOBJ_H
@@ -7,6 +7,8 @@
 
 //sample data class for the Read/Write example
 //it just wraps an int. Notice that is does not inherit from Gaudi DataObject
+
+#include <iostream>
 
 namespace SGTutorial {
 
@@ -23,7 +25,6 @@ namespace SGTutorial {
   private:
     int m_val;
   };
-#include <iostream>
   inline std::ostream& operator<<(std::ostream& ost, const MyDataObj& rhs) {
     ost << "Val: " << rhs.val(); 
     return ost;
