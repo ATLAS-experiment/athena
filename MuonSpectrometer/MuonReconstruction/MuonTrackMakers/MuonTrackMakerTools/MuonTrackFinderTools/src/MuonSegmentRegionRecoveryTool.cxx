@@ -170,11 +170,11 @@ namespace Muon {
         std::vector<IdentifierHash> crossed;
 
         if (type == MDT && m_regsel_mdt->lookup(ctx)) m_regsel_mdt->lookup(ctx)->HashIDList(roi, crossed);
-        if (type == CSC && m_regsel_mdt->lookup(ctx)) m_regsel_csc->lookup(ctx)->HashIDList(roi, crossed);
-        if (type == RPC && m_regsel_mdt->lookup(ctx)) m_regsel_rpc->lookup(ctx)->HashIDList(roi, crossed);
-        if (type == TGC && m_regsel_mdt->lookup(ctx)) m_regsel_tgc->lookup(ctx)->HashIDList(roi, crossed);
-        if (type == STGC && m_regsel_mdt->lookup(ctx)) m_regsel_stgc->lookup(ctx)->HashIDList(roi, crossed);
-        if (type == MM && m_regsel_mdt->lookup(ctx)) m_regsel_mm->lookup(ctx)->HashIDList(roi, crossed);
+        if (type == CSC && m_regsel_csc->lookup(ctx)) m_regsel_csc->lookup(ctx)->HashIDList(roi, crossed);
+        if (type == RPC && m_regsel_rpc->lookup(ctx)) m_regsel_rpc->lookup(ctx)->HashIDList(roi, crossed);
+        if (type == TGC && m_regsel_tgc->lookup(ctx)) m_regsel_tgc->lookup(ctx)->HashIDList(roi, crossed);
+        if (type == STGC && m_regsel_stgc->lookup(ctx)) m_regsel_stgc->lookup(ctx)->HashIDList(roi, crossed);
+        if (type == MM && m_regsel_mm->lookup(ctx)) m_regsel_mm->lookup(ctx)->HashIDList(roi, crossed);
 
         for (std::vector<IdentifierHash>::iterator it = crossed.begin(); it != crossed.end(); ++it) {
             if (!exclusion.count(*it) && !hashes.count(*it)) {
