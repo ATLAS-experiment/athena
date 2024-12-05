@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s)
@@ -9,7 +9,6 @@
 
 // Core include(s):
 #include "AthLinks/ElementLink.h"
-#include "AthContainers/Accessor.h"
 
 // EDM include(s):
 #include "xAODTruth/TruthVertex.h"
@@ -159,37 +158,17 @@ BuildTruthTaus::buildTruthTausFromTruthParticles(TruthTausEvent& truthTausEvent)
 
   bool copyDressedPhotons = false;
 
-  static const SG::Accessor<char> dressedPhotonAcc ("dressedPhoton");
-
-  bool copyDressedPhotons = false;
   for (auto xTruthParticle : *truthTausEvent.m_xTruthParticleContainer)
   {
     if ( xTruthParticle->isTau() )
     {
-      auto xTruthTau = std::make_unique<xAOD::TruthParticle>();
+      xAOD::TruthParticle* xTruthTau = new xAOD::TruthParticle();
       xTruthTau->makePrivateStore( *xTruthParticle );
 
       if ( examineTruthTau(*xTruthTau).isFailure() )
       {
+        delete xTruthTau;
         continue;
-      }
-
-      // The dressedPhoton decoration will likely be unlocked and thus will
-      // not be copied by the above.  Copy it explicitly in that case.
-      // See ATLASRECTS-8008.
-      // First time through the loop we check to see if the decoration
-      // needs to be copied and remember for subsequent iterations
-      // (during which the destination decoration will have already
-      // been created).
-      if (truthTausEvent.m_xTruthTauContainer->empty() &&
-          dressedPhotonAcc.isAvailable ( *xTruthParticle ) &&
-          !dressedPhotonAcc.isAvailable ( *xTruthTau ))
-      {
-        copyDressedPhotons = true;
-      }
-      if (copyDressedPhotons)
-      {
-        dressedPhotonAcc( *xTruthTau ) = dressedPhotonAcc( *xTruthParticle );
       }
 
       // Run classification
@@ -204,7 +183,7 @@ BuildTruthTaus::buildTruthTausFromTruthParticles(TruthTausEvent& truthTausEvent)
       static const SG::Accessor<ElementLink< xAOD::TruthParticleContainer > > accOriginalTruthParticle("originalTruthParticle");
       accOriginalTruthParticle(*xTruthTau) = lTruthParticleLink;
 
-      truthTausEvent.m_xTruthTauContainer->push_back(std::move(xTruthTau));
+      truthTausEvent.m_xTruthTauContainer->push_back(xTruthTau);
     }
   }
   return StatusCode::SUCCESS;
