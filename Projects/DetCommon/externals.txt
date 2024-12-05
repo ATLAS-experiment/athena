@@ -6,4 +6,4 @@
 # forbidden.
 
 # The version of atlas/atlasexternals to use:
-AtlasExternalsVersion = 2.1.32
+AtlasExternalsVersion = 2.1.33
