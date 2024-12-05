@@ -7267,12 +7267,20 @@ namespace Trk {
        */
       double dist = (beg.trackParameters()->position() - end.trackParameters()->position()).norm();
 
+      bool zStartValid = std::abs(beg.trackParameters()->position().z())<10000.;
+      if(!zStartValid){
+	ATH_MSG_DEBUG("Pathological track parameter well outside of detector");
+	ATH_MSG_DEBUG("Propagator might have issue with this, skipping");
+	ATH_MSG_VERBOSE("dumping track parameters " << *(beg.trackParameters()));
+      }
+
       /*
        * Only proceed to count holes if we have seen a measurement before (this
        * may include the starting track state, if it is a measurement) and the
-       * distance between start and end is at least 2.5 millimeters.
+       * distance between start and end is at least 2.5 millimeters
+       * and the z position is valid
        */
-      if (seen_meas && dist >= 2.5) {
+      if (seen_meas && dist >= 2.5 && zStartValid) {
         /*
          * First, we retrieve the hole data stored in the beginning state. Note
          * that this may very well be non-extant, but it is possible for the
