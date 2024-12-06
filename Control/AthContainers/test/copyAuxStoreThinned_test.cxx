@@ -20,6 +20,7 @@
 #include "CxxUtils/FloatCompressor.h"
 #include <vector>
 #include <iostream>
+#include <iomanip>
 #include <cassert>
 #include <bitset>
 
