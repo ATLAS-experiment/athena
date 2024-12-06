@@ -11,6 +11,10 @@
 # art-output: dcube*
 # art-html: dcube_idtide_last
 
+# Fix ordering of output in logfile
+exec 2>&1
+run() { (set -x; exec "$@") }
+
 relname="r24.0.65"
 
 lastref_dir=last_results
