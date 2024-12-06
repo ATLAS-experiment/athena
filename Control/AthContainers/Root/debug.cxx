@@ -17,6 +17,9 @@
 #include "AthContainers/tools/error.h"
 #include "AthContainersInterfaces/IConstAuxStore.h"
 #include "AthLinks/DataLinkBase.h"
+#ifndef XAOD_STANDALONE
+# include "SGTools/DataProxy.h"
+#endif
 #include "CxxUtils/StrFormat.h"
 #include <format>
 #include <vector>
