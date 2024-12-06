@@ -54,7 +54,7 @@ standardmods_ufo = (
 )
 
 clustermods      = ("ECPSFrac","ClusterMoments",) 
-truthmods        = ("PartonTruthLabel","TruthPartonDR","JetDeltaRLabel:5000", "JetGhostLabel")
+truthmods        = ("PartonTruthLabel","JetDeltaRLabel:5000", "JetGhostLabel")
 pflowmods        = ()
 
 
