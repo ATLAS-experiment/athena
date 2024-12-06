@@ -19,21 +19,11 @@
 
 using IdDict::get_bits;
 
-static bool isNumber(const std::string& str) 
-{
-    bool result = true;
-    for (unsigned int i=0; i<str.size(); ++i) {
-	if(!isdigit(str[i])) return (false);
-    }
-    if (0 == str.size()) return (false);
-    
-    return (result);
-}
+using IdDict::isNumber;
 
 IdDictDictionary::IdDictDictionary () 
     : 
     m_parent_dict(0),
-    //m_resolved_references(false),
     m_generated_implementation(false),
     m_do_checks(false),
     m_do_neighbours(true)

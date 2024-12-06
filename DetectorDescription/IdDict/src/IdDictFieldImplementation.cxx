@@ -15,9 +15,7 @@
 
 namespace{
   void tabify (int ntot_spaces, std::stringstream& str) { 
-      for (int i = 0; i < ntot_spaces; ++i) { 
-        str << " "; 
-      } 
+      str<<std::string(ntot_spaces,' ');
   } 
 }
 

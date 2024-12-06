@@ -15,15 +15,12 @@ class Range;
  
 class IdDictDictionaryRef : public IdDictRegionEntry { 
 public: 
-    IdDictDictionaryRef (); 
-    ~IdDictDictionaryRef (); 
-    void resolve_references (const IdDictMgr& idd,  
-                             IdDictDictionary& dictionary, 
+    IdDictDictionaryRef () = default;
+    ~IdDictDictionaryRef () = default; 
+    void resolve_references (const IdDictMgr& idd, IdDictDictionary& dictionary, 
                              IdDictRegion& region);  
-    void generate_implementation (const IdDictMgr& idd,  
-                                  IdDictDictionary& dictionary, 
-                                  IdDictRegion& region,
-                                  const std::string& tag = "");  
+    void generate_implementation (const IdDictMgr& idd, IdDictDictionary& dictionary, 
+                                  IdDictRegion& region, const std::string& tag = "");  
     void reset_implementation ();  
     bool verify () const;  
     Range build_range () const; 
