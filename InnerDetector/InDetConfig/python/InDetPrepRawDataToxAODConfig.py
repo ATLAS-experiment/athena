@@ -74,9 +74,11 @@ def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
     acc.merge(ITkPixelDCSCondStatusAlgCfg(flags))
     acc.merge(ITkPixelDCSCondTempAlgCfg(flags))
     acc.merge(ITkPixelDCSCondHVAlgCfg(flags))
-
-    from InDetConfig.PixelCalibAlgsConfig import ITkPixelChargeToTConversionCfg
-    acc.merge(ITkPixelChargeToTConversionCfg(flags))
+    
+    from TrkConfig.TrkConfigFlags import TrackingComponent
+    if TrackingComponent.AthenaChain in flags.Tracking.recoChain:
+        from InDetConfig.PixelCalibAlgsConfig import ITkPixelChargeToTConversionCfg
+        acc.merge(ITkPixelChargeToTConversionCfg(flags))
 
     if "PixelConditionsSummaryTool" not in kwargs:
         from PixelConditionsTools.ITkPixelConditionsSummaryConfig import ITkPixelConditionsSummaryCfg

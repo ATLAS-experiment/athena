@@ -79,7 +79,7 @@ StatusCode SeedToTrackCnvAlg::execute(const EventContext& context) const
       }
     }
   } 
-
+  
   std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(tracksContainer), 
   m_trackingGeometryTool->getGeometryContext(context).context(), context);
 
