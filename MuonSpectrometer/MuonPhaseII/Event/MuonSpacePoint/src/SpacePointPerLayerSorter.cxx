@@ -22,7 +22,7 @@ namespace MuonR4 {
 
         /// Sort space points by z
         std::ranges::stable_sort(hits, [](const SpacePoint* a, const SpacePoint*b){
-                        const double dZ = a->positionInChamber().z() < b->positionInChamber().z(); 
+                        const double dZ = a->positionInChamber().z() - b->positionInChamber().z(); 
                         if (std::abs(dZ) > 50.*Gaudi::Units::micrometer) {
                             return dZ < 0.;
                         }
