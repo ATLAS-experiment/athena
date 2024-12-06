@@ -34,14 +34,9 @@ from .Physics_pp_run3_v1 import (PhysicsStream,
                                                                  MuonMETGroup,
                                                                  MuonTauGroup,
                                                                  MinBiasGroup,
-                                                                 PrimaryLegGroup,
-                                                                 PrimaryPhIGroup,
-                                                                 PrimaryL1MuGroup,
                                                                  SupportGroup,
                                                                  SupportLegGroup,
                                                                  SupportPhIGroup,
-                                                                 TagAndProbeLegGroup,
-                                                                 TagAndProbePhIGroup,
                                                                  UnconvTrkGroup,
                                                                  METPhaseIStreamersGroup,
                                                                  EOFTLALegGroup,
@@ -51,6 +46,14 @@ from .Physics_pp_run3_v1 import (PhysicsStream,
                                                                  EOFL1MuGroup,
                                                                  EOFBPhysL1MuGroup,
                                                                  )
+
+# Some of the group names are modified for MC and Dev, see the MC menu or ATR-30593 for more info.
+from .MC_pp_run3_v1 import (PrimaryLegGroup,
+                            PrimaryPhIGroup,
+                            PrimaryL1MuGroup,
+                            TagAndProbeLegGroup,
+                            TagAndProbePhIGroup,
+                            )
 
 DevGroup = ['Development']
 
