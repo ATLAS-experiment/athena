@@ -103,7 +103,7 @@ def ISF_FastCaloSimParametrization_SimPreInclude(flags):
     #Frozen Showers
     flags.Sim.LArParameterization=LArParameterization.NoFrozenShowers
     flags.Sim.CalibrationRun=CalibrationRun.DeadLAr
-
+    flags.GeoModel.Align.LegacyConditionsAccess = False
 
 def PostIncludeISF_FastCaloSimParametrizationConditions(flags, cfg):
     from IOVDbSvc.IOVDbSvcConfig import addOverride
