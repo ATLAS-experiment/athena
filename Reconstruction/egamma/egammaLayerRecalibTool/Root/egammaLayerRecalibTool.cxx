@@ -255,7 +255,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     add_scale("acc_zee_r21_v0");
   }
   else if ("run2_alt_with_layer2_r21_Precision_lowmu"==tune) {
-    add_scale("layer2_alt_el_mu_comb_r21_v0");
+    add_scale("layer2_alt_el_mu_comb_r21_v0_fix");
     add_scale("ps_mu_r21_v0");
     add_scale("acc_zee_r21_v0_lowmu");
   }
@@ -490,7 +490,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
               new GetAmountHisto2DEtaCaloRunNumber(*histo_acc));
   }
   else if ("acc_zee_r21_v0_lowmu" == tune) {
-    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v10/egammaLayerRecalibTunes.root");
+    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v12/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
     TH2F* histo_acc = static_cast<TH2F*>(f.Get("hACC_Zee_rel21_lowmu"));
     assert(histo_acc);
@@ -641,7 +641,15 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     add_scale(new ScaleE1(InputModifier::ZEROBASED_ALPHA),
 	      new GetAmountHisto1DErrorDown(*histo));
   }
- else if("layer2_alt_el_mu_comb_r21_v0"==tune) {
+  else if("layer2_alt_el_mu_comb_r21_v0_fix"==tune) {
+    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v12/egammaLayerRecalibTunes.root");
+    TFile f(file.c_str());
+    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2_emu_run2_rel21_v0_fix"));
+    assert(histo);
+    add_scale(new ScaleE2(InputModifier::ONEBASED),
+         new GetAmountHisto1D(*histo));
+  }
+  else if("layer2_alt_el_mu_comb_r21_v0"==tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v8/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
     TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2_emu_run2_rel21_v0"));

@@ -65,7 +65,7 @@ namespace AtlasRoot {
     m_esmodel(egEnergyCorr::UNDEFINED)
   {
 
-    m_rootFileName = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v31/egammaEnergyCorrectionData.root");
+    m_rootFileName = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v34/egammaEnergyCorrectionData.root");
     
     if (m_rootFileName.empty()) {
       ATH_MSG_FATAL("cannot find configuration file");
@@ -697,9 +697,13 @@ namespace AtlasRoot {
         m_aS12Nom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v1/alphaS12_uncor")));           m_aS12Nom->SetDirectory(nullptr);
         m_daS12Cor.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2012c/dalphaS12_cor")));                 m_daS12Cor->SetDirectory(nullptr);
       }
-      else if (m_esmodel == egEnergyCorr::es2022_R21_Precision or m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu) {
-	m_aPSNom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2022_R21_Precision/alphaPS_uncor")));      m_aPSNom->SetDirectory(nullptr);
+      else if (m_esmodel == egEnergyCorr::es2022_R21_Precision) {
+        m_aPSNom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2022_R21_Precision/alphaPS_uncor")));      m_aPSNom->SetDirectory(nullptr);
         m_aS12Nom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2022_R21_Precision/alphaS12_uncor")));    m_aS12Nom->SetDirectory(nullptr);
+      }
+      else if (m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu){
+        m_aPSNom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2022_R21_Precision/alphaPS_uncor")));      m_aPSNom->SetDirectory(nullptr);
+        m_aS12Nom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2022_R21_Precision_lowmu/hE1E2_emu_run2_rel21_v0_fix")));    m_aS12Nom->SetDirectory(nullptr);
       }
       else {
         m_aPSNom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2012c/alphaPS_uncor")));                   m_aPSNom->SetDirectory(nullptr);
