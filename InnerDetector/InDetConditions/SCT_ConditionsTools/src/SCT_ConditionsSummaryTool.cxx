@@ -137,6 +137,15 @@ SCT_ConditionsSummaryTool::getDetectorElementStatus(const EventContext& ctx,
          }
       }
    }
+   if (element_status->getElementStatus().empty()) {
+      element_status->getElementStatus().resize( element_status->getDetectorElements().size(), true);
+   }
+   if (element_status->getElementChipStatus().empty()) {
+      element_status->getElementChipStatus().resize( element_status->getDetectorElements().size(), 0xffff);
+   }
+   if (element_status->getBadCells().empty()) {
+      element_status->getBadCells().resize( element_status->getDetectorElements().size());
+   }
    return element_status;
 }
 

@@ -124,7 +124,7 @@ namespace InDet {
   StatusCode SCT_ClusteringTool::initialize() {
     ATH_CHECK(m_clusterMaker.retrieve());
 
-    if (m_checkBadChannels) {
+    if (m_checkBadChannels && m_sctDetElStatus.empty()) {
       ATH_MSG_DEBUG("Clustering has been asked to look at bad channel info");
       ATH_CHECK(m_conditionsTool.retrieve());
     } else {
@@ -166,7 +166,7 @@ namespace InDet {
     }
 
     ATH_CHECK(m_SCTDetEleCollKey.initialize());
-    ATH_CHECK(m_sctDetElStatus.initialize( false /*!m_sctDetElStatus.empty()*/) );
+    ATH_CHECK(m_sctDetElStatus.initialize( !m_sctDetElStatus.empty()) );
 
     return StatusCode::SUCCESS;
   }
