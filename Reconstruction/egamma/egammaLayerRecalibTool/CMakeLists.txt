@@ -37,9 +37,6 @@ atlas_add_executable( egammaLayerRecalibTool_testmem
    util/egammaLayerRecalibTool_testmem.cxx
    LINK_LIBRARIES egammaLayerRecalibTool )
 
-
-
-
 # Test(s) in the package:
 if( XAOD_STANDALONE )
 
