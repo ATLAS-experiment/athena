@@ -98,9 +98,6 @@ protected:
 public:
    /// @return class ID.
    static const CLID& classID();
-
-private:
-   std::map<DataObject*, PERS*> m_persMap;
 };
 
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustCnv.icc"
