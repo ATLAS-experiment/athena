@@ -347,7 +347,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // This one we can do-- by passing in truth and offline tracks via storegate above.
     if (m_doHoughRootOutput) {
-      ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks));
+      ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_1st, m_writeOutNonSPStripHits, m_trackScoreCut, m_NumOfHitPerGrouping));
     }
 
     // Reset data pointers

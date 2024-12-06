@@ -119,7 +119,9 @@ _FPGATrackSimAlgorithmsArgs = [
     ("DoDeltaGPhis", trfArgClasses.argBool, "Do the track fitting based on the Hough transform, idealized geometry and delta phis"),
     ("outputHitTxt", trfArgClasses.argBool, "write out road hits to text file"),
     ("barcodeFracMatch", trfArgClasses.argFloat, "barcode fraction at which we accept a truth match"),
-    ("writeOutputData", trfArgClasses.argBool, "write out Tree in the output file")
+    ("writeOutputData", trfArgClasses.argBool, "write out Tree in the output file"),
+    ("writeOutNonSPStripHits", trfArgClasses.argBool, "Write tracks to RootOutput if they have strip hits which are not SPs"),
+    ("NumOfHitPerGrouping", trfArgClasses.argInt, "Number of minimum overlapping hits for a track candidate to be removed in the OR tool used in the HoughRootOutputTool"),
 ]
 
 _FPGATrackSimHoughTransformArgs = [

@@ -31,7 +31,9 @@ empty_tag = { # template to add a new tag, and some description of the fields
     'hough': None,
     'hough_d0phi0': None,
     'hough_1d': None,
-    'hough_rootoutput': None,
+    'hough_rootoutput': False,
+    'writeOutNonSPStripHits': True,
+    'NumOfHitPerGrouping': 1,
 
     # NN Track Filtering
     'TrackNNAnalysis': None,
@@ -134,6 +136,9 @@ FPGATrackSimAlgorithmTags = {
             'hough': False,
             'hough_1d': True,
             'hough_rootoutput': False,
+            'writeOutNonSPStripHits': True,
+            'NumOfHitPerGrouping': 1,
+
 
             # NN Track Filtering
             'TrackNNAnalysis': False,
@@ -226,6 +231,8 @@ FPGATrackSimAlgorithmTags = {
             'hough': True,
             'hough_1d': False,
             'hough_rootoutput': False,
+            'writeOutNonSPStripHits': True,
+            'NumOfHitPerGrouping': 1,
 
             # NN Filtering - toggle this one
             'TrackNNAnalysis': False,
@@ -346,6 +353,8 @@ FPGATrackSimAlgorithmTags = {
             'hough': False,
             'hough_1d': False,
             'hough_rootoutput': False,
+            'writeOutNonSPStripHits': True,
+            'NumOfHitPerGrouping': 1,
 
             # NN Filtering
             'TrackNNAnalysis' : False,

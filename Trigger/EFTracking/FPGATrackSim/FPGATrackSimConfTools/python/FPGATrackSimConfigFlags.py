@@ -89,6 +89,7 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('hough', True)
     cf.addFlag('hough1D', False)
     cf.addFlag('genScan', False)
+    cf.addFlag('NumOfHitPerGrouping', 5)
 
     cf.addFlag('etaPatternFilter', False)
     cf.addFlag('phiRoadFilter', False)    
