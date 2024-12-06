@@ -64,7 +64,8 @@ struct InDetRttPlotConfig{
 
   /// Efficiency plots - require truth, optionally
   /// matching reco 
-  bool doEffPlots{true}; 
+  bool doEffPlots{true};
+  bool doTechEffPlots{false};
 
   /// Resolution and "matched track" plots - 
   /// filled if both reco and truth exist

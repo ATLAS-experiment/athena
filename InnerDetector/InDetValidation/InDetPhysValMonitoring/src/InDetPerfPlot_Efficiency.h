@@ -26,7 +26,7 @@ class TEfficiency;
 ///class holding Pt plots for Inner Detector RTT Validation and implementing fill methods
 class InDetPerfPlot_Efficiency: public InDetPlotBase {
 public:
-  InDetPerfPlot_Efficiency(InDetPlotBase* pParent, const std::string& dirName);
+  InDetPerfPlot_Efficiency(InDetPlotBase* pParent, const std::string& dirName, bool doTechEff=false);
 
   void fill(const xAOD::TruthParticle& truth, const bool isGood, unsigned int truthMu, float actualMu, float weight);
 
@@ -88,6 +88,8 @@ private:
   TEfficiency* m_TrkRec_eta_d0{};
   TEfficiency* m_TrkRec_eta_prodR{};
   TEfficiency* m_TrkRec_eta_pT{};
+
+  bool m_doTechEff{false};
 
   // plot base has nop default implementation of this; we use it to book the histos
   void initializePlots();
