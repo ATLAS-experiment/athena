@@ -77,8 +77,13 @@ def InDetTrigPriVxFinderCfg(flags,
 
 def primaryVertexFindingCfg(flags,
                             name: str = "InDetPriVxFinder",
-                            vxCandidatesOutputName: str = "PrimaryVertices",
+                            vxCandidatesOutputName=None,
                             **kwargs) -> ComponentAccumulator:
+    if not vxCandidatesOutputName:
+        vxCandidatesOutputName = "PrimaryVertices"
+        from AthenaConfiguration.Enums import ProductionStep
+        if flags.Common.ProductionStep in [ProductionStep.MinbiasPreprocessing]:
+            vxCandidatesOutputName = f"{flags.Overlay.BkgPrefix}{vxCandidatesOutputName}"
 
     acc = InDetPriVxFinderCfg(flags,
                               name,

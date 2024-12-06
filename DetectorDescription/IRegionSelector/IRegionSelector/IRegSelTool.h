@@ -28,17 +28,14 @@
  * @brief 
  **/
 
-class IRegSelTool : virtual public IAlgTool, virtual public IRegSelLUT {
+class IRegSelTool : virtual public IAlgTool {
 
 public: 
 
   /// InterfaceID
   DeclareInterfaceID( IRegSelTool, 1, 0 ); 
 
-  //! @method lookup, actually retrieve the lookup table as conditions data
-  /// did this ever work ?? It is the wrong class for the calorimeter tables 
-  virtual const IRegSelLUT* lookup() const = 0;                                                                                                                              
-
+  /// the tools only return the lookup table now
   virtual const IRegSelLUT* lookup( const EventContext& ctx ) const = 0;
 
 };

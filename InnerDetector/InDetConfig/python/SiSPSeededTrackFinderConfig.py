@@ -38,8 +38,8 @@ def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs):
 
     kwargs.setdefault("useZBoundFinding",
                       flags.Tracking.ActiveConfig.doZBoundary)
-
-    if flags.Common.ProductionStep is ProductionStep.PileUpPretracking:
+    from AthenaConfiguration.Enums import ProductionStep
+    if flags.Common.ProductionStep in [ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:
         kwargs.setdefault("EventInfoKey", flags.Overlay.BkgPrefix + "EventInfo")
 
     # Heavy-ion config

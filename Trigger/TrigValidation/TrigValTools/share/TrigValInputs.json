@@ -195,7 +195,7 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/eos/atlas/atlascerngroupdisk/data-art/large-input/TriggerTest/mc23_13p6TeV.310772.CosmicRays_CollisionSetup.recon.RDO.s4261_s4260_r15236_tid36836491_00/RDO.36836491._001912.pool.root.1"
+            "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TriggerTest/mc23_13p6TeV.310772.CosmicRays_CollisionSetup.recon.RDO.s4261_s4260_r15236_tid36836491_00/RDO.36836491._001912.pool.root.1"
         ]
     },
     "Zmumu": {

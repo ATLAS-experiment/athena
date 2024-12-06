@@ -130,7 +130,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
     
     std::vector<IdentifierHash> listOfSctIds;
 
-    m_regsel_sct->HashIDList( internalRoI, listOfSctIds );
+    m_regsel_sct->lookup(ctx)->HashIDList( internalRoI, listOfSctIds );
 
     const std::vector<short>* h2l = m_layerNumberTool->sctLayers();
 
@@ -166,7 +166,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
     
     std::vector<IdentifierHash> listOfPixIds;
 
-    m_regsel_pix->HashIDList( internalRoI, listOfPixIds );
+    m_regsel_pix->lookup(ctx)->HashIDList( internalRoI, listOfPixIds );
 
     const std::vector<short>* h2l = m_layerNumberTool->pixelLayers();
 

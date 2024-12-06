@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/DecorKeyHelpers.h
@@ -57,7 +57,8 @@ std::string makeContDecorKey(const std::string& cont, const std::string& decor);
  *
  * Construct the StoreGate key from the associated container and the
  * decoration name passed in @c key. If the latter also contains the container
- * name, an exception will be raised if the name does not match @c contKey.
+ * name, an exception will be raised.  Returns an empty string if @c key
+ * is empty.
  */
 std::string makeContDecorKey(const VarHandleKey& contKey, const std::string& sgkey);
 

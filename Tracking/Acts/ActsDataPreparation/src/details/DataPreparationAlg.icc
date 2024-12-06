@@ -240,7 +240,7 @@ namespace ActsTrk {
     std::vector<IdentifierHash> listOfIds;
     for (const auto* roi : *roiCollection) {
       listOfIds.clear();
-      m_regionSelector->HashIDList(*roi, listOfIds);
+      m_regionSelector->lookup(ctx)->HashIDList(*roi, listOfIds);
       hashes.insert(listOfIds.begin(), listOfIds.end());
     }
     
