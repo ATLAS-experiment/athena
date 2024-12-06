@@ -8,8 +8,6 @@
  * @brief Helper for regression tests.
  */
 
-// cppcheck-suppress-file assertWithSideEffect; unit tests
-
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonReadoutGeometry/CscReadoutElement.h"
 #include "MuonReadoutGeometry/RpcReadoutElement.h"
@@ -260,7 +258,7 @@ MuonGM::MuonDetectorManager&  init_cs (GeoFullPhysVol& pvol1,
   StatusCode sc = cc->insert (range, std::move (muo_dd));
   assert (sc.isSuccess());
 
-  assert (condStore->record (std::move (cc), "MuonDetectorManager"));
+  if (condStore->record (std::move (cc), "MuonDetectorManager").isFailure()) std::abort();
 
   return ret;
 }
@@ -386,62 +384,62 @@ const MuonGM::MuonDetectorManager& make_dd ATLAS_NOT_THREAD_SAFE ()
 
   auto pix_id = std::make_unique<PixelID>();
   pix_id->initialize_from_dictionary (idd);
-  assert ( sg->record (std::move (pix_id), "PixelID") );
+  if (sg->record (std::move (pix_id), "PixelID").isFailure()) std::abort();
 
   auto sct_id = std::make_unique<SCT_ID>();
   sct_id->initialize_from_dictionary (idd);
-  assert ( sg->record (std::move (sct_id), "SCT_ID") );
+  if (sg->record (std::move (sct_id), "SCT_ID").isFailure()) std::abort();
 
   auto trt_id = std::make_unique<TRT_ID>();
   trt_id->initialize_from_dictionary (idd);
-  assert ( sg->record (std::move (trt_id), "TRT_ID") );
+  if (sg->record (std::move (trt_id), "TRT_ID").isFailure()) std::abort();
 
   auto csc_id = std::make_unique<CscIdHelper>();
   csc_id->initialize_from_dictionary (idd);
-  assert ( sg->record (std::move (csc_id), "CscIdHelper") );
+  if (sg->record (std::move (csc_id), "CscIdHelper").isFailure()) std::abort();
 
   auto rpc_id = std::make_unique<RpcIdHelper>();
   rpc_id->initialize_from_dictionary (idd);
-  assert ( sg->record (std::move (rpc_id), "RpcIdHelper") );
+  if (sg->record (std::move (rpc_id), "RpcIdHelper").isFailure()) std::abort();
 
   auto tgc_id = std::make_unique<TgcIdHelper>();
   tgc_id->initialize_from_dictionary (idd);
-  assert ( sg->record (std::move (tgc_id), "TgcIdHelper") );
+  if (sg->record (std::move (tgc_id), "TgcIdHelper").isFailure()) std::abort();
 
   auto mdt_id = std::make_unique<MdtIdHelper>();
   mdt_id->initialize_from_dictionary (idd);
-  assert ( sg->record (std::move (mdt_id), "MdtIdHelper") );
+  if (sg->record (std::move (mdt_id), "MdtIdHelper").isFailure()) std::abort();
 
   new MuonGM::sTGC_Technology ("sTG1-STS", ds);
   new MuonGM::sTGC_Technology ("sTGC_1", ds);
   auto stgc_id = std::make_unique<sTgcIdHelper>();
   stgc_id->initialize_from_dictionary (idd);
-  assert ( sg->record (std::move (stgc_id), "sTgcIdHelper") );
+  if (sg->record (std::move (stgc_id), "sTgcIdHelper").isFailure()) std::abort();
 
   auto mm_id = std::make_unique<MmIdHelper>();
   mm_id->initialize_from_dictionary (idd);
-  assert ( sg->record (std::move (mm_id), "MmIdHelper") );
+  if (sg->record (std::move (mm_id), "MmIdHelper").isFailure()) std::abort();
 
   auto atl_id = std::make_unique<AtlasDetectorID>();
   atl_id->initialize_from_dictionary (idd);
-  assert ( sg->record (std::move (atl_id), "AtlasID") );
+  if (sg->record (std::move (atl_id), "AtlasID").isFailure()) std::abort();
 
   auto pix_dd = std::make_unique<InDetDD::PixelDetectorManager>(sg);
-  assert ( sg->record (std::move (pix_dd), "Pixel") );
+  if (sg->record (std::move (pix_dd), "Pixel").isFailure()) std::abort();
 
   auto sct_dd = std::make_unique<InDetDD::SCT_DetectorManager>(sg);
-  assert ( sg->record (std::move (sct_dd), "SCT") );
+  if (sg->record (std::move (sct_dd), "SCT").isFailure()) std::abort();
 
   auto trt_dd = std::make_unique<InDetDD::TRT_DetectorManager>(sg);
-  assert ( sg->record (std::move (trt_dd), "TRT") );
+  if (sg->record (std::move (trt_dd), "TRT").isFailure()) std::abort();
 
   auto id_mgr = std::make_unique<IdDictManager>(idd);
-  assert ( sg->record (std::move (id_mgr), "IdDict") );
+  if (sg->record (std::move (id_mgr), "IdDict").isFailure()) std::abort();
 
   MuonGM::MuonDetectorManager& ret = init_cs (*pvol1, *pvol4);
   // Some components still expect to get this through DetectorStore.
   // Has to be the same instance, or the detelement comparisons will fail.
-  assert ( sg->record (&ret, "MuonDetectorManager") );
+  if (sg->record (&ret, "MuonDetectorManager").isFailure()) std::abort();
 
   return ret;
 }
