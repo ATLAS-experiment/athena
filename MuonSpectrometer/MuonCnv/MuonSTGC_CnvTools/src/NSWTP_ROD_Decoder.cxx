@@ -105,7 +105,7 @@ StatusCode NSWTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::
     for(uint i_packetIndex = 0; i_packetIndex<pad_packets.size(); i_packetIndex++){
       const STGTPPadPacket& pad_packet = pad_packets.at(i_packetIndex);
       for(uint i_candidateIndex=0; i_candidateIndex < 4; i_candidateIndex++){ // we have at most 4 candidates in the input
-        if(pad_packet.BandID(i_candidateIndex) == 255 && pad_packet.PhiID(i_candidateIndex) == 63) continue; // ignore candidates that the trigger processor flags as invalid
+        if(pad_packet.BandID(i_candidateIndex) == Muon::nsw::STGTPPad::pad_stream_invalid_band_id) continue; // ignore candidates that the trigger processor flags as invalid
         uint8_t candidateNumber = (i_packetIndex<<4) | i_candidateIndex;
         rdo->pad_candidateNumber().push_back(candidateNumber);
         rdo->pad_phiID().push_back(pad_packet.PhiID(i_candidateIndex));
@@ -124,7 +124,7 @@ StatusCode NSWTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::
       uint8_t i_candidateIndex{0};
        for (const STGTPSegmentPacket::SegmentData& payload : segment_packet.Segments()){
         // we have at most 8 candidates in the output
-        if(payload.dTheta == 16) {
+        if(payload.dTheta == Muon::nsw::STGTPSegments::merge_stream_invalid_dTheta) {
            ++i_candidateIndex;
            continue; // ignore candidates that the trigger processor flags as invalid
         }
@@ -159,8 +159,8 @@ StatusCode NSWTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::
       const STGTPMMPacket& mm_packet = mm_packets.at(i_packetIndex);
       uint8_t i_candidateIndex{0};
        for (const STGTPMMPacket::MMSegmentData& payload : mm_packet.Segments()){
-        // we have at most 8 candidates in the output
-        if(payload.dTheta == 16) {
+        // we have at most 8 candidates in the output - non valid segments marked with a bit, are already skipped
+        if(payload.dTheta == Muon::nsw::STGTPMMData::mm_stream_invalid_dTheta) {
            ++i_candidateIndex;
            continue; // ignore candidates that the trigger processor flags as invalid
         }

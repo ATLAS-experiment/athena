@@ -72,12 +72,13 @@ namespace Muon
       constexpr std::size_t size_v1         =                         96;
       constexpr std::size_t size_v2         =                         96;
       constexpr std::size_t size_v3         =                         128;
-      
+      constexpr int         pad_stream_invalid_band_id =              0xFF; 
     };
 
     namespace STGTPMMData {
        constexpr std::size_t num_mm =                    8;
        constexpr int mm_stream_header  =              0xC0CA;
+       constexpr int size_output_mm_valids =              8;
        constexpr int size_output_mm_monitor =             1;
        constexpr int size_output_mm_spare =               2;
        constexpr int size_output_mm_lowRes =              1;
@@ -87,11 +88,12 @@ namespace Muon
        constexpr int size_output_mm_rIndex =              8;
 
        constexpr int size_bcid             =                   12;
-       constexpr int size_v3_padding       =                   52;
+       constexpr int size_v3_padding       =                   44; // now we have the valid bits
 
        constexpr std::size_t size_v1         =                   0;
        constexpr std::size_t size_v2         =                   0;
        constexpr std::size_t size_v3         =                   256;
+       constexpr int         mm_stream_invalid_dTheta =          16;
 
     };    
  
@@ -118,8 +120,9 @@ namespace Muon
        constexpr std::size_t size_v1       =                   256;
        constexpr std::size_t size_v2       =                   256;
        constexpr std::size_t size_v3       =                   256;
-       constexpr std::size_t size_valid_segment_v3 =              8;
-      
+       constexpr std::size_t size_valid_segment_v3 =             8;
+       constexpr int         merge_stream_invalid_dTheta =       16;
+
       enum class MergedSegmentProperty {
           Monitor = fill_bitmask<uint32_t>(0, size_output_segment_monitor),
           Spare = fill_bitmask<uint32_t>(max_bit(Monitor) + 1, size_output_segment_spare),

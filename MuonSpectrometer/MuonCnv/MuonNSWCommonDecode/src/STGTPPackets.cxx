@@ -57,8 +57,11 @@ Muon::nsw::STGTPMMPacket::STGTPMMPacket(const std::vector<uint32_t>& payload, co
 
 
   decode(readPointer, Muon::nsw::STGTPMMData::size_v3_padding);
+  m_valids = decode(readPointer, Muon::nsw::STGTPMMData::size_output_mm_valids);
   for (std::size_t i = Muon::nsw::STGTPMMData::num_mm; i > 0; --i) {
     const auto index = i - 1;
+    uint32_t segment_bit = 1 << index;
+    uint32_t valid_segment = (m_valids & segment_bit);
     m_segmentData.at(index).monitor = decode(readPointer, Muon::nsw::STGTPMMData::size_output_mm_monitor);
     m_segmentData.at(index).spare = decode(readPointer, Muon::nsw::STGTPMMData::size_output_mm_spare);
     m_segmentData.at(index).lowRes = decode(readPointer, Muon::nsw::STGTPMMData::size_output_mm_lowRes);
@@ -66,6 +69,16 @@ Muon::nsw::STGTPMMPacket::STGTPMMPacket(const std::vector<uint32_t>& payload, co
     m_segmentData.at(index).dTheta = decode(readPointer, Muon::nsw::STGTPMMData::size_output_mm_dTheta);
     m_segmentData.at(index).phiID = decode(readPointer, Muon::nsw::STGTPMMData::size_output_mm_phiID);
     m_segmentData.at(index).rIndex = decode(readPointer, Muon::nsw::STGTPMMData::size_output_mm_rIndex);
+    if (!valid_segment)
+    {
+	m_segmentData.at(index).monitor = 0;
+	m_segmentData.at(index).spare = 0;
+	m_segmentData.at(index).lowRes = 0;
+	m_segmentData.at(index).phiRes = 0;
+	m_segmentData.at(index).dTheta = Muon::nsw::STGTPMMData::mm_stream_invalid_dTheta; // this is the invalid flag
+	m_segmentData.at(index).phiID = 0;
+	m_segmentData.at(index).rIndex = 0;
+    }
  }
   m_BCID = decode(readPointer, Muon::nsw::STGTPMMData::size_bcid);
 
