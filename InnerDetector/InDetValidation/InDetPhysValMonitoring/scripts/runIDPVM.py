@@ -40,7 +40,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--requiredSiHits", help='Number of truth silicon hits', type=int, default=0)
     IDPVMparser.add_argument("--selectedCharge", help='Charge of selected truth particles (0=inclusive)', type=int, default=0)
     IDPVMparser.add_argument("--maxProdVertRadius", help='Maximum production radius for truth particles', type=float, default=300)
-    IDPVMparser.add_argument("--GRL", help='Which GRL(s) to use, if any, when running on data', choices=['2015', '2016', '2017', '2018', '2022'], nargs='+', default=[])
+    IDPVMparser.add_argument("--GRL", help='Which GRL(s) to use, if any, when running on data', choices=['2015', '2016', '2017', '2018', '2022', '2023', '2024'], nargs='+', default=[])
     IDPVMparser.add_argument("--validateExtraTrackCollections", help='List of extra track collection names to be validated in addition to Tracks.', nargs='+', default=[])
     IDPVMparser.add_argument("--doIDTIDE", help='run the output from IDTIDE derivation', action='store_true', default=False)
     IDPVMparser.add_argument("--doTechnicalEfficiency", help='fill the technical efficiency plot (requires additional si hit information in the input file)', action='store_true', default=False)
