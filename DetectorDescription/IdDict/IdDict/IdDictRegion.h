@@ -25,11 +25,9 @@ public:
     Range build_range () const; 
     void set_index (size_t index);
     void add_entry (IdDictRegionEntry* entry); 
-    void resolve_references (const IdDictMgr& idd, 
-                             IdDictDictionary& dictionary); 
-    void generate_implementation (const IdDictMgr& idd, 
-                                  IdDictDictionary& dictionary, 
-                                  const std::string& tag = "");  
+    void resolve_references (const IdDictMgr& idd, IdDictDictionary& dictionary); 
+    void generate_implementation (const IdDictMgr& idd, IdDictDictionary& dictionary, 
+            const std::string& tag = "");  
     void find_neighbours (const IdDictDictionary& dictionary);
     void reset_implementation ();  
     bool verify () const;  
@@ -68,4 +66,3 @@ protected:
 }; 
 
 #endif
-
