@@ -80,6 +80,9 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         Gaudi::Property<bool> m_doNNTrack  {this, "DoNNTrack", false, "Run NN track filtering"};
         Gaudi::Property<bool> m_writeOutputData  {this, "writeOutputData", true,"write the output TTree"};
         Gaudi::Property<float> m_trackScoreCut {this, "TrackScoreCut", 25.0, "Minimum track score (e.g. chi2 or NN)." };
+        Gaudi::Property<bool> m_writeOutNonSPStripHits {this, "writeOutNonSPStripHits", true, "Write tracks to RootOutput if they have strip hits which are not SPs"};
+        Gaudi::Property<int> m_NumOfHitPerGrouping { this, "NumOfHitPerGrouping", 5, "Number of minimum overlapping hits for a track candidate to be removed in the HoughRootOutputTool"};
+
 
         // Road filtering configuration, it isn't obvious to me if we want to allow these.
         Gaudi::Property<bool> m_filterRoads  {this, "FilterRoads", false, "enable first road filter"};

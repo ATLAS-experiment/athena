@@ -327,6 +327,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHitsProcessAlg.doOverlapRemoval = flags.Trigger.FPGATrackSim.doOverlapRemoval
     theFPGATrackSimLogicalHitsProcessAlg.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
     theFPGATrackSimLogicalHitsProcessAlg.DoHoughRootOutput = flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput
+    theFPGATrackSimLogicalHitsProcessAlg.NumOfHitPerGrouping = flags.Trigger.FPGATrackSim.ActiveConfig.NumOfHitPerGrouping
     theFPGATrackSimLogicalHitsProcessAlg.DoNNTrack = flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis
     theFPGATrackSimLogicalHitsProcessAlg.runOnRDO = not flags.Trigger.FPGATrackSim.wrapperFileName
     theFPGATrackSimLogicalHitsProcessAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionCfg(flags))

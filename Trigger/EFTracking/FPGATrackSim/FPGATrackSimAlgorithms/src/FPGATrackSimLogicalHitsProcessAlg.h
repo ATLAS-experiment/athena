@@ -104,6 +104,9 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         Gaudi::Property<bool> m_writeOutputData  {this, "writeOutputData", true,"write the output TTree"};
         Gaudi::Property<bool> m_runOnRDO {this,"runOnRDO", false, "case when runnin on RDO file (and not or wrapper)"};
         Gaudi::Property<float> m_trackScoreCut {this, "TrackScoreCut", 25.0, "Minimum track score (e.g. chi2 or NN)." };
+        Gaudi::Property<bool> m_writeOutNonSPStripHits {this, "writeOutNonSPStripHits", true, "Write tracks to RootOutput if they have strip hits which are not SPs"};
+        Gaudi::Property <int> m_NumOfHitPerGrouping { this, "NumOfHitPerGrouping", 5, "Number of minimum overlapping hits for a track candidate to be removed in the HoughRootOutputTool"};
+
 
         // Properties for the output header tool.
         Gaudi::Property<std::string> m_outputBranch     {this, "outputBranchName", "LogicalEventOutputHeader", "Name of the branch for output data in output ROOT file." };

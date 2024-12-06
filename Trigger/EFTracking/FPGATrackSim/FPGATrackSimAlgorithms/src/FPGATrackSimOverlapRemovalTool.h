@@ -18,12 +18,13 @@
 #include "FPGATrackSimObjects/FPGATrackSimTrack.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
+#include "FPGATrackSimHough/FPGATrackSimHoughFunctions.h"
+
 
 #include <string>
 #include <vector>
 #include <ostream>
 
-enum class ORAlgo {Normal, InvertGrouping};
 /**
 * @class FPGATrackSimOverlapRemovalTool
 * @brief Remove (mark) duplicate tracks
@@ -47,10 +48,6 @@ public:
   bool getDoSecondStage() const { return m_do2ndStage; }
   ORAlgo getAlgorithm() const {return m_algo;}
   //  Find the one track from the duplicate group with the minium Chi2 and maximum # of hits
-  void findMinChi2MaxHit(const std::vector<int>& duplicates, std::vector<FPGATrackSimTrack>& tracks);
-  //  Find number of common hits between two tracks
-  int findNCommonHits(const FPGATrackSimTrack&, const FPGATrackSimTrack&);
-  int findNonOverlapHits(const FPGATrackSimTrack&, const FPGATrackSimTrack&);
 
   StatusCode removeOverlapping(FPGATrackSimTrack & track1, FPGATrackSimTrack & track2);
   static bool compareTrackQuality(const FPGATrackSimTrack & track1, const FPGATrackSimTrack & track2);
