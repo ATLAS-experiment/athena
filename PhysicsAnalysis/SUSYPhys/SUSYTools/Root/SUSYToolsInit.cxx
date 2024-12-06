@@ -1457,7 +1457,15 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_MSG_DEBUG( "Initialising EgcalibTool " );
       ATH_CHECK( m_egammaCalibTool.setProperty("ESModel", m_isRun3 ? "es2022_R22_PRE" : "es2023_R22_Run2_v0") );
       ATH_CHECK( m_egammaCalibTool.setProperty("decorrelationModel", "1NP_v1") );
-      ATH_CHECK( m_egammaCalibTool.setProperty("useFastSim", isAtlfast()?1:0) );
+      // allows to bypass (intended) abort from of egamma calibration tool when configured for fastSim
+      if (m_eleForceFullSimCalib) {
+        ATH_MSG_WARNING( "Forcing EgcalibTool to use calibrations for full simulation" );
+        ATH_CHECK( m_egammaCalibTool.setProperty("useFastSim", false) );
+      }
+      else {
+        ATH_MSG_INFO("is Fast Sim:" << isAtlfast());
+        ATH_CHECK( m_egammaCalibTool.setProperty("useFastSim", isAtlfast() ? 1 : 0) );
+      }
       ATH_CHECK( m_egammaCalibTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_egammaCalibTool.retrieve() );
     } else ATH_CHECK( m_egammaCalibTool.retrieve() );

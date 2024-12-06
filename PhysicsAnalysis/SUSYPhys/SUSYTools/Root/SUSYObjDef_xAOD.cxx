@@ -223,6 +223,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_elebaselined0sig(-99.),
     m_elebaselinez0(-99),
     m_eleAllowRun3TrigSFFallback(false),
+    m_eleForceFullSimCalib(false),
     //
     m_muBaselinePt(-99.),
     m_muBaselineEta(-99.),
@@ -561,6 +562,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "EleForceNoId", m_force_noElId );
   declareProperty( "EleEffMapFilePath", m_eleEffMapFilePath);
   declareProperty( "EleAllowRun3TrigSFFallback", m_eleAllowRun3TrigSFFallback);
+  declareProperty( "EleForceFullSimCalib", m_eleForceFullSimCalib);
 
   //MUONS
   declareProperty( "MuonBaselinePt", m_muBaselinePt);
@@ -1457,6 +1459,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_electronTriggerSFStringSingle, "Ele.TriggerSFStringSingle", rEnv, "SINGLE_E_2015_e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose_2016_2018_e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0");
   configFromFile(m_eleEffMapFilePath, "Ele.EffMapFilePath", rEnv, "ElectronEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map4.txt");
   configFromFile(m_eleAllowRun3TrigSFFallback, "Ele.AllowRun3TrigSFFallback", rEnv, false);
+  configFromFile(m_eleForceFullSimCalib, "Ele.ForceFullSimCalib", rEnv, false);
   
   configFromFile(m_trig2015combination_singleLep, "Trig.Singlelep2015", rEnv, "e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose || mu20_iloose_L1MU15_OR_mu40");
   configFromFile(m_trig2016combination_singleLep, "Trig.Singlelep2016", rEnv, "e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0 || mu26_ivarmedium_OR_mu50");

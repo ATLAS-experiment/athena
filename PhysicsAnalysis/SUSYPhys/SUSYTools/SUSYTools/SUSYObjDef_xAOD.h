@@ -690,6 +690,7 @@ namespace ST {
     std::string m_eleEffMapFilePath;
     std::string m_eleEffMapFilePathRun2;
     bool   m_eleAllowRun3TrigSFFallback;
+    bool   m_eleForceFullSimCalib;
 
 
     double m_muBaselinePt;
