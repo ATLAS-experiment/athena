@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from typing import List
 
 from .Checks import AODContentCheck, AODDigestCheck, FrozenTier0PolicyCheck, MetadataCheck
 from .Inputs import input_EVNT, input_HITS, \
     input_HITS_unfiltered, \
-    input_RDO_BKG, \
+    input_RDO_BKG, input_BS_minimum_bias_overlay, \
     input_HITS_data_overlay, input_BS_SKIM, \
     input_HITS_minbias_low, input_HITS_minbias_high, input_HITS_neutrino, \
     input_AOD
@@ -164,6 +164,27 @@ class PileUpTest(WorkflowTest):
             FrozenTier0PolicyCheck(setup, "RDO", 5),
             MetadataCheck(setup, "RDO"),
         ]
+
+        super().__init__(ID, run, type, steps, setup)
+
+
+class DataOverlayPreparationTest(WorkflowTest):
+    """Data overlay minimum bias preprocessing test."""
+
+    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
+        if "maxEvents" not in extra_args:
+            extra_args += " --maxEvents 5"
+
+        self.command = \
+            (f"Overlay_tf.py --AMIConfig {ID}"
+             f" --inputBSFile {input_BS_minimum_bias_overlay[run]} --outputRDO_BKGFile myRDO_BKG.pool.root"
+             f" --imf False {extra_args}")
+
+        # TODO: enable once the output stabilises
+        # self.output_checks = [
+        #     FrozenTier0PolicyCheck(setup, "RDO_BKG", 5),
+        #     MetadataCheck(setup, "RDO_BKG"),
+        # ]
 
         super().__init__(ID, run, type, steps, setup)
 

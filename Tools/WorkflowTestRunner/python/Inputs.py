@@ -48,6 +48,9 @@ input_HITS_data_overlay = {
 input_BS_SKIM = {
     WorkflowRun.Run2: "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/mc15_valid.00200010.overlay_streamsAll_2016_pp_1.skim.DRAW.r8381/DRAW.09331084._000146.pool.root.1",
 }
+input_BS_minimum_bias_overlay = {
+    WorkflowRun.Run3: "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/MinBiasOverlay/data23_hi.00463124.physics_MinBiasOverlay.daq.RAW._lb0305._SFO-16._0001.data",
+}
 
 # derivations
 input_AOD = {
