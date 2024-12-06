@@ -197,6 +197,8 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
 
   rttConfig.doTrtExtensionPlots = m_doTRTExtensionPlots;
 
+  rttConfig.doTechEffPlots = m_fillTechnicalEfficiency;
+
   /// turn off truth if none is present
   if (m_truthParticleName.key().empty()){
     rttConfig.doFakePlots = false; 
