@@ -64,15 +64,15 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
   echo "compare with fixed reference"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_idtide \
-    -c ${dcubeXml_idtide} \
-    -r ${dcubeRef_idtide} \
+    -c ${dcubeXml} \
+    -r ${dcubeRef} \
     physval_idtide.ntuple.root
   echo "art-result: $? shifter_plots_idtide"
   
   echo "compare with last build"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_idtide_last \
-    -c ${dcubeXml_idtide} \
+    -c ${dcubeXml} \
     -r ${lastref_dir}/physval_idtide.ntuple.root \
     physval_idtide.ntuple.root
   echo "art-result: $? shifter_plots_idtide_last"
