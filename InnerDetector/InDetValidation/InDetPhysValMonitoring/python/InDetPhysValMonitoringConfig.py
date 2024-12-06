@@ -80,13 +80,13 @@ def GoodRunsListSelectionToolCfg(flags, **kwargs):
 
     cvmfs = '/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/'
     grldict = {
-        '2015': cvmfs + GRLDict['GRL2015'],
-        '2016': cvmfs + GRLDict['GRL2016'],
-        '2017': cvmfs + GRLDict['GRL2017_Triggerno17e33prim'],
-        '2018': cvmfs + GRLDict['GRL2018_Triggerno17e33prim'],
-        '2022': cvmfs + GRLDict['GRL2022'],
-        '2023': cvmfs + GRLDict['GRL2023'],
-        '2024': cvmfs + GRLDict['GRL2024']
+        '2015': cvmfs + ''.join(GRLDict['GRL2015']),
+        '2016': cvmfs + ''.join(GRLDict['GRL2016']),
+        '2017': cvmfs + ''.join(GRLDict['GRL2017_Triggerno17e33prim']),
+        '2018': cvmfs + ''.join(GRLDict['GRL2018_Triggerno17e33prim']),
+        '2022': cvmfs + ''.join(GRLDict['GRL2022']),
+        '2023': cvmfs + ''.join(GRLDict['GRL2023']),
+        '2024': cvmfs + ''.join(GRLDict['GRL2024'])
     }
 
     acc.setPrivateTools(CompFactory.GoodRunsListSelectionTool(
