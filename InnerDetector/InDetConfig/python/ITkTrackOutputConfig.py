@@ -117,8 +117,10 @@ def ITkTrackRecoOutputCfg(flags, extensions_list=None):
             if (e == '' or flags.Tracking[f"ITk{e}Pass"].storeTrackSeeds) ]
         for extension in listOfExtensionsRequesting:
             toAOD += [
-                f"xAOD::TrackParticleContainer#SiSPSeedSegments{extension}TrackParticles",
-                f"xAOD::TrackParticleAuxContainer#SiSPSeedSegments{extension}TrackParticlesAux."
+                f"xAOD::TrackParticleContainer#SiSPSeedSegments{extension}PixelTrackParticles",
+                f"xAOD::TrackParticleAuxContainer#SiSPSeedSegments{extension}PixelTrackParticlesAux.",
+                f"xAOD::TrackParticleContainer#SiSPSeedSegments{extension}StripTrackParticles",
+                f"xAOD::TrackParticleAuxContainer#SiSPSeedSegments{extension}StripTrackParticlesAux."
             ]
 
     result = ComponentAccumulator()
