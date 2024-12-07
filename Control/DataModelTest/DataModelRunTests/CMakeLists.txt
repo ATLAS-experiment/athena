@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DataModelRunTests )
@@ -24,6 +24,7 @@ function (datamodel_run_test testName)
     set( _arg ${CMAKE_CURRENT_SOURCE_DIR}/test/${testName}.py )
   endif()
 
+  set ( _options )
   if( ARG_MT )
     set( testName "${testName}MT" )
     set( _command "${_command} --threads=1 " )
@@ -31,11 +32,11 @@ function (datamodel_run_test testName)
 
   if( ARG_RNTUPLE )
     set( testName "${testName}RNTup" )
-    set( _command "${_command} Output.StorageTechnology.EventData='ROOTRNTUPLE' " )
+    set( _options " Output.StorageTechnology.EventData='ROOTRNTUPLE' " )
   endif()
 
   atlas_add_test( ${testName}
-                  SCRIPT ${_command} ${_arg}
+                  SCRIPT ${_command} ${_arg} ${_options}
                   PROPERTIES TIMEOUT 600
                   LOG_IGNORE_PATTERN "has different type than the branch|no dictionary for class|^StorageSvc +INFO|Cache alignment|Unable to locate catalog|IOVDbSvc[0-9 ]+INFO|Invalid ./TagInfo${ARG_EXTRA_IGNORE}|The database does not exist|IDatabaseSvc::openDatabase.*=>|New file created"
                   ENVIRONMENT "ATLAS_REFERENCE_TAG=DataModelRunTests/DataModelRunTestsReference-01-00-03"
