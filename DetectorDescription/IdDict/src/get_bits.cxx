@@ -7,7 +7,6 @@
 #include "IdDict/IdDictRegion.h"
 #include "IdDict/IdDictRange.h"
 #include "IdDict/IdDictFieldImplementation.h"
-#include <algorithm>
 
 namespace IdDict{
   typedef std::vector <IdDictRegion*> RV; 
@@ -185,9 +184,5 @@ namespace IdDict{
         mr = temp; 
     } 
   }
-  
-  
-   bool isNumber(const std::string& str) {
-    return ( (not str.empty()) and (std::ranges::all_of(str, ::isdigit)) );
-  }
 }
+

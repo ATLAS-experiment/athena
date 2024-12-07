@@ -12,8 +12,8 @@ class IdDictDictionary;
 
 class IdDictSubRegion : public IdDictRegion { 
 public: 
-    IdDictSubRegion () = default; 
-    virtual ~IdDictSubRegion () = default; 
+    IdDictSubRegion (); 
+    virtual ~IdDictSubRegion (); 
 
     // Dummy: never called - subregions are only generated via
     // IdDictReference where one already has a region which is passed in
@@ -30,3 +30,4 @@ public:
 };
 
 #endif
+

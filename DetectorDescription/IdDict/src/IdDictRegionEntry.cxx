@@ -8,26 +8,29 @@ IdDictRegionEntry::IdDictRegionEntry () = default;
  
 IdDictRegionEntry::~IdDictRegionEntry () = default;
  
-void 
-IdDictRegionEntry::resolve_references (const IdDictMgr& /*idd*/,  
-					    IdDictDictionary& /*dictionary*/, IdDictRegion& /*region*/) { 
+void IdDictRegionEntry::resolve_references (const IdDictMgr& /*idd*/,  
+					    IdDictDictionary& /*dictionary*/, 
+					    IdDictRegion& /*region*/) 
+{ 
 } 
   
-void 
-IdDictRegionEntry::generate_implementation (const IdDictMgr& /*idd*/,  
+void IdDictRegionEntry::generate_implementation (const IdDictMgr& /*idd*/,  
 						 IdDictDictionary& /*dictionary*/, 
 						 IdDictRegion& /*region*/,
-						 const std::string& /*tag*/) { 
+						 const std::string& /*tag*/) 
+{ 
 } 
   
-void 
-IdDictRegionEntry::reset_implementation () { 
+void IdDictRegionEntry::reset_implementation ()
+{ 
 } 
 
-bool 
-IdDictRegionEntry::verify () const { 
+bool IdDictRegionEntry::verify () const 
+{ 
   return (true); 
 } 
  
-void IdDictRegionEntry::clear () { 
+void IdDictRegionEntry::clear () 
+{ 
 } 
+

@@ -39,9 +39,6 @@ namespace IdDict{
   //
   void 
   get_bits (const RV& regions, size_t level, const std::string& group);
-  
-   bool 
-   isNumber(const std::string& str);
 }
 #endif
 
