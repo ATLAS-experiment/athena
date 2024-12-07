@@ -15,9 +15,6 @@ assertWithSideEffect:*_test.*
 # Do not warn about same-named functions in class hierarchies.
 duplInheritedMember
 
-# Do not warn about syntax errors (if it compiles it is likely a bug in cppcheck).
-syntaxError
-
 # Disable warning about too complex files being ignored in check.
 normalCheckLevelMaxBranches
 
