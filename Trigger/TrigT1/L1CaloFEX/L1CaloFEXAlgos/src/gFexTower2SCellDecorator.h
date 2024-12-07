@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GFEXL1CALO2SCELLDECORATORTOOL_H
@@ -16,7 +16,9 @@
 
 #include "CaloEvent/CaloCellContainer.h"
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
-
+#include <vector>
+#include <unordered_map>
+#include <string>
 
 
 namespace LVL1 {
