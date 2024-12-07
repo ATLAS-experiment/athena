@@ -53,7 +53,7 @@ QStringList VP1RawDataHandle_MDT_RDO::clicked(bool verbose) const
 
   QStringList ll;
   ll << " ===> MDT Digit data";
-  ll << "   is a valid digit: "+ m_data->is_valid(idhelper);
+  // ll << "   is a valid digit: "+ m_data->is_valid(idhelper);
   ll << "   adc: " + QString::number(m_data->adc());
   ll << "   tdc: " + QString::number(m_data->tdc());
   if (verbose) {
@@ -86,9 +86,12 @@ QStringList VP1RawDataHandle_MDT_RDO::clicked(bool verbose) const
 SoNode * VP1RawDataHandle_MDT_RDO::buildShape()
 {
   const MuonGM::MdtReadoutElement * elem = element();
+  Identifier id(m_data->identify());
+  double tubeLength = elem->tubeLength(id);
   // double strawlength = elem ? elem->strawLength() : 200.0;
 
-  SoNode * node = common()->nodeManager()->getShapeNode_DriftTube(0.5,0.0/*0 radius for line*/);
+  SoNode * node = common()->nodeManager()->getShapeNode_DriftTube(tubeLength/2, elem->innerTubeRadius());
+  // SoNode * node = common()->nodeManager()->getShapeNode_Wire(0.5,0.0/*0 radius for line*/);
   // if (highThreshold() && static_cast<VP1RawDataColl_MDT_RDO*>(coll())->useSpecialHTMat()) {
   //   SoGroup * gr = new SoGroup;
   //   gr->addChild(coll()->common()->controller()->trtHTMaterial());

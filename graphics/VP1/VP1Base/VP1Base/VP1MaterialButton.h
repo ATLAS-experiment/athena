@@ -16,6 +16,8 @@
 #define VP1MATERIALBUTTON_H
 
 #include "VP1Base/VP1HelperClassBase.h"
+#include "VP1Base/VP1Color.h"
+
 
 #include <QPushButton>
 
@@ -60,6 +62,7 @@ public:
   static SoMaterial* createMaterial( const double& r, const double& g, double b, const double& brightness = 0.0,const double& transp = 0.0 );
   static void setMaterialParameters( SoMaterial * m, const QColor&, const double& brightness = 0.0, const double& transp = 0.0 );
   static void setMaterialParameters( SoMaterial * m, const double& r, const double& g, const double& b, const double& brightness = 0.0, const double& transp = 0.0 );
+  static void setMaterialParametersFromRGB( SoMaterial * m, const int r, const int g, const int b, const double& brightness = 0.0, const double& transp = 0.0 );
 
   //////////////////////////////////////////////////////////////////////
 

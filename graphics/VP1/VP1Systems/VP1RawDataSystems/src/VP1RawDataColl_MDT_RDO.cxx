@@ -26,21 +26,18 @@
 
 #include "StoreGate/ReadCondHandle.h"
 
-// #include "InDetRawData/TRT_RDO_Container.h"
-// #include "InDetRawData/TRT_LoLumRawData.h"
-
 //____________________________________________________________________
 QStringList VP1RawDataColl_MDT_RDO::availableCollections(IVP1System*sys)
 {
-  return VP1SGContentsHelper(sys).getKeys<MdtCsmContainer>();
+  return VP1SGContentsHelper(sys).getKeys<MdtDigitContainer>();
 }
 
 //____________________________________________________________________
 class VP1RawDataColl_MDT_RDO::Imp {
 public:
-  VP1Interval allowedToT;
-  bool requireHT = false;
-  bool useSpecialTRTHTMaterial = false;
+  // VP1Interval allowedToT;
+  // bool requireHT = false;
+  // bool useSpecialTRTHTMaterial = false;
 };
 
 
@@ -48,17 +45,9 @@ public:
 VP1RawDataColl_MDT_RDO::VP1RawDataColl_MDT_RDO(VP1RawDataCommonData*common,const QString& key)
   : VP1RawDataCollBase(common,key), m_d(new Imp)
 {
-  m_d->requireHT = true;
-  m_d->useSpecialTRTHTMaterial = true;
-  m_d->allowedToT = VP1Interval();
-
-  // connect(common->controller(),SIGNAL(trtAllowedToTChanged(const VP1Interval&)),
-	//   this,SLOT(setAllowedToT(const VP1Interval&)));
-  // setAllowedToT(common->controller()->trtAllowedToT());
-
-  // connect(common->controller(),SIGNAL(trtRequireHTChanged(bool)),
-	//   this,SLOT(setRequireHT(bool)));
-  // setRequireHT(common->controller()->trtRequireHT());
+  // m_d->requireHT = true;
+  // m_d->useSpecialTRTHTMaterial = true;
+  // m_d->allowedToT = VP1Interval();
 
   // connect(common->controller(),SIGNAL(useSpecialTRTHTMaterialChanged(bool)),
 	//   this,SLOT(setUseSpecialTRTHTMaterial(bool)));
@@ -74,79 +63,81 @@ VP1RawDataColl_MDT_RDO::~VP1RawDataColl_MDT_RDO()
 //____________________________________________________________________
 void VP1RawDataColl_MDT_RDO::assignDefaultMaterial(SoMaterial*m) const
 {
-  VP1MaterialButton::setMaterialParameters( m, 0.85, 0.85, 0.85, 0.1 );
+  VP1MaterialButton::setMaterialParametersFromRGB( m, 255, 136, 0, 0.1 );
 }
 
 //____________________________________________________________________
-bool VP1RawDataColl_MDT_RDO::load()
-{
+bool VP1RawDataColl_MDT_RDO::load() {
   if (!VP1JobConfigInfo::hasMuonGeometry()) {
-    message("TRT geometry not configured in job");
+    message("Muon geometry not configured in job");
     return false;
   }
-  
-//   // From: https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/MuonSpectrometer/MuonCnv/MuonByteStreamCnvTest/src/ReadMdtDigit.cxx#0055
-// std::string key = "MDT_DIGITS";
-//      SG::ReadHandle<Muon::MdtDigitContainer> hndl(key);
-//      const MdtDigitContainer* mdt_container = hndl.get();
-//      ATH_CHECK(mdt_container != nullptr);
 
+  //   // From:
+  //   https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/MuonSpectrometer/MuonCnv/MuonByteStreamCnvTest/src/ReadMdtDigit.cxx#0055
+  // std::string key = "MDT_DIGITS";
+  //      SG::ReadHandle<Muon::MdtDigitContainer> hndl(key);
+  //      const MdtDigitContainer* mdt_container = hndl.get();
+  //      ATH_CHECK(mdt_container != nullptr);
 
-    // SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{"MuonDetectorManager"};
+  // SG::ReadCondHandle<MuonGM::MuonDetectorManager>
+  // detMgr{"MuonDetectorManager"};
 
   // get the detMgr
-  //TODO: we should probably simplify by moving to:
+  // TODO: we should probably simplify by moving to:
   //   const MuonGM::MuonDetectorManager * detmgr = VP1DetInfo::muonDetMgr();
-    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> detMgrKey{"MuonDetectorManager"};
-detMgrKey.initialize().ignore();
-SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{detMgrKey};
- 
+  SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> detMgrKey{
+      "MuonDetectorManager"};
+  detMgrKey.initialize().ignore();
+  SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{detMgrKey};
+
   SG::ReadHandleKey<MdtDigitContainer> digitContainerKey{"MDT_DIGITS"};
   digitContainerKey.initialize().ignore();
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
 
- SG::ReadHandle<MdtDigitContainer> container(digitContainerKey, ctx);
-     if (!container.isValid()) {
-        std::cout << "Could not find MdtDigitContainer called " << container.name() << " in store " << container.store() << std::endl;
-         //return StatusCode::SUCCESS;
-     }
-    //  ATH_MSG_DEBUG("Found MdtDigitContainer called " << container.name() << " in store " << container.store());
+  SG::ReadHandle<MdtDigitContainer> container(digitContainerKey, ctx);
+  if (!container.isValid()) {
+    std::cout << "Could not find MdtDigitContainer called " << container.name()
+              << " in store " << container.store() << std::endl;
+    // return StatusCode::SUCCESS;
+  }
+  //  ATH_MSG_DEBUG("Found MdtDigitContainer called " << container.name() << "
+  //  in store " << container.store());
 
+  // ATH_MSG_DEBUG("****** mdt->size() : " << mdt_container->size());
 
-    // ATH_MSG_DEBUG("****** mdt->size() : " << mdt_container->size());
- 
- // MuonDetectorManager from the conditions store
-        //  SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> detMgr{this, "DetectorManagerKey", "MuonDetectorManager",
-                                                                                //  "Key of input MuonDetectorManager condition data"};
- 
-//  // MuonDetectorManager from the conditions store
-//          SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_DetectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager",
-//                                                                                  "Key of input MuonDetectorManager condition data"};
-//          SG::ReadCondHandle<MuonGM::MuonDetectorManager> DetectorManagerHandle{m_DetectorManagerKey}; 
+  // MuonDetectorManager from the conditions store
+  //  SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> detMgr{this,
+  //  "DetectorManagerKey", "MuonDetectorManager", "Key of input
+  //  MuonDetectorManager condition data"};
 
- 
-     // Iterate on the collections
-     for (const MdtDigitCollection* coll : *container) {
-         /// Iterate on the digits of the collection
-          for (const MdtDigit* digit : *coll) {
-              const Identifier digitId{digit->identify()};
-              
-              // example from Johannes
-              /*
-              mdtReadoutElement = detMgr->getMdtReadoutElement(digitId);
-              const Amg::Vector3D tubePos = mdtReadoutElement->tubePos(digitId);
-              */
+  //  // MuonDetectorManager from the conditions store
+  //          SG::ReadCondHandleKey<MuonGM::MuonDetectorManager>
+  //          m_DetectorManagerKey{this, "DetectorManagerKey",
+  //          "MuonDetectorManager",
+  //                                                                                  "Key of input MuonDetectorManager condition data"};
+  //          SG::ReadCondHandle<MuonGM::MuonDetectorManager>
+  //          DetectorManagerHandle{m_DetectorManagerKey};
 
+  // Iterate on the collections
+  for (const MdtDigitCollection* coll : *container) {
+    /// Iterate on the digits of the collection
+    for (const MdtDigit* digit : *coll) {
+      const Identifier digitId{digit->identify()};
 
+      // example from Johannes
+      /*
+      mdtReadoutElement = detMgr->getMdtReadoutElement(digitId);
+      const Amg::Vector3D tubePos = mdtReadoutElement->tubePos(digitId);
+      */
 
       if (digit)
-	      addHandle(new VP1RawDataHandle_MDT_RDO(this, digit));
-          }
+        addHandle(new VP1RawDataHandle_MDT_RDO(this, digit));
     }
-  
+  }
 
-//   recheckCutStatusOfAllHandles();
+  //   recheckCutStatusOfAllHandles();
   return true;
 }
 
@@ -160,52 +151,3 @@ bool VP1RawDataColl_MDT_RDO::cut(VP1RawDataHandleBase* handle)
   VP1Msg::message("cut returning 'true'...");
   return true;
 }
-
-// //____________________________________________________________________
-// void VP1RawDataColl_MDT_RDO::setAllowedToT(const VP1Interval& i)
-// {
-//   if (m_d->allowedToT==i)
-//     return;
-//   bool relaxed(i.contains(m_d->allowedToT));
-//   bool tightened(m_d->allowedToT.contains(i));
-//   m_d->allowedToT=i;
-//   if (relaxed)
-//     recheckCutStatusOfAllNotVisibleHandles();
-//   else if (tightened)
-//     recheckCutStatusOfAllVisibleHandles();
-//   else
-//     recheckCutStatusOfAllHandles();
-// }
-
-// //____________________________________________________________________
-// void VP1RawDataColl_MDT_RDO::setRequireHT(bool b)
-// {
-//   if (m_d->requireHT==b)
-//     return;
-//   m_d->requireHT=b;
-//   if (b)
-//     recheckCutStatusOfAllVisibleHandles();
-//   else
-//     recheckCutStatusOfAllNotVisibleHandles();
-// }
-
-// //____________________________________________________________________
-// void VP1RawDataColl_MDT_RDO::setUseSpecialTRTHTMaterial(bool b)
-// {
-//   if (m_d->useSpecialTRTHTMaterial==b)
-//     return;
-//   m_d->useSpecialTRTHTMaterial=b;
-
-//   std::vector<VP1RawDataHandleBase*>::iterator it(getHandles().begin()),itE(getHandles().end());
-//   for (;it!=itE;++it) {
-//     if (static_cast<VP1RawDataHandle_TRT_RDO*>(*it)->highThreshold())
-//       (*it)->update3DObjects();
-//   }
-
-// }
-
-// //____________________________________________________________________
-// bool VP1RawDataColl_MDT_RDO::useSpecialHTMat()
-// {
-//   return m_d->useSpecialTRTHTMaterial;
-// }
