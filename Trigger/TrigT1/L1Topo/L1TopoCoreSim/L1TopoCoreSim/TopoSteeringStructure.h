@@ -1,17 +1,19 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
 
 #include "L1TopoCommon/StatusCode.h"
 
-#include "TrigConfData/L1Menu.h"
-#include "TrigConfData/L1TopoAlgorithm.h"
-
 #include <vector>
 #include <map>
 #include <string>
+#include <iosfwd>
+
+namespace TrigConf{
+  class L1Menu;
+}
 
 namespace TXC {
    class L1TopoMenu;
@@ -25,8 +27,7 @@ namespace TCS {
    class CountingConnector;
    class InputConnector;
    class ParameterSpace;
-//    class DecisionAlg;
-//    class SortingAlg;
+
 
    class TopoSteeringStructure {
    public:
