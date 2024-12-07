@@ -8,6 +8,7 @@
 namespace MuonVal {
 template <class T> VectorBranch<T>::VectorBranch(TTree* tree, const std::string& name) : MuonTesterBranch(tree, name) {}
 
+// cppcheck-suppress missingReturn; false positive
 template <class T> VectorBranch<T>::VectorBranch(MuonTesterTree& tree, const std::string& name) : MuonTesterBranch(tree, name) {}
 template <class T> VectorBranch<T>::VectorBranch(TTree* tree, const std::string& name, const T& def) : VectorBranch<T>(tree, name) {
     VectorBranch<T>::setDefault(def);
