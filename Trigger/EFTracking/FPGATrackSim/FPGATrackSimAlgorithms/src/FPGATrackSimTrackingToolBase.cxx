@@ -20,7 +20,6 @@ StatusCode FPGATrackSimTrackingToolBase::setRoadSectors(std::vector<std::shared_
         nonConstRoad->setSector(m_FPGATrackSimBank->SectorBank_2nd()->findSector(nonConstRoad->getAllHits()));
     }
     else if (m_idealGeoRoads) matchIdealGeoSector(*nonConstRoad);
-    std::cout << "Sector:"<< nonConstRoad->getSector() << std::endl;
   }
   // Spacepoint road filter tool. Needed when fitting to spacepoints.
   if (m_useSpacePoints)

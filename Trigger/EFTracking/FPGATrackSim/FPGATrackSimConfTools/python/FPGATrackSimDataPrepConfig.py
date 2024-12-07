@@ -147,7 +147,7 @@ def WriteToAOD(flags, stage = '',finalTrackParticles = ''): #  store xAOD contai
 def FPGATrackSimEventSelectionCfg(flags):
     result=ComponentAccumulator()
     eventSelector = CompFactory.FPGATrackSimEventSelectionSvc()
-    eventSelector.regions = "HTT/TrigHTTMaps/V1/map_file/slices_v01_Jan21.txt"
+    eventSelector.regions = "eventSelectionSlices/v1.0/slices.txt"
     eventSelector.regionID = flags.Trigger.FPGATrackSim.region
     eventSelector.sampleType = flags.Trigger.FPGATrackSim.sampleType
     eventSelector.withPU = False
