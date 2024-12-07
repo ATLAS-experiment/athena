@@ -8,22 +8,9 @@
 # art-output: *.root
 set -e
 
-
-RDO=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
-
-RDO_EVT=500
-if [ -z $ArtJobType ]
-then
-    RDO=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg0_singlemu.root
-    RDO_EVT=-1
-fi
+source FPGATrackSim_CommonEnv.sh
 
 echo "Running over " $RDO_EVT " events"
-
-
-GEO_TAG="ATLAS-P2-RUN4-03-00-00"
-BANKS_VERSION="v0.20" # instructions on how to change version of files can be found in https://twiki.cern.ch/twiki/bin/view/Atlas/EFTrackingSoftware
-COMBINED_MATRIX="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/banks_9L/${BANKS_VERSION}/combined_matrix.root"
 
 # make wrapper file
 echo "... RDO to AOD with sim"
@@ -32,9 +19,9 @@ Reco_tf.py --CA \
     --preExec "flags.Trigger.FPGATrackSim.wrapperFileName='wrapper.root'" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
     --postInclude "FPGATrackSimSGInput.FPGATrackSimSGInputConfig.FPGATrackSimSGInputCfg" \
-    --inputRDOFile ${RDO} \
+    --inputRDOFile ${RDO_SINGLE_MUON} \
     --outputAODFile AOD.pool.root \
-    --maxEvents ${RDO_EVT}
+    --maxEvents -1
 ls -l
 echo "... RDO to AOD with sim, this part is done ..."
 
@@ -57,8 +44,8 @@ touch maps/moduleidmap
 
 echo "... Banks generation"
 python -m FPGATrackSimBankGen.FPGATrackSimBankGenConfig \
-    --filesInput=${RDO} \
-    --evtMax=${RDO_EVT} \
+    --filesInput=${RDO_SINGLE_MUON} \
+    --evtMax=-1 \
     Trigger.FPGATrackSim.mapsDir=maps
 ls -l
 echo "... Banks generation, this part is done ..."
@@ -104,11 +91,11 @@ echo "... wrapper analysis output verification, this part is done ..."
 
 echo "... analysis on RDO"
 python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
---filesInput=${RDO} \
+--filesInput=${RDO_SINGLE_MUON} \
 --evtMax=${RDO_EVT} \
 Trigger.FPGATrackSim.mapsDir=./maps \
 Trigger.FPGATrackSim.tracking=True \
-Trigger.FPGATrackSim.sampleType='singleMuons' \
+Trigger.FPGATrackSim.sampleType="${SAMPLE_TYPE}" \
 Trigger.FPGATrackSim.bankDir=./banks/ \
 Trigger.FPGATrackSim.doEDMConversion=True \
 Trigger.FPGATrackSim.writeToAOD=True \
