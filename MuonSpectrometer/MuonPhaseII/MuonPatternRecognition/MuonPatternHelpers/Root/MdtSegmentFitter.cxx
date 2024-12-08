@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonPatternHelpers/MdtSegmentFitter.h>
 #include <MuonPatternHelpers/SegmentFitHelperFunctions.h>
@@ -62,7 +62,6 @@ namespace MuonR4{
     inline bool MdtSegmentFitter::recalibrate(const EventContext& ctx,
                                               SegmentFitResult& fitResult) const{
         
-        using State = CalibratedSpacePoint::State;
         const auto [segPos, segDir] = makeLine(fitResult.segmentPars);
 
         fitResult.calibMeasurements = m_cfg.calibrator->calibrate(ctx, std::move(fitResult.calibMeasurements), segPos, segDir,
