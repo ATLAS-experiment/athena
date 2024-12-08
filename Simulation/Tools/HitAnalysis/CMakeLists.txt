@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 # Package: HitAnalysis
@@ -9,7 +9,7 @@ atlas_subdir( HitAnalysis )
 
 # External dependencies:
 find_package( CLHEP )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO MathMore Minuit Minuit2 Matrix Physics HistPainter Rint Graf Graf3d Gpad Html Postscript Gui GX11TTF GX11 )
+find_package( ROOT COMPONENTS Core Tree Hist )
 
 # tag ROOTBasicLibs was not recognized in automatic conversion in cmt2cmake
 
