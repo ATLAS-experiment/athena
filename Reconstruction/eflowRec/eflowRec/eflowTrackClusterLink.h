@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -19,6 +19,8 @@
 #include <mutex>
 
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/EventContext.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "CxxUtils/fpcompare.h"
 #include "eflowRec/eflowRecTrack.h"
