@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -12,10 +12,15 @@ def PixelRawDataProviderToolCfg(flags, prefix="", suffix="", storeInDetTimeColle
     acc.setPrivateTools(CompFactory.PixelRawDataProviderTool(Decoder = decoder, StoreInDetTimeCollections = storeInDetTimeCollections))
     return acc
 
-def PixelRawDataProviderAlgCfg(flags, RDOKey="PixelRDOs", **kwargs):
+def PixelRawDataProviderAlgCfg(flags, **kwargs):
     """ Main function to configure Pixel raw data decoding """
     acc = PixelCablingCondAlgCfg(flags)
     acc.merge(PixelHitDiscCnfgAlgCfg(flags))
+
+    if flags.Overlay.DataOverlay:
+        kwargs.setdefault("RDOKey", f"{flags.Overlay.BkgPrefix}PixelRDOs")
+    else:
+        kwargs.setdefault("RDOKey", "PixelRDOs")
 
     from PixelReadoutGeometry.PixelReadoutGeometryConfig import PixelReadoutManagerCfg
     acc.merge (PixelReadoutManagerCfg(flags))
@@ -27,8 +32,7 @@ def PixelRawDataProviderAlgCfg(flags, RDOKey="PixelRDOs", **kwargs):
     prefix = kwargs.pop("prefix","")
     suffix = kwargs.pop("suffix","")
     providerTool = acc.popToolsAndMerge(PixelRawDataProviderToolCfg(flags, prefix, suffix, storeInDetTimeCollections))
-    acc.addEventAlgo(CompFactory.PixelRawDataProvider(RDOKey = RDOKey,
-                                                      RegSelTool = regSelTool,
+    acc.addEventAlgo(CompFactory.PixelRawDataProvider(RegSelTool = regSelTool,
                                                       ProviderTool = providerTool, 
                                                       **kwargs))
     return acc
