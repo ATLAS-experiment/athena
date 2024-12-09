@@ -31,7 +31,7 @@ InDetRttPlots::InDetRttPlots(InDetPlotBase* pParent, const std::string& sDir, co
   if (m_config.doResolutionPlotPrim)                  m_resolutionPlotPrim= std::make_unique<InDetPerfPlot_Resolution>(this, "Tracks/Matched/Resolutions/Primary");
   if (m_config.doResolutionPlotPrim_truthFromB)       m_resolutionPlotPrim_truthFromB= std::make_unique<InDetPerfPlot_Resolution>(this, "Tracks/Matched/Resolutions/TruthFromB");
   if (m_config.doHitsRecoTracksPlots)                 m_hitsRecoTracksPlots= std::make_unique<InDetPerfPlot_Hits>(this, "Tracks/Selected/HitsOnTracks", m_config.isITk);
-  if (m_config.doEffPlots)                            m_effPlots= std::make_unique<InDetPerfPlot_Efficiency>(this, "Tracks/Efficiency");
+  if (m_config.doEffPlots)                            m_effPlots= std::make_unique<InDetPerfPlot_Efficiency>(this, "Tracks/Efficiency", m_config.doTechEffPlots);
   if (m_config.doDuplicatePlots)                      m_duplicatePlots = std::make_unique<InDetPerfPlot_Duplicate>(this, "Tracks/Duplicate");
   if (m_config.doVerticesVsMuPlots)                   m_verticesVsMuPlots= std::make_unique<InDetPerfPlot_VerticesVsMu>(this, "Vertices/AllPrimaryVertices");
   if (m_config.doVertexPlots)                         m_vertexPlots= std::make_unique<InDetPerfPlot_Vertex>(this, "Vertices/AllPrimaryVertices");

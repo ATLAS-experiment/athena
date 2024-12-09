@@ -22,15 +22,16 @@ def fromRunArgs(runArgs):
     log.info('**** Setting-up configuration flags')
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.addFlag("addVertex", True)
+
     commonRunArgsToFlags(runArgs, flags)
 
     flags.Common.ProductionStep = ProductionStep.MinbiasPreprocessing
+
     flags.Reco.EnableHI = True
     flags.Reco.HIMode = HIMode.HI
-    flags.Detector.EnableTRT = False
     flags.Tracking.doCaloSeededAmbi = False
     flags.Tracking.doCaloSeededBrem = False
+
     # This is for data overlay
     flags.Overlay.DataOverlay = True
 
@@ -79,16 +80,17 @@ def fromRunArgs(runArgs):
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     cfg.merge(ByteStreamReadCfg(flags))
 
+    from LumiBlockComps.LumiBlockMuWriterConfig import LumiBlockMuWriterCfg
+    cfg.merge(LumiBlockMuWriterCfg(flags))
+
     if flags.Detector.EnablePixel:
-        if not flags.addVertex: # no need configure it if reconstructions of vertex is requested
-            from InDetOverlay.PixelOverlayConfig import PixelDataOverlayExtraCfg
-            cfg.merge(PixelDataOverlayExtraCfg(flags))
+        from InDetOverlay.PixelOverlayConfig import PixelDataOverlayExtraCfg
+        cfg.merge(PixelDataOverlayExtraCfg(flags))
         itemList.append(f'PixelRDO_Container#{flags.Overlay.BkgPrefix}PixelRDOs')
 
     if flags.Detector.EnableSCT:
-        if not flags.addVertex:
-            from InDetOverlay.SCTOverlayConfig import SCTDataOverlayExtraCfg
-            cfg.merge(SCTDataOverlayExtraCfg(flags))
+        from InDetOverlay.SCTOverlayConfig import SCTDataOverlayExtraCfg
+        cfg.merge(SCTDataOverlayExtraCfg(flags))
         itemList.append(f'SCT_RDO_Container#{flags.Overlay.BkgPrefix}SCT_RDOs')
 
     if flags.Detector.EnableTRT:
@@ -98,13 +100,15 @@ def fromRunArgs(runArgs):
 
     if flags.Detector.EnableLAr:
         from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
-        cfg.merge(LArRawDataReadingCfg(flags, LArRawChannelKey=f'{flags.Overlay.BkgPrefix}LArRawChannels'))
-        itemList.append(f'LArRawChannelContainer#{flags.Overlay.BkgPrefix}LArRawChannels')
+        cfg.merge(LArRawDataReadingCfg(flags))
+        itemList.append(f'LArDigitContainer#{flags.Overlay.BkgPrefix}LArDigitContainer_data')
+        itemList.append("LArFebHeaderContainer#LArFebHeader")
 
     if flags.Detector.EnableTile:
         from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
-        cfg.merge(TileRawDataReadingCfg(flags))
+        cfg.merge(TileRawDataReadingCfg(flags, readMuRcv=False))
         itemList.append(f'TileRawChannelContainer#{flags.Overlay.BkgPrefix}TileRawChannelCnt')
+        itemList.append(f'TileDigitsContainer#{flags.Overlay.BkgPrefix}TileDigitsCnt')
 
     if flags.Detector.EnableCSC:
         from MuonConfig.CSC_OverlayConfig import CSC_DataOverlayExtraCfg
@@ -136,15 +140,11 @@ def fromRunArgs(runArgs):
         cfg.merge(MM_DataOverlayExtraCfg(flags))
         itemList.append(f'Muon::MM_RawDataContainer#{flags.Overlay.BkgPrefix}MMRDO')
 
-    from LumiBlockComps.LumiBlockMuWriterConfig import LumiBlockMuWriterCfg
-    cfg.merge(LumiBlockMuWriterCfg(flags))
-
-    if flags.addVertex:
+    if flags.Reco.EnableTracking:
         from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
         cfg.merge(InDetTrackRecoCfg(flags))
-
-        itemList.append(f"xAOD::VertexContainer#{flags.Overlay.BkgPrefix}PrimaryVertices")
-        itemList.append(f"xAOD::VertexAuxContainer#{flags.Overlay.BkgPrefix}PrimaryVerticesAux.x.y.z")
+        itemList.append(f'xAOD::VertexContainer#{flags.Overlay.BkgPrefix}PrimaryVertices')
+        itemList.append(f'xAOD::VertexAuxContainer#{flags.Overlay.BkgPrefix}PrimaryVerticesAux.x.y.z')
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     cfg.merge(OutputStreamCfg(flags, 'RDO', itemList))

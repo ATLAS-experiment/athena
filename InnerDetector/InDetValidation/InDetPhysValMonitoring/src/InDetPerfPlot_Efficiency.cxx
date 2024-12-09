@@ -9,10 +9,9 @@
 #include "GaudiKernel/SystemOfUnits.h" //for Gaudi::Units
 using namespace IDPVM;
 
-InDetPerfPlot_Efficiency::InDetPerfPlot_Efficiency(InDetPlotBase* pParent, const std::string& sDir) :
-  InDetPlotBase(pParent, sDir){
-  // nop
-}
+InDetPerfPlot_Efficiency::InDetPerfPlot_Efficiency(InDetPlotBase* pParent, const std::string& sDir, bool doTechEff) :
+  InDetPlotBase(pParent, sDir),
+  m_doTechEff(doTechEff) {}
 
 void
 InDetPerfPlot_Efficiency::initializePlots() {
@@ -58,14 +57,15 @@ InDetPerfPlot_Efficiency::initializePlots() {
   book(m_efficiency_vs_truthMu, "efficiency_vs_truthMu");
   book(m_efficiency_vs_actualMu, "efficiency_vs_actualMu");
 
-  book(m_technical_efficiency_vs_pteta, "technical_efficiency_vs_pteta");
-  book(m_technical_efficiency_vs_eta, "technical_efficiency_vs_eta");
-  book(m_technical_efficiency_vs_pt, "technical_efficiency_vs_pt");
-  book(m_technical_efficiency_vs_phi, "technical_efficiency_vs_phi");
-  book(m_technical_efficiency_vs_d0, "technical_efficiency_vs_d0");
-  book(m_technical_efficiency_vs_z0, "technical_efficiency_vs_z0");
-  book(m_technical_efficiency_vs_truthMu, "technical_efficiency_vs_truthMu");
-  book(m_technical_efficiency_vs_actualMu, "technical_efficiency_vs_actualMu");
+  if(m_doTechEff){
+    book(m_technical_efficiency_vs_eta, "technical_efficiency_vs_eta");
+    book(m_technical_efficiency_vs_pt, "technical_efficiency_vs_pt");
+    book(m_technical_efficiency_vs_phi, "technical_efficiency_vs_phi");
+    book(m_technical_efficiency_vs_d0, "technical_efficiency_vs_d0");
+    book(m_technical_efficiency_vs_z0, "technical_efficiency_vs_z0");
+    book(m_technical_efficiency_vs_truthMu, "technical_efficiency_vs_truthMu");
+    book(m_technical_efficiency_vs_actualMu, "technical_efficiency_vs_actualMu");
+  }
 
   book(m_extended_efficiency_vs_d0, "extended_efficiency_vs_d0");
   book(m_extended_efficiency_vs_d0_abs, "extended_efficiency_vs_d0_abs");

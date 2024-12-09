@@ -1,6 +1,6 @@
 """Define methods to construct configured Pixel overlay algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -14,7 +14,7 @@ def PixelDataOverlayExtraCfg(flags, **kwargs):
 
     # We need to convert BS to RDO for data overlay
     from PixelRawDataByteStreamCnv.PixelRawDataByteStreamCnvConfig import PixelRawDataProviderAlgCfg
-    acc.merge(PixelRawDataProviderAlgCfg(flags, RDOKey=f"{flags.Overlay.BkgPrefix}PixelRDOs"))
+    acc.merge(PixelRawDataProviderAlgCfg(flags))
 
     return acc
 

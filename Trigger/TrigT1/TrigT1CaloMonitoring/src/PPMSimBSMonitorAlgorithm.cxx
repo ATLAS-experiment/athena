@@ -85,11 +85,9 @@ StatusCode PPMSimBSMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
   
   // Loop over the trigger tower objects and fill the histograms 
  
-    for (auto& myTower : vecMonTT) {
+  for (auto& myTower : vecMonTT) {
     ATH_MSG_DEBUG("PPMSimBSMonitorAlgorithm looping over TTs"); 
-
-    const double eta =  (myTower.tower)->eta();
-    const double phi =  (myTower.tower)->phi();
+    const L1CaloCoolChannelId coolId((myTower.tower)->coolId());
     const int datCp =   (myTower.tower)->cpET();
     const int datJep =  (myTower.tower)->lut_jep().empty() ? 0 :  (myTower.tower)->jepET();
     bool pedCorrOverflow = false;
@@ -156,7 +154,7 @@ StatusCode PPMSimBSMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
     
    // ---------------------Fill in error plots------------------------
     int mismatch = 0;
-    
+
     std::string groupName = "group_Mismatch_peakf_"; 
     
     if (datCp || datJep || *std::max_element(std::begin(ADC), std::end(ADC)) >= m_simulationADCCut) {
@@ -176,8 +174,11 @@ StatusCode PPMSimBSMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
           }
 	  else if (!datBcidBits[2]) { //sim no data
 	    ATH_CHECK( fillPPMEtaPhi(myTower, groupName + mismatch_map.at(3), "", 1) );
-          } 
-          ATH_MSG_DEBUG(" PeakfinderBCID sim/data Mismatch eta/phi/sim/dat: " << eta << "/" << phi << "/" << simBcidBits[2] << "/" << datBcidBits[2]);
+          }
+	  if (mismatch>0) {
+	    ATH_MSG_DEBUG("PeakfinderBCID sim/data Mismatch coolId/sim/dat: "
+			  << std::hex <<coolId.id() << std::dec << "/" << simBcidBits[2] << "/" << datBcidBits[2]);
+	  }
         } 
       }
     
@@ -201,8 +202,10 @@ StatusCode PPMSimBSMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	  else if (!datBcidBits[1]) { // sim no data
 	    ATH_CHECK( fillPPMEtaPhi(myTower, groupName + mismatch_map.at(3), "", 1) );
 	  }
-          ATH_MSG_DEBUG(" SaturatedBCID sim/data Mismatch eta/phi/sim/dat: "
-		        << eta << "/" << phi << "/" << simBcidBits[1] << "/" << datBcidBits[1]);  
+	  if (mismatch>0) {
+	    ATH_MSG_DEBUG("SaturatedBCID sim/data Mismatch coolId/sim/dat: "
+			  << std::hex <<coolId.id() << std::dec << "/" << simBcidBits[1] << "/" << datBcidBits[1]);
+	  }
 	}
       }
     }
@@ -233,8 +236,10 @@ StatusCode PPMSimBSMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	else {                    // no sim
 	  ATH_CHECK( fillPPMEtaPhi(myTower, groupName + lut_map.at(3), "", 1) );
         }
-	ATH_MSG_DEBUG(" EMTowerMismatch eta/phi/sim/dat: "
-		      << eta << "/" << phi << "/" << simCp << "/" << datCp);
+	if (mismatch>0) {
+	  ATH_MSG_DEBUG("EMTowerMismatch coolId/simCp/datCp: "
+			<< std::hex <<coolId.id() << std::dec << "/" << simCp << "/" << datCp);
+	}
       }
       
 
@@ -258,8 +263,10 @@ StatusCode PPMSimBSMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	  // no sim
 	  ATH_CHECK( fillPPMEtaPhi(myTower, groupName + lut_map.at(3), "", 1) );
         }
-	ATH_MSG_DEBUG(" EMTowerMismatch eta/phi/sim/dat: "
-		      << eta << "/" << phi << "/" << simJep << "/" << datJep);
+	if (mismatch>0) {
+	  ATH_MSG_DEBUG("EMTowerMismatch coolId/simJep/datJep: "
+			<< std::hex <<coolId.id() << std::dec << "/" << simJep << "/" << datJep);
+	}
       }
     }
 
@@ -286,8 +293,10 @@ StatusCode PPMSimBSMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	else {                    // no sim
 	  ATH_CHECK( fillPPMEtaPhi(myTower, groupName + lut_map.at(3), "", 1) );
         }
-	ATH_MSG_DEBUG(" HADTowerMismatch eta/phi/sim/dat: "
-		      << eta << "/" << phi << "/" << simCp << "/" << datCp);
+	if (mismatch>0) {
+	  ATH_MSG_DEBUG("HADTowerMismatch coolId/simCp/datCp: "
+			<< std::hex <<coolId.id() << std::dec << "/" << simCp << "/" << datCp);
+	}
       }
             
       // For LUT-JEP
@@ -311,11 +320,14 @@ StatusCode PPMSimBSMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	  ATH_CHECK( fillPPMEtaPhi(myTower, groupName + lut_map.at(3), "", 1) );
 
         }
-	ATH_MSG_DEBUG(" HADTowerMismatch eta/phi/sim/dat: "
-		      << eta << "/" << phi << "/" << simJep << "/" << datJep);
+	if (mismatch>0) {
+	  ATH_MSG_DEBUG("HADTowerMismatch coolId/simJep/datJep: "
+			<< std::hex <<coolId.id() << std::dec << "/" << simJep << "/" << datJep);
+	}
       }
     }
     
+
 
 
    
@@ -328,7 +340,6 @@ StatusCode PPMSimBSMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
     
     if (mismatch == 1) {
       std::lock_guard<std::mutex> lock(m_mutex);
-      const L1CaloCoolChannelId coolId((myTower.tower)->coolId());
       const int crate  = coolId.crate();
       const int module = coolId.module();
       crateError[crate] = 1;
@@ -426,8 +437,6 @@ StatusCode PPMSimBSMonitorAlgorithm::fillPPMEtaPhi( MonitorTT &monTT,
     offset = {0.};
   }
 
-  ATH_MSG_DEBUG("absEta: " << absEta << "offset.size(): " << offset.size());
- 
   // Fill the histograms 
   for (auto phiOffset : offset)  {
 
@@ -435,17 +444,10 @@ StatusCode PPMSimBSMonitorAlgorithm::fillPPMEtaPhi( MonitorTT &monTT,
     auto phiTT_2D = Monitored::Scalar<double>("phiTT_2D", phiMod + phiOffset);
     
     auto weight_2D = Monitored::Scalar<double>(weightName, weight); // Weight for filling 2D profile histograms; name must be included in python histogram definition
-    ATH_MSG_DEBUG("groupName: weight_2D" << weight_2D); 
     
     fill(groupName, etaTT_2D, phiTT_2D, weight_2D);
     
   }      
-
-  
-  
- 
-    
-
 
   return StatusCode::SUCCESS;
 } 

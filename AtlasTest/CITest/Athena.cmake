@@ -44,6 +44,9 @@ atlas_add_citest( PileUpPresamplingRun3
 atlas_add_citest( PileUpPresamplingRun4FullTruth
    SCRIPT RunWorkflowTests_Run4.py --CI -p -w PileUpPresampling -e '--maxEvents 5' )
 
+atlas_add_citest( DataOverlayPreparationRun3
+   SCRIPT RunWorkflowTests_Run3.py --CI -p -w MinbiasPreprocessing -e '--maxEvents 5' )
+
 atlas_add_citest( OverlayRun2MC
    SCRIPT RunWorkflowTests_Run2.py --CI -o -w MCOverlay -e '--conditionsTag OFLCOND-MC16-SDR-RUN2-12')
 
