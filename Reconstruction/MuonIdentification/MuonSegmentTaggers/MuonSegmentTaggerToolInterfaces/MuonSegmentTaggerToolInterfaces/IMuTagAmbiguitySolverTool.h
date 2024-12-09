@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IMuTagAmbiguitySolverTool_H
@@ -32,7 +32,7 @@ public:
     virtual std::vector<MuonCombined::MuonSegmentInfo> solveAmbiguities(const EventContext& ctx, std::vector<MuonCombined::MuonSegmentInfo> mtos) const = 0;
 
     virtual std::vector<MuonCombined::MuonSegmentInfo> selectBestMuTaggedSegments(
-        const EventContext& ctx, std::vector<MuonCombined::MuonSegmentInfo> mtss) const = 0;
+        const EventContext& ctx, const std::vector<MuonCombined::MuonSegmentInfo>& mtss) const = 0;
     virtual double Rseg(unsigned int nseg) const = 0;
 };
 
