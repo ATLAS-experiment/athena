@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrigGenericHypoAlg.h"
-#include "DecisionHandling/TrigCompositeUtils.h"
+#include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
 TrigGenericHypoAlg::TrigGenericHypoAlg(const std::string& name, ISvcLocator* pSvcLocator) :
