@@ -33,13 +33,6 @@ class ggF_HH_SMEFT(PowhegV2):
         # but we may use self.executable.replace("pwhg_main", "Virtual") instead at some point
         os.environ["PYTHONPATH"] += ":" + os.environ["PWD"]
 
-        # need to use libraries compatible with the environment used at compilation (so centos7)
-        # would need to use ${LHAPDF_INSTAL_PATH}/lib/python3.9/site-packages when/if the process compiles in alma9 eventually
-        lhapdf_python_path = "/cvmfs/sft.cern.ch/lcg/releases/LCG_101/MCGenerators/lhapdf/6.3.0/x86_64-centos7-gcc8-opt/lib/python3.9/site-packages"
-        os.environ["PYTHONPATH"] += ":" + lhapdf_python_path
-
-        logger.info('PYTHONPATH is now:\n{}'.format(os.environ["PYTHONPATH"]))
-
         # Add all keywords for this process, overriding defaults if required
         self.add_keyword("alphas_from_lhapdf")
         self.add_keyword("bornktmin")
@@ -206,6 +199,7 @@ class ggF_HH_SMEFT(PowhegV2):
 
         # Build the temporary path
         py_path_temp = python_lib_path + "/site-packages" + ":" + py_path_save
+
         os.environ["PYTHONPATH"] = py_path_temp
         logger.debug(f'Temporarily setting PYTHONPATH to:\n{py_path_temp}')
 
