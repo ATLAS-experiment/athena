@@ -61,19 +61,18 @@ def TileDigitsMakerCfg(flags, **kwargs):
         tileNoise = False
         tileCoherNoise = False
 
-        if flags.Overlay.DataOverlay:
-            from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
-            acc.merge( TileRawDataReadingCfg(flags, readMuRcv=False) )
-
-        from TileRecUtils.TileDQstatusConfig import TileDQstatusAlgCfg
-        acc.merge(TileDQstatusAlgCfg(flags))
-
         kwargs['InputTileDigitContainer'] = f'{flags.Overlay.BkgPrefix}TileDigitsCnt'
         kwargs['TileDQstatus'] = 'TileDQstatus'
 
-        if not flags.Overlay.DataOverlay:
+        if flags.Overlay.ByteStream:
+            from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+            acc.merge(TileRawDataReadingCfg(flags, readMuRcv=False))
+        else:
             from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
             acc.merge(SGInputLoaderCfg(flags, [f'TileDigitsContainer#{kwargs["InputTileDigitContainer"]}']))
+
+        from TileRecUtils.TileDQstatusConfig import TileDQstatusAlgCfg
+        acc.merge(TileDQstatusAlgCfg(flags))
 
     if tileNoise or tileCoherNoise or kwargs['RndmEvtOverlay']:
         if 'RndmSvc' not in kwargs:
