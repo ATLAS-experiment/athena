@@ -180,18 +180,6 @@ template<> inline bool isNeutrino(const int& p){ auto sp = std::abs(p); return s
 template<class T> inline bool isSMNeutrino(const T& p){return isSMNeutrino(p->pdg_id());}
 template<> inline bool isSMNeutrino(const int& p){ auto sp = std::abs(p); return sp == NU_E || sp == NU_MU || sp == NU_TAU;  }
 
-template<class T> inline bool isGluon(const T& p){return isGluon(p->pdg_id());}
-template<> inline bool isGluon(const int& p){ return p == GLUON; }
-
-template<class T> inline bool isPhoton(const T& p){return isPhoton(p->pdg_id());}
-template<> inline bool isPhoton(const int& p){ return p == PHOTON; }
-
-template<class T> inline bool isZ(const T& p){return isZ(p->pdg_id());}
-template<> inline bool isZ(const int& p){ return p == Z0BOSON; }
-
-template<class T> inline bool isW(const T& p){return isW(p->pdg_id());}
-template<> inline bool isW(const int& p){ return std::abs(p) == WPLUSBOSON; }
-
 /// PDG rule 4
 /// Diquarks have 4-digit numbers with nq1 >= nq2 and nq3 = 0
 /// APID: the diquarks with fourth generation are not diquarks
@@ -312,11 +300,13 @@ template<class T> inline bool isHadron(const T& p){return isHadron(p->pdg_id());
 template<> inline bool isHadron(const DecodedPID& p){ return isMeson(p) || isBaryon(p) || isTetraquark(p) || isPentaquark(p); }
 template<> inline bool isHadron(const int& p){ auto value_digits = DecodedPID(p); return isHadron(value_digits);}
 
+
 /// PDG rule 8:
 /// The pomeron and odderon trajectories and a generic reggeon trajectory
 /// of states in QCD areassigned codes 990, 9990, and 110 respectively
 template<class T> inline bool isTrajectory(const T& p){return isTrajectory(p->pdg_id());}
 template<> inline bool isTrajectory(const int& p){ return std::abs(p) == POMERON || std::abs(p) == ODDERON || std::abs(p) == REGGEON; }
+
 
 /// PDG rule 9:
 /// Two-digit numbers in the range 21–30 are provided for the Standard
@@ -328,20 +318,35 @@ template<class T> inline bool isBoson(const T& p){return isBoson(p->pdg_id());}
 template<> inline bool isBoson(const int& p){ auto sp = std::abs(p); return sp > 20 && sp < 41; }
 template<> inline bool isBoson(const DecodedPID& p){ return isBoson(p.pid()); }
 
+template<class T> inline bool isGluon(const T& p){return isGluon(p->pdg_id());}
+template<> inline bool isGluon(const int& p){ return p == GLUON; }
+
+template<class T> inline bool isPhoton(const T& p){return isPhoton(p->pdg_id());}
+template<> inline bool isPhoton(const int& p){ return p == PHOTON; }
+
+template<class T> inline bool isZ(const T& p){return isZ(p->pdg_id());}
+template<> inline bool isZ(const int& p){ return p == Z0BOSON; }
+
+template<class T> inline bool isW(const T& p){return isW(p->pdg_id());}
+template<> inline bool isW(const int& p){ return std::abs(p) == WPLUSBOSON; }
+
 /// APID: HIGGS boson is only one particle.
 template<class T> inline bool isHiggs(const T& p){return isHiggs(p->pdg_id());}
 template<> inline bool isHiggs(const int& p){ return p == HIGGSBOSON; }
 
-template<class T> inline bool isResonance(const T& p) { return isZ(p) || isW(p) || isHiggs(p) || isTop(p); } // APID: not including t' (pdg_id=8)
-
 template<class T> inline bool isGraviton(const T& p) {return isGraviton(p->pdg_id());}
 template<> inline bool isGraviton(const int& p){ return p == GRAVITON; }
 
+template<class T> inline bool isResonance(const T& p) { return isZ(p) || isW(p) || isHiggs(p) || isTop(p); } // APID: not including t' (pdg_id=8)
+
+/// PDG rule 11c:
+/// “One-of-a-kind” exotic particles are assigned numbers in the range
+/// 41–80. The subrange 61-80 can be used for new heavier fermions in
+/// generic models, where partners to the SM fermions would have codes
+/// oﬀset by 60. If required, however, other assignments could be
+/// made.
 template<class T> inline bool isLeptoQuark(const T& p){return isLeptoQuark(p->pdg_id());}
 template<> inline bool isLeptoQuark(const int& p){ return std::abs(p) == LEPTOQUARK; }
-
-template<class T> inline bool isValid(const T& p){return isValid(p->pdg_id());}
-template<> inline bool isValid(const DecodedPID& p);
 
 template<class T> inline bool isPythia8Specific(const T& p){return isPythia8Specific(p->pdg_id());}
 template<> inline bool isPythia8Specific(const DecodedPID& p){ return (p.ndigits() == 7 && p(0) == 9 && p(1) == 9);}
@@ -446,13 +451,14 @@ template<> inline bool isGaugino(const int& p){ auto value_digits = DecodedPID(p
 /// the quantum numbers are specified by tech, ij, where i and j are 1 or 2. nLis then 2i+j. The coloron
 /// V8, is a heavy gluon color octet and thus is 3100021
 template<class T> inline bool isTechnicolor(const T& p){return isTechnicolor(p->pdg_id());}
-template<> inline bool isTechnicolor(const DecodedPID& p){return (p.ndigits() == 7 &&  p(0) == 3 && (p(1) == 0 || p(0) == 1) && isValid(p.shift(2)) && !isGenSpecific(p.shift(2).pid()));}
+template<> inline bool isTechnicolor(const DecodedPID& p){ auto pp = (p.ndigits()==7) ? p.shift(2) : DecodedPID(0); return (p.ndigits() == 7 &&  p(0) == 3 && (p(1) == 0 || p(0) == 1) &&
+                                                                                           ( isQuark(pp) || isLepton(pp) || isBoson(pp) || isGlueball(pp) || isDiquark(pp) || isHadron(pp) ) ); }
 template<> inline bool isTechnicolor(const int& p){ auto value_digits = DecodedPID(p); return isTechnicolor(value_digits);}
 
 /// PDG rule 11f
 /// Excited (composite) quarks and leptons are identified by setting n= 4 and nr= 0
 template<class T> inline bool isExcited(const T& p){return isExcited(p->pdg_id());}
-template<> inline bool isExcited(const DecodedPID& p){return (p.ndigits() == 7 && (p(0) == 4 && p(1) == 0 ) && (isLepton(p.shift(2))||isQuark(p.shift(2))) );}
+template<> inline bool isExcited(const DecodedPID& p){ auto pp = (p.ndigits()==7) ? p.shift(2) : DecodedPID(0); return (p.ndigits() == 7 && (p(0) == 4 && p(1) == 0 ) && (isLepton(pp) || isQuark(pp)) );}
 template<> inline bool isExcited(const int& p){ auto value_digits = DecodedPID(p); return isExcited(value_digits);}
 
 /// PDG rule 11g:
@@ -549,7 +555,8 @@ template<> inline bool isDM(const int& p){ auto sp = std::abs(p); return (sp >= 
 /// as far as possible. Thus 4900021 is the gauge boson g_v of a confining gauge field, 490000n_{q_v} and 490001n_{l_v} fundamental
 /// constituents charged or not under this, 4900022 is the γ_v of a non-confining field, and 4900n_{q_{v1}}n_{q_{v2}}n_J a Hidden Valley meson.
 template<class T> inline bool isHiddenValley(const T& p){return isHiddenValley(p->pdg_id());}
-template<> inline bool isHiddenValley(const DecodedPID& p){return (p.ndigits() == 7 &&  p(0) == 4 && p(1) == 9 && isValid(p.shift(2)));}
+template<> inline bool isHiddenValley(const DecodedPID& p){ auto pp = (p.ndigits()==7) ? p.shift(2) : DecodedPID(0);  return (p.ndigits() == 7 &&  p(0) == 4 && p(1) == 9 &&
+                                                                                           ( isQuark(pp) || isLepton(pp) || isBoson(pp) || isGlueball(pp) || isDiquark(pp) || isHadron(pp) ) ); }
 template<> inline bool isHiddenValley(const int& p){ auto value_digits = DecodedPID(p); return isHiddenValley(value_digits);}
 
 /// In addition, there is a need to identify ”Q-ball” and similar very exotic (multi-charged) particles which may have large, non-integer charge.
@@ -586,11 +593,11 @@ template<> inline bool isBSM(const DecodedPID& p){
   if (std::abs(p.pid()) > 39 && std::abs(p.pid()) < 81) return true;
   if (std::abs(p.pid()) > 6 && std::abs(p.pid()) < 9) return true;
   if (isSUSY(p)) return true;
+  if (isGenericMultichargedParticle(p)) return true;
   if (isTechnicolor(p)) return true;
   if (isExcited(p)) return true;
   if (isKK(p)) return true;
   if (isHiddenValley(p)) return true;
-  if (isGenericMultichargedParticle(p)) return true;
   return false;
 }
 template<> inline bool isBSM(const int& p){
@@ -607,7 +614,12 @@ template<> inline bool isTransportable(const DecodedPID& p){ return isPhoton(p.p
 template<> inline bool isTransportable(const int& p){ auto value_digits = DecodedPID(p); return isTransportable(value_digits);}
 
 /// Av: we implement here an ATLAS-sepcific convention: all particles which are 99xxxxx are fine.
-template<> inline bool isValid(const DecodedPID& p){ return isHadron(p) || isTrajectory(p.pid()) || isDiquark(p) || isBSM(p) || isNucleus(p) || (std::abs(p.pid()) < 42) || isGenSpecific(p.pid()) || isGeantino(p.pid()) || isPythia8Specific(p) || isGlueball(p); }
+template<class T> inline bool isValid(const T& p){return isValid(p->pdg_id());}
+template<> inline bool isValid(const DecodedPID& p){
+  return p.pid() !=0 && ( isQuark(p) || isLepton(p) || isBoson(p) || isGlueball(p) ||
+                         isTrajectory(p.pid()) || isGenSpecific(p.pid()) || isDiquark(p) ||
+                         isBSM(p) || isHadron(p) || isNucleus(p) || isGeantino(p.pid()) ||
+                         isPythia8Specific(p) ); }
 template<> inline bool isValid(const int& p){ if (!p) return false; if (std::abs(p) < 42) return true;
   if (isGenSpecific(p)) return true;
   auto value_digits = DecodedPID(p); return isValid(value_digits);
