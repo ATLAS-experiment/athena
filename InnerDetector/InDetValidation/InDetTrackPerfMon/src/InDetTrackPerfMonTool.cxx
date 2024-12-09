@@ -51,7 +51,7 @@ StatusCode InDetTrackPerfMonTool::initialize() {
   ATH_CHECK( ManagedMonitorToolBase::initialize() );
 
   /// Retrieving trkAnaDefSvc
-  if ( not m_trkAnaDefSvc ) {
+  if( not m_trkAnaDefSvc ) {
     ATH_MSG_DEBUG( "Retrieving TrkAnaDefSvc" << m_anaTag.value() );
     m_trkAnaDefSvc = Gaudi::svcLocator()->service( "TrkAnaDefSvc"+m_anaTag.value() );
     ATH_CHECK( m_trkAnaDefSvc.isValid() );
@@ -61,9 +61,13 @@ StatusCode InDetTrackPerfMonTool::initialize() {
 
   ATH_CHECK( m_trigDecTool.retrieve(
       EnableTool{ m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() } ) );
+  ATH_CHECK( m_trackQualitySelectionTool.retrieve() );
+  ATH_CHECK( m_vertexQualitySelectionTool.retrieve() );
   ATH_CHECK( m_roiSelectionTool.retrieve(
       EnableTool{ m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() } ) );
   ATH_CHECK( m_trackRoiSelectionTool.retrieve(
+      EnableTool{ m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger()} ) );
+  ATH_CHECK( m_vertexRoiSelectionTool.retrieve(
       EnableTool{ m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger()} ) );
   ATH_CHECK( m_trackMatchingTool.retrieve( EnableTool{ m_doMatch.value() } ) );
   ATH_CHECK( m_trkAnaInfoWriteTool.retrieve( EnableTool{ m_writeOut.value() } ) );
@@ -195,29 +199,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
   /// -------------------------------
   /// --- Vertex quality selector ---
   /// -------------------------------
-  /// FIXME - for the time being, only copy veritces from FULL
-  /// will need selector tool, as for the tracks
-  if( m_trkAnaDefSvc->useOffline() ) {
-    ATH_CHECK( thisTrkAnaCollections.fillOfflVertexVec(
-        thisTrkAnaCollections.offlVertexVec( IDTPM::TrackAnalysisCollections::FULL ),
-        IDTPM::TrackAnalysisCollections::FS ) );
-  }
-
-  if( m_trkAnaDefSvc->useEFTrigger() ) {
-    ATH_CHECK( thisTrkAnaCollections.fillTrigVertexVec(
-        thisTrkAnaCollections.trigVertexVec( IDTPM::TrackAnalysisCollections::FULL ),
-        IDTPM::TrackAnalysisCollections::FS ) );
-  }
-
-  if( m_trkAnaDefSvc->useTruth() ) {
-    ATH_CHECK( thisTrkAnaCollections.fillTruthVertexVec(
-        thisTrkAnaCollections.truthVertexVec( IDTPM::TrackAnalysisCollections::FULL ),
-        IDTPM::TrackAnalysisCollections::FS ) );
-  }
-
-  /// Debug printout
-  ATH_MSG_DEBUG( "Vertices after initial FullScan copy: " << 
-      thisTrkAnaCollections.printVertexInfo( IDTPM::TrackAnalysisCollections::FS ) );
+  ATH_CHECK( m_vertexQualitySelectionTool->selectVertices( thisTrkAnaCollections ) );
 
   /// -------------------------------------------
   /// -- Main loop over configured TrkAnalyses --
@@ -232,11 +214,14 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
     /// ----------------------------------
     /// --------- Chain selector ---------
     /// ----------------------------------
-    unsigned decisionType = TrigDefs::Physics; // TrigDefs::includeFailedDecisions;
 
     /// skipping TrkAnalysis if chain is not passed for this event
-    if( !thisChain.empty() and thisChain != "Offline" and m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() ) {
-      if( not m_trigDecTool->isPassed( thisChain, decisionType ) ) { 
+    if( m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() and 
+        not thisChain.empty() and thisChain != "Offline" ) {
+
+      unsigned decisionType = TrigDefs::Physics; // TrigDefs::includeFailedDecisions;
+
+      if( not m_trigDecTool->isPassed( thisChain, decisionType ) ) {
         ATH_MSG_DEBUG( "Trigger chain " << thisChain << " is not fired. Skipping" );
         continue;
       }
@@ -262,22 +247,35 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       /// clear collections in this RoI from previous iteration
       thisTrkAnaCollections.clear( IDTPM::TrackAnalysisCollections::InRoI );
 
+      /// Getting RoI ElementLink
       ElementLink< TrigRoiDescriptorCollection > thisRoiLink;
-      if( m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() ) thisRoiLink = selectedRois.at(ir).link;
-      const TrigRoiDescriptor* const* thisRoi = m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() ? 
-                                                thisRoiLink.cptr() : nullptr;
-      std::string thisRoiStr = m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger()?
-                               std::string( **thisRoi ) : "Full Scan";
+      std::string thisRoiStr( "Full Scan" );
+      if( m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() ) {
+        thisRoiLink = selectedRois.at(ir).link;
+
+        /// skip non-valid RoI link
+        if( not thisRoiLink.isValid() ) {
+          ATH_MSG_WARNING( "Found non-valid RoI ElementLink" );
+          continue;
+        }
+
+        /// Updating RoI string
+        thisRoiStr = std::string( **thisRoiLink.cptr() );
+      }
 
       ATH_MSG_DEBUG( "Processing selected RoI : " << thisRoiStr );
 
-      /// ----------------------------------
-      /// --- Track selection within RoI ---
-      /// ----------------------------------
+      /// ---------------------------------------------------
+      /// --- Track (and Vertex) selection within the RoI ---
+      /// ---------------------------------------------------
       if( m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() ) {
         /// Tracks in RoI selection
         ATH_CHECK( m_trackRoiSelectionTool->selectTracksInRoI(
-                                thisTrkAnaCollections, thisRoiLink ) );
+                          thisTrkAnaCollections, thisRoiLink ) );
+
+        /// Vertices in RoI selection
+        ATH_CHECK( m_vertexRoiSelectionTool->selectVerticesInRoI(
+                          thisTrkAnaCollections, thisRoiLink ) );
       } else {
         /// No RoI selection required. Copying FullScan vectors
         thisTrkAnaCollections.copyFS();
@@ -292,7 +290,9 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       /// --- Test/Reference Matching ---
       /// -------------------------------
       std::string chainRoIName = thisChain;
-      if( m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() ) chainRoIName += "_RoI_"+std::to_string(ir);
+      if( m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() ) {
+        chainRoIName += "_RoI_"+std::to_string(ir);
+      }
 
       if( m_doMatch.value() ) {
         ATH_MSG_DEBUG( "Doing Test-Reference matching..." );
@@ -310,8 +310,8 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       /// ---------------------------------------
       if( m_writeOut ) {
         ATH_CHECK( m_trkAnaInfoWriteTool->write( outTrkAnaInfoContHandle,
-                                      thisTrkAnaCollections,
-                                      thisChain, ir, thisRoiStr ) );
+                                                 thisTrkAnaCollections,
+                                                 thisChain, ir, thisRoiStr ) );
       }
 
     } // close selectedRois loop

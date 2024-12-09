@@ -29,7 +29,10 @@
 #include "InDetTrackPerfMon/ITrackAnalysisDefinitionSvc.h"
 #include "TrackAnalysisCollections.h"
 #include "RoiSelectionTool.h"
-#include "InDetTrackPerfMon/ITrackSelectionTool.h"
+#include "TrackRoiSelectionTool.h"
+#include "VertexRoiSelectionTool.h"
+#include "ITrackSelectionTool.h"
+#include "IVertexSelectionTool.h"
 #include "ITrackMatchingTool.h"
 #include "TrackAnalysisPlotsMgr.h"
 #include "TrackAnalysisInfoWriteTool.h"
@@ -112,11 +115,17 @@ private :
     ToolHandle< IDTPM::ITrackSelectionTool > m_trackQualitySelectionTool {
         this, "TrackQualitySelectionTool", "IDTPM::InDetTrackPerfMon/ITrackSelectionTool", "Wrapper-tool to perform general quality-based track(truth) selection" };
 
+    ToolHandle< IDTPM::IVertexSelectionTool > m_vertexQualitySelectionTool {
+        this, "VertexQualitySelectionTool", "IDTPM::InDetTrackPerfMon/IVertexSelectionTool", "Wrapper-tool to perform general quality-based (truth) vertex selection" };
+
     ToolHandle< IDTPM::RoiSelectionTool > m_roiSelectionTool {
         this, "RoiSelectionTool", "IDTPM::InDetTrackPerfMon/RoiSelectionTool", "Tool to retrieve and select RoIs" };
 
-    ToolHandle< IDTPM::ITrackSelectionTool > m_trackRoiSelectionTool {
-        this, "TrackRoiSelectionTool", "IDTPM::InDetTrackPerfMon/ITrackSelectionTool", "Tool to select track within a RoI" };
+    ToolHandle< IDTPM::TrackRoiSelectionTool > m_trackRoiSelectionTool {
+        this, "TrackRoiSelectionTool", "IDTPM::InDetTrackPerfMon/TrackRoiSelectionTool", "Tool to select track within a RoI" };
+
+    ToolHandle< IDTPM::VertexRoiSelectionTool > m_vertexRoiSelectionTool {
+        this, "VertexRoiSelectionTool", "IDTPM::InDetTrackPerfMon/VertexRoiSelectionTool", "Tool to select vertices within a RoI" };
 
     ToolHandle< IDTPM::ITrackMatchingTool > m_trackMatchingTool {
         this, "TrackMatchingTool", "IDTPM::InDetTrackPerfMon/ITrackMatchingTool", "Tool to match test to reference tracks and viceversa" };

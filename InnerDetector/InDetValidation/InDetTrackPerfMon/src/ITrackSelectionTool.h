@@ -16,9 +16,6 @@
 /// Athena includes
 #include "AsgTools/IAsgTool.h"
 
-class TrigRoiDescriptorCollection;
-template <typename TrigRoiDescriptorCollection> class ElementLink;
-
 namespace IDTPM {
 
   class TrackAnalysisCollections;
@@ -32,10 +29,6 @@ namespace IDTPM {
 
     virtual StatusCode selectTracks(
         TrackAnalysisCollections& trkAnaColls ) = 0;
-
-    virtual StatusCode selectTracksInRoI(
-        TrackAnalysisCollections& trkAnaColls,
-        const ElementLink< TrigRoiDescriptorCollection >& roiLink ) = 0;
 
   };
 

@@ -19,7 +19,7 @@
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 
 /// Local include(s)
-#include "InDetTrackPerfMon/ITrackSelectionTool.h"
+#include "ITrackSelectionTool.h"
 
 /// EDM includes
 #include "xAODTracking/TrackParticle.h"
@@ -48,14 +48,6 @@ namespace IDTPM {
     /// Main Track selection method
     virtual StatusCode selectTracks(
         TrackAnalysisCollections& trkAnaColls ) override;
-
-    /// Dummy method - unused
-    virtual StatusCode selectTracksInRoI(
-        TrackAnalysisCollections&,
-        const ElementLink< TrigRoiDescriptorCollection >& ) override {
-      ATH_MSG_WARNING( "selectTracksInRoI method is disabled" );
-      return StatusCode::SUCCESS;
-    }
 
     bool accept( const xAOD::TrackParticle& offTrack,
                  const std::vector< const xAOD::TruthParticle* >& truthVec ) const;

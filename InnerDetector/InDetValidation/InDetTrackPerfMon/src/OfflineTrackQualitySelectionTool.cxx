@@ -5,6 +5,7 @@
 #include "OfflineTrackQualitySelectionTool.h"
 #include "TrackAnalysisCollections.h"
 #include "TrackParametersHelper.h"
+
 namespace IDTPM {
 
 OfflineTrackQualitySelectionTool::OfflineTrackQualitySelectionTool(const std::string& name)
@@ -29,14 +30,6 @@ StatusCode OfflineTrackQualitySelectionTool::selectTracks(
   return StatusCode::SUCCESS;
 }
 
-StatusCode OfflineTrackQualitySelectionTool::selectTracksInRoI(
-    TrackAnalysisCollections& /*trkAnaColls*/,
-    const ElementLink<TrigRoiDescriptorCollection>& /*roiLink*/) {
-  ATH_MSG_FATAL( "using selectTracksInRoI implementation for this tool is an invalid use case" );
-  return StatusCode::FAILURE;
-}
-
-
 bool OfflineTrackQualitySelectionTool::accept(const xAOD::TrackParticle* track) {
   if (m_maxPt!=-9999.   and (pT(*track)) > m_maxPt )              return false;  
   if (m_maxEta!=-9999.  and (eta(*track)) > m_maxEta )              return false;
@@ -58,6 +51,5 @@ bool OfflineTrackQualitySelectionTool::accept(const xAOD::TrackParticle* track) 
   if (m_maxAbsQoPT!=-9999. and std::fabs(qOverPT(*track)) > m_maxAbsQoPT )  return false; 
   return true;
 }
-
 
 }  // namespace IDTPM

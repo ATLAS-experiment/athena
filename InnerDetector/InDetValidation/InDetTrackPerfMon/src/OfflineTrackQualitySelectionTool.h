@@ -1,16 +1,17 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
+
 #ifndef INDETTRACKPERFMON_IDTPM_OFFLINETRACKQUALITYSELECTIONTOOL_H
 #define INDETTRACKPERFMON_IDTPM_OFFLINETRACKQUALITYSELECTIONTOOL_H
 
-// Package includes
-#include "InDetTrackPerfMon/ITrackSelectionTool.h"
+// Local includes
+#include "ITrackSelectionTool.h"
 
 // Framework includes
 #include "AsgTools/AsgTool.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
-#include "AthLinks/ElementLink.h"
+
 // STL includes
 #include <string>
 
@@ -21,25 +22,27 @@ namespace IDTPM {
  * @brief Uses InDetTrackSelection tool and working points defined there for tracks quality selection
  * In future it is possible that the selection cuts & logic will be moved here
  **/
-class OfflineTrackQualitySelectionTool : public virtual IDTPM::ITrackSelectionTool, public asg::AsgTool {
+
+class OfflineTrackQualitySelectionTool :
+    public virtual IDTPM::ITrackSelectionTool, public asg::AsgTool {
+
 public:
+
   ASG_TOOL_CLASS( OfflineTrackQualitySelectionTool, ITrackSelectionTool );
-  OfflineTrackQualitySelectionTool(const std::string& name);
+
+  OfflineTrackQualitySelectionTool( const std::string& name );
 
   virtual StatusCode initialize() override;
 
   virtual StatusCode selectTracks(
       TrackAnalysisCollections& trkAnaColls ) override;
 
-  virtual StatusCode selectTracksInRoI(
-      TrackAnalysisCollections& trkAnaColls,
-      const ElementLink< TrigRoiDescriptorCollection >& roiLink ) override;
-
-
-  bool accept(const xAOD::TrackParticle* track);
+  bool accept( const xAOD::TrackParticle* track );
 
 private:
-  ToolHandle<InDet::IInDetTrackSelectionTool> m_offlineTool{this, "offlineTool", "", "Instance name of track selection tool"};
+
+  ToolHandle< InDet::IInDetTrackSelectionTool > m_offlineTool { this, "offlineTool", "", "Instance name of track selection tool" };
+
   FloatProperty   m_minAbsEta   { this, "minAbsEta", -9999., "Lower cut on |eta| for truth particles" };
   FloatProperty   m_minAbsPhi   { this, "minAbsPhi", -9999., "Lower cut on |phi| for truth particles" };
   FloatProperty   m_maxAbsPhi   { this, "maxAbsPhi", -9999., "Higher cut on |phi| for truth particles" };
