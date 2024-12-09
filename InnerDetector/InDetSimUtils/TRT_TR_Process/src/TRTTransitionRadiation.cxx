@@ -78,7 +78,7 @@ TRTTransitionRadiation::~TRTTransitionRadiation() {
 }
 
 ///////////////////////////////////////////////////////////////////////////
-void TRTTransitionRadiation::AddRadiatorParameters(TRTRadiatorParameters p) {
+void TRTTransitionRadiation::AddRadiatorParameters(const TRTRadiatorParameters& p) {
 
   ATH_MSG_DEBUG(" New Radiator parameters being defined for TR process");
   ATH_MSG_DEBUG(" Volume " << p.GetLogicalVolume()->GetName());

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRTTRANSITIONRADIATION_H
@@ -37,7 +37,7 @@ public:
   G4double GetMeanFreePath(const G4Track& aTrack, G4double, G4ForceCondition *);
   G4VParticleChange* PostStepDoIt(const G4Track& aTrack, const G4Step& aStep);
 
-  void AddRadiatorParameters(TRTRadiatorParameters p);
+  void AddRadiatorParameters(const TRTRadiatorParameters& p);
 
 private:
 
