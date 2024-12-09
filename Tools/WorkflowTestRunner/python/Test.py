@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from enum import Enum
 from logging import Logger
 from os import environ
@@ -74,6 +74,7 @@ class WorkflowType(Enum):
     MCPileUpReco = "MCPileUpReco"
     DataReco = "DataReco"
     PileUpPresampling = "PileUpPresampling"
+    MinbiasPreprocessing = "MinbiasPreprocessing"
     Derivation = "Derivation"
 
     def __str__(self):
