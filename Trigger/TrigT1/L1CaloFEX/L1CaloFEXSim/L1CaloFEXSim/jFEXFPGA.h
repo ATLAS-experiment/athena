@@ -15,35 +15,29 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXToolInterfaces/IjFEXFPGA.h"
-#include "L1CaloFEXSim/jTower.h"
-#include "L1CaloFEXSim/jTowerContainer.h"
-#include "L1CaloFEXToolInterfaces/IjFEXSmallRJetAlgo.h"
-#include "L1CaloFEXToolInterfaces/IjFEXLargeRJetAlgo.h"
-#include "L1CaloFEXToolInterfaces/IjFEXtauAlgo.h"
-#include "L1CaloFEXToolInterfaces/IjFEXsumETAlgo.h"
-#include "L1CaloFEXToolInterfaces/IjFEXmetAlgo.h"
-#include "L1CaloFEXToolInterfaces/IjFEXForwardJetsAlgo.h"
-#include "L1CaloFEXToolInterfaces/IjFEXForwardElecAlgo.h"
-#include "L1CaloFEXToolInterfaces/IjFEXPileupAndNoise.h"
-#include "L1CaloFEXToolInterfaces/IjFEXFormTOBs.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "L1CaloFEXSim/jFEXOutputCollection.h"
-#include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
-#include "TrigConfData/L1Menu.h"
-#include <vector>
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/IClassIDSvc.h"
-#include "SGTools/StlMapClids.h"
-#include "SGTools/TestStore.h"
-#include "StoreGate/WriteHandle.h"
-#include "StoreGate/ReadHandle.h"
-#include "StoreGate/StoreGateSvc.h"
+#include "L1CaloFEXSim/jTowerContainer.h" //handle
+#include "L1CaloFEXToolInterfaces/IjFEXSmallRJetAlgo.h" //handle
+#include "L1CaloFEXToolInterfaces/IjFEXLargeRJetAlgo.h" //handle
+#include "L1CaloFEXToolInterfaces/IjFEXtauAlgo.h" //handle
+#include "L1CaloFEXToolInterfaces/IjFEXsumETAlgo.h" //handle
+#include "L1CaloFEXToolInterfaces/IjFEXmetAlgo.h" //handle
+#include "L1CaloFEXToolInterfaces/IjFEXForwardJetsAlgo.h" //handle
+#include "L1CaloFEXToolInterfaces/IjFEXForwardElecAlgo.h" //handle
+#include "L1CaloFEXToolInterfaces/IjFEXPileupAndNoise.h" //handle
+#include "L1CaloFEXToolInterfaces/IjFEXFormTOBs.h" //handle
+#include "CaloEvent/CaloCellContainer.h" //member
 
-#include "L1CaloFEXSim/jFEXTOB.h"
+#include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
+#include "TrigConfData/L1Menu.h" //handle
+
+#include "StoreGate/ReadHandle.h"
+
+#include <vector>
+#include <memory>
+#include <unordered_map>
+
+class jFEXOutputCollection;
+class jFEXTOB;
 
 namespace LVL1 {
   
@@ -114,8 +108,8 @@ namespace LVL1 {
     std::vector<std::unique_ptr<jFEXTOB>> m_sumET_tobwords;
     std::vector<std::unique_ptr<jFEXTOB>> m_Met_tobwords;    
       
-    int m_id;
-    int m_jfexid;
+    int m_id{};
+    int m_jfexid{};
 
     std::vector<std::vector<uint32_t>> m_FwdEl_tobwords;
 
@@ -131,8 +125,8 @@ namespace LVL1 {
     std::unordered_map<int, jFEXForwardJetsInfo> m_FCALJets; 
     std::unordered_map<uint, jFEXForwardElecInfo> m_ForwardElecs;
 
-    int m_SRJetET;
-    int m_LRJetET;
+    int m_SRJetET{};
+    int m_LRJetET{};
 
     CaloCellContainer m_sCellsCollection;
 

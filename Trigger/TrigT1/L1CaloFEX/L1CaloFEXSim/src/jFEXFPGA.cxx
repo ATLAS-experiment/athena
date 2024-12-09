@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -11,11 +11,9 @@
 
 #include "L1CaloFEXSim/jFEXFPGA.h"
 #include "L1CaloFEXSim/jTower.h"
-#include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/jFEXSmallRJetAlgo.h" 
 #include "L1CaloFEXSim/jFEXLargeRJetAlgo.h" 
 #include "L1CaloFEXSim/jFEXOutputCollection.h" 
-#include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 #include "L1CaloFEXSim/jFEXtauAlgo.h" 
 #include "L1CaloFEXSim/jFEXsumETAlgo.h" 
 #include "L1CaloFEXSim/jFEXmetAlgo.h" 
@@ -25,21 +23,7 @@
 #include "L1CaloFEXSim/jFEXForwardElecInfo.h"
 #include "L1CaloFEXSim/jFEXPileupAndNoise.h"
 #include "L1CaloFEXSim/jFEXFormTOBs.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include <vector>
-#include "TrigConfData/L1Menu.h"
-#include "TH1F.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/IClassIDSvc.h"
-#include "StoreGate/WriteHandle.h"
-#include "StoreGate/ReadHandle.h"
-#include "SGTools/TestStore.h"
-#include "StoreGate/StoreGateSvc.h"
+#include "L1CaloFEXSim/jFEXTOB.h" 
 
 
 namespace LVL1 {
@@ -153,13 +137,13 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
     inputOutputCollection->addValue_pileup("pileup_rho_HAD2", pileup_rho[2]);
     inputOutputCollection->addValue_pileup("pileup_rho_HAD3", pileup_rho[3]);
     inputOutputCollection->addValue_pileup("pileup_rho_FCAL", pileup_rho[4]);
-    inputOutputCollection->addValue_pileup("pileup_map_ID"  , pileup_ID);
-    inputOutputCollection->addValue_pileup("pileup_map_Et_values_HAD_jet"  , pileup_HAD_jet);
-    inputOutputCollection->addValue_pileup("pileup_map_Et_values_EM_jet"   , pileup_EM_jet);
-    inputOutputCollection->addValue_pileup("pileup_map_Et_values_Total_jet", pileup_Total_jet);
-    inputOutputCollection->addValue_pileup("pileup_map_Et_values_HAD_met"  , pileup_HAD_met);
-    inputOutputCollection->addValue_pileup("pileup_map_Et_values_EM_met"   , pileup_EM_met);
-    inputOutputCollection->addValue_pileup("pileup_map_Et_values_Total_met", pileup_Total_met);
+    inputOutputCollection->addValue_pileup("pileup_map_ID"  , std::move(pileup_ID));
+    inputOutputCollection->addValue_pileup("pileup_map_Et_values_HAD_jet"  , std::move(pileup_HAD_jet));
+    inputOutputCollection->addValue_pileup("pileup_map_Et_values_EM_jet"   , std::move(pileup_EM_jet));
+    inputOutputCollection->addValue_pileup("pileup_map_Et_values_Total_jet", std::move(pileup_Total_jet));
+    inputOutputCollection->addValue_pileup("pileup_map_Et_values_HAD_met"  , std::move(pileup_HAD_met));
+    inputOutputCollection->addValue_pileup("pileup_map_Et_values_EM_met"   , std::move(pileup_EM_met));
+    inputOutputCollection->addValue_pileup("pileup_map_Et_values_Total_met", std::move(pileup_Total_met));
     inputOutputCollection->fill_pileup();    
     
     if(m_id==0 || m_id==3) {
@@ -424,9 +408,9 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
 	  uint meta = elCluster.getCoreIeta();//check whether this is the one used by the Trigger conf
     
 	  //retrieve jet rejection thresholds from trigger configuration
-	  auto wp_loose  = thr_jEM.isolation(TrigConf::Selection::WP::LOOSE, meta);
-	  auto wp_medium = thr_jEM.isolation(TrigConf::Selection::WP::MEDIUM, meta);
-	  auto wp_tight  = thr_jEM.isolation(TrigConf::Selection::WP::TIGHT, meta);
+	  const auto & wp_loose  = thr_jEM.isolation(TrigConf::Selection::WP::LOOSE, meta);
+	  const auto & wp_medium = thr_jEM.isolation(TrigConf::Selection::WP::MEDIUM, meta);
+	  const auto & wp_tight  = thr_jEM.isolation(TrigConf::Selection::WP::TIGHT, meta);
 	  Ciso.clear();
 	  Chad1.clear();
 	  Chad2.clear();
