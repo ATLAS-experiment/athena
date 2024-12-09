@@ -71,7 +71,7 @@ def MCMC_generator_map(generatorDict, tagger='GN2v01'):
         elif 'Pythia8' in generatorDict:
             generator = 'Pythia8'
     if 'Sherpa' in generatorDict:
-        sherpa_versions = ['Sherpa2210', 'Sherpa2211', 'Sherpa2212', 'Sherpa2214']
+        sherpa_versions = ['Sherpa2210', 'Sherpa2211', 'Sherpa2212', 'Sherpa2214', 'Sherpa2216']
         generator = 'Sherpa'+generatorDict['Sherpa'].replace('.', '')
         if any(generator.startswith(version) for version in sherpa_versions):
             generator = generator[:10]
