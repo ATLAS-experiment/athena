@@ -484,26 +484,28 @@ def ActsSeedingCfg(flags) -> ComponentAccumulator:
         seedKeyStrips = f'{flags.Tracking.ActiveConfig.extension}StripSeeds'
         trackKeyPixels = f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}PixelTracks'
         trackKeyStrips = f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}StripTracks'
-        particleKeyPixels = f'SiSPSeedSegments{flags.Tracking.ActiveConfig.extension}Pixel'
-        particleKeyStrips = f'SiSPSeedSegments{flags.Tracking.ActiveConfig.extension}Strip'
+        particleKeyPixels = f'SiSPSeedSegments{flags.Tracking.ActiveConfig.extension}PixelTrackParticles'
+        particleKeyStrips = f'SiSPSeedSegments{flags.Tracking.ActiveConfig.extension}StripTrackParticles'
         acc.merge(ActsSeedToTrackCnvAlgPixelCfg(flags, 
                                            name=f"{flags.Tracking.ActiveConfig.extension}PixelSeedToTrackCnvAlg",
                                            SeedContainerKey=seedKeyPixels,
                                            ACTSTracksLocation=trackKeyPixels))
 
-        acc.merge(ActsSeedToTrackCnvAlgStripCfg(flags, 
-                                           name=f"{flags.Tracking.ActiveConfig.extension}StripSeedToTrackCnvAlg",
-                                           SeedContainerKey=seedKeyStrips,
-                                           ACTSTracksLocation=trackKeyStrips))
+        if not flags.Tracking.doITkFastTracking:
+            acc.merge(ActsSeedToTrackCnvAlgStripCfg(flags, 
+                                                    name=f"{flags.Tracking.ActiveConfig.extension}StripSeedToTrackCnvAlg",
+                                                    SeedContainerKey=seedKeyStrips,
+                                                    ACTSTracksLocation=trackKeyStrips))
         from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
         acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, 
                                                     name=f"{flags.Tracking.ActiveConfig.extension}PixelTracksSeedToTrackParticleCnvAlg",
                                                     TrackParticlesOutKey=particleKeyPixels,
                                                     ACTSTracksLocation=[trackKeyPixels]))
-        acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, 
-                                                    name=f"{flags.Tracking.ActiveConfig.extension}StripTracksSeedToTrackParticleCnvAlg",
-                                                    TrackParticlesOutKey=particleKeyStrips,
-                                                    ACTSTracksLocation=[trackKeyStrips]))
+        if not flags.Tracking.doITkFastTracking:
+            acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, 
+                                                        name=f"{flags.Tracking.ActiveConfig.extension}StripTracksSeedToTrackParticleCnvAlg",
+                                                        TrackParticlesOutKey=particleKeyStrips,
+                                                        ACTSTracksLocation=[trackKeyStrips]))
     return acc
 
 

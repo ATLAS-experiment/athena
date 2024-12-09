@@ -6,8 +6,9 @@ from TrkConfig.TrackingPassFlags import printActiveConfig
 from AthenaCommon.Constants import WARNING, INFO
 
 _flags_set = []  # For caching
-_extensions_list = [] # For caching
-_actsExtensions  = ['Acts', 'ActsFast', 'ActsConversion', 'ActsLargeRadius', 'ActsLowPt'] # Possible Acts Passes/Configurations
+_extensions_list = [] # For caching, possible legacy / validate Passes/Configurations
+_actsExtensions  = ['Acts', 'ActsFast', 'ActsConversion', 'ActsLargeRadius', 'ActsLowPt'] # Possible Acts Alone Passes/Configurations
+_outputExtensions  = [] # Passes/Configurations to be passed to the output job option
 
 def CombinedTrackingPassFlagSets(flags):
     global _flags_set
@@ -519,6 +520,9 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
         if extension not in _actsExtensions:
             _extensions_list.append(extension)
 
+        # Add the extension to the output job option
+        _outputExtensions.append(extension)
+
         # Data Preparation
         # According to the tracking pass we have different data preparation 
         # sequences. We may have:
@@ -650,7 +654,7 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
             
     # output
     from InDetConfig.ITkTrackOutputConfig import ITkTrackRecoOutputCfg
-    result.merge(ITkTrackRecoOutputCfg(flags, _extensions_list))
+    result.merge(ITkTrackRecoOutputCfg(flags, _outputExtensions))
     result.printConfig(withDetails = False, summariseProps = False)
     return result
 
