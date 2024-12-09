@@ -65,10 +65,12 @@ def fromRunArgs(runArgs):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
 
     cfg.merge(
-        SetupMetaDataForStreamCfg(flags, "EVNT", disableEventTag=True),
-        createMetadata=[
-            MetadataCategory.IOVMetaData,
-        ],
+        SetupMetaDataForStreamCfg(
+            flags,
+            "EVNT",
+            disableEventTag=True,
+            createMetadata=[MetadataCategory.IOVMetaData],
+        )
     )
 
     # Post-include
