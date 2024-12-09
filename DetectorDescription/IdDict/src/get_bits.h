@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-*/
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ */
 
 #ifndef IDDICT_get_bits_H
 #define IDDICT_get_bits_H
@@ -10,17 +10,17 @@
 
 class IdDictRegion;
 
-namespace IdDict{
-  using RV = std::vector <IdDictRegion*>; 
-  
-  /** 
+namespace IdDict {
+  using RV = std::vector <IdDictRegion*>;
+
+  /**
    * Compute the OR of all fields at <level>, for the
    * subset of overlapping regions
    **/
   void
-  compute_bits (const RV& regions, size_t level, const std::string& group);
-  
-  
+  compute_bits(const RV& regions, size_t level, const std::string& group);
+
+
   // This function is recursively called for each level to get the
   // number of bits. By "definition" we require regions in the same
   // group to overlap to have a uniform bit-allocation for a group.
@@ -37,8 +37,7 @@ namespace IdDict{
   // The calculation of bits needed for a particular level is done
   // in compute_bits before the overlapping is check for this level.
   //
-  void 
-  get_bits (const RV& regions, size_t level, const std::string& group);
+  void
+  get_bits(const RV& regions, size_t level, const std::string& group);
 }
 #endif
-
