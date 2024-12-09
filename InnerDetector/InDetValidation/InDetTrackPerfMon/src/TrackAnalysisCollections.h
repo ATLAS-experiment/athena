@@ -53,6 +53,9 @@ namespace IDTPM {
     /// - InRoI = selected track collections inside the RoI
     enum Stage : size_t { FULL, FS, InRoI, NStages };
 
+    /// Enum for counting objects at various stages 
+    enum Counter : size_t { ALL, SELECTED, INROI, MATCHED, NCOUNTERS };
+
     /// Constructor 
     TrackAnalysisCollections( const std::string& anaTag );
 
@@ -214,6 +217,10 @@ namespace IDTPM {
     const std::vector< const xAOD::TrackParticle* >& trigTrackVec( Stage stage = FULL ) {
       return m_trigTrackVec[ stage ]; }
 
+    /// get counts vectors for TEST/REFERENCE track vectors at all stages
+    std::vector< size_t > testTrackCounts();
+    std::vector< size_t > refTrackCounts();
+
     /// get full TEST vertex containers
     const xAOD::TruthVertexContainer* testTruthVertexContainer();
     const xAOD::VertexContainer*      testRecoVertexContainer();
@@ -245,6 +252,10 @@ namespace IDTPM {
       return m_offlVertexVec[ stage ]; }
     const std::vector< const xAOD::Vertex* >& trigVertexVec( Stage stage = FULL ) {
       return m_trigVertexVec[ stage ]; }
+
+    /// get counts vectors for TEST/REFERENCE vertex vectors at all stages
+    std::vector< size_t > testVertexCounts();
+    std::vector< size_t > refVertexCounts();
 
     /// get track matching information 
     ITrackMatchingLookup& matches() { return *m_matches; }
