@@ -41,7 +41,7 @@ namespace {
 
 namespace xAOD {
 
-   RAuxStore::RAuxStore( const char* prefix, Bool_t topStore, EStructMode mode )
+   RAuxStore::RAuxStore( const char* prefix, ::Long64_t entry, Bool_t topStore, EStructMode mode )
        : SG::IAuxStore(),
          m_prefix( prefix ),
          m_dynPrefix( Utils::dynFieldPrefix( prefix ) ),
@@ -66,6 +66,7 @@ namespace xAOD {
          m_outputNtupleName(),
          m_outModel( nullptr ),
          m_inModel( nullptr ),
+         m_entryToLoad(entry),
          m_fields() {}
 
   RAuxStore::~RAuxStore() {
@@ -183,7 +184,7 @@ namespace xAOD {
       for( auto& fieldPair : m_fields ) {
          if( fieldPair.second.field ) {
             minEntryStatus =
-                std::min( minEntryStatus, ( fieldPair.second ).getEntry() );
+                std::min( minEntryStatus, ( fieldPair.second ).getEntry(m_entryToLoad) );
          }
       }
       return minEntryStatus;
@@ -247,7 +248,7 @@ namespace xAOD {
          auto it = m_fields.find( auxid );
          if( it != m_fields.end() ) {
             const ::Int_t result =
-                const_cast< RFieldInfo& >( it->second ).getEntry();
+                const_cast< RFieldInfo& >( it->second ).getEntry(m_entryToLoad);
             if( result < 0 ) {
                ::Error(
                    "xAOD::RAuxStore::getData",
@@ -1129,16 +1130,6 @@ namespace xAOD {
              addVectorField( fieldName.Data(), fieldTypeName.Data(), kTRUE ) );
       }
 
-      auto file = ::TFile::Open( m_inFileName.c_str(), "UPDATE" );
-
-      // Inside it's own scope to ensure it is not open when we try to read from
-      // it
-      {
-         auto ntuple = RNTupleWriter::Append(
-             std::move( m_inModel ), m_inputNtupleName, *file );
-         ntuple->Fill();
-      }
-
       // Since we just moved the model, we need to reset it
       m_inModel = RNTupleModel::Create();
       RETURN_CHECK(
@@ -1379,16 +1370,17 @@ namespace xAOD {
    /// It uses the field's inspector to determine the type and handles cases
    /// where the expected class or collection proxy is not available.
    ///
+   /// @param fieldName The name of the field in the ntuple
    /// @param auxName The name of the auxiliary field.
    /// @param isStaticField <code>kTRUE</code> if this is a static field, and
    ///                     <code>kFALSE</code> if it's a dynamic one
    ///
-   const std::type_info* RAuxStore::auxFieldType( const std::string& auxName,
-                                                  ::Bool_t isStaticField ) {
+   const std::type_info* RAuxStore::auxFieldType( const std::string& fieldName,
+                                                   const std::string& auxName,
+                                                   ::Bool_t isStaticField ) {
 
       auto inspector =
           RNTupleInspector::Create( m_inputNtupleName, m_inFileName );
-      auto fieldName = Utils::getFirstFieldMatch( *m_inNtuple, auxName );
       const auto& fieldInspector = inspector->GetFieldTreeInspector( fieldName );
 
       std::string typeName =
@@ -1459,7 +1451,7 @@ namespace xAOD {
                                         ::Bool_t isStaticField ) {
 
       std::string expectedClassName;
-      const std::type_info* ti = auxFieldType( auxName, isStaticField );
+      const std::type_info* ti = auxFieldType( fieldName, auxName, isStaticField );
 
       // Get the registry:
       SG::AuxTypeRegistry& registry = SG::AuxTypeRegistry::instance();
@@ -1489,7 +1481,7 @@ namespace xAOD {
              SG::AuxTypeRegistry::linkedName( fieldName );
          const std::type_info* linkedTi = nullptr;
          if( Utils::fieldExists(  std::move(linkedFieldName), *m_inNtuple ) ) {
-            linkedTi = auxFieldType( linkedAttr.c_str(), isStaticField );
+            linkedTi = auxFieldType(  linkedFieldName, linkedAttr.c_str(), isStaticField );
          }
          if( linkedTi ) {
             linkedAuxId = registry.getAuxID(
@@ -1844,10 +1836,9 @@ namespace xAOD {
          fieldTypeName(),
          field( nullptr ),
          ntupleName(),
-         entryToLoad( -1 ),
          entryLoaded( -1 ) {}
 
-   ::Int_t RAuxStore::RFieldInfo::getEntry() {
+   ::Int_t RAuxStore::RFieldInfo::getEntry(::Int_t entryToLoad) {
 
       // A little sanity check:
       if( !field ) {
@@ -1877,8 +1868,7 @@ namespace xAOD {
       }
 
       try {
-         auto obj = field->GetField().CreateObject< void >().release();
-         field->BindRawPtr( obj );
+         field->BindRawPtr( object );
          // Load the entry
          ( *field )( entryToLoad );
 
@@ -1888,7 +1878,7 @@ namespace xAOD {
                   fieldName.c_str(), e.what() );
          return -1;
       }
-
+      entryLoaded = entryToLoad;
       return 1;
    }
 

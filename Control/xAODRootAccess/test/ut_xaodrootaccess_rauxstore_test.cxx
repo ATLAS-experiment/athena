@@ -355,7 +355,8 @@ int main() {
    std::unique_ptr< ::TFile > ifile( ::TFile::Open( INPUT_FILE_NAME, "READ" ) );
    ::Info( APP_NAME, "Created transient input RNTuple for the test" );
 
-   xAOD::RAuxStore store( "PrefixAux:" );
+   // Create the store and tell it to load entry 0
+   xAOD::RAuxStore store( "PrefixAux:",0 );
    store.lock();
    // Create the object that we want to test:
 
@@ -382,6 +383,29 @@ int main() {
    SIMPLE_ASSERT( var1Id != SG::null_auxid );
    const SG::auxid_t var2Id = reg.findAuxID( "var2" );
    SIMPLE_ASSERT( var2Id != SG::null_auxid );
+
+   //check that we can access the data
+   const void* var1Ptr = store.getData( var1Id );
+   SIMPLE_ASSERT( var1Ptr != 0 );
+   const float* var1 = static_cast<const float*>(var1Ptr);
+
+   const void* var2Ptr = store.getData( var2Id );
+   SIMPLE_ASSERT( var2Ptr != 0 );
+   const float* var2 = reinterpret_cast< const float* >( var2Ptr );
+
+   //check that the values match those added in createAndFillNtuple
+   SIMPLE_ASSERT( ( var1 )[ 0 ] == 1.0f );
+   SIMPLE_ASSERT( ( var1 )[ 1 ] == 2.0f );
+   SIMPLE_ASSERT( ( var1 )[ 2 ] == 3.0f );
+   SIMPLE_ASSERT( ( var1 )[ 3 ] == 4.0f );
+   SIMPLE_ASSERT( ( var1 )[ 4 ] == 5.0f );
+
+   SIMPLE_ASSERT( ( var2 )[ 0 ] == 11.0f );
+   SIMPLE_ASSERT( ( var2 )[ 1 ] == 12.0f );
+   SIMPLE_ASSERT( ( var2 )[ 2 ] == 13.0f );
+   SIMPLE_ASSERT( ( var2 )[ 3 ] == 14.0f );
+   SIMPLE_ASSERT( ( var2 )[ 4 ] == 15.0f );
+
    SIMPLE_ASSERT( !store.isDecoration( var1Id ) );
    SIMPLE_ASSERT( !store.isDecoration( var2Id ) );
    SIMPLE_ASSERT( store.isDecoration( decId ) );
