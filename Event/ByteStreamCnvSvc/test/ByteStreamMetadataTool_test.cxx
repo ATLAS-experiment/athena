@@ -89,7 +89,6 @@ namespace Athena_test {
   /**
    * An empty input store should not offend the tool and do nothing
    */
-  // cppcheck-suppress syntaxError
   TEST_F(ByteStreamMetadataToolTest, emptyInput) {
     EXPECT_TRUE(m_tool->beginInputFile().isSuccess());
     EXPECT_TRUE(
