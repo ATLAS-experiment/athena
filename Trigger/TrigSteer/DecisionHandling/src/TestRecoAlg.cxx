@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <iostream>
 #include <fstream>
 #include <xAODTrigger/TrigCompositeAuxContainer.h>
 #include <TrigSteeringEvent/TrigRoiDescriptorCollection.h>
@@ -106,7 +105,7 @@ namespace HLTTest {
       	// create new outpu objects and add the properties
       	if (objects.size() > output->size()) {  	   
           // attaching the correct object form input data:
-          for (auto object: objects){              	        
+          for (const auto & object: objects){              	        
             auto eta = object[0].second;
             auto phi = object[1].second;
             // check eta and phi
