@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -130,7 +130,8 @@ def getMinMaxRunNumbers(flags):
 def EvtIdModifierSvcCfg(flags, name="EvtIdModifierSvc", **kwargs):
     acc = ComponentAccumulator()
     isMT = flags.Concurrency.NumThreads > 0
-    pileUp = flags.Common.ProductionStep in [ProductionStep.Digitization, ProductionStep.PileUpPresampling, ProductionStep.FastChain] and flags.Digitization.PileUp and not flags.Overlay.FastChain
+    pileUp = flags.Common.ProductionStep in [ProductionStep.Digitization, ProductionStep.PileUpPresampling, ProductionStep.FastChain] \
+                and flags.Digitization.PileUp
     if pileUp and not isMT:
         kwargs.setdefault("EvtStoreName", "OriginalEvent_SG")
     elif pileUp:

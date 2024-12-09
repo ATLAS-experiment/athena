@@ -144,9 +144,7 @@ def initConfigFlags():
 
     acf.addFlag('Common.isOnline', False, help='job runs in an online environment')
     acf.addFlag('Common.useOnlineLumi', lambda prevFlags : prevFlags.Common.isOnline, help='use online version of luminosity')
-    acf.addFlag('Common.isOverlay', lambda prevFlags: (prevFlags.Common.ProductionStep == ProductionStep.Overlay or
-                                                       (prevFlags.Common.ProductionStep == ProductionStep.FastChain and
-                                                        prevFlags.Overlay.FastChain)),
+    acf.addFlag('Common.isOverlay', lambda prevFlags: prevFlags.Common.ProductionStep == ProductionStep.Overlay,
                 help='enable overlay')
     acf.addFlag('Common.doExpressProcessing', False, help='do express stream processing')
     acf.addFlag('Common.ProductionStep', ProductionStep.Default, type=ProductionStep, help='production step')

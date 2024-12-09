@@ -32,17 +32,17 @@ def OverlayMainContentCfg(configFlags):
     acc = writeDigitizationParameters(configFlags)
 
     # Add event info overlay
-    if not configFlags.Overlay.FastChain:
+    if not configFlags.Sim.DoFullChain:
         acc.merge(EventInfoOverlayCfg(configFlags))
 
     # Add truth overlay (needed downstream)
-    if not configFlags.Overlay.FastChain and (getEnabledDetectors(configFlags) or configFlags.Digitization.EnableTruth):
+    if not configFlags.Sim.DoFullChain and (getEnabledDetectors(configFlags) or configFlags.Digitization.EnableTruth):
         acc.merge(CopyMcEventCollectionCfg(configFlags))
     if configFlags.Digitization.EnableTruth:
         acc.merge(CopyJetTruthInfoCfg(configFlags))
         acc.merge(CopyPileupParticleTruthInfoCfg(configFlags))
         acc.merge(CopyCaloCalibrationHitContainersCfg(configFlags))
-        if not configFlags.Overlay.FastChain:
+        if not configFlags.Sim.DoFullChain:
             acc.merge(CopyTrackRecordCollectionsCfg(configFlags))
 
     # Beam spot reweighting

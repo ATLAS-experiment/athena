@@ -1,6 +1,6 @@
 """Construct Overlay configuration flags
 
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -21,6 +21,4 @@ def createOverlayConfigFlags():
     flags.addFlag("Overlay.ExtraInputs", [("McEventCollection", "TruthEvent")])
     # track overlay flag
     flags.addFlag("Overlay.doTrackOverlay", False)
-    # Overlay in FastChain
-    flags.addFlag("Overlay.FastChain", False)
     return flags
