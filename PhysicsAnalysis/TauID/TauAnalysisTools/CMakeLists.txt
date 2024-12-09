@@ -7,6 +7,7 @@ atlas_subdir( TauAnalysisTools )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
+find_package( onnxruntime )
 
 # Libraries in the package:
 if( XAOD_STANDALONE )
