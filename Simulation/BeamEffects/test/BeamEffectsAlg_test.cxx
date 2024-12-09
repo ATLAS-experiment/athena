@@ -79,7 +79,6 @@ namespace SimTesting {
   };   // BeamEffectsAlg_test fixture
 
 
-  // cppcheck-suppress syntaxError
   TEST_F(BeamEffectsAlg_test, empty_alg_execute) {
     ASSERT_TRUE( m_alg->initialize().isSuccess() );
     EventContext ctx(0,0);

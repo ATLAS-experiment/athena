@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -26,7 +26,6 @@ namespace Athena_test {
   };
   
   // Test shows how to access Gaudis pointers
-  // cppcheck-suppress syntaxError
   TEST_F( InitGaudiGoogleTestTest, basictest ) {
     EXPECT_TRUE( theApp != nullptr );
     EXPECT_TRUE( propMgr.isValid() );

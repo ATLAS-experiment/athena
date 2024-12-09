@@ -1,6 +1,6 @@
 
 //
-//  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 
 #include "CxxUtils/checker_macros.h"
@@ -65,7 +65,6 @@ namespace Athena_test {
 
   };
 
-  // cppcheck-suppress syntaxError
   TEST_F( AthAsgExUnittestAlgTest, getDefaultPropertyValue ) {
     int prop= getIntProperty( "MyProperty" );
     EXPECT_EQ( prop, 1 );

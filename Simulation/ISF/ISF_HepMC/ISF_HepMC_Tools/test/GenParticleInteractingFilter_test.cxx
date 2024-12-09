@@ -52,7 +52,6 @@ protected:
 };  // GenParticleInteractingFilter_test fixture
 
 
-// cppcheck-suppress syntaxError
 TEST_F(GenParticleInteractingFilter_test, allPropertiesUnset_stdParticle_expectPass) {
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 

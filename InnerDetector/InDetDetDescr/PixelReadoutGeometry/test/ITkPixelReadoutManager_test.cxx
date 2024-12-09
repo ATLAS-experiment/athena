@@ -110,11 +110,6 @@ namespace ITk
   };   // PixelReadoutManager_test fixture
 
 
-  // TEST_F(PixelReadoutManager_test, initialize_empty) {
-  //   ASSERT_TRUE( m_svc->initialize().isSuccess() );
-  // }
-
-  // cppcheck-suppress syntaxError
   TEST_F(PixelReadoutManager_test, barrel) {
     ASSERT_TRUE( m_svc->initialize().isSuccess() );
 
