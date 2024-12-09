@@ -48,7 +48,7 @@ def ByteStreamReadCfg(flags, type_names=None):
         bytestream_input = CompFactory.ByteStreamEventStorageInputSvc(
             name="ByteStreamInputSvc",
             EventInfoKey="{}EventInfo".format(
-                flags.Overlay.BkgPrefix if flags.Overlay.DataOverlay else ""
+                flags.Overlay.BkgPrefix if flags.Overlay.ByteStream else ""
             ),
         )
     result.addService(bytestream_input)

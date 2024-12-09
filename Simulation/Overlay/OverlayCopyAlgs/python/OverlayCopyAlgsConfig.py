@@ -117,7 +117,7 @@ def CopyJetTruthInfoCfg(flags, **kwargs):
 
     # Detect the list of track record collections
     for container in allowedContainers:
-        if not flags.Overlay.DataOverlay and container in flags.Input.Collections:  # SecondaryCollections
+        if container in flags.Input.Collections:  # SecondaryCollections
             availableContainers.append(container)
     if allowedContainers[0] in availableContainers:
         acc.merge(CopyInTimeAntiKt4JetTruthInfoCfg(flags, **kwargs))
@@ -133,11 +133,13 @@ def CopyJetTruthInfoCfg(flags, **kwargs):
 def CopyPileupParticleTruthInfoCfg(flags, name="CopyPileupParticleTruthInfo", **kwargs):
     """Return a ComponentAccumulator for the in-time pile-up jets copying"""
     acc = ComponentAccumulator()
+    if flags.Overlay.DataOverlay:
+        return acc
 
     requiredContainer = f"{flags.Overlay.BkgPrefix}TruthPileupParticles"
 
     # Detect the list of track record collections
-    if not flags.Overlay.DataOverlay and requiredContainer in flags.Input.Collections:  # SecondaryCollections
+    if requiredContainer in flags.Input.Collections:  # SecondaryCollections
         kwargs.setdefault("BkgInputKey", requiredContainer)
         kwargs.setdefault("OutputKey", "TruthPileupParticles")
 
@@ -393,8 +395,8 @@ def CopyCaloCalibrationHitContainersCfg(flags, **kwargs):
 
     # Detect the list of calibration hit containers
     for container in allowedContainers:
-        if (flags.Overlay.DataOverlay and container in flags.Input.Collections) \
-                or (not flags.Overlay.DataOverlay and container in flags.Input.SecondaryCollections):
+        if (flags.Overlay.ByteStream and container in flags.Input.Collections) \
+                or (not flags.Overlay.ByteStream and container in flags.Input.SecondaryCollections):
             availableContainers.append(container)
 
     for container in availableContainers:
@@ -478,7 +480,7 @@ def CopyTrackRecordCollectionsCfg(flags, **kwargs):
     if flags.Common.ProductionStep == ProductionStep.FastChain:
         availableContainers = allowedContainers
     else:
-        hardScatterInputCollections = flags.Input.Collections if flags.Overlay.DataOverlay else flags.Input.SecondaryCollections
+        hardScatterInputCollections = flags.Input.Collections if flags.Overlay.ByteStream else flags.Input.SecondaryCollections
         for container in allowedContainers:
             if container in hardScatterInputCollections:
                 availableContainers.append(container)
