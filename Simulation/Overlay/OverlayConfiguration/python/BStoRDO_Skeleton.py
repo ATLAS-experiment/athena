@@ -98,13 +98,15 @@ def fromRunArgs(runArgs):
 
     if flags.Detector.EnableLAr:
         from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
-        cfg.merge(LArRawDataReadingCfg(flags, LArRawChannelKey=f'{flags.Overlay.BkgPrefix}LArRawChannels'))
-        itemList.append(f'LArRawChannelContainer#{flags.Overlay.BkgPrefix}LArRawChannels')
+        cfg.merge(LArRawDataReadingCfg(flags))
+        itemList.append(f'LArDigitContainer#{flags.Overlay.BkgPrefix}LArDigitContainer_data')
+        itemList.append("LArFebHeaderContainer#LArFebHeader")
 
     if flags.Detector.EnableTile:
         from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
-        cfg.merge(TileRawDataReadingCfg(flags))
+        cfg.merge(TileRawDataReadingCfg(flags, readMuRcv=False))
         itemList.append(f'TileRawChannelContainer#{flags.Overlay.BkgPrefix}TileRawChannelCnt')
+        itemList.append(f'TileDigitsContainer#{flags.Overlay.BkgPrefix}TileDigitsCnt')
 
     if flags.Detector.EnableCSC:
         from MuonConfig.CSC_OverlayConfig import CSC_DataOverlayExtraCfg
