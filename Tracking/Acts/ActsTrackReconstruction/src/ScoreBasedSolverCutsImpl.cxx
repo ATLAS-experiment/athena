@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ScoreBasedSolverCutsImpl.h"
@@ -51,7 +51,7 @@ ActsTrk::MutableTrackContainer addSummaryInformation(
     int nDoubleHoles = 0;
     int nInnermostPixelLayerHits = 0;
     int nContribPixelLayers = 0;
-    for (const auto &ts : track.trackStatesReversed()) {
+    for (const auto ts : track.trackStatesReversed()) {
       if (!ts.hasReferenceSurface()) {
         continue;
       }
