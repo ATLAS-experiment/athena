@@ -7,7 +7,6 @@ namespace Muon
 {
   namespace nsw
   {
-    // cppcheck-suppress syntaxError
     ERS_DECLARE_ISSUE (MuonNSWCommonDecoder, NSWElinkException, , )
 
     ERS_DECLARE_ISSUE_BASE (MuonNSWCommonDecoder,
