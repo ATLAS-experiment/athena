@@ -40,6 +40,16 @@ def TrackRoiSelectionToolCfg( flags, name="TrackRoiSelectionTool", **kwargs ):
     return acc
 
 
+def VertexRoiSelectionToolCfg( flags, name="VertexRoiSelectionTool", **kwargs ):
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault( "TriggerVertexContainerName",
+                       flags.PhysVal.IDTPM.currentTrkAna.TrigVtxKey )
+
+    acc.setPrivateTools( CompFactory.IDTPM.VertexRoiSelectionTool( name, **kwargs ) )
+    return acc
+
+
 def TrackObjectSelectionToolCfg( flags, name="TrackObjectSelectionTool", **kwargs ):
     acc = ComponentAccumulator()
 
@@ -247,4 +257,13 @@ def TrackQualitySelectionToolCfg( flags, name="TrackQualitySelectionTool", **kwa
                    name="TrackObjectSelectionTool" + flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
     acc.setPrivateTools( CompFactory.IDTPM.TrackQualitySelectionTool( name, **kwargs ) )
+    return acc
+
+
+def VertexQualitySelectionToolCfg( flags, name="VertexQualitySelectionTool", **kwargs ):
+    acc = ComponentAccumulator()
+
+    ## TODO: here other selector tools for vertices
+
+    acc.setPrivateTools( CompFactory.IDTPM.VertexQualitySelectionTool( name, **kwargs ) )
     return acc

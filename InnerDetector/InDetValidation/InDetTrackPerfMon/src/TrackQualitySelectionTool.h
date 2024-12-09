@@ -15,10 +15,9 @@
 
 /// Athena include(s)
 #include "AsgTools/AsgTool.h"
-#include "TrigSteeringEvent/TrigRoiDescriptor.h"
 
 /// Local include(s)
-#include "InDetTrackPerfMon/ITrackSelectionTool.h"
+#include "ITrackSelectionTool.h"
 
 /// STD includes
 #include <string>
@@ -46,14 +45,6 @@ namespace IDTPM {
     /// Main Track selection method
     virtual StatusCode selectTracks(
         TrackAnalysisCollections& trkAnaColls ) override;
-
-    /// Dummy method - unused
-    virtual StatusCode selectTracksInRoI(
-        TrackAnalysisCollections& ,
-        const ElementLink< TrigRoiDescriptorCollection >& ) override {
-      ATH_MSG_WARNING( "selectTracksInRoI method is disabled" );
-      return StatusCode::SUCCESS;
-    }
 
   private:
 

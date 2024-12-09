@@ -188,6 +188,12 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
             TrackQualitySelectionToolCfg( flags,
                 name="TrackQualitySelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
+    if "VertexQualitySelectionTool" not in kwargs:
+        from InDetTrackPerfMon.InDetSelectionConfig import VertexQualitySelectionToolCfg
+        kwargs.setdefault( "VertexQualitySelectionTool", acc.popToolsAndMerge(
+            VertexQualitySelectionToolCfg( flags,
+                name="VertexQualitySelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
+
     if ( ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType ) or
          ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.RefType ) ):
 
@@ -216,6 +222,12 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
                 kwargs.setdefault( "TrackRoiSelectionTool", acc.popToolsAndMerge(
                     TrackRoiSelectionToolCfg( flags,
                         name="TrackRoiSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
+
+            if "VertexRoiSelectionTool" not in kwargs:
+                from InDetTrackPerfMon.InDetSelectionConfig import VertexRoiSelectionToolCfg
+                kwargs.setdefault( "VertexRoiSelectionTool", acc.popToolsAndMerge(
+                    VertexRoiSelectionToolCfg( flags,
+                        name="VertexRoiSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
     if "TrackMatchingTool" not in kwargs:
         from InDetTrackPerfMon.InDetMatchingConfig import TrackMatchingToolCfg
