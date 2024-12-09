@@ -1,6 +1,6 @@
 """Define methods to construct configured SCT overlay algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -12,12 +12,12 @@ def SCTDataOverlayExtraCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     # We need to convert BS to RDO for data overlay
-    from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import SCTOverlayRawDataProviderCfg
-    acc.merge(SCTOverlayRawDataProviderCfg(flags, prefix="", **kwargs))
+    from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import SCTRawDataProviderCfg
+    acc.merge(SCTRawDataProviderCfg(flags, **kwargs))
 
     # Add SCT event flag writer
     from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import SCTEventFlagWriterCfg
-    acc.merge(SCTEventFlagWriterCfg(flags, prefix=""))
+    acc.merge(SCTEventFlagWriterCfg(flags))
 
     return acc
 

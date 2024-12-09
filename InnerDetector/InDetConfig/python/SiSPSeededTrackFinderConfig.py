@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of SiSPSeededTrackFinder package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -38,7 +38,6 @@ def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs):
 
     kwargs.setdefault("useZBoundFinding",
                       flags.Tracking.ActiveConfig.doZBoundary)
-    from AthenaConfiguration.Enums import ProductionStep
     if flags.Common.ProductionStep in [ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:
         kwargs.setdefault("EventInfoKey", flags.Overlay.BkgPrefix + "EventInfo")
 
@@ -159,7 +158,7 @@ def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs):
                       if flags.Tracking.ActiveConfig.useITkStripSeeding else "")
     kwargs.setdefault("SpacePointsPixelName", "ITkPixelSpacePoints"
                       if flags.Tracking.ActiveConfig.useITkPixelSeeding else "")
-    if flags.Common.ProductionStep is ProductionStep.PileUpPretracking:
+    if flags.Common.ProductionStep in [ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:
         kwargs.setdefault("EventInfoKey", flags.Overlay.BkgPrefix + "EventInfo")
 
     if flags.Tracking.doITkFastTracking:

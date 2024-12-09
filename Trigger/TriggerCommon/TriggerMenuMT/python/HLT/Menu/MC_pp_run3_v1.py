@@ -32,11 +32,6 @@ from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import ( PhysicsStream,
                                                         METStreamersGroup,
                                                         MultiJetGroup,
                                                         MultiPhotonGroup,
-                                                        PrimaryLegGroup,
-                                                        PrimaryPhIGroup,
-                                                        PrimaryL1MuGroup,
-                                                        TagAndProbeLegGroup,
-                                                        TagAndProbePhIGroup,
                                                         SupportGroup,
                                                         SupportPhIGroup,
                                                         SupportLegGroup,
@@ -60,6 +55,21 @@ from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import ( PhysicsStream,
                                                         EOFTLALegGroup,
                                                         UnconvTrkGroup,
 )
+
+
+# For central PHYS and PHYSLITE derivations of MC where we do not yet have a whole-year GRL available
+# (e.g. because the derivation is running on a campaign which was prepared before the end of data taking for the current year)
+# we use the chain's group's to identify a sub-set of chains from which we determine the sub-set of lowest un-prescaled chains for which we store
+# trigger matching data in the DAOD. This is based on chains with a group which contains 'Primary' or 'TagAndProbe'.
+# We do NOT want chains in the MC menu resolving as looser primaries as compared to their counterparts in the Physics menu.
+# As it would mean that we have matching information available for different chains in MC as compared to data.
+# We avoid this here by renaming these groups in the MC menu to avoid either of these substrings. 'Primary' to 'MCPri' and 'TagAndProbe' to 'MCTagProbe' 
+# See ATR-30593
+PrimaryL1MuGroup = ['MCPri:L1Muon']
+PrimaryLegGroup = ['MCPri:Legacy']
+PrimaryPhIGroup = ['MCPri:PhaseI']
+TagAndProbeLegGroup = ['Support:MCLegacyTagProbe']
+TagAndProbePhIGroup = ['Support:MCPhaseITagProbe']
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )

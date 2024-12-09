@@ -69,6 +69,7 @@ struct InDetRttPlotConfig{
   /// matching reco 
   bool doEffPlots{true};
   bool doDuplicatePlots{false};
+  bool doTechEffPlots{false};
 
   /// Resolution and "matched track" plots - 
   /// filled if both reco and truth exist

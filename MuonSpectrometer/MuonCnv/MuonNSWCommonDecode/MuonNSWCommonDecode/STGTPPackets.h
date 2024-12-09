@@ -40,7 +40,7 @@ class STGTPMMPacket {
   private:  
   std::array<MMSegmentData, STGTPMMData::num_mm> m_segmentData{};
   std::uint32_t m_BCID{};
-
+  std::uint32_t m_valids{};
 };
 
 class STGTPPadPacket {

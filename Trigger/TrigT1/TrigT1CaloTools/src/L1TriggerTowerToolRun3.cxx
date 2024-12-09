@@ -226,7 +226,7 @@ void L1TriggerTowerToolRun3::simulateChannel(const xAOD::TriggerTower& tt, std::
   if(readoutConfigID == 5 or readoutConfigID == 6){
     
     
-    ATH_MSG_DEBUG("80 MHz readout detected, emulating 40 MHz samples");
+    ATH_MSG_DEBUG("::simulateChannel: 80 MHz readout detected, emulating 40 MHz samples");
     
     int nSlices = tt.adc().size();
 
@@ -243,7 +243,7 @@ void L1TriggerTowerToolRun3::simulateChannel(const xAOD::TriggerTower& tt, std::
 
 
   }else{
-    ATH_MSG_DEBUG("40 MHz readout detected");
+    ATH_MSG_DEBUG("::simulateChannel: 40 MHz readout detected");
     digits40 = tt.adc();
   }
   
@@ -625,7 +625,7 @@ void L1TriggerTowerToolRun3::bcidDecisionRange(const std::vector<int>& lutInput,
   else                     etRange(lutInput, channelId, output);
   
   ATH_MSG_DEBUG( "::bcidDecisionRange: decisionSource: " << decisionSource);
-  ATH_MSG_DEBUG( " output: " << output);
+  ATH_MSG_DEBUG( "::bcidDecisionRange: output: " << output);
 
 
 }
@@ -688,7 +688,6 @@ void L1TriggerTowerToolRun3::cpLut(const std::vector<int> &fir, const L1CaloCool
   int cut      = 0;
   unsigned short scale_menu = 0;
   double pedMean = 0;
-  int ped      = 0;
   int hwCoeffSum = 0;
   const std::vector<short int>* hwCoeffs;
 
@@ -703,7 +702,6 @@ void L1TriggerTowerToolRun3::cpLut(const std::vector<int> &fir, const L1CaloCool
       strategy = settings->lutCpStrategy();
       slope    = settings->lutCpSlope();
       cut      = settings->lutCpNoiseCut();
-      ped      = settings->pedValue();
       pedMean  = settings->pedMean();
 
       hwCoeffs =  getFirCoefficients<L1CaloPprConditionsContainerRun2>(channelId.id(), pprConditionsRun2);
@@ -716,15 +714,12 @@ void L1TriggerTowerToolRun3::cpLut(const std::vector<int> &fir, const L1CaloCool
       }
       
       offset = this->getLutOffset(pedMean, startBit, *hwCoeffs, slope, strategy);
-
-      ATH_MSG_DEBUG( "::cpLut: Offset: offset/strategy/pedMean/firCoeffSum/startBit/slope: "
-		       << offset << " " << strategy << " " << " " << pedMean << " " << hwCoeffSum << " " << startBit << " " << slope );
       
     } else ATH_MSG_WARNING( "::cpLut: No L1CaloPprConditions found" );
   } else ATH_MSG_WARNING( "::cpLut: No Conditions Container retrieved" );
 
-  ATH_MSG_DEBUG( "::cpLut: LUT strategy/offset/slope/cut/ped: "
-          << strategy << " " << offset << " " << slope << " " << cut << " " << ped << " " );
+  ATH_MSG_DEBUG( "::cpLut: strategy/scale/offset/slope/cut/pedMean/firCoeffSum/startBit: "
+		 << strategy << "/" << scale_menu << "/" << offset << "/" << slope << "/" << cut << "/" << pedMean << "/" << hwCoeffSum << "/" << startBit );
 
   unsigned int noiseCut = 0;
   bool disabled = disabledChannel(channelId, noiseCut);
@@ -756,7 +751,6 @@ void L1TriggerTowerToolRun3::jepLut(const std::vector<int> &fir, const L1CaloCoo
   int cut        = 0;
   unsigned short scale_db   = 0;
   unsigned short scale_menu = 0;
-  int ped        = 0;
   double pedMean = 0;
   int hwCoeffSum = 0;
   const std::vector<short int>* hwCoeffs;
@@ -781,7 +775,6 @@ void L1TriggerTowerToolRun3::jepLut(const std::vector<int> &fir, const L1CaloCoo
       strategy   = settings->lutJepStrategy();
       slope      = settings->lutJepSlope();
       cut        = settings->lutJepNoiseCut();
-      ped        = settings->pedValue();
       pedMean    = settings->pedMean();
       scale_db   = settings->lutJepScale();
 
@@ -803,14 +796,11 @@ void L1TriggerTowerToolRun3::jepLut(const std::vector<int> &fir, const L1CaloCoo
 
       offset = this->getLutOffset(pedMean, startBit, *hwCoeffs, slope, strategy);
 
-      ATH_MSG_VERBOSE( "::jepLut: Offset: offset/strategy/pedMean/firCoeffSum/startBit/slope: "
-		       << offset << " " << strategy << " " << " " << pedMean << " " << hwCoeffSum << " " << startBit << " " << slope );
-
     } else ATH_MSG_WARNING( "::jepLut: No L1CaloPprConditions found" );
   } else ATH_MSG_WARNING( "::jepLut: No Conditions Container retrieved" );
 
-  ATH_MSG_VERBOSE( "::jepLut: LUT strategy/offset/slope/cut/ped: "
-          << strategy << " " << offset << " " << slope << " " << cut << " " << ped << " " );
+  ATH_MSG_DEBUG( "::jepLut: strategy/scale/offset/slope/cut/pedMean/firCoeffSum/startBit: "
+		 << strategy << "/" << scale_menu << "/" << offset << "/" << slope << "/" << cut << "/" << pedMean << "/" << hwCoeffSum << "/" << startBit );
 
   unsigned int noiseCut = 0;
   bool disabled = disabledChannel(channelId, noiseCut);
