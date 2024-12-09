@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -31,10 +31,15 @@ def SCTRawDataProviderCfg(flags, prefix="InDet", suffix="", **kwargs):
     """ Configures the main algorithm for SCT raw data decoding """
     acc = ComponentAccumulator()    
     kwargs.setdefault("ProviderTool", acc.popToolsAndMerge(SCTRawDataProviderToolCfg(flags, prefix, suffix)))
+
+    if flags.Overlay.DataOverlay:
+        kwargs.setdefault("RDOKey", f"{flags.Overlay.BkgPrefix}SCT_RDOs")
+        kwargs.setdefault("LVL1IDKey", f"{flags.Overlay.BkgPrefix}SCT_LVL1ID")
+        kwargs.setdefault("BCIDKey", f"{flags.Overlay.BkgPrefix}SCT_BCID")
+
     acc.addEventAlgo(CompFactory.SCTRawDataProvider(name=prefix+"SCTRawDataProvider"+suffix,
                                                     **kwargs))
     return acc
-
 
 
 def TrigSCTRawDataProviderCfg(flags, suffix, RoIs):
@@ -59,13 +64,6 @@ def TrigSCTRawDataProviderCfg(flags, suffix, RoIs):
     dataPrepAcc = SCTRawDataProviderCfg(flags, **trigargs)
     dataPrepAcc.merge(regSelAcc)
     return dataPrepAcc
-
-def SCTOverlayRawDataProviderCfg(flags, prefix="InDet", suffix="", **kwargs):
-    """ Configures the main algorithm for SCT raw data decoding for data overlay """
-    kwargs.setdefault("RDOKey", f"{flags.Overlay.BkgPrefix}SCT_RDOs")
-    kwargs.setdefault("LVL1IDKey", f"{flags.Overlay.BkgPrefix}SCT_LVL1ID")
-    kwargs.setdefault("BCIDKey", f"{flags.Overlay.BkgPrefix}SCT_BCID")
-    return SCTRawDataProviderCfg(flags, prefix, suffix, **kwargs)
 
 
 def SCTEventFlagWriterCfg(flags, prefix="InDet", suffix="", **kwargs):

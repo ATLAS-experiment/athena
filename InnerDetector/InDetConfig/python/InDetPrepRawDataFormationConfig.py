@@ -1,9 +1,27 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetPrepRawDataFormation package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
 from AthenaConfiguration.Enums import ProductionStep
+
+
+def clusterizationInputPrefix(flags):
+    """Return clusterization input prefix based on the production step and tracking config"""
+    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
+    else:
+       doTrackOverlay = flags.Overlay.doTrackOverlay
+
+    if doTrackOverlay:
+        prefix = flags.Overlay.SigPrefix
+    elif flags.Common.ProductionStep in [ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:
+        prefix = flags.Overlay.BkgPrefix
+    else:
+        prefix = ''
+
+    return prefix
+
 
 def ITkInDetToXAODClusterConversionCfg(flags, name="ITkInDetToXAODClusterConversion", **kwargs):
     acc = ComponentAccumulator()
@@ -11,6 +29,7 @@ def ITkInDetToXAODClusterConversionCfg(flags, name="ITkInDetToXAODClusterConvers
     kwargs.setdefault('ProcessStrip', flags.Detector.EnableITkStrip)
     acc.addEventAlgo(CompFactory.InDet.InDetToXAODClusterConversion(name, **kwargs))
     return acc
+
 
 def ITkXAODToInDetClusterConversionCfg(flags, name="ITkXAODToInDetClusterConversion", **kwargs):
     acc = ComponentAccumulator()
@@ -24,13 +43,11 @@ def ITkXAODToInDetClusterConversionCfg(flags, name="ITkXAODToInDetClusterConvers
     acc.addEventAlgo(CompFactory.InDet.XAODToInDetClusterConversion(name, **kwargs))
     return acc
 
+
 def PixelClusterizationCfg(flags, name = "InDetPixelClusterization", **kwargs):
     acc = ComponentAccumulator()
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
-       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
-    else:
-       doTrackOverlay = flags.Overlay.doTrackOverlay
-    prefix = flags.Overlay.SigPrefix if doTrackOverlay or flags.Common.ProductionStep is ProductionStep.PileUpPretracking else ''
+    
+    prefix = clusterizationInputPrefix(flags)
 
     if "clusteringTool" not in kwargs:
         from InDetConfig.SiClusterizationToolConfig import MergedPixelsToolCfg
@@ -48,11 +65,13 @@ def PixelClusterizationCfg(flags, name = "InDetPixelClusterization", **kwargs):
     acc.addEventAlgo(CompFactory.InDet.PixelClusterization(prefix+name, **kwargs))
     return acc
 
+
 def PixelClusterizationPUCfg(flags, name="InDetPixelClusterizationPU", **kwargs):
     kwargs.setdefault("DataObjectName", "Pixel_PU_RDOs")
     kwargs.setdefault("ClustersName", "PixelPUClusters")
     kwargs.setdefault("AmbiguitiesMap", "PixelClusterAmbiguitiesMapPU")
     return PixelClusterizationCfg(flags, name, **kwargs)
+
 
 def TrigPixelClusterizationCfg(flags, RoIs, name="InDetPixelClusterization", **kwargs):
     acc = ComponentAccumulator()
@@ -83,13 +102,11 @@ def TrigPixelClusterizationCfg(flags, RoIs, name="InDetPixelClusterization", **k
     acc.addEventAlgo(CompFactory.InDet.PixelClusterization(**kwargs))
     return acc
 
+
 def ITkPixelClusterizationCfg(flags, name = "ITkPixelClusterization", **kwargs):
     acc = ComponentAccumulator()
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
-       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
-    else:
-       doTrackOverlay = flags.Overlay.doTrackOverlay
-    prefix = flags.Overlay.SigPrefix if doTrackOverlay or flags.Common.ProductionStep is ProductionStep.PileUpPretracking else ''
+
+    prefix = clusterizationInputPrefix(flags)
 
     if "clusteringTool" not in kwargs:
         from InDetConfig.SiClusterizationToolConfig import ITkMergedPixelsToolCfg
@@ -106,6 +123,7 @@ def ITkPixelClusterizationCfg(flags, name = "ITkPixelClusterization", **kwargs):
     acc.addEventAlgo(CompFactory.InDet.PixelClusterization(prefix+name, **kwargs))
     return acc
 
+
 def ITkTrigPixelClusterizationCfg(flags, name = "ITkTrigPixelClusterization", roisKey="", signature="", **kwargs):
     acc = ComponentAccumulator()
     from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
@@ -118,13 +136,11 @@ def ITkTrigPixelClusterizationCfg(flags, name = "ITkTrigPixelClusterization", ro
                                         RegSelTool= acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags))))
     return acc
 
+
 def SCTClusterizationCfg(flags, name="InDetSCT_Clusterization", **kwargs):
     acc = ComponentAccumulator()
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
-       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
-    else:
-       doTrackOverlay = flags.Overlay.doTrackOverlay
-    prefix = flags.Overlay.SigPrefix if doTrackOverlay or flags.Common.ProductionStep is ProductionStep.PileUpPretracking else ''
+    
+    prefix = clusterizationInputPrefix(flags)
 
     if "conditionsTool" not in kwargs:
         from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConditionsSummaryToolCfg
@@ -147,10 +163,12 @@ def SCTClusterizationCfg(flags, name="InDetSCT_Clusterization", **kwargs):
     acc.addEventAlgo(CompFactory.InDet.SCT_Clusterization(prefix+name, **kwargs))
     return acc
 
+
 def SCTClusterizationPUCfg(flags, name="InDetSCT_ClusterizationPU", **kwargs):
     kwargs.setdefault("DataObjectName", "SCT_PU_RDOs" )
     kwargs.setdefault("ClustersName", "SCT_PU_Clusters")
     return SCTClusterizationCfg(flags, name, **kwargs)
+
 
 def TrigSCTClusterizationCfg(flags, RoIs, name="InDetSCT_Clusterization", **kwargs):
     acc = ComponentAccumulator()
@@ -182,13 +200,11 @@ def TrigSCTClusterizationCfg(flags, RoIs, name="InDetSCT_Clusterization", **kwar
     acc.addEventAlgo(CompFactory.InDet.SCT_Clusterization(**kwargs))
     return acc
 
+
 def ITkStripClusterizationCfg(flags, name="ITkStripClusterization", **kwargs):
     acc = ComponentAccumulator()
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
-       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
-    else:
-       doTrackOverlay = flags.Overlay.doTrackOverlay
-    prefix = flags.Overlay.SigPrefix if doTrackOverlay or flags.Common.ProductionStep is ProductionStep.PileUpPretracking else ''
+    
+    prefix = clusterizationInputPrefix(flags)
 
     if "conditionsTool" not in kwargs:
         from SCT_ConditionsTools.ITkStripConditionsToolsConfig import ITkStripConditionsSummaryToolCfg
@@ -208,6 +224,7 @@ def ITkStripClusterizationCfg(flags, name="ITkStripClusterization", **kwargs):
     acc.addEventAlgo( CompFactory.InDet.SCT_Clusterization(prefix+name, **kwargs))
     return acc
 
+
 def ITkTrigStripClusterizationCfg(flags, name="ITkTrigStripClusterization", roisKey="", signature="", **kwargs):
     acc = ComponentAccumulator()
     from RegionSelector.RegSelToolConfig import regSelTool_ITkStrip_Cfg
@@ -220,9 +237,16 @@ def ITkTrigStripClusterizationCfg(flags, name="ITkTrigStripClusterization", rois
                                         RegSelTool= acc.popToolsAndMerge(regSelTool_ITkStrip_Cfg(flags))))
     return acc
 
+
 def InDetTRT_RIO_MakerCfg(flags, name = "InDetTRT_RIO_Maker", **kwargs):
     acc = ComponentAccumulator()
-    prefix = flags.Overlay.SigPrefix if flags.Common.ProductionStep is ProductionStep.PileUpPretracking else ''
+
+    # track overlay always uses full input container here
+    if flags.Common.ProductionStep in [ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:
+        prefix = flags.Overlay.BkgPrefix
+    else:
+        prefix = ''
+
     if "TRT_DriftCircleTool" not in kwargs:
         from InDetConfig.TRT_DriftCircleToolConfig import TRT_DriftCircleToolCfg
         kwargs.setdefault("TRT_DriftCircleTool", acc.popToolsAndMerge(
@@ -234,6 +258,7 @@ def InDetTRT_RIO_MakerCfg(flags, name = "InDetTRT_RIO_Maker", **kwargs):
 
     acc.addEventAlgo(CompFactory.InDet.TRT_RIO_Maker(prefix+name, **kwargs))
     return acc
+
 
 def InDetTRT_NoTime_RIO_MakerCfg(flags, name = "InDetTRT_NoTime_RIO_Maker", **kwargs):
     acc = ComponentAccumulator()
@@ -248,6 +273,7 @@ def InDetTRT_NoTime_RIO_MakerCfg(flags, name = "InDetTRT_NoTime_RIO_Maker", **kw
     acc.merge(InDetTRT_RIO_MakerCfg(flags, name, **kwargs))
     return acc
 
+
 def InDetTRT_Phase_RIO_MakerCfg(flags, name = "InDetTRT_Phase_RIO_Maker", **kwargs):
     acc = ComponentAccumulator()
 
@@ -259,10 +285,12 @@ def InDetTRT_Phase_RIO_MakerCfg(flags, name = "InDetTRT_Phase_RIO_Maker", **kwar
     acc.merge(InDetTRT_RIO_MakerCfg(flags, name, **kwargs))
     return acc
 
+
 def InDetTRT_RIO_MakerPUCfg(flags, name = "InDetTRT_RIO_MakerPU", **kwargs):
     kwargs.setdefault("TRTRDOLocation", 'TRT_PU_RDOs')    
     kwargs.setdefault("TRTRIOLocation", 'TRT_PU_DriftCircles')
     return InDetTRT_RIO_MakerCfg(flags, name, **kwargs)
+
 
 def TrigTRTRIOMakerCfg(flags, RoIs, name="InDetTrigMTTRTDriftCircleMaker", **kwargs):
     acc = ComponentAccumulator()
@@ -289,6 +317,7 @@ def TrigTRTRIOMakerCfg(flags, RoIs, name="InDetTrigMTTRTDriftCircleMaker", **kwa
     acc.addEventAlgo(CompFactory.InDet.TRT_RIO_Maker(**kwargs))
     return acc
 
+
 def AthenaTrkClusterizationCfg(flags):
     acc = ComponentAccumulator()
     #
@@ -303,4 +332,3 @@ def AthenaTrkClusterizationCfg(flags):
         acc.merge(ITkStripClusterizationCfg(flags))
 
     return acc
-
