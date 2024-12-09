@@ -42,6 +42,8 @@ set( CMAKE_CPPCHECK_DEFAULT
    "--quiet" "--inline-suppr" "--template=gcc"
    # allow conditionalizing code on cppcheck
    "-D__CPPCHECK__"
+   # Lock-free atomic pointers (required by CxxUtils/CachedPointer.h)
+   "-DATOMIC_POINTER_LOCK_FREE=2"
    # Commonly used libraries
    "--library=boost"
    "--library=googletest"
