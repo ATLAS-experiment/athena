@@ -1,16 +1,16 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGUPGRADETEST_TESTRECOALG_H
 #define TRIGUPGRADETEST_TESTRECOALG_H 1
 
 
-#include <string>
-#include <utility>
+
 #include "xAODTrigger/TrigCompositeContainer.h"
 
 #include "AthenaBaseComps/AthAlgorithm.h"
-
+#include <string>
+#include <utility>
 
 
 namespace HLTTest {
