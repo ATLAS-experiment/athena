@@ -47,7 +47,7 @@ StatusCode AthMonitorAlgorithm::initialize() {
                 m_vTrigChainNames.clear();
             }
         }
-    }
+    } else sc = StatusCode::SUCCESS;
 
     // Retrieve filters
     ATH_CHECK( m_DQFilterTools.retrieve() );
