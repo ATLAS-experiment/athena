@@ -7,18 +7,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-
-def PixelDataOverlayExtraCfg(flags, **kwargs):
-    """Return a ComponentAccumulator with pixel data overlay specifics"""
-    acc = ComponentAccumulator()
-
-    # We need to convert BS to RDO for data overlay
-    from PixelRawDataByteStreamCnv.PixelRawDataByteStreamCnvConfig import PixelRawDataProviderAlgCfg
-    acc.merge(PixelRawDataProviderAlgCfg(flags))
-
-    return acc
-
-
 def PixelOverlayAlgCfg(flags, name="PixelOverlay", **kwargs):
     """Return a ComponentAccumulator for PixelOverlay algorithm"""
     acc = ComponentAccumulator()
@@ -27,7 +15,11 @@ def PixelOverlayAlgCfg(flags, name="PixelOverlay", **kwargs):
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}PixelRDOs")
     kwargs.setdefault("OutputKey", "PixelRDOs")
 
-    if not flags.Overlay.DataOverlay:
+    # Input setup
+    if flags.Overlay.ByteStream:
+        from PixelRawDataByteStreamCnv.PixelRawDataByteStreamCnvConfig import PixelRawDataProviderAlgCfg
+        acc.merge(PixelRawDataProviderAlgCfg(flags))
+    else:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, [f'PixelRDO_Container#{kwargs["BkgInputKey"]}']))
 
@@ -41,7 +33,7 @@ def PixelOverlayAlgCfg(flags, name="PixelOverlay", **kwargs):
             "PixelRDO_Container#PixelRDOs"
         ]))
 
-        if flags.Overlay.DataOverlay:
+        if not flags.Input.isMC:
             acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
                 "IDCInDetBSErrContainer#PixelByteStreamErrs"
             ]))
@@ -52,10 +44,11 @@ def PixelOverlayAlgCfg(flags, name="PixelOverlay", **kwargs):
             f"PixelRDO_Container#{flags.Overlay.SigPrefix}PixelRDOs"
         ]))
 
+    # for track overlay, write out the signal RDOs because reco tracking will only run on them
     if flags.Overlay.doTrackOverlay:
-    #for track overlay, write out the signal RDOs because reco tracking will only run on them
-            acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
-            f"PixelRDO_Container#{flags.Overlay.SigPrefix}PixelRDOs"]))
+        acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
+            f"PixelRDO_Container#{flags.Overlay.SigPrefix}PixelRDOs"
+        ]))
 
     return acc
 
@@ -79,7 +72,7 @@ def PixelTruthOverlayCfg(flags, name="PixelSDOOverlay", **kwargs):
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
             "InDetSimDataCollection#PixelSDO_Map"
         ]))
-    
+
     if flags.Output.doWriteRDO_SGNL:
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
         acc.merge(OutputStreamCfg(flags, "RDO_SGNL", ItemList=[
@@ -93,15 +86,13 @@ def PixelOverlayCfg(flags):
     """Configure and return a ComponentAccumulator for Pixel overlay"""
     acc = ComponentAccumulator()
 
-    # Add data overlay specifics
-    if flags.Overlay.DataOverlay:
-        acc.merge(PixelDataOverlayExtraCfg(flags))
-
     # Add Pixel overlay digitization algorithm
     from PixelDigitization.PixelDigitizationConfig import PixelOverlayDigitizationBasicCfg
     acc.merge(PixelOverlayDigitizationBasicCfg(flags))
+
     # Add Pixel overlay algorithm
     acc.merge(PixelOverlayAlgCfg(flags))
+
     # Add Pixel truth overlay
     if flags.Digitization.EnableTruth:
         acc.merge(PixelTruthOverlayCfg(flags))

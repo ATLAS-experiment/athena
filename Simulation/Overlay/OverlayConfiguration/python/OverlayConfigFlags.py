@@ -13,6 +13,8 @@ def createOverlayConfigFlags():
     flags.addFlag("Overlay.DataOverlay", False)
     # Overlay skip secondary events
     flags.addFlag("Overlay.SkipSecondaryEvents", -1)
+    # Overlay flag when reading from ByteStream
+    flags.addFlag("Overlay.ByteStream", False)
     # Overlay background StoreGate key prefix
     flags.addFlag("Overlay.BkgPrefix", "Bkg_")
     # Overlay signal StoreGate key prefix

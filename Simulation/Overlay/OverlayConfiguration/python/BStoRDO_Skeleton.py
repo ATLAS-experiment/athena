@@ -34,6 +34,7 @@ def fromRunArgs(runArgs):
 
     # This is for data overlay
     flags.Overlay.DataOverlay = True
+    flags.Overlay.ByteStream = True
 
     # Setting input/output files
     if hasattr(runArgs, 'inputBSFile'):
@@ -83,19 +84,26 @@ def fromRunArgs(runArgs):
     from LumiBlockComps.LumiBlockMuWriterConfig import LumiBlockMuWriterCfg
     cfg.merge(LumiBlockMuWriterCfg(flags))
 
+    if flags.Detector.EnableBCM:
+        from InDetOverlay.BCMOverlayConfig import BCMRawDataProviderAlgCfg
+        cfg.merge(BCMRawDataProviderAlgCfg(flags))
+        itemList.append(f'BCM_RDO_Container#{flags.Overlay.BkgPrefix}BCM_RDOs')
+
     if flags.Detector.EnablePixel:
-        from InDetOverlay.PixelOverlayConfig import PixelDataOverlayExtraCfg
-        cfg.merge(PixelDataOverlayExtraCfg(flags))
+        from PixelRawDataByteStreamCnv.PixelRawDataByteStreamCnvConfig import PixelRawDataProviderAlgCfg
+        cfg.merge(PixelRawDataProviderAlgCfg(flags))
         itemList.append(f'PixelRDO_Container#{flags.Overlay.BkgPrefix}PixelRDOs')
 
     if flags.Detector.EnableSCT:
-        from InDetOverlay.SCTOverlayConfig import SCTDataOverlayExtraCfg
-        cfg.merge(SCTDataOverlayExtraCfg(flags))
+        from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import SCTRawDataProviderCfg, SCTEventFlagWriterCfg
+        cfg.merge(SCTRawDataProviderCfg(flags))
+        cfg.merge(SCTEventFlagWriterCfg(flags))
         itemList.append(f'SCT_RDO_Container#{flags.Overlay.BkgPrefix}SCT_RDOs')
+        itemList.append("IDCInDetBSErrContainer#SCT_ByteStreamErrs")
 
     if flags.Detector.EnableTRT:
-        from InDetOverlay.TRTOverlayConfig import TRTDataOverlayExtraCfg
-        cfg.merge(TRTDataOverlayExtraCfg(flags))
+        from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConfig import TRTRawDataProviderCfg
+        cfg.merge(TRTRawDataProviderCfg(flags))
         itemList.append(f'TRT_RDO_Container#{flags.Overlay.BkgPrefix}TRT_RDOs')
 
     if flags.Detector.EnableLAr:
