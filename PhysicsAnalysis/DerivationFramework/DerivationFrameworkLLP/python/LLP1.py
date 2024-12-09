@@ -332,6 +332,16 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                      TrackLocation            = f"{MergedTrackCollection}{TrackSystSuffix}"))
         LLP1VrtSecInclusiveSuffixes.append(TrackSystSuffix)
 
+    # short-lifetime VSI
+    shortLifetimeSuffix = "_shortLifetime"
+    acc.merge(VrtSecInclusiveCfg(flags,
+                                 name = "VrtSecInclusive_InDet"+shortLifetimeSuffix,
+                                 AugmentingVersionString     = shortLifetimeSuffix,
+                                 FillIntermediateVertices    = False,
+                                 TrackLocation               = MergedTrackCollection,
+                                 twoTrkVtxFormingD0Cut       = 1.0))
+    LLP1VrtSecInclusiveSuffixes.append(shortLifetimeSuffix)
+
     # leptons-only VSI
     LeptonsSuffix = "_Leptons"
     acc.merge(VrtSecInclusiveCfg(flags,
