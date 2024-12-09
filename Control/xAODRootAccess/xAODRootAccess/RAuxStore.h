@@ -48,8 +48,8 @@ namespace xAOD {
          kObjectStore = 2      ///< The object describes a single object
       };
 
-      RAuxStore( const char* prefix = "", Bool_t topStore = kTRUE,
-                 EStructMode mode = kUndefinedStore );
+      RAuxStore( const char* prefix = "", ::Long64_t entry = -1, 
+                  Bool_t topStore = kTRUE, EStructMode mode = kUndefinedStore );
       /// Destructor
       virtual ~RAuxStore();
 
@@ -61,7 +61,7 @@ namespace xAOD {
       /// Connect the object to an output RNTuple
       StatusCode writeTo( const std::string& fileName, const std::string& ntupleName );
       /// Get entry from the input RNTuple
-      ::Int_t getEntry( ::Int_t getall );
+      ::Int_t getEntry( ::Int_t getall = 0 );
       /// Reset the store
       void reset();
 
@@ -157,8 +157,9 @@ namespace xAOD {
       /// Scan the input RNTuple for auxiliary fields
       StatusCode scanInputNtuple();
       /// Find the type_info to use as the aux type for a given field.
-      const std::type_info* auxFieldType( const std::string& auxName,
-                                          ::Bool_t staticField );
+      const std::type_info* auxFieldType( const std::string& fieldName,
+                                           const std::string& auxName, 
+                                           ::Bool_t staticField );
       /// Register one input field as an available auxiliary variable
       StatusCode setupAuxField( const std::string & fieldName,
                                 const std::string & auxName,
@@ -233,19 +234,19 @@ namespace xAOD {
       std::unique_ptr< RNTupleModel > m_outModel;
       /// The model of the input ntuple
       std::unique_ptr< RNTupleModel > m_inModel;
+      /// The entry to load from the ntuple
+      ::Long64_t m_entryToLoad;
 
       class RFieldInfo {
       public:
          /// Constructor
          RFieldInfo();
          /// Get entry from the field
-         ::Int_t getEntry();
-
+         ::Int_t getEntry(::Int_t entryToLoad = -1);
          /// The different available statuses for the field
          enum Status { NotInitialized, Initialized, TypeError, NotFound };
          /// The current status of the field
          enum Status status = NotInitialized;
-
          /// The name of the field
          std::string fieldName;
          /// The name of the field's type
@@ -259,8 +260,6 @@ namespace xAOD {
          field;
          /// The name of the ntuple
          std::string ntupleName;
-         /// The entry to load from the ntuple
-         ::Int_t entryToLoad;
          /// The entry that was loaded from the ntuple
          ::Int_t entryLoaded;
          /// The pointer to the object in memory
