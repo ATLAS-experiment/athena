@@ -36,7 +36,6 @@ run Digi_tf.py \
     --maxEvents -1 \
     --outputRDOFile $rdo \
     --preInclude 'HITtoRDO:Campaigns.MC23dNoPileUp' \
-    --preInclude 'HITtoRDO:Campaigns.MC23NoPileUp' \
     --postInclude 'PyJobTransforms.UseFrontier'
 echo "art-result: $? digi"
 
