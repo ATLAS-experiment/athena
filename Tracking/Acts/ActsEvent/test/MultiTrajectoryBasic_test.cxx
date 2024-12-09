@@ -107,7 +107,6 @@ struct EmptyTrackStatesAux {
   ActsTrk::MutableMultiTrajectory m;
 };
 
-// cppcheck-suppress syntaxError
 BOOST_FIXTURE_TEST_CASE(AllMtjStaticxAODVariablesAreKnown, EmptyTrackStatesAux) {
     for (auto id : m.trackStatesAux()->getStore()->getAuxIDs()) {
         const std::string name = SG::AuxTypeRegistry::instance().getName(id);
@@ -171,9 +170,9 @@ std::default_random_engine rng(31415);
 BOOST_AUTO_TEST_SUITE(EventDataMultiTrajectory)
 
 struct EmptyMTJ {  // setup empty MTJ
-  EmptyMTJ() {
-    mtj = std::make_unique<ActsTrk::MutableMultiTrajectory>();
-  }
+  EmptyMTJ() :
+    mtj(std::make_unique<ActsTrk::MutableMultiTrajectory>())
+  {}
 
   std::unique_ptr<ActsTrk::MutableMultiTrajectory> mtj;
   ActsTrk::MultiTrajectory* ro_mtj() {
@@ -196,7 +195,6 @@ BOOST_AUTO_TEST_CASE(OwningMTJ) {
   ActsTrk::MutableMultiTrajectory mtj;
 }
 
-// cppcheck-suppress syntaxError
 BOOST_FIXTURE_TEST_CASE(Fill, EmptyMTJ) {
   BOOST_CHECK(mtj->has_backends());
   constexpr auto kMask = Acts::TrackStatePropMask::Predicted;
