@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // TrkVKalVrtFitter.h
@@ -43,7 +43,7 @@ namespace Trk{
     VertexID VRT;
     std::vector<int> trkInVrt;              // positions of participating tracks in common track list
     std::vector<VertexID> pseudoInVrt;      // VertexIDs of pseudos
-    double Mass;
+    double Mass{};
   };
 
   struct cascadeV{                        //  general description of vertex in cascade
@@ -53,7 +53,7 @@ namespace Trk{
     std::vector<VertexID> inPointingV;    //  which vertices points to it
     VertexID mergedTO;                    //  merged to another vertex (not separate anymore)
     std::vector<VertexID> mergedIN;       //  vertices attached to current
-    int indexInSimpleCascade;
+    int indexInSimpleCascade{};
     cascadeV(){ vID=-999; outPointingV=0; mergedTO=0; indexInSimpleCascade=0;};
    ~cascadeV() = default;
   };
@@ -393,10 +393,10 @@ namespace Trk{
         //
         // Arrays needed for fitting kernel
         //
-        double m_apar[NTrMaxVFit][5];  // used only for fit preparation
-        double m_awgt[NTrMaxVFit][15]; // used only for fit preparation
-        long int m_ich[NTrMaxVFit];
-        double m_parfs[NTrMaxVFit][3];
+        double m_apar[NTrMaxVFit][5]{};  // used only for fit preparation
+        double m_awgt[NTrMaxVFit][15]{}; // used only for fit preparation
+        long int m_ich[NTrMaxVFit]{};
+        double m_parfs[NTrMaxVFit][3]{};
 
         VKalAtlasMagFld m_fitField;
         VKalVrtControl m_vkalFitControl;
@@ -405,7 +405,7 @@ namespace Trk{
 
         const TrackParameters* m_globalFirstHit = nullptr;
 
-        double m_save_xyzfit[3]; //  Save vertex after successful fit
+        double m_save_xyzfit[3]{}; //  Save vertex after successful fit
 
         int m_FitStatus = 0; /* Fit Status flag*/
                              /* =0 - no fit. All "after fit" routines fail*/
@@ -462,12 +462,12 @@ namespace Trk{
 //  Control variables
 //
 
-      double m_BMAG;       /* const magnetic field  if needed */
-      double m_CNVMAG;     /* Conversion constant */
+      double m_BMAG{};       /* const magnetic field  if needed */
+      double m_CNVMAG{};     /* Conversion constant */
 
 
-      VKalExtPropagator*     m_fitPropagator;
-      const IExtrapolator*   m_InDetExtrapolator;     //!< Pointer to Extrapolator AlgTool
+      VKalExtPropagator*     m_fitPropagator{};
+      const IExtrapolator*   m_InDetExtrapolator{};     //!< Pointer to Extrapolator AlgTool
 //
 //
 //
