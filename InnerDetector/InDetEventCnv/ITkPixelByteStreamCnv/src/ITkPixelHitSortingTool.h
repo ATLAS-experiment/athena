@@ -34,7 +34,7 @@ class ITkPixelHitSortingTool: public AthAlgTool {
 
     ServiceHandle< InDetDD::IPixelReadoutManager > m_pixelReadout {this, "PixelReadoutManager", "ITkPixelReadoutManager", "Pixel readout manager" };
 
-    const PixelID* m_pixIdHelper;
+    const PixelID* m_pixIdHelper{};
 };
 
 
