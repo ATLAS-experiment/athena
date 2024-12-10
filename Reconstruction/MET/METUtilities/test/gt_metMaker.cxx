@@ -68,7 +68,6 @@ namespace met {
 
   }; // METMakerTest
 
-  // cppcheck-suppress syntaxError
   TEST_F( METMakerTest, TestInitialize ){
     ASSERT_TRUE(tool.initialize().isSuccess());
   }
