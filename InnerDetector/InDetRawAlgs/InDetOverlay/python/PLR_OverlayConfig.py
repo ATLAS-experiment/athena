@@ -1,6 +1,6 @@
 """Define methods to construct configured PLR overlay algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -15,7 +15,10 @@ def PLR_OverlayAlgCfg(flags, name="PLR_Overlay", **kwargs):
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}PLR_RDOs")
     kwargs.setdefault("OutputKey", "PLR_RDOs")
 
-    if not flags.Overlay.DataOverlay:
+    # Input setup
+    if flags.Overlay.ByteStream:
+        pass
+    else:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, [f'PixelRDO_Container#{kwargs["BkgInputKey"]}']))
 
@@ -29,7 +32,7 @@ def PLR_OverlayAlgCfg(flags, name="PLR_Overlay", **kwargs):
             "PixelRDO_Container#PLR_RDOs"
         ]))
 
-        if flags.Overlay.DataOverlay:
+        if not flags.Input.isMC:
             acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
                 "IDCInDetBSErrContainer#PLR_ByteStreamErrs"
             ]))
@@ -62,7 +65,7 @@ def PLR_TruthOverlayCfg(flags, name="PLR_SDOOverlay", **kwargs):
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
             "InDetSimDataCollection#PLR_SDO_Map"
         ]))
-    
+
     if flags.Output.doWriteRDO_SGNL:
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
         acc.merge(OutputStreamCfg(flags, "RDO_SGNL", ItemList=[
@@ -79,8 +82,10 @@ def PLR_OverlayCfg(flags):
     # Add PLR overlay digitization algorithm
     from PixelDigitization.PLR_DigitizationConfig import PLR_OverlayDigitizationBasicCfg
     acc.merge(PLR_OverlayDigitizationBasicCfg(flags))
+
     # Add PLR overlay algorithm
     acc.merge(PLR_OverlayAlgCfg(flags))
+
     # Add PLR truth overlay
     if flags.Digitization.EnableTruth:
         acc.merge(PLR_TruthOverlayCfg(flags))

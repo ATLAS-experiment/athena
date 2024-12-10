@@ -1,6 +1,6 @@
 """Define methods to construct configured ITk Pixel overlay algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -15,7 +15,10 @@ def ITkPixelOverlayAlgCfg(flags, name="ITkPixelOverlay", **kwargs):
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}ITkPixelRDOs")
     kwargs.setdefault("OutputKey", "ITkPixelRDOs")
 
-    if not flags.Overlay.DataOverlay:
+    # Input setup
+    if flags.Overlay.ByteStream:
+        pass
+    else:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, [f'PixelRDO_Container#{kwargs["BkgInputKey"]}']))
 
@@ -29,7 +32,7 @@ def ITkPixelOverlayAlgCfg(flags, name="ITkPixelOverlay", **kwargs):
             "PixelRDO_Container#ITkPixelRDOs"
         ]))
 
-        if flags.Overlay.DataOverlay:
+        if not flags.Input.isMC:
             acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
                 "IDCInDetBSErrContainer#ITkPixelByteStreamErrs"
             ]))
@@ -40,10 +43,11 @@ def ITkPixelOverlayAlgCfg(flags, name="ITkPixelOverlay", **kwargs):
             f"PixelRDO_Container#{flags.Overlay.SigPrefix}ITkPixelRDOs"
         ]))
 
+    # for track overlay, write out the signal RDOs because reco tracking will only run on them
     if flags.Overlay.doTrackOverlay:
-    #for track overlay, write out the signal RDOs because reco tracking will only run on them
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
-        f"PixelRDO_Container#{flags.Overlay.SigPrefix}ITkPixelRDOs"]))
+            f"PixelRDO_Container#{flags.Overlay.SigPrefix}ITkPixelRDOs"
+        ]))
 
     return acc
 
@@ -67,7 +71,7 @@ def ITkPixelTruthOverlayCfg(flags, name="ITkPixelSDOOverlay", **kwargs):
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
             "InDetSimDataCollection#ITkPixelSDO_Map"
         ]))
-    
+
     if flags.Output.doWriteRDO_SGNL:
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
         acc.merge(OutputStreamCfg(flags, "RDO_SGNL", ItemList=[
@@ -84,8 +88,10 @@ def ITkPixelOverlayCfg(flags):
     # Add ITk Pixel overlay digitization algorithm
     from PixelDigitization.ITkPixelDigitizationConfig import ITkPixelOverlayDigitizationBasicCfg
     acc.merge(ITkPixelOverlayDigitizationBasicCfg(flags))
+
     # Add ITk Pixel overlay algorithm
     acc.merge(ITkPixelOverlayAlgCfg(flags))
+
     # Add ITk Pixel truth overlay
     if flags.Digitization.EnableTruth:
         acc.merge(ITkPixelTruthOverlayCfg(flags))

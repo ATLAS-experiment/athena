@@ -30,10 +30,15 @@ def setOverlayInputFiles(runArgs, flags, log):
         flags.Overlay.SkipSecondaryEvents = runArgs.skipSecondaryEvents
 
     if hasRDO_BKGInput:
-        log.info('Running MC+MC overlay')
-        flags.Overlay.DataOverlay = False
-        flags.Input.isMC = True
         flags.Input.Files = runArgs.inputRDO_BKGFile
+
+        if flags.Input.isMC:
+            log.info('Running MC+MC overlay')
+            flags.Overlay.DataOverlay = False
+        else:
+            log.info('Running MC+data overlay')
+            flags.Overlay.DataOverlay = True
+
         if flags.Common.ProductionStep == ProductionStep.Overlay:
             flags.Input.SecondaryFiles = runArgs.inputHITSFile
         elif flags.Common.ProductionStep == ProductionStep.FastChain:
@@ -44,19 +49,21 @@ def setOverlayInputFiles(runArgs, flags, log):
         else:
             raise RuntimeError('No secondaryFiles are defined')
 
-        # take MCChannelNumber from secondary input:
-        flags.Input.MCChannelNumber = GetFileMD(flags.Input.SecondaryFiles, allowEmpty=False).get("mc_channel_number", 0)
+        if flags.Input.isMC:
+            # take MCChannelNumber from secondary input:
+            flags.Input.MCChannelNumber = GetFileMD(flags.Input.SecondaryFiles, allowEmpty=False).get("mc_channel_number", 0)
 
-        # runNumber is MC channel number in reco
-        if hasattr(runArgs, 'runNumber'):
-            if flags.Input.MCChannelNumber != runArgs.runNumber:
-                log.warning('Got different MC channel number (%d) from runNumber than from metadata (%d)', runArgs.runNumber, flags.Input.MCChannelNumber)
-                flags.Input.MCChannelNumber = runArgs.runNumber
-            else:
-                log.info('MC channel number: %d', flags.Input.MCChannelNumber)
+            # runNumber is MC channel number in reco
+            if hasattr(runArgs, 'runNumber'):
+                if flags.Input.MCChannelNumber != runArgs.runNumber:
+                    log.warning('Got different MC channel number (%d) from runNumber than from metadata (%d)', runArgs.runNumber, flags.Input.MCChannelNumber)
+                    flags.Input.MCChannelNumber = runArgs.runNumber
+                else:
+                    log.info('MC channel number: %d', flags.Input.MCChannelNumber)
     else:
-        log.info('Running MC+data overlay')
+        log.info('Running MC+data overlay from ByteStream')
         flags.Overlay.DataOverlay = True
+        flags.Overlay.ByteStream = True
         flags.Input.isMC = False
         if flags.Common.ProductionStep == ProductionStep.Overlay:
             flags.Input.Files = runArgs.inputHITSFile

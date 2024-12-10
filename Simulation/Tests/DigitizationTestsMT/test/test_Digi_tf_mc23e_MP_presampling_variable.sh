@@ -6,7 +6,7 @@
 # art-athena-mt: 8
 # art-include: 24.0/Athena
 # art-include: main/Athena
-# art-output: mc23d_presampling.SingleBS.RDO.pool.root
+# art-output: mc23e_presampling.SingleBS.RDO.pool.root
 # art-output: log.*
 # art-output: DigiPUConfig*
 
