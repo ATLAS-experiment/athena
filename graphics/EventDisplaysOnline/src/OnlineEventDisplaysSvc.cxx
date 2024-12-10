@@ -8,6 +8,11 @@
 #include "GaudiKernel/Incident.h"
 #include "GaudiKernel/MsgStream.h"
 #include "xAODEventInfo/EventInfo.h"
+
+#include <iostream>
+#include <sys/types.h>
+#include <grp.h>
+
 #include <cstdlib>  // For std::rand() and std::srand()
 #include <sys/stat.h>  //mkdir
 #include <unistd.h>  //chown
