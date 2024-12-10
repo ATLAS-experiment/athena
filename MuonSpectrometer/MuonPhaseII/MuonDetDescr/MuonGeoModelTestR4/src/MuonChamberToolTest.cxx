@@ -31,13 +31,24 @@ namespace MuonGMR4 {
         return StatusCode::SUCCESS;
     }
     template <class EnvelopeType>
+#if defined(FLATTEN) && defined(__GNUC__)
+// We compile this function with optimization, even in debug builds; otherwise,
+// the heavy use of Eigen makes it too slow.  However, from here we may call
+// to out-of-line Eigen code that is linked from other DSOs; in that case,
+// it would not be optimized.  Avoid this by forcing all Eigen code
+// to be inlined here if possible.
+[[gnu::flatten]]
+#endif
     StatusCode MuonChamberToolTest::pointInside(const EnvelopeType& chamb,
                                                 const Acts::Volume& boundVol,
                                                 const Amg::Vector3D& point,
                                                 const std::string& descr,
                                                 const Identifier& channelId) const {
-    
-        if (boundVol.inside(point,tolerance)) {
+
+        // Explicitly inline Volume::inside here so that it gets
+        // flattened in debug builds.
+        Acts::Vector3 posInVolFrame((boundVol.transform().inverse()) * point);
+        if (boundVol.volumeBounds().inside(posInVolFrame,tolerance)) {
             ATH_MSG_VERBOSE("In channel "<<m_idHelperSvc->toString(channelId)
                             <<", point "<<descr <<" is inside of the chamber "<<std::endl<<chamb<<std::endl
                             <<"Local position:" <<Amg::toString(boundVol.itransform() * point));

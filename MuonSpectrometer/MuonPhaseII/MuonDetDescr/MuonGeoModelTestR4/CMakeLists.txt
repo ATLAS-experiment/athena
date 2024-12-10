@@ -14,6 +14,17 @@ atlas_add_component( MuonGeoModelTestR4
                                     GaudiKernel MuonReadoutGeometryR4 MuonGeoModelR4Lib AthenaPoolUtilities
                                     xAODTruth xAODMuonSimHit CxxUtils)
 
+# Some functions here make heavy use of Eigen and are thus very slow in debug
+# builds.  Set up to allow forcing them to compile with optimization and
+# inlining, even in debug builds.
+if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
+  set_source_files_properties(
+     ${CMAKE_CURRENT_SOURCE_DIR}/src/MuonChamberToolTest.cxx
+     PROPERTIES
+     COMPILE_FLAGS "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}"
+     COMPILE_DEFINITIONS "FLATTEN" )
+endif()
+
 #### Standard geometry dumping test R3 (MC)
 atlas_add_test( testR3Geometry
                 SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers "BML1A3 T1E1A01" --noMM --noSTGC
