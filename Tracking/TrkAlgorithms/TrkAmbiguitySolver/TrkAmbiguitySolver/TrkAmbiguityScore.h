@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -35,10 +35,11 @@ namespace Trk
       StatusCode	      finalize(void) override;
 
     private:
-      SG::ReadHandleKeyArray<TrackCollection>       m_originTracksKey;
-      SG::WriteHandleKey<TracksScores> m_scoredTracksKey;
-      ToolHandle<ITrackAmbiguityScoreProcessorTool> m_scoreTool;
-    };
+    SG::ReadHandleKeyArray<TrackCollection> m_originTracksKey{this, "TrackInput", {""}};
+    SG::WriteHandleKey<TracksScores> m_scoredTracksKey{this, "TrackOutput", "Tracks"};
+    ToolHandle<ITrackAmbiguityScoreProcessorTool> m_scoreTool
+      {this, "AmbiguityScoreProcessor", ""};
+  };
 
 }
 

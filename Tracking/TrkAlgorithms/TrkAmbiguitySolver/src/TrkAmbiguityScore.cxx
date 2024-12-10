@@ -1,20 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkAmbiguitySolver/TrkAmbiguityScore.h"
 #include "TrkToolInterfaces/ITrackAmbiguityScoreProcessorTool.h"
 
 Trk::TrkAmbiguityScore::TrkAmbiguityScore(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm (name, pSvcLocator),
-  m_originTracksKey{""},
-  m_scoredTracksKey("Tracks"),
-  m_scoreTool("",this)
-{
-  declareProperty("TrackInput"        , m_originTracksKey);
-  declareProperty("TrackOutput"       , m_scoredTracksKey);
-  declareProperty("AmbiguityScoreProcessor", m_scoreTool);
-}
+  AthReentrantAlgorithm (name, pSvcLocator) {}
 
 //--------------------------------------------------------------------------
 Trk::TrkAmbiguityScore::~TrkAmbiguityScore(void)
