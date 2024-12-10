@@ -25,7 +25,7 @@ class MaxMultFilter: public IHypoJetVectorFilter  {
 private:
   const std::size_t m_end{0};
   const double m_etaMin{0.};
-  const double m_etaMax{0.};
+  const double m_etaMax{5.};
   const long unsigned int m_nToSort{0u};
 };
 
