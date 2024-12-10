@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNTRKINFO_ALIGNSIMODULE_H
@@ -14,7 +14,7 @@ class AlignSiModule {
 
 public:
   // constructor
-  AlignSiModule();
+  AlignSiModule() = default;
   // access methods
   int index() const;
   int dettype() const;
@@ -54,26 +54,25 @@ public:
   void set_stereo(bool);
 
  private:
-  int m_index;
-  int m_dettype;
-  int m_bec;
-  int m_layer;
-  int m_ring;
-  int m_sector;
-  int m_side;
-  int m_ncoord;
-  float m_pos[3];
-  float m_offset[3];
-  float m_rot[9];
-  float m_pitch;
-  float m_length;
-  float m_width[3];
-  mutable std::atomic_int m_nhits;
-  bool m_dead;
-  bool m_stereo;
+  int m_index{};
+  int m_dettype{};
+  int m_bec{};
+  int m_layer{};
+  int m_ring{};
+  int m_sector{};
+  int m_side{};
+  int m_ncoord{};
+  float m_pos[3]{};
+  float m_offset[3]{};
+  float m_rot[9]{};
+  float m_pitch{};
+  float m_length{};
+  float m_width[3]{};
+  mutable std::atomic_int m_nhits{};
+  bool m_dead{};
+  bool m_stereo{};
 };
 
-inline AlignSiModule::AlignSiModule() : m_nhits(0), m_dead(false) {}
 
 inline int AlignSiModule::index() const { return m_index; }
 inline int AlignSiModule::dettype() const { return m_dettype; }
