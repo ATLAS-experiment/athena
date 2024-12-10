@@ -157,7 +157,7 @@ namespace MuonR4 {
                 /// Find the next digit which is either another tube or beyond the dead time
                 saveMe = std::find_if(saveMe +1, digitsInChamber.end(),
                                       [deadInterval, saved](const DigitSDOPair& digitized) {
-                                         return saved->identify() != digitized.first->identify() || deadInterval < saved->tdc();
+                                         return saved->identify() != digitized.first->identify() || deadInterval < digitized.first->tdc();
                                       });
             }
         } while (viewer.next());
