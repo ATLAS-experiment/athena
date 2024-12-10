@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -43,14 +43,16 @@ namespace Trk
 
     private:
       //!<where to find tracks (set in jobOptions and can be multiple collections
-      SG::ReadHandleKey<TracksScores> m_scoredTracksKey;
-      SG::WriteHandleKey<TrackCollection> m_resolvedTracksKey;//!<where to save the resolved tracks
-      ToolHandle<ITrackAmbiguityProcessorTool> m_ambiTool;
+      SG::ReadHandleKey<TracksScores> m_scoredTracksKey{this, "TrackInput", ""};
+      //!<where to save the resolved tracks
+      SG::WriteHandleKey<TrackCollection> m_resolvedTracksKey
+	{this, "TrackOutput", "Tracks"};
+      ToolHandle<ITrackAmbiguityProcessorTool> m_ambiTool{this, "AmbiguityProcessor", "Trk::SimpleAmbiguityProcessorTool/TrkAmbiguityProcessor"};
 
       /**Number of tracks input. Useful for debugging*/
-       mutable std::atomic<long int>          m_trackInCount;
+      mutable std::atomic<long int>          m_trackInCount{0};
       /**Number of tracks passing Ambi solving. Useful for debugging*/
-       mutable std::atomic<long int>          m_trackOutCount;
+      mutable std::atomic<long int>          m_trackOutCount{0};
       
     };
 
