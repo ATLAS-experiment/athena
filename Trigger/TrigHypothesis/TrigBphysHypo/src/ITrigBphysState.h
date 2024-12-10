@@ -33,8 +33,8 @@ class ITrigBphysState {
         m_beamSpotData(beamSpotData) {
     m_beamSpotVertex.makePrivateStore();
     if (m_beamSpotData) {
-      m_beamSpotVertex.setPosition(beamSpotData->beamVtx().position());
-      m_beamSpotVertex.setCovariancePosition(beamSpotData->beamVtx().covariancePosition());
+      m_beamSpotVertex.setPosition(m_beamSpotData->beamVtx().position());
+      m_beamSpotVertex.setCovariancePosition(m_beamSpotData->beamVtx().covariancePosition());
     }
   }
   virtual ~ITrigBphysState() = default;
