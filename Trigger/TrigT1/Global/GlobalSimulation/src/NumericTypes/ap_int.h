@@ -11,6 +11,8 @@
  * class that represnts an int type of fixed width.
  * Implemented using a native C++ int type, but checks fopr overflow
  * is this occurs using the speeciefied bit width.
+ *
+ * Note: possibly ap_fixed with precision = 0 could be used instead of ap_int
  */
 
 namespace GlobalSim {
@@ -86,7 +88,7 @@ namespace GlobalSim {
     }
   
     void test_overflow() {
-      auto val = m_val >= 0 ? m_value : -m_value;
+      auto val = m_value >= 0 ? m_value : -m_value;
     
       if (val > (1<< n_dig)) {
 	m_ovflw=true;
