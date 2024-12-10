@@ -40,6 +40,7 @@ template< class CollectionT>
 PrepRawDataContainer< CollectionT>::PrepRawDataContainer(EventContainers::IdentifiableCache<CollectionT>* cache) :
 	IdentifiableContainer<CollectionT>(cache)
 {
+//cppcheck-suppress missingReturn
 }
 
 
