@@ -92,6 +92,7 @@ ConstAccessor<T, ALLOC>::ConstAccessor (const SG::auxid_t auxid,
                                         const SG::AuxVarFlags flags)
   : m_auxid (auxid)
 {
+  //cppcheck-suppress missingReturn
   SG::AuxTypeRegistry::instance().checkAuxID<T, ALLOC> (auxid, flags);
 }
 
