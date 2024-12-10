@@ -1,5 +1,10 @@
+/*
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ */
+
 #include "FPGATrackSimHough/FPGATrackSimHoughFunctions.h"
 #include "FPGATrackSimObjects/FPGATrackSimFunctions.h"
+#include <stdexcept>
 
 // EPSILON for hit position float comparisons
 constexpr float EPSILON = 1e-5;
@@ -217,7 +222,7 @@ int findNCommonHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Tr
 
 
 // Given road, populates the supplied variables with info on which layers missed hits
-void getMissingInfo(const FPGATrackSimRoad & road, int & nMissing, bool & missPixel, bool & missStrip, layer_bitmask_t & missing_mask, layer_bitmask_t & norecovery_mask, const ServiceHandle<IFPGATrackSimMappingSvc> FPGATrackSimMapping, const TrackCorrType idealCoordFitType)
+void getMissingInfo(const FPGATrackSimRoad & road, int & nMissing, bool & missPixel, bool & missStrip, layer_bitmask_t & missing_mask, layer_bitmask_t & norecovery_mask, const ServiceHandle<IFPGATrackSimMappingSvc> &FPGATrackSimMapping, const TrackCorrType idealCoordFitType)
 {
     int subregion = road.getSubRegion();
     nMissing = FPGATrackSimMapping->PlaneMap_1st(subregion)->getNCoords(); // init with nCoords and decrement as we find misses
@@ -279,7 +284,7 @@ void getMissingInfo(const FPGATrackSimRoad & road, int & nMissing, bool & missPi
  * it may be worth turning this function into a sort of iterator
  * over `combs`, return a single track each call. 
  */
-void makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack & temp, std::vector<FPGATrackSimTrack>& track_cands, const ServiceHandle<IFPGATrackSimMappingSvc> FPGATrackSimMapping)
+void makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack & temp, std::vector<FPGATrackSimTrack>& track_cands, const ServiceHandle<IFPGATrackSimMappingSvc> & FPGATrackSimMapping)
 {
     int idbase = 0;           // offset for new track ids
     int subregion = road.getSubRegion();
@@ -328,7 +333,8 @@ void makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack 
                 // That require another field on the track object, but it avoids having to change the sizes
                 // of arrays computed above.
                 if (hit->getHitType() == HitType::spacepoint && (hit->getPhysLayer() % 2) == 1) {
-                    const FPGATrackSimHit inner_hit = track_cands[icomb].getFPGATrackSimHits().at(layer - 1);
+                    if (layer == 0) throw (std::out_of_range("makeTrackCandidates: Attempt to access vector at element -1"));
+                    const FPGATrackSimHit & inner_hit = track_cands[icomb].getFPGATrackSimHits().at(layer - 1);
                     if ((abs(hit->getX() - inner_hit.getX()) > EPSILON) || (abs(hit->getY() - inner_hit.getY()) > EPSILON) || (abs(hit->getZ() - inner_hit.getZ()) > EPSILON)) {
                         track_cands[icomb].setValidCand(false);
                     }
@@ -342,7 +348,7 @@ void makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack 
 }
 
 
-long getVolumeID(std::shared_ptr<const FPGATrackSimHit> hit)
+long getVolumeID(const FPGATrackSimHit & hit)
 {
   // Custom labelling for the detector volumes
   // to be used in NN training.
@@ -364,29 +370,29 @@ long getVolumeID(std::shared_ptr<const FPGATrackSimHit> hit)
 
   long volumeID = -1;
 
-  if (hit->getR() == 0.0) {
+  if (hit.getR() == 0.0) {
     return -999; //hit not in any physical layer
   }
 
-  if(hit->isBarrel()) {
-    if (hit->isPixel()) {
+  if(hit.isBarrel()) {
+    if (hit.isPixel()) {
       volumeID = 0;
     }
-    if (hit->isStrip()) {
+    if (hit.isStrip()) {
       volumeID = 10;
     }
   }
   else {
-    if (hit->isPixel()) {
-      if (hit->getZ() >= 0.) {
+    if (hit.isPixel()) {
+      if (hit.getZ() >= 0.) {
         volumeID = 2;
       }
       else {
         volumeID = -2;
       }
     }
-    else if (hit->isStrip()) {
-      if (hit->getZ() >= 0.) {
+    else if (hit.isStrip()) {
+      if (hit.getZ() >= 0.) {
         volumeID = 12;
       }
       else {
@@ -397,7 +403,7 @@ long getVolumeID(std::shared_ptr<const FPGATrackSimHit> hit)
   return volumeID;
 }
 
-long getCoarseID(std::shared_ptr<const FPGATrackSimHit> hit)
+long getCoarseID(const FPGATrackSimHit & hit)
 {
   // Custom labelling for the detector layers
   // to be used in NN training.
@@ -411,7 +417,7 @@ long getCoarseID(std::shared_ptr<const FPGATrackSimHit> hit)
   // returns large negative value if no layer
 
   long volumeID = getVolumeID(hit);
-  unsigned layerID = hit->getLayerDisk();
+  unsigned layerID = hit.getLayerDisk();
 
   long offset = -10000;
 
@@ -424,7 +430,7 @@ long getCoarseID(std::shared_ptr<const FPGATrackSimHit> hit)
   return offset + layerID;
 }
 
-long getFineID(std::shared_ptr<const FPGATrackSimHit> hit)
+long getFineID(const FPGATrackSimHit & hit)
 {
   // Custom labelling for the detector layers
   // to be used in NN training.
@@ -433,8 +439,8 @@ long getFineID(std::shared_ptr<const FPGATrackSimHit> hit)
   // Otherwise return convention defined in getCoarseID.
 
   long volumeID = getVolumeID(hit);
-  unsigned layerID = hit->getLayerDisk();
-  int etaID = hit->getEtaModule();
+  unsigned layerID = hit.getLayerDisk();
+  int etaID = hit.getEtaModule();
 
   long offset = -1000;
 

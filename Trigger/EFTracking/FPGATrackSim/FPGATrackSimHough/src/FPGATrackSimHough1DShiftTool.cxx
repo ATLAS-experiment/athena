@@ -464,7 +464,7 @@ FPGATrackSimRoad FPGATrackSimHough1DShiftTool::makeRoad(const std::vector<std::s
 
     FPGATrackSimRoad r;
     r.setHitLayers(hitLayers);
-    r.setHits(std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>(sorted_hits));
+    r.setHits(std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>(std::move(sorted_hits)));
     r.setSubRegion(m_subRegion);
     if (m_fieldCorrection) {
       int inner_bin = static_cast<int>(bin_track)-static_cast<int>(shifts[0]);
