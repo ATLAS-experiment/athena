@@ -44,7 +44,7 @@ namespace xAOD {
     std::vector< float > xSlope;
     std::vector< float > ySlope;
     // float zSlope() const;
-    std::vector< int > nHoles;
+    std::vector< unsigned int > nHoles;
     std::vector< int > nHits;
     std::vector< std::vector<AFPTrack_v1::AFPHitLink_t> > hits;
     std::vector< float > chi2;

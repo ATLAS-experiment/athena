@@ -155,7 +155,7 @@ namespace xAOD {
      *
      * @return Number of empty pixels that the track passes through
      */
-    int nHoles() const;
+    unsigned int nHoles() const;
 
     /** 
      * @brief Set number of empty pixels that the track passes through.
@@ -164,7 +164,7 @@ namespace xAOD {
      *
      * @param nHoles number of empty pixels that the track passes through
      */
-    void setNHoles (int nHoles);
+    void setNHoles (unsigned int nHoles);
 
     /** 
      * @brief Number of clusters used to reconstruct the track.
