@@ -175,6 +175,10 @@ StatusCode GeoModelSvc::geoInit()
     }
     dbTagSvc->setParamSvcName("SqliteReadSvc");
     dbTagSvc->setSqliteReader(m_sqliteReader.get());
+    if(dbTagSvc->setupConfig().isFailure()) {
+      ATH_MSG_FATAL("Failed to setup Geoconfig");
+      return StatusCode::FAILURE;
+    }
   }
   else {
     // Build geometry from the GeometryDB
@@ -245,6 +249,10 @@ StatusCode GeoModelSvc::geoInit()
     
     if(dbTagSvc->setupTags().isFailure()) {
       ATH_MSG_FATAL("Failed to setup subsystem tags");
+      return StatusCode::FAILURE;
+    }
+    if(dbTagSvc->setupConfig().isFailure()) {
+      ATH_MSG_FATAL("Failed to setup Geoconfig");
       return StatusCode::FAILURE;
     }
 

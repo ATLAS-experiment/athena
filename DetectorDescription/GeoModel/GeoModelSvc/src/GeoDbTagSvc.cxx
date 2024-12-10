@@ -1,17 +1,17 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoDbTagSvc.h"
 #include "RDBMaterialManager.h"
 #include "GaudiKernel/ServiceHandle.h"
 
+#include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "RDBAccessSvc/IRDBRecord.h"
 
 GeoDbTagSvc::GeoDbTagSvc(const std::string& name,ISvcLocator* svc)
   : base_class(name,svc)
-  , m_geoConfig(GeoModel::GEO_RUN1)
 {
 }
 
@@ -30,7 +30,11 @@ StatusCode GeoDbTagSvc::finalize()
 StatusCode GeoDbTagSvc::setupTags()
 {
   ATH_MSG_DEBUG("setupTags()");
-  ATH_CHECK(m_rdbAccesSvc.retrieve());
+
+  if(getRdbAccess().isFailure()) {
+    ATH_MSG_FATAL("IRDBAccessSvc not retrieved!");
+    return StatusCode::FAILURE;
+  }
   
   // Check if the Atlas version has already been set
   if(m_AtlasVersion.empty()) {
@@ -83,6 +87,24 @@ StatusCode GeoDbTagSvc::setupTags()
                    ?m_rdbAccesSvc->getChildTag("ForwardDetectors",m_AtlasVersion,"ATLAS")
                    : m_ForwardDetectorsVersionOverride);
 
+  return StatusCode::SUCCESS;
+}
+
+StatusCode GeoDbTagSvc::setupConfig()
+{
+  ATH_MSG_DEBUG("setupConfig()");
+
+  if(getRdbAccess().isFailure()) {
+    ATH_MSG_FATAL("IRDBAccessSvc not retrieved!");
+    return StatusCode::FAILURE;
+  }
+
+  // Check if the Atlas version has already been set
+  if(!m_sqliteReader && m_AtlasVersion.empty()) {
+    ATH_MSG_FATAL("ATLAS tag not set!");
+    return StatusCode::FAILURE;
+  }
+
   // Retrieve geometry config information (RUN1, RUN2, etc...)
   IRDBRecordset_ptr atlasCommonRec =m_rdbAccesSvc->getRecordsetPtr("AtlasCommon",m_AtlasVersion,"ATLAS");
   if(atlasCommonRec->size()==0) {
@@ -106,5 +128,15 @@ StatusCode GeoDbTagSvc::setupTags()
     }
   }
 
+  return StatusCode::SUCCESS;
+}
+
+StatusCode GeoDbTagSvc::getRdbAccess()
+{
+  if(!m_rdbAccesSvc) {
+    SmartIF<IRDBAccessSvc> rdbAccessSvc{Gaudi::svcLocator()->service(m_paramSvcName)};
+    if(!rdbAccessSvc.isValid()) return StatusCode::FAILURE;
+    m_rdbAccesSvc = rdbAccessSvc.operator->();
+  }
   return StatusCode::SUCCESS;
 }
