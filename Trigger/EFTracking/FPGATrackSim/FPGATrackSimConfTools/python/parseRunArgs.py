@@ -36,7 +36,8 @@ _FPGATrackSimMapsArgs = [
     ('layerOverride', trfArgClasses.argIntList, "Overrides the selection of the 1st stage logical layers in the plane map. Each entry declares a detector layer to use as a logical layer. Specify a detector layer with { SilictonTech * 1000 + DetectorZone * 100 + PhysicalLayer }"),
     ('rmap', trfArgClasses.argString, "region map"),
     ('subrmap', trfArgClasses.argString, "Subregion (slice) map"),
-    ('NNmap', trfArgClasses.argString, "NN weighting map"),
+    ('FakeNNonnx', trfArgClasses.argString, "NN ONNX file for fake track labelling"),
+    ('ParamNNonnx', trfArgClasses.argString, "NN ONNX file for track parameter estimation"),
     ("sampleType", trfArgClasses.argString, "Specify the type of sample being used"),
     ("withPU", trfArgClasses.argBool, "specify if sample has pile-up or not"),
 ]

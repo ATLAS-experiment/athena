@@ -56,9 +56,18 @@ StatusCode FPGATrackSimMappingSvc::checkAllocs()
 }
 
 
-std::string FPGATrackSimMappingSvc::getNNMapString() const {
-    if (m_NNmap != nullptr) {
-        return m_NNmap->getNNMap();
+std::string FPGATrackSimMappingSvc::getFakeNNMapString() const {
+    if (m_NNmap_fake != nullptr) {
+        return m_NNmap_fake->getNNMap();
+    }
+    else{
+        return ""; // Handle null case appropriately
+    }
+}
+
+std::string FPGATrackSimMappingSvc::getParamNNMapString() const {
+    if (m_NNmap_param != nullptr) {
+        return m_NNmap_param->getNNMap();
     }
     else{
         return ""; // Handle null case appropriately
@@ -141,13 +150,19 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         m_rmap_1st->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));
         m_subrmap->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));
 	
-	ATH_MSG_DEBUG("Creating NN weighting map");
-    ATH_MSG_INFO("MappingSVc using " << m_NNmap_path.value());
-	if ( ! m_NNmap_path.empty() ) {
-        m_NNmap = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path.value()));
-	} else {
-	    m_NNmap = nullptr;
-	}
+        ATH_MSG_DEBUG("Creating NN weighting map");
+        ATH_MSG_INFO("MappingSVc using " << m_NNmap_path_fake.value() << " and " << m_NNmap_path_param.value());
+        if ( ! m_NNmap_path_fake.empty() ) {
+            m_NNmap_fake = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path_fake.value()));
+        } else {
+            m_NNmap_fake = nullptr;
+        }
+
+        if ( ! m_NNmap_path_param.empty() ) {
+            m_NNmap_param = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path_param.value()));
+        } else {
+            m_NNmap_param = nullptr;
+        }
     }
     ATH_CHECK(checkAllocs());
     return StatusCode::SUCCESS;

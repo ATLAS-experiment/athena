@@ -17,7 +17,8 @@ BANKS_5L="banks_5L/${BANK_5L_VERSION}/"
 
 COMBINED_MATRIX="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/${BANKS_9L}/combined_matrix.root"
 
-ONNX_INPUT="${BANKS_9L}/ClassificationHT_v5.onnx"
+ONNX_INPUT_FAKE="${BANKS_9L}ClassificationHT_v5.onnx"
+ONNX_INPUT_PARAM="${BANKS_9L}ParamEstimationHT_v5.onnx"
 
 RUN_CKF=True
 
