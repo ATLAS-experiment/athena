@@ -410,10 +410,10 @@ ByteStreamEventStorageInputSvc::generateDataHeader()
     std::unique_ptr<DataHeader> dataHeader = std::make_unique<DataHeader>();
     // Declare header primary
     dataHeader->setStatus(DataHeader::Input);
-    //add the data header element self reference to the object vector
-    dataHeader->insert(*std::move(dataHeaderElement));
     // Set processTag
     dataHeader->setProcessTag(dataHeaderElement->getKey());
+    //add the data header element self reference to the object vector
+    dataHeader->insert(*std::move(dataHeaderElement));
 
     // Clean up EventInfo from the previous event
     key = m_eventInfoKey.value();
