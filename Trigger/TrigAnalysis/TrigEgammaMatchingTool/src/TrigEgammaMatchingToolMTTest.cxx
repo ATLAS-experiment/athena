@@ -4,7 +4,7 @@
 
 
 #include "TrigEgammaMatchingToolMTTest.h"
-#include "DecisionHandling/TrigCompositeUtils.h"
+#include "TrigCompositeUtils/TrigCompositeUtils.h"
 
 
 using namespace TrigCompositeUtils;

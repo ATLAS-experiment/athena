@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigHLTJetHypo )
@@ -13,8 +13,8 @@ atlas_add_library( TrigHLTJetHypoLib
                    src/TrigHLTJetHypoUtils/*.cxx
                    PUBLIC_HEADERS TrigHLTJetHypo
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES DecisionHandlingLib GaudiKernel xAODJet FourMomUtils
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaMonitoringKernelLib DecisionHandlingLib TrigCompositeUtilsLib TrigSteeringEvent xAODEventInfo xAODTrigger CaloEvent TrigBjetHypoLib )
+                   LINK_LIBRARIES AthenaMonitoringKernelLib DecisionHandlingLib GaudiKernel xAODBTagging xAODJet FourMomUtils
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps DecisionHandlingLib TrigCompositeUtilsLib TrigSteeringEvent xAODEventInfo xAODTrigger CaloEvent TrigBjetHypoLib )
 
 atlas_add_component( TrigHLTJetHypo
                      src/components/*.cxx

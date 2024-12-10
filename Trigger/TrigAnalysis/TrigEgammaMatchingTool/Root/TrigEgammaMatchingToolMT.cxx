@@ -4,7 +4,7 @@
 
 
 #include "TrigEgammaMatchingTool/TrigEgammaMatchingToolMT.h"
-#include "DecisionHandling/TrigCompositeUtils.h"
+#include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "DecisionHandling/HLTIdentifier.h"
 #include "boost/algorithm/string.hpp"

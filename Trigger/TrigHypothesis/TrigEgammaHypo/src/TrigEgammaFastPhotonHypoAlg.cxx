@@ -3,7 +3,7 @@
 */
 
 #include "TrigEgammaFastPhotonHypoAlg.h"
-#include "DecisionHandling/TrigCompositeUtils.h"
+#include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "xAODTrigger/TrigCompositeContainer.h"
 #include "AthViews/ViewHelper.h"
 
