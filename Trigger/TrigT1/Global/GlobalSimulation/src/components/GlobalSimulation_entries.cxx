@@ -20,6 +20,7 @@
 #include "../GlobalAlgs/EMB1CellsFromCaloCells.h"
 #include "../GlobalAlgs/eFexRoIAlgTool.h"
 #include "../GlobalAlgs/ERatioAlgTool.h"
+#include "../GlobalAlgs/Egamma1BDTAlgTool.h"
 
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)
 
@@ -39,3 +40,4 @@ DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex)
 DECLARE_COMPONENT(GlobalSim::EMB1CellsFromCaloCells)
 DECLARE_COMPONENT(GlobalSim::eFexRoIAlgTool)
 DECLARE_COMPONENT(GlobalSim::ERatioAlgTool)
+DECLARE_COMPONENT(GlobalSim::Egamma1BDTAlgTool)
