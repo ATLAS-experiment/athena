@@ -53,8 +53,8 @@ def getPFClusterSelectorTool(inputFlags,clustersin,calclustersin,algName):
             PFClusterSelectorTool.CaloClusterReadDecorHandleKey_NLeadingTruthParticles = "CaloTopoClusters." + inputFlags.Calo.TopoCluster.CalibrationHitDecorationName
 
     if inputFlags.PF.useTopoTowers:
-        PFClusterSelectorTool.clustersName="CaloFwdTopoTowers"
-        PFClusterSelectorTool.calClustersName="CaloCalFwdTopoTowers"
+        PFClusterSelectorTool.clustersName="CaloTopoSignal"
+        PFClusterSelectorTool.calClustersName="CaloCalTopoSignal"
 
     return PFClusterSelectorTool
 
