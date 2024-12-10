@@ -2,18 +2,18 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CLHEP/Random/RandFlat.h"
-
 #include "ISF_FastCaloSimEvent/TFCSHitCellMappingWiggle.h"
+
+#include <TClass.h>
+
+#include "CLHEP/Random/RandFlat.h"
+#include "ISF_FastCaloSimEvent/TFCS1DFunctionInt32Histogram.h"
+#include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
 #include "ISF_FastCaloSimEvent/TFCSSimulationState.h"
 #include "ISF_FastCaloSimEvent/TFCSTruthState.h"
-#include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
-#include "ISF_FastCaloSimEvent/TFCS1DFunctionInt32Histogram.h"
-
 #include "TH1.h"
-#include "TVector2.h"
 #include "TMath.h"
-#include <TClass.h>
+#include "TVector2.h"
 
 //=============================================
 //======= TFCSHitCellMappingWiggle =========
@@ -25,14 +25,26 @@ TFCSHitCellMappingWiggle::TFCSHitCellMappingWiggle(const char *name,
     : TFCSHitCellMapping(name, title, geo) {}
 
 TFCSHitCellMappingWiggle::~TFCSHitCellMappingWiggle() {
-  for (const auto *function : m_functions)
-    delete function;
+  clear();
+}
+
+void TFCSHitCellMappingWiggle::clear() {
+  for (auto *&function : m_functions) {
+    if (function) {
+      delete function;
+      function = nullptr;
+    }
+  }
+  m_functions.clear();
+  m_bin_low_edge.clear();
+
 #ifdef USE_GPU
   delete m_LdFH;
 #endif
 }
 
 void TFCSHitCellMappingWiggle::initialize(TFCS1DFunction *func) {
+  clear();
   if (!func)
     return;
   for (const auto *function : m_functions)
@@ -50,6 +62,7 @@ void TFCSHitCellMappingWiggle::initialize(TFCS1DFunction *func) {
 void TFCSHitCellMappingWiggle::initialize(
     const std::vector<const TFCS1DFunction *> &functions,
     const std::vector<float> &bin_low_edges) {
+  clear();
   if (functions.size() + 1 != bin_low_edges.size()) {
     ATH_MSG_ERROR("Using " << functions.size() << " functions needs "
                            << functions.size() + 1 << " bin low edges, but got "
@@ -64,6 +77,7 @@ void TFCSHitCellMappingWiggle::initialize(
 }
 
 void TFCSHitCellMappingWiggle::initialize(TH1 *histogram, float xscale) {
+  clear();
   if (!histogram)
     return;
   TFCS1DFunctionInt32Histogram *func =
@@ -78,6 +92,7 @@ void TFCSHitCellMappingWiggle::initialize(TH1 *histogram, float xscale) {
 void TFCSHitCellMappingWiggle::initialize(
     const std::vector<const TH1 *> &histograms,
     const std::vector<float> &bin_low_edges, float xscale) {
+  clear();
   if (histograms.size() + 1 != bin_low_edges.size()) {
     ATH_MSG_ERROR("Using " << histograms.size() << " histograms needs "
                            << histograms.size() + 1 << " bins, but got "
@@ -208,9 +223,9 @@ bool TFCSHitCellMappingWiggle::compare(
   return true;
 }
 
-void TFCSHitCellMappingWiggle::unit_test
-ATLAS_NOT_THREAD_SAFE(TFCSSimulationState *simulstate, TFCSTruthState *truth,
-                      TFCSExtrapolationState *extrapol) {
+void TFCSHitCellMappingWiggle::unit_test ATLAS_NOT_THREAD_SAFE(
+    TFCSSimulationState *simulstate, TFCSTruthState *truth,
+    TFCSExtrapolationState *extrapol) {
   if (!simulstate)
     simulstate = new TFCSSimulationState();
   if (!truth)
@@ -238,7 +253,7 @@ ATLAS_NOT_THREAD_SAFE(TFCSSimulationState *simulstate, TFCSTruthState *truth,
   wiggle_test.setLevel(MSG::DEBUG);
   wiggle_test.Print();
 
-#if 0 // defined(__FastCaloSimStandAlone__)
+#if 0  // defined(__FastCaloSimStandAlone__)
   CaloGeometryFromFile* geo = new CaloGeometryFromFile();
 
 // * load geometry files
