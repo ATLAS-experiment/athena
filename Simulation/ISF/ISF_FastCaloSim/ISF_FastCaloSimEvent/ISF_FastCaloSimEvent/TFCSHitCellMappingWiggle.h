@@ -6,19 +6,18 @@
 #define TFCSHitCellMappingWiggle_h
 
 #include "CxxUtils/checker_macros.h"
-
 #include "ISF_FastCaloSimEvent/TFCSHitCellMapping.h"
 
 #ifdef USE_GPU
-#include "ISF_FastCaloGpu/LoadGpuFuncHist.h"
 #include "ISF_FastCaloGpu/FH_structs.h"
+#include "ISF_FastCaloGpu/LoadGpuFuncHist.h"
 #endif
 
 class TFCS1DFunction;
 class TH1;
 
 class TFCSHitCellMappingWiggle : public TFCSHitCellMapping {
-public:
+ public:
   TFCSHitCellMappingWiggle(const char *name = nullptr,
                            const char *title = nullptr,
                            ICaloGeometry *geo = nullptr);
@@ -31,6 +30,8 @@ public:
   void initialize(TH1 *histogram, float xscale = 1);
   void initialize(const std::vector<const TH1 *> &histograms,
                   const std::vector<float> &bin_low_edges, float xscale = 1);
+
+  void clear();
 
   inline unsigned int get_number_of_bins() const { return m_functions.size(); };
 
@@ -49,10 +50,9 @@ public:
 
   /// modify one hit position to emulate the LAr accordeon shape
   /// and then fills all hits into calorimeter cells
-  virtual FCSReturnCode
-  simulate_hit(Hit &hit, TFCSSimulationState &simulstate,
-               const TFCSTruthState *truth,
-               const TFCSExtrapolationState *extrapol) override;
+  virtual FCSReturnCode simulate_hit(
+      Hit &hit, TFCSSimulationState &simulstate, const TFCSTruthState *truth,
+      const TFCSExtrapolationState *extrapol) override;
 
   virtual bool operator==(const TFCSParametrizationBase &ref) const override;
 
@@ -72,10 +72,10 @@ public:
   LoadGpuFuncHist *LdFH() { return m_LdFH; };
 #endif
 
-protected:
+ protected:
   bool compare(const TFCSParametrizationBase &ref) const;
 
-private:
+ private:
 #ifdef USE_GPU
   // hist functions in GPU
   FHs *m_d_HistFuncs = nullptr;
@@ -88,7 +88,7 @@ private:
   std::vector<const TFCS1DFunction *> m_functions = {nullptr};
   std::vector<float> m_bin_low_edge = {0, static_cast<float>(init_eta_max)};
 
-  ClassDefOverride(TFCSHitCellMappingWiggle, 1) // TFCSHitCellMappingWiggle
+  ClassDefOverride(TFCSHitCellMappingWiggle, 1)  // TFCSHitCellMappingWiggle
 };
 
 #endif
