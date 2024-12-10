@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_XAODJETRETRIEVER_H
@@ -42,7 +42,7 @@ namespace JiveXML{
       
       /// Retrieve all the data
       virtual StatusCode retrieve(ToolHandle<IFormatTool> &FormatTool); 
-      const DataMap getData(const xAOD::JetContainer*, std::string jetkey);
+      const DataMap getData(const xAOD::JetContainer*, const std::string& jetkey);
     
       /// Return the name of the data type
       virtual std::string dataTypeName() const { return "Jet"; };

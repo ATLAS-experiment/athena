@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
    */
 
 #include "xAODJiveXML/xAODJetRetriever.h"
@@ -135,7 +135,7 @@ namespace JiveXML {
    * Retrieve basic parameters, mainly four-vectors, for each collection.
    * Also association with clusters and tracks (ElementLink).
    */
-  const DataMap xAODJetRetriever::getData(const xAOD::JetContainer* jetCont, std::string jetkey) {
+  const DataMap xAODJetRetriever::getData(const xAOD::JetContainer* jetCont, const std::string& jetkey) {
 
     ATH_MSG_DEBUG( "in getData()" );
 
