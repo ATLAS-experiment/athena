@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -37,7 +37,6 @@ namespace Athena_test {
     AthAsgExUnittestTool myTool;
   };
 
-  // cppcheck-suppress syntaxError
   TEST_F( AthAsgExUnittestToolTest, initialise ) {
     EXPECT_TRUE( myTool.initialize().isSuccess() );
   }

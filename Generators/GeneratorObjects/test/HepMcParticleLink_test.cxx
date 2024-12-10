@@ -261,7 +261,6 @@ namespace MCTesting {
     return genPart;
   }
 
-  // cppcheck-suppress syntaxError
   TEST_F(HepMcParticleLink_test, old_test) {
     std::cout << "*** HepMcParticleLink_test starts ***" <<std::endl;
 

@@ -77,7 +77,6 @@ namespace ISFTesting {
   };  // CollectionMerger_test fixture
 
 
-  // cppcheck-suppress syntaxError
   TEST_F(CollectionMerger_test, empty_alg_execute) {
     ASSERT_TRUE( m_alg->initialize().isSuccess() );
     EventContext ctx(0,0);

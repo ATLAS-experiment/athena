@@ -152,7 +152,6 @@ protected:
 
 
 // Just read and write with handles - basic
-// cppcheck-suppress syntaxError
 TEST_F( ViewCollectionMerge_test, testBasicReadWrite ) {
 
   // Make a view vector

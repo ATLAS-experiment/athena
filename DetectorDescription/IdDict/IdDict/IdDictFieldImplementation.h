@@ -62,7 +62,6 @@ public:
     typedef Identifier::size_type   size_type;
 
     typedef enum
-    // cppcheck-suppress syntaxError
     { 
         NBITS   = sizeof(value_type) * 8, // bits per byte
         MAX_BIT = (static_cast<value_type>(1) << (NBITS - 1)),

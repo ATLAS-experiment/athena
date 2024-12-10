@@ -50,7 +50,6 @@ protected:
 };  // GenParticleLifetimeFilter_test fixture
 
 
-// cppcheck-suppress syntaxError
 TEST_F(GenParticleLifetimeFilter_test, allPropertiesUnset_expectPass) {
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 

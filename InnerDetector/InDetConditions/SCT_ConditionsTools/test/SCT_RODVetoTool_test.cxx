@@ -150,7 +150,6 @@ protected:
   SCT_RODVetoTool* m_tool{nullptr};
 };
 
-// cppcheck-suppress syntaxError
 TEST_F(SCT_RODVetoTool_test, Initialization) {
   ASSERT_TRUE( m_tool->initialize().isSuccess() );
 }

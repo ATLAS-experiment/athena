@@ -53,7 +53,6 @@ namespace asg
   }
 
 
-  // cppcheck-suppress syntaxError
   TEST (AssertTest, success_success)
   {
     ASSERT_SUCCESS (functionSuccess());

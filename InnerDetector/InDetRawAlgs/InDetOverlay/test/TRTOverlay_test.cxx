@@ -336,7 +336,6 @@ namespace OverlayTesting {
   };   // TRTOverlay_test fixture
 
 
-  // cppcheck-suppress syntaxError
   TEST_F(TRTOverlay_test, missing_inputs_alg_execute) {
     EventContext ctx = initEventContext(m_sg);
     ASSERT_TRUE( m_alg->initialize().isSuccess() );

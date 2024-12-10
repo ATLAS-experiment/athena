@@ -63,7 +63,6 @@ class MockFilterTool : public AthAlgTool,
 #ifdef HEPMC3
   MOCK_CONST_METHOD1(pass, bool(const HepMC::ConstGenParticlePtr&));
 #else
-  // cppcheck-suppress unknownMacro
   MOCK_CONST_METHOD1(pass, bool(const HepMC::GenParticle&));
 #endif
 };
@@ -109,7 +108,6 @@ protected:
 };  // InputConverter_test fixture
 
 
-// cppcheck-suppress syntaxError
 TEST_F(InputConverter_test, initialize_empty) {
   ASSERT_TRUE( m_svc->initialize().isSuccess() );
 }
