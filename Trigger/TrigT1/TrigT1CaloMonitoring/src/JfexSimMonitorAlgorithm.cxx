@@ -83,27 +83,36 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     }
 
 
-    compareRoI("jJ",EventType,m_data_key_jJ, m_simu_key_jJ,ctx,!jFexTowerContainer->empty());
+    //maximum number of TOBs (not xTOBs) that fit on the realtime path in hardware
+    static constexpr int jJmaxTobs   = 7;
+    static constexpr int jTAUmaxTobs = 6;
+    static constexpr int jEMmaxTobs  = 5;
+    bool simReady = !jFexTowerContainer->empty();
+    compareRoI("jJ",EventType,m_data_key_jJ, m_simu_key_jJ,ctx,simReady,jJmaxTobs);
     //compareRoI("jLJ",EventType,m_data_key_jLJ, m_simu_key_jLJ,ctx,false); - commented out b.c. jFEX doesn't produce Large jets now
-    compareRoI("jTAU",EventType,m_data_key_jTau, m_simu_key_jTau,ctx,!jFexTowerContainer->empty());
-    compareRoI("jEM",EventType,m_data_key_jEM, m_simu_key_jEM,ctx,false);
-    compareRoI("jXE",EventType,m_data_key_jXE, m_simu_key_jXE,ctx,!jFexTowerContainer->empty());
-    compareRoI("jTE",EventType,m_data_key_jTE, m_simu_key_jTE,ctx,!jFexTowerContainer->empty());
+    compareRoI("jTAU",EventType,m_data_key_jTau, m_simu_key_jTau,ctx,simReady,jTAUmaxTobs);
+    compareRoI("jEM",EventType,m_data_key_jEM, m_simu_key_jEM,ctx,false,jEMmaxTobs);
+    compareRoI("jXE",EventType,m_data_key_jXE, m_simu_key_jXE,ctx,simReady);
+    compareRoI("jTE",EventType,m_data_key_jTE, m_simu_key_jTE,ctx,simReady);
 
 
     return StatusCode::SUCCESS;
 }
 
+template<typename T> uint16_t tobEt(const T* tob) { return tob->tobEt(); }
+template<> uint16_t tobEt(const xAOD::jFexMETRoI*) { return 0; }
+template<> uint16_t tobEt(const xAOD::jFexSumETRoI*) { return 0; }
+
 template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string& label, const std::string& evenType,
-                                            const SG::ReadHandleKey<T>& tobs1Key,
-                                            const SG::ReadHandleKey<T>& tobs2Key,
-                                            const EventContext& ctx, bool simReadyFlag) const {
-    SG::ReadHandle<T> tobs1Cont{tobs1Key, ctx};
-    if(!tobs1Cont.isValid()) {
+                                            const SG::ReadHandleKey<T>& tobsDataKey,
+                                            const SG::ReadHandleKey<T>& tobsSimKey,
+                                            const EventContext& ctx, bool simReadyFlag, size_t maxTobs) const {
+    SG::ReadHandle<T> tobsDataCont{tobsDataKey, ctx};
+    if(!tobsDataCont.isValid()) {
         return false;
     }
-    SG::ReadHandle<T> tobs2Cont{tobs2Key, ctx};
-    if(!tobs2Cont.isValid()) {
+    SG::ReadHandle<T> tobsSimCont{tobsSimKey, ctx};
+    if(!tobsSimCont.isValid()) {
         return false;
     }
 
@@ -121,35 +130,64 @@ template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string
     // The saturation bit is the lowest bit on all TOBs except jTE where it is also the highest bit (2 bits):
     auto mask = (label=="jTE") ? 0x7FFFFFFE : 0xFFFFFFFE;
 
+    // if have a max tobs count, need to see if we reached max count in any fpga in any jfex module
+    // if we did, then we allow mismatches of any tob that has the min et
+    std::map<std::pair<uint8_t,uint8_t>,std::multiset<uint16_t>> tobEts_byFpga;
+
     unsigned zeroTobs1 = 0;
     unsigned zeroTobs2 = 0;
-    for(const auto tob1 : *tobs1Cont) {
+    for(const auto tob1 : *tobsDataCont) {
         bool isMatched = false;
         auto word1 = tob1->tobWord();
         auto jfex1 = tob1->jFexNumber();
         auto fpga1 = tob1->fpgaNumber();
         
-        for (const auto tob2 : *tobs2Cont) {
+        for (const auto tob2 : *tobsSimCont) {
             if(word1==0 || ((word1&mask) == (tob2->tobWord()&mask) && jfex1 == tob2->jFexNumber() && fpga1 == tob2->fpgaNumber())) { // do not flag as mismatch if the TOB word is zero, it might simply be (zero) suppressed in the other container!
                 isMatched = true;
                 break;
             }
         }
         if(!isMatched) {
-            mismatches = true;
+            // if this signature has a max number of TOBs (in an FPGA),
+            // possible the mismatch is an ambiguity in the lowest ET TOB
+            // so treat as a match if this data TOB has same ET as the lowest ET sim TOB in the same FPGA
+            if(maxTobs>0) {
+                // first populate the fpga->tobs map with simulation tobs if it hasn't already been filled
+                if(tobEts_byFpga.empty()) {
+                    for (const auto tob: *tobsSimCont) {
+                        // use of multiset ensures all the TOBs are automatically ordered by ET
+                        // the first tob in the multiset will be the lowest ET tob.
+                        tobEts_byFpga[std::pair(tob->jFexNumber(), tob->fpgaNumber())].insert(tobEt(tob));
+                    }
+                }
+                // now check if the FPGA that produced the data TOB reached its max number of TOBs and
+                // the lowest ET TOB has the same ET
+                if(auto itr = tobEts_byFpga.find(std::pair(jfex1,fpga1)); itr != tobEts_byFpga.end()
+                    && itr->second.size() == maxTobs       // number of TOBs in the FPGA reached the maximum
+                    && (*itr->second.begin())==tobEt(tob1) // tob has same ET as lowest ET TOB (first tob in the multiset)
+                    ) {
+                    // possible ambiguity ... treat as a match
+                    isMatched = true;
+                }
+            }
+            if(!isMatched) {
+                mismatches = true;
+            }
         }
         if (word1 == 0) {
             zeroTobs1++;
         }
     }
     
-    for (const auto tob2: *tobs2Cont) {
+    for (const auto tob2: *tobsSimCont) {
         if (tob2->tobWord() == 0) {
           zeroTobs2++;
         }
     }
-    
-    if(tobs2Cont.isValid() && (tobs1Cont->size() - zeroTobs1) < (tobs2Cont->size() - zeroTobs2) ) {
+
+    // check for extra non-zero sim tobs (compared to number of non-zero data tobs)
+    if(tobsSimCont.isValid() && (tobsDataCont->size() - zeroTobs1) < (tobsSimCont->size() - zeroTobs2) ) {
         mismatches=true;
     }
 
@@ -176,8 +214,8 @@ template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string
         auto stobEtas = Monitored::Collection("simEtas", setas);
         auto stobPhis = Monitored::Collection("simPhis", sphis);
         auto stobWord0s = Monitored::Collection("simWord0s", sword0s);
-        fillVectors(tobs1Key,ctx,detas,dphis,dword0s);
-        fillVectors(tobs2Key,ctx,setas,sphis,sword0s);
+        fillVectors(tobsDataKey,ctx,detas,dphis,dword0s);
+        fillVectors(tobsSimKey,ctx,setas,sphis,sword0s);
         if(msgLvl(MSG::DEBUG)) {
             std::cout << "LBN: " << std::string(lbnString) << " EventNumber: " << ULong64_t(evtNumber) << " signature: " << label << std::endl;
             std::cout << "  data : " << std::hex;

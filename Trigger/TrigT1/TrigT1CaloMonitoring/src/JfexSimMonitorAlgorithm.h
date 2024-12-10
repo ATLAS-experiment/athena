@@ -52,7 +52,7 @@ class JfexSimMonitorAlgorithm : public AthMonitorAlgorithm {
       template <typename T> bool compareRoI(const std::string& label, const std::string& evenType,
                                                                    const SG::ReadHandleKey<T>& tobs1Key,
                                                                    const SG::ReadHandleKey<T>& tobs2Key,
-                                                                   const EventContext& ctx, bool simReadyFlag=false) const;
+                                                                   const EventContext& ctx, bool simReadyFlag=false, size_t maxTobs=0) const;
 
         // map hold the binlabels (in form of LBN:FirstEventNum) to use for each lb
         mutable std::map<int,std::string> m_firstEvents ATLAS_THREAD_SAFE;
