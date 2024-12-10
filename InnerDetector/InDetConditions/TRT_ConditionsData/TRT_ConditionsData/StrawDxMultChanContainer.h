@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file StrawDxMultChanContainer.h
@@ -57,25 +57,26 @@ namespace TRTCond
     /** set dx */
     void setDx(const ExpandedIdentifier& id, float dx1, float dx2, float dxerr) {
       if( id.level()==ExpandedIdentifier::DETECTOR ) {
-	findContainer(id)->setDx(dx1,dx2,dxerr) ; 
+	      findContainer(id)->setDx(dx1,dx2,dxerr) ; 
       } else if( id.level()==ExpandedIdentifier::BARRELEC ) {
         MsgStream log(Athena::getMessageSvc(),"StrawDxMultChanContainer"); 
         log << MSG::WARNING << "Sorry: cannot store containers at BARREL_EC granularity" << endmsg ;
       }  else { 
-	findContainer(id)->setDx( id, dx1, dx2, dxerr) ;
+	      findContainer(id)->setDx( id, dx1, dx2, dxerr) ;
       }
     }
     
     /** method to unpack a StrawDx object */
     void unpack(const ExpandedIdentifier& id, float& dx1 , float& dx2, float& dxerr) const {
-          const StrawDxLayerContainer* container = getContainer(channelId(id)) ;
-	  if(container==0) {
-             MsgStream log(Athena::getMessageSvc(),"StrawDxMultChanContainer"); 
-             log << MSG::ERROR << "cannot find container channel " << channelId(id) << endmsg;
-          }
-      dx1 = container->getDx1(id);
-      dx2 = container->getDx2(id);
-      dxerr = container->getDxErr(id);
+      const StrawDxLayerContainer* container = getContainer(channelId(id)) ;
+	    if(container==nullptr) {
+        MsgStream log(Athena::getMessageSvc(),"StrawDxMultChanContainer"); 
+        log << MSG::ERROR << "cannot find container channel " << channelId(id) << endmsg;
+      } else{ 
+        dx1 = container->getDx1(id);
+        dx2 = container->getDx2(id);
+        dxerr = container->getDxErr(id);
+      }
     }
 
     /** classname used to talk to iovservice */
