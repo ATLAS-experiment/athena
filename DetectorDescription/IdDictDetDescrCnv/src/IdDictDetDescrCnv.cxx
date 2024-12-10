@@ -233,6 +233,25 @@ StatusCode IdDictDetDescrCnv::parseXMLDescription() {
 
 //--------------------------------------------------------------------
 
+void IdDictDetDescrCnv::collectCaloNeighbors(IRDBRecordset_ptr recordset)
+{
+  const IRDBRecord *neighborTable = (*recordset)[0];
+  m_fullAtlasNeighborsName = neighborTable->getString("FULLATLASNEIGHBORS");
+  m_fcal2dNeighborsName = neighborTable->getString("FCAL2DNEIGHBORS");
+  m_fcal3dNeighborsNextName = neighborTable->getString("FCAL3DNEIGHBORSNEXT");
+  m_fcal3dNeighborsPrevName = neighborTable->getString("FCAL3DNEIGHBORSPREV");
+  m_tileNeighborsName = neighborTable->getString("TILENEIGHBORS");
+  ATH_MSG_DEBUG(" using neighbor files:  ");
+  ATH_MSG_DEBUG("   FullAtlasNeighborsFileName:  " << m_fullAtlasNeighborsName);
+  ATH_MSG_DEBUG("   FCAL2DNeighborsFileName:     " << m_fcal2dNeighborsName);
+  ATH_MSG_DEBUG("   FCAL3DNeighborsNextFileName: " << m_fcal3dNeighborsNextName);
+  ATH_MSG_DEBUG("   FCAL3DNeighborsPrevFileName: " << m_fcal3dNeighborsPrevName);
+  ATH_MSG_DEBUG("   TileNeighborsFileName:       " << m_tileNeighborsName);
+  return;
+}
+
+//--------------------------------------------------------------------
+
 long int IdDictDetDescrCnv::storageType() {
     return DetDescr_StorageType;
 }
@@ -322,9 +341,19 @@ StatusCode IdDictDetDescrCnv::getFileNamesFromProperties() {
 StatusCode IdDictDetDescrCnv::getFileNamesFromTags() {
     // Fetch file names and tags from the RDB
     ATH_CHECK(m_geoDbTagSvc.retrieve());
-    ATH_MSG_DEBUG("Accessed " << m_geoDbTagSvc->getParamSvcName());
-    m_rdbAccessSvc.setName(m_geoDbTagSvc->getParamSvcName());
+    bool skipDbDictAccess = m_geoDbTagSvc->getParamSvcName().empty();
+    std::string paramSvcName = skipDbDictAccess ? "RDBAccessSvc" : m_geoDbTagSvc->getParamSvcName();
+    ATH_MSG_DEBUG("Accessed " << paramSvcName);
+    m_rdbAccessSvc.setName(paramSvcName);
     ATH_CHECK(m_rdbAccessSvc.retrieve());
+
+    if(skipDbDictAccess) {
+      ATH_MSG_WARNING("Unable to determine RDBAccessSvc backend. Using default dictionaries");
+      // Get Calo Neighbor tables from Oracle and return
+      IRDBRecordset_ptr caloNeighborTable = m_rdbAccessSvc->getRecordsetPtr("CaloNeighborTable", "CaloNeighborTable-00");
+      collectCaloNeighbors(caloNeighborTable);
+      return StatusCode::SUCCESS;
+    }
 
     auto assignTagAndName = [this](const IRDBRecordset_ptr &idDictSet,
                                    std::string &fileName,
@@ -476,18 +505,7 @@ StatusCode IdDictDetDescrCnv::getFileNamesFromTags() {
     }
     // Size == 0 if not found
     if (caloNeighborTable->size()) {
-        const IRDBRecord *neighborTable = (*caloNeighborTable)[0];
-        m_fullAtlasNeighborsName = neighborTable->getString("FULLATLASNEIGHBORS");
-        m_fcal2dNeighborsName = neighborTable->getString("FCAL2DNEIGHBORS");
-        m_fcal3dNeighborsNextName = neighborTable->getString("FCAL3DNEIGHBORSNEXT");
-        m_fcal3dNeighborsPrevName = neighborTable->getString("FCAL3DNEIGHBORSPREV");
-        m_tileNeighborsName = neighborTable->getString("TILENEIGHBORS");
-        ATH_MSG_DEBUG(" using neighbor files:  ");
-        ATH_MSG_DEBUG("   FullAtlasNeighborsFileName:  " << m_fullAtlasNeighborsName);
-        ATH_MSG_DEBUG("   FCAL2DNeighborsFileName:     " << m_fcal2dNeighborsName);
-        ATH_MSG_DEBUG("   FCAL3DNeighborsNextFileName: " << m_fcal3dNeighborsNextName);
-        ATH_MSG_DEBUG("   FCAL3DNeighborsPrevFileName: " << m_fcal3dNeighborsPrevName);
-        ATH_MSG_DEBUG("   TileNeighborsFileName:       " << m_tileNeighborsName);
+        collectCaloNeighbors(caloNeighborTable);
     }
 
     // Get Muon
