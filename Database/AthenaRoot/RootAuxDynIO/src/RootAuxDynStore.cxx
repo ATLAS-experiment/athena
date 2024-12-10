@@ -39,8 +39,9 @@ const SG::IAuxTypeVector* RootAuxDynStore::getVector(SG::auxid_t auxid) const
   const SG::IAuxTypeVector* ret = SG::AuxStoreInternal::getVector (auxid);
   if (!ret) {
     auto this_nc ATLAS_THREAD_SAFE = const_cast<RootAuxDynStore*>(this); // locked above
-    this_nc->readData(auxid);
-    ret = SG::AuxStoreInternal::getVector (auxid);
+    if( this_nc->readData(auxid) ) {
+       ret = SG::AuxStoreInternal::getVector (auxid);
+    }
   }
   return ret;
 }
@@ -59,8 +60,9 @@ const void* RootAuxDynStore::getIOData(SG::auxid_t auxid) const
   const void* ret = SG::AuxStoreInternal::getIODataInternal (auxid, true);
   if (!ret) {
     auto this_nc ATLAS_THREAD_SAFE = const_cast<RootAuxDynStore*>(this); // locked above
-    this_nc->readData(auxid);
-    ret = SG::AuxStoreInternal::getIOData (auxid);
+    if( this_nc->readData(auxid) ) {
+       ret = SG::AuxStoreInternal::getIOData (auxid);
+    }
   }
   return ret;
 }
