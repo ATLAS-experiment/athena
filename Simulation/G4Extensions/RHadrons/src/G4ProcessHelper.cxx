@@ -281,7 +281,7 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
     }
 
   const ReactionMap* reactionMap{};
-  if (CLHEP::RandFlat::shoot()<NumberOfProtons/NumberOfNucleons) {
+  if (NumberOfNucleons>0 && CLHEP::RandFlat::shoot()<NumberOfProtons/NumberOfNucleons) {
     reactionMap = &pReactionMap;
     aTarget = theProton;
   } else {

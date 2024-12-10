@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4_EC_HVHELPER_H
@@ -30,7 +30,7 @@ class HVHelper : public AthMessaging
 
     static const G4double s_EtaLimit[s_NofEtaSection + 1];
 
-    G4double m_Values[s_NofAtlasSide][s_NofEtaSection][s_NofElectrodeSide][s_NofElectrodesOut];
+    G4double m_Values[s_NofAtlasSide][s_NofEtaSection][s_NofElectrodeSide][s_NofElectrodesOut]{};
 
     const LArWheelCalculator *m_calculator;
     const LArWheelCalculator *lwc(void) const { return m_calculator; }
@@ -79,7 +79,7 @@ class HVHelper : public AthMessaging
 class HVHelperV00 : public HVHelper // This serves map versions 00 and 01
 {
   private:
-    G4int m_StartPhi[s_NofAtlasSide * s_NofEtaSection * s_NofElectrodeSide];
+    G4int m_StartPhi[s_NofAtlasSide * s_NofEtaSection * s_NofElectrodeSide]{};
     G4int StartPhi(G4int side, G4int eta, G4int ele) const
     {
         return m_StartPhi[(side*s_NofEtaSection + eta)*s_NofElectrodeSide + ele];
