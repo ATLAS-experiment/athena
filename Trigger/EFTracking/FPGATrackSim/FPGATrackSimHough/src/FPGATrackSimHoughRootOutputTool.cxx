@@ -180,7 +180,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
 
   // fill the truth tree, simply once per event! to know which entry here to loop at for a given road or hit
   // combination below, use treeindex from below to find the entry here
-  for (auto track : truthTracks) {
+  for (const auto & track : truthTracks) {
     if (!m_EvtSel->passCuts(track)) continue;
     if (track.getStatus() != 1) continue;
 
@@ -257,7 +257,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
         tmp_hits_isStrip.push_back(hit->isStrip());
         tmp_hits_isClustered.push_back(hit->isClustered());
 
-        tmp_hits_fineID.push_back(getFineID(hit));
+        tmp_hits_fineID.push_back(getFineID(*hit));
 
         target_r = m_SUBREGIONMAP->getAvgRadius(0, hit->getLayerDisk());
         idealized_coords = computeIdealCoords(*hit, hit->getGPhi(), track.getQOverPt(), target_r, true, TrackCorrType::None);
@@ -488,8 +488,8 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
       m_x.push_back(hit.getX());
       m_y.push_back(hit.getY());
       m_z.push_back(hit.getZ());
-      m_volumeID.push_back(getVolumeID(hit_ptr));
-      m_custom_layerID.push_back(getFineID(hit_ptr));
+      m_volumeID.push_back(getVolumeID(*hit_ptr));
+      m_custom_layerID.push_back(getFineID(*hit_ptr));
       m_layerID.push_back(hit.getLayerDisk());
       m_etaID.push_back(hit.getEtaModule());
 
