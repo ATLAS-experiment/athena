@@ -63,6 +63,13 @@ class FPGATrackSimNNTrackTool : public FPGATrackSimTrackingToolBase, public Onnx
 	ServiceHandle<IFPGATrackSimMappingSvc>   m_FPGATrackSimMapping{this, "FPGATrackSimMappingSvc","FPGATrackSimMappingSvc"};
 	ServiceHandle<ITHistSvc> m_tHistSvc{this, "THistSvc","THistSvc"};
 
+	OnnxRuntimeBase m_paramNN;
+	OnnxRuntimeBase m_fakeNN;
+
+	bool m_useParamNN = true;
+
+	void setTrackParameters(FPGATrackSimTrack& track, std::vector<float> inputTensorValues);
+
 	std::vector<float> m_x; // x position of hit in road
 	std::vector<float> m_y; // y pos
 	std::vector<float> m_z; // z pos

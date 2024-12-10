@@ -33,7 +33,8 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('connectToToITkTracking',True)
     cf.addFlag('loglevel', AthenaCommon.Constants.INFO)
     cf.addFlag('singleTrackSample',  True)
-    cf.addFlag('NNonnxFile', '')
+    cf.addFlag('FakeNNonnxFile', '')
+    cf.addFlag('ParamNNonnxFile', '')
 
     def __httHough1DFlags():
         """Additional function delays import"""

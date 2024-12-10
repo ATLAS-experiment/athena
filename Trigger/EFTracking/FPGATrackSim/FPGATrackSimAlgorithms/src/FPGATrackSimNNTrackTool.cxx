@@ -26,9 +26,41 @@ StatusCode FPGATrackSimNNTrackTool::initialize() {
   ATH_CHECK(m_FPGATrackSimMapping.retrieve());
   ATH_CHECK(m_tHistSvc.retrieve());
   if (m_useSpacePoints) ATH_CHECK(m_spRoadFilterTool.retrieve(EnableTool{m_spRoadFilterTool}));
-  OnnxRuntimeBase::initialize(m_FPGATrackSimMapping->getNNMapString());
+
+  if (m_FPGATrackSimMapping->getFakeNNMapString() != "") {
+    m_fakeNN.initialize(m_FPGATrackSimMapping->getFakeNNMapString());
+  }
+  else {
+    ATH_MSG_ERROR("Path to NN-based fake track removal ONNX file is empty! If you want to run this pipeline, you need to provide an input file.");
+    return StatusCode::FAILURE;
+  }
+
+  if (m_FPGATrackSimMapping->getParamNNMapString() != "") {
+    m_paramNN.initialize(m_FPGATrackSimMapping->getParamNNMapString());
+  }
+  else {
+    ATH_MSG_INFO("Path to NN-based track parameter estimation ONNX file is empty! Estimation is not run...");
+    m_useParamNN = false;
+  }
 
   return StatusCode::SUCCESS;
+}
+
+void FPGATrackSimNNTrackTool::setTrackParameters(FPGATrackSimTrack& track, std::vector<float> inputTensorValues) {
+
+  ATH_MSG_DEBUG("Running NN-based track parameter estimation!");
+  std::vector<float> paramNNoutput = m_paramNN.runONNXInference(inputTensorValues);
+
+  ATH_MSG_DEBUG("Estimated Track Parameters"); 
+  for (unsigned int i = 0; i < paramNNoutput.size(); i++) {
+    ATH_MSG_DEBUG(paramNNoutput[i]);
+  }
+
+  track.setQOverPt(paramNNoutput[0]);
+  track.setEta(paramNNoutput[1]);
+  track.setPhi(paramNNoutput[2]);
+  track.setD0(paramNNoutput[3]);
+  track.setZ0(paramNNoutput[4]);
 }
 
 StatusCode FPGATrackSimNNTrackTool::getTracks(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks) {
@@ -179,7 +211,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(std::vector<std::shared_ptr<const 
         }
       }
       
-      std::vector<float> NNoutput = runONNXInference(inputTensorValues);
+      std::vector<float> NNoutput = m_fakeNN.runONNXInference(inputTensorValues);
 
       ATH_MSG_DEBUG("NN InputTensorValues:");
       ATH_MSG_DEBUG(inputTensorValues);
@@ -209,6 +241,13 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(std::vector<std::shared_ptr<const 
         track_cand.setOrigChi2(chi2);
         track_cand.setChi2(chi2);
         tracks.push_back(track_cand);
+      }
+
+
+      if (m_useParamNN) {
+        for (auto& track : tracks) {
+          setTrackParameters(track, inputTensorValues);
+        }
       }
     }  // loop over combinations
 
