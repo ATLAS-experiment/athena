@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/MuonIdHelperSvc.h"
 
 #include <iostream>
+#include <format>
 
 #include "GaudiKernel/MsgStream.h"
 
@@ -38,12 +39,13 @@ namespace Muon {
         
         for (int tech = 0; tech <= m_primaryHelper->technologyNameIndexMax(); ++tech) {
             std::string name = m_primaryHelper->technologyString(tech);
-            if (name == "MDT") m_technologies.push_back(MuonStationIndex::MDT);
-            if (name == "CSC") m_technologies.push_back(MuonStationIndex::CSCI);
-            if (name == "RPC") m_technologies.push_back(MuonStationIndex::RPC);
-            if (name == "TGC") m_technologies.push_back(MuonStationIndex::TGC);
-            if (name == "STGC") m_technologies.push_back(MuonStationIndex::STGC);
-            if (name == "MM") m_technologies.push_back(MuonStationIndex::MM);
+            
+            if (name == "MDT") m_technologies.push_back(TechIdx::MDT);
+            if (name == "CSC") m_technologies.push_back(TechIdx::CSCI);
+            if (name == "RPC") m_technologies.push_back(TechIdx::RPC);
+            if (name == "TGC") m_technologies.push_back(TechIdx::TGC);
+            if (name == "STGC") m_technologies.push_back(TechIdx::STGC);
+            if (name == "MM") m_technologies.push_back(TechIdx::MM);
             techStr<< ", " << tech << " " << name;
         }
          ATH_MSG_DEBUG(" Technologies: size " << m_primaryHelper->technologyNameIndexMax()<<" "<<techStr.str());
@@ -60,73 +62,72 @@ namespace Muon {
             data.isEndcap = m_primaryHelper->isEndcap(i);
             data.isSmall = m_primaryHelper->isSmall(i);
 
-            data.chIndex = MuonStationIndex::ChUnknown;
             if (data.isEndcap) {
                 if (data.stationName[1] == '1')
-                    data.chIndex = MuonStationIndex::EML;
+                    data.chIndex = ChIdx::EML;
                 else if (data.stationName[1] == '2')
-                    data.chIndex = MuonStationIndex::EML;
+                    data.chIndex = ChIdx::EML;
                 else if (data.stationName[1] == '3')
-                    data.chIndex = MuonStationIndex::EML;
+                    data.chIndex = ChIdx::EML;
                 else if (data.stationName[1] == '4')
-                    data.chIndex = MuonStationIndex::EIL;
+                    data.chIndex = ChIdx::EIL;
 
                 if (data.stationName[1] == 'O') {
                     if (data.stationName[2] == 'L')
-                        data.chIndex = MuonStationIndex::EOL;
+                        data.chIndex = ChIdx::EOL;
                     else
-                        data.chIndex = MuonStationIndex::EOS;
+                        data.chIndex = ChIdx::EOS;
                 } else if (data.stationName[1] == 'M') {
                     if (data.stationName[2] == 'L')
-                        data.chIndex = MuonStationIndex::EML;
+                        data.chIndex = ChIdx::EML;
                     else
-                        data.chIndex = MuonStationIndex::EMS;
+                        data.chIndex = ChIdx::EMS;
                 } else if (data.stationName[1] == 'I') {
                     if (data.stationName[2] == 'L')
-                        data.chIndex = MuonStationIndex::EIL;
+                        data.chIndex = ChIdx::EIL;
                     else
-                        data.chIndex = MuonStationIndex::EIS;
+                        data.chIndex = ChIdx::EIS;
                 } else if (data.stationName[1] == 'E') {
                     if (data.stationName[0] == 'B') {
-                        data.chIndex = MuonStationIndex::BEE;
+                        data.chIndex = ChIdx::BEE;
                     } else {
                         if (data.stationName[2] == 'L')
-                            data.chIndex = MuonStationIndex::EEL;
+                            data.chIndex = ChIdx::EEL;
                         else
-                            data.chIndex = MuonStationIndex::EES;
+                            data.chIndex = ChIdx::EES;
                     }
                 } else if (data.stationName[0] == 'C') {
                     if (data.stationName[2] == 'L')
-                        data.chIndex = MuonStationIndex::CSL;
+                        data.chIndex = ChIdx::CSL;
                     else
-                        data.chIndex = MuonStationIndex::CSS;
+                        data.chIndex = ChIdx::CSS;
                 }
                 if (data.stationName[0] == 'S' || data.stationName[0] == 'M') {
                     if (data.isSmall)
-                        data.chIndex = MuonStationIndex::EIS;
+                        data.chIndex = ChIdx::EIS;
                     else
-                        data.chIndex = MuonStationIndex::EIL;
+                        data.chIndex = ChIdx::EIL;
                 }
 
             } else {
                 if (data.stationName[1] == 'O') {
                     if (data.stationName[2] == 'L')
-                        data.chIndex = MuonStationIndex::BOL;
+                        data.chIndex = ChIdx::BOL;
                     else
-                        data.chIndex = MuonStationIndex::BOS;
+                        data.chIndex = ChIdx::BOS;
                 } else if (data.stationName[1] == 'M') {
                     if (data.stationName[2] == 'L' || data.stationName[2] == 'E')
-                        data.chIndex = MuonStationIndex::BML;
+                        data.chIndex = ChIdx::BML;
                     else
-                        data.chIndex = MuonStationIndex::BMS;
+                        data.chIndex = ChIdx::BMS;
                 } else if (data.stationName[1] == 'I') {
                     if (data.stationName[2] == 'L' || data.stationName[2] == 'M' || data.stationName[2] == 'R')
-                        data.chIndex = MuonStationIndex::BIL;
+                        data.chIndex = ChIdx::BIL;
                     else
-                        data.chIndex = MuonStationIndex::BIS;
+                        data.chIndex = ChIdx::BIS;
                 }
             }
-            if (data.chIndex <0){
+            if (data.chIndex == ChIdx::ChUnknown) {
                ATH_MSG_ERROR("data.chIndex is negative in MuonIdHelperSvc::initialize ");
                return StatusCode::FAILURE;
             }
@@ -256,7 +257,7 @@ namespace Muon {
     MuonStationIndex::ChIndex MuonIdHelperSvc::chamberIndex(const Identifier& id) const {
         if (!id.is_valid() || !isMuon(id)) {
             if (id.is_valid()) ATH_MSG_WARNING("chamberIndex: invalid ID " << m_primaryHelper->print_to_string(id));
-            return MuonStationIndex::ChUnknown;
+            return ChIdx::ChUnknown;
         }
         return m_stationNameData[stationName(id)].chIndex;
     }
@@ -264,7 +265,7 @@ namespace Muon {
     MuonStationIndex::StIndex MuonIdHelperSvc::stationIndex(const Identifier& id) const {
         if (!id.is_valid() || !isMuon(id)) {
             if (id.is_valid()) ATH_MSG_WARNING("stationIndex: invalid ID " << m_primaryHelper->print_to_string(id));
-            return MuonStationIndex::StUnknown;
+            return StIdx::StUnknown;
         }
         return m_stationNameData[stationName(id)].stIndex;
     }
@@ -272,53 +273,46 @@ namespace Muon {
     MuonStationIndex::PhiIndex MuonIdHelperSvc::phiIndex(const Identifier& id) const {
         if (!id.is_valid() || !isMuon(id)) {
             if (id.is_valid()) ATH_MSG_WARNING("phiIndex: invalid ID " << m_primaryHelper->print_to_string(id));
-            return MuonStationIndex::PhiUnknown;
+            return PhiIdx::PhiUnknown;
         }
         if (isMdt(id) || isMM(id)) {
             ATH_MSG_WARNING("phiIndex: not supported for " << toString(id));
-            return MuonStationIndex::PhiUnknown;
+            return PhiIdx::PhiUnknown;
         }
-        MuonStationIndex::PhiIndex index = MuonStationIndex::PhiUnknown;
-        MuonStationIndex::StIndex stIndex = stationIndex(id);
-        if (stIndex == MuonStationIndex::BI) {
-            if (m_rpcIdHelper->doubletR(id) == 1)
-                index = MuonStationIndex::BI1;
-            else
-                index = MuonStationIndex::BI2;
-        } else if (stIndex == MuonStationIndex::BM) {
-            if (m_rpcIdHelper->doubletR(id) == 1)
-                index = MuonStationIndex::BM1;
-            else
-                index = MuonStationIndex::BM2;
-        } else if (stIndex == MuonStationIndex::BO) {
-            if (m_rpcIdHelper->doubletR(id) == 1)
-                index = MuonStationIndex::BO1;
-            else
-                index = MuonStationIndex::BO2;
-        } else if (stIndex == MuonStationIndex::EI) {
-            if (isCsc(id))
-                index = MuonStationIndex::CSC;
-            else if (isTgc(id))
-                index = MuonStationIndex::T4;
-            else if (m_stgcIdHelper->multilayer(id) == 1)
-                index = MuonStationIndex::STGC1;
-            else
-                index = MuonStationIndex::STGC2;
-        } else if (stIndex == MuonStationIndex::EM) {
+        PhiIdx index{PhiIdx::PhiUnknown};
+        const StIdx stIndex = stationIndex(id);
+        if (stIndex == StIdx::BI) {
+            index = m_rpcIdHelper->doubletR(id) == 1 ?  PhiIdx::BI1 : PhiIdx::BI2;
+        } else if (stIndex == StIdx::BM) {
+            index =  m_rpcIdHelper->doubletR(id) == 1 ? PhiIdx::BM1 : PhiIdx::BM2;
+        } else if (stIndex == StIdx::BO) {
+            index = m_rpcIdHelper->doubletR(id) == 1 ?  PhiIdx::BO1 : PhiIdx::BO2;
+        } else if (stIndex == StIdx::EI) {
+            if (isCsc(id)) {
+                index = PhiIdx::CSC;
+            } else if (isTgc(id)) {
+                index = PhiIdx::T4;
+            } else if (m_stgcIdHelper->multilayer(id) == 1) {
+                index = PhiIdx::STGC1;
+            } else {
+                index = PhiIdx::STGC2;
+            }
+        } else if (stIndex == StIdx::EM) {
             std::string chamberName = chamberNameString(id);
             if (chamberName[1] == '1')
-                index = MuonStationIndex::T1;
+                index = PhiIdx::T1;
             else if (chamberName[1] == '2')
-                index = MuonStationIndex::T2;
+                index = PhiIdx::T2;
             else
-                index = MuonStationIndex::T3;
+                index = PhiIdx::T3;
         }
         return index;
     }
 
     MuonStationIndex::DetectorRegionIndex MuonIdHelperSvc::regionIndex(const Identifier& id) const {
-        if (isEndcap(id)) return stationEta(id) < 0 ? MuonStationIndex::EndcapC : MuonStationIndex::EndcapA;
-        return MuonStationIndex::Barrel;
+        using DetRegIdx = MuonStationIndex::DetectorRegionIndex;
+        if (isEndcap(id)) return stationEta(id) < 0 ? DetRegIdx::EndcapC : DetRegIdx::EndcapA;
+        return DetRegIdx::Barrel;
     }
 
     MuonStationIndex::LayerIndex MuonIdHelperSvc::layerIndex(const Identifier& id) const {
@@ -326,57 +320,38 @@ namespace Muon {
     }
 
     MuonStationIndex::TechnologyIndex MuonIdHelperSvc::technologyIndex(const Identifier& id) const {
-        if (isMdt(id)) return MuonStationIndex::MDT;
-        if (isCsc(id)) return MuonStationIndex::CSCI;
-        if (isTgc(id)) return MuonStationIndex::TGC;
-        if (isRpc(id)) return MuonStationIndex::RPC;
-        if (issTgc(id)) return MuonStationIndex::STGC;
-        if (isMM(id)) return MuonStationIndex::MM;
-        return MuonStationIndex::TechnologyUnknown;
+        if (isMdt(id)) return TechIdx::MDT;
+        if (isCsc(id)) return TechIdx::CSCI;
+        if (isTgc(id)) return TechIdx::TGC;
+        if (isRpc(id)) return TechIdx::RPC;
+        if (issTgc(id)) return TechIdx::STGC;
+        if (isMM(id)) return TechIdx::MM;
+        return TechIdx::TechnologyUnknown;
     }
-
     std::string MuonIdHelperSvc::toString(const Identifier& id) const {
-        std::ostringstream sout;
         if (!id.is_valid()) return " Invalid Identifier";
-        sout << toStringGasGap(id);
-        if (isRpc(id)) {
-            sout << (m_rpcIdHelper->measuresPhi(id) ? " phi" : " eta") << " channel " << std::setw(2) << m_rpcIdHelper->channel(id);
-        } else if (isTgc(id)) {
-            sout << (m_tgcIdHelper->measuresPhi(id) ? " phi" : " eta") << " channel " << std::setw(2) << m_tgcIdHelper->channel(id);
-        } else if (isCsc(id)) {
-            sout << (m_cscIdHelper->measuresPhi(id) ? " phi" : " eta") << " channel " << std::setw(2) << m_cscIdHelper->channel(id);
-        } else if (issTgc(id)) {
-            int channelType = m_stgcIdHelper->channelType(id);
-            if (channelType == 0)
-                sout << " pad ";
-            else if (channelType == 1)
-                sout << " eta ";
-            else if (channelType == 2)
-                sout << " phi ";
-            sout << " channel " << std::setw(2) << m_stgcIdHelper->channel(id);
-        } else if (isMM(id)) {
-            sout << " channel " << std::setw(2) << m_mmIdHelper->channel(id);
+        if (isMdt(id)) {
+            return toStringGasGap(id);
         }
-        return sout.str();
+        const std::string_view phiStr{measuresPhi(id) ? "phi" : "eta"};
+        if (isRpc(id)) {
+            return std::format("{:} {:} channel {:2d}",toStringGasGap(id), measuresPhi(id) ? "phi" : "eta", m_rpcIdHelper->channel(id));
+        } else if (isTgc(id)) {
+            return std::format("{:} {:} channel {:2d}",toStringGasGap(id), measuresPhi(id) ? "phi" : "eta",  m_tgcIdHelper->channel(id));
+        } else if (isCsc(id)) {
+            return std::format("{:} {:} channel {:2d}",toStringGasGap(id), measuresPhi(id) ? "phi" : "eta",  m_cscIdHelper->channel(id));
+        } else if (isMM(id)) {
+            return std::format("{:} channel {:4d}",toStringGasGap(id),  m_mmIdHelper->channel(id));
+        } 
+        using  sTgcType = sTgcIdHelper::sTgcChannelTypes;
+        const int channelType = m_stgcIdHelper->channelType(id);
+        return std::format("{:} {:} channel {:3d}",toStringGasGap(id), 
+                            channelType == sTgcType::Strip ? "eta" : channelType == sTgcType::Wire ? "phi" : "pad" ,
+                            m_stgcIdHelper->channel(id));
     }
 
     std::string MuonIdHelperSvc::toStringTech(const Identifier& id) const {
-        std::ostringstream sout;
-        if (!id.is_valid()) return " Invalid Identifier";
-        if (isRpc(id)) {
-            sout << m_rpcIdHelper->technologyString(m_rpcIdHelper->technology(id));
-        } else if (isTgc(id)) {
-            sout << m_tgcIdHelper->technologyString(m_tgcIdHelper->technology(id));
-        } else if (isCsc(id)) {
-            sout << m_cscIdHelper->technologyString(m_cscIdHelper->technology(id));
-        } else if (issTgc(id)) {
-            sout << m_stgcIdHelper->technologyString(m_stgcIdHelper->technology(id));
-        } else if (isMM(id)) {
-            sout << m_mmIdHelper->technologyString(m_mmIdHelper->technology(id));
-        } else {
-            sout << m_mdtIdHelper->technologyString(m_mdtIdHelper->technology(id));
-        }
-        return sout.str();
+        return  MuonStationIndex::technologyName(technologyIndex(id));
     }
 
     std::string MuonIdHelperSvc::chamberNameString(const Identifier& id) const {
@@ -384,104 +359,48 @@ namespace Muon {
     }
 
     std::string MuonIdHelperSvc::toStringStation(const Identifier& id) const {
-        std::ostringstream sout;
-        if (!id.is_valid()) return " Invalid Identifier";
-        if (isRpc(id)) {
-            sout << m_rpcIdHelper->technologyString(m_rpcIdHelper->technology(id)) << " "
-                 << m_rpcIdHelper->stationNameString(m_rpcIdHelper->stationName(id)) << " eta " << std::setw(2)
-                 << m_rpcIdHelper->stationEta(id) << " phi " << std::setw(2) << m_rpcIdHelper->stationPhi(id);
-        } else if (isTgc(id)) {
-            sout << m_tgcIdHelper->technologyString(m_tgcIdHelper->technology(id)) << " "
-                 << m_tgcIdHelper->stationNameString(m_tgcIdHelper->stationName(id)) << " eta " << std::setw(2)
-                 << m_tgcIdHelper->stationEta(id) << " phi " << std::setw(2) << m_tgcIdHelper->stationPhi(id);
-        } else if (isCsc(id)) {
-            sout << m_cscIdHelper->technologyString(m_cscIdHelper->technology(id)) << " "
-                 << m_cscIdHelper->stationNameString(m_cscIdHelper->stationName(id)) << " eta " << std::setw(2)
-                 << m_cscIdHelper->stationEta(id) << " phi " << std::setw(2) << m_cscIdHelper->stationPhi(id);
-        } else if (isMM(id)) {
-            sout << m_mmIdHelper->technologyString(m_mmIdHelper->technology(id)) << " "
-                 << m_mmIdHelper->stationNameString(m_mmIdHelper->stationName(id)) << " eta " << std::setw(2)
-                 << m_mmIdHelper->stationEta(id) << " phi " << std::setw(2) << m_mmIdHelper->stationPhi(id);
-        } else if (issTgc(id)) {
-            sout << m_stgcIdHelper->technologyString(m_stgcIdHelper->technology(id)) << " "
-                 << m_stgcIdHelper->stationNameString(m_stgcIdHelper->stationName(id)) << " eta " << std::setw(2)
-                 << m_stgcIdHelper->stationEta(id) << " phi " << std::setw(2) << m_stgcIdHelper->stationPhi(id);
-        } else {
-            sout << m_mdtIdHelper->technologyString(m_mdtIdHelper->technology(id)) << " "
-                 << m_mdtIdHelper->stationNameString(m_mdtIdHelper->stationName(id)) << " eta " << std::setw(2)
-                 << m_mdtIdHelper->stationEta(id) << " phi " << std::setw(2) << m_mdtIdHelper->stationPhi(id);
-        }
-        return sout.str();
+        return std::format("{:} {:} eta {:2d} phi {:2d}", toStringTech(id),stationNameString(id),
+                                                          stationEta(id), stationPhi(id));
     }
-
     std::string MuonIdHelperSvc::toStringChamber(const Identifier& id) const {
-        std::ostringstream sout;
-        if (!id.is_valid()) return " Invalid Identifier";
-        if (isRpc(id)) {
-            sout << m_rpcIdHelper->technologyString(m_rpcIdHelper->technology(id)) << " "
-                 << m_rpcIdHelper->stationNameString(m_rpcIdHelper->stationName(id)) << " eta " << std::setw(2)
-                 << m_rpcIdHelper->stationEta(id) << " phi " << std::setw(2) << m_rpcIdHelper->stationPhi(id) << " dbR "
-                 << m_rpcIdHelper->doubletR(id);
-        } else if (isTgc(id)) {
-            sout << m_tgcIdHelper->technologyString(m_tgcIdHelper->technology(id)) << " "
-                 << m_tgcIdHelper->stationNameString(m_tgcIdHelper->stationName(id)) << " eta " << std::setw(2)
-                 << m_tgcIdHelper->stationEta(id) << " phi " << std::setw(2) << m_tgcIdHelper->stationPhi(id);
-        } else if (isCsc(id)) {
-            sout << m_cscIdHelper->technologyString(m_cscIdHelper->technology(id)) << " "
-                 << m_cscIdHelper->stationNameString(m_cscIdHelper->stationName(id)) << " eta " << std::setw(2)
-                 << m_cscIdHelper->stationEta(id) << " phi " << std::setw(2) << m_cscIdHelper->stationPhi(id);
-        } else if (issTgc(id)) {
-            sout << m_stgcIdHelper->technologyString(m_stgcIdHelper->technology(id)) << " "
-                 << m_stgcIdHelper->stationNameString(m_stgcIdHelper->stationName(id)) << " eta " << std::setw(2)
-                 << m_stgcIdHelper->stationEta(id) << " phi " << std::setw(2) << m_stgcIdHelper->stationPhi(id);
-        } else if (isMM(id)) {
-            sout << m_mmIdHelper->technologyString(m_mmIdHelper->technology(id)) << " "
-                 << m_mmIdHelper->stationNameString(m_mmIdHelper->stationName(id)) << " eta " << std::setw(2)
-                 << m_mmIdHelper->stationEta(id) << " phi " << std::setw(2) << m_mmIdHelper->stationPhi(id);
-        } else {
-            sout << m_mdtIdHelper->technologyString(m_mdtIdHelper->technology(id)) << " "
-                 << m_mdtIdHelper->stationNameString(m_mdtIdHelper->stationName(id)) << " eta " << std::setw(2)
-                 << m_mdtIdHelper->stationEta(id) << " phi " << std::setw(2) << m_mdtIdHelper->stationPhi(id);
+        if (!id.is_valid()) {
+            return " Invalid Identifier";
         }
-        return sout.str();
+        if (isRpc(id)) {
+            return std::format("{:} dbR {:1}", toStringStation(id), m_rpcIdHelper->doubletR(id));
+        }
+        return toStringStation(id);
     }
 
     std::string MuonIdHelperSvc::toStringDetEl(const Identifier& id) const {
-        std::ostringstream sout;
+
         if (!id.is_valid()) return " Invalid Identifier";
-        if (isRpc(id)) {
-            sout << toStringChamber(id) << " dbZ " << m_rpcIdHelper->doubletZ(id) << " dbPhi " << m_rpcIdHelper->doubletPhi(id);
+        if (isMdt(id)) {
+            return std::format("{:} ml {:1d}", toStringChamber(id), m_mdtIdHelper->multilayer(id));
+        } else if (isRpc(id)) {
+            return std::format("{:} dbZ {:21} dbPhi {:1d}", toStringChamber(id), m_rpcIdHelper->doubletZ(id), m_rpcIdHelper->doubletPhi(id));
         } else if (isTgc(id)) {
-            sout << toStringChamber(id);
-        } else if (isCsc(id)) {
-            sout << toStringChamber(id) << " chlay " << m_cscIdHelper->chamberLayer(id);
+            return toStringChamber(id);
+        } 
+        int ml{0};
+        if (isCsc(id)) {
+           ml =  m_cscIdHelper->chamberLayer(id);
         } else if (isMM(id)) {
-            sout << toStringChamber(id) << " chlay " << m_mmIdHelper->multilayer(id);
-        } else if (issTgc(id)) {
-            sout << toStringChamber(id) << " chlay " << m_stgcIdHelper->multilayer(id);
+            ml = m_mmIdHelper->multilayer(id);
         } else {
-            sout << toStringChamber(id) << " ml " << m_mdtIdHelper->multilayer(id);
+            ml = m_stgcIdHelper->multilayer(id);
         }
-        return sout.str();
+        return std::format("{:} chlay {:1d}",toStringChamber(id), ml);
     }
 
     std::string MuonIdHelperSvc::toStringGasGap(const Identifier& id) const {
-        std::ostringstream sout;
         if (!id.is_valid()) return " Invalid Identifier";
-        if (isRpc(id)) {
-            sout << toStringDetEl(id) << " gap " << m_rpcIdHelper->gasGap(id);
-        } else if (isTgc(id)) {
-            sout << toStringDetEl(id) << " gap " << m_tgcIdHelper->gasGap(id);
-        } else if (isCsc(id)) {
-            sout << toStringDetEl(id) << " lay " << m_cscIdHelper->wireLayer(id);
-        } else if (issTgc(id)) {
-            sout << toStringDetEl(id) << " lay " << m_stgcIdHelper->gasGap(id);
-        } else if (isMM(id)) {
-            sout << toStringDetEl(id) << " lay " << m_mmIdHelper->gasGap(id);
-        } else {
-            sout << toStringDetEl(id) << " lay " << m_mdtIdHelper->tubeLayer(id) << " tube " << std::setw(2) << m_mdtIdHelper->channel(id);
-        }
-        return sout.str();
+        if (isMdt(id)) {
+            return std::format("{:} lay {:1d} tube {:1d}", toStringDetEl(id),m_mdtIdHelper->tubeLayer(id), m_mdtIdHelper->tube(id));
+        } else if (isRpc(id) || isTgc(id)) {
+            return std::format("{:} gap {:1d}", toStringDetEl(id), gasGap(id));
+        } 
+        return std::format("{:} lay {:1d}", toStringDetEl(id), gasGap(id));
     }
 
     Identifier MuonIdHelperSvc::chamberId(const Identifier& id) const {
@@ -489,20 +408,14 @@ namespace Muon {
         // use phi hits on segment
         if (isTgc(id)) {
             chId = m_tgcIdHelper->elementID(id);
-
         } else if (isRpc(id)) {
             chId = m_rpcIdHelper->elementID(id);
-
         } else if (isMM(id)) {
             chId = m_mmIdHelper->elementID(id);
-
         } else if (issTgc(id)) {
             chId = m_stgcIdHelper->elementID(id);
-
         } else if (isCsc(id)) {
-            Identifier elId = m_cscIdHelper->elementID(id);
-            chId = m_cscIdHelper->channelID(elId, 2, 1, 1, 1);
-
+            chId = m_cscIdHelper->channelID(id, 2, 1, 1, 1);
         } else if (isMdt(id)) {
             chId = m_mdtIdHelper->elementID(id);
         }
@@ -510,117 +423,63 @@ namespace Muon {
     }
 
     Identifier MuonIdHelperSvc::detElId(const Identifier& id) const {
-        Identifier detElId;
+        Identifier detElId{};
         // use phi hits on segment
         if (isTgc(id)) {
-            detElId = m_tgcIdHelper->elementID(id);
-
+            return m_tgcIdHelper->elementID(id);
         } else if (isRpc(id)) {
-            Identifier elId = m_rpcIdHelper->elementID(id);
-            int doubZ = m_rpcIdHelper->doubletZ(id);
-            int doubPhi = m_rpcIdHelper->doubletPhi(id);
-            detElId = m_rpcIdHelper->channelID(elId, doubZ, doubPhi, 1, 0, 1);
-
+            return m_rpcIdHelper->channelID(id, m_rpcIdHelper->doubletZ(id), m_rpcIdHelper->doubletPhi(id), 1, false, 1);
         } else if (isCsc(id)) {
-            Identifier elId = m_cscIdHelper->elementID(id);
-            detElId = m_cscIdHelper->channelID(elId, 2, 1, 1, 1);
-
+            return  m_cscIdHelper->channelID(id, 2, 1, 1, 1);
         } else if (issTgc(id)) {
-            Identifier elId = m_stgcIdHelper->elementID(id);
-            detElId = m_stgcIdHelper->channelID(elId, m_stgcIdHelper->multilayer(id), 1, 1, 1);
-
+            return m_stgcIdHelper->channelID(id, m_stgcIdHelper->multilayer(id), 1, sTgcIdHelper::sTgcChannelTypes::Strip, 1);
         } else if (isMM(id)) {
-            Identifier elId = m_mmIdHelper->elementID(id);
-            detElId = m_mmIdHelper->channelID(elId, m_mmIdHelper->multilayer(id), 1, 1);
-
-        } else {
-            Identifier elId = m_mdtIdHelper->elementID(id);
-            detElId = m_mdtIdHelper->channelID(elId, m_mdtIdHelper->multilayer(id), 1, 1);
-        }
-        return detElId;
+            return m_mmIdHelper->channelID(id, m_mmIdHelper->multilayer(id), 1, 1);
+        } 
+        return m_mdtIdHelper->channelID(id, m_mdtIdHelper->multilayer(id), 1, 1);
     }
 
     Identifier MuonIdHelperSvc::layerId(const Identifier& id) const {
-        Identifier layerId;
         // use phi hits on segment
         if (isTgc(id)) {
-            Identifier elId = m_tgcIdHelper->elementID(id);
-            int gasGap = m_tgcIdHelper->gasGap(id);
-            int measuresPhi = m_tgcIdHelper->measuresPhi(id);
-            layerId = m_tgcIdHelper->channelID(elId, gasGap, measuresPhi, 1);
-
+            return m_tgcIdHelper->channelID(id, m_tgcIdHelper->gasGap(id), m_tgcIdHelper->measuresPhi(id), 1);
         } else if (isRpc(id)) {
-            Identifier elId = m_rpcIdHelper->elementID(id);
-            int doubZ = m_rpcIdHelper->doubletZ(id);
-            int doubPhi = m_rpcIdHelper->doubletPhi(id);
-            int gasGap = m_rpcIdHelper->gasGap(id);
-            int measuresPhi = m_rpcIdHelper->measuresPhi(id);
-            layerId = m_rpcIdHelper->channelID(elId, doubZ, doubPhi, gasGap, measuresPhi, 1);
-
+            return m_rpcIdHelper->channelID(id, m_rpcIdHelper->doubletZ(id), m_rpcIdHelper->doubletPhi(id), 
+                                            m_rpcIdHelper->gasGap(id), m_rpcIdHelper->measuresPhi(id), 1);
         } else if (isCsc(id)) {
-            Identifier elId = m_cscIdHelper->elementID(id);
-            int chLayer = m_cscIdHelper->chamberLayer(id);
-            int wireLayer = m_cscIdHelper->wireLayer(id);
-            int measuresPhi = m_cscIdHelper->measuresPhi(id);
-            layerId = m_cscIdHelper->channelID(elId, chLayer, wireLayer, measuresPhi, 1);
-
+            return m_cscIdHelper->channelID(id, m_cscIdHelper->chamberLayer(id), m_cscIdHelper->wireLayer(id), 
+                                            m_cscIdHelper->measuresPhi(id), 1);
         } else if (isMM(id)) {
-            Identifier elId = m_mmIdHelper->elementID(id);
-            int chLayer = m_mmIdHelper->multilayer(id);
-            int wireLayer = m_mmIdHelper->gasGap(id);
-            layerId = m_mmIdHelper->channelID(elId, chLayer, wireLayer, 1);
-
+            return m_mmIdHelper->channelID(id, m_mmIdHelper->multilayer(id), m_mmIdHelper->gasGap(id), 1);
         } else if (issTgc(id)) {
-            Identifier elId = m_stgcIdHelper->elementID(id);
-            int chLayer = m_stgcIdHelper->multilayer(id);
-            int wireLayer = m_stgcIdHelper->gasGap(id);
-            layerId = m_stgcIdHelper->channelID(elId, chLayer, wireLayer, m_stgcIdHelper->channelType(id), 1);
-
-        } else {
-            layerId = id;
+            return m_stgcIdHelper->channelID(id, m_stgcIdHelper->multilayer(id), 
+                                             m_stgcIdHelper->gasGap(id), m_stgcIdHelper->channelType(id), 1);
         }
-        return layerId;
+        /// Return Identifier for the Mdts 
+        return id;
     }
 
     Identifier MuonIdHelperSvc::gasGapId(const Identifier& id) const {
         Identifier gasGapId;
         // use phi hits on segment
         if (isTgc(id)) {
-            Identifier elId = m_tgcIdHelper->elementID(id);
-            int gasGap = m_tgcIdHelper->gasGap(id);
-            gasGapId = m_tgcIdHelper->channelID(elId, gasGap, 0, 1);
+            return m_tgcIdHelper->channelID(id, m_tgcIdHelper->gasGap(id), false, 1);
 
         } else if (isRpc(id)) {
-            Identifier elId = m_rpcIdHelper->elementID(id);
-            int doubZ = m_rpcIdHelper->doubletZ(id);
-            int doubPhi = m_rpcIdHelper->doubletPhi(id);
-            int gasGap = m_rpcIdHelper->gasGap(id);
-            gasGapId = m_rpcIdHelper->channelID(elId, doubZ, doubPhi, gasGap, 0, 1);
+            return m_rpcIdHelper->channelID(id, m_rpcIdHelper->doubletZ(id), m_rpcIdHelper->doubletPhi(id), 
+                                            m_rpcIdHelper->gasGap(id), false, 1);
 
         } else if (isCsc(id)) {
-            Identifier elId = m_cscIdHelper->elementID(id);
-            int chLayer = m_cscIdHelper->chamberLayer(id);
-            int wireLayer = m_cscIdHelper->wireLayer(id);
-            gasGapId = m_cscIdHelper->channelID(elId, chLayer, wireLayer, 1, 1);
+            return m_cscIdHelper->channelID(id, m_cscIdHelper->chamberLayer(id), m_cscIdHelper->wireLayer(id), 1, 1);
         } else if (isMM(id)) {
-            Identifier elId = m_mmIdHelper->elementID(id);
-            int chLayer = m_mmIdHelper->multilayer(id);
-            int wireLayer = m_mmIdHelper->gasGap(id);
-            gasGapId = m_mmIdHelper->channelID(elId, chLayer, wireLayer, 1);
+            return m_mmIdHelper->channelID(id, m_mmIdHelper->multilayer(id), m_mmIdHelper->gasGap(id), 1);
 
         } else if (issTgc(id)) {
-            Identifier elId = m_stgcIdHelper->elementID(id);
-            int chLayer = m_stgcIdHelper->multilayer(id);
-            int wireLayer = m_stgcIdHelper->gasGap(id);
-            gasGapId = m_stgcIdHelper->channelID(elId, chLayer, wireLayer, 1, 1);
+            return m_stgcIdHelper->channelID(id, m_stgcIdHelper->multilayer(id), m_stgcIdHelper->gasGap(id), 
+                                                 sTgcIdHelper::sTgcChannelTypes::Strip, 1);
 
-        } else {
-            Identifier elId = m_mdtIdHelper->elementID(id);
-            int ml = m_mdtIdHelper->multilayer(id);
-            int lay = m_mdtIdHelper->tubeLayer(id);
-            gasGapId = m_mdtIdHelper->channelID(elId, ml, lay, 1);
-        }
-        return gasGapId;
+        } 
+        return m_mdtIdHelper->channelID(id, m_mdtIdHelper->multilayer(id), m_mdtIdHelper->tubeLayer(id), 1);
     }
 
     int MuonIdHelperSvc::stationPhi(const Identifier& id) const {
