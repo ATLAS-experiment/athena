@@ -42,7 +42,7 @@ def inputAMITags(flags, fixBroken=False, silent=False):
     metadta. If nothing can be retrieved from the in-file metadata return empty
     list, otherwise return value from metadata. Inform about differences.
     """
-    if flags.Input.SecondaryFiles and not flags.Overlay.DataOverlay:
+    if flags.Input.SecondaryFiles and not flags.Overlay.ByteStream:
         files = flags.Input.SecondaryFiles
     else:
         files = flags.Input.Files

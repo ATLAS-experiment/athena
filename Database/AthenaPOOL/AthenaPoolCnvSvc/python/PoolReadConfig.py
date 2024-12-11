@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -87,11 +87,11 @@ def PoolReadCfg(flags):
         evSel = CompFactory.DoubleEventSelectorAthenaPool("EventSelector",
                                                           InputCollections=flags.Input.Files)
 
-        if flags.Overlay.DataOverlay:
+        if flags.Overlay.ByteStream:
             # In case of data overlay HITS are primary input
             evSel.SkipEvents = skipEventsPrimary
 
-            # We have to check if we're running data overlay - BS is needed in this case
+            # We have to check if we're running overlay with ByteStream input
             from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
             result.merge(ByteStreamReadCfg(flags))
 
