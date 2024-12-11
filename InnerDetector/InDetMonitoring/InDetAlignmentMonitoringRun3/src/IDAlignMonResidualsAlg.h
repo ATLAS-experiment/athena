@@ -84,7 +84,7 @@ class IDAlignMonResidualsAlg :  public AthMonitorAlgorithm {
 
   std::string m_Pixel_Manager;
   std::string m_SCT_Manager;
-  bool m_extendedPlots;
+  bool m_extendedPlots{};
   bool m_doHitQuality{false};
   int  m_checkrate {};
   bool m_doPulls {};
