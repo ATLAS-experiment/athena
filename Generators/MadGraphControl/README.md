@@ -904,7 +904,7 @@ you would like to request a new model, please open a merge request in
 the
 [MadGraphModels](https://gitlab.cern.ch/atlas-generators-team/MadGraphModels)
 repository in GIT. To keep the repo tidy, we follow a
-fork-and-merge-upstream moidel like athena; you can follow the
+fork-and-merge-upstream model like athena; you can follow the
 [instructions
 here](https://atlassoftwaredocs.web.cern.ch/gittutorial/gitlab-fork/).
 Note that every model needs a corresponding info `.txt` file. These
