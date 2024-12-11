@@ -423,7 +423,6 @@ namespace Muon {
     }
 
     Identifier MuonIdHelperSvc::detElId(const Identifier& id) const {
-        Identifier detElId{};
         // use phi hits on segment
         if (isTgc(id)) {
             return m_tgcIdHelper->elementID(id);
@@ -460,7 +459,6 @@ namespace Muon {
     }
 
     Identifier MuonIdHelperSvc::gasGapId(const Identifier& id) const {
-        Identifier gasGapId;
         // use phi hits on segment
         if (isTgc(id)) {
             return m_tgcIdHelper->channelID(id, m_tgcIdHelper->gasGap(id), false, 1);
