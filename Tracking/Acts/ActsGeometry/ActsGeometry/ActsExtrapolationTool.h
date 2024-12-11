@@ -132,6 +132,14 @@ private:
   Gaudi::Property<bool> m_interactionMultiScatering{this, "InteractionMultiScatering", false, "Whether to consider multiple scattering in the interactor"};
   Gaudi::Property<bool> m_interactionEloss{this, "InteractionEloss", false, "Whether to consider energy loss in the interactor"};
   Gaudi::Property<bool> m_interactionRecord{this, "InteractionRecord", false, "Whether to record all material interactions"};
+
+  template<typename OptionsType>
+  OptionsType 
+  prepareOptions( const Acts::GeometryContext& gctx,
+                  const Acts::MagneticFieldContext& mctx,
+                  const Acts::BoundTrackParameters& startParameters,
+                  Acts::Direction navDir, 
+                  double pathLimit) const;
 };
 
 #endif
