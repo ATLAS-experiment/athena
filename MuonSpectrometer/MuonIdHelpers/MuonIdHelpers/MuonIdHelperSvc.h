@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONIDHELPERSVC_H
@@ -192,15 +192,19 @@ namespace Muon {
 
         ServiceHandle<StoreGateSvc> m_detStore{this, "DetectorStore", "DetectorStore"};
 
+        using TechIdx = MuonStationIndex::TechnologyIndex;
+        using ChIdx = MuonStationIndex::ChIndex;
+        using StIdx = MuonStationIndex::StIndex;
+        using PhiIdx = MuonStationIndex::PhiIndex;
         struct StationNameData {
             std::string stationName{};
             bool isEndcap{false};
             bool isSmall{false};
-            MuonStationIndex::ChIndex chIndex{};
-            MuonStationIndex::StIndex stIndex{};
+            ChIdx chIndex{ChIdx::ChUnknown};
+            StIdx stIndex{StIdx::StUnknown};
         };
         std::vector<StationNameData> m_stationNameData;
-        std::vector<MuonStationIndex::TechnologyIndex> m_technologies;
+        std::vector<TechIdx> m_technologies;
 
         int m_BIS_stat{-1};
         std::set<Identifier> m_smdt_stat{};
