@@ -11,6 +11,8 @@
 #include "StoreGate/DataHandle.h"
 
 // data containers
+#include "InDetPrepRawData/PixelClusterContainer.h"
+#include "InDetPrepRawData/SCT_ClusterContainer.h"
 #include "TrkSpacePoint/SpacePointContainer.h"
 #include "TrkSpacePoint/SpacePointOverlapCollection.h"
 #include "TrkTrack/TrackCollection.h"
@@ -20,6 +22,7 @@
 #include "InDetRecToolInterfaces/ISeedFitter.h"
 #include "TrkFitterInterfaces/ITrackFitter.h"
 #include "IGNNTrackReaderTool.h"
+#include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 
 namespace Trk {
   class ITrackFitter;
@@ -61,6 +64,10 @@ namespace InDet {
         this, "SpacePointsSCTName", "ITkStripSpacePoints"};
       SG::ReadHandleKey<SpacePointOverlapCollection> m_SpacePointsOverlapKey{this, "SpacePointsOverlapName", "ITkOverlapSpacePoints"};
       //@}
+  SG::ReadHandleKey<InDet::PixelClusterContainer> m_ClusterPixelKey{
+      this, "PixelClusterContainer", "ITkPixelClusters"};
+  SG::ReadHandleKey<InDet::SCT_ClusterContainer> m_ClusterStripKey{
+      this, "StripClusterContainer", "ITkStripClusters"};
 
       // output container
       SG::WriteHandleKey<TrackCollection> m_outputTracksKey{
@@ -84,6 +91,8 @@ namespace InDet {
         this, "TrackFitter", 
         "Trk::GlobalChi2Fitter/InDetTrackFitter", "Track Fitter"
       };
+      ToolHandle<Trk::IExtendedTrackSummaryTool> m_trackSummaryTool{
+      this, "TrackSummaryTool", "InDetTrackSummaryTool"};
       ToolHandle<IGNNTrackReaderTool> m_gnnTrackReader{
         this, "GNNTrackReaderTool",
         "InDet::GNNTrackReaderTool", "Track Reader"
@@ -92,6 +101,9 @@ namespace InDet {
 
       MsgStream&    dumptools(MsgStream&    out) const;
       MsgStream&    dumpevent(MsgStream&    out) const;
+      BooleanProperty m_areInputClusters{
+        this, "areInputClusters", false,
+        "Read track candidates as list of clusters"};
     };
 
     MsgStream&    operator << (MsgStream&   ,const SiSPGNNTrackMaker&);

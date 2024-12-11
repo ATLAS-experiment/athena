@@ -27,5 +27,7 @@ def createGNNTrackingConfigFlags():
     icf.addFlag("Tracking.GNN.TrackReader.inputTracksDir", "gnntracks")
     icf.addFlag("Tracking.GNN.TrackReader.csvPrefix", "track")
 
+    icf.addFlag("Tracking.GNN.useClusterTracks", False)
+    icf.addFlag("Tracking.GNN.doAmbiResolution", True)
 
     return icf

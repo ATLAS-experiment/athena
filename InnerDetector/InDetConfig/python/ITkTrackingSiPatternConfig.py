@@ -115,7 +115,10 @@ def ITkTrackingSiPatternCfg(flags,
     # ------------------------------------------------------------
     runTruth = True
 
-    if flags.Tracking.doITkFastTracking and flags.Tracking.ActiveConfig.doAthenaTrack:
+    # if do GNN without ambi resolution, create a CopyAlgForAmbi 
+    doGNNWithoutAmbiReso = flags.Tracking.ActiveConfig.doGNNTrack and (not flags.Tracking.GNN.doAmbiResolution)
+                            
+    if (flags.Tracking.doITkFastTracking and flags.Tracking.ActiveConfig.doAthenaTrack or doGNNWithoutAmbiReso):
 
         from TrkConfig.TrkCollectionAliasAlgConfig import CopyAlgForAmbiCfg
         acc.merge(CopyAlgForAmbiCfg(
