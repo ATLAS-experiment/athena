@@ -1,6 +1,6 @@
 // -*- C++ -*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -93,47 +93,25 @@ StatusCode Herwig7::genInitialize() {
   //ThePEG::Debug::level = 10000;
   ThePEG::Repository::exitOnError() = 1;
 
-  // Horrid runtime ATLAS env variable and CMT path mangling to work out ThePEG module search paths
-  char* env1 = getenv("CMTPATH");
-  char* env2 = getenv("CMTCONFIG");
-  std::string reposearchpaths;
-  if (env1 == nullptr || env2 == nullptr) {
-     // Use everything from $DATAPATH and $LD_LIBRARY_PATH:
-     const char* datapath = getenv( "DATAPATH" );
-     reposearchpaths = datapath;
-     std::vector< std::string > datapaths;
-     boost::split( datapaths, datapath,
-                   boost::is_any_of( std::string( ":" ) ) );
-     for( const std::string& p : datapaths ) {
-        ThePEG::Repository::appendReadDir( p );
-     }
-     const char* ldpath = getenv( "LD_LIBRARY_PATH" );
-     std::vector< std::string > ldpaths;
-     boost::split( ldpaths, ldpath, boost::is_any_of( std::string( ":" ) ) );
-     for( const std::string& p : ldpaths ) {
-        ThePEG::DynamicLoader::appendPath( p );
-     }
-  } else {
-    std::vector<std::string> cmtpaths;
-    boost::split(cmtpaths, env1, boost::is_any_of(std::string(":")));
-    const std::string cmtconfig = env2;
-    const std::string sharepath = "/InstallArea/" + cmtconfig + "/share";
-    const std::string libpath = "/InstallArea/" + cmtconfig + "/lib";
-    // Prepend to the repository and loader command file search paths
-    for(const std::string& p: cmtpaths) {
-      const std::string cmtsharepath = p + sharepath;
-      ATH_MSG_DEBUG("Appending " + cmtsharepath + " to ThePEG repository and command file search paths");
-      reposearchpaths = reposearchpaths + (reposearchpaths.length() == 0 ? "" : ":") + cmtsharepath;
-      ThePEG::Repository::appendReadDir(cmtsharepath);
-      const std::string cmtlibpath = p + libpath;
-      ATH_MSG_DEBUG("Appending " + cmtlibpath + " to ThePEG loader search path");
-      ThePEG::DynamicLoader::appendPath(cmtlibpath);
-    }
+  // Use everything from $DATAPATH and $LD_LIBRARY_PATH:
+  const char* datapath = getenv( "DATAPATH" );
+  std::vector< std::string > datapaths;
+  boost::split( datapaths, datapath,
+                boost::is_any_of( std::string( ":" ) ) );
+  for( const std::string& p : datapaths ) {
+    ThePEG::Repository::appendReadDir( p );
   }
+  const char* ldpath = getenv( "LD_LIBRARY_PATH" );
+  std::vector< std::string > ldpaths;
+  boost::split( ldpaths, ldpath, boost::is_any_of( std::string( ":" ) ) );
+  for( const std::string& p : ldpaths ) {
+    ThePEG::DynamicLoader::appendPath( p );
+  }
+
   ATH_MSG_DEBUG("Num of library search paths = " << ThePEG::DynamicLoader::allPaths().size());
 
   // Use PathResolver to find default Hw7 ThePEG repository file.
-  const std::string repopath = PathResolver::find_file_from_list("HerwigDefaults.rpo", reposearchpaths);
+  const std::string repopath = PathResolver::find_file_from_list("HerwigDefaults.rpo", datapath);
   ATH_MSG_DEBUG("Loading Herwig default repo from " << repopath);
   ThePEG::Repository::load(repopath);
   ATH_MSG_DEBUG("Successfully loaded Herwig default repository");
