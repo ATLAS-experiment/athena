@@ -244,7 +244,7 @@ IDTPM::TrackRoiSelectionTool::getTrigTracks(
   /// Getting SELECTED trigger tracks within the RoI
   std::vector< const xAOD::TrackParticle* > selectedTrigTracks;
   xAOD::TrackParticleContainer::const_iterator trkItr;
-  for( trkItr = trigTrkItrPair.first ; trkItr != trigTrkItrPair.second ; trkItr++ ) {
+  for( trkItr = trigTrkItrPair.first ; trkItr != trigTrkItrPair.second ; ++trkItr ) {
     /// Check if in-RoI track is also in the selected (full-scan) trigger track vector
     /// i.e. if it passes the quality selection (if any)
     if( std::find( tvec.begin(), tvec.end(), *trkItr ) == tvec.end() ) {

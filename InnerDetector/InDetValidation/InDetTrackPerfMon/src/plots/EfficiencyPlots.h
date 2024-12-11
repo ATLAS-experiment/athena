@@ -51,25 +51,25 @@ namespace IDTPM {
   private:
 
     std::string m_trackType;
-    bool m_doGlobalPlots;
-    bool m_doTruthMuPlots;
+    bool m_doGlobalPlots{};
+    bool m_doTruthMuPlots{};
 
-    TEfficiency* m_eff_vs_pt;
-    TEfficiency* m_eff_vs_lowPt;
-    TEfficiency* m_eff_vs_eta;
-    TEfficiency* m_eff_vs_phi;
-    TEfficiency* m_eff_vs_d0;
-    TEfficiency* m_eff_vs_z0;
-    TEfficiency* m_eff_vs_prodR;
-    TEfficiency* m_eff_vs_prodZ;
-    TEfficiency* m_eff_vs_eta_vs_pt;
-    TEfficiency* m_eff_vs_eta_vs_phi;
-    TEfficiency* m_eff_vs_z0_vs_d0;
-    TEfficiency* m_eff_vs_z0sin_vs_d0;
+    TEfficiency* m_eff_vs_pt{};
+    TEfficiency* m_eff_vs_lowPt{};
+    TEfficiency* m_eff_vs_eta{};
+    TEfficiency* m_eff_vs_phi{};
+    TEfficiency* m_eff_vs_d0{};
+    TEfficiency* m_eff_vs_z0{};
+    TEfficiency* m_eff_vs_prodR{};
+    TEfficiency* m_eff_vs_prodZ{};
+    TEfficiency* m_eff_vs_eta_vs_pt{};
+    TEfficiency* m_eff_vs_eta_vs_phi{};
+    TEfficiency* m_eff_vs_z0_vs_d0{};
+    TEfficiency* m_eff_vs_z0sin_vs_d0{};
 
     /// Plots vs global quantities
-    TEfficiency* m_eff_vs_truthMu;
-    TEfficiency* m_eff_vs_actualMu;
+    TEfficiency* m_eff_vs_truthMu{};
+    TEfficiency* m_eff_vs_actualMu{};
 
   }; // class EfficiencyPlots
 

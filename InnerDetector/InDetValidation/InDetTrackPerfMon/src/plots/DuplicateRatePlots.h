@@ -51,32 +51,32 @@ namespace IDTPM {
   private:
 
     std::string m_trackType;
-    bool m_doGlobalPlots;
-    bool m_doTruthMuPlots;
+    bool m_doGlobalPlots{};
+    bool m_doTruthMuPlots{};
     
-    TEfficiency*  m_duplrate_vs_pt;
-    TEfficiency*  m_duplrate_vs_eta;
-    TEfficiency*  m_duplrate_vs_phi;
-    TEfficiency*  m_duplrate_vs_d0;
-    TEfficiency*  m_duplrate_vs_z0;
-    TEfficiency*  m_duplrate_vs_truthMu;
-    TEfficiency*  m_duplrate_vs_actualMu;
+    TEfficiency*  m_duplrate_vs_pt{};
+    TEfficiency*  m_duplrate_vs_eta{};
+    TEfficiency*  m_duplrate_vs_phi{};
+    TEfficiency*  m_duplrate_vs_d0{};
+    TEfficiency*  m_duplrate_vs_z0{};
+    TEfficiency*  m_duplrate_vs_truthMu{};
+    TEfficiency*  m_duplrate_vs_actualMu{};
 
-    TProfile*     m_duplnum_vs_pt;
-    TProfile*     m_duplnum_vs_eta;
-    TProfile*     m_duplnum_vs_phi;
-    TProfile*     m_duplnum_vs_d0;
-    TProfile*     m_duplnum_vs_z0;
-    TProfile*     m_duplnum_vs_truthMu;
-    TProfile*     m_duplnum_vs_actualMu;
+    TProfile*     m_duplnum_vs_pt{};
+    TProfile*     m_duplnum_vs_eta{};
+    TProfile*     m_duplnum_vs_phi{};
+    TProfile*     m_duplnum_vs_d0{};
+    TProfile*     m_duplnum_vs_z0{};
+    TProfile*     m_duplnum_vs_truthMu{};
+    TProfile*     m_duplnum_vs_actualMu{};
 
-    TProfile*     m_duplnum_nonzero_vs_pt;
-    TProfile*     m_duplnum_nonzero_vs_eta;
-    TProfile*     m_duplnum_nonzero_vs_phi;
-    TProfile*     m_duplnum_nonzero_vs_d0;
-    TProfile*     m_duplnum_nonzero_vs_z0;
-    TProfile*     m_duplnum_nonzero_vs_truthMu;
-    TProfile*     m_duplnum_nonzero_vs_actualMu;
+    TProfile*     m_duplnum_nonzero_vs_pt{};
+    TProfile*     m_duplnum_nonzero_vs_eta{};
+    TProfile*     m_duplnum_nonzero_vs_phi{};
+    TProfile*     m_duplnum_nonzero_vs_d0{};
+    TProfile*     m_duplnum_nonzero_vs_z0{};
+    TProfile*     m_duplnum_nonzero_vs_truthMu{};
+    TProfile*     m_duplnum_nonzero_vs_actualMu{};
 
   }; // class DuplicateRatePlots
 
