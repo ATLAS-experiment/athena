@@ -125,14 +125,13 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
                                         Acts::Direction navDir /*= Acts::Direction::Forward*/,
                                         double pathLimit /*= std::numeric_limits<double>::max()*/) const
 {
-  using namespace Acts::UnitLiterals;
+
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__ << " begin");
 
   Acts::MagneticFieldContext mctx = getMagneticFieldContext(ctx);
-  const ActsGeometryContext& gctx
+  const ActsGeometryContext& geo_ctx
     = m_trackingGeometryTool->getGeometryContext(ctx);
-
-  auto anygctx = gctx.context();
+  auto anygctx = geo_ctx.context();
 
   ActsPropagationOutput output;
 
@@ -142,22 +141,9 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
       // Action list and abort list
       using ActorList =
       Acts::ActorList<SteppingLogger, Acts::MaterialInteractor, EndOfWorld>;
-
       using Options = typename Propagator::template Options<ActorList>;
 
-      Options options(anygctx, mctx);
-      options.pathLimit = pathLimit;
-      options.loopProtection
-        = (Acts::VectorHelpers::perp(startParameters.momentum())
-          < m_ptLoopers * 1_MeV);
-      options.maxSteps = m_maxStep;
-      options.direction = navDir;
-      options.stepping.maxStepSize = m_maxStepSize * 1_m;
-
-      auto &mInteractor = options.actorList.template get<Acts::MaterialInteractor>();
-      mInteractor.multipleScattering = m_interactionMultiScatering;
-      mInteractor.energyLoss = m_interactionEloss;
-      mInteractor.recordInteractions = m_interactionRecord;
+       Options options = prepareOptions<Options>(anygctx, mctx, startParameters, navDir, pathLimit);
 
       auto result = propagator.propagate(startParameters, options);
       if (!result.ok()) {
@@ -199,14 +185,12 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
                                  Acts::Direction navDir /*= Acts::Direction::Forward*/,
                                  double pathLimit /*= std::numeric_limits<double>::max()*/) const
 {
-  using namespace Acts::UnitLiterals;
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__ << " begin");
 
-  Acts::MagneticFieldContext mctx;
-  const ActsGeometryContext& gctx
+  Acts::MagneticFieldContext mctx = getMagneticFieldContext(ctx);
+  const ActsGeometryContext& geo_ctx
     = m_trackingGeometryTool->getGeometryContext(ctx);
-
-  auto anygctx = gctx.context();
+  auto anygctx = geo_ctx.context();
 
   auto parameters = boost::apply_visitor([&](const auto& propagator) -> std::optional<const Acts::CurvilinearTrackParameters> {
       using Propagator = std::decay_t<decltype(propagator)>;
@@ -216,19 +200,8 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
       Acts::ActorList<Acts::MaterialInteractor, EndOfWorld>;
       using Options = typename Propagator::template Options<ActorList>;
 
-      Options options(anygctx, mctx);
-      options.pathLimit = pathLimit;
-      options.loopProtection
-        = (Acts::VectorHelpers::perp(startParameters.momentum())
-          < m_ptLoopers * 1_MeV);
-      options.maxSteps = m_maxStep;
-      options.direction = navDir;
-      options.stepping.maxStepSize = m_maxStepSize * 1_m;
+      Options options = prepareOptions<Options>(anygctx, mctx, startParameters, navDir, pathLimit);
 
-      auto& mInteractor = options.actorList.template get<Acts::MaterialInteractor>();
-      mInteractor.multipleScattering = m_interactionMultiScatering;
-      mInteractor.energyLoss = m_interactionEloss;
-      mInteractor.recordInteractions = m_interactionRecord;
       
       auto result = propagator.propagate(startParameters, options);
       if (!result.ok()) {
@@ -249,16 +222,14 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
                                         Acts::Direction navDir /*= Acts::Direction::Forward*/,
                                         double pathLimit /*= std::numeric_limits<double>::max()*/) const
 {
-  using namespace Acts::UnitLiterals;
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__ << " begin");
 
-  Acts::MagneticFieldContext mctx = getMagneticFieldContext(ctx);;
-  const ActsGeometryContext& gctx
-    = m_trackingGeometryTool->getGeometryContext(ctx);
-
-  auto anygctx = gctx.context();
-
   ActsPropagationOutput output;
+
+  Acts::MagneticFieldContext mctx = getMagneticFieldContext(ctx);
+  const ActsGeometryContext& geo_ctx
+    = m_trackingGeometryTool->getGeometryContext(ctx);
+  auto anygctx = geo_ctx.context();
 
   auto res = boost::apply_visitor([&](const auto& propagator) -> ResultType {
       using Propagator = std::decay_t<decltype(propagator)>;
@@ -268,19 +239,7 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
       Acts::ActorList<SteppingLogger, Acts::MaterialInteractor>;
       using Options = typename Propagator::template Options<ActorList>;
 
-      Options options(anygctx, mctx);
-      options.pathLimit = pathLimit;
-      options.loopProtection
-        = (Acts::VectorHelpers::perp(startParameters.momentum())
-          < m_ptLoopers * 1_MeV);
-      options.maxSteps = m_maxStep;
-      options.direction = navDir;
-      options.stepping.maxStepSize = m_maxStepSize * 1_m;
-
-      auto& mInteractor = options.actorList.template get<Acts::MaterialInteractor>();
-      mInteractor.multipleScattering = m_interactionMultiScatering;
-      mInteractor.energyLoss = m_interactionEloss;
-      mInteractor.recordInteractions = m_interactionRecord;
+      Options options = prepareOptions<Options>(anygctx, mctx, startParameters, navDir, pathLimit);
 
       auto result = propagator.propagate(startParameters, target, options);
       if (!result.ok()) {
@@ -315,14 +274,13 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
                                  Acts::Direction navDir /*= Acts::Direction::Forward*/,
                                  double pathLimit /*= std::numeric_limits<double>::max()*/) const
 {
-  using namespace Acts::UnitLiterals;
+  
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__ << " begin");
-
+  
   Acts::MagneticFieldContext mctx = getMagneticFieldContext(ctx);
-  const ActsGeometryContext& gctx
+  const ActsGeometryContext& geo_ctx
     = m_trackingGeometryTool->getGeometryContext(ctx);
-
-  auto anygctx = gctx.context();
+  auto anygctx = geo_ctx.context();
 
   auto parameters = boost::apply_visitor([&](const auto& propagator) -> std::optional<const Acts::BoundTrackParameters> {
       using Propagator = std::decay_t<decltype(propagator)>;
@@ -332,19 +290,7 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
       Acts::ActorList<Acts::MaterialInteractor>;
       using Options = typename Propagator::template Options<ActorList>;
 
-      Options options(anygctx, mctx);
-      options.pathLimit = pathLimit;
-      options.loopProtection
-        = (Acts::VectorHelpers::perp(startParameters.momentum())
-          < m_ptLoopers * 1_MeV);
-      options.maxSteps = m_maxStep;
-      options.direction = navDir;
-      options.stepping.maxStepSize = m_maxStepSize * 1_m;
-
-      auto& mInteractor = options.actorList.template get<Acts::MaterialInteractor>();
-      mInteractor.multipleScattering = m_interactionMultiScatering;
-      mInteractor.energyLoss = m_interactionEloss;
-      mInteractor.recordInteractions = m_interactionRecord;
+      Options options = prepareOptions<Options>(anygctx, mctx, startParameters, navDir, pathLimit);
 
       auto result = propagator.propagate(startParameters, target, options);
       if (!result.ok()) {
@@ -368,4 +314,29 @@ Acts::MagneticFieldContext ActsExtrapolationTool::getMagneticFieldContext(const 
   const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
 
   return Acts::MagneticFieldContext(fieldCondObj);
+}
+
+template<typename OptionsType>
+OptionsType ActsExtrapolationTool::prepareOptions(const Acts::GeometryContext& gctx,
+                                                  const Acts::MagneticFieldContext& mctx,
+                                                  const Acts::BoundTrackParameters& startParameters,
+                                                  Acts::Direction navDir, 
+                                                  double pathLimit) const { 
+  using namespace Acts::UnitLiterals;
+  OptionsType options(gctx, mctx);
+
+  options.pathLimit = pathLimit;
+  options.loopProtection
+    = (Acts::VectorHelpers::perp(startParameters.momentum())
+      < m_ptLoopers * 1_MeV);
+  options.maxSteps = m_maxStep;
+  options.direction = navDir;
+  options.stepping.maxStepSize = m_maxStepSize * 1_m;
+
+  auto& mInteractor = options.actorList.template get<Acts::MaterialInteractor>();
+  mInteractor.multipleScattering = m_interactionMultiScatering;
+  mInteractor.energyLoss = m_interactionEloss;
+  mInteractor.recordInteractions = m_interactionRecord;
+
+  return options;
 }
