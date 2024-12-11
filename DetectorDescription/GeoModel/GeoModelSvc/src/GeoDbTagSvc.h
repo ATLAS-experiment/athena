@@ -6,8 +6,9 @@
 #define GEOMODELSVC_GEODBTAGSVC_H
 
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
-#include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "AthenaBaseComps/AthService.h"
+
+class IRDBAccessSvc;
 
 template <class TYPE> class SvcFactory;
 
@@ -23,7 +24,6 @@ class GeoDbTagSvc : public extends<AthService, IGeoDbTagSvc>
   virtual ~GeoDbTagSvc() = default;
 
  protected:
-    ServiceHandle<IRDBAccessSvc> m_rdbAccesSvc{this, "RDBAccessSvc", "RDBAccessSvc/RDBAccessSvc"};
   void setAtlasVersion(const std::string& tag)                     { m_AtlasVersion=tag; }
   void setInDetVersionOverride(const std::string& tag)             { m_InDetVersionOverride=tag; }
   void setPixelVersionOverride(const std::string& tag)             { m_PixelVersionOverride=tag; }
@@ -41,6 +41,7 @@ class GeoDbTagSvc : public extends<AthService, IGeoDbTagSvc>
   void setSqliteReader(GeoModelIO::ReadGeoModel* reader)           { m_sqliteReader=reader; }
 
   StatusCode setupTags();
+  StatusCode setupConfig();
 
  private:
   // ______________________________ IGeoDbTagSvc ____________________________________
@@ -74,36 +75,39 @@ class GeoDbTagSvc : public extends<AthService, IGeoDbTagSvc>
   virtual const std::string & getParamSvcName()       const override { return m_paramSvcName; }
   virtual GeoModelIO::ReadGeoModel* getSqliteReader() override { return m_sqliteReader; }
 
+  StatusCode getRdbAccess();
+
   // _________________________ Private data Members _______________________________
-  std::string m_AtlasVersion;
+  IRDBAccessSvc* m_rdbAccesSvc{nullptr};
+  std::string m_AtlasVersion{};
 
-  std::string m_InDetVersion;
-  std::string m_PixelVersion;
-  std::string m_SCT_Version;
-  std::string m_TRT_Version;
-  std::string m_LAr_Version;
-  std::string m_TileVersion;
-  std::string m_MuonVersion;
-  std::string m_CaloVersion;
-  std::string m_MagFieldVersion;
-  std::string m_CavernInfraVersion;
-  std::string m_ForwardDetectorsVersion;
+  std::string m_InDetVersion{};
+  std::string m_PixelVersion{};
+  std::string m_SCT_Version{};
+  std::string m_TRT_Version{};
+  std::string m_LAr_Version{};
+  std::string m_TileVersion{};
+  std::string m_MuonVersion{};
+  std::string m_CaloVersion{};
+  std::string m_MagFieldVersion{};
+  std::string m_CavernInfraVersion{};
+  std::string m_ForwardDetectorsVersion{};
 
-  std::string m_InDetVersionOverride;
-  std::string m_PixelVersionOverride;
-  std::string m_SCT_VersionOverride;
-  std::string m_TRT_VersionOverride;
-  std::string m_LAr_VersionOverride;
-  std::string m_TileVersionOverride;
-  std::string m_MuonVersionOverride;
-  std::string m_CaloVersionOverride;
-  std::string m_MagFieldVersionOverride;
-  std::string m_CavernInfraVersionOverride;
-  std::string m_ForwardDetectorsVersionOverride;
+  std::string m_InDetVersionOverride{};
+  std::string m_PixelVersionOverride{};
+  std::string m_SCT_VersionOverride{};
+  std::string m_TRT_VersionOverride{};
+  std::string m_LAr_VersionOverride{};
+  std::string m_TileVersionOverride{};
+  std::string m_MuonVersionOverride{};
+  std::string m_CaloVersionOverride{};
+  std::string m_MagFieldVersionOverride{};
+  std::string m_CavernInfraVersionOverride{};
+  std::string m_ForwardDetectorsVersionOverride{};
 
-  GeoModel::GeoConfig m_geoConfig;
+  GeoModel::GeoConfig m_geoConfig{GeoModel::GEO_RUN1};
 
-  std::string m_paramSvcName{"RDBAccessSvc"};
+  std::string m_paramSvcName{""};
   GeoModelIO::ReadGeoModel* m_sqliteReader{nullptr};
 };
 

@@ -92,6 +92,9 @@ class IdDictDetDescrCnv : public DetDescrConverter {
     /// first time
     StatusCode parseXMLDescription();
 
+    /// A helper function for collecting calo neighbor file names from the database
+    void collectCaloNeighbors(IRDBRecordset_ptr recordset);
+
     /// The xml parser for the dictionary descriptions
     std::unique_ptr<IdDictParser> m_parser{};
 
