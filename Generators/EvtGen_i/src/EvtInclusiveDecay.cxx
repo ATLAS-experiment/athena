@@ -2,7 +2,6 @@
 //
 // Generators/EvtGen_i/EvtInclusiveDecay.h
 //
-//
 // EvtInclusiveDecay is a TopAlg that takes HepMC events from StoreGate and
 // generates particle decays using EvtGen. Depending on job options either all or
 // only a subset of the particles which have decays defined in the EvtGen
@@ -880,46 +879,6 @@ double EvtInclusiveAtRndmGen::random() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void local_split( std::vector <std::string>& tokens,const std::string& input, const char sep) {
-    size_t start = 0, end = 0;
-    for (size_t i = 0; i <= input.size(); i++) {
-        if (input[i] == sep || i == input.size()) {
-            end = i;
-            if (end!=start) tokens.push_back(input.substr(start,end - start));
-            start = end + 1;
-        }
-    }
-}
-
 std::string EvtInclusiveDecay::xmlpath(){
-
-  char *cmtpath = getenv("CMTPATH");
-  char *cmtconfig = getenv("CMTCONFIG");
-
-  std::string foundpath = "";
-
-  if(cmtpath != 0 && cmtconfig != 0){
-
-    std::vector<std::string> cmtpaths;
-    local_split(cmtpaths, cmtpath,':');
-
-    std::string installPath = "/InstallArea/" + std::string(cmtconfig) + "/share/Pythia8/xmldoc";
-
-    for(std::vector<std::string>::const_iterator path = cmtpaths.begin();
-        path != cmtpaths.end() && foundpath == ""; ++path){
-      std::string testPath = *path + installPath;
-      std::ifstream testFile(testPath.c_str());
-      if(testFile.good()) foundpath = testPath;
-      testFile.close();
-    }
-   }
-  else {
-// If the CMT environment is missing, try to find the xmldoc directory
-// using PathResolver:
-    foundpath = PathResolverFindCalibDirectory( "Pythia8/xmldoc" );
-
-  }
-
-
-  return foundpath;
+  return PathResolverFindCalibDirectory( "Pythia8/xmldoc" );
 }
