@@ -13,6 +13,7 @@
 
 xAODTauFilter::xAODTauFilter( const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter( name,pSvcLocator ),
+    m_events(), m_events_sel(),
     m_eventse(0), m_eventsmu(0), m_eventshad(0), 
     m_eventseacc(0), m_eventsmuacc(0), m_eventshadacc(0)
 {
