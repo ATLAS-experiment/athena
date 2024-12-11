@@ -41,6 +41,9 @@ namespace InDet {
     virtual void getTracks(uint32_t runNumber, uint32_t eventNumber,
       std::vector<std::vector<uint32_t> >& tracks) const =0;
 
+    virtual void getTracks(uint32_t runNumber, uint32_t eventNumber,
+      std::vector<std::vector<uint32_t> >& tracks, std::vector<std::vector<uint32_t> >& seeds) const =0;
+
 
     ///////////////////////////////////////////////////////////////////
     // Print internal tool parameters and status

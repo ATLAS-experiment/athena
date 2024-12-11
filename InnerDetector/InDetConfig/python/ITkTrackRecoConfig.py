@@ -347,7 +347,10 @@ def ITkTrackFinalCfg(flags,
     if doTrackOverlay:
         #schedule merge to combine signal and background tracks
         InputCombinedITkTracks += [flags.Overlay.BkgPrefix + TrackContainer]
-
+    
+    from TrkConfig.TrkConfigFlags import TrackingComponent
+    doGNNWithoutAmbiReso = (TrackingComponent.GNNChain in flags.Tracking.recoChain and (not flags.Tracking.GNN.doAmbiResolution))
+    skipClusterMerge = doGNNWithoutAmbiReso or flags.Tracking.doITkFastTracking
     # This merges track collections
     from TrkConfig.TrkTrackCollectionMergerConfig import (
         ITkTrackCollectionMergerAlgCfg)
@@ -356,7 +359,7 @@ def ITkTrackFinalCfg(flags,
         InputCombinedTracks=InputCombinedITkTracks,
         OutputCombinedTracks=TrackContainer,
         AssociationMapName=(
-            "" if flags.Tracking.doITkFastTracking else
+            "" if skipClusterMerge else
             f"PRDtoTrackMapMerge_{TrackContainer}")))
 
     if flags.Tracking.doTruth:
@@ -383,10 +386,10 @@ def ITkTrackFinalCfg(flags,
     result.merge(ITkTrackParticleCnvAlgCfg(
         flags,
         ClusterSplitProbabilityName=(
-            "" if flags.Tracking.doITkFastTracking else
+            "" if skipClusterMerge else
             splitProbName),
         AssociationMapName=(
-            "" if flags.Tracking.doITkFastTracking else
+            "" if skipClusterMerge else
             f"PRDtoTrackMapMerge_{TrackContainer}"),
         isActsAmbi = 'ActsValidateResolvedTracks' in splitProbName or \
         'ActsValidateAmbiguityResolution' in splitProbName or \

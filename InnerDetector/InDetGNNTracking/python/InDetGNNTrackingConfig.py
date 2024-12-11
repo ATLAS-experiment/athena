@@ -104,6 +104,13 @@ def GNNEndToEndTrackMaker(flags, name="GNNEndToEndTrackMaker", **kwargs):
     InDetTrackFitter = acc.popToolsAndMerge(ITkTrackFitterCfg(flags))
     kwargs.setdefault("TrackFitter", InDetTrackFitter)
 
+    if "TrackSummaryTool" not in kwargs:
+        from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolCfg
+
+        kwargs.setdefault(
+            "TrackSummaryTool", acc.popToolsAndMerge(ITkTrackSummaryToolCfg(flags))
+        )
+
     if flags.Tracking.GNN.useTrackFinder:
         InDetGNNTrackFinderTool = acc.popToolsAndMerge(GNNTrackFinderToolCfg(flags))
         kwargs.setdefault("GNNTrackFinderTool", InDetGNNTrackFinderTool)
@@ -114,6 +121,8 @@ def GNNEndToEndTrackMaker(flags, name="GNNEndToEndTrackMaker", **kwargs):
         kwargs.setdefault("GNNTrackFinderTool", None)
     else:
         raise RuntimeError("GNNTrackFinder or GNNTrackReader must be enabled!")
+
+    kwargs.setdefault("areInputClusters", flags.Tracking.GNN.useClusterTracks)
 
     acc.addEventAlgo(CompFactory.InDet.SiSPGNNTrackMaker(name, **kwargs))
     return acc
