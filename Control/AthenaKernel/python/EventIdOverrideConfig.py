@@ -102,29 +102,39 @@ def getMinMaxRunNumbers(flags):
     """Get a pair (firstrun,lastrun + 1) for setting ranges in IOVMetaData """
     mini = 1
     maxi = 2147483647
-    pDicts = flags.Input.RunAndLumiOverrideList
-    if pDicts:
+    if flags.Input.RunAndLumiOverrideList:
         # Behaviour for Digitization jobs using RunAndLumiOverrideList
-        allruns = [element['run'] for element in pDicts]
+        allruns = [element['run'] for element in flags.Input.RunAndLumiOverrideList]
         mini = min(allruns) + 0
         maxi = max(allruns) + 1
-    elif flags.Input.ConditionsRunNumber>0:
+    elif flags.Input.ConditionsRunNumber > 0:
         # Behaviour for Digitization jobs using DataRunNumber
-        DataRunNumber = flags.Input.ConditionsRunNumber
-        assert DataRunNumber >= 0, (
+        assert flags.Input.ConditionsRunNumber >= 0, (
             "flags.Input.ConditionsRunNumber %d is negative. "
-            "Use a real run number from data." % DataRunNumber)
-        mini = DataRunNumber
-        maxi = DataRunNumber+1
+            "Use a real run number from data." % flags.Input.ConditionsRunNumber)
+        mini = flags.Input.ConditionsRunNumber
+        maxi = mini + 1
     elif flags.Input.RunNumbers:
         # Behaviour for Simulation jobs
-        myRunNumber = flags.Input.RunNumbers[0]
-        assert myRunNumber >= 0, (
+        assert flags.Input.RunNumbers[0] >= 0, (
             "flags.Input.RunNumbers[0] %d is negative. "
-            "Use a real run number from data." % myRunNumber)
-        mini = myRunNumber
-        maxi = 2147483647
-    return (mini,maxi)
+            "Use a real run number from data." % flags.Input.RunNumbers[0])
+        if flags.Input.isMC:
+            mini = flags.Input.RunNumbers[0]
+            maxi = 2147483647
+        else:
+            mini = min(flags.Input.RunNumbers) + 0
+            maxi = max(flags.Input.RunNumbers) + 1
+    return (mini, maxi)
+
+
+def IOVDbMetaDataToolWithRunNumberOverrideCfg(flags):
+    """Metadata override for overlay"""
+    tool = CompFactory.IOVDbMetaDataTool()
+    tool.MinMaxRunNumbers = getMinMaxRunNumbers(flags)
+    acc = ComponentAccumulator()
+    acc.addPublicTool(tool)
+    return acc
 
 
 def EvtIdModifierSvcCfg(flags, name="EvtIdModifierSvc", **kwargs):
@@ -142,9 +152,8 @@ def EvtIdModifierSvcCfg(flags, name="EvtIdModifierSvc", **kwargs):
     Modifiers = buildListOfModifiers(flags)
     if len(Modifiers) > 0:
         kwargs.setdefault("Modifiers", Modifiers)
-    iovDbMetaDataTool = CompFactory.IOVDbMetaDataTool()
-    iovDbMetaDataTool.MinMaxRunNumbers = getMinMaxRunNumbers(flags)
-    acc.addPublicTool(iovDbMetaDataTool)
+
+    acc.merge(IOVDbMetaDataToolWithRunNumberOverrideCfg(flags))
 
     acc.addService(CompFactory.EvtIdModifierSvc(name, **kwargs), create=True, primary=True)
     return acc
