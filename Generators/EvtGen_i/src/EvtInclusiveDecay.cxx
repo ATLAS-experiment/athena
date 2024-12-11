@@ -2,7 +2,6 @@
 //
 // Generators/EvtGen_i/EvtInclusiveDecay.h
 //
-// $Id: EvtInclusiveDecay.cxx,v 1.6 2007-03-01 23:23:44 binet Exp $
 //
 // EvtInclusiveDecay is a TopAlg that takes HepMC events from StoreGate and
 // generates particle decays using EvtGen. Depending on job options either all or
@@ -56,7 +55,8 @@
 
 
 EvtInclusiveDecay::EvtInclusiveDecay(const std::string& name, ISvcLocator* pSvcLocator):
-  GenBase( name, pSvcLocator ) {
+  GenBase( name, pSvcLocator ),
+  m_nRepeatedDecays(0) {
 
   // Basic EvtGen configuration: decay and particle definition files, random number stream
   declareProperty("pdtFile", m_pdtFile = "inclusive.pdt");
@@ -175,8 +175,6 @@ StatusCode EvtInclusiveDecay::initialize() {
   m_myEvtGen = new EvtGen( m_decayFile.c_str(), m_pdtFile.c_str(), m_evtAtRndmGen, radCorrEngine, &extraModels);
   if(!m_userDecayFile.empty())
     m_myEvtGen->readUDecay(m_userDecayFile.c_str());
-
-  m_nRepeatedDecays = 0;
 
   return StatusCode::SUCCESS;
 }
