@@ -197,11 +197,15 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
         if (link->status()) {
           ++statistics.nlinks_sus_felix_stat;
         }
+        data.b_PadL1A_ROB_sourceID.push_back(r.rob_source_id());
+        data.b_PadL1A_ROB_status.emplace_back(r.status(), r.status()+r.nstatus());
         data.b_PadL1A_ROD_sourceID.push_back(sid);
         data.b_PadL1A_ROD_subdetID.push_back(s);
         data.b_PadL1A_ROD_moduleID.push_back(m);
         data.b_PadL1A_ROD_L1ID.push_back(r.rod_lvl1_id());
+        data.b_PadL1A_ROD_BCID.push_back(r.rod_bc_id());
         data.b_PadL1A_ROD_n_words.push_back(r.rod_ndata());
+        data.b_PadL1A_ROD_status.emplace_back(r.rod_status(), r.rod_status()+r.rod_nstatus());
         data.b_PadL1A_flags.push_back(link->getFlags());
         data.b_PadL1A_ec.push_back(link->getEc());
         data.b_PadL1A_fragid.push_back(link->getFragid());
@@ -238,11 +242,15 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
         if (link->status()) {
           ++statistics.nlinks_sus_felix_stat;
         }
+        data.b_MML1A_ROB_sourceID.push_back(r.rob_source_id());
+        data.b_MML1A_ROB_status.emplace_back(r.status(), r.status()+r.nstatus());
         data.b_MML1A_ROD_sourceID.push_back(sid);
         data.b_MML1A_ROD_subdetID.push_back(s);
         data.b_MML1A_ROD_moduleID.push_back(m);
         data.b_MML1A_ROD_L1ID.push_back(r.rod_lvl1_id());
+        data.b_MML1A_ROD_BCID.push_back(r.rod_bc_id());
         data.b_MML1A_ROD_n_words.push_back(r.rod_ndata());
+        data.b_MML1A_ROD_status.emplace_back(r.rod_status(), r.rod_status()+r.rod_nstatus());
         data.b_MML1A_link_id.push_back(link->elinkWord());
         data.b_MML1A_link_status.push_back(link->status());
         data.b_MML1A_head_fragID.push_back(link->head_fragID());
@@ -324,11 +332,15 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
         if (link->status()) {
           ++statistics.nlinks_sus_felix_stat;
         }
+        data.b_MMMon_ROB_sourceID.push_back(r.rob_source_id());
+        data.b_MMMon_ROB_status.emplace_back(r.status(), r.status()+r.nstatus());
         data.b_MMMon_ROD_sourceID.push_back(sid);
         data.b_MMMon_ROD_subdetID.push_back(s);
         data.b_MMMon_ROD_moduleID.push_back(m);
         data.b_MMMon_ROD_L1ID.push_back(r.rod_lvl1_id());
+        data.b_MMMon_ROD_BCID.push_back(r.rod_bc_id());
         data.b_MMMon_ROD_n_words.push_back(r.rod_ndata());
+        data.b_MMMon_ROD_status.emplace_back(r.rod_status(), r.rod_status()+r.rod_nstatus());
         data.b_MMMon_link_id.push_back(link->elinkWord());
         data.b_MMMon_link_status.push_back(link->status());
         data.b_MMMon_head_fragID.push_back(link->head_fragID());
@@ -428,11 +440,18 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
       uint i_elink = 0;
       for (const auto& baseLink : nsw_trigger_decoder.get_elinks()) {
         const auto link = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerSTGL1AElink>(baseLink);
+        if (link->status()) {
+          ++statistics.nlinks_sus_felix_stat;
+        }
+        data.b_STGL1A_ROB_sourceID.push_back(r.rob_source_id());
+        data.b_STGL1A_ROB_status.emplace_back(r.status(), r.status()+r.nstatus());
         data.b_STGL1A_ROD_sourceID.push_back(sid);
         data.b_STGL1A_ROD_subdetID.push_back(s);
         data.b_STGL1A_ROD_moduleID.push_back(m);
-        data.b_STGL1A_ROD_L1ID.push_back(0);
-        data.b_STGL1A_ROD_n_words.push_back(0);
+        data.b_STGL1A_ROD_L1ID.push_back(r.rod_lvl1_id());
+        data.b_STGL1A_ROD_BCID.push_back(r.rod_bc_id());
+        data.b_STGL1A_ROD_n_words.push_back(r.rod_ndata());
+        data.b_STGL1A_ROD_status.emplace_back(r.rod_status(), r.rod_status()+r.rod_nstatus());
         data.b_STGL1A_head_fragID.push_back(link->head_fragID());
         data.b_STGL1A_head_sectID.push_back(link->head_sectID());
         data.b_STGL1A_head_EC.push_back(link->head_EC());
@@ -542,6 +561,14 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
 int test_nsw_trigger_common_decoder_event(eformat::read::FullEventFragment& f, outBranches& data, Params& params, Statistics& statistics) {
 
   int err;
+
+  data.b_run_number = f.run_no();
+  data.b_run_type = f.run_type();
+  data.b_lumi_block = f.lumi_block();
+  data.b_L1ID = f.lvl1_id();
+  data.b_BCID = f.bc_id();
+  data.b_BC_time_seconds = f.bc_time_seconds();
+  data.b_BC_time_nanoseconds = f.bc_time_nanoseconds();
 
   std::vector<eformat::read::ROBFragment> robs;
   f.robs(robs);
