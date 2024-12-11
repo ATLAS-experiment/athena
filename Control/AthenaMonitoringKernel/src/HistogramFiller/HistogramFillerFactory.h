@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */  
   
 #ifndef AthenaMonitoringKernel_HistogramFiller_HistogramFillerFactory_h
@@ -28,7 +28,7 @@ namespace Monitored {
      * @param groupName Name of the group to which produced histograms will belong
      */
     HistogramFillerFactory(GenericMonitoringTool * const gmTool, std::string groupName)
-      : m_gmTool(std::move(gmTool)), 
+      : m_gmTool(gmTool),
         m_factory(new HistogramFactory(gmTool->histogramService(), std::move(groupName))) {}
       
     /**
