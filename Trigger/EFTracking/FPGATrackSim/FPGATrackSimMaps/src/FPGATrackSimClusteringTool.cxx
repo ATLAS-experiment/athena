@@ -443,64 +443,46 @@ bool FPGATrackSimCLUSTERING::updatePixelCluster(FPGATrackSimCluster &currentClus
       clusterColWidth++;
       clusterRowWidth++;
 
-      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
-
-      return true;
+      return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
     } else if ((hitCol == clusterCol + clusterColWidth) && (hitRow == clusterRow - 1)) {
       clusterColWidth++;
       clusterRow--;
       clusterRowWidth++;
 
-      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
-
-      return true;
+      return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
     } else if ((hitCol >= clusterCol) && (hitCol < clusterCol + clusterColWidth) && (hitRow == clusterRow + clusterRowWidth)) {
       clusterRowWidth++;
 
-      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
-
-      return true;
+      return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
     } else if ((hitCol == clusterCol + clusterColWidth) && (hitRow >= clusterRow) && (hitRow < clusterRow + clusterRowWidth)) {
       clusterColWidth++;
 
-      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
-
-      return true;
+      return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
     } else if ((hitCol >= clusterCol) && (hitCol < clusterCol + clusterColWidth) && (hitRow == clusterRow - 1)) {
       clusterRow--;
       clusterRowWidth++;
 
-      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
-
-      return true;
+      return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
     } else if ((hitCol == clusterCol - 1) && (hitRow == clusterRow - 1)) {
       clusterCol--;
       clusterColWidth++;
       clusterRow--;
       clusterRowWidth++;
 
-      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
-
-      return true;
+      return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
     } else if ((hitCol == clusterCol - 1) && (hitRow >= clusterRow) && (hitRow < clusterRow + clusterRowWidth)) {
       clusterCol--;
       clusterColWidth++;
 
-      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
-
-      return true;
+      return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
     } else if ((hitCol == clusterCol - 1) && (hitRow == clusterRow + clusterRowWidth)) {
       clusterCol--;
       clusterColWidth++;
       clusterRowWidth++;
 
-      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
-
-      return true;
+      return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
     } else if ((hitCol >= clusterCol) && (hitCol < clusterCol + clusterColWidth) && (hitRow >= clusterRow) && (hitRow < clusterRow + clusterRowWidth)) {
-      FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
-
-      return true;
+      return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
     } else {
       return false;
     }
@@ -558,9 +540,34 @@ bool FPGATrackSimCLUSTERING::updateStripCluster(FPGATrackSimCluster &currentClus
 }
 
 
-void FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentCluster, int &clusterRow, int &clusterRowWidth, int &clusterCol, int &clusterColWidth, FPGATrackSimHit &incomingHit) {
+bool FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentCluster, int &clusterRow, int &clusterRowWidth, int &clusterCol, int &clusterColWidth, FPGATrackSimHit &incomingHit) {
   //Grab the cluster equiv
   FPGATrackSimHit clusterEquiv = currentCluster.getClusterEquiv();
+  bool isConnected = false;
+
+  //Check if connected to another hit in the cluster
+  if(incomingHit.isPixel()){
+    for (auto & hit : currentCluster.getHitList()) {
+      auto hitEta = hit.getEtaIndex();
+      auto hitPhi = hit.getPhiIndex();
+      auto inHitEta = incomingHit.getEtaIndex();
+      auto inHitPhi = incomingHit.getPhiIndex();
+
+      if (((inHitEta == hitEta - 1) && (inHitPhi == hitPhi - 1)) ||
+          ((inHitEta == hitEta + 1) && (inHitPhi == hitPhi - 1)) ||
+          ((inHitEta == hitEta - 1) && (inHitPhi == hitPhi + 1)) ||
+          ((inHitEta == hitEta + 1) && (inHitPhi == hitPhi + 1)) ||
+          ((inHitEta == hitEta) && (inHitPhi == hitPhi - 1)) ||
+          ((inHitEta == hitEta) && (inHitPhi == hitPhi + 1)) ||
+          ((inHitEta == hitEta - 1) && (inHitPhi == hitPhi)) ||
+          ((inHitEta == hitEta + 1) && (inHitPhi == hitPhi))) {
+        isConnected = true;
+        break;
+      }
+    }
+    if (!isConnected)
+      return false;
+  }
 
   //Update the clusterEquiv's position and width
   clusterEquiv.setEtaIndex(clusterRow);
@@ -597,6 +604,8 @@ void FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentC
 
   //Pushback the hit into the hitlist
   currentCluster.push_backHitList(incomingHit);
+
+  return true;
 }
 
 /* Sort for the ordering of ITk modules: Sort by ETA.
