@@ -17,10 +17,6 @@ StatusCode xAODtoHepMCTool::initialize()
 {
   ATH_MSG_INFO("Initializing xAODtoHepMCTool " << name() << "...");
   ATH_MSG_INFO("SignalOnly         = " << m_signalOnly);
-  m_evtCount = 0;
-  m_badSuggest = 0;
-  m_noProdVtx = 0;
-  m_badBeams = 0;
   return StatusCode::SUCCESS;
 }
 
