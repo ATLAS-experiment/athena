@@ -47,15 +47,11 @@
 IDAlignMonResidualsAlg::IDAlignMonResidualsAlg( const std::string & name, ISvcLocator* pSvcLocator ) :
   AthMonitorAlgorithm(name, pSvcLocator),
   m_trtcaldbTool("TRT_CalDbTool", this),
+  m_iUpdator ("Trk::KalmanUpdator"),
+  m_propagator ("Trk::RungeKuttaPropagator"),
+  m_residualPullCalculator( "Trk::ResidualPullCalculator/ResidualPullCalculator"),
   m_trackSelection( "InDet::InDetTrackSelectionTool/TrackSelectionTool", this),
-  m_extendedPlots(false)
-{
-  m_iUpdator = ToolHandle<Trk::IUpdator>("Trk::KalmanUpdator");
-  m_propagator = ToolHandle<Trk::IPropagator>("Trk::RungeKuttaPropagator");
-  m_residualPullCalculator = ToolHandle<Trk::IResidualPullCalculator>(
-								      "Trk::ResidualPullCalculator/ResidualPullCalculator");
-  m_hitQualityTool = ToolHandle<IInDetAlignHitQualSelTool>("");
-  
+  m_hitQualityTool(""){ 
   declareProperty("CheckRate"                 , m_checkrate=1000);
   declareProperty("ITRT_CalDbTool"            , m_trtcaldbTool);
   declareProperty("iUpdator"                  , m_iUpdator);
@@ -292,6 +288,11 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
         ATH_MSG_DEBUG("** IDAlignMonResidualsAlg::fillHistograms() ** Hit is from the TRT, finding residuals... ");
         bool isTubeHit = (mesh->localCovariance()(Trk::locX, Trk::locX) > 1.0);
         const Trk::TrackParameters* trackParameter = tsos->trackParameters();
+        //finding residuals
+        if (!trackParameter) {
+          ATH_MSG_WARNING("No TrackParameters associated with TRT TrkSurface " << nTSOS);
+          continue;
+        }
         float hitR = hit->localParameters()[Trk::driftRadius];
         float trketa = tsos->trackParameters()->eta();
         float pullR = -9.9;
@@ -301,11 +302,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
         int layer_or_wheel = m_trtID->layer_or_wheel(id);
         int phi_module = m_trtID->phi_module(id);
 	
-        //finding residuals
-        if (!trackParameter) {
-          ATH_MSG_WARNING("No TrackParameters associated with TRT TrkSurface " << nTSOS);
-          continue;
-        }
+        
         ATH_MSG_DEBUG("Found Trk::TrackParameters for hit " << nTSOS << " --> TRT hit (detType= " << detType << ")" );
 	
         //getting unbiased track parameters by removing the hit from the track and refitting
