@@ -48,8 +48,7 @@ namespace xAOD {
          kObjectStore = 2      ///< The object describes a single object
       };
 
-      RAuxStore( const char* prefix = "", ::Long64_t entry = -1, 
-                  Bool_t topStore = kTRUE, EStructMode mode = kUndefinedStore );
+      RAuxStore( const char* prefix = "", Bool_t topStore = kTRUE, EStructMode mode = kUndefinedStore );
       /// Destructor
       virtual ~RAuxStore();
 
@@ -61,7 +60,7 @@ namespace xAOD {
       /// Connect the object to an output RNTuple
       StatusCode writeTo( const std::string& fileName, const std::string& ntupleName );
       /// Get entry from the input RNTuple
-      ::Int_t getEntry( ::Int_t getall = 0 );
+      ::Int_t getEntry( Long64_t entry, ::Int_t getall = 0 );
       /// Reset the store
       void reset();
 
@@ -242,7 +241,7 @@ namespace xAOD {
          /// Constructor
          RFieldInfo();
          /// Get entry from the field
-         ::Int_t getEntry(::Int_t entryToLoad = -1);
+         ::Int_t getEntry(::Long64_t entryToLoad);
          /// The different available statuses for the field
          enum Status { NotInitialized, Initialized, TypeError, NotFound };
          /// The current status of the field
@@ -261,7 +260,7 @@ namespace xAOD {
          /// The name of the ntuple
          std::string ntupleName;
          /// The entry that was loaded from the ntuple
-         ::Int_t entryLoaded;
+         ::Long64_t entryLoaded;
          /// The pointer to the object in memory
          void* object{};
          /// The typeinfo of the object
