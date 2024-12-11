@@ -63,6 +63,7 @@ def overlayTestFlags(flags, args):
         flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_DATA
         flags.IOVDb.DatabaseInstance = "CONDBR2"
         flags.Overlay.DataOverlay = True
+        flags.Overlay.ByteStream = True
         from Campaigns import DataOverlayPPTest
         DataOverlayPPTest(flags)
     else:

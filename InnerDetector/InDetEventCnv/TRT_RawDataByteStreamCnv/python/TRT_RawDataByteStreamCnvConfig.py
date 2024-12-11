@@ -9,8 +9,7 @@ def TRT_CablingSvcCfg(flags):
     """Return a ComponentAccumulator for TRT_CablingSvc service"""
     acc = ComponentAccumulator()
     # Properly configure MC/data for TRT cabling
-    tool = CompFactory.TRT_FillCablingData_DC3(RealData=not flags.Input.isMC)
-    acc.addPublicTool(tool)
+    acc.addPublicTool(CompFactory.TRT_FillCablingData_DC3(RealData=not flags.Input.isMC))
     # Setup TRT cabling service
     acc.addService(CompFactory.TRT_CablingSvc())
     return acc
@@ -19,7 +18,7 @@ def TRT_CablingSvcCfg(flags):
 def TRT_RodDecoderCfg(flags, name="TRT_RodDecoder", **kwargs):
     """Return a ComponentAccumulator for TRT ROD decoder"""
     acc = ComponentAccumulator()
-    kwargs.setdefault("SortCollections", flags.Overlay.DataOverlay)
+    kwargs.setdefault("SortCollections", flags.Overlay.ByteStream)
     acc.setPrivateTools(CompFactory.TRT_RodDecoder(name, **kwargs))
     return acc
 
@@ -51,11 +50,10 @@ def TRTRawDataProviderCfg(flags, name="TRTRawDataProvider", **kwargs):
     from RegionSelector.RegSelToolConfig import regSelTool_TRT_Cfg
     kwargs.setdefault("RegSelTool", acc.popToolsAndMerge(regSelTool_TRT_Cfg(flags)))
 
-    if flags.Overlay.DataOverlay:
+    if flags.Overlay.ByteStream:
         kwargs.setdefault("RDOKey", f"{flags.Overlay.BkgPrefix}TRT_RDOs")
 
-    providerAlg = CompFactory.TRTRawDataProvider(name, **kwargs)
-    acc.addEventAlgo(providerAlg)
+    acc.addEventAlgo(CompFactory.TRTRawDataProvider(name, **kwargs))
     return acc
 
 

@@ -1,6 +1,6 @@
 """Define methods to construct configured ITk Strip overlay algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -15,7 +15,10 @@ def ITkStripOverlayAlgCfg(flags, name="ITkStripOverlay", **kwargs):
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}ITkStripRDOs")
     kwargs.setdefault("OutputKey", "ITkStripRDOs")
 
-    if not flags.Overlay.DataOverlay:
+    # Input setup
+    if flags.Overlay.ByteStream:
+        pass
+    else:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, [f'SCT_RDO_Container#{kwargs["BkgInputKey"]}']))
 
@@ -29,7 +32,7 @@ def ITkStripOverlayAlgCfg(flags, name="ITkStripOverlay", **kwargs):
             "SCT_RDO_Container#ITkStripRDOs"
         ]))
 
-        if flags.Overlay.DataOverlay:
+        if not flags.Input.isMC:
             acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
                 "IDCInDetBSErrContainer#ITkStripByteStreamErrs"
             ]))
@@ -39,11 +42,12 @@ def ITkStripOverlayAlgCfg(flags, name="ITkStripOverlay", **kwargs):
         acc.merge(OutputStreamCfg(flags, "RDO_SGNL", ItemList=[
             f"SCT_RDO_Container#{flags.Overlay.SigPrefix}ITkStripRDOs"
         ]))
-    
+
+    # for track overlay, write out the signal RDOs because reco tracking will only run on them
     if flags.Overlay.doTrackOverlay:
-    #for track overlay, write out the signal RDOs because reco tracking will only run on them
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
-            f"SCT_RDO_Container#{flags.Overlay.SigPrefix}ITkStripRDOs"]))
+            f"SCT_RDO_Container#{flags.Overlay.SigPrefix}ITkStripRDOs"
+        ]))
 
     return acc
 
@@ -67,7 +71,7 @@ def ITkStripTruthOverlayCfg(flags, name="ITkStripSDOOverlay", **kwargs):
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
             "InDetSimDataCollection#ITkStripSDO_Map"
         ]))
-    
+
     if flags.Output.doWriteRDO_SGNL:
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
         acc.merge(OutputStreamCfg(flags, "RDO_SGNL", ItemList=[
@@ -84,8 +88,10 @@ def ITkStripOverlayCfg(flags):
     # Add ITk Strip overlay digitization algorithm
     from StripDigitization.StripDigitizationConfig import ITkStripOverlayDigitizationBasicCfg
     acc.merge(ITkStripOverlayDigitizationBasicCfg(flags))
+
     # Add ITk Strip overlay algorithm
     acc.merge(ITkStripOverlayAlgCfg(flags))
+
     # Add ITk Strip truth overlay
     if flags.Digitization.EnableTruth:
         acc.merge(ITkStripTruthOverlayCfg(flags))

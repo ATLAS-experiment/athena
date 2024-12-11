@@ -1,11 +1,11 @@
 """Define methods to construct configured EventInfo conversion algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import LHCPeriod
+from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
 
 
 def EventInfoCnvAlgCfg(flags, name="EventInfoCnvAlg",
@@ -49,7 +49,7 @@ def EventInfoOverlayAlgCfg(flags, name="EventInfoOverlay", **kwargs):
     kwargs.setdefault("OutputKey", "EventInfo")
 
     kwargs.setdefault("DataOverlay", flags.Overlay.DataOverlay)
-    kwargs.setdefault("ValidateBeamSpot", not flags.Overlay.FastChain and not flags.Overlay.DataOverlay and flags.GeoModel.Run is LHCPeriod.Run3)
+    kwargs.setdefault("ValidateBeamSpot", not (flags.Common.ProductionStep == ProductionStep.FastChain and flags.Common.isOverlay) and not flags.Overlay.DataOverlay and flags.GeoModel.Run is LHCPeriod.Run3)
 
     if flags.Input.MCChannelNumber > 0:
         kwargs.setdefault("MCChannelNumber", flags.Input.MCChannelNumber)
@@ -116,8 +116,7 @@ def EventInfoUpdateFromContextAlgCfg(flags, name="EventInfoUpdateFromContextAlg"
     acc.merge(BeamSpotCondAlgCfg(flags))
 
     kwargs.setdefault("SignalInputKey", "Input_EventInfo")
-    from AthenaConfiguration.Enums import ProductionStep
-    kwargs.setdefault("OutputKey", f"{flags.Overlay.SigPrefix}EventInfo" if flags.Common.ProductionStep == ProductionStep.FastChain and flags.Overlay.FastChain else "EventInfo")
+    kwargs.setdefault("OutputKey", f"{flags.Overlay.SigPrefix}EventInfo" if flags.Common.ProductionStep == ProductionStep.FastChain and flags.Common.isOverlay else "EventInfo")
 
     if flags.Input.MCChannelNumber > 0:
         kwargs.setdefault("MCChannelNumber", flags.Input.MCChannelNumber)

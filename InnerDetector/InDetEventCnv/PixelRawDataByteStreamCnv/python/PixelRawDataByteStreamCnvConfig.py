@@ -5,19 +5,21 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from PixelConditionsAlgorithms.PixelConditionsConfig import PixelCablingCondAlgCfg, PixelHitDiscCnfgAlgCfg
-    
+
+
 def PixelRawDataProviderToolCfg(flags, prefix="", suffix="", storeInDetTimeCollections=True):
     acc = ComponentAccumulator()
     decoder = CompFactory.PixelRodDecoder(CheckDuplicatedPixel = False if "data15" in flags.Input.ProjectName else True)
     acc.setPrivateTools(CompFactory.PixelRawDataProviderTool(Decoder = decoder, StoreInDetTimeCollections = storeInDetTimeCollections))
     return acc
 
+
 def PixelRawDataProviderAlgCfg(flags, **kwargs):
     """ Main function to configure Pixel raw data decoding """
     acc = PixelCablingCondAlgCfg(flags)
     acc.merge(PixelHitDiscCnfgAlgCfg(flags))
 
-    if flags.Overlay.DataOverlay:
+    if flags.Overlay.ByteStream:
         kwargs.setdefault("RDOKey", f"{flags.Overlay.BkgPrefix}PixelRDOs")
     else:
         kwargs.setdefault("RDOKey", "PixelRDOs")
@@ -33,7 +35,7 @@ def PixelRawDataProviderAlgCfg(flags, **kwargs):
     suffix = kwargs.pop("suffix","")
     providerTool = acc.popToolsAndMerge(PixelRawDataProviderToolCfg(flags, prefix, suffix, storeInDetTimeCollections))
     acc.addEventAlgo(CompFactory.PixelRawDataProvider(RegSelTool = regSelTool,
-                                                      ProviderTool = providerTool, 
+                                                      ProviderTool = providerTool,
                                                       **kwargs))
     return acc
 

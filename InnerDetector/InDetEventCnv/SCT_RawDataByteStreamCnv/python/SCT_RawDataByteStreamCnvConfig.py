@@ -32,7 +32,7 @@ def SCTRawDataProviderCfg(flags, prefix="InDet", suffix="", **kwargs):
     acc = ComponentAccumulator()    
     kwargs.setdefault("ProviderTool", acc.popToolsAndMerge(SCTRawDataProviderToolCfg(flags, prefix, suffix)))
 
-    if flags.Overlay.DataOverlay:
+    if flags.Overlay.ByteStream:
         kwargs.setdefault("RDOKey", f"{flags.Overlay.BkgPrefix}SCT_RDOs")
         kwargs.setdefault("LVL1IDKey", f"{flags.Overlay.BkgPrefix}SCT_LVL1ID")
         kwargs.setdefault("BCIDKey", f"{flags.Overlay.BkgPrefix}SCT_BCID")
@@ -68,7 +68,7 @@ def TrigSCTRawDataProviderCfg(flags, suffix, RoIs):
 
 def SCTEventFlagWriterCfg(flags, prefix="InDet", suffix="", **kwargs):
     acc = ComponentAccumulator()
-    if flags.Overlay.DataOverlay:
+    if flags.Overlay.ByteStream:
         kwargs.setdefault("xAODEventInfoKey", f"{flags.Overlay.BkgPrefix}EventInfo")
     acc.addEventAlgo(CompFactory.SCTEventFlagWriter(name=prefix+"SCTEventFlagWriter"+suffix,
                                                     **kwargs))

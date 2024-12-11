@@ -7,21 +7,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def SCTDataOverlayExtraCfg(flags, **kwargs):
-    """Return a ComponentAccumulator with SCT data overlay specifics"""
-    acc = ComponentAccumulator()
-
-    # We need to convert BS to RDO for data overlay
-    from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import SCTRawDataProviderCfg
-    acc.merge(SCTRawDataProviderCfg(flags, **kwargs))
-
-    # Add SCT event flag writer
-    from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import SCTEventFlagWriterCfg
-    acc.merge(SCTEventFlagWriterCfg(flags))
-
-    return acc
-
-
 def SCTOverlayAlgCfg(flags, name="SCTOverlay", **kwargs):
     """Return a ComponentAccumulator for SCTOverlay algorithm"""
     acc = ComponentAccumulator()
@@ -30,7 +15,12 @@ def SCTOverlayAlgCfg(flags, name="SCTOverlay", **kwargs):
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}SCT_RDOs")
     kwargs.setdefault("OutputKey", "SCT_RDOs")
 
-    if not flags.Overlay.DataOverlay:
+    # Input setup
+    if flags.Overlay.ByteStream:
+        from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import SCTRawDataProviderCfg, SCTEventFlagWriterCfg
+        acc.merge(SCTRawDataProviderCfg(flags))
+        acc.merge(SCTEventFlagWriterCfg(flags))
+    else:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, [f'SCT_RDO_Container#{kwargs["BkgInputKey"]}']))
 
@@ -44,7 +34,7 @@ def SCTOverlayAlgCfg(flags, name="SCTOverlay", **kwargs):
             "SCT_RDO_Container#SCT_RDOs"
         ]))
 
-        if flags.Overlay.DataOverlay:
+        if not flags.Input.isMC:
             acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
                 "IDCInDetBSErrContainer#SCT_ByteStreamErrs"
             ]))
@@ -55,10 +45,11 @@ def SCTOverlayAlgCfg(flags, name="SCTOverlay", **kwargs):
             f"SCT_RDO_Container#{flags.Overlay.SigPrefix}SCT_RDOs"
         ]))
 
+    # for track overlay, write out the signal RDOs because reco tracking will only run on them
     if flags.Overlay.doTrackOverlay:
-    #for track overlay, write out the signal RDOs because reco tracking will only run on them
-            acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
-            f"SCT_RDO_Container#{flags.Overlay.SigPrefix}SCT_RDOs"]))
+        acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
+            f"SCT_RDO_Container#{flags.Overlay.SigPrefix}SCT_RDOs"
+        ]))
 
     return acc
 
@@ -82,7 +73,7 @@ def SCTTruthOverlayCfg(flags, name="SCTSDOOverlay", **kwargs):
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
             "InDetSimDataCollection#SCT_SDO_Map"
         ]))
-    
+
     if flags.Output.doWriteRDO_SGNL:
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
         acc.merge(OutputStreamCfg(flags, "RDO_SGNL", ItemList=[
@@ -96,15 +87,13 @@ def SCTOverlayCfg(flags):
     """Configure and return a ComponentAccumulator for SCT overlay"""
     acc = ComponentAccumulator()
 
-    # Add data overlay specifics
-    if flags.Overlay.DataOverlay:
-        acc.merge(SCTDataOverlayExtraCfg(flags))
-
     # Add SCT overlay digitization algorithm
     from SCT_Digitization.SCT_DigitizationConfig import SCT_OverlayDigitizationBasicCfg
     acc.merge(SCT_OverlayDigitizationBasicCfg(flags))
+
     # Add SCT overlay algorithm
     acc.merge(SCTOverlayAlgCfg(flags))
+
     # Add SCT truth overlay
     if flags.Digitization.EnableTruth:
         acc.merge(SCTTruthOverlayCfg(flags))

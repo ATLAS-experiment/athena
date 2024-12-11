@@ -7,22 +7,9 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def TRTDataOverlayExtraCfg(flags, **kwargs):
-    """Return a ComponentAccumulator with TRT data overlay specifics"""
-    acc = ComponentAccumulator()
-
-    # We need to convert BS to RDO for data overlay
-    from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConfig import TRTRawDataProviderCfg
-    acc.merge(TRTRawDataProviderCfg(flags))
-
-    return acc
-
-
 def TRTOverlayAlgCfg(flags, name="TRTOverlay", **kwargs):
     """Return a ComponentAccumulator for TRTOverlay algorithm"""
     acc = ComponentAccumulator()
-    from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg
-    acc.merge(TRT_ReadoutGeometryCfg(flags))
 
     kwargs.setdefault("SortBkgInput", flags.Overlay.DataOverlay)
     kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}TRT_RDOs")
@@ -30,9 +17,16 @@ def TRTOverlayAlgCfg(flags, name="TRTOverlay", **kwargs):
     kwargs.setdefault("SignalInputSDOKey", f"{flags.Overlay.SigPrefix}TRT_SDO_Map")
     kwargs.setdefault("OutputKey", "TRT_RDOs")
 
-    if not flags.Overlay.DataOverlay:
+    # Input setup
+    if flags.Overlay.ByteStream:
+        from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConfig import TRTRawDataProviderCfg
+        acc.merge(TRTRawDataProviderCfg(flags))
+    else:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, [f'TRT_RDO_Container#{kwargs["BkgInputKey"]}']))
+
+    from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg
+    acc.merge(TRT_ReadoutGeometryCfg(flags))
 
     # HT hit correction fraction
     kwargs.setdefault("TRT_HT_OccupancyCorrectionBarrel", 0.110)
@@ -60,21 +54,22 @@ def TRTOverlayAlgCfg(flags, name="TRTOverlay", **kwargs):
             "TRT_RDO_Container#TRT_RDOs"
         ]))
 
-        if flags.Overlay.DataOverlay:
+        if not flags.Input.isMC:
             acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
                 "TRT_BSErrContainer#TRT_ByteStreamErrs"
             ]))
-  
+
     if flags.Output.doWriteRDO_SGNL:
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
         acc.merge(OutputStreamCfg(flags, "RDO_SGNL", ItemList=[
             f"TRT_RDO_Container#{flags.Overlay.SigPrefix}TRT_RDOs"
         ]))
 
+    # for track overlay, write out the signal RDOs because reco tracking will only run on them
     if flags.Overlay.doTrackOverlay:
-    #for track overlay, write out the signal RDOs because reco tracking will only run on them
-            acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
-            f"TRT_RDO_Container#{flags.Overlay.SigPrefix}TRT_RDOs"]))
+        acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
+            f"TRT_RDO_Container#{flags.Overlay.SigPrefix}TRT_RDOs"
+        ]))
 
     return acc
 
@@ -84,7 +79,7 @@ def TRTTruthOverlayCfg(flags, name="TRTSDOOverlay", **kwargs):
     acc = ComponentAccumulator()
 
     # We do not need background TRT SDOs for data overlay
-    if flags.Overlay.DataOverlay:
+    if not flags.Input.isMC:
         kwargs.setdefault("BkgInputKey", "")
     else:
         kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}TRT_SDO_Map")
@@ -119,15 +114,13 @@ def TRTOverlayCfg(flags):
     """Configure and return a ComponentAccumulator for TRT overlay"""
     acc = ComponentAccumulator()
 
-    # Add data overlay specifics
-    if flags.Overlay.DataOverlay:
-        acc.merge(TRTDataOverlayExtraCfg(flags))
-
     # Add TRT overlay digitization algorithm
     from TRT_Digitization.TRT_DigitizationConfig import TRT_OverlayDigitizationBasicCfg
     acc.merge(TRT_OverlayDigitizationBasicCfg(flags))
+
     # Add TRT overlay algorithm
     acc.merge(TRTOverlayAlgCfg(flags))
+
     # Add TRT truth overlay
     if flags.Digitization.EnableTruth:
         acc.merge(TRTTruthOverlayCfg(flags))
