@@ -24,7 +24,7 @@ namespace FPGATrackSimCLUSTERING {
   void attachTruth(std::vector<FPGATrackSimHit> &);
   bool updatePixelCluster(FPGATrackSimCluster &currentCluster, FPGATrackSimHit &incomingHit, bool newCluster);
   bool updateStripCluster(FPGATrackSimCluster &currentCluster, FPGATrackSimHit &incomingHit, bool newCluster);
-  void updateClusterContents(FPGATrackSimCluster &currentCluster, int &clusterRow, int &clusterRowWidth, int &clusterCol, int &clusterColWidth, FPGATrackSimHit &incomingHit);
+  bool updateClusterContents(FPGATrackSimCluster &currentCluster, int &clusterRow, int &clusterRowWidth, int &clusterCol, int &clusterColWidth, FPGATrackSimHit &incomingHit);
   bool sortITkInputEta(const FPGATrackSimHit& hitA, const FPGATrackSimHit& hitB);
   bool sortITkInputPhi(const FPGATrackSimHit& hitA, const FPGATrackSimHit& HitB);
 }
