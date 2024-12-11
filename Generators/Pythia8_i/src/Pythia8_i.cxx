@@ -678,7 +678,7 @@ StatusCode Pythia8_i::genFinalize(){
 
   if(m_doLHE3Weights || m_weightIDs.size()>1 ){
     std::cout<<"MetaData: weights = ";
-    for (auto w : m_weightNames ) std::cout<< w <<" | ";
+    for (const auto& w : m_weightNames ) std::cout<< w <<" | ";
     std::cout<<std::endl;
   }
 
