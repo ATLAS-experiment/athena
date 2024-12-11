@@ -31,10 +31,11 @@ namespace CP {
     ANA_CHECK(jets.isValid());
 
     for(const xAOD::Jet* jet : *jets) {
-        const xAOD::BTagging *btag = xAOD::BTaggingUtilities::getBTagging( *jet );
+      const xAOD::BTagging *btag = xAOD::BTaggingUtilities::getBTagging( *jet );
 
-        // copy the values from b-tagging onto the jet
-        for(const auto&[acc, dec] : m_accdecs) dec(*jet) = acc(*btag);
+      // copy the values from b-tagging onto the jet
+      for(const auto&[acc, dec] : m_accdecs) dec(*jet) = acc(*btag);
+
     }
     return StatusCode::SUCCESS;
   }

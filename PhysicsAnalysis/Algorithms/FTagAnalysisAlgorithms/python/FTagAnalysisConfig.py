@@ -69,21 +69,8 @@ class FTagConfig (ConfigBlock):
         self.addOption ('saveCustomVariables', [], type=list,
             info="[Expert mode] additional variables to save from the b-tagging object associated "
             "to each jet. E.g. ['pb','pc','pu', 'ptau'] to replicate 'saveScores=All'.")
-        self.addOption ('readFromBTaggingObject', -1, type=int,
-            info="whether or not to read btagger scores from the BTagging object"
-            "-1 for auto setup; 0 for GN2v01 in recent p-tags; 1 for older taggers or derivations up to p6515")
 
     def makeAlgs (self, config) :
-
-        readFromBTaggingObject = 0
-        if self.readFromBTaggingObject < 0:
-            if self.btagger == 'GN2v01':
-                readFromBTaggingObject = 0
-            else:
-                readFromBTaggingObject = 1
-        else:
-            readFromBTaggingObject = self.readFromBTaggingObject
-
 
         jetCollection = config.originalName (self.containerName)
 
@@ -116,7 +103,6 @@ class FTagConfig (ConfigBlock):
 
         config.addPrivateTool( 'selectionTool', 'BTaggingSelectionTool' )
         alg.selectionTool.TaggerName = self.btagger
-        alg.selectionTool.readFromBTaggingObject = readFromBTaggingObject
         alg.selectionTool.OperatingPoint = self.btagWP
         alg.selectionTool.JetAuthor = jetCollection
         alg.selectionTool.FlvTagCutDefinitionsFileName = bTagCalibFile
@@ -143,7 +129,6 @@ class FTagConfig (ConfigBlock):
                                           'FTagEfficiencyScaleFactorAlg' + postfix )
             config.addPrivateTool( 'efficiencyTool', 'BTaggingEfficiencyTool' )
             alg.efficiencyTool.TaggerName = self.btagger
-            alg.efficiencyTool.readFromBTaggingObject = readFromBTaggingObject
             alg.efficiencyTool.OperatingPoint = self.btagWP
             alg.efficiencyTool.JetAuthor = jetCollection
             alg.efficiencyTool.MinPt = 0.  # user in charge of imposing kinematic cuts for jets
@@ -183,7 +168,6 @@ class FTagConfig (ConfigBlock):
             config.addPrivateTool( 'selectionTool', 'BTaggingSelectionTool' )
             # Configure the b-tagging selection tool
             alg.selectionTool.TaggerName = self.btagger
-            alg.selectionTool.readFromBTaggingObject = readFromBTaggingObject
             alg.selectionTool.OperatingPoint = 'Continuous'
             alg.selectionTool.JetAuthor = jetCollection
             alg.selectionTool.FlvTagCutDefinitionsFileName = bTagCalibFile
@@ -192,15 +176,14 @@ class FTagConfig (ConfigBlock):
 
         # Save the per-flavour probabilities or additional custom variables
         if self.saveScores == 'All' or self.saveCustomVariables:
-            variables = [f'{self.btagger}_{x}' for x in ['pb','pc','pu','ptau'] if x != 'ptau' or self.btagger == 'GN2v01']
-            
-            if readFromBTaggingObject or self.saveCustomVariables:
-                alg = config.createAlgorithm('CP::BTaggingScoresAlg', 'BTagScoringAlg_' + self.btagger)
-                alg.jets = config.readName (self.containerName).replace('%SYS%', 'NOSYS')
-                alg.taggerName = self.btagger
-                variables += self.saveCustomVariables
-                alg.vars = variables
+            alg = config.createAlgorithm('CP::BTaggingScoresAlg', 'BTagScoringAlg_' + self.btagger)
+            alg.jets = config.readName (self.containerName).replace('%SYS%', 'NOSYS')
+            alg.taggerName = self.btagger
 
+            variables = [f'{self.btagger}_{x}' for x in ['pb','pc','pu','ptau'] if x != 'ptau' or self.btagger == 'GN2v01']
+            variables += self.saveCustomVariables
+
+            alg.vars = variables
             for var in variables:
                 config.addOutputVar(self.containerName, var, var, noSys=True)
 
