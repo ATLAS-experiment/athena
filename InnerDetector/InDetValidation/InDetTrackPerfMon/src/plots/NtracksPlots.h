@@ -52,9 +52,9 @@ namespace IDTPM {
   private:
 
     std::string m_trackType;
-    bool m_doTrigger;
-    bool m_doGlobalPlots;
-    bool m_doTruthMuPlots;
+    bool m_doTrigger{};
+    bool m_doGlobalPlots{};
+    bool m_doTruthMuPlots{};
 
     /// Importing Counter enum
     enum Counter : size_t {
@@ -69,10 +69,10 @@ namespace IDTPM {
         "all", "selected", "selectedInRoI", "matched"
     };
 
-    TH1*  m_nTracks[ NCOUNTERS ];
-    TH2*  m_nTracks_vs_nVertices[ NCOUNTERS ];
-    TH2*  m_nTracks_vs_truthMu;
-    TH2*  m_nTracks_vs_actualMu;
+    TH1*  m_nTracks[ NCOUNTERS ]{};
+    TH2*  m_nTracks_vs_nVertices[ NCOUNTERS ]{};
+    TH2*  m_nTracks_vs_truthMu{};
+    TH2*  m_nTracks_vs_actualMu{};
 
   }; // class NtracksPlots
 

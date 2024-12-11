@@ -139,7 +139,7 @@ IDTPM::VertexRoiSelectionTool::getTrigVertices(
   /// Getting SELECTED trigger vertices within the RoI
   std::vector< const xAOD::Vertex* > selectedTrigVertices;
   xAOD::VertexContainer::const_iterator vtxItr;
-  for( vtxItr = trigVtxItrPair.first ; vtxItr != trigVtxItrPair.second ; vtxItr++ ) {
+  for( vtxItr = trigVtxItrPair.first ; vtxItr != trigVtxItrPair.second ; ++vtxItr ) {
     /// Check if in-RoI vertex is also in the selected (full-scan) trigger vertex vector
     /// i.e. if it passes the quality selection (if any)
     if( std::find( vvec.begin(), vvec.end(), *vtxItr ) == vvec.end() ) {

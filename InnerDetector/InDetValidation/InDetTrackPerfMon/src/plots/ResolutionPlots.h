@@ -50,7 +50,7 @@ namespace IDTPM {
 
     std::string m_testType;
     std::string m_refType;
-    unsigned int m_method;
+    unsigned int m_method{};
     
     enum Param {
       PT, ETA, D0, Z0, QOVERP, QOVERPT, THETA, PHI, Z0SIN, NPARAMS,
@@ -65,18 +65,18 @@ namespace IDTPM {
       "pt", "eta", "d0", "z0", "qoverp", "ptqopt", "theta", "phi", "z0sin"
     };
 
-    TH1* m_pull[ NPARAMS ];
-    TH1* m_res[ NPARAMS ];
-    TH1* m_sigma[ NPARAMS ];
-    TH2* m_corr[ NPARAMS ]; // 2D correlation plots
+    TH1* m_pull[ NPARAMS ]{};
+    TH1* m_res[ NPARAMS ]{};
+    TH1* m_sigma[ NPARAMS ]{};
+    TH2* m_corr[ NPARAMS ]{}; // 2D correlation plots
 
-    TH2* m_resHelper[ NPARAMS ][ NPARAMSOUT ];
-    TH1* m_reswidth[ NPARAMS ][ NPARAMSOUT ];
-    TH1* m_resmean[ NPARAMS ][ NPARAMSOUT ];
+    TH2* m_resHelper[ NPARAMS ][ NPARAMSOUT ]{};
+    TH1* m_reswidth[ NPARAMS ][ NPARAMSOUT ]{};
+    TH1* m_resmean[ NPARAMS ][ NPARAMSOUT ]{};
 
-    TH2* m_pullHelper[ NPARAMS ][ NPARAMSOUT ];
-    TH1* m_pullwidth[ NPARAMS ][ NPARAMSOUT ];
-    TH1* m_pullmean[ NPARAMS ][ NPARAMSOUT ];
+    TH2* m_pullHelper[ NPARAMS ][ NPARAMSOUT ]{};
+    TH1* m_pullwidth[ NPARAMS ][ NPARAMSOUT ]{};
+    TH1* m_pullmean[ NPARAMS ][ NPARAMSOUT ]{};
   };
   
 }
