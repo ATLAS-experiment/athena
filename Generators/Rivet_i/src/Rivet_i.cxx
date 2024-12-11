@@ -34,6 +34,7 @@
 
 Rivet_i::Rivet_i(const std::string& name, ISvcLocator* pSvcLocator) :
   AthAlgorithm(name, pSvcLocator),
+  m_needsConversion(false),
   m_analysisHandler(0),
   m_init(false)
 {
