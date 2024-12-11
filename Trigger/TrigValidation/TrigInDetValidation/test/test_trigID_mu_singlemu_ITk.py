@@ -34,7 +34,7 @@ Threads = 8
 Slots   = 8
 Input   = 'Single_mu_Run4'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
-# by default, all MC tests override the global conditions tag and force OFLCOND-MC23-SDR-RUN3-05, which is not suitable for Run4
+# by default, all MC tests override the global conditions tag and force defaultConditionsTags.RUN3_MC, which is not suitable for Run4
 conditionsOverride = 'Run4'
 
 preexec_trig = "flags.Tracking.doTruth=False;flags.Trigger.enableL1CaloPhase1=False;"

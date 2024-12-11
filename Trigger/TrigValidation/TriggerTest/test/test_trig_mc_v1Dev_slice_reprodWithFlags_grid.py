@@ -34,7 +34,7 @@ def generate_exec_steps(slice_name = None):
     ex.threads = 1
     ex.max_events = 100
     ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
-                'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05"']
+                'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05-03"']
     if slice_name:
         ex.flags += [f'Trigger.enabledSignatures=[\\\"{slice_name}\\\"]']
     # rename histogram file

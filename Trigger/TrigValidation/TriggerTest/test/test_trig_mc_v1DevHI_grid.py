@@ -30,7 +30,7 @@ ex.threads = 8
 ex.concurrent_events = 8
 ex.max_events = 500
 ex.flags = ['Trigger.triggerMenuSetup="Dev_HI_run3_v1_TriggerValidation_prescale"',
-            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05"',
+            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05-03"',
             'Trigger.doRuntimeNaviVal=True',
             'Trigger.L1.Menu.doHeavyIonTobThresholds=True'            
             ]
