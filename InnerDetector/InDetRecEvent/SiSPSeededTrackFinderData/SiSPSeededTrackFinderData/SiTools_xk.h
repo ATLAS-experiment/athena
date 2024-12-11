@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@ namespace InDet{
       
     public:
       
-      SiTools_xk();
+      SiTools_xk() = default;
       SiTools_xk(const SiTools_xk&) = default;
       ~SiTools_xk() = default;
       SiTools_xk& operator  = (const SiTools_xk&) = default;
@@ -108,37 +108,37 @@ namespace InDet{
       // Protected Data
       ///////////////////////////////////////////////////////////////////
 
-      const Trk::MagneticFieldProperties* m_fieldtool; // Magnetic field properties
-      const AtlasFieldCacheCondObj*  m_fieldCondObj;  // Magnetic field conditions object to access cache
+      const Trk::MagneticFieldProperties* m_fieldtool{}; // Magnetic field properties
+      const AtlasFieldCacheCondObj*  m_fieldCondObj{};  // Magnetic field conditions object to access cache
 
 
-      const Trk::IPatternParametersPropagator* m_proptool; // Propagator tool
-      const Trk::IPatternParametersUpdator* m_updatortool; // Updator    tool
-      const Trk::IRIO_OnTrackCreator* m_riotool    ;  // RIOonTrack creator
-      const IInDetConditionsTool*     m_pixcond    ;  // Condtionos for pixels 
-      const IInDetConditionsTool*     m_sctcond    ;  // Conditions for sct
-      const Trk::IBoundaryCheckTool*  m_boundaryCheckTool; // Boundary checking tool for detector sensitivities
-      const Trk::PRDtoTrackMap*       m_prdToTrackMap = nullptr; ///< PRD to track association maps
-      const InDet::SiDetectorElementStatus *m_pixelDetElStatus = nullptr;
-      const InDet::SiDetectorElementStatus *m_sctDetElStatus = nullptr;
+      const Trk::IPatternParametersPropagator* m_proptool{}; // Propagator tool
+      const Trk::IPatternParametersUpdator* m_updatortool{}; // Updator    tool
+      const Trk::IRIO_OnTrackCreator* m_riotool{}    ;  // RIOonTrack creator
+      const IInDetConditionsTool*     m_pixcond{}    ;  // Condtionos for pixels 
+      const IInDetConditionsTool*     m_sctcond{}    ;  // Conditions for sct
+      const Trk::IBoundaryCheckTool*  m_boundaryCheckTool{}; // Boundary checking tool for detector sensitivities
+      const Trk::PRDtoTrackMap*       m_prdToTrackMap{}; ///< PRD to track association maps
+      const InDet::SiDetectorElementStatus *m_pixelDetElStatus{};
+      const InDet::SiDetectorElementStatus *m_sctDetElStatus{};
 
-      double                          m_xi2max     ;  // Max Xi2 for updator 
-      double                          m_xi2maxBrem ;  // Max Xi2 for updator (brem fit)  
-      double                          m_xi2maxNoAdd;  // Max Xi2 outlayer 
-      double                          m_xi2maxlink ;  // Max Xi2 for search
-      double                          m_xi2multi   ;  // Max Xi2 for multi tracks
-      double                          m_pTmin      ;  // min pT
-      int                             m_nholesmax  ;  // Max number holes
-      int                             m_dholesmax  ;  // Max holes gap
-      int                             m_nclusmin   ;  // Min number clusters
-      int                             m_maxclusters;  // Max closest clusters in detector elements
-      bool                            m_useassoTool = false;  // Use assosiation tool
-      bool                            m_multitrack ;  // Do multi tracks
-      bool                            m_bremnoise  ;  // Do brem noise
-      bool                            m_electron   ;  // Do electron mode
-      bool                            m_heavyion   ;  // Is it heavy ion event
-      bool                            m_doFastTracking; // Do Fast Tracking setup
-      bool                            m_ITkGeometry; // Is ITk geometry
+      double                          m_xi2max{9.}     ;  // Max Xi2 for updator 
+      double                          m_xi2maxBrem{15.} ;  // Max Xi2 for updator (brem fit)  
+      double                          m_xi2maxNoAdd{20.};  // Max Xi2 outlayer 
+      double                          m_xi2maxlink{200.} ;  // Max Xi2 for search
+      double                          m_xi2multi{5.}   ;  // Max Xi2 for multi tracks
+      double                          m_pTmin{500.}      ;  // min pT
+      int                             m_nholesmax{2}  ;  // Max number holes
+      int                             m_dholesmax{2}  ;  // Max holes gap
+      int                             m_nclusmin{5}   ;  // Min number clusters
+      int                             m_maxclusters{3};  // Max closest clusters in detector elements
+      bool                            m_useassoTool{};  // Use assosiation tool
+      bool                            m_multitrack{} ;  // Do multi tracks
+      bool                            m_bremnoise{}  ;  // Do brem noise
+      bool                            m_electron{}   ;  // Do electron mode
+      bool                            m_heavyion{}   ;  // Is it heavy ion event
+      bool                            m_doFastTracking{}; // Do Fast Tracking setup
+      bool                            m_ITkGeometry{}; // Is ITk geometry
 
       ///////////////////////////////////////////////////////////////////
       // Methods
@@ -146,36 +146,6 @@ namespace InDet{
 
     };
   
-  /////////////////////////////////////////////////////////////////////////////////
-  // Inline methods
-  /////////////////////////////////////////////////////////////////////////////////
-
-  inline SiTools_xk::SiTools_xk()
-    {
-      m_fieldtool   = nullptr;
-      m_proptool    = nullptr;
-      m_updatortool = nullptr;
-      m_riotool     = nullptr;  
-      m_pixcond     = nullptr;
-      m_sctcond     = nullptr;      
-      m_boundaryCheckTool = nullptr;
-      m_xi2max      = 9.  ;
-      m_xi2maxBrem  = 15. ;
-      m_xi2maxlink  = 200.;
-      m_xi2multi    = 5.  ;
-      m_xi2maxNoAdd = 20. ; 
-      m_pTmin       = 500.;
-      m_nholesmax   = 2   ;
-      m_dholesmax   = 1   ;
-      m_nclusmin    = 5   ;
-      m_multitrack  = false; 
-      m_bremnoise   = false;
-      m_electron    = false;
-      m_heavyion    = false;
-      m_doFastTracking = false;
-      m_ITkGeometry = false;
-      m_maxclusters = 3;
-    }
 
   inline void SiTools_xk::setTools
     (const Trk::IPatternParametersPropagator*  PR,
