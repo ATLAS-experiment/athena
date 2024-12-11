@@ -109,7 +109,7 @@ def TileRawDataReadingCfg(flags, readDigits=True, readRawChannel=True,
 
     typeNames = kwargs.pop('type_names', [])
 
-    prefix = flags.Overlay.BkgPrefix if flags.Overlay.DataOverlay else ''
+    prefix = flags.Overlay.BkgPrefix if flags.Overlay.ByteStream else ''
 
     cfg = ComponentAccumulator()
     from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
