@@ -90,11 +90,11 @@ StatusCode FPGATrackSimMatrixGenAlgo::initialize()
 
   }
   else {
-    m_pmap = m_FPGATrackSimMapping->PlaneMap_2nd();
+    m_pmap = m_FPGATrackSimMapping->PlaneMap_2nd(0);
     // Get detector configurations
-    m_nLayers = m_FPGATrackSimMapping->PlaneMap_2nd()->getNLogiLayers();
+    m_nLayers = m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers();
     m_nRegions = m_FPGATrackSimMapping->RegionMap_2nd()->getNRegions();
-    m_nDim = m_FPGATrackSimMapping->PlaneMap_2nd()->getNCoords();
+    m_nDim = m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNCoords();
   }
 
   m_nDim2 = m_nDim * m_nDim;
@@ -476,10 +476,10 @@ FPGATrackSimMatrixGenAlgo::selectHit_returnCode FPGATrackSimMatrixGenAlgo::selec
     }
     else {
       // This will need updating, once we get to the second stage.
-      old_isEC = m_FPGATrackSimMapping->PlaneMap_2nd()->isEC(layer, old_section);
-      new_isEC = m_FPGATrackSimMapping->PlaneMap_2nd()->isEC(layer, new_section);
-      old_disk = m_FPGATrackSimMapping->PlaneMap_2nd()->getLayerInfo(layer, old_section).physDisk;
-      new_disk = m_FPGATrackSimMapping->PlaneMap_2nd()->getLayerInfo(layer, new_section).physDisk;
+      old_isEC = m_FPGATrackSimMapping->PlaneMap_2nd(subregion)->isEC(layer, old_section);
+      new_isEC = m_FPGATrackSimMapping->PlaneMap_2nd(subregion)->isEC(layer, new_section);
+      old_disk = m_FPGATrackSimMapping->PlaneMap_2nd(subregion)->getLayerInfo(layer, old_section).physDisk;
+      new_disk = m_FPGATrackSimMapping->PlaneMap_2nd(subregion)->getLayerInfo(layer, new_section).physDisk;
     }
     // If one is barrel and one endcap, it's definitely OK, take the barrel hit
     if (old_isEC != new_isEC) {

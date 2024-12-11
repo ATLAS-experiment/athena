@@ -75,7 +75,7 @@ void FPGATrackSimTrackingToolBase::matchIdealGeoSector(FPGATrackSimRoad & r)
             if(! m_do2ndStage)
               wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st(0)->getDetType(il));
             else
-              wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_2nd()->getDetType(il));
+              wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_2nd(0)->getDetType(il));
 
             // Now store wc hit in a "std::vector<std::shared_ptr<const FPGATrackSimHit>>" format.
             // We can probably avoid initializing an intermediate variable wcHits as we used to do

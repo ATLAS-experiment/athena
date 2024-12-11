@@ -27,7 +27,7 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
         virtual StatusCode initialize() override;
 
         virtual const FPGATrackSimPlaneMap* PlaneMap_1st(int slice) const override { return m_pmap_vector_1st.at(slice).get(); }
-        virtual const FPGATrackSimPlaneMap* PlaneMap_2nd()          const override { return m_pmap_2nd.get(); }
+        virtual const FPGATrackSimPlaneMap* PlaneMap_2nd(int slice) const override { return m_pmap_vector_2nd.at(slice).get(); }
         virtual const FPGATrackSimRegionMap* RegionMap_1st()        const override { return m_rmap_1st.get(); }
         virtual const FPGATrackSimRegionMap* RegionMap_2nd()        const override { return m_rmap_2nd.get(); }
         virtual const FPGATrackSimRegionMap* SubRegionMap()         const override { return m_subrmap.get();  }
@@ -55,8 +55,9 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
             // Map unique pointers
         //vector of pmaps
         std::vector<std::unique_ptr<FPGATrackSimPlaneMap>>  m_pmap_vector_1st; //  pointer to the pmap object for 1st stage
-        std::unique_ptr<FPGATrackSimPlaneMap>  m_pmap_2nd = nullptr; //  pointer to the pmap object for 2nd stage
-        std::vector<std::unique_ptr<FPGATrackSimPlaneMap>>  m_pmap_vector_2nd; //  pointer to the pmap object for 1st stage
+        std::vector<std::unique_ptr<FPGATrackSimPlaneMap>>  m_pmap_vector_2nd; //  pointer to the pmap object for 2nd stage
+        virtual size_t GetPlaneMap_1stSliceSize() const override {return m_pmap_vector_1st.size();}
+        virtual size_t GetPlaneMap_2ndSliceSize() const override {return m_pmap_vector_2nd.size();}
         std::unique_ptr<FPGATrackSimRegionMap> m_rmap_1st = nullptr; //  pointer to the RMAP object using 1st stage plane map
         std::unique_ptr<FPGATrackSimRegionMap> m_rmap_2nd = nullptr; //  pointer to the RMAP object using 2nd stage plane map
         std::unique_ptr<FPGATrackSimRegionMap> m_subrmap = nullptr;

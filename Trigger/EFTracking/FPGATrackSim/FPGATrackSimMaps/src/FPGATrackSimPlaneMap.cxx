@@ -23,39 +23,6 @@ using namespace std;
 // Constructor/Desctructor
 ///////////////////////////////////////////////////////////////////////////////
 
-FPGATrackSimPlaneMap::FPGATrackSimPlaneMap(const std::string & filepath, unsigned region, unsigned stage, std::vector<int> layerOverrides) :
-    m_map(static_cast<int>(SiliconTech::nTechs),
-          vector<vector<LayerSection>>(static_cast<int>(DetectorZone::nZones))
-    ),
-    m_layerOverrides(std::move(layerOverrides))
-{
-    ifstream fin(filepath);
-    if (!fin.is_open())
-    {
-        ANA_MSG_FATAL("Couldn't open " << filepath);
-        throw ("FPGATrackSimPlaneMap Couldn't open " + filepath);
-    }
-    // Reads the header of the file to resize all the vector members
-    allocateMap(fin, stage);
-
-    // Seek to the correct region
-    seek(fin, region);
-
-    // Reads the rest of the file to populate all the member vectors
-    readLayers(fin, stage);
-
-    // Postprocessing on coordinate indices
-    for (uint32_t l = 0; l < m_nLogiLayers; l++)
-    {
-        m_coordOffset[l] = m_nCoords;
-        m_nCoords += m_dimension[l];
-        for (uint32_t i = 0; i < m_dimension[l]; i++)
-            m_coordLayer.push_back(l);
-    }
-
-    ANA_MSG_INFO("Using " << m_nLogiLayers << " logical layers and " << m_nCoords << " coordinates");
-}
-
 FPGATrackSimPlaneMap::FPGATrackSimPlaneMap(std::ifstream& fin, unsigned region, unsigned stage, std::vector<int> layerOverrides) :
     m_map(static_cast<int>(SiliconTech::nTechs),
           vector<vector<LayerSection>>(static_cast<int>(DetectorZone::nZones))
@@ -257,20 +224,18 @@ void FPGATrackSimPlaneMap::readLayers(ifstream & fin, uint32_t stage)
 ///////////////////////////////////////////////////////////////////////////////
 // Interface Functions
 ///////////////////////////////////////////////////////////////////////////////
-
+void FPGATrackSimPlaneMap::doRemap(FPGATrackSimHit & hit) const
+{
+   if (!hit.isRemapped()) {
+       m_moduleRelabel->remap(hit);
+    }
+}
 
 void FPGATrackSimPlaneMap::map(FPGATrackSimHit & hit) const
 {
-    //TODO WW check of isMapped commented out this might work?
-    
     // re-assign layers in the pixel endcap to be each individual disk
     // technically this returns a success/fail but I'm not sure we need it?
     // This should only happen if the hit is not already mapped.
-    if (!hit.isMapped()){
-        if(!hit.isRemapped()){
-            m_moduleRelabel->remap(hit);
-        }
-    }
     const LayerSection &pinfo = getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer());
     hit.setSection(pinfo.section);
     hit.setLayer(pinfo.layer);

@@ -32,13 +32,17 @@ StatusCode FPGATrackSimWindowExtensionTool::initialize() {
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
     if (m_idealGeoRoads) ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
     m_nLayers_1stStage = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
-    m_nLayers_2ndStage = m_FPGATrackSimMapping->PlaneMap_2nd()->getNLogiLayers() - m_nLayers_1stStage;
+    m_nLayers_2ndStage = m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers() - m_nLayers_1stStage;
 
-    // We need to make this loop slice aware in the future.
-    for (unsigned i = m_nLayers_1stStage; i < m_nLayers_2ndStage +m_nLayers_1stStage ; i++) {
-        m_phits_atLayer[i] = std::vector<std::shared_ptr<const FPGATrackSimHit>>();
+    // This now needs to be done once for each slice.
+    for (size_t j=0; j<m_FPGATrackSimMapping->GetPlaneMap_2ndSliceSize(); j++){
+        ATH_MSG_INFO("Processing second stage slice " << j);
+        m_phits_atLayer[j] = std::map<unsigned, std::vector<std::shared_ptr<const FPGATrackSimHit>>>();
+        for (unsigned i = m_nLayers_1stStage; i < m_nLayers_2ndStage +m_nLayers_1stStage ; i++) {
+            ATH_MSG_INFO("Processing layer " << i);
+            m_phits_atLayer[j][i] = std::vector<std::shared_ptr<const FPGATrackSimHit>>();
+        }
     }
-
     // Probably need to do something here.
     return StatusCode::SUCCESS;
 }
@@ -50,29 +54,28 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
     // Reset the internal second stage roads storage.
     roads.clear();
     m_roads.clear();
-    for (auto& entry : m_phits_atLayer) {
-        entry.second.clear();
-    }
-
-    //const FPGATrackSimPlaneMap* pmap = m_FPGATrackSimMapping->PlaneMap_2nd();
-    // TODO make the second stage subregion map work.
-    const FPGATrackSimRegionMap* rmap_1st = m_FPGATrackSimMapping->SubRegionMap();
-    const FPGATrackSimRegionMap* rmap_2nd = m_FPGATrackSimMapping->SubRegionMap_2nd();
-
-    // Second stage hits may be unmapped, in which case map them.
-    // We need to make this loop slice aware in the future.
-    for (const std::shared_ptr<const FPGATrackSimHit>& hit : hits) {
-        // TODO this needs to be fixed but it needs the hits to not actually be consts.
-        /*if (!hit->isMapped()) {
-            pmap->map(hit):
-        }*/
-
-        // If this is a second stage hit, stick it in
-        if (rmap_1st->getRegions(*hit).size() == 0) {
-            m_phits_atLayer[hit->getLayer()].push_back(hit);
+    for (auto& sliceEntry : m_phits_atLayer){
+        for (auto& entry : sliceEntry.second) {
+            entry.second.clear();
         }
     }
+    const FPGATrackSimRegionMap* rmap_2nd = m_FPGATrackSimMapping->SubRegionMap_2nd();
+    const FPGATrackSimPlaneMap *pmap_2nd = nullptr;
 
+    // Second stage hits may be unmapped, in which case map them.
+    for (size_t i=0; i<m_FPGATrackSimMapping->GetPlaneMap_2ndSliceSize(); i++){
+        pmap_2nd = m_FPGATrackSimMapping->PlaneMap_2nd(i);
+        for (const std::shared_ptr<const FPGATrackSimHit>& hit : hits) {
+            std::shared_ptr<FPGATrackSimHit> hitCopy = std::make_shared<FPGATrackSimHit>(*hit);
+            pmap_2nd->map(*hitCopy);
+            if (!hitCopy->isMapped()){
+                continue;
+            }
+            if (rmap_2nd->isInRegion(i, *hitCopy)) {
+                m_phits_atLayer[i][hitCopy->getLayer()].push_back(hitCopy);
+            }
+        }
+    }
     // Now, loop over the tracks.
     for (std::shared_ptr<const FPGATrackSimTrack> track : tracks) {
         if (track->passedOR() == 0) {
@@ -103,9 +106,12 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
 
         // At this point we should have copied over all the hits.
         std::vector<int> numHits(m_nLayers_2ndStage + m_nLayers_1stStage, 0);
+
+        size_t slice = track->getSubRegion();
+        pmap_2nd = m_FPGATrackSimMapping->PlaneMap_2nd(slice);
         for (unsigned layer = m_nLayers_1stStage; layer < m_nLayers_2ndStage + m_nLayers_1stStage; layer++) {
-            ATH_MSG_DEBUG("Testing layer " << layer << " with " << m_phits_atLayer[layer].size() << " hit");
-            for (const std::shared_ptr<const FPGATrackSimHit>& hit: m_phits_atLayer[layer]) {
+            ATH_MSG_DEBUG("Testing layer " << layer << " with " << m_phits_atLayer[slice][layer].size() << " hit");
+            for (const std::shared_ptr<const FPGATrackSimHit>& hit: m_phits_atLayer[slice][layer]) {
                 // Make sure this hit is in the same subregion as the track. TODO: mapping/slice changes.
                 if (!rmap_2nd->isInRegion(track->getSubRegion(), *hit)) {
                     continue;

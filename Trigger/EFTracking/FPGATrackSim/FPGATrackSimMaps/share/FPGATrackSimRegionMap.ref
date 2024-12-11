@@ -12,4 +12,8 @@ EventLoopMgr      WARNING No events will be processed from external input.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 FPGATrackSimMod...   INFO Allocating map for geometry ATLAS-P2-RUN4-03-00-00 diskIndex size=9
-Package.UserCode     INFO Using 9 logical layers and 10 coordinates
+FPGATrackSimMod...   INFO Allocating map for geometry ATLAS-P2-RUN4-03-00-00 diskIndex size=9
+FPGATrackSimMod...   INFO Allocating map for geometry ATLAS-P2-RUN4-03-00-00 diskIndex size=9
+FPGATrackSimMod...   INFO Allocating map for geometry ATLAS-P2-RUN4-03-00-00 diskIndex size=9
+FPGATrackSimMod...   INFO Allocating map for geometry ATLAS-P2-RUN4-03-00-00 diskIndex size=9
+FPGATrackSimMod...   INFO Allocating map for geometry ATLAS-P2-RUN4-03-00-00 diskIndex size=9

@@ -27,7 +27,7 @@ StatusCode FPGATrackSimBankSvc::initialize()
 
     // resize this to the appropriate one and to be safe, set to nullptr to start
     m_FitConstantBankNoGuess_1st.resize(m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers());
-    m_FitConstantBankNoGuess_2nd.resize(m_FPGATrackSimMapping->PlaneMap_2nd()->getNLogiLayers());
+    m_FitConstantBankNoGuess_2nd.resize(m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers());
     for (unsigned i = 0; i < m_FitConstantBankNoGuess_1st.size(); i++) m_FitConstantBankNoGuess_1st[i] = nullptr;
     for (unsigned i = 0; i < m_FitConstantBankNoGuess_2nd.size(); i++) m_FitConstantBankNoGuess_2nd[i] = nullptr;
 
@@ -54,9 +54,9 @@ bool FPGATrackSimBankSvc::LoadFitConstantBank_1st(int missedPlane)
 bool FPGATrackSimBankSvc::LoadFitConstantBank_2nd(int missedPlane)
 {
     if (missedPlane == -1)
-      m_FitConstantBank_2nd = std::unique_ptr<FPGATrackSimFitConstantBank> (new FPGATrackSimFitConstantBank(m_FPGATrackSimMapping->PlaneMap_2nd(), m_ncoords_2nd, m_path_constants_2nd, false));
+      m_FitConstantBank_2nd = std::make_unique<FPGATrackSimFitConstantBank> (m_FPGATrackSimMapping->PlaneMap_2nd(0), m_ncoords_2nd, m_path_constants_2nd, false);
     else
-      m_FitConstantBankNoGuess_2nd[missedPlane] = std::unique_ptr<FPGATrackSimFitConstantBank> (new FPGATrackSimFitConstantBank(m_FPGATrackSimMapping->PlaneMap_2nd(), m_ncoords_2nd, m_path_constants_2nd_noguess[missedPlane], false, missedPlane)); // no check on the plane number
+      m_FitConstantBankNoGuess_2nd[missedPlane] = std::make_unique<FPGATrackSimFitConstantBank> (m_FPGATrackSimMapping->PlaneMap_2nd(0), m_ncoords_2nd, m_path_constants_2nd_noguess[missedPlane], false, missedPlane); // no check on the plane number
 
     return true;
 }
