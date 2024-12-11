@@ -22,7 +22,7 @@ StatusCode FPGATrackSimOverlapRemovalTool::initialize()
   // Check if this is 2nd stage
   if(m_do2ndStage)
   {
-    m_totLayers = m_FPGATrackSimMapping->PlaneMap_2nd()->getNLogiLayers();
+    m_totLayers = m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers();
   }
   else
   {

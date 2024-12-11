@@ -87,7 +87,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(std::vector<std::shared_ptr<const 
     // Just used to get number of layers considered
     const FPGATrackSimPlaneMap *planeMap = nullptr;
     if (!m_do2ndStage) planeMap = m_FPGATrackSimMapping->PlaneMap_1st(0);
-    else planeMap = m_FPGATrackSimMapping->PlaneMap_2nd();
+    else planeMap = m_FPGATrackSimMapping->PlaneMap_2nd(0);
 
     // Create a template track with common parameters filled already for
     // initializing below
@@ -268,7 +268,7 @@ void FPGATrackSimNNTrackTool::compute_truth(FPGATrackSimTrack &t) const {
 
   const FPGATrackSimPlaneMap* planeMap = nullptr;
   if (!m_do2ndStage) planeMap = m_FPGATrackSimMapping->PlaneMap_1st(0);
-  else planeMap = m_FPGATrackSimMapping->PlaneMap_2nd();
+  else planeMap = m_FPGATrackSimMapping->PlaneMap_2nd(0);
 
   for (unsigned layer = 0; layer < planeMap->getNLogiLayers(); layer++) {
     if (t.getHitMap() & (1 << planeMap->getCoordOffset(layer)))

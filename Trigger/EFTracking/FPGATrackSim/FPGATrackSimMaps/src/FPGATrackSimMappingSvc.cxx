@@ -31,27 +31,59 @@ StatusCode FPGATrackSimMappingSvc::checkAllocs()
     if (m_pmap_vector_1st.empty())
     {
         ATH_MSG_FATAL("Error using 1st stage plane map no elements of vector made: " << m_pmap_vector_1st);
+        return StatusCode::FAILURE;
     }
-    if (!m_numberOfPmaps)
+    if (!m_numberOfPmaps){
         ATH_MSG_FATAL("Error with declared number of plane maps: " << m_pmap_path);
-    if (m_numberOfPmaps != (m_pmap_vector_1st.size()))
+        return StatusCode::FAILURE;
+    }
+    if (m_numberOfPmaps != (m_pmap_vector_1st.size())){
         ATH_MSG_FATAL("Error using number of declared plane maps does not equal number of loaded plane maps: " << m_pmap_path<<"=/="<<m_pmap_vector_1st.size());
+        return StatusCode::FAILURE;
+    }
     for (size_t a = 0 ; a < m_pmap_vector_1st.size() ;a++)
     {
-        if(!m_pmap_vector_1st.at(a))
+        if(!m_pmap_vector_1st.at(a)){
             ATH_MSG_FATAL("Error using 1st stage plane map for slice: " << a <<" of "<< m_pmap_vector_1st.size());
+            return StatusCode::FAILURE;
+        }
     }
-    if (!m_pmap_2nd)
-        ATH_MSG_FATAL("Error using 2nd stage plane map: " << m_pmap_path);
-    if (!m_rmap_1st)
+    if (m_pmap_vector_2nd.empty())
+    {
+        ATH_MSG_FATAL("Error using 2nd stage plane map no elements of vector made: " << m_pmap_vector_2nd);
+        return StatusCode::FAILURE;
+    }
+    if (!m_numberOfPmaps){
+        ATH_MSG_FATAL("Error with declared number of plane maps: " << m_pmap_path);
+        return StatusCode::FAILURE;
+    }
+    if (m_numberOfPmaps != (m_pmap_vector_2nd.size())){
+        ATH_MSG_FATAL("Error using number of declared plane maps does not equal number of loaded plane maps: " << m_pmap_path<<"=/="<<m_pmap_vector_2nd.size());
+        return StatusCode::FAILURE;
+    }
+    for (size_t a = 0 ; a < m_pmap_vector_2nd.size() ;a++)
+    {
+        if(!m_pmap_vector_2nd.at(a)){
+            ATH_MSG_FATAL("Error using 1st stage plane map for slice: " << a <<" of "<< m_pmap_vector_2nd.size());
+            return StatusCode::FAILURE;
+        }
+    }
+    if (!m_rmap_1st){
         ATH_MSG_FATAL("Error creating region map for 1st stage from: " << m_rmap_path);
-    if (!m_rmap_2nd)
+        return StatusCode::FAILURE;
+    }
+    if (!m_rmap_2nd){
         ATH_MSG_FATAL("Error creating region map for 2nd stage from: " << m_rmap_path);
-    if (!m_subrmap)
+        return StatusCode::FAILURE;
+    }
+    if (!m_subrmap){
         ATH_MSG_FATAL("Error creating sub-region map from: " << m_subrmap_path);
-    if (!m_subrmap_2nd)
+        return StatusCode::FAILURE;
+    }
+    if (!m_subrmap_2nd){
         ATH_MSG_FATAL("Error creating second stage sub-region map from: " << m_subrmap_path);
-
+        return StatusCode::FAILURE;
+    }
     return StatusCode::SUCCESS;
 }
 
@@ -121,15 +153,14 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         fin.close();
         fin.open(filepath);
         ATH_MSG_DEBUG("Creating the 2nd stage plane map");
-        m_pmap_2nd = std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(fin, m_EvtSel->getRegionID(), 2));
+        for (size_t i = 0; i<m_numberOfPmaps; i++)
+        {
+            m_pmap_vector_2nd.emplace_back(std::make_unique<FPGATrackSimPlaneMap>(fin, m_EvtSel->getRegionID(), 2, m_layerOverrides));
+        }
         fin.close();
 
         ATH_MSG_DEBUG("Creating the 1st stage region map");
         m_rmap_1st = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_rmap_path.value())));
-
-        fin.open(filepath);
-        m_pmap_vector_2nd.emplace_back(std::make_unique<FPGATrackSimPlaneMap>(fin, m_EvtSel->getRegionID(), 1, m_layerOverrides));
-        fin.close();
 
         ATH_MSG_DEBUG("Creating the 2nd stage region map");
         m_rmap_2nd = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_2nd, PathResolverFindCalibFile(m_rmap_path.value())));
@@ -138,8 +169,7 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         m_subrmap = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_subrmap_path.value())));
 
         ATH_MSG_DEBUG("Creating the 2nd stage sub-region map");
-        //The 2nd satge will have the full mutimap intergration in a future MR
-        m_subrmap_2nd = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_subrmap_path.value())));
+        m_subrmap_2nd = std::make_unique<FPGATrackSimRegionMap>(m_pmap_vector_2nd, PathResolverFindCalibFile(m_subrmap_path.value()));
 
         ATH_MSG_DEBUG("Setting the Modules LUT for Region Maps");
         m_rmap_1st->loadModuleIDLUT(PathResolverFindCalibFile(m_modulelut_path.value()));

@@ -61,7 +61,8 @@ class FPGATrackSimWindowExtensionTool : public extends <AthAlgTool, IFPGATrackSi
         Gaudi::Property <bool> m_useSpacePoints { this, "useSpacePoints", false, "Whether we are using spacepoints."};
 
         std::vector<FPGATrackSimRoad> m_roads;
-        std::map<unsigned, std::vector<std::shared_ptr<const FPGATrackSimHit>>> m_phits_atLayer;
+        //This is a map(dict python equivalent) of slice IDs that have a map of layer IDs in it. That map has a vector of hits associated with it
+        std::map<unsigned, std::map<unsigned, std::vector<std::shared_ptr<const FPGATrackSimHit>>>> m_phits_atLayer;
         unsigned m_nLayers_1stStage = 0;
         unsigned m_nLayers_2ndStage = 0;
 

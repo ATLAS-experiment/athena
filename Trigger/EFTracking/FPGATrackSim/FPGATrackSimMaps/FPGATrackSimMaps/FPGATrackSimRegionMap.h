@@ -64,6 +64,7 @@ class FPGATrackSimRegionMap
 
         ///////////////////////////////////////////////////////////////////////
         // Constructors/Initialization
+        // See doc on m_layerOverrides for info on argument layerOverrides
 
         FPGATrackSimRegionMap(const std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> & pmaps, std::string const & filepath);
 

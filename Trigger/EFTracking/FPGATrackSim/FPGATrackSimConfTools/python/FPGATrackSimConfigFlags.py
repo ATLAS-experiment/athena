@@ -144,7 +144,7 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('chi2cut', 40)
 
     # second stage fitting
-    cf.addFlag('secondStage', True)
+    cf.addFlag('secondStage', False)
     cf.addFlag('secondChi2Cut', 40)
 
     # fast monitoring

@@ -204,7 +204,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     auto mon_nroads = Monitored::Scalar<unsigned>("nroads_2nd", roads.size());
     for (auto const &road : roads) {
       unsigned bitmask = road->getHitLayers();
-      for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_2nd()->getNLogiLayers(); l++) {
+      for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers(); l++) {
         if (bitmask & (1 << l)) {
             auto mon_layerIDs = Monitored::Scalar<unsigned>("layerIDs_2nd",l);
             Monitored::Group(m_monTool,mon_layerIDs);
