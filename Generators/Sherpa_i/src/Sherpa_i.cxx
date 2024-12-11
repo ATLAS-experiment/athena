@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AtlasHepMC/GenEvent.h"
@@ -350,7 +350,7 @@ void Sherpa_i::getParameters(int &argc, char** &argv) {
 }
 #endif
 
-void Sherpa_i::compilePlugin(std::string pluginCode) {
+void Sherpa_i::compilePlugin(const std::string& pluginCode) {
   // TODO: not very pretty, should we eventually do this in Python instead (base fragment)
   FILE *file = fopen("Sherpa_iPlugin.C","w");
   fputs(pluginCode.c_str(),file);
