@@ -85,8 +85,8 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TriggerTest/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34171421_00/RDO.34171421._000011.pool.root.1",
-	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TriggerTest/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34171421_00/RDO.34171421._000016.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TriggerTest/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42189392_00/RDO.42189392._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TriggerTest/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42189392_00/RDO.42189392._000002.pool.root.1"
         ]
     },
     "pbpb": {
@@ -153,14 +153,14 @@
         "source": "mc",
         "format": "HITS",
         "paths": [
-            "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigAnalysisTest/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.merge.HITS.e8514_e8528_s4159_s4114_tid34263760_00/HITS.34263760._000001.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigAnalysisTest/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.merge.HITS.e8514_e8528_s4369_s4370_tid40005971_00/HITS.40005971._000001.pool.root.1"
         ]
     },
     "pileup_RDO": {
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigAnalysisTest/valid1.900149.PG_single_nu_Pt50.merge.RDO.e8514_e8528_s4153_d1879_d1880_tid34263698_00/RDO.34263698._000001.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigAnalysisTest/mc23_13p6TeV.900149.PG_single_nu_Pt50.merge.RDO.e8514_e8528_s4332_s4324_d1994_d1943/RDO.41085106._008185.pool.root.1"
         ]
     },
     "ttbar_HITS_MC16": {
