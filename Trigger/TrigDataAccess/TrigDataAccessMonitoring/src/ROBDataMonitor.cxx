@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <functional>
-#include <algorithm>
+#include <iomanip>
 #include "TrigDataAccessMonitoring/ROBDataMonitor.h"
 
 using namespace robmonitor;
@@ -11,18 +10,8 @@ using namespace robmonitor;
 //
 //--- ROBDataStruct 
 //    -------------
-ROBDataStruct::ROBDataStruct()
-  : rob_id(0),
-    rob_size(0),
-    rob_history(robmonitor::UNCLASSIFIED),
-    rob_status_word(0)
-{}
-
 ROBDataStruct::ROBDataStruct(const uint32_t srcId)
-  : rob_id(srcId),
-    rob_size(0),
-    rob_history(robmonitor::UNCLASSIFIED),
-    rob_status_word(0)
+  : rob_id(srcId)
 {}
 
 bool ROBDataStruct::isUnclassified() const {
@@ -53,33 +42,47 @@ bool ROBDataStruct::isStatusOk() const {
   return (rob_status_word == 0) ? true : false;
 }
 
+// Extraction operator for ROBDataStruct
+std::ostream& robmonitor::operator<<(std::ostream& os, const ROBDataStruct& rhs) {
+  os << "[SourceID,Size(words),History,(Status words)]=["
+     << std::hex <<  std::setfill( '0' ) << "0x" << std::setw(6) << rhs.rob_id
+     << std::dec << std::setfill(' ')
+     << "," << std::setw(8) << rhs.rob_size;
+  os << "," << std::setw(12);
+  if (rhs.rob_history == robmonitor::UNCLASSIFIED) {
+    os << "UNCLASSIFIED";
+  } else if (rhs.rob_history == robmonitor::RETRIEVED) {
+    os << "RETRIEVED";
+  } else if (rhs.rob_history == robmonitor::HLT_CACHED) {
+    os << "HLT_CACHED";
+  } else if (rhs.rob_history == robmonitor::DCM_CACHED) {
+    os << "DCM_CACHED";
+  }else if (rhs.rob_history == robmonitor::IGNORED) {
+    os << "IGNORED";
+  } else if (rhs.rob_history == robmonitor::UNDEFINED) {
+    os << "UNDEFINED";
+  } else {
+    os << "invalid code";
+  }
+  os << ",(";
+  os << std::hex <<  std::setfill( '0' ) << "0x" << std::setw(8) << rhs.rob_status_word;
+  os << ")]";
+  return os;
+}
 
 //
 //--- ROBDataMonitorStruct
 //    --------------------
-ROBDataMonitorStruct::ROBDataMonitorStruct()
-  :lvl1ID(0),
-   requestor_name("UNKNOWN"),
-   requested_ROBs(),
-   start_time_of_ROB_request(),
-   end_time_of_ROB_request()
-{}
-
 ROBDataMonitorStruct::ROBDataMonitorStruct(const uint32_t l1_id, const std::string& req_nam="UNKNOWN")
   :lvl1ID(l1_id),
-   requestor_name(req_nam),
-   requested_ROBs(),
-   start_time_of_ROB_request(),
-   end_time_of_ROB_request()
+   requestor_name(req_nam)
 {}
 
 ROBDataMonitorStruct::ROBDataMonitorStruct(const uint32_t l1_id, 
 					   const std::vector<uint32_t>& req_robs,
 					   const std::string& req_nam="UNKNOWN")
   :lvl1ID(l1_id),
-   requestor_name(req_nam),
-   start_time_of_ROB_request(),
-   end_time_of_ROB_request()
+   requestor_name(req_nam)
 {
   for (uint32_t rob : req_robs) {
     requested_ROBs[ rob ] = robmonitor::ROBDataStruct( rob ) ;
@@ -147,10 +150,44 @@ unsigned ROBDataMonitorStruct::statusOkROBs() const {
 }
 
 float ROBDataMonitorStruct::elapsedTime() const {
-  int secs = 0 ;
-  if (end_time_of_ROB_request.tv_sec >= start_time_of_ROB_request.tv_sec)
-    secs = end_time_of_ROB_request.tv_sec - start_time_of_ROB_request.tv_sec;
+  float secs = 0 ;
+  if (end_time >= start_time)
+    secs = (end_time - start_time)/1e3;
+  return secs;
+}
 
-  int usecs = end_time_of_ROB_request.tv_usec - start_time_of_ROB_request.tv_usec;
-  return static_cast<float>(secs)*1000 + static_cast<float>(usecs)/1000;
+// Extraction operator for ROBDataMonitorStruct
+std::ostream& robmonitor::operator<<(std::ostream& os, const ROBDataMonitorStruct& rhs) {
+  const std::string prefix("   ");
+  const std::string prefix2("-> ");
+  os << "ROB Request for L1 ID = " << std::dec << rhs.lvl1ID << " (decimal), L1 ID = 0x"
+     << std::hex << rhs.lvl1ID << " (hex)" << std::dec;
+  os << "\n" << prefix << "Requestor name = " << rhs.requestor_name;
+
+  const std::time_t s_time(rhs.start_time / static_cast<int>(1e6));
+  struct tm buf;
+  localtime_r(&s_time, &buf);
+  os << "\n" << prefix << "Start time of ROB request         = "
+     << std::put_time(&buf, "%c")
+     << " + " << (rhs.start_time % static_cast<int>(1e6)) / 1000.0f << " [ms]";
+
+  const std::time_t e_time(rhs.end_time / static_cast<int>(1e6));
+  localtime_r(&e_time, &buf);
+  os << "\n" << prefix << "Stop  time of ROB request         = "
+     << std::put_time(&buf, "%c")
+     << " + " << (rhs.end_time % static_cast<int>(1e6)) / 1000.0f << " [ms]";
+  os << "\n" << prefix << "Elapsed time for ROB request [ms] = " << rhs.elapsedTime();
+  os << "\n" << prefix << "Requested ROBs:";
+  os << "\n" << prefix << prefix2 << "All          " << rhs.allROBs()          ;
+  os << "\n" << prefix << prefix2 << "Unclassified " << rhs.unclassifiedROBs() ;
+  os << "\n" << prefix << prefix2 << "HLT Cached   " << rhs.HLTcachedROBs()    ;
+  os << "\n" << prefix << prefix2 << "DCM Cached   " << rhs.DCMcachedROBs()    ;
+  os << "\n" << prefix << prefix2 << "Retrieved    " << rhs.retrievedROBs()    ;
+  os << "\n" << prefix << prefix2 << "Ignored      " << rhs.ignoredROBs()      ;
+  os << "\n" << prefix << prefix2 << "Undefined    " << rhs.undefinedROBs()    ;
+  os << "\n" << prefix << prefix2 << "Status OK    " << rhs.statusOkROBs()     ;
+  for (const auto& [id, rob] : rhs.requested_ROBs ) {
+    os << "\n" << prefix << prefix2 << rob;
+  }
+  return os;
 }
