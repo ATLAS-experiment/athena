@@ -41,7 +41,7 @@ namespace {
 
 namespace xAOD {
 
-   RAuxStore::RAuxStore( const char* prefix, ::Long64_t entry, Bool_t topStore, EStructMode mode )
+   RAuxStore::RAuxStore( const char* prefix, Bool_t topStore, EStructMode mode )
        : SG::IAuxStore(),
          m_prefix( prefix ),
          m_dynPrefix( Utils::dynFieldPrefix( prefix ) ),
@@ -66,7 +66,7 @@ namespace xAOD {
          m_outputNtupleName(),
          m_outModel( nullptr ),
          m_inModel( nullptr ),
-         m_entryToLoad(entry),
+         m_entryToLoad( 0 ),
          m_fields() {}
 
   RAuxStore::~RAuxStore() {
@@ -146,11 +146,12 @@ namespace xAOD {
       return StatusCode::SUCCESS;
    }
 
-   ::Int_t RAuxStore::getEntry( ::Int_t getall ) {
+   ::Int_t RAuxStore::getEntry(Long64_t entry, ::Int_t getall ) {
 
       // Guard against multi-threaded execution:
       guard_t guard( m_mutex1 );
 
+      m_entryToLoad = entry;
       // Reset the transient store. TEvent::fill() calls this function with
       // getall==99. When that is happening, we need to keep the transient
       // store still around. Since the user may want to interact with the
@@ -201,7 +202,7 @@ namespace xAOD {
      m_inputScanned = kFALSE;
    }
 
-   // SG::IConsRAuxStore functions
+   // SG::IConstAuxStore functions
 
    /// Get a pointer to a given array
    ///
@@ -1838,7 +1839,7 @@ namespace xAOD {
          ntupleName(),
          entryLoaded( -1 ) {}
 
-   ::Int_t RAuxStore::RFieldInfo::getEntry(::Int_t entryToLoad) {
+   ::Int_t RAuxStore::RFieldInfo::getEntry(::Long64_t entryToLoad) {
 
       // A little sanity check:
       if( !field ) {
@@ -1874,7 +1875,7 @@ namespace xAOD {
 
       } catch( ROOT::Experimental::RException& e ) {
          ::Error( "xAOD::RAuxStore::RFieldInfo::getEntry",
-                  "Failed to load entry %d for field %s: %s", entryToLoad,
+                  "Failed to load entry %lld for field %s: %s", entryToLoad,
                   fieldName.c_str(), e.what() );
          return -1;
       }
