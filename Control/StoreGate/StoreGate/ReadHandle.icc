@@ -278,6 +278,7 @@ inline
 ReadHandle<T>::ReadHandle (const VarHandleKey& key, const EventContext* ctx)
   : VarHandleBase (key, ctx)
 {
+  // cppcheck-suppress missingReturn; false positive
 }
 
 
