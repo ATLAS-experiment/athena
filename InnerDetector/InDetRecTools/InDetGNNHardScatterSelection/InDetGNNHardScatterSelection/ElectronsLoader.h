@@ -31,7 +31,7 @@ namespace InDetGNNHardScatterSelection {
     // Subclass for Electrons loader inherited from abstract IConstituentsLoader class
     class ElectronsLoader : public IConstituentsLoader {
       public:
-        ElectronsLoader(ConstituentsInputConfig);
+        ElectronsLoader(const ConstituentsInputConfig &);
         std::tuple<std::string, FlavorTagDiscriminants::Inputs, std::vector<const xAOD::IParticle*>> getData(
           const xAOD::Vertex& vertex) const override ;
         std::string getName() const override;

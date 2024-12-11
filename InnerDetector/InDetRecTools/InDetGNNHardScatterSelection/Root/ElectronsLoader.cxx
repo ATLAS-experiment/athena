@@ -25,7 +25,7 @@ namespace InDetGNNHardScatterSelection {
     } // end of iparticle sort getter
 
     ElectronsLoader::ElectronsLoader(
-        ConstituentsInputConfig cfg
+        const ConstituentsInputConfig & cfg
     ):
         IConstituentsLoader(cfg),
         m_iparticleSortVar(ElectronsLoader::iparticleSortVar(cfg.order)),
