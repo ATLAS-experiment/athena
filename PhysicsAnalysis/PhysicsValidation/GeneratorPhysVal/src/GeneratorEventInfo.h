@@ -15,7 +15,7 @@ namespace GeneratorPhysVal
   {
   public:
 
-    GeneratorEventInfo(PlotBase* pParent, std::string sDir, std::string sType = "");
+    GeneratorEventInfo(PlotBase* pParent, const std::string& sDir, const std::string& sType = "");
 
     void check_eventNumber(SG::ReadHandle<xAOD::EventInfo> evt);
     int check_mcChannelNumber(SG::ReadHandle<xAOD::EventInfo> evt, int ref);
