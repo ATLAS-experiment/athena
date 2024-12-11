@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // File:  Generators/FlowAfterburnber/CheckFlow.h
@@ -56,28 +56,28 @@ private:
   };
 
   //Histograms, used if m_produceHistogram is true = 1
-  TH1D *m_hist_Psi_n_true    [6] [n_b_bins];
-  TH1D *m_hist_Psi_n_reco    [6] [n_b_bins];
-  TH1D *m_hist_psi_corr_true [36][n_b_bins];
-  TH1D *m_hist_psi_corr_reco [36][n_b_bins];
+  TH1D *m_hist_Psi_n_true    [6] [n_b_bins]{};
+  TH1D *m_hist_Psi_n_reco    [6] [n_b_bins]{};
+  TH1D *m_hist_psi_corr_true [36][n_b_bins]{};
+  TH1D *m_hist_psi_corr_reco [36][n_b_bins]{};
 
-  TH1D *m_hist_Psi_n_ebe     [6][n_b_bins];
-  TH1D *m_hist_Psi_n_ebe_pt  [6][n_b_bins];
-  TH1D *m_hist_vn_ebe        [6][n_b_bins];
-  TH1D *m_hist_vn_ebe_ID1    [6][n_b_bins];
-  TH1D *m_hist_vn_ebe_ID2    [6][n_b_bins];
+  TH1D *m_hist_Psi_n_ebe     [6][n_b_bins]{};
+  TH1D *m_hist_Psi_n_ebe_pt  [6][n_b_bins]{};
+  TH1D *m_hist_vn_ebe        [6][n_b_bins]{};
+  TH1D *m_hist_vn_ebe_ID1    [6][n_b_bins]{};
+  TH1D *m_hist_vn_ebe_ID2    [6][n_b_bins]{};
 
-  TProfile *m_profile_pt_dep      [6][n_b_bins][n_etabin]; 
-  TProfile *m_profile_eta_dep     [6][n_b_bins][n_ptbin ]; 
-  TProfile *m_profile_pt_dep_reco [6][n_b_bins][n_etabin]; 
-  TProfile *m_profile_eta_dep_reco[6][n_b_bins][n_ptbin ]; 
+  TProfile *m_profile_pt_dep      [6][n_b_bins][n_etabin]{};
+  TProfile *m_profile_eta_dep     [6][n_b_bins][n_ptbin ]{};
+  TProfile *m_profile_pt_dep_reco [6][n_b_bins][n_etabin]{};
+  TProfile *m_profile_eta_dep_reco[6][n_b_bins][n_ptbin ]{};
 
-  TProfile *m_profile_b_dep     [6][n_ptbin ][n_etabin]; 
-  TProfile *m_profile_b_dep_reco[6][n_ptbin ][n_etabin]; 
+  TProfile *m_profile_b_dep     [6][n_ptbin ][n_etabin]{};
+  TProfile *m_profile_b_dep_reco[6][n_ptbin ][n_etabin]{};
 
-  TProfile *m_profile_resolution[6];
+  TProfile *m_profile_resolution[6]{};
 
-  ITHistSvc*      m_thistSvc;
-  TruthHelper::GenAccessIO*    m_tesIO;
+  ITHistSvc*      m_thistSvc{};
+  TruthHelper::GenAccessIO*    m_tesIO{};
 };
 #endif 

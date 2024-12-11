@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // File:  Generators/FlowAfterburnber/CheckFlow_New_Minbias.h
@@ -47,9 +47,6 @@ CheckFlow_New_Minbias::CheckFlow_New_Minbias(const std::string& name, ISvcLocato
   declareProperty("PtCutMax"      , m_ptcut_max        = 999999     );
   declareProperty("RapidityCutMin", m_rapcut_min       = 0          );
   declareProperty("RapidityCutMax", m_rapcut_max       = 5.5        );
-
-  m_thistSvc = 0;
-  m_tesIO    = 0;
 }
 
 
