@@ -1,19 +1,20 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
 
 #include "TrigDataAccessMonitoring/ROBDataMonitor.h"
-using namespace std;
+
 using namespace robmonitor;
+
 int main() {
   // create list
   ROBDataMonitorStruct req;
   req.lvl1ID = 12345 ;
   req.requestor_name = "MyAlgorithm";
-  gettimeofday(&(req.start_time_of_ROB_request), 0);
-  gettimeofday(&(req.end_time_of_ROB_request), 0);
+  req.start_time = 1733910572 * 1e6;  // Wed Dec 11 10:49:32 2024
+  req.end_time = req.start_time + 3e6 + 5e3 + 42;
 
   // individual ROB records
   ROBDataStruct u(0x770000);
