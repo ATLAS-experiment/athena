@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -15,6 +15,9 @@
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
+#include <AsgDataHandles/ReadHandleKey.h>
+#include <AsgDataHandles/ReadHandle.h>
+#include <AsgDataHandles/WriteDecorHandleKey.h>
 
 namespace CP
 {
@@ -56,35 +59,43 @@ namespace CP
 
     /// \brief the name of the original event info (this should usually be the same as eventiNfoHandle and EventInfo)
   private:
-    std::string m_baseEventInfoName{"EventInfo"};
+    SG::ReadHandleKey<xAOD::EventInfo> m_baseEventInfoName {this, "baseEventInfo", "EventInfo",       "The name of the original event info. The non-systematic dependent decorations will be applied to this "
+      "object so it should be at least a base of the shallow copies read in by the 'eventInfo' handle. "
+      "The default (and strongly recommended behaviour) is to leave all of these pointed at the central 'EventInfo' object!"};
 
     /// \brief the decoration for the corrected and scaled average interactions per crossing
   private:
-    std::string m_correctedScaledAverageMuDecoration;
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_correctedScaledAverageMuDecorator
+    { this, "correctedScaledAverageMuDecoration", m_baseEventInfoName, "",
+        "the decoration for the corrected and scaled average interactions per crossing" };
 
     /// \brief the decoration for the corrected actual interactions per crossing
   private:
-    std::string m_correctedActualMuDecoration;
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_correctedActualMuDecorator
+    { this, "correctedActualMuDecoration", m_baseEventInfoName, "",
+        "the decoration for the corrected actual interactions per crossing" };
 
     /// \brief the decoration for the corrected and scaled actual interactions per crossing
   private:
-    std::string m_correctedScaledActualMuDecoration;
-
-    /// \brief the accessor for \ref m_correctedScaledAverageMuDecoration
-  private:
-    std::unique_ptr<const SG::AuxElement::Decorator<float>> m_correctedScaledAverageMuDecorator;
-
-    /// \brief the accessor for \ref m_correctedActualMuDecoration
-  private:
-    std::unique_ptr<const SG::AuxElement::Decorator<float>> m_correctedActualMuDecorator;
-
-    /// \brief the accessor for \ref m_correctedScaledAverageMuDecoration
-  private:
-    std::unique_ptr<const SG::AuxElement::Decorator<float>> m_correctedScaledActualMuDecorator;
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_correctedScaledActualMuDecorator
+    { this, "correctedScaledActualMuDecoration", m_baseEventInfoName, "",
+        "the decoration for the corrected and scaled actual interactions per crossing" };
 
     /// \brief the helper for OutOfValidity results
   private:
     OutOfValidityHelper m_outOfValidity {this};
+
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_decRRNKey
+    { this, "RandomRunNumberKey", m_baseEventInfoName, "RandomRunNumber",
+        "Name for the RandomRunNumber decoration" };
+
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_decRLBNKey
+    { this, "RandomLumiBlockNumberKey", m_baseEventInfoName, "RandomLumiBlockNumber",
+        "Name for the RandomLumiBlockNumber decoration" }; // unsigned int
+
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_decHashKey
+    { this, "PRWHashKey", m_baseEventInfoName, "PRWHash",
+        "Name for the PRWHash decoration" };  // uint64_t
   };
 }
 
