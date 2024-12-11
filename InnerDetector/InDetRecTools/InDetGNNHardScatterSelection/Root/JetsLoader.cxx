@@ -25,9 +25,7 @@ namespace InDetGNNHardScatterSelection {
       }
     } // end of iparticle sort getter
 
-    JetsLoader::JetsLoader(
-        ConstituentsInputConfig cfg
-    ):
+    JetsLoader::JetsLoader( const ConstituentsInputConfig & cfg):
         IConstituentsLoader(cfg),
         m_iparticleSortVar(JetsLoader::iparticleSortVar(cfg.order)),
         m_customSequenceGetter(getter_utils::CustomSequenceGetter<xAOD::Jet>(
