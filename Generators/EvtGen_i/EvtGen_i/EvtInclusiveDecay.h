@@ -1,12 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
 //
 // Generators/EvtGen_i/EvtInclusiveDecay.h
-//
-// $Id: EvtInclusiveDecay.h,v 1.5 2007-03-01 23:23:44 binet Exp $
 //
 // EvtInclusiveDecay is a TopAlg that takes HepMC events from StoreGate and
 // generates particle decays using EvtGen. Depending on job options either all or
