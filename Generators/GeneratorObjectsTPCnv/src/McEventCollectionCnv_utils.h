@@ -20,7 +20,7 @@ std::map<std::string, unsigned long int> names_to_name_index_map(const  std::vec
 {
 std::map<std::string, unsigned long int> result;
 unsigned long int i=0;
-for (auto a: input) {result[a]=i; i++;}
+for (const auto& a: input) {result[a]=i; i++;}
 return result;
 }
 
@@ -29,7 +29,7 @@ std::vector<std::pair<int,int> > vector_to_vector_int_int(const  std::vector<int
 // The "i" values used here now match HepMC2 most of the time, but still differ sometimes.
 std::vector<std::pair<int,int> > result;
 unsigned long int i=1;
-for (auto a: input) {result.push_back(std::pair<int,int>(i,a)); i++;}
+for (const auto& a: input) {result.push_back(std::pair<int,int>(i,a)); i++;}
 return result;
 }
 #endif

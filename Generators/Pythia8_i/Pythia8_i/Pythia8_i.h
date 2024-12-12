@@ -167,7 +167,7 @@ private:
 
   static int s_allowedTunes(double version);
 
-  Pythia8::SuppressSmallPT *m_SuppressSmallPT;
+  Pythia8::SuppressSmallPT *m_SuppressSmallPT{};
 
 };
 

@@ -35,18 +35,6 @@
 CheckFlow_New::CheckFlow_New(const std::string& name, ISvcLocator* pSvcLocator) :
   AthAlgorithm(name, pSvcLocator)
 {
-  for ( int i = 0; i< 6; i++  ){
-    m_hist_Psi_n_true[i] = 0;
-    m_hist_Psi_n_reco[i] = 0;
-    m_hist_Psi_n_ebe[i] = 0;
-    m_hist_Psi_n_ebe_pt[i] = 0;
-    m_hist_vn_ebe[i] = 0;
-  }
-
-  for ( int i = 0; i< 36; i++  ){
-    m_hist_psi_corr_true[i] = 0;
-    m_hist_psi_corr_reco[i] = 0;
-  }
 }
 
 

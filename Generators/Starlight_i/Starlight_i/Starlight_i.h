@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // --------------------------------------------------
@@ -74,13 +74,13 @@ protected:
   int          m_productionMode{0};
   unsigned int m_nmbEventsTot{0};
   int          m_prodParticleId{0};
-  int          m_outputFormat; // ???
+  int          m_outputFormat{0};
   int          m_beamBreakupMode{0};
   bool         m_interferenceEnabled{false};
   double       m_interferenceStrength{0.};
   bool         m_coherentProduction{false};
   double       m_incoherentFactor{0.};
-  double       m_bford; // ???
+  double       m_bford{0.};
   double       m_maxPtInterference{0.};
   int          m_nmbPtBinsInterference{0};
   double       m_ptBinWidthInterference{0.};

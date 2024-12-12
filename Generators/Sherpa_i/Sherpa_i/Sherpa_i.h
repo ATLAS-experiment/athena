@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SHERPA_I_SHERPA_I_H
@@ -25,7 +25,7 @@ public:
   #ifndef IS_SHERPA_3
   void getParameters(int &argc, char** &argv);
   #endif
-  void compilePlugin(std::string);
+  void compilePlugin(const std::string&);
 
 protected:
   
