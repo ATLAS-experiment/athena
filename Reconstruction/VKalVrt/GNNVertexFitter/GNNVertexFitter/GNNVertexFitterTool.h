@@ -7,44 +7,33 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GNNVertexFitter/IGNNVertexFitterInterface.h"
-#include "StoreGate/ReadDecorHandleKey.h"
-#include "StoreGate/WriteDecorHandleKey.h"
 
-#include "AnalysisUtils/AnalysisMisc.h"
-#include "BeamSpotConditionsData/BeamSpotData.h"
-#include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
-#include "GeoPrimitives/GeoPrimitivesHelpers.h"
-#include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h"
-#include "TMath.h"
-#include "TrkToolInterfaces/ITrackSummaryTool.h"
-#include "TrkVKalVrtCore/TrkVKalVrtCore.h"
-#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
-#include "VxSecVertex/VxSecVertexInfo.h"
-#include "xAODEventInfo/EventInfo.h"
-#include "xAODJet/JetContainer.h"
-#include "xAODTracking/TrackParticleContainer.h"
-#include "xAODTracking/Vertex.h"
-#include "xAODTracking/VertexContainer.h"
-#include "xAODBTagging/BTaggingContainer.h"
+#include "GaudiKernel/ToolHandle.h" //member
+#include "StoreGate/ReadDecorHandleKey.h" //member
+#include "StoreGate/WriteDecorHandleKey.h" //member
+#include "StoreGate/ReadCondHandleKey.h" //member
 
-#include "algorithm"
-#include "iostream"
-#include "iterator"
-#include "map"
-#include "ranges"
-#include "set"
-#include "vector"
-#include <numeric>
+#include "BeamSpotConditionsData/BeamSpotData.h" //ReadCondHandle template param
+
+#include "GeoPrimitives/GeoPrimitives.h" //Amg::Vector3D
+#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h" //ToolHandle template param
+#include "xAODEventInfo/EventInfo.h" //ReadHandle template param
+#include "xAODJet/JetContainer.h" //ToolHandle template param
+#include "xAODTracking/Vertex.h" //typedef for Vertex
+#include "xAODTracking/VertexContainer.h" //typedef for Vertex
+#include "AthContainers/AuxElement.h" //SG::AuxElement::Decorator
+#include "TLorentzVector.h" //member
+#include <deque>
 #include <vector>
 
 namespace Trk {
-class TrkVKalVrtFitter;
-class IVertexFitter;
-class IVKalState;
-class VxSecVKalVertexInfo;
+  class TrkVKalVrtFitter;
+  class IVertexFitter;
+  class IVKalState;
+  class VxSecVKalVertexInfo;
 } // namespace Trk
+
+
 
 namespace Rec {
 
@@ -91,7 +80,7 @@ public:
   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
 
   // Access the Primary Vertex Info
-  const xAOD::Vertex *m_thePV;
+  const xAOD::Vertex *m_thePV{};
 
 private:
 
@@ -136,7 +125,7 @@ private:
   DoubleProperty    m_minSig3D{this, "minSig3D", 0, "Minimum 3D significance from the PV"};
   DoubleProperty    m_HFRatioThres{this, "HFRatio", 0.0, "The threshold for the Ratio between HF tracks and all track for a vertex"};
   DoubleProperty    m_minNTrack{this, "minNTrk", 2, "Minimum number of tracks in a vertex"};
-  double m_massPi;
+  double m_massPi{};
 };
 } // namespace Rec
 
