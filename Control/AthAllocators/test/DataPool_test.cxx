@@ -43,6 +43,11 @@ class Fluff
 class ClearedFluff
   : public Fluff
 {
+};
+
+
+class ClearFluff
+{
 public:
   static void clear (ClearedFluff* f) {
     f->setPar (1);
@@ -210,7 +215,7 @@ void test_clear()
 {
   std::cout << "test_clear\n";
 
-  DataPool<ClearedFluff, ClearedFluff::clear> df;
+  DataPool<ClearedFluff, ClearFluff> df;
 
   size_t cap = df.capacity();
   for (size_t i = 0; i < cap; i++) {
