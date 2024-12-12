@@ -541,13 +541,14 @@ class EventSelectionConfig(ConfigBlock):
         thisalg = f'{self.name}_NLJETMASSWINDOW_{self.step}'
         alg = config.createAlgorithm('CP::NLargeRJetMassWindowSelectorAlg', thisalg)
         alg.ljets, alg.ljetSelection = config.readNameAndSelection(self.largeRjets)
-        if len(items) == 5 or (len(items) == 6 and "veto" in items):
+        vetoMode = items[-1] == 'veto' or items[-1] == 'VETO'
+        if len(items) == 5 or (len(items) == 6 and vetoMode):
             alg.lowMass  = self.check_float(items[1])
             alg.highMass = self.check_float(items[2])
             alg.sign     = self.check_sign(items[3])
             alg.count    = self.check_int(items[4])
-            alg.vetoMode = (len(items) == 6 and self.check_string(items[5]) == "veto")
-        elif (len(items) == 6 and "veto" not in items) or len(items) == 7:
+            alg.vetoMode = vetoMode
+        elif (len(items) == 6 and not vetoMode) or len(items) == 7:
             extraSel = self.check_string(items[1])
             if alg.ljetSelection:
                 alg.ljetSelection += "&&" + config.getFullSelection(self.largeRjets.split(".")[0], extraSel)
@@ -557,7 +558,7 @@ class EventSelectionConfig(ConfigBlock):
             alg.highMass = self.check_float(items[3])
             alg.sign     = self.check_sign(items[4])
             alg.count    = self.check_int(items[5])
-            alg.vetoMode = (len(items) ==7 and self.check_string(items[6]) == "veto")
+            alg.vetoMode = vetoMode
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
@@ -706,7 +707,7 @@ class EventSelectionConfig(ConfigBlock):
             alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
         alg.lowMLL = self.check_float(items[1])
         alg.highMLL = self.check_float(items[2])
-        alg.vetoMode = (len(items) == 4 and self.check_string(items[3]) == "veto")
+        alg.vetoMode = (len(items) == 4 and self.check_string(items[3]).lower() == "veto")
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
@@ -779,7 +780,7 @@ class EventSelectionConfig(ConfigBlock):
                 alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
         alg.lowMll = self.check_float(items[1])
         alg.highMll = self.check_float(items[2])
-        alg.vetoMode = (len(items) == 4 and self.check_string(items[3]) == "veto")
+        alg.vetoMode = (len(items) == 4 and self.check_string(items[3]).lower() == "veto")
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
