@@ -60,7 +60,7 @@ namespace GlobalSim {
 
 	bool comparison[n_nodes];
 	bool activation[n_nodes];
-	bool activation_leaf[n_leaves];
+	bool activation_leaf[n_leaves] = {false};
 	score_t value_leaf[n_leaves];
 
 	// Execute all comparisons
