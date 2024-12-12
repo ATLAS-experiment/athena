@@ -47,19 +47,19 @@ class JSSTaggerUtils :
 
     private:
 
-      int m_nbins_eta, m_nbins_phi;
-      double m_min_eta, m_max_eta, m_min_phi, m_max_phi;
-      int m_ncolors;
-      bool m_dorscaling;
-      double m_rscaling_p0, m_rscaling_p1;
+      int m_nbins_eta{}, m_nbins_phi{};
+      double m_min_eta{}, m_max_eta{}, m_min_phi{}, m_max_phi{};
+      int m_ncolors{};
+      bool m_dorscaling{};
+      double m_rscaling_p0{}, m_rscaling_p1{};
 
 
       // Constituents tagger 
-      bool m_UseConstTagger;
+      bool m_UseConstTagger{};
       ToolHandle<AthONNX::IJSSMLTool> m_MLBosonTagger {"", this};
       
       // HighLevel tagger
-      bool m_UseHLTagger;
+      bool m_UseHLTagger{};
       ToolHandle<AthONNX::IJSSMLTool> m_MLBosonTagger_HL {"", this};
 
       /// WriteDecorHandle keys
