@@ -199,12 +199,12 @@ protected:
    * If LHF. All lines (since the last open() or readEvent()) outside
    * the header, init and event tags.
    */
-  string m_outsideblock;
+  string m_outsideBlock;
 
   /**
    * If LHF. All lines from the header block.
    */
-  string m_headerblock;
+  string m_headerBlock;
 
   /**
    * If LHF. Additional comments found in the init block.
@@ -265,6 +265,7 @@ private:
    */
   
   map<string,double> m_optionalWeightsTemp;
+  map<string,string> m_optionalWeightsLabel;
 
 
 private:
