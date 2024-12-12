@@ -77,7 +77,6 @@ private:
 
   TProfile *m_profile_resolution[6]{};
 
-  ITHistSvc*      m_thistSvc{};
   TruthHelper::GenAccessIO*    m_tesIO{};
 };
 #endif 
