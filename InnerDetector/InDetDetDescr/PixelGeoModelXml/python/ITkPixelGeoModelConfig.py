@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-def ITkPixelGeoModelCfg(flags,setGeometryAlignable=False,setAlignmentFolderName="/Indet/Align"):
+def ITkPixelGeoModelCfg(flags):
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
     acc = GeoModelCfg(flags)
     geoModelSvc = acc.getPrimary()
@@ -8,8 +8,8 @@ def ITkPixelGeoModelCfg(flags,setGeometryAlignable=False,setAlignmentFolderName=
     from AthenaConfiguration.ComponentFactory import CompFactory
     ITkPixelDetectorTool = CompFactory.ITk.PixelDetectorTool()
     # ITkPixelDetectorTool.useDynamicAlignFolders = flags.GeoModel.Align.Dynamic
-    ITkPixelDetectorTool.Alignable = setGeometryAlignable # make this a flag? Set true as soon as decided on folder structure
-    ITkPixelDetectorTool.AlignmentFolderName = setAlignmentFolderName
+    ITkPixelDetectorTool.Alignable = flags.ITk.Geometry.pixelAlignable
+    ITkPixelDetectorTool.AlignmentFolderName = flags.ITk.Geometry.alignmentFolder
     ITkPixelDetectorTool.DetectorName = "ITkPixel"
     if flags.ITk.Geometry.PixelLocal:
         # Setting this filename triggers reading from local file rather than DB
@@ -20,26 +20,26 @@ def ITkPixelGeoModelCfg(flags,setGeometryAlignable=False,setAlignmentFolderName=
     return acc
 
 
-def ITkPixelAlignmentCfg(flags,setGeometryAlignable=False,setAlignmentFolderName="/Indet/Align"):
+def ITkPixelAlignmentCfg(flags):
     if flags.GeoModel.Align.LegacyConditionsAccess:  # revert to old style CondHandle in case of simulation
         from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
-        return addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", setAlignmentFolderName)
+        return addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", flags.ITk.Geometry.alignmentFolder)
     else:
         from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelAlignCondAlgCfg
-        return ITkPixelAlignCondAlgCfg(flags,setAlignmentFolderName=setAlignmentFolderName)
+        return ITkPixelAlignCondAlgCfg(flags)
 
 
-def ITkPixelSimulationGeometryCfg(flags,setGeometryAlignable=False,setAlignmentFolderName="/Indet/Align"):
+def ITkPixelSimulationGeometryCfg(flags):
     # main GeoModel config
-    acc = ITkPixelGeoModelCfg(flags,setGeometryAlignable=setGeometryAlignable,setAlignmentFolderName=setAlignmentFolderName)
-    acc.merge(ITkPixelAlignmentCfg(flags,setGeometryAlignable=setGeometryAlignable,setAlignmentFolderName=setAlignmentFolderName))
+    acc = ITkPixelGeoModelCfg(flags)
+    acc.merge(ITkPixelAlignmentCfg(flags))
     return acc
 
 
-def ITkPixelReadoutGeometryCfg(flags,setGeometryAlignable=False,setAlignmentFolderName="/Indet/Align"):
+def ITkPixelReadoutGeometryCfg(flags):
     # main GeoModel config
-    acc = ITkPixelGeoModelCfg(flags,setGeometryAlignable=setGeometryAlignable,setAlignmentFolderName=setAlignmentFolderName)
-    acc.merge(ITkPixelAlignmentCfg(flags,setGeometryAlignable=setGeometryAlignable,setAlignmentFolderName=setAlignmentFolderName))
+    acc = ITkPixelGeoModelCfg(flags)
+    acc.merge(ITkPixelAlignmentCfg(flags))
     from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementCondAlgCfg
-    acc.merge(ITkPixelDetectorElementCondAlgCfg(flags,setAlignmentFolderName=setAlignmentFolderName))
+    acc.merge(ITkPixelDetectorElementCondAlgCfg(flags))
     return acc

@@ -43,6 +43,8 @@ def getFlags(**kwargs):
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
     flags.GeoModel.Align.Dynamic = False
     
+    flags.ITk.Geometry.isAlignable = True
+
     flags.ITk.Geometry.AllLocal = False
     detectors = [
     "ITkPixel",
@@ -61,6 +63,7 @@ def getFlags(**kwargs):
     databaseFilename     = 'MisalignmentSet%s.db' % (MisalignMode)
     flags.IOVDb.DBConnection="sqlite://;schema=%s;dbname=OFLCOND" % (databaseFilename) 
     flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
+
 
     # This should run serially for the moment.
     flags.Concurrency.NumThreads = 1
@@ -103,8 +106,8 @@ def CreateMis(flags,name="CreateITkMisalignAlg",**kwargs):
     kwargs.setdefault("MaxShift",shiftInMicrons)
     kwargs.setdefault("CreateFreshDB",createFreshDB)
     #Create and configure the AlignDB tool
-    outputAlignFolder="/Indet/AlignITk" #The folder name to which the created misaligments should be written
-    inputAlignFolder="/Indet/Align" #The folder name from which initial misalignments should be read
+    
+    outputAlignFolder="/Indet/AlignITk" #The folder name from which initial misalignments should be read - currently may clash if this is the same is the input folder!
 
     writeDBPoolFile=True   #Activate or deactivate writing to outFiles + '.pool.root'
     kargsTool={}
@@ -123,7 +126,7 @@ def CreateMis(flags,name="CreateITkMisalignAlg",**kwargs):
 
     kwargs.setdefault("IDAlignDBTool",dbTool)
 
-    cfg=CreateITkMisalignAlgCfg(flags,name=name,SetITkPixelAlignable=True,SetITkStripAlignable=True,setAlignmentFolderName=inputAlignFolder,**kwargs)
+    cfg=CreateITkMisalignAlgCfg(flags,name=name,**kwargs)
 
     acc.merge(cfg)
     if writeDBPoolFile:

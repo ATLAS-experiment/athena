@@ -3,26 +3,26 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def CreateITkMisalignAlgCfg(flags, name="CreateITkMisalignAlg",SetITkPixelAlignable=False,SetITkStripAlignable=False,setAlignmentFolderName="/Indet/AlignITk", **kwargs):
+def CreateITkMisalignAlgCfg(flags, name="CreateITkMisalignAlg", **kwargs):
 
     result = ComponentAccumulator()
     
     if flags.Detector.EnableITkPixel:
         from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-        result.merge(ITkPixelReadoutGeometryCfg(flags,setGeometryAlignable=SetITkPixelAlignable,setAlignmentFolderName=setAlignmentFolderName))
+        result.merge(ITkPixelReadoutGeometryCfg(flags))
         kwargs.setdefault("PixelDetEleCollKey","ITkPixelDetectorElementCollection")
     else:
         kwargs.setdefault("PixelDetEleCollKey","")
 
     if flags.Detector.EnableITkStrip:    
         from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
-        result.merge(ITkStripReadoutGeometryCfg(flags,setGeometryAlignable=SetITkStripAlignable,setAlignmentFolderName=setAlignmentFolderName))
+        result.merge(ITkStripReadoutGeometryCfg(flags))
         kwargs.setdefault("SCTDetEleCollKey","ITkStripDetectorElementCollection")
     else:
         kwargs.setdefault("SCTDetEleCollKey","")
 
     from InDetAlignGenTools.InDetAlignGenToolsConfig import ITkAlignDBTool
-    dbTool = result.popToolsAndMerge(ITkAlignDBTool(flags,setAlignmentFolderName=setAlignmentFolderName))
+    dbTool = result.popToolsAndMerge(ITkAlignDBTool(flags))
 
     kwargs.setdefault("IDAlignDBTool",dbTool)
     kwargs.setdefault("TRTDetEleCollKey","")
