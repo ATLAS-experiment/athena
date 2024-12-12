@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -10,9 +10,6 @@
  * @brief persistent partner for TrigMissingET
  *
  * @author Diego Casadei  <Diego.Casadei@cern.ch>  - NYU
- *
- * File and Version Information:
- * $Id: TrigMissingET_p3.h 778886 2016-10-17 20:44:41Z khamano $
  **********************************************************************************/
 #ifndef TRIGMISSINGETEVENTTPCNV_TRIGMISSINGET_p3_H
 #define TRIGMISSINGETEVENTTPCNV_TRIGMISSINGET_p3_H
@@ -28,13 +25,13 @@ class TrigMissingET_p3
 
  public:
   
-  TrigMissingET_p3() : m_flag(0) {}
-  virtual ~TrigMissingET_p3(){}
+  TrigMissingET_p3() = default;
+  virtual ~TrigMissingET_p3() = default;
   
   //private:
   /** Basic information **/
 
-  float m_allTheFloats[5];
+  float m_allTheFloats[5]{};
   //float m_ex, m_ey, m_ez;  //<! components of the missing energy vector
   //float m_sum_et, m_sum_e; //<! sums of |Et| and |E|
   int   m_flag = 0;            //<! event flag: 0 (default) means OK
@@ -43,7 +40,7 @@ class TrigMissingET_p3
   /** Auxiliary information **/
   /// transient class contains std::vector< TrigMissingEtComponent > m_compVec;
   /// that is "flattened" here into separate arrays
-  unsigned int m_comp_number; //<! size of all following vectors
+  unsigned int m_comp_number{}; //<! size of all following vectors
   std::vector<std::string>    m_c_name;
   std::vector<short>          m_c_status;
   std::vector<float>          m_c_ex;

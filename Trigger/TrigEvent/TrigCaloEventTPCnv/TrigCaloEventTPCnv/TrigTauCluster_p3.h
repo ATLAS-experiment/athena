@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -34,8 +34,8 @@ class TrigTauCluster_p3 {
 
  private:
   
-        float m_allTheFloats[8];
-        int m_allTheInts[2];
+        float m_allTheFloats[8]{};
+        int m_allTheInts[2]{};
 
 	/**  EM Energy */
 //        float m_EMenergy;

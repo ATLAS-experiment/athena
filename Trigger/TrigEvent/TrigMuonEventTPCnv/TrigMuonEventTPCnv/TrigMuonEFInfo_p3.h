@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -31,15 +31,14 @@ public:
 	TrigMuonEFInfo_p3() {}
 	virtual ~TrigMuonEFInfo_p3(){}
 
-        //private:
-	unsigned short int m_roi;
-	unsigned short int m_nSegments;
-	unsigned short int m_nMdtHits;
-	unsigned short int m_nRpcHits;
-	unsigned short int m_nTgcHits;
-	unsigned short int m_nCscHits;
-	double m_etaPreviousLevel;
-	double m_phiPreviousLevel;
+	unsigned short int m_roi{};
+	unsigned short int m_nSegments{};
+	unsigned short int m_nMdtHits{};
+	unsigned short int m_nRpcHits{};
+	unsigned short int m_nTgcHits{};
+	unsigned short int m_nCscHits{};
+	double m_etaPreviousLevel{};
+	double m_phiPreviousLevel{};
 
 	TPObjRef m_spectrometerTrack;
 	TPObjRef m_extrapolatedTrack;

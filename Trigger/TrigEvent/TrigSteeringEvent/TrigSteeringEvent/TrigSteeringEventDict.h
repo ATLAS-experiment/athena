@@ -1,7 +1,7 @@
 // emacs: this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGSTEERINGEVENT_TRIGSTEERINGEVENTDICT_H
@@ -23,11 +23,11 @@
 #include "TrigSteeringEvent/StringSerializer.h"
 
 void dummy_function_for_TrigSteeringEvent_which_forces_dictionaries_generation ( 
-   TrigRoiDescriptorCollection   troi,   std::vector<TrigRoiDescriptor*> troi_vec,   std::vector<const TrigRoiDescriptor*> troi_const_vec,
-   TrigSuperRoiCollection        tsroi,  std::vector<TrigSuperRoi*>      tsroi_vec,  std::vector<const TrigSuperRoi*>      tsroi_const_vec,
-   TrigOperationalInfoCollection toi,    std::vector<LVL1CTP::Lvl1Item*> test_vec,   std::vector<const LVL1CTP::Lvl1Item*> test_const_vec,
-   TrigPassBitsCollection        tbits,  std::vector<TrigPassBits*>      tbits_vec,  std::vector<const TrigPassBits*>      tbits_const_vec,
-   TrigPassFlagsCollection       tflags, std::vector<TrigPassFlags*>     tflags_vec, std::vector<const TrigPassFlags*>     tflags_const_vec  ) 
+   TrigRoiDescriptorCollection&   troi,   std::vector<TrigRoiDescriptor*>& troi_vec,   std::vector<const TrigRoiDescriptor*>& troi_const_vec,
+   TrigSuperRoiCollection&        tsroi,  std::vector<TrigSuperRoi*>&      tsroi_vec,  std::vector<const TrigSuperRoi*>&      tsroi_const_vec,
+   TrigOperationalInfoCollection& toi,    std::vector<LVL1CTP::Lvl1Item*>& test_vec,   std::vector<const LVL1CTP::Lvl1Item*>& test_const_vec,
+   TrigPassBitsCollection&        tbits,  std::vector<TrigPassBits*>&      tbits_vec,  std::vector<const TrigPassBits*>&      tbits_const_vec,
+   TrigPassFlagsCollection&       tflags, std::vector<TrigPassFlags*>&     tflags_vec, std::vector<const TrigPassFlags*>&     tflags_const_vec  )
 {
 
   TrigRoiDescriptorCollection aatroi = troi; 

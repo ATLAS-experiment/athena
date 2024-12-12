@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -25,17 +25,14 @@ class Trig3Momentum{
   
  public:
   /** Default Constructor */
-  Trig3Momentum() : m_e(0.), m_eta(0.), m_phi(0.), m_inCone(false)
-    , m_caloSample(CaloSampling::Unknown), m_time(0.){};
+  Trig3Momentum() = default;
   /** Constructor with input parameters */
   Trig3Momentum( double Energy, double Eta, double Phi)
-              : m_e(Energy), m_eta(Eta), m_phi(Phi)
-	, m_caloSample(CaloSampling::Unknown), m_time(0.){};
+    : m_e(Energy), m_eta(Eta), m_phi(Phi) {};
   /** Constructor with input parameters */
   Trig3Momentum( double Energy, double Eta, double Phi
-	, CaloSampling::CaloSample s)
-              : m_e(Energy), m_eta(Eta), m_phi(Phi), m_inCone(false)
-	, m_caloSample(s), m_time(0.){};
+                 , CaloSampling::CaloSample s)
+    : m_e(Energy), m_eta(Eta), m_phi(Phi), m_caloSample(s) {};
   
   // Get methods
   /** Get the energy */
@@ -84,20 +81,20 @@ class Trig3Momentum{
 
  private:
   /** Energy */
-  double m_e;
+  double m_e{};
   /** Eta */
-  double m_eta;
+  double m_eta{};
   /** Phi */
-  double m_phi;
+  double m_phi{};
   /** Set in cone flag */
-  bool m_inCone;
+  bool m_inCone{false};
   /** Calorimeter Sample */
-  CaloSampling::CaloSample m_caloSample; 
+  CaloSampling::CaloSample m_caloSample{CaloSampling::Unknown};
 	// Cleaning +++++++++++++++++++++:
 	/** Cell details (to contain [0] = quality and [1] = provenance) */
-  uint16_t m_cellDetails[2];
+  uint16_t m_cellDetails[2]{};
   /** Cell time */
-  float m_time;
+  float m_time{};
   
 };
 
