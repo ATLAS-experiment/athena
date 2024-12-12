@@ -228,9 +228,8 @@ namespace MuonR4{
                                                const CalibratedSpacePoint& spacePoint) const {
         if(spacePoint.type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
             const MuonCalib::MdtFullCalibData* calibConsts = m_mdtCalibrationTool->getCalibConstants(ctx, spacePoint.spacePoint()->identify());
-            bool valid{false};
-            const double driftTime = calibConsts->rtRelation->tr()->tFromR(spacePoint.driftRadius(), valid);
-            return calibConsts->rtRelation->rt()->driftVelocity(driftTime);
+            const std::optional<double> driftTime = calibConsts->rtRelation->tr()->driftTime(spacePoint.driftRadius());
+            return calibConsts->rtRelation->rt()->driftVelocity(driftTime.value_or(0.));
         }
         return 0.;
     }
@@ -238,9 +237,8 @@ namespace MuonR4{
                                                    const CalibratedSpacePoint& spacePoint) const  {
         if(spacePoint.type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
             const MuonCalib::MdtFullCalibData* calibConsts = m_mdtCalibrationTool->getCalibConstants(ctx, spacePoint.spacePoint()->identify());
-            bool valid{false};
-            const double driftTime = calibConsts->rtRelation->tr()->tFromR(spacePoint.driftRadius(), valid);
-            return calibConsts->rtRelation->rt()->driftAcceleration(driftTime);
+            const std::optional<double> driftTime = calibConsts->rtRelation->tr()->driftTime(spacePoint.driftRadius());
+            return calibConsts->rtRelation->rt()->driftAcceleration(driftTime.value_or(0.));
         }
         return 0.;
     }

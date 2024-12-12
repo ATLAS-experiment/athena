@@ -100,16 +100,17 @@ def MdtCalibrationToolCfg(flags, name= "MdtCalibrationTool",  **kwargs):
 def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
     result = ComponentAccumulator()
     result.merge(MuonGeoModelCfg(flags))    
-    if flags.GeoModel.Run is LHCPeriod.Run4 and flags.Muon.usePhaseIIGeoSetup:
-        alg = CompFactory.MuonCalibR4.MdtCalibDbAlg(name)
-        result.addCondAlgo (alg, primary = True)
-        return result
     from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
     result.merge(MdtCondDbAlgCfg(flags))
 
     # setup COOL folders
     acc, mdt_folder_name_appendix = _setupMdtCondDB(flags)
     result.merge(acc)
+
+    if flags.GeoModel.Run is LHCPeriod.Run4 and flags.Muon.usePhaseIIGeoSetup:
+        alg = CompFactory.MuonCalibR4.MdtCalibDbAlg(name, **kwargs)
+        result.addCondAlgo (alg, primary = True)
+        return result
 
     # set some default proper ties
     if flags.Common.isOnline and not flags.Input.isMC:

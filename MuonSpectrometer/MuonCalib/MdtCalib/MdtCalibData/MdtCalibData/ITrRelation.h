@@ -18,6 +18,7 @@ namespace MuonCalib{
                 CalibFunc{parameters}, m_rt{rtRelation}{}
             /** @brief Desctructor */
             virtual ~ITrRelation() = default;
+            virtual std::string typeName() const override final { return "ITrRelation"; }
             /** @brief Interface method for fetching the drift-time from the radius
              *         Returns a nullopt if the time is out of the boundaries */
             virtual std::optional<double> driftTime(const double r)const =0;

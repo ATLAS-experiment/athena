@@ -247,10 +247,8 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
   if (!resolFromRtrack) {
     reso = rtRelation->rtRes()->resolution( t_inrange );
   } else {
-    bool boundFlag{false};
-    const double tFromR = rtRelation->tr()->tFromR(std::abs(calibIn.distanceToTrack()),
-                                                   boundFlag);
-    reso = rtRelation->rtRes()->resolution(tFromR);
+    const std::optional<double> tFromR = rtRelation->tr()->driftTime(std::abs(calibIn.distanceToTrack()));
+    reso = rtRelation->rtRes()->resolution(tFromR.value_or(0.));
   }
   
 

@@ -23,8 +23,9 @@ StatusCode MdtCalibDbAlgTest::initialize() {
     ATH_CHECK(m_calibrationTool.retrieve());
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_tree.init(this));
-    ATH_CHECK(book(TH2D("DriftRadiusVsTdc", "DriftRadiusVsTdc", 100, 0., 250., 100, 0., 15.), "MdtCalibDbAlgTest", "MdtCalibDbAlgTest"));
-    ATH_CHECK(book(TH2D("DriftdRdtVsTdc", "DriftdRdtVsTdc", 100, 0., 250., 100, 0., 0.6), "MdtCalibDbAlgTest", "MdtCalibDbAlgTest"));
+    ATH_CHECK(book(TH2D("DriftRadiusVsTdc", "DriftRadiusVsTdc", 100, 0., 680., 100, 0., 15.), "MdtCalibDbAlgTest", "MdtCalibDbAlgTest"));
+    ATH_CHECK(book(TH2D("DriftdRdtVsTdc", "DriftdRdtVsTdc", 100, 0., 680., 100, 0., 0.6), "MdtCalibDbAlgTest", "MdtCalibDbAlgTest"));
+    ATH_CHECK(book(TH2D("DriftTimeVsDriftRadius", "DriftTimeVsDriftRadius", 100, 0., 15., 100, 0., 680.), "MdtCalibDbAlgTest", "MdtCalibDbAlgTest"));
     return StatusCode::SUCCESS;
 }
 
@@ -50,6 +51,8 @@ StatusCode MdtCalibDbAlgTest::execute() {
         m_out_tdc = mdt->tdc();
         m_out_driftRadius = mdt->driftRadius();
         const float driftV = m_calibrationTool->getCalibConstants(ctx, mdt->identify())->rtRelation->rt()->driftVelocity(tdcAdj);
+        std::optional<double> driftTime = m_calibrationTool->getCalibConstants(ctx, mdt->identify())->rtRelation->tr()->driftTime(mdt->driftRadius());
+        const float f_driftTime = static_cast<float>(driftTime.value_or(0.));
         m_out_driftdRdt = driftV;
         m_out_identifier = mdt->identify();
         m_out_globalPos = mdtGlobalTubePos.norm();
@@ -57,8 +60,10 @@ StatusCode MdtCalibDbAlgTest::execute() {
         m_out_globalPosY = mdtGlobalTubePos.y();
         m_out_globalPosZ = mdtGlobalTubePos.z();
         m_out_tubeLength = mdtRE->activeTubeLength(mdt->measurementHash());
+        m_out_driftTime = f_driftTime;
         hist("DriftRadiusVsTdc")->Fill(tdcAdj, mdt->driftRadius());
         hist("DriftdRdtVsTdc")->Fill(tdcAdj, driftV);
+        hist("DriftTimeVsDriftRadius")->Fill(mdt->driftRadius(), f_driftTime);
         m_tree.fill(ctx);
     }
 
