@@ -230,6 +230,7 @@ namespace Athena_test
     assert(liint.index() == 1);
     assert(liint.dataID() == "a vector");
     cout << "*** DataLink_test StoreGate OK ***\n\n" <<endl;
+    // cppcheck-suppress memleak; pBar not really leaked
   }
 
   void dummyToRemoveWarning(const Foo&) 
@@ -333,6 +334,7 @@ namespace Athena_test
     std::cout << "xxx " << der << " " << link.cptr() << "\n";
     //assert (link.cptr() == der);
     cout << "*** DataLink_test FwdBase OK ***\n\n" <<endl;
+    // cppcheck-suppress memleak; der not really leaked
   }
 } //end namespace
 
