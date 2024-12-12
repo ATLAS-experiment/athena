@@ -439,7 +439,7 @@ StatusCode JSSTaggerUtils::ReadScaler(){
   };
 
   // loop and read
-  for(std::string var : vars_list){
+  for(const std::string & var : vars_list){
     std::string s_mean = var + "_mean";
     std::string s_std  = var + "_std";
     double mean = m_configReader.GetValue(s_mean.c_str(), -99.);

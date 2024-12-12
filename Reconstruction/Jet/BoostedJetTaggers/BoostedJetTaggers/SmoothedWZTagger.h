@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BOOSTEDJETSTAGGERS_SMOOTHEDWZTAGGER_H_
@@ -25,7 +25,7 @@ class SmoothedWZTagger :
     private:
 
       /// Flag to indicate if Ntrk is used
-      bool m_useNtrk;
+      bool m_useNtrk{};
 
       /// Store functional form of cuts
       std::string m_strD2Cut;
