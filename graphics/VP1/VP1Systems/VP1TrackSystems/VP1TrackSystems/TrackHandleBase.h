@@ -159,7 +159,7 @@ protected:
   virtual void visibleStateChanged();//!< override if need to take action in this case.
   virtual void currentMaterialChanged() {};//!< override if need to take action in this case.
 
-  QList<AssociatedObjectHandleBase*> getAllAscObjHandles() const; //!< Return list of all AscObj handles. Not guaranteed to be filled unless tsoses are visible.
+  const QList<AssociatedObjectHandleBase*>& getAllAscObjHandles() const; //!< Return list of all AscObj handles. Not guaranteed to be filled unless tsoses are visible.
 
   virtual bool containsDetElement(const QString&) const {return false; }
 private:

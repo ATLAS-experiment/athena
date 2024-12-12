@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -82,7 +82,7 @@ private:
   class Imp;
   Imp * m_d;
   void ensureInitSubSysHitInfo() const;
-  double getBTaggingWeight(std::string tagger);
+  double getBTaggingWeight(const std::string& tagger);
 
 };
 

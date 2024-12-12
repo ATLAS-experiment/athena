@@ -374,6 +374,7 @@ void IParticleCollHandle_CaloCluster::resetCachedValuesCuts()
 const CaloClusterCollectionSettingsButton& IParticleCollHandle_CaloCluster::collSettingsButton() const {
   if (!m_d->collSettingsButton){
     messageVerbose("CaloCluster - No collSettingsButton set! Can't call init(), so crash is imminent...");
+    throw std::runtime_error("CaloCluster - No collSettingsButton set!");
   }
   return *m_d->collSettingsButton;
 }

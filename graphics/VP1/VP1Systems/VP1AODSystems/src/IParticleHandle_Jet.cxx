@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -716,7 +716,7 @@ void IParticleHandle_Jet::updateBTagging(const std::string& bTaggingTagger, cons
 }
 
 //____________________________________________________________________
-double IParticleHandle_Jet::getBTaggingWeight(std::string tagger)
+double IParticleHandle_Jet::getBTaggingWeight(const std::string& tagger)
 {
     double weight = 0.0;
 
