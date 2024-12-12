@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LumiCalc/LumiCalculator.h"
@@ -53,6 +53,28 @@ LumiCalculator::LumiCalculator()
  , m_lbstarttime(0.)
  , m_lbendtime(0.)
 
+ , m_totalDelL(0.)
+ , m_totalL(0.)
+ , m_totalLRun(0.)
+ , m_totaltime(0.)
+ , m_instLumi(0.)
+ , m_AvEvtsPerBX(0.)
+ , m_delLumi(0.)
+ , m_intLumi(0.)
+ , m_deltaT(0.)
+ , m_TotaldeltaT(0.)
+ , m_livefrac(0.)
+ , m_livetime(0.)
+ , m_l1acc(0)
+ , m_livetime_l1acc(0)
+ , m_l1accof(false)
+ , m_l2acc(0)
+ , m_l3acc(0)
+ , m_totall1acc(0)
+ , m_livtrig_totall1acc(0)
+ , m_totall1befpresc(0)
+ , m_totall2acc(0)
+ , m_totall3acc(0)
  , m_l1prescale(0.)
  , m_l2prescale(0.)
  , m_l3prescale(0.)
@@ -95,7 +117,6 @@ LumiCalculator::LumiCalculator()
  , m_lartime(0.)
  , m_larfrac(0.)
  , m_bsvalid(0.)
-
  , m_effxsec(1.)
  , m_l1rate(0.)
  , m_l2rate(0.)
@@ -375,6 +396,7 @@ void  LumiCalculator::IntegrateLumi ATLAS_NOT_THREAD_SAFE (const xAOD::LumiBlock
   m_delLumi = 0.;
   m_intLumi = 0.;
   m_deltaT = 0.;
+
   m_totalPrescaleWLiveTime = 0.;
   m_totalPrescale = 0.;
   m_lumiWOPrescale = 0.;
