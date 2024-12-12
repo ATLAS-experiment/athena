@@ -161,7 +161,7 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
 
   if (!res.ok()) {
     ATH_MSG_ERROR("Got error during propagation: "
-		  << res.error() << " " << res.error().message()
+		              << res.error() << " " << res.error().message()
                   << ". Returning empty step vector.");
     return {};
   }
@@ -206,7 +206,7 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
       auto result = propagator.propagate(startParameters, options);
       if (!result.ok()) {
         ATH_MSG_ERROR("Got error during propagation:" << result.error()
-        << ". Returning empty parameters.");
+                      << ". Returning empty parameters.");
         return std::nullopt;
       }
       return result.value().endParameters;
@@ -241,7 +241,8 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
 
       Options options = prepareOptions<Options>(anygctx, mctx, startParameters, navDir, pathLimit);
 
-      auto result = propagator.propagate(startParameters, target, options);
+      auto result = propagator.template propagate<Acts::BoundTrackParameters, Options,
+                                   Acts::ForcedSurfaceReached, Acts::PathLimitReached>(startParameters, target, options);
       if (!result.ok()) {
         return result.error();
       }
@@ -292,10 +293,11 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
 
       Options options = prepareOptions<Options>(anygctx, mctx, startParameters, navDir, pathLimit);
 
-      auto result = propagator.propagate(startParameters, target, options);
+      auto result = propagator.template propagate<Acts::BoundTrackParameters, Options,
+                                   Acts::ForcedSurfaceReached, Acts::PathLimitReached>(startParameters, target, options);
       if (!result.ok()) {
         ATH_MSG_ERROR("Got error during propagation: " << result.error()
-        << ". Returning empty parameters.");
+                      << ". Returning empty parameters.");
         return std::nullopt;
       }
       return result.value().endParameters;
