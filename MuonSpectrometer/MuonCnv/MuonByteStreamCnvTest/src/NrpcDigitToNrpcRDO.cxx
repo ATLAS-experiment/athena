@@ -13,14 +13,8 @@
 #include "TrigT1RPClogic/ShowData.h"
 #include "xAODMuonRDO/NRPCRDOAuxContainer.h"
 
-/////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////
-
-NrpcDigitToNrpcRDO::NrpcDigitToNrpcRDO(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator){}
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
+namespace Muon{
 StatusCode NrpcDigitToNrpcRDO::initialize() {
     ATH_MSG_DEBUG(" in initialize()");
     
@@ -42,80 +36,79 @@ StatusCode NrpcDigitToNrpcRDO::initialize() {
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 StatusCode NrpcDigitToNrpcRDO::execute(const EventContext& ctx) const {
-    ATH_MSG_DEBUG("in execute()");
+        ATH_MSG_DEBUG("in execute()");
 
-    SG::ReadHandle<RpcDigitContainer> container(m_digitContainerKey, ctx);
-    if (!container.isValid()) {
-        ATH_MSG_FATAL("Could not find RpcDigitContainer called " << container.name() << " in store " << container.store());
-        return StatusCode::FAILURE;
-    }
-    SG::ReadCondHandle<MuonNRPC_CablingMap> readHandle_Cabling(m_cablingKey, ctx);
-    if (!readHandle_Cabling.isValid()) {
-        ATH_MSG_FATAL("Could not find MuonNRPC_CablingMap " );
-        return StatusCode::FAILURE;
-    }
-    const MuonNRPC_CablingMap* cabling_ptr = readHandle_Cabling.cptr();
-    ATH_MSG_DEBUG("Found MuonNRPC_CablingMap ");
+        SG::ReadHandle container(m_digitContainerKey, ctx);
+        if (!container.isValid()) {
+            ATH_MSG_FATAL("Could not find RpcDigitContainer called " << container.name() << " in store " << container.store());
+            return StatusCode::FAILURE;
+        }
+        SG::ReadCondHandle cabling(m_cablingKey, ctx);
+        if (!cabling.isValid()) {
+            ATH_MSG_FATAL("Could not find MuonNRPC_CablingMap " );
+            return StatusCode::FAILURE;
+        }
+        ATH_MSG_DEBUG("Found MuonNRPC_CablingMap ");
 
-    /// Record the output container
-    SG::WriteHandle<xAOD::NRPCRDOContainer> nrpcRdoData(m_NrpcContainerKey, ctx);
-    ATH_CHECK(nrpcRdoData.record(std::make_unique<xAOD::NRPCRDOContainer>(), 
-                                 std::make_unique<xAOD::NRPCRDOAuxContainer>()));
+        /// Record the output container
+        SG::WriteHandle nrpcRdoData(m_NrpcContainerKey, ctx);
+        ATH_CHECK(nrpcRdoData.record(std::make_unique<xAOD::NRPCRDOContainer>(), 
+                                     std::make_unique<xAOD::NRPCRDOAuxContainer>()));
+
+
+         const IdContext rpcContext = m_idHelperSvc->rpcIdHelper().module_context();
     
+        // loop over digit collections
+        for (const RpcDigitCollection* rpcCollection : *container) {
+            ATH_MSG_DEBUG("RPC Digit -> Pad loop :: digitCollection at " << rpcCollection);
 
-    const IdContext rpcContext = m_idHelperSvc->rpcIdHelper().module_context();
-    
-    // loop over digit collections
-    for (const RpcDigitCollection* rpcCollection : *container) {
-        ATH_MSG_DEBUG("RPC Digit -> Pad loop :: digitCollection at " << rpcCollection);
+            IdentifierHash moduleHash = rpcCollection->identifierHash();
+            Identifier moduleId{0};
 
-        IdentifierHash moduleHash = rpcCollection->identifierHash();
-        Identifier moduleId{0};
-
-        if (m_idHelperSvc->rpcIdHelper().get_id(moduleHash, moduleId, &rpcContext)) {
-            ATH_MSG_WARNING("Failed to translate the "<<moduleHash<<" to a valid identifier");
-            continue;
-        }
-        if (m_selectedStations.size() &&
-            !m_selectedStations.count(m_idHelperSvc->stationName(moduleId))) {
-            ATH_MSG_DEBUG("Detector element "<<m_idHelperSvc->toString(moduleId)
-                         <<" is not considered to be a small gap RPC");
-            continue;
-        }
-
-        // loop over digit 
-        for (const RpcDigit* rpcDigit : *rpcCollection) {
-            const Identifier channelId = rpcDigit->identify();
-
-            ATH_MSG_DEBUG("Convert RPC digit "<<m_idHelperSvc->toString(channelId));
-            
-            NrpcCablingData cabling_data{};
-            /// Load the identifier into the cabling data
-            if (!cabling_ptr->convert(channelId, cabling_data, rpcDigit->stripSide())) {
-                ATH_MSG_FATAL("Found a non NRPC identifier " << m_idHelperSvc->toString(channelId));
-                return StatusCode::FAILURE;
+            if (m_idHelperSvc->rpcIdHelper().get_id(moduleHash, moduleId, &rpcContext)) {
+                ATH_MSG_WARNING("Failed to translate the "<<moduleHash<<" to a valid identifier");
+                continue;
             }
-            
-            bool cabling = cabling_ptr->getOnlineId(cabling_data, msgStream());
-            if (!cabling) {
-                ATH_MSG_ERROR("Offline to Online Id conversion for NRPC chamber.");
-                return StatusCode::FAILURE;
+            if (m_selectedStations.size() &&
+                !m_selectedStations.count(m_idHelperSvc->stationName(moduleId))) {
+                ATH_MSG_DEBUG("Detector element "<<m_idHelperSvc->toString(moduleId)
+                             <<" is not considered to be a small gap RPC");
+                continue;
             }
-            /// Correct for the time of flight
-            const float rdo_time = rpcDigit->time();
 
-            const float the_timeoverthr = rpcDigit->ToT();
-            uint32_t the_bcid= rdo_time / 25.;
+            // loop over digit 
+            for (const RpcDigit* rpcDigit : *rpcCollection) {
+                const Identifier channelId = rpcDigit->identify();
 
-            xAOD::NRPCRDO* NrpcRdo = nrpcRdoData->push_back(std::make_unique<xAOD::NRPCRDO>());
-            NrpcRdo->setBcid(the_bcid);
-            NrpcRdo->setTime(rdo_time);
-            NrpcRdo->setSubdetector(cabling_data.subDetector);
-            NrpcRdo->setTdcsector(cabling_data.tdcSector);
-            NrpcRdo->setTdc(cabling_data.tdc);
-            NrpcRdo->setChannel(cabling_data.channelId);
-            NrpcRdo->setTimeoverthr(the_timeoverthr);
+                ATH_MSG_DEBUG("Convert RPC digit "<<m_idHelperSvc->toString(channelId));
+            
+                RpcCablingData translateCache{};
+                /// Load the identifier into the cabling data
+                if (!cabling->convert(channelId, translateCache, rpcDigit->stripSide())) {
+                    ATH_MSG_FATAL("Found a non NRPC identifier " << m_idHelperSvc->toString(channelId));
+                    return StatusCode::FAILURE;
+                }
+            
+                if (!cabling->getOnlineId(translateCache, msgStream())) {
+                    ATH_MSG_ERROR("Offline to Online Id conversion for NRPC chamber.");
+                    return StatusCode::FAILURE;
+                }
+                 /// Correct for the time of flight
+                const float rdo_time = rpcDigit->time();
+
+                const float the_timeoverthr = rpcDigit->ToT();
+                uint32_t the_bcid= rdo_time / 25.;
+
+                xAOD::NRPCRDO* NrpcRdo = nrpcRdoData->push_back(std::make_unique<xAOD::NRPCRDO>());
+                NrpcRdo->setBcid(the_bcid);
+                NrpcRdo->setTime(rdo_time);
+                NrpcRdo->setSubdetector(translateCache.subDetector);
+                NrpcRdo->setTdcsector(translateCache.tdcSector);
+                NrpcRdo->setTdc(translateCache.tdc);
+                NrpcRdo->setChannel(translateCache.channelId);
+                NrpcRdo->setTimeoverthr(the_timeoverthr);
+           }
         }
+        return StatusCode::SUCCESS;
     }
-    return StatusCode::SUCCESS;
 }

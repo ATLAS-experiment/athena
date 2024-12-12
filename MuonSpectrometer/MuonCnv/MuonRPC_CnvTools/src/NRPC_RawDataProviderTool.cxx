@@ -10,10 +10,7 @@ namespace Muon {
 
 
 NRPC_RawDataProviderTool::NRPC_RawDataProviderTool(const std::string& t, const std::string& n, const IInterface* p) :
-    base_class(t, n, p) {
-    declareInterface<Muon::IMuonRawDataProviderTool>(this);
-
-}
+    base_class(t, n, p) {}
 
 StatusCode NRPC_RawDataProviderTool::initialize() {
 
@@ -54,16 +51,12 @@ StatusCode NRPC_RawDataProviderTool::convert(
     const EventContext& ctx) const  // call decoding function using list of all detector ROBId's
 {
 
-    SG::ReadCondHandle<MuonNRPC_CablingMap> readHandle{m_readKey, ctx};
-    const MuonNRPC_CablingMap* readCdo{*readHandle};
-    if (!readCdo) {
+    SG::ReadCondHandle readCdo{m_readKey, ctx};   
+    if (!readCdo.isValid()) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");
         return StatusCode::FAILURE;
     }
-    
-    const std::vector<uint32_t>& robIds=readCdo->getAllROBId();    
-    
-    return convert(robIds, ctx);
+    return convert(readCdo->getAllROBId(), ctx);
 }
 
 StatusCode NRPC_RawDataProviderTool::convert(const std::vector<IdentifierHash>& HashVec) const {
@@ -71,9 +64,8 @@ StatusCode NRPC_RawDataProviderTool::convert(const std::vector<IdentifierHash>& 
 }
 
 StatusCode NRPC_RawDataProviderTool::convert(const std::vector<IdentifierHash>& HashVec, const EventContext& ctx) const {
-    SG::ReadCondHandle<MuonNRPC_CablingMap> readHandle{m_readKey, ctx};
-    const MuonNRPC_CablingMap* readCdo{*readHandle};
-    if (!readCdo) {
+    SG::ReadCondHandle readCdo{m_readKey, ctx};
+    if (!readCdo.isValid()) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");
         return StatusCode::FAILURE;
     }
@@ -108,13 +100,10 @@ StatusCode NRPC_RawDataProviderTool::convert(const std::vector<const OFFLINE_FRA
                                                     const EventContext& ctx) const {
     ATH_MSG_VERBOSE("convert(): " << vecRobs.size() << " ROBFragments.");
 
-    SG::WriteHandle<xAOD::NRPCRDOContainer> rdoContainerHandle(m_rdoContainerKey, ctx);
-    ATH_CHECK(rdoContainerHandle.record(std::make_unique<xAOD::NRPCRDOContainer>(), std::make_unique<xAOD::NRPCRDOAuxContainer>()));
-    xAOD::NRPCRDOContainer* rdoContainer = rdoContainerHandle.ptr();
-
+    SG::WriteHandle rdoContainer(m_rdoContainerKey, ctx);
+    ATH_CHECK(rdoContainer.record(std::make_unique<xAOD::NRPCRDOContainer>(), std::make_unique<xAOD::NRPCRDOAuxContainer>()));
     // use the convert function in the NRPC_RawDataProviderTool class
     ATH_CHECK(convertIntoContainer(vecRobs, *rdoContainer));
-
     return StatusCode::SUCCESS;
 }
 
@@ -189,8 +178,7 @@ StatusCode NRPC_RawDataProviderTool::fillCollections(const OFFLINE_FRAGMENTS_NAM
                 }
 
                 // Build the RDO
-                xAOD::NRPCRDO* NrpcRdo = new xAOD::NRPCRDO();
-                rdoIdc.push_back(NrpcRdo);
+                xAOD::NRPCRDO* NrpcRdo = rdoIdc.push_back(std::make_unique<xAOD::NRPCRDO>());
                 NrpcRdo->setBcid(bcid);
                 NrpcRdo->setTime(time);
                 NrpcRdo->setSubdetector(subDetector);
@@ -198,7 +186,6 @@ StatusCode NRPC_RawDataProviderTool::fillCollections(const OFFLINE_FRAGMENTS_NAM
                 NrpcRdo->setTdc(tdc);
                 NrpcRdo->setChannel(chan);
                 NrpcRdo->setTimeoverthr(tot);
-
             }
         }
 

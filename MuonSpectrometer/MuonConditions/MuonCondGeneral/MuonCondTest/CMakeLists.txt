@@ -39,7 +39,7 @@ atlas_add_test( MdtCabling_Run3MC
                 POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( RpcCabling_Run3MC
-                SCRIPT python -m MuonNRPC_Cabling.createCablingJSON && python -m MuonCondTest.RpcCablingTester
+                SCRIPT python -m MuonNRPC_Cabling.createCablingJSON && python -m MuonCondTest.RpcCablingTester --cablingMap CablingFile.json
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)

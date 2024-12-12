@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -20,24 +20,24 @@
  */
 
 
-class RpcToyCablingJsonDumpAlg : public AthAlgorithm {
-public:
-    RpcToyCablingJsonDumpAlg(const std::string& name, ISvcLocator* pSvcLocator);
-    virtual ~RpcToyCablingJsonDumpAlg() = default;
-    virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
-    virtual unsigned int cardinality() const override final{return 1;}
+namespace Muon {
+    class RpcToyCablingJsonDumpAlg : public AthAlgorithm {
+        public:
+            using AthAlgorithm::AthAlgorithm;
+            virtual ~RpcToyCablingJsonDumpAlg() = default;
+            virtual StatusCode initialize() override;
+            virtual StatusCode execute() override;
+            virtual unsigned int cardinality() const override final{return 1;}
 
-private:
-    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+        private:
+            ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-    const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
+            const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
 
-    Gaudi::Property<std::string> m_cablingJSON{this, "OutCablingJSON", "RpcCabling.json", "Cabling JSON"};
+            Gaudi::Property<std::string> m_cablingJSON{this, "OutCablingJSON", "RpcCabling.json", "Cabling JSON"};
 
-    int m_BIL_stIdx{9999};
-    int m_BIS_stIdx{9999};
-    
-};
-
+            int m_BIL_stIdx{9999};
+            int m_BIS_stIdx{9999};
+    };
+}
 #endif

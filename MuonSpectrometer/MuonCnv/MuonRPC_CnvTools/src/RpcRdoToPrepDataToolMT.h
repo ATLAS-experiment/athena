@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRDOTOPREPDATA_RPCRDOTOPREPDATATOOLMT_H
@@ -11,7 +11,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "MuonCablingData/MuonNRPC_CablingMap.h"
+#include "MuonCablingData/RpcCablingMap.h"
 #include "MuonCnvToolInterfaces/IMuonRdoToPrepDataTool.h"
 #include "MuonCondData/RpcCondDbData.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -172,7 +172,7 @@ class RpcRdoToPrepDataToolMT
       this, "RpcCablingKey", "RpcCablingCondData", "Key of RpcCablingCondData"};
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName",
                                                  "EventInfo", "event info key"};
-  SG::ReadCondHandleKey<MuonNRPC_CablingMap> m_nRpcCablingKey{
+  SG::ReadCondHandleKey<RpcCablingMap> m_nRpcCablingKey{
       this, "NrpcCablingKey", "MuonNRPC_CablingMap",
       "Key of MuonNRPC_CablingMap"};
 

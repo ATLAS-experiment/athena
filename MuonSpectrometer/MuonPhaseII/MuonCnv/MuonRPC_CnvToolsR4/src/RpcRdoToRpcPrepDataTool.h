@@ -14,7 +14,7 @@
 #include <xAODMuonRDO/NRPCRDOContainer.h>
 #include <xAODMuonPrepData/RpcStrip2DContainer.h>
 #include <xAODMuonPrepData/RpcStripContainer.h>
-#include <MuonCablingData/MuonNRPC_CablingMap.h>
+#include <MuonCablingData/RpcCablingMap.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
@@ -48,7 +48,7 @@ namespace MuonR4{
 
             SG::ReadHandleKey<xAOD::NRPCRDOContainer> m_rdoKey{this, "RdoCollection", "NRPCRDO"};
 
-            SG::ReadCondHandleKey<MuonNRPC_CablingMap> m_cablingKey{this, "CablingKey", "MuonNRPC_CablingMap",
+            SG::ReadCondHandleKey<Muon::RpcCablingMap> m_cablingKey{this, "CablingKey", "MuonNRPC_CablingMap",
                                                                     "Key of MuonNRPC_CablingMap"};
 
 

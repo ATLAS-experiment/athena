@@ -336,7 +336,7 @@ StatusCode RpcRdoToPrepDataToolMT::decodeImpl(const EventContext& ctx,
 
   ATH_MSG_DEBUG("Decoding RPC RDO into RPC PrepRawData");
 
-  SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, ctx};
+  SG::ReadCondHandle cablingCondData{m_rpcReadKey, ctx};
   const RpcCablingCondData* rpcCabling{*cablingCondData};
 
   // if the vector requested has size 0, we need to perform a scan of the entire
@@ -497,7 +497,7 @@ StatusCode RpcRdoToPrepDataToolMT::decodeImpl(
       ATH_MSG_VERBOSE("0x" << MSG::hex << robid << MSG::dec << " ");
   }
 
-  SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, ctx};
+  SG::ReadCondHandle cablingCondData{m_rpcReadKey, ctx};
   const RpcCablingCondData* rpcCabling{*cablingCondData};
 
   // if all robs will be decoded after the current execution of the method, set
@@ -619,13 +619,13 @@ StatusCode RpcRdoToPrepDataToolMT::processPad(
   RpcCoinDataCollection* collectionTrg{nullptr};
   IdentifierHash rpcHashId{0};
 
-  SG::ReadCondHandle<RpcCablingCondData> rpcCabling{m_rpcReadKey, ctx};
+  SG::ReadCondHandle rpcCabling{m_rpcReadKey, ctx};
 
   // For each pad, loop on the coincidence matrices
   RpcPad::const_iterator itCM = rdoColl->begin();
   RpcPad::const_iterator itCM_e = rdoColl->end();
   int icm = 0;
-  SG::ReadHandle<xAOD::EventInfo> evtInfo{m_eventInfo, ctx};
+  SG::ReadHandle evtInfo{m_eventInfo, ctx};
   for (; itCM != itCM_e; ++itCM) {
     icm++;
     bool etaview = false;
@@ -926,12 +926,11 @@ StatusCode RpcRdoToPrepDataToolMT::processPad(
                     ATH_MSG_DEBUG(
                         "collection already processed and "
                         "doingSecondLoopAmbigColls=true; trying to store data "
-                        "even if "
-                        "unsolvedAmbiguity");
+                        "even if unsolvedAmbiguity");
                   }
                 }
               }
-              SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgr{m_muDetMgrKey, ctx};
+              SG::ReadCondHandle muDetMgr{m_muDetMgrKey, ctx};
               const RpcReadoutElement* descriptor = muDetMgr->getRpcReadoutElement(channelId);
 
               // here check validity
@@ -1009,7 +1008,7 @@ StatusCode RpcRdoToPrepDataToolMT::processPad(
 
               // correct prd time from cool db
               if (m_RPCInfoFromDb) {
-                SG::ReadCondHandle<RpcCondDbData> readHandle{m_readKey, ctx};
+                SG::ReadCondHandle readHandle{m_readKey, ctx};
                 std::optional<double> StripTimeFromCool = readHandle->getStripTime(channelId);
                 if (StripTimeFromCool) {
                   time -= (*StripTimeFromCool);
@@ -1106,8 +1105,7 @@ StatusCode RpcRdoToPrepDataToolMT::processNrpcRdo(const EventContext& ctx,
   }
 
   ATH_MSG_DEBUG("Retrieving Nrpc RDO container from the store");
-  SG::ReadHandle<xAOD::NRPCRDOContainer> rdoNrpcContainerHandle{
-      m_rdoNrpcContainerKey, ctx};
+  SG::ReadHandle rdoNrpcContainerHandle{m_rdoNrpcContainerKey, ctx};
   if (!rdoNrpcContainerHandle.isPresent()) {
     ATH_MSG_ERROR("Retrieval of NRPC RDO " << m_rdoNrpcContainerKey.fullKey()
                                            << " container failed !");
@@ -1121,25 +1119,25 @@ StatusCode RpcRdoToPrepDataToolMT::processNrpcRdo(const EventContext& ctx,
   }
   ATH_MSG_DEBUG("Not empty NRPC RDO container in this event ");
 
-  SG::ReadCondHandle<MuonNRPC_CablingMap> readCdo{m_nRpcCablingKey, ctx};
+  SG::ReadCondHandle readCdo{m_nRpcCablingKey, ctx};
   if (!readCdo.isValid()) {
     ATH_MSG_ERROR("Could not retrieve " << m_nRpcCablingKey.fullKey()
                                         << " from the conditions store");
     return StatusCode::FAILURE;
   }
   /// No need to check for its validity. It's done at other places for sure
-  SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgr{m_muDetMgrKey, ctx};
+  SG::ReadCondHandle muDetMgr{m_muDetMgrKey, ctx};
 
   for (const xAOD::NRPCRDO* nrpcrdo : *rdoNrpcContainerHandle) {
     /// Convert from online to offline cabling
-    NrpcCablingData cabling_data{};
-    cabling_data.subDetector = nrpcrdo->subdetector();
-    cabling_data.tdcSector = nrpcrdo->tdcsector();
-    cabling_data.tdc = nrpcrdo->tdc();
-    cabling_data.channelId = nrpcrdo->channel();
+    RpcCablingData translateCache{};
+    translateCache.subDetector = nrpcrdo->subdetector();
+    translateCache.tdcSector = nrpcrdo->tdcsector();
+    translateCache.tdc = nrpcrdo->tdc();
+    translateCache.channelId = nrpcrdo->channel();
     Identifier chanId{};
-    if (!readCdo->getOfflineId(cabling_data, msgStream()) ||
-        !readCdo->convert(cabling_data, chanId, false)) {
+    if (!readCdo->getOfflineId(translateCache, msgStream()) ||
+        !readCdo->convert(translateCache, chanId, false)) {
       ATH_MSG_FATAL("Failed to retrieve the offline Identifier");
       return StatusCode::FAILURE;
     }

@@ -16,6 +16,10 @@ if __name__ == "__main__":
     args.geoModelFile = geoModelFileDefault(args.setupRun4)
     flags, cfg = setupGeoR4TestCfg(args)
     cfg.merge(RpcCablingTestAlgCfg(flags, TestStations = [], JSONFile = args.JSONFile))
+    cfg.getService("MessageSvc").debugLimit = 2147483647
+    cfg.getService("MessageSvc").verboseLimit = 2147483647
+    cfg.getService("MessageSvc").infoLimit = 2147483647
+
     executeTest(cfg)
 
 
