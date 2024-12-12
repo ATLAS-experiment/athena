@@ -586,12 +586,14 @@ const xAOD::TruthParticle* EgammaPhysValMonitoringTool::Match(const xAOD::Egamma
 							      const xAOD::TruthParticleContainer* truthParticles) {
   float currentdr = 0.05;
   const xAOD::TruthParticle* matchedTruthParticle = nullptr;
-  for (const auto *truthParticle: *truthParticles){
-    if (std::abs(truthParticle->pdgId()) != pdg || !MC::isStable(truthParticle)) continue;
-    float dr = particle->p4().DeltaR(truthParticle->p4());
-    if (dr < currentdr){
-      currentdr = dr;
-      matchedTruthParticle = truthParticle;
+  if (truthParticles){
+    for (const auto *truthParticle: *truthParticles){
+      if (std::abs(truthParticle->pdgId()) != pdg || !MC::isStable(truthParticle)) continue;
+      float dr = particle->p4().DeltaR(truthParticle->p4());
+      if (dr < currentdr){
+        currentdr = dr;
+        matchedTruthParticle = truthParticle;
+      }
     }
   }
   return matchedTruthParticle;
