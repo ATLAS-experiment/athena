@@ -20,21 +20,23 @@ namespace Muon {
 }
 
 namespace MuonHough {
-    static constexpr int UNINITIALIZED = -99999;
+   
     /// struct containing additional debug information on the hits that is not needed for the actual alg
     /// but very useful for debugging
     class HitDebugInfo {
     public:
+        static constexpr int UNINITIALIZED = -99999;
+        using DetRegIdx = Muon::MuonStationIndex::DetectorRegionIndex;
+        using LayerIdx =  Muon::MuonStationIndex::LayerIndex; 
         HitDebugInfo() = default;
-
-        HitDebugInfo(int type_, int sector_, Muon::MuonStationIndex::DetectorRegionIndex region_, Muon::MuonStationIndex::LayerIndex layer_,
+        HitDebugInfo(int type_, int sector_, DetRegIdx region_, LayerIdx layer_,
                      int sublayer_);
 
         int type{UNINITIALIZED};    /// technology type
         int sector{UNINITIALIZED};  /// sector
-        Muon::MuonStationIndex::DetectorRegionIndex region{
-            Muon::MuonStationIndex::DetectorRegionUnknown};                              /// detector region (endcapA/barrel/endcapC)
-        Muon::MuonStationIndex::LayerIndex layer{Muon::MuonStationIndex::LayerUnknown};  /// layer (inner/middle/outer)
+
+        DetRegIdx region{DetRegIdx::DetectorRegionUnknown};                              /// detector region (endcapA/barrel/endcapC)
+        LayerIdx layer{LayerIdx::LayerUnknown};  /// layer (inner/middle/outer)
         int sublayer{UNINITIALIZED};                                                     /// sublayer within layer
         int pdgId{UNINITIALIZED};                                                        /// pdgId of the associated truth particle (if any)
         int barcode{UNINITIALIZED};                                                      /// barcode of truth particle - FIXME barcode-based
@@ -57,6 +59,7 @@ namespace MuonHough {
     /// struct containing all hit information needed for the Hough transform
     class Hit {
     public:
+        static constexpr int UNINITIALIZED = HitDebugInfo::UNINITIALIZED;
         /// constructor, takes ownership of the HitDebugInfo pointer
         Hit(int layer_, float x_, float ymin_, float ymax_, float w_, HitDebugInfo* d_ = nullptr, const Trk::PrepRawData* prd_ = nullptr,
             const Muon::TgcClusterObj3D* tgc_ = nullptr);
@@ -94,6 +97,7 @@ namespace MuonHough {
 
     /// struct containing all hit information needed for the Hough transform
     struct PhiHit {
+        static constexpr int UNINITIALIZED = HitDebugInfo::UNINITIALIZED;
         /// constructor, takes ownership of the HitDebugInfo pointer
         PhiHit(int layer_, float r_, float phimin_, float phimax_, float w_, HitDebugInfo* d_ = 0, const Trk::PrepRawData* prd_ = 0,
                const Muon::TgcClusterObj3D* tgc_ = 0);
@@ -131,6 +135,8 @@ namespace MuonHough {
 
     /// struct containing truth or track information
     struct MuonDebugInfo {
+        static constexpr int UNINITIALIZED = HitDebugInfo::UNINITIALIZED;
+
         int pdgId{UNINITIALIZED};      /// pdgId of the true muon
         int barcode{UNINITIALIZED};    /// barcode of the true muon
         int muonIndex{UNINITIALIZED};  /// index of the associated track
@@ -157,6 +163,7 @@ namespace MuonHough {
 
     /// struct containing truth or segment information
     struct SegDebugInfo {
+        static constexpr int UNINITIALIZED = HitDebugInfo::UNINITIALIZED;
         float sposx{UNINITIALIZED};
         float sposy{UNINITIALIZED};
         float sposz{UNINITIALIZED};

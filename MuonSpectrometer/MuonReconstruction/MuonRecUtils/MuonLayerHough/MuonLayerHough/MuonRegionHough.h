@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONREGIONHOUGH_H
@@ -18,11 +18,14 @@ namespace MuonHough {
     /** class managing geometry of the Hough spaces */
     class MuonDetectorDescription {
     public:
+        
+        using DetRegIdx = Muon::MuonStationIndex::DetectorRegionIndex;
+        using LayIdx = Muon::MuonStationIndex::LayerIndex;
         /// constructor
         MuonDetectorDescription();
+        
 
-        RegionDescriptor getDescriptor(int sector, Muon::MuonStationIndex::DetectorRegionIndex region,
-                                       Muon::MuonStationIndex::LayerIndex layer) const;
+        RegionDescriptor getDescriptor(int sector, DetRegIdx region, LayIdx layer) const;
 
     private:
         /// initialize default geometry
@@ -40,26 +43,37 @@ namespace MuonHough {
 
         /// destructor
         ~MuonSectorHough();
-
+        
+        using DetRegIdx = Muon::MuonStationIndex::DetectorRegionIndex;
+        using LayIdx = Muon::MuonStationIndex::LayerIndex;
         /// access the Hough transform for a given region
-        MuonLayerHough& hough(Muon::MuonStationIndex::DetectorRegionIndex region, Muon::MuonStationIndex::LayerIndex layer);
+        MuonLayerHough& hough(DetRegIdx region, LayIdx layer) {
+            int index = Muon::MuonStationIndex::sectorLayerHash(region, layer);
+            return *m_transforms[index];
+        }
 
         /// reset histograms
         void reset();
 
     private:
-        std::vector<MuonLayerHough*> m_transforms;  /// Hough transforms for all regions
+        std::vector<std::unique_ptr<MuonLayerHough>> m_transforms;  /// Hough transforms for all regions
                                                     // int m_sector;                                /// sector number
     };
 
     /** class managing all Hough transforms in the detector */
     class MuonDetectorHough {
     public:
+        using DetRegIdx = Muon::MuonStationIndex::DetectorRegionIndex;
+        using LayIdx = Muon::MuonStationIndex::LayerIndex;
         /// access phi transform
-        MuonPhiLayerHough& phiHough(Muon::MuonStationIndex::DetectorRegionIndex region);
+        MuonPhiLayerHough& phiHough(DetRegIdx region) {
+             return *m_phiTransforms[static_cast<int>(region)];
+        }
 
         /// access precision transform
-        MuonLayerHough& hough(int sector, Muon::MuonStationIndex::DetectorRegionIndex region, Muon::MuonStationIndex::LayerIndex layer);
+        MuonLayerHough& hough(int sector, DetRegIdx region, LayIdx layer) {
+            return m_sectors[sector - 1]->hough(region, layer);
+        }
 
         /// reset histograms
         void reset();
@@ -76,24 +90,10 @@ namespace MuonHough {
     private:
         void init();
 
-        std::vector<MuonSectorHough*> m_sectors;          /// sector transforms
-        std::vector<MuonPhiLayerHough*> m_phiTransforms;  /// phi transforms
+        std::vector<std::unique_ptr<MuonSectorHough>> m_sectors;          /// sector transforms
+        std::vector<std::unique_ptr<MuonPhiLayerHough>> m_phiTransforms;  /// phi transforms
     };
 
-    inline MuonLayerHough& MuonSectorHough::hough(Muon::MuonStationIndex::DetectorRegionIndex region,
-                                                  Muon::MuonStationIndex::LayerIndex layer) {
-        int index = Muon::MuonStationIndex::sectorLayerHash(region, layer);
-        return *m_transforms[index];
-    }
-
-    inline MuonPhiLayerHough& MuonDetectorHough::phiHough(Muon::MuonStationIndex::DetectorRegionIndex region) {
-        return *m_phiTransforms[region];
-    }
-
-    inline MuonLayerHough& MuonDetectorHough::hough(int sector, Muon::MuonStationIndex::DetectorRegionIndex region,
-                                                    Muon::MuonStationIndex::LayerIndex layer) {
-        return m_sectors[sector - 1]->hough(region, layer);
-    }
-
+    
 }  // namespace MuonHough
 #endif
