@@ -22,7 +22,9 @@
 
 
 // This class is merely a lightweight wrapper around multiple road finder tools.
-class FPGATrackSimRoadUnionTool : public extends <AthAlgTool, IFPGATrackSimRoadFinderTool>
+// It has evolved into representing the "slicing engine" in firmware and thus no longer
+// inherits from IFPGATrackSimRoadFinderTool.
+class FPGATrackSimRoadUnionTool : public AthAlgTool
 {
     public:
 
@@ -36,15 +38,23 @@ class FPGATrackSimRoadUnionTool : public extends <AthAlgTool, IFPGATrackSimRoadF
         ///////////////////////////////////////////////////////////////////////
         // IFPGATrackSimRoadFinderTool
 
-        virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) override;
+        StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits,
+                        std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads,
+                        std::vector<FPGATrackSimTruthTrack> const &truthtracks)
+        {
+            m_truthtracks = truthtracks;
+            return getRoads(hits, roads);
+        }
+
+        StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads);
+
+        std::vector<FPGATrackSimTruthTrack> const *getTruthTracks() { return &m_truthtracks; }
 
         ///////////////////////////////////////////////////////////////////////
         // FPGATrackSimRoadUnionTool
 
         ToolHandleArray<IFPGATrackSimRoadFinderTool> const & tools() const { return m_tools; }
         void setupSlices(FPGATrackSimLogicalEventInputHeader* slicedHitHeader) {m_slicedHitHeader = slicedHitHeader; }
-
-        virtual int getSubRegion() const override{return -1;}
 
     private:
 
@@ -58,6 +68,7 @@ class FPGATrackSimRoadUnionTool : public extends <AthAlgTool, IFPGATrackSimRoadF
         // Internal storage for the sliced hits (implemented as a LogicalEventInputHeader,
         // so we can easily copy to the output ROOT file).
         FPGATrackSimLogicalEventInputHeader*  m_slicedHitHeader = nullptr;
+        std::vector<FPGATrackSimTruthTrack> m_truthtracks;
 };
 
 #endif
