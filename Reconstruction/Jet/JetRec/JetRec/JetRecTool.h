@@ -1,7 +1,7 @@
 // JetRecTool.h. This file is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -129,21 +129,21 @@ private:
   ToolHandle<IJetGroomer> m_groomer;
   ToolHandleArray<IJetModifier> m_modifiers {this, "JetModifiers", {}};
   ToolHandleArray<IJetConsumer> m_consumers {this, "JetConsumers", {}};
-  bool m_trigger;
+  bool m_trigger{};
 
   // Cached state.
-  int m_initCount;
-  bool m_find;
-  bool m_groom;
-  bool m_copy;
+  int m_initCount{};
+  bool m_find{};
+  bool m_groom{};
+  bool m_copy{};
   xAOD::JetInput::Type m_inputtype;
   IJetFinder::NameList m_ghostlabs;
   std::vector<std::string> m_incolls;
   std::vector<std::string> m_outcolls;
-  const IJetPseudojetRetriever* m_ppjr;
+  const IJetPseudojetRetriever* m_ppjr{};
 
   // trigger hacks
-  const xAOD::JetContainer* m_trigInputJetsForGrooming; // used in trigger context only
+  const xAOD::JetContainer* m_trigInputJetsForGrooming{}; // used in trigger context only
 
 #if !defined (GENERATIONBASE) && !defined (XAOD_ANALYSIS)
   ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool","","Monitoring tool"};
