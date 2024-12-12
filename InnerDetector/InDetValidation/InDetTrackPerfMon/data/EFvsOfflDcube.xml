@@ -1,0 +1,89 @@
+<?xml version="1.0" ?>
+<!--
+ DCube configuration XML file = EFvsOfflDcube.xml
+ auto-generated using DCube 7.3.0 by Krzysztof Daniel Ciba (Krzysztof.Ciba@NOSPAMgmail.com)
+ on Mon, 21 Oct 2024 14:21:16 CEST
+ from Root reference file: IDTPM.SA.HIST.root
+ Statistics tests:
+ "['KSnorm']"
+ Legend:
+ * KS      - Kolmogorov-Smirnov test
+ * KSnorm  - Kolmogorov-Smirnov + normalisation tests (default)
+ * chi2    - chi2 test
+ * bbb     - bin-by-bin comparision
+ * meany   - avg eff mean y [TProfiles only!]
+ * all     - all above tests (except KSnorm)
+ * allnorm - all above tests (except KS)
+ Tweaks:
+ [1] remove or comment out (using HTML comments tags) histograms not relevant
+     to your analysis
+ [2] provide a new content to "ref_desc" and "mon_desc" tags to something
+     more meaningful
+ [3] and of course feel free to change attribute "tests" in each "hist" tag
+ [4] limits of p-value warning and failure can be set by changing attributes
+     in <plimit> tag
+ [5] if you want to make plots FOR EVERY histogram in your monitored file
+     change attribute "inclusive" in <mode> tag to "true"
+-->
+<dcube_client_config>
+ <dcube branch="*" install="*" cmtconfig="*" project="*" jobId="*">
+  <!--
+  ###################################################
+  DCubeClient for:
+  [1] branch: *
+  [2] install: *
+  [3] cmtconfig: *
+  [4] project: *
+  [5] jobId: *
+  [6] reference root file: /eos/home-p/piazza/EFTrackingFin/testDcube2/IDTPM.SA.HIST.root
+  [7] p-values limits FAIL = 0.750000 WARN = 0.950000
+  ###################################################
+-->
+  <reference file="/eos/home-p/piazza/EFTrackingFin/testDcube2/IDTPM.SA.HIST.root"/>
+  <ref_desc>PUT YOUR REFERENCE DESCRIPTION HERE</ref_desc>
+  <test_desc>PUT YOUR TEST DESCRIPTION HERE</test_desc>
+  <plimit fail="0.75" warn="0.95"/>
+  <TDirectory name="/">
+   <TDirectory name="InDetTrackPerfMonPlots">
+    <TDirectory name="TrkAnaEF">
+     <TDirectory name="Offline">
+      <TDirectory name="Tracks">
+       <TDirectory name="Resolutions">
+        <hist1D name="resolution_pt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_eta_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_d0_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_d0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_z0_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_z0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_phi_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_phi_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+       </TDirectory>
+       <TDirectory name="Efficiencies">
+        <graph name="eff_vs_truth_pt" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="eff_vs_truth_eta" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="eff_vs_truth_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="eff_vs_truth_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="eff_vs_truth_z0" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="eff_vs_truthMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
+       </TDirectory>
+      </TDirectory>
+     </TDirectory>
+    </TDirectory>
+    <TDirectory name="TrkAnaDoubleRatio">
+     <TDirectory name="Offline">
+      <TDirectory name="Tracks">
+       <TDirectory name="Efficiencies">
+        <graph name="eff_vs_truth_pt" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="eff_vs_truth_eta" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="eff_vs_truth_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="eff_vs_truth_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="eff_vs_truth_z0" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="eff_vs_truthMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
+       </TDirectory>
+      </TDirectory>
+     </TDirectory>
+    </TDirectory>
+   </TDirectory>
+  </TDirectory>
+ </dcube>
+</dcube_client_config>

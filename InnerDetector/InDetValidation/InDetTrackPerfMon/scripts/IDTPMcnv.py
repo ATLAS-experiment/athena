@@ -10,13 +10,15 @@ import argparse, ROOT, os
 parser = argparse.ArgumentParser( description = "MakePlots.py options:" )
 parser.add_argument( "-i", "--inputFile", help="IDPVM input file" )
 parser.add_argument( "-c", "--config", help="config file" )
+parser.add_argument( "-o", "--output", help="suffix for output file (IDTPMcnv for IDPVM vs IDTPM, ref for EF vs Offline)" )
 
 MyArgs = parser.parse_args()
 
 inFileName = MyArgs.inputFile
+outputSuffix = MyArgs.output
 inFile = ROOT.TFile.Open( inFileName , "READ" )
 
-outFile = ROOT.TFile.Open( inFileName.replace( "root", "IDTPMcnv.root" ) , "RECREATE" )
+outFile = ROOT.TFile.Open( inFileName.replace( "root", outputSuffix+".root" ) , "RECREATE" )
 
 configFileName = MyArgs.config
 configFile = open( configFileName, 'r' )
@@ -25,22 +27,22 @@ lines = configFile.readlines()
 for line in lines:
     parsed = line.strip().split()
     htype = parsed[0]
-    hidpvm = parsed[1]
-    hidtpm = parsed[2]
+    href = parsed[1]
+    htest = parsed[2]
 
     ## getting histo
     inFile.cd()
-    obj = inFile.Get( hidpvm )
+    obj = inFile.Get( href )
     obj.SetDirectory(0)
 
     ## writing histo
     outFile.cd()
-    hidtpm_dir = os.path.dirname( hidtpm )
-    hidtpm_name = os.path.basename( hidtpm )
-    if( not outFile.GetDirectory( hidtpm_dir ) ):
-        outFile.mkdir( hidtpm_dir, hidtpm_dir )
-    outFile.cd( hidtpm_dir )
-    obj.SetName( hidtpm_name )
+    htest_dir = os.path.dirname( htest )
+    htest_name = os.path.basename( htest )
+    if( not outFile.GetDirectory( htest_dir ) ):
+        outFile.mkdir( htest_dir, htest_dir )
+    outFile.cd( htest_dir )
+    obj.SetName( htest_name )
     obj.Write()
 
 inFile.Close()
