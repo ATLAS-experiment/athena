@@ -40,10 +40,12 @@ from .ttbb import ttbb
 from .ttH import ttH
 from .ttj import ttj
 from .ttj_MiNNLO import ttj_MiNNLO
+from .ttll import ttll
 from .ttWm_EW import ttWm_EW
 from .ttWm_QCD import ttWm_QCD
 from .ttWp_EW import ttWp_EW
 from .ttWp_QCD import ttWp_QCD
+from .ttZ import ttZ
 from .VBF_H import VBF_H
 from .VBF_ZZ import VBF_ZZ
 from .VBF_osWW import VBF_osWW
