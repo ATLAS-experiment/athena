@@ -17,7 +17,7 @@ lastref_dir=last_results
 INPUT_AOD_FILE="xAOD_${PREFIX}.root"
 
 ATHENA_SOURCE="${ATLAS_RELEASE_BASE}/Athena/${Athena_VERSION}/InstallArea/${Athena_PLATFORM}/src/"
-IDTPM_CONFIG="${ATHENA_SOURCE}/Trigger/EFTracking/FPGATrackSim/FPGATrackSimConfTools/test/IDTPM_configs/F100_singleMu_region0.json"
+IDTPM_CONFIG="${ATHENA_SOURCE}/Trigger/EFTracking/FPGATrackSim/FPGATrackSimConfTools/test/IDTPM_configs/F2x0_F3x0_singleMu_region0.json"
 DCUBE_CONFIG="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/dcube/config/FPGATrackSimIDTPMconfig.xml"
 
 
@@ -54,9 +54,7 @@ run "IDTPM" \
     runIDTPM.py --inputFileNames=$INPUT_AOD_FILE \
                 --outputFilePrefix="IDTPM.${PREFIX}" \
                 --writeAOD_IDTPM \
-                --trkAnaCfgFile=$IDTPM_CONFIG \
-                --plotsDefFileList="InDetTrackPerfMon/PlotsDefFileList_default.txt" \
-                --plotsCommonValuesFile="InDetTrackPerfMon/PlotsDefCommonValues.json"
+                --trkAnaCfgFile=$IDTPM_CONFIG
 
 
 art.py download --user=artprod --dst=last_results "$ArtPackage" "$ArtJobName"
