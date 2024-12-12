@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* ***********************************************************************************\
@@ -16,20 +16,18 @@
 #ifndef JetCalibTools_GlobalLargeRDNNCalibration_H
 #define JetCalibTools_GlobalLargeRDNNCalibration_H
 
+
+// Other packages includes
+#include "AthOnnxInterfaces/IOnnxRuntimeSvc.h" //Ort::Session
+
+// Local includes
+#include "JetCalibTools/JetCalibrationStep.h"
+
 #include <string>
 #include <vector>
 
-//xAOD EDM classes
-#include "xAODEventInfo/EventInfo.h"
-#include "xAODJet/JetContainer.h"
-
-// Other packages includes
-#include "AsgServices/ServiceHandle.h"
-#include "AthOnnxInterfaces/IOnnxRuntimeSvc.h"
-
-// Local includes
-#include "JetCalibTools/IJetCalibrationTool.h"
-#include "JetCalibTools/JetCalibrationStep.h"
+class EventInfo;
+class TEnv;
 
 class GlobalLargeRDNNCalibration : virtual public ::JetCalibrationStep {
   
@@ -101,9 +99,9 @@ public:
     std::vector<int64_t> m_output_node_dims;
     std::vector<const char*> m_output_node_names;
     
-    TEnv * m_config;
+    TEnv * m_config{};
     std::string m_calibArea;
-    bool m_devMode;
+    bool m_devMode{};
 
 
 }; // Class GlobalLargeRDNNCalibration
