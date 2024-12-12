@@ -58,7 +58,7 @@ AsgPhotonEfficiencyCorrectionTool::AsgPhotonEfficiencyCorrectionTool( const std:
   declareProperty( "CorrectionFileNameUnconv", m_corrFileNameUnconv="",
                    "File that stores the correction factors for simulation for unconverted photons");
 				   
-  declareProperty("MapFilePath", m_mapFile = "PhotonEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map1.txt",
+  declareProperty("MapFilePath", m_mapFile = "PhotonEfficiencyCorrection/2015_2025/rel22.2/2024_FinalRun2_Recommendation_v1/map0.txt",
                   "Full path to the map file");  
 				  
   declareProperty( "ForceDataType", m_dataTypeOverwrite=-1,
