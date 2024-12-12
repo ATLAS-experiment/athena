@@ -25,6 +25,13 @@ def is_data_from(config, data_year_list: Union[int, Iterable[int]]) -> bool:
     return config.dataType() is DataType.Data and config.dataYear() in data_year_list
 
 
+def get_year_data(dictionary: dict, year: int | str) -> list:
+    """
+    Utility function to get the data for a specific year from a dictionary
+    """
+    return dictionary.get(int(year), dictionary.get(str(year), []))
+
+
 class TriggerAnalysisSFBlock(ConfigBlock):
     """the ConfigBlock for trigger analysis"""
     def __init__(self):
@@ -129,10 +136,10 @@ class TriggerAnalysisSFBlock(ConfigBlock):
     ) -> None:
         alg = config.createAlgorithm( 'CP::TrigGlobalEfficiencyAlg', 'TrigGlobalSFAlg' + triggerSuffix + self.postfix)
         if config.geometry() is LHCPeriod.Run3:
-            alg.triggers_2022 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2022',[])]
-            alg.triggers_2023 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2023',[])]
-            alg.triggers_2024 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2024',[])]
-            alg.triggers_2025 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2025',[])]
+            alg.triggers_2022 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2022)]
+            alg.triggers_2023 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2023)]
+            alg.triggers_2024 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2024)]
+            alg.triggers_2025 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2025)]
             if is_mc_from(config, [Campaign.MC21a, Campaign.MC23a]) or is_data_from(config, 2022):
                 if not alg.triggers_2022:
                     raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the year 2022!')
@@ -140,10 +147,10 @@ class TriggerAnalysisSFBlock(ConfigBlock):
                 if not alg.triggers_2023:
                     raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the year 2023!')
         else:
-            alg.triggers_2015 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2015',[])]
-            alg.triggers_2016 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2016',[])]
-            alg.triggers_2017 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2017',[])]
-            alg.triggers_2018 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2018',[])]
+            alg.triggers_2015 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2015)]
+            alg.triggers_2016 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2016)]
+            alg.triggers_2017 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2017)]
+            alg.triggers_2018 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2018)]
             if is_mc_from(config, Campaign.MC20a):
                 if not (alg.triggers_2015 and alg.triggers_2016):
                     raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the years 2015 and 2016!')
@@ -215,17 +222,17 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         triggerSuffix: str = ''
     ) -> None:
         years = []
-        if config.campaign() is Campaign.MC20a:     years = ['2015', '2016']
-        elif is_data_from(config, 2015):   years = ['2015']
-        elif is_data_from(config, 2016):   years = ['2016']
-        elif config.campaign() is Campaign.MC20d or is_data_from(config, 2017):   years = ['2017']
-        elif config.campaign() is Campaign.MC20e or is_data_from(config, 2018):   years = ['2018']
-        elif config.campaign() in [Campaign.MC21a, Campaign.MC23a] or is_data_from(config, 2022): years = ['2022']
-        elif config.campaign() in [Campaign.MC23c, Campaign.MC23d] or is_data_from(config, 2023): years = ['2023']
+        if config.campaign() is Campaign.MC20a:     years = [2015, 2016]
+        elif is_data_from(config, 2015):   years = [2015]
+        elif is_data_from(config, 2016):   years = [2016]
+        elif config.campaign() is Campaign.MC20d or is_data_from(config, 2017):   years = [2017]
+        elif config.campaign() is Campaign.MC20e or is_data_from(config, 2018):   years = [2018]
+        elif config.campaign() in [Campaign.MC21a, Campaign.MC23a] or is_data_from(config, 2022): years = [2022]
+        elif config.campaign() in [Campaign.MC23c, Campaign.MC23d] or is_data_from(config, 2023): years = [2023]
 
         triggerMatchingChains = []
         for year in years:
-            for trig in self.triggerChainsPerYear.get(year,[]):
+            for trig in get_year_data(self.triggerChainsPerYear, year):
                 trig = trig.replace(' || ', '_OR_')
                 triggerMatchingChains += trig.split('_OR_')
 
