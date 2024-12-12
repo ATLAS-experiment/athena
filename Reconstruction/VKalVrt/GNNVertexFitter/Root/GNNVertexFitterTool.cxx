@@ -3,10 +3,15 @@
 */
 
 #include "GNNVertexFitter/GNNVertexFitterTool.h"
+#include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h" //InDet::ExclusiveOrigin
+#include "GeoPrimitives/GeoPrimitivesHelpers.h" //Amg::deltaR
+#include "AthLinks/ElementLink.h"
+#include "xAODTracking/TrackParticleContainer.h" //template param for ElementLink
+
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
-#include "ranges"
-#include <boost/iterator/zip_iterator.hpp>
+#include <cmath>
+
 
 namespace Rec {
 
