@@ -29,7 +29,7 @@ ex.input = 'ttbar'
 ex.threads = 8
 ex.concurrent_events = 8
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
-            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05"',
+            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05-03"',
             'Trigger.enabledSignatures=[\\\"Bjet\\\"]']
 
 test = Test.Test()

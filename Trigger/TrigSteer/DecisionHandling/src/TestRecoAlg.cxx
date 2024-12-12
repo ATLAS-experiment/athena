@@ -5,7 +5,7 @@
 #include <fstream>
 #include <xAODTrigger/TrigCompositeAuxContainer.h>
 #include <TrigSteeringEvent/TrigRoiDescriptorCollection.h>
-#include <DecisionHandling/TrigCompositeUtils.h>
+#include <TrigCompositeUtils/TrigCompositeUtils.h>
 #include "TestRecoAlg.h"
 
 

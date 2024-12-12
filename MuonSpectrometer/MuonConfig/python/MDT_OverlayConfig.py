@@ -1,22 +1,11 @@
 
 """Define methods to construct configured MDT overlay algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-
-
-def MDT_DataOverlayExtraCfg(flags, **kwargs):
-    """Return a ComponentAccumulator with MDT data overlay specifics"""
-    acc = ComponentAccumulator()
-
-    # We need to convert BS to RDO for data overlay
-    from MuonConfig.MuonBytestreamDecodeConfig import MdtBytestreamDecodeCfg
-    acc.merge(MdtBytestreamDecodeCfg(flags))
-
-    return acc
 
 
 def MDT_OverlayAlgCfg(flags, name="MdtOverlay", **kwargs):
@@ -53,7 +42,7 @@ def MDT_TruthOverlayCfg(flags, name="MdtTruthOverlay", **kwargs):
     acc = ComponentAccumulator()
 
     # We do not need background MDT SDOs
-    if flags.Overlay.DataOverlay:
+    if not flags.Input.isMC:
         kwargs.setdefault("BkgInputKey", "")
     else:
         kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}MDT_SDO")
@@ -87,18 +76,17 @@ def MDT_OverlayCfg(flags):
     """Configure and return a ComponentAccumulator for MDT overlay"""
     acc = ComponentAccumulator()
 
-    # Add data overlay specifics
-    if flags.Overlay.DataOverlay:
-        acc.merge(MDT_DataOverlayExtraCfg(flags))
-
     # Add MDT RDO to digit config
     from MuonConfig.MuonByteStreamCnvTestConfig import MdtRdoToMdtDigitCfg
     acc.merge(MdtRdoToMdtDigitCfg(flags))
+
     # Add MDT overlay digitization algorithm
     from MuonConfig.MDT_DigitizationConfig import MDT_OverlayDigitizationBasicCfg
     acc.merge(MDT_OverlayDigitizationBasicCfg(flags))
+
     # Add MDT overlay algorithm
     acc.merge(MDT_OverlayAlgCfg(flags))
+
     # Add MDT truth overlay
     if flags.Digitization.EnableTruth:
         if flags.Muon.usePhaseIIGeoSetup:
@@ -106,6 +94,7 @@ def MDT_OverlayCfg(flags):
             acc.merge(TruthOverlayCfg(flags, name="MdtTruthOverlay", WriteKey="MDT_SDO", deadTime = 700.))
         else:
             acc.merge(MDT_TruthOverlayCfg(flags))
+
     # Add MDT digit to RDO config
     from MuonConfig.MuonByteStreamCnvTestConfig import MdtDigitToMdtRDOCfg
     acc.merge(MdtDigitToMdtRDOCfg(flags))

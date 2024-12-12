@@ -16,7 +16,7 @@ ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'mc_cosmics'
 ex.threads = 1
 ex.flags = ['Trigger.triggerMenuSetup="Cosmic_run3_v1"',
-            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05"',
+            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05-03"',
             'Beam.Type=BeamType.Cosmics']
 
 test = Test.Test()

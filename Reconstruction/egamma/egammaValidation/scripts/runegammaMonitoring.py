@@ -46,6 +46,7 @@ setupDetectorFlags(flags, ['LAr','Tile'], use_metadata=True, toggle_geometry=Tru
 # Returning NULL DataObject pointer  
 #GeoModelSvc.LAr...  ERROR  Could not retrieve LAr DetCondKeyTrans 
 flags.LAr.doAlign = False
+flags.GeoModel.Align.LegacyConditionsAccess = False
 flags.lock()
 
 # Construct our accumulator to run
