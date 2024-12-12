@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -136,7 +136,7 @@ public:
 };
 
 //____________________________________________________________________
-VP1AODSystem::VP1AODSystem(QString name)
+VP1AODSystem::VP1AODSystem(const QString& name)
   : IVP13DSystemSimple(name,
 "System showing all (x)AOD objects.",
 "Edward.Moyse@cern.ch, Riccardo.maria.bianchi@cern.ch, Sebastian.Andreas.Merkt@cern.ch"), m_d(new Imp)

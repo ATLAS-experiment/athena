@@ -279,6 +279,7 @@ void IParticleCollHandle_Jet::setupSettingsFromControllerSpecific(const AODSyste
 const JetCollectionSettingsButton& IParticleCollHandle_Jet::collSettingsButton() const {
   if (!m_d->collSettingsButton){
     messageVerbose("Jet - No collSettingsButton set! Can't call init(), so crash is imminent...");
+    throw std::runtime_error("Jet - No collSettingsButton set!");
   }
   return *m_d->collSettingsButton;
 }

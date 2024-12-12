@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -37,7 +37,7 @@ class VP1AODSystem : public IVP13DSystemSimple {
 
 public:
 
-  VP1AODSystem(QString name="Analysis");
+  VP1AODSystem(const QString& name="Analysis");
   virtual ~VP1AODSystem();
 
   void systemcreate(StoreGateSvc* detstore);

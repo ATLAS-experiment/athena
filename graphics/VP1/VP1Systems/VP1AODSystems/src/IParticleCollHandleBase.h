@@ -110,7 +110,7 @@ public Q_SLOTS:
   //getters
   const VP1Interval& getCutAllowedPt() {return m_cut_allowedPtSq; };
   const VP1Interval& getCutAllowedEta() {return m_cut_allowedEta; };
-  QList<VP1Interval> getCutAllowedPhi() {return m_cut_allowedPhi; };
+  const QList<VP1Interval>& getCutAllowedPhi() {return m_cut_allowedPhi; };
   bool getPtAllowall() {return m_cut_pt_allowall; };
   bool getEtaAllowall() {return m_cut_eta_allowall; };
   bool getPhiAllowall() {return m_cut_phi_allowall; };
