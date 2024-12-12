@@ -1,6 +1,6 @@
 // this file is -*- C++ -*-
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETREC_JETCLUSTERER_H
@@ -94,11 +94,11 @@ protected:
   
   // internal data set from properties during initialize()
   fastjet::JetAlgorithm m_fjalg;
-  bool m_useArea;
+  bool m_useArea{};
   
   Gaudi::Property<float> m_minrad        {this, "VariableRMinRadius", -1.0, "Variable-R min radius" };
   Gaudi::Property<float> m_massscale     {this, "VariableRMassScale", -1.0, "Variable-R mass scale" };
-  bool m_isVariableR;  
+  bool m_isVariableR{};  
   bool isVariableR() const { return m_isVariableR;}
 
   SG::AuxElement::Accessor<int> m_jetRankAccessor;
