@@ -105,6 +105,7 @@ namespace MuonR4 {
                     break;
                 case xAOD::UncalibMeasType::RpcStripType:
                 case xAOD::UncalibMeasType::TgcStripType:
+                case xAOD::UncalibMeasType::MMClusterType:
                     chi2 = chiSqTermStrip(segPos, segDir, timeOffset, arrivalTime, hit, msg);
                     break; 
                 case xAOD::UncalibMeasType::Other:
