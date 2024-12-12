@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "eflowRec/PFSubtractionTool.h"
 
 #include "eflowRec/eflowCaloObject.h"
@@ -526,7 +530,7 @@ void PFSubtractionTool::performTruthSubtraction(eflowCaloObject& thisEflowCaloOb
       //reco algorithm does) or reweight the cells contribution based on subtracting the truth
       //energy from the reco cell energy
 
-      for (; theCell != lastCell; theCell++){
+      for (; theCell != lastCell; ++theCell){
         //get the truth energy for this cell
         double truthEnergy = thisEfRecTrack->getCellTruthEnergy(*theCell);
         //reweight the cell such that energy*weight gives the new energy
@@ -600,7 +604,7 @@ void PFSubtractionTool::addSubtractedCells(eflowCaloObject& thisEflowCaloObject,
       const CaloClusterCellLink* theCellLink = thisCluster->getCellLinks();
       CaloClusterCellLink::const_iterator theCell = theCellLink->begin();
       CaloClusterCellLink::const_iterator lastCell = theCellLink->end();
-      for (; theCell != lastCell; theCell++) thisTrack->addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theCell.index()),theCell.weight()/numTracks);
+      for (; theCell != lastCell; ++theCell) thisTrack->addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theCell.index()),theCell.weight()/numTracks);
     }
   }
 }
