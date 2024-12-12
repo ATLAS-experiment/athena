@@ -31,7 +31,7 @@ namespace InDetGNNHardScatterSelection {
     // Subclass for Muons loader inherited from abstract IConstituentsLoader class
     class MuonsLoader : public IConstituentsLoader {
       public:
-        MuonsLoader(ConstituentsInputConfig);
+        MuonsLoader(const ConstituentsInputConfig & cfg);
         std::tuple<std::string, FlavorTagDiscriminants::Inputs, std::vector<const xAOD::IParticle*>> getData(
           const xAOD::Vertex& vertex) const override ;
         std::string getName() const override;
