@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -10,9 +10,6 @@
  * @brief persistent partner for TrigMissingET
  *
  * @author Diego Casadei  <Diego.Casadei@cern.ch>  - NYU
- *
- * File and Version Information:
- * $Id: TrigMissingET_p2.h,v 1.2 2009-04-01 22:10:11 salvator Exp $
  **********************************************************************************/
 #ifndef TRIGMISSINGETEVENTTPCNV_TRIGMISSINGET_p2_H
 #define TRIGMISSINGETEVENTTPCNV_TRIGMISSINGET_p2_H
@@ -28,8 +25,8 @@ class TrigMissingET_p2
 
  public:
   
-  TrigMissingET_p2() {}
-  virtual ~TrigMissingET_p2(){}
+  TrigMissingET_p2() = default;
+  virtual ~TrigMissingET_p2() = default;
   
   //private:
   /** Basic information **/
@@ -41,7 +38,7 @@ class TrigMissingET_p2
   /** Auxiliary information **/
   /// transient class contains std::vector< TrigMissingEtComponent > m_compVec;
   /// that is "flattened" here into separate arrays
-  unsigned int m_comp_number; //<! size of all following vectors
+  unsigned int m_comp_number{}; //<! size of all following vectors
   std::vector<std::string>    m_c_name;
   std::vector<short>          m_c_status;
   std::vector<float>          m_c_ex;

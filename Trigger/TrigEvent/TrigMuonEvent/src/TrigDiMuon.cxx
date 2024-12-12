@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -10,17 +10,6 @@
 ********************************************************************/
 
 #include "TrigMuonEvent/TrigDiMuon.h"
-//#include <math.h>
-
-TrigDiMuon::TrigDiMuon() 
-:
-m_mdt_coll_size(0),
-m_rpc_wcoll_size(0),
-m_rpc_scoll_size(0),
-m_tgc_wcoll_size(0),
-m_tgc_scoll_size(0)
-{}
-
 
 
 TrigDiMuon::TrigDiMuon	(	TrigInDetTrack* track,

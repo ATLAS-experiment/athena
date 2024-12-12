@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONEVENTTPCNV_MUONFEATUREDETAILS_P2_H
@@ -66,8 +66,8 @@ class MuonFeatureDetails_p2
 
 
 
-    MuonFeatureDetails::AlgoId   m_id;
-    int   m_Address;
+    MuonFeatureDetails::AlgoId   m_id{};
+    int   m_Address{};
     
     // uint32_t m_te_id;
     // uint32_t m_error;
@@ -85,7 +85,7 @@ class MuonFeatureDetails_p2
     // uint32_t m_rpc_pad_error;
     // uint32_t m_tgc_rdo_error;
     
-    uint32_t m_allTheUInts[13];
+    uint32_t m_allTheUInts[13]{};
     
     // long  m_tgc_Mid_rho_N;
     // long  m_tgc_Mid_phi_N;
@@ -93,7 +93,7 @@ class MuonFeatureDetails_p2
     // long  m_tgc_Inn_phi_N;
     // long  m_type;
     
-    long  m_allTheLongs[5];
+    long  m_allTheLongs[5]{};
     
     // float    m_RoIEta;
     // float    m_RoIPhi;  
@@ -172,7 +172,7 @@ class MuonFeatureDetails_p2
     // float m_Pt;
     // float m_Charge;
     
-    float m_allTheFloats[65];
+    float m_allTheFloats[65]{};
     
     std::vector<uint32_t> m_extension0;
     std::vector<uint32_t> m_extension1;

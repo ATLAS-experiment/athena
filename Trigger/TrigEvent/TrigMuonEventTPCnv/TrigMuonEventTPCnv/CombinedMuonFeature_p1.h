@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONEVENTTPCNV_COMBINEDMUONFEATURE_P1_H
@@ -13,13 +13,13 @@ class CombinedMuonFeature_p1 {
  public:
     
   // default constructor
-  CombinedMuonFeature_p1() { }
+  CombinedMuonFeature_p1() = default;
   
   // default destructor
-  virtual ~CombinedMuonFeature_p1() { }
+  virtual ~CombinedMuonFeature_p1() = default;
 
-  float m_pt;
-  float m_sigma_pt;
+  float m_pt{};
+  float m_sigma_pt{};
   TPObjRef  m_muFastTrack;
   TPObjRef  m_IDTrack;
 };

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -22,7 +22,7 @@ class TrigDiMuon
 
  public:
 
-  TrigDiMuon();
+  TrigDiMuon() = default;
 
   TrigDiMuon( TrigInDetTrack* track, 
 		int mdt_coll_size,
@@ -40,12 +40,12 @@ class TrigDiMuon
   TrigInDetTrack* get_InDet() const { return m_track; }
 
   private:
-	TrigInDetTrack* m_track;
-	int m_mdt_coll_size;
-	int m_rpc_wcoll_size;
-	int m_rpc_scoll_size;
-	int m_tgc_wcoll_size;
-	int m_tgc_scoll_size;
+	TrigInDetTrack* m_track{};
+	int m_mdt_coll_size{};
+	int m_rpc_wcoll_size{};
+	int m_rpc_scoll_size{};
+	int m_tgc_wcoll_size{};
+	int m_tgc_scoll_size{};
 };
 
 #endif

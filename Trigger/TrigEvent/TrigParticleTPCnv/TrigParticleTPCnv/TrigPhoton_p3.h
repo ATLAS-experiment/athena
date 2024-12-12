@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -11,9 +11,6 @@
  *
  * @author Andrew Hamilton  <Andrew.Hamilton@cern.ch>  - U. Geneva
  * @author Francesca Bucci  <F.Bucci@cern.ch>          - U. Geneva
- *
- * File and Version Information:
- * $Id: TrigPhoton_p3.h 724425 2016-02-16 23:37:59Z ssnyder $
  **********************************************************************************/
 #ifndef TRIGPARTICLETPCNV_TRIGPHOTON_P3_H
 #define TRIGPARTICLETPCNV_TRIGPHOTON_P3_H
@@ -21,8 +18,6 @@
 #include "DataModelAthenaPool/ElementLink_p3.h"
 
 #include "EventCommonTPCnv/P4PtEtaPhiMCnv_p1.h"
-//#include "AthenaPoolUtilities/TPObjRef.h"
-
 
 class TrigPhoton_p3 
 {
@@ -30,17 +25,11 @@ class TrigPhoton_p3
 
  public:
   
-  TrigPhoton_p3() : 
-    m_roiID(0),
-    m_valid(false)
-  {}
-
+  TrigPhoton_p3() = default;
   virtual ~TrigPhoton_p3() = default;
-  
-  //private:
 
-  int   m_roiID;
-  float m_allTheFloats[11];
+  int   m_roiID{};
+  float m_allTheFloats[11]{};
 
 /*
   float m_HadEt; 
@@ -55,12 +44,10 @@ class TrigPhoton_p3
   float m_Fside;       
   float m_Weta2;       
 */
-  bool  m_valid;
+  bool  m_valid{false};
 
-  //TPObjRef  m_cluster;
   ElementLinkInt_p3 m_cluster;
 
-  //TPObjRef  m_p4PtEtaPhiM;
   P4PtEtaPhiM_p1 m_P4PtEtaPhiM;
 
 };

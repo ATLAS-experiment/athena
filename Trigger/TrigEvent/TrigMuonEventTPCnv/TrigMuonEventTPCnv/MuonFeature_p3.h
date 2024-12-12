@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -11,9 +11,6 @@
  *
  * @author Andrew Hamilton  <Andrew.Hamilton@cern.ch>  - U. Geneva
  * @author Francesca Bucci  <F.Bucci@cern.ch>          - U. Geneva
- *
- * File and Version Information:
- * $Id: MuonFeature_p3.h,v 1.2 2009-04-01 22:12:15 salvator Exp $
  **********************************************************************************/
 #ifndef TRIGMUONEVENTTPCNV_MUONFEATURE_P3_H
 #define TRIGMUONEVENTTPCNV_MUONFEATURE_P3_H
@@ -28,15 +25,13 @@ class MuonFeature_p3
 
    public:
   
-      MuonFeature_p3() {}
-      virtual ~MuonFeature_p3(){}
+      MuonFeature_p3() = default;
+      virtual ~MuonFeature_p3() = default;
   
-      //private:
-
-      MuonFeature::AlgoId m_algoId;
+      MuonFeature::AlgoId m_algoId{};
       //int    m_RoIId;
       //int    m_saddress;
-      int    m_allTheInts[2];
+      int    m_allTheInts[2]{};
       //float  m_pt;
       //float  m_radius;
       //float  m_eta;
@@ -60,7 +55,7 @@ class MuonFeature_p3
       //float  m_ec_beta;
       //double m_dq_var1;
       //double m_dq_var2;
-      float m_allTheFloats[23];
+      float m_allTheFloats[23]{};
 };
 
 #endif

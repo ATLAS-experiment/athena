@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -30,8 +30,7 @@ class TrigMuonEFCbTrack_p1
   TrigMuonEFCbTrack_p1() {}
   virtual ~TrigMuonEFCbTrack_p1(){}
   
-  //private:
-  double m_matchChi2;
+  double m_matchChi2{};
   TPObjRef m_TrigMuonEFTrack;
   TPObjRef m_P4IPtCotThPhiM;
 };

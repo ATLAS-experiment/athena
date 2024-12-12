@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -27,20 +27,13 @@ class TileMuFeature_p1
 
  public:
 
-  TileMuFeature_p1() {}
-  virtual ~TileMuFeature_p1(){}
+  TileMuFeature_p1() = default;
+  virtual ~TileMuFeature_p1() = default;
 
-  ///private:
- 
-  float m_eta;
-  float m_phi;
+  float m_eta{};
+  float m_phi{};
   std::vector<float> m_energy_deposited;
-  float m_quality_factor;
-
-  //float m_Pt_IDTrk, m_Eta_IDTrk, m_EtaTR_IDTrk;
-  //float m_Phi_IDTrk, m_PhiTR_IDTrk, m_zPos_IDTrk;
-  //int    m_IDTrk;
- 
+  float m_quality_factor{};
 };
 
 #endif

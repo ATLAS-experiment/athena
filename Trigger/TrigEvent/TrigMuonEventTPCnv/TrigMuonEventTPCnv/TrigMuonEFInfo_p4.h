@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -28,22 +28,17 @@ class TrigMuonEFInfo_p4
 
 public:
 
-	TrigMuonEFInfo_p4() :
-          m_roi(0), m_nSegments(0), m_nMdtHits(0),
-          m_nRpcHits(0), m_nTgcHits(0), m_nCscHits(0),
-          m_etaPreviousLevel(0.0), m_phiPreviousLevel(0.0)
-          {}
-	virtual ~TrigMuonEFInfo_p4(){}
+	TrigMuonEFInfo_p4() = default;
+	virtual ~TrigMuonEFInfo_p4() = default;
 
-        //private:
-	unsigned short int m_roi;
-	unsigned short int m_nSegments;
-	unsigned short int m_nMdtHits;
-	unsigned short int m_nRpcHits;
-	unsigned short int m_nTgcHits;
-	unsigned short int m_nCscHits;
-	float m_etaPreviousLevel;
-	float m_phiPreviousLevel;
+	unsigned short int m_roi{};
+	unsigned short int m_nSegments{};
+	unsigned short int m_nMdtHits{};
+	unsigned short int m_nRpcHits{};
+	unsigned short int m_nTgcHits{};
+	unsigned short int m_nCscHits{};
+	float m_etaPreviousLevel{};
+	float m_phiPreviousLevel{};
 
 	TPObjRef m_spectrometerTrack;
 	TPObjRef m_extrapolatedTrack;

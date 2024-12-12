@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -30,11 +30,10 @@ public:
 	TrigMuonEFCbTrack_p2() {}
 	virtual ~TrigMuonEFCbTrack_p2(){}
 
-        //private:
-	double m_matchChi2;
-	unsigned short int m_nIdSctHits;
-	unsigned short int m_nIdPixelHits;
-	unsigned short int m_nTrtHits;
+	double m_matchChi2{};
+	unsigned short int m_nIdSctHits{};
+	unsigned short int m_nIdPixelHits{};
+	unsigned short int m_nTrtHits{};
 
 	TPObjRef m_TrigMuonEFTrack;
 	TPObjRef m_P4IPtCotThPhiM;
