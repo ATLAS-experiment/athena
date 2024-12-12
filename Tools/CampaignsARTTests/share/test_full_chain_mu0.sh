@@ -8,7 +8,7 @@ echo "Input Parameters"
 number_of_events=$1
 
 #Option for sim/digi/reco
-default_geometry="ATLAS-P2-RUN4-03-01-00"
+default_geometry="ATLAS-P2-RUN4-04-00-00"
 default_condition="OFLCOND-MC21-SDR-RUN4-02"
 
 #Post-processing for ID/ITk and FTag
