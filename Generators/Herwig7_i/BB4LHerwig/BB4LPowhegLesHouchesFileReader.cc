@@ -22,6 +22,8 @@
 #include "ThePEG/Persistency/PersistentIStream.h"
 #include <sstream>
 #include <iostream>
+#include <regex>
+
 
 using namespace ThePEG;
 using namespace std;
@@ -34,25 +36,22 @@ map<string,double> optionalWeightsTemp_save;
 map<string,string> eventAttributes_save;
 int optionalnpLO_save, optionalnpNLO_save;
 int maxev;
+nevcounter nevcounter_;
 const int maxShowerTries=10;
 const int maxVetoTries=1000;
 int showerTries;
 int vetoTries;
-bool vetoedEvent;
-bool showerSuccess;
-bool dipoleShower4f=false;
-bool lowremnscale=false;
+extern bool vetoedEvent;
+extern bool showerSuccess;
 
-bool doremn=true;
-bool dobtilde=true;
 double ubcorrections[3];
 
 
 BB4LPowhegLesHouchesFileReader::
 BB4LPowhegLesHouchesFileReader(const BB4LPowhegLesHouchesFileReader & x)
   : LesHouchesReader(x), m_neve(x.m_neve), m_ieve(0),
-    m_LHFVersion(x.m_LHFVersion), m_outsideblock(x.m_outsideblock),
-    m_headerblock(x.m_headerblock), m_initComments(x.m_initComments),
+    m_LHFVersion(x.m_LHFVersion), m_outsideBlock(x.m_outsideBlock),
+    m_headerBlock(x.m_headerBlock), m_initComments(x.m_initComments),
     m_initAttributes(x.m_initAttributes), m_eventComments(x.m_eventComments),
     m_eventAttributes(x.m_eventAttributes),
     m_theFileName(x.m_theFileName), m_theQNumbers(x.m_theQNumbers),
@@ -77,7 +76,7 @@ bool BB4LPowhegLesHouchesFileReader::preInitialize() const {
 void BB4LPowhegLesHouchesFileReader::doinit  () {
   LesHouchesReader::doinit();
 
-  hepevt_.nevhep=0;  
+  nevcounter_.nev=0;  
   ubcorrections[0]=powheginput_("#ub_btilde_corr",15);
   if(ubcorrections[0]<=0) ubcorrections[0]=1.;
   ubcorrections[1]=powheginput_("#ub_remn_corr",13);
@@ -90,7 +89,7 @@ void BB4LPowhegLesHouchesFileReader::doinit  () {
   if(!m_theQNumbers) return;
   // parse the header block and create 
   // any new particles needed in QNUMBERS blocks
-  string block = m_headerblock;
+  string block = m_headerBlock;
   string line  = "";
   bool readingSLHA = false;
   int (*pf)(int) = tolower;
@@ -101,7 +100,7 @@ void BB4LPowhegLesHouchesFileReader::doinit  () {
     if(line[0]=='#') continue;
     // are we reading the SLHA block
     if(readingSLHA) {
-      // reached the end of slha block ?
+      // reached the end of slha block
       if(line.find("</slha") != string::npos) {
 	readingSLHA = false;
 	break;
@@ -243,7 +242,7 @@ void BB4LPowhegLesHouchesFileReader::doinit  () {
   }
   while(line!="");
   // now set any masses/decay modes
-  block = m_headerblock;
+  block = m_headerBlock;
   line="";
   readingSLHA=false;
   bool ok=true;
@@ -280,8 +279,8 @@ void BB4LPowhegLesHouchesFileReader::doinit  () {
 	  temp >> id >> mass;
 	  // skip resetting masses on SM particles
 	  // as it can cause problems later on in event generation
-	  if(abs(id)<=6 || (abs(id)>=11 && abs(id)<=16) ||
-	     abs(id)==23 || abs(id)==24) {
+	  if(std::abs(id) <= 6 || (std::abs(id) >= 11 && std::abs(id) <= 16) ||
+	     std::abs(id) == 23 || std::abs(id) == 24) {
 	    block = StringUtils::cdr(block,"\r\n");
 	    line = StringUtils::car(block,"\r\n");
 	    continue;
@@ -319,11 +318,11 @@ void BB4LPowhegLesHouchesFileReader::doinit  () {
 	    << parent << " does not exist. " << Exception::runerror;
 	  return;
 	}
-	if ( abs(inpart->id()) == 6 || 
-	     abs(inpart->id()) == 15 || 
-	     abs(inpart->id()) == 23 || 
-	     abs(inpart->id()) == 24 || 
-	     abs(inpart->id()) == 25 ) {
+	if ( std::abs(inpart->id()) == 6 || 
+	     std::abs(inpart->id()) == 15 || 
+	     std::abs(inpart->id()) == 23 || 
+	     std::abs(inpart->id()) == 24 || 
+	     std::abs(inpart->id()) == 25 ) {
 	  Throw<SetupException>() << "\n"
 	    "************************************************************************\n"
 	    "* Your LHE file changes the width of " << inpart->PDGName() << ".\n"
@@ -370,7 +369,7 @@ void BB4LPowhegLesHouchesFileReader::doinit  () {
 	    long t;
 	    is >> t;
 	    if( is.fail() ) break; 
-	    if( t == abs(parent) )
+	    if( t == std::abs(parent) )
 	      throw SetupException() 
 		<< "An error occurred while read a decay of the " 
 		<< inpart->PDGName() << ". One of its products has the same PDG code "
@@ -529,7 +528,7 @@ void BB4LPowhegLesHouchesFileReader::open  () {
 
   bool readingHeader = false;
   bool readingInit = false;
-  m_headerblock = "";
+  m_headerBlock = "";
   
 //  char (cwgtinfo_weights_info[250][15]);
   string hs;
@@ -581,60 +580,26 @@ void BB4LPowhegLesHouchesFileReader::open  () {
       /* if we are reading a new weightgroup, go on 
        * until we find the end of it
        */
+      /* BEGIN MOD*/
       if(readingInitWeights_sc && !m_cfile.find("</weightgroup")) {
 	hs = m_cfile.getline();
-
-    //fix for potential new lines:
-    if(!m_cfile.find("<weight") and !m_cfile.find("</weightgroup")) {
-      weightinfo = weightinfo + hs;
-      //cout << "weightinfo fixed= " << weightinfo << endl;
-      continue;
-    }
-	istringstream isc(hs);
-	int ws = 0;
-	/* get the name that will be used to identify the scale 
-	 */
-	do {
-	  string sub;
-	  isc >> sub;
-	  if(ws==1) {
-	    std::size_t pos = sub.find(">");
-	    scalename = sub.substr(0,pos);
-	    break;
-	  }
-	  ++ws;
-	}
-	while (isc);
-	/* now get the relevant information
-	 * e.g. scales or PDF sets used
-	 */
-	string startDEL = "'>"; //starting delimiter
-	string stopDEL = "</weight>"; //end delimiter
-	int firstLim = hs.find(startDEL); //find start of delimiter
-	if(firstLim == -1) { startDEL = ">"; firstLim = hs.find(startDEL); }
-//	unsigned lastLim = hs.find(stopDEL); //find end of delimitr
-	string scinfo = hs.substr(firstLim); //define the information for the scale
-	erase_substr(scinfo,stopDEL);
-	erase_substr(scinfo,startDEL);		
-        scinfo = StringUtils::stripws(scinfo);
-	/* fill in the map 
-	 * indicating the information to be appended to each scale
-	 * i.e. scinfo for each scalname
-	 */
-	m_scalemap[scalename] = scinfo.c_str();
-	string str_id = "id=";
-	string str_prime = "'";
-	erase_substr(scalename, str_id);
-	erase_substr(scalename, str_prime);
-	optionalWeightsNames.push_back(scalename);
+	hs.erase(std::remove(hs.begin(), hs.end(), ' '), hs.end());
+	std::string IdLabel = hs.substr(0, hs.find(">", 0));
+	IdLabel = std::regex_replace(IdLabel, std::regex(R"([\D])"), "");
+	std::string name = hs;
+	erase_substr(name, "<weightid='"+IdLabel+"'>");
+	name.erase(name.find('<'));
+	m_optionalWeightsLabel[IdLabel]=name;	
+	optionalWeightsNames.push_back(name);
       }
+      /*END MOD*/
     }
    
     if ( m_cfile.find("<header") ) {
       // We have hit the header block, so we should dump this and all
-      // following lines to m_headerblock until we hit the end of it.
+      // following lines to m_headerBlock until we hit the end of it.
       readingHeader = true;
-      m_headerblock = m_cfile.getline() + "\n";
+      m_headerBlock = m_cfile.getline() + "\n";
     }
     if ( (m_cfile.find("<init ") && !m_cfile.find("<initrwgt")) || m_cfile.find("<init>") ) {
       // We have hit the init block, so we should expect to find the
@@ -665,12 +630,12 @@ void BB4LPowhegLesHouchesFileReader::open  () {
     }
     if ( m_cfile.find("</header") ) {
       readingHeader = false;
-      m_headerblock += m_cfile.getline() + "\n";
+      m_headerBlock += m_cfile.getline() + "\n";
     }
     if ( readingHeader ) {
       /* We are in the process of reading the header block. Dump the
-	 line to m_headerblock.*/
-      m_headerblock += m_cfile.getline() + "\n";
+	 line to m_headerBlock.*/
+      m_headerBlock += m_cfile.getline() + "\n";
     }
     if ( readingInit ) {
       // Here we found a comment line. Dump it to m_initComments.
@@ -680,7 +645,6 @@ void BB4LPowhegLesHouchesFileReader::open  () {
   string central = "central";
   if (m_theIncludeCentral) optionalWeightsNames.push_back(central);
 
-  //  cout << "reading init finished" << endl;
   if ( !m_cfile ) {
     heprup.NPRUP = -42;
     m_LHFVersion = "";
@@ -728,25 +692,16 @@ bool BB4LPowhegLesHouchesFileReader::doReadEvent  () {
   if ( heprup.NPRUP < 0 ) return false;
 
     // we have showered all the events
-  if(hepevt_.nevhep==maxev) return false; 
+  if(nevcounter_.nev==maxev) return false; 
   bool repeatEvent;
 
   
   m_eventComments = "";
-  m_outsideblock = "";
+  m_outsideBlock = "";
   hepeup.NUP = 0;
   hepeup.XPDWUP.first = hepeup.XPDWUP.second = 0.0;
   optionalWeights.clear();
   m_optionalWeightsTemp.clear();
-
-  // added source code which was previously in powhegAnalysis.cc
-  int toveto;
-	
-  herwig7_veto_(& toveto);
-
-  if(toveto==1) vetoedEvent=true;
-  else vetoedEvent=false;
-  // end of added source code which was previously in powhegAnalysis.cc
 
   //Increase the tries counters:
   //a)showerTries parametries the tries to shower an event
@@ -775,10 +730,10 @@ bool BB4LPowhegLesHouchesFileReader::doReadEvent  () {
 	  else
 	    {
 	      repeatEvent=false;
-	      std::cout<<"Herwig could not pass the weto for the event with nevhep="<<hepevt_.nevhep<<" after "<< maxVetoTries<<" tries..."<<endl;
+	      std::cout<<"Herwig could not pass the weto for the event with nevhep="<<nevcounter_.nev<<" after "<< maxVetoTries<<" tries..."<<endl;
 	      std::cout<<"top scale: "<<resonancevetos_.vetoscaletp<<"; anti-top scale: "<<resonancevetos_.vetoscaletm<<endl;
 	      //If we have to skip this event and do a new one, increase the evt counter and set vetoTries=1 for the new event
-	      hepevt_.nevhep=hepevt_.nevhep+1;
+	      nevcounter_.nev=nevcounter_.nev+1;
 	      // we abandon this event:
 	      vetoTries=1;
 	      showerTries=1;
@@ -797,9 +752,9 @@ bool BB4LPowhegLesHouchesFileReader::doReadEvent  () {
       else
 	{
 	  repeatEvent=false;
-	  std::cout<<"Herwig could not shower event with nevhep="<<hepevt_.nevhep<<" after "<< maxShowerTries<<" tries..."<<endl;
+	  std::cout<<"Herwig could not shower event with nevhep="<<nevcounter_.nev<<" after "<< maxShowerTries<<" tries..."<<endl;
 	  //If we have to skip this event and do a new one, increase the evt counter and set showerTries=1 for the new event
-	  hepevt_.nevhep=hepevt_.nevhep+1;
+	  nevcounter_.nev=nevcounter_.nev+1;
 	  showerTries=1;
 	  vetoTries=1;
 	}
@@ -811,7 +766,7 @@ bool BB4LPowhegLesHouchesFileReader::doReadEvent  () {
     // copy it back here.
     hepeup=hepeup_save;
     m_eventComments=eventComments_save;
-    m_outsideblock=outsideBlock_save;
+    m_outsideBlock=outsideBlock_save;
     optionalWeights=optionalWeights_save;
     m_optionalWeightsTemp=optionalWeightsTemp_save;
     m_eventAttributes=eventAttributes_save;
@@ -829,7 +784,7 @@ bool BB4LPowhegLesHouchesFileReader::doReadEvent  () {
   // the event block. Save any inbetween lines. Exit if we didn't
   // find an event.
   while ( m_cfile.readline() && !m_cfile.find("<event") )
-    m_outsideblock += m_cfile.getline() + "\n";
+    m_outsideBlock += m_cfile.getline() + "\n";
 
   // We found an event. First scan for attributes.
   m_eventAttributes = StringUtils::xmlAttributes("event", m_cfile.getline());
@@ -956,42 +911,26 @@ bool BB4LPowhegLesHouchesFileReader::doReadEvent  () {
     
     /* reading of optional weights
      */
-    if(readingWeights) {
-      
-      int numwgts = 0;
+    /* BEGIN MOD*/
+    if(readingWeights) { 
       if(!m_cfile.find("<wgt")) { continue; }
       istringstream iss(m_cfile.getline());
-      int wi = 0;
       double weightValue(0);
-      string weightName = "";
-      // we need to put the actual weight value into a double
-      do {
-	string sub; iss >> sub;
-
-	if(wi==1){
-	  std::size_t pos = sub.find(">");
-	  weightName = sub.substr(0,pos);
-	  pos++;
-	  string wgt = sub.substr(pos);
-	  pos = wgt.find("<");
-	  wgt.resize(pos);
-	  weightValue = atof(wgt.c_str());
-	}
-	++wi;
-      } while (iss);
-      // store the optional weights found in the temporary map
-      weightValue *= ubcorrections[weights_.radtype-1];
-      m_optionalWeightsTemp[weightName] = weightValue;
-      if(numwgts >= max_num_weights)
-	{
-	  std::cout<<" Number of weights > "<< max_num_weights<<endl;
-	  std::cout<<" Increase max_num_weights in BB4LPowhegLesHouchesFileReader.cc" <<endl;  
-	  exit(-1);
-	}
-      weights_.weight[numwgts] = weightValue;
-      weights_.numweights= numwgts;
-      numwgts ++;
+      std::string hs=m_cfile.getline();
+      hs.erase(std::remove(hs.begin(), hs.end(), ' '), hs.end());
+      std::string IdLabel = hs.substr(0, hs.find(">", 0));
+      IdLabel = std::regex_replace(IdLabel, std::regex(R"([\D])"), "");
+      std::string weightName = m_optionalWeightsLabel[IdLabel];
+      std::string value=hs;
+      erase_substr(value, "<wgtid='"+IdLabel+"'>");
+      erase_substr(value, "<wgtid=\""+IdLabel+"\">");
+      erase_substr(value, "</wgt>");
+      erase_substr(value, "\n");
+      weightValue=std::stod(value);
+      m_optionalWeightsTemp[weightName] = weightValue; 
+      optionalWeights[weightName] = weightValue; 
     }
+    /* END MOD */
     
     /* reading of aMCFast weights
      */
@@ -1080,11 +1019,6 @@ bool BB4LPowhegLesHouchesFileReader::doReadEvent  () {
     }
   }
 
-  if(weights_.weight[0] !=0){
-    hepeup.XWGTUP = weights_.weight[0]; //it already include the ubcorrection [default=1]
-  }else{
-    hepeup.XWGTUP *= ubcorrections[weights_.radtype-1];
-  }
   /* additionally, we set the "central" scale
    * this is actually the default event weight 
    */
@@ -1093,7 +1027,7 @@ bool BB4LPowhegLesHouchesFileReader::doReadEvent  () {
  /* We copy the event in global variable, in order to be able to access them in the next iteration*/
   hepeup_save=hepeup;
   eventComments_save=m_eventComments;
-  outsideBlock_save=m_outsideblock;
+  outsideBlock_save=m_outsideBlock;
   optionalWeights_save=optionalWeights;
   optionalWeightsTemp_save=m_optionalWeightsTemp;
   eventAttributes_save=m_eventAttributes;
@@ -1113,13 +1047,13 @@ void BB4LPowhegLesHouchesFileReader::close() {
 }
 
 void BB4LPowhegLesHouchesFileReader::persistentOutput(PersistentOStream & os) const {
-  os << m_neve << m_LHFVersion << m_outsideblock << m_headerblock << m_initComments
+  os << m_neve << m_LHFVersion << m_outsideBlock << m_headerBlock << m_initComments
      << m_initAttributes << m_eventComments << m_eventAttributes << m_theFileName
      << m_theQNumbers << m_theIncludeFxFxTags << m_theIncludeCentral << m_theDecayer ;
 }
 
 void BB4LPowhegLesHouchesFileReader::persistentInput(PersistentIStream & is, int) {
-  is >> m_neve >> m_LHFVersion >> m_outsideblock >> m_headerblock >> m_initComments
+  is >> m_neve >> m_LHFVersion >> m_outsideBlock >> m_headerBlock >> m_initComments
      >> m_initAttributes >> m_eventComments >> m_eventAttributes >> m_theFileName
      >> m_theQNumbers >> m_theIncludeFxFxTags >> m_theIncludeCentral >> m_theDecayer;
   m_ieve = 0;

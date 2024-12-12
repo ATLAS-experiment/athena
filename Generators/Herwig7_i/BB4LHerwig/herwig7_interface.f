@@ -17,6 +17,10 @@
       common/ptmin/ptmin
       real *8 btildecorr, remncorr
       common/corrfactors/btildecorr, remncorr
+      integer maxweights, numweights,radtype
+      parameter(maxweights=50)
+      real *8 weight
+      common/weights/weight(maxweights),numweights,radtype
 
 
       if(ini) then
@@ -336,99 +340,3 @@ c     theta_{\tilde{ij}} is zero for the first emission
       endif
       end
       
-
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-C---- To call the analysis and fill the histrograms     
-      subroutine herwiganalysis()
-      implicit none
-      include 'hepevt.h'
-      include 'LesHouches.h'
-      if (mod(nevhep,2000).eq.0) then
-         write(*,*) 'analyzing nevhep', nevhep
-         call flush(6) 
-      endif
-      !write(*,*)'ratio'
-      !write(*,*) weight, xwgtup, weight/xwgtup
-!call analysis(xwgtup)
-      call analysis(xwgtup)
-      call pwhgaccumup 
-      end    
-
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-C---  To write the histograms in a top file     
-      subroutine herwig7_end(runNumber)
-      implicit none
-      integer runNumber, j
-      character*4 chRunNumber
-      character*30 prefix
-      call pwhgsetout
-      if (runNumber == 0) then
-        prefix = 'pwg'
-      else
-        write(chRunNumber,'(i4)') runNumber
-        do j=1,4
-          if(chRunNumber(j:j).eq.' ') chRunNumber(j:j)='0'
-        enddo
-        prefix = 'pwg-'//trim(chRunNumber)//'-'
-      endif      
-      prefix=adjustl(prefix)      
-      call pwhgtopout(trim(prefix)//'POWHEG+HERWIG7-output')
-      flush(6)
-      end
-
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-      subroutine herwig7_veto(itoveto)
-      implicit none
-      integer itoveto
-      logical toveto
-      integer maxtries
-      include "hepevt.h"
-      include 'LesHouches.h'
-      include 'nlegborn.h'
-      integer j
-      real * 8 vetoscaletp,vetoscaletm,
-     1         vetoscalewp,vetoscalewm
-      common/resonancevetos/vetoscaletp,vetoscaletm,
-     1                      vetoscalewp,vetoscalewm
-      real * 8 powheginput
-      external powheginput
-      include 'herwigsettings.inc'
-      integer ntpdec,ntmdec,tpiddec(8),tmiddec(8)
-      real * 8 tpdecsc,tmdecsc,tppdec(4,8),tmpdec(4,8)
-      real * 8 wpdecsc,wmdecsc
-      common/ctptmdec/tpdecsc,tmdecsc,tppdec,tmpdec,
-     1     ntpdec,ntmdec,tpiddec,tmiddec
-      integer tries
-      data tries/0/
-      save tries
-      integer fail
-      data fail/0/
-      save fail
-      integer maxweights, numweights,radtype
-      parameter(maxweights=50)
-      real *8 weight
-      common/weights/weight(maxweights),numweights,radtype
-      integer innlodec
-      common/c_innlodec/innlodec
-      logical veto_rad_in_decay
-      external veto_rad_in_decay
-      
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c     Decide if we like the event (toveto = .false.) or not (toveto=.true.)
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c     If radtype is 2 it is a remnant, we do not veto
-      if(weveto .and. (radtype.ne.2 .or. (innlodec.eq.1))) then
-         toveto = veto_rad_in_decay(1).or.veto_rad_in_decay(-1)
-      else
-         toveto=.false.
-      endif
-
-      if(toveto) then
-         itoveto=1
-      else
-         itoveto=0
-      endif
-
-      end      
-

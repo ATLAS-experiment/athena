@@ -71,6 +71,13 @@ set /Herwig/Particles/bbar:ConstituentMass 4.95
 set /Herwig/Particles/W+:Width_generator:Initialize Yes
 set /Herwig/Particles/W+:Mass_generator:Initialize Yes
 
+cd /Herwig/Generators
+create ThePEG::powhegAnalysis powhegAnalysis libpowhegHerwigBB4L.so
+insert /Herwig/Generators/EventGenerator:AnalysisHandlers 0 powhegAnalysis
+
+set powhegAnalysis:Units GeV_mm
+set powhegAnalysis:RunNumber 0001
+
 """.format(PwgReaderLib = "libpowhegHerwigBB4L.so",
            PDFOrder="NLO") )
 

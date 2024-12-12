@@ -1,9 +1,7 @@
 #define max_num_weights  50
 
+
 extern "C" {
-  void herwig7_veto_(int*);
-  void herwiganalysis_();
-  void herwig7_end_(int*);
   void herwig7_init_(int & maxev, const char* name, long int len);
   void herwig7_calculatescales_();
   double powheginput_(const char* , long int);
@@ -32,14 +30,10 @@ extern "C" {
   };
   extern hepeup hepeup_;
 
-  struct hepevt {
-    // nb. Fortran 2d arrays need to be declared as 1d C arrays
-    //  in order to avoid -Wlto-type-mismatch warnings when compiling with LTO.
-    int nevhep, nhep, isthep[4000], idhep[4000], jmohep[4000*2],
-      jdahep[4000*2];
-    double phep[4000*5], vhep[4000*4];
-  };
-  extern hepevt hepevt_;
+  struct nevcounter {
+    int nev;
+  }; 
+  extern nevcounter nevcounter_;
 
   struct weights {
     double weight[max_num_weights];
