@@ -240,9 +240,13 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
       using Options = typename Propagator::template Options<ActorList>;
 
       Options options = prepareOptions<Options>(anygctx, mctx, startParameters, navDir, pathLimit);
+      auto result = target.type() == Acts::Surface::Perigee  ?
+        propagator.template propagate<Acts::BoundTrackParameters, Options,
+                                    Acts::ForcedSurfaceReached, Acts::PathLimitReached>(startParameters, target, options) :
+        propagator.template propagate<Acts::BoundTrackParameters, Options,
+                                    Acts::SurfaceReached, Acts::PathLimitReached>(startParameters, target, options);
 
-      auto result = propagator.template propagate<Acts::BoundTrackParameters, Options,
-                                   Acts::ForcedSurfaceReached, Acts::PathLimitReached>(startParameters, target, options);
+      
       if (!result.ok()) {
         return result.error();
       }
@@ -292,9 +296,11 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
       using Options = typename Propagator::template Options<ActorList>;
 
       Options options = prepareOptions<Options>(anygctx, mctx, startParameters, navDir, pathLimit);
-
-      auto result = propagator.template propagate<Acts::BoundTrackParameters, Options,
-                                   Acts::ForcedSurfaceReached, Acts::PathLimitReached>(startParameters, target, options);
+      auto result = target.type() == Acts::Surface::Perigee  ?
+        propagator.template propagate<Acts::BoundTrackParameters, Options,
+                                    Acts::ForcedSurfaceReached, Acts::PathLimitReached>(startParameters, target, options) :
+        propagator.template propagate<Acts::BoundTrackParameters, Options,
+                                    Acts::SurfaceReached, Acts::PathLimitReached>(startParameters, target, options);
       if (!result.ok()) {
         ATH_MSG_ERROR("Got error during propagation: " << result.error()
                       << ". Returning empty parameters.");
