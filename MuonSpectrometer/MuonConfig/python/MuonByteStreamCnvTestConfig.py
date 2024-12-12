@@ -75,7 +75,7 @@ def RpcRdoToRpcDigitCfg(flags, name="RpcRdoToRpcDigitAlg", **kwargs):
     rpcrdo_decode = CompFactory.Muon.RpcRDO_Decoder("RpcRDO_Decoder", BCZERO=flags.Trigger.L1MuonSim.RPCNBCZ)
     kwargs.setdefault("rpcRdoDecoderTool", rpcrdo_decode)
 
-    result.addEventAlgo(CompFactory.RpcRdoToRpcDigit(name, **kwargs))
+    result.addEventAlgo(CompFactory.Muon.RpcRdoToRpcDigit(name, **kwargs))
     return result
 
 
@@ -190,7 +190,7 @@ def NrpcDigitToNrpcRDOCfg(flags, name="NrpcDigitToNrpcRDO", **kwargs):
     else:
         kwargs.setdefault("NrpcRdoKey", "NRPCRDO")
 
-    acc.addEventAlgo(CompFactory.NrpcDigitToNrpcRDO(name, **kwargs))
+    acc.addEventAlgo(CompFactory.Muon.NrpcDigitToNrpcRDO(name, **kwargs))
     return acc
 
 

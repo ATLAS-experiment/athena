@@ -1,6 +1,6 @@
 /*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-#include "../MuonNRPC_CablingAlg.h"
+#include "../NRpcCablingAlg.h"
 
-DECLARE_COMPONENT(MuonNRPC_CablingAlg)
+DECLARE_COMPONENT(Muon::NRpcCablingAlg)

@@ -4,7 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def RpcToyCablingJsonDumpAlgCfg(flags, name="RpcToyCablingJsonDumpAlg", **kwargs):
     result = ComponentAccumulator()
-    the_alg = CompFactory.RpcToyCablingJsonDumpAlg(name, **kwargs)
+    the_alg = CompFactory.Muon.RpcToyCablingJsonDumpAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 

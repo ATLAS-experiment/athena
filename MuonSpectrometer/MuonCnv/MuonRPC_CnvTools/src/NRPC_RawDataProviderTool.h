@@ -11,7 +11,7 @@
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "MuonCablingData/MuonNRPC_CablingMap.h"
+#include "MuonCablingData/RpcCablingMap.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "xAODMuonRDO/NRPCRDOContainer.h"
@@ -103,7 +103,7 @@ namespace Muon {
         // Rob Data Provider handle
         ServiceHandle<IROBDataProviderSvc> m_robDataProvider{this, "ROBDataProviderSvc", "ROBDataProviderSvc"};
 
-        SG::ReadCondHandleKey<MuonNRPC_CablingMap> m_readKey{this, "ReadKey", "MuonNRPC_CablingMap", "Key of MuonNRPC_CablingMap"};
+        SG::ReadCondHandleKey<RpcCablingMap> m_readKey{this, "ReadKey", "MuonNRPC_CablingMap", "Key of MuonNRPC_CablingMap"};
     };
 }  // namespace Muon
 

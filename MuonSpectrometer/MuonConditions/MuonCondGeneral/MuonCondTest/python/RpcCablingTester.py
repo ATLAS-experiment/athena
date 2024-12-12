@@ -1,13 +1,13 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 def RpcCablingTestAlgCfg(flags, name = "RpcCablingTestAlg", JSONFile="",**kwargs):
-    from AthenaConfiguration.ComponentFactory import CompFactory
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    result = ComponentAccumulator()
+    from AthenaConfiguration.ComponentFactory import CompFactory
     from MuonConfig.MuonCablingConfig import NRPCCablingConfigCfg
     from AthenaCommon.Constants import DEBUG
+    result = ComponentAccumulator()
     result.merge(NRPCCablingConfigCfg(flags, JSONFile = JSONFile, OutputLevel = DEBUG ))
-    event_algo = CompFactory.RpcCablingTestAlg(name,**kwargs)
+    event_algo = CompFactory.Muon.RpcCablingTestAlg(name, OutputLevel = DEBUG, **kwargs)
     result.addEventAlgo(event_algo, primary = True)
     return result
 
@@ -25,9 +25,17 @@ if __name__ == "__main__":
     flags.Output.ESDFileName = args.output
     flags.Input.Files = args.inputFile
     flags.lock()   
+
     from MuonCondTest.MdtCablingTester import setupServicesCfg
     cfg = setupServicesCfg(flags)
-    cfg.merge(RpcCablingTestAlgCfg(flags))
+    
+    cfg.merge( RpcCablingTestAlgCfg(flags))  
+    if len(args.cablingMap):
+        cfg.getCondAlgo("MuonNRPC_CablingAlg").JSONFile = args.cablingMap
+    cfg.getService("MessageSvc").debugLimit = 2147483647
+    cfg.getService("MessageSvc").verboseLimit = 2147483647
+    cfg.getService("MessageSvc").infoLimit = 2147483647
+
     cfg.printConfig(withDetails=True, summariseProps=True)
     flags.dump()
    
