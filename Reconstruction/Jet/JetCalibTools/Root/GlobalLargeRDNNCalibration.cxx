@@ -1,20 +1,24 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // System includes
-#include <TEnv.h>
-#include <tuple>
-#include <cmath>
-#include <map>
+#include "JetCalibTools/CalibrationMethods/GlobalLargeRDNNCalibration.h"
+
 
 #ifdef XAOD_STANDALONE
 #include <AsgMessaging/MessageCheck.h>
 #endif
 
 #include "JetCalibTools/JetCalibUtils.h"
+#include "AsgServices/ServiceHandle.h"
 #include "PathResolver/PathResolver.h"
-#include "JetCalibTools/CalibrationMethods/GlobalLargeRDNNCalibration.h"
+
+#include <TEnv.h>
+#include <tuple>
+#include <cmath>
+#include <map>
+#include <algorithm> //count_if
 
 
 namespace{
