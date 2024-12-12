@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -94,7 +94,6 @@ std::vector<InDet::IZWindowRoISeedTool::ZWindow> InDet::LeadTracksRoISeedTool::g
   ATH_MSG_DEBUG("Selected track collection size "<<selectedTracks.size());
 
   //create all pairs that satisfy leading pT and delta z0 requirements
-  typedef std::vector<Trk::Track*>::iterator iteratorTracks;
   for ( Trk::Track *trkLeading : selectedTracks ) {
     //kinematic requirements
     float thetaLeading = trkLeading->perigeeParameters()->parameters()[Trk::theta];
