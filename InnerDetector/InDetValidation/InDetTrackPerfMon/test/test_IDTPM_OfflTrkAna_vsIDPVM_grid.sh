@@ -75,7 +75,7 @@ fi
 
 # convert IDPVM output to IDTPM's format
 echo "Converting IDPVM output for comparison..."
-IDTPMcnv.py -i idpvm.root -c ${IDPVMtoIDTPMcnv_absPath}
+IDTPMcnv.py -i idpvm.root -c ${IDPVMtoIDTPMcnv_absPath} -o IDTPMcnv
 
 # Don't run IDTPM vs IDPVM comparison if dcube config is not found
 if [ -z "$dcubeXml_IDTPMcmp_absPath" ]; then
