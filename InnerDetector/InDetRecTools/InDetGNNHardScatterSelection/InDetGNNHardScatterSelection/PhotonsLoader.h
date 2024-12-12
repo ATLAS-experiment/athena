@@ -31,7 +31,7 @@ namespace InDetGNNHardScatterSelection {
     // Subclass for Photons loader inherited from abstract IConstituentsLoader class
     class PhotonsLoader : public IConstituentsLoader {
       public:
-        PhotonsLoader(ConstituentsInputConfig);
+        PhotonsLoader(const ConstituentsInputConfig & cfg);
         std::tuple<std::string, FlavorTagDiscriminants::Inputs, std::vector<const xAOD::IParticle*>> getData(
           const xAOD::Vertex& vertex) const override ;
         std::string getName() const override;

@@ -84,7 +84,7 @@ namespace InDetGNNHardScatterSelection {
           using NamedSequenceFromConstituents = std::function<std::pair<std::string, std::vector<double>>(
               const xAOD::Vertex&,
               const Constituents&)>;
-          CustomSequenceGetter(std::vector<InputVariableConfig> inputs);
+          CustomSequenceGetter(const std::vector<InputVariableConfig> & inputs);
 
           std::pair<std::vector<float>, std::vector<int64_t>> getFeats(const xAOD::Vertex& jet, const Constituents& constituents) const;
           

@@ -26,7 +26,7 @@ namespace InDetGNNHardScatterSelection {
     } // end of iparticle sort getter
 
     TracksLoader::TracksLoader(
-        ConstituentsInputConfig cfg
+        const ConstituentsInputConfig & cfg
     ):
         IConstituentsLoader(cfg),
         m_iparticleSortVar(TracksLoader::iparticleSortVar(cfg.order)),

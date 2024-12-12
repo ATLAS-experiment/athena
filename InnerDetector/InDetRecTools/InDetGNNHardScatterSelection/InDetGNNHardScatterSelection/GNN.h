@@ -73,7 +73,7 @@ namespace InDetGNNHardScatterSelection {
     std::vector<std::shared_ptr<IConstituentsLoader>> m_constituentsLoaders;
 
     Decorators m_decorators;
-    float m_defaultValue;
+    float m_defaultValue{};
   };
 } // end namespace InDetGNNHardScatterSelection
 #endif // HS_GNN_H

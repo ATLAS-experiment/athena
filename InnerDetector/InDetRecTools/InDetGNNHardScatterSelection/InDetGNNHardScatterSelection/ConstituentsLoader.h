@@ -53,8 +53,8 @@ namespace InDetGNNHardScatterSelection {
     };
 
     ConstituentsInputConfig createConstituentsLoaderConfig(
-      std::string name,
-      std::vector<std::string> input_variables
+      const std::string & name,
+      const std::vector<std::string> & input_variables
     );
 
     // Virtual class to represent loader of any type of constituents

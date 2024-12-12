@@ -47,8 +47,8 @@ namespace InDetGNNHardScatterSelection {
     // Create a configuration for the constituents loaders
     //
     ConstituentsInputConfig createConstituentsLoaderConfig(
-      std::string name,
-      std::vector<std::string> input_variables
+      const std::string & name,
+      const std::vector<std::string> & input_variables
     ){
       ConstituentsInputConfig config;
 

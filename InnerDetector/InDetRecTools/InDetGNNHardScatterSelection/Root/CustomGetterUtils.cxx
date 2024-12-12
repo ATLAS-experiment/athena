@@ -261,7 +261,7 @@ namespace {
 
     template <typename T>
     CustomSequenceGetter<T>::CustomSequenceGetter(
-      std::vector<InputVariableConfig> inputs)
+      const std::vector<InputVariableConfig> & inputs)
     {
         for (const InputVariableConfig& input_cfg: inputs) {
           auto [seqGetter, seq_deps] = seqFromConsituents(input_cfg);
