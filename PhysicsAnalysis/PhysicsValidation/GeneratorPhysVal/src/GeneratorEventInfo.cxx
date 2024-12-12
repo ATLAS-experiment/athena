@@ -5,8 +5,8 @@
 #include "GeneratorEventInfo.h"
 
 namespace GeneratorPhysVal {
-GeneratorEventInfo::GeneratorEventInfo(PlotBase* pParent, std::string sDir,
-                                       std::string sType)
+GeneratorEventInfo::GeneratorEventInfo(PlotBase* pParent, const std::string& sDir,
+                                       const std::string& sType)
     : PlotBase(pParent, sDir), m_sType(sType) {
 
   m_event_number = Book1D("is_event_number", "is_event_number", 2, -0.5, 1.5);
