@@ -1,20 +1,19 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HIEVENTUTILS_HIEVENTSHAPEINDEX_H
 #define HIEVENTUTILS_HIEVENTSHAPEINDEX_H
 
-#include "xAODHIEvent/HIEventShapeContainer.h"
-#include "HIEventUtils/HIEventDefs.h"
+#include "HIEventUtils/HIEventDefs.h" //HI::BinningScheme
+#include  "xAODHIEvent/HIEventShapeContainer.h" //typedef
 #include <memory>
 #include <map>
-#include <cmath>
-#include <TH2.h>
+#include <vector>
+class TH2;
 
 
-class HIEventShapeIndex
-{
+class HIEventShapeIndex{
 
 public:
   HIEventShapeIndex();
@@ -42,9 +41,9 @@ public:
   std::string print() const;
 private:
   struct range_index_t{
-    float eta_min;
-    float eta_max;
-    unsigned int index;
+    float eta_min{};
+    float eta_max{};
+    unsigned int index{};
 
     range_index_t(float emin, float emax, unsigned int ii) : eta_min(emin), eta_max(emax),index(ii) {};
     range_index_t()=default;
@@ -58,7 +57,7 @@ private:
   };
   std::map<int,std::vector<range_index_t> > m_edges;
   
-  unsigned int m_size;
+  unsigned int m_size{};
 
   unsigned int getIndex_Internal(float eta, int layer, bool etaIndex) const;
   std::map<int,std::vector<range_index_t> >::const_iterator getLayer(int layer) const;

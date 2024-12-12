@@ -4,6 +4,7 @@
 
 #include "HIEventUtils/HIEventShapeIndex.h"
 #include "HIEventUtils/HICaloRange.h"
+#include "TH2.h"
 #include <iomanip>
 #include <sstream>
 #include <iostream>
@@ -249,7 +250,7 @@ std::string HIEventShapeIndex::print() const
 	ss.precision(3);
 	for(const auto& pp : m_edges)
 	{
-		for(auto ri : pp.second)
+		for(const auto & ri : pp.second)
 		{
 			ss << std::setw(10) << pp.first
 			<< std::setw(10) << ri.eta_min
