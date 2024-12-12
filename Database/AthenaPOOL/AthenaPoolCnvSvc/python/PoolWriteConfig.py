@@ -140,6 +140,12 @@ def PoolWriteCfg(flags):
         PoolAttributes += [ pah.setContainerSplitLevel( fileName, "Aux.", splitLvl ) ]
         PoolAttributes += [ pah.setContainerSplitLevel( fileName, "Dyn.", dynSplitLvl ) ]
 
+        # ROOT inadvertently broke forward compatibility in v6.30+ (see root/issues/15964)
+        # This workaround is needed so that older releases can read files created by the new ones
+        # For more information see ATEAM-1001
+        if "EVNT" in stream or "RDO" in stream:
+            PoolAttributes += [ f"DatabaseName = '{fileName}'; FILEFORWARD_COMPATIBILITY = '1'" ]
+
         # Find the maximum AutoFlush across all formats
         maxAutoFlush = max(maxAutoFlush, autoFlush)
 

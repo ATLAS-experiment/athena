@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.RootUtils
 # @author Sebastien Binet
@@ -129,11 +129,10 @@ def _pythonize_tfile():
             ),
         ]):
         cppyy.load_library("libRootUtilsPyROOTDict")
-        rootutils = getattr(root, "RootUtils")
-        pybytes        = getattr(rootutils, "PyBytes")  # noqa: F841
+        _ = root.RootUtils.PyBytes
         #MN: lines below fail in ROOT6 if PCM from RootUtils is not found
-        read_root_file = getattr(rootutils, "_pythonize_read_root_file")
-        tell_root_file = getattr(rootutils, "_pythonize_tell_root_file")
+        read_root_file = root.RootUtils._pythonize_read_root_file
+        tell_root_file = root.RootUtils._pythonize_tell_root_file
         pass
     def read(self, size=-1):
         """read([size]) -> read at most size bytes, returned as a string.
@@ -306,6 +305,12 @@ class RootFileDumper(object):
 
                 br = tree.GetBranch (br_name)
                 if br.GetClassName() != '':
+                    # Make sure dictionaries are completely loaded before
+                    # trying to fetch it from ROOT.  Otherwise we can run
+                    # into cling parse failures due to it synthesizing
+                    # incorrect forward declarations.
+                    # See ATEAM-1000.
+                    getattr (ROOT, br.GetClassName())
                     val = getattr(tree, br_name)
                 else:
                     vals = [_getLeaf (l) for l in br.GetListOfLeaves()]

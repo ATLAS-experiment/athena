@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils/python/xmldict.py
 # @purpose converts an XML file into a python dict, back and forth
@@ -27,7 +27,7 @@ def import_etree():
     m = imp.find_module('etree', [xml_site_package])
 
     etree = imp.load_module('xml.etree', *m)
-    setattr(xml, 'etree', etree)
+    xml.etree = etree
     return etree
 
 etree = import_etree()
