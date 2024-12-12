@@ -34,11 +34,11 @@ rm log.AODMerge >> /dev/null 2>&1
 
 # Histo stage
 runegammaMonitoring.py -p 'electron' >> histo.log 2>&1
-mv Nightly-monitoring.hist.root Nightly-monitoring_electron.hist.root
 state=$?
+mv Nightly-monitoring.hist.root Nightly-monitoring_electron.hist.root
 runegammaMonitoring.py -p 'gamma' >> histo.log 2>&1
-mv Nightly-monitoring.hist.root Nightly-monitoring_gamma.hist.root
 statg=$?
+mv Nightly-monitoring.hist.root Nightly-monitoring_gamma.hist.root
 
 if [ $state -eq 0 -a $statg -eq 0 ]
 then
