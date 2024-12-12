@@ -248,6 +248,7 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
           ATH_MSG_ERROR("Cluster index out of range");
           continue;
         }
+        //cppcheck-suppress containerOutOfBounds
         if (allClusters[id]->type(Trk::PrepRawDataType::PixelCluster))
           nPIX++;
         if (allClusters[id]->type(Trk::PrepRawDataType::SCT_Cluster))
