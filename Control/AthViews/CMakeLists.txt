@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthViews )
@@ -43,7 +43,7 @@ atlas_add_test( ViewLinking_test
 atlas_add_test( ViewCollectionMerge_test
                 SOURCES test/ViewCollectionMerge_test.cxx
                 INCLUDE_DIRS ${GMOCK_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
-                LINK_LIBRARIES ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} AthContainers AthLinks AthViews AthenaBaseComps AthenaKernel CxxUtils GaudiKernel StoreGateLib TrigSteeringEvent
+                LINK_LIBRARIES ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} AthContainers AthLinks AthViews AthenaBaseComps AthenaKernel CxxUtils GaudiKernel GoogleTestTools StoreGateLib TrigSteeringEvent
                 ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/test"
                 POST_EXEC_SCRIPT nopost.sh )
 
