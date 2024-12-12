@@ -13,6 +13,7 @@
 #include "FPGATrackSimInput/IFPGATrackSimEventInputHeaderTool.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFilterTool.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFinderTool.h"
+#include "FPGATrackSimHough/FPGATrackSimRoadUnionTool.h"
 #include "FPGATrackSimMaps/FPGATrackSimSpacePointsToolI.h"
 #include "FPGATrackSimMaps/IFPGATrackSimHitFilteringTool.h"
 #include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"
@@ -76,7 +77,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         std::string m_description;
 
         // Handles
-        ToolHandle<IFPGATrackSimRoadFinderTool>          m_roadFinderTool {this, "RoadFinder", "FPGATrackSimPatternMatchTool", "Road Finder Tool"};
+        ToolHandle<FPGATrackSimRoadUnionTool>            m_roadFinderTool {this, "RoadFinder", "FPGATrackSimPatternMatchTool", "Road Finder Tool"};
         ToolHandle<FPGATrackSimLLPRoadFilterTool>        m_LRTRoadFilterTool {this, "LRTRoadFilter", "FPGATrackSimLLPRoadFilterTool/FPGATrackSimLLPRoadFilterTool", "LRT Road Filter Tool"};
         ToolHandle<IFPGATrackSimRoadFinderTool>          m_LRTRoadFinderTool {this, "LRTRoadFinder", "FPGATrackSimHoughTransform_d0phi0_Tool/FPGATrackSimHoughTransform_d0phi0_Tool", "LRT Road Finder Tool"};
         ToolHandle<IFPGATrackSimRoadFilterTool>          m_roadFilterTool {this, "RoadFilter", "FPGATrackSimEtaPatternFilterTool", "Road Filter Tool"};
@@ -109,9 +110,11 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
 
 
         // Properties for the output header tool.
-        Gaudi::Property<std::string> m_outputBranch     {this, "outputBranchName", "LogicalEventOutputHeader", "Name of the branch for output data in output ROOT file." };
+        Gaudi::Property<std::string> m_sliceBranch  {this, "SliceBranchName", "LogicalEventSlicedHeader", "Name of the branch for slied hits in output ROOT file." };
+        Gaudi::Property<std::string> m_outputBranch {this, "outputBranchName", "LogicalEventOutputHeader", "Name of the branch for output data in output ROOT file." };
 
         // ROOT pointers.
+        FPGATrackSimLogicalEventInputHeader*  m_slicedHitHeader = nullptr;
         FPGATrackSimLogicalEventOutputHeader* m_logicEventOutputHeader = nullptr;
 
         // Event storage

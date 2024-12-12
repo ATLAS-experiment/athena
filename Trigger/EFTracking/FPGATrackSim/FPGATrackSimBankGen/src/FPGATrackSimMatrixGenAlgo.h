@@ -32,7 +32,7 @@
 #include "FPGATrackSimMaps/FPGATrackSimSpacePointsToolI.h"
 #include "FPGATrackSimObjects/FPGATrackSimEventInputHeader.h"
 #include "FPGATrackSimObjects/FPGATrackSimTruthTrack.h"
-#include "FPGATrackSimHough/IFPGATrackSimRoadFinderTool.h"
+#include "FPGATrackSimHough/FPGATrackSimRoadUnionTool.h"
 #include "FPGATrackSimMatrixIO.h"
 
 #include "TTree.h"
@@ -47,7 +47,6 @@ class ITHistSvc;
 class TH1F;
 class TH2F;
 class IFPGATrackSimMappingSvc;
-class IFPGATrackSimRoadFinderTool;
 
 class FPGATrackSimMatrixGenAlgo : public AthAlgorithm
 {
@@ -78,7 +77,7 @@ class FPGATrackSimMatrixGenAlgo : public AthAlgorithm
 	ToolHandle<FPGATrackSimRawToLogicalHitsTool> m_hitMapTool {this, "FPGATrackSimRawToLogicalHitsTool", "FPGATrackSimRawToLogicalHitsTool/FPGATrackSim_RawToLogicalHitsTool", "FPGATrackSim_RawToLogicalHitsTool"};
         ToolHandle<FPGATrackSimClusteringToolI>       m_clusteringTool { this, "FPGATrackSimClusteringFTKTool", "FPGATrackSimClusteringFTKTool/FPGATrackSimClusteringFTKTool", "FPGATrackSimClusteringFTKTool" };
         ToolHandle<FPGATrackSimSpacePointsToolI>       m_spacePointsTool { this, "SpacePointTool", "FPGATrackSimSpacePointsTool/FPGATrackSimSpacePointsTool", "FPGATrackSimSpacePointsTool" };
-	ToolHandle<IFPGATrackSimRoadFinderTool>       m_roadFinderTool {this, "RoadFinder", "RoadFinder"};
+	ToolHandle<FPGATrackSimRoadUnionTool>       m_roadFinderTool {this, "RoadFinder", "RoadFinder"};
 	const FPGATrackSimPlaneMap* m_pmap = nullptr; // alias to m_FPGATrackSimMapping->PlaneMap();
 
 

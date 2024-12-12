@@ -71,8 +71,12 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
 
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
 
-    // This file should only need to generate one output tool!
+    // This file should only need to generate one input and output branch.
+    m_slicedHitHeader = m_writeOutputTool->addInputBranch(m_sliceBranch.value(), true);
     m_logicEventOutputHeader = m_writeOutputTool->addOutputBranch(m_outputBranch.value(), true);
+
+    // Connect the road union tool accordingly.
+    m_roadFinderTool->setupSlices(m_slicedHitHeader);
 
     ATH_MSG_DEBUG("initialize() Setting branch");
 
@@ -351,6 +355,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
 
     // Reset data pointers
+    m_slicedHitHeader->reset();
     m_logicEventOutputHeader->reset();
 
     TIME(m_tfin);
