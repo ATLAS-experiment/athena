@@ -126,7 +126,8 @@ namespace MuonHough {
                               << " layer " << (*it)->layer << " binmin " << binmin << " max " << binmax;
                     if ((*it)->debugInfo()) {
                         const HitDebugInfo* db1 = (*it)->debugInfo();
-                        std::cout << " sec " << db1->sector << " r " << db1->region << " type " << db1->type << " lay " << db1->layer
+                        std::cout << " sec " << db1->sector << " r " <<Muon::MuonStationIndex::regionName(db1->region) << " type " 
+                                  << db1->type << " lay " << Muon::MuonStationIndex::layerName(db1->layer)
                                   << " slay " << db1->sublayer << std::endl;
                     } else
                         std::cout << std::endl;
@@ -245,8 +246,9 @@ namespace MuonHough {
                               << binmax * m_binsize + m_descriptor.yMinRange;
                     if ((*it)->debugInfo()) {
                         const HitDebugInfo* db1 = (*it)->debugInfo();
-                        std::cout << " sec " << db1->sector << " r " << db1->region << " type " << db1->type << " lay " << db1->layer
-                                  << " bc " << db1->barcode << std::endl;
+                        std::cout << " sec " << db1->sector << " r " << Muon::MuonStationIndex::regionName(db1->region)
+                         << " type " << db1->type << " lay " << Muon::MuonStationIndex::layerName(db1->layer)
+                         << " bc " << db1->barcode << std::endl;
                     } else
                         std::cout << std::endl;
                 }
@@ -291,8 +293,8 @@ namespace MuonHough {
         maximum.pos = 0;
         maximum.theta = 0;
         maximum.refpos = 0;
-        maximum.refregion = -1;
-        maximum.refchIndex = -1;
+        maximum.refregion = DetRegIdx::DetectorRegionUnknown;
+        maximum.refchIndex = ChIdx::ChUnknown;
         maximum.binpos = -1;
         maximum.binposmin = -1;
         maximum.binposmax = -1;
@@ -534,7 +536,7 @@ namespace MuonHough {
             float extrapolated_diff = 9999;
             const float tan_theta_ref = std::tan(theta_ref);
             const float invtan_theta_ref = 1. / tan_theta_ref;
-            float r_start = ref.hough->m_descriptor.chIndex % 2 > 0
+            float r_start = static_cast<int>(ref.hough->m_descriptor.chIndex) % 2 > 0
                                 ? 4900.
                                 : 5200.;  // start of barrel B field; values could be further optimized; 5500.:6500.
             float z_start = 8500.;        // start of endcap B field; used to be 6500; should start at 8500

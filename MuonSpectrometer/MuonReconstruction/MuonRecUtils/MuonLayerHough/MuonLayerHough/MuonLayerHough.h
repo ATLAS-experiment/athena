@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONLAYERHOUGH_H
@@ -23,23 +23,28 @@ namespace MuonHough {
 
     /** struct containing all information to build a Hough transform for a given chamber index */
     struct RegionDescriptor {
-        RegionDescriptor(int sector_, Muon::MuonStationIndex::DetectorRegionIndex region_, Muon::MuonStationIndex::ChIndex chIndex_,
-                         float referencePosition_, float yMinRange_, float yMaxRange_, float yBinSize_, float thetaStep_,
+        
+        using DetRegIdx = Muon::MuonStationIndex::DetectorRegionIndex;
+        using ChIdx =  Muon::MuonStationIndex::ChIndex; 
+        
+        RegionDescriptor(int sector_, DetRegIdx region_, ChIdx chIndex_,
+                         float referencePosition_, float yMinRange_, 
+                         float yMaxRange_, float yBinSize_, float thetaStep_,
                          unsigned int nthetaSamples_) :
-            sector(sector_),
-            region(region_),
-            chIndex(chIndex_),
-            referencePosition(referencePosition_),
-            yMinRange(yMinRange_),
-            yMaxRange(yMaxRange_),
-            yBinSize(yBinSize_),
-            thetaStep(thetaStep_),
-            nthetaSamples(nthetaSamples_) {}
+            sector{sector_},
+            region{region_},
+            chIndex{chIndex_},
+            referencePosition{referencePosition_},
+            yMinRange{yMinRange_},
+            yMaxRange{yMaxRange_},
+            yBinSize{yBinSize_},
+            thetaStep{thetaStep_},
+            nthetaSamples{nthetaSamples_} {}
         RegionDescriptor() = default;
 
         int sector{0};
-        Muon::MuonStationIndex::DetectorRegionIndex region{Muon::MuonStationIndex::DetectorRegionUnknown};
-        Muon::MuonStationIndex::ChIndex chIndex{Muon::MuonStationIndex::ChUnknown};
+        DetRegIdx region{DetRegIdx::DetectorRegionUnknown};
+        ChIdx chIndex{ChIdx::ChUnknown};
         float referencePosition{0};
         float yMinRange{0};
         float yMaxRange{0};
@@ -52,6 +57,9 @@ namespace MuonHough {
 
     
     struct MuonLayerHough {
+        
+        using DetRegIdx = Muon::MuonStationIndex::DetectorRegionIndex;
+        using ChIdx =  Muon::MuonStationIndex::ChIndex; 
         /// struct representing the maximum in the hough space
         struct Maximum {
             Maximum() = default;
@@ -61,8 +69,8 @@ namespace MuonHough {
             float theta{0.};  // angle
 
             float refpos{0.};   // reference position
-            int refregion{0};   // reference region
-            int refchIndex{0};  // reference chamber index
+            DetRegIdx refregion{DetRegIdx::DetectorRegionUnknown};   // reference region
+            ChIdx refchIndex{ChIdx::ChUnknown};  // reference chamber index
 
             int binpos{-1};           // position bin
             int binposmin{-1};        // lower edge of the maximum
@@ -76,10 +84,10 @@ namespace MuonHough {
 
             bool isEndcap() const {
                 // refers to the chamber orientation!!!! so BEE is a barell in this def
-                Muon::MuonStationIndex::DetectorRegionIndex region = hough->m_descriptor.region;
-                Muon::MuonStationIndex::ChIndex chIndex = hough->m_descriptor.chIndex;
+                DetRegIdx region = hough->m_descriptor.region;
+                ChIdx chIndex = hough->m_descriptor.chIndex;
                 // need to make sure BEE's reference plane is the same as barrel
-                if (region != Muon::MuonStationIndex::Barrel && chIndex != Muon::MuonStationIndex::BEE) { return true; }
+                if (region != DetRegIdx::Barrel && chIndex != ChIdx::BEE) { return true; }
                 return false;
             };
             float getGlobalR() const {
