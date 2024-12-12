@@ -50,18 +50,18 @@ def ITkPixelModuleConfigCondAlgCfg(flags, name="ITkPixelModuleConfigCondAlg", **
     acc.addCondAlgo(CompFactory.PixelModuleConfigCondAlg(name, **CondArgs))
     return acc
 
-def ITkPixelAlignCondAlgCfg(flags, name="ITkPixelAlignCondAlg",setAlignmentFolderName="/Indet/Align", **kwargs):
+def ITkPixelAlignCondAlgCfg(flags,name="ITkPixelAlignCondAlg", **kwargs):
     """Return a ComponentAccumulator with configured PixelAlignCondAlg for ITk"""
     acc = ComponentAccumulator()
 
     if flags.GeoModel.Align.Dynamic:
         raise RuntimeError("Dynamic alignment not supported for ITk yet")
     else:
-        acc.merge(addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", setAlignmentFolderName, className="AlignableTransformContainer"))
+        acc.merge(addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", flags.ITk.Geometry.alignmentFolder , className="AlignableTransformContainer"))
 
     kwargs.setdefault("DetManagerName", "ITkPixel")
     kwargs.setdefault("UseDynamicAlignFolders", flags.GeoModel.Align.Dynamic)
-    kwargs.setdefault("ReadKeyStatic", setAlignmentFolderName)
+    kwargs.setdefault("ReadKeyStatic", flags.ITk.Geometry.alignmentFolder)
     # kwargs.setdefault("ReadKeyDynamicL1", "/Indet/AlignL1/ID")
     # kwargs.setdefault("ReadKeyDynamicL2", "/Indet/AlignL2/PIX")
     # kwargs.setdefault("ReadKeyDynamicL3", "/Indet/AlignL3")
@@ -139,10 +139,10 @@ def ITkPixelDeadMapCondAlgCfg(flags, name="ITkPixelDeadMapCondAlg", **kwargs):
     acc.addCondAlgo(CompFactory.PixelDeadMapCondAlg(name, **kwargs))
     return acc
 
-def ITkPixelDetectorElementCondAlgCfg(flags, name="ITkPixelDetectorElementCondAlg",setAlignmentFolderName="/Indet/Align", **kwargs):
+def ITkPixelDetectorElementCondAlgCfg(flags, name="ITkPixelDetectorElementCondAlg", **kwargs):
     """Return a ComponentAccumulator with configured PixelDetectorElementCondAlg for ITk"""
     acc = ComponentAccumulator()
-    acc.merge(ITkPixelAlignCondAlgCfg(flags,setAlignmentFolderName=setAlignmentFolderName))
+    acc.merge(ITkPixelAlignCondAlgCfg(flags))
     kwargs.setdefault("DetManagerName", "ITkPixel")
     kwargs.setdefault("PixelAlignmentStore", "ITkPixelAlignmentStore")
     kwargs.setdefault("WriteKey", "ITkPixelDetectorElementCollection")

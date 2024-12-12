@@ -6,17 +6,18 @@ from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
 from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripGeoModelCfg
 
 
-def ITkStripAlignCondAlgCfg(flags, name="ITkStripAlignCondAlg",setGeometryAlignable=False,setAlignmentFolderName="/Indet/Align", **kwargs):
+def ITkStripAlignCondAlgCfg(flags, name="ITkStripAlignCondAlg", **kwargs):
     """Return a configured SCT_AlignCondAlg for ITk"""
-    acc = ITkStripGeoModelCfg(flags,setGeometryAlignable=setGeometryAlignable,setAlignmentFolderName=setAlignmentFolderName)
+    acc = ITkStripGeoModelCfg(flags)
     if flags.GeoModel.Align.Dynamic:
         raise RuntimeError("Dynamic alignment not supported for ITk yet")
     else:
-        acc.merge(addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", setAlignmentFolderName, className="AlignableTransformContainer"))
+        acc.merge(addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", flags.ITk.Geometry.alignmentFolder, className="AlignableTransformContainer"))
 
     kwargs.setdefault("DetManagerName", "ITkStrip")
     kwargs.setdefault("WriteKey", "ITkStripAlignmentStore")
     kwargs.setdefault("UseDynamicAlignFolders", flags.GeoModel.Align.Dynamic)
+    kwargs.setdefault("ReadKeyStatic",flags.ITk.Geometry.alignmentFolder)
 
     sctAlignCondAlg = CompFactory.SCT_AlignCondAlg(name, **kwargs)
     acc.addCondAlgo(sctAlignCondAlg)
@@ -64,11 +65,11 @@ def ITkStripConfigurationCondAlgCfg(flags, name="ITkStripConfigurationCondAlg", 
     return acc
 
 
-def ITkStripDetectorElementCondAlgCfg(flags, name="ITkStripDetectorElementCondAlg",setGeometryAlignable=False,setAlignmentFolderName="/Indet/Align", **kwargs):
+def ITkStripDetectorElementCondAlgCfg(flags, name="ITkStripDetectorElementCondAlg", **kwargs):
     kwargs.setdefault("DetManagerName", "ITkStrip")
     kwargs.setdefault("ReadKey", "ITkStripAlignmentStore")
     kwargs.setdefault("WriteKey", "ITkStripDetectorElementCollection")
 
-    acc = ITkStripAlignCondAlgCfg(flags,setGeometryAlignable=setGeometryAlignable,setAlignmentFolderName=setAlignmentFolderName)
+    acc = ITkStripAlignCondAlgCfg(flags)
     acc.addCondAlgo(CompFactory.SCT_DetectorElementCondAlg(name, **kwargs))
     return acc
