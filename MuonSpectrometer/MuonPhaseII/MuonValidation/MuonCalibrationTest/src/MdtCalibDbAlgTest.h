@@ -44,6 +44,7 @@ namespace MuonValR4{
             MuonVal::ScalarBranch<float>& m_out_tdc{m_tree.newScalar<float>("tdc")};
             MuonVal::ScalarBranch<float>& m_out_driftRadius{m_tree.newScalar<float>("driftRadius")};
             MuonVal::ScalarBranch<float>& m_out_driftdRdt{m_tree.newScalar<float>("driftdRdt")};
+            MuonVal::ScalarBranch<float>& m_out_driftTime{m_tree.newScalar<float>("driftTime")};
             MuonVal::ScalarBranch<Identifier>& m_out_identifier{m_tree.newScalar<Identifier>("identifier")};
             MuonVal::ScalarBranch<float>& m_out_globalPos{m_tree.newScalar<float>("globalPos")};
             MuonVal::ScalarBranch<float>& m_out_globalPosX{m_tree.newScalar<float>("globalPosX")};

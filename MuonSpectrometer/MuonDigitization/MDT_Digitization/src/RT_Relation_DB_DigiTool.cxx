@@ -60,7 +60,6 @@ double RT_Relation_DB_DigiTool::getDriftTime(const EventContext& ctx,
 
     double time = 0.0;
     double t = 0.0;
-    bool outOfBound = false;
 
     if (data) {
         // get RT relation and resolution function
@@ -68,8 +67,8 @@ double RT_Relation_DB_DigiTool::getDriftTime(const EventContext& ctx,
         const MuonCalib::IRtResolution *rtResolution = data->rtRes();
 
         // get inverse rt and calculate time resolution
-        const MuonCalib::TrRelation *trRelation = data->tr();
-        time = trRelation->tFromR(std::abs(measRadius), outOfBound);
+        const MuonCalib::ITrRelation *trRelation = data->tr();
+        time = trRelation->driftTime(std::abs(measRadius)).value_or(0.);
 
         if (time < 0.0) {
             time = 0.0;
@@ -95,10 +94,9 @@ double RT_Relation_DB_DigiTool::getDriftTime(const EventContext& ctx,
         double tmin = time - 3.4 * timeWidth;
         double tmax = time + 3.4 * timeWidth;
 
-        bool outOfBound2 = false;
         if (tmin < 0.0) tmin = 0.0;
         if (tmax > tUp)
-            tmax = trRelation->tFromR(innerTubeRadius, outOfBound2);  // tmax = tUp+tLow; //means: tmax  = (tmax of rt relation) + (one binwidth )
+            tmax = trRelation->driftTime(innerTubeRadius).value_or(0.);  // tmax = tUp+tLow; //means: tmax  = (tmax of rt relation) + (one binwidth )
 
         double gaussian;
         constexpr double sqrt_one_over_two_pi = 0.39894228;

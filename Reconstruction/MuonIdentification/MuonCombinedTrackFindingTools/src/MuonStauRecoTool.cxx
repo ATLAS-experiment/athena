@@ -345,11 +345,10 @@ namespace MuonCombined {
                     float errR = pars->covariance() ? Amg::error(*pars->covariance(), Trk::locR) : 0.3;
                     auto data = mdtCalibConstants->getCalibData(id, msgStream());
                     const auto& rtRelation = data->rtRelation;
-                    bool out_of_bound_flag = false;
                     float drdt = rtRelation->rt()->driftVelocity(driftTime);
                     float rres = rtRelation->rtRes()->resolution(driftTime);
                     float tres = rres / drdt;
-                    float TlocR = rtRelation->tr()->tFromR(std::abs(locR), out_of_bound_flag);
+                    float TlocR = rtRelation->tr()->driftTime(std::abs(locR)).value_or(0.);
                     float trackTimeRes = errR / drdt;
                     float tofShiftFromBeta = calculateTof(betaSeed, distance) - tof;
                     er = std::sqrt(tres * tres + trackTimeRes * trackTimeRes);
@@ -363,7 +362,7 @@ namespace MuonCombined {
                             m_updator->removeFromState(*pars, meas->localParameters(), meas->localCovariance()));
                         if (unbiasedPars) {
                             float locRu = unbiasedPars->parameters()[Trk::locR];
-                            float TlocRu = rtRelation->tr()->tFromR(std::abs(locRu), out_of_bound_flag);
+                            float TlocRu = rtRelation->tr()->driftTime(std::abs(locRu)).value_or(0.);
                             float errRu = unbiasedPars->covariance() ? Amg::error(*unbiasedPars->covariance(), Trk::locR) : 0.3;
                             float trackTimeResu = errRu / drdt;
                             sh = TlocR - TlocRu;
@@ -637,11 +636,10 @@ namespace MuonCombined {
                 float errR = dc.errorTrack();
                 auto data = mdtCalibConstants->getCalibData(id, msgStream());
                 const auto& rtRelation = data->rtRelation;
-                bool out_of_bound_flag = false;
                 float drdt = rtRelation->rt()->driftVelocity(driftTime);
                 float rres = rtRelation->rtRes()->resolution(driftTime);
                 float tres = rres / drdt;
-                float TlocR = rtRelation->tr()->tFromR(std::abs(locR), out_of_bound_flag);
+                float TlocR = rtRelation->tr()->driftTime(std::abs(locR)).value_or(0.);
                 float trackTimeRes = errR / drdt;
                 float tofShiftFromBeta = 0.;  // muonBetaCalculationUtils.calculateTof(betaSeed,distance)-tof;
                 er = std::sqrt(tres * tres + trackTimeRes * trackTimeRes);

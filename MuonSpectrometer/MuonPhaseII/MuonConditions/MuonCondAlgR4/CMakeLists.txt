@@ -12,11 +12,11 @@ find_package( nlohmann_json )
 atlas_add_library( MuonCondAlgR4Lib
                    src/*.cxx
                    PUBLIC_HEADERS MuonCondAlgR4
-                   INCLUDE_DIRS 
+                   INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS 
-                   LINK_LIBRARIES  AthenaBaseComps AthenaKernel Identifier GaudiKernel  
-                                   StoreGateLib MuonIdHelpersLib MuonAlignmentDataR4 PathResolver 
-                                   nlohmann_json::nlohmann_json MuonReadoutGeometryR4 MdtCalibR4 MdtCalibData
+                   LINK_LIBRARIES  ${CORAL_LIBRARIES} AthenaBaseComps AthenaKernel Identifier GaudiKernel  
+                                   StoreGateLib MuonIdHelpersLib MuonAlignmentDataR4 PathResolver CoralUtilitiesLib
+                                   nlohmann_json::nlohmann_json MuonReadoutGeometryR4 MdtCalibR4 MdtCalibData MuonCalibITools
                    PRIVATE_LINK_LIBRARIES EventInfo )
 
 atlas_add_component( MuonCondAlgR4
