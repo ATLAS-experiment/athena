@@ -123,6 +123,19 @@ def GNNEndToEndTrackMaker(flags, name="GNNEndToEndTrackMaker", **kwargs):
         raise RuntimeError("GNNTrackFinder or GNNTrackReader must be enabled!")
 
     kwargs.setdefault("areInputClusters", flags.Tracking.GNN.useClusterTracks)
+    kwargs.setdefault("doRecoTrackCuts", flags.Tracking.GNN.doRecoTrackCuts)
+
+    # add eta dependent cut service
+    if "InDetEtaDependentCutSvc" not in kwargs:
+        from InDetConfig.InDetEtaDependentCutsConfig import ITkEtaDependentCutsSvcCfg
+        acc.merge(ITkEtaDependentCutsSvcCfg(flags))
+        kwargs.setdefault("InDetEtaDependentCutsSvc", acc.getService("ITkEtaDependentCutsSvc"+flags.Tracking.ActiveConfig.extension))
+
+    kwargs.setdefault("minClusters", flags.Tracking.GNN.minClusters)
+    kwargs.setdefault("pTmin", flags.Tracking.GNN.pTmin)
+    kwargs.setdefault("etamax", flags.Tracking.GNN.etamax)
+    kwargs.setdefault("minPixelClusters", flags.Tracking.GNN.minPixelClusters)
+    kwargs.setdefault("minStripClusters", flags.Tracking.GNN.minStripClusters)
 
     acc.addEventAlgo(CompFactory.InDet.SiSPGNNTrackMaker(name, **kwargs))
     return acc

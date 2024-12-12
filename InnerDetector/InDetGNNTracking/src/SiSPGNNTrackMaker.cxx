@@ -8,6 +8,7 @@
 #include "SiSPGNNTrackMaker.h"
 
 #include "TrkPrepRawData/PrepRawData.h"
+#include "TrkRIO_OnTrack/RIO_OnTrack.h"
 
 InDet::SiSPGNNTrackMaker::SiSPGNNTrackMaker(
   const std::string& name, ISvcLocator* pSvcLocator)
@@ -45,6 +46,36 @@ StatusCode InDet::SiSPGNNTrackMaker::initialize()
   }
   if (m_areInputClusters) {
     ATH_MSG_INFO("Use input clusters");
+  }
+  // retrieve eta dependent cut svc
+  ATH_CHECK(m_etaDependentCutsSvc.retrieve());
+
+  ATH_MSG_INFO("Applying the following cuts during GNN-based track reconstruction: ");
+  ATH_MSG_INFO("Min pT: " << m_pTmin);
+  ATH_MSG_INFO("Max eta: " << m_etamax);
+  ATH_MSG_INFO("Min number of clusters: " << m_minClusters);
+  ATH_MSG_INFO("Min number of pixel clusters: " << m_minPixelClusters);
+  ATH_MSG_INFO("Min number of strip clusters: " << m_minStripClusters);
+
+
+  if (m_doRecoTrackCuts) {
+    ATH_MSG_INFO("Applying the following eta dependant track cuts after GNN-based track reconstruction: ");
+    std::vector <double> etaBins, minPT, maxz0, maxd0;
+    std::vector <int> minClusters, minPixelHits, maxHoles;
+    m_etaDependentCutsSvc->getValue(InDet::CutName::etaBins, etaBins);
+    ATH_MSG_INFO("Eta bins: " << etaBins );
+    m_etaDependentCutsSvc->getValue(InDet::CutName::minClusters, minClusters);
+    ATH_MSG_INFO("Min Si Hits: " << minClusters );
+    m_etaDependentCutsSvc->getValue(InDet::CutName::minPixelHits, minPixelHits);
+    ATH_MSG_INFO("Min pixel hits: " << minPixelHits );
+    m_etaDependentCutsSvc->getValue(InDet::CutName::maxHoles, maxHoles);
+    ATH_MSG_INFO("Max holes: " << maxHoles);
+    m_etaDependentCutsSvc->getValue(InDet::CutName::minPT, minPT);
+    ATH_MSG_INFO("Min pT: " << minPT);
+    m_etaDependentCutsSvc->getValue(InDet::CutName::maxZImpact, maxz0);
+    ATH_MSG_INFO("Max z0: " << maxz0);
+    m_etaDependentCutsSvc->getValue(InDet::CutName::maxPrimaryImpact, maxd0);
+    ATH_MSG_INFO("Max d0: " << maxd0);
   }
 
   return StatusCode::SUCCESS;
@@ -187,7 +218,21 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
   // loop over all track candidates
   // and perform track fitting for each.
   int trackCounter = -1;
+  std::multimap<double, Trk::Track*> qualitySortedTrackCandidates;
+  std::vector<int> status_codes;
+  // track processing loop
   for (auto& trackIndices : TT) {
+    // For each track candidate:
+    // 1. Sort space points by distance from origin
+    // 2. Get associated clusters
+    // 3. Perform track fitting:
+    //    - Initial conformal mapping
+    //    - First chi2 fit without outlier removal
+    //    - Second chi2 fit with perigee parameters
+    //    - Final fit with outlier removal
+    // 4. Apply quality cuts (pT, eta)
+    // 5. Compute track summary
+    // 6. Store track if it passes all criteria
 
     std::vector<const Trk::PrepRawData*> clusters;
     std::vector<const Trk::SpacePoint*> trackCandidate;
@@ -283,6 +328,22 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
       continue;
     }
 
+    if (nPIX < m_minPixelClusters) {
+      ATH_MSG_DEBUG("Track " << trackCounter << " does not have enough pixel clusters, rejecting");
+      continue;
+    }
+
+    if (nStrip < m_minStripClusters) {
+      ATH_MSG_DEBUG("Track " << trackCounter << " does not have enough strip clusters, rejecting");
+      continue;
+    }
+
+    if (static_cast<int>(clusters.size()) < m_minClusters) {
+      ATH_MSG_DEBUG("Track " << trackCounter
+                             << " does not have enough hits, rejecting");
+      continue;
+    }
+
     // conformal mapping for track parameters
     auto trkParameters = m_seedFitter->fit(trackCandidate);
     if (trkParameters == nullptr) {
@@ -300,16 +361,22 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
                              << " fails the first chi2 fit, skipping");
       continue;
     }
-      // fit the track again with perigee parameters and without outlier
-      // removal.
-      track = m_trackFitter->fit(ctx, clusters, *track->perigeeParameters(),
-                                 false, matEffects);
+
+    // reject track with pT too low, default 400 MeV
+    if (track->perigeeParameters()->pT() < m_pTmin) {
+      continue;
+    }
+
+    // fit the track again with perigee parameters and without outlier
+    // removal.
+    track = m_trackFitter->fit(ctx, clusters, *track->perigeeParameters(),
+                                false, matEffects);
     if (track == nullptr || track->perigeeParameters() == nullptr) {
       ATH_MSG_DEBUG("Track " << trackCounter
                              << " fails the second chi2 fit, skipping");
       continue;
     }
-        // finally fit with outlier removal
+    // finally fit with outlier removal
     track = m_trackFitter->fit(ctx, clusters, *track->perigeeParameters(), true,
                                matEffects);
     if (track == nullptr || track->perigeeParameters() == nullptr) {
@@ -319,26 +386,94 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
     }
 
     // compute pT and skip if pT too low
-    const Trk::Perigee* origPerigee = track->perigeeParameters();
-    double pt = std::hypot(origPerigee->momentum().x(), origPerigee->momentum().y());
-    ATH_MSG_DEBUG("Track " << trackCounter << " has pT: " << pt);
-    if (pt < 500) {
+    if (track->perigeeParameters()->pT() < m_pTmin) {
       ATH_MSG_DEBUG("Track " << trackCounter
+                             << "with pt = " << track->perigeeParameters()->pT()
                              << " has pT too low, skipping track!");
+      continue;
+    }
+
+    // get rid of tracks with eta too large
+    if (std::abs(track->perigeeParameters()->eta()) > m_etamax) {
+      ATH_MSG_DEBUG("Track " << trackCounter << "with eta = "
+                             << std::abs(track->perigeeParameters()->eta())
+                             << " has eta too high, skipping track!");
       continue;
     }
     // need to compute track summary here. This is done during ambiguity 
     // resolution in the legacy chain. Since we skip it, we must do it here
     m_trackSummaryTool->computeAndReplaceTrackSummary(
         *track, false /* DO NOT suppress hole search*/);
-    outputTracks->push_back(track.release());
+
+    int passTrackCut = (m_doRecoTrackCuts) ? passEtaDepCuts(*track) : -1;
+    status_codes.push_back(passTrackCut);
+    if (passTrackCut<=0) {
+      outputTracks->push_back(track.release());
+    }
   }
-  
-  ATH_MSG_DEBUG("Run " << runNumber << ", Event " << eventNumber << " has " << outputTracks->size() << " tracks stored");
+  if (m_doRecoTrackCuts) {
+    ATH_MSG_INFO("Event " << eventNumber << " has " << status_codes.size() << " tracks found, " 
+                << std::count(status_codes.begin(), status_codes.end(), 0)
+                << " tracks remains after applying track cuts");
+  } else {
+    ATH_MSG_INFO("Event " << eventNumber << " has " << status_codes.size() << " tracks found, all tracks are kept");
+  }
+
   return StatusCode::SUCCESS;
 }
 
 
+
+
+
+int InDet::SiSPGNNTrackMaker::passEtaDepCuts(const Trk::Track& track) const 
+{
+  const Trk::Perigee* origPerigee = track.perigeeParameters();
+  double pt = origPerigee->pT();
+
+  double eta = std::abs(origPerigee->eta());
+
+  double d0 = std::abs(origPerigee->parameters()[Trk::d0]);
+
+  double z0 = std::abs(origPerigee->parameters()[Trk::z0]);
+
+  int nHolesOnTrack = track.trackSummary()->get(Trk::numberOfPixelHoles) +
+                      track.trackSummary()->get(Trk::numberOfSCTHoles);
+
+  int nPixels = track.trackSummary()->get(Trk::numberOfPixelHits);
+  int nStrips = track.trackSummary()->get(Trk::numberOfSCTHits);
+  int nClusters = nPixels + nStrips;
+
+  ATH_MSG_DEBUG("track params: " << pt << " " << eta << " " << d0 << " " << z0
+                                 << " " << nClusters << nStrips
+                                 << " " << nPixels);
+
+  // min Si hits
+  if (nClusters < m_etaDependentCutsSvc->getMinSiHitsAtEta(eta))
+    return 1;
+
+  // min pixel hits
+  if (nPixels < m_etaDependentCutsSvc->getMinPixelHitsAtEta(eta))
+    return 2;
+
+  // min pT, default 400
+  if (pt < m_etaDependentCutsSvc->getMinPtAtEta(eta))
+    return 3;
+
+  // max z0
+  if (z0 > m_etaDependentCutsSvc->getMaxZImpactAtEta(eta))
+    return 4;
+
+  // max d0
+  if (d0 > m_etaDependentCutsSvc->getMaxPrimaryImpactAtEta(eta))
+    return 5;
+
+  // max holes
+  if (nHolesOnTrack > m_etaDependentCutsSvc->getMaxSiHolesAtEta(eta))
+    return 6;
+
+  return 0;
+}
 
 ///////////////////////////////////////////////////////////////////
 // Overload of << operator MsgStream

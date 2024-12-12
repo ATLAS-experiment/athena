@@ -13,6 +13,8 @@
 // data containers
 #include "InDetPrepRawData/PixelClusterContainer.h"
 #include "InDetPrepRawData/SCT_ClusterContainer.h"
+#include "InDetPrepRawData/PixelClusterContainer.h"
+#include "InDetPrepRawData/SCT_ClusterContainer.h"
 #include "TrkSpacePoint/SpacePointContainer.h"
 #include "TrkSpacePoint/SpacePointOverlapCollection.h"
 #include "TrkTrack/TrackCollection.h"
@@ -23,6 +25,7 @@
 #include "TrkFitterInterfaces/ITrackFitter.h"
 #include "IGNNTrackReaderTool.h"
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
+#include "InDetRecToolInterfaces/IInDetEtaDependentCutsSvc.h"
 
 namespace Trk {
   class ITrackFitter;
@@ -102,10 +105,25 @@ namespace InDet {
       MsgStream&    dumptools(MsgStream&    out) const;
       MsgStream&    dumpevent(MsgStream&    out) const;
       BooleanProperty m_areInputClusters{
-        this, "areInputClusters", false,
-        "Read track candidates as list of clusters"};
-    };
+          this, "areInputClusters", false,
+          "Read track candidates as list of clusters"};
+      BooleanProperty m_doRecoTrackCuts{this, "doRecoTrackCuts", false,
+                                      "Apply Loose track cuts"};
+      // eta dependent track selection
+      ServiceHandle<IInDetEtaDependentCutsSvc> m_etaDependentCutsSvc{
+          this, "InDetEtaDependentCutsSvc", "InDetEtaDependentCutsSvc"};
 
+      IntegerProperty m_minClusters{this, "minClusters", 6, "Min number clusters"};
+      IntegerProperty m_minPixelClusters{this, "minPixelClusters", 1, "min pixel clusters"};
+      IntegerProperty m_minStripClusters{this, "minStripClusters", 0,
+                                    "Minimum number of strip clusters"};
+      DoubleProperty m_pTmin{this, "pTmin", 400., "min pT"};
+      DoubleProperty m_etamax{this, "etamax", 4., "max reco eta"};
+      
+      int passEtaDepCuts(const Trk::Track& track) const;
+
+    };
+      
     MsgStream&    operator << (MsgStream&   ,const SiSPGNNTrackMaker&);
     std::ostream& operator << (std::ostream&,const SiSPGNNTrackMaker&); 
 }
