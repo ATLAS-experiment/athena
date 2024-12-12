@@ -96,10 +96,9 @@ public:
     return &x;
   }
 
-  bool operator== (const TestAlloc& other) const
-  { return this == &other; }
-  bool operator!= (const TestAlloc& other) const
-  { return this != &other; }
+  // We have no state, so consider all instances equal.
+  bool operator== (const TestAlloc& /*other*/) const
+  { return true; }
 };
 
 
