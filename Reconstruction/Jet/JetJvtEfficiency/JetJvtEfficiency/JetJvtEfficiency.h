@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETJVTEFFICIENCYSCALEFACTORS_H_
@@ -12,7 +12,6 @@
 #include "PATInterfaces/SystematicsTool.h"
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/AnaToolHandle.h"
-#include "AsgDataHandles/ReadDecorHandle.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
 #include "JetMomentTools/JetVertexNNTagger.h"
 
@@ -78,10 +77,10 @@ private:
     ToolHandle<IAsgSelectionTool> m_jvtSelTool;
     ToolHandle<IJvtEfficiencyTool> m_jvtEffTool;
 
-    int m_tagger;
+    int m_tagger{};
     std::string m_wp;
     std::string m_file;
-    JvtTagger m_taggingAlg;
+    JvtTagger m_taggingAlg{};
     std::unique_ptr<TH2> m_h_JvtHist;
     std::unique_ptr<TH2> m_h_EffHist;
     std::string m_passJvtDecName;
@@ -89,19 +88,19 @@ private:
     std::string m_isHS_decoration_name;
     std::string m_truthJetContName;
     std::string m_jetEtaName;
-    float m_maxPtForJvt;
-    bool m_doTruthRequirement;
+    float m_maxPtForJvt{};
+    bool m_doTruthRequirement{};
     std::string m_ORdec;
-    bool m_useMuBinsSF;
-    bool m_useDummySFs;
+    bool m_useMuBinsSF{};
+    bool m_useDummySFs{};
     std::string m_jetContainerName;
     std::string m_NNJvtParamFile;
     std::string m_NNJvtCutFile;
 
     // kept for backwards compatibility with legacy Jvt
     std::string m_jetJvtMomentName;
-    float m_jvtCut;
-    float m_jvtCutBorder;
+    float m_jvtCut{};
+    float m_jvtCutBorder{};
 
     // configurable accessors/decorators
     std::unique_ptr<SG::AuxElement::ConstAccessor< float > > m_jetEtaAcc;
@@ -112,7 +111,7 @@ private:
 
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_passJvtKey{this, "PassJVTKey", "passJvt",
       "SG key for passJvt decoration (including jet container name)"};
-    bool m_suppressOutputDependence;
+    bool m_suppressOutputDependence{};
 };
 
 } /* namespace CP */
