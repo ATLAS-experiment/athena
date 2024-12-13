@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to configure beam effects with the ComponentAccumulator"""
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -43,9 +43,8 @@ def GenEventVertexPositionerCfg(flags, name="GenEventVertexPositioner", **kwargs
     acc = ComponentAccumulator()
 
     from SimulationConfig.SimEnums import VertexSource
-    readVtxPosFromFile = flags.Sim.VertexSource in [VertexSource.VertexOverrideFile, VertexSource.VertexOverrideEventFile]
-    if readVtxPosFromFile:
-        kwargs.setdefault("VertexShifters", [acc.popToolsAndMerge(VertexPositionFromFileCfg(flags))])
+    if flags.Sim.VertexSource is VertexSource.MatchingBkg:
+        kwargs.setdefault("VertexShifters", [acc.popToolsAndMerge(MatchingBkgVertexPositionerCfg(flags))])
     elif flags.Sim.VertexSource is VertexSource.CondDB:
         kwargs.setdefault("VertexShifters", [acc.popToolsAndMerge(VertexBeamCondPositionerCfg(flags))])
     elif flags.Sim.VertexSource is VertexSource.LongBeamspotVertexPositioner:
@@ -73,11 +72,17 @@ def VertexBeamCondPositionerCfg(flags, name="VertexBeamCondPositioner", **kwargs
     return acc
 
 
-def VertexPositionFromFileCfg(flags, name="VertexPositionFromFile", **kwargs):
-    """Return a vertex positioner tool"""
-    # todo input file? look at cxx for details
+def MatchingBkgVertexPositionerCfg(flags, name="MatchingBkgVertexPositioner", **kwargs):
+    """Return a vertex positioner tool that reads a matching vertex from the background input file."""
     acc = ComponentAccumulator()
-    acc.setPrivateTools(CompFactory.Simulation.VertexPositionFromFile(name, **kwargs))
+
+    if flags.Overlay.DataOverlay:
+        kwargs.setdefault("PrimaryVertexContainerName", f"{flags.Overlay.BkgPrefix}PrimaryVertices")
+
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'xAOD::VertexContainer#{kwargs["PrimaryVertexContainerName"]}']))
+
+    acc.setPrivateTools(CompFactory.Simulation.MatchingBkgVertexPositioner(name, **kwargs))
     return acc
 
 
@@ -129,9 +134,7 @@ def BeamEffectsAlgCfg(flags, name="BeamEffectsAlg", **kwargs):
         if flags.Beam.Type not in [BeamType.Cosmics, BeamType.TestBeam] and flags.Sim.CavernBackground is not CavernBackground.Read:
             manipulators.append(acc.popToolsAndMerge(GenEventVertexPositionerCfg(flags)))
         # manipulators.append(acc.popToolsAndMerge(GenEventBeamEffectBoosterCfg(flags))) # todo segmentation violation
-        # manipulators.append(acc.popToolsAndMerge(VertexPositionFromFileCfg(flags))) # todo
         # manipulators.append(acc.popToolsAndMerge(CrabKissingVertexPositionerCfg(flags))) # todo Callback registration failed
-        # manipulators.append(acc.popToolsAndMerge(LongBeamspotVertexPositionerCfg(flags))) # todo Callback registration failed
     kwargs.setdefault("GenEventManipulators", manipulators)
 
     acc.addEventAlgo(CompFactory.Simulation.BeamEffectsAlg(name, **kwargs), primary=True)
