@@ -42,8 +42,9 @@ namespace Muon {
 
     class MuPatSegment : public MuPatCandidateBase, public Trk::ObjectCounter<MuPatSegment> {
     public:
+        using ChIdx = MuonStationIndex::ChIndex;
+        using StIdx = MuonStationIndex::StIndex;
         MuPatSegment() = default;
-
         ~MuPatSegment() = default;
 
 
@@ -55,8 +56,8 @@ namespace Muon {
         int usedInFit{0};
         Identifier chid{0};
         std::string name{};
-        MuonStationIndex::ChIndex chIndex{MuonStationIndex::ChUnknown};
-        MuonStationIndex::StIndex stIndex{MuonStationIndex::StUnknown};
+        ChIdx chIndex{ChIdx::ChUnknown};
+        StIdx stIndex{StIdx::StUnknown};
         bool isEndcap{false};
         bool isMdt{false};  //!< true for MDT, false for CSC
 

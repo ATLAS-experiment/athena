@@ -6,6 +6,8 @@
 #include "AthContainers/ConstAccessor.h"
 
 namespace Muon{
+  using ChIdx = MuonStationIndex::ChIndex;
+  using PhiIdx = MuonStationIndex::PhiIndex;
   
 MuonTruthHitPlots::MuonTruthHitPlots(PlotBase* pParent, const std::string& sDir):
 PlotBase(pParent, sDir)
@@ -57,45 +59,45 @@ PlotBase(pParent, sDir)
   void MuonTruthHitPlots::fill(const xAOD::Muon& muon, float weight){
 
     fillPlot(precMatchedHitsSummed,"nprecMatchedHitsPerChamberLayer", muon, weight);
-    fillPlot(precMatchedHitsBIS,"nprecMatchedHitsPerChamberLayer", Muon::MuonStationIndex::BIS, muon, weight);
-    fillPlot(precMatchedHitsBIL,"nprecMatchedHitsPerChamberLayer", Muon::MuonStationIndex::BIL, muon, weight);
-    fillPlot(precMatchedHitsBMS,"nprecMatchedHitsPerChamberLayer", Muon::MuonStationIndex::BMS, muon, weight);
-    fillPlot(precMatchedHitsBML,"nprecMatchedHitsPerChamberLayer", Muon::MuonStationIndex::BML, muon, weight);
-    fillPlot(precMatchedHitsBOS,"nprecMatchedHitsPerChamberLayer", Muon::MuonStationIndex::BOS, muon, weight);
-    fillPlot(precMatchedHitsBOL,"nprecMatchedHitsPerChamberLayer", Muon::MuonStationIndex::BOL, muon, weight);
-    fillPlot(precMatchedHitsBEE,"nprecMatchedHitsPerChamberLayer", Muon::MuonStationIndex::BEE, muon, weight);
-    fillPlot(precMatchedHitsEIS,"nprecMatchedHitsPerChamberLayer", Muon::MuonStationIndex::EIS, muon, weight);
-    fillPlot(precMatchedHitsEIL,"nprecMatchedHitsPerChamberLayer", Muon::MuonStationIndex::EIL, muon, weight);
-    fillPlot(precMatchedHitsEMS,"nprecMatchedHitsPerChamberLayer", Muon::MuonStationIndex::EMS, muon, weight);
-    fillPlot(precMatchedHitsEML,"nprecMatchedHitsPerChamberLayer", Muon::MuonStationIndex::EML, muon, weight);
-    fillPlot(precMatchedHitsEOS,"nprecMatchedHitsPerChamberLayer", Muon::MuonStationIndex::EOS, muon, weight);
-    fillPlot(precMatchedHitsEOL,"nprecMatchedHitsPerChamberLayer", Muon::MuonStationIndex::EOL, muon, weight);
-    fillPlot(precMatchedHitsEES,"nprecMatchedHitsPerChamberLayer", Muon::MuonStationIndex::EES, muon, weight);
-    fillPlot(precMatchedHitsEEL,"nprecMatchedHitsPerChamberLayer", Muon::MuonStationIndex::EEL, muon, weight);
-    fillPlot(precMatchedHitsCSS,"nprecMatchedHitsPerChamberLayer", Muon::MuonStationIndex::CSS, muon, weight);
-    fillPlot(precMatchedHitsCSL,"nprecMatchedHitsPerChamberLayer", Muon::MuonStationIndex::CSL, muon, weight);
+    fillPlot(precMatchedHitsBIS,"nprecMatchedHitsPerChamberLayer", ChIdx::BIS, muon, weight);
+    fillPlot(precMatchedHitsBIL,"nprecMatchedHitsPerChamberLayer", ChIdx::BIL, muon, weight);
+    fillPlot(precMatchedHitsBMS,"nprecMatchedHitsPerChamberLayer", ChIdx::BMS, muon, weight);
+    fillPlot(precMatchedHitsBML,"nprecMatchedHitsPerChamberLayer", ChIdx::BML, muon, weight);
+    fillPlot(precMatchedHitsBOS,"nprecMatchedHitsPerChamberLayer", ChIdx::BOS, muon, weight);
+    fillPlot(precMatchedHitsBOL,"nprecMatchedHitsPerChamberLayer", ChIdx::BOL, muon, weight);
+    fillPlot(precMatchedHitsBEE,"nprecMatchedHitsPerChamberLayer", ChIdx::BEE, muon, weight);
+    fillPlot(precMatchedHitsEIS,"nprecMatchedHitsPerChamberLayer", ChIdx::EIS, muon, weight);
+    fillPlot(precMatchedHitsEIL,"nprecMatchedHitsPerChamberLayer", ChIdx::EIL, muon, weight);
+    fillPlot(precMatchedHitsEMS,"nprecMatchedHitsPerChamberLayer", ChIdx::EMS, muon, weight);
+    fillPlot(precMatchedHitsEML,"nprecMatchedHitsPerChamberLayer", ChIdx::EML, muon, weight);
+    fillPlot(precMatchedHitsEOS,"nprecMatchedHitsPerChamberLayer", ChIdx::EOS, muon, weight);
+    fillPlot(precMatchedHitsEOL,"nprecMatchedHitsPerChamberLayer", ChIdx::EOL, muon, weight);
+    fillPlot(precMatchedHitsEES,"nprecMatchedHitsPerChamberLayer", ChIdx::EES, muon, weight);
+    fillPlot(precMatchedHitsEEL,"nprecMatchedHitsPerChamberLayer", ChIdx::EEL, muon, weight);
+    fillPlot(precMatchedHitsCSS,"nprecMatchedHitsPerChamberLayer", ChIdx::CSS, muon, weight);
+    fillPlot(precMatchedHitsCSL,"nprecMatchedHitsPerChamberLayer", ChIdx::CSL, muon, weight);
  
     fillPlot(phiMatchedHitsSummed,"nphiMatchedHitsPerChamberLayer", muon, weight);
-    fillPlot(phiMatchedHitsBM1,  "nphiMatchedHitsPerChamberLayer", Muon::MuonStationIndex::BM1, muon,weight);
-    fillPlot(phiMatchedHitsBM2,  "nphiMatchedHitsPerChamberLayer", Muon::MuonStationIndex::BM2, muon, weight);
-    fillPlot(phiMatchedHitsBO1,  "nphiMatchedHitsPerChamberLayer", Muon::MuonStationIndex::BO1, muon, weight);
-    fillPlot(phiMatchedHitsBO2,  "nphiMatchedHitsPerChamberLayer", Muon::MuonStationIndex::BO2, muon, weight);
-    fillPlot(phiMatchedHitsT1,   "nphiMatchedHitsPerChamberLayer", Muon::MuonStationIndex::T1, muon, weight);
-    fillPlot(phiMatchedHitsT2,   "nphiMatchedHitsPerChamberLayer", Muon::MuonStationIndex::T2, muon, weight);
-    fillPlot(phiMatchedHitsT3,   "nphiMatchedHitsPerChamberLayer", Muon::MuonStationIndex::T3, muon, weight);
-    fillPlot(phiMatchedHitsT4,   "nphiMatchedHitsPerChamberLayer", Muon::MuonStationIndex::T4, muon, weight);
-    fillPlot(phiMatchedHitsCSC,  "nphiMatchedHitsPerChamberLayer", Muon::MuonStationIndex::CSC, muon, weight);
+    fillPlot(phiMatchedHitsBM1,  "nphiMatchedHitsPerChamberLayer", PhiIdx::BM1, muon,weight);
+    fillPlot(phiMatchedHitsBM2,  "nphiMatchedHitsPerChamberLayer", PhiIdx::BM2, muon, weight);
+    fillPlot(phiMatchedHitsBO1,  "nphiMatchedHitsPerChamberLayer", PhiIdx::BO1, muon, weight);
+    fillPlot(phiMatchedHitsBO2,  "nphiMatchedHitsPerChamberLayer", PhiIdx::BO2, muon, weight);
+    fillPlot(phiMatchedHitsT1,   "nphiMatchedHitsPerChamberLayer", PhiIdx::T1, muon, weight);
+    fillPlot(phiMatchedHitsT2,   "nphiMatchedHitsPerChamberLayer", PhiIdx::T2, muon, weight);
+    fillPlot(phiMatchedHitsT3,   "nphiMatchedHitsPerChamberLayer", PhiIdx::T3, muon, weight);
+    fillPlot(phiMatchedHitsT4,   "nphiMatchedHitsPerChamberLayer", PhiIdx::T4, muon, weight);
+    fillPlot(phiMatchedHitsCSC,  "nphiMatchedHitsPerChamberLayer", PhiIdx::CSC, muon, weight);
  
     fillPlot(trigEtaMatchedHitsSummed,"ntrigEtaMatchedHitsPerChamberLayer", muon, weight);
-    fillPlot(trigEtaMatchedHitsBM1,  "ntrigEtaMatchedHitsPerChamberLayer", Muon::MuonStationIndex::BM1, muon, weight);
-    fillPlot(trigEtaMatchedHitsBM2,  "ntrigEtaMatchedHitsPerChamberLayer", Muon::MuonStationIndex::BM2, muon, weight);
-    fillPlot(trigEtaMatchedHitsBO1,  "ntrigEtaMatchedHitsPerChamberLayer", Muon::MuonStationIndex::BO1, muon, weight);
-    fillPlot(trigEtaMatchedHitsBO2,  "ntrigEtaMatchedHitsPerChamberLayer", Muon::MuonStationIndex::BO2, muon, weight);
-    fillPlot(trigEtaMatchedHitsT1,   "ntrigEtaMatchedHitsPerChamberLayer", Muon::MuonStationIndex::T1, muon, weight);
-    fillPlot(trigEtaMatchedHitsT2,   "ntrigEtaMatchedHitsPerChamberLayer", Muon::MuonStationIndex::T2, muon, weight);
-    fillPlot(trigEtaMatchedHitsT3,   "ntrigEtaMatchedHitsPerChamberLayer", Muon::MuonStationIndex::T3, muon, weight);
-    fillPlot(trigEtaMatchedHitsT4,   "ntrigEtaMatchedHitsPerChamberLayer", Muon::MuonStationIndex::T4, muon, weight);
-  //  fillPlot(trigEtaMatchedHitsCSC,  "ntrigEtaMatchedHitsPerChamberLayer", Muon::MuonStationIndex::CSC, muon);
+    fillPlot(trigEtaMatchedHitsBM1,  "ntrigEtaMatchedHitsPerChamberLayer", PhiIdx::BM1, muon, weight);
+    fillPlot(trigEtaMatchedHitsBM2,  "ntrigEtaMatchedHitsPerChamberLayer", PhiIdx::BM2, muon, weight);
+    fillPlot(trigEtaMatchedHitsBO1,  "ntrigEtaMatchedHitsPerChamberLayer", PhiIdx::BO1, muon, weight);
+    fillPlot(trigEtaMatchedHitsBO2,  "ntrigEtaMatchedHitsPerChamberLayer", PhiIdx::BO2, muon, weight);
+    fillPlot(trigEtaMatchedHitsT1,   "ntrigEtaMatchedHitsPerChamberLayer", PhiIdx::T1, muon, weight);
+    fillPlot(trigEtaMatchedHitsT2,   "ntrigEtaMatchedHitsPerChamberLayer", PhiIdx::T2, muon, weight);
+    fillPlot(trigEtaMatchedHitsT3,   "ntrigEtaMatchedHitsPerChamberLayer", PhiIdx::T3, muon, weight);
+    fillPlot(trigEtaMatchedHitsT4,   "ntrigEtaMatchedHitsPerChamberLayer", PhiIdx::T4, muon, weight);
+  //  fillPlot(trigEtaMatchedHitsCSC,  "ntrigEtaMatchedHitsPerChamberLayer", PhiIdx::CSC, muon);
   
 }
 
