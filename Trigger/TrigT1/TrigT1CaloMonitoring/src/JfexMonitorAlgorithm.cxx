@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JfexMonitorAlgorithm.h"
@@ -327,7 +327,7 @@ template <typename TOB>
 StatusCode JfexMonitorAlgorithm::fillMapsCentralAndFCAL(
     TOB tob, Monitored::Scalar<float> &eta, Monitored::Scalar<float> &phi,
     Monitored::Scalar<int> &binNumber, Monitored::Scalar<int> &lbn,
-    std::vector<float> etaBinBorders, Monitored::Scalar<float> &weight) const {
+    const std::vector<float>& etaBinBorders, Monitored::Scalar<float> &weight) const {
   binNumber = binNumberFromCoordinates(eta, phi, etaBinBorders);
   fill(m_Groupmaps, eta, phi, lbn, binNumber, weight);
   if (passesEnergyCut(tob))
@@ -339,7 +339,7 @@ template <typename TOB>
 StatusCode JfexMonitorAlgorithm::fillMapsEndcap(
     TOB tob, Monitored::Scalar<float> &eta, Monitored::Scalar<float> &phi,
     Monitored::Scalar<int> &binNumber, Monitored::Scalar<int> &lbn,
-    std::vector<float> etaBinBorders, Monitored::Scalar<float> &weight) const {
+    const std::vector<float>& etaBinBorders, Monitored::Scalar<float> &weight) const {
   float originalPhi = phi;
   phi = originalPhi - M_PI / 64;
   fill(m_Groupmaps, eta, phi, weight);
@@ -360,7 +360,7 @@ StatusCode JfexMonitorAlgorithm::fillMapsEndcap(
 StatusCode JfexMonitorAlgorithm::fillMapsOverlap(
     const xAOD::jFexSRJetRoI *tob, Monitored::Scalar<float> &eta,
     Monitored::Scalar<float> &phi, Monitored::Scalar<int> &binNumber,
-    Monitored::Scalar<int> &lbn, std::vector<float> etaBinBorders,
+    Monitored::Scalar<int> &lbn, const std::vector<float>& etaBinBorders,
     Monitored::Scalar<float> &weight) const {
   binNumber = binNumberFromCoordinates(eta, phi, etaBinBorders);
   fill(m_Groupmaps, lbn, binNumber);
@@ -401,7 +401,7 @@ bool JfexMonitorAlgorithm::passesEnergyCut(const xAOD::jFexTauRoI *tob) const {
 }
 
 int JfexMonitorAlgorithm::binNumberFromCoordinates(
-    float eta, float phi, std::vector<float> etaBinBorders) const {
+    float eta, float phi, const std::vector<float>& etaBinBorders) const {
   if (etaBinBorders.size() == 0) {
     ANA_MSG_ERROR("List of eta bin borders is empty!");
     return 0;
