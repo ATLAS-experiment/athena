@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1CALOMONITORING_JFEXMONITORALGORITHM_H
 #define TRIGT1CALOMONITORING_JFEXMONITORALGORITHM_H
@@ -52,7 +52,7 @@ class JfexMonitorAlgorithm : public AthMonitorAlgorithm {
         SG::ReadHandleKey< xAOD::jFexMETRoIContainer   > m_jFexMETContainerKey   {this,"jFexMETRoIContainer"  ,"L1_jFexMETRoI"  ,"SG key of the input jFex MET Roi container"};
         SG::ReadHandleKey< xAOD::jFexSumETRoIContainer > m_jFexSumEtContainerKey {this,"jFexSumETRoIContainer","L1_jFexSumETRoI","SG key of the input jFex SumEt Roi container"};
 
-        int binNumberFromCoordinates(float eta, float phi, std::vector<float> etaBinBorders) const;
+        int binNumberFromCoordinates(float eta, float phi, const std::vector<float>& etaBinBorders) const;
 
         StatusCode fillJetMaps(const xAOD::jFexSRJetRoI *tob,
                              Monitored::Scalar<float> &eta,
@@ -73,7 +73,7 @@ class JfexMonitorAlgorithm : public AthMonitorAlgorithm {
                              Monitored::Scalar<float> &phi,
                              Monitored::Scalar<int> &binNumber,
                              Monitored::Scalar<int> &lbn,
-                             std::vector<float> etaBinBorders,
+                             const std::vector<float>& etaBinBorders,
                              Monitored::Scalar<float> &weight) const;
         // for faking ~0.2 phi binning in endcap
         template<typename TOB>
@@ -82,7 +82,7 @@ class JfexMonitorAlgorithm : public AthMonitorAlgorithm {
                              Monitored::Scalar<float> &phi,
                              Monitored::Scalar<int> &binNumber,
                              Monitored::Scalar<int> &lbn,
-                             std::vector<float> etaBinBorders,
+                             const std::vector<float>& etaBinBorders,
                              Monitored::Scalar<float> &weight) const;
         // special handling for jets in endcap/FCAL overlap
         StatusCode fillMapsOverlap(const xAOD::jFexSRJetRoI* tob,
@@ -90,7 +90,7 @@ class JfexMonitorAlgorithm : public AthMonitorAlgorithm {
                              Monitored::Scalar<float> &phi,
                              Monitored::Scalar<int> &binNumber,
                              Monitored::Scalar<int> &lbn,
-                             std::vector<float> etaBinBorders,
+                             const std::vector<float>& etaBinBorders,
                              Monitored::Scalar<float> &weight) const;
 
         bool passesEnergyCut(const xAOD::jFexSRJetRoI *tob) const;

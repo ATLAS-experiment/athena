@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigT1TGC_TGCEIFICoincidenceMap_hh
@@ -76,7 +76,7 @@ class TGCEIFICoincidenceMap : public AthMessaging
   int m_side; 
   bool m_fullCW;
 
-  LVL1TGCTrigger::TGCArguments* m_tgcArgs;
+  LVL1TGCTrigger::TGCArguments* m_tgcArgs{};
 
   const SG::ReadCondHandleKey<TGCTriggerData>& m_readCondKey;
 };

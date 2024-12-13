@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXJwoJAlgo - Jets without jets algorithm for gFEX
@@ -44,15 +44,15 @@ namespace LVL1 {
 
   private:
 
-    float m_aFPGA_A;
-    float m_bFPGA_A;
-    float m_aFPGA_B;
-    float m_bFPGA_B;
-    float m_aFPGA_C;
-    float m_bFPGA_C;
-    float m_gBlockthresholdA;
-    float m_gBlockthresholdB;
-    float m_gBlockthresholdC;
+    float m_aFPGA_A{};
+    float m_bFPGA_A{};
+    float m_aFPGA_B{};
+    float m_bFPGA_B{};
+    float m_aFPGA_C{};
+    float m_bFPGA_C{};
+    float m_gBlockthresholdA{};
+    float m_gBlockthresholdB{};
+    float m_gBlockthresholdC{};
  
 
     void gBlockAB(const gTowersType & twrs, gTowersType & gBlkSum, gTowersType & hasSeed, int seedThreshold) const;
