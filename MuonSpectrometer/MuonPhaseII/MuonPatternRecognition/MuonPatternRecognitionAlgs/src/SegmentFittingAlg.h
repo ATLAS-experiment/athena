@@ -111,9 +111,6 @@ namespace MuonR4{
             ToolHandle<ISpacePointCalibrator> m_calibTool{this, "Calibrator", "" };
             /// Pattern visualization tool
             ToolHandle<MuonValR4::IPatternVisualizationTool> m_visionTool{this, "VisualizationTool", ""};
-            
-            /// Toggle the fitter
-            Gaudi::Property<bool> m_useMinuit{this, "useMinuit", false};
 
             Gaudi::Property<bool> m_doT0Fit{this, "fitSegmentT0", true};
             /// Add beamline constraint
