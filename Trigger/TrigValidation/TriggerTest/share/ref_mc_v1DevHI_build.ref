@@ -3459,17 +3459,17 @@ HLT_mu4_hi_FgapAC5_L1MU3V_VTE50:
 HLT_mu4_hi_FgapAC5_L1MU3V_VjTE50:
   eventCount: 0
 HLT_mu4_idperf_L1MU3V:
-  eventCount: 9
+  eventCount: 10
   stepCounts:
     0: 10
     1: 10
-    2: 9
-    3: 9
+    2: 10
+    3: 10
   stepFeatures:
     0: 13
     1: 13
-    2: 12
-    3: 12
+    2: 13
+    3: 13
 HLT_mu4_j20_L1MU3V_J12:
   eventCount: 8
   stepCounts:
@@ -3634,14 +3634,14 @@ HLT_mu4_mu4noL1_L1MU3V:
     1: 9
     2: 9
     3: 8
-    4: 5
+    4: 4
     5: 3
   stepFeatures:
     0: 13
     1: 12
     2: 12
     3: 11
-    4: 12
+    4: 10
     5: 8
 HLT_mu4_mu4noL1_L1MU3V_VTE50:
   eventCount: 1
