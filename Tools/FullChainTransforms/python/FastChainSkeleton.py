@@ -45,6 +45,10 @@ def fromRunArgs(runArgs):
         setOverlayInputFiles(runArgs, flags, logFastChain)
         flags.Common.isOverlay = True
         flags.Digitization.PileUp = False
+
+        if flags.Overlay.DataOverlay and not flags.Overlay.ByteStream:
+            from SimulationConfig.SimEnums import VertexSource
+            flags.Sim.VertexSource = VertexSource.MatchingBkg
     else:
         # Setting input files for FastChain without overlay
         if hasattr(runArgs, 'inputEVNTFile'):
