@@ -29,9 +29,6 @@ namespace MuonR4 {
     using namespace SegmentFit;
     using namespace MuonValR4;
 
-    constexpr double inv_c = 1./ Gaudi::Units::c_light;
-    
-  
     MuonR4::SegmentFitResult::HitVec copy(const MuonR4::SegmentFitResult::HitVec& hits) {
         MuonR4::SegmentFitResult::HitVec copied{};
         copied.reserve(hits.size());
