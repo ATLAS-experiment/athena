@@ -2083,12 +2083,6 @@ StatusCode IDPerfMonZmumu::FillTruthParameters(const xAOD::TrackParticle* trackP
     return StatusCode::FAILURE;
   }
 
-  static const SG::ConstAccessor<float> truthMatchProbabilityAcc("truthMatchProbability");
-  float result = truthMatchProbabilityAcc.withDefault(*trackParticle,
-                                                      std::numeric_limits<float>::quiet_NaN());
-  ATH_MSG_DEBUG(" -- FillTruthParameters -- TruthMatchProbablity of trackpartile : > " << result);
-
-
   const xAOD::TruthParticle* particle = getTruthParticle( *trackParticle );
   double charge = 0;
   if (!particle) {
