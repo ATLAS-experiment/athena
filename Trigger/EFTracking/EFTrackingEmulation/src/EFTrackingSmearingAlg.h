@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef EFTRACKING_SMEARINGALG_H
 #define EFTRACKING_SMEARINGALG_H 
@@ -23,7 +23,6 @@ class EFTrackingSmearingAlg: public ::AthHistogramAlgorithm {
 
   virtual StatusCode  initialize() override;
   virtual StatusCode  execute() override;
-  virtual StatusCode  finalize() override;
 
  private: 
 
@@ -70,7 +69,7 @@ class EFTrackingSmearingAlg: public ::AthHistogramAlgorithm {
   
   LongLongProperty m_RandomSeed{this,"RandomSeed",0};
   
-  void *m_mySmearer;
+  std::unique_ptr<FakeTrackSmearer> m_mySmearer;
   StatusCode book_histograms();
   StatusCode smearTruthParticles(const EventContext& ctx);
 }; 
