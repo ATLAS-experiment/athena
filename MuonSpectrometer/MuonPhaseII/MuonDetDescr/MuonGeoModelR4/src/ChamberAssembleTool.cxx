@@ -37,9 +37,15 @@ namespace {
    ///   x-axis: Parallel to the eta channels
    ///   y-axis: Along the beam axis
    ///   z-axis: Towards the sky
-   const Amg::Transform3D axisRotation{Amg::getRotateZ3D(-90. * Gaudi::Units::deg) *
-                                       Amg::getRotateY3D(-90. * Gaudi::Units::deg)};
-
+   
+   
+   Amg::Transform3D axisRotation(ActsTrk::DetectorType t) {
+      if (t == ActsTrk::DetectorType::sTgc) {
+         return Amg::Transform3D::Identity();
+      }
+      return Amg::getRotateZ3D(-90. * Gaudi::Units::deg) *
+              Amg::getRotateY3D(-90. * Gaudi::Units::deg);
+   }
    
    using BoundEnum = Acts::TrapezoidVolumeBounds::BoundValues;
 
@@ -164,8 +170,8 @@ ChamberAssembleTool::BoundTrfPair
       Amg::Transform3D newCentreTrf{Amg::Transform3D::Identity()};
       for (const MuonReadoutElement* chambEle :  readoutEles) {
             Amg::Transform3D trf = newCentreTrf * toCenter * 
-                                         chambEle->localToGlobalTrans(gctx) * 
-                                         axisRotation.inverse();
+                                   chambEle->localToGlobalTrans(gctx) * 
+                                   axisRotation(chambEle->detectorType()).inverse();
             std::shared_ptr<BoundType> bounds = boundingBox(chambEle, boundSet);
             if (!envelopeBounds) {
                envelopeBounds = bounds;
@@ -360,7 +366,8 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
    ActsTrk::SurfaceBoundSet<BoundType> boundSet{};    
    for (chamberArgs& candidate : envelopeCandidates) {
          std::unordered_set<Identifier> reIds{};
-         const Amg::Transform3D toCenter = axisRotation * candidate.detEles.front()->globalToLocalTrans(gctx);
+         const MuonReadoutElement* refEle = candidate.detEles.front();
+         const Amg::Transform3D toCenter = axisRotation(refEle->detectorType()) * refEle->globalToLocalTrans(gctx);
          ATH_MSG_VERBOSE("New envelope candidate ");
          const auto [envelopeBox, envelopeCentre] = boundingBox(gctx, candidate.detEles, toCenter, boundSet);
        
@@ -378,8 +385,9 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
             }
             /** Create the enclosing chamber volume */
             for (auto& [parent, detEles]: stationMap) {
-               const Amg::Transform3D toChambCentre = axisRotation * detEles.front()->globalToLocalTrans(gctx);
-               ATH_MSG_VERBOSE("New chambre candidate "<<m_idHelperSvc->toStringChamber(detEles.front()->identify()));
+               const MuonReadoutElement* refEle = detEles.front();
+               const Amg::Transform3D toChambCentre = axisRotation(refEle->detectorType()) * refEle->globalToLocalTrans(gctx);
+               ATH_MSG_VERBOSE("New chambre candidate "<<m_idHelperSvc->toStringChamber(refEle->identify()));
                const auto[chamberBox, chamberCentre] = boundingBox(gctx, detEles, toChambCentre, boundSet, 0.1*Gaudi::Units::cm);
                chamberArgs chambArgs{};
                chambArgs.detEles =std::move(detEles);
@@ -392,8 +400,9 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                }
             }
          } else {
-            const Amg::Transform3D toChambCentre = axisRotation * candidate.detEles.front()->globalToLocalTrans(gctx);
-            ATH_MSG_VERBOSE("New chambre candidate "<<m_idHelperSvc->toStringChamber(candidate.detEles.front()->identify()));
+               const MuonReadoutElement* refEle = candidate.detEles.front();
+            const Amg::Transform3D toChambCentre = axisRotation(refEle->detectorType()) * refEle->globalToLocalTrans(gctx);
+            ATH_MSG_VERBOSE("New chambre candidate "<<m_idHelperSvc->toStringChamber(refEle->identify()));
             const auto[chamberBox, chamberCentre] = boundingBox(gctx, candidate.detEles, toChambCentre, boundSet, 0.1*Gaudi::Units::cm);
             chamberArgs chambArgs{};
             chambArgs.detEles = candidate.detEles;
