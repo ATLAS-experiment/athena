@@ -1,25 +1,29 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+from AthenaConfiguration.Enums import ProductionStep
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
 from LArConfiguration.LArConfigFlags import RawChannelSource 
 
 
-def LArRawDataReadingCfg(configFlags, **kwargs):
+def LArRawDataReadingCfg(flags, **kwargs):
     acc=ComponentAccumulator()
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    acc.merge(LArGMCfg(configFlags))
-    acc.merge(ByteStreamReadCfg(configFlags))
+    acc.merge(LArGMCfg(flags))
+    acc.merge(ByteStreamReadCfg(flags))
 
-    if configFlags.Overlay.DataOverlay:
-        kwargs.setdefault("LArDigitKey", configFlags.Overlay.BkgPrefix + "FREE")
+    if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing:
+        kwargs.setdefault("LArDigitKey", f"{flags.Overlay.BkgPrefix}LArDigitContainer_data")
         kwargs.setdefault("LArFebHeaderKey", "LArFebHeader")
-    if configFlags.LAr.RawChannelSource is RawChannelSource.Calculated or configFlags.Overlay.DataOverlay:
+    elif flags.Overlay.ByteStream:
+        kwargs.setdefault("LArDigitKey", f"{flags.Overlay.BkgPrefix}FREE")
+        kwargs.setdefault("LArFebHeaderKey", "LArFebHeader")
+    if flags.LAr.RawChannelSource is RawChannelSource.Calculated or flags.Overlay.DataOverlay:
         kwargs.setdefault("LArRawChannelKey", "")
 
-    print('LArRawDataReadingCfg configFlags.LAr.RawChannelSource ',configFlags.LAr.RawChannelSource)
+    print('LArRawDataReadingCfg flags.LAr.RawChannelSource ',flags.LAr.RawChannelSource)
 
     acc.addEventAlgo(CompFactory.LArRawDataReadingAlg(**kwargs))
     return acc
