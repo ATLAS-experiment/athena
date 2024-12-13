@@ -2163,6 +2163,9 @@ class ItemDef:
             MenuItem('L1_DPHI-2eTAU1_VjTE200_GAP_AANDC').setLogic( d.TOPO_23DPHI32_2eTAU1s & Not(d.jTE200) & GAPAC & physcond)
             MenuItem('L1_DPHI-2jTAU1').setLogic( d.TOPO_23DPHI32_2jTAU1s & physcond)
 
+            # g-2 tau (ATR-30638)
+            MenuItem('L1_DPHI-2eTAU60').setLogic(d.TOPO_30DPHI32_2eTAU60s & physcond)
+
         except NameError as ex:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             fn,ln,_,_ = traceback.extract_tb(exc_traceback)[0]

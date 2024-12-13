@@ -136,12 +136,19 @@ def LArPileUpToolCfg(flags, name="LArPileUpTool", **kwargs):
                 "LArHitContainer#LArHitFCAL",
                 "LArHitContainer#LArHitHEC",
             ]))
+
     if flags.Common.isOverlay:
         kwargs.setdefault("OnlyUseContainerName", False)
-        if flags.Overlay.DataOverlay:
+        if flags.Overlay.ByteStream:
+            from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
+            acc.merge(LArRawDataReadingCfg(flags))
+
             kwargs.setdefault("InputDigitContainer", f"{flags.Overlay.BkgPrefix}FREE")
         else:
-            kwargs.setdefault("InputDigitContainer", f"{flags.Overlay.BkgPrefix}LArDigitContainer_MC")
+            if flags.Input.isMC:
+                kwargs.setdefault("InputDigitContainer", f"{flags.Overlay.BkgPrefix}LArDigitContainer_MC")
+            else:
+                kwargs.setdefault("InputDigitContainer", f"{flags.Overlay.BkgPrefix}LArDigitContainer_data")
 
             from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
             acc.merge(SGInputLoaderCfg(flags, [f'LArDigitContainer#{kwargs["InputDigitContainer"]}']))
@@ -216,7 +223,7 @@ def LArOutputCfg(flags):
             ItemList.append("LArDigitContainer#LArDigitContainer_MC_Thinned")
         if flags.Common.ProductionStep != ProductionStep.PileUpPresampling:
             ItemList.append("LArRawChannelContainer#LArRawChannels")
-        if flags.Overlay.DataOverlay and flags.Input.DataYear >= 2023:
+        if flags.Overlay.DataOverlay:
             ItemList.append("LArFebHeaderContainer#LArFebHeader")
         if flags.Digitization.EnableTruth:
             ItemList.append("CaloCalibrationHitContainer#*")
@@ -254,10 +261,6 @@ def LArDigitizationCfg(flags, **kwargs):
 def LArOverlayDigitizationBasicCfg(flags, name="digitmaker1", **kwargs):
     """Return ComponentAccumulator with LAr Overlay digitization configuration"""
     acc = ComponentAccumulator()
-
-    if flags.Overlay.DataOverlay:
-        from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
-        acc.merge(LArRawDataReadingCfg(flags))
 
     if "LArPileUpTool" not in kwargs:
         kwargs["LArPileUpTool"] = acc.popToolsAndMerge(LArPileUpToolCfg(flags))

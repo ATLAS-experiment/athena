@@ -976,7 +976,11 @@ def setupMenu():
         ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU60_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportPhIGroup),
         # new version of triggers with pileup recalculation, should be prescaled 
         ChainProp(name='HLT_j30_CLEANllp_momemfrac012_calratiovar_roiftf_preselj20emf12_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup),
-
+        # Calratio LLP-NoMATCH analogs
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU40HT', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU40HT', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU60HM', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU60HM', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportPhIGroup),
 
 
         # Support performance chains (for emulation+calibration studies) ATR-20624
