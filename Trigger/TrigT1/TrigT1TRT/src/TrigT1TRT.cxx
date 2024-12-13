@@ -108,7 +108,6 @@ namespace LVL1 {
           if (element == nullptr) continue;
 
           for(unsigned int istraw = 0; istraw < element->nStraws(); istraw++) {
-            if(istraw>element->nStraws()) continue;
 
             Identifier strawID = m_pTRTHelper->straw_id(id, int(istraw));
             int i_chip;
@@ -140,7 +139,6 @@ namespace LVL1 {
           if (element == nullptr) continue;
 
           for(unsigned int istraw = 0; istraw < element->nStraws(); istraw++) {
-            if(istraw>element->nStraws()) continue;
 
             int tempStrawNumber = EndcapStrawNumber(istraw, idStrawLayer, idLayerWheel, idPhiModule, idSide);
 
