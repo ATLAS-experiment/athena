@@ -355,7 +355,7 @@ void SpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
            continue;
         }
         /// The current measurement is too far away from the first one. Make a new bucket
-        if (currPoint - lastPoint > m_spacePointWindow) {
+        if (currPoint - lastPoint > m_maxBucketLength || (!splittedHits.empty() && !splittedHits.back().empty()  && currPoint - pointPos(*splittedHits.back().back()) > m_spacePointWindow )) {
             newBucket(currPoint);            
         }
         std::shared_ptr<SpacePoint> spacePoint = std::make_shared<SpacePoint>(std::move(toSort));
