@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // METMaker.h
@@ -152,49 +152,49 @@ namespace met {
     // pT threshold for suppressing warnings of objects missing in association map
     float m_missObjWarningPtThreshold;
 
-    bool m_jetCorrectPhi;
-    double m_jetMinEfrac;
-    double m_jetMinWeightedPt;
+    bool m_jetCorrectPhi{};
+    double m_jetMinEfrac{};
+    double m_jetMinWeightedPt{};
     std::string m_jetConstitScaleMom;
     std::string m_jetJvtMomentName;
     std::string m_jetRejectionDec;
 
-    double m_CenJetPtCut, m_FwdJetPtCut ; // jet pt cut for central/forward jets
-    double m_JvtCut, m_JvtPtMax; // JVT cut and pt region of jets to apply a JVT selection
-    double m_JetEtaMax;
-    double m_JetEtaForw;
+    double m_CenJetPtCut{}, m_FwdJetPtCut{} ; // jet pt cut for central/forward jets
+    double m_JvtCut{}, m_JvtPtMax{}; // JVT cut and pt region of jets to apply a JVT selection
+    double m_JetEtaMax{};
+    double m_JetEtaForw{};
 
     std::string m_jetSelection;
     std::string m_JvtWP;
 
     // Extra configurables for custom WP
-    double m_customCenJetPtCut,m_customFwdJetPtCut;
-    double m_customJvtPtMax;
+    double m_customCenJetPtCut{},m_customFwdJetPtCut{};
+    double m_customJvtPtMax{};
     std::string m_customJvtWP;
 
-    bool m_doPFlow;
-    bool m_doSoftTruth;
-    bool m_doConstJet;
+    bool m_doPFlow{};
+    bool m_doSoftTruth{};
+    bool m_doConstJet{};
 
-    bool m_useGhostMuons;
-    bool m_doRemoveMuonJets;
-    bool m_doRemoveElecTrks;
-    bool m_doRemoveElecTrksEM;
-    bool m_doSetMuonJetEMScale;
-    bool m_skipSystematicJetSelection;
+    bool m_useGhostMuons{};
+    bool m_doRemoveMuonJets{};
+    bool m_doRemoveElecTrks{};
+    bool m_doRemoveElecTrksEM{};
+    bool m_doSetMuonJetEMScale{};
+    bool m_skipSystematicJetSelection{};
 
-    bool m_muEloss;
-    bool m_orCaloTaggedMuon;
-    bool m_greedyPhotons;
-    bool m_veryGreedyPhotons;
+    bool m_muEloss{};
+    bool m_orCaloTaggedMuon{};
+    bool m_greedyPhotons{};
+    bool m_veryGreedyPhotons{};
 
     // muon overlap variables
-    int m_jetTrkNMuOlap;
-    double m_jetWidthMuOlap;
-    double m_jetPsEMuOlap;
-    double m_jetEmfMuOlap;
-    double m_jetTrkPtMuPt;
-    double m_muIDPTJetPtRatioMuOlap;
+    int m_jetTrkNMuOlap{};
+    double m_jetWidthMuOlap{};
+    double m_jetPsEMuOlap{};
+    double m_jetEmfMuOlap{};
+    double m_jetTrkPtMuPt{};
+    double m_muIDPTJetPtRatioMuOlap{};
 
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trkseltool;
     ToolHandle<IAsgSelectionTool> m_JvtTool;
