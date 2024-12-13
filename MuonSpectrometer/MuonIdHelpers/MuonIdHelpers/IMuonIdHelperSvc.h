@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_IMUONIDHELPERSVC_H
 #define MUON_IMUONIDHELPERSVC_H
 
 #include <string>
+#include <set>
 
 #include "GaudiKernel/IService.h"
 #include "Identifier/Identifier.h"
@@ -25,6 +26,7 @@ namespace Muon {
     */
     class IMuonIdHelperSvc : virtual public IService {
     public:
+        
         DeclareInterfaceID(IMuonIdHelperSvc, 1, 0);
 
         /** @brief destructor */
@@ -148,6 +150,9 @@ namespace Muon {
 
         /** @brief calculate layer index from Identifier */
         virtual MuonStationIndex::TechnologyIndex technologyIndex(const Identifier& id) const = 0;
+        /** @brief Recieve all technologies in a station */
+        virtual const std::set<MuonStationIndex::TechnologyIndex>& 
+                    technologiesInStation(MuonStationIndex::StIndex stIndex) const = 0;
 
         /** @brief Return stationPhi for all technologies */
         virtual int stationPhi(const Identifier& id) const = 0;

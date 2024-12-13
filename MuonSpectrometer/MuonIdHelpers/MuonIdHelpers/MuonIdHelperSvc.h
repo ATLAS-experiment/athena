@@ -8,6 +8,9 @@
 #include "AthenaBaseComps/AthService.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
+
+#include <unordered_set>
+#include <array>
 namespace Muon {
     /**
        @brief Helper service that creates muon Identifiers and can be used to print Identifiers
@@ -154,6 +157,9 @@ namespace Muon {
 
         /** @brief return sector number 1-16, odd=large, even=small */
         virtual int sector(const Identifier& id) const override;
+        /** @brief Recieve all technologies in a station */
+        virtual const std::set<MuonStationIndex::TechnologyIndex>& 
+                    technologiesInStation(MuonStationIndex::StIndex stIndex) const override;
 
         bool hasRPC() const override;
         bool hasTGC() const override;
@@ -201,13 +207,15 @@ namespace Muon {
             bool isEndcap{false};
             bool isSmall{false};
             ChIdx chIndex{ChIdx::ChUnknown};
-            StIdx stIndex{StIdx::StUnknown};
+            StIdx stIndex{StIdx::StUnknown};           
         };
-        std::vector<StationNameData> m_stationNameData;
-        std::vector<TechIdx> m_technologies;
+        std::vector<StationNameData> m_stationNameData{};
+        std::vector<TechIdx> m_technologies{};
 
         int m_BIS_stat{-1};
-        std::set<Identifier> m_smdt_stat{};
+        std::unordered_set<Identifier> m_smdt_stat{};
+        /** @brief Array holding which technologies are there per station */
+        std::array<std::set<TechIdx>, static_cast<int>(StIdx::StIndexMax)> m_techPerStation{};
     };
 
 }  // namespace Muon
