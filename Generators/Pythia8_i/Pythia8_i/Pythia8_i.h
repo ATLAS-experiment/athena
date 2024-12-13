@@ -44,13 +44,16 @@ public:
 
   // Routine for generating a random number.
   inline double flat(){
+    m_RNC++;
     return CLHEP::RandFlat::shoot(m_engine);
   };
 
   // Initialisation Routine
-  inline void init(CLHEP::HepRandomEngine* engine) {m_engine=engine;};
+  inline void init(CLHEP::HepRandomEngine* engine) {m_engine=engine; m_RNC=0;}
   inline CLHEP::HepRandomEngine* getEngine() { return m_engine; }
+  inline unsigned long long int getRNCalls() {return m_RNC;}
 private:
+  unsigned long long int m_RNC;
   CLHEP::HepRandomEngine* m_engine{};
 };
 
@@ -80,10 +83,11 @@ public:
 
   static const std::string& pythia_stream();
   static std::string xmlpath();
-
+  
 protected:
 
   bool useRndmGenSvc() const { return m_useRndmGenSvc; }
+  bool useReseed() const {return m_useReseed; }
 
   std::unique_ptr<Pythia8::Pythia> m_pythia{};
   HepMC::Pythia8ToHepMC m_pythiaToHepMC;
@@ -91,6 +95,8 @@ protected:
 
   BooleanProperty m_useRndmGenSvc{this, "useRndmGenSvc", true, "the max number of consecutive failures"};
   std::shared_ptr<customRndm> m_atlasRndmEngine{};
+
+  BooleanProperty m_useReseed{this,"useReseed", false};
 
   IntegerProperty m_dsid{this, "Dsid", 999999, "Dataset ID number"};
   StringArrayProperty m_userHooks{this, "UserHooks", {} };

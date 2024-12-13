@@ -220,7 +220,6 @@ StatusCode Pythia8_i::genInitialize() {
     ATH_MSG_INFO(" !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ");
 
     m_atlasRndmEngine = std::make_shared<customRndm>();
-
     CLHEP::HepRandomEngine* rndmEngine = getRandomEngineDuringInitialize(s_pythia_stream, m_randomSeed, m_dsid); // NOT THREAD-SAFE
     m_atlasRndmEngine->init(rndmEngine);
 #if PYTHIA_VERSION_INTEGER >= 8310
@@ -356,8 +355,7 @@ StatusCode Pythia8_i::genInitialize() {
 StatusCode Pythia8_i::callGenerator(){
 
   ATH_MSG_DEBUG(">>> Pythia8_i from callGenerator");
-
-  if(m_useRndmGenSvc){
+  if(m_useRndmGenSvc && m_useReseed){
     //Re-seed the random number stream
     long seeds[7];
     const EventContext& ctx = Gaudi::Hive::currentContext();
@@ -686,7 +684,12 @@ StatusCode Pythia8_i::genFinalize(){
         if (info.nTried()>0) ATH_MSG_INFO("Pythia8 efficiency (nAccepted/nTried %) = " << info.nAccepted()*100./info.nTried());
         else ATH_MSG_INFO("Pythia8 efficiency cannot be computed, nTried <=0");
   }
-      
+
+if(m_useRndmGenSvc){
+  ATH_MSG_INFO("Number of random numbers produced  " << m_atlasRndmEngine->getRNCalls());
+  if (m_useReseed) ATH_MSG_INFO("Each event was reseeded ");
+  else  ATH_MSG_INFO("Events were not reseeded ");
+}      
 
   return StatusCode::SUCCESS;
 }
