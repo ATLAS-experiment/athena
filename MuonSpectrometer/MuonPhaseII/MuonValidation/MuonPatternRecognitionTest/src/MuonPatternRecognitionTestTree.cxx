@@ -105,6 +105,10 @@ namespace MuonValR4{
                 m_out_seed_x0.push_back(seed->interceptX());
                 m_out_seed_tanphi.push_back(seed->tanPhi());
             }
+            else{
+                m_out_seed_x0.push_back(-999);
+                m_out_seed_tanphi.push_back(-999);
+            }
         
             m_out_seed_nHits.push_back(seed->getHitsInMax().size()); 
             m_out_seed_nEtaHits.push_back(std::accumulate(seed->getHitsInMax().begin(), seed->getHitsInMax().end(),0,

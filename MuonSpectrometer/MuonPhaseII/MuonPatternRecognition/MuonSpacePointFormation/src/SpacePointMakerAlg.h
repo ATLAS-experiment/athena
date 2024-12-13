@@ -161,7 +161,10 @@ namespace MuonR4{
             
             SG::WriteHandleKey<SpacePointContainer> m_writeKey{this, "WriteKey", "MuonSpacePoints"};
 
-            Gaudi::Property<double> m_spacePointWindow{this, "spacePointWindowSize", 2.*Gaudi::Units::m,
+            Gaudi::Property<double> m_spacePointWindow{this, "spacePointWindowSize", 0.8*Gaudi::Units::m,
+                                                       "Maximal distance between consecutive hits in a bucket"};
+
+            Gaudi::Property<double> m_maxBucketLength{this, "maxBucketLength", 2.*Gaudi::Units::m,
                                                        "Maximal size of a space point bucket"};
             
             Gaudi::Property<double> m_spacePointOverlap{this, "spacePointOverlap", 25.*Gaudi::Units::cm,
