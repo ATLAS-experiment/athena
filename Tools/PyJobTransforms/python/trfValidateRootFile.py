@@ -86,7 +86,8 @@ def checkNTupleEventWise(ntuple, printInterval = 150000):
 
     for i in reader:
         try:
-            reader.LoadEntry(i)
+            entry = reader.GetModel().CreateEntry()
+            reader.LoadEntry(i, entry)
         except Exception as err:
             msg.warning('Event %s of ntuple %s is corrupted: %s', i, reader.GetDescriptor().GetName(), err)
             return 1
