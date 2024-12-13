@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-def emulateSC_Cfg(flags, CellsIn="SeedLessFS"):
+def emulateSC_Cfg(flags, CellsIn="SeedLessFS",CellsOut=""):
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.ComponentFactory import CompFactory
@@ -20,7 +20,10 @@ def emulateSC_Cfg(flags, CellsIn="SeedLessFS"):
 
     larSCargs = {}
     larSCargs["SCellContainerIn"] = "EmulatedSCellNoBCID"
-    larSCargs["SCellContainerOut"] = flags.Trigger.L1.L1CaloSuperCellContainerName
+    if (CellsOut==""):
+       larSCargs["SCellContainerOut"] = flags.Trigger.L1.L1CaloSuperCellContainerName
+    else :
+       larSCargs["SCellContainerOut"] = CellsOut
 
     # Apply the pedestal correction
     acc.merge(LArSuperCellBCIDEmAlgCfg(flags, **larSCargs))
