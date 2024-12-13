@@ -52,7 +52,7 @@ StatusCode LArSuperCellMonAlg::initialize() {
   ATH_CHECK( m_superCellContainerKey.initialize() );
   ATH_CHECK( m_superCellContainerRefKey.initialize() );
   ATH_CHECK( m_noiseCDOKey.initialize() );
-  ATH_CHECK( m_bcDataKey.initialize() );
+  ATH_CHECK( m_bcDataKey.initialize(SG::AllowEmpty) );
  
   if(m_superCellContainerRecoKey.empty()) m_doSCReco=false;
   ATH_CHECK(m_superCellContainerRecoKey.initialize(m_doSCReco));  
@@ -92,7 +92,6 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
   SG::ReadCondHandle<CaloNoise> noiseHdl{m_noiseCDOKey, ctx};
   const CaloNoise *noisep = *noiseHdl;
 
-  SG::ReadCondHandle<BunchCrossingCondData> bccd (m_bcDataKey,ctx);
 
   const CaloCellContainer *superCellRecoCont = nullptr;
   if(m_doSCReco){
@@ -114,7 +113,11 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
   lumiBlock = ctx.eventID().lumi_block();
   auto bcid = Monitored::Scalar<unsigned int>("bcid",0);
   bcid = ctx.eventID().bunch_crossing_id();
-  int bcidFFB = bccd->distanceFromFront(bcid,BunchCrossingCondData::BunchCrossings);
+  int bcidFFB = bcid;
+  if (!m_bcDataKey.empty()){ 
+    SG::ReadCondHandle<BunchCrossingCondData> bccd (m_bcDataKey,ctx);
+    bcid=bccd->distanceFromFront(bcid,BunchCrossingCondData::BunchCrossings);
+  }
 
 
 

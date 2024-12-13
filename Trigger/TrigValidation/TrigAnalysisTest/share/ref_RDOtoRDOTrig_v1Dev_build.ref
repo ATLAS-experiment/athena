@@ -19151,6 +19151,14 @@ HLT_larpsallem_L1EM7_EMPTY:
   eventCount: 0
 HLT_larpsallem_L1EM7_FIRSTEMPTY:
   eventCount: 0
+HLT_larsupercellmon_L1RD0_EMPTY:
+  eventCount: 0
+HLT_larsupercellmon_L1RD0_FILLED:
+  eventCount: 0
+HLT_larsupercellmon_L1RD0_EMPTY:
+  eventCount: 0
+HLT_larsupercellmon_L1RD0_FILLED:
+  eventCount: 0
 HLT_mu10_L1MU8F:
   eventCount: 7
   stepCounts:

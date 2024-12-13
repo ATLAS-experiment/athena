@@ -39,6 +39,32 @@ def timeBurnerCfg(flags):
                           HypoToolGen=TimeBurnerHypoToolGen)
     return msca
 
+
+#----------------------------------------------------------------
+def LArSuperCellMonitoringGenCfg(flags):
+   from LArMonitoring.LArSuperCellMonAlg import LArSuperCellMonConfigHLT
+   # Input maker - required by the framework, but inputs don't matter for LArSuperCell
+   inputMaker = CompFactory.InputMakerForRoI("IM_LArSuperCellMon",
+                                             RoITool=CompFactory.ViewCreatorInitialROITool(),
+                                             RoIs="LArSuperCellMonRoIs",
+   )
+   reco = InEventRecoCA('LArSuperCellMonitoring',inputMaker=inputMaker)
+   reco.merge( LArSuperCellMonConfigHLT(flags) )
+   # TimeBurner alg works as a reject-all hypo
+   selAcc = SelectionCA('LArSuperCellMonitoringSequence')
+   selAcc.mergeReco(reco)
+   selAcc.addHypoAlgo(
+       TimeBurnerCfg(flags,
+                     name="LArSuperCellMonHypoConfig",
+                     SleepTimeMillisec=0
+       )
+   )
+
+   # TimeBurnerHypo is never even called
+   msca = MenuSequence(flags, selAcc,
+                         HypoToolGen=TimeBurnerHypoToolGen)
+   return msca
+
 def L1TopoOnlineMonitorSequenceCfg(flags):
 
         # Input maker for FS initial RoI
@@ -113,6 +139,8 @@ class MonitorChainConfiguration(ChainConfigurationBase):
 
         if monType == 'timeburner':
             chainSteps.append(self.getTimeBurnerStep(flags))
+        elif monType == 'larsupercellmon':
+            chainSteps.append(self.getLArSuperCellMonitoringGenCfg(flags))
         elif monType == 'l1topoPh1debug':
             chainSteps.append(self.getL1TopoOnlineMonitorStep(flags))
         elif monType == 'mistimemonj400':
@@ -127,6 +155,12 @@ class MonitorChainConfiguration(ChainConfigurationBase):
     # --------------------
     def getTimeBurnerStep(self, flags):
         return self.getStep(flags, 'TimeBurner',[timeBurnerCfg])
+
+    # --------------------
+    # LArSuperCellMon configuration
+    # --------------------
+    def getLArSuperCellMonitoringGenCfg(self, flags):
+        return self.getStep(flags, 'larsupercellmon',[LArSuperCellMonitoringGenCfg])
 
     # --------------------
     # L1TopoOnlineMonitor configuration
