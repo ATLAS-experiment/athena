@@ -186,7 +186,7 @@ template<> inline bool isSMNeutrino(const int& p){ auto sp = std::abs(p); return
 template<class T> inline bool isDiquark(const T& p){return isDiquark(p->pdg_id());}
 template<> inline bool isDiquark(const DecodedPID& p){
   if ( p.ndigits() == 4 &&  p(0) >= p(1) && p(2) == 0 &&  p.last() % 2 == 1
-       && p.max_digit(1,3) <= 6
+       && p.max_digit(2,4) <= TQUARK
        ) return true;
   return false;
 }
@@ -209,6 +209,7 @@ template<> inline bool isMeson(const DecodedPID& p){
   if (p.last() % 2 != 1 ) return false;
   if (p.max_digit(1,3) >= 6 ) return false;
   if (p.max_digit(1,3) == 0 ) return false;
+  if (p.ndigits() > 3 && *(p.second.rbegin() + 3) != 0 ) return false;
 
   if (p.ndigits() == 3 && p(0) == p(1) && p.pid() < 0 ) return false;
   if (p.ndigits() == 5 && p(2) == p(3) && p.pid() < 0 ) return false;
@@ -222,7 +223,7 @@ template<> inline bool isMeson(const DecodedPID& p){
 
   if (p.ndigits() == 6 && p(3) >= p(4) && p(4) != 0 && p.last() % 2 == 1  ) return true;
 
-  if (p.ndigits() == 7 && p(4) >= p(5) && p(5) != 0) return true;
+  if (p.ndigits() == 7 && p(0) == 9 && p(1) == 0 && p(4) >= p(5) && p(5) != 0) return true;
 
   return false;
 }
@@ -480,7 +481,7 @@ template<> inline bool isExcited(const int& p){ auto value_digits = DecodedPID(p
 /// PDG_IDs.
 template<class T> inline bool isRGlueball(const T& p) { return isRGlueball(p->pdg_id()); }
 template<> inline bool isRGlueball(const DecodedPID& p) {
-  if (p.ndigits() != 7) return false;
+  if (p.ndigits() != 7 || p(0)  != 1) return false;
   auto pp = p.shift(1);
   return
     ( ( pp.ndigits() == 3 && pp(0) == COMPOSITEGLUON && pp(1) == COMPOSITEGLUON && (pp(2) == 1 || pp(2) == 3) ) ||
@@ -488,31 +489,33 @@ template<> inline bool isRGlueball(const DecodedPID& p) {
 }
 template<> inline bool isRGlueball(const int& p) {  auto value_digits = DecodedPID(p);  return isRGlueball(value_digits); }
 
-// APID Define R-Mesons as gluino-quark-antiquark and squark-antiquark bound states
+// APID Define R-Mesons as gluino-quark-antiquark and squark-antiquark bound states (ignore 4th generation squarks/quarks)
 // NB Current models only allow gluino-quark-antiquark, stop-antiquark and sbottom-antiquark states
 template<class T> inline bool isRMeson(const T& p) { return isRMeson(p->pdg_id()); }
 template<> inline bool isRMeson(const DecodedPID& p) {
+  if (!(p.ndigits() == 7 && (p(0) == 1 || p(0) == 2))) return false;
   auto pp = p.shift(1);
-  return isSUSY(p) && (
-                       // Handle ~gluino-quark-antiquark states
-                       (pp.ndigits() == 4 && pp(0) == COMPOSITEGLUON  && pp.max_digit(1,3) < COMPOSITEGLUON  && pp(2) <= pp(1) && (pp.last() == 1 || pp.last() == 3)) ||
-                       // Handle squark-antiquark states (previously called Smeson/mesoninos)
-                       (pp.ndigits() == 3 && pp.max_digit(1,3) < COMPOSITEGLUON && pp(1) <= pp(0) && pp.last() == 2)
-                       );
+  return (
+          // Handle ~gluino-quark-antiquark states
+          (pp.ndigits() == 4 && pp(0) == COMPOSITEGLUON  && pp.max_digit(1,3) < COMPOSITEGLUON  && pp(2) <= pp(1) && isSMQuark(pp(1)) && isSMQuark(pp(2)) && (pp.last() == 1 || pp.last() == 3)) ||
+          // Handle squark-antiquark states (previously called Smeson/mesoninos)
+          (pp.ndigits() == 3 && pp.max_digit(1,3) < COMPOSITEGLUON && pp(1) <= pp(0) && isSMQuark(pp(0)) && isSMQuark(pp(1)) && pp.last() == 2)
+          );
 }
 template<> inline bool isRMeson(const int& p) { auto value_digits = DecodedPID(p); return isRMeson(value_digits); }
 
-// APID Define R-Baryons as gluino-quark-quark-quark and squark-quark-quark bound states
+// APID Define R-Baryons as gluino-quark-quark-quark and squark-quark-quark bound states (ignore 4th generation squarks/quarks)
 // NB Current models only allow gluino-quark-quark-quark, stop-quark-quark and sbottom-quark-quark states
 template<class T> inline bool isRBaryon(const T& p) { return isRBaryon(p->pdg_id()); }
 template<> inline bool isRBaryon(const DecodedPID& p) {
+  if (!(p.ndigits() == 7 && (p(0) == 1 || p(0) == 2))) return false;
   auto pp = p.shift(1);
-  return isSUSY(p) && (
-                       // Handle ~gluino-quark-quark-quark states
-                       (pp.ndigits() == 5 && pp(0) == COMPOSITEGLUON && pp.max_digit(1,4) < COMPOSITEGLUON && pp(2) <= pp(1) && pp(3) <= pp(2) && (pp.last() == 2 || pp.last() == 4)) ||
-                       // Handle squark-quark-quark states (previously called Sbaryons)
-                       (pp.ndigits() == 4 && pp.max_digit(1,4) < COMPOSITEGLUON && pp(1) <= pp(0) && pp(2) <= pp(1) && (pp.last() == 1 || pp.last() == 3))
-                       );
+  return (
+          // Handle ~gluino-quark-quark-quark states
+          (pp.ndigits() == 5 && pp(0) == COMPOSITEGLUON && pp.max_digit(1,4) < COMPOSITEGLUON && pp(2) <= pp(1) && pp(3) <= pp(2) && isSMQuark(pp(1)) && isSMQuark(pp(2)) && isSMQuark(pp(3))  && (pp.last() == 2 || pp.last() == 4)) ||
+          // Handle squark-quark-quark states (previously called Sbaryons)
+          (pp.ndigits() == 4 && pp.max_digit(1,4) < COMPOSITEGLUON && pp(1) <= pp(0) && pp(2) <= pp(1) && isSMQuark(pp(0))  && isSMQuark(pp(1)) && isSMQuark(pp(2)) && (pp.last() == 1 || pp.last() == 3))
+          );
 }
 template<> inline bool isRBaryon(const int& p) { auto value_digits = DecodedPID(p); return isRBaryon(value_digits); }
 
@@ -637,8 +640,10 @@ template<> inline bool hasQuark(const DecodedPID& p, const int& q){
   if (isSUSY(p)) { // APID SUSY case
     auto pp = p.shift(1);
     if ( pp.ndigits() == 1 ) { return false; } // Handle squarks
-    if ( pp.ndigits() == 3 ) { pp = DecodedPID(pp(1)); } // Handle ~q qbar pairs
-    if ( pp.ndigits()  > 3 ) { pp = pp.shift(1); } // Drop gluinos and squarks
+    if ( pp.ndigits() == 3 ) { return (pp(1) == q); } // Handle ~q qbar pairs
+    if ( pp.ndigits() == 4 ) { return (pp(1) == q || pp(2) == q); } // Ignore gluinos and squarks
+    if ( pp.ndigits() == 5 ) {  return (pp(1) == q || pp(2) == q || pp(3) == q); } // Ignore gluinos and squarks
+    if ( pp.ndigits() > 5 ) { pp = pp.shift(1); } // Drop gluinos and squarks
     return hasQuark(pp, q); }
   return false;
 }
