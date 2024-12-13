@@ -88,7 +88,12 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.fitFromPRD', False) # Acts.writeTrackCollection needs to be True for either cases. If Acts.fitFromPRD is False, fit from ROT; else, fit from PRD
     actscf.addFlag('Acts.trackFitterType', TrackFitterType.KalmanFitter, type=TrackFitterType) # Define Tracking algorithm for refitting
 
+    # GSF specific flags
     actscf.addFlag("Acts.useActsGsfInEgamma", False)
+    actscf.addFlag("Acts.GsfMaxComponents", 12)
+    actscf.addFlag("Acts.GsfComponentMergeMethod", 'eMaxWeight')
+    actscf.addFlag("Acts.GsfDirectNavigation", False)
+    actscf.addFlag("Acts.GsfOutlierChi2Cut", 20.0)
 
     actscf.addFlag('Acts.useDefaultActsMeasurementSelector', False) # if True, uses no outlier chi2 cut as before (chi2<25,inf)
 
