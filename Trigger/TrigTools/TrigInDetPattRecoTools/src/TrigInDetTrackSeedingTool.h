@@ -75,7 +75,7 @@ class TrigInDetTrackSeedingTool: public extends<AthAlgTool, ITrigInDetTrackSeedi
   IntegerProperty m_nMaxEdges{this, "MaxGraphEdges", 2000000};
   StringProperty  m_connectionFile{this, "ConnectionFileName", "binTables_ITK_RUN4.txt"};
 
-  float m_phiSliceWidth;
+  float m_phiSliceWidth{};
   
   /// region selector tools
   ToolHandle<IRegSelTool> m_regsel_pix { this, "RegSelTool_Pixel",  "RegSelTool/RegSelTool_Pixel" };
