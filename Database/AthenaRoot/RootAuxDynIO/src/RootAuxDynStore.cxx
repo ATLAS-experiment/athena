@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainers/exceptions.h"
@@ -28,8 +28,9 @@ const void* RootAuxDynStore::getData(SG::auxid_t auxid) const
   const void* ret = SG::AuxStoreInternal::getData (auxid);
   if (!ret) {
     auto this_nc ATLAS_THREAD_SAFE = const_cast<RootAuxDynStore*>(this); // locked above
-    this_nc->readData(auxid);
-    ret = SG::AuxStoreInternal::getData (auxid);
+    if( this_nc->readData(auxid) ) {
+       ret = SG::AuxStoreInternal::getData(auxid);
+    }
   }
   return ret;
 }
@@ -48,8 +49,9 @@ const void* RootAuxDynStore::getIOData(SG::auxid_t auxid) const
   const void* ret = SG::AuxStoreInternal::getIODataInternal (auxid, true);
   if (!ret) {
     auto this_nc ATLAS_THREAD_SAFE = const_cast<RootAuxDynStore*>(this); // locked above
-    this_nc->readData(auxid);
-    ret = SG::AuxStoreInternal::getIOData (auxid);
+    if( this_nc->readData(auxid) ) {
+       ret = SG::AuxStoreInternal::getIOData (auxid);
+    }
   }
   return ret;
 }
