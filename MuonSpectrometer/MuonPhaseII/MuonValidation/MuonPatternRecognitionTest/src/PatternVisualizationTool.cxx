@@ -16,6 +16,7 @@
 #include "xAODMuonPrepData/MdtDriftCircle.h"
 #include "xAODMuonPrepData/RpcMeasurement.h"
 #include "xAODMuonPrepData/TgcStrip.h"
+#include "xAODMuonPrepData/MMCluster.h"
 
 #include <format>
 #include <sstream>
@@ -546,7 +547,14 @@ namespace MuonValR4 {
                 primitives.push_back(drawBox(hit.positionInChamber(), boxWidth, 0.5*meas->readoutElement()->gasGapPitch(),
                                              boxColor, fillStyle));
                 break; 
-            } case xAOD::UncalibMeasType::Other :{
+            } case xAOD::UncalibMeasType::MMClusterType: {
+                const auto* meas{static_cast<const xAOD::MMCluster*>(underlyingSp->primaryMeasurement())};
+                const int boxColor = isLabeled(*meas) ? truthColor : kAquamarine;
+                const double boxWidth = 0.5*Gaudi::Units::mm;
+                primitives.push_back(drawBox(hit.positionInChamber(), boxWidth, 10.*Gaudi::Units::mm,
+                                             boxColor, fillStyle));
+                break; 
+            }  case xAOD::UncalibMeasType::Other :{
                 break;
             } default:
                 ATH_MSG_WARNING("Please implement proper drawings of the new small wheel.. "<<__FILE__<<":"<<__LINE__);    
@@ -612,61 +620,46 @@ namespace MuonValR4 {
             }
             
             const Identifier hitId =  underlyingSp ? underlyingSp->identify(): Identifier{};
-            std::stringstream legendstream{};
+            std::string legendstream{};
             switch(hit->type()) {
                 case xAOD::UncalibMeasType::MdtDriftCircleType: {
                     const int driftSign{SegmentFitHelpers::driftSign(locPos, locDir, *hit, msgStream())};
                     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
-                    legendstream<<"ML: "<<idHelper.multilayer(hitId);
-                    legendstream<<", TL: "<<idHelper.tubeLayer(hitId);
-                    legendstream<<", T: "<<idHelper.tube(hitId);
-                    legendstream<<", "<<(driftSign == -1 ? "L" : "R");
+                    legendstream = std::format("ML: {:1d}, TL: {:1d}, T: {:3d}, {:}",
+                                                idHelper.multilayer(hitId), idHelper.tubeLayer(hitId),
+                                                idHelper.tube(hitId), driftSign == -1 ? "L" : "R");
                     break;
                 } case xAOD::UncalibMeasType::RpcStripType: {
                     const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
-                    legendstream<<"DR: "<<idHelper.doubletR(hitId);
-                    legendstream<<" DZ: "<<idHelper.doubletZ(hitId);
-                    legendstream<<", GAP: "<<idHelper.gasGap(hitId);
-                    legendstream<<", #eta/#phi: "<<(hit->measuresEta() ? "si" : "nay") 
-                                << "/"<<(hit->measuresPhi() ? "si" : "nay");
+                    legendstream= std::format("DR: {:1d}, DZ: {:1d}, GAP: {:1d}, #eta/#phi: {:}/{:}",
+                                              idHelper.doubletR(hitId), idHelper.doubletZ(hitId), idHelper.gasGap(hitId),
+                                              hit->measuresEta() ? "si" : "nay", hit->measuresPhi() ? "si" : "nay");
                     break;
                 } case xAOD::UncalibMeasType::TgcStripType: {
                     const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
-                    legendstream<<"ST: "<<m_idHelperSvc->stationNameString(hitId);
-                    legendstream<<", GAP: "<<idHelper.gasGap(hitId);
-                    legendstream<<", #eta/#phi: "<<(hit->measuresEta() ? "si" : "nay") 
-                                 << "/"<<(hit->measuresPhi() ? "si" : "nay");      
+                    legendstream = std::format("ST: {:}, GAP: {:1d}, #eta/#phi: {:}/{:}",
+                                               m_idHelperSvc->stationNameString(hitId), idHelper.gasGap(hitId),
+                                               hit->measuresEta() ? "si" : "nay", hit->measuresPhi() ? "si" : "nay");      
                     break;
                 } case xAOD::UncalibMeasType::MMClusterType: {
                     const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
-                    legendstream<<"ML: "<<idHelper.multilayer(hitId);
-                    legendstream<<", GAP: "<<idHelper.gasGap(hitId);
-                    legendstream<<", stereo: "<<(idHelper.isStereo(hitId)? "si" : "nay");
+                    const auto* clus = static_cast<const xAOD::MMCluster*>(underlyingSp->primaryMeasurement());
+                    const MuonGMR4::StripDesign& design = clus->readoutElement()->stripLayer(clus->layerHash()).design();
+                    legendstream = std::format("ML: {:1d}, GAP: {:1d}, {:}", idHelper.multilayer(hitId), idHelper.gasGap(hitId),
+                                                !design.hasStereoAngle() ? "X"  : design.stereoAngle() > 0 ? "U" :"V");
                     break;
                 } case xAOD::UncalibMeasType::sTgcStripType: {
                     const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
-                    legendstream<<"ML: "<<idHelper.multilayer(hitId);
-                    legendstream<<", GAP: "<<idHelper.gasGap(hitId);
-                    switch (idHelper.channelType(hitId)) {
-                        case sTgcIdHelper::sTgcChannelTypes::Strip:
-                            legendstream<<", strip";
-                            break;
-                        case sTgcIdHelper::sTgcChannelTypes::Wire:
-                            legendstream<<", wire";
-                            break;
-                        case sTgcIdHelper::sTgcChannelTypes::Pad:
-                            legendstream<<", pad";
-                            break;
-                        default:
-                            break;
-                    }
+                    legendstream = std::format("ML: {:1d}, GAP: {:1d}, #eta/#phi: {:}/{:}", 
+                                               idHelper.multilayer(hitId), idHelper.gasGap(hitId),
+                                               hit->measuresEta() ? "si" : "nay", hit->measuresPhi() ? "si" : "nay");
                     break;
                 } 
                 default:
                     break;
             }
-            legendstream<<std::format(", #chi^{{2}}: {:.2f}", chi2);
-            primitives.push_back(drawLabel(legendstream.str(), legX, startLegY, 14));
+            legendstream+=std::format(", #chi^{{2}}: {:.2f}", chi2);
+            primitives.push_back(drawLabel(legendstream, legX, startLegY, 14));
             startLegY -= 0.05;
             if (startLegY<= endLegY) {
                 break;
