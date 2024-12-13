@@ -54,8 +54,8 @@ StatusCode NRPC_RawDataProviderTool::convert(
     const EventContext& ctx) const  // call decoding function using list of all detector ROBId's
 {
 
-    SG::ReadCondHandle<MuonNRPC_CablingMap> readHandle{m_readKey, ctx};
-    const MuonNRPC_CablingMap* readCdo{*readHandle};
+    SG::ReadCondHandle<RpcCablingMap> readHandle{m_readKey, ctx};
+    const RpcCablingMap* readCdo{*readHandle};
     if (!readCdo) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");
         return StatusCode::FAILURE;
@@ -71,8 +71,8 @@ StatusCode NRPC_RawDataProviderTool::convert(const std::vector<IdentifierHash>& 
 }
 
 StatusCode NRPC_RawDataProviderTool::convert(const std::vector<IdentifierHash>& HashVec, const EventContext& ctx) const {
-    SG::ReadCondHandle<MuonNRPC_CablingMap> readHandle{m_readKey, ctx};
-    const MuonNRPC_CablingMap* readCdo{*readHandle};
+    SG::ReadCondHandle<RpcCablingMap> readHandle{m_readKey, ctx};
+    const RpcCablingMap* readCdo{*readHandle};
     if (!readCdo) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");
         return StatusCode::FAILURE;

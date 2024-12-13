@@ -684,7 +684,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeNRpcRDO(const EventContext& ctx, RpcDig
         ATH_MSG_FATAL("Failed to retrieve "<<m_nRpcRdoKey.fullKey());
         return StatusCode::FAILURE;
     }
-    SG::ReadCondHandle<MuonNRPC_CablingMap> cabling{m_nRpcCablingKey, ctx};
+    SG::ReadCondHandle cabling{m_nRpcCablingKey, ctx};
     if (!cabling.isValid()) {
         ATH_MSG_FATAL("Failed to retrieve "<<m_nRpcCablingKey.fullKey());
         return StatusCode::FAILURE;
@@ -694,7 +694,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeNRpcRDO(const EventContext& ctx, RpcDig
         ATH_MSG_FATAL("Failed to retrieve the readout geometry "<<muonDetMgr.fullKey());
         return StatusCode::FAILURE;
     }    
-    using CablingData = NrpcCablingData;
+    using CablingData = Muon::RpcCablingData;
     const RpcIdHelper& id_helper = m_idHelperSvc->rpcIdHelper();
         
     /// Prepare the ouput container map

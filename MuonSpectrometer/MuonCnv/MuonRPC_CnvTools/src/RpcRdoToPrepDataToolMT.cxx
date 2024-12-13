@@ -1265,7 +1265,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processNrpcRdo(const EventContext& ctx,
     ATH_MSG_DEBUG("Not empty NRPC RDO container in this event ");
 
 
-    SG::ReadCondHandle<MuonNRPC_CablingMap> readCdo{m_nRpcCablingKey, ctx};
+    SG::ReadCondHandle<RpcCablingMap> readCdo{m_nRpcCablingKey, ctx};
     if (!readCdo.isValid()) {
         ATH_MSG_ERROR("Could not retrieve "<<m_nRpcCablingKey.fullKey()<<" from the conditions store");
         return StatusCode::FAILURE;
@@ -1275,7 +1275,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processNrpcRdo(const EventContext& ctx,
   
     for (const xAOD::NRPCRDO* nrpcrdo: *rdoNrpcContainerHandle) {
         /// Convert from online to offline cabling
-        NrpcCablingData cabling_data{};
+        RpcCablingData cabling_data{};
         cabling_data.subDetector = nrpcrdo->subdetector();
         cabling_data.tdcSector = nrpcrdo->tdcsector();
         cabling_data.tdc = nrpcrdo->tdc();

@@ -55,19 +55,18 @@ StatusCode NrpcDigitToNrpcRDO::execute(const EventContext& ctx) const {
         ATH_MSG_FATAL("Could not find RpcDigitContainer called " << container.name() << " in store " << container.store());
         return StatusCode::FAILURE;
     }
-    SG::ReadCondHandle<MuonNRPC_CablingMap> readHandle_Cabling(m_cablingKey, ctx);
-    if (!readHandle_Cabling.isValid()) {
-        ATH_MSG_FATAL("Could not find MuonNRPC_CablingMap " );
+    SG::ReadCondHandle cabling_ptr(m_cablingKey, ctx);
+    if (!cabling_ptr.isValid()) {
+        ATH_MSG_FATAL("Could not find RpcCablingMap " );
         return StatusCode::FAILURE;
     }
-    const MuonNRPC_CablingMap* cabling_ptr = readHandle_Cabling.cptr();
-        SG::ReadCondHandle<MuonGM::MuonDetectorManager> muonDetMgr{m_muonManagerKey, ctx};
+    SG::ReadCondHandle<MuonGM::MuonDetectorManager> muonDetMgr{m_muonManagerKey, ctx};
     if (!muonDetMgr.isValid()) {
         ATH_MSG_FATAL("Failed to retrieve the muon detector manager "<<m_muonManagerKey.fullKey());
         return StatusCode::FAILURE;
     }
 
-    ATH_MSG_DEBUG("Found MuonNRPC_CablingMap ");
+    ATH_MSG_DEBUG("Found RpcCablingMap ");
 
     /// Record the output container
     SG::WriteHandle<xAOD::NRPCRDOContainer> nrpcRdoData(m_NrpcContainerKey, ctx);
@@ -101,7 +100,7 @@ StatusCode NrpcDigitToNrpcRDO::execute(const EventContext& ctx) const {
 
             ATH_MSG_DEBUG("Convert RPC digit "<<m_idHelperSvc->toString(channelId));
             
-            NrpcCablingData cabling_data{};
+            Muon::RpcCablingData cabling_data{};
             /// Load the identifier into the cabling data
             if (!cabling_ptr->convert(channelId, cabling_data, false)) {
                 ATH_MSG_FATAL("Found a non NRPC identifier " << m_idHelperSvc->toString(channelId));

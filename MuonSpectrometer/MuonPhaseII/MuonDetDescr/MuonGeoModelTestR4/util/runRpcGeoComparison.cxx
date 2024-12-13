@@ -11,7 +11,7 @@
 #include <GeoPrimitives/GeoPrimitives.h>
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
-#include <MuonCablingData/NrpcCablingData.h>
+#include <MuonCablingData/RpcCablingData.h>
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
 #include <GaudiKernel/SystemOfUnits.h>
 #include "CxxUtils/starts_with.h"
@@ -31,7 +31,7 @@ struct RpcChamber{
     RpcChamber() = default;
     
     /// Identifier of the Rpc chamber
-    using  chamberIdentifier = NrpcCablingOfflineID;
+    using  chamberIdentifier = Muon::RpcCablingOfflineID;
     chamberIdentifier id{};
     std::string design{};
 
