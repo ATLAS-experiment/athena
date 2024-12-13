@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -190,8 +190,9 @@ namespace Rec {
                innerParameters = std::move(exPars);
             } else if (exPars && innerParameters && !middleParameters ) {
                 middleParameters = std::move(exPars);
+            } else {
+              lastPars = std::move(exPars);
             }
-            lastPars = std::move(exPars);
             innerParsSet = true;
         }
 
