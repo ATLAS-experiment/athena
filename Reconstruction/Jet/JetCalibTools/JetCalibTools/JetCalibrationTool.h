@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetCalibrationTool.h 
@@ -75,42 +75,42 @@ private:
   std::string m_calibSeq;
   std::string m_calibAreaTag;
   std::string m_originScale;
-  bool m_devMode;
-  bool m_isData;
-  bool m_timeDependentCalib;
-  bool m_originCorrectedClusters;
-  bool m_useNjetInResidual;
-  float m_nJetThreshold;
+  bool m_devMode{};
+  bool m_isData{true};
+  bool m_timeDependentCalib{};
+  bool m_originCorrectedClusters{};
+  bool m_useNjetInResidual{};
+  float m_nJetThreshold{};
   std::string m_nJetContainerName;
   std::string m_dir;
   std::string m_eInfoName;
   std::vector<TString> m_timeDependentInsituConfigs;
   std::vector<double>  m_runBins;
-  bool m_doSetDetectorEta;
-  bool m_insituCombMassCalib;
+  bool m_doSetDetectorEta{};
+  bool m_insituCombMassCalib{};
   std::vector<TString> m_insituCombMassConfig;
 
   //TEnv to hold the global text config
-  TEnv * m_globalConfig;
+  TEnv * m_globalConfig{};
   std::vector<TEnv*> m_globalTimeDependentConfigs;
   std::vector<TEnv*> m_globalInsituCombMassConfig;
 
   //Bools/enums to avoid string comparisons at run time
-  jetScale m_jetScale;
-  bool m_doBcid;
-  bool m_doJetArea;
-  bool m_doResidual;
-  bool m_doOrigin;
-  bool m_doGSC;
-  bool m_doDNNCal;
+  jetScale m_jetScale = jetScale::EM;
+  bool m_doBcid{true};
+  bool m_doJetArea{true};
+  bool m_doResidual{true};
+  bool m_doOrigin{true};
+  bool m_doGSC{true};
+  bool m_doDNNCal{};
 
-  std::string m_gscDepth; // if not set then use the one defined in the config
+  std::string m_gscDepth{"auto"}; // if not set then use the one defined in the config
 
   std::vector<std::unique_ptr<JetCalibrationStep> > m_calibSteps;
-  int m_smearIndex;
+  int m_smearIndex{-1};
 
   // Try to use jet-attribute-specified origin vertex for calibration
-  bool m_useOriginVertex;
+  bool m_useOriginVertex{};
 }; 
 
 #endif //> !JETCALIBTOOLS_APPLYJETCALIBRATION_H

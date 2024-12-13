@@ -52,7 +52,7 @@ class SmearingCalibStep
         ToolHandle<JetHelper::IVarTool> m_histToolData {this, "HistoReaderData", "HistoInput2D", "Instance of HistoInput1D or HistoInput2D for reading histogram for data"};
 
         // Helper methods
-        StatusCode getSigmaSmear(xAOD::Jet& jet, JetHelper::JetContext jc, double& sigmaSmear) const;
+        StatusCode getSigmaSmear(xAOD::Jet& jet, const JetHelper::JetContext & jc, double& sigmaSmear) const;
         StatusCode getNominalResolution(const xAOD::Jet& jet, JetHelper::JetContext jc, double& resolution) const;
         TRandom3* getTLSRandomGen(unsigned long seed) const;
 
@@ -64,7 +64,7 @@ class SmearingCalibStep
             Mass,       // Mass smearing (JMR)
             FourVec     // Four-vector smearing (JER)
         };
-        SmearType m_smearTypeClass;
+        SmearType m_smearTypeClass = SmearType::UNKNOWN;
 
         mutable boost::thread_specific_ptr<TRandom3> m_rand_tls; // thread-specific random number generator
 };

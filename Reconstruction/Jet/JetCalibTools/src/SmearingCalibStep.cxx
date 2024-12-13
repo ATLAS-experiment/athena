@@ -65,7 +65,7 @@ TRandom3* SmearingCalibStep::getTLSRandomGen(unsigned long seed) const
   return random;
 }
 
-StatusCode SmearingCalibStep::getSigmaSmear(xAOD::Jet& jet, JetHelper::JetContext jc, double& sigmaSmear) const
+StatusCode SmearingCalibStep::getSigmaSmear(xAOD::Jet& jet, const JetHelper::JetContext & jc, double& sigmaSmear) const
 {
     /*
         Nominal jet smearing
