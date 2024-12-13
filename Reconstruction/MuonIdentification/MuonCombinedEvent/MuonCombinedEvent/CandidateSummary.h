@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #pragma once
@@ -37,7 +37,7 @@ namespace MuGirlNS {
     }
 
     struct StauHit {
-        StauHitTechnology eTech;
+        StauHitTechnology eTech{};
         double mToF{-1.};
         double x{0.};
         double y{0.};
