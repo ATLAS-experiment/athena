@@ -10,10 +10,11 @@ def ActsGaussianSumFitterToolCfg(flags,
 
     kwargs.setdefault("RefitOnly", True) # Track summary will be added in the algorithm
 
-    kwargs.setdefault("UseDirectNavigation", False) # direct navigation used for refitting measurements
-    kwargs.setdefault("ComponentMergeMethod", "eMaxWeight") # eMean or eMaxWeight
-    kwargs.setdefault("MaxComponents", 12)
-    
+    kwargs.setdefault("UseDirectNavigation", flags.Acts.GsfDirectNavigation) # direct navigation used for refitting measurements
+    kwargs.setdefault("ComponentMergeMethod", flags.Acts.GsfComponentMergeMethod) # eMean or eMaxWeight
+    kwargs.setdefault("MaxComponents", flags.Acts.GsfMaxComponents)
+    kwargs.setdefault("OutlierChi2Cut", flags.Acts.GsfOutlierChi2Cut)
+
     if "TrackingGeometryTool" not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs["TrackingGeometryTool"] = acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))

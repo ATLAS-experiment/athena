@@ -99,15 +99,20 @@ StatusCode GaussianSumFitterTool::initialize() {
   
   m_outlierFinder.StateChiSquaredPerNumberDoFCut = m_option_outlierChi2Cut;
   m_gsfExtensions.outlierFinder.connect<&ActsTrk::detail::FitterHelperFunctions::ATLASOutlierFinder::operator()<ActsTrk::MutableTrackStateBackend>>(&m_outlierFinder);
-  if(m_option_componentMergeMethod == "eMean")
+  if(m_option_componentMergeMethod == "eMean" || m_option_componentMergeMethod == "mean")
     m_componentMergeMethod = Acts::ComponentMergeMethod::eMean;
-  else if(m_option_componentMergeMethod == "eMaxWeight"){
+  else if(m_option_componentMergeMethod == "eMaxWeight" || m_option_componentMergeMethod == "maxWeight"){
     m_componentMergeMethod = Acts::ComponentMergeMethod::eMaxWeight;
   }else{
-    ATH_MSG_ERROR("Unknown option for ComponentMergeMethod: " << m_option_componentMergeMethod );
+    throw std::runtime_error("Unknown option for ComponentMergeMethod: " + m_option_componentMergeMethod.value());
   }
   
-  ATH_MSG_INFO("ACTS GSF  "<< m_useDirectNavigation << m_maxComponents <<  m_option_componentMergeMethod << m_weightCutOff  );
+  ATH_MSG_INFO("ACTS GSF direct nav   " << m_useDirectNavigation.value());
+  ATH_MSG_INFO("ACTS GSF max cmps     " << m_maxComponents.value());
+  ATH_MSG_INFO("ACTS GSF merge meth   " << m_option_componentMergeMethod.value());
+  ATH_MSG_INFO("ACTS GSF weight ctf   " << m_weightCutOff.value());
+  ATH_MSG_INFO("ACTS GSF outlier chi2 " << m_option_outlierChi2Cut.value());
+  
   return StatusCode::SUCCESS;
 }
 
