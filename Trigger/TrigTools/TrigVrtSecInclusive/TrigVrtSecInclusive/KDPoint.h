@@ -161,11 +161,9 @@ class KDTree {
       /**
       * Node class for KDTree
       */
-      class Node {
-         public :
+      struct Node {
             const KDPoint<T, D>&    dataRef;
             int dataIdx;
-            int axis;
             std::unique_ptr<Node>   leftPtr;
             std::unique_ptr<Node>   rightPtr;
 
