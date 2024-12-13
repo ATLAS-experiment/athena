@@ -140,36 +140,34 @@ def defineInputsMenu():
         "type" : "optical",
         "fpga" : 0,
         "legacy" : False,
-        "thresholds" : [ # Topo1A: eFex EM, eFex TAU, gJ, gLJ
-            # eTAU thresholds for commissioning
-            ('eTAU12',3), ('eTAU20',3), ('eTAU1',3),
+        "thresholds" : [ # Topo1A: eFex EM, eFex TAU, gFEX gJ, gFEX gLJ
+            # eTAU thresholds for production
+            ('eTAU1',3), ('eTAU12',3), ('eTAU20',3),
 
-            (None,3),
+            (None, 3),
 
             'eTAU20L', 'eTAU20M', 'eTAU30', 'eTAU30M',
-            'eTAU35', 'eTAU35M', 'eTAU40HM','eTAU60', 'eTAU80', 'eTAU140',
-        
-            # eTAU thresholds for production
-            #'eTAUSPARE6', 'eTAUSPARE7', 
-            
+            'eTAU35', 'eTAU35M', 'eTAU40HM', 'eTAU40HT',
+            'eTAU60', 'eTAU60HM', 'eTAU80', 'eTAU140',
+
             None, None,
-            
-            # gLJ thresholds for commissioning
+        
+            # gLJ thresholds for production
             'gLJ80p0ETA25', 'gLJ100p0ETA25', 'gLJ140p0ETA25', 'gLJ160p0ETA25',
 
-            # gLJ thresholds for production
+            # gLJ thresholds for commissioning
             'gLJSPARE1', 'gLJSPARE2', 'gLJSPARE3', 'gLJSPARE4',
 
-            None, 
+            None,
 
-            # gJ thresholds for commissioning
+            # gJ thresholds for production
             ('gJ20p0ETA25',3), ('gJ20p25ETA49',3), ('gJSPARE1',3),
 
             (None,3),
 
-            'gJ50p0ETA25', 'gJ100p0ETA25', 
-            'gJ400p0ETA25',
-            
+            'gJ50p0ETA25', 'gJ100p0ETA25', 'gJ400p0ETA25',
+
+            None,
         ]
     })
 
