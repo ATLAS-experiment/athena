@@ -560,7 +560,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeEtaPatterns()
 StatusCode FPGATrackSimMapMakerAlg::writeRadiiFile(std::vector<FPGATrackSimHit> const & allHits)
 {
     // calculate mean radii.
-  m_radii.resize(m_nSlices.value(), std::vector<std::vector<float>>(m_planes->at(m_region).size(),std::vector<float>(0)));
+  m_radii.resize(m_nSlices.value(), std::vector<std::vector<float>>(m_planes2.at(m_region).size(),std::vector<float>(0)));
     for (const auto& hit: allHits)
     {
         SiliconTech det = hit.getDetType();
@@ -568,12 +568,12 @@ StatusCode FPGATrackSimMapMakerAlg::writeRadiiFile(std::vector<FPGATrackSimHit> 
         int lyr = hit.getPhysLayer();
         int slice = m_track2slice[hit.getEventIndex()];
         int plane = -1;
-        if (det == SiliconTech::pixel && bec == DetectorZone::barrel) plane = findPlane(m_planes->at(m_region), "pb" + std::to_string(lyr));
-        if (det == SiliconTech::pixel && bec == DetectorZone::posEndcap) plane = findPlane(m_planes->at(m_region), "pe" + std::to_string(lyr) + "+");
-        if (det == SiliconTech::pixel && bec == DetectorZone::negEndcap) plane = findPlane(m_planes->at(m_region), "pe" + std::to_string(lyr) + "-");
-        if (det == SiliconTech::strip && bec == DetectorZone::barrel) plane = findPlane(m_planes->at(m_region), "sb" + std::to_string(lyr));
-        if (det == SiliconTech::strip && bec == DetectorZone::posEndcap) plane = findPlane(m_planes->at(m_region), "se" + std::to_string(lyr) + "+");
-        if (det == SiliconTech::strip && bec == DetectorZone::negEndcap) plane = findPlane(m_planes->at(m_region), "se" + std::to_string(lyr) + "-");
+        if (det == SiliconTech::pixel && bec == DetectorZone::barrel) plane = findPlane(m_planes2.at(m_region), "pb" + std::to_string(lyr));
+        if (det == SiliconTech::pixel && bec == DetectorZone::posEndcap) plane = findPlane(m_planes2.at(m_region), "pe" + std::to_string(lyr) + "+");
+        if (det == SiliconTech::pixel && bec == DetectorZone::negEndcap) plane = findPlane(m_planes2.at(m_region), "pe" + std::to_string(lyr) + "-");
+        if (det == SiliconTech::strip && bec == DetectorZone::barrel) plane = findPlane(m_planes2.at(m_region), "sb" + std::to_string(lyr));
+        if (det == SiliconTech::strip && bec == DetectorZone::posEndcap) plane = findPlane(m_planes2.at(m_region), "se" + std::to_string(lyr) + "+");
+        if (det == SiliconTech::strip && bec == DetectorZone::negEndcap) plane = findPlane(m_planes2.at(m_region), "se" + std::to_string(lyr) + "-");
 
         if (plane != -1) {
             m_radii[slice][plane].push_back(hit.getR());
@@ -586,7 +586,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeRadiiFile(std::vector<FPGATrackSimHit> 
     m_radfile.open(radii_path, std::ofstream::out);
     for (int s = 0; s < m_nSlices.value(); s++){
         m_radfile << std::to_string(s) << " ";
-        for (unsigned p = 0; p < (m_planes->at(m_region)).size(); p++){
+        for (unsigned p = 0; p < (m_planes2.at(m_region)).size(); p++){
             if (m_radii[s][p].size() != 0){
                 // "If left to type inference, op operates on values of the same type as
                 // init which can result in unwanted casting of the iterator elements."
@@ -603,7 +603,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeRadiiFile(std::vector<FPGATrackSimHit> 
 
     // Calculate global mean radii by reversing the order of the above two loops.
     m_radfile << -1 << " ";
-    for (unsigned p = 0; p < (m_planes->at(m_region)).size(); p++) {
+    for (unsigned p = 0; p < (m_planes2.at(m_region)).size(); p++) {
         float avg = 0;
         int count = 0;
         for (int s = 0; s < m_nSlices.value(); s++) {
@@ -629,7 +629,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeRadiiFile(std::vector<FPGATrackSimHit> 
 StatusCode FPGATrackSimMapMakerAlg::writeMedianZFile(std::vector<FPGATrackSimHit> const & allHits)
 {
     // calculate median z. We do this globally and slice-by-slice.
-  m_z.resize(m_nSlices.value(), std::vector<std::vector<float>>((m_planes->at(m_region)).size(),std::vector<float>(0)));
+  m_z.resize(m_nSlices.value(), std::vector<std::vector<float>>((m_planes2.at(m_region)).size(),std::vector<float>(0)));
     for (const auto& hit: allHits)
     {
         SiliconTech det = hit.getDetType();
@@ -637,12 +637,12 @@ StatusCode FPGATrackSimMapMakerAlg::writeMedianZFile(std::vector<FPGATrackSimHit
         int lyr = hit.getPhysLayer();
         int slice = m_track2slice[hit.getEventIndex()];
         int plane = -1;
-        if (det == SiliconTech::pixel && bec == DetectorZone::barrel) plane = findPlane(m_planes->at(m_region), "pb" + std::to_string(lyr));
-        if (det == SiliconTech::pixel && bec == DetectorZone::posEndcap) plane = findPlane(m_planes->at(m_region), "pe" + std::to_string(lyr) + "+");
-        if (det == SiliconTech::pixel && bec == DetectorZone::negEndcap) plane = findPlane(m_planes->at(m_region), "pe" + std::to_string(lyr) + "-");
-        if (det == SiliconTech::strip && bec == DetectorZone::barrel) plane = findPlane(m_planes->at(m_region), "sb" + std::to_string(lyr));
-        if (det == SiliconTech::strip && bec == DetectorZone::posEndcap) plane = findPlane(m_planes->at(m_region), "se" + std::to_string(lyr) + "+");
-        if (det == SiliconTech::strip && bec == DetectorZone::negEndcap) plane = findPlane(m_planes->at(m_region), "se" + std::to_string(lyr) + "-");
+        if (det == SiliconTech::pixel && bec == DetectorZone::barrel) plane = findPlane(m_planes2.at(m_region), "pb" + std::to_string(lyr));
+        if (det == SiliconTech::pixel && bec == DetectorZone::posEndcap) plane = findPlane(m_planes2.at(m_region), "pe" + std::to_string(lyr) + "+");
+        if (det == SiliconTech::pixel && bec == DetectorZone::negEndcap) plane = findPlane(m_planes2.at(m_region), "pe" + std::to_string(lyr) + "-");
+        if (det == SiliconTech::strip && bec == DetectorZone::barrel) plane = findPlane(m_planes2.at(m_region), "sb" + std::to_string(lyr));
+        if (det == SiliconTech::strip && bec == DetectorZone::posEndcap) plane = findPlane(m_planes2.at(m_region), "se" + std::to_string(lyr) + "+");
+        if (det == SiliconTech::strip && bec == DetectorZone::negEndcap) plane = findPlane(m_planes2.at(m_region), "se" + std::to_string(lyr) + "-");
 
         if (plane != -1) {
             m_z[slice][plane].push_back(hit.getZ());
@@ -655,7 +655,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeMedianZFile(std::vector<FPGATrackSimHit
     m_zedfile.open(zed_path, std::ofstream::out);
     for (int s = 0; s < m_nSlices.value(); s++){
         m_zedfile << std::to_string(s) << " ";
-        for (unsigned p = 0; p < (m_planes->at(m_region)).size(); p++){
+        for (unsigned p = 0; p < (m_planes2.at(m_region)).size(); p++){
             if (m_z[s][p].size() != 0){
                 float minZ = *std::min_element(m_z[s][p].begin(), m_z[s][p].end());
                 float maxZ = *std::max_element(m_z[s][p].begin(), m_z[s][p].end());
@@ -671,7 +671,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeMedianZFile(std::vector<FPGATrackSimHit
 
     // Now do this globally. Note: should this be meanZ instead of medianZ in the forward region?
     m_zedfile << -1 << " ";
-    for (unsigned p = 0; p < (m_planes->at(m_region)).size(); p++) {
+    for (unsigned p = 0; p < (m_planes2.at(m_region)).size(); p++) {
         float minZ = 0;
         float maxZ = 0;
         bool doneInitial = false;
