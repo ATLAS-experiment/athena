@@ -15,6 +15,8 @@ from .L1TopoKFMETweights import KFMETweightParameters
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
+from collections import namedtuple
+
 class TopoAlgoDef:
 
     @staticmethod
@@ -2324,4 +2326,23 @@ class TopoAlgoDef:
             alg.addvariable('MinET2',      d.minET2*_et_conversion)
             alg.addvariable('MinDeltaPhi', d.minDphi*_phi_conversion)
             alg.addvariable('MaxDeltaPhi', d.maxDphi*_phi_conversion)
+            tm.registerTopoAlgo(alg)
+
+        # g-2 tau (ATR-30638)
+        Algo = namedtuple('Algo', ['dPhiMin', 'dPhiMax', 'otype', 'olist', 'ocut1', 'ocut2', 'nTOB'])
+        algolist=[
+            Algo(dPhiMin=30, dPhiMax=32, otype='eTAU', olist='s', ocut1=60, ocut2=60, nTOB=HW.eTauOutputWidthSort), #30DPHI32-2eTAU60s
+        ]
+        for x in algolist:
+            name = f'{x.dPhiMin}DPHI{x.dPhiMax}-'
+            name += f'2{x.otype}{x.ocut1}{x.olist}' if x.ocut1 == x.ocut2 else f'{x.otype}{x.ocut1}{x.olist}-{x.otype}{x.ocut2}{x.olist}'
+
+            alg = AlgConf.DeltaPhiIncl1(name=name, inputs=[x.otype+x.olist], outputs=[name])
+            alg.addgeneric('NumResultBits', 1)
+            alg.addgeneric('InputWidth', x.nTOB)
+            alg.addgeneric('MaxTob', x.nTOB)
+            alg.addvariable('MinET1', get_threshold_cut(x.otype, x.ocut1)*_et_conversion)
+            alg.addvariable('MinET2', get_threshold_cut(x.otype, x.ocut2)*_et_conversion)
+            alg.addvariable('MinDeltaPhi', x.dPhiMin*_phi_conversion)
+            alg.addvariable('MaxDeltaPhi', x.dPhiMax*_phi_conversion)
             tm.registerTopoAlgo(alg)
