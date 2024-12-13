@@ -175,7 +175,7 @@ def tagInfoMetadataCheck(sigdict, pudict):
 
 def overlayMetadataCheck(flags):
     """Check overlay metadata"""
-    if flags.Overlay.DataOverlay:
+    if flags.Overlay.ByteStream:
         files = flags.Input.Files
         filesPileup = flags.Input.SecondaryFiles
     else:
@@ -212,7 +212,7 @@ def overlayMetadataCheck(flags):
 
 def fastChainOverlayMetadataCheck(flags):
     """Check fastchain overlay metadata"""
-    if flags.Overlay.DataOverlay:
+    if flags.Overlay.ByteStream:
         filesPileup = flags.Input.SecondaryFiles
     else:
         filesPileup = flags.Input.Files

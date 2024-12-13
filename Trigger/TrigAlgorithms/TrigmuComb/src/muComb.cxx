@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -131,7 +131,7 @@ int muComb::drptMatch(double pt, double eta, double phi, double id_pt, double id
 ExtrapolationResult muComb::getExtrapolatedMuon(const xAOD::L2StandAloneMuon* feature) const
 {
    ATH_MSG_DEBUG("in getExtrapolatedMuon");
-   ExtrapolationResult result;
+   ExtrapolationResult result{};
 
    const EventContext& ctx = Gaudi::Hive::currentContext();
 
@@ -684,7 +684,7 @@ StatusCode muComb::execute(const EventContext& ctx) const
      // retrieve extrapolated muon if G4 extrapolation was
      // requested; in this way we don't compute it Ntrk times
      // but only once per SA muon
-     ExtrapolationResult extr;
+     ExtrapolationResult extr{};
      if (usealgo <= 0 && m_useBackExtrapolatorG4) {//Std match
        extr = getExtrapolatedMuon(muonSA);
      }

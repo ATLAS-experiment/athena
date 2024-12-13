@@ -119,33 +119,33 @@ def fromRunArgs(runArgs):
         itemList.append(f'TileDigitsContainer#{flags.Overlay.BkgPrefix}TileDigitsCnt')
 
     if flags.Detector.EnableCSC:
-        from MuonConfig.CSC_OverlayConfig import CSC_DataOverlayExtraCfg
-        cfg.merge(CSC_DataOverlayExtraCfg(flags))
+        from MuonConfig.MuonBytestreamDecodeConfig import CscBytestreamDecodeCfg
+        cfg.merge(CscBytestreamDecodeCfg(flags))
         itemList.append(f'CscRawDataContainer#{flags.Overlay.BkgPrefix}CSCRDO')
 
     if flags.Detector.EnableMDT:
-        from MuonConfig.MDT_OverlayConfig import MDT_DataOverlayExtraCfg
-        cfg.merge(MDT_DataOverlayExtraCfg(flags))
+        from MuonConfig.MuonBytestreamDecodeConfig import MdtBytestreamDecodeCfg
+        cfg.merge(MdtBytestreamDecodeCfg(flags))
         itemList.append(f'MdtCsmContainer#{flags.Overlay.BkgPrefix}MDTCSM')
 
     if flags.Detector.EnableRPC:
-        from MuonConfig.RPC_OverlayConfig import RPC_DataOverlayExtraCfg
-        cfg.merge(RPC_DataOverlayExtraCfg(flags))
+        from MuonConfig.MuonBytestreamDecodeConfig import RpcBytestreamDecodeCfg
+        cfg.merge(RpcBytestreamDecodeCfg(flags))
         itemList.append(f'RpcPadContainer#{flags.Overlay.BkgPrefix}RPCPAD')
 
     if flags.Detector.EnableTGC:
-        from MuonConfig.TGC_OverlayConfig import TGC_DataOverlayExtraCfg
-        cfg.merge(TGC_DataOverlayExtraCfg(flags))
+        from MuonConfig.MuonBytestreamDecodeConfig import TgcBytestreamDecodeCfg
+        cfg.merge(TgcBytestreamDecodeCfg(flags))
         itemList.append(f'TgcRdoContainer#{flags.Overlay.BkgPrefix}TGCRDO')
 
     if flags.Detector.EnablesTGC:
-        from MuonConfig.sTGC_OverlayConfig import sTGC_DataOverlayExtraCfg
-        cfg.merge(sTGC_DataOverlayExtraCfg(flags))
+        from MuonConfig.MuonBytestreamDecodeConfig import sTgcBytestreamDecodeCfg
+        cfg.merge(sTgcBytestreamDecodeCfg(flags))
         itemList.append(f'Muon::STGC_RawDataContainer#{flags.Overlay.BkgPrefix}sTGCRDO')
     
     if flags.Detector.EnableMM:
-        from MuonConfig.MM_OverlayConfig import MM_DataOverlayExtraCfg
-        cfg.merge(MM_DataOverlayExtraCfg(flags))
+        from MuonConfig.MuonBytestreamDecodeConfig import MmBytestreamDecodeCfg
+        cfg.merge(MmBytestreamDecodeCfg(flags))
         itemList.append(f'Muon::MM_RawDataContainer#{flags.Overlay.BkgPrefix}MMRDO')
 
     if flags.Reco.EnableTracking:

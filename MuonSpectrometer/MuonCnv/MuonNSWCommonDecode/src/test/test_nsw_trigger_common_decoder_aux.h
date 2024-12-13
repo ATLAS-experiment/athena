@@ -36,15 +36,29 @@ struct Statistics
 //all the possible branches
 struct outBranches
 {
+  //ATLAS level info
+  uint32_t b_run_number;
+  uint32_t b_run_type;
+  uint32_t b_lumi_block;
+  uint32_t b_L1ID;
+  uint32_t b_BCID;
+  uint32_t b_BC_time_seconds; // unix time
+  uint32_t b_BC_time_nanoseconds; // nanoseconds additionally to the amount of seconds
+
   //each event has multple ROBs (e.g. multiple sectors)
   //each ROB then has multiple elinks
   //MML1A - comtemplating multiple elinks,
   //so the vector is on elinks for all the sectors
+  //NB: for NSW ROB==ROD
+  std::vector<uint32_t> b_MML1A_ROB_sourceID = {} ;
+  std::vector<std::vector<uint32_t>> b_MML1A_ROB_status = {} ;
   std::vector<uint32_t> b_MML1A_ROD_sourceID = {} ;
   std::vector<uint32_t> b_MML1A_ROD_subdetID = {} ;
   std::vector<uint32_t> b_MML1A_ROD_moduleID = {} ;
   std::vector<uint32_t> b_MML1A_ROD_L1ID = {} ;
+  std::vector<uint32_t> b_MML1A_ROD_BCID = {} ;
   std::vector<uint32_t> b_MML1A_ROD_n_words = {} ;
+  std::vector<std::vector<uint32_t>> b_MML1A_ROD_status = {} ; 
   std::vector<uint32_t> b_MML1A_link_id = {} ;
   std::vector<uint32_t> b_MML1A_link_status = {} ;
   std::vector<uint32_t> b_MML1A_head_fragID = {} ;
@@ -88,11 +102,15 @@ struct outBranches
   std::vector<bool> b_MML1A_CRC_ok = {} ;
   //MMMon - comtemplating multiple elinks (even if only one possible in current design)
   //so the vector is on elinks for all the sectors
+  std::vector<uint32_t> b_MMMon_ROB_sourceID = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_ROB_status = {} ;
   std::vector<uint32_t> b_MMMon_ROD_sourceID = {} ;
   std::vector<uint32_t> b_MMMon_ROD_subdetID = {} ;
   std::vector<uint32_t> b_MMMon_ROD_moduleID = {} ;
   std::vector<uint32_t> b_MMMon_ROD_L1ID = {} ;
+  std::vector<uint32_t> b_MMMon_ROD_BCID = {} ;
   std::vector<uint32_t> b_MMMon_ROD_n_words = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_ROD_status = {} ;
   std::vector<uint32_t> b_MMMon_link_id = {} ;
   std::vector<uint32_t> b_MMMon_link_status = {} ;
   std::vector<uint32_t> b_MMMon_head_fragID = {} ;
@@ -136,11 +154,15 @@ struct outBranches
   std::vector<bool> b_MMMon_CRC_ok = {} ;
   //PadL1A - comtemplating multiple elinks
   //so the vector is on elinks for all the sectors
+  std::vector<uint32_t> b_PadL1A_ROB_sourceID = {} ;
+  std::vector<std::vector<uint32_t>> b_PadL1A_ROB_status = {} ;
   std::vector<uint32_t> b_PadL1A_ROD_sourceID = {} ;
   std::vector<uint32_t> b_PadL1A_ROD_subdetID = {} ;
   std::vector<uint32_t> b_PadL1A_ROD_moduleID = {} ;
   std::vector<uint32_t> b_PadL1A_ROD_L1ID = {} ;
+  std::vector<uint32_t> b_PadL1A_ROD_BCID = {} ;
   std::vector<uint32_t> b_PadL1A_ROD_n_words = {} ;
+  std::vector<std::vector<uint32_t>> b_PadL1A_ROD_status = {} ;
   std::vector<uint32_t> b_PadL1A_flags = {} ;
   std::vector<uint32_t> b_PadL1A_ec = {} ;
   std::vector<uint32_t> b_PadL1A_fragid = {} ;
@@ -170,11 +192,15 @@ struct outBranches
   std::vector<std::vector<uint32_t>> b_PadL1A_bcid_multzero = {} ;
   //STGL1A - comtemplating multiple elinks
   //so the vector is on elinks for all the sectors
+  std::vector<uint32_t> b_STGL1A_ROB_sourceID = {} ;
+  std::vector<std::vector<uint32_t>> b_STGL1A_ROB_status = {} ;
   std::vector<uint32_t> b_STGL1A_ROD_sourceID = {} ;
   std::vector<uint32_t> b_STGL1A_ROD_subdetID = {} ;
   std::vector<uint32_t> b_STGL1A_ROD_moduleID = {} ;
   std::vector<uint32_t> b_STGL1A_ROD_L1ID = {} ;
+  std::vector<uint32_t> b_STGL1A_ROD_BCID = {} ;
   std::vector<uint32_t> b_STGL1A_ROD_n_words = {} ;
+  std::vector<std::vector<uint32_t>> b_STGL1A_ROD_status = {} ;
   std::vector<uint32_t> b_STGL1A_head_fragID = {} ;
   std::vector<uint32_t> b_STGL1A_head_sectID = {} ;
   std::vector<uint32_t> b_STGL1A_head_EC = {} ;
@@ -248,13 +274,26 @@ struct outBranches
 
 
 int test_nsw_trigger_common_decoder_init_tree (TTree &outtree, outBranches &data, Params &params) {
+  //ATLAS level info
+  outtree.Branch( "run_number", &data.b_run_number);
+  outtree.Branch( "run_type", &data.b_run_type);
+  outtree.Branch( "lumi_block", &data.b_lumi_block);
+  outtree.Branch( "L1ID", &data.b_L1ID);
+  outtree.Branch( "BCID", &data.b_BCID);
+  outtree.Branch( "BC_time_seconds", &data.b_BC_time_seconds);
+  outtree.Branch( "BC_time_nanoseconds", &data.b_BC_time_nanoseconds);
+
   //not the most elegant way, can change if the branch number is diverging (must change the branch struct too)
   if ( std::find(params.elink_types.begin(), params.elink_types.end(), "MML1A") != params.elink_types.end() ) {
+    outtree.Branch( "MML1A_ROB_sourceID", &data.b_MML1A_ROB_sourceID);
+    outtree.Branch( "MML1A_ROB_status", &data.b_MML1A_ROB_status);
     outtree.Branch( "MML1A_ROD_sourceID", &data.b_MML1A_ROD_sourceID);
     outtree.Branch( "MML1A_ROD_subdetID", &data.b_MML1A_ROD_subdetID);
     outtree.Branch( "MML1A_ROD_moduleID", &data.b_MML1A_ROD_moduleID);
     outtree.Branch( "MML1A_ROD_L1ID", &data.b_MML1A_ROD_L1ID);
+    outtree.Branch( "MML1A_ROD_BCID", &data.b_MML1A_ROD_BCID);
     outtree.Branch( "MML1A_ROD_n_words", &data.b_MML1A_ROD_n_words);
+    outtree.Branch( "MML1A_ROD_status", &data.b_MML1A_ROD_status);
     outtree.Branch( "MML1A_link_id", &data.b_MML1A_link_id);
     outtree.Branch( "MML1A_link_status", &data.b_MML1A_link_status);
     outtree.Branch( "MML1A_head_fragID", &data.b_MML1A_head_fragID);
@@ -298,11 +337,15 @@ int test_nsw_trigger_common_decoder_init_tree (TTree &outtree, outBranches &data
     outtree.Branch( "MML1A_CRC_ok", &data.b_MML1A_CRC_ok);
   }
   if ( std::find(params.elink_types.begin(), params.elink_types.end(), "MMMon") != params.elink_types.end() ) {
+    outtree.Branch("MMMon_ROB_sourceID", &data.b_MMMon_ROB_sourceID);
+    outtree.Branch("MMMon_ROB_status", &data.b_MMMon_ROB_status);
     outtree.Branch("MMMon_ROD_sourceID", &data.b_MMMon_ROD_sourceID);
     outtree.Branch("MMMon_ROD_subdetID", &data.b_MMMon_ROD_subdetID);
     outtree.Branch("MMMon_ROD_moduleID", &data.b_MMMon_ROD_moduleID);
     outtree.Branch("MMMon_ROD_L1ID", &data.b_MMMon_ROD_L1ID);
+    outtree.Branch("MMMon_ROD_BCID", &data.b_MMMon_ROD_BCID);
     outtree.Branch("MMMon_ROD_n_words", &data.b_MMMon_ROD_n_words);
+    outtree.Branch("MMMon_ROD_status", &data.b_MMMon_ROD_status);
     outtree.Branch("MMMon_link_id", &data.b_MMMon_link_id);
     outtree.Branch("MMMon_link_status", &data.b_MMMon_link_status);
     outtree.Branch("MMMon_head_fragID", &data.b_MMMon_head_fragID);
@@ -346,11 +389,15 @@ int test_nsw_trigger_common_decoder_init_tree (TTree &outtree, outBranches &data
     outtree.Branch("MMMon_CRC_ok", &data.b_MMMon_CRC_ok);
   }
   if ( std::find(params.elink_types.begin(), params.elink_types.end(), "PadL1A") != params.elink_types.end() ) {
+    outtree.Branch( "PadL1A_ROB_sourceID", &data.b_PadL1A_ROB_sourceID);
+    outtree.Branch( "PadL1A_ROB_status", &data.b_PadL1A_ROB_status);
     outtree.Branch( "PadL1A_ROD_sourceID", &data.b_PadL1A_ROD_sourceID);
     outtree.Branch( "PadL1A_ROD_subdetID", &data.b_PadL1A_ROD_subdetID);
     outtree.Branch( "PadL1A_ROD_moduleID", &data.b_PadL1A_ROD_moduleID);
     outtree.Branch( "PadL1A_ROD_L1ID", &data.b_PadL1A_ROD_L1ID);
+    outtree.Branch( "PadL1A_ROD_BCID", &data.b_PadL1A_ROD_BCID);
     outtree.Branch( "PadL1A_ROD_n_words", &data.b_PadL1A_ROD_n_words);
+    outtree.Branch( "PadL1A_ROD_status", &data.b_PadL1A_ROD_status);
     outtree.Branch( "PadL1A_flags", &data.b_PadL1A_flags);
     outtree.Branch( "PadL1A_ec", &data.b_PadL1A_ec);
     outtree.Branch( "PadL1A_fragid", &data.b_PadL1A_fragid);
@@ -380,11 +427,15 @@ int test_nsw_trigger_common_decoder_init_tree (TTree &outtree, outBranches &data
     outtree.Branch( "PadL1A_bcid_multzero", &data.b_PadL1A_bcid_multzero);
   }
   if ( std::find(params.elink_types.begin(), params.elink_types.end(), "STGL1A") != params.elink_types.end() ) {
+    outtree.Branch( "STGL1A_ROB_sourceID", &data.b_STGL1A_ROB_sourceID);
+    outtree.Branch( "STGL1A_ROB_status", &data.b_STGL1A_ROB_status);
     outtree.Branch( "STGL1A_ROD_sourceID", &data.b_STGL1A_ROD_sourceID);
     outtree.Branch( "STGL1A_ROD_subdetID", &data.b_STGL1A_ROD_subdetID);
     outtree.Branch( "STGL1A_ROD_moduleID", &data.b_STGL1A_ROD_moduleID);
     outtree.Branch( "STGL1A_ROD_L1ID", &data.b_STGL1A_ROD_L1ID);
+    outtree.Branch( "STGL1A_ROD_BCID", &data.b_STGL1A_ROD_BCID);
     outtree.Branch( "STGL1A_ROD_n_words", &data.b_STGL1A_ROD_n_words);
+    outtree.Branch( "STGL1A_ROD_status", &data.b_STGL1A_ROD_status);
     outtree.Branch( "STGL1A_head_fragID", &data.b_STGL1A_head_fragID);
     outtree.Branch( "STGL1A_head_sectID", &data.b_STGL1A_head_sectID);
     outtree.Branch( "STGL1A_head_EC", &data.b_STGL1A_head_EC);

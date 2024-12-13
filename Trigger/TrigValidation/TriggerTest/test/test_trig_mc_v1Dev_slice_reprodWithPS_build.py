@@ -102,7 +102,7 @@ def generate_config_steps():
     ex.input = 'ttbar'
     ex.threads = 1
     ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
-                'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05"']
+                'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05-03"']
     ex.perfmon = False
     # Make a copy of the default prescales file
     copy_ps = CopyStep('CopyPrescales.Default', 'HLTPrescalesSet*.json', 'prescales_Default.json')

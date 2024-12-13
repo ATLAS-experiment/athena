@@ -1,22 +1,11 @@
 
 """Define methods to construct configured TGC overlay algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-
-
-def TGC_DataOverlayExtraCfg(flags, **kwargs):
-    """Return a ComponentAccumulator with TGC data overlay specifics"""
-    acc = ComponentAccumulator()
-
-    # We need to convert BS to RDO for data overlay
-    from MuonConfig.MuonBytestreamDecodeConfig import TgcBytestreamDecodeCfg
-    acc.merge(TgcBytestreamDecodeCfg(flags))
-
-    return acc
 
 
 def TGC_OverlayAlgCfg(flags, name="TgcOverlay", **kwargs):
@@ -51,7 +40,7 @@ def TGC_TruthOverlayCfg(flags, name="TgcTruthOverlay", **kwargs):
     acc = ComponentAccumulator()
 
     # We do not need background TGC SDOs
-    if flags.Overlay.DataOverlay:
+    if not flags.Input.isMC:
         kwargs.setdefault("BkgInputKey", "")
     else:
         kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}TGC_SDO")
@@ -86,18 +75,17 @@ def TGC_OverlayCfg(flags):
     """Configure and return a ComponentAccumulator for TGC overlay"""
     acc = ComponentAccumulator()
 
-    # Add data overlay specifics
-    if flags.Overlay.DataOverlay:
-        acc.merge(TGC_DataOverlayExtraCfg(flags))
-
     # Add TGC RDO to digit config
     from MuonConfig.MuonByteStreamCnvTestConfig import TgcRdoToTgcDigitCfg
     acc.merge(TgcRdoToTgcDigitCfg(flags))
+
     # Add TGC overlay digitization algorithm
     from MuonConfig.TGC_DigitizationConfig import TGC_OverlayDigitizationBasicCfg
     acc.merge(TGC_OverlayDigitizationBasicCfg(flags))
+
     # Add TGC overlay algorithm
     acc.merge(TGC_OverlayAlgCfg(flags))
+
     # Add TGC truth overlay
     if flags.Digitization.EnableTruth:
         if flags.Muon.usePhaseIIGeoSetup:
@@ -105,6 +93,7 @@ def TGC_OverlayCfg(flags):
             acc.merge(TruthOverlayCfg(flags, name="TgcTruthOverlay", WriteKey="TGC_SDO", deadTime = 100.))
         else:
             acc.merge(TGC_TruthOverlayCfg(flags))
+
     # Add TGC digit to RDO config
     from MuonConfig.MuonByteStreamCnvTestConfig import TgcDigitToTgcRDOCfg
     acc.merge(TgcDigitToTgcRDOCfg(flags))

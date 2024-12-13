@@ -227,7 +227,7 @@ def getGeneratorsInfo(flags):
     """
     from AthenaConfiguration.Enums import ProductionStep
     inputFiles = flags.Input.Files
-    if flags.Common.ProductionStep in [ProductionStep.Overlay, ProductionStep.FastChain] and not flags.Overlay.DataOverlay and flags.Input.SecondaryFiles:
+    if flags.Common.ProductionStep in [ProductionStep.Overlay, ProductionStep.FastChain] and flags.Input.SecondaryFiles and not flags.Overlay.ByteStream:
         # Do something special for MC Overlay
         inputFiles = flags.Input.SecondaryFiles
     generatorsString = ""

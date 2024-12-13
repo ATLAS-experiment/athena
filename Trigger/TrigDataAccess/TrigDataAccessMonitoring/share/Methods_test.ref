@@ -1,0 +1,27 @@
+
+ ROBDataMonitorStruct req = 
+
+  ROB Request for L1 ID = 12345 (decimal), L1 ID = 0x3039 (hex)
+   Requestor name = MyAlgorithm
+   Start time of ROB request         = Wed Dec 11 10:49:32 2024 + 0 [ms]
+   Stop  time of ROB request         = Wed Dec 11 10:49:35 2024 + 5.042 [ms]
+   Elapsed time for ROB request [ms] = 3005.04
+   Requested ROBs:
+   -> All          10
+   -> Unclassified 1
+   -> HLT Cached   4
+   -> DCM Cached   0
+   -> Retrieved    2
+   -> Ignored      2
+   -> Undefined    1
+   -> Status OK    7
+   -> [SourceID,Size(words),History,(Status words)]=[0x730001,       0,   UNDEFINED,(0x00000000)]
+   -> [SourceID,Size(words),History,(Status words)]=[0x740001,       0,     IGNORED,(0x00000000)]
+   -> [SourceID,Size(words),History,(Status words)]=[0x740002,       0,     IGNORED,(0x00000000)]
+   -> [SourceID,Size(words),History,(Status words)]=[0x750001,       0,   RETRIEVED,(0x00000004)]
+   -> [SourceID,Size(words),History,(Status words)]=[0x750002,       0,   RETRIEVED,(0x00000004)]
+   -> [SourceID,Size(words),History,(Status words)]=[0x760000,   25000,  HLT_CACHED,(0x00000000)]
+   -> [SourceID,Size(words),History,(Status words)]=[0x760001,  125000,  HLT_CACHED,(0x00000008)]
+   -> [SourceID,Size(words),History,(Status words)]=[0x760002,   25000,  HLT_CACHED,(0x00000000)]
+   -> [SourceID,Size(words),History,(Status words)]=[0x760003,   25000,  HLT_CACHED,(0x00000000)]
+   -> [SourceID,Size(words),History,(Status words)]=[0x770000,   10000,UNCLASSIFIED,(0x00000000)]

@@ -1,6 +1,6 @@
 #include <algorithm>
 #include "TrigEgammaTLAPhotonHypoAlg.h"
-#include "DecisionHandling/TrigCompositeUtils.h"
+#include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "AthViews/ViewHelper.h"
 //#include "xAODTrigger/TrigCompositeContainer.h"

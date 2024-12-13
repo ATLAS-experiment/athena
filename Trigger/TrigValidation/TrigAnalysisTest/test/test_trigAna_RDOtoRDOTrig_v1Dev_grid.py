@@ -36,9 +36,9 @@ ex.threads = 8
 ex.concurrent_events = 8
 ex.args = '--outputRDO_TRIGFile=RDO_TRIG.pool.root'
 ex.args += ' --preExec="all:{:s};"'.format(preExec)
-ex.args += ' --preInclude "all:Campaigns.MC23c"'
+ex.args += ' --preInclude "all:Campaigns.MC23e"'
 ex.args += ' --CA "all:True"'
-ex.args += ' --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-05"'
+ex.args += ' --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-05-03"'
 
 test = Test.Test()
 test.art_type = 'grid'

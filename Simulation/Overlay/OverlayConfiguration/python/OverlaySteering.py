@@ -7,9 +7,9 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors
 from AthenaConfiguration.Enums import LHCPeriod
+from AthenaKernel.EventIdOverrideConfig import IOVDbMetaDataToolWithRunNumberOverrideCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from DigitizationConfig.DigitizationParametersConfig import writeDigitizationParameters
-
 from OverlayCopyAlgs.OverlayCopyAlgsConfig import \
     CopyCaloCalibrationHitContainersCfg, CopyJetTruthInfoCfg, CopyPileupParticleTruthInfoCfg, CopyMcEventCollectionCfg, \
     CopyTrackRecordCollectionsCfg
@@ -30,6 +30,9 @@ def OverlayMainContentCfg(configFlags):
     """Main overlay content"""
 
     acc = writeDigitizationParameters(configFlags)
+
+    if not configFlags.Overlay.ByteStream:
+        acc.merge(IOVDbMetaDataToolWithRunNumberOverrideCfg(configFlags))
 
     # Add event info overlay
     if not configFlags.Sim.DoFullChain:

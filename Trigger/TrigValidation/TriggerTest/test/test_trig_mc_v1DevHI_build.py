@@ -16,7 +16,7 @@ ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'ttbar' # TODO restore to 'pbpb', MR !68783
 ex.threads = 1
 ex.flags = ['Trigger.triggerMenuSetup="Dev_HI_run3_v1_TriggerValidation_prescale"',
-            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05"',
+            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05-03"',
             'Trigger.doRuntimeNaviVal=True',
             'Trigger.L1.Menu.doHeavyIonTobThresholds=True']
 
