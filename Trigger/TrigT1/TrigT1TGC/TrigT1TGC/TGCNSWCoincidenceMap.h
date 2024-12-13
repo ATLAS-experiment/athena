@@ -66,7 +66,6 @@ private:
   int m_module;
   int m_sector;
   TGCRegionType m_region;
-  bool m_fullCW;
 
 
 
