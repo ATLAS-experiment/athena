@@ -186,7 +186,6 @@ def overlayMetadataCheck(flags):
         signalMetadata = GetFileMD(files, maxLevel="full")
         signalSimulationMetadata = signalMetadata.get("/Simulation/Parameters", {})
         signalTagInfoMetadata = signalMetadata.get("/TagInfo", {})
-        print(signalMetadata.metadata, signalSimulationMetadata, signalTagInfoMetadata)
         # signal check
         overlayInputMetadataCheck(flags, signalSimulationMetadata, signalTagInfoMetadata)
     else:
