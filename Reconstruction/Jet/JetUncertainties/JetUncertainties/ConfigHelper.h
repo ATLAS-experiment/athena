@@ -77,7 +77,7 @@ class ComponentHelper
         std::vector<LargeRJetTruthLabel::TypeEnum> LargeRJetTruthLabels;
         std::vector<TString> LargeRJetTruthLabelsForSFstrs;
         std::vector<CompFlavorLabelVar::TypeEnum> LargeRJetTruthLabelsForSF;
-        CompTaggerRegionVar::TypeEnum RegionForSF;
+        CompTaggerRegionVar::TypeEnum RegionForSF{};
 };
 
 class GroupHelper
