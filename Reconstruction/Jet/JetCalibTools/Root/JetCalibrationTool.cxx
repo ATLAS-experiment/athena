@@ -25,10 +25,7 @@
 #include "AthContainers/ConstAccessor.h"
 
 JetCalibrationTool::JetCalibrationTool(const std::string& name)
-  : asg::AsgTool( name ),
-    m_jetAlgo(""), m_config(""), m_calibSeq(""), m_calibAreaTag(""), m_originScale(""), m_devMode(false),
-    m_isData(true), m_timeDependentCalib(false), m_dir(""), m_eInfoName(""), m_globalConfig(nullptr),
-    m_doBcid(true), m_doJetArea(true), m_doResidual(true), m_doOrigin(true), m_doGSC(true), m_doDNNCal(false), m_gscDepth("auto"), m_smearIndex(-1), m_useOriginVertex(false)
+  : asg::AsgTool( name )
 { 
   declareProperty( "JetCollection", m_jetAlgo = "AntiKt4LCTopo" );
   declareProperty( "ConfigFile", m_config = "" );
