@@ -5,17 +5,16 @@
 #ifndef JETTOOLHELPERS_MCJESINPUTBASE_H
 #define JETTOOLHELPERS_MCJESINPUTBASE_H
 
-#include <memory>
-#include "TH1.h"
-#include "TH2.h"
+
 #include "TString.h"
 #include "TEnv.h"
-#include "TObjString.h"
-#include "TAxis.h"
 
 #include "JetAnalysisInterfaces/IVarTool.h"
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/PropertyWrapper.h"
+#include <memory>
+#include <string>
+class TAxis;
 
 namespace JetHelper {
 
@@ -38,8 +37,8 @@ class MCJESInputBase :public asg::AsgTool, virtual public IVarTool
    
     private:
         // support functions to extract information from text files
-	double getLogPolN(const double *factors, double x) const;
-	std::vector<double> VectorizeD(const TString& str, TString sep=" ") const;
+        double getLogPolN(const double *factors, double x) const;
+        std::vector<double> VectorizeD(const TString& str, TString sep=" ") const;
         int getEtaBin(double eta_det) const; 
         /// name of the text file
         Gaudi::Property< std::string > m_fileName { this, "inputfile", "/afs/cern.ch/work/s/stapiaar/JetDev4/athena/JetToolHelpers/data/file_JES.config", "File containing histograms" };
@@ -48,13 +47,13 @@ class MCJESInputBase :public asg::AsgTool, virtual public IVarTool
 
     protected:
         std::unique_ptr<TEnv> m_config;
-	unsigned int m_nPar; // number of parameters in config file
-	const static unsigned int s_nEtaBins = 90;
-	const static unsigned int s_nParMax = 9; 
-	double m_JESFactors[s_nEtaBins][s_nParMax];
-	double m_etaCorrFactors[s_nEtaBins][s_nParMax];
-        double m_energyFreezeJES[s_nEtaBins];
-	TAxis * m_etaBinAxis;
+        unsigned int m_nPar{}; // number of parameters in config file
+        const static unsigned int s_nEtaBins = 90;
+        const static unsigned int s_nParMax = 9; 
+        double m_JESFactors[s_nEtaBins][s_nParMax]{};
+        double m_etaCorrFactors[s_nEtaBins][s_nParMax]{};
+        double m_energyFreezeJES[s_nEtaBins]{};
+        TAxis * m_etaBinAxis{};
         
         /// This function fill the ntuples with calibration factors 
         bool readMCJESFromText();

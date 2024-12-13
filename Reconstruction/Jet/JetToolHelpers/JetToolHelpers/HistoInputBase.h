@@ -5,13 +5,16 @@
 #ifndef JETTOOLHELPERS_HISTOINPUTBASE_H
 #define JETTOOLHELPERS_HISTOINPUTBASE_H
 
-#include <memory>
-#include "TH1.h"
-#include "TH2.h"
 
 #include "JetAnalysisInterfaces/IVarTool.h"
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/PropertyWrapper.h"
+
+#include "TH1.h" //unique_ptr member, and d'tor defined here
+#include <string>
+#include <memory>
+
+class TAxis;
 
 namespace JetHelper {
 
@@ -56,7 +59,7 @@ class HistoInputBase :public asg::AsgTool, virtual public IVarTool
             OnlyX,      // Interpolate only in the x dimension
             OnlyY       // Interpolate only in the y dimension
         };
-        InterpType m_interpNum;
+        InterpType m_interpNum{InterpType::UNKNOWN};
     
 };
 } // namespace JetHelper
