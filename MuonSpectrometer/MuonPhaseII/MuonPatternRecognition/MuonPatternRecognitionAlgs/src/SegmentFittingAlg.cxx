@@ -9,9 +9,9 @@
 
 #include <MuonPatternHelpers/SegmentFitHelperFunctions.h>
 #include <MuonPatternHelpers/MdtSegmentSeedGenerator.h>
-#include <MuonPatternHelpers/CalibSegmentChi2Minimizer.h>
 #include <MuonPatternHelpers/MdtSegmentFitter.h>
-
+#include "xAODMuonPrepData/MdtDriftCircleContainer.h"
+#include "xAODMuonPrepData/RpcStripContainer.h"
 #include <MuonSpacePoint/SpacePointPerLayerSorter.h>
 #include <MuonSpacePoint/UtilFunctions.h>
 
@@ -179,90 +179,12 @@ namespace MuonR4 {
 
         const Amg::Transform3D& locToGlob{calibHits[0]->spacePoint()->msSector()->localToGlobalTrans(gctx)};
 
-        if (!m_useMinuit) {
-            MdtSegmentFitter::Config fitCfg{};
-            fitCfg.calibrator = m_calibTool.get();
-            fitCfg.doTimeFit = m_doT0Fit;
+        MdtSegmentFitter::Config fitCfg{};
+        fitCfg.calibrator = m_calibTool.get();
+        fitCfg.doTimeFit = m_doT0Fit;
 
-            MdtSegmentFitter fitter{name(), std::move(fitCfg)};
-            return fitter.fitSegment(ctx, std::move(calibHits), startPars, locToGlob);
-        }
-
-        data.segmentPars = startPars;
-
-        CalibSegmentChi2Minimizer c2f{name(), ctx, locToGlob, copy(calibHits), m_calibTool.get(), m_doT0Fit};
-        data.hasPhi = c2f.hasPhiMeas();
-        data.timeFit = c2f.doTimeFit();
-        data.nDoF = c2f.nDoF();
-        if (data.nDoF <= 0) {
-            ATH_MSG_DEBUG("Reject fit due to 0 degrees of freedom");
-            return data;
-        }
-        ROOT::Minuit2::Minuit2Minimizer minimizer((name() + std::to_string(ctx.eventID().event_number())).c_str());
-        /** Configure the minimizer */
-        minimizer.SetMaxFunctionCalls(100000);
-        minimizer.SetTolerance(0.0001);
-        minimizer.SetPrintLevel(-1);
-        minimizer.SetStrategy(1);
-
-        minimizer.SetVariable(toInt(ParamDefs::y0), "y0", startPars[toInt(ParamDefs::y0)], 1.e-5);
-        minimizer.SetVariable(toInt(ParamDefs::theta), "theta", startPars[toInt(ParamDefs::theta)], 1.e-5);
-        minimizer.SetVariableLimits(toInt(ParamDefs::y0), 
-                                    startPars[toInt(ParamDefs::y0)] - 60. *Gaudi::Units::cm, 
-                                    startPars[toInt(ParamDefs::y0)] + 60. *Gaudi::Units::cm);
-        minimizer.SetVariableLimits(toInt(ParamDefs::theta),
-                                    startPars[toInt(ParamDefs::theta)] - 0.6, 
-                                    startPars[toInt(ParamDefs::theta)] + 0.6);
-        
-        if (data.hasPhi) {
-            minimizer.SetVariable(toInt(ParamDefs::x0), "x0", startPars[toInt(ParamDefs::x0)], 1.e-5);
-            minimizer.SetVariable(toInt(ParamDefs::phi), "phi", startPars[toInt(ParamDefs::phi)], 1.e-5);
-            minimizer.SetVariableLimits(toInt(ParamDefs::x0), 
-                                        startPars[toInt(ParamDefs::x0)] - 600, 
-                                        startPars[toInt(ParamDefs::x0)] + 600);
-            minimizer.SetVariableLimits(toInt(ParamDefs::phi), 
-                                        startPars[toInt(ParamDefs::phi)] - 0.6, 
-                                        startPars[toInt(ParamDefs::phi)] + 0.6);
-        } else {
-            minimizer.SetFixedVariable(toInt(ParamDefs::x0), "x0", 0.);
-            minimizer.SetFixedVariable(toInt(ParamDefs::phi), "phi", 90.*Gaudi::Units::deg);
-        }
-        /// Assumption that the particle travels at the speed of light
-        if (data.timeFit) {
-            minimizer.SetVariable(toInt(ParamDefs::time), "t0", startPars[toInt(ParamDefs::time)] , 1.);
-            minimizer.SetVariableLimits(toInt(ParamDefs::time), 
-                                        startPars[toInt(ParamDefs::time)] - 50,
-                                        startPars[toInt(ParamDefs::time)] + 50);
-        } else{
-            minimizer.SetFixedVariable(toInt(ParamDefs::time), "t0", 0.);
-        }
-        minimizer.SetFunction(c2f);
-        /// Execute fit
-        if (!minimizer.Minimize() || !minimizer.Hesse()) {
-            data.calibMeasurements = std::move(calibHits);
-        } else {
-            const double* xs = minimizer.X();
-            const double* errs = minimizer.Errors();
-
-            for (unsigned int p = 0; p < toInt(ParamDefs::nPars); ++p) {
-                data.segmentPars[p] = xs[p];
-                data.segmentParErrs(p,p) = errs[p];
-            }
-            std::optional<double> ToF{std::nullopt};
-            const auto [locPos, locDir] = data.makeLine();
-            if (data.timeFit) {
-                ToF = std::make_optional<double>((locToGlob*locPos).mag() * inv_c);
-            }
-            data.nIter = minimizer.NCalls();
-            data.calibMeasurements = c2f.release(xs);
-
-            data.chi2 = std::accumulate(data.calibMeasurements.begin(),data.calibMeasurements.end(),0.,
-                                         [this,&locPos,&locDir, &ToF, &xs]( double chi2, const auto& hit) {
-                                            return SegmentFitHelpers::chiSqTerm(locPos, locDir, xs[toInt(ParamDefs::time)], ToF, *hit, msg()) + chi2;
-                                         });
-            data.converged = true;
-        }
-        return data;
+        MdtSegmentFitter fitter{name(), std::move(fitCfg)};
+        return fitter.fitSegment(ctx, std::move(calibHits), startPars, locToGlob);
     }
     std::vector<std::unique_ptr<Segment>>
          SegmentFittingAlg::fitSegmentSeed(const EventContext& ctx,

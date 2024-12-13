@@ -24,7 +24,6 @@ def MuonSegmentFittingAlgCfg(flags, name = "MuonSegmentFittingAlg", **kwargs):
     kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags, mdtErrorScaleFactor=2.0, MdtPropagationTimeUncert=True)))
     kwargs.setdefault("ResoSeedHitAssoc", 5. )
     kwargs.setdefault("RecoveryPull", 3.)
-    kwargs.setdefault("useMinuit", False)
     kwargs.setdefault("fitSegmentT0", False)
     kwargs.setdefault("SeedRefine", False)
     kwargs.setdefault("doBeamspotConstraint", True)
