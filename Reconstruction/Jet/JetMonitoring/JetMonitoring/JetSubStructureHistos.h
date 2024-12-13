@@ -1,7 +1,7 @@
 //  -*- c++ -*- 
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETMONITORING_JETSUBSTRUCTUREHISTOS_H
@@ -14,7 +14,7 @@
 ////////////////////////////////////////////
 
 #include "JetMonitoring/JetHistoBase.h"
-#include "TH1.h"
+class TH1F;
 
 class JetSubStructureHistos : public JetHistoBase {
   ASG_TOOL_CLASS0(JetSubStructureHistos);
@@ -30,14 +30,14 @@ public:
 
 protected:
 
-  TH1F* m_tau21;
-  TH1F* m_tau32;
-  TH1F* m_tau21_wta;
-  TH1F* m_tau32_wta;
+  TH1F* m_tau21{};
+  TH1F* m_tau32{};
+  TH1F* m_tau21_wta{};
+  TH1F* m_tau32_wta{};
 
-  TH1F* m_C1;
-  TH1F* m_C2;
-  TH1F* m_D2;
+  TH1F* m_C1{};
+  TH1F* m_C2{};
+  TH1F* m_D2{};
 
   std::string  m_jetScale;
 

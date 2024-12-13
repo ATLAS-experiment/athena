@@ -1,7 +1,7 @@
 //  -*- c++ -*- 
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETMONITORING_LEADINGJETRELATION_H
@@ -27,12 +27,12 @@ public:
 
 protected:
   ToolHandleArray<HistoDefinitionTool> m_histoDef;
-  TH1F * m_histDeltaR;
-  TH1F * m_histDeltaEta;
-  TH1F * m_histDeltaPhi;
-  TH1F * m_histFrac;
+  TH1F * m_histDeltaR{};
+  TH1F * m_histDeltaEta{};
+  TH1F * m_histDeltaPhi{};
+  TH1F * m_histFrac{};
 
-  TH2F* m_histEta1Eta2;
+  TH2F* m_histEta1Eta2{};
 
 };
 

@@ -1,7 +1,7 @@
 //  -*- c++ -*- 
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETMONITORING_JETKINEMATICHISTOS_H
@@ -14,9 +14,10 @@
 ////////////////////////////////////////////
 
 #include "JetMonitoring/JetHistoBase.h"
-#include "TH1.h"
-#include "TH2.h"
-#include "TProfile2D.h"
+#include <string>
+class TH1F;
+class TH2F;
+class TProfile2D;
 
 class JetKinematicHistos : public JetHistoBase {
   ASG_TOOL_CLASS0(JetKinematicHistos);
@@ -33,35 +34,35 @@ public:
 
 protected:
 
-  TH1F* m_njet;
-  TH1F* m_njet_passJVT;
-  TH1F* m_njet_failJVT;
-  TH1F* m_pt;
-  TH1F* m_eta;
-  TH1F* m_phi;
-  TH1F* m_m;
-  TH1F* m_e;
-  TH1F* m_nConstit;
+  TH1F* m_njet{};
+  TH1F* m_njet_passJVT{};
+  TH1F* m_njet_failJVT{};
+  TH1F* m_pt{};
+  TH1F* m_eta{};
+  TH1F* m_phi{};
+  TH1F* m_m{};
+  TH1F* m_e{};
+  TH1F* m_nConstit{};
 
   // high pT
-  TH1F* m_pt_high;
-  TH1F* m_eta_high;
-  TH1F* m_m_high;
-  TH1F* m_e_high;
-  TH1F* m_nConstit_high;
+  TH1F* m_pt_high{};
+  TH1F* m_eta_high{};
+  TH1F* m_m_high{};
+  TH1F* m_e_high{};
+  TH1F* m_nConstit_high{};
 
-  TH2F* m_occupancyEtaPhi;
-  TProfile2D* m_averagePtEtaPhi;
-  TProfile2D* m_averageE_EtaPhi;
+  TH2F* m_occupancyEtaPhi{};
+  TProfile2D* m_averagePtEtaPhi{};
+  TProfile2D* m_averageE_EtaPhi{};
   
   std::string  m_jetScale;
 
-  bool m_doN;
-  bool m_doM;
-  bool m_doE;
-  bool m_doOccupancy;
-  bool m_doAveragePt;
-  bool m_doAverageE;
-  bool m_doNConstit;
+  bool m_doN{};
+  bool m_doM{};
+  bool m_doE{};
+  bool m_doOccupancy{};
+  bool m_doAveragePt{};
+  bool m_doAverageE{};
+  bool m_doNConstit{};
 };
 #endif

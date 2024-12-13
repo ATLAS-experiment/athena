@@ -5,6 +5,7 @@
 #include "JetMonitoring/JetSubStructureHistos.h"
 #include "TString.h"
 #include <map>
+#include "TH1F.h"
 
 #define toGeV 1/1000.
 
