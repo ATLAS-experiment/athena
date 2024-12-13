@@ -83,26 +83,29 @@ StatusCode ISF::DNNCaloSimSvc::initialize()
 
   ATH_CHECK(m_rndGenSvc.retrieve());
   m_randomEngine = m_rndGenSvc->GetEngine( m_randomEngineName);
-  if(!m_randomEngine)
+  if (!m_randomEngine)
     {
       ATH_MSG_ERROR("Could not get random number engine from RandomNumberService. Abort.");
       return StatusCode::FAILURE;
     }
-  
+
   m_caloDetDescrManager = detStore()->tryConstRetrieve<CaloDetDescrManager>(caloMgrStaticKey);
-  if(!m_caloDetDescrManager) {
+  if (!m_caloDetDescrManager) {
     std::unique_ptr<CaloDetDescrManager> caloMgrPtr = buildCaloDetDescrNoAlign(serviceLocator()
-									       , Athena::getMessageSvc());
+                                                                               , Athena::getMessageSvc());
     ATH_CHECK(detStore()->record(std::move(caloMgrPtr), caloMgrStaticKey));
     ATH_CHECK(detStore()->retrieve(m_caloDetDescrManager, caloMgrStaticKey));
+    if (!m_caloDetDescrManager) {
+      ATH_MSG_ERROR ("Failed to build CaloDetDescrManager.");
+      return StatusCode::FAILURE;
+    }
   }
-
   const FCALDetectorManager * fcalManager=nullptr;
   ATH_CHECK(detStore()->retrieve(fcalManager));
 
   const CaloIdManager* caloId_mgr = m_caloDetDescrManager->getCalo_Mgr();
   m_emID = caloId_mgr->getEM_ID();
-  
+
   m_caloGeo = std::make_unique<CaloGeometryFromCaloDDM>();
   m_caloGeo->LoadGeometryFromCaloDDM(m_caloDetDescrManager);
   if(!m_caloGeo->LoadFCalChannelMapFromFCalDDM(fcalManager) )ATH_MSG_FATAL("Found inconsistency between FCal_Channel map and GEO file. Please, check if they are configured properly.");
