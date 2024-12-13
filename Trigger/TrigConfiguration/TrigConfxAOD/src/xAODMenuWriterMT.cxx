@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi/Athena include(s):
@@ -44,6 +44,7 @@ namespace TrigConf
 
    StatusCode xAODMenuWriterMT::initialize()
    {
+      // cppcheck-suppress-begin danglingLifetime; cached pointers owned by store
 
       // Greet the user:
       ATH_MSG_INFO("Initialising");
@@ -119,6 +120,8 @@ namespace TrigConf
 
       ATH_CHECK( m_metaStore->record(std::move(aux_bg), m_metaNameJSON_bg + "Aux." ) );
       ATH_CHECK( m_metaStore->record(std::move(bg), m_metaNameJSON_bg ) );
+
+      // cppcheck-suppress-end danglingLifetime
 
       // Return gracefully:
       return StatusCode::SUCCESS;
