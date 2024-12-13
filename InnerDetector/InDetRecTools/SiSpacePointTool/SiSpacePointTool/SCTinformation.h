@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -17,8 +17,10 @@
 
 #ifndef SCTinformation_h
 #define SCTinformation_h
+#include "GeoPrimitives/GeoPrimitives.h" //Amg::Vector3D
 
 namespace InDet {
+  class SiCluster;
 
   class SCTinformation final {
    
@@ -27,16 +29,13 @@ namespace InDet {
     /////////////////////////////////////////////////////////////////////////////////
    
   public:
-    SCTinformation();
+    SCTinformation() = default;
     SCTinformation(const InDet::SiCluster* cluster, 
                    const Amg::Vector3D& strip_start, 
                    const Amg::Vector3D& strip_end, 
                    const Amg::Vector3D& vec, 
                    const double& locx);
 
-    SCTinformation(const SCTinformation&) = default;
-    ~SCTinformation() = default;
-    SCTinformation& operator = (const SCTinformation&) = default;
 
     const InDet::SiCluster* cluster() const {return m_cluster;}
     const Amg::Vector3D& strip_center () const {return m_center ;}
@@ -57,20 +56,16 @@ namespace InDet {
 
   private:
 
-    const InDet::SiCluster* m_cluster;     // SCT cluster
+    const InDet::SiCluster* m_cluster{};     // SCT cluster
     Amg::Vector3D m_center;                // Center of strip
     Amg::Vector3D m_sdir;                  // Direction of strip (strip_start-strip_end)
     Amg::Vector3D m_tdir;                  // Direction of trajectory (strip_start+strip_end-2*vertexVec)
     Amg::Vector3D m_normal;                // Normal to strip diretion and trjectory direction plane
-    double        m_oneOverStrip;          // Invert length of the strip
-    double        m_locX;                  // cluster local X 
+    double        m_oneOverStrip{};          // Invert length of the strip
+    double        m_locX{};                  // cluster local X 
   };
 
 
-  /////////////////////////////////////////////////////////////////////////////////
-  // Inline methods
-  /////////////////////////////////////////////////////////////////////////////////
-  inline SCTinformation::SCTinformation() : m_cluster(nullptr) {}
   
   /////////////////////////////////////////////////////////////////////////////////
   // Constructor with initialisation
