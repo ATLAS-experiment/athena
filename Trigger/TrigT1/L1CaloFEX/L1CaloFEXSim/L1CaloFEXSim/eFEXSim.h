@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -65,9 +65,8 @@ namespace LVL1 {
     std::vector<std::unique_ptr<eFEXtauTOB>> getTauTOBs(std::vector<std::vector<std::unique_ptr<eFEXtauTOB>> >& tauTobObjects);
     /** Internal data */
   private:
-    int m_id;
-    int m_eTowersIDs [10][18];
-    //std::map<int,eTower> m_eTowersColl;
+    int m_id{};
+    int m_eTowersIDs [10][18]{};
     CaloCellContainer m_sCellsCollection;
     std::vector<eFEXFPGA*> m_eFEXFPGACollection;
 
