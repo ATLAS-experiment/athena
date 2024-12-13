@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,6 +15,7 @@
 #include "PixelRawContByteStreamTool.h"
 #include "InDetIdentifier/PixelID.h"
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
+#include "PixelByteStreamModuleMask.h" //for PRB_LINKHEADER, PRB_BCIDmask, PRB_BCIDskip etc.
 
 
 //#define PIXEL_DEBUG ;
@@ -124,7 +125,8 @@ const InterfaceID& PixelRawContByteStreamTool::interfaceID() {
 
 ////////////////////////
 //  fillROD() - convert Pixel RDO to a vector of 32bit words
-////////////////////////
+// RDOs parameter will be sorted here, so cannot be const ref
+//cppcheck-suppress passedByValue
 void PixelRawContByteStreamTool::fillROD(std::vector<uint32_t>& v32rod, std::vector<const PixelRDORawData*> RDOs, int BCs_per_LVL1ID) const {
   ATH_MSG_DEBUG("#####################################################################################");
   ATH_MSG_DEBUG("Entering PixelRodEncoder");
@@ -148,7 +150,6 @@ void PixelRawContByteStreamTool::fillROD(std::vector<uint32_t>& v32rod, std::vec
   int hitDiscCnfg = 2;
 
   SG::ReadCondHandle<PixelCablingCondData> pixCabling(m_condCablingKey);
-  //SG::ReadCondHandle<PixelHitDiscCnfgData> pixHitDiscCnfg(m_condHitDiscCnfgKey);
   std::unique_ptr<SG::ReadCondHandle<PixelHitDiscCnfgData> > pixHitDiscCnfg;
 
   // ordering of the elements of the RDOs vector by offlineId, n5

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ class PixelRawContByteStreamCnv: public AthConstConverter {
   static const CLID& classID();
 
 private: 
-  const PixelRawContByteStreamTool* m_PixelRawContBSTool;
+  const PixelRawContByteStreamTool* m_PixelRawContBSTool{};
   ServiceHandle<IByteStreamEventAccess> m_ByteStreamEventAccess; 
 };
 #endif // PIXELBYTESTREAM_PXIELRAWCONTRAWEVENTCNV_H
