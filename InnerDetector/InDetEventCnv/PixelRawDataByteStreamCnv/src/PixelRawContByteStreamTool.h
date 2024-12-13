@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -23,23 +23,15 @@
 
 #include "GaudiKernel/ServiceHandle.h"
 
-#include "ByteStreamData/RawEvent.h" 
-#include "InDetRawData/InDetRawDataCLASS_DEF.h"
-
-#include "ByteStreamCnvSvcBase/FullEventAssembler.h" // needed, template class
+#include "InDetRawData/PixelRDO_Container.h" //typedef
 #include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
-
-#include "PixelByteStreamModuleMask.h"
-
-#include "ByteStreamCnvSvcBase/SrcIdMap.h" 
-
 #include "PixelConditionsData/PixelCablingCondData.h"
 #include "PixelConditionsData/PixelHitDiscCnfgData.h"
 #include "PixelReadoutGeometry/IPixelReadoutManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include <cstdint>
 #include <string>
-
+#include <vector>
 class PixelID;
 
 namespace InDetDD{
@@ -84,8 +76,8 @@ class PixelRawContByteStreamTool: public AthAlgTool {
 
     const InDetDD::PixelDetectorManager* m_pixelManager{};
 
-    unsigned short m_RodBlockVersion;
-    int m_BCs_per_LVL1ID;
+    unsigned short m_RodBlockVersion{};
+    int m_BCs_per_LVL1ID{};
 
     SG::ReadCondHandleKey<PixelCablingCondData> m_condCablingKey
     {this, "PixelCablingCondData", "PixelCablingCondData", "Pixel cabling key"};
@@ -104,15 +96,6 @@ class OrderRdos {
     OrderRdos(Identifier offlineId, const ServiceHandle<InDetDD::IPixelReadoutManager> &pixelReadout):
       m_pixelReadout(pixelReadout), m_offlineId(offlineId) {  }
 
-    // copy constructor
-    OrderRdos(const OrderRdos & orderFunct) = default;
-
-    // assignment operator
-    OrderRdos& operator= (const OrderRdos &other) { 
-      m_pixelReadout = other.m_pixelReadout;
-      return *this;
-    }
-
     bool operator() (const PixelRDORawData* rdo0, const PixelRDORawData* rdo1);
 };
 
@@ -120,22 +103,12 @@ class OrderInitialRdos {
 
   private:
     ServiceHandle<InDetDD::IPixelReadoutManager> m_pixelReadout;
-    const PixelID * m_PixelID;
+    const PixelID * m_PixelID{};
     SG::ReadCondHandle<PixelCablingCondData> m_pixCabling;
 
   public:
     OrderInitialRdos(const ServiceHandle<InDetDD::IPixelReadoutManager> &pixelReadout, const PixelID *pixelID, SG::ReadCondHandle<PixelCablingCondData> &pixCabling):
       m_pixelReadout(pixelReadout), m_PixelID(pixelID), m_pixCabling(pixCabling) {  }
-
-    // copy constructor
-    OrderInitialRdos(const OrderInitialRdos & orderFunct) = default;
-
-    // assignment operator
-    // cppcheck-suppress operatorEqVarError
-    OrderInitialRdos& operator= (const OrderInitialRdos &other) { 
-      m_pixelReadout = other.m_pixelReadout;
-      return *this;
-    }
 
     bool operator() (const PixelRDORawData* rdo0, const PixelRDORawData* rdo1);
 };
