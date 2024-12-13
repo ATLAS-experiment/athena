@@ -32,7 +32,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "TGCcablingInterface/ITGCcablingSvc.h"
 #include "xAODMuonRDO/NRPCRDOContainer.h"
-#include "MuonCablingData/MuonNRPC_CablingMap.h"
+#include "MuonCablingData/RpcCablingMap.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 
 class MdtDigitContainer;
@@ -154,7 +154,7 @@ private:
 
     /// New BIS78 RDO container
     SG::ReadHandleKey<xAOD::NRPCRDOContainer> m_nRpcRdoKey{this, "NRpcRdoContainer", "NRPCRDO", "BIS78 RPC Rdo input with ToTs"};
-    SG::ReadCondHandleKey<MuonNRPC_CablingMap> m_nRpcCablingKey{this, "NRpcCablingKey", "MuonNRPC_CablingMap", "Key of input MDT cabling map"};
+    SG::ReadCondHandleKey<Muon::RpcCablingMap> m_nRpcCablingKey{this, "NRpcCablingKey", "MuonNRPC_CablingMap", "Key of input MDT cabling map"};
     
     SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_DetectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager",
                                                                             "Key of input MuonDetectorManager condition data"};

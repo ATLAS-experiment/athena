@@ -13,7 +13,7 @@
 #include "xAODMuonRDO/NRPCRDOContainer.h"
 
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
-#include "MuonCablingData/MuonNRPC_CablingMap.h"
+#include "MuonCablingData/RpcCablingMap.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ private:
     Gaudi::Property<std::vector<std::string>> m_convStat{this, "ConvertHitsFromStations",
                                                             {"BIS"}, "Only hits from these RPC stations are converted to RDOs" };
     
-    SG::ReadCondHandleKey<MuonNRPC_CablingMap> m_cablingKey{this, "CablingKey", "MuonNRPC_CablingMap", "Key of MuonNRPC_CablingMap"};
+    SG::ReadCondHandleKey<Muon::RpcCablingMap> m_cablingKey{this, "CablingKey", "MuonNRPC_CablingMap", "Key of MuonNRPC_CablingMap"};
 
     SG::ReadHandleKey<RpcDigitContainer> m_digitContainerKey{this, "InputObjectName", "RPC_DIGITS",
                                                              "ReadHandleKey for Input RpcDigitContainer"};

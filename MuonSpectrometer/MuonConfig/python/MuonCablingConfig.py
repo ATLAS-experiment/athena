@@ -12,19 +12,19 @@ def NRPCCablingConfigCfg(flags, name = "MuonNRPC_CablingAlg", **kwargs):
         from IOVDbSvc.IOVDbSvcConfig import addFolders
         dbName = 'RPC_OFL' if flags.Input.isMC else 'RPC'
         cablingFolder = "/RPC/NCABLING/JSON" if flags.Input.isMC else "/RPC/Onl/NCABLING/JSON"
-        cablingTag = "RpcNcablingJson-RUN3-04"
+        cablingTag = "RpcNcablingJson-RUN3-07"
         from AthenaConfiguration.Enums import LHCPeriod
         if flags.Muon.usePhaseIIGeoSetup and flags.Input.isMC:  
             if flags.GeoModel.Run <= LHCPeriod.Run3:   
-                cablingTag = "RpcNcablingJson-RUN3-FanatasyCabling-2"
+                cablingTag = "RpcNcablingJson-RUN3-FantasyCabling-4"
             else:
-                cablingTag = "RpcNcablingJson-RUN4-FantasyCabling-1"
+                cablingTag = "RpcNcablingJson-RUN4-FantasyCabling-4"
 
         result.merge(addFolders(flags, [cablingFolder], detDb=dbName, className='CondAttrListCollection', tag=cablingTag))
         kwargs.setdefault("MapFolders",  cablingFolder)
     
     ### Cabling algorithm setup
-    NRPCCablingAlg = CompFactory.MuonNRPC_CablingAlg(name, **kwargs)
+    NRPCCablingAlg = CompFactory.Muon.NRpcCablingAlg(name, **kwargs)
 
     result.addCondAlgo( NRPCCablingAlg, primary= True)
     return result
@@ -86,16 +86,12 @@ def MuonTGC_CablingSvcCfg(flags):
 def TGCCablingConfigCfg(flags):
     acc = ComponentAccumulator()
     if not flags.Detector.GeometryTGC: return acc
-    # No ServiceHandle in TGCcablingServerSvc
+
     acc.merge(MuonTGC_CablingSvcCfg(flags))
 
-    TGCcablingServerSvc=CompFactory.TGCcablingServerSvc
-    TGCCablingSvc = TGCcablingServerSvc()
-    acc.addService( TGCCablingSvc, primary=True )
-
-    #from IOVDbSvc.IOVDbSvcConfig import addFolders
-    #dbName = 'TGC_OFL' if flags.Input.isMC else 'TGC'
-    #acc.merge(addFolders(flags, '/TGC/CABLING/MAP_SCHEMA', dbName))
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    dbName = 'TGC_OFL' if flags.Input.isMC else 'TGC'
+    acc.merge(addFolders(flags, '/TGC/CABLING/MAP_SCHEMA', dbName))
 
     return acc
 
@@ -103,6 +99,7 @@ def TGCCablingConfigCfg(flags):
 # athena/MuonSpectrometer/MuonCnv/MuonCnvExample/python/MuonCablingConfig.py
 def MDTCablingConfigCfg(flags, name = "MuonMDT_CablingAlg", **kwargs):
     acc = ComponentAccumulator()
+    if not flags.Detector.GeometryMDT: return acc
     from AthenaConfiguration.Enums import LHCPeriod
     
     kwargs.setdefault("UseJSONFormat", flags.Muon.usePhaseIIGeoSetup and \
@@ -121,9 +118,12 @@ def MDTCablingConfigCfg(flags, name = "MuonMDT_CablingAlg", **kwargs):
                flags.GeoModel.Run >= LHCPeriod.Run4: 
                 dbTagMezz = "MDTMezMapSchemaJSON_RUN4_FantasyCabling_1"
                 dbTagSchema = "MDTCablingMapSchemaJSON_RUN4_FantasyCabling_1"
+            elif flags.GeoModel.Run >= LHCPeriod.Run4:
+                dbTagSchema = "MDTOflCablingMapSchema_RUN124_MC15_02"
+                dbTagMezz = "MDTOflCablingMezzanineSchema_RUN124_MC15_02"
             if kwargs["UseJSONFormat"]:
-                kwargs.setdefault("MapFolders", "/MDT/Ofl/CABLING/MAP_SCHEMA_JSON")
-                kwargs.setdefault("MezzanineFolders", "/MDT/Ofl/CABLING/MEZZANINE_SCHEMA_JSON")
+                kwargs.setdefault("MapFolders", "/MDT/CABLING/MAP_SCHEMA_JSON")
+                kwargs.setdefault("MezzanineFolders", "/MDT/CABLING/MEZZANINE_SCHEMA_JSON")
             else:
                 kwargs.setdefault("MapFolders", "/MDT/Ofl/CABLING/MAP_SCHEMA")
                 kwargs.setdefault("MezzanineFolders", "/MDT/Ofl/CABLING/MEZZANINE_SCHEMA")
@@ -147,6 +147,20 @@ def MDTCablingConfigCfg(flags, name = "MuonMDT_CablingAlg", **kwargs):
    
     return acc
 
+def MdtTwinTubeMapCondAlgCfg(flags, name="MdtTwinTubeCondAlg", **kwargs):
+    result = ComponentAccumulator()
+    if not flags.Detector.GeometryMDT: return result
+    kwargs.setdefault("JSONFile","")
+    if(not kwargs["JSONFile"]):
+        kwargs.setdefault("FolderName","/MDT/TWINMAPPING")
+        from IOVDbSvc.IOVDbSvcConfig import addFolders
+        result.merge(addFolders(flags,[kwargs["FolderName"]], ("MDT_OFL" if flags.Input.isMC else "MDT"),className="CondAttrListCollection", tag="MDTTwinMapping_compactFormat_Run123"))
+    else:
+        kwargs["FolderName"] = ""
+
+    the_alg = CompFactory.Muon.TwinTubeMappingCondAlg(name, **kwargs)
+    result.addCondAlgo(the_alg, primary = True)    
+    return result
 
 # This should be checked by experts 
 def CSCCablingConfigCfg(flags):
@@ -176,18 +190,12 @@ def NswCablingCfg(flags, name = "MuonNSW_CablingAlg", **kwargs):
 #All the cabling configs together (convenience function)
 def MuonCablingConfigCfg(flags):
     acc = ComponentAccumulator()
+    acc.merge( RPCCablingConfigCfg(flags) )
+    acc.merge( TGCCablingConfigCfg(flags) )
 
-    result = RPCCablingConfigCfg(flags)
-    acc.merge( result )
+    acc.merge( MDTCablingConfigCfg(flags) )
 
-    result = TGCCablingConfigCfg(flags)
-    acc.merge( result )
-
-    result = MDTCablingConfigCfg(flags)
-    acc.merge( result )
-
-    result = CSCCablingConfigCfg(flags)
-    acc.merge( result )
+    acc.merge( CSCCablingConfigCfg(flags) )
 
     acc.merge(NswCablingCfg(flags))
 

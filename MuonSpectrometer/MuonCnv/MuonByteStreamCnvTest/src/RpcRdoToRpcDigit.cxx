@@ -124,7 +124,7 @@ StatusCode RpcRdoToRpcDigit::decodeNRpc(const EventContext& ctx, RpcDigitContain
         ATH_MSG_FATAL("Failed to retrieve "<<m_nRpcRdoKey.fullKey());
         return StatusCode::FAILURE;
     }
-    SG::ReadCondHandle<MuonNRPC_CablingMap> cabling{m_nRpcCablingKey, ctx};
+    SG::ReadCondHandle cabling{m_nRpcCablingKey, ctx};
     if (!cabling.isValid()) {
         ATH_MSG_FATAL("Failed to retrieve "<<m_nRpcCablingKey.fullKey());
         return StatusCode::FAILURE;
@@ -143,7 +143,7 @@ StatusCode RpcRdoToRpcDigit::decodeNRpc(const EventContext& ctx, RpcDigitContain
                 rdo->time()<<", ToT: "<<rdo->timeoverthr());
         
         /// Fill the cabling object
-        NrpcCablingData conv_obj{};
+        Muon::RpcCablingData conv_obj{};
         conv_obj.subDetector = rdo->subdetector();
         conv_obj.tdcSector = rdo->tdcsector();
         conv_obj.tdc = rdo->tdc();
