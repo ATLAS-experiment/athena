@@ -33,19 +33,11 @@
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloCluster.h"
 
-#include "GaudiKernel/MsgStream.h"
 
 #include "ISF_FastCaloSimEvent/FCS_StepInfoCollection.h"
 
-#include "TTree.h"
-#include "TFile.h"
-#include "TString.h"
-#include "TVector3.h"
-#include <sstream>
-
 // For MC Truth information:
 #include "GeneratorObjects/McEventCollection.h"
-
 
 //####################
 #include "CaloDetDescr/CaloDepthTool.h"
@@ -57,10 +49,13 @@
 #include "TrkMaterialOnTrack/EnergyLoss.h"
 #include "TrkGeometry/TrackingGeometry.h"
 #include "HepPDT/ParticleData.hh"
-#include "HepPDT/ParticleDataTable.hh"
 //#########################
 
-
+#include "TTree.h"
+#include "TFile.h"
+#include "TString.h"
+#include "TVector3.h"
+#include <sstream>
 #include <algorithm>
 #include <cmath>
 #include <functional>

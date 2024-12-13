@@ -5,54 +5,52 @@
 #ifndef ISF_FASTCALOSIMPARAMETRIZATION_ISF_HIT_ANALYSIS_H
 #define ISF_FASTCALOSIMPARAMETRIZATION_ISF_HIT_ANALYSIS_H
 
-#include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/Algorithm.h"
-#include "GaudiKernel/ObjectVector.h"
-#include "GaudiKernel/ITHistSvc.h"
-#include "CLHEP/Units/SystemOfUnits.h"
-#include "AthenaKernel/IOVSvcDefs.h"
-#include "StoreGate/ReadCondHandle.h"
-
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "CxxUtils/checker_macros.h"
-#include "CxxUtils/CachedPointer.h"
-#include "LArElecCalib/ILArfSampl.h"
+#include "AthenaKernel/IOVSvcDefs.h"
+
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 
+#include "LArElecCalib/ILArfSampl.h"
 #include "TileConditions/TileSamplingFraction.h"
 #include "TileConditions/TileCablingSvc.h"
-
-//#####################################
 #include "CaloDetDescr/ICaloCoordinateTool.h"
-#include "ISF_FastCaloSimParametrization/FSmap.h"
-#include "AtlasHepMC/GenParticle.h"
-#include "HepPDT/ParticleData.hh"
-#include "GaudiKernel/IPartPropSvc.h"
-#include "TrkParameters/TrackParameters.h"
-//#####################################
 
 #include "ISF_FastCaloSimParametrization/IFastCaloSimCaloExtrapolation.h"
 #include "ISF_FastCaloSimEvent/FastCaloSim_CaloCell_ID.h"
 #include "ISF_FastCaloSimParametrization/FCS_Cell.h"
-
-
-namespace Trk
-{
-  class TrackingVolume;
-}
+#include "ISF_FastCaloSimParametrization/FSmap.h"
 
 #include "TrkExInterfaces/ITimedExtrapolator.h"
 #include "TrkEventPrimitives/PdgToParticleHypothesis.h"
+#include "TrkParameters/TrackParameters.h"
 
-#include <string>
-#include <Rtypes.h>
+#include "StoreGate/ReadCondHandle.h"
+
+#include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/ITHistSvc.h"
+#include "GaudiKernel/IPartPropSvc.h"
+
+#include "CxxUtils/checker_macros.h"
+#include "CxxUtils/CachedPointer.h"
+
+#include "AtlasHepMC/GenParticle.h"
+#include "HepPDT/ParticleDataTable.hh"
+
+#include "CLHEP/Units/SystemOfUnits.h"
 #include <TLorentzVector.h>
+#include <Rtypes.h>
+#include <string>
 
 /* *************************************************************
    This is a modified copy of Simulation/Tools/CaloHitAnalysis
    Aug 27, 2013 Zdenek Hubacek (CERN)
    ************************************************************** */
+
+namespace Trk
+{
+  class TrackingVolume;
+}
 
 class TileID;
 class TileHWID;
@@ -63,12 +61,6 @@ class LArFCAL_ID;
 class LArHEC_ID;
 
 //############################
-class ICaloCoordinateTool;
-class IExtrapolateToCaloTool;
-class CaloDepthTool;
-namespace Trk {
-  class IExtrapolator;
-}
 
 class ISF_HitAnalysis : public AthAlgorithm {
 
@@ -134,115 +126,115 @@ private:
   StringProperty m_MC_DIGI_PARAM{this, "MetaDataDigi", "/Digitization/Parameters"};
   StringProperty m_MC_SIM_PARAM{this, "MetaDataSim", "/Simulation/Parameters"};
 
-  const LArEM_ID *m_larEmID{nullptr};
-  const LArFCAL_ID *m_larFcalID{nullptr};
-  const LArHEC_ID *m_larHecID{nullptr};
-  const TileID * m_tileID{nullptr};
-  const TileHWID*     m_tileHWID{nullptr};
-  const TileCablingService* m_tileCabling{nullptr};
+  const LArEM_ID *m_larEmID{};
+  const LArFCAL_ID *m_larFcalID{};
+  const LArHEC_ID *m_larHecID{};
+  const TileID * m_tileID{};
+  const TileHWID*     m_tileHWID{};
+  const TileCablingService* m_tileCabling{};
 
-  const TileDetDescrManager * m_tileMgr{nullptr};
+  const TileDetDescrManager * m_tileMgr{};
 
   /** Simple variables by Ketevi */
-  std::vector<float>* m_hit_x{nullptr};
-  std::vector<float>* m_hit_y{nullptr};
-  std::vector<float>* m_hit_z{nullptr};
-  std::vector<float>* m_hit_energy{nullptr};
-  std::vector<float>* m_hit_time{nullptr};
-  std::vector<Long64_t>* m_hit_identifier{nullptr};
-  std::vector<Long64_t>* m_hit_cellidentifier{nullptr};
-  std::vector<bool>*  m_islarbarrel{nullptr};
-  std::vector<bool>*  m_islarendcap{nullptr};
-  std::vector<bool>*  m_islarhec{nullptr};
-  std::vector<bool>*  m_islarfcal{nullptr};
-  std::vector<bool>*  m_istile{nullptr};
-  std::vector<int>*   m_hit_sampling{nullptr};
-  std::vector<float>* m_hit_samplingfraction{nullptr};
+  std::vector<float>* m_hit_x{};
+  std::vector<float>* m_hit_y{};
+  std::vector<float>* m_hit_z{};
+  std::vector<float>* m_hit_energy{};
+  std::vector<float>* m_hit_time{};
+  std::vector<Long64_t>* m_hit_identifier{};
+  std::vector<Long64_t>* m_hit_cellidentifier{};
+  std::vector<bool>*  m_islarbarrel{};
+  std::vector<bool>*  m_islarendcap{};
+  std::vector<bool>*  m_islarhec{};
+  std::vector<bool>*  m_islarfcal{};
+  std::vector<bool>*  m_istile{};
+  std::vector<int>*   m_hit_sampling{};
+  std::vector<float>* m_hit_samplingfraction{};
 
-  std::vector<float>* m_truth_energy{nullptr};
-  std::vector<float>* m_truth_px{nullptr};
-  std::vector<float>* m_truth_py{nullptr};
-  std::vector<float>* m_truth_pz{nullptr};
-  std::vector<int>*   m_truth_pdg{nullptr};
-  std::vector<int>*   m_truth_barcode{nullptr};
-  std::vector<int>*   m_truth_vtxbarcode{nullptr}; //production vertex barcode
+  std::vector<float>* m_truth_energy{};
+  std::vector<float>* m_truth_px{};
+  std::vector<float>* m_truth_py{};
+  std::vector<float>* m_truth_pz{};
+  std::vector<int>*   m_truth_pdg{};
+  std::vector<int>*   m_truth_barcode{};
+  std::vector<int>*   m_truth_vtxbarcode{}; //production vertex barcode
 
-  std::vector<float>* m_cluster_energy{nullptr};
-  std::vector<float>* m_cluster_eta{nullptr};
-  std::vector<float>* m_cluster_phi{nullptr};
-  std::vector<unsigned>* m_cluster_size{nullptr};
-  std::vector<std::vector<Long64_t >>* m_cluster_cellID{nullptr};
+  std::vector<float>* m_cluster_energy{};
+  std::vector<float>* m_cluster_eta{};
+  std::vector<float>* m_cluster_phi{};
+  std::vector<unsigned>* m_cluster_size{};
+  std::vector<std::vector<Long64_t >>* m_cluster_cellID{};
 
 
-  std::vector<Long64_t>*    m_cell_identifier{nullptr};
-  std::vector<float>*       m_cell_energy{nullptr};
-  std::vector<int>*         m_cell_sampling{nullptr};
+  std::vector<Long64_t>*    m_cell_identifier{};
+  std::vector<float>*       m_cell_energy{};
+  std::vector<int>*         m_cell_sampling{};
 
-  std::vector<float>*       m_g4hit_energy{nullptr};
-  std::vector<float>*       m_g4hit_time{nullptr};
-  std::vector<Long64_t>*    m_g4hit_identifier{nullptr};
-  std::vector<Long64_t>*    m_g4hit_cellidentifier{nullptr};
-  std::vector<float>*       m_g4hit_samplingfraction{nullptr};
-  std::vector<int>*         m_g4hit_sampling{nullptr};
+  std::vector<float>*       m_g4hit_energy{};
+  std::vector<float>*       m_g4hit_time{};
+  std::vector<Long64_t>*    m_g4hit_identifier{};
+  std::vector<Long64_t>*    m_g4hit_cellidentifier{};
+  std::vector<float>*       m_g4hit_samplingfraction{};
+  std::vector<int>*         m_g4hit_sampling{};
 
   //CaloHitAna variables
   FCS_matchedcellvector* m_oneeventcells = nullptr; //these are all matched cells in a single event
-  FCS_matchedcellvector* m_layercells[MAX_LAYER]; //these are all matched cells in a given layer in a given event
+  FCS_matchedcellvector* m_layercells[MAX_LAYER]{}; //these are all matched cells in a given layer in a given event
 
-  Float_t m_total_cell_e = 0;
-  Float_t m_total_hit_e = 0;
-  Float_t m_total_g4hit_e = 0;
+  Float_t m_total_cell_e{};
+  Float_t m_total_hit_e{};
+  Float_t m_total_g4hit_e{};
 
-  std::vector<Float_t>* m_final_cell_energy{nullptr};
-  std::vector<Float_t>* m_final_hit_energy{nullptr};
-  std::vector<Float_t>* m_final_g4hit_energy{nullptr};
+  std::vector<Float_t>* m_final_cell_energy{};
+  std::vector<Float_t>* m_final_hit_energy{};
+  std::vector<Float_t>* m_final_g4hit_energy{};
 
-  TTree * m_tree{nullptr};
+  TTree * m_tree{};
   //####################################################
-  double m_eta_calo_surf{0.};
-  double m_phi_calo_surf{0.};
-  double m_d_calo_surf{0.};
-  double m_ptruth_eta{0.};
-  double m_ptruth_phi{0.};
-  double m_ptruth_e{0.};
-  double m_ptruth_et{0.};
-  double m_ptruth_pt{0.};
-  double m_ptruth_p{0.};
-  int m_pdgid{0};
+  double m_eta_calo_surf{};
+  double m_phi_calo_surf{};
+  double m_d_calo_surf{};
+  double m_ptruth_eta{};
+  double m_ptruth_phi{};
+  double m_ptruth_e{};
+  double m_ptruth_et{};
+  double m_ptruth_pt{};
+  double m_ptruth_p{};
+  int m_pdgid{};
 
-  std::vector<std::vector<float> >* m_newTTC_entrance_eta{nullptr};
-  std::vector<std::vector<float> >* m_newTTC_entrance_phi{nullptr};
-  std::vector<std::vector<float> >* m_newTTC_entrance_r{nullptr};
-  std::vector<std::vector<float> >* m_newTTC_entrance_z{nullptr};
-  std::vector<std::vector<float> >* m_newTTC_entrance_detaBorder{nullptr};
-  std::vector<std::vector<bool> >*  m_newTTC_entrance_OK{nullptr};
-  std::vector<std::vector<float> >* m_newTTC_back_eta{nullptr};
-  std::vector<std::vector<float> >* m_newTTC_back_phi{nullptr};
-  std::vector<std::vector<float> >* m_newTTC_back_r{nullptr};
-  std::vector<std::vector<float> >* m_newTTC_back_z{nullptr};
-  std::vector<std::vector<float> >* m_newTTC_back_detaBorder{nullptr};
-  std::vector<std::vector<bool> >*  m_newTTC_back_OK{nullptr};
-  std::vector<std::vector<float> >* m_newTTC_mid_eta{nullptr};
-  std::vector<std::vector<float> >* m_newTTC_mid_phi{nullptr};
-  std::vector<std::vector<float> >* m_newTTC_mid_r{nullptr};
-  std::vector<std::vector<float> >* m_newTTC_mid_z{nullptr};
-  std::vector<std::vector<float> >* m_newTTC_mid_detaBorder{nullptr};
-  std::vector<std::vector<bool> >*  m_newTTC_mid_OK{nullptr};
-  std::vector<float>* m_newTTC_IDCaloBoundary_eta{nullptr};
-  std::vector<float>* m_newTTC_IDCaloBoundary_phi{nullptr};
-  std::vector<float>* m_newTTC_IDCaloBoundary_r{nullptr};
-  std::vector<float>* m_newTTC_IDCaloBoundary_z{nullptr};
-  std::vector<float>* m_newTTC_Angle3D{nullptr};
-  std::vector<float>* m_newTTC_AngleEta{nullptr};
+  std::vector<std::vector<float> >* m_newTTC_entrance_eta{};
+  std::vector<std::vector<float> >* m_newTTC_entrance_phi{};
+  std::vector<std::vector<float> >* m_newTTC_entrance_r{};
+  std::vector<std::vector<float> >* m_newTTC_entrance_z{};
+  std::vector<std::vector<float> >* m_newTTC_entrance_detaBorder{};
+  std::vector<std::vector<bool> >*  m_newTTC_entrance_OK{};
+  std::vector<std::vector<float> >* m_newTTC_back_eta{};
+  std::vector<std::vector<float> >* m_newTTC_back_phi{};
+  std::vector<std::vector<float> >* m_newTTC_back_r{};
+  std::vector<std::vector<float> >* m_newTTC_back_z{};
+  std::vector<std::vector<float> >* m_newTTC_back_detaBorder{};
+  std::vector<std::vector<bool> >*  m_newTTC_back_OK{};
+  std::vector<std::vector<float> >* m_newTTC_mid_eta{};
+  std::vector<std::vector<float> >* m_newTTC_mid_phi{};
+  std::vector<std::vector<float> >* m_newTTC_mid_r{};
+  std::vector<std::vector<float> >* m_newTTC_mid_z{};
+  std::vector<std::vector<float> >* m_newTTC_mid_detaBorder{};
+  std::vector<std::vector<bool> >*  m_newTTC_mid_OK{};
+  std::vector<float>* m_newTTC_IDCaloBoundary_eta{};
+  std::vector<float>* m_newTTC_IDCaloBoundary_phi{};
+  std::vector<float>* m_newTTC_IDCaloBoundary_r{};
+  std::vector<float>* m_newTTC_IDCaloBoundary_z{};
+  std::vector<float>* m_newTTC_Angle3D{};
+  std::vector<float>* m_newTTC_AngleEta{};
 
-  std::vector<float>* m_MuonEntryLayer_E{nullptr};
-  std::vector<float>* m_MuonEntryLayer_px{nullptr};
-  std::vector<float>* m_MuonEntryLayer_py{nullptr};
-  std::vector<float>* m_MuonEntryLayer_pz{nullptr};
-  std::vector<float>* m_MuonEntryLayer_x{nullptr};
-  std::vector<float>* m_MuonEntryLayer_y{nullptr};
-  std::vector<float>* m_MuonEntryLayer_z{nullptr};
-  std::vector<int>*   m_MuonEntryLayer_pdg{nullptr};
+  std::vector<float>* m_MuonEntryLayer_E{};
+  std::vector<float>* m_MuonEntryLayer_px{};
+  std::vector<float>* m_MuonEntryLayer_py{};
+  std::vector<float>* m_MuonEntryLayer_pz{};
+  std::vector<float>* m_MuonEntryLayer_x{};
+  std::vector<float>* m_MuonEntryLayer_y{};
+  std::vector<float>* m_MuonEntryLayer_z{};
+  std::vector<int>*   m_MuonEntryLayer_pdg{};
 
   /** The new Extrapolator setup */
   CxxUtils::CachedPointer<const Trk::TrackingVolume> m_caloEntrance;
@@ -253,18 +245,18 @@ private:
   CaloCell_ID_FCS::CaloSample    m_sample_calo_surf{CaloCell_ID_FCS::noSample};
   std::vector< CaloCell_ID_FCS::CaloSample > m_surfacelist;
 
-  bool   m_layerCaloOK[CaloCell_ID_FCS::MaxSample][3];
-  double m_letaCalo[CaloCell_ID_FCS::MaxSample][3];
-  double m_lphiCalo[CaloCell_ID_FCS::MaxSample][3];
-  double m_lrCalo[CaloCell_ID_FCS::MaxSample][3];
-  double m_lzCalo[CaloCell_ID_FCS::MaxSample][3];
-  double m_dCalo[CaloCell_ID_FCS::MaxSample][3];
-  double m_distetaCaloBorder[CaloCell_ID_FCS::MaxSample][3];
+  bool   m_layerCaloOK[CaloCell_ID_FCS::MaxSample][3]{};
+  double m_letaCalo[CaloCell_ID_FCS::MaxSample][3]{};
+  double m_lphiCalo[CaloCell_ID_FCS::MaxSample][3]{};
+  double m_lrCalo[CaloCell_ID_FCS::MaxSample][3]{};
+  double m_lzCalo[CaloCell_ID_FCS::MaxSample][3]{};
+  double m_dCalo[CaloCell_ID_FCS::MaxSample][3]{};
+  double m_distetaCaloBorder[CaloCell_ID_FCS::MaxSample][3]{};
 
   /// Handle on the particle property service
   ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
 
-  HepPDT::ParticleDataTable*     m_particleDataTable{nullptr};
+  HepPDT::ParticleDataTable*     m_particleDataTable{};
 
   //###################################################################
 
