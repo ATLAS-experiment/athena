@@ -2,7 +2,7 @@
 
 import sys
 
-from AthenaConfiguration.Enums import ProductionStep, HIMode
+from AthenaConfiguration.Enums import MetadataCategory, ProductionStep, HIMode
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 
@@ -74,9 +74,13 @@ def fromRunArgs(runArgs):
     flags.lock()
 
     itemList = [] # items to store in RDO
+    acceptAlgs = [] # skimming algs
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
+
+    from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
+    cfg.merge(CutFlowSvcCfg(flags))
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     cfg.merge(ByteStreamReadCfg(flags))
@@ -154,11 +158,16 @@ def fromRunArgs(runArgs):
         itemList.append(f'xAOD::VertexContainer#{flags.Overlay.BkgPrefix}PrimaryVertices')
         itemList.append(f'xAOD::VertexAuxContainer#{flags.Overlay.BkgPrefix}PrimaryVerticesAux.x.y.z')
 
+        from OverlayUtilities.OverlayUtilitiesConfig import OverlayVertexSkimmingAlgCfg
+        cfg.merge(OverlayVertexSkimmingAlgCfg(flags))
+        acceptAlgs.append('OverlayVertexSkimmingAlg')
+
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    cfg.merge(OutputStreamCfg(flags, 'RDO', itemList))
+    cfg.merge(OutputStreamCfg(flags, 'RDO', itemList, AcceptAlgs=acceptAlgs))
 
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    cfg.merge(SetupMetaDataForStreamCfg(flags, 'RDO'))
+    cfg.merge(SetupMetaDataForStreamCfg(flags, 'RDO', AcceptAlgs=acceptAlgs,
+                                        createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)
