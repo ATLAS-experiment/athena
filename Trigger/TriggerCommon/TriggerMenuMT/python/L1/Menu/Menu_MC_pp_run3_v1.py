@@ -46,8 +46,6 @@ def defineMenu():
         # ATR-24037 
         'L1_jXEPerf100',
         # ATR-22696
-        'L1_eTAU40HT',
-        'L1_eTAU60HM',
         'L1_eTAU60HL',
         'L1_eTAU80HL',
 
