@@ -22,10 +22,13 @@ atlas_install_runtime( share/*.txt )
 
 atlas_add_test( AtlasPIDTest
                 SOURCES
-                test/testPIDs.cxx 
+                test/testPIDs.cxx
                 LINK_LIBRARIES TruthUtils
                 ENVIRONMENT "REFERENCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/share/AtlasPIDTest.ref"
                 POST_EXEC_SCRIPT nopost.sh )
 atlas_add_executable( pdgInfo
                 test/pdgInfo.cxx
+                LINK_LIBRARIES TruthUtils )
+atlas_add_executable( listPDGIDs
+                test/listPDGIDs.cxx
                 LINK_LIBRARIES TruthUtils )
