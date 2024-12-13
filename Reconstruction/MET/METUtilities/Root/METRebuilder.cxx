@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // METRebuilder.cxx
@@ -200,10 +200,10 @@ namespace met {
 
     // Create a MissingETContainer with its aux store
     SG::WriteHandle<xAOD::MissingETContainer> OutMET(m_OutMETKey);
-    std::unique_ptr<MissingETContainer> outCont = std::make_unique<xAOD::MissingETContainer>();
-    std::unique_ptr<MissingETAuxContainer> metAuxCont = std::make_unique<xAOD::MissingETAuxContainer>();
+    auto outCont = std::make_unique<xAOD::MissingETContainer>();
+    auto metAuxCont = std::make_unique<xAOD::MissingETAuxContainer>();
     ATH_CHECK( OutMET.record(std::move(outCont),std::move(metAuxCont) ) );
-
+    
     if(m_doEle) {
       if(m_rebuildEle) {
         SG::ReadHandle<xAOD::ElectronContainer> Electrons(m_ElectronContainerKey);
