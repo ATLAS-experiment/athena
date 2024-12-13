@@ -6,8 +6,8 @@
 
 #include <iostream>
 #include <format>
+#include <ranges>
 
-#include "GaudiKernel/MsgStream.h"
 
 namespace Muon {
 
@@ -24,12 +24,12 @@ namespace Muon {
         if (m_hasMM) ATH_CHECK(m_detStore->retrieve(m_mmIdHelper));
        
         /// Find an id helper that is not a nullptr
-        const std::array<const MuonIdHelper*, 6> all_helpers{m_mdtIdHelper, m_rpcIdHelper, m_tgcIdHelper,
-                                                       m_cscIdHelper, m_stgcIdHelper, m_mmIdHelper};
-        std::array<const MuonIdHelper*, 6>::const_iterator itr = std::find_if(all_helpers.begin(),
-                                                                              all_helpers.end(),
-                                                                              [](const MuonIdHelper* h){return h != nullptr;});
-        if (itr == all_helpers.end()){
+        using AllHelperArray = std::array<const MuonIdHelper*, 6>; 
+        const AllHelperArray allHelpers{m_mdtIdHelper, m_rpcIdHelper, m_tgcIdHelper,
+                                         m_cscIdHelper, m_stgcIdHelper, m_mmIdHelper};
+        AllHelperArray::const_iterator itr = std::ranges::find_if(allHelpers,
+                                                          [](const MuonIdHelper* h){return h != nullptr;});
+        if (itr == allHelpers.end()){
             ATH_MSG_WARNING("No MuonIdHelper has been created before. Please do not setup the service if no muon layout is loaded");
             return StatusCode::SUCCESS;
         }                
@@ -166,6 +166,16 @@ namespace Muon {
                 }
             }
         }
+
+        std::ranges::for_each(allHelpers, [this](const MuonIdHelper* idHelper){
+            if (!idHelper) return;
+            const TechIdx techIdx = technologyIndex(*idHelper->module_begin());
+            for (auto itr = idHelper->module_begin(); itr != idHelper->module_end(); ++itr) {
+                const int stIdx = static_cast<int>(MuonStationIndex::toStationIndex(chamberIndex(*itr)));
+                m_techPerStation[stIdx].insert(techIdx);
+            }
+        }); 
+
         ATH_MSG_DEBUG("Configured the service with the following flags --- hasMDT: "<< hasMDT()<<" hasRPC: "<<hasRPC()
                       <<" hasTGC"<< hasTGC() << " hasCSC: "<< hasCSC() << " hasSTGC: " << hasSTGC() << " hasMM: " << hasMM() );
         return StatusCode::SUCCESS;
@@ -215,6 +225,11 @@ namespace Muon {
         return m_stgcIdHelper && m_stgcIdHelper->is_stgc(id);
     }
 
+    const std::set<MuonStationIndex::TechnologyIndex>& 
+        MuonIdHelperSvc::technologiesInStation(MuonStationIndex::StIndex stIndex) const {
+        assert(static_cast<unsigned>(stIndex) < m_techPerStation.size());
+        return m_techPerStation[static_cast<unsigned>(stIndex)];
+    }
     bool MuonIdHelperSvc::issMdt(const Identifier& id) const {
         if (!isMdt(id))
             return false;

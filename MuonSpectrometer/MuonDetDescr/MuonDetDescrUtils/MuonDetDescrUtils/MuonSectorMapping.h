@@ -30,6 +30,10 @@ namespace Muon {
 
         /** returns the centeral phi position of a sector in radians */
         double sectorPhi(int sector) const;
+        /*** Returns whether the sector is a small sector */
+        static bool isSmall(int sector) {
+            return sector % 2 == 0;
+        }
 
         /** transforms a phi position from and to the sector coordinate system in radians */
         double transformPhiToSector(double phi, int sector, bool toSector = true) const;
