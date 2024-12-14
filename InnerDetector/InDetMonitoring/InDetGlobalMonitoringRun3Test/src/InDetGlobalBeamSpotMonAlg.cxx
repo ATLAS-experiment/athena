@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -213,7 +213,7 @@ StatusCode InDetGlobalBeamSpotMonAlg::fillHistograms( const EventContext& ctx ) 
     int nPriVtx = 0;
     int nPileupVtx = 0;
     
-    for(const auto & vtx : *vertexContainer) {
+    for(const auto vtx : *vertexContainer) {
       
       if ( !vtx ) continue;
       

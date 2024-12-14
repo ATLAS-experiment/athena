@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -86,7 +86,7 @@ StatusCode IDAlignMonPVBiasesAlg::fillHistograms( const EventContext& ctx ) cons
   /******************************************************************
   ** Trackparticle Loop
   *******************************************************************/
-  for (const auto& trackPart: *trackParticles) {
+  for (const auto trackPart: *trackParticles) {
     if ( !trackPart )
       {
 	ATH_MSG_DEBUG( "InDetAlignPVBiasesAlg: NULL track pointer in collection" );
