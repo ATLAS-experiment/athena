@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -13,6 +13,8 @@
 
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
+#include "AsgDataHandles/ReadDecorHandleKey.h"
 
 // Local include(s):
 #include "AsgAnalysisInterfaces/IGoodRunsListSelectionTool.h"
@@ -92,15 +94,21 @@ protected:
    StatusCode readXMLs( Root::TGRLCollection& grl,
                         const std::vector< std::string >& files );
 
-   std::vector< std::string > m_goodrunslistVec;
-   std::vector< std::string > m_blackrunslistVec;
+   Gaudi::Property<std::vector<std::string>> m_goodrunslistVec{this, "GoodRunsListVec", {}};
+   Gaudi::Property<std::vector<std::string>> m_blackrunslistVec{this, "BlackRunsListVec", {}};
 
    Root::TGRLCollection m_grlcollection;
    Root::TGRLCollection m_brlcollection;
 
-   int  m_boolop;
-   bool m_passthrough;
-   bool m_rejectanybrl;
+   Gaudi::Property<int> m_boolop{this, "BoolOperation", 0};
+   Gaudi::Property<bool> m_passthrough{this, "PassThrough", true};
+   Gaudi::Property<bool> m_rejectanybrl{this, "RejectBlackRunsInEventSelector", false};
+   Gaudi::Property<bool> m_useRandomRunNumber{this, "UseRandomRunNumber", false};
+
+   SG::ReadDecorHandleKey<xAOD::EventInfo> m_randomRunNumberKey
+     {this, "RandomRunNumber", "EventInfo.RandomRunNumber"};
+   SG::ReadDecorHandleKey<xAOD::EventInfo> m_randomLumiBlockKey
+     {this, "RandomLumiBlock", "EventInfo.RandomLumiBlockNumber"};
 
 }; // class GoodRunsListSelectionTool
 

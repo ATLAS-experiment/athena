@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
 
 // Framework include(s):
 #include "PathResolver/PathResolver.h"
+#include <AsgDataHandles/ReadDecorHandle.h>
 
 // Local include(s):
 #include "GoodRunsLists/GoodRunsListSelectionTool.h"
@@ -13,15 +14,7 @@
 #include "GoodRunsLists/TMsgLogger.h"
 
 GoodRunsListSelectionTool::GoodRunsListSelectionTool( const std::string& name ) 
-   : asg::AsgTool( name ) {
-
-   declareProperty( "GoodRunsListVec", m_goodrunslistVec );
-   declareProperty( "BlackRunsListVec", m_blackrunslistVec );
-
-   declareProperty( "BoolOperation", m_boolop = 0 );
-   declareProperty( "PassThrough", m_passthrough = true );
-   declareProperty( "RejectBlackRunsInEventSelector", m_rejectanybrl = false );
-}
+   : asg::AsgTool( name ) {}
 
 StatusCode GoodRunsListSelectionTool::initialize() {
 
@@ -46,6 +39,9 @@ StatusCode GoodRunsListSelectionTool::initialize() {
    // Read in the XML files:
    ATH_CHECK( readXMLs( m_grlcollection, m_goodrunslistVec ) );
    ATH_CHECK( readXMLs( m_brlcollection, m_blackrunslistVec ) );
+
+   ATH_CHECK(m_randomRunNumberKey.initialize(m_useRandomRunNumber));
+   ATH_CHECK(m_randomLumiBlockKey.initialize(m_useRandomRunNumber));
 
    // Return gracefully:
    return StatusCode::SUCCESS;
@@ -78,8 +74,16 @@ passRunLB( const xAOD::EventInfo& event,
            const std::vector< std::string >& grlnameVec,
            const std::vector< std::string >& brlnameVec ) const {
 
-   return passRunLB( event.runNumber(), event.lumiBlock(),
-                     grlnameVec, brlnameVec );
+   int runNumber = event.runNumber();
+   int lumiBlock = event.lumiBlock();
+   if(m_useRandomRunNumber){
+     SG::ReadDecorHandle<xAOD::EventInfo, unsigned int> randomRunNumber(m_randomRunNumberKey);
+     SG::ReadDecorHandle<xAOD::EventInfo, unsigned int> randomLumiBlock(m_randomLumiBlockKey);
+     runNumber = randomRunNumber(event);
+     lumiBlock = randomLumiBlock(event);
+   }
+
+   return passRunLB( runNumber, lumiBlock, grlnameVec, brlnameVec );
 }
 
 
@@ -178,7 +182,7 @@ GoodRunsListSelectionTool::readXMLs( Root::TGRLCollection& grl,
 
    // Merge the GRLs into one:
    const Root::BoolOperation op =
-         static_cast< Root::BoolOperation >( m_boolop );
+     static_cast< Root::BoolOperation >( m_boolop.value() );
    grl = reader.GetMergedGRLCollection( op );
 
    // Return gracefully:

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -33,6 +33,8 @@ class EventCleaningBlock (ConfigBlock):
         self.addOption ('GRLDict', {}, type=None)
         self.addOption ('noFilter', False, type=bool,
             info="do apply event decoration, but do not filter. The default is False, i.e. 'We decorate events but do not filter' ")
+        self.addOption ('useRandomRunNumber', False, type=bool,
+            info="use RandomRunNumber to compute GRL info. Only supported for MC. The default is False")
 
         if self.runGRL and self.userGRLFiles:
             raise ValueError("No userGRLFiles should be specified if runGRL=False")
@@ -60,13 +62,17 @@ class EventCleaningBlock (ConfigBlock):
     def makeAlgs (self, config) :
         
         # Apply GRL
-        if self.runGRL and config.dataType() is DataType.Data:
+        if self.runGRL and (config.dataType() is DataType.Data or self.useRandomRunNumber):
+            if config.dataType() is DataType.Data and self.useRandomRunNumber:
+                raise ValueError ("UseRandomRunNumber is only supported for MC!")
+
             if self.noFilter:
                 # here we only decorate the PHYSLITE events with a boolean and don't do any cleaning
                 # Set up the GRL Decoration
                 for GRLDecoratorName,GRLFile in (self.GRLDict).items():
                     alg = config.createAlgorithm( 'GRLSelectorAlg', GRLDecoratorName )
                     config.addPrivateTool( 'Tool', 'GoodRunsListSelectionTool' )
+                    alg.Tool.UseRandomRunNumber = self.useRandomRunNumber
                     alg.Tool.GoodRunsListVec = GRLFile
                     alg.noFilter = True
                     alg.grlKey = "EventInfo." + GRLDecoratorName
@@ -75,6 +81,7 @@ class EventCleaningBlock (ConfigBlock):
                 # Set up the GRL selection:
                 alg = config.createAlgorithm( 'GRLSelectorAlg', 'GRLSelectorAlg' )
                 config.addPrivateTool( 'Tool', 'GoodRunsListSelectionTool' )
+                alg.Tool.UseRandomRunNumber = self.useRandomRunNumber
                 if self.userGRLFiles:
                     alg.Tool.GoodRunsListVec = self.userGRLFiles
                 else:
