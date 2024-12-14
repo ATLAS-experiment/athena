@@ -31,24 +31,24 @@ def EventSelectorAthenaPoolCfg(flags):
             assert DataRunNumber >= 0, (
                 "flags.Input.OverrideRunNumber was True, but provided DataRunNumber (%d) is negative. "
                 "Use a real run number from data." % DataRunNumber)
-            evSel.OverrideRunNumber = flags.Input.OverrideRunNumber
+            evSel.OverrideRunNumber = True
             evSel.RunNumber = DataRunNumber
             evSel.FirstLB = FirstLB
             evSel.InitialTimeStamp = InitialTimeStamp # Necessary to avoid a crash
             if hasattr(evSel, "OverrideRunNumberFromInput"):
-                evSel.OverrideRunNumberFromInput = flags.Input.OverrideRunNumber
+                evSel.OverrideRunNumberFromInput = True
             if OldRunNumber > 0:
                 evSel.OldRunNumber = OldRunNumber
         elif flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.FastChain]:
             # Behaviour for Simulation and FastChain jobs using RunAndLumiOverrideList
             from AthenaKernel.EventIdOverrideConfig import getMinMaxRunNumbers, getFirstLumiBlock
             minMax = getMinMaxRunNumbers(flags)
-            evSel.OverrideRunNumber = flags.Input.OverrideRunNumber
+            evSel.OverrideRunNumber = True
             evSel.RunNumber = minMax[0]
             evSel.FirstLB = getFirstLumiBlock(flags, minMax[0])
             evSel.InitialTimeStamp = flags.IOVDb.RunToTimestampDict.get(minMax[0], 1) # TODO fix repeated configuration
             if hasattr(evSel, "OverrideRunNumberFromInput"):
-                evSel.OverrideRunNumberFromInput = flags.Input.OverrideRunNumber
+                evSel.OverrideRunNumberFromInput = True
         else:
             # Behaviour for Digitization jobs using RunAndLumiOverrideList
             pass

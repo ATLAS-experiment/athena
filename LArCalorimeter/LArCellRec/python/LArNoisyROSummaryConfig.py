@@ -18,8 +18,8 @@ def LArNoisyROSummaryCfg(configFlags, **kwargs):
 
    # now configure the algorithm
    LArNoisyROAlg,LArNoisyROTool=CompFactory.getComps("LArNoisyROAlg","LArNoisyROTool")
-   if configFlags.Common.ProductionStep is ProductionStep.PileUpPretracking:
-        kwargs.setdefault('EventInfoKey', "Bkg_EventInfo") 
+   if configFlags.Common.ProductionStep in [ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:
+        kwargs.setdefault('EventInfoKey', f"{configFlags.Overlay.BkgPrefix}EventInfo") 
 
    theLArNoisyROTool=LArNoisyROTool(CellQualityCut=configFlags.LAr.NoisyRO.CellQuality,
                                     BadChanPerFEB=configFlags.LAr.NoisyRO.BadChanPerFEB, 

@@ -92,7 +92,6 @@ class TruthStrategy(FlagEnum):
 
 class VertexSource(FlagEnum):
     CondDB = 'CondDB'
-    VertexOverrideFile = 'VertexOverrideFile'
-    VertexOverrideEventFile = 'VertexOverrideEventFile'
+    MatchingBkg = 'MatchingBkg' # take from background input file
     LongBeamspotVertexPositioner = 'LongBeamspotVertexPositioner'
     AsGenerated = 'AsGenerated' # I.e. no shift

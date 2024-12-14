@@ -55,8 +55,8 @@ def defineMenu():
         'L1_eTAU20L', 'L1_eTAU20M', 
         'L1_eTAU30', 'L1_cTAU30M', 
         'L1_eTAU35', 'L1_cTAU35M', 
-        'L1_eTAU40HM',
-        'L1_eTAU60', 'L1_eTAU60_EMPTY', 'L1_eTAU60_UNPAIRED_ISO',
+        'L1_eTAU40HM', 'L1_eTAU40HT', 
+        'L1_eTAU60', 'L1_eTAU60HM', 'L1_eTAU60_EMPTY', 'L1_eTAU60_UNPAIRED_ISO',
         'L1_eTAU80', 'L1_eTAU140',
 
 
@@ -257,10 +257,12 @@ def defineMenu():
         'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20', 'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', 
         'L1_eTAU80_2cTAU30M_DR-eTAU30eTAU20', 
         'L1_cTAU20M_DR-eTAU20eTAU12-jJ40', 
-        #ATR-26902
+        # ATR-26902
         'L1_4jJ30p0ETA24_0DETA24-eTAU30eTAU12',
         'L1_cTAU20M_cTAU12M_4jJ30p0ETA24_0DETA24-eTAU30eTAU12',
         'L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU12',
+        # ATR-30638 (g-2 tau measurement)
+        'L1_DPHI-2eTAU60',
         
         'L1_DY-BOX-2MU5VF', 'L1_DY-BOX-MU5VFMU3V', 'L1_DY-BOX-2MU3VF',
 

@@ -1,7 +1,6 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from enum import Enum
-from collections import OrderedDict as odict
 
 from AthenaCommon.Logging import logging
 
@@ -51,10 +50,9 @@ class CFormat(Enum):
 
 
 
-class MenuConnectorsCollection(object):
-
+class MenuConnectorsCollection:
     def __init__(self):
-        self.connectors = odict()
+        self.connectors = {}
 
     def __iter__(self):
         return iter(self.connectors.values())
@@ -81,7 +79,7 @@ class MenuConnectorsCollection(object):
         self.connectors[name] = newConnector
 
     def json(self):
-        confObj = odict()
+        confObj = {}
         for conn in self.connectors.values():
             confObj[conn.name] = conn.json()
         return confObj
@@ -89,8 +87,8 @@ class MenuConnectorsCollection(object):
 
 
 
-class Connector(object):
-    __slots__ = [ 'name', 'cformat', 'ctype', 'legacy', 'boardName', 'triggerLines']
+class Connector:
+    __slots__ = ['name', 'cformat', 'ctype', 'legacy', 'boardName', 'triggerLines', 'emptyTriggerLines']
     def __init__(self, connDef):
         """
         @param name name of the connector
@@ -104,9 +102,13 @@ class Connector(object):
         self.legacy  = bool(legacy)
         self.boardName = boardName
         self.triggerLines = []
+        self.emptyTriggerLines = [] # Empty placeholders in the output fibers/cables, to ensure correst alignment of the triggerLines bits
 
     def addTriggerLine(self, tl):
-        self.triggerLines.append( tl )
+        self.triggerLines.append(tl)
+
+    def addEmptyTriggerLine(self, tl):
+        self.emptyTriggerLines.append(tl)
 
     def isLegacy(self):
         return self.legacy
@@ -115,7 +117,7 @@ class Connector(object):
         return [x.name for x in self.triggerLines]
 
     def json(self):
-        confObj = odict()
+        confObj = {}
         confObj["type"] = str(self.ctype)
         if self.legacy:
             confObj["legacy"] = self.legacy
@@ -124,7 +126,7 @@ class Connector(object):
 
 
 class CtpinConnector(Connector):
-    __slots__ = [ 'name', 'legacy', 'triggerLines']
+    __slots__ = ['name', 'legacy', 'triggerLines', 'emptyTriggerLines']
     def __init__(self, name, legacy, connDef):
         """
         @param name name of the connector
@@ -137,17 +139,18 @@ class CtpinConnector(Connector):
         for thrName in connDef["thresholds"]:
             nbits = connDef["nbitsDefault"]
             if type(thrName)==tuple:
-                (thrName,nbits) = thrName
+                (thrName, nbits) = thrName
+
             if thrName is None:
-                startbit += nbits
-                continue
-            tl = TriggerLine( name = thrName, startbit = startbit, flatindex = startbit, nbits = nbits)
+                self.addEmptyTriggerLine(EmptyTriggerLine(startbit, nbits))
+            else:
+                self.addTriggerLine(TriggerLine(name=thrName, startbit=startbit, flatindex=startbit, nbits=nbits))
+
             startbit += nbits
-            self.addTriggerLine(tl)
 
 
 class OpticalConnector(Connector):
-    __slots__ = [ 'name', 'cformat', 'ctype', 'legacy', 'triggerLines']
+    __slots__ = ['name', 'cformat', 'ctype', 'legacy', 'triggerLines', 'emptyTriggerLines']
     def __init__(self, name, cformat, ctype, legacy, connDef):
         """
         @param name name of the connector
@@ -163,13 +166,15 @@ class OpticalConnector(Connector):
             for thrName in connDef["thresholds"]:
                 nbits = connDef["nbitsDefault"]
                 if type(thrName)==tuple:
-                    (thrName,nbits) = thrName
+                    (thrName, nbits) = thrName
+
                 if thrName is None:
-                    startbit += nbits
-                    continue
-                tl = TriggerLine( name = thrName, startbit = startbit, flatindex = startbit, nbits = nbits)
+                    self.addEmptyTriggerLine(EmptyTriggerLine(startbit, nbits))
+                else:
+                    self.addTriggerLine(TriggerLine(name=thrName, startbit=startbit, flatindex=startbit, nbits=nbits))
+
                 startbit += nbits
-                self.addTriggerLine(tl)
+
         else:
             raise RuntimeError("Property 'format' of connector %s is '%s' but must be either 'multiplicity' or 'topological', however 'topological' is not yet implemented" % (name,connDef["format"]))
 
@@ -226,11 +231,11 @@ class ElectricalConnector(Connector):
         return [x.name for x in thr]
 
     def json(self):
-        confObj = odict()
+        confObj = {}
         confObj["type"] = str(self.ctype)
         if self.legacy:
             confObj["legacy"] = self.legacy
-        confObj["triggerlines"] = odict()
+        confObj["triggerlines"] = {}
         if self.cformat == CFormat.TOPO:
             _triggerLines = []
             for fpga in [0,1]:
@@ -245,8 +250,7 @@ class ElectricalConnector(Connector):
         return confObj
 
 
-class TriggerLine(object):
-
+class TriggerLine:
     def __init__(self, name, startbit, nbits, flatindex=None, fpga=None, clock=None):
         self.name      = name    
         self.startbit  = startbit
@@ -256,7 +260,7 @@ class TriggerLine(object):
         self.clock     = clock 
          
     def json(self):
-        confObj = odict()
+        confObj = {}
         confObj["name"]     = self.name
         confObj["startbit"] = self.startbit
         if self.flatindex is not None: 
@@ -268,5 +272,17 @@ class TriggerLine(object):
            confObj["clock"] = self.clock
         return confObj
 
+    @property
+    def endbit(self) -> int:
+        return self.startbit + self.nbits - 1
 
 
+
+class EmptyTriggerLine:
+    def __init__(self, startbit: int, nbits: int):
+        self.startbit  = startbit
+        self.nbits     = nbits
+
+    @property
+    def endbit(self) -> int:
+        return self.startbit + self.nbits - 1
