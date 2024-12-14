@@ -59,7 +59,7 @@ TEST(ap_fixedTester, stablity) {
 
   while (cval <= max_val) {
     
-    auto ap_gs0 = GlobalSim::ap_fixed<10, 5>(cval);
+    auto ap_gs0 = GlobalSim::ap_fixed<10, 5, GlobalSim::Round>(cval);
     double d0 = static_cast<double>(ap_gs0);
     auto ap_gs1 = GlobalSim::ap_fixed<10, 5>(d0);
     double d1 = static_cast<double>(ap_gs1);
@@ -78,7 +78,7 @@ TEST(ap_fixedTester, stablity) {
 TEST(ap_fixedTester, specialValue) {
 
   //Xylinx ap_fixed gets this wrong
-  auto apf =  GlobalSim::ap_fixed<10, 5>(-0.327374935);
+  auto apf =  GlobalSim::ap_fixed<10, 5, GlobalSim::Round>(-0.327374935);
   EXPECT_EQ (-0.3125, static_cast<double>(apf));
   std::stringstream ss;
   ss << std::hex << apf.m_value;
@@ -92,7 +92,7 @@ TEST(ap_fixedTester, overflow_h) {
   constexpr int prec{5};
 
   /// EXPECT does not take templates, provide a new typename
-  using ap = typename GlobalSim::ap_fixed<width, prec>; 
+  using ap = typename GlobalSim::ap_fixed<width, prec, GlobalSim::Round>; 
   // out of range by 0.5*prec
   double outOfRange = max<width, prec>() + pow(2, -prec-1);
 
@@ -105,7 +105,7 @@ TEST(ap_fixedTester, overflow_l) {
 
   // out of range by 0.5*prec
   double outOfRange = min<width, prec>() - pow(2, -prec-1);
-  using ap = GlobalSim::ap_fixed<width, prec>;
+  using ap = GlobalSim::ap_fixed<width, prec, GlobalSim::Round>;
 
   EXPECT_THROW ((ap(outOfRange)), std::out_of_range);
 }
@@ -116,7 +116,7 @@ TEST(ap_fixedTester, addition) {
   constexpr int width{10};
   constexpr int prec{5};
   const double eps {std::pow(2.0, -prec)};
-  using ap = GlobalSim::ap_fixed<width, prec>;
+  using ap = GlobalSim::ap_fixed<width, prec, GlobalSim::Round>;
 
   ap ap_sum = ap(1) + ap(2);
   auto val = static_cast<double>(ap_sum);
@@ -138,7 +138,7 @@ TEST(ap_fixedTester, addition1) {
   constexpr int width{10};
   constexpr int prec{5};
   const double eps {std::pow(2.0, -prec)};
-  using ap = GlobalSim::ap_fixed<width, prec>;
+  using ap = GlobalSim::ap_fixed<width, prec, GlobalSim::Round>;
 
   ap ap_sum = ap(2) += 1;
   auto val = static_cast<double>(ap_sum);
@@ -161,7 +161,7 @@ TEST(ap_fixedTester, subtraction) {
   constexpr int width{10};
   constexpr int prec{5};
   const double eps {std::pow(2.0, -prec)};
-  using ap = GlobalSim::ap_fixed<width, prec>;
+  using ap = GlobalSim::ap_fixed<width, prec, GlobalSim::Round>;
 
   ap ap_diff = ap(1) - ap(2);
   auto val = static_cast<double>(ap_diff);
@@ -183,7 +183,7 @@ TEST(ap_fixedTester, subtraction1) {
   constexpr int width{10};
   constexpr int prec{5};
   const double eps {std::pow(2.0, -prec)};
-  using ap = GlobalSim::ap_fixed<width, prec>;
+  using ap = GlobalSim::ap_fixed<width, prec, GlobalSim::Round>;
 
   ap ap_diff = ap(1) -= 2;
   auto val = static_cast<double>(ap_diff);
@@ -207,7 +207,7 @@ TEST(ap_fixedTester, multiplication) {
   constexpr int width{10};
   constexpr int prec{5};
   const double eps {std::pow(2.0, -prec)};
-  using ap = GlobalSim::ap_fixed<width, prec>;
+  using ap = GlobalSim::ap_fixed<width, prec, GlobalSim::Round>;
 
   ap ap_prod = ap(1) * ap(2);
   auto val = static_cast<double>(ap_prod);
@@ -228,7 +228,7 @@ TEST(ap_fixedTester, multiplication1) {
   constexpr int width{10};
   constexpr int prec{5};
   const double eps {std::pow(2.0, -prec)};
-  using ap = GlobalSim::ap_fixed<width, prec>;
+  using ap = GlobalSim::ap_fixed<width, prec, GlobalSim::Round>;
 
   ap ap_prod = ap(1) *= ap(2);
   auto val = static_cast<double>(ap_prod);
@@ -251,7 +251,7 @@ TEST(ap_fixedTester, division) {
   constexpr int width{10};
   constexpr int prec{5};
   const double eps {std::pow(2.0, -prec)};
-  using ap = GlobalSim::ap_fixed<width, prec>;
+  using ap = GlobalSim::ap_fixed<width, prec, GlobalSim::Round>;
 
   ap ap_div = ap(1)/ap(2);
   auto val = static_cast<double>(ap_div);
@@ -274,7 +274,7 @@ TEST(ap_fixedTester, division1) {
   constexpr int width{10};
   constexpr int prec{5};
   const double eps {std::pow(2.0, -prec)};
-  using ap = GlobalSim::ap_fixed<width, prec>;
+  using ap = GlobalSim::ap_fixed<width, prec, GlobalSim::Round>;
 
   ap ap_div = ap(1)/=ap(2);
   auto val = static_cast<double>(ap_div);
@@ -297,7 +297,7 @@ TEST(ap_fixedTester, negation) {
   constexpr int width{10};
   constexpr int prec{5};
 
-  using ap = GlobalSim::ap_fixed<width, prec>;
+  using ap = GlobalSim::ap_fixed<width, prec, GlobalSim::Round>;
 
   auto ap_p = ap(1);
   auto ap_n = -ap_p;
@@ -316,7 +316,7 @@ TEST(ap_fixedTester, doubleMult) {
   constexpr int width{10};
   constexpr int prec{5};
 
-  using ap = GlobalSim::ap_fixed<width, prec>;
+  using ap = GlobalSim::ap_fixed<width, prec, GlobalSim::Round>;
   ap ap_mul = 9.99 * ap(1);
 
   EXPECT_EQ (10, static_cast<double>(ap_mul));
