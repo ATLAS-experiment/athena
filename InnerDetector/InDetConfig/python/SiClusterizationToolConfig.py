@@ -377,6 +377,9 @@ def SCT_ClusteringToolCfg(
 
     kwargs.setdefault("SCTDetElStatus",
                       "SCTDetectorElementStatusWithoutFlagged")
+    # Simplification introduced in r25
+    kwargs.setdefault("doSimplePositionWidthCalculation",
+                      flags.InDet.doSCTSimpleWidth)
 
     if "conditionsTool" not in kwargs:
         from SCT_ConditionsTools.SCT_ConditionsToolsConfig import (
@@ -402,19 +405,22 @@ def SCT_ClusteringToolCfg(
     return acc
 
 
-def Trig_SCT_ClusteringToolCfg(flags, name="Trig_SCT_ClusteringTool"):
+def Trig_SCT_ClusteringToolCfg(flags, name="Trig_SCT_ClusteringTool", **kwargs):
     acc = ComponentAccumulator()
 
-    from SCT_ConditionsTools.SCT_ConditionsToolsConfig import (
-        SCT_ConditionsSummaryToolCfg)
-    conditionsTool = acc.popToolsAndMerge(SCT_ConditionsSummaryToolCfg(
-        flags, withFlaggedCondTool=False, withTdaqTool=False))
+    if "conditionsTool" not in kwargs:
+        from SCT_ConditionsTools.SCT_ConditionsToolsConfig import (
+            SCT_ConditionsSummaryToolCfg)
+        kwargs.setdefault("conditionsTool", acc.popToolsAndMerge(
+            SCT_ConditionsSummaryToolCfg(flags, withFlaggedCondTool=False, withTdaqTool=False)))
 
-    acc.setPrivateTools(acc.popToolsAndMerge(SCT_ClusteringToolCfg(
-        flags, name,
-        conditionsTool=conditionsTool,
-        SCTDetElStatus=""
-    )))
+    kwargs.setdefault("SCTDetElStatus", "")
+        
+    # Keep r24 config for now
+    kwargs.setdefault("doSimplePositionWidthCalculation", False)
+    
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        SCT_ClusteringToolCfg(flags, name, **kwargs)))
     return acc
 
 
@@ -426,7 +432,7 @@ def ITKStrip_SCT_ClusteringToolCfg(
     acc = ITkStripReadoutGeometryCfg(flags)
 
     kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
-    kwargs.setdefault("useRowInformation", True)  # ITk-specific clustering
+    kwargs.setdefault("doSimplePositionWidthCalculation", True)
 
     if "conditionsTool" not in kwargs:
         from SCT_ConditionsTools.ITkStripConditionsToolsConfig import (
