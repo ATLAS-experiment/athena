@@ -20,6 +20,11 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // due to statics used for debugging
 
 
 namespace GlobalSim {
+
+   
+  struct Round{};
+  struct Trunc{};
+  struct XilDef{};
   
   template<std::size_t width, typename T>
   constexpr T max_to_overflow() {
@@ -36,6 +41,7 @@ namespace GlobalSim {
 
   template <std::size_t width,
 	    std::size_t dp,
+	    typename S=XilDef,
 	    typename T=int16_t,
 	    typename WS=int32_t>
   struct ap_fixed  {
@@ -49,17 +55,23 @@ namespace GlobalSim {
     
     bool m_ovflw{false};
     friend std::ostream& operator<<(std::ostream& os,
-				    const ap_fixed<width, dp, T, WS> ap) {
+				    const ap_fixed<width, dp, S,  T, WS> ap) {
       os << ap.m_value << ' ' << double(ap);
       return os;
     }
 
     ap_fixed() = default;
 
-    ap_fixed(const double d) {
+    ap_fixed(const double d) requires(std::is_same_v<S, Round>)  {
       m_value = T(d * double (1<< dp) + (d >= 0 ? 0.5 : -0.5));
       test_overflow();
     }
+
+    ap_fixed(const double d) requires(std::is_same_v<S, XilDef>){
+      m_value = T(d * double (1<< dp) + (d >= 0 ? 0. : -1.0));
+      test_overflow();
+    }
+   
       
     operator double() const{
       return double(this->m_value) / double(1 << dp);
