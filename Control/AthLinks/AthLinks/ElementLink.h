@@ -18,9 +18,11 @@
 
 #include "AthLinks/tools/ElementLinkTraits.h"
 #include "AthLinks/DataLink.h"
-#include "AthenaKernel/IProxyDict.h"
-#include "GaudiKernel/EventContext.h"
 #include <utility>
+
+
+class IProxyDict;
+class EventContext;
 
 
 /**

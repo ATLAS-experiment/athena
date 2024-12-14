@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/test/DataLink_test.cxx
@@ -12,6 +12,7 @@
 #include "AthLinks/DataLink.h"
 #include "SGTools/CurrentEventStore.h"
 #include "AthenaKernel/StorableConversions.h"
+#include "AthenaKernel/ExtendedEventContext.h"
 #include "SGTools/DataProxy.h"
 #include "SGTools/TransientAddress.h"
 #include "AthenaKernel/ClassID_traits.h"

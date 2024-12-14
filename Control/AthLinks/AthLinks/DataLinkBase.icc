@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/DataLinkBase.icc
@@ -8,7 +8,7 @@
  * @brief Type-independent part of @c DataLink; holds the persistent state.
  */
 
-#include "AthenaKernel/ExtendedEventContext.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 
 /**
  * @brief Test to see if we're in the default state.
@@ -112,7 +112,7 @@ bool DataLinkBase::toTransient (IProxyDict* sg /*= 0*/)
 inline
 bool DataLinkBase::toTransient (const EventContext& ctx)
 {
-  m_proxy.toTransient (m_persKey, Atlas::getExtendedEventContext(ctx).proxy());
+  m_proxy.toTransient (m_persKey, Atlas::proxyDictFromEventContext(ctx));
   return true;
 }
 
@@ -156,7 +156,7 @@ bool DataLinkBase::toTransient (const ID_type& dataID,
                                 const EventContext& ctx)
 {
   if (!isDefault()) SG::throwExcBadToTransient();
-  m_persKey = m_proxy.toTransient (dataID, link_clid, Atlas::getExtendedEventContext(ctx).proxy());
+  m_persKey = m_proxy.toTransient (dataID, link_clid, Atlas::proxyDictFromEventContext(ctx));
   return true;
 }
 
