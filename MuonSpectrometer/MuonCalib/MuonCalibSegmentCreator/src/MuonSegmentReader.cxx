@@ -309,6 +309,7 @@ void MuonSegmentReader::storeMeasurement(const EventContext& ctx, const MuonGM::
       const MuonGM::MdtReadoutElement* detEl = MuonDetMgr->getMdtReadoutElement(id);
       if( !detEl ) {
         ATH_MSG_WARNING( "getGlobalToStation failed to retrieve detEL byebye"  );
+        return;
       }
 
       // get the 2nd coordinator from the track hit measurement
@@ -342,7 +343,7 @@ void MuonSegmentReader::storeMeasurement(const EventContext& ctx, const MuonGM::
       // residual calculator  
       float residualBiased = -999.;
       float pullBiased = -999.;
-      if( trackPars ) {
+      {
         std::optional<Trk::ResidualPull> resPullBiased = m_pullCalculator->residualPull(measurement, trackPars, Trk::ResidualPull::Biased );
         if(resPullBiased.has_value()){
           residualBiased = resPullBiased.value().residual().front();
