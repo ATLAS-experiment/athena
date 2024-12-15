@@ -108,8 +108,6 @@ def LArSuperCellMonConfig(flags, **kwargs):
 
 def LArSuperCellMonConfigCore(helper, algclass, flags, isCosmics=False, isMC=False, algname='LArSuperCellMonAlg', RemoveMasked=True):
 
-    # For SC binning
-    from LArMonitoring.GlobalVariables import lArDQGlobals
 
 
     LArSuperCellMonAlg = helper.addAlgorithm(algclass, algname)
@@ -122,6 +120,7 @@ def LArSuperCellMonConfigCore(helper, algclass, flags, isCosmics=False, isMC=Fal
     LArSuperCellMonAlg.CaloCellContainer = 'EmulatedSuperCells'
     LArSuperCellMonAlg.CaloCellContainerRef = flags.Trigger.L1.L1CaloSuperCellContainerName
     LArSuperCellMonAlg.RemoveMasked = RemoveMasked
+    LArSuperCellMonAlg.doDatabaseNoiseVsEtaPhi=True
     
 
     do2DOcc = True #TMP
@@ -136,10 +135,67 @@ def LArSuperCellMonConfigCore(helper, algclass, flags, isCosmics=False, isMC=Fal
         '/LAr/LArSuperCellMon_NoTrigSel/'
 
     )
+    cellMonGroup=defineHistograms(cellMonGroup,LArSuperCellMonAlg.LayerNames,isHLT=False)
+    return LArSuperCellMonAlg
+
+def LArSuperCellMonConfigHLT(flags, name='LArSuperCellMonAlgHLT', RemoveMasked=True):
+
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    cfg=ComponentAccumulator()
+    if flags.Common.isOnline:
+       cfg.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg('CaloSuperCellAlignCondAlg'))
 
 
+    from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
+    cfg.merge(CaloNoiseCondAlgCfg(flags))
+    cfg.merge(CaloNoiseCondAlgCfg(flags,noisetype="electronicNoise"))
+
+    from TrigT1CaloFexPerf.EmulationConfig import emulateSC_Cfg
+    cfg.merge(emulateSC_Cfg(flags,CellsOut="EmulatedSCells"))
+
+    from LArCellRec.LArRAWtoSuperCellConfig import LArRAWtoSuperCellCfg
+
+    # Reco SC:
+    #get SC onl-offl mapping from DB
+    from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
+    cfg.merge(LArOnOffIdMappingSCCfg(flags))
+
+    SCellsToCheck="SCellFromBS"
+    if flags.Common.isOnline:
+      mask=True
+      cfg.merge(LArRAWtoSuperCellCfg(flags,name="LArRAWtoSuperCellFromBS",SCellContainerOut=SCellsToCheck,mask=mask) )
+    else:
+      SCellsToCheck="SCell"
+
+    algname='LArSuperCellMonAlg'
+    lArCellMonAlg=CompFactory.LArSuperCellMonAlg(algname,CaloCellContainerReco="",CaloCellContainerRef="EmulatedSCells",doSCReco=False,CaloCellContainer=SCellsToCheck,TrigDecisionTool="",EnableLumi = False, RemoveMasked = RemoveMasked)
+
+    if flags.Input.isMC is False and not flags.Common.isOnline:
+       from LumiBlockComps.LuminosityCondAlgConfig import  LuminosityCondAlgCfg
+       cfg.merge(LuminosityCondAlgCfg(flags))
+       from LumiBlockComps.LBDurationCondAlgConfig import  LBDurationCondAlgCfg
+       cfg.merge(LBDurationCondAlgCfg(flags))
+
+
+    monTool = GenericMonitoringTool(flags, 'LArSuperCellMonTool')
+    lArCellMonAlg.GMTools = [monTool]
+    lArCellMonAlg.MonGroupName='LArSuperCellMonTool'
+    lArCellMonAlg.BunchCrossingCondDataKey=""
+
+    lArCellMonAlg.doDatabaseNoiseVsEtaPhi = True
+    monTool=defineHistograms(monTool,lArCellMonAlg.LayerNames,isHLT=True)
+    cfg.addEventAlgo(lArCellMonAlg)
+    return cfg
+
+def defineHistograms(cellMonGroup,LayerNames,isHLT=False):
+
+
+    from LArMonitoring.GlobalVariables import lArDQGlobals
     #--define histograms
     sc_hist_path='SC/'
+    if isHLT: sc_hist_path='EXPERT'
 
 
     cellMonGroup.defineHistogram('superCellEt;h_SuperCellEt',
@@ -227,7 +283,8 @@ def LArSuperCellMonConfigCore(helper, algclass, flags, isCosmics=False, isMC=Fal
 
 
     sc_hist_path='SC_Layer/'
-    for part in LArSuperCellMonAlg.LayerNames:
+    if isHLT: sc_hist_path='EXPERT'
+    for part in LayerNames:
            partp='('+part+')'
 
            Part = part[:-2]
@@ -322,9 +379,8 @@ def LArSuperCellMonConfigCore(helper, algclass, flags, isCosmics=False, isMC=Fal
                                         type='TH1F', path=sc_hist_path,
                                         xbins =  100,xmin=0,xmax=50000
                                         )
-    LArSuperCellMonAlg.doDatabaseNoiseVsEtaPhi = True
 
-    for part in LArSuperCellMonAlg.LayerNames:        
+    for part in LayerNames:        
         
         cellMonGroup.defineHistogram('celleta_'+part+';NCellsActiveVsEta_'+part,
                                            title="No. of Active Cells in #eta for "+part+";cell #eta",
@@ -349,7 +405,7 @@ def LArSuperCellMonConfigCore(helper, algclass, flags, isCosmics=False, isMC=Fal
         
 
 
-    return LArSuperCellMonAlg
+    return cellMonGroup
 
 
 if __name__=='__main__':
@@ -365,15 +421,12 @@ if __name__=='__main__':
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
+    # this could be relevant later on
     #from AthenaConfiguration.TestDefaults import defaultTestFiles
     #flags.Input.Files = defaultTestFiles.ESD
     # to test tier0 workflow:
-    #flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/data15_13TeV.00278748.physics_ZeroBias.merge.RAW._lb0384._SFO-ALL._0001.1']
-    #flags.Input.Files = ['../data22_13p6TeV/data22_13p6TeV.00432180.physics_Main.daq.RAW._lb0335._SFO-16._0001.data']
-    #flags.Input.Files = ['/eos/atlas/atlastier0/daq/data22_13p6TeV/express_express/00432180/data22_13p6TeV.00432180.express_express.daq.RAW/data22_13p6TeV.00432180.express_express.daq.RAW._lb0374._SFO-12._0001.data']
-    flags.Input.Files = ['/eos/atlas/atlastier0/daq/data22_13p6TeV/express_express/00439798/data22_13p6TeV.00439798.express_express.daq.RAW/data22_13p6TeV.00439798.express_express.daq.RAW._lb1085._SFO-16._0001.data']
+    flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_13p6TeV.00475321.physics_EnhancedBias.merge.RAW._lb0231._SFO-11._0001.1']
 
-    #flags.Calo.Cell.doPileupOffsetBCIDCorr=True
     flags.Output.HISTFileName = 'LArSuperCellMonOutput.root'
     flags.DQ.enableLumiAccess = True
     flags.DQ.useTrigger = False

@@ -1135,7 +1135,7 @@ CalibChainParts_Default = {
 # ---- MonitorDef chains -----
 #==========================================================
 AllowedMonitorChainIdentifiers = ['robrequest', 'timeburner',
-                                  'idmon',
+                                  'idmon','larsupercellmon',
                                   'l1calooverflow', 'l1topoPh1debug',
                                   'mistimemonl1bccorr','mistimemonl1bccorrnomu',
                                   'mistimemoncaltimenomu','mistimemoncaltime',

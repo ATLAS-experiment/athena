@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXaltMetAlgo - Noise cut and Rho+RMS algorithm for gFEX MET
@@ -44,7 +44,7 @@ namespace LVL1 {
   private:
 
     std::array<std::vector<int>, 2> m_etaThr;
-    int m_rhoPlusThr;
+    int m_rhoPlusThr{};
     
     
     void metFPGA(const gTowersCentral &twrs, int & MET_x, int & MET_y, const unsigned short FPGA_NO) const;
