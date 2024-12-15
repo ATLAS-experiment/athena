@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZEEVALIDATION_RECONELECTRONSPLOTS_H
@@ -16,7 +16,7 @@ namespace ZeeValidation{
   
   class ReconElectronsPlots:public PlotBase {
   public:
-    ReconElectronsPlots(PlotBase* pParent, std::string sDir, std::string sParticleType);
+    ReconElectronsPlots(PlotBase* pParent, const std::string& sDir, const std::string& sParticleType);
 
     void fill(const xAOD::Electron* electron, int level);
     void fillinAcc(const xAOD::Electron* electron, int level);

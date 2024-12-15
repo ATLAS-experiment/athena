@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZEEVALIDATION_TRUEFWDELECTRONSPLOTS_H
@@ -14,7 +14,7 @@ namespace ZeeValidation{
   
   class TrueFwdElectronsPlots:public PlotBase {
   public:
-    TrueFwdElectronsPlots(PlotBase* pParent, std::string sDir, std::string sParticleType);
+    TrueFwdElectronsPlots(PlotBase* pParent, const std::string& sDir, const std::string& sParticleType);
     void fill(const xAOD::IParticle* part, int level);
 
     void fillResponse(const xAOD::IParticle* part, const xAOD::Electron* electron);   

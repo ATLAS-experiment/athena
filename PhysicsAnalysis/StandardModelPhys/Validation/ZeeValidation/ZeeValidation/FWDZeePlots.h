@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZEEVALIDATION_FWDZEEPLOTS_H
@@ -13,7 +13,7 @@ namespace ZeeValidation{
   
   class FWDZeePlots:public PlotBase {
   public:
-    FWDZeePlots(PlotBase* pParent, std::string sDir, std::string sParticleType);  
+    FWDZeePlots(PlotBase* pParent, const std::string& sDir, const std::string& sParticleType);
     void fillZPlots(TLorentzVector& , int level );
     void fillElPlots(TLorentzVector& eleccen, TLorentzVector& elecfwd, int level  );
 
