@@ -217,6 +217,8 @@ namespace Athena_test
     DataLink<Bar> fLink("a Bar");
     assert(fLink.isValid());
     assert(pBar == &*fLink);
+    // cppcheck-suppress memleak; pBar not really leaked
+    pBar = nullptr;
 
     //a link to an element
     IntVector* pvint(new IntVector);
@@ -230,7 +232,6 @@ namespace Athena_test
     assert(liint.index() == 1);
     assert(liint.dataID() == "a vector");
     cout << "*** DataLink_test StoreGate OK ***\n\n" <<endl;
-    // cppcheck-suppress memleak; pBar not really leaked
   }
 
   void dummyToRemoveWarning(const Foo&) 
