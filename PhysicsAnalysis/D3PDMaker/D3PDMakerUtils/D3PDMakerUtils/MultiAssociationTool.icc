@@ -13,22 +13,6 @@ namespace D3PD {
 
 
 /**
- * @brief Standard Gaudi tool constructor.
- * @param type The name of the tool type.
- * @param name The tool name.
- * @param parent The tool's Gaudi parent.
- */
-template <typename TO_T>
-MultiAssociationToolTo<TO_T>::MultiAssociationToolTo
-  (const std::string& type,
-   const std::string& name,
-   const IInterface* parent)
-    : MultiAssociationToolImpl (type, name, parent)
-{
-}
-
-
-/**
  * @brief Return the element type for the target of the association.
  *
  * I.e., @c nextUntyped returns a pointer to this type.
@@ -87,22 +71,6 @@ MultiAssociationToolTo<TO_T>::releaseElementUntyped (const void* p)
 
 
 //=========================================================================
-
-
-/**
- * @brief Standard Gaudi tool constructor.
- * @param type The name of the tool type.
- * @param name The tool name.
- * @param parent The tool's Gaudi parent.
- */
-template <typename FROM_T, typename TO_T>
-MultiAssociationTool<FROM_T, TO_T>::MultiAssociationTool
-  (const std::string& type,
-   const std::string& name,
-   const IInterface* parent)
-    : MultiAssociationToolTo<TO_T> (type, name, parent)
-{
-}
 
 
 /**

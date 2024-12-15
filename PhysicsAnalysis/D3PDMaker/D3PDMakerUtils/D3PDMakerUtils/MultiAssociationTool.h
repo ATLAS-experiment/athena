@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file D3PDMakerUtils/MultiAssociationTool.h
  * @author scott snyder <snyder@bnl.gov>
@@ -39,9 +36,7 @@ public:
    * @param name The tool name.
    * @param parent The tool's Gaudi parent.
    */
-  MultiAssociationToolTo (const std::string& type,
-                          const std::string& name,
-                          const IInterface* parent);
+  using MultiAssociationToolImpl::MultiAssociationToolImpl;
 
 
   /**
@@ -163,9 +158,7 @@ public:
    * @param name The tool name.
    * @param parent The tool's Gaudi parent.
    */
-  MultiAssociationTool (const std::string& type,
-                        const std::string& name,
-                        const IInterface* parent);
+  using MultiAssociationToolTo<TO_T>::MultiAssociationToolTo;
 
 
   /**
