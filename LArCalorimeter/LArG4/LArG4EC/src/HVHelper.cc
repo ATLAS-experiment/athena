@@ -71,6 +71,7 @@ FILE * HVHelper::OpenFileAndCheckVersion(const G4String &version)
 
     const size_t buf_size = 80;
     char buf[buf_size] = { 0 };
+    // cppcheck-suppress nullPointerRedundantCheck; false positive
     fgets(buf, buf_size, F);
     char *v = buf + 9;
     if(version == "v02" || version == "v99") v ++;
