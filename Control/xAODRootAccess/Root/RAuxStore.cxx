@@ -1482,7 +1482,7 @@ namespace xAOD {
              SG::AuxTypeRegistry::linkedName( fieldName );
          const std::type_info* linkedTi = nullptr;
          if( Utils::fieldExists(  linkedFieldName, *m_inNtuple ) ) {
-            linkedTi = auxFieldType(  std::move(linkedFieldName), linkedAttr.c_str(), isStaticField );
+            linkedTi = auxFieldType(  std::move(linkedFieldName), linkedAttr, isStaticField );
          }
          if( linkedTi ) {
             linkedAuxId = registry.getAuxID(
