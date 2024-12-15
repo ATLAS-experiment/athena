@@ -1101,7 +1101,7 @@ std::vector<ModulePosition> HGTD_DetectorFactory::prepareModulePositionsInRowTwo
         // y coordinate for vertical rows
         double modulePosAlongRow = -99.; // mock value for now
         // for the first module, pick the right starting point
-        if (module == 0) {
+        if (modulePositions.empty()) {
             // start at inner radius and include any offset for backside.
             if (rowForInnerRadius < 3) {
             modulePosAlongRow = std::sqrt( pow(rInner, 2) - pow((moduleWidth + rowSpaceSide)*rowForInnerRadius, 2) )
