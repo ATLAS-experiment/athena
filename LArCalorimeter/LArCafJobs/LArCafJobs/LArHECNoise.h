@@ -48,7 +48,7 @@ class LArHECNoise : public AthAlgorithm  {
  public:
 
    LArHECNoise(const std::string& name, ISvcLocator* pSvcLocator);
-   ~LArHECNoise() = default;
+   ~LArHECNoise();
 
    virtual StatusCode initialize() override;
    virtual StatusCode finalize() override;
