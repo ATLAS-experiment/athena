@@ -53,8 +53,8 @@ namespace LVL1 {
     ServiceHandle<ITRT_StrawNeighbourSvc> m_TRTStrawNeighbourSvc;
 
     /* RDO hit containers */
-    const InDetDD::TRT_DetectorManager *m_mgr;
-    const TRT_ID* m_pTRTHelper;
+    const InDetDD::TRT_DetectorManager *m_mgr{};
+    const TRT_ID* m_pTRTHelper{};
 
     /* Gaudi Properties */
     Gaudi::Property<int> m_TTCMultiplicity{this, "TTCMultiplicity", 4, "TTC board multiplicity required to fire the trigger"};
@@ -71,10 +71,10 @@ namespace LVL1 {
     int BarrelStrawNumber(int strawNumber, int strawlayerNumber, int LayerNumber) const;
     int BarrelStrawLayerNumber(int strawLayerNumber, int LayerNumber) const;
 
-    unsigned char m_mat_chip_barrel[64][1642];
-    unsigned char m_mat_chip_endcap[64][3840];
+    unsigned char m_mat_chip_barrel[64][1642]{};
+    unsigned char m_mat_chip_endcap[64][3840]{};
 
-    int m_numberOfStraws[75];
+    int m_numberOfStraws[75]{};
   };
 }
 

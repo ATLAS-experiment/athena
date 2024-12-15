@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXFPGA - Defines FPGA tools
@@ -306,7 +306,7 @@ namespace LVL1
       *tower = calTower;
    }
 
-   void gFEXFPGA::calExpand(gTowersType &offsets, gTowersType &noiseCuts, gTowersType &slopes, const int offset, const std::array<int, 12> columnNoiseCuts, const std::array<int, 12> columnSlopes) const
+   void gFEXFPGA::calExpand(gTowersType &offsets, gTowersType &noiseCuts, gTowersType &slopes, const int offset, const std::array<int, 12>& columnNoiseCuts, const std::array<int, 12>& columnSlopes) const
    {
 
       int rows = offsets.size();

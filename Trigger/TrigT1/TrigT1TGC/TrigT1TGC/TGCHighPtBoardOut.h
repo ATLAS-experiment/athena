@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCHighPtBoardOut_hh
@@ -54,12 +54,12 @@ private:
   const TGCHighPtBoard* m_origin;
   int m_bid;
 
-  int m_pt[NumberOfChip][MaxNumberOfHPBData]; //[chip][block]
-  int m_pos[NumberOfChip][MaxNumberOfHPBData];
-  int m_dev[NumberOfChip][MaxNumberOfHPBData];
-  bool m_hit[NumberOfChip][MaxNumberOfHPBData];
+  int m_pt[NumberOfChip][MaxNumberOfHPBData]{}; //[chip][block]
+  int m_pos[NumberOfChip][MaxNumberOfHPBData]{};
+  int m_dev[NumberOfChip][MaxNumberOfHPBData]{};
+  bool m_hit[NumberOfChip][MaxNumberOfHPBData]{};
   // enable when the track is selected in trackselector. 
-  int m_select[NumberOfChip][MaxNumberOfHPBData];
+  int m_select[NumberOfChip][MaxNumberOfHPBData]{};
 };
 
 inline

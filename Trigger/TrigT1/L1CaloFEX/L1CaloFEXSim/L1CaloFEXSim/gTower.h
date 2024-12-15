@@ -119,20 +119,20 @@ namespace LVL1 {
 
     /** Internal data */
   private:
-    int m_eta;
-    int m_phi;
-    int m_et;
-    float m_eta_float;
-    float m_phi_float;
-    float m_et_float;
+    int m_eta = 0;
+    int m_phi = 0;
+    int m_et = 0;
+    float m_eta_float = 0;
+    float m_phi_float = 0;
+    float m_et_float = 0;
     std::vector<float> m_et_float_perlayer;
     std::vector<Identifier> m_scID;
 
-    int m_tower_id;
+    int m_tower_id = -9999999;
     int m_posneg = 0;
     int m_noisecut = -100000; //noisecut currently not used by gFEX, leave it here in case we need it (default value is < of minimum negative energy received by gFEX)
 
-    char m_saturated;
+    char m_saturated = 0;
   };
 
 } // end of namespace

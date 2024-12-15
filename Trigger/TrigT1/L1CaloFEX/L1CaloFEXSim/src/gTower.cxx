@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gTower - Defines all properties and methods for the gFEX towers
@@ -15,11 +15,7 @@
 namespace LVL1 {
 
   // default constructors
-  gTower::gTower():
-    m_eta(0),
-    m_phi(0),
-    m_tower_id(-9999999),
-    m_posneg(0)
+  gTower::gTower()
   {
     this->clear_scIDs();
     this->clearET();
@@ -30,8 +26,7 @@ namespace LVL1 {
     m_eta(ieta),
     m_phi(iphi),
     m_tower_id(id_modifier + iphi + (nphi * ieta)),
-    m_posneg(posneg),
-    m_saturated(0)
+    m_posneg(posneg)
   {
     this->clear_scIDs();
     this->clearET();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXFPGA - Defines FPGA tools
@@ -72,7 +72,7 @@ namespace LVL1
 
     void calLookup(int *tower, const int offset, const int noiseCut, const int slope) const;
 
-    void calExpand(gTowersType &offsets, gTowersType &noiseCuts, gTowersType &slopes, const int offset, const std::array<int, 12> columnNoiseCuts, const std::array<int, 12> columnSlopes) const;
+    void calExpand(gTowersType &offsets, gTowersType &noiseCuts, gTowersType &slopes, const int offset, const std::array<int, 12>& columnNoiseCuts, const std::array<int, 12>& columnSlopes) const;
 
     SG::ReadHandleKey<LVL1::gTowerContainer> m_gFEXFPGA_gTowerContainerKey{this, "MyGTowers", "gTowerContainer", "Input container for gTowers"};
     SG::ReadHandleKey<LVL1::gTowerContainer> m_gFEXFPGA_gTower50ContainerKey{this, "MyGTowers50", "gTower50Container", "Input container for gTowers"};
