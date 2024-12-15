@@ -208,6 +208,7 @@ G4mplEquationSetup::CreateStepperToChordFinder(G4MagneticField* magFieldNC)
   delete fMonopoleChordFinder;
 
   auto integrDriver = new G4MagInt_Driver( fMinStep, fMonopoleStepper,
+                                           // cppcheck-suppress nullPointerRedundantCheck; false positive
                                            fMonopoleStepper->GetNumberOfVariables() );
   fMonopoleChordFinder = new G4ChordFinder( integrDriver );
 }
