@@ -96,6 +96,7 @@ PackedLinkConverter<CONT>::PackedLinkConverter (AuxVectorData& container,
     m_linkedVec (container, auxid),
     m_dlinks (*container.getDataSpan (linked_auxid))
 {
+  // cppcheck-suppress missingReturn; false positive
 }
 
 

@@ -63,6 +63,7 @@ Decorator<PackedLink<CONT>, ALLOC>::Decorator (const SG::auxid_t auxid)
   m_linkedAuxid = r.linkedVariable (m_auxid);
   if (m_linkedAuxid == static_cast<uint32_t>(null_auxid)) {
     throw SG::ExcNoLinkedVar (auxid, typeid (CONT));
+    // cppcheck-suppress missingReturn; false positive
   }
 }
 

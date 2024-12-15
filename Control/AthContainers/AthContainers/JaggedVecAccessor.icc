@@ -60,6 +60,7 @@ inline
 Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::Accessor (const SG::auxid_t auxid)
   : Base (auxid)
 {
+  // cppcheck-suppress missingReturn; false positive
 }
 
 
@@ -92,6 +93,7 @@ Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::operator() (ELT& e) const
  * Will return a proxy object, which will allow treating this
  * jagged vector element as a vector.
  */
+#ifndef __CPPCHECK__ // cppcheck gets parse errors on this
 template <class PAYLOAD_T, class ALLOC>
 inline
 auto
@@ -106,6 +108,7 @@ Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::operator() (AuxVectorData& container,
                          container,
                          this->m_auxid);
 }
+#endif // not __CPPCHECK__
 
 
 /**
