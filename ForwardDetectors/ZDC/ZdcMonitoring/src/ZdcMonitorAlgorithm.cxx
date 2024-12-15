@@ -35,7 +35,7 @@ void ZdcMonitorAlgorithm::calculate_log_bin_edges(float min_value, float max_val
 }
 
 
-float ZdcMonitorAlgorithm::calculate_inverse_bin_width(float event_value, std::string variable_name, const std::vector<float>& bin_edges) const {
+float ZdcMonitorAlgorithm::calculate_inverse_bin_width(float event_value, const std::string& variable_name, const std::vector<float>& bin_edges) const {
     // Check if the event_value is out of range
     if (event_value < bin_edges.front() || event_value > bin_edges.back()) { // changed output level to debug: this is not uncommon
         ATH_MSG_DEBUG("In calculation of inverse-bin-width event weight for the variable " << variable_name << ", the current event value " << event_value << " is out of the bin range.");
