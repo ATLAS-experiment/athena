@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZeeValidation/TrueElectronsPlots.h"
@@ -8,7 +8,7 @@ using CLHEP::GeV;
 
 namespace ZeeValidation{
   
-  TrueElectronsPlots::TrueElectronsPlots(PlotBase* pParent, std::string sDir, std::string sParticleType):
+  TrueElectronsPlots::TrueElectronsPlots(PlotBase* pParent, const std::string& sDir, const std::string& sParticleType):
     PlotBase(pParent, sDir),
     m_sParticleType(sParticleType),
     h_e_response_vs_e(NULL),

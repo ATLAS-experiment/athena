@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZEEVALIDATION_ZEEPLOTS_H
@@ -14,7 +14,7 @@ namespace ZeeValidation{
   
   class ZeePlots:public PlotBase {
   public:
-    ZeePlots(PlotBase* pParent, std::string sDir, std::string sParticleType);
+    ZeePlots(PlotBase* pParent, const std::string& sDir, const std::string& sParticleType);
 
     void fillZPlots( TLorentzVector& z, int level );
     void fillElectronPlots( TLorentzVector& elec1, TLorentzVector& elec2, TLorentzVector& cluster1, TLorentzVector& cluster2, TLorentzVector& track1, TLorentzVector& track2,int charge1, int charge2, int level );
