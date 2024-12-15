@@ -86,6 +86,7 @@ WriteHandle<T>::WriteHandle (const WriteHandleKey<T>& key,
                              const EventContext& ctx)
   : VarHandleBase (key, &ctx)
 {
+  // cppcheck-suppress missingReturn; false positive
 }
 
 

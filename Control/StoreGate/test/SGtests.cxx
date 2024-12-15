@@ -233,6 +233,7 @@ namespace Athena_test
     // cppcheck-suppress assertWithSideEffect
     SGASSERTERROR(rSG.record(new Foo(6), key, LOCKED).isSuccess());
     std::unique_ptr<Foo> foo5 (new Foo(5));
+    // cppcheck-suppress assertWithSideEffect
     SGASSERTERROR(rSG.record(std::move(foo5), key).isSuccess());
     assert (foo5.get() == 0);
 
@@ -248,6 +249,7 @@ namespace Athena_test
     assert(rSG.record(new Foo(11), "LockedDelete", LOCKED, DELETE).isSuccess());
 
     std::unique_ptr<Foo> foo12 (new Foo(12));
+    // cppcheck-suppress assertWithSideEffect
     assert(rSG.record(std::move(foo12),
                       "UnLockedDelete", !LOCKED, DELETE).isSuccess());
     assert(foo12.get() == 0);
@@ -257,6 +259,7 @@ namespace Athena_test
     assert(rSG.record(cpFoo=new Foo(13), "Const").isSuccess());
 
     std::unique_ptr<const Foo> foo13a (new Foo(130));
+    // cppcheck-suppress assertWithSideEffect
     assert(rSG.record(std::move(foo13a), "Const2").isSuccess());
     assert(foo13a.get() == 0);
 
