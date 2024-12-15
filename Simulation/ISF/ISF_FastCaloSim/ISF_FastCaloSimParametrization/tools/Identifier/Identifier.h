@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IdentifierStandAlone
@@ -30,12 +30,12 @@ class Identifier
   } max_value_type;
 
   Identifier():m_id(max_value) {};
-  Identifier(const Identifier& value):m_id(value.m_id) {};
+  Identifier(const Identifier& value) = default;
   Identifier(value_type value):m_id(value) {};
   
   operator value_type() const { return m_id; }
 
-  Identifier& operator = (const Identifier& old) {m_id=old;return (*this);};
+  Identifier& operator = (const Identifier& old) = default;
   Identifier& operator = (value_type value) {m_id=value;return (*this);};
   bool operator == (const Identifier& other) const {return (m_id == other.m_id);}
   bool operator != (const Identifier& other) const {return (m_id != other.m_id);}
