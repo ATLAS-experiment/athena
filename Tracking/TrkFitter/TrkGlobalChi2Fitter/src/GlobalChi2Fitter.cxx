@@ -1737,6 +1737,7 @@ namespace Trk {
           errors[1] = 10;
 
           pseudostate2->setMeasurementErrors(errors);
+          // cppcheck-suppress invalidLifetime; false positive
           outlierstates2.push_back(pseudostate2.get());
           trajectory.addMeasurementState(std::move(pseudostate2));
         }
