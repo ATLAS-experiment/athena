@@ -54,16 +54,14 @@ StatusCode JetHistoResponseAndEff::processJetContainer(const JetMonitoringAlg& p
     if (listJets.empty() ) break;
     // find the min match
     std::list<const xAOD::Jet*>::iterator it=listJets.begin();
-    std::list<const xAOD::Jet*>::iterator itmin=listJets.end();
+    std::list<const xAOD::Jet*>::iterator itmin=it;
     for( ; it != listJets.end(); ++it) {
       double dr2 = xAOD::P4Helpers::deltaR2(*(*it),*refjet);
       if(dr2 < dr2min) { dr2min = dr2; itmin = it ;}
     }
 
     // calculate efficiency and response from matched jet
-    //cppcheck-suppress derefInvalidIterator
     const xAOD::Jet* matched = *itmin;
-    //cppcheck-suppress eraseIteratorOutOfBoundsCond
     listJets.erase(itmin);
     
     double dr = sqrt(dr2min);
