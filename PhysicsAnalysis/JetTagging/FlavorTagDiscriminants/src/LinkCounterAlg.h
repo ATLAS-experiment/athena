@@ -17,7 +17,7 @@ namespace FlavorTagDiscriminants {
   class LinkCounterAlg : public AthReentrantAlgorithm
   {
   public:
-    LinkCounterAlg(const std::string& name, ISvcLocator* svcloc);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& cxt) const override;
   protected:

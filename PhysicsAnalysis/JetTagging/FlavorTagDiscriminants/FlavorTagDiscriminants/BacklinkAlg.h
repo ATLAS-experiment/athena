@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BACKLINK_ALG_H
@@ -17,7 +17,7 @@ namespace FlavorTagDiscriminants {
   class BacklinkAlg : public AthReentrantAlgorithm
   {
   public:
-    BacklinkAlg(const std::string& name, ISvcLocator* svcloc);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& cxt) const override;
     virtual StatusCode finalize() override;
