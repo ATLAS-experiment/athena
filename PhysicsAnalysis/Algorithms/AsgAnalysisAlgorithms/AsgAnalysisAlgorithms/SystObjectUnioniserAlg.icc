@@ -13,14 +13,6 @@
 namespace CP
 {
   template<class T, class C>
-  SystObjectUnioniserAlg<T,C> ::SystObjectUnioniserAlg(const std::string &name,
-                                  ISvcLocator *pSvcLocator)
-      : EL::AnaReentrantAlgorithm(name, pSvcLocator)
-  {
-
-  }
-
-  template<class T, class C>
   StatusCode SystObjectUnioniserAlg<T,C> ::initialize()
   {
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
   SystObjectUnioniserAlg:
   This alg takes a set of systematic variation containers which have
@@ -65,7 +65,7 @@ namespace CP
   {
     /// \brief The standard constructor
 public:
-    SystObjectUnioniserAlg(const std::string &name, ISvcLocator *pSvcLocator);
+    using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
 
     /// \brief Initialisation method, for setting up tools and other persistent
     /// configs
