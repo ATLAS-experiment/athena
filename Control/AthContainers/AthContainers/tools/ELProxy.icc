@@ -37,6 +37,7 @@ ELProxyValBase<CONT>::ELProxyValBase (AuxVectorData& container,
                                       SG::auxid_t linked_auxid)
   : m_cnv (container, auxid, linked_auxid)
 {
+  // cppcheck-suppress missingReturn; false positive
 }
 
 

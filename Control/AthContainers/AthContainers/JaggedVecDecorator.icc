@@ -129,6 +129,7 @@ Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::operator() (const ELT& e) const
  * that do not yet exist (in which case they will be marked as decorations)
  * or variables already marked as decorations.
  */
+#ifndef __CPPCHECK__ // cppcheck gets parse errors on this
 template <class PAYLOAD_T, class ALLOC>
 inline
 auto
@@ -145,6 +146,7 @@ Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::operator() (const AuxVectorData& cont
                     container_nc,
                     this->m_auxid);
 }
+#endif // not __CPPCHECK__
 
 
 /**
