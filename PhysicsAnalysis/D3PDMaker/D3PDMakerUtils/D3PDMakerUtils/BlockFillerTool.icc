@@ -13,21 +13,6 @@ namespace D3PD {
 
 
 /**
- * @brief Standard Gaudi tool constructor.
- * @param type The name of the tool type.
- * @param name The tool name.
- * @param parent The tool's Gaudi parent.
- */
-template <class T>
-BlockFillerTool<T>::BlockFillerTool (const std::string& type,
-                                     const std::string& name,
-                                     const IInterface* parent)
-  : BlockFillerToolImpl (type, name, parent)
-{
-}
-
-
-/**
  * @brief Configure during initialization: type-check.
  * @param tree Our parent for tuple making.
  * @param ti Gives the type of the object being passed to @c fillUntyped.

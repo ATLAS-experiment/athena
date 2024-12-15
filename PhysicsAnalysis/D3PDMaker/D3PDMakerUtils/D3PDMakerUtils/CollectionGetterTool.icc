@@ -69,21 +69,6 @@ struct Deref<CONT, DataLink<T> >
 
 
 /**
- * @brief Standard Gaudi tool constructor.
- * @param type The name of the tool type.
- * @param name The tool name.
- * @param parent The tool's Gaudi parent.
- */
-template <class CONT>
-CollectionGetterTool<CONT>::CollectionGetterTool (const std::string& type,
-                                                  const std::string& name,
-                                                  const IInterface* parent)
-  : CollectionGetterToolImpl (type, name, parent)
-{
-}
-
-
-/**
  * @brief Return the target object.
  * @param allowMissing If true, then we should not generate errors
  *        if the requested object is missing.
