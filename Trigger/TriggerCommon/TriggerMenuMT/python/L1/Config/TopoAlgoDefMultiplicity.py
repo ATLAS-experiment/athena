@@ -69,20 +69,21 @@ class TopoAlgoDefMultiplicity:
             'jTAU20'
         ]        
         ctauThresholds_3bits = [ 
-            'cTAU12M', 'cTAU20M', 
+            'cTAU12M', 'cTAU20M', 'cTAUSPARE1',
         ]
         etauThresholds_2bits = [ 
             'eTAU20L', 'eTAU20M', 'eTAU30', 'eTAU30M', 'eTAU35', 'eTAU35M', 'eTAU40HM', 'eTAU60', 'eTAU80', 'eTAU140', 
             'eTAU40HT', 'eTAU60HM','eTAU60HL', 'eTAU80HL',
         ]
         jtauThresholds_2bits = [ 
-            'jTAU1', 'jTAU30', 'jTAU30M',
+            'jTAU1',
         ]
         ctauThresholds_2bits = [ 
             'cTAU30M', 'cTAU35M',  
 
             # spares
             'cTAUSPARE2',
+            'cTAUSPARE3',
         ]
 
         for tau in etauThresholds_3bits:
@@ -273,9 +274,9 @@ class TopoAlgoDefMultiplicity:
             
             # FPGA 1, Topo1 fiber 3
             multLimits(thrtype='jTAU',          conn='Topo1Opt3', nbit=3, startbit=0,  endbit=2 ),
-            multLimits(thrtype='jTAU',          conn='Topo1Opt3', nbit=2, startbit=6,  endbit=11),
-            multLimits(thrtype='cTAU',          conn='Topo1Opt3', nbit=3, startbit=14, endbit=19),
-            multLimits(thrtype='cTAU',          conn='Topo1Opt3', nbit=2, startbit=23, endbit=28),
+            multLimits(thrtype='jTAU',          conn='Topo1Opt3', nbit=2, startbit=6,  endbit=7 ),
+            multLimits(thrtype='cTAU',          conn='Topo1Opt3', nbit=3, startbit=14, endbit=22),
+            multLimits(thrtype='cTAU',          conn='Topo1Opt3', nbit=2, startbit=23, endbit=30),
             multLimits(thrtype='jEM',           conn='Topo1Opt3', nbit=2, startbit=31, endbit=36),
             multLimits(thrtype='LArSaturation', conn='Topo1Opt3', nbit=1, startbit=37, endbit=37),
             multLimits(thrtype='ZeroBiasB',     conn='Topo1Opt3', nbit=1, startbit=38, endbit=38),

@@ -766,14 +766,6 @@ def getDevSignatures():
         ChainProp(name="HLT_tau25_perf_tracktwoMVA_L1jTAU20",     groups=SupportPhIGroup+SingleTauGroup, monGroups=['tauMon:t0']),
         ChainProp(name="HLT_tau25_mediumRNN_tracktwoMVA_L1jTAU20",   groups=SupportPhIGroup+SingleTauGroup, monGroups=['tauMon:t0']),
 
-        ChainProp(name="HLT_tau35_idperf_tracktwoMVA_L1jTAU30",   groups=SupportPhIGroup+SingleTauGroup, monGroups=['tauMon:t0']),
-        ChainProp(name="HLT_tau35_perf_tracktwoMVA_L1jTAU30",     groups=SupportPhIGroup+SingleTauGroup, monGroups=['tauMon:t0']),
-        ChainProp(name="HLT_tau35_mediumRNN_tracktwoMVA_L1jTAU30",   groups=SupportPhIGroup+SingleTauGroup, monGroups=['tauMon:t0']),
-
-        ChainProp(name="HLT_tau35_idperf_tracktwoMVA_L1jTAU30M",   groups=SupportPhIGroup+SingleTauGroup, monGroups=['tauMon:t0']),
-        ChainProp(name="HLT_tau35_perf_tracktwoMVA_L1jTAU30M",     groups=SupportPhIGroup+SingleTauGroup, monGroups=['tauMon:t0']),
-        ChainProp(name="HLT_tau35_mediumRNN_tracktwoMVA_L1jTAU30M",   groups=SupportPhIGroup+SingleTauGroup, monGroups=['tauMon:t0']),
-
         ChainProp(name="HLT_tau35_idperf_tracktwoMVA_L1eTAU30",   groups=SupportPhIGroup+SingleTauGroup, monGroups=['tauMon:t0']),
         ChainProp(name="HLT_tau35_perf_tracktwoMVA_L1eTAU30",   groups=SupportPhIGroup+SingleTauGroup, monGroups=['tauMon:t0']),
         ChainProp(name="HLT_tau35_mediumRNN_tracktwoMVA_L1eTAU30",   groups=SupportPhIGroup+SingleTauGroup, monGroups=['tauMon:t0']),

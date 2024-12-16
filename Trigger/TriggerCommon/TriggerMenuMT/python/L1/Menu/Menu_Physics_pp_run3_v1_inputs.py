@@ -214,26 +214,18 @@ def defineInputsMenu():
         "fpga" : 1,
         "legacy" : False,
         "thresholds" : [ # Topo1B: jFex small-R jet, jFex large-R jet, combined eFex/jFex TAU, gFex+jFex EX, gFex+jFex SumET, jFex TAU
-            # jTAU thresholds for commissioning
+            # jTAU thresholds
             ('jTAU20',3), 
-
             (None,3),
 
-            'jTAU30', 'jTAU30M',
-            # jTAU thresholds for production
             'jTAU1',
+            None, None, None,
 
-            None, 
-
-            # cTAU thresholds for commissioning
-            ('cTAU12M',3), ('cTAU20M',3),# ('cTAUSPARE1',3), 
-            (None,3),
+            # cTAU thresholds
+            ('cTAU12M',3), ('cTAU20M',3), ('cTAUSPARE1',3), 
 
             'cTAU30M', 'cTAU35M', 
-            # cTAU thresholds for production
-            'cTAUSPARE2',
-
-            None,
+            'cTAUSPARE2', 'cTAUSPARE3',
 
             # jEM thresholds for commissioning
             'jEM20', 'jEM20M', 
@@ -244,8 +236,6 @@ def defineInputsMenu():
             ('LArSaturation',1),
             # ZeroBias Topo Algo
             ('ZeroBiasB', 1),
-
-         #   (None,1),
 
             # energy thresholds
             # commissioning
