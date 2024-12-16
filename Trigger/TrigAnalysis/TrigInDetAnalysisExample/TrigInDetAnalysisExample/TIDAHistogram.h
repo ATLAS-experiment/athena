@@ -5,7 +5,7 @@
  **   @author       sutt  
  **   @date         Sun  2 Jan 2022 06:57:06 GMT  
  ** 
- **   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -51,7 +51,7 @@ public:
     else std::cerr << "Histogram " << m_name << "\tmonTool not defined" << std::endl;
   }
 
-  std::string name() const { return m_name; } 
+  const std::string& name() const { return m_name; }
 
   ToolHandle<GenericMonitoringTool>* monTool() const { return m_monTool; };
 

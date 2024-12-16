@@ -11,7 +11,7 @@
  **     @author  mark sutton
  **     @date    Monday 18th May  2020 22:55:37 BST 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -32,7 +32,7 @@ public:
     // - xxxKey:  the key for tracks to be retrieved from the test/reference/selection chain or container
     // - all standard operations are performed in loops over 0=test 1=reference 2=selection
 
-  AnalysisConfigMT_Ntuple(const std::vector<std::string>& chainNames, std::string outputFileName="TrkNtuple.root", 
+  AnalysisConfigMT_Ntuple(const std::vector<std::string>& chainNames, const std::string& outputFileName="TrkNtuple.root",
 			   double tauEtCutOffline=0.0, int TruthPdgId = 0, bool keepAllEvents_=false, int parentTruthId = 0 ) : 
     AnalysisConfig_Ntuple( chainNames, outputFileName, tauEtCutOffline, TruthPdgId, keepAllEvents_ , parentTruthId),
     m_fiducial_radius(47),

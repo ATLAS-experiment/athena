@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:06:37 CET 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -40,7 +40,7 @@ public:
     // - xxxKey:  the key for tracks to be retrieved from the test/reference/selection chain or container
     // - all standard operations are performed in loops over 0=test 1=reference 2=selection
 
-  AnalysisConfig_Ntuple(const std::vector<std::string>& chainNames, std::string outputFileName="TrkNtuple.root", 
+  AnalysisConfig_Ntuple(const std::vector<std::string>& chainNames, const std::string& outputFileName="TrkNtuple.root",
 			  double tauEtCutOffline=0.0, int TruthPdgId = 0, bool _keepAllEvents=false, int parentTruthPdgId = 0) : 
     T_AnalysisConfig<AthReentrantAlgorithm>( "Ntple",
 				   "", "", "",
@@ -49,9 +49,11 @@ public:
 				   0, 0, 0,
 				   0,
 				   0 ),
+    m_useBeamCondSvc(false),
     m_event(0),
     m_File(0),
     m_Tree(0),
+    m_Dir(0),
     m_doOffline(false),
     m_doVertices(false),
     m_doMuons(false),
@@ -129,7 +131,9 @@ public:
 
   }
   
-  
+  // non-copyable
+  AnalysisConfig_Ntuple( const AnalysisConfig_Ntuple& );
+  AnalysisConfig_Ntuple& operator=( const AnalysisConfig_Ntuple& );
 
   virtual ~AnalysisConfig_Ntuple() {
     /// leave in this debug printout ...
