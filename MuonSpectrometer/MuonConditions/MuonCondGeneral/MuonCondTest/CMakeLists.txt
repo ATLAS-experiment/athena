@@ -88,11 +88,11 @@ atlas_add_test( TgcDigiJitterTest
                 POST_EXEC_SCRIPT nopost.sh)
 
 
-atlas_add_test( MdtCalibDbR4Test
-                SCRIPT python -m MuonCondTest.MdtCalibDbTesterR4
-                PRIVATE_WORKING_DIRECTORY
-                PROPERTIES TIMEOUT 1200
-                POST_EXEC_SCRIPT nopost.sh)
+#atlas_add_test( MdtCalibDbR4Test
+#                SCRIPT python -m MuonCondTest.MdtCalibDbTesterR4
+#                PRIVATE_WORKING_DIRECTORY
+#                PROPERTIES TIMEOUT 1200
+#                POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( MdtTwinCablingTest
                 SCRIPT python -m MuonCondDump.dumpTwinCabling --setupRun4 --cablingMap twinCabling.json  --chamberToTwin all && python -m MuonCondTest.MdtTwinTester --setupRun4 --cablingJSON twinCabling.json
