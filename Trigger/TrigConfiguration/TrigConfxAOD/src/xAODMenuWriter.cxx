@@ -1,7 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
 
 // Gaudi/Athena include(s):
 #include "AthenaKernel/errorcheck.h"
@@ -18,271 +17,228 @@
 #include "TrigConfHLTData/HLTSignature.h"
 #include "TrigConfHLTData/HLTTriggerElement.h"
 #include "TrigConfHLTData/HLTSequenceList.h"
+#include "TrigConfHLTData/HLTPrescale.h"
+
+#include "TrigConfData/L1BunchGroupSet.h"
 
 // EDM include(s):
-#include "xAODTrigger/TrigConfKeys.h"
 #include "xAODTrigger/TriggerMenu.h"
 #include "xAODTrigger/TriggerMenuAuxContainer.h"
+#include "xAODTrigger/TriggerMenuJson.h"
+#include "xAODTrigger/TriggerMenuJsonAuxContainer.h"
 
 // Local include(s):
 #include "xAODMenuWriter.h"
 #include "PrintVectorHelper.h"
+#include "KeyWriterTool.h"
 
-namespace TrigConf {
+namespace TrigConf
+{
 
-   xAODMenuWriter::xAODMenuWriter( const std::string& name,
-                                   ISvcLocator* svcLoc )
-      : AthAlgorithm( name, svcLoc ),
-        m_trigConf( "TrigConfigSvc", name ),
-        m_metaStore( "MetaDataStore", name ),
-        m_tmc( 0 ) {
-
-      declareProperty( "EventObjectName", m_eventName = "TrigConfKeys" );
-      declareProperty( "MetaObjectName", m_metaName = "TriggerMenu" );
-      declareProperty( "OverwriteEventObj", m_overwriteEventObj = false );
-
-      declareProperty( "TrigConfigSvc", m_trigConf );
-      declareProperty( "MetaDataStore", m_metaStore );
+   xAODMenuWriter::xAODMenuWriter(const std::string &name,
+                                  ISvcLocator *svcLoc)
+       : AthReentrantAlgorithm(name, svcLoc),
+         m_metaStore("MetaDataStore", name)
+   {
    }
 
-   StatusCode xAODMenuWriter::initialize() {
+   StatusCode xAODMenuWriter::initialize()
+   {
 
       // Greet the user:
-      ATH_MSG_INFO( "Initialising" );
-      ATH_MSG_DEBUG( "EventObjectName   = " << m_eventName );
-      ATH_MSG_DEBUG( "MetaObjectName    = " << m_metaName );
-      ATH_MSG_DEBUG( "OverwriteEventObj = "
-                     << ( m_overwriteEventObj ? "Yes" : "No" ) );
-      ATH_MSG_VERBOSE( "TrigConfigSvc = " << m_trigConf );
-      ATH_MSG_VERBOSE( "MetaDataStore = " << m_metaStore );
+      ATH_MSG_INFO("Initialising");
+      ATH_MSG_VERBOSE("MetaDataStore = " << m_metaStore);
 
       // Retrieve the necessary service(s):
-      CHECK( m_trigConf.retrieve() );
-      CHECK( m_metaStore.retrieve() );
+      ATH_CHECK(m_metaStore.retrieve());
 
-      // Clear the internal cache variable:
-      m_convertedKeys.clear();
+      ATH_CHECK(m_keyWriterTool.retrieve());
 
-      // Create an empty trigger menu container:
-      xAOD::TriggerMenuAuxContainer* aux = new xAOD::TriggerMenuAuxContainer();
-      m_tmc = new xAOD::TriggerMenuContainer();
-      m_tmc->setStore( aux );
+      ATH_CHECK(m_HLTMenuKey.initialize());             // ReadHandleKey, but DetStore (so renounce)
+      renounce(m_HLTMenuKey);
+      ATH_CHECK(m_HLTMonitoringKey.initialize());       // ReadHandleKey, but DetStore (so renounce)
+      renounce(m_HLTMonitoringKey);
+      ATH_CHECK(m_HLTPrescaleSetInputKey.initialize()); // ReadCondHandleKey
 
-      // Record the trigger configuration metadata into it:
-      CHECK( m_metaStore->record( aux, m_metaName + "Aux." ) );
-      CHECK( m_metaStore->record( m_tmc, m_metaName ) );
+      ATH_CHECK(m_L1MenuKey.initialize());             // ReadHandleKey, but DetStore (so renounce)
+      renounce(m_L1MenuKey);
+      ATH_CHECK(m_L1PrescaleSetInputKey.initialize()); // ReadCondHandleKey
+
+      ATH_CHECK(m_bgInputKey.initialize()); // ReadCondHandleKey
+
+      // HLT JSON object - contains HLT menus
+      std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_hlt = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
+      std::unique_ptr<xAOD::TriggerMenuJsonContainer> hlt = std::make_unique<xAOD::TriggerMenuJsonContainer>();
+      // cppcheck-suppress danglingLifetime; false positive
+      m_menuJSON_hlt = hlt.get(); // Keep a cached pointer from which we can add to the output metastore
+      // cppcheck-suppress danglingLifetime; false positive
+      m_menuJSON_hlt->setStore(aux_hlt.get());
+
+      ATH_CHECK(m_metaStore->record(std::move(aux_hlt), m_metaNameJSON_hlt + "Aux."));
+      ATH_CHECK(m_metaStore->record(std::move(hlt), m_metaNameJSON_hlt));
+
+      // HLT Monitoring JSON object - contains Monitoring groups for HLT menus
+      std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_hltmonitoring = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
+      std::unique_ptr<xAOD::TriggerMenuJsonContainer> hltmonitoring = std::make_unique<xAOD::TriggerMenuJsonContainer>();
+      // cppcheck-suppress danglingLifetime; false positive
+      m_menuJSON_hltmonitoring = hltmonitoring.get(); // Keep a cached pointer from which we can add to the output metastore
+      // cppcheck-suppress danglingLifetime; false positive
+      m_menuJSON_hltmonitoring->setStore(aux_hltmonitoring.get());
+
+      ATH_CHECK(m_metaStore->record(std::move(aux_hltmonitoring), m_metaNameJSON_hltmonitoring + "Aux."));
+      ATH_CHECK(m_metaStore->record(std::move(hltmonitoring), m_metaNameJSON_hltmonitoring));
+
+      // L1 JSON object - contains L1 menus
+      std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_l1 = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
+      std::unique_ptr<xAOD::TriggerMenuJsonContainer> l1 = std::make_unique<xAOD::TriggerMenuJsonContainer>();
+      // cppcheck-suppress danglingLifetime; false positive
+      m_menuJSON_l1 = l1.get(); // Keep a cached pointer from which we can add to the output metastore
+      // cppcheck-suppress danglingLifetime; false positive
+      m_menuJSON_l1->setStore(aux_l1.get());
+
+      ATH_CHECK(m_metaStore->record(std::move(aux_l1), m_metaNameJSON_l1 + "Aux."));
+      ATH_CHECK(m_metaStore->record(std::move(l1), m_metaNameJSON_l1));
+
+      // HLT PS JSON object - contains prescales sets for HLT menus
+      std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_hltps = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
+      std::unique_ptr<xAOD::TriggerMenuJsonContainer> hltps = std::make_unique<xAOD::TriggerMenuJsonContainer>();
+      // cppcheck-suppress danglingLifetime; false positive
+      m_menuJSON_hltps = hltps.get(); // Keep a cached pointer from which we can add to the output metastore
+      // cppcheck-suppress danglingLifetime; false positive
+      m_menuJSON_hltps->setStore(aux_hltps.get());
+
+      ATH_CHECK(m_metaStore->record(std::move(aux_hltps), m_metaNameJSON_hltps + "Aux."));
+      ATH_CHECK(m_metaStore->record(std::move(hltps), m_metaNameJSON_hltps));
+
+      // L1 PS JSON object - contains prescales sets for L1 menus
+      std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_l1ps = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
+      std::unique_ptr<xAOD::TriggerMenuJsonContainer> l1ps = std::make_unique<xAOD::TriggerMenuJsonContainer>();
+      // cppcheck-suppress danglingLifetime; false positive
+      m_menuJSON_l1ps = l1ps.get(); // Keep a cached pointer from which we can add to the output metastore
+      // cppcheck-suppress danglingLifetime; false positive
+      m_menuJSON_l1ps->setStore(aux_l1ps.get());
+
+      ATH_CHECK(m_metaStore->record(std::move(aux_l1ps), m_metaNameJSON_l1ps + "Aux."));
+      ATH_CHECK(m_metaStore->record(std::move(l1ps), m_metaNameJSON_l1ps));
+
+      // Bunchgroup JSON object - contains bungchgroup configuration
+      std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_bg = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
+      std::unique_ptr<xAOD::TriggerMenuJsonContainer> bg = std::make_unique<xAOD::TriggerMenuJsonContainer>();
+      // cppcheck-suppress danglingLifetime; false positive
+      m_menuJSON_bg = bg.get(); // Keep a cached pointer from which we can add to the output metastore
+      // cppcheck-suppress danglingLifetime; false positive
+      m_menuJSON_bg->setStore( aux_bg.get() );
+
+      ATH_CHECK( m_metaStore->record(std::move(aux_bg), m_metaNameJSON_bg + "Aux." ) );
+      ATH_CHECK( m_metaStore->record(std::move(bg), m_metaNameJSON_bg ) );
 
       // Return gracefully:
       return StatusCode::SUCCESS;
    }
 
-   StatusCode xAODMenuWriter::execute() {
-
-      // Check if the event-level object exists already:
-      if( ( ! evtStore()->contains< xAOD::TrigConfKeys >( m_eventName ) ) ||
-          m_overwriteEventObj ) {
-
-         // Create the trigger configuration keys for the event data:
-         xAOD::TrigConfKeys* keys =
-            new xAOD::TrigConfKeys( m_trigConf->masterKey(),
-                                    m_trigConf->lvl1PrescaleKey(),
-                                    m_trigConf->hltPrescaleKey() );
-
-         // Now record it:
-         if( m_overwriteEventObj ) {
-            CHECK( evtStore()->overwrite( keys, m_eventName, false ) );
-         } else {
-            CHECK( evtStore()->record( keys, m_eventName ) );
-         }
-      }
+   StatusCode xAODMenuWriter::execute(const EventContext &ctx) const
+   {
 
       // Create the keys in the "internal format":
-      TrigKey_t ckeys =
-         std::make_pair( m_trigConf->masterKey(),
-                         std::make_pair( m_trigConf->lvl1PrescaleKey(),
-                                         m_trigConf->hltPrescaleKey() ) );
+      TrigKey_t ckeys;
 
-      // Check if we converted this configuration already:
-      if( ! m_convertedKeys.insert( ckeys ).second ) {
-         ATH_MSG_VERBOSE( "Configuration with keys SMK: "
-                          << ckeys.first << ", L1PSK: " << ckeys.second.first
-                          << ", HLTPSK: " << ckeys.second.second
-                          << " already translated" );
-         return StatusCode::SUCCESS;
-      }
+      // Write to SG via writer tool.
+      // Get keys back via pass-by-reference
+      ATH_CHECK(m_keyWriterTool->writeKeys(ctx, /*SMK*/ ckeys.first, /*L1PSK*/ ckeys.second.first, /*HLTPSK*/ ckeys.second.second));
 
-      // Tell the user what's happening:
-      ATH_MSG_INFO( "Converting configuration with keys SMK: "
-                    << ckeys.first << ", L1PSK: " << ckeys.second.first
-                    << ", HLTPSK: " << ckeys.second.second );
+      uint32_t bunchgroupKey = 0;
+      ATH_CHECK(m_keyWriterTool->writeBunchgroupKey(ctx, bunchgroupKey));
 
-      // Apparently not, so let's make a new object:
-      xAOD::TriggerMenu* menu = new xAOD::TriggerMenu();
-      m_tmc->push_back( menu );
+      // The following code must only run on one event at a time
+      std::lock_guard<std::mutex> lock(m_mutex);
 
-      //
-      // Set its keys:
-      //
-      menu->setSMK( m_trigConf->masterKey() );
-      menu->setL1psk( m_trigConf->lvl1PrescaleKey() );
-      menu->setHLTpsk( m_trigConf->hltPrescaleKey() );
-
-      //
-      // Set its LVL1 information:
-      //
-      ATH_MSG_DEBUG( "Filling LVL1 information" );
-      std::vector< uint16_t > ctpIds;
-      std::vector< std::string > itemNames;
-      std::vector< float > itemPrescales;
-      TrigConf::ItemContainer::const_iterator item_itr =
-         m_trigConf->ctpConfig()->menu().items().begin();
-      TrigConf::ItemContainer::const_iterator item_end =
-         m_trigConf->ctpConfig()->menu().items().end();
-      std::vector< float > prescales =
-         m_trigConf->ctpConfig()->prescaleSet().prescales_float();
-      for( ; item_itr != item_end; ++item_itr ) {
-
-         // Extract the information:
-         ctpIds.push_back( ( *item_itr )->ctpId() );
-         itemNames.push_back( ( *item_itr )->name() );
-         itemPrescales.push_back( prescales[ ( *item_itr )->ctpId() ] );
-
-         // Some verbose information:
-         ATH_MSG_VERBOSE( "  \"" << itemNames.back() << "\" CTP Id = "
-                          << ctpIds.back() << ", prescale = "
-                          << itemPrescales.back() );
-      }
-      menu->setItemCtpIds( ctpIds );
-      menu->setItemNames( itemNames );
-      menu->setItemPrescales( itemPrescales );
-
-      //
-      // Set its HLT information:
-      //
-      ATH_MSG_DEBUG( "Filling HLT information" );
-      std::vector< uint16_t > chainIds;
-      std::vector< std::string > chainNames, chainParentNames;
-      std::vector< float > chainPrescales, chainRerunPrescales,
-         chainPassthroughPrescales;
-
-      std::vector< std::vector< uint32_t > > chainSignatureCounters;
-      std::vector< std::vector< int > > chainSignatureLogics;
-      std::vector< std::vector< std::vector< std::string > > > chainSignatureOutputTEs;
-      std::vector< std::vector< std::string > > chainSignatureLabels;
-
-      TrigConf::HLTChainList::const_iterator chain_itr =
-         m_trigConf->chains().begin();
-      TrigConf::HLTChainList::const_iterator chain_end =
-         m_trigConf->chains().end();
-      for( ; chain_itr != chain_end; ++chain_itr ) {
-
-         // Extract the information:
-         chainIds.push_back( ( *chain_itr )->chain_counter() );
-         chainNames.push_back( ( *chain_itr )->chain_name() );
-         chainParentNames.push_back( ( *chain_itr )->lower_chain_name() );
-         chainPrescales.push_back( ( *chain_itr )->prescale() );
-         chainRerunPrescales.push_back(
-                                       ( *chain_itr )->prescales().getRerunPrescale("").second );
-         chainPassthroughPrescales.push_back( ( *chain_itr )->pass_through() );
-
-         std::vector<uint32_t> counters;
-         std::vector<int> logics;
-         std::vector<std::vector<std::string> > outputTEs;
-         std::vector<std::string> labels;
-
-         ATH_MSG_VERBOSE((*chain_itr)->chain_name() << " has " << (*chain_itr)->signatureList().size() << " signatures");
-         for(auto& signature : (*chain_itr)->signatureList() ){
-            uint32_t cntr = signature->signature_counter();
-            counters.push_back(cntr);
-            logics.push_back(signature->logic());
-            labels.push_back(signature->label());
-            std::vector<std::string> outputTEids;
-            for(auto& outputTE : signature->outputTEs()){
-               outputTEids.push_back(outputTE->name());
-            }
-            outputTEs.push_back(outputTEids);
-            ATH_MSG_VERBOSE("converted this signature: " << *signature);
+      if (!m_converted_smk.insert(ckeys.first).second) {
+         ATH_MSG_VERBOSE("Already converted SMK: " << ckeys.first);
+      } else {
+         ATH_MSG_DEBUG("Filling HLT Menu information for SMK:" << ckeys.first);
+         SG::ReadHandle<TrigConf::HLTMenu> hltMenuHandle(m_HLTMenuKey, ctx);
+         ATH_CHECK(hltMenuHandle.isValid());
+         std::stringstream hltTriggerMenuJson;
+         hltMenuHandle->printRaw(hltTriggerMenuJson);
+         xAOD::TriggerMenuJson *hlt = new xAOD::TriggerMenuJson();
+         m_menuJSON_hlt->push_back(hlt); // Now owned by MetaDataStore
+         hlt->setKey(ckeys.first);
+         hlt->setName(hltMenuHandle->name());
+         hlt->setPayload(hltTriggerMenuJson.str());
+         //////////////////////////////////////////////////////////////////////////////
+         ATH_MSG_DEBUG("Filling HLT Monitoring information for SMK:" << ckeys.first);
+         SG::ReadHandle<TrigConf::HLTMonitoring> hltMonitoringHandle(m_HLTMonitoringKey, ctx);
+         if (hltMonitoringHandle.isValid()) {
+            std::stringstream hltMonitoringJson;
+            hltMonitoringHandle->printRaw(hltMonitoringJson);
+            xAOD::TriggerMenuJson *hltmonitoring = new xAOD::TriggerMenuJson();
+            m_menuJSON_hltmonitoring->push_back(hltmonitoring); // Now owned by MetaDataStore
+            hltmonitoring->setKey(ckeys.first);
+            hltmonitoring->setName(hltMonitoringHandle->name());
+            hltmonitoring->setPayload(hltMonitoringJson.str());
+         } else {
+            ATH_MSG_DEBUG("No HLT Monitoring JSON available - skipping.");
          }
-         chainSignatureCounters.push_back(counters);
-         chainSignatureLogics.push_back(logics);
-         chainSignatureOutputTEs.push_back(outputTEs);
-         chainSignatureLabels.push_back(labels);
-
-         // Some verbose information:
-         ATH_MSG_VERBOSE( "  \"" << chainNames.back() << "\" Chain Id = "
-                          << chainIds.back() << ", parent name = \""
-                          << chainParentNames.back() << "\", prescale = "
-                          << chainPrescales.back() << ", re-run prescale = "
-                          << chainRerunPrescales.back()
-                          << ", pass-through presclale = "
-                          << chainPassthroughPrescales.back() );
-      }
-      menu->setChainIds( chainIds );
-      menu->setChainNames( chainNames );
-      menu->setChainParentNames( chainParentNames );
-      menu->setChainPrescales( chainPrescales );
-      menu->setChainRerunPrescales( chainRerunPrescales );
-      menu->setChainPassthroughPrescales( chainPassthroughPrescales );
-      menu->setChainSignatureCounters(chainSignatureCounters);
-
-      menu->setChainSignatureCounters(chainSignatureCounters);
-      menu->setChainSignatureLogics(chainSignatureLogics);
-      menu->setChainSignatureOutputTEs(chainSignatureOutputTEs);
-      menu->setChainSignatureLabels(chainSignatureLabels);
-
-      //
-      // Set its sequence information:
-      //
-      ATH_MSG_DEBUG( "Filling sequence information" );
-      auto& sequenceList = m_trigConf->sequences();
-      std::vector<std::vector<std::string> > sequenceInputTEs;
-      std::vector<std::string> sequenceOutputTE;
-      std::vector<std::vector<std::string> > sequenceAlgorithms;
-
-      for(auto& seq : sequenceList){
-         std::vector<std::string> inputTEs;
-         for(auto& input : seq->inputTEs()) inputTEs.push_back(input->name());
-         sequenceInputTEs.push_back(inputTEs);
-         sequenceAlgorithms.push_back(seq->algorithms());
-         sequenceOutputTE.push_back(seq->outputTE()->name());
-
-         ATH_MSG_VERBOSE("original sequence: \n" << *seq);
-	
-         ATH_MSG_VERBOSE("added sequence with: ");
-         ATH_MSG_VERBOSE("  inputTEs: " << sequenceInputTEs.back());
-         ATH_MSG_VERBOSE("     algos: " << sequenceAlgorithms.back());
-         ATH_MSG_VERBOSE("  outputTE: " << sequenceOutputTE.back());
+         //////////////////////////////////////////////////////////////////////////////
+         ATH_MSG_DEBUG("Filling L1 information for SMK:" << ckeys.first);
+         SG::ReadHandle<TrigConf::L1Menu> l1MenuHandle = SG::makeHandle(m_L1MenuKey, ctx);
+         ATH_CHECK(l1MenuHandle.isValid());
+         std::stringstream l1TriggerMenuJson;
+         l1MenuHandle->printRaw(l1TriggerMenuJson);
+         xAOD::TriggerMenuJson *l1 = new xAOD::TriggerMenuJson();
+         m_menuJSON_l1->push_back(l1); // Now owned by MetaDataStore
+         l1->setKey(ckeys.first);
+         l1->setName(l1MenuHandle->name());
+         l1->setPayload(l1TriggerMenuJson.str());
       }
 
-      menu->setSequenceInputTEs(sequenceInputTEs);
-      menu->setSequenceOutputTEs(sequenceOutputTE);
-      menu->setSequenceAlgorithms(sequenceAlgorithms);
-
-      //
-      // Set its bunch-group information:
-      //
-      ATH_MSG_DEBUG( "Filling bunch-group information" );
-      std::vector< std::vector< uint16_t > > bgs;
-      std::vector< BunchGroup >::const_iterator bg_itr =
-         m_trigConf->bunchGroupSet()->bunchGroups().begin();
-      std::vector< BunchGroup >::const_iterator bg_end =
-         m_trigConf->bunchGroupSet()->bunchGroups().end();
-      for( int i = 0; bg_itr != bg_end; ++bg_itr, ++i ) {
-
-         // Extract the information. Unfortunately we need to make
-         // and explicit conversion by hand.
-         const std::vector< uint16_t > bunches( bg_itr->bunches().begin(),
-                                                bg_itr->bunches().end() );
-         bgs.push_back( bunches );
-
-         // Some verbose information:
-         ATH_MSG_VERBOSE( "  Bunch group " << i << " bunches: "
-                          << bgs.back() );
+      if (!m_converted_hltpsk.insert(ckeys.second.second).second) {
+         ATH_MSG_VERBOSE("Already converted HLTPSK: " << ckeys.second.second);
+      } else {
+         ATH_MSG_DEBUG("Filling prescale information for HLTPSK:" << ckeys.second.second);
+         SG::ReadCondHandle<TrigConf::HLTPrescalesSet> hltPSHandle(m_HLTPrescaleSetInputKey, ctx);
+         ATH_CHECK(hltPSHandle.isValid());
+         std::stringstream hltPSJSON;
+         hltPSHandle->printRaw(hltPSJSON);
+         xAOD::TriggerMenuJson *hltps = new xAOD::TriggerMenuJson();
+         m_menuJSON_hltps->push_back(hltps); // Now owned by MetaDataStore
+         hltps->setKey(ckeys.second.second);
+         hltps->setName(hltPSHandle->name());
+         hltps->setPayload(hltPSJSON.str());
       }
-      menu->setBunchGroupBunches( bgs );
+
+      if (!m_converted_l1psk.insert(ckeys.second.first).second) {
+         ATH_MSG_VERBOSE("Already converted LVL1PSK: " << ckeys.second.first);
+      } else {
+         ATH_MSG_DEBUG("Filling prescale information for LVL1PSK:" << ckeys.second.first);
+         SG::ReadCondHandle<TrigConf::L1PrescalesSet> l1PSHandle(m_L1PrescaleSetInputKey, ctx);
+         ATH_CHECK(l1PSHandle.isValid());
+         std::stringstream l1PSJSON;
+         l1PSHandle->printRaw(l1PSJSON);
+         xAOD::TriggerMenuJson *l1ps = new xAOD::TriggerMenuJson();
+         m_menuJSON_l1ps->push_back(l1ps); // Now owned by MetaDataStore
+         l1ps->setKey(ckeys.second.first);
+         l1ps->setName(l1PSHandle->name());
+         l1ps->setPayload(l1PSJSON.str());
+      }
+
+      if (!m_converted_bg.insert(bunchgroupKey).second) {
+         ATH_MSG_VERBOSE("Already converted Bunchgroup Key: " << bunchgroupKey);
+      } else {
+         ATH_MSG_DEBUG("Filling prescale information for Bunchgroup Key:" << bunchgroupKey);
+         SG::ReadCondHandle<TrigConf::L1BunchGroupSet> bunchgroupHandle(m_bgInputKey, ctx);
+         ATH_CHECK(bunchgroupHandle.isValid());
+         std::stringstream l1BunchgroupJSON;
+         bunchgroupHandle->printRaw(l1BunchgroupJSON);
+         xAOD::TriggerMenuJson *l1bg = new xAOD::TriggerMenuJson();
+         m_menuJSON_bg->push_back(l1bg); // Now owned by MetaDataStore
+         l1bg->setKey(bunchgroupKey);
+         l1bg->setName(bunchgroupHandle->name());
+         l1bg->setPayload(l1BunchgroupJSON.str());
+      }
 
       // Return gracefully:
       return StatusCode::SUCCESS;
    }
 
-} // namespace TrigConf
+}

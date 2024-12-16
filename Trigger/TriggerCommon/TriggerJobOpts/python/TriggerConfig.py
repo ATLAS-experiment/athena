@@ -497,7 +497,7 @@ def triggerPOOLOutputCfg(flags):
                                             createMetadata=[MetadataCategory.TriggerMenuMetaData]))
 
         alg = acc.getEventAlgo(outputStreamName(outputType))
-        # Ensure OutputStream runs after TrigDecisionMakerMT and xAODMenuWriterMT
+        # Ensure OutputStream runs after TrigDecisionMakerMT and xAODMenuWriter
         alg.ExtraInputs |= {
             ("xAOD::TrigDecision", str(decmaker.TrigDecisionKey)),
             ("xAOD::TrigConfKeys", metadataOutputs)} | set(xRoIBResultOutputs)
