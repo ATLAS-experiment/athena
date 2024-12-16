@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PFOPVMATCHEDPLOTS_H
@@ -16,21 +16,21 @@ namespace PFO {
 
   public:
 
-    PFOPVMatchedPlots(PlotBase *pParent, std::string sDir, std::string sFEContainerName);
+    PFOPVMatchedPlots(PlotBase *pParent, const std::string & sDir, const std::string & sFEContainerName);
 
     void fill(const xAOD::FlowElement& FE, const xAOD::Vertex& theVertex, const xAOD::EventInfo& eventInfo);
 
   private:
-    TH1* m_FE_pt;
-    TH1* m_FE_eta;
-    TH1* m_FE_phi;
-    TH1* m_FE_m;
-    TH1* m_FE_charge;
+    TH1* m_FE_pt{};
+    TH1* m_FE_eta{};
+    TH1* m_FE_phi{};
+    TH1* m_FE_m{};
+    TH1* m_FE_charge{};
     
     /** Pt Histogram binned in eta */
-    TH1* m_FE_pt_etaBinA;
-    TH1* m_FE_pt_etaBinB;
-    TH1* m_FE_pt_etaBinC;
+    TH1* m_FE_pt_etaBinA{};
+    TH1* m_FE_pt_etaBinB{};
+    TH1* m_FE_pt_etaBinC{};
     
     void initializePlots();
     std::string m_sFEContainerName;

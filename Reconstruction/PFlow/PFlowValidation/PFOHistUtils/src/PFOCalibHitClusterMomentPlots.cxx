@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOHistUtils/PFOCalibHitClusterMomentPlots.h"
 
 namespace PFO {
-PFOCalibHitClusterMomentPlots::PFOCalibHitClusterMomentPlots(PlotBase* pParent, std::string sDir, std::string sPFOContainerName, std::string sFEContainerName) : PlotBase(pParent, sDir), m_sPFOContainerName(sPFOContainerName), m_sFEContainerName(sFEContainerName){
+PFOCalibHitClusterMomentPlots::PFOCalibHitClusterMomentPlots(PlotBase* pParent, const std::string & sDir, const std::string & sPFOContainerName, const std::string & sFEContainerName) : PlotBase(pParent, sDir), m_sPFOContainerName(sPFOContainerName), m_sFEContainerName(sFEContainerName){
   }
 
   void PFOCalibHitClusterMomentPlots::initializePlots(){

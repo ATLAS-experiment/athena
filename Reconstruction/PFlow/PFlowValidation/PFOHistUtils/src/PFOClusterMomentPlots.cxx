@@ -1,72 +1,14 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOHistUtils/PFOClusterMomentPlots.h"
 
 namespace PFO {
 
-  PFOClusterMomentPlots::PFOClusterMomentPlots(PlotBase* pParent, std::string sDir, std::string sFEContainerName) : PlotBase(pParent, sDir), m_sFEContainerName(sFEContainerName){
+  PFOClusterMomentPlots::PFOClusterMomentPlots(PlotBase* pParent, const std::string & sDir, const std::string & sFEContainerName) : PlotBase(pParent, sDir), m_sFEContainerName(sFEContainerName){
         
-    m_FE_SECOND_R = nullptr;
-    m_FE_CENTER_LAMBDA = nullptr;
-    m_FE_ISOLATION = nullptr;
-    m_FE_ENG_BAD_CELLS = nullptr;
-    m_FE_N_BAD_CELLS = nullptr;
-    m_FE_BADLARQ_FRAC = nullptr;
-    m_FE_ENG_POS = nullptr;
-    m_FE_AVG_LAR_Q = nullptr;
-    m_FE_AVG_TILE_Q = nullptr;
-    m_FE_EM_PROBABILITY = nullptr;
-    m_FE_SECOND_LAMBDA = nullptr;
-
-    m_FE_SECOND_R_etaBinA = nullptr;
-    m_FE_CENTER_LAMBDA_etaBinA = nullptr;
-    m_FE_ISOLATION_etaBinA = nullptr;
-    m_FE_ENG_BAD_CELLS_etaBinA = nullptr;
-    m_FE_N_BAD_CELLS_etaBinA = nullptr;
-    m_FE_BADLARQ_FRAC_etaBinA = nullptr;
-    m_FE_ENG_POS_etaBinA = nullptr;
-    m_FE_AVG_LAR_Q_etaBinA = nullptr;
-    m_FE_AVG_TILE_Q_etaBinA = nullptr;
-    m_FE_EM_PROBABILITY_etaBinA = nullptr;
-    m_FE_SECOND_LAMBDA_etaBinA = nullptr;
-
-    m_FE_SECOND_R_etaBinB = nullptr;
-    m_FE_CENTER_LAMBDA_etaBinB = nullptr;
-    m_FE_ISOLATION_etaBinB = nullptr;
-    m_FE_ENG_BAD_CELLS_etaBinB = nullptr;
-    m_FE_N_BAD_CELLS_etaBinB = nullptr;
-    m_FE_BADLARQ_FRAC_etaBinB = nullptr;
-    m_FE_ENG_POS_etaBinB = nullptr;
-    m_FE_AVG_LAR_Q_etaBinB = nullptr;
-    m_FE_AVG_TILE_Q_etaBinB = nullptr;
-    m_FE_EM_PROBABILITY_etaBinB = nullptr;
-    m_FE_SECOND_LAMBDA_etaBinB = nullptr;
-
-    m_FE_SECOND_R_etaBinC = nullptr;
-    m_FE_CENTER_LAMBDA_etaBinC = nullptr;
-    m_FE_ISOLATION_etaBinC = nullptr;
-    m_FE_ENG_BAD_CELLS_etaBinC = nullptr;
-    m_FE_N_BAD_CELLS_etaBinC = nullptr;
-    m_FE_BADLARQ_FRAC_etaBinC = nullptr;
-    m_FE_ENG_POS_etaBinC = nullptr;
-    m_FE_AVG_LAR_Q_etaBinC = nullptr;
-    m_FE_AVG_TILE_Q_etaBinC = nullptr;
-    m_FE_EM_PROBABILITY_etaBinC = nullptr;
-    m_FE_SECOND_LAMBDA_etaBinC = nullptr;
-
-    m_FE_SECOND_R_etaBinD = nullptr;
-    m_FE_CENTER_LAMBDA_etaBinD = nullptr;
-    m_FE_ISOLATION_etaBinD = nullptr;
-    m_FE_ENG_BAD_CELLS_etaBinD = nullptr;
-    m_FE_N_BAD_CELLS_etaBinD = nullptr;
-    m_FE_BADLARQ_FRAC_etaBinD = nullptr;
-    m_FE_ENG_POS_etaBinD = nullptr;
-    m_FE_AVG_LAR_Q_etaBinD = nullptr;
-    m_FE_AVG_TILE_Q_etaBinD = nullptr;
-    m_FE_EM_PROBABILITY_etaBinD = nullptr;
-    m_FE_SECOND_LAMBDA_etaBinD = nullptr;
+   
   }
 
   void PFOClusterMomentPlots::initializePlots(){

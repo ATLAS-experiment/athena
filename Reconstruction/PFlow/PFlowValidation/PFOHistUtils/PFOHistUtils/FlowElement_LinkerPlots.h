@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FLOWELEMENT_LINKERPLOTS_H
@@ -11,47 +11,50 @@
 #include <string>
 #include "xAODEventInfo/EventInfo.h"
 
+
+class TH1;
+
 namespace PFO{
 
   class FlowElement_LinkerPlots : public PlotBase {
 
   public:
-    FlowElement_LinkerPlots(PlotBase *pParent, std::string sDir, std::string sFEContainerName, bool doNeutralFE);
+    FlowElement_LinkerPlots(PlotBase *pParent, const std::string & sDir, const std::string & sFEContainerName, bool doNeutralFE);
 
     void fill(const xAOD::FlowElement& FE, const xAOD::EventInfo& eventInfo);
 
   private:
 
 
-    TH1* m_CFE_tau_dR;
-    TH1* m_CFE_tau_NMatchedTau;
+    TH1* m_CFE_tau_dR{};
+    TH1* m_CFE_tau_NMatchedTau{};
     
-    TH1* m_NFE_tau_dR;
-    TH1* m_NFE_tau_NMatchedTau;
+    TH1* m_NFE_tau_dR{};
+    TH1* m_NFE_tau_NMatchedTau{};
     
-    TH1* m_CFE_muon_dR;
-    TH1* m_CFE_muon_NMatchedMuon;
-    TH1* m_CFE_muon_largeDR_debug_author;
-    TH1* m_CFE_muon_largeDR_debug_type;
+    TH1* m_CFE_muon_dR{};
+    TH1* m_CFE_muon_NMatchedMuon{};
+    TH1* m_CFE_muon_largeDR_debug_author{};
+    TH1* m_CFE_muon_largeDR_debug_type{};
     
-    TH1* m_NFE_muon_dR;
-    TH1* m_NFE_muon_NMatchedMuon;
+    TH1* m_NFE_muon_dR{};
+    TH1* m_NFE_muon_NMatchedMuon{};
       
-    TH1* m_CFE_photon_dR;
-    TH1* m_CFE_photon_NMatchedPhoton;
+    TH1* m_CFE_photon_dR{};
+    TH1* m_CFE_photon_NMatchedPhoton{};
 
-    TH1* m_NFE_photon_dR;
-    TH1* m_NFE_photon_NMatchedPhoton;
+    TH1* m_NFE_photon_dR{};
+    TH1* m_NFE_photon_NMatchedPhoton{};
 
-    TH1* m_CFE_electron_dR;
-    TH1* m_CFE_electron_NMatchedElectron;
+    TH1* m_CFE_electron_dR{};
+    TH1* m_CFE_electron_NMatchedElectron{};
     
-    TH1* m_NFE_electron_dR;
-    TH1* m_NFE_electron_NMatchedElectron;
+    TH1* m_NFE_electron_dR{};
+    TH1* m_NFE_electron_NMatchedElectron{};
 
     void initializePlots();
     std::string m_sFEContainerName;
-    bool m_doNeutralFE;
+    bool m_doNeutralFE{};
   };
 
 }

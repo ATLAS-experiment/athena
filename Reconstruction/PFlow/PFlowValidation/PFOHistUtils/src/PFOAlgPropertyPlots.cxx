@@ -1,23 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOHistUtils/PFOAlgPropertyPlots.h"
 
 namespace PFO {
 
-  PFOAlgPropertyPlots::PFOAlgPropertyPlots(PlotBase* pParent, std::string sDir, std::string sFEContainerName) : PlotBase(pParent, sDir), m_sFEContainerName(sFEContainerName){    
-    m_FE_isInDenseEnvironment = nullptr;
-    m_FE_tracksExpectedEnergyDeposit = nullptr;
-
-    m_FE_isInDenseEnvironment_etaBinA = nullptr;
-    m_FE_tracksExpectedEnergyDeposit_etaBinA = nullptr;
-
-    m_FE_isInDenseEnvironment_etaBinB = nullptr;
-    m_FE_tracksExpectedEnergyDeposit_etaBinB = nullptr;
-
-    m_FE_isInDenseEnvironment_etaBinC = nullptr;
-    m_FE_tracksExpectedEnergyDeposit_etaBinC = nullptr;
+  PFOAlgPropertyPlots::PFOAlgPropertyPlots(PlotBase* pParent, const std::string & sDir, const std::string & sFEContainerName) : PlotBase(pParent, sDir), m_sFEContainerName(sFEContainerName){    
+   
   }
 
   void PFOAlgPropertyPlots::initializePlots(){    

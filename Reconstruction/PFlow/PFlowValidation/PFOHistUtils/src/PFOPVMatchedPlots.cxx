@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOHistUtils/PFOPVMatchedPlots.h"
@@ -7,12 +7,8 @@
 
 namespace PFO {
 
-  PFOPVMatchedPlots::PFOPVMatchedPlots(PlotBase* pParent, std::string sDir, std::string sFEContainerName) : PlotBase(pParent, sDir), m_sFEContainerName(sFEContainerName){    
-    m_FE_pt = nullptr;
-    m_FE_eta = nullptr;
-    m_FE_phi = nullptr;
-    m_FE_m = nullptr;
-    m_FE_charge = nullptr;
+  PFOPVMatchedPlots::PFOPVMatchedPlots(PlotBase* pParent, const std::string & sDir, const std::string & sFEContainerName) : PlotBase(pParent, sDir), m_sFEContainerName(sFEContainerName){    
+   
   }
 
   void PFOPVMatchedPlots::initializePlots(){    

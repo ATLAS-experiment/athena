@@ -6,9 +6,11 @@
 #define CLUSTERPLOTS_H
 
 #include "TrkValHistUtils/PlotBase.h"
-#include "xAODEventInfo/EventInfo.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
+#include "xAODEventInfo/EventInfo.h"
+
+class TH1;
 
 
 namespace PFO {
@@ -17,7 +19,7 @@ namespace PFO {
 
   public:
 
-     ClusterPlots(PlotBase *pParent, std::string sDir, SG::ReadHandleKey<xAOD::CaloClusterContainer>& sClusterContainerName);
+     ClusterPlots(PlotBase *pParent, const std::string & sDir, SG::ReadHandleKey<xAOD::CaloClusterContainer>& sClusterContainerName);
 
      void fill(const xAOD::CaloCluster& Cluster, const xAOD::EventInfo& eventInfo);
 

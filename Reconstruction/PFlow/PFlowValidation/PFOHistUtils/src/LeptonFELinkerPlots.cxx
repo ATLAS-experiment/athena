@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOHistUtils/LeptonFELinkerPlots.h"
-#include <iostream>
 #include "xAODPFlow/FlowElementContainer.h"
 #include "xAODMuon/MuonContainer.h"
 #include "xAODEgamma/ElectronContainer.h"
@@ -12,7 +11,7 @@
 #include "AthLinks/ElementLink.h"
 
 namespace PFO {
-  LeptonFELinkerPlots::LeptonFELinkerPlots(PlotBase* pParent, std::string sDir, std::string LeptonContainerName,const bool& doNeutralFE,const int& PID): 
+  LeptonFELinkerPlots::LeptonFELinkerPlots(PlotBase* pParent,const std::string & sDir, const std::string & LeptonContainerName,const bool& doNeutralFE,const int& PID): 
     PlotBase(pParent, sDir),
     m_LeptonContainerName(LeptonContainerName),
     m_doNeutralFE(doNeutralFE),
