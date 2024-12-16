@@ -180,15 +180,15 @@ namespace InDet{
          void buildFrameWork(double r_rmax, double r_rstep, double ptmin);
          void erase(); // unused?
 
-         int m_r_size                                                   ;
+         int m_r_size{}                                                   ;
          std::list<std::pair<const Trk::SpacePoint*,int> > m_rf_Sorted[530]   ;
          std::list<std::pair<const Trk::SpacePoint*,int> > m_newRfi_Sorted    ;
 
          int m_ns=0                                                     ;
          int m_fNmax=0                                                  ;
          int  m_nr=0     ; int* m_r_index=nullptr; int* m_r_map=nullptr ;
-         int  m_nrf=0   , m_rf_index   [ 530], m_rf_map   [ 530]        ;
-         double m_sF;
+         int  m_nrf=0   , m_rf_index   [ 530]{}, m_rf_map   [ 530]{}        ;
+         double m_sF{};
 
       };
 
@@ -239,16 +239,16 @@ namespace InDet{
       // instead of repeating the same computations many times in the
       // nested loop (memory allocated and deallocated in production2Spb)
       struct bypass_struct {
-	double X, Y, Z;
-	double R, invR;
-	double a, b;
+        double X{}, Y{}, Z{};
+        double R{}, invR{};
+        double a{}, b{};
       };
 
       // place to keep scalar values needed for cuts, common to all seeds
       // updated only once per production2Sp call instead or each cutTPb
       struct invar_bypass_struct {
-	  double min_theta, max_theta, min_phi, max_phi, invp_min, invp_max,
-	  invp_min2, invp_max2;
+        double min_theta{}, max_theta{}, min_phi{}, max_phi{}, invp_min{}, invp_max{},
+        invp_min2{}, invp_max2{};
       };
 
       /** Cut on chi2 based on TRT segment qOverP, theta and phi track parameters */

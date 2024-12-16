@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkSurfaces/PlaneSurface.h"
@@ -8,23 +8,7 @@
 // Inline methods
 /////////////////////////////////////////////////////////////////////////////////
 
-inline InDet::SiTrajectory_xk::SiTrajectory_xk()
-  : m_firstElement (0),
-    m_lastElement (0),
-    m_nclusters (0),
-    m_nclustersNoAdd (0),
-    m_difference (0),
-    m_nHolesBefore (0),
-    m_nHolesAfter (0),
-    m_nholes (0),
-    m_dholes (0),
-    m_nActiveElements (0),
-    m_nElements (0),
-    m_ndfcut (0),
-    m_ndf (0),
-    m_ntos (0),
-    m_tools (nullptr)
-{
+inline InDet::SiTrajectory_xk::SiTrajectory_xk(){
 }
 
 inline InDet::SiTrajectory_xk::SiTrajectory_xk(const InDet::SiTrajectory_xk& T)
