@@ -44,8 +44,6 @@ namespace TrigConf
 
    StatusCode xAODMenuWriterMT::initialize()
    {
-      // cppcheck-suppress-begin danglingLifetime; cached pointers owned by store
-
       // Greet the user:
       ATH_MSG_INFO("Initialising");
       ATH_MSG_VERBOSE("MetaDataStore = " << m_metaStore);
@@ -120,8 +118,6 @@ namespace TrigConf
       ATH_CHECK( m_metaStore->record(std::move(aux_bg), m_metaNameJSON_bg + "Aux." ) );
       ATH_CHECK( m_metaStore->record(std::move(bg), m_metaNameJSON_bg ) );
       m_menuJSON_bg = m_metaStore->retrieve<xAOD::TriggerMenuJsonContainer>(m_metaNameJSON_bg); // Keep a cached pointer from which we can add to the output metastore
-
-      // cppcheck-suppress-end danglingLifetime
 
       // Return gracefully:
       return StatusCode::SUCCESS;
