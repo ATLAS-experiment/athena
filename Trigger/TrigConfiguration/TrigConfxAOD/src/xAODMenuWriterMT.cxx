@@ -68,58 +68,58 @@ namespace TrigConf
       ATH_CHECK(m_bgInputKey.initialize()); // ReadCondHandleKey
 
       // HLT JSON object - contains HLT menus
-      std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_hlt = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
-      std::unique_ptr<xAOD::TriggerMenuJsonContainer> hlt = std::make_unique<xAOD::TriggerMenuJsonContainer>();
-      m_menuJSON_hlt = hlt.get(); // Keep a cached pointer from which we can add to the output metastore
-      m_menuJSON_hlt->setStore(aux_hlt.get());
+      auto aux_hlt = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
+      auto hlt = std::make_unique<xAOD::TriggerMenuJsonContainer>();
+      hlt->setStore(aux_hlt.get());
 
       ATH_CHECK(m_metaStore->record(std::move(aux_hlt), m_metaNameJSON_hlt + "Aux."));
       ATH_CHECK(m_metaStore->record(std::move(hlt), m_metaNameJSON_hlt));
+      m_menuJSON_hlt = m_metaStore->retrieve<xAOD::TriggerMenuJsonContainer> (m_metaNameJSON_hlt); // Keep a cached pointer from which we can add to the output metastore
 
       // HLT Monitoring JSON object - contains Monitoring groups for HLT menus
-      std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_hltmonitoring = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
-      std::unique_ptr<xAOD::TriggerMenuJsonContainer> hltmonitoring = std::make_unique<xAOD::TriggerMenuJsonContainer>();
-      m_menuJSON_hltmonitoring = hltmonitoring.get(); // Keep a cached pointer from which we can add to the output metastore
-      m_menuJSON_hltmonitoring->setStore(aux_hltmonitoring.get());
+      auto aux_hltmonitoring = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
+      auto hltmonitoring = std::make_unique<xAOD::TriggerMenuJsonContainer>();
+      hltmonitoring->setStore(aux_hltmonitoring.get());
 
       ATH_CHECK(m_metaStore->record(std::move(aux_hltmonitoring), m_metaNameJSON_hltmonitoring + "Aux."));
       ATH_CHECK(m_metaStore->record(std::move(hltmonitoring), m_metaNameJSON_hltmonitoring));
+      m_menuJSON_hltmonitoring = m_metaStore->retrieve<xAOD::TriggerMenuJsonContainer> (m_metaNameJSON_hltmonitoring); // Keep a cached pointer from which we can add to the output metastore
 
       // L1 JSON object - contains L1 menus
-      std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_l1 = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
-      std::unique_ptr<xAOD::TriggerMenuJsonContainer> l1 = std::make_unique<xAOD::TriggerMenuJsonContainer>();
-      m_menuJSON_l1 = l1.get(); // Keep a cached pointer from which we can add to the output metastore
-      m_menuJSON_l1->setStore(aux_l1.get());
+      auto aux_l1 = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
+      auto l1 = std::make_unique<xAOD::TriggerMenuJsonContainer>();
+      l1->setStore(aux_l1.get());
 
       ATH_CHECK(m_metaStore->record(std::move(aux_l1), m_metaNameJSON_l1 + "Aux."));
       ATH_CHECK(m_metaStore->record(std::move(l1), m_metaNameJSON_l1));
+      m_menuJSON_l1 = m_metaStore->retrieve<xAOD::TriggerMenuJsonContainer>(m_metaNameJSON_l1); // Keep a cached pointer from which we can add to the output metastore
 
       // HLT PS JSON object - contains prescales sets for HLT menus
-      std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_hltps = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
-      std::unique_ptr<xAOD::TriggerMenuJsonContainer> hltps = std::make_unique<xAOD::TriggerMenuJsonContainer>();
-      m_menuJSON_hltps = hltps.get(); // Keep a cached pointer from which we can add to the output metastore
-      m_menuJSON_hltps->setStore(aux_hltps.get());
+      auto aux_hltps = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
+      auto hltps = std::make_unique<xAOD::TriggerMenuJsonContainer>();
+      hltps->setStore(aux_hltps.get());
 
       ATH_CHECK(m_metaStore->record(std::move(aux_hltps), m_metaNameJSON_hltps + "Aux."));
       ATH_CHECK(m_metaStore->record(std::move(hltps), m_metaNameJSON_hltps));
+      m_menuJSON_hltps = m_metaStore->retrieve<xAOD::TriggerMenuJsonContainer>(m_metaNameJSON_hltps); // Keep a cached pointer from which we can add to the output metastore
 
       // L1 PS JSON object - contains prescales sets for L1 menus
-      std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_l1ps = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
-      std::unique_ptr<xAOD::TriggerMenuJsonContainer> l1ps = std::make_unique<xAOD::TriggerMenuJsonContainer>();
-      m_menuJSON_l1ps = l1ps.get(); // Keep a cached pointer from which we can add to the output metastore
-      m_menuJSON_l1ps->setStore(aux_l1ps.get());
+      auto aux_l1ps = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
+      auto l1ps = std::make_unique<xAOD::TriggerMenuJsonContainer>();
+      l1ps->setStore(aux_l1ps.get());
 
       ATH_CHECK(m_metaStore->record(std::move(aux_l1ps), m_metaNameJSON_l1ps + "Aux."));
       ATH_CHECK(m_metaStore->record(std::move(l1ps), m_metaNameJSON_l1ps));
+      m_menuJSON_l1ps = m_metaStore->retrieve<xAOD::TriggerMenuJsonContainer>(m_metaNameJSON_l1ps); // Keep a cached pointer from which we can add to the output metastore
 
       // Bunchgroup JSON object - contains bungchgroup configuration
-      std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_bg = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
-      std::unique_ptr<xAOD::TriggerMenuJsonContainer> bg = std::make_unique<xAOD::TriggerMenuJsonContainer>();
-      m_menuJSON_bg = bg.get(); // Keep a cached pointer from which we can add to the output metastore
-      m_menuJSON_bg->setStore( aux_bg.get() );
+      auto aux_bg = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
+      auto bg = std::make_unique<xAOD::TriggerMenuJsonContainer>();
+      bg->setStore( aux_bg.get() );
 
       ATH_CHECK( m_metaStore->record(std::move(aux_bg), m_metaNameJSON_bg + "Aux." ) );
       ATH_CHECK( m_metaStore->record(std::move(bg), m_metaNameJSON_bg ) );
+      m_menuJSON_bg = m_metaStore->retrieve<xAOD::TriggerMenuJsonContainer>(m_metaNameJSON_bg); // Keep a cached pointer from which we can add to the output metastore
 
       // cppcheck-suppress-end danglingLifetime
 
