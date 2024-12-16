@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,9 +10,9 @@
  * @date Sep, 2013
  * @brief Helper for emitting error messages.
  *
- * This defines the macro @c ATHCONTAINER_ERROR, which emits an error
- * through the message service if we're built for Athena and prints
- * it directly if we're built standalone.
+ * This defines the macros @c ATHCONTAINER_ERROR and @c ATHCONTAINER_WARNING,
+ * which emit an diagnostics through the message service if we're built
+ * for Athena and print them directly if we're built standalone.
  *
  * We also define @c AthContainers_detail::typeinfoName.
  */
@@ -28,14 +28,18 @@
 #include <typeinfo>
 
 #define ATHCONTAINERS_ERROR(ctx, msg) \
-  AthContainers_detail::reportErrorStandalone(ctx, __FILE__, __LINE__, msg)
+  AthContainers_detail::reportMessageStandalone(ctx, "ERROR", __FILE__, __LINE__, msg)
+
+#define ATHCONTAINERS_WARNING(ctx, msg)                                   \
+  AthContainers_detail::reportMessageStandalone(ctx, "WARNING", __FILE__, __LINE__, msg)
 
 
 namespace AthContainers_detail {
 
-void reportErrorStandalone (const std::string& context,
-                            const std::string& file, int line,
-                            const std::string& msg);
+void reportMessageStandalone (const std::string& context,
+                              const std::string& severity,
+                              const std::string& file, int line,
+                              const std::string& msg);
 
 std::string typeinfoName (const std::type_info& ti);
 
@@ -49,6 +53,9 @@ std::string typeinfoName (const std::type_info& ti);
 
 #define ATHCONTAINERS_ERROR(ctx, msg) \
   errorcheck::ReportMessage(MSG::ERROR, __LINE__, __FILE__, "", ATLAS_PACKAGE_NAME, ctx).msgstream() << msg
+
+#define ATHCONTAINERS_WARNING(ctx, msg) \
+  errorcheck::ReportMessage(MSG::WARNING, __LINE__, __FILE__, "", ATLAS_PACKAGE_NAME, ctx).msgstream() << msg
 
 namespace AthContainers_detail {
 
