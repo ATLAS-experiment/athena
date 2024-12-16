@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //Author: Lianyou Shan <lianyou.shan@cern.ch>
 //#define Mode3dFromFsmw1d_DEBUG
@@ -420,9 +420,7 @@ int Mode3dFromFsmw1dFinder::doModeSearch( VeVecIndices * idxs,
     for ( unsigned int splt = 0 ; splt < M + 1 ; splt ++ ) 
     {
       // below lines are tooo dirty ...
-      std::vector< IndexedWeighted > tmpor ;
-
-      std::vector< std::pair< int, int> > idxplt =  
+      const std::vector< std::pair< int, int> >& idxplt =
         ( splt == M ?  (*idxs)[splt-1] : (*idxs)[splt] ) ;
 
       int sz = idxplt.size() - 1 ;
@@ -445,8 +443,8 @@ int Mode3dFromFsmw1dFinder::doModeSearch( VeVecIndices * idxs,
         begin = origin + offset ;
       } else 
       {
-        std::vector< std::pair< int, int> > idxprevious = (*idxs)[splt-1] ;
-        offset = idxprevious[sz].second ;
+        const std::vector< std::pair< int, int> >& idxprevious = (*idxs)[splt-1] ;
+        offset = idxprevious.back().second ;
         ATH_MSG_VERBOSE(" offset begin = " << offset );
         if ( offset > tot - 3 || offset < sz + 1 ) continue ;
         begin = origin + offset + 1 ;
@@ -459,9 +457,7 @@ int Mode3dFromFsmw1dFinder::doModeSearch( VeVecIndices * idxs,
       if ( end < begin + 2 ) continue ;
 
       ATH_MSG_DEBUG(" new searching domain is defined in splitted region " << splt );
-      tmpor.insert(  tmpor.end(), begin, end ) ;
-  
-      position_OR.push_back( tmpor ) ;
+      position_OR.emplace_back( begin, end ) ;
     } 
   } else 
     position_OR.push_back( position ) ; // zero split
@@ -469,7 +465,7 @@ int Mode3dFromFsmw1dFinder::doModeSearch( VeVecIndices * idxs,
   for ( unsigned int splt = 0 ; splt < position_OR.size() ; splt ++ )
   {
     ATH_MSG_DEBUG(" In split " << splt <<" after overlap removal " );
-    std::vector< IndexedWeighted > spltposi = position_OR[splt] ;
+    const std::vector< IndexedWeighted >& spltposi = position_OR[splt] ;
     int spltgot = 0, lastgot = 0 ;
     do
     {
@@ -666,7 +662,7 @@ Mode3dFromFsmw1dFinder::CheckCorrelation( [[maybe_unused]] Mode3dFromFsmw1dInfo&
 
 
 std::vector< std::pair< int, int > >
-Mode3dFromFsmw1dFinder::getFsmw1dMode( std::vector< IndexedWeighted > & posidxwght, 
+Mode3dFromFsmw1dFinder::getFsmw1dMode( const std::vector< IndexedWeighted > & posidxwght,
                                        int minModeDiff) const 
 {
   // the 1st is the absolute index from initial crossings
