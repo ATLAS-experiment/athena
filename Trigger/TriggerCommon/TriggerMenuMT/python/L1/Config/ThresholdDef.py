@@ -199,7 +199,7 @@ class ThresholdDef:
             cTauThreshold('cTAU%iM' % thrV, 'cTAU').setEt(get_threshold_cut('cTAU', thrV)).setIsolation( isolation = f'Medium{thrV}' )
 
         # cTAU SPARES
-        for thrV in range(1,3):
+        for thrV in range(1,4):
             cTauThreshold('cTAUSPARE%i' % thrV, 'cTAU').setEt(thrVal_SPARE)
 
         # jTAU
