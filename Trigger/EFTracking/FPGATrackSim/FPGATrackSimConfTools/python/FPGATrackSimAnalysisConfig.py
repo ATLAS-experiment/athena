@@ -250,7 +250,7 @@ def NNTrackToolCfg(flags):
     NNTrackTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     NNTrackTool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
     NNTrackTool.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
-    NNTrackTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints
+    NNTrackTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan
     NNTrackTool.SPRoadFilterTool = getSPRoadFilterTool(flags)
     
     result.setPrivateTools(NNTrackTool)
@@ -270,7 +270,7 @@ def FPGATrackSimTrackFitterToolCfg(flags):
     TF_1st.DoDeltaGPhis = flags.Trigger.FPGATrackSim.ActiveConfig.doDeltaGPhis
     TF_1st.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
     TF_1st.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
-    TF_1st.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints
+    TF_1st.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan
     TF_1st.SPRoadFilterTool = getSPRoadFilterTool(flags)
     result.addPublicTool(TF_1st, primary=True)
     return result
@@ -382,7 +382,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHitsProcessAlg.OverlapRemoval_1st = result.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags))
 
     # Create SPRoadFilterTool if spacepoints are turned on. TODO: make things configurable?
-    if flags.Trigger.FPGATrackSim.spacePoints:
+    if flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan:
         theFPGATrackSimLogicalHitsProcessAlg.SPRoadFilterTool = getSPRoadFilterTool(flags)
         theFPGATrackSimLogicalHitsProcessAlg.Spacepoints = True
 

@@ -28,8 +28,8 @@ def FPGATrackSimWindowExtensionToolCfg(flags):
 
     # These MUST be of size equal to the full number of layers (13), though only the "new" layers
     # in the second stage are actually used.
-    FPGATrackSimWindowExtensionTool.phiWindow = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0.035, 0.01, 0.008, 0.008]
-    FPGATrackSimWindowExtensionTool.zWindow =   [0, 0, 0, 0, 0, 0, 0, 0, 0, 3.62, 4.42, 5.59, 7.13]
+    FPGATrackSimWindowExtensionTool.zWindow =   [0, 0, 0, 0, 0, 20,20,30,30,40,40,50,50]
+    FPGATrackSimWindowExtensionTool.phiWindow = [0, 0, 0, 0, 0, 0.01, 0.01, 0.02, 0.02, 0.04, 0.04, 0.05, 0.05]
 
     # Other settings, shared with the first stage mostly. disable 2nd stage tracking for now.
     FPGATrackSimWindowExtensionTool.fieldCorrection =flags.Trigger.FPGATrackSim.ActiveConfig.fieldCorrection
@@ -134,7 +134,7 @@ def FPGATrackSimSecondStageAlgCfg(inputFlags):
     theFPGATrackSimSecondStageAlg.FPGATrackSimMapping = FPGATrackSimMapping
 
     # If tracking is set to False, don't configure the bank service
-    if flags.Trigger.FPGATrackSim.tracking:
+    if theFPGATrackSimSecondStageAlg.tracking:
         result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.FPGATrackSimBankSvcCfg(flags))
 
     # Here, configure the window tool.
@@ -149,7 +149,7 @@ def FPGATrackSimSecondStageAlgCfg(inputFlags):
     theFPGATrackSimSecondStageAlg.OverlapRemoval_2nd = result.popToolsAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags))
 
     # Create SPRoadFilterTool if spacepoints are turned on. TODO: make things configurable?
-    if flags.Trigger.FPGATrackSim.spacePoints:
+    if flags.Trigger.FPGATrackSim.spacePoints and theFPGATrackSimSecondStageAlg.tracking:
         theFPGATrackSimSecondStageAlg.SPRoadFilterTool = FPGATrackSimAnalysisConfig.getSPRoadFilterTool(flags,secondStage=True)
         theFPGATrackSimSecondStageAlg.Spacepoints = True
 

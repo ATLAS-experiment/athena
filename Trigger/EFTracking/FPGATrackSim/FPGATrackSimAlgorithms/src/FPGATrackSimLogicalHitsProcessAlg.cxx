@@ -173,7 +173,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> prefilter_roads;
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st = prefilter_roads;
     ATH_CHECK(m_roadFinderTool->getRoads(phits_1st, roads_1st, *FPGATruthTracks));
- 
+
     auto mon_nroads_1st = Monitored::Scalar<unsigned>("nroads_1st", roads_1st.size());
     for (auto const &road : roads_1st) {
       unsigned bitmask = road->getHitLayers();
@@ -204,7 +204,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     auto mon_nroads_1st_postfilter = Monitored::Scalar<unsigned>("nroads_1st_postfilter", roads_1st.size());
     Monitored::Group(m_monTool, mon_nroads_1st_postfilter);
-
+    
     TIME(m_troad_filter);
     // Get tracks
     std::vector<FPGATrackSimTrack> tracks_1st;
