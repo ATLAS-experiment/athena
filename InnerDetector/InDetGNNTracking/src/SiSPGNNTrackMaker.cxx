@@ -90,124 +90,22 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
   uint32_t runNumber = ctx.eventID().run_number();
   uint32_t eventNumber = ctx.eventID().event_number();
 
-  std::vector<const Trk::SpacePoint*> spacePoints;
+  // get all space points from event
+  std::vector<const Trk::SpacePoint*> spacePoints = getSpacePointsInEvent(ctx, eventNumber);
 
-  auto getData = [&](const SG::ReadHandleKey<SpacePointContainer>& containerKey){
-    if (not containerKey.empty()){
+  // get all clusters from event
+  std::vector<const Trk::PrepRawData*> allClusters = getClustersInEvent(ctx, eventNumber);
 
-      SG::ReadHandle<SpacePointContainer> container{containerKey, ctx};
-
-      if (container.isValid()){
-        // loop over spacepoint collection
-        auto spc = container->begin();
-        auto spce = container->end();
-        for(; spc != spce; ++spc){
-          const SpacePointCollection* spCollection = (*spc);
-          auto sp = spCollection->begin();
-          auto spe = spCollection->end();
-          for(; sp != spe; ++sp) {
-            const Trk::SpacePoint* spacePoint = (*sp);
-            spacePoints.push_back(spacePoint);
-          }
-        }
-      }
-    }
-  };
-
-  auto getOverlapData = [&](const SG::ReadHandleKey<SpacePointOverlapCollection>& containerKey){
-    if (not containerKey.empty()){
-      
-      SG::ReadHandle<SpacePointOverlapCollection> collection{containerKey, ctx};
-
-      if (collection.isValid()){
-        for (const Trk::SpacePoint *sp : *collection) {
-          spacePoints.push_back(sp);
-        }
-      }
-    }
-  };
-
-  getData(m_SpacePointsPixelKey);
-  int npixsp = spacePoints.size();
-  ATH_MSG_DEBUG("Event " << eventNumber << " has " << npixsp
-                         << " pixel space points");
-  getData(m_SpacePointsSCTKey);
-  ATH_MSG_DEBUG("Event " << eventNumber << " has "
-                         << spacePoints.size() - npixsp << " Strips space points");
-  int nNonOverlap = spacePoints.size();
-  ATH_MSG_DEBUG("Event " << eventNumber << " has " << nNonOverlap
-                         << " non-overlapping spacepoints");
-  getOverlapData(m_SpacePointsOverlapKey);
-  ATH_MSG_DEBUG("Event " << eventNumber << " has " << spacePoints.size()
-                        << " space points");
-
-  // get clusters
-  std::vector<const Trk::PrepRawData*> allClusters;
-  if (m_areInputClusters) {
-    SG::ReadHandle<InDet::PixelClusterContainer> pixcontainer(m_ClusterPixelKey,
-                                                            ctx);
-    SG::ReadHandle<InDet::SCT_ClusterContainer> strip_container(m_ClusterStripKey,
-                                                            ctx);
-
-    if (!pixcontainer.isValid()) {
-      ATH_MSG_ERROR("Pixel container invalid, returning");
-      return StatusCode::FAILURE;
-    }
-
-    if (!strip_container.isValid()) {
-      ATH_MSG_ERROR("Strip container invalid, returning");
-      return StatusCode::FAILURE;
-    }
-
-    auto pixcollection = pixcontainer->begin();
-    auto pixcollectionEnd = pixcontainer->end();
-    for (; pixcollection != pixcollectionEnd; ++pixcollection) {
-      if ((*pixcollection)->empty()) {
-        ATH_MSG_WARNING("Empty pixel cluster collection encountered");
-        continue;
-      }
-      auto const* clusterCollection = (*pixcollection);
-      auto thisCluster = clusterCollection->begin();
-      auto clusterEnd = clusterCollection->end();
-      for (; thisCluster != clusterEnd; ++thisCluster) {
-        const PixelCluster* cl = (*thisCluster);
-        allClusters.push_back(cl);
-      }
-    }
-
-    auto strip_collection = strip_container->begin();
-    auto strip_collectionEnd = strip_container->end();
-    for (; strip_collection != strip_collectionEnd; ++strip_collection) {
-      if ((*strip_collection)->empty()) {
-        ATH_MSG_WARNING("Empty strip cluster collection encountered");
-        continue;
-      }
-      auto const* clusterCollection = (*strip_collection);
-      auto thisCluster = clusterCollection->begin();
-      auto clusterEnd = clusterCollection->end();
-      for (; thisCluster != clusterEnd; ++thisCluster) {
-        const SCT_Cluster* cl = (*thisCluster);
-        allClusters.push_back(cl);
-      }
-    }
-
-    ATH_MSG_DEBUG("Event " << eventNumber << " has " << allClusters.size()
-                          << " clusters");
-  }
-
-  // get tracks
-
+  // get tracks from GNN chain
   std::vector<std::vector<uint32_t> > TT;
   std::vector<std::vector<uint32_t> > clusterTracks;
   if (m_gnnTrackFinder.isSet()) {
     ATH_CHECK(m_gnnTrackFinder->getTracks(spacePoints, TT));
   } else if (m_gnnTrackReader.isSet()) {
     // if track candidates are built from cluster, get both clusters and SPs
-    if (m_areInputClusters) {
-      m_gnnTrackReader->getTracks(runNumber, eventNumber, clusterTracks, TT);
-    } else {
-      m_gnnTrackReader->getTracks(runNumber, eventNumber, TT);
-    }
+    m_areInputClusters ? 
+      m_gnnTrackReader->getTracks(runNumber, eventNumber, clusterTracks, TT) :
+      m_gnnTrackReader->getTracks(runNumber, eventNumber, TT); 
   } else {
     ATH_MSG_ERROR("Both GNNTrackFinder and GNNTrackReader are not set");
     return StatusCode::FAILURE;
@@ -218,13 +116,21 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
   // loop over all track candidates
   // and perform track fitting for each.
   int trackCounter = -1;
-  std::multimap<double, Trk::Track*> qualitySortedTrackCandidates;
   std::vector<int> status_codes;
   // track processing loop
   for (auto& trackIndices : TT) {
     // For each track candidate:
+    trackCounter++;
+
     // 1. Sort space points by distance from origin
+    std::vector<const Trk::SpacePoint*> trackCandidate = getSpacePoints(trackIndices, spacePoints);
+
     // 2. Get associated clusters
+    // if track candidates are built from cluster, get both clusters and SPs
+    std::vector<const Trk::PrepRawData*> clusters = m_areInputClusters ? 
+      getClusters (clusterTracks, allClusters, trackCounter) 
+      : spacePointsToClusters(trackCandidate) ;
+
     // 3. Perform track fitting:
     //    - Initial conformal mapping
     //    - First chi2 fit without outlier removal
@@ -233,185 +139,20 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
     // 4. Apply quality cuts (pT, eta)
     // 5. Compute track summary
     // 6. Store track if it passes all criteria
+    auto [fitSuccess, passTrackCut, track] = doFitAndCut(ctx, trackCandidate, clusters, trackCounter);
 
-    std::vector<const Trk::PrepRawData*> clusters;
-    std::vector<const Trk::SpacePoint*> trackCandidate;
-    trackCandidate.reserve(trackIndices.size());
-
-    trackCounter++;
-    ATH_MSG_DEBUG("Track " << trackCounter << " has " << trackIndices.size()
-                           << " spacepoints");
-
-    std::stringstream spCoordinates;
-    std::vector<std::pair<double, const Trk::SpacePoint*> > distanceSortedSPs;
-
-    // get track space points
-    // sort SPs in track by distance from origin
-    for (auto& id : trackIndices) {
-      //// for each spacepoint, attach all prepRawData to a list.
-      if (id > spacePoints.size()) {
-        ATH_MSG_WARNING("SpacePoint index "
-                        << id << " out of range: " << spacePoints.size());
-        continue;
-      }
-
-      const Trk::SpacePoint* sp = spacePoints[id];
-      if (static_cast<int>(id) > nNonOverlap) {
-        ATH_MSG_DEBUG("Track " << trackCounter << " Overlapping Hit " << id
-                               << ": (" << sp->globalPosition().x() << ", "
-                               << sp->globalPosition().y() << ", "
-                               << sp->globalPosition().z() << ")");
-      }
-
-      // store distance - hit paire
-      if (sp != nullptr) {
-        distanceSortedSPs.push_back(
-          std::make_pair(
-            std::pow(sp->globalPosition().x(), 2) + std::pow(sp->globalPosition().y(), 2),
-            sp
-          )
-        );
-      }
-    }
-
-    // sort by distance
-    std::sort(distanceSortedSPs.begin(), distanceSortedSPs.end());
-
-    // add SP to trk candidate in the same order
-    for (std::pair<double, const Trk::SpacePoint*> pair : distanceSortedSPs) {
-      trackCandidate.push_back(pair.second);
-    }
-
-    // get cluster list
-    int nPIX(0), nStrip(0);
-    // if use input clusters, get the cluster list from clusterTracks
-    if (m_areInputClusters) {
-      std::vector<uint32_t> clusterIndices = clusterTracks[trackCounter];
-      clusters.reserve(clusterIndices.size());
-      for (uint32_t id : clusterIndices) {
-        if (id > allClusters.size()) {
-          ATH_MSG_ERROR("Cluster index out of range");
-          continue;
-        }
-        //cppcheck-suppress containerOutOfBounds
-        if (allClusters[id]->type(Trk::PrepRawDataType::PixelCluster))
-          nPIX++;
-        if (allClusters[id]->type(Trk::PrepRawDataType::SCT_Cluster))
-          nStrip++;
-        clusters.push_back(allClusters[id]);
-      }  // if not get list of clusters from space points
-    } else {
-      for (const Trk::SpacePoint* sp : trackCandidate) {
-        if (sp->clusterList().first->type(Trk::PrepRawDataType::PixelCluster))
-          nPIX++;
-        if (sp->clusterList().first->type(Trk::PrepRawDataType::SCT_Cluster))
-          nStrip++;
-        clusters.push_back(sp->clusterList().first);
-        if (sp->clusterList().second != nullptr) {
-          clusters.push_back(sp->clusterList().second);
-          nStrip++;
-        }
-      }
-    }
-
-    ATH_MSG_DEBUG("Track " << trackCounter << " has " << trackCandidate.size()
-                           << " space points, " << clusters.size()
-                           << " clusters, " << nPIX << " pixel clusters, "
-                           << nStrip << " Strip clusters");
-
-    // reject track with less than 3 space point hits, the conformal map will
-    // fail any way
-    if (trackCandidate.size() < 3) {
-      ATH_MSG_DEBUG(
-          "Track "
-          << trackCounter
-          << " does not have enough hits to run a conformal map, rejecting");
+    if (not fitSuccess) {
       continue;
     }
 
-    if (nPIX < m_minPixelClusters) {
-      ATH_MSG_DEBUG("Track " << trackCounter << " does not have enough pixel clusters, rejecting");
-      continue;
-    }
-
-    if (nStrip < m_minStripClusters) {
-      ATH_MSG_DEBUG("Track " << trackCounter << " does not have enough strip clusters, rejecting");
-      continue;
-    }
-
-    if (static_cast<int>(clusters.size()) < m_minClusters) {
-      ATH_MSG_DEBUG("Track " << trackCounter
-                             << " does not have enough hits, rejecting");
-      continue;
-    }
-
-    // conformal mapping for track parameters
-    auto trkParameters = m_seedFitter->fit(trackCandidate);
-    if (trkParameters == nullptr) {
-      ATH_MSG_DEBUG("Conformal mapping failed");
-      continue;
-    }
-
-    Trk::ParticleHypothesis matEffects = Trk::pion;
-    // first fit the track with local parameters and without outlier removal.
-    std::unique_ptr<Trk::Track> track =
-        m_trackFitter->fit(ctx, clusters, *trkParameters, false, matEffects);
-
-    if (track == nullptr || track->perigeeParameters() == nullptr) {
-      ATH_MSG_DEBUG("Track " << trackCounter
-                             << " fails the first chi2 fit, skipping");
-      continue;
-    }
-
-    // reject track with pT too low, default 400 MeV
-    if (track->perigeeParameters()->pT() < m_pTmin) {
-      continue;
-    }
-
-    // fit the track again with perigee parameters and without outlier
-    // removal.
-    track = m_trackFitter->fit(ctx, clusters, *track->perigeeParameters(),
-                                false, matEffects);
-    if (track == nullptr || track->perigeeParameters() == nullptr) {
-      ATH_MSG_DEBUG("Track " << trackCounter
-                             << " fails the second chi2 fit, skipping");
-      continue;
-    }
-    // finally fit with outlier removal
-    track = m_trackFitter->fit(ctx, clusters, *track->perigeeParameters(), true,
-                               matEffects);
-    if (track == nullptr || track->perigeeParameters() == nullptr) {
-      ATH_MSG_DEBUG("Track " << trackCounter
-                             << " fails the third chi2 fit, skipping");
-      continue;
-    }
-
-    // compute pT and skip if pT too low
-    if (track->perigeeParameters()->pT() < m_pTmin) {
-      ATH_MSG_DEBUG("Track " << trackCounter
-                             << "with pt = " << track->perigeeParameters()->pT()
-                             << " has pT too low, skipping track!");
-      continue;
-    }
-
-    // get rid of tracks with eta too large
-    if (std::abs(track->perigeeParameters()->eta()) > m_etamax) {
-      ATH_MSG_DEBUG("Track " << trackCounter << "with eta = "
-                             << std::abs(track->perigeeParameters()->eta())
-                             << " has eta too high, skipping track!");
-      continue;
-    }
-    // need to compute track summary here. This is done during ambiguity 
-    // resolution in the legacy chain. Since we skip it, we must do it here
-    m_trackSummaryTool->computeAndReplaceTrackSummary(
-        *track, false /* DO NOT suppress hole search*/);
-
-    int passTrackCut = (m_doRecoTrackCuts) ? passEtaDepCuts(*track) : -1;
-    status_codes.push_back(passTrackCut);
-    if (passTrackCut<=0) {
+    if (passTrackCut <= 0) {
       outputTracks->push_back(track.release());
     }
+
+    status_codes.push_back(passTrackCut);
+
   }
+
   if (m_doRecoTrackCuts) {
     ATH_MSG_INFO("Event " << eventNumber << " has " << status_codes.size() << " tracks found, " 
                 << std::count(status_codes.begin(), status_codes.end(), 0)
@@ -424,7 +165,9 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
 }
 
 
-
+bool InDet::SiSPGNNTrackMaker::prefitCheck(int nPix, int nStrip, int nClusters, int nSpacePoints) const {
+  return nPix >= m_minPixelClusters && nStrip >= m_minStripClusters && nClusters >= m_minClusters && nSpacePoints >= 3;
+}
 
 
 int InDet::SiSPGNNTrackMaker::passEtaDepCuts(const Trk::Track& track) const 
@@ -475,6 +218,362 @@ int InDet::SiSPGNNTrackMaker::passEtaDepCuts(const Trk::Track& track) const
 
   return 0;
 }
+
+std::vector<const Trk::SpacePoint*> InDet::SiSPGNNTrackMaker::getSpacePointsInEvent (
+  const EventContext& ctx,
+  int eventNumber
+) const {
+  std::vector<const Trk::SpacePoint*> spacePoints;
+
+  int npixsp(0), nstrip(0), n_overlap(0);
+  for (const Trk::SpacePoint* sp : getSpacePointsInEvent(ctx, m_SpacePointsPixelKey)) {
+    spacePoints.push_back(sp);
+    npixsp++;
+  }
+  for (const Trk::SpacePoint* sp : getSpacePointsInEvent(ctx, m_SpacePointsSCTKey)) {
+    spacePoints.push_back(sp);
+    nstrip++;
+  }
+  for (const Trk::SpacePoint* sp : getSpacePointsInEvent(ctx, m_SpacePointsOverlapKey)) {
+    spacePoints.push_back(sp);
+    n_overlap++;
+  }
+  ATH_MSG_DEBUG("Event " << eventNumber << " has " << npixsp
+                         << " pixel space points, " << nstrip 
+                         << " strips space points" << n_overlap
+                         << " overlapping spacepoints" << spacePoints.size()
+                          << " space points");
+
+  return spacePoints;
+}
+
+std::vector<const Trk::SpacePoint*> InDet::SiSPGNNTrackMaker::getSpacePointsInEvent(
+  const EventContext& ctx,
+  const SG::ReadHandleKey<SpacePointContainer>& containerKey
+) const {
+  std::vector<const Trk::SpacePoint*> spacePoints;
+  if (not containerKey.empty()){
+
+    SG::ReadHandle<SpacePointContainer> container{containerKey, ctx};
+
+    if (container.isValid()){
+      // loop over spacepoint collection
+      auto spc = container->begin();
+      auto spce = container->end();
+      for(; spc != spce; ++spc){
+        const SpacePointCollection* spCollection = (*spc);
+        auto sp = spCollection->begin();
+        auto spe = spCollection->end();
+        for(; sp != spe; ++sp) {
+          const Trk::SpacePoint* spacePoint = (*sp);
+          spacePoints.push_back(spacePoint);
+        }
+      }
+    }
+  }
+
+  return spacePoints;
+}
+
+std::vector<const Trk::SpacePoint*> InDet::SiSPGNNTrackMaker::getSpacePointsInEvent(
+  const EventContext& ctx,
+  const SG::ReadHandleKey<SpacePointOverlapCollection>& containerKey
+) const {
+
+  std::vector<const Trk::SpacePoint*> spacePoints;
+
+  if (not containerKey.empty()){
+
+    SG::ReadHandle<SpacePointOverlapCollection> collection{containerKey, ctx};
+
+    if (collection.isValid()){
+      for (const Trk::SpacePoint *sp : *collection) {
+        spacePoints.push_back(sp);
+      }
+    }
+  }
+
+  return spacePoints;
+}
+
+std::vector<const Trk::PrepRawData*> InDet::SiSPGNNTrackMaker::getClustersInEvent (
+  const EventContext& ctx,
+  int eventNumber
+) const {
+  std::vector<const Trk::PrepRawData*> allClusters;
+  if (m_areInputClusters) {
+    SG::ReadHandle<InDet::PixelClusterContainer> pixcontainer(m_ClusterPixelKey,
+                                                            ctx);
+    SG::ReadHandle<InDet::SCT_ClusterContainer> strip_container(m_ClusterStripKey,
+                                                            ctx);
+
+    if (!pixcontainer.isValid()) {
+      ATH_MSG_ERROR("Pixel container invalid, returning");
+      return allClusters;
+    }
+
+    if (!strip_container.isValid()) {
+      ATH_MSG_ERROR("Strip container invalid, returning");
+      return allClusters;
+    }
+
+    auto pixcollection = pixcontainer->begin();
+    auto pixcollectionEnd = pixcontainer->end();
+    for (; pixcollection != pixcollectionEnd; ++pixcollection) {
+      if ((*pixcollection)->empty()) {
+        ATH_MSG_WARNING("Empty pixel cluster collection encountered");
+        continue;
+      }
+      auto const* clusterCollection = (*pixcollection);
+      auto thisCluster = clusterCollection->begin();
+      auto clusterEnd = clusterCollection->end();
+      for (; thisCluster != clusterEnd; ++thisCluster) {
+        const PixelCluster* cl = (*thisCluster);
+        allClusters.push_back(cl);
+      }
+    }
+
+    auto strip_collection = strip_container->begin();
+    auto strip_collectionEnd = strip_container->end();
+    for (; strip_collection != strip_collectionEnd; ++strip_collection) {
+      if ((*strip_collection)->empty()) {
+        ATH_MSG_WARNING("Empty strip cluster collection encountered");
+        continue;
+      }
+      auto const* clusterCollection = (*strip_collection);
+      auto thisCluster = clusterCollection->begin();
+      auto clusterEnd = clusterCollection->end();
+      for (; thisCluster != clusterEnd; ++thisCluster) {
+        const SCT_Cluster* cl = (*thisCluster);
+        allClusters.push_back(cl);
+      }
+    }
+
+    ATH_MSG_DEBUG("Event " << eventNumber << " has " << allClusters.size()
+                          << " clusters");
+  }
+  return allClusters;
+}
+ 
+
+std::vector<const Trk::SpacePoint*> InDet::SiSPGNNTrackMaker::getSpacePoints (
+  std::vector<uint32_t> trackIndices,
+  std::vector<const Trk::SpacePoint*> allSpacePoints
+) const {
+
+  std::vector<const Trk::SpacePoint*> trackCandidate;
+  trackCandidate.reserve(trackIndices.size());
+
+  std::vector<std::pair<double, const Trk::SpacePoint*> > distanceSortedSPs;
+
+  // get track space points
+  // sort SPs in track by distance from origin
+  for (auto& id : trackIndices) {
+    //// for each spacepoint, attach all prepRawData to a list.
+    if (id > allSpacePoints.size()) {
+      ATH_MSG_WARNING("SpacePoint index "
+                      << id << " out of range: " << allSpacePoints.size());
+      continue;
+    }
+
+    const Trk::SpacePoint* sp = allSpacePoints[id];
+
+    // store distance - hit paire
+    if (sp != nullptr) {
+      distanceSortedSPs.push_back(
+        std::make_pair(
+          pow(sp->globalPosition().x(), 2) + pow(sp->globalPosition().y(), 2),
+          sp
+        )
+      );
+    }
+  }
+
+  // sort by distance
+  std::sort(distanceSortedSPs.begin(), distanceSortedSPs.end());
+
+  // add SP to trk candidate in the same order
+  for (size_t i = 0; i < distanceSortedSPs.size(); i++) {
+    trackCandidate.push_back(distanceSortedSPs[i].second);
+  }
+
+  return trackCandidate;
+}
+
+std::vector<const Trk::PrepRawData*> InDet::SiSPGNNTrackMaker :: spacePointsToClusters (
+  std::vector<const Trk::SpacePoint*> spacePoints
+) const {
+  std::vector<const Trk::PrepRawData*> clusters;
+  for (const Trk::SpacePoint* sp : spacePoints) {
+    clusters.push_back(sp->clusterList().first);
+    if (sp->clusterList().second != nullptr) {
+      clusters.push_back(sp->clusterList().second);
+    }
+  }
+  return clusters;
+}
+
+std::vector<const Trk::PrepRawData*> InDet::SiSPGNNTrackMaker :: getClusters (
+  std::vector<std::vector<uint32_t>> clusterTracks,
+  std::vector<const Trk::PrepRawData*> allClusters,
+  int trackNumber
+) const {
+  std::vector<uint32_t> clusterIndices = clusterTracks[trackNumber];
+  std::vector<const Trk::PrepRawData*> clusters;
+  clusters.reserve(clusterIndices.size());
+  for (uint32_t id : clusterIndices) {
+    if (id > allClusters.size()) {
+      ATH_MSG_ERROR("Cluster index out of range");
+      continue;
+    }
+    clusters.push_back(allClusters[id]);
+  }
+  return clusters;
+}
+
+/**
+ * @brief Fits a track and applies quality cuts to determine if it should be kept
+ *
+ * @param ctx           Event context for conditions access
+ * @param clusters      Vector of cluster measurements used to fit the track
+ * @param initial_params Initial track parameters from seed finding
+ * @param trackCounter  Index/ID of the track candidate being processed
+ *
+ * @return std::tuple<bool, int, std::unique_ptr<Trk::Track>>
+ *         - bool: Whether the fit was successful
+ *         - int: Error/status code (0 for success, >0 for specific failure modes)
+ *         - Track: The fitted track (nullptr if fit fails or track rejected)
+ *
+ * This function performs the following steps:
+ * 1. Fits the track using the provided clusters and initial parameters
+ * 2. Checks basic kinematic cuts (pT, eta)
+ * 3. Computes track summary (hits, holes)
+ * 4. Applies eta-dependent quality cuts if configured
+ *
+ * Error codes:
+ * - 0: Success, track passes all cuts
+ * - 1: Failed minimum silicon hits requirement
+ * - 2: Failed minimum pixel hits requirement
+ * - 3: Failed minimum pT requirement
+ * - 4: Failed maximum z0 requirement
+ * - 5: Failed maximum d0 requirement
+ * - 6: Failed maximum holes requirement
+ * - 999: Track fit failed
+ *
+ * @note The track fitting is performed using the configured track fitter tool
+ * @note Quality cuts are configurable via job options
+ */
+
+std::tuple<bool, int, std::unique_ptr<Trk::Track>> InDet::SiSPGNNTrackMaker::doFitAndCut (
+    const EventContext& ctx,
+    std::vector<const Trk::SpacePoint*>& spacePoints,
+    std::vector<const Trk::PrepRawData*>& clusters,
+    int& trackCounter
+  ) const 
+  {
+    // get cluster list
+    int nPIX(0), nStrip(0);
+
+    for (const Trk::PrepRawData* cl : clusters) {
+      if (cl->type(Trk::PrepRawDataType::PixelCluster)) nPIX++;
+      if (cl->type(Trk::PrepRawDataType::SCT_Cluster)) nStrip++;
+    }
+
+    ATH_MSG_DEBUG("Track " << trackCounter << " has " << spacePoints.size()
+                           << " space points, " << clusters.size()
+                           << " clusters, " << nPIX << " pixel clusters, "
+                           << nStrip << " strip clusters");
+
+    // check hit counts
+    if (not prefitCheck(nPIX, nStrip, clusters.size(), spacePoints.size())) {
+      ATH_MSG_DEBUG("Track " << trackCounter << " does not pass prefit cuts, skipping");
+      return std::make_tuple(false, 999, nullptr);
+    }
+
+    // conformal mapping for track parameters
+    auto trkParameters = m_seedFitter->fit(spacePoints);
+    if (trkParameters == nullptr) {
+      ATH_MSG_DEBUG("Conformal mapping failed");
+      return std::make_tuple(false, 999, nullptr);
+    }
+
+    std::unique_ptr<Trk::Track> track = fitTrack(ctx, clusters, *trkParameters, trackCounter);
+
+    if (track == nullptr || track->perigeeParameters() == nullptr) {
+      ATH_MSG_DEBUG("Track " << trackCounter
+                             << " fails the third chi2 fit, skipping");
+      return std::make_tuple(false, 999, nullptr);
+    }
+
+    // compute pT and skip if pT too low
+    if (track->perigeeParameters()->pT() < m_pTmin) {
+      ATH_MSG_DEBUG("Track " << trackCounter
+                             << "with pt = " << track->perigeeParameters()->pT()
+                             << " has pT too low, skipping track!");
+      return std::make_tuple(false, 999, nullptr);
+    }
+
+    // get rid of tracks with eta too large
+    if (std::abs(track->perigeeParameters()->eta()) > m_etamax) {
+      ATH_MSG_DEBUG("Track " << trackCounter << "with eta = "
+                             << std::abs(track->perigeeParameters()->eta())
+                             << " has eta too high, skipping track!");
+      return std::make_tuple(false, 999, nullptr);
+    }
+
+    // if track fit succeeds, eta and pT within range, compute track summary. This is quite expensive.
+    m_trackSummaryTool->computeAndReplaceTrackSummary(
+        *track, false /* DO NOT suppress hole search*/);
+    
+    int passTrackCut = (m_doRecoTrackCuts) ? passEtaDepCuts(*track) : -1;
+    
+    return std::make_tuple(true, passTrackCut, std::move(track));
+    
+  }
+
+std::unique_ptr<Trk::Track> InDet::SiSPGNNTrackMaker::fitTrack (
+    const EventContext& ctx,
+    std::vector<const Trk::PrepRawData*> clusters,
+    const Trk::TrackParameters& initial_params,
+    int trackCounter
+  ) const 
+  {
+
+    Trk::ParticleHypothesis matEffects = Trk::pion;
+    // first fit the track with local parameters and without outlier removal.
+    std::unique_ptr<Trk::Track> track =
+        m_trackFitter->fit(ctx, clusters, initial_params, false, matEffects);
+    
+    if (track == nullptr || track->perigeeParameters() == nullptr) {
+      ATH_MSG_DEBUG("Track " << trackCounter
+                             << " fails the first chi2 fit, skipping");
+      return track;
+    }
+
+    // reject track with pT too low, default 400 MeV
+    if (track->perigeeParameters()->pT() < m_pTmin) {
+      ATH_MSG_DEBUG("Track " << trackCounter
+                             << " fails the first chi2 fit, skipping");
+      return nullptr;
+    }
+
+    // fit the track again with perigee parameters and without outlier
+    // removal.
+    track = m_trackFitter->fit(ctx, clusters, *track->perigeeParameters(),
+                                false, matEffects);
+
+    // track = m_trackFitter->fit(ctx, *track, false, matEffects);
+    if (track == nullptr || track->perigeeParameters() == nullptr) {
+      ATH_MSG_DEBUG("Track " << trackCounter
+                             << " fails the second chi2 fit, skipping");
+      return track;
+    }
+    // finally fit with outlier removal
+    // track = m_trackFitter->fit(ctx, clusters, *track->perigeeParameters(), true,
+    //                            matEffects);
+
+    return m_trackFitter->fit(ctx, clusters, *track->perigeeParameters(), true, matEffects);
+  }
 
 ///////////////////////////////////////////////////////////////////
 // Overload of << operator MsgStream

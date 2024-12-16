@@ -13,8 +13,6 @@
 // data containers
 #include "InDetPrepRawData/PixelClusterContainer.h"
 #include "InDetPrepRawData/SCT_ClusterContainer.h"
-#include "InDetPrepRawData/PixelClusterContainer.h"
-#include "InDetPrepRawData/SCT_ClusterContainer.h"
 #include "TrkSpacePoint/SpacePointContainer.h"
 #include "TrkSpacePoint/SpacePointOverlapCollection.h"
 #include "TrkTrack/TrackCollection.h"
@@ -67,10 +65,10 @@ namespace InDet {
         this, "SpacePointsSCTName", "ITkStripSpacePoints"};
       SG::ReadHandleKey<SpacePointOverlapCollection> m_SpacePointsOverlapKey{this, "SpacePointsOverlapName", "ITkOverlapSpacePoints"};
       //@}
-  SG::ReadHandleKey<InDet::PixelClusterContainer> m_ClusterPixelKey{
-      this, "PixelClusterContainer", "ITkPixelClusters"};
-  SG::ReadHandleKey<InDet::SCT_ClusterContainer> m_ClusterStripKey{
-      this, "StripClusterContainer", "ITkStripClusters"};
+      SG::ReadHandleKey<InDet::PixelClusterContainer> m_ClusterPixelKey{
+          this, "PixelClusterContainer", "ITkPixelClusters"};
+      SG::ReadHandleKey<InDet::SCT_ClusterContainer> m_ClusterStripKey{
+          this, "StripClusterContainer", "ITkStripClusters"};
 
       // output container
       SG::WriteHandleKey<TrackCollection> m_outputTracksKey{
@@ -121,6 +119,63 @@ namespace InDet {
       DoubleProperty m_etamax{this, "etamax", 4., "max reco eta"};
       
       int passEtaDepCuts(const Trk::Track& track) const;
+
+          
+      std::tuple<bool, int, std::unique_ptr<Trk::Track>> doFitAndCut(
+        const EventContext& ctx,
+        std::vector<const Trk::SpacePoint*>& spacePoints,
+        std::vector<const Trk::PrepRawData*>& clusters,
+        int& trackCounter
+      ) const;
+
+      int passEtaDepCuts(const Trk::Track* track, int nClusters,
+                                int nFreeClusters, int nPixels) const;
+
+      bool prefitCheck(int nPix, int nStrip, int nClusters, int nSpacePoints) const;
+
+      std::unique_ptr<Trk::Track> fitTrack(
+        const EventContext& ctx,
+        std::vector<const Trk::PrepRawData*> clusters,
+        const Trk::TrackParameters& initial_params,
+        int trackCounter
+      ) const;
+
+      std::vector<const Trk::SpacePoint*> getSpacePoints (
+        std::vector<uint32_t> trackIndices,
+        std::vector<const Trk::SpacePoint*> allSpacePoints
+      ) const;
+
+      std::vector<const Trk::PrepRawData*> spacePointsToClusters (
+        std::vector<const Trk::SpacePoint*> spacePoints
+      ) const;
+
+      std::vector<const Trk::PrepRawData*> getClusters (
+        std::vector<std::vector<uint32_t>> clusterTracks,
+        std::vector<const Trk::PrepRawData*> allClusters,
+        int trackNumber
+      ) const;
+
+      std::vector<const Trk::SpacePoint*> getSpacePointsInEvent (
+        const EventContext& ctx,
+        int eventNumber
+      ) const;
+
+      std::vector<const Trk::SpacePoint*> getSpacePointsInEvent(
+        const EventContext& ctx,
+        const SG::ReadHandleKey<SpacePointContainer>& containerKey
+      ) const;
+
+      std::vector<const Trk::SpacePoint*> getSpacePointsInEvent(
+        const EventContext& ctx,
+        const SG::ReadHandleKey<SpacePointOverlapCollection>& containerKey
+      ) const ;
+
+      std::vector<const Trk::PrepRawData*> getClustersInEvent (
+        const EventContext& ctx,
+        int eventNumber
+      ) const;
+
+
 
     };
       
