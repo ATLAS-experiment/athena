@@ -46,8 +46,8 @@ namespace Trk {
     class RIO_OnTrack;
 }  // namespace Trk
 
-using namespace MuonVal ;
 namespace MuonCalib {
+using namespace MuonVal ;
 
 class MuonSegmentReader : public AthHistogramAlgorithm
    {
