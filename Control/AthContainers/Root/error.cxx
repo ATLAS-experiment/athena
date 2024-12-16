@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -27,9 +27,10 @@ namespace AthContainers_detail {
 
 
 /// Code mimicking Athena's message formatting, in standalone builds
-void reportErrorStandalone (const std::string& context,
-                            const std::string& file, int line,
-                            const std::string& msg) {
+void reportMessageStandalone (const std::string& context,
+                              const std::string& severity,
+                              const std::string& file, int line,
+                              const std::string& msg) {
 
   // Make sure that the message's source/location is not longer than a
   // pre-set maximum value.
@@ -43,7 +44,7 @@ void reportErrorStandalone (const std::string& context,
   // Print the message to stdout/std::cout.
   std::ostringstream output;
   output << std::setiosflags(std::ios::left)
-         << std::setw(CONTEXT_WIDTH) << source << "  ERROR "
+         << std::setw(CONTEXT_WIDTH) << source << "  " << severity << " "
          << file << ":" << line << ": "
          << msg;
   std::cout << output.str() << std::endl;

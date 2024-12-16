@@ -199,6 +199,13 @@ void test1()
   src.suppress (ftyp);
   copyAuxStoreThinned (src, dst2, &info);
   compare (src, dst2, true, ftyp);
+
+  std::cout << "should see unlocked decoration warning here\n";
+  src.lock();
+  SG::auxid_t dityp = r.getAuxID<int> ("anIntDecor");
+  src.getDecoration (dityp, 10, 10);
+  src.suppress (ftyp);
+  copyAuxStoreThinned (src, dst2, &info);
 }
 
 
