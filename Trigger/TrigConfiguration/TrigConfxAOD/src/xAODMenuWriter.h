@@ -4,8 +4,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGCONFXAOD_XAODMENUWRITERMT_H
-#define TRIGCONFXAOD_XAODMENUWRITERMT_H
+#ifndef TRIGCONFXAOD_XAODMENUWRITER_H
+#define TRIGCONFXAOD_XAODMENUWRITER_H
 
 // System include(s):
 extern "C" {
@@ -51,13 +51,13 @@ namespace TrigConf {
     * @author Tim Martin <Tim.Martin@cern.ch>
     *
     */
-   class xAODMenuWriterMT : public AthReentrantAlgorithm {
+   class xAODMenuWriter : public AthReentrantAlgorithm {
 
    public:
       /// Regular Algorithm constructor
-      xAODMenuWriterMT( const std::string& name, ISvcLocator* svcLoc );
+      xAODMenuWriter( const std::string& name, ISvcLocator* svcLoc );
 
-      virtual ~xAODMenuWriterMT() override = default;
+      virtual ~xAODMenuWriter() override = default;
 
       /// Function initialising the algorithm
       virtual StatusCode initialize() override;
@@ -129,8 +129,8 @@ namespace TrigConf {
       /// The mutex to prevent us from writing more than one configuration at a time
       mutable std::mutex m_mutex;
 
-   }; // class xAODMenuWriterMT
+   }; // class xAODMenuWriter
 
 } // namespace TrigConf
 
-#endif // TRIGCONFXAOD_XAODMENUWRITERMT_H
+#endif // TRIGCONFXAOD_XAODMENUWRITER_H

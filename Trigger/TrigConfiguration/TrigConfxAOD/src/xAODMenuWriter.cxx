@@ -28,21 +28,21 @@
 #include "xAODTrigger/TriggerMenuJsonAuxContainer.h"
 
 // Local include(s):
-#include "xAODMenuWriterMT.h"
+#include "xAODMenuWriter.h"
 #include "PrintVectorHelper.h"
 #include "KeyWriterTool.h"
 
 namespace TrigConf
 {
 
-   xAODMenuWriterMT::xAODMenuWriterMT(const std::string &name,
-                                      ISvcLocator *svcLoc)
+   xAODMenuWriter::xAODMenuWriter(const std::string &name,
+                                  ISvcLocator *svcLoc)
        : AthReentrantAlgorithm(name, svcLoc),
          m_metaStore("MetaDataStore", name)
    {
    }
 
-   StatusCode xAODMenuWriterMT::initialize()
+   StatusCode xAODMenuWriter::initialize()
    {
 
       // Greet the user:
@@ -136,7 +136,7 @@ namespace TrigConf
       return StatusCode::SUCCESS;
    }
 
-   StatusCode xAODMenuWriterMT::execute(const EventContext &ctx) const
+   StatusCode xAODMenuWriter::execute(const EventContext &ctx) const
    {
 
       // Create the keys in the "internal format":
