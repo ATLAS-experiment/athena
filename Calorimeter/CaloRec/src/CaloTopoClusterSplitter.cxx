@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -939,14 +939,12 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
 	    // from the myNextCells list and from the other cluster
 	    if ( m_shareBorderCells && myCluster != otherCluster ) {
 	      std::vector<HashCell>::iterator nextCellIter = myNextCells.begin();
-	      std::vector<HashCell>::iterator nextCellIterEnd = myNextCells.end();
 	      bool isRemoved(false);
 	      // try to remove the neighborCell - if it belongs to the
 	      // myNextCell list it is a shared cell, added to the
 	      // list of shared cells and removed from the cluster it
 	      // first was added to
-              // cppcheck-suppress invalidContainer; false positive
-	      while ( !isRemoved && nextCellIter != nextCellIterEnd ) {
+	      while ( !isRemoved && nextCellIter != myNextCells.end() ) {
 		if ( (*nextCellIter) == neighborCell ) {
 		  nextCellIter = myNextCells.erase(nextCellIter);
 		  isRemoved=true;
