@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -91,13 +91,8 @@ Subtractor::annihilateCluster(xAOD::CaloCluster* cluster)
 {
 
   CaloClusterCellLink* theCellLink = cluster->getOwnCellLinks();
-
-  CaloClusterCellLink::iterator theFirstCell = theCellLink->begin();
-  CaloClusterCellLink::iterator theLastCell = theCellLink->end();
-
-  for (; theFirstCell != theLastCell; ++theFirstCell)
-    theCellLink->removeCell(theFirstCell);
-
+  theCellLink->clear();
+  
   cluster->setE(0.0);
   cluster->setRawE(0.0);
   CaloClusterKineHelper::calculateKine(cluster, true, true);
