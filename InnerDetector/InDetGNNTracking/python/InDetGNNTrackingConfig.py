@@ -85,11 +85,11 @@ def GNNTrackReaderToolCfg(flags, name='GNNTrackReaderTool', **kwargs):
 
 def GNNTrackMakerCfg(flags, name="GNNTrackMaker", **kwargs):
     """Sets up a GNNTrackMaker algorithm and returns it."""
-    
+
     if flags.Tracking.GNN.usePixelHitsOnly:
         return GNNSeedingTrackMakerCfg(flags, name, **kwargs)
-    else:
-        return GNNEndToEndTrackMaker(flags, name, **kwargs)
+    
+    return GNNEndToEndTrackMaker(flags, name, **kwargs)
 
 def GNNEndToEndTrackMaker(flags, name="GNNEndToEndTrackMaker", **kwargs):
     """Sets up a GNNTrackMaker algorithm and returns it."""
