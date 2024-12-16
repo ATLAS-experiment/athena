@@ -1,13 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOHistUtils/ClusterPlots.h"
 
-
 namespace PFO {
 
-  ClusterPlots::ClusterPlots(PlotBase* pParent, std::string sDir, SG::ReadHandleKey<xAOD::CaloClusterContainer>& sClusterContainerName) : PlotBase(pParent, sDir), m_sClusterContainerName(sClusterContainerName){}
+  ClusterPlots::ClusterPlots(PlotBase* pParent, const std::string & sDir, SG::ReadHandleKey<xAOD::CaloClusterContainer>& sClusterContainerName) : PlotBase(pParent, sDir), m_sClusterContainerName(sClusterContainerName){}
 
   void ClusterPlots::initializePlots(){
 

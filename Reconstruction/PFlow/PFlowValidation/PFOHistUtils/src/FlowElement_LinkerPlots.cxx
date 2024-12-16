@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOHistUtils/FlowElement_LinkerPlots.h"
-#include <iostream>
 #include "xAODMuon/MuonContainer.h"
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODEgamma/PhotonContainer.h"
@@ -12,38 +11,11 @@
 
 namespace PFO {
 
-  FlowElement_LinkerPlots::FlowElement_LinkerPlots(PlotBase* pParent, std::string sDir, std::string sFEContainerName, bool doNeutralFE): 
+  FlowElement_LinkerPlots::FlowElement_LinkerPlots(PlotBase* pParent, const std::string & sDir, const std::string & sFEContainerName, bool doNeutralFE): 
     PlotBase(pParent, sDir),
     m_sFEContainerName(sFEContainerName),
     m_doNeutralFE(doNeutralFE)
     {
-      m_CFE_tau_dR=nullptr;
-      m_CFE_tau_NMatchedTau=nullptr;
-
-      m_NFE_tau_dR=nullptr;
-      m_NFE_tau_NMatchedTau=nullptr;
-
-      m_CFE_muon_dR=nullptr;
-      m_CFE_muon_NMatchedMuon=nullptr;
-      m_CFE_muon_largeDR_debug_author=nullptr;
-      m_CFE_muon_largeDR_debug_type=nullptr;
-
-      m_NFE_muon_dR=nullptr;
-      m_NFE_muon_NMatchedMuon=nullptr;
-      
-      m_CFE_photon_dR=nullptr;
-      m_CFE_photon_NMatchedPhoton=nullptr;
-
-      m_NFE_photon_dR=nullptr;
-      m_NFE_photon_NMatchedPhoton=nullptr;
-
-      m_CFE_electron_dR=nullptr;
-      m_CFE_electron_NMatchedElectron=nullptr;
-
-      m_NFE_electron_dR=nullptr;
-      m_NFE_electron_NMatchedElectron=nullptr;
-
-
     }
 
   void FlowElement_LinkerPlots::initializePlots(){
