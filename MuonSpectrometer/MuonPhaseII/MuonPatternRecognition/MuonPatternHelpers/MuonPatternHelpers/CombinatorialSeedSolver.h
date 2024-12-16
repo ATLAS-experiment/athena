@@ -131,8 +131,12 @@ namespace MuonR4{
 
         //estimate the seed direction from the 2nd equation of the system of the layer equations
         Amg::Vector3D seedDirection = ((spacePoints[1]->positionInChamber() + parameters[1]*spacePoints[1]->directionInChamber() - seedPosition)).unit();
-        
-        return std::make_pair(seedPosition, seedDirection);
+
+        Amg::Vector3D seedPositionZ0 = seedPosition + Amg::intersect<3>(seedPosition, seedDirection, Amg::Vector3D::UnitZ(), 0.).value_or(0.)*seedDirection;
+
+    
+
+        return std::make_pair(seedPositionZ0, seedDirection.z() > 0 ? seedDirection : -seedDirection);
 
       };
 
