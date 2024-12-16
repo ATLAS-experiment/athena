@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -22,7 +22,7 @@
 #include "SiSPSeededTrackFinderData/SiTools_xk.h"
 #include "SiSPSeededTrackFinderData/SiTrajectoryElement_xk.h"
 #include "SiSPSeededTrackFinderData/SiDetElementBoundaryLink_xk.h"
-
+#include <iosfwd>
 #include <map>
 #include <memory>
 
@@ -167,31 +167,31 @@ namespace InDet{
       // Protected Data
       ///////////////////////////////////////////////////////////////////
 
-      int                               m_firstElement    ; /// index of the first element where we have 
+      int                               m_firstElement{}    ; /// index of the first element where we have 
                                                             /// a cluster 
-      int                               m_lastElement     ; /// index of the last element where we have 
+      int                               m_lastElement{}     ; /// index of the last element where we have 
                                                             /// a cluster
-      int                               m_nclusters       ; /// Number of clusters on trajectory
-      int                               m_nclustersNoAdd  ; // (NCL)
-      int                               m_difference      ; // forward-bacward diff 
-      int                               m_nHolesBefore         ; // holes before
-      int                               m_nHolesAfter         ; // holes after
-      int                               m_nholes          ; // holes
-      int                               m_dholes          ; // dholes
-      int                               m_nActiveElements      ; /// count active elements 
-      int                               m_nElements       ; // index 
-      int                               m_elementsMap[300]; // index
-      int                               m_ndfcut          ; //
-      int                               m_ndf             ; //
-      int                               m_ntos            ; //
-      int                               m_atos[100]       ; //
-      int                               m_itos[100]       ; //
-      SiTrajectoryElement_xk            m_elements   [300]; /// Trajectory elements on this trajectory. 
+      int                               m_nclusters{}       ; /// Number of clusters on trajectory
+      int                               m_nclustersNoAdd{}  ; // (NCL)
+      int                               m_difference{}      ; // forward-bacward diff 
+      int                               m_nHolesBefore{}         ; // holes before
+      int                               m_nHolesAfter{}         ; // holes after
+      int                               m_nholes{}          ; // holes
+      int                               m_dholes{}          ; // dholes
+      int                               m_nActiveElements{}      ; /// count active elements 
+      int                               m_nElements{}       ; // index 
+      int                               m_elementsMap[300]{}; // index
+      int                               m_ndfcut{}          ; //
+      int                               m_ndf{}             ; //
+      int                               m_ntos{}            ; //
+      int                               m_atos[100]{}       ; //
+      int                               m_itos[100]{}       ; //
+      SiTrajectoryElement_xk            m_elements   [300]{}; /// Trajectory elements on this trajectory. 
                                                             /// Each one corresponds to one detector element on
                                                             /// the search road 
-      const InDet::SiTools_xk*          m_tools           ; //
+      const InDet::SiTools_xk*          m_tools{}           ; //
       std::unique_ptr<const Trk::Surface> m_surfacedead   ;
-      PatternHoleSearchOutcome    m_patternHoleOutcome; 
+      PatternHoleSearchOutcome    m_patternHoleOutcome{}; 
 
       ///////////////////////////////////////////////////////////////////
       // Methods
