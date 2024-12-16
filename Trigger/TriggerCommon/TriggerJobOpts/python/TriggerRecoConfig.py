@@ -137,7 +137,7 @@ def TriggerMetadataWriterCfg(flags):
         acc.merge( TrigConfigSvcCfg(flags) )
         keyWriterTool = CompFactory.TrigConf.KeyWriterTool("KeyWriterToolOffline")
         keyWriterOutput = str(keyWriterTool.ConfKeys)
-        acc.addEventAlgo( CompFactory.TrigConf.xAODMenuWriterMT("xAODMenuWriterMT", KeyWriterTool = keyWriterTool) )
+        acc.addEventAlgo( CompFactory.TrigConf.xAODMenuWriter("xAODMenuWriter", KeyWriterTool = keyWriterTool) )
     return acc, keyWriterOutput
 
 def TriggerEDMCfg(flags):

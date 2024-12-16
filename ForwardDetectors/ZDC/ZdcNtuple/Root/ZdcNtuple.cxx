@@ -835,8 +835,11 @@ void ZdcNtuple::processZdcNtupleFromModules()
     }
     if (!globalSum) {
       ANA_MSG_ERROR("unable to locate global ZdcSum (side = 0)");
+      t_centroidDecorationsAvailable = false;
     }
-    t_centroidDecorationsAvailable = centroidStatusAcc.isAvailable(*globalSum);
+    else {
+      t_centroidDecorationsAvailable = centroidStatusAcc.isAvailable(*globalSum);
+    }
   }
 
   if (rpdErr||zdcErr) ANA_MSG_WARNING( "Decoding errors ZDC=" << zdcErr << " RPD=" << rpdErr );

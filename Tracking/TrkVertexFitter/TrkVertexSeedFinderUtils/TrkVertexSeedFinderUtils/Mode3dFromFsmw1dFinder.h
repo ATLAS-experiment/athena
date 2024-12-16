@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //Author: Lianyou Shan <lianyou.shan@cern.ch>
 #ifndef TRKVERTEXSEEDFINDERUTILS_MODE3DTOFSMW1DFINDER_H
@@ -149,7 +149,7 @@ namespace Trk
 
     // working horse for 1dMode
     std::vector< std::pair< int, int> >
-    getFsmw1dMode( std::vector<IndexedWeighted> &, int ) const ;
+    getFsmw1dMode( const std::vector<IndexedWeighted> &, int ) const ;
 
 
     Amg::Vector3D
