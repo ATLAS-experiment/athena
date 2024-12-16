@@ -93,24 +93,26 @@ def fromRunArgs(runArgs):
         from PixelRawDataByteStreamCnv.PixelRawDataByteStreamCnvConfig import PixelRawDataProviderAlgCfg
         cfg.merge(PixelRawDataProviderAlgCfg(flags))
         itemList.append(f'PixelRDO_Container#{flags.Overlay.BkgPrefix}PixelRDOs')
+        itemList.append('IDCInDetBSErrContainer#PixelByteStreamErrs')
 
     if flags.Detector.EnableSCT:
         from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import SCTRawDataProviderCfg, SCTEventFlagWriterCfg
         cfg.merge(SCTRawDataProviderCfg(flags))
         cfg.merge(SCTEventFlagWriterCfg(flags))
         itemList.append(f'SCT_RDO_Container#{flags.Overlay.BkgPrefix}SCT_RDOs')
-        itemList.append("IDCInDetBSErrContainer#SCT_ByteStreamErrs")
+        itemList.append('IDCInDetBSErrContainer#SCT_ByteStreamErrs')
 
     if flags.Detector.EnableTRT:
         from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConfig import TRTRawDataProviderCfg
         cfg.merge(TRTRawDataProviderCfg(flags))
         itemList.append(f'TRT_RDO_Container#{flags.Overlay.BkgPrefix}TRT_RDOs')
+        itemList.append('TRT_BSErrContainer#TRT_ByteStreamErrs')
 
     if flags.Detector.EnableLAr:
         from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
         cfg.merge(LArRawDataReadingCfg(flags))
         itemList.append(f'LArDigitContainer#{flags.Overlay.BkgPrefix}LArDigitContainer_data')
-        itemList.append("LArFebHeaderContainer#LArFebHeader")
+        itemList.append('LArFebHeaderContainer#LArFebHeader')
 
     if flags.Detector.EnableTile:
         from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
