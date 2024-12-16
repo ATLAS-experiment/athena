@@ -354,22 +354,25 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
                         info="the input tau container, with a possible selection, in "
                         "the format container or container.selection.")
 
+    def get_year_data(self, dictionary: dict, year: int | str) -> list:
+        return dictionary.get(int(year), dictionary.get(str(year), []))
+
     def makeAlgs (self, config) :
 
         if config.dataType() is not DataType.Data:
             if config.campaign() is Campaign.MC20a:
-                triggers = self.triggerChainsPerYear.get('2015',[])
-                triggers += self.triggerChainsPerYear.get('2016',[])
+                triggers = self.get_year_data(self.triggerChainsPerYear, 2015)
+                triggers += self.get_year_data(self.triggerChainsPerYear, 2016)
                 # Remove potential duplicates
                 triggers = list(set(triggers))
             elif config.campaign() is Campaign.MC20d:
-                triggers = self.triggerChainsPerYear.get('2017',[])
+                triggers = self.get_year_data(self.triggerChainsPerYear, 2017)
             elif config.campaign() is Campaign.MC20e:
-                triggers = self.triggerChainsPerYear.get('2018',[])
+                triggers = self.get_year_data(self.triggerChainsPerYear, 2018)
             elif config.campaign() in [Campaign.MC21a, Campaign.MC23a]:
-                triggers = self.triggerChainsPerYear.get('2022',[])
+                triggers = self.get_year_data(self.triggerChainsPerYear, 2022)
             elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]:
-                triggers = self.triggerChainsPerYear.get('2023',[])
+                triggers = self.get_year_data(self.triggerChainsPerYear, 2023)
             else:
                 logging.warning("unknown campaign, skipping triggers: " + str(config.campaign()))
                 triggers = []

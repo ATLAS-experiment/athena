@@ -656,19 +656,19 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
             mapKeysDict = MapKeysDict(version)
 
             if config.campaign() is Campaign.MC20a:
-                years = ['2015', '2016']
+                years = [2015, 2016]
             elif config.campaign() is Campaign.MC20d:
-                years = ['2017']
+                years = [2017]
             elif config.campaign() is Campaign.MC20e:
-                years = ['2018']
+                years = [2018]
             elif config.campaign() in [Campaign.MC21a, Campaign.MC23a]:
-                years = ['2022']
+                years = [2022]
             elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]:
-                years = ['2023']
+                years = [2023]
 
             triggerConfigs = {}
             for year in years:
-                triggerChains = self.triggerChainsPerYear.get(year,[])
+                triggerChains = self.triggerChainsPerYear.get(int(year), self.triggerChainsPerYear.get(str(year), []))
                 for chain in triggerChains:
                     chain = chain.replace("HLT_", "").replace(" || ", "_OR_")
                     legs = triggerDict[chain]
