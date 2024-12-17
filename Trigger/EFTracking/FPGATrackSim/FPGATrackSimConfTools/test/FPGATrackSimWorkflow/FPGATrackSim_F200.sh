@@ -28,7 +28,7 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.outputMonitorFile="monitoring${TEST_LABEL}.root"
 }
 run_F200
-if [ -z $ArtJobType ];then # skip file check for ART (this has already been done in CI)
+if [ -z "$ArtJobType" ];then # skip file check for ART (this has already been done in CI)
     ls -l
     echo "... ${TEST_LABEL} pipeline on RDO, this part is done now checking the xAOD"
     checkxAOD.py $xAODOutput

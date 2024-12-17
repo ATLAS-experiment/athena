@@ -1,5 +1,5 @@
 #!/bin/bash
-# art-description: Test running F100 pipeline
+# art-description: Test running F300 pipeline
 # art-type: grid
 # art-include: main/Athena
 # art-input-nfiles: 2

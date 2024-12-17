@@ -1,5 +1,5 @@
 #!/bin/bash
-# art-description: Test running F200 pipeline
+# art-description: Test running F210 pipeline
 # art-type: grid
 # art-include: main/Athena
 # art-input-nfiles: 2
@@ -12,13 +12,14 @@
 
 set -e
 
-PREFIX="F200"
+PREFIX="F210"
 lastref_dir=last_results
 INPUT_AOD_FILE="xAOD_${PREFIX}.root"
 
 ATHENA_SOURCE="${ATLAS_RELEASE_BASE}/Athena/${Athena_VERSION}/InstallArea/${Athena_PLATFORM}/src/"
 IDTPM_CONFIG="${ATHENA_SOURCE}/Trigger/EFTracking/FPGATrackSim/FPGATrackSimConfTools/test/IDTPM_configs/F2x0_F3x0_singleMu_region0.json"
 DCUBE_CONFIG="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/dcube/config/FPGATrackSimIDTPMconfig.xml"
+
 
 # Don't run if dcube config for nightly cmp is not found
 if [ -z "$DCUBE_CONFIG" ]; then
@@ -45,8 +46,9 @@ run () {
     return $rc
 }
 
+
 run "${PREFIX} pipeline" \
-    FPGATrackSim_F200.sh $INPUT_AOD_FILE
+    FPGATrackSim_F210.sh $INPUT_AOD_FILE
 
 run "IDTPM" \
     runIDTPM.py --inputFileNames=$INPUT_AOD_FILE \
