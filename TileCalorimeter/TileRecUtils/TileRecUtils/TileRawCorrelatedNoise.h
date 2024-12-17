@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILERAWCORRELATEDNOISE_H
@@ -62,8 +62,8 @@ class TileRawCorrelatedNoise: public AthAlgorithm {
       float m[4][64][48][48];
     };
     std::unique_ptr<AlphaMatrix> m_alphaMatrix;
-    float m_meanSamples[4][64][48][7];
-    float m_sample3RMS[4][64][48];
+    float m_meanSamples[4][64][48][7]{};
+    float m_sample3RMS[4][64][48]{};
 
     bool m_useMeanFiles;
     bool m_pmtOrder;

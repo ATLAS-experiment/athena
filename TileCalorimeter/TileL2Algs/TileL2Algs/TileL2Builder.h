@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -204,12 +204,12 @@ class TileL2Builder: public AthAlgTool {
 
     TileFragHash m_hashFunc;
 
-    float m_sinTh[4][48];
-    float m_sinThRound[4][48];
-    float m_cosTh[4][48];
-    float m_cosThRound[4][48];
-    bool m_connected[4][48];
-    int m_channelPairs[4][48];
+    float m_sinTh[4][48]{};
+    float m_sinThRound[4][48]{};
+    float m_cosTh[4][48]{};
+    float m_cosThRound[4][48]{};
+    bool m_connected[4][48]{};
+    int m_channelPairs[4][48]{};
 };
 
 #endif // TILEL2ALGS_TILEL2BUILDER_H

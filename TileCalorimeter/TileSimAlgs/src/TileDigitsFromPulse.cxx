@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -61,7 +61,11 @@ using CLHEP::RandFlat;
 TileDigitsFromPulse::TileDigitsFromPulse(const std::string& name, ISvcLocator* pSvcLocator) :
   AthAlgorithm(name, pSvcLocator),
   m_tileHWID(0),
-  m_tileInfo(0)
+  m_tileInfo(0),
+  m_i_ADCmax(0),
+  m_nPul_eff(0),
+  m_buf(nullptr),
+  m_tsg(nullptr)
 {
 	m_rChUnit = TileRawChannelUnit::ADCcounts;
 	m_rChType = TileFragHash::Default;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -30,6 +30,7 @@ TileRawChannelNoiseFilter::TileRawChannelNoiseFilter(const std::string& type,
     , m_useTwoGaussNoise(false) // do not use 2G - has no sense for ADC HF noise for the moment
     , m_useGapCells(false) // use gap cells for noise filter as all normal cells
     , m_tileInfo(0)
+    , m_ADCmaskValueMinusEps(0)
 {
 
   declareProperty("TruncationThresholdOnAbsEinSigma", m_truncationThresholdOnAbsEinSigma);

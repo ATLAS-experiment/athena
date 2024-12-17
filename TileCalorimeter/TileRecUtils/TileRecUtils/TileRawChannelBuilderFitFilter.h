@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILERAWCHANNELBUILDERFITFILTER_H
@@ -73,7 +73,7 @@ class TileRawChannelBuilderFitFilter: public TileRawChannelBuilder {
     double m_t0Fit;
     // Parameters for pulse shape functions
     // [0] - phase, [1] - pedestal, [2] - amplitude
-    double m_fnParameters[3];
+    double m_fnParameters[3]{};
     int m_iPeak0;
     //double m_phasefrac;
     double m_minTime;
