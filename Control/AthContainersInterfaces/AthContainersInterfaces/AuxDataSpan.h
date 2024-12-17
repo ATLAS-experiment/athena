@@ -42,6 +42,7 @@ struct AuxDataSpanBase
    * @param the_beg The start of the variable's vector.
    * @param the_size The length of the variable's vector.
    */
+  // cppcheck-suppress uninitMemberVar; false positive
   AuxDataSpanBase (void* the_beg = 0, size_t the_size = 0)
     : beg(the_beg), size(the_size)
   {
