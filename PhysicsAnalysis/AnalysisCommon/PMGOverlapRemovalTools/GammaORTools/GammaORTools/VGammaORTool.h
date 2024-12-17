@@ -195,8 +195,6 @@ private:
   // Minimum photon pT considered in algorithm -- increase speeds up algorithm as less photons need to be classified
   float m_min_considered_photon_pT;
 
-  // Name of truth particle collection
-  std::string m_truthparticle_collection_name;
 };
 
 
