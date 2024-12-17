@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackDataNtupleTree.h"
@@ -21,7 +21,7 @@ TrackDataNtupleTree::TrackDataNtupleTree(TTree *tree, bool includingDAFdata) :
         tree = (TTree*)gDirectory->Get("OutputTrack");
     
     }
-    Init(tree);
+    TrackDataNtupleTree::Init(tree);
 //     for (int i=0; i<300; i++){
 //         (*CompROTnContainedROTs)[i]=0;
 //     }

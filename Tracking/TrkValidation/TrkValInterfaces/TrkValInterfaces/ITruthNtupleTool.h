@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -65,7 +65,7 @@ public:
 
     virtual StatusCode initBranches(const std::vector<const Trk::ITrackTruthClassifier*>& classifiers,
                                     bool,
-                                    const std::vector<std::string> trackCollectionNames) = 0;
+                                    const std::vector<std::string>& trackCollectionNames) = 0;
 };
 
 inline const InterfaceID& Trk::ITruthNtupleTool::interfaceID() {

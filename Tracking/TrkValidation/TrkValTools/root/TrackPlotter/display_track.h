@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DISPLAY_TRACK_H
@@ -29,6 +29,8 @@ class displayTracks {
 public:
     displayTracks();
     virtual ~displayTracks();
+    displayTracks (const displayTracks&) = delete;
+    displayTracks& operator= (const displayTracks&) = delete;
     /** create the graphic objects for a single track state */
     virtual void displayTrackState( GlobalPosition& trkPosition, GlobalDirection& trkDirection) = 0;
     /** create the graphic objects for a single TRT measurement on track */

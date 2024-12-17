@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "display_track.h"
@@ -31,7 +31,7 @@ displayTracks::displayTracks() {
 };
 
 displayTracks::~displayTracks() {
-    clear();
+    displayTracks::clear();
     delete m_trackGraphics;
     m_trackGraphics = 0;
     delete m_rioGraphics;
