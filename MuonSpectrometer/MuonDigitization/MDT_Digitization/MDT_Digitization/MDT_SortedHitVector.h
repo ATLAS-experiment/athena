@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MDT_DIGITIZATION_MDT_SORTEDHITVECTOR_H
 #define MDT_DIGITIZATION_MDT_SORTEDHITVECTOR_H
 #include "MuonSimEvent/MDTSimHit.h"
+
 class mdt_hit_info {
 public:
     mdt_hit_info(Identifier i, double t, double a, double r, const TimedHitPtr<MDTSimHit>* aHit) :
@@ -12,10 +13,10 @@ public:
     mdt_hit_info(Identifier i, double t, double a) : id(i), time(t), adc(a) {}
     mdt_hit_info() : time(0.), adc(0.) {}
     Identifier id;
-    double time;
-    double adc;
-    double radius;
-    const TimedHitPtr<MDTSimHit>* simhit;
+    double time{};
+    double adc{};
+    double radius{};
+    const TimedHitPtr<MDTSimHit>* simhit{};
     bool operator<(const mdt_hit_info& aInfo) const {
         if (id < aInfo.id)
             return true;
@@ -38,7 +39,7 @@ public:
     bool isSorted() { return m_isSorted; }
 
 private:
-    bool m_isSorted;
+    bool m_isSorted{};
 };
 inline void MDT_SortedHitVector::sort() {
     std::stable_sort(HitVector::begin(), HitVector::end());
