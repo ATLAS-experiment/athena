@@ -29,6 +29,9 @@ namespace CP {
   }
 
   StatusCode SumNElNMuPtSelectorAlg::execute() {
+    // accessors
+    static const SG::AuxElement::ConstAccessor<float> acc_pt_dressed("pt_dressed");
+
     for (const auto &sys : m_systematicsList.systematicsVector()) {
       // retrieve the EventInfo
       const xAOD::EventInfo *evtInfo = nullptr;
@@ -55,17 +58,21 @@ namespace CP {
       if (m_electronsHandle) {
 	for (const xAOD::IParticle *el : *electrons){
 	  if (!m_electronSelection || m_electronSelection.getBool(*el, sys)) {
-	    if (el->pt() > m_elptmin){
-	      count++;
-	    }
-	  }
-	}
+        if (m_useDressedProperties) {
+          if (acc_pt_dressed(*el) > m_elptmin) count++;
+        } else {
+          if (el->pt() > m_elptmin) count++;
+        }
+      }
+    }
       }
       if (m_muonsHandle) {
 	for (const xAOD::IParticle *mu : *muons) {
 	  if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)) {
-	    if (mu->pt() > m_muptmin){
-	      count++;
+        if (m_useDressedProperties) {
+          if (acc_pt_dressed(*mu) > m_muptmin) count++;
+        } else {
+          if (mu->pt() > m_muptmin) count++;
 	    }
 	  }
 	}

@@ -27,6 +27,9 @@ namespace CP {
   }
 
   StatusCode NObjectPtSelectorAlg::execute() {
+    // accessors
+    static const SG::AuxElement::ConstAccessor<float> acc_pt_dressed("pt_dressed");
+
     for (const auto &sys : m_systematicsList.systematicsVector()) {
       // retrieve the EventInfo
       const xAOD::EventInfo *evtInfo = nullptr;
@@ -47,8 +50,10 @@ namespace CP {
       int count = 0;
       for (const xAOD::IParticle *obj : *objects){
         if (!m_objectSelection || m_objectSelection.getBool(*obj, sys)){
-          if (obj->pt() > m_ptmin){
-            count++;
+          if (m_useDressedProperties) {
+            if (acc_pt_dressed(*obj) > m_ptmin) count++;
+          } else {
+            if (obj->pt() > m_ptmin) count++;
           }
         }
       }

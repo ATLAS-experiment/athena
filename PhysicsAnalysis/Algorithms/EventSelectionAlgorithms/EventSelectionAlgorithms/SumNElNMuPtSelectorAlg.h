@@ -47,6 +47,11 @@ namespace CP {
     /// \brief the count of events desired
     Gaudi::Property<int> m_count {this, "count", 0, "count value"};
 
+    /// \brief use dressed kinematics
+    Gaudi::Property<bool> m_useDressedProperties{this, "useDressedProperties", false,
+      "whether to use dressed electron and muon kinematics rather than simple "
+      "P4 kinematics"};
+
     /// \brief the operator version of the comparison (>, <, etc)
     SignEnum::ComparisonOperator m_signEnum;
 
