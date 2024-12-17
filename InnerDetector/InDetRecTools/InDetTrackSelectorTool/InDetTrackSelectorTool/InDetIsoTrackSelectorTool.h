@@ -12,7 +12,6 @@
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
-using CLHEP::mm;
 
 /**
  * @file InDetIsoTrackSelectorTool.h
@@ -58,8 +57,8 @@ namespace InDet
     /** Robust cut window setting */
     BooleanProperty m_robustCuts{this, "RobustCuts", true};
     BooleanProperty m_applySinThetaCorrection{this, "SinThetaCorrection", true};
-    DoubleProperty m_d0max{this, "maxD0", 1.5*mm};
-    DoubleProperty m_z0stMax{this, "maxZ0", 1.5*mm};
+    DoubleProperty m_d0max{this, "maxD0", 1.5*CLHEP::mm};
+    DoubleProperty m_z0stMax{this, "maxZ0", 1.5*CLHEP::mm};
     /** Sophisticated cut window setting : d0/z0 significance - only when robustCuts off*/
     DoubleProperty m_d0Significance{this, "maxD0overSigmaD0", 3.};
     DoubleProperty m_z0Significance{this, "maxZ0overSigmaZ0", 3.};
