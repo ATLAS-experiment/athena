@@ -212,7 +212,7 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             for trig in alg.trigSingleMatchingList:
                 trig = trig.replace(".", "p").replace("-", "_").replace(" ", "")
                 if trig_string in trig:
-                    config.addOutputVar(particles, f'trigMatched_{triggerSuffix}{self.postfix}{trig}', f'trigMatched_{triggerSuffix}{self.postfix}{trig}')
+                    config.addOutputVar(particles.split('.')[0], f'trigMatched_{triggerSuffix}{self.postfix}{trig}', f'trigMatched_{triggerSuffix}{self.postfix}{trig}')
         return
 
     def makeTrigMatchingAlg(
