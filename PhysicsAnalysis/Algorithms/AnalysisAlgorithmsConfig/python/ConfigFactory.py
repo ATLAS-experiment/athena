@@ -294,10 +294,29 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="SystObjectLink", alg=SystObjectLinkBlock,
             superBlocks=[self.ROOTNAME, "Jets", "Electrons", "Photons", "Muons", "TauJets"])
 
+        # Particle-level truth algorithms
+        from TruthParticleLevelAnalysisAlgorithms.ParticleLevelElectronsConfig import ParticleLevelElectronsBlock
+        self.addAlgConfigBlock(algName="PL_Electrons", alg=ParticleLevelElectronsBlock)
+        from TruthParticleLevelAnalysisAlgorithms.ParticleLevelMuonsConfig import ParticleLevelMuonsBlock
+        self.addAlgConfigBlock(algName="PL_Muons", alg=ParticleLevelMuonsBlock)
+        from TruthParticleLevelAnalysisAlgorithms.ParticleLevelNeutrinosConfig import ParticleLevelNeutrinosBlock
+        self.addAlgConfigBlock(algName="PL_Neutrinos", alg=ParticleLevelNeutrinosBlock)
+        from TruthParticleLevelAnalysisAlgorithms.ParticleLevelJetsConfig import ParticleLevelJetsBlock
+        self.addAlgConfigBlock(algName="PL_Jets", alg=ParticleLevelJetsBlock)
+        from TruthParticleLevelAnalysisAlgorithms.ParticleLevelTausConfig import ParticleLevelTausBlock
+        self.addAlgConfigBlock(algName="PL_Taus", alg=ParticleLevelTausBlock)
+        from TruthParticleLevelAnalysisAlgorithms.ParticleLevelPhotonsConfig import ParticleLevelPhotonsBlock
+        self.addAlgConfigBlock(algName="PL_Photons", alg=ParticleLevelPhotonsBlock)
+        from TruthParticleLevelAnalysisAlgorithms.ParticleLevelMissingETConfig import ParticleLevelMissingETBlock
+        self.addAlgConfigBlock(algName="PL_MissingET", alg=ParticleLevelMissingETBlock)
+        from TruthParticleLevelAnalysisAlgorithms.ParticleLevelOverlapRemovalConfig import ParticleLevelOverlapRemovalBlock
+        self.addAlgConfigBlock(algName="PL_OverlapRemoval", alg=ParticleLevelOverlapRemovalBlock)
+
         # IFF truth classification
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import IFFLeptonDecorationBlock
         self.addAlgConfigBlock(algName="IFFClassification", alg=IFFLeptonDecorationBlock,
-            superBlocks=["Electrons","Muons"])
+            superBlocks=["Electrons", "Muons",
+                         "PL_Electrons", "PL_Muons"])
 
         # generator level analysis
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import GeneratorAnalysisBlock
@@ -307,7 +326,9 @@ class ConfigFactory():
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import PtEtaSelectionBlock
         self.addAlgConfigBlock(algName="PtEtaSelection", alg=PtEtaSelectionBlock,
             defaults={'selectionName': ''},
-            superBlocks=[self.ROOTNAME, "Jets", "Electrons", "Photons", "Muons", "TauJets"])
+            superBlocks=[self.ROOTNAME,
+                         "Jets", "Electrons", "Photons", "Muons", "TauJets",
+                         "PL_Jets", "PL_Electrons", "PL_Photons", "PL_Muons", "PL_Taus", "PL_Neutrinos"])
 
         # met
         from MetAnalysisAlgorithms.MetAnalysisConfig import MetAnalysisConfig

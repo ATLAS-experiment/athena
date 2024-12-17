@@ -50,7 +50,7 @@ class ContainerConfig :
     This tracks the naming of all temporary containers, as well as all the
     selection decorations."""
 
-    def __init__ (self, name, sourceName, *, originalName = None, calibMode = None, noSysSuffix) :
+    def __init__ (self, name, sourceName, *, originalName = None, calibMode = None, isMet = False, noSysSuffix) :
         self.name = name
         self.sourceName = sourceName
         self.originalName = originalName
@@ -59,7 +59,7 @@ class ContainerConfig :
         self.index = 0
         self.maxIndex = None
         self.viewIndex = 1
-        self.isMet = False
+        self.isMet = isMet
         self.selections = []
         self.outputs = {}
 
@@ -315,7 +315,7 @@ class ConfigAccumulator :
 
 
     def setSourceName (self, containerName, sourceName,
-                       *, originalName = None, calibMode = None) :
+                       *, originalName = None, calibMode = None, isMet = False) :
         """set the (default) name of the source/original container
 
         This is essentially meant to allow using e.g. the muon
@@ -333,7 +333,7 @@ class ConfigAccumulator :
         information to be configured, like the METSignificance
         """
         if containerName not in self._containerConfig :
-            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName, noSysSuffix = self._noSysSuffix, originalName = originalName, calibMode = calibMode)
+            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName, noSysSuffix = self._noSysSuffix, originalName = originalName, calibMode = calibMode, isMet = isMet)
 
 
     def writeName (self, containerName, *, isMet=None) :

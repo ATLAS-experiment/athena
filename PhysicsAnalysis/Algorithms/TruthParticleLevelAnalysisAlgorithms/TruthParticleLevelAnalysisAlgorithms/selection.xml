@@ -1,0 +1,10 @@
+<lcgdict>
+
+  <class name="CP::ParticleLevelJetsAlg" />
+  <class name="CP::ParticleLevelIsolationAlg" />
+  <class name="CP::ParticleLevelChargeDecoratorAlg" />
+  <class name="CP::ParticleLevelPtEtaPhiDecoratorAlg" />
+  <class name="CP::ParticleLevelMissingETAlg" />
+  <class name="CP::ParticleLevelOverlapRemovalAlg" />
+
+</lcgdict>

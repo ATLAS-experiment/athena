@@ -149,6 +149,12 @@
 #include <TriggerAnalysisAlgorithms/TrigMatchingAlg.h>
 #include <TriggerMatchingTool/DRScoringTool.h>
 #include <TriggerMatchingTool/MatchFromCompositeTool.h>
+#include <TruthParticleLevelAnalysisAlgorithms/ParticleLevelChargeDecoratorAlg.h>
+#include <TruthParticleLevelAnalysisAlgorithms/ParticleLevelIsolationAlg.h>
+#include <TruthParticleLevelAnalysisAlgorithms/ParticleLevelJetsAlg.h>
+#include <TruthParticleLevelAnalysisAlgorithms/ParticleLevelMissingETAlg.h>
+#include <TruthParticleLevelAnalysisAlgorithms/ParticleLevelOverlapRemovalAlg.h>
+#include <TruthParticleLevelAnalysisAlgorithms/ParticleLevelPtEtaPhiDecoratorAlg.h>
 #include <egammaMVACalib/egammaMVACalibTool.h>
 #include <egammaMVACalib/egammaMVASvc.h>
 #include <tauRecTools/TauCombinedTES.h>
@@ -262,6 +268,12 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TrigGlobalEfficiencyAlg>("CP::TrigGlobalEfficiencyAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TrigPrescalesAlg>("CP::TrigPrescalesAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TrigMatchingAlg>("CP::TrigMatchingAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::ParticleLevelChargeDecoratorAlg>("CP::ParticleLevelChargeDecoratorAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::ParticleLevelIsolationAlg>("CP::ParticleLevelIsolationAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::ParticleLevelJetsAlg>("CP::ParticleLevelJetsAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::ParticleLevelMissingETAlg>("CP::ParticleLevelMissingETAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::ParticleLevelOverlapRemovalAlg>("CP::ParticleLevelOverlapRemovalAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::ParticleLevelPtEtaPhiDecoratorAlg>("CP::ParticleLevelPtEtaPhiDecoratorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::VertexSelectionAlg>("CP::VertexSelectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::VGammaORAlg>("CP::VGammaORAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::xAODWriterAlg>("CP::xAODWriterAlg"));
