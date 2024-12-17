@@ -23,7 +23,6 @@
 #include <filesystem>
 
 
-#include "TCanvas.h"
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TMarker.h"
@@ -182,6 +181,7 @@ namespace MuonValR4 {
         /** Enter the lock phase */
         std::lock_guard guard{s_mutex};
         /** Check again in case multiple threads are simultaneously in the lock phase */
+        //cppcheck-suppress identicalConditionAfterEarlyExit
         if (m_canvCounter >= m_canvasLimit) {
             return;
         }
@@ -266,6 +266,7 @@ namespace MuonValR4 {
         /** Enter the lock phase */
         std::lock_guard guard{s_mutex};
         /** Check again in case multiple threads are simultaneously in the lock phase */
+        //cppcheck-suppress identicalConditionAfterEarlyExit
         if (m_canvCounter >= m_canvasLimit) {
             return;
         }
@@ -342,6 +343,7 @@ namespace MuonValR4 {
         /** Enter the lock phase */
         std::lock_guard guard{s_mutex};
         /** Check again in case multiple threads are simultaneously in the lock phase */
+        //cppcheck-suppress identicalConditionAfterEarlyExit
         if (m_canvCounter >= m_canvasLimit) {
             return;
         }
@@ -413,6 +415,7 @@ namespace MuonValR4 {
         /** Enter the lock phase */
         std::lock_guard guard{s_mutex};
         /** Check again in case multiple threads are simultaneously in the lock phase */
+        //cppcheck-suppress identicalConditionAfterEarlyExit
         if (m_canvCounter >= m_canvasLimit) {
             return;
         }
