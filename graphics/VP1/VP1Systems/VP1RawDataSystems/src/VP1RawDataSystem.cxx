@@ -76,7 +76,7 @@ public:
 VP1RawDataSystem::VP1RawDataSystem()
   : IVP13DSystemSimple("RawHits",
 		       "System showing Raw Data (RDO's, BCM hits, ...)",
-		       "Thomas.Kittelmann@cern.ch"),
+		       "Thomas.Kittelmann@cern.ch, Riccardo.Maria.Bianchi@cern.ch"),
     m_d(new Imp(this))
 {
 }

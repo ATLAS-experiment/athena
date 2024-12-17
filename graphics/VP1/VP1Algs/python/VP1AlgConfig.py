@@ -359,6 +359,12 @@ def SetupVP1():
     # Add MDT RDO to digit config
     from MuonConfig.MuonByteStreamCnvTestConfig import MdtRdoToMdtDigitCfg
     cfg.merge(MdtRdoToMdtDigitCfg(flags))
+    _logger.verbose("+ MdtRdoToMdtDigitCfg added.")
+    # Add MM RDO to digit config
+    from MuonConfig.MuonByteStreamCnvTestConfig import MM_RdoToDigitCfg
+    cfg.merge(MM_RdoToDigitCfg(flags))
+    _logger.verbose("+ MM_RdoToDigitCfg added.")
+    
     _logger.verbose("+ ...Done")
 
     # configure VP1
