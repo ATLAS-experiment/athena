@@ -21,6 +21,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "TGraph.h"
+class TH1D;
+class TH2D;
 
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
@@ -47,6 +49,7 @@
     StatusCode registerHistograms(unsigned nLayers,const FPGATrackSimGenScanBinningBase  *binning,
                                  double rin, double rout);
     void allocateDataFlowCounters();
+    void resetDataFlowCounters();
 
     // This is done at the end of event execution to store any graphs that were created
     StatusCode registerGraphs();
@@ -65,18 +68,23 @@
     void fillBinLevelOutput(const FPGATrackSimGenScanBinningBase::IdxSet &idx,
                                   const FPGATrackSimGenScanTool::BinEntry &data,                            
                                   const std::vector<std::vector<const FPGATrackSimGenScanTool::StoredHit *> >&  hitsByLayer);
-    void fillPairFilterCuts(const FPGATrackSimGenScanTool::HitPairSet &pairs);
+    void fillPairingHits(std::vector<const FPGATrackSimGenScanTool::StoredHit *> const *lastlyr,
+                         std::vector<const FPGATrackSimGenScanTool::StoredHit *> const *lastlastlyr);
+    void fillPairFilterCuts(const FPGATrackSimGenScanTool::HitPair &pair);
     void fillPairSetFilterCut(std::vector<TH1D *> &histset, double val,
                                     const FPGATrackSimGenScanTool::HitPair &pair,
                                     const FPGATrackSimGenScanTool::HitPair &lastpair, 
                                     bool nminus1);
 
+    
     void fillInputSummary(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits,
                                 const FPGATrackSimGenScanArray<int> &validSlice,
                                 const FPGATrackSimGenScanArray<int> &validScan);
     void fillOutputSummary(const FPGATrackSimGenScanArray<int>& validSlice,
                                  const FPGATrackSimGenScanArray<int>& validSliceAndScan);
 
+    void fillBuildGroupsWithPairs(const std::vector<FPGATrackSimGenScanTool::IntermediateState>& states, unsigned allowed_misses);
+    
     // Counter Increments
     void incrementInputPerSlice(const std::vector<unsigned>& sliceidx) { m_inputhitsperslice[sliceidx]++; }
     void incrementInputPerScan(const FPGATrackSimGenScanBinningBase::IdxSet& idx, 
@@ -169,6 +177,13 @@
     TH1D *m_pairs = 0;
     TH1D *m_filteredpairs = 0;
     TH1D *m_pairsets = 0;
+
+    // Build Pairs with Groups
+    TH2D* m_unpairedHits = 0;
+    TH2D* m_pairsetsIncr = 0;
+    TH2D* m_pairsetsHits = 0;
+    TH2D* m_binStagesIncr = 0;
+    TH2D* m_totalInputIncr = 0;
 
     TH1D *m_pairinghits = 0;
 

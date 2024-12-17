@@ -51,6 +51,7 @@
  * References:
  *
  */
+#include "AthenaBaseComps/AthAlgTool.h"
 
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
@@ -63,8 +64,6 @@
 #include <string>
 #include <vector>
 
-
-
 //-------------------------------------------------------------------------------------------------------
 // Binning base class
 //       Nomenclature:
@@ -75,9 +74,10 @@
 //             scanPar = scan variables of Hough-like scan (e.g. pT,d0)
 //             rowPar = variable that scanPars specify a valid range of for a given hit (e.g. phi_track)
 //-------------------------------------------------------------------------------------------------------
-class FPGATrackSimGenScanBinningBase
-{
+class FPGATrackSimGenScanBinningBase : virtual public IAlgTool {
 public:
+   DeclareInterfaceID(FPGATrackSimGenScanBinningBase, 2, 0);
+
   //--------------------------------------------------------------------------------------------------
   //
   // These just makes ParSet and IdxSet types that have 5 double or unsigned int
@@ -277,10 +277,17 @@ public:
 //      as the row of the accumulator
 //
 //-------------------------------------------------------------------------------------------------------
-class FPGATrackSimGenScanStdTrkBinning : public FPGATrackSimGenScanBinningBase
+class FPGATrackSimGenScanStdTrkBinning : public extends<AthAlgTool, FPGATrackSimGenScanBinningBase> 
 {
 public:
-  FPGATrackSimGenScanStdTrkBinning() : m_parNames({"z0", "eta", "qOverPt", "d0", "phi"}) {}
+  FPGATrackSimGenScanStdTrkBinning(const std::string& algname, const std::string &name, const IInterface *ifc) :
+  base_class(algname, name, ifc), m_parNames({"z0", "eta", "qOverPt", "d0", "phi"})
+  {
+    declareInterface<FPGATrackSimGenScanBinningBase>(this);
+  }
+  
+  virtual StatusCode initialize() override { return StatusCode::SUCCESS; }
+
   virtual const std::string &parNames(unsigned i) const override { return m_parNames[i]; }
   virtual unsigned rowParIdx() const override { return 4;}
   
@@ -347,8 +354,12 @@ class FPGATrackSimGenScanKeyLyrHelper
 {
 public:
   FPGATrackSimGenScanKeyLyrHelper(double r1, double r2) : m_R1(r1), m_R2(r2) {}
+  FPGATrackSimGenScanKeyLyrHelper() {} // NOTE r1 and r2 must be set before using class
 
   struct KeyLyrPars {
+    KeyLyrPars() {}
+    KeyLyrPars(const FPGATrackSimGenScanBinningBase::ParSet &parset)
+        : z1(parset[0]), z2(parset[1]), phi1(parset[2]), phi2(parset[3]), xm(parset[4]) {}
     double z1;
     double z2;
     double phi1;
@@ -398,6 +409,8 @@ public:
   // accessors
   double R1() const {return m_R1;}
   double R2() const {return m_R2;}
+  void setR1(const double r1) {m_R1=r1;}
+  void setR2(const double r2) {m_R2=r2;}
 
   private:
     double m_R1;
@@ -412,12 +425,24 @@ public:
 //     and then uses xm as the final row variable
 //
 //-------------------------------------------------------------------------------------------------------
-class FPGATrackSimGenScanKeyLyrBinning : public FPGATrackSimGenScanBinningBase
+class FPGATrackSimGenScanKeyLyrBinning :  public extends<AthAlgTool, FPGATrackSimGenScanBinningBase>
 {
 public:
+  FPGATrackSimGenScanKeyLyrBinning(const std::string& algname, const std::string &name, const IInterface *ifc) :
+  base_class(algname, name, ifc), m_keylyrtool(m_rin,m_rout), m_parNames({"zR1", "zR2", "phiR1", "phiR2", "xm"})
+  {
+    declareInterface<FPGATrackSimGenScanBinningBase>(this);
+  }
 
-  FPGATrackSimGenScanKeyLyrBinning(double r_in, double r_out) : 
-    m_keylyrtool(r_in,r_out), m_parNames({"zR1", "zR2", "phiR1", "phiR2", "xm"}) {}
+  virtual StatusCode initialize() override {
+    m_keylyrtool.setR1(m_rin);
+    m_keylyrtool.setR2(m_rout);
+    return StatusCode::SUCCESS; 
+  }
+  
+  Gaudi::Property<double> m_rin{this, "rin", {-1.0}, "Radius of inner layer for keylayer definition"};
+  Gaudi::Property<double> m_rout{this, "rout", {-1.0}, "Radius of outer layer for keylayer definition"};
+
   virtual const std::string &parNames(unsigned i) const override { return m_parNames[i]; }
   virtual unsigned rowParIdx() const override { return 4;}
   virtual std::vector<unsigned> slicePars() const override { return std::vector<unsigned>({0,1}); }
@@ -431,19 +456,13 @@ public:
   }
 
   FPGATrackSimGenScanKeyLyrHelper::KeyLyrPars parSetToKeyPars(const ParSet &parset) const {
-    FPGATrackSimGenScanKeyLyrHelper::KeyLyrPars keypars;
-    keypars.z1 = parset[0];
-    keypars.z2 = parset[1];
-    keypars.phi1 = parset[2];
-    keypars.phi2 = parset[3];
-    keypars.xm = parset[4];
-    return keypars;
+    return FPGATrackSimGenScanKeyLyrHelper::KeyLyrPars(parset);
   }
 
-  virtual const ParSet trackParsToParSet(const FPGATrackSimTrackPars &pars) const override {
+  virtual const ParSet trackParsToParSet(const FPGATrackSimTrackPars &pars) const override {  
     return keyparsToParSet(m_keylyrtool.trackParsToKeyPars(pars));
   }
-  virtual const FPGATrackSimTrackPars parSetToTrackPars(const ParSet &parset) const override {    
+  virtual const FPGATrackSimTrackPars parSetToTrackPars(const ParSet &parset) const override {      
     return m_keylyrtool.keyParsToTrackPars(parSetToKeyPars(parset));
   }
   virtual double sliceVarExpected(const ParSet &pars, FPGATrackSimHit const *hit) const override 
@@ -481,12 +500,24 @@ private:
 //       to be simple windows so that its more like real firmware
 //
 //-------------------------------------------------------------------------------------------------------
-class FPGATrackSimGenScanPhiSlicedKeyLyrBinning : public FPGATrackSimGenScanBinningBase
+class FPGATrackSimGenScanPhiSlicedKeyLyrBinning : public extends<AthAlgTool, FPGATrackSimGenScanBinningBase>
 {
 public:
+  FPGATrackSimGenScanPhiSlicedKeyLyrBinning(const std::string& algname, const std::string &name, const IInterface *ifc) :
+  base_class(algname, name, ifc), m_parNames({"zR1", "zR2", "phiR1", "phiR2", "xm"})
+  {
+    declareInterface<FPGATrackSimGenScanBinningBase>(this);
+  }
 
-  FPGATrackSimGenScanPhiSlicedKeyLyrBinning(double r_in, double r_out) : 
-    m_keylyrtool(r_in,r_out), m_parNames({"zR1", "zR2", "phiR1", "phiR2", "xm"}) {}
+  virtual StatusCode initialize() override {
+    m_keylyrtool.setR1(m_rin);
+    m_keylyrtool.setR2(m_rout);
+    return StatusCode::SUCCESS; 
+  }
+
+  Gaudi::Property<double> m_rin{this, "rin", {-1.0}, "Radius of inner layer for keylayer definition"};
+  Gaudi::Property<double> m_rout{this, "rout", {-1.0}, "Radius of outer layer for keylayer definition"};
+
   virtual const std::string &parNames(unsigned i) const override { return m_parNames[i]; }
   virtual unsigned rowParIdx() const override { return 4;}
   virtual std::vector<unsigned> slicePars() const override { return std::vector<unsigned>({2,3,4}); }
@@ -500,19 +531,15 @@ public:
   }
 
   FPGATrackSimGenScanKeyLyrHelper::KeyLyrPars parSetToKeyPars(const ParSet &parset) const {
-    FPGATrackSimGenScanKeyLyrHelper::KeyLyrPars keypars;
-    keypars.z1 = parset[0];
-    keypars.z2 = parset[1];
-    keypars.phi1 = parset[2];
-    keypars.phi2 = parset[3];
-    keypars.xm = parset[4];
-    return keypars;
+    return FPGATrackSimGenScanKeyLyrHelper::KeyLyrPars(parset);
   }
 
-  virtual const ParSet trackParsToParSet(const FPGATrackSimTrackPars &pars) const override {
+  virtual const ParSet
+  trackParsToParSet(const FPGATrackSimTrackPars &pars) const override {
     return keyparsToParSet(m_keylyrtool.trackParsToKeyPars(pars));
   }
-  virtual const FPGATrackSimTrackPars parSetToTrackPars(const ParSet &parset) const override {    
+  virtual const FPGATrackSimTrackPars
+  parSetToTrackPars(const ParSet &parset) const override {
     return m_keylyrtool.keyParsToTrackPars(parSetToKeyPars(parset));
   }
   

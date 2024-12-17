@@ -7,6 +7,7 @@
 #include "../FPGATrackSimSpacepointRoadFilterTool.h"
 #include "../FPGATrackSimGenScanTool.h"
 #include "../FPGATrackSimGenScanMonitoring.h"
+#include "../FPGATrackSimGenScanBinning.h"
 
 
 DECLARE_COMPONENT( FPGATrackSimEtaPatternFilterTool )
@@ -17,4 +18,7 @@ DECLARE_COMPONENT( FPGATrackSimPhiRoadFilterTool )
 DECLARE_COMPONENT( FPGATrackSimRoadUnionTool )
 DECLARE_COMPONENT( FPGATrackSimSpacepointRoadFilterTool )
 DECLARE_COMPONENT( FPGATrackSimGenScanTool )
-DECLARE_COMPONENT( FPGATrackSimGenScanMonitoring )
+DECLARE_COMPONENT( FPGATrackSimGenScanMonitoring)
+DECLARE_COMPONENT( FPGATrackSimGenScanPhiSlicedKeyLyrBinning )
+DECLARE_COMPONENT( FPGATrackSimGenScanKeyLyrBinning )
+DECLARE_COMPONENT( FPGATrackSimGenScanStdTrkBinning )

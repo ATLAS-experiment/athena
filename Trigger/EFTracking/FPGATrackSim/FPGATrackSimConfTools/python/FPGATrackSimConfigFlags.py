@@ -32,6 +32,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('outputMonitorFile',"monitoring.root")
     cf.addFlag('connectToToITkTracking',True)
     cf.addFlag('loglevel', AthenaCommon.Constants.INFO)
+    cf.addFlag('msgLimit',-1)
     cf.addFlag('singleTrackSample',  True)
     cf.addFlag('FakeNNonnxFile', '')
     cf.addFlag('ParamNNonnxFile', '')
@@ -264,6 +265,8 @@ def createGenScanFPGATrackSimConfigFlags():
 
     cf.name = 'genScan'
     cf.addFlag('genScanCuts','FPGATrackSimHough.FPGATrackSimGenScanCuts')
+    cf.addFlag('reverse','False')
+    cf.addFlag('binFilter','PairThenGroup')
 
     return cf
 

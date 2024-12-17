@@ -30,7 +30,11 @@
 
 
 #include <vector>
+#include <string>
+#include <stdexcept>
 #include <utility>
+
+#include "CxxUtils/checker_macros.h"
 
 template <typename T>
 class FPGATrackSimGenScanArray
