@@ -28,8 +28,6 @@ VGammaORTool::VGammaORTool(const std::string& name)
   declareProperty("abs_pdgids_excluded_from_iso", m_abs_pdgids_excluded_from_iso = {11, 12, 13, 14, 15, 16, 22});
   declareProperty("min_considered_photon_pT", m_min_considered_photon_pT = 3.e3);
 
-  declareProperty("truthparticle_collection_name", m_truthparticle_collection_name = "TruthParticles");
-
   for (int origin : m_preferred_lepton_origins) {
     if (std::find(m_lepton_veto_origins.begin(), m_lepton_veto_origins.end(), origin) != m_lepton_veto_origins.end()) {
       ATH_MSG_ERROR(origin << " in both lepton origin and lepton veto origin, this is not correct.");
@@ -54,7 +52,7 @@ StatusCode VGammaORTool::inOverlap(bool& result,
 				   const std::vector<int>* photon_origins) const {
   std::vector<float> photon_pts;
   ANA_CHECK(photonPtsOutsideDr(photon_pts,leptons,photons,lepton_origins,photon_origins));
-  result = checkPhotonPts(photon_pts);  
+  result = checkPhotonPts(photon_pts);
   return StatusCode::SUCCESS;
 }
 
@@ -94,7 +92,6 @@ StatusCode VGammaORTool::photonPtsOutsideDrs(std::map<float, std::vector<float> 
 					     const std::vector<TLorentzVector>* photons,
 					     const std::vector<int>* lepton_origins,
 					     const std::vector<int>* photon_origins) const {
-  
   std::vector<TLorentzVector> good_leptons;
   std::vector<TLorentzVector> good_photons;
   ANA_CHECK(setInput(good_leptons,good_photons,leptons,photons,lepton_origins,photon_origins));
@@ -130,17 +127,21 @@ StatusCode VGammaORTool::setInput(std::vector<TLorentzVector>& leptons_out,
 				  const std::vector<int>* photon_origins) const {
 
   // truth particles are retrieved from event if not given by user
-
-  const xAOD::TruthParticleContainer* truthLeptons(nullptr);
+  const xAOD::TruthParticleContainer* truthMuons(nullptr);
+  const xAOD::TruthParticleContainer* truthElectrons(nullptr);
   const xAOD::TruthParticleContainer* truthPhotons(nullptr);
-  if(lepton_p4s==0 || photon_p4s==0){ 
-    ANA_CHECK(evtStore()->retrieve(truthLeptons, "BornLeptons"));
+  if(lepton_p4s==0 || photon_p4s==0){
+    ANA_CHECK(evtStore()->retrieve(truthMuons,"TruthMuons"));
+    ANA_CHECK(evtStore()->retrieve(truthElectrons,"TruthElectrons"));
     ANA_CHECK(evtStore()->retrieve(truthPhotons, "TruthPhotons"));
   }
 
   // relevant photons and leptons identified
   if(lepton_p4s==0){
-    leptons_out = getLeptonP4s(*truthLeptons);
+    std::vector<TLorentzVector> muonsOut=getLeptonP4s(*truthMuons);
+    std::vector<TLorentzVector> electronsOut=getLeptonP4s(*truthElectrons);
+    leptons_out.insert(leptons_out.end(),muonsOut.begin(),muonsOut.end());
+    leptons_out.insert(leptons_out.end(),electronsOut.begin(),electronsOut.end());
   }
   else{
     if(lepton_origins!=0){
