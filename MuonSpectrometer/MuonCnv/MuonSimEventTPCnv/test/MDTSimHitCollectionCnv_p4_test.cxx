@@ -74,7 +74,7 @@ void testit (const MDTSimHitCollection& trans1)
 }
 
 
-void test1 ATLAS_NOT_THREAD_SAFE (std::vector<HepMC::GenParticlePtr> genPartVector)
+void test1 ATLAS_NOT_THREAD_SAFE (const std::vector<HepMC::GenParticlePtr> & genPartVector)
 {
   std::cout << "test1\n";
   auto particle = genPartVector.at(0);
