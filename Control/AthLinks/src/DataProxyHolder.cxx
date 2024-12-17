@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,6 +11,7 @@
 
 
 #include "AthLinks/tools/DataProxyHolder.h"
+#include "AthLinks/tools/DataProxyHolderInputRename.h"
 #include "AthLinks/exceptions.h"
 #include "SGTools/DataProxy.h"
 #include "SGTools/TransientAddress.h"
@@ -28,7 +29,7 @@ namespace {
 
 
 /// Current input renaming map.
-const SG::DataProxyHolder::InputRenameRCU_t* s_inputRenameMap ATLAS_THREAD_SAFE
+const Athena::IInputRename::InputRenameRCU_t* s_inputRenameMap ATLAS_THREAD_SAFE
   = nullptr;
 
 
@@ -333,6 +334,7 @@ DataProxyHolder::toTransient (sgkey_t sgkey, IProxyDict* sg /*= 0*/)
 
   // Do input renaming.
   if (s_inputRenameMap) {
+    using InputRenameMap_t = Athena::InputRenameMap_t;
     Athena::RCURead<InputRenameMap_t> r (*s_inputRenameMap);
     auto it = r->find (sgkey);
     if (it != r->end())
@@ -611,7 +613,8 @@ bool DataProxyHolder::operator== (const DataProxyHolder& other) const
  * @brief Set map used for performing input renaming in toTransient.
  * @param map The new map, or nullptr for no renmaing.
  */
-void DataProxyHolder::setInputRenameMap ATLAS_NOT_THREAD_SAFE (const InputRenameRCU_t* map)
+void setDataProxyHolderInputRenameMap ATLAS_NOT_THREAD_SAFE
+  (const Athena::IInputRename::InputRenameRCU_t* map)
 {
   s_inputRenameMap = map;
 }

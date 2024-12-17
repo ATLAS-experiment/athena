@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/IInputRename.h
@@ -15,9 +15,8 @@
 
 
 #include "AthenaKernel/RCUObject.h"
-#include "CxxUtils/sgkey_t.h"
+#include "AthenaKernel/InputRenameMap.h"
 #include "GaudiKernel/IInterface.h"
-#include <unordered_map>
 
 
 namespace Athena {
@@ -36,14 +35,7 @@ class IInputRename
   : virtual public IInterface
 {
 public:
-  /// Type of the input rename map: sgkey_t -> sgkey_t.
-  struct Rename
-  {
-    SG::sgkey_t m_sgkey;
-    std::string m_key;
-  };
-  typedef SG::SGKeyMap<Rename> InputRenameMap_t;
-  typedef RCUObject<InputRenameMap_t> InputRenameRCU_t;
+  using InputRenameRCU_t = RCUObject<InputRenameMap_t>;
 
   DeclareInterfaceID (IInputRename,1,0);
 

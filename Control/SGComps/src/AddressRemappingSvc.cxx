@@ -21,7 +21,7 @@
 
 #include "SGTools/DataProxy.h"
 #include "SGTools/TransientAddress.h"
-#include "AthLinks/tools/DataProxyHolder.h"
+#include "AthLinks/tools/DataProxyHolderInputRename.h"
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainersInterfaces/IAuxStore.h"
 #include "CxxUtils/checker_macros.h"
@@ -156,14 +156,14 @@ StatusCode AddressRemappingSvc::initInputRenames()
     // Translate to sgkeys and add to the map.
     SG::sgkey_t from_key = m_proxyDict->stringToKey (from, clid);
     SG::sgkey_t to_key = m_proxyDict->stringToKey (to, clid);
-    newmap[from_key] = Athena::IInputRename::Rename { to_key, to };
+    newmap[from_key] = Athena::InputRenameEntry { to_key, to };
   }
 
   // Publish the map.
   addInputRenames (newmap);
 
   if (!m_typeKeyRenameMaps.empty()) {
-    SG::DataProxyHolder::setInputRenameMap (m_inputRenames.get());
+    SG::setDataProxyHolderInputRenameMap (m_inputRenames.get());
     Athena::RCURead<InputRenameMap_t> r (*m_inputRenames);
     SG::AuxTypeRegistry::instance().setInputRenameMap (&*r,
                                                        *m_proxyDict);
@@ -401,7 +401,7 @@ StatusCode AddressRemappingSvc::renameTads (IAddressProvider::tadList& tads) con
         SG::sgkey_t from_key = m_proxyDict->stringToKey (tad->name(), clid);
         if (r->find(from_key) == r->end()) {
           SG::sgkey_t to_key = m_proxyDict->stringToKey (name_renamed, clid);
-          newmap[from_key] = Athena::IInputRename::Rename { to_key, name_renamed };
+          newmap[from_key] = Athena::InputRenameEntry { to_key, name_renamed };
         }
       }
 
