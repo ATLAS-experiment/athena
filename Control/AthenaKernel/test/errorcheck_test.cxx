@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -97,6 +97,7 @@ class Test
 public:
   StatusCode test1();
   int test2();
+  StatusCode test3();
 };
 
 
@@ -120,6 +121,16 @@ int Test::test2()
   return 0;
 }
 
+StatusCode Test::test3()
+{
+  // Check macro expansion in unscoped if-statement
+  StatusCode sc (StatusCode::SUCCESS);
+  if (true)
+    CHECK( sc );
+  else
+    sc = StatusCode::FAILURE;
+  return sc;
+}
 
 
 StatusCode test1a()
@@ -242,6 +253,7 @@ StatusCode test1()
   assert( servtest.test1().isFailure() );
   assert( test.test1().isFailure() );
   assert( test.test2()==-1 );
+  assert( test.test3().isSuccess() );
 
   errorcheck::ReportMessage::hideErrorLocus();
   REPORT_ERROR_WITH_CONTEXT (StatusCode (StatusCode::FAILURE), "alg")
