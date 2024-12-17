@@ -336,6 +336,7 @@ void SpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
         }
         lastPoint = newContainer.empty() ? currPos : pointPos(**newContainer.begin());
         overlap.setCoveredRange(pointPos(**overlap.begin()), pointPos(**overlap.rbegin()));
+        overlap.populateChamberLocations(); 
     };
 
     for (SpacePoint& toSort : spacePoints) {        

@@ -20,8 +20,9 @@ namespace MuonR4{
     class SpacePointBucket : 
         public std::vector<std::shared_ptr<SpacePoint>> {
          public:
+            using chamberLocation = MuonGMR4::SpectrometerSector::chamberLocation;
             /** @brief Standard constructor*/
-            SpacePointBucket() = default;
+            using std::vector<std::shared_ptr<SpacePoint>>::vector;
             /** @brief set the range in the precision plane covered by the bucket*/
             void setCoveredRange(double min, double max){
                 m_min = min;
@@ -51,10 +52,43 @@ namespace MuonR4{
                 if (chambCompare) return chambCompare < 0;
                 return bucketId() < other.bucketId();
             }
+            /// populate the chamber location list. 
+            /// This should be done once all the hits have been added. 
+            void populateChamberLocations(){
+                if (!msSector()){
+                    std::cerr << "SpacePointContainer::populateChamberLocations can only be called once we have a valid hit"<<std::endl;
+                    return; 
+                }
+                chamberLocation closestRight{1e8,1e8,1e8,1e8}; 
+                // loop over all chambers in the sector
+                for (auto & chamber : msSector()->chamberLocations()){
+                    // truncate to the bucket volume 
+                    double left = std::max(m_min, chamber.yLeft); 
+                    double right = std::min(m_max, chamber.yRight);
+                    // only keep one chamber outside the bucket - the right-hand side 
+                    // neighbour (for shallow tracks)  
+                    if (left > right){
+                        if (chamber.yLeft - m_max < closestRight.yLeft - m_max){
+                            closestRight = chamber; 
+                        }
+                    } 
+                    // keep all chambers inside the bucket 
+                    else{
+                        m_chamberLocs.push_back(chamber);
+                    }
+                }
+                // add the closest right hand side chamber, if there is one 
+                if (closestRight.yLeft < 1e8) m_chamberLocs.push_back(closestRight); 
+            }
+            /// returns the list of all tracking chambers in the bucket for fast navigation
+            const std::vector<chamberLocation> & chamberLocations() const{
+                return m_chamberLocs; 
+            }
         private:
             unsigned int m_bucketId{0};
             double m_min{-20. *Gaudi::Units::m};
             double m_max{20. * Gaudi::Units::m};
+            std::vector<chamberLocation> m_chamberLocs; 
     };
 
     using SpacePointContainer = DataVector<SpacePointBucket>;

@@ -73,6 +73,10 @@ Chamber::ReadoutSet SpectrometerSector::readoutEles() const {
     }
     return toReturn;
 }
+const std::vector<SpectrometerSector::chamberLocation> & SpectrometerSector::chamberLocations() const{
+    return m_args.chamberLocs;
+
+}
 std::ostream& operator<<(std::ostream& ostr, 
                          const SpectrometerSector::defineArgs& args) {
     ostr<<std::endl

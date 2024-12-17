@@ -418,7 +418,43 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                                                    const SpectrometerSector::ChamberPtr& b) {
                                                       return (*a) < (*b);
                                                    });
+         auto globalToSector = sectorArgs.locToGlobTrf.inverse(); 
 
+         /// now, build simplified 2D representations of the sorted chambers we collected. 
+         for (auto & chamber : sectorArgs.chambers){
+            // split by readout elements - MDT multilayers and trigger chambers 
+            for (auto & RE : chamber->readoutEles()){
+               // get the center of the element in the sector frame 
+               auto chamberToGlobal = RE->localToGlobalTrans(gctx); 
+               Amg::Vector3D origin {0, 0,  0}; 
+               origin = globalToSector * chamberToGlobal * origin;
+               // and then add the bounds of the element - this is technology dependent 
+               if (RE->detectorType()==ActsTrk::DetectorType::Mdt){
+                     const MuonGMR4::MdtReadoutElement* MDT = dynamic_cast<const MuonGMR4::MdtReadoutElement*>(RE); 
+                     sectorArgs.chamberLocs.emplace_back(origin.y() - MDT->getParameters().halfY, 
+                                                         origin.y() + MDT->getParameters().halfY, 
+                                                         origin.z() - MDT->getParameters().halfHeight, 
+                                                         origin.z() + MDT->getParameters().halfHeight, 
+                                                         RE->detectorType()); 
+               }
+               else if (RE->detectorType()==ActsTrk::DetectorType::Rpc){
+                     const MuonGMR4::RpcReadoutElement* RPC = dynamic_cast<const MuonGMR4::RpcReadoutElement*>(RE);
+                     sectorArgs.chamberLocs.emplace_back(origin.y() - RPC->getParameters().halfLength, 
+                                                         origin.y() + RPC->getParameters().halfLength, 
+                                                         origin.z() - RPC->getParameters().halfThickness, 
+                                                         origin.z() + RPC->getParameters().halfThickness, 
+                                                         RE->detectorType()); 
+               }
+               else if (RE->detectorType()==ActsTrk::DetectorType::Tgc){
+                     const MuonGMR4::TgcReadoutElement* TGC = dynamic_cast<const MuonGMR4::TgcReadoutElement*>(RE);
+                     sectorArgs.chamberLocs.emplace_back(origin.y() - TGC->getParameters().halfHeight, 
+                                                         origin.y() + TGC->getParameters().halfHeight, 
+                                                         origin.z() - TGC->getParameters().halfThickness, 
+                                                         origin.z() + TGC->getParameters().halfThickness, 
+                                                         RE->detectorType()); 
+               }
+            }
+         }
          auto newSector = std::make_unique<SpectrometerSector>(std::move(sectorArgs));
          
          for (const Identifier& chId : reIds) {

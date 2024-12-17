@@ -13,10 +13,10 @@ namespace MuonValR4{
                                               const double radius, const int color,
                                               const int fillStyle) {
         auto ellipse = std::make_unique<TEllipse>(center.y(), center.z(), radius);
-        ellipse->SetFillColor(color);
         ellipse->SetLineColor(color);
         ellipse->SetFillStyle(fillStyle);
-        ellipse->SetFillColorAlpha(color, 0.8);
+        ellipse->SetLineWidth(1);
+        ellipse->SetFillColorAlpha(color, 0.2);
         return ellipse;
     }
 
@@ -29,12 +29,18 @@ namespace MuonValR4{
         tl->SetTextSize(fontSize); 
         return tl;
     }
-     std::unique_ptr<TBox> drawBox(const Amg::Vector3D& boxCenter,
+    std::unique_ptr<TBox> drawBox(const Amg::Vector3D& boxCenter,
                                    const double boxWidth, const double boxHeight,
                                    const int color, const int fillStyle,
                                    const int view) {
-        auto box = std::make_unique<TBox>(boxCenter[view] - 0.5*boxWidth, boxCenter.z() - 0.5*boxHeight,
-                                          boxCenter[view] + 0.5*boxWidth, boxCenter.z() + 0.5*boxHeight);
+        return drawBox(boxCenter[view] - 0.5*boxWidth, boxCenter.z() - 0.5*boxHeight,
+                       boxCenter[view] + 0.5*boxWidth, boxCenter.z() + 0.5*boxHeight,
+                                    color, fillStyle); 
+    }
+    std::unique_ptr<TBox> drawBox(const double x1, const double y1, 
+                                  const double x2, const double y2, 
+                                   const int color, const int fillStyle) {
+        auto box = std::make_unique<TBox>(x1,y1,x2,y2);
         box->SetFillColor(color);
         box->SetLineColor(color);
         box->SetFillStyle(fillStyle);

@@ -52,15 +52,15 @@ if __name__=="__main__":
     if not args.noMonitorPlots:
         cfg.getEventAlgo("MuonEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="EtaHoughPlotValid",
-                                                                                                AllCanvasName="AllEtaHoughiDiPuffPlots",
-                                                                                                saveSinglePDFs = False, saveSummaryPDF= False))
+                                                                                                AllCanvasName="AllEtaHoughiDiPuffPlots",                                         displayTruthOnly = True,
+                                                                                                saveSinglePDFs = True, saveSummaryPDF= True))
         cfg.getEventAlgo("MuonPhiHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="PhiHoughPlotValid",
-                                                                                                AllCanvasName="AllPhiHoughiDiPuffPlots",
+                                                                                                AllCanvasName="AllPhiHoughiDiPuffPlots",                                   displayTruthOnly = True,
                                                                                                 saveSinglePDFs = False, saveSummaryPDF= False))
         cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="SegmentPlotValid",
-                                                                                                AllCanvasName="AllSegmentFitPlots",
+                                                                                                AllCanvasName="AllSegmentFitPlots",                                   displayTruthOnly = True,
                                                                                                 saveSinglePDFs = True, saveSummaryPDF= False))
 
     executeTest(cfg)

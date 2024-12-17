@@ -8,10 +8,10 @@ if __name__=="__main__":
     #parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)
     parser.set_defaults(outRootFile="HoughTransformTester.root")
-    #parser.set_defaults(condTag="CONDBR2-BLKPA-2023-03")
+    # parser.set_defaults(condTag="CONDBR2-BLKPA-2023-03")
     parser.set_defaults(inputFile=[
                                    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R3SimHits.pool.root"
-                                    #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
+                                    # "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
                                     ])
     parser.set_defaults(eventPrintoutLevel = 500)
     parser.add_argument("--monitorPlots", action='store_true', default=False, 
@@ -66,17 +66,19 @@ if __name__=="__main__":
                                                                                                 CanvasPreFix="EtaHoughPlotValid",
                                                                                                 AllCanvasName="AllEtaHoughiDiPuffPlots",
                                                                                                 TruthSegDecors=["HabemusZ"],
-                                                                                                saveSinglePDFs = False, saveSummaryPDF= False))
+                                                                                                displayTruthOnly = False,
+                                                                                                saveSinglePDFs = True, saveSummaryPDF= True))
         cfg.getEventAlgo("MuonPhiHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="PhiHoughPlotValid",
                                                                                                 AllCanvasName="AllPhiHoughiDiPuffPlots",
                                                                                                 TruthSegDecors=["HabemusZ"],
+                                                                                                displayTruthOnly = False,
                                                                                                 saveSinglePDFs = False, saveSummaryPDF= False))
         cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="SegmentPlotValid",
                                                                                                 AllCanvasName="AllSegmentFitPlots",
                                                                                                 TruthSegDecors=["HabemusZ"],
-                                                                                                displayTruthOnly = True,
-                                                                                                saveSinglePDFs = True, saveSummaryPDF= False)) 
+                                                                                                displayTruthOnly = False,
+                                                                                                saveSinglePDFs = False, saveSummaryPDF= False)) 
     executeTest(cfg)
     
