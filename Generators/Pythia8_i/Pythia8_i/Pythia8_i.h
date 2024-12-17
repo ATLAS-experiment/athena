@@ -53,7 +53,7 @@ public:
   inline CLHEP::HepRandomEngine* getEngine() { return m_engine; }
   inline unsigned long long int getRNCalls() {return m_RNC;}
 private:
-  unsigned long long int m_RNC;
+  unsigned long long int m_RNC{};
   CLHEP::HepRandomEngine* m_engine{};
 };
 
