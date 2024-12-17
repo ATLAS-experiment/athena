@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RIO_OnTrack/test/test_HGTD_ClusterOnTrack.cxx
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -105,18 +105,24 @@ void testAssignment(const HGTD_ClusterOnTrack& cot) {
 
 void testMoveCtor(HGTD_ClusterOnTrack cot) {
   std::cout << "testMoveCtor\n";
-  HGTD_ClusterOnTrack copied_cot(std::move(cot));
-
-  compare(cot, copied_cot);
+  //already tested copy c'tor
+  const HGTD_ClusterOnTrack& copied_cot(cot);
+  HGTD_ClusterOnTrack moved_cot(std::move(cot));
+  //can't compared the cot with moved_cot because cot is now moved,
+  //so compare with the copied version
+  compare(copied_cot, moved_cot);
   std::cout << "testMoveCtor done\n";
 }
 
 void testMoveAssignment(HGTD_ClusterOnTrack cot) {
   std::cout << "testMoveAssignment\n";
+  //already tested copy c'tor
+  const HGTD_ClusterOnTrack& copied_cot(cot);
   HGTD_ClusterOnTrack move_assign_cot;
   move_assign_cot = std::move(cot);
-
-  compare(cot, move_assign_cot);
+  //can't compared the cot with move_assign_cot because cot is now moved,
+  //so compare with the copied version
+  compare(copied_cot, move_assign_cot);
   std::cout << "testMoveAssignment done\n";
 }
 
