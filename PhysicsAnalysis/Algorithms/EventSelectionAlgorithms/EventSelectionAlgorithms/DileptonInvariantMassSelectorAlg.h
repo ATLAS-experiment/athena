@@ -43,6 +43,11 @@ namespace CP {
       /// \brief the comparison (GT, LT, etc)
       Gaudi::Property<std::string> m_sign {this, "sign", "SetMe", "comparison sign to use"};
 
+      /// \brief use dressed kinematics
+      Gaudi::Property<bool> m_useDressedProperties{this, "useDressedProperties", false,
+        "whether to use dressed electron and muon kinematics rather than simple "
+        "P4 kinematics"};
+
       /// \brief the operator version of the comparison (>, <, etc)
       SignEnum::ComparisonOperator m_signEnum;
 

@@ -32,6 +32,12 @@ namespace CP {
   }
 
   StatusCode DileptonInvariantMassSelectorAlg::execute() {
+    // accessors
+    static const SG::AuxElement::ConstAccessor<float> acc_pt_dressed("pt_dressed");
+    static const SG::AuxElement::ConstAccessor<float> acc_eta_dressed("eta_dressed");
+    static const SG::AuxElement::ConstAccessor<float> acc_phi_dressed("phi_dressed");
+    static const SG::AuxElement::ConstAccessor<float> acc_e_dressed("e_dressed");
+
     for (const auto &sys : m_systematicsList.systematicsVector()) {
       // retrieve the EventInfo
       const xAOD::EventInfo *evtInfo = nullptr;
@@ -62,10 +68,22 @@ namespace CP {
 	  if (!m_electronSelection || m_electronSelection.getBool(*el, sys)) {
 	    total_leptons++;
 	    if (!isfilled0){
-	      lepton0.SetCoordinates(el->pt(), el->eta(), el->phi(), el->e());
+          if (m_useDressedProperties)
+            lepton0.SetCoordinates(acc_pt_dressed(*el),
+                                   acc_eta_dressed(*el),
+                                   acc_phi_dressed(*el),
+                                   acc_e_dressed(*el));
+          else
+            lepton0.SetCoordinates(el->pt(), el->eta(), el->phi(), el->e());
 	      isfilled0 = true;
 	    } else if (!isfilled1){
-	      lepton1.SetCoordinates(el->pt(), el->eta(), el->phi(), el->e());
+          if (m_useDressedProperties)
+            lepton1.SetCoordinates(acc_pt_dressed(*el),
+                                   acc_eta_dressed(*el),
+                                   acc_phi_dressed(*el),
+                                   acc_e_dressed(*el));
+          else
+            lepton1.SetCoordinates(el->pt(), el->eta(), el->phi(), el->e());
 	      isfilled1 = true;
 	    } else {
 	      break;
@@ -78,10 +96,22 @@ namespace CP {
 	  if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)) {
 	    total_leptons++;
 	    if (!isfilled0){
-	      lepton0.SetCoordinates(mu->pt(), mu->eta(), mu->phi(), mu->e());
+          if (m_useDressedProperties)
+            lepton0.SetCoordinates(acc_pt_dressed(*mu),
+                                   acc_eta_dressed(*mu),
+                                   acc_phi_dressed(*mu),
+                                   acc_e_dressed(*mu));
+          else
+            lepton0.SetCoordinates(mu->pt(), mu->eta(), mu->phi(), mu->e());
 	      isfilled0 = true;
 	    } else if (!isfilled1){
-	      lepton1.SetCoordinates(mu->pt(), mu->eta(), mu->phi(), mu->e());
+          if (m_useDressedProperties)
+            lepton1.SetCoordinates(acc_pt_dressed(*mu),
+                                   acc_eta_dressed(*mu),
+                                   acc_phi_dressed(*mu),
+                                   acc_e_dressed(*mu));
+          else
+            lepton1.SetCoordinates(mu->pt(), mu->eta(), mu->phi(), mu->e());
 	      isfilled1 = true;
 	    } else {
 	      break;

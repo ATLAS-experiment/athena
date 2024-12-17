@@ -30,6 +30,10 @@ namespace CP {
   }
 
   StatusCode TransverseMassSelectorAlg::execute() {
+    // accessors
+    static const SG::AuxElement::ConstAccessor<float> acc_pt_dressed("pt_dressed");
+    static const SG::AuxElement::ConstAccessor<float> acc_phi_dressed("phi_dressed");
+
     for (const auto &sys : m_systematicsList.systematicsVector()) {
       // retrieve the EventInfo
       const xAOD::EventInfo *evtInfo = nullptr;
@@ -67,8 +71,13 @@ namespace CP {
       if (m_electronsHandle) {
 	for (const xAOD::IParticle *el : *electrons) {
 	  if (!m_electronSelection || m_electronSelection.getBool(*el, sys)){
-	    lep_pt = el->pt();
-	    lep_phi = el->phi();
+        if (m_useDressedProperties) {
+          lep_pt = acc_pt_dressed(*el);
+          lep_phi = acc_phi_dressed(*el);
+        } else {
+          lep_pt = el->pt();
+          lep_phi = el->phi();
+        }
 	    lep_count++;
 	    break;
 	  }
@@ -77,8 +86,13 @@ namespace CP {
       if (m_muonsHandle) {
 	for (const xAOD::IParticle *mu : *muons) {
 	  if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)) {
-	    lep_pt = mu->pt();
-	    lep_phi = mu->phi();
+        if (m_useDressedProperties) {
+          lep_pt = acc_pt_dressed(*mu);
+          lep_phi = acc_phi_dressed(*mu);
+        } else {
+          lep_pt = mu->pt();
+          lep_phi = mu->phi();
+        }
 	    lep_count++;
 	    break;
 	  }
