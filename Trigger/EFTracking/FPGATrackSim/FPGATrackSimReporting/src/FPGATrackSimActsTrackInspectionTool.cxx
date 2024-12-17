@@ -17,7 +17,7 @@ StatusCode FPGATrackSim::ActsTrackInspectionTool::initialize() {
 FPGATrackSimActsEventTracks FPGATrackSim::ActsTrackInspectionTool::getActsTracks(const ActsTrk::TrackContainer& tracksContainer) const
 {
     FPGATrackSimActsEventTracks t_actsTracks;
-    for (const ActsTrk::TrackContainer::ConstTrackProxy& tp : tracksContainer)
+    for (const ActsTrk::TrackContainer::ConstTrackProxy tp : tracksContainer)
     {
         std::deque<std::unique_ptr<FpgaActsTrack::Measurement>> t_TrackMeasurements;
         const Acts::BoundVector& parameters = tp.parameters();
