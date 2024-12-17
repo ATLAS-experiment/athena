@@ -577,7 +577,7 @@ namespace CP {
             return StatusCode::SUCCESS;
         }
 
-        if (topologyAffected != "All" && topologyAffected != jetTopology){
+        if (topologyAffected != "All" && !TString(topologyAffected).Contains(jetTopology)){
             ATH_MSG_VERBOSE("The systematic does not affect to this jet topology");
             return StatusCode::SUCCESS;
         }
