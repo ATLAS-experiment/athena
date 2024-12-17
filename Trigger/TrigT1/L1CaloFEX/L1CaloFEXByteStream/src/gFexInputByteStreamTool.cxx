@@ -463,6 +463,8 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
 
     for(unsigned int i=0; i<100; i++){
 
+        if (XMPD_NFI[i] < 0) continue;
+
         if( ( Xfiber[i][gPos::W280-1] & 0x000000FF ) == 0x000000BC ) {
 
           fiberFields[i][16] = 1;
