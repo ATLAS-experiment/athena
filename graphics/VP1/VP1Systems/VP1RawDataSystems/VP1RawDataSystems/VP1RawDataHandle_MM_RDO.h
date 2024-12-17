@@ -5,31 +5,31 @@
 
 ////////////////////////////////////////////////////////////////
 //                                                            //
-//  Header file for class VP1RawDataHandle_MDT_RDO            //
+//  Header file for class VP1RawDataHandle_MM_RDO            //
 //                                                            //
 //  Description: Handle for TRT RDO's                         //
 //                                                            //
 //  Author: Riccardo Maria BIANCHI (riccardo.maria.bianchi@cern.ch) 
-//  Initial version: January 2024       
+//  Initial version: December 2024       
 //                                                            //
 ////////////////////////////////////////////////////////////////
 
-#ifndef VP1RawDataHandle_MDT_RDO_H
-#define VP1RawDataHandle_MDT_RDO_H
+#ifndef VP1RawDataHandle_MM_RDO_H
+#define VP1RawDataHandle_MM_RDO_H
 
 #include "VP1RawDataSystems/VP1RawDataHandleBase.h"
 
-#include "MuonReadoutGeometry/MdtReadoutElement.h"
+#include "MuonReadoutGeometry/MMReadoutElement.h"
 
-class MdtDigit;
+class MmDigit;
 
 namespace InDetDD { class TRT_BaseElement; }
 
-class VP1RawDataHandle_MDT_RDO : public VP1RawDataHandleBase {
+class VP1RawDataHandle_MM_RDO : public VP1RawDataHandleBase {
 public:
 
-  VP1RawDataHandle_MDT_RDO(VP1RawDataCollBase*,const MdtDigit*);
-  virtual ~VP1RawDataHandle_MDT_RDO();
+  VP1RawDataHandle_MM_RDO(VP1RawDataCollBase*,const MmDigit*);
+  virtual ~VP1RawDataHandle_MM_RDO();
   QStringList clicked(bool verbose) const;
 
   // VP1RawDataFlags::InDetPartsFlags inInDetParts() const;
@@ -40,8 +40,8 @@ public:
 protected:
   SoNode * buildShape();
   SoTransform * buildTransform();
-  const MdtDigit* m_data;
-  const MuonGM::MdtReadoutElement * element() const;//null in case of errors
+  const MmDigit* m_data;
+  const MuonGM::MMReadoutElement * element() const;//null in case of errors
   // int strawID() const;//-1 in case of errors
 
 };
