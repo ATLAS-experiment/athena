@@ -13,7 +13,6 @@
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
-using CLHEP::mm;
 
 /**
  * @file InDetTrackSelectorTool.h
@@ -69,9 +68,9 @@ namespace InDet
 
     DoubleProperty m_minPt{this, "minPt", 500., "Minimum Pt of tracks"};
     DoubleProperty m_IPz0Max
-      {this, "IPz0Max", 10.*mm, "max. z0: |z0*sin(theta)| < z0Max"};
+      {this, "IPz0Max", 10.*CLHEP::mm, "max. z0: |z0*sin(theta)| < z0Max"};
     DoubleProperty m_maxZ0{this, "maxZ0", 99999., "Maximum z0 of tracks"};
-    DoubleProperty m_maxD0{this, "maxD0", 2.*mm, "Maximum d0 of tracks"};
+    DoubleProperty m_maxD0{this, "maxD0", 2.*CLHEP::mm, "Maximum d0 of tracks"};
     DoubleProperty m_maxD0overSigmaD0
       {this, "maxD0overSigmaD0", 3., "Maximum d0/sigmad0 of tracks"};
     IntegerProperty m_numberOfPixelHits{this, "numberOfPixelHits",2};
