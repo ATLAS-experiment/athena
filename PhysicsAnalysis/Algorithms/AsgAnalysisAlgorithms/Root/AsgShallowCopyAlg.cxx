@@ -21,6 +21,7 @@
 #include <xAODTau/TauJetContainer.h>
 #include <xAODTau/DiTauJetContainer.h>
 #include <xAODTracking/TrackParticleContainer.h>
+#include <xAODMissingET/MissingETContainer.h>
 #include <xAODTruth/TruthParticleContainer.h>
 #include <SystematicsHandles/CopyHelpers.h>
 
@@ -45,14 +46,40 @@ namespace CP
     return StatusCode::SUCCESS;
   }
 
+  // Specialization for MissingETContainer
+  template<> StatusCode AsgShallowCopyAlg ::
+  executeTemplate<xAOD::MissingETContainer> (const CP::SystematicSet& sys)
+  {
+    const xAOD::MissingETContainer *input = nullptr;
+    ANA_CHECK (evtStore()->retrieve (input, m_inputHandle.getName (sys)));
 
+    auto name = m_outputHandle.getName(sys);
+    auto output = std::make_unique<xAOD::MissingETContainer>();
+    auto auxOutput = std::make_unique<xAOD::AuxContainerBase>();
+
+    output->setStore(auxOutput.get());
+    for (const auto* met : *input)
+      {
+        xAOD::MissingET* out = new xAOD::MissingET();
+        out->makePrivateStore(*met);
+        output->push_back(out);
+      }
+
+    ANA_CHECK(evtStore()->record(std::move(output), name));
+    ANA_CHECK(evtStore()->record(std::move(auxOutput), name + "Aux."));
+
+    return StatusCode::SUCCESS;
+  }
 
 
   StatusCode AsgShallowCopyAlg ::
   executeFindType (const CP::SystematicSet& sys)
   {
     const xAOD::IParticleContainer *input = nullptr;
-    ANA_CHECK (m_inputHandle.retrieve (input, sys));
+    if (evtStore()->contains<xAOD::IParticleContainer>(m_inputHandle.getName(sys)))
+      {
+        ANA_CHECK (m_inputHandle.retrieve (input, sys));
+      }
 
     if (dynamic_cast<const xAOD::ElectronContainer*> (input))
     {
@@ -92,6 +119,11 @@ namespace CP
     {
       m_function =
         &AsgShallowCopyAlg::executeTemplate<xAOD::TruthParticleContainer>;
+    }
+    else if (evtStore()->contains<xAOD::MissingETContainer>(m_inputHandle.getName(sys)))
+    {
+      m_function =
+        &AsgShallowCopyAlg::executeTemplate<xAOD::MissingETContainer>;
     }
     else
     {
