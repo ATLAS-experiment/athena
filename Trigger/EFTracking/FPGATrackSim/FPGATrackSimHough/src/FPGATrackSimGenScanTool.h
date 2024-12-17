@@ -51,16 +51,12 @@
  */
 
 #include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ITHistSvc.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
-#include "FPGATrackSimObjects/FPGATrackSimVectors.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
-#include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFinderTool.h"
-#include "FPGATrackSimHough/IFPGATrackSimRoadFilterTool.h"
 #include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
@@ -68,24 +64,18 @@
 #include "FPGATrackSimGenScanBinning.h"
 #include "FPGATrackSimGenScanArray.h"
 
-#include "TFile.h"
-#include "TH1D.h"
-#include "TH2D.h"
-#include "TGraph.h"
-
 #include <string>
 #include <vector>
 #include <utility>
-#include <unordered_set>
 
 class FPGATrackSimGenScanMonitoring;
 
 class FPGATrackSimGenScanTool : public extends<AthAlgTool, IFPGATrackSimRoadFinderTool>
 {
 public:
-    ///////////////////////////////////////////////////////////////////////
-    // AthAlgTool
-
+  ///////////////////////////////////////////////////////////////////////
+  // AthAlgTool
+  
     FPGATrackSimGenScanTool(const std::string &, const std::string &, const IInterface *);
 
     virtual StatusCode initialize() override;
@@ -106,7 +96,8 @@ protected:
     ServiceHandle<IFPGATrackSimBankSvc> m_FPGATrackSimBankSvc{this, "FPGATrackSimBankSvc", "FPGATrackSimBankSvc"};
     ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping{this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
     ToolHandle<FPGATrackSimGenScanMonitoring> m_monitoring {this, "Monitoring", "FPGATrackSimGenScanMonitoring", "Monitoring Tool"};
-    
+    ToolHandle<FPGATrackSimGenScanBinningBase> m_binning {this, "Binning", "FPGATrackSimGenScanBinningBase", "Gen Scan Binning Tool"};
+
     ///////////////////////////////////////////////////////////////////////
     // Properties
     Gaudi::Property<std::string> m_parSet{this, "parSet", {}, "String name of parameter set"};
@@ -125,7 +116,10 @@ protected:
 
     Gaudi::Property<unsigned> m_threshold{this, "threshold", {}, "Minimum value to accept as a road (inclusive)"};
 
+    Gaudi::Property<std::string> m_binFilter{this, "binFilter", {"PairThenGroup"}, "which bin filter to run, current options: PairThenGroup, IncrementalBuild"};
+    
     Gaudi::Property<bool> m_applyPairFilter{this, "applyPairFilter", {}, "Apply Pair Filter"};
+    Gaudi::Property<bool> m_reversePairDir{this, "reversePairDir", {}, "Build Pairs starting at last layer and work in"};
     Gaudi::Property<std::vector<double>> m_pairFilterDeltaPhiCut{this, "pairFilterDeltaPhiCut", {}, "Pair Filter Delta Phi Cut Value (list one per layer)"};
     Gaudi::Property<std::vector<double>> m_pairFilterDeltaEtaCut{this, "pairFilterDeltaEtaCut", {}, "Pair Filter Delta Eta Cut Value (list one per layer)"};
     Gaudi::Property<std::vector<double>> m_pairFilterPhiExtrapCut{this, "pairFilterPhiExtrapCut", {}, "Pair Filter Phi Extrap Cut Value (in/out pair)"};
@@ -161,17 +155,28 @@ protected:
     // by m_binning object)
     StatusCode fillImage(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits);
 
-    // Filter the bins above threshold (=roads) into pairsets which output roads
-    StatusCode filterRoad(const BinEntry &bindata, const FPGATrackSimGenScanBinningBase::IdxSet &bin,
-                          std::vector<HitPairSet> &output_pairset);
-
+    // Filter the bins above threshold into pairsets which output roads (2 options)
+    //
+    // Option 1) Originl version described here: https://indico.cern.ch/event/1469103/contributions/6187259/attachments/2952665/5190800/InsideOut_241010.pdf
+    StatusCode pairThenGroupFilter(const BinEntry &bindata, const FPGATrackSimGenScanBinningBase::IdxSet &bin,
+                                   std::vector<HitPairSet> &output_pairset);
+    // Option 2) New version (no external documentation as of now)
+    struct IntermediateState;
+    void updateState(const IntermediateState &inputstate,
+                     IntermediateState &outputstate,
+                     unsigned lyridx, std::vector<const StoredHit *> newhits);
+    StatusCode incrementalBuildFilter(const BinEntry &bindata, const FPGATrackSimGenScanBinningBase::IdxSet &bin,
+                                    std::vector<HitPairSet> &output_pairset);
+    
     // 1st step of filter: sort hits by layer
     StatusCode sortHitsByLayer(const BinEntry &bindata, std::vector<std::vector<const StoredHit *>> &hitsByLayer);
 
     // 2nd step of filter: make pairs of hits from adjacent and next-to-adjacent layers
     StatusCode makePairs(const std::vector<std::vector<const StoredHit *>>& hitsByLayer, HitPairSet &pairs);
 
-    // 3rd step of filter: make cuts on the pairs to ensure that are consisten with the bin they are in
+    // 3rd step of filter: make cuts on the pairs to ensure that are consisten
+    // with the bin they are in
+    bool pairPassesFilter(const HitPair &pair);
     StatusCode filterPairs(HitPairSet &pairs, HitPairSet &filteredpairs);
 
     // 4th step of filter: group pairs into sets where they are all consistent with being from the same track
@@ -215,15 +220,33 @@ protected:
     class HitPair : public std::pair<const StoredHit *, const StoredHit *>
     {
     public:
-        HitPair(const StoredHit *first, const StoredHit *second) : std::pair<const StoredHit *, const StoredHit *>(first, second) {}
+        HitPair(const StoredHit *first, const StoredHit *second, bool reverse) : std::pair<const StoredHit *, const StoredHit *>(first, second), m_reverse(reverse) {}
         double dPhi() const { return this->second->phiShift - this->first->phiShift; }
         double dEta() const { return this->second->etaShift - this->first->etaShift; }
         double dR() const { return this->second->hitptr->getR() - this->first->hitptr->getR(); }
 
-        double PhiOutExtrap(double r_out) const { return this->second->phiShift + this->dPhi() / this->dR() * (r_out - this->second->hitptr->getR()); }
-        double PhiInExtrap(double r_in) const { return this->first->phiShift + this->dPhi() / this->dR() * (r_in - this->first->hitptr->getR()); }
-        double EtaOutExtrap(double r_out) const { return this->second->etaShift + this->dEta() / this->dR() * (r_out - this->second->hitptr->getR()); }
-        double EtaInExtrap(double r_in) const { return this->first->etaShift + this->dEta() / this->dR() * (r_in - this->first->hitptr->getR()); }
+        // Eta/PhiExtrapolation methods below assume pair is radially ordered
+        // this enables flipping them if working in reverse
+        const HitPair Reversed() const {
+            return HitPair(this->second, this->first, false);
+        }
+
+        double PhiOutExtrap(double r_out) const {
+          if (m_reverse)
+            return Reversed().PhiOutExtrap(r_out);
+          return this->second->phiShift + this->dPhi() / this->dR() * (r_out - this->second->hitptr->getR());  }
+        double PhiInExtrap(double r_in) const {
+          if (m_reverse) return Reversed().PhiInExtrap(r_in);
+          return this->first->phiShift + this->dPhi() / this->dR() * (r_in - this->first->hitptr->getR()); }
+        double EtaOutExtrap(double r_out) const {
+          if (m_reverse) return Reversed().EtaOutExtrap(r_out);
+          return this->second->etaShift + this->dEta() / this->dR() * (r_out - this->second->hitptr->getR()); }
+        double EtaInExtrap(double r_in) const {
+          if (m_reverse) return Reversed().EtaInExtrap(r_in);
+          return this->first->etaShift + this->dEta() / this->dR() * (r_in - this->first->hitptr->getR()); }
+
+      private:
+        bool m_reverse;
     };
 
     // Pair of hits, methods gives variable you might want to cut on
@@ -272,14 +295,20 @@ protected:
         double PhiOutExtrapCurved(const HitPair &pair, double r_out) const;
     };
 
+    // state structure used by buildGroupsWithPairs method
+    struct IntermediateState {
+      std::vector<const StoredHit *> unpairedHits{};
+      std::vector<HitPairSet> pairsets{};
+    };
     
     ///////////////////////////////////////////////////////////////////////
     // Event Storage
     int m_evtsProcessed = 0;
     unsigned m_nLayers = 0; // copy of m_FPGATrackSimMapping->PlaneMap1stStage()->getNLogiLayers();
-
+    std::vector<unsigned int> m_pairingLayers; 
+    
     // The implementation of the binning base class that defines the binning to be used
-    FPGATrackSimGenScanBinningBase *m_binning{nullptr};
+    // FPGATrackSimGenScanBinningBase *m_binning{nullptr};
 
     // Main image (up to 5d) with the hits binned according to m_binning
     FPGATrackSimGenScanArray<BinEntry> m_image;

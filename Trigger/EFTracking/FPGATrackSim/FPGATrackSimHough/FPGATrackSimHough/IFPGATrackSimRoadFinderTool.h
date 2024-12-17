@@ -20,7 +20,6 @@
 
 #include "GaudiKernel/IAlgTool.h"
 
-#include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
 #include "FPGATrackSimObjects/FPGATrackSimTruthTrack.h"
 

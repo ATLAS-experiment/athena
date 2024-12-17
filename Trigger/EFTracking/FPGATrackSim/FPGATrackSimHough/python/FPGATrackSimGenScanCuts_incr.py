@@ -5,6 +5,7 @@
 @brief This file specifies cuts for the FPGATrackSimGenScanTool
 '''
 
+# Cut Values for incremental L4 to L0 track building
 
 NoCut = 10000000
 
@@ -19,17 +20,17 @@ cuts = {
         "parBins" : [20, 20, 5, 20, 3],
         "pairFilterDeltaPhiCut" : [NoCut,NoCut,NoCut,NoCut],
         "pairFilterDeltaEtaCut" : [NoCut,NoCut,NoCut,NoCut],
-        "pairFilterPhiExtrapCut" : [6.0,7.0],
-        "pairFilterEtaExtrapCut" : [8.5,10.0],
-        "pairSetMatchPhiCut" : 0.035,
-        "pairSetMatchEtaCut" : 0.100,
-        "pairSetDeltaDeltaPhiCut" :0.022,
-        "pairSetDeltaDeltaEtaCut" :0.024,
-        "pairSetPhiCurvatureCut" : NoCut,
-        "pairSetEtaCurvatureCut" : NoCut,
-        "pairSetDeltaPhiCurvatureCut" : NoCut,
-        "pairSetDeltaEtaCurvatureCut" : NoCut,
-        "pairSetPhiExtrapCurvedCut" : [NoCut,NoCut],  
+        "pairFilterPhiExtrapCut" : [7.5,4.0],
+        "pairFilterEtaExtrapCut" : [11.2,10.0],
+        "pairSetMatchPhiCut" : NoCut,
+        "pairSetMatchEtaCut" : NoCut,
+        "pairSetDeltaDeltaPhiCut" : NoCut, 
+        "pairSetDeltaDeltaEtaCut" : NoCut, 
+        "pairSetPhiCurvatureCut" : 0.00025,
+        "pairSetEtaCurvatureCut" : 0.00010,
+        "pairSetDeltaPhiCurvatureCut" : 0.00012,
+        "pairSetDeltaEtaCurvatureCut" : NoCut, 
+        "pairSetPhiExtrapCurvedCut" : [2.0,NoCut],  
         },
         3: {
         "rin" : 30.0,
@@ -40,16 +41,16 @@ cuts = {
         "parBins" : [20, 20, 5, 20, 3],
         "pairFilterDeltaPhiCut" : [NoCut,NoCut,NoCut,NoCut],
         "pairFilterDeltaEtaCut" : [NoCut,NoCut,NoCut,NoCut],
-        "pairFilterPhiExtrapCut" : [5.3,6.9],
-        "pairFilterEtaExtrapCut" : [10.6,17.0],
-        "pairSetMatchPhiCut" : 0.26,
-        "pairSetMatchEtaCut" : 0.6,
-        "pairSetDeltaDeltaPhiCut" : 0.022,
-        "pairSetDeltaDeltaEtaCut" : 0.068,
-        "pairSetPhiCurvatureCut" : NoCut,
-        "pairSetEtaCurvatureCut" : NoCut,
-        "pairSetDeltaPhiCurvatureCut" : NoCut,
+        "pairFilterPhiExtrapCut" : [6.2,4.0],
+        "pairFilterEtaExtrapCut" : [15.0,16.0],
+        "pairSetMatchPhiCut" : NoCut,
+        "pairSetMatchEtaCut" : NoCut,
+        "pairSetDeltaDeltaPhiCut" : NoCut,
+        "pairSetDeltaDeltaEtaCut" : NoCut,
+        "pairSetPhiCurvatureCut" : 0.00023,
+        "pairSetEtaCurvatureCut" : 0.00050,
+        "pairSetDeltaPhiCurvatureCut" : 0.00055,
         "pairSetDeltaEtaCurvatureCut" : NoCut,
-        "pairSetPhiExtrapCurvedCut" : [NoCut,7.0]
+        "pairSetPhiExtrapCurvedCut" : [2.0,NoCut]
         },
 }

@@ -50,7 +50,6 @@ StatusCode FPGATrackSimRoadUnionTool::initialize()
 
 StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) 
 {
-    
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
 
     // Create one "tower" per slice for this event.
@@ -64,11 +63,9 @@ StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr
     // We separately need to pass a vector of *pointers* to hit objects to the road finder tools.
     // Makes a vector of slices that have a vector of hits assiociated with that slice
     std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> sliceHits(m_tools.size());
-
     const FPGATrackSimPlaneMap *pmap = nullptr;
     int toolNum = 0;//same as sliceNum
-    for (auto & tool : m_tools)
-    {
+    for (auto &tool : m_tools) {
         pmap = m_FPGATrackSimMapping->PlaneMap_1st(toolNum);
         auto* subrmap = m_FPGATrackSimMapping->SubRegionMap();
         for (auto & iHit:hits)
@@ -80,9 +77,8 @@ StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr
                 if (m_slicedHitHeader) m_slicedHitHeader->getTower(toolNum)->addHit(*hitCopy);
                 sliceHits[toolNum].push_back(hitCopy);
             }
-
-        }   
-        toolNum++;  
+        }
+        toolNum++;
     }
     roads.clear();
     for (auto & tool : m_tools)

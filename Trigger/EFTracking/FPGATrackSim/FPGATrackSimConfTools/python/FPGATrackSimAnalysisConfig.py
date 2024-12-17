@@ -172,7 +172,20 @@ def FPGATrackSimRoadUnionTool1DCfg(flags):
 
 def FPGATrackSimRoadUnionToolGenScanCfg(flags):
     result=ComponentAccumulator()
+
+    # read the cuts from a seperate python file specified by FPGATrackSim.GenScan.genScanCuts
+    cutset = importlib.import_module(flags.Trigger.FPGATrackSim.GenScan.genScanCuts).cuts[flags.Trigger.FPGATrackSim.region]
     
+    # make the binning class
+    Binning = None
+    if (cutset["parSet"]=="PhiSlicedKeyLyrPars") :
+        Binning = CompFactory.FPGATrackSimGenScanPhiSlicedKeyLyrBinning("GenScanBinning")
+    else:
+        log.error("Unknown Binning") 
+    Binning.rin=cutset["rin"]
+    Binning.rout=cutset["rout"]
+    Binning.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+
     # make the monitoring class
     Monitor = CompFactory.FPGATrackSimGenScanMonitoring("GenScanMonitoring")
     Monitor.THistSvc = CompFactory.THistSvc()
@@ -184,9 +197,12 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags):
     tool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
     tool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     tool.Monitoring = Monitor
+    tool.Binning = Binning
     tool.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
 
     # configure which filers and thresholds to apply
+    tool.binFilter=flags.Trigger.FPGATrackSim.GenScan.binFilter
+    tool.reversePairDir=flags.Trigger.FPGATrackSim.GenScan.reverse
     tool.applyPairFilter=True
     tool.applyPairSetFilter=True
     tool.threshold = 4
@@ -198,9 +214,8 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags):
     tool.phiFractionalPadding =0.05
     tool.qOverPtFractionalPadding =0.05                
 
-    # read the cuts from a seperate python file specified by FPGATrackSim.GenScan.genScanCuts
-    cutset = importlib.import_module(flags.Trigger.FPGATrackSim.GenScan.genScanCuts)
-    for (cut,val) in cutset.cuts[flags.Trigger.FPGATrackSim.region].items():
+    # set cuts
+    for (cut,val) in cutset.items():
         setattr(tool,cut,val)
 
     # even though we are not actually doing a Union, we need the 
@@ -565,5 +580,10 @@ if __name__ == "__main__":
        
        acc.store(open('AnalysisConfig.pkl','wb'))
    
+       acc.foreach_component("FPGATrackSim*").OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+       if flags.Trigger.FPGATrackSim.msgLimit!=-1:
+        acc.getService("MessageSvc").debugLimit = flags.Trigger.FPGATrackSim.msgLimit
+        acc.getService("MessageSvc").infoLimit = flags.Trigger.FPGATrackSim.msgLimit
+
        statusCode = acc.run(flags.Exec.MaxEvents)
        assert statusCode.isSuccess() is True, "Application execution did not succeed"
