@@ -73,16 +73,6 @@ bool VP1RawDataColl_MM_RDO::load() {
     return false;
   }
 
-  //   // From:
-  //   https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/MuonSpectrometer/MuonCnv/MuonByteStreamCnvTest/src/ReadMdtDigit.cxx#0055
-  // std::string key = "MDT_DIGITS";
-  //      SG::ReadHandle<Muon::MdtDigitContainer> hndl(key);
-  //      const MdtDigitContainer* mdt_container = hndl.get();
-  //      ATH_CHECK(mdt_container != nullptr);
-
-  // SG::ReadCondHandle<MuonGM::MuonDetectorManager>
-  // detMgr{"MuonDetectorManager"};
-
   // get the detMgr
   // TODO: we should probably simplify by moving to:
   //   const MuonGM::MuonDetectorManager * detmgr = VP1DetInfo::muonDetMgr();
@@ -102,23 +92,6 @@ bool VP1RawDataColl_MM_RDO::load() {
               << " in store " << container.store() << std::endl;
     // return StatusCode::SUCCESS;
   }
-  //  ATH_MSG_DEBUG("Found MdtDigitContainer called " << container.name() << "
-  //  in store " << container.store());
-
-  // ATH_MSG_DEBUG("****** mdt->size() : " << mdt_container->size());
-
-  // MuonDetectorManager from the conditions store
-  //  SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> detMgr{this,
-  //  "DetectorManagerKey", "MuonDetectorManager", "Key of input
-  //  MuonDetectorManager condition data"};
-
-  //  // MuonDetectorManager from the conditions store
-  //          SG::ReadCondHandleKey<MuonGM::MuonDetectorManager>
-  //          m_DetectorManagerKey{this, "DetectorManagerKey",
-  //          "MuonDetectorManager",
-  //                                                                                  "Key of input MuonDetectorManager condition data"};
-  //          SG::ReadCondHandle<MuonGM::MuonDetectorManager>
-  //          DetectorManagerHandle{m_DetectorManagerKey};
 
   // Iterate on the collections
   for (const MmDigitCollection* coll : *container) {
