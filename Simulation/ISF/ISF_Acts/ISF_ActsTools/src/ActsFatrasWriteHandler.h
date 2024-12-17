@@ -66,8 +66,8 @@ public:
                   SiHitCollection& pixelSiHits, SiHitCollection& sctSiHits) const; // override final;
 
 protected:
-  const PixelID*                       m_pixIdHelper;             //!< the Pixel ID helper
-  const SCT_ID*                        m_sctIdHelper;             //!< the SCT ID helper
+  const PixelID*                       m_pixIdHelper{};             //!< the Pixel ID helper
+  const SCT_ID*                        m_sctIdHelper{};             //!< the SCT ID helper
 
   std::array<StringProperty,2> m_HitCollectionNames{{{this,"PixelCollectionName","PixelHits_ActsFatras"},{this,"SCTCollectionName","SCT_Hits_ActsFatras"}}};
   SG::WriteHandleKeyArray<SiHitCollection> m_HitCollectionKeys;
