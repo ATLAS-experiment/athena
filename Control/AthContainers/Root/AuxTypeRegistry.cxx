@@ -1234,7 +1234,7 @@ AuxTypeRegistry::~AuxTypeRegistry()
  * @c inputRename.
  */
 void
-AuxTypeRegistry::setInputRenameMap (const Athena::IInputRename::InputRenameMap_t* map,
+AuxTypeRegistry::setInputRenameMap (const Athena::InputRenameMap_t* map,
                                     const IStringPool& pool)
 {
   auto impl = static_cast<AuxTypeRegistryImpl*> (this);

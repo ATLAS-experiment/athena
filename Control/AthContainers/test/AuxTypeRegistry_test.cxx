@@ -441,7 +441,7 @@ void test_copyForOutput()
 
 
 #ifndef XAOD_STANDALONE
-void addto_renameMap (Athena::IInputRename::InputRenameMap_t& map,
+void addto_renameMap (Athena::InputRenameMap_t& map,
                       IStringPool& pool,
                       const char* from,
                       const char* to)
@@ -449,7 +449,7 @@ void addto_renameMap (Athena::IInputRename::InputRenameMap_t& map,
   CLID clid = 123;
   sgkey_t from_key = pool.stringToKey (from, clid);
   sgkey_t to_key   = pool.stringToKey (to, clid);
-  map[from_key] = Athena::IInputRename::Rename { to_key, to };
+  map[from_key] = Athena::InputRenameEntry { to_key, to };
 }
 #endif // NOT XAOD_STANDALONE
 
@@ -460,7 +460,7 @@ void test_renameMap()
 
 #ifndef XAOD_STANDALONE
   TestStringPool pool;
-  Athena::IInputRename::InputRenameMap_t map;
+  Athena::InputRenameMap_t map;
 
   addto_renameMap (map, pool, "a", "a_renamed");
   addto_renameMap (map, pool, "b.c", "b.c_renamed");

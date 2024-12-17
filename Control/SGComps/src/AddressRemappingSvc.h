@@ -109,8 +109,8 @@ private: // Data
    /// Map of sgkey->sgkey for input renames.
    /// This object is exported via inputRenameMap and is synchronized
    /// via RCU.
-  typedef Athena::IInputRename::InputRenameMap_t InputRenameMap_t;
-  typedef Athena::IInputRename::InputRenameRCU_t InputRenameRCU_t;
+  using InputRenameMap_t = Athena::InputRenameMap_t;
+  using InputRenameRCU_t = Athena::IInputRename::InputRenameRCU_t;
    std::unique_ptr<InputRenameRCU_t> m_inputRenames;
 
   Gaudi::Property<bool> m_skipBadRemappings{this,"SkipBadRemappings",false,

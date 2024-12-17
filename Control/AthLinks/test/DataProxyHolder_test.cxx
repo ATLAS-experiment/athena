@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/test/DataProxyHolder_test.cxx
@@ -10,6 +10,7 @@
 
 #undef NDEBUG
 #include "AthLinks/tools/DataProxyHolder.h"
+#include "AthLinks/tools/DataProxyHolderInputRename.h"
 #include "AthLinks/exceptions.h"
 #include "SGTools/StringPool.h"
 #include "AthenaKernel/getMessageSvc.h"
@@ -367,18 +368,19 @@ void test7 (SGTest::TestStore& store)
 }
 
 
-SG::DataProxyHolder::InputRenameRCU_t inputRenameMap(1);
+Athena::IInputRename::InputRenameRCU_t inputRenameMap(1);
 
 
 void initInputRename ATLAS_NOT_THREAD_SAFE ()
 {
+  using InputRenameMap_t = Athena::InputRenameMap_t;
   SG::StringPool sp;
-  auto m = std::make_unique<SG::DataProxyHolder::InputRenameMap_t>();
-  Athena::IInputRename::Rename ren { sp.stringToKey("fooy", fooclid), "fooy" };
+  auto m = std::make_unique<InputRenameMap_t>();
+  Athena::InputRenameEntry ren { sp.stringToKey("fooy", fooclid), "fooy" };
   (*m)[sp.stringToKey("foox", fooclid)] = ren;
-  Athena::RCUUpdate<SG::DataProxyHolder::InputRenameMap_t> u (inputRenameMap);
+  Athena::RCUUpdate<InputRenameMap_t> u (inputRenameMap);
   u.update (std::move (m));
-  SG::DataProxyHolder::setInputRenameMap (&inputRenameMap);
+  SG::setDataProxyHolderInputRenameMap (&inputRenameMap);
 }
 
 
