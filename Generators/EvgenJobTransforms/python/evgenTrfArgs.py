@@ -63,6 +63,10 @@ def addStdEvgenArgs(parser):
                         help="Name of YODA file for Rivet histo output",
                         type=trfArgClasses.argFactory(trfArgClasses.argYODAFile, type='yoda', io='output', runarg=True))
 
+    parser.add_argument("--outputEvtFile", group="Evgen",
+                        help="Name of Evt (HepMC) output file",
+                        type=trfArgClasses.argFactory(trfArgClasses.argHepEvtAsciiFile, type='evt', io='output', runarg=True))
+
     parser.add_argument("--rivetAnas", group="Evgen",
                         help="a comma-separated list of Rivet analyses to run on the resulting events",
                         type=trfArgClasses.argFactory(trfArgClasses.argList, runarg=True))
