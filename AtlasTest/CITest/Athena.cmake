@@ -186,35 +186,35 @@ atlas_add_citest( RecoRun4MC_DAODPHYS
 #################################################################################
 
 atlas_add_citest( CPAlgorithmsRun2MC_PHYS
-   SCRIPT FullCPAlgorithmsTest_CA.py --data-type fullsim --input-file ../DerivationRun2MC_PHYS/run_mc_PHYS_Run2/DAOD_PHYS.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --data-type fullsim --input-file ../DerivationRun2MC_PHYS/run_mc_PHYS_Run2/DAOD_PHYS.myOutput.pool.root --bleeding-edge
    DEPENDS_SUCCESS DerivationRun2MC_PHYS )
 
 atlas_add_citest( CPAlgorithmsRun2MC_PHYSLITE
-   SCRIPT FullCPAlgorithmsTest_CA.py --data-type fullsim --physlite --input-file ../DerivationRun2MC_PHYSLITE/run_mc_PHYSLITE_Run2/DAOD_PHYSLITE.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --data-type fullsim --physlite --input-file ../DerivationRun2MC_PHYSLITE/run_mc_PHYSLITE_Run2/DAOD_PHYSLITE.myOutput.pool.root --bleeding-edge
    DEPENDS_SUCCESS DerivationRun2MC_PHYSLITE )
 
 atlas_add_citest( CPAlgorithmsRun2Data_PHYS
-   SCRIPT FullCPAlgorithmsTest_CA.py --data-type data --input-file ../DerivationRun2Data_PHYS/run_data_PHYS_Run2/DAOD_PHYS.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --data-type data --input-file ../DerivationRun2Data_PHYS/run_data_PHYS_Run2/DAOD_PHYS.myOutput.pool.root --bleeding-edge
    DEPENDS_SUCCESS DerivationRun2Data_PHYS )
 
 atlas_add_citest( CPAlgorithmsRun2Data_PHYSLITE
-   SCRIPT FullCPAlgorithmsTest_CA.py --data-type data --physlite --input-file ../DerivationRun2Data_PHYSLITE/run_data_PHYSLITE_Run2/DAOD_PHYSLITE.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --data-type data --physlite --input-file ../DerivationRun2Data_PHYSLITE/run_data_PHYSLITE_Run2/DAOD_PHYSLITE.myOutput.pool.root --bleeding-edge
    DEPENDS_SUCCESS DerivationRun2Data_PHYSLITE )
 
 atlas_add_citest( CPAlgorithmsRun3MC_PHYS
-   SCRIPT FullCPAlgorithmsTest_CA.py --data-type fullsim --input-file ../DerivationRun3MC_PHYS/run_mc_PHYS_Run3/DAOD_PHYS.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --data-type fullsim --input-file ../DerivationRun3MC_PHYS/run_mc_PHYS_Run3/DAOD_PHYS.myOutput.pool.root --bleeding-edge
    DEPENDS_SUCCESS DerivationRun3MC_PHYS )
 
 atlas_add_citest( CPAlgorithmsRun3MC_PHYSLITE
-   SCRIPT FullCPAlgorithmsTest_CA.py --data-type fullsim --physlite --input-file ../DerivationRun3MC_PHYSLITE/run_mc_PHYSLITE_Run3/DAOD_PHYSLITE.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --data-type fullsim --physlite --input-file ../DerivationRun3MC_PHYSLITE/run_mc_PHYSLITE_Run3/DAOD_PHYSLITE.myOutput.pool.root --bleeding-edge
    DEPENDS_SUCCESS DerivationRun3MC_PHYSLITE )
 
 atlas_add_citest( CPAlgorithmsRun3Data_PHYS
-   SCRIPT FullCPAlgorithmsTest_CA.py --data-type data --input-file ../DerivationRun3Data_PHYS/run_data_PHYS_Run3/DAOD_PHYS.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --data-type data --input-file ../DerivationRun3Data_PHYS/run_data_PHYS_Run3/DAOD_PHYS.myOutput.pool.root --bleeding-edge
    DEPENDS_SUCCESS DerivationRun3Data_PHYS )
 
 atlas_add_citest( CPAlgorithmsRun3Data_PHYSLITE
-   SCRIPT FullCPAlgorithmsTest_CA.py --data-type data --physlite --input-file ../DerivationRun3Data_PHYSLITE/run_data_PHYSLITE_Run3/DAOD_PHYSLITE.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --data-type data --physlite --input-file ../DerivationRun3Data_PHYSLITE/run_data_PHYSLITE_Run3/DAOD_PHYSLITE.myOutput.pool.root --bleeding-edge
    DEPENDS_SUCCESS DerivationRun3Data_PHYSLITE )
 
 

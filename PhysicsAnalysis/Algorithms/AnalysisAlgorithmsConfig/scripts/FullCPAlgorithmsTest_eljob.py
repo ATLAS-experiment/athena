@@ -43,18 +43,12 @@ parser.add_option( '--factory-preload', dest='factory_preload',
 parser.add_option( '--no-systematics', dest='no_systematics',
                    action = 'store_true', default = False,
                    help = 'Configure the job to with no systematics' )
-parser.add_option( '--hard-cuts', dest='hard_cuts',
-                   action = 'store_true', default = False,
-                   help = 'Configure the job with harder cuts' )
 parser.add_option( '--block-config', dest='block_config',
                    action = 'store_true', default = False,
                    help = 'Configure the job with block configuration' )
 parser.add_option( '--text-config', dest='text_config',
                    action = 'store', default = '',
                    help = 'Configure the job with the provided text configuration' )
-parser.add_option( '--for-compare', dest='for_compare',
-                   action = 'store_true', default = False,
-                   help = 'Configure the job for comparison of sequences vs blocks' )
 parser.add_option( '--physlite', dest='physlite',
                    action = 'store_true', default = False,
                    help = 'Configure the job for physlite' )
@@ -82,7 +76,10 @@ ROOT.xAOD.TauJetContainer()
 dataType = DataType(options.data_type)
 blockConfig = options.block_config
 textConfig = options.text_config
-forCompare = options.for_compare
+
+if textConfig:
+    from PathResolver import PathResolver
+    textConfig = PathResolver.FindCalibFile(textConfig)
 
 print(f"Running on data type: {dataType.value}")
 
@@ -149,9 +146,8 @@ if options.factory_preload != '' :
 
 from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence, printSequenceAlgs
 algSeq = makeSequence (dataType, yamlPath=textConfig,
-                       forCompare=forCompare,
                        noSystematics = options.no_systematics,
-                       hardCuts = options.hard_cuts, isPhyslite=options.physlite,
+                       isPhyslite=options.physlite,
                        autoconfigFromFlags=flags, onlyNominalOR=options.onlyNominalOR,
                        forceEGammaFullSimConfig=forceEGammaFullSimConfig)
 printSequenceAlgs( algSeq ) # For debugging
