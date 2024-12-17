@@ -111,7 +111,7 @@ def MuonR4PatternRecoChainCfg(flags):
                                       xAODContainerName="MuonSegmentsFromHoughR4"))
     
     from MuonConfig.MuonTrackBuildingConfig import MuPatTrackBuilderCfg
-    result.merge(MuPatTrackBuilderCfg(flags))
+
     from xAODTrackingCnv.xAODTrackingCnvConfig import MuonStandaloneTrackParticleCnvAlgCfg
     result.merge(MuPatTrackBuilderCfg(flags, name="TrackBuildingFromHoughR4",
                                       MuonSegmentCollection = "TrkMuonSegmentsFromHoughR4",

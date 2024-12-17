@@ -8,6 +8,7 @@
 
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
 #include <MuonReadoutGeometryR4/Chamber.h>
+#include <ActsGeometryInterfaces/GeometryDefs.h>
 
 #include <set>
 
@@ -40,6 +41,18 @@ namespace MuonGMR4 {
         public:
             using ChamberPtr = GeoModel::TransientConstSharedPtr<Chamber>;
             using ChamberSet = std::vector<ChamberPtr>;
+
+            /// @brief: Helper struct for fast approximate navigation. 
+            /// Maps regions instrumented by chambers in the y-z frame. 
+            /// Used in pattern recognition. 
+            struct chamberLocation{
+                double yLeft{0.};     // left edge 
+                double yRight{0.};     // right edge 
+                double zBottom{0.};     // bottom edge 
+                double zTop{0.};     // top edge 
+                ActsTrk::DetectorType type{ActsTrk::DetectorType::UnDefined}; 
+            };
+
             struct defineArgs{
                 /// List of readout elements in the chamber
                 ChamberSet chambers{};
@@ -47,6 +60,8 @@ namespace MuonGMR4 {
                 std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds{};
                 /// Transformation to the chamber volume
                 Amg::Transform3D locToGlobTrf{Amg::Transform3D::Identity()};
+
+                std::vector<chamberLocation> chamberLocs{}; 
             };
 
             /** @brief Standard constructor taking the defining parameters */
@@ -95,6 +110,10 @@ namespace MuonGMR4 {
             std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds() const;
             /** @brief Returns the list of all associated readout elements */
             Chamber::ReadoutSet readoutEles() const;
+            /// returns the list of all MDT chambers in the sector for fast navigation
+            const std::vector<chamberLocation> & chamberLocations() const; 
+
+
         private:
            defineArgs m_args{};
     };

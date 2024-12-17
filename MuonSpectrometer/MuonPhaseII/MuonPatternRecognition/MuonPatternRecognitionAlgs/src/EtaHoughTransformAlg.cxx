@@ -10,6 +10,7 @@
 #include "MuonPatternHelpers/HoughHelperFunctions.h"
 #include "MuonPatternEvent/SegmentSeed.h"
 #include "MuonSpacePoint/UtilFunctions.h"
+#include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
 
 namespace MuonR4{
 EtaHoughTransformAlg::EtaHoughTransformAlg(const std::string& name,
@@ -20,6 +21,7 @@ StatusCode EtaHoughTransformAlg::initialize() {
     ATH_CHECK(m_geoCtxKey.initialize());
     ATH_CHECK(m_spacePointKey.initialize());
     ATH_CHECK(m_maxima.initialize());
+    ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_visionTool.retrieve(EnableTool{!m_visionTool.empty()}));
     return StatusCode::SUCCESS;
 }
@@ -149,6 +151,81 @@ void EtaHoughTransformAlg::prepareHoughPlane(HoughEventData& data) const {
     data.peakFinder = std::make_unique<ActsPeakFinderForMuon>(peakFinderCfg);
 }
 
+bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBucket, const MuonR4::ActsPeakFinderForMuon::Maximum & maximum) const{
+
+    // helper to check if a space-point is inside a chamber 
+    auto isInside = [](const SpacePointBucket::chamberLocation & loc, const Amg::Vector3D & SP){
+        return (loc.yLeft < SP.y() &&  SP.y() < loc.yRight && loc.zBottom < SP.z() && SP.z() < loc.zTop);  
+    };
+
+    // helper to check if our trajectory traverses a chamber
+    auto passesThrough = [](const SpacePointBucket::chamberLocation & loc, double y0, double tanTheta){
+        double yCross = (y0 + 0.5 * (loc.zBottom+loc.zTop) * tanTheta);  
+        return (loc.yLeft < yCross && yCross < loc.yRight); 
+    };
+
+    // determines the local residual when traversing a chamber 
+    auto proximity = []( HoughHitType dc, double y0, double tanTheta){
+        return std::min(std::abs(HoughHelpers::Eta::houghParamMdtLeft(tanTheta,dc) - y0), std::abs(HoughHelpers::Eta::houghParamMdtRight(tanTheta,dc) - y0)); 
+    };
+
+    // now we propagate along the seed trajectory and collect crossed volumes 
+    int expectedLayers = 0; 
+    int expectedPrecisionChambers = 0; 
+    int seenPrecisionChambers = 0; 
+    bool hasTrig = false; 
+    // loop over all chambers in the bucker 
+    for (auto & mdtChamber : currentBucket.bucket->chamberLocations()){
+        // skip any we don't touch 
+        if (!passesThrough(mdtChamber, maximum.y, maximum.x)) continue; 
+        // for MDT multilayers, we increase our expected number of crossed chambers / tubes
+        if (mdtChamber.type == ActsTrk::DetectorType::Mdt){
+            ++expectedPrecisionChambers; 
+            expectedLayers +=3; 
+        }
+        // now we check if we have a compatible measurement on our seed
+        bool hasHit = false; 
+        for (auto & SP : maximum.hitIdentifiers){
+            // the hit should be inside the current volume and the local residual should be 
+            // compatible with the desired resolution 
+            if (isInside(mdtChamber, SP->positionInChamber()) && proximity(SP,maximum.y,maximum.x) < 2. * m_targetResoIntercept){
+                hasHit=true;
+                break;
+            }
+        }
+        // if we find an MDT hit, we increment the counter for seen chambers
+        if (mdtChamber.type == ActsTrk::DetectorType::Mdt){
+            seenPrecisionChambers += (hasHit); 
+        }
+        // for trigger hits, we set a flag indicating we have at least one 
+        else hasTrig |= hasHit; 
+    }
+    // now count the total number of MDT tube layers we collected on our seed 
+    std::set<std::pair<int,int>> seenLayers; 
+    for (auto & SP : maximum.hitIdentifiers){
+        if (SP->type() == xAOD::UncalibMeasType::MdtDriftCircleType){
+            // apply a compatibility window - enforce hits are at least reasonably close 
+            if (proximity(SP,maximum.y,maximum.x) < 2. * m_targetResoIntercept){
+                const xAOD::MdtDriftCircle* dc = static_cast<const xAOD::MdtDriftCircle*>(SP->primaryMeasurement());
+                seenLayers.emplace(dc->readoutElement()->multilayer(), dc->tubeLayer()); 
+            }
+        }
+    }
+    // compute the minimum number of requested precision layers
+    // the integer division will round down (resulting cut: 2 for single-ML, 4 for dual-ML)  
+    int minLayers = seenLayers.size() / 2 + 1;  
+    // require 2 precision chambers with measurements, except if we only cross one precision multilayer in total 
+    int minSeenPrecisionChambers = (expectedPrecisionChambers > 1) + 1; 
+    // if we have at least one trigger hit, we loosen the requirements on precision hits and chambers
+    if (hasTrig) {
+        minLayers -= 1;
+        minSeenPrecisionChambers = 1;
+    }
+    
+    return seenPrecisionChambers >= minSeenPrecisionChambers && (int)seenLayers.size() >= minLayers; 
+}
+
+
 void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
                                          HoughEventData& data, 
                                          HoughSetupForBucket& bucket) const {
@@ -206,26 +283,87 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
             <<m_nBinsIntercept<<" bins.");  
         return;
     }
+
+    // remember used hits - assign only to first maximum when counting
+    // precision hits
+    std::set<HoughHitType> seenHits;
+
+    // now clean up and potentially write the maxima
     for (const auto& max : maxima) {
-        /// TODO: Proper weighted hit counting...
-        std::vector<HoughHitType> hitList;
-        hitList.reserve(max.hitIdentifiers.size());
+
+        // precision hit cut, using only the measurements on the hough maximum
         unsigned int nPrec{0};
-        for (const HoughHitType& hit : max.hitIdentifiers) {
-            nPrec += isPrecisionHit(hit);
-            hitList.push_back(hit);
+        auto toBins = [&data](double x, double y){
+            return std::make_pair(
+                Acts::HoughTransformUtils::binIndex(data.currAxisRanges.xMin, data.currAxisRanges.xMax, data.houghPlane->nBinsX(), x), 
+                Acts::HoughTransformUtils::binIndex(data.currAxisRanges.yMin, data.currAxisRanges.yMax, data.houghPlane->nBinsY(), y)
+            );
+        };
+        auto accumulatorBins = toBins(max.x,max.y); 
+        for (const HoughHitType& hit : data.houghPlane->hitIds(accumulatorBins.first, accumulatorBins.second)) {
+            auto res = seenHits.emplace(hit); 
+            if (res.second){
+                nPrec += isPrecisionHit(hit);
+            }
         }
         if (nPrec < m_nPrecHitCut) {
             ATH_MSG_VERBOSE("The maximum did not pass the precision hit cut");
             continue;
+        }      
+
+        // convert the set of hit identifiers from ACTS to the vector we need later 
+        std::vector<HoughHitType> hitList;
+        hitList.reserve(max.hitIdentifiers.size());
+        for (auto & hit : max.hitIdentifiers){
+            hitList.push_back(hit);
         }
+
+        // apply a seed quality cut. 
+        if (!passSeedQuality(bucket,max)) {
+            // if seed visualisation is enabled, draw the rejected seed 
+            if (m_visionTool.isEnabled()) {
+                const HoughMaximum& houghMax{max.x, max.y, (double)hitList.size(), std::move(hitList), bucket.bucket};
+                const SegmentSeed seed{houghMax};
+                MuonValR4::IPatternVisualizationTool::PrimitiveVec primitives{};  
+                MuonValR4::IPatternVisualizationTool::PrimitiveVec primitivesForAcc{};  
+                for (auto & chamber : bucket.bucket->chamberLocations()){
+                    primitives.push_back(MuonValR4::drawBox(chamber.yLeft, chamber.zBottom, chamber.yRight, chamber.zTop, kGray+2)); 
+                }
+       
+                primitives.push_back(MuonValR4::drawLabel(std::format("Missed seed - score {}, layer score {}, comprising {} measurements ",data.houghPlane->nHits(accumulatorBins.first, accumulatorBins.second),data.houghPlane->nLayers(accumulatorBins.first, accumulatorBins.second),hitList.size()),0.05,0.03,12)); 
+       
+                primitivesForAcc.push_back(MuonValR4::drawLabel(std::format("Missed seed - score {}, layer score {}, comprising {} measurements ",data.houghPlane->nHits(accumulatorBins.first, accumulatorBins.second),data.houghPlane->nLayers(accumulatorBins.first, accumulatorBins.second),hitList.size()),0.05,0.03,12)); 
+                m_visionTool->visualizeAccumulator(ctx, *data.houghPlane, data.currAxisRanges, {max},
+                                "MissedAccumulator", std::move(primitivesForAcc));
+                m_visionTool->visualizeSeed(ctx, seed, "Missed seed",std::move(primitives));
+            }
+            continue;
+        }
+        
+        // this seed looks good! Let's finalise it 
         size_t nHits = hitList.size();
+        // add phi measurements - will be filtered for compatibility in separate algorithm
         extendWithPhiHits(hitList, bucket);
+        // sort hits by layer 
         sortByLayer(hitList);
+        // create hough maximum instance and add it to the event data for later writing! 
         const HoughMaximum& houghMax{data.maxima.emplace_back(max.x, max.y, nHits, std::move(hitList), bucket.bucket)};
+
+        // if desired, visualise the result 
         if (m_visionTool.isEnabled()) {
             const SegmentSeed seed{houghMax};
-            m_visionTool->visualizeSeed(ctx, seed, "#eta-HoughSeed");
+            MuonValR4::IPatternVisualizationTool::PrimitiveVec primitives{}; 
+            MuonValR4::IPatternVisualizationTool::PrimitiveVec primitivesForAcc{};   
+            for (auto & chamber : bucket.bucket->chamberLocations()){
+                primitives.push_back(MuonValR4::drawBox(chamber.yLeft, chamber.zBottom, chamber.yRight, chamber.zTop, kGray+2)); 
+            }
+            
+            primitives.push_back(MuonValR4::drawLabel(std::format("score {}, layer score {}, comprising {} measurements. wx = {:.2f}, wy = {:.1f} ",data.houghPlane->nHits(accumulatorBins.first, accumulatorBins.second),data.houghPlane->nLayers(accumulatorBins.first, accumulatorBins.second),hitList.size(), max.wx, max.wy),0.05,0.03,12)); 
+
+            primitivesForAcc.push_back(MuonValR4::drawLabel(std::format("score {}, layer score {}, comprising {} measurements. wx = {:.2f}, wy = {:.1f} ",data.houghPlane->nHits(accumulatorBins.first, accumulatorBins.second),data.houghPlane->nLayers(accumulatorBins.first, accumulatorBins.second),hitList.size(), max.wx / m_targetResoTanTheta, max.wy / m_targetResoIntercept),0.05,0.03,12)); 
+
+            m_visionTool->visualizeAccumulator(ctx, *data.houghPlane, data.currAxisRanges, {max},"#eta Hough accumulator", std::move(primitivesForAcc));
+            m_visionTool->visualizeSeed(ctx, seed, "#eta-HoughSeed", std::move(primitives));
         }
     }
 }
@@ -238,10 +376,17 @@ void EtaHoughTransformAlg::fillFromSpacePoint(HoughEventData& data, const HoughH
         w = 0.5; 
     }
     if (SP->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
+        // if invalid time, do not count this hit towards a potential peak.
+        // The hits will still be included in a potential maximum formed by valid hits,
+        // for later recovery.  
+        if (!isPrecisionHit(SP)) w = 0;
+        const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(SP->primaryMeasurement());
+        // dummy index for precision layer counting within the hough plane 
+        const unsigned precisionLayerIndex = (dc->readoutElement()->multilayer() * 10 + dc->tubeLayer());
         data.houghPlane->fill<HoughHitType>(SP, data.currAxisRanges, HoughHelpers::Eta::houghParamMdtLeft,
-                                            std::bind(HoughHelpers::Eta::houghWidthMdt, _1, _2, m_targetResoIntercept), SP, 0, w);
+                                            std::bind(HoughHelpers::Eta::houghWidthMdt, _1, _2,  m_targetResoIntercept), SP, precisionLayerIndex, w);
         data.houghPlane->fill<HoughHitType>(SP, data.currAxisRanges, HoughHelpers::Eta::houghParamMdtRight,
-                                            std::bind(HoughHelpers::Eta::houghWidthMdt, _1, _2, m_targetResoIntercept), SP, 0, w);
+                                            std::bind(HoughHelpers::Eta::houghWidthMdt, _1, _2,  m_targetResoIntercept), SP, precisionLayerIndex, w);
     } else {
         if (SP->measuresEta()) {
             data.houghPlane->fill<HoughHitType>(SP, data.currAxisRanges, HoughHelpers::Eta::houghParamStrip,

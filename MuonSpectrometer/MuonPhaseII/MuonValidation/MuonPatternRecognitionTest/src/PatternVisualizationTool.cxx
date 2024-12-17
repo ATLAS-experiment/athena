@@ -586,6 +586,17 @@ namespace MuonValR4 {
                 drawHit(*hit, primitives, canvasDim, view, hollowFilling);
             } 
         }
+
+        // adapt the draw range to make sure any detector elements we wish to display 
+        // are included 
+        for (auto & prim : primitives){
+            TBox* theBox = dynamic_cast<TBox*>(prim.get()); 
+            if (theBox){
+                canvasDim[Edges::zLow] = std::min(canvasDim[Edges::zLow], theBox->GetY1()); 
+                canvasDim[Edges::zHigh] = std::max(canvasDim[Edges::zHigh], theBox->GetY2()); 
+            }
+        }
+
         double width =  (canvasDim[Edges::yHigh] - canvasDim[Edges::yLow])*m_canvasExtraScale;
         double height = (canvasDim[Edges::zHigh] - canvasDim[Edges::zLow])*m_canvasExtraScale;
         if (height > width) width = height; 

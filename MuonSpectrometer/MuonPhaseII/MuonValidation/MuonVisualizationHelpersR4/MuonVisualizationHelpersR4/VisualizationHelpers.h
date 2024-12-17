@@ -50,6 +50,20 @@ namespace MuonValR4 {
                                   const int color = kGreen +2,
                                   const int fillStyle = hollowFilling,
                                   const int view = objViewEta);
+    /** @brief Creates a box for drawing, e.g strip measurements
+     *  @param x1: Left edge location
+     *  @param y1: Bottom edge location
+     *  @param x2: Right edge location
+     *  @param y2: TopEdgeLocation
+     *  @param color: Color of the surrounding line & filling
+     *  @param fillStyle: Box fill style
+     *  @param view: Is the box placed in the y-z or in the x-z plane */
+    std::unique_ptr<TBox> drawBox(const double x1,
+                                  const double y1,
+                                  const double x2,
+                                  const double y2,
+                                  const int color = kGreen +2,
+                                  const int fillStyle = hollowFilling);
     
     std::unique_ptr<TLine> drawLine(const MuonR4::SegmentFit::Parameters& pars,
                                     const double lowEnd, const double highEnd,
