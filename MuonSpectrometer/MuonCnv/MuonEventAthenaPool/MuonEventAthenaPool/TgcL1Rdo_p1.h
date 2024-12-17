@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_TGCL1RDO_P1_H
@@ -21,7 +21,7 @@ public:
 
 private:
 
-    uint16_t m_version;
+    uint16_t m_version{};
 
     // ID of this instance
     uint16_t m_id{0};

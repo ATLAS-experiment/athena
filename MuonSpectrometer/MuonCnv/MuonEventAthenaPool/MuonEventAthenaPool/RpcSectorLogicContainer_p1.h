@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // RpcSectorLogicContainer_p1.h
@@ -20,7 +20,7 @@ class RpcSectorLogicContainer_p1  {
 public:  
     RpcSectorLogicContainer_p1() {}; 
     
-    uint32_t m_sectorList[2]; //!< From RpcSectorLogicContainer. Dataword to contain the list of already filled sectors.
+    uint32_t m_sectorList[2]{}; //!< From RpcSectorLogicContainer. Dataword to contain the list of already filled sectors.
       
    /**This contains the bulk of the information from the various SL objects.
    
