@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILERAWCHANNELBUILDERMF_H
@@ -73,8 +73,8 @@ class TileRawChannelBuilderMF: public TileRawChannelBuilder {
     bool m_timeFromCOF; // if true, take time estimated from second step of COF
 
     std::vector<float> m_digits;
-    int m_chPedCounter[5][64][48][2];
-    float m_chPed[5][64][48][2];
+    int m_chPedCounter[5][64][48][2]{};
+    float m_chPed[5][64][48][2]{};
 
 };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILERAWCHANNELBUILDERQIEFILTER_H
@@ -91,12 +91,12 @@ class TileRawChannelBuilderQIEFilter: public TileRawChannelBuilder {
     //bool m_bestPhase; // if true, use best phase from COOL DB in "fixed phase" mode (i.e., no iterations)
     //bool m_ofcFromCool; // if true, take OFCs from DB (no on-fly calculations)
     //bool m_emulateDsp; // if true, emulate DSP reconstruction algorithm
-    int m_nSignal; //!< internal counters
+    int m_nSignal{}; //!< internal counters
     //int m_nNegative;  //!< internal counters
     //int m_nCenter; //!< internal counters
-    int m_nConst;  //!< internal counters
+    int m_nConst{};  //!< internal counters
 
-    int m_nSamples; //!< number of samples in the data
+    int m_nSamples{}; //!< number of samples in the data
     //int m_t0SamplePosition;  //!< position of peak sample = (m_nSamples-1)/2
     //float m_maxTime; //!< max allowed time = 25*(m_nSamples-1)/2
     //float m_minTime; //!< min allowed time = -25*(m_nSamples-1)/2
