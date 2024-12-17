@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -65,9 +65,9 @@ private:
   TileGeoG4CellMap* m_cellMap;
   TileGeoG4SectionMap* m_sectionMap;
   bool m_isE5;
-  int m_npmtC10[2][64]; //array of number of PMTs for C10 Cells
-  int m_npmtD4[2][64];  //array of number of PMTs for D4 Cells
-  int m_npmtE5[2][64];  //array of number of PMTs for E4' Cells
+  int m_npmtC10[2][64]{}; //array of number of PMTs for C10 Cells
+  int m_npmtD4[2][64]{};  //array of number of PMTs for D4 Cells
+  int m_npmtE5[2][64]{};  //array of number of PMTs for E4' Cells
 
   int m_verboseLevel; //!< Level of verbosity, passed in from above
 };
