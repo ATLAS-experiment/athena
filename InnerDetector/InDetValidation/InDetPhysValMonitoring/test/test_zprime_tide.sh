@@ -15,7 +15,7 @@
 exec 2>&1
 run() { (set -x; exec "$@") }
 
-relname="r24.0.65"
+relname="r24.2024-12-15T2101"
 
 lastref_dir=last_results
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
