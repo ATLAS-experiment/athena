@@ -1847,7 +1847,7 @@ class argHepEvtAsciiFile(argFile):
                 eventCount = 0
                 f = open(fname, 'r')
                 for line in f:
-                    if len(line.split(" "))==3:
+                    if line.upper().startswith("E "):
                         eventCount += 1
                 self._fileMetadata[fname]['nentries'] = eventCount
             except OSError as e:
