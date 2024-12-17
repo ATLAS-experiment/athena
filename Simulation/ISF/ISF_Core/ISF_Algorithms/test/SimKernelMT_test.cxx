@@ -27,10 +27,10 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 // Framework includes
 #include "AthenaBaseComps/AthService.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/IAppMgrUI.h"
 #include "GaudiKernel/SmartIF.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GaudiKernel/PhysicalConstants.h"
+#include "GoogleTestTools/InitGaudiGoogleTest.h"
 
 // Google Test and Google Mock
 #include "gtest/gtest.h"
@@ -39,10 +39,6 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "AtlasHepMC/Operators.h"
 #include "TruthUtils/MagicNumbers.h"
 
-#if __GNUC__ >= 12
-// gcc12 gives maybe-uninitialized warnings about uses of testing::_.
-# pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
 
 namespace ISFTesting {
 
@@ -70,8 +66,8 @@ namespace ISFTesting {
     MOCK_CONST_METHOD4(convertHepMCToG4Event, StatusCode(const EventContext&, McEventCollection&,
                                                          G4Event*&,
                                                          McEventCollection&));
-   MOCK_CONST_METHOD3(convertHepMCToG4EventLegacy, StatusCode(const EventContext&, McEventCollection&,
-                                                              G4Event*&));
+    MOCK_CONST_METHOD3(convertHepMCToG4EventLegacy, StatusCode(const EventContext&, McEventCollection&,
+                                                               G4Event*&));
     MOCK_CONST_METHOD5(ISF_to_G4Event, G4Event*(const EventContext&, const std::vector<ISF::ISFParticle*>&,
                                                 HepMC::GenEvent*,
                                                 HepMC::GenEvent*,
@@ -259,67 +255,14 @@ public:
 DECLARE_COMPONENT( MockEntryLayerTool )
 
 
-// Gaudi Test fixture that provides a clean Gaudi environment for
-// each individual test case
-class GaudiFixture {
-
-protected:
-  GaudiFixture() {
-    SetUpGaudi();
-  }
-
-  ~GaudiFixture() {
-    TearDownGaudi();
-  }
-
-  void SetUpGaudi() {
-    m_appMgr = Gaudi::createApplicationMgr();
-    ASSERT_TRUE( m_appMgr!=nullptr );
-
-    m_svcLoc = m_appMgr;
-    ASSERT_TRUE( m_svcLoc.isValid() );
-
-    m_svcMgr = m_appMgr;
-    ASSERT_TRUE( m_svcMgr.isValid() );
-
-    m_propMgr = m_appMgr;
-    ASSERT_TRUE( m_propMgr.isValid() );
-    ASSERT_TRUE( m_propMgr->setProperty( "EvtSel",         "NONE" ).isSuccess() );
-    ASSERT_TRUE( m_propMgr->setProperty( "JobOptionsType", "FILE" ).isSuccess() );
-    ASSERT_TRUE( m_propMgr->setProperty( "JobOptionsPath", "SimKernelMT_test.txt" ).isSuccess() );
-
-    m_toolSvc = m_svcLoc->service("ToolSvc");
-    ASSERT_TRUE( m_toolSvc.isValid() );
-
-    ASSERT_TRUE( m_appMgr->configure().isSuccess() );
-    ASSERT_TRUE( m_appMgr->initialize().isSuccess() );
-  }
-
-  void TearDownGaudi() {
-    ASSERT_TRUE( m_svcMgr->finalize().isSuccess() );
-    ASSERT_TRUE( m_appMgr->finalize().isSuccess() );
-    ASSERT_TRUE( m_appMgr->terminate().isSuccess() );
-    m_svcLoc->release();
-    m_svcMgr->release();
-    Gaudi::setInstance( static_cast<IAppMgrUI*>(nullptr) );
-  }
-
-  // protected member variables for Core Gaudi components
-  IAppMgrUI*               m_appMgr = nullptr;
-  SmartIF<ISvcLocator>     m_svcLoc;
-  SmartIF<ISvcManager>     m_svcMgr;
-  SmartIF<IToolSvc>        m_toolSvc;
-  SmartIF<IProperty>       m_propMgr;
-};
-
-
   // Test fixture specifically for SimKernelMT AthAlgorithm
-  class SimKernelMT_test: public ::testing::Test, public GaudiFixture {
+  class SimKernelMT_test: public Athena_test::InitGaudiGoogleTest {
 
   protected:
-    virtual void SetUp() override {
-      // the tested AthAlgorithm
-      m_alg = new ISF::SimKernelMT{"SimKernelMT", m_svcLoc};
+    SimKernelMT_test() :
+      Athena_test::InitGaudiGoogleTest("SimKernelMT_test.txt"),
+      m_alg(std::make_unique<ISF::SimKernelMT>("SimKernelMT", svcLoc)) {
+
       m_alg->addRef();
       EXPECT_TRUE( m_alg->setProperty("SimulationTools", "['"+particleKillerSimulatorToolName+"']").isSuccess() );
       EXPECT_TRUE( m_alg->setProperty("GeoIDSvc", mockGeoIDSvcName).isSuccess() );
@@ -334,33 +277,20 @@ protected:
       m_mockParticleKillerTool = retrieveTool<MockParticleKillerTool>(mockParticleKillerToolName);
       m_mockSimulationSelector = retrieveTool<MockSimulationSelector>(mockSimulationSelectorName);
       m_mockEntryLayerTool = retrieveTool<MockEntryLayerTool>(mockEntryLayerToolName);
-      SmartIF<IService> smart_sg = m_svcLoc->service("StoreGateSvc");
-      m_sg = dynamic_cast<StoreGateSvc*>(smart_sg.get());
-    }
-
-    virtual void TearDown() override {
-      // let the Gaudi ServiceManager finalize all services
-      ASSERT_TRUE( m_svcMgr->finalize().isSuccess() );
-
-      // release tested AthAlgorithm
-      delete m_alg;
-      // release various service instances
-      delete m_mockGeoIDSvc;
-      delete m_mockTruthSvc;
-      delete m_mockInputConverter;
+      m_sg = svcLoc->service("StoreGateSvc");
     }
 
     template<typename T>
     T* retrieveService(const std::string& name) {
       T* service = nullptr;
-      SmartIF<IService>& serviceSmartPointer = m_svcLoc->service(name);
+      SmartIF<IService>& serviceSmartPointer = svcLoc->service(name);
       service = dynamic_cast<T*>(serviceSmartPointer.get());
       EXPECT_NE(nullptr, service);
       if(!service) {
         return nullptr;
       }
       EXPECT_TRUE( service->configure().isSuccess() );
-      EXPECT_TRUE( m_svcMgr->addService(service).isSuccess() );
+      EXPECT_TRUE( svcMgr->addService(service).isSuccess() );
       // assert that finalize() gets called once per test case
       EXPECT_CALL( *service, finalize() )
         .Times(1)
@@ -372,7 +302,7 @@ protected:
     template<typename T>
     T* retrieveTool(const std::string& name) {
       IAlgTool* toolInterface = nullptr;
-      EXPECT_TRUE( m_toolSvc->retrieveTool(name, toolInterface).isSuccess() );
+      EXPECT_TRUE( toolSvc->retrieveTool(name, toolInterface).isSuccess() );
       EXPECT_NE(nullptr, toolInterface);
 
       T* tool = dynamic_cast<T*>(toolInterface);
@@ -426,9 +356,9 @@ protected:
     }
 
     // the tested AthAlgorithm
-    ISF::SimKernelMT* m_alg{};
+    std::unique_ptr<ISF::SimKernelMT> m_alg;
 
-    StoreGateSvc* m_sg{};
+    SmartIF<StoreGateSvc> m_sg;
 
     // mocked Athena components
     ISFTesting::MockGeoIDSvc* m_mockGeoIDSvc{};
