@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,8 +9,8 @@
 //                                                            //
 //  Description: Handle for TRT RDO's                         //
 //                                                            //
-//  Author: Thomas H. Kittelmann (Thomas.Kittelmann@cern.ch)  //
-//  Initial version: April 2008 (rewritten January 2009)      //
+//  Author: Riccardo Maria BIANCHI (riccardo.maria.bianchi@cern.ch) 
+//  Initial version: January 2024       
 //                                                            //
 ////////////////////////////////////////////////////////////////
 
