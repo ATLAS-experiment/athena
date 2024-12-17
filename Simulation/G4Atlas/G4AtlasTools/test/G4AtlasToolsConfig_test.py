@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Run tests on G4AtlasToolsConfig
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 if __name__ == '__main__':
@@ -50,4 +50,5 @@ if __name__ == '__main__':
   with open("test.pkl", "wb") as f:
     cfg.store(f) #sets wasmerged = true
 
+  cfg.popPrivateTools()
   print ("-----------------finished----------------------")
