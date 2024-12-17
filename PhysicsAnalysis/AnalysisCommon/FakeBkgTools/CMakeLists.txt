@@ -11,15 +11,14 @@ atlas_add_library( FakeBkgToolsLib
   FakeBkgTools/*.h Root/*.h Root/*.cxx  ${FakeBkgToolsDictSource}
   PUBLIC_HEADERS FakeBkgTools
   DEFINITIONS FAKEBKGTOOLS_ATLAS_ENVIRONMENT
-  PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-  LINK_LIBRARIES AsgAnalysisInterfaces AsgTools xAODBase PATInterfaces CxxUtils
-  PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} xAODEgamma xAODMuon xAODTau PathResolver SelectionHelpersLib
-  xAODCore xAODEventInfo AthContainers )
+  INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+  LINK_LIBRARIES ${ROOT_LIBRARIES} AsgAnalysisInterfaces AsgTools AthContainers xAODBase xAODEventInfo CxxUtils
+  PRIVATE_LINK_LIBRARIES xAODEgamma xAODMuon xAODTau PathResolver SelectionHelpersLib )
 
 if( NOT XAOD_STANDALONE )
   atlas_add_component( FakeBkgTools
     src/components/*.cxx
-    LINK_LIBRARIES GaudiKernel FakeBkgToolsLib )
+    LINK_LIBRARIES FakeBkgToolsLib )
 endif()
 
 atlas_add_dictionary( FakeBkgToolsDict
