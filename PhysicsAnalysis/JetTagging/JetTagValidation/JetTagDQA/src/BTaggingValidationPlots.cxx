@@ -1528,11 +1528,8 @@ namespace JetTagDQA{
     // get the GN2v01 vars
     double GN2v01_pb, GN2v01_pu, GN2v01_pc, GN2v01_ptau;
     SG::ConstAccessor<float> GN2pbAcc(m_GN2v01Name + "_pb");
-    if (GN2pbAcc.isAvailable(*btag)) {
-        GN2v01_pb = GN2pbAcc(*btag);
-    } else {
-	GN2v01_pb = -1;
-    }
+    GN2v01_pb = GN2pbAcc.withDefault(*btag, -1);
+
     SG::ConstAccessor<float> GN2puAcc(m_GN2v01Name + "_pu");
     GN2v01_pu = GN2puAcc.withDefault(*btag, -1);
 
