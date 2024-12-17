@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -41,8 +41,6 @@ namespace LArGeo {
     LArDetectorFactoryLite() = delete;
     LArDetectorFactoryLite(const LArDetectorFactoryLite &right) = delete;
     const LArDetectorFactoryLite & operator=(const LArDetectorFactoryLite &right) = delete;
-
-    virtual ~LArDetectorFactoryLite();
 
     // Build the parts of the description that cannot be read from the SQLite database
     virtual void create(GeoPhysVol* world) override;
