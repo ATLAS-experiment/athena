@@ -37,17 +37,29 @@ def GNNTrackFinderToolCfg(flags, name='GNNTrackFinderTool', **kwargs):
     kwargs.setdefault("knnVal", flags.Tracking.GNN.TrackFinder.knnVal)
     kwargs.setdefault("filterCut", flags.Tracking.GNN.TrackFinder.filterCut)
     kwargs.setdefault("inputMLModelDir", flags.Tracking.GNN.TrackFinder.inputMLModelDir)
+    kwargs.setdefault("ccCut", flags.Tracking.GNN.TrackFinder.ccCut)
+    kwargs.setdefault("walkMin", flags.Tracking.GNN.TrackFinder.walkMin)
+    kwargs.setdefault("walkMax", flags.Tracking.GNN.TrackFinder.walkMax)
+    kwargs.setdefault("EmbeddingFeatureNames", flags.Tracking.GNN.TrackFinder.EmbeddingFeatureNames)
+    kwargs.setdefault("EmbeddingFeatureScales", flags.Tracking.GNN.TrackFinder.EmbeddingFeatureScales)
+    kwargs.setdefault("FilterFeatureNames", flags.Tracking.GNN.TrackFinder.FilterFeatureNames)
+    kwargs.setdefault("FilterFeatureScales", flags.Tracking.GNN.TrackFinder.FilterFeatureScales)
+    kwargs.setdefault("GNNFeatureNames", flags.Tracking.GNN.TrackFinder.GNNFeatureNames)
+    kwargs.setdefault("GNNFeatureScales", flags.Tracking.GNN.TrackFinder.GNNFeatureScales)
 
     from AthOnnxComps.OnnxRuntimeInferenceConfig import OnnxRuntimeInferenceToolCfg
     ort_exe_provider = flags.Tracking.GNN.TrackFinder.ORTExeProvider
     kwargs.setdefault("Embedding", acc.popToolsAndMerge(
-        OnnxRuntimeInferenceToolCfg(flags, Path(kwargs["inputMLModelDir"]) / "embedding.onnx", ort_exe_provider)
+        OnnxRuntimeInferenceToolCfg(flags, str(Path(kwargs["inputMLModelDir"]) / "embedding.onnx"), 
+                                    ort_exe_provider, name="Embedding")
     ))
     kwargs.setdefault("Filtering", acc.popToolsAndMerge(
-        OnnxRuntimeInferenceToolCfg(flags, Path(kwargs["inputMLModelDir"]) / "filtering.onnx", ort_exe_provider)
+        OnnxRuntimeInferenceToolCfg(flags, str(Path(kwargs["inputMLModelDir"]) / "filtering.onnx"), 
+                                    ort_exe_provider, name="Filtering")
     ))
     kwargs.setdefault("GNN", acc.popToolsAndMerge(
-        OnnxRuntimeInferenceToolCfg(flags, Path(kwargs["inputMLModelDir"]) / "gnn.onnx", ort_exe_provider)
+        OnnxRuntimeInferenceToolCfg(flags, str(Path(kwargs["inputMLModelDir"]) / "gnn.onnx"), 
+                                    ort_exe_provider, name="GNN")
     ))
     
     acc.setPrivateTools(CompFactory.InDet.SiGNNTrackFinderTool(name, **kwargs))

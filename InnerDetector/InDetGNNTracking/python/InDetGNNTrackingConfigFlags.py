@@ -16,10 +16,6 @@ def createGNNTrackingConfigFlags():
     icf.addFlag("Tracking.GNN.DumpObjects.NtupleTreeName", "GNN4ITk")
 
     # GNN Track finder tool
-    icf.addFlag("Tracking.GNN.TrackFinder.embeddingDim", 8)
-    icf.addFlag("Tracking.GNN.TrackFinder.rVal", 1.7)
-    icf.addFlag("Tracking.GNN.TrackFinder.knnVal", 500)
-    icf.addFlag("Tracking.GNN.TrackFinder.filterCut", 0.21)
     icf.addFlag("Tracking.GNN.TrackFinder.inputMLModelDir", "TrainedMLModels4ITk")
     icf.addFlag("Tracking.GNN.TrackFinder.ORTExeProvider", OnnxRuntimeType.CPU)
     

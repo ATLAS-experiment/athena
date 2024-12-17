@@ -6,6 +6,7 @@ atlas_subdir( InDetGNNTracking )
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 find_package( HepPDT )
+find_package(Boost REQUIRED COMPONENTS graph)
 
 # Component(s) in the package:
 atlas_add_component( InDetGNNTracking
@@ -18,7 +19,7 @@ atlas_add_component( InDetGNNTracking
     PixelReadoutGeometryLib SCT_ReadoutGeometry InDetSimData
     InDetPrepRawData TrkTrack TrkRIO_OnTrack InDetSimEvent
     AtlasHepMCLib InDetRIO_OnTrack InDetRawData TrkTruthData
-    SiSPSeededTrackFinderData 
+    SiSPSeededTrackFinderData Boost::graph
 )
 
 atlas_install_python_modules( python/*.py )
