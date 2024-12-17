@@ -308,9 +308,14 @@ namespace MuonR4{
         }
         /// Seed candidate is 
         for (const HoughHitType& hit : solCandidate.seedHits){
+            //calibBottom is nullptr after it has been moved, so...
+            //cppcheck-suppress accessMoved
             if (hit == bottomHit && calibBottom) {
                 candidateSeed.measurements.emplace_back(std::move(calibBottom));
-            } else if (hit == topHit && calibTop) {
+            } 
+            //calibTop is nullptr after it has been moved, so...
+            //cppcheck-suppress accessMoved
+            else if (hit == topHit && calibTop) {
                 candidateSeed.measurements.emplace_back(std::move(calibTop));
             } else {
                 candidateSeed.measurements.emplace_back(m_cfg.calibrator->calibrate(ctx, hit, seedPos, seedDir, 0.));
