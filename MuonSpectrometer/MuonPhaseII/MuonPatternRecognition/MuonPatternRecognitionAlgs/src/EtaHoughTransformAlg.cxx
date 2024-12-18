@@ -170,7 +170,6 @@ bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBu
     };
 
     // now we propagate along the seed trajectory and collect crossed volumes 
-    int expectedLayers = 0; 
     int expectedPrecisionChambers = 0; 
     int seenPrecisionChambers = 0; 
     bool hasTrig = false; 
@@ -181,7 +180,6 @@ bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBu
         // for MDT multilayers, we increase our expected number of crossed chambers / tubes
         if (mdtChamber.type == ActsTrk::DetectorType::Mdt){
             ++expectedPrecisionChambers; 
-            expectedLayers +=3; 
         }
         // now we check if we have a compatible measurement on our seed
         bool hasHit = false; 
