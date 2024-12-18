@@ -9,8 +9,8 @@
 *:/cvmfs/sft.cern.ch/lcg/*
 
 # It's common to use assert with side-effects in unit tests. Don't warn about those.
-assignmentInAssert:*_test.*
-assertWithSideEffect:*_test.*
+assignmentInAssert:*/test/*
+assertWithSideEffect:*/test/*
 
 # Do not warn about same-named functions in class hierarchies.
 duplInheritedMember
