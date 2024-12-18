@@ -170,9 +170,7 @@ namespace GlobalSim {
     }
 
     // container for strips close to RoI in eta
-    auto close =
-      std::vector<std::vector<const CaloCell*>>(3,
-						std::vector<const CaloCell*>());
+    auto close = std::vector<std::vector<const CaloCell*>>(3);
     for (auto& v :close) {v.reserve(100);}
     
     
@@ -231,11 +229,8 @@ namespace GlobalSim {
 
     // set up Cell containers for the neighborhood. One container
     // per adjacent RoI phi indices.
-    auto neigh_cells =
-      std::vector<std::vector<const CaloCell*>>(3,
-						std::vector<const CaloCell*>());
-    
-    
+    auto neigh_cells = std::vector<std::vector<const CaloCell*>>(3);
+
     const CaloCell* max_cell{*it};
     const auto  max_cell_eta = max_cell->eta();
     

@@ -164,7 +164,7 @@ protected:
     struct IntermediateState;
     void updateState(const IntermediateState &inputstate,
                      IntermediateState &outputstate,
-                     unsigned lyridx, std::vector<const StoredHit *> newhits);
+                     unsigned lyridx, const std::vector<const StoredHit *>& newhits);
     StatusCode incrementalBuildFilter(const BinEntry &bindata, const FPGATrackSimGenScanBinningBase::IdxSet &bin,
                                     std::vector<HitPairSet> &output_pairset);
     

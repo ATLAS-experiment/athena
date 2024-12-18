@@ -84,6 +84,7 @@ private:
 		SG::AuxElement::ConstAccessor<char> decorator;
 		std::size_t hash;
 		bool suffixed;
+		// cppcheck-suppress uninitMemberVar; false positive (https://trac.cppcheck.net/ticket/13444)
 		TagDecorator(const std::string& name, std::size_t the_hash, bool suffixed) : decorator(name), hash(the_hash), suffixed(suffixed) {}
 	};
 	struct CachedRanking
@@ -99,8 +100,11 @@ private:
 		std::pair<unsigned,unsigned> boundaries;
 		bool operator<(const ToolKey& rhs) const { return hash<rhs.hash || (hash==rhs.hash && boundaries.second<rhs.boundaries.first); }
 		bool operator==(const ToolKey& rhs) const { return hash==rhs.hash && boundaries.second>=rhs.boundaries.first && rhs.boundaries.second>=boundaries.first; }
+		// cppcheck-suppress uninitMemberVar; false positive (https://trac.cppcheck.net/ticket/13444)
 		ToolKey(std::size_t leg, std::size_t tag, unsigned runNumber) : hash(leg^tag), boundaries(runNumber, runNumber) {}
+		// cppcheck-suppress uninitMemberVar; false positive (https://trac.cppcheck.net/ticket/13444)
 		ToolKey(std::size_t leg, std::size_t tag, std::pair<unsigned,unsigned> bounds) : hash(leg^tag), boundaries(bounds) {}
+		// cppcheck-suppress uninitMemberVar; false positive (https://trac.cppcheck.net/ticket/13444)
 		ToolKey(std::size_t leg = 0, std::size_t tag = 0) : hash(leg^tag), boundaries(0, 999999) {}
 	};
 	using LeptonList = std::vector<TrigGlobEffCorr::Lepton>;

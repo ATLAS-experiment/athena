@@ -30,7 +30,8 @@ TrigInDetAccelerationSvc::TrigInDetAccelerationSvc( const std::string& name, ISv
   m_moduleName("libTrigInDetCUDA.so"),
   m_useITkGeometry(false),
   m_libHandle(0),
-  m_pWF(0),   
+  m_pWF(0),
+  m_module(0),
   m_detStore("DetectorStore", name),
   m_evtStore("StoreGateSvc",name), 
   m_factoryConfigured(false) {
