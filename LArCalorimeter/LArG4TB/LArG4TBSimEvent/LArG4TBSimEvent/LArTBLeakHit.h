@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //=================================================
@@ -19,19 +19,8 @@
 class LArTBLeakHit 
 {
  public:
-     LArTBLeakHit(){;};
-     LArTBLeakHit(int d){m_dir = d;};
-     LArTBLeakHit(int dir, int pcode, float ekin, float etot);
-     LArTBLeakHit(const LArTBLeakHit &right);
-//     ~LArTBLeakHit(){;};
-
-     const LArTBLeakHit& operator=(const LArTBLeakHit &right);
-     int operator==(const LArTBLeakHit &right);
-//     inline void *operator new(size_t, void* aHit = 0);
-//     inline void operator delete(void *aHit);
-
-     void Draw(){;};
-     void Print(){;};
+     LArTBLeakHit() = default;
+     LArTBLeakHit(int d) : m_dir(d) {};
 
 //Set- Get- methods
  // energy deposit
@@ -55,14 +44,14 @@ class LArTBLeakHit
      inline int GetDir() { return m_dir; }
 
  private:
-     double m_ekin;   // kinetic energy of stopped particle
-     double m_etot;   // total energy       -"-
-     int    m_pcode;  // particle code, special codes for: deuterium 9001
+     double m_ekin{};   // kinetic energy of stopped particle
+     double m_etot{};   // total energy       -"-
+     int    m_pcode{};  // particle code, special codes for: deuterium 9001
                         //                                   tritium   9002
                         //                                   alpha     9003
                         //                                   He3       9004
      CLHEP::Hep3Vector m_pos; // absolute position of hit
-     int    m_dir;     // leakage direction encoding
+     int    m_dir{};    // leakage direction encoding
                         // 1,2     EMEC     x<0, x>0
                         // 3     EMEC down
                         // 4,5   EMEC back    -"-
@@ -76,19 +65,4 @@ class LArTBLeakHit
 
 typedef std::vector<LArTBLeakHit> LArTBLeakHitsCollection;
 
-// extern G4Allocator<LArTBLeakHit> LArTBLeakHitAllocator;
-
-/*
-inline void* LArTBLeakHit::operator new(size_t, void* aHit)
-{
-// void *aHit;
- aHit = (void*) LArTBLeakHitAllocator.MallocSingle();
- return aHit;
-}
-
-inline void LArTBLeakHit::operator delete(void *aHit)
-{
- LArTBLeakHitAllocator.FreeSingle( (LArTBLeakHit*) aHit);
-}
-*/
 #endif
