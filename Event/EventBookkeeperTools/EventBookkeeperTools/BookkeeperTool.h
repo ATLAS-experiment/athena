@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENT_BOOKKEEPER_TOOLS__BOOKKEEPER_TOOL_H
@@ -12,7 +12,7 @@
  *  @author Jack Cranshaw <cranshaw@anl.gov>
  **/
 
-#include <memory>
+
 
 #include <AsgTools/AsgMetadataTool.h>
 #include <AsgTools/PropertyWrapper.h>
@@ -28,7 +28,9 @@
 #include <xAODCutFlow/CutBookkeeperAuxContainer.h>
 
 #include <EventBookkeeperTools/CutBookkeepersLocalCache.h>
-
+#include <memory>
+#include <string>
+#include <unordered_map>
 
 #ifndef XAOD_STANDALONE
 
@@ -83,7 +85,7 @@ private:
   /// Pointer to the public CutFlowSvc interface
   ServiceHandle<ICutFlowSvc> m_cutFlowSvc{ this, "CutFlowSvc", "CutFlowSvc/CutFlowSvc", "Pointer to the CutFlowSvc"};
   /// Direct pointer to the CutFlowSvc for "private" methods access
-  CutFlowSvc *m_cutFlowSvcPrivate;
+  CutFlowSvc *m_cutFlowSvcPrivate{};
 #endif // XAOD_STANDALONE
 
   /// The name of the input CutBookkeeperContainer
