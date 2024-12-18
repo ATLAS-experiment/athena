@@ -62,6 +62,21 @@ class OutputAnalysisConfig (ConfigBlock):
             info="If set to True, all branches will be given a systematics suffix, "
             "even if they have no systematics (beyond the nominal).")
 
+    @staticmethod
+    def branchSortOrder (rule):
+        return rule.split('->')[1].strip()
+
+    def createOutputAlgs (self, config, name, vars, isMet=False):
+        """A helper function to create output algorithm"""
+        alg = config.createAlgorithm('CP::AsgxAODMetNTupleMakerAlg' if isMet else 'CP::AsgxAODNTupleMakerAlg', name)
+        alg.TreeName = self.treeName
+        alg.RootStreamName = self.streamName
+        branchList = list(self.vars | set(vars))
+        branchList.sort(key=self.branchSortOrder)
+        branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
+        branchList_sys = [branch for branch in branchList if "%SYS%" in branch]
+        alg.Branches = branchList_nosys + branchList_sys
+        return alg
 
     def makeAlgs (self, config) :
 
@@ -167,46 +182,22 @@ class OutputAnalysisConfig (ConfigBlock):
             postfix = self.treeName
 
         # Add an ntuple dumper algorithm:
-        treeMaker = config.createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' + postfix )
+        treeMaker = config.createAlgorithm( 'CP::TreeMakerAlg', f'TreeMaker{postfix}' )
         treeMaker.TreeName = self.treeName
         treeMaker.RootStreamName = self.streamName
         # the auto-flush setting still needs to be figured out
         #treeMaker.TreeAutoFlush = 0
 
-        if len (self.vars) + len (autoVars) :
-            ntupleMaker = config.createAlgorithm( 'CP::AsgxAODNTupleMakerAlg', 'NTupleMaker' + postfix )
-            ntupleMaker.TreeName = self.treeName
-            ntupleMaker.RootStreamName = self.streamName
-            branchList = list(self.vars | set(autoVars))
-            branchList.sort()
-            branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
-            branchList_sys = [branch for branch in branchList if "%SYS%" in branch]
-            ntupleMaker.Branches = branchList_nosys + branchList_sys
-            # ntupleMaker.OutputLevel = 2  # For output validation
+        if self.vars or autoVars:
+            ntupleMaker = self.createOutputAlgs(config, f'NTupleMaker{postfix}', autoVars)
 
-        if len (self.metVars) + len (autoMetVars) > 0:
-            ntupleMaker = config.createAlgorithm( 'CP::AsgxAODMetNTupleMakerAlg', 'MetNTupleMaker' + postfix )
-            ntupleMaker.TreeName = self.treeName
-            ntupleMaker.RootStreamName = self.streamName
-            branchList = self.metVars + autoMetVars
-            branchList.sort()
-            branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
-            branchList_sys = [branch for branch in branchList if "%SYS%" in branch]
-            ntupleMaker.Branches = branchList_nosys + branchList_sys
+        if self.metVars or autoMetVars:
+            ntupleMaker = self.createOutputAlgs(config, f'MetNTupleMaker{postfix}', autoMetVars, isMet=True)
             ntupleMaker.termName = self.metTermName
-            #ntupleMaker.OutputLevel = 2  # For output validation
 
-        if len (self.metVars) + len (autoTruthMetVars) > 0:
-            ntupleMaker = config.createAlgorithm( 'CP::AsgxAODMetNTupleMakerAlg', 'TruthMetNTupleMaker' + postfix )
-            ntupleMaker.TreeName = self.treeName
-            ntupleMaker.RootStreamName = self.streamName
-            branchList = self.metVars + autoTruthMetVars
-            branchList.sort()
-            branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
-            branchList_sys = [branch for branch in branchList if "%SYS%" in branch]
-            ntupleMaker.Branches = branchList_nosys + branchList_sys
+        if self.metVars or autoTruthMetVars:
+            ntupleMaker = self.createOutputAlgs(config, f'TruthMetNTupleMaker{postfix}', autoTruthMetVars, isMet=True)
             ntupleMaker.termName = self.truthMetTermName
-            #ntupleMaker.OutputLevel = 2  # For output validation
 
         treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' + postfix )
         treeFiller.TreeName = self.treeName
