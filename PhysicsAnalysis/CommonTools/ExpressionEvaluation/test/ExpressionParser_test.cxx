@@ -218,13 +218,13 @@ public:
       }
    }
    void setVerbose(bool verbose) {m_verbose=verbose; }
-   const EventContext                        *m_event;
-   SG::HiveEventSlot                         *m_store;
-   const ExpressionParsing::ExpressionParser *m_parser;
-   const std::vector<int>                    *m_ref;
-   bool                                       m_refPassed;
+   const EventContext                        *m_event{};
+   SG::HiveEventSlot                         *m_store{};
+   const ExpressionParsing::ExpressionParser *m_parser{};
+   const std::vector<int>                    *m_ref{};
+   bool                                       m_refPassed{};
    bool                                       m_isBool=false;
-   bool                                       m_verbose;
+   bool                                       m_verbose{};
 };
 
 int main(int argc, char **argv)
