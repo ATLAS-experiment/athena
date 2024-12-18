@@ -17,7 +17,7 @@
  **     @author  mark sutton
  **     @date    Tue 16 May 2017 09:28:55 CEST 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 #ifndef TrigInDetAnalysisExample_T_AnalysisConfigMT_Tier0_H
@@ -113,6 +113,7 @@ public:
 			 testFilter, referenceFilter,
 			 associator,
 			 analysis),
+    _analysis(0),
     m_useBeamCondSvc(false),
     m_doOffline(true),
     m_doMuons(false),
@@ -120,6 +121,8 @@ public:
     m_doTaus(false),
     m_doBjets(false),
     m_hasTruthMap(false),
+    m_doTauThreeProng(false),
+    m_tauEtCutOffline(false),
     m_NRois(0),
     m_NRefTracks(0),
     m_NTestTracks(0),
@@ -130,7 +133,8 @@ public:
     m_containTracks(false),
     m_TnP_tool(TnP_tool),
     m_invmass(0),
-    m_invmass_obj(0)
+    m_invmass_obj(0),
+    m_monTool(0)
   {
     /// FIXME: the m_event should not be needed, we need to make this a local variable
     m_event = new TIDA::Event();
@@ -271,7 +275,7 @@ protected:
 	  }
 	}
 
-        chainitr++;
+        ++chainitr;
       }
 
       // m_chainNames.insert( m_chainNames.end(), chains.begin(), chains.end() );
@@ -791,7 +795,7 @@ protected:
 	  }
 	
 
-	  if ( roiInfo ) delete roiInfo;
+	  delete roiInfo;
 
 	}
 	else {
@@ -898,7 +902,7 @@ protected:
 	    }
 #endif
 	  
-	    if ( roiInfo ) delete roiInfo;
+	    delete roiInfo;
 	  
 	  }
 

@@ -40,9 +40,6 @@ namespace JetTagDQA {
     // Public methods:
     ///////////////////////////////////////////////////////////////////
   public:
-    double m_PV_x = -999.;
-    double m_PV_y = -999.;
-    double m_PV_z = -999.;
     // Copy constructor:
 
     /// Constructor with parameters:

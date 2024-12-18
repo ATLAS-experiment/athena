@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    $Id: AnalysisR3_Tier0.cxx   Thu 18 May 2017 15:35:34 CEST 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -26,6 +26,7 @@ AnalysisR3_Tier0::AnalysisR3_Tier0(const std::string& name,
     // m_etaCut(etaCut),
     // m_d0Cut(d0Cut),
     // m_z0Cut(z0Cut),
+    m_nVtx(0),
     m_debug(false),
     m_eventid(0),
     m_vtxanal(0),
@@ -291,8 +292,7 @@ void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
   
   if ( roi!=nullptr ) m_hroieta->Fill( roi->eta(), 1 );
 
-  //  if ( m_eventid != event()->event_number() ) { 
-  if ( m_eventid != tevt->event_number() ) { 
+  if ( tevt!=nullptr && m_eventid != tevt->event_number() ) {
     /// if the event number has changed, this is a new event
     /// so update the event counts
     //    m_eventid = event()->event_number(); 
@@ -335,9 +335,9 @@ void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
     m_hetaeff->Fill( referenceEta, eff_weight );
     m_hphieff->Fill( referencePhi, eff_weight );
     /// m_hnVtxeff->Fill( m_nVtx, eff_weight ); /// don't use the class variable as this is not thread safe
-    m_hnVtxeff->Fill( beamline[3], eff_weight ); /// this is a hack to make it thread safe 
+    if (beamline) m_hnVtxeff->Fill( beamline[3], eff_weight ); /// this is a hack to make it thread safe
 
-    m_hlbeff->Fill( tevt->lumi_block(), eff_weight );
+    if (tevt) m_hlbeff->Fill( tevt->lumi_block(), eff_weight );
 
     m_htrkpT->Fill( std::fabs(referencePT)*0.001 );
     m_htrketa->Fill( referenceEta );
@@ -374,7 +374,7 @@ void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
    
 
     //    m_hnsihits_lb->Fill( event()->lumi_block(), (*reference)->siHits() ); 
-    m_hnsihits_lb->Fill( tevt->lumi_block(), (*reference)->siHits() ); 
+    if (tevt) m_hnsihits_lb->Fill( tevt->lumi_block(), (*reference)->siHits() );
  
     m_hd0vsphi->Fill(referencePhi, referenceD0 );
  
@@ -413,9 +413,11 @@ void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
       //    m_htrkvtx_y_lb->Fill( event()->lumi_block(), beamTesty() );
       //    m_htrkvtx_z_lb->Fill( event()->lumi_block(), beamTestz() );
 
-      m_htrkvtx_x_lb->Fill( tevt->lumi_block(), beamline[0] );
-      m_htrkvtx_y_lb->Fill( tevt->lumi_block(), beamline[1] );
-      m_htrkvtx_z_lb->Fill( tevt->lumi_block(), beamline[2] );
+      if (tevt && beamline) {
+        m_htrkvtx_x_lb->Fill( tevt->lumi_block(), beamline[0] );
+        m_htrkvtx_y_lb->Fill( tevt->lumi_block(), beamline[1] );
+        m_htrkvtx_z_lb->Fill( tevt->lumi_block(), beamline[2] );
+      }
 
       for ( size_t ilayer=0 ; ilayer<32 ; ilayer++ ) { 
 	if ( test->hitPattern()&(1U<<ilayer) ) m_hlayer_rec->Fill( ilayer );
@@ -474,8 +476,7 @@ void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
       m_hnsct_rec->Fill(  test->sctHits() ); 
       m_hnsihits_rec->Fill(  test->siHits() ); 
 
-      //      m_hnsihits_lb_rec->Fill( event()->lumi_block(), test->siHits() ); 
-      m_hnsihits_lb_rec->Fill( tevt->lumi_block(), test->siHits() ); 
+      if (tevt) m_hnsihits_lb_rec->Fill( tevt->lumi_block(), test->siHits() );
     
  
       m_hntrt_rec->Fill(  test->strawHits() ); 
