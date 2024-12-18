@@ -75,7 +75,6 @@ public: // Constructor and Destructor
    std::set<std::string>        getObjAlias(unsigned int index) const;
    std::set<unsigned int>       getObjSymLinks(unsigned int index) const;
    std::vector<sgkey_t>         getObjHashes(unsigned int index) const;
-   std::string          calculateMdx();
    bool                 isModified() const;
    void                 clearModified();
    void                 setToken(const std::string& tok);
