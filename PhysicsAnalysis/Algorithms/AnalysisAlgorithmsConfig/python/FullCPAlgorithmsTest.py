@@ -73,6 +73,12 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
                         'jet_': 'OutJets',
                         'met_': 'AnaMET',
                         ''    : 'EventInfo'}
+    outputContainersForMC = {'truth_mu_' : 'OutTruthMuons',
+                             'truth_el_' : 'OutTruthElectrons',
+                             'truth_ph_' : 'OutTruthPhotons',
+                             'truth_tau_': 'OutTruthTaus',
+                             'truth_jet_': 'OutTruthJets',
+                             'truth_met_': 'TruthMET'}
 
     # create factory object to build block configurations
     from AnalysisAlgorithmsConfig.ConfigFactory import ConfigFactory
@@ -231,6 +237,59 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq += config.makeConfig('SystObjectLink', containerName='AnaTauJets')
 
 
+    # Particle-level objects
+    configSeq += config.makeConfig ('PL_Electrons',
+        containerName='TruthElectrons')
+    configSeq += config.makeConfig ('PL_Electrons.PtEtaSelection',
+        containerName='TruthElectrons')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.useDressedProperties', True)
+    configSeq.setOptionValue ('.minPt', 20e3)
+
+    configSeq += config.makeConfig ('PL_Muons',
+        containerName='TruthMuons')
+    configSeq += config.makeConfig ('PL_Muons.PtEtaSelection',
+        containerName='TruthMuons')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.useDressedProperties', True)
+    configSeq.setOptionValue ('.minPt', 20e3)
+
+    configSeq += config.makeConfig ('PL_Neutrinos')
+    configSeq.setOptionValue ('.skipOnData', True)
+
+    configSeq += config.makeConfig ('PL_Jets',
+        containerName='AntiKt4TruthDressedWZJets')
+    configSeq += config.makeConfig ('PL_Jets.PtEtaSelection',
+        containerName='AntiKt4TruthDressedWZJets')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.minPt', 20e3)
+
+    configSeq += config.makeConfig ('PL_Taus',
+        containerName='TruthTaus')
+    configSeq += config.makeConfig ('PL_Taus.PtEtaSelection',
+        containerName='TruthTaus')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.minPt', 20e3)
+
+    configSeq += config.makeConfig ('PL_Photons',
+        containerName='TruthPhotons')
+    configSeq += config.makeConfig ('PL_Photons.PtEtaSelection',
+        containerName='TruthPhotons')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.minPt', 20e3)
+
+    configSeq += config.makeConfig ('PL_MissingET')
+    configSeq.setOptionValue ('.skipOnData', True)
+
+    configSeq += config.makeConfig ('PL_OverlapRemoval')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.electrons', 'TruthElectrons')
+    configSeq.setOptionValue ('.muons', 'TruthMuons')
+    configSeq.setOptionValue ('.photons', 'TruthPhotons')
+    configSeq.setOptionValue ('.jets', 'AntiKt4TruthDressedWZJets')
+    configSeq.setOptionValue ('.useRapidityForDeltaR', False)
+
+
     if dataType is not DataType.Data :
         # Include, and then set up the generator analysis sequence:
         configSeq += config.makeConfig( 'GeneratorLevelAnalysis')
@@ -336,12 +395,33 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
         configSeq += config.makeConfig ('Thinning',
             containerName='AnaLargeRJets')
         configSeq.setOptionValue ('.outputName', 'OutLargeRJets')
+    configSeq += config.makeConfig ('Thinning',
+        containerName='TruthElectrons')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.outputName', 'OutTruthElectrons')
+    configSeq += config.makeConfig ('Thinning',
+        containerName='TruthPhotons')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.outputName', 'OutTruthPhotons')
+    configSeq += config.makeConfig ('Thinning',
+        containerName='TruthMuons')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.outputName', 'OutTruthMuons')
+    configSeq += config.makeConfig ('Thinning',
+        containerName='TruthTaus')
+    configSeq.setOptionValue ('.skipOnData', True)
+    configSeq.setOptionValue ('.outputName', 'OutTruthTaus')
+    configSeq += config.makeConfig ('Thinning',
+        containerName='AntiKt4TruthDressedWZJets')
+    configSeq.setOptionValue ('.outputName', 'OutTruthJets')
+    configSeq.setOptionValue ('.skipOnData', True)
 
     configSeq += config.makeConfig ('Output')
     configSeq.setOptionValue ('.treeName', 'analysis')
     configSeq.setOptionValue ('.vars', vars)
     configSeq.setOptionValue ('.metVars', metVars)
     configSeq.setOptionValue ('.containers', outputContainers)
+    configSeq.setOptionValue ('.containersOnlyForMC', outputContainersForMC)
 
     disable_commands = []
     configSeq.setOptionValue ('.commands', disable_commands)

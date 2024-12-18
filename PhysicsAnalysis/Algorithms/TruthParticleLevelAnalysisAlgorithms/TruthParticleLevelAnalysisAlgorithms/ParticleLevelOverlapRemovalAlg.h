@@ -7,17 +7,11 @@
 #ifndef TRUTH__PARTICLELEVEL_OVERLAPREMOVAL__ALG_H
 #define TRUTH__PARTICLELEVEL_OVERLAPREMOVAL__ALG_H
 
-// Algorithm includes
 #include <AnaAlgorithm/AnaAlgorithm.h>
-#include <AsgDataHandles/ReadHandle.h>
 #include <AsgDataHandles/ReadHandleKey.h>
-#include <AsgDataHandles/WriteDecorHandle.h>
 #include <AsgDataHandles/WriteDecorHandleKey.h>
-#include <AsgTools/CurrentContext.h>
 #include <AsgTools/PropertyWrapper.h>
 #include <SelectionHelpers/SelectionReadHandle.h>
-
-// Framework includes
 #include <xAODJet/JetContainer.h>
 #include <xAODTruth/TruthParticleContainer.h>
 

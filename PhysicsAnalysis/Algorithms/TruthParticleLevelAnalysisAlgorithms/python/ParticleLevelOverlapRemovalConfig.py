@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+
 
 class ParticleLevelOverlapRemovalBlock(ConfigBlock):
     """ConfigBlock for particle-level truth taus"""
@@ -22,11 +22,10 @@ class ParticleLevelOverlapRemovalBlock(ConfigBlock):
                        info='whether to use dressed electron and muon kinematics rather than simple P4 kinematics')
         self.addOption('useRapidityForDeltaR', True, type=bool,
                        info='whether to use rapidity instead of pseudo-rapidity for the calculation of DeltaR')
+        # Always skip on data
+        self.setOptionValue('skipOnData', True)
 
     def makeAlgs(self, config):
-        if config.dataType() is DataType.Data:
-            return
-
         alg = config.createAlgorithm('CP::ParticleLevelOverlapRemovalAlg', 'ParticleLevelOverlapRemoval')
         alg.useDressedProperties = self.useDressedProperties
         alg.useRapidityForDeltaR = self.useRapidityForDeltaR

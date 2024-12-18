@@ -217,6 +217,57 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (photons='AnaPhotons.tight')
     config.setOptions (muons='AnaMuons.medium')
 
+    # Particle-level objects
+    config.addBlock ('PL_Electrons')
+    config.setOptions (containerName='TruthElectrons')
+    config.addBlock ('PL_Electrons.PtEtaSelection')
+    config.setOptions (containerName='TruthElectrons')
+    config.setOptions (skipOnData=True)
+    config.setOptions (useDressedProperties=True)
+    config.setOptions (minPt=20e3)
+
+    config.addBlock ('PL_Photons')
+    config.setOptions (containerName='TruthPhotons')
+    config.addBlock ('PL_Photons.PtEtaSelection')
+    config.setOptions (containerName='TruthPhotons')
+    config.setOptions (skipOnData=True)
+    config.setOptions (minPt=20e3)
+
+    config.addBlock ('PL_Muons')
+    config.setOptions (containerName='TruthMuons')
+    config.addBlock ('PL_Muons.PtEtaSelection')
+    config.setOptions (containerName='TruthMuons')
+    config.setOptions (skipOnData=True)
+    config.setOptions (useDressedProperties=True)
+    config.setOptions (minPt=20e3)
+
+    config.addBlock ('PL_Taus')
+    config.setOptions (containerName='TruthTaus')
+    config.addBlock ('PL_Taus.PtEtaSelection')
+    config.setOptions (containerName='TruthTaus')
+    config.setOptions (skipOnData=True)
+    config.setOptions (minPt=20e3)
+
+    config.addBlock ('PL_Jets')
+    config.setOptions (containerName='AntiKt4TruthDressedWZJets')
+    config.addBlock ('PL_Jets.PtEtaSelection')
+    config.setOptions (containerName='AntiKt4TruthDressedWZJets')
+    config.setOptions (skipOnData=True)
+    config.setOptions (minPt=20e3)
+
+    config.addBlock ('PL_Neutrinos')
+    config.setOptions (skipOnData=True)
+    config.addBlock ('PL_MissingET')
+    config.setOptions (skipOnData=True)
+
+    config.addBlock ('PL_OverlapRemoval')
+    config.setOptions (skipOnData=True)
+    config.setOptions (electrons='TruthElectrons')
+    config.setOptions (muons='TruthMuons')
+    config.setOptions (photons='TruthPhotons')
+    config.setOptions (jets='AntiKt4TruthDressedWZJets')
+    config.setOptions (useRapidityForDeltaR=False)
+
     # Thinning
     config.addBlock ('Thinning')
     config.setOptions (containerName='AnaElectrons')
@@ -240,6 +291,26 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.addBlock ('Thinning')
     config.setOptions (containerName='AnaLargeRJets')
     config.setOptions (outputName='OutLargeRJets')
+    config.addBlock ('Thinning')
+    config.setOptions (containerName='TruthElectrons')
+    config.setOptions (skipOnData=True)
+    config.setOptions (outputName='OutTruthElectrons')
+    config.addBlock ('Thinning')
+    config.setOptions (containerName='TruthPhotons')
+    config.setOptions (skipOnData=True)
+    config.setOptions (outputName='OutTruthPhotons')
+    config.addBlock ('Thinning')
+    config.setOptions (containerName='TruthMuons')
+    config.setOptions (skipOnData=True)
+    config.setOptions (outputName='OutTruthMuons')
+    config.addBlock ('Thinning')
+    config.setOptions (containerName='TruthTaus')
+    config.setOptions (skipOnData=True)
+    config.setOptions (outputName='OutTruthTaus')
+    config.addBlock ('Thinning')
+    config.setOptions (containerName='AntiKt4TruthDressedWZJets')
+    config.setOptions (outputName='OutTruthJets')
+    config.setOptions (skipOnData=True)
 
     # Trigger
     triggerChainsPerYear = {
@@ -318,6 +389,13 @@ SAVE
         'met_': 'AnaMET',
         '': 'EventInfo'}
     config.setOptions (containers=outputContainers)
+    outputContainersForMC = {'truth_mu_' : 'OutTruthMuons',
+                             'truth_el_' : 'OutTruthElectrons',
+                             'truth_ph_' : 'OutTruthPhotons',
+                             'truth_tau_': 'OutTruthTaus',
+                             'truth_jet_': 'OutTruthJets',
+                             'truth_met_': 'TruthMET'}
+    config.setOptions (containersOnlyForMC=outputContainersForMC)
     disable_commands = []
     config.setOptions (commands=disable_commands)
 

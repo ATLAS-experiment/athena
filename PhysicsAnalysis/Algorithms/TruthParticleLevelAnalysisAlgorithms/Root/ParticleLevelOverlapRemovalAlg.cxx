@@ -6,7 +6,10 @@
 
 #include "TruthParticleLevelAnalysisAlgorithms/ParticleLevelOverlapRemovalAlg.h"
 
-#include "FourMomUtils/xAODP4Helpers.h"
+#include <AsgDataHandles/ReadHandle.h>
+#include <AsgDataHandles/WriteDecorHandle.h>
+#include <AsgTools/CurrentContext.h>
+#include <FourMomUtils/xAODP4Helpers.h>
 
 namespace CP {
 
@@ -21,6 +24,11 @@ StatusCode ParticleLevelOverlapRemovalAlg::initialize() {
   m_decORmuon = m_muonsKey.key() + "." + m_decLabelOR.value();
   m_decORphoton = m_photonsKey.key() + "." + m_decLabelOR.value();
   m_decORjet = m_jetsKey.key() + "." + m_decLabelOR.value();
+
+  ANA_CHECK(m_decORelectron.initialize());
+  ANA_CHECK(m_decORmuon.initialize());
+  ANA_CHECK(m_decORphoton.initialize());
+  ANA_CHECK(m_decORjet.initialize());
 
   ANA_CHECK(m_jetSelection.initialize());
   ANA_CHECK(m_electronSelection.initialize());

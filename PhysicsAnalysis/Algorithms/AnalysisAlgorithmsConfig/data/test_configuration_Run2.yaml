@@ -109,6 +109,37 @@ ObjectCutFlow:
 
 GeneratorLevelAnalysis: {}
 
+PL_Electrons:
+  containerName: TruthElectrons
+  PtEtaSelection:
+    useDressedProperties: true
+    minPt: 20000.0
+PL_Photons:
+  containerName: TruthPhotons
+  PtEtaSelection:
+    minPt: 20000.0
+PL_Muons:
+  containerName: TruthMuons
+  PtEtaSelection:
+    useDressedProperties: true
+    minPt: 20000.0
+PL_Taus:
+  containerName: TruthTaus
+  PtEtaSelection:
+    minPt: 20000.0
+PL_Jets:
+  containerName: AntiKt4TruthDressedWZJets
+  PtEtaSelection:
+    minPt: 20000.0
+PL_Neutrinos: {}
+PL_MissingET: {}
+PL_OverlapRemoval:
+  electrons: TruthElectrons
+  muons: TruthMuons
+  photons: TruthPhotons
+  jets: AntiKt4TruthDressedWZJets
+  useRapidityForDeltaR: False
+
 # containerName and selectionName must be defined in their respective blocks
 MissingET:
   - containerName: AnaMET
@@ -147,6 +178,21 @@ Thinning:
     outputName: OutJets
   - containerName: AnaLargeRJets
     outputName: OutLargeRJets
+  - containerName: TruthElectrons
+    outputName: OutTruthElectrons
+    skipOnData: true
+  - containerName: TruthPhotons
+    outputName: OutTruthPhotons
+    skipOnData: true
+  - containerName: TruthMuons
+    outputName: OutTruthMuons
+    skipOnData: true
+  - containerName: TruthTaus
+    outputName: OutTruthTaus
+    skipOnData: true
+  - containerName: AntiKt4TruthDressedWZJets
+    outputName: OutTruthJets
+    skipOnData: true
 
 EventSelection:
   - electrons: AnaElectrons.loose
@@ -238,7 +284,7 @@ Output:
   vars: []
   metVars: []
   containers:
-    # Format should follow: <suffix>:<output container>
+    # Format should follow: <prefix>:<output container>
     mu_: OutMuons
     el_: OutElectrons
     ph_: OutPhotons
@@ -247,3 +293,10 @@ Output:
     larger_jet_: OutLargeRJets
     met_: AnaMET
     "": EventInfo
+  containersOnlyForMC:
+    truth_mu_: OutTruthMuons
+    truth_el_: OutTruthElectrons
+    truth_ph_: OutTruthPhotons
+    truth_tau_: OutTruthTaus
+    truth_jet_: OutTruthJets
+    truth_met_: TruthMET
