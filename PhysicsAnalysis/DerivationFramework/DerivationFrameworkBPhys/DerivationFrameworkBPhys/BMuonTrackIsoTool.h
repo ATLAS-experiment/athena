@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -58,7 +58,7 @@ namespace DerivationFramework {
   public:
     std::vector<float>  vIsoValues;
     std::vector<int>    vNTracks;
-    MuonBag             vMuons;
+    MuonBag             vMuons{};
   }; // MuIsoItem
     
   public: 
@@ -99,7 +99,7 @@ namespace DerivationFramework {
       std::vector<int>                 m_isoDoTrkImpLogChi2Cut;
 
       // containers
-      mutable const xAOD::MuonContainer* m_muons;
+      mutable const xAOD::MuonContainer* m_muons{};
       
       
       // results array

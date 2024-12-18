@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 // ****************************************************************************
 // ----------------------------------------------------------------------------
@@ -45,7 +45,6 @@ public:
     ReVertex(const std::string& t, const std::string& n, const IInterface* p);
 
     virtual StatusCode initialize() override;
-    //virtual StatusCode finalize() override;
 
     virtual StatusCode addBranches() const override;
 
@@ -62,7 +61,7 @@ private:
     std::vector<int> m_TrackIndices;
     ToolHandle < InDet::VertexPointEstimator > m_vertexEstimator;
     ToolHandle < Trk::IVertexFitter > m_iVertexFitter;
-    Trk::TrkVKalVrtFitter* m_VKVFitter;
+    Trk::TrkVKalVrtFitter* m_VKVFitter{};
     SG::WriteHandleKey<xAOD::VertexContainer> m_OutputContainerName;
     SG::ReadHandleKey<xAOD::VertexContainer> m_inputContainerName;
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackContainer;
@@ -72,30 +71,30 @@ private:
 
     std::vector<double> m_trkMasses;
     std::vector<int> m_indices;
-    double m_massConst;
-    double m_totalMassConst;
+    double m_massConst{};
+    double m_totalMassConst{};
     std::vector<std::string> m_hypoNames;
 
     ToolHandle<Trk::V0Tools>                    m_v0Tools;
     ToolHandle<Analysis::PrimaryVertexRefitter> m_pvRefitter;
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key{this, "EventInfo", "EventInfo", "Input event information"};
-    int         m_PV_max;
-    int         m_DoVertexType;
-    size_t      m_PV_minNTracks;
-    bool        m_do3d;
-    bool        m_AddPVData;
-    bool        m_refitPV;
-    bool        m_doMassConst;
-    bool        m_startingpoint0;
+    int         m_PV_max{};
+    int         m_DoVertexType{};
+    size_t      m_PV_minNTracks{};
+    bool        m_do3d{};
+    bool        m_AddPVData{};
+    bool        m_refitPV{};
+    bool        m_doMassConst{};
+    bool        m_startingpoint0{};
     
-    bool m_vertexFittingWithPV;
+    bool m_vertexFittingWithPV{};
 
-   double m_BMassUpper;
-   double m_BMassLower;
-   double m_chi2cut;                 // chi2/Ndof of the final veretx
-   double m_trkDeltaZ;               // DeltaZ between the JPsi vertex and hadronic tracks Z0
+   double m_BMassUpper{};
+   double m_BMassLower{};
+   double m_chi2cut{};                 // chi2/Ndof of the final veretx
+   double m_trkDeltaZ{};               // DeltaZ between the JPsi vertex and hadronic tracks Z0
 
-   bool m_useAdditionalTrack;
+   bool m_useAdditionalTrack{};
 
    SG::ReadHandleKeyArray<xAOD::VertexContainer> m_CollectionsToCheck{this, "CheckVertexContainers", {}};
    SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_RelinkContainers{this, "RelinkTracks", {}, "Track Containers if they need to be relinked through indirect use" };

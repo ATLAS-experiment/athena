@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -256,50 +256,50 @@ namespace DerivationFramework {
       std::string                      m_pvContainerName;
       std::vector<std::string>         m_refPVContainerNames;
 
-      int                              m_doVertexType;
+      int                              m_doVertexType{};
       std::vector<uint64_t>            m_useTrackTypes;
-      bool                             m_incPrecVerticesInDecay;
-      int                              m_minNTracksInPV;
+      bool                             m_incPrecVerticesInDecay{};
+      int                              m_minNTracksInPV{};
       std::vector<uint64_t>            m_pvTypesToConsider;
-      int                              m_debugTrackTypes;
+      int                              m_debugTrackTypes{};
       std::vector<uint64_t>            m_debugTracksInEvents;
 
       // working point of TVA tool
-      bool m_tvaToolHasWpLoose;
+      bool m_tvaToolHasWpLoose{};
 
       // containers
-      mutable const xAOD::TrackParticleContainer*    m_tracks;
-      mutable const xAOD::TrackParticleAuxContainer* m_tracksAux;
-      mutable const xAOD::VertexContainer*           m_pvtxContainer;
-      mutable const xAOD::VertexContainer*           m_svtxContainer;
-      mutable const xAOD::VertexAuxContainer*        m_svtxAuxContainer;
-      mutable const xAOD::VertexContainer*           m_refPVContainer;
-      mutable const xAOD::VertexAuxContainer*        m_refPVAuxContainer;
+      mutable const xAOD::TrackParticleContainer*    m_tracks{};
+      mutable const xAOD::TrackParticleAuxContainer* m_tracksAux{};
+      mutable const xAOD::VertexContainer*           m_pvtxContainer{};
+      mutable const xAOD::VertexContainer*           m_svtxContainer{};
+      mutable const xAOD::VertexAuxContainer*        m_svtxAuxContainer{};
+      mutable const xAOD::VertexContainer*           m_refPVContainer{};
+      mutable const xAOD::VertexAuxContainer*        m_refPVAuxContainer{};
       
       // cache for individual vertex types
       std::vector<xAOD::BPhysHelper::pv_type> m_pvAssocTypes;
 
-      mutable unsigned int m_nEvtsSeen;
+      mutable unsigned int m_nEvtsSeen{};
 
       // event info
-      mutable const xAOD::EventInfo* m_eventInfo;
+      mutable const xAOD::EventInfo* m_eventInfo{};
 
       // cache for similar PV-to-SV associations
       typedef std::map<std::string, int> StringIntMap_t;
       mutable StringIntMap_t m_pvAssocResMap;
 
       // track types considered
-      uint64_t m_trackTypesUsed;
+      uint64_t m_trackTypesUsed{};
 
       // track type counter map (for debugging)
       std::unique_ptr<TrackTypeCounter> m_mttc;
 
       // run and event numbers (see EventIDBase.h for types)
-      mutable unsigned int  m_runNumber;
-      mutable uint64_t      m_evtNumber;
+      mutable unsigned int  m_runNumber{};
+      mutable uint64_t      m_evtNumber{};
 
       // debug tracks in the current event?
-      mutable bool          m_debugTracksInThisEvent;
+      mutable bool          m_debugTracksInThisEvent{};
       
   }; // class
 } // namespace

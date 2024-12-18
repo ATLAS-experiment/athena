@@ -62,56 +62,56 @@ namespace DerivationFramework {
     SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_RelinkContainers;
     std::string m_hypoName;
 
-    double m_jxMassLower;
-    double m_jxMassUpper;
-    double m_jpsiMassLower;
-    double m_jpsiMassUpper;
-    double m_diTrackMassLower;
-    double m_diTrackMassUpper;
-    std::string m_V01Hypothesis;
-    double m_V01MassLower;
-    double m_V01MassUpper;
-    double m_lxyV01_cut;
-    std::string m_V02Hypothesis;
-    double m_V02MassLower;
-    double m_V02MassUpper;
-    double m_lxyV02_cut;
-    double m_minMass_gamma;
-    double m_chi2cut_gamma;
-    double m_JXV02MassLower;
-    double m_JXV02MassUpper;
-    double m_MassLower;
-    double m_MassUpper;
-    int    m_jxDaug_num;
-    double m_jxDaug1MassHypo; // mass hypothesis of 1st daughter from vertex JX
-    double m_jxDaug2MassHypo; // mass hypothesis of 2nd daughter from vertex JX
-    double m_jxDaug3MassHypo; // mass hypothesis of 3rd daughter from vertex JX
-    double m_jxDaug4MassHypo; // mass hypothesis of 4th daughter from vertex JX
-    double m_massJX;
-    double m_massJpsi;
-    double m_massX;
-    double m_massV01;
-    double m_massV02;
-    double m_massJXV02;
-    double m_massMainV;
-    bool   m_constrJX;
-    bool   m_constrJpsi;
-    bool   m_constrX;
-    bool   m_constrV01;
-    bool   m_constrV02;
-    bool   m_constrJXV02;
-    bool   m_constrMainV;
-    bool   m_JXSubVtx;
-    bool   m_JXV02SubVtx;
-    double m_chi2cut_JX;
-    double m_chi2cut_V0;
-    double m_chi2cut;
-    bool   m_useTRT;
-    double m_ptTRT;
-    double m_d0_cut;
-    unsigned int m_maxJXCandidates;
-    unsigned int m_maxV0Candidates;
-    unsigned int m_maxMainVCandidates;
+    double m_jxMassLower{};
+    double m_jxMassUpper{};
+    double m_jpsiMassLower{};
+    double m_jpsiMassUpper{};
+    double m_diTrackMassLower{};
+    double m_diTrackMassUpper{};
+    std::string m_V01Hypothesis{};
+    double m_V01MassLower{};
+    double m_V01MassUpper{};
+    double m_lxyV01_cut{};
+    std::string m_V02Hypothesis{};
+    double m_V02MassLower{};
+    double m_V02MassUpper{};
+    double m_lxyV02_cut{};
+    double m_minMass_gamma{};
+    double m_chi2cut_gamma{};
+    double m_JXV02MassLower{};
+    double m_JXV02MassUpper{};
+    double m_MassLower{};
+    double m_MassUpper{};
+    int    m_jxDaug_num{};
+    double m_jxDaug1MassHypo{}; // mass hypothesis of 1st daughter from vertex JX
+    double m_jxDaug2MassHypo{}; // mass hypothesis of 2nd daughter from vertex JX
+    double m_jxDaug3MassHypo{}; // mass hypothesis of 3rd daughter from vertex JX
+    double m_jxDaug4MassHypo{}; // mass hypothesis of 4th daughter from vertex JX
+    double m_massJX{};
+    double m_massJpsi{};
+    double m_massX{};
+    double m_massV01{};
+    double m_massV02{};
+    double m_massJXV02{};
+    double m_massMainV{};
+    bool   m_constrJX{};
+    bool   m_constrJpsi{};
+    bool   m_constrX{};
+    bool   m_constrV01{};
+    bool   m_constrV02{};
+    bool   m_constrJXV02{};
+    bool   m_constrMainV{};
+    bool   m_JXSubVtx{};
+    bool   m_JXV02SubVtx{};
+    double m_chi2cut_JX{};
+    double m_chi2cut_V0{};
+    double m_chi2cut{};
+    bool   m_useTRT{};
+    double m_ptTRT{};
+    double m_d0_cut{};
+    unsigned int m_maxJXCandidates{};
+    unsigned int m_maxV0Candidates{};
+    unsigned int m_maxMainVCandidates{};
 
     ToolHandle < Trk::TrkVKalVrtFitter >             m_iVertexFitter;
     ToolHandle < Trk::TrkV0VertexFitter >            m_iV0Fitter;
@@ -125,19 +125,19 @@ namespace DerivationFramework {
     ToolHandle < Trk::IExtrapolator >                m_extrapolator;
     ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
 
-    bool   m_refitPV;
-    int    m_PV_max;
-    size_t m_PV_minNTracks;
-    int    m_DoVertexType;
+    bool   m_refitPV{};
+    int    m_PV_max{};
+    size_t m_PV_minNTracks{};
+    int    m_DoVertexType{};
 
-    double m_mass_e;
-    double m_mass_mu;
-    double m_mass_pion;
-    double m_mass_proton;
-    double m_mass_Lambda;
-    double m_mass_Lambda_b;
-    double m_mass_Ks;
-    double m_mass_Bpm;
+    double m_mass_e{};
+    double m_mass_mu{};
+    double m_mass_pion{};
+    double m_mass_proton{};
+    double m_mass_Lambda{};
+    double m_mass_Lambda_b{};
+    double m_mass_Ks{};
+    double m_mass_Bpm{};
 
     std::vector<double> m_massesV0_ppi;
     std::vector<double> m_massesV0_pip;

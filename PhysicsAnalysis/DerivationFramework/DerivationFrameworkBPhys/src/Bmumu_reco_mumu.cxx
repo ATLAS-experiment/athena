@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -96,7 +96,6 @@ namespace DerivationFramework {
     std::unique_ptr<xAOD::VertexAuxContainer> refPvAuxContainer = std::make_unique<xAOD::VertexAuxContainer>();
     refPvContainer->setStore(refPvAuxContainer.get());
     
-    //m_refContainerKey
     
     // Give the helper class the ptr to v0tools and beamSpotsSvc to use
     SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key, ctx);
@@ -119,6 +118,7 @@ namespace DerivationFramework {
     // save in the StoreGate
     //----------------------------------------------------
     SG::WriteHandle<xAOD::VertexContainer> outputVertices{m_outVtxContainerKey, ctx};
+    auto nVertices = vtxContainer->size();
     ATH_CHECK(outputVertices.record(std::move(vtxContainer), std::move(vtxAuxContainer)));
     
     if(m_refitPV) {
@@ -129,11 +129,11 @@ namespace DerivationFramework {
     // add counter for number of events seen
     addEvent("dimuEvents");
     // add counter for the number of events with >= 1 reco'd vertices
-    if ( vtxContainer->size() > 0 ) {
+    if ( nVertices > 0 ) {
       addEvent("dimuWithVertexCand");
     }
     // add counter for the number of vertices
-    addToCounter("dimuNumVertices", vtxContainer->size());
+    addToCounter("dimuNumVertices", nVertices);
     
     return StatusCode::SUCCESS;
   }  
