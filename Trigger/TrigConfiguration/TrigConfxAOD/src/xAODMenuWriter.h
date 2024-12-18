@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONFXAOD_XAODMENUWRITER_H
@@ -113,12 +113,12 @@ namespace TrigConf {
       typedef std::pair< uint32_t, std::pair< uint32_t, uint32_t > > TrigKey_t;
 
       //  The configuration objects that we are writing
-      mutable xAOD::TriggerMenuJsonContainer* m_menuJSON_hlt ATLAS_THREAD_SAFE;
-      mutable xAOD::TriggerMenuJsonContainer* m_menuJSON_hltmonitoring ATLAS_THREAD_SAFE;
-      mutable xAOD::TriggerMenuJsonContainer* m_menuJSON_l1 ATLAS_THREAD_SAFE;
-      mutable xAOD::TriggerMenuJsonContainer* m_menuJSON_hltps ATLAS_THREAD_SAFE;
-      mutable xAOD::TriggerMenuJsonContainer* m_menuJSON_l1ps ATLAS_THREAD_SAFE;
-      mutable xAOD::TriggerMenuJsonContainer* m_menuJSON_bg ATLAS_THREAD_SAFE;
+      mutable xAOD::TriggerMenuJsonContainer* m_menuJSON_hlt ATLAS_THREAD_SAFE {};
+      mutable xAOD::TriggerMenuJsonContainer* m_menuJSON_hltmonitoring ATLAS_THREAD_SAFE {};
+      mutable xAOD::TriggerMenuJsonContainer* m_menuJSON_l1 ATLAS_THREAD_SAFE {};
+      mutable xAOD::TriggerMenuJsonContainer* m_menuJSON_hltps ATLAS_THREAD_SAFE {};
+      mutable xAOD::TriggerMenuJsonContainer* m_menuJSON_l1ps ATLAS_THREAD_SAFE {};
+      mutable xAOD::TriggerMenuJsonContainer* m_menuJSON_bg ATLAS_THREAD_SAFE {};
 
       /// Trigger configuration keys that are already converted
       mutable std::set< uint32_t > m_converted_smk ATLAS_THREAD_SAFE;
