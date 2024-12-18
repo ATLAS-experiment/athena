@@ -51,21 +51,21 @@ class MissingMassCalculator {
 
   //---------------- structures
   struct DitauStuff {
-    double Mditau_best; // best fitted M(ditau)
-    double Sign_best;   // best significance of M(ditau) fit
+    double Mditau_best{}; // best fitted M(ditau)
+    double Sign_best{};   // best significance of M(ditau) fit
     PtEtaPhiMVector nutau1;  // fitted 4-vec for neutrino from tau-1
     PtEtaPhiMVector nutau2;  // fitted 4-vec for neutrino from tau-2
     PtEtaPhiMVector vistau1;  // fitted 4-vec for visible tau-1
     PtEtaPhiMVector vistau2;  // fitted 4-vec for visible tau-2
-    double RMSoverMPV;
+    double RMSoverMPV{};
   };
 
   TRandom2 m_randomGen;
   
   MMCCalibrationSet::e m_mmcCalibrationSet;
 
-  bool m_fUseEfficiencyRecovery; // switch to turn ON/OFF re-fit in order to recover efficiency
-  bool m_fUseFloatStopping; // switch to turn ON/OFF floating stopping criterion
+  bool m_fUseEfficiencyRecovery{}; // switch to turn ON/OFF re-fit in order to recover efficiency
+  bool m_fUseFloatStopping{}; // switch to turn ON/OFF floating stopping criterion
 
   int m_nsolmax,m_nsolfinalmax;
   int m_niterRandomLocal;
@@ -93,103 +93,103 @@ class MissingMassCalculator {
   
   double m_nsigma_METscan,m_nsigma_METscan2,m_nsigma_METscan_ll,m_nsigma_METscan_lh,m_nsigma_METscan_hh,m_nsigma_METscan_lfv_ll,m_nsigma_METscan_lfv_lh, m_beamEnergy; // number of sigmas for MET-scan
 
-  int m_iter1,m_iter2,m_iter3,m_iter4,m_iter5,m_iang1low,m_iang1high,m_iang2low,m_iang2high;
-  int m_iterTheta3d;
+  int m_iter1{},m_iter2{},m_iter3{},m_iter4{},m_iter5{},m_iang1low{},m_iang1high{},m_iang2low{},m_iang2high{};
+  int m_iterTheta3d{};
   
-  double m_prob_tmp;
+  double m_prob_tmp{};
   
-  double m_totalProbSum;
-  double m_mtautauSum;
+  double m_totalProbSum{};
+  double m_mtautauSum{};
 
-  int m_eventNumber;
-  int m_seed;
+  int m_eventNumber{};
+  int m_seed{};
   // data member for the spaceWalker approach
 
-  int m_iter0;
-  int m_iterNuPV3;
-  int m_testptn1;
-  int m_testptn2;
-  int m_testdiscri1;
-  int m_testdiscri2;
-  int m_nosol1;
-  int m_nosol2;
-  int m_iterNsuc;
-  bool m_switch1;
-  bool m_switch2;
+  int m_iter0{};
+  int m_iterNuPV3{};
+  int m_testptn1{};
+  int m_testptn2{};
+  int m_testdiscri1{};
+  int m_testdiscri2{};
+  int m_nosol1{};
+  int m_nosol2{};
+  int m_iterNsuc{};
+  bool m_switch1{};
+  bool m_switch2{};
 
-  bool m_meanbinToBeEvaluated;
+  bool m_meanbinToBeEvaluated{};
   
-  int m_markovCountDuplicate;
-  int m_markovNFullScan;
-  int m_markovNRejectNoSol;
-  int m_markovNRejectMetropolis;
-  int m_markovNAccept;
+  int m_markovCountDuplicate{};
+  int m_markovNFullScan{};
+  int m_markovNRejectNoSol{};
+  int m_markovNRejectMetropolis{};
+  int m_markovNAccept{};
 
-  double m_PrintmMaxError;
-  double m_PrintmMeanError;
-  double m_PrintmInvWidth2Error;
+  double m_PrintmMaxError{};
+  double m_PrintmMeanError{};
+  double m_PrintmInvWidth2Error{};
 
-  double m_proposalTryMEt;
-  double m_ProposalTryPhi;
-  double m_ProposalTryMnu;
-  double m_ProposalTryEtau;
+  double m_proposalTryMEt{};
+  double m_ProposalTryPhi{};
+  double m_ProposalTryMnu{};
+  double m_ProposalTryEtau{};
 
 
-  double m_mTau,m_mTau2;
-  double m_MEtL,m_MEtP,m_Phi1,m_Phi2,m_Mnu1,m_Mnu2;
-  double m_eTau1, m_eTau2;
-  double m_eTau10, m_eTau20;
-  double m_MEtL0,m_MEtP0,m_Phi10,m_Phi20,m_Mnu10,m_Mnu20;
-  double m_MEtLMin,m_MEtPMin,m_Phi1Min,m_Phi2Min,m_Mnu1Min,m_Mnu2Min;
-  double m_MEtLMax,m_MEtPMax,m_Phi1Max,m_Phi2Max,m_Mnu1Max,m_Mnu2Max;
-  double m_MEtLStep,m_MEtPStep,m_Phi1Step,m_Phi2Step,m_Mnu1Step,m_Mnu2Step;
-  double m_MEtLRange,m_MEtPRange,m_Phi1Range,m_Phi2Range,m_Mnu1Range,m_Mnu2Range;
-  double m_MEtProposal,m_PhiProposal,m_MnuProposal;
-  double m_metCovPhiCos,m_metCovPhiSin;
-  double m_eTau1Proposal,m_eTau2Proposal;
+  double m_mTau{},m_mTau2{};
+  double m_MEtL{},m_MEtP{},m_Phi1{},m_Phi2{},m_Mnu1{},m_Mnu2{};
+  double m_eTau1{}, m_eTau2{};
+  double m_eTau10{}, m_eTau20{};
+  double m_MEtL0{},m_MEtP0{},m_Phi10{},m_Phi20{},m_Mnu10{},m_Mnu20{};
+  double m_MEtLMin{},m_MEtPMin{},m_Phi1Min{},m_Phi2Min{},m_Mnu1Min{},m_Mnu2Min{};
+  double m_MEtLMax{},m_MEtPMax{},m_Phi1Max{},m_Phi2Max{},m_Mnu1Max{},m_Mnu2Max{};
+  double m_MEtLStep{},m_MEtPStep{},m_Phi1Step{},m_Phi2Step{},m_Mnu1Step{},m_Mnu2Step{};
+  double m_MEtLRange{},m_MEtPRange{},m_Phi1Range{},m_Phi2Range{},m_Mnu1Range{},m_Mnu2Range{};
+  double m_MEtProposal{},m_PhiProposal{},m_MnuProposal{};
+  double m_metCovPhiCos{},m_metCovPhiSin{};
+  double m_eTau1Proposal{},m_eTau2Proposal{};
 
-  double m_eTau1Min,m_eTau1Max,m_eTau1Range;
-  double m_eTau2Min,m_eTau2Max,m_eTau2Range;
-  bool m_fullParamSpaceScan;
-  bool m_Mnu1Exclude;
-  int m_nsolOld;
+  double m_eTau1Min{},m_eTau1Max{},m_eTau1Range{};
+  double m_eTau2Min{},m_eTau2Max{},m_eTau2Range{};
+  bool m_fullParamSpaceScan{};
+  bool m_Mnu1Exclude{};
+  int m_nsolOld{};
   std::vector<double>   m_probFinalSolOldVec;
   std::vector<double>   m_mtautauFinalSolOldVec;
   std::vector<PtEtaPhiMVector>  m_nu1FinalSolOldVec;
   std::vector<PtEtaPhiMVector>  m_nu2FinalSolOldVec;
 
-  int m_nsol;
+  int m_nsol{};
   std::vector<double>   m_probFinalSolVec;
   std::vector<double>   m_mtautauFinalSolVec;
   std::vector<PtEtaPhiMVector>  m_nu1FinalSolVec;
   std::vector<PtEtaPhiMVector>  m_nu2FinalSolVec;
 
 
-  double m_Mnu1ExcludeMin,m_Mnu1ExcludeMax,m_Mnu1ExcludeRange;
-  double m_Mnu1XMin,m_Mnu1XMax, m_Mnu1XRange;
-  double m_walkWeight;
-  double m_cosPhi1, m_cosPhi2, m_sinPhi1, m_sinPhi2;
+  double m_Mnu1ExcludeMin{},m_Mnu1ExcludeMax{},m_Mnu1ExcludeRange{};
+  double m_Mnu1XMin{},m_Mnu1XMax{}, m_Mnu1XRange{};
+  double m_walkWeight{};
+  double m_cosPhi1{}, m_cosPhi2{}, m_sinPhi1{}, m_sinPhi2{};
   
-  bool m_scanMnu1,m_scanMnu2;
+  bool m_scanMnu1{},m_scanMnu2{};
 
   PtEtaPhiMVector m_tauVec1,m_tauVec2;
-  double m_tauVec1Phi, m_tauVec2Phi;
-  double m_tauVec1M, m_tauVec2M;
-  double m_tauVec1Px, m_tauVec1Py, m_tauVec1Pz;
-  double m_tauVec2Px, m_tauVec2Py, m_tauVec2Pz;
-  double m_tauVec1P, m_tauVec2P;
-  double m_tauVec1E;
-  double m_tauVec2E;
-  double m_m2Nu1;
-  double m_m2Nu2;
-  double m_ET2v1;
-  double m_ET2v2;
-  double m_E2v1;
-  double m_E2v2;
-  double m_Ev2;
-  double m_Ev1;
-  double m_Mvis,m_Meff;
-  bool m_reRunWithBestMET;
+  double m_tauVec1Phi{}, m_tauVec2Phi{};
+  double m_tauVec1M{}, m_tauVec2M{};
+  double m_tauVec1Px{}, m_tauVec1Py{}, m_tauVec1Pz{};
+  double m_tauVec2Px{}, m_tauVec2Py{}, m_tauVec2Pz{};
+  double m_tauVec1P{}, m_tauVec2P{};
+  double m_tauVec1E{};
+  double m_tauVec2E{};
+  double m_m2Nu1{};
+  double m_m2Nu2{};
+  double m_ET2v1{};
+  double m_ET2v2{};
+  double m_E2v1{};
+  double m_E2v2{};
+  double m_Ev2{};
+  double m_Ev1{};
+  double m_Mvis{},m_Meff{};
+  bool m_reRunWithBestMET{};
   
   //--- define histograms for histogram method
   //--- upper limits need to be revisied in the future!!! It may be not enough for some analyses
@@ -226,16 +226,16 @@ class MissingMassCalculator {
   std::shared_ptr<TH1F> m_fPhi1_split2;
   std::shared_ptr<TH1F> m_fPhi2_split2;
 
-  TF1 *m_fFitting;
+  TF1 *m_fFitting{};
 
-  TH1F* m_fPhi1;
-  TH1F* m_fPhi2;
-  TH1F* m_fMnu1;
-  TH1F* m_fMnu2;
-  TH1F* m_fMetx;
-  TH1F* m_fMety;
-  TH1F* m_fTheta3D;
-  TH1F* m_fTauProb;
+  TH1F* m_fPhi1{};
+  TH1F* m_fPhi2{};
+  TH1F* m_fMnu1{};
+  TH1F* m_fMnu2{};
+  TH1F* m_fMetx{};
+  TH1F* m_fMety{};
+  TH1F* m_fTheta3D{};
+  TH1F* m_fTauProb{};
 
   // for intermediate calc
   PtEtaPhiMVector m_TLVdummy;
@@ -244,19 +244,19 @@ class MissingMassCalculator {
   DitauStuff m_fDitauStuffFit; // results based on fit method
   DitauStuff m_fDitauStuffHisto; // results based on histo method
 
-  int m_niter_fit1; // number of iterations for dR-dPhi scan 
-  int m_niter_fit2; // number of iterations for MET-scan 
-  int m_niter_fit3; // number of iterations for Mnu-scan 
-  int m_NiterRandom; // number of random iterations (for lh, multiply or divide by 10 for ll and hh)
-  int m_NsucStop;
-  int m_RMSStop;
-  int m_RndmSeedAltering; // reset seed (not necessary by default)
+  int m_niter_fit1{}; // number of iterations for dR-dPhi scan 
+  int m_niter_fit2{}; // number of iterations for MET-scan 
+  int m_niter_fit3{}; // number of iterations for Mnu-scan 
+  int m_NiterRandom{}; // number of random iterations (for lh, multiply or divide by 10 for ll and hh)
+  int m_NsucStop{};
+  int m_RMSStop{};
+  int m_RndmSeedAltering{}; // reset seed (not necessary by default)
 
-  double m_dTheta3d_binMin; // minimal step size for dTheta3D
-  double m_dTheta3d_binMax; // maximum step size for dTheta3D
-  double m_dRmax_tau; // maximum dR(nu-visTau)
+  double m_dTheta3d_binMin{}; // minimal step size for dTheta3D
+  double m_dTheta3d_binMax{}; // maximum step size for dTheta3D
+  double m_dRmax_tau{}; // maximum dR(nu-visTau)
 
-  double m_MnuScanRange; // range of M(nunu) scan; M(nunu) range can be affected by selection cuts
+  double m_MnuScanRange{}; // range of M(nunu) scan; M(nunu) range can be affected by selection cuts
   
 
   //---------------- protected functions

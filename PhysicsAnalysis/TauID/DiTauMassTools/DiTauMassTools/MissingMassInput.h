@@ -53,36 +53,36 @@ class MissingMassInput {
     XYVector m_MetVec;
     PtEtaPhiMVector m_vistau1;
     PtEtaPhiMVector m_vistau2;
-    int m_type_visTau1; // 0: l, 1:1-prong, 3:3-prong
-    int m_type_visTau2;  // 0: l, 1:1-prong, 3:3-prong
-    int m_Nprong_tau1;
-    int m_Nprong_tau2;
-    int m_dataType;
-    double m_METcovphi;
-    double m_METsigmaP;
-    double m_METsigmaL;
-    double m_SumEt;
+    int m_type_visTau1{}; // 0: l, 1:1-prong, 3:3-prong
+    int m_type_visTau2{};  // 0: l, 1:1-prong, 3:3-prong
+    int m_Nprong_tau1{};
+    int m_Nprong_tau2{};
+    int m_dataType{};
+    double m_METcovphi{};
+    double m_METsigmaP{};
+    double m_METsigmaL{};
+    double m_SumEt{};
     std::vector<PtEtaPhiMVector> m_jet4vecs;
-    int m_Njet25;
-    double m_DelPhiTT;
-    double m_MHtSigma1; // sigma of 1st Gaussian in missing Ht resolution
-    double m_MHtSigma2; // sigma of 2nd Gaussian in missing Ht resolution
-    double m_MHtGaussFr; // relative fraction of 2nd Gaussian
-    double m_HtOffset; // HT offset
-    double m_beamEnergy; // beam energy (Tevatron=980, LHC-1=3500.0) 
-    int m_InputReorder; // flag for input re-order
-    int m_METScanScheme; // MET-scan scheme: 0- use JER; 1- use simple sumEt & missingHt for Njet=0 events in (lep-had) 
-    int m_METresSyst; // switch to turn on/off MET resolution systematics
-    bool m_fUseDefaults; // switch to control defaults: 1== use defaults, 0== don't use defaults (useful for studies) 
-    bool m_fUseTailCleanup; // switch to apply tail clean-up
-    bool m_fUseVerbose; // code to turn ON printouts for debugging
+    int m_Njet25{};
+    double m_DelPhiTT{};
+    double m_MHtSigma1{}; // sigma of 1st Gaussian in missing Ht resolution
+    double m_MHtSigma2{}; // sigma of 2nd Gaussian in missing Ht resolution
+    double m_MHtGaussFr{}; // relative fraction of 2nd Gaussian
+    double m_HtOffset{}; // HT offset
+    double m_beamEnergy{}; // beam energy (Tevatron=980, LHC-1=3500.0) 
+    int m_InputReorder{}; // flag for input re-order
+    int m_METScanScheme{}; // MET-scan scheme: 0- use JER{}; 1- use simple sumEt & missingHt for Njet=0 events in (lep-had) 
+    int m_METresSyst{}; // switch to turn on/off MET resolution systematics
+    bool m_fUseDefaults{}; // switch to control defaults: 1== use defaults, 0== don't use defaults (useful for studies) 
+    bool m_fUseTailCleanup{}; // switch to apply tail clean-up
+    bool m_fUseVerbose{}; // code to turn ON printouts for debugging
     XYVector m_metVec;
     PtEtaPhiMVector m_tlv_tmp;
-    double m_inputMEtX,m_inputMEtY,m_inputMEtT;
-    double m_MEtX, m_MEtY,m_MEtT;
-    double m_htOffset;
-    int m_LFVmode; // flag to determine which LFV decay to be reconstructed: 0=H->e+tau(mu) or 1=H->mu+tau(e) 
-    TauTypes::e m_tauTypes;
+    double m_inputMEtX{},m_inputMEtY{},m_inputMEtT{};
+    double m_MEtX{}, m_MEtY{},m_MEtT{};
+    double m_htOffset{};
+    int m_LFVmode{}; // flag to determine which LFV decay to be reconstructed: 0=H->e+tau(mu) or 1=H->mu+tau(e) 
+    TauTypes::e m_tauTypes{};
 };
 } // namespace DiTauMassTools
 
