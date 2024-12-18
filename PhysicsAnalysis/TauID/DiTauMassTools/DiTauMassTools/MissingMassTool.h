@@ -77,25 +77,25 @@ class MissingMassTool : virtual public IMissingMassTool, virtual public asg::Asg
 
  private:
 
-  MissingMassCalculator* m_MMC;
-  double m_n_sigma_met;
-  int m_tail_cleanup;
-  int m_use_verbose;
-  int m_use_tau_probability;
-  int m_niter_fit_2;
-  int m_niter_fit_3;
-  int m_use_defaults;
-  int m_use_efficiency_recovery;
+  MissingMassCalculator* m_MMC{};
+  double m_n_sigma_met{};
+  int m_tail_cleanup{};
+  int m_use_verbose{};
+  int m_use_tau_probability{};
+  int m_niter_fit_2{};
+  int m_niter_fit_3{};
+  int m_use_defaults{};
+  int m_use_efficiency_recovery{};
   std::string m_calib_set;
   std::string m_lfv_mode;
-  bool m_decorate;
-  bool m_float_stop;
-  bool m_use_mnu_probability;
-  bool m_use_met_param_dphiLL;
+  bool m_decorate{};
+  bool m_float_stop{};
+  bool m_use_mnu_probability{};
+  bool m_use_met_param_dphiLL{};
   std::string m_param_file_path;
-  double m_beam_energy;
-  bool m_lfv_leplep_refit;
-  bool m_save_llh_histo;
+  double m_beam_energy{};
+  bool m_lfv_leplep_refit{};
+  bool m_save_llh_histo{};
 
 };
 } // namespace DiTauMassTools  

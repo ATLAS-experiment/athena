@@ -13,6 +13,7 @@
 
 // ROOT include(s):
 #include <TH1.h>
+#include <memory> //shared_ptr
 
 namespace DiTauMassTools{
   using ROOT::Math::PtEtaPhiMVector;
@@ -49,25 +50,25 @@ class MissingMassOutput {
 
   private:
     void ClearOutput(bool fUseVerbose);
-    int m_FitStatus;
-    double m_FitSignificance[MMCFitMethod::MAX];
-    double m_FittedMass[MMCFitMethod::MAX];
-    double m_FittedMassUpperError[MMCFitMethod::MAX];
-    double m_FittedMassLowerError[MMCFitMethod::MAX];
-    PtEtaPhiMVector m_nuvec1[MMCFitMethod::MAX];
-    PtEtaPhiMVector m_objvec1[MMCFitMethod::MAX];
-    PtEtaPhiMVector m_nuvec2[MMCFitMethod::MAX];
-    PtEtaPhiMVector m_objvec2[MMCFitMethod::MAX];
-    PtEtaPhiMVector m_totalvec[MMCFitMethod::MAX];
-    XYVector m_FittedMetVec[MMCFitMethod::MAX];
-    double m_RMS2MPV;
+    int m_FitStatus{};
+    double m_FitSignificance[MMCFitMethod::MAX]{};
+    double m_FittedMass[MMCFitMethod::MAX]{};
+    double m_FittedMassUpperError[MMCFitMethod::MAX]{};
+    double m_FittedMassLowerError[MMCFitMethod::MAX]{};
+    PtEtaPhiMVector m_nuvec1[MMCFitMethod::MAX]{};
+    PtEtaPhiMVector m_objvec1[MMCFitMethod::MAX]{};
+    PtEtaPhiMVector m_nuvec2[MMCFitMethod::MAX]{};
+    PtEtaPhiMVector m_objvec2[MMCFitMethod::MAX]{};
+    PtEtaPhiMVector m_totalvec[MMCFitMethod::MAX]{};
+    XYVector m_FittedMetVec[MMCFitMethod::MAX]{};
+    double m_RMS2MPV{};
     std::shared_ptr<TH1F> m_hMfit_all;
     std::shared_ptr<TH1F> m_hMfit_allNoWeight;
-    int m_NTrials;
-    int m_NSuccesses;
-    int m_NSolutions;
-    double m_SumW;
-    double m_AveSolRMS;
+    int m_NTrials{};
+    int m_NSuccesses{};
+    int m_NSolutions{};
+    double m_SumW{};
+    double m_AveSolRMS{};
 };
 } // namespace DiTauMassTools
 
