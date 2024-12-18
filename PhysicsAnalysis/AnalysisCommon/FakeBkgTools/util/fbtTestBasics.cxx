@@ -32,9 +32,9 @@
 #include "AsgAnalysisInterfaces/IFakeBkgTool.h"
 #include "AsgAnalysisInterfaces/ILinearFakeBkgTool.h"
 
+
 bool successful(bool arg) { return arg; }
-bool successful(int arg);
-bool successful(const StatusCode& arg) { return arg == StatusCode::SUCCESS; }
+bool successful(const StatusCode& arg) { return arg.isSuccess(); }
 
 #define FBT_CHECK1(x, FAIL)                                             \
   do {                                                                  \
@@ -52,36 +52,33 @@ struct Result
   bool operator==(const Result&) const;
   void Print() const;
 };
-    
-bool allTests ATLAS_NOT_THREAD_SAFE();
-bool minimalTest ATLAS_NOT_THREAD_SAFE(const std::string& type, Result& result);
-bool parallelJob ATLAS_NOT_THREAD_SAFE(const std::string& type, const std::string& saveAs);
-bool readFromROOT ATLAS_NOT_THREAD_SAFE();
-bool readFromXML ATLAS_NOT_THREAD_SAFE();
-
-template<class Interface = CP::IFakeBkgTool> bool setup ATLAS_NOT_THREAD_SAFE(asg::AnaToolHandle<Interface>& tool, const std::string& type);
-template<class Interface = CP::IFakeBkgTool> bool eventLoop ATLAS_NOT_THREAD_SAFE(asg::AnaToolHandle<Interface>& tool, Result& result);
-bool addEventWeight ATLAS_NOT_THREAD_SAFE(asg::AnaToolHandle<CP::ILinearFakeBkgTool>& tool, Result& result);
-bool addEventWeight ATLAS_NOT_THREAD_SAFE(asg::AnaToolHandle<CP::IFakeBkgTool>& tool, Result& result);
-template<class Interface = CP::IFakeBkgTool> bool fillResult ATLAS_NOT_THREAD_SAFE(asg::AnaToolHandle<Interface>& tool, Result& result);
 
 #ifdef XAOD_STANDALONE
-std::unique_ptr<xAOD::TStore> store;
+using Store_t = std::unique_ptr<xAOD::TStore>;
 #else
-StoreGateSvc* store = nullptr;
+using Store_t = StoreGateSvc*;
 #endif
 
-std::vector<std::string> config;
-std::string selection = ">=1T";    
-std::string process = ">=1F[T]";
-bool readCPVariations = true;
-int eventOffset = 0;
-int nEvents = 48;
-std::string progressFile = "";
+bool allTests(Store_t& store);
+bool minimalTest(const std::string& type, const std::vector<std::string>& config, Store_t& store, Result& result);
+bool parallelJob(const std::string& type, const std::vector<std::string>& config, Store_t& store, const std::string& saveAs, int nEvents, int eventOffset);
+bool readFromROOT(std::vector<std::string>& config);
+bool readFromXML(std::vector<std::string>& config);
 
-bool verbose = false;
+template<class Interface = CP::IFakeBkgTool> bool setup(asg::AnaToolHandle<Interface>& tool, const std::string& type, const std::vector<std::string>& config, const std::string& progressFile="");
+template<class Interface = CP::IFakeBkgTool> bool eventLoop(asg::AnaToolHandle<Interface>& tool, Store_t& store, Result& result, int nEvents, int eventOffset=0);
+bool addEventWeight(asg::AnaToolHandle<CP::ILinearFakeBkgTool>& tool, Result& result);
+bool addEventWeight(asg::AnaToolHandle<CP::IFakeBkgTool>& tool, Result& result);
+template<class Interface = CP::IFakeBkgTool> bool fillResult(asg::AnaToolHandle<Interface>& tool, Result& result);
 
-int main ATLAS_NOT_THREAD_SAFE(int argc, char* argv[])
+const std::string selection = ">=1T";
+const std::string process = ">=1F[T]";
+const bool readCPVariations = true;
+const int nEvents = 48;
+
+std::atomic<bool> verbose = false;  // set once in main
+
+int main(int argc, char* argv[])
 {
   for(int i=1;i<argc;++i)
     {
@@ -92,16 +89,16 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char* argv[])
 #ifdef XAOD_STANDALONE
   xAOD::Init("fbtTestBasics").ignore();
   xAOD::TEvent event(xAOD::TEvent::kClassAccess);
-  store = std::make_unique<xAOD::TStore>();
+  Store_t store = std::make_unique<xAOD::TStore>();
   StatusCode::enableFailure();
 #else
   IAppMgrUI* app = POOL::Init();
   POOL::TEvent event(POOL::TEvent::kClassAccess);
   FBT_CHECK1( event.evtStore().retrieve(), 1 );
-  store = event.evtStore().get();
+  Store_t store = event.evtStore().get();
 #endif
     
-  int returnCode = allTests() ? 0 : 1;
+  int returnCode = allTests(store) ? 0 : 1;
     
 #ifndef XAOD_STANDALONE
   FBT_CHECK1( app->finalize(), 1 );
@@ -109,51 +106,44 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char* argv[])
   return returnCode;
 }
 
-bool allTests ATLAS_NOT_THREAD_SAFE()
+bool allTests(Store_t& store)
 {
-    
+  std::vector<std::string> config;
   Result result0, result1, result2, result3, result4, result5;
     
   if(verbose) std::cout <<"\nWill do minimal test with CP::ApplyFakeFactor\n";
-  FBT_CHECK( readFromROOT() );
-  FBT_CHECK( minimalTest("CP::ApplyFakeFactor", result0) );
+  FBT_CHECK( readFromROOT(config) );
+  FBT_CHECK( minimalTest("CP::ApplyFakeFactor", config, store, result0) );
     
   if(verbose) std::cout <<"\nWill do minimal test with CP::AsymptMatrixTool\n";
-  FBT_CHECK( minimalTest("CP::AsymptMatrixTool", result1) );
+  FBT_CHECK( minimalTest("CP::AsymptMatrixTool", config, store, result1) );
     
   if(verbose) std::cout <<"\nWill do minimal test with CP::LhoodMM_tools\n";
-  FBT_CHECK( minimalTest("CP::LhoodMM_tools", result2) );
+  FBT_CHECK( minimalTest("CP::LhoodMM_tools", config, store, result2) );
     
   if(verbose) std::cout <<"\nWill test loading efficiencies from XML\n";
-  FBT_CHECK( readFromXML() );
-  FBT_CHECK( minimalTest("CP::AsymptMatrixTool", result3) );
-  FBT_CHECK( readFromROOT() );
+  FBT_CHECK( readFromXML(config) );
+  FBT_CHECK( minimalTest("CP::AsymptMatrixTool", config, store, result3) );
+  FBT_CHECK( readFromROOT(config) );
   FBT_CHECK( result1 == result3 );
     
   if(verbose) std::cout <<"\nWill test getEventWeight()\n";
   {
     asg::AnaToolHandle<CP::ILinearFakeBkgTool> tool;
-    FBT_CHECK( setup(tool, "CP::AsymptMatrixTool") );
-    FBT_CHECK( eventLoop(tool, result4) );
+    FBT_CHECK( setup(tool, "CP::AsymptMatrixTool", config) );
+    FBT_CHECK( eventLoop(tool, store, result4, nEvents) );
     if(verbose) result3.Print();
   }
   FBT_CHECK( result1 == result4 );
     
   if(verbose) std::cout <<"\nWill test parallel jobs and merging\n";
-  eventOffset = 0;
-  nEvents = 16;
-  FBT_CHECK( parallelJob("CP::LhoodMM_tools", "fbt_job1.root") );
-  eventOffset = 16;
-  FBT_CHECK( parallelJob("CP::LhoodMM_tools", "fbt_job2.root") );
-  eventOffset = 32;
-  FBT_CHECK( parallelJob("CP::LhoodMM_tools", "fbt_job3.root") );
-  eventOffset = 0;
+  FBT_CHECK( parallelJob("CP::LhoodMM_tools", config, store, "fbt_job1.root", 16, 0) );
+  FBT_CHECK( parallelJob("CP::LhoodMM_tools", config, store, "fbt_job2.root", 16, 16) );
+  FBT_CHECK( parallelJob("CP::LhoodMM_tools", config, store, "fbt_job3.root", 16, 32) );
   FBT_CHECK( gSystem->Exec("hadd -f fbt_merged.root fbt_job*.root") == 0 );
   {
     asg::AnaToolHandle<CP::IFakeBkgTool> tool;
-    progressFile = "fbt_merged.root";
-    FBT_CHECK( setup(tool, "CP::LhoodMM_tools") );
-    progressFile.clear();
+    FBT_CHECK( setup(tool, "CP::LhoodMM_tools", config, "fbt_merged.root") );
     FBT_CHECK( fillResult(tool, result5) );
   }
   FBT_CHECK(result2 == result5 );
@@ -161,21 +151,21 @@ bool allTests ATLAS_NOT_THREAD_SAFE()
   return true;
 }
 
-bool minimalTest ATLAS_NOT_THREAD_SAFE(const std::string& type, Result& result)
+bool minimalTest(const std::string& type, const std::vector<std::string>& config, Store_t& store, Result& result)
 {
   asg::AnaToolHandle<CP::IFakeBkgTool> tool;
-  FBT_CHECK( setup(tool, type) );
-  FBT_CHECK( eventLoop(tool, result) );
+  FBT_CHECK( setup(tool, type, config) );
+  FBT_CHECK( eventLoop(tool, store, result, nEvents) );
   FBT_CHECK( fillResult(tool, result) );
   return true;
 }
 
-bool parallelJob ATLAS_NOT_THREAD_SAFE(const std::string& type, const std::string& saveAs)
+bool parallelJob(const std::string& type, const std::vector<std::string>& config, Store_t& store, const std::string& saveAs, int nEvents, int eventOffset)
 {
   asg::AnaToolHandle<CP::IFakeBkgTool> tool;
-  FBT_CHECK( setup(tool, type) );
+  FBT_CHECK( setup(tool, type, config) );
   Result result;
-  FBT_CHECK( eventLoop(tool, result) );
+  FBT_CHECK( eventLoop(tool, store, result, nEvents, eventOffset) );
   std::unique_ptr<TFile> f(TFile::Open(saveAs.c_str(), "RECREATE"));
   FBT_CHECK( !!f );
   FBT_CHECK( tool->saveProgress(f->mkdir("fakes")) );
@@ -189,10 +179,10 @@ bool parallelJob ATLAS_NOT_THREAD_SAFE(const std::string& type, const std::strin
   return true;
 }
 
-static long instance = 0; /// mostly useful for athena, which will otherwise re-use the previous tool
+static std::atomic<long> instance = 0; /// mostly useful for athena, which will otherwise re-use the previous tool
 
 template<class Interface>
-bool setup ATLAS_NOT_THREAD_SAFE(asg::AnaToolHandle<Interface>& tool, const std::string& type)
+bool setup(asg::AnaToolHandle<Interface>& tool, const std::string& type, const std::vector<std::string>& config, const std::string& progressFile)
 {
   tool = asg::AnaToolHandle<Interface>(type + "/FBT" + std::to_string(++instance));
   FBT_CHECK( tool.setProperty("InputFiles", config) );
@@ -200,7 +190,7 @@ bool setup ATLAS_NOT_THREAD_SAFE(asg::AnaToolHandle<Interface>& tool, const std:
   FBT_CHECK( tool.setProperty("ConvertWhenMissing", true) );
   FBT_CHECK( tool.setProperty("Selection", selection) );
   FBT_CHECK( tool.setProperty("Process", process) );
-  if(progressFile.size())
+  if(!progressFile.empty())
     {
       FBT_CHECK( tool.setProperty("ProgressFileName", progressFile) );
       FBT_CHECK( tool.setProperty("ProgressFileDirectory", "fakes") );
@@ -211,7 +201,7 @@ bool setup ATLAS_NOT_THREAD_SAFE(asg::AnaToolHandle<Interface>& tool, const std:
 }
 
 template<class Interface>
-bool eventLoop ATLAS_NOT_THREAD_SAFE(asg::AnaToolHandle<Interface>& tool, Result& result)
+bool eventLoop(asg::AnaToolHandle<Interface>& tool, Store_t& store, Result& result, int nEvents, int eventOffset)
 {
   auto eventInfo = std::make_unique<xAOD::EventInfo>();
   auto eventAuxInfo = std::make_unique<xAOD::EventAuxInfo>();
@@ -243,7 +233,7 @@ bool eventLoop ATLAS_NOT_THREAD_SAFE(asg::AnaToolHandle<Interface>& tool, Result
   return true;
 }
 
-bool addEventWeight ATLAS_NOT_THREAD_SAFE(asg::AnaToolHandle<CP::ILinearFakeBkgTool>& tool, Result& result)
+bool addEventWeight(asg::AnaToolHandle<CP::ILinearFakeBkgTool>& tool, Result& result)
 {
   FBT_CHECK( tool->applySystematicVariation({}) );
   float y;
@@ -260,13 +250,13 @@ bool addEventWeight ATLAS_NOT_THREAD_SAFE(asg::AnaToolHandle<CP::ILinearFakeBkgT
   return true;
 }
 
-bool addEventWeight ATLAS_NOT_THREAD_SAFE(asg::AnaToolHandle<CP::IFakeBkgTool>&, Result&)
+bool addEventWeight(asg::AnaToolHandle<CP::IFakeBkgTool>&, Result&)
 {
   return true;
 }
 
 template<class Interface>
-bool fillResult ATLAS_NOT_THREAD_SAFE(asg::AnaToolHandle<Interface>& tool, Result& result)
+bool fillResult(asg::AnaToolHandle<Interface>& tool, Result& result)
 {
   result.variations.clear();
   FBT_CHECK( tool->getTotalYield(result.value, result.statUp, result.statDown) );
@@ -316,7 +306,7 @@ void Result::Print() const
     }
 }
 
-bool readFromROOT ATLAS_NOT_THREAD_SAFE()
+bool readFromROOT(std::vector<std::string>& config)
 {
   config.clear();
   config.emplace_back("fbt_efficiencies.root");
@@ -343,7 +333,7 @@ bool readFromROOT ATLAS_NOT_THREAD_SAFE()
   return true;
 }
 
-bool readFromXML ATLAS_NOT_THREAD_SAFE()
+bool readFromXML(std::vector<std::string>& config)
 {
   config.clear();
   config.emplace_back("fbt_efficiencies.xml");
