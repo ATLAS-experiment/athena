@@ -428,6 +428,22 @@ def HION4SkimmingTriggersVM():
     return VMtrigger
 
 #################################################################################
+#HION5
+
+def HION5SkimmingTriggers():
+    triggers  = []
+    triggers += ["HLT_e15_lhloose_nod0"]
+    triggers += ["HLT_mu15"]
+    triggers += ["HLT_g10_loose"]
+    triggers += ["HLT_g15_loose"]
+    triggers += ["HLT_g20_loose"]
+    triggers += ["HLT_g25_loose"]
+    triggers += ["HLT_g30_loose"]
+    triggers += ["HLT_g35_loose"]
+    
+    return triggers
+
+#################################################################################
 #HION12
 
 def HION12MBtriggers2018():

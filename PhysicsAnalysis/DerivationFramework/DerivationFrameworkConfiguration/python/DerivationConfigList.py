@@ -148,6 +148,7 @@ from DerivationFrameworkTLA.TLA2 import TLA2Cfg
 #Heavy Ion group derivations
 from DerivationFrameworkHI.HION2 import HION2Cfg
 from DerivationFrameworkHI.HION4 import HION4Cfg
+from DerivationFrameworkHI.HION5 import HION5Cfg
 from DerivationFrameworkHI.HION7 import HION7Cfg
 from DerivationFrameworkHI.HION12 import HION12Cfg
 from DerivationFrameworkHI.HION14 import HION14Cfg
@@ -180,6 +181,6 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'TRIG8Cfg',"TRIG9Cfg",'L1CALO1Cfg',
            'MUON1Cfg','MUON5Cfg',
            'TLA0Cfg', 'TLA1Cfg', 'TLA2Cfg',
-           'HION2Cfg','HION4Cfg','HION7Cfg','HION12Cfg','HION14Cfg',
+           'HION2Cfg','HION4Cfg','HION5Cfg','HION7Cfg','HION12Cfg','HION14Cfg',
            'NCB1Cfg'
            ]
