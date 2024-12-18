@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi/Athena include(s):
@@ -44,8 +44,8 @@ namespace xAODMaker
     ATH_CHECK(m_cnvTool->convert(tileCellsHandle.ptr(), modulesContainer.get()));
 
     auto modulesHandle = SG::makeHandle(m_outputKey, ctx);
-    ATH_CHECK(modulesHandle.record(std::move(modulesContainer), std::move(modulesAuxContainer)));
     ATH_MSG_DEBUG("Recorded xAODMBTSModules with key: " << m_outputKey.key() << " of size " << modulesContainer->size());
+    ATH_CHECK(modulesHandle.record(std::move(modulesContainer), std::move(modulesAuxContainer)));
 
     return StatusCode::SUCCESS;
   }
