@@ -245,7 +245,8 @@ class TextConfig(ConfigFactory):
         return
 
 
-    def _configureAlg(self, block, blockConfig, configSeq=None, containerName=None):
+    def _configureAlg(self, block, blockConfig, configSeq=None, containerName=None,
+                      extraOptions=None):
         if not isinstance(blockConfig, list):
             blockConfig = [blockConfig]
 
@@ -272,6 +273,17 @@ class TextConfig(ConfigFactory):
             if configSeq is not None:
                 configSeq += seq
 
+            # propagate special extra options to subalgs
+            if extraOptions is None:
+                extraOptionsList = ["skipOnData", "skipOnMC", "onlyForDSIDs"]
+                for i in algOpts:
+                    if i['name'] in extraOptionsList and i['defaultValue'] != i['value']:
+                        if extraOptions is None:
+                            extraOptions = {}
+                        extraOptions[i['name']] = i['value']
+            else:
+                algOpts = seq.setOptions(extraOptions)
+
             # check to see if there are unused parameters
             algOpts = [i['name'] for i in algOpts]
             expectedOptions = set(funcOpts)
@@ -290,7 +302,7 @@ class TextConfig(ConfigFactory):
             for alg in self._order.get(block.algName, []):
                 if alg in options:
                     subAlg = block.subAlgs[alg]
-                    self._configureAlg(subAlg, options[alg], configSeq, containerName)
+                    self._configureAlg(subAlg, options[alg], configSeq, containerName, extraOptions)
         return configSeq
 
 

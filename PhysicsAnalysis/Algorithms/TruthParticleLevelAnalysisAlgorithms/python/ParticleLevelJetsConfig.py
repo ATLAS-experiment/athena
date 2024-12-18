@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+
 
 class ParticleLevelJetsBlock(ConfigBlock):
     """ConfigBlock for particle-level truth jets"""
@@ -10,11 +10,10 @@ class ParticleLevelJetsBlock(ConfigBlock):
         super(ParticleLevelJetsBlock, self).__init__()
         self.addOption('containerName', 'AntiKt4TruthDressedWZJets', type=str,
                        info='the name of the input truth jets container')
+        # Always skip on data
+        self.setOptionValue('skipOnData', True)
 
     def makeAlgs(self, config):
-        if config.dataType() is DataType.Data:
-            return
-
         config.setSourceName (self.containerName, self.containerName)
 
         # count the number of heavy-flavour jets for normalisation of e.g. V+HF samples

@@ -44,6 +44,9 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('metTermName', 'Final', type=str,
             info="the name (string) of the MET term to save, turning the MET "
             "container into a single object. The default is 'Final'.")
+        self.addOption ('truthMetTermName', 'NonInt', type=str,
+            info="the name (string) of the truth MET term to save, turning the MET "
+            "container into a single object. The default is 'NonInt'.")
         # TODO: add info strng
         self.addOption ('storeSelectionFlags', True, type=bool,
             info="")
@@ -138,11 +141,15 @@ class OutputAnalysisConfig (ConfigBlock):
 
         autoVars = []
         autoMetVars = []
+        autoTruthMetVars = []
         for outputName in outputConfigs :
             outputConfig = outputConfigs[outputName]
             if outputConfig.enabled :
-                if config.isMetContainer (outputConfig.origContainerName) :
-                    myVars = autoMetVars
+                if config.isMetContainer (outputConfig.origContainerName):
+                    if "Truth" in outputConfig.origContainerName:
+                        myVars = autoTruthMetVars
+                    else:
+                        myVars = autoMetVars
                 else :
                     myVars = autoVars
                 if outputConfig.noSys :
@@ -187,6 +194,18 @@ class OutputAnalysisConfig (ConfigBlock):
             branchList_sys = [branch for branch in branchList if "%SYS%" in branch]
             ntupleMaker.Branches = branchList_nosys + branchList_sys
             ntupleMaker.termName = self.metTermName
+            #ntupleMaker.OutputLevel = 2  # For output validation
+
+        if len (self.metVars) + len (autoTruthMetVars) > 0:
+            ntupleMaker = config.createAlgorithm( 'CP::AsgxAODMetNTupleMakerAlg', 'TruthMetNTupleMaker' + postfix )
+            ntupleMaker.TreeName = self.treeName
+            ntupleMaker.RootStreamName = self.streamName
+            branchList = self.metVars + autoTruthMetVars
+            branchList.sort()
+            branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
+            branchList_sys = [branch for branch in branchList if "%SYS%" in branch]
+            ntupleMaker.Branches = branchList_nosys + branchList_sys
+            ntupleMaker.termName = self.truthMetTermName
             #ntupleMaker.OutputLevel = 2  # For output validation
 
         treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' + postfix )

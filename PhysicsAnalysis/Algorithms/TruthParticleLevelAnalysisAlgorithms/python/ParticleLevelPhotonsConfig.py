@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+
 
 class ParticleLevelPhotonsBlock(ConfigBlock):
     """ConfigBlock for particle-level truth photons"""
@@ -19,11 +19,10 @@ class ParticleLevelPhotonsBlock(ConfigBlock):
                        info='variable to use in isolation cuts of the form "var/pT < cut".')
         self.addOption('isolationCut', -1, type=float,
                        info='threshold to use in isolation cuts of the form "var/pT < cut".')
+        # Always skip on data
+        self.setOptionValue('skipOnData', True)
 
     def makeAlgs(self, config):
-        if config.dataType() is DataType.Data:
-            return
-
         config.setSourceName (self.containerName, self.containerName)
 
         # decorate the missing elements of the 4-vector so we can save it later
