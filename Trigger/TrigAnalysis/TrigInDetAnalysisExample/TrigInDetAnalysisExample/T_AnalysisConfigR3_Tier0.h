@@ -17,7 +17,7 @@
  **     @author  mark sutton
  **     @date    Tue 16 May 2017 09:28:55 CEST 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 #ifndef TrigInDetAnalysisExample_T_AnalysisConfigR3_Tier0_H
@@ -117,12 +117,15 @@ public:
 			 testFilter, referenceFilter,
 			 associator,
 			 analysis),
+    m_manalysis(0),
     m_useBeamCondSvc(false),
     m_doOffline(true),
     m_doMuons(false),
     m_doElectrons(false),
     m_doTaus(false),
     m_doBjets(false),
+    m_doTauThreeProng(false),
+    m_tauEtCutOffline(false),
     m_pdgID(0),
     m_parent_pdgID(0),
     m_NRois(0),
@@ -134,6 +137,7 @@ public:
     m_first(true),
     m_containTracks(false), 
     m_tnp_flag(false),
+    m_monTool(0),
     m_invmass(0),
     m_invmass_obj(0)
   {
@@ -908,7 +912,7 @@ protected:
 	    }
 #endif
 	  
-	    if ( roiInfo ) delete roiInfo;
+	    delete roiInfo;
 	  
 	  }
 
