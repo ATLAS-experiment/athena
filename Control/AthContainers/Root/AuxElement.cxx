@@ -605,7 +605,7 @@ void AuxElement::clearAux()
  * aux data items for this object are cleared.)
  */
 void AuxElement::copyAux (const ConstAuxElement& other,
-                          bool warnUnlocked /*= false*/)
+                          [[maybe_unused]] bool warnUnlocked /*= false*/)
 {
   if (!m_container) return;
   if (!m_container->hasStore()) return;
@@ -621,12 +621,15 @@ void AuxElement::copyAux (const ConstAuxElement& other,
 
   size_t oindex = other.index();
   SG::auxid_set_t other_ids = ocont->getAuxIDs();
+#ifndef XAOD_STANDALONE
   SG::auxid_set_t other_decors = ocont->getDecorIDs();
+#endif
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
 
   SG::AuxVectorData& cont = *container();
   for (SG::auxid_t auxid : other_ids) {
+#ifndef XAOD_STANDALONE
     if (other_decors.test (auxid)) {
       // Don't copy decorations --- another thread may be modifying them.
       other_ids.reset (auxid);
@@ -639,7 +642,9 @@ void AuxElement::copyAux (const ConstAuxElement& other,
         ATHCONTAINERS_WARNING("copyAux", ss.str());
       }
     }
-    else if (!r.isLinked (auxid)) {
+    else
+#endif
+    if (!r.isLinked (auxid)) {
       r.copy (auxid, cont, index(), *ocont, oindex, 1);
     }
   }
@@ -667,7 +672,7 @@ void AuxElement::copyAux (const ConstAuxElement& other,
  * aux data items for this object are cleared.)
  */
 void AuxElement::copyAux (const AuxElement& other,
-                          bool warnUnlocked /*= false*/)
+                          [[maybe_unused]] bool warnUnlocked /*= false*/)
 {
   if (!m_container) return;
   if (!m_container->hasStore()) return;
@@ -683,12 +688,15 @@ void AuxElement::copyAux (const AuxElement& other,
 
   size_t oindex = other.index();
   SG::auxid_set_t other_ids = ocont->getAuxIDs();
+#ifndef XAOD_STANDALONE
   SG::auxid_set_t other_decors = ocont->getDecorIDs();
+#endif
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
 
   AuxVectorData& cont = *container();
   for (SG::auxid_t auxid : other_ids) {
+#ifndef XAOD_STANDALONE
     if (other_decors.test (auxid)) {
       // Don't copy decorations --- another thread may be modifying them.
       other_ids.reset (auxid);
@@ -701,7 +709,9 @@ void AuxElement::copyAux (const AuxElement& other,
         ATHCONTAINERS_WARNING("copyAux", ss.str());
       }
     }
-    else if (!r.isLinked (auxid)) {
+    else
+#endif
+    if (!r.isLinked (auxid)) {
       r.copy (auxid, cont, index(), *ocont, oindex, 1);
     }
   }

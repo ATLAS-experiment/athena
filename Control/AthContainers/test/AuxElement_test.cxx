@@ -447,7 +447,10 @@ void test_copy()
   assert (elt2.ftyp1() == 10.5);
   assert (ityp2(elt2) == 0);
   assert (store1.getAuxIDs().find (linked_id) == store1.getAuxIDs().end());
+#ifndef XAOD_ANALYSIS
+  // Unlocked decoration not copied in Athena.
   assert (!idec.isAvailable (elt2));
+#endif
 
   const Elt& celt2 = elt2;
   SG::Accessor<int> ityp3 ("yetAnotherInt");
