@@ -17,7 +17,7 @@
  **     @author  mark sutton
  **     @date    Tue 16 May 2017 09:28:55 CEST 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 #ifndef TrigInDetAnalysisExample_T_AnalysisConfig_Tier0_H
@@ -106,6 +106,7 @@ public:
 			 testFilter, referenceFilter,
 			 associator,
 			 analysis ),
+    _analysis(0),
     m_useBeamCondSvc(false),
     m_doOffline(true),
     m_doMuons(false),
@@ -113,6 +114,8 @@ public:
     m_doTaus(false),
     m_doBjets(false),
     m_hasTruthMap(false),
+    m_doTauThreeProng(false),
+    m_tauEtCutOffline(false),
     m_NRois(0),
     m_NRefTracks(0),
     m_NTestTracks(0),
@@ -264,7 +267,7 @@ protected:
 	  }
 	}
 
-        chainitr++;
+        ++chainitr;
       }
 
       // m_chainNames.insert( m_chainNames.end(), chains.begin(), chains.end() );
@@ -495,7 +498,7 @@ protected:
       m_provider->msg(MSG::VERBOSE) << "xAOD Primary vertex container " << xaodVtxCollection->size() <<  " entries" << endmsg;
 
       xAOD::VertexContainer::const_iterator vtxitr = xaodVtxCollection->begin();
-      for ( ; vtxitr != xaodVtxCollection->end(); vtxitr++ ) {
+      for ( ; vtxitr != xaodVtxCollection->end(); ++vtxitr ) {
 	if ( (*vtxitr)->nTrackParticles()>0 && (*vtxitr)->vertexType()!=0 ) {
 	  vertices.push_back( TIDA::Vertex( (*vtxitr)->x(),
 					    (*vtxitr)->y(),
@@ -652,7 +655,7 @@ protected:
 
         chain.back().addTracks(testtracks);
 	
-        if ( roiInfo ) delete roiInfo;
+        delete roiInfo;
 
       }
       else {
@@ -804,7 +807,7 @@ protected:
 	  
 	  chain.back().addTracks(testtracks);
 	  
-	  if ( roiInfo ) delete roiInfo;
+	  delete roiInfo;
 	  
 	  /// get vertex information 
 	  

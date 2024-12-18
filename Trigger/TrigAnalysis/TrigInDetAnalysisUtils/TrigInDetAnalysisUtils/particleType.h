@@ -14,7 +14,7 @@
  **     @author  mark sutton
  **     @date    Thu 14 Jul 2011 09:50:36 BST 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -138,7 +138,7 @@ inline std::ostream& operator<<( std::ostream& s, const particleType& p ) {
 
   while ( pitr!=pend ) { 
     s << "p[" << pitr->first << "]=" << pitr->second << std::endl;
-    pitr++;
+    ++pitr;
   }
  
   return s;

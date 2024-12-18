@@ -74,9 +74,13 @@ def fromRunArgs(runArgs):
     flags.lock()
 
     itemList = [] # items to store in RDO
+    acceptAlgs = [] # skimming algs
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
+
+    from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
+    cfg.merge(CutFlowSvcCfg(flags))
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     cfg.merge(ByteStreamReadCfg(flags))
@@ -93,24 +97,26 @@ def fromRunArgs(runArgs):
         from PixelRawDataByteStreamCnv.PixelRawDataByteStreamCnvConfig import PixelRawDataProviderAlgCfg
         cfg.merge(PixelRawDataProviderAlgCfg(flags))
         itemList.append(f'PixelRDO_Container#{flags.Overlay.BkgPrefix}PixelRDOs')
+        itemList.append('IDCInDetBSErrContainer#PixelByteStreamErrs')
 
     if flags.Detector.EnableSCT:
         from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import SCTRawDataProviderCfg, SCTEventFlagWriterCfg
         cfg.merge(SCTRawDataProviderCfg(flags))
         cfg.merge(SCTEventFlagWriterCfg(flags))
         itemList.append(f'SCT_RDO_Container#{flags.Overlay.BkgPrefix}SCT_RDOs')
-        itemList.append("IDCInDetBSErrContainer#SCT_ByteStreamErrs")
+        itemList.append('IDCInDetBSErrContainer#SCT_ByteStreamErrs')
 
     if flags.Detector.EnableTRT:
         from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConfig import TRTRawDataProviderCfg
         cfg.merge(TRTRawDataProviderCfg(flags))
         itemList.append(f'TRT_RDO_Container#{flags.Overlay.BkgPrefix}TRT_RDOs')
+        itemList.append('TRT_BSErrContainer#TRT_ByteStreamErrs')
 
     if flags.Detector.EnableLAr:
         from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
         cfg.merge(LArRawDataReadingCfg(flags))
         itemList.append(f'LArDigitContainer#{flags.Overlay.BkgPrefix}LArDigitContainer_data')
-        itemList.append("LArFebHeaderContainer#LArFebHeader")
+        itemList.append('LArFebHeaderContainer#LArFebHeader')
 
     if flags.Detector.EnableTile:
         from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
@@ -154,11 +160,17 @@ def fromRunArgs(runArgs):
         itemList.append(f'xAOD::VertexContainer#{flags.Overlay.BkgPrefix}PrimaryVertices')
         itemList.append(f'xAOD::VertexAuxContainer#{flags.Overlay.BkgPrefix}PrimaryVerticesAux.x.y.z')
 
+        from OverlayUtilities.OverlayUtilitiesConfig import OverlayVertexSkimmingAlgCfg
+        cfg.merge(OverlayVertexSkimmingAlgCfg(flags))
+        acceptAlgs.append('OverlayVertexSkimmingAlg')
+
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    cfg.merge(OutputStreamCfg(flags, 'RDO', itemList))
+    cfg.merge(OutputStreamCfg(flags, 'RDO', itemList, AcceptAlgs=acceptAlgs))
 
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    cfg.merge(SetupMetaDataForStreamCfg(flags, 'RDO', createMetadata=[MetadataCategory.IOVMetaData]))
+    cfg.merge(SetupMetaDataForStreamCfg(flags, 'RDO', AcceptAlgs=acceptAlgs,
+                                        createMetadata=[MetadataCategory.IOVMetaData,
+                                                        MetadataCategory.CutFlowMetaData]))
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_ConditionsData/StrawStatusSummary.h"
@@ -8,8 +8,8 @@ namespace TRTCond
 {
 
 StrawStatusSummary::StrawStatusSummary(size_t nstraws)
+  : m_status (nstraws)
 {
-  m_status.reserve(nstraws);
 }
 
 void StrawStatusSummary::setStatus(const IdentifierHash &hashId, bool status)

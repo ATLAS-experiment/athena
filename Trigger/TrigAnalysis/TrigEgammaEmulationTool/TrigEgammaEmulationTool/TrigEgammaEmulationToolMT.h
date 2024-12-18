@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 
@@ -61,15 +61,15 @@ class TrigData{
     std::string signature;
     
     // L1 object
-    const TrigRoiDescriptor *roi;
+    const TrigRoiDescriptor *roi{};
     // L1 legacy object
-    const xAOD::EmTauRoI *l1;
+    const xAOD::EmTauRoI *l1{};
     // Step 1 cluster
-    const xAOD::TrigEMCluster *emCluster;
+    const xAOD::TrigEMCluster *emCluster{};
     // Step 1 rings
-    const xAOD::TrigRingerRings *rings;
+    const xAOD::TrigRingerRings *rings{};
     // Step 2 photon object
-    const xAOD::TrigPhoton* trig_photon;
+    const xAOD::TrigPhoton* trig_photon{};
     // Step 3 clusters
     std::vector<const xAOD::CaloCluster*> clusters;
     // Step 2 electrons

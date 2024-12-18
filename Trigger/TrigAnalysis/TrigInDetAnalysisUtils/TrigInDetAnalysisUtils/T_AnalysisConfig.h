@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:06:39 CET
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -74,6 +74,7 @@ public:
 		   TrackAssociator* associator,
 		   TrackAnalysis* analysis) :
     m_provider(0),
+    m_tdt(0),
     m_analysisInstanceName(analysisInstanceName),
     m_refChainName(referenceChainName),
     m_refChainKey(referenceKey),
@@ -132,6 +133,7 @@ public:
 		   TrackAssociator* associator,
 		   TrackAnalysis* analysis) :
     m_provider(0),
+    m_tdt(0),
     m_analysisInstanceName(analysisInstanceName),
     m_refChainName(referenceChainName),
     m_refChainKey(referenceKey),
@@ -230,7 +232,7 @@ public:
   virtual void book() { }
 
   // Accessor methods
-  const std::string name() const {return m_analysisInstanceName;}
+  const std::string& name() const {return m_analysisInstanceName;}
 
   const std::string testChains() const {
       std::string name;
@@ -268,7 +270,7 @@ public:
   bool genericFlag() const    { return m_genericFlag; }
   void setGenericFlag(bool b) { m_genericFlag=b; }
 
-  std::string releaseData() const                { return m_releaseData; }
+  const std::string& releaseData() const                { return m_releaseData; }
   void releaseData(const std::string& s)  { m_releaseData = s; }
 
   void keepAllEvents( bool b ) { m_keepAllEvents = b; }
@@ -343,7 +345,7 @@ protected:
     
     xAOD::VertexContainer::const_iterator vtxitr = vtx_start;
  
-    for (  ; vtxitr!=vtx_end  ;  vtxitr++ ) {
+    for (  ; vtxitr!=vtx_end  ;  ++vtxitr ) {
       if ( (*vtxitr)->vertexType()!=0 ) {
 	m_provider->msg(MSG::VERBOSE) << "\tvertex " << (*vtxitr)->z() << endmsg;
 
@@ -610,10 +612,10 @@ protected:
 
     StatusCode sc = retrieve( collection, key );
 
+    if ( !( sc.isSuccess() && collection ) ) return false;
+
     m_provider->msg(MSG::DEBUG) << "SG Collection->size() " << collection->size() << " (" << key << ")" << endmsg;
 
-    if ( !( sc.isSuccess() && collection ) ) return false;
-  
     // added to fix muon samples bug
     if ( collection->size() == 0 ) {
       m_provider->msg(MSG::WARNING) << "no particles in collection" << endmsg;
@@ -636,8 +638,8 @@ protected:
     if ( key!="" ) {
       if ( m_provider->evtStore()->template contains<Collection>( key ) ) {
 	StatusCode sc = retrieve( collection, key );
-	m_provider->msg(MSG::DEBUG) << "SG Collection->size() " << collection->size() << " (" << key << ")" << endmsg;
 	if( sc.isSuccess() && collection ) {
+	  m_provider->msg(MSG::DEBUG) << "SG Collection->size() " << collection->size() << " (" << key << ")" << endmsg;
 
 	  typename Collection::const_iterator  trackitr = collection->begin();
 	  typename Collection::const_iterator  trackend = collection->end();
