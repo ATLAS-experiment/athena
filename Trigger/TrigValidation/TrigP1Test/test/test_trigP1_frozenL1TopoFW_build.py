@@ -33,6 +33,7 @@ class DiffL1MenuStep(CheckSteps.RefComparisonStep):
         super(DiffL1MenuStep, self).__init__(name)
         self.executable = 'topoconverterph1/diffL1Menu.py'
         self.input_file = None
+        self.auto_report_result = True
 
     def configure(self, test):
         if self.reference is None:
