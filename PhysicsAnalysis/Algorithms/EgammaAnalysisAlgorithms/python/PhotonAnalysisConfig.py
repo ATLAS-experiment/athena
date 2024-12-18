@@ -63,6 +63,8 @@ class PhotonCalibrationConfig (ConfigBlock) :
             "systematics dependent corrections.  The net effect is that the "
             "slower first step only has to be run once, while the second is run "
             "once per systematic. ATLASG-2358")
+        self.addOption ('decorateTruth', False, type=bool,
+            info="decorate truth particle information on the reconstructed one")
 
 
     def makeCalibrationAndSmearingAlg (self, config, name) :
@@ -249,6 +251,10 @@ class PhotonCalibrationConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
         config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
 
+        # decorate truth information on the reconstructed object:
+        if self.decorateTruth and config.dataType() is not DataType.Data:
+            config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True)
+            config.addOutputVar (self.containerName, "truthOrigin", "truth_origin", noSys=True)
 
 
 class PhotonWorkingPointConfig (ConfigBlock) :

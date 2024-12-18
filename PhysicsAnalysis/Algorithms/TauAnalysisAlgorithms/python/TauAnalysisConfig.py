@@ -26,9 +26,8 @@ class TauCalibrationConfig (ConfigBlock):
         self.addOption ('rerunTruthMatching', True, type=bool,
             info="whether to rerun truth matching (sets up an instance of "
             "CP::TauTruthMatchingAlg). The default is True.")
-        # TODO: add info string
         self.addOption ('decorateTruth', False, type=bool,
-            info="")
+            info="decorate truth particle information on the reconstructed one")
 
 
     def makeAlgs (self, config) :
@@ -68,6 +67,10 @@ class TauCalibrationConfig (ConfigBlock):
             for var in ['DecayMode', 'ParticleType'] + alg.doubleDecorations[:] + alg.floatDecorations[:] + alg.intDecorations[:] + alg.charDecorations[:]:
                 branchName = alg.prefix+var
                 config.addOutputVar (self.containerName, branchName, branchName, noSys=True)
+            
+            # these are already available
+            config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True)
+            config.addOutputVar (self.containerName, "truthOrigin", "truth_origin", noSys=True)
 
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' + postfix )

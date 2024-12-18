@@ -33,6 +33,7 @@ Electrons:
   - containerName: AnaElectrons
     forceFullSimConfig: True
     recalibratePhyslite: False
+    decorateTruth: true
     WorkingPoint:
       - selectionName: loose
         forceFullSimConfig: True
@@ -47,6 +48,7 @@ Photons:
     recomputeIsEM: False
     forceFullSimConfig: True
     recalibratePhyslite: False
+    decorateTruth: true
     WorkingPoint:
       - selectionName: tight
         forceFullSimConfig: True
@@ -59,6 +61,7 @@ Photons:
 Muons:
   - containerName: AnaMuons
     recalibratePhyslite: False
+    decorateTruth: true
     WorkingPoint:
       - selectionName: medium
         quality: Medium
@@ -67,6 +70,7 @@ Muons:
 
 TauJets:
   - containerName: AnaTauJets
+    decorateTruth: true
     WorkingPoint:
       - selectionName: tight
         quality: Tight

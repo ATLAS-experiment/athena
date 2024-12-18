@@ -35,6 +35,8 @@ class MuonCalibrationConfig (ConfigBlock):
             info="only for testing purposes, turn on to ignore NSW hits and "
             "fix a crash with older derivations (p-tag <p5834)")
         self.addOption ('calibMode', 'correctData_CB', type=str, info='calibration mode of the MuonCalibTool needed to turn on the sagitta bias corrections and to select the muon track calibration type (CB or ID+MS)')
+        self.addOption ('decorateTruth', False, type=bool,
+            info="decorate truth particle information on the reconstructed one")
 
     def makeAlgs (self, config) :
 
@@ -111,6 +113,10 @@ class MuonCalibrationConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
 
+        # decorate truth information on the reconstructed object:
+        if self.decorateTruth and config.dataType() is not DataType.Data:
+            config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True)
+            config.addOutputVar (self.containerName, "truthOrigin", "truth_origin", noSys=True)
 
 class MuonWorkingPointConfig (ConfigBlock) :
     """the ConfigBlock for the muon working point
