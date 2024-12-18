@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FILTERUSINGMBTSTIMING_H
@@ -29,12 +29,12 @@ class FilterUsingMBTSTiming : public AthAlgorithm {
     ///MBTSContainer", "StoreGate key of the MBTS container (default=\"MBTSContainer\")");
     std::string m_mbtsContainerName;
     ///Only count cell above this threshold (default = 40/222[pC])");
-    float m_MBTSThreshold;
+    float m_MBTSThreshold{};
     ///Maximum difference of the average time of hits on A and C-side (default=10[ns])");
-    float m_maxTimeDifference;
+    float m_maxTimeDifference{};
     //@}
 
     // Handle to the Tile identifier helper
-    const TileTBID* m_tileTBID;
+    const TileTBID* m_tileTBID{};
 };
 #endif
