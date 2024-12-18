@@ -48,7 +48,7 @@ namespace CP {
       Gaudi::Property<int> m_count {this, "count", 0, "count value"};
 
       /// \brief the operator version of the comparison (>, <, etc)
-      SignEnum::ComparisonOperator m_signEnum;
+      SignEnum::ComparisonOperator m_signEnum{};
 
       /// \brief the systematics list
       CP::SysListHandle m_systematicsList {this};

@@ -45,7 +45,7 @@ namespace CP {
       Gaudi::Property<std::string> m_sign {this, "sign", "SetMe", "comparison sign to use"};
 
       /// \brief the operator version of the comparison (>, <, etc)
-      SignEnum::ComparisonOperator m_signEnum;
+      SignEnum::ComparisonOperator m_signEnum{};
 
       /// \brief use dressed kinematics
       Gaudi::Property<bool> m_useDressedProperties{this, "useDressedProperties", false,
