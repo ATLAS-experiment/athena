@@ -378,7 +378,7 @@ StatusCode FPGATrackSimGenScanTool::pairThenGroupFilter(const BinEntry &bindata,
 void FPGATrackSimGenScanTool::updateState(const IntermediateState &inputstate,
                                           IntermediateState &outputstate,
                                           unsigned lyridx,
-                                          std::vector<const StoredHit *> newhits)
+                                          const std::vector<const StoredHit *>& newhits)
 {
   unsigned int allowed_missed_hits = m_nLayers - m_threshold;
 
