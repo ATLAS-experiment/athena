@@ -13,15 +13,13 @@
 #ifndef  DerivationFrameworkMCTruth_HadronOriginClassifier_H
 #define  DerivationFrameworkMCTruth_HadronOriginClassifier_H
 
-#include <vector>
-#include <map>
-#include <set>
-#include <string>
-#include <utility>
-
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "xAODEventInfo/EventInfo.h"
+
+#include <map>
+#include <set>
+#include <string>
 
 namespace DerivationFramework{
 
@@ -97,10 +95,10 @@ namespace DerivationFramework{
     inline bool IsTtBb() const {return m_ttbb;}
 
     std::string m_mcName;
-    double m_HadronPtMinCut;
-    double m_HadronEtaMaxCut;
-    int m_DSID;
-    GEN_id m_GenUsed;
+    double m_HadronPtMinCut{};
+    double m_HadronEtaMaxCut{};
+    int m_DSID{};
+    GEN_id m_GenUsed{};
     bool m_ttbb = false;
     
   };
