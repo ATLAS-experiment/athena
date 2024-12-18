@@ -229,7 +229,7 @@ namespace Athena_test
     SGASSERTERROR(rSG.record(new Foo(6), key, LOCKED).isSuccess());
     std::unique_ptr<Foo> foo5 (new Foo(5));
     SGASSERTERROR(rSG.record(std::move(foo5), key).isSuccess());
-    assert (foo5.get() == 0);
+    assert (foo5.get() == 0);  // cppcheck-suppress accessMoved; deliberate
 
     assert(rSG.record(new Foo(7), "UnLocked", !LOCKED).isSuccess());
     assert(rSG.record(new Foo(8), "Locked", LOCKED).isSuccess());
@@ -240,13 +240,13 @@ namespace Athena_test
     std::unique_ptr<Foo> foo12 (new Foo(12));
     assert(rSG.record(std::move(foo12),
                       "UnLockedDelete", !LOCKED, DELETE).isSuccess());
-    assert(foo12.get() == 0);
+    assert(foo12.get() == 0);  // cppcheck-suppress accessMoved; deliberate
 
     assert(rSG.record(cpFoo=new Foo(13), "Const").isSuccess());
 
     std::unique_ptr<const Foo> foo13a (new Foo(130));
     assert(rSG.record(std::move(foo13a), "Const2").isSuccess());
-    assert(foo13a.get() == 0);
+    assert(foo13a.get() == 0);  // cppcheck-suppress accessMoved; deliberate
 
     //FIXME!!! assert(rSG.record(cpFoo=new Foo(14), "ConstUnLocked", !LOCKED).isSuccess());
     SGASSERTERROR(rSG.record(cpFoo=new Foo(15), "Const").isSuccess());
