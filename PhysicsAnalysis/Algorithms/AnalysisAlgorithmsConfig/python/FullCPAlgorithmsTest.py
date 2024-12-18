@@ -174,6 +174,12 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq.setOptionValue ('.isolationWP', 'Loose_VarRad')
     configSeq.setOptionValue ('.writeTrackD0Z0', True)
 
+    configSeq += config.makeConfig ('Electrons.IFFClassification',
+        containerName='AnaElectrons')
+    configSeq += config.makeConfig ('Electrons.MCTCClassification',
+        containerName='AnaElectrons')
+    configSeq.setOptionValue ('.prefix', 'truth_')
+
     configSeq += config.makeConfig ('Electrons.PtEtaSelection',
         containerName='AnaElectrons')
     configSeq.setOptionValue ('.minPt', electronMinPt)
@@ -211,6 +217,13 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
     configSeq.setOptionValue ('.writeTrackD0Z0', True)
 
+    configSeq += config.makeConfig ('Muons.IFFClassification',
+        containerName='AnaMuons')
+    configSeq += config.makeConfig ('Muons.MCTCClassification',
+        containerName='AnaMuons')
+    configSeq.setOptionValue ('.prefix', 'truth_')
+
+
     # TODO: MCP should restore this when the recommendations for Tight WP exist in R23
     # configSeq += config.makeConfig ('Muons.Selection', 'AnaMuons.tight')
     # configSeq.setOptionValue ('.quality', 'Tight')
@@ -230,6 +243,10 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq.setOptionValue('.tauID', 'Tight')
     configSeq.setOptionValue('.triggerChainsPerYear', tauTriggerChainsSF)
 
+    configSeq += config.makeConfig ('TauJets.MCTCClassification',
+        containerName='AnaTauJets')
+    configSeq.setOptionValue ('.prefix', 'truth_')
+
 
     # Add systematic object links
     configSeq += config.makeConfig('SystObjectLink', containerName='AnaJets')
@@ -244,6 +261,9 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     # Particle-level objects
     configSeq += config.makeConfig ('PL_Electrons',
         containerName='TruthElectrons')
+    configSeq += config.makeConfig ('PL_Electrons.MCTCClassification',
+        containerName='TruthElectrons')
+    configSeq.setOptionValue ('.prefix', '')
     configSeq += config.makeConfig ('PL_Electrons.PtEtaSelection',
         containerName='TruthElectrons')
     configSeq.setOptionValue ('.skipOnData', True)
@@ -252,6 +272,9 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
 
     configSeq += config.makeConfig ('PL_Muons',
         containerName='TruthMuons')
+    configSeq += config.makeConfig ('PL_Muons.MCTCClassification',
+        containerName='TruthMuons')
+    configSeq.setOptionValue ('.prefix', '')
     configSeq += config.makeConfig ('PL_Muons.PtEtaSelection',
         containerName='TruthMuons')
     configSeq.setOptionValue ('.skipOnData', True)
@@ -270,6 +293,9 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
 
     configSeq += config.makeConfig ('PL_Taus',
         containerName='TruthTaus')
+    configSeq += config.makeConfig ('PL_Taus.MCTCClassification',
+        containerName='TruthTaus')
+    configSeq.setOptionValue ('.prefix', '')
     configSeq += config.makeConfig ('PL_Taus.PtEtaSelection',
         containerName='TruthTaus')
     configSeq.setOptionValue ('.skipOnData', True)

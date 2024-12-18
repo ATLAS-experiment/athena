@@ -545,11 +545,10 @@ class IFFLeptonDecorationBlock (ConfigBlock):
         self.addOption ('decoration', 'IFFClass_%SYS%', type=str,
             info="the name (str) of the decoration set by the IFF "
             "TruthClassificationTool. The default is 'IFFClass_%SYS%'.")
+        # Always skip on data
+        self.setOptionValue('skipOnData', True)
 
     def makeAlgs (self, config) :
-        # the classification is only for MC
-        if config.dataType() is DataType.Data: return
-
         particles = config.readName(self.containerName)
 
         alg = config.createAlgorithm( 'CP::AsgClassificationDecorationAlg', 'IFFClassifierAlg' + self.containerName )
@@ -562,6 +561,34 @@ class IFFLeptonDecorationBlock (ConfigBlock):
 
         # write the decoration only once to the output
         config.addOutputVar(self.containerName, alg.decoration, alg.decoration.split("_%SYS%")[0], noSys=True)
+
+
+class MCTCLeptonDecorationBlock (ConfigBlock):
+
+    def __init__ (self, containerName="") :
+        super (MCTCLeptonDecorationBlock, self).__init__ ()
+
+        self.addOption ("containerName", containerName, type=str,
+                        noneAction='error',
+                        info="the input lepton container, with a possible selection, "
+                        "in the format container or container.selection.")
+        self.addOption ("prefix", 'MCTC_', type=str,
+                        info="the prefix (str) of the decorations based on the MCTC "
+                        "classification. The default is 'MCTC_'.")
+        # Always skip on data
+        self.setOptionValue('skipOnData', True)
+
+    def makeAlgs (self, config) :
+        particles, selection = config.readNameAndSelection(self.containerName)
+
+        alg = config.createAlgorithm ("CP::MCTCDecorationAlg", f"MCTCDecorationAlg{self.containerName}")
+        alg.particles = particles
+        alg.preselection = selection
+        alg.affectingSystematicsFilter = '.*'
+        config.addOutputVar (self.containerName, "MCTC_isPrompt", f"{self.prefix}isPrompt", noSys=True)
+        config.addOutputVar (self.containerName, "MCTC_fromHadron", f"{self.prefix}fromHadron", noSys=True)
+        config.addOutputVar (self.containerName, "MCTC_fromBSM", f"{self.prefix}fromBSM", noSys=True)
+        config.addOutputVar (self.containerName, "MCTC_fromTau", f"{self.prefix}fromTau", noSys=True)
 
 
 class PerEventSFBlock (ConfigBlock):

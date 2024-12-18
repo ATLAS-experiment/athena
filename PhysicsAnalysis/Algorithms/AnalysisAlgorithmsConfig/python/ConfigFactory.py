@@ -317,6 +317,11 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="IFFClassification", alg=IFFLeptonDecorationBlock,
             superBlocks=["Electrons", "Muons",
                          "PL_Electrons", "PL_Muons"])
+        # MCTC truth classification
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import MCTCLeptonDecorationBlock
+        self.addAlgConfigBlock(algName="MCTCClassification", alg=MCTCLeptonDecorationBlock,
+            superBlocks=["Electrons", "Muons", "TauJets",
+                         "PL_Electrons", "PL_Muons", "PL_Taus"])
 
         # generator level analysis
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import GeneratorAnalysisBlock
