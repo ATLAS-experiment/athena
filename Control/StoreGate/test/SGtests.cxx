@@ -208,12 +208,10 @@ namespace Athena_test
     expCLIDs.insert (ClassID_traits<Foo>::ID());
     checkCLIDs (rSG, expCLIDs);
     //can't record with same key
-    // cppcheck-suppress assertWithSideEffect
     SGASSERTERROR(rSG.record(new Foo(3), "pFoo1", LOCKED).isSuccess());
     //can't record same object twice
     SGASSERTERROR(rSG.record(pFoo, "pFoo2", !LOCKED).isSuccess());
     //check we haven't left any trace of "pFoo2" in DataStore
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.record(new Foo(2), "pFoo2", !LOCKED).isSuccess());
 
     const Foo* cpFoo = new Foo;
@@ -225,60 +223,41 @@ namespace Athena_test
     assert(1 == ids.size());
     
     SillyKey key("silly");
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.record(new Foo(4), key).isSuccess());
     //can't record with same key
-    // cppcheck-suppress assertWithSideEffect
     SGASSERTERROR(rSG.record(new Foo(5), key).isSuccess());
-    // cppcheck-suppress assertWithSideEffect
     SGASSERTERROR(rSG.record(new Foo(6), key, LOCKED).isSuccess());
     std::unique_ptr<Foo> foo5 (new Foo(5));
-    // cppcheck-suppress assertWithSideEffect
     SGASSERTERROR(rSG.record(std::move(foo5), key).isSuccess());
     assert (foo5.get() == 0);
 
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.record(new Foo(7), "UnLocked", !LOCKED).isSuccess());
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.record(new Foo(8), "Locked", LOCKED).isSuccess());
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.record(new Foo(9), "LockedReset", LOCKED, RESET).isSuccess());
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.record(new Foo(10), "UnLockedReset", !LOCKED, RESET).isSuccess());
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.record(new Foo(11), "LockedDelete", LOCKED, DELETE).isSuccess());
 
     std::unique_ptr<Foo> foo12 (new Foo(12));
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.record(std::move(foo12),
                       "UnLockedDelete", !LOCKED, DELETE).isSuccess());
     assert(foo12.get() == 0);
 
-    // cppcheck-suppress assignmentInAssert
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.record(cpFoo=new Foo(13), "Const").isSuccess());
 
     std::unique_ptr<const Foo> foo13a (new Foo(130));
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.record(std::move(foo13a), "Const2").isSuccess());
     assert(foo13a.get() == 0);
 
     //FIXME!!! assert(rSG.record(cpFoo=new Foo(14), "ConstUnLocked", !LOCKED).isSuccess());
-    // cppcheck-suppress assignmentInAssert
-    // cppcheck-suppress assertWithSideEffect
     SGASSERTERROR(rSG.record(cpFoo=new Foo(15), "Const").isSuccess());
 
 
     /// Test overwriting.
-    // cppcheck-suppress assertWithSideEffect
     assert (rSG.record(new Foo(101), "ow").isSuccess());
-    // cppcheck-suppress assertWithSideEffect
     assert (rSG.overwrite(new Foo(102), "ow").isSuccess());
     assert (rSG.overwrite(make_unique<Foo>(103), "ow").isSuccess());
 
-    // cppcheck-suppress assertWithSideEffect
     assert (rSG.record(new Foo(104), "ow2", LOCKED).isSuccess());
-    // cppcheck-suppress assertWithSideEffect
     assert (rSG.overwrite(new Foo(105), "ow2", LOCKED).isSuccess());
     assert (rSG.overwrite(make_unique<Foo>(106), "ow2", LOCKED).isSuccess());
 
@@ -304,7 +283,6 @@ namespace Athena_test
     // record a keyed object and remove. this will only reset proxy
     pFoo = new Foo();
     assert(rSG.record(pFoo, "pFooKey").isSuccess());
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.remove(pFoo).isSuccess());
     cout << " Now we expect to see an error for invalid proxy >>> " << endl;
     assert(rSG.retrieve(pFoo, "pFooKey").isFailure());
@@ -312,7 +290,6 @@ namespace Athena_test
 
     pFoo = new Foo();
     assert(rSG.record(pFoo, "pFooKey").isSuccess());
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.remove(pFoo).isSuccess());
     assert(0 == rSG.proxy(pFoo));
     assert(0 != rSG.proxy(ClassID_traits<Foo>::ID(), "pFooKey"));
@@ -321,7 +298,6 @@ namespace Athena_test
     
     pFoo = new Foo();
     assert(rSG.record(pFoo, "pFooKey").isSuccess());
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.removeDataAndProxy(pFoo).isSuccess());
     assert(0 == rSG.proxy(pFoo));
     assert(0 == rSG.proxy(ClassID_traits<Foo>::ID(), "pFooKey"));
@@ -433,7 +409,6 @@ namespace Athena_test
     checkCLIDs (sg, expCLIDs);
 
     // create alias with type, key
-    // cppcheck-suppress assertWithSideEffect
     assert (sg.setAlias(d1, "d1Alias").isSuccess());
     D1* d1Alias = 0;
     assert (sg.retrieve(d1Alias, "d1Alias").isSuccess());
@@ -441,7 +416,6 @@ namespace Athena_test
     assert (dp->refCount() == 4); // add one alias
 
     // create alias with pointer
-    // cppcheck-suppress assertWithSideEffect
     assert (sg.setAlias(d1, "d1AnotherAlias").isSuccess());
     D1* d1AnotherAlias = 0;
     assert (sg.retrieve(d1AnotherAlias, "d1AnotherAlias").isSuccess());
@@ -457,7 +431,6 @@ namespace Athena_test
     assert (sg.retrieve(d2b, "d2").isSuccess());
 
     // set same alias as D1
-    // cppcheck-suppress assertWithSideEffect
     assert (sg.setAlias(d2, "d1Alias").isSuccess());
 
     // retrieve with alias and make sure that you get the new one.
@@ -479,7 +452,6 @@ namespace Athena_test
 
     // Now remove it.  The symlink needs to go away too.
     assert (b1_dtor == 0);
-    // cppcheck-suppress assertWithSideEffect
     assert (sg.removeDataAndProxy(d1).isSuccess());
     assert (b1_dtor == 1);
 
@@ -580,7 +552,6 @@ namespace Athena_test {
       new SG::TransientAddress (ClassID_traits<D1>::ID(), "dd",
                                 pIOA, false);
     DataProxy* dp = new SG::DataProxy (taddr, &cnv);
-    // cppcheck-suppress assertWithSideEffect
     assert (sg.addToStore (ClassID_traits<D1>::ID(), dp).isSuccess());
     IOpaqueAddress *pIOAB(new TestIOA);
     taddr =
@@ -588,7 +559,6 @@ namespace Athena_test {
                                 pIOAB, false);
     taddr->setTransientID (ClassID_traits<B1>::ID());
     DataProxy* dpB = new SG::DataProxy (taddr, &cnv);
-    // cppcheck-suppress assertWithSideEffect
     assert (sg.addToStore (ClassID_traits<B1>::ID(), dpB).isSuccess());
 
     D1* d1 = 0;
@@ -730,7 +700,6 @@ namespace Athena_test {
 
     assert(rSG.record(cFoo,dbKey).isSuccess());
 
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.bind(chFoo,dbKey).isSuccess());
     assert(chFoo.cptr() == cFoo);
 
@@ -765,13 +734,9 @@ namespace Athena_test {
   void testClear(::StoreGateSvc& rSG) {
 
     Foo* pFoo;    
-    // cppcheck-suppress assignmentInAssert
     assert(rSG.record(pFoo=new Foo, "LockReset", LOCKED, RESET).isSuccess());
-    // cppcheck-suppress assignmentInAssert
     assert(rSG.record(pFoo=new Foo, "UnLockReset", !LOCKED, RESET).isSuccess());
-    // cppcheck-suppress assignmentInAssert
     assert(rSG.record(pFoo=new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
-    // cppcheck-suppress assignmentInAssert
     assert(rSG.record(pFoo=new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
     Bar* pBar = new Bar();
     Base* bDum(0);
@@ -799,7 +764,6 @@ namespace Athena_test {
     assert(pFoo2->i() == 2);
     pFoo2 = 0;
 
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.transientSwap( 8101, "pSwapFoo1", "pSwapFoo2" ));
     assert(rSG.retrieve( pFoo1, "pSwapFoo1" ).isSuccess());
     assert(rSG.retrieve( pFoo2, "pSwapFoo2" ).isSuccess());
@@ -813,52 +777,41 @@ namespace Athena_test {
   {  
     cout << "\n*** StoreGateSvcClient_test VersionedKey BEGINS ***" << endl;
     //start by creating an unversioned object to test handling of legacy keys
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.record(new Foo(11), "aVersObj").isSuccess());
     const Foo* pFoo(0);
-    // cppcheck-suppress assignmentInAssert
     assert(0 != (pFoo = rSG.retrieve<Foo>("aVersObj")));
     assert(pFoo->i() == 11);
     
     //try to put a VersionedKey on top
     VersionedKey myKey("aVersObj", 77);
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.record(new Foo(77), (std::string)myKey).isSuccess());
     const Foo* pFoo77(0);
-    // cppcheck-suppress assignmentInAssert
     assert(0 != (pFoo77 = rSG.retrieve<Foo>(myKey)));
     assert(pFoo77->i() == 77);
     //test that we can retrieve the same object with an unversioned key
-    // cppcheck-suppress assignmentInAssert
     assert(0 != (pFoo = rSG.retrieve<Foo>("aVersObj")));
     assert(pFoo->i() == 77);
     
     //check we can retrieve the old object with a default unversioned key
     VersionedKey defVK("aVersObj");
-    // cppcheck-suppress assignmentInAssert
     assert(0 != (pFoo = rSG.retrieve<Foo>((std::string)defVK)));
     assert(pFoo->i() == 11);
 
 
     const std::string baseKey("aVersObj");
     VersionedKey my2Key(baseKey, 88);
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.record(new Foo(88), (std::string)my2Key).isSuccess());
     const Foo* pFoo88(0);
-    // cppcheck-suppress assignmentInAssert
     assert(0 != (pFoo88 = rSG.retrieve<Foo>(my2Key)));
     assert(pFoo88->i() == 88);
 
-    // cppcheck-suppress assertWithSideEffect
     SGASSERTERROR(rSG.record(new Foo(66), (std::string)my2Key).isSuccess());
     VersionedKey my3Key(baseKey, 66);
-    // cppcheck-suppress assertWithSideEffect
     assert(rSG.record(new Foo(66), (std::string)my3Key).isSuccess());
 
     //test that a generic retrieve now returns the third recorded object
     //Notice how a generic retrieve will always return the last recorded
     //object with that key, independent from the numeric value of its version
-    // cppcheck-suppress assignmentInAssert
     assert(0 != (pFoo = rSG.retrieve<Foo>(baseKey)));
     assert(pFoo->i() == 66);
 
@@ -879,15 +832,10 @@ namespace Athena_test {
     rSG.clearStore().ignore();
 
     Foo* pFoo;    
-    // cppcheck-suppress assignmentInAssert
     assert(rSG.record(pFoo=new Foo, "LockReset", LOCKED, RESET).isSuccess());
-    // cppcheck-suppress assignmentInAssert
     assert(rSG.record(pFoo=new Foo, "UnLockReset", !LOCKED, RESET).isSuccess());
-    // cppcheck-suppress assignmentInAssert
     assert(rSG.record(pFoo=new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
-    // cppcheck-suppress assignmentInAssert
     assert(rSG.record(pFoo=new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
-    // cppcheck-suppress assertWithSideEffect
     assert (rSG.setAlias(pFoo, "fooAlias").isSuccess());
 
     std::vector<std::string> keys;
@@ -914,13 +862,9 @@ namespace Athena_test {
     //get rid of the two RESET dobjs
     rSG.clearStore(/*force=*/true).ignore();
 
-    // cppcheck-suppress assignmentInAssert
     assert(rSG.record(pFoo=new Foo, "LockReset", LOCKED, DELETE).isSuccess());
-    // cppcheck-suppress assignmentInAssert
     assert(rSG.record(pFoo=new Foo, "UnLockReset", !LOCKED, DELETE).isSuccess());
-    // cppcheck-suppress assignmentInAssert
     assert(rSG.record(pFoo=new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
-    // cppcheck-suppress assignmentInAssert
     assert(rSG.record(pFoo=new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
     rSG.clearStore().ignore();
     rSG.keys<Foo>(keys);
@@ -972,14 +916,12 @@ namespace Athena_test {
 
     assert(rSG.retrieve(pVec,"BVec").isSuccess());    
     //second retrieve does not trigger retrieve of AuxStore
-    // cppcheck-suppress assignmentInAssert
-    assert( 0 != (pVec=rSG.retrieve<TestVector<BX> >("BVec")) );    
+    assert( 0 != (pVec=rSG.retrieve<TestVector<BX> >("BVec")) );
 
     const TestVector<BX>* cpVec(0);
     assert(rSG.retrieve(cpVec, "CVec").isSuccess());    
     // a regular retrieve ignores a missing aux store
-    // cppcheck-suppress assignmentInAssert
-    assert( 0 != (cpVec=rSG.retrieve<const TestVector<BX> >("ErrorVec")) );    
+    assert( 0 != (cpVec=rSG.retrieve<const TestVector<BX> >("ErrorVec")) );
     
     //deprecated but we need to test it nonetheless...
 #ifdef TEST_DEPRECATED
@@ -993,7 +935,6 @@ namespace Athena_test {
     TestAuxStore* pAux_b = new TestAuxStore;
     assert(rSG.record(pAux_b, "BStandAux.").isSuccess());
 
-    // cppcheck-suppress assignmentInAssert
     assert( 0 != (pb=rSG.retrieve<BX>("BStand")) );
     //assert (pb->usingStandAloneStore());
     //assert (pb->getStore() == pAux_b);
@@ -1036,18 +977,14 @@ namespace Athena_test {
     {
       SG::WriteHandle<int> h ("testBoundReset", rSG.name());
       h = std::make_unique<int> (10);
-      // cppcheck-suppress assertWithSideEffect
       assert (h.isValid());
-      // cppcheck-suppress assertWithSideEffect
       assert (*h.cachedPtr() == 10);
       rSG.commitNewDataObjects();
-      // cppcheck-suppress assertWithSideEffect
       assert (h.cachedPtr() == nullptr);
     }
 
     {
       SG::ReadHandle<int> h ("testBoundReset", rSG.name());
-      // cppcheck-suppress assertWithSideEffect
       assert (h.isValid());
       assert (*h.cachedPtr() == 10);
     }
@@ -1172,7 +1109,6 @@ namespace Athena_test {
       auto obj = std::make_unique<BX> (10);
       auto objAux = std::make_unique<TestAuxStore>();
       paux = objAux.get();
-      // cppcheck-suppress assertWithSideEffect
       assert (h.record (std::move(obj), std::move(objAux)).isSuccess());
       assert (!paux->m_locked);
     }
