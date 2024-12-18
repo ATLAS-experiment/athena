@@ -57,6 +57,41 @@ class TextConfig(ConfigFactory):
         self._config = config
         return
 
+    # Less-than-ideal fix introduced in !76767
+    def preprocessConfig(self, config, algs):
+        """
+        Preprocess the configuration dictionary.
+        Ensure blocks with only sub-blocks are initialized with an empty dictionary.
+        """
+        def processNode(node, algs):
+            if not isinstance(node, dict):
+                return  # Base case: not a dictionary
+            for blockName, blockContent in list(node.items()):
+                # If the block name is recognized in algs
+                if blockName in algs:
+                    # If the block only defines sub-blocks, initialize it
+                    if isinstance(blockContent, dict) and not any(
+                            key in algs[blockName].options for key in blockContent
+                    ):
+                        # Ensure parent block is initialized as an empty dictionary
+                        node[blockName] = {'__placeholder__': True, **blockContent}
+                    # Recurse into sub-blocks
+                    processNode(node[blockName], algs[blockName].subAlgs)
+
+        # Start processing from the root of the configuration
+        processNode(config, algs)
+
+    # Less-than-ideal fix introduced in !76767
+    def cleanupPlaceholders(self, config):
+        """
+        Remove placeholder markers after initialization.
+        """
+        if not isinstance(config, dict):
+            return
+        if "__placeholder__" in config:
+            del config["__placeholder__"]
+        for key, value in config.items():
+            self.cleanupPlaceholders(value)
 
     def loadConfig(self, yamlPath):
         """
@@ -95,7 +130,15 @@ class TextConfig(ConfigFactory):
         # check if blocks are defined in yaml file
         if "AddConfigBlocks" in config:
            self._configureAlg(self._algs["AddConfigBlocks"], config["AddConfigBlocks"])
+
+        # Preprocess the configuration dictionary (see !76767)
+        self.preprocessConfig(config, self._algs)
+
         merge(config, self._algs)
+
+        # Cleanup placeholders (see !76767)
+        self.cleanupPlaceholders(config)
+
         return
 
 
@@ -218,6 +261,14 @@ class TextConfig(ConfigFactory):
             if not seq._blocks:
                 continue
             algOpts = seq.setOptions(options)
+            # If containerName was not set explicitly, we can now retrieve
+            # its default value
+            if containerName is None:
+                for opt in algOpts:
+                    if 'name' in opt and opt['name'] == 'containerName':
+                        containerName = opt.get('value', None)
+                        break  # Exit the loop as we've found the key
+
             if configSeq is not None:
                 configSeq += seq
 
@@ -228,6 +279,7 @@ class TextConfig(ConfigFactory):
             expectedOptions |= set(block.subAlgs)
 
             difference = set(options.keys()) - expectedOptions
+            difference.discard('__placeholder__')
             if difference:
                 difference = "\n".join(difference)
                 raise ValueError(f"There are options set that are not used for "
