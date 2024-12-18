@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 # TEST5.py - derivation framework example demonstrating the use of decorators
 # Two decorations are done - one from an example tool (AugemntationToolExample)
 # and one from a CP tool (muon selection tool). Decorations are added as ExtraVariables

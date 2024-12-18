@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 #========================================================================
 # DAOD_SUSY20.py
 # This defines DAOD_SUSY20, a skimmed DAOD format for Run-2 and Run-3.

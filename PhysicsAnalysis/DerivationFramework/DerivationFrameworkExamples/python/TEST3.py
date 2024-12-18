@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 # TEST3.py - derivation framework example demonstrating thinning 
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator

@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 # TEST4.py - derivation framework example demonstrating slimming 
 # Note this is the same as TEST1,2,3 but without any tools
 

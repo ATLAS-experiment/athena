@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 #========================================================================
 # TRIG9.py
 # This defines DAOD_TRIG9, a DAOD format for Run 3.

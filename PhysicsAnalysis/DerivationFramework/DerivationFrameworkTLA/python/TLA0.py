@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 #====================================================================
 # Slimmed DAOD_PHYS.py for Run 3 trigger-object level analyses (TLAs)
 # It contains the variables and objects needed for  Run 3 TLA searches.

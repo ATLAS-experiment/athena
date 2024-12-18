@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 # ListSlimming.py - List of collections for slimming from athena 21.2 HION4 and EGAM1ExtraContent.py
 
 #################################################################################
