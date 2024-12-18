@@ -104,6 +104,7 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (containerName='AnaElectrons')
     config.setOptions (forceFullSimConfig=True)
     config.setOptions (recalibratePhyslite=False)
+    config.setOptions (decorateTruth=True)
     # Electrons.WorkingPoint
     config.addBlock ('Electrons.WorkingPoint')
     config.setOptions (containerName='AnaElectrons')
@@ -123,6 +124,7 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (forceFullSimConfig=True)
     config.setOptions (recomputeIsEM=False)
     config.setOptions (recalibratePhyslite=False)
+    config.setOptions (decorateTruth=True)
     # Photons.WorkingPoint
     config.addBlock ('Photons.WorkingPoint')
     config.setOptions (containerName='AnaPhotons')
@@ -139,6 +141,7 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     # Muons
     config.addBlock ('Muons', containerName='AnaMuons')
     config.setOptions (recalibratePhyslite=False)
+    config.setOptions (decorateTruth=True)
     # Muons.WorkingPoint
     config.addBlock ('Muons.WorkingPoint')
     config.setOptions (containerName='AnaMuons')
@@ -149,6 +152,7 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
 
     # TauJets
     config.addBlock ('TauJets', containerName='AnaTauJets')
+    config.setOptions (decorateTruth=True)
     # TauJets.WorkingPoint
     config.addBlock ('TauJets.WorkingPoint')
     config.setOptions (containerName='AnaTauJets')

@@ -153,6 +153,7 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     likelihood = True
     configSeq += config.makeConfig ('Electrons',
         containerName='AnaElectrons' )
+    configSeq.setOptionValue ('.decorateTruth', True)
     configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.recalibratePhyslite', False)
     configSeq += config.makeConfig ('Electrons.WorkingPoint',
@@ -175,6 +176,7 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     # Include, and then set up the photon analysis algorithm sequence:
     configSeq += config.makeConfig ('Photons',
         containerName='AnaPhotons' )
+    configSeq.setOptionValue ('.decorateTruth', True)
     configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.recomputeIsEM', False)
     configSeq.setOptionValue ('.recalibratePhyslite', False)
@@ -194,6 +196,7 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     # set up the muon analysis algorithm sequence:
     configSeq += config.makeConfig ('Muons',
         containerName='AnaMuons')
+    configSeq.setOptionValue ('.decorateTruth', True)
     configSeq.setOptionValue ('.recalibratePhyslite', False)
     configSeq += config.makeConfig ('Muons.WorkingPoint',
         containerName='AnaMuons',
@@ -210,6 +213,7 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     # Include, and then set up the tau analysis algorithm sequence:
     configSeq += config.makeConfig ('TauJets',
         containerName='AnaTauJets')
+    configSeq.setOptionValue ('.decorateTruth', True)
     configSeq += config.makeConfig ('TauJets.WorkingPoint',
         containerName='AnaTauJets',
         selectionName='tight')

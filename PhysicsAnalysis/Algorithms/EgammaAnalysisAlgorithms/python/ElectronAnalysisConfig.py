@@ -58,6 +58,9 @@ class ElectronCalibrationConfig (ConfigBlock) :
             "systematics dependent corrections.  The net effect is that the "
             "slower first step only has to be run once, while the second is run "
             "once per systematic. ATLASG-2358")
+    
+        self.addOption ('decorateTruth', False, type=bool,
+            info="decorate truth particle information on the reconstructed one")
 
 
     def makeCalibrationAndSmearingAlg (self, config, name) :
@@ -206,6 +209,14 @@ class ElectronCalibrationConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
 
+        # decorate truth information on the reconstructed object:
+        if self.decorateTruth and config.dataType() is not DataType.Data:
+            config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True)
+            config.addOutputVar (self.containerName, "truthOrigin", "truth_origin", noSys=True)
+
+            config.addOutputVar (self.containerName, "firstEgMotherPdgId", "truth_firstEgMotherPdgId", noSys=True)
+            config.addOutputVar (self.containerName, "firstEgMotherTruthOrigin", "truth_firstEgMotherTruthOrigin", noSys=True)
+            config.addOutputVar (self.containerName, "firstEgMotherTruthType", "truth_firstEgMotherTruthType", noSys=True)
 
 
 class ElectronWorkingPointConfig (ConfigBlock) :
