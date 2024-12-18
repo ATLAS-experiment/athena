@@ -49,6 +49,9 @@ namespace InDet {
     /// configure the tool to apply a given list of systematic variations
     virtual StatusCode applySystematicVariation( const CP::SystematicSet& ) = 0;
 
+    /// directly return a per track uncertainty from the 2D histogram for tight and loose standard tracks in the style of the LRT systematic from the InclusiveTrackFilterTool (TEMPORARY FIX -- experts only! Will be superseded by ATLIDTRKCP-665)
+    virtual float getTrackUncertainty(const xAOD::TrackParticle* track, const std::string& systName) const = 0;
+
 
   }; // class IInDetTrackTruthFilterTool
 

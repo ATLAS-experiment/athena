@@ -66,6 +66,9 @@ namespace InDet {
     /// configure the tool to apply a given list of systematic variations
     virtual StatusCode applySystematicVariation( const CP::SystematicSet& ) override;
 
+    /// directly return a per track uncertainty from the 2D histogram for tight and loose standard tracks in the style of the LRT systematic from InclusiveTrackFilterTool (TEMPORARY FIX -- experts only! Should be superseded by ATLIDTRKCP-665)
+    virtual float getTrackUncertainty(const xAOD::TrackParticle* track, const std::string& systName) const override;
+
   private:
 
     StatusCode initTrkEffSystHistogram(float scale, TH2 *&histogram, std::string rootFileName, std::string histogramName) const;
@@ -108,6 +111,8 @@ namespace InDet {
     TH2* m_trkEffHistLRTIBL = nullptr;
     TH2* m_trkEffHistLRTPP0 = nullptr;
     TH2* m_trkEffHistLRTPhysModel = nullptr;
+
+    std::unordered_map<std::string, TH2*> m_histMap;
 
     // allow the user to configure which calibration files to use if desired
     std::string m_calibFileNomEff;
