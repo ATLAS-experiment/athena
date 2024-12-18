@@ -47,7 +47,7 @@ class ParticleLevelElectronsBlock(ConfigBlock):
                 ['pt_dressed', 'pt'],
                 ['eta_dressed', 'eta'],
                 ['phi_dressed', 'phi'],
-                ['e', 'e'],
+                ['e_dressed', 'e'],
                 ['charge', 'charge'],
                 ['classifierParticleType', 'type'],
                 ['classifierParticleOrigin', 'origin'],
