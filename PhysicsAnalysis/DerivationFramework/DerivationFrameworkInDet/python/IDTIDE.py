@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 # ====================================================================
 # IDTIDE.py
 # Contact: atlas-cp-tracking-denseenvironments@cern.ch

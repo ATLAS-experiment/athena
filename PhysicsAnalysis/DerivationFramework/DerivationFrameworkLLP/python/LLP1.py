@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 #====================================================================
 # DAOD_LLP1.py
 # This defines DAOD_LLP1, an unskimmed DAOD format for Run 3.

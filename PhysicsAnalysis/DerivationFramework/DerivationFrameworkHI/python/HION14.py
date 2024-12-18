@@ -1,6 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
-
 #====================================================================
 # HION14.py
 # author: Mariana Vivas <mariana.vivas.albornoz@cern.ch>

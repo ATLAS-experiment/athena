@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 #====================================================================
 # DAOD_HIGG1D1.py
 # This defines DAOD_HIGG1D1, an unskimmed DAOD format for Run 3.

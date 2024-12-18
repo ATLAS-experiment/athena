@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 #====================================================================
 # DAOD_FTAG4.py
 # This defines DAOD_FTAG4, an unskimmed DAOD format for Run 3.

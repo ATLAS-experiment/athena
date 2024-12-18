@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 # HION12.py  
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator

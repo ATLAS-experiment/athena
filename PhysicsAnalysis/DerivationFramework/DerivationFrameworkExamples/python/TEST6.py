@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 # TEST6.py - derivation framework example demonstrating pre-selection, such that only
 # after passing the skimming do heavier augmentation tools run 
 

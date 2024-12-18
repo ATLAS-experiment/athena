@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
 # TRUTH3.py - format containing standard common ATLAS truth record
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
