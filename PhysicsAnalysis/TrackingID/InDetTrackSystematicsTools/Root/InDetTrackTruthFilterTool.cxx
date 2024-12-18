@@ -127,6 +127,17 @@ namespace InDet {
       ATH_MSG_INFO( "Using for LRT track efficiency the calibration file " << PathResolverFindCalibFile(m_calibFileLRTEff) );
     }
 
+     m_histMap = {
+      {"TRK_EFF_LOOSE_GLOBAL", m_trkEffHistLooseGlobal},
+      {"TRK_EFF_LOOSE_IBL", m_trkEffHistLooseIBL},
+      {"TRK_EFF_LOOSE_PP0", m_trkEffHistLoosePP0},
+      {"TRK_EFF_LOOSE_PHYSMODEL", m_trkEffHistLoosePhysModel},
+      {"TRK_EFF_TIGHT_GLOBAL", m_trkEffHistTightGlobal},
+      {"TRK_EFF_TIGHT_IBL", m_trkEffHistTightIBL},
+      {"TRK_EFF_TIGHT_PP0", m_trkEffHistTightPP0},
+      {"TRK_EFF_TIGHT_PHYSMODEL", m_trkEffHistTightPhysModel}
+    };
+
     ATH_CHECK ( m_trackOriginTool.retrieve() );
 
     ATH_CHECK ( InDetTrackSystematicsTool::initialize() );
@@ -367,6 +378,28 @@ namespace InDet {
       frac = 0.;
     }
     return frac;
+  }
+
+  float InDetTrackTruthFilterTool::getTrackUncertainty(const xAOD::TrackParticle* track, const std::string& systName) const {
+
+    auto it = m_histMap.find(systName);
+    if (it == m_histMap.end()) {
+      ATH_MSG_ERROR( "getTrackUncertainty: Standard track systematic name " << systName << " is not recognized. Returning 0." );
+      return 0.;
+    }
+
+    TH2* hist = it->second;
+    if (hist == nullptr) {
+      ATH_MSG_ERROR( "Standard tracking efficiency histogram for " << systName << " is not properly initialized!" );
+      return 0.;
+    }
+
+    //convert pt to GeV
+    float pt = track->pt() * 1.e-3;
+
+    //check that track pt does not go beyond range
+    if( pt >= hist->GetXaxis()->GetXmax() ) pt = hist->GetXaxis()->GetXmax() - 0.001;
+    return hist->GetBinContent(hist->FindBin(pt, track->eta()));
   }
 
   // this is where the calculation of the fake probability is done if you are not using truth info to determine whether a track is fake
