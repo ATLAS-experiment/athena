@@ -24,6 +24,9 @@
 //Root includes
 #include "TFormula.h"
 
+#include <memory>
+#include <vector>
+
 // forward declarations
 class TObject;
 class TGraph;
@@ -170,7 +173,7 @@ private:
     //! @brief List of bools whether a parameter should use linear interpolation in pT if it's some kind of pT binned parameter
     std::vector<bool> m_interpolatePtFlags;
     //! @brief The type of objects to which the specific conf file settings are allowed to be applied to
-    ElectronPhotonVariableCorrectionBase::EGammaObjects m_applyToObjects;
+    ElectronPhotonVariableCorrectionBase::EGammaObjects m_applyToObjects{};
     //! @brief Store if already retrieved eta binning
     bool m_retrievedEtaBinning = false;
     //! @brief Store if already retrieved pt binning
