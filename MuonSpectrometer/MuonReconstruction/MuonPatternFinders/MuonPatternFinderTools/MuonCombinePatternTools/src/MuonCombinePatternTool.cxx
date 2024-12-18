@@ -770,7 +770,8 @@ std::vector<PrdPatternPair> MuonCombinePatternTool::splitPatterns2D(
             etapattern2->addPrd(prd);
         }
     }
-    splitPatterns.emplace_back(std::move(phipattern1), std::move(etapattern1));
+    //clone: cant have two unique_ptrs to the same object in the container
+    splitPatterns.emplace_back(std::move(phipattern1), std::make_unique<Muon::MuonPrdPattern>(*etapattern1));
     splitPatterns.emplace_back(std::move(etapattern1), std::move(etapattern2));
     return splitPatterns;
 }
