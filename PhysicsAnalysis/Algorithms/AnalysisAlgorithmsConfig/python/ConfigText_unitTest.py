@@ -118,6 +118,13 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.addBlock ('Electrons.PtEtaSelection')
     config.setOptions (containerName='AnaElectrons')
     config.setOptions (minPt=10000.0)
+    # Electrons.IFFClassification
+    config.addBlock ('Electrons.IFFClassification')
+    config.setOptions (containerName='AnaElectrons')
+    # Electrons.MCTCClassification
+    config.addBlock ('Electrons.MCTCClassification')
+    config.setOptions (containerName='AnaElectrons')
+    config.setOptions (prefix='truth_')
 
     # Photons
     config.addBlock ('Photons', containerName='AnaPhotons')
@@ -149,6 +156,13 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (quality='Medium')
     config.setOptions (isolation='Loose_VarRad')
     config.setOptions (writeTrackD0Z0=True)
+    # Muons.IFFClassification
+    config.addBlock ('Muons.IFFClassification')
+    config.setOptions (containerName='AnaMuons')
+    # Muons.MCTCClassification
+    config.addBlock ('Muons.MCTCClassification')
+    config.setOptions (containerName='AnaMuons')
+    config.setOptions (prefix='truth_')
 
     # TauJets
     config.addBlock ('TauJets', containerName='AnaTauJets')
@@ -169,6 +183,10 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (containerName='AnaTauJets')
     config.setOptions (tauID='Tight')
     config.setOptions (triggerChainsPerYear=tauTriggerChainsSF)
+    # TauJets.MCTCClassification
+    config.addBlock ('TauJets.MCTCClassification')
+    config.setOptions (containerName='AnaTauJets')
+    config.setOptions (prefix='truth_')
 
     config.addBlock ('SystObjectLink')
     config.setOptions (containerName='AnaJets')
@@ -229,6 +247,9 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (skipOnData=True)
     config.setOptions (useDressedProperties=True)
     config.setOptions (minPt=20e3)
+    config.addBlock ('PL_Electrons.MCTCClassification')
+    config.setOptions (containerName='TruthElectrons')
+    config.setOptions (prefix='')
 
     config.addBlock ('PL_Photons')
     config.setOptions (containerName='TruthPhotons')
@@ -244,6 +265,9 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (skipOnData=True)
     config.setOptions (useDressedProperties=True)
     config.setOptions (minPt=20e3)
+    config.addBlock ('PL_Muons.MCTCClassification')
+    config.setOptions (containerName='TruthMuons')
+    config.setOptions (prefix='')
 
     config.addBlock ('PL_Taus')
     config.setOptions (containerName='TruthTaus')
@@ -251,6 +275,9 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (containerName='TruthTaus')
     config.setOptions (skipOnData=True)
     config.setOptions (minPt=20e3)
+    config.addBlock ('PL_Taus.MCTCClassification')
+    config.setOptions (containerName='TruthTaus')
+    config.setOptions (prefix='')
 
     config.addBlock ('PL_Jets')
     config.setOptions (containerName='AntiKt4TruthDressedWZJets')

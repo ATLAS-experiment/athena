@@ -15,7 +15,7 @@ atlas_add_library( AsgAnalysisAlgorithmsLib
      AnaAlgorithmLib AsgAnalysisInterfaces AssociationUtilsLib GammaORToolsLib
      EventBookkeeperToolsLib IsolationSelectionLib PMGAnalysisInterfacesLib FakeBkgToolsLib
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PATInterfaces xAODCore xAODMetaData xAODJet xAODMuon xAODTau xAODEgamma xAODMissingET
-     xAODTracking xAODTruth xAODRootAccess RootCoreUtils )
+     xAODTracking xAODTruth xAODRootAccess RootCoreUtils TruthUtils )
 
 atlas_add_dictionary( AsgAnalysisAlgorithmsDict
    AsgAnalysisAlgorithms/AsgAnalysisAlgorithmsDict.h

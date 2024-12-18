@@ -43,6 +43,9 @@ Electrons:
         writeTrackD0Z0: True
     PtEtaSelection:
       minPt: 10000.0
+    IFFClassification: {}
+    MCTCClassification:
+      prefix: truth_
 
 Photons:
   - containerName: AnaPhotons
@@ -68,6 +71,9 @@ Muons:
         quality: Medium
         isolation: Loose_VarRad
         writeTrackD0Z0: True
+    IFFClassification: {}
+    MCTCClassification:
+      prefix: truth_
 
 TauJets:
   - containerName: AnaTauJets
@@ -90,6 +96,8 @@ TauJets:
           2018:
             - HLT_tau25_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA
             - HLT_tau35_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA
+    MCTCClassification:
+      prefix: truth_
 
 SystObjectLink:
   - containerName: AnaJets
@@ -118,6 +126,8 @@ PL_Electrons:
   PtEtaSelection:
     useDressedProperties: true
     minPt: 20000.0
+  MCTCClassification:
+    prefix: ""
 PL_Photons:
   containerName: TruthPhotons
   PtEtaSelection:
@@ -127,10 +137,14 @@ PL_Muons:
   PtEtaSelection:
     useDressedProperties: true
     minPt: 20000.0
+  MCTCClassification:
+    prefix: ""
 PL_Taus:
   containerName: TruthTaus
   PtEtaSelection:
     minPt: 20000.0
+  MCTCClassification:
+    prefix: ""
 PL_Jets:
   containerName: AntiKt4TruthDressedWZJets
   PtEtaSelection:
