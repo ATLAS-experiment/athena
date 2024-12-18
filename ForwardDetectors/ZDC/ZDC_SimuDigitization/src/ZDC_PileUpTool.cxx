@@ -5,11 +5,12 @@
 
 #include "ZDC_SimuDigitization/ZDC_PileUpTool.h"
 #include "xAODForward/ZdcModuleToString.h"
-#include <algorithm>
-#include "ZDC_SimEvent/ZDC_SimFiberHit_Collection.h"
-#include "ZDC_SimEvent/ZDC_SimFiberHit.h"
+#include "ZdcIdentifier/ZdcID.h"
+
 #include "ZdcUtils/ZDCWaveformFermiExp.h"
 #include "ZdcUtils/ZDCWaveformLTLinStep.h"
+#include "ZdcUtils/ZDCWaveformSampler.h"
+
 #include "PileUpTools/PileUpMergeSvc.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "AthenaKernel/RNGWrapper.h"
@@ -17,6 +18,7 @@
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGaussQ.h"
 #include "CLHEP/Random/RandPoissonQ.h"
+#include <algorithm>
 
 ZDC_PileUpTool::ZDC_PileUpTool(const std::string& type,
              const std::string& name,
