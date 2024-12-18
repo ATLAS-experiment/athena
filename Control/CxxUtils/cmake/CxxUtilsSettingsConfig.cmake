@@ -45,7 +45,6 @@ set( CMAKE_CPPCHECK_DEFAULT
    # Commonly used libraries
    "--library=boost"
    "--library=googletest"
-   "--library=posix"
    "--library=python"
    # Athena-specific config and suppression file
    "--library=${_baseDir}/cppcheck_athena.cfg"
