@@ -20,6 +20,9 @@
 #include "TRT_TrackExtensionTool_xk/TRT_TrajectoryElement_xk.h"
 // MagField cache
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
+#include <iosfwd>
+#include <utility>
+#include <vector>
 
 namespace Trk {
   class Track;
@@ -136,29 +139,29 @@ namespace InDet{
       // Protected Data
       ///////////////////////////////////////////////////////////////////
 
-      int                                 m_firstRoad      ; //
-      int                                 m_lastRoad       ; //
-      int                                 m_firstTrajectory; //
-      int                                 m_lastTrajectory ; //
-      int                                 m_nclusters      ; //
-      int                                 m_ntclusters     ; //
-      int                                 m_nholesb        ; //
-      int                                 m_nholese        ; //
-      int                                 m_nholes         ; //
-      int                                 m_dholes         ; //
-      int                                 m_naElements     ; //
-      int                                 m_nElements      ; // nindex
-      int                                 m_ndf            ; //
-      double                              m_xi2            ; //
-      double                              m_roadwidth2     ; // road width**2
-      double                              m_zVertexWidth   ; // z-vertex half width
-      double                              m_impact         ; // max impact parameters
-      double                              m_scale_error    ; // scale factor for hit uncertainty
+      int                                 m_firstRoad      {}; //
+      int                                 m_lastRoad       {}; //
+      int                                 m_firstTrajectory{}; //
+      int                                 m_lastTrajectory {}; //
+      int                                 m_nclusters      {}; //
+      int                                 m_ntclusters     {}; //
+      int                                 m_nholesb        {}; //
+      int                                 m_nholese        {}; //
+      int                                 m_nholes         {}; //
+      int                                 m_dholes         {}; //
+      int                                 m_naElements     {}; //
+      int                                 m_nElements      {}; // nindex
+      int                                 m_ndf            {}; //
+      double                              m_xi2            {}; //
+      double                              m_roadwidth2     {}; // road width**2
+      double                              m_zVertexWidth   {}; // z-vertex half width
+      double                              m_impact         {}; // max impact parameters
+      double                              m_scale_error    {}; // scale factor for hit uncertainty
       Trk::PatternTrackParameters         m_parameters     ; // Track parameters
-      TRT_TrajectoryElement_xk            m_elements[400]  ; //
+      TRT_TrajectoryElement_xk            m_elements[400]  {}; //
       Trk::MagneticFieldProperties        m_fieldprop      ; //
-      const Trk::IPatternParametersPropagator*  m_proptool ; //
-      const Trk::IPatternParametersUpdator*  m_updatortool ; //
+      const Trk::IPatternParametersPropagator*  m_proptool {}; //
+      const Trk::IPatternParametersUpdator*  m_updatortool {}; //
 
       ///////////////////////////////////////////////////////////////////
       // Work arrey for stab line search
