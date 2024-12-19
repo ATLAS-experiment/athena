@@ -664,8 +664,6 @@ HLT_2mu4_b0dRAB207invmAB22vtx20_L1BPH-7M22-0DR20-2MU3V:
   eventCount: 0
 HLT_2mu4_b0dRAB207invmAB22vtx20_L1BPH-7M22-0DR20-2MU3VF:
   eventCount: 0
-HLT_2mu4_b7invmAB22vtx20_L1BPH-7M22-2MU3VF:
-  eventCount: 0
 HLT_2mu4_bBmumu_L12MU3V:
   eventCount: 0
   stepCounts:
@@ -1441,18 +1439,6 @@ HLT_7j45_pf_ftf_presel7j30_L14J15:
   eventCount: 0
 HLT_7j45_pf_ftf_presel7j30_L14jJ40:
   eventCount: 0
-HLT_distrk20_medium_L1XE50:
-  eventCount: 0
-  stepCounts:
-    0: 2
-  stepFeatures:
-    0: 2
-HLT_distrk20_medium_L1XE55:
-  eventCount: 0
-  stepCounts:
-    0: 1
-  stepFeatures:
-    0: 1
 HLT_distrk20_medium_L1gXEJWOJ100:
   eventCount: 0
 HLT_distrk20_medium_L1gXEJWOJ110:
@@ -1465,18 +1451,6 @@ HLT_distrk20_medium_L1jXE100:
     0: 1
 HLT_distrk20_medium_L1jXE110:
   eventCount: 0
-HLT_distrk20_tight_L1XE50:
-  eventCount: 0
-  stepCounts:
-    0: 2
-  stepFeatures:
-    0: 2
-HLT_distrk20_tight_L1XE55:
-  eventCount: 0
-  stepCounts:
-    0: 1
-  stepFeatures:
-    0: 1
 HLT_distrk20_tight_L1gXEJWOJ100:
   eventCount: 0
 HLT_distrk20_tight_L1gXEJWOJ110:
@@ -7921,22 +7895,6 @@ HLT_g90_loose_xe90_cell_L1eEM28M:
   stepFeatures:
     0: 1
     1: 1
-HLT_hitdvjet200_medium_L1XE50:
-  eventCount: 0
-  stepCounts:
-    0: 2
-    1: 2
-  stepFeatures:
-    0: 2
-    1: 2
-HLT_hitdvjet200_medium_L1XE55:
-  eventCount: 0
-  stepCounts:
-    0: 1
-    1: 1
-  stepFeatures:
-    0: 1
-    1: 1
 HLT_hitdvjet200_medium_L1gXEJWOJ100:
   eventCount: 0
 HLT_hitdvjet200_medium_L1gXEJWOJ110:
@@ -7951,11 +7909,7 @@ HLT_hitdvjet200_medium_L1jXE100:
     1: 1
 HLT_hitdvjet200_medium_L1jXE110:
   eventCount: 0
-HLT_hitdvjet260_medium_L1J100:
-  eventCount: 0
 HLT_hitdvjet260_medium_L1jJ160:
-  eventCount: 0
-HLT_hitdvjet260_tight_L1J100:
   eventCount: 0
 HLT_hitdvjet260_tight_L1jJ160:
   eventCount: 0
@@ -12543,8 +12497,6 @@ HLT_mu6_msonly_j70_j50a_j0_DJMASS900j50dphi260x200deta_L1jMJJ-500-NFF:
 HLT_mu6_mu4_L1BPH-7M14-MU5VFMU3VF:
   eventCount: 0
 HLT_mu6_mu4_PhysicsTLA_L1BPH-7M22-MU5VFMU3VF:
-  eventCount: 0
-HLT_mu6_mu4_b7invmAB22vtx20_L1BPH-7M22-MU5VFMU3VF:
   eventCount: 0
 HLT_mu6_mu4_bBmumu_L1BPH-2M9-0DR15-C-MU5VFMU3V:
   eventCount: 0
