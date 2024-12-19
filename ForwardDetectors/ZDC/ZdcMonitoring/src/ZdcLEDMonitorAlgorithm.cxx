@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcMonitoring/ZdcLEDMonitorAlgorithm.h"
@@ -102,7 +102,7 @@ StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms(unsigned int DAQMode, const
         const xAOD::ZdcModule* moduleSumEventInfo_ptr = 0;
 
         SG::ReadHandle<xAOD::ZdcModuleContainer> zdcSums(m_ZdcSumContainerKey, ctx); // already checked in fillHistograms that zdcSums is valid
-        for (const auto& zdcSum : *zdcSums) { 
+        for (const auto zdcSum : *zdcSums) { 
             if (zdcSum->zdcSide() == 0){
                 moduleSumEventInfo_ptr = zdcSum;
             }
@@ -136,7 +136,7 @@ StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms(unsigned int DAQMode, const
 
     SG::ReadHandle<xAOD::ZdcModuleContainer> zdcSums(m_ZdcSumContainerKey, ctx); // already checked in fillHistograms that zdcSums is valid
 
-    for (const auto& zdcSum : *zdcSums) { 
+    for (const auto zdcSum : *zdcSums) { 
         if (zdcSum->zdcSide() == 0){
             iLEDType = zdcLEDTypeHandle(*zdcSum);
             led_type_str = m_LEDNames[iLEDType];
@@ -258,7 +258,7 @@ StatusCode ZdcLEDMonitorAlgorithm::fillHistograms( const EventContext& ctx ) con
        ATH_MSG_WARNING("evtStore() does not contain Collection with name "<< m_ZdcSumContainerKey);
        return StatusCode::SUCCESS;
     }
-    for (const auto& zdcSum : *zdcSums) { 
+    for (const auto zdcSum : *zdcSums) { 
         if (zdcSum->zdcSide() == 0){
             if (!eventTypeHandle.isAvailable()){
                 ATH_MSG_WARNING("The global sum entry in zdc sum container can be retrieved; but it does NOT have the variable eventType written as a decoration!");
