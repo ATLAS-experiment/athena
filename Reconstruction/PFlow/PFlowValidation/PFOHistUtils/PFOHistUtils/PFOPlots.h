@@ -39,7 +39,7 @@ namespace PFO {
     /** Pt Histogram binned in eta */
     TH1* m_FE_pt_etaBinA{};
     TH1* m_FE_pt_etaBinB{};
-    TH1* m_FE_pt_etaBinC;
+    TH1* m_FE_pt_etaBinC{};
     
     void initializePlots();    
     std::string m_sFEContainerName;
