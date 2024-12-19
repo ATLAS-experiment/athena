@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -57,30 +57,30 @@ namespace Analysis {
         //-------------------------------------------------------------------------------------
         
     private:
-        bool m_piMassHyp;
-        bool m_kMassHyp;
-        double m_trkThresholdPt;
-        double m_trkMaxEta;
-        double m_BThresholdPt;
-        double m_BMassUpper;
-        double m_BMassLower;
+        bool m_piMassHyp{};
+        bool m_kMassHyp{};
+        double m_trkThresholdPt{};
+        double m_trkMaxEta{};
+        double m_BThresholdPt{};
+        double m_BMassUpper{};
+        double m_BMassLower{};
         SG::ReadHandleKey<xAOD::VertexContainer> m_jpsiCollectionKey;
-        double m_jpsiMassUpper;
-        double m_jpsiMassLower;
+        double m_jpsiMassUpper{};
+        double m_jpsiMassLower{};
         SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrkParticleCollection;
         SG::ReadHandleKey<xAOD::MuonContainer> m_MuonsUsedInJpsi;
-        bool m_excludeJpsiMuonsOnly;
-        bool m_excludeCrossJpsiTracks; //Added by Matteo Bedognetti
+        bool m_excludeJpsiMuonsOnly{};
+        bool m_excludeCrossJpsiTracks{}; //Added by Matteo Bedognetti
         ToolHandle < Trk::IVertexFitter > m_iVertexFitter;
         ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;
-        Trk::TrkVKalVrtFitter* m_VKVFitter;
-        bool m_useMassConst;
-        double m_altMassConst;
-        double m_chi2cut;
-        double m_trkTrippletMassUpper;
-        double m_trkTrippletMassLower;
-        double m_trkTrippletPt       ;
-        double m_trkDeltaZ           ;
+        Trk::TrkVKalVrtFitter* m_VKVFitter{};
+        bool m_useMassConst{};
+        double m_altMassConst{};
+        double m_chi2cut{};
+        double m_trkTrippletMassUpper{};
+        double m_trkTrippletMassLower{};
+        double m_trkTrippletPt       {};
+        double m_trkDeltaZ           {};
         int m_requiredNMuons=0;
         int m_requiredNElectrons=0;
         std::vector<double> m_muonMasses;
@@ -89,7 +89,7 @@ namespace Analysis {
         std::bitset<3>      m_useGSFTrack;
         SG::ReadHandleKey<xAOD::ElectronContainer>    m_electronCollectionKey;
         bool m_skipNoElectron = false;
-        size_t m_candidateLimit;
+        size_t m_candidateLimit{};
 
     };
 } // end of namespace
