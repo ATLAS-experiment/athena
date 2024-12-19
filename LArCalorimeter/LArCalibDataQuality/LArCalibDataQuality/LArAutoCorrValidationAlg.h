@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -67,9 +67,9 @@ class LArAutoCorrValidationAlg: public LArAutoCorrValidationBase
   CaloCellGroupList m_covTolerance;
 
   /** Number of elements of the Covariance vector that should be checked */
-  unsigned m_nSamplesToCheck;
+  unsigned m_nSamplesToCheck{};
 
-  bool m_checkFifthSample;
+  bool m_checkFifthSample{};
 
   //The following is for keeping track of entire FEBs
   /** @brief Method to compare FEB averages */
@@ -81,19 +81,19 @@ class LArAutoCorrValidationAlg: public LArAutoCorrValidationBase
 		   covVal(0.),covRef(0.) {}
     DataPerFEB (const HWIdentifier cid, const HWIdentifier fid, int g) : chid(cid), febid(fid), gain(g),
 		   covVal(0.),covRef(0.),nEntries(0) {}
-    HWIdentifier chid;  //We need to remember the first connected channel for the offline id conversion
+    HWIdentifier chid{};  //We need to remember the first connected channel for the offline id conversion
     HWIdentifier febid;
-    int          gain;
-    double       covVal;
-    double       covRef;
-    unsigned     nEntries;
+    int          gain{};
+    double       covVal{};
+    double       covRef{};
+    unsigned     nEntries{};
   };
   
   std::vector<DataPerFEB> m_vDataPerFEB;
 
   //The following is for keeping track of the global average
-  double m_covGlobalVal,m_covGlobalRef;
-  unsigned m_nEntriesGlobal;
+  double m_covGlobalVal{},m_covGlobalRef{};
+  unsigned m_nEntriesGlobal{};
 };
 
 
