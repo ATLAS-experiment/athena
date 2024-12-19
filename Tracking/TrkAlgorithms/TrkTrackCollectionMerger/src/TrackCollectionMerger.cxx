@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -18,14 +18,7 @@
 ///////////////////////////////////////////////////////////////////
 Trk::TrackCollectionMerger::TrackCollectionMerger(const std::string& name,
                                                   ISvcLocator* pSvcLocator)
-  : AthReentrantAlgorithm(name, pSvcLocator)
-  , m_outtracklocation("CombinedInDetTracks")
-  , m_doTrackOverlay(false)
-{
-  declareProperty("TracksLocation", m_tracklocation);
-  declareProperty("OutputTracksLocation", m_outtracklocation);
-  declareProperty("DoTrackOverlay", m_doTrackOverlay);
-}
+  : AthReentrantAlgorithm(name, pSvcLocator) {}
 
 ///////////////////////////////////////////////////////////////////
 // Initialisation
