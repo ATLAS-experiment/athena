@@ -8,7 +8,7 @@ project( DetCommon VERSION ${_version} LANGUAGES C CXX )
 unset( _version )
 
 # Set the version of tdaq-common to use for the build:
-set( TDAQ-COMMON_VERSION "11-04-00" CACHE STRING
+set( TDAQ-COMMON_VERSION "12-00-00" CACHE STRING
    "The version of tdaq-common to use for the build" )
 set( TDAQ-COMMON_ATROOT
    "$ENV{TDAQ_RELEASE_BASE}/tdaq-common/tdaq-common-${TDAQ-COMMON_VERSION}"
@@ -22,7 +22,7 @@ set( Boost_NO_WARN_NEW_VERSIONS TRUE CACHE BOOL
 find_package( AtlasCMake QUIET )
 
 # Build the project against LCG:
-set( LCG_VERSION_POSTFIX "a"   # Needs to match tdaq release (NO layer, ATLINFR-3977)
+set( LCG_VERSION_POSTFIX "b"   # Needs to match tdaq release (NO layer, ATLINFR-3977)
    CACHE STRING "Version postfix for the LCG release to use" )
 set( LCG_VERSION_NUMBER 106
    CACHE STRING "Version number for the LCG release to use" )
