@@ -814,7 +814,7 @@ CaloSurfaceBuilder::fill_tg_surfaces(const CaloDetDescrManager* calo_dd) const
 
   // exit surfaces
   for (CaloCell_ID::CaloSample sample = CaloCell_ID::PreSamplerB;
-       sample + 1 < CaloCell_ID::Unknown;
+       sample + 1 < static_cast<int>(m_layerEntries.size());
        sample = CaloCell_ID::CaloSample(sample + 1)) {
     m_layerExits.push_back(m_layerEntries[sample + 1]);
   }
