@@ -13,7 +13,7 @@ atlas_add_library( ITkPixelCablingLib
                    PRIVATE_LINK_LIBRARIES InDetIdentifier )
 
 atlas_add_component( ITkPixelCabling
-                     src/* src/components/*.cxx 
+                     src/ITkPixelCablingAlg.cxx src/components/*.cxx 
                      LINK_LIBRARIES ITkPixelCablingLib 
                      PRIVATE_LINK_LIBRARIES AthenaBaseComps InDetIdentifier PathResolver IdDictParser StoreGateLib)
 
