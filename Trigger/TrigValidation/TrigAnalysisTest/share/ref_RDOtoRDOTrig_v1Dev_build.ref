@@ -15665,6 +15665,8 @@ HLT_j20_calratiovar_j70_j50a_j0_DJMASS900j50dphi260x200deta_roiftf_preselj20emf7
   eventCount: 0
 HLT_j20_calratiovar_roiftf_preselj20emf24_L1LLPDPHI-jXE40-jJ40:
   eventCount: 0
+HLT_j20_calratiovar_roiftf_preselj20emf24_L1LLPNODPHI-jXE40-jJ40:
+  eventCount: 0
 HLT_j20_j20_pf_ftf_presel3c20XX1c20bgtwo85_PhysicsTLA_L13jJ40p0ETA25:
   eventCount: 12
   stepCounts:
@@ -19150,10 +19152,6 @@ HLT_larpsallem_L1EM3_EMPTY:
 HLT_larpsallem_L1EM7_EMPTY:
   eventCount: 0
 HLT_larpsallem_L1EM7_FIRSTEMPTY:
-  eventCount: 0
-HLT_larsupercellmon_L1RD0_EMPTY:
-  eventCount: 0
-HLT_larsupercellmon_L1RD0_FILLED:
   eventCount: 0
 HLT_larsupercellmon_L1RD0_EMPTY:
   eventCount: 0
@@ -27324,6 +27322,8 @@ HLT_noalg_L1J85:
   eventCount: 5
 HLT_noalg_L1LLPDPHI-jXE40-jJ40:
   eventCount: 6
+HLT_noalg_L1LLPNODPHI-jXE40-jJ40:
+  eventCount: 7
 HLT_noalg_L1MU10BO:
   eventCount: 4
 HLT_noalg_L1MU10BOM:
