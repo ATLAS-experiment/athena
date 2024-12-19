@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local
@@ -302,7 +302,7 @@ bool Prompt::PrimaryVertexReFitter::decorateLepWithReFitPrimaryVertex(
         //
         // Record vertex with output container
         //
-        refitVtxContainer.push_back(std::move(refittedVtxRMLep));
+        refitVtxContainer.push_back(refittedVtxRMLep);
 
         // TODO: I don't know if this is the correct use of an ElementLink
         //

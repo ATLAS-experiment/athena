@@ -42,8 +42,8 @@ namespace Prompt {
     std::shared_ptr<const FlavorTagDiscriminants::OnnxUtil> m_onnxUtil{};
     std::shared_ptr<const FlavorTagDiscriminants::OnnxUtil> m_onnxUtil_endcap{};
 
-    int m_num_lepton_features;
-    int m_num_track_features;
+    int m_num_lepton_features{};
+    int m_num_track_features{};
 
     StatusCode initializeAccessors();
 
