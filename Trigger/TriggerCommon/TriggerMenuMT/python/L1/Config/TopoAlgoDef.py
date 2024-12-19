@@ -221,6 +221,18 @@ class TopoAlgoDef:
         alg.addvariable('GoodMFieldCut', 0)
         tm.registerTopoAlgo(alg)
     
+        #Muon sort
+        alg = AlgConf.MuonSort( name = 'MUs', inputs = 'MuonTobs', outputs = 'MUs' )
+        alg.addgeneric('InputWidth', HW.muonInputWidth)
+        alg.addgeneric('OutputWidth', HW.muonOutputWidthSort)
+        # alg.addvariable('MinET', 4)
+        alg.addvariable('MinEta', 0*_eta_conversion)
+        alg.addvariable('MaxEta', 25*_eta_conversion)
+        alg.addvariable('InnerCoinCut', 0)
+        alg.addvariable('FullStationCut', 0)
+        alg.addvariable('GoodMFieldCut', 0)
+        tm.registerTopoAlgo(alg)
+
         #LATE 
         alg = AlgConf.MuonSort_1BC( name = 'LMUs', inputs = 'LateMuonTobArray', outputs = 'LMUs' )
         alg.addgeneric('InputWidth', HW.muonInputWidth)
@@ -1712,6 +1724,49 @@ class TopoAlgoDef:
             alg.addvariable('DisambDRSqr', d.disamb*d.disamb*_dr_conversion*_dr_conversion, 0)
             tm.registerTopoAlgo(alg)
 
+        #VAE-based anomaly trigger
+        # output lines: 'ADVAE2A-6jJ0s-4eTAU0s-4MU0s-jXE0s-Tight', 
+        #               'ADVAE2A-6jJ0s-4eTAU0s-4MU0s-jXE0s-Loose'
+        #Ordering -
+        #1. jJetx6
+        #2. eTAUx4
+        #3. MUx4
+        #4. jXEx1
+        algo = {
+              "algoname" : "ADVAE2A-jJ0s-eTAU0s-MU0s-jXE0s",
+              "otype1" : "jJ", "olist1": "s", "inputwidth1": 6, "nleading1": 6,
+              "otype2" : "eTAU", "olist2": "s", "inputwidth2": 6, "nleading2": 4,
+              "otype3" : "MU", "olist3": "s", "inputwidth3": 6, "nleading3": 4,
+              "otype4" : "jXE", "olist4": "s", "inputwidth4": 1, "nleading4": 1,
+              "WPList" : ["Tight", "Loose"],
+              "AnomalyScoreThresh" : [3875, 3875], #corresponds to Tight and Loose WPs
+        }
+        class d:
+            pass
+        for k in algo:
+            setattr (d, k, algo[k])
+        toponames = []
+        for WP in d.WPList:
+            toponames.append("ADVAE2A-%s%s0%s-%s%s0%s-%s%s0%s-%s0%s-%s" %(str(d.nleading1), d.otype1, d.olist1, 
+                                                                          str(d.nleading2), d.otype2, d.olist2, 
+                                                                          str(d.nleading3), d.otype3, d.olist3, 
+                                                                          d.otype4, d.olist4, 
+                                                                          WP) )
+        inputList = [d.otype1 + d.olist1, d.otype2 + d.olist2, d.otype3 + d.olist3, d.otype4 + d.olist4]
+        alg = AlgConf.ADVAE_2A( name = d.algoname, inputs = inputList, outputs = toponames)
+        alg.addgeneric('InputWidth1', d.inputwidth1)
+        alg.addgeneric('InputWidth2', d.inputwidth2)
+        alg.addgeneric('InputWidth3', d.inputwidth3)
+        alg.addgeneric('InputWidth4', d.inputwidth4)
+        alg.addgeneric('MaxTob1', d.nleading1)
+        alg.addgeneric('MaxTob2', d.nleading2)
+        alg.addgeneric('MaxTob3', d.nleading3)
+        alg.addgeneric('MaxTob4', d.nleading4)
+        alg.addgeneric('NumResultBits', len(toponames))
+        alg.addgeneric('ADVAEVersion', 1)
+        for bitId in range(len(toponames)):
+            alg.addvariable('AnomalyScoreThresh', d.AnomalyScoreThresh[bitId], bitId)
+        tm.registerTopoAlgo(alg)
 
         algolist=[
             { "disamb": 2,
