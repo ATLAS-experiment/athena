@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_STORABLECONVERSIONS_H
@@ -15,7 +15,6 @@
 #include "AthenaKernel/DataBucket.h"
 #include "AthenaKernel/DataBucketTraitFwd.h"
 #include "AthenaKernel/ClassID_traits.h"
-#include "AthenaKernel/tools/type_tools.h"
 #include "AthenaKernel/DataObjectSharedPtr.h"
 #include "GaudiKernel/DataObject.h"
 
@@ -24,9 +23,6 @@
 #  include "GaudiKernel/MsgStream.h"
 #endif
 
-#include <type_traits>
-#include "boost/mpl/identity.hpp"
-#include "boost/mpl/eval_if.hpp"
 #include <memory>
 #include <type_traits>
 
@@ -132,21 +128,19 @@ namespace SG {
   struct DataBucketTrait
   {
     // The first base of @c T (or @c SG::NoBase).
-    typedef typename SG::BaseType<typename SG::Bases<T>::bases::Base1>::type base1;
+    using base1 = SG::BaseType_t<typename SG::Bases<T>::bases::Base1>;
 
     // Test to see if it's valid.
-    typedef typename std::is_same<base1, SG::NoBase>::type has_base;
+    static constexpr bool has_base = std::is_same_v<base1, SG::NoBase>;
 
     // This is what we'll return in the default (no base) case.
-    typedef boost::mpl::identity<SG::DataBucket<U> > deflt;
+    using deflt = std::type_identity<SG::DataBucket<U> >;
 
     // This is what we use to recursively check the base
-    typedef DataBucketTrait<base1, U> recurse;
+    using recurse = DataBucketTrait<base1, U>;
 
     // Calculate the output.
-    // (Note that it's important to use @c eval_if here; otherwise,
-    // applying this to @c SG::NoBase won't work.)
-    typedef typename boost::mpl::eval_if<has_base, deflt, recurse>::type type;
+    using type = typename std::conditional_t<has_base, deflt, recurse>::type;
 
     /// Initialization hook.  A no-op by default.
     static void init() {}
