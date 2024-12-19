@@ -117,7 +117,7 @@ namespace xAOD {
      return (word1() >> s_eFexBit) & s_eFexMask;
    }
 
-   /// Shelf number
+   // Shelf number.  Usually 0 or 1, but can be 12 for Surface Test Facility.
    unsigned int eFexEMRoI_v1::shelfNumber() const {
      return (word1() >> s_shelfBit) & s_shelfMask;
    }
@@ -224,6 +224,7 @@ namespace xAOD {
    /// Methods that decode the eFEX number
 
   /// Return phi index in the range 0-63
+  /// (or 384-415 for STF)
   int eFexEMRoI_v1::iPhi() const {
 
      /// Calculate octant (0-7) from eFEX and shelf numbers

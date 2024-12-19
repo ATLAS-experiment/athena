@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: eFexEMRoI_v1.h 1 2019-06-30 12:15:18 watsona $
@@ -68,7 +68,8 @@ namespace xAOD {
       /// Phi coordinates (as for eta)
       float   phi() const; /// Floating point, ATLAS phi convention (-pi -> pi)
       void    setPhi( float value); /// Setter for the above
-      int     iPhi() const; /// Getter for integer phi index (0-63)
+      /// Getter for integer phi index (0-63) or (384-415) for STF
+      int     iPhi() const;
 
       /// Getters for Topo coordinate indices
       int iEtaTopo() const;
@@ -107,7 +108,7 @@ namespace xAOD {
       /// Object type (TOB or xTOB)
       ObjectType type() const;
 
-      // Shelf number
+      // Shelf number.  Usually 0 or 1, but can be 12 for Surface Test Facility.
       unsigned int shelfNumber() const;
 
       // eFEX number
@@ -157,7 +158,11 @@ namespace xAOD {
       /** Constants used in decoding TOB words
           For TOB word format changes these can be replaced
           by arrays in the _v2 object so that different 
-          versions can be decoded by one class */
+          versions can be decoded by one class.
+
+          See https://edms.cern.ch/ui/file/1492098/1/L1CaloTOBFormats_v015_docx_cpdf.pdf
+              https://edms.cern.ch/file/1419789/1/eFeX_System_Readout_Formats_Draft095_docx_cpdf.pdf
+      */
 
       //  Data locations within word
       static const int s_fpgaBit         = 30;
