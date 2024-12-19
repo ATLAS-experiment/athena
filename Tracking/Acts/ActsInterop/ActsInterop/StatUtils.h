@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSUTILS_STAT_H
@@ -176,8 +176,8 @@ public:
       return msg.str();
    }
 
-   double m_xmin;
-   double m_scale;
+   double m_xmin{};
+   double m_scale{1.0};
    std::vector<unsigned int> m_histogram;
 };
 }
