@@ -17,21 +17,21 @@
 
 
 #include "AthLinks/tools/DataProxyHolder.h"
-#include "AthLinks/tools/selection_ns.h"
 #include "AthLinks/DataLinkBase.h"
 #include "AthenaKernel/getThinningCache.h"
 #include "CxxUtils/CachedValue.h"
 #include "CxxUtils/checker_macros.h"
 #include <concepts>
+#include <RootMetaSelection.h>
 
 
 // Forward declaration(s):
-ENTER_ROOT_SELECTION_NS
-namespace SG {
-template< class INDEXING_POLICY >
-struct GenericElementLinkBase;
-}
-EXIT_ROOT_SELECTION_NS
+namespace ROOT { namespace Meta { namespace Selection {
+  namespace SG {
+    template< class INDEXING_POLICY >
+    struct GenericElementLinkBase;
+  }
+}}}
 
 
 template <class POLICY>
@@ -546,7 +546,7 @@ private:
   
   /// Connect to selection rules.
   typedef typename
-  ROOT_SELECTION_NS::SG::GenericElementLinkBase<INDEXING_POLICY>::self DictSel;
+  ROOT::Meta::Selection::SG::GenericElementLinkBase<INDEXING_POLICY>::self DictSel;
 };
 
 
@@ -554,18 +554,18 @@ private:
 
 
 /// Selection rules: declare transient members.
-ENTER_ROOT_SELECTION_NS
+namespace ROOT { namespace Meta { namespace Selection {
 namespace SG {
 template <class INDEXING_POLICY>
 struct GenericElementLinkBase : SelectNoInstance {
   typedef GenericElementLinkBase<INDEXING_POLICY> self;
-  ROOT_SELECTION_NS::TRANSIENT m_proxy;
-  ROOT_SELECTION_NS::TRANSIENT m_cacheValid;
-  ROOT_SELECTION_NS::TRANSIENT m_element;
+  ROOT::Meta::Selection::MemberAttributes<kTransient> m_proxy;
+  ROOT::Meta::Selection::MemberAttributes<kTransient> m_cacheValid;
+  ROOT::Meta::Selection::MemberAttributes<kTransient> m_element;
 };
 
 }
-EXIT_ROOT_SELECTION_NS
+}}} // ROOT namespace
 
 
 #include "AthLinks/GenericElementLinkBase.icc"

@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
- Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 #ifndef ATHLINKS_DATALINK_H
 #define ATHLINKS_DATALINK_H
@@ -10,19 +10,19 @@ extern "C" {
 #   include <stdint.h>
 }
 #include <string>
+#include <RootMetaSelection.h>
 
 // Local include(s):
 #include "AthLinks/DataLinkBase.h"
-#include "AthLinks/tools/selection_ns.h"
 
 // Forward declaration(s):
 namespace xAOD {
    class TVirtualEvent;
 }
-ENTER_ROOT_SELECTION_NS
-template< class STORABLE >
-class DataLink;
-EXIT_ROOT_SELECTION_NS
+namespace ROOT { namespace Meta { namespace Selection {
+   template< class STORABLE >
+   class DataLink;
+}}}
 
 /// @short DataLink implementation for ROOT usage
 /// @file AthLinksSA/AthLinks/DataLink.h
@@ -32,8 +32,6 @@ EXIT_ROOT_SELECTION_NS
 ///
 /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 ///
-/// $Revision: 649074 $
-/// $Date: 2015-02-23 17:51:40 +0100 (Mon, 23 Feb 2015) $
 ///
 template< typename STORABLE >
 class DataLink : public DataLinkBase {
@@ -150,7 +148,7 @@ private:
    xAOD::TVirtualEvent* m_event;
 
    /// Needed to take the Reflex/Cling specifications into account
-   typedef typename ROOT_SELECTION_NS::DataLink< STORABLE >::self DictSel;
+   typedef typename ROOT::Meta::Selection::DataLink< STORABLE >::self DictSel;
 
 }; // class DataLink
 
@@ -158,7 +156,7 @@ private:
  * The following piece of code declares the member variables of all
  * DataLink<T> types as transient.
  */
-ENTER_ROOT_SELECTION_NS
+namespace ROOT { namespace Meta { namespace Selection {
 template< class STORABLE >
 class DataLink : public SelectNoInstance
 {
@@ -168,12 +166,12 @@ public:
    typedef DataLink< STORABLE > self;
 
    /// Declare m_object as transient
-   ROOT_SELECTION_NS::MemberAttributes< kTransient > m_object;
+   ROOT::Meta::Selection::MemberAttributes< kTransient > m_object;
    /// Declare m_event as transient
-   ROOT_SELECTION_NS::MemberAttributes< kTransient > m_event;
+   ROOT::Meta::Selection::MemberAttributes< kTransient > m_event;
 
 };
-EXIT_ROOT_SELECTION_NS
+}}} // ROOT namespace
 
 /// Equality checker operator
 template< typename STORABLE >

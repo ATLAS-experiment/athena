@@ -1,23 +1,23 @@
 // Dear emacs, this is -*- c++ -*-
 /*
- Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 #ifndef ATHLINKS_ELEMENTLINKVECTOR_H
 #define ATHLINKS_ELEMENTLINKVECTOR_H
 
 // System include(s):
 #include <vector>
+#include <RootMetaSelection.h>
 
 // Local include(s):
 #include "AthLinks/ElementLink.h"
 #include "AthLinks/ElementLinkVectorBase.h"
-#include "AthLinks/tools/selection_ns.h"
 
 // Forward declaration(s):
-ENTER_ROOT_SELECTION_NS
-template< class CONTAINER >
-class ElementLinkVector;
-EXIT_ROOT_SELECTION_NS
+namespace ROOT { namespace Meta { namespace Selection {
+  template< class CONTAINER >
+  class ElementLinkVector;
+}}}
 
 /**
  *  @short ElementLinkVector implementation for standalone ROOT
@@ -29,8 +29,6 @@ EXIT_ROOT_SELECTION_NS
  *
  * @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
  *
- * $Revision: 649074 $
- * $Date: 2015-02-23 17:51:40 +0100 (Mon, 23 Feb 2015) $
  */
 template< class CONTAINER >
 class ElementLinkVector : public ElementLinkVectorBase {
@@ -184,7 +182,7 @@ private:
 
    /// Needed to take the Reflex/Cling specifications into account
    typedef typename
-   ROOT_SELECTION_NS::ElementLinkVector< CONTAINER >::self DictSel;
+   ROOT::Meta::Selection::ElementLinkVector< CONTAINER >::self DictSel;
 
 }; // class ElementLinkVector
 
@@ -192,7 +190,7 @@ private:
  * This code declares that the variables of ElementLinkVector
  * are supposed to be transient in all instantiations.
  */
-ENTER_ROOT_SELECTION_NS
+namespace ROOT { namespace Meta { namespace Selection {
 template< class CONTAINER >
 class ElementLinkVector : public SelectNoInstance
 {
@@ -202,10 +200,10 @@ public:
    typedef ElementLinkVector< CONTAINER > self;
 
    /// Mark all transient members:
-   ROOT_SELECTION_NS::MemberAttributes< kTransient > m_elVec;
+   ROOT::Meta::Selection::MemberAttributes< kTransient > m_elVec;
 
 };
-EXIT_ROOT_SELECTION_NS
+}}} // ROOT namespace
 
 // Include the implementation:
 #ifndef __GCCXML__
