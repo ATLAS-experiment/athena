@@ -34,6 +34,7 @@ namespace MuonGM
         m_d[i].type             = (*aptp)[i]->getString("TYP"); 
         m_d[i].i           = (*aptp)[i]->getInt("I");
         m_d[i].icut        = (*aptp)[i]->getInt("ICUT");
+        m_d[i].iphi.resize(8);
         m_d[i].iphi[0]     = (*aptp)[i]->getInt("IPHI_0");        
         m_d[i].iphi[1]     = (*aptp)[i]->getInt("IPHI_1");        
         m_d[i].iphi[2]     = (*aptp)[i]->getInt("IPHI_2");        
