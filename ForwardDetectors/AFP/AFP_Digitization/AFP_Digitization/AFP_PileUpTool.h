@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_DIGITIZATION_TOOL_H
@@ -167,9 +167,9 @@ private:
   AFP_TDSimHitCollection m_mergedTDSimHitList;
   AFP_SIDSimHitCollection m_mergedSIDSimHitList;
 
-  double m_QuantumEff_PMT[82];
-  double m_TDC_offsets[4][4][4]; // station, train, bar
-  int m_ChargeVsTot_LUT[16]; // look-up table for charge2tot conversion, 16 = n. of bits
+  double m_QuantumEff_PMT[82]{};
+  double m_TDC_offsets[4][4][4]{}; // station, train, bar
+  int m_ChargeVsTot_LUT[16]{}; // look-up table for charge2tot conversion, 16 = n. of bits
 
   const int m_ArrSize; // 645120 = 4 x 6 x 336 x 80
   std::vector<float> m_deposited_charge; 
@@ -179,7 +179,7 @@ private:
   std::vector<double> m_SignalVect;
   
   /// @brief array of histograms storing final signals in the PMTs
-  TH1F m_SignalHist[4][4][4]; // station, train, bar
+  TH1F m_SignalHist[4][4][4]{}; // station, train, bar
 
 protected:
 
