@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EfexMonitorAlgorithm.h"
@@ -58,6 +58,7 @@ StatusCode EfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
       ATH_CHECK(fillEMHistograms(m_packageName+'_'+key.key()+"_HiPtCut", emDataContPtr, m_hiPtCut,ctx));
       if(key.key().find("Sim") == std::string::npos) {
           for (const xAOD::eFexEMRoI *roi: *emDataContPtr) {
+              if ((roi->iPhi() / 8) >= 8) continue; // Can happen for STF
               locIdx = std::to_string(roi->iPhi() / 8) + ":" + std::to_string(roi->iEta());
               tobEt = roi->et();
               fill(m_packageName + "_" + key.key(), tobEt, lbn, locIdx);
@@ -83,6 +84,7 @@ StatusCode EfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
       ATH_CHECK(fillTauHistograms(m_packageName+'_'+key.key()+"_HiPtCut", tauDataContPtr, m_hiPtCut,ctx));
       if(key.key().find("Sim") == std::string::npos) {
           for (const xAOD::eFexTauRoI *roi: *tauDataContPtr) {
+              if ((roi->iPhi() / 8) >= 8) continue; // Can happen for STF
               locIdx = std::to_string(roi->iPhi() / 8) + ":" + std::to_string(roi->iEta());
               tobEt = roi->et();
               fill(m_packageName + "_" + key.key(), tobEt, lbn, locIdx);
