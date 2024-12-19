@@ -463,11 +463,11 @@ StatusCode TileInfoLoader::buildDigitsShapesHiLo(TileInfo& info) {
   for (int i = 0; i < info.m_nSamples; i++) {
     int j = info.m_digitsTime0BinHi + (i - info.m_iTrigSample) * info.m_digitsBinsPerXHi;
     if (j < 0) j = 0;
-    if (j > info.m_digitsNBinsHi) j = info.m_digitsNBinsHi;
+    if (j >= info.m_digitsNBinsHi) j = info.m_digitsNBinsHi-1;
     info.m_digitsShapeHi[i] = info.m_digitsFullShapeHi[j];
     int k = info.m_digitsTime0BinLo + (i - info.m_iTrigSample) * info.m_digitsBinsPerXLo;
     if (k < 0) k = 0;
-    if (k > info.m_digitsNBinsLo) k = info.m_digitsNBinsLo;
+    if (k >= info.m_digitsNBinsLo) k = info.m_digitsNBinsLo-1;
     info.m_digitsShapeLo[i] = info.m_digitsFullShapeLo[k];
   }
 
@@ -608,7 +608,7 @@ StatusCode TileInfoLoader::buildTTL1Shapes(TileInfo& info,
   for (int i = 0; i < info.m_nSamples; i++) {
     int j = Time0Bin + (i - info.m_iTrigSample) * BinsPerX;
     if (j < 0) j = 0;
-    if (j > NBins) j = NBins;
+    if (j >= NBins) j = NBins-1;
     Shape[i] = FullShape[j];
   }
 
