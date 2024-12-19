@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETUNCERTAINTIES_UNCERTAINTYCOMPONENT_H
@@ -47,18 +47,18 @@ class UncertaintyComponent : public asg::AsgMessaging
 
     protected:
         // Protected members
-        bool m_isInit;
+        bool m_isInit{};
         const TString m_uncHistName;
         const TString m_validHistName;
         const CompScaleVar::TypeEnum m_scaleVar;
         const JetTopology::TypeEnum m_topology;
-        const float m_energyScale;
+        const float m_energyScale{};
         const Interpolate::TypeEnum m_interpolate;
-        const int m_splitNumber;
+        const int m_splitNumber{};
         
-        int m_numExpectedHist;
-        UncertaintyHistogram* m_uncHist;
-        UncertaintyHistogram* m_validHist;
+        int m_numExpectedHist{};
+        UncertaintyHistogram* m_uncHist{};
+        UncertaintyHistogram* m_validHist{};
 
         // Methods for derived classes to implement
         virtual bool   getValidityImpl(const xAOD::Jet& jet, const xAOD::EventInfo& eInfo)    const = 0;
