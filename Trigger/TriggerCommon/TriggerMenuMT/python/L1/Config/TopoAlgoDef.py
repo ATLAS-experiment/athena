@@ -1673,21 +1673,50 @@ class TopoAlgoDef:
             alg.addvariable('MaxDeltaEta', d.maxDeta*_eta_conversion, 0)
             tm.registerTopoAlgo(alg)
 
-        #LLPDPHI - ATR-28563
-        toponame = "0DPHI10-jXE40delay-jJ40s"
-        alg = AlgConf.DeltaPhiIncl2( name = toponame, inputs = ['jXEs', 'jJs'], outputs = [ toponame ])
-        alg.addgeneric('NumResultBits', 1)            
-        alg.addgeneric('Delay1', 1)
-        alg.addgeneric('Delay2', 0)
-        alg.addgeneric('InputWidth1', HW.metOutputWidth)
-        alg.addgeneric('InputWidth2', HW.jJetOutputWidthSort)
-        alg.addgeneric('MaxTob1', 1)
-        alg.addgeneric('MaxTob2', 6)
-        alg.addvariable('MinET1', 40*_et_conversion)
-        alg.addvariable('MinET2', 40*_et_conversion)
-        alg.addvariable('MinDeltaPhi', 0*_phi_conversion)
-        alg.addvariable('MaxDeltaPhi', 10*_phi_conversion)
-        tm.registerTopoAlgo(alg)
+        # ATR-30401
+        # topoitems will be the follwoing:
+        # 0DPHI10_jXE40delay_jJ40s
+        # 0DPHI99_jXE40delay_jJ40s
+        DPHI_jXE40delay_jJ40s_map = [
+        {  
+            "algoname"  : "DPHI_jXE40delay_jJ40s",
+            "Delay1"    : 1,
+            "Delay2"    : 0,
+            "InputWidth1": HW.metOutputWidth,
+            "InputWidth2": HW.jJetOutputWidthSort,
+            "MaxTob1"   : 1,
+            "MaxTob2"   : 6,
+            "MinET1"    : 40*_et_conversion,
+            "MinET2"    : 40*_et_conversion,
+            "MinDeltaPhi": 0*_phi_conversion,
+            "phi_thresholds": [10, 99],
+        }
+        ]
+
+        for x in DPHI_jXE40delay_jJ40s_map:
+            class d:
+                pass
+            for k in x:
+                setattr(d,k,x[k])
+            inputList = ['jXEs', 'jJs']
+            toponames = []
+            for bitId in range(len(d.phi_thresholds)):
+                toponames.append("0DPHI%d-jXE40delay-jJ40s"  % (d.phi_thresholds[bitId]))
+            
+            alg = AlgConf.DeltaPhiIncl2( name = d.algoname, inputs = inputList, outputs =  toponames )
+            
+            alg.addgeneric('InputWidth1', d.InputWidth1)
+            alg.addgeneric('InputWidth2', d.InputWidth2)
+            alg.addgeneric('MaxTob1', d.MaxTob1)
+            alg.addgeneric('MaxTob2', d.MaxTob2)
+            alg.addgeneric('NumResultBits', len(toponames) )
+
+            for bitId in range(len(toponames)):
+                alg.addvariable('MinET1', d.MinET1, bitId)
+                alg.addvariable('MinET2', d.MinET2, bitId)
+                alg.addvariable('MinDeltaPhi', d.MinDeltaPhi, bitId)
+                alg.addvariable('MaxDeltaPhi', d.phi_thresholds[bitId]*_phi_conversion, bitId)
+            tm.registerTopoAlgo(alg)
 
         # DISAMB 3 lists with DR cut to 2nd and 3rd lists
         algolist=[

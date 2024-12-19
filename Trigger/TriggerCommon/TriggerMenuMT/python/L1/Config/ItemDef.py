@@ -419,6 +419,7 @@ class ItemDef:
         MenuItem('L1_2MU14FCH_OVERLAY').setLogic( d.MU14FCH.x(2)       & physcond).setTriggerType(TT.zerobs)
 
         MenuItem('L1_LLPDPHI-jXE40-jJ40').setLogic( d.TOPO_0DPHI10_jXE40delay_jJ40s & physcond)
+        MenuItem('L1_LLPNODPHI-jXE40-jJ40').setLogic( d.TOPO_0DPHI99_jXE40delay_jJ40s & physcond)
         
         # HI
         MenuItem('L1_MU3V_VTE10' ).setLogic( d.MU3V      & Not(d.TE10) & physcond).setTriggerType(TT.muon)
