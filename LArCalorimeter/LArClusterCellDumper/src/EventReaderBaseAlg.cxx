@@ -3,6 +3,15 @@
 #include "LArClusterCellDumper/EventReaderBaseAlg.h"
 
 #include "xAODTracking/TrackParticlexAODHelpers.h"
+#include "CLHEP/Units/PhysicalConstants.h"
+#include "CLHEP/Units/SystemOfUnits.h"
+
+#include <TTree.h>
+
+
+using CLHEP::GeV;
+using CLHEP::pi;
+using CLHEP::twopi;
 
 EventReaderBaseAlg::EventReaderBaseAlg( const std::string& name, ISvcLocator* pSvcLocator ) : 
     AthAlgorithm(name, pSvcLocator) {}

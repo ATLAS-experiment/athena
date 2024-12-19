@@ -5,32 +5,21 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ITHistSvc.h"
-
-#include "StoreGate/ReadHandleKey.h"
-#include "StoreGate/WriteHandleKey.h"
-#include "StoreGate/ReadCondHandleKey.h"
-
 #include "xAODEventInfo/EventInfo.h"
-#include "xAODEgamma/ElectronContainer.h"
+#include "xAODEgamma/Electron.h"
 #include "xAODTracking/VertexContainer.h"
-#include "xAODEgamma/EgammaxAODHelpers.h"
-#include "CLHEP/Units/SystemOfUnits.h"
-#include "CLHEP/Units/PhysicalConstants.h"
-
-#include <TTree.h>
-
 #include "CxxUtils/checker_macros.h"
+class TTree;
+class CaloCell;
 
-using CLHEP::GeV;
-using CLHEP::pi;
-using CLHEP::twopi;
+
+
 
 
 class ATLAS_NOT_THREAD_SAFE EventReaderBaseAlg: public ::AthAlgorithm
 {
     public:
+     
     
         EventReaderBaseAlg( const std::string& name, ISvcLocator* pSvcLocator );
         
@@ -81,8 +70,8 @@ class ATLAS_NOT_THREAD_SAFE EventReaderBaseAlg: public ::AthAlgorithm
         // Global Variables in general
         //#############################
 
-        TTree *m_Tree;
-        TTree *m_secondTree;
+        TTree *m_Tree{};
+        TTree *m_secondTree{};
 
         //##################
         // Dumped Variables

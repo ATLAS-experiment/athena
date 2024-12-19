@@ -39,6 +39,7 @@
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloIdentifier/CaloIdManager.h"
+#include "GaudiKernel/ITHistSvc.h"
 
 
 class ATLAS_NOT_THREAD_SAFE EventReaderAlg: public EventReaderBaseAlg
