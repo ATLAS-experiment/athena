@@ -821,9 +821,8 @@ std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::VertexIterativeFitMergingTool
       }
 
       if(passVertexSelection(vtx.get())) {
-        passVtxs.push_back(std::move(vtx));
-
         ATH_MSG_DEBUG("fit2TrackVertexeses - pass vertex: " << vtxAsStr(vtx.get(), true));
+        passVtxs.push_back(std::move(vtx));
       }
     }
   }

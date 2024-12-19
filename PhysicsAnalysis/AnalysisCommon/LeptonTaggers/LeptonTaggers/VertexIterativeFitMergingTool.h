@@ -49,12 +49,12 @@ namespace Prompt
   {
     TwoTrackVtx():vertex(nullptr), trackId0(0), trackId1(0), vertexFitProb(1000.0), sumTrackPt(0.0) {}
 
-    xAOD::Vertex* vertex;
-    const xAOD::TrackParticle* trackId0;
-    const xAOD::TrackParticle* trackId1;
+    xAOD::Vertex* vertex{};
+    const xAOD::TrackParticle* trackId0{};
+    const xAOD::TrackParticle* trackId1{};
 
-    double                                     vertexFitProb;
-    double                                     sumTrackPt;
+    double                                     vertexFitProb{};
+    double                                     sumTrackPt{};
   };
 
   //=============================================================================
@@ -232,38 +232,38 @@ namespace Prompt
     //
     // Development histograms
     //
-    TH1                                                   *m_histNvtx2TrkInit;
-    TH1                                                   *m_histNvtx2TrkPass;
-    TH1                                                   *m_histNvtx2TrkUnmerged;
-    TH1                                                   *m_histNvtxMerged;
+    TH1                                                   *m_histNvtx2TrkInit{};
+    TH1                                                   *m_histNvtx2TrkPass{};
+    TH1                                                   *m_histNvtx2TrkUnmerged{};
+    TH1                                                   *m_histNvtxMerged{};
 
-    TH1                                                   *m_histNewVtxFitChi2;
-    TH1                                                   *m_histNewVtxFitProb;
+    TH1                                                   *m_histNewVtxFitChi2{};
+    TH1                                                   *m_histNewVtxFitProb{};
 
-    TH1                                                   *m_histNewVtxFitDistToCurr;
-    TH1                                                   *m_histNewVtxFitDistToSeed;
-    TH1                                                   *m_histNewVtxFitDistToSeedPass;
-    TH1                                                   *m_histNewVtxFitDistToSeedFail;
+    TH1                                                   *m_histNewVtxFitDistToCurr{};
+    TH1                                                   *m_histNewVtxFitDistToSeed{};
+    TH1                                                   *m_histNewVtxFitDistToSeedPass{};
+    TH1                                                   *m_histNewVtxFitDistToSeedFail{};
 
-    TH1                                                   *m_histNewVtxFitProbCandOverSeed;
-    TH1                                                   *m_histNewVtxFitProbCandOverSeedPass;
-    TH1                                                   *m_histNewVtxFitProbCandOverSeedFail;
-    TH1                                                   *m_histNewVtxFitProbCandOverSeed3Trk;
-    TH1                                                   *m_histNewVtxFitProbCandOverSeed3TrkPass;
+    TH1                                                   *m_histNewVtxFitProbCandOverSeed{};
+    TH1                                                   *m_histNewVtxFitProbCandOverSeedPass{};
+    TH1                                                   *m_histNewVtxFitProbCandOverSeedFail{};
+    TH1                                                   *m_histNewVtxFitProbCandOverSeed3Trk{};
+    TH1                                                   *m_histNewVtxFitProbCandOverSeed3TrkPass{};
 
-    TH1                                                   *m_histVtx2TrkPairDist;
-    TH1                                                   *m_histVtx2trkPairDistZoom;
-    TH1                                                   *m_histVtx2TrkPairSig1;
-    TH1                                                   *m_histVtx2TrkPairSig2;
+    TH1                                                   *m_histVtx2TrkPairDist{};
+    TH1                                                   *m_histVtx2trkPairDistZoom{};
+    TH1                                                   *m_histVtx2TrkPairSig1{};
+    TH1                                                   *m_histVtx2TrkPairSig2{};
 
-    TH1                                                   *m_histSelectedTrackCountAll;
-    TH1                                                   *m_histSelectedTrackCountMatch2Vtx;
-    TH1                                                   *m_histSelectedTrackCountWithout2Vtx;
+    TH1                                                   *m_histSelectedTrackCountAll{};
+    TH1                                                   *m_histSelectedTrackCountMatch2Vtx{};
+    TH1                                                   *m_histSelectedTrackCountWithout2Vtx{};
 
-    TH1                                                   *m_histVtxWithoutLepton2TrkNTrack;
-    TH1                                                   *m_histVtxWithoutLepton2TrkNPass;
-    TH1                                                   *m_histVtxWithoutLepton2TrkNPassUnmerged;
-    TH1                                                   *m_histVtxWithoutLepton2TrkNMerged;
+    TH1                                                   *m_histVtxWithoutLepton2TrkNTrack{};
+    TH1                                                   *m_histVtxWithoutLepton2TrkNPass{};
+    TH1                                                   *m_histVtxWithoutLepton2TrkNPassUnmerged{};
+    TH1                                                   *m_histVtxWithoutLepton2TrkNMerged{};
   };
 }
 
