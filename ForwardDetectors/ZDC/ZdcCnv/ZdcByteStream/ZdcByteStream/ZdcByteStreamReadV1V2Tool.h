@@ -1,60 +1,33 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOBYTESTREAM_ZDCBYTESTREAMREADV1V2TOOL_H
 #define TRIGT1CALOBYTESTREAM_ZDCBYTESTREAMREADV1V2TOOL_H
-// ===========================================================================
-// Includes
-// ===========================================================================
-// STD:
-// ===========================================================================
-#include <stdint.h>
-#include <vector>
 
-// ===========================================================================
-// Athena:
-// ===========================================================================
 #include "AsgTools/AsgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 
-#include "xAODTrigL1Calo/TriggerTower.h"
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
-
-//#include "xAODForward/ZdcModule.h"
-//#include "xAODForward/ZdcModuleContainer.h"
 
 #include "ZdcByteStream/ZdcCaloUserHeader.h"
 #include "ZdcByteStream/ZdcSubBlockHeader.h"
-#include "ZdcByteStream/ZdcSubBlockStatus.h"
-#include "ZdcEvent/ZdcDigitsCollection.h"
 
-//#include "TrigT1CaloByteStream/L1CaloErrorByteStreamTool.h"
 #include "ZdcByteStream/ZdcL1CaloErrorByteStreamTool.h"
 
-// ===========================================================================
-// Forward declarations
-// ===========================================================================
+#include <stdint.h>
+#include <vector>
+#include <set>
+#include <map>
 
 
-// ===========================================================================
 class ZdcSrcIdMap;
 class ZdcID;
-class ZdcL1CaloErrorByteStreamTool;
-namespace LVL1BS {
-// Forward declarations
-//class L1CaloErrorByteStreamTool;
-// ===========================================================================
-}// end namespace
+class ZdcDigitsCollection;
 
-// instead let's use their stupid namespace
-//using namespace LVL1BS;
-// ===========================================================================
-
-// ===========================================================================
 
 /** Tool to perform ROB fragments to trigger towers and trigger towers
  *  to raw data conversions.
@@ -88,7 +61,6 @@ public:
   StatusCode convert(const std::string& sgKey, xAOD::TriggerTowerContainer* const ttCollection) const;
 
   ZdcDigitsCollection* convertTT2ZD(xAOD::TriggerTowerContainer* const ttCollection) const;
-  //xAOD::ZdcModuleContainer* convertTT2ZM(xAOD::TriggerTowerContainer* const ttCollection);
 
 
   // =========================================================================
@@ -116,8 +88,8 @@ private:
 
 
   private:
-    uint32_t m_ppPointer;
-    uint32_t m_ppMaxBit;
+    uint32_t m_ppPointer{};
+    uint32_t m_ppMaxBit{};
     const std::vector<uint32_t>& m_ppBlock;
   };
 
@@ -209,10 +181,8 @@ private:
   void initSourceIDs();
 
 private:
-  //ToolHandle<LVL1BS::L1CaloErrorByteStreamTool> m_errorTool;
   ToolHandle<ZdcL1CaloErrorByteStreamTool> m_errorTool;
-  /// Channel mapping tool
-  //ToolHandle<LVL1::IL1CaloMappingTool> m_ppmMaps;
+
   /// Service for reading bytestream
   ServiceHandle<IROBDataProviderSvc> m_robDataProvider;
 
@@ -220,8 +190,8 @@ private:
   std::vector<uint32_t> m_ppmSourceIDs;
   std::vector<uint32_t> m_ppmSourceIDsMuon;
   std::vector<uint32_t> m_ppmSourceIDsSpare;
-  ZdcSrcIdMap* m_srcIdMap;
-  const ZdcID* m_zdcID;
+  ZdcSrcIdMap* m_srcIdMap{};
+  const ZdcID* m_zdcID{};
 };
 
 

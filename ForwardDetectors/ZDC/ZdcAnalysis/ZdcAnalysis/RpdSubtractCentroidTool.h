@@ -1,12 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_RPDSUBTRACTCENTROIDTOOL_H
 #define ZDCANALYSIS_RPDSUBTRACTCENTROIDTOOL_H
 
-#include <array>
-#include <bitset>
 
 #include "ZdcAnalysis/IZdcAnalysisTool.h"
 #include "ZdcAnalysis/RPDDataAnalyzer.h"
@@ -19,6 +17,11 @@
 #include "AsgDataHandles/WriteDecorHandleKey.h"
 #include "xAODForward/ZdcModuleContainer.h"
 #include "xAODEventInfo/EventInfo.h"
+
+#include <vector>
+#include <array>
+#include <bitset>
+#include <optional>
 
 namespace ZDC {
 
@@ -71,7 +74,7 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
   std::string m_configuration;
   std::string m_ZDCModuleContainerName;
   std::string m_ZDCSumContainerName;
-  bool m_writeAux;
+  bool m_writeAux{};
   std::string m_auxSuffix;
   // these are optional and null by default; if their values are set, they will overwrite the bulk configuration from config string
   RPDUtils::OptionalToolProperty<std::vector<float>> m_forceMinZDCEnergy;
@@ -90,8 +93,8 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
   std::vector<float> m_maxEMEnergy;
   std::vector<float> m_pileupMaxFrac;
   std::vector<float> m_maximumNegativeSubtrAmpFrac;
-  bool m_useRPDSumAdc;
-  bool m_useCalibDecorations;
+  bool m_useRPDSumAdc{};
+  bool m_useCalibDecorations{};
 
   StatusCode initializeKey(std::string const& containerName, SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> & readHandleKey, std::string const& key);
   StatusCode initializeKey(std::string const& containerName, SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> & writeHandleKey, std::string const& key);
@@ -107,14 +110,14 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
   //
   struct RPDChannelData {
     unsigned int channel;
-    float xposRel;
-    float yposRel;
-    unsigned short row;
-    unsigned short col;
-    float amp;
-    float subtrAmp;
-    float pileupFrac;
-    unsigned int status;
+    float xposRel{};
+    float yposRel{};
+    unsigned short row{};
+    unsigned short col{};
+    float amp{};
+    float subtrAmp{};
+    float pileupFrac{};
+    unsigned int status{};
   };
   std::array<std::bitset<RPDDataAnalyzer::N_STATUS_BITS>, 2> m_RPDSideStatus {}; /** RPD analysis status word on each side */
   std::optional<std::array<unsigned int, 2>> m_ZDCSideStatus; /** ZDC analysis status on each side */

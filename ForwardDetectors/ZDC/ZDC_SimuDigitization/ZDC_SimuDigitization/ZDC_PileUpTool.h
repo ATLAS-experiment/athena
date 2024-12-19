@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDC_DIGITIZATION_TOOL_H
@@ -8,13 +8,10 @@
 #include "PileUpTools/PileUpToolBase.h"
 #include "Gaudi/Property.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ITHistSvc.h"
+
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "ZDC_SimEvent/ZDC_SimFiberHit.h"
 #include "ZDC_SimEvent/ZDC_SimFiberHit_Collection.h"
-#include "ZdcUtils/ZDCWaveformSampler.h"
-#include "ZdcIdentifier/ZdcID.h"
-#include "xAODForward/ZdcModule.h"
 #include "xAODForward/ZdcModuleContainer.h"
 #include "xAODForward/ZdcModuleAuxContainer.h"
 #include "HitManagement/TimedHitCollection.h"
@@ -22,6 +19,11 @@
 
 #include <vector>
 #include <string>
+#include <memory>
+
+
+class ZdcID;
+class ZDCWaveformSampler;
 
 namespace CLHEP {
   class HepRandomEngine;
@@ -71,7 +73,7 @@ public:
   void SetDumps(bool, bool);
   
   ZDC_SimFiberHit_Collection *m_mergedFiberHitList{};
-  const ZdcID* m_ZdcID;
+  const ZdcID* m_ZdcID{};
   std::unique_ptr<xAOD::ZdcModuleContainer> m_ZdcModuleContainer;
   std::unique_ptr<xAOD::ZdcModuleAuxContainer> m_ZdcModuleAuxContainer;
 
