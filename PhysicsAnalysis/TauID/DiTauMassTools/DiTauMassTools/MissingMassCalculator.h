@@ -67,11 +67,11 @@ class MissingMassCalculator {
   bool m_fUseEfficiencyRecovery{}; // switch to turn ON/OFF re-fit in order to recover efficiency
   bool m_fUseFloatStopping{}; // switch to turn ON/OFF floating stopping criterion
 
-  int m_nsolmax,m_nsolfinalmax;
-  int m_niterRandomLocal;
-  int m_nsucStop;
-  int m_rmsStop;
-  double m_meanbinStop;
+  int m_nsolmax,m_nsolfinalmax{};
+  int m_niterRandomLocal{};
+  int m_nsucStop{};
+  int m_rmsStop{};
+  double m_meanbinStop{};
   
   // these are temporary vectors. Declared globally to avoid construction/destruction
   std::vector<PtEtaPhiMVector> m_nuvecsol1;
