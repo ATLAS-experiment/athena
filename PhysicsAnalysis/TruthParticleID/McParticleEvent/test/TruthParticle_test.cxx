@@ -92,7 +92,7 @@ make_map_t_pair(const HepMC::GenParticlePtr &p,
   HepMcParticleLink link(HepMC::barcode(p), genEventIdx, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
   return Map_t::value_type(link.compress(), &tp);
 }
-bool operator==(TruthParticle a, HepMC::GenParticlePtr b)
+bool operator==(const TruthParticle & a, HepMC::GenParticlePtr b)
 {
 if (!a.genParticle() && !b) return true;
 if (a.genParticle() && !b) return false;
