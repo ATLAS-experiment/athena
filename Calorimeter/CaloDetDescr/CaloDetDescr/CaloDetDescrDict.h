@@ -1,9 +1,14 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloDetDescr/CaloDetDescrManager.h"
-#include "CaloDetDescr/CaloDetDescrElement.h"
+/**
+ * These headers should not (from pure C++ pov) be necessary, 
+ * but are needed for building the ROOT dictionary.
+ * Omitting them results in warnings of this kind:
+ * Unused class rule: ICaloRecoSimpleGeomTool
+ **/
 #include "CaloDetDescr/CaloDetectorElements.h"
 #include "CaloDetDescr/CaloDetDescriptor.h"
 #include "CaloDetDescr/CaloDepthTool.h"
@@ -26,10 +31,10 @@ struct CaloDetDescrDict
 
 namespace CaloDetDescrDictInstan
 {
-  bool ritdum (CaloDetDescrManager::calo_descr_const_iterator a,
-               CaloDetDescrManager::calo_descr_const_iterator b)
-  { return a==b || a!=b; }
-  bool eitdum (CaloDetDescrManager::calo_element_const_iterator a,
-               CaloDetDescrManager::calo_element_const_iterator b)
-  { return a==b || a!=b; }
+  bool ritdum (CaloDetDescrManager::calo_descr_const_iterator /*a*/,
+               CaloDetDescrManager::calo_descr_const_iterator /*b*/)
+  { return true;}
+  bool eitdum (CaloDetDescrManager::calo_element_const_iterator /*a*/,
+               CaloDetDescrManager::calo_element_const_iterator /*b*/)
+  { return true; }
 }
