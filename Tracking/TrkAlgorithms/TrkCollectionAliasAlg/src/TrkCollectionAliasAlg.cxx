@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,12 +11,7 @@
 //================ Constructor =================================================
 
 Trk::TrkCollectionAliasAlg::TrkCollectionAliasAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name,pSvcLocator)
-{
-  //  template for property decalration
-  declareProperty("CollectionName", m_collectionName = "ResolvedTracks");
-  declareProperty("AliasName"     , m_aliasName      = "Tracks");
-}
+  AthReentrantAlgorithm(name,pSvcLocator) {}
 
 //================ Destructor =================================================
 

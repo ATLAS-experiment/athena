@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -53,8 +53,8 @@ namespace Trk {
       ///////////////////////////////////////////////////////////////////
       
       /** Vector of track collections to be merged. */  
-      SG::ReadHandleKeyArray<TrackCollection>
-        m_tracklocation;
+      SG::ReadHandleKeyArray<TrackCollection> m_tracklocation {
+	this, "TracksLocation", {}};
       /**overlay track collection, if track overlay is on; 
        * default is emptystring, i.e. track overlay is off */
       SG::ReadHandleKey<TrackCollection> m_overlayTrackLocation{
@@ -87,8 +87,8 @@ namespace Trk {
         "Pileup SCT Clusters"
       }; 
       /** Combined track collection.   */
-      SG::WriteHandleKey<ConstDataVector<TrackCollection>>
-        m_outtracklocation;
+      SG::WriteHandleKey<ConstDataVector<TrackCollection>> m_outtracklocation
+	{this, "OutputTracksLocation", "CombinedInDetTracks"};
 
       ///< the key given to the newly created association map
       SG::WriteHandleKey<Trk::PRDtoTrackMap> m_assoMapName{
@@ -113,9 +113,9 @@ namespace Trk {
                             ConstDataVector<TrackCollection>* outputCol) const;
 
     private:
-     
-      bool m_doTrackOverlay; //doing track overlay: needed to initialize the background PRD containers
 
+      //doing track overlay: needed to initialize the background PRD containers
+      BooleanProperty m_doTrackOverlay{this, "DoTrackOverlay", false};
 
     };
     

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,11 +14,11 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKeyArray.h"
 #include "TrkTrack/TrackCollection.h"
+#include "TrkToolInterfaces/ITrackSlimmingTool.h"
 
 #include <atomic>
 
 namespace Trk {
-class ITrackSlimmingTool;
 
 /** @class TrackSlimmer
 
@@ -47,8 +47,10 @@ public:
 private:
   /** member variables for algorithm properties: */
   // int/double/bool  m_propertyName;
-  ToolHandle<ITrackSlimmingTool> m_slimTool;
-  SG::ReadHandleKeyArray<TrackCollection> m_trackLocation;
+  ToolHandle<ITrackSlimmingTool> m_slimTool{this, "TrackSlimmingTool",
+      "Trk::TrkTrackSlimmingTool/TrkTrackSlimmingTool"};
+  SG::ReadHandleKeyArray<TrackCollection> m_trackLocation
+    {this, "TrackLocation", {"ConvertedMooreTracks"}};
 };
 } // end of namespace
 

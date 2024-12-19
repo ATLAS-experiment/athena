@@ -8,9 +8,8 @@ def TrackSlimmerCfg(flags, name="TrackSlimmer", **kwargs):
 
     if "TrackSlimmingTool" not in kwargs:
         from TrkConfig.TrkTrackSlimmingToolConfig import TrackSlimmingToolCfg
-        TrackSlimmingTool = acc.popToolsAndMerge(TrackSlimmingToolCfg(flags))
-        acc.addPublicTool(TrackSlimmingTool)
-        kwargs.setdefault("TrackSlimmingTool", TrackSlimmingTool)
+        kwargs.setdefault("TrackSlimmingTool", acc.popToolsAndMerge(
+            TrackSlimmingToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.Trk.TrackSlimmer(name, **kwargs))
     return acc
