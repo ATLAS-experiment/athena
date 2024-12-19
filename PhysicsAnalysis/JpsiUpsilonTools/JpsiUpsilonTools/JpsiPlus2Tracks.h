@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -64,46 +64,46 @@ namespace Analysis {
         //-------------------------------------------------------------------------------------
         
     private:
-        bool m_pipiMassHyp;
-        bool m_kkMassHyp;
-        bool m_kpiMassHyp;
-        bool m_kpMassHyp;
-        bool m_oppChargesOnly;
-        bool m_sameChargesOnly;
-        double m_trkThresholdPt;
-        double m_trkMaxEta;
-        double m_BThresholdPt;
-        double m_BMassUpper;
-        double m_BMassLower;
+        bool m_pipiMassHyp{};
+        bool m_kkMassHyp{};
+        bool m_kpiMassHyp{};
+        bool m_kpMassHyp{};
+        bool m_oppChargesOnly{};
+        bool m_sameChargesOnly{};
+        double m_trkThresholdPt{};
+        double m_trkMaxEta{};
+        double m_BThresholdPt{};
+        double m_BMassUpper{};
+        double m_BMassLower{};
         SG::ReadHandleKey<xAOD::VertexContainer> m_jpsiCollectionKey;
-        double m_jpsiMassUpper;
-        double m_jpsiMassLower;
+        double m_jpsiMassUpper{};
+        double m_jpsiMassLower{};
         SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrkParticleCollection;
         SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrkParticleGSFCollection;
         SG::ReadHandleKey<xAOD::MuonContainer> m_MuonsUsedInJpsi;
-        bool m_excludeJpsiMuonsOnly; //Add by Matt Klein
-        bool m_excludeCrossJpsiTracks; //Added by Matteo Bedognetti
+        bool m_excludeJpsiMuonsOnly{}; //Add by Matt Klein
+        bool m_excludeCrossJpsiTracks{}; //Added by Matteo Bedognetti
         ToolHandle < Trk::IVertexFitter > m_iVertexFitter;
         ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;
-        Trk::TrkVKalVrtFitter* m_VKVFitter;
-        bool m_useMassConst;
-        double m_altMassConst;
-        double m_diTrackMassUpper;
-        double m_diTrackMassLower;
+        Trk::TrkVKalVrtFitter* m_VKVFitter{};
+        bool m_useMassConst{};
+        double m_altMassConst{};
+        double m_diTrackMassUpper{};
+        double m_diTrackMassLower{};
         
         // additional cuts (Daniel Scheirich)
-        double m_chi2cut;                 // chi2/Ndof of the final veretx
-        double m_diTrackPt;               // pT of the hadronic track pair before fit
-        double m_trkQuadrupletMassUpper;  // invariant mass of all the 4 tracks before fit
-        double m_trkQuadrupletMassLower;
-        double m_trkQuadrupletPt;         // combined pT of all 4 tracks  before fit
-        double m_finalDiTrackMassUpper;   // inveriant mass of the hadronic track pair after the fit
-        double m_finalDiTrackMassLower;
-        double m_finalDiTrackPt;          // pT of the hadronic track after fit
-        double m_trkDeltaZ;               // DeltaZ between the JPsi vertex and hadronic tracks Z0
+        double m_chi2cut{};                 // chi2/Ndof of the final veretx
+        double m_diTrackPt{};               // pT of the hadronic track pair before fit
+        double m_trkQuadrupletMassUpper{};  // invariant mass of all the 4 tracks before fit
+        double m_trkQuadrupletMassLower{};
+        double m_trkQuadrupletPt{};         // combined pT of all 4 tracks  before fit
+        double m_finalDiTrackMassUpper{};   // inveriant mass of the hadronic track pair after the fit
+        double m_finalDiTrackMassLower{};
+        double m_finalDiTrackPt{};          // pT of the hadronic track after fit
+        double m_trkDeltaZ{};               // DeltaZ between the JPsi vertex and hadronic tracks Z0
         // (to reduce the pileup contribution before vertexing)
         std::vector<double> m_manualMassHypo;
-        int m_requiredNMuons;
+        int m_requiredNMuons{};
         std::vector<double> m_altMassMuonTracks;
         std::vector<double>  m_mumukkMasses;
         std::vector<double>  m_mumupipiMasses;
@@ -113,7 +113,7 @@ namespace Analysis {
         std::vector<double>  m_mumupkMasses;
         std::vector<int>     m_useGSFTrackIndices;
         std::bitset<4>       m_useGSFTrack;
-        size_t m_candidateLimit;
+        size_t m_candidateLimit{};
 
     };
 } // end of namespace
