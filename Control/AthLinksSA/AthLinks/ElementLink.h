@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 #ifndef ATHLINKS_ELEMENTLINK_H
 #define ATHLINKS_ELEMENTLINK_H
@@ -10,17 +10,17 @@ extern "C" {
 #   include <stdint.h>
 }
 #include <string>
+#include <RootMetaSelection.h>
 
 // Local include(s):
 #include "AthLinks/ElementLinkBase.h"
-#include "AthLinks/tools/selection_ns.h"
 #include "AthLinks/tools/TypeTools.h"
 
 // Forward declaration(s):
-ENTER_ROOT_SELECTION_NS
-template< typename STORABLE >
-class ElementLink;
-EXIT_ROOT_SELECTION_NS
+namespace ROOT { namespace Meta { namespace Selection {
+  template< typename STORABLE >
+  class ElementLink;
+}}}
 namespace xAOD {
    class TVirtualEvent;
 }
@@ -34,8 +34,6 @@ namespace xAOD {
 ///
 /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 ///
-/// $Revision: 649074 $
-/// $Date: 2015-02-23 17:51:40 +0100 (Mon, 23 Feb 2015) $
 ///
 template< typename STORABLE >
 class ElementLink : public ElementLinkBase {
@@ -206,7 +204,7 @@ private:
 
    /// Needed to take the Reflex/Cling specifications into account
    typedef typename
-   ROOT_SELECTION_NS::ElementLink< STORABLE >::self DictSel;
+   ROOT::Meta::Selection::ElementLink< STORABLE >::self DictSel;
 
 }; // class ElementLink
 
@@ -222,7 +220,7 @@ bool operator> (const ElementLink<STORABLE> &lhs,
  * The following piece of code declares all members of the ElementLink
  * class as transient.
  */
-ENTER_ROOT_SELECTION_NS
+namespace ROOT { namespace Meta { namespace Selection {
 template< typename STORABLE >
 class ElementLink : public SelectNoInstance
 {
@@ -232,13 +230,13 @@ public:
    typedef ElementLink< STORABLE > self;
 
    /// Mark all transient members:
-   ROOT_SELECTION_NS::MemberAttributes< kTransient > m_container;
-   ROOT_SELECTION_NS::MemberAttributes< kTransient > m_element;
-   ROOT_SELECTION_NS::MemberAttributes< kTransient > m_elementCached;
-   ROOT_SELECTION_NS::MemberAttributes< kTransient > m_event;
+   ROOT::Meta::Selection::MemberAttributes< kTransient > m_container;
+   ROOT::Meta::Selection::MemberAttributes< kTransient > m_element;
+   ROOT::Meta::Selection::MemberAttributes< kTransient > m_elementCached;
+   ROOT::Meta::Selection::MemberAttributes< kTransient > m_event;
 
 };
-EXIT_ROOT_SELECTION_NS
+}}} // ROOT namespace
 
 // Include the implementation:
 #ifndef __GCCXML__

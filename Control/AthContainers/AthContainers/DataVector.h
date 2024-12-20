@@ -538,7 +538,6 @@
 #include "AthContainers/tools/ElementProxy.h"
 #include "AthContainers/tools/IsMostDerivedFlag.h"
 #include "AthContainers/DataVectorWithAllocFwd.h"
-#include "AthLinks/tools/selection_ns.h"
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <type_traits>
 #include <vector>
@@ -549,6 +548,7 @@
 #include <stdexcept>
 #include <iterator>
 #include <initializer_list>
+#include <RootMetaSelection.h>
 
 
 
@@ -577,9 +577,9 @@
 
 
 // Forward declarations.
-ENTER_ROOT_SELECTION_NS
-template <class T, class BASE> class DataVector;
-EXIT_ROOT_SELECTION_NS
+namespace ROOT { namespace Meta { namespace Selection {
+  template <class T, class BASE> class DataVector;
+}}}
 
 
 namespace DataVector_detail {
@@ -2039,7 +2039,7 @@ private:
 
 
   typedef typename
-    ROOT_SELECTION_NS::DataVector<T, DataVector_BASE>::self self;
+    ROOT::Meta::Selection::DataVector<T, DataVector_BASE>::self self;
 };
 
 
@@ -3356,7 +3356,7 @@ private:
 
 
   typedef typename
-    ROOT_SELECTION_NS::DataVector<T, DataVector_BASE>::self self;
+    ROOT::Meta::Selection::DataVector<T, DataVector_BASE>::self self;
 };
 
 template <class T>
@@ -3417,7 +3417,7 @@ template <class T>
 void swap (DataVector<T>& a, DataVector<T>& b);
 
 
-ENTER_ROOT_SELECTION_NS
+namespace ROOT { namespace Meta { namespace Selection {
 
 template< class T, class BASE >
 class DataVector : KeepFirstTemplateArguments< 1 >, SelectNoInstance
@@ -3429,19 +3429,19 @@ public:
 #ifndef XAOD_STANDALONE
    /// Automatically generate dictionary for contained vector
     //MN: this causes massive dictionary duplication.  Disabling for now.
-   // ROOT_SELECTION_NS::MemberAttributes< kAutoSelected > m_pCont;
+   // ROOT::Meta::Selection::MemberAttributes< kAutoSelected > m_pCont;
 #endif  
    /// Declare the automatically created variable transient
-   ROOT_SELECTION_NS::MemberAttributes< kTransient > m_isMostDerived;
-   ROOT_SELECTION_NS::MemberAttributes< kTransient > m_deleter;
+   ROOT::Meta::Selection::MemberAttributes< kTransient > m_isMostDerived;
+   ROOT::Meta::Selection::MemberAttributes< kTransient > m_deleter;
 
    /// We do not want to save this.  The P->T converter should
    /// decide the ownership mode.
-   ROOT_SELECTION_NS::MemberAttributes< kTransient > m_ownPolicy;
+   ROOT::Meta::Selection::MemberAttributes< kTransient > m_ownPolicy;
 
 };
 
-EXIT_ROOT_SELECTION_NS
+}}} // namespace
 
 
 #include "AthContainers/ClassName.h"
