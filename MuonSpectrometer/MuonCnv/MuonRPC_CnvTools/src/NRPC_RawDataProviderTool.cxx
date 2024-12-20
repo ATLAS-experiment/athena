@@ -173,11 +173,11 @@ StatusCode NRPC_RawDataProviderTool::fillCollections(const OFFLINE_FRAGMENTS_NAM
             
             // Decode data
             for (unsigned int i=0; i<data[idata]-6; i++) {
-                uint16_t tdc = (data[idata+4] & 0x000000ff) ;
-                uint16_t chan = (data[idata+4] & 0x0000ff00) >> 8 ;
-                float tot = ((data[idata+4] & 0x00ff0000) >> 16)*0.4 ;
-                float time = ((data[idata+4] & 0x0f000000) >> 24)*1.6 ;
-                uint32_t bcid_hit = (data[idata+4] & 0xf0000000) >> 28 ;
+                uint16_t tdc = (data[idata+4+i] & 0x000000ff) ;
+                uint16_t chan = (data[idata+4+i] & 0x0000ff00) >> 8 ;
+                float tot = ((data[idata+4+i] & 0x007f0000) >> 16)*0.4 ;
+                float time = ((data[idata+4+i] & 0x0f000000) >> 24)*1.6 ;
+                uint32_t bcid_hit = (data[idata+4+i] & 0xf0000000) >> 28 ;
 
                 // Compute the BCID of the hit combining the nominal BCID with the last 4 bits from the hit (bcid_hit)
                 uint32_t bcid_nom_4bits = (bcid_nom & 0x0000000f) ;
