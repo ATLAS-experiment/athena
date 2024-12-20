@@ -351,7 +351,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
         cur_event_ZDC_available &= ZdcSumCalibEnergyHandle.isAvailable();
 
         if (cur_event_ZDC_available){
-            for (const auto& zdcSum : *zdcSums) { // side -1: C; side 1: A
+            for (const auto zdcSum : *zdcSums) { // side -1: C; side 1: A
                 if (zdcSum->zdcSide() != 0){
                     int iside = (zdcSum->zdcSide() > 0)? 1 : 0;
 
@@ -378,7 +378,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     } else if (m_enableZDC){ // enable ZDC but not physics - for now, the only case is injector pulse --> no energy, only record uncalib sum
         cur_event_ZDC_available &= ZdcSumUncalibSumHandle.isAvailable();
         if (cur_event_ZDC_available){
-            for (const auto& zdcSum : *zdcSums) { // side -1: C; side 1: A
+            for (const auto zdcSum : *zdcSums) { // side -1: C; side 1: A
                 if (zdcSum->zdcSide() != 0){
                     int iside = (zdcSum->zdcSide() > 0)? 1 : 0;
                     zdcUncalibSumArr[iside] = ZdcSumUncalibSumHandle(*zdcSum);
@@ -392,7 +392,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
         SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> RPDsideStatusHandle(m_RPDSideStatusKey, ctx);
         cur_event_RPD_available &= RPDsideStatusHandle.isAvailable();
         if (cur_event_RPD_available){
-            for (const auto& zdcSum : *zdcSums) { // side -1: C; side 1: A
+            for (const auto zdcSum : *zdcSums) { // side -1: C; side 1: A
                 if (zdcSum->zdcSide() != 0){ // contains the RPD Cos Delta reaction plane
                     int iside = (zdcSum->zdcSide() > 0)? 1 : 0;
                     unsigned int rpdStatusCurSide = RPDsideStatusHandle(*zdcSum);
@@ -414,7 +414,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
 
         cur_event_RPDCentroid_available &= RPDcentroidStatusHandle.isAvailable();
         if (cur_event_RPDCentroid_available){
-            for (const auto& zdcSum : *zdcSums) { // side -1: C; side 1: A
+            for (const auto zdcSum : *zdcSums) { // side -1: C; side 1: A
                 
                 if (zdcSum->zdcSide() == 0){ // contains the RPD Cos Delta reaction plane
                     rpdCosDeltaReactionPlaneAngle = RPDcosDeltaReactionPlaneAngleHandle(*zdcSum);
@@ -951,7 +951,7 @@ StatusCode ZdcMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
        ATH_MSG_WARNING("evtStore() does not contain Collection with name "<< m_ZdcSumContainerKey);
        return StatusCode::SUCCESS;
     }
-    for (const auto& zdcSum : *zdcSums) { 
+    for (const auto zdcSum : *zdcSums) { 
         if (zdcSum->zdcSide() == 0){
             if (!eventTypeHandle.isAvailable()){
                 ATH_MSG_WARNING("The global sum entry in zdc sum container can be retrieved; but it does NOT have the variable eventType written as a decoration!");

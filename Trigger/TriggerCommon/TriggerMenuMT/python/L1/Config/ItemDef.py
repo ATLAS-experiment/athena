@@ -419,6 +419,7 @@ class ItemDef:
         MenuItem('L1_2MU14FCH_OVERLAY').setLogic( d.MU14FCH.x(2)       & physcond).setTriggerType(TT.zerobs)
 
         MenuItem('L1_LLPDPHI-jXE40-jJ40').setLogic( d.TOPO_0DPHI10_jXE40delay_jJ40s & physcond)
+        MenuItem('L1_LLPNODPHI-jXE40-jJ40').setLogic( d.TOPO_0DPHI99_jXE40delay_jJ40s & physcond)
         
         # HI
         MenuItem('L1_MU3V_VTE10' ).setLogic( d.MU3V      & Not(d.TE10) & physcond).setTriggerType(TT.muon)
@@ -965,6 +966,9 @@ class ItemDef:
         MenuItem('L1_MU14FCH_jXE70').setLogic( d.MU14FCH & d.jXE70 & physcond).setTriggerType(TT.calo) 
         MenuItem('L1_MU14FCH_jJ90' ).setLogic( d.MU14FCH & d.jJ90 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_MU14FCH_jXE80').setLogic( d.MU14FCH & d.jXE80 & physcond).setTriggerType(TT.calo)        
+        #ATR-30618
+        MenuItem('L1_ADVAET').setLogic( d.TOPO_ADVAE2A_6jJ0s_4eTAU0s_4MU0s_jXE0s_Tight & physcond )
+        MenuItem('L1_ADVAEL').setLogic( d.TOPO_ADVAE2A_6jJ0s_4eTAU0s_4MU0s_jXE0s_Loose & physcond )
         # HI
         MenuItem('L1_J15_NZ' ).setLogic( d.J15      & Not(ZDC_AND) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2J15_NZ').setLogic( d.J15.x(2) & Not(ZDC_AND) & physcond).setTriggerType(TT.calo)

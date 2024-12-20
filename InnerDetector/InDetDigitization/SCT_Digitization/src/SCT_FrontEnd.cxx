@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_FrontEnd.h"
@@ -109,18 +109,15 @@ StatusCode SCT_FrontEnd::finalize() {
 // Init the class variable  vectors
 // ----------------------------------------------------------------------
 StatusCode SCT_FrontEnd::initVectors(int strips, SCT_FrontEndData& data) const {
-  //previously, these were all zero'd as well here
-  //however, this takes up a lot of CPU (especially for ITk)
-  //and doesn't seem necessary
-  data.m_GainFactor.reserve(strips);
+  data.m_GainFactor.resize(strips);
 
   if (m_data_readout_mode == Condensed) {
-    data.m_Analogue[0].reserve(strips);
-    data.m_Analogue[1].reserve(strips);
+    data.m_Analogue[0].resize(strips);
+    data.m_Analogue[1].resize(strips);
   } else { // Expanded
-    data.m_Analogue[0].reserve(strips);
-    data.m_Analogue[1].reserve(strips);
-    data.m_Analogue[2].reserve(strips);
+    data.m_Analogue[0].resize(strips);
+    data.m_Analogue[1].resize(strips);
+    data.m_Analogue[2].resize(strips);
   }
 
   return StatusCode::SUCCESS;
@@ -583,7 +580,7 @@ void SCT_FrontEnd::process(SiChargedDiodeCollection& collection, CLHEP::HepRando
 
   // Check number of strips in design and from manager(max number of strips on any module)
   // The design value should always be equal or lower than the manager one
-  // However, no resising is now done in case of a lower value
+  // However, no resizing is now done in case of a lower value
   const int strip_max = p_design->cells();
   // Init vectors
   if (StatusCode::SUCCESS != initVectors(strip_max, data)) {
@@ -594,19 +591,8 @@ void SCT_FrontEnd::process(SiChargedDiodeCollection& collection, CLHEP::HepRando
   // Contains strip hit info, reset to 0 for each wafer processed
   data.m_StripHitsOnWafer.assign(strip_max, 0);
 
-  // Containes the charge for each bin on each hit strip
-  if (m_data_readout_mode == Condensed) {
-    for (int i = 0; i < strip_max; ++i) {
-      data.m_Analogue[0][i] = 0.0;
-      data.m_Analogue[1][i] = 0.0;
-    }
-  } else { // Expanded
-    for (int i = 0; i < strip_max; ++i) {
-      data.m_Analogue[0][i] = 0.0;
-      data.m_Analogue[1][i] = 0.0;
-      data.m_Analogue[2][i] = 0.0;
-    }
-  }
+  // data.m_Analogue contains the charge for each bin on each hit strip
+  // These vectors were cleared in initVectors().
 
   // Get wafer, moduleId and side
   Identifier waferId = collection.identify();
