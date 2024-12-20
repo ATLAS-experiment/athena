@@ -283,7 +283,7 @@ def create_dir_and_copy_refs(test, actually_update=False):
     """
     commands = []
     if test.new_version_directory not in dirs_created:
-        commands.append("mkdir " + test.new_version_directory)
+        commands.append("mkdir -p " + test.new_version_directory)
         dirs_created.append(test.new_version_directory)
                 
     # Copy new directory first, then copy old (in case the new MR did not touch all files)
