@@ -38,7 +38,7 @@ namespace CP
           m_isolationTool->getMuonAcceptInfo()));
     }
 
-    asg::AcceptData blankAccept {&m_isolationTool->getObjAcceptInfo()};
+    asg::AcceptData blankAccept {&m_isolationTool->getMuonAcceptInfo()};
     m_setOnFail = selectionFromAccept(blankAccept);
 
     return StatusCode::SUCCESS;
