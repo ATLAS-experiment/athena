@@ -1490,13 +1490,11 @@ Trk::GeantFollowerMSHelper::modifyTSOSvector(
         const Trk::TrackStateOnSurface* newTSOSFirst =
             new Trk::TrackStateOnSurface(nullptr, std::move(parsFirst),
                                          std::move(meotFirst), typePattern);
-        const Trk::TrackStateOnSurface* newTSOS =
-            (elossFlag != 0 ? new Trk::TrackStateOnSurface(
+        auto whichType = (elossFlag != 0) ? typePatternDeposit : typePattern;
+        const Trk::TrackStateOnSurface* newTSOS = new Trk::TrackStateOnSurface(
                                   nullptr, std::move(parsLast),
-                                  std::move(meotLast), typePatternDeposit)
-                            : new Trk::TrackStateOnSurface(
-                                  nullptr, std::move(parsLast),
-                                  std::move(meotLast), typePattern));
+                                  std::move(meotLast), whichType);
+       
         newTSOSvector.push_back(newTSOSFirst);
         newTSOSvector.push_back(newTSOS);
       } else {
