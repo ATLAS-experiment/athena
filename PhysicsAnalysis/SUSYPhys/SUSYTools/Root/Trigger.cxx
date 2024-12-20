@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to trigger
@@ -281,14 +281,14 @@ void SUSYObjDef_xAOD::TrigMatch(const std::initializer_list<const xAOD::IParticl
 
 
 void SUSYObjDef_xAOD::TrigMatch(const xAOD::IParticleContainer* v, const std::vector<std::string>& items) {
-  for(const auto& p : *v) {
+  for(const auto p : *v) {
     this->TrigMatch(p, items);
   }
 }
 
 
 void SUSYObjDef_xAOD::TrigMatch(const xAOD::IParticleContainer* v, const std::initializer_list<std::string>& items) {
-  for(const auto& p : *v) {
+  for(const auto p : *v) {
     this->TrigMatch(p, items);
   }
 }

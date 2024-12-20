@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to TauJets
@@ -60,7 +60,7 @@ StatusCode SUSYObjDef_xAOD::GetTaus(xAOD::TauJetContainer*& copy, xAOD::ShallowA
     taus=copy;
   }
 
-  for (const auto& tau : *copy) {
+  for (const auto tau : *copy) {
     ATH_CHECK( this->FillTau(*tau) );
     this->IsSignalTau(*tau, m_tauPt, m_tauEta);
   }

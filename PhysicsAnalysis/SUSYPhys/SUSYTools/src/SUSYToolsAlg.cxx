@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // SUSYToolsAlg.cxx
@@ -481,7 +481,7 @@ StatusCode SUSYToolsAlg::execute() {
   if (m_slices["tau"]) {
      if (!isData && !m_isPHYSLITE) {
        ATH_CHECK( evtStore()->retrieve(taus_gettruth,"TauJets") );
-       for(const auto& tau : *taus_gettruth) {
+       for(const auto tau : *taus_gettruth) {
          m_tauTruthMatchingTool->getTruth(*tau);
        }
      }
@@ -1039,7 +1039,7 @@ StatusCode SUSYToolsAlg::execute() {
     if (m_slices["ele"]) {
       ATH_MSG_DEBUG("Working on electrons");
       float electrons_weight(1.);
-      for ( const auto& el : *electrons ) {
+      for ( const auto el : *electrons ) {
         if( !isData ){
           if (isNominal || syst_affectsElectrons) {
             if ((ST::acc_signal(*el) == 1) && (isNominal || sysInfo.affectsWeights)) {
@@ -1074,7 +1074,7 @@ StatusCode SUSYToolsAlg::execute() {
     if (m_slices["pho"]) {
       ATH_MSG_DEBUG("Working on photons");
       float photons_weight(1.);
-      for ( const auto& ph : *photons ) {
+      for ( const auto ph : *photons ) {
         if( !isData ){
           if (isNominal || syst_affectsPhotons) {
             if ((ST::acc_signal(*ph) == 1) && (isNominal || sysInfo.affectsWeights)) {
@@ -1107,7 +1107,7 @@ StatusCode SUSYToolsAlg::execute() {
     if (m_slices["mu"]) {
       ATH_MSG_DEBUG("Working on muons");
       float muons_weight(1.);
-      for ( const auto& mu : *muons ) {
+      for ( const auto mu : *muons ) {
         if( !isData ){
           if (isNominal || syst_affectsMuons) {
             if ((ST::acc_signal(*mu) == 1) && (isNominal || sysInfo.affectsWeights)) {
@@ -1140,7 +1140,7 @@ StatusCode SUSYToolsAlg::execute() {
     //--- Jets
     if (m_slices["jet"]) {
       ATH_MSG_DEBUG("Working on jets");
-      for ( const auto& jet : *jets ) {
+      for ( const auto jet : *jets ) {
         ATH_MSG_VERBOSE( " Jet is bad? "        << static_cast<int>(ST::acc_bad(*jet)));
         ATH_MSG_VERBOSE( " Jet is baseline ? "  << static_cast<int>(ST::acc_baseline(*jet)));
         ATH_MSG_VERBOSE( " Jet passes OR ? "    << static_cast<int>(ST::acc_passOR(*jet)));
@@ -1199,7 +1199,7 @@ StatusCode SUSYToolsAlg::execute() {
 
     if( m_slices["fjet"] && doFatJets ) {
       ATH_MSG_DEBUG("Working on fat jets");
-      for ( const auto& fatjet : *fatjets ) {
+      for ( const auto fatjet : *fatjets ) {
         ATH_MSG_VERBOSE( " Jet is bad? "       << static_cast<int>(ST::acc_bad(*fatjet)));
         ATH_MSG_VERBOSE( " Jet is baseline ? " << static_cast<int>(ST::acc_baseline(*fatjet)));
         ATH_MSG_VERBOSE( " Jet passes OR ? "   << static_cast<int>(ST::acc_passOR(*fatjet)));
@@ -1228,7 +1228,7 @@ StatusCode SUSYToolsAlg::execute() {
 
     if( m_slices["tjet"] && doTrkJets ) {
       ATH_MSG_DEBUG("Working on trk jets");
-      for ( const auto& trkjet : *trkjets ) {
+      for ( const auto trkjet : *trkjets ) {
         ATH_MSG_VERBOSE( " Jet is bad? "        << static_cast<int>(ST::acc_bad(*trkjet)));
         ATH_MSG_VERBOSE( " Jet is baseline ? "  << static_cast<int>(ST::acc_baseline(*trkjet)));
         ATH_MSG_VERBOSE( " Jet passes OR ? "    << static_cast<int>(ST::acc_passOR(*trkjet)));
@@ -1257,7 +1257,7 @@ StatusCode SUSYToolsAlg::execute() {
     if (m_slices["tau"]) {
       ATH_MSG_DEBUG("Working on taus");
       float taus_weight(1.);
-      for ( const auto& ta : *taus ) {
+      for ( const auto ta : *taus ) {
         if( !isData ){
           if (isNominal || syst_affectsTaus) {
             if ((ST::acc_signal(*ta) == 1) && (isNominal || sysInfo.affectsWeights)) {
