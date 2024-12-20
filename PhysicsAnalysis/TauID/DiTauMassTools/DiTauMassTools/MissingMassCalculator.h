@@ -62,7 +62,7 @@ class MissingMassCalculator {
 
   TRandom2 m_randomGen;
   
-  MMCCalibrationSet::e m_mmcCalibrationSet;
+  MMCCalibrationSet::e m_mmcCalibrationSet{};
 
   bool m_fUseEfficiencyRecovery{}; // switch to turn ON/OFF re-fit in order to recover efficiency
   bool m_fUseFloatStopping{}; // switch to turn ON/OFF floating stopping criterion
@@ -91,7 +91,9 @@ class MissingMassCalculator {
   
   int m_nCallprobCalculatorV9fast;
   
-  double m_nsigma_METscan,m_nsigma_METscan2,m_nsigma_METscan_ll,m_nsigma_METscan_lh,m_nsigma_METscan_hh,m_nsigma_METscan_lfv_ll,m_nsigma_METscan_lfv_lh, m_beamEnergy; // number of sigmas for MET-scan
+  double m_nsigma_METscan{},m_nsigma_METscan2{},m_nsigma_METscan_ll{};
+  double m_nsigma_METscan_lh{},m_nsigma_METscan_hh{},m_nsigma_METscan_lfv_ll{};
+  double m_nsigma_METscan_lfv_lh{}, m_beamEnergy{}; // number of sigmas for MET-scan
 
   int m_iter1{},m_iter2{},m_iter3{},m_iter4{},m_iter5{},m_iang1low{},m_iang1high{},m_iang2low{},m_iang2high{};
   int m_iterTheta3d{};
