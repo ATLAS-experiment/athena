@@ -406,10 +406,6 @@ SAVE
     config.setOptions (lepton_postfix='nominal')
 
     # Output
-    config.addBlock ('Output')
-    config.setOptions (treeName='analysis')
-    config.setOptions (vars=[])
-    config.setOptions (metVars=[])
     outputContainers = {
         'mu_': 'OutMuons',
         'el_': 'OutElectrons',
@@ -419,16 +415,28 @@ SAVE
         'larger_jet_': 'OutLargeRJets',
         'met_': 'AnaMET',
         '': 'EventInfo'}
-    config.setOptions (containers=outputContainers)
     outputContainersForMC = {'truth_mu_' : 'OutTruthMuons',
                              'truth_el_' : 'OutTruthElectrons',
                              'truth_ph_' : 'OutTruthPhotons',
                              'truth_tau_': 'OutTruthTaus',
                              'truth_jet_': 'OutTruthJets',
                              'truth_met_': 'TruthMET'}
+    config.addBlock ('Output')
+    config.setOptions (treeName='analysis')
+    config.setOptions (vars=[
+        'EventInfo.actualInteractionsPerCrossing -> actualMuScaled',
+    ])
+    config.setOptions (metVars=[
+        'AnaMET_%SYS%.met -> met_%SYS%',
+    ])
+    config.setOptions (truthMetVars=[
+        'TruthMET_NOSYS.met -> truth_met',
+    ])
+    config.setOptions (containers=outputContainers)
     config.setOptions (containersOnlyForMC=outputContainersForMC)
-    disable_commands = []
-    config.setOptions (commands=disable_commands)
+    config.setOptions (commands=[
+        "disable actualInteractionsPerCrossing",
+    ])
 
     # configure ConfigSequence
     configSeq = config.configure()

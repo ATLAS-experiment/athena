@@ -55,9 +55,6 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
                         returnConfigSeq=False,
                         bleedingEdge=False) :
 
-    vars = []
-    metVars = []
-
     largeRJets = True
 
     if autoconfigFromFlags is not None:
@@ -448,13 +445,20 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
 
     configSeq += config.makeConfig ('Output')
     configSeq.setOptionValue ('.treeName', 'analysis')
-    configSeq.setOptionValue ('.vars', vars)
-    configSeq.setOptionValue ('.metVars', metVars)
+    configSeq.setOptionValue ('.vars', [
+        'EventInfo.actualInteractionsPerCrossing -> actualMuScaled',
+    ])
+    configSeq.setOptionValue ('.metVars', [
+        'AnaMET_%SYS%.met -> met_%SYS%',
+    ])
+    configSeq.setOptionValue ('.truthMetVars', [
+        'TruthMET_NOSYS.met -> truth_met',
+    ])
     configSeq.setOptionValue ('.containers', outputContainers)
     configSeq.setOptionValue ('.containersOnlyForMC', outputContainersForMC)
-
-    disable_commands = []
-    configSeq.setOptionValue ('.commands', disable_commands)
+    configSeq.setOptionValue ('.commands', [
+        'disable actualInteractionsPerCrossing',
+    ])
 
     # return configSeq for unit test
     if returnConfigSeq:

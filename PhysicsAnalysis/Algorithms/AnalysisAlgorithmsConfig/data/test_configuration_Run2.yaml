@@ -299,8 +299,14 @@ Bootstraps:
 # After configuring each container, many variables will be saved automatically.
 Output:
   treeName: analysis
-  vars: []
-  metVars: []
+  vars:
+    - EventInfo.actualInteractionsPerCrossing -> actualMuScaled
+  metVars:
+    - AnaMET_%SYS%.met -> met_%SYS%
+  truthMetVars:
+    - TruthMET_NOSYS.met -> truth_met
+  commands:
+    - disable actualInteractionsPerCrossing
   containers:
     # Format should follow: <prefix>:<output container>
     mu_: OutMuons

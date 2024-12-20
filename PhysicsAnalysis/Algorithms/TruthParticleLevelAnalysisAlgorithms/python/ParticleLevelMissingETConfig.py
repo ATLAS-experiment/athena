@@ -26,9 +26,5 @@ class ParticleLevelMissingETBlock(ConfigBlock):
             alg.input = config.readName (self.outputContainerName)
             alg.output = config.copyName (self.outputContainerName)
 
-        outputVars = [
-            ['met_met', 'met'],
-            ['met_phi', 'phi'],
-        ]
-        for decoration, branch in outputVars:
-            config.addOutputVar (self.outputContainerName, decoration, branch, noSys=True)
+        config.addOutputVar (self.outputContainerName, 'met', 'met', noSys=True)
+        config.addOutputVar (self.outputContainerName, 'phi', 'phi', noSys=True)
