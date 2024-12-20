@@ -1801,12 +1801,9 @@ Trk::TrkMaterialProviderTool::modifyTSOSvector(const std::vector<const Trk::Trac
         const Trk::TrackStateOnSurface* newTSOSFirst =
           new Trk::TrackStateOnSurface(
             nullptr, std::move(parsFirst), std::move(meotFirst), typePattern);
-        const Trk::TrackStateOnSurface* newTSOS =
-          (elossFlag != 0
-             ? new Trk::TrackStateOnSurface(
-                 nullptr, std::move(parsLast), std::move(meotLast), typePatternDeposit)
-             : new Trk::TrackStateOnSurface(
-                 nullptr, std::move(parsLast), std::move(meotLast), typePattern));
+        auto whichPattern = (elossFlag != 0) ? typePatternDeposit : typePattern;
+        const Trk::TrackStateOnSurface* newTSOS = new Trk::TrackStateOnSurface( nullptr, 
+            std::move(parsLast), std::move(meotLast), whichPattern);
         newTSOSvector->push_back(newTSOSFirst);
         newTSOSvector->push_back(newTSOS);
       } else {
