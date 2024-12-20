@@ -16,24 +16,31 @@ namespace CP {
 StatusCode ParticleLevelOverlapRemovalAlg::initialize() {
 
   ANA_CHECK(m_jetsKey.initialize());
-  ANA_CHECK(m_electronsKey.initialize());
-  ANA_CHECK(m_muonsKey.initialize());
-  ANA_CHECK(m_photonsKey.initialize());
+  ANA_CHECK(m_electronsKey.initialize(SG::AllowEmpty));
+  ANA_CHECK(m_muonsKey.initialize(SG::AllowEmpty));
+  ANA_CHECK(m_photonsKey.initialize(SG::AllowEmpty));
 
-  m_decORelectron = m_electronsKey.key() + "." + m_decLabelOR.value();
-  m_decORmuon = m_muonsKey.key() + "." + m_decLabelOR.value();
-  m_decORphoton = m_photonsKey.key() + "." + m_decLabelOR.value();
+  if (!m_electronsKey.empty())
+    m_decORelectron = m_electronsKey.key() + "." + m_decLabelOR.value();
+  if (!m_muonsKey.empty())
+    m_decORmuon = m_muonsKey.key() + "." + m_decLabelOR.value();
+  if (!m_photonsKey.empty())
+    m_decORphoton = m_photonsKey.key() + "." + m_decLabelOR.value();
   m_decORjet = m_jetsKey.key() + "." + m_decLabelOR.value();
 
-  ANA_CHECK(m_decORelectron.initialize());
-  ANA_CHECK(m_decORmuon.initialize());
-  ANA_CHECK(m_decORphoton.initialize());
+  ANA_CHECK(m_decORelectron.initialize(SG::AllowEmpty));
+  ANA_CHECK(m_decORmuon.initialize(SG::AllowEmpty));
+  ANA_CHECK(m_decORphoton.initialize(SG::AllowEmpty));
   ANA_CHECK(m_decORjet.initialize());
 
-  ANA_CHECK(m_jetSelection.initialize());
-  ANA_CHECK(m_electronSelection.initialize());
-  ANA_CHECK(m_muonSelection.initialize());
-  ANA_CHECK(m_photonSelection.initialize());
+  if (!m_jetSelection.empty())
+    ANA_CHECK(m_jetSelection.initialize());
+  if (!m_electronSelection.empty())
+    ANA_CHECK(m_electronSelection.initialize());
+  if (!m_muonSelection.empty())
+    ANA_CHECK(m_muonSelection.initialize());
+  if (!m_photonSelection.empty())
+    ANA_CHECK(m_photonSelection.initialize());
 
   return StatusCode::SUCCESS;
 }

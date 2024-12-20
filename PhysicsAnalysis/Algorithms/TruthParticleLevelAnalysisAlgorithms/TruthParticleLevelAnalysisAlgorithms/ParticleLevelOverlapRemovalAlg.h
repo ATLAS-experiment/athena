@@ -31,14 +31,14 @@ class ParticleLevelOverlapRemovalAlg : public EL::AnaAlgorithm {
       this, "muons", "", "the name of the input truth muons container"};
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_photonsKey{
       this, "photons", "", "the name of the input truth photons container"};
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_decORjet{this, "decORjet", "",
-                                                         ""};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_decORjet{
+      this, "decORjet", "SetMe", ""};
   SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_decORelectron{
-      this, "decORelectron", "", ""};
+      this, "decORelectron", "TruthElectrons.passesOR", ""};
   SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_decORmuon{
-      this, "decORmuon", "", ""};
+      this, "decORmuon", "TruthMuons.passesOR", ""};
   SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_decORphoton{
-      this, "decORphoton", "", ""};
+      this, "decORphoton", "TruthPhotons.passesOR", ""};
   CP::SelectionReadHandle m_jetSelection{
       this, "jetSelection", "", "the selection on the input truth jets"};
   CP::SelectionReadHandle m_electronSelection{
@@ -66,7 +66,7 @@ class ParticleLevelOverlapRemovalAlg : public EL::AnaAlgorithm {
       this, "doJetPhotonOR", false,
       "whether to perform jet-photon overlap removal"};
   Gaudi::Property<std::string> m_decLabelOR{
-      this, "labelOR", "",
+      this, "labelOR", "passesOR",
       "decoration to apply to all particles for overlap removal"};
 
   float dressedDeltaR(const xAOD::Jet* p1, TLorentzVector& p2,
