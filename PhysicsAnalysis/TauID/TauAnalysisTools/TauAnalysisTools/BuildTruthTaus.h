@@ -105,7 +105,7 @@ protected:
   TruthTausEvent m_truthTausEvent;
 
   // temporary, drop at the first occasion
-  bool m_bTruthTauAvailable;
+  bool m_bTruthTauAvailable{};
 
 private:
 
@@ -119,11 +119,11 @@ private:
   SG::WriteHandleKey<xAOD::TruthParticleContainer> m_truthTauOutputContainer { this, "NewTruthTauContainerName", "TruthTaus", "Truth tau output container name" };
 
   bool m_truthMatchingMode = false;
-  bool m_bWriteInvisibleFourMomentum;
-  bool m_bWriteVisibleChargedFourMomentum;
-  bool m_bWriteVisibleNeutralFourMomentum;
-  bool m_bWriteDecayModeVector;
-  bool m_bWriteVertices;
+  bool m_bWriteInvisibleFourMomentum{};
+  bool m_bWriteVisibleChargedFourMomentum{};
+  bool m_bWriteVisibleNeutralFourMomentum{};
+  bool m_bWriteDecayModeVector{};
+  bool m_bWriteVertices{};
 
   asg::AnaToolHandle<IMCTruthClassifier> m_tMCTruthClassifier;
 
