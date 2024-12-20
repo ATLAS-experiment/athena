@@ -26,6 +26,10 @@ class OutputAnalysisConfig (ConfigBlock):
             "and decorations to output branches. Specficially for MET "
             "variables, where only the final MET term is retained. "
             "The default is [] (empty list).")
+        self.addOption ('truthMetVars', [], type=None,
+            info="a list of mappings (list of strings) between containers "
+            "and decorations to output branches for truth MET. "
+            "The default is [] (empty list).")
         self.addOption ('containers', {}, type=None,
             info="a dictionary mapping prefixes (key) to container names "
             "(values) to be used when saving to the output tree. Branches "
@@ -71,7 +75,7 @@ class OutputAnalysisConfig (ConfigBlock):
         alg = config.createAlgorithm('CP::AsgxAODMetNTupleMakerAlg' if isMet else 'CP::AsgxAODNTupleMakerAlg', name)
         alg.TreeName = self.treeName
         alg.RootStreamName = self.streamName
-        branchList = list(self.vars | set(vars))
+        branchList = list(vars)
         branchList.sort(key=self.branchSortOrder)
         branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
         branchList_sys = [branch for branch in branchList if "%SYS%" in branch]
@@ -84,6 +88,9 @@ class OutputAnalysisConfig (ConfigBlock):
 
         self.vars = set(self.vars)
         self.varsOnlyForMC = set(self.varsOnlyForMC)
+        self.metVars = set(self.metVars)
+        self.truthMetVars = set(self.truthMetVars)
+
         # merge the MC-specific branches and containers into the main list/dictionary only if we are not running on data
         if config.dataType() is not DataType.Data:
             self.vars |= self.varsOnlyForMC
@@ -154,9 +161,9 @@ class OutputAnalysisConfig (ConfigBlock):
             else :
                 raise KeyError ('unknown command for "commands" option: ' + words[0])
 
-        autoVars = []
-        autoMetVars = []
-        autoTruthMetVars = []
+        autoVars = set()
+        autoMetVars = set()
+        autoTruthMetVars = set()
         for outputName in outputConfigs :
             outputConfig = outputConfigs[outputName]
             if outputConfig.enabled :
@@ -174,7 +181,7 @@ class OutputAnalysisConfig (ConfigBlock):
                         outputName += "_NOSYS"
                 else :
                     outputName += '_%SYS%'
-                myVars += [outputConfig.outputContainerName + '.' + outputConfig.variableName + ' -> ' + outputName]
+                myVars.add(f"{outputConfig.outputContainerName}.{outputConfig.variableName} -> {outputName}")
 
         if self.postfix:
             postfix = self.postfix
@@ -189,14 +196,14 @@ class OutputAnalysisConfig (ConfigBlock):
         #treeMaker.TreeAutoFlush = 0
 
         if self.vars or autoVars:
-            ntupleMaker = self.createOutputAlgs(config, f'NTupleMaker{postfix}', autoVars)
+            ntupleMaker = self.createOutputAlgs(config, f'NTupleMaker{postfix}', self.vars | autoVars)
 
         if self.metVars or autoMetVars:
-            ntupleMaker = self.createOutputAlgs(config, f'MetNTupleMaker{postfix}', autoMetVars, isMet=True)
+            ntupleMaker = self.createOutputAlgs(config, f'MetNTupleMaker{postfix}', self.metVars | autoMetVars, isMet=True)
             ntupleMaker.termName = self.metTermName
 
-        if self.metVars or autoTruthMetVars:
-            ntupleMaker = self.createOutputAlgs(config, f'TruthMetNTupleMaker{postfix}', autoTruthMetVars, isMet=True)
+        if config.dataType() is not DataType.Data and (self.truthMetVars or autoTruthMetVars):
+            ntupleMaker = self.createOutputAlgs(config, f'TruthMetNTupleMaker{postfix}', self.truthMetVars | autoTruthMetVars, isMet=True)
             ntupleMaker.termName = self.truthMetTermName
 
         treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' + postfix )
