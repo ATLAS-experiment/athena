@@ -76,20 +76,13 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.addBlock( 'Jets.FlavourTagging')
     config.setOptions (containerName='AnaJets')
     config.setOptions (selectionName='ftag')
-    config.setOptions (noEffSF=True)
     config.setOptions (btagger='GN2v01')
     config.setOptions (btagWP='FixedCutBEff_65')
-    # Jets.FlavourTagging
-    config.addBlock( 'Jets.FlavourTagging')
-    config.setOptions (containerName='AnaJets')
-    config.setOptions (btagger='GN2v01')
-    config.setOptions (btagWP='Continuous')
     config.setOptions (saveScores='All')
     # Jets.FlavourTaggingEventSF
     config.addBlock( 'Jets.FlavourTaggingEventSF')
     config.setOptions (containerName='AnaJets.baselineJvt')
     config.setOptions (btagger='GN2v01')
-    config.setOptions (btagWP='Continuous')
     # Jets.JVT
     config.addBlock('Jets.JVT', containerName='AnaJets')
 

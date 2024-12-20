@@ -131,13 +131,6 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
         configSeq += config.makeConfig( 'Jets.FlavourTagging',
                                         containerName='AnaJets',
                                         selectionName='ftag' )
-        configSeq.setOptionValue ('.noEffSF', True)
-        configSeq.setOptionValue ('.btagger', btagger)
-        configSeq.setOptionValue ('.btagWP', btagWP)
-
-        btagWP = "Continuous"
-        configSeq += config.makeConfig( 'Jets.FlavourTagging',
-                                        containerName='AnaJets')
         configSeq.setOptionValue ('.btagger', btagger)
         configSeq.setOptionValue ('.btagWP', btagWP)
         configSeq.setOptionValue ('.saveScores', 'All')
@@ -145,7 +138,6 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
         configSeq += config.makeConfig( 'Jets.FlavourTaggingEventSF',
                                         containerName='AnaJets.baselineJvt')
         configSeq.setOptionValue ('.btagger', btagger)
-        configSeq.setOptionValue ('.btagWP', btagWP)
 
     if largeRJets :
         configSeq += config.makeConfig( 'Jets',

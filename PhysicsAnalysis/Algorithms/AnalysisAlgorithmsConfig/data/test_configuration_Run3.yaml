@@ -14,16 +14,12 @@ Jets:
     recalibratePhyslite: False
     FlavourTagging:
       - selectionName: ftag
-        noEffSF: True
         btagger: GN2v01
         btagWP: FixedCutBEff_65
-      - btagger: GN2v01
-        btagWP: Continuous
         saveScores: All
     FlavourTaggingEventSF:
       - containerName: AnaJets.baselineJvt
         btagger: GN2v01
-        btagWP: Continuous
     JVT: {}
   - containerName: AnaLargeRJets
     jetCollection: AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets
