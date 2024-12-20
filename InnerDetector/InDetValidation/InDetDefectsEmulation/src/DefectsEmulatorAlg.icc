@@ -1,0 +1,92 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+// Silicon trackers includes
+#include "InDetRawData/PixelRDORawData.h"
+
+#include "Identifier/Identifier.h"
+#include "AtlasDetDescr/AtlasDetectorID.h"
+#include "EventContainers/IdentifiableContainerBase.h"
+#include "InDetIdentifier/PixelID.h"
+#include "InDetRawData/InDetRawDataCollection.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "PixelReadoutGeometry/PixelModuleDesign.h"
+#include "InDetRawData/PixelRDORawData.h"
+
+#include "StoreGate/WriteHandle.h"
+#include <typeinfo>
+
+
+namespace InDet{
+
+  template <class T_RDO_Container>
+  StatusCode DefectsEmulatorAlg<T_RDO_Container>::initialize(){
+     ATH_CHECK( m_emulatedDefects.initialize() );
+     ATH_CHECK( m_rdoOutContainerKey.initialize() );
+     ATH_CHECK( m_origRdoContainerKey.initialize() );
+     ATH_CHECK( detStore()->retrieve(m_idHelper, m_idHelperName.value()) );
+
+     return DefectsEmulatorBase::initialize();
+  }
+
+  template <class T_RDO_Container>
+  StatusCode DefectsEmulatorAlg<T_RDO_Container>::execute(const EventContext& ctx) const {
+    SG::ReadCondHandle<T_DefectsData> emulatedDefects(m_emulatedDefects,ctx);
+    ATH_CHECK(emulatedDefects.isValid());
+    SG::ReadHandle<T_RDO_Container> origRdoContainer(m_origRdoContainerKey, ctx);
+    ATH_CHECK(origRdoContainer.isValid());
+    SG::WriteHandle<T_RDO_Container> rdoOutContainer(m_rdoOutContainerKey, ctx);
+    ATH_CHECK( rdoOutContainer.record (std::make_unique<T_RDO_Container>(origRdoContainer->size(), EventContainers::Mode::OfflineFast)) );
+
+    unsigned int n_rejected=0u;
+    unsigned int n_new=0;
+    for(const InDetRawDataCollection<T_RDORawData>* collection : *origRdoContainer ) {
+       const IdentifierHash idHash = collection->identifyHash();
+       std::unique_ptr<InDetRawDataCollection<T_RDORawData> >
+          clone = std::make_unique<InDetRawDataCollection<T_RDORawData> >(idHash);
+       clone->setIdentifier(collection->identify());
+       T_ModuleHelper helper( emulatedDefects->m_detectorElements->at(idHash)->design() );
+       if (!helper) {
+          ATH_MSG_ERROR( "Not module design for " << idHash);
+          return StatusCode::FAILURE;
+       }
+       unsigned int rejected_per_mod=0u;
+       for(const auto *const rdo : *collection) {
+          const Identifier rdoID = rdo->identify();
+
+          auto row_idx = m_idHelper->phi_index(rdoID);
+          auto col_idx = m_idHelper->eta_index(rdoID);
+
+          if (!emulatedDefects->isDefect( helper, idHash, row_idx, col_idx)) {
+             clone->push_back(std::make_unique<T_RDORawDataConcreteType>(dynamic_cast<const T_RDORawDataConcreteType &>(*rdo)
+                                                              ).release() );
+          }
+          else {
+             if (m_histogrammingEnabled) {
+                std::lock_guard<std::mutex> lock(m_histMutex);
+                TH2 *h2=findHist(helper.nRows(), helper.nColumns());
+                h2->Fill(col_idx, row_idx);
+             }
+             ++rejected_per_mod;
+          }
+
+       }
+       if (m_histogrammingEnabled) {
+          std::lock_guard<std::mutex> lock(m_histMutex);
+          m_moduleHist->SetBinContent(m_moduleHist->GetBin( idHash%100+1, idHash/100+1), rejected_per_mod );
+       }
+       n_rejected += rejected_per_mod;
+       n_new += clone->size();
+       if (idHash>=emulatedDefects->m_detectorElements->size()) {
+          ATH_MSG_ERROR("Invalid ID hash " << idHash);
+       }
+       rdoOutContainer->addCollection( clone.release(), idHash).ignore();
+    }
+    m_rejectedRDOs += n_rejected;
+    m_totalRDOs += n_new;
+    ATH_MSG_DEBUG("rejected  " << m_rejectedRDOs << ", copied " << m_totalRDOs << " RDOs");
+
+    return StatusCode::SUCCESS;
+  }
+
+}
