@@ -183,7 +183,7 @@ namespace Trk {
       S_NOT_CONVERGENT,
       S_HIGH_CHI2,
       S_LOW_MOMENTUM,
-      __S_MAX_VALUE
+      S_MAX_VALUE
     };
 
     struct Cache {
@@ -204,15 +204,15 @@ namespace Trk {
       const TrackingVolume *m_caloEntrance = nullptr;
       const TrackingVolume *m_msEntrance = nullptr;
 
-      bool m_calomat, m_extmat;
+      bool m_calomat{}, m_extmat{};
       bool m_idmat = true;
-      bool m_sirecal;
+      bool m_sirecal{};
       bool m_getmaterialfromtrack;
-      bool m_reintoutl;
+      bool m_reintoutl{};
       bool m_matfilled = false;
-      bool m_acceleration;
-      bool m_fiteloss;
-      bool m_asymeloss;
+      bool m_acceleration{};
+      bool m_fiteloss{};
+      bool m_asymeloss{};
 
       std::vector<double> m_phiweight;
       std::vector<int> m_firstmeasurement;
@@ -224,8 +224,8 @@ namespace Trk {
 
       bool m_fastmat = true;
 
-      int m_lastiter;
-      int m_miniter;
+      int m_lastiter{};
+      int m_miniter{};
 
       #ifdef GXFDEBUGCODE
       int m_iterations = 0;
@@ -242,8 +242,8 @@ namespace Trk {
 
       FitterStatusCode m_fittercode;
 
-      std::array<unsigned int, __S_MAX_VALUE> m_fit_status {};
-      std::array<std::atomic<unsigned int>, __S_MAX_VALUE>  *m_fit_status_out = nullptr;
+      std::array<unsigned int, S_MAX_VALUE> m_fit_status {};
+      std::array<std::atomic<unsigned int>, S_MAX_VALUE>  *m_fit_status_out = nullptr;
 
        Cache(const GlobalChi2Fitter *fitter):
         m_calomat(fitter->m_calomat),
@@ -991,7 +991,7 @@ namespace Trk {
      * these members as thread_safe for the ATLAS G++ plugin.
      */
     //mutable std::mutex m_fit_status_lock ATLAS_THREAD_SAFE;
-    mutable std::array<std::atomic<unsigned int>, __S_MAX_VALUE> m_fit_status ATLAS_THREAD_SAFE = {};
+    mutable std::array<std::atomic<unsigned int>, S_MAX_VALUE> m_fit_status ATLAS_THREAD_SAFE = {};
   };
 }
 #endif
