@@ -24,6 +24,7 @@
 #include "JetMomentTools/JetDRTrackAssocTool.h"
 #include "JetMomentTools/JetConstituentFrac.h"
 #include "JetMomentTools/JetGroomMRatio.h"
+#include "JetMomentTools/BoostedJetTaggerTool.h"
 
 #ifndef XAOD_ANALYSIS
 #include "JetMomentTools/JetBadChanCorrTool.h"
@@ -55,6 +56,7 @@ DECLARE_COMPONENT( JetEMScaleMomTool )
 DECLARE_COMPONENT( JetDRTrackAssocTool )
 DECLARE_COMPONENT( JetConstituentFrac )
 DECLARE_COMPONENT( JetGroomMRatio)
+DECLARE_COMPONENT( BoostedJetTaggerTool )
 
 #ifndef XAOD_ANALYSIS
 DECLARE_COMPONENT( JetBadChanCorrTool )

@@ -151,6 +151,10 @@ def JETM2Cfg(flags):
     from DerivationFrameworkJetEtMiss.CommonJETMXContent import ExtraJSSVariables
     JETM2SlimmingHelper.ExtraVariables += [".".join(["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"] + ExtraJSSVariables)]
 
+    # sub-structure taggers score
+    from DerivationFrameworkJetEtMiss.CommonJETMXContent import JSSTaggersVariables
+    JETM2SlimmingHelper.ExtraVariables += JSSTaggersVariables
+
     JETM2SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.GhostTower.IsoFixedCone5Pt.IsoFixedCone5PtPUsub",
                                            "AntiKt4EMTopoNoPtCutJets.IsoFixedCone5Pt.IsoFixedCone5PtPUsub",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.SizeParameter",

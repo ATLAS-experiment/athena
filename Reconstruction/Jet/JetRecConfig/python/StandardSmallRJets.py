@@ -57,6 +57,11 @@ clustermods      = ("ECPSFrac","ClusterMoments",)
 truthmods        = ("PartonTruthLabel","JetDeltaRLabel:5000", "JetGhostLabel")
 pflowmods        = ()
 
+### ToDo: 
+### add it to the modifiers of the AntiKt4EMPFlow
+### the model is still under validation given a computation issue
+#jettaggerscore = ("qgtransformer",)
+
 
 # ********************************************************
 # Standard track jet definition

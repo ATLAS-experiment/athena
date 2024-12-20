@@ -28,22 +28,15 @@ class JSSTaggerUtils :
 
       // Const tagger
       TH2D MakeJetImage(TString TagImage, const xAOD::Jet* jet, std::vector<xAOD::JetConstituent> constituents) const override;
-      StatusCode GetImageScore(const xAOD::Jet& jet) const override;
-      StatusCode GetConstScore(const xAOD::Jet& jet) const override;
+      StatusCode GetImageScore(const xAOD::JetContainer& jets) const override;
+      StatusCode GetConstScore(const xAOD::JetContainer& jets) const override;
 
       // HighLevel tagger
-      StatusCode GetHLScore(const xAOD::Jet& jet) const override;
+      StatusCode GetHLScore(const xAOD::JetContainer& jets) const override;
       std::map<std::string, double> GetJSSVars(const xAOD::Jet& jet) const override;
       StatusCode ReadScaler() override;
 
       std::map<std::string, std::vector<double>> m_scaler;
-
-      // some jss variables decorators
-      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decNtrk500Key{this, "Ntrk500NameOut", "ParentJetNTrkPt500", "SG key for Ntrk500 from ungroomed jet"};
-      SG::ReadDecorHandleKey<xAOD::JetContainer>  m_readNtrk500Key{this, "Ntrk500Name", "ParentJetNTrkPt500", "SG key for Ntrk500 from ungroomed jet"};
-      SG::ReadDecorHandleKey<xAOD::JetContainer> m_readD2Key{this, "D2Name", "D2", "SG key for D2"};
-      SG::ReadDecorHandleKey<xAOD::JetContainer> m_readTau21WTAKey{this, "Tau21WTAName", "Tau21_wta", "SG key for Tau21_wta"};
-      SG::ReadDecorHandleKey<xAOD::JetContainer> m_readTau32WTAKey{this, "Tau32WTAName", "Tau32_wta", "SG key for Tau32_wta"};
 
     private:
 
@@ -63,12 +56,11 @@ class JSSTaggerUtils :
       ToolHandle<AthONNX::IJSSMLTool> m_MLBosonTagger_HL {"", this};
 
       /// WriteDecorHandle keys
-      SG::WriteDecorHandleKey<xAOD::Jet> m_decNConstituentsKey{this, "nConstituentsName", "nConstituents", "SG key for ConstScore"};
-      SG::WriteDecorHandleKey<xAOD::Jet> m_decNTopoTowersKey{this, "nTopoTowersName", "nTopoTowers", "SG key for ConstScore"};
-
-      SG::WriteDecorHandleKey<xAOD::Jet> m_decConstScoreKey{this, "ConstScoreName", "ConstScore", "SG key for ConstScore"};
-      SG::ReadDecorHandleKey<xAOD::Jet> m_readConstScoreKey{this, "ConstScoreName", "ConstScore", "SG key for ConstScore"};
-      SG::WriteDecorHandleKey<xAOD::Jet> m_decHLScoreKey{this, "HLScoreName", "HLScore", "SG key for HLScore"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decNConstituentsKey{this, "nConstituentsName", "nConstituents", "SG key for constituents multiplicity"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decNTopoTowersKey{this, "nTopoTowersName", "nTopoTowers", "SG key for towers multiplicity"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decConstScoreKey{this, "ConstScoreNameDec", "ConstScore", "SG key for ConstScore"};
+      SG::ReadDecorHandleKey<xAOD::JetContainer> m_readConstScoreKey{this, "ConstScoreNameRead", "ConstScore", "SG key for ConstScore"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decHLScoreKey{this, "HLScoreName", "HLScore", "SG key for HLScore"};
 
   };
 

@@ -198,8 +198,8 @@ StatusCode JSSTaggerBase::initialize() {
 
   m_decWeightKey = m_containerName + "." + m_decorationName + "_" + m_weightDecorationName;
   m_decEfficiencyKey = m_containerName + "." + m_decorationName + "_" + m_decEfficiencyKey.key();
-  m_decEffSFKey = m_containerName + "." +m_decorationName + "_" + m_decEffSFKey.key();
-  m_decSigeffSFKey = m_containerName + "." +m_decorationName + "_" + m_decSigeffSFKey.key();
+  m_decEffSFKey = m_containerName + "." + m_decorationName + "_" + m_decEffSFKey.key();
+  m_decSigeffSFKey = m_containerName + "." + m_decorationName + "_" + m_decSigeffSFKey.key();
 
   ATH_CHECK( m_decWeightKey.initialize() );
   ATH_CHECK( m_decEfficiencyKey.initialize() );
@@ -210,6 +210,14 @@ StatusCode JSSTaggerBase::initialize() {
 
   m_readTruthLabelKey = m_containerName + "." + m_truthLabelName;
   ATH_CHECK( m_readTruthLabelKey.initialize() );
+
+  m_readD2Key = m_containerName + "." + m_readD2Key.key();
+  m_decNtrk500Key = m_containerName + "." + m_decNtrk500Key.key();
+  m_readNtrk500Key = m_containerName + "." + m_readNtrk500Key.key();
+
+  ATH_CHECK( m_readD2Key.initialize() );
+  ATH_CHECK( m_decNtrk500Key.initialize() );
+  ATH_CHECK( m_readNtrk500Key.initialize() );
 
 #ifndef XAOD_STANDALONE
   if (m_suppressOutputDependence) {

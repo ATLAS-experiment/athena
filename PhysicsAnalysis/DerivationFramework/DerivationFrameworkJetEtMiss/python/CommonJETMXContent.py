@@ -38,3 +38,6 @@ ExtraJSSVariables = ["C1.C2.C3.C4.D2",
                      "ZCut23.ZCut34",
                      "rg.zg",
                      "Width.WidthPhi"]
+
+### sub-structure ML taggers
+JSSTaggersVariables = ["AntiKt4EMPFlowJets.QGTransformer_ConstScore"]

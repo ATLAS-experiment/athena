@@ -19,7 +19,7 @@ def JetCommonCfg(ConfigFlags):
     acc.merge(AddDistanceInTrainCfg(ConfigFlags))
     acc.merge(AddSidebandEventShapeCfg(ConfigFlags))
     acc.merge(AddEventCleanFlagsCfg(ConfigFlags))
-
+    
     return acc
 
 
