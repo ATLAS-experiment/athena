@@ -9,7 +9,6 @@
 #define EIGEN_DONT_VECTORIZE
 #endif // __GCCXML__
 
-#include "METUtilities/METRebuilder.h"
 #include "METUtilities/METMaker.h"
 #include "METUtilities/METSystematicsTool.h"
 #include "METUtilities/METSignificance.h"

@@ -2,7 +2,6 @@
   <namespace name="met"/>
 
   <class name="IMETMaker" />
-  <class name="IMETRebuilder" />
   <class name="IMETSystematicsTool" />
   <class name="IMETSignificance" />
 

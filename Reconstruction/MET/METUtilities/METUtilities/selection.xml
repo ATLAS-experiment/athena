@@ -1,5 +1,4 @@
 <lcgdict>
-   <class name="met::METRebuilder" />
    <class name="met::METMaker" />
    <class name="met::METSystematicsTool" />
    <class name="met::METSignificance" />
