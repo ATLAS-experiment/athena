@@ -34,8 +34,10 @@ namespace
     // upper_bound returns an iterator to the first value larger than value
     // If begin is returned, then value is below the lowest bin edge,
     // If end is returned, then value is above the highest bin edge
-    if (itr == bins.begin() || itr == bins.end())
+    if (itr == bins.end())
       return SIZE_MAX;
+    if (itr == bins.begin())
+      return 0;
     return std::distance(bins.begin(), itr) - 1;
   }
 

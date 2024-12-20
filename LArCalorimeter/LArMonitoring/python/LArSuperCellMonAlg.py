@@ -164,6 +164,8 @@ def LArSuperCellMonConfigHLT(flags, name='LArSuperCellMonAlgHLT', RemoveMasked=T
 
     SCellsToCheck="SCellFromBS"
     if flags.Common.isOnline:
+      from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
+      cfg.merge(LArRawSCDataReadingCfg(flags))
       mask=True
       cfg.merge(LArRAWtoSuperCellCfg(flags,name="LArRAWtoSuperCellFromBS",SCellContainerOut=SCellsToCheck,mask=mask) )
     else:
