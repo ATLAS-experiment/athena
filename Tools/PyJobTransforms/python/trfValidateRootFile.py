@@ -102,6 +102,10 @@ def checkNTupleFieldWise(ntuple):
     """Bulk read each top level field cluster by cluster.
     """
     from array import array
+    try:
+        from ROOT import RException
+    except ImportError:
+        from ROOT.Experimental import RException
 
     try:
         reader=RNTupleReader.Open(ntuple)
@@ -131,7 +135,7 @@ def checkNTupleFieldWise(ntuple):
                 values = bulk.ReadBulk(clusterIndex, maskReq, size)
                 msg.debug(f"        values array at {values}")
 
-    except ROOT.Experimental.RException as err:
+    except RException as err:
         from traceback import format_exception
         msg.error("Exception reading ntuple %r\n%s", ntuple, "".join(format_exception(err)))
         return 1
