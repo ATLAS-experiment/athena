@@ -13,7 +13,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // due to statics used for debugging
 
 /*
  * representation of a fixed point number.
- * A fixed point number has a fiexed width and precision.
+ * A fixed point number has a fixed width and precision.
  * This implementation uses an C++ int type to store the bits.
  * so allowing fast integer arithmetic.
  */
@@ -62,13 +62,13 @@ namespace GlobalSim {
 
     ap_fixed() = default;
 
-    ap_fixed(const double d) requires(std::is_same_v<S, Round>)  {
-      m_value = T(d * double (1<< dp) + (d >= 0 ? 0.5 : -0.5));
+    ap_fixed(const double d) requires(std::is_same_v<S, Round>):
+        m_value(d * double (1<< dp) + (d >= 0 ? 0.5 : -0.5)){
       test_overflow();
     }
 
-    ap_fixed(const double d) requires(std::is_same_v<S, XilDef>){
-      m_value = T(d * double (1<< dp) + (d >= 0 ? 0. : -1.0));
+    ap_fixed(const double d) requires(std::is_same_v<S, XilDef>):
+        m_value(d * double (1<< dp) + (d >= 0 ? 0. : -1.0)){
       test_overflow();
     }
    
