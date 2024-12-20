@@ -19063,17 +19063,7 @@ HLT_j95_0eta290_020jvt_bgn260_pf_ftf_xe50_cell_xe85_tcpufit_L1jXE110:
     2: 4
 HLT_l1topoPh1debug_L1All:
   eventCount: 0
-HLT_larnoiseburst_L1J40_XE50:
-  eventCount: 0
-HLT_larnoiseburst_L1J40_XE60:
-  eventCount: 0
 HLT_larpsall_L1TAU8_EMPTY:
-  eventCount: 0
-HLT_larpsallem_L1EM3_EMPTY:
-  eventCount: 0
-HLT_larpsallem_L1EM7_EMPTY:
-  eventCount: 0
-HLT_larpsallem_L1EM7_FIRSTEMPTY:
   eventCount: 0
 HLT_larsupercellmon_L1RD0_EMPTY:
   eventCount: 0
@@ -27173,14 +27163,6 @@ HLT_noalg_L110DR-MU14FCH-MU5VF_UNPAIRED_ISO:
   eventCount: 0
 HLT_noalg_L12MU5VF:
   eventCount: 2
-HLT_noalg_L1AFP_A_AND_C_TOF_J50:
-  eventCount: 0
-HLT_noalg_L1AFP_A_AND_C_TOF_J75:
-  eventCount: 0
-HLT_noalg_L1AFP_A_AND_C_TOF_T0T1_J50:
-  eventCount: 0
-HLT_noalg_L1AFP_A_AND_C_TOF_T0T1_J75:
-  eventCount: 0
 HLT_noalg_L1AFP_A_AND_C_TOF_T0T1_jJ125:
   eventCount: 0
 HLT_noalg_L1AFP_A_AND_C_TOF_T0T1_jJ90:
@@ -27209,26 +27191,6 @@ HLT_noalg_L1EM3_EMPTY:
   eventCount: 0
 HLT_noalg_L1EM7_EMPTY:
   eventCount: 0
-HLT_noalg_L1J100:
-  eventCount: 3
-HLT_noalg_L1J15:
-  eventCount: 20
-HLT_noalg_L1J20:
-  eventCount: 19
-HLT_noalg_L1J25:
-  eventCount: 19
-HLT_noalg_L1J30:
-  eventCount: 19
-HLT_noalg_L1J40:
-  eventCount: 15
-HLT_noalg_L1J400:
-  eventCount: 0
-HLT_noalg_L1J50:
-  eventCount: 12
-HLT_noalg_L1J75:
-  eventCount: 6
-HLT_noalg_L1J85:
-  eventCount: 5
 HLT_noalg_L1LLPDPHI-jXE40-jJ40:
   eventCount: 6
 HLT_noalg_L1LLPNODPHI-jXE40-jJ40:
@@ -27263,34 +27225,6 @@ HLT_noalg_L1RD0_FILLED:
   eventCount: 20
 HLT_noalg_L1RD1_FILLED:
   eventCount: 20
-HLT_noalg_L1TAU12IM:
-  eventCount: 14
-HLT_noalg_L1TAU20IM:
-  eventCount: 13
-HLT_noalg_L1TAU40:
-  eventCount: 9
-HLT_noalg_L1TAU60:
-  eventCount: 5
-HLT_noalg_L1TAU8:
-  eventCount: 20
-HLT_noalg_L1TAU8_EMPTY:
-  eventCount: 0
-HLT_noalg_L1XE30:
-  eventCount: 9
-HLT_noalg_L1XE300:
-  eventCount: 0
-HLT_noalg_L1XE35:
-  eventCount: 8
-HLT_noalg_L1XE40:
-  eventCount: 6
-HLT_noalg_L1XE45:
-  eventCount: 6
-HLT_noalg_L1XE50:
-  eventCount: 6
-HLT_noalg_L1XE55:
-  eventCount: 4
-HLT_noalg_L1XE60:
-  eventCount: 4
 HLT_noalg_L1cTAU20M:
   eventCount: 19
 HLT_noalg_L1cTAU30M:
