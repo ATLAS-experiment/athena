@@ -77,9 +77,9 @@ private:
   /// Object used to store the last decision
   asg::AcceptInfo m_acceptinfo;  
 
-  double m_maxEta;
-  double m_minPt;
-  double m_maxRangePt;
+  double m_maxEta{};
+  double m_minPt{};
+  double m_maxRangePt{};
 
   std::string m_CutFileName;
   std::string m_taggerName;
@@ -88,7 +88,7 @@ private:
   std::string m_ContinuousBenchmarks;
   std::string m_wps_raw;
 
-  TFile *m_inf;
+  TFile *m_inf{};
   std::vector<double> m_continuouscuts;
 
   SG::AuxElement::ConstAccessor<float> m_accessor_pb;
@@ -118,7 +118,7 @@ private:
   taggerproperties m_tagger;
 
   enum Tagger{UNKNOWN, DL1, GN1, GN2, MV2c10};
-  Tagger m_taggerEnum;
+  Tagger m_taggerEnum{UNKNOWN};
 
   Tagger SetTaggerEnum(const std::string& taggerName){
     if(taggerName.find("DL1") != std::string::npos) return Tagger::DL1;
