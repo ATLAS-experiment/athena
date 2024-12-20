@@ -23,6 +23,7 @@ find_package( lwtnn )
 atlas_add_library( BoostedJetTaggersLib
   BoostedJetTaggers/*.h
   Root/JSSTaggerBase.cxx
+  Root/JSSMLTool.cxx
   Root/JSSTaggerUtils.cxx
   Root/JetQGTagger.cxx
   Root/JetQGTaggerBDT.cxx

@@ -286,8 +286,19 @@ stdJetModifiers.update(
     qw = JetModifier( "QwTool", "qw"),
 
     softdropobs = JetModifier("SoftDropObservablesTool", "softdropobs"),
-
 )
+
+# Substructure tagger tools 
+try :
+    from JetMomentTools import JetMomentToolsConfig
+    stdJetModifiers.update( 
+        qgtransformer = JetModifier("BoostedJetTaggerTool", "qgtransformer",
+                            createfn=JetMomentToolsConfig.getBoostedJetTaggerTool,
+                            JetContainer = _jetname),
+    )
+except ModuleNotFoundError:
+    # In some releases (AthGeneration) JetMomentTools is not existing
+    pass
 
 # VR track-jet decorations
 stdJetModifiers.update(

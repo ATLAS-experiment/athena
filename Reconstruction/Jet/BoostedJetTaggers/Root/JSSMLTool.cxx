@@ -82,11 +82,8 @@ namespace AthONNX {
   StatusCode JSSMLTool::initialize( ) {
 
     // Access the service.    
-    // Find the model file.
-    std::string modelFileName = gSystem->Getenv("WorkDir_DIR");
-    modelFileName += "/" + m_modelFileName;
-    
-    ATH_MSG_INFO( "Using model file: " << modelFileName );
+    // Find the model file.    
+    ATH_MSG_INFO( "Using model file: " << m_modelFileName );
     
     // Set up the ONNX Runtime session.
     Ort::SessionOptions sessionOptions;
@@ -95,7 +92,7 @@ namespace AthONNX {
     Ort::AllocatorWithDefaultOptions allocator;
     m_env = std::make_unique< Ort::Env >(ORT_LOGGING_LEVEL_WARNING, "");
     m_session = std::make_unique< Ort::Session >( *m_env,
-						  modelFileName.c_str(),
+						  m_modelFileName.c_str(),
 						  sessionOptions );
     
     ATH_MSG_INFO( "Created the ONNX Runtime session" );
@@ -248,7 +245,7 @@ namespace AthONNX {
     int max_index = 0;
     for (int i = 0; i < arrSize; i++){
       ATH_MSG_VERBOSE("Score for class "<<i<<" = "<<floatarr[i]<<std::endl);
-      std::cout << " +++ Score for class "<<i<<" = "<<floatarr[i]<<std::endl;
+      ATH_MSG_VERBOSE(" +++ Score for class "<<i<<" = "<<floatarr[i]<<std::endl);
       if (ConstScore<floatarr[i]){
         ConstScore = floatarr[i];
         max_index = i;
