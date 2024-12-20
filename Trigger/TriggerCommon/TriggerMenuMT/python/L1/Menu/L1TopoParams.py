@@ -74,6 +74,8 @@ L1TopoParams = {
                                           'DisambDRSqrMin',
                                           'DisambDRSqrMax',
                                           'DisambDRSqr']},
+ 'ADVAE_2A': {'comment': '',
+           'parameters': ['AnomalyScoreThresh']},
  'DisambiguationIncl2': {'ApplyDR = 1': {'comment': '',
                                          'parameters': ['MinET1',
                                                         'MinET2',

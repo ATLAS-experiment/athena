@@ -250,6 +250,9 @@ def defineMenu():
         'L1_HT190-jJ40s5pETA21',
         'L1_SC111-CjJ40',  
         'L1_jJ90_DETA20-jJ90J', 
+        #ATR-30618
+        'L1_ADVAET',
+        'L1_ADVAEL',
 
         # tau 
         'L1_cTAU30M_2cTAU20M',
@@ -337,6 +340,7 @@ def defineMenu():
 
         #ATR-28563
         'L1_LLPDPHI-jXE40-jJ40',
+        'L1_LLPNODPHI-jXE40-jJ40',
         
         ]
 
