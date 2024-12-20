@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Helper for MultiParticleGunPileup
@@ -257,12 +257,10 @@ class PosSampler {
  public:
   ~PosSampler() = default;
   PosSampler() = default;
-  PosSampler(float x, float y, float z, float t=0) {
-    m_x = ConstSampler(x);
-    m_y = ConstSampler(y);
-    m_z = ConstSampler(z);
-    m_t = ConstSampler(t);
-  }
+  PosSampler(float x, float y, float z, float t=0):
+    m_x(ConstSampler(x)), m_y(ConstSampler(y)), m_z(ConstSampler(z)), m_t(ConstSampler(t)){
+    //nop
+    }
 
   TLorentzVector shoot(){
     float x = m_x.shoot();
@@ -330,14 +328,11 @@ class PtEtaMPhiSampler : public MomSampler{
 class SampledParticle {
  public:
   ~SampledParticle(){};
-  SampledParticle(int pid=0, TLorentzVector mom=TLorentzVector(0,0,0,0), TLorentzVector pos= TLorentzVector(0,0,0,0)) {
+  SampledParticle(int pid=0, TLorentzVector mom=TLorentzVector(0,0,0,0), TLorentzVector pos= TLorentzVector(0,0,0,0)) :
+   m_pid (pid), m_mom(mom), m_pos(pos), m_mass(0.f){
     //        Constructor/initializer: PID is the (int) PDG particle ID code
     //        of this particle, mom is its momentum 4-vector, and pos is
     //        the vertex 4-position (both as ROOT.TLorentzVector, in MeV).
-    m_pid = pid;
-    m_mom = mom;
-    m_pos = pos;
-    m_mass = 0;
   }
   int m_pid{};
   TLorentzVector m_mom, m_pos;
