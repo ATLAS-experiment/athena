@@ -2,6 +2,7 @@
 
 # Declare the package name:
 atlas_subdir( TrkVolumes )
+find_package( Boost COMPONENTS unit_test_framework )
 
 # Component(s) in the package:
 atlas_add_library( TrkVolumes
