@@ -15,7 +15,6 @@
 #include "AthenaKernel/DataBucket.h"
 #include "AthenaKernel/DataBucketTraitFwd.h"
 #include "AthenaKernel/ClassID_traits.h"
-#include "AthenaKernel/DataObjectSharedPtr.h"
 #include "GaudiKernel/DataObject.h"
 
 #ifndef NDEBUG
@@ -158,12 +157,6 @@ namespace SG {
   DataObject* asStorable(std::unique_ptr<T> pObject) {
     typedef typename std::remove_const<T>::type T_nc;
     typedef typename DataBucketTrait<T_nc>::type bucket_t;
-    return new bucket_t (std::move(pObject));
-  }  
-
-  template <typename T>
-  DataObject* asStorable(SG::DataObjectSharedPtr<T> pObject) {
-    typedef typename DataBucketTrait<T>::type bucket_t;
     return new bucket_t (std::move(pObject));
   }  
 
