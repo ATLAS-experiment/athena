@@ -27,6 +27,12 @@ using ROOT::Experimental::RFieldBase;
 using ROOT::Experimental::RNTupleInspector;
 using ROOT::Experimental::RNTupleWriter;
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,35,1)
+using ROOT::RException;
+#else
+using ROOT::Experimental::RException;
+#endif
+
 namespace {
 
    TClass* lookupVectorType( TClass* cl ) {
@@ -1873,7 +1879,7 @@ namespace xAOD {
          // Load the entry
          ( *field )( entryToLoad );
 
-      } catch( ROOT::Experimental::RException& e ) {
+      } catch( RException& e ) {
          ::Error( "xAOD::RAuxStore::RFieldInfo::getEntry",
                   "Failed to load entry %lld for field %s: %s", entryToLoad,
                   fieldName.c_str(), e.what() );
