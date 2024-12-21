@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -60,6 +60,10 @@ namespace CP
   private:
     SysReadSelectionHandleArray m_selections {
       this, "selections", {}, "the inputs to the object cutflow"};
+
+    /// \brief force cut sequence
+  private:
+    Gaudi::Property<bool> m_forceCutSequence {this, "forceCutSequence", false, "force cut sequence and do not accept if previous cuts failed"};
 
     /// \brief the total number of cuts configured (needed to
     /// configure histograms)

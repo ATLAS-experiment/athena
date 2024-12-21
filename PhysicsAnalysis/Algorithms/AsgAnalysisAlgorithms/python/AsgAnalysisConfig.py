@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -409,6 +409,9 @@ class ObjectCutFlowBlock (ConfigBlock):
             "performed for every object within the container. Specifying a "
             "name (e.g. loose) generates the cutflow only for those object "
             "that also pass that selection.")
+        self.addOption ('forceCutSequence', False, type=bool,
+            info="whether to force the cut sequence and not accept objects "
+            "if previous cuts failed. The default is False.")
 
     def makeAlgs (self, config) :
 
@@ -417,6 +420,7 @@ class ObjectCutFlowBlock (ConfigBlock):
         alg.selections = config.getSelectionCutFlow (self.containerName, self.selectionName)
         alg.input = config.readName (self.containerName)
         alg.histTitle = "Object Cutflow: " + self.containerName + "." + self.selectionName
+        alg.forceCutSequence = self.forceCutSequence
 
 
 class EventCutFlowBlock (ConfigBlock):

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -79,16 +79,19 @@ namespace CP
       }
 
       for (const xAOD::IParticle *particle : *input) {
-	if (m_preselection.getBool (*particle, sys)) {
-	  unsigned cutIndex = 1;
-	  histIter->second->Fill (0);
-	  for (size_t i{}; i < m_selections.size(); i++) {
-	    if (m_selections.at(i).getBool (*particle, sys) > 0) {
-	      histIter->second->Fill (cutIndex);
-	    }
-	    cutIndex++;
-	  }
-	}
+        if (m_preselection.getBool (*particle, sys)) {
+          unsigned cutIndex = 1;
+          histIter->second->Fill (0);
+          bool selected{true};
+          for (size_t i{}; i < m_selections.size(); i++) {
+            if ((!m_forceCutSequence.value() || selected) && m_selections.at(i).getBool (*particle, sys) > 0) {
+              histIter->second->Fill (cutIndex);
+            } else {
+              selected = false;
+            }
+            cutIndex++;
+          }
+        }
       }
 
     }
