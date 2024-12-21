@@ -5,6 +5,7 @@
 #undef NDEBUG
 
 #include "AthenaKernel/DataBucket.h"
+#include "AthenaKernel/DataObjectSharedPtr.h"
 #include "AthenaKernel/StorableConversions.h"
 #include "AthenaKernel/ILockable.h"
 #include "AthenaKernel/CLASS_DEF.h"
@@ -413,7 +414,7 @@ int main () {
   {
     SG::DataObjectSharedPtr<GaudiDataObj> ptr (new GaudiDataObj);
     assert (ptr->refCount() == 1);
-    DataBucketBase* b5 = new SG::DataBucket<GaudiDataObj> (ptr);
+    DataBucketBase* b5 = new SG::DataBucket<GaudiDataObj> (ptr.get());
     assert (ptr->refCount() == 2);
     assert (b5->object() == ptr.get());
     delete b5;

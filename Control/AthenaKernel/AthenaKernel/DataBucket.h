@@ -1,14 +1,13 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_DATABUCKET_H
 #define ATHENAKERNEL_DATABUCKET_H
 
 #include "AthenaKernel/DataBucketBase.h"
-#include "AthenaKernel/DataObjectSharedPtr.h"
 
 //FIXME CLID is a tdef and can't be forward declared 
 #include "GaudiKernel/ClassID.h"
@@ -37,7 +36,6 @@ namespace SG {
     DataBucket(T* data);
     template <class U>
     DataBucket(std::unique_ptr<U> data);
-    DataBucket(SG::DataObjectSharedPtr<T> data);
   
     // DESTRUCTOR:
   

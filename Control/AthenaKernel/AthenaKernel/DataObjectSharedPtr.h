@@ -1,10 +1,8 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthenaKernel/DataObjectSharedPtr.h
  * @author scott snyder <snyder@bnl.gov>
@@ -17,6 +15,7 @@
 #define ATHENAKERNEL_DATAOBJECTSHAREDPTR_H
 
 
+#include "AthenaKernel/StorableConversions.h"
 #include "GaudiKernel/DataObject.h"
 #include "boost/intrusive_ptr.hpp"
 #include <memory>
@@ -60,6 +59,13 @@ public:
   // Avoid coverity warning.
   DataObjectSharedPtr& operator= (const DataObjectSharedPtr& rhs) = default;
 };
+
+
+template <typename T>
+DataObject* asStorable(SG::DataObjectSharedPtr<T> pObject) {
+  typedef typename DataBucketTrait<T>::type bucket_t;
+  return new bucket_t (pObject.get());
+}  
 
 
 } // namespace SG
