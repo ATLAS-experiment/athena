@@ -176,7 +176,7 @@ if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
 atlas_add_executable( cool_crest_compare
    test/CoolCrestCompare.cxx test/*.h src/*.h src/IOVDbFolder.cxx
    src/FolderTypes.cxx src/IOVDbStringFunctions.cxx src/IOVDbParser.cxx src/IOVDbConn.cxx
-   src/IOVDbFolder.cxx src/IovStore.cxx src/ReadFromFileMetaData.cxx src/IOVDbCoolFunctions.cxx src/TagFunctions.cxx
+   src/IovStore.cxx src/ReadFromFileMetaData.cxx src/IOVDbCoolFunctions.cxx src/TagFunctions.cxx
    src/Cool2Json.cxx src/Base64Codec.cxx src/Json2Cool.cxx src/BasicFolder.cxx src/CrestFunctions.cxx src/IOVDbJsonStringFunctions.cxx  #src/*.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} CoralUtilities
    LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} nlohmann_json::nlohmann_json
