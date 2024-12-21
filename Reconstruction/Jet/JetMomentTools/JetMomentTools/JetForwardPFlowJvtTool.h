@@ -62,6 +62,8 @@
 #include "xAODJet/JetContainer.h"
 #include "xAODJet/JetAuxContainer.h"
 #include "xAODPFlow/FlowElementContainer.h"
+#include "xAODEventInfo/EventInfo.h"
+
 
 #include "AsgDataHandles/ReadDecorHandleKey.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
@@ -150,6 +152,7 @@ namespace pflow {
     SG::ReadHandleKey<xAOD::VertexContainer> m_vxContKey{this, "verticesName", "PrimaryVertices", "Container name of vertices to be retrieved"};
     SG::ReadHandleKey<xAOD::PFOContainer> m_PFOKey{this, "PFOName", "CHSParticleFlowObjects", "SG Key for CHS PFO Container"};
     SG::ReadHandleKey<xAOD::FlowElementContainer> m_FEKey{this, "FEName", "", "SG Key for CHS FlowElement Container (overrides PFO if not empty)"};
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{"EventInfo"};
 
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_passJvtKey{this, "passJvtName", "NNJvtPass", "SG key for output pass-JVT decoration"};
     SG::ReadDecorHandleKey<xAOD::PFO> m_orKey{this, "ORName", "", "OR label"};
