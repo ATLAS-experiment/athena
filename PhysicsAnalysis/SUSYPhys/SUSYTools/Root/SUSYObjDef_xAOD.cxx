@@ -1040,8 +1040,8 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
       fmd->value(xAOD::FileMetaData::amiTag, amiTag);
       fmd->value(xAOD::FileMetaData::simFlavour, simFlavour);
 
-      if(simFlavour.find("ATLFASTII")==0) simType = "AFII";
-      else if(simFlavour.find("ATLFAST3")==0) simType = "AF3";
+      if(simFlavour.starts_with("ATLFASTII")) simType = "AFII";
+      else if(simFlavour.starts_with("ATLFAST3")) simType = "AF3";
       else simType = "FS";
 
       bool found = false;
