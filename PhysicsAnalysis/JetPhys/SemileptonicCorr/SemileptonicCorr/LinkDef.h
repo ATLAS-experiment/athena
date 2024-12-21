@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifdef __CINT__
@@ -8,7 +8,5 @@
 #pragma link off all classes;
 #pragma link off all functions;
 #pragma link C++ nestedclasses;
-#pragma link C++ global gROOT;
-#pragma link C++ global gEnv;
 #pragma link C++ class semilCorr;
 #endif
