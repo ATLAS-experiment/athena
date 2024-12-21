@@ -550,7 +550,7 @@ StatusCode InDet::DumpObjects::execute() {
     }
     sdoCollection = sdoCollectionHandle.cptr();
 
-    for (const auto &clusterCollection : *PixelClusterContainer) {
+    for (const auto clusterCollection : *PixelClusterContainer) {
       // skip empty collections
       if (clusterCollection->empty())
         continue;
@@ -575,7 +575,7 @@ StatusCode InDet::DumpObjects::execute() {
       }
 
       // loop over collection
-      for (const auto &cluster : *clusterCollection) {
+      for (const auto cluster : *clusterCollection) {
         Identifier clusterId = cluster->identify();
         if (!clusterId.is_valid()) {
           ATH_MSG_WARNING("Pixel cluster identifier is not valid");
@@ -739,7 +739,7 @@ StatusCode InDet::DumpObjects::execute() {
     }
     sdoCollection = sdoCollectionHandle.cptr();
 
-    for (const auto &clusterCollection : *SCT_ClusterContainer) {
+    for (const auto clusterCollection : *SCT_ClusterContainer) {
       // skip empty collections
       if (clusterCollection->empty())
         continue;
@@ -758,7 +758,7 @@ StatusCode InDet::DumpObjects::execute() {
       float norm_z = fabs(my_normal.z()) > 1e-5 ? my_normal.z() : 0.;
 
       // loop over collection
-      for (const auto &cluster : *clusterCollection) {
+      for (const auto cluster : *clusterCollection) {
         Identifier clusterId = cluster->identify();
         if (!clusterId.is_valid()) {
           ATH_MSG_WARNING("SCT cluster identifier is not valid");
@@ -962,7 +962,7 @@ StatusCode InDet::DumpObjects::execute() {
   m_nSP     = 0;
   
   if (xAODPixelSPContainer && xAODPixelSPContainer->size() > 0) {
-    for (const auto &sp : *xAODPixelSPContainer) {
+    for (const auto sp : *xAODPixelSPContainer) {
 
       if (not linkAcc.isAvailable(*sp)) 
 	ATH_MSG_FATAL("no pixel SpacePoint link for xAOD::SpacePoint");
@@ -996,7 +996,7 @@ StatusCode InDet::DumpObjects::execute() {
   if (xAODStripSPContainer && xAODStripSPContainer->size() > 0) {
     
     //loop over collection
-    for (const auto &sp : *xAODStripSPContainer) {
+    for (const auto sp : *xAODStripSPContainer) {
 
       ATH_CHECK(striplinkAcc.isAvailable(*sp));
       
@@ -1057,7 +1057,7 @@ StatusCode InDet::DumpObjects::execute() {
   if (xAODStripSPOverlapContainer && xAODStripSPOverlapContainer->size() > 0) {
     
     //loop over collection
-    for (const auto &sp : *xAODStripSPOverlapContainer) {
+    for (const auto sp : *xAODStripSPOverlapContainer) {
       
       ATH_CHECK(stripOverlaplinkAcc.isAvailable(*sp));
       
