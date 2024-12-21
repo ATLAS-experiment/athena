@@ -298,8 +298,6 @@ namespace AthONNX {
     input_tensor.emplace_back(
       Ort::Value::CreateTensor<float>(memory_info, input_tensor_values.data(), input_tensor_size, m_input_node_dims.data(), m_input_node_dims.size())
     );
-
-    assert(input_tensor.IsTensor());
         
     auto output_tensors = m_session->Run(Ort::RunOptions{nullptr}, m_input_node_names.data(), input_tensor.data(), m_input_node_names.size(), m_output_node_names.data(), m_output_node_names.size());
     assert(output_tensors.size() == 1 && output_tensors.front().IsTensor());
