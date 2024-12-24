@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-# AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
@@ -44,18 +43,44 @@ class TriggerAnalysisBlock (ConfigBlock):
         self.addOption ('noL1', False, type=bool,
             info="")
 
-    def makeTriggerDecisionTool(self, config):
+    @staticmethod
+    def makeTriggerDecisionTool(config):
+        # Might have already been added
+        toolName = "TrigDecisionTool"
+        if toolName in config._algorithms:
+            return config._algorithms[toolName]
 
         # Create public trigger tools
-        xAODConfTool = config.createPublicTool( 'TrigConf::xAODConfigTool', 'xAODConfigTool' )
-        decisionTool = config.createPublicTool( 'Trig::TrigDecisionTool', 'TrigDecisionTool' )
-        decisionTool.ConfigTool = '%s/%s' % \
-            ( xAODConfTool.getType(), xAODConfTool.getName() )
+        xAODConfTool = config.createPublicTool("TrigConf::xAODConfigTool", "xAODConfigTool")
+        decisionTool = config.createPublicTool("Trig::TrigDecisionTool", toolName)
+        decisionTool.ConfigTool = f"{xAODConfTool.getType()}/{xAODConfTool.getName()}"
         decisionTool.HLTSummary = config.hltSummary()
         if config.geometry() is LHCPeriod.Run3:
-            decisionTool.NavigationFormat = 'TrigComposite' # Read Run 3 navigation (options are "TrigComposite" for R3 or "TriggElement" for R2, R2 navigation is not kept in most DAODs)
+            # Read Run 3 navigation
+            # (options are "TrigComposite" for R3 or "TriggElement" for R2,
+            # R2 navigation is not kept in most DAODs)
+            decisionTool.NavigationFormat = "TrigComposite"
 
         return decisionTool
+
+    @staticmethod
+    def makeTriggerMatchingTool(config, decisionTool):
+        # Might have already been added
+        toolName = "TrigMatchingTool"
+        if toolName in config._algorithms:
+            return config._algorithms[toolName]
+
+        # Create public trigger tools
+        if config.geometry() is LHCPeriod.Run3:
+            drScoringTool = config.createPublicTool("Trig::DRScoringTool", "DRScoringTool")
+            matchingTool = config.createPublicTool("Trig::R3MatchingTool", toolName)
+            matchingTool.ScoringTool = f"{drScoringTool.getType()}/{drScoringTool.getName()}"
+            matchingTool.TrigDecisionTool = f"{decisionTool.getType()}/{decisionTool.getName()}"
+        else:
+            matchingTool = config.createPublicTool("Trig::MatchFromCompositeTool", toolName)
+            if config.isPhyslite():
+                matchingTool.InputPrefix = "AnalysisTrigMatch_"
+        return matchingTool
 
 
     def makeTriggerSelectionAlg(self, config, decisionTool):
