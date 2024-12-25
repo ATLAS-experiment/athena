@@ -2,8 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef _VrtSecInclusive_VrtSecInclusive_Utilities_H
-#define _VrtSecInclusive_VrtSecInclusive_Utilities_H
+#ifndef VRTSECINCLUSIVE_UTILITIES_H
+#define VRTSECINCLUSIVE_UTILITIES_H
 
 #include "VrtSecInclusive/IntersectionPos.h"
 #include <numeric>
@@ -129,7 +129,9 @@ namespace VKalVrtAthena {
     // Grouping decorators
     enum { k_ip_d0, k_ip_z0, k_ip_pt, k_ip_eta, k_ip_phi, k_ip_d0err, k_ip_z0err };
     
-    if( !m_decor_svLink ) m_decor_svLink = std::make_unique< VertexELType >( "svLinks" + m_jp.augVerString );
+    if( !m_decor_svLink ) {
+      m_decor_svLink.emplace ( "svLinks" + m_jp.augVerString );
+    }
     
     // Loop over leptons
     for( const auto& lepton : *leptonContainer ) {

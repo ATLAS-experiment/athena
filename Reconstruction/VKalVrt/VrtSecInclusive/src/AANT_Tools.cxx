@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -262,7 +262,7 @@ namespace VKalVrtAthena {
   //____________________________________________________________________________________________________
   StatusCode VrtSecInclusive::fillAANT_SelectedBaseTracks() {
     
-    for ( const xAOD::TrackParticle* trk : *m_selectedTracks ) {
+    for ( const xAOD::TrackParticle* trk : m_selectedTracks ) {
       
       if( m_jp.FillNtuple ) {
         uint8_t tmpT;

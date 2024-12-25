@@ -376,9 +376,9 @@ namespace VKalVrtAthena {
 
     
     // Later use elsewhere in the algorithm
-    m_selectedTracks = std::make_unique<std::vector<const xAOD::TrackParticle*>>  ( );
-    m_associatedTracks = std::make_unique<std::vector<const xAOD::TrackParticle*>>( );
-    m_leptonicTracks = std::make_unique<std::vector<const xAOD::TrackParticle*>>  ( );
+    m_selectedTracks.clear();
+    m_associatedTracks.clear();
+    m_leptonicTracks.clear();
 
     m_extrapolatedPatternBank.clear();
     
@@ -405,14 +405,14 @@ namespace VKalVrtAthena {
     }
 
     if( m_jp.FillNtuple )
-      m_ntupleVars->get<unsigned int>( "NumSelTrks" ) = static_cast<int>( m_selectedTracks->size() );
+      m_ntupleVars->get<unsigned int>( "NumSelTrks" ) = static_cast<int>( m_selectedTracks.size() );
     
     // fill information about selected tracks in AANT
     ATH_CHECK( fillAANT_SelectedBaseTracks() );
     
     //-------------------------------------------------------
     // Skip the event if the number of selected tracks is more than m_jp.SelTrkMaxCutoff
-    if( m_selectedTracks->size() < 2 ) {
+    if( m_selectedTracks.size() < 2 ) {
       ATH_MSG_DEBUG( "execute: Too few (<2) selected reco tracks. Terminated reconstruction." );
       m_vertexingStatus = 1;
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
@@ -420,7 +420,7 @@ namespace VKalVrtAthena {
       return StatusCode::SUCCESS;   
     }
       
-    if( m_selectedTracks->size() > m_jp.SelTrkMaxCutoff ) {
+    if( m_selectedTracks.size() > m_jp.SelTrkMaxCutoff ) {
       ATH_MSG_INFO( "execute: Too many selected reco tracks. Terminated reconstruction." );
       m_vertexingStatus = 2;
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
@@ -437,7 +437,7 @@ namespace VKalVrtAthena {
       m_vertexingAlgorithmStep = 0;
     
       // set of vertices created in the following while loop.
-      auto* workVerticesContainer = new std::vector<WrkVrt>;
+      std::vector<WrkVrt> workVerticesContainer;
     
       // the main sequence of the main vertexing algorithms
       // see initialize() what kind of algorithms exist.
@@ -448,7 +448,7 @@ namespace VKalVrtAthena {
       
         auto t_start = std::chrono::system_clock::now();
       
-        ATH_CHECK( (this->*alg)( workVerticesContainer ) );
+        ATH_CHECK( (this->*alg)( &workVerticesContainer ) );
       
         auto t_end = std::chrono::system_clock::now();
       
@@ -456,22 +456,17 @@ namespace VKalVrtAthena {
           auto sec = std::chrono::duration_cast<std::chrono::microseconds>( t_end - t_start ).count();
           m_hists["CPUTime"]->Fill( m_vertexingAlgorithmStep, sec/1.e6 );
         }
-      
-        auto end = std::remove_if( workVerticesContainer->begin(), workVerticesContainer->end(),
-                                   []( WrkVrt& wrkvrt ) {
-                                     return ( !wrkvrt.isGood || wrkvrt.nTracksTotal() < 2 ); }
-                                   );
-      
-        workVerticesContainer->erase( end, workVerticesContainer->end() );
 
-        ATH_CHECK( monitorVertexingAlgorithmStep( workVerticesContainer, name, std::next( itr ) == m_vertexingAlgorithms.end() ) );
+        std::erase_if( workVerticesContainer,
+                       []( WrkVrt& wrkvrt ) {
+                         return ( !wrkvrt.isGood || wrkvrt.nTracksTotal() < 2 ); }
+                       );
+
+        ATH_CHECK( monitorVertexingAlgorithmStep( &workVerticesContainer, name, std::next( itr ) == m_vertexingAlgorithms.end() ) );
       
         m_vertexingAlgorithmStep++;
       
       }
-    
-      delete workVerticesContainer;
-      
     }
     
     m_vertexingStatus = 0;
