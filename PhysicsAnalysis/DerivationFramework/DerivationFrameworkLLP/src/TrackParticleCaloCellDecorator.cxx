@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*  TrackParticleCaloCellDecorator.cxx    */
@@ -192,8 +192,14 @@ namespace DerivationFramework {
 	    trackCellQuality.emplace_back(cell->quality());
 	    trackCellProvenance.emplace_back(cell->provenance());
 	    trackCellGain.emplace_back(cell->gain());
-	    trackCellEneDiff.emplace_back(static_cast<const TileCell*>(cell)->eneDiff());
-	    trackCellTimeDiff.emplace_back(static_cast<const TileCell*>(cell)->timeDiff());
+            if (caloDDE->is_tile()) {
+              trackCellEneDiff.emplace_back(static_cast<const TileCell*>(cell)->eneDiff());
+              trackCellTimeDiff.emplace_back(static_cast<const TileCell*>(cell)->timeDiff());
+            }
+            else {
+              trackCellEneDiff.emplace_back(0);
+              trackCellTimeDiff.emplace_back(0);
+            }
 	  } // if ( caloDDE )	    
 	} // for( cell )	  
       } // for( cluster )
