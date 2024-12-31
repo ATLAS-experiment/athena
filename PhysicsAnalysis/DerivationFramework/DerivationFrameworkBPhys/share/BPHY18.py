@@ -459,6 +459,27 @@ BPHY18_IsoMultiplicityTool = DerivationFramework__BKllIsoMultiplicityTool(
 ToolSvc += BPHY18_IsoMultiplicityTool
 print BPHY18_IsoMultiplicityTool
 
+#BPHY18_MuonTrackIsoTool = DerivationFramework__BMuonTrackIsoTool(
+#    name                       = "BPHY8_MuonIsoTool",
+#    BranchPrefixes             = BPHY8cf.BranchPrefixes,
+#    BranchBaseName             = "muiso",
+#    OutputLevel                = INFO,
+#    VertexContainerNames       = BPHY8cf.VtxContNames,
+#    RefPVContainerNames        = BPHY8cf.RefPVContNames,
+#    TrackParticleContainerName = BPHY8cf.TrkPartContName,
+#    PVContainerName            = BPHY8cf.PVContName,
+#    PVTypesToConsider          = BPHY8cf.MinChi2ToAnyPVTypes,
+#    MuonContainerName          = BPHY8cf.UsedMuonCollection,
+#    TrackSelectionTools        = BPHY8_MuIsoTrkSelTools.values(),
+#    TVATool                    = BPHY8_TvaTools["TrackMuonIsoTva"],
+#    IsolationConeSizes         = BPHY8cf.MuIsolationConeSizes,
+#    IsoTrkImpLogChi2Max        = BPHY8cf.MuIsoTrkImpLogChi2Max,    
+#    IsoDoTrkImpLogChi2Cut      = BPHY8cf.MuIsoDoTrkImpLogChi2Cut,
+#    DoVertexType               = BPHY8cf.doVertexType,
+#    UseTrackTypes              = BPHY8cf.useMuIsoTrackTypes,
+#    DebugTrackTypes            = BPHY8cf.DebugTrackTypes,
+#    DebugTracksInEvents        = [])
+
 if True:
     from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__xAODStringSkimmingTool
     BPHY18_SelectBeeKstEvent = DerivationFramework__xAODStringSkimmingTool(

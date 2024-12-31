@@ -58,8 +58,30 @@ namespace DerivationFramework {
     mutable std::vector<float>  vIsoValues;
     mutable std::vector<int>    vNTracks;
     mutable MuonBag             vMuons;
-  }; // MuIsoItem
+  }; // MuIsoItem 
+  protected:
+    class TrackIsoItem : public BaseItem {
     
+  public:
+    TrackIsoItem(std::string Name="_none_", std::string Bname="trackiso",
+	      std::string Prefix="");
+    virtual ~TrackIsoItem();
+	
+    virtual void        resetVals();
+    virtual void        copyVals(const BaseItem& item);
+    virtual void        copyVals(const MuIsoItem& item);
+    virtual void        fill(double isoValue=-2., int nTracks=-1,
+			     const xAOD::TrackParticle* muon=NULL);
+    virtual std::string trackIsoName();
+    virtual std::string nTracksName();
+    virtual std::string trackLinkName();
+    
+  public:
+    mutable std::vector<float>  vIsoValues;
+    mutable std::vector<int>    vNTracks;
+    mutable TrackBag             vTracks;
+  }; // TrackIsoItem 
+
   public: 
       BMuonTrackIsoTool(const std::string& t, const std::string& n,
 			const IInterface* p);
@@ -93,6 +115,7 @@ namespace DerivationFramework {
   private:      
       // job options
       std::string                      m_muonContainerName;
+      
       std::vector<double>              m_isoConeSizes;
       std::vector<double>              m_isoTrkImpLogChi2Max;
       std::vector<int>                 m_isoDoTrkImpLogChi2Cut;

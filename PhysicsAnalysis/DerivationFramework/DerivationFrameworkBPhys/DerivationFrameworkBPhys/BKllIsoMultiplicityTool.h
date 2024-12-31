@@ -6,8 +6,10 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "xAODTracking/Vertex.h"
+#include "xAODBPhys/BPhysHelper.h"
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
+#include "DerivationFrameworkBPhys/BPhysVertexTrackBase.h"
 #include <vector>
 
 namespace Trk {
@@ -39,6 +41,7 @@ namespace DerivationFramework {
 	  std::string m_trackContainerName;
     ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;
     std::vector<std::string> m_trkSelectionCuts;
+    float m_trkPVAssociationChi2Cut;
     float m_trackPtCut;
     float m_trackEtaCut;
     std::string  m_elContainerKey;

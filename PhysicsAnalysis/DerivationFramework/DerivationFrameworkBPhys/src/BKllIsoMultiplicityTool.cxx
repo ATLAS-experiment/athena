@@ -5,6 +5,7 @@
 #include "TLorentzVector.h"
 
 #include "xAODBPhys/BPhysHelper.h"
+#include "DerivationFrameworkBPhys/BPhysVertexTrackBase.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
@@ -25,6 +26,7 @@ BKllIsoMultiplicityTool::BKllIsoMultiplicityTool(
       m_trackContainerName("InDetTrackParticles"),
       m_trkSelector("InDet::TrackSelectorTool"),
       m_trkSelectionCuts(),
+      m_trkPVAssociationChi2Cut(10.),
       m_trackPtCut(500.),
       m_trackEtaCut(-1.), // < 0 -> No eta cut applied!
       m_elContainerKey("Electrons"),
@@ -395,15 +397,23 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
     std::vector<float> refTracksPx = vertex->auxdata< std::vector< float, std::allocator< float > > > ("RefTrackPx");
     std::vector<float> refTracksPy = vertex->auxdata< std::vector< float, std::allocator< float > > > ("RefTrackPy");
     std::vector<float> refTracksPz = vertex->auxdata< std::vector< float, std::allocator< float > > > ("RefTrackPz");
+    
+    xAOD::BPhysHelper   cand(vertex);
+    const xAOD::Vertex* candRefPV = cand.pv(xAOD::BPhysHelper::PV_MIN_A0);
 
     // Loop Over Tracks to Create Temporarily Updated TrackBag
     std::vector<const xAOD::TrackParticle*> vTrackBag;
     std::vector<bool> isSelectedVTrackBag;
+    std::vector<bool> isPVAssociatedTrackBag;
     for (unsigned int iTrack = 0; iTrack < trackBag.size(); iTrack++ ) {
       auto track = trackBag.at( iTrack ); 
       if ( isTrackInVertex( vertex, track ) ) continue;
       vTrackBag.push_back( track );
       isSelectedVTrackBag.push_back( isSelectedTrackBag.at( iTrack ) );
+      bool isAssoc = false;
+      //auto logchi2 = BPhysVertexTrackBase::getTrackCandPVLogChi2(trackBag.at(iTrack), candRefPV, false, 0);
+      //if ( logchi2 <= m_trkPVAssociationChi2Cut ) isAssoc = true;
+      isPVAssociatedTrackBag.push_back( isAssoc );
     }
     // Loop Over Legs 
     std::vector<std::vector<float>> isolationsOrigAllLegs;
@@ -412,6 +422,9 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
     std::vector<std::vector<float>> selectedIsolationsOrigAllLegs;
     std::vector<std::vector<float>> selectedIsolationsRefitAllLegs;
     std::vector<std::vector<float>> selectedIsolationsOrigInDetAllLegs;
+    std::vector<std::vector<float>> pvAssocIsolationsOrigAllLegs;
+    std::vector<std::vector<float>> pvAssocIsolationsRefitAllLegs;
+    std::vector<std::vector<float>> pvAssocIsolationsOrigInDetAllLegs;
     for (unsigned int iLeg = 0; iLeg < vertex->nTrackParticles(); iLeg++ ){
         auto vertexTrack = vertex->trackParticle( iLeg );
 
@@ -430,24 +443,31 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
         std::vector<float> selectedIsolationsOrig      (m_cones.size(), 0.);
         std::vector<float> selectedIsolationsRefit     (m_cones.size(), 0.);
         std::vector<float> selectedIsolationsOrigInDet (m_cones.size(), 0.);
+        std::vector<float> pvAssocIsolationsOrig      (m_cones.size(), 0.);
+        std::vector<float> pvAssocIsolationsRefit     (m_cones.size(), 0.);
+        std::vector<float> pvAssocIsolationsOrigInDet (m_cones.size(), 0.);
         // Loop Over Cones
         for (unsigned int iCone = 0; iCone < m_cones.size(); iCone++){
           float thrDeltaR = std::stof( m_cones.at( iCone ) ) * 0.01;
           // Loop Over Tracks 
           for ( unsigned int iTrack = 0; iTrack < vTrackBag.size(); iTrack++ ){
             bool isSelected = isSelectedVTrackBag.at( iTrack );
+            bool isPVAssociated = isPVAssociatedTrackBag.at(iTrack);
               auto trackMomentum = vTrackBag.at( iTrack )->p4();
               if ( legMomentumOrig.DeltaR( trackMomentum ) <= thrDeltaR ) {
                 isolationsOrig.at( iCone ) += trackMomentum.Pt(); 
                 if ( isSelected ) selectedIsolationsOrig.at( iCone ) += trackMomentum.Pt();
+                if ( isPVAssociated ) pvAssocIsolationsOrig.at( iCone ) += trackMomentum.Pt();
               }
               if ( legMomentumRefit.DeltaR( trackMomentum ) <= thrDeltaR ) {
                 isolationsRefit.at( iCone ) += trackMomentum.Pt();
                 if ( isSelected ) selectedIsolationsRefit.at( iCone ) += trackMomentum.Pt();
+                if ( isPVAssociated ) pvAssocIsolationsRefit.at( iCone ) += trackMomentum.Pt();
               }
               if ( legMomentumOrigInDet.DeltaR( trackMomentum ) <= thrDeltaR ) {
                 isolationsOrigInDet.at( iCone ) += trackMomentum.Pt();
                 if ( isSelected ) selectedIsolationsOrigInDet.at( iCone ) += trackMomentum.Pt();
+                if ( isPVAssociated ) pvAssocIsolationsOrigInDet.at( iCone ) += trackMomentum.Pt();
               }
           }
         }
@@ -457,6 +477,9 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
         selectedIsolationsOrigAllLegs.push_back( selectedIsolationsOrig );
         selectedIsolationsRefitAllLegs.push_back( selectedIsolationsRefit );
         selectedIsolationsOrigInDetAllLegs.push_back( selectedIsolationsOrigInDet );
+        pvAssocIsolationsOrigAllLegs.push_back( pvAssocIsolationsOrig );
+        pvAssocIsolationsRefitAllLegs.push_back( pvAssocIsolationsRefit );
+        pvAssocIsolationsOrigInDetAllLegs.push_back( pvAssocIsolationsOrigInDet );
       }
       setIsoVar( vertex, isolationsOrigAllLegs, m_name + "TrackIsoOrig" );
       setIsoVar( vertex, isolationsRefitAllLegs, m_name + "TrackIsoRefit" );
@@ -464,6 +487,9 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
       setIsoVar( vertex, selectedIsolationsOrigAllLegs, m_name + "SelectedTrackIsoOrig" );
       setIsoVar( vertex, selectedIsolationsRefitAllLegs, m_name + "SelectedTrackIsoRefit" );
       setIsoVar( vertex, selectedIsolationsOrigInDetAllLegs, m_name + "SelectedTrackIsoOrigInDet" );
+      setIsoVar( vertex, pvAssocIsolationsOrigAllLegs, m_name + "PVAssocTrackIsoOrig" );
+      setIsoVar( vertex, pvAssocIsolationsRefitAllLegs, m_name + "PVAssocTrackIsoRefit" );
+      setIsoVar( vertex, pvAssocIsolationsOrigInDetAllLegs, m_name + "PVAssocTrackIsoOrigInDet" );
     }
   return StatusCode::SUCCESS;
 }
