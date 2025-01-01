@@ -165,7 +165,7 @@ namespace VKalVrtAthena {
     std::vector<bool> cutBits;
     
     cutBits.reserve(m_trackSelectionFuncs.size());
-for( auto func : m_trackSelectionFuncs ) cutBits.emplace_back( (this->*func)( trk ) );
+    for( auto func : m_trackSelectionFuncs ) cutBits.emplace_back( (this->*func)( trk ) );
       
     if( m_jp.FillHist ) {
       m_hists["trkSelCuts"]->Fill( 0 );
