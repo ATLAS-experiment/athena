@@ -89,32 +89,6 @@ if __name__=='__main__':
     #flags.IOVDb.GlobalTag="CONDBR2-HLTP-2024-02"
     flags.Trigger.triggerConfig='DB'
 
-    if partitionName == "ATLAS" or partitionName == 'ATLAS_MP1':
-        try:
-            y = ISObject(p, 'RunParams.RunParams', 'RunParams')
-        except:
-            print("Could not find Run Parameters in IS - Set default beam type to 'cosmics'")
-            beamType=BeamType.Cosmics
-        else:
-            y.checkout()
-            beamtype = y.beam_type
-            beamenergy = y.beam_energy
-            runnumber = y.run_number
-            project = y.T0_project_tag
-            print("RUN CONFIGURATION: beam type %i, beam energy %i, run number %i, project tag %s"%(beamtype,beamenergy,runnumber,project))
-        # Define beam type based on project tag name
-        if project[7:10]=="cos":
-               beamType=BeamType.Cosmics
-        else:
-            beamType=BeamType.Collisions
-               
-    else:
-        beamType=BeamType.Collisions
-
-    flags.Beam.Type = beamType
-    flags.Beam.BunchSpacing = 25
-    print("RUN CONFIGURATION: Beamtype =",flags.Beam.Type)
-
     if partitionName not in ['ATLAS', 'ATLAS_MP1']: 
         from AthenaConfiguration.TestDefaults import defaultTestFiles
         # if --filesInput was specified as well (!) this will override
@@ -138,12 +112,24 @@ if __name__=='__main__':
 
     flags.Common.isOnline = True
 
-    # Print configuration info for debugging
-    print(f"Partition: {partitionName}")
-    print(f"Max events: {flags.Exec.MaxEvents}")
-    print(f"Run numbers: {flags.Input.RunNumbers}")
-    print(f"Lumi block numbers: {flags.Input.LumiBlockNumbers}")
-    print(f"Is online: {flags.Common.isOnline}")
+    print("=" * 50)
+    print("Configuration Info".center(50))
+    print("=" * 50)
+    print(f"{'Partition:':30} {partitionName}")
+    print(f"{'Max events:':30} {flags.Exec.MaxEvents}")
+    print(f"{'Run numbers:':30} {flags.Input.RunNumbers}")
+    print(f"{'Lumi block numbers:':30} {flags.Input.LumiBlockNumbers}")
+    print("=" * 50)
+    if not args.offline:
+        print("=" * 50)
+        print("Beam Info".center(50))
+        print(f"{'Beam Energy:':30} {flags.Beam.Energy}")
+        print(f"{'Beam Type:':30} {flags.Beam.Type}")
+        print(f"{'Beam Number Of Collisions:':30} {flags.Beam.NumberOfCollisions}")
+        print(f"{'Beam Estimated Luminosity:':30} {flags.Beam.estimatedLuminosity}")
+        print(f"{'Beam Bunch Spacing:':30} {flags.Beam.BunchSpacing}")
+        print("=" * 50)
+
 
     flags.Input.isMC = False
 
@@ -192,8 +178,6 @@ if __name__=='__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg(flags)
     acc.addService(CompFactory.ByteStreamCnvSvc(), primary=True)
-    
- 
  
     #if args.offline:
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
@@ -367,15 +351,25 @@ if __name__=='__main__':
     #if flags.Reco.EnablePostProcessing:
     #    acc.merge(RecoPostProcessingCfg(flags))
 
-    # Monitoring
-    acc.flagPerfmonDomain('DQM')
-    if flags.DQ.doMonitoring:
-        from AthenaMonitoring.AthenaMonitoringCfg import (AthenaMonitoringCfg, AthenaMonitoringPostprocessingCfg)
-        acc.merge(AthenaMonitoringCfg(flags))
-        if flags.DQ.doPostProcessing:
-            acc.merge(AthenaMonitoringPostprocessingCfg(flags))
+    if not args.offline :
+        # Monitoring
+        acc.flagPerfmonDomain('DQM')
+        if flags.DQ.doMonitoring:
+            from AthenaMonitoring.AthenaMonitoringCfg import (AthenaMonitoringCfg, AthenaMonitoringPostprocessingCfg)
+            acc.merge(AthenaMonitoringCfg(flags))
+            if flags.DQ.doPostProcessing:
+                acc.merge(AthenaMonitoringPostprocessingCfg(flags))
+
+        if flags.DQ.Steering.doInDetMon:
+            if flags.DQ.Steering.InDet.doGlobalMon:
+                #info('Set up InDet Global monitoring')
+                from InDetGlobalMonitoringRun3Test.InDetGlobalMonitoringRun3TestConfig import InDetGlobalMonitoringRun3TestConfig
+                acc.merge(InDetGlobalMonitoringRun3TestConfig(flags))
+            if flags.DQ.Steering.InDet.doAlignMon:
+                #info('Set up Alignment monitoring')
+                from InDetAlignmentMonitoringRun3.InDetAlignmentMonitoringRun3Config import InDetAlignmentMonitoringRun3Config
+                acc.merge(InDetAlignmentMonitoringRun3Config(flags))
             
-    if not args.offline:       
         if flags.DQ.Steering.doPixelMon:
             from PixelMonitoring.PixelMonitoringConfig import PixelMonitoringConfig
             acc.merge(PixelMonitoringConfig(flags))
@@ -389,16 +383,6 @@ if __name__=='__main__':
             #info('Set up TRT monitoring')
             from TRTMonitoringRun3.TRTMonitoringRun3Config import TRTMonitoringRun3Cfg
             acc.merge(TRTMonitoringRun3Cfg(flags))
-
-        if flags.DQ.Steering.doInDetMon:
-            if flags.DQ.Steering.InDet.doGlobalMon:
-                #info('Set up InDet Global monitoring')
-                from InDetGlobalMonitoringRun3Test.InDetGlobalMonitoringRun3TestConfig import InDetGlobalMonitoringRun3TestConfig
-                acc.merge(InDetGlobalMonitoringRun3TestConfig(flags))
-            if flags.DQ.Steering.InDet.doAlignMon:
-                #info('Set up Alignment monitoring')
-                from InDetAlignmentMonitoringRun3.InDetAlignmentMonitoringRun3Config import InDetAlignmentMonitoringRun3Config
-                acc.merge(InDetAlignmentMonitoringRun3Config(flags))
 
         if flags.DQ.Steering.doLArMon:
             #info('Set up LAr monitoring')
@@ -447,15 +431,17 @@ if __name__=='__main__':
                     from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
                     acc.merge(PFGlobalFlowElementLinkingCfg(flags))
 
+        # #######################################
+        # Set TRT expert flags
+        # #######################################
+        acc.getEventAlgo("AlgTRTMonitoringRun3RAW").doExpert = True
+        # acc.getEventAlgo("AlgTRTMonitoringRun3RAW").doExpert = False
+        # acc.getEventAlgo("AlgTRTMonitoringRun3RAW").doEfficiency = True
+
     from IOVDbSvc.IOVDbSvcConfig import addOverride
     acc.merge(addOverride(flags, "/TRT/Onl/Calib/PID_NN", "TRTCalibPID_NN_v2", db=""))
 
-    # #######################################
-    # Set TRT expert flags
-    # #######################################
-    acc.getEventAlgo("AlgTRTMonitoringRun3RAW").doExpert = True
-    # acc.getEventAlgo("AlgTRTMonitoringRun3RAW").doExpert = False
-    # acc.getEventAlgo("AlgTRTMonitoringRun3RAW").doEfficiency = True
+
 
     # #######################################
     # Need to add this line since it was needed as explained in the below link. Otherwise jobs crash
