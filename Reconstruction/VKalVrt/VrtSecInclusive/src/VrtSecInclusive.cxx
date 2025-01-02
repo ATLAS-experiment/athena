@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -416,6 +416,7 @@ namespace VKalVrtAthena {
       ATH_MSG_DEBUG( "execute: Too few (<2) selected reco tracks. Terminated reconstruction." );
       m_vertexingStatus = 1;
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
+      ATH_CHECK( lockTrackDecorations( true ) );
       return StatusCode::SUCCESS;   
     }
       
@@ -423,6 +424,7 @@ namespace VKalVrtAthena {
       ATH_MSG_INFO( "execute: Too many selected reco tracks. Terminated reconstruction." );
       m_vertexingStatus = 2;
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
+      ATH_CHECK( lockTrackDecorations( true ) );
       return StatusCode::SUCCESS;   
     }
       
@@ -481,6 +483,7 @@ namespace VKalVrtAthena {
       ATH_CHECK( clearNtupleVariables() );
     }
     
+    ATH_CHECK( lockTrackDecorations( false ) );
     
     ATH_MSG_VERBOSE( "execute: process done." );
     // end
@@ -488,4 +491,86 @@ namespace VKalVrtAthena {
     
   }
     
+  void VrtSecInclusive::lockTrackDecorations( const xAOD::TrackParticle* trk, bool onlySelection ) const {
+    SG::AuxVectorData* cont_nc ATLAS_THREAD_SAFE =
+      const_cast<SG::AuxVectorData*> (trk->container());
+    cont_nc->lockDecoration (m_decor_isSelected->auxid());
+
+    if (onlySelection) return;
+
+    if (m_decor_isAssociated && m_decor_isAssociated->isAvailable (*cont_nc)) {
+      cont_nc->lockDecoration (m_decor_isAssociated->auxid());
+    }
+    if (m_decor_is_svtrk_final && m_decor_is_svtrk_final->isAvailable (*cont_nc)) {
+      cont_nc->lockDecoration (m_decor_is_svtrk_final->auxid());
+    }
+
+    for (const auto& p : m_trkDecors) {
+      cont_nc->lockDecoration (p.second.auxid());
+    }
+  }
+
+void VrtSecInclusive::lockLeptonDecorations( const SG::AuxVectorData* cont ) const {
+    SG::AuxVectorData* cont_nc ATLAS_THREAD_SAFE =
+      const_cast<SG::AuxVectorData*> (cont);
+    for (const IPDecoratorType& dec : m_ipDecors) {
+      if (dec.isAvailable (*cont)) {
+        cont_nc->lockDecoration (dec.auxid());
+      }
+    }
+
+    if (m_decor_svLink) {
+      if (m_decor_svLink->isAvailable (*cont)) {
+        cont_nc->lockDecoration (m_decor_svLink->auxid());
+      }
+    }
+  }
+
+  StatusCode VrtSecInclusive::lockTrackDecorations( bool onlySelection ) const
+  {
+    const xAOD::TrackParticleContainer* trackParticleContainer ( nullptr );
+    ATH_CHECK( evtStore()->retrieve( trackParticleContainer, m_jp.TrackLocation) );
+    for( const xAOD::TrackParticle* trk : *trackParticleContainer ) {
+      lockTrackDecorations( trk, onlySelection );
+    }
+
+    const xAOD::MuonContainer* muons ( nullptr );
+    ATH_CHECK( evtStore()->retrieve( muons, m_jp.MuonLocation) );
+    if (muons->ownPolicy() != SG::VIEW_ELEMENTS) {
+      lockLeptonDecorations (muons);
+    }
+    for( const xAOD::Muon* muon : *muons ) {
+      if (muons->ownPolicy() == SG::VIEW_ELEMENTS) {
+        lockLeptonDecorations (muon->container());
+      }
+      if ( const xAOD::TrackParticle* trk = muon->trackParticle( xAOD::Muon::InnerDetectorTrackParticle ) ) {
+        lockTrackDecorations( trk, onlySelection );
+      }
+    }
+
+    const xAOD::ElectronContainer *electrons( nullptr );
+    ATH_CHECK( evtStore()->retrieve( electrons, m_jp.ElectronLocation ) );
+    if (electrons->ownPolicy() != SG::VIEW_ELEMENTS) {
+      lockLeptonDecorations (electrons);
+    }
+    for( const xAOD::Electron* electron : *electrons ) {
+      if (electrons->ownPolicy() == SG::VIEW_ELEMENTS) {
+        lockLeptonDecorations (electron->container());
+      }
+      if( electron->nTrackParticles() > 0 ) {
+        if (const xAOD::TrackParticle* trk = electron->trackParticle(0)) {
+          lockTrackDecorations( trk, onlySelection );
+        }
+      }
+    }
+
+    const xAOD::TrackParticleContainer* IDtracks ( nullptr );
+    ATH_CHECK( evtStore()->retrieve( IDtracks, m_jp.TrackLocation) );
+    for( const auto *trk : *IDtracks ) {
+      lockTrackDecorations( trk, onlySelection );
+    }
+
+    return StatusCode::SUCCESS;
+  }
+
 } // end of namespace bracket
