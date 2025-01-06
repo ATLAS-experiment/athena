@@ -604,7 +604,7 @@ void* SG::DataProxy_cast (SG::DataProxy* proxy, CLID clid)
   DataObject* pObject = proxy->accessData();
   if (0 == pObject)
     return 0;
-  return SG::Storable_cast (pObject, clid, proxy, proxy->isConst());
+  return SG::Storable_cast (pObject, clid, nullptr, true, proxy, proxy->isConst());
 }
 
   

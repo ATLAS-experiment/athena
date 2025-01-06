@@ -8,7 +8,6 @@
 # define ATHENAKERNEL_STORABLECONVERSIONS_H
 /** @file StorableConversions.h
  *  @brief convert to and from a SG storable
- * $Id: StorableConversions.h,v 1.13 2008-05-22 22:54:12 calaf Exp $
  * @author ATLAS Collaboration
  **/
 
@@ -17,13 +16,9 @@
 #include "AthenaKernel/ClassID_traits.h"
 #include "GaudiKernel/DataObject.h"
 
-#ifndef NDEBUG
-#  include "AthenaKernel/getMessageSvc.h"
-#  include "GaudiKernel/MsgStream.h"
-#endif
-
 #include <memory>
 #include <type_traits>
+#include <typeinfo>
 
 
 namespace SG {
@@ -52,6 +47,8 @@ namespace SG {
    *        converted to be of type @a clid.
    * @param pDObj The @a DataObject.
    * @param clid The ID of the class to which to convert.
+   * @param tinfo type_info for the object being converted (optional).
+   * @param quiet If true, suppress warning messages.
    * @param irt To be called if we make a new instance.
    * @param isConst True if the object being converted is regarded as const.
    *
@@ -59,6 +56,8 @@ namespace SG {
    * Returns 0 on failure,
    */
   void* fromStorable(DataObject* pDObj, CLID clid,
+                     const std::type_info* tinfo = nullptr,
+                     bool quiet = false,
                      IRegisterTransient* irt = 0,
                      bool isConst = true);
 
@@ -68,6 +67,8 @@ namespace SG {
    *        converted to be of type @a clid.
    * @param pDObj The @a DataObject.
    * @param clid The ID of the class to which to convert.
+   * @param tinfo type_info for the object being converted (optional).
+   * @param quiet If true, suppress warning messages.
    * @param irt To be called if we make a new instance.
    * @param isConst True if the object being converted is regarded as const.
    *
@@ -75,9 +76,10 @@ namespace SG {
    * Returns 0 on failure,
    */
   void* Storable_cast(DataObject* pDObj, CLID clid,
+                      const std::type_info* tinfo = nullptr,
+                      bool quiet = false,
                       IRegisterTransient* irt = 0,
                       bool isConst = true);
-
 }
 
 //////////////////////////////////////////////////////////////////
@@ -165,48 +167,19 @@ namespace SG {
 
   template <typename T>
   bool  fromStorable(DataObject* pDObj, T*& pTrans, 
-                     bool
-#ifndef NDEBUG
-                     quiet
-#endif
-                     , IRegisterTransient* irt,
+                     bool quiet,
+                     IRegisterTransient* irt,
                      bool isConst /*= true*/)
   {
     typedef typename std::remove_const<T>::type T_nc;
     DataBucketTrait<T_nc>::init();
 
-    //check inputs
-    if (0 == pDObj) {
-      pTrans=0;
-#ifndef NDEBUG
-      MsgStream gLog(Athena::getMessageSvc(), "SG::fromStorable");
-      gLog << MSG::WARNING << "null input pointer " << endmsg;
-#endif
-      return false;
-    }
+    pTrans = static_cast<T*> (fromStorable (pDObj, ClassID_traits<T_nc>::ID(),
+                                            &typeid(T_nc),
+                                            quiet, irt, isConst));
+    return pTrans != nullptr;
+}
 
-    // get T* from DataBucket:
-    // All objects in the event store nowadays are instances
-    // of DataBucket, so just do a static_cast.
-    DataBucketBase* b = static_cast<DataBucketBase*>(pDObj);
-    pTrans = b->template cast<T_nc> (irt, isConst);
-    bool success = pTrans != nullptr;
-
-#ifndef NDEBUG
-    if (!quiet && !success) {
-      MsgStream gLog(Athena::getMessageSvc(), "SG::fromStorable");
-      gLog << MSG::WARNING 
-		<< "can't convert stored DataObject " << pDObj 
-		<< " to type ("
-		<< ClassID_traits<T_nc>::typeName() 
-		<< ")\n Unless you are following a symlink,"
-	        << " it probably means you have a duplicate "
-		<< "CLID = "  << pDObj->clID() 
-		<< endmsg;
-    }
-#endif
-    return success;
-  }
 }
 
 #endif // ATHENAKERNEL_STORABLECONVERSIONS_H

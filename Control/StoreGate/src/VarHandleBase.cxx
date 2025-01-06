@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // VarHandleBase.cxx 
@@ -1067,7 +1067,7 @@ namespace SG {
     }
 
     const CLID clid = this->clid();
-    void* ptr = SG::Storable_cast(dobj, clid, proxy);
+    void* ptr = SG::Storable_cast(dobj, clid, nullptr, true, proxy);
     if (ptr)
       return ptr;
 
