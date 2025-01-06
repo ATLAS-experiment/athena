@@ -50,7 +50,7 @@ StatusCode StripClusteringTool::initialize()
 {
     ATH_MSG_DEBUG("Initializing " << name() << "...");
 
-    ATH_CHECK(m_conditionsTool.retrieve());
+    ATH_CHECK(m_conditionsTool.retrieve(DisableTool{!m_stripDetElStatus.empty()} ));
     ATH_CHECK(m_lorentzAngleTool.retrieve());
     ATH_CHECK(decodeTimeBins());    
 

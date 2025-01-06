@@ -1,6 +1,6 @@
 """Define functions to configure Pixel conditions algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -183,4 +183,37 @@ def ITkPixelOfflineCalibCondAlgCfg(flags, name="ITkPixelOfflineCalibCondAlg", **
     kwargs.setdefault("WriteKey", "ITkPixelOfflineCalibData")
     kwargs.setdefault("InputSource", 2)
     acc.addCondAlgo(CompFactory.ITk.PixelOfflineCalibCondAlg(name, **kwargs))
+    return acc
+
+def ITkPixelDetectorElementStatusCondAlgNoByteStreamErrorsCfg(flags, name = "ITkPixelDetectorElementStatusCondAlgNoByteStreamErrors", **kwargs) :
+    '''
+    Condition alg to precompute the pixel detector element status.
+    This algorithm does not consider the byte stream errors which are event data.
+    '''
+    acc = ComponentAccumulator()
+    if 'ConditionsSummaryTool' not in kwargs :
+        from PixelConditionsTools.ITkPixelConditionsSummaryConfig import ITkPixelConditionsSummaryCfg
+        kwargs.setdefault("ConditionsSummaryTool", acc.popToolsAndMerge( ITkPixelConditionsSummaryCfg(flags)))
+    kwargs.setdefault( "WriteKey", "ITkPixelDetectorElementStatusNoByteStream")
+    acc.addCondAlgo( CompFactory.InDet.SiDetectorElementStatusCondAlg(name, **kwargs) )
+    return acc
+
+def ITkPixelDetectorElementStatusAlgCfg(flags, name = "ITkPixelDetectorElementStatusAlg", **kwargs) :
+    '''
+    Event alg which could extend the pixel detector element status conditions data with bytestream errors.
+    '''
+    acc = ComponentAccumulator()
+    if 'ConditionsSummaryTool' not in kwargs:
+        element_status_input=None
+        acc.merge( ITkPixelDetectorElementStatusCondAlgNoByteStreamErrorsCfg(flags) )
+        element_status_input="ITkPixelDetectorElementStatusNoByteStream"
+        from PixelConditionsTools.ITkPixelConditionsSummaryConfig import ITkByteStreamErrorDetectorElementStatusToolCfg
+        kwargs.setdefault("ConditionsSummaryTool",
+                          acc.popToolsAndMerge(ITkByteStreamErrorDetectorElementStatusToolCfg(flags, PixelDetElStatusCondDataBaseKey=element_status_input) ))
+
+    kwargs.setdefault("WriteKey","ITkPixelDetectorElementStatus")
+
+    # @TODO merge pixel raw data provider for bytestream input
+
+    acc.addEventAlgo( CompFactory.InDet.SiDetectorElementStatusAlg(name, **kwargs) )
     return acc

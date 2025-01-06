@@ -66,21 +66,27 @@ class ITkTrigSequence(InnerTrackerTrigSequence):
     from InDetConfig.InDetPrepRawDataFormationConfig import ITkTrigPixelClusterizationCfg, ITkTrigStripClusterizationCfg
     acc.merge(ITkTrigPixelClusterizationCfg(self.flags, roisKey=self.rois, signature=signature))
     acc.merge(ITkTrigStripClusterizationCfg(self.flags, roisKey=self.rois, signature=signature))
-
+    from InDetConfig.TrackRecoConfig import SiDetectorElementStatusCfg
+    acc.merge(SiDetectorElementStatusCfg(self.flags,f"_{signature}"))
     return acc
         
   def viewDataVerifierAfterPattern(self, viewVerifier='IDViewDataVerifierForAmbi') -> ComponentAccumulator:
     
     acc = ComponentAccumulator()
 
+    dataObjects = [
+                ( 'InDet::PixelGangedClusterAmbiguities' , 'ITkPixelClusterAmbiguitiesMap'),
+                ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map')
+            ]
+    from TrigInDetConfig.TrigInDetConfig import InDetExtraDataObjectsFromDataPrep
+    InDetExtraDataObjectsFromDataPrep(self.flags,dataObjects)
+
     ViewDataVerifier = \
         CompFactory.AthViews.ViewDataVerifier( 
             name = viewVerifier + "_" + self.signature,
-            DataObjects = {
-                ( 'InDet::PixelGangedClusterAmbiguities' , 'ITkPixelClusterAmbiguitiesMap'),
-                ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map'),
-            }
+            DataObjects = dataObjects
         )
+    from TrigInDetConfig.TrigInDetConfig import InDetExtraDataObjectsFromDataPrep
 
     acc.addEventAlgo(ViewDataVerifier)
     return acc
@@ -117,6 +123,7 @@ class ITkTrigSequence(InnerTrackerTrigSequence):
 
     if self.inView:
       acc.merge(self.viewDataVerifierAfterPattern())
+
 
     from TrkConfig.TrkAmbiguitySolverConfig import ITkTrkAmbiguityScoreCfg
     acc.merge(

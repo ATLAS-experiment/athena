@@ -106,11 +106,15 @@ def ITkPixelRDOToolCfg(flags, name="ITkPixelRDOTool", **kwargs):
         ITkPixelReadoutGeometryCfg)
     acc = ITkPixelReadoutGeometryCfg(flags)
 
-    if "PixelConditionsSummaryTool" not in kwargs:
-        from PixelConditionsTools.ITkPixelConditionsSummaryConfig import (
-            ITkPixelConditionsSummaryCfg)
-        kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(
-            ITkPixelConditionsSummaryCfg(flags)))
+    kwargs.setdefault("PixelConditionsSummaryTool", None) # PixelDetElStatus is used instead
+    if "PixelDetElStatus" not in kwargs :
+        if not flags.Trigger.doHLT :
+            from PixelConditionsAlgorithms.ITkPixelConditionsConfig import (
+                ITkPixelDetectorElementStatusAlgCfg)
+            acc.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
+        kwargs.setdefault("PixelDetElStatus", "ITkPixelDetectorElementStatus")
+
+    kwargs.setdefault("PixelReadoutManager","ITkPixelReadoutManager")
 
     kwargs.setdefault("PixelDetEleCollKey", "ITkPixelDetectorElementCollection")
     kwargs.setdefault("CheckGanged", False)
@@ -434,11 +438,13 @@ def ITKStrip_SCT_ClusteringToolCfg(
     kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
     kwargs.setdefault("doSimplePositionWidthCalculation", True)
 
-    if "conditionsTool" not in kwargs:
-        from SCT_ConditionsTools.ITkStripConditionsToolsConfig import (
-            ITkStripConditionsSummaryToolCfg)
-        kwargs.setdefault("conditionsTool", acc.popToolsAndMerge(
-            ITkStripConditionsSummaryToolCfg(flags)))
+    kwargs.setdefault("conditionsTool",None) # SCTDetElStatus is used instead
+    if "SCTDetElStatus" not in kwargs :
+        if not flags.Trigger.doHLT :
+            from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import  (
+                ITkStripDetectorElementStatusAlgCfg)
+            acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
+        kwargs.setdefault("SCTDetElStatus","ITkStripDetectorElementStatus")
 
     if "LorentzAngleTool" not in kwargs:
         from SiLorentzAngleTool.ITkStripLorentzAngleConfig import (

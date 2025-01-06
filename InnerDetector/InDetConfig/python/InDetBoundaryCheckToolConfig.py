@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetBoundaryCheckTool package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -102,14 +102,16 @@ def CombinedMuonTrigIDBoundaryCheckToolCfg(
 def ITkBoundaryCheckToolCfg(flags, name='ITkBoundaryCheckTool', **kwargs):
     result = ComponentAccumulator()
 
-    if 'SctSummaryTool' not in kwargs:
-        if flags.Detector.EnableITkStrip:
-            from SCT_ConditionsTools.ITkStripConditionsToolsConfig import (
-                ITkStripConditionsSummaryToolCfg)
-            kwargs.setdefault("SctSummaryTool", result.popToolsAndMerge(
-                ITkStripConditionsSummaryToolCfg(flags)))
-        else:
-            kwargs.setdefault("SctSummaryTool", None)
+    kwargs.setdefault("SctSummaryTool", None) # SCTDetElStatus is used instead
+    if "SCTDetElStatus" not in kwargs :
+        if flags.Detector.EnableITkStrip :
+            if not flags.Trigger.doHLT :
+                from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import  (
+                    ITkStripDetectorElementStatusAlgCfg)
+                result.merge(ITkStripDetectorElementStatusAlgCfg(flags))
+            kwargs.setdefault("SCTDetElStatus", "ITkStripDetectorElementStatus")
+        else :
+            kwargs.setdefault("SCTDetElStatus", "")
 
     if 'PixelLayerTool' not in kwargs:
         from InDetConfig.InDetTestPixelLayerConfig import (

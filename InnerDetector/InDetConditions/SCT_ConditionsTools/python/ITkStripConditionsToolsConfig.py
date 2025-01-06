@@ -1,6 +1,7 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import Format
 from AtlasGeoModel.GeoModelConfig import GeoModelCfg
 from IOVDbSvc.IOVDbSvcConfig import addFolders, addFoldersSplitOnline
 from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
@@ -21,6 +22,17 @@ def ITkStripConditionsSummaryToolCfg(flags, name="ITkStripConditionsSummaryTool"
         ConditionsTools += [ acc.popToolsAndMerge(ITkStripModuleVetoCfg(flags)) ]
 
     kwargs.setdefault("ConditionsTools", ConditionsTools)
+    kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
+    acc.setPrivateTools(CompFactory.SCT_ConditionsSummaryTool(name, **kwargs))
+    return acc
+
+
+def ITkStripDetectorElementStatusAddByteStreamErrorsToolCfg(flags, name="ITkStripDetectorElementStatusAddByteStreamErrorsTool", **kwargs):
+    acc = ComponentAccumulator()
+    if not flags.Input.isMC  and flags.Input.Format is Format.BS :
+        if "ConditionsTools" not in kwargs :
+            kwargs.setdefault("ConditionsTools", [ acc.popToolsAndMerge(ITkStripByteStreamErrorsToolCfg(flags)) ])
+
     kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
     acc.setPrivateTools(CompFactory.SCT_ConditionsSummaryTool(name, **kwargs))
     return acc
