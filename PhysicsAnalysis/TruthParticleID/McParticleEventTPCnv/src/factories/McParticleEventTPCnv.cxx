@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // generate the T/P converter entries
@@ -35,18 +35,3 @@ DECLARE_TPCNV_FACTORY(TruthParticleContainerCnv_p6,
                       TruthParticleContainer,
                       TruthParticleContainer_p6,
                       Athena::TPCnvVers::Current)
-
-typedef T_TPCnv<TruthParticleContainer, TruthParticleContainer_p5> 
-RootTruthParticleContainerCnv_p5;
-DECLARE_ARATPCNV_FACTORY(RootTruthParticleContainerCnv_p5,
-                         TruthParticleContainer,
-                         TruthParticleContainer_p5,
-                         Athena::TPCnvVers::Old)
-
-typedef T_TPCnv<TruthParticleContainer, TruthParticleContainer_p6> 
-RootTruthParticleContainerCnv_p6;
-DECLARE_ARATPCNV_FACTORY(RootTruthParticleContainerCnv_p6,
-                         TruthParticleContainer,
-                         TruthParticleContainer_p6,
-                         Athena::TPCnvVers::Current)
-

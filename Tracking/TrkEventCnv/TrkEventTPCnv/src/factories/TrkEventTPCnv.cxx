@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // generate the T/P converter entries
@@ -204,16 +204,3 @@ DECLARE_TPCNV_FACTORY(TrackCollectionCnv_p4,
                       TrackCollection,
                       Trk::TrackCollection_p4,
                       Athena::TPCnvVers::Old)
-
-using VxContainerARACnv_tlp1 = T_TPCnv<VxContainer, Trk::VxContainer_tlp1>;
-DECLARE_ARATPCNV_FACTORY(VxContainerARACnv_tlp1,
-			 VxContainer,
-			 Trk::VxContainer_tlp1,
-			     Athena::TPCnvVers::Old)
-		     
-using VxContainerARACnv_tlp2 = T_TPCnv<VxContainer, Trk::VxContainer_tlp2>;
-DECLARE_ARATPCNV_FACTORY(VxContainerARACnv_tlp2,
-			 VxContainer,
-			 Trk::VxContainer_tlp2,
-			    Athena::TPCnvVers::Current)
-		     

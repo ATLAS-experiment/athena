@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // generate the T/P converter entries
@@ -141,11 +141,6 @@ DECLARE_TPCNV_FACTORY(TrigInDetTrackCollectionCnv_tlp3,
                       TrigInDetTrackCollection,
                       TrigInDetTrackCollection_tlp3,
                       Athena::TPCnvVers::Old) 
-                      
-DECLARE_ARATPCNV_FACTORY(TrigInDetTrackCollectionCnvARA_tlp3,
-                         TrigInDetTrackCollection,
-                         TrigInDetTrackCollection_tlp3,
-                         Athena::TPCnvVers::Old) 
                       
 DECLARE_TPCNV_FACTORY(TrigInDetTrackCollectionCnv_tlp4,
                       TrigInDetTrackCollection,
