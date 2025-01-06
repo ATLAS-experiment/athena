@@ -610,15 +610,15 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   //    made at the same time to match the timing shift of the LG channels 
   //
   // ---
-  timeCorrCoefficLG[0][0] = {0.035+3.25, -0.126189, 0.022724, 0.039116, -0.098255};
-  timeCorrCoefficLG[0][1] = {0.022+3.25, -0.165988, -0.014125, 0.057323, -0.205109};
-  timeCorrCoefficLG[0][2] = {0.01+3.25, -0.136087, -0.007248, -0.014452, -0.060469};
-  timeCorrCoefficLG[0][3] = {0.0+3.25, -0.131067, 0.025579, 0.059994, -0.065595};
+  timeCorrCoefficLG[0][0] = {0.035f+3.25f, -0.126189, 0.022724, 0.039116, -0.098255};
+  timeCorrCoefficLG[0][1] = {0.022f+3.25f, -0.165988, -0.014125, 0.057323, -0.205109};
+  timeCorrCoefficLG[0][2] = {0.01f+3.25f, -0.136087, -0.007248, -0.014452, -0.060469};
+  timeCorrCoefficLG[0][3] = {0.0f+3.25f, -0.131067, 0.025579, 0.059994, -0.065595};
   
-  timeCorrCoefficLG[1][0] = {0.076+3.25, -0.300587, -0.041827, 0.641108, -0.594157};
-  timeCorrCoefficLG[1][1] = {0.057+3.25, -0.223443, -0.125013, -0.176900, 0.348081};
-  timeCorrCoefficLG[1][2] = {0.015+3.25, -0.141721, 0.023936, 0.099657, -0.188526};
-  timeCorrCoefficLG[1][3] = {0.01+3.25, -0.152589, 0.016122, -0.086580, 0.563625};
+  timeCorrCoefficLG[1][0] = {0.076f+3.25f, -0.300587, -0.041827, 0.641108, -0.594157};
+  timeCorrCoefficLG[1][1] = {0.057f+3.25f, -0.223443, -0.125013, -0.176900, 0.348081};
+  timeCorrCoefficLG[1][2] = {0.015f+3.25f, -0.141721, 0.023936, 0.099657, -0.188526};
+  timeCorrCoefficLG[1][3] = {0.01f+3.25f, -0.152589, 0.016122, -0.086580, 0.563625};
 
   zdcDataAnalyzer->SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrLog, 0, 700, timeCorrCoefficHG, timeCorrCoefficLG);
   
@@ -774,15 +774,15 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2024()
   //    made at the same time to match the timing shift of the LG channels 
   //
   // ---
-  timeCorrCoefficLG[0][0] = {0.035+3.25, -0.126189, 0.022724, 0.039116, -0.098255};
-  timeCorrCoefficLG[0][1] = {0.022+3.25, -0.165988, -0.014125, 0.057323, -0.205109};
-  timeCorrCoefficLG[0][2] = {0.01+3.25, -0.136087, -0.007248, -0.014452, -0.060469};
-  timeCorrCoefficLG[0][3] = {0.0+3.25, -0.131067, 0.025579, 0.059994, -0.065595};
+  timeCorrCoefficLG[0][0] = {0.035f+3.25f, -0.126189, 0.022724, 0.039116, -0.098255};
+  timeCorrCoefficLG[0][1] = {0.022f+3.25f, -0.165988, -0.014125, 0.057323, -0.205109};
+  timeCorrCoefficLG[0][2] = {0.01f+3.25f, -0.136087, -0.007248, -0.014452, -0.060469};
+  timeCorrCoefficLG[0][3] = {0.0f+3.25f, -0.131067, 0.025579, 0.059994, -0.065595};
   
-  timeCorrCoefficLG[1][0] = {0.076+3.25, -0.300587, -0.041827, 0.641108, -0.594157};
-  timeCorrCoefficLG[1][1] = {0.057+3.25, -0.223443, -0.125013, -0.176900, 0.348081};
-  timeCorrCoefficLG[1][2] = {0.015+3.25, -0.141721, 0.023936, 0.099657, -0.188526};
-  timeCorrCoefficLG[1][3] = {0.01+3.25, -0.152589, 0.016122, -0.086580, 0.563625};
+  timeCorrCoefficLG[1][0] = {0.076f+3.25f, -0.300587, -0.041827, 0.641108, -0.594157};
+  timeCorrCoefficLG[1][1] = {0.057f+3.25f, -0.223443, -0.125013, -0.176900, 0.348081};
+  timeCorrCoefficLG[1][2] = {0.015f+3.25f, -0.141721, 0.023936, 0.099657, -0.188526};
+  timeCorrCoefficLG[1][3] = {0.01f+3.25f, -0.152589, 0.016122, -0.086580, 0.563625};
 
   // Commenting out the timing correlation for PbPb2024: re-calibraton needed
   // zdcDataAnalyzer->SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrLog, 0, 700, timeCorrCoefficHG, timeCorrCoefficLG);
