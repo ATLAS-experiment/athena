@@ -4,7 +4,7 @@
 atlas_subdir( ActsTrackReconstruction )
 
 # External dependencies:
-find_package( Acts COMPONENTS Core )
+find_package( Acts COMPONENTS Core PluginJson )
 find_package( Boost )
 
 atlas_add_component( ActsTrackReconstruction
