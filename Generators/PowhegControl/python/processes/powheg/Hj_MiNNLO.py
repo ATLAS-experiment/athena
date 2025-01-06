@@ -27,7 +27,7 @@ class Hj_MiNNLO(PowhegV2):
         warnings = super(Hj_MiNNLO, self).hoppet_warning()
         infos = super(Hj_MiNNLO, self).hoppet_info()
 
-        super(Hj_MiNNLO, self).__init__(base_directory, os.path.join("HJ", "HJMiNNLO"), powheg_executable="pwhg_main", warning_output=warnings, info_output=infos, **kwargs)
+        super(Hj_MiNNLO, self).__init__(base_directory, os.path.join("HJ", "HJMiNNLO"), warning_output=warnings, info_output=infos, **kwargs)
 
         # Add all keywords for this process, overriding defaults if required
         self.add_keyword("alphas_from_lhapdf",0.0)
