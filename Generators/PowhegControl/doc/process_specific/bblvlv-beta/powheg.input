@@ -1,0 +1,147 @@
+allrad 1                                ! [ATLAS default: 1] turns on multiple shower scheme. Keeps hardest radiation from production and all resonances. [1:enabled]
+alpha -1                                ! [ATLAS default: -1] [-1:use Powheg default]
+bmass 4.95                              ! [ATLAS default: 4.95] b-quark mass in GeV
+bornktmin -1                            ! [ATLAS default: -1] generation cut: minimum kt in underlying Born. [<0:default to 0]
+bornonly 0                              ! [ATLAS default: 0] calculate only Born-level process. [1:enabled]
+bornsuppfact -1                         ! [ATLAS default: -1] mass parameter for Born suppression factor. [<0:disabled]
+bornzerodamp 1                          ! [ATLAS default: 1] damping of real contributions for the suppression of Born zeroes. [1:enabled]
+bottomthr 4.95                          ! [ATLAS default: 4.95] minimum pT in GeV for generating emission off b-quarks. [<0:default to 5.0]
+bottomthrpdf 4.95                       ! [ATLAS default: 4.95] threshold in GeV at which b-quark PDF becomes non-zero. [<0:default to 5.0]
+btildeborn -1                           ! [ATLAS default: -1] Born contributions. [0:disabled]
+btildecoll -1                           ! [ATLAS default: -1] collinear contributions. [0:disabled]
+btildereal -1                           ! [ATLAS default: -1] for fixed order: distinguish real terms from Born/virtual/subtraction. [0:disabled]
+btildevirt -1                           ! [ATLAS default: -1] virtual contributions [0:disabled]
+btlscalect -1                           ! [ATLAS default: -1] use the scales of the underlying-Born configuration for the subtraction terms. [1:enabled]
+btlscalereal -1                         ! [ATLAS default: -1] compute scales that depend on the real kinematics. [1:enabled]
+channel 7                               ! [ATLAS default: b l+ vl b~ l- vl~] bb4l decay code
+charmthr 1.55                           ! [ATLAS default: 1.55] minimum pT in GeV for generating emission off c-quarks. [<0:default to 1.5]
+charmthrpdf 1.55                        ! [ATLAS default: 1.55] threshold in GeV at which c-quark PDF becomes non-zero. [<0:default to 1.5]
+chklimseed -1                           ! [ATLAS default: -1] check limit seed
+clobberlhe -1                           ! [ATLAS default: -1] allow LHE files to be overwritten. [1:enabled]
+colltest 1                              ! [ATLAS default: 1] check collinear limits. [0:disabled]
+complexGFermi 1                         ! [ATLAS default: 1] use complex G_F [0:disabled]
+compress_lhe 1                         ! [ATLAS default: -1] compress LHE output.
+compress_upb 1                         ! [ATLAS default: -1] [-1:use Powheg default]
+compute_rwgt 0                          ! [ATLAS default: 0] whether to compute a reweighting factor. [1:enabled]
+dontAdaptWind 1                         ! [ATLAS default: 1] bb4l
+doublefsr 0                             ! [ATLAS default: 1] reduce observable spikes by suppressing FSR emissions harder than the emitter. [>0:enabled]
+ebeam1 6500.0                           ! [ATLAS default: 6500.0] energy of beam in GeV
+ebeam2 6500.0                           ! [ATLAS default: 6500.0] energy of beam in GeV
+enhancereg -1                           ! [ATLAS default: -1] enhance reg
+evenmaxrat 1                            ! [ATLAS default: 1] speed up upper-bound calculation by taking maximum of identical processes. [1:enabled]
+ewscheme 2                              ! [ATLAS default: 2] EW scheme. [1: MZ, MW, Gmu; 2:MZ, MW, alpha]
+facscfact 1.0                           ! [ATLAS default: [1.0, 1.0, 1.0, 0.5, 0.5, 2.0, 2.0]] factorization scale factor: mu_fact = mu_ref * facscfact
+fastbtlbound 1                          ! [ATLAS default: 1] use fast btilde bound. [0: disabled; 1: enabled]
+fixedscale -1                           ! [ATLAS default: -1] use reference renormalisation and factorisation scales [>=0: enabled]
+flg_debug 0                             ! [ATLAS default: 0] write extra information to LHEF. Breaks PYTHIA showering. [1: enabled]
+foldcsi 2                               ! [ATLAS default: 2] number of folds on csi integration. [allowed: 1, 2, 5, 10, 25, 50]
+foldphi 2                               ! [ATLAS default: 5] number of folds on phi integration. [allowed: 1, 2, 5, 10, 25, 50]
+foldy 2                                 ! [ATLAS default: 5] number of folds on y integration. [allowed: 1, 2, 5, 10, 25, 50]
+for_reweighting 0                       ! [ATLAS default: 0] run the whole chain without virtual corrections and add these during reweighting. [1:enabled]
+fourToFiveMatch 1                       ! [ATLAS default: 1] [1:enabled]
+fourToFiveMatchAS 0                     ! [ATLAS default: 0] [1:enabled]
+fullrwgt -1                             ! [ATLAS default: -1] experimental! Must ONLY be used for processes with no Born-level parton radiation. [1:enabled]
+hdamp 258.75                            ! [ATLAS default: 172.5] apply damping factor (in GeV) for high-pT radiation: h**2/(pt2+h**2). [>0:enabled]
+hfact -1                                ! [ATLAS default: -1] apply damping factor for high-pT radiation. [>0:enabled]
+hmass 125.0                             ! [ATLAS default: 125.0] Higgs boson mass in GeV
+hwidth 0.00407                          ! [ATLAS default: 0.00407] Higgs boson width in GeV
+icsimax 1                               ! [ATLAS default: 1] number of intervals (<= 10) csi grid to compute upper bounds
+ih1 1                                   ! [ATLAS default: 1] hadron content of beam 1. [(-)1:(anti)proton; (-)2:(anti)neutron; (-)3:(-)pion]
+ih2 1                                   ! [ATLAS default: 1] hadron content of beam 2. [(-)1:(anti)proton; (-)2:(anti)neutron; (-)3:(-)pion]
+itmx1 2                                 ! [ATLAS default: 1] number of iterations for initializing the integration grid
+itmx1btl -1                             ! [ATLAS default: -1] number of iterations for btilde during grid generation
+itmx1btlbrn -1                          ! [ATLAS default: -1] number of iterations for Born-level btilde during grid generation
+itmx1rm -1                              ! [ATLAS default: -1] number of iterations for initializing the integration grid for the remnant. [<0:use itmx1]
+itmx2 3                                 ! [ATLAS default: 6] number of iterations for computing the integral and finding upper bound
+itmx2btl -1                             ! [ATLAS default: -1] number of iterations for btilde during integral/upper bound finding
+itmx2btlbrn -1                          ! [ATLAS default: -1] number of iterations for Born-level btilde during integral/upper bound finding
+itmx2rm -1                              ! [ATLAS default: -1] number of iterations for computing the integral and finding upper bound for the remnant. [<0:use itmx2]
+iupperfsr -1                            ! [ATLAS default: -1] choice of FSR upper bounding functional form. [<0:use default - usually 2]
+iupperisr -1                            ! [ATLAS default: -1] choice of ISR upper bounding functional form. [<0:use default - usually 1]
+iymax 1                                 ! [ATLAS default: 1] number of intervals (<= 10) in y grid to compute upper bounds
+lhans1 260000                           ! [ATLAS default: [260000, 260001, 260002, 260003, 260004, 260005, 260006, 260007, 260008, 260009, 260010, 260011, 260012, 260013, 260014, 260015, 260016, 260017, 260018, 260019, 260020, 260021, 260022, 260023, 260024, 260025, 260026, 260027, 260028, 260029, 260030, 260031, 260032, 260033, 260034, 260035, 260036, 260037, 260038, 260039, 260040, 260041, 260042, 260043, 260044, 260045, 260046, 260047, 260048, 260049, 260050, 260051, 260052, 260053, 260054, 260055, 260056, 260057, 260058, 260059, 260060, 260061, 260062, 260063, 260064, 260065, 260066, 260067, 260068, 260069, 260070, 260071, 260072, 260073, 260074, 260075, 260076, 260077, 260078, 260079, 260080, 260081, 260082, 260083, 260084, 260085, 260086, 260087, 260088, 260089, 260090, 260091, 260092, 260093, 260094, 260095, 260096, 260097, 260098, 260099, 260100, 266000, 265000, 303200, 27400, 27100, 14000, 14400, 304400, 304200, 331500, 331100, 14200, 14300, 14100, 93300, 93301, 93302, 93303, 93304, 93305, 93306, 93307, 93308, 93309, 93310, 93311, 93312, 93313, 93314, 93315, 93316, 93317, 93318, 93319, 93320, 93321, 93322, 93323, 93324, 93325, 93326, 93327, 93328, 93329, 93330, 93331, 93332, 93333, 93334, 93335, 93336, 93337, 93338, 93339, 93340, 93341, 93342, 338500, 338520, 338540]] PDF set for hadron 1. [LHAPDF numbering]
+lhans2 260000                           ! [ATLAS default: [260000, 260001, 260002, 260003, 260004, 260005, 260006, 260007, 260008, 260009, 260010, 260011, 260012, 260013, 260014, 260015, 260016, 260017, 260018, 260019, 260020, 260021, 260022, 260023, 260024, 260025, 260026, 260027, 260028, 260029, 260030, 260031, 260032, 260033, 260034, 260035, 260036, 260037, 260038, 260039, 260040, 260041, 260042, 260043, 260044, 260045, 260046, 260047, 260048, 260049, 260050, 260051, 260052, 260053, 260054, 260055, 260056, 260057, 260058, 260059, 260060, 260061, 260062, 260063, 260064, 260065, 260066, 260067, 260068, 260069, 260070, 260071, 260072, 260073, 260074, 260075, 260076, 260077, 260078, 260079, 260080, 260081, 260082, 260083, 260084, 260085, 260086, 260087, 260088, 260089, 260090, 260091, 260092, 260093, 260094, 260095, 260096, 260097, 260098, 260099, 260100, 266000, 265000, 303200, 27400, 27100, 14000, 14400, 304400, 304200, 331500, 331100, 14200, 14300, 14100, 93300, 93301, 93302, 93303, 93304, 93305, 93306, 93307, 93308, 93309, 93310, 93311, 93312, 93313, 93314, 93315, 93316, 93317, 93318, 93319, 93320, 93321, 93322, 93323, 93324, 93325, 93326, 93327, 93328, 93329, 93330, 93331, 93332, 93333, 93334, 93335, 93336, 93337, 93338, 93339, 93340, 93341, 93342, 338500, 338520, 338540]] PDF set for hadron 2. [LHAPDF numbering]
+lhefuborn 0                             ! [ATLAS default: 0] semileptonic bb4l
+LOevents 0                              ! [ATLAS default: 0] produce LOPS events (scalup=ptj); in this case bornonly should also be enabled. [0:disabled; 1:enabled]
+manyseeds 1                             ! [ATLAS default: 0] read multiple seeds for the random number generator from pwgseeds.dat. [1:enabled]
+max_io_bufsize -1                       ! [ATLAS default: -1] size of I/O buffer. [<0:default to 100000]
+maxseeds -1                             ! [ATLAS default: -1] maximum number of seeds to use. [<0:default to 200]
+minlo 0                                 ! [ATLAS default: 0] use MiNLO (if minlo is set for unsupported processes, Powheg will crash with an 'st_bornorder' error) [1:enabled]
+mint_density_map -1                     ! [ATLAS default: -1] keep track of the distribution of integrand values while doing the integration (for debugging).
+mintupbratlim -1                        ! [ATLAS default: -1] while computing btilde upper bound, disregard points with btilde/born ratio greater than mintupbratlim
+ncall1 40000                           ! [ATLAS default: 120000] number of calls for initializing the integration grid
+ncall1btl -1                            ! [ATLAS default: -1] number of calls btilde (itr1)
+ncall1btlbrn -1                         ! [ATLAS default: -1] number of calls btilde born-level (itr1)
+ncall1rm 80000                             ! [ATLAS default: -1] number of calls for initializing the integration grid for the remant. [<0:use ncall1]
+ncall2 100000                           ! [ATLAS default: 180000] number of calls for computing the integral and finding upper bound
+ncall2btl -1                            ! [ATLAS default: -1] number of calls btilde (itr2)
+ncall2btlbrn -1                         ! [ATLAS default: -1] Number of calls btilde born-level (itr2)
+ncall2rm -1                             ! [ATLAS default: -1] number of calls for computing the integral and finding upper bound for the remnant. [<0:use ncall2]
+ncallfrominput 1                        ! [ATLAS default: 1] read ncall parameters from run card. [1:enabled]
+noevents -1                             ! [ATLAS default: -1] do not generate events. [1:enabled]
+nores 0                                 ! [ATLAS default: 0] disable the resonance treatment. [1: disabled]
+novirtual -1                            ! [ATLAS default: -1] ignore virtual contributions. [1:enabled]
+nubound 50000                          ! [ATLAS default: 100000] number of calls to setup upper bounds for radiation
+numevts 1                               ! [ATLAS default: 2] number of events to be generated
+olpreset -1                             ! [ATLAS default: -1] OpenLoops preset
+olverbose 0                             ! [ATLAS default: 0] OpenLoops verbosity
+openloops-stability 1                   ! [ATLAS default: 1] write OpenLoops stability information to log file.
+openloopsreal 1                         ! [ATLAS default: 1] OpenLoops real diagrams [0:disabled]
+openloopsvirtual 1                      ! [ATLAS default: 1] OpenLoops virtual diagrams [0:disabled]
+par_2gsupp -1                           ! [ATLAS default: -1] [<0:use 1.0]
+par_diexp -1                            ! [ATLAS default: -1] ISR singularity exponent (p1). [<0:default to 1.0]
+par_dijexp -1                           ! [ATLAS default: -1] FSR singularity exponent (p2). [<0:default to 1.0]
+parallelstage 1
+pdfreweight 1                           ! [ATLAS default: 1] store PDF information. Deprecated for processes with XML-reweighting. [1:enabled]
+ptsqmin 1.44                            ! [ATLAS default: -1] minimum pT in GeV for generating gluon emission off light quarks. [<0:default to 0.8]
+ptsupp -1                               ! [ATLAS default: -1] DEPRECATED: only included because PowhegBox checks for it
+radregion -1                            ! [ATLAS default: -1] only generate radiation in the selected singular region (otherwise all regions). [>=0:which region to use]
+rand1 0                                 ! [ATLAS default: 0] user-initiated random seed. [<0: defaults to 0]
+rand2 0                                 ! [ATLAS default: 0] user-initiated random seed. [<0: defaults to 0]
+regridfix -1                            ! [ATLAS default: -1] regularization grid is fixed
+renscfact 1.0                           ! [ATLAS default: [1.0, 0.5, 2.0, 0.5, 1.0, 1.0, 2.0]] renormalization scale factor: mu_ren = mu_ref * renscfact
+RHStrategy 1                            ! [ATLAS default: 1]
+RHWithSingleTops 1                      ! [ATLAS default: 1]
+rwl_add 0                               ! [ATLAS default: 0] rerun adding additional weights. [1:enabled]
+rwl_file ''                             ! [ATLAS default: ] XML file used for reweighting
+rwl_format_rwgt 1                       ! [ATLAS default: 1] Use LHE standard for weights instead of Powheg standard. [1:enabled]
+rwl_group_events 10000                  ! [ATLAS default: 10000] Number of events to group together when running reweighting. [<0:defaults to 10000]
+smartsig 1                              ! [ATLAS default: 1] remember equal amplitudes. [0:disabled]
+softmismch 1                            ! [ATLAS default: 1] do soft step. [0:disabled]
+softonly -1                             ! [ATLAS default: -1] [-1:use Powheg default]
+softtest 1                              ! [ATLAS default: 1] check soft limits. [0:disabled]
+st_nlight_as 5                          ! [ATLAS default: 5]
+st_nlight_default 5                     ! [ATLAS default: 5]
+st_nlight_ssv 4                         ! [ATLAS default: 4]
+stage2init -1                           ! [ATLAS default: -1] [1:enabled]
+storemintupb 1                          ! [ATLAS default: 1] cache cross sections (stage2 btilde calls) to speed up construction of upper bounding envelope. [1:enabled]
+testplots 0                             ! [ATLAS default: 0] plot NLO and PWHG distributions. [1:enabled]
+testsuda 0                              ! [ATLAS default: 0] test Sudakov form factor by numerical integration. [1:enabled]
+tmass 172.5                             ! [ATLAS default: 172.5] top quark mass in GeV
+tmass_phsp 172.5                        ! [ATLAS default: -1] [-1:use Powheg default]
+twidth 1.32733                          ! [ATLAS default: 1.32] top quark width in GeV
+twidth_phsp 1.32733                     ! [ATLAS default: 1.32] top width for phase-space generation, should be the same as twidth [-1:use Powheg default]
+ubexcess_correct 0                      ! [ATLAS default: 1] whether to correct for upper bound violations in btilde/remnant generation. [1:enabled]
+ubsigmadetails -1                       ! [ATLAS default: -1] output calculated cross-sections. [1:enabled]
+use-old-grid 1                          ! [ATLAS default: 1] use old integration grid if available. [0:disabled]
+use-old-ubound 0                        ! [ATLAS default: 1] read norm of upper bounding function from pwgubound.dat, if present. [1:enabled]
+user_reshists_sep -1                    ! [ATLAS default: -1] [-1:use Powheg default]
+verytinypars 0                          ! [ATLAS default: 0] set all ISR/FSR grid parameters to 1e-12. [1:enabled]
+virtonly -1                             ! [ATLAS default: -1] [-1:use Powheg default]
+whichpwhgevent -1                       ! [ATLAS default: -1] [-1:use Powheg default]
+whichW -1                               ! [ATLAS default: -1] bb4l: redecay one of the W bosons, thereby converting it into an hadronically decaying W boson, 1 or -1
+width_correction 5                      ! [ATLAS default: 5]
+withbtilde 1                            ! [ATLAS default: 1] do btilde step. [0:disabled]
+withdamp 1                              ! [ATLAS default: 1] enable hdamp and bornzerodamp. [1:enabled]
+withnegweights 1                        ! [ATLAS default: 1] allow negative weights. [1:enabled]
+withremnants 1                          ! [ATLAS default: 1] do remnant step. [0:disabled]
+withsubtr 1                             ! [ATLAS default: 1] subtract real counterterms. [0:disabled]
+wmass 80.399                            ! [ATLAS default: 80.399] W boson mass in GeV
+wwidth 2.085                            ! [ATLAS default: 2.085] W boson width in GeV
+xgriditeration 1
+xupbound 3.0                            ! [ATLAS default: 2] increase upper bound for radiation generation by this factor
+zerowidth 0                             ! [ATLAS default: 0] use on-shell quarks/bosons only. [1:enabled]
+zmass 91.1876                           ! [ATLAS default: 91.1876] Z boson mass in GeV
+zwidth 2.4952                           ! [ATLAS default: 2.4952] Z boson width in GeV
+check_bad_st2 1
+check_bad_st1 1
