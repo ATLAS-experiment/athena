@@ -3,7 +3,7 @@
 */
 
 #include "DerivationFrameworkTop/BoostedHadTopAndTopPairFilterTool.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace DerivationFramework{
 
@@ -84,14 +84,14 @@ StatusCode BoostedHadTopAndTopPairFilterTool::finalize() {return StatusCode::SUC
       int pdgId = part->pdgId();
 
       // pdgId t quark = 6
-      if ( pdgId == 6 && isFinalParticle(part) ){
+      if ( pdgId == MC::TQUARK && isFinalParticle(part) ){
         if ( part->pt() > topPt ){
           topPx = part->px();
           topPy = part->py();
           topPt = part->pt();}
       }
 
-      if ( pdgId == -6 && isFinalParticle(part) ){
+      if ( pdgId == -MC::TQUARK && isFinalParticle(part) ){
         if ( part->pt() > topbarPt ){
           topbarPx = part->px();
           topbarPy = part->py();
@@ -99,7 +99,7 @@ StatusCode BoostedHadTopAndTopPairFilterTool::finalize() {return StatusCode::SUC
       }
 
      // pdgId W boson = 24
-     if ( abs(pdgId) != 24 || !isFinalParticle(part) ) continue;
+      if ( !MC::isW(pdgId) || !isFinalParticle(part) ) continue;
 
      // "part" is now a W boson
      bPx=PxBofW(part);
@@ -167,7 +167,7 @@ bool BoostedHadTopAndTopPairFilterTool::isFromTop(const xAOD::TruthParticle* par
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if( abs( parent->pdgId() ) == 6 ) return true;
+    if( MC::isTop(parent->pdgId()) ) return true;
   }
 
   return false;
@@ -178,7 +178,7 @@ bool BoostedHadTopAndTopPairFilterTool::isHadronic(const xAOD::TruthParticle* pa
 
   for(unsigned j = 0; j < part->nChildren(); j++){
     const xAOD::TruthParticle* child = part->child(j);
-    if( abs(child->pdgId()) <= 5 ) return true;
+    if( abs(child->pdgId()) <= MC::BQUARK ) return true;
   }
   return false;
 }
@@ -206,7 +206,7 @@ double BoostedHadTopAndTopPairFilterTool::PxBofW(const xAOD::TruthParticle* part
 
   for(unsigned j = 0; j < initpart->nChildren(); j++){
     const xAOD::TruthParticle* child = initpart->child(j);
-    if( abs( child->pdgId() ) == 5 ){
+    if( MC::isBottom(child->pdgId()) ){
       px = child->px();
      }
   }
@@ -222,7 +222,7 @@ double BoostedHadTopAndTopPairFilterTool::PyBofW(const xAOD::TruthParticle* part
 
   for(unsigned j = 0; j < initpart->nChildren(); j++){
     const xAOD::TruthParticle* child = initpart->child(j);
-    if( abs( child->pdgId() ) == 5 ){
+    if( MC::isBottom( child->pdgId() ) ){
       py = child->py();
      }
   }

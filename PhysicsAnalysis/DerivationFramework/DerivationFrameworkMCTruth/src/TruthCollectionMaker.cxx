@@ -233,8 +233,8 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                                 // W boson
                                 pdg_id=24*(boson[0]->pdgId()+boson[1]->pdgId());
                             }
-                            if ( (SherpaW && std::abs(pdg_id)==24) ||
-                                 (SherpaZ && pdg_id==23) ){
+                            if ( (SherpaW && MC::isW(pdg_id)) ||
+                                 (SherpaZ && MC::isZ(pdg_id)) ){
                                 // Make a Z or a W
                                 xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
                                 newParticlesWriteHandle->push_back( xTruthParticle );

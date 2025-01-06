@@ -376,7 +376,7 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
             if (!incomingParticle) continue;
             if ((m_writeBSMProducts && MC::isBSM(incomingParticle)) ||
                 (m_writeBosonProducts && (MC::isZ(incomingParticle)||MC::isW(incomingParticle)||MC::isHiggs(incomingParticle) || (MC::isPhoton(incomingParticle) && incomingParticle->pt()>m_photonPtCut) )) ||
-                (m_writeTopAndDecays && abs(incomingParticle->pdgId())==6) ){
+                (m_writeTopAndDecays && MC::isTop(incomingParticle)) ){
                 ok = true;
                 break;
             }
@@ -435,7 +435,7 @@ bool DerivationFramework::MenuTruthThinning::isOrphanIncTau(const xAOD::TruthPar
         if(incomingParticle->pdgId() == pdgId) {
             if(!isOrphanIncTau(incomingParticle)) nParents++;
         }
-        else if(abs(incomingParticle->pdgId()) == 15) {
+        else if(MC::isTau(incomingParticle)) {
             if(!isOrphanIncTau(incomingParticle)) nParents++;
         }
         else {
@@ -575,9 +575,8 @@ bool DerivationFramework::MenuTruthThinning::isFromTau(const xAOD::TruthParticle
         const xAOD::TruthParticle* itrParent = prod->incomingParticle(pitr);
         if (!itrParent) continue;
         if (pitr>2) break; // No point in trying - this vertex does not have a quantum meaning...
-        
-        int parentId = itrParent->pdgId();
-        if(abs(parentId) == 15) {
+
+        if( MC::isTau(itrParent) ) {
             // Check if one of the children of this parent was a tau - if it is, then it is
             //   photon radiation, and we already cover that under FSR
             bool has_fsr = false;
@@ -586,7 +585,7 @@ bool DerivationFramework::MenuTruthThinning::isFromTau(const xAOD::TruthParticle
                 for (unsigned int citr = 0; citr<nChildren; ++citr) {
                     const xAOD::TruthParticle* itrChild = itrParent->decayVtx()->outgoingParticle(citr);
                     if (!itrChild) continue;
-                    if (abs(itrChild->pdgId())==15){
+                    if (MC::isTau(itrChild)){
                         has_fsr = true;
                         break;
                     } // Caught FSR check
@@ -640,9 +639,9 @@ bool DerivationFramework::MenuTruthThinning::isFsrFromLepton(const xAOD::TruthPa
     for(unsigned int pitr=0; pitr<nIncoming; ++pitr){
         const xAOD::TruthParticle* itrParent = prod->incomingParticle(pitr);
         int parentId = itrParent->pdgId();
-        if(abs(parentId) == 11 || 
-           abs(parentId) == 13 ||
-           abs(parentId) == 15) {
+        if(MC::isElectron(parentId) ||
+           MC::isMuon(parentId) ||
+           MC::isTau(parentId)) {
           ATH_MSG_DEBUG("Photon with uniqueID " << HepMC::uniqueID(part) << " matched to particle with pdgId = " << parentId );
             return true; // Has lepton parent
         }

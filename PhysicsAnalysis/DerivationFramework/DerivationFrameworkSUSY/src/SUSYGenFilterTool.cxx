@@ -123,7 +123,7 @@ namespace DerivationFramework {
       if (MC::isZeroEnergyPhoton(tp)) continue; // Work around for an old generator bug
       if ( !MC::isStable(tp) ) continue; // Stable!
 
-      if ((std::abs(pdgid)==11 || std::abs(pdgid)==13) && tp->pt()>m_MinLepPt && std::fabs(tp->eta())<m_MaxLepEta) {
+      if ((MC::isElectron(pdgid) || MC::isMuon(pdgid)) && tp->pt()>m_MinLepPt && std::fabs(tp->eta())<m_MaxLepEta) {
 	if( isPrompt(tp) ) {
 	  ATH_MSG_VERBOSE("Adding prompt lepton " << tp);
 	  genFiltHT += tp->pt();
