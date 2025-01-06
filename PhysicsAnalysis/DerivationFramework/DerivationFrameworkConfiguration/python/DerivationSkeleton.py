@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
@@ -112,9 +112,52 @@ def fromRunArgs(runArgs):
        from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
        cfg.merge(MetaDataSvcCfg(flags, ['IOVDbMetaDataTool']))
 
+    # Further workaround for issues with overlap removal.
+    # As further explained in JetCommonConfig.AddEventCleanFlagsCfg,
+    # we can schedule multiple overlap removal algorithms which overwrite
+    # each other's decorations.  To get the decorations locked, we put
+    # all the OR-related decoration algorithms in the EventCleanSeq
+    # sequence followed by decoration locking algorithms in EventCleanLockSeq.
+    # Each derivation format ensures that these sequences are in the
+    # correct place.  But we can still run into trouble when multiple
+    # formats are combined.  When we merge two CAs both of which
+    # contain the same sequence S, S will end up with the algorithms
+    # from both, but S will stay at its existing position in the
+    # first (destination) CA.  However, for these sequences, we need
+    # them to run at the sequence's position in the second (source) CA,
+    # i.e., the later of the two positions.  We accomplish this by
+    # munging the CAs before merging: remove the sequence from the
+    # destination CA and merge its algorithms to the source CA.
+    def premerge (cfg, newcfg, seqnam):
+        # Check if both CAs contain the requested sequence.
+        seq = cfg.getSequence(seqnam)
+        if not seq: return
+        newseq = newcfg.getSequence(seqnam)
+        if not newseq: return
+
+        # Make a temporary CA with the sequence to hold algorithms
+        # removed from CFG.
+        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+        ca = ComponentAccumulator()
+        ca.addSequence (CompFactory.AthSequencer (seqnam, Sequential=True))
+
+        # Remove the sequence's algorithms from CFG and add to the temp CA.
+        for a in seq.Members:
+            ca.addEventAlgo (cfg.popEventAlgo (a.getName(), seqnam), seqnam)
+
+        # Remove the sequence itself (which should now by empty) from CFG.
+        cfg.getSequence('AthAlgSeq').Members.remove (seq)
+
+        # Add the moved algorithms to NEWCFG.
+        newcfg.merge (ca)
+        return
+
     for formatName in formats:
         derivationConfig = getattr(DerivationConfigList, f'{formatName}Cfg')
-        cfg.merge(derivationConfig(flags))
+        newcfg = derivationConfig(flags)
+        premerge (cfg, newcfg, 'EventCleanSeq')
+        premerge (cfg, newcfg, 'EventCleanLockSeq')
+        cfg.merge(newcfg)
 
     # Pass-through mode (ignore skimming and accept all events)
     if hasattr(runArgs, 'passThrough'):
