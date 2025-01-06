@@ -25,7 +25,7 @@ class FPGATrackSimFitConstantBank : public AthMessaging
  public:
   
   // missing plane -1 means we guess hits, we don't have separate banks for a missing plane
-  FPGATrackSimFitConstantBank(FPGATrackSimPlaneMap const * pmap, int ncoords, std::string const & fname, bool isFirstStage, int missingPlane = -1);
+  FPGATrackSimFitConstantBank(FPGATrackSimPlaneMap const * pmap, int ncoords, std::string const & fname, bool isFirstStage, float phishift, int missingPlane = -1);
   
   ///////////////////////////////////////////////////////////////////////
   // Simple Getters
@@ -54,7 +54,8 @@ class FPGATrackSimFitConstantBank : public AthMessaging
   
   void invlinfit(sector_t sector, FPGATrackSimTrack &track, double const *constr) const;
   void setIdealCoordFit(bool v) { m_isIdealCoordFit = v;}
-
+  void setPhiShift(float v) {m_phiShift = v;}
+  
  private:
   
   FPGATrackSimPlaneMap const * m_pmap = nullptr;
@@ -68,6 +69,7 @@ class FPGATrackSimFitConstantBank : public AthMessaging
   int m_ncoords; // number of coordinates used in the linear fit
   int m_nconstr; // number of constraints: m_ncoords-m_npars
   int m_npixcy; // number of 2d coordinates
+  float m_phiShift; // amount to shift phi of hits 
   int m_missingPlane; // plane that is missing
 //  bool m_isFirstStage; // is this a first stage fit?
   bool m_isIdealCoordFit; // fitting for ideal coordinates? by default always true for now

@@ -36,6 +36,7 @@ class FPGATrackSimBankSvc : public extends< AthService, IFPGATrackSimBankSvc >
     private:
 	// Gaudi properties
 
+        Gaudi::Property<float> m_phiShift {this, "phiShift", 0.0, "Amount to shift phi for fit cosntant banks"};
 	Gaudi::Property<std::string> m_path_constants_1st {this, "constants_1st", "", "Path of the 1st stage constants"};
 	Gaudi::Property<std::string> m_path_constants_2nd {this, "constants_2nd", "", "Path of the 2nd stage constants"};
 	Gaudi::Property<std::string> m_path_sectorbank_1st {this, "sectorBank_1st", "", "Path of the 1st stage sector bank"};

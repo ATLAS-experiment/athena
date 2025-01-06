@@ -43,9 +43,9 @@ StatusCode FPGATrackSimBankSvc::initialize()
 bool FPGATrackSimBankSvc::LoadFitConstantBank_1st(int missedPlane)
 {
     if (missedPlane == -1)
-      m_FitConstantBank_1st = std::unique_ptr<FPGATrackSimFitConstantBank>(new FPGATrackSimFitConstantBank(m_FPGATrackSimMapping->PlaneMap_1st(0), m_ncoords_1st, m_path_constants_1st, true));
+      m_FitConstantBank_1st = std::unique_ptr<FPGATrackSimFitConstantBank>(new FPGATrackSimFitConstantBank(m_FPGATrackSimMapping->PlaneMap_1st(0), m_ncoords_1st, m_path_constants_1st, true, m_phiShift));
     else
-      m_FitConstantBankNoGuess_1st[missedPlane] = std::unique_ptr<FPGATrackSimFitConstantBank> (new FPGATrackSimFitConstantBank(m_FPGATrackSimMapping->PlaneMap_1st(0), m_ncoords_1st, m_path_constants_1st_noguess[missedPlane], true, missedPlane)); // no check on the plane number
+      m_FitConstantBankNoGuess_1st[missedPlane] = std::unique_ptr<FPGATrackSimFitConstantBank> (new FPGATrackSimFitConstantBank(m_FPGATrackSimMapping->PlaneMap_1st(0), m_ncoords_1st, m_path_constants_1st_noguess[missedPlane], true, m_phiShift, missedPlane)); // no check on the plane number
 
     return true;
 }
@@ -54,9 +54,9 @@ bool FPGATrackSimBankSvc::LoadFitConstantBank_1st(int missedPlane)
 bool FPGATrackSimBankSvc::LoadFitConstantBank_2nd(int missedPlane)
 {
     if (missedPlane == -1)
-      m_FitConstantBank_2nd = std::make_unique<FPGATrackSimFitConstantBank> (m_FPGATrackSimMapping->PlaneMap_2nd(0), m_ncoords_2nd, m_path_constants_2nd, false);
+      m_FitConstantBank_2nd = std::make_unique<FPGATrackSimFitConstantBank> (m_FPGATrackSimMapping->PlaneMap_2nd(0), m_ncoords_2nd, m_path_constants_2nd, false, m_phiShift);
     else
-      m_FitConstantBankNoGuess_2nd[missedPlane] = std::make_unique<FPGATrackSimFitConstantBank> (m_FPGATrackSimMapping->PlaneMap_2nd(0), m_ncoords_2nd, m_path_constants_2nd_noguess[missedPlane], false, missedPlane); // no check on the plane number
+      m_FitConstantBankNoGuess_2nd[missedPlane] = std::make_unique<FPGATrackSimFitConstantBank> (m_FPGATrackSimMapping->PlaneMap_2nd(0), m_ncoords_2nd, m_path_constants_2nd_noguess[missedPlane], false, m_phiShift, missedPlane); // no check on the plane number
 
     return true;
 }

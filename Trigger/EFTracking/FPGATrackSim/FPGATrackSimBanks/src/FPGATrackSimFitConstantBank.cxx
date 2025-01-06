@@ -19,7 +19,7 @@
 
 #include <sstream>
 
-FPGATrackSimFitConstantBank::FPGATrackSimFitConstantBank(FPGATrackSimPlaneMap const * pmap, int ncoords, std::string const & fname, bool /*isFirstStage*/, int missingPlane) :
+FPGATrackSimFitConstantBank::FPGATrackSimFitConstantBank(FPGATrackSimPlaneMap const * pmap, int ncoords, std::string const & fname, bool /*isFirstStage*/, float phishift, int missingPlane) :
     AthMessaging ("FPGATrackSimFitConstantBank"),
     m_pmap(pmap),
     m_bankID(0),
@@ -27,6 +27,7 @@ FPGATrackSimFitConstantBank::FPGATrackSimFitConstantBank(FPGATrackSimPlaneMap co
     m_ncoords(ncoords),
     m_nconstr(0),
     m_npixcy(0),
+    m_phiShift(phishift),    
     m_missingPlane(missingPlane),
 //    m_isFirstStage(isFirstStage),
     m_isIdealCoordFit(true)
@@ -385,7 +386,13 @@ int FPGATrackSimFitConstantBank::missing_point_guess(sector_t sector, FPGATrackS
         {
             if (!coordsmask[col]) continue;
 
-            a[i] -= m_maj_kk(sector, col, missid[i])*track.getPhiCoord(m_pmap->getCoordLayer(col));
+	    /// we don't want to shift phi for the outer hits in a SP, so check that!
+	    float phishift = m_phiShift;
+	    int layer = m_pmap->getCoordLayer(col);
+	    FPGATrackSimHit hit = (track.getFPGATrackSimHits())[layer];
+	    if (((hit.getPhysLayer() %2) == 1) && hit.getHitType() == HitType::spacepoint) phishift = 0.0;
+
+            a[i] -= m_maj_kk(sector, col, missid[i])*(phishift+track.getPhiCoord(m_pmap->getCoordLayer(col)));
 
             if (m_pmap->getDim(m_pmap->getCoordLayer(col)) == 2) { // do two at a time if 2d, then skip ahead
                a[i] -= m_maj_kk(sector, col+1, missid[i])*track.getEtaCoord(m_pmap->getCoordLayer(col));
@@ -467,14 +474,20 @@ void FPGATrackSimFitConstantBank::linfit_chisq(sector_t sector, FPGATrackSimTrac
     {
         float chi_component = m_kaverage(sector, i);
         for (int ix = 0; ix != m_npixcy/2; ix++) // pxl plane loop (divide by two to get number of pix planes from pix coords)
-        {
-	  chi_component += m_kernel(sector, i, 2*ix) * trk.getPhiCoord(m_pmap->getCoordLayer(2*ix));
+        {	  
+	  chi_component += m_kernel(sector, i, 2*ix) * (m_phiShift+trk.getPhiCoord(m_pmap->getCoordLayer(2*ix)));
 	  chi_component += m_kernel(sector, i, 2*ix+1) * trk.getEtaCoord(m_pmap->getCoordLayer(2*ix));
         }
 
         for (int ix = m_npixcy; ix != m_ncoords; ix++) // strip coords, easier
         {
-	  chi_component += m_kernel(sector, i, ix) * trk.getPhiCoord(m_pmap->getCoordLayer(ix));
+	  /// we don't want to shift phi for the outer hits in a SP, so check that!
+	  float phishift = m_phiShift;
+	  int layer = m_pmap->getCoordLayer(ix);
+	  FPGATrackSimHit hit = (trk.getFPGATrackSimHits())[layer];
+	  if (((hit.getPhysLayer() %2) == 1) && hit.getHitType() == HitType::spacepoint) phishift = 0.0;
+	  
+	  chi_component += m_kernel(sector, i, ix) * (phishift+trk.getPhiCoord(m_pmap->getCoordLayer(ix)));
         }
 
         chi2 += chi_component * chi_component;
@@ -500,7 +513,14 @@ void FPGATrackSimFitConstantBank::linfit_pars_eval(sector_t sector, FPGATrackSim
         pars[ip] = m_fit_const(sector, ip);
 	
         for (int coord = 0; coord < m_ncoords; coord++) {
-	  pars[ip] += m_fit_pars(sector, ip, coord) * trk.getPhiCoord(m_pmap->getCoordLayer(coord));
+
+	  /// we don't want to shift phi for the outer hits in a SP, so check that!
+	  float phishift = m_phiShift;
+	  int layer = m_pmap->getCoordLayer(coord);
+	  FPGATrackSimHit hit = (trk.getFPGATrackSimHits())[layer];
+	  if (((hit.getPhysLayer() %2) == 1) && hit.getHitType() == HitType::spacepoint) phishift = 0.0;
+	  
+	  pars[ip] += m_fit_pars(sector, ip, coord) * (phishift+trk.getPhiCoord(m_pmap->getCoordLayer(coord)));
 	  if (m_pmap->getDim(m_pmap->getCoordLayer(coord)) == 2) { // do two at a time if 2d, then skip ahead
 	    pars[ip] += m_fit_pars(sector, ip, coord+1) * trk.getEtaCoord(m_pmap->getCoordLayer(coord));
 	    ++coord;
@@ -510,13 +530,14 @@ void FPGATrackSimFitConstantBank::linfit_pars_eval(sector_t sector, FPGATrackSim
     
     trk.setQOverPt(pars[0]);
     trk.setD0(pars[1]);
-    trk.setPhi(pars[2]); // angle is moved within -pi to +pi
+    trk.setPhi(pars[2]-m_phiShift); // angle is moved within -pi to +pi, and shift phi back to the range we want
     trk.setZ0(pars[3]);
     trk.setEta(pars[4]);
     if (trk.getDoDeltaGPhis()) {
       trk.setQOverPt(trk.getHoughY()/1000.0 - trk.getQOverPt()); // final  q/pT =  q/pT from HT + delta q/pT
       trk.setPhi(trk.getHoughX() - trk.getPhi());                // final phi_0 = phi_0 from HT + delta phi_0
     }
+    
 }
 
 
