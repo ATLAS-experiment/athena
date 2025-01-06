@@ -62,7 +62,8 @@ def FPGATrackSimBankSvcCfg(flags):
     FPGATrackSimBankSvc.sectorBank_1st = f'{pathBankSvc}sectorsHW_raw_{layers}_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.patt'
     FPGATrackSimBankSvc.sectorBank_2nd = f'{pathBankSvc}sectorsHW_raw_13L_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.patt'
     FPGATrackSimBankSvc.sectorSlices = f'{pathBankSvc}slices_{layers}_reg{flags.Trigger.FPGATrackSim.region}.root'
-    
+    FPGATrackSimBankSvc.phiShift = flags.Trigger.FPGATrackSim.phiShift
+
     # These should be configurable. The tag system needs updating though.
     import FPGATrackSimConfTools.FPGATrackSimTagConfig as FPGATrackSimTagConfig
     bank_tag = FPGATrackSimTagConfig.getTags(stage='bank')['bank']
