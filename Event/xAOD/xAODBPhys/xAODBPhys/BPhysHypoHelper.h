@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file:   BPhysHypoHelper.h
  *  @author: Daniel Scheirich <daniel.scheirich@cern.ch>
  *
- *  @brief:  B-physcis xAOD helpers.
+ *  @brief:  B-physics xAOD helpers.
  *
- *  This class provides interface to the basic B-physics augmemtation which
+ *  This class provides an interface to the basic B-physics augmentation which
  *  depends on the invariant mass hypothesis, i.e.:
  *    - invariant mass and its error
  *    - proper decay time
@@ -82,10 +82,13 @@ namespace xAOD {
        *
        *  @param[in] hypo  Name of the hypothesis
        *  @param[in] b     Pointer to the xAOD::Vertex
+       *  @param decors    If provided, use this to keep track of produced decorations.
        */
-      BPhysHypoHelper(const std::string &hypo, const xAOD::Vertex* b) :
+      BPhysHypoHelper(const std::string &hypo, const xAOD::Vertex* b,
+                      SG::auxid_set_t* decors = nullptr) :
         BPhysHelper(b),
-        m_hypo(hypo)
+        m_hypo(hypo),
+        m_decors(decors)
       {
         /* nothing here */
       }
@@ -213,9 +216,15 @@ namespace xAOD {
        */
       
       std::string m_hypo;   //!< name of the mass hypothesis
+
+      SG::auxid_set_t* m_decors; //!< set of decorations that we're written
       
       /** @} */
       
+
+  private:
+    float get_float( const std::string& name ) const;
+    bool set_float( const std::string& name, float val );
       
   };
 }

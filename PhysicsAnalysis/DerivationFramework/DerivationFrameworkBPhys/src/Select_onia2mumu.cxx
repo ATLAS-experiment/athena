@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -15,6 +15,7 @@
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "xAODTracking/VertexContainer.h"
+#include "CxxUtils/checker_macros.h"
 #include <vector>
 #include <string>
 
@@ -131,6 +132,7 @@ namespace DerivationFramework {
   {
     
     SG::ReadHandle<xAOD::VertexContainer> oniaContainer(m_inputVtxContainerName);
+    SG::auxid_set_t decor_auxids;
 
     bool doPt   = (m_DoVertexType & 1) != 0;
     bool doA0   = (m_DoVertexType & 2) != 0;
@@ -140,7 +142,7 @@ namespace DerivationFramework {
     xAOD::VertexContainer::const_iterator oniaItr = oniaContainer->begin();
     for(; oniaItr!=oniaContainer->end(); ++oniaItr) {
       // create BPhysHypoHelper
-      xAOD::BPhysHypoHelper onia(m_hypoName, *oniaItr);
+      xAOD::BPhysHypoHelper onia(m_hypoName, *oniaItr, &decor_auxids);
       if((*oniaItr)->nTrackParticles() != m_trkMasses.size())
           ATH_MSG_WARNING("Vertex has " << (*oniaItr)->nTrackParticles() << " while provided masses " << m_trkMasses.size());
       //----------------------------------------------------
@@ -186,6 +188,13 @@ namespace DerivationFramework {
       }
 
     } // end of loop over onia candidates
+
+    // Lock the decorations we just produced.
+    xAOD::VertexContainer* onia_nc ATLAS_THREAD_SAFE =
+      const_cast<xAOD::VertexContainer*> (oniaContainer.cptr());
+    for (SG::auxid_t auxid : decor_auxids) {
+      onia_nc->lockDecoration (auxid);
+    }
     
     // all OK
     return StatusCode::SUCCESS;
