@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: CA-based config ATLFAST3F_G4MS with Track-overlay for MC23a ttbar running serial
+# art-description: CA-based config Track-overlay for MC23a ttbar running serial
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena

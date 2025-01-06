@@ -26,6 +26,7 @@ Reco_tf.py \
   --postInclude 'PyJobTransforms.UseFrontier' \
   --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01'  \
   --geometryVersion 'ATLAS-R3S-2021-03-02-00' \
+  --preExec="flags.Tracking.doBackTracking=False;" \
   --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
   --athenaopts "all:--threads=1" \
   --imf False
