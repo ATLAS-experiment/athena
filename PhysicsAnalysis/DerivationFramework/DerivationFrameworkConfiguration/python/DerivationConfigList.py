@@ -38,6 +38,8 @@ from DerivationFrameworkPhysicsValidation.PHYSVAL import PHYSVALCfg
 # Higgs derivations
 # HIGG1D1 Higgs->gammagamma derivation
 from DerivationFrameworkHiggs.HIGG1D1 import HIGG1D1Cfg
+# HIGG9D1 Higgs+Onia derivation
+from DerivationFrameworkHiggs.HIGG9D1 import HIGG9D1Cfg
 
 # LLP derivations
 from DerivationFrameworkLLP.LLP1 import LLP1Cfg
@@ -163,7 +165,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'PHYSCfg','PHYSLITECfg',
            'PHYSVALCfg',
            'FTAG1Cfg', 'FTAG2Cfg', 'FTAG3Cfg', 'FTAG4Cfg',
-           'HIGG1D1Cfg',
+           'HIGG1D1Cfg', 'HIGG9D1Cfg',
            'LLP1Cfg', 'LLJ1Cfg',
            'SUSY20Cfg',
            'IDTR2Cfg',
