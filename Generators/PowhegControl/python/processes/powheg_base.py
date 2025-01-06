@@ -153,6 +153,9 @@ class PowhegBase(Configurable):
         ## Powheg executable that will be used
         self.executable = os.path.join(base_directory, version, executable_name, powheg_executable)
 
+        ## Add to Python path "python" directory on POWHEG process directory
+        os.environ["PYTHONPATH"] += ":" + os.path.join(base_directory, version, executable_name, "python")
+
         ## SVN revision of process code
         self.process_revision = check_svn_revision(os.path.dirname(self.executable))
 

@@ -27,12 +27,6 @@ class ggF_HH_SMEFT(PowhegV2):
         # Add grid file creation function
         self.validation_functions.append("create_grid_file")
 
-        # This process uses a python script which uses .grid files searched for in $PYTHONPATH
-        # By appending the folder that they live in to PYTHONPATH it is able to find them
-        # At the moment these files are stored or linked locally, so we use ${PWD}
-        # but we may use self.executable.replace("pwhg_main", "Virtual") instead at some point
-        os.environ["PYTHONPATH"] += ":" + os.environ["PWD"]
-
         # Add all keywords for this process, overriding defaults if required
         self.add_keyword("alphas_from_lhapdf")
         self.add_keyword("bornktmin")
