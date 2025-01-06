@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef INDET_DEFECTSEMULATOR_H
 #define INDET_DEFECTSEMULATOR_H
@@ -13,7 +13,7 @@
 
 namespace InDet {
 template <class T_RDO_Container>
-class DefectsEmulatorTraits;
+struct DefectsEmulatorTraits;
 
 /** Algorithm template to selectivly copy RDOs from an InDetRawDataCollection
  *
