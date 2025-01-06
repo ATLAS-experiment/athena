@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ElectronPhotonVariableCorrectionBase_H
@@ -24,6 +24,7 @@
 //Root includes
 #include "TFormula.h"
 
+#include "boost/thread/tss.hpp"
 #include <memory>
 #include <vector>
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PersistentDataModel/Guid.h"
@@ -11,6 +11,7 @@
 
 
 #include "AthContainers/tools/threading.h"
+#include "AthContainers/tools/upgrade_mutex.h"
 typedef AthContainers_detail::upgrade_mutex mutex_t;
 typedef AthContainers_detail::upgrading_lock<mutex_t> upgrading_lock_t;
 typedef std::lock_guard<mutex_t> lock_guard_t;

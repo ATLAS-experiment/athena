@@ -48,51 +48,6 @@ public:
 };
 
 
-/**
- * @brief No-op definition of @c upgrade_mutex.
- */
-class upgrade_mutex
-{
-public:
-  void lock() {}
-  void unlock() {}
-  void lock_shared() {}
-  void unlock_shared() {}
-  void lock_upgrade() {}
-  void unlock_upgrade() {}
-  void unlock_upgrade_and_lock() {}
-private:
-  // Real upgrade_mutex is not assignable.  Need this for proper
-  // dictionary generation.
-  upgrade_mutex& operator= (const upgrade_mutex&);
-};
-
-
-/**
- * @brief Single-thread version of thread_specific_ptr.
- */
-template <class T>
-class thread_specific_ptr
-{
-public:
-  thread_specific_ptr() : m_ptr(0) {}
-  ~thread_specific_ptr() { delete m_ptr; }
-  thread_specific_ptr (const thread_specific_ptr&) = delete;
-  thread_specific_ptr& operator= (const thread_specific_ptr&) = delete;
-  T* get() { return m_ptr; }
-  T* operator->() { return m_ptr; }
-  T& operator*() { return *m_ptr; }
-  const T* get() const { return m_ptr; }
-  const T* operator->() const { return m_ptr; }
-  const T& operator*() const { return *m_ptr; }
-  void reset (T* new_value=0) { delete m_ptr; m_ptr = new_value; }
-  T* release() { T* ret = m_ptr; m_ptr = 0; return ret; }
-
-private:
-  T* m_ptr;
-};
-
-
 /// No-op definitions of fences.
 inline void fence_acq_rel() {}
 inline void fence_seq_cst() {}
@@ -124,9 +79,6 @@ private:
 #endif
 #endif
 
-#include "boost/thread/shared_mutex.hpp"
-#include "boost/thread/tss.hpp"
-
 
 #include <atomic>
 #include <mutex>
@@ -135,10 +87,6 @@ private:
 
 namespace AthContainers_detail {
 
-
-// Take these from boost.  (Boost extensions not in C++.)
-using boost::upgrade_mutex;
-using boost::thread_specific_ptr;
 
 using std::mutex;
 using std::recursive_mutex;
