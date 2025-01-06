@@ -158,7 +158,7 @@ StatusCode TrigCaloClusterMonitor::execute(const EventContext & ctx) const
 
       SG::ReadCondHandle<CaloNoise> noiseHdl{m_noiseCDOKey, ctx};
       const CaloNoise * noisep = *noiseHdl;
-      for (const auto & cell : *cell_collection)
+      for (const auto cell : *cell_collection)
         {
           const CaloDetDescrElement * cdde = cell->caloDDE();
 
