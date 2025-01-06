@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
   Contact: Xin Chen <xin.chen@cern.ch>
 */
 #ifndef JPSIXPLUSDISPLACED_H
@@ -7,6 +7,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IPartPropSvc.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
@@ -46,7 +47,7 @@ namespace DerivationFramework {
       V0Enum V0type = UNKNOWN;
       const xAOD::Vertex* V0vtx = nullptr;
       const xAOD::TrackParticle* track = nullptr;
-      double chi2NDF = 0;
+      double chi2NDF = 999;
       TLorentzVector p4_V0track1;
       TLorentzVector p4_V0track2;
       TLorentzVector p4_disVtrack;
@@ -94,6 +95,7 @@ namespace DerivationFramework {
     SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_RelinkContainers;
     std::string m_hypoName;
 
+    bool   m_useImprovedMass{};
     double m_jxMassLower{};
     double m_jxMassUpper{};
     double m_jpsiMassLower{};
@@ -101,8 +103,10 @@ namespace DerivationFramework {
     double m_diTrackMassLower{};
     double m_diTrackMassUpper{};
     std::string m_V0Hypothesis{};
-    double m_V0MassLower{};
-    double m_V0MassUpper{};
+    double m_LambdaMassLower{};
+    double m_LambdaMassUpper{};
+    double m_KsMassLower{};
+    double m_KsMassUpper{};
     double m_lxyV0_cut{};
     double m_minMass_gamma{};
     double m_chi2cut_gamma{};
@@ -128,43 +132,35 @@ namespace DerivationFramework {
     double m_extraTrk2MinPt{};
     double m_extraTrk3MassHypo{};
     double m_extraTrk3MinPt{};
-    double m_V0ExtraMassLower{};
-    double m_V0ExtraMassUpper{};
     double m_DpmMassLower{};
     double m_DpmMassUpper{};
     double m_D0MassLower{};
     double m_D0MassUpper{};
-    double m_DstpmMassLower{};
-    double m_DstpmMassUpper{};
     size_t m_maxMesonCandidates{};
     bool   m_MesonPtOrdering{};
     double m_massJX{};
     double m_massJpsi{};
     double m_massX{};
     double m_massDisV{};
-    double m_massV0{};
-    double m_massV0Extra{};
-    double m_mass_Dpm{};
-    double m_mass_D0{};
-    double m_mass_Dstpm{};
+    double m_massLd{};
+    double m_massKs{};
+    double m_massDpm{};
+    double m_massD0{};
     double m_massMainV{};
     bool   m_constrJX{};
     bool   m_constrJpsi{};
     bool   m_constrX{};
     bool   m_constrDisV{};
     bool   m_constrV0{};
-    bool   m_constrV0Extra{};
     bool   m_constrDpm{};
     bool   m_constrD0{};
-    bool   m_constrDstpm{};
     bool   m_constrMainV{};
     bool   m_JXSubVtx{};
     double m_chi2cut_JX{};
     double m_chi2cut_V0{};
     double m_chi2cut_DisV{};
-    double m_chi2cut_V0Extra{};
-    double m_chi2cut_JXDpm{};
-    double m_chi2cut_JXDstpm{};
+    double m_chi2cut_Dpm{};
+    double m_chi2cut_D0{};
     double m_chi2cut{};
     bool   m_useTRT{};
     double m_ptTRT{};
@@ -173,6 +169,8 @@ namespace DerivationFramework {
     unsigned int m_maxV0Candidates{};
     unsigned int m_maxDisVCandidates{};
     unsigned int m_maxMainVCandidates{};
+
+    ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
 
     ToolHandle < Trk::TrkVKalVrtFitter >             m_iVertexFitter;
     ToolHandle < Trk::TrkV0VertexFitter >            m_iV0Fitter;
@@ -185,7 +183,6 @@ namespace DerivationFramework {
     ToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
     ToolHandle < InDet::VertexPointEstimator >       m_vertexEstimator;
     ToolHandle < Trk::IExtrapolator >                m_extrapolator;
-    ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
 
     bool   m_refitPV{};
     int    m_PV_max{};
@@ -199,7 +196,10 @@ namespace DerivationFramework {
     double m_mass_Lambda{};
     double m_mass_Ks{};
     double m_mass_Xi{};
-    double m_mass_Bpm{};
+    double m_mass_phi{};
+    double m_mass_B0{};
+    double m_mass_Dpm{};
+    double m_mass_D0{};
 
     std::vector<double> m_massesV0_ppi;
     std::vector<double> m_massesV0_pip;
@@ -207,9 +207,9 @@ namespace DerivationFramework {
 
     bool d0Pass(const xAOD::TrackParticle* track, const xAOD::Vertex* PV) const;
     XiCandidate getXiCandidate(const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticle* track3) const;
-    MesonCandidate getEtacCandidate(const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2) const;
-    MesonCandidate getDpmCandidate(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2, const xAOD::TrackParticle* extraTrk3) const;
-    MesonCandidate getDstpmCandidate(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2, const xAOD::TrackParticle* extraTrk3) const;
+    std::unique_ptr<xAOD::Vertex> fitTracks(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::TrackParticle* track3 = nullptr) const;
+    MesonCandidate getDpmCandidate(const xAOD::Vertex* JXvtx, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2, const xAOD::TrackParticle* extraTrk3) const;
+    MesonCandidate getD0Candidate(const xAOD::Vertex* JXvtx, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2) const;
     std::vector<Trk::VxCascadeInfo*> fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
     std::vector<Trk::VxCascadeInfo*> fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const XiCandidate& disVtx, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
     void fitV0Container(xAOD::VertexContainer* V0ContainerNew, const std::vector<const xAOD::TrackParticle*>& selectedTracks, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
