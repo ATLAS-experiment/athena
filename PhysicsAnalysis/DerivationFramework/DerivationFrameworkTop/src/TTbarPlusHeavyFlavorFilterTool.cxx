@@ -80,16 +80,16 @@ int TTbarPlusHeavyFlavorFilterTool::filterFlag() const{
       int pdgid = std::abs(part->pdgId());
 
       //// don't loose time checking all if one found
-      if(pdgid == 5 ){
+      if ( MC::isBottom(pdgid) ) {
         isbquark=true;
       }
-      else if(pdgid == 4 ){
+      else if ( MC::isCharm(pdgid) ) {
         iscquark=true;
       }
-      else if ( MC::isBottomHadron(part) && !HepMC::is_simulation_particle(part)){
+      else if ( MC::isBottomHadron(part) && !HepMC::is_simulation_particle(part) ) {
         isbhadron=true;
       }
-      else if ( MC::isCharmHadron(part) && !HepMC::is_simulation_particle(part)){
+      else if ( MC::isCharmHadron(part) && !HepMC::is_simulation_particle(part) ) {
         ischadron=true;
       }
       else {
@@ -211,7 +211,7 @@ bool TTbarPlusHeavyFlavorFilterTool::isQuarkFromHadron(const xAOD::TruthParticle
     const xAOD::TruthParticle* parent = part->parent(i);
     if (HepMC::is_same_particle(part,parent) ) continue; /// protection for sherpa
     int mothertype = std::abs(MC::leadingQuark(parent));
-    if (4 == mothertype || 5 == mothertype ){
+    if ( MC::isCharm(mothertype) || MC::isBottom(mothertype) ){
       return true;
     }
     if (isQuarkFromHadron(parent)) return true;
@@ -269,7 +269,7 @@ bool TTbarPlusHeavyFlavorFilterTool::isDirectlyFromTop(const xAOD::TruthParticle
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
     if (HepMC::is_same_particle(part,parent) ) continue; /// protection for sherpa
-    if (std::abs( parent->pdgId() ) == 6 ) return true;
+    if ( MC::isTop(parent->pdgId()) ) return true;
   }
   return false;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -25,7 +25,7 @@
 #include "StoreGate/ThinningHandle.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include <vector>
 #include <string>
 
@@ -179,7 +179,7 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
       hardPart.push_back(*pItr);
       if( m_isolR > 0 ){
         int ida = abs( (*pItr)->pdgId() );
-        if( ida==11 || ida==13 || ida==15 || ida==22 ){
+        if( MC::isElectron(ida) || MC::isMuon(ida) || MC::isTau(ida) || MC::isPhoton(ida) ){
           pLepGam.push_back( (*pItr)->p4() );
         }
       }

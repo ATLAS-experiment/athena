@@ -217,7 +217,7 @@ namespace DerivationFramework {
 
         double mass_v0 = m_mass_ks; 
         double mass_b = m_mass_b0;
-        double mass_track = m_jpsi_trk_pdg == 11 ? m_mass_electron : m_mass_muon;
+        double mass_track = MC::isElectron(m_jpsi_trk_pdg) ? m_mass_electron : m_mass_muon;
         std::vector<double> massesJpsi(2, mass_track);
         std::vector<double> massesV0;
         std::vector<double> Masses(2, mass_track);
@@ -443,7 +443,7 @@ namespace DerivationFramework {
         CHECK(evtStore()->retrieve(v0Container   , m_vertexV0ContainerKey       ));
 
         double mass_v0 = m_mass_ks; 
-        double mass_tracks = m_jpsi_trk_pdg == 11 ? m_mass_electron : m_mass_muon;
+        double mass_tracks = MC::isElectron(m_jpsi_trk_pdg) ? m_mass_electron : m_mass_muon;
         std::vector<const xAOD::TrackParticle*> tracksJpsi;
         std::vector<const xAOD::TrackParticle*> tracksV0;
         std::vector<double> massesJpsi(2, mass_tracks);

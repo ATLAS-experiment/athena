@@ -258,10 +258,10 @@ namespace DerivationFramework{
         bool isHFhadron = false; // The particle is a HF hadron.
         // Extract the pdgid of the particle and use it to determine the type of particle.
         int pdgid = abs(part->pdgId());
-        if(pdgid == 5 ){
+        if( MC::isBottom(pdgid) ){
           isbquark=true;
         }
-        else if(pdgid == 4 ){
+        else if( MC::isCharm(pdgid) ){
           iscquark=true;
         }
         else if(MC::isBottomHadron(part) || MC::isCharmHadron(part)){
@@ -437,7 +437,7 @@ namespace DerivationFramework{
       if(!parent) continue;
       if(looping) continue;
       // If the i-th parent is a top, then return true
-      if( abs( parent->pdgId() ) == 6 ) return true;
+      if( MC::isTop(parent) ) return true;
     }
     // If a top is no the parent, then return false.
     return false;
@@ -477,7 +477,7 @@ namespace DerivationFramework{
       const xAOD::TruthParticle* parent = part->parent(i);
       if(!parent) continue;
       if( looping ) continue;
-      if( MC::isPhoton(parent) || abs(parent->pdgId())<5 ) return true;
+      if( MC::isPhoton(parent) || abs(parent->pdgId())<MC::BQUARK ) return true;
     }
     return false;
   }
@@ -494,15 +494,15 @@ namespace DerivationFramework{
       if(!parent) continue;
       if(looping ) continue;
       if(!MC::isW(parent)) continue;
-        if(abs(part->pdgId())==4){
-          //trick to get at least 50% of PowhegPythia c from FSR
-          if(part->pdgId()==-(parent->pdgId())/6){
-            if( isFromGluonQuark(parent, looping) ) return true;
-          }
-        }
-        else{
+      if(MC::isCharm(part)){
+        //trick to get at least 50% of PowhegPythia c from FSR
+        if(part->pdgId()==-(parent->pdgId())/6){
           if( isFromGluonQuark(parent, looping) ) return true;
         }
+      }
+      else{
+        if( isFromGluonQuark(parent, looping) ) return true;
+      }
     }
     return false;
   }
@@ -526,7 +526,7 @@ namespace DerivationFramework{
       const xAOD::TruthParticle* parent = part->parent(i);
       if(!parent) continue;
       if( looping ) continue;
-      if( abs(parent->pdgId())<6 ) {
+      if( abs(parent->pdgId())<MC::TQUARK ) {
 
         if(isFromTop(parent,looping)){
           return true;
@@ -579,7 +579,7 @@ namespace DerivationFramework{
       if(!parent) continue;
       if(looping ) continue;
       // Check if the parent is a quark different from the top.
-      if( abs(parent->pdgId())<6 ) {
+      if( abs(parent->pdgId())<MC::TQUARK ) {
         // In this case, the parent is a quark different from top.
         // Check if it comes from the decay chain of the t->Wb.
         // If it is the case, return true.
@@ -607,7 +607,7 @@ namespace DerivationFramework{
       const xAOD::TruthParticle* parent = part->parent(i);
       if(!parent) continue;
       if( looping ) continue;
-      if( abs(parent->pdgId())== 2212 && MC::isPhysical(part)) return true;
+      if( abs(parent->pdgId()) == MC::PROTON && MC::isPhysical(part) ) return true;
     }
     return false;
   }

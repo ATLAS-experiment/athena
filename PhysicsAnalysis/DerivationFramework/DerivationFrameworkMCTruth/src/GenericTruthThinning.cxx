@@ -15,7 +15,7 @@
 #include "StoreGate/ThinningHandle.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include <vector>
 #include <string>
@@ -129,7 +129,7 @@ StatusCode DerivationFramework::GenericTruthThinning::doThinning() const
         DerivationFramework::DecayGraphHelper tauDecayHelper;
         for (unsigned int i=0; i<nParticles; ++i) {
             const xAOD::TruthParticle* particle = (*importedTruthParticles)[i];
-            if ( abs(particle->pdgId())==15 ) { // This is a tau
+            if ( MC::isTau(particle) ) { // This is a tau
                 bool last(true);
                 std::vector<int> tauDecayProducts; // all decay products of the tau
                 std::unordered_set<int> tauDecayEncounteredUniqueIDs; // loop checking

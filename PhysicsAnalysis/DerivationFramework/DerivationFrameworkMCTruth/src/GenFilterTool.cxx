@@ -145,7 +145,7 @@ namespace DerivationFramework {
       if (MC::isZeroEnergyPhoton(tp)) continue; // Work around for an old generator bug
       if ( !MC::isStable(tp)) continue; // Stable!
 
-      if ((std::abs(pdgid)==11 || std::abs(pdgid)==13) && tp->pt()>m_MinLepPt && std::abs(tp->eta())<m_MaxLepEta) {
+      if ((MC::isElectron(pdgid) || MC::isMuon(pdgid)) && tp->pt()>m_MinLepPt && std::abs(tp->eta())<m_MaxLepEta) {
         if( isPrompt(tp) ) {
           ATH_MSG_VERBOSE("Adding prompt lepton " << tp);
           genFiltHT += tp->pt();
@@ -184,22 +184,24 @@ namespace DerivationFramework {
     bool AllowElecMu_PTZ = false;
     bool AllowSameCharge_PTZ = false;
     for (const xAOD::TruthParticle* pitr1 : *mcParticleOrigin){
-      int pdgId1 = pitr1->pdgId();
+      const int pdgId1 = pitr1->pdgId();
       if (HepMC::is_simulation_particle(pitr1)) continue;
       if (!MC::isStable(pitr1)) continue;
       // Pick electrons or muons with Pt > MinPt_PTZ and |eta| < m_maxEta
-      if (std::abs(pdgId1) == 11 || std::abs(pdgId1) == 13) {
+      if (MC::isElectron(pdgId1) || MC::isMuon(pdgId1)) {
         if (pitr1->pt() >= MinPt_PTZ && std::abs(pitr1->eta()) <= MaxEta_PTZ){
           for (const xAOD::TruthParticle* pitr2 : *mcParticleOrigin){
             if (pitr2==pitr1) continue;
             if (HepMC::is_simulation_particle(pitr2)) continue;
             if (!MC::isStable(pitr2)) continue;
-            int pdgId2 = pitr2->pdgId();
+            const int pdgId2 = pitr2->pdgId();
             // Pick electrons or muons with Pt > MinPt_PTZ and |eta| < MaxEta_PTZ
             // If AllowSameCharge_PTZ is not true only pick those with opposite charge to the first particle
             // If AllowElecMu_PTZ is true allow also Z -> emu compinations (with charge requirements as above)
-            if ((AllowSameCharge_PTZ  && (std::abs(pdgId2) == std::abs(pdgId1) || (AllowElecMu_PTZ && (std::abs(pdgId2) == 11 || std::abs(pdgId2) == 13) ) ) ) ||
-                (!AllowSameCharge_PTZ && (pdgId2 == -1*pdgId1 || (AllowElecMu_PTZ && (pdgId2 == (pdgId1 < 0 ? 1 : -1) * 11 || (pdgId1 < 0 ? 1 : -1) * pdgId2 == 13) ) ) ) ) {
+            if (!(MC::isElectron(pdgId2) || MC::isMuon(pdgId2))) continue;
+            if ( ( AllowSameCharge_PTZ  && ( AllowElecMu_PTZ || std::abs(pdgId2) == std::abs(pdgId1) ) ) ||
+                 ( !AllowSameCharge_PTZ && ( pdgId2 == -1*pdgId1 || (AllowElecMu_PTZ && MC::charge3(pdgId1) == MC::charge3(pdgId2) ) ) )
+                 ) {
               if (pitr2->pt() >= MinPt_PTZ && std::abs(pitr2->eta()) <= MaxEta_PTZ){
                 double invMass = (pitr1->p4()+pitr2->p4()).M();
                 double dilepPt = (pitr1->p4()+pitr2->p4()).Pt();
