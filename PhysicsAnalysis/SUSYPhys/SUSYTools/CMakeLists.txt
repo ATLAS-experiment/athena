@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( SUSYTools )
@@ -17,15 +17,15 @@ find_package( GTest )
 # Libraries in the package:
 atlas_add_library( SUSYToolsLib
    Root/*.cxx
-   PUBLIC_HEADERS SUSYTools src
-   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${BOOST_INCLUDE_DIRS}
+   PUBLIC_HEADERS SUSYTools
+   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES AsgTools PATCoreLib xAODCore xAODEgamma xAODEventInfo
    xAODJet xAODMissingET xAODMuon xAODTau xAODTracking xAODTruth
    AssociationUtilsLib BoostedJetTaggersLib GoodRunsListsLib PATInterfaces TrigDecisionToolLib
    MCTruthClassifierLib JetJvtEfficiencyLib JetSubStructureUtils
    ParticleJetToolsLib PMGAnalysisInterfacesLib AnaAlgorithmLib
    MuonAnalysisInterfacesLib EgammaAnalysisInterfacesLib
-   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${BOOST_LIBRARIES}
+   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES}
    AthContainers EventPrimitives FourMomUtils xAODBTagging xAODBase
    xAODPrimitives xAODRootAccess
    EgammaAnalysisHelpersLib FTagAnalysisInterfacesLib IsolationSelectionLib 
@@ -42,7 +42,7 @@ atlas_add_library( SUSYToolsLib
 if( NOT XAOD_STANDALONE )
    atlas_add_component( SUSYTools
       src/*.cxx src/components/*.cxx
-      NOCLID
+      NOCLIDDB
       PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthAnalysisBaseCompsLib SUSYToolsLib TauAnalysisToolsLib )
    atlas_add_dictionary( SUSYToolsDict
@@ -52,7 +52,7 @@ if( NOT XAOD_STANDALONE )
 else()
    atlas_add_library( SUSYTools src/SUSYToolsAlg.cxx src/SUSYToolsAlg.h
            NO_PUBLIC_HEADERS
-           PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${BOOST_INCLUDE_DIRS}
+           PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
            PRIVATE_LINK_LIBRARIES SUSYToolsLib TauAnalysisToolsLib
            )
    atlas_add_dictionary( SUSYToolsDict
