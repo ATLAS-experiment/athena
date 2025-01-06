@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASGMESSAGING_CHECK_H
@@ -8,6 +8,7 @@
 // Local include(s):
 #include "AsgMessaging/MsgStreamMacros.h"
 
+#include "boost/preprocessor/facilities/overload.hpp"
 #include "CxxUtils/AthUnlikelyMacros.h"
 
 /// Helper macro for checking the status code returned by a function call

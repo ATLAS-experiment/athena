@@ -21,6 +21,7 @@
 #include "AthContainersInterfaces/IAuxStoreHolder.h"
 #include "CxxUtils/checker_macros.h"
 #include "AthContainers/tools/threading.h"
+#include "AthContainers/tools/upgrade_mutex.h"
 #include "CxxUtils/sgkey_t.h"
 
 // Interface include(s):

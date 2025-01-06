@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/test/threading_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -13,6 +11,8 @@
 
 #undef NDEBUG
 #include "AthContainers/tools/threading.h"
+#include "AthContainers/tools/upgrade_mutex.h"
+#include "AthContainers/tools/thread_specific_ptr.h"
 #include <iostream>
 #include <cassert>
 

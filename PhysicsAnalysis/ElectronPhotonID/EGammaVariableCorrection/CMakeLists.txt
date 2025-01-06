@@ -1,18 +1,19 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( EGammaVariableCorrection )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core MathCore Hist Graf RIO )
+find_package( Boost COMPONENTS thread )
 
 # Component(s) in the package:
 atlas_add_library( EGammaVariableCorrectionLib
    EGammaVariableCorrection/*.h
    Root/*.cxx
    PUBLIC_HEADERS EGammaVariableCorrection
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools EgammaAnalysisInterfacesLib EgammaAnalysisHelpersLib
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} AsgTools EgammaAnalysisInterfacesLib EgammaAnalysisHelpersLib
    PRIVATE_LINK_LIBRARIES PathResolver xAODEgamma xAODEventShape)
 
 if( NOT XAOD_STANDALONE )

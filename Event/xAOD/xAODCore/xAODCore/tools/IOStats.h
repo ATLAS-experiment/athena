@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODCORE_TOOLS_IOSTATS_H
@@ -14,6 +14,7 @@
 
 // EDM include(s):
 #include "AthContainers/tools/threading.h"
+#include "AthContainers/tools/thread_specific_ptr.h"
 
 // Local include(s):
 #include "xAODCore/tools/ReadStats.h"

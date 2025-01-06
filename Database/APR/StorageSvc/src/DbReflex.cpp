@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: DbReflex.cpp 717955 2016-01-15 13:34:52Z mnowak $
@@ -18,6 +18,7 @@
 #include <cstring>
 
 #include "AthContainers/tools/threading.h"
+#include "AthContainers/tools/upgrade_mutex.h"
 typedef AthContainers_detail::upgrade_mutex mutex_t;
 typedef AthContainers_detail::upgrading_lock<mutex_t> upgrading_lock_t;
 mutex_t guidMapMutex;
