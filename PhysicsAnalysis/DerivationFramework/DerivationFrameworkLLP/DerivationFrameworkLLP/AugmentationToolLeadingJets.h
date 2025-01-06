@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,13 +13,24 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "xAODJet/JetContainer.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
 
 namespace DerivationFramework {
 
   class AugmentationToolLeadingJets : public AthAlgTool, public IAugmentationTool {
     public: 
       AugmentationToolLeadingJets(const std::string& t, const std::string& n, const IInterface* p);
-      virtual StatusCode addBranches() const;
+      virtual StatusCode initialize() override;
+      virtual StatusCode addBranches() const override;
+
+
+  private:
+    SG::ReadHandleKey<xAOD::JetContainer> m_jetKey
+      { this, "JetKey", "AntiKt4EMTopoJets", "" };
+    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decorationKey
+      { this, "DecorationKey", m_jetKey, "DFDecoratorLeadingJets", "" };
   }; 
 }
 
