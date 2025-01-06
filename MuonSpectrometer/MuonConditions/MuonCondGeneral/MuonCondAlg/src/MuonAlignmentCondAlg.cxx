@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondAlg/MuonAlignmentCondAlg.h"
@@ -198,13 +198,20 @@ StatusCode MuonAlignmentCondAlg::parseDataFromJSON(const nlohmann::json& lines,
             id = m_idHelperSvc->cscIdHelper().elementID(stationType, stationEta, stationPhi);
         } else if (stationType.substr(0, 3) == "BML" && std::abs(stationEta) == 7) {
             if (!m_idHelperSvc->hasRPC()) {
-                ATH_MSG_VERBOSE("No Rpcs defined skiping "<<stationType<<","<<","<<stationEta<<","<<stationPhi);
+                ATH_MSG_VERBOSE("No Rpcs defined skipping "<<stationType<<","<<","<<stationEta<<","<<stationPhi);
                 continue;
             }
             // rpc case
             id = m_idHelperSvc->rpcIdHelper().elementID(stationType, stationEta, stationPhi, 1);
         } else if (m_idHelperSvc->hasMDT()) {
-            id = m_idHelperSvc->mdtIdHelper().elementID(stationType, stationEta, stationPhi);
+            bool isValid = false;
+            id = m_idHelperSvc->mdtIdHelper().elementID(stationType, stationEta, stationPhi, isValid);
+            if (!isValid) {
+              ATH_MSG_WARNING("Invalid MDT station " << stationType
+                              << " eta " << stationEta
+                              << " phi " << stationPhi);
+              continue;
+            }
         } else {
             continue;
         }
