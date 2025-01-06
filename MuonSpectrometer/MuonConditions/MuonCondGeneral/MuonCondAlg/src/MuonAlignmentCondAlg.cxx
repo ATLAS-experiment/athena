@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondAlg/MuonAlignmentCondAlg.h"
@@ -189,7 +189,14 @@ StatusCode MuonAlignmentCondAlg::parseDataFromJSON(const nlohmann::json& lines,
             // rpc case
             id = m_idHelperSvc->rpcIdHelper().elementID(stationType, stationEta, stationPhi, 1);
         } else {
-            id = m_idHelperSvc->mdtIdHelper().elementID(stationType, stationEta, stationPhi);
+            bool isValid = false;
+            id = m_idHelperSvc->mdtIdHelper().elementID(stationType, stationEta, stationPhi, isValid);
+            if (!isValid) {
+              ATH_MSG_WARNING("Invalid MDT station " << stationType
+                              << " eta " << stationEta
+                              << " phi " << stationPhi);
+              continue;
+            }
         }
         ALinePar newALine{};
         newALine.setIdentifier(id);
