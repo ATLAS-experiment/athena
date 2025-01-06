@@ -61,8 +61,9 @@ namespace FlavorTagDiscriminants {
       m_constituentAux.emplace_back(this, key, full, "");
       ATH_CHECK(m_constituentAux.back().initialize());
     }
-    m_decor.reserve(m_decorator->getDecoratorKeys().size());
-    for (const std::string& key: m_decorator->getDecoratorKeys()) {
+    std::set<std::string> keys = m_decorator->getDecoratorKeys();
+    m_decor.reserve(keys.size());
+    for (const std::string& key: keys) {
       const std::string full = m_containerKey.key() + "." + key;
       m_decor.emplace_back(this, key, full, "");
       ATH_CHECK(m_decor.back().initialize());
