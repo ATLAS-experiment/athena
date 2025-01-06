@@ -282,7 +282,7 @@ class TextConfig(ConfigFactory):
                             extraOptions = {}
                         extraOptions[i['name']] = i['value']
             else:
-                algOpts = seq.setOptions(extraOptions)
+                algOpts = seq.setOptions(extraOptions.copy())
 
             # check to see if there are unused parameters
             algOpts = [i['name'] for i in algOpts]
