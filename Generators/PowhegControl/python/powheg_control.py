@@ -46,6 +46,9 @@ class PowhegControl(object):
         """
         ## Current directory
         self.__run_directory = os.environ["PWD"]
+        
+        ## Add run directory to PYTHONPATH
+        os.environ["PYTHONPATH"] += ":" + self.__run_directory
 
         ## Name of output LHE file used by Generate_tf for showering
         self.__output_LHE_file = "PowhegOTF._1.events"
