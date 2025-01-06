@@ -23,7 +23,7 @@ class GeneratorSelector
   {
   std::vector< TLorentzVector > generic_stable_parton;
     
-    for(const auto&  vcont: *cont){
+    for(const auto  vcont: *cont){
       if (!(MC::isGenStable(vcont))) continue; 
       TLorentzVector tlv (vcont->px(), vcont->py(), vcont->pz(), vcont->e()); 
       generic_stable_parton.push_back(tlv);
@@ -36,7 +36,7 @@ class GeneratorSelector
   {
   std::vector< TLorentzVector > generic_stable_parton;
   
-    for(const auto&  vcont: *cont){
+    for(const auto  vcont: *cont){
       if (!(MC::isSimStable(vcont))) continue;
       TLorentzVector tlv (vcont->px(), vcont->py(), vcont->pz(), vcont->e());
       generic_stable_parton.push_back(tlv);

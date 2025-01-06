@@ -94,7 +94,7 @@ StatusCode GeneratorPhysValMonitoringTool::book(PlotBase& plots)
     const std::vector< TLorentzVector >  SelectedSimulationLevel = m_GeneratorSelector->GetSimulationLevel(TruthParticles);
 
 
-    for (const auto &particle : *TruthParticles)
+    for (const auto particle : *TruthParticles)
     {
 
       if (particle->charge()){
