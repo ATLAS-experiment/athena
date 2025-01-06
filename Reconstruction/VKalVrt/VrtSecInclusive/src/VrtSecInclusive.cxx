@@ -401,22 +401,10 @@ namespace VKalVrtAthena {
     }    
 
     // Perform track selection and store it to selectedBaseTracks
-    try {
-
-      for( auto alg : m_trackSelectionAlgs ) {
-        ATH_CHECK( (this->*alg)() );
-      }
-      
-    } catch( ... ) {
-      
-      ATH_MSG_WARNING( " > " << __FUNCTION__ << ": some other error is detected in the track selection scope."  );
-      
-      vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
-      return StatusCode::SUCCESS;
-      
+    for( auto alg : m_trackSelectionAlgs ) {
+      ATH_CHECK( (this->*alg)() );
     }
-    
-    
+
     if( m_jp.FillNtuple )
       m_ntupleVars->get<unsigned int>( "NumSelTrks" ) = static_cast<int>( m_selectedTracks->size() );
     
@@ -443,7 +431,7 @@ namespace VKalVrtAthena {
     // Core part of Vertexing
     //
     
-    try {
+    {
 
       m_vertexingAlgorithmStep = 0;
     
@@ -482,14 +470,6 @@ namespace VKalVrtAthena {
       }
     
       delete workVerticesContainer;
-    
-    } catch(std::exception& e) {
-      
-      ATH_MSG_WARNING( " > " << __FUNCTION__ << ": exception detected in the vertexing scope: " << e.what() );
-      m_vertexingStatus = 4;
-            
-      vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
-      return StatusCode::SUCCESS;
       
     }
     
