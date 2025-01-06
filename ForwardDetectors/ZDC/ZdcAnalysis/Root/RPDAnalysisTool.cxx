@@ -187,7 +187,7 @@ void RPDAnalysisTool::reset() {
 
 void RPDAnalysisTool::readAOD(xAOD::ZdcModuleContainer const& moduleContainer) {
   // loop through ZDC modules to find those which are RPD channels
-  for (auto const& module : moduleContainer) {
+  for (auto const module : moduleContainer) {
     if (module->zdcType() != RPDUtils::ZDCModuleRPDType) {
       // this is not an RPD channel, so skip it
       continue;
@@ -232,7 +232,7 @@ void RPDAnalysisTool::writeAOD(xAOD::ZdcModuleContainer const& moduleContainer, 
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, unsigned int> chMaxSample(m_chMaxSampleKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, unsigned int> chStatus(m_chStatusKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> chPileupFrac(m_chPileupFracKey);
-  for (auto const& module : moduleContainer) {
+  for (auto const module : moduleContainer) {
     if (module->zdcType() != RPDUtils::ZDCModuleRPDType) {
       // this is not an RPD channel, so skip it
       continue;
@@ -257,7 +257,7 @@ void RPDAnalysisTool::writeAOD(xAOD::ZdcModuleContainer const& moduleContainer, 
 
   // write per-side decorations (in ZdcSums)
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, unsigned int> sideStatus(m_sideStatusKey);
-  for (auto const& sum: moduleSumContainer) {
+  for (auto const sum: moduleSumContainer) {
     if (sum->zdcSide() == RPDUtils::ZDCSumsGlobalZDCSide) {
       // skip global sum (it's like the side between sides)
       continue;
