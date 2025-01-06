@@ -1,6 +1,10 @@
 #!/bin/sh
 
-# art-include: main/Athena
+# Disable this test: Derivations are not expected to work with MT.
+# At a minimum, the truth dressing tool and overlap removal need to
+# be redesigned to avoid modifying the same decoration from different
+# algorithms.
+# art-include: main/Athena_disabled
 # art-description: DAOD building PHYS mc20 MT
 # art-type: grid
 # art-output: *.pool.root
