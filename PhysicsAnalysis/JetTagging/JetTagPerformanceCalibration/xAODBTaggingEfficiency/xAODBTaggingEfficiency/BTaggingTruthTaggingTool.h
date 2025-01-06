@@ -178,12 +178,12 @@ class BTaggingTruthTaggingTool: public asg::AsgTool,
   //These WP must be listed in ascending order of cut value, meaning 85 to 60
   std::vector<std::string> m_availableOP_fixCut= {"FixedCutBEff_85", "FixedCutBEff_77","FixedCutBEff_70","FixedCutBEff_60"};
 
-  TFile *m_inf; //file for reading the cut values from the CDI.
+  TFile *m_inf{}; //file for reading the cut values from the CDI.
 
   //vector storing the cuts, one for each tag bin 
   std::vector<TagBin> m_cuts;
 
-  bool m_initialised;
+  bool m_initialised{};
 
   StatusCode getTRFweight(TRFinfo &trfinf,unsigned int nbtag, bool isInclusive);
 
@@ -244,42 +244,41 @@ class BTaggingTruthTaggingTool: public asg::AsgTool,
   /// systematics model to be used (current choices are "SFEigen" and "Envelope")
   std::string m_systStrategy;
   /// if true, attempt to retrieve the data/MC efficiency scale factor calibration files from the @PathResolver development area
-  bool m_useDevFile;
+  bool m_useDevFile{};
   /// if true, use cone-based labelling (as opposed to ghost association)
-  bool m_coneFlavourLabel;
+  bool m_coneFlavourLabel{true};
   /// in case of continuous WP you can choose to ignore some of the eigenvectors
   std::string m_excludeEV;
   ///possibility to compute the direct tagging SFs map directly from the TruthTaggingTool
-  bool m_doDirectTag;
+  bool m_doDirectTag{};
   /// if this string is empty, the onnx tool won't be used
   std::string m_pathToONNX;
   /// tagging strategy is required to do TT with GNN, when we don't want to truth tag all the jets (eg. 'leading2SignalJets')          
   std::string m_taggingStrategy;            
   /// will be set according to m_taggingStrategy
   enum NjetsTagStrategy {AllJets=-1, Leading2SignalJets=2, Leading3SignalJets=3};
-  NjetsTagStrategy m_njetsTagStrategy;
+  NjetsTagStrategy m_njetsTagStrategy{AllJets};
 
   //*********************************//
   // Prop. of BTaggingSelectionTool  //
   //*********************************//
 
-  float m_maxEta;
-  float m_minPt;
-  float m_maxRangePt;
-  //  std::string m_CutFileName;
+  float m_maxEta{2.5f};
+  float m_minPt{20000.f};
+  float m_maxRangePt{1000000.f};
 
   // properties of truth tagging
-  bool m_doOnlyUpVariations;
-  bool m_ignoreSF;
-  bool m_usePerm;
-  bool m_useQuntile;
-  bool m_continuous;
-  bool m_continuous2D;
-  bool m_useSys;
-  int m_nbtag;
-  int m_nbins;
+  bool m_doOnlyUpVariations{};
+  bool m_ignoreSF{true};
+  bool m_usePerm{true};
+  bool m_useQuantile{true};
+  bool m_continuous{};
+  bool m_continuous2D{};
+  bool m_useSys{};
+  int m_nbtag{2};
+  int m_nbins{};
   std::vector<int> m_OperatingBins;
-  unsigned int m_OP_index_for_GNN;
+  unsigned int m_OP_index_for_GNN{};
 
   std::map<int, asg::AnaToolHandle<IBTaggingEfficiencyTool> > m_effTool_allBins;
 

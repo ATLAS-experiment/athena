@@ -47,7 +47,7 @@ BTaggingTruthTaggingTool::BTaggingTruthTaggingTool( const std::string & name)
   // properties of BTaggingTruthTaggingTool
   declareProperty( "IgnoreScaleFactors", m_ignoreSF=true, "ignore scale factors in computation of TRF weight");
   declareProperty( "UsePermutations", m_usePerm=true, "if the chosen permutation is used, a reweighting is applied to the TRF weight for systematics");
-  declareProperty( "UseQuantile", m_useQuntile=true, "if the chosen quantile is used, a reweighting is applied to the TRF weight for systematics");
+  declareProperty( "UseQuantile", m_useQuantile=true, "if the chosen quantile is used, a reweighting is applied to the TRF weight for systematics");
   declareProperty( "UseSystematics", m_useSys=false, "will the results contain all systematic variations, or just the nominal");
   declareProperty( "MaxNtagged", m_nbtag=2, "what is the maximal possible number of tagged jets");
 
@@ -182,7 +182,7 @@ StatusCode BTaggingTruthTaggingTool::initialize() {
     m_OperatingBins.push_back(1); //first bin: untagged, second bin: tagged.
 }
   
-  if(m_useQuntile && !m_continuous){
+  if(m_useQuantile && !m_continuous){
     ATH_MSG_ERROR("UseQuantile is available only in Continuous WP. Please consider switching the Operating Point.");
     return StatusCode::FAILURE;
   }
