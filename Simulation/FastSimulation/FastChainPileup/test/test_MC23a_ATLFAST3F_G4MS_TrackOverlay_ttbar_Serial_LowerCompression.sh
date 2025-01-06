@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: CA-based config ATLFAST3F_G4MS with Hybrid-overlay for MC23a ttbar running serial
+# art-description: CA-based config ATLFAST3F_G4MS with Track-overlay for MC23a ttbar running serial
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
@@ -36,7 +36,7 @@ FastChain_tf.py \
    --postInclude 'PyJobTransforms.UseFrontier' 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-07' \
    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-   --preExec 'EVNTtoRDO:ConfigFlags.Overlay.doTrackOverlay=True;' \
+   --preExec 'EVNTtoRDO:ConfigFlags.Overlay.doTrackOverlay=True;flags.Output.TemporaryStreams="RDO"' \
    --postExec 'with open("Config.pkl", "wb") as f: cfg.store(f)' \
    --imf False
 fastchain=$?
@@ -65,7 +65,7 @@ then
       --autoConfiguration=everything \
       --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-07' \
       --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-      --preExec="all:flags.Reco.EnableTrackOverlay=True; flags.Overlay.doTrackOverlay=True;" \
+      --preExec 'RAWtoALL:flags.Reco.EnableTrackOverlay=True; flags.TrackOverlay.MLThreshold=0.95;' 'RDOtoRDOTrigger:flags.Overlay.doTrackOverlay=True;'\
       --postExec 'RAWtoALL:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("RAWtoALL_config.txt")' \
       --athenaopts "all:--threads=1" \
       --imf False

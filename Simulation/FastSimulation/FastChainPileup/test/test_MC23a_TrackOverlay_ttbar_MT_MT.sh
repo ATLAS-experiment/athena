@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: CA-based config ATLFAST3F_G4MS with Track-overlay for MC23a ttbar
+# art-description: CA-based config  Track-overlay for MC23a ttbar
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
@@ -14,7 +14,7 @@
 
 events=25
 
-export ATHENA_CORE_NUMBER=2
+export ATHENA_CORE_NUMBER=8
 
 HITS_File='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8514_s4162/100events.HITS.pool.root'
 RDO_BKG_File='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastChainPileup/TrackOverlay/RDO_TrackOverlay_Run3_MC23a.pool.root'
