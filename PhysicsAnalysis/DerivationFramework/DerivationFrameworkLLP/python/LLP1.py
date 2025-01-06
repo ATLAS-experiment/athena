@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_LLP1.py
 # This defines DAOD_LLP1, an unskimmed DAOD format for Run 3.
@@ -416,7 +416,11 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
         EventCleanPrefix  = jet_clean_prefix,
         CleaningLevel     = jet_clean_level,
         doEvent           = True)
-    acc.addEventAlgo(LLP1EventCleanAlg)
+
+    # Sequence for decorator locking.
+    # See comments in JetCommonConfig.AddEventCleanFlagsCfg.
+    acc.addSequence(CompFactory.AthSequencer('EventCleanSeq', Sequential=True))
+    acc.addEventAlgo(LLP1EventCleanAlg, 'EventCleanSeq')
 
     from DerivationFrameworkLLP.LLPToolsConfig import AugmentationToolLeadingJetsCfg
     augmentationToolLeadingJets = acc.getPrimaryAndMerge(AugmentationToolLeadingJetsCfg(flags))
