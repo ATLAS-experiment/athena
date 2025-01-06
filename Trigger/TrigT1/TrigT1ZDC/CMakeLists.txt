@@ -5,7 +5,7 @@ atlas_subdir( TrigT1ZDC )
 
 # Component(s) in the package:
 atlas_add_component( TrigT1ZDC
-                      src/*
+                      src/*.cxx
                       src/components/*.cxx
                       LINK_LIBRARIES AthenaBaseComps GaudiKernel AthContainers xAODForward TrigT1Interfaces PathResolver ZdcByteStreamLib ZdcConditions ZdcIdentifier ZdcUtilsLib)
 
