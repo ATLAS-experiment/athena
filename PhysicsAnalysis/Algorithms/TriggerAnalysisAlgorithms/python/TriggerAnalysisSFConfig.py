@@ -1,11 +1,11 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from typing import Iterable, Union
 
-# AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType, ConfigAccumulator
 from AthenaConfiguration.Enums import LHCPeriod
 from Campaigns.Utils import Campaign
+from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock
 
 
 def is_mc_from(config: ConfigAccumulator, campaign_list: Union[Campaign, Iterable[Campaign]]) -> bool:
@@ -92,40 +92,6 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         self.addOption ('postfix', '', type=str,
             info="a unique identifier for the trigger matching decorations. Only "
             "useful when defining multiple setups. The default is '' (empty string).")
-
-    
-
-    def makeTriggerDecisionTool(self, config: ConfigAccumulator):
-        # Might have already been added in TriggerAnalysisBlock
-        if "TrigDecisionTool" in config._algorithms:
-            return config._algorithms["TrigDecisionTool"]
-
-        # Create public trigger tools
-        xAODConfTool = config.createPublicTool( 'TrigConf::xAODConfigTool', 'xAODConfigTool' + self.postfix )
-        decisionTool = config.createPublicTool( 'Trig::TrigDecisionTool', 'TrigDecisionTool' + self.postfix )
-        decisionTool.ConfigTool = '%s/%s' % \
-            ( xAODConfTool.getType(), xAODConfTool.getName() )
-        if config.geometry() is LHCPeriod.Run3:
-            decisionTool.NavigationFormat = 'TrigComposite' # Read Run 3 navigation (options are "TrigComposite" for R3 or "TriggElement" for R2, R2 navigation is not kept in most DAODs)
-            decisionTool.HLTSummary = 'HLTNav_Summary_DAODSlimmed' # Name of R3 navigation container (if reading from AOD, then "HLTNav_Summary_AODSlimmed" instead)
-
-        return decisionTool
-
-    def makeTriggerMatchingTool(self, config: ConfigAccumulator, decisionTool):
-        # Create public trigger tools
-        drScoringTool = config.createPublicTool( 'Trig::DRScoringTool', 'DRScoringTool' + self.postfix )
-        if config.geometry() is LHCPeriod.Run3:
-            matchingTool = config.createPublicTool( 'Trig::R3MatchingTool', 'MatchingTool' + self.postfix )
-            matchingTool.ScoringTool = '%s/%s' % \
-                    ( drScoringTool.getType(), drScoringTool.getName() )
-            matchingTool.TrigDecisionTool = '%s/%s' % \
-                    ( decisionTool.getType(), decisionTool.getName() )
-        else:
-            matchingTool = config.createPublicTool( 'Trig::MatchFromCompositeTool', 'MatchingTool' + self.postfix )
-            if config.isPhyslite():
-                matchingTool.InputPrefix = "AnalysisTrigMatch_"
-
-        return matchingTool
 
     def makeTriggerGlobalEffCorrAlg(
         self,
@@ -258,10 +224,10 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             self.multiTriggerChainsPerYear = {'': self.triggerChainsPerYear}
 
         # Create the decision algorithm, keeping track of the decision tool for later
-        decisionTool = self.makeTriggerDecisionTool(config)
+        decisionTool = TriggerAnalysisBlock.makeTriggerDecisionTool(config)
 
         # Now pass it to the matching algorithm, keeping track of the matching tool for later
-        matchingTool = self.makeTriggerMatchingTool(config, decisionTool)
+        matchingTool = TriggerAnalysisBlock.makeTriggerMatchingTool(config, decisionTool)
 
         # Calculate multi-lepton (electron/muon/photon) trigger efficiencies and SFs
         if self.multiTriggerChainsPerYear and not self.noGlobalTriggerEff:
