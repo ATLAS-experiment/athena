@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -72,6 +72,10 @@ class TauCalibrationConfig (ConfigBlock):
                     branchOutput = branchName
                 config.addOutputVar (self.containerName, branchName, branchOutput, noSys=True)
 
+        # Decorate extra variables
+        alg = config.createAlgorithm( 'CP::TauExtraVariablesAlg', 'TauExtraVariables' + self.containerName + self.postfix )
+        alg.taus = config.readName (self.containerName)
+
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' + postfix )
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::TauSmearingTool' )
@@ -90,6 +94,7 @@ class TauCalibrationConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
         config.addOutputVar (self.containerName, 'NNDecayMode', 'NNDecayMode', noSys=True)
+        config.addOutputVar (self.containerName, 'nTracks', 'nTracks', noSys=True)
 
 
 class TauWorkingPointConfig (ConfigBlock) :

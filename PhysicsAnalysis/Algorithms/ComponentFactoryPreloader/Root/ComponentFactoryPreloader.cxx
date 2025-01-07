@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -132,6 +132,7 @@
 #include <TauAnalysisAlgorithms/DiTauTruthMatchingAlg.h>
 #include <TauAnalysisAlgorithms/TauCombineMuonRMTausAlg.h>
 #include <TauAnalysisAlgorithms/TauEfficiencyCorrectionsAlg.h>
+#include <TauAnalysisAlgorithms/TauExtraVariablesAlg.h>
 #include <TauAnalysisAlgorithms/TauSmearingAlg.h>
 #include <TauAnalysisAlgorithms/TauTruthDecorationsAlg.h>
 #include <TauAnalysisAlgorithms/TauTruthMatchingAlg.h>
@@ -259,6 +260,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::SysListDumperAlg>("CP::SysListDumperAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TauCombineMuonRMTausAlg>("CP::TauCombineMuonRMTausAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TauEfficiencyCorrectionsAlg>("CP::TauEfficiencyCorrectionsAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::TauExtraVariablesAlg>("CP::TauExtraVariablesAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TauSmearingAlg>("CP::TauSmearingAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TauTruthDecorationsAlg>("CP::TauTruthDecorationsAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TauTruthMatchingAlg>("CP::TauTruthMatchingAlg"));
