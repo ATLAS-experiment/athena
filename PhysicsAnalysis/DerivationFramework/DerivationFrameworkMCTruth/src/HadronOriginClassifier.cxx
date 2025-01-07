@@ -28,18 +28,9 @@ namespace {
 namespace DerivationFramework{
 
   HadronOriginClassifier::HadronOriginClassifier(const std::string& t, const std::string& n, const IInterface* p):
-    AthAlgTool(t,n,p),
-    m_mcName("TruthEvents"),
-    m_HadronPtMinCut(0),
-    m_HadronEtaMaxCut(0),
-    m_DSID(0)
+    AthAlgTool(t,n,p)
     {
       declareInterface<DerivationFramework::HadronOriginClassifier>(this);
-
-      declareProperty("MCCollectionName",m_mcName="TruthEvents");
-      declareProperty("HadronpTMinCut",m_HadronPtMinCut=5000.); /// MeV
-      declareProperty("HadronetaMaxCut",m_HadronEtaMaxCut=2.5);
-      declareProperty("DSID",m_DSID=410000);
     }
 
   HadronOriginClassifier::~HadronOriginClassifier(){}

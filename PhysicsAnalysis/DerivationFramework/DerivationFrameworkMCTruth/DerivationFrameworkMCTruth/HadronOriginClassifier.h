@@ -94,12 +94,12 @@ namespace DerivationFramework{
     inline bool IsSherpa() const {return m_GenUsed==GEN_id::Sherpa;};
     inline bool IsTtBb() const {return m_ttbb;}
 
-    std::string m_mcName;
-    double m_HadronPtMinCut{};
-    double m_HadronEtaMaxCut{};
-    int m_DSID{};
+    Gaudi::Property<std::string> m_mcName{this, "MCCollectionName", "TruthEvents"};
+    Gaudi::Property<double> m_HadronPtMinCut{this, "HadronpTMinCut", 5000.}; /// MeV
+    Gaudi::Property<double> m_HadronEtaMaxCut{this, "HadronetaMaxCut", 2.5};
+    Gaudi::Property<int> m_DSID{this, "DSID", 410000};
     GEN_id m_GenUsed{};
-    bool m_ttbb = false;
+    bool m_ttbb{false};
     
   };
 
