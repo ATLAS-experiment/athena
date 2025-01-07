@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCALIBSTREAM_RPCCALIBRAWDATAPROVIDER_H
 #define MUONCALIBSTREAM_RPCCALIBRAWDATAPROVIDER_H
@@ -33,7 +33,6 @@
 class StatusCode;
 
 
-using namespace LVL2_MUON_CALIBRATION;
 
 class RpcCalibRawDataProvider : public AthReentrantAlgorithm {
     
@@ -53,7 +52,7 @@ class RpcCalibRawDataProvider : public AthReentrantAlgorithm {
     private:
 
  
-        StatusCode decodeImpl(const EventContext& ctx, RpcPadContainer *m_padContainer, const CalibEvent *event) const ;
+        StatusCode decodeImpl(const EventContext& ctx, RpcPadContainer *m_padContainer, const LVL2_MUON_CALIBRATION::CalibEvent *event) const ;
 
         ServiceHandle<IMuonCalibStreamDataProviderSvc> m_dataProvider{this,"DataProviderSvc","MuonCalibStreamDataProviderSvc"};
 
