@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimGenScanBinning_H
 #define FPGATrackSimGenScanBinning_H
@@ -63,6 +63,9 @@
 #include <initializer_list>
 #include <string>
 #include <vector>
+#include <array>
+#include <stdexcept> //std::invalid_argument
+#include <algorithm> //std::copy
 
 //-------------------------------------------------------------------------------------------------------
 // Binning base class
@@ -357,14 +360,14 @@ public:
   FPGATrackSimGenScanKeyLyrHelper() {} // NOTE r1 and r2 must be set before using class
 
   struct KeyLyrPars {
-    KeyLyrPars() {}
+    KeyLyrPars() = default;
     KeyLyrPars(const FPGATrackSimGenScanBinningBase::ParSet &parset)
         : z1(parset[0]), z2(parset[1]), phi1(parset[2]), phi2(parset[3]), xm(parset[4]) {}
-    double z1;
-    double z2;
-    double phi1;
-    double phi2;
-    double xm;
+    double z1{};
+    double z2{};
+    double phi1{};
+    double phi2{};
+    double xm{};
   };
 
   // convert (r,phi) to (x,y)
@@ -380,10 +383,10 @@ public:
   // Simple struct and function to get the rotation angle and full rotated information in one call
   struct rotatedConfig
   {
-    std::pair<double, double> xy1p;   // point 1 after rotation
-    std::pair<double, double> xy2p;   // point 2 after rotation
-    std::pair<double, double> rotang; // rotation angle
-    double y;                         // y seperation after rotation
+    std::pair<double, double> xy1p{};   // point 1 after rotation
+    std::pair<double, double> xy2p{};   // point 2 after rotation
+    std::pair<double, double> rotang{}; // rotation angle
+    double y{};                         // y seperation after rotation
   };
   rotatedConfig getRotatedConfig(const KeyLyrPars &keypars) const;
 
@@ -413,8 +416,8 @@ public:
   void setR2(const double r2) {m_R2=r2;}
 
   private:
-    double m_R1;
-    double m_R2;
+    double m_R1{};
+    double m_R2{};
 };
 
 //-------------------------------------------------------------------------------------------------------
