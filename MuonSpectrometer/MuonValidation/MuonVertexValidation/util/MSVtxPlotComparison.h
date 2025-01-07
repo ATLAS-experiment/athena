@@ -50,7 +50,7 @@ class MSVtxPlotComparison {
             const TString ylabel{};
 
             PlotInfo(std::unique_ptr<T> plot, TLegend* legend, double maxy, TString xlabel, const TString ylabel) 
-                    : plot(std::move(plot)), legend(legend), maxy(maxy), xlabel(xlabel), ylabel(ylabel) {};
+                    : plot(std::move(plot)), legend(legend), maxy(maxy), xlabel(std::move(xlabel)), ylabel(std::move(ylabel)) {};
         };
 
         void setup();

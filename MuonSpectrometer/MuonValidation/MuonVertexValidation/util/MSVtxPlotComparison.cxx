@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MSVtxPlotComparison.h"
@@ -111,15 +111,15 @@ std::unique_ptr<MSVtxPlotComparison::PlotInfo<THStack>> MSVtxPlotComparison::get
     for (unsigned int i=0; i<m_datapaths.size(); ++i){
         // retrieve histogram and set drawing style
         std::unique_ptr<TFile> file(TFile::Open(TString(m_datapaths[i]+"Histograms.root"), "read"));
-        TH1* h = static_cast<TH1*>(file->Get(name));
-        h->SetDirectory(0); // histogram doesn't belong to any directory now to avoid clashing memory management with the smart pointer file 
-        h->SetLineColor(m_colors[i]); 
-        h->SetLineStyle(1); 
+        TH1* pH = static_cast<TH1*>(file->Get(name));
+        pH->SetDirectory(0); // histogram doesn't belong to any directory now to avoid clashing memory management with the smart pointer file 
+        pH->SetLineColor(m_colors[i]); 
+        pH->SetLineStyle(1); 
         // add to THStack and legend
-        hstack->Add(h);
+        hstack->Add(pH);
         legend->AddEntry(h, m_labels[i].c_str(), "L");
         // update maximal y value
-        maxy = h->GetMaximum() > maxy ? h->GetMaximum() : maxy;
+        maxy = pH->GetMaximum() > maxy ? pH->GetMaximum() : maxy;
     }
 
     return std::make_unique<PlotInfo<THStack>>(std::move(hstack), legend, maxy, xlabel, ylabel);
@@ -259,18 +259,18 @@ std::unique_ptr<MSVtxPlotComparison::PlotInfo<TMultiGraph>> MSVtxPlotComparison:
     for (unsigned int i=0; i<m_datapaths.size(); ++i){
         // retrieve histogram and set drawing style
         std::unique_ptr<TFile> file(TFile::Open(TString(m_datapaths[i]+"Histograms.root"), "read"));
-        TEfficiency* h = static_cast<TEfficiency*>(file->Get(name));
-        h->SetLineColor(m_colors[i]); 
-        h->SetLineStyle(1); 
-        h->SetMarkerColor(m_colors[i]);
-        h->SetMarkerStyle(m_markers[i]);
-        h->SetMarkerSize(0.5);
+        TEfficiency* pH = static_cast<TEfficiency*>(file->Get(name));
+        pH->SetLineColor(m_colors[i]); 
+        pH->SetLineStyle(1); 
+        pH->SetMarkerColor(m_colors[i]);
+        pH->SetMarkerStyle(m_markers[i]);
+        pH->SetMarkerSize(0.5);
         // add to multigraph and legend
-        h->Draw(); 
+        pH->Draw(); 
         gPad->Update();
-        TGraphAsymmErrors* g = h->GetPaintedGraph();
+        TGraphAsymmErrors* g = pH->GetPaintedGraph();
         mg->Add(g, "PEZ"); // draw markers and no vertical lines on the error bars
-        legend->AddEntry(h, m_labels[i].c_str(), "PEL"); // draw marker, vertical error bar and line in legend
+        legend->AddEntry(pH, m_labels[i].c_str(), "PEL"); // draw marker, vertical error bar and line in legend
         maxy = getMaxy(g, maxy);
         m_c->Clear(); // needed to clear the canvas after drawing the TEfficiency object
     }
