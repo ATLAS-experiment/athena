@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonBucketDump )
@@ -20,4 +20,4 @@ atlas_add_test( testMuonBucketDump
                 SCRIPT python -m MuonBucketDump.muonBucketDump --nEvents 5 --noSTGC --noMM
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
