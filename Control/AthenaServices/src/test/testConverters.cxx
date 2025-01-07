@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dummy converters for testing AthTPCnvSvc
@@ -45,7 +45,6 @@ class TestConverter_TA_PA1 : public TestConverterBase {};
 class TestConverter_TA_PA2 : public TestConverterBase {};
 
 class TestConverter_TB_PB1 : public TestConverterBase {};
-class TestConverter_TB_PB1_ARA : public TestConverterBase {};
 class TestConverter_TBTRIG_PB1 : public TestConverterBase {};
 
 
@@ -66,10 +65,6 @@ DECLARE_TPCNV_FACTORY (AthenaServicesTestConverters::TestConverter_TB_PB1,
                        AthenaServicesTestConverters::TB,
                        AthenaServicesTestConverters::PB1,
                        Athena::TPCnvVers::Current)
-DECLARE_ARATPCNV_FACTORY (AthenaServicesTestConverters::TestConverter_TB_PB1_ARA,
-                          AthenaServicesTestConverters::TB,
-                          AthenaServicesTestConverters::PB1,
-                          Athena::TPCnvVers::Current)
 DECLARE_TRIGTPCNV_FACTORY (AthenaServicesTestConverters::TestConverter_TBTRIG_PB1,
                           AthenaServicesTestConverters::TBTRIG,
                           AthenaServicesTestConverters::PB1,

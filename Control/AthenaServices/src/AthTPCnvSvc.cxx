@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthTPCnvSvc.cxx 
@@ -19,8 +19,6 @@ std::string prefix (Athena::TPCnvType::Value type)
 {
   switch (type)
   {
-  case Athena::TPCnvType::ARA:
-    return "_ARA";
   case Athena::TPCnvType::Trigger:
     return "_TRIG";
   default:
