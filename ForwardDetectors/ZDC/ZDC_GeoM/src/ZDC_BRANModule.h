@@ -14,7 +14,7 @@ class ZDC_BRANModule : public ZDC_ModuleBase{
 
     virtual ~ZDC_BRANModule() = default;
 
-    virtual void create(GeoFullPhysVol* mother, StoredMaterialManager *materialManager, const ZdcID *zdcID) override;
+    virtual void create(GeoFullPhysVol* mother, GeoAlignableTransform* trf) override;
 
 };
 

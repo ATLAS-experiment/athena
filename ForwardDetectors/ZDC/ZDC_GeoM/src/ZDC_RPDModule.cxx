@@ -23,10 +23,17 @@
 #include "AthenaKernel/getMessageSvc.h"
 #include "CLHEP/Geometry/Transform3D.h"
 
-void ZDC_RPDModule::create(GeoFullPhysVol* mother, StoredMaterialManager *materialManager, const ZdcID *zdcID){
+void ZDC_RPDModule::create(GeoFullPhysVol* mother, GeoAlignableTransform* trf){
 
     MsgStream LogStream(Athena::getMessageSvc(), "ZDC_RPDModule::create");
-
+    
+    StoredMaterialManager *materialManager = nullptr;
+    if (StatusCode::SUCCESS != m_detectorStore->retrieve(materialManager, "MATERIALS")) {
+        MsgStream LogStream(Athena::getMessageSvc(), "ZDC_RPDModule::create");
+        LogStream << MSG::ERROR << "execute: Could not retrieve StoredMaterialManager object from the detector store" << endmsg;
+        return;
+    }
+    
     const GeoMaterial *Aluminum = materialManager->getMaterial("std::Aluminium");
     const GeoMaterial *OpAir = materialManager->getMaterial("ZDC::opticalAir");
     const GeoMaterial *OpSilicaCore = materialManager->getMaterial("ZDC::opticalSilica");
@@ -48,7 +55,9 @@ void ZDC_RPDModule::create(GeoFullPhysVol* mother, StoredMaterialManager *materi
     const float footWidth = 91;                                 // Width of the foot of the module
     const float footDepth = 75;                                 // Depth of the foot of the module
     const float footHeight = 10;                                // Height of the foot of the module
-    const float posY = m_trf.translation().y();                 // Y position of center of the tiles
+    const float posX = trf->getTransform().translation().x();   // X position of center of the tiles
+    const float posY = trf->getTransform().translation().y();   // Y position of center of the tiles
+    const float posZ = trf->getTransform().translation().z();   // Z position of center of the tiles
 
     const GeoBox* motherBox = dynamic_cast<const GeoBox*>(mother->getLogVol()->getShape());
     const float halfY = motherBox->getYHalfLength();
@@ -57,13 +66,6 @@ void ZDC_RPDModule::create(GeoFullPhysVol* mother, StoredMaterialManager *materi
     const float detectorHeight = 2*halfY - footHeight;          // Height of the detector minus the foot
     const float readoutFiberLength = halfY - posY - 2*tileSize; // Length of the "readout" section of the fibers, not including the active area extension
     
-    // Build the main transforms here
-    //The foot has to be placed at the bottom of the TAN/TAXN slot
-    const GeoTrf::Transform3D footTrf = GeoTrf::TranslateY3D((-halfY - posY + footHeight * 0.5) * Gaudi::Units::mm) * m_trf;
-
-    //The main housing is shifted up by half the foot height
-    const GeoTrf::Transform3D moduleTrf = GeoTrf::TranslateY3D((0.5 * footHeight - posY) * Gaudi::Units::mm) * m_trf;
-
     char volName[64];
 
     // Aluminum housing (case)
@@ -179,8 +181,8 @@ void ZDC_RPDModule::create(GeoFullPhysVol* mother, StoredMaterialManager *materi
 
             int channel = 4*row + col;
 
-            std::string channelHashStr = zdcID->channel_id(m_side,m_module,ZdcIDType::ACTIVE,channel).getString();
-            uint32_t channelHash = zdcID->channel_id(m_side,m_module,ZdcIDType::ACTIVE,channel).get_identifier32().get_compact();
+            std::string channelHashStr = m_zdcID->channel_id(m_side,m_module,ZdcIDType::ACTIVE,channel).getString();
+            uint32_t channelHash = m_zdcID->channel_id(m_side,m_module,ZdcIDType::ACTIVE,channel).get_identifier32().get_compact();
 
 
             /*******************************************
@@ -251,7 +253,7 @@ void ZDC_RPDModule::create(GeoFullPhysVol* mother, StoredMaterialManager *materi
     Identifier id;
 
     // Place the fiber routing volume
-    id = zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::AIR);
+    id = m_zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::AIR);
     sprintf(volName, "ZDC::RPD_Air_Cavity %s", id.getString().c_str());
     Housing_Physical->add(new GeoNameTag(volName));
     Housing_Physical->add(new GeoIdentifierTag( id.get_identifier32().get_compact()));
@@ -259,19 +261,19 @@ void ZDC_RPDModule::create(GeoFullPhysVol* mother, StoredMaterialManager *materi
     Housing_Physical->add(Module_Physical);
     
     // Place the foot in the mother volume
-    id = zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
+    id = m_zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
     sprintf(volName, "ZDC::RPD_Foot %s",id.getString().c_str());
     mother->add(new GeoNameTag(volName));
     mother->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
-    mother->add(new GeoAlignableTransform( footTrf ));
+    mother->add(new GeoAlignableTransform(GeoTrf::Translate3D(posX * Gaudi::Units::mm, (-halfY + footHeight * 0.5) * Gaudi::Units::mm, posZ * Gaudi::Units::mm)));
     mother->add(Foot_Physical);
 
     // Place the module in the mother volume
-    id = zdcID->channel_id(m_side, 4, ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
+    id = m_zdcID->channel_id(m_side, 4, ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
     sprintf(volName, "Zdc::RPD_Mod %s", id.getString().c_str());
     mother->add(new GeoNameTag(volName));
     mother->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
-    mother->add(new GeoAlignableTransform( moduleTrf));
+    mother->add(new GeoAlignableTransform(GeoTrf::Translate3D(posX * Gaudi::Units::mm, 0.5 * footHeight * Gaudi::Units::mm, posZ * Gaudi::Units::mm)));
     mother->add(Housing_Physical);
 
 }

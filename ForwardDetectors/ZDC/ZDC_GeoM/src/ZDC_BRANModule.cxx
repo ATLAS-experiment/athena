@@ -4,6 +4,7 @@
 
 #include "ZDC_BRANModule.h"
 
+#include "GeoModelKernel/GeoElement.h"
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoTube.h"
 #include "GeoModelKernel/GeoLogVol.h"
@@ -15,11 +16,13 @@
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GeoModelKernel/Units.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include "StoreGate/StoreGateSvc.h"
 #include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "GeoModelKernel/GeoMaterial.h"
 
 
 #include "AthenaKernel/getMessageSvc.h"
+#include "CLHEP/Geometry/Transform3D.h"
 
 /*
  * For now we create the Run3 BRAN only. The detector is a stack of plates in z
@@ -27,9 +30,16 @@
  * The stack ordering is Cu, Al, Cu, Cu, Al, Cu. This will be simplified here by
  * creating a copper body with aluminum plates placed within.
 */
-void ZDC_BRANModule::create(GeoFullPhysVol* mother, StoredMaterialManager *materialManager, const ZdcID *zdcID){
+void ZDC_BRANModule::create(GeoFullPhysVol* mother, GeoAlignableTransform* trf){
 
     MsgStream LogStream(Athena::getMessageSvc(), "ZDC_ZDCModule::create");
+
+    StoredMaterialManager *materialManager = nullptr;
+    if (StatusCode::SUCCESS != m_detectorStore->retrieve(materialManager, "MATERIALS")) {
+        MsgStream LogStream(Athena::getMessageSvc(), "ZDC_ZDCModule::create");
+        LogStream << MSG::ERROR << "execute: Could not retrieve StoredMaterialManager object from the detector store" << endmsg;
+        return;
+    }
 
     const GeoMaterial *OpAir    = materialManager->getMaterial("ZDC::opticalAir"   );
     const GeoMaterial *OpSilica = materialManager->getMaterial("ZDC::opticalSilica");
@@ -62,9 +72,9 @@ void ZDC_BRANModule::create(GeoFullPhysVol* mother, StoredMaterialManager *mater
     GeoFullPhysVol *Cu_Body_Physical = new GeoFullPhysVol(Cu_Body_Logical);
 
     //Create the IDs and names here since we aren't doing any channel separation
-    Identifier airID = zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::AIR);;
-    Identifier aluID = zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
-    Identifier rodID = zdcID->channel_id(m_side,m_module,ZdcIDType::ACTIVE,ZdcIDVolChannel::READOUT);
+    Identifier airID = m_zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::AIR);;
+    Identifier aluID = m_zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
+    Identifier rodID = m_zdcID->channel_id(m_side,m_module,ZdcIDType::ACTIVE,ZdcIDVolChannel::READOUT);
 
     char airName[64], rodName[64], aluName[64];
     sprintf(airName, "ZDC::BRAN_Air %s", airID.getString().c_str());
@@ -117,11 +127,11 @@ void ZDC_BRANModule::create(GeoFullPhysVol* mother, StoredMaterialManager *mater
 
     // Place the copper body in the mother volume
     char volName[64];
-    Identifier id = zdcID->channel_id(m_side, m_module, ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
+    Identifier id = m_zdcID->channel_id(m_side, m_module, ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
     sprintf(volName, "Zdc::BRAN_Mod %s", id.getString().c_str());
     mother->add(new GeoNameTag(volName));
     mother->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
-    mother->add(new GeoAlignableTransform(m_trf));
+    mother->add(trf);
     mother->add(Cu_Body_Physical);
 
 }

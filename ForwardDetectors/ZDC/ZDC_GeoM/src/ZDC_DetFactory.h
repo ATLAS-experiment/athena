@@ -6,16 +6,14 @@
 #define ZDC_DETFACTORY_H
 
 #include "GeoModelKernel/GeoVDetectorFactory.h"
-#include "GeoModelKernel/GeoDefinitions.h"
 #include "AthenaBaseComps/AthMessaging.h"
 //compiler needs to know ZDC_DetManager return type derives from GeoVDetectorManager
 //to avoid "invalid covariant return type" warning
 #include "ZDC_DetManager.h" 
-#include "ZDC_ModuleBase.h"
 
-#include <string>
 #include <vector>
-#include <array>
+#include <utility> //for std::pair
+#include "GeoModelKernel/GeoAlignableTransform.h"
 
 class StoreGateSvc;
 class ZdcID;
@@ -34,23 +32,24 @@ public:
   virtual const ZDC_DetManager *getDetectorManager() const override;
   void buildMaterials(StoredMaterialManager *materialManager);
 
-  /*************************************************
-  * The scene of the crime. Still inlined because
-  * the function is just to push_back
-  **************************************************/
-  inline void addModule(std::unique_ptr<ZDC_ModuleBase> module) { m_modules.push_back(std::move(module) ); }
-  void setTANSlot(uint iside, double width, double height, double depth, const GeoTrf::Transform3D trf, std::string name);
-  
+  void initializePbPb2015();
+  void initializePbPb2023();
+
 private:
 
   ZDC_DetManager *m_detectorManager{};
   StoreGateSvc *m_detectorStore{};
   const ZdcID *m_zdcID{};
-  std::vector< std::unique_ptr<ZDC_ModuleBase> > m_modules;
-  std::array<GeoTrf::Transform3D, 2> m_tanSlotTransform;
-  std::array<double, 2> m_tanW, m_tanH, m_tanD;
-  std::array<std::string, 2> m_tanSlotName;
+  bool m_RPDs_On{}; //Flag for both RPD modules
+  bool m_BRANs_On{}; //Flag for both BRAN modules
+  std::vector< std::vector< bool > > m_zdcOn;
+  std::vector< std::vector< float > > m_zdcPos; //Positions of the ZDC modules
+  std::vector< std::vector< int > > m_zdcModType; //Module types of the ZDC modules
+  std::vector< GeoAlignableTransform* > m_rpdPos; //Positions of the RPD modules
+  std::vector< float > m_branPos; //Positions of the BRAN modules
 };
+
+
 
 
 #endif

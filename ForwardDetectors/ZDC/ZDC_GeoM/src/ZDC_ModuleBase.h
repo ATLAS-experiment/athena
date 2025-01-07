@@ -7,43 +7,39 @@
 
 #include "ZdcIdentifier/ZdcID.h"
 #include "GeoModelKernel/GeoFullPhysVol.h"
-#include "GeoModelKernel/GeoDefinitions.h"
-#include "GeoModelInterfaces/StoredMaterialManager.h"
+#include "GeoModelKernel/GeoAlignableTransform.h"
+#include "StoreGate/StoreGateSvc.h"
 #include "ZdcIdentifier/ZdcID.h"
+
+struct Materials;
 
 class ZDC_ModuleBase{
   public:
-    ZDC_ModuleBase(){m_side = 0; m_module = -1;}
-    ZDC_ModuleBase(std::string name, int side, int module)
-      : m_side( side ),
+    ZDC_ModuleBase(){ m_detectorStore = nullptr; m_side = 0; m_module = -1; m_zdcID = nullptr;}
+    ZDC_ModuleBase(StoreGateSvc *detStore, int side, int module, const ZdcID *zdcID)
+      : m_detectorStore( detStore ),
+      m_side( side ),
       m_module( module ),
-      m_name( name ),
-      m_trf( GeoTrf::Transform3D() )
+      m_zdcID( zdcID )
     {}
 
-    ZDC_ModuleBase(ZDC_ModuleBase *right, int side, int module)
-    : m_side( side ),
+    ZDC_ModuleBase(ZDC_ModuleBase *right, int side, int module): 
+      m_detectorStore(right->m_detectorStore ),
+      m_side( side ),
       m_module( module ),
-      m_name( right->m_name ),
-      m_trf( right->m_trf )
-    {}
+      m_zdcID( right->m_zdcID )
+      {}
 
     virtual ~ZDC_ModuleBase() = default;
 
-    virtual void create(GeoFullPhysVol* mother, StoredMaterialManager *materialManager, const ZdcID *zdcID) = 0;
-    inline void setTransform(const GeoTrf::Transform3D trf){m_trf = trf;}
-    
-    inline int getSide() const {return m_side;}
-    inline int getModule() const {return m_module;}
-    inline std::string getName() const {return m_name;}
-    inline GeoTrf::Transform3D getTransform() const {return m_trf;}
+    virtual void create(GeoFullPhysVol* mother, GeoAlignableTransform* trf) = 0;
 
   protected:
 
+    StoreGateSvc *m_detectorStore;
     int m_side;
     int m_module;
-    std::string m_name;
-    GeoTrf::Transform3D m_trf;
+    const ZdcID *m_zdcID;
 
 };
 

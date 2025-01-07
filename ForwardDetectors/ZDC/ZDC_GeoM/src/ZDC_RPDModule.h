@@ -14,7 +14,7 @@ class ZDC_RPDModule : public ZDC_ModuleBase {
 
     virtual ~ZDC_RPDModule() = default;
 
-    virtual void create(GeoFullPhysVol* mother, StoredMaterialManager *materialManager, const ZdcID *zdcID) override;
+    virtual void create(GeoFullPhysVol* mother, GeoAlignableTransform* trf) override;
 
 };
 
