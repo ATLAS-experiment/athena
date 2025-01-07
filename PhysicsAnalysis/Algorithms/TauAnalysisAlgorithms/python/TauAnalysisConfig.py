@@ -56,21 +56,21 @@ class TauCalibrationConfig (ConfigBlock):
             alg = config.createAlgorithm( 'CP::TauTruthDecorationsAlg',
                                         'TauTruthDecorationsAlg' + postfix )
             alg.taus = config.readName (self.containerName)
-            alg.preselection = config.getPreselection (self.containerName, '')
             alg.doubleDecorations = ['pt_vis', 'eta_vis', 'phi_vis', 'm_vis']
             alg.floatDecorations = []
             alg.intDecorations = ['pdgId']
+            alg.unsignedIntDecorations = ['classifierParticleOrigin', 'classifierParticleType']
             alg.charDecorations = ['IsHadronicTau']
             alg.prefix = 'truth_'
 
             # these are "_ListHelper" objects, and not "list", need to copy to lists to allow concatenate
-            for var in ['DecayMode', 'ParticleType'] + alg.doubleDecorations[:] + alg.floatDecorations[:] + alg.intDecorations[:] + alg.charDecorations[:]:
-                branchName = alg.prefix+var
-                config.addOutputVar (self.containerName, branchName, branchName, noSys=True)
-            
-            # these are already available
-            config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True)
-            config.addOutputVar (self.containerName, "truthOrigin", "truth_origin", noSys=True)
+            for var in ['DecayMode', 'ParticleType', 'PartonTruthLabelID'] + alg.doubleDecorations[:] + alg.floatDecorations[:] + alg.intDecorations[:] + alg.unsignedIntDecorations[:] + alg.charDecorations[:]:
+                branchName = alg.prefix + var
+                if 'classifierParticle' in var:
+                    branchOutput = alg.prefix + var.replace('classifierParticle', '').lower()
+                else:
+                    branchOutput = branchName
+                config.addOutputVar (self.containerName, branchName, branchOutput, noSys=True)
 
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' + postfix )
