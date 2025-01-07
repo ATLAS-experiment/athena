@@ -9,7 +9,6 @@ def LArRawSCDataReadingCfg(configFlags, **kwargs):
     acc=ComponentAccumulator()
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     acc.merge(LArGMCfg(configFlags))
-    acc.merge(ByteStreamReadCfg(configFlags))
     from LArCabling.LArCablingConfig import LArLATOMEMappingCfg
     acc.merge(LArLATOMEMappingCfg(configFlags))
 
@@ -35,6 +34,7 @@ if __name__=="__main__":
     flags.lock()
 
     acc = MainServicesCfg( flags )
+    acc.merge(ByteStreamReadCfg(flags))
     acc.merge(LArRawSCDataReadingCfg(flags))
     
     acc.run(2)

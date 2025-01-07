@@ -3,6 +3,7 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from LArBadChannelTool.LArBadFebsConfig import LArKnownBadFebCfg, LArKnownMNBFebCfg
+from LArCabling.LArHVCablingConfig import LArHVCablingCfg
 from AthenaConfiguration.Enums import ProductionStep
 
 def LArNoisyROSummaryCfg(configFlags, **kwargs):
@@ -14,6 +15,7 @@ def LArNoisyROSummaryCfg(configFlags, **kwargs):
    if not isMC:
       result.merge(LArKnownBadFebCfg(configFlags))
       result.merge(LArKnownMNBFebCfg(configFlags))
+      result.merge(LArHVCablingCfg(configFlags))
       result.addEventAlgo(CompFactory.LArHVlineMapAlg(keyOutput="LArHVNcells"))
 
    # now configure the algorithm

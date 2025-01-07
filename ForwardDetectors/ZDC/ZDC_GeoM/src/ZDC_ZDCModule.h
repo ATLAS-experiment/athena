@@ -10,12 +10,12 @@
 class ZDC_ZDCModule : public ZDC_ModuleBase{
   public:
     ZDC_ZDCModule();
-    ZDC_ZDCModule(StoreGateSvc *detStore, int side, int module, const ZdcID *zdcID, int modType);
+    ZDC_ZDCModule(std::string name, int side, int module, int modType);
     ZDC_ZDCModule(ZDC_ZDCModule *right, int side, int module);
 
     virtual ~ZDC_ZDCModule() = default;
 
-    virtual void create(GeoFullPhysVol* mother, GeoAlignableTransform* trf) override;
+    virtual void create(GeoFullPhysVol* mother, StoredMaterialManager *materialManager, const ZdcID *zdcID) override;
 
   protected:
     int m_modType;

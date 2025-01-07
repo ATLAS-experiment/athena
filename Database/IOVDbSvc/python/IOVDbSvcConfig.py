@@ -15,6 +15,15 @@ def CondInputLoaderCfg(flags, **kwargs):
     return result
 
 
+def DBReplicaSvcCfg(flags, vetoDBRelease=False, **kwargs):
+    if vetoDBRelease:
+        kwargs.setdefault('COOLSQLiteVetoPattern', '/DBRelease/')
+
+    result = ComponentAccumulator()
+    result.addService(CompFactory.DBReplicaSvc(**kwargs))
+    return result
+
+
 @AccumulatorCache
 def IOVDbSvcCfg(flags, **kwargs):
     # Add the conditions loader, must be the first in the sequence
@@ -55,7 +64,7 @@ def IOVDbSvcCfg(flags, **kwargs):
     result.addService(CompFactory.ProxyProviderSvc(ProviderNames=['IOVDbSvc']))
 
     if not flags.Input.isMC:
-        result.addService(CompFactory.DBReplicaSvc(COOLSQLiteVetoPattern='/DBRelease/'))
+        result.merge(DBReplicaSvcCfg(flags, vetoDBRelease=True))
 
     # Get TagInfoMgr
     from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
