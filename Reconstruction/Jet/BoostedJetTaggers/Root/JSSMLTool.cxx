@@ -8,6 +8,7 @@
 
 // ROOT includes
 #include "TSystem.h"
+#include "TH2D.h"
 
 namespace AthONNX {
 
@@ -41,7 +42,7 @@ namespace AthONNX {
     std::vector<float> input_tensor_values(m_nvars);
 
     // apply features scaling
-    for(auto var : JSSVars){
+    for(const auto & var : JSSVars){
       double mean = m_scaler.find(var.first)->second[0];
       double std  = m_scaler.find(var.first)->second[1];
       JSSVars[var.first] = (var.second - mean) / std;

@@ -9,20 +9,18 @@
 // ONNX Runtime include(s).
 #include <onnxruntime_cxx_api.h>
 
-// System include(s).
-#include <memory>
-#include <string>
-#include <iostream> 
-#include <fstream>
-#include <arpa/inet.h>
-#include <numeric>
-
-// root
-#include "TH2.h"
-
 // xAOD
 #include "xAODJet/JetContainer.h"
 #include "xAODPFlow/TrackCaloClusterContainer.h"
+// System include(s).
+#include <memory> //unique_ptr
+#include <string>
+#include <map>
+#include <vector>
+#include <cstdint>
+
+class TH2D; 
+
 
 namespace AthONNX {
 
@@ -84,7 +82,7 @@ class JSSMLTool
 
      // input node info
      std::vector<int64_t> m_input_node_dims;
-     size_t m_num_input_nodes;
+     size_t m_num_input_nodes{};
      std::vector<const char*> m_input_node_names;
 
      // output node info
@@ -93,9 +91,9 @@ class JSSMLTool
      std::vector<const char*> m_output_node_names;
 
      // some configs
-      int m_nPixelsX, m_nPixelsY, m_nPixelsZ;
+      int m_nPixelsX{}, m_nPixelsY{}, m_nPixelsZ{};
 
-     int m_nvars;
+     int m_nvars{};
 
    }; // class JSSMLTool
 
