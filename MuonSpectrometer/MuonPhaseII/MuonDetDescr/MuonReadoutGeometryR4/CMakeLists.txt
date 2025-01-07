@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 # Package: MuonReadoutGeometryR4
@@ -25,6 +25,19 @@ atlas_add_library( MuonReadoutGeometryR4
                    LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel GeoPrimitives Identifier  
                                   ActsGeometryInterfacesLib ActsGeoUtils MuonIdHelpersLib GaudiKernel 
                                   StoreGateLib GeoModelUtilities CxxUtils ${extra_libs})
+
+# Some functions here make heavy use of Eigen and are thus very slow in debug
+# builds.  Set up to allow forcing them to compile with optimization and
+# inlining, even in debug builds.
+if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
+  set_source_files_properties(
+     ${CMAKE_CURRENT_SOURCE_DIR}/src/RpcReadoutElement.cxx
+     ${CMAKE_CURRENT_SOURCE_DIR}/src/MmReadoutElement.cxx
+     PROPERTIES
+     COMPILE_FLAGS "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}"
+     COMPILE_DEFINITIONS "FLATTEN" )
+endif()
+
 
 # we also add unit tests. 
 # Build them from the files in test/ 
