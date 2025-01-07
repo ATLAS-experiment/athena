@@ -85,12 +85,12 @@ def UseFrontier(flags):
     """
     from os import environ
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    from AthenaConfiguration.ComponentFactory import CompFactory
 
     cfg = ComponentAccumulator()
     if environ.get('FRONTIER_SERVER'):
         msg.info('Enabling FRONTIER DB access')
-        cfg.addService(CompFactory.DBReplicaSvc(COOLSQLiteVetoPattern='DBRelease'))
+        from IOVDbSvc.IOVDbSvcConfig import DBReplicaSvcCfg
+        cfg.merge(DBReplicaSvcCfg(flags, vetoDBRelease=True))
     else:
         msg.info('Using default DB access')
 
