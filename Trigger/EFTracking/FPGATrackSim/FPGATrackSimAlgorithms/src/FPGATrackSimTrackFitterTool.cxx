@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-#include "FPGATrackSimTrackFitterTool.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimTrackFitterTool.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
 #include "FPGATrackSimMaps/FPGATrackSimRegionMap.h"
 

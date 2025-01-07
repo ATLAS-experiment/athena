@@ -11,7 +11,7 @@
  * then stored in an FPGATrackSimTrack object
  */
 
-#include "FPGATrackSimNNTrackTool.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimNNTrackTool.h"
 #include "FPGATrackSimMaps/FPGATrackSimNNMap.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include "FPGATrackSimObjects/FPGATrackSimFunctions.h"

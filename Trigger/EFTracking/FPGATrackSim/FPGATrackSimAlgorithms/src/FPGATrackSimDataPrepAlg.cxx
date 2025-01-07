@@ -10,9 +10,9 @@
 #include "FPGATrackSimObjects/FPGATrackSimLogicalEventInputHeader.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 
-#include "FPGATrackSimNNTrackTool.h"
-#include "FPGATrackSimOverlapRemovalTool.h"
-#include "FPGATrackSimTrackFitterTool.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimNNTrackTool.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimOverlapRemovalTool.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimTrackFitterTool.h"
 
 #include "FPGATrackSimConfTools/FPGATrackSimRegionSlices.h"
 

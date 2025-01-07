@@ -14,7 +14,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimBanks/FPGATrackSimSectorBank.h"
 
-#include "FPGATrackSimWindowExtensionTool.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimWindowExtensionTool.h"
 
 #include <sstream>
 #include <cmath>

@@ -15,7 +15,7 @@
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
 #include "FPGATrackSimHough/FPGATrackSimHoughRootOutputTool.h"
 
-#include "IFPGATrackSimTrackExtensionTool.h"
+#include "FPGATrackSimAlgorithms/IFPGATrackSimTrackExtensionTool.h"
 
 #include "AthenaMonitoringKernel/Monitored.h"
 

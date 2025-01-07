@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-#include "FPGATrackSimTrackingToolBase.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimTrackingToolBase.h"
 
 
 FPGATrackSimTrackingToolBase::FPGATrackSimTrackingToolBase(const std::string& type, const std::string& name, const IInterface* parent)

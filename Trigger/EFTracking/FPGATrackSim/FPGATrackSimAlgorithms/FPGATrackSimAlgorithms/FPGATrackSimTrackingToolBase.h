@@ -6,7 +6,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
-#include "IFPGATrackSimTrackingTool.h"
+#include "FPGATrackSimAlgorithms/IFPGATrackSimTrackingTool.h"
 
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
 #include "FPGATrackSimBanks/FPGATrackSimSectorBank.h"

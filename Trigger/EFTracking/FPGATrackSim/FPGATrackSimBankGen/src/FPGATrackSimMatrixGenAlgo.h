@@ -23,6 +23,9 @@
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimTrackFitterTool.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimOverlapRemovalTool.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimWindowExtensionTool.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
 #include "FPGATrackSimMaps/FPGATrackSimRegionMap.h"
 #include "FPGATrackSimSGInput/IFPGATrackSimInputTool.h"
@@ -77,14 +80,23 @@ class FPGATrackSimMatrixGenAlgo : public AthAlgorithm
 	ToolHandle<FPGATrackSimRawToLogicalHitsTool> m_hitMapTool {this, "FPGATrackSimRawToLogicalHitsTool", "FPGATrackSimRawToLogicalHitsTool/FPGATrackSim_RawToLogicalHitsTool", "FPGATrackSim_RawToLogicalHitsTool"};
         ToolHandle<FPGATrackSimClusteringToolI>       m_clusteringTool { this, "FPGATrackSimClusteringFTKTool", "FPGATrackSimClusteringFTKTool/FPGATrackSimClusteringFTKTool", "FPGATrackSimClusteringFTKTool" };
         ToolHandle<FPGATrackSimSpacePointsToolI>       m_spacePointsTool { this, "SpacePointTool", "FPGATrackSimSpacePointsTool/FPGATrackSimSpacePointsTool", "FPGATrackSimSpacePointsTool" };
-	ToolHandle<FPGATrackSimRoadUnionTool>       m_roadFinderTool {this, "RoadFinder", "RoadFinder"};
 	const FPGATrackSimPlaneMap* m_pmap = nullptr; // alias to m_FPGATrackSimMapping->PlaneMap();
+	ToolHandle<FPGATrackSimRoadUnionTool>       m_roadFinderTool {this, "RoadFinder", "RoadFinder"};
+        ToolHandle<FPGATrackSimTrackFitterTool>          m_trackFitterTool_1st {this, "TrackFitter_1st", "FPGATrackSimTrackFitterTool/FPGATrackSimTrackFitterTool_1st", "1st stage track fit tool"};
+
+        ToolHandle<IFPGATrackSimTrackExtensionTool>      m_trackExtensionTool {this, "TrackExtensionTool", "FPGATrackSimTrackExtensionTool", "Track extensoin tool"};
+        ToolHandle<FPGATrackSimOverlapRemovalTool>       m_overlapRemovalTool {this, "OverlapRemoval_1st", "FPGATrackSimOverlapRemovalTool/FPGATrackSimOverlapRemovalTool_1st", "1st stage overlap removal tool"};
+
+
+	const FPGATrackSimPlaneMap* m_pmap_1st = nullptr; // alias to m_FPGATrackSimMapping->PlaneMap();
+	const FPGATrackSimPlaneMap* m_pmap_2nd = nullptr; // alias to m_FPGATrackSimMapping->PlaneMap();  
 
 
         ///////////////////////////////////////////////////////////////////////
         // Configuration
 	Gaudi::Property<int> m_nRegions {this, "NBanks", 0, "Number of banks to make"};
 	Gaudi::Property<bool> m_doClustering {this, "Clustering", true, "Do cluster?"};
+        Gaudi::Property<bool> m_doSecondStage {this, "SecondStage", false, "Run second stage?"};
 	Gaudi::Property<bool> m_doSpacePoints {this, "SpacePoints", true, "Do spacepoints?"};
 	Gaudi::Property<int> m_ideal_geom {this, "IdealiseGeometry", 0, "Ideal geo flag, 0 is non, 1 is 1st order, 2 is 2nd order"};
 	Gaudi::Property<bool> m_single {this, "SingleSector", false, "Run single sector"};
@@ -110,13 +122,17 @@ class FPGATrackSimMatrixGenAlgo : public AthAlgorithm
 	Gaudi::Property<int> m_temp_d0_slices {this, "par_d0_slices", 100, "Number of d0 slices"};
 	Gaudi::Property<int> m_temp_z0_slices {this, "par_z0_slices", 100, "Number of z0 slices"};
 	Gaudi::Property<int> m_temp_eta_slices {this, "par_eta_slices", 100, "Number of eta slices"};
-	Gaudi::Property<bool> m_absQOverPtBinning{this, "qptAbsBinning", false, "This property controls whether or not to interpret the bins as q/pt or |q/pt|"};
+    Gaudi::Property<bool> m_absQOverPtBinning{this, "qptAbsBinning", false, "This property controls whether or not to interpret the bins as q/pt or |q/pt|"};
 	Gaudi::Property<std::vector<double> > m_qOverPtBins{this, "sectorQPtBins", {}, "q/pt bins for sector definition"};
+    Gaudi::Property<bool> m_dropHitsAndFill{this, "dropHitsAndFill", false, "If true, we can drop hits to fill the accumulator"};
+
+	int m_nLayers_1st = 0;
+	int m_nDim_1st = 0;
+  
+    int m_nLayers_2nd = 0;
+	int m_nDim_2nd = 0;
 	
-	int m_nLayers = 0;
-	int m_nDim = 0;
-	int m_nDim2 = 0; // m_nDim ^ 2
-	
+  
         FPGATrackSimTrackPars m_sliceMin = 0;
         FPGATrackSimTrackPars m_sliceMax = 0;
         FPGATrackSimTrackParsI m_nBins;
@@ -138,10 +154,13 @@ class FPGATrackSimMatrixGenAlgo : public AthAlgorithm
         std::vector<FPGATrackSimHit> getLogicalHits() ;
         std::vector<FPGATrackSimTruthTrack> filterTrainingTracks(std::vector<FPGATrackSimTruthTrack> const & truth_tracks) const;
         std::map<int, std::vector<FPGATrackSimHit>> makeBarcodeMap(std::vector<FPGATrackSimHit> const & hits, std::vector<FPGATrackSimTruthTrack> const & tracks) const;
-        selectHit_returnCode selectHit(FPGATrackSimHit const & old_hit, FPGATrackSimHit const & new_hit, int subregion) const;
-        bool filterSectorHits(std::vector<FPGATrackSimHit> const & all_hits, std::vector<FPGATrackSimHit> & sector_hits, FPGATrackSimTruthTrack const & t, int subregion) const;
-        int getRegion(std::vector<FPGATrackSimHit> const & hits) const;
+        selectHit_returnCode selectHit(FPGATrackSimHit const & old_hit, FPGATrackSimHit const & new_hit, bool is1ststage, int subregion) const;
+        bool filterSectorHits(std::vector<FPGATrackSimHit> const & all_hits, std::vector<FPGATrackSimHit> & sector_hits, FPGATrackSimTruthTrack const & t, bool is1ststage, int subregion) const;
+        int getRegion(std::vector<FPGATrackSimHit> const & hits, bool is1ststage) const;
         StatusCode makeAccumulator(std::vector<FPGATrackSimHit> const & sector_hits, FPGATrackSimTruthTrack const & track, std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> & accumulator) const;
+        StatusCode fillAccumulatorByDropping(std::vector<FPGATrackSimHit> & sector_hits, bool is1ststage, double x, double y, std::vector<module_t> &modules, AccumulateMap &map, FPGATrackSimTruthTrack const & track, int subregion) const;
+
+  
         std::vector<TTree*> createMatrixTrees();
         void fillMatrixTrees(std::vector<TTree*> const & matrixTrees);
         void writeSliceTree();

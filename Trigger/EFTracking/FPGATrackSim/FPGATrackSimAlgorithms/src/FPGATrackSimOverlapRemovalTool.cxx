@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-#include "FPGATrackSimOverlapRemovalTool.h"
+#include "../FPGATrackSimAlgorithms/FPGATrackSimOverlapRemovalTool.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
 #include "FPGATrackSimObjects/FPGATrackSimVectors.h"
 

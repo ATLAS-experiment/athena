@@ -71,9 +71,21 @@ def FPGATrackSimBankGenCfg(flags, **kwargs):
 
     theFPGATrackSimMatrixGenAlg.FPGATrackSimMappingSvc = acc.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
 
+    if (flags.Trigger.FPGATrackSim.ActiveConfig.secondStage):
+        from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimTrackFitterToolCfg,FPGATrackSimOverlapRemovalToolCfg
+        from FPGATrackSimConfTools.FPGATrackSimSecondStageConfig import FPGATrackSimWindowExtensionToolCfg
+        theFPGATrackSimMatrixGenAlg.TrackFitter_1st = acc.getPrimaryAndMerge(FPGATrackSimTrackFitterToolCfg(flags))
+        theFPGATrackSimMatrixGenAlg.OverlapRemoval_1st = acc.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags))
+        theFPGATrackSimMatrixGenAlg.TrackExtensionTool = acc.getPrimaryAndMerge(FPGATrackSimWindowExtensionToolCfg(flags))
+        theFPGATrackSimMatrixGenAlg.SecondStage = True
+    else:
+        theFPGATrackSimMatrixGenAlg.SecondStage = False
+
+    
     # Override this. It gets set somewhere from bank_tag.
     theFPGATrackSimMatrixGenAlg.WCmax = 2
- 
+    theFPGATrackSimMatrixGenAlg.dropHitsAndFill = flags.dropHitsAndFill
+    
     theFPGATrackSimMatrixGenAlg.FPGATrackSimRawToLogicalHitsTool = acc.getPrimaryAndMerge(FPGATrackSimRawLogicCfg(flags))
     if (flags.Trigger.FPGATrackSim.ActiveConfig.genScan):
         theFPGATrackSimMatrixGenAlg.RoadFinder = acc.getPrimaryAndMerge(FPGATrackSimRoadUnionToolGenScanCfg(flags))
@@ -103,6 +115,8 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     flags = initConfigFlags()
+    flags.addFlag('dropHitsAndFill', False)
+
     from AthenaCommon.Logging import logging
     log = logging.getLogger(__name__)
 
