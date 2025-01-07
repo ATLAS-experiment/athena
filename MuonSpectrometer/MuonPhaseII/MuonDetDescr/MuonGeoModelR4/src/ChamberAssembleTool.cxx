@@ -453,6 +453,14 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                                                          origin.z() + TGC->getParameters().halfThickness, 
                                                          RE->detectorType()); 
                }
+               else if (RE->detectorType() == ActsTrk::DetectorType::Mm){
+                   const MuonGMR4::MmReadoutElement* MM = dynamic_cast<const MuonGMR4::MmReadoutElement*>(RE);
+                   sectorArgs.chamberLocs.emplace_back(origin.y() - MM->getParameters().halfHeight,
+                                                       origin.y() + MM->getParameters().halfHeight,
+                                                       origin.z() - MM->getParameters().halfThickness,
+                                                       origin.z() + MM->getParameters().halfThickness,
+                                                       RE->detectorType());
+               }
             }
          }
          auto newSector = std::make_unique<SpectrometerSector>(std::move(sectorArgs));

@@ -129,7 +129,10 @@ bool EtaHoughTransformAlg::isPrecisionHit(const HoughHitType& hit) {
             return dc->status() == Muon::MdtDriftCircleStatus::MdtStatusDriftTime;
             break;
         }
-        case xAOD::UncalibMeasType::MMClusterType:
+        case xAOD::UncalibMeasType::MMClusterType:{
+            return hit->measuresEta();
+            break;
+        }
         case xAOD::UncalibMeasType::sTgcStripType:
             return hit->measuresEta();
             break;
@@ -173,26 +176,26 @@ bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBu
     int expectedPrecisionChambers = 0; 
     int seenPrecisionChambers = 0; 
     bool hasTrig = false; 
-    // loop over all chambers in the bucker 
-    for (auto & mdtChamber : currentBucket.bucket->chamberLocations()){
+    // loop over all chambers in the bucket    
+    for (auto & muonChamber : currentBucket.bucket->chamberLocations()){      
         // skip any we don't touch 
-        if (!passesThrough(mdtChamber, maximum.y, maximum.x)) continue; 
+        if (!passesThrough(muonChamber, maximum.y, maximum.x)) continue; 
         // for MDT multilayers, we increase our expected number of crossed chambers / tubes
-        if (mdtChamber.type == ActsTrk::DetectorType::Mdt){
+        if (muonChamber.type == ActsTrk::DetectorType::Mdt || muonChamber.type == ActsTrk::DetectorType::Mm){
             ++expectedPrecisionChambers; 
         }
         // now we check if we have a compatible measurement on our seed
         bool hasHit = false; 
         for (auto & SP : maximum.hitIdentifiers){
             // the hit should be inside the current volume and the local residual should be 
-            // compatible with the desired resolution 
-            if (isInside(mdtChamber, SP->positionInChamber()) && proximity(SP,maximum.y,maximum.x) < 2. * m_targetResoIntercept){
+            // compatible with the desired resolution            
+            if (isInside(muonChamber, SP->positionInChamber()) && proximity(SP,maximum.y,maximum.x) < 2. * m_targetResoIntercept){
                 hasHit=true;
                 break;
             }
         }
         // if we find an MDT hit, we increment the counter for seen chambers
-        if (mdtChamber.type == ActsTrk::DetectorType::Mdt){
+        if (muonChamber.type == ActsTrk::DetectorType::Mdt || muonChamber.type == ActsTrk::DetectorType::Mm){
             seenPrecisionChambers += (hasHit); 
         }
         // for trigger hits, we set a flag indicating we have at least one 
@@ -200,14 +203,18 @@ bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBu
     }
     // now count the total number of MDT tube layers we collected on our seed 
     std::set<std::pair<int,int>> seenLayers; 
-    for (auto & SP : maximum.hitIdentifiers){
-        if (SP->type() == xAOD::UncalibMeasType::MdtDriftCircleType){
+    for (auto & SP : maximum.hitIdentifiers){       
             // apply a compatibility window - enforce hits are at least reasonably close 
             if (proximity(SP,maximum.y,maximum.x) < 2. * m_targetResoIntercept){
-                const xAOD::MdtDriftCircle* dc = static_cast<const xAOD::MdtDriftCircle*>(SP->primaryMeasurement());
-                seenLayers.emplace(dc->readoutElement()->multilayer(), dc->tubeLayer()); 
+                if (SP->type() == xAOD::UncalibMeasType::MdtDriftCircleType){
+                    const xAOD::MdtDriftCircle* dc = static_cast<const xAOD::MdtDriftCircle*>(SP->primaryMeasurement());
+                    seenLayers.emplace(dc->readoutElement()->multilayer(), dc->tubeLayer()); 
+                }
+                else if(SP->type() == xAOD::UncalibMeasType::MMClusterType){
+                    const xAOD::MMCluster* mmclust = static_cast<const xAOD::MMCluster*>(SP->primaryMeasurement());
+                    seenLayers.emplace(mmclust->readoutElement()->multilayer(), mmclust->gasGap()); 
+                }
             }
-        }
     }
     // compute the minimum number of requested precision layers
     // the integer division will round down (resulting cut: 2 for single-ML, 4 for dual-ML)  
