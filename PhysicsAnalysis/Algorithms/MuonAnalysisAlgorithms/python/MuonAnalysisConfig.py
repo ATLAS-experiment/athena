@@ -154,9 +154,9 @@ class MuonWorkingPointConfig (ConfigBlock) :
             info="the isolation WP (string) to use. Supported isolation WPs: "
             "PflowLoose_VarRad, PflowTight_VarRad, Loose_VarRad, "
             "Tight_VarRad, NonIso.")
-        self.addOption ('qualitySelectionOutput', True, type=bool,
-            info="whether to retain only muons satisfying the quality "
-            "requirements (bad muon veto). The default is True.")
+        self.addOption ('addSelectionToPreselection', True, type=bool,
+            info="whether to retain only muons satisfying the working point "
+            "requirements. The default is True.")
         self.addOption ('closeByCorrection', False, type=bool,
             info="whether to use close-by-corrected isolation working points.")
         self.addOption ('systematicBreakdown', False, type=bool,
@@ -212,7 +212,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
             if self.trackSelection :
-                config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration, preselection=self.qualitySelectionOutput)
+                config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration, preselection=self.addSelectionToPreselection)
             if self.writeTrackD0Z0 :
                 alg.d0sigDecoration = 'd0sig' + postfix
                 alg.z0sinthetaDecoration = 'z0sintheta' + postfix
@@ -230,13 +230,13 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.selectionTool.ExcludeNSWFromPrecisionLayers = True
         else:
             alg.selectionTool.ExcludeNSWFromPrecisionLayers = self.excludeNSWFromPrecisionLayers and (config.geometry() >= LHCPeriod.Run3)
-        alg.selectionDecoration = 'good_muon' + postfix + ',as_bits'
+        alg.selectionDecoration = 'good_muon' + postfix + ',as_char'
         alg.badMuonVetoDecoration = 'is_bad' + postfix + ',as_char'
         alg.muons = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
         config.addSelection (self.containerName, self.selectionName,
                              alg.selectionDecoration,
-                             preselection=self.qualitySelectionOutput)
+                             preselection=self.addSelectionToPreselection)
 
         # Set up the isolation calculation algorithm:
         if self.isolation != 'NonIso' :
@@ -246,12 +246,12 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.isolationTool.MuonWP = self.isolation
             if self.closeByCorrection:
               alg.isolationTool.IsoDecSuffix = "CloseByCorr"
-            alg.isolationDecoration = 'isolated_muon' + postfix + ',as_bits'
+            alg.isolationDecoration = 'isolated_muon' + postfix + ',as_char'
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             config.addSelection (self.containerName, self.selectionName,
                                  alg.isolationDecoration,
-                                 preselection=self.qualitySelectionOutput)
+                                 preselection=self.addSelectionToPreselection)
 
         # Set up the reco/ID efficiency scale factor calculation algorithm:
         if config.dataType() is not DataType.Data and (not self.noEffSF or self.onlyRecoEffSF):
@@ -347,7 +347,7 @@ def makeMuonCalibrationConfig( seq, containerName,
 
 
 def makeMuonWorkingPointConfig( seq, containerName, workingPoint, selectionName,
-                                qualitySelectionOutput = None,
+                                addSelectionToPreselection = None,
                                 systematicBreakdown = None,
                                 noEffSF = None,
                                 onlyRecoEffSF = None ):
@@ -359,7 +359,7 @@ def makeMuonWorkingPointConfig( seq, containerName, workingPoint, selectionName,
                  names.  this is mostly used/needed when using this
                  sequence with multiple working points to ensure all
                  names are unique.
-      qualitySelectionOutput -- Whether or not to apply muon quality selection
+      addSelectionToPreselection -- Whether or not to apply muon quality selection
                                 when creating output containers.
       systematicBreakdown -- enables the full breakdown of eff SF systematics
       noEffSF -- Disables the calculation of efficiencies and scale factors
@@ -374,7 +374,7 @@ def makeMuonWorkingPointConfig( seq, containerName, workingPoint, selectionName,
             raise ValueError ('working point should be of format "quality.isolation", not ' + workingPoint)
         config.setOptionValue ('quality', splitWP[0])
         config.setOptionValue ('isolation', splitWP[1])
-    config.setOptionValue ('qualitySelectionOutput', qualitySelectionOutput)
+    config.setOptionValue ('addSelectionToPreselection', addSelectionToPreselection)
     config.setOptionValue ('systematicBreakdown', systematicBreakdown)
     config.setOptionValue ('noEffSF', noEffSF)
     config.setOptionValue ('onlyRecoEffSF', onlyRecoEffSF)
