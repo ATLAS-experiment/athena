@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -456,9 +456,9 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
 
                 # Avoid warnings for MC20a 2015-2016 triggers covering a single year
                 if config.campaign() is Campaign.MC20a:
-                    if triggerConfigYears[trig_short] == ['2015']:
+                    if triggerConfigYears[trig_short] == [2015]:
                         alg.maxRunNumber = 290000
-                    elif triggerConfigYears[trig_short] == ['2016']:
+                    elif triggerConfigYears[trig_short] == [2016]:
                         alg.minRunNumber = 290000
 
                 alg.trigger = trig
