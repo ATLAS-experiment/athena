@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCALIBSTREAM_EVENTINFOCALIBRAWDATAPROVIDER_H
 #define MUONCALIBSTREAM_EVENTINFOCALIBRAWDATAPROVIDER_H
@@ -28,7 +28,6 @@
 class StatusCode;
 //class MuonCalibRunLumiBlockCoolSvc;
 
-using namespace LVL2_MUON_CALIBRATION;
 
 class EventInfoCalibRawDataProvider : public AthReentrantAlgorithm {
     

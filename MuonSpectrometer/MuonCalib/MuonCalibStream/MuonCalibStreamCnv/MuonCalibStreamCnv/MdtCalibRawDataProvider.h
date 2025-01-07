@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCALIBSTREAM_MDTCALIBRAWDATAPROVIDER_H
 #define MUONCALIBSTREAM_MDTCALIBRAWDATAPROVIDER_H
@@ -34,7 +34,6 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonCablingData/MuonMDT_CablingMap.h"
 
-using namespace LVL2_MUON_CALIBRATION;
 
 class StatusCode;
 
@@ -56,7 +55,7 @@ class MdtCalibRawDataProvider : public AthReentrantAlgorithm {
     private:
 
  
-        StatusCode decodeImpl(Muon::MdtPrepDataContainer *mdtPrepDataContainer, const CalibEvent *event, const MuonGM::MuonDetectorManager* muDetMgr) const;
+        StatusCode decodeImpl(Muon::MdtPrepDataContainer *mdtPrepDataContainer, const LVL2_MUON_CALIBRATION::CalibEvent *event, const MuonGM::MuonDetectorManager* muDetMgr) const;
 
         ServiceHandle<IMuonCalibStreamDataProviderSvc> m_dataProvider{this,"DataProviderSvc","MuonCalibStreamDataProviderSvc"};
 
