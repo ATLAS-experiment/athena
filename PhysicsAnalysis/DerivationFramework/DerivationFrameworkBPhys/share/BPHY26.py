@@ -6,8 +6,8 @@
 # Set up common services and job object. 
 # This should appear in ALL derivation job options
 from DerivationFrameworkCore.DerivationFrameworkMaster import *
-
 from DerivationFrameworkCore.DerivationFrameworkMaster import DerivationFrameworkHasTruth
+from DerivationFrameworkMuons.MuonsCommon import *
 isSimulation = DerivationFrameworkHasTruth
 
 #====================================================================
@@ -22,7 +22,11 @@ Jpsimass = 3096.916
 Psi2Smass = 3686.10
 Upsimass = 9460.30
 Upsi2Smass = 10023.26
+Wmass = 80377.
 
+Jpsimass_lower = 770.0
+Jpsimass_upper = 10000.0 #Three channels, Phi + pi, Jpsi + pi and Upsilon +pi, are actually considered
+TeV = 13000000
 #--------------------------------------------------------------------
 ## 2/ Setup the vertex fitter tools (e.g. JpsiFinder, JpsiPlus1Track, etc).
 ##    These are general tools independent of DerivationFramework that do the 
@@ -36,9 +40,9 @@ BPHY26JpsiFinder = Analysis__JpsiFinder( # phi, psi, upsilon
     TrackAndTrack               = False,
     assumeDiMuons               = True,  # If true, will assume dimu hypothesis and use PDG value for mu mass
     trackThresholdPt            = 2500.,
-    invMassUpper                = 10000.0,
-    invMassLower                = 770.,
-    Chi2Cut                     = 50.,
+    invMassUpper                = Jpsimass_upper,
+    invMassLower                = Jpsimass_lower,
+    Chi2Cut                     = 30.,
     oppChargesOnly	            = True,
     atLeastOneComb              = True,
     useCombinedMeasurement      = False, # Only takes effect if combOnly=True	
@@ -95,12 +99,12 @@ BPHY26Plus1Track = Analysis__JpsiPlus1Track(
     name                                = "BPHY26Plus1Track",
     pionHypothesis                      = True,
     kaonHypothesis                      = False,
-    trkThresholdPt                      = 380.,
+    trkThresholdPt                      = 3000,
     trkMaxEta                           = 2.6,
-    JpsiMassLower                       = 770,
-    JpsiMassUpper                       = 10000,
+    JpsiMassLower                       = Jpsimass_lower,
+    JpsiMassUpper                       = Jpsimass_upper,
     TrkTrippletMassLower                = 40000., # 50000.
-    TrkTrippletMassUpper                = 150000.,
+    TrkTrippletMassUpper                = TeV, #13TeV or 150GeV
     Chi2Cut                             = 30.0,
     JpsiContainerKey                    = "BPHY26OniaCandidates",
     TrackParticleCollection             = "InDetTrackParticles",
@@ -133,9 +137,9 @@ BPHY26_Select_ThreeTrack      = DerivationFramework__Select_onia2mumu(
     HypothesisName             = "ThreeTracks",
     InputVtxContainerName      = "BPHY26ThreeTrack",
     TrkMasses                  = [105.658, 105.658, 139.570],
-    VtxMassHypo                = 80377., # for decay time
+    VtxMassHypo                = Wmass, # for decay time
     MassMin                    = 40000., # 50000.
-    MassMax                    = 150000.,
+    MassMax                    = TeV, #13TeV as the upper limit of the energy that can be generated
     Chi2Max                    = 30.)
 
 ToolSvc += BPHY26_Select_ThreeTrack
@@ -166,7 +170,7 @@ ToolSvc += BPHY26TrackIsolationDecorator
 #====================================================================
 
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__ReVertex
-## can try "UseVertexFittingWithPV" to see if there is a difference on W resolution
+# can try "UseVertexFittingWithPV" to see if there is a difference on W resolution
 BPHY26_Revertex_phipi          = DerivationFramework__ReVertex(
     name                       = "BPHY26_Revertex_phipi",
     InputVtxContainerName      = "BPHY26ThreeTrack",
@@ -175,7 +179,7 @@ BPHY26_Revertex_phipi          = DerivationFramework__ReVertex(
     RefitPV                    = True,
     RefPVContainerName         = "BPHY26RefittedPrimaryVertices", # use existing refitted PVs
     UseMassConstraint          = False,
-    SubVertexMass              = 1019.461,
+    SubVertexMass              = Phimass,
     MassInputParticles         = [105.658, 105.658, 139.570],
     TrkVertexFitterTool        = BPHY26VertexFit,
     OutputVtxContainerName     = "BPHY26Revtx_phipi")
@@ -187,10 +191,10 @@ BPHY26_Select_phipi          = DerivationFramework__Select_onia2mumu(
     HypothesisName             = "phipi",
     InputVtxContainerName      = "BPHY26Revtx_phipi",
     TrkMasses                  = [105.658, 105.658, 139.570],
-    VtxMassHypo                = 80377.,
+    VtxMassHypo                = Wmass,
     MassMin                    = 40000., # 50000.
-    MassMax                    = 150000,
-    Chi2Max                    = 30)
+    MassMax                    = TeV, #13TeV as the upper limit of the energy that can be generated
+    Chi2Max                    = 30.)
 
 ToolSvc += BPHY26_Select_phipi
 
@@ -203,7 +207,7 @@ BPHY26_Revertex_Jpsipi          = DerivationFramework__ReVertex(
     RefitPV                    = True,
     RefPVContainerName         = "BPHY26RefittedPrimaryVertices", # use existing refitted PVs
     UseMassConstraint          = True,
-    SubVertexMass              = 3096.916,
+    SubVertexMass              = Jpsimass,
     MassInputParticles         = [105.658, 105.658, 139.570],
     TrkVertexFitterTool        = BPHY26VertexFit,
     OutputVtxContainerName     = "BPHY26Revtx_Jpsipi")
@@ -215,10 +219,10 @@ BPHY26_Select_Jpsipi          = DerivationFramework__Select_onia2mumu(
     HypothesisName             = "Jpsipi",
     InputVtxContainerName      = "BPHY26Revtx_Jpsipi",
     TrkMasses                  = [105.658, 105.658, 139.570],
-    VtxMassHypo                = 80377.,
+    VtxMassHypo                = Wmass,
     MassMin                    = 40000., #50000.
-    MassMax                    = 150000,
-    Chi2Max                    = 30)
+    MassMax                    = TeV, #13TeV as the upper limit of the energy that can be generated
+    Chi2Max                    = 30.)
 
 ToolSvc += BPHY26_Select_Jpsipi
 
@@ -230,7 +234,7 @@ BPHY26_Revertex_Upsipi          = DerivationFramework__ReVertex(
     RefitPV                    = True,
     RefPVContainerName         = "BPHY26RefittedPrimaryVertices", # use existing refitted PVs
     UseMassConstraint          = True,
-    SubVertexMass              = 9460.30,
+    SubVertexMass              = Upsimass,
     MassInputParticles         = [105.658, 105.658, 139.570],
     TrkVertexFitterTool        = BPHY26VertexFit,
     OutputVtxContainerName     = "BPHY26Revtx_Upsipi")
@@ -242,10 +246,10 @@ BPHY26_Select_Upsipi          = DerivationFramework__Select_onia2mumu(
     HypothesisName             = "Upsipi",
     InputVtxContainerName      = "BPHY26Revtx_Upsipi",
     TrkMasses                  = [105.658, 105.658, 139.570],
-    VtxMassHypo                = 80377.,
+    VtxMassHypo                = Wmass,
     MassMin                    = 40000., # 50000.
-    MassMax                    = 150000,
-    Chi2Max                    = 30)
+    MassMax                    = TeV, #13TeV as the upper limit of the energy that can be generated
+    Chi2Max                    = 30.)
 
 ToolSvc += BPHY26_Select_Upsipi
 
@@ -260,7 +264,7 @@ ToolSvc += BPHY26_Select_Upsipi
 ##    where "ContainerName" is output container from some Reco_* tool, "HypoName" is the hypothesis name setup in some "Select_*"
 ##    tool and "count" is the number of candidates passing the selection you want to keep. 
 
-expression = "( count(BPHY26ThreeTrack.passed_ThreeTracks) > 0 && (count(BPHY26Revtx_phipi.passed_phipi) + count(BPHY26Revtx_Jpsipi.passed_Jpsipi) + count(BPHY26Revtx_Upsipi.passed_Upsipi) ) > 0)"
+expression = "( count(BPHY26ThreeTrack.passed_ThreeTracks) > 0 && ( count(BPHY26Revtx_Jpsipi.passed_Jpsipi) + count(BPHY26Revtx_Upsipi.passed_Upsipi) + count(BPHY26Revtx_phipi.passed_phipi) ) > 0)"
 
 
 from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__xAODStringSkimmingTool
@@ -287,18 +291,30 @@ ToolSvc += BPHY26_SelectEvent
 #====================================================================
 ## 9/ IMPORTANT bit. Don't forget to pass the tools to the DerivationKernel! If you don't do that, they will not be 
 ##    be executed!
+#=======================================
+# CREATE PRIVATE SEQUENCE  
+#=======================================
+BPHY26Seq = CfgMgr.AthSequencer("SequenceBPHY26")
+from DerivationFrameworkFlavourTag.FlavourTagCommon import FlavorTagInit
+FlavorTagInit(JetCollections=['AntiKt4EMPFlowJets'], Sequencer=BPHY26Seq)
 
 
 # The name of the kernel (BPHY26Kernel in this case) must be unique to this derivation
 from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramework__DerivationKernel
 augmentation_tools = [BPHY26_Reco_mumu, BPHY26ThreeTrackSelectAndWrite, BPHY26_Select_ThreeTrack]
-augmentation_tools += [BPHY26TrackIsolationDecorator, BPHY26_Revertex_phipi, BPHY26_Select_phipi, BPHY26_Revertex_Jpsipi, BPHY26_Select_Jpsipi, BPHY26_Revertex_Upsipi, BPHY26_Select_Upsipi]
+augmentation_tools += [BPHY26TrackIsolationDecorator,BPHY26_Revertex_phipi , BPHY26_Select_phipi, BPHY26_Revertex_Jpsipi, BPHY26_Select_Jpsipi , BPHY26_Revertex_Upsipi , BPHY26_Select_Upsipi]
 
 DerivationFrameworkJob += CfgMgr.DerivationFramework__DerivationKernel(
     "BPHY26Kernel",
     AugmentationTools = augmentation_tools,
     SkimmingTools     = [BPHY26_SelectEvent]
 )
+
+import LeptonTaggers.LeptonTaggersConfig as PLVConfig
+PLVConfig.ConfigureAntiKt4PV0TrackJets(BPHY26Seq, 'BPHY26')
+BPHY26Seq += PLVConfig.GetDecoratePromptLeptonAlgs(name="Muons")
+BPHY26Seq += PLVConfig.GetDecorateImprovedPromptLeptonAlgs()
+DerivationFrameworkJob += BPHY26Seq
 
 #====================================================================
 # SET UP STREAM   
@@ -342,7 +358,7 @@ BPHY26_AllVariables += ["InDetTrackParticles"]
 BPHY26_AllVariables += ["CombinedMuonTrackParticles", "ExtrapolatedMuonTrackParticles"]
 
 ## muon container
-BPHY26_AllVariables += ["Muons", "MuonSegments"]
+BPHY26_AllVariables += ["Muons","MuonSegments"]
 
 BPHY26_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY26ThreeTrackSelectAndWrite.OutputVtxContainerName]
 BPHY26_StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY26ThreeTrackSelectAndWrite.OutputVtxContainerName]
@@ -351,7 +367,7 @@ BPHY26_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPH
 
 BPHY26_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY26_Revertex_phipi.OutputVtxContainerName]
 BPHY26_StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY26_Revertex_phipi.OutputVtxContainerName]
-## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
+# we have to disable vxTrackAtVertex branch since it is not xAOD compatible
 BPHY26_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY26_Revertex_phipi.OutputVtxContainerName]
 
 BPHY26_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY26_Revertex_Jpsipi.OutputVtxContainerName]
@@ -361,7 +377,7 @@ BPHY26_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPH
 
 BPHY26_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY26_Revertex_Upsipi.OutputVtxContainerName]
 BPHY26_StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY26_Revertex_Upsipi.OutputVtxContainerName]
-## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
+# we have to disable vxTrackAtVertex branch since it is not xAOD compatible
 BPHY26_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY26_Revertex_Upsipi.OutputVtxContainerName]
 
 
@@ -370,6 +386,10 @@ if isSimulation:
     BPHY26_AllVariables += ["TruthEvents","TruthParticles","TruthVertices","MuonTruthParticles"]
 
 BPHY26SlimmingHelper.SmartCollections = ["Muons", "PrimaryVertices", "InDetTrackParticles"]
+BPHY26SlimmingHelper.ExtraVariables = [
+    "Muons.ptcone20_TightTTVA_pt1000.ptcone20_TightTTVA_pt500.ptvarcone20_TightTTVA_pt1000.ptvarcone20_TightTTVA_pt500.ptvarcone30_TightTTVA_pt1000.ptvarcone30_TightTTVA_pt500",
+    "Muons.PromptLeptonIso.PromptLeptonVeto.LowPtPLV"
+]
 BPHY26SlimmingHelper.AllVariables = BPHY26_AllVariables
 BPHY26SlimmingHelper.StaticContent = BPHY26_StaticContent
 BPHY26SlimmingHelper.AppendContentToStream(BPHY26Stream)
