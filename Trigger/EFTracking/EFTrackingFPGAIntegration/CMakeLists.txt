@@ -19,10 +19,35 @@ if( NOT DEFINED ENV{XILINX_XRT} )
 endif()
 
 find_package(OpenCL REQUIRED)
+
+# Xilinx XRT library
+find_package(XRT REQUIRED)
+
+# FIXME this a hack as this library is currently not distributed in CVMFS
+add_library(LibXRT SHARED IMPORTED)
+set_target_properties(LibXRT PROPERTIES
+  IMPORTED_LOCATION "$ENV{XILINX_XRT}/lib/libxrt_coreutil.so"
+  INTERFACE_INCLUDE_DIRECTORIES "$ENV{XILINX_XRT}/include"
+)
+
+add_library(LibXOCL SHARED IMPORTED)
+set_target_properties(LibXOCL PROPERTIES
+  IMPORTED_LOCATION "$ENV{XILINX_XRT}/lib/libxilinxopencl.so"
+  INTERFACE_INCLUDE_DIRECTORIES "$ENV{XILINX_XRT}/include"
+)
+
 atlas_add_component(EFTrackingFPGAIntegration
     src/*.h src/*.cxx src/components/*.cxx 
     INCLUDE_DIRS ${OpenCL_INCLUDE_DIRS} 
-    LINK_LIBRARIES GaudiKernel AthenaBaseComps xAODInDetMeasurement ${OpenCL_LIBRARIES} InDetPrepRawData InDetIdentifier InDetReadoutGeometry
+    LINK_LIBRARIES GaudiKernel 
+                   AthenaBaseComps 
+                   xAODInDetMeasurement 
+                   ${OpenCL_LIBRARIES} 
+                   InDetPrepRawData 
+                   InDetIdentifier 
+                   InDetReadoutGeometry
+                   LibXRT 
+                   LibXOCL
 )
 
 atlas_install_python_modules(python/*.py)
