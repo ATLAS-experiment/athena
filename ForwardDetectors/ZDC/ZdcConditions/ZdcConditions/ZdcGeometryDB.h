@@ -20,7 +20,7 @@ public:
   ZdcGeometryDB();
 
   static const ZdcGeometryDB* getInstance();
-  const nlohmann::json& getDB();
+  const nlohmann::json& getDB() const {return m_mainJson;};
   void loadJSONFile(std::string geoStr="ZDCgeom_Run3.json");
 
 };

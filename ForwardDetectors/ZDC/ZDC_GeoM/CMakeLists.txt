@@ -10,6 +10,6 @@ find_package( GeoModel COMPONENTS GeoModelKernel )
 atlas_add_component( ZDC_GeoM
 		     src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel GeoModelUtilities GaudiKernel GeoModelInterfaces StoreGateLib AthenaBaseComps ZdcIdentifier)
+                     LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel GeoModelUtilities GaudiKernel GeoModelInterfaces StoreGateLib AthenaBaseComps ZdcIdentifier ZdcConditions)
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
