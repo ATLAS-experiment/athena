@@ -225,7 +225,7 @@ void test1()
   assert (b3.container() == &v3);
   assert (ityp1(b3) == 21);
   assert (ftyp1(b3) == 1.5);
-
+  //cppcheck-suppress accessMoved
   SG::AuxElement b4 = std::move(b);
   assert (b4.index() == 0);
   assert (b4.container() == 0);
