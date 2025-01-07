@@ -13,7 +13,8 @@
   <class name="DataVector<Trk::Track>" id="70ECEBFC-BE00-46C2-8B35-4CC12D18DE39"/>
   <class name="std::vector<Trk::Track*>"  />
 
-  <class name="std::vector<ElementLink<TrackCollection > >" > </class>
+  <!-- This is also TrackViewVector::Pers_t -->
+  <class name="std::vector<ElementLink<TrackCollection > >" id="FBAE722E-DF5B-4811-8132-4D80DBB2688C"/>
 
   <!-- TSoS --> 
   <class name="Trk::TrackStateOnSurface" />
@@ -36,7 +37,5 @@
       <field name="m_patternRecognition"/>
     </class>
   </exclusion>
-
-  <class name="std::bitset<11>" />
 
 </lcgdict>
