@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthLinks/tools/IdentContIndexingPolicy.icc
  * @author scott snyder <snyder@bnl.gov>
@@ -98,8 +96,8 @@ IdentContIndexingPolicy<CONT>::reverseLookup(const CONT& data,
                                              ElementConstReference element,
                                              index_type& index)
 {
-  //compiler checks we can compare elements
-  ::boost::function_requires<typename ::boost::EqualityComparableConcept<ElementType> >();
+  // compiler checks we can compare elements
+  static_assert (std::equality_comparable<ElementType>);
 
   // The hash and possibly the object index may already have
   // been set by the user. We verify that the index does
