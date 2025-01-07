@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Unit test for AthTPCnvSvc
 
 from AthenaPython import PyAthena
@@ -54,8 +54,6 @@ assert getname(tpsvc.t2p_cnv(20394828,2)) == \
 
 assert getname(tpsvc.t2p_cnv('AthenaServicesTestConverters::TB')) == \
        'AthenaServicesTestConverters::TestConverter_TB_PB1'
-assert getname(tpsvc.t2p_cnv('AthenaServicesTestConverters::TB',1)) == \
-       'AthenaServicesTestConverters::TestConverter_TB_PB1_ARA'
 assert getname(tpsvc.t2p_cnv('AthenaServicesTestConverters::TB',2)) == \
        'AthenaServicesTestConverters::TestConverter_TB_PB1'
 
@@ -68,22 +66,16 @@ assert getname(tpsvc.t2p_cnv('AthenaServicesTestConverters::TBTRIG',2)) == \
 
 assert getname(tpsvc.p2t_cnv('AthenaServicesTestConverters::PB1')) == \
        'AthenaServicesTestConverters::TestConverter_TB_PB1'
-assert getname(tpsvc.p2t_cnv('AthenaServicesTestConverters::PB1',1)) == \
-       'AthenaServicesTestConverters::TestConverter_TB_PB1_ARA'
 assert getname(tpsvc.p2t_cnv('AthenaServicesTestConverters::PB1',2)) == \
        'AthenaServicesTestConverters::TestConverter_TBTRIG_PB1'
 
 assert getname(tpsvc.t2p_cnv(20394827)) == \
        'AthenaServicesTestConverters::TestConverter_TB_PB1'
-assert getname(tpsvc.t2p_cnv(20394827,1)) == \
-       'AthenaServicesTestConverters::TestConverter_TB_PB1_ARA'
 assert getname(tpsvc.t2p_cnv(20394827,2)) == \
        'AthenaServicesTestConverters::TestConverter_TB_PB1'
 
 assert getname(tpsvc.t2p_cnv(20394826)) == \
        'AthenaServicesTestConverters::TestConverter_TB_PB1'
-assert getname(tpsvc.t2p_cnv(20394826,1)) == \
-       'AthenaServicesTestConverters::TestConverter_TB_PB1_ARA'
 assert getname(tpsvc.t2p_cnv(20394826,2)) == \
        'AthenaServicesTestConverters::TestConverter_TB_PB1'
 
