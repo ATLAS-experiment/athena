@@ -1,10 +1,8 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthLinks/tools/ForwardIndexingPolicy.h
  * @author scott snyder <snyder@bnl.gov>
@@ -21,8 +19,8 @@
 #include "AthLinks/tools/findInContainer.h"
 #include "AthenaKernel/tools/type_tools.h"
 #include "AthenaKernel/ClassName.h"
-#include <boost/concept_check.hpp>
 #include <cstddef>
+#include <concepts>
 #include <stdint.h>
 
 
