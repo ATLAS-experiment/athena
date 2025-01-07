@@ -1,6 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
+#if defined(FLATTEN) && defined(__GNUC__)
+// Avoid warning in dbg build
+#pragma GCC optimize "-fno-var-tracking-assignments"
+#endif
 
 #include "MuonChamberToolTest.h"
 
