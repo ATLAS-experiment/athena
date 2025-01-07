@@ -11,24 +11,6 @@ namespace Tau{
 GeneralTauPlots::GeneralTauPlots(PlotBase* pParent, const std::string& sDir, const std::string& sTauJetContainerName):
    PlotBase(pParent, sDir),
    m_oParamPlots(this, "", sTauJetContainerName),
-   m_tauCharge(nullptr),
-   m_tauNChargedTracks(nullptr),
-   m_tauNIsolatedTracks(nullptr),
-   m_tauNCoreTracks(nullptr),
-   m_tauNWideTracks(nullptr),
-   m_ptHighPt(nullptr),
-   m_RNNEleScore(nullptr),
-   m_RNNEleScoreSigTrans(nullptr),
-   m_RNNJetScore(nullptr),
-   m_RNNJetScoreSigTrans(nullptr),
-   m_ptRNNVeryLoose(nullptr),
-   m_ptRNNLoose(nullptr),
-   m_ptRNNMedium(nullptr),
-   m_ptRNNTight(nullptr),
-   m_ptRNNVeryLooseHighPt(nullptr),
-   m_ptRNNLooseHighPt(nullptr),
-   m_ptRNNMediumHighPt(nullptr),
-   m_ptRNNTightHighPt(nullptr),
    m_sTauJetContainerName(sTauJetContainerName)
 {	
 }
