@@ -11,7 +11,7 @@
 #include "AthenaKernel/getMessageSvc.h"
 
 
-#include "TrackFitter.h"
+#include "FPGATrackSimAlgorithms/TrackFitter.h"
 
 
 std::vector<FPGATrackSimTrack>::const_iterator getBestChi2(std::vector<FPGATrackSimTrack> const & tracks);

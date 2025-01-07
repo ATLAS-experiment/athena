@@ -14,7 +14,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
-#include "OnnxRuntimeBase.h"
+#include "FPGATrackSimAlgorithms/OnnxRuntimeBase.h"
 
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
@@ -25,7 +25,7 @@
 
 #include "GaudiKernel/ITHistSvc.h"
 
-#include "FPGATrackSimTrackingToolBase.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimTrackingToolBase.h"
 
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"

@@ -13,7 +13,7 @@
 
 #include "FPGATrackSimTrackingToolBase.h"
 
-#include "TrackFitter.h"
+#include "FPGATrackSimAlgorithms/TrackFitter.h"
 #include "FPGATrackSimBanks/FPGATrackSimSectorBank.h"
 
 #include <string>

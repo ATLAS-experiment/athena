@@ -76,28 +76,33 @@ StatusCode FPGATrackSimMatrixGenAlgo::initialize()
   ATH_CHECK(m_roadFinderTool.retrieve());
   if (m_doClustering) ATH_CHECK(m_clusteringTool.retrieve());
   if (m_doSpacePoints) ATH_CHECK(m_spacePointsTool.retrieve());
+  ATH_CHECK(m_trackExtensionTool.retrieve(EnableTool{m_doHoughConstants && m_doSecondStage}));
+  ATH_CHECK(m_trackFitterTool_1st.retrieve(EnableTool{m_doHoughConstants && m_doSecondStage}));
+  ATH_CHECK(m_overlapRemovalTool.retrieve(EnableTool{m_doHoughConstants && m_doSecondStage}));
 
+
+  
   if (m_doHoughConstants) {
     if (m_ideal_geom == 0) {
       ATH_MSG_INFO("Hough constants method needs idealized geometry > 0, aborting.");
       return StatusCode::FAILURE;
     }
-    m_pmap = m_FPGATrackSimMapping->PlaneMap_1st(0);
-    // Get detector configurations
-    m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
     m_nRegions = m_FPGATrackSimMapping->RegionMap_1st()->getNRegions();
-    m_nDim = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNCoords();
-
+    m_pmap_2nd = m_FPGATrackSimMapping->PlaneMap_2nd(0);
+    m_pmap_1st = m_FPGATrackSimMapping->PlaneMap_1st(0);
+    // Get detector configurations
+    m_nLayers_1st = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
+    m_nDim_1st = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNCoords();
+    m_nLayers_2nd = m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers();
+    m_nDim_2nd = m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNCoords();
   }
   else {
-    m_pmap = m_FPGATrackSimMapping->PlaneMap_2nd(0);
     // Get detector configurations
-    m_nLayers = m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers();
+    m_nLayers_1st = m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers();
     m_nRegions = m_FPGATrackSimMapping->RegionMap_2nd()->getNRegions();
-    m_nDim = m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNCoords();
+    m_nDim_1st = m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNCoords();
   }
 
-  m_nDim2 = m_nDim * m_nDim;
   m_sector_cum.resize(m_nRegions);
 
   // Retrieve slice information
@@ -197,9 +202,9 @@ void fillTrackPars(TH1I* const hists[FPGATrackSimTrackPars::NPARS], FPGATrackSim
 
 StatusCode FPGATrackSimMatrixGenAlgo::execute()
 {
+  ATH_MSG_DEBUG("execute()");
   m_eventHeader->clearHits();
   m_eventHeader->reset();
-
   // Get hits and training tracks from this event
   ATH_CHECK(m_hitInputTool->readData(m_eventHeader, Gaudi::Hive::currentContext()));
 
@@ -207,21 +212,19 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
 
   std::vector<FPGATrackSimTruthTrack> truth_tracks = m_eventHeader->optional().getTruthTracks();
   std::vector<FPGATrackSimTruthTrack> tracks = filterTrainingTracks(truth_tracks);
-
   m_nTracks += truth_tracks.size();
   if (tracks.empty()) {  
     ATH_MSG_DEBUG("Empty training tracks");
     return StatusCode::SUCCESS;
   }
-
   // Prepare a map of the hits according the barcode
   std::map<int, std::vector<FPGATrackSimHit>> barcode_hits = makeBarcodeMap(hits, tracks);
-
   // For each training track, find the sector it belongs to and accumulate the
   // hit coordinates and track parameters.
   for (FPGATrackSimTruthTrack const & track : tracks) {
-
+    
     int nSlices = m_FPGATrackSimMapping->SubRegionMap()->getNRegions();
+
     // Get list of hits associated to the current truth track
     std::vector<FPGATrackSimHit> & track_hits = barcode_hits[track.getBarcode()];
 
@@ -231,68 +234,129 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
 
     for (int iSlice = 0; iSlice<nSlices; iSlice++){
       t_pmap = m_FPGATrackSimMapping->PlaneMap_1st(iSlice);
+      
       for (auto & iHit : track_hits) {
         t_pmap->map(iHit);
       }
+      
+      
       std::vector<FPGATrackSimHit> sector_hits;
-      bool success = filterSectorHits(track_hits, sector_hits, track, iSlice);
+      bool success = filterSectorHits(track_hits, sector_hits, track, true, iSlice);
       if (!success) continue; // Skip this track if it has bad hits (not complete, etc.)
       m_h_trackQoP_okHits->Fill(track.getQOverPt());
-
+      
       // Get the region of this sector
-      int region = getRegion(sector_hits);
+      int region = getRegion(sector_hits, true);
       if (region < 0 || region >= m_nRegions) continue;
       m_h_trackQoP_okRegion->Fill(track.getQOverPt());
-        
       //For the Hough constants, find the Hough roads
       std::vector<std::shared_ptr<const FPGATrackSimRoad>> houghRoads;
-      if (m_doHoughConstants) {
-        std::vector<std::shared_ptr<const FPGATrackSimHit>> phits;
+      if (m_doHoughConstants){
+	
+	std::vector<std::shared_ptr<const FPGATrackSimHit>> phits;
+	
+	for (const FPGATrackSimHit& hit : sector_hits) if (hit.isMapped() && hit.isReal()) phits.emplace_back(std::make_shared<const FPGATrackSimHit>(hit));
+	StatusCode sc = m_roadFinderTool->getRoads(phits, houghRoads);
+	if (sc.isFailure()) ATH_MSG_WARNING("Hough Transform -> getRoads() failed");
+	if (m_doSecondStage) { // if doing 2nd stage, we want to get tracks from the road and then do tracking and overlap removal
 
-        for (const FPGATrackSimHit& hit : sector_hits) phits.emplace_back(std::make_shared<const FPGATrackSimHit>(hit));
+	  /// map hits as 2nd stage
+	  const FPGATrackSimPlaneMap *pmap_2nd = m_FPGATrackSimMapping->PlaneMap_2nd(iSlice);
+	  for (auto & iHit : track_hits) {
+	    pmap_2nd->map(iHit);
+	  }
 
-        StatusCode sc = m_roadFinderTool->getRoads(phits, houghRoads);
-        if (sc.isFailure()) ATH_MSG_WARNING("Hough Transform -> getRoads() failed");
-
-        if (!houghRoads.empty()){
-          double y = 0.0;
-          double x = 0.0;
-
-          //For each Hough road, make the accumulator
-          for (auto const &hr : houghRoads){
-            y = hr->getY();
-            x = hr->getX();
-
-            // Prepare the accumulator struct
-            std::vector<module_t> modules(m_nLayers);
-            FPGATrackSimMatrixAccumulator acc(m_nLayers, m_nDim);
-            acc.pars.qOverPt = y;
-            acc.pars.phi = x;
-            std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> modules_acc = {modules, acc};
-            ATH_CHECK(makeAccumulator(sector_hits, track, modules_acc));
-
-            // Add the track to the accumulate map
-            accumulate(m_sector_cum[region], modules_acc.first, modules_acc.second);
-            m_nTracksUsed++;
-          }
-        } else {
-          ATH_MSG_DEBUG("execute(): no hough roads?");
-          return StatusCode::SUCCESS;
-        }
-      } else {
-        // Prepare the accumulator struct
-        std::vector<module_t> modules(m_nLayers);
-        FPGATrackSimMatrixAccumulator acc(m_nLayers, m_nDim);
-        std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> modules_acc = {modules, acc};
-        ATH_CHECK(makeAccumulator(sector_hits, track, modules_acc));
-
-        // Add the track to the accumulate map
-        accumulate(m_sector_cum[region], modules_acc.first, modules_acc.second);
-        m_nTracksUsed++;
+	  std::vector<FPGATrackSimTrack> tracks_1st;
+	  ATH_CHECK(m_trackFitterTool_1st->getTracks(houghRoads, tracks_1st));
+	  ATH_CHECK(m_overlapRemovalTool->runOverlapRemoval(tracks_1st));
+	  // Prepare the accumulator struct
+	  std::vector<module_t> modules(m_nLayers_2nd);
+	  FPGATrackSimMatrixAccumulator acc(m_nLayers_2nd, m_nDim_2nd);	
+	  std::vector<FPGATrackSimHit> hits_2nd;
+	  std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_2nd;
+	  success = filterSectorHits(track_hits, hits_2nd, track, false, iSlice); // only look at 2nd stage hits!
+	  
+	  
+	  if (!success) continue; // Skip this track if it has bad hits (not complete, etc.)
+	  // awkward fixme
+	  for (const auto& hit : hits_2nd) {
+	    phits_2nd.push_back(std::make_shared<const FPGATrackSimHit>(hit));
+	  }
+	  
+	  // Use the track extension tool to actually produce a new set of roads.
+	  std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_2nd;
+	  std::vector<std::shared_ptr<const FPGATrackSimTrack>> ptracks_1st;
+	  ptracks_1st.reserve(tracks_1st.size());
+	  for (const auto& track : tracks_1st) {
+	    ptracks_1st.push_back(std::make_shared<const FPGATrackSimTrack>(track));
+	  }
+	  ATH_CHECK(m_trackExtensionTool->extendTracks(phits_2nd, ptracks_1st, roads_2nd));
+	  for (auto road_2nd : roads_2nd) {
+	    std::vector<module_t> modules(m_nLayers_2nd);
+	    FPGATrackSimMatrixAccumulator acc(m_nLayers_2nd, m_nDim_2nd);
+	    acc.pars.qOverPt = road_2nd->getY();
+	    acc.pars.phi = road_2nd->getX();
+	    
+	    std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> modules_acc = {modules, acc};
+	    std::vector<std::shared_ptr<const FPGATrackSimHit>> phits;
+	    ATH_CHECK(makeAccumulator(hits_2nd, track, modules_acc));
+	    
+	    // Add the track to the accumulate map
+	    accumulate(m_sector_cum[region], modules_acc.first, modules_acc.second);
+	    
+	    if (m_dropHitsAndFill)
+	      ATH_CHECK(fillAccumulatorByDropping(hits_2nd, false, acc.pars.phi, acc.pars.qOverPt, modules, m_sector_cum[region], track, iSlice));
+	    
+	    m_nTracksUsed++;
+	  }
+	}
+	else {	
+	  //For each Hough road, make the accumulator
+	  if (!houghRoads.empty()){
+	    double y = 0.0;
+	    double x = 0.0;
+	    
+	    //For each Hough road, make the accumulator
+	    for (auto const &hr : houghRoads){
+	      y = hr->getY();
+	      x = hr->getX();
+	      // Prepare the accumulator struct
+	      std::vector<module_t> modules(m_nLayers_1st);
+	      FPGATrackSimMatrixAccumulator acc(m_nLayers_1st, m_nDim_1st);
+	      acc.pars.qOverPt = y;
+	      acc.pars.phi = x;
+	      std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> modules_acc = {modules, acc};
+	      ATH_CHECK(makeAccumulator(sector_hits, track, modules_acc));
+	      
+	      // Add the track to the accumulate map
+	      accumulate(m_sector_cum[region], modules_acc.first, modules_acc.second);
+	      
+	      if (m_dropHitsAndFill)
+		ATH_CHECK(fillAccumulatorByDropping(sector_hits, true, acc.pars.phi, acc.pars.qOverPt, modules, m_sector_cum[region], track, iSlice));	      
+	      
+	      m_nTracksUsed++;
+	    }
+	  }
+	}
+      }
+      else{
+	// Prepare the accumulator struct
+	std::vector<module_t> modules(m_nLayers_1st);
+	FPGATrackSimMatrixAccumulator acc(m_nLayers_1st, m_nDim_1st);
+	std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> modules_acc = {modules, acc};
+	ATH_CHECK(makeAccumulator(sector_hits, track, modules_acc));
+	
+	// Add the track to the accumulate map
+	accumulate(m_sector_cum[region], modules_acc.first, modules_acc.second);      
+	
+	if (m_dropHitsAndFill)
+	  ATH_CHECK(fillAccumulatorByDropping(sector_hits, true, acc.pars.phi, acc.pars.qOverPt, modules, m_sector_cum[region], track, iSlice));
+	
+	m_nTracksUsed++;
       }
     }
   }
-  
+
   return StatusCode::SUCCESS;
 }
 
@@ -405,45 +469,39 @@ std::map<int, std::vector<FPGATrackSimHit>> FPGATrackSimMatrixGenAlgo::makeBarco
 // eta and phi will differ in general in this case
 // Take the lower-z hit preferentially (right thing to do? d0/pT tradeoff)
 // But something fishy is going on if we've got two hits on the same disk.
-FPGATrackSimMatrixGenAlgo::selectHit_returnCode FPGATrackSimMatrixGenAlgo::selectHit(FPGATrackSimHit const & old_hit, FPGATrackSimHit const & new_hit,
-                                                                                     int subregion) const
+FPGATrackSimMatrixGenAlgo::selectHit_returnCode FPGATrackSimMatrixGenAlgo::selectHit(FPGATrackSimHit const & old_hit, FPGATrackSimHit const & new_hit, bool is1ststage, int subregion) const
 {
-  if ((new_hit.getSection() == old_hit.getSection()) && (new_hit.getLayer() == old_hit.getLayer())
-      && (new_hit.getEtaModule() == old_hit.getEtaModule()) && (new_hit.getPhiModule() == old_hit.getPhiModule())) {
-    ATH_MSG_DEBUG("Two hits on same module");
-    return selectHit_returnCode::SH_FAILURE;
-  }
-    
-  // Always prefer spacepoints, regardless of all other considerations.
-  // This is necessary in part due to spacepoint duplication.
-  if (old_hit.getHitType() == HitType::spacepoint && new_hit.getHitType() != HitType::spacepoint) {
-    return selectHit_returnCode::SH_KEEP_OLD;
-  } else if (old_hit.getHitType() != HitType::spacepoint && new_hit.getHitType() == HitType::spacepoint) {
-    return selectHit_returnCode::SH_KEEP_NEW;
-  }
-
-  int new_section = new_hit.getSection();
-  int old_section = old_hit.getSection();
-
-  if (old_section == new_section) {
-
-    if (old_hit.getEtaModule() == new_hit.getEtaModule()) {
+   if (old_hit.isReal() && !new_hit.isReal()) return selectHit_returnCode::SH_KEEP_OLD;
+   if (!old_hit.isReal() && new_hit.isReal()) return selectHit_returnCode::SH_KEEP_NEW;  
+   if (!old_hit.isReal() && !new_hit.isReal()) return selectHit_returnCode::SH_FAILURE;
+   if ((new_hit.getSection() == old_hit.getSection()) && (new_hit.getLayer() == old_hit.getLayer())
+       && (new_hit.getEtaModule() == old_hit.getEtaModule()) && (new_hit.getPhiModule() == old_hit.getPhiModule())) {
+      ATH_MSG_DEBUG("Two hits on same module");
+      return selectHit_returnCode::SH_FAILURE;
+   }
+   // Always prefer spacepoints, regardless of all other considerations.
+   // This is necessary in part due to spacepoint duplication.
+   if (old_hit.getHitType() == HitType::spacepoint && new_hit.getHitType() != HitType::spacepoint) {
+      return selectHit_returnCode::SH_KEEP_OLD;
+   } else if (old_hit.getHitType() != HitType::spacepoint && new_hit.getHitType() == HitType::spacepoint) {
+      return selectHit_returnCode::SH_KEEP_NEW;
+   }
+   int new_section = new_hit.getSection();
+   int old_section = old_hit.getSection();
+   
+   if (old_section == new_section) {
+      if (old_hit.getEtaModule() == new_hit.getEtaModule()) {
       int rmax = 0;
-      if (m_doHoughConstants) {
-        // Use the subregion map, not the region map, for these checks.
-        int phi_max = m_FPGATrackSimMapping->SubRegionMap()->getRegionBoundaries(subregion, new_hit.getLayer(), new_section).phi_max;
-        int phi_min = m_FPGATrackSimMapping->SubRegionMap()->getRegionBoundaries(subregion, new_hit.getLayer(), new_section).phi_min;
+      if (m_doHoughConstants && is1ststage) {
+         int phi_max = m_FPGATrackSimMapping->SubRegionMap()->getRegionBoundaries(subregion, new_hit.getLayer(), new_section).phi_max;
+         int phi_min = m_FPGATrackSimMapping->SubRegionMap()->getRegionBoundaries(subregion, new_hit.getLayer(), new_section).phi_min;
+         rmax = phi_max - phi_min;
 
-        rmax = phi_max - phi_min;
       }
       else {
-        // TODO: this needs updating, once we get the second stage going again.
-        int reg = m_FPGATrackSimMapping->RegionMap_2nd()->getRegions(new_hit)[0]; // just take region with lowest index
-
-        int phi_max = m_FPGATrackSimMapping->RegionMap_2nd()->getRegionBoundaries(reg, new_hit.getLayer(), new_section).phi_max;
-        int phi_min = m_FPGATrackSimMapping->RegionMap_2nd()->getRegionBoundaries(reg, new_hit.getLayer(), new_section).phi_min;
-
-        rmax = phi_max - phi_min;
+         int phi_max = m_FPGATrackSimMapping->SubRegionMap_2nd()->getRegionBoundaries(subregion, new_hit.getLayer(), new_section).phi_max;
+         int phi_min = m_FPGATrackSimMapping->SubRegionMap_2nd()->getRegionBoundaries(subregion, new_hit.getLayer(), new_section).phi_min;
+         rmax = phi_max - phi_min;
       }
       
       int phi_diff = old_hit.getPhiModule() - new_hit.getPhiModule();
@@ -451,133 +509,122 @@ FPGATrackSimMatrixGenAlgo::selectHit_returnCode FPGATrackSimMatrixGenAlgo::selec
       if (phi_diff == 1 || phi_diff == -rmax) return selectHit_returnCode::SH_KEEP_OLD;
       else if (phi_diff == -1 || phi_diff == rmax) return selectHit_returnCode::SH_KEEP_NEW;
       else {
-	ATH_MSG_DEBUG("Hits are too far away in phi");
-	return selectHit_returnCode::SH_FAILURE;
+         ATH_MSG_DEBUG("Hits are too far away in phi");
+         return selectHit_returnCode::SH_FAILURE;
       }
-    }
-    else { // Different eta is no good
-      
-      ATH_MSG_DEBUG("Hits are in different eta");
-      return selectHit_returnCode::SH_FAILURE;
-    }
-  }
-  else { // sections are different
-    
-    int  layer = old_hit.getLayer();
-    bool old_isEC = 0;
-    bool new_isEC = 0;
-    int  old_disk = 0;
-    int  new_disk = 0;
-    if (m_doHoughConstants) {
-      old_isEC = m_FPGATrackSimMapping->PlaneMap_1st(subregion)->isEC(layer, old_section);
-      new_isEC = m_FPGATrackSimMapping->PlaneMap_1st(subregion)->isEC(layer, new_section);
-      old_disk = m_FPGATrackSimMapping->PlaneMap_1st(subregion)->getLayerInfo(layer, old_section).physDisk;
-      new_disk = m_FPGATrackSimMapping->PlaneMap_1st(subregion)->getLayerInfo(layer, new_section).physDisk;
-    }
-    else {
-      // This will need updating, once we get to the second stage.
-      old_isEC = m_FPGATrackSimMapping->PlaneMap_2nd(subregion)->isEC(layer, old_section);
-      new_isEC = m_FPGATrackSimMapping->PlaneMap_2nd(subregion)->isEC(layer, new_section);
-      old_disk = m_FPGATrackSimMapping->PlaneMap_2nd(subregion)->getLayerInfo(layer, old_section).physDisk;
-      new_disk = m_FPGATrackSimMapping->PlaneMap_2nd(subregion)->getLayerInfo(layer, new_section).physDisk;
-    }
-    // If one is barrel and one endcap, it's definitely OK, take the barrel hit
-    if (old_isEC != new_isEC) {
-      
-      if (old_isEC) return selectHit_returnCode::SH_KEEP_NEW;
-      else return selectHit_returnCode::SH_KEEP_OLD;
-    }
-    // Two endcap hits : same disk: discard
-    else if (old_disk == new_disk) {
-      
-      ATH_MSG_DEBUG("Two modules hit in same physical disk " << old_disk);
-      return selectHit_returnCode::SH_FAILURE;
-    }
-    // Two endcap hits on same side: different disks: take the lower-z
-    else {
-      ATH_MSG_DEBUG("Keeping the lower-z of the two disks (" << old_disk << ", " << new_disk << ") hit");
-      if (old_disk > new_disk) return selectHit_returnCode::SH_KEEP_NEW;
-      else return selectHit_returnCode::SH_KEEP_OLD;
-    }
-  }
+      }
+      else { // Different eta is no good
+         ATH_MSG_DEBUG("Hits are in different eta");
+         return selectHit_returnCode::SH_FAILURE;
+      }
+   }
+   else { // sections are different
+      int  layer = old_hit.getLayer();
+      bool old_isEC = 0;
+      bool new_isEC = 0;
+      int  old_disk = 0;
+      int  new_disk = 0;
+      if (m_doHoughConstants && is1ststage) {
+         old_isEC = m_FPGATrackSimMapping->PlaneMap_1st(subregion)->isEC(layer, old_section);
+         new_isEC = m_FPGATrackSimMapping->PlaneMap_1st(subregion)->isEC(layer, new_section);
+         old_disk = m_FPGATrackSimMapping->PlaneMap_1st(subregion)->getLayerInfo(layer, old_section).physDisk;
+         new_disk = m_FPGATrackSimMapping->PlaneMap_1st(subregion)->getLayerInfo(layer, new_section).physDisk;
+      }
+      else {
+         old_isEC = m_FPGATrackSimMapping->PlaneMap_2nd(subregion)->isEC(layer, old_section);
+         new_isEC = m_FPGATrackSimMapping->PlaneMap_2nd(subregion)->isEC(layer, new_section);
+         old_disk = m_FPGATrackSimMapping->PlaneMap_2nd(subregion)->getLayerInfo(layer, old_section).physDisk;
+         new_disk = m_FPGATrackSimMapping->PlaneMap_2nd(subregion)->getLayerInfo(layer, new_section).physDisk;
+      }
+      // If one is barrel and one endcap, it's definitely OK, take the barrel hit
+      if (old_isEC != new_isEC) {
+         
+         if (old_isEC) return selectHit_returnCode::SH_KEEP_NEW;
+         else return selectHit_returnCode::SH_KEEP_OLD;
+      }
+      // Two endcap hits : same disk: discard
+      else if (old_disk == new_disk) {
+         
+         ATH_MSG_DEBUG("Two modules hit in same physical disk " << old_disk);
+         return selectHit_returnCode::SH_FAILURE;
+      }
+      // Two endcap hits on same side: different disks: take the lower-z
+      else {
+         ATH_MSG_DEBUG("Keeping the lower-z of the two disks (" << old_disk << ", " << new_disk << ") hit");
+         if (old_disk > new_disk) return selectHit_returnCode::SH_KEEP_NEW;
+         else return selectHit_returnCode::SH_KEEP_OLD;
+      }
+   }
 }
 
 
-// A sector is created from 8 hits in 8 layers. Sometimes there will be extraneous hits
+// A sector is created from hits in all layers. Sometimes there will be extraneous hits
 // that need to be filtered. This functions returns true on success, and by reference
-// the filtered hit list with size m_nLayers.
+// the filtered hit list with size m_nLayers_1st.
 //
-// the truth track is "temp" and could be removed in the future?
 // See selectHit() for details on which hit is chosen when there's more than 1 per layer.
 bool FPGATrackSimMatrixGenAlgo::filterSectorHits(std::vector<FPGATrackSimHit> const & all_hits, std::vector<FPGATrackSimHit> & sector_hits,
-                                                 FPGATrackSimTruthTrack const & t, int subregion) const
+                                                 FPGATrackSimTruthTrack const & t, bool is1ststage, int subregion) const
 {
   FPGATrackSimHit nohit;
   nohit.setHitType(HitType::wildcard);
-  sector_hits.resize(m_nLayers, nohit);
-  std::vector<int> layer_count(m_nLayers); // count number of hits seen in each layer
-
-  const FPGATrackSimRegionMap* rmap_1st = m_FPGATrackSimMapping->SubRegionMap();
+  int nLayers = (is1ststage ? m_nLayers_1st : m_nLayers_2nd);
+  const FPGATrackSimRegionMap *rmap = (is1ststage ? m_FPGATrackSimMapping->SubRegionMap() : m_FPGATrackSimMapping->SubRegionMap_2nd());
+  sector_hits.resize(nLayers, nohit);
+  std::vector<int> layer_count(nLayers); // count number of hits seen in each layer
 
   for (FPGATrackSimHit const & hit : all_hits) {
-    if (!hit.isMapped()){
-        continue;
-    }
+     if (!hit.isReal() || !hit.isMapped()) continue;
+
     // Sanity check. make sure the hit is actually in the first stage?
     // If the hit falls within the boundaries of ANY subregion in the first stage, it's 1st stage.
-    if (rmap_1st->getRegions(hit).size() == 0) {
+    if (rmap->getRegions(hit).size() == 0) {
       continue;
     }
     int layer = hit.getLayer();
-
     if (layer_count[layer] == 0){
       layer_count[layer]++;
       sector_hits[layer] = hit;
     }
     else if (layer_count[layer] == 1) {
       layer_count[layer]++;
-      
-      // Already found a hit in this layer, so pick which hit to use.
-      // This needs to be subregion aware, unfortunately, so we use the right subrmap to do the checks.
-      selectHit_returnCode selected_hit = selectHit(sector_hits[layer], hit, subregion);
+      // Already found a hit in this layer, so pick which hit to use
+      selectHit_returnCode selected_hit = selectHit(sector_hits[layer], hit, is1ststage, subregion);
       
       if (selected_hit == selectHit_returnCode::SH_FAILURE) {
-	fillTrackPars(m_h_SHfailure, t);
-	return false;
+         fillTrackPars(m_h_SHfailure, t);
+         return false;
       }
       else if (selected_hit == selectHit_returnCode::SH_KEEP_NEW) sector_hits[layer] = hit;
     }
     else {
-      ATH_MSG_DEBUG("Too many hits on a plane, exiting filterHitsSec");
-      fillTrackPars(m_h_3hitsInLayer, t);
-      return false;
+       ATH_MSG_DEBUG("Too many hits on a plane, exiting filterHitsSec");
+       fillTrackPars(m_h_3hitsInLayer, t);
+       return false;
     }
   }
-  
   // Count number of wildcards, spacepoints, and pixel hits.
   int nwc = 0;
   int num_sp = 0;
   int num_pixel = 0;
 
-  // Check we have the right number of hits
   // Check we have the right number of hits.
-  for (int i = 0; i < m_nLayers; ++i)
+  for (int i = 0; i < nLayers; ++i)
   {
     if (layer_count[i] == 0)
     {
-      ATH_MSG_DEBUG("Layer " << i << " has no hits");
-      nwc++;
+       ATH_MSG_DEBUG("Layer " << i << " has no hits");
+       nwc++;
     }
 
     // Now that we've decided which hit to use-- check their type.
     if (sector_hits[i].getHitType() == HitType::spacepoint) {
-      num_sp += 1;
+       num_sp += 1;
     }
     if (sector_hits[i].isPixel()) {
-      num_pixel += 1;
+       num_pixel += 1;
     }
   }
-
   ATH_MSG_DEBUG("Found " << nwc << " wildcards compared to maximum: " << m_MaxWC);
   // Divide by 2 due to spacepoint duplication.
   num_sp /= 2;
@@ -585,8 +632,8 @@ bool FPGATrackSimMatrixGenAlgo::filterSectorHits(std::vector<FPGATrackSimHit> co
   // Require we don't have too many wildcards.
   if (nwc > m_MaxWC)
   {
-    fillTrackPars(m_h_notEnoughHits, t);
-    return false;
+     fillTrackPars(m_h_notEnoughHits, t);
+     return false;
   }
   // Require that we have a certain number of "2D" hits (i.e. pixels and spacepoints)
   // The effect of this is that we can ensure we have 4/5 2D hits but 7/9 hits total.
@@ -594,16 +641,16 @@ bool FPGATrackSimMatrixGenAlgo::filterSectorHits(std::vector<FPGATrackSimHit> co
   num_sp += num_pixel;
   int minSpacePlusPixel = /*m_isSecondStage ? m_minSpacePlusPixel2 :*/ m_minSpacePlusPixel;
   if (num_sp < minSpacePlusPixel) {
-    ATH_MSG_DEBUG("Not enough pixel hits + spacepoints (" << num_sp << " < " << minSpacePlusPixel << ")");
-    fillTrackPars(m_h_notEnoughHits, t);
-    return false;
+     ATH_MSG_DEBUG("Not enough pixel hits + spacepoints (" << num_sp << " < " << minSpacePlusPixel << ")");
+     fillTrackPars(m_h_notEnoughHits, t);
+     return false;
   }
   return true;
 }
 
 
 // Returns the lowest index region that contains all hits in 'hits'
-int FPGATrackSimMatrixGenAlgo::getRegion(std::vector<FPGATrackSimHit> const & hits) const
+int FPGATrackSimMatrixGenAlgo::getRegion(std::vector<FPGATrackSimHit> const & hits, bool is1ststage) const
 {
   // Start with a bitmask, all true, and set a region to false if any mismatch is found
   std::vector<bool> region_mask(m_nRegions, true);
@@ -611,7 +658,7 @@ int FPGATrackSimMatrixGenAlgo::getRegion(std::vector<FPGATrackSimHit> const & hi
   for (FPGATrackSimHit const & hit : hits) {
     if (hit.getHitType() !=  HitType::wildcard){ // don't worry about hits that are WCs
       for (int region = 0; region < m_nRegions; region++) {
-	if (m_doHoughConstants) {
+	if (m_doHoughConstants && is1ststage) {
 	  if (!m_FPGATrackSimMapping->RegionMap_1st()->isInRegion(region, hit))
 	    region_mask[region] = false;
 	}
@@ -631,29 +678,93 @@ int FPGATrackSimMatrixGenAlgo::getRegion(std::vector<FPGATrackSimHit> const & hi
   return -1;
 }
 
+// Fill accumulators by dropping one hit
+StatusCode FPGATrackSimMatrixGenAlgo::fillAccumulatorByDropping(std::vector<FPGATrackSimHit> &sector_hits, bool is1ststage, double x, double y, std::vector<module_t> &modules, AccumulateMap &map, FPGATrackSimTruthTrack const & track, int subregion) const
+{
+
+  int nLayers = (is1ststage ? m_nLayers_1st : m_nLayers_2nd);
+  int nDim = (is1ststage ? m_nDim_1st : m_nDim_2nd);
+
+  int nwc = 0;
+  for (auto module : modules) {
+    if (module == -1) nwc++;
+  }
+  // Don't do this unless we miss at most one hit!
+  if (nwc < m_MaxWC) {
+    for (int layer = 0; layer < nLayers; layer++) {
+      // Back up the current hit in this layer.
+      FPGATrackSimHit backup_hit = sector_hits[layer];
+      
+      // Create a new wildcard hit, and put it here.
+      FPGATrackSimHit *wcHit = new FPGATrackSimHit();
+      wcHit->setHitType(HitType::wildcard);
+      wcHit->setLayer(layer);
+      if (is1ststage) wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st(subregion)->getDetType(layer));
+      else wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_2nd(subregion)->getDetType(layer));
+
+      sector_hits[layer] = *wcHit;
+      
+      // If this is a spacepoint, we must also convert the other hit.
+      FPGATrackSimHit other_backup = backup_hit;
+      unsigned other_layer = 0;
+      if (backup_hit.getHitType() == HitType::spacepoint) {
+         other_layer = (backup_hit.getPhysLayer() % 2 == 0) ? layer + 1 : layer - 1;
+         other_backup = sector_hits[other_layer];
+         sector_hits[other_layer] = other_backup.getOriginalHit();
+      }
+      
+      FPGATrackSimMatrixAccumulator new_acc(nLayers, nDim);
+      new_acc.pars.qOverPt = y;
+      new_acc.pars.phi = x;
+      std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> new_modules_acc = {modules, new_acc};
+      
+      ATH_CHECK(makeAccumulator(sector_hits, track, new_modules_acc));
+      accumulate(map, new_modules_acc.first, new_modules_acc.second);
+      
+      // Restore the hit. May not be necessary to clean up wcHit here.
+      sector_hits[layer] = backup_hit;
+      delete wcHit;
+      
+      // Restore the other layer, if this is a spacepoint.
+      if (backup_hit.getHitType() == HitType::spacepoint) {
+         sector_hits[other_layer] = other_backup;
+      }
+    }
+  }
+  return StatusCode::SUCCESS;
+}
 
 // Given a track and corresponding hits, returns the sector (list of modules) and the accumulation
 // struct.
 StatusCode FPGATrackSimMatrixGenAlgo::makeAccumulator(std::vector<FPGATrackSimHit> const & sector_hits, FPGATrackSimTruthTrack const & track, std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> & accumulator) const
 {
-  std::vector<module_t> modules(m_nLayers);
-  FPGATrackSimMatrixAccumulator acc(m_nLayers, m_nDim);
+
+
+  const FPGATrackSimPlaneMap *pmap = (m_doSecondStage ? m_pmap_2nd : m_pmap_1st);
+  int nLayers = (m_doSecondStage ? m_nLayers_2nd : m_nLayers_1st);
+  int nDim = (m_doSecondStage ? m_nDim_2nd : m_nDim_1st);
+  std::vector<module_t> modules(nLayers);
+  FPGATrackSimMatrixAccumulator acc(nLayers, nDim);
 
   //find the bin!
   // NOTE: this only implements q/pt binning, not the subregion / eta pattern-based constants for now.
   int sectorbin = 0;
   double qoverpt = track.getQ() / track.getPt();
-  if (m_absQOverPtBinning) qoverpt = abs(qoverpt);
-  for (unsigned bin = 0; bin < m_qOverPtBins.size()-1; bin++) {
-    sectorbin = fpgatracksim::QPT_SECTOR_OFFSET * bin;
-    if (qoverpt < m_qOverPtBins[bin+1]) break;
+
+  // for 2nd stage we only use one q/pt bin
+  if (m_absQOverPtBinning || m_doSecondStage) qoverpt = abs(qoverpt);
+  if (!m_doSecondStage) {
+    for (unsigned bin = 0; bin < m_qOverPtBins.size()-1; bin++) {
+      sectorbin = fpgatracksim::QPT_SECTOR_OFFSET * bin;
+      if (qoverpt < m_qOverPtBins[bin+1]) break;
+    }
   }
   
   // Create sector definitions (list of modules)
   std::string module_printout = "";
-  for (int i = 0; i < m_nLayers; i++)
+  for (int i = 0; i < nLayers; i++)
     {
-      if (sector_hits[i].getHitType() != HitType::wildcard) {
+      if (sector_hits[i].isReal()) {
         if (m_single) modules[i] = sector_hits[i].getIdentifierHash();
         else {
           modules[i] = sectorbin;
@@ -699,16 +810,17 @@ StatusCode FPGATrackSimMatrixGenAlgo::makeAccumulator(std::vector<FPGATrackSimHi
   // Vectorize (flatten) coordinates
   std::vector<float> coords;
 
-  for (int i = 0; i < m_nLayers; ++i) {
+  for (int i = 0; i < nLayers; ++i) {
     if (sector_hits[i].getHitType() != HitType::wildcard) {
 
-      double target_r = m_FPGATrackSimMapping->RegionMap_1st()->getAvgRadius(0, i);
-
+      double target_r = (m_doSecondStage ? m_FPGATrackSimMapping->RegionMap_2nd()->getAvgRadius(0, i) : m_FPGATrackSimMapping->RegionMap_1st()->getAvgRadius(0, i));
       // If this is a spacepoint the target R should be the average of the two layers.
       // TODO, get this to be loaded in from a mean radii file into the mapping infrastructure.
       if (sector_hits[i].getHitType() == HitType::spacepoint) {
         int other_layer = (sector_hits[i].getSide() == 0) ? i + 1 : i - 1;
-        target_r = (target_r + m_FPGATrackSimMapping->RegionMap_1st()->getAvgRadius(0, other_layer)) / 2.;
+	target_r = (m_doSecondStage ?
+		    (target_r +  m_FPGATrackSimMapping->RegionMap_2nd()->getAvgRadius(0, other_layer))/2. :
+		    (target_r +  m_FPGATrackSimMapping->RegionMap_1st()->getAvgRadius(0, other_layer))/2.);
       }
 
       std::vector<float> coords_tmp;
@@ -734,14 +846,14 @@ StatusCode FPGATrackSimMatrixGenAlgo::makeAccumulator(std::vector<FPGATrackSimHi
       }
     }
     else {
-      if (m_pmap->getDim(i) == 2) {
+      if (pmap->getDim(i) == 2) {
         coords.push_back(0);
       }
       coords.push_back(0);
     }
   }
 
-  assert(coords.size() == (size_t)m_nDim);
+  assert(coords.size() == (size_t)nDim);
   acc.hit_coords = coords;
   acc.hit_coordsG = coords;
   
@@ -764,7 +876,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::makeAccumulator(std::vector<FPGATrackSimHi
   }
 
   // Calculate the pre-multiplied elements
-  for (int i = 0; i < m_nDim; i++)
+  for (int i = 0; i < nDim; i++)
     {
       acc.hit_x_QoP[i] = coords[i] * acc.pars.qOverPt;
       acc.hit_xG_HIP[i] = coords[i] * acc.pars.qOverPt;
@@ -774,11 +886,11 @@ StatusCode FPGATrackSimMatrixGenAlgo::makeAccumulator(std::vector<FPGATrackSimHi
       acc.hit_xG_eta[i] = coords[i] * acc.pars.eta;
       acc.hit_x_phi[i] = coords[i] * acc.pars.phi;
 
-      for (int j = i; j < m_nDim; j++)
-	acc.covariance[i * m_nDim + j] = coords[i] * coords[j];
+      for (int j = i; j < nDim; j++)
+	acc.covariance[i * nDim + j] = coords[i] * coords[j];
 
-      for (int j = i; j < m_nDim; j++)
-	acc.covarianceG[i * m_nDim + j] = coords[i] * coords[j];
+      for (int j = i; j < nDim; j++)
+	acc.covarianceG[i * nDim + j] = coords[i] * coords[j];
     }
 
   accumulator = {modules, acc};
@@ -796,6 +908,8 @@ StatusCode FPGATrackSimMatrixGenAlgo::finalize()
 {
   ATH_MSG_DEBUG("finalize()");
   ATH_MSG_INFO("Tracks used: " << m_nTracksUsed << "/" << m_nTracks);
+  int nLayers = (m_doSecondStage ? m_nLayers_2nd : m_nLayers_1st);
+  int nDim = (m_doSecondStage ? m_nDim_2nd : m_nDim_1st);
 
   for (int region = 0; region < m_nRegions; region++) {
       // Create the tree
@@ -807,7 +921,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::finalize()
       ATH_CHECK(m_tHistSvc->regTree(Form("/TRIGFPGATrackSimMATRIXOUT/%s",tree->GetName()), tree));
 
       // Fill the tree
-      ::fillTree(m_sector_cum[region], tree, m_nLayers, m_nDim);
+      ::fillTree(m_sector_cum[region], tree, nLayers, nDim);
       // Monitoring
       ATH_MSG_INFO("Sectors found in region " << region << ": " << m_sector_cum[region].size());
       for (auto & sector_info : m_sector_cum[region]) {
