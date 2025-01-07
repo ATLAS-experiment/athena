@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODDiLeptonMassFilter.h"
@@ -76,7 +76,7 @@ StatusCode xAODDiLeptonMassFilter::filterEvent() {
     if (!MC::isStable(lightLeptonParticle)) continue;
 
     // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
-      if (std::abs(pdgId1) == 11 || std::abs(pdgId1) == 13) {
+    if (MC::isElectron(lightLeptonParticle) || MC::isMuon(lightLeptonParticle)) {
         if (lightLeptonParticle->pt() >= m_minPt && std::abs(lightLeptonParticle->eta()) <= m_maxEta){
         //loop over all remaining particles in the event
 
@@ -88,7 +88,7 @@ StatusCode xAODDiLeptonMassFilter::filterEvent() {
             // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
             // If m_allowSameChagrge is not true only pick those with opposite charge to the first particle
             // If m_allowElecMu is true allow also Z -> emu compinations (with charge requirements as above)
-            if ((m_allowSameCharge  && (std::abs(pdgId2) == std::abs(pdgId1) || (m_allowElecMu && (std::abs(pdgId2) == 11 || std::abs(pdgId2) == 13) ) ) ) ||
+            if ((m_allowSameCharge  && (std::abs(pdgId2) == std::abs(pdgId1) || (m_allowElecMu && (MC::isElectron(lightLeptonParticle2) || MC::isMuon(lightLeptonParticle2)) ) ) ) ||
                 (!m_allowSameCharge && (pdgId2 == -1*pdgId1 || (m_allowElecMu && (pdgId2 == (pdgId1 < 0 ? 1 : -1) * 11 || (pdgId1 < 0 ? 1 : -1) * pdgId2 == 13) ) ) ) ) {
               if (lightLeptonParticle2->pt() >= m_minPt && std::abs(lightLeptonParticle2->eta()) <= m_maxEta){
                 // Calculate invariant mass and apply cut

@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeneratorFilters/xAODTTbarWithJpsimumuFilter.h"
-
+#include "TruthUtils/HepMCHelpers.h"
 #include "GaudiKernel/MsgStream.h"
 
 //--------------------------------------------------------------------------
@@ -55,9 +55,9 @@ StatusCode xAODTTbarWithJpsimumuFilter::filterEvent()
   unsigned int nPart = xTruthParticleContainer->size();
   for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
             const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
-            if (std::abs(pitr->pdgId())!=443) continue;
+            if (std::abs(pitr->pdgId())!=MC::JPSI) continue;
             if (HepMC::is_simulation_particle(pitr)) continue;
-            if(!isLeptonDecay(pitr, 13)) continue;
+            if(!isLeptonDecay(pitr, MC::MUON)) continue;
             if (!passJpsiSelection(pitr)) continue;
             isjpsi = true;
 

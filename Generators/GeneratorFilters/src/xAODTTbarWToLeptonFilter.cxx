@@ -3,6 +3,7 @@
 */
 
 #include "GeneratorFilters/xAODTTbarWToLeptonFilter.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 xAODTTbarWToLeptonFilter::xAODTTbarWToLeptonFilter(const std::string &name, ISvcLocator *pSvcLocator)
     : GenFilter(name, pSvcLocator)
@@ -41,11 +42,11 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
   unsigned int nPart = xTruthParticleContainer->size();
   for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
             const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
-            if (std::abs(pitr->pdgId()) != 6)
+            if (!MC::isTop(pitr))
                 continue;
-            if (pitr->pdgId() == 6)
+            if (pitr->pdgId() == MC::TQUARK)
                 N_quark_t_all++;
-            if (pitr->pdgId() == -6)
+            if (pitr->pdgId() == -MC::TQUARK)
                 N_quark_tbar_all++;
             auto decayVtx = pitr->decayVtx();
             // Verify if we got a valid pointer and retrieve the number of daughters
@@ -59,11 +60,11 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
             {
                 auto child_mcpart = pitr->decayVtx()->outgoingParticle(thisChild_id);
                 //  Implicitly assume that tops always decay to W X
-                if (std::abs(child_mcpart->pdgId()) != 24)
+                if (!MC::isW(child_mcpart))
                     continue;
-                if (pitr->pdgId() == 6)
+                if (pitr->pdgId() == MC::TQUARK)
                     N_quark_t++;
-                if (pitr->pdgId() == -6)
+                if (pitr->pdgId() == -MC::TQUARK)
                     N_quark_tbar++;
 
                 bool useNextVertex = false;
@@ -78,7 +79,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
                         int grandchild_pid = grandchild_mcpart->pdgId();
                         ATH_MSG_DEBUG("W (t/tbar) has " << w_decayVtx->nOutgoingParticles() << " children and the pdgId of the next is " << grandchild_pid);
                         // Check if the W's child is W again. If yes, then move to its next decay vertex in a decay tree
-                        if (std::abs(grandchild_pid) == 24)
+                        if (MC::isW(grandchild_pid))
                         {
                             w_decayVtx = grandchild_mcpart->decayVtx();
                             // If something wrong comes from truth...
@@ -92,7 +93,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
                         }
 
                         // use brute force to use only leptons that have not been found already
-                        if (grandchild_pid == -11 && foundlepton[0] < count_found_leptons)
+                        if (grandchild_pid == MC::POSITRON && foundlepton[0] < count_found_leptons)
                         {
                             if (grandchild_mcpart->pt() >= m_Ptmin)
                             {
@@ -101,7 +102,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
                                 N_pt_above_cut_minus++;
                             }
                         }
-                        if (grandchild_pid == 11 && foundlepton[1] < count_found_leptons)
+                        if (grandchild_pid == MC::ELECTRON && foundlepton[1] < count_found_leptons)
                         {
                             if (grandchild_mcpart->pt() >= m_Ptmin)
                             {
@@ -110,7 +111,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
                                 N_pt_above_cut_plus++;
                             }
                         }
-                        if (grandchild_pid == -13 && foundlepton[2] < count_found_leptons)
+                        if (grandchild_pid == -MC::MUON && foundlepton[2] < count_found_leptons)
                         {
                             if (grandchild_mcpart->pt() >= m_Ptmin)
                             {
@@ -119,7 +120,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
                                 N_pt_above_cut_minus++;
                             }
                         }
-                        if (grandchild_pid == 13 && foundlepton[3] < count_found_leptons)
+                        if (grandchild_pid == MC::MUON && foundlepton[3] < count_found_leptons)
                         {
                             if (grandchild_mcpart->pt() >= m_Ptmin)
                             {
@@ -128,7 +129,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
                                 N_pt_above_cut_plus++;
                             }
                         }
-                        if (grandchild_pid == -15 && foundlepton[4] < count_found_leptons)
+                        if (grandchild_pid == -MC::TAU && foundlepton[4] < count_found_leptons)
                         {
                             if (grandchild_mcpart->pt() >= m_Ptmin)
                             {
@@ -137,7 +138,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
                                 N_pt_above_cut_minus++;
                             }
                         }
-                        if (grandchild_pid == 15 && foundlepton[5] < count_found_leptons)
+                        if (grandchild_pid == MC::TAU && foundlepton[5] < count_found_leptons)
                         {
                             if (grandchild_mcpart->pt() >= m_Ptmin)
                             {

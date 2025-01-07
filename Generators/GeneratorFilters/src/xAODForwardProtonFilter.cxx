@@ -44,7 +44,7 @@ StatusCode xAODForwardProtonFilter::filterEvent()
         continue;
       // We are specifically looking for protons
       const long pid = pitr->pdgId();
-      if (pid != 2212)
+      if (pid != MC::PROTON)
         continue;
       const double E = pitr->e();
       const double pz = pitr->pz();

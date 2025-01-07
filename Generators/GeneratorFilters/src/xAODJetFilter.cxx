@@ -12,6 +12,7 @@
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 xAODJetFilter::xAODJetFilter(const std::string& name, ISvcLocator* pSvcLocator)
     : GenFilter(name, pSvcLocator) {}
@@ -78,10 +79,8 @@ StatusCode xAODJetFilter::filterEvent() {
       const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
 
       if (part->isGenStable()) {  // stables only
-        if ((part->pdgId() != 13) && (part->pdgId() != -13) &&
-            (part->pdgId() != 12) && (part->pdgId() != -12) &&
-            (part->pdgId() != 14) && (part->pdgId() != -14) &&
-            (part->pdgId() != 16) && (part->pdgId() != -16) &&
+        if (!MC::isMuon(part) &&
+            !MC::isSMNeutrino(part) &&
             (std::abs(part->eta()) <=
              m_emaxeta)) {  // no neutrinos or muons and particles must be in
                             // active range

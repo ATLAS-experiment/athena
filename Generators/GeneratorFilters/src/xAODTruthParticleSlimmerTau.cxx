@@ -46,7 +46,7 @@ StatusCode xAODTruthParticleSlimmerTau::initialize()
 CLHEP::HepLorentzVector xAODTruthParticleSlimmerTau::sumDaughterNeutrinos(const xAOD::TruthParticle *part)
 {
   CLHEP::HepLorentzVector nu(0, 0, 0, 0);
-  if (((std::abs(part->pdgId()) == 12) || (std::abs(part->pdgId()) == 14) || (std::abs(part->pdgId()) == 16)) && MC::isPhysical(part))
+  if (MC::isSMNeutrino(part) && MC::isPhysical(part))
   {
     nu.setPx(part->px());
     nu.setPy(part->py());
@@ -152,9 +152,9 @@ StatusCode xAODTruthParticleSlimmerTau::execute()
       int tauType = 0;
       for (size_t n = 0; n < tau->nChildren(); ++n)
       {
-        if (tau->child(n)->absPdgId() == 12)
+        if (tau->child(n)->absPdgId() == MC::NU_E)
           tauType = 1; //Tau decays into an electron
-        else if (tau->child(n)->absPdgId() == 14)
+        else if (tau->child(n)->absPdgId() == MC::NU_MU)
           tauType = 2; //Tau decays into a muon
         else if (MC::isTau(tau->child(n)))
           tauType = 11; //Tau radiates a particle and decays into another tau

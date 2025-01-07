@@ -61,7 +61,7 @@ StatusCode xAODM4MuIntervalFilter::filterEvent() {
            const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
 
 	   // muon
-	   if (std::abs((pitr)->pdgId()) == 13 && MC::isStable(pitr) &&
+	   if ( MC::isMuon(pitr) && MC::isStable(pitr) &&
 	      (pitr)->pt() >= m_minPt &&
 	       std::abs((pitr)->eta()) <= m_maxEta) {
            HepMC::FourVector tmp((pitr)->px(), (pitr)->py(), (pitr)->pz(), (pitr)->e());

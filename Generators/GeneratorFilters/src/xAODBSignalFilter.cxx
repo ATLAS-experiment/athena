@@ -178,7 +178,7 @@ if (LVL1Passed && (m_localLVL2MuonCutOn || m_localLVL2ElectronCutOn))
         //
         for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
             const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
-            if (std::abs(part->pdgId()) <= 6 && MC::isStable(part))
+            if (MC::isSMQuark(part) && MC::isStable(part))
             {
                 acceptEvent = false;
                 ATH_MSG_WARNING(" Undecayed quark "  << part);
@@ -405,11 +405,10 @@ bool xAODBSignalFilter::test_cuts(const double myPT, const double testPT, const 
 bool xAODBSignalFilter::LVL1_Mu_Trigger(const xAOD::TruthParticle* child) const
 {
     bool accept = false;
-    int pID = child->pdgId();
     double myPT = child->pt();
     double myEta = child->eta();
 
-    if ((std::abs(pID) == 13) && m_localLVL1MuonCutOn)
+    if (MC::isMuon(child) && m_localLVL1MuonCutOn)
         accept = test_cuts(myPT, m_localLVL1MuonCutPT, myEta, m_localLVL1MuonCutEta);
 
     return accept;
@@ -418,13 +417,12 @@ bool xAODBSignalFilter::LVL1_Mu_Trigger(const xAOD::TruthParticle* child) const
 bool xAODBSignalFilter::LVL2_eMu_Trigger(const xAOD::TruthParticle* child) const
 {
     bool accept = false;
-    int pID = child->pdgId();
     double myPT = child->pt();
     double myEta = child->eta();
 
-    if ((std::abs(pID) == 11) && m_localLVL2ElectronCutOn)
+    if (MC::isElectron(child) && m_localLVL2ElectronCutOn)
         accept = test_cuts(myPT, m_localLVL2ElectronCutPT, myEta, m_localLVL2ElectronCutEta);
-    if ((std::abs(pID) == 13) && m_localLVL2MuonCutOn)
+    if (MC::isMuon(child) && m_localLVL2MuonCutOn)
         accept = test_cuts(myPT, m_localLVL2MuonCutPT, myEta, m_localLVL2MuonCutEta);
 
     return accept;
@@ -444,15 +442,15 @@ void xAODBSignalFilter::FindAllChildren(const xAOD::TruthParticle* mother, std::
         {
             foundSignal = true;
             bool passedCut = FinalStatePassedCuts(mother); // X = X && ... in case of multiple particles (e.g. KK)
-            if (m_cuts_f_e_on && std::abs(pID) == 11)
+            if (m_cuts_f_e_on && MC::isElectron(pID))
                 passedAllCuts = passedAllCuts && passedCut;
-            if (m_cuts_f_mu_on && std::abs(pID) == 13)
+            if (m_cuts_f_mu_on && MC::isMuon(pID))
                 passedAllCuts = passedAllCuts && passedCut;
             if (m_cuts_f_had_on && MC::isHadron(pID) && MC::isCharged(pID))
                 passedAllCuts = passedAllCuts && passedCut;
-            if (m_cuts_f_gam_on && std::abs(pID) == 22)
+            if (m_cuts_f_gam_on && MC::isPhoton(pID))
                 passedAllCuts = passedAllCuts && passedCut;
-            if (m_cuts_f_K0_on && std::abs(pID) == 311)
+            if (m_cuts_f_K0_on && std::abs(pID) == MC::K0)
                 passedAllCuts = passedAllCuts && passedCut;
             //
             if ((m_InvMass_switch || m_TotalInvMass_switch) && m_InvMass_PartId1 == pID)
@@ -543,7 +541,7 @@ bool xAODBSignalFilter::FinalStatePassedCuts(const xAOD::TruthParticle* child) c
 
     if (m_cuts_f_e_on)
     {
-        if (std::abs(pID) == 11)
+      if (MC::isElectron(pID))
         {
             ATH_MSG_DEBUG("       ** ( pT , eta ) cuts applied on the electron --> ( " << m_cuts_f_e_pT
                                                                                        << " , " << m_cuts_f_e_eta << " )");
@@ -566,7 +564,7 @@ bool xAODBSignalFilter::FinalStatePassedCuts(const xAOD::TruthParticle* child) c
     }
     if (m_cuts_f_mu_on)
     {
-        if (std::abs(pID) == 13)
+      if (MC::isMuon(pID))
         {
             ATH_MSG_DEBUG("       ** ( pT , eta ) cuts applied on the muon --> ( " << m_cuts_f_mu_pT
                                                                                    << " , " << m_cuts_f_mu_eta << " )");
@@ -612,7 +610,7 @@ bool xAODBSignalFilter::FinalStatePassedCuts(const xAOD::TruthParticle* child) c
     }
     if (m_cuts_f_gam_on)
     {
-        if (std::abs(pID) == 22)
+      if (MC::isPhoton(pID))
         {
             ATH_MSG_DEBUG("       ** ( pT , eta ) cuts applied on the gamma --> ( " << m_cuts_f_gam_pT
                                                                                     << " , " << m_cuts_f_gam_eta << " )");
@@ -635,7 +633,7 @@ bool xAODBSignalFilter::FinalStatePassedCuts(const xAOD::TruthParticle* child) c
     }
     if (m_cuts_f_K0_on)
     {
-        if (std::abs(pID) == 311)
+      if (std::abs(pID) == MC::K0)
         {
             ATH_MSG_DEBUG("       ** ( pT , eta ) cuts applied on the K0 --> ( " << m_cuts_f_K0_pT
                                                                                  << " , " << m_cuts_f_K0_eta << " )");
