@@ -1,11 +1,11 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
 
-#ifndef EVENT_SELECTOR_SUMNELNMUPTSELECTORALG_H
-#define EVENT_SELECTOR_SUMNELNMUPTSELECTORALG_H
+#ifndef EVENT_SELECTOR_SUMNLEPTONPTSELECTORALG_H
+#define EVENT_SELECTOR_SUMNLEPTONPTSELECTORALG_H
 
 // Algorithm includes
 #include <AnaAlgorithm/AnaAlgorithm.h>
@@ -23,13 +23,13 @@
 namespace CP {
 
   /// \brief an algorithm to select an event with a specified number
-  /// of electrons or muons compared to a transverse momentum value
+  /// of electrons, muons or taus compared to a transverse momentum value
 
-  class SumNElNMuPtSelectorAlg final : public EL::AnaAlgorithm {
+  class SumNLeptonPtSelectorAlg final : public EL::AnaAlgorithm {
 
     /// \brief the standard constructor
   public:
-    SumNElNMuPtSelectorAlg(const std::string &name, ISvcLocator *pSvcLocator);
+    SumNLeptonPtSelectorAlg(const std::string &name, ISvcLocator *pSvcLocator);
     virtual StatusCode initialize() override;
     virtual StatusCode execute() override;
 
@@ -41,6 +41,9 @@ namespace CP {
     /// \brief the pT threshold on which to select electrons
     Gaudi::Property<float> m_muptmin {this, "minPtMu", 0., "minimum muon pT (in MeV)"};
 
+    /// \brief the pT threshold on which to select taus
+    Gaudi::Property<float> m_tauptmin {this, "minPtTau", 0., "minimum tau pT (in MeV)"};
+
     /// \brief the sign against which to compare pT (GT, LT, etc)
     Gaudi::Property<std::string> m_sign {this, "sign", "SetMe", "comparison sign to use"};
 
@@ -49,8 +52,7 @@ namespace CP {
 
     /// \brief use dressed kinematics
     Gaudi::Property<bool> m_useDressedProperties{this, "useDressedProperties", false,
-      "whether to use dressed electron and muon kinematics rather than simple "
-      "P4 kinematics"};
+      "whether to use dressed lepton kinematics rather than simple P4 kinematics"};
 
     /// \brief the operator version of the comparison (>, <, etc)
     SignEnum::ComparisonOperator m_signEnum{};
@@ -78,6 +80,16 @@ namespace CP {
       this, "muonSelection", "", "the selection on the input muons"
     };
 
+    /// \brief the taus handle
+    CP::SysReadHandle<xAOD::IParticleContainer> m_tausHandle {
+      this, "taus", "", "the taus container to use"
+    };
+
+    /// \brief the taus selection
+    CP::SysReadSelectionHandle m_tauSelection {
+      this, "tauSelection", "", "the selection on the input taus"
+    };
+
     /// \brief the event info handle
     CP::SysReadHandle<xAOD::EventInfo> m_eventInfoHandle {
       this, "eventInfo", "EventInfo", "the EventInfo container to read selection decisions from"
@@ -96,4 +108,4 @@ namespace CP {
   }; // class
 } // namespace CP
 
-#endif // EVENT_SELECTOR_SUMNELNMUPTSELECTORALG_H
+#endif // EVENT_SELECTOR_SUMNLEPTONPTSELECTORALG_H

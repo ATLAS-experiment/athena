@@ -121,6 +121,8 @@ class EventSelectionConfig(ConfigBlock):
             self.add_NMU_selector(text, cfg)
         elif "SUM_EL_N_MU_N" in text.split():
             self.add_SUMNELNMU_selector(text, cfg)
+        elif "SUM_EL_N_MU_N_TAU_N" in text.split():
+            self.add_SUMNLEPTONS_selector(text, cfg)
         elif "JET_N_GHOST" in text.split():
             self.add_NJETGHOST_selector(text, cfg)
         elif "JET_N" in text.split():
@@ -348,7 +350,7 @@ class EventSelectionConfig(ConfigBlock):
         if not self.electrons and not self.muons:
             self.raise_missinginput("electrons or muons")
         thisalg = f'{self.name}_SUMNELNMU_{self.step}'
-        alg = config.createAlgorithm('CP::SumNElNMuPtSelectorAlg', thisalg)
+        alg = config.createAlgorithm('CP::SumNLeptonPtSelectorAlg', thisalg)
         alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
         alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
         if "Truth" in self.electrons:
@@ -364,6 +366,37 @@ class EventSelectionConfig(ConfigBlock):
             alg.minPtMu = self.check_float(items[2])
             alg.sign  = self.check_sign(items[3])
             alg.count = self.check_int(items[4])
+        self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
+        return
+    
+    def add_SUMNLEPTONS_selector(self, text, config):
+        items = text.split()
+        if items[0] != "SUM_EL_N_MU_N_TAU_N":
+            self.raise_misconfig(text, "SUM_EL_N_MU_N_TAU_N")
+        if len(items) != 4 and len(items) != 6:
+            self.raise_misconfig(text, "number of arguments")
+        if not self.electrons and not self.muons and not self.taus:
+            self.raise_missinginput("electrons, muons or taus")
+        thisalg = f'{self.name}_SUMNLEPTONS_{self.step}'
+        alg = config.createAlgorithm('CP::SumNLeptonPtSelectorAlg', thisalg)
+        alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
+        alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        alg.taus, alg.tauSelection = config.readNameAndSelection(self.taus)
+        if "Truth" in self.electrons:
+            alg.useDressedProperties = self.useDressedProperties
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
+        if len(items) == 4:
+            alg.minPtEl = self.check_float(items[1])
+            alg.minPtMu = self.check_float(items[1])
+            alg.minPtTau = self.check_float(items[1])
+            alg.sign  = self.check_sign(items[2])
+            alg.count = self.check_int(items[3])
+        elif len(items) == 6:
+            alg.minPtEl = self.check_float(items[1])
+            alg.minPtMu = self.check_float(items[2])
+            alg.minPtTau = self.check_float(items[3])
+            alg.sign  = self.check_sign(items[4])
+            alg.count = self.check_int(items[5])
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
 
