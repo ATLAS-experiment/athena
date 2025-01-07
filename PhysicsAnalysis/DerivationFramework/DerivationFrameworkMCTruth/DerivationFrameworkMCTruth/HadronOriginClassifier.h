@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -45,7 +45,7 @@ namespace DerivationFramework{
 		  c_from_top=-4, b_from_top =4,
 		  c_from_H  =-5, b_from_H   =5} HF_id;
     
-    typedef enum { Pythia6=0, Pythia8=1, HerwigPP=2, Sherpa=3 } GEN_id;
+    enum class GEN_id { Pythia6=0, Pythia8=1, HerwigPP=2, Sherpa=3 };
         
     std::map<const xAOD::TruthParticle*, HF_id> GetOriginMap() const;
     
@@ -88,10 +88,10 @@ namespace DerivationFramework{
     static bool isDirectlyMPISherpa(const xAOD::TruthParticle* part) ;
 
      
-    inline bool IsHerwigPP() const {return m_GenUsed==HerwigPP;};
-    inline bool IsPythia8() const {return m_GenUsed==Pythia8;};
-    inline bool IsPythia6() const {return m_GenUsed==Pythia6;};
-    inline bool IsSherpa() const {return m_GenUsed==Sherpa;};
+    inline bool IsHerwigPP() const {return m_GenUsed==GEN_id::HerwigPP;};
+    inline bool IsPythia8() const {return m_GenUsed==GEN_id::Pythia8;};
+    inline bool IsPythia6() const {return m_GenUsed==GEN_id::Pythia6;};
+    inline bool IsSherpa() const {return m_GenUsed==GEN_id::Sherpa;};
     inline bool IsTtBb() const {return m_ttbb;}
 
     std::string m_mcName;
