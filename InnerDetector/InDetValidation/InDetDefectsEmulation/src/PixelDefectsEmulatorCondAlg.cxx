@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 // Silicon trackers includes
 #include "PixelDefectsEmulatorCondAlg.h"
@@ -141,9 +141,9 @@ namespace InDet{
           // bad to lock for the entire loop, but this algorithm is intended to run
           // only once per job anyway
           MyLockGuard lock(m_histMutex, m_histogrammingEnabled);
-          TH2 *h2=findHist(helper.nRows(), helper.nColumns());
+          TH2 *h2=findHist(helper.nSensorRows(), helper.nSensorColumns());
 
-          unsigned int n_col_group_defects=static_cast<unsigned int>(std::max(0,static_cast<int>(CLHEP::RandPoisson::shoot(rndmEngine,helper.nColumns()
+          unsigned int n_col_group_defects=static_cast<unsigned int>(std::max(0,static_cast<int>(CLHEP::RandPoisson::shoot(rndmEngine,helper.nSensorColumns()
                                                                                                                            * m_pixelColGroupdDefectProbability.value()))));
           n_col_group_defects_total += n_col_group_defects;
           max_n_col_group_defects = std::max(max_n_col_group_defects, n_col_group_defects);
@@ -158,10 +158,10 @@ namespace InDet{
 
              // accumulate defects on checker board
              if (m_checkerBoardToggle) {
-                pixel_idx=makeCheckerboard(pixel_idx,helper.nRows(), helper.nColumns(), m_oddRowToggle.value(), m_oddColToggle.value() );
+                pixel_idx=makeCheckerboard(pixel_idx,helper.nSensorRows(), helper.nSensorColumns(), m_oddRowToggle.value(), m_oddColToggle.value() );
              }
 
-             unsigned int key = helper.columnGroupDefect(pixel_idx / helper.nColumns(), pixel_idx % helper.nColumns());
+             unsigned int key = helper.columnGroupDefect(pixel_idx / helper.nSensorColumns(), pixel_idx % helper.nSensorColumns());
              auto [insert_iter,end_iter] = PixelEmulatedDefects::lower_bound( module_defects, key);
              if (insert_iter == end_iter) {
                 module_defects.push_back(key);
@@ -176,7 +176,7 @@ namespace InDet{
 
              }
              else {
-                if (!helper.isSameDefectWithGroups(*insert_iter, key)) {
+                if (!helper.isSameDefectWithGroups(*insert_iter, key,helper.columnGroupRowColumnMask())) {
                    module_defects.insert( insert_iter, key);
                    if (h2) {
                       std::array<unsigned int,4> ranges_row_col = helper.offlineRange(key);
@@ -196,10 +196,10 @@ namespace InDet{
 
              // accumulate defects on checker board
              if (m_checkerBoardToggle) {
-                pixel_idx=makeCheckerboard(pixel_idx,helper.nRows(), helper.nColumns(), m_oddRowToggle.value(), m_oddColToggle.value());
+                pixel_idx=makeCheckerboard(pixel_idx,helper.nSensorRows(), helper.nSensorColumns(), m_oddRowToggle.value(), m_oddColToggle.value());
              }
 
-             unsigned int key = helper.hardwareCoordinates(pixel_idx / helper.nColumns(), pixel_idx % helper.nColumns());
+             unsigned int key = helper.hardwareCoordinates(pixel_idx / helper.nSensorColumns(), pixel_idx % helper.nSensorColumns());
              // order keys in descending order
              // such that lower_bound with greater will return the matching element or the element before
              auto [insert_iter,end_iter] = PixelEmulatedDefects::lower_bound( module_defects, key);
@@ -214,7 +214,7 @@ namespace InDet{
                    }
                 }
              }
-             else if (helper.isSameDefectWithGroups(*insert_iter, key)) {
+             else if (helper.isSameDefectWithGroups(*insert_iter, key,helper.columnGroupRowColumnMask())) {
                 continue;
              }
              else {

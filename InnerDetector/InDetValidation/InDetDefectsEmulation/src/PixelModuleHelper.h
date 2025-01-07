@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
   */
 #ifndef INDET_PIXELMODULEHELPER_H
 #define INDET_PIXELMODULEHELPER_H
@@ -44,37 +44,47 @@ namespace InDet {
       static constexpr unsigned int COL_SHIFT  = 12;
       static constexpr unsigned int ROW_SHIFT  = 0;
 
-      static constexpr unsigned int N_COLS_PER_GROUP = 8;
-      static constexpr unsigned int COL_MASK_FOR_GROUP = MaskUtils::createMask<12,3+12>(); //8 columns per group
+      static constexpr std::array<unsigned short,2> N_COLS_PER_GROUP {
+         8,  //8 columns per group for square pixels
+         4}; //4 columns per group for rectangular pixels
+      static constexpr std::array<unsigned int,2> COL_MASK_FOR_GROUP {
+         MaskUtils::createMask<12,3+12>(),  //8 columns per group for square pixels
+         MaskUtils::createMask<12,2+12>()}; //4 columns per group for rectangular pixels
 
       PixelModuleHelper(const InDetDD::SiDetectorDesign &design)
-         : m_pixelModuleDesign( dynamic_cast<const InDetDD::PixelModuleDesign *>(&design))
       {
-         if (m_pixelModuleDesign->rowsPerCircuit()==400 /* @TODO find a better way to identify when to swap columns and rows*/ ) {
+         const InDetDD::PixelModuleDesign *pixelModuleDesign = dynamic_cast<const InDetDD::PixelModuleDesign *>(&design);
+         if (pixelModuleDesign) {
+         m_sensorColumns = pixelModuleDesign->columns();
+         m_sensorRows = pixelModuleDesign->rows();
+         if (pixelModuleDesign->rowsPerCircuit()==400 /* @TODO find a better way to identify when to swap columns and rows*/ ) {
             // the front-ends of ITk ring triplet modules are rotated differently
             // wrt. the offline coordinate system compared to quads and
             // barrel triplets. Once these modules are identified, the translation
             // works in exactly the same way, but columns and rows need to be swapped,
             m_swapOfflineRowsColumns=true;
-            m_columns = m_pixelModuleDesign->rows();
-            m_rows = m_pixelModuleDesign->columns();
-            m_columnsPerCircuit = m_pixelModuleDesign->rowsPerCircuit();
-            m_rowsPerCircuit = m_pixelModuleDesign->columnsPerCircuit();
-            m_circuitsPerColumn = m_pixelModuleDesign->numberOfCircuitsPerRow();
-            m_circuitsPerRow = m_pixelModuleDesign->numberOfCircuitsPerColumn();
+            m_columns = pixelModuleDesign->rows();
+            m_rows = pixelModuleDesign->columns();
+            m_columnsPerCircuit = pixelModuleDesign->rowsPerCircuit();
+            m_rowsPerCircuit = pixelModuleDesign->columnsPerCircuit();
+            m_circuitsPerColumn = pixelModuleDesign->numberOfCircuitsPerRow();
+            m_circuitsPerRow = pixelModuleDesign->numberOfCircuitsPerColumn();
          }
          else {
             m_swapOfflineRowsColumns=false;
-            m_rows = m_pixelModuleDesign->rows();
-            m_columns = m_pixelModuleDesign->columns();
-            m_rowsPerCircuit = m_pixelModuleDesign->rowsPerCircuit();
-            m_columnsPerCircuit = m_pixelModuleDesign->columnsPerCircuit();
-            m_circuitsPerRow = m_pixelModuleDesign->numberOfCircuitsPerRow();
-            m_circuitsPerColumn = m_pixelModuleDesign->numberOfCircuitsPerColumn();
+            m_rows = pixelModuleDesign->rows();
+            m_columns = pixelModuleDesign->columns();
+            m_rowsPerCircuit = pixelModuleDesign->rowsPerCircuit();
+            m_columnsPerCircuit = pixelModuleDesign->columnsPerCircuit();
+            m_circuitsPerRow = pixelModuleDesign->numberOfCircuitsPerRow();
+            m_circuitsPerColumn = pixelModuleDesign->numberOfCircuitsPerColumn();
          }
-
+         m_rectangularPixels = (m_columns==200);
+         }
+         m_columnGroupLeadPixelMask = (~COL_MASK_FOR_GROUP[m_rectangularPixels]) & (~ROW_MASK) ;
+         m_columnGroupRowColumnMask = CHIP_MASK|(COL_MASK & (~COL_MASK_FOR_GROUP[m_rectangularPixels] ));
       }
-      operator bool () const { return m_pixelModuleDesign != nullptr; }
+      operator bool () const { return m_columns>0; }
 
       unsigned int columns() const { return m_columns; }
       unsigned int rows() const { return m_rows; }
@@ -83,6 +93,8 @@ namespace InDet {
       unsigned int circuitsPerColumn() const { return m_circuitsPerColumn; }
       unsigned int circuitsPerRow() const { return m_circuitsPerRow; }
       bool swapOfflineRowsColumns() const { return m_swapOfflineRowsColumns; }
+      bool rectangularPixels() const { return m_rectangularPixels; }
+      unsigned int columnGroupRowColumnMask() const { return m_columnGroupRowColumnMask; }
 
       /** compute "hardware" coordinates from offline coordinates.
        * @param row offline row aka. phi index
@@ -125,17 +137,17 @@ namespace InDet {
        * flag.
        */
       unsigned int columnGroupDefect(unsigned int row, unsigned int column) const {
-         return (hardwareCoordinates(row,column) & ((~COL_MASK_FOR_GROUP) & (~ROW_MASK))) | COLGROUP_DEFECT_BIT_MASK;
+         return (hardwareCoordinates(row,column) & m_columnGroupLeadPixelMask) | COLGROUP_DEFECT_BIT_MASK;
       }
 
       unsigned int nPixels() const {
-         return m_pixelModuleDesign->columns() * m_pixelModuleDesign->rows();
+         return m_columns * m_rows;
       }
-      unsigned int nColumns() const {
-         return m_pixelModuleDesign->columns();
+      unsigned int nSensorColumns() const {
+         return m_sensorColumns;
       }
-      unsigned int nRows() const {
-         return m_pixelModuleDesign->rows();
+      unsigned int nSensorRows() const {
+         return m_sensorRows;
       }
       static constexpr unsigned int getChip(unsigned int hardware_coordinates) {
          return (hardware_coordinates & CHIP_MASK) >> CHIP_SHIFT;
@@ -155,8 +167,7 @@ namespace InDet {
 
       /** Test whether the two packed hardware coorindates refer to the same column group.
        */
-      static constexpr bool inSameColumnGroup(unsigned int key_ref, unsigned int key_test) {
-         constexpr unsigned int mask_out_rows_and_cols_per_group = (CHIP_MASK|(COL_MASK & (~COL_MASK_FOR_GROUP)));
+      static constexpr bool inSameColumnGroup(unsigned int key_ref, unsigned int key_test, unsigned int mask_out_rows_and_cols_per_group) {
          return     (key_ref  & mask_out_rows_and_cols_per_group)
             ==  (key_test & mask_out_rows_and_cols_per_group);
       }
@@ -177,12 +188,12 @@ namespace InDet {
        * If key_ref and key test both could address exclusively a column group defect use :
        * <verb>
        * isSameDefect(key_ref, key_test)
-       *   || ( (isColumnGroupDefect(key_ref)|| isColumnGroupDefect(key_test)) && inSameColumnGroup(key_ref, key_test));
+       *   || ( (isColumnGroupDefect(key_ref)|| isColumnGroupDefect(key_test)) && inSameColumnGroup(key_ref, key_test, helper.columnGroupRowColumnMask()));
        * </verb>
        * instead.
        */
-      constexpr static bool isSameDefectWithGroups( unsigned int key_ref, unsigned int key_test) {
-         return isSameDefect(key_ref, key_test) || (isColumnGroupDefect(key_ref) && inSameColumnGroup(key_ref, key_test));
+      constexpr static bool isSameDefectWithGroups( unsigned int key_ref, unsigned int key_test, unsigned int mask_out_rows_and_cols_per_group) {
+         return isSameDefect(key_ref, key_test) || (isColumnGroupDefect(key_ref) && inSameColumnGroup(key_ref, key_test, mask_out_rows_and_cols_per_group));
       }
 
       /** Convenience function to return oflline column and row ranges matching the defect-area of the given key
@@ -199,7 +210,7 @@ namespace InDet {
             unsigned int row=getRow(key);
             unsigned int row_end=row + rowsPerCircuit()-1;
             unsigned int column=getColumn(key);
-            unsigned int column_end= column + N_COLS_PER_GROUP-1;
+            unsigned int column_end= column + N_COLS_PER_GROUP[m_rectangularPixels]-1;
 
             unsigned int chip_row = chip / circuitsPerRow();
             unsigned int chip_column = chip % circuitsPerRow();
@@ -248,13 +259,17 @@ namespace InDet {
       }
 
    private:
-      const InDetDD::PixelModuleDesign *m_pixelModuleDesign =nullptr;
+      unsigned int m_columnGroupLeadPixelMask = 0;
+      unsigned int m_columnGroupRowColumnMask = 0;
+      unsigned short m_sensorRows=0;
+      unsigned short m_sensorColumns=0;
       unsigned short m_rows = 0;
       unsigned short m_columns = 0;
       unsigned short m_rowsPerCircuit = 0;
       unsigned short m_columnsPerCircuit = 0;
       unsigned char m_circuitsPerRow = 0;
       unsigned char m_circuitsPerColumn = 0;
+      bool m_rectangularPixels = false;
       bool m_swapOfflineRowsColumns=false;
    };
 }

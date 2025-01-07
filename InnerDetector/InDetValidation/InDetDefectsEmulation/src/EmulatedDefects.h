@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
   */
 /* Dear emacs, this is -*-c++-*- */
 #ifndef INDET_EMULATEDDEFECTS_H
@@ -71,7 +71,7 @@ namespace InDet {
        */
       bool isDefect(const T_ModuleHelper &helper, unsigned int id_hash, unsigned int key) const {
          auto [defect_iter, end_iter] =lower_bound(id_hash, key);
-         return (defect_iter != end_iter && helper.isSameDefectWithGroups( *defect_iter, key) );
+         return (defect_iter != end_iter && helper.isSameDefectWithGroups( *defect_iter, key,helper.columnGroupRowColumnMask()) );
       }
 
       /** Test whether a pixel on a certain module is marked as defect.
