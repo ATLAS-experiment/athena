@@ -1,33 +1,12 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration 
 
-# Todo: Move this helper algorithm to pyAthena
-def EFTrackingDataStreamLoaderAlgorithmCfg(flags, **kwargs):
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault("bufferSize", 8192);
-
-    from AthenaConfiguration.ComponentFactory import CompFactory 
-    acc.addEventAlgo(CompFactory.EFTrackingDataStreamLoaderAlgorithm("EFTrackingDataStreamLoaderAlgorithm", **kwargs))
-
-    return acc
-
-def EFTrackingDataStreamUnloaderAlgorithmCfg(flags, **kwargs):
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    acc = ComponentAccumulator()
-
-    from AthenaConfiguration.ComponentFactory import CompFactory 
-    acc.addEventAlgo(CompFactory.EFTrackingDataStreamUnloaderAlgorithm("EFTrackingDataStreamUnloaderAlgorithm", **kwargs))
-
-    return acc
-
 def EFTrackingXrtAlgorithmCfg(flags, **kwargs):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
 
     # Example settings. No sensible defaults as the firmware distribution 
     # (cvmfs, eos) is not yet stadardised.
-    kwargs.setdefault("bufferSize", 8192);
+    kwargs.setdefault("bufferSize", 8192)
     #kwargs.setdefault("xclbinPath", "SerialLoaderToSerialUnloader")
     #kwargs.setdefault("kernelDefinitions", {"serialLoader": [{"storeGateKey": "inputDataStream",
     #                                                         "argumentIndex": "0",
@@ -69,6 +48,7 @@ if __name__ == "__main__":
     arguments = argumentParser.parse_args()
 
     for inputCsvPath, sgKey in arguments.inputCsvPathToSgKeyMap.items():
+        from EFTrackingDataStreamLoaderAlgorithmConfig import EFTrackingDataStreamLoaderAlgorithmCfg
         acc.merge(EFTrackingDataStreamLoaderAlgorithmCfg(flags,
                                                          bufferSize = arguments.bufferSize,
                                                          inputCsvPath = inputCsvPath,
@@ -80,6 +60,7 @@ if __name__ == "__main__":
                                         kernelDefinitions = arguments.kernelDefinitions))
 
     for outputCsvPath, sgKey in arguments.outputCsvPathToSgKeyMap.items():
+        from EFTrackingDataStreamUnloaderAlgorithmConfig import EFTrackingDataStreamUnloaderAlgorithmCfg
         acc.merge(EFTrackingDataStreamUnloaderAlgorithmCfg(flags,
                                                            outputCsvPath = outputCsvPath,
                                                            outputDataStream = sgKey))
