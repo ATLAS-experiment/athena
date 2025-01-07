@@ -80,7 +80,7 @@
 #include <EventSelectionAlgorithms/NObjectMassSelectorAlg.h>
 #include <EventSelectionAlgorithms/NObjectPtSelectorAlg.h>
 #include <EventSelectionAlgorithms/SaveFilterAlg.h>
-#include <EventSelectionAlgorithms/SumNElNMuPtSelectorAlg.h>
+#include <EventSelectionAlgorithms/SumNLeptonPtSelectorAlg.h>
 #include <EventSelectionAlgorithms/TransverseMassSelectorAlg.h>
 #include <FTagAnalysisAlgorithms/BTaggingEfficiencyAlg.h>
 #include <FTagAnalysisAlgorithms/BTaggingInformationDecoratorAlg.h>
@@ -254,7 +254,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::PileupReweightingAlg>("CP::PileupReweightingAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::SaveFilterAlg>("CP::SaveFilterAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::SecVertexTruthMatchAlg>("CP::SecVertexTruthMatchAlg"));
-    ANA_CHECK (asg::registerAlgorithmFactory<CP::SumNElNMuPtSelectorAlg>("CP::SumNElNMuPtSelectorAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::SumNLeptonPtSelectorAlg>("CP::SumNLeptonPtSelectorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::SystObjectLinkerAlg>("CP::SystObjectLinkerAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::SysListDumperAlg>("CP::SysListDumperAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TauCombineMuonRMTausAlg>("CP::TauCombineMuonRMTausAlg"));

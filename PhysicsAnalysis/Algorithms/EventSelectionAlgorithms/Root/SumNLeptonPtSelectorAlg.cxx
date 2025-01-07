@@ -1,22 +1,24 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
 
-#include "EventSelectionAlgorithms/SumNElNMuPtSelectorAlg.h"
+#include "EventSelectionAlgorithms/SumNLeptonPtSelectorAlg.h"
 
 namespace CP {
 
-  SumNElNMuPtSelectorAlg::SumNElNMuPtSelectorAlg(const std::string &name, ISvcLocator *pSvcLocator)
+  SumNLeptonPtSelectorAlg::SumNLeptonPtSelectorAlg(const std::string &name, ISvcLocator *pSvcLocator)
     : EL::AnaAlgorithm(name, pSvcLocator)
   {}
 
-  StatusCode SumNElNMuPtSelectorAlg::initialize() {
+  StatusCode SumNLeptonPtSelectorAlg::initialize() {
     ANA_CHECK(m_electronsHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_electronSelection.initialize(m_systematicsList, m_electronsHandle, SG::AllowEmpty));
     ANA_CHECK(m_muonsHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_muonSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
+    ANA_CHECK(m_tausHandle.initialize(m_systematicsList, SG::AllowEmpty));
+    ANA_CHECK(m_tauSelection.initialize(m_systematicsList, m_tausHandle, SG::AllowEmpty));
     ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList));
 
     ANA_CHECK(m_preselection.initialize(m_systematicsList, m_eventInfoHandle, SG::AllowEmpty));
@@ -28,7 +30,7 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode SumNElNMuPtSelectorAlg::execute() {
+  StatusCode SumNLeptonPtSelectorAlg::execute() {
     // accessors
     static const SG::AuxElement::ConstAccessor<float> acc_pt_dressed("pt_dressed");
 
@@ -47,35 +49,47 @@ namespace CP {
       // retrieve the electron container
       const xAOD::IParticleContainer *electrons = nullptr;
       if (m_electronsHandle)
-	ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
-      // retrieve the electron container
+        ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
+      // retrieve the muon container
       const xAOD::IParticleContainer *muons = nullptr;
       if (m_muonsHandle)
-	ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
+        ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
+      // retrieve the tau container
+      const xAOD::IParticleContainer *taus = nullptr;
+      if (m_tausHandle)
+        ANA_CHECK(m_tausHandle.retrieve(taus, sys));
 
       // apply the requested selection
       int count = 0;
       if (m_electronsHandle) {
-	for (const xAOD::IParticle *el : *electrons){
-	  if (!m_electronSelection || m_electronSelection.getBool(*el, sys)) {
-        if (m_useDressedProperties) {
-          if (acc_pt_dressed(*el) > m_elptmin) count++;
-        } else {
-          if (el->pt() > m_elptmin) count++;
+        for (const xAOD::IParticle *el : *electrons) {
+          if (!m_electronSelection || m_electronSelection.getBool(*el, sys)) {
+            if (m_useDressedProperties) {
+              if (acc_pt_dressed(*el) > m_elptmin) count++;
+            } else {
+              if (el->pt() > m_elptmin) count++;
+            }
+          }
         }
       }
-    }
-      }
       if (m_muonsHandle) {
-	for (const xAOD::IParticle *mu : *muons) {
-	  if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)) {
-        if (m_useDressedProperties) {
-          if (acc_pt_dressed(*mu) > m_muptmin) count++;
-        } else {
-          if (mu->pt() > m_muptmin) count++;
-	    }
-	  }
-	}
+        for (const xAOD::IParticle *mu : *muons) {
+          if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)) {
+              if (m_useDressedProperties) {
+                if (acc_pt_dressed(*mu) > m_muptmin) count++;
+              } else {
+                if (mu->pt() > m_muptmin) count++;
+            }
+          }
+        }
+      }
+      if (m_tausHandle) {
+        for (const xAOD::IParticle *tau : *taus) {
+          if (!m_tauSelection || m_tauSelection.getBool(*tau, sys)) {
+            // for taus dressed properties do not make a big difference
+            if (tau->pt() > m_tauptmin) count++;
+          }
+        }
       }
 
       // calculate decision

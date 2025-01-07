@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -19,7 +19,7 @@
 #include <EventSelectionAlgorithms/NObjectMassSelectorAlg.h>
 #include <EventSelectionAlgorithms/NLargeRJetMassWindowSelectorAlg.h>
 #include <EventSelectionAlgorithms/DileptonOSSFInvariantMassWindowSelectorAlg.h>
-#include <EventSelectionAlgorithms/SumNElNMuPtSelectorAlg.h>
+#include <EventSelectionAlgorithms/SumNLeptonPtSelectorAlg.h>
 #include <EventSelectionAlgorithms/JetNGhostSelectorAlg.h>
 #include <EventSelectionAlgorithms/RunNumberSelectorAlg.h>
 
