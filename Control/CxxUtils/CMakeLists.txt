@@ -31,6 +31,8 @@ atlas_add_library( AthDSoCallBacks src/AthDsoCbk.c
    LINK_LIBRARIES calg
    PRIVATE_LINK_LIBRARIES ${CMAKE_DL_LIBS} )
 
+atlas_install_scripts( scripts/cppcheck_atlas )
+
 #Add unit_test_framework
 find_package( Boost COMPONENTS timer unit_test_framework )
 

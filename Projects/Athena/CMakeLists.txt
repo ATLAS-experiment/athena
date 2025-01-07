@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.25 )
@@ -105,9 +105,15 @@ endif()
 if( ATLAS_USE_CPPCHECK )
    find_package( Cppcheck 2.14 )
 
-   if( CPPCHECK_FOUND )
+   # Find ATLAS-specific wrapper:
+   find_program( CPPCHECK_ATLAS cppcheck_atlas
+      PATHS "${CMAKE_CURRENT_SOURCE_DIR}/../../Control/CxxUtils/scripts" )
+   mark_as_advanced( CPPCHECK_ATLAS )
+
+   if( CPPCHECK_FOUND AND CPPCHECK_ATLAS )
       # Prepend cppcheck command to already defined command line options:
-      list( PREPEND CMAKE_CPPCHECK_DEFAULT "${CPPCHECK_cppcheck_EXECUTABLE}" )
+      list( PREPEND CMAKE_CPPCHECK_DEFAULT ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/atlas_build_run.sh
+         "${CMAKE_CURRENT_SOURCE_DIR}/../../Control/CxxUtils/scripts/cppcheck_atlas" )
 
       # Ignore externals:
       foreach( ignored_path "${LCG_RELEASE_BASE}"
