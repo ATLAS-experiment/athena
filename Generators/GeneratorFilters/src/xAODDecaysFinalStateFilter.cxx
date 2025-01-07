@@ -32,6 +32,7 @@
 
 #include "GeneratorFilters/xAODDecaysFinalStateFilter.h"
 //#include "GaudiKernel/MsgStream.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include <cmath>
 
 
@@ -94,13 +95,13 @@ StatusCode xAODDecaysFinalStateFilter::filterEvent() {
 
             for (int iOutPart = 0; iOutPart< num_outgoing_particles; iOutPart++) {
                 const xAOD::TruthParticle* out_part =  decayVertex->outgoingParticle(iOutPart);
-                int apid = std::abs(out_part->pdgId());
-                if (apid == 1 || apid == 2 || apid == 3 || apid == 4 || apid ==5) nQuarks++;
-                if (apid == 11) { nElectrons++; nChargedLeptons++; }
-                if (apid == 13) { nMuons++; nChargedLeptons++; }
-                if (apid == 15) { nTaus++; nChargedLeptons++; }
-                if (apid == 12 || apid == 14 || apid == 16) nNeutrinos++;
-                if (apid == 22) nPhotons++;
+                const int apid = std::abs(out_part->pdgId());
+                if ( apid <=  MC::BQUARK ) nQuarks++;
+                else if (MC::isElectron(apid)) { nElectrons++; nChargedLeptons++; }
+                else if (MC::isMuon(apid)) { nMuons++; nChargedLeptons++; }
+                else if (MC::isTau(apid)) { nTaus++; nChargedLeptons++; }
+                else if (MC::isSMNeutrino(apid)) nNeutrinos++;
+                else if (MC::isPhoton(apid)) nPhotons++;
             }
 
        }//loop over TruthParticles

@@ -146,7 +146,7 @@ StatusCode xAODHTFilter::filterEvent()
         }
 
         // pick muons and electrons specifically -- isLepton selects both charged leptons and neutrinos
-        if ( m_UseLep && (std::abs(pdgid) == 11 || std::abs(pdgid) == 13) && theParticle->isGenStable() && (theParticle)->pt() > m_MinLepPt * Gaudi::Units::GeV && std::abs(theParticle->eta()) < m_MaxLepEta)
+        if ( m_UseLep && (MC::isElectron(pdgid) || MC::isMuon(pdgid)) && theParticle->isGenStable() && (theParticle)->pt() > m_MinLepPt * Gaudi::Units::GeV && std::abs(theParticle->eta()) < m_MaxLepEta)
         {
           if (Common::prompt(theParticle,m_classif))
           {

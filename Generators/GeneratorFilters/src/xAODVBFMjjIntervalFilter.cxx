@@ -134,11 +134,11 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
                         auto child = tau->decayVtx()->outgoingParticle(thisChild_id);
                         if (child->prodVtx() != tau->decayVtx())
                             continue;
-                        if (std::abs(child->pdgId()) == 12)
+                        if (std::abs(child->pdgId()) == MC::NU_E)
                             leptonic = 1;
-                        if (std::abs(child->pdgId()) == 14)
+                        else if (std::abs(child->pdgId()) == MC::NU_MU)
                             leptonic = 2;
-                        if (std::abs(child->pdgId()) == 15)
+                        else if (std::abs(child->pdgId()) == MC::TAU)
                             leptonic = 11;
                     }
 
@@ -392,7 +392,7 @@ TLorentzVector xAODVBFMjjIntervalFilter::sumDaughterNeutrinos(const xAOD::TruthP
 {
     TLorentzVector nu(0, 0, 0, 0);
 
-    if ((std::abs(part->pdgId()) == 12) || (std::abs(part->pdgId()) == 14) || (std::abs(part->pdgId()) == 16))
+    if (MC::isSMNeutrino(part))
     {
         nu.SetPx(part->px());
         nu.SetPy(part->py());

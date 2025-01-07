@@ -5,6 +5,7 @@
 #include "GeneratorFilters/xAODHeavyFlavorHadronFilter.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "xAODJet/JetContainer.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "CxxUtils/BasicTypes.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include <cmath>
@@ -82,7 +83,7 @@ StatusCode xAODHeavyFlavorHadronFilter::filterEvent() {
       // between the final quark in the decay chain and intermediates
       // That means the code is NOT appropriate for counting the number
       // of heavy flavor quarks!
-      if (m_Request_bQuark && std::abs(part->pdgId())==5 &&
+      if (m_Request_bQuark && MC::isBottom(part) &&
           part->pt()> m_bPtMin &&
           std::abs(part->rapidity())<m_bEtaMax) {
         if (m_RequireTruthJet) {
@@ -103,7 +104,7 @@ StatusCode xAODHeavyFlavorHadronFilter::filterEvent() {
       // That means the code is NOT appropriate for counting the number
       // of heavy flavor quarks!
       if (m_Request_cQuark &&
-          std::abs(part->pdgId())==4 &&
+          MC::isCharm(part) &&
           part->pt()>m_cPtMin &&
           std::abs(part->rapidity())<m_cEtaMax) {
         if (m_RequireTruthJet) {

@@ -40,7 +40,7 @@ StatusCode xAODMultiElecMuTauFilter::filterEvent() {
   unsigned int nPart = xTruthParticleContainer->size();
   for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
        const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
-       if (MC::isStable(pitr) && (std::abs(pitr->pdgId()) == 11 || std::abs(pitr->pdgId()) == 13)) {
+       if (MC::isStable(pitr) && (MC::isElectron(pitr) || MC::isMuon(pitr))) {
          if (pitr->pt() >= m_minPt && std::abs(pitr->eta()) <= m_maxEta) {
            ATH_MSG_DEBUG("Found lepton" << pitr);
             numLeptons++;
@@ -71,12 +71,12 @@ StatusCode xAODMultiElecMuTauFilter::filterEvent() {
                break;
            }
              // Ignore leptonic decays
-             if (std::abs(citr->pdgId()) == 13 || std::abs(citr->pdgId()) == 11) {
+             if (MC::isMuon(citr) || MC::isElectron(citr)) {
                tau = nullptr;
                break;
           }
             // Find tau decay nu
-            if (std::abs(citr->pdgId()) == 16) {
+             if (std::abs(citr->pdgId()) == MC::NU_TAU) {
                taunu = citr;
            }
          }

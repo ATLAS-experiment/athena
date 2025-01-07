@@ -137,11 +137,11 @@ StatusCode xAODVBFForwardJetsFilter::filterEvent()
                     auto child = tau->decayVtx()->outgoingParticle(thisChild_id);
                     if (child->prodVtx() != tau->decayVtx())
                         continue;
-                    if (std::abs(child->pdgId()) == 12)
+                    if (std::abs(child->pdgId()) == MC::NU_E)
                         leptonic = 1;
-                    if (std::abs(child->pdgId()) == 14)
+                    else if (std::abs(child->pdgId()) == MC::NU_MU)
                         leptonic = 2;
-                    if (std::abs(child->pdgId()) == 15)
+                    else if (MC::isTau(child))
                         leptonic = 11;
                 }
 
@@ -288,7 +288,7 @@ CLHEP::HepLorentzVector xAODVBFForwardJetsFilter::sumDaughterNeutrinos(const xAO
 {
     CLHEP::HepLorentzVector nu(0, 0, 0, 0);
 
-    if ((std::abs(part->pdgId()) == 12) || (std::abs(part->pdgId()) == 14) || (std::abs(part->pdgId()) == 16))
+    if (MC::isSMNeutrino(part))
     {
         nu.setPx(part->px());
         nu.setPy(part->py());

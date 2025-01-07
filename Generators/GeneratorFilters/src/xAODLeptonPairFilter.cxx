@@ -82,7 +82,7 @@ StatusCode xAODLeptonPairFilter::filterEvent() {
         // We do not place requirements on their origins (updated: optionally rejecting hadron decays)
         // save pdg ids of found leptons
         // do not consider taus
-        if( std::abs(pitr->pdgId()) !=  11  && std::abs(pitr->pdgId()) !=  13) continue;
+        if( !MC::isElectron(pitr) && !MC::isMuon(pitr) ) continue;
         //only consider leptons which satisfy  pt and eta requirements
         if( (pitr->pt() < m_Ptmin) || std::abs(pitr->eta()) > m_EtaRange) continue;
 			  if(m_onlyMassiveParents)
@@ -96,7 +96,7 @@ StatusCode xAODLeptonPairFilter::filterEvent() {
 					  if(vxp->nIncomingParticles()!=1) break;
 					  p = vxp->incomingParticle(0);
 					  const int pdg = std::abs(p->pdgId());
-					  if(!((pdg>=11 && pdg<=16) || pdg==22))
+					  if(!(MC::isSMLepton(pdg) || MC::isPhoton(pdg)))
 					  {
 						  massiveParent = (p->m()>20000);
 						  break;
