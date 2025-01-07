@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonCalibStreamCnvSvc )
@@ -7,7 +7,7 @@ atlas_subdir( MuonCalibStreamCnvSvc )
 find_package( COOL COMPONENTS CoolKernel )
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
-find_package( tdaq-common COMPONENTS MuCalDecode )
+find_package( tdaq-common COMPONENTS MuCalDecode EventStorage )
 
 # Component(s) in the package:
 atlas_add_library( MuonCalibStreamCnvSvcLib
