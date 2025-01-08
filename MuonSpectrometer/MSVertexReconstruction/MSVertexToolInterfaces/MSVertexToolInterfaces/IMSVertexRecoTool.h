@@ -2,8 +2,7 @@
   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MSVERTEXTOOLINTERFACES_MUON_IMSVERTEXRECOTOOL_H
-#define MSVERTEXTOOLINTERFACES_MUON_IMSVERTEXRECOTOOL_H
+#pragma once
 
 #include <vector>
 
@@ -12,7 +11,6 @@
 #include "MSVertexUtils/MSVertex.h"
 #include "MSVertexUtils/Tracklet.h"
 //
-static const InterfaceID IID_IMSVertexRecoTool("Muon::IMSVertexRecoTool", 1, 0);
 
 namespace Muon {
 
@@ -20,14 +18,10 @@ namespace Muon {
     class IMSVertexRecoTool : virtual public IAlgTool {
     public:
         /** access to tool interface */
-        static const InterfaceID& interfaceID();
+        DeclareInterfaceID(Muon::IMSVertexRecoTool, 1, 0);
 
-        virtual StatusCode findMSvertices(std::vector<Tracklet>& tracklets, std::vector<MSVertex*>& vertices,
+        virtual StatusCode findMSvertices(const std::vector<Tracklet>& tracklets, std::vector<std::unique_ptr<MSVertex>> &vertices,
                                           const EventContext& ctx) const = 0;
     };
 
-    inline const InterfaceID& IMSVertexRecoTool::interfaceID() { return IID_IMSVertexRecoTool; }
-
 }  // namespace Muon
-
-#endif
