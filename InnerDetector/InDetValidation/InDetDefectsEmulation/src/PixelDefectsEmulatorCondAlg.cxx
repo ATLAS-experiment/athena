@@ -111,15 +111,20 @@ namespace InDet{
 
     defectsOut.addDependency(pixelDetEleColl);
 
-    unsigned int n_pixel=0u;
-    unsigned int n_error=0u;
+    std::size_t n_pixel=0u;
+    std::size_t n_column_groups=0u;
+    std::size_t n_error=0u;
     unsigned int max_n_defects=0u;
     unsigned int max_n_col_group_defects=0u;
-    unsigned int n_col_group_defects_total=0u;
+    unsigned int no_unique_position=0u;
+    std::size_t retries_column_group_defect=0u;
+    std::size_t retries_pixel_defect=0u;
+    std::size_t n_col_group_defects_total=0u;
     std::unique_ptr<InDet::PixelEmulatedDefects> defects = std::make_unique<InDet::PixelEmulatedDefects>();
     defects->m_detectorElements=pixelDetEleColl.cptr();
     defects->resize( pixelDetEleColl.cptr()->size());
     unsigned int n_defects_total=0;
+    unsigned int n_attempts_max=m_maxAttempts.value();
     {
        ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_rngName);
        rngWrapper->setSeed( m_rngName, ctx );
@@ -143,7 +148,8 @@ namespace InDet{
           MyLockGuard lock(m_histMutex, m_histogrammingEnabled);
           TH2 *h2=findHist(helper.nSensorRows(), helper.nSensorColumns());
 
-          unsigned int n_col_group_defects=static_cast<unsigned int>(std::max(0,static_cast<int>(CLHEP::RandPoisson::shoot(rndmEngine,helper.nSensorColumns()
+          n_column_groups += helper.nColumnGroups();
+          unsigned int n_col_group_defects=static_cast<unsigned int>(std::max(0,static_cast<int>(CLHEP::RandPoisson::shoot(rndmEngine,helper.nColumnGroups()
                                                                                                                            * m_pixelColGroupdDefectProbability.value()))));
           n_col_group_defects_total += n_col_group_defects;
           max_n_col_group_defects = std::max(max_n_col_group_defects, n_col_group_defects);
@@ -154,29 +160,80 @@ namespace InDet{
           std::vector<unsigned int> &module_defects=(*defects).at(module_i);
           module_defects.reserve(n_defects + n_col_group_defects);
           for (unsigned int defect_i=0; defect_i < n_col_group_defects; ++defect_i) {
-             unsigned int pixel_idx=CLHEP::RandFlat::shoot(rndmEngine,pixels); // %pixels;
+             unsigned int attempt_i=0;
+             for (attempt_i=0; attempt_i<n_attempts_max; ++attempt_i) {
+                unsigned int pixel_idx=CLHEP::RandFlat::shoot(rndmEngine,pixels); // %pixels;
 
-             // accumulate defects on checker board
-             if (m_checkerBoardToggle) {
-                pixel_idx=makeCheckerboard(pixel_idx,helper.nSensorRows(), helper.nSensorColumns(), m_oddRowToggle.value(), m_oddColToggle.value() );
+                // accumulate defects on checker board
+                if (m_checkerBoardToggle) {
+                   pixel_idx=makeCheckerboard(pixel_idx,helper.nSensorRows(), helper.nSensorColumns(), m_oddRowToggle.value(), m_oddColToggle.value() );
+                }
+
+                unsigned int key = helper.columnGroupDefect(pixel_idx / helper.nSensorColumns(), pixel_idx % helper.nSensorColumns());
+                auto [insert_iter,end_iter] = PixelEmulatedDefects::lower_bound( module_defects, key);
+                if (insert_iter == end_iter) {
+                   module_defects.push_back(key);
+                   if (h2) {
+                      std::array<unsigned int,4> ranges_row_col = helper.offlineRange(key);
+                      for (unsigned int row_i=ranges_row_col[0]; row_i<ranges_row_col[1]; ++row_i) {
+                         for (unsigned int col_i=ranges_row_col[2]; col_i<ranges_row_col[3]; ++col_i) {
+                            h2->Fill(col_i, row_i);
+                         }
+                      }
+                   }
+                   break;
+                }
+                else {
+                   if (!helper.isSameDefectWithGroups(*insert_iter, key,helper.columnGroupRowColumnMask())) {
+                      module_defects.insert( insert_iter, key);
+                      if (h2) {
+                         std::array<unsigned int,4> ranges_row_col = helper.offlineRange(key);
+                         for (unsigned int row_i=ranges_row_col[0]; row_i<ranges_row_col[1]; ++row_i) {
+                            for (unsigned int col_i=ranges_row_col[2]; col_i<ranges_row_col[3]; ++col_i) {
+                               h2->Fill(col_i, row_i);
+                            }
+                         }
+                      }
+                      break;
+                   }
+                }
+                ++retries_column_group_defect;
              }
+             no_unique_position += attempt_i >= n_attempts_max;
+          }
+          unsigned int n_col_group_defects_registered=module_defects.size();
 
-             unsigned int key = helper.columnGroupDefect(pixel_idx / helper.nSensorColumns(), pixel_idx % helper.nSensorColumns());
-             auto [insert_iter,end_iter] = PixelEmulatedDefects::lower_bound( module_defects, key);
-             if (insert_iter == end_iter) {
-                module_defects.push_back(key);
-                if (h2) {
-                   std::array<unsigned int,4> ranges_row_col = helper.offlineRange(key);
-                   for (unsigned int row_i=ranges_row_col[0]; row_i<ranges_row_col[1]; ++row_i) {
-                      for (unsigned int col_i=ranges_row_col[2]; col_i<ranges_row_col[3]; ++col_i) {
-                         h2->Fill(col_i, row_i);
+          for (unsigned int defect_i=0; defect_i < n_defects; ++defect_i) {
+             unsigned int attempt_i=0;
+             for (attempt_i=0; attempt_i<n_attempts_max; ++attempt_i) {
+                unsigned int pixel_idx=CLHEP::RandFlat::shoot(rndmEngine,pixels); // %pixels;
+
+                // accumulate defects on checker board
+                if (m_checkerBoardToggle) {
+                   pixel_idx=makeCheckerboard(pixel_idx,helper.nSensorRows(), helper.nSensorColumns(), m_oddRowToggle.value(), m_oddColToggle.value());
+                }
+
+                unsigned int key = helper.hardwareCoordinates(pixel_idx / helper.nSensorColumns(), pixel_idx % helper.nSensorColumns());
+                // order keys in descending order
+                // such that lower_bound with greater will return the matching element or the element before
+                auto [insert_iter,end_iter] = PixelEmulatedDefects::lower_bound( module_defects, key);
+                if (insert_iter != end_iter && !helper.isColumnGroupDefect(*insert_iter) && *insert_iter==key) {
+                   // duplicate
+                   ++retries_pixel_defect;
+                   continue;
+                }
+                if (insert_iter == end_iter) {
+                   module_defects.push_back(key);
+                   if (h2) {
+                      std::array<unsigned int,4> ranges_row_col = helper.offlineRange(key);
+                      for (unsigned int row_i=ranges_row_col[0]; row_i<ranges_row_col[1]; ++row_i) {
+                         for (unsigned int col_i=ranges_row_col[2]; col_i<ranges_row_col[3]; ++col_i) {
+                            h2->Fill(col_i, row_i);
+                         }
                       }
                    }
                 }
-
-             }
-             else {
-                if (!helper.isSameDefectWithGroups(*insert_iter, key,helper.columnGroupRowColumnMask())) {
+                else if (!helper.isSameDefectWithGroups(*insert_iter, key,helper.columnGroupRowColumnMask())) {
                    module_defects.insert( insert_iter, key);
                    if (h2) {
                       std::array<unsigned int,4> ranges_row_col = helper.offlineRange(key);
@@ -187,47 +244,9 @@ namespace InDet{
                       }
                    }
                 }
+                break;
              }
-          }
-          unsigned int n_col_group_defects_registered=module_defects.size();
-
-          for (unsigned int defect_i=0; defect_i < n_defects; ++defect_i) {
-             unsigned int pixel_idx=CLHEP::RandFlat::shoot(rndmEngine,pixels); // %pixels;
-
-             // accumulate defects on checker board
-             if (m_checkerBoardToggle) {
-                pixel_idx=makeCheckerboard(pixel_idx,helper.nSensorRows(), helper.nSensorColumns(), m_oddRowToggle.value(), m_oddColToggle.value());
-             }
-
-             unsigned int key = helper.hardwareCoordinates(pixel_idx / helper.nSensorColumns(), pixel_idx % helper.nSensorColumns());
-             // order keys in descending order
-             // such that lower_bound with greater will return the matching element or the element before
-             auto [insert_iter,end_iter] = PixelEmulatedDefects::lower_bound( module_defects, key);
-             if (insert_iter == end_iter) {
-                module_defects.push_back(key);
-                if (h2) {
-                   std::array<unsigned int,4> ranges_row_col = helper.offlineRange(key);
-                   for (unsigned int row_i=ranges_row_col[0]; row_i<ranges_row_col[1]; ++row_i) {
-                      for (unsigned int col_i=ranges_row_col[2]; col_i<ranges_row_col[3]; ++col_i) {
-                         h2->Fill(col_i, row_i);
-                      }
-                   }
-                }
-             }
-             else if (helper.isSameDefectWithGroups(*insert_iter, key,helper.columnGroupRowColumnMask())) {
-                continue;
-             }
-             else {
-                module_defects.insert( insert_iter, key);
-                if (h2) {
-                   std::array<unsigned int,4> ranges_row_col = helper.offlineRange(key);
-                   for (unsigned int row_i=ranges_row_col[0]; row_i<ranges_row_col[1]; ++row_i) {
-                      for (unsigned int col_i=ranges_row_col[2]; col_i<ranges_row_col[3]; ++col_i) {
-                         h2->Fill(col_i, row_i);
-                      }
-                   }
-                }
-             }
+             no_unique_position += attempt_i >= n_attempts_max;
           }
           if (m_histogrammingEnabled) {
              // all the following histograms are expected to have the same binning
@@ -252,7 +271,11 @@ namespace InDet{
     ATH_CHECK( defectsOut.record (std::move(defects)) );
 
     ATH_MSG_INFO("Total pixel " << n_pixel << " non-pixel modules " << n_error << " defects " << n_defects_total << " max /mod " << max_n_defects
-                 << " core column defects " << n_col_group_defects_total << " max. / mod " << max_n_col_group_defects);
+                 << " core columns total " << n_column_groups << " core column defects " << n_col_group_defects_total << " max. / mod " << max_n_col_group_defects);
+    if (retries_pixel_defect+retries_column_group_defect+no_unique_position>0) {
+       ATH_MSG_INFO("Retried to create unique defects : for pixel defects " << retries_pixel_defect << ", for column group defects " << retries_column_group_defect
+                    << ", insufficient number of retries " << no_unique_position);
+    }
 
     return StatusCode::SUCCESS;
   }

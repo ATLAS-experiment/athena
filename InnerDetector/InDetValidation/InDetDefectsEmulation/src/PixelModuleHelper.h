@@ -149,6 +149,10 @@ namespace InDet {
       unsigned int nSensorRows() const {
          return m_sensorRows;
       }
+      unsigned int nColumnGroups() const {
+         return columns() * circuitsPerRow() / (m_rectangularPixels ? 4 : 8);
+      }
+
       static constexpr unsigned int getChip(unsigned int hardware_coordinates) {
          return (hardware_coordinates & CHIP_MASK) >> CHIP_SHIFT;
       }

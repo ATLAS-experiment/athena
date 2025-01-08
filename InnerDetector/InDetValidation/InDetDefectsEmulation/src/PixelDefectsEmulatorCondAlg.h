@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDET_PIXELDEFECTSEMULATORCONDALG_H
@@ -55,6 +55,8 @@ namespace InDet {
          {this, "OddColToggle",  false};
       Gaudi::Property<bool> m_checkerBoardToggle
          {this, "CheckerBoardDefects",  false};
+      Gaudi::Property<unsigned int> m_maxAttempts
+         {this, "MaxRandomPositionAttempts",  10};
 
       ServiceHandle<ITHistSvc> m_histSvc{this,"HistSvc","THistSvc"};
       Gaudi::Property<std::string> m_histogramGroupName
