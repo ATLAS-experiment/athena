@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -21,8 +21,8 @@
 using namespace IDPVM;
 
 
-InDetPerfPlot_Vertex::InDetPerfPlot_Vertex(InDetPlotBase* pParent, const std::string& sDir) :
-  InDetPlotBase(pParent, sDir) {
+InDetPerfPlot_Vertex::InDetPerfPlot_Vertex(InDetPlotBase* pParent, const std::string& sDir, bool isITk) :
+  InDetPlotBase(pParent, sDir), m_isITk(isITk) {
   // nop
 }
 
@@ -31,12 +31,12 @@ InDetPerfPlot_Vertex::initializePlots() {
   book(m_vx_x,"vx_x");
   book(m_vx_y,"vx_y");
   book(m_vx_z,"vx_z");
-  book(m_vx_time,"vx_time");
+  if(m_isITk) book(m_vx_time,"vx_time");
 
   book(m_vx_err_x,"vx_err_x");
   book(m_vx_err_y,"vx_err_y");
   book(m_vx_err_z,"vx_err_z");
-  book(m_vx_err_time,"vx_err_time");
+  if(m_isITk) book(m_vx_err_time,"vx_err_time");
 
   book(m_vx_chi2_over_ndf,"vx_chi2_over_ndf");
   book(m_vx_type,"vx_type");
@@ -65,24 +65,26 @@ InDetPerfPlot_Vertex::fill(const xAOD::Vertex& vertex, float weight) {
   fillHisto(m_vx_y, vertex.y(), weight);
   fillHisto(m_vx_z, vertex.z(), weight);
 
-  static const SG::AuxElement::Accessor<uint8_t> accHasValidTime("hasValidTime");
-  static const SG::AuxElement::Accessor<float> accTime("time");
-  if (accHasValidTime.isAvailable(vertex) && accTime.isAvailable(vertex)) {
-    if (vertex.hasValidTime()) {
-      fillHisto(m_vx_time, vertex.time(), weight);
-    }
-  }
-
   // fill error plots
   const AmgSymMatrix(3)& covariance = vertex.covariancePosition();
   fillHisto(m_vx_err_x, Amg::error(covariance, 0), weight);
   fillHisto(m_vx_err_y, Amg::error(covariance, 1), weight);
   fillHisto(m_vx_err_z, Amg::error(covariance, 2), weight);
 
-  static const SG::AuxElement::Accessor<float> accTimeResolution("timeResolution");
-  if (accHasValidTime.isAvailable(vertex) && accTimeResolution.isAvailable(vertex)) {
-    if (vertex.hasValidTime()) {
-      fillHisto(m_vx_err_time, vertex.timeResolution(), weight);
+  if(m_isITk){
+    static const SG::AuxElement::Accessor<uint8_t> accHasValidTime("hasValidTime");
+    static const SG::AuxElement::Accessor<float> accTime("time");
+    if (accHasValidTime.isAvailable(vertex) && accTime.isAvailable(vertex)) {
+      if (vertex.hasValidTime()) {
+	fillHisto(m_vx_time, vertex.time(), weight);
+      }
+    }
+
+    static const SG::AuxElement::Accessor<float> accTimeResolution("timeResolution");
+    if (accHasValidTime.isAvailable(vertex) && accTimeResolution.isAvailable(vertex)) {
+      if (vertex.hasValidTime()) {
+	fillHisto(m_vx_err_time, vertex.timeResolution(), weight);
+      }
     }
   }
 

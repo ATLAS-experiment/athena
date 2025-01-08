@@ -18,8 +18,9 @@
 
 using namespace IDPVM;
 
-InDetPerfPlot_VertexTruthMatching::InDetPerfPlot_VertexTruthMatching(InDetPlotBase* pParent, const std::string& sDir, const int detailLevel) :
+InDetPerfPlot_VertexTruthMatching::InDetPerfPlot_VertexTruthMatching(InDetPlotBase* pParent, const std::string& sDir, const int detailLevel, bool isITk) :
     InDetPlotBase(pParent, sDir),
+    m_isITk(isITk),
     m_detailLevel(detailLevel),
     m_vx_type_truth(nullptr),
     m_vx_hs_classification(nullptr),
@@ -217,8 +218,10 @@ void InDetPerfPlot_VertexTruthMatching::initializePlots() {
     book(m_vx_type_truth,"vx_type_truth");
     book(m_vx_z_diff,"vx_z_diff");
     book(m_vx_z_diff_pull,"vx_z_diff_pull");
-    book(m_vx_time_diff,"vx_time_diff");
-    book(m_vx_time_diff_pull,"vx_time_diff_pull");
+    if(m_isITk){
+      book(m_vx_time_diff,"vx_time_diff");
+      book(m_vx_time_diff_pull,"vx_time_diff_pull");
+    }
     if (m_detailLevel >= 200) {
         book(m_vx_hs_classification,"vx_hs_classification");
         book(m_vx_nReco_vs_nTruth_inclusive,"vx_nReco_vs_nTruth_inclusive");
@@ -585,19 +588,22 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex& vertex, const x
       fillHisto(m_vx_z_diff,diff_z, weight);
       fillHisto(m_vx_z_diff_pull,diff_z/err_z, weight);
 
-      static const SG::AuxElement::Accessor<uint8_t> accHasValidTime("hasValidTime");
-      static const SG::AuxElement::Accessor<float> accTime("time");
-      static const SG::AuxElement::Accessor<float> accTimeResolution("timeResolution");
-      if (accHasValidTime.isAvailable(vertex) && accTime.isAvailable(vertex) &&
-          accTimeResolution.isAvailable(vertex)) {
+      if(m_isITk){
+	static const SG::AuxElement::Accessor<uint8_t> accHasValidTime("hasValidTime");
+	static const SG::AuxElement::Accessor<float> accTime("time");
+	static const SG::AuxElement::Accessor<float> accTimeResolution("timeResolution");
+	if (accHasValidTime.isAvailable(vertex) && accTime.isAvailable(vertex) &&
+	    accTimeResolution.isAvailable(vertex)) {
 
-        if (vertex.hasValidTime()) {
+	  if (vertex.hasValidTime()) {
             float diff_time = vertex.time()-tvrt->t()/Gaudi::Units::c_light;
             float err_time = vertex.timeResolution();
             fillHisto(m_vx_time_diff, diff_time, weight);
             fillHisto(m_vx_time_diff_pull, diff_time/err_time, weight);
-        }
+	  }
+	}
       }
+
     }
 
     // Get the match type info for each vertex:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -19,9 +19,11 @@ void
 InDetPerfPlot_Hits::initializePlots() {
 
   book(m_nInnerMostPixelHits, "nInnerMostPixelHits");
-  book(m_nInnerMostPixelEndcapHits, "nInnerMostPixelEndcapHits");
   book(m_nNextToInnerMostPixelHits, "nNextToInnerMostPixelHits");
-  book(m_nNextToInnerMostPixelEndcapHits, "nNextToInnerMostPixelEndcapHits");
+  if(m_isITk){
+    book(m_nInnerMostPixelEndcapHits, "nInnerMostPixelEndcapHits");
+    book(m_nNextToInnerMostPixelEndcapHits, "nNextToInnerMostPixelEndcapHits");
+  }
   book(m_nPixelHits, "nPixelHits");
   book(m_nSCTHits, "nSCTHits");
   if(!m_isITk){
@@ -37,9 +39,11 @@ InDetPerfPlot_Hits::initializePlots() {
     book(m_nTRTHighThresholdHitsAr, "nTRTHighThresholdHitsAr");
   }
   book(m_nInnerMostPixelHits_vs_eta, "nInnerMostPixelHits_vs_eta");
-  book(m_nInnerMostPixelEndcapHits_vs_eta, "nInnerMostPixelEndcapHits_vs_eta");
   book(m_nNextToInnerMostPixelHits_vs_eta, "nNextToInnerMostPixelHits_vs_eta");
-  book(m_nNextToInnerMostPixelEndcapHits_vs_eta, "nNextToInnerMostPixelEndcapHits_vs_eta");
+  if(m_isITk){
+    book(m_nInnerMostPixelEndcapHits_vs_eta, "nInnerMostPixelEndcapHits_vs_eta");
+    book(m_nNextToInnerMostPixelEndcapHits_vs_eta, "nNextToInnerMostPixelEndcapHits_vs_eta");
+  }
   book(m_nPixelHits_vs_eta, "nPixelHits_vs_eta");
   book(m_nSCTHits_vs_eta, "nSCTHits_vs_eta");
   if(!m_isITk){
@@ -55,9 +59,11 @@ InDetPerfPlot_Hits::initializePlots() {
     book(m_nTRTHighThresholdHitsAr_vs_eta, "nTRTHighThresholdHitsAr_vs_eta");
   }
   book(m_nInnerMostPixelHits_vs_phi, "nInnerMostPixelHits_vs_phi");
-  book(m_nInnerMostPixelEndcapHits_vs_phi, "nInnerMostPixelEndcapHits_vs_phi");
   book(m_nNextToInnerMostPixelHits_vs_phi, "nNextToInnerMostPixelHits_vs_phi");
-  book(m_nNextToInnerMostPixelEndcapHits_vs_phi, "nNextToInnerMostPixelEndcapHits_vs_phi");
+  if(m_isITk){
+    book(m_nInnerMostPixelEndcapHits_vs_phi, "nInnerMostPixelEndcapHits_vs_phi");
+    book(m_nNextToInnerMostPixelEndcapHits_vs_phi, "nNextToInnerMostPixelEndcapHits_vs_phi");
+  }
   book(m_nPixelHits_vs_phi, "nPixelHits_vs_phi");
   book(m_nSCTHits_vs_phi, "nSCTHits_vs_phi");
   if(!m_isITk) book(m_nTRTHits_vs_phi, "nTRTHits_vs_phi");
@@ -66,22 +72,22 @@ InDetPerfPlot_Hits::initializePlots() {
   if(!m_isITk) book(m_nTRTHighThresholdHits_vs_phi, "nTRTHighThresholdHits_vs_phi");
 
   book(m_nInnerMostPixelSharedHits, "nInnerMostPixelSharedHits");
-  book(m_nInnerMostPixelSharedEndcapHits, "nInnerMostPixelSharedEndcapHits");
+  if(m_isITk) book(m_nInnerMostPixelSharedEndcapHits, "nInnerMostPixelSharedEndcapHits");
   book(m_nPixelSharedHits, "nPixelSharedHits");
   book(m_nSCTSharedHits, "nSCTSharedHits");
   book(m_nInnerMostPixelSharedHits_vs_eta, "nInnerMostPixelSharedHits_vs_eta");
-  book(m_nInnerMostPixelSharedEndcapHits_vs_eta, "nInnerMostPixelSharedEndcapHits_vs_eta");
+  if(m_isITk) book(m_nInnerMostPixelSharedEndcapHits_vs_eta, "nInnerMostPixelSharedEndcapHits_vs_eta");
   book(m_nPixelSharedHits_vs_eta, "nPixelSharedHits_vs_eta");
   book(m_nSCTSharedHits_vs_eta, "nSCTSharedHits_vs_eta");
   book(m_nInnerMostPixelSharedHits_vs_phi, "nInnerMostPixelSharedHits_vs_phi");
-  book(m_nInnerMostPixelSharedEndcapHits_vs_phi, "nInnerMostPixelSharedEndcapHits_vs_phi");
+  if(m_isITk) book(m_nInnerMostPixelSharedEndcapHits_vs_phi, "nInnerMostPixelSharedEndcapHits_vs_phi");
   book(m_nPixelSharedHits_vs_phi, "nPixelSharedHits_vs_phi");
   book(m_nSCTSharedHits_vs_phi, "nSCTSharedHits_vs_phi");
 
   book(m_nInnerMostPixelHits_vs_etaphi, "nInnerMostPixelHits_vs_etaphi");
-  book(m_nInnerMostPixelEndcapHits_vs_etaphi, "nInnerMostPixelEndcapHits_vs_etaphi");
+  if(m_isITk) book(m_nInnerMostPixelEndcapHits_vs_etaphi, "nInnerMostPixelEndcapHits_vs_etaphi");
   book(m_nNextToInnerMostPixelHits_vs_etaphi, "nNextToInnerMostPixelHits_vs_etaphi");
-  book(m_nNextToInnerMostPixelEndcapHits_vs_etaphi, "nNextToInnerMostPixelEndcapHits_vs_etaphi");
+  if(m_isITk) book(m_nNextToInnerMostPixelEndcapHits_vs_etaphi, "nNextToInnerMostPixelEndcapHits_vs_etaphi");
   book(m_nPixelHits_vs_etaphi, "nPixelHits_vs_etaphi");
   book(m_nPixelHoles_vs_etaphi, "nPixelHoles_vs_etaphi");
   book(m_nSCTHits_vs_etaphi, "nSCTHits_vs_etaphi");
@@ -91,9 +97,9 @@ InDetPerfPlot_Hits::initializePlots() {
 
   if (m_iDetailLevel >= 100){
     book(m_nInnerMostPixelOutliers, "nInnerMostPixelOutliers");
-    book(m_nInnerMostPixelEndcapOutliers, "nInnerMostPixelEndcapOutliers");
+    if(m_isITk) book(m_nInnerMostPixelEndcapOutliers, "nInnerMostPixelEndcapOutliers");
     book(m_nInnerMostPixelSplitHits, "nInnerMostPixelSplitHits");
-    book(m_nInnerMostPixelSplitEndcapHits, "nInnerMostPixelSplitEndcapHits");
+    if(m_isITk) book(m_nInnerMostPixelSplitEndcapHits, "nInnerMostPixelSplitEndcapHits");
     book(m_nExpectedInnerMostPixelHits, "nExpectedInnerMostPixelHits");
     book(m_nExpectedNextToInnerMostPixelHits, "nExpectedNextToInnerMostPixelHits");
     book(m_nPixelOutliers, "nPixelOutliers");
@@ -111,9 +117,11 @@ InDetPerfPlot_Hits::initializePlots() {
     book(m_nSCTDeadSensors, "nSCTDeadSensors");
   
     book(m_nInnerMostPixelOutliers_vs_eta, "nInnerMostPixelOutliers_vs_eta");
-    book(m_nInnerMostPixelEndcapOutliers_vs_eta, "nInnerMostPixelEndcapOutliers_vs_eta");
     book(m_nInnerMostPixelSplitHits_vs_eta, "nInnerMostPixelSplitHits_vs_eta");
-    book(m_nInnerMostPixelSplitEndcapHits_vs_eta, "nInnerMostPixelSplitEndcapHits_vs_eta");
+    if(m_isITk){
+      book(m_nInnerMostPixelEndcapOutliers_vs_eta, "nInnerMostPixelEndcapOutliers_vs_eta");
+      book(m_nInnerMostPixelSplitEndcapHits_vs_eta, "nInnerMostPixelSplitEndcapHits_vs_eta");
+    }
     book(m_nExpectedInnerMostPixelHits_vs_eta, "nExpectedInnerMostPixelHits_vs_eta");
     book(m_nExpectedNextToInnerMostPixelHits_vs_eta, "nExpectedNextToInnerMostPixelHits_vs_eta");
     book(m_nPixelOutliers_vs_eta, "nPixelOutliers_vs_eta");
@@ -131,9 +139,11 @@ InDetPerfPlot_Hits::initializePlots() {
     book(m_nSCTDeadSensors_vs_eta, "nSCTDeadSensors_vs_eta");
 
     book(m_nInnerMostPixelOutliers_vs_phi, "nInnerMostPixelOutliers_vs_phi");
-    book(m_nInnerMostPixelEndcapOutliers_vs_phi, "nInnerMostPixelEndcapOutliers_vs_phi");
     book(m_nInnerMostPixelSplitHits_vs_phi, "nInnerMostPixelSplitHits_vs_phi");
-    book(m_nInnerMostPixelSplitEndcapHits_vs_phi, "nInnerMostPixelSplitEndcapHits_vs_phi");
+    if(m_isITk){
+      book(m_nInnerMostPixelEndcapOutliers_vs_phi, "nInnerMostPixelEndcapOutliers_vs_phi");
+      book(m_nInnerMostPixelSplitEndcapHits_vs_phi, "nInnerMostPixelSplitEndcapHits_vs_phi");
+    }
     book(m_nExpectedInnerMostPixelHits_vs_phi, "nExpectedInnerMostPixelHits_vs_phi");
     book(m_nExpectedNextToInnerMostPixelHits_vs_phi, "nExpectedNextToInnerMostPixelHits_vs_phi");
     book(m_nPixelOutliers_vs_phi, "nPixelOutliers_vs_phi");
@@ -157,9 +167,11 @@ InDetPerfPlot_Hits::initializePlots() {
     book(m_nSCTDoubleHoles_vs_etaphi, "nSCTDoubleHoles_vs_etaphi");
 
     book(m_nInnerMostPixelHits_vs_mu, "nInnerMostPixelHits_vs_mu");
-    book(m_nInnerMostPixelEndcapHits_vs_mu, "nInnerMostPixelEndcapHits_vs_mu");
     book(m_nNextToInnerMostPixelHits_vs_mu, "nNextToInnerMostPixelHits_vs_mu");
-    book(m_nNextToInnerMostPixelEndcapHits_vs_mu, "nNextToInnerMostPixelEndcapHits_vs_mu");
+    if(m_isITk){
+      book(m_nInnerMostPixelEndcapHits_vs_mu, "nInnerMostPixelEndcapHits_vs_mu");
+      book(m_nNextToInnerMostPixelEndcapHits_vs_mu, "nNextToInnerMostPixelEndcapHits_vs_mu");
+    }
     book(m_nPixelHits_vs_mu, "nPixelHits_vs_mu");
     book(m_nSCTHits_vs_mu, "nSCTHits_vs_mu");
     if(!m_isITk){
@@ -183,13 +195,15 @@ InDetPerfPlot_Hits::initializePlots() {
       book(m_nTRTHighThresholdHitsAr_vs_mu_ECsideC, "nTRTHighThresholdHitsAr_vs_mu_ECsideC");
     }
     book(m_nInnerMostPixelSharedHits_vs_mu, "nInnerMostPixelSharedHits_vs_mu");
-    book(m_nInnerMostPixelSharedEndcapHits_vs_mu, "nInnerMostPixelSharedEndcapHits_vs_mu");
+    if(m_isITk) book(m_nInnerMostPixelSharedEndcapHits_vs_mu, "nInnerMostPixelSharedEndcapHits_vs_mu");
     book(m_nPixelSharedHits_vs_mu, "nPixelSharedHits_vs_mu");
     book(m_nSCTSharedHits_vs_mu, "nSCTSharedHits_vs_mu");
     book(m_nInnerMostPixelOutliers_vs_mu, "nInnerMostPixelOutliers_vs_mu");
-    book(m_nInnerMostPixelEndcapOutliers_vs_mu, "nInnerMostPixelEndcapOutliers_vs_mu");
     book(m_nInnerMostPixelSplitHits_vs_mu, "nInnerMostPixelSplitHits_vs_mu");
-    book(m_nInnerMostPixelSplitEndcapHits_vs_mu, "nInnerMostPixelSplitEndcapHits_vs_mu");
+    if(m_isITk){
+      book(m_nInnerMostPixelEndcapOutliers_vs_mu, "nInnerMostPixelEndcapOutliers_vs_mu");
+      book(m_nInnerMostPixelSplitEndcapHits_vs_mu, "nInnerMostPixelSplitEndcapHits_vs_mu");
+    }
     book(m_nExpectedInnerMostPixelHits_vs_mu, "nExpectedInnerMostPixelHits_vs_mu");
     book(m_nExpectedNextToInnerMostPixelHits_vs_mu, "nExpectedNextToInnerMostPixelHits_vs_mu");
     book(m_nPixelOutliers_vs_mu, "nPixelOutliers_vs_mu");
