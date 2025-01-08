@@ -149,6 +149,7 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq += config.makeConfig ('Electrons',
         containerName='AnaElectrons' )
     configSeq.setOptionValue ('.decorateTruth', True)
+    configSeq.setOptionValue ('.decorateCaloClusterEta', True)
     configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.recalibratePhyslite', False)
     configSeq += config.makeConfig ('Electrons.WorkingPoint',

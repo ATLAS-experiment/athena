@@ -61,6 +61,8 @@ class ElectronCalibrationConfig (ConfigBlock) :
     
         self.addOption ('decorateTruth', False, type=bool,
             info="decorate truth particle information on the reconstructed one")
+        self.addOption ('decorateCaloClusterEta', False, type=bool,
+            info="decorate the calo cluster eta on the reconstructed one")
 
 
     def makeCalibrationAndSmearingAlg (self, config, name) :
@@ -110,12 +112,17 @@ class ElectronCalibrationConfig (ConfigBlock) :
         else :
             config.setSourceName (self.containerName, "Electrons")
 
+        # Decorate calo cluster eta if required
+        if self.decorateCaloClusterEta:
+            alg = config.createAlgorithm( 'CP::EgammaCaloClusterEtaAlg', 'ElectronEgammaCaloClusterEtaAlg' + self.postfix )
+            alg.particles = config.readName(self.containerName)
+            config.addOutputVar (self.containerName, 'caloEta2', 'caloEta2', noSys=True)
+
         # Set up a shallow copy to decorate
         if config.wantCopy (self.containerName) :
             alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'ElectronShallowCopyAlg' + self.postfix )
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
-
 
         # Set up the eta-cut on all electrons prior to everything else
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronEtaCutAlg' + self.postfix )

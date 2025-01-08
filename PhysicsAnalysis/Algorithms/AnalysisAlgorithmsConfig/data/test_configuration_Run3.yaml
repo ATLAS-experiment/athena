@@ -30,6 +30,7 @@ Electrons:
     forceFullSimConfig: True
     recalibratePhyslite: False
     decorateTruth: true
+    decorateCaloClusterEta: true
     WorkingPoint:
       - selectionName: loose
         forceFullSimConfig: True
