@@ -73,7 +73,7 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     ## CloseByIsolation correction augmentation
     ## For the moment, run BOTH CloseByIsoCorrection on AOD AND add in augmentation variables to be able to also run on derivation (the latter part will eventually be suppressed)
     from IsolationSelection.IsolationSelectionConfig import  IsoCloseByAlgsCfg
-    acc.merge(IsoCloseByAlgsCfg(flags, suff = "_"+name_tag, isPhysLite = False, stream_name = StreamName))
+    acc.merge(IsoCloseByAlgsCfg(flags, isPhysLite = False, stream_name = StreamName))
 
     #===================================================
     # HEAVY FLAVOR CLASSIFICATION FOR ttbar+jets EVENTS

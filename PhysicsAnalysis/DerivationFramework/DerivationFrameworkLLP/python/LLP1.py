@@ -741,7 +741,14 @@ def LLP1Cfg(flags):
     ## For the moment, run BOTH CloseByIsoCorrection on AOD AND add in augmentation variables to be able to also run on derivation (the latter part will eventually be suppressed)
     ## Must set useSelTools to set elLHVLoose and phIsEMLoose with tools - not already set in LLP1 derivation
     from IsolationSelection.IsolationSelectionConfig import IsoCloseByAlgsCfg
-    contNames = [ "Muons", "Electrons", "Photons", "LRTElectrons", "MuonsLRT" ]
+    # We can't pass non-LRT containers to the LLP algorithm.
+    # Otherwise, if this is run in conjunction with PHYS, the decorations
+    # produced by the PHYS algorithm will be overwritten.  To get those
+    # decorations produced when LLP1 is run alone, we schedule a separate
+    # algorithm for those but make it the same as the one in PHYS so that
+    # they'll be merged when both formats are used together.
+    acc.merge(IsoCloseByAlgsCfg(flags, isPhysLite = False, stream_name = 'StreamDAOD_LLP1'))
+    contNames = [ "LRTElectrons", "MuonsLRT" ]
     acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1", isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = 'StreamDAOD_LLP1'))
 
     # ============================
