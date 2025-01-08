@@ -88,7 +88,11 @@ def sTGC_OverlayCfg(flags):
 
     # Add sTGC truth overlay
     if flags.Digitization.EnableTruth:
-        acc.merge(sTGC_TruthOverlayCfg(flags))
+        if flags.Muon.usePhaseIIGeoSetup:
+            from MuonTruthOverlayR4.TruthOverlayConfig import TruthOverlayCfg
+            acc.merge(TruthOverlayCfg(flags, name="sTgcTruthOverlay", WriteKey="sTGC_SDO", deadTime = 100.))
+        else:
+            acc.merge(sTGC_TruthOverlayCfg(flags))
 
     # Add sTGC digit to RDO config
     from MuonConfig.MuonByteStreamCnvTestConfig import STGC_DigitToRDOCfg
