@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_INDETPERFPLOT_VERTEX
@@ -23,9 +23,10 @@ class TH1;
 ///class holding general plots for xAOD::Vertex
 class InDetPerfPlot_Vertex: public InDetPlotBase {
 public:
-  InDetPerfPlot_Vertex(InDetPlotBase* pParent, const std::string& dirName);
+  InDetPerfPlot_Vertex(InDetPlotBase* pParent, const std::string& dirName, bool isITk);
   void fill(const xAOD::Vertex& vertex, float weight);
 private:
+  bool m_isITk{false};
   ///@name Position of vertex
   ///@{
   ///Position x

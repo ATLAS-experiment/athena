@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_INDETPERFPLOT_TRACKPARAMETERS
@@ -22,10 +22,11 @@
 ///class holding Pt plots for Inner Detector RTT Validation and implementing fill methods
 class InDetPerfPlot_TrackParameters: public InDetPlotBase {
 public:
-  InDetPerfPlot_TrackParameters(InDetPlotBase* pParent, const std::string& dirName);
+  InDetPerfPlot_TrackParameters(InDetPlotBase* pParent, const std::string& dirName, bool isITk);
   void fill(const xAOD::TrackParticle& particle, float weight);
   void fill(const xAOD::TruthParticle& particle, float weight);
 private:
+  bool m_isITk{false};
 
   TH1* m_reco_d0{};
   TH1* m_reco_z0{};

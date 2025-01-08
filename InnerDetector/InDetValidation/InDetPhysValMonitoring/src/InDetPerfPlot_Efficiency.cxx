@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetPerfPlot_Efficiency.h"
@@ -9,12 +9,19 @@
 #include "GaudiKernel/SystemOfUnits.h" //for Gaudi::Units
 using namespace IDPVM;
 
-InDetPerfPlot_Efficiency::InDetPerfPlot_Efficiency(InDetPlotBase* pParent, const std::string& sDir, bool doTechEff) :
+InDetPerfPlot_Efficiency::InDetPerfPlot_Efficiency(InDetPlotBase* pParent, const std::string& sDir, bool doTechEff, bool isITk) :
   InDetPlotBase(pParent, sDir),
-  m_doTechEff(doTechEff) {}
+  m_doTechEff(doTechEff),
+  m_isITk(isITk) {}
 
 void
 InDetPerfPlot_Efficiency::initializePlots() {
+  // Drop eta bins larger than 2.5
+  if(!m_isITk){
+    m_eta_bins.erase(std::remove_if(m_eta_bins.begin(), m_eta_bins.end(),
+				    [](float eta) { return eta > 2.5; }),
+		     m_eta_bins.end());
+  }
 
   book(m_efficiency_vs_pteta, "efficiency_vs_pteta");
   book(m_efficiency_vs_ptTruthMu, "efficiency_vs_ptTruthMu");
