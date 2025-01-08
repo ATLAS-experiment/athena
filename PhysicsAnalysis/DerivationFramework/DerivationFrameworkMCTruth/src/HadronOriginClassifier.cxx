@@ -1,24 +1,36 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "DerivationFrameworkMCTruth/HadronOriginClassifier.h"
 #include "TruthUtils/HepMCHelpers.h"
 
+
+namespace {
+  /// Helper class to store sample properties
+  struct Sample {
+    using GEN_id = DerivationFramework::HadronOriginClassifier::GEN_id;
+
+    /// Range of samples with low <= id <= high
+    Sample(int low, int high, GEN_id gen, bool ttbb=false) :
+      low(low), high(high), gen(gen), ttbb(ttbb) {}
+
+    /// Single sample with `id`
+    Sample(int id, GEN_id gen, bool ttbb=false) :
+      Sample(id, id, gen, ttbb) {}
+
+    int low{};
+    int high{};
+    GEN_id gen{GEN_id::Pythia6};
+    bool ttbb{false};
+  };
+}
+
 namespace DerivationFramework{
 
   HadronOriginClassifier::HadronOriginClassifier(const std::string& t, const std::string& n, const IInterface* p):
-    AthAlgTool(t,n,p),
-    m_mcName("TruthEvents"),
-    m_HadronPtMinCut(0),
-    m_HadronEtaMaxCut(0),
-    m_DSID(0)
+    AthAlgTool(t,n,p)
     {
       declareInterface<DerivationFramework::HadronOriginClassifier>(this);
-
-      declareProperty("MCCollectionName",m_mcName="TruthEvents");
-      declareProperty("HadronpTMinCut",m_HadronPtMinCut=5000.); /// MeV
-      declareProperty("HadronetaMaxCut",m_HadronEtaMaxCut=2.5);
-      declareProperty("DSID",m_DSID=410000);
     }
 
   HadronOriginClassifier::~HadronOriginClassifier(){}
@@ -26,124 +38,104 @@ namespace DerivationFramework{
   StatusCode HadronOriginClassifier::initialize() {
     ATH_MSG_INFO("Initialize " );
     ATH_MSG_INFO("DSID " << m_DSID );
-    // all Herwig++/Herwig7 showered samples
-    if( m_DSID==410003 || m_DSID == 410008 //aMC@NLO+Hpp
-          || m_DSID == 410004 || m_DSID == 410163 //Powheg+Hpp
-          || m_DSID == 410232 //first attempt for Powheg+H7
-          || m_DSID == 410233 //first attempt for aMC@NLO+H7
-          || (m_DSID>=410525 && m_DSID<=410530) //New Powheg+H7 samples
-          || (m_DSID>=407037 && m_DSID<=407040) //Powheg+Hpp MET/HT sliced
-          || m_DSID ==410536 || m_DSID == 410537
-          || m_DSID == 410245 //aMC@NLO+H++ , ttbb
-          || (m_DSID>=410557 && m_DSID<=410559) // new Powheg+H7, mc16
-          || (m_DSID>=411082 && m_DSID<=411090) //Powheg+H7 HF-filtered
-          || (m_DSID>=407354 && m_DSID<=407356) //Powheg+H7 ttbar HT-filtered
-          || m_DSID ==411233 || m_DSID==411234 //Powheg+H7.1.3 ttbar 
-          || m_DSID == 411316 //Powheg+H7 allhad ttbar
-          || (m_DSID>=411329 && m_DSID<=411334) //Powheg+H7.1.3 ttbar HF-filtered
-          || (m_DSID>=411335 && m_DSID<=411337) //Powheg+H7.1.3 ttbar HT-filtered
-          || m_DSID ==412116 || m_DSID == 412117 //amc@NLO+H7.1.3 ttbar 
-          || m_DSID ==504329 || m_DSID == 504333 || m_DSID == 504341 //amc@NLO+H7.2.1 refined ttZ
-          || (m_DSID >= 601239 && m_DSID <= 601240)
-          || m_DSID == 601668 || m_DSID == 603905 || m_DSID == 603906 // ttbb Powheg+H7 dilep, ljet, allhad
-          ){
-      m_GenUsed=HerwigPP;
-      if (m_DSID==410245 || (m_DSID >= 601239 && m_DSID <= 601240)
-          || m_DSID == 601668 || m_DSID == 603905 || m_DSID == 603906
-          ){
-        m_ttbb=true;
+
+    static const std::vector<Sample> samples = {
+      // all Herwig++/Herwig7 showered samples
+      {410003, GEN_id::HerwigPP}, {410008, GEN_id::HerwigPP}, //aMC@NLO+Hpp
+      {410004, GEN_id::HerwigPP}, {410163, GEN_id::HerwigPP}, //Powheg+Hpp
+      {410232, 410233, GEN_id::HerwigPP}, //first attempt for Powheg+H7 / aMC@NLO+H7
+      {410525, 410530, GEN_id::HerwigPP}, //New Powheg+H7 samples
+      {407037, 407040, GEN_id::HerwigPP}, //Powheg+Hpp MET/HT sliced
+      {410536, 410537, GEN_id::HerwigPP}, {410245, GEN_id::HerwigPP, true}, //aMC@NLO+H++ , ttbb
+      {410557, 410559, GEN_id::HerwigPP}, // new Powheg+H7, mc16
+      {411082, 411090, GEN_id::HerwigPP}, //Powheg+H7 HF-filtered
+      {407354, 407356, GEN_id::HerwigPP}, //Powheg+H7 ttbar HT-filtered
+      {411233, 411234, GEN_id::HerwigPP}, //Powheg+H7.1.3 ttbar
+      {411316, GEN_id::HerwigPP}, //Powheg+H7 allhad ttbar
+      {411329, 411334, GEN_id::HerwigPP}, //Powheg+H7.1.3 ttbar HF-filtered
+      {411335, 411337, GEN_id::HerwigPP}, //Powheg+H7.1.3 ttbar HT-filtered
+      {412116, 412117, GEN_id::HerwigPP}, //amc@NLO+H7.1.3 ttbar
+      {504329, GEN_id::HerwigPP}, {504333, GEN_id::HerwigPP}, {504341, GEN_id::HerwigPP}, //amc@NLO+H7.2.1 refined ttZ
+      {601239, 601240, GEN_id::HerwigPP, true},
+      {601668, GEN_id::HerwigPP, true},
+      {603905, 603906, GEN_id::HerwigPP, true}, // ttbb Powheg+H7 dilep, ljet, allhad
+
+      // all Pythia8 showered samples
+      {410006, GEN_id::Pythia8}, //Powheg+P8 old main31
+      {410500, GEN_id::Pythia8}, //Powheg+P8 new main31, hdamp=mt
+      {410501, 410508, GEN_id::Pythia8}, //Powheg+P8 new main31, hdamp=1.5m // Boosted samples are included 410507 410508
+      {410511, 410524, GEN_id::Pythia8}, //Powheg+P8 new main31, hdamp=1.5mt, radiation systematics
+      {410531, 410535, GEN_id::Pythia8}, //Powheg+P8 allhad samples
+      {346343, 346345, GEN_id::Pythia8}, //Powheg+P8 ttH
+      {412123, GEN_id::Pythia8}, // MG+P8 ttW
+      {410155, GEN_id::Pythia8}, // aMC@NlO+P8 ttW
+      {410159, 410160, GEN_id::Pythia8}, //aMC@NLO+P8, old settings
+      {410218, 410220, GEN_id::Pythia8}, // aMC@NlO+P8 ttZ
+      {410276, 410278, GEN_id::Pythia8}, // aMC@NlO+P8 ttZ_lowMass
+      {410225, 410227, GEN_id::Pythia8}, {410274, 410275, GEN_id::Pythia8}, //aMC@NLO+P8, new settings
+      {410568, 410569, GEN_id::Pythia8}, // nonallhad boosted c-filtered
+      {410244, GEN_id::Pythia8, true}, //aMC@NLO+P8, ttbb (old)
+      {410441, 410442, GEN_id::Pythia8}, //new aMC@NLO+P8 mc16, new shower starting scale
+      {410464, 410466, GEN_id::Pythia8}, //new aMC@NLO+P8 mc16, new shower starting scale, no shower weights
+      {410470, 410472, GEN_id::Pythia8}, {410480, 410482, GEN_id::Pythia8}, //new Powheg+P8 mc16
+      {410452, GEN_id::Pythia8}, //new aMC@NLO+P8 FxFx mc16
+      {411073, 411081, GEN_id::Pythia8}, //Powheg+P8 HF-filtered
+      {412066, 412074, GEN_id::Pythia8}, //aMC@NLO+P8 HF-filtered
+      {411068, 411070, GEN_id::Pythia8, true}, //Powheg+P8 ttbb
+      {410265, 410267, GEN_id::Pythia8, true}, //aMC@NLO+P8 ttbb
+      {411178, 411180, GEN_id::Pythia8, true}, {411275, GEN_id::Pythia8, true}, //Powheg+P8 ttbb OTF production - ATLMCPROD-7240
+      {600791, 600792, GEN_id::Pythia8, true}, //Powheg+P8 ttbb - ATLMCPROD-9179
+      {600737, 600738, GEN_id::Pythia8, true}, //Powheg+P8 ttbb - ATLMCPROD-9179
+      {601226, 601227, GEN_id::Pythia8, true}, // Powheg+P8 ttbb bornzerodamp cut 5, ATLMCPROD-9694
+      {407342, 407344, GEN_id::Pythia8}, //Powheg+P8 ttbar HT-filtered
+      {407345, 407347, GEN_id::Pythia8}, //Powheg+P8 ttbar MET-filtered
+      {407348, 407350, GEN_id::Pythia8}, //aMC@NLO+P8 ttbar HT-filtered
+      {504330, 504332, GEN_id::Pythia8}, {504334, 504336, GEN_id::Pythia8}, {504338, GEN_id::Pythia8}, {504342, 504344, GEN_id::Pythia8}, {504346, GEN_id::Pythia8}, //aMC@NLO+P8 refined ttZ
+      {601491, 601492, GEN_id::Pythia8}, //Pow+Py8 ttbar pTHard variations - ATLMCPROD-10168
+      {601495, 601498, GEN_id::Pythia8}, //Pow+Py8 ttbar pTHard variations - ATLMCPROD-10168
+      {601229, 601230, GEN_id::Pythia8}, // mc23 ttbar dilep, singlelep
+      {601237, GEN_id::Pythia8}, // mc23 ttbar allhad
+      {601398, 601399, GEN_id::Pythia8}, // mc23 ttbar dilep, singlelep hdamp517p5
+      {601491, GEN_id::Pythia8}, {601495, GEN_id::Pythia8}, {601497, GEN_id::Pythia8}, // mc23 ttbar pThard variations, dilep, singlelep, allhad
+      {601783, 601784, GEN_id::Pythia8, true}, // Powheg+P8 ttbb bornzerodamp cut 5 pThard variations - ATLMCPROD-10527
+      {603003, 603004, GEN_id::Pythia8, true}, // Powheg+P8 ttbb nominal and pthard1 allhad
+      {603190, 603193, GEN_id::Pythia8, true}, // Powheg+P8 ttbb nominal and pthard1 dilep, ljet
+
+      // all Sherpa showered samples
+      {410186, 410189, GEN_id::Sherpa}, //Sherpa 2.2.0
+      {410249, 410252, GEN_id::Sherpa}, //Sherpa 2.2.1
+      {410342, 410347, GEN_id::Sherpa}, //Sherpa 2.2.1 sys
+      {410350, 410355, GEN_id::Sherpa}, //Sherpa 2.2.1 sys
+      {410357, 410359, GEN_id::Sherpa}, //Sherpa 2.2.1 sys
+      {410361, 410367, GEN_id::Sherpa}, //Sherpa 2.2.1 sys
+      {410281, 410283, GEN_id::Sherpa}, //Sherpa BFilter
+      {410051, GEN_id::Sherpa, true}, //Sherpa ttbb (ICHEP sample)
+      {410323, 410325, GEN_id::Sherpa, true}, {410369, GEN_id::Sherpa, true}, //New Sherpa 2.2.1 ttbb
+      {364345, 364348, GEN_id::Sherpa}, //Sherpa 2.2.4 (test)
+      {410424, 410427, GEN_id::Sherpa}, //Sherpa 2.2.4
+      {410661, 410664, GEN_id::Sherpa, true}, //Sherpa 2.2.4 ttbb
+      {421152, 421158, GEN_id::Sherpa}, //Sherpa2.2.8 ttbar
+      {413023, GEN_id::Sherpa}, // sherpa 2.2.1 ttZ
+      {700000, GEN_id::Sherpa}, // Sherpa 2.2.8 ttW
+      {700168, GEN_id::Sherpa}, // Sherpa 2.2.10 ttW
+      {700205, GEN_id::Sherpa}, // Sherpa 2.2.10 ttW EWK
+      {700309, GEN_id::Sherpa}, // Sherpa 2.2.11 ttZ
+      {700051, 700054, GEN_id::Sherpa, true}, //Sherpa2.2.8 ttbb
+      {700121, 700124, GEN_id::Sherpa}, //Sherpa2.2.10 ttbar
+      {700164, 700167, GEN_id::Sherpa, true}, //Sherpa2.2.10 ttbb
+      {700807, 700809, GEN_id::Sherpa}, //Sherpa2.2.14 ttbar
+
+    };
+
+    // Linear search for sample and assign properties:
+    for (const auto& s : samples) {
+      if (m_DSID>=s.low && m_DSID<=s.high) {
+        m_GenUsed = s.gen;
+        m_ttbb = s.ttbb;
+        return StatusCode::SUCCESS;
       }
     }
-    // all Pythia8 showered samples
-    else if( m_DSID==410006 //Powheg+P8 old main31
-          || m_DSID==410500 //Powheg+P8 new main31, hdamp=mt
-          || (m_DSID>=410501 && m_DSID<=410508) //Powheg+P8 new main31, hdamp=1.5m // Boosted samples are included 410507 410508
-          || (m_DSID>=410511 && m_DSID<=410524) //Powheg+P8 new main31, hdamp=1.5mt, radiation systematics
-          || (m_DSID>=410531 && m_DSID<=410535) //Powheg+P8 allhad samples
-          || (m_DSID>=346343 && m_DSID<=346345) //Powheg+P8 ttH
-          || m_DSID==412123 // MG+P8 ttW
-          || m_DSID==410155 // aMC@NlO+P8 ttW
-          || m_DSID==410159 || m_DSID==410160 //aMC@NLO+P8, old settings
-          || (m_DSID>=410218 && m_DSID<=410220) // aMC@NlO+P8 ttZ
-          || (m_DSID>=410276 && m_DSID<=410278) // aMC@NlO+P8 ttZ_lowMass
-          || (m_DSID>=410225 && m_DSID<=410227) || m_DSID==410274 || m_DSID==410275 //aMC@NLO+P8, new settings
-          || m_DSID==410568 || m_DSID==410569 // nonallhad boosted c-filtered
-          || m_DSID==410244 //aMC@NLO+P8, ttbb (old)
-          || m_DSID==410441 || m_DSID==410442 //new aMC@NLO+P8 mc16, new shower starting scale
-          || (m_DSID>=410464 && m_DSID<=410466) //new aMC@NLO+P8 mc16, new shower starting scale, no shower weights
-          || (m_DSID>=410470 && m_DSID<=410472) || (m_DSID>=410480 && m_DSID<=410482) //new Powheg+P8 mc16
-          || m_DSID==410452 //new aMC@NLO+P8 FxFx mc16
-          || (m_DSID>=411073 && m_DSID<=411081) //Powheg+P8 HF-filtered
-          || (m_DSID>=412066 && m_DSID<=412074) //aMC@NLO+P8 HF-filtered
-          || (m_DSID>=411068 && m_DSID<=411070) //Powheg+P8 ttbb
-          || (m_DSID>=410265 && m_DSID<=410267) //aMC@NLO+P8 ttbb
-          || (m_DSID>=411178 && m_DSID<=411180) || (m_DSID==411275) //Powheg+P8 ttbb OTF production - ATLMCPROD-7240
-          || (m_DSID>=600791 && m_DSID<=600792) //Powheg+P8 ttbb - ATLMCPROD-9179
-          || (m_DSID>=600737 && m_DSID<=600738) //Powheg+P8 ttbb - ATLMCPROD-9179
-          || (m_DSID>=601226 && m_DSID<=601227) // Powheg+P8 ttbb bornzerodamp cut 5, ATLMCPROD-9694
-          || (m_DSID>=407342 && m_DSID<=407344) //Powheg+P8 ttbar HT-filtered
-          || (m_DSID>=407345 && m_DSID<=407347) //Powheg+P8 ttbar MET-filtered
-          || (m_DSID>=407348 && m_DSID<=407350) //aMC@NLO+P8 ttbar HT-filtered
-          ||  m_DSID==504330 || m_DSID==504331 || m_DSID==504332 || m_DSID==504334 || m_DSID==504335 || m_DSID==504336 || m_DSID==504338 || m_DSID==504342 || m_DSID==504343 || m_DSID==504344 || m_DSID==504346//aMC@NLO+P8 refined ttZ
-          ||  m_DSID==601491 || m_DSID==601492  //Pow+Py8 ttbar pTHard variations - ATLMCPROD-10168
-          || (m_DSID>=601495 && m_DSID<=601498) //Pow+Py8 ttbar pTHard variations - ATLMCPROD-10168
-          || (m_DSID>=601229 && m_DSID<=601230) // mc23 ttbar dilep, singlelep
-          || m_DSID==601237 // mc23 ttbar allhad       
-          || (m_DSID>=601398 && m_DSID<=601399) // mc23 ttbar dilep, singlelep hdamp517p5
-          || m_DSID==601491 || m_DSID==601495 || m_DSID==601497 // mc23 ttbar pThard variations, dilep, singlelep, allhad    
-          || (m_DSID>=601783 && m_DSID<=601784) // Powheg+P8 ttbb bornzerodamp cut 5 pThard variations - ATLMCPROD-10527
-          || (m_DSID>=603003 && m_DSID<=603004) // Powheg+P8 ttbb nominal and pthard1 allhad
-          || (m_DSID>=603190 && m_DSID<=603193) // Powheg+P8 ttbb nominal and pthard1 dilep, ljet
-          ){
-      m_GenUsed=Pythia8;
-      if ( m_DSID==410244 //aMC@NLO+P8, ttbb (old)
-          || (m_DSID>=411068 && m_DSID<=411070) //Powheg+P8 ttbb
-          || (m_DSID>=410265 && m_DSID<=410267) //aMC@NLO+P8 ttbb
-          || (m_DSID>=411178 && m_DSID<=411180) || (m_DSID==411275) //Powheg+P8 ttbb OTF production - ATLMCPROD-7240
-          || (m_DSID>=600791 && m_DSID<=600792) // Powheg+P8 ttbb
-          || (m_DSID>=600737 && m_DSID<=600738) // Powheg+P8 ttbb dipole recoil
-          || (m_DSID>=601226 && m_DSID<=601227) // Powheg+P8 ttbb bornzerodamp cut 5
-          || (m_DSID>=601783 && m_DSID<=601784) // Powheg+P8 ttbb bornzerodamp cut 5 pThard variations - ATLMCPROD-10527
-          || (m_DSID>=603003 && m_DSID<=603004) // Powheg+P8 ttbb nominal and pthard1 allhad
-          || (m_DSID>=603190 && m_DSID<=603193) // Powheg+P8 ttbb nominal and pthard1 dilep, ljet
-      ){
-        m_ttbb=true;
-      }
-    }
-    // all Sherpa showered samples
-    else if( (m_DSID>=410186 && m_DSID<=410189) //Sherpa 2.2.0
-          || (m_DSID>=410249 && m_DSID<=410252) //Sherpa 2.2.1
-          || (m_DSID>=410342 && m_DSID<=410347) //Sherpa 2.2.1 sys
-          || (m_DSID>=410350 && m_DSID<=410355) //Sherpa 2.2.1 sys
-          || (m_DSID>=410357 && m_DSID<=410359) //Sherpa 2.2.1 sys
-          || (m_DSID>=410361 && m_DSID<=410367) //Sherpa 2.2.1 sys
-          || (m_DSID>=410281 && m_DSID<=410283) //Sherpa BFilter
-          || m_DSID==410051 //Sherpa ttbb (ICHEP sample)
-          || (m_DSID>=410323 && m_DSID<=410325) || (m_DSID==410369) //New Sherpa 2.2.1 ttbb
-          || (m_DSID>=364345 && m_DSID<=364348) //Sherpa 2.2.4 (test)
-          || (m_DSID>=410424 && m_DSID<=410427) //Sherpa 2.2.4
-          || (m_DSID>=410661 && m_DSID<=410664) //Sherpa 2.2.4 ttbb
-          || (m_DSID>=421152 && m_DSID<=421158) //Sherpa2.2.8 ttbar
-          ||  m_DSID==413023 // sherpa 2.2.1 ttZ 
-          ||  m_DSID==700000 // Sherpa 2.2.8 ttW
-          ||  m_DSID==700168 // Sherpa 2.2.10 ttW
-          ||  m_DSID==700205 // Sherpa 2.2.10 ttW EWK
-          ||  m_DSID==700309 // Sherpa 2.2.11 ttZ
-          || (m_DSID>=700051 && m_DSID<=700054) //Sherpa2.2.8 ttbb
-          || (m_DSID>=700121 && m_DSID<=700124) //Sherpa2.2.10 ttbar
-          || (m_DSID>=700164 && m_DSID<=700167) //Sherpa2.2.10 ttbb
-          || (m_DSID>=700807 && m_DSID<=700809) //Sherpa2.2.14 ttbar
-          ){
-      m_GenUsed=Sherpa;
-      if( m_DSID==410051
-          || (m_DSID>=410323 && m_DSID<=410325) || (m_DSID==410369)
-          || (m_DSID>=410661 && m_DSID<=410664)
-          || (m_DSID>=700051 && m_DSID<=700054)
-          || (m_DSID>=700164 && m_DSID<=700167)
-        ){
-        m_ttbb=true;
-      }
-    }
+
     // the default is Pythia6, so no need to list the Pythia6 showered samples
     // these are:
     // 410000-410002
@@ -155,9 +147,8 @@ namespace DerivationFramework{
     // 410120
     // 426090-426097
     // 429007
-    else{
-      m_GenUsed=Pythia6;
-    }
+    m_GenUsed = GEN_id::Pythia6;
+
     return StatusCode::SUCCESS;
   }
 
