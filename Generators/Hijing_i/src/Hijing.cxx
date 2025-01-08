@@ -128,24 +128,6 @@ StatusCode Hijing::genInitialize()
            << "    Jet sigma       = " << m_hiparnt.hint1(11) << " mb\n"
       << "=================================================\n" );
 
-//     std::cout << " PRINTING HIPR1 " << std::endl;
-//     for (int i = 1; i <= m_hiparnt.lenHipr1(); ++i)
-//       std::cout << i << ":" << m_hiparnt.hipr1(i) << ", ";
-//     std::cout << std::endl;
-//     std::cout << " PRINTING IHPR2 " << std::endl;
-//     for (int i = 1; i <= m_hiparnt.lenIhpr2(); ++i)
-//       std::cout << i << ":" << m_hiparnt.ihpr2(i) << ", ";
-//     std::cout << std::endl;
-//     std::cout << " PRINTING HINT1 " << std::endl;
-//     for (int i = 1; i <= m_hiparnt.lenHint1(); ++i)
-//       std::cout << i << ":" << m_hiparnt.hint1(i) << ", ";
-//     std::cout << std::endl;
-//     std::cout << " PRINTING IHNT2 " << std::endl;
-//     for (int i = 1; i <= m_hiparnt.lenIhnt2(); ++i)
-//       std::cout << i << ":" << m_hiparnt.ihnt2(i) << ", ";
-//     std::cout << std::endl;
-
-//     std::cout << " NSEED = " << m_ranseed.nseed() << std::endl;
 
     return StatusCode::SUCCESS;
 }
@@ -261,6 +243,7 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
                       ion->event_plane_angle=bphi;
                       ion->event_plane_angle=-1;
                       ion->sigma_inel_NN=sigmainel;
+    evt->set_heavy_ion(ion);                      
 #else
     HepMC::HeavyIon ion
       (
@@ -600,8 +583,6 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
       vertexPtrVec[particleVertexIndex]->add_particle_out(newParticle_p);
       partOriginVertex_vec[i-1] = particleVertexIndex;
 
-      //std::cout << "ML-> particleId = " << particleId << "   particleStatus = " << particleStatus
-      // << "   particleVertexIndex = " << particleVertexIndex << std::endl;
     }
 
     if (inconsistency)
@@ -627,13 +608,6 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
               << std::setw(7) << m_himain2.vatt(i, 3) );
          }
       }
-
-    //  Now loop over all vertices and add them to the event
-    //
-    //    for (unsigned int ivertex = 0; ivertex < vertexPtrVec.size(); ivertex++)
-    //{
-    //  evt->add_vertex(vertexPtrVec[ivertex]);
-    //}
 
     // Generate documentation lines for high-pt partons
     //
