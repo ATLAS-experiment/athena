@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKPARTICLETRUTHALG_H
@@ -25,15 +25,24 @@ public:
   
 private:
 
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_particlesLinkKey;
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_particlesTypeKey;
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_particlesOriginKey;
-  std::string m_particleName; /// TrackParticle input name
-  SG::ReadHandleKey<xAODTruthParticleLinkVector>  m_truthParticleLinkVecKey;//std::string m_truthLinkVecName;   /// link vector to map HepMC onto xAOD truth
-  SG::ReadHandleKey<TrackTruthCollection> m_truthTracksKey;//std::string m_truthName;          /// Track(Particle)TruthCollection input name
-  
-  
-  ToolHandle<IMCTruthClassifier> m_truthClassifier;
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_particlesLinkKey
+    {this, "ParticleLinkKey", ""};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_particlesTypeKey
+    {this, "ParticleTypeKey", ""};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_particlesOriginKey
+    {this, "ParticleOriginKey", ""};
+  StringProperty m_particleName
+    {this, "TrackParticleName", "InDetTrackParticles",
+     "TrackParticle input name"};
+  SG::ReadHandleKey<xAODTruthParticleLinkVector>  m_truthParticleLinkVecKey
+    {this, "xAODTruthLinkVector", "xAODTruthLinks",
+     "link vector to map HepMC onto xAOD truth"};
+  SG::ReadHandleKey<TrackTruthCollection> m_truthTracksKey
+    {this, "TrackTruthName", "TrackTruthCollection",
+     "Track(Particle)TruthCollection input name"};
+
+  ToolHandle<IMCTruthClassifier> m_truthClassifier{this, "MCTruthClassifier",
+    "MCTruthClassifier/MCTruthClassifier"};
 };
 
 #endif/*TRACKTRUTHSELECTOR_H*/

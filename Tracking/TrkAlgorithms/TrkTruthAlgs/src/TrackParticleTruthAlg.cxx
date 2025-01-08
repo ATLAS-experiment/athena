@@ -1,42 +1,22 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackParticleTruthAlg.h"
 
-
 #include "TrkTruthData/TrackTruthKey.h"
 #include "xAODCore/AuxStoreAccessorMacros.h"
 #include "GeneratorObjects/McEventCollection.h"
-#include "MCTruthClassifier/IMCTruthClassifier.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "TruthUtils/MagicNumbers.h"
 
 
-TrackParticleTruthAlg::TrackParticleTruthAlg(const std::string &name,ISvcLocator *pSvcLocator) :
-  AthAlgorithm(name,pSvcLocator),
-  m_particlesLinkKey("MuonSpectrometerTrackParticles"),
-  m_particlesTypeKey("MuonSpectrometerTrackParticles"),
-  m_particlesOriginKey("MuonSpectrometerTrackParticles"),
-  m_particleName("InDetTrackParticles"),
-  m_truthParticleLinkVecKey("xAODTruthLinks"),
-  m_truthTracksKey("TrackTruthCollection"),
-  m_truthClassifier("MCTruthClassifier/MCTruthClassifier")
-{
-  declareProperty("ParticleLinkKey",    m_particlesLinkKey);
-  declareProperty("ParticleTypeKey",    m_particlesTypeKey);
-  declareProperty("ParticleOriginKey",  m_particlesOriginKey);
-  declareProperty("MCTruthClassifier",  m_truthClassifier);
-  declareProperty("TrackTruthName",     m_truthTracksKey);
-  declareProperty("TrackParticleName",  m_particleName);
-  declareProperty("xAODTruthLinkVector",m_truthParticleLinkVecKey);
-}
+TrackParticleTruthAlg::TrackParticleTruthAlg(const std::string &name,ISvcLocator *pSvcLocator) : AthAlgorithm(name,pSvcLocator) {}
 
 // -----------------------------------------------------------------------------------------------------
 StatusCode TrackParticleTruthAlg::initialize()
 {
-  std::string keyName=m_particleName+".truthParticleLink";
-  m_particlesLinkKey=keyName.c_str();
+  m_particlesLinkKey=m_particleName+".truthParticleLink";
   m_particlesTypeKey=m_particleName+".truthType";
   m_particlesOriginKey=m_particleName+".truthOrigin";
   ATH_CHECK(m_particlesLinkKey.initialize());
