@@ -1,19 +1,19 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
+#define BOOST_TEST_MODULE GenericMonParsing
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
 #include <iostream>
-
-#undef NDEBUG
-#include <cassert>
 #include <nlohmann/json.hpp>
-#include "TestTools/expect.h"
-#include "TestTools/expect_exception.h"
+
 #include "AthenaMonitoringKernel/HistogramDef.h"
+
 using namespace Monitored;
 using json = nlohmann::json;
 
-json defaultJson() {
+static const json defaultJson() {
   json j;
   j["alias"] = "var";
   j["allvars"] = json::array({"var"});
@@ -56,23 +56,23 @@ json defaultJson() {
   return j;
 }
 
-bool parse1D() {
+
+BOOST_AUTO_TEST_CASE( parse1D ) {
   json check = defaultJson();
   auto def = HistogramDef::parse(check.dump());
 
-  VALUE ( def.ok ) EXPECTED ( true );
-  VALUE ( def.alias ) EXPECTED ( "var" );
-  VALUE ( def.type ) EXPECTED ( "TH1F" );
-  VALUE ( def.name.size() ) EXPECTED ( 1 );
-  VALUE ( def.xvar ) EXPECTED ( "var" );
-  VALUE ( def.xbins ) EXPECTED ( 100 );
-  VALUE ( def.xmin ) EXPECTED ( 0.0 );
-  VALUE ( def.xmax ) EXPECTED ( 1.0 );
-
-  return true;
+  BOOST_TEST( def.ok == true );
+  BOOST_TEST( def.alias == "var" );
+  BOOST_TEST( def.type == "TH1F" );
+  BOOST_TEST( def.name.size() == 1 );
+  BOOST_TEST( def.xvar == "var" );
+  BOOST_TEST( def.xbins == 100 );
+  BOOST_TEST( def.xmin == 0.0 );
+  BOOST_TEST( def.xmax == 1.0 );
 }
 
-bool parse1D_options() {
+
+BOOST_AUTO_TEST_CASE( parse1D_options ) {
   json check = defaultJson();
   check["xbins"] = 10;
   check["xmin"] = -1.0;
@@ -86,22 +86,21 @@ bool parse1D_options() {
   check["cutMask"] = "mycutmask";
   auto def = HistogramDef::parse(check.dump());
 
-  VALUE ( def.ok ) EXPECTED ( true );
-  VALUE ( def.xbins ) EXPECTED ( 10 );
-  VALUE ( def.xmin ) EXPECTED ( -1.0 );
-  VALUE ( def.xmax ) EXPECTED ( 1.0 );
-  VALUE ( def.title ) EXPECTED ( "toptitle; xtitle; ytitle" );
-  VALUE ( def.Sumw2 ) EXPECTED ( true );
-  VALUE ( def.kLBNHistoryDepth ) EXPECTED ( 99 );
-  VALUE ( def.path ) EXPECTED ( "mypath/tohistograms" );
-  VALUE ( def.type ) EXPECTED ( "TH1D" );
-  VALUE ( def.weight ) EXPECTED ( "myweight" );
-  VALUE ( def.cutMask ) EXPECTED ( "mycutmask" );
-
-  return true;
+  BOOST_TEST( def.ok == true );
+  BOOST_TEST( def.xbins == 10 );
+  BOOST_TEST( def.xmin == -1.0 );
+  BOOST_TEST( def.xmax == 1.0 );
+  BOOST_TEST( def.title == "toptitle; xtitle; ytitle" );
+  BOOST_TEST( def.Sumw2 == true );
+  BOOST_TEST( def.kLBNHistoryDepth == 99 );
+  BOOST_TEST( def.path == "mypath/tohistograms" );
+  BOOST_TEST( def.type == "TH1D" );
+  BOOST_TEST( def.weight == "myweight" );
+  BOOST_TEST( def.cutMask == "mycutmask" );
 }
 
-bool parse2D() {
+
+BOOST_AUTO_TEST_CASE( parse2D ) {
   json check = defaultJson();
   check["type"] = "TH2F";
   check["allvars"] = {"varX", "varY"};
@@ -114,24 +113,23 @@ bool parse2D() {
   check["title"] = "X vs. Y; X [x unit]; Y [y unit]";
   auto def = HistogramDef::parse(check.dump());
 
-  VALUE ( def.ok ) EXPECTED ( true );
-  VALUE ( def.type ) EXPECTED ( "TH2F" );
-  VALUE ( def.name.size() ) EXPECTED ( 2 );
-  VALUE ( std::string(def.name[0]) ) EXPECTED ( "varX" );
-  VALUE ( std::string(def.name[1]) ) EXPECTED ( "varY" );
-  VALUE ( def.alias ) EXPECTED( "varX_vs_varY" );
-  VALUE ( def.title ) EXPECTED ( "X vs. Y; X [x unit]; Y [y unit]" );
-  VALUE ( def.xbins ) EXPECTED ( 100 );
-  VALUE ( def.xmin ) EXPECTED ( 0.0 );
-  VALUE ( def.xmax ) EXPECTED ( 1.0 );
-  VALUE ( def.ybins ) EXPECTED ( 10 );
-  VALUE ( def.ymin ) EXPECTED ( 0.0 );
-  VALUE ( def.ymax ) EXPECTED ( 20.0 );
-
-  return true;
+  BOOST_TEST( def.ok == true );
+  BOOST_TEST( def.type == "TH2F" );
+  BOOST_TEST( def.name.size() == 2 );
+  BOOST_TEST( std::string(def.name[0]) == "varX" );
+  BOOST_TEST( std::string(def.name[1]) == "varY" );
+  BOOST_TEST( def.alias == "varX_vs_varY" );
+  BOOST_TEST( def.title == "X vs. Y; X [x unit]; Y [y unit]" );
+  BOOST_TEST( def.xbins == 100 );
+  BOOST_TEST( def.xmin == 0.0 );
+  BOOST_TEST( def.xmax == 1.0 );
+  BOOST_TEST( def.ybins == 10 );
+  BOOST_TEST( def.ymin == 0.0 );
+  BOOST_TEST( def.ymax == 20.0 );
 }
 
-bool parse3D() {
+
+BOOST_AUTO_TEST_CASE( parse3D ) {
   json check = defaultJson();
   check["type"] = "TProfile2D";
   check["allvars"] = {"varX", "varY", "varZ"};
@@ -147,32 +145,20 @@ bool parse3D() {
   check["title"] = "X vs. Y vs. Z; X [x unit]; Y [y unit]; Z [z unit]";
   auto def = HistogramDef::parse(check.dump());
 
-  VALUE ( def.ok ) EXPECTED ( true );
-  VALUE ( def.type ) EXPECTED ( "TProfile2D" );
-  VALUE ( def.name.size() ) EXPECTED ( 3 );
-  VALUE ( std::string(def.name[0]) ) EXPECTED ( "varX" );
-  VALUE ( std::string(def.name[1]) ) EXPECTED ( "varY" );
-  VALUE ( std::string(def.name[2]) ) EXPECTED ( "varZ" );
-  VALUE ( def.alias ) EXPECTED( "varX_vs_varY_vs_varZ" );
-  VALUE ( def.title ) EXPECTED ( "X vs. Y vs. Z; X [x unit]; Y [y unit]; Z [z unit]" );
-  VALUE ( def.xbins ) EXPECTED ( 100 );
-  VALUE ( def.xmin ) EXPECTED ( 0.0 );
-  VALUE ( def.xmax ) EXPECTED ( 1.0 );
-  VALUE ( def.ybins ) EXPECTED ( 10 );
-  VALUE ( def.ymin ) EXPECTED ( 0.0 );
-  VALUE ( def.ymax ) EXPECTED ( 20.0 );
-  VALUE ( def.zmin ) EXPECTED ( -1.0 );
-  VALUE ( def.zmax ) EXPECTED ( 1.0 );
-  
-  return true;
-}
-
-int main() {
-  assert( parse1D() );
-  assert( parse1D_options() );
-  assert( parse2D() );
-  assert( parse3D() );
-
-  std::cout << "all ok" << std::endl;
-  return 0;
+  BOOST_TEST( def.ok == true );
+  BOOST_TEST( def.type == "TProfile2D" );
+  BOOST_TEST( def.name.size() == 3 );
+  BOOST_TEST( std::string(def.name[0]) == "varX" );
+  BOOST_TEST( std::string(def.name[1]) == "varY" );
+  BOOST_TEST( std::string(def.name[2]) == "varZ" );
+  BOOST_TEST( def.alias == "varX_vs_varY_vs_varZ" );
+  BOOST_TEST( def.title == "X vs. Y vs. Z; X [x unit]; Y [y unit]; Z [z unit]" );
+  BOOST_TEST( def.xbins == 100 );
+  BOOST_TEST( def.xmin == 0.0 );
+  BOOST_TEST( def.xmax == 1.0 );
+  BOOST_TEST( def.ybins == 10 );
+  BOOST_TEST( def.ymin == 0.0 );
+  BOOST_TEST( def.ymax == 20.0 );
+  BOOST_TEST( def.zmin == -1.0 );
+  BOOST_TEST( def.zmax == 1.0 );
 }
