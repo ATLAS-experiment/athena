@@ -34,11 +34,31 @@ namespace InDetGNNHardScatterSelection
     m_jetLinksKey = baseName + ".jetLinks";
     m_electronLinksKey = baseName + ".electronLinks";
     m_muonLinksKey = baseName + ".muonLinks";
-    
+    m_mDecor_ntrk = baseName + "." + m_mDecor_ntrk.key();
+    m_mDecor_sumPt = baseName + "." + m_mDecor_sumPt.key();
+    m_mDecor_chi2Over_ndf = baseName + "." + m_mDecor_chi2Over_ndf.key();
+    m_mDecor_z_asym = baseName + "." + m_mDecor_z_asym.key();
+    m_mDecor_weighted_z_asym = baseName + "." + m_mDecor_weighted_z_asym.key();
+    m_mDecor_weighted_z_kurt = baseName + "." + m_mDecor_weighted_z_kurt.key();
+    m_mDecor_z_skew = baseName + "." + m_mDecor_z_skew.key();
+    m_mDecor_photon_deltaz = baseName + "." + m_mDecor_photon_deltaz.key();
+    m_mDecor_photon_deltaPhi = baseName + "." + m_mDecor_photon_deltaPhi.key();
+    m_mDecor_actualInterPerXing = baseName + "." + m_mDecor_actualInterPerXing.key();
+
     ATH_CHECK(m_photonLinksKey.initialize());
     ATH_CHECK(m_jetLinksKey.initialize());
     ATH_CHECK(m_electronLinksKey.initialize());
     ATH_CHECK(m_muonLinksKey.initialize());
+    ATH_CHECK(m_mDecor_ntrk.initialize());
+    ATH_CHECK(m_mDecor_sumPt.initialize());
+    ATH_CHECK(m_mDecor_chi2Over_ndf.initialize());
+    ATH_CHECK(m_mDecor_z_asym.initialize());
+    ATH_CHECK(m_mDecor_weighted_z_asym.initialize());
+    ATH_CHECK(m_mDecor_weighted_z_kurt.initialize());
+    ATH_CHECK(m_mDecor_z_skew.initialize());
+    ATH_CHECK(m_mDecor_photon_deltaz.initialize());
+    ATH_CHECK(m_mDecor_photon_deltaPhi.initialize());
+    ATH_CHECK(m_mDecor_actualInterPerXing.initialize());
 
     // ReadHandleKeys
     m_deltaZKey = baseName + ".deltaZ";
@@ -59,7 +79,11 @@ namespace InDetGNNHardScatterSelection
 
     // Tools
     ATH_CHECK(m_gnnTool.retrieve());
+    ATH_CHECK(m_trkVtxAssociationTool->setProperty("WorkingPoint","Prompt_MaxWeight"));
+    ATH_CHECK(m_trkVtxAssociationTool->setProperty("AMVFVerticesDeco","TTVA_AMVFVertices_forReco"));
+    ATH_CHECK(m_trkVtxAssociationTool->setProperty("AMVFWeightsDeco","TTVA_AMVFWeights_forReco"));
     ATH_CHECK(m_trkVtxAssociationTool.retrieve());
+    ATH_CHECK(m_trkVtxAssociationTool->initialize());
 
     return StatusCode::SUCCESS;
   }
@@ -90,16 +114,16 @@ namespace InDetGNNHardScatterSelection
     SG::ReadDecorHandle<xAOD::VertexContainer, float> acc_deltaPhi(m_deltaPhiKey, ctx);
 
     // Decorations needed by the GNNTool
-    SG::AuxElement::Decorator<int>   dec_ntrk("ntrk");
-    SG::AuxElement::Decorator<float> dec_sumPt("sumPt");
-    SG::AuxElement::Decorator<float> dec_chi2Over_ndf("chi2Over_ndf");
-    SG::AuxElement::Decorator<float> dec_z_asym("z_asymmetry");
-    SG::AuxElement::Decorator<float> dec_weighted_z_asym("weighted_z_asymmetry");
-    SG::AuxElement::Decorator<float> dec_z_kurt("z_kurtosis");
-    SG::AuxElement::Decorator<float> dec_z_skew("z_skewness");
-    SG::AuxElement::Decorator<float> dec_photon_deltaz("photon_deltaz");
-    SG::AuxElement::Decorator<float> dec_photon_deltaPhi("photon_deltaPhi");
-    SG::AuxElement::Decorator<float> dec_actualInterPerXing("actualIntPerXing");
+    SG::WriteDecorHandle<xAOD::VertexContainer, int> dec_ntrk(m_mDecor_ntrk, ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_sumPt(m_mDecor_sumPt,ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_chi2Over_ndf(m_mDecor_chi2Over_ndf,ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_z_asym(m_mDecor_z_asym,ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_weighted_z_asym(m_mDecor_weighted_z_asym,ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_z_kurt(m_mDecor_weighted_z_kurt,ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_z_skew(m_mDecor_z_skew,ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_photon_deltaz(m_mDecor_photon_deltaz,ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_photon_deltaPhi(m_mDecor_photon_deltaPhi,ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_actualInterPerXing(m_mDecor_actualInterPerXing,ctx);
 
     std::map< const xAOD::Vertex*, std::vector<const xAOD::Jet*> > jetsInVertex;
     std::map< const xAOD::Jet*, std::map< const xAOD::Vertex*, int> > jetVertexPt;
@@ -211,20 +235,17 @@ namespace InDetGNNHardScatterSelection
       // associate objects to vertices
       std::vector<ElementLink<xAOD::ElectronContainer>> electronLinks;
       for(const xAOD::Electron* electron : *electronsIn){
-
         const auto *id_trk = xAOD::EgammaHelpers::getOriginalTrackParticle(electron);
         if(!id_trk) continue;
-
-        for(size_t i = 0; i < vertex->nTrackParticles(); i++){
-          const xAOD::TrackParticle *trk = vertex->trackParticle(i);
-          if(trk && id_trk == trk) {
-            ElementLink<xAOD::ElectronContainer> elLink;
+        auto eleVertex = m_trkVtxAssociationTool->getUniqueMatchVertexLink(*id_trk, *vertices);
+        if(!eleVertex) continue;
+        ElementLink<xAOD::ElectronContainer> elLink;
+        if(*eleVertex == vertex){
             elLink.setElement(electron);
             elLink.setStorableObject(*electronsIn.ptr(), true);
             electronLinks.push_back(elLink);
-            break;
-          }
         }
+
       }
       dec_electronLinks(*vertex) = electronLinks;
 
@@ -269,19 +290,22 @@ namespace InDetGNNHardScatterSelection
 
       std::vector<ElementLink<xAOD::MuonContainer>> muonLinks;
       for(const xAOD::Muon* muon : *muonsIn){
-
         auto tp = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
-
-        for (size_t i = 0; i < vertex->nTrackParticles(); i++){
-          const xAOD::TrackParticle *trk = vertex->trackParticle(i);
-          if(trk && tp == trk){
-            ElementLink<xAOD::MuonContainer> muonLink;
+        if(!tp) continue;
+        try{
+          auto muonVertex = m_trkVtxAssociationTool->getUniqueMatchVertexLink(*tp, *vertices);
+          if(!muonVertex) continue;
+          ElementLink<xAOD::MuonContainer> muonLink;
+          if(*muonVertex == vertex){
             muonLink.setElement(muon);
             muonLink.setStorableObject(*muonsIn.ptr(), true);
             muonLinks.push_back(muonLink);
-            break;
           }
+        }catch(...) {
+          ATH_MSG_DEBUG("Skipping muon as the track is not associated to any PV ");
+          ATH_MSG_DEBUG("Muon pT, eta = " << muon->pt() << " " << muon->eta());
         }
+
       }
       dec_muonLinks(*vertex) = muonLinks;
 
