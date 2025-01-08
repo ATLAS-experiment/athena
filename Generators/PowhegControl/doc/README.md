@@ -334,8 +334,14 @@ which also allows features such as PDF reweighting.
 Contact the experts in case your desired process is not available in V2, a request might need to be made to the process authors.
 
 **Powheg Box SVN revisions for the processes used in each
-`External/Powheg` tag are listed [HERE](https://docs.google.com/spreadsheets/d/16XvI5k2I2On4TkkIWJC9MXr0fMaRU2SvOkgBucRPzs0)
-in a Google doc.**
+`External/Powheg` tag are given in the following files
+
+  - [ATLASOTF-07-09](https://gitlab.cern.ch/atlas-physics/pmg/mcexperts/powheg-experts/powheg-compilation/-/blob/ATLASOTF-07-09/Install.sh)
+  - [ATLASOTF-07-08](https://gitlab.cern.ch/atlas-physics/pmg/mcexperts/powheg-experts/powheg-compilation/-/blob/ATLASOTF-07-08/Install.sh)
+  - [ATLASOTF-07-07](https://gitlab.cern.ch/atlas-physics/pmg/mcexperts/powheg-experts/powheg-compilation/-/blob/ATLASOTF-07-07/Install.sh)
+  - [ATLASOTF-07-06](https://gitlab.cern.ch/atlas-physics/pmg/mcexperts/powheg-experts/powheg-compilation/-/blob/ATLASOTF-07-06/Install.sh)
+  - [older](https://docs.google.com/spreadsheets/d/16XvI5k2I2On4TkkIWJC9MXr0fMaRU2SvOkgBucRPzs0)
+.**
 
 
 
