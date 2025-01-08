@@ -4,29 +4,21 @@
 
 #include "TrkTruthAlgs/TrackTruthSelector.h"
 
-TrackTruthSelector::TrackTruthSelector(const std::string &name,ISvcLocator *pSvcLocator) :
-  AthAlgorithm(name,pSvcLocator),
-  m_detailedTrackTruthName("DetailedTrackTruth"),
-  m_outputName("TrackTruthNew"),
-  m_subDetWeights(SubDetHitStatistics::NUM_SUBDETECTORS, 1.)
-{
-  declareProperty("DetailedTrackTruthName",  m_detailedTrackTruthName);
-  declareProperty("OutputName",  m_outputName);
-
-  declareProperty("WeightPixel",  m_subDetWeights[SubDetHitStatistics::Pixel]);
-  declareProperty("WeightSCT",    m_subDetWeights[SubDetHitStatistics::SCT]);
-  declareProperty("WeightTRT",    m_subDetWeights[SubDetHitStatistics::TRT]);
-  declareProperty("WeightMDT",    m_subDetWeights[SubDetHitStatistics::MDT]);
-  declareProperty("WeightRPC",    m_subDetWeights[SubDetHitStatistics::RPC]);
-  declareProperty("WeightTGC",    m_subDetWeights[SubDetHitStatistics::TGC]);
-  declareProperty("WeightCSC",    m_subDetWeights[SubDetHitStatistics::CSC]);
-  declareProperty("WeightsTGC",   m_subDetWeights[SubDetHitStatistics::STGC]=0.25);
-  declareProperty("WeightMM",     m_subDetWeights[SubDetHitStatistics::MM]=0.25);
-}
+TrackTruthSelector::TrackTruthSelector(const std::string &name,ISvcLocator *pSvcLocator) : AthAlgorithm(name,pSvcLocator) {}
 
 // -----------------------------------------------------------------------------------------------------
 StatusCode TrackTruthSelector::initialize()
 {
+  m_subDetWeights[SubDetHitStatistics::Pixel] = m_weightPixel;
+  m_subDetWeights[SubDetHitStatistics::SCT] = m_weightSCT;
+  m_subDetWeights[SubDetHitStatistics::TRT] = m_weightTRT;
+  m_subDetWeights[SubDetHitStatistics::MDT] = m_weightMDT;
+  m_subDetWeights[SubDetHitStatistics::RPC] = m_weightRPC;
+  m_subDetWeights[SubDetHitStatistics::TGC] = m_weightTGC;
+  m_subDetWeights[SubDetHitStatistics::CSC] = m_weightCSC;
+  m_subDetWeights[SubDetHitStatistics::STGC] = m_weightsTGC;
+  m_subDetWeights[SubDetHitStatistics::MM] = m_weightMM;
+
   ATH_CHECK( m_detailedTrackTruthName.initialize() );
   ATH_CHECK( m_outputName.initialize() );
   return StatusCode::SUCCESS;
