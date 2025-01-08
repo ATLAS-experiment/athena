@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -52,6 +52,8 @@ class PhotonCalibrationConfig (ConfigBlock) :
         self.addOption ('minPt', 10*GeV, type=float,
             info="the minimum pT cut to apply to calibrated photons. "
             "The default is 10 GeV.")
+        self.addOption ('maxEta', 2.37, type=float,
+            info="maximum photon |eta| (float). The default is 2.37.")
         self.addOption ('forceFullSimConfig', False, type=bool,
             info="whether to force the tool to use the configuration meant for "
             "full simulation samples. Only for testing purposes. "
@@ -130,7 +132,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonEtaCutAlg' + postfix )
         alg.selectionDecoration = 'selectEta' + postfix + ',as_bits'
         config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-        alg.selectionTool.maxEta = 2.37
+        alg.selectionTool.maxEta = self.maxEta
         if self.crackVeto:
             alg.selectionTool.etaGapLow = 1.37
             alg.selectionTool.etaGapHigh = 1.52
@@ -279,6 +281,9 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         self.addOption ('isolationWP', None, type=str,
             info="the ID WP (string) to use. Supported isolation WPs: "
             "FixedCutLoose, FixedCutTight, TightCaloOnly, NonIso.")
+        self.addOption ('addSelectionToPreselection', True, type=bool,
+            info="whether to retain only photons satisfying the working point "
+            "requirements. The default is True.")
         self.addOption ('closeByCorrection', False, type=bool,
             info="whether to use close-by-corrected isolation working points")
         self.addOption ('recomputeIsEM', False, type=bool,
@@ -325,7 +330,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
 
         # Set up the photon selection algorithm:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonIsEMSelectorAlg' + postfix )
-        alg.selectionDecoration = 'selectEM' + postfix + ',as_bits'
+        alg.selectionDecoration = 'selectEM' + postfix + ',as_char'
         if self.recomputeIsEM:
             # Rerun the cut-based ID
             config.addPrivateTool( 'selectionTool', 'AsgPhotonIsEMSelector' )
@@ -351,7 +356,8 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             alg.selectionTool.selectionFlags = [ dfFlag ]
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
+        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                             preselection=self.addSelectionToPreselection)
 
         # Set up the FSR selection
         if self.doFSRSelection :
@@ -365,7 +371,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         if self.isolationWP != 'NonIso' :
             alg = config.createAlgorithm( 'CP::EgammaIsolationSelectionAlg',
                                           'PhotonIsolationSelectionAlg' + postfix )
-            alg.selectionDecoration = 'isolated' + postfix + ',as_bits'
+            alg.selectionDecoration = 'isolated' + postfix + ',as_char'
             config.addPrivateTool( 'selectionTool', 'CP::IsolationSelectionTool' )
             alg.selectionTool.PhotonWP = self.isolationWP
             if self.closeByCorrection:
@@ -373,7 +379,8 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             alg.isPhoton = True
             alg.egammas = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                                 preselection=self.addSelectionToPreselection)
 
         # Set up the ID/reco photon efficiency correction algorithm:
         if config.dataType() is not DataType.Data and not self.noEffSF:

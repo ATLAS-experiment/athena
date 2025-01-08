@@ -46,6 +46,8 @@ class ElectronCalibrationConfig (ConfigBlock) :
         self.addOption ('minPt', 4.5*GeV, type=float,
             info="the minimum pT cut to apply to calibrated electrons. "
             "The default is 4.5 GeV.")
+        self.addOption ('maxEta', 2.47, type=float,
+            info="maximum electron |eta| (float). The default is 2.47.")
         self.addOption ('forceFullSimConfig', False, type=bool,
             info="whether to force the tool to use the configuration meant for "
             "full simulation samples. Only for testing purposes. The default "
@@ -121,7 +123,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronEtaCutAlg' + self.postfix )
         alg.selectionDecoration = 'selectEta' + self.postfix + ',as_bits'
         config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-        alg.selectionTool.maxEta = 2.47
+        alg.selectionTool.maxEta = self.maxEta
         if self.crackVeto:
             alg.selectionTool.etaGapLow = 1.37
             alg.selectionTool.etaGapHigh = 1.52
@@ -256,6 +258,9 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             info="the isolation WP (string) to use. Supported isolation WPs: "
             "HighPtCaloOnly, Loose_VarRad, Tight_VarRad, TightTrackOnly_"
             "VarRad, TightTrackOnly_FixedRad, NonIso.")
+        self.addOption ('addSelectionToPreselection', True, type=bool,
+            info="whether to retain only electrons satisfying the working point "
+            "requirements. The default is True.")
         self.addOption ('closeByCorrection', False, type=bool,
             info="whether to use close-by-corrected isolation working points")
         self.addOption ('recomputeID', False, type=bool,
@@ -324,7 +329,8 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
             if self.trackSelection :
-                config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
+                config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                                     preselection=self.addSelectionToPreselection)
             if self.writeTrackD0Z0 :
                 alg.d0sigDecoration = 'd0sig' + postfix
                 alg.z0sinthetaDecoration = 'z0sintheta' + postfix
@@ -335,7 +341,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             # Set up the likelihood ID selection algorithm
             # It is safe to do this before calibration, as the cluster E is used
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' + postfix )
-            alg.selectionDecoration = 'selectLikelihood' + selectionPostfix + ',as_bits'
+            alg.selectionDecoration = 'selectLikelihood' + selectionPostfix + ',as_char'
             if self.recomputeID:
                 # Rerun the likelihood ID
                 config.addPrivateTool( 'selectionTool', 'AsgElectronLikelihoodTool' )
@@ -355,33 +361,25 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         elif 'SiHit' in self.identificationWP:
             # Only want SiHit electrons, so veto loose LH electrons
             algVeto = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlgVeto' + postfix + 'Veto')
-            algVeto.selectionDecoration = 'selectLikelihoodVeto' + postfix + ',as_bits'
+            algVeto.selectionDecoration = 'selectLikelihoodVeto' + postfix + ',as_char'
             config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
             algVeto.selectionTool.selectionFlags = ["DFCommonElectronsLHLoose"]
             algVeto.selectionTool.invertFlags    = [True]
             algVeto.particles = config.readName (self.containerName)
             algVeto.preselection = config.getPreselection (self.containerName, self.selectionName)
-            # add in as preselection a veto
-            config.addSelection (self.containerName, self.selectionName, algVeto.selectionDecoration)
+            # add the veto as a selection
+            config.addSelection (self.containerName, self.selectionName, algVeto.selectionDecoration,
+                                 preselection=self.addSelectionToPreselection)
 
             # Select SiHit electrons using IsEM bits
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' + postfix )
-            alg.selectionDecoration = 'selectSiHit' + selectionPostfix + ',as_bits'
+            alg.selectionDecoration = 'selectSiHit' + selectionPostfix + ',as_char'
             # Select from Derivation Framework IsEM bits
             config.addPrivateTool( 'selectionTool', 'CP::AsgMaskSelectionTool' )
             dfVar = "DFCommonElectronsLHLooseBLIsEMValue"
             alg.selectionTool.selectionVars = [dfVar]
             mask = int( 0 | 0x1 << 1 | 0x1 << 2)
             alg.selectionTool.selectionMasks = [mask]
-
-            # Set up the ElectronSiHitDecAlg algorithm to decorate SiHit electrons with a minimal amount of information:
-            algDec = config.createAlgorithm( 'CP::ElectronSiHitDecAlg', 'ElectronSiHitDecAlg' + postfix )
-            selDec = 'siHitEvtHasLeptonPair' + selectionPostfix + ',as_bits'
-            algDec.selectionName     = selDec.split(",")[0]
-            algDec.ElectronContainer = config.readName (self.containerName)
-            # Set flag to only collect SiHit electrons for events with an electron or muon pair to minimize size increase from SiHit electrons
-            algDec.RequireTwoLeptons = True
-            config.addSelection (self.containerName, self.selectionName, selDec)
         elif 'DNN' in self.identificationWP:
             if self.chargeIDSelectionRun2:
                 raise ValueError('DNN is not intended to be used with '
@@ -389,7 +387,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                  'DNN WPs containing charge flip rejection.')
             # Set up the DNN ID selection algorithm
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronDNNAlg' + postfix )
-            alg.selectionDecoration = 'selectDNN' + selectionPostfix + ',as_bits'
+            alg.selectionDecoration = 'selectDNN' + selectionPostfix + ',as_char'
             if self.recomputeID:
                 # Rerun the DNN ID
                 config.addPrivateTool( 'selectionTool', 'AsgElectronSelectorTool' )
@@ -406,7 +404,20 @@ class ElectronWorkingPointConfig (ConfigBlock) :
 
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
+        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                             preselection=self.addSelectionToPreselection)
+
+        # maintain order of selections
+        if 'SiHit' in self.identificationWP:
+            # Set up the ElectronSiHitDecAlg algorithm to decorate SiHit electrons with a minimal amount of information:
+            algDec = config.createAlgorithm( 'CP::ElectronSiHitDecAlg', 'ElectronSiHitDecAlg' + postfix )
+            selDec = 'siHitEvtHasLeptonPair' + selectionPostfix + ',as_char'
+            algDec.selectionName     = selDec.split(",")[0]
+            algDec.ElectronContainer = config.readName (self.containerName)
+            # Set flag to only collect SiHit electrons for events with an electron or muon pair to minimize size increase from SiHit electrons
+            algDec.RequireTwoLeptons = True
+            config.addSelection (self.containerName, self.selectionName, selDec,
+                                 preselection=self.addSelectionToPreselection)
 
         # Set up the FSR selection
         if self.doFSRSelection :
@@ -425,14 +436,15 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         if self.isolationWP != 'NonIso' :
             alg = config.createAlgorithm( 'CP::EgammaIsolationSelectionAlg',
                                           'ElectronIsolationSelectionAlg' + postfix )
-            alg.selectionDecoration = 'isolated' + selectionPostfix + ',as_bits'
+            alg.selectionDecoration = 'isolated' + selectionPostfix + ',as_char'
             config.addPrivateTool( 'selectionTool', 'CP::IsolationSelectionTool' )
             alg.selectionTool.ElectronWP = self.isolationWP
             if self.closeByCorrection:
               alg.selectionTool.IsoDecSuffix = "CloseByCorr"
             alg.egammas = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                                 preselection=self.addSelectionToPreselection)
 
         if self.chargeIDSelectionRun2 and config.geometry() >= LHCPeriod.Run3:
             log.warning("ECIDS is only available for Run 2 and will not have effect in run 3.")
@@ -441,7 +453,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         if self.chargeIDSelectionRun2 and config.geometry() < LHCPeriod.Run3:
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
                                           'ElectronChargeIDSelectionAlg' + postfix )
-            alg.selectionDecoration = 'chargeID' + selectionPostfix + ',as_bits'
+            alg.selectionDecoration = 'chargeID' + selectionPostfix + ',as_char'
             if self.recomputeChargeID:
                 # Rerun the ECIDS BDT
                 config.addPrivateTool( 'selectionTool',
@@ -457,7 +469,8 @@ class ElectronWorkingPointConfig (ConfigBlock) :
 
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                                 preselection=self.addSelectionToPreselection)
 
         correlationModels = ["SIMPLIFIED", "FULL", "TOTAL", "TOYS"]
 

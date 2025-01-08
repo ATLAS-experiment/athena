@@ -115,7 +115,7 @@ namespace CP
             for ( auto el : *els ) {
 
                 // Select or not SiHits depending on whether this event has an electron pair
-                uint32_t evtOK = (eventHasLeptonPair) ? selectionAccept() : selectionReject();
+                char evtOK = (eventHasLeptonPair) ? 1 : 0;
                 m_evtOKDec.set(*el, evtOK, sys);
                 ATH_MSG_DEBUG( "SiHit el passes?: " << evtOK );
 
