@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_PHYSLITE.py
 # This defines DAOD_PHYSLITE, an unskimmed DAOD format for Run 3.
@@ -172,6 +172,12 @@ def CPAlgorithmsCfg(flags):
     subConfig = factory.makeConfig ('Jets', containerName='AnalysisLargeRJets',
         jetCollection=largeRjetContainer)
     subConfig.setOptionValue ('.runGhostMuonAssociation', False)
+    # Disable kinematic selections on large-R jets
+    subConfig.setOptionValue ('.minPt', 0.)
+    subConfig.setOptionValue ('.maxPt', 0.)
+    subConfig.setOptionValue ('.maxEta', 0.)
+    subConfig.setOptionValue ('.minMass', 0.)
+    subConfig.setOptionValue ('.maxMass', 0.)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Thinning', containerName='AnalysisLargeRJets')
     subConfig.setOptionValue ('.deepCopy', True)

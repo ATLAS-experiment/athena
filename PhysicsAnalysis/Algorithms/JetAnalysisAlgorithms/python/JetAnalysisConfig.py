@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 from __future__ import print_function
@@ -554,6 +554,21 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
                 info="data type (str) to use for the jet uncertainty tool (e.g. "
                 "'AF3' or 'MC16'). Expert option to override JetETmiss "
                 "recommendations. The default is None.")
+        self.addOption ('minPt', 200.*GeV, type=float,
+            info="the minimum pt cut to apply to calibrated large-R jets. "
+            "The default is 200 GeV.")
+        self.addOption ('maxPt', 3000.*GeV, type=float,
+            info="the maximum pt cut to apply to calibrated large-R jets. "
+            "The default is 3000 GeV.")
+        self.addOption ('maxEta', 2., type=float,
+            info="the maximum |eta| cut to apply to calibrated large-R jets. "
+            "The default is 2.")
+        self.addOption ('minMass', 40.*GeV, type=float,
+            info="the minimum mass cut to apply to calibrated large-R jets. "
+            "The default is 40 GeV.")
+        self.addOption ('maxMass', 600.*GeV, type=float,
+            info="the maximum mass cut to apply to calibrated large-R jets. "
+            "The default is 600 GeV.")
 
     def getUncertaintyToolSettings(self, config):
         # Retrieve appropriate JES/JER recommendations for the JetUncertaintiesTool.
@@ -726,6 +741,31 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.jetsOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
             config.addSelection (self.containerName, '', 'outOfValidity')
+
+        if self.minPt > 0 or self.maxPt > 0 or self.maxEta > 0:
+            # Set up the the pt-eta selection
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'JetPtEtaCutAlg'+self.containerName )
+            alg.selectionDecoration = 'selectPtEta,as_bits'
+            config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
+            alg.selectionTool.minPt = self.minPt
+            alg.selectionTool.maxPt = self.maxPt
+            alg.selectionTool.maxEta = self.maxEta
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+            config.addSelection (self.containerName, '', alg.selectionDecoration,
+                                 preselection=True)
+            
+        if self.minMass > 0 or self.maxMass > 0:
+            # Set up the the mass selection
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'JetMassCutAlg'+self.containerName )
+            alg.selectionDecoration = 'selectMass,as_bits'
+            config.addPrivateTool( 'selectionTool', 'CP::AsgMassSelectionTool' )
+            alg.selectionTool.minM = self.minMass
+            alg.selectionTool.maxM = self.maxMass
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+            config.addSelection (self.containerName, '', alg.selectionDecoration,
+                                 preselection=True)
 
         config.addOutputVar (self.containerName, 'm', 'm')
 

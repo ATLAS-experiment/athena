@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -14,6 +14,7 @@
 #include <AsgAnalysisAlgorithms/AsgOriginalObjectLinkAlg.h>
 #include <AsgAnalysisAlgorithms/AsgPriorityDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/AsgPtEtaSelectionTool.h>
+#include <AsgAnalysisAlgorithms/AsgMassSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/AsgShallowCopyAlg.h>
 #include <AsgAnalysisAlgorithms/AsgUnionPreselectionAlg.h>
@@ -54,6 +55,7 @@ DECLARE_COMPONENT (CP::AsgMaskSelectionTool)
 DECLARE_COMPONENT (CP::AsgOriginalObjectLinkAlg)
 DECLARE_COMPONENT (CP::AsgPriorityDecorationAlg)
 DECLARE_COMPONENT (CP::AsgPtEtaSelectionTool)
+DECLARE_COMPONENT (CP::AsgMassSelectionTool)
 DECLARE_COMPONENT (CP::AsgSelectionAlg)
 DECLARE_COMPONENT (CP::AsgShallowCopyAlg)
 DECLARE_COMPONENT (CP::AsgUnionPreselectionAlg)
