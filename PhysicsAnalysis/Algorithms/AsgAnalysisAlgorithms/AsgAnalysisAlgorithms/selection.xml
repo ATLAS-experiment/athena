@@ -9,6 +9,7 @@
    <class name="CP::AsgOriginalObjectLinkAlg" />
    <class name="CP::AsgPriorityDecorationAlg" />
    <class name="CP::AsgPtEtaSelectionTool" />
+   <class name="CP::AsgMassSelectionTool" />
    <class name="CP::AsgSelectionAlg" />
    <class name="CP::AsgShallowCopyAlg" />
    <class name="CP::AsgUnionPreselectionAlg" />

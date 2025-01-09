@@ -20,6 +20,7 @@
 #include <AsgAnalysisAlgorithms/AsgFlagSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgLeptonTrackSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/AsgMaskSelectionTool.h>
+#include <AsgAnalysisAlgorithms/AsgMassSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgOriginalObjectLinkAlg.h>
 #include <AsgAnalysisAlgorithms/AsgPriorityDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/AsgPtEtaSelectionTool.h>
@@ -286,6 +287,7 @@ namespace CP
     ANA_CHECK (asg::registerToolFactory<BTaggingSelectionTool> ("BTaggingSelectionTool"));
     ANA_CHECK (asg::registerToolFactory<CP::AsgFlagSelectionTool> ("CP::AsgFlagSelectionTool"));
     ANA_CHECK (asg::registerToolFactory<CP::AsgMaskSelectionTool> ("CP::AsgMaskSelectionTool"));
+    ANA_CHECK (asg::registerToolFactory<CP::AsgMassSelectionTool> ("CP::AsgMassSelectionTool"));
     ANA_CHECK (asg::registerToolFactory<CP::AsgPtEtaSelectionTool> ("CP::AsgPtEtaSelectionTool"));
     ANA_CHECK (asg::registerToolFactory<CP::EgammaCalibrationAndSmearingTool> ("CP::EgammaCalibrationAndSmearingTool"));
     ANA_CHECK (asg::registerToolFactory<CP::EgammaIsGoodOQSelectionTool> ("CP::EgammaIsGoodOQSelectionTool"));

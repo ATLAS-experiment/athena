@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -18,6 +18,7 @@
 #include <AsgAnalysisAlgorithms/AsgOriginalObjectLinkAlg.h>
 #include <AsgAnalysisAlgorithms/AsgPriorityDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/AsgPtEtaSelectionTool.h>
+#include <AsgAnalysisAlgorithms/AsgMassSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/AsgShallowCopyAlg.h>
 #include <AsgAnalysisAlgorithms/AsgUnionPreselectionAlg.h>
