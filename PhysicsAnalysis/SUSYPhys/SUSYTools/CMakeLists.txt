@@ -50,7 +50,7 @@ if( NOT XAOD_STANDALONE )
            SUSYTools/selection.xml
            LINK_LIBRARIES SUSYToolsLib )
 else()
-   atlas_add_library( SUSYTools src/SUSYToolsAlg.cxx src/SUSYToolsAlg.h
+   atlas_add_library( SUSYTools src/SUSYToolsAlg.cxx SUSYTools/SUSYToolsAlg.h
            NO_PUBLIC_HEADERS
            PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
            PRIVATE_LINK_LIBRARIES SUSYToolsLib TauAnalysisToolsLib
