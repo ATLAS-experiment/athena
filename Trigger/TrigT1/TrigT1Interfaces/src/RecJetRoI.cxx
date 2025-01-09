@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /***************************************************************************
                          RecJetRoI.cxx  -  description
@@ -344,7 +344,7 @@ LVL1::RecJetRoI::passedFwdThreshold(unsigned int thresholdNumber) const {
 /** returns the CoordinateRange. This is worked out from the RoIWord's hardware
  *  coords (i.e. crate number, CPM number etc.) by the RoIDecoder class.
  **/
-LVL1::CoordinateRange
+const LVL1::CoordinateRange&
 LVL1::RecJetRoI::coord() const { return m_coordRange; }
 
 /** returns a vector of thresholds passed. */

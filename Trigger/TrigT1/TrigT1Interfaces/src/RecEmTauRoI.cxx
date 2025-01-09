@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 // $Id: RecEmTauRoI.cxx 796120 2017-02-08 03:20:47Z ssnyder $
 /***************************************************************************
@@ -390,7 +390,7 @@ bool LVL1::RecEmTauRoI::passedThreshold(unsigned int threshold_number) const
 /** returns the CoordinateRange. This is worked out from the RoIWord's hardware
  coords
   (i.e. crate number, CPM number etc.) by the RoIDecoder class.  */
-LVL1::CoordinateRange LVL1::RecEmTauRoI::coord() const { return m_coordRange; }
+const LVL1::CoordinateRange& LVL1::RecEmTauRoI::coord() const { return m_coordRange; }
 
 /** returns a vector of thresholds passed. */
 std::vector<unsigned int> *
