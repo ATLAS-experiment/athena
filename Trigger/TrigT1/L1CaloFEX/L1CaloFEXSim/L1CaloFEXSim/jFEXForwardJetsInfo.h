@@ -45,7 +45,7 @@ class jFEXForwardJetsInfo {
         float getCentreLocalTTPhi();
 
         void  includeTTinSeed(int TT_ID);
-        std::vector<int> getTTinSeed();
+        const std::vector<int>& getTTinSeed();
 
         void addToSeedET(int seed_ET);
         int getSeedET();
@@ -54,16 +54,16 @@ class jFEXForwardJetsInfo {
         int getFirstEnergyRingET();
 
         void includeTTIDinFirstER(int firstER_TTID);
-        std::vector<int> getTTIDinFirstER();
+        const std::vector<int>& getTTIDinFirstER();
 
         void addToSecondEnergyRingET(int secondER_ET);
         int getSecondEnergyRingET();
 
         void includeTTIDinSecondER(int secondER_TTID);
-        std::vector<int> getTTIDinSecondER();
+        const std::vector<int>& getTTIDinSecondER();
 
         void includeTTinSearchWindow(int TT_ID);
-        std::vector<int> getTTinSearchWindow();
+        const std::vector<int>& getTTinSearchWindow();
         void addToSearchWindowET(int seed_ET);
         int getSearchWindowET();
 

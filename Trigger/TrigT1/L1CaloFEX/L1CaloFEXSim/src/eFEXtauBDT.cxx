@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //*************************************************************************
@@ -112,7 +112,7 @@ void LVL1::eFEXtauBDT::initHADETPointers() {
 void LVL1::eFEXtauBDT::initPointers(const std::vector<std::vector<int>> &scells,
                                     std::vector<unsigned int *> &ptr_list) {
   m_log->msg(MSG::DEBUG) << "Will use sum of supercells: " << endmsg;
-  for (auto scell : scells) {
+  for (const auto& scell : scells) {
     int eta = scell[0];
     int phi = scell[1];
     int layer = scell[2];
