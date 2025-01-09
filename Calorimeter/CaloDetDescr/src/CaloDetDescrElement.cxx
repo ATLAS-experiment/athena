@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloDetDescr/CaloDetDescrElement.h"
@@ -42,7 +42,6 @@ CaloDetDescrElement::CaloDetDescrElement(const IdentifierHash subcaloHash,
   , m_onl1(onl1)
   , m_onl2(onl2)
 {
-  m_sample=CaloCell_ID::Unknown;
   if(is_tile()) {
     // Tile
     m_sample = (CaloCell_ID::CaloSample)(

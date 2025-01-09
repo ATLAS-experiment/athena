@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/LArFCAL_Base_ID.h"
@@ -19,15 +19,6 @@ LArFCAL_Base_ID::LArFCAL_Base_ID(const std::string& name, bool supercell)
   : CaloIDHelper (name),
     m_slar (supercell ? 1 : 0)
 {
-  m_fcal_region_index = 0;
-  m_LAR_INDEX = 999;
-  m_SLAR_INDEX = 999;
-  m_FCAL_INDEX = 999;
-  m_POSNEG_INDEX = 999;
-  m_MODULE_INDEX = 999; 
-  m_ETA_INDEX = 999;
-  m_PHI_INDEX = 999;
-  m_two_sym_sides = 1;
 }
 
 

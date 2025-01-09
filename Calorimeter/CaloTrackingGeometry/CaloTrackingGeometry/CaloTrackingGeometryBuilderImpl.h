@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALORIMETER_CALOTRACKINGGEOMETRYBUILDERIMPL_H
@@ -117,7 +117,7 @@ class CaloTrackingGeometryBuilderImpl : public AthAlgTool {
    * an associative container */
   void registerInLayerIndexCaloSampleMap(
       Trk::LayerIndexSampleMap& licsMAp,
-      std::vector<CaloCell_ID::CaloSample> ccid, const Trk::TrackingVolume& vol,
+      const std::vector<CaloCell_ID::CaloSample>& ccid, const Trk::TrackingVolume& vol,
       int side = 1) const;
 
   /** method to build enclosed beam pipe volumes */
