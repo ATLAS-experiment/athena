@@ -215,7 +215,7 @@ def createTrackingConfigFlags():
     # Control cuts and settings for different lumi to limit CPU and disk space
     icf.addFlag("Tracking.cutLevel", cutLevel)
 
-    icf.addFlag("Tracking.TRTStandalone.startArOriginalPerigee", False)
+    icf.addFlag("Tracking.TRTStandalone.startAtOriginalPerigee", False)
 
     # Turn on InDetRecStatistics
     icf.addFlag("Tracking.doStats", False)
