@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TEST_INITGAUDI_H
@@ -11,6 +11,7 @@
  **/
 
 #include <string>
+#include "GaudiKernel/SmartIF.h"
 
 #undef NDEBUG
 
@@ -34,5 +35,38 @@ namespace Athena_test {
    *  @return true on success, false on failure
    */
   bool initGaudi(const std::string& jobOptsFile, ISvcLocator*& pSvcLoc);
+
+
+  /**
+   * Generic test fixture to setup Gaudi.
+   *
+   * Example usage with boost test:
+   *
+   * @code
+   * BOOST_FIXTURE_TEST_SUITE( MyTestSuite,
+   *    * boost::unit_test::fixture<Athena_test::InitGaudi>(std::string("jo.txt")) )
+   * @endcode
+   */
+  class InitGaudi {
+  public:
+    /**
+     * @brief Create Gaudi test fixture.
+     * @param jobOptsPath Path to job options
+     */
+    InitGaudi(const std::string& jobOptsFile);
+
+    /**
+     * @brief Create Gaudi test fixture without job options.
+     */
+    InitGaudi() : InitGaudi("") {}
+
+    /**
+     * @brief Finalize Gaudi.
+     */
+    ~InitGaudi();
+
+    SmartIF<ISvcLocator> svcLoc;
+  };
+
 }
 #endif // TEST_INITGAUDI_H
