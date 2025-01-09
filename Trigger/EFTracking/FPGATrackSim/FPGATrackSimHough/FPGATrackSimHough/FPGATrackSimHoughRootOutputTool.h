@@ -145,11 +145,13 @@ class FPGATrackSimHoughRootOutputTool : public AthAlgTool
         std::vector<std::vector<bool>> m_track_hit_isStrip;
         std::vector<std::vector<bool>> m_track_hit_isClustered;
         std::vector<std::vector<bool>> m_track_hit_isSpacepoint;
+        std::vector<std::vector<bool>> m_track_hit_isMapped;
         std::vector<std::vector<int>> m_track_hit_barcode;
         std::vector<std::vector<float>> m_track_hit_barcodefrac;
         std::vector<std::vector<float>> m_track_hit_zIdeal;
         std::vector<std::vector<float>> m_track_hit_gphiIdeal;
         std::vector<std::vector<long>> m_track_hit_fineID;
+        std::vector<std::vector<int>> m_track_hit_volumeID;
 
         // And now the offline information
         TTree *m_offlinetree = nullptr;

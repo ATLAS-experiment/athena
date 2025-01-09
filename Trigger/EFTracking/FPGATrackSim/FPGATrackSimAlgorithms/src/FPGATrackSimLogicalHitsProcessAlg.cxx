@@ -89,6 +89,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK( m_FPGATrackKey.initialize() );
     ATH_CHECK( m_inputTruthParticleContainerKey.initialize(m_runOnRDO) );
     ATH_CHECK( m_FPGAHitKey.initialize() );
+    ATH_CHECK( m_FPGAHitKey_2nd.initialize(m_doHoughRootOutput) );
     ATH_CHECK( m_FPGATruthTrackKey.initialize() );
     ATH_CHECK( m_FPGAOfflineTrackKey.initialize() );
 
@@ -351,7 +352,31 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // This one we can do-- by passing in truth and offline tracks via storegate above.
     if (m_doHoughRootOutput) {
-      ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_1st, m_writeOutNonSPStripHits, m_trackScoreCut, m_NumOfHitPerGrouping));
+        SG::ReadHandle<FPGATrackSimHitCollection> FPGAHits_2nd(m_FPGAHitKey_2nd.at(0), ctx);
+
+        if (!FPGAHits_2nd.isValid()) {
+            if (m_evt == 0) {
+                ATH_MSG_WARNING("Didn't receive FPGAHits_2nd on first event; assuming no input events. (Used in HoughRootOutputTool)");
+            }
+            SmartIF<IEventProcessor> appMgr{service("ApplicationMgr")};
+            if (!appMgr) {
+                ATH_MSG_ERROR("Failed to retrieve ApplicationMgr as IEventProcessor");
+                return StatusCode::FAILURE;
+            }
+            return appMgr->stopRun();
+        }
+
+        // Get 2nd stage hits here in order to access all hits for the RootOutputTool.
+        std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_2nd;
+        phits_2nd.reserve(FPGAHits_2nd->size());
+        for (const auto& hit : *FPGAHits_2nd) {
+            phits_2nd.push_back(std::make_shared<const FPGATrackSimHit>(hit));
+        }
+
+        // Concatenate 1st and 2nd stage hits vectors to access both in the OutputTool
+        phits_2nd.insert(phits_2nd.end(), std::make_move_iterator(phits_1st.begin()), std::make_move_iterator(phits_1st.end()));
+        // Create output ROOT file
+        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, m_trackScoreCut, m_NumOfHitPerGrouping));
     }
 
     // Reset data pointers

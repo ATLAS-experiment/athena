@@ -64,7 +64,6 @@ StatusCode FPGATrackSimHoughRootOutputTool::bookTree()
   m_tree->Branch("phimodule",&m_phimodule);
   m_tree->Branch("ID",&m_ID);
   m_tree->Branch("diskLayer",&m_diskLayer);
-  m_tree->Branch("hitIsMapped",&m_mapped);
 
   m_tree->Branch("candidate_barcodefrac",&m_candidate_barcodefrac);
   m_tree->Branch("candidate_barcode",&m_candidate_barcode);
@@ -105,6 +104,8 @@ StatusCode FPGATrackSimHoughRootOutputTool::bookTree()
   m_truthtree->Branch("truth_track_hit_zIdeal", &m_track_hit_zIdeal);
   m_truthtree->Branch("truth_track_hit_gphiIdeal", &m_track_hit_gphiIdeal);
   m_truthtree->Branch("truth_track_hit_fineID", &m_track_hit_fineID);
+  m_truthtree->Branch("truth_track_hit_volumeID", &m_track_hit_volumeID);
+  m_truthtree->Branch("truth_track_hit_isMapped", &m_track_hit_isMapped);
 
   m_offlinetree = new TTree("FPGATrackSimOfflineTree","FPGATrackSimOfflineTree");
   m_offlinetree->Branch("offline_d0",&m_offline_d0);
@@ -157,6 +158,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
   std::vector<float> tmp_hits_zIdeal;
   std::vector<float> tmp_hits_gphiIdeal;
   std::vector<long> tmp_hits_fineID;
+  std::vector<int> tmp_hits_volumeID;
 
   std::vector<float> tmp_hits_x_sorted;
   std::vector<float> tmp_hits_y_sorted;
@@ -173,6 +175,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
   std::vector<float> tmp_hits_zIdeal_sorted;
   std::vector<float> tmp_hits_gphiIdeal_sorted;
   std::vector<long> tmp_hits_fineID_sorted;
+  std::vector<int> tmp_hits_volumeID_sorted;
 
   std::vector<bool> tmp_hits_mapped_sorted;
   bool has_strip_nonspacepoint;
@@ -208,6 +211,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
     tmp_hits_R_sorted.clear();
     tmp_hits_phi_sorted.clear();
     tmp_hits_layer_disk_sorted.clear();
+    tmp_hits_mapped_sorted.clear();
     tmp_hits_isPixel_sorted.clear();
     tmp_hits_isStrip_sorted.clear();
     tmp_hits_isClustered_sorted.clear();
@@ -217,6 +221,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
     tmp_hits_zIdeal_sorted.clear();
     tmp_hits_gphiIdeal_sorted.clear();
     tmp_hits_fineID_sorted.clear();
+    tmp_hits_volumeID.clear();
 
     has_strip_nonspacepoint = false;
 
@@ -252,6 +257,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
         tmp_hits_R.push_back(hit->getR());
         tmp_hits_phi.push_back(hit->getGPhi());
         tmp_hits_layer_disk.push_back(hit->getLayerDisk());
+        tmp_hits_volumeID.push_back(getVolumeID(*hit));
         tmp_hits_mapped.push_back(hit->isMapped());
         tmp_hits_isPixel.push_back(hit->isPixel());
         tmp_hits_isStrip.push_back(hit->isStrip());
@@ -307,6 +313,9 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
       tmp_hits_zIdeal_sorted.push_back(tmp_hits_zIdeal[sorting_index[i]]);
       tmp_hits_gphiIdeal_sorted.push_back(tmp_hits_gphiIdeal[sorting_index[i]]);
       tmp_hits_fineID_sorted.push_back(tmp_hits_fineID[sorting_index[i]]);
+      tmp_hits_volumeID_sorted.push_back(tmp_hits_volumeID[sorting_index[i]]);
+      tmp_hits_mapped_sorted.push_back(tmp_hits_mapped[sorting_index[i]]);
+
     };
 
     m_track_hit_x.push_back(tmp_hits_x_sorted);
@@ -324,6 +333,8 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
     m_track_hit_zIdeal.push_back(tmp_hits_zIdeal_sorted);
     m_track_hit_gphiIdeal.push_back(tmp_hits_gphiIdeal_sorted);
     m_track_hit_fineID.push_back(tmp_hits_fineID_sorted);
+    m_track_hit_volumeID.push_back(tmp_hits_volumeID_sorted);
+    m_track_hit_isMapped.push_back(tmp_hits_mapped_sorted);
 
     m_truth_d0.push_back(track.getD0());
     m_truth_z0.push_back(track.getZ0());
@@ -571,6 +582,7 @@ void FPGATrackSimHoughRootOutputTool::ResetVectors() {
   m_truth_barcode.clear();
   m_truth_eventindex.clear();
   m_truth_pdg.clear();
+  m_track_hit_volumeID.clear();
   m_offline_n_holes.clear();
   m_offline_n_measurement.clear();
   m_offline_n_inertmaterial.clear();
@@ -602,6 +614,7 @@ void FPGATrackSimHoughRootOutputTool::ResetVectors() {
   m_track_hit_zIdeal.clear();
   m_track_hit_gphiIdeal.clear();
   m_track_hit_fineID.clear();
+  m_track_hit_isMapped.clear();
 
   m_gphi.clear();
   m_zIdeal.clear();
