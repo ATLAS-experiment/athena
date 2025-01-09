@@ -742,7 +742,7 @@ namespace ActsTrk
            }
         }
 
-        Acts::trimTrack(track, true, true, true);
+        Acts::trimTrack(track, true, true, true, true);
         Acts::calculateTrackQuantities(track);
         if (m_addPixelStripCounts) {
           initPixelStripCounts(track);
