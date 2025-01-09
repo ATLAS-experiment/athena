@@ -143,6 +143,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
 
         // Read hits from data prep algorithm. TODO: regionalize.
         SG::ReadHandleKeyArray<FPGATrackSimHitCollection> m_FPGAHitKey{this, "FPGATrackSimHitKey",{"FPGAHits_1st"},"FPGATrackSim Hits key"};
+        SG::ReadHandleKeyArray<FPGATrackSimHitCollection> m_FPGAHitKey_2nd{this, "FPGATrackSimHitKey_2nd",{"FPGAHits_2nd"},"FPGATrackSim 2nd stage hits key"};
 
         // Write out roads, hits in roads, and tracks.
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitFilteredKey{this, "FPGATrackSimHitFiltered1stKey","FPGAHitsFiltered_1st","FPGATrackSim Filtered Hits 1st stage key"};
