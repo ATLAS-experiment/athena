@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsCaloTrackingVolumeBuilder.h"
@@ -103,7 +103,10 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
 
   // This was removed in https://github.com/acts-project/acts/pull/3029
   // To be reimplemented using new geometry model instead of explicit TrackingVolume content
+  (void)gctx;  // suppress compiler warning
   throw std::runtime_error{"Calo building for ACTS currently disabled"};
+
+  /***** TODO START *****
   std::shared_ptr<Acts::TrackingVolume> calo;
       // = Acts::TrackingVolume::create(Acts::Transform3::Identity(),
                                      // caloVolBounds,
@@ -343,6 +346,7 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
   ATH_MSG_VERBOSE("Built main container: " << *mainContainer);
 
   return mainContainer;
+  ***** TODO END *****/
 }
 
 std::shared_ptr<Acts::CutoutCylinderVolumeBounds>
