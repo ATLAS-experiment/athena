@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************  
 //              jFEXForwardJetsInfo - 
@@ -66,7 +66,7 @@ void LVL1::jFEXForwardJetsInfo::includeTTinSeed(int TT_ID)
   m_TTsInSeed.push_back(TT_ID);
 }
 
-std::vector<int> LVL1::jFEXForwardJetsInfo::getTTinSeed()
+const std::vector<int>& LVL1::jFEXForwardJetsInfo::getTTinSeed()
 {
   return m_TTsInSeed;
 }
@@ -94,7 +94,7 @@ void LVL1::jFEXForwardJetsInfo::includeTTIDinFirstER(int firstER_TTID)
 {
   m_firstEnergyRing_TTIDs.push_back(firstER_TTID);
 }
-std::vector<int> LVL1::jFEXForwardJetsInfo::getTTIDinFirstER()
+const std::vector<int>& LVL1::jFEXForwardJetsInfo::getTTIDinFirstER()
 {
   return m_firstEnergyRing_TTIDs;
 }
@@ -103,7 +103,7 @@ void LVL1::jFEXForwardJetsInfo::includeTTIDinSecondER(int secondER_TTID)
 {
   m_secondEnergyRing_TTIDs.push_back(secondER_TTID);
 }
-std::vector<int> LVL1::jFEXForwardJetsInfo::getTTIDinSecondER()
+const std::vector<int>& LVL1::jFEXForwardJetsInfo::getTTIDinSecondER()
 {
   return m_secondEnergyRing_TTIDs;
 }
@@ -122,7 +122,7 @@ void LVL1::jFEXForwardJetsInfo::includeTTinSearchWindow(int TT_ID){
     m_TTsInSearchWindow.push_back(TT_ID);
 }
 
-std::vector<int> LVL1::jFEXForwardJetsInfo::getTTinSearchWindow(){
+const std::vector<int>& LVL1::jFEXForwardJetsInfo::getTTinSearchWindow(){
     return m_TTsInSearchWindow;
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXNtupleWriter
@@ -57,10 +57,10 @@ private:
   SG::ReadHandleKey<CaloCellContainer> m_scellsCollectionSGKey {this, "SCell", "SCell", "SCell"};
   
 
-  gFEXOutputCollection* m_gFEXOutputCollection;
-  float m_jet_nTOBs;
-  float m_global_nTOBs;
-  bool m_load_truth_jet;
+  gFEXOutputCollection* m_gFEXOutputCollection{};
+  float m_jet_nTOBs{};
+  float m_global_nTOBs{};
+  bool m_load_truth_jet{};
 
   std::vector<float> m_truth_jet_eta;
   std::vector<float> m_truth_jet_phi;
@@ -83,8 +83,8 @@ private:
   std::vector<float> m_global_TOB_Status2;
 
   std::string m_jet_container_name = "AntiKt10TruthJets";
-  TTree *m_myTree;
-  TTree *m_valiTree;
+  TTree *m_myTree{};
+  TTree *m_valiTree{};
 
   std::vector<float> m_sc_phi;
   std::vector<float> m_sc_eta;
