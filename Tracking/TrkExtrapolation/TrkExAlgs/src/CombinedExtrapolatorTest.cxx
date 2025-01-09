@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -8,46 +8,16 @@
 
 // Tracking
 #include "TrkExAlgs/CombinedExtrapolatorTest.h"
-#include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkSurfaces/CylinderSurface.h"
 #include "TrkSurfaces/DiscSurface.h"
 #include "TrkSurfaces/PerigeeSurface.h"
 #include "TrkGeometry/TrackingGeometry.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
-#include "GaudiKernel/SystemOfUnits.h"
 
 //================ Constructor =================================================
 Trk::CombinedExtrapolatorTest::CombinedExtrapolatorTest(const std::string& name, ISvcLocator* pSvcLocator)
   :
-  AthAlgorithm(name,pSvcLocator),
-  m_extrapolator("Trk::Extrapolator/AtlasExtrapolator"),
-  m_gaussDist(nullptr),
-  m_flatDist(nullptr),
-  m_sigmaD0(17.*Gaudi::Units::micrometer),                   
-  m_minZ0(-25000.),
-  m_maxZ0(+25000.),
-  m_minEta(-3.),                    
-  m_maxEta(3.),                    
-  m_minP(0.5*Gaudi::Units::GeV),                      
-  m_maxP(50000.*Gaudi::Units::GeV),
-  m_outerBoundary(nullptr),
-  m_trackingGeometry(nullptr),
-  m_particleType(Trk::muon)
-{
-  // used algorithms and alg tools
-  declareProperty("Extrapolator",                m_extrapolator);
-
-  // algorithm steering
-  declareProperty("StartPerigeeSigmaD0"       , m_sigmaD0);
-  declareProperty("StartPerigeeMinZ0"         , m_minZ0);
-  declareProperty("StartPerigeeMaxZ0"         , m_maxZ0);
-  declareProperty("StartPerigeeMinEta"        , m_minEta);
-  declareProperty("StartPerigeeMaxEta"        , m_maxEta);
-  declareProperty("StartPerigeeMinP"          , m_minP);
-  declareProperty("StartPerigeeMaxP"          , m_maxP);
-  declareProperty("ParticleType"              , m_particleType);
-
-}
+  AthAlgorithm(name,pSvcLocator) {}
 
 //================ Destructor =================================================
 
@@ -107,7 +77,6 @@ StatusCode Trk::CombinedExtrapolatorTest::execute()
   double d0 = m_gaussDist->shoot() * m_sigmaD0;
   double z0 = m_minZ0 + m_flatDist->shoot() * (m_maxZ0-m_minZ0);
   double phi = 2.*M_PI * m_flatDist->shoot() - M_PI;
-  //double eta = m_minEta + m_flatDist->shoot()*(m_maxEta-m_minEta);
   double ctheta = -1. + 2* m_flatDist->shoot();
   double theta = acos(ctheta);
   double p = m_minP + m_flatDist->shoot()*(m_maxP-m_minP);
@@ -127,7 +96,7 @@ StatusCode Trk::CombinedExtrapolatorTest::execute()
     *seed,
     *m_outerBoundary, 
     Trk::alongMomentum,
-    (Trk::ParticleHypothesis)m_particleType).release();
+    static_cast<Trk::ParticleHypothesis>(m_particleType.value())).release();
 
   if (!destParameters || !m_extrapolator->trackingGeometry()->atVolumeBoundary(destParameters->position(),m_outerBoundary,0.001) ) {
     msg(MSG::ERROR) << " extrapolation to outer boundary failed for input parameters: " << initialPerigee.parameters() << endmsg;
@@ -143,7 +112,7 @@ StatusCode Trk::CombinedExtrapolatorTest::execute()
       pSf, 
       Trk::oppositeMomentum,
       false,
-      (Trk::ParticleHypothesis)m_particleType).release();
+      static_cast<Trk::ParticleHypothesis>(m_particleType.value())).release();
     if ( peri) {
       msg(MSG::INFO) << " extrapolation to perigee:input: " << initialPerigee.parameters() << endmsg;
       msg(MSG::INFO) << " extrapolation to perigee:output: " << peri->parameters() << endmsg;
