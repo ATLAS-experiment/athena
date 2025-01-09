@@ -4,7 +4,7 @@
 
 // SUSYToolsAlg.cxx
 // Base class
-#include "SUSYToolsAlg.h"
+#include "SUSYTools/SUSYToolsAlg.h"
 
 // EDM includes
 #include "xAODEventInfo/EventInfo.h"
