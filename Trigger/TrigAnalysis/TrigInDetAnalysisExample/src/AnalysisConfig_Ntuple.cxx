@@ -3,7 +3,7 @@
  **
  **     @author  mark sutton
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -300,7 +300,7 @@ void AnalysisConfig_Ntuple::finalize() {
 
 	//  gDirectory->pwd();
 
-	if ( m_Tree ) m_Tree->Write("", TObject::kOverwrite);
+	m_Tree->Write("", TObject::kOverwrite);
 
 	//  m_File->Write();
 	if ( m_File ) m_File->Close();
