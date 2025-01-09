@@ -1,0 +1,51 @@
+#!/bin/sh
+#
+# art-description: CA-based config Pile-up Pre-tracking for MC23a
+# art-type: grid
+# art-include: main/Athena
+# art-include: 24.0/Athena
+# art-output: log.*
+# art-output: *.pkl
+# art-output: *.txt
+# art-output: PU_TRK.RDO.pool.root
+# art-architecture: '#x86_64-intel'
+
+
+events=50
+
+export ATHENA_CORE_NUMBER=8
+
+RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/RDO_BKG/mc23_13p6TeV.900149.PG_single_nu_Pt50.merge.RDO.e8514_e8528_s4153_d1907_d1908/100events.RDO.pool.root"
+RDO_PU_File="PU_TRK.RDO.pool.root"
+
+Reco_tf.py \
+  --CA \
+  --multithreaded True \
+  --inputRDOFile ${RDO_BKG_File} \
+  --outputRDO_PUFile ${RDO_PU_File} \
+  --maxEvents ${events} \
+  --skipEvents 0 \
+  --preInclude 'Campaigns.MC23a' \
+  --postInclude 'PyJobTransforms.UseFrontier' \
+  --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01'  \
+  --geometryVersion 'ATLAS-R3S-2021-03-02-00' \
+  --preExec="flags.Tracking.doBackTracking=False;" \
+  --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
+  --imf False
+pretracking=$?
+echo  "art-result: $pretracking PUTracking"
+status=$pretracking
+
+if [ $status -eq 0 ]; then
+   mv ${RDO_PU_File} backup_${RDO_PU_File}
+   rm PoolFileCatalog.xml
+   RDOMerge_tf.py \
+     --CA \
+     --PileUpPresampling True \
+     --inputRDOFile backup_${RDO_PU_File}\
+     --outputRDO_MRGFile ${RDO_PU_File}\
+     --postInclude "default:PyJobTransforms.UseFrontier" "all:PyJobTransforms.SortInput"
+     rdomerge=$?
+     rm backup_${RDO_PU_File}
+     status=$rdomerge
+fi
