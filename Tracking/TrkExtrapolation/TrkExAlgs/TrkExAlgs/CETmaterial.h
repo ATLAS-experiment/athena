@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,14 +15,15 @@
 #include "GaudiKernel/RndmGenerators.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/IChronoStatSvc.h"
+#include "GaudiKernel/SystemOfUnits.h"
 #include "TrkParameters/TrackParameters.h"
 #include <string>
 
+#include "TrkExInterfaces/IExtrapolator.h"
 
 namespace Trk 
 {
 
-  class IExtrapolator;
   class Surface;
   class TrackingVolume;
   class TrackingGeometry;
@@ -59,48 +60,45 @@ namespace Trk
        void printMatComp(double theta, double phi, const Trk::TrackParameters* currPar, const std::string& name, double mat, double matApp,double dx, double dy) const;
             
       /** The Extrapolator(s) to be retrieved */
-      ToolHandle<IExtrapolator>         m_extrapolator;
-      ToolHandle<IExtrapolator>         m_extraprec;
+      ToolHandle<IExtrapolator> m_extrapolator
+        {this, "Extrapolator", "Trk::Extrapolator/AtlasExtrapolator"};
+      ToolHandle<IExtrapolator> m_extraprec
+        {this, "ExtraExtrapolator", "Trk::Extrapolator/MuonExtrapolator"};
 
-      /** Random Number setup */
-      Rndm::Numbers*                    m_gaussDist;
-      Rndm::Numbers*                    m_flatDist;
+      DoubleProperty m_minZ0{this, "StartPerigeeMinZ0", 0.};
+      DoubleProperty m_maxZ0{this, "StartPerigeeMaxZ0", 0.};
+      DoubleProperty m_minTheta{this, "StartPerigeeMinTheta", 0.};
+      DoubleProperty m_maxTheta{this, "StartPerigeeMaxTheta", M_PI};
+      DoubleProperty m_minP{this, "StartPerigeeMinP", 50000*Gaudi::Units::GeV};
+      DoubleProperty m_maxP{this, "StartPerigeeMaxP", 50000*Gaudi::Units::GeV};
+      DoubleProperty m_charge{this, "StartPerigeeCharge", 1.};
+      UnsignedIntegerProperty m_numScan{this, "NumberOfScanTracks", 10};
+      BooleanProperty m_checkStepWise{this, "CheckActiveLayers", false};
+      BooleanProperty m_printMaterial{this, "PrintMaterial", false};
+      BooleanProperty m_printActive{this, "PrintActivePos", false};
 
-      double                   m_sigmaD0;                    //!< Sigma of distribution for D0
-      double                   m_minZ0;                      //!< min Z0
-      double                   m_maxZ0;                      //!< max Z0
-      double                   m_minEta;                     //!< Minimal eta value
-      double                   m_maxEta;                     //!< Maximal eta value
-      double                   m_minTheta;                   //!< Minimal theta value
-      double                   m_maxTheta;                   //!< Maximal theta value
-      double                   m_minPhi;                     //!< Minimal phi value
-      double                   m_maxPhi;                     //!< Maximal phi value
-      double                   m_minP;                       //!< Minimal p value 
-      double                   m_maxP;                       //!< Maximal p value
-      double                   m_charge;                     //!< charge
-      unsigned int             m_numScan;                    //!< number of scan tracks
-      bool                     m_checkStepWise; 
-      bool                     m_printMaterial;
-      bool                     m_printActive;
-      const char*              m_matTotFile;
-      const char*              m_matScanFile;
-      const char*              m_matActiveFile;
-      const char*              m_matCompFile;
-      bool                     m_backward;
-      bool                     m_domsentry;
-      bool                     m_doprecision;
-      double                   m_th;
-      double                   m_ph;
-      int                      m_id;
-      double                   m_matSaved;
-      Trk::TrackParameters*    m_next;
-      Amg::MatrixX*            m_err;
+      const char* m_matTotFile = "material.txt";
+      const char* m_matScanFile = "material_scan.txt";
+      const char* m_matActiveFile = "mat_active.txt";
+      const char* m_matCompFile = "material_comp.txt";
 
-      const Trk::Surface*                m_outerBoundary;
-      const Trk::TrackingGeometry*       m_trackingGeometry;
-      const Trk::TrackingVolume*         m_msentry;
+      BooleanProperty m_backward{this, "CheckBackward", false};
+      BooleanProperty m_domsentry{this, "CheckMSentry", false};
+      BooleanProperty m_doprecision{this, "CheckPrecision", false};
 
-      int                      m_particleType;               //!< the particle typre for the extrap.
+      double m_th = 0.;
+      double m_ph = 0.;
+      int    m_id = 0;
+      double m_matSaved = 0.;
+      Trk::TrackParameters* m_next = nullptr;
+      Amg::MatrixX* m_err = nullptr;
+
+      const Trk::Surface*          m_outerBoundary = nullptr;
+      const Trk::TrackingGeometry* m_trackingGeometry = nullptr;
+      const Trk::TrackingVolume*   m_msentry = nullptr;
+
+      IntegerProperty m_particleType{this, "ParticleType", Trk::muon,
+	"the particle type for the extrap."};
 
       typedef ServiceHandle<IChronoStatSvc> IChronoStatSvc_t;
       IChronoStatSvc_t              m_chronoStatSvc;      

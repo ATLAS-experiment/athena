@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,7 +10,6 @@
 
 // Tracking
 #include "TrkExAlgs/CETmaterial.h"
-#include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkSurfaces/CylinderSurface.h"
 #include "TrkSurfaces/DiscSurface.h"
 #include "TrkSurfaces/PerigeeSurface.h"
@@ -18,7 +17,6 @@
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "TrkTrack/TrackStateOnSurface.h"
 #include "TrkVolumes/CylinderVolumeBounds.h"
-#include "GaudiKernel/SystemOfUnits.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 
 //================ Constructor =================================================
@@ -26,81 +24,13 @@
 Trk::CETmaterial::CETmaterial(const std::string& name, ISvcLocator* pSvcLocator)
   :
   AthAlgorithm(name,pSvcLocator),
-  m_extrapolator("Trk::Extrapolator/AtlasExtrapolator"),
-  m_extraprec("Trk::Extrapolator/MuonExtrapolator"),
-  m_gaussDist(nullptr),
-  m_flatDist(nullptr),
-  m_sigmaD0(17.*Gaudi::Units::micrometer),
-  m_minZ0(0.),
-  m_maxZ0(0.),
-  m_minEta(-3.),
-  m_maxEta(3.),
-  m_minTheta(0.),
-  m_maxTheta(M_PI),
-  m_minPhi(-M_PI),
-  m_maxPhi( M_PI),
-  m_minP(50000*Gaudi::Units::GeV),
-  m_maxP(50000*Gaudi::Units::GeV),
-  m_charge(1.),
-  m_numScan(10),
-  m_checkStepWise(false),
-  m_printMaterial(false),
-  m_printActive(false),
-  m_matTotFile("material.txt"),
-  m_matScanFile("material_scan.txt"),
-  m_matActiveFile("mat_active.txt"),
-  m_matCompFile("material_comp.txt"),
-  m_backward(false),
-  m_domsentry(false),
-  m_doprecision(false),
-  m_th(0.),
-  m_ph(0.),
-  m_id(0),
-  m_matSaved(0.),
-  m_next(nullptr),
-  m_err(nullptr),
-  m_outerBoundary(nullptr),
-  m_trackingGeometry(nullptr),
-  m_msentry(nullptr),
-  m_particleType(Trk::muon),
   m_chronoStatSvc( "ChronoStatSvc", name )
-{
-  // used algorithms and alg tools
-  declareProperty("Extrapolator"              , m_extrapolator);
-  declareProperty("ExtraExtrapolator"         , m_extraprec);
-
-  // algorithm steering
-  declareProperty("StartPerigeeSigmaD0"       , m_sigmaD0);
-  declareProperty("StartPerigeeMinZ0"         , m_minZ0);
-  declareProperty("StartPerigeeMaxZ0"         , m_maxZ0);
-  declareProperty("StartPerigeeMinEta"        , m_minEta);
-  declareProperty("StartPerigeeMaxEta"        , m_maxEta);
-  declareProperty("StartPerigeeMinTheta"      , m_minTheta);
-  declareProperty("StartPerigeeMaxTheta"      , m_maxTheta);
-  declareProperty("StartPerigeeMinPhi"        , m_minPhi);
-  declareProperty("StartPerigeeMaxPhi"        , m_maxPhi);
-  declareProperty("StartPerigeeMinP"          , m_minP);
-  declareProperty("StartPerigeeMaxP"          , m_maxP);
-  declareProperty("StartPerigeeCharge"        , m_charge);
-  declareProperty("ParticleType"              , m_particleType);
-  declareProperty("NumberOfScanTracks"        , m_numScan);
-  declareProperty("CheckActiveLayers"         , m_checkStepWise);
-  declareProperty("PrintMaterial"             , m_printMaterial);
-  declareProperty("PrintActivePos"            , m_printActive);
-  //declareProperty("TotalMaterialOutput"       , m_matTotFile);
-  //declareProperty("ScanMaterialOutput"        , m_matScanFile);
-  declareProperty("CheckBackward"             , m_backward);
-  declareProperty("CheckMSentry"              , m_domsentry);
-  declareProperty("CheckPrecision"            , m_doprecision);
-
-}
+{ }
 
 //================ Destructor =================================================
 
 Trk::CETmaterial::~CETmaterial()
 {
-  delete m_gaussDist;
-  delete m_flatDist;
   delete m_err;
 }
 
@@ -122,13 +52,6 @@ StatusCode Trk::CETmaterial::initialize()
       ATH_MSG_FATAL( "Could not retrieve Tool " << m_extraprec << ". Exiting." );
       return StatusCode::FAILURE;
   }
-
-  //if (m_chronoStatSvc.retrieve().isFailure()) {
-  //    ATH_MSG_WARNING << "Could not retrieve Tool " << m_chronoStatSvc << ". Exiting." );
-  //}
-
-  m_gaussDist = new Rndm::Numbers(randSvc(), Rndm::Gauss(0.,1.));
-  m_flatDist  = new Rndm::Numbers(randSvc(), Rndm::Flat(0.,1.));
 
   ATH_MSG_INFO( "initialize() successful" );
   return StatusCode::SUCCESS;
@@ -162,17 +85,6 @@ StatusCode Trk::CETmaterial::execute()
     ATH_MSG_INFO( "boundary retrieved " );
   }
 
-  // generate with random number generator
-  //double d0 = m_gaussDist->shoot() * m_sigmaD0;
-  //double z0 = m_minZ0 + m_flatDist->shoot() * (m_maxZ0-m_minZ0);
-  //double phi = 2.*M_PI * m_flatDist->shoot() - M_PI;
-  //double eta = m_minEta + m_flatDist->shoot()*(m_maxEta-m_minEta);
-  //double ctheta = -1. + 2* m_flatDist->shoot();
-  //double theta = acos(ctheta);
-  //double p = m_minP + m_flatDist->shoot()*(m_maxP-m_minP);
-  //double charge = (m_flatDist->shoot() > 0.5 ) ? -1. : 1.;
-  //double qOverP = charge/(p);
-
   if (m_chronoStatSvc) m_chronoStatSvc->chronoStart("MS::scan");
 
   // scan
@@ -205,7 +117,7 @@ StatusCode Trk::CETmaterial::execute()
             *currPar,
             *m_msentry,
             Trk::alongMomentum,
-            (Trk::ParticleHypothesis)m_particleType).release();
+            static_cast<Trk::ParticleHypothesis>(m_particleType.value())).release();
         if (msEntry) {
           printMat(
             theta,
@@ -219,12 +131,16 @@ StatusCode Trk::CETmaterial::execute()
                                                                                                       msEntry->associatedSurface(),
                                                                                                       Trk::alongMomentum,
                                                                                                       false,
-                                                                                                      (Trk::ParticleHypothesis)m_particleType);
+                                                                                                      static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
           if (mmsentry ) {
-            for (unsigned int i=0; i< mmsentry->size(); i++)
-                if ((*mmsentry)[i])
-                    ATH_MSG_DEBUG( "position:eloss:" << i << "," << (*mmsentry)[i]->trackParameters()->position() << ":"
-                        << (*mmsentry)[i]->trackParameters()->momentum().mag()-currPar->momentum().mag());
+	    for (const auto& entry : *mmsentry) {
+	      if (entry) {
+		ATH_MSG_DEBUG("position:eloss:"
+			      << entry->trackParameters()->position() << ":"
+			      << entry->trackParameters()->momentum().mag() - currPar->momentum().mag());
+	      }
+	    }
+
             currPar = (mmsentry->back()) ?  mmsentry->back()->trackParameters() : msEntry;
 
             const std::vector<const Trk::TrackStateOnSurface*>* peri = m_extrapolator->extrapolateM(ctx,
@@ -232,7 +148,7 @@ StatusCode Trk::CETmaterial::execute()
                                                                                                     pSf,
                                                                                                     Trk::oppositeMomentum,
                                                                                                     false,
-                                                                                                    (Trk::ParticleHypothesis)m_particleType);
+                                                                                                    static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
             ATH_MSG_INFO ( "material scan:backward:" );
             if (peri){
               ATH_MSG_DEBUG ("trPar vector size:" << peri->size() );
@@ -241,10 +157,13 @@ StatusCode Trk::CETmaterial::execute()
               delete msEntry;
               return StatusCode::FAILURE;
             }
-            for (unsigned int i=0; i< peri->size(); i++)
-                if ((*peri)[i] && (*peri)[i]->trackParameters())
-                    ATH_MSG_DEBUG( "position:eloss:" << i << "," << (*peri)[i]->trackParameters()->position() << ":"
-                        << (*peri)[i]->trackParameters()->momentum().mag()-msEntry->momentum().mag() );
+	    for (const auto& entry : *peri) {
+	      if (entry && entry->trackParameters()) {
+		ATH_MSG_DEBUG("position:eloss:"
+			      << entry->trackParameters()->position() << ":"
+			      << entry->trackParameters()->momentum().mag() - msEntry->momentum().mag());
+	      }
+	    }
 
             if (peri->back() && peri->back()->trackParameters()) {
               ATH_MSG_INFO( "extrapolation to perigee:input: "
@@ -282,7 +201,7 @@ StatusCode Trk::CETmaterial::execute()
                                                 Trk::alongMomentum,
                                                 true,
                                                 material,
-                                                (Trk::ParticleHypothesis)m_particleType);
+                                                static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
 
 
         const Trk::TrackParameters* nextPar = next.first.release();
@@ -296,7 +215,7 @@ StatusCode Trk::CETmaterial::execute()
                                                     *precPar,currPar->associatedSurface(),
                                                     Trk::alongMomentum,
                                                     false,
-                                                    (Trk::ParticleHypothesis)m_particleType);
+                                                    static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
           delete precPar;
           // collect material
           if (nextPrec) {
@@ -353,7 +272,7 @@ StatusCode Trk::CETmaterial::execute()
                                                                               *m_outerBoundary,
                                                                               Trk::alongMomentum,
                                                                               false,
-                                                                              (Trk::ParticleHypothesis)m_particleType);
+                                                                              static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
 
       if (m_printMaterial) {
         double mat=0.;
@@ -385,8 +304,6 @@ StatusCode Trk::CETmaterial::execute()
         ATH_MSG_ERROR( "extrapolation to outer boundary failed for input parameters: " << initialPerigee.parameters() );
       } else if (destParameters->back()->trackParameters()) {
         // forward extrapolation ok
-        //ATH_MSG_INFO( "last material reached at: " << destParameters->back()->trackParameters()->position().perp() <<","<<destParameters->back()->position().z() );
-
         if (m_backward) {
           material.clear();
           const std::vector<const Trk::TrackStateOnSurface*>* peri = m_extrapolator->extrapolateM(
@@ -394,7 +311,7 @@ StatusCode Trk::CETmaterial::execute()
                                                                                               pSf,
                                                                                               Trk::oppositeMomentum,
                                                                                               false,
-                                                                                              (Trk::ParticleHypothesis)m_particleType);
+                                                                                              static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
 
           if (peri) {
               ATH_MSG_INFO( "trPar vector size:" << peri->size() );
