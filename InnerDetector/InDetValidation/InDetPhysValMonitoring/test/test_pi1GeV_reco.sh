@@ -16,7 +16,7 @@
 #RDO is made at rel 22.0.73
 #reference plots are made at rel 22.0.73
 
-relname="r24.0.65"
+relname="r25.0.21"
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_piplus1GeV_reco.root
