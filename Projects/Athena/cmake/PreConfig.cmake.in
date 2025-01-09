@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Pre-config script to propagate variables to downstream projects
 #
@@ -54,6 +54,7 @@ find_package( Qt5 ${_quietFlag} COMPONENTS Core OpenGL Gui PrintSupport Widgets
    Sql Network )
 find_package( GTest ${_quietFlag} )
 find_package( Geant4 ${_quietFlag} )
+find_package( Boost ${_quietFlag} COMPONENTS ALL )
 
 # Set the versions of the TDAQ projects:
 set( TDAQ_PROJECT_NAME "@TDAQ_PROJECT_NAME@" CACHE STRING
