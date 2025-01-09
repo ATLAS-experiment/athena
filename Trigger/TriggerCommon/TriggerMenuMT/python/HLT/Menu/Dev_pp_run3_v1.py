@@ -151,10 +151,6 @@ def getDevSignatures():
         # ATR-24117
 
         # Jpsiee
-        ChainProp(name='HLT_e5_lhtight_e9_etcut_probe_1invmAB5_L1JPSI-1M5-EM7', l1SeedThresholds=['EM3','PROBEEM7'], groups=DevGroup+MultiElectronGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_e5_lhtight_e14_etcut_probe_1invmAB5_L1JPSI-1M5-EM12', l1SeedThresholds=['EM3','PROBEEM12'], groups=DevGroup+MultiElectronGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_e9_lhtight_e4_etcut_probe_1invmAB5_L1JPSI-1M5-EM7', l1SeedThresholds=['EM7','PROBEEM3'], groups=DevGroup+MultiElectronGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_e14_lhtight_e4_etcut_probe_1invmAB5_L1JPSI-1M5-EM12', l1SeedThresholds=['EM12','PROBEEM3'], groups=DevGroup+MultiElectronGroup+LegacyTopoGroup),
 
         # low-mass boosted diphoton TLA
         # M, DR
