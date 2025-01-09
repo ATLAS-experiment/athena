@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -224,11 +224,12 @@ namespace xAOD {
    /// Methods that decode the eFEX number
 
   /// Return phi index in the range 0-63
-  /// (or 384-415 for STF)
   int eFexEMRoI_v1::iPhi() const {
 
      /// Calculate octant (0-7) from eFEX and shelf numbers
-     unsigned int octant = int(eFexNumber()/3) + shelfNumber()*s_shelfPhiWidth;
+     // only use LSB of shelfNumber to determine the octant
+     // (shelfNumber is 0 or 1 in P1, but can be 12 in the STF)
+     unsigned int octant = int(eFexNumber()/3) + (shelfNumber()%2)*s_shelfPhiWidth;
 
      /// Find global phi index (0-63) for this window in this eFEX 
      int index = s_eFexPhiWidth*octant + fpgaPhi() + s_eFexPhiOffset;

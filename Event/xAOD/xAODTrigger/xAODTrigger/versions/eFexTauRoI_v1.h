@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTRIGGER_VERSIONS_EFEXTAUROI_V1_H
@@ -56,6 +56,7 @@ namespace xAOD {
       void setWord1( uint32_t value );
 
       // Shelf number (decoded from second xTOB word)
+      // Usually 0 or 1, but can be 12 for Surface Test Facility.
       unsigned int shelfNumber() const;
 
       // eFEX number (decoded from second xTOB word)

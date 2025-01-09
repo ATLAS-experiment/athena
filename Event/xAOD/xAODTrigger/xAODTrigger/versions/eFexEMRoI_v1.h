@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: eFexEMRoI_v1.h 1 2019-06-30 12:15:18 watsona $
@@ -68,8 +68,7 @@ namespace xAOD {
       /// Phi coordinates (as for eta)
       float   phi() const; /// Floating point, ATLAS phi convention (-pi -> pi)
       void    setPhi( float value); /// Setter for the above
-      /// Getter for integer phi index (0-63) or (384-415) for STF
-      int     iPhi() const;
+      int     iPhi() const; /// Getter for integer phi index (0-63)
 
       /// Getters for Topo coordinate indices
       int iEtaTopo() const;
