@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -13,18 +13,19 @@
 #ifndef ZDCRECNOISETOOL_H_
 #define ZDCRECNOISETOOL_H_
 
-#include <string>
-#include <map>
+
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 
 #include "ZdcEvent/ZdcRawChannelCollection.h"
 
+#include <string>
+#include <memory>
+
 class IInterface;
 class InterfaceID;
 class StatusCode;
-//class Identifier;
 class ZdcDigitsCollection;
 
 
@@ -50,13 +51,10 @@ public:
 
 private:
 
-	//ZdcRawChannelCollection      m_ChannelCollection;
-	//unsigned int     m_nsamples;
-
 	std::string  m_pedestalDir;
 	std::string  m_pedestalFile;
 
-	ZdcDigitsCollection* m_pedestalData{};
+	std::unique_ptr<ZdcDigitsCollection> m_pedestalData{};
 
 };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -21,12 +21,10 @@
 #include <vector>
 #include <map>
 
-//#include "Identifier/HWIdentifier.h"
 
 #include "GaudiKernel/IInterface.h"
 #include "GaudiKernel/MsgStream.h"
 
-//#include "ZdcIdentifier/ZdcID.h"
 #include "ZdcEvent/ZdcDigits.h"
 #include "ZdcEvent/ZdcDigitsCollection.h"
 #include "ZdcRec/ZdcRecNoiseTool.h"
@@ -70,7 +68,7 @@ ZdcRecNoiseTool::~ZdcRecNoiseTool()
 //==================================================================================================
 int ZdcRecNoiseTool::readPedestals()
 {
-	m_pedestalData = new ZdcDigitsCollection;
+	m_pedestalData = std::make_unique<ZdcDigitsCollection>();
 
 	int nsamples = 0;
 	int i = 0;
@@ -118,7 +116,7 @@ return i;
 int ZdcRecNoiseTool::writePedestals()
 {
 	//remove this
-	m_pedestalData = new ZdcDigitsCollection;
+	m_pedestalData = std::make_unique<ZdcDigitsCollection>();
 
 	int nsamples = 0;
 	int i = 0;
