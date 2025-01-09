@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Calo
@@ -1418,7 +1418,7 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(
 
 void Calo::CaloTrackingGeometryBuilderImpl::registerInLayerIndexCaloSampleMap(
     Trk::LayerIndexSampleMap& licsMap,
-    std::vector<CaloCell_ID::CaloSample> ccid, const Trk::TrackingVolume& vol,
+    const std::vector<CaloCell_ID::CaloSample>& ccid, const Trk::TrackingVolume& vol,
     int side) const {
 
   ATH_MSG_VERBOSE("[+] Registering layers of TrackingVolume '"
@@ -1453,10 +1453,10 @@ void Calo::CaloTrackingGeometryBuilderImpl::registerInLayerIndexCaloSampleMap(
   // everything's fine for side > 0
   if (side > 0) {
     // match 1-to-1
-    std::vector<const Trk::Layer*>::iterator layerIt = materialLayers.begin();
-    std::vector<const Trk::Layer*>::iterator layerItEnd = materialLayers.end();
-    std::vector<CaloCell_ID::CaloSample>::iterator ccidIt = ccid.begin();
-    std::vector<CaloCell_ID::CaloSample>::iterator ccidItEnd = ccid.end();
+    std::vector<const Trk::Layer*>::const_iterator layerIt = materialLayers.begin();
+    std::vector<const Trk::Layer*>::const_iterator layerItEnd = materialLayers.end();
+    std::vector<CaloCell_ID::CaloSample>::const_iterator ccidIt = ccid.begin();
+    std::vector<CaloCell_ID::CaloSample>::const_iterator ccidItEnd = ccid.end();
 
     for (; layerIt != layerItEnd && ccidIt != ccidItEnd; ++layerIt, ++ccidIt)
       licsMap.insert(std::make_pair((*layerIt)->layerIndex(), int(*ccidIt)));
@@ -1465,8 +1465,8 @@ void Calo::CaloTrackingGeometryBuilderImpl::registerInLayerIndexCaloSampleMap(
     // the order needs to be reversed, because TG has z-ordering positive
     // defined
 
-    std::vector<CaloCell_ID::CaloSample>::iterator ccidIt = ccid.begin();
-    std::vector<CaloCell_ID::CaloSample>::iterator ccidItEnd = ccid.end();
+    std::vector<CaloCell_ID::CaloSample>::const_iterator ccidIt = ccid.begin();
+    std::vector<CaloCell_ID::CaloSample>::const_iterator ccidItEnd = ccid.end();
 
     for (; ccidIt != ccidItEnd; ++ccidIt, --matLaySize)
       licsMap.insert(std::make_pair(
