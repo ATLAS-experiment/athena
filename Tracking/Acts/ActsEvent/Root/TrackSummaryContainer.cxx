@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "ActsEvent/TrackSummaryContainer.h"
 #include <Acts/EventData/Types.hpp>
@@ -133,19 +133,19 @@ void ActsTrk::TrackSummaryContainer::decodeSurfaces(const xAOD::TrackSurfaceCont
 ////////////////////////////////////////////////////////////////////
 // write api
 ////////////////////////////////////////////////////////////////////
-ActsTrk::MutableTrackSummaryContainer::MutableTrackSummaryContainer() {
-
-  m_mutableTrackBackend = std::make_unique<xAOD::TrackSummaryContainer>();
-  m_mutableTrackBackendAux = std::make_unique<xAOD::TrackSummaryAuxContainer>();
+ActsTrk::MutableTrackSummaryContainer::MutableTrackSummaryContainer() :
+  m_mutableTrackBackend(std::make_unique<xAOD::TrackSummaryContainer>()),
+  m_mutableTrackBackendAux(std::make_unique<xAOD::TrackSummaryAuxContainer>())
+{
   m_mutableTrackBackend->setStore(m_mutableTrackBackendAux.get());
-
   TrackSummaryContainer::m_trackBackend = m_mutableTrackBackend.get();
 }
 
 ActsTrk::MutableTrackSummaryContainer::MutableTrackSummaryContainer(
-    MutableTrackSummaryContainer&& other) {
-  m_mutableTrackBackend = std::move(other.m_mutableTrackBackend);
-  m_mutableTrackBackendAux = std::move(other.m_mutableTrackBackendAux);
+    MutableTrackSummaryContainer&& other) :
+  m_mutableTrackBackend(std::move(other.m_mutableTrackBackend)),
+  m_mutableTrackBackendAux(std::move(other.m_mutableTrackBackendAux))
+{
   m_mutableTrackBackend->setStore(m_mutableTrackBackendAux.get());
   TrackSummaryContainer::m_trackBackend = m_mutableTrackBackend.get();
 
