@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Hephaestus/Hephaestus.h"
@@ -1047,19 +1047,22 @@ static PyObject* hep_symbname( PyObject* unused, PyObject* args ) {
 }
 
 /* _________________________________________________________________________ */
-static PyObject* hep_freestat_start() {
+static PyObject* hep_freestat_start(PyObject* a [[maybe_unused]],
+                                    PyObject* b [[maybe_unused]]) {
    gFlags |= FREESTAT;
    return PyLong_FromLong( gFlags );
 }
 
 /* _________________________________________________________________________ */
-static PyObject* hep_freestat_stop() {
+static PyObject* hep_freestat_stop(PyObject* a [[maybe_unused]],
+                                   PyObject* b [[maybe_unused]]) {
    gFlags &= gFlags ^ FREESTAT;
    return PyLong_FromLong( gFlags );
 }
 
 /* _________________________________________________________________________ */
-static PyObject* hep_freestat_reset() {
+static PyObject* hep_freestat_reset(PyObject* a [[maybe_unused]],
+                                    PyObject* b [[maybe_unused]]) {
    gFreeStatistics.total     = 0.;
    gFreeStatistics.untracked = 0;
 
@@ -1068,7 +1071,8 @@ static PyObject* hep_freestat_reset() {
 }
 
 /* _________________________________________________________________________ */
-static PyObject* hep_freestat_stat() {
+static PyObject* hep_freestat_stat(PyObject* a [[maybe_unused]],
+                                   PyObject* b [[maybe_unused]]) {
    PyObject *stat = 0;
 
    stat = PyTuple_New( 2 );
