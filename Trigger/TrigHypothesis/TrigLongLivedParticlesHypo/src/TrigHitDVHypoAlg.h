@@ -124,14 +124,13 @@ private:
    mutable SG::SlotSpecificObj<TMVAReader> m_tmva_reader ATLAS_THREAD_SAFE;
 
    // parameters
-   int m_tools_lowest_jetEt;
-   int m_tools_loosest_wp;
+   int m_tools_lowest_jetEt = 1000;
+   int m_tools_loosest_wp = 0;
 
    //Ctrl Flags
-   bool m_useBeamSpot;
+   bool m_useBeamSpot = true;
 
    //Vertex
-   //bool m_doHitDV;
    bool m_doHitDV_Seeding = true;
 
    SG::ReadHandleKey<xAOD::jFexSRJetRoIContainer> m_jetRoiCollectionKey {this, "jFexSRJetRoI", "", ""};

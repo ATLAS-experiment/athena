@@ -124,6 +124,9 @@ class TrigInDetReco(ExecStep):
                 flags  += "'Bjet',"
             if ( i=='fsjet' or i=='fs' or i=='jet' ) :
                 chains += "'HLT_j45_pf_ftf_preselj20_L1jJ40',"
+                chains += "'HLT_j45_320eta490_L1J15p31ETA49',"
+                chains += "'HLT_j220_320eta490_L1J75p31ETA49',"
+                chains += "'HLT_j420_a10t_lcw_jes_35smcINF_L1SC111-CJ15',"
                 flags  += "'Jet',"
             if (i=='beamspot') :
                 chains += "'HLT_beamspot_allTE_trkfast_BeamSpotPEB_L1J15','HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L1J15',"
