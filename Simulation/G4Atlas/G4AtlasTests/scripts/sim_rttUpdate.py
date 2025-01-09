@@ -412,19 +412,19 @@ class RttUpdate :
             print 'using default rttpath =',opt.rttpath
 
         # EOS result directory, etc.
-        opt.rttcastor='/eos/atlas/atlascerngroupdisk/proj-sit/rtt/prod/rtt/'+opt.rel+'/'+opt.branch+'/'+opt.cmt+'/offline/'+opt.package
+        opt.rttcastor='/eos/atlas/atlascerngroupdisk/proj-ascig/rtt/prod/rtt/'+opt.rel+'/'+opt.branch+'/'+opt.cmt+'/offline/'+opt.package
         opt.eoscmd='/afs/cern.ch/project/eos/installation/0.1.0-22d/bin/eos.select'
         opt.eosprefix='root://eosatlas.cern.ch/'
 
         """
-        xrdcp root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/proj-sit/rtt/prod/rtt/rel_2/17.1.X.Y/i686-slc5-gcc43-opt/offline/DigitizationTests/mc11_ttbar_LVL1_on/mc11_ttbar.RDO.pool.root root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/proj-sit/digitization/RTT/ReferenceFiles/MC12/MC11_ttbar_LVL1_ON.RDO.pool.root
+        xrdcp root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/proj-ascig/rtt/prod/rtt/rel_2/17.1.X.Y/i686-slc5-gcc43-opt/offline/DigitizationTests/mc11_ttbar_LVL1_on/mc11_ttbar.RDO.pool.root root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/proj-ascig/digitization/RTT/ReferenceFiles/MC12/MC11_ttbar_LVL1_ON.RDO.pool.root
 """
 
         opt.testpath,opt.project=db.findPackage(opt.package)
         opt.ref=db.findReference(opt.branch,opt.project)
         
 
-        opt.refpath='/eos/atlas/atlascerngroupdisk/proj-sit/'+opt.project+'/validation/RTT/referenceFiles/'
+        opt.refpath='/eos/atlas/atlascerngroupdisk/proj-ascig/'+opt.project+'/validation/RTT/referenceFiles/'
         opt.dcubepath='/afs/cern.ch/atlas/project/RTT/DCubeReference/offline/'+opt.testpath+'/'+opt.package+'/'
         if opt.ref!='':
             opt.refpath+=opt.ref+'/'
