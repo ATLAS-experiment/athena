@@ -69,6 +69,7 @@ namespace TrigConf {
 
 
       // getters
+      // cppcheck-suppress returnTempReference; name() returns const-ref to private member
       const std::string&                  chain_name            () const { return name(); }
       int                                 chain_counter         () const { return m_chain_counter; }
       int                                 chain_version         () const { return m_chain_version; }

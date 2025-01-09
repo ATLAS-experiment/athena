@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPClogic/PATTERNidentity.h" 
@@ -13,11 +13,10 @@ const char PATTERNidentity::s_inputTag[4][9] =
 PATTERNidentity::PATTERNidentity(CMAinput io,int layer) : 
     m_input_id(io),m_layer_id(layer) {}
  
-PATTERNidentity::PATTERNidentity(const PATTERNidentity& id)
-{
-    m_input_id = id.input_id();
-    m_layer_id = id.layer_id();
-}
+PATTERNidentity::PATTERNidentity(const PATTERNidentity& id) :
+  m_input_id(id.input_id()),
+  m_layer_id(id.layer_id())
+{}
 
 PATTERNidentity
 PATTERNidentity::operator=(const PATTERNidentity& id)

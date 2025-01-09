@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigCompositeUtils_AlgToChainTool_h
@@ -74,7 +74,7 @@ namespace TrigCompositeUtils {
       std::map<std::string, std::vector<std::string>> m_algToSequencersMap;
 
       std::vector<std::string> m_cachedEventStoreKeys;
-      uint64_t  m_cachedEventID;
+      uint64_t  m_cachedEventID{};
 
       // Based on the sequence name create the first part of the name of collection from the decision store
       std::string createCollectionName(const std::string& sequenceName) const;
