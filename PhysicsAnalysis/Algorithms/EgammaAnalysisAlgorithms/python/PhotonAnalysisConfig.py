@@ -397,7 +397,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
             if config.geometry() >= LHCPeriod.Run2:
-                alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2025/rel22.2/2024_FinalRun2_Recommendation_v1/map0.txt'
+                alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2025/rel22.2/2024_FinalRun2_Recommendation_v1/map1.txt'
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'ph_id_bad_eff' + postfix
             alg.photons = config.readName (self.containerName)
