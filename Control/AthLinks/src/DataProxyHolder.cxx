@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -14,6 +14,7 @@
 #include "AthLinks/tools/DataProxyHolderInputRename.h"
 #include "AthLinks/exceptions.h"
 #include "SGTools/DataProxy.h"
+#include "SGTools/DataProxy_cast.h"
 #include "SGTools/TransientAddress.h"
 #include "SGTools/CurrentEventStore.h"
 #include "AthenaKernel/ThinningCache.h"

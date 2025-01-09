@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file SGTools/src/exceptions.cxx
@@ -10,6 +10,7 @@
 
 
 #include "SGTools/exceptions.h"
+#include "SGTools/DataProxy.h"
 #include "GaudiKernel/System.h"
 #include <sstream>
 #include <string>
@@ -50,12 +51,12 @@ const char* ExcBadDataProxyCast::what() const throw()
 
 /**
  * @brief Throw an ExcBadDataProxyCast exception.
- * @param id CLID of the DataProxy.
+ * @param proxy The proxy from which we're trying to cast.
  * @param tid Type to which we're trying to convert the object.
  */
-void throwExcBadDataProxyCast (CLID id, const std::type_info& tid)
+void throwExcBadDataProxyCast (const DataProxy& proxy, const std::type_info& tid)
 {
-  throw ExcBadDataProxyCast (id, tid);
+  throw ExcBadDataProxyCast (proxy.clID(), tid);
 }
 
 
