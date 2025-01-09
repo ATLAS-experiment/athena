@@ -1,10 +1,11 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
-from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
-from Campaigns.Utils import Campaign
+from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaCommon.Logging import logging
+from AthenaConfiguration.Enums import LHCPeriod
+from Campaigns.Utils import Campaign
 
 
 class TauCalibrationConfig (ConfigBlock):
@@ -80,6 +81,7 @@ class TauCalibrationConfig (ConfigBlock):
         alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' + postfix )
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::TauSmearingTool' )
         alg.smearingTool.useFastSim = config.dataType() is DataType.FastSim
+        alg.smearingTool.Campaign = "mc21" if config.geometry() is LHCPeriod.Run3 else "mc20"
         alg.taus = config.readName (self.containerName)
         alg.tausOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -127,6 +129,9 @@ class TauWorkingPointConfig (ConfigBlock) :
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
             "factors are not available. The default is False.")
+        self.addOption ('addSelectionToPreselection', True, type=bool,
+            info="whether to retain only tau-jets satisfying the working point "
+            "requirements. The default is True.")
 
     def makeAlgs (self, config) :
 
@@ -159,10 +164,11 @@ class TauWorkingPointConfig (ConfigBlock) :
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'TauSelectionAlg' + postfix )
         config.addPrivateTool( 'selectionTool', 'TauAnalysisTools::TauSelectionTool' )
         alg.selectionTool.ConfigPath = inputfile
-        alg.selectionDecoration = 'selected_tau' + selectionPostfix + ',as_bits'
+        alg.selectionDecoration = 'selected_tau' + selectionPostfix + ',as_char'
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
+        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                             preselection=self.addSelectionToPreselection)
 
         # Set up the algorithm calculating the efficiency scale factors for the
         # taus:
