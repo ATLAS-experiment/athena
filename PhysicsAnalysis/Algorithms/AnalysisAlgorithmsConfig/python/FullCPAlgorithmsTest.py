@@ -17,6 +17,12 @@ triggerChainsPerYear = {
     # '2022': ['HLT_e26_lhtight_ivarloose_L1EM22VHI || HLT_e60_lhmedium_L1EM22VHI || HLT_e140_lhloose_L1EM22VHI'],
     # '2023': ['HLT_e26_lhtight_ivarloose_L1EM22VHI || HLT_e60_lhmedium_L1EM22VHI || HLT_e140_lhloose_L1EM22VHI'],
 }
+triggerMatchingChainsPerYear = {
+    2015: ['HLT_e24_lhmedium_L1EM20VH || HLT_e60_lhmedium || HLT_e120_lhloose', 'HLT_mu20_iloose_L1MU15 || HLT_mu40'],
+    2016: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu26_ivarmedium || HLT_mu50'],
+    2017: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu50'],
+    2018: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu26_ivarmedium'],
+}
 tauTriggerChainsSF = {
     2015: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
     2016: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
@@ -106,7 +112,7 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
         configSeq.setOptionValue ('.electronIsol', 'Tight_VarRad')
         configSeq.setOptionValue ('.photonIsol', 'TightCaloOnly')
         configSeq.setOptionValue ('.muonID', 'Tight')
-        configSeq.setOptionValue ('.triggerMatchingChainsPerYear', triggerChainsPerYear)
+        configSeq.setOptionValue ('.triggerMatchingChainsPerYear', triggerMatchingChainsPerYear)
 
     # Include, and then set up the jet analysis algorithm sequence:
     configSeq += config.makeConfig( 'Jets',

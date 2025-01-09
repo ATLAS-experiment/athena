@@ -343,6 +343,12 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
         2017: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_2g22_tight_L12EM15VHI', 'HLT_mu50'],
         2018: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_g35_medium_g25_medium_L12EM20VH', 'HLT_mu26_ivarmedium', 'HLT_2mu14'],
     }
+    triggerMatchingChainsPerYear = {
+        2015: ['HLT_e24_lhmedium_L1EM20VH || HLT_e60_lhmedium || HLT_e120_lhloose', 'HLT_mu20_iloose_L1MU15 || HLT_mu40'],
+        2016: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu26_ivarmedium || HLT_mu50'],
+        2017: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu50'],
+        2018: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu26_ivarmedium'],
+    }
     config.addBlock ('Trigger')
     config.setOptions (triggerChainsPerYear=triggerChainsPerYear)
     config.setOptions (noFilter=True)
@@ -354,7 +360,7 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (electronIsol='Tight_VarRad')
     config.setOptions (photonIsol='TightCaloOnly')
     config.setOptions (muonID='Tight')
-    config.setOptions (triggerMatchingChainsPerYear=triggerChainsPerYear)
+    config.setOptions (triggerMatchingChainsPerYear=triggerMatchingChainsPerYear)
 
     # EventSelection
     # Example cuts used for event selection algorithm test

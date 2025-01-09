@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Marco Rimoldi
@@ -58,6 +58,9 @@ namespace CP
     /// \brief list of triggers
     Gaudi::Property<std::vector<std::string>> m_trigSingleMatchingList {this, "trigSingleMatchingList", {}, "List of triggers for Matching"};
   
+    /// \brief list of triggers for dummy matching decorations
+    Gaudi::Property<std::vector<std::string>> m_trigSingleMatchingListDummy {this, "trigSingleMatchingListDummy", {}, "List of triggers for dummy matching decorations"};
+
     /// \brief input particle collection
     SysReadHandle<xAOD::IParticleContainer> m_particlesHandle { this, "particles", "", "the particle container to use"};
 
