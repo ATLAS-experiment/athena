@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigEgammaMatchingTool/TrigEgammaMatchingTool.h"
@@ -267,11 +267,11 @@ namespace Trig {
         double deltaR=0.;
         for(auto feat : vec){
             const xAOD::CaloClusterContainer *cont = feat.cptr();
-            ATH_MSG_DEBUG("EF Calo Size " << cont->size());
             if(cont == nullptr) {
                 ATH_MSG_DEBUG("CaloCluster Container from TE nullptr");
                 continue;
             }
+            ATH_MSG_DEBUG("EF Calo Size " << cont->size());
             for(const auto clus : *cont){
                 if(clus == nullptr) {
                     ATH_MSG_DEBUG("CaloCluster from TE nullptr");
