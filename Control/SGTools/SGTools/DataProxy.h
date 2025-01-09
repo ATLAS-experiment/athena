@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SGTOOLS_DATAPROXY_H
@@ -394,26 +394,6 @@ class DataStore;
 
   };
 
-  ///cast the proxy into the concrete data object it proxies
-  //@{
-  template<typename DATA>
-  DATA* DataProxy_cast(DataProxy* proxy);
-
-  ///const ref version of the cast. @throws SG::ExcBadDataProxyCast.
-  template<typename DATA>
-  DATA DataProxy_cast(const DataProxy& proxy);
-
-  /**
-   * @brief Try to get the pointer back from a @a DataProxy,
-   *        converted to be of type @a clid.
-   * @param proxy The @a DataProxy.
-   * @param clid The ID of the class to which to convert.
-   *
-   * Only works if the held object is a @a DataBucket.
-   * Returns 0 on failure,
-   */
-  void* DataProxy_cast(DataProxy* proxy, CLID clid);
-  //@}
 
 } //end namespace SG
 

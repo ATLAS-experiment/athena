@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHandle.h
@@ -15,6 +15,7 @@
 #include "AthenaKernel/IProxyDict.h"
 #include "SGTools/ProxyMap.h"
 #include "SGTools/DataProxy.h"
+#include "SGTools/DataProxy_cast.h"
 #include "SGTools/DataHandleBase.h"
 #include "CxxUtils/checker_macros.h"
 #include <iterator>
