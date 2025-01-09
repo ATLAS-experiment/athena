@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # File taking care of pointing the downstream projects at the right
 # version of LCG.
@@ -43,6 +43,7 @@ set( TDAQ-COMMON_ATROOT "@TDAQ-COMMON_ATROOT@" CACHE PATH
 
 # Find tdaq-common, mainly to have packages find COOL/CORAL.
 find_package( tdaq-common ${_quietFlag} )
+find_package( Boost ${_quietFlag} COMPONENTS ALL )
 
 # Clean up.
 unset( _quietFlag )

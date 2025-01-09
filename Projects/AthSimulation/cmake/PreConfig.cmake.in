@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Pre-config script to propagate variables to downstream projects
 #
@@ -44,6 +44,7 @@ find_package( LCG @LCG_VERSION_NUMBER@ REQUIRED EXACT ${_quietFlag} )
 find_package( nlohmann_json ${_quietFlag} )
 find_package( GTest ${_quietFlag} )
 find_package( Geant4 ${_quietFlag} )
+find_package( Boost ${_quietFlag} COMPONENTS ALL )
 
 # Clean up.
 unset( _quietFlag )
