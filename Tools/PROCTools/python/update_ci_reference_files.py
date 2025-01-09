@@ -111,7 +111,7 @@ def process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_
     eos_path_root = '/eos/atlas/atlascerngroupdisk/data-art/grid-input/WorkflowReferences/'
 
     # Copied file path
-    # e.g. from ERROR    Copied '../SimulationRun3FullSim/run_s4006/myHITS.pool.root' to '/eos/atlas/atlascerngroupdisk/proj-sit/gitlabci/MR63410_a84345c776e93f0d7f25d00c9e91e35bcb965d09/SimulationRun3FullSimChecks'
+    # e.g. from ERROR    Copied '../SimulationRun3FullSim/run_s4006/myHITS.pool.root' to '/eos/atlas/atlascerngroupdisk/proj-ascig/gitlabci/MR63410_a84345c776e93f0d7f25d00c9e91e35bcb965d09/SimulationRun3FullSimChecks'
     copied_file_match = re.search(r'^ERROR    Copied.*', text, flags=re.MULTILINE)
     if not copied_file_match:
         print("FATAL: Could not find matching copied file")
@@ -131,7 +131,7 @@ def process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_
     new_version_directory = eos_path_root+branch+'/'+ami_tag+'/'+new_version_number 
     old_version_directory = eos_path_root+branch+'/'+ami_tag+'/'+existing_version_number 
     # Copied file path
-    # e.g. from ERROR    Copied '../SimulationRun3FullSim/run_s4006/myHITS.pool.root' to '/eos/atlas/atlascerngroupdisk/proj-sit/gitlabci/MR63410_a84345c776e93f0d7f25d00c9e91e35bcb965d09/SimulationRun3FullSimChecks'
+    # e.g. from ERROR    Copied '../SimulationRun3FullSim/run_s4006/myHITS.pool.root' to '/eos/atlas/atlascerngroupdisk/proj-ascig/gitlabci/MR63410_a84345c776e93f0d7f25d00c9e91e35bcb965d09/SimulationRun3FullSimChecks'
     copied_file_match = re.search(r'^ERROR    Copied.*', text, flags=re.MULTILINE)
     if not copied_file_match:
         print("FATAL: Could not find matching copied file")
