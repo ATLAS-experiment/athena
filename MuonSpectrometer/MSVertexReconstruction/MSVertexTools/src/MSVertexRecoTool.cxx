@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MSVertexRecoTool.h"
@@ -307,7 +307,7 @@ namespace Muon {
     void MSVertexRecoTool::MSVxFinder(const std::vector<Tracklet>& tracklets, std::unique_ptr<MSVertex>& vtx,
                                       const EventContext& ctx) const {
         int nTrkToVertex(0);
-        double NominalAngle(m_TrackPhiAngle), RotationAngle(m_TrackPhiAngle + m_TrackPhiRotation);
+        double NominalAngle(m_TrackPhiAngle.value()), RotationAngle(m_TrackPhiAngle.value() + m_TrackPhiRotation.value());
         
         Amg::Vector3D aveTrkPos(0, 0, 0);
         for (const Tracklet &trk : tracklets) aveTrkPos += trk.globalPosition();
