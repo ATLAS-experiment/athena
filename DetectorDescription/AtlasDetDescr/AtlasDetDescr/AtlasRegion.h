@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -8,12 +8,6 @@
 
 #ifndef ATLASDETDESCR_ATLASREGION_H
 #define ATLASDETDESCR_ATLASREGION_H 1
-
-#include <assert.h>
-
-// use these macros to check a given AtlasRegion for its validity
-#define validAtlasRegion(region) ( (region<AtlasDetDescr::fNumAtlasRegions) && (region>=AtlasDetDescr::fFirstAtlasRegion) )
-#define assertAtlasRegion(region) ( assert(validAtlasRegion(region)) )
 
 namespace AtlasDetDescr {
 
@@ -40,5 +34,11 @@ namespace AtlasDetDescr {
    };
 
 } // end of namespace
+
+
+/// Check a given AtlasRegion for its validity
+inline bool validAtlasRegion(AtlasDetDescr::AtlasRegion region) {
+  return (region<AtlasDetDescr::fNumAtlasRegions) && (region>=AtlasDetDescr::fFirstAtlasRegion);
+}
 
 #endif // ATLASDETDESCR_ATLASREGION

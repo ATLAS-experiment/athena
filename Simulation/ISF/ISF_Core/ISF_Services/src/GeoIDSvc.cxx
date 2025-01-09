@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header include
@@ -276,7 +276,7 @@ std::unique_ptr<ISF::RZPairList> ISF::GeoIDSvc::prepareRZPairs( AtlasDetDescr::A
   std::unique_ptr<RZPairList> negativeZ = std::make_unique<RZPairList>();
 
   // ensure a proper numeric value for geoID
-  assertAtlasRegion(geoID);
+  assert(validAtlasRegion(geoID));
 
   ATH_MSG_INFO( "Building envelope volume for '" << AtlasDetDescr::AtlasRegionHelper::getName(geoID)
                 << "' (GeoID="<< geoID << ").");

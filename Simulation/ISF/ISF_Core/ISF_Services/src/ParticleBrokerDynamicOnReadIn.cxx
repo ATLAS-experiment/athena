@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -274,7 +274,7 @@ StatusCode ISF::ParticleBrokerDynamicOnReadIn::initializeEvent(ISFParticleContai
     // identify the geoID of the particle
     m_geoIDSvcQuick->identifyAndRegNextGeoID(particle);
     // the geoID at this point better makes sense :)
-    assertAtlasRegion( particle.nextGeoID() );
+    assert(validAtlasRegion( particle.nextGeoID() ));
 
     // update all registered selectors (in all geoIDs) with this particle
     updateAllSelectors(particle);
