@@ -5,9 +5,7 @@ set -eu
 TMP=$(mktemp)
 h5dump -o $TMP -y -d '4d[0,1,2,3,4]' output.h5 > /dev/null
 EIGHTY_SIX=$(cat $TMP | xargs | paste -s | cut -d , -f 2)
-if (( $EIGHTY_SIX == 86 )); then
-    echo "test magic number is correct!"
-else
+if (( $EIGHTY_SIX != 86 )); then
     echo "test magic number is incorrect ($EIGHTY_SIX != 86)"
     exit 1
 fi
