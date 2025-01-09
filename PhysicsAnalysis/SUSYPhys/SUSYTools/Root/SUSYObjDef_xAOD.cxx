@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -2877,7 +2877,7 @@ float SUSYObjDef_xAOD::getSherpaVjetsNjetsWeight(const std::string& jetContainer
 const xAOD::Vertex* SUSYObjDef_xAOD::GetPrimVtx() const {
   const xAOD::VertexContainer* vertices = nullptr;
   if ( evtStore()->retrieve( vertices, "PrimaryVertices" ).isSuccess() ) {
-    for ( const auto& vx : *vertices ) {
+    for ( const auto vx : *vertices ) {
       if (vx->vertexType() == xAOD::VxType::PriVtx) {
         ATH_MSG_DEBUG("PrimaryVertex found with z=" << vx->z());
         return vx;

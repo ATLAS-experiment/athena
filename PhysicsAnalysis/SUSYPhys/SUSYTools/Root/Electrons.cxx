@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to Electrons
@@ -205,7 +205,7 @@ StatusCode SUSYObjDef_xAOD::GetElectrons(xAOD::ElectronContainer*& copy, xAOD::S
     electrons=copy;
   }
 
-  for (const auto& electron : *copy) {
+  for (const auto electron : *copy) {
     ATH_CHECK( this->FillElectron(*electron, m_eleBaselinePt, m_eleBaselineEta) );
     this->IsSignalElectron(*electron, m_elePt, m_eled0sig, m_elez0, m_eleEta);
   }

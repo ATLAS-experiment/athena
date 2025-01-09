@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to Jets
@@ -127,7 +127,7 @@ namespace ST {
     }
 
     // Calculate Jvt scores (required by METSignificance)
-    for (const auto& jet : *copy) {
+    for (const auto jet : *copy) {
       dec_jvt(*jet) = m_jetJvtMomentTool->updateJvt(*jet);
     }
 
@@ -135,11 +135,11 @@ namespace ST {
     if (m_applyJVTCut) ATH_CHECK(m_jetNNJvtMomentTool->decorate(*copy));
 
     // Update the jets
-    for (const auto& jet : *copy) {
+    for (const auto jet : *copy) {
       ATH_CHECK( this->FillJet(*jet) );
     }
 
-    for (const auto& jet : *copy) {
+    for (const auto jet : *copy) {
       // Update the JVT decorations if needed
       if( m_doFwdJVT){
         dec_passJvt(*jet) = acc_passFJvt(*jet) && acc_passJvt(*jet);
@@ -213,7 +213,7 @@ namespace ST {
     //disable - notfortrackjets? ATH_CHECK(m_jetCalibTool->applyCalibration(*copy));
 
     // Update the jets
-    for (const auto& jet : *copy) {
+    for (const auto jet : *copy) {
       ATH_CHECK( this->FillTrackJet(*jet) );
     }
 
@@ -299,7 +299,7 @@ namespace ST {
     }
 
 
-    for (const auto& jet : *copy) {
+    for (const auto jet : *copy) {
 
       ATH_CHECK( this->FillJet(*jet, true, true, doLargeRdecorations) );
       //
@@ -352,11 +352,11 @@ namespace ST {
     met::addGhostMuonsToJets(*muons, *copy);
 
     // Update the jets
-    for (const auto& jet : *copy) {
+    for (const auto jet : *copy) {
       ATH_CHECK( this->FillJet(*jet, false) );
     }
 
-    for (const auto& jet : *copy) {
+    for (const auto jet : *copy) {
       // Update the JVT decorations if needed
       if( m_doFwdJVT){
         dec_passJvt(*jet) = acc_passFJvt(*jet) && acc_passJvt(*jet);

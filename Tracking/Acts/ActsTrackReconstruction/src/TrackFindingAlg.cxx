@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "src/TrackFindingAlg.h"
 #include "Acts/Propagator/PropagatorOptions.hpp"
@@ -716,7 +716,7 @@ namespace ActsTrk
         Acts::calculateTrackQuantities(track);
         if (m_addPixelStripCounts) {
           initPixelStripCounts(track);
-          for (const auto& trackState : track.trackStatesReversed()) {
+          for (const auto trackState : track.trackStatesReversed()) {
             updatePixelStripCounts(track, trackState.typeFlags(), measurementType(trackState));
           }
           checkPixelStripCounts(track);

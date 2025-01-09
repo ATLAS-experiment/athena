@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to Muons
@@ -189,7 +189,7 @@ StatusCode SUSYObjDef_xAOD::GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAu
       muons=copy;
   }
 
-  for (const auto& muon : *copy) {
+  for (const auto muon : *copy) {
     ATH_CHECK( this->FillMuon(*muon, m_muBaselinePt, m_muBaselineEta) );
     this->IsSignalMuon(*muon, m_muPt, m_mud0sig, m_muz0, m_muEta);
     this->IsCosmicMuon(*muon, m_muCosmicz0, m_muCosmicd0);
