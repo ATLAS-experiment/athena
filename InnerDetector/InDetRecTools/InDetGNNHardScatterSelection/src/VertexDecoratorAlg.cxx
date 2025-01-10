@@ -210,10 +210,12 @@ namespace InDetGNNHardScatterSelection
       }
 
       dec_ntrk(*vertex) = number_tracks;
-      dec_sumPt(*vertex) = sumPt;
 
+      static const SG::AuxElement::Decorator<float> acc_sumPt("sumPt");
+      if(not acc_sumPt.isAvailable(*vertex)){
+        dec_sumPt(*vertex) = sumPt;
+      }
       dec_chi2Over_ndf(*vertex) = vertex->chiSquared() / vertex->numberDoF();
-
       dec_z_asym(*vertex) = z_asym;
       dec_weighted_z_asym(*vertex) = weighted_z_asym;
       dec_z_kurt(*vertex) = z_kurt;
