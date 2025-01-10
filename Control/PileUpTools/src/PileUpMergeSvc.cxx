@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PileUpTools/PileUpMergeSvc.h"
@@ -237,12 +237,13 @@ const xAOD::EventInfo* PileUpMergeSvc::getPileUpEvent( StoreGateSvc* sg, const s
          // the lifetime connection between the pointer and the unique_ptr.
          xAODEventInfo = std::launder(pxAODEventInfo.get());
          // Record the xAOD object(s):
+         const auto ptrVal = pxAODEventInfo.get();//for use in dbg message
          if( ! sg->record( std::move( pxAODEventAuxInfo ), "EventInfoAux." ).isSuccess() //MN: FIX? key
              || ! sg->record( std::move( pxAODEventInfo ), "EventInfo" ).isSuccess() ) {
             ATH_MSG_ERROR("Failed to record the new xAOD::EventInfo in SG");
             xAODEventInfo = nullptr;
          }
-         ATH_MSG_DEBUG("Record the new xAOD::EventInfo "<<pxAODEventInfo.get()<<" in SG="<<sg);
+         ATH_MSG_DEBUG("Record the new xAOD::EventInfo "<<ptrVal<<" in SG="<<sg);
       }
    }
 
