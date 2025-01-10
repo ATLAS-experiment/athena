@@ -174,6 +174,7 @@ namespace MuonCombined {
         SG::ReadCondHandleKey<CaloNoise> m_caloNoiseKey{this, "CaloNoise", "", "CaloNoise object to use, or blank."};
 
         Gaudi::Property<bool> m_buildStauContainer{this, "BuildStauContainer", false, "flag to decide whether to build stau or not"};
+        Gaudi::Property<bool> m_addMDTExtrasMuGirlLowBeta{this, "AddMDTExtrasMuGirlLowBeta", false};
         Gaudi::Property<bool> m_fillEnergyLossFromTrack{this, "FillEnergyLossFromTrack", true,
                                                         "Decide whether to try to extract the calo energy loss from tracks "};
 
@@ -213,6 +214,9 @@ namespace MuonCombined {
         std::vector< std::unique_ptr<SG::AuxElement::Accessor<uint8_t> > >  m_copyCharSummaryAccessors;
 
         SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this, "CaloDetDescrManager", "CaloDetDescrManager"};
+    
+        
+    
     };
 
 }  // namespace MuonCombined
