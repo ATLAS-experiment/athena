@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -59,15 +59,8 @@
 //
 TileDigitsToTTL1::TileDigitsToTTL1(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_tileID(0)
-  , m_tileHWID(0)
-  , m_tileInfo(0)
-  , m_TT_ID(0)
   , m_tileToolEmscale("TileCondToolEmscale")
 {
-  // which CIS constants will be used for calibration
-  m_rChType = TileFragHash::FitFilter;
-
   declareProperty("TileInfoName", m_infoName = "TileInfo");
   declareProperty("TileCondToolEmscale"    , m_tileToolEmscale);
 }
