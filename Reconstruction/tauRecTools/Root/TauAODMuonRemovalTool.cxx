@@ -61,7 +61,7 @@ StatusCode TauAODMuonRemovalTool::execute(xAOD::TauJet& tau) const {
 }
 
 //helpers
-std::vector<const xAOD::CaloCluster*> TauAODMuonRemovalTool::getOrignalTopoClusters(const xAOD::CaloCluster *cluster) const {
+std::vector<const xAOD::CaloCluster*> TauAODMuonRemovalTool::getOriginalTopoClusters(const xAOD::CaloCluster *cluster) const {
     static const SG::Accessor<std::vector<ElementLink<xAOD::CaloClusterContainer>>> acc_origClusterLinks("constituentClusterLinks");
     std::vector< const xAOD::CaloCluster* > orig_cls;
     if(acc_origClusterLinks.isAvailable(*cluster)) {
@@ -74,19 +74,6 @@ std::vector<const xAOD::CaloCluster*> TauAODMuonRemovalTool::getOrignalTopoClust
         }
     }
     return orig_cls;
-}
-
-const xAOD::TrackParticle* TauAODMuonRemovalTool::getOrignalTrackParticle(const xAOD::TrackParticle* trk) const {
-    static const SG::Accessor<ElementLink<xAOD::TrackParticleContainer>> acc_origTracks ("originalTrackParticle");
-    const xAOD::TrackParticle* orig_trk = nullptr;
-    if(acc_origTracks.isAvailable(*trk)) {
-        if (const auto & orig_link = acc_origTracks(*trk); orig_link.isValid()) {
-            if (orig_link.dataID() != "InDetTrackParticles")
-                ATH_MSG_WARNING("the tracks in the lepton cannot be converted to InDetTrackParticles, the ID is " << orig_link.dataID());
-            orig_trk = *orig_link;
-        }
-    }
-    return orig_trk;
 }
 
 std::vector<std::pair<const xAOD::TrackParticle*, const xAOD::Muon*>> TauAODMuonRemovalTool::getMuonAndTrk(const xAOD::TauJet& tau, const xAOD::MuonContainer& muon_container) const {
@@ -114,7 +101,7 @@ std::vector<std::pair<const xAOD::CaloCluster*, const xAOD::Muon*>> TauAODMuonRe
                     auto cls_e = muon_cluster->e();
                     auto loss_diff = ((cls_e - loss_e) / (cls_e + loss_e));
                     if (muon_e > cls_e && loss_diff < 0.1 && loss_diff > -0.3) {
-                        auto orig_muon_clusters = getOrignalTopoClusters(muon_cluster);
+                        auto orig_muon_clusters = getOriginalTopoClusters(muon_cluster);
                         for (auto cluster : orig_muon_clusters)
                             ret.push_back(std::make_pair(cluster, muon));
                     }

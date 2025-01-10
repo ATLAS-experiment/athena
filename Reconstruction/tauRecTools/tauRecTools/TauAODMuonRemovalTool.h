@@ -34,8 +34,7 @@ class TauAODMuonRemovalTool : public TauRecToolBase
         Gaudi::Property<std::string> m_strMinMuonIdWp    {this, "muonIDWP",           "Medium",              "minimum muon identification WP, [VeryLoose, Loose, Medium, Tight]"    };
         Gaudi::Property<double>      m_lepRemovalConeSize{this, "lepRemovalConeSize", 0.6,                   "The maximum dR between the lepton and the tau"                        };
         //helpers
-        std::vector<const xAOD::CaloCluster*>                                       getOrignalTopoClusters (const xAOD::CaloCluster   *cluster) const;
-        const xAOD::TrackParticle*                                                  getOrignalTrackParticle(const xAOD::TrackParticle *trk  )   const;
+        std::vector<const xAOD::CaloCluster*>                                       getOriginalTopoClusters (const xAOD::CaloCluster   *cluster) const;
         std::vector<std::pair<const xAOD::TrackParticle*,     const xAOD::Muon*>>   getMuonAndTrk(const xAOD::TauJet& tau,  const xAOD::MuonContainer& muon_cont) const;
         std::vector<std::pair<const xAOD::CaloCluster*,       const xAOD::Muon*>>   getMuonAndCls(const xAOD::TauJet& tau,  const xAOD::MuonContainer& muon_cont) const;
         template<typename Tlep, typename Tlinks> std::vector<Tlep>                  removeTrks(Tlinks& tau_trk_links,   std::vector<std::pair<const xAOD::TrackParticle*, Tlep>>& removings) const;
