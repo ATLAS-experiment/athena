@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETREC_FASTJETINTERFACETOOL_H
@@ -206,6 +206,7 @@ public:
    *
    *  The string returned cannot be modified by client. 
    */
+  // cppcheck-suppress returnByReference; do not expose internals
   const std::string getAreaDefinitionType() const;
 
   /*! @brief Get known jet algorithms */
