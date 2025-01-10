@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -65,6 +65,8 @@
 
 #include "CLHEP/Random/RandomEngine.h"
 
+//C++ STL includes
+#include <vector>
 #include <string>
 
 //Simulation includes
@@ -99,15 +101,15 @@ public:
 private:
     std::string m_outputContainer; //!< Name of the output TileDigitsContainer
     
-    const TileHWID* m_tileHWID;
+    const TileHWID* m_tileHWID{};
     
     // TileInfo
     std::string m_infoName;
-    const TileInfo* m_tileInfo;
-    int m_i_ADCmax;
+    const TileInfo* m_tileInfo{};
+    int m_i_ADCmax{};
     
-    TileRawChannelUnit::UNIT m_rChUnit; //!< Units used for the TileRawChannels (ADC, pCb, etc.)(see TileInfo.h)
-    TileFragHash::TYPE m_rChType; //!< Type of TileRawChannels (Digitizar, OF1, OF2, Fit, etc.)(see TileFragHash.h)
+    TileRawChannelUnit::UNIT m_rChUnit{TileRawChannelUnit::ADCcounts}; //!< Units used for the TileRawChannels (ADC, pCb, etc.)(see TileInfo.h)
+    TileFragHash::TYPE m_rChType{TileFragHash::Default}; //!< Type of TileRawChannels (Digitizar, OF1, OF2, Fit, etc.)(see TileFragHash.h)
     
     ToolHandle<TileCondToolNoiseSample> m_tileToolNoiseSample{this,
         "TileCondToolNoiseSample", "TileCondToolNoiseSample", "Tile sample noise tool"};
@@ -157,7 +159,7 @@ private:
     int m_BunchSpacing; //!< Time between pulses in ms 25, 50 or 75
     int m_nSamples;  //!< number of read out samples
     int m_nPul;  //!< number of pileup pulses 
-    int m_nPul_eff;  //Used for symetrization of PU in computation
+    int m_nPul_eff{};  //Used for symetrization of PU in computation
     std::vector<float> m_PUAmp;
     bool m_PhaseII; //Use parameters of TilePhaseII if the option is set to true
     bool m_bigain; //If true, save the two gains in the ntuples
@@ -168,8 +170,8 @@ private:
 
     //Members for simulator
     TilePulseShape*      m_ps[2]; //!< Class for defining pulse. One element for lo gain and one for hi.
-    TileSampleBuffer*    m_buf; //!< Buffer class to hold generated pulses
-    TileSampleGenerator* m_tsg; //!< Pulse generating class
+    TileSampleBuffer*    m_buf{}; //!< Buffer class to hold generated pulses
+    TileSampleGenerator* m_tsg{}; //!< Pulse generating class
     
     //Histograms for distribution
     TH1F* m_ootDist; //!< Histogram to hold the distribution of out-of-time amplitudes.
