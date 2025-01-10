@@ -250,6 +250,10 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   std::string tune = resolve_alias(tuneIn);
 
   if (tune.empty()) { }
+  // R22 layer tune with fixed E1E2 and repeated acc
+  else if ("es2022_22.0_Precision_v1" == tune) {
+    add_scale("run2_alt_with_layer2_r22_Precision_v1");
+  }
   else if ("es2022_22.0_Precision" == tune) {
     add_scale("run2_alt_with_layer2_r22_Precision");
   }
@@ -274,6 +278,12 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     add_scale(new ScaleE1(InputModifier::SUBTRACT), new GetAmountPileupE1(m_pileup_tool));
     add_scale(new ScaleE2(InputModifier::SUBTRACT), new GetAmountPileupE2(m_pileup_tool));
     add_scale(new ScaleE3(InputModifier::SUBTRACT), new GetAmountPileupE3(m_pileup_tool));
+  }
+  //Run 2 release 22 with fixed E1E2 and repeated acc 
+  else if ("run2_alt_with_layer2_r22_Precision_v1"==tune) {
+    add_scale("layer2_alt_el_mu_comb_r21_v0_fix");
+    add_scale("ps_mu_r21_v0");
+    if(m_doSaccCorrections) add_scale("acc_zee_r22_v1");
   }
   //Run 2 release 22
   else if ("run2_alt_with_layer2_r22_Precision"==tune) {
@@ -502,6 +512,15 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     add_scale(new ScaleE0(InputModifier::ZEROBASED), new GetAmountHisto1D(h_presampler));
     add_scale(new ScaleE1(InputModifier::ZEROBASED), new GetAmountFixed(0.01));
   }
+  // repeated acc scale based on layer2_alt_el_mu_comb_r21_v0_fix 
+  else if ("acc_zee_r22_v1" == tune) {
+    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v12/egammaLayerRecalibTunes.root");
+    TFile f(file.c_str());
+    TH2F* histo_acc = static_cast<TH2F*>(f.Get("hACC_Zee_rel22"));
+    assert(histo_acc);
+    add_scale(new ScaleEaccordion(InputModifier::ZEROBASED_ALPHA),
+              new GetAmountHisto2DEtaCaloRunNumber(*histo_acc));
+  }
   else if ("acc_zee_r22_v0" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v11/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
@@ -636,6 +655,15 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     TH1* histo = checked_cast<TH1*>(f.Get("hE1E2ave_2010"));
     add_scale(new ScaleE1(InputModifier::ZEROBASED_ALPHA),
 	      new GetAmountHisto1DErrorDown(*histo));
+  }
+  // fix E1E2 scale from R21 precision model
+  else if("layer2_alt_el_mu_comb_r21_v0_fix"==tune) {
+    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v12/egammaLayerRecalibTunes.root");
+    TFile f(file.c_str());
+    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2_emu_run2_rel21_v0_fix"));
+    assert(histo);
+    add_scale(new ScaleE2(InputModifier::ONEBASED),
+         new GetAmountHisto1D(*histo));
   }
   else if("layer2_alt_el_mu_comb_r21_v0"==tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v11/egammaLayerRecalibTunes.root");
