@@ -40,6 +40,8 @@ class MuonCalibrationConfig (ConfigBlock):
 
     def makeAlgs (self, config) :
 
+        log = logging.getLogger('MuonCalibrationConfig')
+
         #make sure that this is sync with
         #PhysicsAnalysis/MuonID/MuonIDAnalysis/MuonMomentumCorrections/MuonMomentumCorrections/MuonCalibTool.h#L31-37
         if self.calibMode == 'correctData_CB':
@@ -82,7 +84,7 @@ class MuonCalibrationConfig (ConfigBlock):
         alg.calibrationAndSmearingTool.IsRun3Geo = config.geometry() >= LHCPeriod.Run3
         alg.calibrationAndSmearingTool.calibMode = calibMode
         if config.geometry() is LHCPeriod.Run4:
-            logging.warning("MuonCalibrationConfig: disabling NSW hits for Run4 geometry")
+            log.warning("Disabling NSW hits for Run4 geometry")
             alg.calibrationAndSmearingTool.ExcludeNSWFromPrecisionLayers = True
         else:
             alg.calibrationAndSmearingTool.ExcludeNSWFromPrecisionLayers = self.excludeNSWFromPrecisionLayers and (config.geometry() >= LHCPeriod.Run3)
@@ -175,6 +177,8 @@ class MuonWorkingPointConfig (ConfigBlock) :
             "fix a crash with older derivations (p-tag <p5834)")
 
     def makeAlgs (self, config) :
+        log = logging.getLogger('MuonWorkingPointConfig')
+
         from xAODMuon.xAODMuonEnums import xAODMuonEnums
         if self.quality == 'Tight' :
             quality = xAODMuonEnums.Quality.Tight
@@ -226,7 +230,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
         alg.selectionTool.MuQuality = quality
         alg.selectionTool.IsRun3Geo = config.geometry() >= LHCPeriod.Run3
         if config.geometry() is LHCPeriod.Run4:
-            logging.warning("MuonCalibrationConfig: disabling NSW hits for Run4 geometry")
+            log.warning("Disabling NSW hits for Run4 geometry")
             alg.selectionTool.ExcludeNSWFromPrecisionLayers = True
         else:
             alg.selectionTool.ExcludeNSWFromPrecisionLayers = self.excludeNSWFromPrecisionLayers and (config.geometry() >= LHCPeriod.Run3)
