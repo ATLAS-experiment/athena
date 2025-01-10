@@ -74,6 +74,8 @@ class PhotonCalibrationConfig (ConfigBlock) :
 
         Factoring this out into its own function, as we want to
         instantiate it in multiple places"""
+        log = logging.getLogger('PhotonCalibrationConfig')
+
         # Set up the calibration and smearing algorithm:
         alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg', name + self.postfix )
         config.addPrivateTool( 'calibrationAndSmearingTool',
@@ -87,7 +89,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
             elif config.geometry() is LHCPeriod.Run3:
                 alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
             elif config.geometry() is LHCPeriod.Run4:
-                logging.warning("No ESModel set for Run4, using Run3 model")
+                log.warning("No ESModel set for Run4, using Run3 model")
                 alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
             else:
                 raise ValueError (f"Can't set up the ElectronCalibrationConfig with {config.geometry().value}, "
