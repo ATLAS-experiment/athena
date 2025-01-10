@@ -71,22 +71,22 @@ class UnconventionalTrackingChainConfiguration(ChainConfigurationBase):
         return self.getStep(flags, 'JetRecoOnlyCfg',[UTTJetRecoSequenceGenCfg])
     # Empty for alignment
     def getIsoHPtTrackEmpty(self, flags):
-        return  self.getEmptyStep(1,'EmptyUncTrk')
+        return  self.getEmptyStep('EmptyUncTrk')
     def getFSLRTEmpty(self, flags):
-        return self.getEmptyStep(1, 'FSLRTEmptyStep')
+        return self.getEmptyStep('FSLRTEmptyStep')
     def getDisTrkEmpty(self, flags):
-        return self.getEmptyStep(1, 'DisTrkEmptyStep')
+        return self.getEmptyStep('DisTrkEmptyStep')
     def getVSIEmpty(self, flags):
-        return self.getEmptyStep(1, 'VSIEmptyStep')
+        return self.getEmptyStep('VSIEmptyStep')
     def getdEdxEmpty(self, flags):
-        return self.getEmptyStep(1, 'dEdxEmptyStep')
+        return self.getEmptyStep('dEdxEmptyStep')
 
     # Step 2
     def getFSLRTTrigger(self, flags):
         return self.getStep(flags, 'FSLRT',[FullScanLRTMenuSequenceGenCfg])
     # Empty for alignment with jets
     def getRoITrkEmpty(self, flags):
-        return self.getEmptyStep(2, 'RoITrkEmptyStep')
+        return self.getEmptyStep('RoITrkEmptyStep')
 
     # Step 3 -- all FTF tracking here
     def getFTFTrackReco(self, flags):

@@ -149,10 +149,10 @@ class TestChainConfiguration(ChainConfigurationBase):
         return self.getStep(flags, "mu41",[ muCfg411 ])
 
     def Step_empty1(self, flags):
-        return self.getEmptyStep(1,'empty')
+        return self.getEmptyStep('empty')
 
     def Step_empty2(self, flags):
-        return self.getEmptyStep(2,'empty')
+        return self.getEmptyStep('empty')
 
     def Step_empty3(self, flags):
         return self.getStep(flags,'emptySeq', [EmptyMenuSequenceCfg], name="EmptySequence")

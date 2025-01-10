@@ -141,7 +141,7 @@ class CalibChainConfiguration(ChainConfigurationBase):
         return self.getStep(flags, 'LArPSALL', [getCaloAllEMLayersPSSequenceGenCfg], doAllorAllEM=True)
 
     def getIDCalibEmpty(self, flags, i):
-        return self.getEmptyStep(1, 'IDCalibEmptyStep')
+        return self.getEmptyStep('IDCalibEmptyStep')
 
     def getIDCalibFTFReco(self, flags, i):
         return self.getStep(flags, 'IDCalibFTFCfg',[IDCalibFTFSequenceGenCfg])
