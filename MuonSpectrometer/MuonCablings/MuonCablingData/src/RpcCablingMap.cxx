@@ -148,6 +148,17 @@ namespace Muon {
                 <<offCh<<std::format("firstStrip: {:2d}", entry.firstStrip)<<" - "<<onlCh
                 <<std::format("flatCable: {:2d}", entry.flatCable->id())<<endmsg;
         }
+
+        int sub = entry.subDetector;
+        int rod = entry.tdcSector;
+
+        int32_t hardId = (sub << 16) | rod;
+
+        const bool robInitialized = std::find(m_listOfROB.begin(), m_listOfROB.end(), hardId) != m_listOfROB.end();
+        if (!robInitialized) {
+            m_listOfROB.push_back(hardId);
+        }
+    
         return true;
     }
     bool RpcCablingMap::finalize(MsgStream& log) {
