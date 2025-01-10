@@ -642,19 +642,6 @@ def getDevSignatures():
 
     chains['Combined'] = [
         # Test chains for muon msonly + VBF for ATR-28412
-        ChainProp(name='HLT_mu6_msonly_j70_j50a_j0_DJMASS1000j50dphi260x200deta_L1MJJ-500-NFF', l1SeedThresholds=['MU5VF','FSNOSEED','FSNOSEED','FSNOSEED'], stream=[PhysicsStream],groups=PrimaryLegGroup+MuonJetGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_mu6_msonly_j70_j50a_j0_DJMASS900j50dphi260x200deta_L1MJJ-500-NFF', l1SeedThresholds=['MU5VF','FSNOSEED','FSNOSEED','FSNOSEED'], stream=[PhysicsStream],groups=PrimaryLegGroup+MuonJetGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_2mu6noL1_msonly_nscan_j70_j50a_j0_DJMASS900j50dphi260x200deta_L1MJJ-500-NFF', l1SeedThresholds=['FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED'], stream=[PhysicsStream],groups=PrimaryLegGroup+MuonJetGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_2mu6noL1_msonly_nscan_j70_j50a_j0_DJMASS1000j50dphi260x200deta_L1MJJ-500-NFF', l1SeedThresholds=['FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED'], stream=[PhysicsStream],groups=PrimaryLegGroup+MuonJetGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_mu6_msonly_j50_j30a_j0_DJMASS1000j30dphi260x200deta_L1MJJ-500-NFF', l1SeedThresholds=['MU5VF','FSNOSEED','FSNOSEED','FSNOSEED'], stream=[PhysicsStream],groups=PrimaryLegGroup+MuonJetGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_mu6_msonly_j50_j30a_j0_DJMASS900j30dphi260x200deta_L1MJJ-500-NFF', l1SeedThresholds=['MU5VF','FSNOSEED','FSNOSEED','FSNOSEED'], stream=[PhysicsStream],groups=PrimaryLegGroup+MuonJetGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_2mu6noL1_msonly_nscan_j50_j30a_j0_DJMASS900j30dphi260x200deta_L1MJJ-500-NFF', l1SeedThresholds=['FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED'], stream=[PhysicsStream],groups=PrimaryLegGroup+MuonJetGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_2mu6noL1_msonly_nscan_j50_j30a_j0_DJMASS1000j30dphi260x200deta_L1MJJ-500-NFF', l1SeedThresholds=['FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED'], stream=[PhysicsStream],groups=PrimaryLegGroup+MuonJetGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_mu20_msonly_j70_j50a_j0_DJMASS1000j50dphi260x200deta_L1MJJ-500-NFF', l1SeedThresholds=['MU5VF','FSNOSEED','FSNOSEED','FSNOSEED'], stream=[PhysicsStream],groups=PrimaryLegGroup+MuonJetGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_mu20_msonly_j70_j50a_j0_DJMASS900j50dphi260x200deta_L1MJJ-500-NFF', l1SeedThresholds=['MU5VF','FSNOSEED','FSNOSEED','FSNOSEED'], stream=[PhysicsStream],groups=PrimaryLegGroup+MuonJetGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_mu6noL1_msonly_j70_j50a_j0_DJMASS1000j50dphi260x200deta_L1MJJ-500-NFF', l1SeedThresholds=['FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED'], stream=[PhysicsStream],groups=PrimaryLegGroup+MuonJetGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_mu6noL1_msonly_j70_j50a_j0_DJMASS900j50dphi260x200deta_L1MJJ-500-NFF', l1SeedThresholds=['FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED'], stream=[PhysicsStream],groups=PrimaryLegGroup+MuonJetGroup+LegacyTopoGroup),
-
 
         # Test chains for muon + jet/MET merging/aligning
         ChainProp(name='HLT_mu6_xe30_mht_L1XE30', l1SeedThresholds=['MU5VF','FSNOSEED'], stream=[PhysicsStream], groups=MuonMETGroup),
