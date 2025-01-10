@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
@@ -168,6 +168,11 @@ const ToolHandle<GenericMonitoringTool>& AthMonitorAlgorithm::getGroup( const st
         return m_tools[idx->second];
     }
     else {
+      // treat empty tool handle case as in Monitored::Group
+      if (m_toolLookupMap.empty()) {
+	return m_dummy;
+      }
+
       if (!isInitialized()) {
         ATH_MSG_FATAL(
             "It seems that the AthMonitorAlgorithm::initialize was not called "
