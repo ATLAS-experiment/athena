@@ -34,6 +34,7 @@
 #include <AsgAnalysisAlgorithms/BootstrapGeneratorAlg.h>
 #include <AsgAnalysisAlgorithms/CopyNominalSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/EventCutFlowHistAlg.h>
+#include <AsgAnalysisAlgorithms/EventDecoratorAlg.h>
 #include <AsgAnalysisAlgorithms/EventFlagSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/EventSelectionByObjectFlagAlg.h>
 #include <AsgAnalysisAlgorithms/EventStatusSelectionAlg.h>
@@ -69,28 +70,34 @@
 #include <EgammaAnalysisAlgorithms/PhotonExtraVariablesAlg.h>
 #include <EgammaAnalysisAlgorithms/PhotonOriginCorrectionAlg.h>
 #include <EgammaAnalysisAlgorithms/PhotonShowerShapeFudgeAlg.h>
+#include <ElectronEfficiencyCorrection/AsgElectronEfficiencyCorrectionTool.h>
 #include <ElectronPhotonFourMomentumCorrection/EgammaCalibrationAndSmearingTool.h>
 #include <ElectronPhotonSelectorTools/AsgDeadHVCellRemovalTool.h>
 #include <EventSelectionAlgorithms/ChargeSelectorAlg.h>
 #include <EventSelectionAlgorithms/DileptonInvariantMassSelectorAlg.h>
 #include <EventSelectionAlgorithms/DileptonInvariantMassWindowSelectorAlg.h>
 #include <EventSelectionAlgorithms/DileptonOSSFInvariantMassWindowSelectorAlg.h>
+#include <EventSelectionAlgorithms/JetNGhostSelectorAlg.h>
 #include <EventSelectionAlgorithms/MissingETPlusTransverseMassSelectorAlg.h>
 #include <EventSelectionAlgorithms/MissingETSelectorAlg.h>
 #include <EventSelectionAlgorithms/NLargeRJetMassWindowSelectorAlg.h>
 #include <EventSelectionAlgorithms/NObjectMassSelectorAlg.h>
 #include <EventSelectionAlgorithms/NObjectPtSelectorAlg.h>
+#include <EventSelectionAlgorithms/RunNumberSelectorAlg.h>
 #include <EventSelectionAlgorithms/SaveFilterAlg.h>
 #include <EventSelectionAlgorithms/SumNLeptonPtSelectorAlg.h>
 #include <EventSelectionAlgorithms/TransverseMassSelectorAlg.h>
+#include <FakeBkgTools/AsymptMatrixTool.h>
 #include <FTagAnalysisAlgorithms/BTaggingEfficiencyAlg.h>
 #include <FTagAnalysisAlgorithms/BTaggingInformationDecoratorAlg.h>
 #include <FTagAnalysisAlgorithms/BTaggingScoresAlg.h>
 #include <GammaORTools/VGammaORTool.h>
 #include <GoodRunsLists/GRLSelectorAlg.h>
 #include <GoodRunsLists/GoodRunsListSelectionTool.h>
+#include <InDetSecVtxTruthMatchTool/InDetSecVtxTruthMatchTool.h>
 #include <IsolationCorrections/IsolationCorrectionTool.h>
 #include <IsolationSelection/IsolationSelectionTool.h>
+#include <JetAnalysisAlgorithms/BJetCalibrationAlg.h>
 #include <JetAnalysisAlgorithms/JetCalibrationAlg.h>
 #include <JetAnalysisAlgorithms/JetDecoratorAlg.h>
 #include <JetAnalysisAlgorithms/JetGhostMergingAlg.h>
@@ -105,11 +112,15 @@
 #include <JetCalibTools/JetCalibrationTool.h>
 #include <JetCalibTools/BJetCorrectionTool.h>
 #include <JetCalibTools/MuonInJetCorrectionTool.h>
+#include <JetJvtEfficiency/JvtEfficiencyTool.h>
 #include <JetJvtEfficiency/NNJvtSelectionTool.h>
 #include <JetMomentTools/JetVertexNNTagger.h>
 #include <JetUncertainties/JetUncertaintiesTool.h>
+#include <LRTElectronAnalysisTools/ElectronLRTOverlapRemovalTool.h>
+#include <LRTMuonAnalysisTools/MuonLRTOverlapRemovalTool.h>
 #include <METUtilities/METMaker.h>
 #include <METUtilities/METSignificance.h>
+#include <METUtilities/METSystematicsTool.h>
 #include <MetAnalysisAlgorithms/MetBuilderAlg.h>
 #include <MetAnalysisAlgorithms/MetMakerAlg.h>
 #include <MetAnalysisAlgorithms/MetSignificanceAlg.h>
@@ -119,11 +130,15 @@
 #include <MuonAnalysisAlgorithms/MuonLRTMergingAlg.h>
 #include <MuonAnalysisAlgorithms/MuonSelectionAlg.h>
 #include <MuonAnalysisAlgorithms/MuonTriggerEfficiencyScaleFactorAlg.h>
+#include <MuonEfficiencyCorrections/MuonEfficiencyScaleFactors.h>
+#include <MuonEfficiencyCorrections/MuonTriggerScaleFactors.h>
 #include <MuonMomentumCorrections/MuonCalibIntSagittaTool.h>
 #include <MuonMomentumCorrections/MuonCalibIntScaleSmearTool.h>
 #include <MuonMomentumCorrections/MuonCalibTool.h>
 #include <MuonSelectorTools/MuonSelectionTool.h>
 #include <PileupReweighting/PileupReweightingTool.h>
+#include <PhotonEfficiencyCorrection/AsgPhotonEfficiencyCorrectionTool.h>
+#include <PMGTools/PMGTruthWeightTool.h>
 #include <SelectionHelpers/SelectionNameSvc.h>
 #include <StandaloneAnalysisAlgorithms/xAODWriterAlg.h>
 #include <SystematicsHandles/SystematicsSvc.h>
@@ -138,20 +153,27 @@
 #include <TauAnalysisAlgorithms/TauTruthDecorationsAlg.h>
 #include <TauAnalysisAlgorithms/TauTruthMatchingAlg.h>
 #include <TauAnalysisTools/CommonSmearingTool.h>
+#include <TauAnalysisTools/DiTauEfficiencyCorrectionsTool.h>
+#include <TauAnalysisTools/DiTauSmearingTool.h>
+#include <TauAnalysisTools/DiTauTruthMatchingTool.h>
+#include <TauAnalysisTools/TauEfficiencyCorrectionsTool.h>
 #include <TauAnalysisTools/TauSelectionTool.h>
 #include <TauAnalysisTools/TauSmearingTool.h>
+#include <TauAnalysisTools/TauTruthMatchingTool.h>
 #include <TrackingAnalysisAlgorithms/SecVertexTruthMatchAlg.h>
 #include <TrackingAnalysisAlgorithms/TrackParticleMergerAlg.h>
 #include <TrackingAnalysisAlgorithms/VertexSelectionAlg.h>
 #include <TrigConfxAOD/xAODConfigTool.h>
 #include <TrigDecisionTool/TrigDecisionTool.h>
 #include <TrigGlobalEfficiencyCorrection/TrigGlobalEfficiencyCorrectionTool.h>
+#include <TriggerMatchingTool/MatchingTool.h>
 #include <TriggerAnalysisAlgorithms/TrigEventSelectionAlg.h>
 #include <TriggerAnalysisAlgorithms/TrigGlobalEfficiencyAlg.h>
 #include <TriggerAnalysisAlgorithms/TrigPrescalesAlg.h>
 #include <TriggerAnalysisAlgorithms/TrigMatchingAlg.h>
 #include <TriggerMatchingTool/DRScoringTool.h>
 #include <TriggerMatchingTool/MatchFromCompositeTool.h>
+#include <TruthClassification/TruthClassificationTool.h>
 #include <TruthParticleLevelAnalysisAlgorithms/ParticleLevelChargeDecoratorAlg.h>
 #include <TruthParticleLevelAnalysisAlgorithms/ParticleLevelIsolationAlg.h>
 #include <TruthParticleLevelAnalysisAlgorithms/ParticleLevelJetsAlg.h>
@@ -161,6 +183,7 @@
 #include <egammaMVACalib/egammaMVACalibTool.h>
 #include <egammaMVACalib/egammaMVASvc.h>
 #include <tauRecTools/TauCombinedTES.h>
+#include <xAODBTaggingEfficiency/BTaggingEfficiencyTool.h>
 #include <xAODBTaggingEfficiency/BTaggingSelectionTool.h>
 
 //
@@ -192,6 +215,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::AsgViewFromSelectionAlg>("CP::AsgViewFromSelectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::AsgxAODMetNTupleMakerAlg>("CP::AsgxAODMetNTupleMakerAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::AsgxAODNTupleMakerAlg>("CP::AsgxAODNTupleMakerAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::BJetCalibrationAlg >("CP::BJetCalibrationAlg "));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::BTaggingEfficiencyAlg>("CP::BTaggingEfficiencyAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::BTaggingInformationDecoratorAlg>("CP::BTaggingInformationDecoratorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::BTaggingScoresAlg>("CP::BTaggingScoresAlg"));
@@ -213,6 +237,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::ElectronLRTMergingAlg>("CP::ElectronLRTMergingAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::ElectronSiHitDecAlg>("CP::ElectronSiHitDecAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::EventCutFlowHistAlg>("CP::EventCutFlowHistAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::EventDecoratorAlg>("CP::EventDecoratorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::EventFlagSelectionAlg>("CP::EventFlagSelectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::EventSelectionByObjectFlagAlg>("CP::EventSelectionByObjectFlagAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::EventStatusSelectionAlg>("CP::EventStatusSelectionAlg"));
@@ -224,6 +249,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetGhostMergingAlg>("CP::JetGhostMergingAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetGhostMuonAssociationAlg>("CP::JetGhostMuonAssociationAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetModifierAlg>("CP::JetModifierAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::JetNGhostSelectorAlg>("CP::JetNGhostSelectorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetReclusteringAlg>("CP::JetReclusteringAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetSelectionAlg>("CP::JetSelectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetTruthTagAlg>("CP::JetTruthTagAlg"));
@@ -254,6 +280,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::PhotonOriginCorrectionAlg>("CP::PhotonOriginCorrectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::PhotonShowerShapeFudgeAlg>("CP::PhotonShowerShapeFudgeAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::PileupReweightingAlg>("CP::PileupReweightingAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::RunNumberSelectorAlg>("CP::RunNumberSelectorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::SaveFilterAlg>("CP::SaveFilterAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::SecVertexTruthMatchAlg>("CP::SecVertexTruthMatchAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::SumNLeptonPtSelectorAlg>("CP::SumNLeptonPtSelectorAlg"));
@@ -279,28 +306,39 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::ParticleLevelMissingETAlg>("CP::ParticleLevelMissingETAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::ParticleLevelOverlapRemovalAlg>("CP::ParticleLevelOverlapRemovalAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::ParticleLevelPtEtaPhiDecoratorAlg>("CP::ParticleLevelPtEtaPhiDecoratorAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::PMGTruthWeightAlg>("CP::PMGTruthWeightAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::VertexSelectionAlg>("CP::VertexSelectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::VGammaORAlg>("CP::VGammaORAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::xAODWriterAlg>("CP::xAODWriterAlg"));
 
     ANA_CHECK (asg::registerToolFactory<AsgDeadHVCellRemovalTool> ("AsgDeadHVCellRemovalTool"));
+    ANA_CHECK (asg::registerToolFactory<AsgElectronEfficiencyCorrectionTool> ("AsgElectronEfficiencyCorrectionTool"));
+    ANA_CHECK (asg::registerToolFactory<AsgPhotonEfficiencyCorrectionTool> ("AsgPhotonEfficiencyCorrectionTool"));
+    ANA_CHECK (asg::registerToolFactory<BTaggingEfficiencyTool> ("BTaggingEfficiencyTool"));
     ANA_CHECK (asg::registerToolFactory<BTaggingSelectionTool> ("BTaggingSelectionTool"));
     ANA_CHECK (asg::registerToolFactory<CP::AsgFlagSelectionTool> ("CP::AsgFlagSelectionTool"));
     ANA_CHECK (asg::registerToolFactory<CP::AsgMaskSelectionTool> ("CP::AsgMaskSelectionTool"));
     ANA_CHECK (asg::registerToolFactory<CP::AsgMassSelectionTool> ("CP::AsgMassSelectionTool"));
     ANA_CHECK (asg::registerToolFactory<CP::AsgPtEtaSelectionTool> ("CP::AsgPtEtaSelectionTool"));
+    ANA_CHECK (asg::registerToolFactory<CP::AsymptMatrixTool> ("CP::AsymptMatrixTool"));
     ANA_CHECK (asg::registerToolFactory<CP::EgammaCalibrationAndSmearingTool> ("CP::EgammaCalibrationAndSmearingTool"));
     ANA_CHECK (asg::registerToolFactory<CP::EgammaIsGoodOQSelectionTool> ("CP::EgammaIsGoodOQSelectionTool"));
+    ANA_CHECK (asg::registerToolFactory<CP::ElectronLRTOverlapRemovalTool> ("CP::ElectronLRTOverlapRemovalTool"));
     ANA_CHECK (asg::registerToolFactory<CP::IsolationCorrectionTool> ("CP::IsolationCorrectionTool"));
     ANA_CHECK (asg::registerToolFactory<CP::IsolationSelectionTool> ("CP::IsolationSelectionTool"));
+    ANA_CHECK (asg::registerToolFactory<CP::JvtEfficiencyTool> ("CP::JvtEfficiencyTool"));
     ANA_CHECK (asg::registerToolFactory<CP::MuonCalibIntSagittaTool> ("CP::MuonCalibIntSagittaTool"));
     ANA_CHECK (asg::registerToolFactory<CP::MuonCalibIntScaleSmearTool> ("CP::MuonCalibIntScaleSmearTool"));
     ANA_CHECK (asg::registerToolFactory<CP::MuonCalibTool> ("CP::MuonCalibTool"));
+    ANA_CHECK (asg::registerToolFactory<CP::MuonLRTOverlapRemovalTool> ("CP::MuonLRTOverlapRemovalTool"));
     ANA_CHECK (asg::registerToolFactory<CP::MuonSelectionTool> ("CP::MuonSelectionTool"));
+    ANA_CHECK (asg::registerToolFactory<CP::MuonEfficiencyScaleFactors> ("CP::MuonEfficiencyScaleFactors"));
+    ANA_CHECK (asg::registerToolFactory<CP::MuonTriggerScaleFactors> ("CP::MuonTriggerScaleFactors"));
     ANA_CHECK (asg::registerToolFactory<CP::NNJvtSelectionTool> ("CP::NNJvtSelectionTool"));
     ANA_CHECK (asg::registerToolFactory<CP::PileupReweightingTool> ("CP::PileupReweightingTool"));
     ANA_CHECK (asg::registerToolFactory<DiTauMassTools::MissingMassTool> ("DiTauMassTools::MissingMassTool"));
     ANA_CHECK (asg::registerToolFactory<GoodRunsListSelectionTool> ("GoodRunsListSelectionTool"));
+    ANA_CHECK (asg::registerToolFactory<InDetSecVtxTruthMatchTool> ("InDetSecVtxTruthMatchTool"));
     ANA_CHECK (asg::registerToolFactory<JetCalibrationTool> ("JetCalibrationTool"));
     ANA_CHECK (asg::registerToolFactory<BJetCorrectionTool> ("BJetCorrectionTool"));
     ANA_CHECK (asg::registerToolFactory<MuonInJetCorrectionTool> ("MuonInJetCorrectionTool"));
@@ -311,19 +349,28 @@ namespace CP
     ANA_CHECK (asg::registerToolFactory<ORUtils::EleMuSharedTrkOverlapTool> ("ORUtils::EleMuSharedTrkOverlapTool"));
     ANA_CHECK (asg::registerToolFactory<ORUtils::MuJetOverlapTool> ("ORUtils::MuJetOverlapTool"));
     ANA_CHECK (asg::registerToolFactory<ORUtils::OverlapRemovalTool> ("ORUtils::OverlapRemovalTool"));
+    ANA_CHECK (asg::registerToolFactory<PMGTools::PMGTruthWeightTool> ("PMGTools::PMGTruthWeightTool"));
     ANA_CHECK (asg::registerToolFactory<TauAnalysisTools::CommonSmearingTool> ("TauAnalysisTools::CommonSmearingTool"));
+    ANA_CHECK (asg::registerToolFactory<TauAnalysisTools::DiTauEfficiencyCorrectionsTool> ("TauAnalysisTools::DiTauEfficiencyCorrectionsTool"));
+    ANA_CHECK (asg::registerToolFactory<TauAnalysisTools::DiTauSmearingTool> ("TauAnalysisTools::DiTauSmearingTool"));
+    ANA_CHECK (asg::registerToolFactory<TauAnalysisTools::DiTauTruthMatchingTool> ("TauAnalysisTools::DiTauTruthMatchingTool"));
+    ANA_CHECK (asg::registerToolFactory<TauAnalysisTools::TauEfficiencyCorrectionsTool> ("TauAnalysisTools::TauEfficiencyCorrectionsTool"));
     ANA_CHECK (asg::registerToolFactory<TauAnalysisTools::TauSelectionTool> ("TauAnalysisTools::TauSelectionTool"));
     ANA_CHECK (asg::registerToolFactory<TauAnalysisTools::TauSmearingTool> ("TauAnalysisTools::TauSmearingTool"));
+    ANA_CHECK (asg::registerToolFactory<TauAnalysisTools::TauTruthMatchingTool> ("TauAnalysisTools::TauTruthMatchingTool"));
     ANA_CHECK (asg::registerToolFactory<TauCombinedTES> ("TauCombinedTES"));
     ANA_CHECK (asg::registerToolFactory<Trig::DRScoringTool> ("Trig::DRScoringTool"));
     ANA_CHECK (asg::registerToolFactory<Trig::MatchFromCompositeTool> ("Trig::MatchFromCompositeTool"));
     ANA_CHECK (asg::registerToolFactory<Trig::TrigDecisionTool> ("Trig::TrigDecisionTool"));
+    ANA_CHECK (asg::registerToolFactory<Trig::MatchingTool> ("Trig::MatchingTool"));
     ANA_CHECK (asg::registerToolFactory<TrigConf::xAODConfigTool> ("TrigConf::xAODConfigTool"));
     ANA_CHECK (asg::registerToolFactory<TrigGlobalEfficiencyCorrectionTool> ("TrigGlobalEfficiencyCorrectionTool"));
+    ANA_CHECK (asg::registerToolFactory<TruthClassificationTool> ("TruthClassificationTool"));
     ANA_CHECK (asg::registerToolFactory<VGammaORTool> ("VGammaORTool"));
     ANA_CHECK (asg::registerToolFactory<egammaMVACalibTool> ("egammaMVACalibTool"));
     ANA_CHECK (asg::registerToolFactory<met::METMaker> ("met::METMaker"));
     ANA_CHECK (asg::registerToolFactory<met::METSignificance> ("met::METSignificance"));
+    ANA_CHECK (asg::registerToolFactory<met::METSystematicsTool> ("met::METSystematicsTool"));
 
     ANA_CHECK (asg::registerServiceFactory<egammaMVASvc> ("egammaMVASvc"));
     ANA_CHECK (asg::registerServiceFactory<CP::SystematicsSvc> ("CP::SystematicsSvc"));

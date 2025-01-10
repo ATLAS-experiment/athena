@@ -16,6 +16,7 @@ atlas_add_library( ComponentFactoryPreloaderLib
       JetCalibToolsLib JetJvtEfficiencyLib JetMomentToolsLib JetUncertaintiesLib METUtilitiesLib egammaMVACalibLib tauRecToolsLib
       GoodRunsListsLib
       TrigConfxAODLib TrigDecisionToolLib TrigGlobalEfficiencyCorrectionLib TriggerMatchingToolLib
+      LRTElectronAnalysisToolsLib LRTMuonAnalysisToolsLib PhotonEfficiencyCorrectionLib MuonEfficiencyCorrectionsLib PMGToolsLib
    )
 
 atlas_add_dictionary( ComponentFactoryPreloaderDict
