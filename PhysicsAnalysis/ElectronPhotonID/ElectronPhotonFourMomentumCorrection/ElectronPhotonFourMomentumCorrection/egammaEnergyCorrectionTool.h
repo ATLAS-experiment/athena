@@ -93,10 +93,10 @@ namespace egEnergyCorr {
     MaterialPP0Up,
     MaterialPP0Down,
   
-    // Atlfast 2 resolution uncertainties
-    af2Up,
-    af2Down,
-  
+    // Atlfast resolution uncertainties
+    afUp,
+    afDown,
+
     // OFC for Run-3 pre-recommendations
     OFCUp,
     OFCDown,
@@ -242,8 +242,8 @@ namespace Scale {
     MatPP0Down,
   
     // AF2 systematics
-    af2Up,
-    af2Down,
+    afUp,
+    afDown,
   
     // The following apply to photons only
   
@@ -324,8 +324,10 @@ enum ESModel {
   es2018_R21_v0,
   es2018_R21_v1,       // model with new E1/E2 muon calibration from full run 2
                        // low+high mu data
+  // ---------------------------- release 22+ ----------------------------
   es2022_R22_PRE,      // Pre-recommnedations for release 22, Run-3
   es2023_R22_Run2_v0,  // R22 Run-2 recommendations based on R21
+  es2023_R22_Run2_v1,  // fix E1E2 for es2023_R22_Run2_v0
   es2024_Run3_ofc0_v0,  // for run 3 data recorded with LAR OFC(mu=0), based on es2017_R21_ofc0_v1 
                         //  with extra uncertainty   (preliminary recommendation)
 

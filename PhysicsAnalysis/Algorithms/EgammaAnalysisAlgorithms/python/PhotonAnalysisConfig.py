@@ -83,7 +83,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
             alg.calibrationAndSmearingTool.ESModel = self.ESModel
         else:
             if config.geometry() is LHCPeriod.Run2:
-                alg.calibrationAndSmearingTool.ESModel = 'es2023_R22_Run2_v0'
+                alg.calibrationAndSmearingTool.ESModel = 'es2023_R22_Run2_v1'
             elif config.geometry() is LHCPeriod.Run3:
                 alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
             elif config.geometry() is LHCPeriod.Run4:
