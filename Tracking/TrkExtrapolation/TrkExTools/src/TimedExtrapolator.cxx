@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -2133,11 +2133,12 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
     throwIntoGarbageBin(cache,nextPar);
   }
 
-  ATH_MSG_DEBUG(
-    "  transportToVolumeWithPathLimit() - return from volume " << cache.m_currentStatic->volumeName() << " at position:" <<
-    nextPar->position());
+ 
 
   if (nextPar) {
+   ATH_MSG_DEBUG(
+    "  transportToVolumeWithPathLimit() - return from volume " << cache.m_currentStatic->volumeName() << " at position:" <<
+    nextPar->position());
     return nextPar->uniqueClone();
   }
     return nullptr;
@@ -2151,7 +2152,8 @@ Trk::TimedExtrapolator::transportInAlignableTV(Trk::TimedExtrapolator::Cache &ca
                                                Trk::ParticleHypothesis particle,
                                                Trk::GeometrySignature &nextGeoID,
                                                const Trk::AlignableTrackingVolume *aliTV) const {
-  ATH_MSG_DEBUG("  [0] starting transport of neutral particle in alignable volume " << aliTV->volumeName());
+  const std::string m = aliTV ? aliTV->volumeName() : " NULLPTR!";
+  ATH_MSG_DEBUG("  [0] starting transport of neutral particle in alignable volume " << m);
 
   // material loop in sensitive Calo volumes
   // returns: boundary parameters (static volume boundary)
@@ -2179,10 +2181,6 @@ Trk::TimedExtrapolator::transportInAlignableTV(Trk::TimedExtrapolator::Cache &ca
 
   const Trk::Material *currMat = aliTV;     // material to be used
 
-  // if (binMat && cache.m_hitVector) {
-  //  binIDMat = binMat->material(currPar->position());
-  //  if (binIDMat->second>0) cache.m_hitVector->push_back(Trk::HitInfo(currPar->clone(),timeLim.time,binIDMat->second,0.));
-  // }
 
   // loop through binned material : save identifier, material, distance
 
@@ -2431,19 +2429,7 @@ Trk::TimedExtrapolator::transportInAlignableTV(Trk::TimedExtrapolator::Cache &ca
 
   throwIntoGarbageBin(cache,nextPar);
 
-  // static volume boundary; return to the main loop : TODO move from misaligned to static
-  // unsigned int index = cache.m_trStaticBounds[0].bIndex;
-  // use global coordinates to retrieve attached volume (just for static!)
-  // nextVol =
-  // (cache.m_currentStatic->boundarySurfaces())[index].get()->attachedVolume(nextPar->position(),nextPar->momentum(),dir);
-  // double check the next volume
-  // if ( nextVol && !(nextVol->inside(nextPar->position()+0.01*nextPar->momentum().normalized(),m_tolerance) ) ) {
-  //  ATH_MSG_DEBUG( "  [!] WARNING: wrongly assigned static volume ?"<< cache.m_currentStatic->volumeName()<<"->" <<
-  // nextVol->volumeName() );
-  //  nextVol =
-  // m_navigator->trackingGeometry()->lowestStaticTrackingVolume(nextPar->position()+0.01*nextPar->momentum().normalized());
-  //  if (nextVol) ATH_MSG_DEBUG( "  new search yields: "<< nextVol->volumeName() );
-  // }
+ 
 
   ATH_MSG_DEBUG("  [+] StaticVol boundary reached of '" << cache.m_currentStatic->volumeName() << "'.");
 
@@ -2470,7 +2456,8 @@ Trk::TimedExtrapolator::extrapolateInAlignableTV(Trk::TimedExtrapolator::Cache &
                                                  Trk::ParticleHypothesis particle,
                                                  Trk::GeometrySignature &nextGeoID,
                                                  const Trk::AlignableTrackingVolume *vol) const {
-  ATH_MSG_DEBUG("M-[" << ++cache.m_methodSequence << "] extrapolateInAlignableTV(...) " << vol->volumeName());
+  const std::string m =  vol ? vol->volumeName():"NULLPTR";
+  ATH_MSG_DEBUG("M-[" << ++cache.m_methodSequence << "] extrapolateInAlignableTV(...) " << m);
 
   // material loop in sensitive Calo volumes
   // extrapolation without target surface returns:
