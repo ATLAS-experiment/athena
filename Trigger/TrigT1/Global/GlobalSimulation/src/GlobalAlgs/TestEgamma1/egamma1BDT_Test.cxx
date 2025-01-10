@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -120,5 +120,5 @@ TEST (egamma1BDTTester, testvecs) {
     ++i_vec;
   }
 
-  EXPECT_EQ(i_vec, 32602);
+  EXPECT_EQ(i_vec, 32602u);
 }
