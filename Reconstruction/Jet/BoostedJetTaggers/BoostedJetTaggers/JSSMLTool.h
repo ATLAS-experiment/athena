@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #ifndef BOOSTEDJETTAGGERS_JSSMLTOOL_H
 #define BOOSTEDJETTAGGERS_JSSMLTOOL_H
 
@@ -87,7 +87,7 @@ class JSSMLTool
 
      // output node info
      std::vector<int64_t> m_output_node_dims;
-     size_t m_num_output_nodes;
+     size_t m_num_output_nodes{};
      std::vector<const char*> m_output_node_names;
 
      // some configs
