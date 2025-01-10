@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@ namespace DerivationFramework {
 
         // Struct to hold all decorators
         struct moments_t;
-        moments_t* m_moments;
+        moments_t* m_moments{};
 
         // The filter object that will apply the grooming
         std::unique_ptr<fastjet::Filter> m_trimmer;

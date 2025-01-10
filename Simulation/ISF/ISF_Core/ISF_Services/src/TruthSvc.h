@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_SERVICES_TRUTHSVC_H
@@ -97,7 +97,7 @@ namespace ISF {
 
     Gaudi::Property<std::vector<unsigned int> >  m_forceEndVtxRegionsVec{this, "ForceEndVtxInRegions", {}, ""}; //!< property containing AtlasRegions for which
     //   to write end-vtx
-    std::array<bool, AtlasDetDescr::fNumAtlasRegions> m_forceEndVtx; //!< attach end vertex to
+    std::array<bool, AtlasDetDescr::fNumAtlasRegions> m_forceEndVtx{}; //!< attach end vertex to
     //   all parent particles if they die
 
     Gaudi::Property<bool>   m_quasiStableParticlesIncluded{this, "QuasiStableParticlesIncluded", false, ""}; //!< does this job simulate quasi-stable particles.
