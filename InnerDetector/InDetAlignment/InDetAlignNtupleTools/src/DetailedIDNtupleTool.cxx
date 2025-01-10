@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TrkEventPrimitives/FitQuality.h"
@@ -388,52 +388,50 @@ namespace InDet {
       return false;
     }
 
-    if (TruthMap) {
-      ElementLink<TrackCollection> tracklink;
-      tracklink.setElement(const_cast<Trk::Track*>(alignTrack->originalTrack()));
-      tracklink.setStorableObject(*RecCollection);
-      const ElementLink<TrackCollection> tracklink2 = tracklink;
+    ElementLink<TrackCollection> tracklink;
+    tracklink.setElement(const_cast<Trk::Track*>(alignTrack->originalTrack()));
+    tracklink.setStorableObject(*RecCollection);
+    const ElementLink<TrackCollection> tracklink2 = tracklink;
 
-      TrackTruthCollection::const_iterator found = TruthMap->find(tracklink2);
-      if ((found != TruthMap->end()) && (found->second.probability() > m_matchProbability)) {
-        TrackTruth trtruth = found->second;
-        const HepMcParticleLink& HMPL = trtruth.particleLink();
+    TrackTruthCollection::const_iterator found = TruthMap->find(tracklink2);
+    if ((found != TruthMap->end()) && (found->second.probability() > m_matchProbability)) {
+      TrackTruth trtruth = found->second;
+      const HepMcParticleLink& HMPL = trtruth.particleLink();
 
-        if (HMPL.isValid()) {
+      if (HMPL.isValid()) {
 #ifdef HEPMC3
-          HepMC::ConstGenParticlePtr genparptr = HMPL.scptr();
+        HepMC::ConstGenParticlePtr genparptr = HMPL.scptr();
 #else
-          const HepMC::GenParticle* genparptr = HMPL.cptr();
+        const HepMC::GenParticle* genparptr = HMPL.cptr();
 #endif
 
-          if (genparptr) {
-            if (genparptr->production_vertex()) {
-              if (genparptr->pdg_id() == 0) {
-                ATH_MSG_INFO("PDG ID is zero in DetailedIDNtupleTool::retrieveTruthInfo");
-              } else {
-                const Trk::TrackParameters* generatedTrackPerigee = m_truthToTrack->makePerigeeParameters(genparptr);
-                if (!generatedTrackPerigee) ATH_MSG_WARNING("Unable to extrapolate genparticle to perigee!");
-                else {
-                  flag = true;
-                  m_truth_qoverpt = generatedTrackPerigee->parameters()[Trk::qOverP] / std::sin(
-                    generatedTrackPerigee->parameters()[Trk::theta]);
-                  m_truth_qoverp = generatedTrackPerigee->parameters()[Trk::qOverP];
-                  m_truth_phi0 = generatedTrackPerigee->parameters()[Trk::phi0];
-                  m_truth_d0 = generatedTrackPerigee->parameters()[Trk::d0];
-                  m_truth_z0 = generatedTrackPerigee->parameters()[Trk::z0];
-                  m_truth_theta = generatedTrackPerigee->parameters()[Trk::theta];
-                  m_truth_eta = generatedTrackPerigee->eta();
-                  m_truth_prod_x = genparptr->production_vertex()->position().x();
-                  m_truth_prod_y = genparptr->production_vertex()->position().y();
-                  m_truth_prod_z = genparptr->production_vertex()->position().z();
+        if (genparptr) {
+          if (genparptr->production_vertex()) {
+            if (genparptr->pdg_id() == 0) {
+              ATH_MSG_INFO("PDG ID is zero in DetailedIDNtupleTool::retrieveTruthInfo");
+            } else {
+              const Trk::TrackParameters* generatedTrackPerigee = m_truthToTrack->makePerigeeParameters(genparptr);
+              if (!generatedTrackPerigee) ATH_MSG_WARNING("Unable to extrapolate genparticle to perigee!");
+              else {
+                flag = true;
+                m_truth_qoverpt = generatedTrackPerigee->parameters()[Trk::qOverP] / std::sin(
+                  generatedTrackPerigee->parameters()[Trk::theta]);
+                m_truth_qoverp = generatedTrackPerigee->parameters()[Trk::qOverP];
+                m_truth_phi0 = generatedTrackPerigee->parameters()[Trk::phi0];
+                m_truth_d0 = generatedTrackPerigee->parameters()[Trk::d0];
+                m_truth_z0 = generatedTrackPerigee->parameters()[Trk::z0];
+                m_truth_theta = generatedTrackPerigee->parameters()[Trk::theta];
+                m_truth_eta = generatedTrackPerigee->eta();
+                m_truth_prod_x = genparptr->production_vertex()->position().x();
+                m_truth_prod_y = genparptr->production_vertex()->position().y();
+                m_truth_prod_z = genparptr->production_vertex()->position().z();
 
-                  delete  generatedTrackPerigee;
-                  m_truth_pt = 1. / std::abs(m_truth_qoverpt);
-                  m_truth_charge = 1;
-                  if (m_truth_qoverpt < 0) m_truth_charge = -1;
-                  if (m_truth_phi0 < 0) m_truth_phi0 += 2 * M_PI;
-                  ATH_MSG_DEBUG("Found matched truth track with phi, PT = " << m_truth_phi0 << ", " << m_truth_pt);
-                }
+                delete  generatedTrackPerigee;
+                m_truth_pt = 1. / std::abs(m_truth_qoverpt);
+                m_truth_charge = 1;
+                if (m_truth_qoverpt < 0) m_truth_charge = -1;
+                if (m_truth_phi0 < 0) m_truth_phi0 += 2 * M_PI;
+                ATH_MSG_DEBUG("Found matched truth track with phi, PT = " << m_truth_phi0 << ", " << m_truth_pt);
               }
             }
           }
