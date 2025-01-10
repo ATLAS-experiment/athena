@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_HistogramFiller_HistogramFiller1D_h
@@ -10,6 +10,7 @@
 #include "AthenaMonitoringKernel/HistogramFiller.h"
 #include "HistogramFillerUtils.h"
 
+#include "AthenaKernel/getMessageSvc.h"
 #include "CxxUtils/AthUnlikelyMacros.h"
 #include "GaudiKernel/MsgStream.h"
 

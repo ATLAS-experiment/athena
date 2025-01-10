@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,6 +10,8 @@
  *   2) adjust the CALLGRIND_ macros below to target the relevant code
  *   3) valgrind --tool=callgrind --collect-jumps=yes --trace-children=no --instr-atstart=no GenericMonPerf_test.exe
  */
+
+#undef NDEBUG
 
 #include <chrono>
 #include <iomanip>
@@ -22,7 +24,6 @@
 #include "CxxUtils/ubsan_suppress.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/MsgStream.h"
-#include "TestTools/expect.h"
 #include "TestTools/initGaudi.h"
 
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
@@ -87,7 +88,7 @@ void timeboth(const F1& f1, const F2& f2, const TH1* h, const std::string& title
   auto t1 = timeit(f1);
   int fills = h->GetEntries();
   auto t2 = timeit(f2);
-  VALUE(h->GetEntries()) EXPECTED(fills);
+  assert( h->GetEntries() == fills );
 
   std::cout << std::left << std::setw(30) << title << "MON: " << std::setw(20) << t1 << " ROOT: " << t2
             << std::endl;
