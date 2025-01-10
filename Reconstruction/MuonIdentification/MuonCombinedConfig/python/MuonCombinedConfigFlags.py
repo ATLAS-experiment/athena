@@ -26,6 +26,8 @@ def createMuonCombinedConfigFlags():
     mcf.addFlag("MuonCombined.doMuGirlLowBeta",
                 lambda prevFlags : prevFlags.MuonCombined.doMuGirl)
     mcf.addFlag("MuonCombined.writeUnAssocSegments", True)
+    # Add MDT ADC counts and drift radii to SlowMuon container
+    mcf.addFlag("MuonCombined.addMDTExtrasMuGirlLowBeta", False)
 
     return mcf
 

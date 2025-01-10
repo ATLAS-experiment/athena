@@ -384,8 +384,14 @@ namespace MuonCombined {
                                                 << beta << " diff " << std::abs(beta - betaSeed));
                     if (std::abs(beta - betaSeed) > m_mdttBetaAssociationCut) continue;
 
-                    hits.push_back(Muon::TimePointBetaFitter::Hit(distance, time, er));
-                    candidate.stauHits.push_back(MuGirlNS::StauHit(tech, time + tof, ix, iy, iz, id, ie, er, sh, isEta, propTime));
+                    hits.emplace_back(Muon::TimePointBetaFitter::Hit(distance, time, er));
+                    candidate.stauHits.emplace_back(MuGirlNS::StauHit(tech, time + tof, ix, iy, iz, id, ie, er, sh, isEta, propTime));
+                    
+                    if (m_addMDTExtrasMuGirlLowBeta ) {
+                        float iadc = mdt->prepRawData()->adc();
+                        float irdrift = mdt->driftRadius();
+                        candidate.stauMDTHitExtras.emplace_back(MuGirlNS::StauMDTHitExtra(iadc, irdrift));
+                    }
                 }
             } else if (m_idHelperSvc->isRpc(id)) {
                 // treat CompetingMuonClustersOnTrack differently than RpcClusterOnTrack
@@ -630,6 +636,9 @@ namespace MuonCombined {
                 float propTime = 0;
                 float tof = calculateTof(1, distance);
 
+                float iadc = mdt->prepRawData()->adc();
+                float irdrift = mdt->driftRadius();
+
                 // use inverted RT relation together with track prediction to get estimate of drift time
                 float driftTime = calibratedMdt->driftTime();  // we need to add beta seed as it was subtracted when calibrating the hits
                 float locR = rline;
@@ -668,6 +677,9 @@ namespace MuonCombined {
 
                 hits.emplace_back(distance, time, er);
                 candidate.stauHits.emplace_back(MuGirlNS::MDTT_STAU_HIT, time + tof, ix, iy, iz, id, ie, er, sh, isEta, propTime);
+                if (m_addMDTExtrasMuGirlLowBeta) {
+                    candidate.stauMDTHitExtras.emplace_back(MuGirlNS::StauMDTHitExtra(iadc, irdrift));
+                }
             }
         }
         // fit data
@@ -707,6 +719,11 @@ namespace MuonCombined {
         stauExtras->betaAll = candidate.betaFitResult.beta;
         stauExtras->betaAllt = candidate.finalBetaFitResult.beta;      
         stauExtras->hits = candidate.stauHits;
+        // TODO: ALEXIS ADD FLAG
+        if (m_addMDTExtrasMuGirlLowBeta) {
+            stauExtras->extraMDTHitInfo = candidate.stauMDTHitExtras;
+        }
+        
         tag->setStauExtras(std::move(stauExtras));
 
         // print results afer refineCandidate

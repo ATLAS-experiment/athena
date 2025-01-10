@@ -115,6 +115,7 @@ namespace MuonCombined {
             std::unique_ptr<const Muon::MuonCandidate> muonCandidate;
             std::unique_ptr<Trk::Track> combinedTrack;
             MuGirlNS::StauHits stauHits;
+            MuGirlNS::StauMDTHitExtras stauMDTHitExtras;
             Muon::TimePointBetaFitter::FitResult finalBetaFitResult;
         };
         typedef std::vector<std::shared_ptr<Candidate>> CandidateVec;
@@ -268,8 +269,10 @@ namespace MuonCombined {
         Gaudi::Property<double> m_mdttBetaAssociationCut{this, "MDTTAssocationCut", 0.4};
         Gaudi::Property<double> m_rpcBetaAssociationCut{this, "RPCAssocationCut", 0.2};
         Gaudi::Property<double> m_segmentBetaAssociationCut{this, "SegmentAssocationCut", 0.2};
+        Gaudi::Property<bool> m_addMDTExtrasMuGirlLowBeta{this, "AddMDTExtrasMuGirlLowBeta", false};
 
         std::set<int> m_selectedPdgs;  // set storing particle PDG's considered for matching
+
     };
 
 }  // namespace MuonCombined
