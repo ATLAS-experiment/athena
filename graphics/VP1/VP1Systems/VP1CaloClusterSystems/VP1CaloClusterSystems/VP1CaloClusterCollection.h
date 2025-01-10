@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -44,6 +44,9 @@ public:
   void largeChangesEnd();
 
 protected:
+  //An interface change to return const ref. would require all derived classes to behave
+  //similarly, which is not the case
+  //cppcheck-suppress returnByReference
   QString provideText() const;
   void assignDefaultMaterial(SoMaterial*) const;
   bool load();
