@@ -5,6 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
+from typing import Optional
 from functools import cache
 import json
 
@@ -161,8 +162,9 @@ def getHLTJobOptionsFileName( ):
     return 'HLTJobOptions.json'
 
 # Creates an L1 Prescale file from the menu
-# this is a temporary solution, in the final version the L1PrescalesSet file should come from the menu
-def createL1PrescalesFileFromMenu( flags ):
+def createL1PrescalesFileFromMenu(flags, prescales: Optional[dict[str, float]] = None):
+    from TriggerMenuMT.L1.Base.PrescaleHelper import getCutFromPrescale
+
     menuFN = getL1MenuFileName(flags)
     with open(menuFN,'r') as fh:
         data = json.load(fh)
@@ -170,10 +172,13 @@ def createL1PrescalesFileFromMenu( flags ):
                 'name': data['name'],
                 'cutValues': {} }
         ps = pso['cutValues']
-        for name, item in sorted(data['items'].items()):
-            ps[name] = {"cut": 1,
-                        "enabled": True,
-                        "info": "prescale: 1"}
+        for name in sorted(data['items'].keys()):
+            ps = prescales[name] if prescales and name in prescales else 1
+            pso['cutValues'][name] = {
+                'cut': getCutFromPrescale(ps),
+                'enabled': ps > 0,
+                'info': f'prescale: {ps}'
+            }
 
     psFN = getL1PrescalesSetFileName( flags )
     with open(psFN, 'w') as outfile:
