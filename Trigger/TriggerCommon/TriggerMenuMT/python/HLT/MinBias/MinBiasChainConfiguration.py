@@ -55,7 +55,7 @@ class MinBiasChainConfig(ChainConfigurationBase):
         return self.getStep(flags, 'Mbts', [MinBiasMbtsSequenceGenCfg])
 
     def getMinBiasEmptyMbtsStep(self, flags):
-        return self.getEmptyStep(1,'EmptyMbts')
+        return self.getEmptyStep('EmptyMbts')
 
     def getMinBiasSpStep(self, flags):
         return self.getStep(flags, 'SPCount', [MinBiasSPSequenceGenCfg])
