@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -45,6 +45,12 @@ protected:
   qint32 provideCollTypeID() const { return 1; }//Vertex col. type: 0 for reconstructed vertices, 1 for truth vertices.
   QString provideSection() const { return "Truth Vertices"; };
   QString provideSectionToolTip() const { return "Collections of truth vertices"; }
+  /* While _in this class_ provideText could return by const reference, changing it here
+   * would imply changing it in the interface (VP1StdCollection). Some of the derived
+   * classes of VP1StdCollection build the string on the fly, so would end up returning
+   * a reference to a temporary.
+   */
+  //cppcheck-suppress returnByReference
   QString provideText() const;
   void assignDefaultMaterial(SoMaterial*) const;
   bool load();
