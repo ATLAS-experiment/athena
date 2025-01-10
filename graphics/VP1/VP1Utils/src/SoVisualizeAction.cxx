@@ -135,6 +135,7 @@ void SoVisualizeAction::handleShape(const GeoShape *shape)
     shape->exec(&a);
     const SbPolyhedron *poly =a.getPolyhedron();
     if (poly) {
+      //SoPolyhedron takes ownership of poly
       SoPolyhedron *myPoly = new SoPolyhedron(poly);
       m_shape=myPoly;
     }

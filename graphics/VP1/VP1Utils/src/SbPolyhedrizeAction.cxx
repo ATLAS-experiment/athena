@@ -28,7 +28,7 @@
 #include <map>
 
 SbPolyhedrizeAction::SbPolyhedrizeAction()
-  : m_polyhedron(NULL)
+  : m_polyhedron(nullptr)
 {
   setDepthLimit(0);
 }
@@ -36,7 +36,7 @@ SbPolyhedrizeAction::SbPolyhedrizeAction()
 
 SbPolyhedrizeAction::~SbPolyhedrizeAction()
 {
-  delete m_polyhedron;
+  
 }
 
 void SbPolyhedrizeAction::handleShift(const GeoShapeShift *shift)
@@ -67,7 +67,7 @@ void SbPolyhedrizeAction::handleUnion(const GeoShapeUnion *unio)
   SbPolyhedrizeAction auxA,auxB;
   unio->getOpA()->exec(&auxA);
   unio->getOpB()->exec(&auxB);
-  m_polyhedron = new SbPolyhedron(auxA.getPolyhedron()->add(*auxB.getPolyhedron()));
+  m_polyhedron = std::make_unique<SbPolyhedron>(auxA.getPolyhedron()->add(*auxB.getPolyhedron()));
 }
 
 void SbPolyhedrizeAction::handleIntersection(const GeoShapeIntersection *isect)
@@ -75,7 +75,7 @@ void SbPolyhedrizeAction::handleIntersection(const GeoShapeIntersection *isect)
   SbPolyhedrizeAction auxA,auxB;
   isect->getOpA()->exec(&auxA);
   isect->getOpB()->exec(&auxB);
-  m_polyhedron=new SbPolyhedron(auxA.getPolyhedron()->intersect(*auxB.getPolyhedron()));
+  m_polyhedron=std::make_unique<SbPolyhedron>(auxA.getPolyhedron()->intersect(*auxB.getPolyhedron()));
 }
 
 void SbPolyhedrizeAction::handleSubtraction(const GeoShapeSubtraction *subtract)
@@ -83,19 +83,19 @@ void SbPolyhedrizeAction::handleSubtraction(const GeoShapeSubtraction *subtract)
   SbPolyhedrizeAction auxA,auxB;
   subtract->getOpA()->exec(&auxA);
   subtract->getOpB()->exec(&auxB);
-  m_polyhedron=new SbPolyhedron(auxA.getPolyhedron()->subtract(*auxB.getPolyhedron()));
+  m_polyhedron=std::make_unique<SbPolyhedron>(auxA.getPolyhedron()->subtract(*auxB.getPolyhedron()));
 }
 
 void SbPolyhedrizeAction::handleBox(const GeoBox *box)
 {
-  m_polyhedron=new SbPolyhedronBox (box->getXHalfLength(),
+  m_polyhedron=std::make_unique<SbPolyhedronBox> (box->getXHalfLength(),
 				   box->getYHalfLength(),
 				   box->getZHalfLength());
 }
 
 void SbPolyhedrizeAction::handleCons(const GeoCons *cons)
 {
-  m_polyhedron = new SbPolyhedronCons (cons->getRMin1(),
+  m_polyhedron = std::make_unique<SbPolyhedronCons> (cons->getRMin1(),
 				      cons->getRMax1(),
 				      cons->getRMin2(),
 				      cons->getRMax2(),
@@ -106,7 +106,7 @@ void SbPolyhedrizeAction::handleCons(const GeoCons *cons)
 
 void SbPolyhedrizeAction::handlePara(const GeoPara *para)
 {
-  m_polyhedron=new SbPolyhedronPara(para->getXHalfLength(),
+  m_polyhedron=std::make_unique<SbPolyhedronPara>(para->getXHalfLength(),
 				   para->getYHalfLength(),
 				   para->getZHalfLength(),
 				   para->getAlpha(),
@@ -125,7 +125,7 @@ void SbPolyhedrizeAction::handlePcon(const GeoPcon *pcon)
     rmn[s] = pcon->getRMinPlane (s);
     rmx[s] = pcon->getRMaxPlane (s);
   }
-  m_polyhedron = new SbPolyhedronPcon (pcon->getSPhi(), pcon->getDPhi(), pcon->getNPlanes (), z, rmn, rmx);
+  m_polyhedron = std::make_unique<SbPolyhedronPcon> (pcon->getSPhi(), pcon->getDPhi(), pcon->getNPlanes (), z, rmn, rmx);
   
   delete[]z;
   delete[]rmn;
@@ -143,7 +143,7 @@ void SbPolyhedrizeAction::handlePgon(const GeoPgon *pgon)
     rmn[s] = pgon->getRMinPlane (s);
     rmx[s] = pgon->getRMaxPlane (s);
   }
-  m_polyhedron = new SbPolyhedronPgon (pgon->getSPhi(), pgon->getDPhi(), pgon->getNSides(), pgon->getNPlanes (), z, rmn, rmx);
+  m_polyhedron = std::make_unique<SbPolyhedronPgon> (pgon->getSPhi(), pgon->getDPhi(), pgon->getNSides(), pgon->getNPlanes (), z, rmn, rmx);
   
   delete[]z;
   delete[]rmn;
@@ -152,7 +152,7 @@ void SbPolyhedrizeAction::handlePgon(const GeoPgon *pgon)
 
 void SbPolyhedrizeAction::handleTrap(const GeoTrap *trap)
 {
-  m_polyhedron = new SbPolyhedronTrap (trap->getZHalfLength(),
+  m_polyhedron = std::make_unique<SbPolyhedronTrap> (trap->getZHalfLength(),
 				      trap->getTheta(),
 				      trap->getPhi(),
 				      trap->getDydzn(),
@@ -165,7 +165,7 @@ void SbPolyhedrizeAction::handleTrap(const GeoTrap *trap)
 
 void SbPolyhedrizeAction::handleTrd(const GeoTrd *trd)
 {
-  m_polyhedron = new SbPolyhedronTrd2 (trd->getXHalfLength1(),
+  m_polyhedron = std::make_unique<SbPolyhedronTrd2> (trd->getXHalfLength1(),
 				      trd->getXHalfLength2(),
 				      trd->getYHalfLength1(),
 				      trd->getYHalfLength2(),
@@ -174,12 +174,12 @@ void SbPolyhedrizeAction::handleTrd(const GeoTrd *trd)
 
 void SbPolyhedrizeAction::handleTube(const GeoTube *tube)
 {
-  m_polyhedron = new SbPolyhedronTube (tube->getRMin(),tube->getRMax(),tube->getZHalfLength());
+  m_polyhedron = std::make_unique<SbPolyhedronTube> (tube->getRMin(),tube->getRMax(),tube->getZHalfLength());
 }
 
 void SbPolyhedrizeAction::handleTubs(const GeoTubs *tubs)
 {
-  m_polyhedron= new SbPolyhedronTubs (tubs->getRMin(),
+  m_polyhedron= std::make_unique<SbPolyhedronTubs> (tubs->getRMin(),
 				     tubs->getRMax(),
 				     tubs->getZHalfLength(),
 				     tubs->getSPhi(),
@@ -196,7 +196,7 @@ void SbPolyhedrizeAction::handleSimplePolygonBrep(const GeoSimplePolygonBrep *br
     y.push_back(brep->getYVertex(i));
   }
 
-  m_polyhedron = new SbPolyhedronPolygonXSect(x,y,dz);
+  m_polyhedron = std::make_unique<SbPolyhedronPolygonXSect>(x,y,dz);
 }
 
 void SbPolyhedrizeAction::handleTessellatedSolid(const GeoTessellatedSolid *tessellated)
@@ -265,7 +265,7 @@ void SbPolyhedrizeAction::handleTessellatedSolid(const GeoTessellatedSolid *tess
   }
 
   polyhedron->Finalize();
-  m_polyhedron = polyhedron;
+  m_polyhedron.reset(polyhedron);
 }
 
 void SbPolyhedrizeAction::handleGenericTrap(const GeoGenericTrap *gentrap)
@@ -274,12 +274,13 @@ void SbPolyhedrizeAction::handleGenericTrap(const GeoGenericTrap *gentrap)
   vertices.reserve(8);
   for(size_t i=0; i<8; ++i)
     vertices.push_back(std::pair<double,double>(gentrap->getVertices()[i].x(),gentrap->getVertices()[i].y()));
-  m_polyhedron = new SbPolyhedronGenericTrap(gentrap->getZHalfLength(),vertices);
+  m_polyhedron = std::make_unique<SbPolyhedronGenericTrap>(gentrap->getZHalfLength(),vertices);
 }
 
-const SbPolyhedron * SbPolyhedrizeAction::getPolyhedron() const
+SbPolyhedron * SbPolyhedrizeAction::getPolyhedron()
 {
-  return m_polyhedron;
+ //transfer ownership via raw ptr
+  return m_polyhedron.release();
 }
 
 
