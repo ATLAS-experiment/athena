@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <memory>
@@ -357,8 +357,8 @@ std::vector<const Trk::PrepRawData*> InDet::SiSPGNNTrackMaker::getClustersInEven
  
 
 std::vector<const Trk::SpacePoint*> InDet::SiSPGNNTrackMaker::getSpacePoints (
-  std::vector<uint32_t> trackIndices,
-  std::vector<const Trk::SpacePoint*> allSpacePoints
+  const std::vector<uint32_t>& trackIndices,
+  const std::vector<const Trk::SpacePoint*>& allSpacePoints
 ) const {
 
   std::vector<const Trk::SpacePoint*> trackCandidate;
@@ -401,7 +401,7 @@ std::vector<const Trk::SpacePoint*> InDet::SiSPGNNTrackMaker::getSpacePoints (
 }
 
 std::vector<const Trk::PrepRawData*> InDet::SiSPGNNTrackMaker :: spacePointsToClusters (
-  std::vector<const Trk::SpacePoint*> spacePoints
+  const std::vector<const Trk::SpacePoint*>& spacePoints
 ) const {
   std::vector<const Trk::PrepRawData*> clusters;
   for (const Trk::SpacePoint* sp : spacePoints) {
@@ -414,8 +414,8 @@ std::vector<const Trk::PrepRawData*> InDet::SiSPGNNTrackMaker :: spacePointsToCl
 }
 
 std::vector<const Trk::PrepRawData*> InDet::SiSPGNNTrackMaker :: getClusters (
-  std::vector<std::vector<uint32_t>> clusterTracks,
-  std::vector<const Trk::PrepRawData*> allClusters,
+  const std::vector<std::vector<uint32_t>>& clusterTracks,
+  const std::vector<const Trk::PrepRawData*>& allClusters,
   int trackNumber
 ) const {
   std::vector<uint32_t> clusterIndices = clusterTracks[trackNumber];

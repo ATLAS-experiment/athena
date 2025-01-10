@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SiSPGNNTrackMaker_H
@@ -141,17 +141,17 @@ namespace InDet {
       ) const;
 
       std::vector<const Trk::SpacePoint*> getSpacePoints (
-        std::vector<uint32_t> trackIndices,
-        std::vector<const Trk::SpacePoint*> allSpacePoints
+        const std::vector<uint32_t>& trackIndices,
+        const std::vector<const Trk::SpacePoint*>& allSpacePoints
       ) const;
 
       std::vector<const Trk::PrepRawData*> spacePointsToClusters (
-        std::vector<const Trk::SpacePoint*> spacePoints
+        const std::vector<const Trk::SpacePoint*>& spacePoints
       ) const;
 
       std::vector<const Trk::PrepRawData*> getClusters (
-        std::vector<std::vector<uint32_t>> clusterTracks,
-        std::vector<const Trk::PrepRawData*> allClusters,
+        const std::vector<std::vector<uint32_t>>& clusterTracks,
+        const std::vector<const Trk::PrepRawData*>& allClusters,
         int trackNumber
       ) const;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DumpObjects.h"
@@ -56,9 +56,8 @@ int InDet::compute_overlap_SP_flag(const int& eta_module_cl1,const int& phi_modu
 //-------------------------------------------------------------------------
 InDet::DumpObjects::DumpObjects(const std::string &name, ISvcLocator *pSvcLocator)
     //-------------------------------------------------------------------------
-    : AthAlgorithm(name, pSvcLocator), m_pixelID(nullptr), m_SCT_ID(nullptr), m_pixelManager(nullptr),
-      m_SCT_Manager(nullptr), m_event(0), m_selected(0), m_particlePropSvc("PartPropSvc", name),
-      m_particleDataTable(0), m_offset(0) {
+    : AthAlgorithm(name, pSvcLocator),
+      m_particlePropSvc("PartPropSvc", name) {
   declareProperty("Offset", m_offset);
   declareProperty("FileName", m_name = "");
   //
