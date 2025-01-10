@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -137,7 +137,7 @@ namespace LVL1 {
 JetCMXTopoData& JetCMXTopoData::checkJemOverflow()
 {
     const size_t max_jem_index = 15; // as indicated in JetTopoTOB::jem()
-    std::vector<uint32_t> counters_tob_per_jem(max_jem_index, 0);
+    std::vector<uint32_t> counters_tob_per_jem(max_jem_index+1, 0);
     for(const uint32_t word : m_tobWords) {
         JetTopoTOB tob(m_crate, word);
         const size_t iJem = tob.jem();
