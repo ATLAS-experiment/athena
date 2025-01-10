@@ -290,7 +290,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                     configFile = "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"
                     alg.calibrationTool.CalibArea = "00-04-82"
                 elif config.geometry() >= LHCPeriod.Run3:
-                    configFile = "AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_240306_InSitu.config"
+                    configFile = "AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_241208_InSitu.config"
                     alg.calibrationTool.CalibArea = "00-04-83"
             else:
                 if config.dataType() is DataType.FastSim:
