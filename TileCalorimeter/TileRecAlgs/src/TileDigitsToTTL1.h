@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -72,12 +72,12 @@ class TileDigitsToTTL1: public AthAlgorithm {
 
     std::string m_infoName;        // name of TileInfo object in TES
 
-    TileFragHash::TYPE m_rChType;
+    TileFragHash::TYPE m_rChType{TileFragHash::FitFilter};
 
-    const TileID* m_tileID;
-    const TileHWID* m_tileHWID;
-    const TileInfo* m_tileInfo;
-    const CaloLVL1_ID* m_TT_ID;
+    const TileID* m_tileID{};
+    const TileHWID* m_tileHWID{};
+    const TileInfo* m_tileInfo{};
+    const CaloLVL1_ID* m_TT_ID{};
 
     ToolHandle<TileCondToolEmscale> m_tileToolEmscale; //!< main Tile Calibration tool
 };
