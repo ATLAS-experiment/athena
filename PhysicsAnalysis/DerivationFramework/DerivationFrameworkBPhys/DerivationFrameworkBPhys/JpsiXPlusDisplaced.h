@@ -79,7 +79,7 @@ namespace DerivationFramework {
     JpsiXPlusDisplaced(const std::string& type, const std::string& name, const IInterface* parent);
     virtual ~JpsiXPlusDisplaced() = default;
     virtual StatusCode initialize() override;
-    StatusCode performSearch(std::vector<Trk::VxCascadeInfo*>& cascadeinfoContainer, const std::vector<std::pair<const xAOD::Vertex*,V0Enum> >& selectedV0Candidates, const std::vector<const xAOD::TrackParticle*>& tracksDisplaced) const;
+    StatusCode performSearch(std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> >& cascadeinfoContainer, const std::vector<std::pair<const xAOD::Vertex*,V0Enum> >& selectedV0Candidates, const std::vector<const xAOD::TrackParticle*>& tracksDisplaced) const;
     virtual StatusCode addBranches() const override;
 
   private:
@@ -87,6 +87,7 @@ namespace DerivationFramework {
     SG::ReadHandleKey<xAOD::VertexContainer> m_vertexV0ContainerKey;
     std::vector<std::string> m_vertexJXHypoNames;
     SG::WriteHandleKeyArray<xAOD::VertexContainer> m_cascadeOutputKeys;
+    SG::WriteHandleKeyArray<xAOD::VertexContainer> m_cascadeOutputKeys_mvc;
     SG::WriteHandleKey<xAOD::VertexContainer> m_v0VtxOutputKey;
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrkParticleCollection;
     SG::ReadHandleKey<xAOD::VertexContainer> m_VxPrimaryCandidateName;
@@ -117,6 +118,8 @@ namespace DerivationFramework {
     double m_lxyD0_cut{};
     double m_MassLower{};
     double m_MassUpper{};
+    double m_PostMassLower{};
+    double m_PostMassUpper{};
     int    m_jxDaug_num{};
     double m_jxDaug1MassHypo{}; // mass hypothesis of 1st daughter from vertex JX
     double m_jxDaug2MassHypo{}; // mass hypothesis of 2nd daughter from vertex JX
@@ -155,6 +158,7 @@ namespace DerivationFramework {
     bool   m_constrDpm{};
     bool   m_constrD0{};
     bool   m_constrMainV{};
+    bool   m_doPostMainVContrFit{};
     bool   m_JXSubVtx{};
     double m_chi2cut_JX{};
     double m_chi2cut_V0{};
@@ -200,6 +204,7 @@ namespace DerivationFramework {
     double m_mass_B0{};
     double m_mass_Dpm{};
     double m_mass_D0{};
+    double m_mass_BCPLUS{};
 
     std::vector<double> m_massesV0_ppi;
     std::vector<double> m_massesV0_pip;
@@ -210,8 +215,8 @@ namespace DerivationFramework {
     std::unique_ptr<xAOD::Vertex> fitTracks(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::TrackParticle* track3 = nullptr) const;
     MesonCandidate getDpmCandidate(const xAOD::Vertex* JXvtx, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2, const xAOD::TrackParticle* extraTrk3) const;
     MesonCandidate getD0Candidate(const xAOD::Vertex* JXvtx, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2) const;
-    std::vector<Trk::VxCascadeInfo*> fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
-    std::vector<Trk::VxCascadeInfo*> fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const XiCandidate& disVtx, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
+    std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
+    std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const XiCandidate& disVtx, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
     void fitV0Container(xAOD::VertexContainer* V0ContainerNew, const std::vector<const xAOD::TrackParticle*>& selectedTracks, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
     template<size_t NTracks> const xAOD::Vertex* FindVertex(const xAOD::VertexContainer* cont, const xAOD::Vertex* v) const;
   };

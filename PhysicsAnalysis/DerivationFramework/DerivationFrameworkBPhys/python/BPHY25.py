@@ -91,6 +91,7 @@ def BPHY25Cfg(flags):
     Jpsimass = 3096.916
     Dpmmass = 1869.66
     B0mass = 5279.66
+    Bcmass = 6274.47
     Lambdamass = 1115.683
     Ximass = 1321.71
     Omegamass = 1672.45
@@ -379,7 +380,7 @@ def BPHY25Cfg(flags):
     ## Bc+ -> J/psi D+ Ks, D+ -> K- pi+ pi+ ##
     ##########################################
 
-    list_3bodyA_hypo = ["Bc_3body"]
+    list_3bodyA_hypo = ["Bc3body"]
     list_3bodyA_extraTrk1Mass = [Kmass]
     list_3bodyA_extraTrk2Mass = [Pimass]
     list_3bodyA_extraTrk3Mass = [Pimass]
@@ -401,7 +402,10 @@ def BPHY25Cfg(flags):
         list_3bodyA_obj[i].KsMassUpperCut             = Ks_hi
         list_3bodyA_obj[i].MassLowerCut               = 5900.
         list_3bodyA_obj[i].MassUpperCut               = 6650.
+        list_3bodyA_obj[i].PostMassLowerCut           = 6190.
+        list_3bodyA_obj[i].PostMassUpperCut           = 6360.
         list_3bodyA_obj[i].CascadeVertexCollections   = ["BPHY25_"+list_3bodyA_hypo[i]+"_CascadeVtx1","BPHY25_"+list_3bodyA_hypo[i]+"_CascadeVtx2","BPHY25_"+list_3bodyA_hypo[i]+"_CascadeMainVtx"]
+        list_3bodyA_obj[i].CascadeVertexCollectionsMVC= ["BPHY25_"+list_3bodyA_hypo[i]+"_CascadeVtx1_mvc","BPHY25_"+list_3bodyA_hypo[i]+"_CascadeVtx2_mvc","BPHY25_"+list_3bodyA_hypo[i]+"_CascadeMainVtx_mvc"]
         list_3bodyA_obj[i].VxPrimaryCandidateName     = "PrimaryVertices"
         list_3bodyA_obj[i].V0Hypothesis               = "Ks"
         list_3bodyA_obj[i].MassCutGamma               = 10.
@@ -427,10 +431,12 @@ def BPHY25Cfg(flags):
         list_3bodyA_obj[i].JpsiMass                   = Jpsimass
         list_3bodyA_obj[i].LambdaMass                 = Lambdamass
         list_3bodyA_obj[i].KsMass                     = Ksmass
+        list_3bodyA_obj[i].MainVtxMass                = Bcmass
         list_3bodyA_obj[i].ApplyJpsiMassConstraint    = True
         list_3bodyA_obj[i].ApplyV0MassConstraint      = True
         list_3bodyA_obj[i].ApplyDpmMassConstraint     = True
         list_3bodyA_obj[i].ApplyMainVMassConstraint   = False
+        list_3bodyA_obj[i].DoPostMainVContrFit        = True
         list_3bodyA_obj[i].Chi2CutV0                  = 4.
         list_3bodyA_obj[i].Chi2CutDpm                 = 3.
         list_3bodyA_obj[i].Chi2Cut                    = 4.
@@ -451,6 +457,7 @@ def BPHY25Cfg(flags):
         list_3bodyA_obj[i].TrackSelectorTool          = trackselect
         list_3bodyA_obj[i].Extrapolator               = extrapolator
 
+    # BcToJpsiPi:
     Collections        = [ "BPHY25_BcToJpsiPi" ]
     RefPVContainers    = [ "xAOD::VertexContainer#BPHY25_BcToJpsiPi_RefPrimaryVertices" ]
     RefPVAuxContainers = [ "xAOD::VertexAuxContainer#BPHY25_BcToJpsiPi_RefPrimaryVerticesAux." ]
@@ -460,6 +467,8 @@ def BPHY25Cfg(flags):
 
     for obj in list_obj:
         Collections += obj.CascadeVertexCollections
+        if obj.ApplyMainVMassConstraint is False and obj.DoPostMainVContrFit is True:
+            Collections += obj.CascadeVertexCollectionsMVC
         RefPVContainers += ["xAOD::VertexContainer#BPHY25_" + obj.HypothesisName + "_RefPrimaryVertices"]
         RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY25_" + obj.HypothesisName + "_RefPrimaryVerticesAux."]
         passedCandidates += ["BPHY25_" + obj.HypothesisName + "_CascadeMainVtx"]
