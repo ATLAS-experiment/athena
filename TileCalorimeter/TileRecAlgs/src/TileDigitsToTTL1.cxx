@@ -59,13 +59,7 @@
 //
 TileDigitsToTTL1::TileDigitsToTTL1(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_tileToolEmscale("TileCondToolEmscale")
 {
-  declareProperty("TileInfoName", m_infoName = "TileInfo");
-  declareProperty("TileCondToolEmscale"    , m_tileToolEmscale);
-}
-
-TileDigitsToTTL1::~TileDigitsToTTL1() {
 }
 
 //
