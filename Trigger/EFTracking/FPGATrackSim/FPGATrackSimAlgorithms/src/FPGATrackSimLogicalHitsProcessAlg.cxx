@@ -298,7 +298,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         if (tracks_1st.size() > 0) {
             m_nTracksFound++;
             for (const auto& track : tracks_1st) {
-                if (track.getChi2ndof() < 10) {
+                if (track.getChi2ndof() < m_trackScoreCut) {
                     passchi2 = true;
                     if (track.passedOR()) {
                         passchi2OLR = true;

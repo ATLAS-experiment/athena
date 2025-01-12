@@ -473,26 +473,26 @@ void FPGATrackSimFitConstantBank::linfit_chisq(sector_t sector, FPGATrackSimTrac
     for (int i = 0; i < m_nconstr; i++)
     {
         float chi_component = m_kaverage(sector, i);
-        for (int ix = 0; ix != m_npixcy/2; ix++) // pxl plane loop (divide by two to get number of pix planes from pix coords)
-        {	  
-	  chi_component += m_kernel(sector, i, 2*ix) * (m_phiShift+trk.getPhiCoord(m_pmap->getCoordLayer(2*ix)));
-	  chi_component += m_kernel(sector, i, 2*ix+1) * trk.getEtaCoord(m_pmap->getCoordLayer(2*ix));
-        }
 
-        for (int ix = m_npixcy; ix != m_ncoords; ix++) // strip coords, easier
-        {
-	  /// we don't want to shift phi for the outer hits in a SP, so check that!
-	  float phishift = m_phiShift;
-	  int layer = m_pmap->getCoordLayer(ix);
-	  FPGATrackSimHit hit = (trk.getFPGATrackSimHits())[layer];
-	  if (((hit.getPhysLayer() %2) == 1) && hit.getHitType() == HitType::spacepoint) phishift = 0.0;
-	  
-	  chi_component += m_kernel(sector, i, ix) * (phishift+trk.getPhiCoord(m_pmap->getCoordLayer(ix)));
-        }
+        for (int coord = 0; coord < m_ncoords; coord++) {
+	  unsigned layer = m_pmap->getCoordLayer(coord);
 
-        chi2 += chi_component * chi_component;
+	  if (m_pmap->getDim(m_pmap->getCoordLayer(coord)) == 2) { // do two at a time if 2d, then skip ahead
+	    chi_component += m_kernel(sector, i, coord) * (m_phiShift+trk.getPhiCoord(layer));
+	    chi_component += m_kernel(sector, i, coord+1) * trk.getEtaCoord(layer);
+	    ++coord;
+	  }
+	  else { // strip coords	    
+	    /// we don't want to shift phi for the outer hits in a SP, so check that!
+	    float phishift = m_phiShift;
+	    FPGATrackSimHit hit = (trk.getFPGATrackSimHits())[layer];
+	    if (((hit.getPhysLayer() %2) == 1) && hit.getHitType() == HitType::spacepoint) phishift = 0.0;
+	    chi_component += m_kernel(sector, i, coord) * (phishift+trk.getPhiCoord(layer));
+	  }
+	}	
+	chi2 += chi_component * chi_component;
+
     }
-
     trk.setChi2(chi2);
 }
 
@@ -520,9 +520,9 @@ void FPGATrackSimFitConstantBank::linfit_pars_eval(sector_t sector, FPGATrackSim
 	  FPGATrackSimHit hit = (trk.getFPGATrackSimHits())[layer];
 	  if (((hit.getPhysLayer() %2) == 1) && hit.getHitType() == HitType::spacepoint) phishift = 0.0;
 	  
-	  pars[ip] += m_fit_pars(sector, ip, coord) * (phishift+trk.getPhiCoord(m_pmap->getCoordLayer(coord)));
+	  pars[ip] += m_fit_pars(sector, ip, coord) * (phishift+trk.getPhiCoord(layer));
 	  if (m_pmap->getDim(m_pmap->getCoordLayer(coord)) == 2) { // do two at a time if 2d, then skip ahead
-	    pars[ip] += m_fit_pars(sector, ip, coord+1) * trk.getEtaCoord(m_pmap->getCoordLayer(coord));
+	    pars[ip] += m_fit_pars(sector, ip, coord+1) * trk.getEtaCoord(layer);
 	    ++coord;
 	  }
 	}

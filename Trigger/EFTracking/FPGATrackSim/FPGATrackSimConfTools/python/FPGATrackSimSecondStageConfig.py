@@ -123,7 +123,7 @@ def FPGATrackSimSecondStageAlgCfg(inputFlags):
 
     theFPGATrackSimSecondStageAlg=CompFactory.FPGATrackSimSecondStageAlg()
     theFPGATrackSimSecondStageAlg.writeOutputData = flags.Trigger.FPGATrackSim.ActiveConfig.writeOutputData
-    theFPGATrackSimSecondStageAlg.tracking = False #flags.Trigger.FPGATrackSim.tracking
+    theFPGATrackSimSecondStageAlg.tracking = flags.Trigger.FPGATrackSim.tracking
     theFPGATrackSimSecondStageAlg.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
     theFPGATrackSimSecondStageAlg.DoHoughRootOutput = False #flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput
     theFPGATrackSimSecondStageAlg.DoNNTrack = False

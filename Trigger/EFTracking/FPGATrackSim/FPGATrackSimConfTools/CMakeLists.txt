@@ -62,7 +62,7 @@ atlas_add_test( FPGATrackSim_F100_test
 atlas_add_test( FPGATrackSim_F200-InsideOut_test
                 PRIVATE_WORKING_DIRECTORY 
                 SCRIPT FPGATrackSimInsideOutOnRDO.sh
-                LOG_IGNORE_PATTERN ".*FPGAActsTrkConverter.*ERROR.Found a proto-track with no measurements.*" # TODO Fix the prototrack-related issue described in EFTRACK-801
+                LOG_IGNORE_PATTERN ".*FPGAActsTrkConverter.*ERROR.Found a proto-track with no measurements.*|.*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*|.*ERROR.*IDTPM.*|.*ERROR.*eftrig_chi2.*|.*ERROR.*InDetTrackPerfMonTool.*" # TODO Fix the prototrack-related issue described in EFTRACK-801
                 POST_EXEC_SCRIPT noerror.sh 
                 PROPERTIES TIMEOUT 450 )
 

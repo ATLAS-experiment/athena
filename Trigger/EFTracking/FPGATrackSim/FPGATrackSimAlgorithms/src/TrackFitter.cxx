@@ -72,7 +72,7 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
  * fits them using the constant bank, and filters them based on the chi2 of the fit.
  */
  int TrackFitter::fitTracks(const std::shared_ptr<const FPGATrackSimRoad> &road, std::vector<FPGATrackSimTrack>& tracks)
-{   
+{
     if (not road){
       ATH_MSG_WARNING("road pointer is null in TrackFitter::fitTracks");
       return FITTRACKS_BAD;
@@ -301,7 +301,7 @@ void TrackFitter::makeTrackCandidates(const FPGATrackSimRoad & road, const FPGAT
 {
     std::vector<std::vector<int>> combs = getComboIndices(road.getNHits_layer());
     track_cands.resize(combs.size(), temp);
-    //
+
     //get the WC hits:
     layer_bitmask_t wcbits= road.getWCLayers();
     // Add the hits from each combination to the track, and set ID
@@ -314,7 +314,7 @@ void TrackFitter::makeTrackCandidates(const FPGATrackSimRoad & road, const FPGAT
       // If this is an idealized coordinate fit; keep references to the idealized radii.
       track_cands[icomb].setIdealRadii(m_rmap->getAvgRadii(0));
 
-        std::vector<int> const & hit_indices = combs[icomb]; // size nLayers
+      std::vector<int> const & hit_indices = combs[icomb]; // size nLayers
         for (unsigned layer = 0; layer < m_pmap->getNLogiLayers(); layer++)
         {
             if (hit_indices[layer] < 0) // Set a dummy hit if road has no hits in this layer
@@ -345,7 +345,7 @@ void TrackFitter::makeTrackCandidates(const FPGATrackSimRoad & road, const FPGAT
                         track_cands[icomb].setValidCand(false);
                     }
                 }
-                track_cands[icomb].setFPGATrackSimHit(layer, *hit);               
+                track_cands[icomb].setFPGATrackSimHit(layer, *hit);
             }
         }
     }

@@ -8,7 +8,7 @@ WRP_EVT=200
 WRAPPER="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/Wrappers/v0.10/FPGATrackSimWrapper.root"
 BANKS="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/banks_9L/v0.20/"
 
-MAPS="maps_9L/OtherFPGAPipelines/v0.21/"
+MAPS="maps_9L/OtherFPGAPipelines/v0.22/"
 
 
 echo "... analysis on wrapper"
