@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonPatternHelpers/MdtSegmentSeedGenerator.h>
 #include <MuonPatternHelpers/SegmentFitHelperFunctions.h>
@@ -259,7 +259,6 @@ namespace MuonR4{
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Reject due to similarity");
             return std::nullopt;
         }
-        using CalibSpacePointPtr = ISpacePointCalibrator::CalibSpacePointPtr;
         unsigned int nMdt{0};
         /** Collect all hits close to the seed line */
         for (const auto& [layerNr,  hitsInLayer] : Acts::enumerate(m_hitLayers.mdtHits())) {
