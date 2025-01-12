@@ -185,6 +185,7 @@
 + Simulation/Tools/AtlasCLHEP_RandomGenerators
 + Tools/ART
 + Tools/Campaigns
++ Tools/GdbUtils
 + Tools/PathResolver
 + Tools/PmbCxxUtils
 + Tools/PyJobTransforms
