@@ -51,6 +51,7 @@ namespace DerivationFramework {
   //
   typedef std::vector<const xAOD::TrackParticle*> TrackBag;
   typedef std::vector<const xAOD::Muon*>          MuonBag;
+  typedef std::vector<const xAOD::Electron*>      ElectronBag;
   typedef InDet::IInDetTrackSelectionTool         TrkSelTool;
   
   class BPhysVertexTrackBase : public AthAlgTool,
@@ -180,6 +181,7 @@ namespace DerivationFramework {
       virtual TrackBag    findAllTracksInDecay(xAOD::BPhysHelper& vtx) const;
       virtual void        findAllTracksInDecay(xAOD::BPhysHelper& vtx,
 					       TrackBag& tracks) const;
+
       virtual MuonBag     findAllMuonsInDecay(xAOD::BPhysHelper& vtx) const;
       virtual void        findAllMuonsInDecay(xAOD::BPhysHelper& vtx,
 					      MuonBag& muons) const;
@@ -187,6 +189,17 @@ namespace DerivationFramework {
 						     MuonBag& muons) const;
       virtual std::vector<TVector3>
 	findMuonRefTrackMomenta(xAOD::BPhysHelper& vtx, MuonBag& muons) const;
+
+      virtual ElectronBag     findAllElectronsInDecay(xAOD::BPhysHelper& vtx) const;
+      virtual void        findAllElectronsInDecay(xAOD::BPhysHelper& vtx,
+					      ElectronBag& electrons) const;
+      virtual TrackBag    findAllElectronTracksInDecay(xAOD::BPhysHelper& vtx,
+						     ElectronBag& electrons, unsigned int elTrackType) const;
+      virtual std::vector<TVector3>
+	findElectronRefTrackMomenta(xAOD::BPhysHelper& vtx, ElectronBag& electrons) const;
+
+      virtual std::vector<TVector3>
+	findAllRefTrackMomenta(xAOD::BPhysHelper& vtx, TrackBag& tracks) const;
 
       virtual TrackBag    selectTracks(const xAOD::TrackParticleContainer*
 				       inpTracks,

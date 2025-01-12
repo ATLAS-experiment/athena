@@ -50,6 +50,10 @@ namespace DerivationFramework {
     virtual void        copyVals(const MuIsoItem& item);
     virtual void        fill(double isoValue=-2., int nTracks=-1,
 			     const xAOD::Muon* muon=NULL);
+    virtual void        fill(double isoValue=-2., int nTracks=-1,
+			     const xAOD::Electron* electron=NULL);
+    virtual void        fill(double isoValue=-2., int nTracks=-1,
+			     const xAOD::TrackParticle* trackParticle=NULL);
     virtual std::string muIsoName();
     virtual std::string nTracksName();
     virtual std::string muLinkName();
@@ -58,6 +62,8 @@ namespace DerivationFramework {
     mutable std::vector<float>  vIsoValues;
     mutable std::vector<int>    vNTracks;
     mutable MuonBag             vMuons;
+    mutable TrackBag            vTracks;
+    mutable ElectronBag         vElectrons;
   }; // MuIsoItem 
   protected:
     class TrackIsoItem : public BaseItem {
@@ -115,13 +121,21 @@ namespace DerivationFramework {
   private:      
       // job options
       std::string                      m_muonContainerName;
-      
+      std::string                      m_electronContainerName;
+      std::string                      m_trackContainerName;
+      std::string                      m_elTrackParticleContainerName;
+
+      unsigned int                     m_legType;
+
       std::vector<double>              m_isoConeSizes;
       std::vector<double>              m_isoTrkImpLogChi2Max;
       std::vector<int>                 m_isoDoTrkImpLogChi2Cut;
 
       // containers
       mutable const xAOD::MuonContainer* m_muons;
+      mutable const xAOD::ElectronContainer* m_electrons;
+      mutable const xAOD::TrackParticleContainer* m_elTrackParticles;
+      mutable const xAOD::TrackParticleContainer* m_trackParticles;
       
       
       // results array

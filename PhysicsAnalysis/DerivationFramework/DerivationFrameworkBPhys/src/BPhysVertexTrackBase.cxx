@@ -157,6 +157,7 @@
 //
 #include "DerivationFrameworkBPhys/BPhysVertexTrackBase.h"
 #include "xAODTracking/TrackParticlexAODHelpers.h"
+#include "xAODEgamma/ElectronxAODHelpers.h"
 #include "xAODBPhys/BPhysHelper.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
@@ -1232,7 +1233,211 @@ namespace DerivationFramework {
     
     return refMuTracks;
   }
+  //--------------------------------------------------------------------------
+  // findAllElectronsInDecay: returns a vector of xAOD::Electron objects
+  // found in this vertex and subsequent decay vertices (if chosen).
+  //--------------------------------------------------------------------------
+  ElectronBag BPhysVertexTrackBase::findAllElectronsInDecay(xAOD::BPhysHelper& vtx )
+    const {
+      ElectronBag electrons;
+      findAllElectronsInDecay( vtx, electrons );
+      return electrons;
+    }
+  //--------------------------------------------------------------------------
+  // findAllElectronsInDecay: fills vector of xAOD::Electron objects
+  // found in this vertex and subsequent decay vertices (if chosen).
+  // Method avoids duplicate entries in vector.
+  // Recursively calls itself if necessary.
+  //--------------------------------------------------------------------------
+  void BPhysVertexTrackBase::findAllElectronsInDecay(xAOD::BPhysHelper& vtx, 
+    ElectronBag &electrons)
+      const {
+        for (int i=0; i < vtx.nElectrons(); ++i){
+          if ( std::find(electrons.begin(),electrons.end(),vtx.electron(i)) == electrons.end()){
+            electrons.push_back(vtx.electron(i));
+          } //if
+        } //for
+        // loop over preceeding vertices (preceeding in vtx building, succeeding in time)
+        if ( m_incPrecVerticesInDecay ){
+          for (int ivtx = 0; ivtx < vtx.nPrecedingVertices(); ++ivtx) {
+	          xAOD::BPhysHelper precVtx(vtx.precedingVertex(ivtx));
+	          findAllElectronsInDecay(precVtx, electrons);
+          } // for
+        } //if 
+      } 
   
+  //--------------------------------------------------------------------------
+  // findAllElectronTracksInDecay: returns a vector of xAOD::TrackParticle
+  // objects found in this vertex and subsequent decay vertices.
+  // Returns the tracks. Need to specify the type of track: ID (0), GSF (1)
+  // The vector of track pointers reeturned may contain NULL elements.
+  // NOTICE: If calo-refitted GSF is used for vertexing then calo-refitted
+  // GSF will be found. TODO: Implement the option to get original GSF as well.
+  //--------------------------------------------------------------------------
+  TrackBag
+  BPhysVertexTrackBase::findAllElectronTracksInDecay(xAOD::BPhysHelper& vtx,
+						   ElectronBag& electrons, unsigned int elTrackType = 0) const {
+
+    TrackBag tracks;
+    electrons = findAllElectronsInDecay(vtx);
+
+    for (ElectronBag::const_iterator elItr = electrons.begin(); elItr != electrons.end();
+	 ++elItr) {
+      const xAOD::TrackParticle* gsfTrack = (*elItr)->trackParticle(0);
+      if ( elTrackType == 1 ) tracks.push_back(gsfTrack);
+      if ( elTrackType == 0 ) {
+        const xAOD::TrackParticle* idTrack = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( gsfTrack );
+        tracks.push_back( idTrack );
+      }
+    } // for 
+    return tracks;
+  }
+  //--------------------------------------------------------------------------
+  // findElectronRefTrackMomenta: returns a vector<TVector3> containing the
+  // three momenta of refitted tracks identified as muons.
+  // The vector may contain (0,0,0) elements indicating an error.
+  //--------------------------------------------------------------------------
+  std::vector<TVector3>
+  BPhysVertexTrackBase::findElectronRefTrackMomenta(xAOD::BPhysHelper& vtx,
+						ElectronBag& electrons) const {
+
+    std::vector<TVector3> refElTracks;
+
+    // quick solution if nRefTrks == nMuons:
+    if ( vtx.nRefTrks() == vtx.nElectrons() && !m_incPrecVerticesInDecay ) {
+      electrons = vtx.electrons();
+      for ( auto refElTrack : vtx.refTrks() ) {
+	      refElTracks.push_back(refElTrack);
+      }
+    } else {
+      TrackBag electronTracks = findAllElectronTracksInDecay(vtx, electrons,1);
+      if ( vtx.nRefTrks() == (int)vtx.vtx()->nTrackParticles() ) {
+	      for (int i=0; i<vtx.nRefTrks(); ++i) {
+	        const xAOD::TrackParticle* otp = (const xAOD::TrackParticle*)vtx.refTrkOrigin(i);
+	        if ( otp != NULL ) {
+	          if ( std::find(electronTracks.begin(), electronTracks.end(), otp)
+		          != electronTracks.end() ) {
+	            refElTracks.push_back(vtx.refTrk(i));
+	          }
+	          } else {
+	            ATH_MSG_WARNING("BPhysVertexTrackBase::findElectronRefTrackMomenta():"
+			          " refTrkOrigin == NULL for refTrk # "
+			          << i << " !");
+	        }
+	      } // for
+      } else {
+	      ATH_MSG_WARNING("BPhysVertexTrackBase::findElectronRefTrackMomenta():"
+			    " size mismatch #refTrks = " << vtx.nRefTrks()
+			    << "#trackParticles = " << vtx.vtx()->nTrackParticles()
+			    << " !");
+      } // if nRefTracks == nTrackParticles
+      // loop over preceeding vertices -- only if not all refElTrks found yet
+      if ( m_incPrecVerticesInDecay && electrons.size() > refElTracks.size() ) {
+	      for (int ivtx = 0; ivtx < vtx.nPrecedingVertices(); ++ivtx) {
+	        xAOD::BPhysHelper precVtx(vtx.precedingVertex(ivtx));
+	        std::vector<TVector3> precRefElTracks =
+	        findElectronRefTrackMomenta(precVtx, electrons);
+	        // append only if not yet contained in
+	        for ( auto precRefElTrack : precRefElTracks ) {
+	          if ( std::find(refElTracks.begin(), refElTracks.end(),
+			        precRefElTrack) == refElTracks.end() ) {
+	            refElTracks.push_back(precRefElTrack);
+	          } // if
+	        } // for 
+	      } // for ivtx
+      } // if
+    } // if (shortcut)
+
+    // debug output
+    if ( msgLvl( MSG::DEBUG ) ) { 
+	    ATH_MSG_DEBUG("BPhysVertexTrackBase::findElectronRefTrackMomenta():"
+		      << " #muons: " << electrons.size()
+		      << "  #refMuTrks: " << refElTracks.size());
+	    TString str = Form(">> refElTracks(%d):\n", (int)refElTracks.size());
+	    for (unsigned int i=0; i < refElTracks.size(); ++i) {
+	      str += Form("(%10.4f,%10.4f,%10.4f) ",
+		      refElTracks[i].x(), refElTracks[i].y(),
+		      refElTracks[i].z());
+	    }
+	    ATH_MSG_DEBUG(str.Data());
+      }
+    
+    return refElTracks;
+  }
+  //--------------------------------------------------------------------------
+  // findAllRefTrackMomenta: returns a vector<TVector3> containing the
+  // three momenta of refitted tracks identified.
+  // The vector may contain (0,0,0) elements indicating an error.
+  //--------------------------------------------------------------------------
+  std::vector<TVector3>
+  BPhysVertexTrackBase::findAllRefTrackMomenta(xAOD::BPhysHelper& vtx,
+						TrackBag& tracks) const {
+
+    std::vector<TVector3> refAllTracks;
+
+    // quick solution if no preceding vertex:
+    if ( !m_incPrecVerticesInDecay ) {
+      for ( unsigned int iTrack = 0; iTrack < vtx.vtx()->nTrackParticles(); ++iTrack ) {
+	      refAllTracks.push_back(vtx.refTrk(iTrack));
+        tracks.push_back(vtx.vtx()->trackParticle(iTrack));
+      }
+    } else {
+      findAllTracksInDecay(vtx, tracks);
+      if ( vtx.nRefTrks() == (int)vtx.vtx()->nTrackParticles() ) {
+	      for (int i=0; i<vtx.nRefTrks(); ++i) {
+	        const xAOD::TrackParticle* otp = (const xAOD::TrackParticle*)vtx.refTrkOrigin(i);
+	        if ( otp != NULL ) {
+	          if ( std::find(tracks.begin(), tracks.end(), otp)
+		          != tracks.end() ) {
+	            refAllTracks.push_back(vtx.refTrk(i));
+	          }
+	          } else {
+	            ATH_MSG_WARNING("BPhysVertexTrackBase::findAllRefTrackMomenta():"
+			          " refTrkOrigin == NULL for refTrk # "
+			          << i << " !");
+	        }
+	      } // for
+      } else {
+	      ATH_MSG_WARNING("BPhysVertexTrackBase::findAllRefTrackMomenta():"
+			    " size mismatch #refTrks = " << vtx.nRefTrks()
+			    << "#trackParticles = " << vtx.vtx()->nTrackParticles()
+			    << " !");
+      } // if nRefTracks == nTrackParticles
+      // loop over preceeding vertices -- only if not all refElTrks found yet
+      if ( m_incPrecVerticesInDecay && tracks.size() > refAllTracks.size() ) {
+	      for (int ivtx = 0; ivtx < vtx.nPrecedingVertices(); ++ivtx) {
+	        xAOD::BPhysHelper precVtx(vtx.precedingVertex(ivtx));
+          TrackBag _tracks;
+	        std::vector<TVector3> precRefAllTracks =
+	        findAllRefTrackMomenta(precVtx, _tracks);
+	        // append only if not yet contained in
+	        for ( auto precRefAllTrack : precRefAllTracks ) {
+	          if ( std::find(refAllTracks.begin(), refAllTracks.end(),
+			        precRefAllTrack) == refAllTracks.end() ) {
+	            refAllTracks.push_back(precRefAllTrack);
+	          } // if
+	        } // for 
+	      } // for ivtx
+      } // if
+    } // if (shortcut)
+
+    // debug output
+    if ( msgLvl( MSG::DEBUG ) ) { 
+	    ATH_MSG_DEBUG("BPhysVertexTrackBase::findAllRefTrackMomenta():"
+		      << " #tracks: " << tracks.size()
+		      << "  #refTrks: " << refAllTracks.size());
+	    TString str = Form(">> refAllTracks(%d):\n", (int)refAllTracks.size());
+	    for (unsigned int i=0; i < refAllTracks.size(); ++i) {
+	      str += Form("(%10.4f,%10.4f,%10.4f) ",
+		      refAllTracks[i].x(), refAllTracks[i].y(),
+		      refAllTracks[i].z());
+	    }
+	    ATH_MSG_DEBUG(str.Data());
+      }
+    
+    return refAllTracks;
+  }
+
   //--------------------------------------------------------------------------
   // selectTracks: returns a vector of xAOD::TrackParticle objects
   // seleted from the input track collection according to the selection

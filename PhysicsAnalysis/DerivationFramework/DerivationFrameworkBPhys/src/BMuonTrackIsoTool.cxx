@@ -15,18 +15,29 @@
 // For an usage example see BPHY8.py .
 //
 // Job options provided by this class:
-// - MuonContainerName          -- name of muon container
-// - IsolationConeSizes         -- List of isolation cone sizes
-// - IsoTrkImpLogChi2Max        -- List of maximum log(chi2) cuts for
-//                                 association of tracks to the primary
-//                                 vertex picked.
-// - IsoDoTrkImpLogChi2Cut      -- apply log(chi2) cuts
-//                                 0 : don't apply log(chi2) cuts
-//                                 1 : apply log(chi2) cuts
-//                                 2 : apply log(chi2) cuts [former version]
-//                                 (The last two job options must
-//                                  contain the same number of elements
-//                                  as the IsolationConeSizes list.)
+// - LegType                      -- vertex leg-type for which to calculate isolation
+//                                   0: Muons
+//                                   1: Electrons 
+//                                   2: Track Particles 
+// - MuonContainerName            -- name of muon container 
+//                                   (relevant iff LegType == 0)
+// - ElectronContainerName        -- name of electron container 
+//                                   (relevant iff LegType == 1)
+// - TrackParticleContainerName   -- name of track particle container 
+//                                   (relevant iff LegType == 2) 
+// - ElTrackParticleContainerName -- name of the track particle associated 
+//                                   w/ electrons (relevant iff LegType == 1)
+// - IsolationConeSizes           -- List of isolation cone sizes
+// - IsoTrkImpLogChi2Max          -- List of maximum log(chi2) cuts for
+//                                   association of tracks to the primary
+//                                   vertex picked.
+// - IsoDoTrkImpLogChi2Cut        -- apply log(chi2) cuts
+//                                   0 : don't apply log(chi2) cuts
+//                                   1 : apply log(chi2) cuts
+//                                   2 : apply log(chi2) cuts [former version]
+//                                   (The last two job options must
+//                                    contain the same number of elements
+//                                    as the IsolationConeSizes list.)
 //                           
 //============================================================================
 //
@@ -61,6 +72,8 @@ namespace DerivationFramework {
     vIsoValues.clear();
     vNTracks.clear();
     vMuons.clear();
+    vElectrons.clear();
+    vTracks.clear();
   }
 
   void BMuonTrackIsoTool::MuIsoItem::copyVals(const BaseItem& item) {
@@ -71,6 +84,8 @@ namespace DerivationFramework {
       vIsoValues = item.vIsoValues;
       vNTracks   = item.vNTracks;
       vMuons     = item.vMuons;
+      vElectrons = item.vElectrons;
+      vTracks    = item.vTracks;
   }
 
   void BMuonTrackIsoTool::MuIsoItem::fill(double isoValue, int nTracks,
@@ -79,7 +94,21 @@ namespace DerivationFramework {
     vNTracks.push_back(nTracks);
     vMuons.push_back(muon);
   }
-  
+
+  void BMuonTrackIsoTool::MuIsoItem::fill(double isoValue, int nTracks,
+					  const xAOD::Electron* electron) {
+    vIsoValues.push_back(isoValue);
+    vNTracks.push_back(nTracks);
+    vElectrons.push_back(electron);
+  }
+
+  void BMuonTrackIsoTool::MuIsoItem::fill(double isoValue, int nTracks,
+					  const xAOD::TrackParticle* trackParticle) {
+    vIsoValues.push_back(isoValue);
+    vNTracks.push_back(nTracks);
+    vTracks.push_back(trackParticle);
+  }
+
   std::string BMuonTrackIsoTool::MuIsoItem::muIsoName() {
     return buildName();
   }
@@ -100,7 +129,11 @@ namespace DerivationFramework {
     
     declareInterface<DerivationFramework::IAugmentationTool>(this);
 
-    declareProperty("MuonContainerName"     , m_muonContainerName="");
+    declareProperty("LegType"                      , m_legType=0);
+    declareProperty("MuonContainerName"            , m_muonContainerName="");
+    declareProperty("ElectronContainerName"        , m_electronContainerName="");
+    declareProperty("TrackParticleContainerName"   , m_trackParticleContainerName="");
+    declareProperty("ElTrackParticleContainerName" , m_elTrackParticleContainerName="");
     declareProperty("IsolationConeSizes"    , m_isoConeSizes);
     declareProperty("IsoTrkImpLogChi2Max"   , m_isoTrkImpLogChi2Max);
     declareProperty("IsoDoTrkImpLogChi2Cut" , m_isoDoTrkImpLogChi2Cut);
@@ -122,8 +155,17 @@ namespace DerivationFramework {
     }      
 
     // check muon container name
-    if ( m_muonContainerName == "" ) {
+    if ( m_muonContainerName == "" && m_legType == 0 ) {
       ATH_MSG_ERROR("No muon container name provided!");
+    }
+    if ( m_electronContainerName == "" && m_legType == 1 ) {
+      ATH_MSG_ERROR("No electron container name provided!");
+    }
+    if ( m_elTrackParticleContainerName == "" && m_legType == 1 ) {
+      ATH_MSG_ERROR("No track particle container name provided for electrons!");
+    }
+    if ( m_trackParticleContainerName == "" && m_legType == 2 ) {
+      ATH_MSG_ERROR("No track particle container name provided!");
     }
 
     // initialize results array
@@ -165,11 +207,24 @@ namespace DerivationFramework {
 
     ATH_MSG_DEBUG("BMuonTrackIsoTool::addBranchesSVLoopHook() -- begin");
 
-    // retrieve muon container
+    // retrieve the relevant container
     m_muons = NULL;
-    if ( m_muonContainerName != "" ) {
+    if ( m_muonContainerName != "" && m_legType == 0) {
       CHECK(evtStore()->retrieve(m_muons, m_muonContainerName));
       ATH_MSG_DEBUG("Found muon collection with key " << m_muonContainerName);
+    }
+    m_electrons = NULL;
+    m_elTrackParticles = NULL;
+    if ( m_electronContainerName != "" && m_legType == 1) {
+      CHECK(evtStore()->retrieve(m_electrons, m_electronContainerName));
+      ATH_MSG_DEBUG("Found electron collection with key " << m_electronContainerName);
+      CHECK(evtStore()->retrieve(m_elTrackParticles, m_elTrackParticleContainerName));
+      ATH_MSG_DEBUG("Found track particle collection with key " << m_elTrackParticleContainerName);
+    }
+    m_trackParticles = NULL;
+    if ( m_trackParticleContainerName != "" && m_legType == 2) {
+      CHECK(evtStore()->retrieve(m_trackParticles, m_trackParticleContainerName));
+      ATH_MSG_DEBUG("Found track particle collection with key " << m_trackParticleContainerName);
     }
     
     ATH_MSG_DEBUG("BMuonTrackIsoTool::addBranchesSVLoopHook(): "
@@ -204,16 +259,34 @@ namespace DerivationFramework {
     const xAOD::Vertex* candRefPV = cand.pv(m_pvAssocTypes[ipv]);
 
     MuonBag  muons;
+    ElectronBag electrons;
+    TrackBag _candTracks;
     // TrackBag candMuTracks = findAllMuonIdTracksInDecay(cand, muons);
     std::vector<TVector3> candMuTracks = findMuonRefTrackMomenta(cand, muons);
-    
+    std::vector<TVector3> candElTracks = findElectronRefTrackMomenta(cand, electrons);
+    std::vector<TVector3> candTracks   = findAllRefTrackMomenta(cand, _candTracks);
+
     TrackBag tracks = selectTracks(m_tracks, cand, ipv, its, itt);
 
     ATH_MSG_DEBUG("calcValuesHook: found " << muons.size() <<
 		  " muons and " << candMuTracks.size() <<
+		  " muon tracks from B cand; " << tracks.size() <<
+		  " tracks to check.");
+
+    ATH_MSG_DEBUG("calcValuesHook: found " << electrons.size() <<
+		  " electrons and " << candElTracks.size() <<
+		  " electron tracks from B cand; " << tracks.size() <<
+		  " tracks to check.");
+
+    ATH_MSG_DEBUG("calcValuesHook: found " << _candTracks.size() <<
 		  " tracks from B cand; " << tracks.size() <<
 		  " tracks to check.");
-    
+
+    std::vector<TVector3> candLegTracks;
+    if ( m_legType == 0 ) candLegTracks = candMuTracks;
+    if ( m_legType == 1 ) candLegTracks = candElTracks;
+    if ( m_legType == 2 ) candLegTracks = candTracks;
+
     // loop over isolation cones (pt and deltaR)
     unsigned int nCones = m_isoConeSizes.size();
     for (unsigned int ic = 0; ic < nCones; ++ic) {
@@ -225,11 +298,11 @@ namespace DerivationFramework {
       unsigned int id(0);
       // for (TrackBag::const_iterator muTrkItr = candMuTracks.begin();
       // muTrkItr != candMuTracks.end(); ++muTrkItr, ++id) {
-      for (id=0; id < candMuTracks.size(); ++id) {
+      for (id=0; id < candLegTracks.size(); ++id) {
       
 	// make sure there was an ID track for the muon
 	// if ( *muTrkItr != NULL ) {
-	if ( candMuTracks[id].Mag() > 0. ) {
+	if ( candLegTracks[id].Mag() > 0. ) {
 	
 	  const double& coneSize   = m_isoConeSizes[ic];
 	  const double& logChi2Max = m_isoTrkImpLogChi2Max[ic];
@@ -245,7 +318,7 @@ namespace DerivationFramework {
 
 	    for (TrackBag::const_iterator trkItr = tracks.begin();
            trkItr != tracks.end(); ++trkItr) {
-	      double deltaR = candMuTracks[id].DeltaR((*trkItr)->p4().Vect());
+	      double deltaR = candLegTracks[id].DeltaR((*trkItr)->p4().Vect());
 	      if ( deltaR < coneSize ) {
           double logChi2 = (doLogChi2 > 0) ?
             getTrackCandPVLogChi2(*trkItr, candRefPV) : -9999.;
@@ -258,17 +331,28 @@ namespace DerivationFramework {
 	      } // deltaR
 	    }    
 	    // calculate result
-	    if ( ptSumInCone + candMuTracks[id].Pt() > 0. ) {
-	      isoValue = candMuTracks[id].Pt()
-          / ( ptSumInCone + candMuTracks[id].Pt() );
+	    if ( ptSumInCone + candLegTracks[id].Pt() > 0. ) {
+	      isoValue = candLegTracks[id].Pt()
+          / ( ptSumInCone + candLegTracks[id].Pt() );
 	    }
 
 	  } else {
 	    isoValue = -10.;
 	  } // if candRefPV != NULL
-	    
-	  const xAOD::Muon* muon = id < muons.size() ? muons.at(id) : NULL;
-	  iso.fill(isoValue, nTracksInCone, muon);
+
+    if ( m_legType == 0 ){  
+	    const xAOD::Muon* muon = id < muons.size() ? muons.at(id) : NULL;
+	    iso.fill(isoValue, nTracksInCone, muon);
+    }
+    if ( m_legType == 1 ){  
+	    const xAOD::Electron* electron = id < electrons.size() ? electrons.at(id) : NULL;
+	    iso.fill(isoValue, nTracksInCone, electron);
+    }
+    if ( m_legType == 2 ){  
+	    const xAOD::TrackParticle* _candTrack = id < _candTracks.size() ? _candTracks.at(id) : NULL;
+	    iso.fill(isoValue, nTracksInCone, _candTrack);
+    }
+
 	} // if *muTrkItr != NULL
       } // for muTrkItr
     } // for ic
@@ -342,19 +426,21 @@ namespace DerivationFramework {
 			  << vtx->z() << "), N(iso): "
 			  << result.vIsoValues.size() << ", N(nTracks): "
 			  << result.vNTracks.size());
-	    MuonLinkVector_t links;
-	    for (const xAOD::Muon* muon : result.vMuons) {
-	      if ( muon != NULL ) {
-		MuonLink_t link(muon, *m_muons);
-		links.push_back(link);
-	      } else {
-		ATH_MSG_WARNING("BMuonTrackIsoTool::saveIsolation(): "
-				<< " *muon == NULL -- EL not saved!");
+      if ( m_legType ==  1 ) { 
+	      MuonLinkVector_t links;
+	      for (const xAOD::Muon* muon : result.vMuons) {
+  	      if ( muon != NULL ) {
+		        MuonLink_t link(muon, *m_muons);
+		        links.push_back(link);
+	        } else {
+		        ATH_MSG_WARNING("BMuonTrackIsoTool::saveIsolation(): "
+				    << " *muon == NULL -- EL not saved!");
+	        }
 	      }
-	    }
-	    vtx->auxdecor<MuonLinkVector_t>(result.muLinkName()) = links;
-	    ATH_MSG_DEBUG("BMuonTrackIsoTool::saveIsolation() -- muLinks: "
-			  << "N_saved = " << links.size() );
+	      vtx->auxdecor<MuonLinkVector_t>(result.muLinkName()) = links;
+	      ATH_MSG_DEBUG("BMuonTrackIsoTool::saveIsolation() -- muLinks: "
+			    << "N_saved = " << links.size() );
+      }
 	  } // for itt
 	} // for ic
       } // for ipv

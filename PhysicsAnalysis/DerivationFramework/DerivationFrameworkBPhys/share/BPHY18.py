@@ -129,7 +129,8 @@ if runGSFCalo:
 ## 1/ setup vertexing tools and services
 include("DerivationFrameworkBPhys/configureVertexing.py")
 BPHY18_VertexTools = BPHYVertexTools("BPHY18")
-
+from TrackVertexAssociationTool.TrackVertexAssociationToolConf \
+    import CP__TrackVertexAssociationTool
 
 print '********************** VERTEX TOOLS ***********************'
 print BPHY18_VertexTools
@@ -427,58 +428,65 @@ BPHY18_Select_piK = DerivationFramework__Select_onia2mumu(
 ToolSvc += BPHY18_Select_piK
 print      BPHY18_Select_piK
 
-from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__BKllIsoMultiplicityTool
-BPHY18_IsoMultiplicityTool = DerivationFramework__BKllIsoMultiplicityTool(
-    BKllIsoMultiplicityToolName = "BPHY18",
-    TrackContainer             = "InDetTrackParticles",
-    InputVertexContainer       = "BeeKstCandidates",
-    IsolationCones             = [ "10", "20", "30", "40", "50" ],
-    OnlyInVertex               = BPHY18cf.isoMultOnlyInVertex,
-    VertexPassFlags            =  ["passed_Bd", "passed_Bdbar"], 
-    TrackSelectorTool          = BPHY18_VertexTools.InDetTrackSelectorTool,
-    AddTrackSelectionCuts      = [ "Loose" ],
-    TrackPtCut                 = BPHY18cf.BeeKstPreFitMesonTrackPtCut,
-    TrackEtaCut                = BPHY18cf.BeeKstPreFitMesonTrackEtaCut,
-    ElectronContainerKey       = "Electrons",
-    ElectronTrackContainerKey  = electronTrackParticleCollection,
-    AddElectronTrackSelectionCuts = [ "Loose", "LooseElectron" ],
-    ElectronTrackPtCut         = BPHY18cf.JPsiPreFitElPtCut,
-    ElectronTrackEtaCut        = -1.,
-    ElectronLikelihoodCut      = "DFCommonElectronsLHVeryLoosenod0",
-    MuonContainerKey           = "Muons",
-    MuonTrackContainerKey      = "InDetTrackParticles",
-    AddMuonTrackSelectionCuts  = [ "Loose" ],
-    MuonTrackPtCut             = 5000.,
-    MuonTrackEtaCut            = -1.,
-    MuonQualityCut             = 1,
-    RecordTrackMultiplicity    = True, 
-    RecordElectronMultiplicity = True, 
-    RecordMuonMultiplicity     = True
-)
+#from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__BKllIsoMultiplicityTool
+#BPHY18_IsoMultiplicityTool = DerivationFramework__BKllIsoMultiplicityTool(
+#    BKllIsoMultiplicityToolName = "BPHY18",
+#    TrackContainer             = "InDetTrackParticles",
+#    InputVertexContainer       = "BeeKstCandidates",
+#    IsolationCones             = [ "10", "20", "30", "40", "50" ],
+#    OnlyInVertex               = BPHY18cf.isoMultOnlyInVertex,
+#    VertexPassFlags            =  ["passed_Bd", "passed_Bdbar"], 
+#    TrackSelectorTool          = BPHY18_VertexTools.InDetTrackSelectorTool,
+#    AddTrackSelectionCuts      = [ "Loose" ],
+#    TrackPtCut                 = BPHY18cf.BeeKstPreFitMesonTrackPtCut,
+#    TrackEtaCut                = BPHY18cf.BeeKstPreFitMesonTrackEtaCut,
+#    ElectronContainerKey       = "Electrons",
+#    ElectronTrackContainerKey  = electronTrackParticleCollection,
+#    AddElectronTrackSelectionCuts = [ "Loose", "LooseElectron" ],
+#    ElectronTrackPtCut         = BPHY18cf.JPsiPreFitElPtCut,
+#    ElectronTrackEtaCut        = -1.,
+#    ElectronLikelihoodCut      = "DFCommonElectronsLHVeryLoosenod0",
+#    MuonContainerKey           = "Muons",
+#    MuonTrackContainerKey      = "InDetTrackParticles",
+#    AddMuonTrackSelectionCuts  = [ "Loose" ],
+#    MuonTrackPtCut             = 5000.,
+#    MuonTrackEtaCut            = -1.,
+#    MuonQualityCut             = 1,
+#    RecordTrackMultiplicity    = True, 
+#    RecordElectronMultiplicity = True, 
+#    RecordMuonMultiplicity     = True
+#)
 
-ToolSvc += BPHY18_IsoMultiplicityTool
-print BPHY18_IsoMultiplicityTool
+#ToolSvc += BPHY18_IsoMultiplicityTool
+#print BPHY18_IsoMultiplicityTool
 
-#BPHY18_MuonTrackIsoTool = DerivationFramework__BMuonTrackIsoTool(
-#    name                       = "BPHY8_MuonIsoTool",
-#    BranchPrefixes             = BPHY8cf.BranchPrefixes,
-#    BranchBaseName             = "muiso",
-#    OutputLevel                = INFO,
-#    VertexContainerNames       = BPHY8cf.VtxContNames,
-#    RefPVContainerNames        = BPHY8cf.RefPVContNames,
-#    TrackParticleContainerName = BPHY8cf.TrkPartContName,
-#    PVContainerName            = BPHY8cf.PVContName,
-#    PVTypesToConsider          = BPHY8cf.MinChi2ToAnyPVTypes,
-#    MuonContainerName          = BPHY8cf.UsedMuonCollection,
-#    TrackSelectionTools        = BPHY8_MuIsoTrkSelTools.values(),
-#    TVATool                    = BPHY8_TvaTools["TrackMuonIsoTva"],
-#    IsolationConeSizes         = BPHY8cf.MuIsolationConeSizes,
-#    IsoTrkImpLogChi2Max        = BPHY8cf.MuIsoTrkImpLogChi2Max,    
-#    IsoDoTrkImpLogChi2Cut      = BPHY8cf.MuIsoDoTrkImpLogChi2Cut,
-#    DoVertexType               = BPHY8cf.doVertexType,
-#    UseTrackTypes              = BPHY8cf.useMuIsoTrackTypes,
-#    DebugTrackTypes            = BPHY8cf.DebugTrackTypes,
-#    DebugTracksInEvents        = [])
+BPHY18_LegTrackIsoTool = DerivationFramework__BMuonTrackIsoTool(
+    name                       = "BPHY18_TrackIsoTool",
+    BranchPrefixes             = [ "BeeKstCandidates" ],
+    BranchBaseName             = "legIso",
+    OutputLevel                = DEBUG,
+    VertexContainerNames       = [ "BeeKstCandidates" ],
+    RefPVContainerNames        = [ "BPHY18RefittedPrimaryVertices" ],
+    TrackParticleContainerName = [ "InDetTrackParticles" ],
+    PVContainerName            = [ "PrimaryVertices" ],
+    PVTypesToConsider          = [1, 3],
+    TrackParticleContainerName          = "InDetTrackParticles",
+    TrackSelectionTools        = [  BPHY18_VertexTools.InDetTrackSelectorTool ],
+    TVATool                    =  CP__TrackVertexAssociationTool(
+                                        name          = "BPHY18_VtxIsoTvaTool",
+                                        WorkingPoint  = "Loose",
+                                        OutputLevel   = WARNING),
+    IsolationConeSizes         = [ 0.2, 0.3, 0.4, 0.5 ],
+    IsoTrkImpLogChi2Max        = [ 5.0, 0.0 ],    
+    IsoDoTrkImpLogChi2Cut      = [ 2., 0. ],
+    DoVertexType               = 4, # Only Min A0
+    UseTrackTypes              = [ 35, 134217728],
+    DebugTrackTypes            = 1,
+    DebugTracksInEvents        = [])
+
+ToolSvc += BPHY18_BLegTrackIsoTool
+print BPHY18_BLegTrackIsoTool
+
 
 if True:
     from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__xAODStringSkimmingTool
