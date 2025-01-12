@@ -55,6 +55,7 @@ void FPGATrackSimTrackingToolBase::matchIdealGeoSector(FPGATrackSimRoad & r)
     // estimate sectorbin
     int sectorbin = fpgatracksim::QPT_SECTOR_OFFSET * (bounds.first - qoverpt_bins.begin() - 1);
     sectorbin = std::clamp(sectorbin, 0, 10 * static_cast<int>(qoverpt_bins.size() - 2));
+    if (m_do2ndStage) sectorbin = 0;
 
     if (m_doRegionalMapping){
       int subregion = r.getSubRegion();

@@ -175,11 +175,12 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         m_rmap_1st->loadModuleIDLUT(PathResolverFindCalibFile(m_modulelut_path.value()));
         m_rmap_2nd->loadModuleIDLUT(PathResolverFindCalibFile(m_modulelut_path.value()));
 
-        // We probably need two versions of this path for the second stage.
         ATH_MSG_DEBUG("Setting the average radius per logical layer for Region and Subregion Maps");
         m_rmap_1st->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));
         m_rmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));	
         m_subrmap->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));
+        m_rmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));
+        m_subrmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));	
 	
         ATH_MSG_DEBUG("Creating NN weighting map");
         ATH_MSG_INFO("MappingSVc using " << m_NNmap_path_fake.value() << " and " << m_NNmap_path_param.value());

@@ -9,7 +9,7 @@ export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrad
 RDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/RDO/reg0_singlemu.root"
 RDO_EVT=200
 BANKS="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/banks_9L/"
-MAPS="maps_9L/OtherFPGAPipelines/v0.21"
+MAPS="maps_9L/OtherFPGAPipelines/v0.22"
 
 echo "... analysis on RDO"
 python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
