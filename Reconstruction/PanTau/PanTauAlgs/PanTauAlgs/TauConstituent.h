@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PANTAUALGS_TAUCONSTITUENT_H
@@ -138,14 +138,14 @@ namespace PanTau {
     //Getter functions
     std::vector<std::string>                getTypeName() const;
     std::string                             getTypeNameString() const;
-    std::vector<int>                        getTypeFlags() const;
+    const std::vector<int>&                 getTypeFlags() const;
     bool                                    isOfType(TauConstituent::Type aType) const;
     double                                  getBDTValue() const;
     int                                     getCharge() const;
     const xAOD::PFO*                        getPFO() const;
     
     void                                    addShot(TauConstituent* shot);
-    std::vector<TauConstituent*>            getShots() const;
+    const std::vector<TauConstituent*>&     getShots() const;
     unsigned int                            getNShots() const;
     
     void                                    setNPhotonsInShot(int nPhotons);
