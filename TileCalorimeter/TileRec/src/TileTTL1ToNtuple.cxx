@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -111,7 +111,7 @@ StatusCode TileTTL1ToNtuple::execute()
 {
 
   // step1: read TileTTL1s from TDS
-  const TileTTL1Container* TTL1Cnt; 
+  const TileTTL1Container* TTL1Cnt = nullptr; 
   CHECK( evtStore()->retrieve(TTL1Cnt, m_ttl1Container) );
 
   // step2: put items in ntuple
