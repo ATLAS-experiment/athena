@@ -128,9 +128,24 @@ if runGSFCalo:
 
 ## 1/ setup vertexing tools and services
 include("DerivationFrameworkBPhys/configureVertexing.py")
-BPHY18_VertexTools = BPHYVertexTools("BPHY18")
+BPHY18_VertexTools = BPHYVertexTools("BPHY18_BeeKst")
 from TrackVertexAssociationTool.TrackVertexAssociationToolConf \
     import CP__TrackVertexAssociationTool
+from InDetTrackSelectionTool.InDetTrackSelectionToolConf \
+    import InDet__InDetTrackSelectionTool
+BPHY18_TrackSelTool = InDet__InDetTrackSelectionTool(
+        name        = "BPHY18_Loose",
+        OutputLevel = INFO
+)
+BPHY18_TrackSelTool.CutLevel                     = "Loose"
+BPHY18_TrackSelTool.minPt                        = 500
+ToolSvc += BPHY18_TrackSelTool
+
+BPHY18_VtxTVATool =  CP__TrackVertexAssociationTool(
+                                        name          = "BPHY18_VtxIsoTvaTool",
+                                        WorkingPoint  = "Loose",
+                                        OutputLevel   = WARNING)
+ToolSvc += BPHY18_VtxTVATool
 
 print '********************** VERTEX TOOLS ***********************'
 print BPHY18_VertexTools
@@ -460,32 +475,30 @@ print      BPHY18_Select_piK
 #ToolSvc += BPHY18_IsoMultiplicityTool
 #print BPHY18_IsoMultiplicityTool
 
+from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__BMuonTrackIsoTool
 BPHY18_LegTrackIsoTool = DerivationFramework__BMuonTrackIsoTool(
+        LegType                = 2,
     name                       = "BPHY18_TrackIsoTool",
     BranchPrefixes             = [ "BeeKstCandidates" ],
     BranchBaseName             = "legIso",
     OutputLevel                = DEBUG,
     VertexContainerNames       = [ "BeeKstCandidates" ],
     RefPVContainerNames        = [ "BPHY18RefittedPrimaryVertices" ],
-    TrackParticleContainerName = [ "InDetTrackParticles" ],
-    PVContainerName            = [ "PrimaryVertices" ],
+    TrackParticleContainerName = "InDetTrackParticles",
+    PVContainerName            = "PrimaryVertices",
     PVTypesToConsider          = [1, 3],
-    TrackParticleContainerName          = "InDetTrackParticles",
-    TrackSelectionTools        = [  BPHY18_VertexTools.InDetTrackSelectorTool ],
-    TVATool                    =  CP__TrackVertexAssociationTool(
-                                        name          = "BPHY18_VtxIsoTvaTool",
-                                        WorkingPoint  = "Loose",
-                                        OutputLevel   = WARNING),
-    IsolationConeSizes         = [ 0.2, 0.3, 0.4, 0.5 ],
+    TrackSelectionTools        = [ BPHY18_TrackSelTool ], #  BPHY18_VertexTools.InDetTrackSelectorTool ],
+    TVATool                    =  BPHY18_VtxTVATool,
+    IsolationConeSizes         = [ 0.2, 0.3 ],
     IsoTrkImpLogChi2Max        = [ 5.0, 0.0 ],    
-    IsoDoTrkImpLogChi2Cut      = [ 2., 0. ],
+    IsoDoTrkImpLogChi2Cut      = [ 2, 0 ],
     DoVertexType               = 4, # Only Min A0
     UseTrackTypes              = [ 35, 134217728],
     DebugTrackTypes            = 1,
     DebugTracksInEvents        = [])
 
-ToolSvc += BPHY18_BLegTrackIsoTool
-print BPHY18_BLegTrackIsoTool
+ToolSvc += BPHY18_LegTrackIsoTool
+print BPHY18_LegTrackIsoTool
 
 
 if True:
@@ -594,7 +607,7 @@ if runGSFCalo:
 AugmentationToolList += [ ElectronPassLHvloosenod0,BPHY18DiElectronSelectAndWrite,  
                        BPHY18_Select_DiElectrons,
                        BPHY18BeeKstSelectAndWrite, BPHY18_Select_BeeKst, BPHY18_Select_BeeKstbar,
-                       BPHY18_diMeson_revertex, BPHY18_Select_Kpi, BPHY18_Select_piK, BPHY18_IsoMultiplicityTool ]
+                       BPHY18_diMeson_revertex, BPHY18_Select_Kpi, BPHY18_Select_piK, BPHY18_LegTrackIsoTool ]
 
 from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramework__DerivationKernel
 DerivationFrameworkJob += CfgMgr.DerivationFramework__DerivationKernel(
