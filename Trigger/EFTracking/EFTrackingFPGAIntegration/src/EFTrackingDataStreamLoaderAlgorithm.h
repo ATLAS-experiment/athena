@@ -30,6 +30,13 @@ class EFTrackingDataStreamLoaderAlgorithm : public AthReentrantAlgorithm
     8192,
     "Capacity of std::vector."
   };
+
+  Gaudi::Property<bool> m_ignoreIsolatedLineFeed {
+    this,
+    "ignoreIsolatedLineFeed",
+    false,
+    "Set std::vector entry to zero is csv line only contains line feed."
+  };
   
  public:
   EFTrackingDataStreamLoaderAlgorithm(const std::string& name, ISvcLocator* pSvcLocator);
