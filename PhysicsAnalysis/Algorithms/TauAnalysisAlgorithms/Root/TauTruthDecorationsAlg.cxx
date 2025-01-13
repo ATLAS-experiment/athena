@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Christian Grefe
@@ -22,6 +22,8 @@
 //
 // method implementations
 //
+
+
 
 namespace CP
 {
@@ -101,57 +103,34 @@ namespace CP
     for (auto &[acc, writeHandleKey] : m_charWriteHandleKeys) {
       charWriteHandles.emplace(acc.get(), SG::WriteDecorHandle<xAOD::TauJetContainer, char>(writeHandleKey, ctx));
     }
-
+    
     SG::WriteDecorHandle<xAOD::TauJetContainer, float> truthDecayModeHandle(m_truthDecayModeKey, ctx);
     SG::WriteDecorHandle<xAOD::TauJetContainer, float> truthParticleTypeHandle(m_truthParticleTypeKey, ctx);
     SG::WriteDecorHandle<xAOD::TauJetContainer, float> partonTruthLabelIDHandle(m_partonTruthLabelIDKey, ctx);
-
-    for (const xAOD::TauJet *tau : *taus)
-    {
+    
+    //
+    for (const xAOD::TauJet *tau : *taus){
       const xAOD::TruthParticle* truthParticle = xAOD::TauHelpers::getTruthParticle(tau);
-      if (truthParticle == nullptr) continue;
-
-      for (auto& [acc, writeHandle] : doubleWriteHandles) {
-        if (truthParticle == nullptr or !acc->isAvailable(*truthParticle)) {
-          writeHandle(*tau) = -999.;
-        } else {
-          writeHandle(*tau) = (*acc)(*truthParticle);
+      //ensure _each tau_ is decorated with something, even if truthParticle is nullptr
+      //
+      //some cruft to get from the unordered map to the underlying  type of the handles
+      //T::mapped_type::accessor_t::element_type will be int, float, char etc
+      auto decorateWithNumber = [&truthParticle, &tau]<typename T>(T & writeHandles, T::mapped_type::accessor_t::element_type v)->void{
+        for (auto& [acc, writeHandle] : writeHandles) {
+          if ((!truthParticle) or (!acc->isAvailable(*truthParticle)) ) {
+            writeHandle(*tau) = v;
+          } else {
+            writeHandle(*tau) = (*acc)(*truthParticle);
+          }
         }
-      }
+      };
+      decorateWithNumber(doubleWriteHandles, -999.f);
+      decorateWithNumber(floatWriteHandles, -999.f);
+      decorateWithNumber(intWriteHandles, 0);
+      decorateWithNumber(unsignedIntWriteHandles, 0);
+      decorateWithNumber(charWriteHandles, 0);
 
-      for (auto& [acc, writeHandle] : floatWriteHandles) {
-        if (truthParticle == nullptr or !acc->isAvailable(*truthParticle)) {
-          writeHandle(*tau) = -999.;
-        } else {
-          writeHandle(*tau) = (*acc)(*truthParticle);
-        }
-      }
-
-      for (auto& [acc, writeHandle] : intWriteHandles) {
-        if (truthParticle == nullptr or !acc->isAvailable(*truthParticle)) {
-          writeHandle(*tau) = -999;
-        } else {
-          writeHandle(*tau) = (*acc)(*truthParticle);
-        }
-      }
-
-       for (auto& [acc, writeHandle] : unsignedIntWriteHandles) {
-        if (truthParticle == nullptr or !acc->isAvailable(*truthParticle)) {
-          writeHandle(*tau) = -999;
-        } else {
-          writeHandle(*tau) = (*acc)(*truthParticle);
-        }
-      }
-
-      for (auto& [acc, writeHandle] : charWriteHandles) {
-        if (truthParticle == nullptr or !acc->isAvailable(*truthParticle)) {
-          writeHandle(*tau) = 0;
-        } else {
-          writeHandle(*tau) = (*acc)(*truthParticle);
-        }
-      }
-
-      truthDecayModeHandle(*tau) = TauAnalysisTools::getTruthDecayMode(*truthParticle);
+      truthDecayModeHandle(*tau) = truthParticle ? TauAnalysisTools::getTruthDecayMode(*truthParticle) : xAOD::TauJetParameters::Mode_Error;
       truthParticleTypeHandle(*tau) = static_cast<int>(TauAnalysisTools::getTruthParticleType(*tau));
 
       static const SG::AuxElement::ConstAccessor<int> acc_PartonTruthLabelID("PartonTruthLabelID");
