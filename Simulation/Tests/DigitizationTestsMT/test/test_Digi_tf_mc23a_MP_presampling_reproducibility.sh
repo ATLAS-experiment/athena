@@ -111,7 +111,7 @@ rc4=-9999
 if [[ $rc -eq 0 ]] && [[ $rc2 -eq 0 ]]
 then
     acmd.py diff-root ${DigiOutFileNameSP} ${DigiOutFileNameMP0} \
-        --mode=semi-detailed --error-mode resilient --order-trees \
+        --nan-equal --mode=semi-detailed --error-mode resilient --order-trees \
         --ignore-leaves RecoTimingObj_p1_Bkg_HITStoRDO_timings index_ref
     rc4=$?
     if [[ $status -eq 0 ]]; then
