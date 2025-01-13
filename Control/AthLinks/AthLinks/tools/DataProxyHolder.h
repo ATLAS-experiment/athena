@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/tools/DataProxyHolder.h
@@ -16,19 +16,20 @@
 
 
 #include "CxxUtils/sgkey_t.h"
-#include "SGTools/CurrentEventStore.h"
-#include "SGTools/DataProxy.h"
-#include "AthenaKernel/IStringPool.h"
-#include "AthenaKernel/RCUObject.h"
-#include "CxxUtils/checker_macros.h"
+#include "GaudiKernel/ClassID.h"
 #include <string>
 #include <unordered_map>
+#include <cassert>
+
+
+class IProxyDict;
 
 
 namespace SG {
 
 
 class ThinningCache;
+class DataProxy;
 
 
 /**
