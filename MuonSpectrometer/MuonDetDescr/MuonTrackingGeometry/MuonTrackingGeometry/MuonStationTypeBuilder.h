@@ -150,7 +150,7 @@ class MuonStationTypeBuilder : public AthAlgTool {
     Trk::MaterialProperties collectStationMaterial(const Trk::TrackingVolume& trVol, double) const;
 
    private:
-    void printVolumeBounds(std::string comment,
+    void printVolumeBounds(const std::string & comment,
                            const Trk::VolumeBounds& vb) const;
 
     // derive layer bounds from the station envelope

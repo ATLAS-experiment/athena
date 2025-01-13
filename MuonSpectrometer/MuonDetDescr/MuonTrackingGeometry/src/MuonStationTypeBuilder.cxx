@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Muon
@@ -2216,7 +2216,6 @@ std::pair<std::unique_ptr<Trk::Layer>,std::vector<std::unique_ptr<Trk::Layer>>>
         double thickness = 2 * cubBounds->halflengthX();
         double sf = 4 * cubBounds->halflengthZ() * cubBounds->halflengthY();
         auto bounds = std::make_unique<Trk::RectangleBounds>(cubBounds->halflengthY(), cubBounds->halflengthZ());
-        std::unique_ptr<Trk::OverlapDescriptor> od;
         Trk::MaterialProperties matProp = collectStationMaterial(trVol, sf);
         ATH_MSG_VERBOSE(" collectStationMaterial cub " << matProp);
         if (matProp.thickness() > thickness) {
@@ -2229,7 +2228,7 @@ std::pair<std::unique_ptr<Trk::Layer>,std::vector<std::unique_ptr<Trk::Layer>>>
         }
         Trk::HomogeneousLayerMaterial mat(matProp, 0.);
         layRepr = std::make_unique<Trk::PlaneLayer>(Amg::getRotateY3D(M_PI_2) * Amg::getRotateZ3D(M_PI_2),
-                                                    bounds->clone(), mat, thickness, std::move(od), 1);
+                                                    bounds->clone(), mat, thickness, nullptr, 1);
         // multilayers
         if (m_multilayerRepresentation && trVol.confinedVolumes()) {
             Trk::BinnedArraySpan<Trk::TrackingVolume* const> vols = trVol.confinedVolumes()->arrayObjects();
@@ -2239,7 +2238,7 @@ std::pair<std::unique_ptr<Trk::Layer>,std::vector<std::unique_ptr<Trk::Layer>>>
                     ATH_MSG_VERBOSE(" collectStationMaterial cub matMulti "<< matMulti);
                     multi.emplace_back(std::make_unique<Trk::PlaneLayer>(vol->transform() * Amg::getRotateY3D(M_PI_2) *  Amg::getRotateZ3D(M_PI_2),
                                                                           bounds->clone(), Trk::HomogeneousLayerMaterial(matMulti, 0.),
-                                                                          matMulti.thickness(), std::move(od), 1));
+                                                                          matMulti.thickness(), nullptr, 1));
                 }
             }
         }
@@ -2249,7 +2248,6 @@ std::pair<std::unique_ptr<Trk::Layer>,std::vector<std::unique_ptr<Trk::Layer>>>
         std::vector<std::unique_ptr<const Trk::Surface>> surfs = toVec(trdBounds->decomposeToSurfaces(Amg::Transform3D::Identity()));
         const Trk::TrapezoidBounds* tbounds = dynamic_cast<const Trk::TrapezoidBounds*>(&surfs[0]->bounds());
         Trk::SharedObject<const Trk::SurfaceBounds> bounds = std::make_unique<Trk::TrapezoidBounds>(*tbounds);
-        std::unique_ptr<Trk::OverlapDescriptor> od = nullptr;
         Trk::MaterialProperties matProp = collectStationMaterial(trVol, sf);
         ATH_MSG_VERBOSE(" collectStationMaterial trd " << matProp << trVol.volumeName());
         if (matProp.thickness() > thickness) {
@@ -2260,7 +2258,7 @@ std::pair<std::unique_ptr<Trk::Layer>,std::vector<std::unique_ptr<Trk::Layer>>>
                                              matProp.averageA(), matProp.averageZ(), matProp.averageRho() / sf);
         }
         Trk::HomogeneousLayerMaterial mat(matProp, 0.);
-        layRepr = std::make_unique<Trk::PlaneLayer>(subt * trVol.transform(), bounds, mat, thickness, std::move(od), 1);
+        layRepr = std::make_unique<Trk::PlaneLayer>(subt * trVol.transform(), bounds, mat, thickness, nullptr, 1);
         
         // multilayers
         if (m_multilayerRepresentation && trVol.confinedVolumes()) {
@@ -2271,7 +2269,7 @@ std::pair<std::unique_ptr<Trk::Layer>,std::vector<std::unique_ptr<Trk::Layer>>>
                     ATH_MSG_VERBOSE(" collectStationMaterial trd matMulti  "<< matMulti);
                     multi.emplace_back(std::make_unique<Trk::PlaneLayer>(Amg::Transform3D(vol->transform()), bounds,
                                                                          Trk::HomogeneousLayerMaterial(matMulti, 0.),
-                                                                         matMulti.thickness(), std::move(od), 1));
+                                                                         matMulti.thickness(), nullptr, 1));
                 }
             }
         }
@@ -2282,7 +2280,6 @@ std::pair<std::unique_ptr<Trk::Layer>,std::vector<std::unique_ptr<Trk::Layer>>>
         std::vector<std::unique_ptr<const Trk::Surface>> surfs = toVec(dtrdBounds->decomposeToSurfaces(Amg::Transform3D::Identity()));
         const Trk::DiamondBounds* dbounds = dynamic_cast<const Trk::DiamondBounds*>(&surfs[0]->bounds());
         Trk::SharedObject<const Trk::SurfaceBounds> bounds = std::make_unique<Trk::DiamondBounds>(*dbounds);
-        std::unique_ptr<Trk::OverlapDescriptor> od = nullptr;
         Trk::MaterialProperties matProp = collectStationMaterial(trVol, sf);
         ATH_MSG_VERBOSE(" collectStationMaterial dtrd  " << matProp);
         if (matProp.thickness() > thickness) {
@@ -2294,7 +2291,7 @@ std::pair<std::unique_ptr<Trk::Layer>,std::vector<std::unique_ptr<Trk::Layer>>>
                                               matProp.averageRho() / sf);
         }
         Trk::HomogeneousLayerMaterial mat(matProp, 0.);
-        layRepr = std::make_unique<Trk::PlaneLayer>(trVol.transform(), bounds, mat, thickness, std::move(od), 1);
+        layRepr = std::make_unique<Trk::PlaneLayer>(trVol.transform(), bounds, mat, thickness, nullptr, 1);
         // multilayers
         if (m_multilayerRepresentation && trVol.confinedVolumes()) {
             Trk::BinnedArraySpan<Trk::TrackingVolume* const> vols = trVol.confinedVolumes()->arrayObjects();
@@ -2304,7 +2301,7 @@ std::pair<std::unique_ptr<Trk::Layer>,std::vector<std::unique_ptr<Trk::Layer>>>
                     ATH_MSG_VERBOSE(" collectStationMaterial dtrd matMulti  " << matMulti);
                     multi.emplace_back(std::make_unique<Trk::PlaneLayer>(vol->transform(), bounds,
                                                                          Trk::HomogeneousLayerMaterial(matMulti, 0.),
-                                                                         matMulti.thickness(), std::move(od), 1));
+                                                                         matMulti.thickness(), nullptr, 1));
                 }
             }
         }
@@ -2436,7 +2433,7 @@ Trk::MaterialProperties Muon::MuonStationTypeBuilder::collectStationMaterial(con
     return layMat;
 }
 
-void Muon::MuonStationTypeBuilder::printVolumeBounds(std::string comment, const Trk::VolumeBounds& volBounds) const {
+void Muon::MuonStationTypeBuilder::printVolumeBounds(const std::string & comment, const Trk::VolumeBounds& volBounds) const {
 
     ATH_MSG_DEBUG(comment);
 
