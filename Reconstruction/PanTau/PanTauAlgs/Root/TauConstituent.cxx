@@ -212,7 +212,7 @@ double PanTau::TauConstituent::getBDTValue() const {
 }
 
 
-std::vector<int> PanTau::TauConstituent::getTypeFlags() const {
+const std::vector<int>& PanTau::TauConstituent::getTypeFlags() const {
   return m_TypeFlags;
 }
 
@@ -241,7 +241,7 @@ void PanTau::TauConstituent::addShot(TauConstituent* shot) {
 }
 
 
-std::vector<PanTau::TauConstituent*> PanTau::TauConstituent::getShots() const {
+const std::vector<PanTau::TauConstituent*>& PanTau::TauConstituent::getShots() const {
   return m_Shots;
 }
 

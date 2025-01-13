@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PANTAUALGS_PANTAUSEED_H
@@ -128,7 +128,7 @@ namespace PanTau {
 		 const std::vector<int>&              pantauSeed_TechnicalQuality
 		 );
 
-    std::string                                         getNameInputAlgorithm() const;
+    const std::string&                                  getNameInputAlgorithm() const;
     const xAOD::TauJet*                                 getTauJet() const;
     xAOD::TauJet*                                       getTauJet();
     const PanTau::TauFeature*                           getFeatures() const;
@@ -137,13 +137,13 @@ namespace PanTau {
     TLorentzVector                                      getProtoMomentumWide() const;
 
     bool                                                getIsValidSeed() const;
-    std::vector<int>                                    getTechnicalQuality() const;
+    const std::vector<int>&                             getTechnicalQuality() const;
     bool                                                isOfTechnicalQuality(int pantauSeed_TechnicalQuality) const;
-    std::vector< std::vector<PanTau::TauConstituent*> > getConstituents() const;
-    std::vector<PanTau::TauConstituent*>                getConstituentsAsList_Core() const;
-    std::vector<PanTau::TauConstituent*>                getConstituentsAsList_Wide() const;
-    std::vector<PanTau::TauConstituent*>                getConstituentsAsList_All() const;
-
+    const std::vector< std::vector<PanTau::TauConstituent*> >& getConstituents() const;
+    const std::vector<PanTau::TauConstituent*>&         getConstituentsAsList_Core() const;
+    const std::vector<PanTau::TauConstituent*>&         getConstituentsAsList_Wide() const;
+    const std::vector<PanTau::TauConstituent*>&         getConstituentsAsList_All() const;
+    
     std::vector<PanTau::TauConstituent*>                getConstituentsOfType(int tauConstituent_Type, bool& foundit);
     int                                                 getNumberOfConstituentsOfType(int tauConstituent_Type);
     TLorentzVector                                      getSubsystemHLV(int tauConstituent_Type, bool& foundit);
@@ -224,25 +224,25 @@ namespace PanTau {
 } //end name space pantau
 
 
-inline std::string                                          PanTau::PanTauSeed::getNameInputAlgorithm() const       {return m_NameInputAlgorithm;}
+inline const std::string&                                   PanTau::PanTauSeed::getNameInputAlgorithm() const       {return m_NameInputAlgorithm;}
 inline const xAOD::TauJet*                                  PanTau::PanTauSeed::getTauJet() const                   {return m_TauJet;}
 inline xAOD::TauJet*                                        PanTau::PanTauSeed::getTauJet()                         {return m_TauJet;}
 inline const PanTau::TauFeature*                            PanTau::PanTauSeed::getFeatures() const                 {return m_Features;}
 inline PanTau::TauFeature*                                  PanTau::PanTauSeed::getFeatures()                       {return m_Features;}
 inline TLorentzVector                                       PanTau::PanTauSeed::getProtoMomentumWide() const        {return m_ProtoMomentum_Wide;}
 inline TLorentzVector                                       PanTau::PanTauSeed::getProtoMomentumCore() const        {return m_ProtoMomentum_Core;}
-inline std::vector< std::vector<PanTau::TauConstituent*> >  PanTau::PanTauSeed::getConstituents() const             {return m_Constituents;}
-inline std::vector<PanTau::TauConstituent*>                 PanTau::PanTauSeed::getConstituentsAsList_Core() const  {return m_ConstituentsList_Core;}
-inline std::vector<PanTau::TauConstituent*>                 PanTau::PanTauSeed::getConstituentsAsList_Wide() const  {return m_ConstituentsList_Wide;}
-inline std::vector<PanTau::TauConstituent*>                 PanTau::PanTauSeed::getConstituentsAsList_All() const   {return m_ConstituentsList_All;}
+inline const std::vector< std::vector<PanTau::TauConstituent*> >&  PanTau::PanTauSeed::getConstituents() const      {return m_Constituents;}
+inline const std::vector<PanTau::TauConstituent*>&          PanTau::PanTauSeed::getConstituentsAsList_Core() const  {return m_ConstituentsList_Core;}
+inline const std::vector<PanTau::TauConstituent*>&          PanTau::PanTauSeed::getConstituentsAsList_Wide() const  {return m_ConstituentsList_Wide;}
+inline const std::vector<PanTau::TauConstituent*>&          PanTau::PanTauSeed::getConstituentsAsList_All() const   {return m_ConstituentsList_All;}
 inline TLorentzVector                                       PanTau::PanTauSeed::getFinalMomentum() const            {return m_FinalMomentum;}
 inline int                                                  PanTau::PanTauSeed::getDecayModeBySubAlg() const        {return m_DecayMode_BySubAlg;}
 inline int                                                  PanTau::PanTauSeed::getDecayModeByPanTau() const        {return m_DecayMode_ByPanTau;}
 inline bool                                                 PanTau::PanTauSeed::getIsValidSeed() const              {return m_IsValidSeed;}
-inline std::vector<int>                                     PanTau::PanTauSeed::getTechnicalQuality() const         {return m_TechnicalQuality;}
+inline const std::vector<int>&                              PanTau::PanTauSeed::getTechnicalQuality() const         {return m_TechnicalQuality;}
 
 inline void                                                 PanTau::PanTauSeed::setFinalMomentum(TLorentzVector finalMom)  {m_FinalMomentum = finalMom;}
-inline void                                                 PanTau::PanTauSeed::setDecayModeByPanTau(int decayModePanTau)           {m_DecayMode_ByPanTau = decayModePanTau;}
+inline void                                                 PanTau::PanTauSeed::setDecayModeByPanTau(int decayModePanTau)  {m_DecayMode_ByPanTau = decayModePanTau;}
 
 
 inline static void                                          PanTau::SetP4EEtaPhiM(TLorentzVector& hlv, double e, double eta, double phi, double m ){
