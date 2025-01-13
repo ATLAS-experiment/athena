@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: PMGCrossSectionTool.cxx 764400 2016-07-26 17:47:39Z tripiana $
@@ -34,7 +34,7 @@ StatusCode PMGCrossSectionTool::initialize() {
 }
 
 
-bool PMGCrossSectionTool::readInfosFromFiles(std::vector<std::string> InputFiles)
+bool PMGCrossSectionTool::readInfosFromFiles(const std::vector<std::string> & InputFiles)
 {
 
   for (const auto& currentFileName : InputFiles) {
