@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## @Package PyJobTransforms.trfValidateRootFile
 # @brief Functionality to test a Root file for corruption
@@ -8,6 +8,7 @@
 # @todo The main() CLI should migrate to @c scripts and this module just implement functions
 
 
+from functools import lru_cache
 import sys, os
 import logging
 
@@ -18,6 +19,12 @@ from ROOT.Experimental import RNTupleReader
 from PyUtils.PoolFile import isRNTuple
 
 msg = logging.getLogger(__name__)
+
+@lru_cache(maxsize=1)
+def getROOTVersion():
+    from Gaudi.Main import BootstrapHelper
+    bsh = BootstrapHelper()
+    return bsh.ROOT_VERSION
 
 def checkBranch(branch):
 
@@ -86,7 +93,10 @@ def checkNTupleEventWise(ntuple, printInterval = 150000):
 
     for i in reader:
         try:
-            entry = reader.GetModel().CreateEntry()
+            if getROOTVersion() >= (6, 33, 0):
+                entry = reader.CreateEntry()
+            else:
+                entry = reader.GetModel().CreateEntry()
             reader.LoadEntry(i, entry)
         except Exception as err:
             msg.warning('Event %s of ntuple %s is corrupted: %s', i, reader.GetDescriptor().GetName(), err)
