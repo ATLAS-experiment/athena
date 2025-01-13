@@ -11,7 +11,7 @@ def TrackToVertexCfg(flags, name="AtlasTrackToVertexTool", **kwargs):
             AtlasExtrapolatorCfg(flags)))
 
     kwargs.setdefault("StartTRTStandaloneTracksAtOriginalPerigee",
-                      flags.Tracking.TRTStandalone.startArOriginalPerigee)
+                      flags.Tracking.TRTStandalone.startAtOriginalPerigee)
     result.setPrivateTools(CompFactory.Reco.TrackToVertex(name, **kwargs))
     return result
 
@@ -23,6 +23,6 @@ def InDetTrackToVertexCfg(flags, name='InDetTrackToVertex', **kwargs):
             InDetExtrapolatorCfg(flags)))
 
     kwargs.setdefault("StartTRTStandaloneTracksAtOriginalPerigee",
-                      flags.Tracking.TRTStandalone.startArOriginalPerigee)
+                      flags.Tracking.TRTStandalone.startAtOriginalPerigee)
     result.setPrivateTools(CompFactory.Reco.TrackToVertex(name, **kwargs))
     return result

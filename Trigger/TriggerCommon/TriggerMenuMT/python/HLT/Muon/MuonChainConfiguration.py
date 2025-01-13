@@ -181,20 +181,16 @@ class MuonChainConfiguration(ChainConfigurationBase):
         return self.getStep(flags, 'muEFMSIso',[ muEFMSIsoSequenceGenCfg], is_probe_leg=is_probe_leg)
 
     #--------------------
-    def getmuMSEmptyAll(self, flags, stepID): # No T&P info needed for empty step?
-        return self.getEmptyStep(stepID,'muMS_empty')
-
-    #--------------------
     def getmuMSEmpty(self, flags, is_probe_leg=False): # No T&P info needed for empty step?
-        return self.getmuMSEmptyAll(flags, 2)
+        return self.getEmptyStep('muMS_empty')
 
     #--------------------
     def getmuFastEmpty(self, flags, is_probe_leg=False): # No T&P info needed for empty step?
-        return self.getEmptyStep(1,'muFast_empty')
+        return self.getEmptyStep('muFast_empty')
 
     #--------------------
     def getEFCBEmpty(self, flags, is_probe_leg=False): # No T&P info needed for empty step?
-        return self.getEmptyStep(4,'muefCB_Empty')
+        return self.getEmptyStep('muefCB_Empty')
 
     #--------------------
     def getLateMuRoI(self, flags, is_probe_leg=False): # No T&P support, add if needed

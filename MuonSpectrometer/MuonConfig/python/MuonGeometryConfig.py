@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -99,6 +99,7 @@ def MuonDetectorToolCfg(flags, name = "MuonDetectorTool", **kwargs):
 
 def MuonAlignmentCondAlgCfg(flags, name="MuonAlignmentCondAlg", **kwargs):
     acc = ComponentAccumulator()
+
     # here define if I-lines (CSC internal alignment) are enabled
     acc.merge(CscILineCondAlgCfg(flags))
     # here define if As-Built (MDT chamber alignment) are enabled
@@ -110,7 +111,7 @@ def MuonAlignmentCondAlgCfg(flags, name="MuonAlignmentCondAlg", **kwargs):
         return acc
     from IOVDbSvc.IOVDbSvcConfig import addFolders    
     
-    onl = "/Onl" if flags.Common.isOnline and not flags.Input.isMC else ""
+    onl = "/Onl" if ((flags.Common.isOnline or flags.IOVDb.GlobalTag.startswith("CONDBR2-HLTP")) and not flags.Input.isMC else ""
     ParlineFolders = [f"/MUONALIGN{onl}/MDT/BARREL", 
                       f"/MUONALIGN{onl}/MDT/ENDCAP/SIDEA",
                       f"/MUONALIGN{onl}/MDT/ENDCAP/SIDEC", 

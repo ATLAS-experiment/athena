@@ -62,10 +62,9 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
         # if not returned any step
         raise RuntimeError("[getStep] No sequences generated for step %s!", stepName)
 
-    def getEmptyStep(self, stepID, stepPartName):
-        stepName = 'Step%s'%str(stepID) + '_' + stepPartName
-        log.debug("Configuring empty step %s", stepName)
-        return ChainStep(stepName, chainDicts=[self.dict], isEmpty = True)
+    def getEmptyStep(self, stepName):
+        log.debug('Configuring empty step %s', stepName)
+        return ChainStep(stepName, chainDicts=[self.dict], isEmpty=True)
  
     def buildChain(self, chainSteps):
     

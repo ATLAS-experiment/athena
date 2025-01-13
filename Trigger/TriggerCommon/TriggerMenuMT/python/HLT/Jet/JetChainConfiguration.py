@@ -135,7 +135,7 @@ class JetChainConfiguration(ChainConfigurationBase):
                 caloRecoStep = self.getJetCaloRecoChainStep(flags)
                 chainSteps.append( caloRecoStep )
                 #Add empty step to align with preselection step
-                roitrkPreselStep = self.getEmptyStep(2, 'RoIFTFEmptyStep')
+                roitrkPreselStep = self.getEmptyStep('RoIFTFEmptyStep')
             else:
                 # Add calo preselection step
                 preselJetDef, jetPreselStep = self.getJetCaloPreselChainStep(flags)
@@ -146,7 +146,7 @@ class JetChainConfiguration(ChainConfigurationBase):
                     roitrkPreselStep = self.getJetRoITrackJetTagPreselChainStep(flags, preselJetDef)
                 else:
                     # Empty step for alignment if no roiftf preselection defined
-                    roitrkPreselStep=self.getEmptyStep(2, 'RoIFTFEmptyStep')
+                    roitrkPreselStep=self.getEmptyStep('RoIFTFEmptyStep')
 
             chainSteps.append(roitrkPreselStep)
             # Final selection with FS tracking
@@ -166,7 +166,7 @@ class JetChainConfiguration(ChainConfigurationBase):
             chainSteps+= [ CRVARStep]
         elif self.exotHypo != '' and ("calratio" in self.exotHypo):
             CRStep = self.getJetCRChainStep(flags, self.jetName, self.exotHypo)
-            chainSteps+= [self.getEmptyStep(2, 'RoIFTFEmptyStep'), CRStep]
+            chainSteps+= [self.getEmptyStep('RoIFTFEmptyStep'), CRStep]
 
         myChain = self.buildChain(chainSteps)
 

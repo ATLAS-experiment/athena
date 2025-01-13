@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //                           jFEXOutputCollection.h  -
@@ -44,12 +44,12 @@ class jFEXOutputCollection
         int PileupEtSize() const;
         void setdooutput(bool);
         bool getdooutput() const;
-        int get_smallRJet(int,std::string) const;
-        int get_largeRJet(int,std::string) const;
-        int get_tau(int,std::string) const;
-        int get_fwdEl(int,std::string) const;
-        int get_pileup(int,std::string) const;
-        std::vector<int> get_pileup_map(int,std::string) const;
+        int get_smallRJet(int,const std::string&) const;
+        int get_largeRJet(int,const std::string&) const;
+        int get_tau(int,const std::string&) const;
+        int get_fwdEl(int,const std::string&) const;
+        int get_pileup(int,const std::string&) const;
+        std::vector<int> get_pileup_map(int,const std::string&) const;
     private:
         bool m_dooutput;
         std::unordered_map<std::string, int> m_values_tem_smallRJet;
@@ -58,8 +58,8 @@ class jFEXOutputCollection
         std::vector<std::unique_ptr<std::unordered_map<std::string, int>> > m_allvalues_largeRJet;
         std::unordered_map<std::string, int> m_values_tem_tau;
         std::vector<std::unique_ptr<std::unordered_map<std::string, int>> > m_allvalues_tau;
-	std::unordered_map<std::string, int> m_values_tem_fwdEl;
-	std::vector<std::unique_ptr<std::unordered_map<std::string, int>> > m_allvalues_fwdEl;
+        std::unordered_map<std::string, int> m_values_tem_fwdEl;
+        std::vector<std::unique_ptr<std::unordered_map<std::string, int>> > m_allvalues_fwdEl;
         std::unordered_map<std::string, int> m_values_tem_pileup;
         std::vector< std::unique_ptr<std::unordered_map<std::string, int>> > m_allvalues_pileup;
         std::unordered_map<std::string, std::vector<int> > m_values_tem_pileup_maps;

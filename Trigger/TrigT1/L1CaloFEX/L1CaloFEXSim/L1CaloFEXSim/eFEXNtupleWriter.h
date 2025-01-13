@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -49,8 +49,8 @@ private:
   /// @brief readhandle key for eFEXOutputCollection
   SG::ReadHandleKey<LVL1::eFEXOutputCollection> m_eFEXOutputCollectionSGKey {this, "MyOutputs", "eFEXOutputCollection", "MyOutputs"};
 
-  int m_eg_nTOBs; ///< number of e-gamma tobs
-  bool m_load_truth_jet; ///< if load truth jets
+  int m_eg_nTOBs{}; ///< number of e-gamma tobs
+  bool m_load_truth_jet{}; ///< if load truth jets
 
   // values from the e-gamma algorithm
   std::vector<float> m_em;
@@ -115,7 +115,7 @@ private:
   std::vector<float> m_eg_TOB_energy;
   
   std::string m_jet_container_name = "AntiKt10TruthJets"; ///< truth jet type
-  TTree *m_myTree;
+  TTree *m_myTree{};
   
   /// @brief save variables related to the e-gamma algorithm
   StatusCode loadegAlgoVariables(SG::ReadHandle<LVL1::eFEXOutputCollection>);

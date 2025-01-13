@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -69,13 +69,13 @@ private:
   void setSCellPointers();
   void setThresholdPointers();
 
-  unsigned int m_hadFracMultipliers[3];
-  unsigned int m_bdtThresholds[3];
-  unsigned int m_etThreshold;
-  unsigned int m_maxEtThreshold;
-  unsigned int m_bdtMinEtThreshold;
+  unsigned int m_hadFracMultipliers[3]{};
+  unsigned int m_bdtThresholds[3]{};
+  unsigned int m_etThreshold{};
+  unsigned int m_maxEtThreshold{};
+  unsigned int m_bdtMinEtThreshold{};
 
-  unsigned int m_bdtScore;
+  unsigned int m_bdtScore{};
 
   // Final computed BDT variables
   std::vector<unsigned int> m_bdtVars;

@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //              jFEXForwardElecInfo - Class to store information about trigger towers
@@ -60,7 +60,7 @@ class jFEXForwardElecInfo {
   int  getTTClusEtEM();           //used
   bool getTTClusSatEM();
   void  includeTTinSearchWindow(uint TT_ID);
-  std::vector<uint> getTTinSearchWindow();
+  const std::vector<uint>& getTTinSearchWindow();
   // floating point values
   void  setCoreTTfEta(float feta);//used
   float getCoreTTfEta();          //used

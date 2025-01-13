@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************  
 //              jFEXForwardElecInfo - 
@@ -187,7 +187,7 @@ void LVL1::jFEXForwardElecInfo::includeTTinSearchWindow(uint TT_ID){
   m_TTsInSearchWindow.push_back(TT_ID);
 }
 
-std::vector<uint> LVL1::jFEXForwardElecInfo::getTTinSearchWindow(){
+const std::vector<uint>& LVL1::jFEXForwardElecInfo::getTTinSearchWindow(){
   return m_TTsInSearchWindow;
 }
 

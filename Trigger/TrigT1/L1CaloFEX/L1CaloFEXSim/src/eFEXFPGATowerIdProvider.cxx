@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1CaloFEXSim/eFEXFPGATowerIdProvider.h"
@@ -17,7 +17,6 @@ LVL1::eFEXFPGATowerIdProvider::eFEXFPGATowerIdProvider(const std::string &type, 
 
 StatusCode LVL1::eFEXFPGATowerIdProvider::initialize()
 {
-  m_hascsvfile = false;
   std::string csvpath =  PathResolver::find_file("tower_fpga_efex_map.csv", "DATAPATH");
   if (setAddress(csvpath) == StatusCode::FAILURE) {
     ATH_MSG_WARNING("tower_fpga_efex_map.csv missing or invalid. Swiching to hard-coded mapping.");
@@ -27,15 +26,8 @@ StatusCode LVL1::eFEXFPGATowerIdProvider::initialize()
 
 LVL1::eFEXFPGATowerIdProvider::~eFEXFPGATowerIdProvider()
 {
-  for (auto each : m_alltowers) {
-    delete each.second;
-  }
   m_alltowers.clear();
-  for (auto each : m_towerrankingcache) {
-    delete each;
-    each = nullptr;
-  }
-  m_hascsvfile = false;
+  m_towerrankingcache.clear();
 }
 
 StatusCode LVL1::eFEXFPGATowerIdProvider::setAddress(const std::string& inputaddress) 
@@ -50,7 +42,8 @@ StatusCode LVL1::eFEXFPGATowerIdProvider::setAddress(const std::string& inputadd
     m_hascsvfile = false;
     return StatusCode::FAILURE;
   }
-  m_towerrankingcache = std::vector<std::vector<int>*>(96, nullptr);
+  m_towerrankingcache.clear();
+  m_towerrankingcache.resize(96);
   // sort the towers in each FPGA
   for (int efex{ 0 }; efex < 24; efex++) {
     for (int fpga{ 0 }; fpga < 4; fpga++) {
@@ -174,14 +167,15 @@ StatusCode LVL1::eFEXFPGATowerIdProvider::rankTowerinFPGA(int FPGAindex)
         }
         return (a.first > b.first);
       });
-    std::vector<int>* output = new std::vector<int>;
+    auto output = std::make_unique<std::vector<int>>();
+    output->reserve(60);
     int vectorindex = 0;
     for (int i{ 0 }; i < 10; i++) {
       for (int j{ 0 }; j < 6; j++) {
         output->push_back(rankingmap[vectorindex++].second);
       }
     }
-    m_towerrankingcache[FPGAindex] = output;
+    m_towerrankingcache[FPGAindex] = std::move(output);
   }
   return StatusCode::SUCCESS;
 }
@@ -189,11 +183,7 @@ StatusCode LVL1::eFEXFPGATowerIdProvider::rankTowerinFPGA(int FPGAindex)
 bool LVL1::eFEXFPGATowerIdProvider::hasFPGA(int FPGAindex) const
 {
   // check if the info of a speific FPGA has been loaded or not
-  std::unordered_map<int, std::vector<towerinfo>*>::const_iterator haskey = m_alltowers.find(FPGAindex);
-  if (haskey == m_alltowers.end()) {
-    return false;
-  }
-  return true;
+  return m_alltowers.contains(FPGAindex);
 }
 
 StatusCode LVL1::eFEXFPGATowerIdProvider::loadcsv()
@@ -272,9 +262,7 @@ StatusCode LVL1::eFEXFPGATowerIdProvider::loadcsv()
       if (hasFPGA(FPGAindex)) {
         m_alltowers[FPGAindex]->push_back(tem_towerinfo);
       } else {
-        std::vector<towerinfo>* FPGAinfovector = new std::vector<towerinfo>;
-        FPGAinfovector->push_back(tem_towerinfo);
-        m_alltowers[FPGAindex] = FPGAinfovector;
+        m_alltowers[FPGAindex] = std::make_unique<std::vector<towerinfo>>(std::vector{tem_towerinfo});
       }
     }
     myfile.close();

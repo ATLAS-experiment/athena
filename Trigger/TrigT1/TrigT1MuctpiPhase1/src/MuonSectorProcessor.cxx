@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // First the corresponding header.
@@ -214,7 +214,7 @@ namespace LVL1MUCTPIPHASE1 {
     if (!m_l1menu) return false;
 
     m_ptEncoding.clear();
-    m_ptEncoding = std::vector<std::map<int, int> >(3, std::map<int, int>());
+    m_ptEncoding.resize(3);
 
     //build the map between index and pt threshold.
     //the index is the 3- or 4-bit pt word, and has a different
