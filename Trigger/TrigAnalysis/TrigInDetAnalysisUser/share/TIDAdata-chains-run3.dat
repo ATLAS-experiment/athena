@@ -94,7 +94,11 @@ testChains = {
     "HLT_tau25_idperf_trackLRT_L1TAU12IM:HLT_IDTrack_TauLRT_IDTrig:HLT_Roi_TauLRT",
     
     "HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1J20:HLT_IDTrack_Bjet_FTF",
+    "HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1J20:HLT_IDTrack_Bjet_IDTrig",
+    "HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1J20:HLT_IDTrack_FS_FTF:HLT_FSRoI:HLT_IDVertex_FS:post:rvtx=HLT_IDVertex_FS",
+    "HLT_j45_subjesgscIS_ftf_boffperf_split_L1J20:HLT_IDTrack_FS_FTF:HLT_FSRoI:HLT_IDVertex_FS:post:rvtx=HLT_IDVertex_FS",
 
+    
     "HLT_mb_sptrk_L1RD0_FILLED:HLT_IDTrack_MinBias_IDTrig",
     
     "HLT_2mu4_bBmumux_BsmumuPhi_L12MU3V:HLT_IDTrack_Bmumux_FTF",
