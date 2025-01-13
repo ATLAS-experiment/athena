@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _VrtSecInclusive_VrtSecInclusive_Utilities_H
@@ -116,16 +116,17 @@ namespace VKalVrtAthena {
     const LeptonContainer *leptonContainer( nullptr );
     ATH_CHECK( evtStore()->retrieve( leptonContainer, containerName ) );
     
-    if( !m_decor_d0_wrtSVs    ) m_decor_d0_wrtSVs    = std::make_unique<IPDecoratorType>( "d0_wrtSVs"    + m_jp.augVerString );
-    if( !m_decor_z0_wrtSVs    ) m_decor_z0_wrtSVs    = std::make_unique<IPDecoratorType>( "z0_wrtSVs"    + m_jp.augVerString );
-    if( !m_decor_pt_wrtSVs    ) m_decor_pt_wrtSVs    = std::make_unique<IPDecoratorType>( "pt_wrtSVs"    + m_jp.augVerString );
-    if( !m_decor_eta_wrtSVs   ) m_decor_eta_wrtSVs   = std::make_unique<IPDecoratorType>( "eta_wrtSVs"   + m_jp.augVerString );
-    if( !m_decor_phi_wrtSVs   ) m_decor_phi_wrtSVs   = std::make_unique<IPDecoratorType>( "phi_wrtSVs"   + m_jp.augVerString );
-    if( !m_decor_d0err_wrtSVs ) m_decor_d0err_wrtSVs = std::make_unique<IPDecoratorType>( "d0err_wrtSVs" + m_jp.augVerString );
-    if( !m_decor_z0err_wrtSVs ) m_decor_z0err_wrtSVs = std::make_unique<IPDecoratorType>( "z0err_wrtSVs" + m_jp.augVerString );
+    if (m_ipDecors.empty()) {
+      m_ipDecors.emplace_back( "d0_wrtSVs"    + m_jp.augVerString );
+      m_ipDecors.emplace_back( "z0_wrtSVs"    + m_jp.augVerString );
+      m_ipDecors.emplace_back( "pt_wrtSVs"    + m_jp.augVerString );
+      m_ipDecors.emplace_back( "eta_wrtSVs"   + m_jp.augVerString );
+      m_ipDecors.emplace_back( "phi_wrtSVs"   + m_jp.augVerString );
+      m_ipDecors.emplace_back( "d0err_wrtSVs" + m_jp.augVerString );
+      m_ipDecors.emplace_back( "z0err_wrtSVs" + m_jp.augVerString );
+    }
     
     // Grouping decorators
-    std::vector< IPDecoratorType* > decor_ipWrtSVs { m_decor_d0_wrtSVs.get(), m_decor_z0_wrtSVs.get(), m_decor_pt_wrtSVs.get(), m_decor_eta_wrtSVs.get(), m_decor_phi_wrtSVs.get(), m_decor_d0err_wrtSVs.get(), m_decor_z0err_wrtSVs.get() };
     enum { k_ip_d0, k_ip_z0, k_ip_pt, k_ip_eta, k_ip_phi, k_ip_d0err, k_ip_z0err };
     
     if( !m_decor_svLink ) m_decor_svLink = std::make_unique< VertexELType >( "svLinks" + m_jp.augVerString );
@@ -133,7 +134,7 @@ namespace VKalVrtAthena {
     // Loop over leptons
     for( const auto& lepton : *leptonContainer ) {
       
-      std::vector< std::vector< std::vector<float> > > ip_wrtSVs( decor_ipWrtSVs.size() ); // triple nest of { ip parameters, tracks, DVs }
+      std::vector< std::vector< std::vector<float> > > ip_wrtSVs( m_ipDecors.size() ); // triple nest of { ip parameters, tracks, DVs }
       
       bool linkFlag { false };
       
@@ -143,7 +144,7 @@ namespace VKalVrtAthena {
       // Loop over lepton types
       for( auto& trackType : trackTypes ) {
         
-        std::vector< std::vector<float> > ip_wrtSV( decor_ipWrtSVs.size() ); // nest of { tracks, DVs }
+        std::vector< std::vector<float> > ip_wrtSV( m_ipDecors.size() ); // nest of { tracks, DVs }
         
         const auto* trk = getLeptonTrackParticle<LeptonFlavor>( lepton, trackType );
         
@@ -199,8 +200,10 @@ namespace VKalVrtAthena {
       } // end of track type loop
       
       // decoration
-      for( size_t ipar = 0; ipar < decor_ipWrtSVs.size(); ipar++ ) ( *( decor_ipWrtSVs.at( ipar ) ) )( *lepton ) = ip_wrtSVs.at( ipar );
-      
+      for( size_t ipar = 0; ipar < m_ipDecors.size(); ipar++ ) {
+        m_ipDecors.at( ipar )( *lepton ) = ip_wrtSVs.at( ipar );
+      }
+
     } // end of lepton container loop
     
     return StatusCode::SUCCESS;
