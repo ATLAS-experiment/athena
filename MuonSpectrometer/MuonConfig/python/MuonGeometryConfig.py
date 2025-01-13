@@ -111,7 +111,7 @@ def MuonAlignmentCondAlgCfg(flags, name="MuonAlignmentCondAlg", **kwargs):
         return acc
     from IOVDbSvc.IOVDbSvcConfig import addFolders    
     
-    onl = "/Onl" if ((flags.Common.isOnline or flags.IOVDb.GlobalTag.startswith("CONDBR2-HLTP")) and not flags.Input.isMC else ""
+    onl = "/Onl" if ((flags.Common.isOnline or flags.IOVDb.GlobalTag.startswith("CONDBR2-HLTP")) and not flags.Input.isMC) else ""
     ParlineFolders = [f"/MUONALIGN{onl}/MDT/BARREL", 
                       f"/MUONALIGN{onl}/MDT/ENDCAP/SIDEA",
                       f"/MUONALIGN{onl}/MDT/ENDCAP/SIDEC", 
