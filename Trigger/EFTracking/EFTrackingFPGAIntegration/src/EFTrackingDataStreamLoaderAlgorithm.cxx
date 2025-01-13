@@ -45,11 +45,19 @@ StatusCode EFTrackingDataStreamLoaderAlgorithm::execute(const EventContext& ctx)
       return StatusCode::FAILURE;
     }
 
-    const auto word = [&inputFile]->std::optional<unsigned long> {
+    const auto word = [&]->std::optional<unsigned long> {
                         std::string word{};
                         std::getline(inputFile, word);
                         
-                        // (8 ascii character) x (2 char per ascii character)
+                        if (m_ignoreIsolatedLineFeed && word.size() == 0) {
+                          ATH_MSG_WARNING("Found isolated line feed in " <<
+                                          m_inputCsvPath << 
+                                          ". Inserting zero to data stream.");
+
+                          return {0};
+                        }
+
+                        // (8 ascii characters) x (2 char per ascii character)
                         if (word.size() != 16) {
                           return std::nullopt;
                         }
