@@ -2096,7 +2096,7 @@ double egammaEnergyCorrectionTool::getCorrectedEnergy(
                m_esmodel <= egEnergyCorr::es2018_R21_v1) {
         daAF2 = 0.001*sign;
       }
-      else if (m_esmodel >= egEnergyCorr::es2022_R22_PRE or
+      else if (m_esmodel >= egEnergyCorr::es2022_R22_PRE and
                m_esmodel <= egEnergyCorr::es2024_Run3_ofc0_v0) {
         if (ptype == PATCore::ParticleType::ConvertedPhoton and
             fullyCorrectedEnergy/cosh(cl_eta) < 20e3) {
