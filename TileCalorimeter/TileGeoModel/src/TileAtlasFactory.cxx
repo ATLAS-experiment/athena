@@ -163,8 +163,8 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
   // --------------- TILE  -------  TILE  --------- TILE ---------- TILE ------------
   // Envelope creation. Building three tree tops for standard setup and only one for commissioning
-  GeoLogVol  *lvTileEnvelopeBarrel =0, *lvTileEnvelopePosEndcap =0, *lvTileEnvelopeNegEndcap =0, *lvTileEnvelopePosCrack =0, *lvTileEnvelopeNegCrack =0;
-  GeoPhysVol *pvTileEnvelopeBarrel =0, *pvTileEnvelopePosEndcap =0, *pvTileEnvelopeNegEndcap =0, *pvTileEnvelopePosCrack =0, *pvTileEnvelopeNegCrack =0;
+  GeoIntrusivePtr<GeoLogVol> lvTileEnvelopeBarrel{nullptr}, lvTileEnvelopePosEndcap{nullptr}, lvTileEnvelopeNegEndcap{nullptr}, lvTileEnvelopePosCrack{nullptr}, lvTileEnvelopeNegCrack{nullptr};
+  PVLink pvTileEnvelopeBarrel{nullptr}, pvTileEnvelopePosEndcap{nullptr}, pvTileEnvelopeNegEndcap {nullptr}, pvTileEnvelopePosCrack{nullptr}, pvTileEnvelopeNegCrack{nullptr};
 
   if (crack_flag==2) {
     if ( m_volumeNames.size()<1 ) {
@@ -175,12 +175,10 @@ void TileAtlasFactory::create(GeoPhysVol *world)
       GeoVolumeVec_t vols = geoGetVolumes (&*world);
       for (auto v : vols) {
         if (v.first->getLogVol()->getName() == m_volumeNames[0] ) {
-          GeoPhysVol* tmpPV ATLAS_THREAD_SAFE = (GeoPhysVol *)(v.first);
-          pvTileEnvelopePosCrack = tmpPV;
+          pvTileEnvelopePosCrack = const_pointer_cast(PVConstLink{v.first});
 	}
         else if (m_volumeNames.size()>1 && v.first->getLogVol()->getName() == m_volumeNames[1] ) {
-	  GeoPhysVol* tmpPV ATLAS_THREAD_SAFE = (GeoPhysVol *)(v.first);
-          pvTileEnvelopeNegCrack = tmpPV;
+          pvTileEnvelopeNegCrack = const_pointer_cast(PVConstLink{v.first});
 	}
       }
     }
@@ -691,15 +689,15 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     sectionBuilder->setExtendedPeriodThickness(2.*(dbManager->TILBdzmast() + dbManager->TILBdzspac() + 2.*dzGlue)*Gaudi::Units::cm);
   }
 
-  GeoPhysVol *pvBarrelMother{nullptr},     *pvFingerMotherNeg{nullptr}, *pvFingerMotherPos{nullptr}, *pvSaddleMotherNeg{nullptr},  *pvSaddleMotherPos{nullptr};
-  GeoPhysVol *pvEBarrelMotherNeg{nullptr}, *pvEBarrelMotherPos{nullptr};
-  GeoPhysVol *pvEFingerMotherNeg{nullptr}, *pvEFingerMotherPos{nullptr}, *pvESaddleMotherNeg{nullptr}, *pvESaddleMotherPos{nullptr};
-  GeoPhysVol *pvITCMotherNeg{nullptr},     *pvITCMotherPos{nullptr};
-  GeoPhysVol *pvGapMotherNeg{nullptr},     *pvGapMotherPos{nullptr};
-  GeoPhysVol *pvCrackMotherNeg{nullptr},   *pvCrackMotherPos{nullptr};
+  PVLink pvBarrelMother{nullptr},     pvFingerMotherNeg{nullptr}, pvFingerMotherPos{nullptr}, pvSaddleMotherNeg{nullptr},  pvSaddleMotherPos{nullptr};
+  PVLink pvEBarrelMotherNeg{nullptr}, pvEBarrelMotherPos{nullptr};
+  PVLink pvEFingerMotherNeg{nullptr}, pvEFingerMotherPos{nullptr}, pvESaddleMotherNeg{nullptr}, pvESaddleMotherPos{nullptr};
+  PVLink pvITCMotherNeg{nullptr},     pvITCMotherPos{nullptr};
+  PVLink pvGapMotherNeg{nullptr},     pvGapMotherPos{nullptr};
+  PVLink pvCrackMotherNeg{nullptr},   pvCrackMotherPos{nullptr};
 
   GeoLogVol  *lvEBarrelModuleMotherPos{nullptr}, *lvEBarrelModuleMotherNeg{nullptr};
-  GeoPhysVol *pvEBarrelModuleMotherPos{nullptr}, *pvEBarrelModuleMotherNeg{nullptr};
+  PVLink pvEBarrelModuleMotherPos{nullptr}, pvEBarrelModuleMotherNeg{nullptr};
 
   /*
     GeoPhysVol *pvTmp_EBarrelModuleMotherPos =0,*pvTmL_EBarrelModuleMotherPos =0,*pvTmR_EBarrelModuleMotherPos =0;
@@ -1347,7 +1345,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                                                   heightWedgeMother/2);
 
           GeoLogVol* lvBarrelModuleMother = new GeoLogVol("BarrelModule",barrelModuleMother,matAir);
-          GeoPhysVol* pvBarrelModuleMother = new GeoPhysVol(lvBarrelModuleMother);
+          PVLink pvBarrelModuleMother = new GeoPhysVol(lvBarrelModuleMother);
 
           // Fill the section
           if (Filling) {
@@ -1386,7 +1384,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                                                        heightWedgeMother/2);
 
             GeoLogVol* lvFingerModuleMotherPos = new GeoLogVol("FingerModule",fingerModuleMotherPos,matAir);
-            GeoPhysVol* pvFingerModuleMotherPos = new GeoPhysVol(lvFingerModuleMotherPos);
+            PVLink pvFingerModuleMotherPos = new GeoPhysVol(lvFingerModuleMotherPos);
 
             if (Filling)
               sectionBuilder->fillFinger(pvFingerModuleMotherPos, 1,
@@ -1419,7 +1417,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                                                        heightWedgeMother/2);
 
             GeoLogVol* lvFingerModuleMotherNeg = new GeoLogVol("FingerModule",fingerModuleMotherNeg,matAir);
-            GeoPhysVol* pvFingerModuleMotherNeg = new GeoPhysVol(lvFingerModuleMotherNeg);
+            PVLink pvFingerModuleMotherNeg = new GeoPhysVol(lvFingerModuleMotherNeg);
 
             if (Filling)
               sectionBuilder->fillFinger(pvFingerModuleMotherNeg, 1,
@@ -1451,7 +1449,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                                                   0.,deltaPhi*Gaudi::Units::deg);
 
               GeoLogVol* lvSaddleModule = new GeoLogVol("SaddleModule",SaddleModule,matIron);
-              GeoPhysVol* pvSaddleModule = new GeoPhysVol(lvSaddleModule);
+              PVLink pvSaddleModule = new GeoPhysVol(lvSaddleModule);
 
               pvSaddleMotherPos->add(zrotSaddle);
               pvSaddleMotherPos->add(new GeoIdentifierTag(ModuleNcp));
@@ -1638,7 +1636,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                                                    heightWedgeMother/2);
 
           GeoLogVol* lvEFingerModuleMother = new GeoLogVol("EFingerModule",efingerModuleMother,matAir);
-          GeoPhysVol* pvEFingerModuleMother = new GeoPhysVol(lvEFingerModuleMother);
+          PVLink pvEFingerModuleMother = new GeoPhysVol(lvEFingerModuleMother);
 
           // Fill the section
           if (Filling) {
@@ -1667,7 +1665,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                                                   0.,deltaPhi*Gaudi::Units::deg);
 
               GeoLogVol* lvSaddleModule = new GeoLogVol("SaddleModule",SaddleModule,matIron);
-              GeoPhysVol* pvSaddleModule = new GeoPhysVol(lvSaddleModule);
+              PVLink pvSaddleModule = new GeoPhysVol(lvSaddleModule);
 
               pvESaddleMotherPos->add(zrotSaddle);
               pvESaddleMotherPos->add(new GeoIdentifierTag(ModuleNcp));
@@ -1855,7 +1853,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                                                    heightWedgeMother/2);
 
           GeoLogVol* lvEFingerModuleMother = new GeoLogVol("EFingerModule",efingerModuleMother,matAir);
-          GeoPhysVol* pvEFingerModuleMother = new GeoPhysVol(lvEFingerModuleMother);
+          PVLink pvEFingerModuleMother = new GeoPhysVol(lvEFingerModuleMother);
 
           // Fill the section
           if (Filling) {
@@ -1884,7 +1882,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                                                   0.,deltaPhi*Gaudi::Units::deg);
 
               GeoLogVol* lvSaddleModule = new GeoLogVol("SaddleModule",SaddleModule,matIron);
-              GeoPhysVol* pvSaddleModule = new GeoPhysVol(lvSaddleModule);
+              PVLink pvSaddleModule = new GeoPhysVol(lvSaddleModule);
 
               pvESaddleMotherNeg->add(zrotSaddle);
               pvESaddleMotherNeg->add(new GeoIdentifierTag(ModuleNcp));
@@ -1991,7 +1989,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
               GeoTrf::Translate3D itcModuleSubShiftNeg(X, 0., Z);
 
               GeoLogVol* lvITCModuleMotherNeg = new GeoLogVol("ITCModule",&itcModuleMotherNeg,matAir);
-              GeoPhysVol* pvITCModuleMotherNeg = new GeoPhysVol(lvITCModuleMotherNeg);
+              PVLink pvITCModuleMotherNeg = new GeoPhysVol(lvITCModuleMotherNeg);
 
               //Mother volume for ITC1
               //In plug1 it's necessary to produce GeoShapeUnion for mother volume that is composed by two parts:
@@ -2072,7 +2070,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                 lvPlug1ModuleMotherNeg = new GeoLogVol("Plug1Module",plug1SubMotherNeg,matAir);
               }
 
-              GeoPhysVol* pvPlug1ModuleMotherNeg = new GeoPhysVol(lvPlug1ModuleMotherNeg);
+              PVLink pvPlug1ModuleMotherNeg = new GeoPhysVol(lvPlug1ModuleMotherNeg);
 
               // Fill the section
               if (Filling) {
@@ -2120,7 +2118,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                                                           heightWedgeMother/2);
 
                 GeoLogVol* lvPlug2ModuleMotherNeg = new GeoLogVol("Plug2Module",plug2ModuleMotherNeg,matAir);
-                GeoPhysVol* pvPlug2ModuleMotherNeg = new GeoPhysVol(lvPlug2ModuleMotherNeg);
+                PVLink pvPlug2ModuleMotherNeg = new GeoPhysVol(lvPlug2ModuleMotherNeg);
 
                 // Fill the section
                 if (Filling) {
@@ -2194,7 +2192,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                                                       heightWedgeMother/2);
 
               GeoLogVol* lvGapModuleMotherNeg = new GeoLogVol("GapModule",gapModuleMotherNeg,matAir);
-              GeoPhysVol* pvGapModuleMotherNeg = new GeoPhysVol(lvGapModuleMotherNeg);
+              PVLink pvGapModuleMotherNeg = new GeoPhysVol(lvGapModuleMotherNeg);
 
               // Fill the section
               if (Filling) {
@@ -2240,7 +2238,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                                                         heightWedgeMother/2);
 
               GeoLogVol* lvCrackModuleMotherNeg = new GeoLogVol("CrackModule",crackModuleMotherNeg,matAir);
-              GeoPhysVol* pvCrackModuleMotherNeg = new GeoPhysVol(lvCrackModuleMotherNeg);
+              PVLink pvCrackModuleMotherNeg = new GeoPhysVol(lvCrackModuleMotherNeg);
 
               // Fill the section
               if (Filling) {
@@ -2309,7 +2307,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
               GeoTrf::Translate3D itcModuleSubShiftPos(X, 0., Z);
 
               GeoLogVol* lvITCModuleMotherPos = new GeoLogVol("ITCModule",&itcModuleMotherPos,matAir);
-              GeoPhysVol* pvITCModuleMotherPos = new GeoPhysVol(lvITCModuleMotherPos);
+              PVLink pvITCModuleMotherPos = new GeoPhysVol(lvITCModuleMotherPos);
 
               // Mother volume for ITC1
               // In plug1 it's necessary to produce GeoShapeUnion for mother volume that is composed by two parts:
@@ -2392,7 +2390,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                 lvPlug1ModuleMotherPos = new GeoLogVol("Plug1Module",plug1SubMotherPos,matAir);
               }
 
-              GeoPhysVol* pvPlug1ModuleMotherPos = new GeoPhysVol(lvPlug1ModuleMotherPos);
+              PVLink pvPlug1ModuleMotherPos = new GeoPhysVol(lvPlug1ModuleMotherPos);
 
               // Fill the section
               if (Filling) {
@@ -2440,7 +2438,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                                                           heightWedgeMother/2);
 
                 GeoLogVol* lvPlug2ModuleMotherPos = new GeoLogVol("Plug2Module",plug2ModuleMotherPos,matAir);
-                GeoPhysVol* pvPlug2ModuleMotherPos = new GeoPhysVol(lvPlug2ModuleMotherPos);
+                PVLink pvPlug2ModuleMotherPos = new GeoPhysVol(lvPlug2ModuleMotherPos);
 
                 // Fill the section
                 if (Filling) {
@@ -2513,7 +2511,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                                                       heightWedgeMother/2);
 
               GeoLogVol* lvGapModuleMotherPos = new GeoLogVol("GapModule",gapModuleMotherPos,matAir);
-              GeoPhysVol* pvGapModuleMotherPos = new GeoPhysVol(lvGapModuleMotherPos);
+              PVLink pvGapModuleMotherPos = new GeoPhysVol(lvGapModuleMotherPos);
 
               // Fill the section
               if (Filling) {
@@ -2559,7 +2557,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                                                         heightWedgeMother/2);
 
               GeoLogVol* lvCrackModuleMotherPos = new GeoLogVol("CrackModule",crackModuleMotherPos,matAir);
-              GeoPhysVol* pvCrackModuleMotherPos = new GeoPhysVol(lvCrackModuleMotherPos);
+              PVLink pvCrackModuleMotherPos = new GeoPhysVol(lvCrackModuleMotherPos);
 
               // Fill the section
               if (Filling) {
