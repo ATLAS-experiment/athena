@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -107,6 +107,12 @@ StatusCode CountHepMC::execute() {
 
     outputEvtInfo = outputEvtInfoHandle.ptr();
     *outputEvtInfo = *inputEvtInfoHandle;
+
+    // This is sometimes marked as a decoration in the source, meaning
+    // it won't get copied by the assignment above.  Make sure it
+    // gets copied.
+    outputEvtInfo->setMCEventWeights (inputEvtInfoHandle->mcEventWeights());
+
     inpRunNumber = inputEvtInfoHandle->runNumber();
     if(!m_mcWeightsKey.empty()) {
       SG::ReadDecorHandle<xAOD::EventInfo,std::vector<float>> mcWeights(m_mcWeightsKey);
