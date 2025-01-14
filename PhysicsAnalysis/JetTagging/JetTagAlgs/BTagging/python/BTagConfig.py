@@ -66,7 +66,7 @@ def GetTaggerTrainingMap(inputFlags, jet_col):
             "BTagging/20230413/gn2xv00/antikt10ufo/network.onnx",
             "BTagging/20230413/gn2xwithmassv00/antikt10ufo/network.onnx",
             "BTagging/20230705/gn2xv01/antikt10ufo/network.onnx",
-            "BTagging/20240726/GN2Xv02/antikt10ufo/network.onnx"
+            "BTagging/20240925/GN2Xv02/antikt10ufo/network.onnx"
         ],
     }
 
