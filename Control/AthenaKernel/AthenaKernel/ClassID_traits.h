@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_CLASSID_TRAITS_H
@@ -10,63 +10,86 @@
  *
  * @author Paolo Calafiura <pcalafiura@lbl.gov> - ATLAS Collaboration
  */
+
+#include "AthenaKernel/ClassName.h"
+#include "GaudiKernel/ClassID.h"
+
 #include <string>
 #include <typeinfo>
-
-
-#include "GaudiKernel/ClassID.h"
-#include "GaudiKernel/DataObject.h"
-#include "GaudiKernel/System.h"
-
-#include "AthenaKernel/CLIDRegistry.h"
-#include "AthenaKernel/ClassName.h"
-
 #include <type_traits>
+#include <concepts>
 
-
-
-template <bool x> struct ERROR_you_should_use_the_CLASS_DEF_macro_to_define_CLID_and_VERSION;
-template <>       struct ERROR_you_should_use_the_CLASS_DEF_macro_to_define_CLID_and_VERSION<true>{};
 
 ///internal use: issues a compilation error when condition B is false
 #define MY_STATIC_ASSERT( B ) \
-  static_assert (B, "You should use the CLASS_DEF macro to define CLID and VERSION");
+  static_assert (B, "You should use the CLASS_DEF macro to define CLID and VERSION")
+class ClassID_trait_dummy{};
 
 /** @class ClassID_traits
  * @brief  a traits class that associates a CLID to a type T
  * It also detects whether T inherits from Gaudi DataObject
+ *
+ * This default specialization just gives errors.
+ *
+ * Normally, this will get specialized by the @c CLASS_DEF macro.
  */
 template <typename T>
 struct ClassID_traits {
-  //default only works for DataObjects
-  typedef std::is_base_of<DataObject, T> isDObj_t; 
-  ///flags whether T inherits from DataObject
-  static const bool s_isDataObject = isDObj_t::value;
+  // Always false, but needs to depend on T to prevent the assertions
+  // from being instantiated too early.
+  static const bool s_isDataObject = !std::same_as<T, ClassID_trait_dummy>;
+  using has_classID_tag = std::false_type;
+  static const int s_version = 0;
 
-  //default traits for class ID assignment
-  typedef std::integral_constant<bool, s_isDataObject> is_DataObject_tag;
+  static CLID ID() {
+    MY_STATIC_ASSERT(s_isDataObject);
+    return CLID_NULL;
+  }
+
+  static const std::string& typeName() {
+    MY_STATIC_ASSERT(s_isDataObject);
+    static const std::string dummy;
+    return dummy;
+  }
+
+  static const std::type_info& typeInfo() {
+    MY_STATIC_ASSERT(s_isDataObject);
+    return typeid(int);
+  }
+};
+
+
+/**
+ * @brief This specialization is used for classes deriving from @c DataObject.
+ *        To avoid having a compile-time dependency on @c DataObject,
+ *        we enable this based on whether or not @c T::classID() is defined.
+ */
+template <typename T>
+requires requires () {
+  { T::classID() } -> std::convertible_to<CLID>;
+}
+struct ClassID_traits<T> {
+  static const bool s_isDataObject = true;
 
   ///the CLID of T
   static const CLID& ID() { 
-    MY_STATIC_ASSERT(s_isDataObject);
     return T::classID(); 
   }
 
   ///the demangled type name of T
   static const std::string& typeName() {
-    MY_STATIC_ASSERT(s_isDataObject);
-    static const std::string tname = System::typeinfoName(typeid(T));
+    static const std::string tname = Athena::typeinfoName(typeid(T));
     return tname;
   }
 
   ///the type id of T
   static const std::type_info& typeInfo() {
-    MY_STATIC_ASSERT(s_isDataObject);
     return typeid(T);
   }
 
-  typedef std::false_type has_version_tag;
-  typedef std::false_type has_classID_tag;
+  using has_version_tag = std::false_type;
+  using has_classID_tag = std::false_type;
+
   static const int s_version = 0;
 
   // Is this is true, these types will automatically be made

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_CLASS_DEF_H
@@ -11,7 +11,10 @@
  */
 
 #include "AthenaKernel/ClassID_traits.h"
+#include "AthenaKernel/ClassName.h"
+#include "AthenaKernel/CLIDRegistry.h"
 #include "CxxUtils/checker_macros.h"
+#include "GaudiKernel/DataObject.h"
 
 #ifdef __CLING__
 # define CLIDREGISTRY_ADDENTRY(CID, NAME)                               \
@@ -66,7 +69,6 @@
   struct ClassID_traits< NAME > {                                       \
     typedef std::is_base_of<DataObject, NAME> isDObj_t;                 \
     static const bool s_isDataObject = isDObj_t::value;                 \
-    typedef std::integral_constant<bool, s_isDataObject> is_DataObject_tag; \
     typedef std::true_type has_classID_tag;                             \
     static const CLID& ID ATLAS_CHECK_THREAD_SAFETY () { static const CLID c(CID); return  c; }    \
     static const char* typeNameString ATLAS_CHECK_THREAD_SAFETY () {    \
@@ -102,7 +104,6 @@
   struct ClassID_traits< ARG1,ARG2 > {					\
     typedef std::is_base_of<DataObject, ARG1, ARG2 > isDObj_t;          \
     static const bool s_isDataObject = isDObj_t::value;                 \
-    typedef std::integral_constant<bool, s_isDataObject> is_DataObject_tag; \
     typedef std::true_type has_classID_tag;                             \
     static const CLID& ID ATLAS_CHECK_THREAD_SAFETY () {                \
       static const CLID c(CID); return  c;                              \
