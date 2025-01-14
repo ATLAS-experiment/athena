@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //Fixme: cleanup includes.
@@ -447,7 +447,7 @@ void VP1PrepRawDataSystem::userDeselectedSingleNode(SoCooperativeSelection* sel,
 }
 
 //_____________________________________________________________________________________
-void VP1PrepRawDataSystem::userChangedSelection(SoCooperativeSelection*sel , QSet<SoNode*>, QSet<SoPath*>)
+void VP1PrepRawDataSystem::userChangedSelection(SoCooperativeSelection*sel , const QSet<SoNode*>&, QSet<SoPath*>)
 {
   if (m_d->selNode_highlight==sel)
     return;

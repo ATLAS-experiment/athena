@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////
@@ -170,7 +170,7 @@ void Example3DSystem5::userPickedNode(SoNode* pickedNode, SoPath * /*pickedPath*
 }
 
 //_____________________________________________________________________________________
-void Example3DSystem5::userChangedSelection(SoCooperativeSelection*, QSet<SoNode*> nodes, QSet<SoPath*>)
+void Example3DSystem5::userChangedSelection(SoCooperativeSelection*, const QSet<SoNode*> & nodes, QSet<SoPath*>)
 {
   //Calculate and print invariant mass.
   if (nodes.count()<2)

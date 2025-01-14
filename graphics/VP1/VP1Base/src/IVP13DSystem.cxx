@@ -58,7 +58,7 @@ std::map<SoCooperativeSelection*,IVP13DSystem*> IVP13DSystem::Imp::selection2sys
 // Methods invoked upon selection / deselection (to be reimplemented in derived classes).
 void IVP13DSystem::userSelectedSingleNode(SoCooperativeSelection*, SoNode* , SoPath*) {}
 void IVP13DSystem::userDeselectedSingleNode(SoCooperativeSelection*, SoNode* , SoPath*) {}
-void IVP13DSystem::userChangedSelection(SoCooperativeSelection*, QSet<SoNode*>, QSet<SoPath*>) {}
+void IVP13DSystem::userChangedSelection(SoCooperativeSelection*, const QSet<SoNode*>&, QSet<SoPath*>) {}
 void IVP13DSystem::userClickedOnBgd() {}
 
 //___________________________________________________________________________________________________________
