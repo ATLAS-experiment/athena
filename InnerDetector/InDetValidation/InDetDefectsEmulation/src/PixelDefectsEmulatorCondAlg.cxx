@@ -116,6 +116,9 @@ namespace InDet{
   }
 
   StatusCode PixelDefectsEmulatorCondAlg::finalize(){
+     if (m_modulesWithoutDefectParameters>0) {
+        ATH_MSG_WARNING("No defect parameters for " << m_modulesWithoutDefectParameters << " modules.");
+     }
      return StatusCode::SUCCESS;
   }
 
@@ -142,8 +145,8 @@ namespace InDet{
     defects->resize( pixelDetEleColl.cptr()->size());
     unsigned int n_defects_total=0;
     unsigned int n_attempts_max=m_maxAttempts.value();
-    // Silence Clang warnings. It seems that no_column_group_defects_for_matrix_type will be used in the future
-    [[maybe_unused]] unsigned int no_column_group_defects_for_matrix_type=0u;
+    unsigned int no_column_group_defects_for_matrix_type=0u;
+    std::array<unsigned short, 8> no_column_group_defects_n_columns{};
     {
        ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_rngName);
        rngWrapper->setSeed( m_rngName, ctx );
@@ -170,8 +173,23 @@ namespace InDet{
           std::vector<unsigned int>::const_iterator
              matrix_type_iter = std::lower_bound(m_matrixTypeNColumns.begin(),m_matrixTypeNColumns.end(),
                                                  helper.nSensorColumns() );
-          if (matrix_type_iter == m_matrixTypeNColumns.end()) {
-             // @TODO collect information about such modules ?
+          if (matrix_type_iter == m_matrixTypeNColumns.end() || *matrix_type_iter != helper.nSensorColumns()) {
+             // if there are no defect parameters for this module type, issue warning but remember for which
+             // module type this warning has been already issued to issue the warning only once.
+             unsigned int n_types=std::min(static_cast<unsigned int>(no_column_group_defects_n_columns.size()), no_column_group_defects_for_matrix_type);
+             if (n_types < no_column_group_defects_n_columns.size()) {
+                auto no_column_group_defects_n_columns_iter
+                   = std::find(no_column_group_defects_n_columns.begin(),no_column_group_defects_n_columns.begin()+n_types, helper.nSensorColumns());
+                if (no_column_group_defects_n_columns_iter == no_column_group_defects_n_columns.begin()+n_types) {
+                   no_column_group_defects_n_columns.at(n_types)=helper.nSensorColumns();
+                   ATH_MSG_WARNING("No defect parameters for pixel matrices with " << helper.nSensorColumns() << " columns and "
+                                   << helper.nSensorRows() << " rows.");
+                   ++n_types;
+                   if (n_types>=no_column_group_defects_n_columns.size()) {
+                      ATH_MSG_INFO("Too many matrices miss defect parameters. No further such warnings.");
+                   }
+                }
+             }
              ++no_column_group_defects_for_matrix_type;
              continue;
           }
@@ -309,7 +327,7 @@ namespace InDet{
           n_defects_total+=module_defects.size();
        }
     }
-
+    m_modulesWithoutDefectParameters += no_column_group_defects_for_matrix_type;
 
     ATH_CHECK( defectsOut.record (std::move(defects)) );
 
