@@ -34,7 +34,7 @@ JetVarsToKeep = ['ActiveArea', 'ActiveArea4vec_eta', 'ActiveArea4vec_m', 'Active
                  'JetEtaJESScaleMomentum_eta', 'JetEtaJESScaleMomentum_m', 'JetEtaJESScaleMomentum_phi', 'JetEtaJESScaleMomentum_pt',
                  'JetGSCScaleMomentum_eta', 'JetGSCScaleMomentum_m', 'JetGSCScaleMomentum_phi', 'JetGSCScaleMomentum_pt',
                  'Jvt', 'JVFCorr', 'JvtRpt', 'NumTrkPt500', 'NumTrkPt1000', 'SizeParameter', 'SumPtChargedPFOPt500', 'SumPtTrkPt500', 
-                 'SumPtTrkPt1000','Timing','TrackWidthPt1000'
+                 'SumPtTrkPt1000','Timing','TrackWidthPt1000',
              ]
 JetVars = '.'.join(JetVarsToKeep)
 
@@ -43,7 +43,11 @@ JetCopyVarsToKeep = ['pt', 'eta', 'phi', 'm',
                      'JetPileupScaleMomentum_eta', 'JetPileupScaleMomentum_m', 'JetPileupScaleMomentum_phi', 'JetPileupScaleMomentum_pt',
                      'JetEtaJESScaleMomentum_eta', 'JetEtaJESScaleMomentum_m', 'JetEtaJESScaleMomentum_phi', 'JetEtaJESScaleMomentum_pt',
                      'JetGSCScaleMomentum_eta', 'JetGSCScaleMomentum_m', 'JetGSCScaleMomentum_phi', 'JetGSCScaleMomentum_pt',
-                     'Jvt', 'JvtRpt','Timing', 'TracksForMinimalJetTag']
+                     'Jvt', 'JvtRpt','Timing', 'TracksForMinimalJetTag',
+                     # additional variables also stored in TLA stream for jet cleaning studies
+                     # stored for calibrated HLT container in the same way as in the TLA streams
+                     "N90Constituents", "LArQuality", "FracSamplingMax", "NegativeE", "HECQuality", "AverageLArQF", "BchCorrCell",
+                    ]
 
 FastFtagPFlowVarsToKeep = [f'dips20211116_p{x}' for x in 'cub']
 FastFtagPFlowVarsToKeep += [f'fastDIPS20211215_p{x}' for x in 'cub']
