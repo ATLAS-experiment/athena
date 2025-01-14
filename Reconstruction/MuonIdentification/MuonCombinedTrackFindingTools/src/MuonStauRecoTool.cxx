@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonStauRecoTool.h"
@@ -378,8 +378,13 @@ namespace MuonCombined {
                                                 << beta << " diff " << std::abs(beta - betaSeed));
                     if (std::abs(beta - betaSeed) > m_mdttBetaAssociationCut) continue;
 
-                    hits.push_back(Muon::TimePointBetaFitter::Hit(distance, time, er));
-                    candidate.stauHits.push_back(MuGirlNS::StauHit(tech, time + tof, ix, iy, iz, id, ie, er, sh, isEta, propTime));
+                    hits.emplace_back(Muon::TimePointBetaFitter::Hit(distance, time, er));
+                    candidate.stauHits.emplace_back(MuGirlNS::StauHit(tech, time + tof, ix, iy, iz, id, ie, er, sh, isEta, propTime));
+                    if (m_addMDTExtrasMuGirlLowBeta) {
+                        float iadc = mdt->prepRawData()->adc();
+                        float irdrift = mdt->driftRadius();
+                        candidate.stauMDTHitExtras.emplace_back(MuGirlNS::StauMDTHitExtra(iadc, irdrift));
+                    }
                 }
             } else if (m_idHelperSvc->isRpc(id)) {
                 // treat CompetingMuonClustersOnTrack differently than RpcClusterOnTrack
@@ -663,6 +668,11 @@ namespace MuonCombined {
 
                 hits.emplace_back(distance, time, er);
                 candidate.stauHits.emplace_back(MuGirlNS::MDTT_STAU_HIT, time + tof, ix, iy, iz, id, ie, er, sh, isEta, propTime);
+                if (m_addMDTExtrasMuGirlLowBeta) {
+                        float iadc = mdt->prepRawData()->adc();
+                        float irdrift = mdt->driftRadius();
+                        candidate.stauMDTHitExtras.emplace_back(MuGirlNS::StauMDTHitExtra(iadc, irdrift));
+                }
             }
         }
         // fit data
@@ -713,6 +723,9 @@ namespace MuonCombined {
         stauExtras->caloBetaChi2 = 0;
         stauExtras->caloBetaDof = 0;
         stauExtras->hits = candidate.stauHits;
+        if (m_addMDTExtrasMuGirlLowBeta) {
+            stauExtras->extraMDTHitInfo = candidate.stauMDTHitExtras;
+        }
         tag->setStauExtras(stauExtras);
 
         // print results afer refineCandidate
