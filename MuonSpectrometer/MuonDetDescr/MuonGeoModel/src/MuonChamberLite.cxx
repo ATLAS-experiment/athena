@@ -327,10 +327,7 @@ namespace MuonGM {
 
 
 
-            GeoFullPhysVol *lvm = nullptr;
-            GeoFullPhysVol *lvr = nullptr;
-            GeoFullPhysVol *lvt = nullptr;
-            GeoFullPhysVol *lvc = nullptr;
+            GeoIntrusivePtr<GeoFullPhysVol> lvm{}, lvr{}, lvt{}, lvc{};
 
 
 

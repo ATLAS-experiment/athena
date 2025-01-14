@@ -38,8 +38,6 @@ namespace {
 
 namespace MuonGM {
 
-    using PVRef = GeoRef<GeoPhysVol>;
-
     Rpc::Rpc(const MYSQL& mysql, Component *ss) : DetectorElement(ss->name) {
         double tol = 1.e-3;
         RpcComponent *s = (RpcComponent *)ss;
@@ -58,7 +56,7 @@ namespace MuonGM {
             m_nlayers = 3;
     }
 
-    GeoFullPhysVol *Rpc::build(StoredMaterialManager& matManager,
+    GeoIntrusivePtr<GeoFullPhysVol> Rpc::build(StoredMaterialManager& matManager,
                                const MYSQL& mysql,
                                int minimalgeo) {
         std::vector<Cutout *> vcutdef;
@@ -66,7 +64,7 @@ namespace MuonGM {
         return build(matManager, mysql, minimalgeo, cutoutson, vcutdef);
     }
 
-    GeoFullPhysVol *Rpc::build(StoredMaterialManager& matManager,
+    GeoIntrusivePtr<GeoFullPhysVol> Rpc::build(StoredMaterialManager& matManager,
                                const MYSQL& mysql,
                                int minimalgeo, int cutoutson,
                                const std::vector<Cutout *>& vcutdef) {
@@ -116,7 +114,7 @@ namespace MuonGM {
 
         const GeoMaterial *mrpc = matManager.getMaterial("std::Air");
         GeoLogVol *lrpc = new GeoLogVol(logVolName, srpc, mrpc);
-        GeoFullPhysVol *prpc = new GeoFullPhysVol(lrpc);
+        GeoIntrusivePtr<GeoFullPhysVol> prpc = new GeoFullPhysVol(lrpc);
 
         if (minimalgeo == 1)
             return prpc;
@@ -141,10 +139,10 @@ namespace MuonGM {
             const GeoShape *sholpan2 = sholpan;
             const GeoMaterial *mallpan = matManager.getMaterial("std::Aluminium");
             GeoLogVol *lallpan = new GeoLogVol("RPC_AL_extsuppanel", sallpan, mallpan);
-            PVRef pallpan = PVRef (new GeoPhysVol(lallpan));
+            PVLink  pallpan = new GeoPhysVol(lallpan);
             const GeoMaterial *mholpan = matManager.getMaterial("muo::RpcAlHonC");
             GeoLogVol *lholpan = new GeoLogVol("RPC_honeyc_extsuppanel", sholpan2, mholpan);
-            GeoPhysVol *pholpan = new GeoPhysVol(lholpan);
+            PVLink pholpan = new GeoPhysVol(lholpan);
             pallpan->add(pholpan); // this way the honeycomb is a child of its al skin
 
             // Apply cutouts
@@ -158,7 +156,7 @@ namespace MuonGM {
 
                     GeoCutVolAction cutAction(*cutoutShape, cutTrans);
                     pallpan->apply(&cutAction);
-                    pallpan = PVRef (cutAction.getPV());
+                    pallpan = cutAction.getPV();
                 }
             }
 
@@ -179,7 +177,7 @@ namespace MuonGM {
 
             // bottom RpcLayer
             std::unique_ptr<RpcLayer> rl = std::make_unique<RpcLayer>(name, this);
-            GeoVPhysVol *plowergg;
+            PVLink plowergg;
             if (cutoutson && !vcutdef.empty()) {
                 plowergg = rl->build(matManager, mysql, cutoutson, vcutdef);
             } else {
@@ -206,10 +204,10 @@ namespace MuonGM {
             const GeoShape *salcpan = scpan;
             const GeoShape *shocpan2 = shocpan;
             GeoLogVol *lalcpan = new GeoLogVol("RPC_AL_midsuppanel", salcpan, mallpan);
-            PVRef palcpan = PVRef (new GeoPhysVol(lalcpan));
+            PVLink  palcpan = new GeoPhysVol(lalcpan);
             const GeoMaterial *mhocpan = matManager.getMaterial("muo::RpcPapHonC");
             GeoLogVol *lhocpan = new GeoLogVol("RPC_honeyc_midsuppanel", shocpan2, mhocpan);
-            GeoPhysVol *phocpan = new GeoPhysVol(lhocpan);
+            PVLink phocpan = new GeoPhysVol(lhocpan);
             palcpan->add(phocpan); // this way the honeycomb is a child of its al skin
 
             // Apply cutouts
@@ -223,7 +221,7 @@ namespace MuonGM {
 
                     GeoCutVolAction cutAction(*cutoutShape, cutTrans);
                     palcpan->apply(&cutAction);
-                    palcpan = PVRef (cutAction.getPV());
+                    palcpan = cutAction.getPV();
                 }
             }
 
@@ -242,7 +240,7 @@ namespace MuonGM {
 
             // top RpcLayer
             std::unique_ptr<RpcLayer> ru = std::make_unique<RpcLayer>(name, this);
-            GeoVPhysVol *puppergg;
+            PVLink puppergg;
             if (cutoutson && !vcutdef.empty()) {
                 // This code required to take into account the various
                 // 180 degree rotations of RPC panels in BMS chambers
@@ -314,7 +312,7 @@ namespace MuonGM {
             if (m_nlayers == 3) {
                 newpos += rpcLayerThickness / 2.;
                 RpcLayer rthird (name, this);
-                GeoVPhysVol *pthirdgg;
+                PVLink pthirdgg;
                 if (cutoutson && !vcutdef.empty()) {
                     pthirdgg = rthird.build(matManager, mysql, cutoutson, vcutdef);
                 } else {
