@@ -718,7 +718,7 @@ BOOST_AUTO_TEST_CASE( stringFromCollection ) {
       const std::string& getName() const { return name; }
     };
     std::vector<StringInObject> testData({{0, "PIX"}, {1, "PIX"}, {3, "SCT"}, {1, "PIX"}});
-    auto name = Monitored::Collection("DetID", testData,  [](const StringInObject& s){ return s.getName(); }); // lambda as accessor
+    auto name = Monitored::Collection("DetID", testData,  [](const StringInObject& s)->const std::string &{ return s.getName(); }); // lambda as accessor
 
     auto ignored1 = Monitored::Collection("ignored", testData,  &StringInObject::getName  ); // access via member function
     auto ignored2 = Monitored::Collection("ignored", testData,  [](const StringInObject& s){ return s.getName().c_str(); }  ); // accessor returning const char* is supported

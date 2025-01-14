@@ -52,14 +52,14 @@ public:
   template <class HistogramType>
   HistogramType* createHistogram(const std::string& histogramType) {
     HistogramDef histogramDef = defaultHistogramDef(histogramType);
-    return dynamic_cast<HistogramType*>(m_testObj->create(histogramDef));
+    return static_cast<HistogramType*>(m_testObj->create(histogramDef));
   }
 
   TEfficiency* createEfficiency() {
     HistogramDef histogramDef = defaultHistogramDef("TEfficiency");
     histogramDef.ybins = 0;
     histogramDef.zbins = 0;
-    return dynamic_cast<TEfficiency*>(m_testObj->create(histogramDef));
+    return static_cast<TEfficiency*>(m_testObj->create(histogramDef));
   }
 
   void clearHistogramService() {
@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE( test_shouldSetXAxisLabelsFor1DHistogram ) {
   histogramDef.ybins = 0;
   histogramDef.xlabels = { "xlabel1", "xlabel2", "xlabel3" };
   histogramDef.ylabels = { "ylabel1" };
-  TH1F* const histogram = dynamic_cast<TH1F*>(m_testObj->create(histogramDef));
+  TH1F* const histogram = static_cast<TH1F*>(m_testObj->create(histogramDef));
  
   BOOST_TEST( histogram->GetXaxis()->GetNbins() == 3);
   BOOST_TEST( std::string(histogram->GetXaxis()->GetBinLabel(1)) == "xlabel1");
@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE( test_shouldSetXAndYAxisLabelsFor2DHistogram ) {
   histogramDef.ybins = 3;
   histogramDef.xlabels = { "xlabel1", "xlabel2", "xlabel3" };
   histogramDef.ylabels = { "ylabel1", "ylabel2", "ylabel3" };
-  TH2F* const histogram = dynamic_cast<TH2F*>(m_testObj->create(histogramDef));
+  TH2F* const histogram = static_cast<TH2F*>(m_testObj->create(histogramDef));
  
   BOOST_TEST( histogram->GetXaxis()->GetNbins() == 3);
   BOOST_TEST( std::string(histogram->GetXaxis()->GetBinLabel(1)) == "xlabel1" );
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE( test_shouldSetExtendAxesWhenkCanRebinIsSet ) {
   HistogramDef histogramDef = defaultHistogramDef("TH1F");
   histogramDef.alias = "allAxesRebinAlias";
   histogramDef.kCanRebin = true;
-  TH1F* const histogram = dynamic_cast<TH1F*>(m_testObj->create(histogramDef));
+  TH1F* const histogram = static_cast<TH1F*>(m_testObj->create(histogramDef));
  
   BOOST_TEST( histogram->CanExtendAllAxes() );
 }
@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_CASE( test_shouldNotSetExtendAxesWhenkCanRebinIsNotSet ) {
   HistogramDef histogramDef = defaultHistogramDef("TH1F");
   histogramDef.alias = "noAxesRebinAlias";
   histogramDef.kCanRebin = false;
-  TH1F* const histogram = dynamic_cast<TH1F*>(m_testObj->create(histogramDef));
+  TH1F* const histogram = static_cast<TH1F*>(m_testObj->create(histogramDef));
  
   BOOST_TEST( histogram->CanExtendAllAxes() == false );
 }
@@ -261,7 +261,7 @@ BOOST_AUTO_TEST_CASE( test_shouldSetSumw2WhenSumw2IsSet ) {
   HistogramDef histogramDef = defaultHistogramDef("TH1F");
   histogramDef.alias = "Sumw2ActiveAlias";
   histogramDef.Sumw2 = true;
-  TH1F* const histogram = dynamic_cast<TH1F*>(m_testObj->create(histogramDef));
+  TH1F* const histogram = static_cast<TH1F*>(m_testObj->create(histogramDef));
  
   BOOST_TEST( histogram->GetSumw2N() == 3 );
 }
@@ -270,7 +270,7 @@ BOOST_AUTO_TEST_CASE( test_shouldNotSetSumw2WhenSumw2IsNotSet ) {
   HistogramDef histogramDef = defaultHistogramDef("TH1F");
   histogramDef.alias = "Sumw2InactiveAlias";
   histogramDef.Sumw2 = false;
-  TH1F* const histogram = dynamic_cast<TH1F*>(m_testObj->create(histogramDef));
+  TH1F* const histogram = static_cast<TH1F*>(m_testObj->create(histogramDef));
  
   BOOST_TEST( histogram->GetSumw2N() == 0 );
 }
