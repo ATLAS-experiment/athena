@@ -6,7 +6,7 @@
 atlas_subdir( MuonLayerHough )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Gpad Graf Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint Graf3d Html Postscript Gui GX11TTF GX11 )
+find_package( ROOT COMPONENTS Core Hist )
 
 # Component(s) in the package:
 atlas_add_library( MuonLayerHough

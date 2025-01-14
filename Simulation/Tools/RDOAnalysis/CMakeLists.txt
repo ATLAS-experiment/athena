@@ -5,8 +5,7 @@
 # Declare the package name:
 atlas_subdir( RDOAnalysis )
 
-# External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint Graf Graf3d Gpad Html Postscript Gui GX11TTF GX11 )
+find_package( ROOT COMPONENTS Core Tree Hist )
 
 # tag ROOTBasicLibs was not recognized in automatic conversion in cmt2cmake
 
