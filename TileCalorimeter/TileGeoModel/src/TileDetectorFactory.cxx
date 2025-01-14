@@ -255,7 +255,7 @@ void TileDetectorFactory::create(GeoPhysVol *world)
                                             heightWedgeMother/2.);
 
     GeoLogVol* lvBarrelModuleMother = new GeoLogVol("BarrelModule",barrelModuleMother,matAir);
-    GeoPhysVol* pvBarrelModuleMother = new GeoPhysVol(lvBarrelModuleMother);
+    PVLink pvBarrelModuleMother = new GeoPhysVol(lvBarrelModuleMother);
 
     // Fill the section
     sectionBuilder->fillSection(pvBarrelModuleMother,
@@ -376,7 +376,7 @@ pvBarrelMother->add(pvBarrelModuleMother);
                                              heightWedgeMother/2.);
 
     GeoLogVol* lvEBarrelModuleMother = new GeoLogVol("EBarrelModule",ebarrelModuleMother,matAir);
-    GeoPhysVol* pvEBarrelModuleMother = new GeoPhysVol(lvEBarrelModuleMother);
+    PVLink pvEBarrelModuleMother = new GeoPhysVol(lvEBarrelModuleMother);
 
     // Fill the section
     sectionBuilder->fillSection(pvEBarrelModuleMother,
@@ -538,7 +538,7 @@ pvBarrelMother->add(pvBarrelModuleMother);
     const GeoShapeUnion& itcModuleMother = itcModuleSub1->add(*itcModuleSub2<<itcModuleSubShift);
 
     GeoLogVol* lvITCModuleMother = new GeoLogVol("ITCModule",&itcModuleMother,matAir);
-    GeoPhysVol* pvITCModuleMother = new GeoPhysVol(lvITCModuleMother);
+    PVLink pvITCModuleMother = new GeoPhysVol(lvITCModuleMother);
 
     //Mother volume for ITC1
     //In plug1 it's necessary to produce GeoShapeUnion for mother volume that is composed by two parts:
@@ -577,7 +577,7 @@ pvBarrelMother->add(pvBarrelModuleMother);
 
     const GeoShapeUnion& plug1ModuleMother = plug1SubMother->add(*plug2SubMother<<plug1SubOffset);
     GeoLogVol* lvPlug1ModuleMother = new GeoLogVol("Plug1Module",&plug1ModuleMother,matAir);
-    GeoPhysVol* pvPlug1ModuleMother = new GeoPhysVol(lvPlug1ModuleMother);
+    PVLink pvPlug1ModuleMother = new GeoPhysVol(lvPlug1ModuleMother);
 
     // Fill the section
     sectionBuilder->fillSection(pvPlug1ModuleMother, 3,
@@ -611,7 +611,7 @@ pvBarrelMother->add(pvBarrelModuleMother);
                                            heightWedgeMother/2.);
 
     GeoLogVol* lvPlug2ModuleMother = new GeoLogVol("Plug2Module",plug2ModuleMother,matAir);
-    GeoPhysVol* pvPlug2ModuleMother = new GeoPhysVol(lvPlug2ModuleMother);
+    PVLink pvPlug2ModuleMother = new GeoPhysVol(lvPlug2ModuleMother);
 
     // Fill the section
     sectionBuilder->fillSection(pvPlug2ModuleMother,
@@ -696,7 +696,7 @@ pvBarrelMother->add(pvBarrelModuleMother);
                                          heightWedgeMother/2.);
 
     GeoLogVol* lvGapModuleMother = new GeoLogVol("GapModule",gapModuleMother,matAir);
-    GeoPhysVol* pvGapModuleMother = new GeoPhysVol(lvGapModuleMother);
+    PVLink pvGapModuleMother = new GeoPhysVol(lvGapModuleMother);
 
     // Fill the section
     sectionBuilder->fillSection(pvGapModuleMother,
@@ -824,7 +824,7 @@ pvBarrelMother->add(pvBarrelModuleMother);
                                            heightWedgeMother/2.);
 
     GeoLogVol* lvCrackModuleMother = new GeoLogVol("CrackModule",crackModuleMother,matAir);
-    GeoPhysVol* pvCrackModuleMother = new GeoPhysVol(lvCrackModuleMother);
+    PVLink pvCrackModuleMother = new GeoPhysVol(lvCrackModuleMother);
 
     // Fill the section
     sectionBuilder->fillSection(pvCrackModuleMother,
@@ -901,7 +901,7 @@ pvBarrelMother->add(pvBarrelModuleMother);
                                             heightWedgeMother/2.);
 
     GeoLogVol* lvFingerModuleMother = new GeoLogVol("FingerModule",fingerModuleMother,matAir);
-    GeoPhysVol* pvFingerModuleMother = new GeoPhysVol(lvFingerModuleMother);
+    PVLink pvFingerModuleMother = new GeoPhysVol(lvFingerModuleMother);
 
     // Fill the section
     sectionBuilder->fillFinger(pvFingerModuleMother, 1,
@@ -973,7 +973,7 @@ pvBarrelMother->add(pvBarrelModuleMother);
                                              heightWedgeMother/2.);
 
     GeoLogVol* lvEFingerModuleMother = new GeoLogVol("EFingerModule",efingerModuleMother,matAir);
-    GeoPhysVol* pvEFingerModuleMother = new GeoPhysVol(lvEFingerModuleMother);
+    PVLink pvEFingerModuleMother = new GeoPhysVol(lvEFingerModuleMother);
 
     // Fill the section
     sectionBuilder->fillFinger(pvEFingerModuleMother,

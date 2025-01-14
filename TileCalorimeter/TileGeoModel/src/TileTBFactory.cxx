@@ -399,7 +399,7 @@ void TileTBFactory::create(GeoPhysVol *world)
                                                 heightWedgeMother/2.);
 
         GeoLogVol* lvBarrelModuleMother = new GeoLogVol("BarrelModule",barrelModuleMother,matAir);
-        GeoPhysVol* pvBarrelModuleMother = new GeoPhysVol(lvBarrelModuleMother);
+        PVLink pvBarrelModuleMother = new GeoPhysVol(lvBarrelModuleMother);
 
         //Fill the section
         sectionBuilder->fillSection(pvBarrelModuleMother,
@@ -441,7 +441,7 @@ void TileTBFactory::create(GeoPhysVol *world)
                                                 heightWedgeMother/2.);
 
         GeoLogVol* lvFingerModuleMother = new GeoLogVol("FingerModule",fingerModuleMother,matAir);
-        GeoPhysVol* pvFingerModuleMother = new GeoPhysVol(lvFingerModuleMother);
+        PVLink pvFingerModuleMother = new GeoPhysVol(lvFingerModuleMother);
 
         // Fill the section
         sectionBuilder->fillFinger(pvFingerModuleMother, 1,
@@ -490,7 +490,7 @@ void TileTBFactory::create(GeoPhysVol *world)
                                                     heightWedgeMother/2.);
 
         GeoLogVol* lvEBarrelModuleMotherPos = new GeoLogVol("EBarrelModule",ebarrelModuleMotherPos,matAir);
-        GeoPhysVol* pvEBarrelModuleMotherPos = new GeoPhysVol(lvEBarrelModuleMotherPos);
+        PVLink pvEBarrelModuleMotherPos = new GeoPhysVol(lvEBarrelModuleMotherPos);
 
         // Fill the section
         sectionBuilder->fillSection(pvEBarrelModuleMotherPos,
@@ -526,7 +526,7 @@ void TileTBFactory::create(GeoPhysVol *world)
                                                  heightWedgeMother/2.);
 
         GeoLogVol* lvEFingerModuleMother = new GeoLogVol("EFingerModule",efingerModuleMother,matAir);
-        GeoPhysVol* pvEFingerModuleMother = new GeoPhysVol(lvEFingerModuleMother);
+        PVLink pvEFingerModuleMother = new GeoPhysVol(lvEFingerModuleMother);
 
         // Fill the section
         sectionBuilder->fillFinger(pvEFingerModuleMother,
@@ -567,7 +567,7 @@ void TileTBFactory::create(GeoPhysVol *world)
                                                     heightWedgeMother/2.);
 
         GeoLogVol* lvEBarrelModuleMotherNeg = new GeoLogVol("EBarrelModule",ebarrelModuleMotherNeg,matAir);
-        GeoPhysVol* pvEBarrelModuleMotherNeg = new GeoPhysVol(lvEBarrelModuleMotherNeg);
+        PVLink pvEBarrelModuleMotherNeg = new GeoPhysVol(lvEBarrelModuleMotherNeg);
 
         // Fill the section
         sectionBuilder->fillSection(pvEBarrelModuleMotherNeg,
@@ -604,7 +604,7 @@ void TileTBFactory::create(GeoPhysVol *world)
                                                  heightWedgeMother/2.);
 
         GeoLogVol* lvEFingerModuleMother = new GeoLogVol("EFingerModule",efingerModuleMother,matAir);
-        GeoPhysVol* pvEFingerModuleMother = new GeoPhysVol(lvEFingerModuleMother);
+        PVLink pvEFingerModuleMother = new GeoPhysVol(lvEFingerModuleMother);
 
         // Fill the section
         sectionBuilder->fillFinger(pvEFingerModuleMother,
@@ -646,7 +646,7 @@ void TileTBFactory::create(GeoPhysVol *world)
                                                 heightWedgeMother/2.);
 
         GeoLogVol* lvITCModuleMotherPos = new GeoLogVol("ITCModule",itcModuleMotherPos,matAir);
-        GeoPhysVol* pvITCModuleMotherPos = new GeoPhysVol(lvITCModuleMotherPos);
+        PVLink pvITCModuleMotherPos = new GeoPhysVol(lvITCModuleMotherPos);
 
         //Mother volume for ITC1
         //In plug1 it's necessary to produce GeoShapeUnion for mother volume that is composed by two parts:
@@ -684,7 +684,7 @@ void TileTBFactory::create(GeoPhysVol *world)
 
         const GeoShapeUnion& plug1ModuleMother = plug1SubMother->add(*plug2SubMother<<plug1SubOffset);
         GeoLogVol* lvPlug1ModuleMother = new GeoLogVol("Plug1Module",&plug1ModuleMother,matAir);
-        GeoPhysVol* pvPlug1ModuleMother = new GeoPhysVol(lvPlug1ModuleMother);
+        PVLink pvPlug1ModuleMother = new GeoPhysVol(lvPlug1ModuleMother);
 
         // Fill the section
         sectionBuilder->fillSection(pvPlug1ModuleMother, 3,
@@ -718,7 +718,7 @@ void TileTBFactory::create(GeoPhysVol *world)
                                                heightWedgeMother/2.);
 
         GeoLogVol* lvPlug2ModuleMother = new GeoLogVol("Plug2Module",plug2ModuleMother,matAir);
-        GeoPhysVol* pvPlug2ModuleMother = new GeoPhysVol(lvPlug2ModuleMother);
+        PVLink pvPlug2ModuleMother = new GeoPhysVol(lvPlug2ModuleMother);
 
         // Fill the section
         sectionBuilder->fillSection(pvPlug2ModuleMother,
@@ -768,7 +768,7 @@ void TileTBFactory::create(GeoPhysVol *world)
                                                 heightWedgeMother/2.);
 
         GeoLogVol* lvITCModuleMotherNeg = new GeoLogVol("ITCModule",itcModuleMotherNeg,matAir);
-        GeoPhysVol* pvITCModuleMotherNeg = new GeoPhysVol(lvITCModuleMotherNeg);
+        PVLink pvITCModuleMotherNeg = new GeoPhysVol(lvITCModuleMotherNeg);
 
         //Mother volume for ITC1
         //In plug1 it's necessary to produce GeoShapeUnion for mother volume that is composed by two parts:
@@ -806,7 +806,7 @@ void TileTBFactory::create(GeoPhysVol *world)
 
         const GeoShapeUnion& plug1ModuleMother = plug1SubMother->add(*plug2SubMother<<plug1SubOffset);
         GeoLogVol* lvPlug1ModuleMother = new GeoLogVol("Plug1Module",&plug1ModuleMother,matAir);
-        GeoPhysVol* pvPlug1ModuleMother = new GeoPhysVol(lvPlug1ModuleMother);
+        PVLink pvPlug1ModuleMother = new GeoPhysVol(lvPlug1ModuleMother);
 
         // Fill the section
         sectionBuilder->fillSection(pvPlug1ModuleMother,
@@ -841,7 +841,7 @@ void TileTBFactory::create(GeoPhysVol *world)
                                                heightWedgeMother/2.);
 
         GeoLogVol* lvPlug2ModuleMother = new GeoLogVol("Plug2Module",plug2ModuleMother,matAir);
-        GeoPhysVol* pvPlug2ModuleMother = new GeoPhysVol(lvPlug2ModuleMother);
+        PVLink pvPlug2ModuleMother = new GeoPhysVol(lvPlug2ModuleMother);
 
         // Fill the section
         sectionBuilder->fillSection(pvPlug2ModuleMother,
