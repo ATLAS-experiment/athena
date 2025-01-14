@@ -336,7 +336,7 @@ namespace MuonGM {
             mtrd = matManager.getMaterial("std::Air");
         }
         GeoLogVol *ltrd = new GeoLogVol(std::string(stName) + "_Station", strd, mtrd);
-        GeoPhysVol *ptrd = new GeoPhysVol(ltrd);
+        PVLink ptrd = new GeoPhysVol(ltrd);
 
         double ypos{0.}, zpos{0.}, xpos{0.}, irad{0.};
         std::array<int, 2> ndbz{0, 0};
@@ -464,16 +464,10 @@ namespace MuonGM {
             const std::string &techname = c->name;
             std::string_view type = std::string_view(techname).substr(0, 3);
 
-            GeoVPhysVol *lv = nullptr;
-            GeoVPhysVol *lvd = nullptr;
-            GeoVPhysVol *lvs = nullptr;
-            GeoVPhysVol *lvo = nullptr;
-            GeoFullPhysVol *lvm = nullptr;
-            GeoFullPhysVol *lvr = nullptr;
-            GeoFullPhysVol *lvt = nullptr;
-            GeoFullPhysVol *lvc = nullptr;
+            PVLink lv{}, lvd{}, lvs{}, lvo{};
+            GeoIntrusivePtr<GeoFullPhysVol> lvm{}, lvr{}, lvt{}, lvc{};
 
-            double BeamHeight;
+            double BeamHeight{0.};
 
             // Are there cutouts?
             std::string statType = stName.substr(0, 3);
@@ -820,7 +814,7 @@ namespace MuonGM {
                     key += "m" + buildString(mysql.allocPosFindSubtype(statType, fi, zi), 0) + "_" + buildString(mysql.allocPosFindCutout(statType, fi, zi), 0) + "_" +
                            buildString(vcutdef.size(), 0) + "_" + buildString(rp->iswap, 0);
                 }
-                GeoVPhysVol *fpv = m_FPVMAP->GetDetector(key);
+                PVLink fpv = m_FPVMAP->GetDetector(key);
                 if (fpv == nullptr) {
                     std::unique_ptr<Rpc> r = std::make_unique<Rpc>(mysql, c);
                     r->setLogVolName(std::string(stName) + techname);
@@ -841,7 +835,7 @@ namespace MuonGM {
 
                     m_FPVMAP->StoreDetector(lvr, key);
                 } else {
-                    GeoFullPhysVol *rfpv = (GeoFullPhysVol *)fpv;
+                    auto rfpv = dynamic_pointer_cast<GeoFullPhysVol>(fpv);
                     lvr = rfpv->clone();
                 }
 
@@ -864,7 +858,7 @@ namespace MuonGM {
                            buildString(vcutdef.size(), 0);
                 }
                 key += buildString(int(c->dy), 0) + "_" + buildString(int(c->dx1), 0);
-                GeoVPhysVol *fpv = m_FPVMAP->GetDetector(key);
+                PVLink fpv = m_FPVMAP->GetDetector(key);
 
                 if (fpv == nullptr) {
                     std::unique_ptr<Ded> r = std::make_unique<Ded>(mysql, c);

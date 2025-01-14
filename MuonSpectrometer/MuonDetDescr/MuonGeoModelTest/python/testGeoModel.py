@@ -100,8 +100,7 @@ if __name__=="__main__":
     
     chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []
     if not args.noMdt:
-        cfg.merge(GeoModelMdtTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"], 
-                                            dumpSurfaces = False ))
+        cfg.merge(GeoModelMdtTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"]))
     if not args.noRpc:
         cfg.merge(GeoModelRpcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "B"]))
     if not args.noTgc:
