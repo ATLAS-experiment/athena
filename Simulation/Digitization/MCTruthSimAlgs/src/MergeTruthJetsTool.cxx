@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MergeTruthJetsTool.h"
@@ -206,8 +206,9 @@ double MergeTruthJetsTool::processJetContainer(const xAOD::JetContainer* inputJe
   const static SG::AuxElement::Accessor< int > eventNumberAccessor("pileupEventNumber");
   double max_pT=-1.;
   for (const xAOD::Jet *origTruthJet : *inputJetContainer) {
+    if (not origTruthJet) continue;
     try {
-      if (!origTruthJet || origTruthJet->pt()<ptCut) {
+      if (origTruthJet->pt()<ptCut) {
         ATH_MSG_VERBOSE( "processJetContainer: Jet with pT = " << origTruthJet->pt() << " GeV failed ptCut of " << ptCut << "GeV." );
         continue;
       }
