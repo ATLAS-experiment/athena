@@ -278,6 +278,9 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.Online.useOnlineTHistSvc', False,
                   help='use online THistSvc')
 
+    flags.addFlag('Trigger.Online.useOnlineWebdaqHistSvc', False,
+                      help='use online Webdaq HistSvc')
+
     flags.addFlag('Trigger.Online.BFieldAutoConfig', True,
                   help='auto-configure magnetic field from currents in IS')
 
