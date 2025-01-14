@@ -14,7 +14,7 @@ const int* has_classID 244260744
 vector<int> has_classID 22592129
 GaudiDataObj has_classID 8010 and does inherit from DataObject
 MyDataObj has_classID 8000 and does not inherit from DataObject
-AbstractDataObj has_classID 8011
+AbstractDataObj has_classID 8019
 AbstractType has_classID 8004
 Now we expect to see an error message:
 ----Error Message Starts--->>
