@@ -2309,8 +2309,8 @@ namespace xAOD {
                                ::Bool_t overwrite, ::Bool_t metadata,
                                ::Bool_t isOwner ) {
 
-      // Check if we have an output tree:
-      if( ! m_outTree ) {
+      // Check if we have an output tree when writing an event:
+      if( ! m_outTree && ! metadata ) {
          ::Error( "xAOD::TEvent::record",
                   XAOD_MESSAGE( "No output tree defined. Did you forget to "
                                 "call writeTo(...)?" ) );

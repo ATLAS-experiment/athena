@@ -14,8 +14,26 @@
 namespace asg {
 
    SgTEventMeta::SgTEventMeta( StoreType type, xAOD::TEvent* event )
-      : m_type( type ), m_event( event ) {
+      : m_type( type ) {
+      m_event.store(event);
+   }
 
+   SgTEventMeta::SgTEventMeta(SgTEventMeta&& other) noexcept
+      : m_type(other.m_type) {
+      m_event.store(other.m_event.load());
+   }
+
+   SgTEventMeta& SgTEventMeta::operator=(SgTEventMeta&& other) noexcept {
+      if (this != &other) {
+         m_type = other.m_type;
+         m_event.store(other.m_event.load());
+      }
+      return *this;
+   }
+
+   SgTEventMeta& SgTEventMeta::operator=(xAOD::TEvent* event) {
+      m_event.store(event);
+      return *this;
    }
 
    /// This function is used by the template functions to try to retrieve
@@ -28,7 +46,7 @@ namespace asg {
    StatusCode SgTEventMeta::initialize() const {
 
       // Return right away if we already have a non-null pointer:
-      if( m_event ) {
+      if (m_event && m_event.load()) {
          return StatusCode::SUCCESS;
       }
 
@@ -41,8 +59,8 @@ namespace asg {
       }
 
       // This should actually be a TEvent:
-      m_event = dynamic_cast< xAOD::TEvent* >( event );
-      if( ! m_event ) {
+      m_event.store(dynamic_cast< xAOD::TEvent* >( event ));
+      if( !m_event || !m_event.load() ) {
          std::cout << META_ERROR_SOURCE << "The active event is not of type "
                    << "xAOD::TEvent?!?" << std::endl;
          return StatusCode::FAILURE;

@@ -22,7 +22,7 @@ namespace asg {
    bool SgTEventMeta::contains( const std::string& name ) {
 
       // Make sure the object is initialised:
-      if( ( ! m_event ) && initialize().isFailure() ) {
+      if( (!m_event || !m_event.load()) && initialize().isFailure() ) {
          std::cout << META_ERROR_SOURCE << "Couldn't initialise the tool"
                    << std::endl;
          return false;
@@ -30,9 +30,9 @@ namespace asg {
 
       // Decide which function to call:
       if( m_type == InputStore ) {
-         return m_event->template containsMeta< T >( name );
+         return m_event.load()->template containsMeta< T >( name );
       } else if( m_type == OutputStore ) {
-         return m_event->template transientContainsMeta< T >( name );
+         return m_event.load()->template transientContainsMeta< T >( name );
       } else {
          std::cout << META_ERROR_SOURCE << "Unknown store type (" << m_type
                    << ") defined" << std::endl;
@@ -44,21 +44,21 @@ namespace asg {
    bool SgTEventMeta::transientContains( const std::string& name ) const {
 
       // Make sure the object is initialised:
-      if( ( ! m_event ) && initialize().isFailure() ) {
+      if( (!m_event || !m_event.load()) && initialize().isFailure() ) {
          std::cout << META_ERROR_SOURCE << "Couldn't initialise the tool"
                    << std::endl;
          return false;
       }
 
       // Forward the call:
-      return m_event->template transientContainsMeta< T >( name );
+      return m_event.load()->template transientContainsMeta< T >( name );
    }
 
    template< typename T >
    StatusCode SgTEventMeta::retrieve( T*& obj, const std::string& name ) {
 
       // Make sure the object is initialised:
-      if( ( ! m_event ) && initialize().isFailure() ) {
+      if( (!m_event || !m_event.load()) && initialize().isFailure() ) {
          std::cout << META_ERROR_SOURCE << "Couldn't initialise the tool"
                    << std::endl;
          return StatusCode::FAILURE;
@@ -73,7 +73,7 @@ namespace asg {
       }
 
       // Forward the call:
-      if( ! m_event->retrieveMetaOutput( obj, name ).isSuccess() ) {
+      if( ! m_event.load()->retrieveMetaOutput( obj, name ).isSuccess() ) {
          std::cout << META_ERROR_SOURCE << "Failed to retrieve output metadata "
                    << "object with name " << name << std::endl;
          return StatusCode::FAILURE;
@@ -87,7 +87,7 @@ namespace asg {
    StatusCode SgTEventMeta::retrieve( const T*& obj, const std::string& name ) {
 
       // Make sure the object is initialised:
-      if( ( ! m_event ) && initialize().isFailure() ) {
+      if( (!m_event || !m_event.load()) && initialize().isFailure() ) {
          std::cout << META_ERROR_SOURCE << "Couldn't initialise the tool"
                    << std::endl;
          return StatusCode::FAILURE;
@@ -96,14 +96,14 @@ namespace asg {
       // Decide which function to call:
       if( m_type == InputStore ) {
          // Forward the call:
-         if( ! m_event->retrieveMetaInput( obj, name ).isSuccess() ) {
+         if( ! m_event.load()->retrieveMetaInput( obj, name ).isSuccess() ) {
             std::cout << META_ERROR_SOURCE << "Failed to retrieve input "
                       << "metadata object with name " << name << std::endl;
             return StatusCode::FAILURE;
          }
       } else if( m_type == OutputStore ) {
          // Forward the call:
-         if( ! m_event->retrieveMetaOutput( obj, name ).isSuccess() ) {
+         if( ! m_event.load()->retrieveMetaOutput( obj, name ).isSuccess() ) {
             std::cout << META_ERROR_SOURCE << "Failed to retrieve output "
                       << "metadata object with name " << name << std::endl;
             return StatusCode::FAILURE;
@@ -122,7 +122,7 @@ namespace asg {
    StatusCode SgTEventMeta::record( std::unique_ptr<T> obj, const std::string& name ) {
 
       // Make sure the object is initialised:
-      if( ( ! m_event ) && initialize().isFailure() ) {
+      if( (!m_event || !m_event.load()) && initialize().isFailure() ) {
          std::cout << META_ERROR_SOURCE << "Couldn't initialise the tool"
                    << std::endl;
          return StatusCode::FAILURE;
@@ -136,7 +136,7 @@ namespace asg {
       }
 
       // Forward the call:
-      if( ! m_event->recordMeta( std::move( obj ), name ).isSuccess() ) {
+      if( ! m_event.load()->recordMeta( std::move( obj ), name ).isSuccess() ) {
          std::cout << META_ERROR_SOURCE << "Failed to record output metadata "
                    << "object with name " << name << std::endl;
          return StatusCode::FAILURE;
@@ -154,8 +154,14 @@ namespace asg {
 
    template< typename T >
    void SgTEventMeta::keys( std::vector< std::string >& vkeys ) const {
-      if (m_event)
-         m_event->keys<T>(vkeys, true); // true tells TEvent to scan metadata
+
+      // Try initialising the object if it hasn't been done yet
+      if (!m_event || !m_event.load()) {
+         initialize().ignore();
+      }
+      if (m_event && m_event.load()) {
+         m_event.load()->keys<T>(vkeys, true); // true tells TEvent to scan metadata
+      }
    }
 
 } // namespace asg
