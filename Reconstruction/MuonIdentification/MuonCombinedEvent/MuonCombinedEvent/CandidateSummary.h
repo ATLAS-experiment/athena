@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #pragma once
 
 #include <algorithm>
+#include <optional>
 
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "MuonCombinedEvent/RpcSegmentInfo.h"
@@ -238,9 +239,9 @@ namespace MuGirlNS {
         bool measuresEta;
         double propagationTime;
 
-        StauHit() : mToF(-1), x(0), y(0), z(0), e(-1), error(-1), shift(0), measuresEta(false), propagationTime(0) {}
-        StauHit(StauHitTechnology tech, double tof, double ix, double iy, double iz, Identifier iid, double ie, double er = -1,
-                double sh = 0, bool isEta = false, double propTime = 0) :
+        StauHit() : mToF(-1.), x(0.), y(0.), z(0.), e(-1.), error(-1.), shift(0.), measuresEta(false), propagationTime(0.) {}
+        StauHit(StauHitTechnology tech, double tof, double ix, double iy, double iz, Identifier iid, double ie, double er = -1.,
+                double sh = 0., bool isEta = false, double propTime = 0.) :
             eTech(tech),
             mToF(tof),
             x(ix),
@@ -253,7 +254,21 @@ namespace MuGirlNS {
             measuresEta(isEta),
             propagationTime(propTime) {}
     };
+
+    // conditional decoration of SlowMuon container with MDT ADC counts and drift radii
+    // enabled by flag MuonCombined.addMDTExtrasMuGirlLowBeta 
+    struct StauMDTHitExtra {
+        int adc{-1};
+        float rdrift{-1.};
+
+        StauMDTHitExtra() = default;
+        StauMDTHitExtra(int iadc, float irdrift):
+            adc(iadc),
+            rdrift(irdrift) {}
+    };
+
     typedef std::vector<StauHit> StauHits;
+    using StauMDTHitExtras = std::vector<StauMDTHitExtra>;
 
     struct StauExtras {
         double ann;
@@ -266,8 +281,10 @@ namespace MuGirlNS {
         double caloBetaAvg, caloBetaRms, caloBetaChi2;
         int caloBetaDof;
         StauHits hits;
+        std::optional<StauMDTHitExtras> extraMDTHitInfo;
 
         void addHits(StauHits stauHits) { std::copy(stauHits.begin(), stauHits.end(), std::back_inserter(hits)); }
+        void addMDTHitExtras(StauMDTHitExtras stauMDTHitExtras) { std::copy(stauMDTHitExtras.begin(), stauMDTHitExtras.end(), std::back_inserter(*extraMDTHitInfo)); }
     };
 
     struct RHExtras {

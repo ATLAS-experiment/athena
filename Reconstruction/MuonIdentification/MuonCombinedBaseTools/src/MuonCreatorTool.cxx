@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////
@@ -543,7 +543,6 @@ namespace MuonCombined {
             std::vector<float>& yVec = slowMuon->auxdata<std::vector<float>>("hitPositionY");
             std::vector<float>& zVec = slowMuon->auxdata<std::vector<float>>("hitPositionZ");
             std::vector<float>& eVec = slowMuon->auxdata<std::vector<float>>("hitEnergy");
-
             std::vector<float>& errorVec = slowMuon->auxdata<std::vector<float>>("hitError");
             std::vector<float>& shiftVec = slowMuon->auxdata<std::vector<float>>("hitShift");
             std::vector<float>& propagationTimeVec = slowMuon->auxdata<std::vector<float>>("hitPropagationTime");
@@ -560,6 +559,23 @@ namespace MuonCombined {
                 shiftVec.push_back(hit.shift);
                 propagationTimeVec.push_back(hit.propagationTime);
             }
+
+            // additional MDT hit info (optional)
+            if (m_addMDTExtrasMuGirlLowBeta) {
+                static const SG::Accessor<std::vector<int> > adcAcc ("hitAdc");
+                static const SG::Accessor<std::vector<float> > rdriftAcc ("hitDriftRadius");
+                
+                std::vector<int>& adcVec = adcAcc(*slowMuon);
+                std::vector<float>& rdriftVec = rdriftAcc(*slowMuon);
+
+                if (stauExtras->extraMDTHitInfo) { // check if extra MDT hit info added
+                    for (const auto& extraMDTinfo : *stauExtras->extraMDTHitInfo) {
+                        adcVec.push_back(extraMDTinfo.adc);
+                        rdriftVec.push_back(extraMDTinfo.rdrift);
+                    }
+                }
+            }
+
         }
 
         if (!muon.combinedTrackParticleLink().isValid() && tag->combinedTrack()) {
