@@ -66,14 +66,14 @@ namespace MuonR4{
 
         if (msgLvl(MSG::VERBOSE)) {
             std::stringstream sstr{};
-            for (const auto& [layCount, layer] : Acts::enumerate(m_hitLayers.mdtHits())) { 
+            for (const auto [layCount, layer] : Acts::enumerate(m_hitLayers.mdtHits())) { 
                 sstr<<"Mdt-hits in layer "<<layCount<<": "<<layer.size()<<std::endl;
                 for (const HoughHitType& hit : layer) {
                     sstr<<"   **** "<<hit->msSector()->idHelperSvc()->toString(hit->identify())<<" "
                         <<Amg::toString(hit->positionInChamber())<<", driftRadius: "<<hit->driftRadius()<<std::endl;
                 }
             }
-            for (const auto& [layCount, layer] : Acts::enumerate(m_hitLayers.stripHits())) { 
+            for (const auto [layCount, layer] : Acts::enumerate(m_hitLayers.stripHits())) { 
                 sstr<<"Hits in layer "<<layCount<<": "<<layer.size()<<std::endl;
                 for (const HoughHitType& hit : layer) {
                     sstr<<"   **** "<<hit->msSector()->idHelperSvc()->toString(hit->identify())<<" "
@@ -261,7 +261,7 @@ namespace MuonR4{
         }
         unsigned int nMdt{0};
         /** Collect all hits close to the seed line */
-        for (const auto& [layerNr,  hitsInLayer] : Acts::enumerate(m_hitLayers.mdtHits())) {
+        for (const auto [layerNr,  hitsInLayer] : Acts::enumerate(m_hitLayers.mdtHits())) {
             ATH_MSG_VERBOSE( hitsInLayer.size()<<" hits in layer "<<(layerNr +1));
             bool hadGoodHit{false};
             for (const HoughHitType testMe : hitsInLayer){
@@ -398,7 +398,7 @@ namespace MuonR4{
         aux.covNorm = 1./ norm;
         aux.centerOfGrav *= aux.covNorm;
         /// Calculate the fit constants
-        for (const auto&[covIdx, hit] : Acts::enumerate(seed.measurements)) {
+        for (const auto [covIdx, hit] : Acts::enumerate(seed.measurements)) {
             const double& invCov = aux.invCovs[covIdx];
             const int& sign = aux.driftSigns[covIdx];
             const Amg::Vector3D pos = hit->positionInChamber() - aux.centerOfGrav;
@@ -469,7 +469,7 @@ namespace MuonR4{
         MdtSegmentSeedGenerator::estimateAuxillaries(const EventContext& ctx,
                                                      const DriftCircleSeed& seed) const {
         SeedFitAuxWithT0 aux{estimateAuxillaries(seed)};
-        for (const auto& [idx, hit] : Acts::enumerate(seed.measurements)){
+        for (const auto [idx, hit] : Acts::enumerate(seed.measurements)){
             const double signedCov = aux.driftSigns[idx] * aux.invCovs[idx];
             const double weight = aux.covNorm * signedCov;
             const double velocity = m_cfg.calibrator->driftVelocity(ctx, *hit); 
