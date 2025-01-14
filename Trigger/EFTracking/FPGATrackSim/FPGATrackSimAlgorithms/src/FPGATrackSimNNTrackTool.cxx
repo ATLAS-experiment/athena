@@ -77,7 +77,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(std::vector<std::shared_ptr<const 
     int sector = iroad->getSector();
     if (sector < 0) {
       ATH_MSG_DEBUG("Bad sector " << sector);
-      return StatusCode::SUCCESS;
+      continue;
     }
 
     // Get info on layers with missing hits
