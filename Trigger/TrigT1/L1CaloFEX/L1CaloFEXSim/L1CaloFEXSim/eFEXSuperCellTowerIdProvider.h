@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -69,7 +69,7 @@ namespace LVL1 {
     bool ifhaveinputfile() const override;
 
   private:
-    bool m_hascsvfile; ///< if the csv file is valid
+    bool m_hascsvfile{false}; ///< if the csv file is valid
 
     std::string m_csvaddress; ///< path to the csv file
 

@@ -303,7 +303,7 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.TRTStandalone.minTRTPrecFrac", 0.15)
     icf.addFlag("Tracking.TRTStandalone.minTRT", 15)
 
-    icf.addFlag("Tracking.TRTStandalone.startArOriginalPerigee", False)
+    icf.addFlag("Tracking.TRTStandalone.startAtOriginalPerigee", False)
 
     # Turn on InDetRecStatistics
     icf.addFlag("Tracking.doStats", False)

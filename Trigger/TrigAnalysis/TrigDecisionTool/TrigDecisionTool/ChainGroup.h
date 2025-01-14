@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGGER_DECISION_TOOL_CHAIN_GROUP_H
@@ -91,7 +91,7 @@ namespace Trig {
       float getPrescale(unsigned int condition=TrigDefs::Physics) const;
 
 
-      std::vector< std::string > getListOfTriggers() const;
+      std::vector< std::string > getListOfTriggers() const;  // cppcheck-suppress returnByReference; for consistency
       std::vector< std::string > getListOfStreams() const;
       std::vector< std::string > getListOfGroups() const;
       std::vector< std::string > getListOfThresholds() const;

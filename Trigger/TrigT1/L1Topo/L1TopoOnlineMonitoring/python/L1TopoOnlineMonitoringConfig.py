@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -56,6 +56,12 @@ def getMultiplicityLabels(flags,topoModule):
     
     return topo_trigline_labels
 
+def Phase1TopoMonitoringCfg(flags):
+    # placeholder for new phase-1 implementation, used in L1CaloPhase1Monitoring
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    result = ComponentAccumulator()
+
+    return result
 
 def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=True, doHwMonCtp=False, doHwMon=False, doComp=False, doMultComp=False, forceCtp=False, logLevel = None, toolName="L1TopoMonitoringTool"):
     # Placeholder for phase-1 implementation

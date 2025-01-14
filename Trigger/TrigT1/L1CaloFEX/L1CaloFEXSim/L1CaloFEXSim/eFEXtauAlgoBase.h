@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***********************************************************************************
@@ -65,7 +65,7 @@ protected:
       this, "MyETowers", "eTowerContainer", "Input container for eTowers"};
   bool m_cellsSet = false;
 
-  int m_eFexalgoTowerID[3][3];
+  int m_eFexalgoTowerID[3][3]{};
 
   void buildLayers(int efex_id, int fpga_id, int central_eta);
   void setSCellPointers();
@@ -76,12 +76,12 @@ protected:
   virtual bool getUnD() const override { return 0; }
   virtual unsigned int getSeed() const override { return 0; }
 
-  unsigned int m_em0cells[3][3];
-  unsigned int m_em1cells[12][3];
-  unsigned int m_em2cells[12][3];
-  unsigned int m_em3cells[3][3];
-  unsigned int m_hadcells[3][3];
-  unsigned int m_twrcells[3][3];
+  unsigned int m_em0cells[3][3]{};
+  unsigned int m_em1cells[12][3]{};
+  unsigned int m_em2cells[12][3]{};
+  unsigned int m_em3cells[3][3]{};
+  unsigned int m_hadcells[3][3]{};
+  unsigned int m_twrcells[3][3]{};
 
 };
 

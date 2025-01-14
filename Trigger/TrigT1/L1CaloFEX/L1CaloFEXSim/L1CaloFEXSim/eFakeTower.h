@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -126,12 +126,12 @@ namespace LVL1 {
      */
     int getFPGAnumber(int iefex, int ifpga) const;
 
-    eTowerContainer* m_eTowerContainer; //the eTowerContainer object for which the Et will be replaced
+    eTowerContainer* m_eTowerContainer{}; //the eTowerContainer object for which the Et will be replaced
 
     /// @brief Load the Et or index in a block
     std::vector<int>* loadBlock(const std::string&, int) const;
 
-    int m_numberofevents; ///< number of events
+    int m_numberofevents{}; ///< number of events
 
     /// tool needed for tower-FPGA mapping
     ToolHandle<IeFEXFPGATowerIdProvider> m_eFEXFPGATowerIdProviderTool {this, "eFEXFPGATowerIdProviderTool", "LVL1::eFEXFPGATowerIdProvider", "Tool that provides tower-FPGA mapping"};

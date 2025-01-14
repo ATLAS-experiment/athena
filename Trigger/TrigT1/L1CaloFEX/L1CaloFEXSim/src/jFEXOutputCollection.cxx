@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************  
@@ -171,28 +171,28 @@ int LVL1::jFEXOutputCollection::PileupEtSize() const
     return m_allvalues_pileup_map.size();
 }
 
-int LVL1::jFEXOutputCollection::get_smallRJet(int location,std::string str_) const
+int LVL1::jFEXOutputCollection::get_smallRJet(int location,const std::string& str_) const
 {
     return (*m_allvalues_smallRJet.at(location))[str_];
 }
-int LVL1::jFEXOutputCollection::get_largeRJet(int location,std::string str_) const
+int LVL1::jFEXOutputCollection::get_largeRJet(int location,const std::string& str_) const
 {
     return (*m_allvalues_largeRJet.at(location))[str_];
 }
-int LVL1::jFEXOutputCollection::get_tau(int location,std::string str_) const
+int LVL1::jFEXOutputCollection::get_tau(int location,const std::string& str_) const
 {
     return (*m_allvalues_tau.at(location))[str_];
 }
-int LVL1::jFEXOutputCollection::get_fwdEl(int location,std::string str_) const
+int LVL1::jFEXOutputCollection::get_fwdEl(int location,const std::string& str_) const
 {
   return (*m_allvalues_fwdEl.at(location))[str_];
 }
 
-int LVL1::jFEXOutputCollection::get_pileup(int location,std::string str_) const
+int LVL1::jFEXOutputCollection::get_pileup(int location,const std::string& str_) const
 {
     return (*m_allvalues_pileup.at(location))[str_];
 }
-std::vector<int> LVL1::jFEXOutputCollection::get_pileup_map(int location,std::string str_) const
+std::vector<int> LVL1::jFEXOutputCollection::get_pileup_map(int location,const std::string& str_) const
 {
     return (*m_allvalues_pileup_map.at(location))[str_];
 }
