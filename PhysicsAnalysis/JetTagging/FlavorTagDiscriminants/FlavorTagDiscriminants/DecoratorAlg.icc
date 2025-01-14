@@ -9,13 +9,6 @@
 
 namespace FlavorTagDiscriminants {
   template <typename C, typename D, typename N>
-  DecoratorAlg<C,D,N>::DecoratorAlg(
-    const std::string& name, ISvcLocator* svcloc):
-    AthReentrantAlgorithm(name, svcloc)
-  {
-  }
-
-  template <typename C, typename D, typename N>
   StatusCode DecoratorAlg<C,D,N>::initialize()
   {
     return initializeInternal();

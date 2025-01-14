@@ -14,13 +14,6 @@
 namespace FlavorTagDiscriminants {
 
   template <typename T, typename C>
-  LinkCounterAlg<T,C>::LinkCounterAlg(
-    const std::string& name, ISvcLocator* svcloc):
-    AthReentrantAlgorithm(name, svcloc)
-  {
-  }
-
-  template <typename T, typename C>
   StatusCode LinkCounterAlg<T,C>::initialize()
   {
     if (m_links.empty()) {
