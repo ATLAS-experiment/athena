@@ -35,6 +35,7 @@ the_signature_grouping = OrderedDict([
 
 
 def get_alignment_group_ordering():
+    # TODO use this: ordered_ag = list(dict.fromkeys(ordering.values()))
     seen = set()
     return [v for v in the_signature_grouping.values() if not (v in seen or seen.add(v))]
 
