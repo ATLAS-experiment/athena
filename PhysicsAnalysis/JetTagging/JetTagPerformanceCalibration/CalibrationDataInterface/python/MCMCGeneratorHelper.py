@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.Enums import LHCPeriod
 
 DL1dv01_MC20_Generator_dict = {
@@ -86,7 +86,7 @@ def MCMC_dsid_map(geometry, generatorDict={}, selfDefineGenerator=None, tagger='
        to get the generator setting for MCMC efficiency map"""
 
     if (tagger, geometry) not in dict_tagger_generator:
-        raise ValueError("No CDI MCMC map avaialble for " + tagger + " in " + str(geometry))
+        raise ValueError("No CDI MCMC map available for " + tagger + " in " + str(geometry))
     mc_dict = dict_tagger_generator[tagger, geometry]
 
     dsid = None
@@ -100,6 +100,6 @@ def MCMC_dsid_map(geometry, generatorDict={}, selfDefineGenerator=None, tagger='
         dsid = mc_dict[generator]
 
     if dsid is None:
-        raise ValueError("No CDI MCMC map avaialble for generator: " + generator + " with " + tagger + " in " + str(geometry))
+        raise ValueError("No CDI MCMC map available for generator: " + generator + " with " + tagger + " in " + str(geometry))
     else:
         return dsid
