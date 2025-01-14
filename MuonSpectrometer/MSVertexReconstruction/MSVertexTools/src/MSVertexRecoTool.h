@@ -1,21 +1,14 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #pragma once
 
-#include <utility>
-#include <optional>
-#include <vector>
-#include <array>
-#include <string>
+
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/IAthRNGSvc.h"
-#include "AthenaKernel/RNGWrapper.h"
 
-#include "EventPrimitives/EventPrimitives.h"
-#include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 
@@ -26,21 +19,22 @@
 #include "StoreGate/WriteHandleKey.h"
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "MuonReadoutGeometry/MdtReadoutElement.h"
 #include "MuonPrepRawData/MdtPrepDataContainer.h"
 #include "MuonPrepRawData/RpcPrepDataContainer.h"
 #include "MuonPrepRawData/TgcPrepDataContainer.h"
 
 #include "TrkExInterfaces/IExtrapolator.h"
-#include "TrkParameters/TrackParameters.h"
-#include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/Vertex.h"
-#include "xAODTracking/VertexAuxContainer.h"
 #include "xAODTracking/VertexContainer.h"
 
 #include "MSVertexToolInterfaces/IMSVertexRecoTool.h"
 #include "MSVertexUtils/MSVertex.h"
 #include "MSVertexUtils/Tracklet.h"
+
+#include <optional>
+#include <vector>
+#include <string>
+#include <memory>
 
 
 namespace Muon {
@@ -132,7 +126,7 @@ namespace Muon {
         void HitCounter(MSVertex *MSRecoVx, const EventContext &ctx) const;  // counts MDT, RPC & TGC around a reco'd vertex
         double vxPhiFinder(const double theta, const double phi, const EventContext &ctx) const;  // vertex phi location reco algorithm
         std::vector<Tracklet> getTracklets(const std::vector<Tracklet> &trks, const std::set<int> &tracklet_subset) const;
-        static void dressVtxHits(xAOD::Vertex* xAODVx, std::vector<SG::AuxElement::Decorator<int>>& decs, std::vector<int> hits);
+        static void dressVtxHits(xAOD::Vertex* xAODVx, std::vector<SG::AuxElement::Decorator<int>>& decs, const std::vector<int> & hits);
         static StatusCode FillOutputContainer(const std::vector<std::unique_ptr<MSVertex>> &, SG::WriteHandle<xAOD::VertexContainer> &xAODVxContainer,
                                               std::vector<SG::AuxElement::Decorator<int>>& nMDT_decs,
                                               std::vector<SG::AuxElement::Decorator<int>>& nRPC_decs,

@@ -3,6 +3,9 @@
 */
 
 #include "MSVertexRecoTool.h"
+#include "xAODTracking/VertexAuxContainer.h"
+#include "EventPrimitives/EventPrimitivesHelpers.h" //Amg::error
+#include "AthenaKernel/RNGWrapper.h"
 
 #include "CLHEP/Random/RandFlat.h"
 #include "TMath.h"  
@@ -795,7 +798,7 @@ namespace Muon {
 
     //** ----------------------------------------------------------------------------------------------------------------- **//
 
-    void MSVertexRecoTool::dressVtxHits(xAOD::Vertex* xAODVx, std::vector<SG::AuxElement::Decorator<int>>& decs, std::vector<int> hits){
+    void MSVertexRecoTool::dressVtxHits(xAOD::Vertex* xAODVx, std::vector<SG::AuxElement::Decorator<int>>& decs, const std::vector<int> & hits){
             unsigned int i{0};
             for (SG::AuxElement::Decorator<int> &dec : decs) {
                 dec(*xAODVx) = hits[i];
