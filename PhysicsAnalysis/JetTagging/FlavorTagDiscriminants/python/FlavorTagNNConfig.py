@@ -84,9 +84,9 @@ def GNNToolCfg(flags, NNFile, **options):
     # trigger GN2
     elif '20240122trig' in NNFile:
         defout = {
-            'pu': 1.0,
-            'pb': 0.0,
-            'pc': 0.0,
+            'pu': 0.6712538,
+            'pb': 0.10002074,
+            'pc': 0.22872543,
         }
     else:
         defout = {}
