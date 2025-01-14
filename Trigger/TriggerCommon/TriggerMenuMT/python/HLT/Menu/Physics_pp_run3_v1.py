@@ -445,6 +445,8 @@ def setupMenu():
         ChainProp(name='HLT_e24_lhvloose_2e12_lhvloose_L1eEM24L_3eEM12L',l1SeedThresholds=['eEM24L','eEM12L'], groups=PrimaryPhIGroup+MultiElectronGroup),
         #--------- primary special
         ChainProp(name='HLT_e20_lhtight_ivarloose_L1ZAFB-25DPHI-eEM18M', l1SeedThresholds=['eEM18M'], groups=PrimaryPhIGroup+SingleElectronGroup+Topo3Group),
+        # ATR-30666
+        ChainProp(name='HLT_e20_lhtight_ivarloose_L1ZAFB-25DPHIM-eEM18M', l1SeedThresholds=['eEM18M'], groups=PrimaryPhIGroup+SingleElectronGroup+Topo3Group),
         # ATR-25512
         ChainProp(name='HLT_e20_lhtight_ivarloose_L12eEM9', l1SeedThresholds=['eEM9'], groups=SupportPhIGroup+SingleElectronGroup), # Phase-1 ATR-27156
 
