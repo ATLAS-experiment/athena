@@ -47,24 +47,6 @@ def MuonHoughPatternFinderToolCfg(flags, name = "MuonHoughPatternFinderTool", **
     result.setPrivateTools(the_tool)
     return result
 
-def MdtDriftCircleOnTrackCreatorAdjustableT0Cfg(flags,**kwargs):
-    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg
-    kwargs.setdefault("TimingMode", 3)
-    kwargs.setdefault("DoTofCorrection", True)
-    kwargs.setdefault("TimeWindowSetting", MdtCalibWindowNumber('Collision_data'))
-    acc = MuonClusterOnTrackCreatorCfg(flags, **kwargs)  
-    return acc
-
-def AdjustableT0Tool(flags,**kwargs):
-    # NB: the following 'ifs' are the same as in the MdtDriftCircleOnTrackCreator, so that the ToF setting is the same
-    if flags.Beam.Type is BeamType.Cosmics:
-        kwargs.setdefault("DoTof", 0)
-    else: # collisions simulation final precise cuts
-        kwargs.setdefault("DoTof", 1)
-        
-    AdjT0__AdjustableT0Tool=CompFactory.getComp("AdjT0::AdjustableT0Tool")
-    return AdjT0__AdjustableT0Tool(**kwargs)
-
 def MdtMathSegmentFinderCfg(flags,name="MdtMathSegmentFinder", **kwargs):
     # beamType       = getattr(extraFlags,"beamType", beamFlags.beamType())
     # enableCurvedSegmentFinding = getattr(extraFlags,"enableCurvedSegmentFinding", muonStandaloneFlags.enableCurvedSegmentFinding())
