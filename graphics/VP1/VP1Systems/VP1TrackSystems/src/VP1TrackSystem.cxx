@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -720,7 +720,7 @@ void VP1TrackSystem::updateShownTotMomentum()
 }
 
 //____________________________________________________________________
-void VP1TrackSystem::userChangedSelection(SoCooperativeSelection* sel, QSet<SoNode*> /*nodes*/, QSet<SoPath*>/*paths*/)
+void VP1TrackSystem::userChangedSelection(SoCooperativeSelection* sel, const QSet<SoNode*>& /*nodes*/, QSet<SoPath*>/*paths*/)
 {
   messageVerbose("userChangedSelection begin");
   if (sel!=m_d->sel_tracks)

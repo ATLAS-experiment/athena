@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -75,7 +75,7 @@ public:
   virtual void userSelectedSingleNode(SoCooperativeSelection*, SoNode* , SoPath*);
   virtual void userDeselectedSingleNode(SoCooperativeSelection*, SoNode* , SoPath*);
   //For SoCooperativeSelection with policy TOGGLE or SHIFT:
-  virtual void userChangedSelection(SoCooperativeSelection*, QSet<SoNode*>, QSet<SoPath*>);
+  virtual void userChangedSelection(SoCooperativeSelection*, const QSet<SoNode*>& , QSet<SoPath*>);
   //Tip: If you need to know which paths/nodes were just removed/added
   //then simply cache the last selection set somewhere and use
   //QSet::subtract() to find the difference.

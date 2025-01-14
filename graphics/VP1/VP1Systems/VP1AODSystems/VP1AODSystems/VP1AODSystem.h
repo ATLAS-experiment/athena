@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -54,7 +54,7 @@ public:
   void userPickedNode(SoNode* pickedNode, SoPath *pickedPath);
   void userSelectedSingleNode(SoCooperativeSelection*, SoNode* , SoPath*);//SINGLE
   void userDeselectedSingleNode(SoCooperativeSelection*, SoNode* , SoPath*);//SINGLE
-  void userChangedSelection(SoCooperativeSelection*, QSet<SoNode*>, QSet<SoPath*>);//TOGGLE/SHIFT
+  void userChangedSelection(SoCooperativeSelection*, const QSet<SoNode*> &, QSet<SoPath*>);//TOGGLE/SHIFT
   void userClickedOnBgd();  
 
 public Q_SLOTS:

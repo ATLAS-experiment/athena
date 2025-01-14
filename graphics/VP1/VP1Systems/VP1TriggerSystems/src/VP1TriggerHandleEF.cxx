@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************************
@@ -242,7 +242,7 @@ void VP1Trig::VP1TriggerHandleEF::loadMuonTrack(int trackNo, QString type)
     if(muonTrackName[i]=="Theta") {
       double cotTh = muonTrackData(type,i);
       if(cotTh!=0) data.push_back(QString::number((M_PI_2)-std::atan(1/cotTh)));
-      else data.push_back(QString::number((M_PI_2)-std::atan(10^10)));
+      else data.push_back(QString::number(0));
     }
     else {
       data.push_back(QString::number(muonTrackData(type,i)));

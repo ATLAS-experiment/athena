@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************************
@@ -147,7 +147,7 @@ void TrackSystemDisplay::userPickedNode(SoNode* pickedNode, SoPath * /*pickedPat
 
 //Actions when user chose <multi> track selections in controller and clicked on 2 or more tracks
 //_____________________________________________________________________________________________
-void TrackSystemDisplay::userChangedSelection(SoCooperativeSelection*, QSet<SoNode*> nodes, QSet<SoPath*>)
+void TrackSystemDisplay::userChangedSelection(SoCooperativeSelection*, const QSet<SoNode*> & nodes, QSet<SoPath*>)
 {
   if(nodes.count()<2)
     return;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-20235 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////
@@ -19,7 +19,6 @@
 #include "TrkSurfaces/Surface.h"
 #include "TrkSurfaces/SurfaceCollection.h"
 #include "GeoPrimitives/GeoPrimitives.h"
-//#include "CLHEP/Units/SystemOfUnits.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 #include <Inventor/nodes/SoSeparator.h>
@@ -148,7 +147,7 @@ void TrackingSurfacesSystem::userPickedNode(SoNode* pickedNode, SoPath * /*picke
 }
 
 //_____________________________________________________________________________________
-void TrackingSurfacesSystem::userChangedSelection(SoCooperativeSelection*, QSet<SoNode*> nodes, QSet<SoPath*>)
+void TrackingSurfacesSystem::userChangedSelection(SoCooperativeSelection*, const QSet<SoNode*> & nodes, QSet<SoPath*>)
 {
   for (SoNode * node : nodes) {
     //Surface pointer:

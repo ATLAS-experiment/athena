@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1PREPRAWDATASYSTEM_H
@@ -39,7 +39,7 @@ public:
   void userPickedNode(SoNode* pickedNode, SoPath * pickedPath);
   void userSelectedSingleNode(SoCooperativeSelection*, SoNode* , SoPath*);//SINGLE
   void userDeselectedSingleNode(SoCooperativeSelection*, SoNode* , SoPath*);//SINGLE
-  void userChangedSelection(SoCooperativeSelection*, QSet<SoNode*>, QSet<SoPath*>);//TOGGLE/SHIFT
+  void userChangedSelection(SoCooperativeSelection*, const QSet<SoNode*>&, QSet<SoPath*>);//TOGGLE/SHIFT
   void userClickedOnBgd();
 
   virtual void deselectAll(SoCooperativeSelection* exception_sel = 0);

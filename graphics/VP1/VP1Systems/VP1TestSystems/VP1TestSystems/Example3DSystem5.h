@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EXAMPLE3DSYSTEM5_H
@@ -35,7 +35,7 @@ public:
   virtual ~Example3DSystem5(){};
   void buildEventSceneGraph(StoreGateSvc* sg, SoSeparator *root);
   void userPickedNode(SoNode* pickedNode, SoPath * pickedPath);
-  void userChangedSelection(SoCooperativeSelection*, QSet<SoNode*>, QSet<SoPath*>);
+  void userChangedSelection(SoCooperativeSelection*, const QSet<SoNode*> &, QSet<SoPath*>);
   QWidget * buildController();
 
 private Q_SLOTS:

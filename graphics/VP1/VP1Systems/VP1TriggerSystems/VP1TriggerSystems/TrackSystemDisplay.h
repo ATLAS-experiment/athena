@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKSYSTEMDISPLAY_H
@@ -38,7 +38,7 @@ public:
   virtual ~TrackSystemDisplay(){};
   void buildEventSceneGraph(StoreGateSvc* sg, SoSeparator *root);
   void userPickedNode(SoNode* pickedNode, SoPath * pickedPath);
-  void userChangedSelection(SoCooperativeSelection*, QSet<SoNode*>, QSet<SoPath*>);
+  void userChangedSelection(SoCooperativeSelection*, const QSet<SoNode*>&, QSet<SoPath*>);
   QWidget * buildController();
   void printTrackInfo(QString title, QList<QString> paraname, QList<QString> paravalue);
 
