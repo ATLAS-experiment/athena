@@ -8,7 +8,7 @@ find_package( Boost COMPONENTS regex )
 find_package( CORAL COMPONENTS CoralBase CoralKernel )
 find_package( ROOT COMPONENTS Core Tree Hist RIO )
 find_package( tdaq COMPONENTS owl )
-find_package( tdaq-common COMPONENTS CTPfragment eformat hltinterface ers )
+find_package( tdaq-common COMPONENTS CTPfragment eformat hltinterface ers webdaq )
 find_package( TBB )
 
 # Component(s) in the package:
@@ -21,7 +21,7 @@ atlas_add_component( TrigServices
                      AthenaBaseComps AthenaInterprocess AthenaKernel AthenaMonitoringKernelLib AthenaPoolUtilities
                      ByteStreamCnvSvcBaseLib ByteStreamData CxxUtils EventInfoUtils GaudiKernel RDBAccessSvcLib StoreGateLib TrigCostMonitorLib TrigKernel
                      TrigDataAccessMonitoringLib TrigOutputHandlingLib TrigSteeringEvent TrigSteerMonitorLib
-                     TrigTimeAlgsLib xAODEventInfo xAODTrigger TrigT1Result )
+                     TrigTimeAlgsLib xAODEventInfo xAODTrigger TrigT1Result)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py
