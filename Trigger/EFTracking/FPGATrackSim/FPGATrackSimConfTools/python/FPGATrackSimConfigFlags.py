@@ -266,9 +266,9 @@ def createGenScanFPGATrackSimConfigFlags():
     cf = createBasicFPGATrackSimConfigFlags()
 
     cf.name = 'genScan'
-    cf.addFlag('genScanCuts','FPGATrackSimHough.FPGATrackSimGenScanCuts')
-    cf.addFlag('reverse','False')
-    cf.addFlag('binFilter','PairThenGroup')
+    cf.addFlag('genScanCuts','FPGATrackSimHough.FPGATrackSimGenScanCuts_incr')
+    cf.addFlag('reverse','True')
+    cf.addFlag('binFilter','IncrementalBuild')
 
     return cf
 
