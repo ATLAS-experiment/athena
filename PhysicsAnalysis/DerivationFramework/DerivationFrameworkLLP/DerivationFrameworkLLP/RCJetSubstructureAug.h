@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -13,7 +13,6 @@
 #ifndef DERIVATIONFRAMEWORK_RCJetSubstructureAug_H
 #define DERIVATIONFRAMEWORK_RCJetSubstructureAug_H
 
-#include <string>
 #include "fastjet/tools/Filter.hh"
 #include "fastjet/contrib/SoftDrop.hh"
 
@@ -21,6 +20,9 @@
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "xAODJet/JetContainer.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
+#include <string>
+#include <optional>
 
 #include "ExpressionEvaluation/ExpressionParserUser.h"
 
@@ -31,7 +33,6 @@ namespace DerivationFramework {
         RCJetSubstructureAug(const std::string& t, const std::string& n, const IInterface* p);
         virtual ~RCJetSubstructureAug();
         virtual StatusCode initialize() override;
-        virtual StatusCode finalize() override;
         virtual StatusCode addBranches() const override;
 
         private:
@@ -58,83 +59,48 @@ namespace DerivationFramework {
         Gaudi::Property<float> m_R0 
             {this, "R0Soft", 1. , "Normalization of angular distance, usually the characteristic jet radius (default R0 = 1)"};
         
-        SG::ReadHandleKey< xAOD::JetContainer > m_jetKey{ this, "JetContainerKey", ""};
+        SG::ReadHandleKey< xAOD::JetContainer > m_jetKey
+          { this, "JetContainerKey", ""};
 
-        // Struct to hold all decorators
-        struct moments_t;
-        moments_t* m_moments;
+        using WDHK = SG::WriteDecorHandleKey<xAOD::JetContainer>;
 
-        // The filter object that will apply the grooming
-        std::unique_ptr<fastjet::Filter> m_trimmer;
-        std::unique_ptr<fastjet::contrib::SoftDrop> m_softdropper;
-
-    };
-
-    struct RCJetSubstructureAug::moments_t {
         /// Qw decorator
-        SG::AuxElement::Decorator<float> dec_Qw;
+        WDHK m_dec_Qw { this, "dec_Qw", m_jetKey, "Qw_" };
 
         /// Nsubjetiness decorators
-        SG::AuxElement::Decorator<float> dec_Tau1;
-        SG::AuxElement::Decorator<float> dec_Tau2;
-        SG::AuxElement::Decorator<float> dec_Tau3;
-        SG::AuxElement::Decorator<float> dec_Tau4;
-        SG::AuxElement::Decorator<float> dec_Tau21;
-        SG::AuxElement::Decorator<float> dec_Tau32;
+        WDHK m_dec_Tau1 { this, "dec_Tau1", m_jetKey, "Tau1_" };
+        WDHK m_dec_Tau2 { this, "dec_Tau2", m_jetKey, "Tau2_" };
+        WDHK m_dec_Tau3 { this, "dec_Tau3", m_jetKey, "Tau3_" };
+        WDHK m_dec_Tau4 { this, "dec_Tau4", m_jetKey, "Tau4_" };
+        WDHK m_dec_Tau21 { this, "dec_Tau21", m_jetKey, "Tau21_" };
+        WDHK m_dec_Tau32 { this, "dec_Tau32", m_jetKey, "Tau32_" };
 
         /// KtSplittingScale decorators
-        SG::AuxElement::Decorator<float> dec_Split12;
-        SG::AuxElement::Decorator<float> dec_Split23;
-        SG::AuxElement::Decorator<float> dec_Split34;
+        WDHK m_dec_Split12 { this, "dec_Split12", m_jetKey, "Split12_" };
+        WDHK m_dec_Split23 { this, "dec_Split23", m_jetKey, "Split23_" };
+        WDHK m_dec_Split34 { this, "dec_Split34", m_jetKey, "Split34_" };
 
         /// Energy correlation factors decorators
-        SG::AuxElement::Decorator<float> dec_ECF1;
-        SG::AuxElement::Decorator<float> dec_ECF2;
-        SG::AuxElement::Decorator<float> dec_ECF3;
-        SG::AuxElement::Decorator<float> dec_ECF4;
-        SG::AuxElement::Decorator<float> dec_C2;
-        SG::AuxElement::Decorator<float> dec_D2;
+        WDHK m_dec_ECF1 { this, "dec_ECF1", m_jetKey, "ECF1_" };
+        WDHK m_dec_ECF2 { this, "dec_ECF2", m_jetKey, "ECF2_" };
+        WDHK m_dec_ECF3 { this, "dec_ECF3", m_jetKey, "ECF3_" };
+        WDHK m_dec_ECF4 { this, "dec_ECF4", m_jetKey, "ECF4_" };
+        WDHK m_dec_C2 { this, "dec_C2", m_jetKey, "C2_" };
+        WDHK m_dec_D2 { this, "dec_D2", m_jetKey, "D2_" };
 
-        /// Cluster jets informations decorators 
-        SG::AuxElement::Decorator<float> dec_pT;
-        SG::AuxElement::Decorator<float> dec_m;
-        SG::AuxElement::Decorator<float> dec_NClusts;
-        SG::AuxElement::Decorator<float> dec_eta;
-        SG::AuxElement::Decorator<float> dec_phi;
+        /// Reclustered jets information decorators 
+        WDHK m_dec_pT { this, "dec_pT", m_jetKey, "pT_" };
+        WDHK m_dec_m { this, "dec_m", m_jetKey, "m_" };
+        WDHK m_dec_NClusts { this, "dec_NClusts", m_jetKey, "NClusts_" };
+        WDHK m_dec_eta { this, "dec_eta", m_jetKey, "eta_" };
+        WDHK m_dec_phi { this, "dec_phi", m_jetKey, "phi_" };
 
         /// Timing information 
-        SG::AuxElement::Decorator<float> dec_timing;
-        
-        moments_t (const std::string& suffix):
-        
-            dec_Qw("Qw_" + suffix),
+        WDHK m_dec_timing { this, "dec_timing", m_jetKey, "timing_" };
 
-            dec_Tau1("Tau1_" + suffix), 
-            dec_Tau2("Tau2_" + suffix),
-            dec_Tau3("Tau3_" + suffix),
-            dec_Tau4("Tau4_" + suffix),
-            dec_Tau21("Tau21_" + suffix),
-            dec_Tau32("Tau32_" + suffix),
-
-            dec_Split12("Split12_" + suffix),
-            dec_Split23("Split23_" + suffix),
-            dec_Split34("Split34_" + suffix),
-
-            dec_ECF1("ECF1_" + suffix),
-            dec_ECF2("ECF2_" + suffix),
-            dec_ECF3("ECF3_" + suffix),
-            dec_ECF4("ECF4_" + suffix),
-            dec_C2("C2_" + suffix),
-            dec_D2("D2_" + suffix),
-
-            dec_pT("pT_" + suffix),
-            dec_m("m_" + suffix),
-            dec_NClusts("NClusts"),
-            dec_eta("eta_" + suffix),
-            dec_phi("phi_" + suffix),
-
-            dec_timing("timing_" + suffix){}
-
+        // The filter object that will apply the grooming
+        std::optional<fastjet::Filter> m_trimmer;
+        std::optional<fastjet::contrib::SoftDrop> m_softdropper;
     };
 
 }
