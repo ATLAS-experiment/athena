@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -53,6 +53,7 @@ protected:
   qint32 provideCollTypeID() const { return 0; }//Vertex col. type: 0 for reconstructed vertices, 1 for truth vertices.
   QString provideSection() const { return "Reconstructed Vertices"; };
   QString provideSectionToolTip() const { return "Collections of reconstructed vertices"; }
+  //cppcheck-suppress returnByReference
   QString provideText() const;
   void assignDefaultMaterial(SoMaterial*) const;
   bool load();
