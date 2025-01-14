@@ -575,6 +575,8 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         # We do this separately from the tool declaration, as we may need to set uo
         # two such tools, but they have to be private.
 
+        log = logging.getLogger('LargeRJetAnalysisConfig')
+
         # Config file:
         config_file = None
         if self.systematicsModelJER in ["Simple", "Full"]:
@@ -603,9 +605,14 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         if self.uncertToolMCType is not None:
             mc_type = self.uncertToolMCType
         else:
-            if config.dataType() is DataType.FastSim and config.geometry() is LHCPeriod.Run2:
-                # not supported for Run 3 yet!
-                mc_type = "AF3"
+            if config.dataType() is DataType.FastSim:
+                # To be updated when FastSim recommendatiosn are released
+                log.warning("AF3 uncertainties for large-R jets are not yet released!")
+                log.warning("Using full-sim ones in the meantime!")
+                if config.geometry() is LHCPeriod.Run2:
+                    mc_type = "MC20"
+                else:
+                    mc_type = "MC23"
             else:
                 if config.geometry() is LHCPeriod.Run2:
                     mc_type = "MC20"
@@ -702,7 +709,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.jets = config.readName (self.containerName)
 
         # Jet uncertainties
-        if self.jetInput == "UFO" and config.dataType() is (DataType.FullSim or DataType.FastSim):
+        if self.jetInput == "UFO" and config.dataType() in [DataType.FullSim, DataType.FastSim]:
             alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+self.containerName )
             self.createUncertaintyTool(alg, config, jetCollectionName, doPseudoData=( self.systematicsModelJER in ["Full","All"] ))
             # R=1.0 jets have a validity range
@@ -714,8 +721,6 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             )
 
             log.warning("Uncertainties for UFO jets are test only! This {0} is not for physics analysis! ".format(alg.uncertaintiesTool.ConfigFile))
-            if config.dataType() is DataType.FastSim:
-                log.warning("You are applying UFO FS uncertainty on AF3! This {0} is only for test purpose and not for physics analysis! ".format(alg.uncertaintiesTool.ConfigFile))
 
             alg.uncertaintiesTool.MCType = "MC20"
             alg.uncertaintiesTool.IsData = config.dataType() is DataType.Data
