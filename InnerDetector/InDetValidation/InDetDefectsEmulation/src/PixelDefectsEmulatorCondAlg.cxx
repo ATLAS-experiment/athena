@@ -142,7 +142,8 @@ namespace InDet{
     defects->resize( pixelDetEleColl.cptr()->size());
     unsigned int n_defects_total=0;
     unsigned int n_attempts_max=m_maxAttempts.value();
-    unsigned int no_column_group_defects_for_matrix_type=0u;
+    // Silence Clang warnings. It seems that no_column_group_defects_for_matrix_type will be used in the future
+    [[maybe_unused]] unsigned int no_column_group_defects_for_matrix_type=0u;
     {
        ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_rngName);
        rngWrapper->setSeed( m_rngName, ctx );
