@@ -171,8 +171,10 @@ def CopyMcEventCollectionCfg(flags, name="CopyMcEventCollection", **kwargs):
     else:
         kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}TruthEvent")
         inputs.append(f'McEventCollection#{kwargs["BkgInputKey"]}')
+
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}TruthEvent")
-    inputs.append(f'McEventCollection#{kwargs["SignalInputKey"]}')
+    if flags.Common.ProductionStep is not ProductionStep.FastChain:
+        inputs.append(f'McEventCollection#{kwargs["SignalInputKey"]}')
 
     if flags.Sim.DoFullChain and flags.Common.isOverlay:
         kwargs.setdefault("OutputKey", "BeamTruthEvent")
