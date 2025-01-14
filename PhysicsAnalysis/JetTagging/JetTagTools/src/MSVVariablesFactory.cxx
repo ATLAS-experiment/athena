@@ -219,8 +219,9 @@ namespace Analysis {
       std::vector<const xAOD::Vertex*> vecVtxHolder;
       vecVtxHolder.push_back(vertex);
 
-      ATH_MSG_DEBUG("Factory PVX x = " << priVtx->x() << " y = " << priVtx->y() << " z = " << priVtx->z());
+      
       if (priVtx) {
+        ATH_MSG_DEBUG("Factory PVX x = " << priVtx->x() << " y = " << priVtx->y() << " z = " << priVtx->z());
         localdistnrm = get3DSignificance(priVtx, vecVtxHolder, jet_V3);
       } else {
         ATH_MSG_WARNING("#BTAG# Tagging requested, but no primary vertex supplied.");
