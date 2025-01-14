@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DECORATOR_ALG_H
@@ -15,8 +15,8 @@ namespace FlavorTagDiscriminants {
   class DecoratorAlg : public AthReentrantAlgorithm
   {
   public:
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
     using ExtraDependencies = std::set<std::string>;
-    DecoratorAlg(const std::string& name, ISvcLocator* svcloc);
     virtual StatusCode initialize() override;
     virtual StatusCode initializeInternal(ExtraDependencies = {});
     virtual StatusCode execute(const EventContext& cxt) const override;

@@ -10,7 +10,7 @@ namespace FlavorTagDiscriminants {
     
 
     HitsLoader::HitsLoader(
-        ConstituentsInputConfig cfg,
+        const ConstituentsInputConfig& cfg,
         const FTagOptions& options
     ):
         IConstituentsLoader(cfg),

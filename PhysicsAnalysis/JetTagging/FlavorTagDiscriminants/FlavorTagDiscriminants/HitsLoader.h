@@ -34,7 +34,7 @@ namespace FlavorTagDiscriminants {
     // Subclass for Hits loader inherited from abstract IConstituentsLoader class
     class HitsLoader : public IConstituentsLoader {
       public:
-        HitsLoader(ConstituentsInputConfig, const FTagOptions& options);
+        HitsLoader(const ConstituentsInputConfig&, const FTagOptions& options);
         std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> getData(
           const xAOD::Jet& jet, 
           [[maybe_unused]] const SG::AuxElement& btag) const override ;
