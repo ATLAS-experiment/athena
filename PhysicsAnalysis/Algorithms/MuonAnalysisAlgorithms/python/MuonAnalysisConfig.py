@@ -326,65 +326,6 @@ class MuonWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'TTVA_effSF' + postfix)
 
 
-def makeMuonCalibrationConfig( seq, containerName,
-                               postfix = None):
-    """Create muon calibration analysis algorithms
-
-    This makes all the algorithms that need to be run first befor
-    all working point specific algorithms and that can be shared
-    between the working points.
-
-    Keyword arguments:
-      containerName -- name of the output container
-      postfix -- a postfix to apply to decorations and algorithm
-                 names.  this is mostly used/needed when using this
-                 sequence with multiple working points to ensure all
-                 names are unique.
-    """
-
-    config = MuonCalibrationConfig (containerName)
-    config.setOptionValue ('postfix', postfix)
-    seq.append (config)
-
-
-
-
-
-def makeMuonWorkingPointConfig( seq, containerName, workingPoint, selectionName,
-                                addSelectionToPreselection = None,
-                                systematicBreakdown = None,
-                                noEffSF = None,
-                                onlyRecoEffSF = None ):
-    """Create muon analysis algorithms for a single working point
-
-    Keyword arguments:
-      workingPoint -- The working point to use
-      selectionName -- a postfix to apply to decorations and algorithm
-                 names.  this is mostly used/needed when using this
-                 sequence with multiple working points to ensure all
-                 names are unique.
-      addSelectionToPreselection -- Whether or not to apply muon quality selection
-                                when creating output containers.
-      systematicBreakdown -- enables the full breakdown of eff SF systematics
-      noEffSF -- Disables the calculation of efficiencies and scale factors
-      onlyRecoEffSF -- Only enables the reconstruction scale factor
-    """
-
-
-    config = MuonWorkingPointConfig (containerName, selectionName)
-    if workingPoint is not None :
-        splitWP = workingPoint.split ('.')
-        if len (splitWP) != 2 :
-            raise ValueError ('working point should be of format "quality.isolation", not ' + workingPoint)
-        config.setOptionValue ('quality', splitWP[0])
-        config.setOptionValue ('isolation', splitWP[1])
-    config.setOptionValue ('addSelectionToPreselection', addSelectionToPreselection)
-    config.setOptionValue ('systematicBreakdown', systematicBreakdown)
-    config.setOptionValue ('noEffSF', noEffSF)
-    config.setOptionValue ('onlyRecoEffSF', onlyRecoEffSF)
-    seq.append (config)
-
-
 class MuonTriggerAnalysisSFBlock (ConfigBlock):
 
     def __init__ (self, configName='') :

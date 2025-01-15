@@ -110,31 +110,3 @@ class EventCleaningBlock (ConfigBlock):
 
 
 
-
-def makeEventCleaningConfig( seq,
-                             runPrimaryVertexSelection = None,
-                             runEventCleaning = None,
-                             runGRL = None,
-                             userGRLFiles = None,
-                             GRLDict = None,
-                             noFilter = None,
-                             ):
-    """Create a basic event cleaning analysis algorithm sequence
-
-    Keyword arguments:
-      runPrimaryVertexSelection -- whether to run primary vertex selection
-      runEventCleaning -- whether to run event cleaning
-      runGRL -- whether to run GRL selection
-      userGRLFiles -- a list of GRL files to select data from
-      GRLDict -- a dictionary of GRL files to determine decoration names
-      noFilter -- whether to apply event decoration or not
-    """
-
-    config = EventCleaningBlock ()
-    config.setOptionValue ('runPrimaryVertexSelection', runPrimaryVertexSelection)
-    config.setOptionValue ('runEventCleaning', runEventCleaning)
-    config.setOptionValue ('runGRL', runGRL)
-    config.setOptionValue ('userGRLFiles', userGRLFiles)
-    config.setOptionValue ('GRLDict', GRLDict)
-    config.setOptionValue ('noFilter', noFilter)
-    seq.append (config)

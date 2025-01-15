@@ -20,13 +20,3 @@ class SystObjectLinkBlock (ConfigBlock):
 
 
 
-
-def makeSystObjectLinkConfig( seq, containerName ):
-    """Create an alg for linking systematic variations with their nominal object
-
-    Keyword arguments:
-      containerName: the container to be decorated with the links
-    """
-
-    config = SystObjectLinkBlock (containerName)
-    seq.append (config)

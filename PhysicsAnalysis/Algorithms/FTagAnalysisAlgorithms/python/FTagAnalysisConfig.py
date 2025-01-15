@@ -103,19 +103,3 @@ class FTagConfig (ConfigBlock):
             alg.vars = variables
             for var in variables:
                 config.addOutputVar(self.containerName, var, var, noSys=True)
-
-def makeFTagAnalysisConfig( seq, containerName,
-                            selectionName,
-                            btagWP = None,
-                            btagger = None):
-    """Create a ftag analysis algorithm config
-
-    Keyword arguments:
-      btagWP -- Flavour tagging working point
-      btagger -- Flavour tagger
-    """
-
-    config = FTagConfig (containerName, selectionName)
-    config.setOptionValue ('btagWP', btagWP)
-    config.setOptionValue ('btagger', btagger)
-    seq.append (config)

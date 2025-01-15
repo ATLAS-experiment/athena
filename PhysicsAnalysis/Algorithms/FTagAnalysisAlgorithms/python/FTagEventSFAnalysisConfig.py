@@ -142,13 +142,3 @@ class FTagEventSFConfig(ConfigBlock):
         config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration,
                             'weight_ftag_effSF_' + selectionName)
 
-
-def makeFTagEventSFConfig(seq, containerName,
-                          selectionName,
-                          btagWP=None,
-                          btagger=None):
-
-    config = FTagEventSFConfig(containerName, selectionName)
-    config.setOptionValue('btagWP', btagWP)
-    config.setOptionValue('btagger', btagger)
-    seq.append(config)
