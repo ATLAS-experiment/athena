@@ -37,7 +37,7 @@ template <typename T>
 struct ClassID_traits {
   // Always false, but needs to depend on T to prevent the assertions
   // from being instantiated too early.
-  static const bool s_isDataObject = !std::same_as<T, ClassID_trait_dummy>;
+  static const bool s_isDataObject = std::same_as<T, ClassID_trait_dummy>;
   using has_classID_tag = std::false_type;
   static const int s_version = 0;
 
