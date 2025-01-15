@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -62,9 +62,6 @@ TileHitToRawChannel::TileHitToRawChannel(const std::string& name, ISvcLocator* p
   , m_threshHi(0.0)
   , m_ampMaxHi(0.0)
 {
-  m_rChUnit = TileRawChannelUnit::ADCcounts;
-  m_rChType = TileFragHash::Default;
-
   declareProperty("TileInfoName", m_infoName  = "TileInfo");
   declareProperty("DeltaT", m_deltaT = -1.0); // keep hits only within deltaT;
   declareProperty("calibrateEnergy", m_calibrateEnergy = false); // convert or not to pCb
