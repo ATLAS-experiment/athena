@@ -24,10 +24,17 @@ def PhysValPFOToolCfg(name, container='', **kwargs):
     acc.setPrivateTools(tool)
     return acc
 
-def PhysValPFOCfg(flags):
+def PhysValPFOCfg(flags, useGlobalContainers=False):
     acc = ComponentAccumulator()
 
-    tools = [ acc.popToolsAndMerge(PhysValPFOToolCfg("PhysValFE_charged", "JetETMissChargedParticleFlowObjects")) ]
-    tools += [ acc.popToolsAndMerge(PhysValPFOToolCfg("PhysValFE_neutral", "JetETMissNeutralParticleFlowObjects")) ]
+    if useGlobalContainers:
+        chargedName="GlobalChargedParticleFlowObjects"
+        neutralName="GlobalNeutralParticleFlowObjects"
+    else:
+        chargedName="JetETMissChargedParticleFlowObjects"
+        neutralName="JetETMissNeutralParticleFlowObjects"
+
+    tools = [ acc.popToolsAndMerge(PhysValPFOToolCfg("PhysValFE_charged", chargedName)) ]
+    tools += [ acc.popToolsAndMerge(PhysValPFOToolCfg("PhysValFE_neutral", neutralName)) ]
     acc.setPrivateTools(tools)
     return acc
