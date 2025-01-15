@@ -1,6 +1,7 @@
 // AsgExampleTools_entries.cxx
 
 #include <EgammaAnalysisAlgorithms/EgammaCalibrationAndSmearingAlg.h>
+#include <EgammaAnalysisAlgorithms/EgammaCaloClusterEtaAlg.h>
 #include <EgammaAnalysisAlgorithms/EgammaIsGoodOQSelectionTool.h>
 #include <EgammaAnalysisAlgorithms/EgammaIsolationCorrectionAlg.h>
 #include <EgammaAnalysisAlgorithms/EgammaIsolationSelectionAlg.h>
@@ -14,6 +15,7 @@
 #include <EgammaAnalysisAlgorithms/PhotonExtraVariablesAlg.h>
 
 DECLARE_COMPONENT (CP::EgammaCalibrationAndSmearingAlg)
+DECLARE_COMPONENT (CP::EgammaCaloClusterEtaAlg)
 DECLARE_COMPONENT (CP::EgammaIsGoodOQSelectionTool)
 DECLARE_COMPONENT (CP::EgammaIsolationCorrectionAlg)
 DECLARE_COMPONENT (CP::EgammaIsolationSelectionAlg)

@@ -67,6 +67,8 @@ class PhotonCalibrationConfig (ConfigBlock) :
             "once per systematic. ATLASG-2358")
         self.addOption ('decorateTruth', False, type=bool,
             info="decorate truth particle information on the reconstructed one")
+        self.addOption ('decorateCaloClusterEta', False, type=bool,
+            info="decorate the calo cluster eta on the reconstructed one")
 
 
     def makeCalibrationAndSmearingAlg (self, config, name) :
@@ -123,6 +125,12 @@ class PhotonCalibrationConfig (ConfigBlock) :
             config.setSourceName (self.containerName, "Photons")
 
         cleaningWP = 'NoTime' if self.cleaningAllowLate else ''
+
+        # Decorate calo cluster eta if required
+        if self.decorateCaloClusterEta:
+            alg = config.createAlgorithm( 'CP::EgammaCaloClusterEtaAlg', 'ElectronEgammaCaloClusterEtaAlg' + self.postfix )
+            alg.particles = config.readName(self.containerName)
+            config.addOutputVar (self.containerName, 'caloEta2', 'caloEta2', noSys=True)
 
         # Set up a shallow copy to decorate
         if config.wantCopy (self.containerName) :

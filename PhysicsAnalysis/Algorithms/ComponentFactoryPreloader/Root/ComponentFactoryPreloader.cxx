@@ -59,6 +59,7 @@
 #include <AssociationUtils/OverlapRemovalTool.h>
 #include <DiTauMassTools/MissingMassTool.h>
 #include <EgammaAnalysisAlgorithms/EgammaCalibrationAndSmearingAlg.h>
+#include <EgammaAnalysisAlgorithms/EgammaCaloClusterEtaAlg.h>
 #include <EgammaAnalysisAlgorithms/EgammaFSRForMuonsCollectorAlg.h>
 #include <EgammaAnalysisAlgorithms/EgammaIsGoodOQSelectionTool.h>
 #include <EgammaAnalysisAlgorithms/EgammaIsolationCorrectionAlg.h>
@@ -230,6 +231,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::DileptonInvariantMassWindowSelectorAlg>("CP::DileptonInvariantMassWindowSelectorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::DileptonOSSFInvariantMassWindowSelectorAlg>("CP::DileptonOSSFInvariantMassWindowSelectorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::EgammaCalibrationAndSmearingAlg>("CP::EgammaCalibrationAndSmearingAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::EgammaCaloClusterEtaAlg>("CP::EgammaCaloClusterEtaAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::EgammaFSRForMuonsCollectorAlg>("CP::EgammaFSRForMuonsCollectorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::EgammaIsolationCorrectionAlg>("CP::EgammaIsolationCorrectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::EgammaIsolationSelectionAlg>("CP::EgammaIsolationSelectionAlg"));

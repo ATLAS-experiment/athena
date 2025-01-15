@@ -98,6 +98,7 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (forceFullSimConfig=True)
     config.setOptions (recalibratePhyslite=False)
     config.setOptions (decorateTruth=True)
+    config.setOptions (decorateCaloClusterEta=True)
     # Electrons.WorkingPoint
     config.addBlock ('Electrons.WorkingPoint')
     config.setOptions (containerName='AnaElectrons')
