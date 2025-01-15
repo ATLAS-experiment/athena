@@ -2172,6 +2172,13 @@ class ItemDef:
             # g-2 tau (ATR-30638)
             MenuItem('L1_DPHI-2eTAU60').setLogic(d.TOPO_30DPHI32_2eTAU60s & physcond)
 
+            # ATR-30657
+            MenuItem('L1_BTAG-MU5VFjJ30').setLogic( d.TOPO_0DR04_MU5VFab_CjJ30ab & physcond)
+            MenuItem('L1_BTAG-MU3VFjJ30').setLogic( d.TOPO_0DR04_MU3VFab_CjJ30ab & physcond)
+            MenuItem('L1_BTAG-MU3VFjJ30_2jJ30p0ETA25').setLogic( d.TOPO_0DR04_MU3VFab_CjJ30ab & d.jJ300ETA25.x(2) & physcond)
+            MenuItem('L1_BTAG-MU3VFjJ30_2jJ40p0ETA25').setLogic( d.TOPO_0DR04_MU3VFab_CjJ30ab & d.jJ400ETA25.x(2) & physcond)
+            MenuItem('L1_BTAG-MU3VFjJ30_2jJ30p0ETA25_jJ40p0ETA25').setLogic( d.TOPO_0DR04_MU3VFab_CjJ30ab & d.jJ300ETA25.x(2) & d.jJ400ETA25 & physcond)
+
         except NameError as ex:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             fn,ln,_,_ = traceback.extract_tb(exc_traceback)[0]

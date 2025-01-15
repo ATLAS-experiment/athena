@@ -4287,12 +4287,68 @@ HLT_g20_tight_icaloloose_L1eEM18M:
     4: 1
 HLT_g20_tight_icaloloose_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS500j35_pf_ftf_L1eEM22M_jMJJ-300:
   eventCount: 0
+  stepCounts:
+    0: 7
+    1: 7
+    2: 7
+    3: 1
+    4: 1
+    5: 1
+  stepFeatures:
+    0: 7
+    1: 7
+    2: 7
+    3: 1
+    4: 1
+    5: 3
 HLT_g20_tight_icaloloose_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS500j35_pf_ftf_L1eEM22M_jMJJ-300:
   eventCount: 0
+  stepCounts:
+    0: 7
+    1: 7
+    2: 7
+    3: 1
+    4: 1
+    5: 1
+  stepFeatures:
+    0: 7
+    1: 7
+    2: 7
+    3: 1
+    4: 1
+    5: 3
 HLT_g20_tight_icaloloose_j40_j35a_j20c_j0_DJMASS300j35_pf_ftf_L1eEM22M_jMJJ-300:
   eventCount: 0
+  stepCounts:
+    0: 7
+    1: 7
+    2: 7
+    3: 1
+    4: 1
+    5: 1
+  stepFeatures:
+    0: 7
+    1: 7
+    2: 7
+    3: 1
+    4: 1
+    5: 4
 HLT_g20_tight_icaloloose_j40_j35a_j25a_j25_j20c_j0_DJMASS300j35_pf_ftf_L1eEM22M_jMJJ-300:
   eventCount: 0
+  stepCounts:
+    0: 7
+    1: 7
+    2: 7
+    3: 1
+    4: 1
+    5: 1
+  stepFeatures:
+    0: 7
+    1: 7
+    2: 7
+    3: 1
+    4: 1
+    5: 6
 HLT_g20_tight_icaloloose_ringer_L1eEM18M:
   eventCount: 1
   stepCounts:
@@ -4309,8 +4365,32 @@ HLT_g20_tight_icaloloose_ringer_L1eEM18M:
     4: 1
 HLT_g20_tight_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS500j35_pf_ftf_L1eEM22M_jMJJ-300:
   eventCount: 0
+  stepCounts:
+    0: 7
+    1: 7
+    2: 7
+    3: 1
+    4: 1
+  stepFeatures:
+    0: 7
+    1: 7
+    2: 7
+    3: 1
+    4: 3
 HLT_g20_tight_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS500j35_pf_ftf_L1eEM22M_jMJJ-300:
   eventCount: 0
+  stepCounts:
+    0: 7
+    1: 7
+    2: 7
+    3: 1
+    4: 1
+  stepFeatures:
+    0: 7
+    1: 7
+    2: 7
+    3: 1
+    4: 3
 HLT_g20_tight_ringer_L1eEM18M:
   eventCount: 1
   stepCounts:
@@ -8153,9 +8233,21 @@ HLT_mu10_ivarmedium_j70_j50a_j0_DJMASS900j50_L1jMJJ-500-NFF:
   eventCount: 0
 HLT_mu10_ivarmedium_mu10_10invmAB70_L12MU8F:
   eventCount: 0
+? HLT_mu10_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn277_pf_ftf_presel3c20XX1c20bgtwo85_dRAB04_L1BTAG-MU3VFjJ30_2jJ30p0ETA25
+: eventCount: 0
+? HLT_mu10_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn277_pf_ftf_presel3c20XX1c20bgtwo85_dRAB04_L1BTAG-MU3VFjJ30_2jJ30p0ETA25_jJ40p0ETA25
+: eventCount: 0
+? HLT_mu10_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn277_pf_ftf_presel3c20XX1c20bgtwo85_dRAB04_L1BTAG-MU3VFjJ30_2jJ40p0ETA25
+: eventCount: 0
 ? HLT_mu10_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn277_pf_ftf_presel3c20XX1c20bgtwo85_dRAB04_L1BTAG-MU8FjJ30_2jJ30p0ETA25_jJ50p0ETA25
 : eventCount: 0
 ? HLT_mu10_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn277_pf_ftf_presel3c20XX1c20bgtwo85_dRAB04_L1BTAG-MU8FjJ40_2jJ40p0ETA25
+: eventCount: 0
+? HLT_mu10_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn280_pf_ftf_presel3c20XX1c20bgtwo85_dRAB04_L1BTAG-MU3VFjJ30_2jJ30p0ETA25
+: eventCount: 0
+? HLT_mu10_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn280_pf_ftf_presel3c20XX1c20bgtwo85_dRAB04_L1BTAG-MU3VFjJ30_2jJ30p0ETA25_jJ40p0ETA25
+: eventCount: 0
+? HLT_mu10_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn280_pf_ftf_presel3c20XX1c20bgtwo85_dRAB04_L1BTAG-MU3VFjJ30_2jJ40p0ETA25
 : eventCount: 0
 ? HLT_mu10_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn280_pf_ftf_presel3c20XX1c20bgtwo85_dRAB04_L1BTAG-MU8FjJ30_2jJ30p0ETA25_jJ50p0ETA25
 : eventCount: 0
@@ -9986,11 +10078,23 @@ HLT_mu6_j100_0eta290_020jvt_boffperf_pf_ftf_dRAB04_L1BTAG-MU5VFjJ80:
   eventCount: 0
 HLT_mu6_j100_0eta290_020jvt_boffperf_pf_ftf_dRAB04_L1MU5VF_jJ80:
   eventCount: 0
+? HLT_mu6_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn277_pf_ftf_presel3c20XX1c20bgtwo85_dRAB04_L1BTAG-MU3VFjJ30_2jJ30p0ETA25
+: eventCount: 0
+? HLT_mu6_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn277_pf_ftf_presel3c20XX1c20bgtwo85_dRAB04_L1BTAG-MU3VFjJ30_2jJ30p0ETA25_jJ40p0ETA25
+: eventCount: 0
+? HLT_mu6_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn277_pf_ftf_presel3c20XX1c20bgtwo85_dRAB04_L1BTAG-MU3VFjJ30_2jJ40p0ETA25
+: eventCount: 0
 ? HLT_mu6_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn277_pf_ftf_presel3c20XX1c20bgtwo85_dRAB04_L1BTAG-MU5VFjJ30_2jJ30p0ETA25_jJ50p0ETA25
 : eventCount: 0
 ? HLT_mu6_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn277_pf_ftf_presel3c20XX1c20bgtwo85_dRAB04_L1BTAG-MU5VFjJ40_2jJ40p0ETA25
 : eventCount: 0
 ? HLT_mu6_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn280_pf_ftf_presel3c20XX1c20bgtwo85_L1BTAG-MU5VFjJ30_2jJ30p0ETA25_jJ50p0ETA25
+: eventCount: 0
+? HLT_mu6_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn280_pf_ftf_presel3c20XX1c20bgtwo85_dRAB04_L1BTAG-MU3VFjJ30_2jJ30p0ETA25
+: eventCount: 0
+? HLT_mu6_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn280_pf_ftf_presel3c20XX1c20bgtwo85_dRAB04_L1BTAG-MU3VFjJ30_2jJ30p0ETA25_jJ40p0ETA25
+: eventCount: 0
+? HLT_mu6_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn280_pf_ftf_presel3c20XX1c20bgtwo85_dRAB04_L1BTAG-MU3VFjJ30_2jJ40p0ETA25
 : eventCount: 0
 ? HLT_mu6_j20c_020jvt_3j20c_020jvt_SHARED_j20c_020jvt_bgn280_pf_ftf_presel3c20XX1c20bgtwo85_dRAB04_L1BTAG-MU5VFjJ40_2jJ40p0ETA25
 : eventCount: 0
