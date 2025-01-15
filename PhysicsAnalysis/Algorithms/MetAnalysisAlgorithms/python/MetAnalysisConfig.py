@@ -128,36 +128,3 @@ class MetAnalysisConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'phi', 'phi')
         config.addOutputVar (self.containerName, 'sumet', 'sumet')
 
-
-def makeMetAnalysisConfig( seq, containerName,
-                             useFJVT = None,
-                             treatPUJets = None,
-                             setMuonJetEMScale = None,
-                             jets = None,
-                             electrons = None,
-                             muons = None,
-                             photons = None,
-                             taus = None):
-    """Create a met analysis algorithm config
-
-    Note that defining a jet container is mandatory, but all other input
-    containers are optional.
-
-    Selections on each container can also be defined
-
-    Keyword arguments:
-      useFJVT -- Use FJVT decision for the calculation
-      treatPUJets -- Treat pile-up jets in the MET significance calculation
-      setMuonJetEMScale -- Use consituent scale and subtract muon eloss for jets overlapping muons
-    """
-
-    config = MetAnalysisConfig (containerName)
-    config.setOptionValue ('useFJVT', useFJVT)
-    config.setOptionValue ('treatPUJets', treatPUJets)
-    config.setOptionValue ('setMuonJetEMScale', setMuonJetEMScale)
-    config.setOptionValue ('jets', jets)
-    config.setOptionValue ('electrons', electrons)
-    config.setOptionValue ('muons', muons)
-    config.setOptionValue ('photons', photons)
-    config.setOptionValue ('taus', taus)
-    seq.append (config)

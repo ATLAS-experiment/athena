@@ -51,18 +51,3 @@ class JetJvtAnalysisConfig (ConfigBlock) :
 
             config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, 'weight_fjvt_effSF')
 
-
-def makeJetJvtAnalysisConfig( seq, containerName,
-                              postfix = None,
-                              enableFJvt = None ):
-    """Create a jet JVT analysis algorithm config
-
-    Keyword arguments:
-      enableFJvt -- Whether to enable forward JVT calculations
-    """
-
-    config = JetJvtAnalysisConfig (containerName)
-    config.setOptionValue ('postfix', postfix)
-    config.setOptionValue ('enableFJvt', enableFJvt)
-
-    seq.append (config)

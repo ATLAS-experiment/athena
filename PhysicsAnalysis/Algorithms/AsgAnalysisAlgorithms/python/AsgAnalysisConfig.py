@@ -655,90 +655,18 @@ class SelectionDecorationBlock (ConfigBlock):
                 config.addOutputVar(
                     originContainerName, selectionDecoration, selectionName)
 
-
-def makeCommonServicesConfig( seq ):
-    """Create the common services config"""
-
-    seq.append (CommonServicesConfig ())
-
-
-
-def makePileupReweightingConfig( seq, campaign=None, files=None, useDefaultConfig=None, userLumicalcFiles=None, userPileupConfigs=None ):
-    """Create a PRW analysis config
-
-    Keyword arguments:
-    """
-    # TO DO: add explanation of the keyword arguments, left to experts
-
-    config = PileupReweightingBlock ()
-    config.setOptionValue ('campaign', campaign)
-    config.setOptionValue ('files', files)
-    config.setOptionValue ('useDefaultConfig', useDefaultConfig)
-    config.setOptionValue ('userLumicalcFiles', userLumicalcFiles)
-    config.setOptionValue ('userPileupConfigs', userPileupConfigs)
-    seq.append (config)
-
-
-
-def makeGeneratorAnalysisConfig( seq,
-                                 saveCutBookkeepers=None,
-                                 runNumber=None,
-                                 cutBookkeepersSystematics=None ):
-    """Create a generator analysis algorithm sequence
-
-    Keyword arguments:
-      saveCutBookkeepers -- save cut bokkeepers information into output file
-      runNumber -- MC run number
-      cutBookkeepersSystematics -- store CutBookkeepers systematics
-    """
-
-    config = GeneratorAnalysisBlock ()
-    config.setOptionValue ('saveCutBookkeepers', saveCutBookkeepers)
-    config.setOptionValue ('runNumber', runNumber)
-    config.setOptionValue ('cutBookkeepersSystematics', cutBookkeepersSystematics)
-    seq.append (config)
-
-
-
-def makeEventCutFlowConfig( seq, containerName,
-                              *, postfix = None, selectionName, customSelections = None):
+def makeEventCutFlowConfig(seq, containerName,
+                            *, postfix=None, selectionName, customSelections=None):
     """Create an event-level cutflow config
 
     Keyword arguments:
-      containerName -- name of the container
-      postfix -- a postfix to apply to decorations and algorithm names.
-      selectionName -- the name of the selection to do the cutflow for
-      customSelections -- a list of decorations to use in the cutflow, to override the retrieval of all decorations
+    containerName -- name of the container
+    postfix -- a postfix to apply to decorations and algorithm names.
+    selectionName -- the name of the selection to do the cutflow for
+    customSelections -- a list of decorations to use in the cutflow, to override the retrieval of all decorations
     """
 
-    config = EventCutFlowBlock (containerName, selectionName)
-    config.setOptionValue ('postfix', postfix)
-    config.setOptionValue ('customSelections', customSelections)
-    seq.append (config)
-
-
-def makeOutputThinningConfig( seq, containerName,
-                              *, postfix = None, selection = None, selectionName = None, outputName = None, configName='Thinning'):
-    """Create an output thinning config
-
-    This will do a consistent selection of output containers (if there
-    is a preselection or a selection specified) and then creates a set
-    of view containers (or deep copies) based on that selection.
-
-    Keyword arguments:
-      containerName -- name of the container
-      postfix -- a postfix to apply to decorations and algorithm
-                 names.  this is mostly used/needed when using this
-                 sequence with multiple working points to ensure all
-                 names are unique.
-      selection -- the name of an optional selection decoration to use
-      outputName -- an optional name for the output container
-
-    """
-
-    config = OutputThinningBlock (containerName, configName)
-    config.setOptionValue ('postfix', postfix)
-    config.setOptionValue ('selection', selection)
-    config.setOptionValue ('selectionName', selectionName)
-    config.setOptionValue ('outputName', outputName)
-    seq.append (config)
+    config = EventCutFlowBlock(containerName, selectionName)
+    config.setOptionValue('postfix', postfix)
+    config.setOptionValue('customSelections', customSelections)
+    seq.append(config)
