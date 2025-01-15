@@ -139,6 +139,14 @@ atlas_add_citest( DerivationRun2MC_PHYSLITE
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
    PROPERTIES PROCESSORS 4 )
 
+atlas_add_citest( DerivationRun2MCAF3_PHYS
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag af3_PHYS --threads 4
+   PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun2MCAF3_PHYSLITE
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag af3_PHYSLITE --threads 4
+   PROPERTIES PROCESSORS 4 )
+
 atlas_add_citest( DerivationRun3Data_PHYS
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS --threads 4
    PROPERTIES PROCESSORS 4 )
@@ -193,6 +201,14 @@ atlas_add_citest( CPAlgorithmsRun2MC_PHYSLITE
    SCRIPT FullCPAlgorithmsTest_CA.py --data-type fullsim --physlite --input-file ../DerivationRun2MC_PHYSLITE/run_mc_PHYSLITE_Run2/DAOD_PHYSLITE.myOutput.pool.root --bleeding-edge
    DEPENDS_SUCCESS DerivationRun2MC_PHYSLITE )
 
+atlas_add_citest( CPAlgorithmsRun2MCAF3_PHYS
+   SCRIPT FullCPAlgorithmsTest_CA.py --data-type fastsim --input-file ../DerivationRun2MCAF3_PHYS/run_af3_PHYS_Run2/DAOD_PHYS.myOutput.pool.root --bleeding-edge
+   DEPENDS_SUCCESS DerivationRun2MCAF3_PHYS )
+
+atlas_add_citest( CPAlgorithmsRun2MCAF3_PHYSLITE
+   SCRIPT FullCPAlgorithmsTest_CA.py --data-type fastsim --physlite --input-file ../DerivationRun2MCAF3_PHYSLITE/run_af3_PHYSLITE_Run2/DAOD_PHYSLITE.myOutput.pool.root --bleeding-edge
+   DEPENDS_SUCCESS DerivationRun2MCAF3_PHYSLITE )
+
 atlas_add_citest( CPAlgorithmsRun2Data_PHYS
    SCRIPT FullCPAlgorithmsTest_CA.py --data-type data --input-file ../DerivationRun2Data_PHYS/run_data_PHYS_Run2/DAOD_PHYS.myOutput.pool.root --bleeding-edge
    DEPENDS_SUCCESS DerivationRun2Data_PHYS )
@@ -208,6 +224,14 @@ atlas_add_citest( CPAlgorithmsRun3MC_PHYS
 atlas_add_citest( CPAlgorithmsRun3MC_PHYSLITE
    SCRIPT FullCPAlgorithmsTest_CA.py --data-type fullsim --physlite --input-file ../DerivationRun3MC_PHYSLITE/run_mc_PHYSLITE_Run3/DAOD_PHYSLITE.myOutput.pool.root --bleeding-edge
    DEPENDS_SUCCESS DerivationRun3MC_PHYSLITE )
+
+atlas_add_citest( CPAlgorithmsRun3MCAF3_PHYS
+   SCRIPT FullCPAlgorithmsTest_CA.py --data-type fastsim --input-file ../DerivationRun3MCAF3_PHYS/run_af3_PHYS_Run3/DAOD_PHYS.myOutput.pool.root --bleeding-edge
+   DEPENDS_SUCCESS DerivationRun3MCAF3_PHYS )
+
+atlas_add_citest( CPAlgorithmsRun3MCAF3_PHYSLITE
+   SCRIPT FullCPAlgorithmsTest_CA.py --data-type fastsim --physlite --input-file ../DerivationRun3MCAF3_PHYSLITE/run_af3_PHYSLITE_Run3/DAOD_PHYSLITE.myOutput.pool.root --bleeding-edge
+   DEPENDS_SUCCESS DerivationRun3MCAF3_PHYSLITE )
 
 atlas_add_citest( CPAlgorithmsRun3Data_PHYS
    SCRIPT FullCPAlgorithmsTest_CA.py --data-type data --input-file ../DerivationRun3Data_PHYS/run_data_PHYS_Run3/DAOD_PHYS.myOutput.pool.root --bleeding-edge
