@@ -7,6 +7,7 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "TestVectorTool.h"
 
 class EFTrackingDataStreamLoaderAlgorithm : public AthReentrantAlgorithm
 {
@@ -31,13 +32,13 @@ class EFTrackingDataStreamLoaderAlgorithm : public AthReentrantAlgorithm
     "Capacity of std::vector."
   };
 
-  Gaudi::Property<bool> m_ignoreIsolatedLineFeed {
-    this,
-    "ignoreIsolatedLineFeed",
-    false,
-    "Set std::vector entry to zero is csv line only contains line feed."
-  };
-  
+  ToolHandle<TestVectorTool> m_testVectorTool{
+    this, 
+    "TestVectorTool", 
+    "TestVectorTool", 
+    "Tool to prepare test vector"
+  };  
+
  public:
   EFTrackingDataStreamLoaderAlgorithm(const std::string& name, ISvcLocator* pSvcLocator);
   StatusCode initialize() override final;
