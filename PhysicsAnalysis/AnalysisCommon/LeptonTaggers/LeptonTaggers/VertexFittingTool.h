@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LEPTONTAGGERS_VertexFittingTool_H
@@ -106,11 +106,11 @@ namespace Prompt {
         // Variables
         //
         TStopwatch                                             m_timer;
-        int                                                    m_countNumberOfFits;
-        int                                                    m_countNumberOfFitsFailed;
-        int                                                    m_countNumberOfFitsInvalid;
+        int                                                    m_countNumberOfFits{0};
+        int                                                    m_countNumberOfFitsFailed{0};
+        int                                                    m_countNumberOfFitsInvalid{0};
 
-        int                                                    m_secondaryVertexIndex;
+        int                                                    m_secondaryVertexIndex{0};
 
         std::unique_ptr<SG::AuxElement::Decorator<float> >     m_distToPriVtx;
         std::unique_ptr<SG::AuxElement::Decorator<float> >     m_normDistToPriVtx;
