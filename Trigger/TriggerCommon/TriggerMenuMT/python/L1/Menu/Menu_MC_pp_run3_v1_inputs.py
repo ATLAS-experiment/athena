@@ -30,20 +30,19 @@ def defineInputsMenu():
                     for group in conn["algorithmGroups"]:
                         if group["fpga"]==0 and group["clock"]==0:
                             group["algorithms"] += [
-                                    TopoMenuDef( '0DR04-MU5VFab-CjJ30ab' , outputbits = 13), 
-                                    TopoMenuDef( '0DR04-MU5VFab-CjJ40ab' , outputbits = 14), 
-                                    TopoMenuDef( '0DR04-MU8Fab-CjJ30ab'  , outputbits = 15), 
-                                    TopoMenuDef( '0DR04-MU8Fab-CjJ40ab'  , outputbits = 16), 
+                                    TopoMenuDef( '0DR04-MU5VFab-CjJ40ab' , outputbits = 15), 
+                                    TopoMenuDef( '0DR04-MU8Fab-CjJ30ab'  , outputbits = 16), 
+                                    TopoMenuDef( '0DR04-MU8Fab-CjJ40ab'  , outputbits = 17), 
                             ]
                         elif group["fpga"]==0 and group["clock"]==1:
                             group["algorithms"] += [
-                                    TopoMenuDef( '0DR04-MU5VFab-CjJ90ab',     outputbits = 11), #Bjet, TODO: not a primary
-                                    TopoMenuDef( '2DISAMB-jJ30ab-0DR10-eTAU20ab-eTAU12ab', outputbits = 12),
-                                    TopoMenuDef( '2DISAMB-jJ55ab-4DR28-eTAU30ab-eTAU20ab',  outputbits = 13),
-                                    TopoMenuDef( '2DISAMB-jJ55ab-4DR32-eTAU30ab-eTAU20ab',  outputbits = 14),
-                                    TopoMenuDef( '2DISAMB-jJ55ab-10DR32-eTAU30ab-eTAU20ab', outputbits = 15),
-                                    TopoMenuDef( '0DETA24-4DPHI99-eTAU30ab-eTAU20ab',       outputbits = 16),
-                                    TopoMenuDef( '0DETA24-10DPHI99-eTAU30ab-eTAU12ab',      outputbits = 17),
+                                    TopoMenuDef( '0DR04-MU5VFab-CjJ90ab',     outputbits = 15), #Bjet, TODO: not a primary
+                                    TopoMenuDef( '2DISAMB-jJ30ab-0DR10-eTAU20ab-eTAU12ab', outputbits = 16),
+                                    TopoMenuDef( '2DISAMB-jJ55ab-4DR28-eTAU30ab-eTAU20ab',  outputbits = 17),
+                                    TopoMenuDef( '2DISAMB-jJ55ab-4DR32-eTAU30ab-eTAU20ab',  outputbits = 18),
+                                    TopoMenuDef( '2DISAMB-jJ55ab-10DR32-eTAU30ab-eTAU20ab', outputbits = 19),
+                                    TopoMenuDef( '0DETA24-4DPHI99-eTAU30ab-eTAU20ab',       outputbits = 20),
+                                    TopoMenuDef( '0DETA24-10DPHI99-eTAU30ab-eTAU12ab',      outputbits = 21),
                             ]
                         elif group["fpga"]==1 and group["clock"]==0:
                             group["algorithms"] += [
@@ -70,7 +69,6 @@ def defineInputsMenu():
                                     TopoMenuDef( '3DR99-MU8Fab-eTAU30ab', outputbits = 2),
                                     TopoMenuDef( '3DR28-MU8Fab-eTAU30ab', outputbits = 3),
                                     TopoMenuDef( '3DR30-MU8Fab-eTAU30ab', outputbits = 4),
-                                    TopoMenuDef( '3DR35-MU8Fab-eTAU30ab', outputbits = 5),
                             ]
 
     #----------------------------------------------
