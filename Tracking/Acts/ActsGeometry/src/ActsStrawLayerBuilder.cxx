@@ -25,6 +25,7 @@
 #include "Acts/Utilities/BinningType.hpp"
 
 // STL
+#include <Acts/Utilities/AxisDefinitions.hpp>
 #include <iostream>
 #include <fstream>
 
@@ -50,6 +51,7 @@ ActsStrawLayerBuilder::centralLayers(const Acts::GeometryContext& gctx) const
   ACTS_VERBOSE("Building central Straw layers");
 
   using LBBV = Acts::LineBounds::BoundValues;
+  using enum Acts::AxisDirection;
 
   const InDetDD::TRT_Numerology* trtNums = m_cfg.mng->getNumerology();
   size_t    nBarrelRings  = trtNums->getNBarrelRings();
@@ -69,15 +71,15 @@ ActsStrawLayerBuilder::centralLayers(const Acts::GeometryContext& gctx) const
     // were calculating min/max radius while were at it.
     Acts::ProtoLayer pl;
     auto& ext = pl.extent;
-    ext.range(Acts::BinningValue::binR).setMin( std::numeric_limits<double>::max() );
-    ext.range(Acts::BinningValue::binR).setMax( std::numeric_limits<double>::lowest() );
-    ext.range(Acts::BinningValue::binZ).setMin( std::numeric_limits<double>::max() );
-    ext.range(Acts::BinningValue::binZ).setMax( std::numeric_limits<double>::lowest() );
-    ext.range(Acts::BinningValue::binPhi).setMin( -M_PI );
-    ext.range(Acts::BinningValue::binPhi).setMax( M_PI );
+    ext.range(AxisR).setMin( std::numeric_limits<double>::max() );
+    ext.range(AxisR).setMax( std::numeric_limits<double>::lowest() );
+    ext.range(AxisZ).setMin( std::numeric_limits<double>::max() );
+    ext.range(AxisZ).setMax( std::numeric_limits<double>::lowest() );
+    ext.range(AxisPhi).setMin( -M_PI );
+    ext.range(AxisPhi).setMax( M_PI );
 
-    pl.envelope[Acts::BinningValue::binZ] = {1_mm, 1_mm};
-    pl.envelope[Acts::BinningValue::binR] = {0_mm, 0_mm};
+    pl.envelope[AxisZ] = {1_mm, 1_mm};
+    pl.envelope[AxisR] = {0_mm, 0_mm};
 
     double fudge = 0_mm;
     // RING in TRT speak is translated to Layer in ACTS speak
@@ -123,10 +125,10 @@ ActsStrawLayerBuilder::centralLayers(const Acts::GeometryContext& gctx) const
 
             // calculate min/max R and Z
             Acts::Vector3 ctr = straw->center(gctx);
-            ext.range(Acts::BinningValue::binR).setMax( std::max(ext.max(Acts::BinningValue::binR), ctr.perp() + radius) );
-            ext.range(Acts::BinningValue::binR).setMin( std::min(ext.min(Acts::BinningValue::binR), ctr.perp() - radius) );
-            ext.range(Acts::BinningValue::binZ).setMax( std::max(ext.max(Acts::BinningValue::binZ), ctr.z() + length) );
-            ext.range(Acts::BinningValue::binZ).setMin( std::min(ext.min(Acts::BinningValue::binZ), ctr.z() - length) );
+            ext.range(AxisR).setMax( std::max(ext.max(AxisR), ctr.perp() + radius) );
+            ext.range(AxisR).setMin( std::min(ext.min(AxisR), ctr.perp() - radius) );
+            ext.range(AxisZ).setMax( std::max(ext.max(AxisZ), ctr.z() + length) );
+            ext.range(AxisZ).setMin( std::min(ext.min(AxisZ), ctr.z() - length) );
 
             layerSurfaces.push_back(straw->getSharedPtr());
           }
@@ -139,7 +141,7 @@ ActsStrawLayerBuilder::centralLayers(const Acts::GeometryContext& gctx) const
     if(iring > 0) {
       // match outer radius of previous ring
       const Acts::ProtoLayer &prev = protoLayers.at(iring-1);
-      ext.range(Acts::BinningValue::binR).setMin( prev.extent.max(Acts::BinningValue::binR) + prev.envelope[Acts::BinningValue::binR][1] + pl.envelope[Acts::BinningValue::binR][0] + fudge );
+      ext.range(AxisR).setMin( prev.extent.max(AxisR) + prev.envelope[AxisR][1] + pl.envelope[AxisR][0] + fudge );
     }
 
     std::shared_ptr<Acts::Layer> layer
@@ -158,6 +160,7 @@ ActsStrawLayerBuilder::endcapLayers(const Acts::GeometryContext& gctx, int side)
 {
   ACTS_VERBOSE("Building endcap Straw layers");
   using LBBV = Acts::LineBounds::BoundValues;
+  using enum Acts::AxisDirection;
 
   const InDetDD::TRT_Numerology* trtNums = m_cfg.mng->getNumerology();
   size_t    nEndcapWheels  = trtNums->getNEndcapWheels();
@@ -180,13 +183,13 @@ ActsStrawLayerBuilder::endcapLayers(const Acts::GeometryContext& gctx, int side)
 
       Acts::ProtoLayer pl;
       auto& ext = pl.extent;;
-      ext.range(Acts::BinningValue::binR).setMin( std::numeric_limits<double>::max() );
-      ext.range(Acts::BinningValue::binR).setMax( std::numeric_limits<double>::lowest() );
-      ext.range(Acts::BinningValue::binZ).setMin( std::numeric_limits<double>::max() );
-      ext.range(Acts::BinningValue::binZ).setMax( std::numeric_limits<double>::lowest() );
-      ext.range(Acts::BinningValue::binPhi).setMin( -M_PI );
-      ext.range(Acts::BinningValue::binPhi).setMax( M_PI );
-      pl.envelope[Acts::BinningValue::binR] = {0_mm, 0_mm};
+      ext.range(AxisR).setMin( std::numeric_limits<double>::max() );
+      ext.range(AxisR).setMax( std::numeric_limits<double>::lowest() );
+      ext.range(AxisZ).setMin( std::numeric_limits<double>::max() );
+      ext.range(AxisZ).setMax( std::numeric_limits<double>::lowest() );
+      ext.range(AxisPhi).setMin( -M_PI );
+      ext.range(AxisPhi).setMax( M_PI );
+      pl.envelope[AxisR] = {0_mm, 0_mm};
 
       for (unsigned int iphisec=0; iphisec<nEndcapPhiSectors; ++iphisec) {
 
@@ -221,11 +224,11 @@ ActsStrawLayerBuilder::endcapLayers(const Acts::GeometryContext& gctx, int side)
               double length = strawBounds->get(LBBV::eHalfLengthZ);
 
               Acts::Vector3 ctr = straw->center(gctx);
-              ext.range(Acts::BinningValue::binZ).setMax( std::max(ext.max(Acts::BinningValue::binZ), ctr.z() + radius) );
-              ext.range(Acts::BinningValue::binZ).setMin( std::min(ext.min(Acts::BinningValue::binZ), ctr.z() - radius) );
-	      ext.range(Acts::BinningValue::binR).setMax( std::max(ext.max(Acts::BinningValue::binR), ctr.perp() + length) );
-              ext.range(Acts::BinningValue::binR).setMin( std::min(ext.min(Acts::BinningValue::binR), ctr.perp() - length) );
-	      pl.envelope[Acts::BinningValue::binZ] = {radius/2., radius/2.};
+              ext.range(AxisZ).setMax( std::max(ext.max(AxisZ), ctr.z() + radius) );
+              ext.range(AxisZ).setMin( std::min(ext.min(AxisZ), ctr.z() - radius) );
+	      ext.range(AxisR).setMax( std::max(ext.max(AxisR), ctr.perp() + length) );
+              ext.range(AxisR).setMin( std::min(ext.min(AxisR), ctr.perp() - length) );
+	      pl.envelope[AxisZ] = {radius/2., radius/2.};
 
               wheelSurfaces.push_back(straw->getSharedPtr());
             }

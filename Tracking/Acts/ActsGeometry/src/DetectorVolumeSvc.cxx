@@ -3,6 +3,7 @@
 */
 
 #include "ActsGeometry/DetectorVolumeSvc.h"
+#include <Acts/Utilities/AxisDefinitions.hpp>
 
 #include "ActsGeoUtils/NoDeletePtr.h"
 // ATHENA
@@ -52,11 +53,12 @@ std::shared_ptr<const Acts::Experimental::Detector> DetectorVolumeSvc::buildDete
     for (const auto &builder : m_builderTools) {
         builders.push_back(NoDeletePtr<const Acts::Experimental::IDetectorComponentBuilder>(builder.get()));
     }
+    using enum Acts::AxisDirection;
 
     //Define config for cylindrical container builder
     Acts::Experimental::CylindricalContainerBuilder::Config cylindricalCfg;
     cylindricalCfg.builders = builders;
-    cylindricalCfg.binning = std::vector<Acts::BinningValue>{Acts::BinningValue::binZ, Acts::BinningValue::binR};
+    cylindricalCfg.binning = std::vector<Acts::AxisDirection>{AxisZ, AxisR};
     auto cylindricalBuilder = std::make_shared<Acts::Experimental::CylindricalContainerBuilder>(cylindricalCfg);
 
     //Define config for detector builder

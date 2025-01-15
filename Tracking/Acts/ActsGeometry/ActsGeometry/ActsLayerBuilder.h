@@ -16,6 +16,7 @@
 #include "Acts/Geometry/ILayerBuilder.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Utilities/BinningType.hpp"
+#include "Acts/Utilities/AxisDefinitions.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Definitions/Units.hpp"
 
@@ -77,7 +78,7 @@ public:
     std::pair<size_t, size_t> endcapMaterialBins = {20, 5};
     std::pair<size_t, size_t> barrelMaterialBins = {10, 10};
 
-    std::function<bool(const Acts::GeometryContext &, Acts::BinningValue,
+    std::function<bool(const Acts::GeometryContext &, Acts::AxisDirection,
                        const Acts::Surface *, const Acts::Surface *)>
         surfaceMatcher;
 

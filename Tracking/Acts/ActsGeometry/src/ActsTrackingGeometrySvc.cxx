@@ -51,6 +51,7 @@
 #include "ActsInterop/Logger.h"
 #include "ActsInterop/LoggerUtils.h"
 
+#include <Acts/Utilities/AxisDefinitions.hpp>
 #include <limits>
 #include <random>
 #include <stdexcept>
@@ -653,7 +654,7 @@ ActsTrackingGeometrySvc::makeStrawLayerBuilder(
 
   std::string managerName = manager->getName();
   auto matcher = [](const Acts::GeometryContext & /*gctx*/,
-                    Acts::BinningValue /*bValue*/, const Acts::Surface * /*aS*/,
+                    Acts::AxisDirection /*aDir*/, const Acts::Surface * /*aS*/,
                     const Acts::Surface *
                     /*bS*/) -> bool { return false; };
 
@@ -684,7 +685,7 @@ ActsTrackingGeometrySvc::makeHGTDLayerBuilder(
 
   std::string managerName = manager->getName();
   auto matcher = [](const Acts::GeometryContext & /*gctx*/,
-                    Acts::BinningValue /*bValue*/, const Acts::Surface * /*aS*/,
+                    Acts::AxisDirection /*aDir*/, const Acts::Surface * /*aS*/,
                     const Acts::Surface *
                     /*bS*/) -> bool { return false; };
 
@@ -711,11 +712,13 @@ ActsTrackingGeometrySvc::makeHGTDLayerBuilder(
 
 ActsLayerBuilder::Config ActsTrackingGeometrySvc::makeLayerBuilderConfig(
     const InDetDD::InDetDetectorManager *manager) {
+  using enum Acts::AxisDirection;
+
   std::string managerName = manager->getName();
 
   std::shared_ptr<const Acts::ILayerBuilder> gmLayerBuilder;
   auto matcher = [](const Acts::GeometryContext & /*gctx*/,
-                    Acts::BinningValue bValue, const Acts::Surface *aS,
+                    Acts::AxisDirection aDir, const Acts::Surface *aS,
                     const Acts::Surface *bS) -> bool {
     auto a = dynamic_cast<const ActsDetectorElement *>(
         aS->associatedDetectorElement());
@@ -735,18 +738,18 @@ ActsLayerBuilder::Config ActsTrackingGeometrySvc::makeLayerBuilderConfig(
     if (idA.bec() != idB.bec())
       return false;
 
-    if (bValue == Acts::BinningValue::binPhi) {
+    if (aDir == AxisPhi) {
       // std::cout << idA.phi_module() << " <-> " << idB.phi_module() <<
       // std::endl;
       return idA.phi_module() == idB.phi_module();
     }
 
-    if (bValue == Acts::BinningValue::binZ) {
+    if (aDir == AxisZ) {
       return (idA.eta_module() == idB.eta_module()) &&
              (idA.layer_disk() == idB.layer_disk()) && (idA.bec() == idB.bec());
     }
 
-    if (bValue == Acts::BinningValue::binR) {
+    if (aDir == AxisR) {
       return (idA.eta_module() == idB.eta_module()) &&
              (idA.layer_disk() == idB.layer_disk()) && (idB.bec() == idA.bec());
     }
