@@ -286,6 +286,7 @@ namespace Muon {
         MuonSegmentVec out_segments{};
         {
             MuonSegmentVec stereoSegs = findStereoSegments(ctx, muonClusters, 0);
+            ATH_MSG_VERBOSE("Found " << stereoSegs.size() << " MMG stereo seeded segments");
             out_segments.insert(out_segments.end(), std::make_move_iterator(stereoSegs.begin()),
                                                     std::make_move_iterator(stereoSegs.end()));
         }
@@ -322,7 +323,9 @@ namespace Muon {
         /// All segments
         {
             MuonSegmentVec etaSegs = findStgcPrecisionSegments(ctx, segmentInput);
+            ATH_MSG_VERBOSE("Found " << etaSegs.size() << " stgc seeded eta segments");
             MuonSegmentVec precSegs = find3DSegments(ctx, segmentInput, etaSegs);
+            ATH_MSG_VERBOSE("Found " << precSegs.size() << " 3D segments");
             out_segments.insert(out_segments.end(),
                                 std::make_move_iterator(precSegs.begin()),
                                 std::make_move_iterator(precSegs.end()));
@@ -380,7 +383,12 @@ namespace Muon {
                                                                 const std::vector<const Muon::MuonClusterOnTrack*>& allClusts,
                                                                 int singleWedge) const {
 
-        if (!m_useStereoSeeding) return {};
+       if (!m_useStereoSeeding){
+          ATH_MSG_VERBOSE("MMStereoSeeding disabled!"); 
+          return {};
+       }
+
+       ATH_MSG_VERBOSE("Running MMStereoSeeding"); 
         /// Order any parsed hit into the layer structure
         LayerMeasVec orderedClust =
             classifyByLayer(cleanClusters(allClusts, HitType::Eta | HitType::Phi, singleWedge), HitType::Wire | HitType::Pad);
@@ -393,6 +401,8 @@ namespace Muon {
 
 
         std::vector<NSWSeed> seeds = segmentSeedFromMM(orderedClust);
+        ATH_MSG_VERBOSE("Retrieved " << seeds.size() << " seeds in the MMStereoAlg after the ambiguity resolution" );
+
         if (seeds.empty()) return {};
         TrackCollection trackSegs{SG::OWN_ELEMENTS};
         /// Loop over the seeds
@@ -457,13 +467,25 @@ namespace Muon {
     MuonSegmentVec MuonNSWSegmentFinderTool::findStgcPrecisionSegments(const EventContext& ctx,
                                                                        const std::vector<const Muon::MuonClusterOnTrack*>& muonClusters,
                                                                        int singleWedge) const {
+
+       if (!m_usesTGCSeeding){
+          ATH_MSG_VERBOSE("2D sTGC seeding disabled!"); 
+          return {};
+       }
+
+       ATH_MSG_VERBOSE("Running 2D sTGC seeding"); 
+
+
         // clean the muon clusters; select only the eta hits.
         // in single-wedge mode the eta seeds are retrieved from the specific wedge
+        
+        ATH_MSG_DEBUG("Cleaning eta clusters in stgc seeded 2D segments ");
         MeasVec clusters = cleanClusters(muonClusters, HitType::Eta, singleWedge);  // eta hits only
         ATH_MSG_VERBOSE("  After hit cleaning, there are " << clusters.size() << " precision 2D clusters");
 
         // classify eta clusters by layer
         LayerMeasVec orderedClusters = classifyByLayer(clusters, 0);
+
         if (orderedClusters.size() < 4) return {};  // at least four layers with eta hits (MM and sTGC)
 
         // create segment seeds
@@ -474,7 +496,10 @@ namespace Muon {
         TrackCollection segTrkColl{SG::OWN_ELEMENTS};
 
         for (NSWSeed& seed : seeds) {
-            if (seed.size() < 4) continue;
+            if (seed.size() < 4){
+               ATH_MSG_VERBOSE(__func__<<" :"<<__LINE__<< " - Seed size: " << seed.size() << " is below the cut (4)");
+               continue;
+            }
 
             etaHitVec = seed.measurements();
             const Trk::PlaneSurface& surf = static_cast<const Trk::PlaneSurface&>(etaHitVec.front()->associatedSurface());
@@ -548,8 +573,12 @@ namespace Muon {
                                                             int singleWedge) const {
         MuonSegmentVec segments{};
         // cluster cleaning #1; select only phi hits (must be from all wedges, in order to phi-seed)
+        
+        ATH_MSG_DEBUG("Cleaning phi clusters in stgc seeded 3D segments ");
         MeasVec phiClusters = cleanClusters(muonClusters, HitType::Phi | HitType::Wire, singleWedge);
         ATH_MSG_DEBUG("After hit cleaning, there are " << phiClusters.size() << " phi clusters to be fit");
+
+
         // classify the phi clusters by layer
         LayerMeasVec orderedWireClusters = classifyByLayer(phiClusters, HitType::Wire);
         LayerMeasVec orderedPadClusters = classifyByLayer(phiClusters, HitType::Pad);  // pads only
@@ -560,6 +589,7 @@ namespace Muon {
         }
 
         // cluster cleaning #2; select only eta hits
+        ATH_MSG_DEBUG("Cleaning eta clusters in stgc seeded 3D segments ");
         MeasVec etaClusters = cleanClusters(muonClusters, HitType::Eta, singleWedge);
         LayerMeasVec orderedEtaClusters = classifyByLayer(etaClusters, HitType::Eta);
 
@@ -691,13 +721,10 @@ namespace Muon {
         if (!nHitsPhi) {
             // generate two pseudo phi measurements for the fit,
             // one on the first hit surface and one on the last hit surface.
-            const unsigned int nMM = std::count_if(etaHitVec.begin(), etaHitVec.end(),
-                                                        [this](const Muon::MuonClusterOnTrack* hit) {
-                                                            return m_idHelperSvc->isMM(hit->identify());
-                                                        });
-            double errPos = (nMM) ? 1000. : 0.1;
+
             Amg::MatrixX cov(1, 1);
-            cov(0, 0) = errPos * errPos;
+            constexpr double pseudoPrecision = 100 * Gaudi::Units::micrometer;
+            cov(0, 0) = pseudoPrecision; 
             static const Trk::LocalParameters loc_pseudopars{Trk::DefinedParameter(0, Trk::locY)};
             pseudoPhi1 = std::make_unique<Trk::PseudoMeasurementOnTrack>(Trk::LocalParameters(loc_pseudopars),
                                                                          Amg::MatrixX(cov),
@@ -745,6 +772,8 @@ namespace Muon {
                 ((hit_sel & HitType::Phi) && m_idHelperSvc->measuresPhi(id)))
                 clusters.emplace_back(cluster);
         }
+
+        ATH_MSG_VERBOSE(" After hit cleaning, there are " << clusters.size() );
         return clusters;
     }
 
@@ -836,7 +865,7 @@ namespace Muon {
                         }
                         usedLayerR = true;
                         usedLayerL = true;
-                        getClustersOnSegment(orderedClusters, seed, {ilayerL, ilayerR});
+                        getClustersOnSegment(orderedClusters, seed, {ilayerL, ilayerR}, false);
                         seeds.emplace_back(std::move(seed));
 
                     }
@@ -875,13 +904,24 @@ namespace Muon {
 
     //============================================================================
     int MuonNSWSegmentFinderTool::getClustersOnSegment(const LayerMeasVec& orderedclusters,
-                                                       NSWSeed& seed, const std::set<unsigned int>& exclude) const {
+                                                       NSWSeed& seed, const std::set<unsigned int>& exclude, bool useStereo) const {
         ATH_MSG_VERBOSE(" getClustersOnSegment: layers " << orderedclusters.size());
         int nHitsAdded{0};
+
         for (const MeasVec& surfHits : orderedclusters) {
             if (exclude.count(layerNumber(surfHits[0]))) continue;
             // get the best hit candidate on this layer
-            for (const SeedMeasurement& hit : surfHits) { nHitsAdded += seed.add(hit, m_maxClustDist); }
+            
+            for (const SeedMeasurement& hit : surfHits) { 
+
+                  const Identifier id = hit->identify();
+                  const MuonGM::MuonChannelDesign* design = getDesign(hit);
+
+                  //In case of the 2D eta stgc seeding we don't want the MMG stereo hits on the segment
+                  if ( !useStereo && m_idHelperSvc->isMM(id) && design->hasStereoAngle() ) continue;
+
+                  nHitsAdded += seed.add(hit, m_maxClustDist); 
+            }
         }
         ATH_MSG_VERBOSE(" getClustersOnSegment: returning " << nHitsAdded << " hits ");
         return nHitsAdded;
