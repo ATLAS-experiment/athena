@@ -150,7 +150,7 @@ class ggF_HH_quartic(PowhegV2):
     def create_grid_file(self):
         """! Creates the .grid file needed by this process."""
         """! This function calls a python script provided by the authors, which is linked to the local directory."""
-        """! The code of this function is adapted from the script ${POWHEGPATH}/POWHEG-BOX-V2/ggHH/testrun/run.sh"""
+        """! The code of this function is adapted from the script ${POWHEGPATH}/POWHEG-BOX-V2/ggHH_quartic/testrun/run.sh"""
         self.expose()  # convenience call to simplify syntax
 
         logger.info('Now attempting to link locally the files needed by this Powheg process')

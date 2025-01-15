@@ -32,11 +32,7 @@ class gg4l(PowhegRES):
         self.manually_set_openloops_gnu_paths()
 
         # Adding external libraries to LD_LIBRARY_PATH for gg4l
-        self.link_external_powheg_libraries("/External/cln*/cln_lib/lib")
-        self.link_external_powheg_libraries("/External/ginac*/ginac_lib/lib/")
-        self.link_external_powheg_libraries("/External/chaplin*/lib")
         self.link_external_powheg_libraries("/POWHEG-BOX-RES/gg4l/amplitudes/obj-gnu/")
-        self.link_external_powheg_libraries("/POWHEG-BOX-RES/gg4l/ggvvamp*/obj-gnu")
         self.link_external_powheg_libraries("/POWHEG-BOX-RES/gg4l/QCDLoop*/ff/obj-gnu/")
 
         # Add parameter validation functions
