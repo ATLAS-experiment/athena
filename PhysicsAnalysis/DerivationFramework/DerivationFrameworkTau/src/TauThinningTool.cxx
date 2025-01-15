@@ -86,7 +86,8 @@ StatusCode DerivationFramework::TauThinningTool::doThinning() const
   if( tausToKeep.size() > 0){
     for(size_t i=0; i < tausToKeep.size()-1; i++){
       const auto* aTau=tausToKeep[i];
-      std::remove_if(tausToKeep.begin()+i+1,tausToKeep.end(),[aTau](const xAOD::TauJet* bTau) {return aTau->p4().DeltaR(bTau->p4()) < 0.01;});
+      auto it = std::remove_if(tausToKeep.begin()+i+1,tausToKeep.end(),[aTau](const xAOD::TauJet* bTau) {return aTau->p4().DeltaR(bTau->p4()) < 0.01;});
+      tausToKeep.erase (it, tausToKeep.end());
     }
   }   
 
