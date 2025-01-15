@@ -225,7 +225,7 @@ void TrigFTF_GNN_DataStorage<externalSP>::initializeNodes(bool useML) {
 
     for(int b=0;b<nBins;b++) {//loop over eta-bins in Layer
 
-      TrigFTF_GNN_EtaBin<externalSP> B = m_etaBins.at(pL->m_bins.at(b));
+      TrigFTF_GNN_EtaBin<externalSP>& B = m_etaBins.at(pL->m_bins.at(b));
 
       if(B.empty()) continue;
       
