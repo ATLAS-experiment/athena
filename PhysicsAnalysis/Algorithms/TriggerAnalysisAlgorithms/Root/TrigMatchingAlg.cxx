@@ -1,18 +1,19 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Marco Rimoldi
 
+#include <TrigCompositeUtils/ChainNameParser.h>
 #include <TriggerAnalysisAlgorithms/TrigMatchingAlg.h>
 #include <xAODEventInfo/EventInfo.h>
 #include <RootCoreUtils/StringUtil.h>
-#include "PATCore/PATCoreEnums.h"
+
 
 namespace CP
 {
 
-  TrigMatchingAlg::TrigMatchingAlg(const std::string& name, 
+  TrigMatchingAlg::TrigMatchingAlg(const std::string& name,
                                          ISvcLocator *svcLoc)
       : EL::AnaAlgorithm(name, svcLoc)
   {
@@ -27,7 +28,7 @@ namespace CP
       return StatusCode::FAILURE;
     }
 
-    if (m_trigSingleMatchingList.empty())
+    if (m_trigSingleMatchingList.empty() && m_trigSingleMatchingListDummy.empty())
     {
       ATH_MSG_ERROR("At least one trigger needs to be provided in the list");
       return StatusCode::FAILURE;
@@ -37,6 +38,10 @@ namespace CP
     ANA_CHECK(m_trigMatchingTool.retrieve());
 
     for (const std::string &chain : m_trigSingleMatchingList)
+    {
+      m_matchingDecorators.emplace(chain, m_matchingDecoration + "_" + RCU::substitute (chain, "-", "_"));
+    }
+    for (const std::string &chain : m_trigSingleMatchingListDummy)
     {
       m_matchingDecorators.emplace(chain, m_matchingDecoration + "_" + RCU::substitute (chain, "-", "_"));
     }
@@ -66,8 +71,20 @@ namespace CP
         {
           for (const std::string &chain : m_trigSingleMatchingList)
           {
-            float dR = chain.starts_with("HLT_tau")? 0.2:0.1;
+            // A string-based signature-identifier per leg, may contain duplicated return values for asymmetric chains.
+            const std::vector<std::string> signatures = ChainNameParser::signatures(chain);
+            if (signatures.size() != 1) {
+              ANA_MSG_ERROR("The decoration-based TrigMatchingAlg only supports single-legged triggers." << chain << " has " << signatures.size() << " legs.");
+              return StatusCode::FAILURE;
+            }
+
+            const float dR = (signatures.at(0) == "tau" ? 0.2 : 0.1);
             (m_matchingDecorators.at(chain))(*particle) = m_trigMatchingTool->match(*particle, chain, dR, false);
+          }
+
+          for (const std::string &chain : m_trigSingleMatchingListDummy)
+          {
+            (m_matchingDecorators.at(chain))(*particle) = 0;
           }
         }
       }
