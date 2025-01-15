@@ -307,10 +307,21 @@ class TopoAlgoDef:
         alg.addgeneric('OutputWidth', HW.jEmOutputWidthSort)
         alg.addvariable('MinEta', 25*_eta_conversion)
         alg.addvariable('MaxEta', 49*_eta_conversion)
-        # Setting no WP for now, use 0-3 for None/L/M/T when optimised
-        alg.addvariable('IsoMin',    0) # Placeholder, see TypeWideThresholdConfig
+        # Setting no WP, use 0-3 for None/L/M/T 
+        alg.addvariable('IsoMin',    0) # see TypeWideThresholdConfig
         alg.addvariable('Frac1Min',  0)
         alg.addvariable('Frac2Min',  0)
+        tm.registerTopoAlgo(alg)
+
+        alg = AlgConf.jEmSort( name = 'jEMsm25ETA49', inputs = 'jEmTobs', outputs = 'jEMsm25ETA49' )
+        alg.addgeneric('InputWidth', HW.jEmInputWidth)
+        alg.addgeneric('OutputWidth', HW.jEmOutputWidthSort)
+        alg.addvariable('MinEta', 25*_eta_conversion)
+        alg.addvariable('MaxEta', 49*_eta_conversion)
+        # Setting medium WP , use 0-3 for None/L/M/T
+        alg.addvariable('IsoMin',    2) # see TypeWideThresholdConfig
+        alg.addvariable('Frac1Min',  2)
+        alg.addvariable('Frac2Min',  2)
         tm.registerTopoAlgo(alg)
 
         # jTAU inputs # for ATR-29784
@@ -2130,6 +2141,32 @@ class TopoAlgoDef:
                                                                                      d.otype1, str(d.ocut1) , d.olist1, str(d.nleading1) if d.olist1=="s" else "",
                                                                                      str(d.ocut2) , str(d.nleading2) , d.minEta2, d.maxEta2))
             alg = AlgConf.InvariantMassDeltaPhiInclusive2( name = 'ZAFB_DPHI', inputs = inputList, outputs = toponames)
+            alg.addgeneric('InputWidth1', d.inputwidth1)
+            alg.addgeneric('InputWidth2', d.inputwidth2)
+            alg.addgeneric('MaxTob1', d.nleading1)
+            alg.addgeneric('MaxTob2', d.nleading2)
+            alg.addgeneric('NumResultBits',  len(toponames))
+            alg.addgeneric('ApplyEtaCut', 1)
+            for bitid,minDphi in enumerate(d.minDphiList):
+                alg.addvariable('MinET1',  get_threshold_cut(d.otype1, d.ocut1)*_et_conversion, bitid)
+                alg.addvariable('MinET2',  get_threshold_cut('jEM', d.ocut2)*_et_conversion, bitid)
+                alg.addvariable('MinMSqr', d.minInvm*d.minInvm*_et_conversion*_et_conversion, bitid)
+                alg.addvariable('MaxMSqr', _no_m_upper_threshold, bitid)
+                alg.addvariable('MinEta1',  0*_eta_conversion, bitid)
+                alg.addvariable('MaxEta1', 49*_eta_conversion, bitid)
+                alg.addvariable('MinEta2', d.minEta2*_eta_conversion, bitid)
+                alg.addvariable('MaxEta2', d.maxEta2*_eta_conversion, bitid)
+                alg.addvariable('MinDeltaPhi', minDphi*_phi_conversion, bitid)
+                alg.addvariable('MaxDeltaPhi', d.maxDphi*_phi_conversion, bitid)
+            tm.registerTopoAlgo(alg)
+
+            inputList = [d.otype1 + d.olist1, 'jEMsm25ETA49']
+            toponames=[]
+            for minDphi in d.minDphiList:
+                toponames.append ("%iINVM-%02dDPHI%i-%s%s%s%s-jEM%ssm%s%iETA%i"  % (d.minInvm, minDphi, d.maxDphi,
+                                                                                     d.otype1, str(d.ocut1) , d.olist1, str(d.nleading1) if d.olist1=="s" else "",
+                                                                                     str(d.ocut2) , str(d.nleading2) , d.minEta2, d.maxEta2))
+            alg = AlgConf.InvariantMassDeltaPhiInclusive2( name = 'ZAFB_DPHIM', inputs = inputList, outputs = toponames)
             alg.addgeneric('InputWidth1', d.inputwidth1)
             alg.addgeneric('InputWidth2', d.inputwidth2)
             alg.addgeneric('MaxTob1', d.nleading1)

@@ -115,7 +115,7 @@ if args.runNumber is not None:
       tryStr = f"/eos/atlas/atlastier0/rucio/data*/{args.stream}/*{args.runNumber}/*RAW/*lb{int(lb):04}.*"
     log.info(" ".join(("Trying",tryStr)))
     flags.Input.Files += glob(tryStr)
-  log.info(" ".join(("Found",len(flags.Input.Files),"files")))
+  log.info(" ".join(("Found",str(len(flags.Input.Files)),"files")))
 
 standalone = False
 # require at least 1 input file if running offline

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType
@@ -25,6 +25,8 @@ def createMuonCombinedConfigFlags():
     # Switch on/off algorithms that make Muons for the MuGirlLowBetaMuonCollection         
     mcf.addFlag("MuonCombined.doMuGirlLowBeta",
                 lambda prevFlags : prevFlags.MuonCombined.doMuGirl)
+    # Add MDT ADC counts and drift radii to SlowMuon container
+    mcf.addFlag("MuonCombined.addMDTExtrasMuGirlLowBeta", False)
     mcf.addFlag("MuonCombined.writeUnAssocSegments", True)
     # Add MDT ADC counts and drift radii to SlowMuon container
     mcf.addFlag("MuonCombined.addMDTExtrasMuGirlLowBeta", False)
