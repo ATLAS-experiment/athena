@@ -25,8 +25,6 @@ def createMuonCombinedConfigFlags():
     # Switch on/off algorithms that make Muons for the MuGirlLowBetaMuonCollection         
     mcf.addFlag("MuonCombined.doMuGirlLowBeta",
                 lambda prevFlags : prevFlags.MuonCombined.doMuGirl)
-    # Add MDT ADC counts and drift radii to SlowMuon container
-    mcf.addFlag("MuonCombined.addMDTExtrasMuGirlLowBeta", False)
     mcf.addFlag("MuonCombined.writeUnAssocSegments", True)
     # Add MDT ADC counts and drift radii to SlowMuon container
     mcf.addFlag("MuonCombined.addMDTExtrasMuGirlLowBeta", False)
