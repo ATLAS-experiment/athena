@@ -93,6 +93,8 @@ namespace InDet {
       mutable TH2 *                      m_moduleCoreColDefectsHist ATLAS_THREAD_SAFE = nullptr;
       mutable TH2 *                      m_matrixHist ATLAS_THREAD_SAFE = nullptr;
 
+      mutable std::atomic<unsigned int>  m_modulesWithoutDefectParameters {};
+
       bool m_histogrammingEnabled = false;
    };
 }
