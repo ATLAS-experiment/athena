@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #####
 # CI Reference Files Map
@@ -38,6 +38,8 @@ references_map = {
     "mc_PHYSLITE_Run2": "v26",
     "mc_PHYS_Run3": "v55",
     "mc_PHYSLITE_Run3": "v28",
+    "af3_PHYS_Run2": "v3",
+    "af3_PHYSLITE_Run2": "v3",
     "af3_PHYS_Run3": "v35",
     "af3_PHYSLITE_Run3": "v28",
 }
