@@ -34,9 +34,6 @@ if __name__ == "__main__":
     argumentParser = ArgumentParser()
     argumentParser.add_argument("--xclbinPath")
     argumentParser.add_argument("--bufferSize", default = 8192)
-    argumentParser.add_argument("--ignoreIsolatedLineFeed", 
-                                default = False, 
-                                action = "store_true")
 
     from argparse import Action
     class JsonToDictAction(Action):
@@ -54,7 +51,6 @@ if __name__ == "__main__":
         from EFTrackingDataStreamLoaderAlgorithmConfig import EFTrackingDataStreamLoaderAlgorithmCfg
         acc.merge(EFTrackingDataStreamLoaderAlgorithmCfg(flags,
                                                          bufferSize = arguments.bufferSize,
-                                                         ignoreIsolatedLineFeed = arguments.ignoreIsolatedLineFeed,
                                                          inputCsvPath = inputCsvPath,
                                                          inputDataStream = sgKey))
 
