@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "WebdaqHistSvc.h"
@@ -355,12 +355,6 @@ StatusCode WebdaqHistSvc::regHist(const std::string& id)
 }
 
 StatusCode WebdaqHistSvc::regHist(const std::string& id, std::unique_ptr<TH1> hist)
-{
-  THistID* hid = nullptr;
-  return regHist_i(std::move(hist), id, false, hid);
-}
-
-StatusCode WebdaqHistSvc::regHist(const std::string& id, std::unique_ptr<TH1> hist, TH1* /*hist_ptr*/)
 {
   THistID* hid = nullptr;
   return regHist_i(std::move(hist), id, false, hid);
