@@ -13,7 +13,7 @@
 # art-html: dcube_shifter_last
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-relname="r24.0.65"
+relname="r25.2025-01-12T2101"
 dcuberef_sim=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/HitValid_mu_5GeV_simreco.root
 dcuberef_rdo=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/RDOAnalysis_mu_5GeV_simreco.root
 dcuberef_rec=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_mu5GeV_simreco.root 
