@@ -183,8 +183,7 @@ namespace FlavorTagDiscriminants {
 
     // constituent level inputs
     Tracks input_tracks;
-    int64_t num_tracks = 0;
-    bool  using_tracks = false;
+    int64_t num_inputs = 0;
     for (auto loader : m_constituentsLoaders){
       auto [input_name, input_data, input_objects] = loader->getData(jet, btag);
       if (m_onnxUtil->getOnnxModelVersion() != OnnxModelVersion::V2) {
@@ -192,21 +191,20 @@ namespace FlavorTagDiscriminants {
         input_name.append("_features");
       }
       gnn_inputs.insert({input_name, input_data});
-      
+      num_inputs += input_data.first.size();
+
       // for now we only collect tracks for aux task decoration
       // they have to be converted back from IParticle to TrackParticle first
       if (loader->getType() == ConstituentsType::TRACK){
         for (auto constituent : input_objects){
           input_tracks.push_back(dynamic_cast<const xAOD::TrackParticle*>(constituent));
         }
-        num_tracks += input_data.first.size();
-        using_tracks = true;
       }
     }
 
     // run inference
     // -------------
-    if (m_defaultZeroTracks && using_tracks && num_tracks == 0) {
+    if (m_defaultZeroTracks && num_inputs == 0) {
       this->decorateWithDefaults(btag);
       return;
     }
