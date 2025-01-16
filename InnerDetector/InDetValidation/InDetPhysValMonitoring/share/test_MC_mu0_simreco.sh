@@ -69,6 +69,7 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
    -c ${dcubecfg_sim} \
    -r ${dcuberef_sim} \
    ${dcubemon_sim}
+ echo "art-result: $? dcube_sim"
  
  $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
    -p -x ${dcube_sim_lastref} \
