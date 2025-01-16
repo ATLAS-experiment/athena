@@ -222,11 +222,11 @@ class ggF_HH_SMEFT(PowhegV2):
             CHG_str = f'{list(self.parameters_by_keyword("CHG"))[0].value:+.4E}'
 
             logger.info('Now trying to use warmup_smeft.py to create the Virt_full_*.grid file')
-            logger.info(f'Parameters are: GF={GF_str}, Lambda={Lambda_str}, CHbox={CHbox_str}, CHD={CHD_str}, CH={CH_str}, CuH={CuH_str}, CHG={CHG_str}, EFTcount={EFTcount_str}, usesmeft={usesmeft_str}, lhapdfid={lhapdfid_str}, renfac={renfac_str}')
+            logger.info(f'Parameters are: GF={GF_str}, Lambda={Lambda_str}, CHbox={CHbox_str}, CHD={CHD_str}, CH={CH_str}, CuH={CuH_str}, CHG={CHG_str}, EFTcount={EFTcount_str}, lhapdfid={lhapdfid_str}, renfac={renfac_str}')
             try:
                 #import creategrid as cg
                 #cg.combinegrids(grid_file_name, chhh_str, ct_str, ctt_str, cggh_str, cgghh_str)
-                pythoncmd=f"import warmup_smeft as ws; ws.combinegrids_smeft({Lambda_str}, {CHbox_str}, {CHD_str}, {CH_str}, {CuH_str}, {CHG_str}, {GF_str}, {EFTcount_str}, {usesmeft_str}, {lhapdfid_str}, {renfac_str})"
+                pythoncmd=f"import warmup_smeft as ws; ws.combinegrids_SMEFT({Lambda_str}, {CHbox_str}, {CHD_str}, {CH_str}, {CuH_str}, {CHG_str}, {GF_str}, {EFTcount_str}, {lhapdfid_str}, {renfac_str})"
                 os.system("python3 -c \""+pythoncmd+"\"")
             except RuntimeError:
                 logger.error('Impossible to use warmup_smeft.py to create the Virt_full_*.grid file')

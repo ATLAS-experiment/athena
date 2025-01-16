@@ -23,8 +23,15 @@ class gg4l(PowhegRES):
         @param base_directory: path to PowhegBox code.
         @param kwargs          dictionary of arguments from Generate_tf.
         """
+
+        # list of message patterns to be treated as warnings
+        warnings = [
+            "ggvvamp: increasing precision to"
+            ]
         super(gg4l, self).__init__(base_directory, "gg4l", **kwargs)
-                # defining gg4l environment variable to bypass file path issues in QCDLoop-*/ff/ffinit.f
+        self.warning_output = warnings
+
+        # defining gg4l environment variable to bypass file path issues in QCDLoop-*/ff/ffinit.f
         os.environ['gg4lPATH'] = os.path.dirname(self.executable)
         logger.info("gg4lPATH defined as = {0}".format(os.getenv('gg4lPATH')))
 
