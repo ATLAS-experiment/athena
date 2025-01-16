@@ -2300,6 +2300,7 @@ class argSubstepSteering(argSubstep):
     # "no" - a convenience null option for production managers, does nothing
     # "doRDO_TRIG" - run split trigger for Reco_tf and friends
     # "doOverlay" - run event overlay on presampled RDOs instead of standard HITtoRDO digitization
+    # "doFCtoDAOD" - run the FastChain transform, including the Derivation step, to process data from EVNT to DAOD
     # "afterburn" - run the B decay afterburner for event generation
     # "doRAWtoALL" - (deprecated) produce all DESDs and AODs directly from bytestream
     # "doTRIGtoALL" - (deprecated) produce AODs directly from trigger RDOs
@@ -2308,6 +2309,7 @@ class argSubstepSteering(argSubstep):
                       'doRDO_TRIG': {'RAWtoALL': [('in', '-', 'RDO'), ('in', '+', 'RDO_TRIG'), ('in', '-', 'BS')]},
                       'doOverlay': {'HITtoRDO': [('in', '-', 'HITS'), ('out', '-', 'RDO'), ('out', '-', 'RDO_FILT')],
                                     'Overlay': [('in', '+', ('HITS', 'RDO_BKG')), ('out', '+', 'RDO')]},
+                      'doFCtoDAOD': {'Derivation': [('in', '-', 'EVNT')]},
                       'afterburn': {'generate': [('out', '-', 'EVNT')]},
                       'doRAWtoALL': {},
                       'doTRIGtoALL': {}

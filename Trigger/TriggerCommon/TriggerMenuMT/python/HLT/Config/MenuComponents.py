@@ -18,6 +18,7 @@ from collections.abc import MutableSequence
 import functools
 import inspect
 import re
+import types
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
@@ -526,6 +527,16 @@ class Chain(object):
                 elif re.search('^Step[0-9]{2}_', step_name):
                     step_name = step_name[7:]   
                 step.name = 'Step%d_'%(stepID+1)+step_name
+
+                # also modify the empty sequence names to follow the step name change
+                for iseq, seq in enumerate(step.sequenceGens):
+                    if isEmptySequenceCfg(seq): 
+                        name = seq.func.__name__ 
+                        if re.search('Seq[0-9]_',name):
+                            newname = re.sub('Seq[0-9]_', 'Seq%d_'%(stepID+1), name)
+                            #replace the empty sequence                            
+                            step.sequenceGens[iseq]=functools.partial(EmptyMenuSequenceCfg, None, name=newname)
+
         return
 
 
@@ -569,7 +580,7 @@ class Chain(object):
         for stepID in range(1,n_new_steps+1):
             new_step_name =  prev_step_name+'_'+empty_step_name+'%d_'%stepID+next_step_name
 
-            log.debug("Configuring empty step %s", new_step_name)
+            log.debug("Adding empty step %s", new_step_name)
             steps_to_add += [ChainStep(new_step_name, chainDicts=prev_chain_dict, comboHypoCfg=ComboHypoCfg, isEmpty=True)]
         
         self.steps = chain_steps_pre_split + steps_to_add + chain_steps_post_split
@@ -602,6 +613,10 @@ class Chain(object):
         stepname = "last step" if step=="last" else step.name
         log.debug("Adding topo configurator %s for %s to %s", topoPair[0].__qualname__, topoPair[1], "step " + stepname)
         self.topoMap[step] = topoPair
+
+    def __str__(self):
+        return "\n-*- Chain %s -*- \n + Seeds: %s, Steps: %s, AlignmentGroups: %s "%(\
+                    self.name, ' '.join(map(str, self.L1decisions)), self.nSteps, self.alignmentGroups)     
 
     def __repr__(self):
         return "\n-*- Chain %s -*- \n + Seeds: %s, Steps: %s, AlignmentGroups: %s \n + Steps: \n %s \n"%(\
@@ -754,7 +769,8 @@ class ChainStep(object):
         self.comboToolConfs.append(tool)
 
     def getComboHypoFncName(self):
-        return self.comboHypoCfg.func.__name__ if isinstance(self.comboHypoCfg, functools.partial) else self.comboHypoCfg
+        return self.comboHypoCfg.__name__ if isinstance(self.comboHypoCfg, types.FunctionType) else self.comboHypoCfg        
+
 
     def makeCombo(self):
         """ Configure the Combo Hypo Alg and generate the corresponding function, without instantiation which is done in createSequences() """ 
@@ -775,10 +791,6 @@ class ChainStep(object):
         self.combo = _ComboHypoPool[key] 
         log.debug("Created combo %s with name %s, step comboName %s, key %s", funcName, self.combo.name, comboNameFromStep,key)
 
-        
-
-        
-                       
 
     def createComboHypoTools(self, flags, chainName):
         chainDict = HLTMenuConfig.getChainDictFromChainName(chainName)

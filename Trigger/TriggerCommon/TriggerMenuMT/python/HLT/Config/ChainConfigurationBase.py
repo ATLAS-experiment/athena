@@ -47,7 +47,7 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
         log.debug("Configuring step %s with %d chainParts", stepName, len(self.dict['chainParts']))
         
         # do not generate Menu Sequences, just store the functions that can do that
-        seqArray = [functools.partial(gen, flags, **stepArgs) for gen in sequenceCfgArray]          
+        seqArray = [functools.partial(gen, flags, **stepArgs) for gen in sequenceCfgArray]
 
         if (len(seqArray)>0):                                
             if inspect.signature(comboHypoCfg).parameters and all(inspect.signature(comboTool).parameters for comboTool in comboTools):                

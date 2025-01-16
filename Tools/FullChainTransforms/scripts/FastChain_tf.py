@@ -20,6 +20,7 @@ from PyJobTransforms.trfArgs import addAthenaArguments, addDetectorArguments, ad
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
 from RecJobTransforms.recTransformUtils import addRecoSubsteps, addAllRecoArgs
 from SimuJobTransforms.simTrfArgs import addCommonSimTrfArgs, addBasicDigiArgs, addCommonSimDigTrfArgs, addTrackRecordArgs, addSim_tfArgs, addSimIOTrfArgs, addPileUpTrfArgs
+from DerivationFrameworkConfiguration.DerivationTransformHelpers import addDerivationArguments, addDerivationSubstep, addPhysicsValidationArguments, addPhysicsValidationSubstep
 
 from PyJobTransforms.trfArgClasses import argFactory, argList, argRDOFile
 
@@ -48,6 +49,10 @@ def getTransform():
                                    inData=['NULL','EVNT', 'RDO_BKG', 'BS_SKIM'],
                                    outData=['RDO', 'HITS', 'NULL'] ))
 
+    # Derivation
+    addDerivationSubstep(executorSet)
+    addPhysicsValidationSubstep(executorSet)
+
     trf = transform(executor = executorSet, description = 'Fast chain ATLAS transform with ISF simulation, digitisation'
                     ' and reconstruction. Inputs can be EVNT, with outputs of RDO, ESD, AOD or DPDs.'
                     ' See https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/FastChainTf for more details.')
@@ -74,6 +79,10 @@ def getTransform():
     # Overlay arguments
     from OverlayConfiguration.OverlayTransformHelpers import addOverlayArguments
     addOverlayArguments(trf.parser)
+
+    # Derivation agruments
+    addDerivationArguments(trf.parser)
+    addPhysicsValidationArguments(trf.parser)
 
     return trf
 

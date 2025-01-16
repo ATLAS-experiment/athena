@@ -2044,6 +2044,8 @@ class ItemDef:
             #ATR-18824
             MenuItem('L1_ZAFB-04DPHI-eEM18M' ).setLogic( d.TOPO_60INVM_04DPHI32_eEM18abm_jEM20s625ETA49 & physcond)
             MenuItem('L1_ZAFB-25DPHI-eEM18M' ).setLogic( d.TOPO_60INVM_25DPHI32_eEM18abm_jEM20s625ETA49 & physcond)
+            MenuItem('L1_ZAFB-04DPHIM-eEM18M' ).setLogic( d.TOPO_60INVM_04DPHI32_eEM18abm_jEM20sm625ETA49 & physcond)
+            MenuItem('L1_ZAFB-25DPHIM-eEM18M' ).setLogic( d.TOPO_60INVM_25DPHI32_eEM18abm_jEM20sm625ETA49 & physcond)
             #ATR-19302:
             MenuItem('L1_DPHI-M70-2eEM12M' ).setLogic( d.TOPO_0INVM70_27DPHI32_eEM12sm1_eEM12sm6 & physcond)
             MenuItem('L1_DPHI-M70-2eEM15M' ).setLogic( d.TOPO_0INVM70_27DPHI32_eEM15sm1_eEM15sm6 & physcond)
