@@ -3,6 +3,7 @@
 */
 
 #include "ActsGeometry/SurfaceOfMeasurementUtil.h"
+#include "ActsGeometry/ATLASSourceLink.h"
 
 namespace ActsTrk::detail {
   
