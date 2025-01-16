@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef IsolationSelection_IsolationCloseByCorrectionTool_H
@@ -105,6 +105,9 @@ namespace CP {
         // Function to pipe each container given by the interfaces through. It loops over all
         // particles and removes the isolation overlap between the objects
         CorrectionCode performCloseByCorrection (const EventContext& ctx, ObjectCache& cache) const;
+
+        // Lock decorations that we produced.
+        void lockDecorations (const xAOD::IParticleContainer* parts) const;
 
         // Helper function to obtain the isolation cones to use for a given particle
         const IsoVector& getIsolationTypes(const xAOD::IParticle* particle) const;

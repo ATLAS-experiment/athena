@@ -206,18 +206,6 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
     # can ignore some of them.
     missingKeys = getStaticTrackVars(inputTracks)
 
-    # optionally avoid cases with zero tracks
-    nonzero_tracks = 'nonzeroTracks'
-    min_links = 1
-    ca.addEventAlgo(
-        CompFactory.FlavorTagDiscriminants.CountIParticleAlg(
-            f'CountTrackParticleAlg{jet_name}',
-            links=f'{jet_name}.{tracksOnJetDecoratorName}',
-            minimumLinks=min_links,
-            flag=f'{jet_name}.{nonzero_tracks}',
-        )
-    )
-
     for nnFile, variableRemapping in dl2_configs:
         nnAlgo = nnFile.replace('/','_').split('.')
         nnAlgoKey = nnAlgo[0]
@@ -229,8 +217,11 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
         tag_flags = {pass_flag}
 
         if nnAlgoext == 'onnx':
-            tag_flags.add(nonzero_tracks)
-            extra = dict(defaultOutputValues=_triggerDefaultsFromPath(nnFile))
+            defaults = _triggerDefaultsFromPath(nnFile)
+            extra = dict(
+                defaultOutputValues=defaults,
+                defaultZeroTracks=(True if defaults else False),
+            )
         else:
             extra = {}
 
