@@ -41,8 +41,6 @@ void GeneralTauPlots::initializePlots(){
    m_ptRNNMediumHighPt = Book1D("ptRNNSigMediumHighPt", m_sTauJetContainerName+" RNNSigMediumHighPt; pt"+"; # Taus",20, 0.0, 1500.0);
    m_ptRNNTight = Book1D("ptRNNSigTight",m_sTauJetContainerName+" RNNSigTight; pt; # Taus", 20, 0.0, 150.0);
    m_ptRNNTightHighPt = Book1D("ptRNNSigTightHighPt", m_sTauJetContainerName+" RNNSigTightHighPt; pt"+"; # Taus",20, 0.0, 1500.0);
-   m_ptGNTauVeryLoose = Book1D("ptGNTauSigVeryLoose", m_sTauJetContainerName+" GNTauSigVeryLoose; pt; # Taus",20, 0.0, 150.0);
-   m_ptGNTauVeryLooseHighPt = Book1D("ptGNTauSigVeryLooseHighPt", m_sTauJetContainerName+" GNTauSigVeryLooseHighPt"+"; pt; # Taus",20, 0.0, 1500.0);
    m_ptGNTauLoose = Book1D("ptGNTauSigLoose",m_sTauJetContainerName+" GNTauSigLoose; pt; # Taus", 20, 0.0, 150.0);
    m_ptGNTauLooseHighPt = Book1D("ptGNTauSigLooseHighPt", m_sTauJetContainerName+" GNTauSigLooseHighPt; pt"+"; # Taus",20, 0.0, 1500.0);
    m_ptGNTauMedium = Book1D("ptGNTauSigMedium",m_sTauJetContainerName+" GNTauSigMedium; pt; # Taus", 20, 0.0, 150.0);
@@ -109,11 +107,7 @@ void GeneralTauPlots::fill(const xAOD::TauJet& tau, float weight) {
      m_ptRNNTight      ->Fill(tau.pt()/1000, weight);
      m_ptRNNTightHighPt->Fill(tau.pt()/1000, weight);
   }
-  static const SG::ConstAccessor<char> acc_GNTauVL("GNTauVL_v0prune");
-  if( acc_GNTauVL.isAvailable(tau) && acc_GNTauVL(tau)) {
-     m_ptGNTauVeryLoose      ->Fill(tau.pt()/1000, weight);
-     m_ptGNTauVeryLooseHighPt->Fill(tau.pt()/1000, weight);
-  }
+
   static const SG::ConstAccessor<char> acc_GNTauL("GNTauL_v0prune");
   if( acc_GNTauL.isAvailable(tau) && acc_GNTauL(tau)) {
      m_ptGNTauLoose      ->Fill(tau.pt()/1000, weight);
