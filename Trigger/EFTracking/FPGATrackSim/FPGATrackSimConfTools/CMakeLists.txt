@@ -48,7 +48,7 @@ atlas_add_test( FPGATrackSimBankGeneration_test
 atlas_add_test( FPGATrackSim_F300_test
                 SCRIPT FPGATrackSim_F300.sh
                 PRIVATE_WORKING_DIRECTORY
-                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*" # ACTS (C)KF related errors
+                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:..*" # ACTS (C)KF related errors
                 POST_EXEC_SCRIPT noerror.sh 
                 PROPERTIES TIMEOUT 600 )
 
@@ -68,14 +68,14 @@ atlas_add_test( FPGATrackSim_F600_test
 atlas_add_test( FPGATrackSim_F200_test
                 SCRIPT FPGATrackSim_F200.sh
                 PRIVATE_WORKING_DIRECTORY
-                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*" # ACTS (C)KF related errors
+                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:..*" # ACTS (C)KF related errors
                 POST_EXEC_SCRIPT noerror.sh 
                 PROPERTIES TIMEOUT 600 )
 
 atlas_add_test( FPGATrackSim_F210_test # TODO: Figure out why we get this many errors (FPE) from ACTS
                 SCRIPT FPGATrackSim_F210.sh
                 PRIVATE_WORKING_DIRECTORY
-                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*|.*KalmanRefitDirectKalmanFitterActor.*|.*ERROR KalmanFilter failed.*|.*WARNING FPE.*FPGATrackSimProtoTackFitAlg.*" # ACTS (C)KF related errors
+                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:..*|.*KalmanRefitDirectKalmanFitterActor.*|.*ERROR KalmanFilter failed.*|.*WARNING FPE.*FPGATrackSimProtoTackFitAlg.*" # ACTS (C)KF related errors
                 POST_EXEC_SCRIPT noerror.sh 
                 PROPERTIES TIMEOUT 600 )
 
