@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Steering script for IDPVM ART Run 4 configuration, ITK only recontruction, acts activated
 
@@ -11,7 +11,7 @@ maxEvents=$3
 lastref_dir=last_results
 dcubeXml=dcube_ART_IDPVMPlots_ITk.xml
 
-geometry=ATLAS-P2-RUN4-03-00-00
+geometry=ATLAS-P2-RUN4-04-00-00
 condition=OFLCOND-MC21-SDR-RUN4-02
 
 # search in $DATAPATH for matching file
