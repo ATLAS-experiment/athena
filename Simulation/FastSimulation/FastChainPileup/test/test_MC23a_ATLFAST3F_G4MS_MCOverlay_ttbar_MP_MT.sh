@@ -10,7 +10,7 @@
 # art-output: RDO.pool.root
 # art-output: AOD.pool.root
 # art-architecture: '#x86_64-intel'
-
+# art-memory: 5999
 
 events=50
 

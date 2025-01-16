@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: CA-based config ATLFAST3F_G4MS with MC-overlay for MC23a ttbar
+# art-description: CA-based config ATLFAST3MT with MC-overlay for MC23a ttbar
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
@@ -10,7 +10,7 @@
 # art-output: RDO.pool.root
 # art-output: AOD.pool.root
 # art-architecture: '#x86_64-intel'
-
+# art-memory: 5999
 
 events=50
 
@@ -23,6 +23,7 @@ AOD_File='AOD.pool.root'
 
 FastChain_tf.py \
    --CA \
+   --multithreaded True \
    --simulator ATLFAST3MT \
    --physicsList FTFP_BERT_ATL \
    --useISF True \
