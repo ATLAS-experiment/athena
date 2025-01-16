@@ -725,7 +725,7 @@ def TrigMuonEFMSonlyHypoToolFromName( flags, chainDict):
     for part in cparts:
         if 'mu' in part:
             thrPart = part.split('mu')
-            if not thrPart[0]:
+            if not thrPart[0] or thrPart[0] == "0":
                 mult = 1
             else:
                 mult=thrPart[0]
@@ -876,7 +876,7 @@ def TrigMuonEFCombinerHypoToolFromName( flags, chainDict ):
     for part in cparts:
         if 'mu' in part:
             thrPart = part.split('mu')
-            if not thrPart[0]:
+            if not thrPart[0] or thrPart[0] == "0":
                 mult = 1
             else:
                 mult=thrPart[0]
