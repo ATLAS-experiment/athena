@@ -459,8 +459,7 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
 
         // get a reference element for dimensions
         if (!sectorDiscBounds){
-          const Trk::SurfaceBounds& sectorSurfaceBounds = sectorDiscElement->bounds();
-          sectorDiscBounds = dynamic_cast<const Trk::DiscBounds*>(&sectorSurfaceBounds);
+          sectorDiscBounds = dynamic_cast<const Trk::DiscBounds*>(&(sectorDiscElement->bounds()));
         }
 
         double currentZ = std::abs(sectorDiscElement->center().z());
