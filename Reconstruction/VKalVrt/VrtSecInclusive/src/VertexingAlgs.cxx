@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -56,8 +56,8 @@ namespace VKalVrtAthena {
     std::vector<const xAOD::TrackParticle*>    baseTracks;
     std::vector<const xAOD::NeutralParticle*>  dummyNeutrals;
    
-    ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": Selected Tracks = "<< m_selectedTracks->size());
-    if( m_jp.FillHist ) { m_hists["selTracksDist"]->Fill( m_selectedTracks->size() ); }
+    ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": Selected Tracks = "<< m_selectedTracks.size());
+    if( m_jp.FillHist ) { m_hists["selTracksDist"]->Fill( m_selectedTracks.size() ); }
     
     std::string msg;
     
@@ -71,13 +71,13 @@ namespace VKalVrtAthena {
     std::map<const xAOD::TruthVertex*, bool> matchMap;
 
     // first make all 2-track vertices
-    for( auto itrk = m_selectedTracks->begin(); itrk != m_selectedTracks->end(); ++itrk ) {
-      for( auto jtrk = std::next(itrk); jtrk != m_selectedTracks->end(); ++jtrk ) {
+    for( auto itrk = m_selectedTracks.begin(); itrk != m_selectedTracks.end(); ++itrk ) {
+      for( auto jtrk = std::next(itrk); jtrk != m_selectedTracks.end(); ++jtrk ) {
         
         // avoid both tracks are too close to the beam line
         
-        const int itrk_id = itrk - m_selectedTracks->begin();
-        const int jtrk_id = jtrk - m_selectedTracks->begin();
+        const int itrk_id = itrk - m_selectedTracks.begin();
+        const int jtrk_id = jtrk - m_selectedTracks.begin();
         
         WrkVrt wrkvrt;
         wrkvrt.selectedTrackIndices.emplace_back( itrk_id );
@@ -361,7 +361,7 @@ namespace VKalVrtAthena {
   {
     ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": begin");
     
-    const auto compSize = m_selectedTracks->size()*(m_selectedTracks->size() - 1)/2 - m_incomp.size();
+    const auto compSize = m_selectedTracks.size()*(m_selectedTracks.size() - 1)/2 - m_incomp.size();
     if( m_jp.FillHist ) { m_hists["2trkVerticesDist"]->Fill( compSize ); }
     
     ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": compatible track pair size   = " << compSize );
@@ -389,13 +389,13 @@ namespace VKalVrtAthena {
 
       // Solution of the graph method routine (minimal covering of the graph)
       // The size of the solution is returned by NPTR (see below)
-      std::vector<long int> solution( m_selectedTracks->size() );
+      std::vector<long int> solution( m_selectedTracks.size() );
 
       // Number of edges in the list is the size of incompatibility track pairs.
       long int nEdges = m_incomp.size();
 
       // input number of nodes in the graph.
-      long int nTracks = static_cast<long int>( m_selectedTracks->size() );
+      long int nTracks = static_cast<long int>( m_selectedTracks.size() );
 
       // Input variable; the threshold. Solutions shorter than nth are not returned (ignored).
       long int nth = 2;    //VK some speed up
@@ -445,7 +445,7 @@ namespace VKalVrtAthena {
       
         for(long int i = 0; i<solutionSize; i++) {
           wrkvrt.selectedTrackIndices.emplace_back(solution[i]-1);
-          baseTracks.emplace_back( m_selectedTracks->at(solution[i]-1) );
+          baseTracks.emplace_back( m_selectedTracks.at(solution[i]-1) );
         }
 
         // Perform vertex fitting
@@ -491,8 +491,8 @@ namespace VKalVrtAthena {
               tmp.selectedTrackIndices.emplace_back( jtrk );
               
               baseTracks.clear();
-              baseTracks.emplace_back( m_selectedTracks->at( itrk ) );
-              baseTracks.emplace_back( m_selectedTracks->at( jtrk ) );
+              baseTracks.emplace_back( m_selectedTracks.at( itrk ) );
+              baseTracks.emplace_back( m_selectedTracks.at( jtrk ) );
               
               // Perform vertex fitting
               Amg::Vector3D initVertex;
@@ -533,7 +533,7 @@ namespace VKalVrtAthena {
             
             tmp.selectedTrackIndices.emplace_back( itrk );
             baseTracks.clear();
-            for( auto& jtrk : tmp.selectedTrackIndices ) { baseTracks.emplace_back( m_selectedTracks->at(jtrk) ); }
+            for( auto& jtrk : tmp.selectedTrackIndices ) { baseTracks.emplace_back( m_selectedTracks.at(jtrk) ); }
             
             // Perform vertex fitting
             Amg::Vector3D initVertex;
@@ -638,7 +638,7 @@ namespace VKalVrtAthena {
       
         for(const auto& index: cluster.tracks) {
           wrkvrt.selectedTrackIndices.emplace_back( index );
-          baseTracks.emplace_back( m_selectedTracks->at( index ) );
+          baseTracks.emplace_back( m_selectedTracks.at( index ) );
         }
         
         // Perform vertex fitting
@@ -972,7 +972,7 @@ namespace VKalVrtAthena {
       
       for( auto& index : wrkvrt.selectedTrackIndices ) {
         
-        const xAOD::TrackParticle* trk = m_selectedTracks->at( index );
+        const xAOD::TrackParticle* trk = m_selectedTracks.at( index );
         
         mergiableVertex[index] = workVerticesContainer->rend();
         
@@ -1067,7 +1067,9 @@ namespace VKalVrtAthena {
     const xAOD::VertexContainer *pvs (nullptr);
     ATH_CHECK( evtStore()->retrieve( pvs, "PrimaryVertices") );
     
-    if( !m_decor_isAssociated ) m_decor_isAssociated = std::make_unique< SG::AuxElement::Decorator<char> >( "is_associated" + m_jp.augVerString );
+    if( !m_decor_isAssociated ) {
+      m_decor_isAssociated.emplace ( "is_associated" + m_jp.augVerString );
+    }
     
     ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": #verticess = " << workVerticesContainer->size() );
     
@@ -1113,11 +1115,11 @@ namespace VKalVrtAthena {
                                                                      // when using selected tracks from electrons, also check the orginal track particle from GSF to see if InDetTrackParticle (trk) is an electron that is already in the vertex
                                                                     if (m_jp.doSelectTracksFromElectrons || m_jp.doSelectIDAndGSFTracks) {
                                                                       const xAOD::TrackParticle *id_tr;
-                                                                      id_tr = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(m_selectedTracks->at(index));
-                                                                      return trk == m_selectedTracks->at(index) or trk == id_tr;
+                                                                      id_tr = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(m_selectedTracks.at(index));
+                                                                      return trk == m_selectedTracks.at(index) or trk == id_tr;
                                                                     }
                                                                     else{
-                                                                      return trk == m_selectedTracks->at(index);
+                                                                      return trk == m_selectedTracks.at(index);
                                                                     }
                                                                    } );
                                         return found != wrkvrt.selectedTrackIndices.end();
@@ -1127,9 +1129,9 @@ namespace VKalVrtAthena {
         
         // If the track is already registered to the associated track list, reject.
         {
-          auto result = std::find_if( m_associatedTracks->begin(), m_associatedTracks->end(),
+          auto result = std::find_if( m_associatedTracks.begin(), m_associatedTracks.end(),
                                       [&] (const auto* atrk) { return trk == atrk; } );
-          if( result != m_associatedTracks->end() ) continue;
+          if( result != m_associatedTracks.end() ) continue;
         }
         
         // Reject PV-associated tracks
@@ -1181,11 +1183,11 @@ namespace VKalVrtAthena {
         wrkvrt.Chi2PerTrk.clear();
         
         for( const auto& index : wrkvrt.selectedTrackIndices ) {
-          baseTracks.emplace_back( m_selectedTracks->at( index ) );
+          baseTracks.emplace_back( m_selectedTracks.at( index ) );
           wrkvrt.Chi2PerTrk.emplace_back( AlgConsts::chi2PerTrackInitValue );
         }
         for( const auto& index : wrkvrt.associatedTrackIndices ) {
-          baseTracks.emplace_back( m_associatedTracks->at( index ) );
+          baseTracks.emplace_back( m_associatedTracks.at( index ) );
           wrkvrt.Chi2PerTrk.emplace_back( AlgConsts::chi2PerTrackInitValue );
         }
         
@@ -1246,9 +1248,9 @@ namespace VKalVrtAthena {
         
         associateCounter++;
         
-        wrkvrt.associatedTrackIndices.emplace_back( m_associatedTracks->size() );
+        wrkvrt.associatedTrackIndices.emplace_back( m_associatedTracks.size() );
         
-        m_associatedTracks->emplace_back( trk );
+        m_associatedTracks.emplace_back( trk );
         (*m_decor_isAssociated)( *trk ) = true;
         
       }
@@ -1496,7 +1498,9 @@ namespace VKalVrtAthena {
       m_trkDecors.emplace( kErrZ0,  SG::AuxElement::Decorator<float>("errz0_wrtSV" + m_jp.augVerString) );
       m_trkDecors.emplace( kChi2SV, SG::AuxElement::Decorator<float>("chi2_toSV"   + m_jp.augVerString) );
     }
-    if( !m_decor_is_svtrk_final ) m_decor_is_svtrk_final = std::make_unique< SG::AuxElement::Decorator<char> >( "is_svtrk_final" + m_jp.augVerString );
+    if( !m_decor_is_svtrk_final ) {
+      m_decor_is_svtrk_final.emplace ( "is_svtrk_final" + m_jp.augVerString );
+    }
 
     std::map<const WrkVrt*, const xAOD::Vertex*> wrkvrtLinkMap;
     
@@ -1537,7 +1541,7 @@ namespace VKalVrtAthena {
         // for selected tracks
         wrkvrt.selectedTrackIndices.erase( std::remove_if( wrkvrt.selectedTrackIndices.begin(), wrkvrt.selectedTrackIndices.end(),
                                                            [&]( auto& index ) {
-                                                             auto* trk = m_selectedTracks->at( index );
+                                                             auto* trk = m_selectedTracks.at( index );
                                                              uint8_t nPixelHits { 0 }; trk->summaryValue( nPixelHits,  xAOD::numberOfPixelHits );
                                                              return ( nPixelHits < 3 );
                                                            } ),
@@ -1546,7 +1550,7 @@ namespace VKalVrtAthena {
         // for associated tracks
         wrkvrt.associatedTrackIndices.erase( std::remove_if( wrkvrt.associatedTrackIndices.begin(), wrkvrt.associatedTrackIndices.end(),
                                                              [&]( auto& index ) {
-                                                               auto* trk = m_associatedTracks->at( index );
+                                                               auto* trk = m_associatedTracks.at( index );
                                                                uint8_t nPixelHits { 0 }; trk->summaryValue( nPixelHits,  xAOD::numberOfPixelHits );
                                                                return ( nPixelHits < 3 );
                                                              } ),
@@ -1626,8 +1630,8 @@ namespace VKalVrtAthena {
       
       std::map<const std::deque<long int>*, const std::vector<const xAOD::TrackParticle*>&> indicesSet
         = {
-            { &(wrkvrt.selectedTrackIndices),   *m_selectedTracks   },
-            { &(wrkvrt.associatedTrackIndices), *m_associatedTracks }
+            { &(wrkvrt.selectedTrackIndices),   m_selectedTracks   },
+            { &(wrkvrt.associatedTrackIndices), m_associatedTracks }
           };
       
       for( auto& pair : indicesSet ) {
@@ -1802,7 +1806,7 @@ namespace VKalVrtAthena {
 
         bool oneLepMatchTrack = false;
         for (const auto *trk: tracks) {
-          if ( std::find(m_leptonicTracks->begin(), m_leptonicTracks->end(), trk) != m_leptonicTracks->end() ) {
+          if ( std::find(m_leptonicTracks.begin(), m_leptonicTracks.end(), trk) != m_leptonicTracks.end() ) {
             oneLepMatchTrack = true;
             break;
           }
@@ -1880,7 +1884,7 @@ namespace VKalVrtAthena {
       // loop over the tracks comprising the vertex
       for( auto trk_id : wrkvrt.selectedTrackIndices ) {
 
-        const xAOD::TrackParticle *trk = m_selectedTracks->at( trk_id );
+        const xAOD::TrackParticle *trk = m_selectedTracks.at( trk_id );
 
         // Acquire link the track to the vertex
         ElementLink<xAOD::TrackParticleContainer> link_trk( *( dynamic_cast<const xAOD::TrackParticleContainer*>( trk->container() ) ), static_cast<long unsigned int>(trk->index()) );
@@ -1892,7 +1896,7 @@ namespace VKalVrtAthena {
       
       for( auto trk_id : wrkvrt.associatedTrackIndices ) {
 
-        const xAOD::TrackParticle *trk = m_associatedTracks->at( trk_id );
+        const xAOD::TrackParticle *trk = m_associatedTracks.at( trk_id );
 
         // Acquire link the track to the vertex
         ElementLink<xAOD::TrackParticleContainer> link_trk( *( dynamic_cast<const xAOD::TrackParticleContainer*>( trk->container() ) ), static_cast<long unsigned int>(trk->index()) );
@@ -2001,7 +2005,7 @@ namespace VKalVrtAthena {
         // loop over the tracks comprising the vertex
         for( auto trk_id : wrkvrt.selectedTrackIndices ) {
 
-          const xAOD::TrackParticle *trk = m_selectedTracks->at( trk_id );
+          const xAOD::TrackParticle *trk = m_selectedTracks.at( trk_id );
 
           // Acquire link the track to the vertex
           ElementLink<xAOD::TrackParticleContainer> link_trk( *( dynamic_cast<const xAOD::TrackParticleContainer*>( trk->container() ) ), static_cast<long unsigned int>(trk->index()) );
@@ -2013,7 +2017,7 @@ namespace VKalVrtAthena {
       
         for( auto trk_id : wrkvrt.associatedTrackIndices ) {
 
-          const xAOD::TrackParticle *trk = m_associatedTracks->at( trk_id );
+          const xAOD::TrackParticle *trk = m_associatedTracks.at( trk_id );
 
           // Acquire link the track to the vertex
           ElementLink<xAOD::TrackParticleContainer> link_trk( *( dynamic_cast<const xAOD::TrackParticleContainer*>( trk->container() ) ), static_cast<long unsigned int>(trk->index()) );
@@ -2037,7 +2041,7 @@ namespace VKalVrtAthena {
     
     if( m_vertexingAlgorithmStep == 0 ) {
       
-      const auto compSize = m_selectedTracks->size()*(m_selectedTracks->size() - 1)/2 - m_incomp.size();
+      const auto compSize = m_selectedTracks.size()*(m_selectedTracks.size() - 1)/2 - m_incomp.size();
       m_hists["vertexYield"]->Fill( m_vertexingAlgorithmStep, compSize );
       
     } else {

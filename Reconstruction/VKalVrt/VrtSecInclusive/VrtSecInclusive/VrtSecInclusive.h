@@ -11,6 +11,7 @@
 #include "VrtSecInclusive/Constants.h"
 
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthContainers/Decorator.h"
 
 // Gaudi includes
 #include "GaudiKernel/ToolHandle.h"
@@ -52,6 +53,7 @@
 #include <vector>
 #include <deque>
 #include <functional>
+#include <optional>
 
 
 /** Forward declarations **/
@@ -252,9 +254,9 @@ namespace VKalVrtAthena {
     // xAOD Accessors
     const xAOD::VertexContainer*  m_primaryVertices;
     const xAOD::Vertex*           m_thePV;
-    std::unique_ptr<std::vector<const xAOD::TrackParticle*> > m_selectedTracks;
-    std::unique_ptr<std::vector<const xAOD::TrackParticle*> > m_associatedTracks;
-    std::unique_ptr<std::vector<const xAOD::TrackParticle*> > m_leptonicTracks;
+    std::vector<const xAOD::TrackParticle*> m_selectedTracks;
+    std::vector<const xAOD::TrackParticle*> m_associatedTracks;
+    std::vector<const xAOD::TrackParticle*> m_leptonicTracks;
     std::vector<double>  m_BeamPosition;
 
     /////////////////////////////////////////////////////////
@@ -284,10 +286,10 @@ namespace VKalVrtAthena {
     std::map<std::string, PatternStrategyFunc> m_patternStrategyFuncs;
 
     // AuxElement decorators
-    std::unique_ptr< SG::AuxElement::Decorator< char > > m_decor_isSelected;
-    std::unique_ptr< SG::AuxElement::Decorator< char > > m_decor_isAssociated;
-    std::unique_ptr< SG::AuxElement::Decorator< char > > m_decor_is_svtrk_final;
-    std::map< unsigned, SG::AuxElement::Decorator<float> > m_trkDecors;
+    std::optional< SG::Decorator< char > > m_decor_isSelected;
+    std::optional< SG::Decorator< char > > m_decor_isAssociated;
+    std::optional< SG::Decorator< char > > m_decor_is_svtrk_final;
+    std::map< unsigned, SG::Decorator<float> > m_trkDecors;
 
     /** Read/Write Handle Keys **/
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey", "EventInfo", "EventInfo name"};
@@ -297,7 +299,7 @@ namespace VKalVrtAthena {
     std::vector< IPDecoratorType > m_ipDecors;
 
     using VertexELType = SG::AuxElement::Decorator< std::vector<ElementLink< xAOD::VertexContainer > > >;
-    std::unique_ptr< VertexELType > m_decor_svLink;
+    std::optional< VertexELType > m_decor_svLink;
 
     //////////////////////////////////////////////////////////////////////////////////////
     //
