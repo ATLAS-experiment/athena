@@ -28,6 +28,8 @@ namespace CP {
 
         IsoVariableHelper(IsoType type, const std::string& backupPreFix, const std::string& isoDecSuffix = "");
 
+        void lockDecorations(const SG::AuxVectorData& parts) const;
+
     private:
         CorrectionCode getIsolationFromOriginal(const xAOD::IParticle* particle, float& value) const;
         IsoType m_isoType;
