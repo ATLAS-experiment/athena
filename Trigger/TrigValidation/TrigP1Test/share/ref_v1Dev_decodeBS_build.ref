@@ -11090,17 +11090,17 @@ HLT_tau25_idperf_tracktwoMVA_L1jTAU20:
     3: 22
     4: 22
 HLT_tau25_looseRNN_trackLRT_L1cTAU20M:
-  eventCount: 9
+  eventCount: 8
   stepCounts:
     0: 12
     1: 12
     2: 12
-    3: 9
+    3: 8
   stepFeatures:
     0: 17
     1: 17
     2: 17
-    3: 10
+    3: 9
 HLT_tau25_looseRNN_tracktwoLLP_L1cTAU20M:
   eventCount: 8
   stepCounts:
