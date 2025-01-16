@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -1590,10 +1590,10 @@ void TileAANtuple::fillCellMap(TTree* ntuplePtr) {
     }
   }
   
-  const MbtsDetDescrManager* mbtsMgr; //!< Pointer to MbtsDetDescrManager
+  const MbtsDetDescrManager* mbtsMgr = nullptr; //!< Pointer to MbtsDetDescrManager
   if ( detStore()->retrieve(mbtsMgr).isFailure() ) {
     ATH_MSG_WARNING( "Unable to retrieve MbtsDetDescrManager from DetectorStore" );
-    mbtsMgr = 0;
+    mbtsMgr = nullptr;
   }
   for (int ROS = 1; ROS < 5; ++ROS) {
     int rosI = ROS - 1;
