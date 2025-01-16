@@ -8,8 +8,10 @@
 #include "src/IMeasurementSelector.h"
 #include <vector>
 #include <utility>
+#include <memory>
 
 namespace ActsTrk::detail {
+   class IOnBoundStateCalibratorTool;
    std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const ActsTrk::IOnBoundStateCalibratorTool *onTrackCalibratorTool,
                                                                           const std::vector<float> &etaBinsf,
                                                                           const std::vector<std::pair<float, float> > &chi2CutOffOutlier,

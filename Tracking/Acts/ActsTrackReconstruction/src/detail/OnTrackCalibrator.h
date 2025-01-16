@@ -9,6 +9,7 @@
 #include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
 #include "src/detail/MeasurementCalibratorBase.h"
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
+#include "Acts/Geometry/TrackingGeometry.hpp"
 
 #include "xAODInDetMeasurement/PixelCluster.h"
 #include "xAODInDetMeasurement/StripCluster.h"

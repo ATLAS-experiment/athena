@@ -5,6 +5,8 @@
 #ifndef ACTSTRK_HITSUMMARYDATAUTILS_H
 #define ACTSTRK_HITSUMMARYDATAUTILS_H
 
+#include "ActsEvent/TrackContainer.h"
+#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
@@ -13,10 +15,7 @@
 #include <cmath>
 #include <array>
 #include <tuple>
-
-namespace InDetDD {
-   class SiDetectorElementCollection;
-}
+#include <type_traits>
 
 namespace ActsTrk::detail {
    /** @brief Helper to convert class enum into an integer.

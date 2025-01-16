@@ -4,8 +4,6 @@
 
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "Acts/Surfaces/BoundaryTolerance.hpp"
-#include "ActsEvent/TrackContainer.h"
-#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 
