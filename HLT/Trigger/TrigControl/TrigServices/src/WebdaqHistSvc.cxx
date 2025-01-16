@@ -77,6 +77,13 @@ StatusCode WebdaqHistSvc::initialize ATLAS_NOT_THREAD_SAFE()
     ATH_MSG_ERROR("TDAQ_WEBDAQ_BASE environment variable not set! Is needed for the OH publication through webdaq");
     return StatusCode::FAILURE;
   }
+  const char* tdaq_oh_server = std::getenv("TDAQ_OH_SERVER");
+  if (tdaq_oh_server != nullptr) {
+    m_tdaqOHServerName = std::string(tdaq_oh_server);
+  } else {
+    m_tdaqOHServerName = m_OHServerName.value();
+  } 
+  ATH_MSG_INFO("TDAQ_OH_SERVER value: " << m_tdaqOHServerName);
   ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
   ATH_CHECK( incSvc.retrieve() );
   incSvc->addListener(this, AthenaInterprocess::UpdateAfterFork::type());
@@ -508,7 +515,7 @@ void WebdaqHistSvc::monitoringTask()
       for (size_t j = i; j < end; ++j) {
         const std::string& id = HistoList[j];
         std::string path = appName + '.' + id;
-        ATH_MSG_DEBUG("Going to publish to " << m_partition << " Histogram " << path << " to the OH server " << m_OHServerName);
+        ATH_MSG_DEBUG("Going to publish to " << m_partition << " Histogram " << path << " to the OH server " << m_tdaqOHServerName);
         tbb::concurrent_hash_map<std::string, THistID>::const_accessor accessor;
         if (!m_hists.find(accessor, id)) {
           ATH_MSG_ERROR("Histogram with name " << id << " not found in histogram map");
@@ -519,7 +526,7 @@ void WebdaqHistSvc::monitoringTask()
           ATH_MSG_DEBUG("Histogram found in map, going to lock mutex and then publish it");
           //Locking the OH mutex before the Histogram publication
           oh_scoped_lock_histogram lock;
-          if (!webdaq::oh::put(m_partition, m_OHServerName, path, accessor->second.obj)) {
+          if (!webdaq::oh::put(m_partition, m_tdaqOHServerName, path, accessor->second.obj)) {
             ATH_MSG_ERROR("Histogram publishing failed !");
           }
         }
