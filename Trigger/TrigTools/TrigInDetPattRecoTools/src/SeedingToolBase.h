@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETPATTRECOTOOLS_SEEDINGTOOLBASE_H
@@ -60,7 +60,7 @@ class SeedingToolBase: public AthAlgTool {
   IntegerProperty m_nMaxEdges{this, "MaxGraphEdges", 2000000};
   StringProperty  m_connectionFile{this, "ConnectionFileName", "binTables_ITK_RUN4.txt"};
 
-  float m_phiSliceWidth;
+  float m_phiSliceWidth = 0.;
 
   std::unique_ptr<GNN_FasTrackConnector> m_connector = nullptr;
   std::vector<TrigInDetSiLayer> m_layerGeometry;
