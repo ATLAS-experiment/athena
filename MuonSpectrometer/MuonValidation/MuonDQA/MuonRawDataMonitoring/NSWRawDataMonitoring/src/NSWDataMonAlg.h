@@ -17,6 +17,8 @@
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
+
 
 //stl includes                                                                                              
 #include <string>
@@ -32,8 +34,10 @@ class NSWDataMonAlg: public AthMonitorAlgorithm {
   
  private:
 
-  Gaudi::Property<bool> m_doESD{this,"DoESD",true};
   SG::ReadHandleKey<xAOD::MuonContainer> m_muonKey{this, "MuonsKey", "Muons"};
-  
+  ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+  DoubleProperty m_cutPt{this,"muonPtCut",15000,"Minimum muon transverse momentum"};
+
+
 };    
 #endif
