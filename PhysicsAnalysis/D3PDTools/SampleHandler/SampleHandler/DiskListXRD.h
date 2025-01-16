@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SAMPLE_HANDLER__DISK_LIST_XRD_H
@@ -113,7 +113,7 @@ namespace SH
 
     /// \brief whether this is a directory
   private:
-    bool m_isDir;
+    bool m_isDir = false;
 
     /// \brief whether the directory has been read
   private:
