@@ -275,26 +275,18 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
       m_ATLASConverterTool->trkTrackParametersToActsParameters(
           (*inputTrack.perigeeParameters()), tgContext);
 
-  // The covariance from already fitted track are too small and would result an
-  // incorrect smoothing. We scale up the input covariance to avoid this.
-  Acts::BoundSquareMatrix scaledCov = Acts::BoundSquareMatrix::Identity();
-  for (int i = 0; i < 6; ++i) {
-    double scale = m_option_seedCovarianceScale;
-    (scaledCov)(i, i) = scale * initialParams.covariance().value()(i, i);
-  }
-
   // @TODO: Synchronize with prtHypothesis
   Acts::ParticleHypothesis hypothesis = Acts::ParticleHypothesis::pion();
 
-  const Acts::BoundTrackParameters scaledInitialParams(
+  const Acts::BoundTrackParameters initialParamsWithHypothesis(
       initialParams.referenceSurface().getSharedPtr(),
-      initialParams.parameters(), scaledCov, hypothesis);
+      initialParams.parameters(), initialParams.covariance(), hypothesis);
 
   ActsTrk::MutableTrackContainer tracks;
 
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
-                              scaledInitialParams, gx2fOptions, tracks);
+                              initialParamsWithHypothesis, gx2fOptions, tracks);
   if (result.ok()) {
     track = makeTrack(ctx, tgContext, tracks, result);
   }
@@ -636,22 +628,16 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
       m_ATLASConverterTool->trkTrackParametersToActsParameters(
           *(intrk1.perigeeParameters()), tgContext);
 
-  // The covariance from already fitted track are too small and would result an
-  // incorrect smoothing. We scale up the input covariance to avoid this.
-  Acts::BoundSquareMatrix scaledCov = Acts::BoundSquareMatrix::Identity();
-  for (int i = 0; i < 6; ++i) {
-    double scale = m_option_seedCovarianceScale;
-    (scaledCov)(i, i) = scale * initialParams.covariance().value()(i, i);
-  }
+  Acts::ParticleHypothesis hypothesis = Acts::ParticleHypothesis::pion();
 
-  const Acts::BoundTrackParameters scaledInitialParams(
+  const Acts::BoundTrackParameters initialParamsWithHypothesis(
       initialParams.referenceSurface().getSharedPtr(),
-      initialParams.parameters(), scaledCov, Acts::ParticleHypothesis::pion());
+      initialParams.parameters(), initialParams.covariance(), hypothesis);
 
   ActsTrk::MutableTrackContainer tracks;
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
-                              scaledInitialParams, gx2fOptions, tracks);
+                              initialParamsWithHypothesis, gx2fOptions, tracks);
   if (result.ok()) {
     track = makeTrack(ctx, tgContext, tracks, result);
   }
