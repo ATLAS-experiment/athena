@@ -38,6 +38,7 @@ MetaDataSvc                                         DEBUG initInputMetaDataStore
 Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] A811B014-0297-AD47-AF4C-B75EF418982D
 Domain[ROOT_All]                                     INFO                           SimplePoolFile3.root
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
 ##Shapes                                            DEBUG Opened container ##Shapes of type ROOT_Tree
