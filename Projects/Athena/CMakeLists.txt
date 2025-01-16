@@ -21,6 +21,15 @@ set( CMAKE_CUDA_STANDARD 20 CACHE STRING "CUDA C++ standard to use" )
 set( CMAKE_CUDA_ARCHITECTURES "52" CACHE STRING
    "CUDA architectures to build code for" )
 
+# Turn on HIP as a compiler, if it's available.
+check_language( HIP )
+if( CMAKE_HIP_COMPILER )
+   enable_language( HIP )
+endif()
+# Use C++20 with HIP.
+set( CMAKE_HIP_STANDARD 20 CACHE STRING "HIP C++ standard to use" )
+
+
 # Set the versions of the TDAQ externals to pick up for the build:
 if( NOT LCG_NIGHTLY )
    if( NOT "$ENV{LCG_NIGHTLY}" STREQUAL "" )
@@ -87,19 +96,6 @@ find_package( AthenaExternals REQUIRED )
 find_package( Gaudi )
 find_package( tdaq-common )
 find_package( tdaq )
-
-# Turn on HIP as a compiler, if it's available.
-find_package( AtlasHIP )
-if( AtlasHIP_FOUND )
-   # It's pretty bad if we don't find the code even, but let's be ready for
-   # it... And now let's check whether HIP can be used as a compiler.
-   include( AtlasCheckLanguage )
-   atlas_check_language( HIP )
-   if( CMAKE_HIP_COMPILER )
-      # If so, let's enable it.
-      enable_language( HIP )
-   endif()
-endif()
 
 # Set up CppCheck.
 if( ATLAS_USE_CPPCHECK )
