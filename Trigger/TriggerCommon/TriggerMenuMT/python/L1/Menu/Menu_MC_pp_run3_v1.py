@@ -67,6 +67,9 @@ def defineMenu():
         'L1_BTAG-MU5VFjJ30_2jJ30p0ETA25_jJ50p0ETA25', 
         'L1_BPH-0M9-EM7-EM5',
         'L1_BPH-0DR3-EM7J15',
+        'L1_BTAG-MU3VFjJ30_2jJ30p0ETA25',
+        'L1_BTAG-MU3VFjJ30_2jJ40p0ETA25', 
+        'L1_BTAG-MU3VFjJ30_2jJ30p0ETA25_jJ40p0ETA25', 
 
         #ATR-26902
         'L1_2cTAU20M_4DR28-eTAU30eTAU20-jJ55',
@@ -106,7 +109,6 @@ def defineMenu():
         'L1_MU8F_TAU20IM',
         #ATR-30179
         'L1_cTAU30M_3DR99-MU8F-eTAU30',
-        'L1_cTAU30M_3DR35-MU8F-eTAU30',
         'L1_cTAU30M_3DR30-MU8F-eTAU30',
         'L1_cTAU30M_3DR28-MU8F-eTAU30',
         #

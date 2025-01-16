@@ -96,7 +96,8 @@ def defineMenu():
         'L1_eEM24L_3jJ50',
 
         # combined mu - jet 
-        'L1_BTAG-MU3VjJ40', 'L1_BTAG-MU5VFjJ80',  
+        'L1_BTAG-MU3VjJ40', 'L1_BTAG-MU5VFjJ80',
+        'L1_BTAG-MU5VFjJ30', 'L1_BTAG-MU3VFjJ30', #ATR-30657
 
         #ATR-13743 J,XE thershold change for ATR-19376 
         'L1_MU8F_2jJ50','L1_MU8F_3jJ50', 'L1_MU8F_2jJ40_jJ50',
@@ -344,6 +345,9 @@ def defineMenu():
         #ATR-28563
         'L1_LLPDPHI-jXE40-jJ40',
         'L1_LLPNODPHI-jXE40-jJ40',
+
+        #ATR-30656
+        'L1_cTAU30M_3DR35-MU8F-eTAU30',
         
         ]
 

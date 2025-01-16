@@ -316,6 +316,8 @@ def defineInputsMenu():
                     TopoMenuDef( '2DISAMB-jJ40ab-0DR10-eTAU20ab-eTAU12ab',   outputbits = 10 ),
                     TopoMenuDef( 'ADVAE2A-jJ0s-eTAU0s-MU0s-jXE0s',           outputbits = (11,12), outputlines = [ 'ADVAE2A-6jJ0s-4eTAU0s-4MU0s-jXE0s-Tight',
                                                                                                                    'ADVAE2A-6jJ0s-4eTAU0s-4MU0s-jXE0s-Loose' ] ), # VAE AD
+                    TopoMenuDef( '0DR04-MU3VFab-CjJ30ab' ,                   outputbits = 13), #ATR-30657
+                    TopoMenuDef( '0DR04-MU5VFab-CjJ30ab' ,                   outputbits = 14), #ATR-30657
                 ]
             },
             
@@ -441,6 +443,7 @@ def defineInputsMenu():
                     TopoMenuDef('7INVM22-0DR20-2MU3VFab',               outputbits=10), #BLS, ATR-21566
 
                     TopoMenuDef('30DPHI32-2eTAU60s',                    outputbits=11),
+                    TopoMenuDef('3DR35-MU8Fab-eTAU30ab',                outputbits = 12), #ATR-30656
                 ]
             }
         ]

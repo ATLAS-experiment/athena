@@ -171,8 +171,7 @@ def LArSuperCellMonConfigHLT(flags, name='LArSuperCellMonAlgHLT', RemoveMasked=T
     else:
       SCellsToCheck="SCell"
 
-    algname='LArSuperCellMonAlg'
-    lArCellMonAlg=CompFactory.LArSuperCellMonAlg(algname,CaloCellContainerReco="",CaloCellContainerRef="EmulatedSCells",doSCReco=False,CaloCellContainer=SCellsToCheck,TrigDecisionTool="",EnableLumi = False, RemoveMasked = RemoveMasked)
+    lArCellMonAlg=CompFactory.LArSuperCellMonAlg(name,CaloCellContainerReco="",CaloCellContainerRef="EmulatedSCells",doSCReco=False,CaloCellContainer=SCellsToCheck,TrigDecisionTool="",EnableLumi = False, RemoveMasked = RemoveMasked)
 
     if flags.Input.isMC is False and not flags.Common.isOnline:
        from LumiBlockComps.LuminosityCondAlgConfig import  LuminosityCondAlgCfg
@@ -186,12 +185,13 @@ def LArSuperCellMonConfigHLT(flags, name='LArSuperCellMonAlgHLT', RemoveMasked=T
     lArCellMonAlg.MonGroupName='LArSuperCellMonTool'
     lArCellMonAlg.BunchCrossingCondDataKey=""
 
-    lArCellMonAlg.doDatabaseNoiseVsEtaPhi = True
-    monTool=defineHistograms(monTool,lArCellMonAlg.LayerNames,isHLT=True)
+    doDatabaseNoiseVsEtaPhi = False
+    lArCellMonAlg.doDatabaseNoiseVsEtaPhi = doDatabaseNoiseVsEtaPhi
+    monTool=defineHistograms(monTool,lArCellMonAlg.LayerNames,isHLT=True,isDatabaseNoise=doDatabaseNoiseVsEtaPhi)
     cfg.addEventAlgo(lArCellMonAlg)
     return cfg
 
-def defineHistograms(cellMonGroup,LayerNames,isHLT=False):
+def defineHistograms(cellMonGroup,LayerNames,isHLT=False,isDatabaseNoise=True):
 
 
     from LArMonitoring.GlobalVariables import lArDQGlobals
@@ -382,7 +382,8 @@ def defineHistograms(cellMonGroup,LayerNames,isHLT=False):
                                         xbins =  100,xmin=0,xmax=50000
                                         )
 
-    for part in LayerNames:        
+    if ( isDatabaseNoise ):
+      for part in LayerNames:        
         
         cellMonGroup.defineHistogram('celleta_'+part+';NCellsActiveVsEta_'+part,
                                            title="No. of Active Cells in #eta for "+part+";cell #eta",
@@ -400,7 +401,7 @@ def defineHistograms(cellMonGroup,LayerNames,isHLT=False):
                                            title="Map of Noise Values from the Database vs (#eta,#phi) for "+part+";cell #eta;cell #phi",
                                            weight='cellnoisedb_'+part,
                                            cutmask='doDatabaseNoisePlot',
-                                           type='TH2F', path="DatabaseNoise/", 
+                                           type='TH2F', path=sc_hist_path, 
                                            xbins =  100,xmin=-5,xmax=5,
                                            ybins =  100,ymin=-5,ymax=5,
                                            merge='weightedAverage')

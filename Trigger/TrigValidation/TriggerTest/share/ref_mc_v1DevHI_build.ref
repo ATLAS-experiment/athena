@@ -453,36 +453,6 @@ HLT_g50_loose_ion_L1eEM26:
     1: 15
     2: 11
     3: 4
-HLT_hi_FgapA10_L1VTE50:
-  eventCount: 1
-  stepCounts:
-    0: 1
-  stepFeatures:
-    0: 1
-HLT_hi_FgapAC10_L1VTE50:
-  eventCount: 1
-  stepCounts:
-    0: 1
-  stepFeatures:
-    0: 1
-HLT_hi_FgapAC3_L1VTE50:
-  eventCount: 1
-  stepCounts:
-    0: 1
-  stepFeatures:
-    0: 1
-HLT_hi_FgapAC5_L1VTE50:
-  eventCount: 1
-  stepCounts:
-    0: 1
-  stepFeatures:
-    0: 1
-HLT_hi_FgapC10_L1VTE50:
-  eventCount: 1
-  stepCounts:
-    0: 1
-  stepFeatures:
-    0: 1
 HLT_hi_uccTh1_L1jTE8300:
   eventCount: 0
 HLT_hi_uccTh2_L1jTE10000:
@@ -849,34 +819,6 @@ HLT_j100_ion_L1jJ60:
     0: 8
   stepFeatures:
     0: 15
-HLT_j10a_L1TE5_VTE200:
-  eventCount: 14
-  stepCounts:
-    0: 14
-  stepFeatures:
-    0: 104
-HLT_j10a_L1VTE200:
-  eventCount: 14
-  stepCounts:
-    0: 14
-  stepFeatures:
-    0: 104
-HLT_j10a_pf_jes_ftf_L1TE5_VTE200:
-  eventCount: 14
-  stepCounts:
-    0: 14
-    1: 14
-  stepFeatures:
-    0: 14
-    1: 80
-HLT_j10a_pf_jes_ftf_L1VTE200:
-  eventCount: 14
-  stepCounts:
-    0: 14
-    1: 14
-  stepFeatures:
-    0: 14
-    1: 80
 HLT_j10a_pf_jes_ftf_L1jTE5_VjTE200:
   eventCount: 3
   stepCounts:
@@ -897,20 +839,6 @@ HLT_j150_ion_L1jJ90:
     0: 5
   stepFeatures:
     0: 7
-HLT_j15a_L1TE5_VTE200:
-  eventCount: 14
-  stepCounts:
-    0: 14
-  stepFeatures:
-    0: 80
-HLT_j15a_pf_jes_ftf_L1TE5_VTE200:
-  eventCount: 14
-  stepCounts:
-    0: 14
-    1: 14
-  stepFeatures:
-    0: 14
-    1: 69
 HLT_j15a_pf_jes_ftf_L1jTE5_VjTE200:
   eventCount: 3
   stepCounts:
@@ -925,20 +853,6 @@ HLT_j200_ion_L1jJ90:
     0: 2
   stepFeatures:
     0: 4
-HLT_j20a_L1TE5_VTE200:
-  eventCount: 14
-  stepCounts:
-    0: 14
-  stepFeatures:
-    0: 69
-HLT_j20a_pf_jes_ftf_L1TE5_VTE200:
-  eventCount: 14
-  stepCounts:
-    0: 14
-    1: 14
-  stepFeatures:
-    0: 14
-    1: 61
 HLT_j20a_pf_jes_ftf_L1jTE5_VjTE200:
   eventCount: 3
   stepCounts:
@@ -947,20 +861,6 @@ HLT_j20a_pf_jes_ftf_L1jTE5_VjTE200:
   stepFeatures:
     0: 3
     1: 11
-HLT_j30a_L1TE5_VTE200:
-  eventCount: 14
-  stepCounts:
-    0: 14
-  stepFeatures:
-    0: 56
-HLT_j30a_pf_jes_ftf_L1TE5_VTE200:
-  eventCount: 14
-  stepCounts:
-    0: 14
-    1: 14
-  stepFeatures:
-    0: 14
-    1: 51
 HLT_j30a_pf_jes_ftf_L1jTE5_VjTE200:
   eventCount: 3
   stepCounts:
@@ -991,12 +891,6 @@ HLT_j40_ion_L1RD0_FILLED:
     0: 20
   stepFeatures:
     0: 65
-HLT_j40a_L1TE5_VTE200:
-  eventCount: 14
-  stepCounts:
-    0: 14
-  stepFeatures:
-    0: 43
 HLT_j40a_pf_jes_ftf_L1jTE5_VjTE200:
   eventCount: 3
   stepCounts:
@@ -1084,8 +978,6 @@ HLT_j85_ion_L1jJ60:
   stepFeatures:
     0: 21
 HLT_j90f_ion_L1jJ90p30ETA49:
-  eventCount: 0
-HLT_mb_excl_1trk2_pt1_L1TRT_VTE20:
   eventCount: 0
 HLT_mb_excl_1trk5_pt0p5_L1TRT_VjTE20:
   eventCount: 0
@@ -1257,18 +1149,6 @@ HLT_mb_pixsptrk_nototpix30_q2_L1TRT_ZDC_XOR_VjTE10:
   eventCount: 0
 HLT_mb_pixsptrk_nototpix30_q2_L1TRT_ZDC_XOR_VjTE10_UNPAIRED_NONISO:
   eventCount: 0
-HLT_mb_sp15_trk15_hmt_L1MBTS_1_VTE50:
-  eventCount: 0
-HLT_mb_sp300_trk20_hmt_L1TE3_VTE50:
-  eventCount: 1
-  stepCounts:
-    0: 1
-    1: 1
-    2: 1
-  stepFeatures:
-    0: 1
-    1: 1
-    2: 1
 HLT_mb_sp400_trk25_hmt_hi_FgapA5_L11ZDC_NZDC_jTE3_VjTE200:
   eventCount: 0
 HLT_mb_sp400_trk25_hmt_hi_FgapA5_L1MBTS_1_1ZDC_NZDC_jTE3_VjTE200:
@@ -1365,16 +1245,6 @@ HLT_mb_sp700_trk35_hmt_hi_FgapC5_L1ZDC_A_VZDC_C_gTE5_VjTE200:
   eventCount: 0
 HLT_mb_sp700_trk35_hmt_hi_FgapC5_L1ZDC_A_VZDC_C_jTE5_VjTE200:
   eventCount: 0
-HLT_mb_sp_L1MBTS_1_VTE50:
-  eventCount: 0
-HLT_mb_sp_L1TE3_VTE50:
-  eventCount: 1
-  stepCounts:
-    0: 1
-  stepFeatures:
-    0: 1
-HLT_mb_sp_L1VTE50:
-  eventCount: 0
 HLT_mb_sp_nototpix100_L1RD0_FILLED:
   eventCount: 20
   stepCounts:
@@ -1469,8 +1339,6 @@ HLT_mb_sp_pix50_L1RD0_FILLED:
     0: 20
   stepFeatures:
     0: 20
-HLT_mb_sp_vetospmbts2in_L1TE5_VTE200:
-  eventCount: 0
 HLT_mb_sp_vpix15_hi_FgapAC5_L12eEM1_VjTE200:
   eventCount: 0
   stepCounts:
@@ -1591,36 +1459,6 @@ HLT_mb_sp_vpix30_hi_FgapAC5_L1jTAU1:
     0: 7
   stepFeatures:
     0: 7
-HLT_mb_sp_vpix35_hi_FgapAC5_L1TAU1_TE4_VTE200:
-  eventCount: 0
-  stepCounts:
-    0: 4
-  stepFeatures:
-    0: 4
-HLT_mb_sp_vpix40_hi_FgapAC5_L1TAU1_TE4_VTE200:
-  eventCount: 0
-  stepCounts:
-    0: 4
-  stepFeatures:
-    0: 4
-HLT_mb_sp_vpix45_hi_FgapAC5_L1TAU1_TE4_VTE200:
-  eventCount: 0
-  stepCounts:
-    0: 4
-  stepFeatures:
-    0: 4
-HLT_mb_sp_vpix50_hi_FgapAC5_L1TAU1_TE4_VTE200:
-  eventCount: 0
-  stepCounts:
-    0: 4
-  stepFeatures:
-    0: 4
-HLT_mb_sp_vpix55_hi_FgapAC5_L1TAU1_TE4_VTE200:
-  eventCount: 0
-  stepCounts:
-    0: 4
-  stepFeatures:
-    0: 4
 HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_25dphiCC_L12eEM1_VjTE200:
   eventCount: 0
   stepCounts:
@@ -1853,12 +1691,6 @@ HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI-2eTAU1_VjTE200_GAP_AANDC:
     0: 1
   stepFeatures:
     0: 1
-HLT_mb_sp_vpix60_hi_FgapAC5_L1TAU1_TE4_VTE200:
-  eventCount: 0
-  stepCounts:
-    0: 4
-  stepFeatures:
-    0: 4
 HLT_mb_sp_vpix60_hi_FgapAC5_L1eEM1_jTE4_VjTE200:
   eventCount: 0
   stepCounts:
@@ -1894,8 +1726,6 @@ HLT_mb_sp_vpix60_hi_FgapAC5_L1eTAU1_jTE4_VjTE200:
 HLT_mb_sptrk_L11ZDC_A_1ZDC_C_VjTE200:
   eventCount: 0
 HLT_mb_sptrk_L1MBTS_1_1_VjTE50:
-  eventCount: 0
-HLT_mb_sptrk_L1MBTS_1_VTE5:
   eventCount: 0
 HLT_mb_sptrk_L1TRT_1ZDC_NZDC_VjTE200:
   eventCount: 0
@@ -2032,17 +1862,17 @@ HLT_mu4_L1MU3V_VjTE50:
 HLT_mu4_hi_FgapAC5_L1MU3V_VjTE50:
   eventCount: 0
 HLT_mu4_idperf_L1MU3V:
-  eventCount: 10
+  eventCount: 9
   stepCounts:
     0: 10
     1: 10
-    2: 10
-    3: 10
+    2: 9
+    3: 9
   stepFeatures:
     0: 13
     1: 13
-    2: 13
-    3: 13
+    2: 12
+    3: 12
 HLT_mu4_j40_ion_L1MU3V:
   eventCount: 8
   stepCounts:
@@ -2456,8 +2286,6 @@ HLT_noalg_CostMonDS_L1All:
     0: 20
 HLT_noalg_L12MU3V:
   eventCount: 3
-HLT_noalg_L1MBTS_1_VTE5:
-  eventCount: 0
 HLT_noalg_L1MBTS_2_UNPAIRED_ISO:
   eventCount: 0
 HLT_noalg_L1MU3V:
@@ -2473,8 +2301,6 @@ HLT_noalg_L1TRT_EMPTY:
 HLT_noalg_L1TRT_FILLED:
   eventCount: 0
 HLT_noalg_L1TRT_VjTE50:
-  eventCount: 0
-HLT_noalg_L1VTE5:
   eventCount: 0
 HLT_noalg_L1ZDC_A:
   eventCount: 0
@@ -2633,8 +2459,6 @@ HLT_noalg_eb_L1jTE6500:
 HLT_noalg_mb_L1MBTS_1:
   eventCount: 0
 HLT_noalg_mb_L1MBTS_1_1:
-  eventCount: 0
-HLT_noalg_mb_L1MBTS_1_VTE5:
   eventCount: 0
 HLT_noalg_mb_L1MBTS_2:
   eventCount: 0

@@ -187,6 +187,8 @@ namespace Muon {
 
 
         Gaudi::Property<bool> m_useStereoSeeding{this, "SeedMMStereos", true};
+        Gaudi::Property<bool> m_usesTGCSeeding{this, "SeedWithsTGCS", true};
+
         /// Protection against slobbering Micromega events
         Gaudi::Property<unsigned int> m_ocupMmBinWidth{this, "MmOccupancyBinWidth", 100, 
         "Size of the channel window to group the MicroMegaCluster"};
@@ -268,7 +270,7 @@ namespace Muon {
 
         // associate clusters to the segment seeds
         int getClustersOnSegment(const LayerMeasVec& orderedclusters, NSWSeed& seed,
-                                 const std::set<unsigned int>& exclude) const;
+                                 const std::set<unsigned int>& exclude, bool useStereo=true ) const;
 
         // get the clusters after calibration
         MeasVec getCalibratedClusters(NSWSeed& seed) const;

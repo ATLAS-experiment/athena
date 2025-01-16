@@ -74,7 +74,7 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_mu24_idperf_L1MU14FCH',"
                 flags += "'Muon',"
             if (i=='FSLRT') :
-                chains += "'HLT_fslrt0_L1J100',"
+                chains += "'HLT_fslrt0_L1jJ160',"
                 flags  += "'UnconventionalTracking',"
             if (i=='muon') :
                 chains += "'HLT_mu6_idperf_L1MU5VF',"
@@ -103,13 +103,13 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_e26_lhtight_e14_idperf_tight_nogsf_probe_50invmAB130_L1eEM26M',"
                 flags += "'Egamma',"
             if (i=='tau') :
-                chains +=  "'HLT_tau25_idperf_tracktwoMVA_L1TAU12IM',"
+                chains +=  "'HLT_tau25_idperf_tracktwoMVA_L1cTAU20M',"
                 chains +=  "'HLT_tau20_idperf_tracktwoMVA_L1eTAU12',"
                 chains +=  "'HLT_mu24_ivarmedium_tau25_idperf_tracktwoMVA_probe_03dRAB_L1MU14FCH',"
                 chains +=  "'HLT_mu24_ivarmedium_tau25_idperf_tracktwoMVA_probe_L1cTAU20M_03dRAB_L1MU14FCH',"
                 flags += "'Tau',"
             if (i=='tauLRT') :
-                chains +=  "'HLT_tau25_idperf_tracktwoMVA_L1TAU12IM',"
+                chains +=  "'HLT_tau25_idperf_tracktwoMVA_L1cTAU20M',"
                 chains +=  "'HLT_tau25_idperf_tracktwoLLP_L1TAU12IM',"
                 chains +=  "'HLT_tau25_idperf_trackLRT_L1TAU12IM',"
                 flags += "'Tau',"
@@ -118,15 +118,15 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_j20_roiftf_preselj20_L1RD0_FILLED',"
                 chains += "'HLT_j45_pf_ftf_preselj20_L1jJ40',"
 #               chains += "'HLT_j45_subjesgscIS_ftf_boffperf_split_L1J20',"
-                chains += "'HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1J20',"
+                chains += "'HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50',"
 #               chains += "'HLT_j75_0eta290_020jvt_bdl1r60_3j75_pf_ftf_preselj50b85XX3j50_L14J20',"
 #               chains += "'HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bdl1d77_pf_ftf_presel2c20XX2c20b85_L1J45p0ETA21_3J15p0ETA25',"
                 flags  += "'Bjet',"
             if ( i=='fsjet' or i=='fs' or i=='jet' ) :
                 chains += "'HLT_j45_pf_ftf_preselj20_L1jJ40',"
-                chains += "'HLT_j45_320eta490_L1J15p31ETA49',"
-                chains += "'HLT_j220_320eta490_L1J75p31ETA49',"
-                chains += "'HLT_j420_a10t_lcw_jes_35smcINF_L1SC111-CJ15',"
+                chains += "'HLT_j45f_L1jJ40p30ETA49',"
+                chains += "'HLT_j220f_L1jJ125p30ETA49',"
+                chains += "'HLT_j420_a10t_lcw_jes_L1SC111-CjJ40',"
                 flags  += "'Jet',"
             if (i=='beamspot') :
                 chains += "'HLT_beamspot_allTE_trkfast_BeamSpotPEB_L1J15','HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L1J15',"
