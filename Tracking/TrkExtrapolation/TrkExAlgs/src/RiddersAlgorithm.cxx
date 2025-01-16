@@ -1,18 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
 // RiddersAlgorithm.cxx, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 
-
-
-
-
 #include "TrkExAlgs/RiddersAlgorithm.h"
 // Trk stuff
-#include "TrkExInterfaces/IPropagator.h"
 #include "TrkEventPrimitives/TransportJacobian.h"
 #include "TrkGeometry/MagneticFieldProperties.h"
 #include "TrkSurfaces/PlaneSurface.h"
@@ -22,110 +17,17 @@
 // Validation mode - TTree includes
 #include "TTree.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/SystemOfUnits.h"
 #include <cmath>
 
 //================ Constructor =================================================
 
-Trk::RiddersAlgorithm::RiddersAlgorithm(const std::string& name, ISvcLocator* pSvcLocator)
-  :
-  AthAlgorithm(name,pSvcLocator),
-  m_propagator("Trk::RungeKuttaPropagator/RungeKuttaPropagator"),
-  m_useCustomField(true),
-  m_useAlignedSurfaces(true),
-  m_fieldValue(2.*Gaudi::Units::tesla),
-  m_magFieldProperties(nullptr),
-  m_sigmaLoc(100.*Gaudi::Units::micrometer),
-  m_sigmaR(0.0),
-  m_minPhi(-M_PI),
-  m_maxPhi(M_PI),
-  m_minEta(-2.5),
-  m_maxEta(2.5),
-  m_minP(0.5*Gaudi::Units::GeV),
-  m_maxP(50000.*Gaudi::Units::GeV),
-  m_minimumR(10.),
-  m_maximumR(1000.),
-  m_localVariations(),
-  m_angularVariations(),
-  m_qOpVariations(),
-  m_validationTree(nullptr),
-  m_validationTreeName("RiddersTree"),
-  m_validationTreeDescription("Output of the RiddersAlgorithm"),
-  m_validationTreeFolder("/val/RiddersAlgorithm"),
-  m_steps(0),
-  m_loc1loc1{},
-	m_loc1loc2{},
-	m_loc1phi{},
-	m_loc1theta{},
-	m_loc1qop{},
-	m_loc1steps{},
-
-	m_loc2loc1{},
-	m_loc2loc2{},
-	m_loc2phi{},
-	m_loc2theta{},
-	m_loc2qop{},
-	m_loc2steps{},
-
-	m_philoc1{},
-	m_philoc2{},
-	m_phiphi{},
-	m_phitheta{},
-	m_phiqop{},
-	m_phisteps{},
-
-	m_thetaloc1{},
-	m_thetaloc2{},
-	m_thetaphi{},
-	m_thetatheta{},
-	m_thetaqop{},
-	m_thetasteps{},
-
-	m_qoploc1{},
-	m_qoploc2{},
-	m_qopphi{},
-	m_qoptheta{},
-	m_qopqop{},
-	m_qopsteps{},
-
-  m_gaussDist(nullptr),
-  m_flatDist(nullptr)
-{
-
-
-  declareProperty("Propagator"                , m_propagator);
-  declareProperty("CustomFieldValue"          , m_fieldValue);
-  declareProperty("UseCustomMagneticField"    , m_useCustomField);
-  declareProperty("UseAlignedSurfaces"        , m_useAlignedSurfaces);
-
-  // TTree handling
-  declareProperty("ValidationTreeName",          m_validationTreeName);
-  declareProperty("ValidationTreeDescription",   m_validationTreeDescription);
-  declareProperty("ValidationTreeFolder",        m_validationTreeFolder);
-
-  declareProperty("StartPerigeeSigmaLoc"      , m_sigmaLoc);
-  declareProperty("StartPerigeeMinPhi"        , m_minPhi);
-  declareProperty("StartPerigeeMaxPhi"        , m_maxPhi);
-  declareProperty("StartPerigeeMinEta"        , m_minEta);
-  declareProperty("StartPerigeeMaxEta"        , m_maxEta);
-  declareProperty("StartPerigeeMinP"          , m_minP);
-  declareProperty("StartPerigeeMaxP"          , m_maxP);
-
-  declareProperty("TargetSurfaceMinR"         , m_minimumR);
-  declareProperty("TargetSurfaceMaxR"         , m_maximumR);
-
-  declareProperty("LocalVariations"            , m_localVariations);
-  declareProperty("AngularVariations"          , m_angularVariations);
-  declareProperty("QopVariations"              , m_qOpVariations);
-
-
-}
+Trk::RiddersAlgorithm::RiddersAlgorithm(const std::string& name, ISvcLocator* pSvcLocator) :
+  AthAlgorithm(name,pSvcLocator) {}
 
 //================ Destructor =================================================
 
 Trk::RiddersAlgorithm::~RiddersAlgorithm()
 {
-
    delete m_gaussDist;
    delete m_flatDist;
    delete m_magFieldProperties;
@@ -139,11 +41,7 @@ StatusCode Trk::RiddersAlgorithm::initialize()
   // Code entered here will be executed once at program start.
   ATH_MSG_INFO( " initialize()" );
 
-  // Get Extrapolator from ToolService
-  if (m_propagator.retrieve().isFailure()) {
-        ATH_MSG_FATAL( "Could not retrieve Tool " << m_propagator << ". Exiting." );
-        return StatusCode::FAILURE;
-  }
+  ATH_CHECK( m_propagator.retrieve() );
 
   // Prepare the magnetic field properties
   if (!m_useCustomField)
@@ -160,75 +58,67 @@ StatusCode Trk::RiddersAlgorithm::initialize()
   m_flatDist  = new Rndm::Numbers(randSvc(), Rndm::Flat(0.,1.));
 
 
-   // create the new Tree
-   m_validationTree = new TTree(m_validationTreeName.c_str(), m_validationTreeDescription.c_str());
+  // create the new Tree
+  m_validationTree = new TTree(m_validationTreeName.value().c_str(),
+			       m_validationTreeDescription.value().c_str());
 
-   // the branches for the  start
-   m_validationTree->Branch("RiddersSteps", &m_steps, "steps/I");
-   // loc 1
-   m_validationTree->Branch("Loc1Loc1",   m_loc1loc1,    "loc1loc1[steps]/F");
-   m_validationTree->Branch("Loc1Loc2",   m_loc1loc2,    "loc1loc2[steps]/F");
-   m_validationTree->Branch("Loc1Phi",    m_loc1phi,     "loc1phi[steps]/F");
-   m_validationTree->Branch("Loc1Theta",  m_loc1theta,   "loc1theta[steps]/F");
-   m_validationTree->Branch("Loc1qOp",    m_loc1qop,     "loc1qop[steps]/F");
-   m_validationTree->Branch("Loc1Steps",  m_loc1steps,   "loc1steps[steps]/F");
-   // loc 2
-   m_validationTree->Branch("Loc2Loc1",   m_loc2loc1,    "loc2loc1[steps]/F");
-   m_validationTree->Branch("Loc2Loc2",   m_loc2loc2,    "loc2loc2[steps]/F");
-   m_validationTree->Branch("Loc2Phi",    m_loc2phi,     "loc2phi[steps]/F");
-   m_validationTree->Branch("Loc2Theta",  m_loc2theta,   "loc2theta[steps]/F");
-   m_validationTree->Branch("Loc2qOp",    m_loc2qop,     "loc2qop[steps]/F");
-   m_validationTree->Branch("Loc2Steps",  m_loc2steps,   "loc2steps[steps]/F");
-   // phi
-   m_validationTree->Branch("PhiLoc1",    m_philoc1,     "philoc1[steps]/F");
-   m_validationTree->Branch("PhiLoc2",    m_philoc2 ,    "philoc2[steps]/F");
-   m_validationTree->Branch("PhiPhi",     m_phiphi,      "phiphi[steps]/F");
-   m_validationTree->Branch("PhiTheta",   m_phitheta,    "phitheta[steps]/F");
-   m_validationTree->Branch("PhiqOp",     m_phiqop,      "phiqop[steps]/F");
-   m_validationTree->Branch("PhiSteps",   m_phisteps,    "phisteps[steps]/F");
-    // Theta
-   m_validationTree->Branch("ThetaLoc1",  m_thetaloc1,   "thetaloc1[steps]/F");
-   m_validationTree->Branch("ThetaLoc2",  m_thetaloc2,   "thetaloc2[steps]/F");
-   m_validationTree->Branch("ThetaPhi",   m_thetaphi,    "thetaphi[steps]/F");
-   m_validationTree->Branch("ThetaTheta", m_thetatheta,  "thetatheta[steps]/F");
-   m_validationTree->Branch("ThetaqOp",   m_thetaqop,    "thetaqop[steps]/F");
-   m_validationTree->Branch("ThetaSteps", m_thetasteps,  "thetasteps[steps]/F");
-   // Qop
-   m_validationTree->Branch("QopLoc1",    m_qoploc1,     "qoploc1[steps]/F");
-   m_validationTree->Branch("QopLoc2",    m_qoploc2,     "qoploc2[steps]/F");
-   m_validationTree->Branch("QopPhi",     m_qopphi,      "qopphi[steps]/F");
-   m_validationTree->Branch("QopTheta",   m_qoptheta,    "qoptheta[steps]/F");
-   m_validationTree->Branch("QopqOp",     m_qopqop,      "qopqop[steps]/F");
-   m_validationTree->Branch("QopSteps",   m_qopsteps,    "qopsteps[steps]/F");
+  // the branches for the  start
+  m_validationTree->Branch("RiddersSteps", &m_steps, "steps/I");
+  // loc 1
+  m_validationTree->Branch("Loc1Loc1",   m_loc1loc1,    "loc1loc1[steps]/F");
+  m_validationTree->Branch("Loc1Loc2",   m_loc1loc2,    "loc1loc2[steps]/F");
+  m_validationTree->Branch("Loc1Phi",    m_loc1phi,     "loc1phi[steps]/F");
+  m_validationTree->Branch("Loc1Theta",  m_loc1theta,   "loc1theta[steps]/F");
+  m_validationTree->Branch("Loc1qOp",    m_loc1qop,     "loc1qop[steps]/F");
+  m_validationTree->Branch("Loc1Steps",  m_loc1steps,   "loc1steps[steps]/F");
+  // loc 2
+  m_validationTree->Branch("Loc2Loc1",   m_loc2loc1,    "loc2loc1[steps]/F");
+  m_validationTree->Branch("Loc2Loc2",   m_loc2loc2,    "loc2loc2[steps]/F");
+  m_validationTree->Branch("Loc2Phi",    m_loc2phi,     "loc2phi[steps]/F");
+  m_validationTree->Branch("Loc2Theta",  m_loc2theta,   "loc2theta[steps]/F");
+  m_validationTree->Branch("Loc2qOp",    m_loc2qop,     "loc2qop[steps]/F");
+  m_validationTree->Branch("Loc2Steps",  m_loc2steps,   "loc2steps[steps]/F");
+  // phi
+  m_validationTree->Branch("PhiLoc1",    m_philoc1,     "philoc1[steps]/F");
+  m_validationTree->Branch("PhiLoc2",    m_philoc2 ,    "philoc2[steps]/F");
+  m_validationTree->Branch("PhiPhi",     m_phiphi,      "phiphi[steps]/F");
+  m_validationTree->Branch("PhiTheta",   m_phitheta,    "phitheta[steps]/F");
+  m_validationTree->Branch("PhiqOp",     m_phiqop,      "phiqop[steps]/F");
+  m_validationTree->Branch("PhiSteps",   m_phisteps,    "phisteps[steps]/F");
+  // Theta
+  m_validationTree->Branch("ThetaLoc1",  m_thetaloc1,   "thetaloc1[steps]/F");
+  m_validationTree->Branch("ThetaLoc2",  m_thetaloc2,   "thetaloc2[steps]/F");
+  m_validationTree->Branch("ThetaPhi",   m_thetaphi,    "thetaphi[steps]/F");
+  m_validationTree->Branch("ThetaTheta", m_thetatheta,  "thetatheta[steps]/F");
+  m_validationTree->Branch("ThetaqOp",   m_thetaqop,    "thetaqop[steps]/F");
+  m_validationTree->Branch("ThetaSteps", m_thetasteps,  "thetasteps[steps]/F");
+  // Qop
+  m_validationTree->Branch("QopLoc1",    m_qoploc1,     "qoploc1[steps]/F");
+  m_validationTree->Branch("QopLoc2",    m_qoploc2,     "qoploc2[steps]/F");
+  m_validationTree->Branch("QopPhi",     m_qopphi,      "qopphi[steps]/F");
+  m_validationTree->Branch("QopTheta",   m_qoptheta,    "qoptheta[steps]/F");
+  m_validationTree->Branch("QopqOp",     m_qopqop,      "qopqop[steps]/F");
+  m_validationTree->Branch("QopSteps",   m_qopsteps,    "qopsteps[steps]/F");
 
-   // now register the Tree
-   SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
-   if (!tHistSvc){
-      ATH_MSG_ERROR( "initialize() Could not find Hist Service -> Switching ValidationMode Off !" );
-      delete m_validationTree; m_validationTree = nullptr;
-   }
-   if ((tHistSvc->regTree(m_validationTreeFolder, m_validationTree)).isFailure()) {
-      ATH_MSG_ERROR( "initialize() Could not register the validation Tree -> Switching ValidationMode Off !" );
-      delete m_validationTree; m_validationTree = nullptr;
-   }
-
-  if (m_localVariations.empty()){
-       m_localVariations.push_back(0.01);
-       m_localVariations.push_back(0.001);
-       m_localVariations.push_back(0.0001);
+  // now register the Tree
+  SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+  if (!tHistSvc){
+    ATH_MSG_ERROR( "initialize() Could not find Hist Service -> Switching ValidationMode Off !" );
+    delete m_validationTree; m_validationTree = nullptr;
+  }
+  if ((tHistSvc->regTree(m_validationTreeFolder, m_validationTree)).isFailure()) {
+    ATH_MSG_ERROR( "initialize() Could not register the validation Tree -> Switching ValidationMode Off !" );
+    delete m_validationTree; m_validationTree = nullptr;
   }
 
-  if (m_angularVariations.empty()){
-       m_angularVariations.push_back(0.01);
-       m_angularVariations.push_back(0.001);
-       m_angularVariations.push_back(0.0001);
-  }
+  if (m_localVariations.empty())
+    m_localVariations = {0.01, 0.001, 0.0001};
 
-  if (m_qOpVariations.empty()){
-       m_qOpVariations.push_back(0.0001);
-       m_qOpVariations.push_back(0.00001);
-       m_qOpVariations.push_back(0.000001);
-  }
+  if (m_angularVariations.empty())
+    m_angularVariations = {0.01, 0.001, 0.0001};
+
+  if (m_qOpVariations.empty())
+    m_qOpVariations = {0.0001, 0.00001, 0.000001};
 
   ATH_MSG_INFO( "initialize() successful in " );
   return StatusCode::SUCCESS;

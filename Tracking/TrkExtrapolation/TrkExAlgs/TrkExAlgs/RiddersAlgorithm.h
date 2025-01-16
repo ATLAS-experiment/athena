@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,8 +14,11 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/IRndmGenSvc.h"
 #include "GaudiKernel/RndmGenerators.h"
+#include "GaudiKernel/SystemOfUnits.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include <string>
+
+#include "TrkExInterfaces/IPropagator.h"
 
 class AtlasDetectorID;
 class Identifier;
@@ -28,7 +31,6 @@ class TTree;
 namespace Trk 
 {
 
-  class IPropagator;
   class MagneticFieldProperties;
 
   /** @class RiddersAlgorithm
@@ -64,77 +66,89 @@ namespace Trk
                                            double x0, double x1, double x2);
 
       /** member variables for algorithm properties: */
-      ToolHandle<IPropagator>           m_propagator;       
-      bool                              m_useCustomField;
-      bool                              m_useAlignedSurfaces;
-      double                            m_fieldValue;
-      MagneticFieldProperties*          m_magFieldProperties;
+      PublicToolHandle<IPropagator> m_propagator
+	{this, "Propagator", "Trk::RungeKuttaPropagator/RungeKuttaPropagator"};
+      BooleanProperty m_useCustomField{this, "UseCustomMagneticField", true};
+      BooleanProperty m_useAlignedSurfaces{this, "UseAlignedSurfaces", true};
+      DoubleProperty m_fieldValue
+	{this, "CustomFieldValue", 2.*Gaudi::Units::tesla};
+      MagneticFieldProperties* m_magFieldProperties = nullptr;
 
       /** The smearing */
-      double                    m_sigmaLoc;       //!< local sigma of start value
-      double                    m_sigmaR;         //!< r sigma of start value
-      double                    m_minPhi;         //!< Minimal phi value
-      double                    m_maxPhi;         //!< Maximal phi value
-      double                    m_minEta;         //!< Minimal eta value
-      double                    m_maxEta;         //!< Maximal eta value
-      double                    m_minP;           //!< Minimal p value 
-      double                    m_maxP;           //!< Maximal p value
+      DoubleProperty m_sigmaLoc
+	{this, "StartPerigeeSigmaLoc", 100.*Gaudi::Units::micrometer};
+      DoubleProperty m_sigmaR
+	{this, "StartPerigeeSigmaR", 0.};
+      DoubleProperty m_minPhi{this, "StartPerigeeMinPhi", -M_PI};
+      DoubleProperty m_maxPhi{this, "StartPerigeeMaxPhi", M_PI};
+      DoubleProperty m_minEta{this, "StartPerigeeMinEta", -2.5};
+      DoubleProperty m_maxEta{this, "StartPerigeeMaxEta", 2.5};
+      DoubleProperty m_minP
+	{this, "StartPerigeeMinP", 0.5*Gaudi::Units::GeV};
+      DoubleProperty m_maxP
+	{this, "StartPerigeeMaxP", 50000*Gaudi::Units::GeV};
 
       /** To create the first extimations */
-      double                            m_minimumR;
-      double                            m_maximumR;
+      DoubleProperty m_minimumR{this, "TargetSurfaceMinR", 10.};
+      DoubleProperty m_maximumR{this, "TargetSurfaceMaxR", 1000.};
 
       /** variations */
-      std::vector<double>               m_localVariations;
-      std::vector<double>               m_angularVariations;
-      std::vector<double>               m_qOpVariations;
+      DoubleArrayProperty m_localVariations{this, "LocalVariations", {}};
+      DoubleArrayProperty m_angularVariations{this, "AngularVariations", {}};
+      DoubleArrayProperty m_qOpVariations{this, "QopVariations", {}};
 
-      TTree*                    m_validationTree;            //!< Root Validation Tree
+      TTree* m_validationTree = nullptr;            //!< Root Validation Tree
 
-      std::string               m_validationTreeName;        //!< validation tree name - to be acessed by this from root
-      std::string               m_validationTreeDescription; //!< validation tree description - second argument in TTree
-      std::string               m_validationTreeFolder;      //!< stream/folder to for the TTree to be written out
+      StringProperty m_validationTreeName
+	{this, "ValidationTreeName", "RiddersTree",
+	 "validation tree name - to be acessed by this from root"};
+      StringProperty m_validationTreeDescription
+	{this, "ValidationTreeDescription", "Output of the RiddersAlgorithm",
+	 "validation tree description - second argument in TTree"};
+      StringProperty m_validationTreeFolder
+	{this, "ValidationTreeFolder", "/val/RiddersAlgorithm",
+	 "stream/folder to for the TTree to be written out"};
 
-      int               m_steps;
-      float             m_loc1loc1[RIDDLERSSTEPS];
-      float             m_loc1loc2[RIDDLERSSTEPS];
-      float             m_loc1phi[RIDDLERSSTEPS];
-      float             m_loc1theta[RIDDLERSSTEPS];
-      float             m_loc1qop[RIDDLERSSTEPS];
-      float             m_loc1steps[RIDDLERSSTEPS];
+      int m_steps = 0;
+      float m_loc1loc1[RIDDLERSSTEPS]{};
+      float m_loc1loc2[RIDDLERSSTEPS]{};
+      float m_loc1phi[RIDDLERSSTEPS]{};
+      float m_loc1theta[RIDDLERSSTEPS]{};
+      float m_loc1qop[RIDDLERSSTEPS]{};
+      float m_loc1steps[RIDDLERSSTEPS]{};
 
-      float             m_loc2loc1[RIDDLERSSTEPS];
-      float             m_loc2loc2[RIDDLERSSTEPS];
-      float             m_loc2phi[RIDDLERSSTEPS];
-      float             m_loc2theta[RIDDLERSSTEPS];
-      float             m_loc2qop[RIDDLERSSTEPS];
-      float             m_loc2steps[RIDDLERSSTEPS];
+      float m_loc2loc1[RIDDLERSSTEPS]{};
+      float m_loc2loc2[RIDDLERSSTEPS]{};
+      float m_loc2phi[RIDDLERSSTEPS]{};
+      float m_loc2theta[RIDDLERSSTEPS]{};
+      float m_loc2qop[RIDDLERSSTEPS]{};
+      float m_loc2steps[RIDDLERSSTEPS]{};
 
-      float             m_philoc1[RIDDLERSSTEPS];
-      float             m_philoc2[RIDDLERSSTEPS];
-      float             m_phiphi[RIDDLERSSTEPS];
-      float             m_phitheta[RIDDLERSSTEPS];
-      float             m_phiqop[RIDDLERSSTEPS];
-      float             m_phisteps[RIDDLERSSTEPS];
+      float m_philoc1[RIDDLERSSTEPS]{};
+      float m_philoc2[RIDDLERSSTEPS]{};
+      float m_phiphi[RIDDLERSSTEPS]{};
+      float m_phitheta[RIDDLERSSTEPS]{};
+      float m_phiqop[RIDDLERSSTEPS]{};
+      float m_phisteps[RIDDLERSSTEPS]{};
 
-      float             m_thetaloc1[RIDDLERSSTEPS];
-      float             m_thetaloc2[RIDDLERSSTEPS];
-      float             m_thetaphi[RIDDLERSSTEPS];
-      float             m_thetatheta[RIDDLERSSTEPS];
-      float             m_thetaqop[RIDDLERSSTEPS];
-      float             m_thetasteps[RIDDLERSSTEPS];
+      float m_thetaloc1[RIDDLERSSTEPS]{};
+      float m_thetaloc2[RIDDLERSSTEPS]{};
+      float m_thetaphi[RIDDLERSSTEPS]{};
+      float m_thetatheta[RIDDLERSSTEPS]{};
+      float m_thetaqop[RIDDLERSSTEPS]{};
+      float m_thetasteps[RIDDLERSSTEPS]{};
 
-      float             m_qoploc1[RIDDLERSSTEPS];
-      float             m_qoploc2[RIDDLERSSTEPS];
-      float             m_qopphi[RIDDLERSSTEPS];
-      float             m_qoptheta[RIDDLERSSTEPS];
-      float             m_qopqop[RIDDLERSSTEPS];
-      float             m_qopsteps[RIDDLERSSTEPS];
+      float m_qoploc1[RIDDLERSSTEPS]{};
+      float m_qoploc2[RIDDLERSSTEPS]{};
+      float m_qopphi[RIDDLERSSTEPS]{};
+      float m_qoptheta[RIDDLERSSTEPS]{};
+      float m_qopqop[RIDDLERSSTEPS]{};
+      float m_qopsteps[RIDDLERSSTEPS]{};
 
 
       /** Random Number setup */
-      Rndm::Numbers*                    m_gaussDist;
-      Rndm::Numbers*                    m_flatDist;
+      Rndm::Numbers* m_gaussDist = nullptr;
+      Rndm::Numbers* m_flatDist = nullptr;
 
     }; 
 } // end of namespace
