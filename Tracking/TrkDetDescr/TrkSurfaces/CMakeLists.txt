@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name: 
 atlas_subdir( TrkSurfaces )
@@ -21,6 +21,7 @@ if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
      ${CMAKE_CURRENT_SOURCE_DIR}/src/CylinderSurface.cxx
      ${CMAKE_CURRENT_SOURCE_DIR}/src/StraightLineSurface.cxx
      ${CMAKE_CURRENT_SOURCE_DIR}/src/PerigeeSurface.cxx
+     ${CMAKE_CURRENT_SOURCE_DIR}/src/TriangleBounds.cxx
      PROPERTIES
      COMPILE_FLAGS "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}"
      COMPILE_DEFINITIONS "FLATTEN" )

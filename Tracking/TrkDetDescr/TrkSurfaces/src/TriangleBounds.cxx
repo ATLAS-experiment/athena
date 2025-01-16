@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,6 +13,7 @@
 // STD
 #include <iomanip>
 #include <iostream>
+#include "CxxUtils/inline_hints.h"
 
 // default constructor
 Trk::TriangleBounds::TriangleBounds()
@@ -33,6 +34,8 @@ Trk::TriangleBounds::TriangleBounds(const std::vector<std::pair<float, float>>& 
   }
 }
 
+    // Inline Eigen in dbg builds.
+    ATH_FLATTEN
 // rectangle constructor - double constructor
 Trk::TriangleBounds::TriangleBounds(const std::vector<std::pair<double, double>>& vertices)
   : m_boundValues(TriangleBounds::bv_length, 0.)
