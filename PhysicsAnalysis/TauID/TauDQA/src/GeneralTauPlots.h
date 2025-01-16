@@ -41,11 +41,9 @@ class GeneralTauPlots: public PlotBase {
       TH1* m_ptRNNLooseHighPt{};
       TH1* m_ptRNNMediumHighPt{};
       TH1* m_ptRNNTightHighPt{};
-      TH1* m_ptGNTauVeryLoose{};
       TH1* m_ptGNTauLoose{};
       TH1* m_ptGNTauMedium{};
       TH1* m_ptGNTauTight{};
-      TH1* m_ptGNTauVeryLooseHighPt{};
       TH1* m_ptGNTauLooseHighPt{};
       TH1* m_ptGNTauMediumHighPt{};
       TH1* m_ptGNTauTightHighPt{};
