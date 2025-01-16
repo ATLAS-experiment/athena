@@ -154,6 +154,8 @@ private:
   std::string m_partition;
   /// Webdaq configuration variable, see https://gitlab.cern.ch/atlas-tdaq-software/webdaq
   std::string m_tdaqWebdaqBase;
+  /// The OH server name (TDAQ_OH_SERVER if defined, m_OHServerName otherwise)
+  std::string m_tdaqOHServerName;
 
   /// joboptions service
   ServiceHandle<Gaudi::Interfaces::IOptionsSvc> m_jobOptionsSvc{this, "JobOptionsSvc", "JobOptionsSvc"};
