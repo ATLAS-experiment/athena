@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHEXHIVE_THREADINITTOOL_H
@@ -40,7 +40,7 @@ public:
 
 private:
   // Number of threads that have been initialized
-  std::atomic_uint m_nInitThreads;
+  std::atomic_uint m_nInitThreads{0};
 
 };
 
