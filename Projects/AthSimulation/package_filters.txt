@@ -367,6 +367,7 @@
 + Tools/ART
 + Tools/Campaigns
 + Tools/FilePeeker
++ Tools/GdbUtils
 + Tools/PathResolver
 + Tools/PmbCxxUtils
 + Tools/PROCTools
