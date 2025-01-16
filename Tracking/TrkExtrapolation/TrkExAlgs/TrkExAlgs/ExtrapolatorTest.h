@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,15 +15,17 @@
 #include "GaudiKernel/IRndmGenSvc.h"
 #include "GaudiKernel/RndmGenerators.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/SystemOfUnits.h"
 #include <string>
 #include <vector>
+
 #include "TrkParameters/TrackParameters.h"
+#include "TrkExInterfaces/IExtrapolator.h"
+#include "TrkExInterfaces/IPropagator.h"
 
 namespace Trk 
 {
 
-  class IExtrapolator;
-  class IPropagator;
   class Surface;
   class MagneticFieldProperties;
   /** @class ExtrapolatorTest
@@ -64,40 +66,49 @@ namespace Trk
       Trk::Perigee generatePerigee();
       
       /** The Extrapolator to be retrieved */
-      ToolHandle<IExtrapolator>         m_extrapolator;
-      ToolHandle<IPropagator>           m_propagator;
-      MagneticFieldProperties*          m_magFieldProperties; //!< magnetic field properties
+      ToolHandle<IExtrapolator> m_extrapolator
+	{this, "Extrapolator", "Trk::Extrapolator/AtlasExtrapolator"};
+      PublicToolHandle<IPropagator> m_propagator
+	{this, "Propagator", "Trk::RungeKuttaPropagator/RungeKuttaPropagator"};
+      MagneticFieldProperties*  m_magFieldProperties = nullptr; //!< magnetic field properties
 
       /** Random Number setup */
-      Rndm::Numbers*                    m_gaussDist;
-      Rndm::Numbers*                    m_flatDist;
+      Rndm::Numbers* m_gaussDist = nullptr;
+      Rndm::Numbers* m_flatDist = nullptr;
 
-      double                   m_sigmaD0;                    //!< Sigma of distribution for D0
-      double                   m_sigmaZ0;                    //!< Sigma of distribution for Z0
-      double                   m_minPhi;                     //!< Minimal phi value
-      double                   m_maxPhi;                     //!< Maximal phi value
-      double                   m_minEta;                     //!< Minimal eta value
-      double                   m_maxEta;                     //!< Maximal eta value
-      double                   m_minP;                       //!< Minimal p value 
-      double                   m_maxP;                       //!< Maximal p value
+      DoubleProperty m_sigmaD0
+	{this, "StartPerigeeSigmaD0", 17.*Gaudi::Units::micrometer};
+      DoubleProperty m_sigmaZ0
+	{this, "StartPerigeeSigmaZ0", 50.*Gaudi::Units::micrometer};
+      DoubleProperty m_minPhi{this, "StartPerigeeMinPhi", -M_PI};
+      DoubleProperty m_maxPhi{this, "StartPerigeeMaxPhi", M_PI};
+      DoubleProperty m_minEta{this, "StartPerigeeMinEta", -3.};
+      DoubleProperty m_maxEta{this, "StartPerigeeMaxEta", 3.};
+      DoubleProperty m_minP
+	{this, "StartPerigeeMinP", 0.5*Gaudi::Units::GeV};
+      DoubleProperty m_maxP
+	{this, "StartPerigeeMaxP", 50000*Gaudi::Units::GeV};
 
-      int                      m_direction;                  //!< extrapolation direction
-
-      int                      m_particleType;               //!< the particle typre for the extrap.
+      IntegerProperty m_direction{this, "StartDirection", 1};
+      IntegerProperty m_particleType
+	{this, "ParticleType", 2, "the particle type for the extrap."};
 
       /** member variables for algorithm properties: */
-      unsigned int                                     m_referenceSurfaces;
+      unsigned int m_referenceSurfaces = 0;
 
-      std::vector<double>                              m_referenceSurfaceRadius;
-      std::vector<double>                              m_referenceSurfaceHalflength;
+      DoubleArrayProperty m_referenceSurfaceRadius
+	{this, "ReferenceSurfaceRadius", {}};
+      DoubleArrayProperty m_referenceSurfaceHalflength
+	{this, "ReferenceSurfaceHalfZ", {}};
       std::vector< std::vector<const Surface*> >       m_referenceSurfaceTriples;
 
       std::vector<double>                              m_referenceSurfaceNegativeBoundary;
       std::vector<double>                              m_referenceSurfacePositiveBoundary;
 
-      int m_eventsPerExecute;
       std::vector<Trk::Perigee> m_perigees;
-      bool m_useExtrapolator;
+
+      IntegerProperty m_eventsPerExecute{this, "EventsPerExecute", -1};
+      BooleanProperty m_useExtrapolator{this, "UseExtrapolator", false};
     }; 
 } // end of namespace
 

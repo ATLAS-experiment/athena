@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,7 +10,6 @@
 #include <cmath>
 
 #include "TrkExAlgs/ExtrapolationValidation.h"
-#include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkSurfaces/CylinderSurface.h"
 #include "TrkSurfaces/DiscSurface.h"
 #include "TrkSurfaces/PlaneSurface.h"
@@ -22,86 +21,12 @@
 // Validation mode - TTree includes
 #include "TTree.h"
 #include "GaudiKernel/ITHistSvc.h" 
-#include "GaudiKernel/SystemOfUnits.h"
 
 //================ Constructor =================================================
 
 Trk::ExtrapolationValidation::ExtrapolationValidation(const std::string& name, ISvcLocator* pSvcLocator)
   :
-  AthAlgorithm(name,pSvcLocator),
-  m_highestVolume(nullptr),
-  m_extrapolator("Trk::Extrapolator/AtlasExtrapolator"),
-  m_gaussDist(nullptr),
-  m_flatDist(nullptr),
-  m_materialCollectionValidation(true),
-  m_direct(false),
-  m_validationTree(nullptr),  
-  m_validationTreeName("ExtrapolationValidation"),
-  m_validationTreeDescription("Output of the ExtrapolationValidation Algorithm"),
-  m_validationTreeFolder("/val/ExtrapolationValidation"),
-  m_maximumR(0.),
-  m_maximumZ(0.),
-  m_sigmaLoc(10.*Gaudi::Units::micrometer),
-  m_sigmaR(17.*Gaudi::Units::micrometer),                   
-  m_sigmaZ(50.*Gaudi::Units::millimeter),
-  m_minEta(-3.),                    
-  m_maxEta(3.),                    
-  m_minP(0.5*Gaudi::Units::GeV),                      
-  m_maxP(100.*Gaudi::Units::GeV),
-  m_particleType(2),
-  m_parameters(0),
-  m_parameterLoc1{},    //!< start local 1 
-  m_parameterLoc2{},    //!< start local 2 
-  m_parameterPhi{},     //!< start phi 
-  m_parameterTheta{},   //!< start theta
-  m_parameterEta{},     //!< start eta
-  m_parameterQoverP{},  //!< start qOverP
-  m_covarianceLoc1{},    //!< start local 1 
-  m_covarianceLoc2{},    //!< start local 2 
-  m_covariancePhi{},     //!< start phi 
-  m_covarianceTheta{},   //!< start theta
-  m_covarianceQoverP{},  //!< start qOverP
-  m_covarianceDeterminant{},  //!< start qOverP
-  m_destinationSurfaceType(0),
-  m_startX{},      //!< startX
-  m_startY{},      //!< startX
-  m_startR{},      //!< startX
-  m_startZ{},      //!< startX
-  m_startP{},      //!< startP
-  m_estimationX(0.),
-  m_estimationY(0.),
-  m_estimationR(0.),
-  m_estimationZ(0.),
-  m_destinationX(0.),
-  m_destinationY(0.),
-  m_destinationR(0.),
-  m_destinationZ(0.),
-  m_triesFront(0),
-  m_breaksFront(0),
-  m_triesBack(0),
-  m_breaksBack(0),
-  m_collectedLayerFront(0),
-  m_collectedLayerBack(0)  
-{
-  // used algorithms and alg tools
-  declareProperty("Extrapolator",                m_extrapolator);
-  declareProperty("ValidateMaterialCollection",  m_materialCollectionValidation);
-  declareProperty("ExtrapolateDirectly", m_direct);
-  // TTree handling
-  declareProperty("ValidationTreeName",          m_validationTreeName);
-  declareProperty("ValidationTreeDescription",   m_validationTreeDescription);
-  declareProperty("ValidationTreeFolder",        m_validationTreeFolder);
-  // algorithm steering
-  declareProperty("StartPerigeeSigmaLoc"      , m_sigmaLoc);
-  declareProperty("StartPerigeeSigmaR"        , m_sigmaR);
-  declareProperty("StartPerigeeSigmaZ"        , m_sigmaZ);
-  declareProperty("StartPerigeeMinEta"        , m_minEta);
-  declareProperty("StartPerigeeMaxEta"        , m_maxEta);
-  declareProperty("StartPerigeeMinP"          , m_minP);
-  declareProperty("StartPerigeeMaxP"          , m_maxP);
-  declareProperty("ParticleType"              , m_particleType);
-
-}
+  AthAlgorithm(name,pSvcLocator) {}
 
 //================ Destructor =================================================
 
@@ -124,7 +49,8 @@ StatusCode Trk::ExtrapolationValidation::initialize()
    ATH_CHECK( m_extrapolator.retrieve());
   
    // create the new Tree
-   m_validationTree = new TTree(m_validationTreeName.c_str(), m_validationTreeDescription.c_str());
+   m_validationTree = new TTree(m_validationTreeName.value().c_str(),
+				m_validationTreeDescription.value().c_str());
 
    // the branches for the parameters
    m_validationTree->Branch("Parameters",            &m_parameters,     "params/I");
@@ -186,9 +112,9 @@ StatusCode Trk::ExtrapolationValidation::finalize()
   // Code entered here will be executed once at the end of the program run.
     ATH_MSG_INFO("================== Output Statistics =========================");
     ATH_MSG_INFO("= Navigation : ");
-    ATH_MSG_INFO("=  - breaks fwd : " << double(m_breaksFront)/double(m_triesFront) 
+    ATH_MSG_INFO("=  - breaks fwd : " << static_cast<double>(m_breaksFront)/static_cast<double>(m_triesFront)
         << " (" << m_breaksFront << "/" << m_triesFront << ")");
-    ATH_MSG_INFO("=  - breaks bwd : " << double(m_breaksBack)/double(m_triesBack)   
+    ATH_MSG_INFO("=  - breaks bwd : " << static_cast<double>(m_breaksBack)/static_cast<double>(m_triesBack)
         << " (" << m_breaksBack << "/" << m_triesBack << ")");
     if (m_materialCollectionValidation){
         ATH_MSG_INFO("= Material collection : ");
@@ -251,24 +177,23 @@ StatusCode Trk::ExtrapolationValidation::execute()
    m_parameterEta[m_parameters]   = m_minEta + m_flatDist->shoot()*(m_maxEta-m_minEta);
    m_parameterTheta[m_parameters] = 2.*std::atan(std::exp(-m_parameterEta[m_parameters]));
 
-
-   m_covarianceLoc1[m_parameters] = fabs( m_parameterLoc1[m_parameters] * 0.1);                                          
-   m_covarianceLoc2[m_parameters] =  fabs( m_parameterLoc2[m_parameters] * 0.1);                                        
-   m_covariancePhi[m_parameters] =   fabs( m_parameterPhi[m_parameters] * 0.1);
-   m_covarianceTheta[m_parameters] =  fabs(m_parameterTheta[m_parameters] * 0.1);
+   m_covarianceLoc1[m_parameters] = std::abs(m_parameterLoc1[m_parameters] * 0.1);
+   m_covarianceLoc2[m_parameters] = std::abs(m_parameterLoc2[m_parameters] * 0.1);
+   m_covariancePhi[m_parameters] = std::abs(m_parameterPhi[m_parameters] * 0.1);
+   m_covarianceTheta[m_parameters] = std::abs(m_parameterTheta[m_parameters] * 0.1);
 
    // this is fine
    double p = m_minP + m_flatDist->shoot()*(m_maxP-m_minP);
    double charge = (m_flatDist->shoot() > 0.5 ) ? -1. : 1.;   
    m_parameterQoverP[m_parameters] = charge/p;
 
-   m_covarianceQoverP[m_parameters] =  fabs(m_parameterQoverP[m_parameters] * 0.1);
+   m_covarianceQoverP[m_parameters] = std::abs(m_parameterQoverP[m_parameters] * 0.1);
 
    // for the momentum logging
    m_startP  = p;   
 
    // start
-   m_startR          = fabs(m_sigmaR * m_gaussDist->shoot());
+   m_startR          = std::abs(m_sigmaR * m_gaussDist->shoot());
    double surfacePhi = M_PI * m_flatDist->shoot();
    surfacePhi       *= (m_flatDist->shoot() > 0.5 ) ? -1. : 1.;
    m_startX          = m_startR*cos(surfacePhi);
@@ -354,20 +279,20 @@ StatusCode Trk::ExtrapolationValidation::execute()
    m_parameterTheta[m_parameters]  = estimationParameters->parameters()[Trk::theta];
    m_parameterQoverP[m_parameters] = estimationParameters->parameters()[Trk::qOverP];
    if(estimationParameters->covariance()){
-   m_covarianceLoc1[m_parameters] =  (*estimationParameters->covariance())(0,0);
-   m_covarianceLoc2[m_parameters] =  (*estimationParameters->covariance())(1,1);
-   m_covariancePhi[m_parameters] =  (*estimationParameters->covariance())(2,2);
-   m_covarianceTheta[m_parameters] =  (*estimationParameters->covariance())(3,3);
-   m_covarianceQoverP[m_parameters] = (*estimationParameters->covariance())(4,4);
-   m_covarianceDeterminant[m_parameters] = (estimationParameters->covariance())->determinant();
+     m_covarianceLoc1[m_parameters] = (*estimationParameters->covariance())(0,0);
+     m_covarianceLoc2[m_parameters] = (*estimationParameters->covariance())(1,1);
+     m_covariancePhi[m_parameters] = (*estimationParameters->covariance())(2,2);
+     m_covarianceTheta[m_parameters] = (*estimationParameters->covariance())(3,3);
+     m_covarianceQoverP[m_parameters] = (*estimationParameters->covariance())(4,4);
+     m_covarianceDeterminant[m_parameters] = (estimationParameters->covariance())->determinant();
    }
    else{
-     m_covarianceLoc1[m_parameters] = 0;                                          
-     m_covarianceLoc2[m_parameters] =  0;                                        
-   m_covariancePhi[m_parameters] =  0;
-   m_covarianceTheta[m_parameters] =  0;
-   m_covarianceQoverP[m_parameters] = 0;
-   m_covarianceDeterminant[m_parameters] = 0;
+     m_covarianceLoc1[m_parameters] = 0;
+     m_covarianceLoc2[m_parameters] = 0;
+     m_covariancePhi[m_parameters] = 0;
+     m_covarianceTheta[m_parameters] = 0;
+     m_covarianceQoverP[m_parameters] = 0;
+     m_covarianceDeterminant[m_parameters] = 0;
    }
    // the start Momentum
 
@@ -400,7 +325,8 @@ StatusCode Trk::ExtrapolationValidation::execute()
                                                     destinationSurface, 
                                                     Trk::alongMomentum,
                                                     false,
-                                                    (Trk::ParticleHypothesis)m_particleType,Trk::addNoise).release();
+                                                    static_cast<Trk::ParticleHypothesis>(m_particleType.value()),
+                                                    Trk::addNoise).release();
    else if(!m_direct){ // material collection validation
        // get the vector of TrackStateOnSurfaces back
       const std::vector<const Trk::TrackStateOnSurface*>* 
@@ -409,7 +335,7 @@ StatusCode Trk::ExtrapolationValidation::execute()
                                                                       destinationSurface,
                                                                       Trk::alongMomentum,
                                                                       false,
-                                                                      (Trk::ParticleHypothesis)m_particleType);
+                                                                      static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
 
       // get the last one and clone it  
       if (collectedMaterial && !collectedMaterial->empty()){
@@ -418,9 +344,9 @@ StatusCode Trk::ExtrapolationValidation::execute()
         destParameters = destinationState->trackParameters() ? destinationState->trackParameters()->clone() : nullptr;
         m_collectedLayerFront += collectedMaterial->size();
         // delete the layers / cleanup
-        std::vector<const Trk::TrackStateOnSurface*>::const_iterator tsosIter    =  collectedMaterial->begin();
-        std::vector<const Trk::TrackStateOnSurface*>::const_iterator tsosIterEnd =  collectedMaterial->end();
-        for ( ; tsosIter != tsosIterEnd; delete(*tsosIter), ++tsosIter);
+        for (const auto* tsos : *collectedMaterial) {
+          delete tsos;
+        }
      }
    }
 
@@ -430,7 +356,7 @@ StatusCode Trk::ExtrapolationValidation::execute()
                                                           destinationSurface, 
                                                           Trk::alongMomentum,
                                                           false,
-                                                          (Trk::ParticleHypothesis)m_particleType).release();
+                                                          static_cast<Trk::ParticleHypothesis>(m_particleType.value())).release();
      
    }
    // ----------------------- check if forward call was successful and continue then
@@ -477,7 +403,8 @@ StatusCode Trk::ExtrapolationValidation::execute()
                                                          startSurface, 
                                                          Trk::oppositeMomentum,
                                                          false,
-                                                         (Trk::ParticleHypothesis)m_particleType,Trk::removeNoise).release();
+                                                         static_cast<Trk::ParticleHypothesis>(m_particleType.value()),
+                                                         Trk::removeNoise).release();
        else if(!m_direct){ // material collection validation
             // get the vector of TrackStateOnSurfaces back
             const std::vector<const Trk::TrackStateOnSurface*>* 
@@ -486,7 +413,7 @@ StatusCode Trk::ExtrapolationValidation::execute()
                                                                           startSurface,
                                                                           Trk::oppositeMomentum,
                                                                           false,
-                                                                          (Trk::ParticleHypothesis)m_particleType);
+                                                                          static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
             // get the last one and clone it  
             if (collectedBackMaterial && !collectedBackMaterial->empty()){
                 // get the last track state on surface & clone the destination parameters
@@ -495,9 +422,9 @@ StatusCode Trk::ExtrapolationValidation::execute()
                 backParameters = startState->trackParameters() ? startState->trackParameters()->clone() : nullptr;
                 m_collectedLayerBack += collectedBackMaterial->size();
                 // delete the layers / cleanup
-                std::vector<const Trk::TrackStateOnSurface*>::const_iterator tsosIter    =  collectedBackMaterial->begin();
-                std::vector<const Trk::TrackStateOnSurface*>::const_iterator tsosIterEnd =  collectedBackMaterial->end();
-                for ( ; tsosIter != tsosIterEnd; delete(*tsosIter), ++tsosIter);
+                for (const auto* tsos : *collectedBackMaterial) {
+                  delete tsos;
+                }
             }
        }
 
@@ -507,7 +434,7 @@ StatusCode Trk::ExtrapolationValidation::execute()
                                                         startSurface, 
                                                         Trk::oppositeMomentum,
                                                         false,
-                                                        (Trk::ParticleHypothesis)m_particleType).release();
+                                                        static_cast<Trk::ParticleHypothesis>(m_particleType.value())).release();
 
        }
       // ----------------------- check if backward call was successful and continue then

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -8,63 +8,18 @@
 
 // Tracking
 #include "TrkExAlgs/ExtrapolatorTest.h"
-#include "TrkExInterfaces/IExtrapolator.h"
-#include "TrkExInterfaces/IPropagator.h"
 #include "TrkSurfaces/CylinderSurface.h"
 #include "TrkSurfaces/DiscSurface.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "EventPrimitives/EventPrimitives.h"
 #include "TrkGeometry/MagneticFieldProperties.h"
-#include "GaudiKernel/SystemOfUnits.h"
 // std
 #include <cmath>
 
 //================ Constructor =================================================
 
-Trk::ExtrapolatorTest::ExtrapolatorTest(const std::string& name, ISvcLocator* pSvcLocator)
-  :
-  AthAlgorithm(name,pSvcLocator),
-  m_extrapolator("Trk::Extrapolator/AtlasExtrapolator"),
-  m_propagator("Trk::RungeKuttaPropagator/RungeKuttaPropagator"),
-  m_magFieldProperties(nullptr),
-  m_gaussDist(nullptr),
-  m_flatDist(nullptr),
-  m_sigmaD0(17.*Gaudi::Units::micrometer),                   
-  m_sigmaZ0(50.*Gaudi::Units::millimeter),
-  m_minPhi(-M_PI),                    
-  m_maxPhi(M_PI),                    
-  m_minEta(-3.),                    
-  m_maxEta(3.),                    
-  m_minP(0.5*Gaudi::Units::GeV),                      
-  m_maxP(50000.*Gaudi::Units::GeV),
-  m_direction(1),
-  m_particleType(2),
-  m_referenceSurfaces(0),
-  m_eventsPerExecute(-1),
-  m_useExtrapolator(false)
-{
-  // used algorithms and alg tools
-  declareProperty("Extrapolator",                m_extrapolator);
-  declareProperty("Propagator",                  m_propagator);
-
-  // algorithm steering
-  declareProperty("StartPerigeeSigmaD0"       , m_sigmaD0);
-  declareProperty("StartPerigeeSigmaZ0"       , m_sigmaZ0);
-  declareProperty("StartPerigeeMinPhi"        , m_minPhi);
-  declareProperty("StartPerigeeMaxPhi"        , m_maxPhi);
-  declareProperty("StartPerigeeMinEta"        , m_minEta);
-  declareProperty("StartPerigeeMaxEta"        , m_maxEta);
-  declareProperty("StartPerigeeMinP"          , m_minP);
-  declareProperty("StartPerigeeMaxP"          , m_maxP);
-  declareProperty("StartDirection"            , m_direction);
-  declareProperty("ParticleType"              , m_particleType);
-
-  //  template for property decalration
-  declareProperty("ReferenceSurfaceRadius",    m_referenceSurfaceRadius);
-  declareProperty("ReferenceSurfaceHalfZ",     m_referenceSurfaceHalflength);
-  declareProperty("EventsPerExecute",          m_eventsPerExecute );
-  declareProperty("UseExtrapolator",           m_useExtrapolator );
-}
+Trk::ExtrapolatorTest::ExtrapolatorTest(const std::string& name, ISvcLocator* pSvcLocator) :
+  AthAlgorithm(name,pSvcLocator) {}
 
 //================ Destructor =================================================
 
@@ -73,17 +28,11 @@ Trk::ExtrapolatorTest::~ExtrapolatorTest()
   delete m_gaussDist;
   delete m_flatDist;
   // cleanup of the surfaces
-   std::vector< std::vector< const Trk::Surface* > >::const_iterator surfaceTripleIter    = m_referenceSurfaceTriples.begin();
-   std::vector< std::vector< const Trk::Surface* > >::const_iterator surfaceTripleIterEnd = m_referenceSurfaceTriples.end();
-   for ( ; surfaceTripleIter != surfaceTripleIterEnd; ++surfaceTripleIter)
-   {
-     std::vector<const Trk::Surface*>::const_iterator surfIter = (*surfaceTripleIter).begin();
-     std::vector<const Trk::Surface*>::const_iterator surfIterEnd = (*surfaceTripleIter).end();
-     for ( ; surfIter != surfIterEnd; delete (*surfIter), ++surfIter);
-
-   
-   }
-
+  for (const auto& surfaceTriple : m_referenceSurfaceTriples) {
+    for (const auto* surface : surfaceTriple) {
+        delete surface;
+    }
+  }
 }
 
 
@@ -93,18 +42,10 @@ StatusCode Trk::ExtrapolatorTest::initialize()
 {
   // Code entered here will be executed once at program start.
   
-  msg(MSG::INFO) << " initialize()" << endmsg;
+  ATH_MSG_INFO(" initialize()");
 
-  // Get Extrapolator from ToolService   
-  if (m_extrapolator.retrieve().isFailure()) {
-        msg(MSG::FATAL) << "Could not retrieve Tool " << m_extrapolator << ". Exiting."<<endmsg;
-        return StatusCode::FAILURE;
-  }
-  // Get Propagator from ToolService    
-  if (m_propagator.retrieve().isFailure()) {
-        msg(MSG::FATAL) << "Could not retrieve Tool " << m_propagator << ". Exiting."<<endmsg;
-        return StatusCode::FAILURE;
-  }
+  ATH_CHECK( m_extrapolator.retrieve() );
+  ATH_CHECK( m_propagator.retrieve() );
 
   m_magFieldProperties = new Trk::MagneticFieldProperties();
 
@@ -210,7 +151,7 @@ void Trk::ExtrapolatorTest::runTest( const Trk::Perigee& initialPerigee ) {
                *destinationSurface,
                propagationDirection,
                false,
-               (Trk::ParticleHypothesis)m_particleType).release()
+               static_cast<Trk::ParticleHypothesis>(m_particleType.value())).release()
            :
 
            m_propagator
@@ -220,21 +161,20 @@ void Trk::ExtrapolatorTest::runTest( const Trk::Perigee& initialPerigee ) {
                          propagationDirection,
                          false,
                          *m_magFieldProperties,
-                         (Trk::ParticleHypothesis)m_particleType)
+                         static_cast<Trk::ParticleHypothesis>(m_particleType.value()))
              .release();
 
        if (destParameters) {
-           // global position parameter
-           //const Amg::Vector3D& gp = destParameters->position();
-
-           // intersection output
-           ATH_MSG_VERBOSE(" [ intersection ] with surface at (x,y,z) = " << destParameters->position().x() << ", " << destParameters->position().y() << ", " << destParameters->position().z() );           
-
+	 // intersection output
+	 ATH_MSG_VERBOSE(" [ intersection ] with surface at (x,y,z) = " <<
+			 destParameters->position().x() << ", " <<
+			 destParameters->position().y() << ", " <<
+			 destParameters->position().z() );           
        } else if (!destParameters)
-           ATH_MSG_DEBUG(" Extrapolation not successful! " );
-          delete destParameters;
+	 ATH_MSG_DEBUG(" Extrapolation not successful! " );
 
-   } 
+       delete destParameters;
+   }
 }
 
 //============================================================================================

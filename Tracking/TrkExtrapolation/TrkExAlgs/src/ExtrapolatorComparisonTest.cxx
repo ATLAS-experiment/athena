@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,7 +16,6 @@
 #include "TrkParametersBase/ParametersT.h"
 #include "EventPrimitives/EventPrimitives.h"
 
-#include "GaudiKernel/SystemOfUnits.h"
 #include "GaudiKernel/ISvcLocator.h"
 
 // ACTS
@@ -48,54 +47,19 @@ using xclock = std::chrono::steady_clock;
 
 //================ Constructor =================================================
 
-Trk::ExtrapolatorComparisonTest::ExtrapolatorComparisonTest(const std::string& name, ISvcLocator* pSvcLocator)
-  :
-  AthReentrantAlgorithm(name,pSvcLocator),
-  m_sigmaD0(17.*Gaudi::Units::micrometer),
-  m_sigmaZ0(50.*Gaudi::Units::millimeter),
-  m_minPhi(-M_PI),                    
-  m_maxPhi(M_PI),                    
-  m_minEta(-3.),                    
-  m_maxEta(3.),                    
-  m_minPt(0.5*Gaudi::Units::GeV),                      
-  m_maxPt(50000.*Gaudi::Units::GeV),
-  m_particleType(2),
-  m_referenceSurfaces(0),
-  m_eventsPerExecute(1),
-  m_atlasPropResultWriterSvc("ATLASPropResultRootWriterSvc", name),
-  m_actsPropResultWriterSvc("ACTSPropResultRootWriterSvc", name),
-  m_rndmSvc("AthRNGSvc", name)
-{
-  // algorithm steering
-  declareProperty("StartPerigeeSigmaD0"       , m_sigmaD0                   );
-  declareProperty("StartPerigeeSigmaZ0"       , m_sigmaZ0                   );
-  declareProperty("StartPerigeeMinPhi"        , m_minPhi                    );
-  declareProperty("StartPerigeeMaxPhi"        , m_maxPhi                    );
-  declareProperty("StartPerigeeMinEta"        , m_minEta                    );
-  declareProperty("StartPerigeeMaxEta"        , m_maxEta                    );
-  declareProperty("StartPerigeeMinPt"         , m_minPt                     );
-  declareProperty("StartPerigeeMaxPt"         , m_maxPt                     );
-  declareProperty("ParticleType"              , m_particleType              );
-  declareProperty("ReferenceSurfaceRadius"    , m_referenceSurfaceRadius    );
-  declareProperty("ReferenceSurfaceHalfZ"     , m_referenceSurfaceHalflength);
-  declareProperty("EventsPerExecute"          , m_eventsPerExecute          );
-  declareProperty("ATLASPropResultRootWriter" , m_atlasPropResultWriterSvc  );
-  declareProperty("ACTSPropResultRootWriter"  , m_actsPropResultWriterSvc   );
-  declareProperty("RndmSvc"                   , m_rndmSvc                   );
-}
+Trk::ExtrapolatorComparisonTest::ExtrapolatorComparisonTest(const std::string& name, ISvcLocator* pSvcLocator) :
+  AthReentrantAlgorithm(name,pSvcLocator) {}
 
 //================ Destructor =================================================
 
 Trk::ExtrapolatorComparisonTest::~ExtrapolatorComparisonTest()
 {
   // cleanup of the Trk::Surfaces
-  std::vector< std::vector< const Trk::Surface* > >::const_iterator atlasSurfaceTripleIter    = m_atlasReferenceSurfaceTriples.begin();
-  std::vector< std::vector< const Trk::Surface* > >::const_iterator atlasSurfaceTripleIterEnd = m_atlasReferenceSurfaceTriples.end();
-  for ( ; atlasSurfaceTripleIter != atlasSurfaceTripleIterEnd; ++atlasSurfaceTripleIter) {
-    std::vector<const Trk::Surface*>::const_iterator surfIter = (*atlasSurfaceTripleIter).begin();
-    std::vector<const Trk::Surface*>::const_iterator surfIterEnd = (*atlasSurfaceTripleIter).end();
-    for ( ; surfIter != surfIterEnd; delete (*surfIter), ++surfIter);
-  }    
+  for (const auto& surfaceTriple : m_atlasReferenceSurfaceTriples) {
+    for (const auto* surface : surfaceTriple) {
+      delete surface;
+    }
+  }
 }
 
 
@@ -118,8 +82,8 @@ StatusCode Trk::ExtrapolatorComparisonTest::initialize()
      // loop over it and create the 
      for (unsigned int surface = 0; surface < m_referenceSurfaces; surface++) {
        
-       double radius = m_referenceSurfaceRadius.at(surface);
-       double halfZ  = m_referenceSurfaceHalflength.at(surface);
+       double radius = m_referenceSurfaceRadius[surface];
+       double halfZ  = m_referenceSurfaceHalflength[surface];
        
        // create the Surface triplet
        std::vector< const Trk::Surface*> trkSurfaceTriplet;
@@ -224,7 +188,7 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
           *destinationSurface,
           Trk::alongMomentum,
           true,
-          (Trk::ParticleHypothesis)m_particleType).release();
+          static_cast<Trk::ParticleHypothesis>(m_particleType.value())).release();
       auto end_fwd = xclock::now();
       float ms_fwd = std::chrono::duration_cast<std::chrono::milliseconds>(end_fwd-start_fwd).count();
       
@@ -243,7 +207,7 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
             atlPerigee->associatedSurface(),
             Trk::oppositeMomentum,
             true,
-            (Trk::ParticleHypothesis)m_particleType).release();
+            static_cast<Trk::ParticleHypothesis>(m_particleType.value())).release();
         auto end_bkw = xclock::now();
         float ms_bkw = std::chrono::duration_cast<std::chrono::milliseconds>(end_bkw-start_bkw).count();
         
