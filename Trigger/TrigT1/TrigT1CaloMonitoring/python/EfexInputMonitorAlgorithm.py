@@ -35,20 +35,68 @@ def EfexInputMonitoringConfig(flags):
                            xbins=50,xmin=-2.5,xmax=2.5,
                            ybins=64,ymin=-math.pi,ymax=math.pi)
 
-    helper.defineDQAlgorithm("Efex_ecal_hot_etaThiMapFilled",
-                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_Equal_Threshold","BinThreshold":"0."},
-                             thresholdConfig={"NBins":[0,64*50]}, # currently there is no known deadspot in ecal, so that is warning. Error if empty
+    # note: string DQ algo parameters must have leading/trailing ' char, to distinguish from other parts of algo config
+    # these initial values were determined from run 486894 in 2024
+    # these should be reviewed at an L1Calo meeting in 2025, prior to data taking
+    knownAnomalies_hotHcal = {
+        "KnownDead":"\"1,29;12,57;15,57;18,24;18,41;18,50;19,41;2,29;20,41;21,41;22,41;23,29;23,41;24,41;25,36;25,41;26,18;26,38;27,18;28,18;29,18;32,18;33,18;41,21;41,54;42,21;42,43;47,6;7,62;8,54;9,41;9,51;9,52;9,53;9,54;9,56\"",
+        "KnownWarm":"\"26,3;27,3;28,3;29,3;30,3;31,3;32,3;33,3;34,3\"", # noisy tile drawer
+        "KnownHot":"\"15,49\"" # one hotspot in LAr HCal?
+    }
+    knownAnomalies_coldHcal = {
+        "KnownDead":"\"1,29;2,29;41,21;41,54;42,21;42,43;47,6;7,62;8,54;9,41;9,51;9,52;9,53;9,54;9,56\"",
+        "KnownWarm":"\"5,33\"" # one slightly-frequent coldspot
+    }
+    knownAnomalies_hotEcal = {
+        "KnownCold":"\"19,18;48,8;8,33;9,19;9,20;9,33;9,34\"",
+        "KnownWarm":"\"2,15;2,47;2,55;2,56;47,35;47,36;47,47;47,48;48,47;50,44\""
+    }
+    knownAnomalies_coldEcal = {
+        "KnownHot":"\"1,15;2,15;47,47;48,36\"",
+        "KnownWarm":"\"1,47;1,48;1,49;1,55;1,56;2,16;2,47;2,48;2,55;2,56;22,14;23,14;47,35;47,36;47,48;48,35;48,47;48,48;49,51;50,43;50,44\""
+    }
+
+    commonAlgConfig = {"libname":"libdqm_summaries.so",
+                       "name":"L1Calo_BinsDiffFromStripMedian",
+                       "PublishDetail":32}
+    hotCuts = {"ColdCut":-3.5,"WarmCut":9,"HotCut":20} # when looking at frequency of hot deposits, use these cuts
+    coldCuts = {"ColdCut":-4,"WarmCut":5,"HotCut":10} # lower thresholds for looking at negative energy deposits, as RMS is usually smaller
+
+    commonThresholdConfig = {
+        "NWrongKnown":[0,100], # warn of any corrections that are needed for the known anomalies lists
+        "NDead":[0,2], # warn on any new dead spots, error if more than a couple
+        "NHot":[0,2],  # warn on any new hot spots, error if more than a couple
+        "NCold":[0,2],  # warn on any new cold spots, error if more than a couple
+        "NWarm":[0,5],  # warn on any new warm spots, error if more than 5
+        "NDeadStrip":[0,0], # no dead strips - exception to this will be in cold hcal, where tile cannot be negative
+        "NConsecUnlikelyStrip":[2,5], # warn if more than 2 consecutive strips deemed unlikely
+    }
+
+    helper.defineDQAlgorithm("Efex_ecal_hot_etaPhiMapOutliers",
+                             hanConfig=commonAlgConfig|hotCuts|knownAnomalies_hotEcal,
+                             thresholdConfig=commonThresholdConfig
                              )
-    helper.defineDQAlgorithm("Efex_hcal_hot_etaThiMapFilled",
-                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_Equal_Threshold","BinThreshold":"0."},
-                             thresholdConfig={"NBins":[50,64*50]}, # currently there are disabled drawers (24 dead towers). Error if empty
+
+    helper.defineDQAlgorithm("Efex_hcal_hot_etaPhiMapOutliers",
+                             hanConfig=commonAlgConfig|hotCuts|knownAnomalies_hotHcal,
+                             thresholdConfig=commonThresholdConfig
+                             )
+
+    helper.defineDQAlgorithm("Efex_ecal_cold_etaPhiMapOutliers",
+                             hanConfig=commonAlgConfig|coldCuts|knownAnomalies_coldEcal,
+                             thresholdConfig=commonThresholdConfig
+                             )
+
+    helper.defineDQAlgorithm("Efex_hcal_cold_etaPhiMapOutliers",
+                             hanConfig=commonAlgConfig|coldCuts|knownAnomalies_coldHcal,
+                             thresholdConfig=commonThresholdConfig|{"NDeadStrip":[30,30]} # negatives not possible in tile (-1.5->1.5)
                              )
 
     for layer in ["ecal","hcal"]:
         helper.defineHistogram(f'TowerEta,TowerPhi;h_dataTowers_{layer}_hot_EtaPhiMap',title=f'{layer.upper()} SuperCells >= 500MeV;#eta;#phi',
                                cutmask="AboveCut",
                                path="Expert/Inputs/eFEX",
-                               hanConfig={"algorithm":f"Efex_{layer}_hot_etaThiMapFilled","description":f"Check <a href='./detail/h_dataTowers_{layer}_hot_posVsLBN'>detail plot</a> to get timeseries for each location"},
+                               hanConfig={"algorithm":f"Efex_{layer}_hot_etaPhiMapOutliers","description":f"Check <a href='./detail/h_dataTowers_{layer}_hot_posVsLBN'>detail plot</a> to get timeseries for each location"},
                                fillGroup=layer,
                                type='TH2I',
                                xbins=50,xmin=-2.5,xmax=2.5,
@@ -66,7 +114,7 @@ def EfexInputMonitoringConfig(flags):
         helper.defineHistogram(f'TowerEta,TowerPhi;h_dataTowers_{layer}_cold_EtaPhiMap',title=f'{layer.upper()} SuperCells <= -500MeV;#eta;#phi',
                                cutmask="BelowCut",
                                path="Expert/Inputs/eFEX",
-                               hanConfig={"description":f"Check <a href='./detail/h_dataTowers_{layer}_cold_posVsLBN'>detail plot</a> to get timeseries for each location"},
+                               hanConfig={"algorithm":f"Efex_{layer}_cold_etaPhiMapOutliers","description":f"Check <a href='./detail/h_dataTowers_{layer}_cold_posVsLBN'>detail plot</a> to get timeseries for each location"},
                                fillGroup=layer,
                                type='TH2I',
                                xbins=50,xmin=-2.5,xmax=2.5,

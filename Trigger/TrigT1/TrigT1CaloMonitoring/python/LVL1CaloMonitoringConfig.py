@@ -200,6 +200,9 @@ thresholds th_AnyBinIsError {
                 raise Exception("Must specify a hanConfig for a Shifter or Expert (non-detail) histogram")
             else:
                 hanConfig["algorithm"] = "GatherData" # must have an algo, otherwise wont be valid han config
+        elif "algorithm" in hanConfig and hanConfig["algorithm"] not in self.hanAlgConfigs and hanConfig["algorithm"] not in ["All_Bins_Filled","Histogram_Effective_Empty","Histogram_Empty","Histogram_Not_Empty","No_OverFlows","No_UnderFlows"]:
+            # if algorithm specified, must have been defined
+            raise Exception(f'DQ Algorithm {hanConfig["algorithm"]} for histogram {args[0]} not defined. Please use defineDQAlgorithm method to define it')
 
 
         if fillGroup is None: fillGroup = self.alg.name + "_fillGroup"
