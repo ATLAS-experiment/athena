@@ -26,26 +26,30 @@ def precisionTracks_GSFRefitted(flags, RoIs, ion=False, variant=''):
 
     # precision Tracking related data dependencies
     trackParticles = TrigEgammaKeys.precisionTrackingContainer
-    from TrigInDetConfig.InDetTrigCollectionKeys import TrigTRTKeys, TrigPixelKeys
+    ambimap = flags.Trigger.InDetTracking.ClusterAmbiguitiesMap
+    if flags.Detector.GeometryITk:
+        ambimap = flags.Trigger.ITkTracking.ClusterAmbiguitiesMap
 
     dataObjects = [( 'xAOD::TrackParticleContainer','StoreGateSvc+%s' % trackParticles),
                    # verifier object needed by GSF
                    ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' ),
-                   ( 'InDet::PixelGangedClusterAmbiguities' , 'StoreGateSvc+%s' % TrigPixelKeys.PixelClusterAmbiguitiesMap ),
-                   ( 'InDet::TRT_DriftCircleContainer' , 'StoreGateSvc+%s' % TrigTRTKeys.DriftCircles ),
+                   ( 'InDet::PixelGangedClusterAmbiguities' , 'StoreGateSvc+%s' % ambimap ),
                    ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.AveIntPerXDecor' ),
                    ]
+
+    if flags.Detector.GeometryTRT:
+        dataObjects +=  [( 'InDet::TRT_DriftCircleContainer' , 'StoreGateSvc+%s' % "TRT_TrigDriftCircles" )]
+        if flags.Input.isMC:
+            dataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' ),
+                            ( 'InDet::TRT_DriftCircleContainerCache' , 
+                            f'StoreGateSvc+{flags.Trigger.InDetTracking.TRT_DriftCircleCacheKey}' )]
+        else:
+            dataObjects += [( 'TRT_RDO_Cache' , f'StoreGateSvc+{flags.Trigger.InDetTracking.TRTRDOCacheKey}' )]
 
     # These objects must be loaded from SGIL if not from CondInputLoader
 
     if not flags.Input.isMC:
         dataObjects.append(( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ))
-        dataObjects.append(( 'TRT_RDO_Cache' , 
-                             f'StoreGateSvc+{flags.Trigger.InDetTracking.TRTRDOCacheKey}'  ))
-    else:
-        dataObjects.append(( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' ))
-        dataObjects.append(( 'InDet::TRT_DriftCircleContainerCache' , 
-                             f'StoreGateSvc+{flags.Trigger.InDetTracking.TRT_DriftCircleCacheKey}' ))
 
     from TrigInDetConfig.TrigInDetConfig import InDetExtraDataObjectsFromDataPrep
     InDetExtraDataObjectsFromDataPrep(flags,dataObjects)

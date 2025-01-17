@@ -75,7 +75,7 @@ class ITkTrigSequence(InnerTrackerTrigSequence):
     acc = ComponentAccumulator()
 
     dataObjects = [
-                ( 'InDet::PixelGangedClusterAmbiguities' , 'ITkPixelClusterAmbiguitiesMap'),
+                ( 'InDet::PixelGangedClusterAmbiguities' , self.flags.Trigger.ITkTracking.ClusterAmbiguitiesMap),
                 ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map')
             ]
     from TrigInDetConfig.TrigInDetConfig import InDetExtraDataObjectsFromDataPrep
@@ -124,25 +124,23 @@ class ITkTrigSequence(InnerTrackerTrigSequence):
     if self.inView:
       acc.merge(self.viewDataVerifierAfterPattern())
 
-
-    from TrkConfig.TrkAmbiguitySolverConfig import ITkTrkAmbiguityScoreCfg
+    from TrkConfig.TrkAmbiguitySolverConfig import TrigITkTrkAmbiguityScoreCfg
     acc.merge(
-      ITkTrkAmbiguityScoreCfg(
+      TrigITkTrkAmbiguityScoreCfg(
         self.flags,
-        name = "TrkAmbiguityScore_",
-        SiSPSeededTrackCollectionKey=self.lastTrkCollection
-        )
-      )
-
-    from TrkConfig.TrkAmbiguitySolverConfig import ITkTrkAmbiguitySolverCfg
-    acc.merge(
-      ITkTrkAmbiguitySolverCfg(
-        self.flags,
-        name  = "TrkAmbiguitySolver_",
-        ResolvedTrackCollectionKey=self.flags.Tracking.ActiveConfig.trkTracks_IDTrig+"_Amb"
+        name = f"{self.ambiPrefix}Score_{self.flags.Tracking.ActiveConfig.input_name}",
+        TrackInput = [self.lastTrkCollection],
+        AmbiguityScoreProcessor = None
       )
     )
 
+    from TrkConfig.TrkAmbiguitySolverConfig import TrkAmbiguitySolver_Trig_Cfg
+    acc.merge(
+      TrkAmbiguitySolver_Trig_Cfg(
+        self.flags,
+        name = f"{self.ambiPrefix}guitySolver_{self.flags.Tracking.ActiveConfig.input_name}",
+      )
+    )
     self.lastTrkCollection = self.flags.Tracking.ActiveConfig.trkTracks_IDTrig+"_Amb"
     return acc
 

@@ -58,8 +58,9 @@ def cloneFlagsToActiveConfig(
     do InDet/ITk specific clone and replace of ActiveConfig without checking flags vs config_name
     
     """
+    prefix = "Trigger.ITkTracking." if flags.Detector.GeometryITk else "Trigger.InDetTracking." 
     return flags.cloneAndReplace(
         "Tracking.ActiveConfig",
-        ("Trigger.ITkTracking." if flags.Detector.GeometryITk else "Trigger.InDetTracking.") + config_name,
+        prefix + config_name,
         keepOriginal = True
     )

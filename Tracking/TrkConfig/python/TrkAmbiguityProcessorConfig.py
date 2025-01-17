@@ -183,9 +183,9 @@ def SimpleAmbiguityProcessorTool_Trig_Cfg(
 
     if "ScoringTool" not in kwargs:
         from InDetConfig.InDetTrackScoringToolsConfig import (
-            InDetTrigAmbiScoringToolCfg)
+            TrigAmbiScoringToolCfg)
         kwargs.setdefault("ScoringTool", acc.popToolsAndMerge(
-            InDetTrigAmbiScoringToolCfg(flags)))
+            TrigAmbiScoringToolCfg(flags, name="TrigAmbiguityScoringTool"+flags.Tracking.ActiveConfig.input_name)))
 
     if "TrackSummaryTool" not in kwargs:
         from TrkConfig.TrkTrackSummaryToolConfig import (
@@ -199,16 +199,77 @@ def SimpleAmbiguityProcessorTool_Trig_Cfg(
         kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(
             TrigPRDtoTrackMapToolGangedPixelsCfg(flags)))
 
+
+
     if "SelectionTool" not in kwargs:
         from InDetConfig.InDetAmbiTrackSelectionToolConfig import (
-            InDetTrigAmbiTrackSelectionToolCfg,InDetTrigAmbiTrackSelectionToolCosmicsCfg)
+            TrigAmbiTrackSelectionToolCfg,InDetTrigAmbiTrackSelectionToolCosmicsCfg)
         
         if flags.Tracking.ActiveConfig.input_name == "cosmics":
             kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(
                 InDetTrigAmbiTrackSelectionToolCosmicsCfg(flags)))
         else:
             kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(
-                InDetTrigAmbiTrackSelectionToolCfg(flags,DriftCircleCutTool=None)))
+                TrigAmbiTrackSelectionToolCfg(flags,DriftCircleCutTool=None)))
+
+    acc.setPrivateTools(
+        CompFactory.Trk.SimpleAmbiguityProcessorTool(name, **kwargs))
+    return acc
+
+
+def SimpleAmbiguityProcessorTool_ITkTrig_Cfg(
+        flags,
+        name='ITkTrigAmbiguityProcessor',
+        **kwargs):
+    import AthenaCommon.SystemOfUnits as Units
+
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("SuppressTrackFit", (
+        not flags.Tracking.ActiveConfig.doAmbiguityProcessorTrackFit))
+    kwargs.setdefault("SuppressHoleSearch", False)
+    kwargs.setdefault("tryBremFit",
+                      flags.Tracking.ActiveConfig.doBremRecoverySi)
+    kwargs.setdefault("pTminBrem", 5*Units.GeV)
+    kwargs.setdefault("MatEffects", 3)
+
+    if "Fitter" not in kwargs:
+        from TrkConfig.CommonTrackFitterConfig import (
+            ITkTrackFitterCfg)
+        ITkTrackFitter = acc.popToolsAndMerge(
+            ITkTrackFitterCfg(
+                flags,
+                name=('ITkTrackFitterAmbi')))
+        kwargs.setdefault("Fitter",  ITkTrackFitter)
+        
+
+    if "ScoringTool" not in kwargs:
+        from InDetConfig.InDetTrackScoringToolsConfig import (
+            TrigAmbiScoringToolCfg)
+        kwargs.setdefault("ScoringTool", acc.popToolsAndMerge(
+            TrigAmbiScoringToolCfg(flags, name="TrigAmbiguityScoringTool"+flags.Tracking.ActiveConfig.input_name)))
+
+    if "TrackSummaryTool" not in kwargs:
+        from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolCfg
+        kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(
+            ITkTrackSummaryToolCfg(flags)))
+
+    if "AssociationTool" not in kwargs:
+        from InDetConfig.InDetAssociationToolsConfig import (
+            TrigITkPRDtoTrackMapToolGangedPixelsCfg)
+        kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(
+            TrigITkPRDtoTrackMapToolGangedPixelsCfg(flags)))
+
+    if "SelectionTool" not in kwargs:
+        from InDetConfig.InDetAmbiTrackSelectionToolConfig import (
+            TrigAmbiTrackSelectionToolCfg,InDetTrigAmbiTrackSelectionToolCosmicsCfg)
+        
+        if flags.Tracking.ActiveConfig.input_name == "cosmics":
+            kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(
+                InDetTrigAmbiTrackSelectionToolCosmicsCfg(flags)))
+        else:
+            kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(
+                TrigAmbiTrackSelectionToolCfg(flags,DriftCircleCutTool=None)))
 
     acc.setPrivateTools(
         CompFactory.Trk.SimpleAmbiguityProcessorTool(name, **kwargs))

@@ -96,6 +96,17 @@ def InDetTRT_SeededScoringToolCfg(
 
     return InDetAmbiScoringToolBaseCfg(flags, name, **kwargs)
 
+def TrigAmbiScoringToolCfg(
+        flags, 
+        name='TrigAmbiguityScoringTool', **kwargs):
+    
+    if flags.Detector.GeometryITk:
+        tool = ITkTrigAmbiScoringToolCfg(flags, name, **kwargs)
+    else:
+        tool = InDetTrigAmbiScoringToolCfg(flags, name, **kwargs)
+        
+    return tool
+
 
 def InDetTrigAmbiScoringToolCfg(
         flags, 
@@ -142,9 +153,7 @@ def InDetTrigAmbiScoringToolCfg(
         kwargs.setdefault("minTRTPrecisionFraction", 0)
 
         
-    acc.setPrivateTools(ambiScoringFactory(
-        name=name+flags.Tracking.ActiveConfig.input_name, 
-        **kwargs))
+    acc.setPrivateTools(ambiScoringFactory(name=name, **kwargs))
     
     return acc
 
@@ -321,6 +330,9 @@ def ITkAmbiScoringToolCfg(flags, name='ITkAmbiScoringTool', **kwargs):
         name + flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
+def ITkTrigAmbiScoringToolCfg(flags, name='ITkTrigAmbiScoringTool', **kwargs):
+    kwargs.setdefault("InDetEtaDependentCutsSvc", None)    #TODO
+    return ITkAmbiScoringToolCfg(flags, name, **kwargs)
 
 def ITkCosmicsScoringToolCfg(flags, name='ITkCosmicsScoringTool', **kwargs):
     acc = ComponentAccumulator()

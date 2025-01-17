@@ -79,12 +79,15 @@ def ITkTrkAmbiguityScoreCfg(
         **kwargs):
     acc = ComponentAccumulator()
 
-    from TrkConfig.TrkAmbiguityProcessorConfig import (
-        ITkDenseEnvironmentsAmbiguityScoreProcessorToolCfg)
-    ITkAmbiguityScoreProcessor = acc.popToolsAndMerge(
-        ITkDenseEnvironmentsAmbiguityScoreProcessorToolCfg(
-            flags,
-            ClusterSplitProbContainer=ClusterSplitProbContainer))
+    if flags.Tracking.ActiveConfig.useTIDE_Ambi:
+        from TrkConfig.TrkAmbiguityProcessorConfig import (
+            ITkDenseEnvironmentsAmbiguityScoreProcessorToolCfg)
+        ITkAmbiguityScoreProcessor = acc.popToolsAndMerge(
+            ITkDenseEnvironmentsAmbiguityScoreProcessorToolCfg(
+                flags,
+                ClusterSplitProbContainer=ClusterSplitProbContainer))
+    else:
+        ITkAmbiguityScoreProcessor = None
 
     #
     # --- configure Ambiguity (score) solver
@@ -96,9 +99,22 @@ def ITkTrkAmbiguityScoreCfg(
     # TODO: check the case when it is None object
     kwargs.setdefault("AmbiguityScoreProcessor",  ITkAmbiguityScoreProcessor)
 
-    acc.addEventAlgo(CompFactory.Trk.TrkAmbiguityScore(
-        name+flags.Tracking.ActiveConfig.extension, **kwargs))
+    scorename = name + flags.Tracking.ActiveConfig.extension
+    kwargs.setdefault("name", scorename)
+    
+    acc.addEventAlgo(CompFactory.Trk.TrkAmbiguityScore(**kwargs))
     return acc
+
+def TrigITkTrkAmbiguityScoreCfg(
+        flags,
+        name='InDetTrig_SeededAmbiguityScore',
+        **kwargs):
+    kwargs.setdefault("TrackInput", [flags.Tracking.ActiveConfig.trkTracks_FTF])
+    kwargs.setdefault("TrackOutput",
+                      f"ScoreMap{flags.Tracking.ActiveConfig.input_name}")
+    kwargs.setdefault("AmbiguityScoreProcessor", None)
+    
+    return ITkTrkAmbiguityScoreCfg(flags, name, **kwargs)
 
 
 def TrkAmbiguitySolverCfg(
@@ -164,12 +180,20 @@ def TrkAmbiguitySolver_Trig_Cfg(
         **kwargs):
     acc = ComponentAccumulator()
 
-    from TrkConfig.TrkAmbiguityProcessorConfig import (
-        SimpleAmbiguityProcessorTool_Trig_Cfg)
-    processorTool = acc.popToolsAndMerge(
-        SimpleAmbiguityProcessorTool_Trig_Cfg(
-            flags,
-            name=f"InDetTrigMT_AmbiguityProcessor_{flags.Tracking.ActiveConfig.name}"))
+    if flags.Detector.GeometryITk:
+        from TrkConfig.TrkAmbiguityProcessorConfig import (
+            SimpleAmbiguityProcessorTool_ITkTrig_Cfg)
+        processorTool = acc.popToolsAndMerge(
+            SimpleAmbiguityProcessorTool_ITkTrig_Cfg(
+                flags,
+                name=f"TrigAmbiguityProcessor_{flags.Tracking.ActiveConfig.name}"))
+    else:
+        from TrkConfig.TrkAmbiguityProcessorConfig import (
+            SimpleAmbiguityProcessorTool_Trig_Cfg)
+        processorTool = acc.popToolsAndMerge(
+            SimpleAmbiguityProcessorTool_Trig_Cfg(
+                flags,
+                name=f"TrigAmbiguityProcessor_{flags.Tracking.ActiveConfig.name}"))
 
     kwargs.setdefault(
         "TrackInput", f"ScoreMap{flags.Tracking.ActiveConfig.input_name}")
