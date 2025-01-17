@@ -31,12 +31,12 @@ Electrons:
     recalibratePhyslite: False
     decorateTruth: true
     decorateCaloClusterEta: true
+    writeTrackD0Z0: True
     WorkingPoint:
       - selectionName: loose
         forceFullSimConfig: True
         identificationWP: LooseBLayerLH
         isolationWP: Loose_VarRad
-        writeTrackD0Z0: True
     PtEtaSelection:
       minPt: 10000.0
     IFFClassification: {}
@@ -62,11 +62,11 @@ Muons:
   - containerName: AnaMuons
     recalibratePhyslite: False
     decorateTruth: true
+    writeTrackD0Z0: True
     WorkingPoint:
       - selectionName: medium
         quality: Medium
         isolation: Loose_VarRad
-        writeTrackD0Z0: True
     IFFClassification: {}
     MCTCClassification:
       prefix: truth_

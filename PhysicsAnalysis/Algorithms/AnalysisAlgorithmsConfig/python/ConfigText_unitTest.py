@@ -99,6 +99,7 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (recalibratePhyslite=False)
     config.setOptions (decorateTruth=True)
     config.setOptions (decorateCaloClusterEta=True)
+    config.setOptions (writeTrackD0Z0=True)
     # Electrons.WorkingPoint
     config.addBlock ('Electrons.WorkingPoint')
     config.setOptions (containerName='AnaElectrons')
@@ -107,7 +108,6 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (noEffSF=True)
     config.setOptions (identificationWP='LooseBLayerLH')
     config.setOptions (isolationWP='Loose_VarRad')
-    config.setOptions (writeTrackD0Z0=True)
     # Electrons.PtEtaSelection
     config.addBlock ('Electrons.PtEtaSelection')
     config.setOptions (containerName='AnaElectrons')
@@ -143,13 +143,13 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.addBlock ('Muons', containerName='AnaMuons')
     config.setOptions (recalibratePhyslite=False)
     config.setOptions (decorateTruth=True)
+    config.setOptions (writeTrackD0Z0=True)
     # Muons.WorkingPoint
     config.addBlock ('Muons.WorkingPoint')
     config.setOptions (containerName='AnaMuons')
     config.setOptions (selectionName='medium')
     config.setOptions (quality='Medium')
     config.setOptions (isolation='Loose_VarRad')
-    config.setOptions (writeTrackD0Z0=True)
     # Muons.IFFClassification
     config.addBlock ('Muons.IFFClassification')
     config.setOptions (containerName='AnaMuons')
