@@ -13,6 +13,7 @@
 #include <AsgAnalysisAlgorithms/AsgEnergyDecoratorAlg.h>
 #include <AsgAnalysisAlgorithms/AsgEventScaleFactorAlg.h>
 #include <AsgAnalysisAlgorithms/AsgFlagSelectionTool.h>
+#include <AsgAnalysisAlgorithms/AsgLeptonTrackDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/AsgLeptonTrackSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/AsgMaskSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgOriginalObjectLinkAlg.h>

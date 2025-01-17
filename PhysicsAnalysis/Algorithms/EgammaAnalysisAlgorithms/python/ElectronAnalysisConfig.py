@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -65,6 +65,8 @@ class ElectronCalibrationConfig (ConfigBlock) :
             info="decorate truth particle information on the reconstructed one")
         self.addOption ('decorateCaloClusterEta', False, type=bool,
             info="decorate the calo cluster eta on the reconstructed one")
+        self.addOption ('writeTrackD0Z0', False, type = bool,
+            info="save the d0 significance and z0sinTheta variables so they can be written out")
 
 
     def makeCalibrationAndSmearingAlg (self, config, name) :
@@ -209,6 +211,11 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, '')
 
         # Additional decorations
+        if self.writeTrackD0Z0:
+            alg = config.createAlgorithm( 'CP::AsgLeptonTrackDecorationAlg',
+                                          'LeptonTrackDecorator' + self.containerName + self.postfix )
+            alg.particles = config.readName (self.containerName)
+
         alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' + self.containerName + self.postfix )
         alg.particles = config.readName(self.containerName)
 
@@ -217,6 +224,10 @@ class ElectronCalibrationConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
         config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
+
+        if self.writeTrackD0Z0:
+            config.addOutputVar (self.containerName, 'd0sig_%SYS%', 'd0sig', noSys=True)
+            config.addOutputVar (self.containerName, 'z0sintheta_%SYS%', 'z0sintheta', noSys=True)
 
         # decorate truth information on the reconstructed object:
         if self.decorateTruth and config.dataType() is not DataType.Data:
@@ -255,8 +266,6 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         self.addOption ('maxDeltaZ0SinTheta', 0.5, type=float,
             info="maximum z0sinTheta in mm used for the trackSelection"
             "The default is 0.5 mm")
-        self.addOption ('writeTrackD0Z0', False, type = bool,
-            info="save the d0 significance and z0sinTheta variables so they can be written out")
         self.addOption ('identificationWP', None, type=str,
             info="the ID WP (string) to use. Supported ID WPs: TightLH, "
             "MediumLH, LooseBLayerLH, TightDNN, MediumDNN, LooseDNN, "
@@ -326,23 +335,17 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             postfix = '_' + postfix
 
         # Set up the track selection algorithm:
-        if self.writeTrackD0Z0 or self.trackSelection :
+        if self.trackSelection :
             alg = config.createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
                                         'ElectronTrackSelectionAlg' + postfix )
             alg.selectionDecoration = 'trackSelection' + postfix + ',as_bits'
             alg.maxD0Significance = self.maxD0Significance
             alg.maxDeltaZ0SinTheta = self.maxDeltaZ0SinTheta
-            alg.decorateTTVAVars = self.writeTrackD0Z0
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
             if self.trackSelection :
                 config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
                                      preselection=self.addSelectionToPreselection)
-            if self.writeTrackD0Z0 :
-                alg.d0sigDecoration = 'd0sig' + postfix
-                alg.z0sinthetaDecoration = 'z0sintheta' + postfix
-                config.addOutputVar (self.containerName, alg.d0sigDecoration, alg.d0sigDecoration,noSys=True)
-                config.addOutputVar (self.containerName, alg.z0sinthetaDecoration, alg.z0sinthetaDecoration,noSys=True)
 
         if 'LH' in self.identificationWP:
             # Set up the likelihood ID selection algorithm

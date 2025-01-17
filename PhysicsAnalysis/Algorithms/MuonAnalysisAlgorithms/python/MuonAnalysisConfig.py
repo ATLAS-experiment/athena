@@ -37,6 +37,8 @@ class MuonCalibrationConfig (ConfigBlock):
         self.addOption ('calibMode', 'correctData_CB', type=str, info='calibration mode of the MuonCalibTool needed to turn on the sagitta bias corrections and to select the muon track calibration type (CB or ID+MS)')
         self.addOption ('decorateTruth', False, type=bool,
             info="decorate truth particle information on the reconstructed one")
+        self.addOption ('writeTrackD0Z0', False, type = bool,
+            info="save the d0 significance and z0sinTheta variables so they can be written out")
 
     def makeAlgs (self, config) :
 
@@ -106,6 +108,11 @@ class MuonCalibrationConfig (ConfigBlock):
                                 preselection = True)
 
         # Additional decorations
+        if self.writeTrackD0Z0:
+            alg = config.createAlgorithm( 'CP::AsgLeptonTrackDecorationAlg',
+                                          'LeptonTrackDecorator' + self.containerName + self.postfix )
+            alg.particles = config.readName (self.containerName)
+
         alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' + self.containerName + self.postfix )
         alg.particles = config.readName (self.containerName)
 
@@ -114,6 +121,10 @@ class MuonCalibrationConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
         config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
+
+        if self.writeTrackD0Z0:
+            config.addOutputVar (self.containerName, 'd0sig_%SYS%', 'd0sig', noSys=True)
+            config.addOutputVar (self.containerName, 'z0sintheta_%SYS%', 'z0sintheta', noSys=True)
 
         # decorate truth information on the reconstructed object:
         if self.decorateTruth and config.dataType() is not DataType.Data:
@@ -147,8 +158,6 @@ class MuonWorkingPointConfig (ConfigBlock) :
         self.addOption ('maxDeltaZ0SinTheta', 0.5, type=float,
             info="maximum Delta z0sinTheta in mm used for the trackSelection"
             "The default is 0.5 mm")
-        self.addOption ('writeTrackD0Z0', False, type = bool,
-            info="save the d0 significance and z0sinTheta variables so they can be written out")
         self.addOption ('quality', None, type=str,
             info="the ID WP (string) to use. Supported ID WPs: Tight, Medium, "
             "Loose, LowPt, HighPt.")
@@ -206,22 +215,16 @@ class MuonWorkingPointConfig (ConfigBlock) :
             postfix = '_' + postfix
 
         # Set up the track selection algorithm:
-        if self.writeTrackD0Z0 or self.trackSelection:
+        if self.trackSelection:
             alg = config.createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
                                 'MuonTrackSelectionAlg' + postfix )
             alg.selectionDecoration = 'trackSelection' + postfix + ',as_bits'
-            alg.decorateTTVAVars = self.writeTrackD0Z0
             alg.maxD0Significance = self.maxD0Significance
             alg.maxDeltaZ0SinTheta = self.maxDeltaZ0SinTheta
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
             if self.trackSelection :
                 config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration, preselection=self.addSelectionToPreselection)
-            if self.writeTrackD0Z0 :
-                alg.d0sigDecoration = 'd0sig' + postfix
-                alg.z0sinthetaDecoration = 'z0sintheta' + postfix
-                config.addOutputVar (self.containerName, alg.d0sigDecoration, alg.d0sigDecoration,noSys=True)
-                config.addOutputVar (self.containerName, alg.z0sinthetaDecoration, alg.z0sinthetaDecoration,noSys=True)
 
         # Setup the muon quality selection
         alg = config.createAlgorithm( 'CP::MuonSelectionAlgV2',

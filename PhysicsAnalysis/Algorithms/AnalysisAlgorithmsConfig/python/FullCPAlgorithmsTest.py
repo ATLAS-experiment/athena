@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -156,6 +156,7 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
         containerName='AnaElectrons' )
     configSeq.setOptionValue ('.decorateTruth', True)
     configSeq.setOptionValue ('.decorateCaloClusterEta', True)
+    configSeq.setOptionValue ('.writeTrackD0Z0', True)
     configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.recalibratePhyslite', False)
     configSeq += config.makeConfig ('Electrons.WorkingPoint',
@@ -168,7 +169,6 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     else:
         configSeq.setOptionValue ('.identificationWP', 'LooseDNN')
     configSeq.setOptionValue ('.isolationWP', 'Loose_VarRad')
-    configSeq.setOptionValue ('.writeTrackD0Z0', True)
 
     configSeq += config.makeConfig ('Electrons.IFFClassification',
         containerName='AnaElectrons')
@@ -205,13 +205,13 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq += config.makeConfig ('Muons',
         containerName='AnaMuons')
     configSeq.setOptionValue ('.decorateTruth', True)
+    configSeq.setOptionValue ('.writeTrackD0Z0', True)
     configSeq.setOptionValue ('.recalibratePhyslite', False)
     configSeq += config.makeConfig ('Muons.WorkingPoint',
         containerName='AnaMuons',
         selectionName='medium')
     configSeq.setOptionValue ('.quality', 'Medium')
     configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
-    configSeq.setOptionValue ('.writeTrackD0Z0', True)
 
     configSeq += config.makeConfig ('Muons.IFFClassification',
         containerName='AnaMuons')

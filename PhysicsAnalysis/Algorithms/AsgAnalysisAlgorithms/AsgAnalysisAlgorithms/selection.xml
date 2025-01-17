@@ -5,6 +5,7 @@
    <class name="CP::AsgEnergyDecoratorAlg" />
    <class name="CP::AsgEventScaleFactorAlg" />
    <class name="CP::AsgFlagSelectionTool" />
+   <class name="CP::AsgLeptonTrackDecorationAlg" />
    <class name="CP::AsgLeptonTrackSelectionAlg" />
    <class name="CP::AsgOriginalObjectLinkAlg" />
    <class name="CP::AsgPriorityDecorationAlg" />
