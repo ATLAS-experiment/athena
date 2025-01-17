@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ThreadInitTool.h"
@@ -8,9 +8,8 @@
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 ThreadInitTool::ThreadInitTool( const std::string& type, const std::string& name,
-                        const IInterface* parent ) 
-  : base_class(type, name, parent),
-    m_nInitThreads(0)
+				const IInterface* parent ) 
+  : base_class(type, name, parent)
 {
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HiveExSvc.h"
@@ -16,7 +16,7 @@ HiveExSvc::HiveExSvc(const std::string& name, ISvcLocator* svc)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-HiveExSvc::~HiveExSvc() {}
+HiveExSvc::~HiveExSvc() = default;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

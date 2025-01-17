@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -26,11 +26,10 @@ public:
   HiveAlgF (const std::string& name, ISvcLocator* pSvcLocator);
   ~HiveAlgF();
 
-  // Define the initialize, execute and finalize methods:
+  // Define the initialize and execute methods:
   
   virtual StatusCode initialize() override;
   virtual StatusCode execute() override;
-  virtual StatusCode finalize() override;
   
 private:
   

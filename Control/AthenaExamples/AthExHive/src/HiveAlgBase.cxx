@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HiveAlgBase.h"
@@ -10,15 +10,13 @@
 #include "CLHEP/Random/RandFlat.h"
 
 HiveAlgBase::HiveAlgBase( const std::string& name, 
-                      ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator ),
-  m_hes("HiveExSvc",name),
-  m_ccs("CPUCrunchSvc",name),
-  m_rngSvc("AthRNGSvc", name) {}
+			  ISvcLocator* pSvcLocator ) : 
+  ::AthAlgorithm( name, pSvcLocator )
+{}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-HiveAlgBase::~HiveAlgBase() {}
+HiveAlgBase::~HiveAlgBase() = default;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
