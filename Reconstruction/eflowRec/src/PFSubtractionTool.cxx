@@ -529,8 +529,9 @@ void PFSubtractionTool::performTruthSubtraction(eflowCaloObject& thisEflowCaloOb
       //We can either remove a cell entireley if it has any truth deposit (closer to what the real 
       //reco algorithm does) or reweight the cells contribution based on subtracting the truth
       //energy from the reco cell energy
-
-      for (; theCell != lastCell; ++theCell){
+      //We only advance the iterator, theCell, if we *dont* call removeCell to avoid issues with
+      //invalid iterators
+      for (; theCell != lastCell;){
         //get the truth energy for this cell
         double truthEnergy = thisEfRecTrack->getCellTruthEnergy(*theCell);
         //reweight the cell such that energy*weight gives the new energy
@@ -538,7 +539,10 @@ void PFSubtractionTool::performTruthSubtraction(eflowCaloObject& thisEflowCaloOb
         double subtractedCellWeight = (oldCellEnergy - truthEnergy)/oldCellEnergy;
 
         if (0.0 != truthEnergy && m_useFullCellTruthSubtraction) thisCluster->removeCell(*theCell);
-        else if (!m_useFullCellTruthSubtraction) theCell.reweight(subtractedCellWeight);
+        else if (!m_useFullCellTruthSubtraction) {
+          theCell.reweight(subtractedCellWeight);
+          theCell++;
+        }
       }//cell loop
 
       float oldEnergy = thisCluster->e();

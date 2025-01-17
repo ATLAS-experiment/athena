@@ -102,7 +102,10 @@ eflowCellSubtractionFacilitator::annihilateClusters(
     CaloClusterCellLink* theCellLink = thisCluster->getOwnCellLinks();
     CaloClusterCellLink::iterator theFirstCell = theCellLink->begin();
     CaloClusterCellLink::iterator theLastCell = theCellLink->end();
-    for (; theFirstCell != theLastCell; ++theFirstCell){
+
+    //We don't advance the iterator, theCell, because we call removeCell. This avoids issues with
+    //invalid iterators that would otherwise occur and cause only a subset of cells to be processed.
+    for (; theFirstCell != theLastCell;){
       if (addCPData) theTrack.addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theFirstCell.index()),theFirstCell.weight());
       thisCluster->removeCell(*theFirstCell);
     }
