@@ -118,13 +118,13 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
     TRandom3 r;
     for ( int i = range[0]; i <= range[1]; ++i ) {
         std::vector<double> onestrip;
-        double stripSum=0, stripSum2=0;
+        double stripSum=0;//, stripSum2=0;
         for ( int j = range[2]; j <= range[3]; ++j ) {
             if (histogram->GetBinContent(i,j) < ignoreBelow) continue;
             float binvalue = histogram->GetBinContent(i,j);
             onestrip.push_back(binvalue);
             stripSum += binvalue;
-            stripSum2 += binvalue*binvalue;
+            //stripSum2 += binvalue*binvalue;
         }
         stripsAvg.push_back(stripSum/onestrip.size());
         // traditional variance calculation, not robust to outliers

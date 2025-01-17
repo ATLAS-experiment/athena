@@ -36,7 +36,7 @@
 #include <vector>
 #include <memory>
 
-class FPGATrackSimMatrixAccumulator;
+struct FPGATrackSimMatrixAccumulator;
 class FPGATrackSimPlaneMap;
 class TTree;
 class TH1F;
