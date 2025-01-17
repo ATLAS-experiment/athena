@@ -169,7 +169,7 @@ namespace Analysis {
 	
         ATH_MSG_WARNING( "failed to estimate track impact parameter, using dummy values" );
         decor_d0(*track) = NAN;
-        decor_z0(*track) = NAN;
+        decor_z0(*track) = -1e4;
         decor_d0_sigma(*track) = NAN;
         decor_z0_sigma(*track) = NAN;
 	decor_TrkOriginVtx(*track) = vertexLink;
