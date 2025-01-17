@@ -130,11 +130,23 @@ def InDetTRTAmbiTrackSelectionToolCfg(
         CompFactory.InDet.InDetAmbiTrackSelectionTool(name, **kwargs))
     return acc
 
+def TrigAmbiTrackSelectionToolCfg(
+        flags, name='InDetTrigAmbiTrackSelectionTool', **kwargs):
+    
+    if flags.Detector.GeometryITk:
+        kwargs.setdefault("minHits", flags.Tracking.ActiveConfig.minClusters[0]) #TODO eta-dependant cuts
+        kwargs.setdefault("minNotShared",
+                          flags.Tracking.ActiveConfig.minSiNotShared[0])
+        kwargs.setdefault("maxShared", flags.Tracking.ActiveConfig.maxShared[0])
+        tool = ITkTrigAmbiTrackSelectionToolCfg(flags, name, **kwargs)
+    else:
+        tool = InDetTrigAmbiTrackSelectionToolCfg(flags, name, **kwargs)
+
+    return tool
 
 def InDetTrigAmbiTrackSelectionToolCfg(
         flags, name='InDetTrigAmbiTrackSelectionTool', **kwargs):
     acc = ComponentAccumulator()
-    # TODO add AmbiTrackSelectionTool for cosmics
 
     if "DriftCircleCutTool" not in kwargs:
         from InDetConfig.InDetTrackSelectorToolConfig import (
@@ -233,4 +245,35 @@ def ITkAmbiTrackSelectionToolCfg(
 
     acc.setPrivateTools(CompFactory.InDet.InDetDenseEnvAmbiTrackSelectionTool(
         name=name+flags.Tracking.ActiveConfig.extension, **kwargs))
+    return acc
+
+def ITkTrigAmbiTrackSelectionToolCfg(
+        flags, name="ITkTrigAmbiTrackSelectionTool", **kwargs):
+
+    acc = ComponentAccumulator()
+
+    if "DriftCircleCutTool" not in kwargs:
+        from InDetConfig.InDetTrackSelectorToolConfig import (
+            InDetTrigTRTDriftCircleCutToolCfg)
+        DriftCircleCutTool = acc.popToolsAndMerge(
+            InDetTrigTRTDriftCircleCutToolCfg(flags))
+        acc.addPublicTool(DriftCircleCutTool)
+        kwargs.setdefault("DriftCircleCutTool", DriftCircleCutTool)
+
+    if "AssociationTool" not in kwargs:
+        from InDetConfig.InDetAssociationToolsConfig import (
+            TrigITkPRDtoTrackMapToolGangedPixelsCfg)
+        kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(
+            TrigITkPRDtoTrackMapToolGangedPixelsCfg(flags)))
+
+    kwargs.setdefault("minHits", flags.Tracking.ActiveConfig.minClusters)
+    kwargs.setdefault("minNotShared",
+                      flags.Tracking.ActiveConfig.minSiNotShared)
+    kwargs.setdefault("maxShared", flags.Tracking.ActiveConfig.maxShared)
+    kwargs.setdefault("minTRTHits", 0)  # used for Si only tracking !!!
+    kwargs.setdefault("Cosmics", False)  # there is a different instance
+    kwargs.setdefault("UseParameterization", False)
+
+    acc.setPrivateTools(
+        CompFactory.InDet.InDetAmbiTrackSelectionTool(name, **kwargs))
     return acc

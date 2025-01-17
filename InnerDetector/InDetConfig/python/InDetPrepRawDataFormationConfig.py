@@ -104,7 +104,7 @@ def TrigPixelClusterizationCfg(flags, RoIs, name="InDetPixelClusterization", **k
         kwargs.setdefault("gangedAmbiguitiesFinder", acc.popToolsAndMerge(
             PixelGangedAmbiguitiesFinderCfg(flags)))
 
-    kwargs.setdefault("AmbiguitiesMap", "TrigPixelClusterAmbiguitiesMap")
+    kwargs.setdefault("AmbiguitiesMap", flags.Trigger.InDetTracking.ClusterAmbiguitiesMap)
     kwargs.setdefault("ClustersName", "PixelTrigClusters")
     kwargs.setdefault("isRoI_Seeded", True)
     kwargs.setdefault("RoIs", RoIs)
@@ -146,6 +146,7 @@ def ITkTrigPixelClusterizationCfg(flags, name = "ITkTrigPixelClusterization", ro
                                         RoIs=roisKey,
                                         ClustersName = "ITkTrigPixelClusters",
                                         ClusterContainerCacheKey=flags.Trigger.ITkTracking.PixelClusterCacheKey,
+                                        AmbiguitiesMap = flags.Trigger.ITkTracking.ClusterAmbiguitiesMap,
                                         RegSelTool= acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags))))
     return acc
 

@@ -126,7 +126,7 @@ def TrigPixelClusterOnTrackToolBaseCfg(
 
     kwargs.setdefault("ErrorStrategy", 2)
     kwargs.setdefault("SplitClusterAmbiguityMap",
-                      "TrigPixelClusterAmbiguitiesMap")
+                      flags.Trigger.InDetTracking.ClusterAmbiguitiesMap)
 
     acc.setPrivateTools(
         CompFactory.InDet.PixelClusterOnTrackTool(name, **kwargs))

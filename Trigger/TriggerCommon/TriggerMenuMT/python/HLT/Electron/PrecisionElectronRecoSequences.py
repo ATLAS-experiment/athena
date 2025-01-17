@@ -70,8 +70,6 @@ def precisionElectronRecoSequence(flags, RoIs, ion=False, doGSF=True, doLRT=Fals
     OutputClusterContainerName = TrigEgammaKeys.precisionElectronEMClusterContainer
     #useBremAssoc = True
 
-    from TrigInDetConfig.InDetTrigCollectionKeys import TrigTRTKeys, TrigPixelKeys
-
     cellsName = "CaloCells" if not ion else "CorrectedRoICaloCells"
     dataObjects = [( 'CaloCellContainer' , 'StoreGateSvc+%s' % cellsName ),
                    ( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % caloClusters ),
@@ -81,15 +79,23 @@ def precisionElectronRecoSequence(flags, RoIs, ion=False, doGSF=True, doLRT=Fals
                          # verifier object needed by GSF
                          ( 'xAOD::TrackParticleContainer','StoreGateSvc+%s' % trackParticles),
                          ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' ), 
-                         ( 'InDet::PixelGangedClusterAmbiguities' , 'StoreGateSvc+%s' % TrigPixelKeys.PixelClusterAmbiguitiesMap ),
-                         ( 'InDet::TRT_DriftCircleContainer' , 'StoreGateSvc+%s' % TrigTRTKeys.DriftCircles ),
                          ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.AveIntPerXDecor' )]
 
-        if flags.Input.isMC:
-            dataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
-        else:
+        if flags.Detector.GeometryTRT:
+           dataObjects +=  [( 'InDet::TRT_DriftCircleContainer' , 'StoreGateSvc+%s' % "TRT_TrigDriftCircles" )]
+           if flags.Input.isMC:
+               dataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
+           else:
+               dataObjects += [( 'TRT_RDO_Cache' , f'StoreGateSvc+{flags.Trigger.InDetTracking.TRTRDOCacheKey}' )]
+
+        ambimap = flags.Trigger.InDetTracking.ClusterAmbiguitiesMap
+        if flags.Detector.GeometryITk:
+            ambimap = flags.Trigger.ITkTracking.ClusterAmbiguitiesMap
+
+        dataObjects +=  [('InDet::PixelGangedClusterAmbiguities' , 'StoreGateSvc+%s' % ambimap )]
+
+        if not flags.Input.isMC:
             dataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' )]
-            dataObjects += [( 'TRT_RDO_Cache' , f'StoreGateSvc+{flags.Trigger.InDetTracking.TRTRDOCacheKey}' )]
 
     precisionElectronVDV = CompFactory.AthViews.ViewDataVerifier("precisionElectron"+tag+"VDV")
     precisionElectronVDV.DataObjects = dataObjects
