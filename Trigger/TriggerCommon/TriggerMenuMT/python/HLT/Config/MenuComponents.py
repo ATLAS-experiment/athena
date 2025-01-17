@@ -364,12 +364,22 @@ class EmptyMenuSequence:
         return "MenuSequence::%s \n Hypo::%s \n Maker::%s \n Sequence::%s \n HypoTool::%s\n"\
             %(self.name, "Empty", self.maker.Alg.getName(), self.sequence.Alg.getName(), "None")
 
+def createEmptyMenuSequenceCfg(flags, name):
+    """ creates the generator function named as the empty sequence"""
+    def create_sequence(name):            
+        return EmptyMenuSequence(name)
+    # this allows to create the function with the same name as the sequence
+    #TODO need to extend it to also use it instead of EmptyMenuSequenceCfg inside custom steps
+    create_sequence.__name__ = name    
+    globals()[name] = create_sequence
+    return globals()[name]
+
 def EmptyMenuSequenceCfg(flags, name):
     """Function to create a EmptyMenuSequence (used in the functools.partial)"""
     return EmptyMenuSequence(name)
 
 def isEmptySequenceCfg(o):
-    return o.func.__name__ == "EmptyMenuSequenceCfg"
+    return 'Empty' in o.func.__name__
 
 class MenuSequence:
     """Class to group reco sequences with the Hypo.
@@ -527,7 +537,6 @@ class Chain(object):
                 elif re.search('^Step[0-9]{2}_', step_name):
                     step_name = step_name[7:]   
                 step.name = 'Step%d_'%(stepID+1)+step_name
-
                 # also modify the empty sequence names to follow the step name change
                 for iseq, seq in enumerate(step.sequenceGens):
                     if isEmptySequenceCfg(seq): 
@@ -535,8 +544,8 @@ class Chain(object):
                         if re.search('Seq[0-9]_',name):
                             newname = re.sub('Seq[0-9]_', 'Seq%d_'%(stepID+1), name)
                             #replace the empty sequence                            
-                            step.sequenceGens[iseq]=functools.partial(EmptyMenuSequenceCfg, None, name=newname)
-
+                            thisEmpty = createEmptyMenuSequenceCfg(None, newname)                
+                            step.sequenceGens[iseq]=functools.partial(thisEmpty, name=newname)
         return
 
 
