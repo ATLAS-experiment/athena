@@ -57,12 +57,6 @@ class ttj_MiNNLO(PowhegV2):
         OLPath = os.path.dirname(self.executable) + "/OpenLoops2"
         os.environ['OpenLoopsPath'] = OLPath
         logger.info("OpenLoopsPath defined as = {0}".format(os.getenv('OpenLoopsPath')))
-        logger.debug("LD_LIBRARY_PATH (before) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
-        VirtualsPath = os.path.dirname(self.executable) + "/Virtuals/obj-gnu"
-        ldpath = os.getenv('LD_LIBRARY_PATH')
-        ldpath_new = VirtualsPath + ":" + ldpath
-        os.environ['LD_LIBRARY_PATH'] = ldpath_new
-        logger.debug("LD_LIBRARY_PATH (after) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
 
         # Add algorithms to the sequence
         self.add_algorithm(ExternalMadSpin(process="generate p p > t t~ j [QCD]"))
