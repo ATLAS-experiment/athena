@@ -11,28 +11,20 @@
  * @file PixelConditionsData/PixeldEdxData.h
  * @author Rebecca Hicks <rhicks@cern.ch>
  * @class PixelClusterdEdxCondData
- * @brief Store pixel cluster dEdx calibration data 
- **/
-class PixeldClusterEdxCondData {
-public:
-  /*Constructor*/
-  PixelClusterdEdxCondData();
-  /*Destructor*/
-  ~PixelClusterdEdxCondData();
+ * @brief Store pixel cluster dEdx calibration data */
 
-  /*Get Calibration Constants Method*/
-  std::vector<float> PixelClusterdEdxCondData::GetConstants();
-  /*Set Calibration Constants Method*/
-  void PixelClusterdEdxCondData::SetConstants();
-private:
-/*Conditions data is in the form of a scale factor map*/
-/*Map[run,eta,layer,barrel] = sf*/
-
-  std::vector<float> m_Map;
-
+class PixelClusterdEdxCondData {
+  public:
+    PixelClusterdEdxCondData();
+    virtual ~PixelClusterdEdxCondData();
+    int getVar() const;
+    void setVar(const int value);
+ 
+  private:
+    int m_var = -999; //Default for testing
 };
 
-CLASS_DEF( PixelClusterdEdxCondData,  114268426 , 1)
-CONDCONT_DEF(PixelClusterdEdxCondData, 183220670 , 1) /*These numbers are probably going to break something*/
+CLASS_DEF( PixelClusterdEdxCondData, 1240840447  , 1)
+CONDCONT_DEF( PixelClusterdEdxCondData, 1240840448 ); /*These numbers are probably going to break something*/
 
 #endif 

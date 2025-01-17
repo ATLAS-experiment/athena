@@ -19,6 +19,7 @@
 
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
 #include "PixelConditionsData/PixeldEdxData.h"
+#include "PixelConditionsData/PixelClusterdEdxCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
 class AtlasDetectorID;
@@ -60,13 +61,16 @@ namespace InDet {
       const PixelID* m_pixelid;
       double m_conversionfactor;
       
-      std::map<std::tuple<int, int, int>, float> m_scaleFactorMap; //Rebecca edits
+      //std::map<std::tuple<int, int, int>, float> m_scaleFactorMap; //Rebecca edits
 
       SG::ReadCondHandleKey<PixelChargeCalibCondData> m_moduleDataKey
       {this, "PixelChargeCalibCondData", "PixelChargeCalibCondData", "ChargeCalibration data, for ToT overflow setting"};
 
       SG::ReadCondHandleKey<PixeldEdxData> m_dedxKey
       {this, "PixeldEdxData", "PixeldEdxData", "Output key of pixel dEdx"};
+
+  SG::ReadCondHandleKey<PixelClusterdEdxCondData> m_clusterSfKey
+      {this, "PixelClusterdEdxCondData", "PixelClusterdEdxCondData", "Output key of Pixel Cluster dEdx key"};
   }; 
 } // end of namespace
 

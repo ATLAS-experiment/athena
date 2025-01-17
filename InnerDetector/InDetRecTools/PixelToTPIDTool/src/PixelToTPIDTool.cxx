@@ -51,7 +51,7 @@ InDet::PixelToTPIDTool::PixelToTPIDTool(const std::string& t, const std::string&
 
   //conversion Factor
   //{.025,.023,.020}; //{Old Planars,IBL_3Ds,IBL_Planars} the sensors thickness will be take into account in dEdx calculation
-  std::map<std::tuple<int, int, int>, float> m_scaleFactorMap; //Rebecca edits
+  //std::map<std::tuple<int, int, int>, float> m_scaleFactorMap; //Rebecca edits
   m_conversionfactor=energyPair/sidensity;
 }
 
@@ -65,47 +65,47 @@ StatusCode InDet::PixelToTPIDTool::initialize() { //Rebecca - modify this line t
     //  return StatusCode::FAILURE;
     //}
 
-    TFile *file = TFile::Open("/afs/cern.ch/user/r/rhicks/private/clusterPixeldEdx2Athena/test-cool-file-v2.root");
-    if (!file || !file->IsOpen()) {
-      ATH_MSG_ERROR("Rebecca - Failed to open ROOT file");
-      return StatusCode::FAILURE;
-    }
+   // TFile *file = TFile::Open("/afs/cern.ch/user/r/rhicks/private/clusterPixeldEdx2Athena/test-cool-file-v2.root");
+   // if (!file || !file->IsOpen()) {
+   //   ATH_MSG_ERROR("Rebecca - Failed to open ROOT file");
+   //   return StatusCode::FAILURE;
+   // }
 
     // Retrieve the TTree from the ROOT file
-    TTree *tree = (TTree*)file->Get("MyTree");  // Replace with actual TTree name
-    if (!tree) {
-      ATH_MSG_ERROR("Rebecca - Failed to retrieve TTree from ROOT file");
-      return StatusCode::FAILURE;
-    }
+    //TTree *tree = (TTree*)file->Get("MyTree");  // Replace with actual TTree name
+    //if (!tree) {
+    //  ATH_MSG_ERROR("Rebecca - Failed to retrieve TTree from ROOT file");
+    //  return StatusCode::FAILURE;
+   // }
 
     // Define variables to store branch data
-    int rn,eta,layer;
-    float sf;
+    //int rn,eta,layer;
+    //float sf;
 
     // Set the branch addresses
-    tree->SetBranchAddress("RunNumber", &rn);
-    tree->SetBranchAddress("scaleFactor", &sf);
-    tree->SetBranchAddress("layer", &layer);
-    tree->SetBranchAddress("eta", &eta);
+    //tree->SetBranchAddress("RunNumber", &rn);
+    //tree->SetBranchAddress("scaleFactor", &sf);
+    //tree->SetBranchAddress("layer", &layer);
+    //tree->SetBranchAddress("eta", &eta);
 
     // Create a map to store data, keyed by Run, Layer, and Eta
     //std::map<std::tuple<int, int, int>, float> m_scaleFactorMap;
-    m_scaleFactorMap.clear();  // Ensure the map is empty before loading data
+    //m_scaleFactorMap.clear();  // Ensure the map is empty before loading data
 
     // Loop through the TTree and load data into the map
-    Long64_t nEntries = tree->GetEntries();
-    for (Long64_t i = 0; i < nEntries; ++i) {
-      tree->GetEntry(i);  // Get the data for this entry
+    //Long64_t nEntries = tree->GetEntries();
+    //for (Long64_t i = 0; i < nEntries; ++i) {
+    //  tree->GetEntry(i);  // Get the data for this entry
 
       // Store data in the map: key = (Run, Layer, Eta), value = ScaleFactor
-      m_scaleFactorMap[std::make_tuple(rn, layer, eta)] = sf;
-    }
+    //  m_scaleFactorMap[std::make_tuple(rn, layer, eta)] = sf;
+   // }
 
     // Close the file after loading data
-    file->Close();
+    //file->Close();
 
-    ATH_MSG_INFO("Rebecca - Loaded ScaleFactor data  v2 into map with " << m_scaleFactorMap.size() << " entries.");
-
+    //ATH_MSG_INFO("Rebecca - Loaded ScaleFactor data  v2 into map with " << m_scaleFactorMap.size() << " entries.");
+    ATH_MSG_INFO("Rebecca - Did I load my edits?");
   //Rebecca - End modifications 
   ATH_CHECK(AthAlgTool::initialize());
 
@@ -118,6 +118,8 @@ StatusCode InDet::PixelToTPIDTool::initialize() { //Rebecca - modify this line t
   ATH_CHECK(m_moduleDataKey.initialize());
 
   ATH_CHECK(m_dedxKey.initialize());
+
+  ATH_CHECK(m_clusterSfKey.initialize());
 
   return StatusCode::SUCCESS;
 }
@@ -192,13 +194,13 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
           // ATH_MSG_INFO("What are the eta and layer values? - Rebecca ");
           // ATH_MSG_INFO(layer);
           // ATH_MSG_INFO(eta_module);
-          int queryLayer = layer; // Example Layer
-          int queryEta = abs(eta_module);   // Example Eta 
-          auto key = std::make_tuple(queryRun, queryLayer, queryEta); //Rebecca Edits
-          auto it = m_scaleFactorMap.find(key);
-          float scaleFactor = it->second;
-          ATH_MSG_INFO("Rebecca - Yup, here it is: ");
-          ATH_MSG_INFO(scaleFactor);
+          //int queryLayer = layer; // Example Layer
+          //int queryEta = abs(eta_module);   // Example Eta 
+          //auto key = std::make_tuple(queryRun, queryLayer, queryEta); //Rebecca Edits
+          //auto it = m_scaleFactorMap.find(key);
+          //float scaleFactor = it->second;
+          //ATH_MSG_INFO("Rebecca - Yup, here it is: ");
+          //ATH_MSG_INFO(scaleFactor);
            //End of REbecca edits
           float dotProd = (*tsosIter)->trackParameters()->momentum().dot(
             (*tsosIter)->trackParameters()->associatedSurface().normal());
@@ -207,7 +209,7 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
 
           if (std::abs(cosalpha)<0.16) { continue; }
 
-          float charge=pixclus->prepRawData()->totalCharge()*cosalpha*scaleFactor;
+          float charge=pixclus->prepRawData()->totalCharge()*cosalpha;
 
           //keep track if this is an ibl cluster with overflow
           int iblOverflow=0;
@@ -217,6 +219,10 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
             int overflowIBLToT =
               SG::ReadCondHandle<PixelChargeCalibCondData>(m_moduleDataKey, ctx)
                 ->getFEI4OverflowToT();
+            int scaleFactor = 
+              SG::ReadCondHandle<PixelClusterdEdxCondData>(m_clusterSfKey, ctx)->getVar(); //XXXRebecca
+            ATH_MSG_INFO("Did I read from PixelChargeCalibCondData?");
+            ATH_MSG_INFO(scaleFactor);
             const std::vector<int>& ToTs = pixclus->prepRawData()->totList();
 
             for (int pixToT : ToTs) {
