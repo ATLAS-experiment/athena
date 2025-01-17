@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,9 +16,6 @@ Trk::StaticNavigationEngine::StaticNavigationEngine(const std::string& t, const 
 : AthAlgTool(t,n,p)
 {
     declareInterface<Trk::INavigationEngine>(this);
-    // steering of the screen outoput (SOP)
-    declareProperty("OutputPrefix"                          , m_sopPrefix);
-    declareProperty("OutputPostfix"                         , m_sopPostfix);
 }
 
 // destructor
@@ -28,19 +25,13 @@ Trk::StaticNavigationEngine::~StaticNavigationEngine()
 // the interface method initialize
 StatusCode Trk::StaticNavigationEngine::initialize()
 {
+    m_sopPrefix = m_sopPrefix_prop;
+    m_sopPostfix = m_sopPostfix_prop;
     
     ATH_CHECK( m_trackingGeometryReadKey.initialize(!m_trackingGeometryReadKey.key().empty()) );
-    if (m_propagationEngine.retrieve().isFailure()){
-        EX_MSG_FATAL("", "initialize", "", "failed to retrieve propagation engine '"<< m_propagationEngine << "'. Aborting." );
-        return StatusCode::FAILURE;
-    } else 
-        EX_MSG_DEBUG("", "initialize", "", "successfully retrieved '" << m_propagationEngine << "'." );
-    
-    if (m_materialEffectsEngine.retrieve().isFailure()){
-        EX_MSG_FATAL("", "initialize", "", "failed to retrieve material effect engine '"<< m_materialEffectsEngine << "'. Aborting." );
-        return StatusCode::FAILURE;
-    } else 
-        EX_MSG_DEBUG("", "initialize", "", "successfully retrieved '" << m_materialEffectsEngine << "'." );
+    ATH_CHECK( m_propagationEngine.retrieve());
+    ATH_CHECK( m_materialEffectsEngine.retrieve());
+
     EX_MSG_DEBUG("", "initialize", "", "successful" );
     return StatusCode::SUCCESS;
 }    

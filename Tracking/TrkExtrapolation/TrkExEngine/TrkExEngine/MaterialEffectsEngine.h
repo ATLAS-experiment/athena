@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -68,9 +68,15 @@ namespace Trk {
                                              Trk::MaterialUpdateStage matupstage) const;
         
       MaterialInteraction                          m_interactionFormulae;     //!< the formulas concentrated
-      bool                                         m_eLossCorrection;         //!< apply the energy loss correction
-      bool                                         m_eLossMpv;                //!< apply the energy loss correction as most probable value
-      bool                                         m_mscCorrection;           //!< apply the multiple (coulomb) scattering correction
+      BooleanProperty m_eLossCorrection{this, "EnergyLossCorrection", true,
+	"apply the energy loss correction"};
+      BooleanProperty m_eLossMpv{this, "MostProbableEnergyLoss", true,
+	"apply the energy loss correction as most probable value"};
+      BooleanProperty m_mscCorrection{this, "MultipleScatteringCorrection", true,
+	"apply the multiple (coulomb) scattering correction"};
+
+      StringProperty m_sopPrefix_prop{this, "OutputPrefix", ""};
+      StringProperty m_sopPostfix_prop{this, "OutputPostfix", ""};
 
   };
       

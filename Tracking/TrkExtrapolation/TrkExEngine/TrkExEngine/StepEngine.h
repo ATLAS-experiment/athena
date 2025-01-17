@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -104,19 +104,25 @@ namespace Trk {
 	Trk::ExtrapolationCode handleIntersection(ExCellCharged& ecCharged, 
 						  Trk::TargetSurfaceVector& solutions) const;
 
-        ToolHandle<IPropagator>                            m_propagator;        //!< the used propagation engine
-        ToolHandle<IMaterialEffectsEngine>                 m_materialEffectsEngine;    //!< the material effects updated
-        ToolHandle<INavigationEngine>                      m_navigationEngine;         //!< access to tracking geometry
+        ToolHandle<IPropagator> m_propagator
+	  {this, "Propagator", "", "the used propagation engine"};
+        ToolHandle<IMaterialEffectsEngine> m_materialEffectsEngine
+	  {this, "MaterialEffectsEngine", "", "the material effects updated"};
+        ToolHandle<INavigationEngine> m_navigationEngine
+	  {this, "NavigationEngine", "", "access to tracking geometry"};
 
         // local variables
-        double                                             m_tolerance;            
+	double m_tolerance = 0.01;
 
         // target surfaces
         mutable TargetSurfaces                             m_targetSurfaces;
 
         // debugging mode & switch         
-        bool                                               m_debugAndFix;     // switch                                 
-        mutable bool                                       m_debugCall;       // mode                                 
+        BooleanProperty m_debugAndFix{this, "DebugAndFixMode", true};
+        mutable bool m_debugCall = false;       // mode
+
+        StringProperty m_sopPrefix_prop{this, "OutputPrefix", ""};
+        StringProperty m_sopPostfix_prop{this, "OutputPostfix", ""};
 
     };
 
