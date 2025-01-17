@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -116,7 +116,10 @@ namespace Trk {
 
 
         //!< forces a global search for the initialization, allows to switch TrackingGeometries in one job
-        bool                                                m_forceSearchInit; 
+        BooleanProperty m_forceSearchInit{this, "ForceSearchAtInit", false};
+
+        StringProperty m_sopPrefix_prop{this, "OutputPrefix", ""};
+        StringProperty m_sopPostfix_prop{this, "OutputPostfix", ""};
     
     };
 

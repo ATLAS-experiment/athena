@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -75,6 +75,10 @@ namespace Trk {
         virtual const TrackingGeometry& trackingGeometry() const;
 
      private:
+
+        StringProperty m_sopPrefix_prop{this, "OutputPrefix", ""};
+        StringProperty m_sopPostfix_prop{this, "OutputPostfix", ""};
+
         /** resolve the boundary situation */
         template <class T> ExtrapolationCode resolveBoundaryT(ExtrapolationCell<T>& eCell,
                                                              PropDirection dir=alongMomentum) const;
