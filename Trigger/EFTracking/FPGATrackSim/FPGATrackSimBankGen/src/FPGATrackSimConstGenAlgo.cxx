@@ -7,20 +7,21 @@
  * @brief Algorithm to generate fit constants.
  */
 
-
+#include "FPGATrackSimConstGenAlgo.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ITHistSvc.h"
 
 #include "FPGATrackSimBanks/FPGATrackSimSectorSlice.h"
 #include "FPGATrackSimObjects/FPGATrackSimConstants.h"
-
-#include "FPGATrackSimConstGenAlgo.h"
+#include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
 #include "FPGATrackSimMatrixIO.h"
 
+#include "TH1F.h"
 #include "TTree.h"
 #include "TFile.h"
 #include "TMath.h"
 #include "TROOT.h"
+#include "TMatrixD.h"
 
 #include <sstream>
 #include <iostream>
@@ -39,6 +40,13 @@
 
 using namespace std;
 
+namespace {
+  template<typename ...Ptr>
+  bool
+  anyNullPtr(Ptr&&...p){
+    return ((p!=nullptr) && ...) ;
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Initialize
@@ -105,17 +113,19 @@ StatusCode FPGATrackSimConstGenAlgo::initialize()
 
 
 StatusCode FPGATrackSimConstGenAlgo::bookHistograms()
-{
-    m_h_vc = new TH1F("h_vc","h_vc",500,-1e-4,1e-4);
-    m_h_vd = new TH1F("h_vd","h_vd",500,-1e-2,1e-2);
-    m_h_vf = new TH1F("h_vf","h_vf",500,-1e-2,1e-2);
-    m_h_vz = new TH1F("h_vz","h_vz",500,-1e-2,1e-2);
-    m_h_veta = new TH1F("h_veta","h_veta",500,-1e-2,1e-2);
-    ATH_CHECK(m_tHistSvc->regHist("/TRIGFPGATrackSimTREEGOODOUT/h_vc",m_h_vc));
-    ATH_CHECK(m_tHistSvc->regHist("/TRIGFPGATrackSimTREEGOODOUT/h_vd",m_h_vd));
-    ATH_CHECK(m_tHistSvc->regHist("/TRIGFPGATrackSimTREEGOODOUT/h_vf",m_h_vf));
-    ATH_CHECK(m_tHistSvc->regHist("/TRIGFPGATrackSimTREEGOODOUT/h_vz",m_h_vz));
-    ATH_CHECK(m_tHistSvc->regHist("/TRIGFPGATrackSimTREEGOODOUT/h_veta",m_h_veta));
+{   
+    //usage guide:
+    //https://acode-browser.usatlas.bnl.gov/lxr/source/Gaudi/GaudiSvc/src/THistSvc/README.md
+    auto h_vc = std::make_unique<TH1F>("h_vc","h_vc",500,-1e-4,1e-4);
+    auto h_vd = std::make_unique<TH1F>("h_vd","h_vd",500,-1e-2,1e-2);
+    auto h_vf = std::make_unique<TH1F>("h_vf","h_vf",500,-1e-2,1e-2);
+    auto h_vz = std::make_unique<TH1F>("h_vz","h_vz",500,-1e-2,1e-2);
+    auto h_veta = std::make_unique<TH1F>("h_veta","h_veta",500,-1e-2,1e-2);
+    ATH_CHECK(m_tHistSvc->regHist("/TRIGFPGATrackSimTREEGOODOUT/h_vc",std::move(h_vc)));
+    ATH_CHECK(m_tHistSvc->regHist("/TRIGFPGATrackSimTREEGOODOUT/h_vd",std::move(h_vd)));
+    ATH_CHECK(m_tHistSvc->regHist("/TRIGFPGATrackSimTREEGOODOUT/h_vf",std::move(h_vf)));
+    ATH_CHECK(m_tHistSvc->regHist("/TRIGFPGATrackSimTREEGOODOUT/h_vz",std::move(h_vz)));
+    ATH_CHECK(m_tHistSvc->regHist("/TRIGFPGATrackSimTREEGOODOUT/h_veta",std::move(h_veta)));
 
     return StatusCode::SUCCESS;
 }
@@ -378,14 +388,29 @@ void FPGATrackSimConstGenAlgo::fillConstTree(std::vector<module_t> & modules, FP
     m_ctree->Fill();
 
     if (m_Monitor)
-    {
+    {   
+        const std::string prefix{"/TRIGFPGATrackSimTREEGOODOUT/"};
+        auto getHistogram = [&](const std::string & suffix)->TH1*{
+          TH1 * ptr{};
+          const auto sc = m_tHistSvc->getHist(prefix+suffix, ptr);
+          return (sc == StatusCode::SUCCESS) ? ptr: nullptr;
+        };
+        auto h_vc = getHistogram("h_vc");
+        auto h_vd = getHistogram("h_vd");
+        auto h_vf = getHistogram("h_vf");
+        auto h_vz = getHistogram("h_vz");
+        auto h_veta = getHistogram("h_veta");
+        if (anyNullPtr(h_vc, h_vd, h_vf, h_vz, h_veta)){
+          ATH_MSG_ERROR("FPGATrackSimConstGenAlgo::fillConstTree; nullptr");
+          return;
+        }
         for (int i = 0; i < m_nCoords; i++)
         {
-            m_h_vc->Fill(geo.Vcurvature[i]);
-            m_h_vd->Fill(geo.Vd0[i]);
-            m_h_vf->Fill(geo.Vphi[i]);
-            m_h_vz->Fill(geo.Vz0[i]);
-            m_h_veta->Fill(geo.Veta[i]);
+            h_vc->Fill(geo.Vcurvature[i]);
+            h_vd->Fill(geo.Vd0[i]);
+            h_vf->Fill(geo.Vphi[i]);
+            h_vz->Fill(geo.Vz0[i]);
+            h_veta->Fill(geo.Veta[i]);
         }
     }
 }
