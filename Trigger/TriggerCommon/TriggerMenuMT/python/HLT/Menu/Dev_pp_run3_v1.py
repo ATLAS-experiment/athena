@@ -809,14 +809,7 @@ def getDevSignatures():
     ]
 
     chains['UnconventionalTracking'] = [
-        #Isolated High Pt Trigger Test chain for optimisation studies
-        ChainProp(name='HLT_isotrk50_L1XE50', groups=UnconvTrkGroup+DevGroup, l1SeedThresholds=['FSNOSEED']),
-
-
-        ChainProp(name='HLT_fslrt0_L1J100', groups=DevGroup+['PS:NoHLTRepro'], l1SeedThresholds=['FSNOSEED']),
-        ChainProp(name='HLT_fslrt0_L14J15', groups=DevGroup+['PS:NoHLTRepro'], l1SeedThresholds=['FSNOSEED']),
-        ChainProp(name='HLT_fslrt0_L1XE50', groups=DevGroup+['PS:NoHLTRepro'], l1SeedThresholds=['FSNOSEED']),
-        ChainProp(name='HLT_fslrt0_L1All',  groups=DevGroup+['PS:NoHLTRepro'], l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_fslrt0_L1jJ160', groups=DevGroup+['PS:NoHLTRepro'], l1SeedThresholds=['FSNOSEED']),
     ]
 
     return chains
