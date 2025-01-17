@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimMatrixGenAlgo.cxx
@@ -718,7 +718,12 @@ StatusCode FPGATrackSimMatrixGenAlgo::fillAccumulatorByDropping(std::vector<FPGA
       new_acc.pars.phi = x;
       std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> new_modules_acc = {modules, new_acc};
       
-      ATH_CHECK(makeAccumulator(sector_hits, track, new_modules_acc));
+      auto sc = makeAccumulator(sector_hits, track, new_modules_acc);
+      if (sc != StatusCode::SUCCESS){
+        delete wcHit;
+        ATH_MSG_ERROR("FPGATrackSimMatrixGenAlgo::fillAccumulatorByDropping; makeAccumulator failed");
+        return StatusCode::FAILURE;
+      }
       accumulate(map, new_modules_acc.first, new_modules_acc.second);
       
       // Restore the hit. May not be necessary to clean up wcHit here.

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimConstGenAlgo_h
 #define FPGATrackSimConstGenAlgo_h
@@ -26,23 +26,21 @@
 
 #include "GaudiKernel/ITHistSvc.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "FPGATrackSimObjects/FPGATrackSimVectors.h"
+#include "FPGATrackSimObjects/FPGATrackSimTypes.h" //module_t typedef
+#include "FPGATrackSimObjects/FPGATrackSimTrackPars.h" //member
+#include "FPGATrackSimObjects/FPGATrackSimVectors.h" //vector2D
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
-#include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
-#include "TTree.h"
-#include "FPGATrackSimMatrixAccumulator.h"
 
+#include "TMatrixDfwd.h"
 #include <string>
 #include <vector>
+#include <memory>
 
-#include <TMatrixD.h>
-
-#include "TTree.h"
-#include "TH1I.h"
-#include "TH1F.h"
-
-class IFPGATrackSimMappingSvc;
-
+class FPGATrackSimMatrixAccumulator;
+class FPGATrackSimPlaneMap;
+class TTree;
+class TH1F;
+class TFile;
 
 // data structure that contain definition of geometrical constants for linear fits
 struct geo_constants
@@ -59,7 +57,7 @@ struct geo_constants
     // these are the constant/offset values
     FPGATrackSimTrackPars pars;
 
-    int real; // this value is greater than 0 if these constants are correctly evaulated
+    int real{}; // this value is greater than 0 if these constants are correctly evaulated
 
     geo_constants(size_t nCoords) :
         Vd0(nCoords),
@@ -121,11 +119,6 @@ class FPGATrackSimConstGenAlgo : public AthAlgorithm
         TTree *m_matrix_tree = nullptr;
         TTree *m_good_tree = nullptr;
 
-        TH1F *m_h_vc = nullptr;
-        TH1F *m_h_vd = nullptr;
-        TH1F *m_h_vf = nullptr;
-        TH1F *m_h_vz = nullptr;
-        TH1F *m_h_veta = nullptr;
 
         ///////////////////////////////////////////////////////////////////////
         // Slice Info
