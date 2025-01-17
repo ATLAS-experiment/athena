@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( FPGATrackSimMaps )
@@ -15,7 +15,7 @@ atlas_add_library(
     INCLUDE_DIRS        ${LWTNN_INCLUDE_DIRS}
     LINK_LIBRARIES      ${LWTNN_LIBRARIES} GaudiKernel FPGATrackSimConfToolsLib FPGATrackSimObjectsLib
     PRIVATE_INCLUDE_DIRS   ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AsgMessagingLib AthenaBaseComps PathResolver
+    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AsgMessagingLib AthenaBaseComps PathResolver CxxUtils
 )
 
 atlas_add_component(
