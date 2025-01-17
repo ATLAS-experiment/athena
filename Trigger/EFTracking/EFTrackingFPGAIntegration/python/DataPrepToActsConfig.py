@@ -75,7 +75,6 @@ def DataPrepToActsCfg(flags, **kwargs) -> ComponentAccumulator:
     from ActsConfig.ActsTrackFindingConfig import ActsMainTrackFindingAlgCfg
     kwargs.setdefault('ActsTrackFinding.name', 'FPGAActsTrackFindingAlg')
     kwargs.setdefault('ActsTrackFinding.SeedContainerKeys', ['FPGAPixelSeeds','FPGAStripSeeds'])
-    kwargs.setdefault('ActsTrackFinding.EstimatedTrackParametersKeys', ['FPGAPixelEstimatedTrackParams','FPGAStripEstimatedTrackParams'])
     kwargs.setdefault('ActsTrackFinding.UncalibratedMeasurementContainerKeys', [pixelContainer,stripContainer])
     kwargs.setdefault('ActsTrackFinding.ACTSTracksLocation', 'FPGAActsTracks')
     acc.merge(ActsMainTrackFindingAlgCfg(flags, **extractChildKwargs(prefix='ActsTrackFinding.', **kwargs)))

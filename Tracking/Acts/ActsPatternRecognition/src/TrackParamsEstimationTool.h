@@ -21,15 +21,15 @@ namespace ActsTrk {
     virtual ~TrackParamsEstimationTool() = default;
     
     virtual StatusCode initialize() override;
-    
-    // Interface
-    virtual 
+
+    virtual
       std::optional<Acts::BoundTrackParameters>
       estimateTrackParameters(const EventContext& ctx,
 			      const ActsTrk::Seed& seed,
 			      const Acts::GeometryContext& geoContext,
 			      const Acts::MagneticFieldContext& magFieldContext,
-			      std::function<const Acts::Surface&(const ActsTrk::Seed&)> retrieveSurface) const override;
+			      std::function<const Acts::Surface&(const ActsTrk::Seed&)> retrieveSurface,
+			      bool useTopSp) const override;
 
     virtual
       std::optional<Acts::BoundTrackParameters>
@@ -37,9 +37,9 @@ namespace ActsTrk {
 			      const ActsTrk::Seed& seed,
 			      const Acts::GeometryContext& geoContext,
 			      const Acts::Surface& surface,
-			      const Acts::Vector3& bField) const override;
-    
-    // *********************************************************************
+			      const Acts::Vector3& bField,
+			      bool useTopSp) const override;
+
     // *********************************************************************
 
   private:
@@ -60,14 +60,6 @@ namespace ActsTrk {
         "Initial relative pT resolution"};
     Gaudi::Property< std::vector<double> > m_initialVarInflation {this, "initialVarInflation", {1., 1., 1., 1., 1., 1.},
         "Inflate tracks"};
-    Gaudi::Property< bool > m_useTopSp {this, "useTopSp", false,
-        "Use top SP. By default, use bottom SP."};
-
-    /// Private access to the logger
-    const Acts::Logger &logger() const { return *m_logger; }
-    /// logging instance
-    std::unique_ptr<const Acts::Logger> m_logger {nullptr};
-
   };
   
 } // namespace

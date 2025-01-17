@@ -25,17 +25,15 @@ ActsStripSpacePointFormationAlg                                   INFO Space Poi
 | Overlap Space Points |      94491 |
 |----------------------|------------|
 ActsPixelSeedingAlg                                               INFO Seed statistics
-|---------------------|------------|
-| Spacepoints         |    1165578 |
-| Seeds               |     123542 |
-| No track parameters |          0 |
-|---------------------|------------|
+|-------------|------------|
+| Spacepoints |    1165578 |
+| Seeds       |     123542 |
+|-------------|------------|
 ActsStripSeedingAlg                                               INFO Seed statistics
-|---------------------|------------|
-| Spacepoints         |     419947 |
-| Seeds               |      24791 |
-| No track parameters |          0 |
-|---------------------|------------|
+|-------------|------------|
+| Spacepoints |     419947 |
+| Seeds       |      24791 |
+|-------------|------------|
 ActsTrackFindingAlg                                               INFO statistics
 |-----------------------------------|------------|------------|------------|
 |                           All eta | PPP        | SSS        | ALL        |
@@ -108,11 +106,10 @@ ActsLargeRadiusStripOv...pSpacePointPreparationAlg                INFO Data Prep
 | Outputs |      88164 |
 |---------|------------|
 ActsLargeRadiusStripSeedingAlg                                    INFO Seed statistics
-|---------------------|------------|
-| Spacepoints         |     391757 |
-| Seeds               |       9687 |
-| No track parameters |          0 |
-|---------------------|------------|
+|-------------|------------|
+| Spacepoints |     391757 |
+| Seeds       |       9687 |
+|-------------|------------|
 ActsLargeRadiusTrackFindingAlg                                    INFO statistics
 |-----------------------------------|------------|------------|
 |                           All eta | SSS        | ALL        |
@@ -180,11 +177,10 @@ ActsConversionStripSpacePointPreparationAlg                       INFO Data Prep
 | Outputs |       4502 |
 |---------|------------|
 ActsConversionStripSeedingAlg                                     INFO Seed statistics
-|---------------------|------------|
-| Spacepoints         |       4502 |
-| Seeds               |         71 |
-| No track parameters |          0 |
-|---------------------|------------|
+|-------------|------------|
+| Spacepoints |       4502 |
+| Seeds       |         71 |
+|-------------|------------|
 ActsConversionTrackFindingAlg                                     INFO statistics
 |-----------------------------------|------------|------------|
 |                           All eta | SSS        | ALL        |
@@ -262,17 +258,15 @@ ActsLowPtStripOverlapSpacePointPreparationAlg                     INFO Data Prep
 | Outputs |      88005 |
 |---------|------------|
 ActsLowPtPixelSeedingAlg                                          INFO Seed statistics
-|---------------------|------------|
-| Spacepoints         |    1063058 |
-| Seeds               |      46845 |
-| No track parameters |          0 |
-|---------------------|------------|
+|-------------|------------|
+| Spacepoints |    1063058 |
+| Seeds       |      46845 |
+|-------------|------------|
 ActsLowPtStripSeedingAlg                                          INFO Seed statistics
-|---------------------|------------|
-| Spacepoints         |     391136 |
-| Seeds               |       9158 |
-| No track parameters |          0 |
-|---------------------|------------|
+|-------------|------------|
+| Spacepoints |     391136 |
+| Seeds       |       9158 |
+|-------------|------------|
 ActsLowPtTrackFindingAlg                                          INFO statistics
 |-----------------------------------|------------|------------|------------|
 |                           All eta | PPP        | SSS        | ALL        |

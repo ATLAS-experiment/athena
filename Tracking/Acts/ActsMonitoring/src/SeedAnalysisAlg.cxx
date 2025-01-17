@@ -254,13 +254,14 @@ namespace ActsTrk {
     estimated_pt.reserve(seed_container.size());
     estimated_eta.reserve(seed_container.size());
 
-    for (const auto* seed : seed_container) { 
+    for (const auto* seed : seed_container) {
       std::optional<Acts::BoundTrackParameters> optTrackParams =
         m_paramEstimationTool->estimateTrackParameters(ctx,
 						       *seed,
 						       geo_context.context(),
 						       magFieldContext,
-						       retrieveSurfaceFunction);
+						       retrieveSurfaceFunction,
+						       m_useTopSp);
 
       if ( not optTrackParams.has_value() ) continue;
 

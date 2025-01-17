@@ -66,8 +66,8 @@ def ActsMainTrackFindingAlgCfg(flags,
     # These 3 lists must match element for element, reversed if flags.Acts.useStripSeedsFirst is True.
     # Maybe it is best to start with strips where the occupancy is lower.
     kwargs.setdefault("SeedLabels", seedOrder(flags, pixel=["PPP"], strip=["SSS"]))
-    kwargs.setdefault("EstimatedTrackParametersKeys", seedOrder(flags, pixel=["ActsPixelEstimatedTrackParams"], strip=["ActsStripEstimatedTrackParams"]))
     kwargs.setdefault("SeedContainerKeys", seedOrder(flags, pixel=["ActsPixelSeeds"], strip=["ActsStripSeeds"]))
+    kwargs.setdefault('DetectorElementsKeys', seedOrder(flags, pixel=['ITkPixelDetectorElementCollection'], strip=['ITkStripDetectorElementCollection']))
 
     kwargs.setdefault("UncalibratedMeasurementContainerKeys", isdet(flags, pixel=["ITkPixelClusters_Cached" if flags.Acts.useCache else "ITkPixelClusters"], strip=["ITkStripClusters_Cached" if flags.Acts.useCache else "ITkStripClusters"], hgtd=["HGTD_Clusters"]))
 
@@ -140,6 +140,14 @@ def ActsMainTrackFindingAlgCfg(flags,
             "TrackingGeometryTool",
             acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
         )
+
+    if 'ATLASConverterTool' not in kwargs:
+        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
+        kwargs.setdefault('ATLASConverterTool', acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
+
+    if 'TrackParamsEstimationTool' not in kwargs:
+        from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
+        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
         
     if 'ExtrapolationTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
@@ -219,21 +227,21 @@ def ActsTrackFindingCfg(flags,
     # Now set the seed and estimated parameters keys accordingly
     pixelSeedKeys = [f'{flags.Tracking.ActiveConfig.extension}PixelSeeds']
     stripSeedKeys = [f'{flags.Tracking.ActiveConfig.extension}StripSeeds']
-    pixelParameterKeys = [f'{flags.Tracking.ActiveConfig.extension}PixelEstimatedTrackParams']
-    stripParameterKeys = [f'{flags.Tracking.ActiveConfig.extension}StripEstimatedTrackParams']
+    pixelDetElements = ['ITkPixelDetectorElementCollection']
+    stripDetElements = ['ITkStripDetectorElementCollection']
     if pixelSeedLabels is None:
         pixelSeedKeys = None
-        pixelParameterKeys = None
+        pixelDetElements = None
     if stripSeedLabels is None:
         stripSeedKeys = None
-        stripParameterKeys = None
-    
+        stripDetElements = None
+
     kwargs.setdefault('ACTSTracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
     kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=[pixelClusters], strip=[stripClusters], hgtd=[hgtdClusters]))
     kwargs.setdefault('SeedLabels', seedOrder(flags, pixel=pixelSeedLabels, strip=stripSeedLabels))
     kwargs.setdefault('SeedContainerKeys', seedOrder(flags, pixel=pixelSeedKeys, strip=stripSeedKeys))
-    kwargs.setdefault('EstimatedTrackParametersKeys', seedOrder(flags, pixel=pixelParameterKeys, strip=stripParameterKeys))
-            
+    kwargs.setdefault('DetectorElementsKeys', seedOrder(flags, pixel=pixelDetElements, strip=stripDetElements))
+
     acc.merge(ActsMainTrackFindingAlgCfg(flags,
                                          name=f"{flags.Tracking.ActiveConfig.extension}TrackFindingAlg",
                                          **kwargs))

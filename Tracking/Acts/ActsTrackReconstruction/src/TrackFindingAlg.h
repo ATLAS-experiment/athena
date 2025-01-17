@@ -15,6 +15,8 @@
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "src/TrackStatePrinterTool.h"
+#include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
+#include "ActsEventCnv/IActsToTrkConverterTool.h"
 
 // ACTS
 #include "Acts/EventData/VectorTrackContainer.hpp"
@@ -23,6 +25,7 @@
 
 // ActsTrk
 #include "ActsEvent/Seed.h"
+#include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackParametersContainer.h"
 #include "ActsEvent/TrackContainer.h"
@@ -37,6 +40,7 @@
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GaudiKernel/EventContext.h"
+#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
 // STL
 #include <limits>
@@ -76,6 +80,8 @@ namespace ActsTrk
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     ToolHandle<ActsTrk::TrackStatePrinterTool> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
+    ToolHandle< ActsTrk::IActsToTrkConverterTool > m_ATLASConverterTool{this, "ATLASConverterTool", ""};
+    ToolHandle< ActsTrk::ITrackParamsEstimationTool > m_paramEstimationTool{this, "TrackParamsEstimationTool", "", "Track Param Estimation from Seeds"};
     ToolHandle<ActsTrk::IFitterTool> m_fitterTool{this, "FitterTool", "", "Fitter Tool for Seeds"};
     ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_pixelCalibTool{
       this, "PixelCalibrator", "", "Opt. pixel measurement calibrator"};
@@ -87,7 +93,7 @@ namespace ActsTrk
     // Handle Keys
     // Seed collections. These 2 vectors must match element for element.
     SG::ReadHandleKeyArray<ActsTrk::SeedContainer> m_seedContainerKeys{this, "SeedContainerKeys", {}, "Seed containers"};
-    SG::ReadHandleKeyArray<ActsTrk::BoundTrackParametersContainer> m_estimatedTrackParametersKeys{this, "EstimatedTrackParametersKeys", {}, "containers of estimated track parameters from seeding"};
+    SG::ReadCondHandleKeyArray<InDetDD::SiDetectorElementCollection> m_detEleCollKeys{this, "DetectorElementsKeys", {}, "Keys of input SiDetectorElementCollection"};
     // Measurement collections. These 2 vectors must match element for element.
     SG::ReadHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_uncalibratedMeasurementContainerKeys{this, "UncalibratedMeasurementContainerKeys", {}, "input cluster collections"};
     SG::ReadCondHandleKey<ActsTrk::DetectorElementToActsGeometryIdMap> m_detectorElementToGeometryIdMapKey
@@ -177,7 +183,6 @@ namespace ActsTrk
      *
      * @param ctx - event context
      * @param measurements - measurements container
-     * @param estimatedTrackParameters - estimates
      * @param seeds - spacepoint triplet seeds
      * @param tracksContainer - output tracks
      * @param tracksCollection - auxiliary output for downstream tools compatibility (to be removed in the future)
@@ -190,8 +195,8 @@ namespace ActsTrk
                const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
                const detail::TrackFindingMeasurements &measurements,
                detail::DuplicateSeedDetector &duplicateSeedDetector,
-               const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
-               const ActsTrk::SeedContainer *seeds,
+               const ActsTrk::SeedContainer &seeds,
+               const InDetDD::SiDetectorElementCollection& detElements,
                ActsTrk::MutableTrackContainer &tracksContainer,
                size_t seedCollectionIndex,
                const char *seedType,
