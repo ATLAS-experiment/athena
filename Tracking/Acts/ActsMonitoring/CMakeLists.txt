@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ActsMonitoring )
@@ -43,4 +43,5 @@ atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 atlas_add_test( ActsSeedingToolComparison
   SCRIPT test/ActsSeedingAlgorithmTest.py
+  PROPERTIES TIMEOUT 600
   POST_EXEC_SCRIPT nopost.sh )
