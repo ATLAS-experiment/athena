@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -441,7 +441,7 @@ namespace InDet{
 			 errorMatrix, Chi2PerTrk, TrkAtVrt, Chi2,
 			 *state, true);
      if(sc.isFailure() ||  Chi2 > 1000000.) return -10000.;   // No fit
-
+     if (Chi2PerTrk.empty()) return -10000.;   // No fit
      if(m_RobustFit){
        sc = GetTrkFitWeights(trkFitWgt, *state);
        if(sc.isFailure()) return -10000.;    // No weights
