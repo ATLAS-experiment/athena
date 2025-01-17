@@ -23,3 +23,11 @@ atlas_add_test( L1CaloPhase1_Data
         PROPERTIES TIMEOUT 300
         PRIVATE_WORKING_DIRECTORY
         POST_EXEC_SCRIPT noerror.sh )
+
+# Test the han config file generating mode of this application
+# which is triggered by running an evtMax = 0 job.
+atlas_add_test( L1CaloPhase1_ConfigGenerating
+        SCRIPT "athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py --filesInput /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_13p6TeV.00440499.physics_Main.daq.RAW._lb0461._SFO-13._0004.data --evtMax 0"
+        PROPERTIES TIMEOUT 300
+        PRIVATE_WORKING_DIRECTORY
+        POST_EXEC_SCRIPT noerror.sh )
