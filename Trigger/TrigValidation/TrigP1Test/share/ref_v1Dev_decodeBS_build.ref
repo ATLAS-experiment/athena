@@ -4099,13 +4099,7 @@ HLT_e9_lhvloose_L1eEM5_mu23_mu8noL1_L1MU18VFCH:
   stepFeatures:
     0: 3
     1: 1
-HLT_fslrt0_L14J15:
-  eventCount: 0
-HLT_fslrt0_L1All:
-  eventCount: 0
-HLT_fslrt0_L1J100:
-  eventCount: 0
-HLT_fslrt0_L1XE50:
+HLT_fslrt0_L1jJ160:
   eventCount: 0
 HLT_g0_hiptrt_L1eEM26M:
   eventCount: 0
@@ -6699,12 +6693,6 @@ HLT_hitdvjet260_medium_L1jJ160:
   eventCount: 0
 HLT_hitdvjet260_tight_L1jJ160:
   eventCount: 0
-HLT_isotrk50_L1XE50:
-  eventCount: 0
-  stepCounts:
-    0: 2
-  stepFeatures:
-    0: 2
 HLT_j0_DJMASS900j50dphi260x200deta_calratiovar150_roiftf_preselj20emf24_L1jMJJ-500-NFF:
   eventCount: 0
 HLT_j0_DJMASS900j50dphi260x200deta_calratiovar165_roiftf_preselj20emf18_L1jMJJ-500-NFF:
