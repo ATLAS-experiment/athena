@@ -472,7 +472,6 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
     for (FPGATrackSimHit hit : hits) {
 
       m_realHit.push_back(hit.isReal());
-	    mtv.clear();
       FPGATrackSimMultiTruth truth = hit.getTruth();
 
       truth.assign_equal_normalization();
@@ -516,33 +515,35 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
       m_phimodule.push_back(hit.getPhiModule());
       m_ID.push_back(hit.getIdentifierHash());
       m_diskLayer.push_back(hit.getLayerDisk());
-	    }
-      // done looping over hits, now we do the truth calculation for this track candidate
-      // first compute the best geant match, the barcode with the largest number of contributing hits
-      // frac is then the fraction of the total number of hits on the candidate attributed to the barcode.
-      FPGATrackSimMultiTruth mt( std::accumulate(mtv.begin(),mtv.end(),FPGATrackSimMultiTruth(),FPGATrackSimMultiTruth::AddAccumulator()) );
-      // retrieve the best barcode and frac and store it
-      FPGATrackSimMultiTruth::Barcode tbarcode;
-      FPGATrackSimMultiTruth::Weight tfrac;
-      const bool ok = mt.best(tbarcode,tfrac);
-      if( ok ) {
-        m_candidate_eventindex = (int)(tbarcode.first);
-        m_candidate_barcode = (int)(tbarcode.second);
-        m_candidate_barcodefrac = tfrac;
-        if ( tfrac <= 0.5 ) m_fakelabel = 1;
-        else if ( tfrac == 1.0 ) m_fakelabel = 0;
-      }	
-      else {
-        m_candidate_eventindex = -1;
-        m_candidate_barcode = -1;
-        m_candidate_barcodefrac = 0;
-        m_fakelabel = 1;
-      }
-      m_tree->Fill();
-
-      ResetVectors();
-      m_tracknumber++;
     }
+
+    // done looping over hits, now we do the truth calculation for this track candidate
+    // first compute the best geant match, the barcode with the largest number of contributing hits
+    // frac is then the fraction of the total number of hits on the candidate attributed to the barcode.
+    FPGATrackSimMultiTruth mt( std::accumulate(mtv.begin(),mtv.end(),FPGATrackSimMultiTruth(),FPGATrackSimMultiTruth::AddAccumulator()) );
+    // retrieve the best barcode and frac and store it
+    FPGATrackSimMultiTruth::Barcode tbarcode;
+    FPGATrackSimMultiTruth::Weight tfrac;
+    const bool ok = mt.best(tbarcode,tfrac);
+    if( ok ) {
+      m_candidate_eventindex = (int)(tbarcode.first);
+      m_candidate_barcode = (int)(tbarcode.second);
+      m_candidate_barcodefrac = tfrac;
+      if ( tfrac <= 0.5 ) m_fakelabel = 1;
+      else if ( tfrac == 1.0 ) m_fakelabel = 0;
+    }	
+    else {
+      m_candidate_eventindex = -1;
+      m_candidate_barcode = -1;
+      m_candidate_barcodefrac = 0;
+      m_fakelabel = -1;
+    }
+    m_tree->Fill();
+
+    mtv.clear();
+    ResetVectors();
+    m_tracknumber++;
+  }
   m_treeindex++;
   return StatusCode::SUCCESS;
 }
