@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPGATrackSimClusteringTool.h"
 #include "FPGATrackSimObjects/FPGATrackSimMultiTruth.h"
 #include "FPGATrackSimObjects/FPGATrackSimConstants.h"
+#include "CxxUtils/trapping_fp.h"
 #include <algorithm>
 #include <cmath>
 
@@ -204,6 +205,7 @@ void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleH
             newHit = false;
         }
         if (newHit) {
+          CXXUTILS_TRAPPING_FP;
           clusterEquiv = finalCluster.getClusterEquiv();
           float xOld = clusterEquiv.getX();
           float yOld = clusterEquiv.getY();
@@ -495,6 +497,8 @@ bool FPGATrackSimCLUSTERING::updatePixelCluster(FPGATrackSimCluster &currentClus
  */
 bool FPGATrackSimCLUSTERING::updateStripCluster(FPGATrackSimCluster &currentCluster, FPGATrackSimHit &incomingHit, bool newCluster){
 
+  CXXUTILS_TRAPPING_FP;
+
   // Shift initial widths 1->0, 2->2, 3->4, 4->6 etc...
   //The groupSize is stored in the EtaWidth
   int tempWidth = (incomingHit.getEtaWidth()*fpgatracksim::scaleHitFactor)-fpgatracksim::scaleHitFactor;
@@ -584,6 +588,7 @@ bool FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentC
   float zNew = incomingHit.getZ();
   //As strips arrive pre-clustered, this is different for pixels/strips
   if(incomingHit.isPixel()){
+    CXXUTILS_TRAPPING_FP;
     int n = currentCluster.getHitList().size();
     // n+1 because that is old + new now
     clusterEquiv.setX((xOld*n + xNew) / (n+1));
