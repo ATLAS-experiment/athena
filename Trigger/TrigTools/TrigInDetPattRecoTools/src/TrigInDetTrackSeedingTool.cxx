@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetIdentifier/SCT_ID.h"
@@ -250,7 +250,7 @@ void TrigInDetTrackSeedingTool::createGraphNodes(const SpacePointCollection* spC
   tmpColl.resize(spColl->size(), GNN_Node(layer));//all nodes belong to the same layer
   
   int idx = 0;
-  for(const auto& sp : *spColl) {
+  for(const auto sp : *spColl) {
     const auto& pos = sp->globalPosition();
     float xs = pos.x() - shift_x;
     float ys = pos.y() - shift_y;
