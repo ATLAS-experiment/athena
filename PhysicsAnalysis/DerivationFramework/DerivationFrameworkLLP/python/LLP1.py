@@ -316,21 +316,6 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                  TrackLocation            = MergedTrackCollection))
     LLP1VrtSecInclusiveSuffixes.append("")
 
-
-    if flags.Input.isMC and flags.Derivation.LLP.doTrackSystematics:
-        from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import TrackSystematicsAlgCfg
-        TrackSystSuffix = "_TRK_EFF_LARGED0_GLOBAL__1down"
-        acc.merge(TrackSystematicsAlgCfg(
-            flags,
-            InputTrackContainer  = MergedTrackCollection,
-            OutputTrackContainer = f"{MergedTrackCollection}{TrackSystSuffix}"))
-        acc.merge(VrtSecInclusiveCfg(flags,
-                                     name = f"VrtSecInclusive{TrackSystSuffix}",
-                                     AugmentingVersionString  = TrackSystSuffix,
-                                     FillIntermediateVertices = False,
-                                     TrackLocation            = f"{MergedTrackCollection}{TrackSystSuffix}"))
-        LLP1VrtSecInclusiveSuffixes.append(TrackSystSuffix)
-
     # short-lifetime VSI
     shortLifetimeSuffix = "_shortLifetime"
     acc.merge(VrtSecInclusiveCfg(flags,
@@ -340,6 +325,36 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                  TrackLocation               = MergedTrackCollection,
                                  twoTrkVtxFormingD0Cut       = 1.0))
     LLP1VrtSecInclusiveSuffixes.append(shortLifetimeSuffix)
+    
+    if flags.Input.isMC and flags.Derivation.LLP.doTrackSystematics:
+        from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import TrackSystematicsAlgCfg
+        TrackSystSuffix = "_TRK_EFF_LARGED0_GLOBAL__1down"
+        acc.merge(TrackSystematicsAlgCfg(
+            flags,
+            name=f"InDetTrackSystematicsAlg{TrackSystSuffix}",
+            InputTrackContainer  = MergedTrackCollection,
+            OutputTrackContainer = f"{MergedTrackCollection}{TrackSystSuffix}"))
+        acc.merge(VrtSecInclusiveCfg(flags,
+                                     name = f"VrtSecInclusive{TrackSystSuffix}",
+                                     AugmentingVersionString  = TrackSystSuffix,
+                                     FillIntermediateVertices = False,
+                                     TrackLocation            = f"{MergedTrackCollection}{TrackSystSuffix}"))
+        LLP1VrtSecInclusiveSuffixes.append(TrackSystSuffix)
+
+        TrackSystSuffixShortLifetime = "_TRK_EFF_LARGED0_GLOBAL__1down_shortLifetime"
+        acc.merge(TrackSystematicsAlgCfg(
+            flags,
+            name=f"InDetTrackSystematicsAlg{TrackSystSuffixShortLifetime}",
+            InputTrackContainer  = MergedTrackCollection,
+            OutputTrackContainer = f"{MergedTrackCollection}{TrackSystSuffixShortLifetime}"))
+        acc.merge(VrtSecInclusiveCfg(flags,
+                                     name = f"VrtSecInclusive{TrackSystSuffixShortLifetime}",
+                                     AugmentingVersionString  = TrackSystSuffixShortLifetime,
+                                     FillIntermediateVertices = False,
+                                     TrackLocation            = f"{MergedTrackCollection}{TrackSystSuffixShortLifetime}",
+                                     twoTrkVtxFormingD0Cut    = 1.0))
+        LLP1VrtSecInclusiveSuffixes.append(TrackSystSuffixShortLifetime)
+
 
     # leptons-only VSI
     LeptonsSuffix = "_Leptons"
