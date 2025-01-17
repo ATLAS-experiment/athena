@@ -14,7 +14,10 @@
 
 // EFTracking include
 #include "IntegrationBase.h"
-#include "TestVectorTool.h"
+
+#include "InDetRawData/PixelRDO_Container.h"
+#include "InDetRawData/SCT_RDO_Container.h"
+#include "FPGADataFormatTool.h"
 
 // STL include
 #include <string>
@@ -32,7 +35,9 @@ private:
     Gaudi::Property<std::string> m_inputTV{this, "InputTV", "", "Input TestVector"};   //!< Input TestVector
     Gaudi::Property<std::string> m_refTV{this, "RefTV", "", "Reference TestVector"};   //!< Reference TestVector
 
-    ToolHandle<TestVectorTool> m_testVectorTool{this, "TestVectorTool", "TestVectorTool", "Tool to prepare test vector"}; //!< Tool handle for TestVectorTool
+    SG::ReadHandleKey<PixelRDO_Container> m_pixelRDOKey  { this, "PixelRDO", "ITkPixelRDOs" };
+
+    ToolHandle<FPGADataFormatTool> m_FPGADataFormatTool{this, "FPGADataFormatTool", "FPGADataFormatTool", "tool to convert RDOs into FPGA data format"};
 };
 
 #endif // EFTRACKING_FPGA_INTEGRATION_PIXELCLUSTERING_H

@@ -85,7 +85,7 @@ StatusCode IntegrationBase::loadProgram(const std::string& xclbin)
     std::ifstream bin_file(xclbin, std::ios_base::binary);
     if (!bin_file)
     {
-        ATH_MSG_ERROR("Couldn't find the xclbin file.");
+        ATH_MSG_ERROR("Couldn't find the xclbin file: " << xclbin);
         return StatusCode::FAILURE;
     }
     // Get the size of the binary file
@@ -111,7 +111,7 @@ StatusCode IntegrationBase::loadProgram(const std::string& xclbin)
     }
     else
     {
-        ATH_MSG_ERROR("Error loading xclbin file. Error code: " << err);
+        ATH_MSG_ERROR("Error loading xclbin file (" << xclbin << ") into " << m_accelerator.getInfo<CL_DEVICE_NAME>() <<". Error code: " << err);
         return StatusCode::FAILURE;
     }
 
@@ -120,14 +120,5 @@ StatusCode IntegrationBase::loadProgram(const std::string& xclbin)
 
 StatusCode IntegrationBase::precheck(std::vector<Gaudi::Property<std::string>> inputs) const
 {
-    for(auto item : inputs)
-    {
-        if(item.empty())
-        {
-            ATH_MSG_FATAL(item.documentation()<<" is empty. Please set it to a valid value");
-            return StatusCode::FAILURE;
-        }
-    }
-
     return StatusCode::SUCCESS;
 }

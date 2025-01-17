@@ -80,21 +80,21 @@ StatusCode FPGADataFormatTool::convertPixelRDO(
         filledHeader = true;
       }
 
-      // Get the pixel word
-      auto pixelWord = FPGADataFormatUtilites::fill_PIXEL_EF_RDO (
-        (pixelRawData == pixel_rdoCollection->back()), // last 
-        m_pixelId->eta_index(rdoId), // ROW 
-        m_pixelId->phi_index(rdoId), // COL
-        pixelRawData->getToT(), // TOT
-        pixelRawData->getLVL1A(),  // Lvl!
-        pixelCounter,  // id
-        0 // Spare
-        );
-        pixelCounter++;
+          // Get the pixel word
+          auto pixelWord = FPGADataFormatUtilities::fill_PIXEL_EF_RDO (
+            (pixelRawData == pixel_rdoCollection->back()), // last
+            m_pixelId->eta_index(rdoId), // ROW
+            m_pixelId->phi_index(rdoId), // COL
+            pixelRawData->getToT(), // TOT
+            pixelRawData->getLVL1A(),  // Lvl!
+            pixelCounter,  // id
+            0 // Spare
+            );
+            pixelCounter++;
 
-      // Push the word into the vector
-      encodedData.push_back(FPGADataFormatUtilites::get_dataformat_PIXEL_EF_RDO(pixelWord));
-
+          // Push the word into the vector
+          encodedData.push_back(FPGADataFormatUtilities::get_dataformat_PIXEL_EF_RDO(pixelWord));
+      //}
     } // end for each RDO in the collection
 
     // reset the header 
@@ -215,7 +215,7 @@ StatusCode FPGADataFormatTool::convertStripRDO(
         ITkStripID += offset * MaxChannelinStripRow;
 
         stripAlreadyEncoded++;
-        auto stripWord = FPGADataFormatUtilites::fill_STRIP_EF_RDO (
+        auto stripWord = FPGADataFormatUtilities::fill_STRIP_EF_RDO (
           (stripAlreadyEncoded == stripToEncode), //last
           chipID, //chip ID 
           ITkStripID, //strip ID 
@@ -225,7 +225,7 @@ StatusCode FPGADataFormatTool::convertStripRDO(
           );
         stripNumber++;
         // Push the word into the vector
-        encodedData.push_back(FPGADataFormatUtilites::get_dataformat_STRIP_EF_RDO(stripWord));
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_STRIP_EF_RDO(stripWord));
       }
 
     } // end for each RDO in the strip collection
@@ -244,16 +244,16 @@ StatusCode FPGADataFormatTool::convertStripRDO(
 StatusCode FPGADataFormatTool::fillHeader(std::vector<uint64_t> &encodedData) const
 {
   // Fill the event header
-  auto header_w1 = FPGADataFormatUtilites::fill_EVT_HDR_w1 (FPGADataFormatUtilites::EVT_HDR_FLAG, 1, 0, 0);
-  encodedData.push_back(FPGADataFormatUtilites::get_dataformat_EVT_HDR_w1(header_w1));
+  auto header_w1 = FPGADataFormatUtilities::fill_EVT_HDR_w1 (FPGADataFormatUtilities::EVT_HDR_FLAG, 1, 0, 0);
+  encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EVT_HDR_w1(header_w1));
 
   // Fill the event header
-  auto header_w2 = FPGADataFormatUtilites::fill_EVT_HDR_w2 (242000, 0);
-  encodedData.push_back(FPGADataFormatUtilites::get_dataformat_EVT_HDR_w2(header_w2));
+  auto header_w2 = FPGADataFormatUtilities::fill_EVT_HDR_w2 (242000, 0);
+  encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EVT_HDR_w2(header_w2));
 
   // Fill the event header
-  auto header_w3 = FPGADataFormatUtilites::fill_EVT_HDR_w3 (0, 0);
-  encodedData.push_back(FPGADataFormatUtilites::get_dataformat_EVT_HDR_w3(header_w3));
+  auto header_w3 = FPGADataFormatUtilities::fill_EVT_HDR_w3 (0, 0);
+  encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EVT_HDR_w3(header_w3));
 
   return StatusCode::SUCCESS;
 }
@@ -261,24 +261,24 @@ StatusCode FPGADataFormatTool::fillHeader(std::vector<uint64_t> &encodedData) co
 StatusCode FPGADataFormatTool::fillFooter(std::vector<uint64_t> &encodedData) const
 {
   // Fill the event header
-  auto footer_w1 = FPGADataFormatUtilites::fill_EVT_FTR_w1 (FPGADataFormatUtilites::EVT_FTR_FLAG, 0, 0);
-  encodedData.push_back(FPGADataFormatUtilites::get_dataformat_EVT_FTR_w1(footer_w1));
+  auto footer_w1 = FPGADataFormatUtilities::fill_EVT_FTR_w1 (FPGADataFormatUtilities::EVT_FTR_FLAG, 0, 0);
+  encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EVT_FTR_w1(footer_w1));
 
   // Fill the event header
-  auto footer_w2 = FPGADataFormatUtilites::fill_EVT_FTR_w2 (0);
-  encodedData.push_back(FPGADataFormatUtilites::get_dataformat_EVT_FTR_w2(footer_w2));
+  auto footer_w2 = FPGADataFormatUtilities::fill_EVT_FTR_w2 (0);
+  encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EVT_FTR_w2(footer_w2));
 
   // Fill the event header
-  auto footer_w3 = FPGADataFormatUtilites::fill_EVT_FTR_w3 (encodedData.size(), 44939973);
-  encodedData.push_back(FPGADataFormatUtilites::get_dataformat_EVT_FTR_w3(footer_w3));
+  auto footer_w3 = FPGADataFormatUtilities::fill_EVT_FTR_w3 (encodedData.size(), 44939973);
+  encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EVT_FTR_w3(footer_w3));
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode FPGADataFormatTool::fillModuleHeader(const InDetDD::SiDetectorElement* sielement, std::vector<uint64_t> &encodedData) const
 {
-  auto mod_w1 = FPGADataFormatUtilites::fill_M_HDR_w3 (FPGADataFormatUtilites::M_HDR_FLAG, sielement->identify().get_identifier32().get_compact(), 0);
-  encodedData.push_back(FPGADataFormatUtilites::get_dataformat_M_HDR_w3(mod_w1));
+  auto mod_w1 = FPGADataFormatUtilities::fill_M_HDR_w1 (FPGADataFormatUtilities::M_HDR_FLAG, sielement->identify().get_identifier32().get_compact(), 0);
+  encodedData.push_back(FPGADataFormatUtilities::get_dataformat_M_HDR_w1(mod_w1));
 
   return StatusCode::SUCCESS;
 }
