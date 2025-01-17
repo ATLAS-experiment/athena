@@ -144,6 +144,7 @@ def ITkSiTrackerSpacePointFinderCfg(
     kwargs.setdefault("ProcessPixels", flags.Detector.EnableITkPixel)
     kwargs.setdefault("ProcessSCTs", flags.Detector.EnableITkStrip)
     kwargs.setdefault("ProcessOverlaps", flags.Detector.EnableITkStrip)
+    kwargs.setdefault("useSCTLayerDep_OverlapCuts", False)
 
     if flags.Beam.Type is BeamType.Cosmics:
         kwargs.setdefault("ProcessOverlaps", False)

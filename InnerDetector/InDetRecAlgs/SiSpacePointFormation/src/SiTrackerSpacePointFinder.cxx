@@ -95,6 +95,9 @@ StatusCode SiTrackerSpacePointFinder::initialize()
 
   if (!m_monTool.empty()) CHECK(m_monTool.retrieve());
 
+  if(m_useSCTLayerDep_OverlapCuts)
+    ATH_MSG_INFO("Use SCT SP overlap cuts based on layer number parity");
+
   return StatusCode::SUCCESS;
 }
 
@@ -480,22 +483,20 @@ void SiTrackerSpacePointFinder::addSCT_SpacePoints(const SCT_ClusterCollection* 
         break;
       } 
       case EtaMinus: {
-        if ((m_idHelper->layer_disk(thisID) & 1) == 0) {
-          overlapExtents[ 2] = m_overlapLimitEtaMin;
-          overlapExtents[ 3] = m_overlapLimitEtaMax;
-        } else {
+        overlapExtents[ 2] = m_overlapLimitEtaMin;
+        overlapExtents[ 3] = m_overlapLimitEtaMax;
+        if (m_useSCTLayerDep_OverlapCuts && (m_idHelper->layer_disk(thisID) & 1) != 0) {
           overlapExtents[ 2] =-m_overlapLimitEtaMax;
           overlapExtents[ 3] =-m_overlapLimitEtaMin;
         }
         break;
       }
       default: {
-        if ((m_idHelper->layer_disk(thisID) & 1) == 0) {
+        overlapExtents[ 4] = m_overlapLimitEtaMin;
+        overlapExtents[ 5] = m_overlapLimitEtaMax;
+        if (m_useSCTLayerDep_OverlapCuts && (m_idHelper->layer_disk(thisID) & 1) == 0) {
           overlapExtents[ 4] = -m_overlapLimitEtaMax;
           overlapExtents[ 5] = -m_overlapLimitEtaMin;
-        } else {
-          overlapExtents[ 4] = m_overlapLimitEtaMin;
-          overlapExtents[ 5] = m_overlapLimitEtaMax;
         }
         break;
       }

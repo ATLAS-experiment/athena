@@ -207,6 +207,7 @@ namespace InDet {
     bool m_cachemode{false}; //!< used for online MT counters
     BooleanProperty m_useDataPoolWithCache
       {this, "useDataPoolWithCache", false, "use DataPool With Cache"};
+    BooleanProperty m_useSCTLayerDep_OverlapCuts{this,"useSCTLayerDep_OverlapCuts", true};
     //@}
 
     /**
