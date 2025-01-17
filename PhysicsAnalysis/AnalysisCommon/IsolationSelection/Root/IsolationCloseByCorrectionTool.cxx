@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <AsgDataHandles/ReadHandle.h>
@@ -260,7 +260,11 @@ namespace CP {
         loadPrimaryParticles(photons, cache);
 
         loadAssociatedObjects(ctx, cache);
-        return performCloseByCorrection(ctx, cache);
+        CorrectionCode ret = performCloseByCorrection(ctx, cache);
+        lockDecorations(electrons);
+        lockDecorations(muons);
+        lockDecorations(photons);
+        return ret;
     }
     CorrectionCode IsolationCloseByCorrectionTool::performCloseByCorrection (const EventContext& ctx, ObjectCache& cache) const {
         if (cache.prim_vtx) {
@@ -296,6 +300,20 @@ namespace CP {
             }
         }
         return CorrectionCode::Ok;
+    }
+    void IsolationCloseByCorrectionTool::lockDecorations (const xAOD::IParticleContainer* parts) const {
+        if (!parts) return;
+        std::lock_guard<std::mutex> guard{m_isoHelpersMutex};
+        for (const auto& p : m_isohelpers) {
+          if (parts->ownPolicy() == SG::VIEW_ELEMENTS) {
+            for (const xAOD::IParticle* part : *parts) {
+                p.second->lockDecorations(*part->container());
+            }
+          }
+          else {
+            p.second->lockDecorations(*parts);
+          }
+        }
     }
     const IsoVector& IsolationCloseByCorrectionTool::getIsolationTypes(const xAOD::IParticle* particle) const {
         static const IsoVector dummy{};

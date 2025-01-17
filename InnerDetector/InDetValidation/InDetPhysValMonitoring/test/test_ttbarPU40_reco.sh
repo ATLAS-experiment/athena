@@ -22,7 +22,7 @@ relname="r25.0.21"
 lastref_dir=last_results
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeXml_lrt=IDPVMPlots_lrt.xml                                                                                                                                                
-dcubeRef_lrt=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_lrt_ttbarPU40_reco.root
+dcubeRef_lrt=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_ttbarPU40_reco.root
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml_lrt -print -quit 2>/dev/null)
@@ -64,6 +64,7 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
     -c ${dcubeXmlAbsPath} \
     -r ${dcubeRef_lrt} \
     physval_lrt.ntuple.root
+  echo "art-result: $? shifter_plots_lrt"
   
   echo "compare with last build"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
