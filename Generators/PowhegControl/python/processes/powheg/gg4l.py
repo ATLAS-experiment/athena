@@ -38,10 +38,6 @@ class gg4l(PowhegRES):
         # This is a hacky fix that's needed at the moment...
         self.manually_set_openloops_gnu_paths()
 
-        # Adding external libraries to LD_LIBRARY_PATH for gg4l
-        self.link_external_powheg_libraries("/POWHEG-BOX-RES/gg4l/amplitudes/obj-gnu/")
-        self.link_external_powheg_libraries("/POWHEG-BOX-RES/gg4l/QCDLoop*/ff/obj-gnu/")
-
         # Add parameter validation functions
         self.validation_functions.append("validate_process_contrib")
 

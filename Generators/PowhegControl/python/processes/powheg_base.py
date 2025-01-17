@@ -64,14 +64,9 @@ class PowhegBase(Configurable):
         import os
         logger.warning("Applying manual, hard-coded fixes for OpenLoops library paths")
         logger.info("OpenLoopsPath (before) = {0}".format(os.getenv('OpenLoopsPath')))
-        logger.debug("LD_LIBRARY_PATH (before) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
         OLPath = os.path.dirname(self.executable)+"/obj-gfortran"
         os.environ['OpenLoopsPath'] = OLPath
-        ldpath = os.getenv('LD_LIBRARY_PATH')
-        ldpath_new = OLPath+ ":" + OLPath + "/proclib:" + ldpath
-        os.environ['LD_LIBRARY_PATH'] = ldpath_new
-        logger.info("OpenLoopsPath (after) = {0}".format(os.getenv('OpenLoopsPath')))
-        logger.debug("LD_LIBRARY_PATH (after) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
+
 
     def manually_set_openloops_gnu_paths(self):
         '''
@@ -82,32 +77,9 @@ class PowhegBase(Configurable):
         import os
         logger.warning("Applying manual, hard-coded fixes for OpenLoops library paths")
         logger.info("OpenLoopsPath (before) = {0}".format(os.getenv('OpenLoopsPath')))
-        logger.debug("LD_LIBRARY_PATH (before) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
         OLPath = os.path.dirname(self.executable)+"/obj-gnu"
         os.environ['OpenLoopsPath'] = OLPath
-        ldpath = os.getenv('LD_LIBRARY_PATH')
-        ldpath_new = OLPath+ ":" + OLPath + "/proclib:" + ldpath
-        os.environ['LD_LIBRARY_PATH'] = ldpath_new
-        logger.info("OpenLoopsPath (after) = {0}".format(os.getenv('OpenLoopsPath')))
-        logger.debug("LD_LIBRARY_PATH (after) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
 
-    def link_external_powheg_libraries(self, librarypath):
-        '''
-        Manual fix for external libraries path.
-        This library is expected to be installed in the POWHEGPATH folder.
-        Needs to be adjusted if the version of the library changes.
-        '''
-        logger.warning("Applying manual fixes for library paths:" + librarypath)
-        logger.debug("LD_LIBRARY_PATH (before) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
-        ldpath = os.getenv('LD_LIBRARY_PATH')
-        powhegpath = os.getenv('POWHEGPATH')
-        librarypath = glob.glob(powhegpath+librarypath)
-        if (len(librarypath)>0):
-          ldpath_new = ldpath+ ":" + librarypath[0]
-        else:
-          ldpath_new = ldpath
-        os.environ['LD_LIBRARY_PATH'] = ldpath_new
-        logger.debug("LD_LIBRARY_PATH (after) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
 
     def __init__(self, base_directory, version, executable_name, cores, powheg_executable="pwhg_main", is_reweightable=True, warning_output = [], info_output = [], error_output = [], **kwargs):
         """! Constructor.
@@ -127,6 +99,15 @@ class PowhegBase(Configurable):
 
         ## Add to Python path "python" directory on POWHEG process directory
         os.environ["PYTHONPATH"] += ":" + os.path.join(base_directory, version, executable_name, "python")
+
+        ## Add other locations of the libraries
+        os.environ["LD_LIBRARY_PATH"] += ":" + os.path.join(base_directory, version, executable_name, "amplitudes", "obj-gnu")
+        os.environ["LD_LIBRARY_PATH"] += ":" + os.path.join(base_directory, version, executable_name, "QCDLoop-1.95", "ff", "obj-gnu")
+        os.environ["LD_LIBRARY_PATH"] += ":" + os.path.join(base_directory, version, executable_name, "Virtuals", "obj-gnu")
+        os.environ["LD_LIBRARY_PATH"] += ":" + os.path.join(base_directory, version, executable_name, "obj-gfortran")
+        os.environ["LD_LIBRARY_PATH"] += ":" + os.path.join(base_directory, version, executable_name, "obj-gfortran", "proclib")
+        os.environ["LD_LIBRARY_PATH"] += ":" + os.path.join(base_directory, version, executable_name, "obj-gnu")
+        os.environ["LD_LIBRARY_PATH"] += ":" + os.path.join(base_directory, version, executable_name, "obj-gnu", "proclib")
 
         ## SVN revision of process code
         self.process_revision = check_svn_revision(os.path.dirname(self.executable))
