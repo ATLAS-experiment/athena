@@ -26,10 +26,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "   " << m_sigmaQOverP );
     ATH_MSG_DEBUG( "   " << m_sigmaT0 );
     ATH_MSG_DEBUG( "   " << m_initialVarInflation );
-    ATH_MSG_DEBUG( "   " << m_useTopSp );
 
-    // Make the logger And Propagate to ACTS routines
-    m_logger = makeActsAthenaLogger(this, "Acts");
     return StatusCode::SUCCESS;
   }
 
@@ -38,11 +35,12 @@ namespace ActsTrk {
 						     const ActsTrk::Seed& seed,
 						     const Acts::GeometryContext& geoContext,
 						     const Acts::MagneticFieldContext& magFieldContext,
-						     std::function<const Acts::Surface&(const ActsTrk::Seed&)> retrieveSurface) const 
+						     std::function<const Acts::Surface&(const ActsTrk::Seed&)> retrieveSurface,
+						     bool useTopSp) const 
   {
     const auto& sp_collection = seed.sp();
     if ( sp_collection.size() < 3 ) return std::nullopt;
-    const auto& bottom_sp = m_useTopSp ? sp_collection.back() : sp_collection.front();
+    const auto& bottom_sp = useTopSp ? sp_collection.back() : sp_collection.front();
 
     // Magnetic Field
     ATLASMagneticFieldWrapper magneticField;
@@ -57,7 +55,8 @@ namespace ActsTrk {
 				   seed,
 				   geoContext,
 				   surface,
-				   bField);
+				   bField,
+           useTopSp);
   }
 
   std::optional<Acts::BoundTrackParameters>
@@ -65,14 +64,15 @@ namespace ActsTrk {
 						     const ActsTrk::Seed& seed,
 						     const Acts::GeometryContext& geoContext,
 						     const Acts::Surface& surface,
-						     const Acts::Vector3& bField) const 
+						     const Acts::Vector3& bField,
+						     bool useTopSp) const 
   {
     // Get SPs
     const auto& sp_collection = seed.sp();
     if ( sp_collection.size() < 3 ) return std::nullopt;
     
     // Compute Bound parameters at surface
-    auto params_result = m_useTopSp ?
+    auto params_result = useTopSp ?
       Acts::estimateTrackParamsFromSeed(geoContext,
                                         std::ranges::views::reverse(sp_collection),
                                         surface,
@@ -88,7 +88,7 @@ namespace ActsTrk {
 
     auto& params = params_result.value();
 
-    if (m_useTopSp) {
+    if (useTopSp) {
       // reverse direction so momentum vector pointing outwards
       params = Acts::reflectBoundParameters(params);
     }

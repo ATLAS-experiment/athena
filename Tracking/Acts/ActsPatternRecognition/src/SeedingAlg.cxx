@@ -36,19 +36,14 @@ namespace ActsTrk {
     
     // Retrieve seed tool
     ATH_CHECK( m_seedsTool.retrieve() );
-    ATH_CHECK( m_paramEstimationTool.retrieve() );
-    ATH_CHECK( m_trackingGeometryTool.retrieve() );
-    ATH_CHECK( m_ATLASConverterTool.retrieve() );
 
     // Cond
     ATH_CHECK( m_beamSpotKey.initialize() );
     ATH_CHECK( m_fieldCondObjInputKey.initialize() );
-    ATH_CHECK( m_detEleCollKey.initialize() );
 
     // Read and Write handles
     ATH_CHECK( m_spacePointKey.initialize() );
     ATH_CHECK( m_seedKey.initialize() );
-    ATH_CHECK( m_actsTrackParamsKey.initialize() );
 
     ATH_CHECK( m_monTool.retrieve(EnableTool{not m_monTool.empty()}) );
 
@@ -59,8 +54,7 @@ namespace ActsTrk {
      ATH_MSG_INFO("Seed statistics" << std::endl << makeTable(m_stat,
                                                               std::array<std::string, kNStat>{
                                                                  "Spacepoints",
-                                                                 "Seeds",
-                                                                 "No track parameters"
+                                                                 "Seeds"
                                                                     }).columnWidth(10));
     return StatusCode::SUCCESS;
   }
@@ -70,9 +64,8 @@ namespace ActsTrk {
 
     auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
     auto time_seedCreation = Monitored::Timer<std::chrono::milliseconds>( "TIME_seedCreation" );
-    auto time_parameterEstimation = Monitored::Timer<std::chrono::milliseconds>( "TIME_parameterEstimation" );
     auto mon_nSeeds = Monitored::Scalar<int>("nSeeds");
-    auto mon = Monitored::Group( m_monTool, timer, time_seedCreation, time_parameterEstimation, mon_nSeeds );
+    auto mon = Monitored::Group( m_monTool, timer, time_seedCreation, mon_nSeeds );
 
     // ================================================== // 
     // ===================== OUTPUTS ==================== //
@@ -82,11 +75,6 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "    \\__ Seed Container `" << m_seedKey.key() << "` created ..." );
     ATH_CHECK( seedHandle.record( std::make_unique< ActsTrk::SeedContainer >() ) );
     ActsTrk::SeedContainer *seedPtrs = seedHandle.ptr();
-    
-    SG::WriteHandle< ActsTrk::BoundTrackParametersContainer > boundTrackParamsHandle = SG::makeHandle( m_actsTrackParamsKey, ctx );
-    ATH_MSG_DEBUG( "    \\__ Track Params Estimated `"<< m_actsTrackParamsKey.key() << "` created ..." );
-    ATH_CHECK( boundTrackParamsHandle.record( std::make_unique< ActsTrk::BoundTrackParametersContainer >() ) );
-    ActsTrk::BoundTrackParametersContainer *trackParams = boundTrackParamsHandle.ptr();
     
     // ================================================== //
     // ===================== INPUTS ===================== // 
@@ -140,7 +128,7 @@ namespace ActsTrk {
     // ================================================== //
     // ===================== CONDS ====================== // 
     // ================================================== //
-        
+
     // Read the b-field information
     SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle { m_fieldCondObjInputKey, ctx };
     ATH_CHECK( readHandle.isValid() );
@@ -158,15 +146,6 @@ namespace ActsTrk {
     Acts::MagneticFieldProvider::Cache magFieldCache = magneticField.makeCache( magFieldContext );
     Acts::Vector3 bField = *magneticField.getField( Acts::Vector3(beamPos.x(), beamPos.y(), 0),
                                                     magFieldCache );
-
-    SG::ReadCondHandle< InDetDD::SiDetectorElementCollection > detEleHandle( m_detEleCollKey, ctx );
-    ATH_CHECK( detEleHandle.isValid() );
-    const InDetDD::SiDetectorElementCollection* detEle = detEleHandle.retrieve();
-    if ( detEle == nullptr ) {
-      ATH_MSG_FATAL( m_detEleCollKey.fullKey() << " is not available." );
-      return StatusCode::FAILURE;
-    }
-    
 
     // ================================================== // 
     // ===================== COMPUTATION ================ //
@@ -192,44 +171,6 @@ namespace ActsTrk {
     time_seedCreation.stop();
     ATH_MSG_DEBUG("    \\__ Created " << seedPtrs->size() << " seeds");
     m_stat[kNSeeds] += seedPtrs->size();
-
-    // ================================================== //   
-    // ================ PARAMS ESTIMATION =============== //  
-    // ================================================== //   
-
-    ATH_MSG_DEBUG( "Estimating Track Parameters from seed ..." );
-
-    // Estimate Track Parameters
-    auto retrieveSurfaceFunction = 
-      [this, &detEle] (const ActsTrk::Seed& seed) -> const Acts::Surface& 
-      { 
-	const xAOD::SpacePoint* sp = this->m_useTopSp ? seed.sp().back() : seed.sp().front();
-	const InDetDD::SiDetectorElement* Element = detEle->getDetectorElement(
-	    this->m_useTopSp ? sp->elementIdList().back()
-	                     : sp->elementIdList().front());
-	const Trk::Surface& atlas_surface = Element->surface();
-	return this->m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface); 
-      };
-
-    auto geo_context = m_trackingGeometryTool->getNominalGeometryContext();
-
-    time_parameterEstimation.start();
-    for (const ActsTrk::Seed* seed : *seedPtrs) {
-      std::optional<Acts::BoundTrackParameters> optTrackParams =
-        m_paramEstimationTool->estimateTrackParameters(ctx,
-						       *seed,
-						       geo_context.context(),
-						       magFieldContext,
-						       retrieveSurfaceFunction);
-
-      if ( optTrackParams.has_value() ) {
-	Acts::BoundTrackParameters *toAdd = 
-	  new Acts::BoundTrackParameters( optTrackParams.value() );
-	trackParams->push_back( toAdd );
-      }
-    }
-    m_stat[kNSeedsWithoutParam] += (seedPtrs->size() - trackParams->size() );
-    time_parameterEstimation.stop();
 
     mon_nSeeds = seedPtrs->size();
 

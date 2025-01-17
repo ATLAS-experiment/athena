@@ -111,21 +111,21 @@ namespace ActsTrk
 
     // Read and Write handles
     ATH_CHECK(m_seedContainerKeys.initialize());
+    ATH_CHECK(m_detEleCollKeys.initialize());
     ATH_CHECK(m_uncalibratedMeasurementContainerKeys.initialize());
     ATH_CHECK(m_detectorElementToGeometryIdMapKey.initialize());
-    ATH_CHECK(m_estimatedTrackParametersKeys.initialize());
     ATH_CHECK(m_trackContainerKey.initialize());
     ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
 
-    if (m_estimatedTrackParametersKeys.size() != m_seedLabels.size())
+    if (m_seedContainerKeys.size() != m_detEleCollKeys.size())
     {
-      ATH_MSG_FATAL("There are " << m_seedLabels.size() << " SeedLabels, but " << m_estimatedTrackParametersKeys.size() << " EstimatedTrackParametersKeys");
+      ATH_MSG_FATAL("There are " << m_detEleCollKeys.size() << " DetectorElementsKeys, but " << m_seedContainerKeys.size() << " SeedContainerKeys");
       return StatusCode::FAILURE;
     }
 
-    if (m_seedContainerKeys.size() != m_estimatedTrackParametersKeys.size())
+    if (m_detEleCollKeys.size() != m_seedLabels.size())
     {
-      ATH_MSG_FATAL("There are " << m_estimatedTrackParametersKeys.size() << " EstimatedTrackParametersKeys, but " << m_seedContainerKeys.size() << " SeedContainerKeys");
+      ATH_MSG_FATAL("There are " << m_seedLabels.size() << " SeedLabels, but " << m_detEleCollKeys.size() << " DetectorElementsKeys");
       return StatusCode::FAILURE;
     }
 
@@ -133,6 +133,8 @@ namespace ActsTrk
     ATH_CHECK(m_trackingGeometryTool.retrieve());
     ATH_CHECK(m_extrapolationTool.retrieve());
     ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
+    ATH_CHECK(m_ATLASConverterTool.retrieve());
+    ATH_CHECK(m_paramEstimationTool.retrieve());
     ATH_CHECK(m_fitterTool.retrieve());
     ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
     ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
@@ -268,18 +270,6 @@ namespace ActsTrk
     // ===================== INPUTS ===================== //
     // ================================================== //
 
-    // SEED PARAMETERS
-    std::vector<const ActsTrk::BoundTrackParametersContainer *> estimatedTrackParametersContainers;
-    estimatedTrackParametersContainers.reserve(m_estimatedTrackParametersKeys.size());
-    for (const auto &estimatedTrackParametersKey : m_estimatedTrackParametersKeys)
-    {
-      ATH_MSG_DEBUG("Reading input collection with key " << estimatedTrackParametersKey.key());
-      SG::ReadHandle<ActsTrk::BoundTrackParametersContainer> estimatedTrackParametersHandle = SG::makeHandle(estimatedTrackParametersKey, ctx);
-      ATH_CHECK(estimatedTrackParametersHandle.isValid());
-      estimatedTrackParametersContainers.push_back(estimatedTrackParametersHandle.cptr());
-      ATH_MSG_DEBUG("Retrieved " << estimatedTrackParametersContainers.back()->size() << " input elements from key " << estimatedTrackParametersKey.key());
-    }
-
     // SEED TRIPLETS
     std::vector<const ActsTrk::SeedContainer *> seedContainers;
     seedContainers.reserve(m_seedContainerKeys.size());
@@ -313,8 +303,6 @@ namespace ActsTrk
     detail::DuplicateSeedDetector duplicateSeedDetector(total_seeds, m_skipDuplicateSeeds);
     for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
     {
-      if (!seedContainers[icontainer])
-        continue;
       duplicateSeedDetector.addSeeds(icontainer, *seedContainers[icontainer]);
     }
 
@@ -334,6 +322,19 @@ namespace ActsTrk
       m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, **detectorElementToGeometryIdMap, measurements.measurementOffsets());
     }
 
+    // ================================================== //
+    // ===================== CONDS ====================== // 
+    // ================================================== //
+
+    std::vector<const InDetDD::SiDetectorElementCollection*> detElementsCollections;
+    detElementsCollections.reserve(m_detEleCollKeys.size());
+    for (const auto &detEleCollKey : m_detEleCollKeys)
+    {
+      ATH_MSG_DEBUG("Reading input collection with key " << detEleCollKey.key());
+      SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> detEleHandle = SG::makeHandle(detEleCollKey, ctx);
+      ATH_CHECK(detEleHandle.isValid());
+      detElementsCollections.push_back(detEleHandle.cptr());
+    }
 
     // ================================================== //
     // ===================== COMPUTATION ================ //
@@ -343,17 +344,15 @@ namespace ActsTrk
     event_stat.resize(m_stat.size());
 
     // Perform the track finding for all initial parameters.
-    for (std::size_t icontainer = 0; icontainer < estimatedTrackParametersContainers.size(); ++icontainer)
+    for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
     {
-      if (estimatedTrackParametersContainers[icontainer]->empty())
-        continue;
       ATH_CHECK(findTracks(ctx,
                            *acts_tracking_geometry,
                            **detectorElementToGeometryIdMap,
                            measurements,
                            duplicateSeedDetector,
-                           *estimatedTrackParametersContainers[icontainer],
-                           seedContainers[icontainer],
+                           *seedContainers.at(icontainer),
+                           *detElementsCollections.at(icontainer),
                            tracksContainer,
                            icontainer,
                            icontainer < m_seedLabels.size() ? m_seedLabels[icontainer].c_str() : m_seedContainerKeys[icontainer].key().c_str(),
@@ -392,20 +391,14 @@ namespace ActsTrk
                               const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
                               const detail::TrackFindingMeasurements &measurements,
                               detail::DuplicateSeedDetector &duplicateSeedDetector,
-                              const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
-                              const ActsTrk::SeedContainer *seeds,
+                              const ActsTrk::SeedContainer &seeds,
+                              const InDetDD::SiDetectorElementCollection& detElements,
                               ActsTrk::MutableTrackContainer &tracksContainer,
                               size_t typeIndex,
                               const char *seedType,
                               EventStats &event_stat) const
   {
     ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
-
-    if (seeds && seeds->size() != estimatedTrackParameters.size())
-    {
-      // should be the same, but we can cope if not
-      ATH_MSG_WARNING("Have " << seeds->size() << " " << seedType << " seeds, but " << estimatedTrackParameters.size() << "estimated track parameters");
-    }
 
     // Construct a perigee surface as the target surface
     auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
@@ -424,9 +417,8 @@ namespace ActsTrk
     Acts::PropagatorPlainOptions plainOptions{tgContext, mfContext};
     Acts::PropagatorPlainOptions plainSecondOptions{tgContext, mfContext};
 
-    const bool reverseSearch = (typeIndex < m_reverseSearch.size() && m_reverseSearch[typeIndex]);
     plainOptions.maxSteps = m_maxPropagationStep;
-    plainOptions.direction = reverseSearch ? Acts::Direction::Backward : Acts::Direction::Forward;
+    plainOptions.direction = Acts::Direction::Forward;
     plainSecondOptions.maxSteps = m_maxPropagationStep;
     plainSecondOptions.direction = plainOptions.direction.invert();
 
@@ -439,25 +431,21 @@ namespace ActsTrk
                                trackFinder().ckfExtensions,
                                plainOptions,
                                pSurface.get());
-    if (reverseSearch) options.targetSurface = pSurface.get();
     if (!m_useDefaultMeasurementSelector.value()) {
        m_measurementSelector->connect( &options.trackStateCandidateCreator );
     }
-    std::optional<TrackFinderOptions> secondOptions;
-    if (m_doTwoWay) {
-      secondOptions.emplace(tgContext,
-                            mfContext,
-                            calContext,
-                            slAccessorDelegate,
-                            trackFinder().ckfExtensions,
-                            plainSecondOptions,
-                            pSurface.get());
-      if (!reverseSearch) secondOptions->targetSurface = pSurface.get();
-      if (!m_useDefaultMeasurementSelector.value()) {
-         m_measurementSelector->connect( &secondOptions->trackStateCandidateCreator);
-      }
-      secondOptions->skipPrePropagationUpdate = true;
+    TrackFinderOptions secondOptions(tgContext,
+                                     mfContext,
+                                     calContext,
+                                     slAccessorDelegate,
+                                     trackFinder().ckfExtensions,
+                                     plainSecondOptions,
+                                     pSurface.get());
+    secondOptions.targetSurface = pSurface.get();
+    if (!m_useDefaultMeasurementSelector.value()) {
+        m_measurementSelector->connect( &secondOptions.trackStateCandidateCreator );
     }
+    secondOptions.skipPrePropagationUpdate = true;
 
     // ActsTrk::MutableTrackContainer tracksContainerTemp;
     Acts::VectorTrackContainer trackBackend;
@@ -481,9 +469,7 @@ namespace ActsTrk
     if (m_useDefaultMeasurementSelector.value()) {
       // for default measurement selector need connect calibrator
       options.extensions.calibrator.connect<&detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
-      if (m_doTwoWay) {
-	secondOptions->extensions.calibrator.connect<&detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
-      }
+      secondOptions.extensions.calibrator.connect<&detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
     }
 
     const auto &trackSelectorCfg = trackFinder().trackSelector.config();
@@ -581,13 +567,6 @@ namespace ActsTrk
     };
 
     options.extensions.branchStopper.connect(stopBranch);
-    if (m_doTwoWay) {
-      // If we extend the track inwards we can utilize the CKF propagation
-      // as extrapolator and therefore do not need to stop branches.
-      // This only works for outside-in extensions.
-      if (reverseSearch)
-        secondOptions->extensions.branchStopper.connect(stopBranch);
-    }
 
     Acts::PropagatorOptions<detail::Stepper::Options, detail::Navigator::Options,
                             Acts::ActorList<Acts::MaterialInteractor>>
@@ -597,34 +576,64 @@ namespace ActsTrk
         Acts::TrackExtrapolationStrategy::first;
 
     // Perform the track finding for all initial parameters
-    ATH_MSG_DEBUG("Invoke track finding with " << estimatedTrackParameters.size() << ' ' << seedType << " seeds.");
+    ATH_MSG_DEBUG("Invoke track finding with " << seeds.size() << ' ' << seedType << " seeds.");
 
     std::size_t nPrinted = 0;
     auto printSeed = [&](std::size_t iseed, const Acts::BoundTrackParameters &seedParameters, bool isKF = false)
     {
-      if (m_trackStatePrinter.empty() || !seeds)
+      if (m_trackStatePrinter.empty())
         return;
       if (!nPrinted++)
       {
-        ATH_MSG_INFO("CKF results for " << estimatedTrackParameters.size() << ' ' << seedType << " seeds:");
+        ATH_MSG_INFO("CKF results for " << seeds.size() << ' ' << seedType << " seeds:");
       }
-      m_trackStatePrinter->printSeed(tgContext, *(*seeds)[iseed], seedParameters, measurementContainerOffsets, iseed, isKF);
+      m_trackStatePrinter->printSeed(tgContext, *seeds[iseed], seedParameters, measurementContainerOffsets, iseed, isKF);
     };
 
     // Loop over the track finding results for all initial parameters
-    for (std::size_t iseed = 0; iseed < estimatedTrackParameters.size(); ++iseed)
+    for (std::size_t iseed = 0; iseed < seeds.size(); ++iseed)
     {
       category_i = typeIndex * (m_statEtaBins.size() + 1);
       tracksContainerTemp.clear();
 
-      if (!estimatedTrackParameters[iseed])
-      {
-        ATH_MSG_WARNING("No " << seedType << " seed " << iseed);
-        ++event_stat[category_i][kNoTrackParam];
+      const bool reverseSearch = (typeIndex < m_reverseSearch.size() && m_reverseSearch[typeIndex]);
+      const bool refitSeeds = (typeIndex < m_refitSeeds.size() && m_refitSeeds[typeIndex]);
+      const bool useTopSp = reverseSearch && !refitSeeds;
+
+      plainOptions.direction = reverseSearch ? Acts::Direction::Backward : Acts::Direction::Forward;
+      plainSecondOptions.direction = plainOptions.direction.invert();
+      options.targetSurface = reverseSearch ? pSurface.get() : nullptr;
+      secondOptions.targetSurface = reverseSearch ? nullptr : pSurface.get();
+      // TODO since the second pass is strictly an extension we should have a separate branch stopper which never drops and always extrapolates to the target surface
+
+      const ActsTrk::Seed& seed = *seeds[iseed];
+
+      // Estimate Track Parameters
+      auto retrieveSurfaceFunction = 
+        [this, &detElements, useTopSp] (const ActsTrk::Seed& seed) -> const Acts::Surface& { 
+          const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
+          const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(
+                useTopSp ? sp->elementIdList().back()
+                                : sp->elementIdList().front());
+          const Trk::Surface& atlas_surface = element->surface();
+          return this->m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
+        };
+
+      std::optional<Acts::BoundTrackParameters> optTrackParams =
+        m_paramEstimationTool->estimateTrackParameters(ctx,
+						       seed,
+						       tgContext,
+						       mfContext,
+						       retrieveSurfaceFunction,
+                   useTopSp);
+
+      if (!optTrackParams) {
+        ATH_MSG_DEBUG("Failed to estimate track parameters for seed " << iseed);
+        // TODO count
         continue;
       }
 
-      const Acts::BoundTrackParameters *initialParameters = estimatedTrackParameters[iseed];
+      Acts::BoundTrackParameters* initialParameters = &(*optTrackParams);
       printSeed(iseed, *initialParameters);
 
       double etaInitial = -std::log(std::tan(0.5 * initialParameters->theta()));
@@ -642,12 +651,11 @@ namespace ActsTrk
       // Result here contains a vector of TrackProxy objects
       ++event_stat[category_i][kNUsedSeeds];
 
-      std::unique_ptr<Acts::BoundTrackParameters> seedParameters;
-      const bool refitSeeds = (typeIndex < m_refitSeeds.size() && m_refitSeeds[typeIndex]);
+      std::unique_ptr<Acts::BoundTrackParameters> refitSeedParameters;
       if (refitSeeds)
       {
         // Perform KF before CKF
-        const auto fittedSeedCollection = m_fitterTool->fit(ctx, *(*seeds)[iseed], *initialParameters,
+        const auto fittedSeedCollection = m_fitterTool->fit(ctx, *seeds[iseed], *initialParameters,
                                                             tgContext, mfContext, calContext,
                                                             detectorElementToGeoId);
         if (not fittedSeedCollection)
@@ -660,26 +668,25 @@ namespace ActsTrk
         }
         else
         {
-          // Check pTmin requirement
           const auto fittedSeed = fittedSeedCollection->getTrack(0);
+          const auto trackState = reverseSearch ? fittedSeed.outermostTrackState()
+                                                : fittedSeed.innermostTrackState().value();
+          const auto boundParameters = fittedSeed.createParametersFromState(trackState);
 
-          double etaSeed = -std::log(std::tan(0.5 * fittedSeed.parameters()[Acts::eBoundTheta]));
+          // Check pTmin requirement
+          double etaSeed = -std::log(std::tan(0.5 * boundParameters.parameters()[Acts::eBoundTheta]));
           const auto &cutSet = getCuts(etaSeed);
-          if (fittedSeed.transverseMomentum() < cutSet.ptMin)
+          if (boundParameters.transverseMomentum() < cutSet.ptMin)
           {
-            ATH_MSG_VERBOSE("min pt requirement not satisfied after param refinement: pt min is " << cutSet.ptMin << " but Refined params have pt of " << fittedSeed.transverseMomentum());
+            ATH_MSG_VERBOSE("min pt requirement not satisfied after param refinement: pt min is " << cutSet.ptMin << " but Refined params have pt of " << boundParameters.transverseMomentum());
             ++event_stat[category_i][kNRejectedRefinedSeeds];
             continue;
           }
 
-          seedParameters.reset(new Acts::BoundTrackParameters(fittedSeed.referenceSurface().getSharedPtr(),
-                                                              fittedSeed.parameters(),
-                                                              initialParameters->covariance(),
-                                                              fittedSeed.particleHypothesis()));
-          printSeed(iseed, *seedParameters, true);
-
           // Pass the refined params to the CKF
-          initialParameters = seedParameters.get();
+          refitSeedParameters = std::make_unique<Acts::BoundTrackParameters>(boundParameters);
+          initialParameters = refitSeedParameters.get();
+          printSeed(iseed, *initialParameters, true);
         }
       }
 
@@ -787,7 +794,7 @@ namespace ActsTrk
               rootBranch.copyFrom(firstTrack, false);  // #3534
               if (m_addPixelStripCounts)
                 copyPixelStripCounts(rootBranch, firstTrack);
-              auto secondResult = trackFinder().ckf.findTracks(secondInitialParameters, *secondOptions, tracksContainerTemp, rootBranch);
+              auto secondResult = trackFinder().ckf.findTracks(secondInitialParameters, secondOptions, tracksContainerTemp, rootBranch);
 
               if (not secondResult.ok()) {
                 ATH_MSG_WARNING("Second track finding failed for " << seedType << " seed " << iseed << " track " << nfirst << " with error" << secondResult.error());

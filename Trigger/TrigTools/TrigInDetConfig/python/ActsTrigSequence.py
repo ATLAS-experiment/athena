@@ -120,7 +120,7 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
 
     from ActsConfig.ActsTrackFindingConfig import ActsMainTrackFindingAlgCfg, ActsTrackToTrackParticleCnvAlgCfg
 
-    acc.merge(ActsMainTrackFindingAlgCfg(self.flags, name="ActsTrackFindingAlg_"+self.signature, ACTSTracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_FTF,SeedLabels=["PPP"],SeedContainerKeys=["ActsPixelSeeds"],UncalibratedMeasurementContainerKeys=["ITkPixelClusters_Cached" if self.flags.Acts.useCache else "ITkPixelClusters_"+self.signature ,"ITkStripClusters_Cached" if self.flags.Acts.useCache else "ITkStripClusters_"+self.signature],EstimatedTrackParametersKeys=["ActsPixelEstimatedTrackParams"]))
+    acc.merge(ActsMainTrackFindingAlgCfg(self.flags, name="ActsTrackFindingAlg_"+self.signature, ACTSTracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_FTF,SeedLabels=["PPP"],SeedContainerKeys=["ActsPixelSeeds"],UncalibratedMeasurementContainerKeys=["ITkPixelClusters_Cached" if self.flags.Acts.useCache else "ITkPixelClusters_"+self.signature ,"ITkStripClusters_Cached" if self.flags.Acts.useCache else "ITkStripClusters_"+self.signature]))
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(self.flags,name="ActsTrackParticleCreator_"+self.signature, ACTSTracksLocation=[self.flags.Tracking.ActiveConfig.trkTracks_FTF], TrackParticlesOutKey=self.flags.Tracking.ActiveConfig.tracks_FTF))
 
     return acc

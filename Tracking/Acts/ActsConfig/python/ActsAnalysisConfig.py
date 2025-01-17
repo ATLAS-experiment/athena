@@ -590,6 +590,61 @@ def ActsStripEstimatedTrackParamsAnalysisAlgCfg(flags,
                                                       ntupleName = extension.replace("Acts", "") + 'StripEstimatedTrackParams',
                                                       **kwargs)
 
+
+def ActsBaseSeedsToTrackParamsAlgCfg(flags,
+                                     name: str = "",
+                                     **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    if 'ExtrapolationTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+        kwargs.setdefault(
+            'ExtrapolationTool',
+            acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
+        )
+
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault(
+            'TrackingGeometryTool',
+            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
+        )
+
+    if 'ATLASConverterTool' not in kwargs:
+        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
+        kwargs.setdefault('ATLASConverterTool', acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
+
+    if 'TrackParamsEstimationTool' not in kwargs:
+        from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
+        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
+
+    acc.addEventAlgo(CompFactory.ActsTrk.SeedsToTrackParamsAlg(name, **kwargs))
+    return acc
+
+def ActsPixelSeedsToTrackParamsAlgCfg(flags,
+                                      name: str = 'ActsPixelSeedsToTrackParamsAlg',
+                                      extension: str = "Acts",
+                                      **kwargs) -> ComponentAccumulator:
+    kwargs.setdefault('InputSeedContainerKey', 'ActsPixelSeeds')
+    kwargs.setdefault('DetectorElementsKey', 'ITkPixelDetectorElementCollection')
+    kwargs.setdefault('OutputTrackParamsCollectionKey', 'ActsPixelEstimatedTrackParams')
+    return ActsBaseSeedsToTrackParamsAlgCfg(flags,
+                                            name,
+                                            **kwargs)
+
+
+def ActsStripSeedsToTrackParamsAlgCfg(flags,
+                                      name: str = 'ActsStripSeedsToTrackParamsAlgCfg',
+                                      extension: str = "Acts",
+                                      **kwargs) -> ComponentAccumulator:
+    kwargs.setdefault('InputSeedContainerKey', 'ActsStripSeeds')
+    kwargs.setdefault('DetectorElementsKey', 'ITkStripDetectorElementCollection')
+    kwargs.setdefault('OutputTrackParamsCollectionKey', 'ActsStripEstimatedTrackParams')
+    return ActsBaseSeedsToTrackParamsAlgCfg(flags,
+                                            name,
+                                            **kwargs)
+
+
 def PhysValActsCfg(flags,
                    name: str = 'PhysValActs',
                    **kwargs) -> ComponentAccumulator:
@@ -631,4 +686,13 @@ def ActsEstimatedTrackParamsAnalysisCfg(flags) -> ComponentAccumulator:
         acc.merge(ActsPixelEstimatedTrackParamsAnalysisAlgCfg(flags))
     if flags.Detector.EnableITkStrip:
         acc.merge(ActsStripEstimatedTrackParamsAnalysisAlgCfg(flags))
+    return acc
+
+
+def ActsSeedsToTrackParamsCfg(flags) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    if flags.Detector.EnableITkPixel:
+        acc.merge(ActsPixelSeedsToTrackParamsAlgCfg(flags))
+    if flags.Detector.EnableITkStrip:
+        acc.merge(ActsStripSeedsToTrackParamsAlgCfg(flags))
     return acc

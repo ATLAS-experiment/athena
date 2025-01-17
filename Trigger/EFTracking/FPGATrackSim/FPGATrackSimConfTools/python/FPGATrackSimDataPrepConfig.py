@@ -262,19 +262,16 @@ def FPGATrackSimDataPrepConnectToFastTracking(flags,FinalTracks="FPGADataPrep"):
     from ActsConfig.ActsSeedingConfig import ActsStripSeedingAlgCfg, ActsPixelSeedingAlgCfg
     result.merge(ActsStripSeedingAlgCfg(flags, name="FPGADataPrepActsStripSeedingAlg",
                                     InputSpacePoints=['xAODStripSpacePoints_1stFromFPGA'],
-                                    OutputSeeds="FPGADataPrepActsStripSeeds",
-                                    OutputEstimatedTrackParameters="FPGAActsStripEstimatedTrackParams"))
+                                    OutputSeeds="FPGADataPrepActsStripSeeds"))
     
     result.merge(ActsPixelSeedingAlgCfg(flags, name="FPGADataPrepActsPixelSeedingAlg",
                                     InputSpacePoints=['xAODPixelSpacePoints_1stFromFPGA'],
-                                    OutputSeeds="FPGADataPrepActsPixelSeeds",
-                                    OutputEstimatedTrackParameters="FPGAActsPixelEstimatedTrackParams"))
+                                    OutputSeeds="FPGADataPrepActsPixelSeeds"))
     
     # ACTS Tracking
     from ActsConfig.ActsTrackFindingConfig import ActsMainTrackFindingAlgCfg
     result.merge(ActsMainTrackFindingAlgCfg(flags, name="FPGADataPrepActsTrackFindingAlg",
                                 SeedContainerKeys=['FPGADataPrepActsPixelSeeds','FPGADataPrepActsStripSeeds'],
-                                EstimatedTrackParametersKeys=['FPGAActsPixelEstimatedTrackParams','FPGAActsStripEstimatedTrackParams'],
                                 UncalibratedMeasurementContainerKeys=["xAODPixelClusters_1stFromFPGACluster","xAODStripClusters_1stFromFPGACluster"],
                                 ACTSTracksLocation=ACTSTracks))
     
