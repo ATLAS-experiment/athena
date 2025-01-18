@@ -31,6 +31,12 @@ if( @CMAKE_PROJECT_NAME@_FIND_QUIETLY )
   set( _quietFlag QUIET )
 endif()
 
+# Set up the LCG modules. While AnalysisBaseExternals does this as
+# well, we need to do it explicitly here, to make the following find_package
+# calls find the packages correctly.
+set( LCG_VERSION_POSTFIX @LCG_VERSION_POSTFIX@ )
+find_package( LCG @LCG_VERSION_NUMBER@ REQUIRED EXACT ${_quietFlag} )
+
 # Imported target(s) used by the project.
 find_package( Threads ${_quietFlag} )
 find_package( GTest ${_quietFlag} )
