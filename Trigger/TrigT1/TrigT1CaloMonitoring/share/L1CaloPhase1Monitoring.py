@@ -515,6 +515,7 @@ if flags.Exec.MaxEvents==0:
   #   athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py --filesInput /eos/atlas/atlascerngroupdisk/det-l1calo/OfflineSoftware/TestFiles/data24_13p6TeV/data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0821._SFO-20._0001.data --evtMax 0 -- DQ.useTrigger=True
   from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
   L1CaloMonitorCfgHelper.printHanConfig()
+  cfg._wasMerged = True # prevents spurious error message showing up about cfg that wasn't used
   exit(0)
 
 if cfg.run().isFailure():
