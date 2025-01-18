@@ -24,8 +24,8 @@
 #include <set>
 
 
-bool mySortfunc_ratio(dqm_algorithms::L1Calo_BinsDiffFromStripMedian::bin i,
-                      dqm_algorithms::L1Calo_BinsDiffFromStripMedian::bin j){return (std::abs(i.m_outstandingRatio) > std::abs(j.m_outstandingRatio));}
+bool mySortfunc_ratio(const dqm_algorithms::L1Calo_BinsDiffFromStripMedian::bin& i,
+                      const dqm_algorithms::L1Calo_BinsDiffFromStripMedian::bin& j){return (std::abs(i.m_outstandingRatio) > std::abs(j.m_outstandingRatio));}
 static dqm_algorithms::L1Calo_BinsDiffFromStripMedian myInstance;
 
 dqm_algorithms::L1Calo_BinsDiffFromStripMedian::L1Calo_BinsDiffFromStripMedian( )
