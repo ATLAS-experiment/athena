@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -64,12 +64,8 @@ TEST (GridToolsTest, rucioListDids)
   std::map<std::string,unsigned> types;
   for (auto& entry : entries)
   {
-    if (scopes.find (entry.scope) == scopes.end())
-      scopes[entry.scope] = 0;
-    ++ scopes[entry.scope];
-    if (types.find (entry.type) == types.end())
-      types[entry.type] = 0;
-    ++ types[entry.type];
+    ++scopes[entry.scope];
+    ++types[entry.type];
   }
   EXPECT_EQ (1u, scopes.size());
   EXPECT_TRUE (scopes.find ("user.ivukotic") != scopes.end());
@@ -86,8 +82,6 @@ TEST (GridToolsTest, rucioListFileReplicas)
   std::map<std::string,unsigned> types;
   for (auto& entry : entries)
   {
-    if (scopes.find (entry.scope) == scopes.end())
-      scopes[entry.scope] = 0;
     ++ scopes[entry.scope];
   }
   EXPECT_EQ (1u, scopes.size());

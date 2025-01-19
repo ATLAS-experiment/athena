@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //          
@@ -238,14 +238,7 @@ namespace SH
       RCU_THROW_MSG ("sample " + sample->name() + " not found in SampleHandler");
     if (nameIter->second.get() != sample)
       RCU_THROW_MSG ("different sample of name " + sample->name() + " found in SampleHandler");
-    SamplesMIter sampleIter = m_samples.end();
-    for (SamplesMIter iter = m_samples.begin(), end2 = m_samples.end();
-	 iter != end2; ++ iter)
-    {
-      if (*iter == sample)
-	sampleIter = iter;
-    };
-    m_samples.erase (sampleIter);
+    std::erase (m_samples, sample);
     m_named.erase (nameIter);
   }
 
