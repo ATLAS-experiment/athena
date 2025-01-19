@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -103,12 +103,13 @@ unsigned int EGammaAmbiguityTool::ambiguityResolve(const xAOD::CaloCluster* clus
   // Check if the track particle and the ones associated to the conversion vertex
   // have innermost pixel hits
   bool trkHasInnermostHit = tp && hasInnermostPixelHit(*tp);
-  size_t nTrkVxWithInnermostHit = vxDoubleSi ? nTrkWithInnermostPixelHits(*vx) : 0;
+  size_t nTrkVxWithInnermostHit{};
+  if (vx and vxDoubleSi) nTrkVxWithInnermostHit = nTrkWithInnermostPixelHits(*vx);
 
   //See if the Si+Si conversion shares one track with the electron
   //if not we might have a trident.
-  //if yes and the track is not good we definetely matched the conversion as electron.
-  bool shareTrack = tp && trkSiHits>=m_MinNoSiHits && vxDoubleSi && isInVertex(*tp, *vx);
+  //if yes and the track is not good we definitely matched the conversion as electron.
+  bool shareTrack = vx && tp && trkSiHits>=m_MinNoSiHits && vxDoubleSi && isInVertex(*tp, *vx);
 
   //Debug messages
   ATH_MSG_DEBUG("Vertex, SiSi, tracks with innermost pixel hits: "
