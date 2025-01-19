@@ -35,7 +35,7 @@ endif()
 # well, we need to do it explicitly here, to make the following find_package
 # calls find the packages correctly.
 set( LCG_VERSION_POSTFIX @LCG_VERSION_POSTFIX@ )
-find_package( LCG @LCG_VERSION_NUMBER@ REQUIRED EXACT ${_quietFlag} )
+find_package( LCG @LCG_VERSION_NUMBER@ REQUIRED ${_quietFlag} )
 
 # Imported target(s) used by the project.
 find_package( Threads ${_quietFlag} )
