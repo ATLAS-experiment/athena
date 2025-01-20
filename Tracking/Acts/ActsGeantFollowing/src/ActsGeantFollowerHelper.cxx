@@ -270,13 +270,13 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
   std::optional<Acts::BoundTrackParameters> actsParameters = m_actsExtrapolator->propagate(ctx, 
 											   *m_actsParameterCache, 
 											   *destinationSurfaceActs, 
-											   Acts::Direction::Forward,
+											   Acts::Direction::Forward(),
 											   std::numeric_limits<double>::max());
 
   float X0Acts = m_actsExtrapolator->propagationSteps(ctx,
                                                        *m_actsParameterCache, 
                                                        *destinationSurfaceActs,
-                                                       Acts::Direction::Forward,
+                                                       Acts::Direction::Forward(),
                                                        std::numeric_limits<double>::max()).second.materialInX0;
                                                        
   if(not actsParameters.has_value()){

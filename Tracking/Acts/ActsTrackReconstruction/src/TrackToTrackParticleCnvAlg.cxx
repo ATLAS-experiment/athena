@@ -513,7 +513,7 @@ namespace ActsTrk
         perigeeParam = m_extrapolationTool->propagate(ctx,
                                                       trackParam,
                                                       perigee_surface,
-                                                      Acts::Direction::Backward, // @TODO try forward if backward fails ?
+                                                      Acts::Direction::Backward(), // @TODO try forward if backward fails ?
                                                       m_paramExtrapolationParLimit.value());
      if (!perigeeParam.has_value()) {
         ATH_MSG_WARNING( "Failed to extrapolate to perigee, started from \n" << trackParam << " " << trackParam.referenceSurface().name() );

@@ -154,7 +154,7 @@ namespace ActsTrk{
 
     Acts::PropagatorPlainOptions plainOptions(tgContext, mfContext);
     plainOptions.maxSteps = 1000;
-    plainOptions.direction= m_propagateForward ? Acts::Direction::Forward : Acts::Direction::Backward;
+    plainOptions.direction= m_propagateForward ? Acts::Direction::Forward() : Acts::Direction::Backward();
 
 
     TrackExtensionAlg::CKFOptions options(tgContext,

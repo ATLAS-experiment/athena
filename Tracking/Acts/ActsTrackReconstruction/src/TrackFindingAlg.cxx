@@ -429,7 +429,7 @@ namespace ActsTrk
     Acts::PropagatorPlainOptions plainSecondOptions{tgContext, mfContext};
 
     plainOptions.maxSteps = m_maxPropagationStep;
-    plainOptions.direction = Acts::Direction::Forward;
+    plainOptions.direction = Acts::Direction::Forward();
     plainSecondOptions.maxSteps = m_maxPropagationStep;
     plainSecondOptions.direction = plainOptions.direction.invert();
 
@@ -626,7 +626,7 @@ namespace ActsTrk
         if (!m_trackStatePrinter.isSet()) continue;  // delay continue to estimate track parms for TrackStatePrinter?
       }
 
-      plainOptions.direction = reverseSearch ? Acts::Direction::Backward : Acts::Direction::Forward;
+      plainOptions.direction = reverseSearch ? Acts::Direction::Backward() : Acts::Direction::Forward();
       plainSecondOptions.direction = plainOptions.direction.invert();
       options.targetSurface = reverseSearch ? pSurface.get() : nullptr;
       secondOptions.targetSurface = reverseSearch ? nullptr : pSurface.get();

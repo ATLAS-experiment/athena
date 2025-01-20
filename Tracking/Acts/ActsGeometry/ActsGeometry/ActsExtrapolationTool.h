@@ -72,14 +72,14 @@ public:
   ActsPropagationOutput
   propagationSteps(const EventContext& ctx,
                    const Acts::BoundTrackParameters& startParameters,
-                   Acts::Direction navDir = Acts::Direction::Forward,
+                   Acts::Direction navDir = Acts::Direction::Forward(),
                    double pathLimit = std::numeric_limits<double>::max()) const override;
 
   virtual
   std::optional<const Acts::CurvilinearTrackParameters>
   propagate(const EventContext& ctx,
             const Acts::BoundTrackParameters& startParameters,
-            Acts::Direction navDir = Acts::Direction::Forward,
+            Acts::Direction navDir = Acts::Direction::Forward(),
             double pathLimit = std::numeric_limits<double>::max()) const override;
 
   virtual
@@ -87,7 +87,7 @@ public:
   propagationSteps(const EventContext& ctx,
                    const Acts::BoundTrackParameters& startParameters,
                    const Acts::Surface& target,
-                   Acts::Direction navDir = Acts::Direction::Forward,
+                   Acts::Direction navDir = Acts::Direction::Forward(),
                    double pathLimit = std::numeric_limits<double>::max()) const override;
 
   virtual
@@ -95,7 +95,7 @@ public:
   propagate(const EventContext& ctx,
             const Acts::BoundTrackParameters& startParameters,
             const Acts::Surface& target,
-            Acts::Direction navDir = Acts::Direction::Forward,
+            Acts::Direction navDir = Acts::Direction::Forward(),
             double pathLimit = std::numeric_limits<double>::max()) const override;
 
   virtual
