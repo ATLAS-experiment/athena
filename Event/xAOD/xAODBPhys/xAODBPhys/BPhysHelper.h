@@ -343,7 +343,8 @@ namespace xAOD {
       
       const std::vector<const xAOD::Muon*>& muons();
       const std::vector<const xAOD::Electron*>& electrons();
-      
+      const std::vector<unsigned int> electronTrackIndices();
+
       /** Set links to muons
        *  @param[in] muons          std::vector of muons to be linked to this vertex
        *  @param[in] muonContainer  collection these muons belong to
@@ -650,6 +651,24 @@ namespace xAOD {
       bool cacheMuons();
       bool cacheElectrons();
 
+      /************************************************************************/
+      /**
+       *  @brief: Enum type of the electron track used in vertexing
+       * 
+       *  This enum type is used to identify type of the electron track used in 
+       *  vertexing since there are various options. 
+       * 
+       *  @value: TRACK_INDET 
+       *  @value: TRACK_GSF   
+       *  @value: TRACK_GSFCALOREFIT
+       */
+      
+      enum eltrack_type {TRACK_INDET, TRACK_GSF, TRACK_GSFCALOREFIT};
+      std::vector<eltrack_type> m_cachedElTrackTypes;
+      bool decorateElTrackTypes();
+      const std::vector<eltrack_type> electronTrackTypes();
+      static const std::vector<eltrack_type> emptyVectorOfElTrackTypes;
+
 
       /** @brief: Cache preceding vertices
        *
@@ -704,6 +723,8 @@ namespace xAOD {
       bool                           m_electronsCached;
       std::vector<const xAOD::Muon*> m_cachedMuons;
       std::vector<const xAOD::Electron*> m_cachedElectrons;
+      bool m_electronTracksDecorated = false;
+      std::vector<unsigned int> m_cachedElTrackIndices;
       
       /** @} */
 
@@ -727,6 +748,7 @@ namespace xAOD {
       static const std::vector<TVector3>            emptyVectorOfTVector3;
       static const std::vector<const xAOD::Muon*>   emptyVectorOfMuons;
       static const std::vector<const xAOD::Electron*>   emptyVectorOfElectrons;
+      static const std::vector<unsigned int> emptyVectorOfElTrackIndices;
       static const TMatrixTSym<double>              emptyMatrix;
       static const std::vector<const xAOD::Vertex*> emptyVectorOfVertices;
       /** @}  */

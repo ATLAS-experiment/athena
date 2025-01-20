@@ -10,6 +10,7 @@
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
+#include "xAODEgamma/ElectronxAODHelpers.h"
 
 /*****************************************************************************/
 /** @{
@@ -548,6 +549,28 @@ const std::vector<const xAOD::Electron*>& xAOD::BPhysHelper::electrons()
   
   // all OK:
   return m_cachedElectrons;  
+}
+
+const std::vector<unsigned int> xAOD::BPhysHelper::electronTrackIndices()
+{
+  // decorate electron track information
+  if(!decorateElTrackTypes())
+    return xAOD::BPhysHelper::emptyVectorOfElTrackIndices;
+
+  // all OK:
+  return m_cachedElTrackIndices;
+
+}
+
+const std::vector<xAOD::BPhysHelper::eltrack_type> xAOD::BPhysHelper::electronTrackTypes()
+{
+  // decorate electron track information
+  if(!decorateElTrackTypes())
+    return xAOD::BPhysHelper::emptyVectorOfElTrackTypes;
+
+  // all OK:
+  return m_cachedElTrackTypes;
+
 }
 
 /*****************************************************************************/
@@ -1261,7 +1284,37 @@ bool xAOD::BPhysHelper::cacheElectrons()
   return true;
   
 }
-
+/*****************************************************************************/
+bool xAOD::BPhysHelper::decorateElTrackTypes()
+{
+ if(!cacheElectrons()) return false;
+ if(m_electronTracksDecorated && !m_cachedElTrackTypes.empty()) return true;
+ for( unsigned int elIdx = 0; elIdx < m_cachedElectrons.size(); elIdx++ ){
+  const xAOD::TrackParticle* gsfTrack = m_cachedElectrons[elIdx]->trackParticle(0);
+  const xAOD::TrackParticle* idTrack;
+  if ( gsfTrack ){
+    idTrack = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( gsfTrack );
+  } else {
+    idTrack = nullptr;
+  }
+  for( unsigned int iTrk=0; iTrk < m_b->nTrackParticles(); iTrk++ ){
+    if ( m_b->trackParticle(iTrk) == gsfTrack ){
+      m_cachedElTrackTypes.push_back(TRACK_GSF);
+      m_cachedElTrackIndices.push_back(iTrk);
+    } 
+    else if ( m_b->trackParticle(iTrk) == idTrack ){
+      m_cachedElTrackTypes.push_back(TRACK_INDET);
+      m_cachedElTrackIndices.push_back(iTrk);
+    }
+    else{
+      continue;
+    }
+  }
+ }
+ assert(m_cachedElectrons.size()==m_cachedElTrackIndices.size());
+ m_electronTracksDecorated=true;
+ return true;
+}
 /*****************************************************************************/
 bool xAOD::BPhysHelper::cachePrecedingVertices()
 {
@@ -1358,4 +1411,6 @@ const std::vector<const xAOD::Muon*>   xAOD::BPhysHelper::emptyVectorOfMuons(0);
 const std::vector<const xAOD::Electron*>   xAOD::BPhysHelper::emptyVectorOfElectrons(0);
 const TMatrixTSym<double>              xAOD::BPhysHelper::emptyMatrix(0);
 const std::vector<const xAOD::Vertex*> xAOD::BPhysHelper::emptyVectorOfVertices(0);
+const std::vector<xAOD::BPhysHelper::eltrack_type> xAOD::BPhysHelper::emptyVectorOfElTrackTypes(0);
+const std::vector<unsigned int>  xAOD::BPhysHelper::emptyVectorOfElTrackIndices(0);
 /*****************************************************************************/

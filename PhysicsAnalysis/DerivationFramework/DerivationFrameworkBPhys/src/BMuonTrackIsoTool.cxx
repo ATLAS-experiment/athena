@@ -132,8 +132,6 @@ namespace DerivationFramework {
     declareProperty("LegType"                      , m_legType=0);
     declareProperty("MuonContainerName"            , m_muonContainerName="");
     declareProperty("ElectronContainerName"        , m_electronContainerName="");
-    declareProperty("TrackParticleContainerName"   , m_trackParticleContainerName="");
-    declareProperty("ElTrackParticleContainerName" , m_elTrackParticleContainerName="");
     declareProperty("IsolationConeSizes"    , m_isoConeSizes);
     declareProperty("IsoTrkImpLogChi2Max"   , m_isoTrkImpLogChi2Max);
     declareProperty("IsoDoTrkImpLogChi2Cut" , m_isoDoTrkImpLogChi2Cut);
@@ -161,12 +159,12 @@ namespace DerivationFramework {
     if ( m_electronContainerName == "" && m_legType == 1 ) {
       ATH_MSG_ERROR("No electron container name provided!");
     }
-    if ( m_elTrackParticleContainerName == "" && m_legType == 1 ) {
-      ATH_MSG_ERROR("No track particle container name provided for electrons!");
-    }
-    if ( m_trackParticleContainerName == "" && m_legType == 2 ) {
-      ATH_MSG_ERROR("No track particle container name provided!");
-    }
+    //if ( m_elTrackParticleContainerName == "" && m_legType == 1 ) {
+    //  ATH_MSG_ERROR("No track particle container name provided for electrons!");
+    //}
+    //if ( m_trackParticleContainerName == "" && m_legType == 2 ) {
+    //  ATH_MSG_ERROR("No track particle container name provided!");
+    //}
 
     // initialize results array
     initResults();
@@ -214,18 +212,18 @@ namespace DerivationFramework {
       ATH_MSG_DEBUG("Found muon collection with key " << m_muonContainerName);
     }
     m_electrons = NULL;
-    m_elTrackParticles = NULL;
+    //m_elTrackParticles = NULL;
     if ( m_electronContainerName != "" && m_legType == 1) {
       CHECK(evtStore()->retrieve(m_electrons, m_electronContainerName));
       ATH_MSG_DEBUG("Found electron collection with key " << m_electronContainerName);
-      CHECK(evtStore()->retrieve(m_elTrackParticles, m_elTrackParticleContainerName));
-      ATH_MSG_DEBUG("Found track particle collection with key " << m_elTrackParticleContainerName);
+      //CHECK(evtStore()->retrieve(m_elTrackParticles, m_elTrackParticleContainerName));
+      //ATH_MSG_DEBUG("Found track particle collection with key " << m_elTrackParticleContainerName);
     }
-    m_trackParticles = NULL;
-    if ( m_trackParticleContainerName != "" && m_legType == 2) {
-      CHECK(evtStore()->retrieve(m_trackParticles, m_trackParticleContainerName));
-      ATH_MSG_DEBUG("Found track particle collection with key " << m_trackParticleContainerName);
-    }
+    //m_trackParticles = NULL;
+    //if ( m_trackParticleContainerName != "" && m_legType == 2) {
+    //  CHECK(evtStore()->retrieve(m_trackParticles, m_trackParticleContainerName));
+    //  ATH_MSG_DEBUG("Found track particle collection with key " << m_trackParticleContainerName);
+    //}
     
     ATH_MSG_DEBUG("BMuonTrackIsoTool::addBranchesSVLoopHook(): "
 		  "calculate muon track isolation ...");
@@ -413,6 +411,7 @@ namespace DerivationFramework {
 	    MuIsoItem result = m_results[ic][its][ipv][itt];
 	    SG::AuxElement::Decorator< std::vector<float> >
 	      dv_iso_values(result.muIsoName());
+            ATH_MSG_DEBUG( "Decorated w/ Name: " << result.muIsoName() );
 	    SG::AuxElement::Decorator< std::vector<int> >
 	      dv_iso_ntracks(result.nTracksName());
 	    dv_iso_values(*vtx)  = result.vIsoValues;

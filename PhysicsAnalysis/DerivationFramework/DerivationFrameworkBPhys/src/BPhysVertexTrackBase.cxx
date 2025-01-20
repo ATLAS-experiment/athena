@@ -1092,7 +1092,10 @@ namespace DerivationFramework {
     for (unsigned int i=0; i < vtx.vtx()->nTrackParticles(); ++i) {
       const xAOD::TrackParticle* track = vtx.vtx()->trackParticle(i);
       if ( std::find(tracks.begin(),tracks.end(),track) == tracks.end() ) {
-	tracks.push_back(track);
+        const xAOD::TrackParticle* trackToAdd;
+        const xAOD::TrackParticle* trackInDet = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(track);
+        trackToAdd = trackInDet ? trackInDet : track;
+	      tracks.push_back(track);
       } // if
     } // for
     // loop over preceeding vertices
@@ -1310,19 +1313,16 @@ namespace DerivationFramework {
 	      refElTracks.push_back(refElTrack);
       }
     } else {
-      TrackBag electronTracks = findAllElectronTracksInDecay(vtx, electrons,1);
+      const std::vector<unsigned int> electronTrackIndices = vtx.electronTrackIndices();
       if ( vtx.nRefTrks() == (int)vtx.vtx()->nTrackParticles() ) {
-	      for (int i=0; i<vtx.nRefTrks(); ++i) {
-	        const xAOD::TrackParticle* otp = (const xAOD::TrackParticle*)vtx.refTrkOrigin(i);
+	      for (auto electronTrackIndex : electronTrackIndices ) {
+	        const xAOD::TrackParticle* otp = (const xAOD::TrackParticle*)vtx.refTrkOrigin(electronTrackIndex);
 	        if ( otp != NULL ) {
-	          if ( std::find(electronTracks.begin(), electronTracks.end(), otp)
-		          != electronTracks.end() ) {
-	            refElTracks.push_back(vtx.refTrk(i));
-	          }
+	            refElTracks.push_back(vtx.refTrk(electronTrackIndex));
 	          } else {
 	            ATH_MSG_WARNING("BPhysVertexTrackBase::findElectronRefTrackMomenta():"
 			          " refTrkOrigin == NULL for refTrk # "
-			          << i << " !");
+			          << electronTrackIndex << " !");
 	        }
 	      } // for
       } else {
