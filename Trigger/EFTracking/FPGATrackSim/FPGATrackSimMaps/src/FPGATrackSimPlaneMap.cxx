@@ -239,9 +239,9 @@ void FPGATrackSimPlaneMap::map(FPGATrackSimHit & hit) const
     const LayerSection &pinfo = getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer());
     hit.setSection(pinfo.section);
     hit.setLayer(pinfo.layer);
-    if (!hit.isMapped()) // failsafe if for some reason someone calls this on a clustered hit again, or something
+    if (!hit.isMapped() && hit.getHitType() == HitType::unmapped) { // failsafe if for some reason someone calls this on a clustered hit again, or something
         hit.setHitType(HitType::mapped);
-
+    }    
     // Special case if this is a spacepoint (now possible because slicing engine happens after SP formation).
     if (hit.getHitType() == HitType::spacepoint) {
         const LayerSection &pinfo_sp = getLayerSection(hit.getPairedDetType(), hit.getPairedDetZone(), hit.getPairedPhysLayer());
