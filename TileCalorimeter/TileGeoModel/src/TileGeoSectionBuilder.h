@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -14,9 +14,8 @@
 #define TILEGEOMODEL_TILEGEOSECTIONBUILDER_H
 
 #include "StoreGate/StoreGateSvc.h"
-#include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "TileGeoModel/TileSwitches.h"
-#include "GeoModelKernel/GeoPhysVol.h"
+#include "GeoModelKernel/GeoPhysVol.h" //PVLink typedef
 
 // Definition for regions
 #define TILE_REGION_CENTRAL 1
@@ -25,14 +24,13 @@
 #define TILE_REGION_MBSCIN 4
 
 class MsgStream;
-class GeoPhysVol;
 class TileDddbManager;
 class TileDetDescriptor;
 class TileDetDescrManager;
 class GeoMaterial;
 class GeoTrd;
 class GeoShape;
-
+class StoredMaterialManager;
 
 class TileGeoSectionBuilder
 {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileGeoSectionBuilder.h"
@@ -33,6 +33,7 @@
 #include "GeoGenericFunctions/Variable.h"
 #include "GeoModelKernel/GeoXF.h"
 #include "GeoModelKernel/GeoSerialTransformer.h"
+#include "GeoModelInterfaces/StoredMaterialManager.h"
 
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SystemOfUnits.h"
@@ -3475,6 +3476,10 @@ void TileGeoSectionBuilder::setExtendedPeriodThickness(double val)
 
 void TileGeoSectionBuilder::checktransfunc(double absorber, double period, int np, double center)
 {
+  if (np<0){
+    (*m_log) << MSG::WARNING << "TileGeoSectionBuilder::checktransfunc: np is negative!"<<endmsg;
+    return;
+  } 
   (*m_log) << MSG::VERBOSE
            << std::setprecision (std::numeric_limits<double>::digits10 + 1)
            << " Absorber center = " << center
