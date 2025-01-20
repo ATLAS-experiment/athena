@@ -55,32 +55,6 @@ class PowhegBase(Configurable):
         '''
         return ["[POWHEG-BOX+OpenLoops] Process not found!"]
 
-    def manually_set_openloops_paths(self):
-        '''
-        Manual fix for OpenLoops libraries path, avoiding issues when /afs not available
-        This is NOT a viable long-term solution and should be made obsolete after the migration
-        away from AFS is more advanced.
-        '''
-        import os
-        logger.warning("Applying manual, hard-coded fixes for OpenLoops library paths")
-        logger.info("OpenLoopsPath (before) = {0}".format(os.getenv('OpenLoopsPath')))
-        OLPath = os.path.dirname(self.executable)+"/obj-gfortran"
-        os.environ['OpenLoopsPath'] = OLPath
-
-
-    def manually_set_openloops_gnu_paths(self):
-        '''
-        Manual fix for OpenLoops libraries path, avoiding issues when /afs not available
-        This is NOT a viable long-term solution and should be made obsolete after the migration
-        away from AFS is more advanced.
-        '''
-        import os
-        logger.warning("Applying manual, hard-coded fixes for OpenLoops library paths")
-        logger.info("OpenLoopsPath (before) = {0}".format(os.getenv('OpenLoopsPath')))
-        OLPath = os.path.dirname(self.executable)+"/obj-gnu"
-        os.environ['OpenLoopsPath'] = OLPath
-
-
     def __init__(self, base_directory, version, executable_name, cores, powheg_executable="pwhg_main", is_reweightable=True, warning_output = [], info_output = [], error_output = [], **kwargs):
         """! Constructor.
 
