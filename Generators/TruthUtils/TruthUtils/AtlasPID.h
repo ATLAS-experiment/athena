@@ -706,47 +706,56 @@ template<class T> inline bool isTopBaryon(const T& p) { return  leadingQuark(p) 
 
 // APID: This function selects B-Hadrons which predominantly decay weakly. (Commonly used definition in GeneratorFilters package.)
 // 5[1-4]1 L = J = 0, S = 0
-// 5[1-4][1-4]2 J = 1/2, n_r = 0, n_L =0
-// TODO Initially matching what was in GeneratorFilters, but will add
-// all the lowest lying B hadrons including double heavy flavour
-// hadrons in a follow-up MR.
+// 5[1-5][1-4]2 J = 1/2, n_r = 0, n_L =0
 template<class T> inline bool isWeaklyDecayingBHadron(const T& p) {return isWeaklyDecayingBHadron(p->pdg_id());}
 template<> inline bool isWeaklyDecayingBHadron(const int& p) {
   const int pid = std::abs(p);
   return ( pid == 511   || // B0
            pid == 521   || // B+
-           pid == 531   || // Bs
-           pid == 541   || // Bc
-           pid == 5122  || // Lambda_B
+           pid == 531   || // B_s0
+           pid == 541   || // B_c+
+           pid == 5122  || // Lambda_b0
            pid == 5132  || // Xi_b-
-           pid == 5232  || // X_b0
+           pid == 5232  || // Xi_b0
            pid == 5112  || // Sigma_b-
            pid == 5212  || // Sigma_b0
            pid == 5222  || // Sigma_b+
-           pid == 5332 );  // Omega_B
+           pid == 5332  || // Omega_b-
+           pid == 5142  || // Xi_bc0
+           pid == 5242  || // Xi_bc+
+           pid == 5412  || // Xi'_bc0
+           pid == 5422  || // Xi'_bc+
+           pid == 5342  || // Omega_bc0
+           pid == 5432  || // Omega'_bc0
+           pid == 5442  || // Omega_bcc+
+           pid == 5512  || // Xi_bb-
+           pid == 5522  || // Xi_bb0
+           pid == 5532  || // Omega_bb-
+           pid == 5542  ); // Omega_bbc0
 }
 template<> inline bool isWeaklyDecayingBHadron(const DecodedPID& p){ return isWeaklyDecayingBHadron(p.pid()); }
 
 
 // APID: This function selects C-Hadrons which predominantly decay weakly. (Commonly used definition in GeneratorFilters package.)
 // 4[1-3]1 L = J = 0, S = 0
-// 4[1-3][1-3]2 J = 1/2, n_r = 0, n_L =0
-// TODO Initially matching what was in GeneratorFilters, but will
-// remove the Xi'_c+ in a follow-up MR since its lifetime is
-// essentially 0.  (There was an old version of Herwig that decayed it
-// weakly, but this was fixed in Herwig 7).
+// 4[1-4][1-3]2 J = 1/2, n_r = 0, n_L =0
+// NB Omitting pid = 4322 (Xi'_C+) a this undergoes an EM rather than
+// weak decay.  (There was an old version of Herwig that decayed it
+// weakly, but this was fixed in Herwig 7.)
 template<class T> inline bool isWeaklyDecayingCHadron(const T& p) {return isWeaklyDecayingCHadron(p->pdg_id());}
 template<> inline bool isWeaklyDecayingCHadron(const int& p) {
   const int pid = std::abs(p);
   return ( pid == 411   || // D+
            pid == 421   || // D0
-           pid == 431   || // Ds
-           pid == 4122  || // Lambda_C
-           pid == 4132  || // Xi_C^0
-           pid == 4232  || // Xi_C^+
-           pid == 4212  || // Xi_C^0
-           pid == 4322  || // Xi'_C+  This is in fact EM not weak
-           pid == 4332); // Omega_C
+           pid == 431   || // Ds+
+           pid == 4122  || // Lambda_c+
+           pid == 4132  || // Xi_c0
+           pid == 4232  || // Xi_c+
+           pid == 4212  || // Xi_c0
+           pid == 4332  || // Omega_c0
+           pid == 4412  || // Xi_cc+
+           pid == 4422  || // Xi_cc++
+           pid == 4432  ); // Omega_cc+
 }
 template<> inline bool isWeaklyDecayingCHadron(const DecodedPID& p){ return isWeaklyDecayingCHadron(p.pid()); }
 
