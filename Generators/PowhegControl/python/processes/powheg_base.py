@@ -109,6 +109,16 @@ class PowhegBase(Configurable):
         os.environ["LD_LIBRARY_PATH"] += ":" + os.path.join(base_directory, version, executable_name, "obj-gnu")
         os.environ["LD_LIBRARY_PATH"] += ":" + os.path.join(base_directory, version, executable_name, "obj-gnu", "proclib")
 
+        ##OpenLoops
+        directories = ['obj-gfortran', 'OpenLoops2', 'obj-gnu']
+        logger.info("OpenLoopsPath (before) = {0}".format(os.getenv('OpenLoopsPath')))
+        for directory in directories:
+          if os.path.isdir(os.path.join(base_directory, version, executable_name, directory, 'proclib')):
+             OLPath = os.path.join(base_directory, version, executable_name, directory)
+             os.environ['OpenLoopsPath'] = OLPath
+             logger.info("OpenLoopsPath (after) = {0}".format(os.getenv('OpenLoopsPath')))
+             break
+
         ## SVN revision of process code
         self.process_revision = check_svn_revision(os.path.dirname(self.executable))
 

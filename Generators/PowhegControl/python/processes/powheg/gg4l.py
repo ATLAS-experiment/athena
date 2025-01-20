@@ -35,8 +35,6 @@ class gg4l(PowhegRES):
         os.environ['gg4lPATH'] = os.path.dirname(self.executable)
         logger.info("gg4lPATH defined as = {0}".format(os.getenv('gg4lPATH')))
 
-        # This is a hacky fix that's needed at the moment...
-        self.manually_set_openloops_gnu_paths()
 
         # Add parameter validation functions
         self.validation_functions.append("validate_process_contrib")

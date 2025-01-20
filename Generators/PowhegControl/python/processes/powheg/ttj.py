@@ -3,7 +3,6 @@
 from AthenaCommon import Logging
 from ..powheg_V2 import PowhegV2
 from ..external import ExternalMadSpin
-import os
 
 ## Get handle to Athena logging
 logger = Logging.logging.getLogger("PowhegControl")
@@ -40,12 +39,6 @@ class ttj(PowhegV2):
         @param kwargs          dictionary of arguments from Generate_tf.
         """
         super(ttj, self).__init__(base_directory, "ttbarj", **kwargs)
-
-        # hack in place to help powheg executable find all dynamic libraries
-        logger.warning("Applying manual, hard-coded fixes for library paths")
-        OLPath = os.path.dirname(self.executable)+"/obj-gnu"
-        os.environ['OpenLoopsPath'] = OLPath
-        logger.info("OpenLoopsPath defined as = {0}".format(os.getenv('OpenLoopsPath')))
 
         # Add algorithms to the sequence
         self.add_algorithm(ExternalMadSpin(process="generate p p > t t~ j [QCD]"))
