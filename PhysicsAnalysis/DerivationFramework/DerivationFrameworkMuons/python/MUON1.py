@@ -194,11 +194,15 @@ def MUON1KernelCfg(flags, name='MUON1Kernel', **kwargs):
     from DerivationFrameworkMuons.MuonsToolsConfig import AnalysisMuonThinningAlgCfg
     MUON1ThinningTools = [] 
     if kwargs["scheduleThinning"]:
+        fwdTracks = "InDetForwardTrackParticles"
+        if fwdTracks not in flags.Input.Collections:
+          fwdTracks = ""
         acc.merge(AnalysisMuonThinningAlgCfg(flags,
                                              MuonPassFlags = ["{cont}.{passDecor}".format(cont = kwargs["MuonContainer"],
                                                                                           passDecor = passDecor) for passDecor in muonThinFlags],
                                              TrkPassFlags =["{cont}.{passDecor}".format(cont = kwargs["IdTrkContainer"],
                                                                                         passDecor = passDecor) for passDecor in trkThinFlags],
+                                             IdTrkFwdThinning=fwdTracks,
                                              StreamName = kwargs['StreamName']))
 
 
