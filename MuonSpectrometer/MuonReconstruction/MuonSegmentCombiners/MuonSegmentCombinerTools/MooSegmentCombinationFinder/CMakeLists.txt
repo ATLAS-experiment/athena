@@ -16,6 +16,6 @@ atlas_add_component( MooSegmentCombinationFinder
                      LINK_LIBRARIES ${ROOT_LIBRARIES} AtlasHepMCLib AthenaBaseComps StoreGateLib Identifier GaudiKernel MuonReadoutGeometry MuonIdHelpersLib 
                                      MuonChamberT0s MuonPattern MuonPrepRawData MuonRIO_OnTrack MuonSegment MuonRecHelperToolsLib MuonRecToolInterfaces 
                                      MuonLinearSegmentMakerUtilities MuonSegmentMakerUtils MuonEDM_AssociationObjects TrkSurfaces TrkEventPrimitives TrkParameters 
-                                     TrkSegment TrkTrack TrkTruthData TrkExInterfaces TrkFitterInterfaces TrkToolInterfaces MuonSegmentCombinerToolInterfaces 
+                                     TrkSegment TrkTrack TrkTruthData TrkExInterfaces TrkFitterInterfaces TrkToolInterfaces 
                                      MuonSegmentMakerToolInterfaces CscSegmentMakersLib MuonRecToolInterfaces )
 
