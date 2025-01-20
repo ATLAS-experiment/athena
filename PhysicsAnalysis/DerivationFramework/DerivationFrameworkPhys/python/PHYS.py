@@ -168,7 +168,10 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     ## Higgs content - 4l vertex and Higgs STXS truth variables
     from DerivationFrameworkHiggs.HiggsPhysContent import  setupHiggsSlimmingVariables
     setupHiggsSlimmingVariables(flags, PHYSSlimmingHelper)
-   
+
+    ## AFP content - SiT and ToF hits to then be used with AfpAnalysisToolbox reconstruction
+    PHYSSlimmingHelper.AllVariables += [ 'AFPSiHitContainer', 'AFPToFHitContainer' ]
+    
     # Trigger content
     PHYSSlimmingHelper.IncludeTriggerNavigation = False
     PHYSSlimmingHelper.IncludeJetTriggerContent = False
