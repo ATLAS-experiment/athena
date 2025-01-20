@@ -44,9 +44,6 @@ class ttbb(PowhegRES):
         """
         super(ttbb, self).__init__(base_directory, "ttbb", **kwargs)
 
-        # This is a hacky fix that's needed at the moment...
-        self.manually_set_openloops_paths()
-
         # This process' integration needs Athena to be set to run at least two parallel processes
         # Advise the user about this here:
         if self.cores < 2:

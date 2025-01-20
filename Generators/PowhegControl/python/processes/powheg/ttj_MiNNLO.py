@@ -52,12 +52,6 @@ class ttj_MiNNLO(PowhegV2):
         os.environ['ttjMiNNLOPATH'] = os.path.dirname(self.executable)
         logger.info("ttjMiNNLOPATH defined as = {0}".format(os.getenv('ttjMiNNLOPATH')))
 
-        # hack in place to help powheg executable find all dynamic libraries
-        logger.warning("Applying manual, hard-coded fixes for Virtuals library paths")
-        OLPath = os.path.dirname(self.executable) + "/OpenLoops2"
-        os.environ['OpenLoopsPath'] = OLPath
-        logger.info("OpenLoopsPath defined as = {0}".format(os.getenv('OpenLoopsPath')))
-
         # Add algorithms to the sequence
         self.add_algorithm(ExternalMadSpin(process="generate p p > t t~ j [QCD]"))
 
