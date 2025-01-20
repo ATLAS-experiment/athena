@@ -16,10 +16,9 @@
 #include "CxxUtils/checker_macros.h"
 
 G4ProcessHelper::G4ProcessHelper()
-  : theRmesoncloud(0)
-  , theRbaryoncloud(0)
 {
   G4cout << "G4ProcessHelper constructor: start" << G4endl;
+  m_parameters = PhysicsConfigurationHelper::Instance();
   particleTable = G4ParticleTable::GetParticleTable();
   theProton = particleTable->FindParticle("proton");
   theNeutron = particleTable->FindParticle("neutron");
@@ -40,7 +39,7 @@ G4ProcessHelper::G4ProcessHelper()
     // G4cout << "Incident particle: " << incident << G4endl;
     G4ParticleDefinition* incidentDef = particleTable->FindParticle(incident);
     G4int incidentPDG = incidentDef->GetPDGEncoding();
-    known_particles[incidentDef]=true;
+    m_knownParticles[incidentDef]=true;
 
     G4String target = tokens[1];
     // G4cout << "Target particle: " << target << G4endl;
@@ -71,66 +70,13 @@ G4ProcessHelper::G4ProcessHelper()
   process_stream.close();
   G4cout << "Found " << pReactionMap.size() << " proton interactions and " << nReactionMap.size() << " neutron interactions in ProcessList.txt." << G4endl;
 
-  std::map<G4String,G4double> parameters;
-  ReadInPhysicsParameters(parameters);
-
-  resonant = false;
-  reggemodel = false;
-  if (parameters["Resonant"]!=0.) resonant=true;
-  ek_0 = parameters["ResonanceEnergy"]*CLHEP::GeV;
-  gamma = parameters["Gamma"]*CLHEP::GeV;
-  amplitude = parameters["Amplitude"]*CLHEP::millibarn;
-  xsecmultiplier = parameters["XsecMultiplier"];
-  suppressionfactor = parameters["ReggeSuppression"];
-  hadronlifetime = parameters["HadronLifeTime"];
-  mixing = parameters["Mixing"];
-  if(parameters["ReggeModel"]!=0.) reggemodel=true;
-  doDecays=parameters["DoDecays"];
-
-  G4cout<<"Read in physics parameters:"<<G4endl;
-  G4cout<<"Resonant = "<< resonant <<G4endl;
-  G4cout<<"ResonanceEnergy = "<<ek_0/CLHEP::GeV<<" GeV"<<G4endl;
-  G4cout<<"XsecMultiplier = "<<xsecmultiplier<<G4endl;
-  G4cout<<"Gamma = "<<gamma/CLHEP::GeV<<" GeV"<<G4endl;
-  G4cout<<"Amplitude = "<<amplitude/CLHEP::millibarn<<" millibarn"<<G4endl;
-  G4cout<<"ReggeSuppression = "<<100*suppressionfactor<<" %"<<G4endl;
-  G4cout<<"HadronLifeTime = "<<hadronlifetime;
-  if (doDecays) G4cout<<" ns"<<G4endl;
-  else G4cout<<" s"<<G4endl;
-  G4cout<<"ReggeModel = "<< reggemodel <<G4endl;
-  G4cout<<"Mixing = "<< mixing*100 <<" %"<<G4endl;
-  G4cout<<"DoDecays = "<< doDecays << G4endl;
-
-  if ((!doDecays && hadronlifetime>0.) ||
-      (doDecays && hadronlifetime<=0.) ){
-    G4cout << "WARNING: Inconsistent treatment of R-Hadron properties! Lifetime of " << hadronlifetime
-           << " and doDecays= " << doDecays << G4endl;
-  }
-
   G4ParticleTable::G4PTblDicIterator* theParticleIterator;
   theParticleIterator = particleTable->GetIterator();
 
   theParticleIterator->reset();
   while( (*theParticleIterator)() ){
-    CustomParticle* particle = dynamic_cast<CustomParticle*>(theParticleIterator->value());
-    std::string name = theParticleIterator->value()->GetParticleName();
     G4DecayTable* table = theParticleIterator->value()->GetDecayTable();
-    if(particle!=0&&table!=0&&name.find("cloud")>name.size()) {
-      particle->SetPDGLifeTime(hadronlifetime*CLHEP::s);
-      particle->SetPDGStable(false);
-      G4cout<<"Lifetime of: "<<name<<" set to: "<<particle->GetPDGLifeTime()/CLHEP::s<<" s."<<G4endl;
-      G4cout<<"Stable: "<<particle->GetPDGStable()<<G4endl;
-    }
-    if (particle && doDecays==1){
-      // Make them decay immediately!!
-      particle->SetPDGStable(false);
-      particle->SetPDGLifeTime(hadronlifetime*CLHEP::ns);
-      G4cout<<"Forcing a decay for "<<name<<G4endl;
-      G4cout<<"Lifetime of: "<<name<<" set to: "<<particle->GetPDGLifeTime()/CLHEP::ns<<" ns."<<G4endl;
-      G4cout<<"Stable: "<<particle->GetPDGStable()<<G4endl;
-    }
-
-    G4cout << "Done with particle " << name << G4endl;
+    SetCustomParticleLifeTime(theParticleIterator->value(), table);
   }
   theParticleIterator->reset();
   G4cout << "G4ProcessHelper constructor: end" << G4endl;
@@ -138,32 +84,28 @@ G4ProcessHelper::G4ProcessHelper()
 }
 
 
-void G4ProcessHelper::ReadInPhysicsParameters(std::map<G4String,G4double>&  parameters) const
-  {
-    parameters["Resonant"]=0.;
-    parameters["ResonanceEnergy"]=0.;
-    parameters["XsecMultiplier"]=1.;
-    parameters["Gamma"]=0.;
-    parameters["Amplitude"]=0.;
-    parameters["ReggeSuppression"]=0.;
-    parameters["HadronLifeTime"]=0.;
-    parameters["ReggeModel"]=0.;
-    parameters["Mixing"]=0.;
-    parameters["DoDecays"]=0;
-
-    std::ifstream physics_stream ("PhysicsConfiguration.txt");
-    G4String line;
-    char** endptr=0;
-    while (getline(physics_stream,line)) {
-      std::vector<G4String> tokens;
-      //Getting a line
-      ReadAndParse(line,tokens,"=");
-      G4String key = tokens[0];
-      G4double val = strtod(tokens[1],endptr);
-      parameters[key]=val;
+void G4ProcessHelper::SetCustomParticleLifeTime(G4ParticleDefinition* aPart, bool decaysIdentified) const
+{
+  CustomParticle* particle = dynamic_cast<CustomParticle*>(aPart);
+  std::string name = aPart->GetParticleName();
+  if (particle) {
+    if (m_parameters->DoDecays() == 1){
+      // Make them decay immediately!!
+      particle->SetPDGStable(false);
+      particle->SetPDGLifeTime(m_parameters->Lifetime()); // Lifetime of nano-seconds
+      G4cout<<"Forcing a decay for "<<name<<G4endl;
+      G4cout<<"Lifetime of: "<<name<<" set to: "<<particle->GetPDGLifeTime()/CLHEP::ns<<" ns."<<G4endl;
+      G4cout<<"Stable: "<<particle->GetPDGStable()<<G4endl;
     }
-    physics_stream.close();
+    else if (decaysIdentified && name.find("cloud")>name.size()) {
+      particle->SetPDGLifeTime(m_parameters->Lifetime()); // Lifetime of seconds
+      particle->SetPDGStable(false);
+      G4cout<<"Lifetime of: "<<name<<" set to: "<<particle->GetPDGLifeTime()/CLHEP::s<<" s."<<G4endl;
+      G4cout<<"Stable: "<<particle->GetPDGStable()<<G4endl;
+    }
   }
+  G4cout << "Done with particle " << name << G4endl;
+}
 
 
 const G4ProcessHelper* G4ProcessHelper::Instance()
@@ -175,7 +117,7 @@ const G4ProcessHelper* G4ProcessHelper::Instance()
 
 G4bool G4ProcessHelper::ApplicabilityTester(const G4ParticleDefinition& aPart) const {
   try {
-    return known_particles.at(&aPart);
+    return m_knownParticles.at(&aPart);
   }
   catch (const std::out_of_range& e) {
     return false;
@@ -192,7 +134,7 @@ G4double G4ProcessHelper::GetInclusiveCrossSection(const G4DynamicParticle *aPar
   G4double theXsec = 0;
   G4String name = aParticle->GetDefinition()->GetParticleName();
 
-  if (!reggemodel) {
+  if(!m_parameters->ReggeModel()){
     // Flat cross section
     if (MC::isRGlueball(thePDGCode)) {
       theXsec = 24 * CLHEP::millibarn;
@@ -230,24 +172,25 @@ G4double G4ProcessHelper::GetInclusiveCrossSection(const G4DynamicParticle *aPar
 
   //Adding resonance
 
-  if (resonant) {
+  if(m_parameters->Resonant())
+    {
     // Described in Section 5.1 of http://r-hadrons.web.cern.ch/r-hadrons/download/mackeprang_thesis.pdf
     // mentioned but dismissed in Section 3.3 of https://arxiv.org/pdf/hep-ex/0404001.pdf
-    double e_0 = ek_0 + aParticle->GetDefinition()->GetPDGMass(); //Now total energy
+    double e_0 = m_parameters->ResonanceEnergy() + aParticle->GetDefinition()->GetPDGMass(); //Now total energy
 
     e_0 = sqrt(aParticle->GetDefinition()->GetPDGMass()*aParticle->GetDefinition()->GetPDGMass()
                + theProton->GetPDGMass()*theProton->GetPDGMass()
                + 2.*e_0*theProton->GetPDGMass());
     const double sqrts=sqrt(aParticle->GetDefinition()->GetPDGMass()*aParticle->GetDefinition()->GetPDGMass()
                             + theProton->GetPDGMass()*theProton->GetPDGMass() + 2*aParticle->GetTotalEnergy()*theProton->GetPDGMass());
-
-    const double res_result = amplitude*(gamma*gamma/4.)/((sqrts-e_0)*(sqrts-e_0)+(gamma*gamma/4.));//Non-relativistic Breit Wigner
+    const double gamma = m_parameters->Gamma();
+    const double res_result = m_parameters->Amplitude()*(gamma*gamma/4.)/((sqrts-e_0)*(sqrts-e_0)+(gamma*gamma/4.));//Non-relativistic Breit Wigner
 
     theXsec += res_result;
   }
 
 
-  return theXsec * pow(anElement->GetN(),0.7)*1.25 * xsecmultiplier;// * 0.523598775598299;
+  return theXsec * pow(anElement->GetN(),0.7)*1.25 * m_parameters->XsecMultiplier();// * 0.523598775598299;
 
 }
 
@@ -291,9 +234,9 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
 
   G4int theIncidentPDG = aDynamicParticle->GetDefinition()->GetPDGEncoding();
   const bool containsSquark(MC::hasSquark(theIncidentPDG, MC::BQUARK) || MC::hasSquark(theIncidentPDG, MC::TQUARK));
-  if (reggemodel
+  if (m_parameters->ReggeModel()
       && MC::isRMeson(theIncidentPDG) && containsSquark
-      && CLHEP::RandFlat::shoot()*mixing>0.5
+      && CLHEP::RandFlat::shoot()*m_parameters->Mixing()>0.5
       && aDynamicParticle->GetDefinition()->GetPDGCharge()==0.
       )
     {
@@ -305,7 +248,7 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
   bool baryonise=false;
 
   if (!baryonize_failed
-      && reggemodel
+      && m_parameters->ReggeModel()
       && CLHEP::RandFlat::shoot()>0.9
       && MC::isRMeson(theIncidentPDG) &&
       ( (theIncidentPDG > 0) || !containsSquark )
@@ -342,7 +285,7 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
          (baryonise && ReactionGivesBaryon(prod)) ||
          (!baryonise && !ReactionGivesBaryon(prod)) ||
          MC::isRBaryon(theIncidentPDG) ||
-         !reggemodel
+         !m_parameters->ReggeModel()
          )
         )
       {
@@ -368,7 +311,7 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
   }
 
   // For the Regge model no phase space considerations. We pick a process at random
-  if (reggemodel) {
+  if (m_parameters->ReggeModel()) {
     const int n_rps = theReactionProductList.size();
     const int select = static_cast<int>(CLHEP::RandFlat::shoot()*n_rps);
     //      G4cout<<"Possible: "<<n_rps<<", chosen: "<<select<<G4endl;
@@ -440,7 +383,7 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
           G4cout<<"Suggested particle "<<particleTable->FindParticle(theReactionProductList[i][0])->GetParticleName()
           <<" has charge "<<particleTable->FindParticle(theReactionProductList[i][0])->GetPDGCharge()<<G4endl;
         */
-        if(CLHEP::RandFlat::shoot()<suppressionfactor) selected = false;
+        if(CLHEP::RandFlat::shoot()<m_parameters->SuppressionFactor()) selected = false;
       }
     tries++;
     //    G4cout<<"Tries: "<<tries<<G4endl;
