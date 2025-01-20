@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RHADRONS_G4PROCESSHELPER_HH
 #define RHADRONS_G4PROCESSHELPER_HH 1
 
 #include "CxxUtils/checker_macros.h"
+#include "PhysicsConfigurationHelper.h"
 
 #include"globals.hh"
 #include"G4ParticleDefinition.hh"
@@ -35,6 +36,8 @@ public:
   //Make sure the element is known (for n/p-decision)
   ReactionProduct GetFinalState(const G4Track& aTrack,G4ParticleDefinition*& aTarget) const;
 
+  void SetCustomParticleLifeTime(G4ParticleDefinition* aPart, bool decaysIdentified) const;
+
 protected:
   G4ProcessHelper();
   G4ProcessHelper(const G4ProcessHelper&);
@@ -45,7 +48,6 @@ private:
   void ReadAndParse(const G4String& str,
                     std::vector<G4String>& tokens,
                     const G4String& delimiters = " ") const;
-  void ReadInPhysicsParameters(std::map<G4String,G4double>&  parameters) const;
 
   // Version where we know if we baryonize already
   ReactionProduct GetFinalStateInternal(const G4Track& aTrack,G4ParticleDefinition*& aTarget, const bool baryonize_failed) const;
@@ -66,19 +68,9 @@ private:
   G4ParticleDefinition* theRbaryoncloud{};
 
   //Map of applicable particles
-  std::map<const G4ParticleDefinition*,G4bool> known_particles;
+  std::map<const G4ParticleDefinition*,G4bool> m_knownParticles;
 
-  //The parameters themselves
-  bool resonant;
-  bool reggemodel;
-  double ek_0;
-  double gamma;
-  double amplitude;
-  double xsecmultiplier;
-  double suppressionfactor;
-  double hadronlifetime;
-  double mixing;
-  int doDecays;
+  const PhysicsConfigurationHelper *m_parameters{};
 
   //Proton-scattering processes
   ReactionMap pReactionMap;
