@@ -474,8 +474,6 @@ std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::NonPromptLeptonVertexingAlg::
   // Re-fit a three-track vertex using the input tracks from the vertices above.
   //
   std::vector<std::unique_ptr<xAOD::Vertex>> twoTrkVerticesPass;
-  std::vector<std::unique_ptr<xAOD::Vertex>> twoTrkVerticesPassFixed;
-  std::vector<std::unique_ptr<xAOD::Vertex>> twoTrkVerticesMerged;
   std::vector<std::unique_ptr<xAOD::Vertex>> resultVertices;
 
   if(!input.priVtx) {
@@ -491,19 +489,31 @@ std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::NonPromptLeptonVertexingAlg::
     }
 
     if(chi2OverDoF >= 0.0 && chi2OverDoF < m_mergeChi2OverDoF) {
-      twoTrkVerticesPass      .push_back(std::move(vtx));
-      twoTrkVerticesPassFixed.push_back(std::move(vtx));
+      twoTrkVerticesPass.push_back(std::move(vtx));
     }
   }
 
   std::vector<std::unique_ptr<xAOD::Vertex>>::iterator curr_iter = twoTrkVerticesPass.begin();
 
+  /*
+    Cluster the vertices which pass the chi2 selection.
+
+    1. Cluster the vertices.
+    2. For each cluster, extract tracks and fit a new secondary vertex.
+    3. Push the new secondary vertex into resultVertices.
+
+    Note that every vertex in twoTrkVerticesPass is removed from twoTrkVerticesPass during this function.
+  */
   while(curr_iter != twoTrkVerticesPass.end()) {
     std::vector<std::unique_ptr<xAOD::Vertex>> clusterVtxs;
     clusterVtxs.push_back(std::move(*curr_iter));
 
     twoTrkVerticesPass.erase(curr_iter);
 
+    //
+    // Find a new vertex cluster, and remove all vertices in the
+    // cluster from twoTrkVerticesPass
+    //
     makeVertexCluster(clusterVtxs, twoTrkVerticesPass);
 
     curr_iter = twoTrkVerticesPass.begin();
@@ -524,9 +534,12 @@ std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::NonPromptLeptonVertexingAlg::
     }
 
     //
-    // Ignore standalone vertexes
+    // Push standalone vertices into result
     //
-    if(clusterVtxs.size() < 2) {
+    if(clusterVtxs.size() < 1) {
+      continue;
+    } else if(clusterVtxs.size() < 2) {
+      resultVertices.push_back(std::move(clusterVtxs.at(0)));
       continue;
     }
 
@@ -546,26 +559,7 @@ std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::NonPromptLeptonVertexingAlg::
 
     resultVertices.push_back(std::move(newSecondaryVertex));
 
-    for(std::unique_ptr<xAOD::Vertex> &vtx: clusterVtxs) {
-      twoTrkVerticesMerged.push_back(std::move(vtx));
-    }
-
     ATH_MSG_DEBUG("DecorateLepWithMergedSVVec -- NTrack of merged vertex = " << newSecondaryVertex->nTrackParticles());
-  }
-
-  //
-  // Include passed 2-track vertexes that were NOT merged
-  //
-  for(std::unique_ptr<xAOD::Vertex> &vtx: twoTrkVerticesPassFixed) {
-    const std::vector<std::unique_ptr<xAOD::Vertex>>::const_iterator fit = std::find(
-      twoTrkVerticesMerged.begin(),
-      twoTrkVerticesMerged.end(),
-      vtx
-    );
-
-    if(fit == twoTrkVerticesMerged.end()) {
-      resultVertices.push_back(std::move(vtx));
-    }
   }
 
   return resultVertices;
