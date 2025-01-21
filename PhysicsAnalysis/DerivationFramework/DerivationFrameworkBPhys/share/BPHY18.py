@@ -486,6 +486,7 @@ BPHY18_LegTrackIsoTool = DerivationFramework__BMuonTrackIsoTool(
     VertexContainerNames       = [ "BeeKstCandidates" ],
     RefPVContainerNames        = [ "BPHY18RefittedPrimaryVertices" ],
     TrackParticleContainerName = "InDetTrackParticles",
+    ElectronContainerName      = "Electrons",
     PVContainerName            = "PrimaryVertices",
     PVTypesToConsider          = [1, 3],
     TrackSelectionTools        = [ BPHY18_TrackSelTool ], #  BPHY18_VertexTools.InDetTrackSelectorTool ],
