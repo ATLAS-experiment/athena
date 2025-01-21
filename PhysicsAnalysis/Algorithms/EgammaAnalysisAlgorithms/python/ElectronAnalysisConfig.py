@@ -642,11 +642,11 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
                     legs = triggerDict[chain]
                     if len(legs)==0:
                         if chain[0]=='e' and chain[1].isdigit:
-                            triggerConfigs[chain] = mapKeysDict[year + '_' + chain]
+                            triggerConfigs[chain] = mapKeysDict[str(year) + '_' + chain]
                     else:
                         for leg in legs:
                             if leg[0]=='e' and leg[1].isdigit:
-                                triggerConfigs[leg] = mapKeysDict[year + '_' + leg]
+                                triggerConfigs[leg] = mapKeysDict[str(year) + '_' + leg]
 
             decorations = ['EffSF']
             if self.saveEff:
