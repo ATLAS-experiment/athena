@@ -559,6 +559,27 @@ const Acts::Surface* ActsTrk::MutableMultiTrajectory::referenceSurface_impl(Inde
   return toSurfacePtr(m_surfaces[istate]);
 }
 
+void ActsTrk::MutableMultiTrajectory::copyDynamicFrom_impl (ActsTrk::IndexType istate,
+                            Acts::HashedString key,
+                            const std::any& src_ptr) {
+  for (const ActsTrk::detail::Decoration& d : m_decorations) {
+    if (d.hash == key) {
+      d.copier(m_trackStatesAux.get(), istate, d.auxid, src_ptr);
+      return;
+    }
+  }
+  throw std::runtime_error("MultiTrajectory::copyDynamicFrom_impl no such decoration in destination MTJ " + std::to_string(key));
+}
+
+std::vector<Acts::HashedString> ActsTrk::MutableMultiTrajectory::dynamicKeys_impl() const {
+  std::vector<Acts::HashedString> keys;
+  for ( const ActsTrk::detail::Decoration& d: m_decorations) {
+    keys.push_back(d.hash);
+  }
+  return keys;
+}
+
+
 void ActsTrk::MutableMultiTrajectory::trim() {
   m_trackStatesAux->resize(m_trackStatesSize);
   static const SG::Decorator<const xAOD::UncalibratedMeasurement*> decor{"uncalibratedMeasurement"};

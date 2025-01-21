@@ -338,17 +338,20 @@ class MutableMultiTrajectory final
                                 std::shared_ptr<const Acts::Surface>);
   const Acts::Surface* referenceSurface_impl(IndexType ) const;
 
-
-  void copyDynamicFrom_impl (ActsTrk::IndexType /*itrack*/,
-                             Acts::HashedString /*key*/,
-                             const std::any& /*src_ptr*/) {
-      // @TODO: This is currently unimplemented
-  }
-
-  std::vector<Acts::HashedString> dynamicKeys_impl() const {
-      // @TODO: This currently does not do anything useful
-      return {};
-  }
+  /**
+   * @brief copy dynamic data from another MTJ
+   * @param istate - index of the track to be filled
+   * @param key - key of the dynamic data
+   * @param src_ptr - pointer to the source data
+   * @warning the type fetched from src and type of the destiantion decoration need to agree
+   */
+  void copyDynamicFrom_impl (ActsTrk::IndexType istate,
+                             Acts::HashedString key,
+                             const std::any& src_ptr);
+  /**
+   * @brief returns the keys of all the dynamic columns
+   */
+  std::vector<Acts::HashedString> dynamicKeys_impl() const;
 
   // access to some backends (for debugging purposes)
   // the receiver should not assume ownership or similar
