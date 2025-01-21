@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <cstdio>
 #include <cassert>
@@ -111,6 +111,8 @@ int main(int argc, char** argv) {
   TEST_FUNCTION(isTransportable)
   TEST_FUNCTION(isValid)
   TEST_FUNCTION(isW)
+  TEST_FUNCTION(isWeaklyDecayingBHadron)
+  TEST_FUNCTION(isWeaklyDecayingCHadron)
   TEST_FUNCTION(isZ)
   std::cout << "Ignored unknown function " << helper_function << std::endl;
   return 1;

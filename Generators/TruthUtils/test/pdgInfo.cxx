@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include <cstdio>
 #include <cassert>
 #include <iostream>
@@ -106,6 +109,8 @@ int main(int argc, char** argv) {
   TEST_FUNCTION(isTopBaryon)
   TEST_FUNCTION(isTopHadron)
   TEST_FUNCTION(isTopMeson)
+  TEST_FUNCTION(isWeaklyDecayingBHadron)
+  TEST_FUNCTION(isWeaklyDecayingCHadron)
   TEST_FUNCTION(leadingQuark)
   std::cout << "========================================" << std::endl;
   std::cout << ">>>>>>>>>> SUSY Properties <<<<<<<<<<" << std::endl;
