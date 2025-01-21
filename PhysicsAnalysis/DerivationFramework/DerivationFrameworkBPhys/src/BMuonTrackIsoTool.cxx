@@ -214,14 +214,14 @@ namespace DerivationFramework {
     
     // check muon container name if needed
     if ( ( m_muonContainerName == "" ) &&
-         ( m_vertexLegTypes & ( 1 << leg_type::kMuon ) ) 
+         ( m_isoTargetLegTypes == ( 1 << leg_type::kMuon ) ) 
     ) {
       ATH_MSG_ERROR("No muon container name provided!");
     }
 
     // check electron container name if needed 
     if ( ( m_electronContainerName == "" ) &&
-         ( m_vertexLegTypes & ( 1 << leg_type::kElectron ) ) 
+         ( m_isoTargetLegTypes == ( 1 << leg_type::kElectron ) ) 
     ) {
       ATH_MSG_ERROR("No electron container name provided!");
     }
