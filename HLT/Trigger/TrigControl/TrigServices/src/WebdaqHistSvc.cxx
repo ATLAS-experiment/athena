@@ -97,7 +97,6 @@ void WebdaqHistSvc::handle(const Incident& incident)
   if (incident.type() == AthenaInterprocess::UpdateAfterFork::type()) {
     ATH_MSG_INFO("Going to initialize the monitoring Thread"); 
     m_thread = std::thread( &WebdaqHistSvc::monitoringTask, this);
-    m_initialized = true;
   }
 }
 
@@ -106,19 +105,21 @@ void WebdaqHistSvc::handle(const Incident& incident)
 StatusCode WebdaqHistSvc::stop()
 {
   /// Set the stop flag for the task thread to true
-  if (!m_initialized) {
-    ATH_MSG_DEBUG("Monitoring task already stopped");
-    return StatusCode::SUCCESS;
-  }
   ATH_MSG_DEBUG("Stopping monitoring task");
   m_stopFlag = true; 
   // Wait for the task to finish
-  m_thread.join();
-
+  if (m_thread.joinable()) {
+    ATH_MSG_DEBUG("Going to join the monitoring thread");
+    try {
+        m_thread.join();
+    } 
+    catch (const std::exception& e) {
+      ATH_MSG_ERROR("Failed to join the monitoring thread: " << e.what());
+      return StatusCode::FAILURE;
+    }
+  }
   ATH_MSG_DEBUG("Clearing list of histograms");
   m_hists.clear();
-
-  m_initialized = false;
   return StatusCode::SUCCESS;
 }
 

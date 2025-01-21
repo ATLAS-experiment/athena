@@ -26,5 +26,11 @@ if (NOT XAOD_STANDALONE)
                        PRIVATE_LINK_LIBRARIES PathResolver)
 endif ()
 
+atlas_add_dictionary( HIEventUtilsDict
+   HIEventUtils/HIEventUtilsDict.h
+   HIEventUtils/selection.xml
+   LINK_LIBRARIES HIEventUtilsLib )
+
+
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

@@ -33,7 +33,7 @@ fi
 
 rdo=physval.RDO.root
 aod=physval.AOD.root
-idtide=DAOD_TIDE.pool.root
+idtide=physval.DAOD_TIDE.root
 
 conditionsTag=OFLCOND-MC23-SDR-RUN3-07
 
