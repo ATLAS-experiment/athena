@@ -228,7 +228,7 @@ namespace Muon {
             const Trk::StraightLineSurface& surf{mdtPrd->detectorElement()->surface(mdtPrd->identify())};
             std::unique_ptr<Trk::TrackParameters> exPars = m_extrapolator->extrapolateDirectly(ctx, pars, surf, Trk::anyDirection, false, Trk::muon);
             if (!exPars) {
-                ATH_MSG_WARNING("Propagation to "<<m_idHelperSvc->toString(mdtPrd->identify())<<" failed.");
+                ATH_MSG_VERBOSE("Propagation to "<<m_idHelperSvc->toString(mdtPrd->identify())<<" failed.");
                 continue;
             }
 
@@ -312,7 +312,7 @@ namespace Muon {
             const Trk::Surface& surf{getDetectorElement(ctx, hole)->surface(hole)};
             std::unique_ptr<Trk::TrackParameters> exPars = m_extrapolator->extrapolateDirectly(ctx, pars, surf, Trk::anyDirection, false, Trk::muon);
             if (!exPars) {
-                ATH_MSG_WARNING("Propagation to "<<m_idHelperSvc->toString(hole)<<" failed.");
+                ATH_MSG_VERBOSE("Propagation to "<<m_idHelperSvc->toString(hole)<<" failed.");
                 continue;
             }
             ATH_MSG_VERBOSE(__func__<<"() - Add hole "<<m_idHelperSvc->toString(hole));
