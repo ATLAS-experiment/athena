@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Package : NSWRawDataMonAlg
@@ -71,7 +71,6 @@ StatusCode NSWDataMonAlg::fillHistograms(const EventContext& ctx) const
 
 	  float eta_mu=saTP->eta();
 
-	  int	  nMMG=0; int nSTG=0;
 	  int ref_sector=-99;
 	  float z_nsw=-99;
 	  float theta_mu=saTP->theta();
@@ -124,7 +123,6 @@ StatusCode NSWDataMonAlg::fillHistograms(const EventContext& ctx) const
 	    int gap_stg=0;
 
 	    if(m_idHelperSvc->isMM(rot_id)) {
-	      nMMG++;
 	      multi_mm          = m_idHelperSvc->mmIdHelper().multilayer(rot_id);
 	      gap_mm            = m_idHelperSvc->mmIdHelper().gasGap(rot_id);
 	      auto layer_mm=gap_mm+(multi_mm-1)*4;
@@ -137,7 +135,6 @@ StatusCode NSWDataMonAlg::fillHistograms(const EventContext& ctx) const
 	    }
 	    if(m_idHelperSvc->issTgc(rot_id)) {
 	      if (channelType == sTgcIdHelper::sTgcChannelTypes::Strip)  {
-		nSTG++;
 		multi_stg  = m_idHelperSvc -> stgcIdHelper().multilayer(rot_id);
 		gap_stg    = m_idHelperSvc -> stgcIdHelper().gasGap(rot_id);
 		auto layer_stg=gap_stg+(multi_stg-1)*4;
