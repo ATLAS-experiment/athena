@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include <cstdio>
 #include <cassert>
 #include <iostream>
@@ -122,10 +125,12 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isTransportable)
     TEST_FUNCTION(isValid)
     TEST_FUNCTION(isW)
+    TEST_FUNCTION(isWeaklyDecayingBHadron)
+    TEST_FUNCTION(isWeaklyDecayingCHadron)
     TEST_FUNCTION(isZ)
-    TEST_FUNCTION(leadingQuark)
+    TEST_FUNCTION(leadingQuark) // 90
     TEST_FUNCTION(spin2)
-    TEST_FUNCTION(threeCharge) // 90
+    TEST_FUNCTION(threeCharge)
     processed=true;
     // uncomment when updating reference file
     // printf("%s\n",current.c_str()); continue;
