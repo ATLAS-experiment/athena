@@ -39,7 +39,7 @@ namespace TrkDriftCircleMath {
         m_ntubesml.push_back(ntubesml0);
         m_ntubesml.push_back(ntubesml1);
         m_tubeDist = tubeDist;
-        m_tubeStage = tubeStage;
+        m_tubeStage  = tubeStage;
         m_layDist = layDist;
 
         m_firstTube[0] = tube0ml0;
@@ -69,13 +69,9 @@ namespace TrkDriftCircleMath {
     void MdtChamberGeometry::init() {
         m_validGeometry = true;
         if (m_sMdt) {
-            m_tubeDist = 15.10;
             m_tubeRad = 7.1;
-            m_layDist = 13.085;
         } else {
-            m_tubeDist = 30.035;
             m_tubeRad = 14.6;
-            m_layDist = 26.011;
         }
         // initialize first tubes to zero
         m_ntubesml.push_back(0);
@@ -194,11 +190,14 @@ namespace TrkDriftCircleMath {
     inline double MdtChamberGeometry::xPosTube(unsigned int ml, unsigned int lay, unsigned int tube) const {
         double xpos = tube * m_tubeDist + m_firstTube[ml].x();
 
-        if (lay % 2 == 1) {
-            if (m_nlay == 4 && ml == 1)
+        // In most cases, staggering between multilayers has the same sign, this is to take care of the exceptions where that is not the case
+        // Stagerring only happens for the 2nd and 4th layers (in this case indexing from 0)
+        if (lay % 2 == 1 ) {
+            if (m_nlay == 4 && ml == 1 && !m_sMdt)
                 xpos -= m_tubeStage;
             else
                 xpos += m_tubeStage;
+
         }
 
         return xpos;
