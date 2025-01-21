@@ -36,11 +36,13 @@ def fastCaloRecoSequenceCfg(flags, inputEDM="", ClustersName="HLT_FastCaloEMClus
                 acc.merge(t2CaloEgamma_AllCfg(flags, "L2CaloLayersFex",RoIs=inputEDM,ExtraInputs=CaloDataAccessSvcDependencies, ClustersName = ClustersName))
     return acc
 
-def fastCaloVDVCfg(name="fastCaloVDV",InViewRoIs="EMCaloRoIs") :
+def fastCaloVDVCfg(flags,name="fastCaloVDV",InViewRoIs="EMCaloRoIs") :
     reco = ComponentAccumulator()
     fastCaloVDV = CompFactory.AthViews.ViewDataVerifier(name)
     fastCaloVDV.DataObjects = {( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
                                ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s'%InViewRoIs )}
+    if ( not flags.Input.isMC ):
+       fastCaloVDV.DataObjects.add(('LArDeadOTXFromSC' , 'StoreGateSvc+DeadOTXFromSC' ))
     reco.addEventAlgo(fastCaloVDV)
     return reco
 

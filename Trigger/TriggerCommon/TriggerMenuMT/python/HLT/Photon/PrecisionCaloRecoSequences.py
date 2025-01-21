@@ -21,6 +21,8 @@ def precisionCaloPhotonVDVCfg(flags, name, InViewRoIs, ion=False):
         dataObjects += [( 'xAOD::HIEventShapeContainer' , 'StoreGateSvc+' + TrigEgammaKeys.egEventShape ),
                         ( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
                         ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' )]
+    if ( not flags.Input.isMC ):
+        dataObjects += [('LArDeadOTXFromSC' , 'StoreGateSvc+DeadOTXFromSC' )]
 
     precisionCaloPhotonVDV = CompFactory.AthViews.ViewDataVerifier(name)
     precisionCaloPhotonVDV.DataObjects = dataObjects

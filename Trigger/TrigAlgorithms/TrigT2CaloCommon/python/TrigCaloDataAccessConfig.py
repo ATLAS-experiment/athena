@@ -17,7 +17,6 @@ CaloDataAccessSvcDependencies = [('TileEMScale'        , 'ConditionStore+TileEMS
                                  ('LArBadChannelCont'  , 'ConditionStore+LArBadChannel'),
                                  ('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager')]
 
-
 def CaloOffsetCorrectionCfg(flags):
 
     acc = ComponentAccumulator()
@@ -26,6 +25,14 @@ def CaloOffsetCorrectionCfg(flags):
         from LumiBlockComps.LuminosityCondAlgConfig import LuminosityCondAlgCfg
         acc.merge(LuminosityCondAlgCfg(flags))
 
+    # patch from Super-Cells
+    from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingInRoICfg
+    from LArCellRec.LArCellBuilderConfig import LArDeadOTXAlgCfg
+    if ( not flags.Input.isMC ):
+       # keep this code here, but commented for future developement and testing purposes
+       #acc.merge(LArRawSCDataReadingInRoICfg(flags,ROBList=[0x441005]))
+       acc.merge(LArRawSCDataReadingInRoICfg(flags,ROBList=[]))  # empty list assumes good FEBs
+       acc.merge(LArDeadOTXAlgCfg(flags))
     from CaloRec.CaloBCIDAvgAlgConfig import CaloBCIDAvgAlgCfg
     acc.merge(CaloBCIDAvgAlgCfg(flags))
     from LArRecUtils.LArRecUtilsConfig import LArMCSymCondAlgCfg
@@ -89,6 +96,9 @@ def trigCaloDataAccessSvcCfg( flags ):
             acc.merge(eventAcc)
         else:
             acc.merge(CaloOffsetCorrectionCfg(flags))
+
+    if ( flags.Input.isMC ):
+       svc.LArDeadOTXFromSC=""
 
     acc.addService( svc, primary=True )
     return acc
