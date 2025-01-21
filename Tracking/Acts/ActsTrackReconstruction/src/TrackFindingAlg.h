@@ -163,6 +163,7 @@ namespace ActsTrk
       kNUsedSeeds,
       kNoTrack,
       kNDuplicateSeeds,
+      kNNoEstimatedParams,
       kNOutputTracks,
       kNRejectedRefinedSeeds,
       kNSelectedTracks,

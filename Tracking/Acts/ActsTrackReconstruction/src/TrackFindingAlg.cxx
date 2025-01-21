@@ -600,6 +600,22 @@ namespace ActsTrk
       const bool refitSeeds = (typeIndex < m_refitSeeds.size() && m_refitSeeds[typeIndex]);
       const bool useTopSp = reverseSearch && !refitSeeds;
 
+      auto getSeedCategory = [this, useTopSp](std::size_t typeIndex, const ActsTrk::Seed& seed) -> std::size_t {
+        const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
+        const xAOD::SpacePoint::ConstVectorMap pos = sp->globalPosition();
+        double etaSeed = std::atanh(pos[2] / pos.norm());
+        return getStatCategory(typeIndex, etaSeed);
+      };
+
+      const bool isDupSeed = duplicateSeedDetector.isDuplicate(typeIndex, iseed);
+      if (isDupSeed) {
+        ATH_MSG_DEBUG("skip " << seedType << " seed " << iseed << " - already found");
+        category_i = getSeedCategory(typeIndex, *seeds[iseed]);
+        ++event_stat[category_i][kNTotalSeeds];
+        ++event_stat[category_i][kNDuplicateSeeds];
+        if (m_trackStatePrinter.empty()) continue;  // delay continue to estimate track parms for TrackStatePrinter?
+      }
+
       plainOptions.direction = reverseSearch ? Acts::Direction::Backward : Acts::Direction::Forward;
       plainSecondOptions.direction = plainOptions.direction.invert();
       options.targetSurface = reverseSearch ? pSurface.get() : nullptr;
@@ -629,26 +645,20 @@ namespace ActsTrk
 
       if (!optTrackParams) {
         ATH_MSG_DEBUG("Failed to estimate track parameters for seed " << iseed);
-        // TODO count
+        if (!isDupSeed) {
+          category_i = getSeedCategory(typeIndex, seed);
+          ++event_stat[category_i][kNNoEstimatedParams];
+        }
         continue;
       }
 
       Acts::BoundTrackParameters* initialParameters = &(*optTrackParams);
       printSeed(iseed, *initialParameters);
+      if (isDupSeed) continue;  // skip now if not done before
 
       double etaInitial = -std::log(std::tan(0.5 * initialParameters->theta()));
       category_i = getStatCategory(typeIndex, etaInitial);
-      ++event_stat[category_i][kNTotalSeeds];
-
-      if (duplicateSeedDetector.isDuplicate(typeIndex, iseed))
-      {
-        ATH_MSG_DEBUG("skip " << seedType << " seed " << iseed << " - already found");
-        ++event_stat[category_i][kNDuplicateSeeds];
-        continue;
-      }
-
-      // Get the Acts tracks, given this seed
-      // Result here contains a vector of TrackProxy objects
+      ++event_stat[category_i][kNTotalSeeds];  // also updated for duplicate seeds
       ++event_stat[category_i][kNUsedSeeds];
 
       std::unique_ptr<Acts::BoundTrackParameters> refitSeedParameters;
@@ -689,6 +699,9 @@ namespace ActsTrk
           printSeed(iseed, *initialParameters, true);
         }
       }
+
+      // Get the Acts tracks, given this seed
+      // Result here contains a vector of TrackProxy objects
 
       auto result = trackFinder().ckf.findTracks(*initialParameters, options, tracksContainerTemp);
 
@@ -1044,6 +1057,7 @@ namespace ActsTrk
                                           std::make_pair(kNUsedSeeds, "Used   seeds"),
                                           std::make_pair(kNoTrack, "Cannot find track"),
                                           std::make_pair(kNDuplicateSeeds, "Duplicate seeds"),
+                                          std::make_pair(kNNoEstimatedParams, "Initial param estimation failed"),
                                           std::make_pair(kNRejectedRefinedSeeds, "Rejected refined parameters"),
                                           std::make_pair(kNOutputTracks, "CKF tracks"),
                                           std::make_pair(kNSelectedTracks, "selected tracks"),
