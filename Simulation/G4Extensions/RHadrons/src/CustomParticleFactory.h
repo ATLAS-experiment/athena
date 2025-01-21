@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CustomParticleFactory_h
 #define CustomParticleFactory_h 1
 
-#include "CustomParticle.h"
-#include <set>
 
+#include <set>
+class G4ParticleDefinition;
 
 // ######################################################################
 // ###                          CustomParticle                                ###

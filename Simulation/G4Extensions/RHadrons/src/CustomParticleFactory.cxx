@@ -1,17 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <stdexcept>
-#include <sstream>
-#include <iterator>
-#include <map>
-#include <set>
+
 
 #include "PhysicsConfigurationHelper.h"
+#include "G4ParticleDefinition.hh"
 #include "CustomParticle.h"
 #include "CustomParticleFactory.h"
 
@@ -20,6 +14,14 @@
 #include "G4DecayTable.hh"
 #include "G4ParticleTable.hh"
 #include "G4PhaseSpaceDecayChannel.hh"
+
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <stdexcept>
+#include <sstream>
+#include <iterator>
+#include <map>
 
 bool CustomParticleFactory::isCustomParticle(G4ParticleDefinition *particle)
 {
@@ -49,7 +51,7 @@ std::set<G4ParticleDefinition *> CustomParticleFactory::load()
     catch (const::std::out_of_range& e) {
       std::vector<std::vector<std::string>* > decays;
       decays.push_back(txtvec);
-      decayMap[name] = decays;
+      decayMap[name] = std::move(decays);
     }
   }
   decayFile.close();
