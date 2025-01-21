@@ -101,7 +101,7 @@ namespace pool    {
   static const DbType ROOTKEY_StorageType    = makeTechnology(2,1);
   static const DbType ROOTTREE_StorageType   = makeTechnology(2,2);
   static const DbType ROOTTREEINDEX_StorageType = makeTechnology(2,3);
-  static const DbType ROOTRNTUPLE_StorageType   = makeTechnology(2,5);
+  static const DbType ROOTRNTUPLE_StorageType   = makeTechnology(2,4);
   static const DbType OBJY_StorageType       = makeTechnology(3,0);
   static const DbType ACCESS_StorageType     = makeTechnology(4,0);
   static const DbType EXCEL_StorageType      = makeTechnology(5,0);

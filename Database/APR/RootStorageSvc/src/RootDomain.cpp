@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -11,6 +11,7 @@
 
 // Framework include files
 #include "StorageSvc/DbOption.h"
+#include "StorageSvc/DbType.h"
 #include "RootDomain.h"
 #include "RootDatabase.h"
 
@@ -29,7 +30,8 @@ RootDomain::RootDomain() :
   m_defSplitLevel(99),
   m_defAutoSave(16*1024*1024),
   m_defBufferSize(16*1024),
-  m_branchOffsetTabLen(0)
+  m_branchOffsetTabLen(0),
+  m_defContainerType(pool::ROOTTREEINDEX_StorageType.type())
 {
 }
 
@@ -61,6 +63,9 @@ DbStatus RootDomain::setOption(const DbOption& opt)  {
       }
       else if ( !strcasecmp(n, "DEFAULT_BUFFERSIZE") )  {
         return opt._getValue(m_defBufferSize);
+      }
+      else if ( !strcasecmp(n, "DEFAULT_CONTAINER_TYPE") )  {
+        return opt._getValue(m_defContainerType);
       }
       break;
     case 'E':
@@ -147,6 +152,9 @@ DbStatus RootDomain::getOption(DbOption& opt) const   {
       }
       else if ( !strcasecmp(n, "DEFAULT_BUFFERSIZE") )  {
         return opt._setValue(int(m_defBufferSize));
+      }
+      else if ( !strcasecmp(n, "DEFAULT_CONTAINER_TYPE") )  {
+        return opt._setValue(int(m_defContainerType));
       }
       break;
     case 'E':

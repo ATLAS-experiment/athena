@@ -51,6 +51,7 @@ PersistencySvc::UserDB::fid()                       DEBUG lookupPFN: EmptyPoolFi
 Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] C7040C30-3363-7D42-B1B7-E3F3B1881030
 Domain[ROOT_All]                                     INFO                           EmptyPoolFile.root
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
+EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
 ##Shapes                                            DEBUG Opened container ##Shapes of type ROOT_Tree
@@ -112,6 +113,7 @@ DbSession                                            INFO     Open     DbSession
 Domain[ROOT_All]                                     INFO >   Access   DbDomain     READ      [ROOT_All] 
 Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] F2313678-C96A-964F-89E8-08BAB39F2DA7
 Domain[ROOT_All]                                     INFO                           SimplePoolFile1.root
+SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
@@ -211,6 +213,7 @@ PoolSvc                                             DEBUG createCollection() typ
 PersistencySvc::UserDB::fid()                       DEBUG lookupPFN: EmptyPoolFile.root returned FID: 'C7040C30-3363-7D42-B1B7-E3F3B1881030' tech=ROOT_All
 Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] C7040C30-3363-7D42-B1B7-E3F3B1881030
 Domain[ROOT_All]                                     INFO                           EmptyPoolFile.root
+EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
@@ -745,6 +748,7 @@ Domain[ROOT_All]                                     INFO >   Access   DbDomain 
 Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] C7040C30-3363-7D42-B1B7-E3F3B1881030
 Domain[ROOT_All]                                     INFO                           EmptyPoolFile.root
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
+EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
 ##Shapes                                            DEBUG Opened container ##Shapes of type ROOT_Tree
@@ -827,6 +831,7 @@ DbSession                                            INFO     Open     DbSession
 Domain[ROOT_All]                                     INFO >   Access   DbDomain     READ      [ROOT_All] 
 Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] 73F77177-D136-9344-B64D-29693F68D6C2
 Domain[ROOT_All]                                     INFO                           SimplePoolFile2.root
+SimplePoolFile2.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
@@ -1447,6 +1452,7 @@ DbSession                                            INFO     Open     DbSession
 Domain[ROOT_All]                                     INFO >   Access   DbDomain     READ      [ROOT_All] 
 Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] A811B014-0297-AD47-AF4C-B75EF418982D
 Domain[ROOT_All]                                     INFO                           SimplePoolFile3.root
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1

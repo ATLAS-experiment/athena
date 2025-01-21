@@ -39,6 +39,7 @@ PersistencySvc::UserDB::fid()                       DEBUG lookupPFN: SimplePoolF
 Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] F2313678-C96A-964F-89E8-08BAB39F2DA7
 Domain[ROOT_All]                                     INFO                           SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
+SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
 ##Shapes                                            DEBUG Opened container ##Shapes of type ROOT_Tree
@@ -164,6 +165,7 @@ DbSession                                            INFO     Open     DbSession
 Domain[ROOT_All]                                     INFO >   Access   DbDomain     READ      [ROOT_All] 
 Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] F2313678-C96A-964F-89E8-08BAB39F2DA7
 Domain[ROOT_All]                                     INFO                           SimplePoolFile1.root
+SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1

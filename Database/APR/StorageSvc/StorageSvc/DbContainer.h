@@ -132,6 +132,17 @@ namespace pool  {
                   const DbType&       dbtyp,
                   DbAccessMode        mod);
 
+    /// Check if we can access the residing in \<file\> container for reading with the given type
+    /** @param   dbH     [IN]    Valid handle to database object
+      * @param   nam     [IN]    Name of the container to be opened.
+      * @param   dbtyp   [IN]    Database type (including minor type)
+      *
+      * @return Status code indicating success or failure.
+      */
+    DbStatus checkAccess(DbDatabase&        dbH,
+                         const std::string& nam,
+                         const DbType&      dbtyp);
+
     /// Check if the container was opened
     bool isOpen() const;
     /// Execute Database Transaction Action

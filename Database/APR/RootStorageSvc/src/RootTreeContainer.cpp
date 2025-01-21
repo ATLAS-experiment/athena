@@ -500,7 +500,7 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
       IDbDatabase* idb = dbH.info();
       m_rootDb = dynamic_cast<RootDatabase*>(idb);
       if (m_rootDb)
-         m_tree = (TTree*)m_rootDb->file()->Get(treeName.c_str());
+         m_tree = m_rootDb->file()->Get<TTree>(treeName.c_str());
 
       bool hasBeenCreated = (m_branchName.empty()
                              ? m_tree != nullptr
@@ -719,6 +719,24 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
       }
    }
    log << DbPrintLvl::Error << "Cannot open container '" << nam << "', invalid Database handle."
+       << DbPrint::endmsg;
+   return Error;
+}
+
+/// This is a specialized method that checks if we can access the underlying TTree
+DbStatus RootTreeContainer::checkAccess(DbDatabase& dbH,
+                                        const std::string& nam) const
+{
+   if ( dbH.isValid() )    {
+      IDbDatabase* idb = dbH.info();
+      auto rootDb = dynamic_cast<RootDatabase*>(idb);
+      if (rootDb && rootDb->file()->Get<TTree>(nam.c_str())) {
+         return Success;
+      }
+   }
+   DbPrint log(nam);
+   log << DbPrintLvl::Debug << "Cannot access container '" << nam << "', invalid Database handle or "
+       << "container is not of type Tree/Branch."
        << DbPrint::endmsg;
    return Error;
 }

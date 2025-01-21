@@ -59,6 +59,22 @@ DbStatus DbContainer::open( DbDatabase&  dbH,
   return Error;
 }
 
+// Check if we can access the container for reading with the given type
+DbStatus DbContainer::checkAccess(DbDatabase&  dbH,
+                                  const string& nam,
+                                  const DbType& dbtyp)
+{
+  DbStatus result = Error;
+  if ( dbH.isValid() && dbH.openMode() == pool::READ ) {
+    // ASM: Double check this implementation...
+    DbContainerObj* q = dbH.find(nam);
+    switchPtr(q ? q : new DbContainerObj(dbH, nam, dbtyp, pool::READ));
+    result = ptr()->checkAccess();
+    close();
+  }
+  return result;
+}
+
 void DbContainer::switchPtr(DbContainerObj* obj) {
   if (   obj ) obj->addRef();
   if ( m_ptr ) {

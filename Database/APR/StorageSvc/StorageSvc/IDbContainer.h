@@ -87,6 +87,9 @@ namespace pool    {
                             const std::string& nam, 
                             const DbTypeInfo* info, 
                             DbAccessMode mode) = 0;
+    /// Check if we can access the container for reading with the given type
+    virtual DbStatus checkAccess(DbDatabase&        dbH,
+                                 const std::string& nam) const = 0;
     /// Perform UPDATE select
     virtual DbStatus update(  DbSelect& sel) = 0;
     /// Perform DELETE select

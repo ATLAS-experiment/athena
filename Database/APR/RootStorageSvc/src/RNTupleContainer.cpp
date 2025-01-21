@@ -30,6 +30,7 @@
 #include "ROOT/RNTuple.hxx"
 #include "ROOT/RNTupleReader.hxx"
 
+#include "TFile.h"
 #include "TError.h"
 // for version checks
 #include "TROOT.h"
@@ -240,6 +241,29 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
       debugBreak(nam, "Cannot open ROOT container(Tree/Branch)");
       return Error;
    }
+}
+
+
+/// This is a specialized method that checks if we can access the underlying RNTuple
+DbStatus RNTupleContainer::checkAccess(DbDatabase& dbH,
+                                       const std::string& nam) const
+{
+   if ( dbH.isValid() )    {
+      IDbDatabase* idb = dbH.info();
+      auto rootDb = dynamic_cast<RootDatabase*>(idb);
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 33, 0 )
+      if (rootDb && rootDb->file()->Get<ROOT::RNTuple>(nam.c_str())) {
+#else
+      if (rootDb && rootDb->file()->Get<ROOT::Experimental::RNTuple>(nam.c_str())) {
+#endif
+         return Success;
+      }
+   }
+   DbPrint log(nam);
+   log << DbPrintLvl::Debug << "Cannot access container '" << nam << "', invalid Database handle or "
+       << "container is not of type RNTuple."
+       << DbPrint::endmsg;
+   return Error;
 }
 
 
@@ -549,9 +573,18 @@ DbStatus RNTupleContainer::transAct(Transaction::Action action) {
       s_char_Blob.release(false);
     }
   }
-  m_isDirty = false;
+  clearDirty();
 
   return Success;
+}
+
+/// Add single entry to container
+DbStatus RNTupleContainer::save(DbObjectHandle<DbObject>& objH) {
+  // Execute action on the base class first
+  DbStatus status = DbContainerImp::save(objH);
+  // ASM: Do we need to reset rows_written as well?
+  clearDirty();
+  return status;
 }
 
 /// Close the container and deallocate resources

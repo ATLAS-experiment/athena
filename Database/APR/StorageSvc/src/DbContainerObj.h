@@ -101,6 +101,8 @@ namespace pool  {
     uint64_t size();
     /// Open the container
     DbStatus open(const DbTypeInfo* typ);
+    /// Check if we can access the container
+    DbStatus checkAccess();
     /// Close the container
     DbStatus close();
     /// Retire the container

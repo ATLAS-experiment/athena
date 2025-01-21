@@ -158,6 +158,10 @@ namespace pool  {
                           const DbTypeInfo* info,
                           DbAccessMode mod) override;
 
+    /// Check if we can access the container for reading with the given type
+    virtual DbStatus checkAccess(DbDatabase& dbH,
+                                 const std::string& nam) const override final;
+
     /// Access options
     /** @param opt      [IN]  Reference to option object.
       *

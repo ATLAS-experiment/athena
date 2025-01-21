@@ -48,6 +48,8 @@ class RootDatabase;
 
 class RNTupleContainer : public DbContainerImp
 {
+  using DbContainerImp::save;
+
   /// Definition of a field info structure
   struct FieldDesc : public DbColumn
   {
@@ -134,6 +136,10 @@ class RNTupleContainer : public DbContainerImp
                         const DbTypeInfo* info,
                         DbAccessMode mod) override final;
 
+  /// Check if we can access the container for reading with the given type
+  virtual DbStatus checkAccess(DbDatabase& dbH,
+                               const std::string& nam) const override final;
+
   /// Access options
   /** @param opt      [IN]  Reference to option object.
    *
@@ -190,6 +196,9 @@ class RNTupleContainer : public DbContainerImp
 
   /// Execute transaction action
   virtual DbStatus transAct(Transaction::Action action) override final;
+
+  /// Add single entry to container
+  virtual DbStatus save(DbObjectHandle<DbObject>& objH) override final;
 
  private:
   /// Init a field description for an object (i.e. find TClass etc.)
