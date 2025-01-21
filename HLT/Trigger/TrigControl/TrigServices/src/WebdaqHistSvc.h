@@ -140,8 +140,6 @@ private:
     std::mutex* mutex{nullptr};
   };
 
-  ///Flag to indicate if the monitoring thread is initialized
-  std::atomic<bool> m_initialized{false};
   /// Flag to stop the monitoring task
   std::atomic<bool> m_stopFlag{false};
   /// The actual publication Task
