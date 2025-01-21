@@ -529,6 +529,7 @@ namespace InDet{
 
    } // end for (int i = 0; i < NTracksVrt-1; i++)
 
+   // cppcheck-suppress containerOutOfBounds; Chi2PerTrk is not empty if we get here
    ATH_MSG_DEBUG("SecVrt fit converged. Ntr="<< listSecondTracks.size()<<" Chi2="<<Chi2
 		 <<" Chi2_trk="<<Chi2PerTrk[Outlier]<<" Prob="<<FitProb<<" M="<<Momentum.M()<<" Dir="<<projSV_PV(fitVertex,primVrt,jetDir));
 
