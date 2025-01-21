@@ -1510,6 +1510,8 @@ namespace DerivationFramework {
     const xAOD::Vertex* candRefPV  = cand.pv(m_pvAssocTypes[ipv]);
     const xAOD::Vertex* candPV     = cand.origPv(m_pvAssocTypes[ipv]);
 
+    ATH_MSG_DEBUG("selectTracks: Total tracks w/o exclusion "
+      << inpTracks.size() );
     ATH_MSG_DEBUG("selectTracks: Found " << exclTracks.size()
 		  << " " << exclTracks
 		  << " for decay candidate " << cand.vtx()
