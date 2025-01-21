@@ -51,8 +51,12 @@ def generateMonitoringJSON(menuName, chainDicts, fileName):
             
         #add the signatures in the summary file
         for entry in chain['monGroups']:
-            monSignature = entry.split(':')[0]
-            monGroup     = entry.split(':')[1]
+            if (entry == 'detMon'):
+                monSignature = 'detMon' 
+                monGroup     = '' 
+            else:
+                monSignature = entry.split(':')[0]
+                monGroup     = entry.split(':')[1]
             
             if monSignature not in summaryDict['signatures']:
                 summaryDict['signatures'][monSignature] = {chain_name: [monGroup]}
