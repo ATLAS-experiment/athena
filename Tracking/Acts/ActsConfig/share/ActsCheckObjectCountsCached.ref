@@ -63,6 +63,7 @@ ActsTrackFindingAlg                                               INFO statistic
 | Used   seeds                      |      78111 |      15645 |      93756 |
 | Cannot find track                 |      63305 |      11871 |      75176 |
 | Duplicate seeds                   |      45431 |       9146 |      54577 |
+| Initial param estimation failed   |          0 |          0 |          0 |
 | CKF tracks                        |      14806 |       3774 |      18580 |
 | Rejected refined parameters       |          0 |          0 |          0 |
 | selected tracks                   |      13385 |        809 |      14194 |
@@ -150,6 +151,7 @@ ActsLargeRadiusTrackFindingAlg                                    INFO statistic
 | Used   seeds                      |       9484 |       9484 |
 | Cannot find track                 |       8548 |       8548 |
 | Duplicate seeds                   |        204 |        204 |
+| Initial param estimation failed   |          0 |          0 |
 | CKF tracks                        |        936 |        936 |
 | Rejected refined parameters       |          0 |          0 |
 | selected tracks                   |        123 |        123 |
@@ -232,6 +234,7 @@ ActsConversionTrackFindingAlg                                     INFO statistic
 | Used   seeds                      |         71 |         71 |
 | Cannot find track                 |         54 |         54 |
 | Duplicate seeds                   |          0 |          0 |
+| Initial param estimation failed   |          0 |          0 |
 | CKF tracks                        |         17 |         17 |
 | Rejected refined parameters       |          0 |          0 |
 | selected tracks                   |          0 |          0 |
@@ -334,6 +337,7 @@ ActsLowPtTrackFindingAlg                                          INFO statistic
 | Used   seeds                      |      46051 |       8834 |      54885 |
 | Cannot find track                 |      44917 |       7118 |      52035 |
 | Duplicate seeds                   |        809 |        325 |       1134 |
+| Initial param estimation failed   |          0 |          0 |          0 |
 | CKF tracks                        |       1134 |       1716 |       2850 |
 | Rejected refined parameters       |          0 |          0 |          0 |
 | selected tracks                   |        620 |         44 |        664 |
