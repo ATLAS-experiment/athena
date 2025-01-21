@@ -194,7 +194,7 @@ namespace DerivationFramework {
       virtual void        findAllElectronsInDecay(xAOD::BPhysHelper& vtx,
 					      ElectronBag& electrons) const;
       virtual TrackBag    findAllElectronTracksInDecay(xAOD::BPhysHelper& vtx,
-						     ElectronBag& electrons, unsigned int elTrackType) const;
+						     ElectronBag& electrons, xAOD::BPhysHelper::eltrack_type elTrackType ) const;
       virtual std::vector<TVector3>
 	findElectronRefTrackMomenta(xAOD::BPhysHelper& vtx, ElectronBag& electrons) const;
 

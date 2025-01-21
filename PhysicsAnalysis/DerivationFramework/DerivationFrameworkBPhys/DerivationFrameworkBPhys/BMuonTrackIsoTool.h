@@ -122,10 +122,11 @@ namespace DerivationFramework {
       // job options
       std::string                      m_muonContainerName;
       std::string                      m_electronContainerName;
-      std::string                      m_trackContainerName;
-      std::string                      m_elTrackParticleContainerName;
 
-      unsigned int                     m_legType;
+      unsigned int                     m_vertexLegTypes;
+      unsigned int                     m_isoTargetLegTypes;
+
+      enum leg_type{kChargedParticle, kMuon, kElectron};
 
       std::vector<double>              m_isoConeSizes;
       std::vector<double>              m_isoTrkImpLogChi2Max;

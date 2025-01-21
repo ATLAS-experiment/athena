@@ -617,6 +617,21 @@ namespace xAOD {
       /** @}  */
       
       /************************************************************************/
+      /**
+       *  @brief: Enum type of the electron track used in vertexing
+       * 
+       *  This enum type is used to identify type of the electron track used in 
+       *  vertexing since there are various options. 
+       * 
+       *  @value: TRACK_INDET 
+       *  @value: TRACK_GSF   
+       *  @value: TRACK_GSFCALOREFIT
+       */
+      
+      enum eltrack_type {TRACK_INDET, TRACK_GSF, TRACK_GSFCALOREFIT};
+      const std::vector<eltrack_type> electronTrackTypes();
+
+      /************************************************************************/
       /************************************************************************/
     protected:
 
@@ -651,22 +666,8 @@ namespace xAOD {
       bool cacheMuons();
       bool cacheElectrons();
 
-      /************************************************************************/
-      /**
-       *  @brief: Enum type of the electron track used in vertexing
-       * 
-       *  This enum type is used to identify type of the electron track used in 
-       *  vertexing since there are various options. 
-       * 
-       *  @value: TRACK_INDET 
-       *  @value: TRACK_GSF   
-       *  @value: TRACK_GSFCALOREFIT
-       */
-      
-      enum eltrack_type {TRACK_INDET, TRACK_GSF, TRACK_GSFCALOREFIT};
       std::vector<eltrack_type> m_cachedElTrackTypes;
       bool decorateElTrackTypes();
-      const std::vector<eltrack_type> electronTrackTypes();
       static const std::vector<eltrack_type> emptyVectorOfElTrackTypes;
 
 

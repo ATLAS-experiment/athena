@@ -1085,17 +1085,48 @@ namespace DerivationFramework {
   // Method avoids duplicate entries in vector.
   // Recursively calls itself if necessary.
   //--------------------------------------------------------------------------
+  template<typename T>
+  std::unordered_map<T, int> buildIndexMap(const std::vector<T>& vec) {
+    std::unordered_map<T, int> indexMap;
+    for (unsigned int i = 0; i < vec.size(); ++i) {
+        indexMap[vec[i]] = i;
+    }
+    return indexMap;
+  }
+
   void BPhysVertexTrackBase::findAllTracksInDecay(xAOD::BPhysHelper& vtx,
 						  TrackBag& tracks)
     const {
+    
+    const std::vector<unsigned int> elTrackIndices = vtx.electronTrackIndices();
+    auto elTrackIndicesMap = buildIndexMap(elTrackIndices);
+    const std::vector<xAOD::BPhysHelper::eltrack_type> elTrackTypes = vtx.electronTrackTypes();
 
     for (unsigned int i=0; i < vtx.vtx()->nTrackParticles(); ++i) {
       const xAOD::TrackParticle* track = vtx.vtx()->trackParticle(i);
       if ( std::find(tracks.begin(),tracks.end(),track) == tracks.end() ) {
         const xAOD::TrackParticle* trackToAdd;
-        const xAOD::TrackParticle* trackInDet = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(track);
-        trackToAdd = trackInDet ? trackInDet : track;
-	      tracks.push_back(track);
+
+        // Getting InDet from GSF if needed for electrons
+        unsigned int elIdx;
+        auto _elIdx = elTrackIndicesMap.find(i);
+        bool isEl  = _elIdx == elTrackIndicesMap.end() ? false : true;
+        if ( isEl ) {
+          elIdx = _elIdx->second;
+          if ( 
+            ( elTrackTypes.at( elIdx ) == xAOD::BPhysHelper::TRACK_GSF ) ||
+            ( elTrackTypes.at( elIdx ) == xAOD::BPhysHelper::TRACK_GSFCALOREFIT )
+          ){
+              trackToAdd = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(track);
+          } else if ( elTrackTypes.at( elIdx ) == xAOD::BPhysHelper::TRACK_INDET ) {
+              trackToAdd = track;
+          }
+        } else {
+          trackToAdd = track;
+        } 
+        // N.B. We assume only InDet tracks are used for muon legs 
+        // of the vertex -> no special treatment needed for muons! 
+	      tracks.push_back(trackToAdd);
       } // if
     } // for
     // loop over preceeding vertices
@@ -1278,19 +1309,27 @@ namespace DerivationFramework {
   // GSF will be found. TODO: Implement the option to get original GSF as well.
   //--------------------------------------------------------------------------
   TrackBag
-  BPhysVertexTrackBase::findAllElectronTracksInDecay(xAOD::BPhysHelper& vtx,
-						   ElectronBag& electrons, unsigned int elTrackType = 0) const {
+  BPhysVertexTrackBase::findAllElectronTracksInDecay(
+    xAOD::BPhysHelper& vtx,
+		ElectronBag& electrons, 
+    xAOD::BPhysHelper::eltrack_type elTrackType = xAOD::BPhysHelper::TRACK_GSF
+  ) const {
 
     TrackBag tracks;
     electrons = findAllElectronsInDecay(vtx);
 
-    for (ElectronBag::const_iterator elItr = electrons.begin(); elItr != electrons.end();
-	 ++elItr) {
+    for (
+      ElectronBag::const_iterator elItr = electrons.begin(); 
+      elItr != electrons.end(); ++elItr
+    ) {
       const xAOD::TrackParticle* gsfTrack = (*elItr)->trackParticle(0);
-      if ( elTrackType == 1 ) tracks.push_back(gsfTrack);
-      if ( elTrackType == 0 ) {
+      if ( elTrackType == xAOD::BPhysHelper::TRACK_GSF ) tracks.push_back(gsfTrack);
+      if ( elTrackType == xAOD::BPhysHelper::TRACK_INDET ) {
         const xAOD::TrackParticle* idTrack = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( gsfTrack );
         tracks.push_back( idTrack );
+      }
+      if ( elTrackType == xAOD::BPhysHelper::TRACK_GSFCALOREFIT ) {
+        tracks.push_back( nullptr ); // TODO!!
       }
     } // for 
     return tracks;
