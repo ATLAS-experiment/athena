@@ -102,6 +102,11 @@ class SuperChicConfig:
         self.wlm = 'el'
         self.tau = 0.04
         self.mxs = 100
+        self.atau = 0.0
+        self.dtau = 0.0
+        self.calc_tau_coeff = False
+        self.tau_mom = 'atau'
+        self.tau_coeff = 1      
 
     def toFortran(self):
 
@@ -277,6 +282,15 @@ class SuperChicConfig:
         conf+=fortDouble(self.tau) + "                                   ! [tau] : mass distribution decay constant (GeV^-1) \n"
         conf+=fortDouble(self.mxs) + "                                 ! [mxs] : mass of MX \n"
 
+        conf+="****************************************************************************************\n" 
+        conf+="******  tau anomalous moments\n"
+        conf+="****************************************************************************************\n" 
+        conf+=fortDouble(self.atau) + "                                 ! [atau] : magnetic dipole moment\n"
+        conf+=fortDouble(self.dtau) + "                                 ! [dtau] : electric dipole moment [e cm]\n"
+        conf+="******  flags for calculating individual coeffs - SEE MANUAL for explanation\n" 
+        conf+=fortBool(self.calc_tau_coeff) + "                         ! [calc_tau_coeff] : if true calculate  O(a_tau^n) or O(d_tau^n) coefficients\n"
+        conf+=fortStr(self.atau) + "                                  ! [tau_mom] : 'atau','dtau' - coeffecients for magnetic/electric dipole moments\n"
+        conf+=fortInt(self.tau_coeff) + "                                 ! [tau_coeff] : order 'n' in coefficient (0-4)\n"
 
         return conf 
 
