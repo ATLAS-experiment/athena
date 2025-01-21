@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local
@@ -557,9 +557,8 @@ std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::NonPromptLeptonVertexingAlg::
       continue;
     }
 
-    resultVertices.push_back(std::move(newSecondaryVertex));
-
     ATH_MSG_DEBUG("DecorateLepWithMergedSVVec -- NTrack of merged vertex = " << newSecondaryVertex->nTrackParticles());
+    resultVertices.push_back(std::move(newSecondaryVertex));
   }
 
   return resultVertices;
