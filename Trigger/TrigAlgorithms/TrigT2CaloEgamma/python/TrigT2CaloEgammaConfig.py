@@ -93,6 +93,8 @@ def t2CaloEgamma_AllCfg(flags, name="T2CaloEgamma_All",RoIs=inputEDM,ExtraInputs
                                              PhiWidth = 0.1,
                                              ExtraInputs = _T2CaloEgamma_ExtraInputs)
     alg.RoIs=RoIs
+    if(not flags.Input.isMC):
+      alg.ExtraInputs |= {('LArDeadOTXFromSC' , 'StoreGateSvc+DeadOTXFromSC' )}
     alg.ExtraInputs |= ExtraInputs
     alg.ClustersName = recordable(ClustersName)
     acc.addEventAlgo(alg)
@@ -114,6 +116,8 @@ def t2CaloEgamma_AllEmCfg(flags, name="T2CaloEgamma_AllEm", RoIs=inputEDM, Extra
                                              ExtraInputs = _T2CaloEgamma_ExtraInputs)
     alg.RoIs=RoIs
     alg.ExtraInputs |= ExtraInputs
+    if(not flags.Input.isMC):
+      alg.ExtraInputs |= {('LArDeadOTXFromSC' , 'StoreGateSvc+DeadOTXFromSC' )}
     alg.ClustersName = recordable(ClustersName)
     acc.addEventAlgo(alg)
     return acc
@@ -178,6 +182,8 @@ def t2CaloEgamma_ReFastAlgoCfg(flags, name="T2CaloEgamma_ReFastAlgo", ClustersNa
 
     alg.RoIs=RoIs
     alg.ExtraInputs |= ExtraInputs
+    if ( not flags.Input.isMC ):
+      alg.ExtraInputs |= {('LArDeadOTXFromSC' , 'StoreGateSvc+DeadOTXFromSC' )}
     alg.ClustersName = recordable(ClustersName)
     acc.addEventAlgo(alg)
     return acc
@@ -196,6 +202,8 @@ def t2CaloEgamma_ReFastFWDAlgoCfg(flags,  name="T2CaloEgamma_ReFastFWDAlgo",
                                                     PhiWidth = 0.2)
     alg.RoIs=RoIs
     alg.ExtraInputs |= ExtraInputs
+    if ( not flags.Input.isMC ):
+      alg.ExtraInputs |= {('LArDeadOTXFromSC' , 'StoreGateSvc+DeadOTXFromSC' )}
     alg.ClustersName = recordable(ClustersName)
     acc.addEventAlgo(alg)
     return acc
