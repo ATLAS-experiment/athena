@@ -17,6 +17,7 @@
 #include <AsgAnalysisAlgorithms/AsgCutBookkeeperAlg.h>
 #include <AsgAnalysisAlgorithms/AsgEnergyDecoratorAlg.h>
 #include <AsgAnalysisAlgorithms/AsgEventScaleFactorAlg.h>
+#include <AsgAnalysisAlgorithms/AsgObjectScaleFactorAlg.h>
 #include <AsgAnalysisAlgorithms/AsgFlagSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgLeptonTrackDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/AsgLeptonTrackSelectionAlg.h>
@@ -207,6 +208,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::AsgCutBookkeeperAlg>("CP::AsgCutBookkeeperAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::AsgEnergyDecoratorAlg>("CP::AsgEnergyDecoratorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::AsgEventScaleFactorAlg>("CP::AsgEventScaleFactorAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::AsgObjectScaleFactorAlg>("CP::AsgObjectScaleFactorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::AsgLeptonTrackDecorationAlg>("CP::AsgLeptonTrackDecorationAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::AsgLeptonTrackSelectionAlg>("CP::AsgLeptonTrackSelectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::AsgOriginalObjectLinkAlg>("CP::AsgOriginalObjectLinkAlg"));

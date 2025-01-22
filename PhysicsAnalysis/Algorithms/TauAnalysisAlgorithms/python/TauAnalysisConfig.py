@@ -129,6 +129,12 @@ class TauWorkingPointConfig (ConfigBlock) :
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
             "factors are not available. The default is False.")
+        self.addOption ('saveDetailedSF', True, type=bool,
+            info="save all the independent detailed object scale factors. "
+            "The default is True.")
+        self.addOption ('saveCombinedSF', False, type=bool,
+            info="save the combined object scale factor. "
+            "The default is False.")
         self.addOption ('addSelectionToPreselection', True, type=bool,
             info="whether to retain only tau-jets satisfying the working point "
             "requirements. The default is True.")
@@ -170,6 +176,7 @@ class TauWorkingPointConfig (ConfigBlock) :
         config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
                              preselection=self.addSelectionToPreselection)
 
+        sfList = []
         # Set up the algorithm calculating the efficiency scale factors for the
         # taus:
         if config.dataType() is not DataType.Data and not self.noEffSF and not self.useGNTau:
@@ -189,7 +196,10 @@ class TauWorkingPointConfig (ConfigBlock) :
             alg.outOfValidityDeco = 'bad_Reco_eff' + selectionPostfix
             alg.taus = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'Reco_effSF' + postfix)
+            if self.saveDetailedSF:
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
+                                     'Reco_effSF' + postfix)
+            sfList += [alg.scaleFactorDecoration]
 
             # TauEfficiencyCorrectionTool for Identification, use only in case TauID is requested in TauSelectionTool
             if self.quality not in ('VeryLoose','Baseline'):
@@ -215,7 +225,10 @@ class TauWorkingPointConfig (ConfigBlock) :
                 alg.outOfValidityDeco = 'bad_ID_eff' + selectionPostfix
                 alg.taus = config.readName (self.containerName)
                 alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'ID_effSF' + postfix)
+                if self.saveDetailedSF:
+                    config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
+                                         'ID_effSF' + postfix)
+                sfList += [alg.scaleFactorDecoration]
 
             # TauEfficiencyCorrectionTool for eVeto both on true tau and fake tau, use only in case eVeto is requested in TauSelectionTool
             if self.use_eVeto:
@@ -235,7 +248,10 @@ class TauWorkingPointConfig (ConfigBlock) :
                 alg.outOfValidityDeco = 'bad_EvetoFakeTau_eff' + selectionPostfix
                 alg.taus = config.readName (self.containerName)
                 alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'EvetoFakeTau_effSF' + postfix)
+                if self.saveDetailedSF:
+                    config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
+                                         'EvetoFakeTau_effSF' + postfix)
+                sfList += [alg.scaleFactorDecoration]
 
                 # correction for true tau
                 alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
@@ -250,7 +266,19 @@ class TauWorkingPointConfig (ConfigBlock) :
                 alg.outOfValidityDeco = 'bad_EvetoTrueTau_eff' + selectionPostfix
                 alg.taus = config.readName (self.containerName)
                 alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'EvetoTrueTau_effSF' + postfix)
+                if self.saveDetailedSF:
+                    config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
+                                         'EvetoTrueTau_effSF' + postfix)
+                sfList += [alg.scaleFactorDecoration]
+
+            if self.saveCombinedSF:
+                alg = config.createAlgorithm( 'CP::AsgObjectScaleFactorAlg',
+                                              'TauCombinedEfficiencyScaleFactorAlg' + postfix )
+                alg.particles = config.readName (self.containerName)
+                alg.inScaleFactors = sfList
+                alg.outScaleFactor = 'effSF' + postfix + '_%SYS%'
+                config.addOutputVar (self.containerName, alg.outScaleFactor,
+                                     'effSF' + postfix)
 
 
 class EXPERIMENTAL_TauCombineMuonRemovalConfig (ConfigBlock) :

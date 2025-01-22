@@ -8,6 +8,7 @@
 #include <AsgAnalysisAlgorithms/AsgCutBookkeeperAlg.h>
 #include <AsgAnalysisAlgorithms/AsgEnergyDecoratorAlg.h>
 #include <AsgAnalysisAlgorithms/AsgEventScaleFactorAlg.h>
+#include <AsgAnalysisAlgorithms/AsgObjectScaleFactorAlg.h>
 #include <AsgAnalysisAlgorithms/AsgFlagSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgLeptonTrackDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/AsgLeptonTrackSelectionAlg.h>
@@ -50,6 +51,7 @@ DECLARE_COMPONENT (CP::AsgClassificationDecorationAlg)
 DECLARE_COMPONENT (CP::AsgCutBookkeeperAlg)
 DECLARE_COMPONENT (CP::AsgEnergyDecoratorAlg)
 DECLARE_COMPONENT (CP::AsgEventScaleFactorAlg)
+DECLARE_COMPONENT (CP::AsgObjectScaleFactorAlg)
 DECLARE_COMPONENT (CP::AsgFlagSelectionTool)
 DECLARE_COMPONENT (CP::AsgLeptonTrackDecorationAlg)
 DECLARE_COMPONENT (CP::AsgLeptonTrackSelectionAlg)
