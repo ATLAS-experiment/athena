@@ -63,8 +63,6 @@ namespace {
 }
 
 namespace MuonGMR4{
-ReadoutGeomCnvAlg::ReadoutGeomCnvAlg(const std::string& name, ISvcLocator* pSvcLocator):
-    AthReentrantAlgorithm{name, pSvcLocator} {}
 
 StatusCode ReadoutGeomCnvAlg::initialize()  {
     ATH_CHECK(m_idHelperSvc.retrieve());
