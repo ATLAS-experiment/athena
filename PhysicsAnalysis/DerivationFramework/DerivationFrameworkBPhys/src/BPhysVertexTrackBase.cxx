@@ -1098,9 +1098,16 @@ namespace DerivationFramework {
 						  TrackBag& tracks)
     const {
     
-    const std::vector<unsigned int> elTrackIndices = vtx.electronTrackIndices();
+    const std::vector<unsigned int> elTrackIndices; // = vtx.electronTrackIndices();
     auto elTrackIndicesMap = buildIndexMap(elTrackIndices);
-    const std::vector<xAOD::BPhysHelper::eltrack_type> elTrackTypes = vtx.electronTrackTypes();
+    const std::vector<xAOD::BPhysHelper::eltrack_type> elTrackTypes; // = vtx.electronTrackTypes();
+    bool electronsInVtx = ( vtx.nElectrons() > 0 );
+
+    if ( electronsInVtx ){
+      elTrackIndices = vtx.electronTrackIndices();
+      elTrackIndicesMap = buildIndexMap(elTrackIndices);
+      elTrackTypes = vtx.electronTrackTypes();
+    }
 
     for (unsigned int i=0; i < vtx.vtx()->nTrackParticles(); ++i) {
       const xAOD::TrackParticle* track = vtx.vtx()->trackParticle(i);
@@ -1108,9 +1115,12 @@ namespace DerivationFramework {
         const xAOD::TrackParticle* trackToAdd;
 
         // Getting InDet from GSF if needed for electrons
-        unsigned int elIdx;
-        auto _elIdx = elTrackIndicesMap.find(i);
-        bool isEl  = _elIdx == elTrackIndicesMap.end() ? false : true;
+        bool isEl = false;
+        if ( electronsInVtx ) {
+          unsigned int elIdx;
+          auto _elIdx = elTrackIndicesMap.find(i);
+          isEl  = _elIdx == elTrackIndicesMap.end() ? false : true;
+        }
         if ( isEl ) {
           elIdx = _elIdx->second;
           if ( 

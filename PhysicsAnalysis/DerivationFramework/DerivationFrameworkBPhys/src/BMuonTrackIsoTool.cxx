@@ -15,51 +15,31 @@
 // For an usage example see BPHY8.py .
 //
 // Job options provided by this class:
-// - VertexLegTypes               -- types of particles that take part in
-//                                   vertexing. Integer to be calculated
-//                                   out of bits:
-//
-//                                   Bit   Leg Type
-//                                   ===   ========
-//                                   0     Generic Charged Particle
-//                                   1     Muon
-//                                   2     Electron
-//
-//                                   Examples: 
-//                                   ========
-//                                   B->KK vertex                   => 1
-//                                   B->mumu vertex                 => 2
-//                                   B->K*(Kpi)mumu vertex          => 3
-//                                   B->ee vertex                   => 4
-//                                   B->K*(Kpi)ee vertex            => 5
-//                                   X->J/psi(mumu)J/psi(ee) vertex => 6 
 //
 // - IsolationTargetLegTypes      -- types of particles in the vertex 
 //                                   for which to calculate isolation
-//                                   values. Integer to be calculated 
-//                                   out of bits:
+//                                   values. 
+//                                   0: Only for muons
+//                                   1: Only for electrons
+//                                   2: For all tracks in the vertex
+//                                   
+//                                   Examples:
+//                                   ---------
+//                                   * B->KK vertex                   => 2
+//                                   * B->mumu vertex                 => 0
+//                                   * B->K*(Kpi)mumu vertex         
+//                                     - calculate iso of muons only  => 0
+//                                     - calculate iso of all legs    => 2 
+//                                   * J/psi->ee vertex               => 1
 //
-//                                   Bit   Leg Type
-//                                   ===   ========
-//                                   0     Generic Charged Particle
-//                                   1     Muon
-//                                   2     Electron
-//
-//                                   Examples: 
-//                                   ========
-//                                   B->mumu vertex                    => 2
-//                                   B->K*(Kpi)mumu vertex
-//                                   - calculate iso of muons only     => 2
-//                                   - calculate iso of all legs       => 3
-//                                   B->K*(Kpi)ee vertex
-//                                   - calculate iso of electrons only => 4
-//                                   - calculate iso of all legs       => 5
+//                                   * B->K*(Kpi)ee vertex
+//                                     - calculate iso of electrons only => 1
+//                                     - calculate iso of all legs       => 2
+//                                   
+//                                   Can always set 
 //                                    
 // - MuonContainerName            -- name of muon container 
-//                                   (relevant iff VertexLegTypes & ( 1 << 1 ) == 1 )
-// - ElectronContainerName        -- name of electron container 
-//                                   (relevant iff VertexLegTypes & ( 1 << 2 ) == 1 )
-// - TrackParticleContainerName   -- name of track particle container 
+//                                   (relevant iff IsolationTargetLegTypes == 0 )
 // - IsolationConeSizes           -- List of isolation cone sizes
 // - IsoTrkImpLogChi2Max          -- List of maximum log(chi2) cuts for
 //                                   association of tracks to the primary
@@ -162,10 +142,8 @@ namespace DerivationFramework {
     
     declareInterface<DerivationFramework::IAugmentationTool>(this);
 
-    declareProperty("VertexLegTypes"               , m_vertexLegTypes=3);
-    declareProperty("IsolationTargetLegTypes"      , m_isoTargetLegTypes=2);
+    declareProperty("IsolationTargetLegTypes"      , m_isoTargetLegTypes=0);
     declareProperty("MuonContainerName"            , m_muonContainerName="");
-    declareProperty("ElectronContainerName"        , m_electronContainerName="");
     declareProperty("IsolationConeSizes"    , m_isoConeSizes);
     declareProperty("IsoTrkImpLogChi2Max"   , m_isoTrkImpLogChi2Max);
     declareProperty("IsoDoTrkImpLogChi2Cut" , m_isoDoTrkImpLogChi2Cut);
@@ -185,43 +163,17 @@ namespace DerivationFramework {
                     << ") and IsoDoTrkImpChi2Cut ("
                     << m_isoDoTrkImpLogChi2Cut.size() << ") lists!");
     }      
-
-    // check consitency 
-    if ( 
-      ! ( m_vertexLegTypes & ( 1 << leg_type::kChargedParticle ) ) &&
-      ( m_isoTargetLegTypes & ( 1 << leg_type::kChargedParticle ) )
-    ){
-      ATH_MSG_ERROR(
-        "Cannot calculate isolation for tracks if no tracks in vertex!" 
-      );
-    }
-    if ( 
-      ! ( m_vertexLegTypes & ( 1 << leg_type::kMuon ) ) &&
-      ( m_isoTargetLegTypes & ( 1 << leg_type::kMuon ) )
-    ){
-      ATH_MSG_ERROR(
-        "Cannot calculate isolation for muons if no muons in vertex!" 
-      );
-    }
-    if ( 
-      ! ( m_vertexLegTypes & ( 1 << leg_type::kElectron ) ) &&
-      ( m_isoTargetLegTypes & ( 1 << leg_type::kElectron ) )
-    ){
-      ATH_MSG_ERROR(
-        "Cannot calculate isolation for electrons if no electrons in vertex!" 
-      );
-    }
     
     // check muon container name if needed
     if ( ( m_muonContainerName == "" ) &&
-         ( m_isoTargetLegTypes == ( 1 << leg_type::kMuon ) ) 
+         ( m_isoTargetLegTypes == 0 ) 
     ) {
       ATH_MSG_ERROR("No muon container name provided!");
     }
 
     // check electron container name if needed 
     if ( ( m_electronContainerName == "" ) &&
-         ( m_isoTargetLegTypes == ( 1 << leg_type::kElectron ) ) 
+         ( m_isoTargetLegTypes == 1 ) 
     ) {
       ATH_MSG_ERROR("No electron container name provided!");
     }
@@ -269,18 +221,10 @@ namespace DerivationFramework {
     m_muons = NULL;
     if ( 
       ( m_muonContainerName != "" ) && 
-      ( m_vertexLegTypes & ( 1 << leg_type::kMuon )  )
+      ( m_isoTargetLegTypes == 0  )
     ) {
       CHECK(evtStore()->retrieve(m_muons, m_muonContainerName));
       ATH_MSG_DEBUG("Found muon collection with key " << m_muonContainerName);
-    }
-    m_electrons = NULL;
-    if ( 
-      ( m_electronContainerName != "" ) && 
-      ( m_vertexLegTypes & ( 1 << leg_type::kElectron )  )
-    ) {
-      CHECK(evtStore()->retrieve(m_electrons, m_electronContainerName));
-      ATH_MSG_DEBUG("Found electron collection with key " << m_electronContainerName);
     }
     
     ATH_MSG_DEBUG("BMuonTrackIsoTool::addBranchesSVLoopHook(): "
@@ -324,23 +268,23 @@ namespace DerivationFramework {
     //std::variant<MuonBag, ElectronBag, TrackBag> candLegs;
     std::vector<TVector3> candLegsMomenta;
     
-    if ( m_isoTargetLegTypes == ( 1 << leg_type::kMuon ) ){
+    if ( m_isoTargetLegTypes == 0 ){
       candMuTracksMomenta       = findMuonRefTrackMomenta(cand, muons);
-      //candLegs                  = muons;
+      //candLegs                = muons;
       candLegsMomenta           = candMuTracksMomenta;
       ATH_MSG_DEBUG("calcValuesHook: found " << muons.size() <<
 		  " muons and " << candMuTracksMomenta.size() <<
 		  " muon tracks from B cand; " );
-    } else if ( m_isoTargetLegTypes == ( 1 << leg_type::kElectron ) ){
+    } else if ( m_isoTargetLegTypes == 1 ){
       candElTracksMomenta       = findElectronRefTrackMomenta(cand, electrons);
-      //candLegs                  = electrons;
+      //candLegs                = electrons;
       candLegsMomenta           = candElTracksMomenta;
       ATH_MSG_DEBUG("calcValuesHook: found " << electrons.size() <<
 		  " electrons and " << candElTracksMomenta.size() <<
 		  " electron tracks from B cand; " );
     } else {
       candChargedTracksMomenta  = findAllRefTrackMomenta(cand, chargedTracks);
-      //candLegs                  = chargedTracks;
+      //candLegs                = chargedTracks;
       candLegsMomenta           = candChargedTracksMomenta;
       ATH_MSG_DEBUG(
         "calcValuesHook: found " << candChargedTracksMomenta.size() <<
@@ -405,10 +349,10 @@ namespace DerivationFramework {
 	    isoValue = -10.;
 	  } // if candRefPV != NULL
 
-    if ( m_isoTargetLegTypes == ( 1 << leg_type::kMuon ) ){
+    if ( m_isoTargetLegTypes == 0 ){
       auto fillTarget = id < muons.size() ? muons.at(id) : NULL;
       iso.fill(isoValue, nTracksInCone, fillTarget);
-    } else if ( m_isoTargetLegTypes == ( 1 << leg_type::kElectron ) ){
+    } else if ( m_isoTargetLegTypes == 1 ) ){
       auto fillTarget = id < electrons.size() ? electrons.at(id) : NULL;
       iso.fill(isoValue, nTracksInCone, fillTarget);
     } else {
@@ -491,7 +435,13 @@ namespace DerivationFramework {
 			  << vtx->z() << "), N(iso): "
 			  << result.vIsoValues.size() << ", N(nTracks): "
 			  << result.vNTracks.size());
-      if ( m_isoTargetLegTypes & ( 1 << leg_type::kMuon ) ) { 
+      
+      // Links not saved for electrons since they are
+      // already available in BPhysHelper object of the vertex.
+      // _muLinks linked to isolation result kept for muons to be
+      // backward compatible -- but only for cases where you're 
+      // calculating isolation ONLY for muons.
+      if ( m_isoTargetLegTypes == 0 ) { 
 	      MuonLinkVector_t links;
 	      for (const xAOD::Muon* muon : result.vMuons) {
   	      if ( muon != NULL ) {

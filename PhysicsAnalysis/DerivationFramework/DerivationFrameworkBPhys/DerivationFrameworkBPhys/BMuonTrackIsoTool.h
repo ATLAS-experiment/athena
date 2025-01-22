@@ -123,7 +123,6 @@ namespace DerivationFramework {
       std::string                      m_muonContainerName;
       std::string                      m_electronContainerName;
 
-      unsigned int                     m_vertexLegTypes;
       unsigned int                     m_isoTargetLegTypes;
 
       enum leg_type{kChargedParticle, kMuon, kElectron};
@@ -133,11 +132,7 @@ namespace DerivationFramework {
       std::vector<int>                 m_isoDoTrkImpLogChi2Cut;
 
       // containers
-      mutable const xAOD::MuonContainer* m_muons;
-      mutable const xAOD::ElectronContainer* m_electrons;
-      mutable const xAOD::TrackParticleContainer* m_elTrackParticles;
-      mutable const xAOD::TrackParticleContainer* m_trackParticles;
-      
+      mutable const xAOD::MuonContainer* m_muons;      
       
       // results array
       typedef boost::multi_array<MuIsoItem, 4> MuIsoItem4_t;
