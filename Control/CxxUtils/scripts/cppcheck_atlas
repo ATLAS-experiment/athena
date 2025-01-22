@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#
+# Wrapper around cppcheck to be used when compiling ATLAS sources with cmake.
+# cmake adds all non-system include paths to the command line. While this increases
+# code visibility to cppcheck, some of our (templated) headers slow down the
+# processing enourmosuly. So we remove all those non-package include paths in
+# this wrapper.
+#
+# Author: Frank Winklmeier
+#
+
+# Last argument is the source file (cmake invokes cppcheck once per file):
+sourcefile="${@: -1}"
+
+options=()
+for arg in "$@"; do
+    # Remove all -I include paths except the package itself:
+    if [[ $arg == -I* ]]; then
+        path=${arg:2}   # strip "-I"
+        if [[ ${sourcefile} == ${path}* ]]; then
+            options+=(${arg})
+        fi
+    else
+        options+=(${arg})
+    fi
+done
+
+# Run cppcheck with reduced arguments:
+cppcheck ${options[@]}

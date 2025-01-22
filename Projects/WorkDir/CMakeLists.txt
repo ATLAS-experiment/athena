@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Project file for building a selected set of packages against an
 # installed ATLAS release/nightly.
@@ -119,9 +119,14 @@ set( ATLAS_ALWAYS_CHECK_WILDCARDS TRUE CACHE BOOL
 if( ATLAS_USE_CPPCHECK )
    find_package( Cppcheck 2.14 )
 
-   if( CPPCHECK_FOUND )
+   # Find ATLAS-specific wrapper:
+   find_program( CPPCHECK_ATLAS cppcheck_atlas
+      PATHS "${CMAKE_CURRENT_SOURCE_DIR}/../../Control/CxxUtils/scripts" )
+   mark_as_advanced( CPPCHECK_ATLAS )
+
+   if( CPPCHECK_FOUND AND CPPCHECK_ATLAS )
       # Prepend cppcheck command to already defined command line options:
-      list( PREPEND CMAKE_CPPCHECK_DEFAULT "${CPPCHECK_cppcheck_EXECUTABLE}" )
+      list( PREPEND CMAKE_CPPCHECK_DEFAULT ${CPPCHECK_ATLAS} )
 
       # Ignore externals:
       foreach( ignored_path "${LCG_RELEASE_BASE}"
