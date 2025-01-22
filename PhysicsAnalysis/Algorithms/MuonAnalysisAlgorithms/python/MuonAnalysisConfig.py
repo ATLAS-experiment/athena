@@ -181,6 +181,12 @@ class MuonWorkingPointConfig (ConfigBlock) :
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
             "factors are not available. The default is False.")
+        self.addOption ('saveDetailedSF', True, type=bool,
+            info="save all the independent detailed object scale factors. "
+            "The default is True.")
+        self.addOption ('saveCombinedSF', False, type=bool,
+            info="save the combined object scale factor. "
+            "The default is False.")
         self.addOption ('excludeNSWFromPrecisionLayers', False, type=bool,
             info="only for testing purposes, turn on to ignore NSW hits and "
             "fix a crash with older derivations (p-tag <p5834)")
@@ -223,8 +229,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.maxDeltaZ0SinTheta = self.maxDeltaZ0SinTheta
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
-            if self.trackSelection :
-                config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration, preselection=self.addSelectionToPreselection)
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration, preselection=self.addSelectionToPreselection)
 
         # Setup the muon quality selection
         alg = config.createAlgorithm( 'CP::MuonSelectionAlgV2',
@@ -260,6 +265,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
                                  alg.isolationDecoration,
                                  preselection=self.addSelectionToPreselection)
 
+        sfList = []
         # Set up the reco/ID efficiency scale factor calculation algorithm:
         if config.dataType() is not DataType.Data and (not self.noEffSF or self.onlyRecoEffSF):
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
@@ -275,7 +281,10 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'reco_effSF' + postfix)
+            if self.saveDetailedSF:
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
+                                     'reco_effSF' + postfix)
+            sfList += [alg.scaleFactorDecoration]
 
         # Set up the HighPt-specific BadMuonVeto efficiency scale factor calculation algorithm:
         if config.dataType() is not DataType.Data and self.quality == 'HighPt' and not self.onlyRecoEffSF and not self.noEffSF:
@@ -292,7 +301,10 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'BadMuonVeto_effSF' + postfix)
+            if self.saveDetailedSF:
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
+                                     'BadMuonVeto_effSF' + postfix)
+            sfList += [alg.scaleFactorDecoration]
 
         # Set up the isolation efficiency scale factor calculation algorithm:
         if config.dataType() is not DataType.Data and self.isolation != 'NonIso' and not self.onlyRecoEffSF and not self.noEffSF:
@@ -309,7 +321,10 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'isol_effSF' + postfix)
+            if self.saveDetailedSF:
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
+                                     'isol_effSF' + postfix)
+            sfList += [alg.scaleFactorDecoration]
 
         # Set up the TTVA scale factor calculation algorithm:
         if config.dataType() is not DataType.Data and not self.onlyRecoEffSF and not self.noEffSF:
@@ -326,8 +341,18 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'TTVA_effSF' + postfix)
+            if self.saveDetailedSF:
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
+                                     'TTVA_effSF' + postfix)
+            sfList += [alg.scaleFactorDecoration]
 
+        if config.dataType() is not DataType.Data and not self.noEffSF and self.saveCombinedSF:
+            alg = config.createAlgorithm( 'CP::AsgObjectScaleFactorAlg',
+                                          'MuonCombinedEfficiencyScaleFactorAlg' + postfix )
+            alg.particles = config.readName (self.containerName)
+            alg.inScaleFactors = sfList
+            alg.outScaleFactor = 'effSF' + postfix + '_%SYS%'
+            config.addOutputVar (self.containerName, alg.outScaleFactor, 'effSF' + postfix)
 
 class MuonTriggerAnalysisSFBlock (ConfigBlock):
 
