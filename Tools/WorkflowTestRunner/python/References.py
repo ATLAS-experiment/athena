@@ -40,6 +40,6 @@ references_map = {
     "mc_PHYSLITE_Run3": "v29",
     "af3_PHYS_Run2": "v3",
     "af3_PHYSLITE_Run2": "v3",
-    "af3_PHYS_Run3": "v36",
-    "af3_PHYSLITE_Run3": "v29",
+    "af3_PHYS_Run3": "v37",
+    "af3_PHYSLITE_Run3": "v30",
 }
