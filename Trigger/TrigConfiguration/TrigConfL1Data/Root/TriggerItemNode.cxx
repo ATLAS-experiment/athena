@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfL1Data/TriggerItemNode.h"
@@ -240,9 +240,9 @@ TrigConf::TriggerItemNode::buildLogic(std::vector<std::string> & conditionList,
    if (m_NodeType == OBJ) {
       std::string condition("");
       if (m_Threshold) {
-         if( m_Threshold->type() != L1DataDef::rndmType() &&
-             m_Threshold->type() != L1DataDef::pclkType() &&
-             m_Threshold->type() != L1DataDef::bgrpType()) {
+         if( m_Threshold->type() != L1DataDef::typeConfig(L1DataDef::RNDM).name &&
+             m_Threshold->type() != L1DataDef::typeConfig(L1DataDef::PCLK).name &&
+             m_Threshold->type() != L1DataDef::typeConfig(L1DataDef::BGRP).name ) {
             std::string name = m_Threshold->name();
             name += "_x" + std::to_string(m_Multiplicity);
             condition += '0' + m_Multiplicity;
