@@ -617,6 +617,8 @@ bool FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentC
  */
 bool FPGATrackSimCLUSTERING::sortITkInputEta(const FPGATrackSimHit& hitA, const FPGATrackSimHit& hitB)
 {
+  if (hitA.getIdentifierHash() != hitB.getIdentifierHash())
+    return hitA.getIdentifierHash() < hitB.getIdentifierHash();
   return hitA.getEtaIndex() < hitB.getEtaIndex();
 }
 
@@ -624,6 +626,8 @@ bool FPGATrackSimCLUSTERING::sortITkInputEta(const FPGATrackSimHit& hitA, const 
  */
 bool FPGATrackSimCLUSTERING::sortITkInputPhi(const FPGATrackSimHit& hitA, const FPGATrackSimHit& hitB)
 {
+  if (hitA.getIdentifierHash() != hitB.getIdentifierHash())
+    return hitA.getIdentifierHash() < hitB.getIdentifierHash();
   return hitA.getPhiIndex() < hitB.getPhiIndex();
 }
 

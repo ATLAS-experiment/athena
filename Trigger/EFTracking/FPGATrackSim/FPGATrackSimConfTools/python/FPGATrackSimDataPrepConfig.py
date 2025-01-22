@@ -441,7 +441,9 @@ def runDataPrepChain():
             
         # Printout for various FPGA-related objects
         from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
-        acc.merge(FPGATrackSimReportingCfg(flags,perEventReports=True,isDataPrep=True))
+        acc.merge(FPGATrackSimReportingCfg(flags,
+                                           perEventReports = (flags.Trigger.FPGATrackSim.sampleType != 'skipTruth'),
+                                           isDataPrep=True))
         
         # IDTPM running
         from InDetTrackPerfMon.InDetTrackPerfMonConfig import InDetTrackPerfMonCfg
