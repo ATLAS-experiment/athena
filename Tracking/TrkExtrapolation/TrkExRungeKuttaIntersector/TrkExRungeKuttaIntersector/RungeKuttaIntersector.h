@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////
@@ -127,58 +127,92 @@ class RungeKuttaIntersector final : public extends<AthAlgTool, IIntersector> {
       "Name of the Magnetic Field conditions object key"};
 
   // additional configuration
-  bool m_productionMode;
+  BooleanProperty m_productionMode{this, "ProductionMode", true};
 
   // some precalculated constants:
-  const double m_caloR0;
-  const double m_caloR1;
-  const double m_caloR2;
-  const double m_caloR3;
-  const double m_caloR4;
-  const double m_caloZ0;
-  const double m_caloZ1;
-  const double m_caloZ2;
-  const double m_caloZ3;
-  const double m_inDetR0;
-  const double m_inDetR1;
-  const double m_inDetR2;
-  const double m_inDetZ0;
-  const double m_inDetZ1;
-  const double m_inDetZ2;
-  const double m_momentumThreshold;
-  const double m_momentumWarnThreshold;
-  const double m_muonR0;
-  const double m_muonZ0;
-  double m_shortStepMax;
-  const double m_shortStepMin;
-  const double m_solenoidR;
-  const double m_solenoidZ;
-  double m_stepMax0;
-  double m_stepMax1;
-  double m_stepMax2;
-  double m_stepMax3;
-  double m_stepMax4;
-  int m_stepsUntilTrapped;
-  const double m_third;
-  const double m_toroidR0;
-  const double m_toroidR1;
-  const double m_toroidR2;
-  const double m_toroidR3;
-  const double m_toroidZ0;
-  const double m_toroidZ1;
-  const double m_toroidZ2;
-  const double m_toroidZ3;
-  const double m_toroidZ4;
-  const double m_toroidZ5;
-  const double m_toroidZ6;
-  const double m_toroidZ7;
-  const double m_toroidZ8;
+  // r min for calo high field gradient region
+  const double m_caloR0 = 1900.*Gaudi::Units::mm;
+  // r max for calo high field gradient region
+  const double m_caloR1 = 2500.*Gaudi::Units::mm;
+  // r min for calo medium field gradient region
+  const double m_caloR2 = 3500.*Gaudi::Units::mm;
+  // r min for calo outer flux return region
+  const double m_caloR3 = 3700.*Gaudi::Units::mm;
+  // r max for calo medium field gradient region
+  const double m_caloR4 = 3800.*Gaudi::Units::mm;
+  // z min for calo medium field gradient region
+  const double m_caloZ0 = 2350.*Gaudi::Units::mm;
+  // z min for calo high field gradient region
+  const double m_caloZ1 = 2600.*Gaudi::Units::mm;
+  // z max for calo high field gradient region
+  const double m_caloZ2 = 3600.*Gaudi::Units::mm;
+  // z min for calo outer flux return region
+  const double m_caloZ3 = 6000.*Gaudi::Units::mm;
+  // end of central barrel near constant field region
+  const double m_inDetR0 = 400.*Gaudi::Units::mm;
+  // inner radius of middle/outer transition region
+  const double m_inDetR1 = 350.*Gaudi::Units::mm;
+  // outer radius of low field gradient field region
+  const double m_inDetR2 = 800.*Gaudi::Units::mm;
+  // end of central barrel near constant field region
+  const double m_inDetZ0 = 350.*Gaudi::Units::mm;
+  // start of well behaved transition region
+  const double m_inDetZ1 = 420.*Gaudi::Units::mm;
+  // start of endcap region
+  const double m_inDetZ2 = 700.*Gaudi::Units::mm;
+  // protection against loopers
+  const double m_momentumThreshold = 1./20.*Gaudi::Units::MeV;
+  // warning threshold for intersection failure
+  const double m_momentumWarnThreshold = 1./450.*Gaudi::Units::MeV;
+  // inner radius of barrel toroid region
+  const double m_muonR0 = 4300.*Gaudi::Units::mm;
+  // start of endcap toroid region
+  const double m_muonZ0 = 6600.*Gaudi::Units::mm;
+  double m_shortStepMax = 3.0*Gaudi::Units::mm;
+  const double m_shortStepMin = 10.*Gaudi::Units::nanometer;
+  // r max after coil (will take small steps near coil)
+  const double m_solenoidR = 1300.*Gaudi::Units::mm;
+  // z end of InDet region
+  const double m_solenoidZ = 3500.*Gaudi::Units::mm;
+  double m_stepMax0 = 8.0*Gaudi::Units::mm;
+  double m_stepMax1 = 40.0*Gaudi::Units::mm;
+  double m_stepMax2 = 80.0*Gaudi::Units::mm;
+  double m_stepMax3 = 160.0*Gaudi::Units::mm;
+  double m_stepMax4 = 320.0*Gaudi::Units::mm;
+  int m_stepsUntilTrapped = 2000;
+  const double m_third = 1./3.;
+  // endcap toroid central field - inner radius
+  const double m_toroidR0 = 1850.0*Gaudi::Units::mm;
+  // endcap toroid central field - outer radius
+  const double m_toroidR1 = 3500.0*Gaudi::Units::mm;
+  // after inner barrel or outer endcap coil
+  const double m_toroidR2 = 6000.0*Gaudi::Units::mm;
+  // toroid region -  radius above which long steps OK
+  const double m_toroidR3 = 6500.0*Gaudi::Units::mm;
+  // endcap - near iron structure
+  const double m_toroidZ0 = 7000.0*Gaudi::Units::mm;
+  // endcap - high field gradient
+  const double m_toroidZ1 = 8000.0*Gaudi::Units::mm;
+  // barrel - before coil end loop
+  const double m_toroidZ2 = 8700.0*Gaudi::Units::mm;
+  // barrel - nearing coil end loop
+  const double m_toroidZ3 = 9100.0*Gaudi::Units::mm;
+  // endcap toroid full field and barrel coil regions
+  const double m_toroidZ4 = 9500.0*Gaudi::Units::mm;
+  // endcap toroid central field - inner z
+  const double m_toroidZ5 = 9800.0*Gaudi::Units::mm;
+  // endcap toroid central field - outer z
+  const double m_toroidZ6 = 11400.0*Gaudi::Units::mm;
+  // toroid exit fringe fields
+  const double m_toroidZ7 = 12900.0*Gaudi::Units::mm;
+  // essentially out of any toroid fields
+  const double m_toroidZ8 = 14000.0*Gaudi::Units::mm;
 
   // counters
-  mutable std::atomic<unsigned long long> m_countExtrapolations;
-  mutable std::atomic<unsigned long long> m_countShortStep;
-  mutable std::atomic<unsigned long long> m_countStep;
-  mutable std::atomic<unsigned long long> m_countStepReduction;
+  mutable std::atomic<unsigned long long> m_countExtrapolations = 0;
+  mutable std::atomic<unsigned long long> m_countShortStep = 0;
+  mutable std::atomic<unsigned long long> m_countStep = 0;
+  mutable std::atomic<unsigned long long> m_countStepReduction = 0;
 };
 
 //<<<<<< INLINE PRIVATE MEMBER FUNCTIONS                                >>>>>>

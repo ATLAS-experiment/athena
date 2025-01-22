@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////
@@ -50,66 +50,12 @@ namespace Trk
 RungeKuttaIntersector::RungeKuttaIntersector (const std::string&	type,
 					      const std::string&	name, 
 					      const IInterface*		parent)
-    :	base_class		(type, name, parent),
-	m_productionMode	(true),
-	m_caloR0		(1900.*Gaudi::Units::mm),	// r min for calo high field gradient region
-	m_caloR1		(2500.*Gaudi::Units::mm),	// r max for calo high field gradient region
-	m_caloR2		(3500.*Gaudi::Units::mm),	// r min for calo medium field gradient region
-	m_caloR3		(3700.*Gaudi::Units::mm),	// r min for calo outer flux return region
-	m_caloR4		(3800.*Gaudi::Units::mm),	// r max for calo medium field gradient region
-	m_caloZ0		(2350.*Gaudi::Units::mm),	// z min for calo medium field gradient region
-	m_caloZ1		(2600.*Gaudi::Units::mm),	// z min for calo high field gradient region
-	m_caloZ2		(3600.*Gaudi::Units::mm),	// z max for calo high field gradient region
-	m_caloZ3		(6000.*Gaudi::Units::mm),	// z min for calo outer flux return region
-	m_inDetR0		(400.*Gaudi::Units::mm),	// end of central barrel near constant field region
-	m_inDetR1		(350.*Gaudi::Units::mm),	// inner radius of middle/outer transition region
-	m_inDetR2		(800.*Gaudi::Units::mm),	// outer radius of low field gradient field region
-	m_inDetZ0		(350.*Gaudi::Units::mm),	// end of central barrel near constant field region
-	m_inDetZ1		(420.*Gaudi::Units::mm),	// start of well behaved transition region
-	m_inDetZ2		(700.*Gaudi::Units::mm),	// start of endcap region
-	m_momentumThreshold	(1./20.*Gaudi::Units::MeV),	// protection against loopers
-	m_momentumWarnThreshold	(1./450.*Gaudi::Units::MeV),	// warning threshold for intersection failure
-	m_muonR0		(4300.*Gaudi::Units::mm),	// inner radius of barrel toroid region
-	m_muonZ0		(6600.*Gaudi::Units::mm),	// start of endcap toroid region
-	m_shortStepMax		(3.0*Gaudi::Units::mm),
-	m_shortStepMin		(10.*Gaudi::Units::nanometer),
-	m_solenoidR		(1300.*Gaudi::Units::mm),	// r max after coil (will take small steps near coil)
-	m_solenoidZ		(3500.*Gaudi::Units::mm),	// z end of InDet region
-	m_stepMax0		(8.0*Gaudi::Units::mm),
-	m_stepMax1		(40.0*Gaudi::Units::mm),
-	m_stepMax2		(80.0*Gaudi::Units::mm),
-	m_stepMax3		(160.0*Gaudi::Units::mm),
-	m_stepMax4		(320.0*Gaudi::Units::mm),
-	m_stepsUntilTrapped	(2000),
-	m_third			(1./3.),
-	m_toroidR0		(1850.0*Gaudi::Units::mm),	// endcap toroid central field - inner radius
-	m_toroidR1		(3500.0*Gaudi::Units::mm),	// endcap toroid central field - outer radius
-	m_toroidR2		(6000.0*Gaudi::Units::mm),	// after inner barrel or outer endcap coil
-	m_toroidR3		(6500.0*Gaudi::Units::mm),	// toroid region -  radius above which long steps OK
-	m_toroidZ0		(7000.0*Gaudi::Units::mm),	// endcap - near iron structure
-	m_toroidZ1		(8000.0*Gaudi::Units::mm),	// endcap - high field gradient
-	m_toroidZ2		(8700.0*Gaudi::Units::mm),	// barrel - before coil end loop
-	m_toroidZ3		(9100.0*Gaudi::Units::mm),	// barrel - nearing coil end loop
-	m_toroidZ4		(9500.0*Gaudi::Units::mm),	// endcap toroid full field and barrel coil regions
-	m_toroidZ5		(9800.0*Gaudi::Units::mm),	// endcap toroid central field - inner z
-	m_toroidZ6		(11400.0*Gaudi::Units::mm),	// endcap toroid central field - outer z
-	m_toroidZ7		(12900.0*Gaudi::Units::mm),	// toroid exit fringe fields
-	m_toroidZ8		(14000.0*Gaudi::Units::mm),	// essentially out of any toroid fields
-	m_countExtrapolations	(0),
-	m_countShortStep	(0),
-	m_countStep		(0),
-	m_countStepReduction	(0)
-{
-    declareProperty("ProductionMode",		m_productionMode);
-}
+  :	base_class		(type, name, parent) {}
 
 StatusCode
 RungeKuttaIntersector::initialize(){
     // print name and package version
     ATH_MSG_DEBUG( "RungeKuttaIntersector::initialize()" );
-
-    // initialize base class
-    if (StatusCode::SUCCESS != AlgTool::initialize()) return StatusCode::FAILURE;
 
     // retrieve MagneticFieldTool and StraightLineIntersector
     ATH_CHECK( m_fieldCacheCondObjInputKey.initialize() );
