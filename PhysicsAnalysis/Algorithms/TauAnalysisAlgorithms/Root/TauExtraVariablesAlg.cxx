@@ -8,7 +8,6 @@
 
 #include <AsgDataHandles/ReadHandle.h>
 #include <AsgDataHandles/WriteDecorHandle.h>
-#include <AsgTools/CurrentContext.h>
 
 
 namespace CP {
@@ -25,9 +24,8 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TauExtraVariablesAlg::execute() {
+  StatusCode TauExtraVariablesAlg::execute(const EventContext &ctx) const {
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     SG::ReadHandle<xAOD::TauJetContainer> taus(m_tausKey, ctx);
 
     SG::WriteDecorHandle<xAOD::TauJetContainer, int> nTracksHandle(m_nTracksKey, ctx);

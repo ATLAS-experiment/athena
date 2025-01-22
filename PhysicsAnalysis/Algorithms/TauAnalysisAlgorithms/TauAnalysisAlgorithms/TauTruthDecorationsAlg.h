@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Christian Grefe
@@ -8,7 +8,7 @@
 #ifndef TAU_ANALYSIS_ALGORITHMS__TAU_TRUTH_DECORATIONS_ALG_H
 #define TAU_ANALYSIS_ALGORITHMS__TAU_TRUTH_DECORATIONS_ALG_H
 
-#include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
 #include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgDataHandles/WriteDecorHandleKey.h>
 #include <AsgTools/PropertyWrapper.h>
@@ -19,13 +19,13 @@ namespace CP
 {
   /// \brief an algorithm to decorate truth matched information
 
-  class TauTruthDecorationsAlg final : public EL::AnaAlgorithm
+  class TauTruthDecorationsAlg final : public EL::AnaReentrantAlgorithm
   {
     /// \brief the standard constructor
   public:
-    using EL::AnaAlgorithm::AnaAlgorithm;
+    using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext &ctx) const override;
 
     /// \brief the tau collection we run on
   private:

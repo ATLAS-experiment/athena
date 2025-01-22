@@ -55,7 +55,8 @@ class TauCalibrationConfig (ConfigBlock):
         # decorate truth tau information on the reconstructed object:
         if self.decorateTruth and config.dataType() is not DataType.Data:
             alg = config.createAlgorithm( 'CP::TauTruthDecorationsAlg',
-                                        'TauTruthDecorationsAlg' + postfix )
+                                          'TauTruthDecorationsAlg' + postfix,
+                                           reentrant=True )
             alg.taus = config.readName (self.containerName)
             alg.doubleDecorations = ['pt_vis', 'eta_vis', 'phi_vis', 'm_vis']
             alg.floatDecorations = []
@@ -74,7 +75,9 @@ class TauCalibrationConfig (ConfigBlock):
                 config.addOutputVar (self.containerName, branchName, branchOutput, noSys=True)
 
         # Decorate extra variables
-        alg = config.createAlgorithm( 'CP::TauExtraVariablesAlg', 'TauExtraVariables' + self.containerName + self.postfix )
+        alg = config.createAlgorithm( 'CP::TauExtraVariablesAlg',
+                                      'TauExtraVariables' + self.containerName + self.postfix,
+                                      reentrant=True )
         alg.taus = config.readName (self.containerName)
 
         # Set up the tau 4-momentum smearing algorithm:

@@ -7,19 +7,19 @@
 #ifndef TAU_EXTRA_VARIABLES_ALG_H
 #define TAU_EXTRA_VARIABLES_ALG_H
 
-#include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
 #include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgDataHandles/WriteDecorHandleKey.h>
 #include <xAODTau/TauJetContainer.h>
 
 namespace CP {
 
-  class TauExtraVariablesAlg final : public EL::AnaAlgorithm {
+  class TauExtraVariablesAlg final : public EL::AnaReentrantAlgorithm {
 
   public:
-    using EL::AnaAlgorithm::AnaAlgorithm;
+    using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
     SG::ReadHandleKey<xAOD::TauJetContainer> m_tausKey { this, "taus", "", "the input tau jet container" };
