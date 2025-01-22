@@ -18,6 +18,8 @@ namespace Muon{
                 lookUpId = channelId;
                 break;
             case TechIndex::RPC:
+                lookUpId = m_idHelperSvc->layerId(channelId);
+                break;
             case TechIndex::TGC:
             case TechIndex::CSCI:
                 lookUpId = m_idHelperSvc->gasGapId(channelId);
