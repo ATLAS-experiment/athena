@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONVECTORBRANCH_H
 #define MUONTESTER_MUONVECTORBRANCH_H
@@ -35,6 +35,8 @@ public:
     /// Adds a new element at the end of the vector
     inline void push_back(const T& value);
     inline void operator+=(const T& value);
+
+    inline const std::vector<T>& operator=(const std::vector<T>& values);
 
     /// Accesses the idx-th element.
     /// If the index is larger than the size of the vector

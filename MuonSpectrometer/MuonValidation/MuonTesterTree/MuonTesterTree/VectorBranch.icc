@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONSVECTORBRANCH_IXX
 #define MUONTESTER_MUONSVECTORBRANCH_IXX
@@ -41,6 +41,13 @@ template <class T> T& VectorBranch<T>::get(size_t idx) {
         m_updated = true;        
     }
     return m_variable[idx];
+}
+template <class T>
+const std::vector<T>& VectorBranch<T>::operator=(const std::vector<T>& values) {
+    if (!initialized()) { THROW_EXCEPTION(name() + " is not initialized yet"); }
+    m_variable = values;
+    m_updated = true;
+    return m_variable;
 }
 
 template <class T> void VectorBranch<T>::push_back(const T& value) {

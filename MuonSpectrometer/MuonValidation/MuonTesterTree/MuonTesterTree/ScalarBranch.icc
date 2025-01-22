@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONSCALARBRANCH_IXX
 #define MUONTESTER_MUONSCALARBRANCH_IXX
@@ -31,11 +31,13 @@ template <class T> bool ScalarBranch<T>::fill(const EventContext&) {
     return true;
 }
 template <class T> bool ScalarBranch<T>::init() { return addToTree(m_variable); }
-template <class T> void ScalarBranch<T>::setValue(const T& value) { this->operator=(value); }
-template <class T> void ScalarBranch<T>::operator=(const T& value) {
-    if (!initialized()) return;
-    m_variable = value;
-    m_updated = true;
+template <class T> const T& ScalarBranch<T>::setValue(const T& value) { return this->operator=(value); }
+template <class T> const T& ScalarBranch<T>::operator=(const T& value) {
+    if (initialized()) {
+        m_variable = value;
+        m_updated = true;
+    }
+    return m_variable;
 }
 template <class T> void ScalarBranch<T>::setDefault(const T& def) {
     if (!initialized()) {
