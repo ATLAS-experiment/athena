@@ -219,10 +219,10 @@ MissingMassProb::MissingMassProb(MMCCalibrationSet::e aset, const std::string& p
 
   m_fParams = NULL;
   if (!paramFilePath.empty()){
-     std::string total_path = "DiTauMassTools/"+paramFilePath;
-     m_fParams = TFile::Open( (const char*) PathResolverFindCalibFile(total_path).c_str() ,"READ");
+    std::string total_path = "DiTauMassTools/"+paramFilePath;
+    m_fParams = TFile::Open( (const char*) PathResolverFindCalibFile(total_path).c_str() ,"READ");
   }
-  if (aset == MMCCalibrationSet::MMC2019) {
+  if (aset == MMCCalibrationSet::MMC2019 || aset == MMCCalibrationSet::MMC2024) {
     m_probListConstant.push_back( std::bind(&mEtAndTauProbabilityWrapper, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7) );
     m_probListOneTau.push_back( std::bind(&dTheta3d_probabilityNewWrapper, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7) );
     m_probListTwoTau.push_back( std::bind(&TauProbabilityNewWrapper, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7) );
@@ -1277,7 +1277,8 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                     {
                       // placeholder for 2019 tune
                       if (m_mmcCalibrationSet==MMCCalibrationSet::MMC2016MC15C ||
-			  m_mmcCalibrationSet==MMCCalibrationSet::MMC2019){
+			  m_mmcCalibrationSet==MMCCalibrationSet::MMC2019 ||
+			  m_mmcCalibrationSet==MMCCalibrationSet::MMC2024){
                         if(preparedInput.m_MetVec.R()<20.0) // 0-jet low MET case
                           {
                             if(std::abs(preparedInput.m_DelPhiTT)>2.95 && m_allowUseHT) // use mHt only if dPhi(lep-tau)>2.95
@@ -1350,7 +1351,8 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                         }
                       //2016 mc15c or 2019
 		      else if (m_mmcCalibrationSet==MMCCalibrationSet::MMC2016MC15C ||
-			       m_mmcCalibrationSet==MMCCalibrationSet::MMC2019)
+			       m_mmcCalibrationSet==MMCCalibrationSet::MMC2019 ||
+			       m_mmcCalibrationSet==MMCCalibrationSet::MMC2024)
                         {
 			  double x = preparedInput.m_DelPhiTT;
 			  double dphi_scale = x > 0.3 ? 0.9429 - 0.059*x + 0.054*x*x : 0.728;
@@ -1389,7 +1391,8 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                     }
                   else if(preparedInput.m_Njet25==0 &&
 			  (m_mmcCalibrationSet==MMCCalibrationSet::MMC2016MC15C ||
-			   m_mmcCalibrationSet==MMCCalibrationSet::MMC2019))
+			   m_mmcCalibrationSet==MMCCalibrationSet::MMC2019 ||
+			   m_mmcCalibrationSet==MMCCalibrationSet::MMC2024))
                     {
                       double sigmaSyst=0.10; // 10% systematics for now (be conservative)
                       double x = preparedInput.m_DelPhiTT;
@@ -1430,7 +1433,8 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                       double sigma =  preparedInput.m_SumEt>0.0 ? METoffset+METresScale*sqrt(preparedInput.m_SumEt) : std::abs(METoffset);
 
                       if(m_mmcCalibrationSet==MMCCalibrationSet::MMC2016MC15C ||
-			 m_mmcCalibrationSet==MMCCalibrationSet::MMC2019) {
+			 m_mmcCalibrationSet==MMCCalibrationSet::MMC2019 ||
+			 m_mmcCalibrationSet==MMCCalibrationSet::MMC2024) {
                         double x = preparedInput.m_DelPhiTT;
                         double dphi_scale = x > 0.6 ? 1.42047 - 0.666644*x + 0.199986*x*x : 1.02;
                         METoffset = 1.19769*(1.0+preparedInput.m_METresSyst*sigmaSyst);
@@ -1483,7 +1487,8 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                     } // end of MMC2015HIGHMASS
 
                   if(m_mmcCalibrationSet==MMCCalibrationSet::MMC2016MC15C ||
-		     m_mmcCalibrationSet==MMCCalibrationSet::MMC2019)
+		     m_mmcCalibrationSet==MMCCalibrationSet::MMC2019 ||
+		     m_mmcCalibrationSet==MMCCalibrationSet::MMC2024)
 		    // 2016 MC15c + 2019 leplep
                     {
 		      m_UseHT=false;

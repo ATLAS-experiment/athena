@@ -18,7 +18,7 @@ MissingMassTool::MissingMassTool(const std::string& name) : asg::AsgTool(name)
 {
   declareProperty("Decorate",			m_decorate=false, "Activate EventInfo decoration");
   declareProperty("FloatStoppingCrit",		m_float_stop=true, "Activate floating stopping criterion");
-  declareProperty("CalibSet",			m_calib_set="2019", "Calibration: 2019");
+  declareProperty("CalibSet",			m_calib_set="2019", "Calibration: 2019"); // Change to "2024" if the new MMC version is to be used.
   // default negative. Only set parameter if positive
   // so that the default are in MissingMassCalculator code
   declareProperty("NsigmaMET",			m_n_sigma_met=-1);
@@ -32,7 +32,9 @@ MissingMassTool::MissingMassTool(const std::string& name) : asg::AsgTool(name)
   declareProperty("UseDefaults",		m_use_defaults=-1);
   declareProperty("UseEfficiencyRecovery",	m_use_efficiency_recovery=-1);
   declareProperty("UseMETDphiLL",		m_use_met_param_dphiLL = false);
-  declareProperty("ParamFilePath",		m_param_file_path = "MMC_params_v1_fixed.root");
+  // Available parameterization files: MMC_params_v051224_angle_noLikelihoodFit.root and MMC_params_v051224_angle_likelihoodFit.root. More details on the differences between these two options can be found in the slides:
+  // https://indico.cern.ch/event/1487242/contributions/6269201/attachments/2989313/5265428/HbbHtautau_MMCstudies_statusReport_181224_v2.pdf
+  declareProperty("ParamFilePath",            m_param_file_path = "MMC_params_v1_fixed.root"); 
   declareProperty("BeamEnergy",     m_beam_energy = 6500.0);
   declareProperty("LFVLeplepRefit", m_lfv_leplep_refit = true);
   declareProperty("SaveLlhHisto", m_save_llh_histo = false, "Save MMC LLh histograms for debugging purpose. If enabled, it can slow down MMC running time");
@@ -59,6 +61,8 @@ StatusCode MissingMassTool::initialize()
     aset = MMCCalibrationSet::MMC2016MC15C;
   } else if (m_calib_set == "2019") {
     aset = MMCCalibrationSet::MMC2019;
+  } else if (m_calib_set == "2024") {
+    aset = MMCCalibrationSet::MMC2024;
   } else {
     return StatusCode::FAILURE;
   }
