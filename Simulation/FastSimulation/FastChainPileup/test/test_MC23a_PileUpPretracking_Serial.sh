@@ -10,7 +10,6 @@
 # art-output: PU_TRK.RDO.pool.root
 # art-architecture: '#x86_64-intel'
 
-
 events=50
 
 RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/RDO_BKG/mc23_13p6TeV.900149.PG_single_nu_Pt50.merge.RDO.e8514_e8528_s4153_d1907_d1908/100events.RDO.pool.root"
@@ -30,6 +29,22 @@ Reco_tf.py \
   --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
   --athenaopts "all:--threads=1" \
   --imf False
+
 pretracking=$?
 echo  "art-result: $pretracking PUTracking"
 status=$pretracking
+
+# Regression
+reg=-9999
+if [ ${pretracking} -eq 0 ]
+then
+    ArtPackage=$1
+    ArtJobName=$2
+    art.py compare grid --entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file=${RDO_PU_File}
+    reg=$?
+    status=$reg
+fi
+
+echo  "art-result: $reg regression"
+
+exit $status
