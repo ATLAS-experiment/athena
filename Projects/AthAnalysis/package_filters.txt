@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Package filtering rules for the AthAnalysis project build.
 #
@@ -183,6 +183,9 @@
 
 #scripts package contains useful commands like get_files
 + Tools/Scripts
+
+# gdb extensions useful when working in ATLAS releases.
++ Tools/GdbUtils
 
 + Tools/PyUtils
 # Need IOVSvc for, at least, the file peeking (:-()
