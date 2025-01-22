@@ -11,7 +11,6 @@
 # art-output: AOD.pool.root
 # art-architecture: '#x86_64-intel'
 
-
 events=25
 
 HITS_File='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8514_s4162/100events.HITS.pool.root'
@@ -35,22 +34,24 @@ Overlay_tf.py \
    --preExec 'ConfigFlags.Overlay.doTrackOverlay=True;' \
    --postExec 'with open("Config.pkl", "wb") as f: cfg.store(f)' \
    --imf False
+
 overlay=$?
 echo  "art-result: $overlay Overlay"
 status=$overlay
 
 reg=-9999
-if [ $overlay -eq 0 ]
-then
-   art.py compare --file ${RDO_File} --mode=semi-detailed --entries 10
-   reg=$?
-   status=$reg
-fi
-echo  "art-result: $reg regression"
-
 rec=-9999
+reg2=-9999
 if [ ${overlay} -eq 0 ]
 then
+
+   # Regression
+   ArtPackage=$1
+   ArtJobName=$2
+   art.py compare grid -entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file ${RDO_File}
+   reg=$?
+   status=$reg
+
    # Reconstruction
    Reco_tf.py \
       --CA \
@@ -67,8 +68,16 @@ then
       --imf False
      rec=$?
      status=$rec
+     if [ ${rec} -eq 0 ]
+     then
+         art.py compare grid --entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file=${AOD_File}
+         reg2=$?
+         status=$reg2
+     fi
 fi
 
+echo  "art-result: $reg regression"
 echo  "art-result: $rec reconstruction"
+echo  "art-result: $reg2 regression2"
 
 exit $status

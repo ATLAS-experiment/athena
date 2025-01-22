@@ -12,7 +12,7 @@
 # art-output: DAOD_PHYS.OUT.pool.root
 # art-output: DAOD_PHYSVAL.OUT.pool.root
 # art-architecture: '#x86_64-intel'
-# art-memory: 5999
+# art-athena-mt: 8
 
 events=50
 
@@ -51,8 +51,20 @@ FastChain_tf.py \
    --formats PHYS PHYSVAL \
    --athenaopts "EVNTtoRDO:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" "RDOtoRDOTrigger:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" \
    --imf False
+
 fastchain=$?
 echo  "art-result: $fastchain EVNTtoDAOD"
 status=$fastchain
+
+reg=-9999
+if [ $fastchain -eq 0 ]
+then
+    ArtPackage=$1
+    ArtJobName=$2
+    art.py compare grid --entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file=${AOD_File}
+    reg=$?
+    status=$reg
+fi
+echo  "art-result: $reg regression"
 
 exit $status
