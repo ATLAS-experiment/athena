@@ -144,6 +144,9 @@ namespace ORUtils
       /// Calculate deltaR using rapidity
       bool m_useRapidity;
 
+      /// PV Container to use
+      std::string m_PVContName;
+
       /// @}
 
       /// @name Utilities

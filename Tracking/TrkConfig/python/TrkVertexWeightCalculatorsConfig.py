@@ -22,6 +22,13 @@ def SumPtVertexWeightCalculatorCfg(flags, name="SumPtVertexWeightCalculator",
     return acc
 
 
+def GNNVertexWeightCalculatorCfg(flags, name="GNNVertexWeightCalculator",
+                                 **kwargs):
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(
+        CompFactory.GNNVertexWeightCalculator(name, **kwargs))
+    return acc
+
 def BDTVertexWeightCalculatorCfg(flags, **kwargs):
     """
     Configure the BDTVertexWeightCalculator. Note: this tool needs to be run after the
