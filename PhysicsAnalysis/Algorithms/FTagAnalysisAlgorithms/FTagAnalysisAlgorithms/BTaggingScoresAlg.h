@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Diego Baron
@@ -8,24 +8,23 @@
 #define B_TAGGING_SCORES_ALG_H
 
 // Algorithm includes
-#include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
 #include <AsgTools/PropertyWrapper.h>
 #include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgDataHandles/ReadHandle.h>
-#include <AsgTools/CurrentContext.h>
 
 // Framework includes
 #include <xAODJet/JetContainer.h>
 
 namespace CP {
 
-  class BTaggingScoresAlg final : public EL::AnaAlgorithm
+  class BTaggingScoresAlg final : public EL::AnaReentrantAlgorithm
   {
 
   public:
-    using EL::AnaAlgorithm::AnaAlgorithm;
+    using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
     // configurable properties

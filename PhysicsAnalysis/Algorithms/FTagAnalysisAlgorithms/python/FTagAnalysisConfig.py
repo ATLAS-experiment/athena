@@ -93,7 +93,9 @@ class FTagConfig (ConfigBlock):
 
         # Save the per-flavour probabilities or additional custom variables
         if self.saveScores == 'All' or self.saveCustomVariables:
-            alg = config.createAlgorithm('CP::BTaggingScoresAlg', 'BTagScoringAlg_' + self.btagger)
+            alg = config.createAlgorithm('CP::BTaggingScoresAlg',
+                                         'BTagScoringAlg_' + self.btagger,
+                                         reentrant=True)
             alg.jets = config.readName (self.containerName).replace('%SYS%', 'NOSYS')
             alg.taggerName = self.btagger
 
