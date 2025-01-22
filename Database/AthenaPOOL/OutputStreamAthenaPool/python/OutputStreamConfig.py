@@ -76,7 +76,7 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
       # to True (default in C++ is False). This avoids CA merge
       # conflicts.
       outputStream.TakeItemsFromInput = True
-   if not extendProvenanceRecord or streamName in flags.Output.TemporaryStreams:
+   if not extendProvenanceRecord:
        # Treat this similar to takeItemsFromInput
        # (C++ default in this case is True)
        outputStream.ExtendProvenanceRecord = False
