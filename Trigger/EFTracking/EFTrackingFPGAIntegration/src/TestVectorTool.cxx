@@ -18,7 +18,7 @@ StatusCode TestVectorTool::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode TestVectorTool::prepareTV(const std::string inputFile, std::vector<uint64_t> &testVector) const
+StatusCode TestVectorTool::prepareTV(const std::string& inputFile, std::vector<uint64_t> &testVector) const
 {
     ATH_MSG_DEBUG("Preparing input test vector from " << inputFile);
 
