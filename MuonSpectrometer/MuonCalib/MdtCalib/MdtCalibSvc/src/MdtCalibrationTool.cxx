@@ -17,7 +17,6 @@
 #include "MdtCalibData/IMdtBackgroundCorFunc.h"
 #include "MdtCalibData/IRtRelation.h"
 #include "MdtCalibData/IRtResolution.h"
-#include "MdtCalibData/TrRelation.h"
 #include "MdtCalibData/RtScaleFunction.h"
 #include "MagFieldElements/AtlasFieldCache.h"
 #include "MuonCalibEvent/MdtCalibHit.h"
@@ -109,7 +108,13 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
                                              bool resolFromRtrack) const {
   
   const Identifier& id{calibIn.identify()};
-  const MuonCalib::MdtFullCalibData* calibConstants = getCalibConstants(ctx, id);
+  
+  SG::ReadCondHandle constantHandle{m_calibDbKey, ctx};
+  if (!constantHandle.isValid()){
+      THROW_EXCEPTION("Failed to retrieve the Mdt calibration constants "<<m_calibDbKey.fullKey());
+  }
+
+  const MuonCalib::MdtFullCalibData* calibConstants = constantHandle->getCalibData(id, msgStream());
   if (!calibConstants) {
      ATH_MSG_WARNING("Could not find calibration data for channel "<<m_idHelperSvc->toString(id));
      return MdtCalibOutput{};
@@ -133,19 +138,20 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
      ATH_MSG_WARNING("Failed to access tubedata for " << m_idHelperSvc->toString(id));
      return MdtCalibOutput{};
   }
+  const float invPropSpeed = constantHandle->inversePropSpeed();
   
   MdtCalibOutput calibResult{};
   // correct for global t0 of rt-region
   
-  calibResult.setTubeT0(singleTubeData->t0 + rtRelation->t0Global());
+  calibResult.setTubeT0(singleTubeData->t0);
   calibResult.setMeanAdc(singleTubeData->adcCal);
 
   // set propagation delay
   if (m_doProp) {   
     const double propagationDistance = calibIn.signalPropagationDistance(); 
     ATH_MSG_VERBOSE("Calibration of "<<m_idHelperSvc->toString(id)<<", propagation distance: "<<propagationDistance<<" -> "
-                  <<(singleTubeData->inversePropSpeed * propagationDistance));
-    calibResult.setPropagationTime(singleTubeData->inversePropSpeed * propagationDistance);
+                  <<(invPropSpeed * propagationDistance));
+    calibResult.setPropagationTime(invPropSpeed * propagationDistance);
   }
   
   /// calculate drift time
@@ -254,7 +260,6 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
 
   if (m_doPropUncert) {
       assert(rtRelation->rt() != nullptr);
-
       const double driftTimeUp = std::min(rtRelation->rt()->tUpper(),
                                           calibIn.tdc() * tdcBinSize 
                                         - (m_doTof ? calibIn.timeOfFlight() : 0.)
@@ -266,7 +271,7 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
                                         - (m_doTof ? calibIn.timeOfFlight() : 0.)
                                         - calibIn.triggerTime()
                                         - calibResult.tubeT0()
-                                        - calibIn.tubeLength() * singleTubeData->inversePropSpeed);
+                                        - calibIn.tubeLength() * invPropSpeed);
 
       const double radiusUp = rtRelation->rt()->radius(driftTimeUp);
       const double radiusDn = rtRelation->rt()->radius(driftTimeDn);
@@ -308,8 +313,14 @@ MdtCalibTwinOutput MdtCalibrationTool::calibrateTwinTubes(const EventContext& ct
   const Identifier& twinId = twinHit.identify();
 
   // get calibration constants from DbTool
-  const MuonCalib::MdtFullCalibData* data1st = getCalibConstants(ctx, primId);
-  const MuonCalib::MdtFullCalibData* data2nd = getCalibConstants(ctx, twinId);
+  SG::ReadCondHandle constantHandle{m_calibDbKey, ctx};
+  if (!constantHandle.isValid()){
+    THROW_EXCEPTION("Failed to retrieve the Mdt calibration constants "<<m_calibDbKey.fullKey());
+  }
+
+
+  const MuonCalib::MdtFullCalibData* data1st = constantHandle->getCalibData(primId, msgStream());
+  const MuonCalib::MdtFullCalibData* data2nd = constantHandle->getCalibData(twinId, msgStream());
   if (!data1st || !data2nd) {
     ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Failed to access calibration constants for tubes "<<
                     m_idHelperSvc->toString(primId)<<" & "<<m_idHelperSvc->toString(twinId));
@@ -317,6 +328,7 @@ MdtCalibTwinOutput MdtCalibrationTool::calibrateTwinTubes(const EventContext& ct
   }
   const SingleTubeCalib* calibSingleTube1st = data1st->tubeCalib->getCalib(primId);
   const SingleTubeCalib* calibSingleTube2nd = data2nd->tubeCalib->getCalib(twinId);
+  const double invPropSpeed = constantHandle->inversePropSpeed();
   if (!calibSingleTube1st || !calibSingleTube2nd) {
     ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Failed to access calibration constants for tubes "<<
                   m_idHelperSvc->toString(primId)<<" & "<<m_idHelperSvc->toString(twinId));
@@ -327,14 +339,13 @@ MdtCalibTwinOutput MdtCalibrationTool::calibrateTwinTubes(const EventContext& ct
   constexpr double HVdelay = 6.;
 
   /// Propagation time difference inside the primary tube
-  double twin_timedif =  twinDriftTime - primdriftTime - calibSingleTube2nd->inversePropSpeed * twinHit.tubeLength() - HVdelay;
+  double twin_timedif =  twinDriftTime - primdriftTime - invPropSpeed * twinHit.tubeLength() - HVdelay;
   ///  HVPropTime - ROPropTime =  invPropSpeed*(twinZ - HVPos) - (ROPos - twinZ) 
   ///                          =  2*invPropSpeed*twinZ - (HVPos + ROPos)
   
   const double tubeHalfLength = 0.5*primHit.tubeLength();
-  const double zTwin = std::clamp(0.5* primHit.readOutSide()* twin_timedif / calibSingleTube1st->inversePropSpeed, 
-                                  -tubeHalfLength, tubeHalfLength);
-  const double errZTwin = m_resTwin / calibSingleTube1st->inversePropSpeed;
+  const double zTwin = std::clamp(0.5* primHit.readOutSide()* twin_timedif / invPropSpeed,  -tubeHalfLength, tubeHalfLength);
+  const double errZTwin = m_resTwin / invPropSpeed;
 
   ATH_MSG_VERBOSE( "Twin calibration -  tube: " << m_idHelperSvc->toString(primId)<< " twintube: " << m_idHelperSvc->toString(twinId)<<endmsg
                << " prompthit tdc = " << primHit.tdc() << "  twinhit tdc = " << twinHit.tdc()

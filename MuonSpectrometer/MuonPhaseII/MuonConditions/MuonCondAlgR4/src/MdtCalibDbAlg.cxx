@@ -172,7 +172,6 @@ StatusCode MdtCalibDbAlg::loadTube(MuonCalib::MdtCalibDataContainer& writeCdo) c
             return StatusCode::FAILURE;
         }
     }
-    const double inversePropSpeed = 1. / (Gaudi::Units::c_light * m_prop_beta);
     std::vector<const MuonGMR4::MdtReadoutElement*> detEls = m_r4detMgr->getAllMdtReadoutElements();
     for(const MuonGMR4::MdtReadoutElement* mdtDetEl: detEls){
         const Identifier& chamberId = mdtDetEl->identify();
@@ -196,11 +195,10 @@ StatusCode MdtCalibDbAlg::loadTube(MuonCalib::MdtCalibDataContainer& writeCdo) c
                     continue;
                 }
                 const RtTubePayload& payload = it->second;
-                MuonCalib::MdtTubeCalibContainer::SingleTubeCalib tubeCalibration{};
-                tubeCalibration.statusCode = payload.statusCode;
-                tubeCalibration.inversePropSpeed = inversePropSpeed;
-                tubeCalibration.t0 = payload.tZero;
-                tubeCalibration.adcCal = payload.meanAdc;
+                auto tubeCalibration = std::make_unique<MuonCalib::MdtTubeCalibContainer::SingleTubeCalib>();
+                tubeCalibration->statusCode = payload.statusCode;
+                tubeCalibration->t0 = payload.tZero;
+                tubeCalibration->adcCal = payload.meanAdc;
                 if(!tubes->setCalib(std::move(tubeCalibration), tubeId, msgStream())) {
                     ATH_MSG_ERROR("Failed to store tube calibration for " << m_idHelperSvc->toString(tubeId));
                     return StatusCode::FAILURE;
