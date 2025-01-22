@@ -74,6 +74,8 @@ class ElectronCalibrationConfig (ConfigBlock) :
 
         Factoring this out into its own function, as we want to
         instantiate it in multiple places"""
+        log = logging.getLogger('ElectronCalibrationConfig')
+
         # Set up the calibration and smearing algorithm:
         alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg', name + self.postfix )
         config.addPrivateTool( 'calibrationAndSmearingTool',
@@ -87,7 +89,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
             elif config.geometry() is LHCPeriod.Run3:
                 alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
             elif config.geometry() is LHCPeriod.Run4:
-                logging.warning("No ESModel set for Run4, using Run 3 model instead")
+                log.warning("No ESModel set for Run4, using Run 3 model instead")
                 alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
             else:
                 raise ValueError (f"Can't set up the ElectronCalibrationConfig with {config.geometry().value}, "
@@ -602,6 +604,21 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
         self.addOption ('saveEff', False, type=bool,
                         info="define whether we decorate also the trigger scale efficiency "
                         "The default is false.")
+        self.addOption ('prefixSF', 'trigEffSF', type=str,
+                        info="the decoration prefix for trigger scale factors, "
+                        "the default is 'trigEffSF'")
+        self.addOption ('prefixEff', 'trigEff', type=str,
+                        info="the decoration prefix for MC trigger efficiencies, "
+                        "the default is 'trigEff'")
+        self.addOption ('includeAllYears', False, type=bool,
+                        info="if True, all configured years will be included in all jobs. "
+                        "The default is False.")
+        self.addOption ('removeHLTPrefix', True, type=bool,
+                        info="remove the HLT prefix from trigger chain names, "
+                        "The default is True.")
+        self.addOption ('useToolKeyAsOutput', False, type=bool,
+                        info="use tool trigger key as output, "
+                        "The default is False.")
         self.addOption ('containerName', '', type=str,
                         info="the input electron container, with a possible selection, in "
                         "the format container or container.selection.")
@@ -609,6 +626,11 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
     def makeAlgs (self, config) :
 
         if config.dataType() is not DataType.Data:
+            log = logging.getLogger('ElectronTriggerSFConfig')
+
+            if self.includeAllYears and not self.useToolKeyAsOutput:
+                log.warning('`includeAllYears` is set to True, but `useToolKeyAsOutput` is set to False. '
+                            'This will cause multiple branches to be written out with the same content.')
 
             # Dictionary from TrigGlobalEfficiencyCorrection/Triggers.cfg
             # Key is trigger chain (w/o HLT prefix)
@@ -623,7 +645,27 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
             # Value is list of configs available, first one will be used
             mapKeysDict = MapKeysDict(version)
 
-            if config.campaign() is Campaign.MC20a:
+            # helper function for leg filtering, very hardcoded but allows autoconfiguration
+            def filterConfFromMap(conf, legs):
+                if not conf:
+                    raise ValueError("No configuration found for trigger chain.")
+                if len(conf) == 1:
+                    return conf[0]
+
+                # options are TRI-MULTI and TRI-DI, no other combination has ambiguities
+                n_el = len([leg for leg in legs if leg[0] == 'e' and leg[1].isdigit()])
+                n_other = len([leg for leg in legs if leg[0] != 'e'])
+                if n_el != 3 or n_other > 0:
+                    return [c for c in conf if c.startswith("MULTI") or c.startswith("DI")][0]
+
+                return conf[0]
+
+            if self.includeAllYears:
+                years = [int(year) for year in self.triggerChainsPerYear.keys()]
+                if any(year in years for year in [2015, 2016, 2017, 2018]) \
+                    and any(year in years for year in [2022, 2023, 2024, 2025]):
+                    raise ValueError("Mixing years from Run 2 and Run 3 in the same job is currently not supported.")
+            elif config.campaign() is Campaign.MC20a:
                 years = [2015, 2016]
             elif config.campaign() is Campaign.MC20d:
                 years = [2017]
@@ -638,25 +680,32 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
             for year in years:
                 triggerChains = self.triggerChainsPerYear.get(int(year), self.triggerChainsPerYear.get(str(year), []))
                 for chain in triggerChains:
-                    chain = chain.replace("HLT_", "").replace(" || ", "_OR_")
-                    legs = triggerDict[chain]
-                    if len(legs)==0:
-                        if chain[0]=='e' and chain[1].isdigit:
-                            triggerConfigs[chain] = mapKeysDict[str(year) + '_' + chain]
+                    chain = chain.replace(" || ", "_OR_")
+                    chain_noHLT = chain.replace("HLT_", "")
+                    chain_out = chain_noHLT if self.removeHLTPrefix else chain
+                    legs = triggerDict[chain_noHLT]
+                    if not legs:
+                        if chain_noHLT[0] == 'e' and chain_noHLT[1].isdigit:
+                            chain_key = f"{year}_{chain_noHLT}"
+                            chain_conf = mapKeysDict[chain_key][0]
+                            triggerConfigs[chain_conf if self.useToolKeyAsOutput else chain_out] = chain_conf
                     else:
                         for leg in legs:
-                            if leg[0]=='e' and leg[1].isdigit:
-                                triggerConfigs[leg] = mapKeysDict[str(year) + '_' + leg]
+                            if leg[0] == 'e' and leg[1].isdigit:
+                                leg_out = leg if self.removeHLTPrefix else f"HLT_{leg}"
+                                leg_key = f"{year}_{leg}"
+                                leg_conf = filterConfFromMap(mapKeysDict[leg_key], legs)
+                                triggerConfigs[leg_conf if self.useToolKeyAsOutput else leg_out] = leg_conf
 
-            decorations = ['EffSF']
+            decorations = [self.prefixSF]
             if self.saveEff:
-                decorations += ['Eff']
+                decorations += [self.prefixEff]
 
-            for trig, conf in triggerConfigs.items():
+            for label, conf in triggerConfigs.items():
                 for deco in decorations:
                     alg = config.createAlgorithm('CP::ElectronEfficiencyCorrectionAlg',
                                                  'EleTrigEfficiencyCorrectionsAlg' + deco +
-                                                 '_' + trig)
+                                                 '_' + label)
                     config.addPrivateTool( 'efficiencyCorrectionTool',
                                            'AsgElectronEfficiencyCorrectionTool' )
 
@@ -665,15 +714,15 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
                     alg.efficiencyCorrectionTool.IdKey = self.electronID.replace("LH","")
                     alg.efficiencyCorrectionTool.IsoKey = self.electronIsol
                     alg.efficiencyCorrectionTool.TriggerKey = (
-                        ("Eff_" if "SF" not in deco else "") + conf[0])
+                        ("Eff_" if deco == self.prefixEff else "") + conf)
                     alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
                     alg.efficiencyCorrectionTool.ForceDataType = \
                         PATCore.ParticleDataType.Full
 
-                    alg.scaleFactorDecoration = (
-                        'el_trig' + deco + '_' + trig + '_%SYS%')
+                    alg.scaleFactorDecoration = f"el_{deco}_{label}_%SYS%"
+
                     alg.outOfValidity = 2 #silent
-                    alg.outOfValidityDeco = 'bad_eff_eletrig' + deco + '_' + trig
+                    alg.outOfValidityDeco = f"bad_eff_ele{deco}_{label}"
                     alg.electrons = config.readName (self.containerName)
-                    alg.preselection = config.getPreselection (self.containerName, '')
-                    config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'trig' + deco + '_' + trig)
+                    alg.preselection = config.getPreselection (self.containerName, "")
+                    config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f"{deco}_{label}")
