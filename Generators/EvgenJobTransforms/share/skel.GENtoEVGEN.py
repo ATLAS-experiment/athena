@@ -296,7 +296,7 @@ if len(evgenConfig.generators) > len(set(evgenConfig.generators)):
 ## Sort the list of generator names into standard form
 gennames = sorted(evgenConfig.generators, key=gen_sortkey)
 ## Check that the actual generators, tune, and main PDF are consistent with the JO name
-if joparts[0].startswith("MC"): #< if this is an "official" JO
+if joparts[0].startswith("mc"): #< if this is an "official" JO
     genpart = jo_physshortparts[0]
     expectedgenpart = ''.join(gennames)
     ## We want to record that HERWIG was used in metadata, but in the JO naming we just use a "Herwig" label
