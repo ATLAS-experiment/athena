@@ -120,7 +120,9 @@ class ElectronCalibrationConfig (ConfigBlock) :
 
         # Decorate calo cluster eta if required
         if self.decorateCaloClusterEta:
-            alg = config.createAlgorithm( 'CP::EgammaCaloClusterEtaAlg', 'ElectronEgammaCaloClusterEtaAlg' + self.postfix )
+            alg = config.createAlgorithm( 'CP::EgammaCaloClusterEtaAlg',
+                                          'ElectronEgammaCaloClusterEtaAlg' + self.postfix,
+                                           reentrant=True )
             alg.particles = config.readName(self.containerName)
             config.addOutputVar (self.containerName, 'caloEta2', 'caloEta2', noSys=True)
 

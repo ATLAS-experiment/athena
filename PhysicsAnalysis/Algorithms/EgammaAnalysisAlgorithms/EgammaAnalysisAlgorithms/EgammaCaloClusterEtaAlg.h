@@ -7,19 +7,19 @@
 #ifndef EGAMMA_ANALYSIS_ALGORITHMS__EGAMMA_CALO_CLUSTER_ETA_ALG__H
 #define EGAMMA_ANALYSIS_ALGORITHMS__EGAMMA_CALO_CLUSTER_ETA_ALG__H
 
-#include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
 #include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgDataHandles/WriteDecorHandleKey.h>
 #include <xAODEgamma/EgammaContainer.h>
 
 namespace CP {
 
-  class EgammaCaloClusterEtaAlg final : public EL::AnaAlgorithm {
+  class EgammaCaloClusterEtaAlg final : public EL::AnaReentrantAlgorithm {
 
   public:
-    using EL::AnaAlgorithm::AnaAlgorithm;
+    using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
     SG::ReadHandleKey<xAOD::EgammaContainer> m_particlesKey { this, "particles", "", "the input egamma container" };

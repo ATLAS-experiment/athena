@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -7,6 +7,7 @@
 #ifndef EGAMMA_ANALYSIS_ALGORITHMS__PHOTON_ORIGIN_CORRECTION_ALG_H
 #define EGAMMA_ANALYSIS_ALGORITHMS__PHOTON_ORIGIN_CORRECTION_ALG_H
 
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
 #include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgTools/PropertyWrapper.h>
 #include <EgammaAnalysisAlgorithms/CopyHelpers.h>
@@ -21,7 +22,7 @@ namespace CP {
 /// \brief an algorithm for correctiong the origin of a photon
 /// wrt the Primary Vertex
 
-class PhotonOriginCorrectionAlg final : public EL::AnaAlgorithm {
+class PhotonOriginCorrectionAlg final : public EL::AnaReentrantAlgorithm {
   /// \brief the standard constructor
  public:
   PhotonOriginCorrectionAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -30,7 +31,7 @@ class PhotonOriginCorrectionAlg final : public EL::AnaAlgorithm {
   StatusCode initialize() override;
 
  public:
-  StatusCode execute() override;
+  StatusCode execute(const EventContext &ctx) const override;
 
   /// \brief the egamma collection we run on
  private:
