@@ -5,3 +5,4 @@
 #include "LArRecEvent/LArCell.h"
 #include "LArRecEvent/LArNoisyROSummary.h"
 #include "LArRecEvent/LArCollisionTime.h"
+#include "LArRecEvent/LArDeadOTXFromSC.h"

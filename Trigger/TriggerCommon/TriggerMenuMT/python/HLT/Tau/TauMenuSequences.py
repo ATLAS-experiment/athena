@@ -30,15 +30,18 @@ def tauCaloMVAMenuSequenceGenCfg(flags, is_probe_leg=False):
 
     # VDV with all the required collections/objects in the View
     # (the VDV checks are disabled unless running with -l DEBUG)
-    recoAcc.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(
-        name=f'{recoAcc.name}RecoVDV',
-        DataObjects={
+    Objects={
             ('TrigRoiDescriptorCollection', f'StoreGateSvc+{RoIs}'),
             ('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
             ('SG::AuxElement', 'StoreGateSvc+EventInfo.actualInteractionsPerCrossing'),
             ('SG::AuxElement', 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing'),
-            ('CaloBCIDAverage', 'StoreGateSvc+CaloBCIDAverage'),
-        }
+            ('CaloBCIDAverage', 'StoreGateSvc+CaloBCIDAverage')
+    }
+    if ( not flags.Input.isMC ):
+        Objects.add( ('LArDeadOTXFromSC' , 'StoreGateSvc+DeadOTXFromSC' ) )
+    recoAcc.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(
+        name=f'{recoAcc.name}RecoVDV',
+        DataObjects=Objects
     ))
 
 

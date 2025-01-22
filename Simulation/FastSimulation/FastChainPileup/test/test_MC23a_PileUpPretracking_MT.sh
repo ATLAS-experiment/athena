@@ -10,7 +10,6 @@
 # art-output: PU_TRK.RDO.pool.root
 # art-architecture: '#x86_64-intel'
 
-
 events=50
 
 export ATHENA_CORE_NUMBER=8
@@ -32,20 +31,39 @@ Reco_tf.py \
   --preExec="flags.Tracking.doBackTracking=False;" \
   --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
   --imf False
+
 pretracking=$?
 echo  "art-result: $pretracking PUTracking"
 status=$pretracking
 
-if [ $status -eq 0 ]; then
-   mv ${RDO_PU_File} backup_${RDO_PU_File}
-   rm PoolFileCatalog.xml
-   RDOMerge_tf.py \
-     --CA \
-     --PileUpPresampling True \
-     --inputRDOFile backup_${RDO_PU_File}\
-     --outputRDO_MRGFile ${RDO_PU_File}\
-     --postInclude "default:PyJobTransforms.UseFrontier" "all:PyJobTransforms.SortInput"
-     rdomerge=$?
-     rm backup_${RDO_PU_File}
-     status=$rdomerge
+rdomerge=-9999
+reg=-9999
+if [ $pretracking -eq 0 ]
+then
+    mv ${RDO_PU_File} backup_${RDO_PU_File}
+    rm PoolFileCatalog.xml
+
+    RDOMerge_tf.py \
+      --CA \
+      --PileUpPresampling True \
+      --inputRDOFile backup_${RDO_PU_File}\
+      --outputRDO_MRGFile ${RDO_PU_File}\
+      --postInclude "default:PyJobTransforms.UseFrontier" "all:PyJobTransforms.SortInput"
+      rdomerge=$?
+      rm backup_${RDO_PU_File}
+      status=$rdomerge
+      if [ ${rdomerge} -eq 0 ]
+      then
+          # Regression 
+          ArtPackage=$1
+          ArtJobName=$2
+          art.py compare grid --entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file=${RDO_PU_File}
+          reg=$?
+          status=$reg
+     fi
 fi
+
+echo  "art-result: $rdomerge RDOmerge"
+echo  "art-result: $reg regression"
+
+exit $status

@@ -2,4 +2,5 @@
   <class name="LArCell" /> 
   <class name="LArNoisyROSummary" /> 
   <class name="LArCollisionTime" />
+  <class name="LArDeadOTXFromSC" />
 </lcgdict>

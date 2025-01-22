@@ -31,7 +31,7 @@ def fastCalo_FWDSequenceGenCfg(flags,name,doRinger=True, is_probe_leg=False):
    selAcc = SelectionCA(nameselAcc,isProbe=is_probe_leg)
    InViewRoIs="FSJETMETCaloRoI"
    reco = InViewRecoCA("EMCaloFWD",InViewRoIs=InViewRoIs,isProbe=is_probe_leg)
-   reco.mergeReco(fastCaloVDVCfg(InViewRoIs=InViewRoIs))
+   reco.mergeReco(fastCaloVDVCfg(flags,InViewRoIs=InViewRoIs))
    robPrefetchAlg = ROBPrefetchingAlgCfg_Calo( flags, nameSuffix=InViewRoIs+'_probe' if is_probe_leg else InViewRoIs)
    reco.mergeReco(fastCaloRecoSequenceCfg(flags, inputEDM=InViewRoIs,doForward=True,ClustersName=output))
    selAcc.mergeReco(reco, robPrefetchCA=robPrefetchAlg)

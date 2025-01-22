@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./ThresholdConfigLoader.h"
@@ -214,9 +214,9 @@ bool TrigConf::ThresholdConfigLoader::load( ThresholdConfig& thrConfig ) {
             TRG_MSG_VERBOSE("ThresholdConfigLoader loading threshold with ID = " << tt->id() << " for MenuId = " << menuid << ": ");
          }
   
-         if(tt->type() == L1DataDef::rndmType() ||
-            tt->type() == L1DataDef::pclkType() ||
-            tt->type() == L1DataDef::bgrpType() ) {
+         if(tt->type() == L1DataDef::typeAsString(L1DataDef::RNDM) ||
+            tt->type() == L1DataDef::typeAsString(L1DataDef::PCLK) ||
+            tt->type() == L1DataDef::typeAsString(L1DataDef::BGRP) ) {
          } else {
 
             TriggerThresholdValue* ttv = tt->createThresholdValue(row["TT.L1TT_TYPE"].data<std::string>()); 
@@ -238,8 +238,8 @@ bool TrigConf::ThresholdConfigLoader::load( ThresholdConfig& thrConfig ) {
             //is it a cluster_threshold_value?
             try {
                ClusterThresholdValue& ctv = dynamic_cast<ClusterThresholdValue&>(*ttv);
-               if (ttv->type() != L1DataDef::emType() &&
-                   ttv->type() != L1DataDef::tauType()) {
+               if (ttv->type() != L1DataDef::typeAsString(L1DataDef::EM) &&
+                   ttv->type() != L1DataDef::typeAsString(L1DataDef::TAU)) {
                   msg() << "ThresholdConfigLoader >> No type match for ttv_id = "
                         << ctv.id() << " " << ttv->type() << std::endl;
                   throw std::runtime_error( "ThresholdConfigLoader >> ClusterThresholdValue not available" );
@@ -263,9 +263,9 @@ bool TrigConf::ThresholdConfigLoader::load( ThresholdConfig& thrConfig ) {
             //is it a jet_threshold_value?
             try {
                JetThresholdValue& jtv = dynamic_cast<JetThresholdValue&>(*ttv);
-               if (ttv->type() != L1DataDef::jetType() &&
-                   ttv->type() != L1DataDef::jbType() &&
-                   ttv->type() != L1DataDef::jfType()) {
+               if (ttv->type() != L1DataDef::typeAsString(L1DataDef::JET) &&
+                   ttv->type() != L1DataDef::typeAsString(L1DataDef::JB) &&
+                   ttv->type() != L1DataDef::typeAsString(L1DataDef::JF)) {
                   TRG_MSG_ERROR("No type match for ttv_id = " << jtv.id() << ttv->type());
                   throw std::runtime_error( "ThresholdConfigLoader >> TriggerThresholdValue not available" );
                }

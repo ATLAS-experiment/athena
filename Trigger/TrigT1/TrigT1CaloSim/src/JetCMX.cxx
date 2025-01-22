@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // /***************************************************************************
@@ -145,7 +145,7 @@ StatusCode JetCMX::execute(const EventContext& ctx) const
     std::vector<std::shared_ptr<TrigConf::L1Threshold>> allThresholds = l1Menu->thresholds();
 	    // Right type?
 	      for ( const auto& thresh : allThresholds ) {
-          if ( thresh->type() != L1DataDef::jetType() ) continue;
+            if ( thresh->type() != L1DataDef::typeAsString(L1DataDef::JET) ) continue;
 
             // Does TOB satisfy this threshold?
             int etCut              = thresh->thrValue(ieta)*jepScale;

@@ -188,7 +188,7 @@ LockedHandle<T> WebdaqHistSvc::regShared_i(const std::string& id, std::unique_pt
     T* phist = hist.get();
     THistID* phid = nullptr;
     if (regHist_i(std::move(hist), id, true, phid).isSuccess()) {
-      lh.set(phist, phid->mutex);
+      if (phid) lh.set(phist, phid->mutex);
     }
   }
   else 
@@ -221,7 +221,7 @@ T* WebdaqHistSvc::getHist_i(const std::string& id, const size_t& /*ind*/, bool q
   ATH_MSG_DEBUG("Getting histogram " << id);
 
   tbb::concurrent_hash_map<std::string, THistID>::const_accessor accessor;
-  if (!m_hists.find(accessor, id)) {
+  if (!m_hists.find(accessor, id) or accessor.empty()) {
     if (!quiet) ATH_MSG_ERROR("could not locate Hist with id \"" << id << "\"");
     return nullptr;
   }
