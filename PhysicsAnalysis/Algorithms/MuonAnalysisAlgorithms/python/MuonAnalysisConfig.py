@@ -364,9 +364,30 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                         "strings) the trigger chains. The default is {} (empty dictionary).")
         self.addOption ('muonID', '', type=str,
                         info="the muon quality WP (string) to use.")
+        self.addOption ('saveSF', True, type=bool,
+                        info="define whether we decorate the trigger scale factor "
+                        "The default is True.")
         self.addOption ('saveEff', False, type=bool,
-                        info="define whether we decorate also the trigger scale efficiency "
-                        "The default is false.")
+                        info="define whether we decorate the trigger MC efficiencies "
+                        "The default is False.")
+        self.addOption ('saveEffData', False, type=bool,
+                        info="define whether we decorate the trigger data efficiencies "
+                        "The default is False.")
+        self.addOption ('prefixSF', 'trigEffSF', type=str,
+                        info="the decoration prefix for trigger scale factors, "
+                        "the default is 'trigEffSF'")
+        self.addOption ('prefixEff', 'trigEff', type=str,
+                        info="the decoration prefix for MC trigger efficiencies, "
+                        "the default is 'trigEff'")
+        self.addOption ('prefixEffData', 'trigEffData', type=str,
+                        info="the decoration prefix for data trigger efficiencies, "
+                        "the default is 'trigEffData'")
+        self.addOption ('includeAllYears', False, type=bool,
+                        info="if True, all configured years will be included in all jobs. "
+                        "The default is False.")
+        self.addOption ('removeHLTPrefix', True, type=bool,
+                        info="remove the HLT prefix from trigger chain names, "
+                        "The default is True.")
         self.addOption ('containerName', '', type=str,
                         info="the input muon container, with a possible selection, in "
                         "the format container or container.selection.")
@@ -380,7 +401,9 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
             # Value is empty for single leg trigger or list of legs
             triggerDict = TriggerDict()
 
-            if config.campaign() is Campaign.MC20a:
+            if self.includeAllYears:
+                years = [int(year) for year in self.triggerChainsPerYear.keys()]
+            elif config.campaign() is Campaign.MC20a:
                 years = [2015, 2016]
             elif config.campaign() is Campaign.MC20d:
                 years = [2017]
@@ -391,35 +414,47 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
             elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]:
                 years = [2023]
 
+            triggerYearStartBoundaries = {
+                2015: 260000,
+                2016: 290000,
+                2017: 324000,
+                2018: 348000,
+                2022: 410000,
+                2023: 450000,
+                2024: 470000,
+            }
+
             triggerConfigs = {}
             triggerConfigYears = {}
             for year in years:
                 triggerChains = self.triggerChainsPerYear.get(int(year), self.triggerChainsPerYear.get(str(year), []))
                 for chain in triggerChains:
                     chain = chain.replace(" || ", "_OR_")
-                    chain_noHLT = chain.replace("HLT_","")
+                    chain_noHLT = chain.replace("HLT_", "")
+                    chain_out = chain_noHLT if self.removeHLTPrefix else chain
                     legs = triggerDict[chain_noHLT]
-                    if len(legs)==0:
+                    if not legs:
                         if chain_noHLT.startswith('mu') and chain_noHLT[2].isdigit:
                             # Need to support HLT_mu26_ivarmedium_OR_HLT_mu50
-                            triggerConfigs[chain_noHLT] = chain
-                            if chain_noHLT in triggerConfigYears.keys():
-                                triggerConfigYears[chain_noHLT].append(year)
+                            triggerConfigs[chain_out] = chain
+                            if chain_out in triggerConfigYears.keys():
+                                triggerConfigYears[chain_out].append(year)
                             else:
-                                triggerConfigYears[chain_noHLT] = [year]
+                                triggerConfigYears[chain_out] = [year]
                     else:
                         for leg in legs:
                             if leg.startswith('mu') and leg[2].isdigit:
                                 # Need to support HLT_mu14_ivarloose
-                                triggerConfigs[leg] = 'HLT_' + leg
-                                if chain_noHLT in triggerConfigYears.keys():
-                                    triggerConfigYears[leg].append(year)
+                                leg_out = leg if self.removeHLTPrefix else f"HLT_{leg}"
+                                triggerConfigs[leg_out] = f"HLT_{leg}"
+                                if leg_out in triggerConfigYears.keys():
+                                    triggerConfigYears[leg_out].append(year)
                                 else:
-                                    triggerConfigYears[leg] = [year]
+                                    triggerConfigYears[leg_out] = [year]
 
             for trig_short, trig in triggerConfigs.items():
                 alg = config.createAlgorithm('CP::MuonTriggerEfficiencyScaleFactorAlg',
-                                             'MuonTrigEfficiencyCorrectionsAlg_' + trig_short)
+                                             'MuonTrigEfficiencyCorrectionsAlg_' + self.muonID + '_' + trig_short)
                 config.addPrivateTool( 'efficiencyScaleFactorTool',
                                        'CP::MuonTriggerScaleFactors' )
 
@@ -427,21 +462,35 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                 alg.efficiencyScaleFactorTool.MuonQuality = self.muonID
                 alg.efficiencyScaleFactorTool.AllowZeroSF = True
 
-                # Avoid warnings for MC20a 2015-2016 triggers covering a single year
-                if config.campaign() is Campaign.MC20a:
+                # Avoid warnings for missing triggers
+                if self.includeAllYears:
+                    alg.minRunNumber = 0
+                    alg.maxRunNumber = 999999
+
+                    if triggerConfigYears[trig_short][0] != years[0]:
+                        alg.minRunNumber = triggerYearStartBoundaries.get(triggerConfigYears[trig_short][0], 999999)
+                    if triggerConfigYears[trig_short][-1] != years[-1]:
+                        alg.maxRunNumber = triggerYearStartBoundaries.get(triggerConfigYears[trig_short][-1] + 1, 999999)
+                elif config.campaign() is Campaign.MC20a:  # to avoid potential corner-cases keep the default config unchanged
                     if triggerConfigYears[trig_short] == [2015]:
                         alg.maxRunNumber = 290000
                     elif triggerConfigYears[trig_short] == [2016]:
                         alg.minRunNumber = 290000
 
                 alg.trigger = trig
-                alg.scaleFactorDecoration = 'muon_trigEffSF_' + trig_short + '_%SYS%'
-                if(self.saveEff):
-                    alg.mcEfficiencyDecoration = 'muon_trigEff_' + trig_short + '_%SYS%'
+                if self.saveSF:
+                    alg.scaleFactorDecoration = f"muon_{self.prefixSF}_{trig_short}_%SYS%"
+                if self.saveEff:
+                    alg.mcEfficiencyDecoration = f"muon_{self.prefixEff}_{trig_short}_%SYS%"
+                if self.saveEffData:
+                    alg.dataEfficiencyDecoration = f"muon_{self.prefixEffData}_{trig_short}_%SYS%"
                 alg.outOfValidity = 2 #silent
-                alg.outOfValidityDeco = 'bad_eff_muontrig_' + trig_short
+                alg.outOfValidityDeco = f"bad_eff_muontrig_{trig_short}"
                 alg.muons = config.readName (self.containerName)
                 alg.preselection = config.getPreselection (self.containerName, '')
-                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'trigEffSF_' + trig_short)
-                if(self.saveEff):
-                    config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'trigEff_' + trig_short)
+                if self.saveSF:
+                    config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f"{self.prefixSF}_{trig_short}")
+                if self.saveEff:
+                    config.addOutputVar (self.containerName, alg.mcEfficiencyDecoration, f"{self.prefixEff}_{trig_short}")
+                if self.saveEffData:
+                    config.addOutputVar (self.containerName, alg.dataEfficiencyDecoration, f"{self.prefixEffData}_{trig_short}")
