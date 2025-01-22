@@ -41,7 +41,7 @@ SCT_ByteStreamErrorsTool::initialize() {
      if (badError>=63) {
         ATH_MSG_FATAL("Logic error: Error code too large and cannot represented as a bit.");
      }
-     m_badErrorMask |= (1<<badError);
+     m_badErrorMask |= SCT_ByteStreamErrors::makeError(badError);
   }
 
   return StatusCode::SUCCESS;
@@ -123,12 +123,12 @@ SCT_ByteStreamErrorsTool::isGood(const IdentifierHash& elementIdHash, const Even
 
     auto errorCode{idcCachePtr->retrieve(elementIdHash)};
 
-    for (auto badError : SCT_ByteStreamErrors::BadErrors) {
-      if (errorCode == badError) {
-        ATH_MSG_VERBOSE("SCT_ByteStreamErrorsTool Bad Error " << errorCode  << " for ID " << elementIdHash);
-        return false;
-      }
+    bool is_bad = errorCode & m_badErrorMask;
+    if (is_bad) {
+      ATH_MSG_VERBOSE("SCT_ByteStreamErrorsTool Bad Error " << errorCode  << " for ID " << elementIdHash);
+      return false;
     }
+
   } // end of cache operations protection via m_cacheMutex, following code has own protection
   
   // If all 6 chips of a link issue ABCD errors or are bad chips or temporarily masked chips, the link is treated as bad one. 
@@ -200,7 +200,7 @@ SCT_ByteStreamErrorsTool::getDetectorElementStatus(const EventContext& ctx, InDe
    unsigned int element_i=0;
    for ( const auto &val : idcCachePtr->IDCCache->rawReadAccess()) {
       uint64_t error_code = val;
-      bool is_bad=(error_code<63) && ((1ull<<error_code) &  m_badErrorMask);
+      bool is_bad = error_code & m_badErrorMask;
       status.at(element_i) = status.at(element_i) & not is_bad;
       if ( is_bad ) {
          ATH_MSG_VERBOSE("SCT_ByteStreamErrorsTool Bad Error " << error_code  << " for ID " << element_i);
