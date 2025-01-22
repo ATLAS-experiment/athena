@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // /***************************************************************************
@@ -99,8 +99,8 @@ StatusCode EnergyCMX::execute(const EventContext& ctx) const
   auto l1Menu = SG::makeHandle( m_L1MenuKey, ctx );
   std::vector<std::shared_ptr<TrigConf::L1Threshold>> allThresholds = l1Menu->thresholds();
   for ( const auto& thresh : allThresholds ) {
-    if ( ( thresh->type() == L1DataDef::xeType() || thresh->type() == L1DataDef::teType()) && thresh->mapping() > 7 ) {
-      std::shared_ptr<TrigConf::L1Threshold_Calo> thresh_Calo = std::static_pointer_cast<TrigConf::L1Threshold_Calo>(thresh);
+    if ( ( thresh->type() == L1DataDef::typeAsString(L1DataDef::XE) || thresh->type() == L1DataDef::typeAsString(L1DataDef::TE)) && thresh->mapping() > 7 ) {
+      auto thresh_Calo = static_cast<const TrigConf::L1Threshold_Calo*>(thresh.get());
       auto tvcs = thresh_Calo->thrValuesCounts();
       // Make sure only set masks from the first valid threshold in the range (for each type)
       if (maskXE > 0) maskXESet = true;
@@ -112,13 +112,13 @@ StatusCode EnergyCMX::execute(const EventContext& ctx) const
         // Bits are set false by default, so ignore thresholds that are just doing that
         if (tVC.value() >= 0x7fff) continue;
         // Set bits true if module centre between etaMin and etaMax
-        if ( thresh->type() == L1DataDef::xeType()  && !maskXESet ) {
+        if ( thresh->type() == L1DataDef::typeAsString(L1DataDef::XE)  && !maskXESet ) {
           for (unsigned int bin = 0; bin < 8; ++bin) {
             if (moduleEta[bin] > tVC.etaMin()*0.1 && moduleEta[bin] < tVC.etaMax()*0.1)
               maskXE |= (1<<bin);
           }
         }
-        else if ( thresh->type() == L1DataDef::teType()  && !maskTESet ) {
+        else if ( thresh->type() == L1DataDef::typeAsString(L1DataDef::TE) && !maskTESet ) {
           for (unsigned int bin = 0; bin < 8; ++bin) {
             if (moduleEta[bin] > tVC.etaMin()*0.1 && moduleEta[bin] < tVC.etaMax()*0.1)
               maskTE |= (1<<bin);
@@ -285,8 +285,8 @@ unsigned int LVL1::EnergyCMX::ctpWord(unsigned int metSigPassed,
                                       unsigned int etMissPassed,
                                       unsigned int etSumPassed) const {
 
-  return ( (metSigPassed<<(L1DataDef::max_TE_Threshold_Number()+L1DataDef::max_XE_Threshold_Number())) +
-	   (etMissPassed<<L1DataDef::max_TE_Threshold_Number()) + etSumPassed );
+  return ( (metSigPassed<<(L1DataDef::typeConfig(L1DataDef::TE).max+L1DataDef::typeConfig(L1DataDef::XE).max)) +
+           (etMissPassed<<L1DataDef::typeConfig(L1DataDef::TE).max) + etSumPassed );
 }
 
 /** form CTP objects and store them in SG. */

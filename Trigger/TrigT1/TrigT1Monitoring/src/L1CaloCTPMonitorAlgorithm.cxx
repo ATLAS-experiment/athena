@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <map>
 #include <utility>
@@ -11,6 +11,8 @@
 #include <sstream>
 
 #include "L1CaloCTPMonitorAlgorithm.h"
+
+using TrigConf::L1DataDef;
 
 L1CaloCTPMonitorAlgorithm::L1CaloCTPMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
   : AthMonitorAlgorithm(name,pSvcLocator),
@@ -230,13 +232,10 @@ StatusCode L1CaloCTPMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
   const int max_TE_Threshold_Number = 16;
   const int max_XS_Threshold_Number = 8;
 
-   TrigConf::L1DataDef def;
-
-
   //------------------------ EM Hits (3 bits / thresh) -----------------------
   int offset = 0;
   int threshBits = 3;
-  int totalBits = threshBits*def.max_EM_Threshold_Number()/2;  
+  int totalBits = threshBits*L1DataDef::typeConfig(L1DataDef::EM).max/2;
   ATH_MSG_DEBUG("totalBits = " << totalBits);
 
   compare(bunch, EMHits0, totalBits, offset, EM1Type, ctx); // Cable EM1
@@ -311,8 +310,6 @@ void L1CaloCTPMonitorAlgorithm::compare(const CTP_BC& bunch, int hits, int total
   const int max_TE_Threshold_Number = 16;
   const int max_XS_Threshold_Number = 8;
 
-   TrigConf::L1DataDef def;
-     
        std::map<std::string, int> threshMap;
 
       const std::vector<std::shared_ptr<TrigConf::L1Threshold>>& thresholds = getL1Menu(ctx)->thresholds();
@@ -325,15 +322,15 @@ void L1CaloCTPMonitorAlgorithm::compare(const CTP_BC& bunch, int hits, int total
         int fixedThreshNumber  = threshNumber;
 
         while (true) {
-          if ( it->type() == def.emType() ) {
-            if (threshNumber >= (int)def.max_EM_Threshold_Number()/2) {  // Cable EM2; else cable EM1
-             offset += nbits*def.max_EM_Threshold_Number()/2;
-              fixedThreshNumber -= def.max_EM_Threshold_Number()/2;
+          if ( it->type() == L1DataDef::typeAsString(L1DataDef::EM) ) {
+            if (threshNumber >= (int)L1DataDef::typeConfig(L1DataDef::EM).max/2) {  // Cable EM2; else cable EM1
+              offset += nbits*L1DataDef::typeConfig(L1DataDef::EM).max/2;
+              fixedThreshNumber -= L1DataDef::typeConfig(L1DataDef::EM).max/2;
             }
             break;
           }
-          offset += nbits*def.max_EM_Threshold_Number(); 
-          if ( it->type() == def.tauType() ) {
+          offset += nbits*L1DataDef::typeConfig(L1DataDef::EM).max;
+          if ( it->type() == L1DataDef::typeAsString(L1DataDef::TAU) ) {
             if (threshNumber >= (int)max_TAU_3bit_Threshold_Number/2) { // Cable TAU2; else cable TAU1
               offset += nbits*max_TAU_3bit_Threshold_Number/2;
               fixedThreshNumber -= max_TAU_3bit_Threshold_Number/2;
@@ -341,7 +338,7 @@ void L1CaloCTPMonitorAlgorithm::compare(const CTP_BC& bunch, int hits, int total
             break;
           }
           offset += nbits*max_TAU_3bit_Threshold_Number; 
-          if ( it->type() == def.jetType() ) {
+          if ( it->type() == L1DataDef::typeAsString(L1DataDef::JET) ) {
             if (threshNumber >= (int)max_JET_3bit_Threshold_Number) {   // Cable JET2 (2-bit thresholds); else JET1 (3-bit)
               offset += 3*max_JET_3bit_Threshold_Number;
               fixedThreshNumber -= max_JET_3bit_Threshold_Number;
@@ -353,7 +350,7 @@ void L1CaloCTPMonitorAlgorithm::compare(const CTP_BC& bunch, int hits, int total
           nbits--;
           offset += 2*max_JET_2bit_Threshold_Number;
           nbits--;
-          if ( it->type() == def.teType()) {
+          if ( it->type() == L1DataDef::typeAsString(L1DataDef::TE) ) {
             if (threshNumber >= (int)max_TE_Threshold_Number/2) {  // Restricted eta TE threshold: jump to cable EN2
               offset += nbits*max_TE_Threshold_Number/2 + nbits*max_XE_Threshold_Number/2 + nbits*max_XS_Threshold_Number; // 8+8+8 bits on cable EN1
               fixedThreshNumber -= max_TE_Threshold_Number/2;
@@ -361,7 +358,7 @@ void L1CaloCTPMonitorAlgorithm::compare(const CTP_BC& bunch, int hits, int total
             break;  // Full eta & restricted eta thresholds separated on two cables
          }
           offset += nbits*max_TE_Threshold_Number/2; 
-          if ( it->type() == def.xeType() ) {
+          if ( it->type() == L1DataDef::typeAsString(L1DataDef::XE) ) {
             if (threshNumber >= (int)max_XE_Threshold_Number/2) { // Restricted eta XE threshold: jump to cable EN2
               offset += nbits*max_TE_Threshold_Number/2 + nbits*max_XE_Threshold_Number/2 + nbits*max_XS_Threshold_Number;
               fixedThreshNumber -= max_XE_Threshold_Number/2;
@@ -369,7 +366,7 @@ void L1CaloCTPMonitorAlgorithm::compare(const CTP_BC& bunch, int hits, int total
             break;
           }
           offset += nbits*max_XE_Threshold_Number/2;
-          if ( it->type() == def.xsType() ) break;
+          if ( it->type() == L1DataDef::typeAsString(L1DataDef::XS) ) break;
           offset += nbits*max_XS_Threshold_Number;
           nbits--;
           break;

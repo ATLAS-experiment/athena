@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /***************************************************************************
  *                    RecMuonRoI.cxx  -  description
@@ -131,7 +131,7 @@ LVL1::RecMuonRoI::construct( unsigned int roIWord,
    m_thresholdValue = 0;
    for( std::vector< TriggerThreshold* >::const_iterator it = theMuonConfig->begin();
          it != theMuonConfig->end(); ++it ) {
-      if( ( *it )->type() == L1DataDef::muonType() &&
+      if( ( *it )->type() == L1DataDef::typeAsString(L1DataDef::MUON) &&
             ( *it )->thresholdNumber() + 1 == static_cast< int >( m_thresholdNumber ) ) {
 
          TriggerThresholdValue* ttv = ( *it )->triggerThresholdValue( 0, 0 );
@@ -223,7 +223,7 @@ LVL1::RecMuonRoI::construct( unsigned int roIWord,
    // currently only adds a printout function
    m_thresholdValue = 0;
    for(const TrigConf::TriggerThreshold* thr : *theMuonConfig) {
-      if( thr->type() == L1DataDef::muonType() &&
+      if( thr->type() == L1DataDef::typeAsString(L1DataDef::MUON) &&
             thr->thresholdNumber() + 1 == static_cast< int >( m_thresholdNumber ) ) {
 
          TrigConf::TriggerThresholdValue* ttv = thr->triggerThresholdValue( 0, 0 );

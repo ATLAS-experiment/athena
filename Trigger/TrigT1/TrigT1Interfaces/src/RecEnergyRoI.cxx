@@ -1,7 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-// $Id: RecEnergyRoI.cxx 342657 2011-01-28 23:42:18Z watsona $
 /***************************************************************************
                          RecEnergyRoI.cxx  -  description
                             -------------------
@@ -87,15 +86,15 @@ void LVL1::RecEnergyRoI::construct(unsigned int RoIWord0, unsigned int RoIWord1,
    std::map< int, TriggerThreshold* > mEtSigMap;
    for( std::vector< TriggerThreshold* >::const_iterator it = caloThresholds->begin();
          it != caloThresholds->end(); ++it ) {
-      if( ( *it )->type() == L1DataDef::xeType() ) {
+      if( ( *it )->type() == L1DataDef::typeAsString(L1DataDef::XE) ) {
          int num = ( *it )->thresholdNumber();
          etMissMap.insert( std::map< int, TriggerThreshold* >::value_type( num, *it ) );
       }
-      else if( ( *it )->type() == L1DataDef::teType() ) {
+      else if( ( *it )->type() == L1DataDef::typeAsString(L1DataDef::TE) ) {
          int num = ( *it )->thresholdNumber();
          sumEtMap.insert( std::map< int, TriggerThreshold* >::value_type( num, *it ) );
       }
-      else if( ( *it )->type() == L1DataDef::xsType() ) {
+      else if( ( *it )->type() == L1DataDef::typeAsString(L1DataDef::XS) ) {
          int num = ( *it )->thresholdNumber();
          mEtSigMap.insert( std::map< int, TriggerThreshold* >::value_type( num, *it ) );
       }

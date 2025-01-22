@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           SystemEnergy.h  -  description
@@ -280,8 +280,8 @@ void SystemEnergy::etMissTrigger()
   // get Threshold values and test
 
   for ( const auto& thresh : allThresholds ) {
-    if ( thresh->type() == L1DataDef::xeType()) {
-      std::shared_ptr<TrigConf::L1Threshold_Calo> thresh_Calo = std::static_pointer_cast<TrigConf::L1Threshold_Calo>(thresh);
+    if ( thresh->type() == L1DataDef::typeAsString(L1DataDef::XE) ) {
+      auto thresh_Calo = static_cast<const TrigConf::L1Threshold_Calo*>(thresh.get());
       unsigned int thresholdValue = thresh_Calo->thrValueCounts();
       uint32_t tvQ = thresholdValue * thresholdValue;
       int threshNumber = thresh->mapping();
@@ -320,7 +320,7 @@ void SystemEnergy::etSumTrigger()
   // get Threshold values and test
   // Since eta-dependent values are being used to disable TE in regions, must find lowest value for each threshold
   for ( const auto& thresh : allThresholds ) {
-    if ( thresh->type() == L1DataDef::teType()) {
+    if ( thresh->type() == L1DataDef::typeAsString(L1DataDef::TE) ) {
       int threshNumber = thresh->mapping();
       int thresholdValue = m_maxEtSumThr;
       std::shared_ptr<TrigConf::L1Threshold_Calo> thresh_Calo = std::static_pointer_cast<TrigConf::L1Threshold_Calo>(thresh);
@@ -393,7 +393,7 @@ void SystemEnergy::metSigTrigger()
   /// get Threshold values and test
   /// aQTiQ has to be scaled to hardware precision after product formed
   for ( const auto& thresh : allThresholds ) {
-    if ( thresh->type() == L1DataDef::xsType()) {
+    if ( thresh->type() == L1DataDef::typeAsString(L1DataDef::XS) ) {
 
       int threshNumber = thresh->mapping();
       std::shared_ptr<TrigConf::L1Threshold_Calo> thresh_Calo = std::static_pointer_cast<TrigConf::L1Threshold_Calo>(thresh);
