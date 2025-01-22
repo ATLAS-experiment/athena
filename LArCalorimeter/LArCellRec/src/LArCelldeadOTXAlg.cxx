@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCelldeadOTXAlg.h"
@@ -145,10 +145,8 @@ void LArCelldeadOTXAlg::buildMap(const EventContext& ctx, StatusCode& sc) const 
 
   const std::vector<std::pair<unsigned int, LArBadFeb> >& badFebs = mfHdl->fullCont();
 
-  unsigned nDeadFebs = 0;
   for (const auto& idBF : badFebs) {
     if (idBF.second.deadReadout()) {
-      ++nDeadFebs;
       const HWIdentifier febid(idBF.first);
       m_febs.push_back(febid);
       ATH_MSG_INFO("FEB " << m_onlineID->channel_name(febid) << " labelled as dead");
