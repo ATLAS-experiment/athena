@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "eflowRec/PFSubtractionTool.h"
@@ -541,7 +541,7 @@ void PFSubtractionTool::performTruthSubtraction(eflowCaloObject& thisEflowCaloOb
         if (0.0 != truthEnergy && m_useFullCellTruthSubtraction) thisCluster->removeCell(*theCell);
         else if (!m_useFullCellTruthSubtraction) {
           theCell.reweight(subtractedCellWeight);
-          theCell++;
+          ++theCell;
         }
       }//cell loop
 
