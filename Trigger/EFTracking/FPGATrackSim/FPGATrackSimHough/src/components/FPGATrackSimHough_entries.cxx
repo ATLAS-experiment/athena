@@ -3,7 +3,7 @@
 #include "FPGATrackSimHough/FPGATrackSimHoughRootOutputTool.h"
 #include "../FPGATrackSimHoughTransformTool.h"
 #include "../FPGATrackSimPhiRoadFilterTool.h"
-#include "../FPGATrackSimRoadUnionTool.h"
+#include "FPGATrackSimHough/FPGATrackSimRoadUnionTool.h"
 #include "../FPGATrackSimSpacepointRoadFilterTool.h"
 #include "../FPGATrackSimGenScanTool.h"
 #include "../FPGATrackSimGenScanMonitoring.h"
