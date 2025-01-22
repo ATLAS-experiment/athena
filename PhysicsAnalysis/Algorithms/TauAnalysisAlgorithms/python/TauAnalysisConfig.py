@@ -300,6 +300,15 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
                         "strings) the trigger chains. The default is {} (empty dictionary).")
         self.addOption ('tauID', '', type=str,
                         info="the tau quality WP (string) to use.")
+        self.addOption ('prefixSF', 'trigEffSF', type=str,
+                        info="the decoration prefix for trigger scale factors, "
+                        "the default is 'trigEffSF'")
+        self.addOption ('includeAllYears', False, type=bool,
+                        info="if True, all configured years will be included in all jobs. "
+                        "The default is False.")
+        self.addOption ('removeHLTPrefix', True, type=bool,
+                        info="remove the HLT prefix from trigger chain names, "
+                        "The default is True.")
         self.addOption ('containerName', '', type=str,
                         info="the input tau container, with a possible selection, in "
                         "the format container or container.selection.")
@@ -310,33 +319,37 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
     def makeAlgs (self, config) :
 
         if config.dataType() is not DataType.Data:
-            if config.campaign() is Campaign.MC20a:
-                triggers = self.get_year_data(self.triggerChainsPerYear, 2015)
-                triggers += self.get_year_data(self.triggerChainsPerYear, 2016)
-                # Remove potential duplicates
-                triggers = list(set(triggers))
-            elif config.campaign() is Campaign.MC20d:
-                triggers = self.get_year_data(self.triggerChainsPerYear, 2017)
-            elif config.campaign() is Campaign.MC20e:
-                triggers = self.get_year_data(self.triggerChainsPerYear, 2018)
-            elif config.campaign() in [Campaign.MC21a, Campaign.MC23a]:
-                triggers = self.get_year_data(self.triggerChainsPerYear, 2022)
-            elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]:
-                triggers = self.get_year_data(self.triggerChainsPerYear, 2023)
-            else:
-                logging.warning("unknown campaign, skipping triggers: " + str(config.campaign()))
-                triggers = []
+            log = logging.getLogger('TauJetTriggerSFConfig')
 
-            for trig in triggers:
-                trig = trig.replace("HLT_","")
+            triggers = set()
+            if self.includeAllYears:
+                for year in self.triggerChainsPerYear:
+                    triggers.update(self.get_year_data(self.triggerChainsPerYear, year))
+            elif config.campaign() is Campaign.MC20a:
+                triggers.update(self.get_year_data(self.triggerChainsPerYear, 2015))
+                triggers.update(self.get_year_data(self.triggerChainsPerYear, 2016))
+            elif config.campaign() is Campaign.MC20d:
+                triggers.update(self.get_year_data(self.triggerChainsPerYear, 2017))
+            elif config.campaign() is Campaign.MC20e:
+                triggers.update(self.get_year_data(self.triggerChainsPerYear, 2018))
+            elif config.campaign() in [Campaign.MC21a, Campaign.MC23a]:
+                triggers.update(self.get_year_data(self.triggerChainsPerYear, 2022))
+            elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]:
+                triggers.update(self.get_year_data(self.triggerChainsPerYear, 2023))
+            else:
+                log.warning("unknown campaign, skipping triggers: %s", str(config.campaign()))
+
+            for chain in triggers:
+                chain_noHLT = chain.replace("HLT_", "")
+                chain_out = chain_noHLT if self.removeHLTPrefix else chain
                 alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
-                                              'TauTrigEfficiencyCorrectionsAlg' + trig )
+                                              'TauTrigEfficiencyCorrectionsAlg_' + self.tauID + '_' + chain )
                 config.addPrivateTool( 'efficiencyCorrectionsTool',
                                        'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
                 # SFTriggerHadTau correction type from
                 # https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/TauAnalysisTools/Enums.h#L79
                 alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [12]
-                alg.efficiencyCorrectionsTool.TriggerName = 'HLT_' + trig
+                alg.efficiencyCorrectionsTool.TriggerName = chain
 
                 # JetIDLevel from
                 # https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/TauAnalysisTools/Enums.h#L79
@@ -352,11 +365,9 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
                 alg.efficiencyCorrectionsTool.TriggerSFMeasurement = "combined"
                 alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
 
-                alg.scaleFactorDecoration = 'tau_trigEffSF_' + trig + '_%SYS%'
+                alg.scaleFactorDecoration = f"tau_{self.prefixSF}_{chain_out}_%SYS%"
                 alg.outOfValidity = 2 #silent
-                alg.outOfValidityDeco = 'bad_eff_tautrig_' + trig
+                alg.outOfValidityDeco = f"bad_eff_tautrig_{chain_out}"
                 alg.taus = config.readName (self.containerName)
                 alg.preselection = config.getPreselection (self.containerName, self.tauID)
-                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'trigEffSF_' + trig)
-
-        return
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f"{self.prefixSF}_{chain_out}")
