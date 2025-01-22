@@ -13,13 +13,9 @@
 
 namespace MuonCalib{
 
-  RpcCalibDBEntry::~RpcCalibDBEntry(){
-    // free nmemory used for data
-    for(unsigned int k=0;k<m_theEtaData.size();k++) delete m_theEtaData[k];
-    for(unsigned int k=0;k<m_thePhiData.size();k++) delete m_thePhiData[k];
-  }
 
-  RpcCalibDBEntry::RpcCalibDBEntry(Identifier gapID, std::string_view payLoad):m_nRecEta(0),m_nDetEta(0), m_nRecPhi1(0),m_nRecPhi2(0),m_nDetPhi1(0),m_nDetPhi2(0),m_theGap(gapID) {
+  RpcCalibDBEntry::RpcCalibDBEntry(Identifier gapID, std::string_view payLoad):
+      m_theGap(gapID) {
 
     
     std::string::size_type end=payLoad.find("END ");
@@ -102,7 +98,7 @@ namespace MuonCalib{
       etaRec_str>>eff>>errEff>>res1>>errRes1>>res2>>errRes2>>resX>>errResX>>time>>errTime;
       etaDet_str>>noise>>errNoise>>noiseC>>errNoiseC>>cs>>errCs;
       
-      RpcCalibData * etaData=new RpcCalibData;
+      auto etaData= std::make_unique<RpcCalibData>();
       
       etaData->setId(k);
       etaData->setEff(eff);
@@ -122,7 +118,7 @@ namespace MuonCalib{
       etaData->setCs(cs);
       etaData->setErrCs(errCs);
       
-      m_theEtaData.push_back(etaData);
+      m_theEtaData.push_back(std::move(etaData));
       
     }
     
@@ -134,7 +130,7 @@ namespace MuonCalib{
       phiRec2_str>>errEff>>errRes1>>errRes2>>errResX>>errTime;
       phiDet1_str>>noise>>errNoise>>noiseC>>errNoiseC>>cs>>errCs;
 
-      RpcCalibData * phiData=new RpcCalibData;
+      auto phiData= std::make_unique<RpcCalibData>();
 
       phiData->setId(k);
       phiData->setEff(eff);
@@ -154,7 +150,7 @@ namespace MuonCalib{
       phiData->setCs(cs);
       phiData->setErrCs(errCs);
 
-      m_thePhiData.push_back(phiData);
+      m_thePhiData.push_back(std::move(phiData));
 
     }
 
@@ -172,8 +168,7 @@ namespace MuonCalib{
   }
 
 
-  const Identifier  RpcCalibDBEntry::getGapID() const {
-    
+  const Identifier& RpcCalibDBEntry::getGapID() const {    
     return m_theGap;
     
   }
@@ -198,7 +193,7 @@ namespace MuonCalib{
 
     for(int k=0;k<m_nRecEta;k++){
       
-      const RpcCalibData * theData=m_theEtaData[k];
+      const auto& theData = m_theEtaData[k];
       
       eff=theData->getEff();
       errEff=theData->getErrEff();
@@ -225,7 +220,7 @@ namespace MuonCalib{
 
     for(int k=0;k<m_nRecPhi1;k++){
       
-      const RpcCalibData * theData=m_thePhiData[k];
+      const auto& theData = m_thePhiData[k];
       
       eff=theData->getEff();
       errEff=theData->getErrEff();
