@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "WebdaqHistSvc.h"
@@ -188,7 +188,7 @@ LockedHandle<T> WebdaqHistSvc::regShared_i(const std::string& id, std::unique_pt
     T* phist = hist.get();
     THistID* phid = nullptr;
     if (regHist_i(std::move(hist), id, true, phid).isSuccess()) {
-      lh.set(phist, phid->mutex);
+      if (phid) lh.set(phist, phid->mutex);
     }
   }
   else 
