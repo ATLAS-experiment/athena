@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Jackson Burzynski
@@ -16,7 +16,7 @@ namespace CP
   JetGhostMergingAlg ::
   JetGhostMergingAlg (const std::string& name,
                       ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
+    : AnaReentrantAlgorithm (name, pSvcLocator)
   {
   }
 
@@ -41,10 +41,8 @@ namespace CP
   }
 
   StatusCode JetGhostMergingAlg ::
-  execute ()
+  execute (const EventContext &ctx) const
   {
-    const EventContext &ctx = Gaudi::Hive::currentContext();
-
     SG::ReadHandle<xAOD::JetContainer> inputJets(m_jetLocation,ctx);
     if (!inputJets.isValid()) {
         ATH_MSG_FATAL("No jet collection with name " << m_jetLocation.key() << " found in StoreGate!");

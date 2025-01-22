@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,9 +16,8 @@
 #ifndef JET_ANALYSIS_ALGORITHMS__JET_GHOST_MERGING_ALG_H
 #define JET_ANALYSIS_ALGORITHMS__JET_GHOST_MERGING_ALG_H
 
-#include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
 #include <xAODJet/JetContainer.h>
-#include <AsgTools/CurrentContext.h>
 
 #include <AsgTools/PropertyWrapper.h>
 #include <AsgDataHandles/WriteHandle.h>
@@ -34,7 +33,7 @@
 namespace CP
 {
   /// \brief an algorithm for combining multiple ghost collections into one
-  class JetGhostMergingAlg final : public EL::AnaAlgorithm
+  class JetGhostMergingAlg final : public EL::AnaReentrantAlgorithm
   {
     /// \brief the standard constructor
   public:
@@ -45,7 +44,7 @@ namespace CP
     StatusCode initialize () override;
 
   public:
-    StatusCode execute () override;
+    StatusCode execute (const EventContext &ctx) const override;
 
   private:
     /// \brief the jet collection we run on
