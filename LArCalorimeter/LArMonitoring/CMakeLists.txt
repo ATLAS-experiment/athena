@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArMonitoring )
 
 # External dependencies:
 find_package( CLHEP )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread Graf Graf3d Gpad Html Postscript Gui GX11TTF GX11 )
+find_package( ROOT COMPONENTS Core MathCore )
 
 atlas_add_library( LArStrHelper
                    src/StrHelper/LArStrHelper.cxx LArMonitoring/LArStrHelper.h

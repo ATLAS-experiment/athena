@@ -6,7 +6,7 @@
 atlas_subdir( TgcRawDataMonitoring )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint Graf Graf3d Gpad Html Postscript Gui GX11TTF GX11 )
+find_package( ROOT COMPONENTS Core MathCore )
 
 atlas_add_component( TgcRawDataMonitoring
                      src/*.cxx src/components/*.cxx

@@ -6,7 +6,7 @@
 atlas_subdir( MuonTrackMonitoring )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread Graf Graf3d Gpad Html Postscript Gui GX11TTF GX11 )
+find_package( ROOT COMPONENTS Core Hist )
 
 # Component(s) in the package:
 atlas_add_component( MuonTrackMonitoring
