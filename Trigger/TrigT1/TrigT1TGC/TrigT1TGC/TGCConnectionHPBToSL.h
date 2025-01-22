@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //  table of connection between High-Pt Board and Sector Logic
@@ -24,7 +24,7 @@ class TGCConnectionHPBToSL : public TGCBoardConnection
   TGCConnectionHPBToSL& operator=(const TGCConnectionHPBToSL& right);
 
  private:
-  int* m_SLPortToHPB[TGCSector::NumberOfHighPtBoardType];
+  int* m_SLPortToHPB[TGCSector::NumberOfHighPtBoardType]{};
 };
 
 inline
