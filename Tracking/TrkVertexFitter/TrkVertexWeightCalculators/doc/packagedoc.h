@@ -12,6 +12,7 @@ coming from the hard-scatter interaction.
 - SumPtVertexWeightCalculator: return sumPT / sumPT2 of the tracks associated to the vertex.
 - TrueVertexDistanceWeightCalculator: return 1 / deltaZ, where deltaZ is the distance between the reconstructed vertex and the true vertex.
 - BDTVertexWeightCalculator: BDT-based, developed by Davide Riva during his bachelor thesis. @author Ruggero Turra <ruggero.turra@cern.ch>
+- GNNVertexWeightCalculator: GNN-based, developed by Jackson Burzynski & Guglielmo Frattari. @author Jackson Burzynski <jackson.carl.burzynski@cern.ch>
 
 Most of the configuration is in Tracking/TrkConfig/python/TrkVertexWeightCalculatorsConfig.py
 **/

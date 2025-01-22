@@ -59,6 +59,8 @@ namespace ORUtils
                     "Maximum allowed size of sliding dR cone");
     declareProperty("UseRapidity", m_useRapidity = true,
                     "Calculate delta-R using rapidity");
+    declareProperty("PVContainerName", m_PVContName = "PrimaryVertices",
+                    "PV Container to use");
   }
 
   //---------------------------------------------------------------------------
@@ -212,16 +214,15 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   const xAOD::Vertex* MuJetOverlapTool::getPrimVtx() const
   {
-    const char* contName = "PrimaryVertices";
     const xAOD::VertexContainer* vertices = nullptr;
-    if(evtStore()->retrieve(vertices, contName).isSuccess()) {
+    if(evtStore()->retrieve(vertices, m_PVContName).isSuccess()) {
       for(auto vtx : *vertices) {
         if(vtx->vertexType() == xAOD::VxType::PriVtx)
           return vtx;
       }
     }
     else {
-      ATH_MSG_WARNING("Failed to retrieve " << contName);
+      ATH_MSG_WARNING("Failed to retrieve " << m_PVContName);
     }
     // No PV found. We cannot execute the OR recommendations.
     ATH_MSG_FATAL("No primary vertex in the PrimaryVertices container!");
