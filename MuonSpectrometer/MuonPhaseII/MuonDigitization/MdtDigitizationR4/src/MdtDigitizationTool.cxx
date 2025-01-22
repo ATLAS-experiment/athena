@@ -82,7 +82,7 @@ namespace MuonR4 {
 
                 const MuonCalib::MdtTubeCalibContainer::SingleTubeCalib& tubeCalib{*tubeConstants->tubeCalib->getCalib(hitId)};
             
-                const double sigPropTime = tubeCalib.inversePropSpeed*distRO;
+                const double sigPropTime = calibData->inversePropSpeed()*distRO;
                 ATH_MSG_VERBOSE(m_idHelperSvc->toString(hitId)<<" "<<Amg::toString(locPos)<<" distance to readout: "<<distRO<<" --> "<<sigPropTime);
                 /// Total tdc time is the sum of the drift time, the time of flight of the muon, the propgation along the wire
                 /// and finally the constant t0 tube offset
@@ -128,7 +128,7 @@ namespace MuonR4 {
                               <<", twin distance: "<<twinDist);
                 const MuonCalib::MdtTubeCalibContainer::SingleTubeCalib& twinCalib{*tubeConstants->tubeCalib->getCalib(twinId)};
             
-                const double twinPropTime = tubeCalib.inversePropSpeed*twinDist;
+                const double twinPropTime = calibData->inversePropSpeed()*twinDist;
                 /// Total tdc time is the sum of the drift time, the time of flight of the muon, the propgation along the wire
                 /// and finally the constant t0 tube offset
                 const double twinTdcTime = digiOutput.driftTime() + arrivalTime + twinPropTime 

@@ -16,7 +16,7 @@ namespace MuonCalib {
                         m_idHelper.tubeMax(secondMl));
     m_data.resize(m_nLayers * m_nTubes * m_nMl);
 }
-bool MdtTubeCalibContainer::setCalib(SingleTubeCalib&& val, const Identifier& tubeId, MsgStream& msg) {
+bool MdtTubeCalibContainer::setCalib(SingleTubeCalibPtr val, const Identifier& tubeId, MsgStream& msg) {
     /// Make enough space for the calibration constants
     const unsigned int index = vectorIndex(tubeId);
     if (m_moduleID != m_idHelperSvc->chamberId(tubeId)) {
@@ -35,8 +35,8 @@ bool MdtTubeCalibContainer::setCalib(SingleTubeCalib&& val, const Identifier& tu
             <<m_idHelperSvc->chamberNameString(m_moduleID)<<endmsg;
         m_data.resize(index +1);
     }
-    SingleTubeCalib& store = m_data[index];
-    if (store) {
+    SingleTubeCalibPtr& store = m_data[index];
+    if (store && store !=val) {
         msg << MSG::ERROR<< __FILE__ <<":"<< __LINE__<< " Data has already been stored for channel "
             << m_idHelperSvc->toString(tubeId) 
             <<", layer max: "<<m_nLayers<<", tube max: "<<m_nTubes

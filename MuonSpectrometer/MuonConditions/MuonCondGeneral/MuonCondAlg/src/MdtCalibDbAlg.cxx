@@ -114,7 +114,9 @@ StatusCode MdtCalibDbAlg::initialize() {
         ATH_MSG_FATAL("Failed to retrieve conditions object "<<m_readKeyDCS.fullKey());
         return StatusCode::FAILURE;
     }
-    writeHandle.addDependency(readHandle);
+    if (readHandle->hasDCS()) {
+        writeHandle.addDependency(readHandle);
+    }
     return StatusCode::SUCCESS;
 }
 StatusCode MdtCalibDbAlg::execute(const EventContext& ctx) const {
@@ -596,9 +598,6 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
 // build the transient structure and load some defaults for T0s
 StatusCode MdtCalibDbAlg::defaultT0s(MuonCalib::MdtCalibDataContainer& writeCdo) const {
     const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
-    
-    // Inverse of wire propagation speed
-    const float inversePropSpeed = 1. / (Gaudi::Units::c_light * m_prop_beta);
 
     // loop over modules (MDT chambers) and create an MdtTubeContainer for each
     MdtIdHelper::const_id_iterator it = id_helper.module_begin();
@@ -629,11 +628,10 @@ StatusCode MdtCalibDbAlg::defaultT0s(MuonCalib::MdtCalibDataContainer& writeCdo)
         for (unsigned int ml = 1; ml <= nml; ++ml) {
             for (unsigned int l = 1; l <= nlayers; ++l) {
                 for (unsigned int t = 1; t <= ntubes; ++t) {
-                    MuonCalib::MdtTubeCalibContainer::SingleTubeCalib data;
+                    auto data = std::make_unique<MuonCalib::MdtTubeCalibContainer::SingleTubeCalib>();
                     const Identifier tubeId = id_helper.channelID(*it, ml, l, t);
-                    data.t0 = t0;
-                    data.adcCal = 1.;
-                    data.inversePropSpeed = inversePropSpeed;
+                    data->t0 = t0;
+                    data->adcCal = 1.;                   
                     tubes->setCalib(std::move(data), tubeId, msgStream());
                 }
             }
@@ -800,6 +798,8 @@ StatusCode MdtCalibDbAlg::loadTube(const EventContext& ctx, MuonCalib::MdtCalibD
 
     // Inverse of wire propagation speed
     const float inversePropSpeed = 1. / (Gaudi::Units::c_light * m_prop_beta);
+    writeCdo.setInversePropSpeed(inversePropSpeed);
+
 
     // unpack the strings in the collection and update the
     // MdtTubeCalibContainers in TDS
@@ -858,11 +858,10 @@ StatusCode MdtCalibDbAlg::loadTube(const EventContext& ctx, MuonCalib::MdtCalibD
             
             const int statusCode = tubeChannel["status"];
             const double meanAdc = tubeChannel["meanAdc"];
-            MuonCalib::MdtTubeCalibContainer::SingleTubeCalib datatube; 
-            datatube.statusCode = statusCode;
-            datatube.inversePropSpeed = inversePropSpeed;
-            datatube.t0 = tzero;
-            datatube.adcCal = meanAdc;
+            auto datatube = std::make_unique<MuonCalib::MdtTubeCalibContainer::SingleTubeCalib>(); 
+            datatube->statusCode = statusCode;
+            datatube->t0 = tzero;
+            datatube->adcCal = meanAdc;
             const Identifier tubeId = idHelper.channelID(chId, ml, l, t);
             tubes->setCalib(std::move(datatube), tubeId, msgStream());
         }
