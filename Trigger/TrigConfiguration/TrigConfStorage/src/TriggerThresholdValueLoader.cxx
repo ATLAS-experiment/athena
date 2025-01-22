@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////
@@ -165,7 +165,7 @@ TrigConf::TriggerThresholdValueLoader::load( TriggerThresholdValue& ttvTarget ) 
 
    try {
       ClusterThresholdValue& ctvTarget = dynamic_cast<ClusterThresholdValue&>(ttvTarget);
-      if ( type != def.emType() && type != def.tauType()) {
+      if ( type != def.typeAsString(L1DataDef::EM) && type != def.typeAsString(L1DataDef::TAU) ) {
          msg() << "TriggerThresholdValueLoader >> No type match for ttv_id = " 
                << ctvTarget.id() << " " << type << std::endl;
          throw std::runtime_error( "TriggerThresholdValueLoader >> ClusterThresholdValue not available" );
@@ -194,7 +194,9 @@ TrigConf::TriggerThresholdValueLoader::load( TriggerThresholdValue& ttvTarget ) 
    try {
       JetThresholdValue& jtvTarget = dynamic_cast<JetThresholdValue&>(ttvTarget);
       
-      if (type!=def.jetType() && type!=def.jbType() && type!=def.jfType()) {
+      if (type!=def.typeAsString(L1DataDef::JET) &&
+          type!=def.typeAsString(L1DataDef::JB) &&
+          type!=def.typeAsString(L1DataDef::JF)) {
          msg() << "TriggerThresholdValueLoader >> No type match for ttv_id = " 
                << jtvTarget.id() << type << std::endl;
          throw std::runtime_error( "TriggerThresholdValueLoader >> TriggerThresholdValue not available" );
