@@ -52,7 +52,7 @@ public:
      * @param inputFile The input file name to be opened
      * @param testVector The vector of uint64_t to be filled
      */
-    StatusCode prepareTV(const std::string inputFile, std::vector<uint64_t> &testVector) const;
+    StatusCode prepareTV(const std::string& inputFile, std::vector<uint64_t> &testVector) const;
 
     /**
      * @brief Compare two TV in the form of std::vector<uint64_t>
