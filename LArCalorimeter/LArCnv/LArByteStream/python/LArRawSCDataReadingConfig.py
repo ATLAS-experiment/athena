@@ -5,18 +5,29 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
-def LArRawSCDataReadingCfg(configFlags, **kwargs):
+def LArRawSCDataReadingCfg(configFlags, ROBList=None, name="LArRawSCDataReadingAlg", **kwargs):
     acc=ComponentAccumulator()
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     acc.merge(LArGMCfg(configFlags))
     from LArCabling.LArCablingConfig import LArLATOMEMappingCfg
     acc.merge(LArLATOMEMappingCfg(configFlags))
 
-    acc.addEventAlgo(CompFactory.LArRawSCDataReadingAlg("LArRawSCDataReadingAlg",
+    if ( not (ROBList is None) ):
+       acc.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(name,
+                     LATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder",ProtectSourceId = True), 
+                     ROBList=ROBList,
+                     **kwargs)
+                    )
+    else : 
+       acc.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(name,
                      LATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder",ProtectSourceId = True), 
                      **kwargs)
                     )
+
     return acc
+
+def LArRawSCDataReadingInRoICfg(configFlags,name="LArRawSCDataReadingInRoICfg",etIdCollKey="SC_ET_ID_RoI",ROBList=[]):
+    return LArRawSCDataReadingCfg(configFlags,name=name,adcCollKey="",adcBasCollKey="",etCollKey="",LArLATOMEHeaderKey="",etIdCollKey=etIdCollKey,ROBList=ROBList)
 
 
 if __name__=="__main__":

@@ -67,7 +67,7 @@ def getCaloAllEMLayersPSSequenceGenCfg(flags,doAllorAllEM=False):
     selAcc = SelectionCA(nameselAcc)
     InViewRoIs="EMCaloRoIs"
     reco = InViewRecoCA(namerecoAcc,InViewRoIs=InViewRoIs)
-    reco.mergeReco(fastCaloVDVCfg(InViewRoIs=InViewRoIs))
+    reco.mergeReco(fastCaloVDVCfg(flags,InViewRoIs=InViewRoIs))
     reco.mergeReco(fastCaloRecoSequenceCfg(flags, inputEDM=InViewRoIs,ClustersName=output,doAllEm=not doAllorAllEM,doAll=doAllorAllEM))
 
     selAcc.mergeReco(reco)

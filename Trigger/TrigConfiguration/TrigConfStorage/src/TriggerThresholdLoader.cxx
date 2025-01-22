@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./TriggerThresholdValueLoader.h"
@@ -195,32 +195,32 @@ TrigConf::TriggerThresholdLoader::load( TriggerThreshold& ttTarget ) {
             ((dynamic_cast<StorageMgr&>(m_storageMgr)).triggerThresholdValueLoader());
          ttvldr.setVerbose(verbose());
          for (unsigned int i=0; i<numberofvalues; ++i) {
-
-            TriggerThresholdValue* ttv = 0;          
-            if ( ttTarget.type() == L1DataDef::emType() || 
-                 ttTarget.type() == L1DataDef::tauType() ) {
-               ttv = new ClusterThresholdValue();
-            } else if (ttTarget.type()==L1DataDef::jetType() || 
-                       ttTarget.type()==L1DataDef::jbType() ||
-                       ttTarget.type()==L1DataDef::jfType()) {
-               ttv = new JetThresholdValue();
-            } else if (ttTarget.type() ==L1DataDef::muonType()) {
+            TriggerThresholdValue* ttv = 0;
+            if (ttTarget.type() == L1DataDef::typeAsString(L1DataDef::MUON)) {
                ttv = new MuonThresholdValue();
-            } else if (ttTarget.type() == L1DataDef::jeType() || 
-                       ttTarget.type() == L1DataDef::xeType() || 
-                       ttTarget.type() == L1DataDef::teType()) {
+            } else if (ttTarget.type() == L1DataDef::typeAsString(L1DataDef::EM)  ||
+                       ttTarget.type() == L1DataDef::typeAsString(L1DataDef::TAU)) {
+               ttv = new ClusterThresholdValue();
+            } else if (ttTarget.type() == L1DataDef::typeAsString(L1DataDef::JET) ||
+                       ttTarget.type() == L1DataDef::typeAsString(L1DataDef::JB)  ||
+                       ttTarget.type() == L1DataDef::typeAsString(L1DataDef::JF)) {
+               ttv = new JetThresholdValue();
+            } else if (ttTarget.type() == L1DataDef::typeAsString(L1DataDef::XE)  ||
+                       ttTarget.type() == L1DataDef::typeAsString(L1DataDef::JE)  ||
+                       ttTarget.type() == L1DataDef::typeAsString(L1DataDef::TE)) {
                ttv = new EtThresholdValue();
-            } else if (ttTarget.type() == L1DataDef::xsType()) {
+            } else if (ttTarget.type() == L1DataDef::typeAsString(L1DataDef::XS)) {
                ttv = new XsThresholdValue();
-            } else if (ttTarget.type() == L1DataDef::nimType() ||
-                       ttTarget.type() == L1DataDef::mbtsType() ||
-                       ttTarget.type() == L1DataDef::mbtssiType() ||
-                       ttTarget.type() == L1DataDef::calreqType() ||
-                       ttTarget.type() == L1DataDef::zdcType() ||
-                       ttTarget.type() == L1DataDef::trtType() ||
-                       ttTarget.type() == L1DataDef::bcmType() ||
-                       ttTarget.type() == L1DataDef::bcmcmbType() ||
-                       ttTarget.type() == L1DataDef::lucidType()) { 
+            } else if (ttTarget.type() == L1DataDef::typeAsString(L1DataDef::NIM)    ||
+                       ttTarget.type() == L1DataDef::typeAsString(L1DataDef::MBTS)   ||
+                       ttTarget.type() == L1DataDef::typeAsString(L1DataDef::MBTSSI) ||
+                       ttTarget.type() == L1DataDef::typeAsString(L1DataDef::BCM)    ||
+                       ttTarget.type() == L1DataDef::typeAsString(L1DataDef::BCMCMB) ||
+                       ttTarget.type() == L1DataDef::typeAsString(L1DataDef::LUCID)  ||
+                       ttTarget.type() == L1DataDef::typeAsString(L1DataDef::CALREQ) ||
+                       ttTarget.type() == L1DataDef::typeAsString(L1DataDef::ZDC)    ||
+                       ttTarget.type() == L1DataDef::typeAsString(L1DataDef::TRT)    ||
+                       ttTarget.type() == L1DataDef::typeAsString(L1DataDef::BPTX) ) {
                ttv = new NimThresholdValue();
             } else {
                msg() << "TriggerThresholdLoader: not supported type " 

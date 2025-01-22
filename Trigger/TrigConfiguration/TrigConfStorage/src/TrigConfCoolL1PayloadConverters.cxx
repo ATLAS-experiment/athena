@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfStorage/TrigConfCoolL1PayloadConverters.h"
@@ -136,8 +136,8 @@ TrigConfCoolL1PayloadConverters::createLvl1ThresholdPayload( cool::IFolderPtr fl
       string valHad_veto      = "63";
       string valPriority      = lexical_cast<string,float>(thrVal->priority());
 
-      if ( thr.type()==L1DataDef::emType() ||
-           thr.type()==L1DataDef::tauType() ) {
+      if ( thr.type()==L1DataDef::typeAsString(L1DataDef::EM) ||
+           thr.type()==L1DataDef::typeAsString(L1DataDef::TAU) ) {
          ClusterThresholdValue* cluThrVal = dynamic_cast<ClusterThresholdValue*>(thrVal);
          if(cluThrVal) {
             valEm_isolation  = lexical_cast<string,float>(cluThrVal->emIsolation());  

@@ -29,6 +29,7 @@
 #include "LArRecConditions/LArFebRodMapping.h"
 #include "LArRecConditions/LArBadChannelCont.h"
 #include "LArRecConditions/LArRoIMap.h"
+#include "LArRecEvent/LArDeadOTXFromSC.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 
 class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc> {
@@ -90,6 +91,9 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
    {this, "CaloDetDescrManager", "CaloDetDescrManager", "SG Key for CaloDetDescrManager in the Condition Store" };
   SG::ReadCondHandleKey<TileHid2RESrcID> m_tileHid2RESrcIDKey
    {this, "TileHid2RESrcID", "TileHid2RESrcIDHLT", "SG Key of TileHid2RESrcID object"} ;
+  SG::ReadHandleKey<LArDeadOTXFromSC> m_deadOTXFromSCKey
+   {this, "LArDeadOTXFromSC", "DeadOTXFromSC", "Key of the DeadOTXFromSC CDO" };
+  bool m_correctDead;
 
   void reset_LArCol ( LArCellCollection* coll ){
     for(LArCellCollection::iterator ii=coll->begin();ii!=coll->end();++ii)
@@ -148,7 +152,7 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
   unsigned int lateInit( const EventContext& context );
   bool m_lateInitDone = false;
 
-  unsigned int convertROBs(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& robFrags, LArCellCont* larcell, LArRodBlockStructure*& larRodBlockStructure, uint16_t rodMinorVersion, uint32_t robBlockType );
+  unsigned int convertROBs(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& robFrags, LArCellCont* larcell, LArRodBlockStructure*& larRodBlockStructure, uint16_t rodMinorVersion, uint32_t robBlockType, const LArDeadOTXFromSC* dead );
   unsigned int convertROBs( const EventContext& context, const std::vector<IdentifierHash>& rIds, TileCellCont* tilecell, TileROD_Decoder::D0CellsHLT* d0cells );
 
 

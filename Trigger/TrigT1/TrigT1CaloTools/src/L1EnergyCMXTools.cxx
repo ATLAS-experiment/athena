@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <map>
@@ -174,6 +174,7 @@ void L1EnergyCMXTools::formCMXEtSumsModule(
 /** form partial CMXEtSums (crate) from module CMXEtSums */
 void L1EnergyCMXTools::findRestrictedEta(uint32_t &maskXE, uint32_t &maskTE) const
 {
+    using TrigConf::L1DataDef;
     const float moduleEta[8] = {-4.,-2.,-1.2,-0.4,0.4,1.2,2.,4.};
     maskXE =  0;
     maskTE =  0;
@@ -181,10 +182,10 @@ void L1EnergyCMXTools::findRestrictedEta(uint32_t &maskXE, uint32_t &maskTE) con
     bool maskTESet = false;
 
     auto l1Menu = SG::makeHandle( m_L1MenuKey );
-    TrigConf::L1DataDef def;
     std::vector<std::shared_ptr<TrigConf::L1Threshold>> allThresholds = l1Menu->thresholds();
     for ( const auto& thresh : allThresholds ) {
-      if ( ( thresh->type() == def.xeType() || thresh->type() == def.teType()) && thresh->mapping() > 7 ) {
+      if ( ( thresh->type() == L1DataDef::typeAsString(L1DataDef::XE) ||
+             thresh->type() == L1DataDef::typeAsString(L1DataDef::TE) ) && thresh->mapping() > 7 ) {
         auto thresh_Calo = static_cast<TrigConf::L1Threshold_Calo*>(thresh.get());
         auto tvcs = thresh_Calo->thrValuesCounts();
         // Make sure only set masks from the first valid threshold in the range (for each type)
@@ -197,13 +198,13 @@ void L1EnergyCMXTools::findRestrictedEta(uint32_t &maskXE, uint32_t &maskTE) con
           // Bits are set false by default, so ignore thresholds that are just doing that
           if (tVC.value() >= 0x7fff) continue;
           // Set bits true if module centre between etaMin and etaMax
-          if ( thresh->type() == def.xeType()  && !maskXESet ) {
+          if ( thresh->type() == L1DataDef::typeAsString(L1DataDef::XE)  && !maskXESet ) {
             for (unsigned int bin = 0; bin < 8; ++bin) {
               if (moduleEta[bin] > tVC.etaMin()*0.1 && moduleEta[bin] < tVC.etaMax()*0.1)
                 maskXE |= (1<<bin);
             }
           }
-          else if ( thresh->type() == def.teType()  && !maskTESet ) {
+          else if ( thresh->type() == L1DataDef::typeAsString(L1DataDef::TE)  && !maskTESet ) {
             for (unsigned int bin = 0; bin < 8; ++bin) {
               if (moduleEta[bin] > tVC.etaMin()*0.1 && moduleEta[bin] < tVC.etaMax()*0.1)
                 maskTE |= (1<<bin);

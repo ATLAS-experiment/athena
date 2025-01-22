@@ -10,7 +10,7 @@
 # art-output: RDO.pool.root
 # art-output: AOD.pool.root
 # art-architecture: '#x86_64-intel'
-
+# art-memory: 5999
 
 events=50
 
@@ -38,22 +38,24 @@ FastChain_tf.py \
    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
    --postExec 'with open("Config.pkl", "wb") as f: cfg.store(f)' \
    --imf False
+
 fastchain=$?
 echo  "art-result: $fastchain EVNTtoRDO"
 status=$fastchain
 
 reg=-9999
-if [ $fastchain -eq 0 ]
-then
-   art.py compare --file ${RDO_File} --mode=semi-detailed --entries 10
-   reg=$?
-   status=$reg
-fi
-echo  "art-result: $reg regression"
-
 rec=-9999
+reg2=-9999
 if [ ${fastchain} -eq 0 ]
 then
+
+   # Regression
+   ArtPackage=$1
+   ArtJobName=$2
+   art.py compare grid -entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file ${RDO_File}
+   reg=$?
+   status=$reg
+
    # Reconstruction
    Reco_tf.py \
       --CA \
@@ -69,8 +71,16 @@ then
       --imf False
      rec=$?
      status=$rec
+     if [ ${rec} -eq 0 ]
+     then
+         art.py compare grid --entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file=${AOD_File}
+         reg2=$?
+         status=$reg2
+     fi
 fi
 
+echo  "art-result: $reg regression"
 echo  "art-result: $rec reconstruction"
+echo  "art-result: $reg2 regression2"
 
 exit $status
