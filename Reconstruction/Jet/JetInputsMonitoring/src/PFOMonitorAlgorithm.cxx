@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOMonitorAlgorithm.h"
@@ -119,7 +119,7 @@ StatusCode PFOMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
     const static SG::AuxElement::ConstAccessor<int> acc_IsInDenseEnvironment("IsInDenseEnvironment");
     const static SG::AuxElement::ConstAccessor<float> acc_tracksExpectedEnergyDeposit("TracksExpectedEnergyDeposit");
 
-    for (const auto& pfo : *chpfos) {
+    for (const auto pfo : *chpfos) {
       pT  = pfo->pt()/GeV;
       eta = pfo->eta();
       phi = pfo->phi();
@@ -154,7 +154,7 @@ StatusCode PFOMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
 	      
     }
 
-    for (const auto& pfo : *nupfos) {
+    for (const auto pfo : *nupfos) {
       E   = pfo->e()/GeV;
       //some neutral particle flow FlowELement can have their energy set to exactly zero. Will get FPE if
       //try to calculate rapidity, so skip these.
