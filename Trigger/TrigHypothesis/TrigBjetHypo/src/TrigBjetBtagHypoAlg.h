@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGBJETHYPO_TRIGBJETBTAGHYPOALG_H
@@ -22,18 +22,6 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "AthContainers/ConstAccessor.h"
-
-
-#define MONITOR_BTAG_AUX_TRACK_VAR(VAR_NAME, VAR_TYPE ) \
-      auto monitor_for_##VAR_NAME = Monitored::Collection( #VAR_NAME, \
-        SG::ConstAccessor< std::vector<VAR_TYPE> acc( #VAR_NAME )(**bTagLink));
-
-#define MONITOR_BTAG_AUX_VAR(VAR_NAME, VAR_TYPE, CONTAINER ) \
-    auto monitor_for_##VAR_NAME = Monitored::Collection( #VAR_NAME, CONTAINER, \
-      [](const ElementLink< xAOD::BTaggingContainer >& bTagLink) {  \
-        return SG::ConstAccessor<VAR_TYPE>( #VAR_NAME )(**bTagLink); \
-      } \
-    );
 
 
 class TrigBjetBtagHypoAlg : public TrigBjetHypoAlgBase {
