@@ -477,8 +477,7 @@ print      BPHY18_Select_piK
 
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__BMuonTrackIsoTool
 BPHY18_LegTrackIsoTool = DerivationFramework__BMuonTrackIsoTool(
-    VertexLegTypes             = 5,
-    IsolationTargetLegTypes    = 5,
+    IsolationTargetLegTypes    = 2,
     name                       = "BPHY18_TrackIsoTool",
     BranchPrefixes             = [ "BeeKstCandidates" ],
     BranchBaseName             = "legIso",

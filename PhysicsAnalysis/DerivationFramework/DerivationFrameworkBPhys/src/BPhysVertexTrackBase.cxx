@@ -1098,9 +1098,9 @@ namespace DerivationFramework {
 						  TrackBag& tracks)
     const {
     
-    const std::vector<unsigned int> elTrackIndices; // = vtx.electronTrackIndices();
+    std::vector<unsigned int> elTrackIndices; // = vtx.electronTrackIndices();
     auto elTrackIndicesMap = buildIndexMap(elTrackIndices);
-    const std::vector<xAOD::BPhysHelper::eltrack_type> elTrackTypes; // = vtx.electronTrackTypes();
+    std::vector<xAOD::BPhysHelper::eltrack_type> elTrackTypes; // = vtx.electronTrackTypes();
     bool electronsInVtx = ( vtx.nElectrons() > 0 );
 
     if ( electronsInVtx ){
@@ -1120,19 +1120,23 @@ namespace DerivationFramework {
           unsigned int elIdx;
           auto _elIdx = elTrackIndicesMap.find(i);
           isEl  = _elIdx == elTrackIndicesMap.end() ? false : true;
-        }
-        if ( isEl ) {
-          elIdx = _elIdx->second;
-          if ( 
-            ( elTrackTypes.at( elIdx ) == xAOD::BPhysHelper::TRACK_GSF ) ||
-            ( elTrackTypes.at( elIdx ) == xAOD::BPhysHelper::TRACK_GSFCALOREFIT )
-          ){
-              trackToAdd = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(track);
-          } else if ( elTrackTypes.at( elIdx ) == xAOD::BPhysHelper::TRACK_INDET ) {
+          if ( isEl ) {
+            elIdx = _elIdx->second;
+            if ( 
+              ( elTrackTypes.at( elIdx ) == xAOD::BPhysHelper::TRACK_GSF ) ||
+              ( elTrackTypes.at( elIdx ) == xAOD::BPhysHelper::TRACK_GSFCALOREFIT )
+            ){
+                trackToAdd = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(track);
+            } else if ( elTrackTypes.at( elIdx ) == xAOD::BPhysHelper::TRACK_INDET ) {
+                trackToAdd = track;
+            } else {
               trackToAdd = track;
+            }
+          } else {
+            trackToAdd = track; // electrons in vertex but this leg != electron
           }
         } else {
-          trackToAdd = track;
+          trackToAdd = track; // electrons not in vertex
         } 
         // N.B. We assume only InDet tracks are used for muon legs 
         // of the vertex -> no special treatment needed for muons! 
@@ -1142,10 +1146,10 @@ namespace DerivationFramework {
     // loop over preceeding vertices
     if ( m_incPrecVerticesInDecay ) {
       for (int ivtx = 0; ivtx < vtx.nPrecedingVertices(); ++ivtx) {
-	xAOD::BPhysHelper precVtx(vtx.precedingVertex(ivtx));
-	findAllTracksInDecay(precVtx, tracks);
+	      xAOD::BPhysHelper precVtx(vtx.precedingVertex(ivtx));
+	      findAllTracksInDecay(precVtx, tracks);
+        } // for
       } // if
-    } // for 
   }
   //--------------------------------------------------------------------------
   // findAllMuonsInDecay: returns a vector of xAOD::Muon objects

@@ -352,7 +352,7 @@ namespace DerivationFramework {
     if ( m_isoTargetLegTypes == 0 ){
       auto fillTarget = id < muons.size() ? muons.at(id) : NULL;
       iso.fill(isoValue, nTracksInCone, fillTarget);
-    } else if ( m_isoTargetLegTypes == 1 ) ){
+    } else if ( m_isoTargetLegTypes == 1 ){
       auto fillTarget = id < electrons.size() ? electrons.at(id) : NULL;
       iso.fill(isoValue, nTracksInCone, fillTarget);
     } else {
