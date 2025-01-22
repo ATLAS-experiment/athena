@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ClusterMonitorAlgorithm.h"
@@ -107,7 +107,7 @@ StatusCode ClusterMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     nEMClusters = emclusters->size(); 
     fill("ClusterMonitorAllEMClusters", nEMClusters);
 
-    for (const auto& cluster : *clusters) {
+    for (const auto cluster : *clusters) {
       eta = cluster->eta();
       phi = cluster->phi();
       E   = cluster->e()/GeV;
@@ -148,7 +148,7 @@ StatusCode ClusterMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     }
 
     // Repeat for EM clusters - Set monitored variables for this event
-    for (const auto& emcluster : *emclusters) {
+    for (const auto emcluster : *emclusters) {
       emeta = emcluster->eta();
       emphi = emcluster->phi();
       emE   = emcluster->e()/GeV;
