@@ -21,7 +21,6 @@ Adopted from RT_Relation_DigiTool
 #include "MdtCalibData/IRtResolution.h"
 #include "MdtCalibData/MdtFullCalibData.h"
 #include "MdtCalibData/MdtRtRelation.h"
-#include "MdtCalibData/TrRelation.h"
 #include "MdtCalibData/MdtCalibDataContainer.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"

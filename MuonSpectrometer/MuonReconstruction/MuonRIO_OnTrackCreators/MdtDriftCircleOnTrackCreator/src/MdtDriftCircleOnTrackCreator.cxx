@@ -9,7 +9,6 @@
 #include "MdtCalibData/IRtResolution.h"
 #include "MdtCalibData/MdtFullCalibData.h"
 #include "MdtCalibData/MdtRtRelation.h"
-#include "MdtCalibData/TrRelation.h"
 #include "MuonPrepRawData/MdtPrepData.h"
 #include "MuonRIO_OnTrack/MdtDriftCircleOnTrack.h"
 #include "MuonRIO_OnTrack/MuonDriftCircleErrorStrategy.h"

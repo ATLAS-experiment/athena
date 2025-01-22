@@ -36,15 +36,19 @@ int main() {
                 std::cout<<printCoeffs1st(o)<<std::endl;             
                 return EXIT_FAILURE;
             }
-            const double deriv = MuonCalib::legendreDeriv(o,x,1);
-            const double numDeriv = (MuonCalib::legendrePoly(o, x+h) - MuonCalib::legendrePoly(o,x -h))/ (2.*h);
-            if (std::abs(deriv - numDeriv) / cutOff(numDeriv, 10.*h) > 1.e-4) {
-                std::cerr<<"Legendre polynomial "<<o<<" at "<<x<<" first derivative deviates from numerical approach "<<deriv<<", calib: "<<numDeriv<<std::endl;
-                std::cout<<printCoeffs1st(o)<<std::endl;
-                return EXIT_FAILURE;
+            for (unsigned d = 1; d <= o + 1; ++d) {
+                const double deriv = MuonCalib::legendreDeriv(o,d, x);
+                const double numDeriv = (MuonCalib::legendreDeriv(o, d-1, x+h) - 
+                                         MuonCalib::legendreDeriv(o, d-1, x-h))/ (2.*h);
+                if (std::abs(deriv - numDeriv) / cutOff(numDeriv, 10.*h) > 1.e-4) {
+                    std::cerr<<"Legendre polynomial "<<o<<" at "<<x<<" "<<d<< "-th derivative deviates from numerical approach "
+                             <<deriv<<", calib: "<<numDeriv<<std::endl;
+                    std::cout<<printCoeffs1st(o)<<std::endl;
+                    return EXIT_FAILURE;
+                }
             }
             /** Check whether the polynomials solve the legendre differential equation */
-            const double legendreEq = (1- x*x) * MuonCalib::legendreDeriv(o,x, 2) - 2.*x*MuonCalib::legendreDeriv(o,x, 1) + o*(o+1) * MuonCalib::legendrePoly(o,x);
+            const double legendreEq = (1- x*x) * MuonCalib::legendreDeriv(o, 2, x) - 2.*x*MuonCalib::legendreDeriv(o,1, x) + o*(o+1) * MuonCalib::legendrePoly(o,x);
             if (std::abs(legendreEq) > h) {
                 std::cerr<<" The legendre polynomial does not solve the differential equation "
                         <<"x="<<x<<" --> "<<legendreEq<<std::endl;
