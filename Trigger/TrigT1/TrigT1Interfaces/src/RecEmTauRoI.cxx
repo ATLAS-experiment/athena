@@ -1,7 +1,6 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-// $Id: RecEmTauRoI.cxx 796120 2017-02-08 03:20:47Z ssnyder $
 /***************************************************************************
                         RecEmTauRoI.cxx  -  description
                            -------------------
@@ -140,8 +139,8 @@ void LVL1::RecEmTauRoI::constructRun1(
            caloThresholds->begin();
        it != caloThresholds->end(); ++it)
   {
-    if ((*it)->type() == L1DataDef::emType() ||
-        (*it)->type() == L1DataDef::tauType())
+    if ((*it)->type() == L1DataDef::typeAsString(L1DataDef::EM) ||
+        (*it)->type() == L1DataDef::typeAsString(L1DataDef::TAU))
     {
       int num = (*it)->thresholdNumber();
       thrMap.insert(std::map<int, TriggerThreshold *>::value_type(num, (*it)));
@@ -177,8 +176,8 @@ void LVL1::RecEmTauRoI::constructRun1(
         m_hadCoreIsolation.insert(
             std::map<int, unsigned int>::value_type(*itp, ctv->hadVetoCount()));
         TrigT1CaloDefs::ClusterAlgorithm type =
-            ((ctv->type() == L1DataDef::emType()) ? TrigT1CaloDefs::EMAlg
-                                                  : TrigT1CaloDefs::TauAlg);
+            ((ctv->type() == L1DataDef::typeAsString(L1DataDef::EM) ? TrigT1CaloDefs::EMAlg
+                                                                    : TrigT1CaloDefs::TauAlg));
         m_thresholdType.insert(
             std::map<int, TrigT1CaloDefs::ClusterAlgorithm>::value_type(*itp,
                                                                         type));
@@ -205,8 +204,8 @@ void LVL1::RecEmTauRoI::constructRun2(const std::vector<TriggerThreshold *> *cal
   m_thresholdType.clear();
 
   std::string triggerType =
-      (m_type == TrigT1CaloDefs::EMRoIWordType ? L1DataDef::emType()
-                                                : L1DataDef::tauType());
+      (m_type == TrigT1CaloDefs::EMRoIWordType ? L1DataDef::typeAsString(L1DataDef::EM)
+                                               : L1DataDef::typeAsString(L1DataDef::TAU));
 
   int ieta = int((m_coordRange.etaRange().min() + 0.025) / 0.1) +
               ((m_coordRange.etaRange().min() + 0.025 > 0) ? 0 : -1);
@@ -242,8 +241,8 @@ void LVL1::RecEmTauRoI::constructRun2(const std::vector<TriggerThreshold *> *cal
           m_isolationMask.insert(
               std::map<int, unsigned int>::value_type(num, isolMask));
           TrigT1CaloDefs::ClusterAlgorithm type =
-              ((ctv->type() == L1DataDef::emType()) ? TrigT1CaloDefs::EMAlg
-                                                    : TrigT1CaloDefs::TauAlg);
+              ((ctv->type() == L1DataDef::typeAsString(L1DataDef::EM)) ? TrigT1CaloDefs::EMAlg
+                                                                       : TrigT1CaloDefs::TauAlg);
           m_thresholdType.insert(
               std::map<int, TrigT1CaloDefs::ClusterAlgorithm>::value_type(
                   num, type));
