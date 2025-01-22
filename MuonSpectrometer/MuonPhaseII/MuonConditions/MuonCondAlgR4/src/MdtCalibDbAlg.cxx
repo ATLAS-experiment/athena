@@ -1,13 +1,9 @@
 /*
-  Copyright (C) 2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "AthenaKernel/IOVInfiniteRange.h"
 
 #include "MdtCalibDbAlg.h"
-#include "MdtCalibR4/TrSqrt.h"
-#include "MdtCalibR4/RtResolutionSqrt.h"
-#include "MdtCalibData/MdtRtRelation.h"
-#include "MdtCalibData/MdtFullCalibData.h"
 #include "MdtCalibData/RtChebyshev.h"
 #include "MdtCalibData/TrChebyshev.h"
 #include <MuonCalibMath/BaseFunctionFitter.h>
@@ -146,7 +142,7 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
         }
 
         auto rtRelRegion{std::make_shared<MuonCalib::RtChebyshev>(rtPars)};
-        auto rtResRegion{std::make_shared<MuonCalibR4::RtResolutionSqrt>(resolutionPars)};
+        std::unique_ptr<MuonCalib::IRtResolution> rtResRegion{};
         auto trRelRegion{std::make_shared<MuonCalib::TrChebyshev>(rtRelRegion, trPars)};
         RtRelationPtr MdtRt = std::make_unique<MuonCalib::MdtRtRelation>(std::move(rtRelRegion), std::move(rtResRegion), std::move(trRelRegion), 0.);
         if(!writeHandle.storeData(detElId, MdtRt, msgStream())) {
