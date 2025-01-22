@@ -41,6 +41,7 @@ atlas_add_component(EFTrackingFPGAIntegration
     INCLUDE_DIRS ${OpenCL_INCLUDE_DIRS} 
     LINK_LIBRARIES GaudiKernel 
                    AthenaBaseComps 
+                   AthXRTInterfacesLib
                    xAODInDetMeasurement 
                    ${OpenCL_LIBRARIES} 
                    InDetPrepRawData 
