@@ -567,7 +567,7 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
                 mglog.info('remove old tarball')
                 os.unlink('../'+gridpack_name)
                 mglog.info('Package up new tarball')
-                tar = stack_subprocess(['tar','cvzf','../'+gridpack_name,'--exclude=SubProcesses/P*/G*/*_results.dat','--exclude=SubProcesses/P*/G*/*.log','--exclude=SubProcesses/P*/G*/*.txt','.'])
+                tar = stack_subprocess(['tar','--exclude=SubProcesses/P*/G*/*_results.dat','--exclude=SubProcesses/P*/G*/*.log','--exclude=SubProcesses/P*/G*/*.txt','-cvsf','../'+gridpack_name,'.'])
                 tar.wait()
                 MADGRAPH_COMMAND_STACK += ['cd ..','rm -r tmp%i/'%os.getpid()]
                 os.chdir('../')
@@ -581,7 +581,7 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
             mglog.info('Package up process_dir')
             MADGRAPH_COMMAND_STACK += ['mv '+process_dir+' '+MADGRAPH_GRIDPACK_LOCATION]
             os.rename(process_dir,MADGRAPH_GRIDPACK_LOCATION)
-            tar = stack_subprocess(['tar','czf',gridpack_name,MADGRAPH_GRIDPACK_LOCATION,'--exclude=Events/*/*events*gz','--exclude=SubProcesses/P*/G*/log*txt','--exclude=SubProcesses/P*/G*/events.lhe*','--exclude=*/*.o','--exclude=*/*/*.o','--exclude=*/*/*/*.o','--exclude=*/*/*/*/*.o'])
+            tar = stack_subprocess(['tar','--exclude=Events/*/*events*gz','--exclude=SubProcesses/P*/G*/log*txt','--exclude=SubProcesses/P*/G*/events.lhe*','--exclude=*/*.o','--exclude=*/*/*.o','--exclude=*/*/*/*.o','--exclude=*/*/*/*/*.o','-czf',gridpack_name,MADGRAPH_GRIDPACK_LOCATION])
             tar.wait()
             MADGRAPH_COMMAND_STACK += ['mv '+MADGRAPH_GRIDPACK_LOCATION+' '+process_dir]
             os.rename(MADGRAPH_GRIDPACK_LOCATION,process_dir)
