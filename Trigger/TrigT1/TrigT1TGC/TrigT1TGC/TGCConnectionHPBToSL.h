@@ -8,6 +8,7 @@
 
 #include "TrigT1TGC/TGCBoardConnection.h"
 #include "TrigT1TGC/TGCSector.h"
+#include <array>
 
 namespace LVL1TGCTrigger {
 
@@ -24,7 +25,7 @@ class TGCConnectionHPBToSL : public TGCBoardConnection
   TGCConnectionHPBToSL& operator=(const TGCConnectionHPBToSL& right);
 
  private:
-  int* m_SLPortToHPB[TGCSector::NumberOfHighPtBoardType]{};
+  std::array<int*,  TGCSector::NumberOfHighPtBoardType>  m_SLPortToHPB{};
 };
 
 inline
