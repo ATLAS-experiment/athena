@@ -173,6 +173,7 @@ int DiTauMassTools::mmcType(const xAOD::IParticle* part)
 void DiTauMassTools::readInParams(TDirectory* dir, MMCCalibrationSet::e aset, std::vector<TF1*>& lep_numass, std::vector<TF1*>& lep_angle, std::vector<TF1*>& lep_ratio, std::vector<TF1*>& had_angle, std::vector<TF1*>& had_ratio) {
 	std::string paramcode;
 	if (aset == MMCCalibrationSet::MMC2019) paramcode = "MMC2019MC16";
+	else if (aset == MMCCalibrationSet::MMC2024) paramcode = "MMC2024MC23";
 	else {
 		Info("DiTauMassTools", "The specified calibration version does not support root file parametrisations");
 		return;
