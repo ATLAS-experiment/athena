@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // STL
@@ -1051,7 +1051,7 @@ StatusCode LVL1TGCTrigger::getMaskedChannel()
     
     std::ifstream fin(fullName.c_str());
     if (!fin) {
-      ATH_MSG_FATAL("Cannot open file " << fullName);
+      ATH_MSG_FATAL("Cannot open file " << (fullName.empty() ? fname : fullName));
       return StatusCode::FAILURE;
     } else {
       ATH_MSG_INFO("Use mask file : " << fullName);
