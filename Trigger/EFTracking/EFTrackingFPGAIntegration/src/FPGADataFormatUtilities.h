@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EFTRACKING_FPGA_INTEGRATION_FPGADATAFORMATUTILITIES_H
@@ -7,11 +7,13 @@
 
 #include <cstdint>
 
-#define SELECTBITS(len, startbit) (len == 64 ? UINTMAX_MAX : (((1ULL << len) - 1ULL) << startbit))
-
 // Provider of simple function for conversion of data into the FPGA dataformat
 namespace FPGADataFormatUtilities
 {
+    consteval uint64_t SELECTBITS(uint8_t len, uint8_t startbit) {
+        return (len == 64 ? UINTMAX_MAX : (((1ULL << len) - 1ULL) << startbit));
+    }
+
 	// EVT_HDR defined flags
 	const int EVT_HDR_FLAG = 0xab;
 
