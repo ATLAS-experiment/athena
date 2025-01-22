@@ -33,7 +33,7 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
     argumentParser = ArgumentParser()
     argumentParser.add_argument("--xclbinPath")
-    argumentParser.add_argument("--bufferSize", default = 8192)
+    argumentParser.add_argument("--bufferSize", type = int, default = 8192)
 
     from argparse import Action
     class JsonToDictAction(Action):
@@ -46,6 +46,9 @@ if __name__ == "__main__":
     argumentParser.add_argument("--outputCsvPathToSgKeyMap", action=JsonToDictAction)
 
     arguments = argumentParser.parse_args()
+
+    from AthenaConfiguration.ComponentFactory import CompFactory 
+    acc.addService(CompFactory.AthXRT.DeviceMgmtSvc(XclbinPathsList = [arguments.xclbinPath]))
 
     for inputCsvPath, sgKey in arguments.inputCsvPathToSgKeyMap.items():
         from EFTrackingDataStreamLoaderAlgorithmConfig import EFTrackingDataStreamLoaderAlgorithmCfg
