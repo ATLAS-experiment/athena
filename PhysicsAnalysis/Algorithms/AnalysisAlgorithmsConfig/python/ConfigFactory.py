@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # This file defines a factory method that can create a configuration
 # block sequence based on a passed in name.  This avoids having to
@@ -243,9 +243,9 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="FlavourTagging", alg=FTagConfig,
             defaults={'selectionName': ''},
             superBlocks="Jets")
-        from FTagAnalysisAlgorithms.FTagEventSFAnalysisConfig import FTagEventSFConfig
+        from FTagAnalysisAlgorithms.FTagSFAnalysisConfig import FlavourTaggingEventSF
         self.addAlgConfigBlock(algName="FlavourTaggingEventSF",
-                               alg=FTagEventSFConfig,
+                               alg=FlavourTaggingEventSF,
                                defaults={'selectionName': ''},
                                superBlocks="Jets")
 
