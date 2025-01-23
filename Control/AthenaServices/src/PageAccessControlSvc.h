@@ -1,7 +1,7 @@
 // dear emacs, this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_PAGEACCESSCONTROLSVC_H
@@ -50,7 +50,7 @@ class PageAccessControlSvc : public extends<AthService, IPageAccessControlSvc> {
 public:
 
   /// Standard GAUDI constructor
-  PageAccessControlSvc( const std::string& name, ISvcLocator* pSvcLocator ) ATLAS_CTORDTOR_NOT_THREAD_SAFE;
+  PageAccessControlSvc( const std::string& name, ISvcLocator* pSvcLocator ) ATLAS_NOT_THREAD_SAFE;
   
   /// Destructor
   virtual ~PageAccessControlSvc() {} 

@@ -1,11 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #define  GAUDISVC_EVENTLOOPMGR_CPP
-
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // non-MT EventLoopMgr
 
 #include <cassert>
 #include <ios>
@@ -718,7 +715,7 @@ StatusCode AthenaEventLoopMgr::nextEvent(int maxevt)
   // make nextEvent(0) a dummy call
   if (0 == maxevt) return StatusCode::SUCCESS;
 
-  static int        total_nevt = 0;
+  static std::atomic<int> total_nevt = 0;
 
   // the current 'clear-store' policy
   static const ClearStorePolicy::Type s_clearStore = 

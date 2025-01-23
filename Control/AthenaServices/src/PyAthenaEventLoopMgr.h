@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_PYATHENAEVENTLOOPMGR_H
@@ -13,8 +13,6 @@
 */
 
 #include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // non-MT EventLoopMgr
-
 #include "AthenaEventLoopMgr.h"
 
 // Gaudi
@@ -33,7 +31,7 @@ typedef _object PyObject;
     specific overrides in python. The idea is to maximize code-sharing
     with AthenaEventLoopMgr to reduce maintainance.
 */
-class PyAthenaEventLoopMgr : public AthenaEventLoopMgr   {
+class ATLAS_NOT_THREAD_SAFE PyAthenaEventLoopMgr : public AthenaEventLoopMgr   {
 public:
   /// Standard Constructor
   PyAthenaEventLoopMgr( const std::string& name, ISvcLocator* svcLoc );
