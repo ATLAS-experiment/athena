@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfL1Data/TriggerThreshold.h"
@@ -132,25 +132,31 @@ TrigConf::TriggerThreshold::addThresholdValue(const std::string& type) {
 TrigConf::TriggerThresholdValue*
 TrigConf::TriggerThreshold::createThresholdValue(const std::string& type) {
    TriggerThresholdValue* ttv = 0;
-   if (type == L1DataDef::muonType()) {
+   if (type == L1DataDef::typeAsString(L1DataDef::MUON)) {
       ttv = new MuonThresholdValue(); 
-   } else if (type == L1DataDef::emType()  ||
-              type == L1DataDef::tauType()) {
+   } else if (type == L1DataDef::typeAsString(L1DataDef::EM)  ||
+              type == L1DataDef::typeAsString(L1DataDef::TAU)) {
       ttv = new ClusterThresholdValue();
-   } else if (type == L1DataDef::jetType() ||
-              type == L1DataDef::jbType()  ||
-              type == L1DataDef::jfType()) {
+   } else if (type == L1DataDef::typeAsString(L1DataDef::JET) ||
+              type == L1DataDef::typeAsString(L1DataDef::JB)  ||
+              type == L1DataDef::typeAsString(L1DataDef::JF)) {
       ttv = new JetThresholdValue();
-   } else if (type == L1DataDef::xeType()  ||
-              type == L1DataDef::jeType()  ||
-              type == L1DataDef::teType()) {
+   } else if (type == L1DataDef::typeAsString(L1DataDef::XE)  ||
+              type == L1DataDef::typeAsString(L1DataDef::JE)  ||
+              type == L1DataDef::typeAsString(L1DataDef::TE)) {
       ttv = new EtThresholdValue();
-   } else if ( type== L1DataDef::xsType() ) {
+   } else if ( type== L1DataDef::typeAsString(L1DataDef::XS) ) {
       ttv = new XsThresholdValue();
-   } else if (type == L1DataDef::nimType()    || type == L1DataDef::mbtsType()   || type == L1DataDef::mbtssiType() ||
-              type == L1DataDef::bcmType()    || type == L1DataDef::bcmcmbType() || type == L1DataDef::lucidType()  ||
-              type == L1DataDef::calreqType() || type == L1DataDef::zdcType()    || type == L1DataDef::trtType() ||
-              type == L1DataDef::bptxType() ) {
+   } else if (type == L1DataDef::typeAsString(L1DataDef::NIM)    ||
+              type == L1DataDef::typeAsString(L1DataDef::MBTS)   ||
+              type == L1DataDef::typeAsString(L1DataDef::MBTSSI) ||
+              type == L1DataDef::typeAsString(L1DataDef::BCM)    ||
+              type == L1DataDef::typeAsString(L1DataDef::BCMCMB) ||
+              type == L1DataDef::typeAsString(L1DataDef::LUCID)  ||
+              type == L1DataDef::typeAsString(L1DataDef::CALREQ) ||
+              type == L1DataDef::typeAsString(L1DataDef::ZDC)    ||
+              type == L1DataDef::typeAsString(L1DataDef::TRT)    ||
+              type == L1DataDef::typeAsString(L1DataDef::BPTX) ) {
       ttv = new NimThresholdValue();
    } else {
       cout << "TriggerThreshold::createThresholdValue:      ERROR Unknown trigger value type: " << type << endl;

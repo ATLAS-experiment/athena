@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfL1Data/EtThresholdValue.h"
@@ -23,11 +23,11 @@ TrigConf::EtThresholdValue::thresholdValueCount() const {
 
    int count = static_cast<int>( m_Ptcut * caloInfo().globalJetScale() );
 
-   if (type()==L1DataDef::jeType() && count > fgCaloJetEtOff) {
+   if (type()==L1DataDef::typeAsString(L1DataDef::JE) && count > fgCaloJetEtOff) {
       count = fgCaloJetEtOff;
-   } else if (type()==L1DataDef::teType() && count > fgCaloEtSumOff) {
+   } else if (type()==L1DataDef::typeAsString(L1DataDef::TE) && count > fgCaloEtSumOff) {
       count = fgCaloEtSumOff;
-   } else if (type()==L1DataDef::xeType() && count > fgCaloEtMissOff) {
+   } else if (type()==L1DataDef::typeAsString(L1DataDef::XE) && count > fgCaloEtMissOff) {
       count = fgCaloEtMissOff;
    }
 

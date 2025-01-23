@@ -11,17 +11,6 @@
 
 #include "CxxUtils/checker_macros.h"
 
-#define declareBackwardCompatibleMethdods(TL,TU)              \
-   public:                                                              \
-   static std::string TL##Type() { return typeConfig(TU).name; }               \
-   static unsigned int max_##TU##_Threshold_Number() { return typeConfig(TU).max; }
-
-#define registerTriggerType(TU, MAX)                                   \
-   bool is##TU = TrigConf::L1DataDef::addConfig(TrigConf::L1DataDef::TU, #TU, MAX);
-
-#define registerInternalTriggerType(TU, MAX)                                   \
-   bool is##TU = TrigConf::L1DataDef::addConfig(TrigConf::L1DataDef::TU, #TU, MAX, true);
-
 namespace TrigConf {
 
    class L1DataDef {
@@ -74,60 +63,16 @@ namespace TrigConf {
          g_Types.push_back(tt);
          return true;
       }
-      
-
-      // for backward compatibility
-      declareBackwardCompatibleMethdods(em,   EM);
-      declareBackwardCompatibleMethdods(tau,  TAU);
-      declareBackwardCompatibleMethdods(muon, MUON);
-      declareBackwardCompatibleMethdods(jet,  JET);
-      declareBackwardCompatibleMethdods(fjet, FJET);
-      declareBackwardCompatibleMethdods(fj,   FJ);
-      declareBackwardCompatibleMethdods(jf,   JF);
-      declareBackwardCompatibleMethdods(jb,   JB);
-      declareBackwardCompatibleMethdods(xe,   XE);
-      declareBackwardCompatibleMethdods(je,   JE);
-      declareBackwardCompatibleMethdods(te,   TE);
-      declareBackwardCompatibleMethdods(xs,   XS);
-      declareBackwardCompatibleMethdods(th,   TH);
-
-      // internal Triggers
-      declareBackwardCompatibleMethdods(bgrp, BGRP);
-      declareBackwardCompatibleMethdods(rndm, RNDM);
-      declareBackwardCompatibleMethdods(pclk, PCLK);
-
-      // NIM Triggers
-      declareBackwardCompatibleMethdods(zdc,  ZDC);
-      declareBackwardCompatibleMethdods(trt,  TRT);
-      declareBackwardCompatibleMethdods(bcm,  BCM);
-      declareBackwardCompatibleMethdods(lucid,LUCID);
-      declareBackwardCompatibleMethdods(mbts, MBTS);
-      declareBackwardCompatibleMethdods(nim,  NIM);
-      declareBackwardCompatibleMethdods(bptx, BPTX);
-
-      // Zero bias Trigger
-      declareBackwardCompatibleMethdods(zb,   ZB);
-
-   public:
-      // NIM Triggers
-      static std::string bcmcmbType() { return "BCMCMB"; }
-      static std::string mbtssiType() { return "MBTSSI"; }
-      static std::string calreqType() { return "CALREQ"; }
-
-      static unsigned int max_M_Threshold_Number()      { return max_MUON_Threshold_Number(); }
-      //       static unsigned int max_MBTSSI_Threshold_Number() { return Max_MBTSSI_Threshold_Number; }
 
       static void setOldJEP3Cabling();
       static void setNewJEP3Cabling();
 
-      //       static unsigned int Max_MBTSSI_Threshold_Number;
-
    private:
       // thread-safe because set once during initialize
-      static TypeConfigMap_t g_typeConfigs ATLAS_THREAD_SAFE;     // maps TriggerType (e.g. L1DataDef::EM) to the TriggerTypeConfig object
-      static STypeTypeMap_t g_sTypeType ATLAS_THREAD_SAFE;        // maps string to TriggerType (e.g. "EM" -> L1DataDef::EM)
-      static std::vector<TriggerType> g_Types ATLAS_THREAD_SAFE;
-      static unsigned int g_l1Version ATLAS_THREAD_SAFE;
+      inline static TypeConfigMap_t g_typeConfigs ATLAS_THREAD_SAFE;     // maps TriggerType (e.g. L1DataDef::EM) to the TriggerTypeConfig object
+      inline static STypeTypeMap_t g_sTypeType ATLAS_THREAD_SAFE;        // maps string to TriggerType (e.g. "EM" -> L1DataDef::EM)
+      inline static std::vector<TriggerType> g_Types ATLAS_THREAD_SAFE;
+      inline static unsigned int g_l1Version ATLAS_THREAD_SAFE {0};
 
    };
 
