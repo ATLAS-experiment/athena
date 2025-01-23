@@ -64,7 +64,7 @@ def PIXELVALID_ZTAUTAUCfg(flags, name='PIXELVALID_ZTAUTAU'):
     acc.addPublicTool(PIXELVALID_ZTAUTAU, primary=True)
     return acc
 
-
+    
 def PIXELVALIDKernelCommonCfg(flags, name='PIXELVALIDKernelCommon'):
     acc = ComponentAccumulator()
 
@@ -99,6 +99,7 @@ def PIXELVALIDKernelCommonCfg(flags, name='PIXELVALIDKernelCommon'):
     # ====================================================================
     # SKIMMING TOOLS
     # ====================================================================
+    
     skimmingTools = []
     if flags.InDet.DRAWZSelection:
         PIXELVALID_ANDTool = acc.getPrimaryAndMerge(PIXELVALID_ANDToolCfg(flags))
@@ -120,6 +121,7 @@ def PIXELVALIDKernelCommonCfg(flags, name='PIXELVALIDKernelCommon'):
 
     return acc
 
+
 def PIXELVALIDThinningKernelCfg(flags, name="PIXELVALIDThinningKernel", StreamName=""):
     acc = ComponentAccumulator()
 
@@ -132,12 +134,25 @@ def PIXELVALIDThinningKernelCfg(flags, name="PIXELVALIDThinningKernel", StreamNa
     if flags.Input.isMC:
         from DerivationFrameworkInDet.InDetToolsConfig import (IDTRKVALIDTruthThinningToolCfg)
         thinningTools.append(acc.getPrimaryAndMerge(IDTRKVALIDTruthThinningToolCfg(flags, StreamName=StreamName)))
+        acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
+            name,
+            AugmentationTools=[],
+            ThinningTools=thinningTools,
+            OutputLevel=INFO))
 
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
-        name,
-        AugmentationTools=[],
-        ThinningTools=thinningTools,
-        OutputLevel=INFO))
+    elif flags.InDet.PixelDumpMode == 5:
+        acc.addSequence( seqAND("PixelClusterThinningSequence") )
+        acc.getSequence("PixelClusterThinningSequence").ExtraDataForDynamicConsumers = ["xAOD::TrackMeasurementValidationContainer/PixelClusters"]
+        acc.getSequence("PixelClusterThinningSequence").ProcessDynamicDataDependencies = True
+        from DerivationFrameworkInDet.InDetToolsConfig import (PixelClusterThinningCfg)
+        thinningTools.append(acc.getPrimaryAndMerge(PixelClusterThinningCfg(flags, StreamName=StreamName)))
+        acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
+            name,
+            AugmentationTools=[],
+            ThinningTools=thinningTools,
+            OutputLevel=INFO),
+            sequenceName="PixelClusterThinningSequence")        
+
     return acc
 
 
@@ -167,7 +182,7 @@ def PIXELVALIDKernelCfg(flags, name="PIXELVALIDKernel", StreamName=""):
         PixelStoreMode = 1
 
     ## when using PIXELVALID for ID Lumi, remove this tool which has enormous CPU costs
-    if flags.InDet.PixelDumpMode != 4:
+    if flags.InDet.PixelDumpMode < 4:
         from DerivationFrameworkInDet.PixelNtupleMakerConfig import PixelNtupleMakerCfg
         PixelMonitoringTool = acc.getPrimaryAndMerge(PixelNtupleMakerCfg(flags,
                                                                         name          = "PixelMonitoringTool",
@@ -217,6 +232,8 @@ def PixelVALIDCfg(flags):
     if flags.InDet.PixelDumpMode == 4:
         PixelStoreMode = 3
 
+    if flags.InDet.PixelDumpMode == 5:
+        PixelStoreMode = 4
 
     if PixelStoreMode==1:
         PIXELVALIDSlimmingHelper.AppendToDictionary.update({
@@ -428,8 +445,61 @@ def PixelVALIDCfg(flags):
         # Trigger info is actually stored only when running on data...
         PIXELVALIDSlimmingHelper.IncludeTriggerNavigation = True
         PIXELVALIDSlimmingHelper.IncludeAdditionalTriggerContent = True
-    
 
+    ## for ID lumi usage: include Pixel Clusters
+    if PixelStoreMode == 4:
+        PIXELVALIDSlimmingHelper.AppendToDictionary.update({
+            "EventInfo": "xAOD::EventInfo", "EventInfoAux": "xAOD::EventAuxInfo",
+            "InDetTrackParticles": "xAOD::TrackParticleContainer",
+            "InDetTrackParticlesAux": "xAOD::TrackParticleAuxContainer"})
+
+        AllVariables += ["EventInfo",
+                         "InDetTrackParticles"]
+        
+        PIXELVALIDSlimmingHelper.AppendToDictionary.update({
+                "PixelClusters": "xAOD::TrackMeasurementValidationContainer",
+                "PixelClustersAux": "xAOD::TrackMeasurementValidationAuxContainer"})
+        
+        ExtraVariables += ["PixelClusters.charge.layer.bec.phi_module.eta_module.eta_pixel_index.phi_pixel_index.nRDO.sizePhi.sizeZ.ToT"]
+        
+        PIXELVALIDSlimmingHelper.AppendToDictionary.update({
+            "PrimaryVertices": "xAOD::VertexContainer",
+            "PrimaryVerticesAux": "xAOD::VertexAuxContainer"})
+
+        ExtraVariables += ["PrimaryVertices.sumPt2.x.y.z"]
+
+        if flags.Input.isMC:
+            PIXELVALIDSlimmingHelper.AppendToDictionary.update({
+                "TruthEvents": "xAOD::TruthEventContainer",
+                "TruthEventsAux": "xAOD::TruthEventAuxContainer",
+                "TruthParticles": "xAOD::TruthParticleContainer",
+                "TruthParticlesAux": "xAOD::TruthParticleAuxContainer",
+                "TruthVertices": "xAOD::TruthVertexContainer",
+                "TruthVerticesAux": "xAOD::TruthVertexAuxContainer"})
+
+            AllVariables += ["TruthEvents",
+                             "TruthParticles",
+                             "TruthVertices"]
+
+            list_aux = ["BHadronsFinal", "BHadronsInitial", "BQuarksFinal",
+                        "CHadronsFinal", "CHadronsInitial", "CQuarksFinal",
+                        "HBosons", "Partons", "TQuarksFinal", "TausFinal",
+                        "WBosons", "ZBosons"]
+
+            for item in list_aux:
+                label = "TruthLabel"+item
+                labelAux = label+"Aux"
+                PIXELVALIDSlimmingHelper.AppendToDictionary.update(
+                    {label: "xAOD::TruthParticleContainer",
+                     labelAux: "xAOD::TruthParticleAuxContainer"})
+                AllVariables += [label]
+        # End of isMC block
+
+        # Trigger info is actually stored only when running on data...
+        PIXELVALIDSlimmingHelper.IncludeTriggerNavigation = True
+        PIXELVALIDSlimmingHelper.IncludeAdditionalTriggerContent = True
+        
+    
     PIXELVALIDSlimmingHelper.AllVariables = AllVariables
     PIXELVALIDSlimmingHelper.StaticContent = StaticContent
     PIXELVALIDSlimmingHelper.SmartCollections = SmartCollections
@@ -440,7 +510,7 @@ def PixelVALIDCfg(flags):
     acc.merge(OutputStreamCfg(flags, "DAOD_PIXELVALID",
         ItemList=PIXELVALIDItemList, AcceptAlgs=["PIXELVALIDKernelCommon"]))
 
-    if flags.InDet.PixelDumpMode == 4:
+    if flags.InDet.PixelDumpMode == 4 or flags.InDet.PixelDumpMode == 5:
         acc.merge(SetupMetaDataForStreamCfg(
             flags, "DAOD_PIXELVALID", AcceptAlgs=["PIXELVALIDKernelCommon"],
             createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TriggerMenuMetaData]))
