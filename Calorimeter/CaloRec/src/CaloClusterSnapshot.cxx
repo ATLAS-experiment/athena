@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloUtils/CaloClusterStoreHelper.h"
@@ -15,13 +15,13 @@ CaloClusterSnapshot::CaloClusterSnapshot(const std::string& type,
 				   const std::string& name,
 				   const IInterface* parent):
   AthAlgTool(type, name, parent),
-  m_outputKey(""),
-  m_finalContName(nullptr)
+  m_outputKey("")
 { 
   declareInterface<CaloClusterCollectionProcessor> (this);
   declareProperty("OutputName",m_outputKey);
   declareProperty("CellLinkName",m_cellLinkOutputKey);
   declareProperty("SetCrossLinks",m_setCrossLinks=false);
+  declareProperty("FinalClusterContainerName", m_finalContName);
   
 }
 
@@ -32,15 +32,6 @@ CaloClusterSnapshot::~CaloClusterSnapshot()
 = default;
 
 StatusCode CaloClusterSnapshot::initialize() {
-
-  if (m_setCrossLinks) {
-    const CaloClusterMaker* parentAlgo=dynamic_cast<const CaloClusterMaker*>(parent());
-    if (!parentAlgo) {
-      ATH_MSG_ERROR( "Configuration problem. Parent is not CaloClusterMaker. Can't set ElementLink to final cluster."  );
-      return StatusCode::FAILURE;
-    }
-    m_finalContName=&(parentAlgo->getOutputContainerName());
-  }
   ATH_CHECK(m_outputKey.initialize());
   if (m_cellLinkOutputKey.key().empty()) {
     m_cellLinkOutputKey = m_outputKey.key() + "_links";
@@ -78,15 +69,18 @@ CaloClusterSnapshot::execute(const EventContext& ctx,
     }
 
     //From snapshot to final cluster
-    if (m_finalContName) {
-       ClusterLink_t finalEL (*m_finalContName, 0, ctx);
-       for (size_t i=0;i<nClusters;++i) {
-	 (*outputColl)[i]->setSisterClusterLink(ClusterLink_t(finalEL, i));
-	 //	 std::cout << "Setting link to " << *m_finalContName << ", index "<< i <<std::endl;
+    if (m_setCrossLinks) {
+       ClusterLink_t finalEL (m_finalContName, 0, ctx);
+       if (finalEL.isValid()) {
+	 for (size_t i=0;i<nClusters;++i) {
+	   (*outputColl)[i]->setSisterClusterLink(ClusterLink_t(finalEL, i));
+	   //	 std::cout << "Setting link to " << m_finalContName << ", index "<< i <<std::endl;
+	 }
+       }
+       else {
+	 ATH_MSG_DEBUG("Can't set element link from snapshot to final cluster, likely mismatch in the FinalClusterContainerName");	 
        }
     }
-    else
-      ATH_MSG_DEBUG("Can't set element link from snapshot to final cluster, see warning above");
   }
 
   

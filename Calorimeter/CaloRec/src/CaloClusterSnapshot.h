@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -31,7 +31,7 @@ class CaloClusterSnapshot : public AthAlgTool, virtual public CaloClusterCollect
 
   bool m_setCrossLinks;
 
-  const std::string* m_finalContName;
+  std::string m_finalContName;
   
 };
 
