@@ -448,6 +448,20 @@ def TrackParticleThinningCfg(flags, name, **kwargs):
         name, **kwargs), primary=True)
     return acc
 
+# Tool for thinning PixelClusters via string selection
+
+
+def PixelClusterThinningCfg(
+        flags, name="PixelClusterThinningTool", **kwargs):
+    pix_lumi_sel = "PixelClusters.bec == 0 && PixelClusters.layer >= 0 && PixelClusters.sizeZ > 1 && ( PixelClusters.nRDO < PixelClusters.sizeZ + 5 ) && PixelClusters.charge > 30000"
+    kwargs.setdefault("SelectionString", pix_lumi_sel)
+    acc = ComponentAccumulator()
+    acc.addPublicTool(
+        CompFactory.DerivationFramework.TrackMeasurementThinning(
+            name, **kwargs), primary=True)
+    return acc
+
+
 def IDTIDEThinningToolCfg(flags, name="IDTIDEThinningTool", **kwargs):
     if not flags.Detector.EnablePixel:
         kwargs.setdefault("InDetTrackStatesPixKey", "")
