@@ -171,13 +171,6 @@ namespace DerivationFramework {
       ATH_MSG_ERROR("No muon container name provided!");
     }
 
-    // check electron container name if needed 
-    if ( ( m_electronContainerName == "" ) &&
-         ( m_isoTargetLegTypes == 1 ) 
-    ) {
-      ATH_MSG_ERROR("No electron container name provided!");
-    }
-
     // initialize results array
     initResults();
 

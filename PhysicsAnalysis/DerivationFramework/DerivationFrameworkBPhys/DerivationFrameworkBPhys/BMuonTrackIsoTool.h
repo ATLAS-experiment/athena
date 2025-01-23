@@ -121,7 +121,6 @@ namespace DerivationFramework {
   private:      
       // job options
       std::string                      m_muonContainerName;
-      std::string                      m_electronContainerName;
 
       unsigned int                     m_isoTargetLegTypes;
 

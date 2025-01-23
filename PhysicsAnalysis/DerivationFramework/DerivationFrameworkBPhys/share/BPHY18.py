@@ -485,16 +485,39 @@ BPHY18_LegTrackIsoTool = DerivationFramework__BMuonTrackIsoTool(
     VertexContainerNames       = [ "BeeKstCandidates" ],
     RefPVContainerNames        = [ "BPHY18RefittedPrimaryVertices" ],
     TrackParticleContainerName = "InDetTrackParticles",
-    ElectronContainerName      = "Electrons",
     PVContainerName            = "PrimaryVertices",
     PVTypesToConsider          = [1, 3],
     TrackSelectionTools        = [ BPHY18_TrackSelTool ], #  BPHY18_VertexTools.InDetTrackSelectorTool ],
     TVATool                    =  BPHY18_VtxTVATool,
-    IsolationConeSizes         = [ 0.2, 0.3 ],
-    IsoTrkImpLogChi2Max        = [ 5.0, 0.0 ],    
-    IsoDoTrkImpLogChi2Cut      = [ 2, 0 ],
+    IsolationConeSizes         = [ 0.1, 0.2, 0.3, 0.4, 0.5 ] * 2,
+    IsoTrkImpLogChi2Max        = [ 5.0 ] * 5 + [ 0.0 ] * 5,
+    IsoDoTrkImpLogChi2Cut      = [ 2   ] * 5 + [ 0   ] * 5,  
     DoVertexType               = 4, # Only Min A0
-    UseTrackTypes              = [ 35, 134217728],
+    UseTrackTypes              = [ 
+                                    1, 
+                                    # Associated w/ PV associated w/ Candidate
+                                    ( 1 << 0 ) | ( 1 << 1 ) | ( 1 << 5 ),
+                                    # Associated w/ PV associated w/ Candidate 
+                                    # OR Associated w/ Dummy PV
+                                    # OR Associated w/ PV other than Primary, Secondary, Pileup
+                                    ( 1 << 0 ) | ( 1 << 1 ) | ( 1 << 2 ) |\
+                                    ( 1 << 3 ) | ( 1 << 4 ) | ( 1 << 5 ) |\
+                                    ( 1 << 6 ),
+                                    # All Tracks, NO PV Association!!!
+                                    1 << 23, 
+                                    # Associated w/ Refitted PV associated w/ Candidate
+                                    1 << 24, 
+                                    # Associated w/ PV associated w/ Candidate
+                                    # w/ minNumTracks = 0 => Equivalent to 1?
+                                    1 << 27,
+                                    # Min chi2 PV is the same as the refitted PV associated w/
+                                    # candidate, 3D chi2 from track perigee using uncertainties
+                                    # from both track and vertex
+                                    1 << 28
+                                    # Min chi2 PV is the same as the PV associated w/
+                                    # candidate, 3D chi2 from track perigee using uncertainties
+                                    # from both track and vertex
+                                ],
     DebugTrackTypes            = 1,
     DebugTracksInEvents        = [])
 
