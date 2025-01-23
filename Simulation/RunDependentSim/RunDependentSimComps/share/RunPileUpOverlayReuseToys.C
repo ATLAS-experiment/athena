@@ -1,5 +1,4 @@
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include <vector>
 #include <set>
