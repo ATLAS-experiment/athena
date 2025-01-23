@@ -59,10 +59,6 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
       ATH_MSG_FATAL("convert() must have stage == 1 or 2");
   }
 
-  const FPGATrackSimRegionMap* rmap = m_FPGATrackSimMapping->SubRegionMap();
-  const FPGATrackSimRegionMap* rmap_2nd = m_FPGATrackSimMapping->SubRegionMap_2nd();
-  const FPGATrackSimPlaneMap*  pmap = m_FPGATrackSimMapping->PlaneMap_2nd(0);
-
   logicEventHeader.reserveTowers(m_towers.size());
   for (int ireg: m_towers){
     FPGATrackSimTowerInputHeader tower = FPGATrackSimTowerInputHeader(ireg);//default header, can eventually set eta/phi/deta/dphi
@@ -74,19 +70,9 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
       // skip over hits in layers that are not included in the FPGATrackSim geometry, with plane = -1
 
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
-    pmap->doRemap(hit);
     for (unsigned int ireg=0;ireg!=m_towers.size();++ireg) {
-        // For now, assume that there is only actually one tower.
-        // Since the hits aren't being mapped here, instead simply check if they *would* fall into ANY slice
-        // in the configured region. this could probably be done with just the second stage map once
-        // the work to make that functional is completed.
-        if (hit.isPixel())
-            ATH_MSG_DEBUG("Pixel hit in physlayer " << hit.getPhysLayer());
-        if ((rmap->getRegions(hit).size() > 0) || (rmap_2nd->getRegions(hit).size() > 0)) {
-            // if the equivalent hit is compatible with this tower the hit is saved
-            logicEventHeader.getTower( ireg )->addHit(hit);
-            ATH_MSG_VERBOSE ("Hit mapped (" << hit.isMapped() << ") to tower="<<ireg << ", nHits now=" << logicEventHeader.getTower(ireg)->nHits());
-        }
+      logicEventHeader.getTower(ireg)->addHit(hit);
+      ATH_MSG_VERBOSE("Hit mapped (" << hit.isMapped() << ") to tower=" << ireg << ", nHits now=" << logicEventHeader.getTower(ireg)->nHits());
     }
   } // end hit loop
   

@@ -61,7 +61,6 @@ class FPGAClusterConverter : public extends<AthAlgTool,IFPGAClusterConverter>
                                     xAOD::PixelClusterContainer& pixelCont,
                                     xAOD::StripClusterContainer& SCTCont) const override final;
     virtual StatusCode convertSpacePoints(const std::vector<FPGATrackSimCluster>& fpgaSPs,
-                                    const std::vector<FPGATrackSimCluster>& fpgaClusters,
                                     xAOD::SpacePointContainer& SPStripCont,
                                     xAOD::SpacePointContainer& SPPixelCont, 
                                     xAOD::StripClusterContainer& stripClusterCont,
@@ -76,7 +75,7 @@ class FPGAClusterConverter : public extends<AthAlgTool,IFPGAClusterConverter>
     virtual StatusCode createSCTCluster(const FPGATrackSimCluster&, std::unique_ptr<InDet::SCT_Cluster>&) const override final;
     virtual StatusCode createSCTCluster(const FPGATrackSimCluster&, xAOD::StripCluster& ) const override final;
     virtual StatusCode createSP(const FPGATrackSimCluster& cl, xAOD::SpacePoint& sp, xAOD::StripClusterContainer& clustersCont ) const override final;
-    virtual StatusCode createSP(const FPGATrackSimCluster& cl, xAOD::SpacePoint& sp, xAOD::PixelClusterContainer& clustersCont ) const override final;
+    virtual StatusCode createPixelSPs(xAOD::SpacePointContainer& pixelSPs, xAOD::PixelClusterContainer& clustersCont ) const override final;
 
     virtual StatusCode getRdoList(std::vector<Identifier> &rdoList, const FPGATrackSimCluster& cluster) const override final;
     virtual StatusCode getRdoList(std::vector<Identifier> &rdoList, const FPGATrackSimHit& hit) const override final;
@@ -96,6 +95,7 @@ class FPGAClusterConverter : public extends<AthAlgTool,IFPGAClusterConverter>
 
     ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool {this, "LorentzAngleTool", "SiLorentzAngleTool/SCTLorentzAngleTool", "Tool to retrieve Lorentz angle of SCT"};
 
+    Gaudi::Property<bool> m_skipStripSpacePointFormation {this, "skipStripSpFormation", false, "Should be enabled in case we want to test strip seeding"};
  };
 
 #endif
