@@ -39,6 +39,7 @@ public:
   /// Athena algorithm's Hooks
   virtual StatusCode  initialize() override;
   virtual StatusCode  execute(const EventContext& ctx) const override;
+  virtual StatusCode  finalize() override;
   
 protected: // was private 
 
@@ -71,7 +72,13 @@ protected: // was private
   Gaudi::Property<bool> m_doHits {this, "doHits", true, "Convert FPGATrackSimHit"};
   Gaudi::Property<bool> m_doActsTrk {this, "doActsTrk", false, "Run Acts ProtoTrack finding"};
   Gaudi::Property<bool> m_doSP {this, "doSP", false, "Convert SPs"};
+  Gaudi::Property<bool> m_doIndet {this, "doInDet", false, "Perform also to InDet convertion. This is obsolete and not needed anymore. By default disabled to save execution time"};
 
+  private:
+  typedef std::chrono::high_resolution_clock clock_type;
+  mutable std::chrono::nanoseconds m_totalClusterConversionTime ATLAS_THREAD_SAFE = std::chrono::nanoseconds(0);
+  mutable std::chrono::nanoseconds m_totalSpConversionTime ATLAS_THREAD_SAFE = std::chrono::nanoseconds(0);
+  mutable unsigned m_nEvents ATLAS_THREAD_SAFE = 0;
 
 }; 
 
