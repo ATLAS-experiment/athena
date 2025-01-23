@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCALIB_RTRESOLUTIONLOOKUP_H
@@ -32,7 +32,7 @@ namespace MuonCalib {
             }
         }
 
-        std::string name() const { return "RtResolutionLookUp"; }
+        virtual std::string name() const override { return "RtResolutionLookUp"; }
 
         /** returns drift radius for a given time */
         double resolution(double t, double) const override final;
