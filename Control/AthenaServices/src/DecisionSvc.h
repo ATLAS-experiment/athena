@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ATHENASERVICES_DECISIONSVC_H
 #define ATHENASERVICES_DECISIONSVC_H 
@@ -41,7 +41,7 @@ public:
   /// Gaudi Service Implementation
   //@{
   virtual StatusCode initialize() override;
-  virtual StatusCode start() override;
+  virtual StatusCode start ATLAS_NOT_THREAD_SAFE () override;
   virtual StatusCode finalize() override;
   //@}
 

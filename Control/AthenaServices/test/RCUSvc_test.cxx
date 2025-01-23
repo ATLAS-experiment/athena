@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthenaServices/test/RCUSvc_test.cxx
@@ -11,16 +11,13 @@
 
 #undef NDEBUG
 
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
-
 #include "AthenaBaseComps/AthService.h"
 #include "AthenaKernel/IRCUSvc.h"
 #include "AthenaKernel/errorcheck.h"
+#include "CxxUtils/checker_macros.h"
 #include "TestTools/initGaudi.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IHiveWhiteBoard.h"
-////#include "GaudiKernel/DeclareFactoryEntries.h"
 #include "boost/thread/shared_mutex.hpp"
 #include "boost/thread/shared_lock_guard.hpp"
 #include <iostream>
@@ -98,18 +95,13 @@ struct Payload
   }
   int a, b, c, d;
 
-  static std::atomic<int> ninstance;
-  static bool dolog;
+  inline static std::atomic<int> ninstance;
+  inline static std::atomic<bool> dolog{true};
 
 private:
-  static std::vector<int> m_dlog;
-  static std::mutex m_mutex;
+  inline static std::vector<int> m_dlog ATLAS_THREAD_SAFE;  // protected by mutex
+  inline static std::mutex m_mutex;
 };
-
-std::atomic<int> Payload::ninstance;
-bool Payload::dolog = true;
-std::vector<int> Payload::m_dlog;
-std::mutex Payload::m_mutex;
 
 
 void test1 (IRCUSvc& svc)

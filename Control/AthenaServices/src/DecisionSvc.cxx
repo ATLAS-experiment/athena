@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DecisionSvc.h"
@@ -331,7 +331,7 @@ DecisionSvc::isEventAccepted( const std::string& stream,
   return result;
 }
 
-StatusCode DecisionSvc::start()
+StatusCode DecisionSvc::start ATLAS_NOT_THREAD_SAFE ()
 {
   ATH_MSG_DEBUG("in start");
   CHECK( this->interpretAlgMap() );
@@ -358,11 +358,7 @@ StatusCode DecisionSvc::start()
   }
 
   //Now that everything is said and done, match filters with stream and logic in CutFlowSvc
-  StatusCode sc ATLAS_THREAD_SAFE = DeclareToCutFlowSvc();
-  //            ^ FIXME: Should really mark start() as ATLAS_NOT_THREAD_SAFE but that is currently
-  //              not possible with the thread-checker.
-
-  return sc;
+  return DeclareToCutFlowSvc();
 }
 
 StatusCode DecisionSvc::DeclareToCutFlowSvc ATLAS_NOT_THREAD_SAFE ()
