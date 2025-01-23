@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
 // File and Version Information:
-// $Id: CaloHadDMCoeffMinim.cxx,v 1.2 2009/03/06 14:43:23 pospelov Exp $
 //
 // Description: see CaloHadDMCoeffMinim.h
 // 
@@ -26,10 +25,8 @@
 #include "CaloLocalHadCalib/GetLCSinglePionsPerf.h"
 #include "boost/io/ios_state.hpp"
 #include <cmath>
-#include <fstream>
-#include <iomanip>
+#include <format>
 #include <iostream>
-#include <sstream>
 
 #include <CLHEP/Vector/LorentzVector.h>
 
@@ -440,8 +437,6 @@ void CaloHadDMCoeffMinim::make_report(std::string &sreport)
   gStyle->SetTitleBorderSize(1);
   gStyle->SetTitleFillColor(10);
   int cc_xx = 768, cc_yy = 1024;
-  char str[1024];
-  char cname[256];
   gROOT->SetBatch(kTRUE);
   gErrorIgnoreLevel=3; // root global variables to supress text output in ->Print() methods
   std::string sfname = sreport;
@@ -466,8 +461,9 @@ void CaloHadDMCoeffMinim::make_report(std::string &sreport)
       for(int i_lambda=0; i_lambda<dimLambda->getNbins(); i_lambda++){
         for(int i_side=0; i_side<dimSide->getNbins(); i_side++){
           for(int i_phi=0; i_phi<dimPhi->getNbins(); i_phi++){
-            sprintf(cname,"c1_dmfcal_minuit_weights_frac%d_ener%d_lambda%d_phi%d_side%d",i_frac, i_ener, i_lambda, i_phi, i_side);
-            TCanvas *c1_weights = new TCanvas(cname, cname, cc_xx, cc_yy);
+            const std::string cname = std::format("c1_dmfcal_minuit_weights_frac{}_ener{}_lambda{}_phi{}_side{}",
+                                                  i_frac, i_ener, i_lambda, i_phi, i_side);
+            TCanvas *c1_weights = new TCanvas(cname.c_str(), cname.c_str(), cc_xx, cc_yy);
             c1_weights->cd();
             TPad *pad1=nullptr, *pad2=nullptr;
             float y_edge = 0.85;
@@ -475,8 +471,9 @@ void CaloHadDMCoeffMinim::make_report(std::string &sreport)
             pad2 = new TPad("p2ps","p2ps",0.0, 0.0, 1.0, y_edge); pad2->Draw();
             // top pad
             pad1->cd(); gPad->SetGrid(); gPad->SetLeftMargin(0.07); gPad->SetTopMargin(0.05);  gPad->SetRightMargin(0.05);  gPad->SetBottomMargin(0.08);
-            sprintf(str,"frac:%d  ener:%d  lambda:%d phi:%d side:%d",i_frac, i_ener, i_lambda, i_phi, i_side);
-            tex->SetTextColor(1); tex->SetTextSize(0.20); tex->DrawLatex(0.1,0.4,str);
+            std::string str = std::format("frac:{}  ener:{}  lambda:{} phi:{} side:{}",
+                                          i_frac, i_ener, i_lambda, i_phi, i_side);
+            tex->SetTextColor(1); tex->SetTextSize(0.20); tex->DrawLatex(0.1,0.4,str.c_str());
             pad2->Divide(3,3);
             int i_canvas = 0;
             // lets draw sample size
@@ -498,9 +495,8 @@ void CaloHadDMCoeffMinim::make_report(std::string &sreport)
               smpsize += w;
               gr->SetPoint(i_eta, xx, w);
             }
-            char str[256];
-            sprintf(str,"Sample size %d",int(smpsize));
-            gr->SetTitle(str);
+            str = std::format("Sample size {}",int(smpsize));
+            gr->SetTitle(str.c_str());
             gr->Draw("apl");
             i_canvas++;
             for(unsigned int i_par=0; i_par<m_minimPars.size(); i_par++){
