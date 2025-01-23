@@ -12,8 +12,9 @@
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/AuxStoreStandalone.h"
 #include "AthContainers/exceptions.h"
+#include "AthContainers/tools/error.h"
 #include "CxxUtils/checker_macros.h"
-
+#include <sstream>
 
 
 namespace SG {
@@ -562,7 +563,7 @@ void AuxElement::clearAux()
  * aux data items for this object are cleared.)
  */
 void AuxElement::copyAux (const ConstAuxElement& other,
-                          bool /*warnUnlocked = false*/)
+                          [[maybe_unused]] bool warnUnlocked /*= false*/)
 {
   if (!m_container) return;
   if (!m_container->hasStore()) return;
@@ -578,12 +579,32 @@ void AuxElement::copyAux (const ConstAuxElement& other,
 
   size_t oindex = other.index();
   SG::auxid_set_t other_ids = ocont->getAuxIDs();
+#ifndef XAOD_STANDALONE
+  SG::auxid_set_t other_decors = ocont->getDecorIDs();
+#endif
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
 
   SG::AuxVectorData& cont = *container();
   for (SG::auxid_t auxid : other_ids) {
-    r.copy (auxid, cont, index(), *ocont, oindex, 1);
+#ifndef XAOD_STANDALONE
+    if (other_decors.test (auxid)) {
+      // Don't copy decorations --- another thread may be modifying them.
+      other_ids.reset (auxid);
+      // Warn if we skip a decoration (except for mcEventWeights,
+      // for which this is expected).
+      if (warnUnlocked && r.getName(auxid) != "mcEventWeights") {
+        std::ostringstream ss;
+        ss << "skipped unlocked decoration " << r.getName(auxid)
+           << " (" << auxid << ")";
+        ATHCONTAINERS_WARNING("copyAux", ss.str());
+      }
+    }
+    else
+#endif
+    {
+      r.copy (auxid, cont, index(), *ocont, oindex, 1);
+    }
   }
 
   for (SG::auxid_t auxid : m_container->getWritableAuxIDs()) {
@@ -609,7 +630,7 @@ void AuxElement::copyAux (const ConstAuxElement& other,
  * aux data items for this object are cleared.)
  */
 void AuxElement::copyAux (const AuxElement& other,
-                          bool /*warnUnlocked = false*/)
+                          [[maybe_unused]] bool warnUnlocked /*= false*/)
 {
   if (!m_container) return;
   if (!m_container->hasStore()) return;
@@ -625,12 +646,32 @@ void AuxElement::copyAux (const AuxElement& other,
 
   size_t oindex = other.index();
   SG::auxid_set_t other_ids = ocont->getAuxIDs();
+#ifndef XAOD_STANDALONE
+  SG::auxid_set_t other_decors = ocont->getDecorIDs();
+#endif
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
 
   AuxVectorData& cont = *container();
   for (SG::auxid_t auxid : other_ids) {
-    r.copy (auxid, cont, index(), *ocont, oindex, 1);
+#ifndef XAOD_STANDALONE
+    if (other_decors.test (auxid)) {
+      // Don't copy decorations --- another thread may be modifying them.
+      other_ids.reset (auxid);
+      // Warn if we skip a decoration (except for mcEventWeights,
+      // for which this is expected).
+      if (warnUnlocked && r.getName(auxid) != "mcEventWeights") {
+        std::ostringstream ss;
+        ss << "skipped unlocked decoration " << r.getName(auxid)
+           << " (" << auxid << ")";
+        ATHCONTAINERS_WARNING("copyAux", ss.str());
+      }
+    }
+    else
+#endif
+    {
+      r.copy (auxid, cont, index(), *ocont, oindex, 1);
+    }
   }
 
   for (SG::auxid_t auxid : m_container->getWritableAuxIDs()) {
