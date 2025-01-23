@@ -28,7 +28,7 @@
 #endif
 
 #include <CxxUtils/checker_macros.h>
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // unit test
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // GTest with shared fixture resources
 
 //
 // method implementations
