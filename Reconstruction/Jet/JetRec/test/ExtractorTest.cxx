@@ -9,6 +9,7 @@
 #ifndef GENERATIONBASE
 #include "xAODJet/JetTrigAuxContainer.h"
 #endif
+#include "CxxUtils/checker_macros.h"
 #include "SGTools/TestStore.h" 
 
 #include "gtest/gtest.h"
@@ -18,9 +19,6 @@
 
 #include <iostream>
 #include <sstream>
-
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 using ::testing::Return;
 using ::testing::_;
@@ -98,7 +96,7 @@ TEST_F(ExtractorTest, addJet) {
 }
 
 
-int main(int argc, char **argv) {
+int main ATLAS_NOT_THREAD_SAFE (int argc, char **argv) {
   ::testing::InitGoogleTest( &argc, argv );
   SGTest::initTestStore();
   return RUN_ALL_TESTS();

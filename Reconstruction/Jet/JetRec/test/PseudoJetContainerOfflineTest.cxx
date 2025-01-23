@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetRec/IParticleExtractor.h"
@@ -11,6 +11,7 @@
 #ifndef GENERATIONBASE
 #include "xAODJet/JetTrigAuxContainer.h"
 #endif // NOT GENERATIONBASE
+#include "CxxUtils/checker_macros.h"
 #include "SGTools/TestStore.h" 
 
 #include "gtest/gtest.h"
@@ -21,9 +22,6 @@
 #include <sstream>
 
 #include "./testHelpers.h"
-
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 using ::testing::Return;
 using ::testing::_;
@@ -280,7 +278,7 @@ TEST_F(PseudoJetContainerOfflineTest, test_append) {
 }
 
 
-int main(int argc, char **argv) {
+int main ATLAS_NOT_THREAD_SAFE (int argc, char **argv) {
   ::testing::InitGoogleTest( &argc, argv );
   SGTest::initTestStore();
   return RUN_ALL_TESTS();

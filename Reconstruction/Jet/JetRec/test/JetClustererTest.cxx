@@ -1,9 +1,6 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "xAODBase/IParticleContainer.h"
 #include "xAODJet/Jet.h"
@@ -13,7 +10,6 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "gtest/gtest.h"
 
-//#define SC_CHECK( expr ) ASSERT_TRUE( (expr).isSuccess() )
 
 TEST(JetClustererTest, setPropertyTest) {
   JetClusterer clusterer("Test");
