@@ -201,8 +201,6 @@ class ggF_HH(PowhegV2):
             logger.error('Impossible to use creategrid.py to create the Virt_full_*.grid file')
             raise
 
-        # setting PYTHONPATH back to its original value
-        os.environ["PYTHONPATH"] = py_path_save
-        logger.debug(f'Setting PYTHONPATH back to:\n{py_path_save}')
+        # cannot set PYTHONPATH back to its original value, because creategrid.py seems to be later re-used, and it requires lhapdf
 
         logger.info('Although the produced Virt_full_*.grid file now exists in the local directory, Powheg will later try to find it in all directories contained in $PYTHONPATH. This will produce several "not found" info messages which can safely be ignored.')

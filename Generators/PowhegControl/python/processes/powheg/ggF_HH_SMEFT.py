@@ -200,12 +200,10 @@ class ggF_HH_SMEFT(PowhegV2):
         # handling the parameters of this process
         # these parameters need to be parsed in a specific format
         usesmeft_str = str(list(self.parameters_by_keyword("usesmeft"))[0].value)
-        #EFTcount_str = ""
         if usesmeft_str == "0":
             EFTcount = 3
         else:
             EFTcount = list(self.parameters_by_keyword("multiple-insertion"))[0].value
-        EFTcount_str = f'{EFTcount:+n}'
         # need to handle the case where we have different scales or pdfs in the joboption, provided as a list, or just one value
         renfact = list(self.parameters_by_keyword("renscfact"))[0].value
         renfac_str = f'{renfact[0]:+.2f}' if type(renfact) is list else f'{renfact:+.2f}'
@@ -222,11 +220,11 @@ class ggF_HH_SMEFT(PowhegV2):
             CHG_str = f'{list(self.parameters_by_keyword("CHG"))[0].value:+.4E}'
 
             logger.info('Now trying to use warmup_smeft.py to create the Virt_full_*.grid file')
-            logger.info(f'Parameters are: GF={GF_str}, Lambda={Lambda_str}, CHbox={CHbox_str}, CHD={CHD_str}, CH={CH_str}, CuH={CuH_str}, CHG={CHG_str}, EFTcount={EFTcount_str}, lhapdfid={lhapdfid_str}, renfac={renfac_str}')
+            logger.info(f'Parameters are: GF={GF_str}, Lambda={Lambda_str}, CHbox={CHbox_str}, CHD={CHD_str}, CH={CH_str}, CuH={CuH_str}, CHG={CHG_str}, EFTcount={EFTcount}, lhapdfid={lhapdfid_str}, renfac={renfac_str}')
             try:
                 #import creategrid as cg
                 #cg.combinegrids(grid_file_name, chhh_str, ct_str, ctt_str, cggh_str, cgghh_str)
-                pythoncmd=f"import warmup_smeft as ws; ws.combinegrids_SMEFT({Lambda_str}, {CHbox_str}, {CHD_str}, {CH_str}, {CuH_str}, {CHG_str}, {GF_str}, {EFTcount_str}, {lhapdfid_str}, {renfac_str})"
+                pythoncmd=f"import warmup_smeft as ws; ws.combinegrids_SMEFT({Lambda_str}, {CHbox_str}, {CHD_str}, {CH_str}, {CuH_str}, {CHG_str}, {GF_str}, {EFTcount}, {lhapdfid_str}, {renfac_str})"
                 os.system("python3 -c \""+pythoncmd+"\"")
             except RuntimeError:
                 logger.error('Impossible to use warmup_smeft.py to create the Virt_full_*.grid file')
@@ -238,15 +236,15 @@ class ggF_HH_SMEFT(PowhegV2):
             ctt_str  = f'{list(self.parameters_by_keyword("ctt"))[0].value:+.4E}'
             cggh_str   = f'{list(self.parameters_by_keyword("cggh"))[0].value:+.4E}'
             cgghh_str  = f'{list(self.parameters_by_keyword("cgghh"))[0].value:+.4E}'
-            grid_file_name = f'Virt_full_{chhh_str}_{ct_str}_{ctt_str}_{cggh_str}_{cgghh_str}-HEFT{EFTcount_str}.grid'
+            grid_file_name = f'Virt_full-HEFT{EFTcount}_{chhh_str}_{ct_str}_{ctt_str}_{cggh_str}_{cgghh_str}.grid'
 
             logger.info('Now trying to use creategrid.py to create the Virt_full_*.grid file')
             logger.info(f'File name: {grid_file_name}')
-            logger.info(f'Parameters are: chhh={chhh_str}, ct={ct_str}, ctt={ctt_str}, cggh={cggh_str}, cgghh={cgghh_str}, EFTcount={EFTcount_str}, usesmeft={usesmeft_str}, lhapdfid={lhapdfid_str}, renfac={renfac_str}')
+            logger.info(f'Parameters are: chhh={chhh_str}, ct={ct_str}, ctt={ctt_str}, cggh={cggh_str}, cgghh={cgghh_str}, EFTcount={EFTcount}, usesmeft={usesmeft_str}')
             try:
                 #import creategrid as cg
                 #cg.combinegrids(grid_file_name, chhh_str, ct_str, ctt_str, cggh_str, cgghh_str)
-                pythoncmd=f"import creategrid as cg; cg.combinegrids('{grid_file_name}', {chhh_str}, {ct_str}, {ctt_str}, {cggh_str}, {cgghh_str}, {EFTcount_str}, {lhapdfid_str}, {renfac_str})"
+                pythoncmd=f"import creategrid as cg; cg.combinegrids('{grid_file_name}', {chhh_str}, {ct_str}, {ctt_str}, {cggh_str}, {cgghh_str}, {EFTcount})"
                 os.system("python3 -c \""+pythoncmd+"\"")
             except RuntimeError:
                 logger.error('Impossible to use creategrid.py to create the Virt_full_*.grid file')
