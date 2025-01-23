@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCALIBMATH_LEGENDREPOLYS_H
 #define MUONCALIBMATH_LEGENDREPOLYS_H
@@ -190,7 +190,6 @@ namespace MuonCalib{
             default:
                 return Legendre::polySum(l, x);
         }
-        return 0.;
     }
     /** @brief Evaluates the n-th derivative of the l-th Legendre polynomial
      *  @param x: Point of evaluation [-1;1]
