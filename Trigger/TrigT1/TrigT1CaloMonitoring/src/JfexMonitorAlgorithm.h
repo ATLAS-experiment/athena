@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1CALOMONITORING_JFEXMONITORALGORITHM_H
 #define TRIGT1CALOMONITORING_JFEXMONITORALGORITHM_H
@@ -21,9 +21,7 @@
 #include "xAODTrigger/jFexSumETRoIContainer.h"
 #include "xAODTrigger/jFexSumETRoI.h"
 
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
-
+#include <mutex>
 
 class JfexMonitorAlgorithm : public AthMonitorAlgorithm {
     public:
@@ -33,8 +31,7 @@ class JfexMonitorAlgorithm : public AthMonitorAlgorithm {
         virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
 
     private:
-        mutable bool m_firstEvent = true;
-        mutable std::mutex m_mutex;
+        mutable std::once_flag m_initOnce;
 
         StringProperty m_Grouphist{this,"Grouphist","JfexMonitor","group name for histograming"};
         StringProperty m_Groupmaps{this,"Groupmaps","jFEXMaps","group name for jFEX TOB maps"};
