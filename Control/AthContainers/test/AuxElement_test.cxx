@@ -47,9 +47,9 @@ public:
   }
 
   static
-  void copyAux (SG::AuxElement& a, const SG::AuxElement& b)
+  void copyAux (SG::AuxElement& a, const SG::AuxElement& b, bool warnUnlocked = false)
   {
-    a.copyAux (b);
+    a.copyAux (b, warnUnlocked);
   }
 
   static
@@ -434,7 +434,10 @@ void test_copy()
 {
   std::cout << "test_copy\n";
 
-  Elt::Accessor<int> ityp2 ("anotherInt");
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+
+  SG::Accessor<int> ityp2 ("anotherInt");
+  SG::Decorator<int> idec ("idec");
 
   Elt elt1;
   Elt elt2;
@@ -461,10 +464,17 @@ void test_copy()
   elt3.ityp1() = 10;
   elt3.ftyp1() = 10.5;
 
-  SG::AuxVectorBase::copyAux (elt2, elt3);
+  dv3.lock();
+  idec(elt3) = 12;
+
+  SG::AuxVectorBase::copyAux (elt2, elt3, true);
   assert (elt2.ityp1() == 10);
   assert (elt2.ftyp1() == 10.5);
   assert (ityp2(elt2) == 0);
+#ifndef XAOD_ANALYSIS
+  // Unlocked decoration not copied in Athena.
+  assert (!idec.isAvailable (elt2));
+#endif
 
   const Elt& celt2 = elt2;
   Elt::Accessor<int> ityp3 ("yetAnotherInt");
@@ -473,7 +483,6 @@ void test_copy()
   dv5.set (elt5, 1);
   ConstAuxStoreTest store5;
   dv5.setStore (&store5);
-  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t ityp1_id = r.getAuxID<int> ("anInt");
   SG::auxid_t ftyp1_id = r.getAuxID<float> ("aFloat");
   SG::auxid_t ityp3_id = ityp3.auxid();
@@ -485,14 +494,14 @@ void test_copy()
   (*vptr)[1] = 3.5;
   store5.add (ftyp1_id, std::move(vptr));
   EXPECT_EXCEPTION (SG::ExcBadAuxVar, ityp3(celt2));
-  SG::AuxVectorBase::copyAux (elt2, elt5);
+  SG::AuxVectorBase::copyAux (elt2, elt5, true);
   assert (elt2.ityp1() == 0);
   assert (elt2.ftyp1() == 3.5);
   assert (ityp3(celt2) == 0);
 
   Elt elt4;
   elt4.releasePrivateStore();
-  SG::AuxVectorBase::copyAux (elt1, elt4);
+  SG::AuxVectorBase::copyAux (elt1, elt4, true);
   assert (elt1.ityp1() == 0);
   assert (elt1.ftyp1() == 0);
   assert (ityp2(elt1) == 0);
@@ -500,11 +509,11 @@ void test_copy()
   ConstAuxStoreTest store;
   dv1.setStore (&store);
 
-  EXPECT_EXCEPTION(SG::ExcConstAuxData, SG::AuxVectorBase::copyAux(elt1, elt4));
+  EXPECT_EXCEPTION(SG::ExcConstAuxData, SG::AuxVectorBase::copyAux(elt1, elt4, true));
 
   dv1.setStore ((SG::IConstAuxStore*)0);
-  SG::AuxVectorBase::copyAux (elt1, elt4);
-  SG::AuxVectorBase::copyAux (elt4, elt1);
+  SG::AuxVectorBase::copyAux (elt1, elt4, true);
+  SG::AuxVectorBase::copyAux (elt4, elt1, true);
 }
 
 

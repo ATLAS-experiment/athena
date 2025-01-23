@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -176,6 +176,13 @@ void test1()
   copyAuxStoreThinned (src, dst2, &info);
   compare (src, dst2, true, ftyp);
 
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  std::cout << "should see unlocked decoration warning here\n";
+  src.lock();
+  SG::auxid_t dityp = r.getAuxID<int> ("anIntDecor");
+  src.getDecoration (dityp, 10, 10);
+  src.suppress (ftyp);
+  copyAuxStoreThinned (src, dst2, &info);
 }
 
 void test2()
