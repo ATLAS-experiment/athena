@@ -8,7 +8,8 @@ def BPHY_InDetV0FinderToolCfg(flags, derivation="",
                               LambdaContainerName="",
                               LambdabarContainerName="",
                               TrackParticleCollection="InDetTrackParticles",
-                              RelinkTracks=[]):
+                              RelinkTracks=[],
+                              **kwargs):
 
     from InDetConfig.InDetV0FinderConfig import InDetV0FinderToolCfg
     return InDetV0FinderToolCfg(
@@ -18,7 +19,8 @@ def BPHY_InDetV0FinderToolCfg(flags, derivation="",
         KshortContainerName = KshortContainerName,
         LambdaContainerName = LambdaContainerName,
         LambdabarContainerName = LambdabarContainerName,
-        RelinkTracks = RelinkTracks)
+        RelinkTracks = RelinkTracks,
+        **kwargs)
 
 def BPHY_V0MainDecoratorCfg(flags, derivation="",
                             V0ContainerName="",
