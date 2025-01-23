@@ -132,6 +132,8 @@ from DerivationFrameworkJetEtMiss.JETM42 import JETM42Cfg
 from DerivationFrameworkTrigger.TRIG8 import TRIG8Cfg
 # TRIG9: TauTrigger performance
 from DerivationFrameworkTrigger.TRIG9 import TRIG9Cfg
+# TRIG10: TauTrigger performance
+from DerivationFrameworkTrigger.TRIG10 import TRIG10Cfg
 
 # L1CALO1 derivation - runs primarily on RAWD
 from DerivationFrameworkL1Calo.L1CALO1 import L1CALO1Cfg
@@ -180,7 +182,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg', 'EGAM11Cfg', 'EGAM12Cfg',
            'JETM1Cfg','JETM2Cfg','JETM3Cfg','JETM4Cfg','JETM5Cfg','JETM6Cfg','JETM7Cfg',
            'JETM10Cfg','JETM11Cfg','JETM12Cfg','JETM14Cfg', 'JETM42Cfg',
-           'TRIG8Cfg',"TRIG9Cfg",'L1CALO1Cfg',
+           'TRIG8Cfg',"TRIG9Cfg","TRIG10Cfg",'L1CALO1Cfg',
            'MUON1Cfg','MUON5Cfg',
            'TLA0Cfg', 'TLA1Cfg', 'TLA2Cfg',
            'HION2Cfg','HION4Cfg','HION5Cfg','HION7Cfg','HION12Cfg','HION14Cfg',
