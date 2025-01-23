@@ -51,12 +51,11 @@ def createMuonConfigFlags():
                                                                           prevFlags.GeoModel.SQLiteDBFullPath)["Muon"]["useR4Plugin"] )
     # 1. Digitization
     mcf.addFlag("Muon.doDigitization",True)
-    mcf.addFlag("Muon.doFastMMDigitization",True)
+    mcf.addFlag("Muon.doFastMMDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
+
+    
     # 2. Reco MuonRecFlags    
-    mcf.addFlag("Muon.doTGCClusterSegmentFinding", False) # Run cluster segment finding
-    mcf.addFlag("Muon.doRPCClusterSegmentFinding", False) # Run cluster segment finding
-    mcf.addFlag("Muon.prdToxAOD", False) # Run clusterization
-    mcf.addFlag("Muon.rpcRawToxAOD", False) # Add RPC RDO to xAOD
+
     mcf.addFlag("Muon.doMSVertex", True) # Run MS vertex (arXiv:1311.7070)
     mcf.addFlag("Muon.doSegmentT0Fit",lambda prevFlags : prevFlags.Beam.Type is not BeamType.Collisions) # Fit MDT segments using a variable t0. Used for cosmics and single beam to compensate for large errors on the trigger time.
     mcf.addFlag("Muon.enableErrorTuning",True) # turn on error tuning to account for misalignments

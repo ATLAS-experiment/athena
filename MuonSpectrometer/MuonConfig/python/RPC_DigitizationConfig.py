@@ -138,11 +138,14 @@ def RPC_OutputCfg(flags):
     """Return ComponentAccumulator with Output for RPC. Not standalone."""
     acc = ComponentAccumulator()
     if flags.Output.doWriteRDO:
-        ItemList = ["RpcPadContainer#*"]
+        ItemList = []
+        if not flags.Muon.usePhaseIIGeoSetup:
+            ItemList+=["RpcPadContainer#*"]
+            if flags.Digitization.EnableTruth:
+                ItemList += ["MuonSimDataCollection#*"]
         if flags.Muon.enableNRPC:
             ItemList += [ 'xAOD::NRPCRDOContainer#*' , 'xAOD::NRPCRDOAuxContainer#*' ]
-        if flags.Digitization.EnableTruth:
-            ItemList += ["MuonSimDataCollection#*"]
+        if flags.Digitization.EnableTruth:           
             ItemList += ["xAOD::MuonSimHitContainer#*RPC_SDO",
                         "xAOD::MuonSimHitAuxContainer#*RPC_SDOAux."]
             acc.merge(TruthDigitizationOutputCfg(flags))

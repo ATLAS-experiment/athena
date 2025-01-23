@@ -62,7 +62,7 @@ echo ${neutrinoFiles}
         --inputHITSFile ${HITS_FILE} \
         --multithreaded True \
         --geometrySQLite True \
-	--geometrySQLiteFullPath "${geo_db}" \
+	      --geometrySQLiteFullPath "${geo_db}" \
         --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-07'\
         --digiSeedOffset1 170 \
         --digiSeedOffset2 170 \
@@ -72,6 +72,8 @@ echo ${neutrinoFiles}
         --outputRDOFile myRDO.pool.root \
         --skipEvents 0 \
         --maxEvents 10  \
+        --inputHighPtMinbiasHitsFile ${highPtMinBiasFiles} \
+        --inputLowPtMinbiasHitsFile ${lowPtMinBiasFiles} \
         --postInclude 'all:PyJobTransforms.UseFrontier' \
         --preExec "default:flags.Scheduler.CheckDependencies = True;flags.Scheduler.ShowDataDeps = True;flags.Scheduler.ShowDataFlow = True;flags.Scheduler.ShowControlFlow = True;" \
         --postExec "default:flags.dump(evaluate=True);from MuonPRDTestR4.MuonHitTestConfig import MuonHitTesterCfg;cfg.merge(MuonHitTesterCfg(flags,dumpSimHits=True, outFile=\"${validNTuple}\"));cfg.printConfig(withDetails=True, summariseProps=True);"
