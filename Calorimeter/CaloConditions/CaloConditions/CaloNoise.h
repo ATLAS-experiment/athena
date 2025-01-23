@@ -52,9 +52,13 @@ class CaloNoise {
   float getNoise(const HWIdentifier /*hwid*/, const int /*gain*/) const = delete;
 
 
-
   float getEffectiveSigma(const Identifier id, const int gain, const float energy) const {
     IdentifierHash h=m_caloCellId->calo_cell_hash(id);
+    return getEffectiveSigma(h,gain,energy);
+  }
+  
+
+  float getEffectiveSigma(const IdentifierHash h, const int gain, const float energy) const {
     if (h<m_tileHashOffset) {
       return m_larNoise[gain][h];
     }

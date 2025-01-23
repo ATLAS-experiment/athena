@@ -20,7 +20,7 @@ atlas_add_component( CaloRec
    StoreGateLib LumiBlockCompsLib AthenaMonitoringKernelLib
    ${ROOT_LIBRARIES} ${CORAL_LIBRARIES}
    ${EIGEN_LIBRARIES} AthAllocators IdDictParser CaloLumiConditions
-   LArRawConditions FourMom LumiBlockData )
+   LArRawConditions FourMom LumiBlockData xAODTrigCalo )
 
 
 
