@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TForwardElectronLikelihoodTool.h"
@@ -30,36 +30,6 @@ Root::TForwardElectronLikelihoodTool::TForwardElectronLikelihoodTool(
   , m_cutPosition_kinematicEt(-9)
   , m_cutPosition_LH(-9)
 {
-  for (unsigned int varIndex = 0; varIndex < s_fnVariables; varIndex++) {
-    for (auto & fPDFbin : fPDFbins) {
-      for (auto & ip : fPDFbin) {
-        for (unsigned int et = 0; et < s_fnEtBinsHist; et++) {
-          for (unsigned int eta = 0; eta < s_fnEtaBins; eta++) {
-            ip[et][eta][varIndex] = nullptr;
-          }
-        }
-      }
-    }
-  }
-}
-
-//=============================================================================
-// Destructor
-//=============================================================================
-Root::TForwardElectronLikelihoodTool::~TForwardElectronLikelihoodTool()
-{
-  for (unsigned int varIndex = 0; varIndex < s_fnVariables; varIndex++) {
-    for (auto & fPDFbin : fPDFbins) {
-      for (auto & ip : fPDFbin) {
-        for (unsigned int et = 0; et < s_fnEtBinsHist; et++) {
-          for (unsigned int eta = 0; eta < s_fnEtaBins; eta++) {
-            delete ip[et][eta][varIndex];
-            ip[et][eta][varIndex] = nullptr;
-          }
-        }
-      }
-    }
-  }
 }
 
 StatusCode
@@ -515,7 +485,7 @@ Root::TForwardElectronLikelihoodTool::getBinName(
                        iptype, int(fIpBounds[ipbin]),
                        et_bounds[etbin], eta_bounds[etabin]);
   } else {
-    return std::format("et{:02}eta{:.2f}",
+    return std::format("et{}eta{:.2f}",
                        et_bounds[etbin], eta_bounds[etabin]);
   }
 }

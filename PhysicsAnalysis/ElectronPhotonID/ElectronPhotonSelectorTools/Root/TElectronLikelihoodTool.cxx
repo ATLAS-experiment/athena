@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TElectronLikelihoodTool.h"
@@ -10,8 +10,7 @@
 #include "TSystem.h"
 #include <algorithm> // for min
 #include <cmath>
-#include <cstdio>  // for sprintf
-#include <fstream> // for char_traits
+#include <format>
 
 #include "ElectronPhotonSelectorTools/ElectronSelectorHelpers.h"
 
@@ -53,38 +52,6 @@ Root::TElectronLikelihoodTool::TElectronLikelihoodTool(const char* name)
   , m_cutPositionWstotAtHighET(-9)
   , m_cutPositionEoverPAtHighET(-9)
 {
-  for (unsigned int varIndex = 0; varIndex < s_fnVariables; varIndex++) {
-    for (auto & fPDFbin : fPDFbins) {
-      for (auto & ip : fPDFbin) {
-        for (unsigned int et = 0; et < s_fnEtBinsHist; et++) {
-          for (unsigned int eta = 0; eta < s_fnEtaBins; eta++) {
-            ip[et][eta][varIndex] = nullptr;
-          }
-        }
-      }
-    }
-  }
-}
-
-//=============================================================================
-// Destructor
-//=============================================================================
-Root::TElectronLikelihoodTool::~TElectronLikelihoodTool()
-{
-  for (unsigned int varIndex = 0; varIndex < s_fnVariables; varIndex++) {
-    for (auto & fPDFbin : fPDFbins) {
-      for (auto & ip : fPDFbin) {
-        for (unsigned int et = 0; et < s_fnEtBinsHist; et++) {
-          for (unsigned int eta = 0; eta < s_fnEtaBins; eta++) {
-            if (ip[et][eta][varIndex]) {
-              delete ip[et][eta][varIndex];
-              ip[et][eta][varIndex] = nullptr;
-            }
-          }
-        }
-      }
-    }
-  }
 }
 
 StatusCode
@@ -363,8 +330,7 @@ Root::TElectronLikelihoodTool::loadVarHistograms(const std::string& vstr,
           // The 7-10 GeV, crack bin uses the 10-15 Gev pdfs. WE DO NOT DO THIS
           // ANYMORE! unsigned int et_tmp = (eta == 5 && et == 1) ? 1 : et;
           unsigned int et_tmp = et;
-          char binname[200];
-          getBinName(binname, et_tmp, eta_tmp, ip, m_ipBinning);
+          std::string binname = getBinName(et_tmp, eta_tmp, ip, m_ipBinning);
 
           if (((std::string(binname).find("2.37") != std::string::npos)) &&
               (vstr.find("el_f3") != std::string::npos)) {
@@ -377,23 +343,13 @@ Root::TElectronLikelihoodTool::loadVarHistograms(const std::string& vstr,
             continue;
           }
 
-          char pdfdir[500];
-          snprintf(pdfdir, 500, "%s/%s", vstr.c_str(), sig_bkg.c_str());
-          char pdf[500];
-          snprintf(pdf,
-                   500,
-                   "%s_%s_smoothed_hist_from_KDE_%s",
-                   vstr.c_str(),
-                   sig_bkg.c_str(),
-                   binname);
-          char pdf_newname[500];
-          snprintf(pdf_newname,
-                   500,
-                   "%s_%s_%s_LHtool_copy_%s",
-                   m_name.c_str(),
-                   vstr.c_str(),
-                   sig_bkg.c_str(),
-                   binname);
+          const std::string pdfdir = std::format("{}/{}", vstr, sig_bkg);
+
+          std::string pdf = std::format("{}_{}_smoothed_hist_from_KDE_{}",
+                                        vstr, sig_bkg, binname);
+
+          std::string pdf_newname = std::format("{}_{}_{}_LHtool_copy_{}",
+                                                m_name, vstr, sig_bkg, binname);
 
           if (!pdfFile->GetListOfKeys()->Contains(vstr.c_str())) {
             ATH_MSG_INFO("Warning: skipping variable "
@@ -411,28 +367,21 @@ Root::TElectronLikelihoodTool::loadVarHistograms(const std::string& vstr,
           // If the 0th et bin (4-7 GeV) histogram does not exist in the root
           // file, then just use the 7-10 GeV bin histogram. This should
           // preserve backward compatibility
-          if (et == 0 && !((TDirectory*)pdfFile->Get(pdfdir))
+          if (et == 0 && !((TDirectory*)pdfFile->Get(pdfdir.c_str()))
                             ->GetListOfKeys()
-                            ->Contains(pdf)) {
-            getBinName(binname, et_tmp + 1, eta_tmp, ip, m_ipBinning);
-            snprintf(pdf,
-                     500,
-                     "%s_%s_smoothed_hist_from_KDE_%s",
-                     vstr.c_str(),
-                     sig_bkg.c_str(),
-                     binname);
-            snprintf(pdf_newname,
-                     500,
-                     "%s_%s_%s_LHtool_copy4GeV_%s",
-                     m_name.c_str(),
-                     vstr.c_str(),
-                     sig_bkg.c_str(),
-                     binname);
+                            ->Contains(pdf.c_str())) {
+            binname = getBinName(et_tmp + 1, eta_tmp, ip, m_ipBinning);
+
+            pdf = std::format("{}_{}_smoothed_hist_from_KDE_{}",
+                              vstr, sig_bkg, binname);
+
+            pdf_newname = std::format("{}_{}_{}_LHtool_copy4GeV_{}",
+                                      m_name, vstr, sig_bkg, binname);
           }
-          if (((TDirectory*)pdfFile->Get(pdfdir))
+          if (((TDirectory*)pdfFile->Get(pdfdir.c_str()))
                 ->GetListOfKeys()
-                ->Contains(pdf)) {
-            TH1F* hist = (TH1F*)(((TDirectory*)pdfFile->Get(pdfdir))->Get(pdf));
+                ->Contains(pdf.c_str())) {
+            TH1F* hist = (TH1F*)(((TDirectory*)pdfFile->Get(pdfdir.c_str()))->Get(pdf.c_str()));
             fPDFbins[s_or_b][ip][et][eta][varIndex] =
               new EGSelectors::SafeTH1(hist);
             delete hist;
@@ -1110,25 +1059,21 @@ Root::TElectronLikelihoodTool::getLikelihoodEtDiscBin(
 
 //---------------------------------------------------------------------------------------
 // Gets the bin name. Given the HISTOGRAM binning (fnEtBinsHist)
-void
-Root::TElectronLikelihoodTool::getBinName(char* buffer,
-                                          int etbin,
+std::string
+Root::TElectronLikelihoodTool::getBinName(int etbin,
                                           int etabin,
                                           int ipbin,
                                           const std::string& iptype) 
 {
-  double eta_bounds[9] = { 0.0, 0.6, 0.8, 1.15, 1.37, 1.52, 1.81, 2.01, 2.37 };
-  int et_bounds[s_fnEtBinsHist] = { 4, 7, 10, 15, 20, 30, 40 };
+  const double eta_bounds[9] = { 0.0, 0.6, 0.8, 1.15, 1.37, 1.52, 1.81, 2.01, 2.37 };
+  const int et_bounds[s_fnEtBinsHist] = { 4, 7, 10, 15, 20, 30, 40 };
   if (!iptype.empty()) {
-    snprintf(buffer,
-             200,
-             "%s%det%02deta%0.2f",
-             iptype.c_str(),
-             int(s_fIpBounds[ipbin]),
-             et_bounds[etbin],
-             eta_bounds[etabin]);
+    return std::format("{}{}et{:02}eta{:.2f}",
+                       iptype, int(s_fIpBounds[ipbin]),
+                       et_bounds[etbin], eta_bounds[etabin]);
   } else {
-    snprintf(buffer, 200, "et%deta%0.2f", et_bounds[etbin], eta_bounds[etabin]);
+    return std::format("et{}eta{:.2f}",
+                       et_bounds[etbin], eta_bounds[etabin]);
   }
 }
 //----------------------------------------------------------------------------------------
