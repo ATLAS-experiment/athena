@@ -391,6 +391,7 @@ def HION4SkimmingTriggers2023():
     #primary and backup triggers
     triggers  = []
     triggers += ["HLT_mu4_L1MU3V_VTE50"]
+    triggers += ["HLT_mu3_hi_FgapAC5_L1MU3V_VTE50"]
     triggers += ["HLT_mb_sp_vpix30_hi_FgapAC5_2g0_etcut_25dphiCC_L12TAU1_VTE200"]    
     triggers += ["HLT_mb_sp_vpix30_hi_FgapAC5_L1TAU1_TE4_VTE200"]
     triggers += ["HLT_mb_sp_vpix30_hi_FgapAC5_L12TAU1_VTE200"]
@@ -405,6 +406,7 @@ def HION4SkimmingTriggers2023():
     triggers += ["HLT_mb_excl_1trk5_pt1_L1TAU1_TE4_VTE200"]
     triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L12TAU1_VTE200"]
     triggers += ["HLT_mb_sptrk_hi_FgapAC5_L12TAU1_VTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TAU2_VZDC_A_VZDC_C_VTE100"]
     triggers += ["HLT_mb_sp_vpix15_hi_FgapAC5_L1TAU1_TE4_VTE200_EMPTY"]
     triggers += ["HLT_mb_sp_vpix30_hi_FgapAC5_L1TAU1_TE4_VTE200_EMPTY"]
     triggers += ["HLT_mb_sp_vpix30_hi_FgapAC5_L1TAU8_VTE200_EMPTY"]
