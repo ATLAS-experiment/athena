@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <AsgDataHandles/ReadHandle.h>
@@ -140,6 +140,7 @@ namespace CP {
             const IsoVector& iso_types = getIsolationTypes(particle);
             if (iso_types.empty()) { ATH_MSG_DEBUG("No isolation types have been defined for particle type " << particleName(particle)); }
             for (const IsoType type : iso_types) {
+                std::lock_guard<std::mutex> guard{m_isoHelpersMutex};
                 IsoHelperMap::const_iterator Itr = m_isohelpers.find(type);
                 if (Itr == m_isohelpers.end() || Itr->second->backupIsolation(particle) == CorrectionCode::Error) {
                     ATH_MSG_WARNING("Failed to properly access the vanilla isolation variable "
@@ -354,6 +355,7 @@ namespace CP {
                 }
             }
             ATH_MSG_DEBUG("subtractCloseByContribution: Set pt, eta, phi " << par->pt() << ", " << par->eta()  << ", " << par->phi() << " for " << toString(iso_type) << " to " << iso_variable);
+            std::lock_guard<std::mutex> guard{m_isoHelpersMutex};
             if (m_isohelpers.at(iso_type)->setIsolation(par, iso_variable) == CorrectionCode::Error) { 
                 ATH_MSG_ERROR("Cannot set " << toString(iso_type) << " to " << iso_variable);
                 return CorrectionCode::Error; 
@@ -373,6 +375,7 @@ namespace CP {
         }
         for (const IsolationType iso_type : types) {
             float iso_variable{0.f};
+            std::lock_guard<std::mutex> guard{m_isoHelpersMutex};
             if (m_isohelpers.at(iso_type)->getIsolation(part, iso_variable) == CorrectionCode::Error) { 
                 ATH_MSG_ERROR("Cannot get value for " << toString(iso_type));
                 return CorrectionCode::Error; 
@@ -410,6 +413,7 @@ namespace CP {
         loadAssociatedObjects(ctx, cache);
         std::vector<float>::iterator Cone = corrections.begin();
         for (const IsolationType& iso_type : types) {
+            std::lock_guard<std::mutex> guard{m_isoHelpersMutex};
             IsoHelperMap::const_iterator Itr = m_isohelpers.find(iso_type);
             if (Itr->second->backupIsolation(&par) == CP::CorrectionCode::Error) {
                 ATH_MSG_ERROR("Failed to backup isolation");
@@ -569,6 +573,7 @@ namespace CP {
             ATH_MSG_ERROR("Invalid isolation type " << toString(type));
             return CorrectionCode::Error;
         }
+        std::lock_guard<std::mutex> guard{m_isoHelpersMutex};
         IsoHelperMap::const_iterator Itr = m_isohelpers.find(type);
         if (Itr == m_isohelpers.end() || Itr->second->getOriginalIsolation(par, isoValue) == CorrectionCode::Error) {
             ATH_MSG_WARNING("Could not retrieve the isolation variable " << toString(type));
@@ -683,6 +688,7 @@ namespace CP {
             ATH_MSG_ERROR("getCloseByCorrectionTopoIso() -- The isolation type is not an et cone variable " << toString(type));
             return CorrectionCode::Error;
         }
+        std::lock_guard<std::mutex> guard{m_isoHelpersMutex};
         if (m_isohelpers.at(type)->getOriginalIsolation(primary, isoValue) == CorrectionCode::Error) {
             ATH_MSG_WARNING("Could not retrieve the isolation variable.");
             return CorrectionCode::Error;
@@ -979,6 +985,7 @@ namespace CP {
         return (!isSame(P, P1) && deltaR2(P, P1) < (dR * dR));
     }
     float IsolationCloseByCorrectionTool::getOriginalIsolation(const xAOD::IParticle* particle, IsoType isoVariable) const {
+        std::lock_guard<std::mutex> guard{m_isoHelpersMutex};
         IsoHelperMap::const_iterator itr = m_isohelpers.find(isoVariable);
         float isovalue = 0;
         if (itr == m_isohelpers.end() || itr->second->getOriginalIsolation(particle, isovalue) == CorrectionCode::Error) {
