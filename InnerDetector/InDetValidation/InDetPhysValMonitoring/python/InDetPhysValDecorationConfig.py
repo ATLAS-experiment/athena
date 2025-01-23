@@ -85,6 +85,12 @@ def ITkPhysHitDecoratorAlgCfg(flags, name="ITkPhysHitDecoratorAlg", **kwargs):
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(
             ITkPixelLorentzAngleToolCfg(flags)))
 
+    if 'ResidualPullCalculator' not in kwargs:
+        from TrkConfig.TrkResidualPullCalculatorConfig import (
+            ResidualPullCalculatorCfg)
+        kwargs.setdefault("ResidualPullCalculator", acc.addPublicTool(
+            acc.popToolsAndMerge(ResidualPullCalculatorCfg(flags))))
+
     acc.addEventAlgo(CompFactory.InDetPhysHitDecoratorAlg(name, **kwargs))
     return acc
 
