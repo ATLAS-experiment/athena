@@ -152,10 +152,14 @@ void LArCelldeadOTXAlg::buildMap(const EventContext& ctx, StatusCode& sc) const 
       ATH_MSG_INFO("FEB " << m_onlineID->channel_name(febid) << " labelled as dead");
       std::vector<float> vector_of_multipliers;
       std::vector<uint32_t> vector_of_chans;
-      const unsigned nChans = m_onlineID->channelInSlotMax(febid);
+      const int nChans = m_onlineID->channelInSlotMax(febid);//may return -999
+      if (ATH_UNLIKELY(nChans < 0)) {
+        ATH_MSG_WARNING("LArCelldeadOTXAlg::buildMap : nChans<0");
+        continue;
+      }
       vector_of_multipliers.resize(nChans,0.0);
       vector_of_chans.resize(nChans,0xffffffff);
-      for (unsigned ch = 0; ch < nChans; ++ch) {
+      for (int ch = 0; ch < nChans; ++ch) {
         const HWIdentifier chid = m_onlineID->channel_Id(febid, ch);
         const Identifier id = oflCabling->cnvToIdentifier(chid);
         const IdentifierHash hashId = m_calo_id->calo_cell_hash(id);
