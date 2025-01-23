@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonStationIntersectCond/MuonIntersectGeoData.h"
@@ -115,8 +115,8 @@ namespace Muon {
         
         if ((chIndex == Muon::MuonStationIndex::EIS || chIndex == Muon::MuonStationIndex::EIL) && !m_idHelperSvc->hasCSC()) {
             //Chambers can only be -5, -4, 4, 5
-            if( fabs(chEtaLeft) != 5 || fabs(chEtaLeft != 4 ) ) chEtaLeft = -999; 
-            if( fabs(chEtaRight) != 5 || fabs(chEtaRight != 4 ) ) chEtaRight = -999; 
+            if( std::abs(chEtaLeft) != 5 && std::abs(chEtaLeft) != 4 ) chEtaLeft = -999;
+            if( std::abs(chEtaRight) != 5 && std::abs(chEtaRight) != 4 ) chEtaRight = -999;
         }
 
         if (chEtaLeft != -999 &&
