@@ -59,14 +59,14 @@ StatusCode eSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<eTowe
 
   for(auto eachTower : *triggerTowerCollection) {
     if(std::abs(eachTower->eta())<1.5 && eachTower->sampling()==1) {
-      int i_phi = int(eachTower->phi()/pi_over_32);
+      int i_phi = static_cast<int>(eachTower->phi()/pi_over_32);
       int etaSign{-1};
       int towerID_Modifier{100000};
       if (eachTower->eta() > 0) {
         etaSign = 1;
         towerID_Modifier = 200000;
       }
-      int i_eta = int(eachTower->eta() * 10) * etaSign;
+      int i_eta = static_cast<int>(eachTower->eta() * 10) * etaSign;
       if(i_eta * etaSign == -14) {
         towerID_Modifier = 300000;
       } else if (i_eta * etaSign == 14) {
@@ -79,7 +79,7 @@ StatusCode eSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<eTowe
         if (targetTower->getET_float(4, 0) > 0) {
           ATH_MSG_WARNING("\n==== eSuperCellTowerMapper ============ Hadronic layer energy filled more than once - it will be ignored. (Needs investigation).  Please report this!");
         }
-        targetTower->setET(10, int(eachTower->cpET()) * 500., 4);  // cf 0.5 * 1000.0
+        targetTower->setET(10, static_cast<int>(eachTower->cpET()) * 500., 4);  // cf 0.5 * 1000.0
       } else {
         ATH_MSG_WARNING("\n==== eSuperCellTowerMapper ============ Tower id is officially unknown - it will be ignored. (Needs investigation).  Please report this!");
       }
