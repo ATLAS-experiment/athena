@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -10,10 +10,8 @@
 #define ASG_TOOLS__UNIT_TEST_SERVICE1_H
 
 #include <AsgServices/AsgService.h>
+#include <AsgTools/PropertyWrapper.h>
 #include <AsgExampleTools/IUnitTestService1.h>
-
-#include <CxxUtils/checker_macros.h>
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // unit test
 
 namespace asg
 {
@@ -24,49 +22,31 @@ namespace asg
 
   struct UnitTestService1 : extends<AsgService, IUnitTestService1>
   {
-    /// \brief standard constructor
   public:
+    /// \brief standard constructor
     UnitTestService1 (const std::string& name, ISvcLocator* pSvcLocator);
 
     /// \brief standard destructor
-  public:
     ~UnitTestService1 ();
 
-  public:
-    StatusCode initialize () override;
-
-  public:
+    virtual StatusCode initialize () override;
     virtual std::string getPropertyString () const override;
-
-  public:
     virtual int getPropertyInt () const override;
-
-  public:
     virtual void setPropertyInt (int val_property) override;
-
-  public:
     virtual bool isInitialized () const override;
 
+  private:
     /// \brief whether initialize has been called
-  public:
-    bool m_isInitialized = false;
+    bool m_isInitialized{false};
 
     /// \brief the string property
-  public:
-    std::string m_propertyString;
+    Gaudi::Property<std::string> m_propertyString{this, "propertyString", {}, "the string property"};
 
     /// \brief the integer property
-  public:
-    int m_propertyInt = -7;
+    Gaudi::Property<int> m_propertyInt{this, "propertyInt", -7, "the integer property"};
 
     /// \brief whether initialize should fail
-  public:
-    bool m_initializeFail = false;
-
-    /// \brief the number of times the service of the given name has been
-    /// instantiated
-  public:
-    static int& instance_counts (const std::string& name);
+    Gaudi::Property<bool> m_initializeFail{this, "initializeFail", false, "whether initialize should fail"};
   };
 }
 

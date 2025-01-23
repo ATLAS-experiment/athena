@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -10,7 +10,6 @@
 #define ASG_TOOLS__I_DATA_HANDLE_TEST_TOOL_H
 
 #include <AsgTools/IAsgTool.h>
-#include "CxxUtils/checker_macros.h"
 
 namespace asg
 {
@@ -23,7 +22,7 @@ namespace asg
 
     /// \brief run the test
   public:
-    virtual void runTest ATLAS_NOT_THREAD_SAFE () = 0;
+    virtual void runTest () = 0;
   };
 }
 
