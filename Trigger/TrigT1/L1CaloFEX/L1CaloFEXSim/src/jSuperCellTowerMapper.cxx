@@ -53,14 +53,14 @@ StatusCode jSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<jTowe
     }
     for(auto eachTower : *triggerTowerCollection) {
         if(std::fabs(eachTower->eta())<1.5 && eachTower->sampling()==1) {
-            int i_phi = int(eachTower->phi()/pi_over_32);
+            int i_phi = static_cast<int>(eachTower->phi()/pi_over_32);
             int etaSign{-1};
             int towerID_Modifier{100000};
             if (eachTower->eta() > 0) {
                 etaSign = 1;
                 towerID_Modifier = 200000;
             }
-            int i_eta = int(eachTower->eta() * 10) * etaSign;
+            int i_eta = static_cast<int>(eachTower->eta() * 10) * etaSign;
             if(i_eta * etaSign == -14) {
                 towerID_Modifier = 300000;
             } else if (i_eta * etaSign == 14) {
@@ -74,7 +74,7 @@ StatusCode jSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<jTowe
                     ATH_MSG_WARNING("\n==== jSuperCellTowerMapper ============ Hadronic layer energy filled more than once - it will be ignored. (Needs investigation).  Please report this!");
                 }
                 
-                targetTower->set_TileCal_Et(1, int(eachTower->cpET()) * 500.); // cf 500.0
+                targetTower->set_TileCal_Et(1, static_cast<int>(eachTower->cpET()) * 500.); // cf 500.0
             } else {
                 ATH_MSG_WARNING("\n==== jSuperCellTowerMapper ============ Tower ID is officially unknown - it will be ignored. (Needs investigation).  Please report this!");
             }
