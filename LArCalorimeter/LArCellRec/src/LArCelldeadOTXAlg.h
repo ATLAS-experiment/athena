@@ -1,24 +1,25 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCELLREC_LArCelldeadOTXAlg_H
 #define LARCELLREC_LArCelldeadOTXAlg_H
 
-
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "CaloInterface/ICaloCellMakerTool.h"
 #include "CaloDetDescr/ICaloSuperCellIDTool.h"
 #include "LArRawEvent/LArRawSCContainer.h"
 #include "LArRecEvent/LArDeadOTXFromSC.h"
-#include "StoreGate/ReadHandleKey.h"
-#include "StoreGate/ReadCondHandleKey.h"
-#include "AthenaBaseComps/AthAlgTool.h"
 #include "LArRecConditions/LArBadChannelCont.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadCondHandleKey.h"
+#include <mutex>
+#include <vector>
 
+class HWIdentifier;
 class LArOnlineID;
 class LArOnline_SuperCellID;
 class CaloCell_ID;
