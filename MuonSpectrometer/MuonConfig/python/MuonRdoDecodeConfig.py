@@ -87,7 +87,6 @@ def RpcRdoToPrepDataToolCfg(flags, name ="RpcRdoToRpcPrepData",RDOContainer = No
             kwargs.setdefault("OutputContainer", "xRpcMeasurements")
         the_tool = CompFactory.MuonR4.RpcRdoToRpcPrepDataTool(name, **kwargs)
         result.setPrivateTools(the_tool)
-
     else:
         # We need the RPC cabling to be setup
         from MuonConfig.MuonCablingConfig import RPCLegacyCablingConfigCfg
@@ -355,6 +354,10 @@ def MuonRDOtoPRDConvertorsCfg(flags):
 
     if flags.Detector.GeometryRPC:
         acc.merge(RpcRDODecodeCfg(flags))
+        if flags.Input.isMC and flags.Muon.usePhaseIIGeoSetup:
+            ### In simulated events the Rpc -> rdo converter alg does not provide legacy prds
+            from xAODMuonTrkPrepDataCnv.MuonPrepDataCnvCfg import xRpcToRpcPrepDataCnvAlgCfg
+            acc.merge(xRpcToRpcPrepDataCnvAlgCfg(flags))
 
     if flags.Detector.GeometryTGC:
         acc.merge(TgcRDODecodeCfg(flags))
@@ -372,7 +375,6 @@ def MuonRDOtoPRDConvertorsCfg(flags):
 
     if flags.Input.isMC and not flags.Muon.usePhaseIIGeoSetup:
         acc.merge(MuonPRD_MultiTruthMakerCfg(flags))
-
     return acc
 
 

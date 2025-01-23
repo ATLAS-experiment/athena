@@ -26,13 +26,13 @@ Overlay_tf.py \
     --inputHITSFile ${HITS_FILE} \
     --inputRDO_BKGFile ${RDO_BKG_File} \
     --outputRDOFile myRDO.pool.root \
-    --maxEvents 20 \
+    --maxEvents ${events} \
     --digiSeedOffset1 511 \
     --digiSeedOffset2 727 \
     --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-07'\
     --geometryVersion "default:${geo_tag}" \
     --preInclude 'all:Campaigns.MC23a' \
-    --preExec "default:flags.Scheduler.CheckDependencies=True;flags.Scheduler.ShowDataDeps = True;flags.Scheduler.ShowDataFlow=True;flags.Scheduler.ShowControlFlow=True;flags.Detector.GeometrysTGC=False;" \
+    --preExec "default:flags.Scheduler.CheckDependencies=True;flags.Scheduler.ShowDataDeps=True;flags.Scheduler.ShowDataFlow=True;flags.Scheduler.ShowControlFlow=True" \
     --postExec "default:flags.dump(evaluate = True);from MuonPRDTestR4.MuonHitTestConfig import MuonDigiTestCfg;cfg.merge(MuonDigiTestCfg(flags,dumpSimHits=True,dumpDigits=True, outFile=\"${validNTuple}\"));cfg.getEventAlgo('EventInfoOverlay').ValidateBeamSpot = False;cfg.printConfig(withDetails=True, summariseProps=True);" \
     --imf False
 

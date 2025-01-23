@@ -1,10 +1,8 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # This file configures the Muon segment finding. It is based on a few files in the old configuration system:
 # Tools, which are configured here: 
-# https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MuonRecTools.py
-# https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MooreTools.py
-# from https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/CscTools.py
+
 
 # Core
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -555,7 +553,7 @@ def MuonSegmentCnvAlgCfg(flags, name="MuonSegmentCnvAlg", **kwargs):
     return result
 
 
-def MuonSegmentFindingCfg(flags, setup_bytestream = True, cardinality=1):
+def MuonSegmentFindingCfg(flags, setup_bytestream = True):
     """
     Returns a CA setting up Muon Segment Finding
     @param setup_bytestream if True and if Format.BS, sets up reading from bytestream. If False, disables setting up BS, even if Format.BS is True 
@@ -569,7 +567,7 @@ def MuonSegmentFindingCfg(flags, setup_bytestream = True, cardinality=1):
     from MuonConfig.MuonRecToolsConfig import MuonEDMHelperSvcCfg
     result.merge(MuonEDMHelperSvcCfg(flags))    
 
-    if (setup_bytestream):
+    if setup_bytestream:
         # We need to be able to disable this when using MuonCalibStream, 
         # as the normal BS convertors clash with the special MCS converters.
         if flags.Input.Format is Format.BS:
@@ -580,6 +578,7 @@ def MuonSegmentFindingCfg(flags, setup_bytestream = True, cardinality=1):
             from MuonConfig.MuonRdoDecodeConfig import MuonRDOtoPRDConvertorsCfg
             result.merge( MuonRDOtoPRDConvertorsCfg(flags) )
   
+    
     # We need to add two algorithms - one for normal collisions, one for NCB
     result.merge(MuonLayerHoughAlgCfg(flags))
     result.merge(MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMaker"))

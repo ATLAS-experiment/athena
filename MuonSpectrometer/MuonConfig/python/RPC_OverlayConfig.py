@@ -22,19 +22,21 @@ def RPC_OverlayAlgCfg(flags, name="RpcOverlay", **kwargs):
     # Setup output
     if flags.Output.doWriteRDO:
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-        acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
-            "RpcPadContainer#RPCPAD"
-        ]))
+        if not flags.Muon.usePhaseIIGeoSetup:
+            acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
+                "RpcPadContainer#RPCPAD"
+            ]))
         if flags.Muon.enableNRPC:
             acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
                 "xAOD::NRPCRDOContainer#NRPCRDO", "xAOD::NRPCRDOAuxContainer#NRPCRDOAux."
             ]))
 
     if flags.Output.doWriteRDO_SGNL:
-        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-        acc.merge(OutputStreamCfg(flags, "RDO_SGNL", ItemList=[
-            f"RpcPadContainer#{flags.Overlay.SigPrefix}RPCPAD"
-        ]))
+        if not flags.Muon.usePhaseIIGeoSetup:
+            from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+            acc.merge(OutputStreamCfg(flags, "RDO_SGNL", ItemList=[
+                f"RpcPadContainer#{flags.Overlay.SigPrefix}RPCPAD"
+            ]))
         if flags.Muon.enableNRPC:
             acc.merge(OutputStreamCfg(flags, "RDO_SGNL", ItemList=[
                 f"xAOD::NRPCRDOContainer#{flags.Overlay.SigPrefix}NRPCRDO", f"xAOD::NRPCRDOAuxContainer#{flags.Overlay.SigPrefix}NRPCRDOAux."

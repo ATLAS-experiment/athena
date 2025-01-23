@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Core configuration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -47,21 +47,6 @@ def StandaloneMuonOutputCfg(flags):
         # Truth Segment Container
         aod_items += ["xAOD::MuonSegmentContainer#MuonTruthSegments"]
         aod_items += ["xAOD::MuonSegmentAuxContainer#MuonTruthSegmentsAux."]
-
-    if flags.Muon.prdToxAOD:
-        aod_items += ["xAOD::TrackMeasurementValidationContainer#MDT_DriftCircles"]
-        aod_items += ["xAOD::TrackMeasurementValidationAuxContainer#MDT_DriftCirclesAux."]
-        aod_items += ["xAOD::TrackMeasurementValidationContainer#RPC_Measurements"]
-        aod_items += ["xAOD::TrackMeasurementValidationAuxContainer#RPC_MeasurementsAux."]
-        aod_items += ["xAOD::TrackMeasurementValidationContainer#TGC_MeasurementsAllBCs"]
-        aod_items += ["xAOD::TrackMeasurementValidationAuxContainer#TGC_MeasurementsAllBCsAux."]
-        if flags.Detector.EnableCSC:
-            aod_items += ["xAOD::TrackMeasurementValidationContainer#CSC_Clusters"]
-            aod_items += ["xAOD::TrackMeasurementValidationAuxContainer#CSC_ClustersAux."]
-
-    if flags.Muon.rpcRawToxAOD:
-        aod_items += ["xAOD::TrackMeasurementValidationContainer#RPC_RDO_Measurements"]
-        aod_items += ["xAOD::TrackMeasurementValidationAuxContainer#RPC_RDO_MeasurementsAux."]
 
     # ESD list includes all AOD items
     esd_items = []
@@ -201,12 +186,15 @@ def MuonReconstructionCfg(flags):
 
         # Check if we're making PRDs
         # FIXME - I think we can remove this flag if we shift this to where PRDs are being created. However, this will involve some refactoring, so temporary fix is this.
-        if flags.Muon.makePRDs:
-            from MuonConfig.MuonRdoDecodeConfig import MuonPRD_MultiTruthMakerCfg
-            result.merge(MuonPRD_MultiTruthMakerCfg(flags))
-
-            from MuonConfig.MuonTruthAlgsConfig import MuonTruthDecorationAlgCfg
-            result.merge(MuonTruthDecorationAlgCfg(flags))
+        if flags.Muon.makePRDs and flags.Input.isMC:
+            if not flags.Muon.usePhaseIIGeoSetup:
+                from MuonConfig.MuonRdoDecodeConfig import MuonPRD_MultiTruthMakerCfg
+                result.merge(MuonPRD_MultiTruthMakerCfg(flags))
+                from MuonConfig.MuonTruthAlgsConfig import MuonTruthDecorationAlgCfg
+                result.merge(MuonTruthDecorationAlgCfg(flags))
+            else:
+                from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonTruthAlgsCfg
+                result.merge(MuonTruthAlgsCfg(flags))
 
     if flags.Muon.doMSVertex:
         msvertexrecotool = CompFactory.Muon.MSVertexRecoTool(
