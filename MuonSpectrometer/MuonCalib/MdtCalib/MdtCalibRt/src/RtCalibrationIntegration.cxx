@@ -11,6 +11,8 @@
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
 #include "MdtCalibData/RtFromPoints.h"
+#include "MdtCalibData/RtRelationLookUp.h"
+
 #include "MdtCalibRt/RtParabolicExtrapolation.h"
 #include "MdtCalibT0/T0MTHistos.h"
 #include "TF1.h"
@@ -188,7 +190,7 @@ bool RtCalibrationIntegration::analyse() {
     point[nb_bins].set_error(1.);
 
     // get the r-t relationship //
-    m_rt = std::make_shared<RtChebyshev>(rt_from_points.getRtChebyshev(point, 15));
+    m_rt = rt_from_points.getRtChebyshev(point, 15);
 
     ///////////////////////////////////////////////////
     // PARABOLIC EXTRAPOLATION FOR LARGE DRIFT RADII //

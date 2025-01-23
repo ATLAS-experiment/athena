@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef RtResolutionChebyshev_H
-#define RtResolutionChebyshev_H
+#ifndef MdtCalibData_RadiusResoChebyshev_H
+#define MdtCalibData_RadiusResoChebyshev_H
 
 // standard C++ //
 #include <cstdlib>
@@ -13,26 +13,15 @@
 
 // MDT calibration //
 #include "MdtCalibData/IRtResolution.h"
-#include "MdtCalibData/MdtRtRelation.h"
+#include "MdtCalibData/IRtRelation.h"
 
 namespace MuonCalib {
-    /**
-    @class  RtResolutionChebyshev
-    This class contains the implementation of a spatial resolution @f$ \sigma @f$
-    parametrized by a linear combination of Chebyshev polyonomials.
+    /** @brief RadiusResolutionChebyshev parametrizes the uncertainty on the drift-radius as a function of the 
+     *         drift radius itself and not of the drift time. It has a pointer to the corresponding 
+     *         rt-relation which is used to translate the drift time into a radius before parsed through
+     *         the parametrized chebyChev polynomial */
 
-    Convention:
-
-    @f[ \sigma(t) = \sum_{k=0}^{K}
-                         p_k*T_k(2*(t-0.5*(tupper+tlower))/(tupper-tlower) @f]
-    where @f$ T_k @f$ is the Chebyshev polynomial of k-th order,
-    tupper and tlower are upper and lower drift-time bounds.
-
-    Units: [t] = ns, [r] = mm, [v] = mm/ns.
-
-    */
-
-    class RtResolutionChebyshev : public IRtResolution {
+    class RadiusResolutionChebyshev : public IRtResolution {
     public:
         // Constructors
         /** initialization constructor,
@@ -44,7 +33,7 @@ namespace MuonCalib {
         ParVec[2...] = parameters of the Chebyshev polynomial
 
         */
-        RtResolutionChebyshev(const ParVec& vec);
+        RadiusResolutionChebyshev(const ParVec& vec, const IRtRelationPtr& rtRel);
         /** @brief Initialization from a  */
 
         // Methods //
@@ -56,19 +45,15 @@ namespace MuonCalib {
         //!< returned; the background rate is ignored in present implementation
         virtual double resolution(double t, double bgRate = 0.0) const override final;
 
-        // get-methods specific to the RtResolutionChebyshev class //
-
-        //!< get the lower drift-time bound
-        virtual double tLower() const;
-
-        //!< get the upper drift-time bound
-        virtual double tUpper() const;
-
         //!< get the number of parameters used to describe the resolution
         virtual unsigned int nDoF() const override final;
 
         //!< get the coefficients of the r(t) polynomial
         std::vector<double> resParameters() const;
+      private:
+          IRtRelationPtr m_rtRel{};
+          double m_r_max{m_rtRel->radius(m_rtRel->tUpper())};
+          double m_r_min{m_rtRel->radius(m_rtRel->tLower())};
 
     };
 }  // namespace MuonCalib

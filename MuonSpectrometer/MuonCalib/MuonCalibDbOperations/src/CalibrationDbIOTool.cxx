@@ -187,7 +187,7 @@ namespace MuonCalib {
                     SamplePoint outpoint(in_point.x1(), in_point.x2(), 1.0);
                     outpoints.push_back(outpoint);
                 }
-                rts[*it] = new RtRelationLookUp(rt_from_points.getRtRelationLookUp(outpoints));
+                rts[*it] = rt_from_points.getRtRelationLookUp(outpoints).release();
                 if (tmax_diff > -8e8) { rts[*it]->SetTmaxDiff(tmax_diff); }
                 outpoints.clear();
                 for (auto & in_point : in_points) {

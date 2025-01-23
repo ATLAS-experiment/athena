@@ -66,8 +66,8 @@ namespace MuonCalib {
         //!< get the coefficients of the r(t) polynomial
         std::vector<double> rtParameters() const;
 
-        //!< get the reduced time which is the argument of the Legendre polynomial
-        double getReducedTime(const double  t) const;
+        virtual unsigned nDoF() const override final;
+
     };
 }  // namespace MuonCalib
 

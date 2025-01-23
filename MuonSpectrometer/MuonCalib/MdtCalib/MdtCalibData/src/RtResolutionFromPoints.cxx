@@ -1,34 +1,18 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibData/RtResolutionFromPoints.h"
 
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
+#include "MdtCalibData/SamplePointUtils.h"
 #include "MuonCalibMath/BaseFunctionFitter.h"
 #include "MuonCalibMath/ChebyshevPolynomial.h"
 #include "MuonCalibMath/PolygonBase.h"
 
 using namespace MuonCalib;
 
-//*****************************************************************************
-
-//::::::::::::::::::::::::
-//:: METHOD get_min_max ::
-//::::::::::::::::::::::::
-void RtResolutionFromPoints::get_min_max(const std::vector<SamplePoint> &sample_points, double &x_min, double &x_max) {
-    for (unsigned int k = 0; k < sample_points.size(); k++) {
-        if (k == 0) {
-            x_min = sample_points[k].x1();
-            x_max = x_min;
-        }
-        if (x_min > sample_points[k].x1()) { x_min = sample_points[k].x1(); }
-        if (x_max < sample_points[k].x1()) { x_max = sample_points[k].x1(); }
-    }
-
-    return;
-}
 
 //*****************************************************************************
 
@@ -36,7 +20,7 @@ void RtResolutionFromPoints::get_min_max(const std::vector<SamplePoint> &sample_
 //:: METHOD getRtResolutionChebyshev ::
 //:::::::::::::::::::::::::::::::::::::
 RtResolutionChebyshev RtResolutionFromPoints::getRtResolutionChebyshev(const std::vector<SamplePoint> &sample_points,
-                                                                       const unsigned int &order) {
+                                                                       const unsigned int order) {
     ///////////////
     // VARIABLES //
     ///////////////
@@ -50,8 +34,9 @@ RtResolutionChebyshev RtResolutionFromPoints::getRtResolutionChebyshev(const std
     ///////////////////////////////////////////////////////////////////
     // GET THE MINIMUM AND MAXIMUM TIMES AND CALCULATE REDUCED TIMES //
     ///////////////////////////////////////////////////////////////////
-    get_min_max(sample_points, res_param[0], res_param[1]);
-
+    const auto [tLow ,tHigh] = interval(sample_points);
+    res_param[0] = tLow;
+    res_param[1] = tHigh;
     double mean(0.5 * (res_param[1] + res_param[0]));
     double length(res_param[1] - res_param[0]);
     for (unsigned int k = 0; k < my_points.size(); k++) { my_points[k].set_x1(2 * (sample_points[k].x1() - mean) / length); }
@@ -65,9 +50,7 @@ RtResolutionChebyshev RtResolutionFromPoints::getRtResolutionChebyshev(const std
     //////////////////////////////////////////////////////////////
     // CREATE AN RtChebyshev OBJECT WITH THE CORRECT PARAMETERS //
     //////////////////////////////////////////////////////////////
-    RtResolutionChebyshev rt_res_chebyshev(res_param);
-
-    return rt_res_chebyshev;
+    return RtResolutionChebyshev{res_param};
 }
 
 //*****************************************************************************

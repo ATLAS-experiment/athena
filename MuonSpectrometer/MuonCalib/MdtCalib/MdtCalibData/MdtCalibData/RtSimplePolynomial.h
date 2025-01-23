@@ -1,46 +1,22 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef MUONCALIB_RTCHEBYSHEV_H
-#define MUONCALIB_RTCHEBYSHEV_H
+#ifndef MUONCALIB_RTSIMPLEPOLYNOMIAL_H
+#define MUONCALIB_RTSIMPLEPOLYNOMIAL_H
 
 #include <cstdlib>
 #include <iostream>
 #include <vector>
-#include <span>
 
 // MDT calibration //
 #include "MdtCalibData/IRtRelation.h"
 
 namespace MuonCalib {
-    /**
-    @class  RtChebyshev
-    This class contains the implementation of an r(t) relationship
-    parametrized by a linear combination of Chebyshev polyonomials.
-
-    Convention:
-
-    @f[ r(t) = \sum_{k=0}^{K}
-                         p_k*T_k(2*(t-0.5*(tupper+tlower))/(tupper-tlower) @f]
-    where T_k is the Chebyshev polynomial of k-th order,
-    tupper and tlower are upper and lower drift-time bounds.
-
-    Units: [t] = ns, [r] = mm, [v] = mm/ns. */
-    class RtChebyshev : public IRtRelation {
+    class RtSimplePolynomial : public IRtRelation {
 
        public:
-        // Constructors
-        /** initialization constructor,
 
-        size of ParVec - 2 = order of the r(t) polynomial,
-
-        ParVec[0] = t_low (smallest allowed drift time),
-        ParVec[1] = t_up (largest allowed drift time).
-        ParVec[2...] = parameters of the Chebyshev polynomial
-
-        */
-
-        explicit RtChebyshev(const ParVec& vec) ;
+        explicit RtSimplePolynomial(const ParVec& vec) ;
         // Methods //
         // methods required by the base classes //
         virtual std::string name() const override final;  //!< get the class name

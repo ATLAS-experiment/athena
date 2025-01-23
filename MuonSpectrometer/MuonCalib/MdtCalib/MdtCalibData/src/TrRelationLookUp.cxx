@@ -8,13 +8,15 @@
 #include <algorithm>
 
 namespace MuonCalib{
+    unsigned TrRelationLookUp::nDoF() const {
+        return m_times.size();
+    }
+    TrRelationLookUp::TrRelationLookUp(const IRtRelation& rtRelation) : ITrRelation{ParVec{}} {
 
-    TrRelationLookUp::TrRelationLookUp(const IRtRelationPtr& rtRelation, const ParVec& vec) : ITrRelation{rtRelation, vec} {
-
-        std::size_t numPoints(100);
-        double stepSize{rtRelation->radius(rtRelation->tUpper()) / (numPoints - 1)};
-        m_times = std::vector<double>(numPoints);
-        m_radii = std::vector<double>(numPoints);
+        constexpr std::size_t numPoints(100);
+        double stepSize{rtRelation.radius(rtRelation.tUpper()) / (numPoints - 1)};
+        m_times.resize(numPoints);
+        m_radii.resize(numPoints);
 
         for(std::size_t i = 0; i < numPoints; ++i){
             m_radii[i] = i * stepSize;
@@ -62,15 +64,15 @@ namespace MuonCalib{
     double TrRelationLookUp::minRadius() const { return m_minRadius; }
     double TrRelationLookUp::maxRadius() const { return m_maxRadius; }
 
-    double TrRelationLookUp::getTFromR(const double radius, const IRtRelationPtr& rtRelation) const {
+    double TrRelationLookUp::getTFromR(const double radius, const IRtRelation& rtRelation) const {
         double precision{0.001};
-        double tMax{rtRelation->tUpper()};
-        double tMin{rtRelation->tLower()};
+        double tMax{rtRelation.tUpper()};
+        double tMin{rtRelation.tLower()};
 
         //Search for the drift time
-        while (tMax - tMin > 0.1 and std::abs(rtRelation->radius(0.5 * (tMin + tMax)) - radius) > precision) {
+        while (tMax - tMin > 0.1 and std::abs(rtRelation.radius(0.5 * (tMin + tMax)) - radius) > precision) {
             double midPoint = 0.5 * (tMin + tMax);
-            if (rtRelation->radius(midPoint) > radius) {
+            if (rtRelation.radius(midPoint) > radius) {
                 tMax = midPoint;
             } else {
                 tMin = midPoint;

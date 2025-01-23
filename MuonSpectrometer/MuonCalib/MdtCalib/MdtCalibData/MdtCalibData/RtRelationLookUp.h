@@ -38,11 +38,12 @@ namespace MuonCalib {
         virtual double tLower() const override final;
         virtual double tUpper() const override final;
         virtual double tBinWidth() const override final;
+        virtual unsigned nDoF() const override final; 
+
     private:
         int getBin(double t) const;
 
         // take offset due to m_t_min and binsize into account
-        int rtBins() const { return nPar() - 2; }
         double getRadius(int bin) const { return par(bin + 2); }
         // returns best matching bin within rtRange
         int binInRtRange(double t) const;

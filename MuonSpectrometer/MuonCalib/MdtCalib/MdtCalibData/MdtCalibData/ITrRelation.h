@@ -1,21 +1,24 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MDTCALIBDATA_ITrRelation_H
 #define MDTCALIBDATA_ITrRelation_H
 
 // MuonCalib //
-#include "MdtCalibData/IRtRelation.h"
+#include <MdtCalibData/CalibFunc.h>
+#include <MuonCalibMath/UtilFunc.h>
 #include "GeoModelUtilities/TransientConstSharedPtr.h"
 
+#include <optional>
 namespace MuonCalib{
+    class ITrRelation;
+    using ITrRelationPtr = GeoModel::TransientConstSharedPtr<ITrRelation>;
     class ITrRelation: public CalibFunc {
         public:
-            using IRtRelationPtr = GeoModel::TransientConstSharedPtr<IRtRelation>;
             /** @brief Constructor taking the input r-t relation & the vector of parameters */
-            ITrRelation(const IRtRelationPtr& rtRelation, const ParVec& parameters):
-                CalibFunc{parameters}, m_rt{rtRelation}{}
+            ITrRelation(const ParVec& parameters):
+                CalibFunc{parameters}{}
             /** @brief Desctructor */
             virtual ~ITrRelation() = default;
             virtual std::string typeName() const override final { return "ITrRelation"; }
@@ -32,9 +35,17 @@ namespace MuonCalib{
             virtual double minRadius() const = 0;
             /** @brief Returns the maximum drift-radius */
             virtual double maxRadius() const = 0;
-        private:
-            IRtRelationPtr m_rt{};
-
+            /** @brief Returns the number of degrees of freedom of the tr relation */
+            virtual unsigned nDoF() const = 0;
+            /** @brief Maps the radius interval [minRadius;maxRadius] to [-1;1] where 
+             *         the minimal radius is on the lower end */
+            double getReducedR(const double r) const {
+                return  mapToUnitInterval(r, minRadius(), maxRadius());
+            }
+            /** @brief Returns the derivative of the reduced radisu w.r.t r */
+            double getReducedRPrime() const {
+                return unitIntervalPrime(minRadius(), maxRadius());
+            }
     };
 }
 

@@ -39,10 +39,7 @@ namespace MuonCalib {
             unsigned int nPar() const { return m_parameters.size(); }
             const ParVec& parameters() const { return m_parameters; }
             double par(unsigned int index) const {
-                if (index < nPar())
-                    return m_parameters[index];
-                else
-                    return 0.;
+                return index < nPar() ? m_parameters[index] : 0.;
             }
             virtual std::string typeName() const = 0;
             virtual std::string name() const = 0;

@@ -24,7 +24,7 @@ BFieldCorFunc::BFieldCorFunc(const std::string &quality, const CalibFunc::ParVec
       
 BFieldCorFunc::BFieldCorFunc(const CalibFunc::ParVec &parameters, const IRtRelation *rt) : 
     IMdtBFieldCorFunc(parameters) {
-    init(std::string("medium"), parameters, rt);
+    init("medium", parameters, rt);
 }
 
 void BFieldCorFunc::init(const std::string &quality, const CalibFunc::ParVec &params, const IRtRelation *rt) {

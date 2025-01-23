@@ -6,12 +6,16 @@
 #define MUONCALIB_IRTRELATION_H
 
 #include "MdtCalibData/CalibFunc.h"
+#include "MuonCalibMath/UtilFunc.h"
+#include "GeoModelUtilities/TransientConstSharedPtr.h"
+
 #include <optional>
 
 namespace MuonCalib {
 
+    class IRtRelation;
+    using IRtRelationPtr = GeoModel::TransientConstSharedPtr<IRtRelation>;
     /** generic interface for a rt-relation */
-
     class IRtRelation : public CalibFunc {
     public:
         using CalibFunc::CalibFunc;
@@ -30,6 +34,8 @@ namespace MuonCalib {
         virtual double tUpper() const = 0;
         /** Returns the step-size for the sampling */
         virtual double tBinWidth() const =0;
+        /** Returns the number of degrees of freedom of the relation function  */
+        virtual unsigned nDoF() const = 0;
         /** return the difference in total dirft time between the two multilayers (ML1 - ML2) */
         double GetTmaxDiff() const { return m_tmax_diff.value_or(0.); }
 
@@ -37,6 +43,17 @@ namespace MuonCalib {
 
         /** set the difference in total drift time betwene the two multilayers (ML1 - ML2) */
         void SetTmaxDiff(const double d) { m_tmax_diff = d; }
+
+        /** @brief map the in the interval [tLower;tUpper] onto the interval [-1.;1.] where
+         *         tLower is mapped to -1. & tUpper to 1.; */
+        double getReducedTime(const double  t) const {
+           return mapToUnitInterval(t, tLower(), tUpper());
+        }
+        /* @brief Returns the derivative term of the reduced time w.r.t. the time*/
+        double dReducedTimeDt() const {
+            return unitIntervalPrime(tLower(), tUpper());
+        }
+
       private:
         std::optional<double> m_tmax_diff{std::nullopt};
       protected:

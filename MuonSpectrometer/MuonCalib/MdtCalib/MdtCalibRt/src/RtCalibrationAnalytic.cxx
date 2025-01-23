@@ -769,14 +769,14 @@ bool RtCalibrationAnalytic::analyse() {
     // input r-t is of type RtChebyshev //
     if (rt_Chebyshev) {
         // set the number of points //
-        if (rt_Chebyshev->numberOfRtParameters() > 30) { nb_points = rt_Chebyshev->numberOfRtParameters(); }
+        nb_points = std::max(rt_Chebyshev->nDoF(), 30u);
 
         // r step size //
         step = m_r_max / static_cast<double>(nb_points);
 
         // sample points and Chebyshev fitter //
         std::vector<SamplePoint> x_r(nb_points + 1);
-        BaseFunctionFitter fitter(rt_Chebyshev->numberOfRtParameters());
+        BaseFunctionFitter fitter(rt_Chebyshev->nDoF());
         ChebyshevPolynomial chebyshev;
 
         // calculate the sample points //
@@ -823,7 +823,7 @@ bool RtCalibrationAnalytic::analyse() {
         fitter.fit_parameters(x_r, 1, nb_points + 1, chebyshev);
         rt_param[0] = rt_Chebyshev->tLower();
         rt_param[1] = rt_Chebyshev->tUpper();
-        for (unsigned int k = 0; k < rt_Chebyshev->numberOfRtParameters(); k++) { rt_param[k + 2] = fitter.coefficients()[k]; }
+        for (unsigned int k = 0; k < rt_Chebyshev->nDoF(); k++) { rt_param[k + 2] = fitter.coefficients()[k]; }
 
         m_rt_new = std::make_unique<RtChebyshev>(rt_param);
     }
