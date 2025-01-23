@@ -2,15 +2,15 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MUONCALIB_TRCHEBYSHEV_H
-#define MUONCALIB_TRCHEBYSHEV_H
+#ifndef MUONCALIB_TRSIMPLEPOLYNOMIAL_H
+#define MUONCALIB_TRSIMPLEPOLYNOMIAL_H
 
 #include <MdtCalibData/ITrRelation.h>
 
 namespace MuonCalib{
-    class TrChebyshev: public ITrRelation {
+    class TrSimplePolynomial: public ITrRelation {
         public:
-            TrChebyshev(const ParVec& vec);
+            TrSimplePolynomial(const ParVec& vec);
             virtual std::string name() const override final;
             virtual std::optional<double> driftTime(const double r) const override final;
             virtual std::optional<double> driftTimePrime(const double r) const override final;

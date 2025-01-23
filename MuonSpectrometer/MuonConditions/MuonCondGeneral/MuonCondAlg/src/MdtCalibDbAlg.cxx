@@ -14,7 +14,7 @@
 #include "CoralBase/AttributeListSpecification.h"
 #include "GaudiKernel/PhysicalConstants.h"
 #include "MdtCalibData/BFieldCorFunc.h"
-#include "MdtCalibData/CalibFunc.h"
+#include "MdtCalibData/RtRelationLookUp.h"
 #include "MdtCalibData/IRtRelation.h"
 #include "MdtCalibData/IRtResolution.h"
 #include "MdtCalibData/MdtFullCalibData.h"
@@ -219,7 +219,7 @@ StatusCode MdtCalibDbAlg::defaultRt(MuonCalib::MdtCalibDataContainer& writeCdo, 
         // for rtRel, resoRel, and MdtRtRelation
 
         // Loop over RT regions and store the default RT in each
-        RtRelationPtr MdtRt = std::make_unique<MuonCalib::MdtRtRelation>(rtRel, resoRel, 0.);
+        RtRelationPtr MdtRt = std::make_unique<MuonCalib::MdtRtRelation>(rtRel, resoRel);
         
         for(auto itr = idHelper.detectorElement_begin();
                  itr!= idHelper.detectorElement_end();++itr){
@@ -523,7 +523,7 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
         }
 
         // Create RT function from tr_points and load RT and resolution functions
-        std::unique_ptr<MuonCalib::IRtRelation> rt = std::make_unique<MuonCalib::RtRelationLookUp>(MuonCalib::RtFromPoints::getRtRelationLookUp(tr_points));
+        std::unique_ptr<MuonCalib::IRtRelation> rt = MuonCalib::RtFromPoints::getRtRelationLookUp(tr_points);
         if (!reso || !rt) { continue; }
 
         if (rt->par(1) == 0.) {
@@ -535,7 +535,7 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
         // Save ML difference if it is available
         if (multilayer_tmax_diff > -8e8) { rt->SetTmaxDiff(multilayer_tmax_diff); }
         // Store RT and resolution functions for this region
-        RtRelationPtr rt_rel = std::make_unique<MuonCalib::MdtRtRelation>(std::move(rt), std::move(reso), 0.);
+        RtRelationPtr rt_rel = std::make_unique<MuonCalib::MdtRtRelation>(std::move(rt), std::move(reso));
 
         if (!writeCdo.storeData(athenaId ,rt_rel, msgStream())) return StatusCode::FAILURE;
         if (!(m_create_b_field_function || m_createSlewingFunction)) continue;

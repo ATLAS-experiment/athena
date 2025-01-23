@@ -142,9 +142,9 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
         }
 
         auto rtRelRegion{std::make_shared<MuonCalib::RtChebyshev>(rtPars)};
+        auto trRelRegion{std::make_shared<MuonCalib::TrChebyshev>(trPars)};
         std::unique_ptr<MuonCalib::IRtResolution> rtResRegion{};
-        auto trRelRegion{std::make_shared<MuonCalib::TrChebyshev>(rtRelRegion, trPars)};
-        RtRelationPtr MdtRt = std::make_unique<MuonCalib::MdtRtRelation>(std::move(rtRelRegion), std::move(rtResRegion), std::move(trRelRegion), 0.);
+        RtRelationPtr MdtRt = std::make_unique<MuonCalib::MdtRtRelation>(std::move(rtRelRegion), std::move(rtResRegion), std::move(trRelRegion));
         if(!writeHandle.storeData(detElId, MdtRt, msgStream())) {
             ATH_MSG_ERROR("Failed to store Rt for " << m_idHelperSvc->toString(detElId));
             return StatusCode::FAILURE;

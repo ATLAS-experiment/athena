@@ -37,7 +37,7 @@ double RtLegendre::radius(double t) const {
     ////////////////////
     // CALCULATE r(t) //
     ////////////////////
-    for (unsigned int k = 0; k < nPar() - 2; k++) { 
+    for (unsigned int k = 0; k < nDoF(); k++) { 
         rad += par(k+2) * legendrePoly(k, x); 
     }
     return std::max(rad, 0.);
@@ -52,10 +52,10 @@ double RtLegendre::driftVelocity(double t) const {
     // Argument of the Legendre polynomials
     const double x = getReducedTime(t);
     // Chain rule
-    const double dx_dt = 2. / (tUpper() - tLower());
+    const double dx_dt = dReducedTimeDt();
     double drdt{0.};
-    for (unsigned int k = 0; k < nPar() - 2; ++k) {
-        drdt += par(k+2) *  legendreDeriv(k, x, 1) * dx_dt;
+    for (unsigned int k = 0; k < nDoF(); ++k) {
+        drdt += par(k+2) *  legendreDeriv(k, 1, x) * dx_dt;
     }
     return drdt; 
 }
@@ -63,19 +63,16 @@ double RtLegendre::driftAcceleration(double t) const {
     double acc{0.};
     // Argument of the Legendre polynomials
     const double x = getReducedTime(t);
-    const double dx_dt = std::pow(2. / (tUpper() - tLower()), 2);
-    for (unsigned int k = 0; k < nPar() - 2; ++k) {
-        acc += par(k+2) *  legendreDeriv(k, x, 2) * dx_dt;
+    const double dx_dt = std::pow(dReducedTimeDt(), 2);
+    for (unsigned int k = 0; k < nDoF(); ++k) {
+        acc += par(k+2) *  legendreDeriv(k, 2, x) * dx_dt;
     }
     return acc * t;
 }
 double RtLegendre::tLower() const { return par(0); }
 double RtLegendre::tUpper() const { return par(1); }
-unsigned int RtLegendre::numberOfRtParameters() const { return nPar() - 2; }
+unsigned int RtLegendre::nDoF() const { return nPar() -2; }
 
 std::vector<double> RtLegendre::rtParameters() const {
     return std::vector<double>{parameters().begin() +2, parameters().end()};
-}
-double RtLegendre::getReducedTime(const double  t) const {
-    return 2. * (t - 0.5 * (tUpper() + tLower())) / (tUpper() - tLower());
 }

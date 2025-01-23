@@ -40,7 +40,8 @@ namespace MuonCalib {
         ///< "order"; x1 coordinate of the sample points contains the drift time, x2 the
         ///< corresponding radius; the method takes the minimum and maximum x1 values in the set of
         ///< sample points a lower and upper limits in RtResolutionChebyshev
-        static RtResolutionChebyshev getRtResolutionChebyshev(const std::vector<SamplePoint> &sample_points, const unsigned int &order);
+        static RtResolutionChebyshev getRtResolutionChebyshev(const std::vector<SamplePoint> &sample_points, 
+                                                              const unsigned int order);
 
         ///< get an RtResolutionLookUp resembling the sigma(t) function as
         ///< described by the sample points in the vector "sample_points";
@@ -50,9 +51,6 @@ namespace MuonCalib {
         ///< limits in RtResolutionLookUp
         static RtResolutionLookUp getRtResolutionLookUp(const std::vector<SamplePoint> &sample_points);
 
-    private:
-        // get the minimimum and maximum x1 coordinate of the given sample points
-        static void get_min_max(const std::vector<SamplePoint> &sample_points, double &x_min, double &x_max);
     };
 
 }  // namespace MuonCalib
