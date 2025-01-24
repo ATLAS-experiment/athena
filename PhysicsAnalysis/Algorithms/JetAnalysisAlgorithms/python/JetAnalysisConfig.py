@@ -49,7 +49,8 @@ class PreJetAnalysisConfig (ConfigBlock) :
         # Relink original jets in case of b-tagging calibration
         if self.runOriginalObjectLink :
             alg = config.createAlgorithm( 'CP::AsgOriginalObjectLinkAlg',
-                                          'JetOriginalObjectLinkAlg'+self.containerName )
+                                          'JetOriginalObjectLinkAlg'+self.containerName,
+                                           reentrant=True )
             alg.baseContainerName = self.jetCollection
             alg.particles = config.readName (self.containerName)
             if config.wantCopy (self.containerName) :

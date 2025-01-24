@@ -32,10 +32,10 @@ namespace CP
   }
 
   StatusCode AsgLeptonTrackDecorationAlg ::
-  execute ()
+  execute (const EventContext &ctx) const
   {
-    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
-    SG::ReadHandle<xAOD::VertexContainer> vertices(m_primaryVerticesKey);
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
+    SG::ReadHandle<xAOD::VertexContainer> vertices(m_primaryVerticesKey, ctx);
     const xAOD::Vertex *primaryVertex {nullptr};
 
     for (const xAOD::Vertex *vertex : *vertices)

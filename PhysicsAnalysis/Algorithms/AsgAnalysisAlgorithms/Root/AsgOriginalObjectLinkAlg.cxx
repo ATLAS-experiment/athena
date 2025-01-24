@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -36,14 +36,14 @@ namespace CP
 
 
   StatusCode AsgOriginalObjectLinkAlg ::
-  execute ()
+  execute (const EventContext &ctx) const
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       xAOD::IParticleContainer *particles = nullptr;
       ANA_CHECK (m_particleHandle.getCopy (particles, sys));
 
-      SG::ReadHandle<xAOD::IParticleContainer> baseParticles(m_baseContainerName);
+      SG::ReadHandle<xAOD::IParticleContainer> baseParticles(m_baseContainerName, ctx);
 
       if (!xAOD::setOriginalObjectLink (*baseParticles, *particles))
       {
