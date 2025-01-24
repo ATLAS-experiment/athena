@@ -460,37 +460,37 @@ BPHY18_Select_piK = DerivationFramework__Select_onia2mumu(
 ToolSvc += BPHY18_Select_piK
 print      BPHY18_Select_piK
 
-#from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__BKllIsoMultiplicityTool
-#BPHY18_IsoMultiplicityTool = DerivationFramework__BKllIsoMultiplicityTool(
-#    BKllIsoMultiplicityToolName = "BPHY18",
-#    TrackContainer             = "InDetTrackParticles",
-#    InputVertexContainer       = "BeeKstCandidates",
-#    IsolationCones             = [ "10", "20", "30", "40", "50" ],
-#    OnlyInVertex               = BPHY18cf.isoMultOnlyInVertex,
-#    VertexPassFlags            =  ["passed_Bd", "passed_Bdbar"], 
-#    TrackSelectorTool          = BPHY18_VertexTools.InDetTrackSelectorTool,
-#    AddTrackSelectionCuts      = [ "Loose" ],
-#    TrackPtCut                 = BPHY18cf.BeeKstPreFitMesonTrackPtCut,
-#    TrackEtaCut                = BPHY18cf.BeeKstPreFitMesonTrackEtaCut,
-#    ElectronContainerKey       = "Electrons",
-#    ElectronTrackContainerKey  = electronTrackParticleCollection,
-#    AddElectronTrackSelectionCuts = [ "Loose", "LooseElectron" ],
-#    ElectronTrackPtCut         = BPHY18cf.JPsiPreFitElPtCut,
-#    ElectronTrackEtaCut        = -1.,
-#    ElectronLikelihoodCut      = "DFCommonElectronsLHVeryLoosenod0",
-#    MuonContainerKey           = "Muons",
-#    MuonTrackContainerKey      = "InDetTrackParticles",
-#    AddMuonTrackSelectionCuts  = [ "Loose" ],
-#    MuonTrackPtCut             = 5000.,
-#    MuonTrackEtaCut            = -1.,
-#    MuonQualityCut             = 1,
-#    RecordTrackMultiplicity    = True, 
-#    RecordElectronMultiplicity = True, 
-#    RecordMuonMultiplicity     = True
-#)
+from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__BKllIsoMultiplicityTool
+BPHY18_IsoMultiplicityTool = DerivationFramework__BKllIsoMultiplicityTool(
+    BKllIsoMultiplicityToolName = "BPHY18",
+    TrackContainer             = "InDetTrackParticles",
+    InputVertexContainer       = "BeeKstCandidates",
+    IsolationCones             = [ "10", "20", "30", "40", "50" ],
+    OnlyInVertex               = BPHY18cf.isoMultOnlyInVertex,
+    VertexPassFlags            =  ["passed_Bd", "passed_Bdbar"], 
+    TrackSelectorTool          = BPHY18_VertexTools.InDetTrackSelectorTool,
+    AddTrackSelectionCuts      = [ "Loose" ],
+    TrackPtCut                 = BPHY18cf.BeeKstPreFitMesonTrackPtCut,
+    TrackEtaCut                = BPHY18cf.BeeKstPreFitMesonTrackEtaCut,
+    ElectronContainerKey       = "Electrons",
+    ElectronTrackContainerKey  = electronTrackParticleCollection,
+    AddElectronTrackSelectionCuts = [ "Loose", "LooseElectron" ],
+    ElectronTrackPtCut         = BPHY18cf.JPsiPreFitElPtCut,
+    ElectronTrackEtaCut        = -1.,
+    ElectronLikelihoodCut      = "DFCommonElectronsLHVeryLoosenod0",
+    MuonContainerKey           = "Muons",
+    MuonTrackContainerKey      = "InDetTrackParticles",
+    AddMuonTrackSelectionCuts  = [ "Loose" ],
+    MuonTrackPtCut             = 5000.,
+    MuonTrackEtaCut            = -1.,
+    MuonQualityCut             = 1,
+    RecordTrackMultiplicity    = True, 
+    RecordElectronMultiplicity = True, 
+    RecordMuonMultiplicity     = True
+)
 
-#ToolSvc += BPHY18_IsoMultiplicityTool
-#print BPHY18_IsoMultiplicityTool
+ToolSvc += BPHY18_IsoMultiplicityTool
+print BPHY18_IsoMultiplicityTool
 
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf \
     import DerivationFramework__BMuonTrackIsoTool
@@ -636,7 +636,7 @@ if runGSFCalo:
 AugmentationToolList += [ ElectronPassLHvloosenod0,BPHY18DiElectronSelectAndWrite,  
                        BPHY18_Select_DiElectrons,
                        BPHY18BeeKstSelectAndWrite, BPHY18_Select_BeeKst, BPHY18_Select_BeeKstbar,
-                       BPHY18_diMeson_revertex, BPHY18_Select_Kpi, BPHY18_Select_piK, BPHY18_LegTrackIsoTool ]
+                       BPHY18_diMeson_revertex, BPHY18_Select_Kpi, BPHY18_Select_piK, BPHY18_IsoMultiplicityTool, BPHY18_LegTrackIsoTool ]
 
 from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramework__DerivationKernel
 DerivationFrameworkJob += CfgMgr.DerivationFramework__DerivationKernel(
