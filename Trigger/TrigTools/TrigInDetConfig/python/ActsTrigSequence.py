@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from TrigInDetConfig.InnerTrackerTrigSequence import InnerTrackerTrigSequence
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -119,8 +119,17 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
     acc.merge(ActsPixelSeedingAlgCfg(self.flags, name="ActsPixelSeedingAlg_"+self.signature, InputSpacePoints=['ITkPixelSpacePoints_Cached'] if self.flags.Acts.useCache else ['ITkPixelSpacepoints_'+self.signature], useFastTracking=True))
 
     from ActsConfig.ActsTrackFindingConfig import ActsMainTrackFindingAlgCfg, ActsTrackToTrackParticleCnvAlgCfg
-
-    acc.merge(ActsMainTrackFindingAlgCfg(self.flags, name="ActsTrackFindingAlg_"+self.signature, ACTSTracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_FTF,SeedLabels=["PPP"],SeedContainerKeys=["ActsPixelSeeds"],UncalibratedMeasurementContainerKeys=["ITkPixelClusters_Cached" if self.flags.Acts.useCache else "ITkPixelClusters_"+self.signature ,"ITkStripClusters_Cached" if self.flags.Acts.useCache else "ITkStripClusters_"+self.signature]))
+    measurements = ["ITkPixelClusters_Cached" if self.flags.Acts.useCache else "ITkPixelClusters_"+self.signature,
+                    "ITkStripClusters_Cached" if self.flags.Acts.useCache else "ITkStripClusters_"+self.signature]
+    
+    trackfinding = ActsMainTrackFindingAlgCfg(self.flags, 
+                                              name="ActsTrackFindingAlg_"+self.signature, 
+                                              ACTSTracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_FTF,
+                                              SeedLabels=["PPP"],SeedContainerKeys=["ActsPixelSeeds"],
+                                              DetectorElementsKeys=['ITkPixelDetectorElementCollection'],
+                                              UncalibratedMeasurementContainerKeys=measurements)
+    
+    acc.merge(trackfinding)
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(self.flags,name="ActsTrackParticleCreator_"+self.signature, ACTSTracksLocation=[self.flags.Tracking.ActiveConfig.trkTracks_FTF], TrackParticlesOutKey=self.flags.Tracking.ActiveConfig.tracks_FTF))
 
     return acc
