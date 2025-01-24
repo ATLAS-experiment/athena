@@ -84,13 +84,11 @@ def checkNTupleEventWise(ntuple, printInterval = 150000):
 
     msg.debug('Checking %s entries ...', reader.GetNEntries())
 
-    rootVersion = ROOT.gROOT.GetVersionInt()
-
     for i in reader:
         try:
-            if rootVersion >= 63300:
+            try:
                 entry = reader.CreateEntry()
-            else:
+            except AttributeError:
                 entry = reader.GetModel().CreateEntry()
             reader.LoadEntry(i, entry)
         except Exception as err:
