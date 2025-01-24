@@ -140,7 +140,8 @@ class TrigEgammaFastElectronHypoToolConfig:
   def addMonitoring(self, flags):
 
     monTool = GenericMonitoringTool(flags, "MonTool"+self.__name)
-    monTool.defineHistogram('CutCounter', type='TH1I', path='EXPERT', title="FastElectron Hypo Cut Counter;Cut Counter", xbins=8, xmin=-1.5, xmax=7.5, opt="kCumulative")
+    cuts=['Has Track','ptCalo','#Delta #eta', '#Delta #phi','etOverPt_low','etOverPt_high','TRTHitRatio']
+    monTool.defineHistogram('CutCounter', type='TH1I', path='EXPERT', title="FastElectron Hypo Cut Counter;Cut Counter", xbins=7, xmin=0, xmax=7, opt="kCumulative",xlabels=cuts)
     monTool.defineHistogram('CaloTrackdEta', type='TH1F', path='EXPERT', title="FastElectron Hypo #Delta #eta between cluster and track;#Delta #eta;Nevents", xbins=80, xmin=-0.4, xmax=0.4)
     monTool.defineHistogram('CaloTrackdPhi', type='TH1F', path='EXPERT', title="FastElectron Hypo #Delta #phi between cluster and track;#Delta #phi;Nevents", xbins=80, xmin=-0.4, xmax=0.4)
     monTool.defineHistogram('CaloTrackEoverP', type='TH1F', path='EXPERT', title="FastElectron Hypo E/p;E/p;Nevents", xbins=120, xmin=0, xmax=12)

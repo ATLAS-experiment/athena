@@ -60,11 +60,11 @@ bool TrigEgammaPrecisionCaloHypoTool::decide( const ITrigEgammaPrecisionCaloHypo
   auto mon_eta          = Monitored::Scalar( "Eta", -99. ); 
   auto mon_phi          = Monitored::Scalar( "Phi", -99. );
   auto mon_eT_Cluster   = Monitored::Scalar( "Et_em"   , -1.0 );
-  auto PassedCuts       = Monitored::Scalar<int>( "CutCounter", -1 );  
-  auto monitorIt        = Monitored::Group( m_monTool, mon_dEta, mon_dPhi, mon_eta, mon_phi, mon_eT_Cluster,PassedCuts );
+  auto cutCounter       = Monitored::Scalar<int>( "CutCounter", -1 );  
+  auto monitorIt        = Monitored::Group( m_monTool, mon_dEta, mon_dPhi, mon_eta, mon_phi, mon_eT_Cluster,cutCounter);
+
 
  // when leaving scope it will ship data to monTool
-  PassedCuts = PassedCuts + 1; //got called (data in place)
 
   float dEta(0), dPhi(0), eta(0), phi(0), eT_Cluster(0);
 
@@ -77,6 +77,7 @@ bool TrigEgammaPrecisionCaloHypoTool::decide( const ITrigEgammaPrecisionCaloHypo
       return pass;
   } 
 
+  cutCounter++;
   ATH_MSG_DEBUG( "; RoI ID = " << roiDescriptor->roiId()
   		 << ": Eta = " << roiDescriptor->eta()
   		 << ", Phi = " << roiDescriptor->phi() );
@@ -112,7 +113,7 @@ bool TrigEgammaPrecisionCaloHypoTool::decide( const ITrigEgammaPrecisionCaloHypo
   }
   mon_eta  = eta;
   mon_dEta = dEta;
-  PassedCuts = PassedCuts + 1; //Deta
+  cutCounter++; //Deta
   
   // DeltaPhi( clus-ROI )
   ATH_MSG_DEBUG( ": phi="  << pClus->phi()
@@ -125,7 +126,7 @@ bool TrigEgammaPrecisionCaloHypoTool::decide( const ITrigEgammaPrecisionCaloHypo
   }
   mon_dPhi = dPhi;
   mon_phi  = phi;
-  PassedCuts = PassedCuts + 1; //DPhi
+  cutCounter++; //DPhi
 
   // eta range
   if ( cutIndex == -1 ) {  // VD
@@ -134,7 +135,7 @@ bool TrigEgammaPrecisionCaloHypoTool::decide( const ITrigEgammaPrecisionCaloHypo
   } else { 
     ATH_MSG_DEBUG( "eta bin used for cuts " << cutIndex );
   }
-  PassedCuts = PassedCuts + 1; // passed eta cut
+  cutCounter++; // passed eta cut
   
   // ET_em
   ATH_MSG_DEBUG( "PrecisionCaloCluster: ET_em=" << eT_Cluster << " cut: >"  << m_eTthr[cutIndex] );
@@ -146,7 +147,7 @@ bool TrigEgammaPrecisionCaloHypoTool::decide( const ITrigEgammaPrecisionCaloHypo
 
   // got this far => passed!
   pass = true;
-
+  cutCounter++;
   // Reach this point successfully  
   ATH_MSG_DEBUG( "pass = " << pass );
 

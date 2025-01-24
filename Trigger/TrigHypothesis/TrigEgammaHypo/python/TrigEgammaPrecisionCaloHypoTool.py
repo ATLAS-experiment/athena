@@ -25,8 +25,7 @@ def _IncTool(flags, name, monGroups, threshold, sel, tool=None):
 
             cuts=['Input','#Delta #eta L2-L1', '#Delta #phi L2-L1','eta','E_{T}^{EM}']
 
-            monTool.defineHistogram('CutCounter', type='TH1I', path='EXPERT', title="PrecisionCalo Hypo Passed Cuts;Cut",
-                                    xbins=13, xmin=-1.5, xmax=12.5,  opt="kCumulative", xlabels=cuts)
+            monTool.defineHistogram('CutCounter', type='TH1I', path='EXPERT', title="PrecisionCalo Hypo Passed Cuts;Cut", xbins=5, xmin=0, xmax=5,  opt="kCumulative", xlabels=cuts)
 
             tool.MonTool = monTool
 
