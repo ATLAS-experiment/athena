@@ -5,6 +5,12 @@
     <class name="HGTD_RDO_Collection_p1" />
     <class name="HGTD_RDO_Container_p1" id="C25315CC-F0A2-43D6-8F42-012BE34B0107" />
 
+    <!-- HGTD_ALTIROC_RawData -->
+    <class name="HGTD_ALTIROC_RDO_p1" />
+    <class name="std::vector<HGTD_ALTIROC_RDO_p1>" />
+    <class name="HGTD_ALTIROC_RDO_Collection_p1" />
+    <class name="HGTD_ALTIROC_RDO_Container_p1" id="2EE1819F-7EFE-ACB8-5D5F-9EFBFAEBC11E" />
+
     <!-- HGTD_PrepRawData -->
     <class name="HGTD_Cluster_p1" />
     <class name="std::vector<HGTD_Cluster_p1>" />
