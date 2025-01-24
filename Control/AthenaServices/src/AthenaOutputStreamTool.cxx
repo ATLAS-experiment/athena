@@ -250,8 +250,18 @@ StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) 
               delete dhTransAddr; dhTransAddr = 0;
             }
          }
+         // Each stream tag is written only once in the provenance record
+         // In files where there are multiple entries per stream tag
+         // the record is in reverse, i.e., the latest appears first.
+         // Therefore, only keep the first entry if there are multiple
+         // matches so that we retain the latest one.
+         std::set<std::string> insertedTags{};
          for(auto iter=dh->beginProvenance(), iEnd=dh->endProvenance(); iter != iEnd; ++iter) {
-            m_dataHeader->insertProvenance(*iter);
+            const auto currentKey = (*iter).getKey();
+            if(!insertedTags.contains(currentKey)) {
+               insertedTags.insert(currentKey);
+               m_dataHeader->insertProvenance(*iter);
+            }
          }
       }
    }
