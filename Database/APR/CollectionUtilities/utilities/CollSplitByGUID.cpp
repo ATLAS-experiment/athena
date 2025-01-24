@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -7,7 +7,6 @@
  * @brief Utility to list the file GUIDs used by a POOL collection and split the
  * collection into sub-collections by GUID
  * @author  Marcin.Nowak@cern.ch
- * $Id: CollSplitByGUID.cpp 726582 2016-02-27 11:23:37Z krasznaa $
  */
 
 #include "CollectionUtilities/CollSplitByGUIDBase.h"
@@ -21,9 +20,7 @@ using namespace pool;
 
 #define corENDL coral::MessageStream::endmsg
 
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
-
-int main(int argc, const char *argv[])
+int main ATLAS_NOT_THREAD_SAFE (int argc, const char *argv[])
 {
    // Convert argv to vector of strings
    vector<string> argv_v;

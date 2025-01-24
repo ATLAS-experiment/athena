@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,12 +11,10 @@
 #include "CollectionUtilities/CollAppendBase.h"
 #include "CxxUtils/checker_macros.h"
 
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
-
 using namespace std;
 using namespace pool;
 
-int main(int argc, const char *argv[])
+int main ATLAS_NOT_THREAD_SAFE (int argc, const char *argv[])
 {
    // Convert argv to vector of strings
    vector<string> argv_v;
