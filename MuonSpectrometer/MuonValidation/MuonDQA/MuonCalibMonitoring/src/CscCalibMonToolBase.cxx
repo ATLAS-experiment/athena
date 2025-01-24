@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -137,8 +137,8 @@ StatusCode CscCalibMonToolBase::finalize()
 
 
 StatusCode CscCalibMonToolBase::bookHistCollection(HistCollection * histCollection, 
-    std::string dataTypeName, std::string dataTypeTitle, std::string categoryName, std::string categoryTitle, 
-    std::string axisLabel, int numBins, float lowBound, float highBound, std::string parDir,  
+    const std::string & dataTypeName, const std::string & dataTypeTitle, const std::string & categoryName, const std::string & categoryTitle, 
+    const std::string & axisLabel, int numBins, float lowBound, float highBound, const std::string & parDir,  
     uint16_t toSkip)
 {        
   //toSkip bitmask:
@@ -173,7 +173,7 @@ StatusCode CscCalibMonToolBase::bookHistCollection(HistCollection * histCollecti
   bool allGood = true;
 
 
-  std::string nameStart =  std::move(dataTypeName) ;
+  std::string nameStart =  dataTypeName;
   if(categoryName != "" )
     nameStart += "_" + categoryName;
 
@@ -428,8 +428,10 @@ StatusCode CscCalibMonToolBase::bookHistCollection(HistCollection * histCollecti
     return StatusCode::FAILURE;
 }//end bookHistCollection
 
-StatusCode CscCalibMonToolBase::bookLayHists(std::string histTypeDir, std::string parDir,/* MonGroup &monGroup,*/ std::vector<TH1F*> & histVector, std::string namePrefix, std::string titlePrefix,
-    std::string xaxis, std::string yaxis, 
+StatusCode 
+CscCalibMonToolBase::bookLayHists(const std::string & histTypeDir, const std::string & parDir,/* MonGroup &monGroup,*/ 
+  std::vector<TH1F*> & histVector, const std::string & namePrefix, const std::string & titlePrefix,
+    const std::string & xaxis, const std::string & yaxis, 
     bool chanView, bool ignoreY,  unsigned int numBins,
     float lowBound, float highBound)
 {
@@ -543,9 +545,9 @@ StatusCode CscCalibMonToolBase::bookLayHists(std::string histTypeDir, std::strin
 }//end bookLayHists
 
 //NOTE: Chanview mode isn't implemented!
-StatusCode CscCalibMonToolBase::bookChamHists(std::string histTypeDir, std::string parTypeDir, std::vector<TH1F*>&  histVector, 
-    std::string namePrefix, std::string titlePrefix,
-    std::string xaxis, std::string yaxis, bool chanView, 
+StatusCode CscCalibMonToolBase::bookChamHists(const std::string & histTypeDir, const std::string & parTypeDir, std::vector<TH1F*>&  histVector, 
+    const std::string & namePrefix, const std::string & titlePrefix,
+    const std::string & xaxis, const std::string & yaxis, bool chanView, 
     bool ignoreY, unsigned int numBins, 
     float lowBound, float highBound)
 {
