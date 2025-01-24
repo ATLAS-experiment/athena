@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CSCCALIBMONITORING_CSCCALIBMONTOOLBASE_H
@@ -264,8 +264,8 @@ class CscCalibMonToolBase: public ManagedMonitorToolBase
           @param toSkip is a bit word that specifies when to allow certain histograms
          */
         virtual StatusCode bookHistCollection(HistCollection *histCollection,
-            std::string dataTypeName, std::string dataTypeTitle, std::string categoryName, std::string categoryTitle,
-            std::string axisLabel, int numBins, float lowBound, float highBound, std::string parDir ="", 
+            const std::string & dataTypeName, const std::string & dataTypeTitle, const std::string & categoryName, const std::string & categoryTitle,
+            const std::string & axisLabel, int numBins, float lowBound, float highBound, const std::string & parDir ="", 
             uint16_t toSkip =0);
 
         /** Books a vector of histograms where each one corresponds to a layer of the CSC secbers
@@ -281,10 +281,10 @@ class CscCalibMonToolBase: public ManagedMonitorToolBase
           @param lowBound lower bound for histogram x-axis
           @param highBound higher bound for histogram x-axis
          */
-        virtual StatusCode bookLayHists(std::string histTypeDir, std::string parTypeDir,
+        virtual StatusCode bookLayHists(const std::string & histTypeDir, const std::string & parTypeDir,
             std::vector<TH1F*> &vector, 
-            std::string namePrefix, std::string titlePrefix,
-            std::string xaxis, std::string yaxis,  bool chanView = true, 
+            const std::string & namePrefix, const std::string & titlePrefix,
+            const std::string & xaxis, const std::string & yaxis,  bool chanView = true, 
             bool ignoreY = false, unsigned int numBins = 100, 
             float lowBound = 0, float highbound = 100);
 
@@ -299,10 +299,10 @@ class CscCalibMonToolBase: public ManagedMonitorToolBase
           @param lowBound lower bound for histogram x-axis
           @param highBound higher bound for histogram x-axis
          */
-        virtual StatusCode  bookChamHists(std::string histTypeDir, std::string parTypeDir, 
+        virtual StatusCode  bookChamHists(const std::string & histTypeDir, const std::string & parTypeDir, 
             std::vector<TH1F*>&  histVector,
-            std::string namePrefix, std::string titlePrefix,
-            std::string xaxis = "", std::string yaxis = "", bool chanView = true, bool ignoreY = false, 
+            const std::string & namePrefix, const std::string & titlePrefix,
+            const std::string & xaxis = "", const std::string & yaxis = "", bool chanView = true, bool ignoreY = false, 
             unsigned int numBins = 100, float lowBound = 0, float highbound = 100);
 
         /**Should be written by user in derived class. This is called during procHistograms() and is 
