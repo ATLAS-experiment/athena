@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina <baptiste.ravina@cern.ch>
@@ -8,7 +8,7 @@
 #define TRUTH__PARTICLELEVEL_CHARGEDECORATOR__ALG_H
 
 // Algorithm includes
-#include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
 #include <AsgDataHandles/ReadHandle.h>
 #include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgTools/PropertyWrapper.h>
@@ -17,11 +17,11 @@
 #include <xAODTruth/TruthParticleContainer.h>
 
 namespace CP {
-class ParticleLevelChargeDecoratorAlg : public EL::AnaAlgorithm {
+class ParticleLevelChargeDecoratorAlg : public EL::AnaReentrantAlgorithm {
  public:
-  using EL::AnaAlgorithm::AnaAlgorithm;
+  using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
   virtual StatusCode initialize() final;
-  virtual StatusCode execute() final;
+  virtual StatusCode execute(const EventContext &ctx) const final;
 
  private:
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_particlesKey{

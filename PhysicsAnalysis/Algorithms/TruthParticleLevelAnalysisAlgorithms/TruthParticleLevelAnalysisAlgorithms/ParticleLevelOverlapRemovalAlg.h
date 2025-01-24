@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina <baptiste.ravina@cern.ch>
@@ -7,7 +7,7 @@
 #ifndef TRUTH__PARTICLELEVEL_OVERLAPREMOVAL__ALG_H
 #define TRUTH__PARTICLELEVEL_OVERLAPREMOVAL__ALG_H
 
-#include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
 #include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgDataHandles/WriteDecorHandleKey.h>
 #include <AsgTools/PropertyWrapper.h>
@@ -16,11 +16,11 @@
 #include <xAODTruth/TruthParticleContainer.h>
 
 namespace CP {
-class ParticleLevelOverlapRemovalAlg : public EL::AnaAlgorithm {
+class ParticleLevelOverlapRemovalAlg : public EL::AnaReentrantAlgorithm {
  public:
-  using EL::AnaAlgorithm::AnaAlgorithm;
+  using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
   virtual StatusCode initialize() final;
-  virtual StatusCode execute() final;
+  virtual StatusCode execute(const EventContext &ctx) const final;
 
  private:
   SG::ReadHandleKey<xAOD::JetContainer> m_jetsKey{
@@ -70,7 +70,7 @@ class ParticleLevelOverlapRemovalAlg : public EL::AnaAlgorithm {
       "decoration to apply to all particles for overlap removal"};
 
   float dressedDeltaR(const xAOD::Jet* p1, TLorentzVector& p2,
-                      bool useRapidity);
+                      bool useRapidity) const;
 };
 
 }  // namespace CP

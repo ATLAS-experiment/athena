@@ -26,11 +26,15 @@ class ParticleLevelPhotonsBlock(ConfigBlock):
         config.setSourceName (self.containerName, self.containerName)
 
         # decorate the missing elements of the 4-vector so we can save it later
-        alg = config.createAlgorithm('CP::ParticleLevelPtEtaPhiDecoratorAlg', 'ParticleLevelPtEtaPhiDecoratorPhotons' + self.selectionName)
+        alg = config.createAlgorithm('CP::ParticleLevelPtEtaPhiDecoratorAlg',
+                                     'ParticleLevelPtEtaPhiDecoratorPhotons' + self.selectionName,
+                                     reentrant=True)
         alg.particles = self.containerName
 
         # check for prompt isolation
-        alg = config.createAlgorithm('CP::ParticleLevelIsolationAlg', 'ParticleLevelIsolationPhotons' + self.selectionName)
+        alg = config.createAlgorithm('CP::ParticleLevelIsolationAlg',
+                                     'ParticleLevelIsolationPhotons' + self.selectionName,
+                                     reentrant=True)
         alg.particles    = self.containerName
         alg.isolation    = 'isIsolated' + self.selectionName if self.isolated else 'isIsolatedButNotRequired' + self.selectionName
         alg.notTauOrigin = 'notFromTauButNotRequired' + self.selectionName

@@ -26,7 +26,9 @@ class ParticleLevelOverlapRemovalBlock(ConfigBlock):
         self.setOptionValue('skipOnData', True)
 
     def makeAlgs(self, config):
-        alg = config.createAlgorithm('CP::ParticleLevelOverlapRemovalAlg', 'ParticleLevelOverlapRemoval')
+        alg = config.createAlgorithm('CP::ParticleLevelOverlapRemovalAlg',
+                                     'ParticleLevelOverlapRemoval',
+                                     reentrant=True)
         alg.useDressedProperties = self.useDressedProperties
         alg.useRapidityForDeltaR = self.useRapidityForDeltaR
         alg.labelOR = self.label

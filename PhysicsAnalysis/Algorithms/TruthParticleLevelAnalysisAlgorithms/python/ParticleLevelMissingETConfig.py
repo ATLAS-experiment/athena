@@ -17,7 +17,9 @@ class ParticleLevelMissingETBlock(ConfigBlock):
 
     def makeAlgs(self, config):
         # decorate the energy and phi so we can save them later
-        alg = config.createAlgorithm( 'CP::ParticleLevelMissingETAlg', 'ParticleLevelMissingET' + self.containerName )
+        alg = config.createAlgorithm( 'CP::ParticleLevelMissingETAlg',
+                                      'ParticleLevelMissingET' + self.containerName,
+                                      reentrant=True )
         alg.met = self.containerName
 
         config.setSourceName (self.outputContainerName, self.containerName, isMet=True)

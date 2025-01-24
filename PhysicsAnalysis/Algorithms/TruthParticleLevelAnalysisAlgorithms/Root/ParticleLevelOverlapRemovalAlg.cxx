@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina <baptiste.ravina@cern.ch>
@@ -8,7 +8,6 @@
 
 #include <AsgDataHandles/ReadHandle.h>
 #include <AsgDataHandles/WriteDecorHandle.h>
-#include <AsgTools/CurrentContext.h>
 #include <FourMomUtils/xAODP4Helpers.h>
 
 namespace CP {
@@ -47,7 +46,7 @@ StatusCode ParticleLevelOverlapRemovalAlg::initialize() {
 
 float ParticleLevelOverlapRemovalAlg::dressedDeltaR(const xAOD::Jet* p1,
                                                     TLorentzVector& p2,
-                                                    bool useRapidity) {
+                                                    bool useRapidity) const {
   if (useRapidity)
     return xAOD::P4Helpers::deltaR(p1->rapidity(), p1->phi(), p2.Rapidity(),
                                    p2.Phi());
@@ -55,9 +54,7 @@ float ParticleLevelOverlapRemovalAlg::dressedDeltaR(const xAOD::Jet* p1,
     return xAOD::P4Helpers::deltaR(p1->eta(), p1->phi(), p2.Eta(), p2.Phi());
 }
 
-StatusCode ParticleLevelOverlapRemovalAlg::execute() {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-
+StatusCode ParticleLevelOverlapRemovalAlg::execute(const EventContext &ctx) const {
   SG::ReadHandle<xAOD::TruthParticleContainer> electrons, muons, photons;
   if (m_doJetElectronOR)
     electrons = SG::makeHandle(m_electronsKey, ctx);
