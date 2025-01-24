@@ -215,7 +215,8 @@ class ElectronCalibrationConfig (ConfigBlock) :
         # Additional decorations
         if self.writeTrackD0Z0:
             alg = config.createAlgorithm( 'CP::AsgLeptonTrackDecorationAlg',
-                                          'LeptonTrackDecorator' + self.containerName + self.postfix )
+                                          'LeptonTrackDecorator' + self.containerName + self.postfix,
+                                           reentrant=True )
             alg.particles = config.readName (self.containerName)
 
         alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' + self.containerName + self.postfix )
@@ -345,7 +346,8 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         # Set up the track selection algorithm:
         if self.trackSelection :
             alg = config.createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
-                                        'ElectronTrackSelectionAlg' + postfix )
+                                          'ElectronTrackSelectionAlg' + postfix,
+                                          reentrant=True )
             alg.selectionDecoration = 'trackSelection' + postfix + ',as_bits'
             alg.maxD0Significance = self.maxD0Significance
             alg.maxDeltaZ0SinTheta = self.maxDeltaZ0SinTheta

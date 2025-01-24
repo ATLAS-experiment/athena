@@ -9,7 +9,7 @@
 #ifndef ASG_ANALYSIS_ALGORITHMS__ASG_LEPTON_TRACK_SELECTION_ALG_H
 #define ASG_ANALYSIS_ALGORITHMS__ASG_LEPTON_TRACK_SELECTION_ALG_H
 
-#include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
 #include <PATCore/IAsgSelectionTool.h>
 #include <SelectionHelpers/ISelectionNameSvc.h>
 #include <SelectionHelpers/SysWriteSelectionHandle.h>
@@ -38,13 +38,13 @@ namespace CP
   /// at some point we may decide to change this into a selection tool
   /// instead (06 Aug 18).
 
-  class AsgLeptonTrackSelectionAlg final : public EL::AnaAlgorithm
+  class AsgLeptonTrackSelectionAlg final : public EL::AnaReentrantAlgorithm
   {
     /// \brief the standard constructor
   public:
-    using EL::AnaAlgorithm::AnaAlgorithm;
+    using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext &ctx) const override;
 
 
     /// algorithm properties

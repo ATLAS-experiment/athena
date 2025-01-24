@@ -6,7 +6,7 @@
 #ifndef ASG_ANALYSIS_ALGORITHMS__ASG_LEPTON_TRACK_DECORATION_ALG_H
 #define ASG_ANALYSIS_ALGORITHMS__ASG_LEPTON_TRACK_DECORATION_ALG_H
 
-#include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
@@ -21,13 +21,13 @@ namespace CP
 {
   /// \brief an algorithm for decorating track variables on leptons
 
-  class AsgLeptonTrackDecorationAlg final : public EL::AnaAlgorithm
+  class AsgLeptonTrackDecorationAlg final : public EL::AnaReentrantAlgorithm
   {
     /// \brief the standard constructor
   public:
-    using EL::AnaAlgorithm::AnaAlgorithm;
+    using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext &ctx) const override;
 
   private:
     /// \brief the systematics list we run

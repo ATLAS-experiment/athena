@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -8,7 +8,7 @@
 #ifndef ASG_ANALYSIS_ALGORITHMS__ASG_ORIGINAL_OBJECT_LINK_ALG_H
 #define ASG_ANALYSIS_ALGORITHMS__ASG_ORIGINAL_OBJECT_LINK_ALG_H
 
-#include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
 #include <SystematicsHandles/SysCopyHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <xAODBase/IParticleContainer.h>
@@ -25,13 +25,13 @@ namespace CP
   /// not have proper original object linking done when created.
   /// Currently the client are b-tagging calibration shallow copies.
 
-  class AsgOriginalObjectLinkAlg final : public EL::AnaAlgorithm
+  class AsgOriginalObjectLinkAlg final : public EL::AnaReentrantAlgorithm
   {
     /// \brief the standard constructor
   public:
-    using EL::AnaAlgorithm::AnaAlgorithm;
+    using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext &ctx) const override;
 
     /// \brief base container name
   private:
