@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
  * @file CollListPFN.cpp
  * @brief Utility to list the physical file names used by a POOL collection
  * @author K. Karr <Kristo.Karr@cern.ch>
- * $Id: CollListPFN.cpp 726582 2016-02-27 11:23:37Z krasznaa $
  */
 
 #include "PersistentDataModel/Token.h"
@@ -33,12 +32,11 @@
 
 #include <iostream>
 
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
-
 using namespace std;
 using namespace pool;
 
-int main(int argc, const char *argv[])
+
+int main ATLAS_NOT_THREAD_SAFE (int argc, const char *argv[])
 {
    string thisProgram("CollListPFN");
    SystemTools::initGaudi();

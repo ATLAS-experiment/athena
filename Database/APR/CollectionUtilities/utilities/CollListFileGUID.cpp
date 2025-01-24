@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -7,7 +7,6 @@
  * @brief Utility to list the file GUID's used by a POOL collection
  * @author K. Karr <Kristo.Karr@cern.ch>
  * @author Marcin.Nowak@cern.ch
- * $Id: CollListFileGUID.cpp 726582 2016-02-27 11:23:37Z krasznaa $
  */
 
 #include "PersistentDataModel/Token.h"
@@ -38,8 +37,6 @@
 #include <iostream>
 #include <iomanip>
 #include <memory>
-
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 using namespace std;
 using namespace pool;
@@ -99,7 +96,7 @@ void printCountedGuids( const ICollectionGUIDQuery::CountedGroupedGUIDs& guids )
 
    
 
-int main(int argc, const char *argv[])
+int main ATLAS_NOT_THREAD_SAFE (int argc, const char *argv[])
 {
    string       thisProgram("CollListFileGUID");
    SystemTools::initGaudi();

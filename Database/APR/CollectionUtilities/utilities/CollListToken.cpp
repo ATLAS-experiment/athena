@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -34,13 +34,11 @@
 #include <sstream>
 #include <iostream>
 
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
-
 using namespace std;
 using namespace pool;
 #define corENDL coral::MessageStream::endmsg
 
-int main(int argc, const char *argv[])
+int main ATLAS_NOT_THREAD_SAFE (int argc, const char *argv[])
 {
    string thisProgram("CollListToken");
    SystemTools::initGaudi();
