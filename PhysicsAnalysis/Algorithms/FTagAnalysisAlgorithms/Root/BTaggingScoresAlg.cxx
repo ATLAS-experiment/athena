@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Diego Baron
@@ -12,7 +12,6 @@ namespace CP {
 
   StatusCode BTaggingScoresAlg::initialize()
   {
-
     // Input handles
     ANA_CHECK(m_jetsKey.initialize());
 
@@ -22,10 +21,8 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode BTaggingScoresAlg::execute()
+  StatusCode BTaggingScoresAlg::execute(const EventContext &ctx) const
   {
-    const EventContext &ctx = Gaudi::Hive::currentContext();
-
     // retrieve objects
     SG::ReadHandle<xAOD::JetContainer> jets(m_jetsKey, ctx);
     ANA_CHECK(jets.isValid());

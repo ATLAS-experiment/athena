@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetAnalysisAlgorithms/JetTruthTagAlg.h"
 #include "AsgDataHandles/ReadHandle.h"
-#include "AsgDataHandles/WriteDecorHandle.h"
 
 namespace CP {
     StatusCode JetTruthTagAlg::initialize() {
@@ -19,8 +18,8 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode JetTruthTagAlg::execute() {
-        auto truthJets = SG::makeHandle(m_truthJets);
+    StatusCode JetTruthTagAlg::execute(const EventContext &ctx) const {
+        auto truthJets = SG::makeHandle(m_truthJets, ctx);
         if (!truthJets.isValid()) {
             ATH_MSG_ERROR("Failed to retrieve " << m_truthJets.key());
             return StatusCode::FAILURE;
