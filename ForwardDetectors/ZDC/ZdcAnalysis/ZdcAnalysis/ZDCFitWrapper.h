@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_ZDCFITWRAPPER_H
@@ -15,7 +15,7 @@
 inline double ZDCFermiExpFit(const double* xvec, const double* pvec);
 inline double ZDCFermiExpFitRefl(const double* xvec, const double* pvec);
 
-class ATLAS_NOT_THREAD_SAFE ZDCFitWrapper
+class ZDCFitWrapper
 {
 private:
   std::shared_ptr<TF1> m_wrapperTF1{};

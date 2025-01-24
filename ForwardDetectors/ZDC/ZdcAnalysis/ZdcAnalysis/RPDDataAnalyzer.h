@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_RPDDATAANALYZER_H
@@ -13,9 +13,6 @@
 #include "ZdcAnalysis/ZDCMsg.h"
 #include "ZdcUtils/RPDUtils.h"
 
-#include "CxxUtils/checker_macros.h"
-
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 namespace ZDC {
 
