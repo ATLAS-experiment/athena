@@ -25,11 +25,15 @@ class ParticleLevelNeutrinosBlock(ConfigBlock):
         config.setSourceName (self.containerName, self.containerName)
 
         # decorate the missing elements of the 4-vector so we can save it later
-        alg = config.createAlgorithm('CP::ParticleLevelPtEtaPhiDecoratorAlg', 'ParticleLevelPtEtaPhiEDecoratorNeutrinos' + self.selectionName)
+        alg = config.createAlgorithm('CP::ParticleLevelPtEtaPhiDecoratorAlg',
+                                     'ParticleLevelPtEtaPhiEDecoratorNeutrinos' + self.selectionName,
+                                     reentrant=True)
         alg.particles    = self.containerName
 
         # check for prompt isolation and possible origin from tau decays
-        alg = config.createAlgorithm('CP::ParticleLevelIsolationAlg', 'ParticleLevelIsolationNeutrinos' + self.selectionName)
+        alg = config.createAlgorithm('CP::ParticleLevelIsolationAlg',
+                                     'ParticleLevelIsolationNeutrinos' + self.selectionName,
+                                     reentrant=True)
         alg.particles    = self.containerName
         alg.isolation    = 'isIsolated' + self.selectionName if self.isolated else 'isIsolatedButNotRequired' + self.selectionName
         alg.notTauOrigin = 'notFromTau' + self.selectionName if self.notFromTau else 'notFromTauButNotRequired' + self.selectionName

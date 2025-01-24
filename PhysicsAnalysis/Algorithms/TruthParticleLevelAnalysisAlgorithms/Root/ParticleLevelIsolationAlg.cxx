@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina <baptiste.ravina@cern.ch>
@@ -43,9 +43,9 @@ StatusCode ParticleLevelIsolationAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode ParticleLevelIsolationAlg::execute() {
+StatusCode ParticleLevelIsolationAlg::execute(const EventContext &ctx) const {
 
-  SG::ReadHandle<xAOD::TruthParticleContainer> particles(m_particlesKey);
+  SG::ReadHandle<xAOD::TruthParticleContainer> particles(m_particlesKey, ctx);
 
   // accessors
   static const SG::AuxElement::ConstAccessor<unsigned int> acc_type(

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina <baptiste.ravina@cern.ch>
@@ -16,10 +16,10 @@ StatusCode ParticleLevelJetsAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode ParticleLevelJetsAlg::execute() {
+StatusCode ParticleLevelJetsAlg::execute(const EventContext &ctx) const {
 
-  SG::ReadHandle<xAOD::JetContainer> jets(m_jetsKey);
-  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
+  SG::ReadHandle<xAOD::JetContainer> jets(m_jetsKey, ctx);
+  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
 
   // accessors
   static const SG::AuxElement::ConstAccessor<int> acc_flav(

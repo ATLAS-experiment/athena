@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina <baptiste.ravina@cern.ch>
@@ -15,9 +15,9 @@ StatusCode ParticleLevelMissingETAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode ParticleLevelMissingETAlg::execute() {
+StatusCode ParticleLevelMissingETAlg::execute(const EventContext &ctx) const {
 
-  SG::ReadHandle<xAOD::MissingETContainer> met(m_metKey);
+  SG::ReadHandle<xAOD::MissingETContainer> met(m_metKey, ctx);
 
   // decorators
   static const SG::AuxElement::Decorator<float> dec_phi("phi");

@@ -25,11 +25,15 @@ class ParticleLevelMuonsBlock(ConfigBlock):
         config.setSourceName (self.containerName, self.containerName)
 
         # decorate the charge so we can save it later
-        alg = config.createAlgorithm('CP::ParticleLevelChargeDecoratorAlg', 'ParticleLevelChargeDecoratorMuons' + self.selectionName)
+        alg = config.createAlgorithm('CP::ParticleLevelChargeDecoratorAlg',
+                                     'ParticleLevelChargeDecoratorMuons' + self.selectionName,
+                                     reentrant=True)
         alg.particles = self.containerName
 
         # check for prompt isolation and possible origin from tau decays
-        alg = config.createAlgorithm('CP::ParticleLevelIsolationAlg', 'ParticleLevelIsolationMuons' + self.selectionName)
+        alg = config.createAlgorithm('CP::ParticleLevelIsolationAlg',
+                                     'ParticleLevelIsolationMuons' + self.selectionName,
+                                     reentrant=True)
         alg.particles    = self.containerName
         alg.isolation    = 'isIsolated' + self.selectionName if self.isolated else 'isIsolatedButNotRequired' + self.selectionName
         alg.notTauOrigin = 'notFromTau' + self.selectionName if self.notFromTau else 'notFromTauButNotRequired' + self.selectionName

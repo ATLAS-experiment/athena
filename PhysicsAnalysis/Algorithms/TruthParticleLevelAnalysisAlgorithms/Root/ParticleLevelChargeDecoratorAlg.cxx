@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina <baptiste.ravina@cern.ch>
@@ -15,9 +15,9 @@ StatusCode ParticleLevelChargeDecoratorAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode ParticleLevelChargeDecoratorAlg::execute() {
+StatusCode ParticleLevelChargeDecoratorAlg::execute(const EventContext &ctx) const {
 
-  SG::ReadHandle<xAOD::TruthParticleContainer> particles(m_particlesKey);
+  SG::ReadHandle<xAOD::TruthParticleContainer> particles(m_particlesKey, ctx);
 
   // decorators
   static const SG::AuxElement::Decorator<float> dec_charge("charge");

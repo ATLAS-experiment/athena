@@ -18,7 +18,9 @@ class ParticleLevelJetsBlock(ConfigBlock):
 
         # count the number of heavy-flavour jets for normalisation of e.g. V+HF samples
         if "AntiKt4" in self.containerName:
-            alg = config.createAlgorithm('CP::ParticleLevelJetsAlg', 'ParticleLevelJetsAlg' + self.containerName)
+            alg = config.createAlgorithm('CP::ParticleLevelJetsAlg',
+                                         'ParticleLevelJetsAlg' + self.containerName,
+                                         reentrant=True)
             alg.jets = self.containerName
 
         # decorate the energy so we can save it later
