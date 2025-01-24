@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file RootFit.cxx does one of the basic fits implemented by ROOT and returns dqm_core::Result
@@ -18,7 +18,6 @@
 
 #include <dqm_core/AlgorithmManager.h>
 #include <cmath>
-#include <iostream>
 
 namespace
 {
@@ -69,6 +68,8 @@ dqm_algorithms::RootFit::RootFit( const std::string & name )
 
 dqm_algorithms::RootFit::~RootFit()
 {
+  // totally defeats the purpose of unique_ptr, but fixes a segfault in 5.34 ...
+  (void)m_func.release();
 }
 
 dqm_algorithms::RootFit * 
@@ -83,16 +84,24 @@ dqm_algorithms::RootFit::execute(	const std::string & name,
 					const TObject & object, 
 					const dqm_core::AlgorithmConfig & config )
 {  
+  //std::cout<<"ROOTFIT = calling rootfit with name "<<name<<std::endl;
   const TH1 * histogram;
-  if(object.IsA()->InheritsFrom( "TH1" )) {  
-    histogram = static_cast<const TH1*>(&object);
-    if (histogram->GetDimension() > 1 ){ 
-      throw dqm_core::BadConfig( ERS_HERE, name, "dimension > 1 for Fit" );
+  if(object.IsA()->InheritsFrom( "TH1" ))
+    {  
+      histogram = static_cast<const TH1*>(&object);
+      if (histogram->GetDimension() > 1 ){ 
+        throw dqm_core::BadConfig( ERS_HERE, name, "dimension > 1 for Fit" );
+      }
+      //if (histogram->GetEffectiveEntries()==0 ){
+	//throw dqm_core::BadConfig( ERS_HERE, name, "Histogram is empty: No Fit performed" );
+      //}
+      
     }
-  } else {
+  else {
     throw dqm_core::BadConfig( ERS_HERE, name, "does not inherit from TH1" );
   }
   
+  //std::cout<<"ROOTFIT = Trying to get parameters"<<std::endl;
   double xmin = dqm_algorithms::tools::GetFirstFromMap( "xmin", config.getParameters(), histogram->GetXaxis()->GetXmin());
   double xmax = dqm_algorithms::tools::GetFirstFromMap( "xmax", config.getParameters(), histogram->GetXaxis()->GetXmax());
   const bool ignoreFirstLastBin = dqm_algorithms::tools::GetFirstFromMap( "ignoreFirstLastBin", config.getParameters(), 0 );
@@ -102,7 +111,12 @@ dqm_algorithms::RootFit::execute(	const std::string & name,
 
   const double minSig = dqm_algorithms::tools::GetFirstFromMap( "MinSignificance", config.getParameters(), 0);
 
+  // const bool draw = static_cast<bool>(dqm_algorithms::tools::GetFirstFromMap( "DrawFitCurve", config.getParameters(), 0));
   const double lf   = dqm_algorithms::tools::GetFirstFromMap( "LikelihoodFit", config.getParameters(), 0);
+
+  //std::cout << "verbose " << verbose 
+  //<< " draw " << draw  
+  //<< " lf " << lf << std::endl;
 
   if (histogram->GetEffectiveEntries() < minstat || histogram->GetEffectiveEntries()==0) {
     dqm_core::Result *result = new dqm_core::Result(dqm_core::Result::Undefined);
@@ -123,8 +137,12 @@ dqm_algorithms::RootFit::execute(	const std::string & name,
   //Always set option end to avoid making graphics object and drawing it.
   //draw fit curve if DrawFitCurve == 1.0 
   if (verbose){
+    //if( draw ) option = "";
+    //else option="N";
     option="N";
   } else {
+    //if( draw ) option = "Q";
+    //else option = "QN";
     option = "QN";
   }
 
@@ -141,6 +159,7 @@ dqm_algorithms::RootFit::execute(	const std::string & name,
     std::cout <<" histo name " << histogram->GetName() << std::endl;
     std::cout <<" fit option " << option << std::endl;
   }
+  //std::cout<<"ROOTFIT Trying to do fit"<<std::endl;
   if (m_name == "gauspluspol1"){
     m_func->SetParameters(histogram->GetBinContent(histogram->GetMaximumBin()),histogram->GetMean(),histogram->GetRMS());
     m_func->SetParNames ("Constant","Mean","Sigma","pol1[0]","pol1[1]");
@@ -163,6 +182,11 @@ dqm_algorithms::RootFit::execute(	const std::string & name,
     m_func->SetParameter(4,histogram->GetMean());
     m_func->SetParameter(5,par[2]);
     m_func->SetParNames("Constant","Mean","Sigma","Constant1","Mean1","Sigma1");
+    /*
+    const int numsig1 = m_func->GetParNumber("Sigma1");
+    const double sigmaup = dqm_algorithms::tools::GetFirstFromMap( "Sigma_upperLimit", config.getParameters(), 1000000);
+    m_func->SetParLimits(numsig1, 0., sigmaup);
+    */
   }
   else if (m_name == "gausplusexpo") {
     m_func->SetParameters(histogram->GetBinContent(histogram->GetMaximumBin()),histogram->GetMean(),histogram->GetRMS());
@@ -178,20 +202,29 @@ dqm_algorithms::RootFit::execute(	const std::string & name,
     if(verbose)std::cout << "set "<<name<< " parameters" << std::endl;
     m_func->SetParNames("Height");
   }
+/*
+  const int numsig = m_func->GetParNumber("Sigma");
+
+  if (numsig != -1 ){
+  	  double sigmaup = dqm_algorithms::tools::GetFirstFromMap( "Sigma_upperLimit", config.getParameters(), 1000000);
+	  m_func->SetParLimits(numsig, 0., sigmaup);
+  }
+  */ 
+  
 
   if(ignoreFirstLastBin) {
     int firstNonEmptyBin=0;
     int lastNonEmptyBin=0;
     for(int i=1 ; i<=nbins ; i++) {
       if(histogram->GetBinContent(i)!=0.0) {
-	      firstNonEmptyBin=i;
-	      break;
+	firstNonEmptyBin=i;
+	break;
       } 
     }
     for(int i=nbins ; i>=0 ; i--) {
       if(histogram->GetBinContent(i)!=0.0) {
-	      lastNonEmptyBin=i;
-	      break;
+	lastNonEmptyBin=i;
+	break;
       } 
     }
     
@@ -299,6 +332,7 @@ dqm_algorithms::RootFit::printDescription(std::ostream& out)
   out<<"Optional Parameter: xmax: maximum x range"<<std::endl;
   out<<"Optional Parameter: SubtractFromMean: value subtracted from XMean before test is applied: allows using AbsXMean for non-zero expected mean"<<std::endl;
   out<<"Optional Parameter: ignoreFirstLastBin: ignores the first and last non-empty bin"<<std::endl; 
+//  out<<"Optional Parameter: Sigma_upperLimit: Upper limit on Sigma- lower limit set to 0. and default upper value is 1e^6\n"<<std::endl;
                                                                                                                                             
 }
 
