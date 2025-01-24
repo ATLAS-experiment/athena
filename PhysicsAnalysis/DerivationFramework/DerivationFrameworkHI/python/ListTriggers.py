@@ -390,8 +390,10 @@ def HION4SkimmingTriggers2018Support():
 def HION4SkimmingTriggers2023():
     #primary and backup triggers
     triggers  = []
-    triggers += ["HLT_mu4_L1MU3V_VTE50"]
+    triggers += ["HLT_mu3_L1MU3V_VTE50"]
     triggers += ["HLT_mu3_hi_FgapAC5_L1MU3V_VTE50"]
+    triggers += ["HLT_mu4_L1MU3V_VTE50"]
+    triggers += ["HLT_mu4_hi_FgapAC5_L1MU3V_VTE50"]
     triggers += ["HLT_mb_sp_vpix30_hi_FgapAC5_2g0_etcut_25dphiCC_L12TAU1_VTE200"]    
     triggers += ["HLT_mb_sp_vpix30_hi_FgapAC5_L1TAU1_TE4_VTE200"]
     triggers += ["HLT_mb_sp_vpix30_hi_FgapAC5_L12TAU1_VTE200"]
@@ -407,9 +409,50 @@ def HION4SkimmingTriggers2023():
     triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L12TAU1_VTE200"]
     triggers += ["HLT_mb_sptrk_hi_FgapAC5_L12TAU1_VTE200"]
     triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TAU2_VZDC_A_VZDC_C_VTE100"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TAU2_ZDC_XOR4_VTE100"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TAU1_TRT_VTE50"]
     triggers += ["HLT_mb_sp_vpix15_hi_FgapAC5_L1TAU1_TE4_VTE200_EMPTY"]
     triggers += ["HLT_mb_sp_vpix30_hi_FgapAC5_L1TAU1_TE4_VTE200_EMPTY"]
     triggers += ["HLT_mb_sp_vpix30_hi_FgapAC5_L1TAU8_VTE200_EMPTY"]
+
+    return triggers
+
+def HION4SkimmingTriggers2024():
+    #primary and backup triggers
+    triggers  = []
+    triggers += ["HLT_mu3_hi_FgapAC5_L1MU3V_VjTE50"]
+    triggers += ["HLT_mu3_L1MU3V_VjTE50"]
+    triggers += ["HLT_mu4_hi_FgapAC5_L1MU3V_VjTE50"]
+    triggers += ["HLT_mu4_L1MU3V_VjTE50"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1eTAU1_TRT_VZDC_A_VZDC_C_VjTE100"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TRT_VjTE20"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L11ZDC_A_1ZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1ZDC_XOR_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_L1TRT_VjTE20"]
+    triggers += ["HLT_mb_excl_1trk5_pt0p5_L1TRT_VjTE20"]
+    triggers += ["HLT_mb_sptrk_L1TRT_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TRT_VjTE20"]
+    triggers += ["HLT_mb_excl_1trk5_pt0p5_hi_FgapAC5_L1TRT_VjTE20"]
+    triggers += ["HLT_mb_sptrk_L1ZDC_XOR_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L11ZDC_A_1ZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L12eTAU1_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_L12eTAU1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix30_hi_FgapAC5_L1DPHI_2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1DPHI_2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI_2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1DPHI_2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt2_L1eEM1_VTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L12eTAU1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L12eTAU1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L1DPHI_2eEM1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI_2eEM1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1eEM5_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1eEM9_VjTE200_EMPTY"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI_2eEM1_VjTE200_EMPTY"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI_2eTAU1_VjTE200_EMPTY"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L12eTAU1_VjTE200_EMPTY"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1eTAU1_TRT_VjTE200_EMPTY"]
 
     return triggers
 
@@ -419,7 +462,8 @@ def HION4SkimmingTriggersALL():
     triggers += HION4SkimmingTriggers2018Primary()
     triggers += HION4SkimmingTriggers2018Support()
     triggers += HION4SkimmingTriggers2023()
-    
+    triggers += HION4SkimmingTriggers2024()
+
     return triggers
 
 def HION4SkimmingTriggersVM():
