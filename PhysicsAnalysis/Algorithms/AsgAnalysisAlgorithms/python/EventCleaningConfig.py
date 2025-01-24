@@ -90,7 +90,8 @@ class EventCleaningBlock (ConfigBlock):
         # Skip events with no primary vertex:
         if self.runPrimaryVertexSelection:
             alg = config.createAlgorithm( 'CP::VertexSelectionAlg',
-                                          'PrimaryVertexSelectorAlg' )
+                                          'PrimaryVertexSelectorAlg',
+                                           reentrant=True )
             alg.VertexContainer = 'PrimaryVertices'
             alg.MinVertices = 1
             alg.MinTracks = self.minTracksPerVertex

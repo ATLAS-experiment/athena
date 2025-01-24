@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef TRACKINGANALYSISALGORITHMS_TRACKPARTICLEMERGERALG_H
 #define TRACKINGANALYSISALGORITHMS_TRACKPARTICLEMERGERALG_H
@@ -9,7 +9,6 @@
 #include <xAODTracking/TrackParticleContainer.h>
 #include <xAODTracking/TrackParticleAuxContainer.h>
 
-#include <AsgTools/CurrentContext.h>
 #include <AsgTools/PropertyWrapper.h>
 #include <AthContainers/ConstDataVector.h>
 #include <AsgDataHandles/WriteHandleKey.h>
