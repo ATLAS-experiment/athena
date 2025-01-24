@@ -140,16 +140,16 @@ const std::map<std::string, std::string> ElectronDNNPointToConfFile = {
   { "VeryLooseDNNnoCFElectron",
     "ElectronPhotonSelectorTools/offline/mc20_20240628/"
     "ElectronDNNMulticlassVeryLoose.conf"},
-  { "VeryLooseDNNnoCF97Electron", 
+  { "VeryLooseNoCF97DNNElectron", 
     "ElectronPhotonSelectorTools/offline/mc20_20240628/"
     "ElectronDNNMulticlassLoose97_cutBL.conf"},
-  { "LooseDNNnoCFElectron",
+  { "LooseNoCFDNNElectron",
     "ElectronPhotonSelectorTools/offline/mc20_20240628/"
     "ElectronDNNMulticlassLoose.conf"},
-  { "MediumDNNnoCFElectron",
+  { "MediumNoCFDNNElectron",
     "ElectronPhotonSelectorTools/offline/mc20_20240628/"
     "ElectronDNNMulticlassMedium.conf"},
-  { "TightDNNnoCFElectron",
+  { "TightNoCFDNNElectron",
     "ElectronPhotonSelectorTools/offline/mc20_20240628/"
     "ElectronDNNMulticlassTight.conf"}   
 };

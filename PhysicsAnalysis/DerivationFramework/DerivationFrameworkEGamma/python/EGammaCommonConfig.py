@@ -187,7 +187,7 @@ def EGammaCommonCfg(ConfigFlags):
         AsgElectronSelectorToolCfg(
             ConfigFlags,
             name="ElectronDNNSelectorVeryLooseNoCF97",
-            WorkingPoint="VeryLooseDNNnoCF97Electron",
+            WorkingPoint="VeryLooseNoCF97DNNElectron",
         )
     )
     acc.addPublicTool(ElectronDNNSelectorVeryLooseNoCF97)
@@ -197,7 +197,7 @@ def EGammaCommonCfg(ConfigFlags):
         AsgElectronSelectorToolCfg(
             ConfigFlags,
             name="ElectronDNNSelectorLooseNoCF",
-            WorkingPoint="LooseDNNnoCFElectron",
+            WorkingPoint="LooseNoCFDNNElectron",
         )
     )
     acc.addPublicTool(ElectronDNNSelectorLooseNoCF)
@@ -207,7 +207,7 @@ def EGammaCommonCfg(ConfigFlags):
         AsgElectronSelectorToolCfg(
             ConfigFlags,
             name="ElectronDNNSelectorMediumNoCF",
-            WorkingPoint="MediumDNNnoCFElectron",
+            WorkingPoint="MediumNoCFDNNElectron",
         )
     )
     acc.addPublicTool(ElectronDNNSelectorMediumNoCF)
@@ -217,7 +217,7 @@ def EGammaCommonCfg(ConfigFlags):
         AsgElectronSelectorToolCfg(
             ConfigFlags,
             name="ElectronDNNSelectorTightNoCF",
-            WorkingPoint="TightDNNnoCFElectron",
+            WorkingPoint="TightNoCFDNNElectron",
         )
     )
     acc.addPublicTool(ElectronDNNSelectorTightNoCF)
