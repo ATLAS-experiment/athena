@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/FPControl_test.cxx
@@ -18,11 +18,8 @@
 #include <setjmp.h>
 
 
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
-
-
-float blam = 0;
-jmp_buf out;
+const float blam = 0;
+jmp_buf out ATLAS_THREAD_SAFE;   // no multi-threading here
 
 
 void sighandler (int)
