@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcAnalysis/ZDCPulseAnalyzer.h"
@@ -18,10 +18,6 @@
 #include <numeric>
 #include <iomanip>
 
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
-
-extern int gErrorIgnoreLevel;
 
 bool ZDCPulseAnalyzer::s_quietFits         = true;
 bool ZDCPulseAnalyzer::s_saveFitFunc       = false;
@@ -2041,7 +2037,7 @@ unsigned int ZDCPulseAnalyzer::GetStatusMask() const
   return statusMask;
 }
 
-std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetCombinedGraph(bool LGRefit) const
+std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetCombinedGraph(bool LGRefit)
 {
   //
   // We defer filling the histogram if we don't have a pulse until the histogram is requested
@@ -2086,7 +2082,7 @@ std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetCombinedGraph(bool LGRefit) c
 }
 
 
-std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetGraph(bool forceLG) const
+std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetGraph(bool forceLG)
 {
   //
   // We defer filling the histogram if we don't have a pulse until the histogram is requested
