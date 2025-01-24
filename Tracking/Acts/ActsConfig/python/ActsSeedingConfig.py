@@ -167,8 +167,10 @@ def ActsPixelGbtsSeedingToolCfg(flags,
                                 **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkPixel, use default values for ActsTrk::GbtsSeedingTool
-    # need to get correct path for these files 
-    kwargs.setdefault("connector_input_file" , find_datafile("ActsPatternRecognition/GBTS_EdgeProbabilites_ITKPixels.txt"))
+    kwargs.setdefault("ConnectorInputFile" , find_datafile("ActsPatternRecognition/GBTS_EdgeProbabilites_ITKPixels.txt"))
+
+    kwargs.setdefault('PixelDetectorElements', 'ITkPixelDetectorElementCollection')
+
     acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name = name, **kwargs))
     return acc
 

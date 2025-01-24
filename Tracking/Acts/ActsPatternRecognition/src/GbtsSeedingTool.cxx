@@ -38,12 +38,12 @@ namespace ActsTrk {
     m_finderCfg.m_layerGeometry = LayerNumbering();
 
     std::ifstream input_ifstream(
-         m_finderCfg.connector_input_file.c_str(), std::ifstream::in); //change to connector input file 
+         m_finderCfg.ConnectorInputFile.c_str(), std::ifstream::in); //change to connector input file 
     // connector
     std::unique_ptr<Acts::GbtsConnector> inputConnector =  
         std::make_unique<Acts::GbtsConnector>(input_ifstream);
         
-    m_gbtsGeo = std::make_unique<Acts::GbtsGeometry<ActsTrk::GbtsSeedingTool::GbtsSpacePoint>>( 
+    m_gbtsGeo = std::make_unique<Acts::GbtsGeometry<xAOD::SpacePoint>>( 
       m_finderCfg.m_layerGeometry, inputConnector);
 
     return StatusCode::SUCCESS;
@@ -68,11 +68,9 @@ namespace ActsTrk {
     SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle = SG::makeHandle(m_pixelDetEleCollKey, ctx);
     ATH_CHECK(pixelDetEleHandle.isValid()) ;
     const InDetDD::SiDetectorElementCollection* pixelElements = pixelDetEleHandle.cptr();
-   
-    std::vector<std::unique_ptr<GbtsSeedingTool::GbtsSpacePoint>> SeedingToolSP ; 
-    SeedingToolSP.reserve(
-        spContainer.size()); 
-    std::vector<Acts::GbtsSP<GbtsSeedingTool::GbtsSpacePoint>> GbtsSpacePoints;
+  
+
+    std::vector<Acts::GbtsSP<xAOD::SpacePoint>> GbtsSpacePoints;
     GbtsSpacePoints.reserve(
         spContainer.size()); 
 
@@ -94,39 +92,37 @@ namespace ActsTrk {
           int Gbts_id = getCombinedID(eta_mod,barrel_ec,lay_id).second ; 
         
           // fill Gbts vector with current sapce point and ID
-          auto StSp = std::make_unique<GbtsSeedingTool::GbtsSpacePoint>(spacePoint.x(), spacePoint.y(), spacePoint.z(), spacePoint.radius(), &spacePoint.externalSpacePoint());
+          float ClusterWidth = 0; //for now trying to fill this  
         
-          GbtsSpacePoints.emplace_back(StSp.get(), Gbts_id, combined_id); 
-          SeedingToolSP.emplace_back(std::move(StSp)); 
-      
+          // fill Gbts vector with current sapce point and ID
+          GbtsSpacePoints.emplace_back(&spacePoint.externalSpacePoint(), Gbts_id, combined_id, ClusterWidth); 
+          //constructor takes (const space_point_t *sp, 
+
         }
       
     }
 
     ATH_MSG_VERBOSE("Space points successfully assigned Gbts ID");
 
-    Acts::SeedFinderGbts<GbtsSeedingTool::GbtsSpacePoint> finder =
-      Acts::SeedFinderGbts<GbtsSeedingTool::GbtsSpacePoint>(m_finderCfg,
-							    *m_gbtsGeo,
-							    logger().cloneWithSuffix("Finder"));
-    
+    Acts::SeedFinderGbts<xAOD::SpacePoint> finder = Acts::SeedFinderGbts<xAOD::SpacePoint>(m_finderCfg,*m_gbtsGeo);  
+
     finder.loadSpacePoints(GbtsSpacePoints);
     //temporary solution until trigger ROIs implemented 
     Acts::RoiDescriptor internalRoi(0, -4.5, 4.5, 0, -std::numbers::pi, std::numbers::pi, 0, -150.0,150.0); //(eta,etaMinus,etaPlus,phi,phiMinus,Phiplus,z,zMinus,zPlus)
 
-    std::vector<Acts::Seed<GbtsSeedingTool::GbtsSpacePoint, 3ul>> groupSeeds = finder.createSeeds(internalRoi, *m_gbtsGeo);
+    std::vector<Acts::Seed<xAOD::SpacePoint, 3ul>> groupSeeds = finder.createSeeds(internalRoi, *m_gbtsGeo);
 
     // Store seeds
 
     seedContainer.reserve(groupSeeds.size());
-    for( Acts::Seed<GbtsSeedingTool::GbtsSpacePoint, 3ul>& seed: groupSeeds) {
+    for( Acts::Seed<xAOD::SpacePoint, 3ul>& seed: groupSeeds) {
       //turn interim into group seeds 
 
       const auto& spacepoints = seed.sp() ; 
       assert(spacepoints.size()==3) ;  
-      const xAOD::SpacePoint* sp1 = spacepoints[0]->return_SP() ; 
-      const xAOD::SpacePoint* sp2 = spacepoints[1]->return_SP() ; 
-      const xAOD::SpacePoint* sp3 = spacepoints[2]->return_SP() ; 
+      const xAOD::SpacePoint* sp1 = spacepoints[0] ; 
+      const xAOD::SpacePoint* sp2 = spacepoints[1] ; 
+      const xAOD::SpacePoint* sp3 = spacepoints[2] ; 
 
       std::unique_ptr<seed_type> to_add = std::make_unique<seed_type>(*sp1, *sp2, *sp3);
       to_add->setVertexZ(seed.z());
@@ -204,53 +200,17 @@ namespace ActsTrk {
   StatusCode
   GbtsSeedingTool::prepareConfiguration()
   {
-    // Configuration for Acts::SeedFilter
-    Acts::SeedFilterConfig filterCfg;
-    filterCfg.deltaInvHelixDiameter = m_deltaInvHelixDiameter;
-    filterCfg.impactWeightFactor = m_impactWeightFactor;
-    filterCfg.zOriginWeightFactor = m_zOriginWeightFactor;
-    filterCfg.compatSeedWeight = m_compatSeedWeight;    
-    filterCfg.deltaRMin = m_deltaRMin;
-    filterCfg.maxSeedsPerSpM = m_maxSeedsPerSpM;
-    filterCfg.compatSeedLimit = m_compatSeedLimit;
-    filterCfg.seedWeightIncrement = m_seedWeightIncrement;
-    filterCfg.numSeedIncrement = m_numSeedIncrement;
-    filterCfg.seedConfirmation = m_seedConfirmationInFilter;
-    filterCfg.maxSeedsPerSpMConf = m_maxSeedsPerSpMConf;
-    filterCfg.maxQualitySeedsPerSpMConf = m_maxQualitySeedsPerSpMConf;
-    filterCfg.useDeltaRorTopRadius = m_useDeltaRorTopRadius;
-    filterCfg.centralSeedConfirmationRange.zMinSeedConf = m_seedConfCentralZMin;
-    filterCfg.centralSeedConfirmationRange.zMaxSeedConf = m_seedConfCentralZMax;
-    filterCfg.centralSeedConfirmationRange.rMaxSeedConf = m_seedConfCentralRMax;
-    filterCfg.centralSeedConfirmationRange.nTopForLargeR = m_seedConfCentralNTopLargeR;
-    filterCfg.centralSeedConfirmationRange.nTopForSmallR = m_seedConfCentralNTopSmallR;
-    filterCfg.centralSeedConfirmationRange.seedConfMinBottomRadius = m_seedConfCentralMinBottomRadius;
-    filterCfg.centralSeedConfirmationRange.seedConfMaxZOrigin = m_seedConfCentralMaxZOrigin;
-    filterCfg.centralSeedConfirmationRange.minImpactSeedConf = m_seedConfCentralMinImpact;
-    filterCfg.forwardSeedConfirmationRange.zMinSeedConf = m_seedConfForwardZMin;
-    filterCfg.forwardSeedConfirmationRange.zMaxSeedConf = m_seedConfForwardZMax;
-    filterCfg.forwardSeedConfirmationRange.rMaxSeedConf = m_seedConfForwardRMax;
-    filterCfg.forwardSeedConfirmationRange.nTopForLargeR = m_seedConfForwardNTopLargeR;
-    filterCfg.forwardSeedConfirmationRange.nTopForSmallR = m_seedConfForwardNTopSmallR;
-    filterCfg.forwardSeedConfirmationRange.seedConfMinBottomRadius = m_seedConfForwardMinBottomRadius;
-    filterCfg.forwardSeedConfirmationRange.seedConfMaxZOrigin = m_seedConfForwardMaxZOrigin;
-    filterCfg.forwardSeedConfirmationRange.minImpactSeedConf = m_seedConfForwardMinImpact;
-    
     // Configuration Acts::SeedFinderGbts
-    m_finderCfg.seedFilter = std::make_shared<Acts::SeedFilter<GbtsSeedingTool::GbtsSpacePoint>>(filterCfg.toInternalUnits(),
-												 logger().cloneWithSuffix("Filter")); 
 
     m_finderCfg.minPt = m_minPt;
     m_finderCfg.sigmaScattering = m_sigmaScattering;
-    m_finderCfg.maxSeedsPerSpM = m_maxSeedsPerSpM;
     m_finderCfg.highland = m_highland;
     m_finderCfg.maxScatteringAngle2 = m_maxScatteringAngle2;
     m_finderCfg.helixCutTolerance = m_helixCutTolerance ;
     m_finderCfg.m_phiSliceWidth = m_phiSliceWidth ;
     m_finderCfg.m_nMaxPhiSlice = m_nMaxPhiSlice;
     m_finderCfg.m_useClusterWidth = m_useClusterWidth;
-    m_finderCfg.connector_input_file = m_connectorInputFile;
-    m_finderCfg.m_LRTmode = m_LRTmode;
+    m_finderCfg.ConnectorInputFile = m_ConnectorInputFile;
     m_finderCfg.m_useEtaBinning = m_useEtaBinning;
     m_finderCfg.m_doubletFilterRZ = m_doubletFilterRZ ;
     m_finderCfg.m_minDeltaRadius = m_minDeltaRadius;

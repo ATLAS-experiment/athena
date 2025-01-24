@@ -44,4 +44,3 @@ checkxAOD.py ESD.athena.pool.root
 
 echo "Dumping Acts ESD content"
 checkxAOD.py ESD.acts.pool.root
-
