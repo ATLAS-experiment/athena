@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ThinGeantTruthAlg.cxx
@@ -259,6 +259,23 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
 
     if (!HepMC::is_simulation_particle(particle)) {
       particleMask[i] = true;
+    }
+    else {
+      // deal with the products of interactions of quasi-stable
+      // particles
+      if (particle->hasProdVtx()) {
+        const xAOD::TruthVertex* prodVtx = particle->prodVtx();
+        const int nParents = prodVtx->nIncomingParticles();
+        for (int parent = 0; parent < nParents; ++parent) {
+          if (MC::isDecayed(prodVtx->incomingParticle(parent))) {
+            // "simulation particle" with a parent with status==2 was
+            // produced via the interaction of a quasi-stable particle
+            // with the detector material. Such particles should be kept.
+            particleMask[i] = true;
+            break;
+          }
+        }
+      }
     }
   }
 
