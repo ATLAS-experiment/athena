@@ -211,10 +211,15 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
   #
   # Isolation extra cut
   #
-  def addIsoCut(self):
+  def addIsoCut(self,flags):
     if not self.isoInfo() in self.__isolationCut:
       self.__log.fatal(f"Bad Iso selection name: {self.isoInfo()}")
-    self.tool().RelPtConeCut = self.__isolationCut[self.isoInfo()]
+    if flags.Trigger.egamma.isoValidation:
+      valIsoCut = {None: None,'ivarloose': 0.15,'ivarmedium': 0.065,'ivartight': 0.06}
+      self.tool().RelPtConeCut = valIsoCut[self.isoInfo()]
+    else:
+      self.tool().RelPtConeCut = self.__isolationCut[self.isoInfo()]
+
 
  
 
@@ -239,7 +244,7 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
 
     # secundary cut configurations
     if self.isoInfo() and self.isoInfo()!="":
-      self.addIsoCut()
+      self.addIsoCut(flags)
     if self.d0Info() and self.d0Info()!="":
       self.addLRTCut()
     
@@ -258,8 +263,7 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
   #
   def addMonitoring(self, flags):
 
-    monTool = GenericMonitoringTool(flags, "MonTool_"+self.chain(),
-                                    HistPath = 'PrecisionElectronHypo/'+self.chain())
+    monTool = GenericMonitoringTool(flags, "MonTool_"+self.chain(),HistPath = 'PrecisionElectronHypo/'+self.chain())
     monTool.defineHistogram('dEta', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo #Delta#eta_{EF L1}; #Delta#eta_{EF L1}", xbins=80, xmin=-0.01, xmax=0.01)
     monTool.defineHistogram('dPhi', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo #Delta#phi_{EF L1}; #Delta#phi_{EF L1}", xbins=80, xmin=-0.01, xmax=0.01)
     monTool.defineHistogram('Et_em', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo cluster E_{T}^{EM};E_{T}^{EM} [MeV]", xbins=50, xmin=-2000, xmax=100000)
@@ -268,18 +272,17 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
     monTool.defineHistogram('EtaBin', type='TH1I', path='EXPERT', title="PrecisionElectron Hypo entries per Eta bin;Eta bin no.", xbins=11, xmin=-0.5, xmax=10.5)
     monTool.defineHistogram('LikelihoodRatio', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo LH", xbins=100, xmin=-5, xmax=5)
     monTool.defineHistogram('mu', type='TH1F', path='EXPERT', title="Average interaction per crossing", xbins=100, xmin=0, xmax=100)
+    monTool.defineHistogram('relptvarcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo; ptvarcone20/pt;", xbins=50, xmin=0, xmax=0.5)
+    monTool.defineHistogram('ptvarcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo ptvarcone20; ptvarcone20;", xbins=50, xmin=0, xmax=5.0)
 
-    cuts=['Input','#Delta #eta EF-L1', '#Delta #phi EF-L1','eta','E_{T}^{EM}']
+    cuts=['Input','#Delta #eta EF-L1', '#Delta #phi EF-L1','eta','E_{T}^{EM}','LH','Isolation']
+    monTool.defineHistogram('CutCounter', type='TH1I', path='EXPERT', title="PrecisionElectron Hypo Cut Counter;Cut Counter", xbins=7, xmin=0, xmax=7, opt="kCumulative",xlabels=cuts)
 
-    monTool.defineHistogram('CutCounter', type='TH1I', path='EXPERT', title="PrecisionElectron Hypo Passed Cuts;Cut",
-                            xbins=13, xmin=-1.5, xmax=12.5,  opt="kCumulative", xlabels=cuts)
 
 
     if flags.Trigger.doValidationMonitoring:
       monTool.defineHistogram('ptcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo ptcone20; ptcone20;", xbins=50, xmin=0, xmax=5.0)
-      monTool.defineHistogram('relptcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo; ptcone20/pt;", xbins=50, xmin=0, xmax=1)
-      monTool.defineHistogram('ptvarcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo ptvarcone20; ptvarcone20;", xbins=50, xmin=0, xmax=5.0)
-      monTool.defineHistogram('relptvarcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo; ptvarcone20/pt;", xbins=50, xmin=0, xmax=0.5)
+      monTool.defineHistogram('relptcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo; ptcone20/pt;", xbins=50, xmin=0, xmax=1)      
       monTool.defineHistogram('trk_d0', type="TH1F", path='EXPERT', title="PrecisionElectron Hypo Track d0; d0 [mm]", xbins=100, xmin=-1, xmax=1)
 
     self.tool().MonTool = monTool

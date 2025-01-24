@@ -59,7 +59,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
   auto mon_etaBin         = Monitored::Scalar( "EtaBin", -1. );
   auto mon_Eta            = Monitored::Scalar( "Eta", -99. );
   auto mon_Phi            = Monitored::Scalar( "Phi", -99. );
-  auto PassedCuts         = Monitored::Scalar<int>( "CutCounter", -1 );
+  auto cutCounter         = Monitored::Scalar<int>( "CutCounter", -1 );
   auto mon_lhval          = Monitored::Scalar("LikelihoodRatio",   -99.);
   auto mon_mu             = Monitored::Scalar("mu",   -1.);
   auto mon_ptvarcone20    = Monitored::Scalar("ptvarcone20",   -99.);
@@ -69,14 +69,13 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
   auto mon_trk_d0         = Monitored::Scalar("trk_d0",   -1.);
   auto monitorIt          = Monitored::Group( m_monTool, mon_ET, mon_dEta, mon_dPhi, 
                                         mon_etaBin, mon_Eta,
-                                        mon_Phi,PassedCuts,mon_lhval,mon_mu, 
+                                        mon_Phi,cutCounter,mon_lhval,mon_mu, 
                                         mon_ptvarcone20, mon_relptvarcone20,
                                         mon_ptcone20, mon_relptcone20, mon_trk_d0);
 
   float ET(0), dEta(0), dPhi(0), eta(0), phi(0), lhval(0), mu(0), trk_d0(0);
 
   // when leaving scope it will ship data to monTool
-  PassedCuts = PassedCuts + 1; //got called (data in place)
 
   auto roiDescriptor = input.roi;
 
@@ -85,7 +84,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
       ATH_MSG_DEBUG( "REJECT The electron had eta coordinates beyond the EM fiducial volume : " << roiDescriptor->eta() << "; stop the chain now" );       
       return false;
   } 
-
+  cutCounter++;
   ATH_MSG_DEBUG( "; RoI ID = " << roiDescriptor->roiId()
   		 << ": Eta = " << roiDescriptor->eta()
   		 << ", Phi = " << roiDescriptor->phi() );
@@ -134,7 +133,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
      }
      mon_Eta = eta;
      mon_dEta = dEta; 
-     PassedCuts = PassedCuts + 1; //Deta
+     cutCounter++; //Deta
   
      // DeltaPhi( clus-ROI )
      ATH_MSG_DEBUG( ": phi="  << pClus->phi()
@@ -147,7 +146,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
      }
      mon_Phi = phi; 
      mon_dPhi = dPhi;
-     PassedCuts = PassedCuts + 1; //DPhi
+     cutCounter++; //DPhi
 
      // eta range
      if ( cutIndex == -1 ) {  // VD
@@ -157,7 +156,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
        ATH_MSG_DEBUG( "eta bin used for cuts " << cutIndex );
      }
      mon_etaBin = m_etabin[cutIndex]; 
-     PassedCuts = PassedCuts + 1; // passed eta cut
+     cutCounter++; // passed eta cut
   
      // ET_em
      ATH_MSG_DEBUG( "Electron: ET_em=" << ET << " cut: >"  << m_eTthr[cutIndex] );
@@ -166,7 +165,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
        return pass;
      }
      mon_ET = ET; 
-     PassedCuts = PassedCuts + 1; // ET_em
+     cutCounter++; // ET_em
      
      if(m_doNoPid){
        pass = true;
@@ -180,7 +179,6 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
          ATH_MSG_DEBUG("REJECT d0 cut failed");
          return pass;
        }
-       PassedCuts = PassedCuts + 1; // d0
      }
      mon_trk_d0 = trk_d0; 
  
@@ -310,6 +308,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
        return pass;
      } else {
       ATH_MSG_DEBUG("ACCEPT Likelihood passed");
+      cutCounter++;
      }
 
      // Check if need to apply isolation
@@ -322,6 +321,15 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
      }
      // Then, It will pass if relptcone20 is less than cut:
      pass = (relptvarcone20 < m_RelPtConeCut);
+     ATH_MSG_DEBUG("reptvarcon20_rel cut is: " << m_RelPtConeCut);
+     if (!pass){
+      ATH_MSG_DEBUG(" ACCEPT Isolation cut failed");
+      return pass;
+     }else{
+      ATH_MSG_DEBUG(" ACCEPT Isolation cut passed");
+      cutCounter++;
+     }
+
 
   }  // end of if(!m_acceptAll) 
   ATH_MSG_DEBUG( "pass = " << pass );
