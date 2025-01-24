@@ -121,7 +121,7 @@ class TauWorkingPointConfig (ConfigBlock) :
             "Typically not needed here as selectionName is used internally.")
         self.addOption ('quality', None, type=str,
             info="the ID WP (string) to use. Supported ID WPs: Tight, Medium, "
-            "Loose, VeryLoose, Baseline.")
+            "Loose, VeryLoose, Baseline, BaselineForFakes.")
         self.addOption ('use_eVeto', False, type=bool,
             info="use selection with or without eVeto combined with tauID "
             "recommendations: set it to True if electron mis-reconstructed as tau is a large background for your analysis")
@@ -163,10 +163,10 @@ class TauWorkingPointConfig (ConfigBlock) :
             if not self.use_eVeto:
                 nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}_noeleid.conf'
 
-        if self.quality not in ['Tight', 'Medium', 'Loose', 'VeryLoose', 'Baseline'] :
+        if self.quality not in ['Tight', 'Medium', 'Loose', 'VeryLoose', 'Baseline', 'BaselineForFakes'] :
             raise ValueError ("invalid tau quality: \"" + self.quality +
                               "\", allowed values are Tight, Medium, Loose, " +
-                              "VeryLoose, Baseline")
+                              "VeryLoose, Baseline, BaselineForFakes")
         inputfile = nameFormat.format(self.quality.lower())
 
         # Set up the algorithm selecting taus:
@@ -205,7 +205,7 @@ class TauWorkingPointConfig (ConfigBlock) :
             sfList += [alg.scaleFactorDecoration]
 
             # TauEfficiencyCorrectionTool for Identification, use only in case TauID is requested in TauSelectionTool
-            if self.quality not in ('VeryLoose','Baseline'):
+            if self.quality not in ('VeryLoose','Baseline','BaselineForFakes'):
 
                 alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
                                    'TauEfficiencyCorrectionsAlgID' + postfix )
