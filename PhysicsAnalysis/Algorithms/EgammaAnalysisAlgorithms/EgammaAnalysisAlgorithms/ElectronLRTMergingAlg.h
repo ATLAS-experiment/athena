@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -12,10 +12,9 @@
 #ifndef ASG_ANALYSIS_ALGORITHMS__ELECTRON_LRT_MERGING_ALGORITHM__H
 #define ASG_ANALYSIS_ALGORITHMS__ELECTRON_LRT_MERGING_ALGORITHM__H
 
-#include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
 #include <xAODEgamma/ElectronContainer.h>
 #include <EgammaAnalysisInterfaces/IElectronLRTOverlapRemovalTool.h>
-#include <AsgTools/CurrentContext.h>
 #include <AsgTools/ToolHandle.h>
 
 #include "AthContainers/ConstDataVector.h"
@@ -29,7 +28,7 @@
 namespace CP
 {
     /// \brief this wraps the Electron LRT collection merger in a CP algorithm
-    class ElectronLRTMergingAlg final : public EL::AnaAlgorithm
+    class ElectronLRTMergingAlg final : public EL::AnaReentrantAlgorithm
     {
         /// \brief the standard constructor
     public:
@@ -40,7 +39,7 @@ namespace CP
         StatusCode initialize() override;
 
     public:
-        StatusCode execute() override;
+        StatusCode execute(const EventContext &ctx) const override;
 
     private:
         ///////////////////////////////////////////////////////////////////

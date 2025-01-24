@@ -19,7 +19,7 @@
 namespace CP {
 PhotonOriginCorrectionAlg ::PhotonOriginCorrectionAlg(const std::string& name,
                                                       ISvcLocator* pSvcLocator)
-    : AnaAlgorithm(name, pSvcLocator) {}
+    : AnaReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode PhotonOriginCorrectionAlg ::initialize() {
   ANA_CHECK(m_PhotonHandle.initialize(m_systematicsList));
@@ -32,12 +32,12 @@ StatusCode PhotonOriginCorrectionAlg ::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode PhotonOriginCorrectionAlg ::execute() {
+StatusCode PhotonOriginCorrectionAlg ::execute(const EventContext &ctx) const {
 
   // If we can not rely on Event Cleaning or something
   // else having run before for the PHYSLITE.
   // We have to see if we have a PriVtx.
-  SG::ReadHandle<xAOD::VertexContainer> vertices(m_primVertices);
+  SG::ReadHandle<xAOD::VertexContainer> vertices(m_primVertices, ctx);
   const xAOD::Vertex* primary = nullptr;
   for (const xAOD::Vertex* vtx : *vertices) {
     if (vtx->vertexType() == xAOD::VxType::PriVtx) {

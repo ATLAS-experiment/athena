@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,7 +19,7 @@
 namespace CP
 {
     ElectronLRTMergingAlg::ElectronLRTMergingAlg(const std::string &name, ISvcLocator *svcLoc)
-        : EL::AnaAlgorithm(name, svcLoc)
+        : EL::AnaReentrantAlgorithm(name, svcLoc)
     {
     }
 
@@ -49,10 +49,8 @@ namespace CP
     }
 
 
-    StatusCode ElectronLRTMergingAlg::execute()
+    StatusCode ElectronLRTMergingAlg::execute(const EventContext &ctx) const
     {
-
-        const EventContext &ctx = Gaudi::Hive::currentContext();
 
         // Setup containers for output, to avoid const conversions setup two different kind of containers
         std::unique_ptr<ConstDataVector<xAOD::ElectronContainer>> transientContainer = std::make_unique<ConstDataVector<xAOD::ElectronContainer>>(SG::VIEW_ELEMENTS);

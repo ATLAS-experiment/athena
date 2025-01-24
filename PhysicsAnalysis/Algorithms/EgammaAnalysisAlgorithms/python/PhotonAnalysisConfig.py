@@ -128,7 +128,9 @@ class PhotonCalibrationConfig (ConfigBlock) :
 
         # Decorate calo cluster eta if required
         if self.decorateCaloClusterEta:
-            alg = config.createAlgorithm( 'CP::EgammaCaloClusterEtaAlg', 'ElectronEgammaCaloClusterEtaAlg' + self.postfix )
+            alg = config.createAlgorithm( 'CP::EgammaCaloClusterEtaAlg',
+                                          'ElectronEgammaCaloClusterEtaAlg' + self.postfix,
+                                           reentrant=True )
             alg.particles = config.readName(self.containerName)
             config.addOutputVar (self.containerName, 'caloEta2', 'caloEta2', noSys=True)
 
@@ -190,7 +192,8 @@ class PhotonCalibrationConfig (ConfigBlock) :
         # where z comes from the position of a vertex
         # Default the one tagged as Primary
         alg = config.createAlgorithm( 'CP::PhotonOriginCorrectionAlg',
-                                      'PhotonOriginCorrectionAlg' + postfix )
+                                      'PhotonOriginCorrectionAlg' + postfix,
+                                       reentrant=True )
         alg.photons = config.readName (self.containerName)
         alg.photonsOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')

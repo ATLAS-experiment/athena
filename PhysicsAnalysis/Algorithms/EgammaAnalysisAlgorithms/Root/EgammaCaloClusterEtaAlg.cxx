@@ -10,7 +10,6 @@
 
 #include <AsgDataHandles/ReadHandle.h>
 #include <AsgDataHandles/WriteDecorHandle.h>
-#include <AsgTools/CurrentContext.h>
 
 
 namespace CP {
@@ -27,9 +26,8 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode EgammaCaloClusterEtaAlg::execute() {
+  StatusCode EgammaCaloClusterEtaAlg::execute(const EventContext &ctx) const {
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     SG::ReadHandle<xAOD::EgammaContainer> particles(m_particlesKey, ctx);
 
     SG::WriteDecorHandle<xAOD::EgammaContainer, float> caloEta2Handle(m_caloEta2Key, ctx);

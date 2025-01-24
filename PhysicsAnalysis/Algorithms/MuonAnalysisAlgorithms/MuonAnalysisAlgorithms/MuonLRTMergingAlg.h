@@ -9,11 +9,10 @@
 #ifndef ASG_ANALYSIS_ALGORITHMS__MUON_LRT_MERGING_ALGORITHM__H
 #define ASG_ANALYSIS_ALGORITHMS__MUON_LRT_MERGING_ALGORITHM__H
 
-#include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
 #include <xAODMuon/MuonContainer.h>
 #include <xAODMuon/MuonAuxContainer.h>
 #include <MuonAnalysisInterfaces/IMuonLRTOverlapRemovalTool.h>
-#include <AsgTools/CurrentContext.h>
 #include <AsgTools/ToolHandle.h>
 
 #include <AsgTools/PropertyWrapper.h>
@@ -26,14 +25,14 @@ namespace CP
 {
   /// \brief this wraps the MCP LRT collection merger in a CP algorithm
 
-  class MuonLRTMergingAlg final : public EL::AnaAlgorithm
+  class MuonLRTMergingAlg final : public EL::AnaReentrantAlgorithm
   {
     /// \brief the standard constructor
   public:
     MuonLRTMergingAlg (const std::string& name,
                              ISvcLocator* pSvcLocator);
     StatusCode initialize () override;
-    StatusCode execute ()  override;
+    StatusCode execute (const EventContext &ctx) const  override;
 
   private:
 

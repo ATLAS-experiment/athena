@@ -14,7 +14,6 @@
 
 #include <AsgDataHandles/ReadHandle.h>
 #include <AsgDataHandles/WriteDecorHandle.h>
-#include <AsgTools/CurrentContext.h>
 #include <AthContainers/AuxElement.h>
 #include <xAODTruth/TruthParticleContainer.h>
 #include <TauAnalysisTools/HelperFunctions.h>
@@ -77,10 +76,8 @@ namespace CP
 
 
   StatusCode TauTruthDecorationsAlg ::
-  execute ()
+  execute (const EventContext &ctx) const
   {
-
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     SG::ReadHandle<xAOD::TauJetContainer> taus(m_tausKey, ctx);
 
     std::unordered_map<SG::AuxElement::ConstAccessor<double> *, SG::WriteDecorHandle<xAOD::TauJetContainer, float>> doubleWriteHandles;

@@ -56,8 +56,6 @@ namespace CP
     StatusCode EgammaFSRForMuonsCollectorAlg::execute()
     {
 
-        // const EventContext &ctx = Gaudi::Hive::currentContext();
-
         auto selDec   = std::make_unique<SG::AuxElement::Decorator<uint32_t> > ("selectEta");
         auto oqDec    = std::make_unique<SG::AuxElement::Decorator<uint32_t> > ("goodOQ");
         auto cleanDec = std::make_unique<SG::AuxElement::Decorator<uint32_t> > ("isClean");
