@@ -35,11 +35,17 @@ BPHY18MetaDataTool = DerivationFramework__BeeKstMetaData(
 from DerivationFrameworkBPhys.BPhysPyHelpers import BPhysEnsureAttributes 
 from pprint import pprint
 
-BPHY18cf                     = BPhysEnsureAttributes( BPHY18MetaDataTool )
-BPHY18cf.runGSFCalo          = vars().get( "BPHY18_runGSFCalo"          , BPHY18cf.runGSFCalo          )
-BPHY18cf.JPsiFinderLegAndLeg = vars().get( "BPHY18_JPsiFinderLegAndLeg" , BPHY18cf.JPsiFinderLegAndLeg )
-BPHY18cf.BeeKstUseElMass     = vars().get( "BPHY18_BeeKstUseElMass"     , BPHY18cf.BeeKstUseElMass     )
-BPHY18cf.isoMultOnlyInVertex = vars().get( "BPHY18_isoMultOnlyInVertex" , BPHY18cf.isoMultOnlyInVertex )
+## Reading CLI Arguments
+BPHY18cf                          = BPhysEnsureAttributes( BPHY18MetaDataTool )
+BPHY18cf.runGSFCalo               = vars().get( "BPHY18_runGSFCalo"          , BPHY18cf.runGSFCalo          )
+BPHY18cf.JPsiFinderLegAndLeg      = vars().get( "BPHY18_JPsiFinderLegAndLeg" , BPHY18cf.JPsiFinderLegAndLeg )
+BPHY18cf.BeeKstUseElMass          = vars().get( "BPHY18_BeeKstUseElMass"     , BPHY18cf.BeeKstUseElMass     )
+BPHY18cf.GSFCaloRefitUsePosition  = vars().get( "BPHY18_GSFCaloRefitUsePosition" , BPHY18cf.GSFCaloRefitUsePosition  )
+BPHY18cf.GSFCaloRefitUseEnergy    = vars().get( "BPHY18_GSFCaloRefitUseEnergy"   , BPHY18cf.GSFCaloRefitUseEnergy    )
+BPHY18cf.GSFCaloRefitUseEta       = vars().get( "BPHY18_GSFCaloRefitUseEta"      , BPHY18cf.GSFCaloRefitUseEta       )
+BPHY18cf.GSFCaloRefitUsePhi       = vars().get( "BPHY18_GSFCaloRefitUsePhi"      , BPHY18cf.GSFCaloRefitUsePhi       )
+BPHY18cf.GSFCaloRefitDepthChoice  = vars().get( "BPHY18_GSFCaloRefitDepthChoice" , BPHY18cf.GSFCaloRefitDepthChoice  )
+BPHY18cf.isoMultOnlyInVertex      = vars().get( "BPHY18_isoMultOnlyInVertex"     , BPHY18cf.isoMultOnlyInVertex      )
 
 ToolSvc  += BPHY18MetaDataTool
 pprint ( BPHY18MetaDataTool.properties() )
@@ -109,11 +115,11 @@ if runGSFCalo:
 
     include("DerivationFrameworkBPhys/configureGSFCaloImprovement.py")
     BPHY18_GSFCaloImprovementTools = GSFCaloImprovementTools("BPHY18")
-    BPHY18_GSFCaloImprovementTools.RefitterTool.useClusterPosition = True
-    BPHY18_GSFCaloImprovementTools.CCOTBuilder.UseClusterEnergy    = True
-    BPHY18_GSFCaloImprovementTools.CCOTBuilder.UseClusterPhi       = False
-    BPHY18_GSFCaloImprovementTools.CCOTBuilder.UseClusterEta       = False
-    BPHY18_GSFCaloImprovementTools.CaloDepthTool.DepthChoice       = "middle"
+    BPHY18_GSFCaloImprovementTools.RefitterTool.useClusterPosition = BPHY18cf.GSFCaloRefitUsePosition
+    BPHY18_GSFCaloImprovementTools.CCOTBuilder.UseClusterEnergy    = BPHY18cf.GSFCaloRefitUseEnergy
+    BPHY18_GSFCaloImprovementTools.CCOTBuilder.UseClusterPhi       = BPHY18cf.GSFCaloRefitUsePhi
+    BPHY18_GSFCaloImprovementTools.CCOTBuilder.UseClusterEta       = BPHY18cf.GSFCaloRefitUseEta
+    BPHY18_GSFCaloImprovementTools.CaloDepthTool.DepthChoice       = BPHY18cf.GSFCaloRefitDepthChoice
 
     from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__GSFCaloImprovement
     BPHY18_GSFCaloImprovement = DerivationFramework__GSFCaloImprovement(name                     = "BPHY18_GSFCaloImprovement",
@@ -127,24 +133,35 @@ if runGSFCalo:
 
 
 ## 1/ setup vertexing tools and services
+
 include("DerivationFrameworkBPhys/configureVertexing.py")
 BPHY18_VertexTools = BPHYVertexTools("BPHY18_BeeKst")
+
+# TrackSelectionTool for Isolation Calculation
+from InDetTrackSelectionTool.InDetTrackSelectionToolConf \
+   import InDet__InDetTrackSelectionTool
+BPHY18_TrackSelToolDict = {}
+for trackSelWP, trackSelMinPt in list( zip( 
+                                    BPHY18cf.isoTrackWorkingPoints,
+                                    BPHY18cf.isoTrackMinPts
+                                ) ):
+    BPHY18_TrackSelToolDict[ trackSelWP ] = InDet__InDetTrackSelectionTool(
+        name        = "BPHY18_" + trackSelWP,
+        OutputLevel = INFO
+    )
+    BPHY18_TrackSelToolDict[ trackSelWP ].CutLevel = trackSelWP
+    BPHY18_TrackSelToolDict[ trackSelWP ].minPt    = trackSelMinPt
+
+    ToolSvc += BPHY18_TrackSelToolDict[ trackSelWP ]
+
+# TTVATool for Isolation Calculation
 from TrackVertexAssociationTool.TrackVertexAssociationToolConf \
     import CP__TrackVertexAssociationTool
-from InDetTrackSelectionTool.InDetTrackSelectionToolConf \
-    import InDet__InDetTrackSelectionTool
-BPHY18_TrackSelTool = InDet__InDetTrackSelectionTool(
-        name        = "BPHY18_Loose",
-        OutputLevel = INFO
-)
-BPHY18_TrackSelTool.CutLevel                     = "Loose"
-BPHY18_TrackSelTool.minPt                        = 500
-ToolSvc += BPHY18_TrackSelTool
-
-BPHY18_VtxTVATool =  CP__TrackVertexAssociationTool(
-                                        name          = "BPHY18_VtxIsoTvaTool",
-                                        WorkingPoint  = "Loose",
-                                        OutputLevel   = WARNING)
+BPHY18_VtxTVATool = CP__TrackVertexAssociationTool(
+                        name          = "BPHY18_VtxIsoTvaTool",
+                        WorkingPoint  = BPHY18cf.isoTTVAWorkingPoint,
+                        OutputLevel   = WARNING
+                    )
 ToolSvc += BPHY18_VtxTVATool
 
 print '********************** VERTEX TOOLS ***********************'
@@ -475,9 +492,21 @@ print      BPHY18_Select_piK
 #ToolSvc += BPHY18_IsoMultiplicityTool
 #print BPHY18_IsoMultiplicityTool
 
-from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__BMuonTrackIsoTool
+from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf \
+    import DerivationFramework__BMuonTrackIsoTool
+
+_isoTTVALogChi2CutValues = BPHY18cf.isoTTVALogChi2CutValues
+_isoTTVAChi2CutTypes     = BPHY18cf.isoTTVAChi2CutTypes
+if len( _isoTTVAChi2CutTypes ) != len( _isoTTVALogChi2CutValues ):
+   print( "isoTTVALogChi2CutValues and isoTTVAChi2CutTypes should have the same length!" )
+   exit(1) 
+_isoConeSizes            = BPHY18cf.isoConeSizes 
+isoConeSizes             = _isoConeSizes * len( _isoTTVAChi2CutTypes )
+isoTTVAChi2CutTypes      = [ i for i in _isoTTVAChi2CutTypes for _ in range( len( _isoConeSizes ) ) ]
+isoTTVALogChi2CutValues  = [ i for i in _isoTTVALogChi2CutValues for _ in range( len( _isoConeSizes ) ) ] 
+
 BPHY18_LegTrackIsoTool = DerivationFramework__BMuonTrackIsoTool(
-    IsolationTargetLegTypes    = 2,
+    IsolationTargetLegTypes    = BPHY18cf.isoTargetLegTypes,
     name                       = "BPHY18_TrackIsoTool",
     BranchPrefixes             = [ "BeeKstCandidates" ],
     BranchBaseName             = "legIso",
@@ -486,38 +515,14 @@ BPHY18_LegTrackIsoTool = DerivationFramework__BMuonTrackIsoTool(
     RefPVContainerNames        = [ "BPHY18RefittedPrimaryVertices" ],
     TrackParticleContainerName = "InDetTrackParticles",
     PVContainerName            = "PrimaryVertices",
-    PVTypesToConsider          = [1, 3],
-    TrackSelectionTools        = [ BPHY18_TrackSelTool ], #  BPHY18_VertexTools.InDetTrackSelectorTool ],
+    PVTypesToConsider          = BPHY18cf.isoPVTypesForTTVA,
+    TrackSelectionTools        = list( BPHY18_TrackSelToolDict.values() ),
     TVATool                    =  BPHY18_VtxTVATool,
-    IsolationConeSizes         = [ 0.1, 0.2, 0.3, 0.4, 0.5 ] * 2,
-    IsoTrkImpLogChi2Max        = [ 5.0 ] * 5 + [ 0.0 ] * 5,
-    IsoDoTrkImpLogChi2Cut      = [ 2   ] * 5 + [ 0   ] * 5,  
-    DoVertexType               = 4, # Only Min A0
-    UseTrackTypes              = [ 
-                                    1, 
-                                    # Associated w/ PV associated w/ Candidate
-                                    ( 1 << 0 ) | ( 1 << 1 ) | ( 1 << 5 ),
-                                    # Associated w/ PV associated w/ Candidate 
-                                    # OR Associated w/ Dummy PV
-                                    # OR Associated w/ PV other than Primary, Secondary, Pileup
-                                    ( 1 << 0 ) | ( 1 << 1 ) | ( 1 << 2 ) |\
-                                    ( 1 << 3 ) | ( 1 << 4 ) | ( 1 << 5 ) |\
-                                    ( 1 << 6 ),
-                                    # All Tracks, NO PV Association!!!
-                                    1 << 23, 
-                                    # Associated w/ Refitted PV associated w/ Candidate
-                                    1 << 24, 
-                                    # Associated w/ PV associated w/ Candidate
-                                    # w/ minNumTracks = 0 => Equivalent to 1?
-                                    1 << 27,
-                                    # Min chi2 PV is the same as the refitted PV associated w/
-                                    # candidate, 3D chi2 from track perigee using uncertainties
-                                    # from both track and vertex
-                                    1 << 28
-                                    # Min chi2 PV is the same as the PV associated w/
-                                    # candidate, 3D chi2 from track perigee using uncertainties
-                                    # from both track and vertex
-                                ],
+    IsolationConeSizes         = isoConeSizes,
+    IsoTrkImpLogChi2Max        = isoTTVALogChi2CutValues,
+    IsoDoTrkImpLogChi2Cut      = isoTTVAChi2CutTypes,  
+    DoVertexType               = BPHY18cf.isoPVSVAssocType, # Only Min A0
+    UseTrackTypes              = BPHY18cf.isoTrackTypes,
     DebugTrackTypes            = 1,
     DebugTracksInEvents        = [])
 

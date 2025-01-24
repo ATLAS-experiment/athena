@@ -13,6 +13,11 @@ namespace DerivationFramework {
     recordPropertyB( "runGSFCalo"          , true      ); // CLI Flag
     recordPropertyS( "JPsiFinderLegAndLeg" , "elAndEl" ); // CLI Flag
     recordPropertyB( "BeeKstUseElMass"     , true      ); // CLI Flag // This default changes behavior wrt 21.2.181.0-!
+    recordPropertyB( "GSFCaloRefitUsePhi"       , false    ); // CLI Flag
+    recordPropertyB( "GSFCaloRefitUseEta"       , false    ); // CLI Flag
+    recordPropertyB( "GSFCaloRefitUsePosition"  , true     ); // CLI Flag
+    recordPropertyB( "GSFCaloRefitUseEnergy"    , true     ); // CLI Flag
+    recordPropertyS( "GSFCaloRefitDepthChoice"  , "middle" ); // CLI Flag
 
     // Global Constants, in MeV if Relevant.
     /* 
@@ -84,6 +89,64 @@ namespace DerivationFramework {
 
     // Configuration for Isolation/Multiplicity Calculation
     recordPropertyB( "isoMultOnlyInVertex", false );
+
+    /*
+     isoTrackWorkingPoints and isoTrackMinPts are interpreted in 
+     correspondence w/ each other, i.e., k-th isoTrackWorkingPoint will
+     be used with k-th isoTrackMinPt. 
+     */
+    recordPropertyVS( "isoTrackWorkingPoints", { "NoCut", "Loose"});
+    recordPropertyVD( "isoTrackMinPts"       , {   500.0,   500.0});
+    
+    recordPropertyS( "isoTTVAWorkingPoint"   , "Loose" );
+
+    /* 
+    isoTargetLegTypes -> Calculate isolation for:
+    0: Only muon legs in the vertex
+    1: Only electron legs in the vertex
+    2: All legs in the vertex
+    */
+    recordPropertyI( "isoTargetLegTypes"    , 2); 
+
+    recordPropertyVD( "isoConeSizes", {0.2, 0.3, 0.4, 0.5 });
+    // 0: NoVtx, 1: Primary, 2: Secondary, 3: Pileup, 4: Conversion
+    // See: https://acode-browser.usatlas.bnl.gov/lxr/source/athena/Tracking/TrkEvent/TrkEventPrimitives/TrkEventPrimitives/VertexType.h?v=21.2#0024
+    // Used as `PVTypesToConsider` in `BPhysVertexTrackBase.cxx`
+    recordPropertyVD( "isoTTVALogChi2CutValues", {5.0, 0.});
+    recordPropertyVI( "isoTTVAChi2CutTypes", {2,0});
+    
+    recordPropertyVI( "isoPVTypesForTTVA", {1, 3}); 
+    recordPropertyI( "isoPVSVAssocType", 4 ); // 4 is minA0
+    
+    recordPropertyVI( 
+      "isoTrackTypes", 
+      {
+        1, 
+        // 1: Associated w/ PV associated w/ Candidate
+        ( 1 << 0 ) | ( 1 << 1 ) | ( 1 << 5 ), 
+        // 35: Associated w/ PV associated w/ Candidate 
+        // OR Associated w/ Dummy PV
+        // OR Associated w/ PV other than Primary, Secondary, Pileup
+        ( 1 << 0 ) | ( 1 << 1 ) | ( 1 << 2 ) |\
+        ( 1 << 3 ) | ( 1 << 4 ) | ( 1 << 5 ) |\
+        ( 1 << 6 ), 
+        // 127: All Tracks, NO PV Association!!!
+        1 << 23, 
+        // 8388608: Associated w/ Refitted PV associated w/ Candidate
+        1 << 24, 
+        // 16777216: Associated w/ PV associated w/ Candidate
+        // w/ minNumTracks = 0 => Equivalent to 1?
+        1 << 27,
+        // 134217728: Min chi2 PV is the same as the refitted PV associated w/
+        // candidate, 3D chi2 from track perigee using uncertainties
+        // from both track and vertex
+        1 << 28
+        // 268435456: Min chi2 PV is the same as the PV associated w/
+        // candidate, 3D chi2 from track perigee using uncertainties
+        // from both track and vertex
+      }
+    );
+
   }
   //--------------------------------------------------------------------------
 } // namespace
