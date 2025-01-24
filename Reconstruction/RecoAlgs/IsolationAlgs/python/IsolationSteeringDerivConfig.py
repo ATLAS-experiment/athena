@@ -40,7 +40,9 @@ def IsolationSteeringDerivCfg(flags, name = 'IsolationSteeringDeriv', inType = '
     # Prepare IsolationBuilder
     from xAODPrimitives.xAODIso import xAODIso as isoPar
     isoType  = [ [ isoPar.neflowisol20, isoPar.neflowisol30, isoPar.neflowisol40 ] ]
-    isoCor   = [ [ isoPar.coreCone, isoPar.pileupCorrection ] ]
+    isoCor   = [ [ isoPar.coreCone ] ]
+    if not flags.HeavyIon.Egamma.doSubtractedClusters:
+        isoCor[0].append(isoPar.pileupCorrection)
     isoExCor = [ [ isoPar.coreConeSC ] ]
     kwargs['ElIsoTypes'] = isoType
     kwargs['ElCorTypes'] = isoCor
