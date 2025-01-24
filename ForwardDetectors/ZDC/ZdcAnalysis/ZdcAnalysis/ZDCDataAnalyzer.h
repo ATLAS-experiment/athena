@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_ZDCDataAnalyzer_h
@@ -14,9 +14,9 @@
 #include <memory>
 
 #include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY; 
 
-class ZDCDataAnalyzer
+
+class ATLAS_NOT_THREAD_SAFE ZDCDataAnalyzer
 {
 public:
   typedef std::array<std::array<float, 4>, 2> ZDCModuleFloatArray;
