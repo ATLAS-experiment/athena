@@ -554,7 +554,7 @@ const std::vector<const xAOD::Electron*>& xAOD::BPhysHelper::electrons()
 const std::vector<unsigned int> xAOD::BPhysHelper::electronTrackIndices()
 {
   // decorate electron track information
-  if(!decorateElTrackTypes())
+  if(!decorateElTrackInfo())
     return xAOD::BPhysHelper::emptyVectorOfElTrackIndices;
 
   // all OK:
@@ -565,7 +565,7 @@ const std::vector<unsigned int> xAOD::BPhysHelper::electronTrackIndices()
 const std::vector<xAOD::BPhysHelper::eltrack_type> xAOD::BPhysHelper::electronTrackTypes()
 {
   // decorate electron track information
-  if(!decorateElTrackTypes())
+  if(!decorateElTrackInfo())
     return xAOD::BPhysHelper::emptyVectorOfElTrackTypes;
 
   // all OK:
@@ -1285,26 +1285,53 @@ bool xAOD::BPhysHelper::cacheElectrons()
   
 }
 /*****************************************************************************/
-bool xAOD::BPhysHelper::decorateElTrackTypes()
+bool xAOD::BPhysHelper::decorateElTrackInfo()
 {
  if(!cacheElectrons()) return false;
  if(m_electronTracksDecorated && !m_cachedElTrackTypes.empty()) return true;
+ unsigned int nElProcessed = 0;
+ unsigned int nElGSFTrackFound = 0;
+ unsigned int nElGSFCaloRefitTrackFound = 0;
+ unsigned int nElInDetTrackFound = 0;
  for( unsigned int elIdx = 0; elIdx < m_cachedElectrons.size(); elIdx++ ){
   const xAOD::TrackParticle* gsfTrack = m_cachedElectrons[elIdx]->trackParticle(0);
-  const xAOD::TrackParticle* idTrack;
-  if ( gsfTrack ){
-    idTrack = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( gsfTrack );
-  } else {
+  const xAOD::TrackParticle* gsfCaloRefitTrack = nullptr;
+  static const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer> > gsfCaloRefitAcc("gsfCaloTrackParticleLink");
+  if ( gsfCaloRefitAcc.isAvailable( *m_cachedElectrons[elIdx] ) && gsfCaloRefitAcc( *m_cachedElectrons[elIdx] ).isValid() ){
+    gsfCaloRefitTrack = *gsfCaloRefitAcc( *m_cachedElectrons[elIdx] );
+  }
+  const xAOD::TrackParticle* idTrack = nullptr;
+  if ( gsfTrack || gsfCaloRefitTrack ){
+    if ( gsfTrack ) {
+      nElGSFTrackFound += 1;
+      idTrack = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( gsfTrack );
+    }
+    if ( gsfCaloRefitTrack ) {
+      nElGSFCaloRefitTrackFound += 1;
+      if ( !idTrack ) {
+        idTrack = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( gsfCaloRefitTrack );
+      }
+    }
+  } 
+  else {
     idTrack = nullptr;
   }
+  if ( idTrack ) nElInDetTrackFound += 1;
   for( unsigned int iTrk=0; iTrk < m_b->nTrackParticles(); iTrk++ ){
     if ( m_b->trackParticle(iTrk) == gsfTrack ){
       m_cachedElTrackTypes.push_back(TRACK_GSF);
       m_cachedElTrackIndices.push_back(iTrk);
+      nElProcessed += 1;
     } 
+    else if ( m_b->trackParticle(iTrk) == gsfCaloRefitTrack ){
+      m_cachedElTrackTypes.push_back(TRACK_GSFCALOREFIT);
+      m_cachedElTrackIndices.push_back(iTrk);
+      nElProcessed += 1;
+    }
     else if ( m_b->trackParticle(iTrk) == idTrack ){
       m_cachedElTrackTypes.push_back(TRACK_INDET);
       m_cachedElTrackIndices.push_back(iTrk);
+      nElProcessed += 1;
     }
     else{
       continue;
@@ -1312,6 +1339,18 @@ bool xAOD::BPhysHelper::decorateElTrackTypes()
   }
  }
  assert(m_cachedElectrons.size()==m_cachedElTrackIndices.size());
+ //ATH_MSG_DEBUG( "BPhysHelper: nElectrons: " << m_cachedElectrons.size() <<
+ //" , Found GSFCaloRefit Tracks: " << nElGSFCaloRefitTrackFound
+ //);
+ //ATH_MSG_DEBUG( "BPhysHelper: nElectrons: " << m_cachedElectrons.size() <<
+ //" , Found GSF Tracks: " << nElGSFTrackFound
+ //);
+ //ATH_MSG_DEBUG( "BPhysHelper: nElectrons: " << m_cachedElectrons.size() <<
+ //" , Found InDet Tracks: " << nElInDetTrackFound
+ //);
+ //ATH_MSG_DEBUG( "BPhysHelper: nElectrons: " << m_cachedElectrons.size() <<
+ //" , Successfully Processed: " << nElProcessed
+ //);
  m_electronTracksDecorated=true;
  return true;
 }

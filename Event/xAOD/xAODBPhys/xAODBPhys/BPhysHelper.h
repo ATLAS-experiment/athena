@@ -667,7 +667,7 @@ namespace xAOD {
       bool cacheElectrons();
 
       std::vector<eltrack_type> m_cachedElTrackTypes;
-      bool decorateElTrackTypes();
+      bool decorateElTrackInfo();
       static const std::vector<eltrack_type> emptyVectorOfElTrackTypes;
 
 

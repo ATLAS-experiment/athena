@@ -25,6 +25,7 @@ BKllIsoMultiplicityTool::BKllIsoMultiplicityTool(
       m_trackContainerName("InDetTrackParticles"),
       m_trkSelector("InDet::TrackSelectorTool"),
       m_trkSelectionCuts(),
+      m_useTrkSelector(false),
       m_trackPtCut(500.),
       m_trackEtaCut(-1.), // < 0 -> No eta cut applied!
       m_elContainerKey("Electrons"),
@@ -55,6 +56,7 @@ BKllIsoMultiplicityTool::BKllIsoMultiplicityTool(
   declareProperty("TrackContainer", m_trackContainerName);
   declareProperty("TrackSelectorTool",m_trkSelector);
   declareProperty("AddTrackSelectionCuts", m_trkSelectionCuts);
+  declareProperty("UseDetailedTrackSelector", m_useTrkSelector);
   declareProperty("TrackPtCut", m_trackPtCut);
   declareProperty("TrackEtaCut", m_trackEtaCut);
   declareProperty("ElectronContainerKey", m_elContainerKey);
@@ -281,7 +283,7 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
       }
     }
     if ( m_onlyInVertex && !vertexCheck ) continue;
-    if ( !m_trkSelector->decision(*track, 0) ) continue;  
+    if ( m_useTrkSelector && !m_trkSelector->decision(*track, 0) ) continue;  
     for (unsigned int iSel = 0; iSel < m_addTrkSelTools.size(); iSel++ ){
       if (!m_addTrkSelTools.at( iSel )->accept( track ) ) {
         isSelected = false;
@@ -332,7 +334,7 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
         ATH_MSG_ERROR("ElectronTrackContainerKey must be one of: GSFCaloContainer, GSFTrackParticles, InDetTrackParticles..." );
         return StatusCode::FAILURE;
       }
-      if ( !m_trkSelector->decision(*elTrack, 0) ) continue; 
+      if ( m_useTrkSelector && !m_trkSelector->decision(*elTrack, 0) ) continue; 
       for (unsigned int iSel = 0; iSel < m_addElTrkSelTools.size(); iSel++ ){
         if (!m_addElTrkSelTools.at( iSel )->accept( elTrack ) ) {
           isSelected = false;
@@ -372,7 +374,7 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
         ATH_MSG_ERROR("MuonTrackContainerKey must be one of: InDetTrackParticles, CombinedMuonTrackParticles..." );
         return StatusCode::FAILURE;
       }
-      if ( !m_trkSelector->decision(*muTrack, 0) ) continue; 
+      if ( m_useTrkSelector &&  !m_trkSelector->decision(*muTrack, 0) ) continue; 
       for (unsigned int iSel = 0; iSel < m_addMuTrkSelTools.size(); iSel++ ){
         if (!m_addMuTrkSelTools.at( iSel )->accept( muTrack ) ) {
           isSelected = false;
@@ -437,19 +439,25 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
           for ( unsigned int iTrack = 0; iTrack < vTrackBag.size(); iTrack++ ){
             bool isSelected = isSelectedVTrackBag.at( iTrack );
               auto trackMomentum = vTrackBag.at( iTrack )->p4();
-              if ( legMomentumOrig.DeltaR( trackMomentum ) <= thrDeltaR ) {
+              if ( legMomentumOrig.DeltaR( trackMomentum ) < thrDeltaR ) {
                 isolationsOrig.at( iCone ) += trackMomentum.Pt(); 
                 if ( isSelected ) selectedIsolationsOrig.at( iCone ) += trackMomentum.Pt();
               }
-              if ( legMomentumRefit.DeltaR( trackMomentum ) <= thrDeltaR ) {
+              if ( legMomentumRefit.DeltaR( trackMomentum ) < thrDeltaR ) {
                 isolationsRefit.at( iCone ) += trackMomentum.Pt();
                 if ( isSelected ) selectedIsolationsRefit.at( iCone ) += trackMomentum.Pt();
               }
-              if ( legMomentumOrigInDet.DeltaR( trackMomentum ) <= thrDeltaR ) {
+              if ( legMomentumOrigInDet.DeltaR( trackMomentum ) < thrDeltaR ) {
                 isolationsOrigInDet.at( iCone ) += trackMomentum.Pt();
                 if ( isSelected ) selectedIsolationsOrigInDet.at( iCone ) += trackMomentum.Pt();
               }
           }
+          isolationsOrig      .at( iCone ) = ( legMomentumOrig      .Pt() / ( isolationsOrig      .at( iCone ) + legMomentumOrig      .Pt() ) );
+          isolationsRefit     .at( iCone ) = ( legMomentumRefit     .Pt() / ( isolationsRefit     .at( iCone ) + legMomentumRefit     .Pt() ) );
+          isolationsOrigInDet .at( iCone ) = ( legMomentumOrigInDet .Pt() / ( isolationsOrigInDet .at( iCone ) + legMomentumOrigInDet .Pt() ) );
+          selectedIsolationsOrig      .at( iCone ) = ( legMomentumOrig      .Pt() / ( selectedIsolationsOrig      .at( iCone ) + legMomentumOrig      .Pt() ) );
+          selectedIsolationsRefit     .at( iCone ) = ( legMomentumRefit     .Pt() / ( selectedIsolationsRefit     .at( iCone ) + legMomentumRefit     .Pt() ) );
+          selectedIsolationsOrigInDet .at( iCone ) = ( legMomentumOrigInDet .Pt() / ( selectedIsolationsOrigInDet .at( iCone ) + legMomentumOrigInDet .Pt() ) );
         }
         isolationsOrigAllLegs.push_back( isolationsOrig );
         isolationsRefitAllLegs.push_back( isolationsRefit );

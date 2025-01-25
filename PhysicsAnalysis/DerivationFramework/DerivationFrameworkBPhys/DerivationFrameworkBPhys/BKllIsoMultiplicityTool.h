@@ -39,6 +39,7 @@ namespace DerivationFramework {
 	  std::string m_trackContainerName;
     ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;
     std::vector<std::string> m_trkSelectionCuts;
+    bool m_useTrkSelector;
     float m_trackPtCut;
     float m_trackEtaCut;
     std::string  m_elContainerKey;

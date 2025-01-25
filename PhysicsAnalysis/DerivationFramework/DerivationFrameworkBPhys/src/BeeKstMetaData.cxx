@@ -12,7 +12,7 @@ namespace DerivationFramework {
     // Configuration for Vertexing
     recordPropertyB( "runGSFCalo"          , true      ); // CLI Flag
     recordPropertyS( "JPsiFinderLegAndLeg" , "elAndEl" ); // CLI Flag
-    recordPropertyB( "BeeKstUseElMass"     , true      ); // CLI Flag // This default changes behavior wrt 21.2.181.0-!
+    recordPropertyB( "BeeKstUseElMass"     , true      ); // CLI Flag // This changes default behavior wrt 21.2.181.0 (or older)!
     recordPropertyB( "GSFCaloRefitUsePhi"       , false    ); // CLI Flag
     recordPropertyB( "GSFCaloRefitUseEta"       , false    ); // CLI Flag
     recordPropertyB( "GSFCaloRefitUsePosition"  , true     ); // CLI Flag
@@ -95,8 +95,8 @@ namespace DerivationFramework {
      correspondence w/ each other, i.e., k-th isoTrackWorkingPoint will
      be used with k-th isoTrackMinPt. 
      */
-    recordPropertyVS( "isoTrackWorkingPoints", { "NoCut", "Loose"});
-    recordPropertyVD( "isoTrackMinPts"       , {   500.0,   500.0});
+    recordPropertyVS( "isoTrackWorkingPoints", { "Loose" } );
+    recordPropertyVD( "isoTrackMinPts"       , {   500.0 });
     
     recordPropertyS( "isoTTVAWorkingPoint"   , "Loose" );
 
@@ -106,17 +106,15 @@ namespace DerivationFramework {
     1: Only electron legs in the vertex
     2: All legs in the vertex
     */
-    recordPropertyI( "isoTargetLegTypes"    , 2); 
-
-    recordPropertyVD( "isoConeSizes", {0.2, 0.3, 0.4, 0.5 });
+    recordPropertyI  ( "isoTargetLegTypes" , 2 ); 
+    recordPropertyVD ( "isoConeSizes"      , { 0.2, 0.3, 0.4, 0.5 } );
     // 0: NoVtx, 1: Primary, 2: Secondary, 3: Pileup, 4: Conversion
     // See: https://acode-browser.usatlas.bnl.gov/lxr/source/athena/Tracking/TrkEvent/TrkEventPrimitives/TrkEventPrimitives/VertexType.h?v=21.2#0024
     // Used as `PVTypesToConsider` in `BPhysVertexTrackBase.cxx`
-    recordPropertyVD( "isoTTVALogChi2CutValues", {5.0, 0.});
-    recordPropertyVI( "isoTTVAChi2CutTypes", {2,0});
-    
-    recordPropertyVI( "isoPVTypesForTTVA", {1, 3}); 
-    recordPropertyI( "isoPVSVAssocType", 4 ); // 4 is minA0
+    recordPropertyVD ( "isoTTVALogChi2CutValues", { 5.0, 0. } );
+    recordPropertyVI ( "isoTTVAChi2CutTypes"    , {   2, 0  } );
+    recordPropertyVI ( "isoPVTypesForTTVA"      , {   1, 3  } ); 
+    recordPropertyI  ( "isoPVSVAssocType"       , 4           ); // 4 is minA0
     
     recordPropertyVI( 
       "isoTrackTypes", 

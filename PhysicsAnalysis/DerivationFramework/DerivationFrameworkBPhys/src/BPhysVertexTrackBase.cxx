@@ -1102,7 +1102,6 @@ namespace DerivationFramework {
     auto elTrackIndicesMap = buildIndexMap(elTrackIndices);
     std::vector<xAOD::BPhysHelper::eltrack_type> elTrackTypes; // = vtx.electronTrackTypes();
     bool electronsInVtx = ( vtx.nElectrons() > 0 );
-
     if ( electronsInVtx ){
       elTrackIndices = vtx.electronTrackIndices();
       elTrackIndicesMap = buildIndexMap(elTrackIndices);
@@ -1111,7 +1110,6 @@ namespace DerivationFramework {
 
     for (unsigned int i=0; i < vtx.vtx()->nTrackParticles(); ++i) {
       const xAOD::TrackParticle* track = vtx.vtx()->trackParticle(i);
-      if ( std::find(tracks.begin(),tracks.end(),track) == tracks.end() ) {
         const xAOD::TrackParticle* trackToAdd;
 
         // Getting InDet from GSF if needed for electrons
@@ -1140,6 +1138,8 @@ namespace DerivationFramework {
         } 
         // N.B. We assume only InDet tracks are used for muon legs 
         // of the vertex -> no special treatment needed for muons! 
+
+      if ( std::find(tracks.begin(),tracks.end(),trackToAdd) == tracks.end() ) {
 	      tracks.push_back(trackToAdd);
       } // if
     } // for
@@ -1532,8 +1532,12 @@ namespace DerivationFramework {
 		  << "; candPV: " << candPV << " candRefPV: " << candRefPV);
 
     std::string bname(buildBranchBaseName(its, ipv, itt));
+    ATH_MSG_DEBUG( "BPhysVertexTrackBase: Number of tracks in track container: " << inpTracks->size() );
+    ATH_MSG_DEBUG( "BPhysVertexTrackBase: Number of tracks to exclude: " << exclTracks.size() );
     
     // tracks to be considered
+    unsigned int selectionKills = 0;
+    unsigned int overlapKills = 0;
     TrackBag tracks;
     for (xAOD::TrackParticleContainer::const_iterator trkItr =
 	   inpTracks->begin(); trkItr != inpTracks->end(); ++trkItr) {
@@ -1544,8 +1548,18 @@ namespace DerivationFramework {
         trackTypesForTrack = detTrackTypes(track, candPV, candRefPV);
         m_mttc->addToCounter(trackTypesForTrack, itt, bname, "all");
       }
+      // track not in list of tracks to exclude
+      if ( std::find(exclTracks.begin(), exclTracks.end(), track)
+           != exclTracks.end() ) {
+          overlapKills +=1;
+          continue;
+      }
       // track selection check
-      if ( ! m_trackSelectionTools[its]->accept(*track, candRefPV) ) continue;
+      //if ( ! m_trackSelectionTools[its]->accept(*track, candRefPV) ) continue;
+      if ( ! m_trackSelectionTools[its]->accept(*track, candRefPV) ) {
+        selectionKills += 1;
+        continue;
+      }
       // debug track types (after track selection cuts)
       if ( m_debugTrackTypes > 0 ) {
         m_mttc->addToCounter(trackTypesForTrack, itt, bname, "ats");
@@ -1562,14 +1576,13 @@ namespace DerivationFramework {
         if ( (trackTypesForTrack &  m_useTrackTypes[itt]) == 0x0 ) {
           continue;
         }
-      }
+      } //else {
+        //std::cout << "No track type bits calculation necessary!" << std::endl;
+      //}
       // debug track types (after track type cuts)
       if ( m_debugTrackTypes > 0 ) {
         m_mttc->addToCounter(trackTypesForTrack, itt, bname, "att");
       }
-      // track not in list of tracks to exclude
-      if ( std::find(exclTracks.begin(), exclTracks.end(), track)
-           != exclTracks.end() ) continue;
       // debug track types (after all cuts)
       if ( m_debugTrackTypes > 0 ) {
         m_mttc->addToCounter(trackTypesForTrack, itt, bname, "fin");
@@ -1577,7 +1590,9 @@ namespace DerivationFramework {
       // tracks that survived so far
       tracks.push_back(track);
     } // for
-
+    ATH_MSG_DEBUG( "BPhysVertexTrackBase: Number of track surviving selection: " << tracks.size() );
+    ATH_MSG_DEBUG( "BPhysVertexTrackBase: Number of overlap removal kills: " << overlapKills );
+    ATH_MSG_DEBUG( "BPhysVertexTrackBase: Number of selection tool kills: " << selectionKills );
     return tracks;
   }
   //--------------------------------------------------------------------------
