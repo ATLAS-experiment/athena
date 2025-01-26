@@ -150,7 +150,7 @@ def IsoCloseByAlgsCfg(flags, suff = "", isPhysLite = False, containerNames = [ "
     #     These can be used directly reading a derivation.
     #   - Also add in extra information to run IsolationCloseByTool on the derivation
     # For closeByIso correction, only one way is needed. The other way can be a cross check.
-    # The second way will be eventually depricated and is not used for PhysLite to minimize the 
+    # The second way will be eventually deprecated and is not used for PhysLite to minimize the 
     # information on PhysLite.
     acc = ComponentAccumulator()
 
@@ -159,7 +159,7 @@ def IsoCloseByAlgsCfg(flags, suff = "", isPhysLite = False, containerNames = [ "
     # # Add additional information to derivation output to be able to run IsoCloseByCorrectionTool on it 
     # if not isPhysLite:
     #     from IsolationSelection.IsolationSelectionConfig import IsoCloseByCorrSkimmingAlgCfg, IsoCloseByCaloDecorCfg
-    #     ### Add the tracks that potentially polute the isolation cones of others to the collection. 
+    #     ### Add the tracks that potentially pollute the isolation cones of others to the collection. 
     #     ### Question: Is the list of recommended TTVA working points used for isolation available somewhere?
     #     acc.merge(IsoCloseByCorrSkimmingAlgCfg(flags, suff = suff, ttva_wp = "Nonprompt_All_MaxWeight",
     #                                                         OutputStream = stream_name))
