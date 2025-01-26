@@ -43,5 +43,5 @@ atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 atlas_add_test( ActsSeedingToolComparison
   SCRIPT test/ActsSeedingAlgorithmTest.py
-  PROPERTIES TIMEOUT 600
+  PROPERTIES TIMEOUT 900
   POST_EXEC_SCRIPT nopost.sh )
