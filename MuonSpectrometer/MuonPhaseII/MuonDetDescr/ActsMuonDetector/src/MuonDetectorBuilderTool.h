@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ACTSMUONDETECTOR_MUONDETECTORBUILDERTOOL_H
 #define ACTSMUONDETECTOR_MUONDETECTORBUILDERTOOL_H
@@ -12,7 +12,7 @@
 #include <Acts/Surfaces/PlanarBounds.hpp>
 #include <Acts/Surfaces/Surface.hpp>
 
-class GeoChildNodeWithTrf;
+struct GeoChildNodeWithTrf;
 class GeoMaterial;
 
 namespace ActsTrk{
