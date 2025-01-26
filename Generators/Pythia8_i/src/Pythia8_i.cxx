@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "Pythia8_i/Pythia8_i.h"
 #include "Pythia8_i/UserProcessFactory.h"
@@ -629,7 +629,7 @@ StatusCode Pythia8_i::fillWeights(HepMC::GenEvent *evt){
 
 #else
   evt->weights().clear();
-  for (auto w: m_weightNames ) {evt->weights()[w]=fWeights[w];}
+  for (const auto& w: m_weightNames ) {evt->weights()[w]=fWeights[w];}
   auto beams=evt->beam_particles();
   ATH_MSG_DEBUG( " Energy of the beams " << beams.first->momentum().e() );
 
