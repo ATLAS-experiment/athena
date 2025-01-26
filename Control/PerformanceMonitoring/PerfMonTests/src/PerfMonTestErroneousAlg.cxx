@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PerfMonTestErroneousAlg.cxx 
@@ -102,6 +102,9 @@ bool ErroneousAlg::invalidRead()
     invalidReadPointer[i] = double(i);
   }
   //intentional out-of-bounds access
+#if __GNUC__ >= 15
+# pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
   //cppcheck-suppress arrayIndexOutOfBounds
   ATH_MSG_INFO ( "Found, that last element contains " << invalidReadPointer[maximum] ) ;
   
