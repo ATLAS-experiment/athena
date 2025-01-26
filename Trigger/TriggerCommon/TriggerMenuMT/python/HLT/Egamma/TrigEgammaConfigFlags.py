@@ -38,6 +38,10 @@ def createTrigEgammaConfigFlags():
     flags.addFlag('Trigger.egamma.fastCaloETCalibration',False)
     flags.addFlag('Trigger.egamma.fastCaloETCalibrationVersion','egammaFastCaloCalib/online/v0')
     flags.addFlag('Trigger.egamma.CalibrationETThreshold', 3.)
+
+    # Precision Electron Isolation Validation 
+    flags.addFlag('Trigger.egamma.isoValidation', False)
+
     return flags
 
 
