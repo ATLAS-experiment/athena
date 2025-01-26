@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+	Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonDetectorNavTest.h"
@@ -143,7 +143,7 @@ namespace ActsTrk {
 		materialInteractor.recordInteractions = true;
 		
 		const Acts::Experimental::Detector* detector = m_detVolSvc->detector().get();
-		for(const auto& truthParticle : *truthParticles){
+		for(const auto truthParticle : *truthParticles){
 			//Require that we only propagate on muons, and of status 1
 			if(truthParticle->status() == 1 and truthParticle->pdgId() == 13){
 				const auto& particle = truthParticle->p4();
