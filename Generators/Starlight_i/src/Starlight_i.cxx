@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // -------------------------------------------------------------
@@ -101,7 +101,11 @@ StatusCode Starlight_i::callGenerator()
 
     // Generate event
     m_event = new upcEvent;
+#ifdef UPCXEVENT_H
+    (*m_event) = m_starlight->produceUpcEvent();
+#else
     (*m_event) = m_starlight->produceEvent();
+#endif
 
     // update event counter
     ++m_events;
@@ -263,7 +267,11 @@ Starlight_i::starlight2lhef()
 
     for(unsigned int i=0; i<m_maxevents; i++) {
       lheStream << "<event>\n";
+#ifdef UPCXEVENT_H
+      (*uevent) = m_starlight->produceUpcEvent();
+#else
       (*uevent) = m_starlight->produceEvent();
+#endif
       int ipart = 0;
       CLHEP::HepLorentzVector photon_system(0);
       double ptscale =0;
