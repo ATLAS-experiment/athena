@@ -88,7 +88,7 @@ namespace DerivationFramework {
     recordPropertyD( "KstChi2Cut"        , 100.0 );
 
     // Configuration for Isolation/Multiplicity Calculation
-    recordPropertyB( "isoMultOnlyInVertex", false );
+    recordPropertyB( "isoMultOnlyInVertex", false ); // CLI Flag 
 
     /*
      isoTrackWorkingPoints and isoTrackMinPts are interpreted in 
