@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrkFitterUtils/TrackFitInputPreparator.h"
 #include "TrkGlobalChi2Fitter/GlobalChi2Fitter.h"
@@ -5089,15 +5089,16 @@ namespace Trk {
       trajectory.numberOfSiliconHits() == trajectory.numberOfHits()
     ) {
       calculateTrackErrors(trajectory, a_inv, true);
-      finaltrajectory = runTrackCleanerSilicon(ctx,cache, trajectory, a, a_inv, b, runOutlier);
-    }
+      GXFTrajectory* traj = runTrackCleanerSilicon(ctx,cache, trajectory, a, a_inv, b, runOutlier);
 
-    if (cache.m_fittercode != FitterStatusCode::Success) {
-      ATH_MSG_DEBUG("Silicon cleaner failed, returning null...");
-      if (finaltrajectory != &trajectory) {
-        delete finaltrajectory;
+      if (cache.m_fittercode != FitterStatusCode::Success) {
+        ATH_MSG_DEBUG("Silicon cleaner failed, returning null...");
+        if (traj != &trajectory) {
+          delete traj;
+        }
+        return nullptr;
       }
-      return nullptr;
+      finaltrajectory = traj;
     }
 
     if (m_domeastrackpar && (finaltrajectory->prefit() == 0)) {
