@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JSSTaggerBase.h"
@@ -211,12 +211,7 @@ StatusCode JSSTaggerBase::initialize() {
   m_readTruthLabelKey = m_containerName + "." + m_truthLabelName;
   ATH_CHECK( m_readTruthLabelKey.initialize() );
 
-  m_readD2Key = m_containerName + "." + m_readD2Key.key();
-  m_decNtrk500Key = m_containerName + "." + m_decNtrk500Key.key();
   m_readNtrk500Key = m_containerName + "." + m_readNtrk500Key.key();
-
-  ATH_CHECK( m_readD2Key.initialize() );
-  ATH_CHECK( m_decNtrk500Key.initialize() );
   ATH_CHECK( m_readNtrk500Key.initialize() );
 
 #ifndef XAOD_STANDALONE

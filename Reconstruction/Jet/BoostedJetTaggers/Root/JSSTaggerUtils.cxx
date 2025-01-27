@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JSSTaggerUtils.h"
@@ -345,8 +345,6 @@ std::map<std::string, double> JSSTaggerUtils::GetJSSVars(const xAOD::Jet& jet) c
   SG::ReadDecorHandle<xAOD::JetContainer, float> readSplit12(m_readSplit12Key);
   SG::ReadDecorHandle<xAOD::JetContainer, float> readSplit23(m_readSplit23Key);
 
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readD2(m_readD2Key);
-
   SG::ReadDecorHandle<xAOD::JetContainer, float> readTau1_wta(m_readTau1WTAKey);
   SG::ReadDecorHandle<xAOD::JetContainer, float> readTau2_wta(m_readTau2WTAKey);
   SG::ReadDecorHandle<xAOD::JetContainer, float> readTau3_wta(m_readTau3WTAKey);
@@ -365,13 +363,14 @@ std::map<std::string, double> JSSTaggerUtils::GetJSSVars(const xAOD::Jet& jet) c
   static const SG::ConstAccessor<float> AplanarityAcc("Aplanarity");
   static const SG::ConstAccessor<float> ZCut12Acc("ZCut12");
   static const SG::ConstAccessor<float> KtDRAcc("KtDR");
+  static const SG::ConstAccessor<float> D2Acc("D2");
 
   // split
   JSSVars["Split12"] = readSplit12(jet);
   JSSVars["Split23"] = readSplit23(jet);
 
   // Energy Correlation Functions
-  JSSVars["D2"] = readD2(jet);
+  JSSVars["D2"] = D2Acc(jet);
 
   // Tau123 WTA
   JSSVars["Tau1_wta"] = readTau1_wta(jet);
