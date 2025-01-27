@@ -237,10 +237,12 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
   static const SG::Decorator<float> decTruthLeadEta("TruthVisLeadEta");
   static const SG::Decorator<float> decTruthLeadPhi("TruthVisLeadPhi");
   static const SG::Decorator<float> decTruthLeadM("TruthVisLeadM");
+  static const SG::Decorator<float> decTruthLeadPdgID("TruthLeadPdgID");
   static const SG::Decorator<float> decTruthSubleadPt("TruthVisSubleadPt");
   static const SG::Decorator<float> decTruthSubleadEta("TruthVisSubleadEta");
   static const SG::Decorator<float> decTruthSubleadPhi("TruthVisSubleadPhi");
   static const SG::Decorator<float> decTruthSubleadM("TruthVisSubleadM");
+  static const SG::Decorator<float> decTruthSubleadPdgID("TruthSubleadPdgID");
   static const SG::Decorator<float> decTruthDeltaR("TruthVisDeltaR");
   static const SG::Decorator<float> decTruthMass("TruthVisMass");
 
@@ -252,10 +254,12 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
     decTruthLeadEta(xDiTau) = -1234.;
     decTruthLeadPhi(xDiTau) = -1234.;
     decTruthLeadM(xDiTau) = -1234.;
+    decTruthLeadPdgID(xDiTau) = -1234.;
     decTruthSubleadPt(xDiTau) = -1234.;
     decTruthSubleadEta(xDiTau) = -1234.;
     decTruthSubleadPhi(xDiTau) = -1234.;
     decTruthSubleadM(xDiTau) = -1234.;
+    decTruthSubleadPdgID(xDiTau) = -1234.;
     decTruthDeltaR(xDiTau) = -1234.;
     decTruthMass(xDiTau) = -1234.;
     return StatusCode::SUCCESS;
@@ -288,10 +292,12 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
       decTruthLeadEta(xDiTau) = (tlvTruthTau1.Pt() > tlvTruthTau2.Pt()) ? tlvTruthTau1.Eta() : tlvTruthTau2.Eta();
       decTruthLeadPhi(xDiTau) = (tlvTruthTau1.Pt() > tlvTruthTau2.Pt()) ? tlvTruthTau1.Phi() : tlvTruthTau2.Phi();
       decTruthLeadM(xDiTau) = (tlvTruthTau1.Pt() > tlvTruthTau2.Pt()) ? tlvTruthTau1.M() : tlvTruthTau2.M();
+      decTruthLeadPdgID(xDiTau) = (*vTruthLinks.at(0))->pdgId();
       decTruthSubleadPt(xDiTau) = std::min(tlvTruthTau1.Pt(), tlvTruthTau2.Pt());
       decTruthSubleadEta(xDiTau) = (tlvTruthTau1.Pt() > tlvTruthTau2.Pt()) ? tlvTruthTau2.Eta() : tlvTruthTau1.Eta();
       decTruthSubleadPhi(xDiTau) = (tlvTruthTau1.Pt() > tlvTruthTau2.Pt()) ? tlvTruthTau2.Phi() : tlvTruthTau1.Phi();
       decTruthSubleadM(xDiTau) = (tlvTruthTau1.Pt() > tlvTruthTau2.Pt()) ? tlvTruthTau2.M() : tlvTruthTau1.M();
+      decTruthSubleadPdgID(xDiTau) = (*vTruthLinks.at(1))->pdgId();
       decTruthDeltaR(xDiTau) = tlvTruthTau1.DeltaR(tlvTruthTau2);
       decTruthMass(xDiTau) = (tlvTruthTau1 + tlvTruthTau2).M();
     }
@@ -301,10 +307,12 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
       decTruthLeadEta(xDiTau) = -1234.;
       decTruthLeadPhi(xDiTau) = -1234.;
       decTruthLeadM(xDiTau) = -1234.;
+      decTruthLeadPdgID(xDiTau) = -1234.;
       decTruthSubleadPt(xDiTau) = -1234.;
       decTruthSubleadEta(xDiTau) = -1234.; 
       decTruthSubleadPhi(xDiTau) = -1234.;
       decTruthSubleadM(xDiTau) = -1234.;
+      decTruthSubleadPdgID(xDiTau) = -1234.;
       decTruthDeltaR(xDiTau) = -1234.;
       decTruthMass(xDiTau) = -1234.; 
     }	  
