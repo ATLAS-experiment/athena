@@ -118,7 +118,7 @@ StatusCode IntegrationBase::loadProgram(const std::string& xclbin)
     return StatusCode::SUCCESS;
 }
 
-StatusCode IntegrationBase::precheck(std::vector<Gaudi::Property<std::string>> inputs) const
+StatusCode IntegrationBase::precheck([[maybe_unused]] const std::vector<Gaudi::Property<std::string>>& inputs) const
 {
     return StatusCode::SUCCESS;
 }
