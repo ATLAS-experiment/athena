@@ -69,8 +69,8 @@ namespace InDet {
       SG::ReadCondHandleKey<PixeldEdxData> m_dedxKey
       {this, "PixeldEdxData", "PixeldEdxData", "Output key of pixel dEdx"};
 
-  SG::ReadCondHandleKey<PixelClusterdEdxCondData> m_clusterSfKey
-      {this, "PixelClusterdEdxCondData", "PixelClusterdEdxCondData", "Output key of Pixel Cluster dEdx key"};
+      SG::ReadCondHandleKey<PixelClusterdEdxCondData> m_clusterSfKey
+      {this, "PixelClusterdEdxCondData", "PixelClusterdEdxCondData", "Output key of Pixel Cluster dEdx"};
   }; 
 } // end of namespace
 

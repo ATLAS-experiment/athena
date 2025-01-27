@@ -219,7 +219,7 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
             int overflowIBLToT =
               SG::ReadCondHandle<PixelChargeCalibCondData>(m_moduleDataKey, ctx)
                 ->getFEI4OverflowToT();
-            int scaleFactor = 
+            std::string scaleFactor = 
               SG::ReadCondHandle<PixelClusterdEdxCondData>(m_clusterSfKey, ctx)->getVar(); //XXXRebecca
             ATH_MSG_INFO("Did I read from PixelChargeCalibCondData?");
             ATH_MSG_INFO(scaleFactor);

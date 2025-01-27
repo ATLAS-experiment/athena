@@ -233,13 +233,9 @@ def PixelClusterdEdxCondAlgCfg(flags, name="PixelClusterdEdxCondAlg", **kwargs):
     """Return a ComponentAccumulator with configured PixelClusterdEdxCondAlg"""
     acc = ComponentAccumulator()
     acc.merge(PixelConfigCondAlgCfg(flags))
-    if flags.GeoModel.Run is LHCPeriod.Run1:
-        kwargs.setdefault("ReadKey", "")
-    else:
-        kwargs.setdefault("ReadKey", "/PIXEL/PixelModuleFeMask")
-        acc.merge(addFoldersSplitOnline(flags, "PIXEL", "/PIXEL/Onl/PixelModuleFeMask", "/PIXEL/PixelModuleFeMask", className="CondAttrListCollection"))
-    kwargs.setdefault("WriteKey", "PixelDeadMapCondData")
-    kwargs.setdefault("WriteKey2","PixelClusterdEdxCondData")
+    kwargs.setdefault("ReadKey", "/PIXEL/test")
+    acc.merge(addFolders(flags, "/PIXEL/test",  className="CondAttrListCollection"))
+    kwargs.setdefault("WriteKey","PixelClusterdEdxCondData")
     acc.addCondAlgo(CompFactory.PixelClusterdEdxCondAlg(name, **kwargs))
     return acc
 

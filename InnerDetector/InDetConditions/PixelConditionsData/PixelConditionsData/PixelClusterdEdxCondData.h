@@ -17,14 +17,14 @@ class PixelClusterdEdxCondData {
   public:
     PixelClusterdEdxCondData();
     virtual ~PixelClusterdEdxCondData();
-    int getVar() const;
-    void setVar(const int value);
+    std::string getVar() const;
+    void setVar(const std::string& value);
  
   private:
-    int m_var = -999; //Default for testing
+    std::string m_var = "Rebecca was here"; //Default for testing
 };
 
-CLASS_DEF( PixelClusterdEdxCondData, 1240840447  , 1)
-CONDCONT_DEF( PixelClusterdEdxCondData, 1240840448 ); /*These numbers are probably going to break something*/
+CLASS_DEF( PixelClusterdEdxCondData , 112527067 , 1 );
+CONDCONT_DEF( PixelClusterdEdxCondData, 267373537);
 
 #endif 

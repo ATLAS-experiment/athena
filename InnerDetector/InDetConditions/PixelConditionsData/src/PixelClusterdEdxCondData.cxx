@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelConditionsData/PixelClusterdEdxCondData.h"
@@ -9,11 +9,11 @@ PixelClusterdEdxCondData::PixelClusterdEdxCondData() : m_var() {
 
 PixelClusterdEdxCondData::~PixelClusterdEdxCondData() = default;
 
-int PixelClusterdEdxCondData::getVar() const {
+std::string PixelClusterdEdxCondData::getVar() const {
   return m_var;
   }
 
-void PixelClusterdEdxCondData::setVar(const int value){
+void PixelClusterdEdxCondData::setVar(const std::string& value){
   m_var = value;
   return;
   }
