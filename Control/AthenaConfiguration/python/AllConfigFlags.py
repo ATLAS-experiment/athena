@@ -252,6 +252,7 @@ def initConfigFlags():
     acf.addFlag('Output.doJiveXML', False, help='write JiveXML file')
 
     acf.addFlag('Output.TreeAutoFlush', {}, help="dict with auto-flush settings for stream e.g. {'STREAM': 123}")
+    acf.addFlag('Output.TemporaryStreams', [], help='list of output streams that are marked temporary')
     acf.addFlag('Output.StorageTechnology.EventData', 'ROOTTREEINDEX', help='set the underlying POOL storage technology for event data')
     acf.addFlag('Output.StorageTechnology.MetaData', 'ROOTTREE', help='set the underlying POOL storage technology for metadata')
 
