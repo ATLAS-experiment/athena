@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FullModelHadronicProcess.hh"
@@ -112,10 +112,6 @@ G4VParticleChange* FullModelHadronicProcess::PostStepDoIt(const G4Track& aTrack,
 
   cloudParticle->SetDefinition(CustomIncident->GetCloud());
 
-  if(cloudParticle->GetDefinition() == 0)
-    {
-      G4cout << "FullModelHadronicProcess::PostStepDoIt  Definition of particle cloud not available!!" << G4endl;
-    }
   double scale=cloudParticle->GetDefinition()->GetPDGMass()/IncidentRhadron->GetDefinition()->GetPDGMass();
 
   G4LorentzVector cloudMomentum;
