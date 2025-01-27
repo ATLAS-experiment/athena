@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -751,8 +751,8 @@ bool InDetV0FinderTool::pointAtVertex(const xAOD::Vertex* v0, const xAOD::Vertex
     if (prob>0) nLogProb = -1*log10f(prob); //bdt model uses the log, not the raw value
     std::vector<float> bdt_vars = {
                                     nLogProb,
-                                    abs(v0a0xy),
-                                    abs(v0a0z),
+                                    std::abs(v0a0xy),
+                                    std::abs(v0a0z),
                                     v0lxy,
                                     v0lxy/v0lxyError,
                                     cos};
