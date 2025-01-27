@@ -15,10 +15,10 @@ def SetupArgParser():
                         help="Input file to run on ", nargs="+")
     parser.add_argument("--geoTag", default="ATLAS-R3S-2021-03-02-00", help="Geometry tag to use", choices=["ATLAS-R2-2016-01-02-01",
                                                                                      "ATLAS-R3S-2021-03-02-00"])
-    parser.add_argument("--condTag", default="OFLCOND-MC23-SDR-RUN3-02", help="Conditions tag to use",
+    parser.add_argument("--condTag", default="OFLCOND-MC23-SDR-RUN3-07", help="Conditions tag to use",
                                                                          choices=["OFLCOND-MC16-SDR-RUN2-11",
-                                                                                  "OFLCOND-MC23-SDR-RUN3-02",
-                                                                                  "CONDBR2-BLKPA-2023-02",
+                                                                                  "OFLCOND-MC23-SDR-RUN3-07",
+                                                                                  "CONDBR2-BLKPA-2023-03",
                                                                                   "CONDBR2-BLKPA-RUN2-11"])
     parser.add_argument("--chambers", default=["all"
     ], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
