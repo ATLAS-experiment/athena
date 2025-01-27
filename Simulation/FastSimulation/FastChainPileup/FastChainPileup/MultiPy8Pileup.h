@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FASTCHAINPILEUP_MULTIPY8_PILEUP_H
@@ -19,8 +19,9 @@
 #include "Pythia8_i/Pythia8_i.h"
 
 #include "AtlasHepMC/GenEvent_fwd.h"
+#include "CxxUtils/checker_macros.h"
 
-class MultiPy8Pileup : public Pythia8_i {
+class ATLAS_NOT_THREAD_SAFE MultiPy8Pileup : public Pythia8_i {
 
   public:
     MultiPy8Pileup( const std::string &name, ISvcLocator *pSvcLocator );
