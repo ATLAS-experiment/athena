@@ -59,7 +59,7 @@ public:
     /**
      * @brief Check if the the desired Gaudi properties are set
     */
-    StatusCode precheck(std::vector<Gaudi::Property<std::string>> inputs) const;
+    StatusCode precheck(const std::vector<Gaudi::Property<std::string>>& inputs) const;
 
 protected:
     // Madatory OpenCL objects that needed by derived classes

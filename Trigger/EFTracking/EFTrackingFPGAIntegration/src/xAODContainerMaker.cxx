@@ -160,7 +160,7 @@ StatusCode xAODContainerMaker::makePixelClusterContainer(
 
 StatusCode xAODContainerMaker::makePixelSpacePointContainer(
     const EFTrackingDataFormats::SpacePointAuxInput &psAux,
-    const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>
+    const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>&
         pixelsp_meas,
     const EFTrackingDataFormats::Metadata *metadata,
     const EventContext &ctx) const {
@@ -198,7 +198,7 @@ StatusCode xAODContainerMaker::makePixelSpacePointContainer(
 
 StatusCode xAODContainerMaker::makeStripSpacePointContainer(
     const EFTrackingDataFormats::SpacePointAuxInput &sspAux,
-    const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>
+    const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>&
         stripsp_meas,
     const EFTrackingDataFormats::Metadata *metadata,
     const EventContext &ctx) const {
