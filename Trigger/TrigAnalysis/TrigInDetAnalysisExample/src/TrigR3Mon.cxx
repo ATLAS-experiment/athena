@@ -62,7 +62,7 @@ TrigR3Mon::TrigR3Mon( const std::string & name, ISvcLocator* pSvcLocator)
   declareProperty( "tauEtCutOffline",   m_tauEtCutOffline = 0 );
   declareProperty( "doTauThreeProng",   m_doTauThreeProng = false);
 
-  declareProperty( "pTCutOffline",      m_pTCutOffline      = 2000 );
+  declareProperty( "pTCutOffline",      m_pTCutOffline      = 1000 );
   declareProperty( "etaCutOffline",     m_etaCutOffline     = 2.5 );
   declareProperty( "d0CutOffline",      m_d0CutOffline      = 1000 );
   declareProperty( "mind0CutOffline",   m_mind0CutOffline   = 0 );

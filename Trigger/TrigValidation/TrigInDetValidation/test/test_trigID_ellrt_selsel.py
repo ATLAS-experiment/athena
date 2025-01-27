@@ -30,7 +30,7 @@
 # art-output: *.dat 
 
 
-Slices  = ['L2electronLRT']
+Slices  = ['electronLRT']
 Events  = 8000 
 Threads = 8 
 Slots   = 8
