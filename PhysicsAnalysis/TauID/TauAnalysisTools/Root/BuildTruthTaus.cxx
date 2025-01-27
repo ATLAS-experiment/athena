@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s)
@@ -38,8 +38,12 @@ BuildTruthTaus::BuildTruthTaus( const std::string& name )
 //______________________________________________________________________________
 StatusCode BuildTruthTaus::initialize()
 {
-  if (!m_truthMatchingMode) ATH_MSG_INFO( "Initializing BuildTruthTaus, will generate " <<  m_truthTauOutputContainer.key() << " from " << m_truthParticleContainer.key() << " container" );
-  else ATH_MSG_INFO( "Initializing BuildTruthTaus in truth matching mode, using input container " << m_truthTauInputContainer.key() );
+  if (!m_truthMatchingMode) {
+    ATH_MSG_INFO( "Initializing BuildTruthTaus, will generate " <<  m_truthTauOutputContainer.key() << " from " << m_truthParticleContainer.key() << " container" );
+  }
+  else {
+    ATH_MSG_INFO( "Initializing BuildTruthTaus in truth matching mode, using input container " << m_truthTauInputContainer.key() );
+  }
 
   // input containers
   ATH_CHECK( m_truthTauInputContainer.initialize(m_truthMatchingMode) );
@@ -47,6 +51,20 @@ StatusCode BuildTruthTaus::initialize()
   ATH_CHECK( m_truthElectronContainer.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_truthMuonContainer.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_truthJetContainer.initialize(SG::AllowEmpty) );
+
+  // in truth matching mode, truth electron/muon/jet containers are optional but expected
+  if (m_truthMatchingMode) {
+    if (m_truthElectronContainer.empty()) {
+      ATH_MSG_WARNING("Truth electron container is not available, won't perform matching to truth electrons");
+    }
+    if (m_truthMuonContainer.empty()) {
+      ATH_MSG_WARNING("Truth muon container is not available, won't perform matching to truth muons");
+    }
+    if (m_truthJetContainer.empty()) {
+      ATH_MSG_WARNING("Truth jet container is not available, won't perform matching to truth jets");
+    }
+  }
+
   // output container
   ATH_CHECK( m_truthTauOutputContainer.initialize(!m_truthMatchingMode) );
 
@@ -82,44 +100,35 @@ StatusCode BuildTruthTaus::retrieveTruthTaus(TruthTausEvent& truthTausEvent) con
 {
   const EventContext& ctx = Gaudi::Hive::currentContext();
 
-  if (!m_truthElectronContainer.empty()) {
-    SG::ReadHandle<xAOD::TruthParticleContainer> truthElectronsHandle(m_truthElectronContainer, ctx);
-    if (!truthElectronsHandle.isValid()) {
-      ATH_MSG_ERROR ("Could not retrieve " << truthElectronsHandle.key());
-      return StatusCode::FAILURE;
-    }
-    truthTausEvent.m_xTruthElectronContainerConst = truthElectronsHandle.cptr();
-  }
-  else {
-    ATH_MSG_WARNING("Truth electron container is not available, won't perform matching to truth electrons");
-  }
-
-  if (!m_truthMuonContainer.empty()) {
-    SG::ReadHandle<xAOD::TruthParticleContainer> truthMuonsHandle(m_truthMuonContainer, ctx);
-    if (!truthMuonsHandle.isValid()) {
-      ATH_MSG_ERROR ("Could not retrieve " << truthMuonsHandle.key());
-      return StatusCode::FAILURE;
-    }
-    truthTausEvent.m_xTruthMuonContainerConst = truthMuonsHandle.cptr();
-  }
-  else {
-    ATH_MSG_WARNING("Truth muon container is not available, won't perform matching to truth muons");
-  }
-
-  if (!m_truthJetContainer.empty()) {
-    SG::ReadHandle<xAOD::JetContainer> truthJetsHandle(m_truthJetContainer, ctx);
-    if (!truthJetsHandle.isValid()) {
-      ATH_MSG_ERROR ("Could not retrieve " << truthJetsHandle.key());
-      return StatusCode::FAILURE;
-    }
-    truthTausEvent.m_xTruthJetContainerConst = truthJetsHandle.cptr();
-  }
-  else {
-    ATH_MSG_WARNING("Truth jet container is not available, won't perform matching to truth jets");
-  }
-
-  // if TruthTaus container exists, retrieve it, else build it from TruthParticles
+  // truth matching mode
   if (m_truthMatchingMode) {
+    if (!m_truthElectronContainer.empty()) {
+      SG::ReadHandle<xAOD::TruthParticleContainer> truthElectronsHandle(m_truthElectronContainer, ctx);
+      if (!truthElectronsHandle.isValid()) {
+	ATH_MSG_ERROR ("Could not retrieve " << truthElectronsHandle.key());
+	return StatusCode::FAILURE;
+      }
+      truthTausEvent.m_xTruthElectronContainerConst = truthElectronsHandle.cptr();
+    }
+
+    if (!m_truthMuonContainer.empty()) {
+      SG::ReadHandle<xAOD::TruthParticleContainer> truthMuonsHandle(m_truthMuonContainer, ctx);
+      if (!truthMuonsHandle.isValid()) {
+	ATH_MSG_ERROR ("Could not retrieve " << truthMuonsHandle.key());
+	return StatusCode::FAILURE;
+      }
+      truthTausEvent.m_xTruthMuonContainerConst = truthMuonsHandle.cptr();
+    }
+
+    if (!m_truthJetContainer.empty()) {
+      SG::ReadHandle<xAOD::JetContainer> truthJetsHandle(m_truthJetContainer, ctx);
+      if (!truthJetsHandle.isValid()) {
+	ATH_MSG_ERROR ("Could not retrieve " << truthJetsHandle.key());
+	return StatusCode::FAILURE;
+      }
+      truthTausEvent.m_xTruthJetContainerConst = truthJetsHandle.cptr();
+    }
+
     SG::ReadHandle<xAOD::TruthParticleContainer> truthTausHandle(m_truthTauInputContainer, ctx);
     if (!truthTausHandle.isValid()) {
       ATH_MSG_ERROR ("Could not retrieve " << truthTausHandle.key());
@@ -127,6 +136,7 @@ StatusCode BuildTruthTaus::retrieveTruthTaus(TruthTausEvent& truthTausEvent) con
     }
     truthTausEvent.m_xTruthTauContainerConst = truthTausHandle.cptr();
   }
+  // truth tau building mode
   else {
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticlesHandle(m_truthParticleContainer, ctx);
     if (!truthParticlesHandle.isValid()) {
