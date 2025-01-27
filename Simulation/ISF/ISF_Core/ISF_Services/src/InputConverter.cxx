@@ -777,8 +777,8 @@ G4PrimaryParticle* ISF::InputConverter::getDaughterG4PrimaryParticle(HepMC::GenP
     // Set the user information for this primary to point to the HepMcParticleLink...
     std::unique_ptr<PrimaryParticleInformation> primaryPartInfo = std::make_unique<PrimaryParticleInformation>(&genpart);
     primaryPartInfo->SetRegenerationNr(0);
-    g4particle->SetUserInformation(primaryPartInfo.release());
     ATH_MSG_VERBOSE("Making primary down the line with barcode " << primaryPartInfo->GetParticleUniqueID());
+    g4particle->SetUserInformation(primaryPartInfo.release());
   }
 
   return g4particle.release();
