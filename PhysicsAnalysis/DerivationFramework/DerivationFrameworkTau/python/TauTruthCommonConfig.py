@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #********************************************************************
 # TauTruthCommonConfig.py
@@ -69,8 +69,6 @@ def TauTruthToolsCfg(flags):
         DFCommonTauTruthMatchingTool = acc.getPrimaryAndMerge(TauTruthMatchingToolCfg(
             flags,
             name                            = "DFCommonTauTruthMatchingTool",
-            WriteInvisibleFourMomentum      = True,
-            WriteVisibleNeutralFourMomentum = True,
             TruthJetContainerName           = "AntiKt4TruthDressedWZJets"))
         DFCommonTauTruthWrapperTool = acc.getPrimaryAndMerge(TauTruthMatchingWrapperCfg(
             flags,
