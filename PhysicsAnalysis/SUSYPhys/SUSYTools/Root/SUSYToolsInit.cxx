@@ -1329,7 +1329,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_MSG_WARNING( "No Photon efficiency available for " << m_photonId << ", using Tight instead..." );
       }
 
-      ATH_CHECK( m_photonEfficiencySFTool.setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2024_FinalRun2_Recommendation_v1/map0.txt") );
+      ATH_CHECK( m_photonEfficiencySFTool.setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2024_FinalRun2_Recommendation_v1/map1.txt") );
       ATH_CHECK( m_photonEfficiencySFTool.setProperty("ForceDataType", 1) ); // Set data type: 1 for FULLSIM, 3 for AF2
       ATH_CHECK( m_photonEfficiencySFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_photonEfficiencySFTool.retrieve() );
@@ -1455,7 +1455,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     if (!m_egammaCalibTool.isUserConfigured()) {
       m_egammaCalibTool.setTypeAndName("CP::EgammaCalibrationAndSmearingTool/EgammaCalibrationAndSmearingTool");
       ATH_MSG_DEBUG( "Initialising EgcalibTool " );
-      ATH_CHECK( m_egammaCalibTool.setProperty("ESModel", m_isRun3 ? "es2022_R22_PRE" : "es2023_R22_Run2_v0") );
+      ATH_CHECK( m_egammaCalibTool.setProperty("ESModel", m_isRun3 ? "es2022_R22_PRE" : "es2023_R22_Run2_v1") );
       ATH_CHECK( m_egammaCalibTool.setProperty("decorrelationModel", "1NP_v1") );
       // allows to bypass (intended) abort from of egamma calibration tool when configured for fastSim
       if (m_eleForceFullSimCalib) {
