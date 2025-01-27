@@ -30,7 +30,7 @@
 # art-output: *.dat 
 
 
-Slices  = ['L2muonLRT']
+Slices  = ['muonLRT']
 Events  = 8000 
 Threads = 8 
 Slots   = 8
