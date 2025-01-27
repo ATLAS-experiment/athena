@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BOOSTEDJETSTAGGERS_JSSTAGGERBASE_H
@@ -76,8 +76,6 @@ class JSSTaggerBase :   public asg::AsgTool ,
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decPassMassKey{this, "PassMassName", "PassMass", "SG key for PassMass"};
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decPassScoreKey{this, "PassScoreName", "PassScore", "SG key for PassScore"};
 
-    SG::ReadDecorHandleKey<xAOD::JetContainer> m_readD2Key{this, "D2Name", "D2", "SG key for D2"};
-    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decNtrk500Key{this, "Ntrk500NameOut", "ParentJetNTrkPt500", "SG key for Ntrk500 from ungroomed jet"};
     SG::ReadDecorHandleKey<xAOD::JetContainer>  m_readNtrk500Key{this, "Ntrk500Name", "ParentJetNTrkPt500", "SG key for Ntrk500 from ungroomed jet"};
 
     /// Maximum number of warnings
