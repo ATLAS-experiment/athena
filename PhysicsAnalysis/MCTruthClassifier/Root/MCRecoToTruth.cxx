@@ -317,8 +317,13 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, Info* info /*= nul
     }
   }
 
-  if (MC::isDecayed(theGenParticle) || theGenParticle->status() == 3) {
+  if (theGenParticle->status() == 3) {
     ATH_MSG_WARNING("track matched to the truth with status " << theGenParticle->status());
+  }
+  else if (MC::isDecayed(theGenParticle)) {
+    // Matching to status == 2 particles is to be expected if
+    // quasi-stable particle simulation was used.
+    ATH_MSG_DEBUG("track matched to the truth with status " << theGenParticle->status());
   }
 
   if (MC::isDecayed(theGenParticle) && (abs(theGenParticle->pdgId()) == 11 || abs(theGenParticle->pdgId()) == 13)) {
