@@ -39,7 +39,7 @@
 #include "CaloEvent/CaloRecoStatus.h"
 
 #include "xAODCaloEvent/CaloCluster.h"
-
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "TProfile.h"
 #include "TProfile2D.h"
@@ -665,12 +665,16 @@ StatusCode GetLCSinglePionsPerf::execute()
     ATH_MSG_ERROR( "No particles in McEventCollection" );
     return StatusCode::FAILURE;
   }
-#ifdef HEPMC3
-  const HepMC::ConstGenParticlePtr& gen=truthEvent->at(0)->particles().front();
-#else  
-  HepMC::GenEvent::particle_const_iterator pit  = truthEvent->at(0)->particles_begin();
-  const HepMC::GenParticle *gen = (*pit);
-#endif
+  HepMC::ConstGenParticlePtr gen{nullptr};
+  for (auto p: *truthEvent->at(0)) {
+    if (std::abs(p->pdg_id()) !=  MC::PIPLUS || !MC::isGenStable(p)) continue;
+    gen = p;
+    break;
+  }  
+  if(!gen){
+     ATH_MSG_ERROR( "No final stable pion in McEventCollection" );
+     return StatusCode::FAILURE;
+  }
   m_mc_eta = gen->momentum().pseudoRapidity();
   m_mc_phi = gen->momentum().phi();
   m_mc_ener = gen->momentum().e();
