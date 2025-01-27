@@ -30,7 +30,7 @@
 # art-output: *.dat 
 
 
-Slices  = ['electron','electron-tnp']
+Slices  = ['electron','electronTnP']
 Events  = 16000
 Threads = 8
 Slots   = 8

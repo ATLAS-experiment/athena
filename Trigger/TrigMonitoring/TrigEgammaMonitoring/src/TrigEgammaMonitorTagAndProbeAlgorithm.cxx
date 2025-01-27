@@ -118,7 +118,7 @@ StatusCode TrigEgammaMonitorTagAndProbeAlgorithm::fillHistograms( const EventCon
 
         // Include fill here
         fillDistributions( pairObjs, info );
-        fillEfficiencies( pairObjs, info );
+        fillEfficiencies( pairObjs, info, false);
         fillResolutions( pairObjs, info );
 
     } // End loop over trigger list

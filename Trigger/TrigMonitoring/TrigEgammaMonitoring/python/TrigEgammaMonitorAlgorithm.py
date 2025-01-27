@@ -14,7 +14,7 @@ from AthenaCommon.Logging import logging
 log_trigeg = logging.getLogger( 'TrigEgammaMonitorAlgorithm' )
 
 
-def TrigEgammaMonConfig(inputFlags, emulator=None):
+def TrigEgammaMonConfig(inputFlags, emulator=None, onlyHLT = False):
     '''Function to configures some algorithms in the monitoring system.'''
 
     # The following class will make a sequence, configure algorithms, and link
@@ -30,7 +30,7 @@ def TrigEgammaMonConfig(inputFlags, emulator=None):
 
     # configure alg and ana tools
     from TrigEgammaMonitoring.TrigEgammaMonitoringConfig import TrigEgammaMonAlgBuilder
-    monAlgCfg = TrigEgammaMonAlgBuilder( helper, '2018', moniAccess, detailedHistograms=False, emulator=emulator ) # Using 2018 e/g tunings
+    monAlgCfg = TrigEgammaMonAlgBuilder( helper, '2018', moniAccess, detailedHistograms=False, emulator=emulator, onlyHLT = onlyHLT ) # Using 2018 e/g tunings
     # build monitor and book histograms
     monAlgCfg.configure()
 

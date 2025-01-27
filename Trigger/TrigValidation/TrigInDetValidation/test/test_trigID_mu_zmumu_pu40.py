@@ -30,7 +30,7 @@
 # art-output: *.dat 
 
 
-Slices  = ['muon','muon-tnp']
+Slices  = ['muon','muonTnP']
 Events  = 10000
 Threads = 8
 Slots   = 8
