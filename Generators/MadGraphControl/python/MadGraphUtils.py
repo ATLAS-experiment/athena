@@ -435,6 +435,8 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
             raise RuntimeError('Could not find f2py, needed for reweighting')
         check_reweight_card(process_dir)
 
+    global MADGRAPH_COMMAND_STACK
+
     if grid_pack:
         #Running in gridpack mode
         mglog.info('Started generating gridpack at '+str(time.asctime()))
@@ -445,6 +447,12 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
         if isNLO:
             my_settings['req_acc']=str(required_accuracy)
         else:
+            # At LO, no events are generated. That means we need to move the MS card aside and back.
+            LO_has_madspin = False
+            if os.access(f'{process_dir}/Cards/madspin_card.dat',os.R_OK):
+                MADGRAPH_COMMAND_STACK += [f'mv {process_dir}/Cards/madspin_card.dat {process_dir}/Cards/madspin_card.tmp.dat']
+                os.rename(f'{process_dir}/Cards/madspin_card.dat',f'{process_dir}/Cards/madspin_card.tmp.dat')
+                LO_has_madspin = True
             my_settings = {'gridpack':'true'}
         modify_run_card(process_dir=process_dir,settings=my_settings,skipBaseFragment=True)
 
@@ -485,9 +493,7 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
     currdir=os.getcwd()
     os.chdir(process_dir)
     # Record the change
-    global MADGRAPH_COMMAND_STACK
     MADGRAPH_COMMAND_STACK += [ 'cd ${MGaMC_PROCESS_DIR}' ]
-
 
     # Check the run card
     run_card_consistency_check(isNLO=isNLO)
@@ -541,6 +547,11 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
         mglog.info('Tidying up gridpack '+gridpack_name)
 
         if not isNLO:
+            # At LO, no events are generated. That means we need to move the MS card aside and back.
+            if LO_has_madspin:
+                MADGRAPH_COMMAND_STACK += [f'mv {process_dir}/Cards/madspin_card.tmp.dat {process_dir}/Cards/madspin_card.dat']
+                os.rename(f'{process_dir}/Cards/madspin_card.tmp.dat',f'{process_dir}/Cards/madspin_card.dat')
+
             ### LO RUN - names with and without madspin ###
             MADGRAPH_COMMAND_STACK += ['cp '+glob.glob(process_dir+'/'+MADGRAPH_RUN_NAME+'_*gridpack.tar.gz')[0]+' '+gridpack_name]
             shutil.copy(glob.glob(process_dir+'/'+MADGRAPH_RUN_NAME+'_*gridpack.tar.gz')[0],gridpack_name)
