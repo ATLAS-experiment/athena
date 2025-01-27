@@ -49,6 +49,8 @@ class TrigEgammaMonitorPhotonAlgorithm: public TrigEgammaMonitorAnalysisAlgorith
     Gaudi::Property<std::string> m_anatype{this, "Analysis", "Photon"};
     /*! force pid selection into photon navigation */
     Gaudi::Property<bool> m_forcePidSelection{ this, "ForcePidSelection", true};
+    /*! Compute only final HLT decision*/
+    Gaudi::Property<bool> m_onlyHLT{ this, "OnlyHLT", false};
  
     // Containers 
     /*! Event Wise offline PhotonContainer Access and end iterator */

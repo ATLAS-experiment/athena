@@ -38,7 +38,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillLabel( const ToolHandle<GenericMoni
 // *********************************************************************************
 
 void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const std::vector< std::pair< const xAOD::Egamma*, const TrigCompositeUtils::Decision * >>& pairObjs,
-                                                           const TrigInfo& info ) const
+                                                           const TrigInfo& info, const bool onlyHLT ) const
 {
 
   std::vector< std::pair< const xAOD::Egamma*, const TrigCompositeUtils::Decision * >> pair_vec;
@@ -97,7 +97,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const std::vector< st
     // Good pair to be measure
     { // Efficiency
         pair_vec.push_back(pairObj);
-        auto acceptData = setAccept( pairObj.second, info );
+        auto acceptData = setAccept( pairObj.second, info, onlyHLT );
         accept_vec.push_back(acceptData);
         if( pairObj.first->auxdecor<bool>("Isolated") ){
             pair_iso_vec.push_back(pairObj);

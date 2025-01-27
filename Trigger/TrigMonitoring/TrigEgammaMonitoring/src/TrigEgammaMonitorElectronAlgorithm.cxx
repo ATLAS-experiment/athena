@@ -83,7 +83,7 @@ StatusCode TrigEgammaMonitorElectronAlgorithm::fillHistograms( const EventContex
 
 
         fillDistributions( pairObjsRaw, info );
-        fillEfficiencies( pairObjsRaw, info );
+        fillEfficiencies( pairObjsRaw, info, false);
         fillResolutions( pairObjsRaw, info );
 
         ATH_MSG_DEBUG("End Chain Analysis ============================= " << trigger);

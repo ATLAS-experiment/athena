@@ -134,7 +134,7 @@ class TrigEgammaMonitorBaseAlgorithm : public AthMonitorAlgorithm {
     /*! Get the e/g match tool */
     const ToolHandle<TrigEgammaMatchingToolMT>& match() const {return m_matchTool;}
     /*! Set the accept object for all trigger levels */
-    asg::AcceptData setAccept(const TrigCompositeUtils::Decision*, const TrigInfo&) const;
+    asg::AcceptData setAccept(const TrigCompositeUtils::Decision*, const TrigInfo&, const bool) const;
     /*! Get the trigger info parsed from the chain name (only single lepton triggers) */
     TrigInfo getTrigInfo(const std::string&) const;
     /*! Get delta R */
