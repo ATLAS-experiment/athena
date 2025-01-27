@@ -56,6 +56,7 @@ class TrigEgammaMonAlgBuilder:
 
 
   def __init__(self, helper, runflag, moniAccess, emulator=None, 
+                                      onlyHLT = False,
                                       derivation=False,
                                       detailedHistograms = False,
                                       basePath = 'HLT/EgammaMon'):
@@ -69,6 +70,7 @@ class TrigEgammaMonAlgBuilder:
     self.basePath = basePath
     self.detailedHistograms = detailedHistograms 
     self.moniAccess = moniAccess
+    self.onlyHLT = onlyHLT
     self.configureMode()
     
 
@@ -439,7 +441,7 @@ class TrigEgammaMonAlgBuilder:
       self.phMonAlg.ForcePidSelection=True
       self.phMonAlg.DoUnconverted=False
       self.phMonAlg.DoEmulation = False
-
+      self.phMonAlg.OnlyHLT = self.onlyHLT
 
 
       if self.emulator:
