@@ -13,7 +13,6 @@
 #include <list>
 #include <utility> // for std::pair
 
-#include <boost/mpl/if.hpp>
 #include <type_traits>
 #include "GaudiKernel/DataObject.h"
 
@@ -239,17 +238,15 @@ private:
   derives_from_dataobject;
   
 public:
-#define if_c  ::boost::mpl::if_c
-  typedef typename 
-  if_c<derives_from_dataobject::value,
-       ::Athena::IdcThinningHdlr<Container>,
-       typename 
-       if_c<derives_from_std_vector::value,
-	    ::Athena::StdThinningHdlr<Container>,
-	    ::Athena::DvThinningHdlr<Container>
-	    >::type
-  >::type type;
-#undef if_c
+using type = std::conditional_t<
+  derives_from_dataobject::value,
+  ::Athena::IdcThinningHdlr<Container>,
+   std::conditional_t<
+     derives_from_std_vector::value,
+     ::Athena::StdThinningHdlr<Container>,
+     ::Athena::DvThinningHdlr<Container>
+   >
+>;
 };
 
 } //> namespace Athena
