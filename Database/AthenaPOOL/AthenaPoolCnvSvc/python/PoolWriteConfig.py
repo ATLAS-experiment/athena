@@ -95,8 +95,24 @@ def PoolWriteCfg(flags):
         elif "D2AOD" in stream:
             compAlg, compLvl, autoFlush, splitLvl, dynSplitLvl = 5, 5, 500, 1, 1 # Change the defaults for D2AODs
 
-        # For temporary files we always use ZLIB for compression algorithm
-        compAlg = 1 if fileName.endswith('_000') or fileName.startswith('tmp.') else compAlg
+        # For temporary streams/files we use either ZLIB or ZSTD for the compression algorithm to save CPU cycles
+        # Temporary in this context might mean one of three things:
+        #   a) Outputs of intermediate steps of chained workflows (file name begins with tmp.),
+        #   b) Outputs of workers in AthenaMP jobs that are to be merged (file name ends with _000), and
+        #   c) Any output stream that is marked by the user as being temporary (via the CA flag Output.TemporaryStreams)
+        # The ultimate goal is to reconcile all three cases and propagate the information between the job transform
+        # and the job configuration (CA) so that we don't need to rely on the file names here...
+        isTemporaryStream = fileName.endswith('_000') or fileName.startswith('tmp.') or stream in flags.Output.TemporaryStreams
+        tempFileCompressionSetting = (5,1) # ZSTD at level 1
+        if isTemporaryStream:
+            # Outputs created in certain workflows are read with older ROOT versions.
+            # E.g., temporary RDO files that are used in Run-2 simulation.
+            # For those, we have to use ZLIB
+            from AthenaConfiguration.Enums import LHCPeriod
+            if "RDO" in stream and hasattr(flags, "GeoModel") and flags.GeoModel.Run < LHCPeriod.Run3:
+                tempFileCompressionSetting = (1,1) # ZLIB at level 1
+            logger.info(f"Stream {stream} is marked as temporary, overwriting the compression settings to {tempFileCompressionSetting}")
+        compAlg, compLvl = tempFileCompressionSetting if isTemporaryStream else (compAlg, compLvl)
 
         # See if the user asked for the AutoFlush to be overwritten
         autoFlush = _overrideTreeAutoFlush(logger, flags, stream, autoFlush)
