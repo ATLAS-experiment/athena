@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -14,24 +14,16 @@
 #define BOOST_TEST_MODULE TEST_ITkStripCabling
 
 #include <boost/test/unit_test.hpp>
-//
-#include "AthenaKernel/ExtendedEventContext.h"
+
 #include "GaudiKernel/EventContext.h"
-#include "GaudiKernel/ServiceLocatorHelper.h"
-//
-#include "CxxUtils/checker_macros.h"
-
-#include "TestTools/initGaudi.h"
-#include "TInterpreter.h"
-#include "CxxUtils/ubsan_suppress.h"
-#include "CxxUtils/checker_macros.h"
-
+#include "GaudiKernel/EventIDBase.h"
 #include "IdDictParser/IdDictParser.h"  
 #include "InDetIdentifier/SCT_ID.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "TestTools/initGaudi.h"
+
 #include "src/ITkStripCablingAlg.h"
 #include "src/OnlineIdGenerator.h"
-#include "StoreGate/ReadHandleKey.h"
-
 
 #include <string>
 #include <sstream>      // std::ostringstream
@@ -40,31 +32,18 @@
 
 namespace utf = boost::unit_test;
 
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
-struct GaudiKernelFixture{
-  static ISvcLocator* svcLoc;
-  const std::string jobOpts{};
-  GaudiKernelFixture(const std::string & jobOptionFile = "ITkStripCablingAlg_test.txt"):jobOpts(jobOptionFile){
-    CxxUtils::ubsan_suppress ([]() { TInterpreter::Instance(); } );
-    if (svcLoc==nullptr){
-      std::string fullJobOptsName="ITkStripCabling/" + jobOpts;
-      Athena_test::initGaudi(fullJobOptsName, svcLoc);
-    }
-  }
+struct TestFixture : Athena_test::InitGaudi {
+  TestFixture() :
+    Athena_test::InitGaudi("ITkStripCabling/ITkStripCablingAlg_test.txt") {}
 };
-
-ISvcLocator* GaudiKernelFixture::svcLoc = nullptr;
 
 static const std::string itkDictFilename{"InDetIdDictFiles/IdDictInnerDetector_ITK-P2-RUN4-03-00-00.xml"};
 
-//from EventIDBase
-typedef unsigned int number_type;
-typedef uint64_t     event_number_t;
 
 std::pair <EventIDBase, EventContext>
-getEvent(number_type runNumber, number_type timeStamp){
-  event_number_t eventNumber(0);
+getEvent(EventIDBase::number_type runNumber, EventIDBase::number_type timeStamp){
+  EventIDBase::event_number_t eventNumber(0);
   EventIDBase eid(runNumber, eventNumber, timeStamp);
   EventContext ctx;
   ctx.setEventID (eid);
@@ -92,20 +71,13 @@ canRetrieveITkStripCablingData(ServiceHandle<StoreGateSvc> & conditionStore){
   return true;
 }
 
-BOOST_AUTO_TEST_SUITE(ITkStripCablingAlgTest )
-  GaudiKernelFixture g;
+BOOST_FIXTURE_TEST_SUITE( ITkStripCablingAlgTest, TestFixture )
 
-  BOOST_AUTO_TEST_CASE( SanityCheck ){
-    const bool svcLocatorIsOk=(g.svcLoc != nullptr);
-    BOOST_TEST(svcLocatorIsOk);
-  }
-  
   //https://acode-browser.usatlas.bnl.gov/lxr/source/athena/InnerDetector/InDetDetDescr/InDetIdentifier/test/ITkStripID_test.cxx
   BOOST_AUTO_TEST_CASE(ExecuteOptions){
     {//This is just to setup the ITkStripID with a valid set of identifiers
-      const ServiceLocatorHelper helper{*(g.svcLoc), "HELPER"};
-      IService* iSvc{helper.service("StoreGateSvc/DetectorStore", true /*quiet*/ , true /*createIf*/)};
-      StoreGateSvc* detStore{dynamic_cast<StoreGateSvc*>(iSvc)};
+      ServiceHandle<StoreGateSvc> detStore("StoreGateSvc/DetectorStore", "ITkPixelCablingAlgTest");
+      BOOST_TEST(detStore.retrieve().isSuccess());
       IdDictParser parser;
       parser.register_external_entity("InnerDetector", itkDictFilename);
       IdDictMgr& idd = parser.parse ("IdDictParser/ATLAS_IDS.xml");
@@ -146,7 +118,7 @@ BOOST_AUTO_TEST_SUITE(ITkStripCablingAlgTest )
       BOOST_TEST_MESSAGE(stats);
       BOOST_TEST(detStore->record(std::move(pITkId), "SCT_ID").isSuccess());
     }//Now the ITkStripID is in StoreGate, ready to be used by the cabling
-    ITkStripCablingAlg a("MyAlg", g.svcLoc);
+    ITkStripCablingAlg a("MyAlg", svcLoc);
     a.addRef();
     //add property definitions for later (normally in job opts)
     BOOST_TEST(a.setProperty("DataSource","ITkStripCabling.dat").isSuccess());
@@ -158,9 +130,9 @@ BOOST_AUTO_TEST_SUITE(ITkStripCablingAlgTest )
     //execute for the following event:
     EventContext ctx;
     //
-    number_type runNumber(222222 - 100);//run 1
-    event_number_t eventNumber(0);
-    number_type timeStamp(0);
+    EventIDBase::number_type runNumber(222222 - 100);//run 1
+    EventIDBase::event_number_t eventNumber(0);
+    EventIDBase::number_type timeStamp(0);
     EventIDBase eidRun1 (runNumber, eventNumber, timeStamp);
     ctx.setEventID (eidRun1);
     BOOST_TEST(a.execute(ctx).isSuccess());
