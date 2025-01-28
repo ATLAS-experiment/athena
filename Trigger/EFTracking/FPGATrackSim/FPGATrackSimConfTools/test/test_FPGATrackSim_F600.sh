@@ -1,5 +1,5 @@
 #!/bin/bash
-# art-description: Test running F200-InsideOut pipeline
+# art-description: Test running the F600 (InsideOut) pipeline
 # art-type: grid
 # art-include: main/Athena
 # art-input-nfiles: 2
@@ -12,7 +12,7 @@
 
 set -e
 
-PREFIX="F200-InsideOut"
+PREFIX="F600"
 lastref_dir=last_results
 INPUT_AOD_FILE="xAOD_${PREFIX}.root"
 
@@ -46,7 +46,7 @@ run () {
 }
 
 run "${PREFIX} pipeline" \
-    FPGATrackSimInsideOutOnRDO.sh $INPUT_AOD_FILE
+    FPGATrackSim_F600.sh $INPUT_AOD_FILE
 
 run "IDTPM" \
     runIDTPM.py --inputFileNames=$INPUT_AOD_FILE \

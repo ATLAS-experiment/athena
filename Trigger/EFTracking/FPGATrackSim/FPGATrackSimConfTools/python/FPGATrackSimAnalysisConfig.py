@@ -488,6 +488,10 @@ if __name__ == "__main__":
         flags.Trigger.FPGATrackSim.Hough.phiRoadFilter = False
         flags.Trigger.FPGATrackSim.Hough.hough1D = False
         flags.Trigger.FPGATrackSim.Hough.hough = True
+    elif (flags.Trigger.FPGATrackSim.pipeline.startswith('F-6')):
+        flags.Trigger.FPGATrackSim.Hough.genScan=True
+        flags.Trigger.FPGATrackSim.spacePoints=False # possibly redundant
+        
     elif (flags.Trigger.FPGATrackSim.pipeline != ""):
         raise AssertionError("ERROR You are trying to run the pipeline " + flags.Trigger.FPGATrackSim.pipeline + " which is not yet supported!")
 

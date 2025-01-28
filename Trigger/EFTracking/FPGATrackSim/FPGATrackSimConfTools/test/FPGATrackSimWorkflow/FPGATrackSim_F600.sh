@@ -4,7 +4,7 @@ set -e
 
 source FPGATrackSim_CommonEnv.sh
 
-TEST_LABEL="F200-InsideOut"
+TEST_LABEL="F600"
 
 if [ -z $1 ]; then
     xAODOutput="FPGATrackSim_${TEST_LABEL}_AOD.root"
@@ -20,10 +20,9 @@ run_InsideOut(){
         Trigger.FPGATrackSim.bankDir=${BANKS_5L} \
         Trigger.FPGATrackSim.runCKF=$RUN_CKF \
         Trigger.FPGATrackSim.region=0 \
-        Trigger.FPGATrackSim.spacePoints=False \
+        Trigger.FPGATrackSim.pipeline='F-600' \
         Trigger.FPGATrackSim.tracking=True \
         Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
-        Trigger.FPGATrackSim.Hough.genScan=True \
         Trigger.FPGATrackSim.doEDMConversion=True \
         Trigger.FPGATrackSim.doOverlapRemoval=False \
         Trigger.FPGATrackSim.writeToAOD=True \
