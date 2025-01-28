@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger RDO->RDO_TRIG athena CaloGPU for Run4 with ttbar mu=200
 # art-type: grid
 # art-include: main/Athena
+# art-athena-mt: 8
 # art-architecture: '#&nvidia'
 # art-output: *.txt
 # art-output: *.log
@@ -26,8 +27,8 @@ ex = ExecStep.ExecStep()
 ex.type = 'athena'
 ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'ttbar_pu200_Run4'
-ex.threads = 4
-ex.concurrent_events = 4
+ex.threads = 8
+ex.concurrent_events = 8
 ex.flags = [ 'CaloRecGPU.GlobalFlags.UseCaloRecGPU=True',
              'Trigger.triggerMenuSetup="MC_pp_run4_v1"',
              'ITk.doTruth=False',
