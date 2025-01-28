@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -55,8 +55,6 @@ namespace Trk{
     class VxContainer;
 } // namespace
 
-using namespace std;
-using namespace xAOD;
 
 // ADD TILEMUONEVENTFILLERTOOL TO D3PD NAMESPACE
 namespace D3PD {
