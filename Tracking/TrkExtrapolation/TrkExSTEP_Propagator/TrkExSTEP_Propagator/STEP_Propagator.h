@@ -49,7 +49,6 @@ namespace CLHEP{
 namespace Trk {
 class Surface;
 class TrackingVolume;
-class ITimedMatEffUpdator;
 class ScatteringAngles;
 class AlignableTrackingVolume;
 class ExtrapolationCache;
@@ -387,7 +386,7 @@ public:
     double m_momentumCutOff{ 50. };
     double m_scatteringScale{ 1. };
     double m_maxPath{ 100000. };
-    double m_maxSteps{ 10000 };
+    int m_maxSteps{ 10000 };
     double m_layXmax{ 1. };
     // secondary interactions
     double m_timeIn{};
@@ -493,32 +492,49 @@ private:
   //////////////////////////////////////////////////////////////////////////
   void sampleBrem(Cache& cache, double mom) const;
 
-  double m_tolerance; //!< Error tolerance. Low tolerance gives high accuracy
-  bool m_materialEffects;    //!< Switch material effects on or off
-  bool m_includeBgradients;  //!< Include B-gradients in the error propagation
-  bool m_includeGgradient;   //!< Include g-gradient in the error propagation
-  double m_momentumCutOff;   //!< Stop propagation below this momentum
-  bool m_multipleScattering; //!< Switch multiple scattering on or off
-  bool m_energyLoss;
-  bool m_detailedEloss;
-  bool m_straggling;
-  bool m_MPV;
-  double m_stragglingScale;
-  double m_scatteringScale;
-  double m_maxPath;
-  double m_maxSteps;
-  double m_layXmax;
+  DoubleProperty m_tolerance{this, "Tolerance", 1e-05,
+    "Error tolerance. Low tolerance gives igh accuracy"};
+  BooleanProperty m_materialEffects{this, "MaterialEffects", true,
+    "Switch material effects on or off"};
+  BooleanProperty m_includeBgradients{this, "IncludeBgradients", true,
+    "Include B-field gradients in the error propagation"};
+  BooleanProperty m_includeGgradient{this, "IncludeGgradient", false,
+    "Include dg/dlambda into the error propagation? Only relevant when energy loss is true."};
+  DoubleProperty m_momentumCutOff{this, "MomentumCutOff", 50.,
+    "Stop propagation below this momentum in MeV"};
+  BooleanProperty m_multipleScattering{this, "MultipleScattering", true,
+    "Add multiple scattering to the covariance matrix?"};
+  BooleanProperty m_energyLoss{this, "EnergyLoss", true, "Include energy loss?"};
+  BooleanProperty m_detailedEloss{this, "DetailedEloss", true,
+    "Provide the extended EnergyLoss object with MopIonization etc."};
+  BooleanProperty m_straggling{this, "Straggling", true,
+    "Add energy loss fluctuations (straggling) to the covariance matrix?"};
+  BooleanProperty m_MPV{this, "MostProbableEnergyLoss", false,
+    "Use the most probable value of the energy loss, else use the mean energy loss."};
+  DoubleProperty m_stragglingScale{this, "StragglingScale", 1.,
+    "Scale for adjusting the width of the energy loss fluctuations."};
+  DoubleProperty m_scatteringScale{this, "MultipleScatteringScale", 1.,
+    "Scale for adjusting the multiple scattering contribution to the covariance matrix."};
+  DoubleProperty m_maxPath{this, "MaxPath", 100000.,
+    "Maximum propagation length in mm."};
+  IntegerProperty m_maxSteps{this, "MaxSteps", 10000,
+    "Maximum number of allowed steps (to avoid infinite loops)."};
+  DoubleProperty m_layXmax{this, "MSstepMax", 1.,
+    "maximal layer thickness for multiple scattering calculations"};
 
   // The following are needed for simulation
   // enable simulation mode
-  bool m_simulation;
+  BooleanProperty m_simulation{this, "SimulationMode", false,
+    "flag for simulation mode"};
   /** secondary interactions (brem photon emission)*/
-  ToolHandle<ITimedMatEffUpdator> m_simMatUpdator;
+  ToolHandle<ITimedMatEffUpdator> m_simMatUpdator{this, "SimMatEffUpdator", ""};
   /** Random Generator service */
-  ServiceHandle<IAthRNGSvc> m_rndGenSvc;
+  ServiceHandle<IAthRNGSvc> m_rndGenSvc{this, "RandomNumberService", "AthRNGSvc",
+    "Random number generator"};
   /** Random engine */
-  ATHRNG::RNGWrapper*                   m_rngWrapper = nullptr;
-  std::string m_randomEngineName;
+  ATHRNG::RNGWrapper* m_rngWrapper = nullptr;
+  StringProperty m_randomEngineName{this, "RandomStreamName", "FatrasRnd",
+    "Name of the random number stream"};
 
   // Read handle for conditions object to get the field cache
   SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey{
