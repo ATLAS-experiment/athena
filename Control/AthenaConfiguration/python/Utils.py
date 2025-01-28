@@ -1,8 +1,12 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+
 from GaudiKernel.GaudiHandles import GaudiHandle
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon import Constants
 from AthenaCommon.Logging import logging
 import collections
+
+
 def loadDefaultComps(allcomps):
     """Attempts to load all default components (those that are not actually configured)"""
     loadedSome = False
@@ -44,50 +48,46 @@ def exposeHandles(allcomps):
                 comp._properties[propName] = __getDefault(value.default)
 
 def setupLoggingLevels(flags, ca):
-    """Read the Exec.*MessageComponents flags and modify output level of components
+    """Read the Exec.*MessageComponents flags and modify OutputLevel of component(s).
     
-        The specification of components  uses python fnmatch library and resembles UNIX paths.
-        For instance an event algorithm MyAlgo/MyInstance would have following path:
+    The specification of components uses the Python `fnmatch` library and resembles UNIX paths.
+    An event algorithm MyAlgo/MyInstance has the following path:
         MasterSeq/AthAllAlgSeq/AthAlgSeq/MyAlgo/MyInstance
-        A private tool MyTool of name ToolInstance used by this algo:
+    A private tool MyTool of name ToolInstance used by that algorithm:
         MasterSeq/AthAllAlgSeq/AthAlgSeq/MyAlgo/MyInstance/MyTool/ToolInstance
-        A public tool would have path:
-        ToolSvc/MyTool/ToolInstance 
-        and so on.
-        The path specification can look like thi:
-        */ToolInstance - all tools that have matching instance name
-        */MyTool/* - all instances of the tool
-        */MyAlgo/MyInstance - specific algorithm
-        */MyAlg0/* - all instance of specific algorithm
-        */AthAlgSeq/* - all algorithms (with deeper sequences structure e.g. in HLT sub-components of sequences can controlled this way)
-        ToolSvc/My*/* - all public tools that instance name starts with My
+    A public tool:
+        ToolSvc/MyTool/ToolInstance
 
-        The modifications to the OutputLevel are applied form ERROR to VERBOSE.
-        This is to support pattern when large group of components is set to less verbose logging mode
-        and with more specific selection more verbosity is enabled. E.g. all algorithms can be set to WARNING, 
-        the all having calo in the name to INFO, and CaloCellMaker to DEBUG.  
+    The path specification can take the following forms:
+        '*/ToolInstance'      : all tools that have matching instance name
+        '*/MyTool/*'          : all instances of type MyTool
+        '*/MyAlgo/MyInstance' : specific algorithm instance
+        '*/MyAlgo/*'          : all instances of the specific algorithm class
+        '*/AthAlgSeq/*'       : all algorithms of the given sequence
+        'ToolSvc/My*/*'       : all public tools with instance name starting with "My"
 
-        Each setting can be either a string or a list of strings.
+    The modifications to the OutputLevel are applied in the order ERROR to VERBOSE, i.e.
+    it is possible to set higher verbosities with more specific selections.
 
-        If the component-path contains no '/' it is assumed to be a plain component-name. In this case, 
-        the output-level is set using the property MessageSvc.setDebug (or equivalent). This works also
-        for converters that do not inherit PropertyHolder. 
+    Each setting can be either a string or a list of strings. If the component path contains
+    no '/' it is assumed to be a plain component name. In this case, the OutputLevel is set
+    using the property MessageSvc.setDebug or equivalent. This works also for converters, which
+    do not have any properties.
     """
-    
-    msgSvc=ca.getService("MessageSvc") #by the time this snippet runs, the ComponentAccumulator should really contain the MessageSvc
 
-
-    
-    from AthenaCommon.Constants import ERROR,WARNING,INFO,DEBUG,VERBOSE
     def __tolist(d):
-        return ([d] if d != '' else []) if isinstance(d, str) else d
-    for flag_val, level,setter in [(flags.Exec.ErrorMessageComponents, ERROR, msgSvc.setError),
-                                   (flags.Exec.WarningMessageComponents, WARNING, msgSvc.setWarning),
-                                   (flags.Exec.InfoMessageComponents, INFO, msgSvc.setInfo),
-                                   (flags.Exec.DebugMessageComponents, DEBUG, msgSvc.setDebug),
-                                   (flags.Exec.VerboseMessageComponents, VERBOSE, msgSvc.setVerbose) ]:
+        return ([d] if d else []) if isinstance(d, str) else d
+
+    for flag_val, level in ((flags.Exec.ErrorMessageComponents, 'ERROR'),
+                            (flags.Exec.WarningMessageComponents, 'WARNING'),
+                            (flags.Exec.InfoMessageComponents, 'INFO'),
+                            (flags.Exec.DebugMessageComponents, 'DEBUG'),
+                            (flags.Exec.VerboseMessageComponents, 'VERBOSE')):
         for c in __tolist(flag_val):
             if "/" in c:
-                ca.foreach_component(c).OutputLevel=level
-            else: # a plain component name is given
-                setter.append(c)
+                ca.foreach_component(c).OutputLevel = getattr(Constants, level)
+
+            # a plain component name is given
+            else:
+                msgSvc = ca.getService("MessageSvc")  # should exist by the time this code runs
+                getattr(msgSvc, f'set{level.title()}').append(c)  # e.g. setDebug property
