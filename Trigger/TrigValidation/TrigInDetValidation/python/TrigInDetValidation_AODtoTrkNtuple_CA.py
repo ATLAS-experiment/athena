@@ -120,10 +120,11 @@ if ( True ) :
     "HLT_.*_presel.*:key=HLT_IDTrack_JetSuper_FTF:roi=HLT_Roi_JetSuper",
     "HLT_.*_presel.*:key=HLT_IDTrack_JetSuper_FTF:roi=HLT_Roi_JetSuper:vtx=HLT_IDVertex_JetSuper",
 
-
-    "HLT_fslrt.*:HLT_IDTrack_FSLRT_FTF;DTE",
-    "HLT_fslrt.*:HLT_IDTrack_FS_FTF;DTE",
-    "HLT_fslrt.*:HLT_IDTrack_FSLRT_IDTrig;DTE",
+      
+    # the FSLRT runs at global scope
+    "HLT_fslrt.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI",
+    "HLT_fslrt.*:key=HLT_IDTrack_FSLRT_FTF:roi=HLT_FSRoI",
+    "HLT_fslrt.*:key=HLT_IDTrack_FSLRT_IDTrig:roi=HLT_FSRoI",
 
     "HLT_mu.*_idperf.*:HLT_IDTrack_Muon_FTF",
     "HLT_mu.*_idperf.*:HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
