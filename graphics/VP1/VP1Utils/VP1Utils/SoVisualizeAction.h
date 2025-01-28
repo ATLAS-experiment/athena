@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ---------------------------------------------------------------------//
@@ -24,6 +24,7 @@ public:
 
   virtual ~SoVisualizeAction();
 
+  using GeoShapeAction::handleShape;
   virtual void handleShape(const GeoShape *subtract);
 
   virtual void handleBox(const GeoBox *box);
