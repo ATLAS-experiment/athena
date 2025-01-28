@@ -232,7 +232,7 @@ StatusCode FPGAClusterConverter::convertSpacePoints(const std::vector<FPGATrackS
   SPPixelCont.reserve(pixelClusterCont.size());
   ATH_CHECK(createPixelSPs(SPPixelCont, pixelClusterCont));
   
-  if (m_skipStripSpacePointFormation) {
+  if (not m_skipStripSpacePointFormation) {
     ATH_MSG_INFO("Converting Strip SPs");
     SPStripCont.reserve(fpgaSPs.size());
     for (const FPGATrackSimCluster& cl : fpgaSPs) {
