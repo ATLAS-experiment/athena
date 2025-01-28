@@ -62,6 +62,13 @@ if __name__=='__main__':
   from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
   cfg.merge(MetaDataSvcCfg(flags))
 
+  cfgsvc = CompFactory.TrigConf.xAODConfigSvc('xAODConfigSvc')
+  cfg.addService(cfgsvc)
+
+  tdt = CompFactory.Trig.TrigDecisionTool('TrigDecisionTool')
+  tdt.TrigConfigSvc = cfgsvc
+  tdt.NavigationFormat = "TrigComposite"
+  cfg.addPublicTool(tdt)
 
   # If the dataset name is in the input files path, then it will be fetched from there
   # Note to enable autolookup, first run "lsetup pyami; voms-proxy-init -voms atlas" and enter your grid pass phrase
@@ -93,15 +100,14 @@ if __name__=='__main__':
   rates.DoGlobalGroups = args.disableGlobalGroups
   rates.DoExpressRates = args.disableExpressGroup
   rates.DoUniqueRates = args.disableUniqueRates
-  rates.DoHistograms = args.disableHistograms
   rates.UseBunchCrossingData = useBunchCrossingData
   rates.TargetLuminosity = args.targetLuminosity
   rates.VetoStartOfTrain = args.vetoStartOfTrain
   rates.EnableLumiExtrapolation = args.disableLumiExtrapolation
   rates.EnhancedBiasRatesTool = ebw
   rates.OutputLevel = args.loglevel
-  rates.TrigConfigSvc = ""
-  rates.TrigDecisionTool = ""
+  rates.TrigDecisionTool = tdt
+  rates.TrigConfigSvc = cfgsvc
 
   cfg.addEventAlgo(rates)
 

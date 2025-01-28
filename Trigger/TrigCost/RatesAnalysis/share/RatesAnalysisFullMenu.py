@@ -101,7 +101,6 @@ if __name__=='__main__':
   rates.DoGlobalGroups = args.disableGlobalGroups
   rates.DoExpressRates = args.disableExpressGroup
   rates.DoUniqueRates = args.disableUniqueRates
-  rates.DoHistograms = args.disableHistograms
   rates.UseBunchCrossingData = useBunchCrossingData
   rates.TargetLuminosity = args.targetLuminosity
   rates.VetoStartOfTrain = args.vetoStartOfTrain

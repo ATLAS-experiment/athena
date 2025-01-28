@@ -16,23 +16,24 @@
 //uncomment the line below to use the HistSvc for outputting trees and histograms
 #include "GaudiKernel/ITHistSvc.h"
 #include "TH1.h"
-
+#include "TrigConfData/L1BunchGroupSet.h"
 #include <sstream>
 
 
 RatesAnalysisAlg::RatesAnalysisAlg( const std::string& name, ISvcLocator* pSvcLocator ) : 
   AthAnalysisAlgorithm( name, pSvcLocator ),
+  m_linearLumiFactor(0),
+  m_weightingValues(),
+  m_ratesDenominator(0),
   m_targetMu(0.),
   m_targetBunches(0.),
   m_targetLumi(0.),
   m_runNumber(0.),
-  m_ratesDenominator(0),
   m_eventCounter(0),
   m_weightedEventCounter(0),
   m_scalingHist(nullptr),
   m_bcidHist(nullptr),
-  m_metadataTree(nullptr),
-  m_weightingValues()
+  m_metadataTree(nullptr)
 {}
 
 RatesAnalysisAlg::~RatesAnalysisAlg() {}
@@ -119,7 +120,6 @@ StatusCode RatesAnalysisAlg::newTrigger(const std::string& name,
     ATH_MSG_FATAL("Too late to call newTrigger. All emulated triggers must be registered during ratesInitialize().");
     return StatusCode::FAILURE;
   }
-
   if (method == kEXISTING) ATH_CHECK( checkExistingTrigger(name, seedName) ); // Check this agrees with what is in the AOD
 
   // Check if it already exists
@@ -129,7 +129,6 @@ StatusCode RatesAnalysisAlg::newTrigger(const std::string& name,
   }
 
   const ExtrapStrat_t e = (m_enableLumiExtrapolation ? extrapolation : ExtrapStrat_t::kNONE); 
-
   m_triggers.emplace(name, std::make_unique<RatesTrigger>(name, msgSvc(), prescale, expressPrescale, seedName, seedPrecale, m_doHistograms, e));
   RatesTrigger* newTriggerPtr = m_triggers.at(name).get();
 
@@ -370,7 +369,7 @@ StatusCode RatesAnalysisAlg::setTriggerDesicison(const std::string& name, const 
 
 StatusCode RatesAnalysisAlg::initialize() {
   ATH_MSG_INFO ("Initializing " << name() << "...");
-
+ 
   if (!m_tdt.empty()){
     ATH_CHECK( m_tdt.retrieve() );
   }
@@ -410,7 +409,7 @@ StatusCode RatesAnalysisAlg::populateTriggers() {
   ATH_MSG_INFO("Computing coherent factors for coherent prescale groups.");
   // Now we are not going to get any more chains - we can fill in the coherent prescale factors
   for (const auto& trigger : m_triggers) {
-    const size_t CPSID = trigger.second->getCPSID(); 
+    const size_t CPSID = trigger.second->getCPSID();
     if (CPSID != 0) trigger.second->setCoherentFactor( m_lowestPrescale.at(CPSID) );
   }
 
@@ -519,7 +518,6 @@ StatusCode RatesAnalysisAlg::populateTriggers() {
       for (const auto& group : m_globalGroups) ATH_MSG_DEBUG(group.second->printConfig());
     }
   }
-
   if (m_doHistograms) {
     ATH_MSG_DEBUG("################## Registering normalisation histogram:");
     m_scalingHist = new TH1D("normalisation",";;",3,0.,3.);
@@ -533,7 +531,7 @@ StatusCode RatesAnalysisAlg::populateTriggers() {
     ATH_MSG_DEBUG("################## Registering trigger histograms:");
       for (const auto& trigger : m_triggers) {
         if (!trigger.second->doHistograms()) continue; // Not all may be doing histograming
-        std::string lvlSubdir = "";
+	std::string lvlSubdir = "";
         if (trigger.second->getName().find("L1") == 0){
           lvlSubdir = "Rate_ChainL1_HLT/";
         } else if (trigger.second->getName().find("HLT") == 0) {
@@ -705,7 +703,6 @@ StatusCode RatesAnalysisAlg::finalize() {
   printTarget();
   printStatistics();
   ATH_MSG_INFO("##################");
-
   writeMetadata();
 
   return StatusCode::SUCCESS;
@@ -812,14 +809,12 @@ void RatesAnalysisAlg::writeMetadata() {
   if (!m_metadataTree) {
     return;
   }
-
   m_runNumber = m_enhancedBiasRatesTool->getRunNumber();
   m_metadataTree->Branch("runNumber", &m_runNumber);
   
   m_metadataTree->Branch("targetMu", &m_targetMu);
   m_metadataTree->Branch("targetBunches", &m_targetBunches);
   m_metadataTree->Branch("targetLumi", &m_targetLumi);
-
   std::vector<std::string> triggers;
   std::vector<std::string> lowers;
   std::vector<double> prescales;
@@ -834,26 +829,22 @@ void RatesAnalysisAlg::writeMetadata() {
     prescales.push_back(trigger.second->getPrescale() );
     express.push_back(trigger.second->getPrescale(true /*includeExpress*/) );
   }
-
   for (const auto& group : m_groups) {
     triggers.push_back(group.first);
     lowers.push_back("-");
     prescales.push_back(-1);
     express.push_back(-1);
   }
-
   for (const auto& group : m_globalGroups) {
     triggers.push_back("RATE_GLOBAL_" + group.first);
     lowers.push_back("-");
     prescales.push_back(-1);
     express.push_back(-1);
   }
-
   m_metadataTree->Branch("triggers", &triggers);
   m_metadataTree->Branch("lowers", &lowers);
   m_metadataTree->Branch("prescales", &prescales);
   m_metadataTree->Branch("express", &express);
-
   std::vector<int32_t> bunchGroups;
   bunchGroups.reserve(16);
 
@@ -861,34 +852,29 @@ void RatesAnalysisAlg::writeMetadata() {
   uint32_t hltPrescaleKey = 0;
   uint32_t lvl1PrescaleKey = 0;
 
-  if(!m_configSvc.empty() && m_configSvc.isValid()) {
-    const TrigConf::BunchGroupSet* bgs = m_configSvc->bunchGroupSet();
-    for (const TrigConf::BunchGroup& bg : bgs->bunchGroups()) {
-      bunchGroups.push_back(bg.bunches().size());
+  if(!m_enhancedBiasRatesTool->isMC()){
+  	bunchGroups = m_enhancedBiasRatesTool->getBunchGroups();
+  }
+  if(!m_configSvc.empty() && m_configSvc.isValid() && ( bunchGroups.size() == 0 || std::all_of(bunchGroups.begin(), bunchGroups.end(), [](int i) { return i==0; }) ) && (!m_enhancedBiasRatesTool->isMC())) {
+    const TrigConf::L1BunchGroupSet& bgs = m_configSvc->l1BunchGroupSet(Gaudi::Hive::currentContext());
+    for (size_t i = 0; i < bgs.maxNBunchGroups(); ++i ) {
+      bunchGroups.push_back(bgs.getBunchGroup(i)->size());
     }
     masterKey = m_configSvc->masterKey();
     hltPrescaleKey = m_configSvc->hltPrescaleKey();
     lvl1PrescaleKey = m_configSvc->lvl1PrescaleKey();
   }
-
-  if (bunchGroups.size() == 0 || std::all_of(bunchGroups.begin(), bunchGroups.end(), [](int i) { return i==0; })) {
-    bunchGroups = m_enhancedBiasRatesTool->getBunchGroups();
-  }
-
   m_metadataTree->Branch("bunchGroups", &bunchGroups);
-
+  
   m_metadataTree->Branch("hltChainIDGroup", &m_hltChainIDGroup);
   m_metadataTree->Branch("l1ItemID", &m_l1ItemID);
 
   m_metadataTree->Branch("masterKey", &masterKey);
   m_metadataTree->Branch("lvl1PrescaleKey", &lvl1PrescaleKey);
   m_metadataTree->Branch("hltPrescaleKey", &hltPrescaleKey);
-
   std::string atlasProject = std::getenv("AtlasProject");
   std::string atlasVersion = std::getenv("AtlasVersion");
   m_metadataTree->Branch("AtlasProject", &atlasProject);
   m_metadataTree->Branch("AtlasVersion", &atlasVersion);
-
   m_metadataTree->Fill();
-
 }
