@@ -52,6 +52,7 @@ ActsTrackFindingAlg                                               INFO statistic
 | Tracks failing second CKF         |         11 |        186 |        197 |
 | Stopped tracks below pT cut       |       2414 |        495 |       2909 |
 | Stopped tracks above max eta      |          0 |          0 |          0 |
+| Total shared hits                 |      55972 |      12625 |      68597 |
 |-----------------------------------|------------|------------|------------|
 ActsTrackFindingAlg                                               INFO Ratios
 |------------------------------------------|------------|------------|------------|
@@ -64,6 +65,7 @@ ActsTrackFindingAlg                                               INFO Ratios
 | selected tracks / used seeds             |   0.171455 |  0.0516492 |   0.151462 |
 | branched tracks / used seeds             |          0 |          0 |          0 |
 | no 2nd CKF / CKF tracks                  | 0.00074194 |  0.0491803 |  0.0105868 |
+| shared hits / CKF tracks                 |    3.77526 |    3.33818 |    3.68643 |
 |------------------------------------------|------------|------------|------------|
 | selected / CKF tracks           0.0- 0.5 |   0.890205 |    0.11658 |   0.709443 |
 |                                 0.5- 1.0 |   0.913255 |   0.252874 |   0.737646 |
@@ -129,6 +131,7 @@ ActsLargeRadiusTrackFindingAlg                                    INFO statistic
 | Tracks failing second CKF         |         30 |         30 |
 | Stopped tracks below pT cut       |       1885 |       1885 |
 | Stopped tracks above max eta      |          0 |          0 |
+| Total shared hits                 |        582 |        582 |
 |-----------------------------------|------------|------------|
 ActsLargeRadiusTrackFindingAlg                                    INFO Ratios
 |------------------------------------------|------------|------------|
@@ -141,6 +144,7 @@ ActsLargeRadiusTrackFindingAlg                                    INFO Ratios
 | selected tracks / used seeds             |  0.0129706 |  0.0129706 |
 | branched tracks / used seeds             |          0 |          0 |
 | no 2nd CKF / CKF tracks                  |  0.0317797 |  0.0317797 |
+| shared hits / CKF tracks                 |   0.616525 |   0.616525 |
 |------------------------------------------|------------|------------|
 | selected / CKF tracks           0.0- 0.5 |   0.169014 |   0.169014 |
 |                                 0.5- 1.0 |   0.214286 |   0.214286 |
@@ -201,6 +205,7 @@ ActsConversionTrackFindingAlg                                     INFO statistic
 | Tracks failing second CKF         |          0 |          0 |
 | Stopped tracks below pT cut       |          8 |          8 |
 | Stopped tracks above max eta      |          0 |          0 |
+| Total shared hits                 |          0 |          0 |
 |-----------------------------------|------------|------------|
 ActsConversionTrackFindingAlg                                     INFO Ratios
 |------------------------------------------|------------|------------|
@@ -213,6 +218,7 @@ ActsConversionTrackFindingAlg                                     INFO Ratios
 | selected tracks / used seeds             |          0 |          0 |
 | branched tracks / used seeds             |          0 |          0 |
 | no 2nd CKF / CKF tracks                  |          0 |          0 |
+| shared hits / CKF tracks                 |          0 |          0 |
 |------------------------------------------|------------|------------|
 | selected / CKF tracks           0.0- 0.5 |          0 |          0 |
 |                                 0.5- 1.0 |          0 |          0 |
@@ -288,6 +294,7 @@ ActsLowPtTrackFindingAlg                                          INFO statistic
 | Tracks failing second CKF         |          0 |         71 |         71 |
 | Stopped tracks below pT cut       |        441 |         43 |        484 |
 | Stopped tracks above max eta      |          0 |          0 |          0 |
+| Total shared hits                 |       2538 |        257 |       2795 |
 |-----------------------------------|------------|------------|------------|
 ActsLowPtTrackFindingAlg                                          INFO Ratios
 |------------------------------------------|------------|------------|------------|
@@ -300,6 +307,7 @@ ActsLowPtTrackFindingAlg                                          INFO Ratios
 | selected tracks / used seeds             |  0.0134677 | 0.00498132 |  0.0121016 |
 | branched tracks / used seeds             |          0 |          0 |          0 |
 | no 2nd CKF / CKF tracks                  |          0 |  0.0411833 |  0.0247214 |
+| shared hits / CKF tracks                 |     2.2108 |   0.149072 |   0.973189 |
 |------------------------------------------|------------|------------|------------|
 | selected / CKF tracks           0.0- 0.5 |   0.833333 |          0 |       0.36 |
 |                                 0.5- 1.0 |   0.965909 |  0.0215827 |   0.387665 |
