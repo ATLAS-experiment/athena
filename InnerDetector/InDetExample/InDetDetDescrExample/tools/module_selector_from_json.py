@@ -22,19 +22,19 @@ def find(bec=None, layer_disk=None, phi=None, eta=None, side=None, asdec=False, 
     IDs = []
 
     for ID, info in data.items():
-        if bec is not None and info["BEC"] != str(bec):
+        if bec is not None and int(info["BEC"]) != bec:
             continue
 
-        if layer_disk is not None and info["LayerDisk"] != str(layer_disk):
+        if layer_disk is not None and int(info["LayerDisk"]) != layer_disk:
             continue
 
-        if phi is not None and info["PhiModule"] not in str([i for i in phi]):
+        if phi is not None and int(info["PhiModule"]) not in [i for i in phi]:
             continue
 
-        if eta is not None and info["EtaModule"] > str(eta):
+        if eta is not None and int(info["EtaModule"]) > eta:
             continue
 
-        if side is not None and info["Side"] != str(side):
+        if side is not None and int(info["Side"]) != side:
             continue
 
         if asdec:
