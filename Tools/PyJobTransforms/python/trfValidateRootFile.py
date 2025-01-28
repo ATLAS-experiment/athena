@@ -235,11 +235,14 @@ def checkFile(fileName, the_type, requireTree):
 
     msg.info('Checking file %s ...', fileName)
 
-    isIMTEnabled = ROOT.ROOT.IsImplicitMTEnabled()
-    if not isIMTEnabled and 'TRF_MULTITHREADED_VALIDATION' in os.environ and 'ATHENA_CORE_NUMBER' in os.environ:
-        nThreads = int(os.environ['ATHENA_CORE_NUMBER'])
-        msg.info(f"Setting the number of implicit ROOT threads to {nThreads}")
-        ROOT.ROOT.EnableImplicitMT(nThreads)
+    enabledIMT = False
+    if not ROOT.ROOT.IsImplicitMTEnabled() and 'TRF_MULTITHREADED_VALIDATION' in os.environ and 'ATHENA_CORE_NUMBER' in os.environ:
+        if (nThreads := int(os.environ['ATHENA_CORE_NUMBER'])) >= 0:
+            msg.info(f"Setting the number of implicit ROOT threads to {nThreads}")
+            ROOT.ROOT.EnableImplicitMT(nThreads)
+            enabledIMT = True
+        else:
+            msg.warning(f"Ignored negative ATHENA_CORE_NUMBER ({nThreads})")
 
     file_handle=TFile.Open(fileName)
 
@@ -269,7 +272,7 @@ def checkFile(fileName, the_type, requireTree):
     file_handle.Close()
     msg.info("File %s looks ok.", fileName)
 
-    if not isIMTEnabled and 'TRF_MULTITHREADED_VALIDATION' in os.environ and 'ATHENA_CORE_NUMBER' in os.environ:
+    if enabledIMT:
         ROOT.ROOT.DisableImplicitMT()
 
     return 0
