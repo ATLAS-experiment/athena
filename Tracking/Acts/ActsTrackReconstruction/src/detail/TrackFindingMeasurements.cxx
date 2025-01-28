@@ -4,22 +4,15 @@
 
 #include "src/detail/TrackFindingMeasurements.h"
 
+#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
+#include "ActsGeometry/SurfaceOfMeasurementUtil.h"
+
 namespace ActsTrk::detail {
 
-  TrackFindingMeasurements::TrackFindingMeasurements(std::size_t nMeasurementContainerMax)
-    : m_measurementOffsets(nMeasurementContainerMax, 0ul)
-  {}
-  
-  // NB. all addDetectorElements() must have been done before calling first addMeasurements().
   void TrackFindingMeasurements::addMeasurements(std::size_t typeIndex,
 						 const xAOD::UncalibratedMeasurementContainer &clusterContainer,
 						 const DetectorElementToActsGeometryIdMap &detectorElementToGeoid)
   {
-    if (typeIndex >= m_measurementOffsets.size()) {
-      throw std::runtime_error("Adding collection with too big a typeIndex");
-    }    
-    m_measurementOffsets[typeIndex] = m_measurementsTotal;
-    
     if (m_measurementRanges.empty()) {
       // try to reserve needed space,
       // this however will reserve more than necessary not just the space needed for the surfaces of
@@ -77,29 +70,5 @@ namespace ActsTrk::detail {
     
     m_measurementsTotal += clusterContainer.size();
   }
-  
-  std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, std::size_t>>
-  TrackFindingMeasurements::measurementContainerOffsets() const
-  {
-    std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, std::size_t>> offsets;
-    if (m_measurementRanges.numContainers() == 0) return offsets;
-    offsets.reserve(m_measurementRanges.numContainers() - 1); // first one usually 0
-    
-    for (std::size_t typeIndex = 0; typeIndex < m_measurementRanges.numContainers(); ++typeIndex)
-      {
-        const xAOD::UncalibratedMeasurementContainer *theContainer
-	  = std::visit( [] (const auto &a) -> const xAOD::UncalibratedMeasurementContainer *
-	  { return a.containerPtr(); },
-	    m_measurementRanges.container(typeIndex));
-	
-        if (measurementOffset(typeIndex) > 0 and theContainer != nullptr)
-	  {
-	    offsets.emplace_back(theContainer, measurementOffset(typeIndex));
-	  }
-      }
-    
-    return offsets;
-  }
-  
-} // namespace ActsTrk::detail
 
+} // namespace ActsTrk::detail

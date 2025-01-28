@@ -97,7 +97,7 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
   std::unique_ptr<detail::CKF_config> m_ckfConfig;
   std::unique_ptr<const Acts::Logger> m_logger;
 
-  detail::TrackFindingMeasurements collectMeasurements(
+  std::pair<detail::TrackFindingMeasurements, detail::SharedHitCounter> collectMeasurements(
       const EventContext& context,
       const ActsTrk::DetectorElementToActsGeometryIdMap&
           detectorElementToGeometryIdMap) const;

@@ -1,0 +1,116 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include "ActsEvent/TrackContainer.h"
+
+#include <algorithm>
+
+namespace ActsTrk::detail {
+
+inline SharedHitCounter::SharedHitCounter(std::size_t nMeasurementContainerMax)
+    : m_measurementOffsets(nMeasurementContainerMax, 0ul) {
+  m_measurementContainerOffsets.reserve(nMeasurementContainerMax);
+}
+
+inline std::size_t SharedHitCounter::nMeasurements() const {
+  return m_measurementsTotal;
+}
+
+inline const std::vector<std::size_t>& SharedHitCounter::measurementOffsets() const {
+  return m_measurementOffsets;
+}
+
+inline std::size_t SharedHitCounter::measurementIndexSize() const {
+  return m_measurementIndexSize;
+}
+
+inline void SharedHitCounter::addMeasurements(std::size_t typeIndex, const xAOD::UncalibratedMeasurementContainer& clusterContainer) {
+  if (typeIndex < m_measurementOffsets.size())
+    m_measurementOffsets[typeIndex] = m_measurementsTotal;
+
+  for (const auto* measurement : clusterContainer) {
+    auto container = measurement->container();  // owning container, which might be different from clusterContainer
+    if (std::none_of(m_measurementContainerOffsets.begin(),
+                     m_measurementContainerOffsets.end(),
+                     [container](const auto& c) { return c.first == container; })) {
+      m_measurementContainerOffsets.emplace_back(container, m_measurementIndexSize);
+      m_measurementIndexSize += container->size_v();
+    }
+  }
+  m_measurementsTotal += clusterContainer.size();
+}
+
+inline std::size_t SharedHitCounter::measurementIndex(const xAOD::UncalibratedMeasurement& hit) const {
+  const auto* container = hit.container();
+  auto it =
+      std::find_if(m_measurementContainerOffsets.begin(),
+                   m_measurementContainerOffsets.end(),
+                   [container](const auto& c) {
+                     return c.first == container;
+                   });
+  if (it == m_measurementContainerOffsets.end())
+    return m_measurementIndexSize;
+  std::size_t offset = it->second;
+
+  // check our local index is less than the saved size of the container
+  ++it;
+  std::size_t nextOffset = (it != m_measurementContainerOffsets.end()) ? it->second : m_measurementIndexSize;
+  if (!(hit.index() < (nextOffset - offset)))
+    return m_measurementIndexSize;
+
+  return offset + hit.index();
+}
+
+inline std::pair<std::size_t, std::size_t> SharedHitCounter::computeSharedHits(RecoTrackContainerProxy& track,
+                                                                               MutableTrackContainer& tracks) {
+  // Based on ActsExamples::TrackFindingAlgorithm::computeSharedHits().
+  // Finds shared hits in the reconstructed track and updates SharedHitFlag in both tracks.
+  // Uses measurementIndex() to convert hit to hitIndex, and then m_firstTrackStateOnTheHit[] to convert hitIndex -> TrackStateIndex
+  // Returns stats: nShared and nBadTrackMeasurements
+
+  constexpr TrackStateIndex noTrackState{std::numeric_limits<std::size_t>::max(), std::numeric_limits<std::size_t>::max()};
+
+  if (m_firstTrackStateOnTheHit.size() < m_measurementIndexSize)
+    m_firstTrackStateOnTheHit.resize(m_measurementIndexSize, noTrackState);
+
+  std::size_t nShared = 0;
+  std::size_t nBadTrackMeasurements = 0;
+  for (auto state : track.trackStatesReversed()) {
+    if (!state.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag))
+      continue;
+
+    if (!state.hasUncalibratedSourceLink())
+      continue;
+
+    auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
+    const xAOD::UncalibratedMeasurement& hit = getUncalibratedMeasurement(sl);
+    std::size_t hitIndex = measurementIndex(hit);
+    if (!(hitIndex < m_measurementIndexSize)) {
+      ++nBadTrackMeasurements;
+      continue;
+    }
+
+    // Check if hit not already used
+    if (m_firstTrackStateOnTheHit[hitIndex].trackIndex == noTrackState.trackIndex) {
+      m_firstTrackStateOnTheHit[hitIndex] = {track.index(), state.index()};
+      continue;
+    }
+
+    // if already used, control if first track state has been marked as shared
+    const TrackStateIndex& indexFirstTrackState = m_firstTrackStateOnTheHit[hitIndex];
+
+    auto firstState = tracks.getTrack(indexFirstTrackState.trackIndex).container().trackStateContainer().getTrackState(indexFirstTrackState.stateIndex);
+    if (!firstState.typeFlags().test(Acts::TrackStateFlag::SharedHitFlag)) {
+      firstState.typeFlags().set(Acts::TrackStateFlag::SharedHitFlag);
+      ++nShared;
+    }
+
+    // Decorate this track state
+    state.typeFlags().set(Acts::TrackStateFlag::SharedHitFlag);
+    ++nShared;
+  }
+  return {nShared, nBadTrackMeasurements};
+}
+
+}  // namespace ActsTrk::detail
