@@ -170,10 +170,22 @@ class ggF_HH_SMEFT(PowhegV2):
 
         logger.info('Now attempting to link locally the files needed by this Powheg process')
         try:
-            os.system("ln -s " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH_SMEFT/Virtual/events.cdf events.cdf")
-            os.system("ln -s " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH_SMEFT/Virtual/creategrid.py creategrid.py")
-            os.system("ln -s " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH_SMEFT/shell/warmup_smeft.py warmup_smeft.py")
-            os.system("for grid in " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH_SMEFT/Virtual/Virt_full_*E*.grid; do ln -s $grid ${grid##*/}; done")
+            processpythondir = os.path.join(os.environ["POWHEGPATH"], "POWHEG-BOX-V2", "ggHH_SMEFT", 'python')
+            if os.path.isdir(processpythondir):
+                for filename in os.listdir(processpythondir):
+                    source_path = os.path.join(processpythondir, filename)
+                    if os.path.isfile(source_path):
+                        link_name = os.path.join(os.getcwd(), filename)
+                        try:
+                            os.symlink(source_path, link_name)
+                            print(f"Created link: {link_name} -> {source_path}")
+                        except FileExistsError:
+                            print(f"Link already exists: {link_name}")
+            else:
+                os.system("ln -s " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH_SMEFT/Virtual/events.cdf events.cdf")
+                os.system("ln -s " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH_SMEFT/Virtual/creategrid.py creategrid.py")
+                os.system("ln -s " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH_SMEFT/shell/warmup_smeft.py warmup_smeft.py")
+                os.system("for grid in " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH_SMEFT/Virtual/Virt_full_*E*.grid; do ln -s $grid ${grid##*/}; done")
         except RuntimeError:
             logger.error('Impossible to link the needed files locally')
             raise
