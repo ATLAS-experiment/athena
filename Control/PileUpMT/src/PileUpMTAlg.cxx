@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PileUpMT includes
@@ -253,7 +253,12 @@ StatusCode PileUpMTAlg::execute() {
         rv::closed_iota(m_earliestDeltaBC.value(), m_latestDeltaBC.value()) |
         rv::transform(
             [this](int bc) { return int(m_beamInt->normFactor(bc)); }) |
-        rv::group_by(std::equal_to{}) | rv::transform([](const auto& rng) {
+#if RANGE_V3_VERSION >= 1200
+        rv::chunk_by(std::equal_to{}) |
+#else
+        rv::group_by(std::equal_to{}) |
+#endif
+        rv::transform([](const auto& rng) {
           return fmt::format("{}{}", rng.size(), rng[0] == 0 ? 'E' : 'F');
         }) |
         ranges::to<std::vector<std::string>>;
