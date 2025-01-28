@@ -5,7 +5,6 @@
 #include "../PixelClustering.h"
 #include "../Spacepoints.h"
 #include "../xAODContainerMaker.h"
-#include "../TestVectorTool.h"
 #include "../PassThroughTool.h"
 #include "../EFTrackingXrtAlgorithm.h"
 #include "../EFTrackingDataStreamLoaderAlgorithm.h"
@@ -16,7 +15,6 @@ DECLARE_COMPONENT(PixelClustering)
 DECLARE_COMPONENT(Spacepoints)
 DECLARE_COMPONENT(DataPreparationPipeline)
 DECLARE_COMPONENT(xAODContainerMaker)
-DECLARE_COMPONENT(TestVectorTool)
 DECLARE_COMPONENT(PassThroughTool)
 DECLARE_COMPONENT(EFTrackingXrtAlgorithm)
 DECLARE_COMPONENT(EFTrackingDataStreamLoaderAlgorithm)

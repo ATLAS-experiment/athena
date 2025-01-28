@@ -69,7 +69,7 @@ namespace FPGADataFormatUtilities
 		uint64_t crc : EVT_HDR_W3_CRC_bits;
 	} EVT_HDR_w3;
 
-	EVT_HDR_w1 get_bitfields_EVT_HDR_w1 (const uint64_t& in) {
+	inline EVT_HDR_w1 get_bitfields_EVT_HDR_w1 (const uint64_t& in) {
 		EVT_HDR_w1 temp;
 		temp.flag = (in & SELECTBITS(EVT_HDR_W1_FLAG_bits, EVT_HDR_W1_FLAG_lsb)) >> EVT_HDR_W1_FLAG_lsb;
 		temp.l0id = (in & SELECTBITS(EVT_HDR_W1_L0ID_bits, EVT_HDR_W1_L0ID_lsb)) >> EVT_HDR_W1_L0ID_lsb;
@@ -78,21 +78,21 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	EVT_HDR_w2 get_bitfields_EVT_HDR_w2 (const uint64_t& in) {
+	inline EVT_HDR_w2 get_bitfields_EVT_HDR_w2 (const uint64_t& in) {
 		EVT_HDR_w2 temp;
 		temp.runnumber = (in & SELECTBITS(EVT_HDR_W2_RUNNUMBER_bits, EVT_HDR_W2_RUNNUMBER_lsb)) >> EVT_HDR_W2_RUNNUMBER_lsb;
 		temp.time = (in & SELECTBITS(EVT_HDR_W2_TIME_bits, EVT_HDR_W2_TIME_lsb)) >> EVT_HDR_W2_TIME_lsb;
 		return temp;
 	}
 
-	EVT_HDR_w3 get_bitfields_EVT_HDR_w3 (const uint64_t& in) {
+	inline EVT_HDR_w3 get_bitfields_EVT_HDR_w3 (const uint64_t& in) {
 		EVT_HDR_w3 temp;
 		temp.status = (in & SELECTBITS(EVT_HDR_W3_STATUS_bits, EVT_HDR_W3_STATUS_lsb)) >> EVT_HDR_W3_STATUS_lsb;
 		temp.crc = (in & SELECTBITS(EVT_HDR_W3_CRC_bits, EVT_HDR_W3_CRC_lsb)) >> EVT_HDR_W3_CRC_lsb;
 		return temp;
 	}
 
-	uint64_t get_dataformat_EVT_HDR_w1 (const EVT_HDR_w1& in) {
+	inline uint64_t get_dataformat_EVT_HDR_w1 (const EVT_HDR_w1& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.flag) << EVT_HDR_W1_FLAG_lsb);
 		temp |= (static_cast<uint64_t>(in.l0id) << EVT_HDR_W1_L0ID_lsb);
@@ -101,21 +101,21 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	uint64_t get_dataformat_EVT_HDR_w2 (const EVT_HDR_w2& in) {
+	inline uint64_t get_dataformat_EVT_HDR_w2 (const EVT_HDR_w2& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.runnumber) << EVT_HDR_W2_RUNNUMBER_lsb);
 		temp |= (static_cast<uint64_t>(in.time) << EVT_HDR_W2_TIME_lsb);
 		return temp;
 	}
 
-	uint64_t get_dataformat_EVT_HDR_w3 (const EVT_HDR_w3& in) {
+	inline uint64_t get_dataformat_EVT_HDR_w3 (const EVT_HDR_w3& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.status) << EVT_HDR_W3_STATUS_lsb);
 		temp |= (static_cast<uint64_t>(in.crc) << EVT_HDR_W3_CRC_lsb);
 		return temp;
 	}
 
-	EVT_HDR_w1 fill_EVT_HDR_w1 (const uint64_t& flag, const uint64_t& l0id, const uint64_t& bcid, const uint64_t& spare) {
+	inline EVT_HDR_w1 fill_EVT_HDR_w1 (const uint64_t& flag, const uint64_t& l0id, const uint64_t& bcid, const uint64_t& spare) {
 		EVT_HDR_w1 temp;
 		temp.flag = flag;
 		temp.l0id = l0id;
@@ -124,14 +124,14 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	EVT_HDR_w2 fill_EVT_HDR_w2 (const uint64_t& runnumber, const uint64_t& time) {
+	inline EVT_HDR_w2 fill_EVT_HDR_w2 (const uint64_t& runnumber, const uint64_t& time) {
 		EVT_HDR_w2 temp;
 		temp.runnumber = runnumber;
 		temp.time = time;
 		return temp;
 	}
 
-	EVT_HDR_w3 fill_EVT_HDR_w3 (const uint64_t& status, const uint64_t& crc) {
+	inline EVT_HDR_w3 fill_EVT_HDR_w3 (const uint64_t& status, const uint64_t& crc) {
 		EVT_HDR_w3 temp;
 		temp.status = status;
 		temp.crc = crc;
@@ -215,7 +215,7 @@ namespace FPGADataFormatUtilities
 		uint64_t crc : EVT_FTR_W3_CRC_bits;
 	} EVT_FTR_w3;
 
-	EVT_FTR_w1 get_bitfields_EVT_FTR_w1 (const uint64_t& in) {
+	inline EVT_FTR_w1 get_bitfields_EVT_FTR_w1 (const uint64_t& in) {
 		EVT_FTR_w1 temp;
 		temp.flag = (in & SELECTBITS(EVT_FTR_W1_FLAG_bits, EVT_FTR_W1_FLAG_lsb)) >> EVT_FTR_W1_FLAG_lsb;
 		temp.spare = (in & SELECTBITS(EVT_FTR_W1_SPARE_bits, EVT_FTR_W1_SPARE_lsb)) >> EVT_FTR_W1_SPARE_lsb;
@@ -223,20 +223,20 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	EVT_FTR_w2 get_bitfields_EVT_FTR_w2 (const uint64_t& in) {
+	inline EVT_FTR_w2 get_bitfields_EVT_FTR_w2 (const uint64_t& in) {
 		EVT_FTR_w2 temp;
 		temp.error_flags = (in & SELECTBITS(EVT_FTR_W2_ERROR_FLAGS_bits, EVT_FTR_W2_ERROR_FLAGS_lsb)) >> EVT_FTR_W2_ERROR_FLAGS_lsb;
 		return temp;
 	}
 
-	EVT_FTR_w3 get_bitfields_EVT_FTR_w3 (const uint64_t& in) {
+	inline EVT_FTR_w3 get_bitfields_EVT_FTR_w3 (const uint64_t& in) {
 		EVT_FTR_w3 temp;
 		temp.word_count = (in & SELECTBITS(EVT_FTR_W3_WORD_COUNT_bits, EVT_FTR_W3_WORD_COUNT_lsb)) >> EVT_FTR_W3_WORD_COUNT_lsb;
 		temp.crc = (in & SELECTBITS(EVT_FTR_W3_CRC_bits, EVT_FTR_W3_CRC_lsb)) >> EVT_FTR_W3_CRC_lsb;
 		return temp;
 	}
 
-	uint64_t get_dataformat_EVT_FTR_w1 (const EVT_FTR_w1& in) {
+	inline uint64_t get_dataformat_EVT_FTR_w1 (const EVT_FTR_w1& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.flag) << EVT_FTR_W1_FLAG_lsb);
 		temp |= (static_cast<uint64_t>(in.spare) << EVT_FTR_W1_SPARE_lsb);
@@ -244,20 +244,20 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	uint64_t get_dataformat_EVT_FTR_w2 (const EVT_FTR_w2& in) {
+	inline uint64_t get_dataformat_EVT_FTR_w2 (const EVT_FTR_w2& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.error_flags) << EVT_FTR_W2_ERROR_FLAGS_lsb);
 		return temp;
 	}
 
-	uint64_t get_dataformat_EVT_FTR_w3 (const EVT_FTR_w3& in) {
+	inline uint64_t get_dataformat_EVT_FTR_w3 (const EVT_FTR_w3& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.word_count) << EVT_FTR_W3_WORD_COUNT_lsb);
 		temp |= (static_cast<uint64_t>(in.crc) << EVT_FTR_W3_CRC_lsb);
 		return temp;
 	}
 
-	EVT_FTR_w1 fill_EVT_FTR_w1 (const uint64_t& flag, const uint64_t& spare, const uint64_t& hdr_crc) {
+	inline EVT_FTR_w1 fill_EVT_FTR_w1 (const uint64_t& flag, const uint64_t& spare, const uint64_t& hdr_crc) {
 		EVT_FTR_w1 temp;
 		temp.flag = flag;
 		temp.spare = spare;
@@ -265,13 +265,13 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	EVT_FTR_w2 fill_EVT_FTR_w2 (const uint64_t& error_flags) {
+	inline EVT_FTR_w2 fill_EVT_FTR_w2 (const uint64_t& error_flags) {
 		EVT_FTR_w2 temp;
 		temp.error_flags = error_flags;
 		return temp;
 	}
 
-	EVT_FTR_w3 fill_EVT_FTR_w3 (const uint64_t& word_count, const uint64_t& crc) {
+	inline EVT_FTR_w3 fill_EVT_FTR_w3 (const uint64_t& word_count, const uint64_t& crc) {
 		EVT_FTR_w3 temp;
 		temp.word_count = word_count;
 		temp.crc = crc;
@@ -324,7 +324,7 @@ namespace FPGADataFormatUtilities
 		uint64_t spare : M_HDR_W1_SPARE_bits;
 	} M_HDR_w1;
 
-	M_HDR_w1 get_bitfields_M_HDR_w1 (const uint64_t& in) {
+	inline M_HDR_w1 get_bitfields_M_HDR_w1 (const uint64_t& in) {
 		M_HDR_w1 temp;
 		temp.flag = (in & SELECTBITS(M_HDR_W1_FLAG_bits, M_HDR_W1_FLAG_lsb)) >> M_HDR_W1_FLAG_lsb;
 		temp.modid = (in & SELECTBITS(M_HDR_W1_MODID_bits, M_HDR_W1_MODID_lsb)) >> M_HDR_W1_MODID_lsb;
@@ -332,7 +332,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	uint64_t get_dataformat_M_HDR_w1 (const M_HDR_w1& in) {
+	inline uint64_t get_dataformat_M_HDR_w1 (const M_HDR_w1& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.flag) << M_HDR_W1_FLAG_lsb);
 		temp |= (static_cast<uint64_t>(in.modid) << M_HDR_W1_MODID_lsb);
@@ -340,7 +340,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	M_HDR_w1 fill_M_HDR_w1 (const uint64_t& flag, const uint64_t& modid, const uint64_t& spare) {
+	inline M_HDR_w1 fill_M_HDR_w1 (const uint64_t& flag, const uint64_t& modid, const uint64_t& spare) {
 		M_HDR_w1 temp;
 		temp.flag = flag;
 		temp.modid = modid;
@@ -358,6 +358,109 @@ namespace FPGADataFormatUtilities
 
 	inline uint64_t to_real_M_HDR_w1_spare (const uint64_t& in) {
 		return in;
+	}
+
+	// modid is 32-bit long and includes extra information
+	const int MODID_TYPE_PIXEL_FLAG = 0x0;
+	const int MODID_TYPE_STRIP_FLAG = 0x1;
+
+	const int MODID_DETECTOR_TYPE_NEG_ETA_END_CAP = 0x0;
+	const int MODID_DETECTOR_TYPE_BARREL = 0x1;
+	const int MODID_DETECTOR_TYPE_POS_ETA_END_CAP = 0x2;
+
+	const int MODID_STRIP_SIDE_INNER= 0x0;
+	const int MODID_STRIP_SIDE_OUTER = 0x1;
+
+	const int MODID_TYPE_bits = 5;
+	const int MODID_TYPE_lsb = 27;
+	const float MODID_TYPE_mf = 1.;
+
+	const int MODID_DETECTOR_TYPE_bits = 2;
+	const int MODID_DETECTOR_TYPE_lsb = 25;
+	const float MODID_DETECTOR_TYPE_mf = 1.;
+
+	// For pixel modules
+	const int MODID_PIEXL_LAYER_bits = 4;
+	const int MODID_PIEXL_LAYER_lsb = 21;
+	const float MODID_PIEXL_LAYER_mf = 1.;
+
+	const int MODID_PIXEL_PHI_bits = 6;
+	const int MODID_PIXEL_PHI_lsb = 15;
+	const float MODID_PIXEL_PHI_mf = 1.;
+
+	const int MODID_PIXEL_ETA_bits = 6;
+	const int MODID_PIXEL_ETA_lsb = 9;
+	const float MODID_PIXEL_ETA_mf = 1.;
+
+	const int MODID_PIXEL_IGNORE_bits = 9;
+	const int MODID_PIXEL_IGNORE_lsb = 0;
+	const float MODID_PIXEL_IGNORE_mf = 1.;
+
+	// For strip modules
+	const int MODID_STRIP_LAYER_bits = 3;
+	const int MODID_STRIP_LAYER_lsb = 22;
+	const float MODID_STRIP_LAYER_mf = 1.;
+
+	const int MODID_STRIP_PHI_bits = 7;
+	const int MODID_STRIP_PHI_lsb = 15;
+	const float MODID_STRIP_PHI_mf = 1.;
+
+	const int MODID_STRIP_ETA_bits = 7;
+	const int MODID_STRIP_ETA_lsb = 8;
+	const float MODID_STRIP_ETA_mf = 1.;
+
+	const int MODID_STRIP_SIDE_bits = 1;
+	const int MODID_STRIP_SIDE_lsb = 7;
+	const float MODID_STRIP_SIDE_mf = 1.;
+
+	const int MODID_STRIP_IGNORE_bits = 6;
+	const int MODID_STRIP_IGNORE_lsb = 0;
+	const float MODID_STRIP_IGNORE_mf = 1.;
+
+	typedef struct PIXEL_MODULE{
+		uint64_t type : MODID_TYPE_bits;
+		uint64_t detector_type : MODID_DETECTOR_TYPE_bits;
+		uint64_t layer : MODID_PIEXL_LAYER_bits;
+		uint64_t phi : MODID_PIXEL_PHI_bits;
+		uint64_t eta : MODID_PIXEL_ETA_bits;
+		uint64_t ignore : MODID_PIXEL_IGNORE_bits;
+	} PIXEL_MODULE;
+
+	typedef struct STRIP_MODULE{
+		uint64_t type : MODID_TYPE_bits;
+		uint64_t detector_type : MODID_DETECTOR_TYPE_bits;
+		uint64_t layer : MODID_STRIP_LAYER_bits;
+		uint64_t phi : MODID_STRIP_PHI_bits;
+		uint64_t eta : MODID_STRIP_ETA_bits;
+		uint64_t side : MODID_STRIP_SIDE_bits;
+		uint64_t ignore : MODID_STRIP_IGNORE_bits;
+	} STRIP_MODULE;
+
+	inline uint64_t get_bitfields_MODULE_type(const uint64_t& in){
+		return (in & SELECTBITS(MODID_TYPE_bits, MODID_TYPE_lsb)) >> MODID_TYPE_lsb;
+	}
+
+	inline PIXEL_MODULE get_bitfields_PIXEL_MODULE(const uint64_t& in){
+		PIXEL_MODULE temp;
+		temp.type = (in & SELECTBITS(MODID_TYPE_bits, MODID_TYPE_lsb)) >> MODID_TYPE_lsb;
+		temp.detector_type = (in & SELECTBITS(MODID_DETECTOR_TYPE_bits, MODID_DETECTOR_TYPE_lsb)) >> MODID_DETECTOR_TYPE_lsb;
+		temp.layer = (in & SELECTBITS(MODID_PIEXL_LAYER_bits, MODID_PIEXL_LAYER_lsb)) >> MODID_PIEXL_LAYER_lsb;
+		temp.phi = (in & SELECTBITS(MODID_PIXEL_PHI_bits, MODID_PIXEL_PHI_lsb)) >> MODID_PIXEL_PHI_lsb;
+		temp.eta = (in & SELECTBITS(MODID_PIXEL_ETA_bits, MODID_PIXEL_ETA_lsb)) >> MODID_PIXEL_ETA_lsb;
+		temp.ignore = (in & SELECTBITS(MODID_PIXEL_IGNORE_bits, MODID_PIXEL_IGNORE_lsb)) >> MODID_PIXEL_IGNORE_lsb;
+		return temp;
+	}
+
+	inline STRIP_MODULE get_bitfields_STRIP_MODULE(const uint64_t& in){
+		STRIP_MODULE temp;
+		temp.type = (in & SELECTBITS(MODID_TYPE_bits, MODID_TYPE_lsb)) >> MODID_TYPE_lsb;
+		temp.detector_type = (in & SELECTBITS(MODID_DETECTOR_TYPE_bits, MODID_DETECTOR_TYPE_lsb)) >> MODID_DETECTOR_TYPE_lsb;
+		temp.layer = (in & SELECTBITS(MODID_STRIP_LAYER_bits, MODID_STRIP_LAYER_lsb)) >> MODID_STRIP_LAYER_lsb;
+		temp.phi = (in & SELECTBITS(MODID_STRIP_PHI_bits, MODID_STRIP_PHI_lsb)) >> MODID_STRIP_PHI_lsb;
+		temp.eta = (in & SELECTBITS(MODID_STRIP_ETA_bits, MODID_STRIP_ETA_lsb)) >> MODID_STRIP_ETA_lsb;
+		temp.side = (in & SELECTBITS(MODID_STRIP_SIDE_bits, MODID_STRIP_SIDE_lsb)) >> MODID_STRIP_SIDE_lsb;
+		temp.ignore = (in & SELECTBITS(MODID_STRIP_IGNORE_bits, MODID_STRIP_IGNORE_lsb)) >> MODID_STRIP_IGNORE_lsb;
+		return temp;
 	}
 
 	// RD_HDR_W1 word description
@@ -433,7 +536,7 @@ namespace FPGADataFormatUtilities
 		uint64_t spare : RD_HDR_W2_SPARE_bits;
 	} RD_HDR_w2;
 
-	RD_HDR_w1 get_bitfields_RD_HDR_w1 (const uint64_t& in) {
+	inline RD_HDR_w1 get_bitfields_RD_HDR_w1 (const uint64_t& in) {
 		RD_HDR_w1 temp;
 		temp.flag = (in & SELECTBITS(RD_HDR_W1_FLAG_bits, RD_HDR_W1_FLAG_lsb)) >> RD_HDR_W1_FLAG_lsb;
 		temp.type = (in & SELECTBITS(RD_HDR_W1_TYPE_bits, RD_HDR_W1_TYPE_lsb)) >> RD_HDR_W1_TYPE_lsb;
@@ -448,7 +551,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	RD_HDR_w2 get_bitfields_RD_HDR_w2 (const uint64_t& in) {
+	inline RD_HDR_w2 get_bitfields_RD_HDR_w2 (const uint64_t& in) {
 		RD_HDR_w2 temp;
 		temp.global_phi = (in & SELECTBITS(RD_HDR_W2_GLOBAL_PHI_bits, RD_HDR_W2_GLOBAL_PHI_lsb)) >> RD_HDR_W2_GLOBAL_PHI_lsb;
 		temp.global_eta = (in & SELECTBITS(RD_HDR_W2_GLOBAL_ETA_bits, RD_HDR_W2_GLOBAL_ETA_lsb)) >> RD_HDR_W2_GLOBAL_ETA_lsb;
@@ -456,7 +559,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	uint64_t get_dataformat_RD_HDR_w1 (const RD_HDR_w1& in) {
+	inline uint64_t get_dataformat_RD_HDR_w1 (const RD_HDR_w1& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.flag) << RD_HDR_W1_FLAG_lsb);
 		temp |= (static_cast<uint64_t>(in.type) << RD_HDR_W1_TYPE_lsb);
@@ -471,7 +574,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	uint64_t get_dataformat_RD_HDR_w2 (const RD_HDR_w2& in) {
+	inline uint64_t get_dataformat_RD_HDR_w2 (const RD_HDR_w2& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.global_phi) << RD_HDR_W2_GLOBAL_PHI_lsb);
 		temp |= (static_cast<uint64_t>(in.global_eta) << RD_HDR_W2_GLOBAL_ETA_lsb);
@@ -479,7 +582,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	RD_HDR_w1 fill_RD_HDR_w1 (const uint64_t& flag, const uint64_t& type, const uint64_t& eta_region, const uint64_t& phi_region, const uint64_t& slice, const uint64_t& hough_x_bin, const uint64_t& hough_y_bin, const uint64_t& second_stage, const uint64_t& layer_bitmask, const uint64_t& spare) {
+	inline RD_HDR_w1 fill_RD_HDR_w1 (const uint64_t& flag, const uint64_t& type, const uint64_t& eta_region, const uint64_t& phi_region, const uint64_t& slice, const uint64_t& hough_x_bin, const uint64_t& hough_y_bin, const uint64_t& second_stage, const uint64_t& layer_bitmask, const uint64_t& spare) {
 		RD_HDR_w1 temp;
 		temp.flag = flag;
 		temp.type = type;
@@ -494,7 +597,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	RD_HDR_w2 fill_RD_HDR_w2 (const uint64_t& global_phi, const uint64_t& global_eta, const uint64_t& spare) {
+	inline RD_HDR_w2 fill_RD_HDR_w2 (const uint64_t& global_phi, const uint64_t& global_eta, const uint64_t& spare) {
 		RD_HDR_w2 temp;
 		temp.global_phi = global_phi;
 		temp.global_eta = global_eta;
@@ -659,7 +762,7 @@ namespace FPGADataFormatUtilities
 		uint64_t spare : GTRACK_HDR_W3_SPARE_bits;
 	} GTRACK_HDR_w3;
 
-	GTRACK_HDR_w1 get_bitfields_GTRACK_HDR_w1 (const uint64_t& in) {
+	inline GTRACK_HDR_w1 get_bitfields_GTRACK_HDR_w1 (const uint64_t& in) {
 		GTRACK_HDR_w1 temp;
 		temp.flag = (in & SELECTBITS(GTRACK_HDR_W1_FLAG_bits, GTRACK_HDR_W1_FLAG_lsb)) >> GTRACK_HDR_W1_FLAG_lsb;
 		temp.type = (in & SELECTBITS(GTRACK_HDR_W1_TYPE_bits, GTRACK_HDR_W1_TYPE_lsb)) >> GTRACK_HDR_W1_TYPE_lsb;
@@ -674,7 +777,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	GTRACK_HDR_w2 get_bitfields_GTRACK_HDR_w2 (const uint64_t& in) {
+	inline GTRACK_HDR_w2 get_bitfields_GTRACK_HDR_w2 (const uint64_t& in) {
 		GTRACK_HDR_w2 temp;
 		temp.score = (in & SELECTBITS(GTRACK_HDR_W2_SCORE_bits, GTRACK_HDR_W2_SCORE_lsb)) >> GTRACK_HDR_W2_SCORE_lsb;
 		temp.d0 = (in & SELECTBITS(GTRACK_HDR_W2_D0_bits, GTRACK_HDR_W2_D0_lsb)) >> GTRACK_HDR_W2_D0_lsb;
@@ -683,7 +786,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	GTRACK_HDR_w3 get_bitfields_GTRACK_HDR_w3 (const uint64_t& in) {
+	inline GTRACK_HDR_w3 get_bitfields_GTRACK_HDR_w3 (const uint64_t& in) {
 		GTRACK_HDR_w3 temp;
 		temp.qoverpt = (in & SELECTBITS(GTRACK_HDR_W3_QOVERPT_bits, GTRACK_HDR_W3_QOVERPT_lsb)) >> GTRACK_HDR_W3_QOVERPT_lsb;
 		temp.phi = (in & SELECTBITS(GTRACK_HDR_W3_PHI_bits, GTRACK_HDR_W3_PHI_lsb)) >> GTRACK_HDR_W3_PHI_lsb;
@@ -691,8 +794,8 @@ namespace FPGADataFormatUtilities
 		temp.spare = (in & SELECTBITS(GTRACK_HDR_W3_SPARE_bits, GTRACK_HDR_W3_SPARE_lsb)) >> GTRACK_HDR_W3_SPARE_lsb;
 		return temp;
 	}
-
-	uint64_t get_dataformat_GTRACK_HDR_w1 (const GTRACK_HDR_w1& in) {
+	 
+	inline uint64_t get_dataformat_GTRACK_HDR_w1 (const GTRACK_HDR_w1& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.flag) << GTRACK_HDR_W1_FLAG_lsb);
 		temp |= (static_cast<uint64_t>(in.type) << GTRACK_HDR_W1_TYPE_lsb);
@@ -707,7 +810,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	uint64_t get_dataformat_GTRACK_HDR_w2 (const GTRACK_HDR_w2& in) {
+	inline uint64_t get_dataformat_GTRACK_HDR_w2 (const GTRACK_HDR_w2& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.score) << GTRACK_HDR_W2_SCORE_lsb);
 		temp |= (static_cast<uint64_t>(in.d0) << GTRACK_HDR_W2_D0_lsb);
@@ -716,7 +819,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	uint64_t get_dataformat_GTRACK_HDR_w3 (const GTRACK_HDR_w3& in) {
+	inline uint64_t get_dataformat_GTRACK_HDR_w3 (const GTRACK_HDR_w3& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.qoverpt) << GTRACK_HDR_W3_QOVERPT_lsb);
 		temp |= (static_cast<uint64_t>(in.phi) << GTRACK_HDR_W3_PHI_lsb);
@@ -725,7 +828,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	GTRACK_HDR_w1 fill_GTRACK_HDR_w1 (const uint64_t& flag, const uint64_t& type, const uint64_t& eta_region, const uint64_t& phi_region, const uint64_t& slice, const uint64_t& hough_x_bin, const uint64_t& hough_y_bin, const uint64_t& second_stage, const uint64_t& layer_bitmask, const uint64_t& spare) {
+	inline GTRACK_HDR_w1 fill_GTRACK_HDR_w1 (const uint64_t& flag, const uint64_t& type, const uint64_t& eta_region, const uint64_t& phi_region, const uint64_t& slice, const uint64_t& hough_x_bin, const uint64_t& hough_y_bin, const uint64_t& second_stage, const uint64_t& layer_bitmask, const uint64_t& spare) {
 		GTRACK_HDR_w1 temp;
 		temp.flag = flag;
 		temp.type = type;
@@ -740,7 +843,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	GTRACK_HDR_w2 fill_GTRACK_HDR_w2 (const uint64_t& score, const int64_t& d0, const int64_t& z0, const uint64_t& spare) {
+	inline GTRACK_HDR_w2 fill_GTRACK_HDR_w2 (const uint64_t& score, const int64_t& d0, const int64_t& z0, const uint64_t& spare) {
 		GTRACK_HDR_w2 temp;
 		temp.score = score;
 		temp.d0 = d0;
@@ -749,7 +852,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	GTRACK_HDR_w3 fill_GTRACK_HDR_w3 (const int64_t& qoverpt, const int64_t& phi, const int64_t& eta, const uint64_t& spare) {
+	inline GTRACK_HDR_w3 fill_GTRACK_HDR_w3 (const int64_t& qoverpt, const int64_t& phi, const int64_t& eta, const uint64_t& spare) {
 		GTRACK_HDR_w3 temp;
 		temp.qoverpt = qoverpt;
 		temp.phi = phi;
@@ -835,27 +938,27 @@ namespace FPGADataFormatUtilities
 	const int PIXEL_CLUSTER_LAST_lsb = 63;
 	const float PIXEL_CLUSTER_LAST_mf = 1.;
 
-	const int PIXEL_CLUSTER_COL_SIZE_bits = 2;
-	const int PIXEL_CLUSTER_COL_SIZE_lsb = 61;
+	const int PIXEL_CLUSTER_COL_SIZE_bits = 4;
+	const int PIXEL_CLUSTER_COL_SIZE_lsb = 59;
 	const float PIXEL_CLUSTER_COL_SIZE_mf = 1.;
 
 	const int PIXEL_CLUSTER_COL_bits = 13;
-	const int PIXEL_CLUSTER_COL_lsb = 48;
+	const int PIXEL_CLUSTER_COL_lsb = 46;
 	const float PIXEL_CLUSTER_COL_mf = 1.;
 
-	const int PIXEL_CLUSTER_ROW_SIZE_bits = 3;
-	const int PIXEL_CLUSTER_ROW_SIZE_lsb = 45;
+	const int PIXEL_CLUSTER_ROW_SIZE_bits = 4;
+	const int PIXEL_CLUSTER_ROW_SIZE_lsb = 42;
 	const float PIXEL_CLUSTER_ROW_SIZE_mf = 1.;
 
 	const int PIXEL_CLUSTER_ROW_bits = 13;
-	const int PIXEL_CLUSTER_ROW_lsb = 32;
+	const int PIXEL_CLUSTER_ROW_lsb = 29;
 	const float PIXEL_CLUSTER_ROW_mf = 1.;
 
 	const int PIXEL_CLUSTER_CLUSTERID_bits = 13;
-	const int PIXEL_CLUSTER_CLUSTERID_lsb = 19;
+	const int PIXEL_CLUSTER_CLUSTERID_lsb = 16;
 	const float PIXEL_CLUSTER_CLUSTERID_mf = 1.;
 
-	const int PIXEL_CLUSTER_SPARE_bits = 19;
+	const int PIXEL_CLUSTER_SPARE_bits = 16;
 	const int PIXEL_CLUSTER_SPARE_lsb = 0;
 	const float PIXEL_CLUSTER_SPARE_mf = 1.;
 
@@ -869,7 +972,7 @@ namespace FPGADataFormatUtilities
 		uint64_t spare : PIXEL_CLUSTER_SPARE_bits;
 	} PIXEL_CLUSTER;
 
-	PIXEL_CLUSTER get_bitfields_PIXEL_CLUSTER (const uint64_t& in) {
+	inline PIXEL_CLUSTER get_bitfields_PIXEL_CLUSTER (const uint64_t& in) {
 		PIXEL_CLUSTER temp;
 		temp.last = (in & SELECTBITS(PIXEL_CLUSTER_LAST_bits, PIXEL_CLUSTER_LAST_lsb)) >> PIXEL_CLUSTER_LAST_lsb;
 		temp.col_size = (in & SELECTBITS(PIXEL_CLUSTER_COL_SIZE_bits, PIXEL_CLUSTER_COL_SIZE_lsb)) >> PIXEL_CLUSTER_COL_SIZE_lsb;
@@ -881,7 +984,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	uint64_t get_dataformat_PIXEL_CLUSTER (const PIXEL_CLUSTER& in) {
+	inline uint64_t get_dataformat_PIXEL_CLUSTER (const PIXEL_CLUSTER& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.last) << PIXEL_CLUSTER_LAST_lsb);
 		temp |= (static_cast<uint64_t>(in.col_size) << PIXEL_CLUSTER_COL_SIZE_lsb);
@@ -893,7 +996,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	PIXEL_CLUSTER fill_PIXEL_CLUSTER (const uint64_t& last, const uint64_t& col_size, const uint64_t& col, const uint64_t& row_size, const uint64_t& row, const uint64_t& clusterid, const uint64_t& spare) {
+	inline PIXEL_CLUSTER fill_PIXEL_CLUSTER (const uint64_t& last, const uint64_t& col_size, const uint64_t& col, const uint64_t& row_size, const uint64_t& row, const uint64_t& clusterid, const uint64_t& spare) {
 		PIXEL_CLUSTER temp;
 		temp.last = last;
 		temp.col_size = col_size;
@@ -967,7 +1070,9 @@ namespace FPGADataFormatUtilities
 		uint64_t spare : STRIP_CLUSTER_SPARE_bits;
 	} STRIP_CLUSTER;
 
-	STRIP_CLUSTER get_bitfields_STRIP_CLUSTER (const uint64_t& in) {
+	// Even though the input is 64 bits, this function really only operates on the lower 32 bits
+	// Make sure to shift right by 32 bits to get the upper 32 bits
+	inline STRIP_CLUSTER get_bitfields_STRIP_CLUSTER (const uint64_t& in) {
 		STRIP_CLUSTER temp;
 		temp.last = (in & SELECTBITS(STRIP_CLUSTER_LAST_bits, STRIP_CLUSTER_LAST_lsb)) >> STRIP_CLUSTER_LAST_lsb;
 		temp.row = (in & SELECTBITS(STRIP_CLUSTER_ROW_bits, STRIP_CLUSTER_ROW_lsb)) >> STRIP_CLUSTER_ROW_lsb;
@@ -978,15 +1083,15 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	uint64_t get_dataformat_STRIP_CLUSTER_up32 (const uint64_t& in) {
+	inline uint64_t get_dataformat_STRIP_CLUSTER_up32 (const uint64_t& in) {
 		return (in & SELECTBITS(32, 32)) >> 32;
 }
 
-	uint64_t get_dataformat_STRIP_CLUSTER_low32 (const uint64_t& in) {
+	inline uint64_t get_dataformat_STRIP_CLUSTER_low32 (const uint64_t& in) {
 		return (in & SELECTBITS(32, 0));
 }
 
-	uint64_t get_dataformat_STRIP_CLUSTER (const STRIP_CLUSTER& in) {
+	inline uint64_t get_dataformat_STRIP_CLUSTER (const STRIP_CLUSTER& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.last) << STRIP_CLUSTER_LAST_lsb);
 		temp |= (static_cast<uint64_t>(in.row) << STRIP_CLUSTER_ROW_lsb);
@@ -997,12 +1102,12 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	uint64_t get_dataformat_STRIP_CLUSTER_64 (const uint64_t& up, const uint64_t& low) {
+	inline uint64_t get_dataformat_STRIP_CLUSTER_64 (const uint64_t& up, const uint64_t& low) {
 		uint64_t temp = up << 32;
 		return (temp | low);
 }
 
-	STRIP_CLUSTER fill_STRIP_CLUSTER (const uint64_t& last, const uint64_t& row, const uint64_t& nstrips, const uint64_t& strip_index, const uint64_t& clusterid, const uint64_t& spare) {
+	inline STRIP_CLUSTER fill_STRIP_CLUSTER (const uint64_t& last, const uint64_t& row, const uint64_t& nstrips, const uint64_t& strip_index, const uint64_t& clusterid, const uint64_t& spare) {
 		STRIP_CLUSTER temp;
 		temp.last = last;
 		temp.row = row;
@@ -1046,23 +1151,23 @@ namespace FPGADataFormatUtilities
 	const int GHITZ_W1_LYR_lsb = 59;
 	const float GHITZ_W1_LYR_mf = 1.;
 
-	const int GHITZ_W1_RAD_bits = 16;
-	const int GHITZ_W1_RAD_lsb = 43;
+	const int GHITZ_W1_RAD_bits = 18;
+	const int GHITZ_W1_RAD_lsb = 41;
 	const float GHITZ_W1_RAD_mf = 64.;
 
 	const int GHITZ_W1_PHI_bits = 16;
-	const int GHITZ_W1_PHI_lsb = 27;
+	const int GHITZ_W1_PHI_lsb = 25;
 	const float GHITZ_W1_PHI_mf = 8192.;
 
-	const int GHITZ_W1_Z_bits = 16;
-	const int GHITZ_W1_Z_lsb = 11;
+	const int GHITZ_W1_Z_bits = 18;
+	const int GHITZ_W1_Z_lsb = 7;
 	const float GHITZ_W1_Z_mf = 32.;
 
 	const int GHITZ_W1_ROW_bits = 6;
-	const int GHITZ_W1_ROW_lsb = 5;
+	const int GHITZ_W1_ROW_lsb = 1;
 	const float GHITZ_W1_ROW_mf = 1.;
 
-	const int GHITZ_W1_SPARE_bits = 5;
+	const int GHITZ_W1_SPARE_bits = 1;
 	const int GHITZ_W1_SPARE_lsb = 0;
 	const float GHITZ_W1_SPARE_mf = 1.;
 
@@ -1095,7 +1200,7 @@ namespace FPGADataFormatUtilities
 		uint64_t spare : GHITZ_W2_SPARE_bits;
 	} GHITZ_w2;
 
-	GHITZ_w1 get_bitfields_GHITZ_w1 (const uint64_t& in) {
+	inline GHITZ_w1 get_bitfields_GHITZ_w1 (const uint64_t& in) {
 		GHITZ_w1 temp;
 		temp.last = (in & SELECTBITS(GHITZ_W1_LAST_bits, GHITZ_W1_LAST_lsb)) >> GHITZ_W1_LAST_lsb;
 		temp.lyr = (in & SELECTBITS(GHITZ_W1_LYR_bits, GHITZ_W1_LYR_lsb)) >> GHITZ_W1_LYR_lsb;
@@ -1107,7 +1212,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	GHITZ_w2 get_bitfields_GHITZ_w2 (const uint64_t& in) {
+	inline GHITZ_w2 get_bitfields_GHITZ_w2 (const uint64_t& in) {
 		GHITZ_w2 temp;
 		temp.cluster1 = (in & SELECTBITS(GHITZ_W2_CLUSTER1_bits, GHITZ_W2_CLUSTER1_lsb)) >> GHITZ_W2_CLUSTER1_lsb;
 		temp.cluster2 = (in & SELECTBITS(GHITZ_W2_CLUSTER2_bits, GHITZ_W2_CLUSTER2_lsb)) >> GHITZ_W2_CLUSTER2_lsb;
@@ -1115,7 +1220,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	uint64_t get_dataformat_GHITZ_w1 (const GHITZ_w1& in) {
+	inline uint64_t get_dataformat_GHITZ_w1 (const GHITZ_w1& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.last) << GHITZ_W1_LAST_lsb);
 		temp |= (static_cast<uint64_t>(in.lyr) << GHITZ_W1_LYR_lsb);
@@ -1127,7 +1232,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	uint64_t get_dataformat_GHITZ_w2 (const GHITZ_w2& in) {
+	inline uint64_t get_dataformat_GHITZ_w2 (const GHITZ_w2& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.cluster1) << GHITZ_W2_CLUSTER1_lsb);
 		temp |= (static_cast<uint64_t>(in.cluster2) << GHITZ_W2_CLUSTER2_lsb);
@@ -1135,7 +1240,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	GHITZ_w1 fill_GHITZ_w1 (const uint64_t& last, const uint64_t& lyr, const double& rad, const double& phi, const double& z, const uint64_t& row, const uint64_t& spare) {
+	inline GHITZ_w1 fill_GHITZ_w1 (const uint64_t& last, const uint64_t& lyr, const double& rad, const double& phi, const double& z, const uint64_t& row, const uint64_t& spare) {
 		GHITZ_w1 temp;
 		temp.last = last;
 		temp.lyr = lyr;
@@ -1147,7 +1252,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	GHITZ_w2 fill_GHITZ_w2 (const uint64_t& cluster1, const uint64_t& cluster2, const uint64_t& spare) {
+	inline GHITZ_w2 fill_GHITZ_w2 (const uint64_t& cluster1, const uint64_t& cluster2, const uint64_t& spare) {
 		GHITZ_w2 temp;
 		temp.cluster1 = cluster1;
 		temp.cluster2 = cluster2;
@@ -1264,7 +1369,7 @@ namespace FPGADataFormatUtilities
 		uint64_t channelsphi : EDM_STRIP_CLUSTER_CHANNELSPHI_bits;
 	} EDM_STRIP_CLUSTER;
 
-	EDM_STRIP_CLUSTER get_bitfields_EDM_STRIP_CLUSTER (const uint64_t& in) {
+	inline EDM_STRIP_CLUSTER get_bitfields_EDM_STRIP_CLUSTER (const uint64_t& in) {
 		EDM_STRIP_CLUSTER temp;
 		temp.last = (in & SELECTBITS(EDM_STRIP_CLUSTER_LAST_bits, EDM_STRIP_CLUSTER_LAST_lsb)) >> EDM_STRIP_CLUSTER_LAST_lsb;
 		temp.row = (in & SELECTBITS(EDM_STRIP_CLUSTER_ROW_bits, EDM_STRIP_CLUSTER_ROW_lsb)) >> EDM_STRIP_CLUSTER_ROW_lsb;
@@ -1282,7 +1387,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	uint64_t get_dataformat_EDM_STRIP_CLUSTER (const EDM_STRIP_CLUSTER& in) {
+	inline uint64_t get_dataformat_EDM_STRIP_CLUSTER (const EDM_STRIP_CLUSTER& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.last) << EDM_STRIP_CLUSTER_LAST_lsb);
 		temp |= (static_cast<uint64_t>(in.row) << EDM_STRIP_CLUSTER_ROW_lsb);
@@ -1300,7 +1405,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	EDM_STRIP_CLUSTER fill_EDM_STRIP_CLUSTER (const uint64_t& last, const uint64_t& row, const uint64_t& nstrips, const uint64_t& strip_index, const uint64_t& nclusters, const uint64_t& clusteridhash, const uint64_t& clusterid, const uint64_t& localposition, const uint64_t& localcovariance, const uint64_t& global_position, const uint64_t& nstrip, const uint64_t& stripid, const uint64_t& channelsphi) {
+	inline EDM_STRIP_CLUSTER fill_EDM_STRIP_CLUSTER (const uint64_t& last, const uint64_t& row, const uint64_t& nstrips, const uint64_t& strip_index, const uint64_t& nclusters, const uint64_t& clusteridhash, const uint64_t& clusterid, const uint64_t& localposition, const uint64_t& localcovariance, const uint64_t& global_position, const uint64_t& nstrip, const uint64_t& stripid, const uint64_t& channelsphi) {
 		EDM_STRIP_CLUSTER temp;
 		temp.last = last;
 		temp.row = row;
@@ -1484,7 +1589,7 @@ namespace FPGADataFormatUtilities
 		uint64_t chargevalues : EDM_PIXEL_CLUSTER_CHARGEVALUES_bits;
 	} EDM_PIXEL_CLUSTER;
 
-	EDM_PIXEL_CLUSTER get_bitfields_EDM_PIXEL_CLUSTER (const uint64_t& in) {
+	inline EDM_PIXEL_CLUSTER get_bitfields_EDM_PIXEL_CLUSTER (const uint64_t& in) {
 		EDM_PIXEL_CLUSTER temp;
 		temp.last = (in & SELECTBITS(EDM_PIXEL_CLUSTER_LAST_bits, EDM_PIXEL_CLUSTER_LAST_lsb)) >> EDM_PIXEL_CLUSTER_LAST_lsb;
 		temp.col_size = (in & SELECTBITS(EDM_PIXEL_CLUSTER_COL_SIZE_bits, EDM_PIXEL_CLUSTER_COL_SIZE_lsb)) >> EDM_PIXEL_CLUSTER_COL_SIZE_lsb;
@@ -1511,7 +1616,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	uint64_t get_dataformat_EDM_PIXEL_CLUSTER (const EDM_PIXEL_CLUSTER& in) {
+	inline uint64_t get_dataformat_EDM_PIXEL_CLUSTER (const EDM_PIXEL_CLUSTER& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.last) << EDM_PIXEL_CLUSTER_LAST_lsb);
 		temp |= (static_cast<uint64_t>(in.col_size) << EDM_PIXEL_CLUSTER_COL_SIZE_lsb);
@@ -1538,7 +1643,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	EDM_PIXEL_CLUSTER fill_EDM_PIXEL_CLUSTER (const uint64_t& last, const uint64_t& col_size, const uint64_t& col, const uint64_t& row_size, const uint64_t& row, const uint64_t& nclusters, const uint64_t& clusteridhash, const uint64_t& clusterid, const uint64_t& localposition, const uint64_t& localcovariance, const uint64_t& globalposition, const uint64_t& npixel, const uint64_t& pixelid, const uint64_t& channelsinphi, const uint64_t& channelsineta, const uint64_t& widthineta, const uint64_t& omegax, const uint64_t& omegay, const uint64_t& ntot, const uint64_t& totvalue, const uint64_t& ncharge, const uint64_t& chargevalues) {
+	inline EDM_PIXEL_CLUSTER fill_EDM_PIXEL_CLUSTER (const uint64_t& last, const uint64_t& col_size, const uint64_t& col, const uint64_t& row_size, const uint64_t& row, const uint64_t& nclusters, const uint64_t& clusteridhash, const uint64_t& clusterid, const uint64_t& localposition, const uint64_t& localcovariance, const uint64_t& globalposition, const uint64_t& npixel, const uint64_t& pixelid, const uint64_t& channelsinphi, const uint64_t& channelsineta, const uint64_t& widthineta, const uint64_t& omegax, const uint64_t& omegay, const uint64_t& ntot, const uint64_t& totvalue, const uint64_t& ncharge, const uint64_t& chargevalues) {
 		EDM_PIXEL_CLUSTER temp;
 		temp.last = last;
 		temp.col_size = col_size;
@@ -1692,7 +1797,7 @@ namespace FPGADataFormatUtilities
 		uint64_t spare : PIXEL_EF_RDO_SPARE_bits;
 	} PIXEL_EF_RDO;
 
-	PIXEL_EF_RDO get_bitfields_PIXEL_EF_RDO (const uint64_t& in) {
+	inline PIXEL_EF_RDO get_bitfields_PIXEL_EF_RDO (const uint64_t& in) {
 		PIXEL_EF_RDO temp;
 		temp.last = (in & SELECTBITS(PIXEL_EF_RDO_LAST_bits, PIXEL_EF_RDO_LAST_lsb)) >> PIXEL_EF_RDO_LAST_lsb;
 		temp.row = (in & SELECTBITS(PIXEL_EF_RDO_ROW_bits, PIXEL_EF_RDO_ROW_lsb)) >> PIXEL_EF_RDO_ROW_lsb;
@@ -1704,7 +1809,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	uint64_t get_dataformat_PIXEL_EF_RDO (const PIXEL_EF_RDO& in) {
+	inline uint64_t get_dataformat_PIXEL_EF_RDO (const PIXEL_EF_RDO& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.last) << PIXEL_EF_RDO_LAST_lsb);
 		temp |= (static_cast<uint64_t>(in.row) << PIXEL_EF_RDO_ROW_lsb);
@@ -1716,7 +1821,7 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	PIXEL_EF_RDO fill_PIXEL_EF_RDO (const uint64_t& last, const uint64_t& row, const uint64_t& col, const uint64_t& tot, const uint64_t& lvl1, const uint64_t& id, const uint64_t& spare) {
+	inline PIXEL_EF_RDO fill_PIXEL_EF_RDO (const uint64_t& last, const uint64_t& row, const uint64_t& col, const uint64_t& tot, const uint64_t& lvl1, const uint64_t& id, const uint64_t& spare) {
 		PIXEL_EF_RDO temp;
 		temp.last = last;
 		temp.row = row;
@@ -1790,7 +1895,7 @@ namespace FPGADataFormatUtilities
 		uint64_t spare : STRIP_EF_RDO_SPARE_bits;
 	} STRIP_EF_RDO;
 
-	STRIP_EF_RDO get_bitfields_STRIP_EF_RDO (const uint64_t& in) {
+	inline STRIP_EF_RDO get_bitfields_STRIP_EF_RDO (const uint64_t& in) {
 		STRIP_EF_RDO temp;
 		temp.last = (in & SELECTBITS(STRIP_EF_RDO_LAST_bits, STRIP_EF_RDO_LAST_lsb)) >> STRIP_EF_RDO_LAST_lsb;
 		temp.chipid = (in & SELECTBITS(STRIP_EF_RDO_CHIPID_bits, STRIP_EF_RDO_CHIPID_lsb)) >> STRIP_EF_RDO_CHIPID_lsb;
@@ -1801,15 +1906,15 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	uint64_t get_dataformat_STRIP_EF_RDO_up32 (const uint64_t& in) {
+	inline uint64_t get_dataformat_STRIP_EF_RDO_up32 (const uint64_t& in) {
 		return (in & SELECTBITS(32, 32)) >> 32;
 }
 
-	uint64_t get_dataformat_STRIP_EF_RDO_low32 (const uint64_t& in) {
+	inline uint64_t get_dataformat_STRIP_EF_RDO_low32 (const uint64_t& in) {
 		return (in & SELECTBITS(32, 0));
 }
 
-	uint64_t get_dataformat_STRIP_EF_RDO (const STRIP_EF_RDO& in) {
+	inline uint64_t get_dataformat_STRIP_EF_RDO (const STRIP_EF_RDO& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.last) << STRIP_EF_RDO_LAST_lsb);
 		temp |= (static_cast<uint64_t>(in.chipid) << STRIP_EF_RDO_CHIPID_lsb);
@@ -1820,12 +1925,12 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	uint64_t get_dataformat_STRIP_EF_RDO_64 (const uint64_t& up, const uint64_t& low) {
+	inline uint64_t get_dataformat_STRIP_EF_RDO_64 (const uint64_t& up, const uint64_t& low) {
 		uint64_t temp = up << 32;
 		return (temp | low);
 }
 
-	STRIP_EF_RDO fill_STRIP_EF_RDO (const uint64_t& last, const uint64_t& chipid, const uint64_t& strip_num, const uint64_t& cluster_map, const uint64_t& id, const uint64_t& spare) {
+	inline STRIP_EF_RDO fill_STRIP_EF_RDO (const uint64_t& last, const uint64_t& chipid, const uint64_t& strip_num, const uint64_t& cluster_map, const uint64_t& id, const uint64_t& spare) {
 		STRIP_EF_RDO temp;
 		temp.last = last;
 		temp.chipid = chipid;
