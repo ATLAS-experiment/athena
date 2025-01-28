@@ -4,6 +4,10 @@
 
 #include "../FPGADataFormatAlg.h"
 #include "../FPGADataFormatTool.h"
+#include "../TestVectorTool.h"
+#include "../OutputConversionTool.h"
 
 DECLARE_COMPONENT(FPGADataFormatAlg)
 DECLARE_COMPONENT(FPGADataFormatTool)
+DECLARE_COMPONENT(TestVectorTool)
+DECLARE_COMPONENT(OutputConversionTool)

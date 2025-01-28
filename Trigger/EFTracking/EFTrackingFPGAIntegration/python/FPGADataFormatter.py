@@ -13,14 +13,42 @@ def FPGADataFormatToolCfg(flags, name = 'FPGADataFormatTool', **kwarg):
 
     return acc
 
+def FPGATestVectorToolCfg(flags, name = 'FPGATestVectorTool', **kwarg):
+    
+    acc = ComponentAccumulator()
+    
+    kwarg.setdefault('name', name)
+    acc.setPrivateTools(CompFactory.TestVectorTool(**kwarg))
+
+    return acc
+
+def FPGAOutputConversionToolCfg(flags, name = 'FPGAOutputConversionTool', **kwarg):
+    
+    acc = ComponentAccumulator()
+    
+    kwarg.setdefault('name', name)
+    acc.setPrivateTools(CompFactory.OutputConversionTool(**kwarg))
+
+    return acc
+
 def FPGAFormatterPrepCfg(flags, name = "FPGAFormatterPrep", **kwarg):
 
     acc = ComponentAccumulator()
     
     tool = acc.popToolsAndMerge(FPGADataFormatToolCfg(flags))
+    tvTool = acc.popToolsAndMerge(FPGATestVectorToolCfg(flags))
+    outputTool = acc.popToolsAndMerge(FPGAOutputConversionToolCfg(flags))
     
     kwarg.setdefault('name', name)
     kwarg.setdefault('FPGADataFormatTool', tool)
+    kwarg.setdefault('TestVectorTool', tvTool)
+    kwarg.setdefault('OutputConversionTool', outputTool)
+    
+    kwarg.setdefault('PixelClusterRefTV', '')
+    kwarg.setdefault('StripClusterRefTV', '')
+    kwarg.setdefault('PixelL2GRefTV', '')
+    kwarg.setdefault('StripL2GRefTV', '')
+    kwarg.setdefault('SpacePointRefTV', '')
 
     acc.addEventAlgo(CompFactory.FPGADataFormatAlg(**kwarg))
     return acc
