@@ -12,6 +12,8 @@
 
 #include "../CrestApi/CrestApiFs.h"
 #include <string>
+#include <unistd.h>
+#include <sys/stat.h>
 
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
@@ -20,7 +22,8 @@ using namespace Crest;
 
 BOOST_AUTO_TEST_SUITE(CrestApiFsTest)
 
-  std::string workdir = "/tmp/crest";
+  std::string workdir = "./crest";
+  int dirstat = mkdir (workdir.c_str(), S_IRWXU);
   CrestFsClient myCrestClient = CrestFsClient(true, workdir);
   std::string tagname = "test_ctest_tag_01";
   std::string global_tag = "TEST_GLOBAL_TAG_01";
