@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger AthenaMT test running new-style job options
 # art-type: grid
 # art-include: main/Athena
+# art-athena-mt: 8
 # art-architecture: '#&nvidia'
 # If you create a grid version, check art-output in existing grid tests.
 # art-output: *.txt
@@ -25,7 +26,7 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 # Generate configuration run file
 run = ExecStep.ExecStep()
 run.type = 'athena'
-run.threads = 1
+run.threads = 8
 run.input = 'Single_mu_Run4'
 run.job_options = 'TriggerJobOpts/runHLT.py'
 run.flags = ['Trigger.triggerMenuSetup="MC_pp_run4_v1"',
