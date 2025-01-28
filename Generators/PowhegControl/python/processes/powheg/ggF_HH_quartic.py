@@ -46,6 +46,7 @@ class ggF_HH_quartic(PowhegV2):
         self.add_keyword("check_bad_st1")
         self.add_keyword("check_bad_st2")
         self.add_keyword("chhh", 1.0)
+        self.add_keyword("ch4", 1.0)
         self.add_keyword("ct", 1.0)
         self.add_keyword("ctt", 0.)
         self.add_keyword("cggh", 0.)
