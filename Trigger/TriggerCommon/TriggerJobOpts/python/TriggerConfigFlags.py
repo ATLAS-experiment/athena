@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import os
 
@@ -22,7 +22,7 @@ def trigGlobalTag(flags):
     """Return global conditions data to be used in the HLT. Return None to indicate that
     no trigger-specific tag is required. Used for IOVDb.GlobalTag in AllConfigFlags.py.
     """
-    return None if flags.Input.isMC else 'CONDBR2-HLTP-2024-02'
+    return None if flags.Input.isMC else 'CONDBR2-HLTP-2024-03'
 
 def trigGeoTag(flags):
     """Return geometry tag to be used in the HLT. Returns None to indicate that
