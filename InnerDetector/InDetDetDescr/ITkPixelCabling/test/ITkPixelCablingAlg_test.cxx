@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -14,52 +14,32 @@
 #define BOOST_TEST_MODULE TEST_ITkPixelCabling
 
 #include <boost/test/unit_test.hpp>
-//
-#include "AthenaKernel/ExtendedEventContext.h"
+
 #include "GaudiKernel/EventContext.h"
-#include "GaudiKernel/ServiceLocatorHelper.h"
-//
-#include "CxxUtils/checker_macros.h"
-
-#include "TestTools/initGaudi.h"
-#include "TInterpreter.h"
-#include "CxxUtils/ubsan_suppress.h"
-#include "CxxUtils/checker_macros.h"
-
-#include "IdDictParser/IdDictParser.h"  
+#include "GaudiKernel/EventIDBase.h"
+#include "IdDictParser/IdDictParser.h"
 #include "InDetIdentifier/PixelID.h"
-#include "src/ITkPixelCablingAlg.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "TestTools/initGaudi.h"
+
+#include "src/ITkPixelCablingAlg.h"
+
 #include <string>
 #include <memory>
 
 namespace utf = boost::unit_test;
 
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
-
-struct GaudiKernelFixture{
-  static ISvcLocator* svcLoc;
-  const std::string jobOpts{};
-  GaudiKernelFixture(const std::string & jobOptionFile = "ITkPixelCablingAlg_test.txt"):jobOpts(jobOptionFile){
-    CxxUtils::ubsan_suppress ([]() { TInterpreter::Instance(); } );
-    if (svcLoc==nullptr){
-      std::string fullJobOptsName="ITkPixelCabling/" + jobOpts;
-      Athena_test::initGaudi(fullJobOptsName, svcLoc);
-    }
-  }
+struct TestFixture : Athena_test::InitGaudi {
+  TestFixture() :
+    Athena_test::InitGaudi("ITkPixelCabling/ITkPixelCablingAlg_test.txt") {}
 };
 
-ISvcLocator* GaudiKernelFixture::svcLoc = nullptr;
 
 static const std::string itkDictFilename{"InDetIdDictFiles/IdDictInnerDetector_ITK_HGTD_23.xml"};
 
-//from EventIDBase
-typedef unsigned int number_type;
-typedef uint64_t     event_number_t;
-
 std::pair <EventIDBase, EventContext>
-getEvent(number_type runNumber, number_type timeStamp){
-  event_number_t eventNumber(0);
+getEvent(EventIDBase::number_type runNumber, EventIDBase::number_type timeStamp){
+  EventIDBase::event_number_t eventNumber(0);
   EventIDBase eid(runNumber, eventNumber, timeStamp);
   EventContext ctx;
   ctx.setEventID (eid);
@@ -87,20 +67,13 @@ canRetrieveITkPixelCablingData(ServiceHandle<StoreGateSvc> & conditionStore){
   return true;
 }
 
-BOOST_AUTO_TEST_SUITE(ITkPixelCablingAlgTest )
-  GaudiKernelFixture g;
+BOOST_FIXTURE_TEST_SUITE( ITkPixelCablingAlgTest, TestFixture )
 
-  BOOST_AUTO_TEST_CASE( SanityCheck ){
-    const bool svcLocatorIsOk=(g.svcLoc != nullptr);
-    BOOST_TEST(svcLocatorIsOk);
-  }
-  
   //https://acode-browser.usatlas.bnl.gov/lxr/source/athena/InnerDetector/InDetDetDescr/InDetIdentifier/test/ITkPixelID_test.cxx
   BOOST_AUTO_TEST_CASE(ExecuteOptions){
     {//This is just to setup the ITkPixelID with a valid set of identifiers
-      const ServiceLocatorHelper helper{*(g.svcLoc), "HELPER"};
-      IService* iSvc{helper.service("StoreGateSvc/DetectorStore", true /*quiet*/ , true /*createIf*/)};
-      StoreGateSvc* detStore{dynamic_cast<StoreGateSvc*>(iSvc)};
+      ServiceHandle<StoreGateSvc> detStore("StoreGateSvc/DetectorStore", "ITkPixelCablingAlgTest");
+      BOOST_TEST(detStore.retrieve().isSuccess());
       IdDictParser parser;
       parser.register_external_entity("InnerDetector", itkDictFilename);
       IdDictMgr& idd = parser.parse ("IdDictParser/ATLAS_IDS.xml");
@@ -108,21 +81,21 @@ BOOST_AUTO_TEST_SUITE(ITkPixelCablingAlgTest )
       BOOST_TEST(pITkId->initialize_from_dictionary(idd)==0);
       BOOST_TEST(detStore->record(std::move(pITkId), "PixelID").isSuccess());
     }//Now the ITkPixelID is in StoreGate, ready to be used by the cabling
-    ITkPixelCablingAlg a("MyAlg", g.svcLoc);
+    ITkPixelCablingAlg a("MyAlg", svcLoc);
     a.addRef();
     //add property definitions for later (normally in job opts)
     BOOST_TEST(a.setProperty("DataSource","ITkPixelCabling.dat").isSuccess());
     //
     BOOST_TEST(a.sysInitialize().isSuccess() );
-    ServiceHandle<StoreGateSvc> conditionStore ("ConditionStore", "ITkPixelCablingData");
+    ServiceHandle<StoreGateSvc> conditionStore ("ConditionStore", "ITkPixelCablingAlgTest");
     CondCont<ITkPixelCablingData> * cc{};
     BOOST_TEST( canRetrieveITkPixelCablingData(conditionStore));
     //execute for the following event:
     EventContext ctx;
     //
-    number_type runNumber(222222 - 100);//run 1
-    event_number_t eventNumber(0);
-    number_type timeStamp(0);
+    EventIDBase::number_type runNumber(222222 - 100);//run 1
+    EventIDBase::event_number_t eventNumber(0);
+    EventIDBase::number_type timeStamp(0);
     EventIDBase eidRun1 (runNumber, eventNumber, timeStamp);
     ctx.setEventID (eidRun1);
     BOOST_TEST(a.execute(ctx).isSuccess());
