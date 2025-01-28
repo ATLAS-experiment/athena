@@ -174,7 +174,7 @@ bool TrigEgammaMonitorBaseAlgorithm::isPrescaled(const std::string& trigger) con
 
 
 
-asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUtils::Decision *dec, const TrigInfo& info) const {
+asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUtils::Decision *dec, const TrigInfo& info, const bool onlyHLT) const {
     
     ATH_MSG_DEBUG("setAccept");
 
@@ -190,64 +190,84 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
     bool passedEF=false;
     
     if (dec) {
+        auto trigger = info.trigger;
+        if (!onlyHLT){
+            // Step 1
+            passedL1Calo = match()->ancestorPassed<TrigRoiDescriptorCollection>( dec , trigger , "initialRois", condition);
 
-        auto trigger = info.trigger; 
-        // Step 1
-        passedL1Calo = match()->ancestorPassed<TrigRoiDescriptorCollection>( dec , trigger , "initialRois", condition);
+            if( passedL1Calo ){ // HLT item get full decision
+                // Step 2
+                passedL2Calo = match()->ancestorPassed<xAOD::TrigEMClusterContainer>(dec, trigger, match()->key("FastCalo"), condition);  
+            
+                if(passedL2Calo){
 
-        if( passedL1Calo ){ // HLT item get full decision
-            // Step 2
-            passedL2Calo = match()->ancestorPassed<xAOD::TrigEMClusterContainer>(dec, trigger, match()->key("FastCalo"), condition);  
-          
-            if(passedL2Calo){
+                    // Step 3
+                    if(info.signature == "Electron"){
+                        std::string key = match()->key("FastElectrons");
+                        if(info.lrt)  key = match()->key("FastElectrons_LRT");
+                        passedL2 = match()->ancestorPassed<xAOD::TrigElectronContainer>(dec, trigger, key, condition);
+                    }else if(info.signature == "Photon"){
+                        passedL2 = match()->ancestorPassed<xAOD::TrigPhotonContainer>(dec, trigger, match()->key("FastPhotons"), condition);
+                    }
 
-                // Step 3
-                if(info.signature == "Electron"){
-                    std::string key = match()->key("FastElectrons");
-                    if(info.lrt)  key = match()->key("FastElectrons_LRT");
-                    passedL2 = match()->ancestorPassed<xAOD::TrigElectronContainer>(dec, trigger, key, condition);
-                }else if(info.signature == "Photon"){
-                    passedL2 = match()->ancestorPassed<xAOD::TrigPhotonContainer>(dec, trigger, match()->key("FastPhotons"), condition);
+                    if(passedL2){
+
+                        // Step 4
+                        std::string key = match()->key("PrecisionCalo_Electron");
+                        if(info.signature == "Photon") key = match()->key("PrecisionCalo_Photon");
+                        if(info.lrt) key = match()->key("PrecisionCalo_LRT");
+                        if(info.ion) key = match()->key("PrecisionCalo_HI");
+
+                        passedEFCalo = match()->ancestorPassed<xAOD::CaloClusterContainer>(dec, trigger, key, condition);
+
+                        if(passedEFCalo){
+
+                            // Step 5
+                            passedEFTrk=true;// Assume true for photons
+
+                            // Step 6
+                            if(info.signature == "Electron"){
+                                if( info.etcut || info.idperf){// etcut or idperf
+                                    passedEF = true; // since we dont run the preciseElectron step
+                                }else{
+                                    std::string key = match()->key("Electrons_GSF");
+                                    if(info.lrt)  key = match()->key("Electrons_LRT");
+                                    if(info.nogsf)  key = match()->key("Electrons");
+                                    passedEF = match()->ancestorPassed<xAOD::ElectronContainer>(dec, trigger, key, condition);
+                                }
+    
+                            }else if(info.signature == "Photon"){
+                                if (info.etcut){
+                                    passedEF = true; // since we dont run the precisePhoton step
+                                }else{
+                                    passedEF = match()->ancestorPassed<xAOD::PhotonContainer>(dec, trigger, match()->key("Photons"), condition);
+                                }
+                            }
+                        } // EFCalo
+                    }// L2
+                }// L2Calo
+            }// L2Calo
+
+        }
+        else{
+            if(info.signature == "Electron"){
+                if( info.etcut || info.idperf){// etcut or idperf
+                    passedEF = true; // since we dont run the preciseElectron step
+                }else{
+                    std::string key = match()->key("Electrons_GSF");
+                    if(info.lrt)  key = match()->key("Electrons_LRT");
+                    if(info.nogsf)  key = match()->key("Electrons");
+                    passedEF = match()->ancestorPassed<xAOD::ElectronContainer>(dec, trigger, key, condition);
                 }
 
-                if(passedL2){
-
-                    // Step 4
-                    std::string key = match()->key("PrecisionCalo_Electron");
-                    if(info.signature == "Photon") key = match()->key("PrecisionCalo_Photon");
-                    if(info.lrt) key = match()->key("PrecisionCalo_LRT");
-                    if(info.ion) key = match()->key("PrecisionCalo_HI");
-
-                    passedEFCalo = match()->ancestorPassed<xAOD::CaloClusterContainer>(dec, trigger, key, condition);
-
-                    if(passedEFCalo){
-
-                        // Step 5
-                        passedEFTrk=true;// Assume true for photons
-
-                        // Step 6
-                        if(info.signature == "Electron"){
-                            if( info.etcut || info.idperf){// etcut or idperf
-                                passedEF = true; // since we dont run the preciseElectron step
-                            }else{
-                                std::string key = match()->key("Electrons_GSF");
-                                if(info.lrt)  key = match()->key("Electrons_LRT");
-                                if(info.nogsf)  key = match()->key("Electrons");
-                                passedEF = match()->ancestorPassed<xAOD::ElectronContainer>(dec, trigger, key, condition);
-                            }
-   
-                        }else if(info.signature == "Photon"){
-                            if (info.etcut){
-                                passedEF = true; // since we dont run the precisePhoton step
-                            }else{
-                                passedEF = match()->ancestorPassed<xAOD::PhotonContainer>(dec, trigger, match()->key("Photons"), condition);
-                            }
-                        }
-                    } // EFCalo
-                }// L2
-            }// L2Calo
-        }// L2Calo
-
+            }else if(info.signature == "Photon"){
+                if (info.etcut){
+                    passedEF = true; // since we dont run the precisePhoton step
+                }else{
+                    passedEF = match()->ancestorPassed<xAOD::PhotonContainer>(dec, trigger, match()->key("Photons"), condition);
+                }
+            }
+        }
     }
 
     acceptData.setCutResult("L1Calo",passedL1Calo);

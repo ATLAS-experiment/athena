@@ -21,7 +21,7 @@ class TrigEgammaMonitorAnalysisAlgorithm: public TrigEgammaMonitorBaseAlgorithm
   protected:
 
     void fillLabel( const ToolHandle<GenericMonitoringTool>& groupHandle, const std::string &histname, const std::string &label ) const;
-    void fillEfficiencies( const std::vector< std::pair<const xAOD::Egamma*, const TrigCompositeUtils::Decision*> >& , const TrigInfo& ) const;
+    void fillEfficiencies( const std::vector< std::pair<const xAOD::Egamma*, const TrigCompositeUtils::Decision*> >& , const TrigInfo&, const bool ) const;
     void fillDistributions( const std::vector< std::pair<const xAOD::Egamma*, const TrigCompositeUtils::Decision*> >& , const TrigInfo& ) const;
     void fillResolutions( const std::vector< std::pair< const xAOD::Egamma*, const TrigCompositeUtils::Decision * >>& pairObjs, const TrigInfo& info ) const;
     void fillInefficiency(  const std::string &pidword, const TrigInfo& info, const std::vector< std::pair< const xAOD::Egamma *, const TrigCompositeUtils::Decision* >>& pairObjs, const std::vector< asg::AcceptData >& acceptObjs) const;

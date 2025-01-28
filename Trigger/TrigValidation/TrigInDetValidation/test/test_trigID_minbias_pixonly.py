@@ -31,7 +31,7 @@
 
 
 
-Slices  = ['minbias-pixonly']
+Slices  = ['minbiaspix']
 Events  = 8000 
 Threads = 8 
 Slots   = 8

@@ -13,7 +13,8 @@ using namespace Trig;
 
 TrigEgammaMonitorPhotonAlgorithm::TrigEgammaMonitorPhotonAlgorithm( const std::string& name, ISvcLocator* pSvcLocator ):
   TrigEgammaMonitorAnalysisAlgorithm( name, pSvcLocator )
-{}
+{
+}
 
 TrigEgammaMonitorPhotonAlgorithm::~TrigEgammaMonitorPhotonAlgorithm()
 {}
@@ -103,7 +104,7 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::fillHistograms( const EventContext&
         }
         
         fillDistributions( pairObjsRaw, info );
-        fillEfficiencies( pairObjsRaw, info );
+        fillEfficiencies( pairObjsRaw, info, m_onlyHLT );
         fillResolutions( pairObjsRaw, info );
 
 

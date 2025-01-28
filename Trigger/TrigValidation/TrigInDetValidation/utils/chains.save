@@ -1,0 +1,20 @@
+/* emacs: this is -*- c++ -*- */
+testChains = {
+
+#if !defined VTXANALYSIS && !defined LRT
+
+CompChains  
+
+#endif
+
+#ifdef LRT
+
+LRTCompChains
+  
+#else
+
+VertexCompChains
+  
+#endif
+
+};
