@@ -69,9 +69,9 @@ testChains = {
     "HLT_mu24_idperf_L1MU14FCH:HLT_IDTrack_Muon_FTF:HLT_Roi_L2SAMuon",
     "HLT_mu24_idperf_L1MU14FCH:HLT_IDTrack_Muon_IDTrig:HLT_Roi_L2SAMuon",
 
-    "HLT_fslrt0_L1jJ160:HLT_IDTrack_FSLRT_FTF_DTE",
-    "HLT_fslrt0_L1jJ160:HLT_IDTrack_FSLRT_IDTrig_DTE",
-    "HLT_fslrt0_L1jJ160:HLT_IDTrack_FS_FTF_DTE",
+    "HLT_fslrt0_L1jJ160:HLT_IDTrack_FSLRT_FTF:HLT_FSRoI",
+    "HLT_fslrt0_L1jJ160:HLT_IDTrack_FSLRT_IDTrig:HLT_FSRoI",
+    "HLT_fslrt0_L1jJ160:HLT_IDTrack_FS_FTF:HLT_FSRoI",
 
     "HLT_e20_idperf_loose_lrtloose_L1eEM18L:HLT_IDTrack_ElecLRT_FTF:HLT_Roi_FastElectron_LRT",
     "HLT_e20_idperf_loose_lrtloose_L1eEM18L:HLT_IDTrack_ElecLRT_IDTrig:HLT_Roi_FastElectron_LRT",

@@ -105,10 +105,10 @@
        "chains" : " HLT_mu4_cosmic_L1MU3V_EMPTY:HLT_IDTrack_Cosmic_IDTrig " 
    },
    "L2FSLRT": {
-       "chains" : " HLT_fslrt0_L1jJ160:HLT_IDTrack_FSLRT_FTF_DTE  HLT_fslrt0_L1jJ160:HLT_IDTrack_FS_FTF_DTE " 
+       "chains" : " HLT_fslrt0_L1jJ160:HLT_IDTrack_FS_FTF:HLT_FSRoI  HLT_fslrt0_L1jJ160:HLT_IDTrack_FSLRT_FTF:HLT_FSRoI " 
    },
    "EFFSLRT": {
-       "chains" : " HLT_fslrt0_L1jJ160:HLT_IDTrack_FSLRT_FTF_DTE  HLT_fslrt0_L1jJ160:HLT_IDTrack_FSLRT_IDTrig_DTE " 
+       "chains" : " HLT_fslrt0_L1jJ160:HLT_IDTrack_FSLRT_FTF:HLT_FSRoI  HLT_fslrt0_L1jJ160:HLT_IDTrack_FSLRT_IDTrig:HLT_FSRoI " 
    },
    "beamspot": {
        "chains" : " HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L14jJ50  HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L1jJ30_VjTE200  HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L1jJ40  HLT_j0_ftf_beamspotVtx_L1jJ30_VjTE200 " 
