@@ -813,7 +813,8 @@ class transform(object):
         else:
             msg.info('Validating output files')
             parparallelMode = False
-            parmultithreadedMode = False
+            # Make MT file validation default
+            parmultithreadedMode = True
             if 'parallelFileValidation' in self._argdict:
                 parparallelMode = self._argdict['parallelFileValidation'].value
             if 'multithreadedFileValidation' in self._argdict:
