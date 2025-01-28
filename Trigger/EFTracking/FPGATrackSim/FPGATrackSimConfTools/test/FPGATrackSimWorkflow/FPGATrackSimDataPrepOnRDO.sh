@@ -1,36 +1,29 @@
 #!/bin/bash
 set -e
 
-GEO_TAG="ATLAS-P2-RUN4-03-00-00"
-RDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/RDO/reg0_singlemu.root"
-
-# instructions on how to change version of files can be found in https://twiki.cern.ch/twiki/bin/view/Atlas/EFTrackingSoftware
-MAP_VERSION="v0.22"
-export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/:$CALIBPATH
-MAPS="maps_9L/OtherFPGAPipelines/${MAP_VERSION}"
-
+LABEL="F100"
 
 if [ -z $1 ]; then
-    xAODOutput="FPGATrackSimCITestAOD.root"
-    RDO_EVT=200
+    xAODOutput="FPGATrackSim_${LABEL}_AOD.root"
 else
     xAODOutput=$1
-    RDO_EVT=-1
+    shift
 fi
+
+source FPGATrackSim_CommonEnv.sh "$@"
 
 echo "... analysis on RDO"
 
-python -m FPGATrackSimConfTools.FPGATrackSimDataPrepConfig \
-    --evtMax=${RDO_EVT} \
-    --filesInput=${RDO} \
-    Trigger.FPGATrackSim.mapsDir=${MAPS} \
-    Trigger.FPGATrackSim.region=0 \
-    Trigger.FPGATrackSim.spacePoints=True \
-    Trigger.FPGATrackSim.sampleType='singleMuons' \
-    Trigger.FPGATrackSim.doEDMConversion=True  \
+python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
+    --evtMax=$RDO_EVT_ANALYSIS \
+    --filesInput=$RDO_ANALYSIS \
+    Output.AODFileName=$xAODOutput \
+    Trigger.FPGATrackSim.doEDMConversion=True \
+    Trigger.FPGATrackSim.pipeline='F-100' \
+    Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
+    Trigger.FPGATrackSim.mapsDir=$MAPS_9L \
     Trigger.FPGATrackSim.writeToAOD=True \
-    Trigger.FPGATrackSim.outputMonitorFile="monitoringDataPrep.root" \
-    Output.AODFileName=$xAODOutput
+    Trigger.FPGATrackSim.outputMonitorFile="monitoring_${LABEL}.root"
 
 
 if [ -z $ArtJobType ];then # skip file check for ART (this has already been done in CI)

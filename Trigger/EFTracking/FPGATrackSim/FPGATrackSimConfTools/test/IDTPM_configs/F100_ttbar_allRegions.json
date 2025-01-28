@@ -1,0 +1,43 @@
+{
+    "TrkAnaEF" : {
+        "enabled" : true,
+        "TestType"  : "EFTrigger",
+        "RefType"   : "Truth",
+        "TrigTrkKey": "FPGADataPrepTrackParticles",
+        "MatchingType"  : "TruthMatch",
+        "truthMinD0"    : -2.0,
+        "truthMaxD0"    : 2.0,
+        "truthMinZ0"    : -150.0,
+        "truthMaxZ0"    : 150.0,
+        "truthMinQoPT"  : -0.001,
+        "truthMaxQoPT"  : 0.001
+
+    },
+    "TrkAnaOffl" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "MatchingType"  : "TruthMatch",
+        "truthMinD0"    : -2.0,
+        "truthMaxD0"    : 2.0,
+        "truthMinZ0"    : -150.0,
+        "truthMaxZ0"    : 150.0,
+        "truthMinQoPT"  : -0.001,
+        "truthMaxQoPT"  : 0.001
+    },
+    "TrkAnaDoubleRatio" : {
+        "enabled" : true,
+        "TestType"  : "EFTrigger",
+        "RefType"   : "Offline",
+        "TrigTrkKey": "FPGADataPrepTrackParticles",
+        "MatchingType"  : "EFTruthMatch",
+        "SelectOfflineObject" : "Truth",
+        "plotTrackParameters" : false,
+        "truthMinD0"    : -2.0,
+        "truthMaxD0"    : 2.0,
+        "truthMinZ0"    : -150.0,
+        "truthMaxZ0"    : 150.0,
+        "truthMinQoPT"  : -0.001,
+        "truthMaxQoPT"  : 0.001
+    }
+}

@@ -299,7 +299,7 @@ bool FPGATrackSimEventSelectionSvc::checkTruthTracks(const std::vector<FPGATrack
 // find at least one track in the region
   bool good=false;
   for (const FPGATrackSimTruthTrack& track : truthTracks){
-    if(m_regions->inRegion(m_regionID, track)){      
+    if(m_regions->inRegion(m_regionID, track) || m_skipRegionCheck){      
       good=true;
       if (std::abs(track.getPDGCode()) != static_cast<int>(m_st)) {
 	      ATH_MSG_WARNING("selectEvent(): TruthTrack PDGCode != sampleType");

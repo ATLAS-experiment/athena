@@ -71,6 +71,7 @@ class FPGATrackSimEventSelectionSvc : public extends< AthService, IFPGATrackSimE
 
   // Gaudi parameters:
   Gaudi::Property<unsigned int> m_regionID     { this, "regionID", 0, "current region under processing"};  // Current region of interest
+  Gaudi::Property<unsigned int> m_skipRegionCheck     { this, "skipRegionCheck", false, "this should be set to true for DataPrep or in cases where region cuts don't matter"};
   Gaudi::Property<std::string> m_regions_path  { this, "regions", "", "path of the slices file"};         // path to slices file
   Gaudi::Property<std::string> m_sampleType    { this, "sampleType", "singleMuons", "type of sample under processing (skipTruth, singleElectrons, singleMuons, singlePions, or LLPs)"};           // type of sample ("skipTruth", "singleElectrons", "singleMuons", "singlePions")
   Gaudi::Property<bool> m_withPU           { this, "withPU",  false, "flag to say if there is pile-up or not"};              // flag to say if there is pile-up or not

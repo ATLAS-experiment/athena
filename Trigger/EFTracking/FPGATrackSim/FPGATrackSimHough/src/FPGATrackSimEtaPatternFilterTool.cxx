@@ -219,14 +219,10 @@ void FPGATrackSimEtaPatternFilterTool::addHitsToMap(const std::shared_ptr<const 
                 ModuleId mod = { hit->getDetType(), hit->getDetectorZone(), (int)(hit->getEtaModule()) };
                 auto itr = m_moduleHits[lyr].find(mod);
                 if (itr != m_moduleHits[lyr].end())
-                    itr->second.addHit(hit);
-                else {
-                    ATH_MSG_ERROR("Module not in map: " << hit->getDetType() << " " << hit->getDetectorZone() << " " <<  static_cast<int>(hit->getEtaModule()) << " type: " << hit->getHitType() << " layer: " << lyr);
-                    for (auto & itr2 : m_moduleHits[lyr])
-                    {
-                        ATH_MSG_ERROR("   " << itr2.first.siTech << " " << itr2.first.zone << " " << itr2.first.etaModule);
+                    if (!((hit->getHitType() == HitType::spacepoint) && (hit->getSide() == 1))) { // in a way related to EFTRACK-743
+                        ATH_MSG_VERBOSE("Adding hit to map");
+                        itr->second.addHit(hit);
                     }
-                }
             }
 }
 

@@ -95,7 +95,7 @@ class FPGAClusterConverter : public extends<AthAlgTool,IFPGAClusterConverter>
 
     ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool {this, "LorentzAngleTool", "SiLorentzAngleTool/SCTLorentzAngleTool", "Tool to retrieve Lorentz angle of SCT"};
 
-    Gaudi::Property<bool> m_skipStripSpacePointFormation {this, "skipStripSpFormation", false, "Should be enabled in case we want to test strip seeding"};
+    Gaudi::Property<bool> m_skipStripSpacePointFormation {this, "skipStripSpFormation", true, "Should be enabled in case we want to test strip seeding"};
  };
 
 #endif

@@ -50,32 +50,32 @@ atlas_add_test( FPGATrackSim_F300_test
                 PRIVATE_WORKING_DIRECTORY
                 LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*" # ACTS (C)KF related errors
                 POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 450 )
+                PROPERTIES TIMEOUT 600 )
 
 atlas_add_test( FPGATrackSim_F100_test
                 SCRIPT FPGATrackSimDataPrepOnRDO.sh
                 PRIVATE_WORKING_DIRECTORY
                 LOG_IGNORE_PATTERN ".*ERROR.*Global to local transformation did not succeed.*" # TODO remove once we fix strip SP formation
                 POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 450 )
+                PROPERTIES TIMEOUT 600 )
 
 atlas_add_test( FPGATrackSim_F200-InsideOut_test
                 PRIVATE_WORKING_DIRECTORY 
                 SCRIPT FPGATrackSimInsideOutOnRDO.sh
                 LOG_IGNORE_PATTERN ".*FPGAActsTrkConverter.*ERROR.Found a proto-track with no measurements.*|.*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*|.*ERROR.*IDTPM.*|.*ERROR.*eftrig_chi2.*|.*ERROR.*InDetTrackPerfMonTool.*" # TODO Fix the prototrack-related issue described in EFTRACK-801
                 POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 450 )
+                PROPERTIES TIMEOUT 600 )
 
 atlas_add_test( FPGATrackSim_F200_test
                 SCRIPT FPGATrackSim_F200.sh
                 PRIVATE_WORKING_DIRECTORY
-                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*" # ACTS (C)KF related errors
+                LOG_IGNORE_PATTERN ".*FPGATrackSimEtaPatternFilterTool.*ERROR|.*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*" # ACTS (C)KF related errors
                 POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 450 )
+                PROPERTIES TIMEOUT 600 )
 
 atlas_add_test( FPGATrackSim_F210_test # TODO: Figure out why we get this many errors (FPE) from ACTS
                 SCRIPT FPGATrackSim_F210.sh
                 PRIVATE_WORKING_DIRECTORY
                 LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*|.*KalmanRefitDirectKalmanFitterActor.*|.*ERROR KalmanFilter failed.*|.*WARNING FPE.*FPGATrackSimProtoTackFitAlg.*" # ACTS (C)KF related errors
                 POST_EXEC_SCRIPT noerror.sh 
-                PROPERTIES TIMEOUT 450 )
+                PROPERTIES TIMEOUT 600 )

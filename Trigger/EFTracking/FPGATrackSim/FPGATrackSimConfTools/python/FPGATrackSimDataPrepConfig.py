@@ -150,6 +150,7 @@ def FPGATrackSimEventSelectionCfg(flags):
     eventSelector.regions = flags.Trigger.FPGATrackSim.slicesFile
     eventSelector.regionID = flags.Trigger.FPGATrackSim.region
     eventSelector.sampleType = flags.Trigger.FPGATrackSim.sampleType
+    eventSelector.skipRegionCheck = flags.Trigger.FPGATrackSim.pipeline.startswith('F-1') # if set to True, it will essentially run for the whole detector
     eventSelector.withPU = False
     result.addService(eventSelector, create=True, primary=True)
     return result
