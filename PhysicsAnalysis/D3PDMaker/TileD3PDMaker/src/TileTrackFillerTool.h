@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -27,8 +27,6 @@
 
 // MONTE CARLO (TRUTH) INFORMATION
 #include "GeneratorObjects/McEventCollection.h"
-
-using namespace std;
 
 // ADD TILEMUONTRACKFILLERTOOL TO D3PD NAMESPACE
 namespace D3PD {

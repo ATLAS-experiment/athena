@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /* 
@@ -36,8 +36,6 @@
 //Type definitions
 typedef xAOD::Muon MUON;
 typedef xAOD::MuonContainer     MUONCONTAINER;
-
-using namespace std;
 
 // ADD TILEMUONCELLFILLERTOOL TO D3PD NAMESPACE
 namespace D3PD{
