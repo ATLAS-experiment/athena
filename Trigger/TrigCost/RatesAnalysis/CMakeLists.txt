@@ -9,6 +9,7 @@ find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 # Package library:
 atlas_add_library( RatesAnalysisLib
                    src/Rates*.cxx
+		   src/L1Topo*cxx
                    PUBLIC_HEADERS RatesAnalysis
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel AthAnalysisBaseCompsLib AthenaBaseComps TrigDecisionToolLib EnhancedBiasWeighterLib
@@ -31,4 +32,5 @@ atlas_add_test( RatesAnalysis_test
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_scripts( share/RatesAnalysisFullMenu.py share/RatesEmulationExample.py share/RatesAnalysisPostProcessing.py share/RatesAnalysisOnlineProcessing.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_data(share/triggers.json)
+atlas_install_scripts(share/L1TopoRatesCalculator_submatrix_plotter.py share/runL1TopoRates.py share/RatesAnalysisFullMenu.py share/RatesEmulationExample.py share/RatesAnalysisPostProcessing.py share/RatesAnalysisOnlineProcessing.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

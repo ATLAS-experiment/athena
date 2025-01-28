@@ -51,3 +51,4 @@ StatusCode RatesEmulationExample::ratesFinalize() {
   ATH_MSG_DEBUG("In ratesFinalize()");
   return StatusCode::SUCCESS;
 }
+

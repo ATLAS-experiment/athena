@@ -23,3 +23,4 @@ class RatesEmulationExample: public ::RatesAnalysisAlg {
 }; 
 
 #endif //> !RATESANALYSIS_RATESEMULATIONEXAMPLE_H
+
