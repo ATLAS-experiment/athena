@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTestR4/SpacePointTesterModule.h"
@@ -128,7 +128,7 @@ namespace MuonValR4{
             ATH_MSG_FATAL("Failed to retrieve container "<<m_key.fullKey());
             return false;
         }
-        for (const auto& bucket : *container) {
+        for (const MuonR4::SpacePointBucket* bucket : *container) {
             push_back(*bucket);
         }
         m_internalFill = false;

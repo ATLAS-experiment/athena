@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GNNVertexFitter/GNNVertexFitterTool.h"
@@ -118,7 +118,7 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
       jetWriteDecorHandleVertexLink(m_jetWriteDecorKeyVertexLink, ctx);
 
   // Loop over the jets
-  for (const auto &jet : *inJetContainer) {
+  for (const xAOD::Jet* jet : *inJetContainer) {
 
     // Retrieve the Vertex and Track Collections
     auto vertexCollection = vertexLinksHandle(*jet);
