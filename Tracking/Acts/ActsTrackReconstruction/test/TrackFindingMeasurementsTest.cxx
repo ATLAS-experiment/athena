@@ -16,7 +16,6 @@
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 
 #include "src/detail/TrackFindingMeasurements.h"
-#include "src/detail/SharedHitCounter.h"
 
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 
@@ -24,17 +23,19 @@
 
 template <typename std::size_t N>
 void checkList(const ActsTrk::detail::TrackFindingMeasurements& measurements,
-               const ActsTrk::detail::SharedHitCounter& sharedHits,
 	       const std::array<std::size_t, N>& entries,
 	       bool isFilled) {
-  const std::vector<std::size_t>& offsets = sharedHits.measurementOffsets();
   std::size_t cumulativeOffset = 0ul;
   for (std::size_t i(0); i<N; ++i) {
-    std::cout << "Checking measurementOffset " << i << " : " << offsets.at(i) << " with expected " << cumulativeOffset << std::endl;
-    assert( offsets.at(i) == cumulativeOffset );
+    std::cout << "Checking measurementOffset " << i << " : " << measurements.measurementOffset(i) << " with expected " << cumulativeOffset << std::endl;
+    assert( measurements.measurementOffset(i) == cumulativeOffset );
     cumulativeOffset += entries.at(i);
   }
+  // always 0ul if index too high
+  std::cout << "Checking measurementOffset " << N << " : " << measurements.measurementOffset(N) << " with expected " << 0ul << " (too big)" << std::endl;
+  assert( measurements.measurementOffset(N) == 0ul );
   
+  const std::vector<std::size_t>& offsets = measurements.measurementOffsets();
   std::cout << "Checking offsets size: " << offsets.size() << " with expected " <<	N << std::endl;
   assert( offsets.size() == N );
 
@@ -105,13 +106,12 @@ int main() {
   // checks pre-fill
   std::cout << "----------------------------------------------" << std::endl;
   std::cout << "Checking tests pre-fill ..." << std::endl;
-  ActsTrk::detail::TrackFindingMeasurements measurements;
-  ActsTrk::detail::SharedHitCounter sharedHits(N);
+  ActsTrk::detail::TrackFindingMeasurements measurements(N);
   std::cout << "Checking nMeasurements: " << measurements.nMeasurements() << " with the expected " << 0ul << std::endl;
   assert( measurements.nMeasurements() == 0ul );
 
   std::array<std::size_t, N> entries {};
-  checkList<N>(measurements, sharedHits, entries, false);
+  checkList<N>(measurements, entries, false);
 
   // fill
   std::cout << "----------------------------------------------" << std::endl;
@@ -131,28 +131,28 @@ int main() {
   measurements.addMeasurements(0, pixelContainer, geometryIdMap);
   measurements.addMeasurements(1, stripContainer, geometryIdMap);
   measurements.addMeasurements(2, hgtdContainer, geometryIdMap);
-
-  sharedHits.addMeasurements(0, pixelContainer);
-  sharedHits.addMeasurements(1, stripContainer);
-  sharedHits.addMeasurements(2, hgtdContainer);
-
+   
   // check post-fill
   std::cout << "----------------------------------------------" << std::endl;
   std::cout << "Checking tests post-fill ..." << std::endl;
   std::cout << "Checking nMeasurements: " << measurements.nMeasurements() << " with the expected " << nPixelClusters + nStripClusters + nHgtdClusters << std::endl;
   entries = { nPixelClusters, nStripClusters, nHgtdClusters };
-  checkList<N>(measurements, sharedHits, entries, true);
+  checkList<N>(measurements, entries, true);
 
+  std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, std::size_t>> containerOffsets = measurements.measurementContainerOffsets();
+  std::cout << "Checking measurementContainerOffsets size: " << containerOffsets.size() << " with expected " << N - 1 << std::endl;
+  assert( containerOffsets.size() == N - 1 );
   //  collections
-  std::size_t index = sharedHits.measurementIndex(*pixelContainer[0]);
-  std::cout << "Checking index value : " << index << " with expected " << 0ul << std::endl;
-  assert( index == 0ul );
+  auto [container, offset] = containerOffsets.at(0);
+  std::cout << "Checking container : " << container << " with expected " << &stripContainer << std::endl;
+  assert( container == &stripContainer );
+  std::cout << "Checking offset value : " << pixelContainer.size() << " with expected " << offset << std::endl;
+  assert( pixelContainer.size() == offset );
 
-  std::size_t index2 = sharedHits.measurementIndex(*stripContainer[0]);
-  std::cout << "Checking index value : " << index2 << " with expected " << pixelContainer.size() << std::endl;
-  assert( index2 == pixelContainer.size() );
-
-  std::size_t index3 = sharedHits.measurementIndex(*hgtdContainer[0]);
-  std::cout << "Checking index value : " << index3 << " with expected " << pixelContainer.size() + stripContainer.size() << std::endl;
-  assert( index3 == pixelContainer.size() + stripContainer.size() );
+  //
+  auto [container2, offset2] = containerOffsets.at(1);
+  std::cout << "Checking container : " << container2 << " with expected " << &hgtdContainer << std::endl;
+  assert( container2 == &hgtdContainer );
+  std::cout << "Checking offset value : " << pixelContainer.size() + stripContainer.size() << " with expected " << offset2 << std::endl;
+  assert( pixelContainer.size() + stripContainer.size() == offset2 );
 }

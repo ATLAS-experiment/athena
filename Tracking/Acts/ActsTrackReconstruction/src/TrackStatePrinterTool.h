@@ -21,13 +21,13 @@
 #include "Acts/EventData/TrackStateType.hpp"
 
 // PACKAGE
-#include "src/detail/SharedHitCounter.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsEvent/Seed.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
+
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 
 // Other
@@ -64,7 +64,7 @@ namespace ActsTrk
     printSeed(const Acts::GeometryContext &tgContext,
               const ActsTrk::Seed &seed,
               const Acts::BoundTrackParameters &initialParameters,
-              const detail::SharedHitCounter &sharedHits,
+              const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &offset,
               size_t iseed,
               bool isKF) const;
 
@@ -73,13 +73,13 @@ namespace ActsTrk
     printTrack(const Acts::GeometryContext &tgContext,
                const track_container_t &tracks,
                const typename track_container_t::TrackProxy &track,
-               const detail::SharedHitCounter &sharedHits) const;
+               const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &offset) const;
 
     template <typename track_state_proxy_t>
     bool
     printTrackState(const Acts::GeometryContext &tgContext,
                     const track_state_proxy_t &state,
-                    const detail::SharedHitCounter &sharedHits,
+                    const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offset,
                     bool useFiltered = false,
                     bool newLine = true) const;
 
