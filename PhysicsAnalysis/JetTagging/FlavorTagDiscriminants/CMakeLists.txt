@@ -47,7 +47,7 @@ set(FTDSource
   Root/TrackClassifier.cxx
   Root/ConstituentsLoader.cxx
   Root/TracksLoader.cxx
-  Root/IParticlesLoader.cxx
+  Root/FlowElementsLoader.cxx
   Root/HitsLoader.cxx
   Root/CustomGetterUtils.cxx
   Root/StringUtils.cxx

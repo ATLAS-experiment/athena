@@ -25,10 +25,6 @@
 
 // EDM includes
 #include "xAODJet/JetFwd.h"
-#include "xAODTracking/TrackParticleFwd.h"
-#include "xAODBase/IParticle.h"
-#include "xAODTracking/TrackMeasurementValidationContainer.h"
-#include "AthContainers/AuxElement.h"
 #include "FlavorTagDiscriminants/DataPrepUtilities.h"
 
 #include <functional>
@@ -64,7 +60,7 @@ namespace FlavorTagDiscriminants {
      * @tparam T constituent type
      * 
      * It supports the following types of constituents:
-     * - xAOD::IParticle
+     * - xAOD::FlowElement
      * - xAOD::TrackParticle
      * - xAOD::TrackMeasurementValidation
     */

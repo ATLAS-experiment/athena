@@ -38,10 +38,10 @@ namespace FlavorTagDiscriminants {
         std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> getData(
           const xAOD::Jet& jet, 
           [[maybe_unused]] const SG::AuxElement& btag) const override ;
-        FTagDataDependencyNames getDependencies() const override;
-        std::set<std::string> getUsedRemap() const override;
-        std::string getName() const override;
-        ConstituentsType getType() const override;
+        const FTagDataDependencyNames& getDependencies() const override;
+        const std::set<std::string>& getUsedRemap() const override;
+        const std::string& getName() const override;
+        const ConstituentsType& getType() const override;
       protected:
         // typedefs
         typedef xAOD::Jet Jet;
