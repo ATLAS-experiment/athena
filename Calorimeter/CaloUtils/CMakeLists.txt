@@ -1,4 +1,4 @@
-#Copyright (C) 2020, 2021, 2022, 2024 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2020, 2021, 2022, 2024, 2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloUtils )
@@ -12,7 +12,7 @@ atlas_add_library( CaloUtilsLib CaloUtils/*.h CaloUtils/*.icc src/*.h src/*.cxx
    PUBLIC_HEADERS CaloUtils
    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
    LINK_LIBRARIES AthenaBaseComps AthenaKernel CaloConditions CaloDetDescrLib CaloEvent CaloGeoHelpers CaloIdentifier CaloInterfaceLib CxxUtils FourMom GaudiKernel Navigation StoreGateLib xAODCaloEvent AthLinks
-   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} Identifier SGTools TestTools )
+   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} Identifier SGTools )
 
 atlas_add_dictionary( CaloUtilsDict
    CaloUtils/CaloUtilsDict.h CaloUtils/selection.xml
@@ -32,7 +32,7 @@ atlas_add_test( CaloClusterProcessor_test
 atlas_add_test( CaloLayerCalculator_test
    SOURCES test/CaloLayerCalculator_test.cxx
    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-   LINK_LIBRARIES LINK_LIBRARIES ${CLHEP_LIBRARIES} CaloUtilsLib CxxUtils IdDictParser TestTools
+   LINK_LIBRARIES LINK_LIBRARIES ${CLHEP_LIBRARIES} CaloUtilsLib IdDictParser TestTools
    LOG_IGNORE_PATTERN "^lar decode|mask/zero|initialize_from_dict|^ channel range|^AtlasDetectorID::"
    ENVIRONMENT "JOBOPTSEARCHPATH=${_jobOPath}" )
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,11 +11,6 @@
 
 #ifndef XAOD_STANDALONE
 #undef NDEBUG
-
-//This is a test so no need to be thread safe
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
-
 
 #include "CaloUtils/CaloLayerCalculator.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
@@ -65,7 +60,7 @@ struct Testcell
   double energy;
 };
 
-Testcell clust1[] = {
+const Testcell clust1[] = {
   {  1, -1, 10*GeV },
   { -1, -1, 10*GeV },
   { -1,  2, 20*GeV },
@@ -90,7 +85,7 @@ void clust1_check (CaloLayerCalculator& calc, double wt=1)
 }
 
 
-Testcell clust2[] = {
+const Testcell clust2[] = {
   {  0, -1,  10*GeV },
   {  0,  1, -20*GeV },
   {  0,  0,   0 },
