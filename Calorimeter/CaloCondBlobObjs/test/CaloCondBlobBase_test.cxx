@@ -8,8 +8,6 @@
 #include <boost/test/unit_test.hpp>
 
 namespace utf = boost::unit_test;
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "CaloCondBlobObjs/CaloCondBlobBase.h"
 #include "CoralBase/Blob.h"
