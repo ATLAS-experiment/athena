@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Author: Vadim Kostyukhin vadim.kostyukhin@cern.ch
 
 from AthenaCommon.Logging  import logging
@@ -200,7 +200,8 @@ class DVFinderTool( Rec__NewVrtSecInclusiveTool ):
                                              v2tIniBDTCut      =-1.1,  # Disable b-hadron trained BDT here 
                                              v2tFinBDTCut      =-1.1,  # Disable b-hadron trained BDT here
                                              cosSVPVCut        = 0.0,
-                                             CutZVrt           = 100.,
+                                             MaxZVrt           = 100.,
+                                             MinZVrt           = 0.,
                                              VertexMergeCut    = 10.,   # 3D vertex-vertex dist significance to try merging
                                              FastZSVCut        = 30.,   # Pre-selection track-track distance cut
                                              MaxSVRadiusCut    = 350.
@@ -248,7 +249,8 @@ class V2TCalibrationTool( Rec__NewVrtSecInclusiveTool ):
                                              cosSVPVCut        = 0.0,   # Maximal angle between SV-PV and SV momentum
                                              CutD0Max          = 300.,  # Maximal track impact parameter
                                              CutD0Min          = 0.,    # Minimal track impact parameter
-                                             CutZVrt           = 100.,
+                                             MaxZVrt           = 100.,
+                                             MinZVrt           = 0.,
                                              FastZSVCut        = 15.,   # Pre-selection track-track distance cut
                                              MaxSVRadiusCut    = 140.
                                              )

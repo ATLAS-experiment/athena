@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( NewVrtSecInclusiveTool )
@@ -11,7 +11,7 @@ atlas_add_library(   NewVrtSecInclusiveToolLib
                      src/*.cxx
                      PUBLIC_HEADERS NewVrtSecInclusiveTool
                      INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-		     LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} TruthUtils AnalysisUtilsLib AthenaBaseComps GaudiKernel GeoPrimitives BeamSpotConditionsData MVAUtils PathResolver TrkExInterfaces TrkGeometry TrkNeutralParameters TrkTrackSummary TrkVKalVrtFitterLib VxSecVertex xAODTracking xAODTruth CxxUtils xAODJet )
+		     LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} TruthUtils AnalysisUtilsLib AthenaBaseComps GaudiKernel GeoPrimitives BeamSpotConditionsData MVAUtils PathResolver TrkExInterfaces TrkGeometry TrkNeutralParameters TrkTrackSummary TrkVKalVrtFitterLib VxSecVertex xAODTracking xAODTruth CxxUtils xAODJet ITrackToVertex xAODMuon xAODEgamma)
 
 atlas_add_component( NewVrtSecInclusiveTool
                      src/components/*.cxx

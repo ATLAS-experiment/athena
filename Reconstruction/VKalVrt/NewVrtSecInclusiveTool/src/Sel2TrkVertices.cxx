@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 ///
 ///     @author  Vadim Kostyukhin <vadim.kostyukhin@cern.ch>
@@ -151,11 +151,11 @@ namespace Rec{
 // Check pixel hits vs vertex positions.
              int ihitIBL  = getIBLHit(selectedTracks[i]);
              int jhitIBL  = getIBLHit(selectedTracks[j]);
-             if( (ihitIBL==0&&jhitIBL>0) || (ihitIBL>0&&jhitIBL==0) ) continue;
+             if( m_do2TrkIBLChecks && ( (ihitIBL==0&&jhitIBL>0) || (ihitIBL>0&&jhitIBL==0) ) ) continue;
              int ihitBL   = getBLHit (selectedTracks[i]);
              int jhitBL   = getBLHit (selectedTracks[j]);
 //--Very general cleaning cuts based on ID geometry and applicable to all processes
-             if(tmpVrt.fitVertex.perp()<m_firstPixelLayerR-2.*vrtRErr){
+             if( m_do2TrkIBLChecks && tmpVrt.fitVertex.perp()<m_firstPixelLayerR-2.*vrtRErr ){
                 if( ihitIBL<1 && ihitBL<1) continue;
                 if( jhitIBL<1 && jhitBL<1) continue;
              }
@@ -170,6 +170,7 @@ namespace Rec{
                if( ihitR-vrtR <-2.*vrtRErr) continue; // Vertex is behind hit in pixel 
                if( jhitR-vrtR <-2.*vrtRErr) continue; // Vertex is behind hit in pixel 
              }
+             if ((std::abs(selectedTracks[i]->d0())<m_twoTrkVtxFormingD0Cut) && (std::abs(selectedTracks[j]->d0())<m_twoTrkVtxFormingD0Cut)) continue;
 //
 // Debugging and BDT
              double minPtT = std::min(tracksForFit[0]->pt(),tracksForFit[1]->pt());
@@ -214,9 +215,9 @@ namespace Rec{
              std::vector<float> VARS(10);
              VARS[0]=Prob2v;
              VARS[1]=log(tmpVrt.momentum.Pt());
-             VARS[2]=log(std::max(minPtT,m_cutPt));
+             VARS[2]=log(std::max(minPtT,m_cutPt.value()));
              VARS[3]=log(vrtR<20. ? SVPV.Perp() : vrtR);
-             VARS[4]=log(std::max(std::min(trackSignif[i],trackSignif[j]),m_trkSigCut));
+             VARS[4]=log(std::max(std::min(trackSignif[i],trackSignif[j]),m_trkSigCut.value()));
              VARS[5]=log(std::max(trackSignif[i],trackSignif[j]));
              VARS[6]=tmpVrt.momentum.M();
              VARS[7]=sqrt(std::abs(1.-cosSVPV*cosSVPV));
@@ -271,7 +272,7 @@ namespace Rec{
          }
       }
 
-        }
+   }
 
 
 }  //end of namespace

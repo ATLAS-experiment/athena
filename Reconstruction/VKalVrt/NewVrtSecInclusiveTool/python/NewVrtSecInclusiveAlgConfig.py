@@ -1,21 +1,32 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Author: Vadim Kostyukhin vadim.kostyukhin@cern.ch
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Constants import INFO
 
-def NewVrtSecInclusiveAlgCfg(flags, algname="NVSI_Alg"):
+def NewVrtSecInclusiveAlgCfg(flags, algname="NVSI_Alg", **kwargs):
+
+   acc = ComponentAccumulator()
+   if "BVertexTool" not in kwargs:
+      from NewVrtSecInclusiveTool.NewVrtSecInclusiveConfig import SoftBFinderToolCfg
+      kwargs.setdefault("BVertexTool", acc.popToolsAndMerge(SoftBFinderToolCfg(flags,FillHist=True)))
+
+   kwargs.setdefault("BVertexContainerName","AllBVertices")
+
+   acc.addEventAlgo(CompFactory.Rec.NewVrtSecInclusiveAlg(algname, **kwargs))
+   return acc
+
+def NewVrtSecInclusiveAlgLLPCfg(flags, algname="NVSI", AugmentingVersionString="", **kwargs):
   
    acc = ComponentAccumulator()
-   myargs = {}
-   from NewVrtSecInclusiveTool.NewVrtSecInclusiveConfig import SoftBFinderToolCfg
-   myargs["BVertexTool"] = acc.popToolsAndMerge(SoftBFinderToolCfg(flags,FillHist=True))
-   myargs["OutputLevel"] = INFO
-   myargs.setdefault("BVertexContainerName","AllBVertices")
+   if "BVertexTool" not in kwargs:
+      from NewVrtSecInclusiveTool.NewVrtSecInclusiveConfig import DVFinderToolCfg
+      kwargs.setdefault("BVertexTool", acc.popToolsAndMerge(DVFinderToolCfg(flags,FillHist=False,AugmentingVersionString=AugmentingVersionString)))
 
-   NVSI_Alg = CompFactory.Rec.NewVrtSecInclusiveAlg(algname, **myargs)
-   acc.addEventAlgo(NVSI_Alg)
+   kwargs.setdefault("BVertexContainerName","SecondaryVertices_"+algname)
+
+   acc.addEventAlgo(CompFactory.Rec.NewVrtSecInclusiveAlg(algname, **kwargs))
    return acc
 
 def NewVrtSecInclusiveAlgTightCfg(flags, algname="NVSI_Alg_Tight"):
