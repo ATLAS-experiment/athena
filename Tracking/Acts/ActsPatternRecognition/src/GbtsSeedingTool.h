@@ -69,7 +69,7 @@ namespace ActsTrk {
 
 
     // own class functions
-    std::vector<Acts::TrigInDetSiLayer> LayerNumbering() const;
+    std::vector<Acts::Experimental::TrigInDetSiLayer> LayerNumbering() const;
 
     std::pair<int,int> getCombinedID(const int eta_mod, const short barrel_ec, const int lay_id) const;  
 
@@ -79,9 +79,9 @@ namespace ActsTrk {
 
     StatusCode prepareConfiguration();
     
-    Acts::SeedFinderGbtsConfig<xAOD::SpacePoint> m_finderCfg; //temp for new seed type 
+    Acts::Experimental::SeedFinderGbtsConfig<xAOD::SpacePoint> m_finderCfg; //temp for new seed type 
     
-    std::unique_ptr<Acts::GbtsGeometry<xAOD::SpacePoint>> m_gbtsGeo = nullptr;
+    std::unique_ptr<Acts::Experimental::GbtsGeometry<xAOD::SpacePoint>> m_gbtsGeo = nullptr;
 
     const PixelID* m_pixelId = nullptr ; 
     const InDetDD::PixelDetectorManager* m_pixelManager = nullptr ; 

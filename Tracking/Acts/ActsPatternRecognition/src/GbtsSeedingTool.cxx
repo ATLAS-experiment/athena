@@ -40,10 +40,10 @@ namespace ActsTrk {
     std::ifstream input_ifstream(
          m_finderCfg.ConnectorInputFile.c_str(), std::ifstream::in); //change to connector input file 
     // connector
-    std::unique_ptr<Acts::GbtsConnector> inputConnector =  
-        std::make_unique<Acts::GbtsConnector>(input_ifstream);
+    std::unique_ptr<Acts::Experimental::GbtsConnector> inputConnector =  
+        std::make_unique<Acts::Experimental::GbtsConnector>(input_ifstream);
         
-    m_gbtsGeo = std::make_unique<Acts::GbtsGeometry<xAOD::SpacePoint>>( 
+    m_gbtsGeo = std::make_unique<Acts::Experimental::GbtsGeometry<xAOD::SpacePoint>>( 
       m_finderCfg.m_layerGeometry, inputConnector);
 
     return StatusCode::SUCCESS;
@@ -70,7 +70,7 @@ namespace ActsTrk {
     const InDetDD::SiDetectorElementCollection* pixelElements = pixelDetEleHandle.cptr();
   
 
-    std::vector<Acts::GbtsSP<xAOD::SpacePoint>> GbtsSpacePoints;
+    std::vector<Acts::Experimental::GbtsSP<xAOD::SpacePoint>> GbtsSpacePoints;
     GbtsSpacePoints.reserve(
         spContainer.size()); 
 
@@ -104,11 +104,11 @@ namespace ActsTrk {
 
     ATH_MSG_VERBOSE("Space points successfully assigned Gbts ID");
 
-    Acts::SeedFinderGbts<xAOD::SpacePoint> finder = Acts::SeedFinderGbts<xAOD::SpacePoint>(m_finderCfg,*m_gbtsGeo);  
+    Acts::Experimental::SeedFinderGbts<xAOD::SpacePoint> finder = Acts::Experimental::SeedFinderGbts<xAOD::SpacePoint>(m_finderCfg,*m_gbtsGeo);  
 
     finder.loadSpacePoints(GbtsSpacePoints);
     //temporary solution until trigger ROIs implemented 
-    Acts::RoiDescriptor internalRoi(0, -4.5, 4.5, 0, -std::numbers::pi, std::numbers::pi, 0, -150.0,150.0); //(eta,etaMinus,etaPlus,phi,phiMinus,Phiplus,z,zMinus,zPlus)
+    Acts::Experimental::RoiDescriptor internalRoi(0, -4.5, 4.5, 0, -std::numbers::pi, std::numbers::pi, 0, -150.0,150.0); //(eta,etaMinus,etaPlus,phi,phiMinus,Phiplus,z,zMinus,zPlus)
 
     std::vector<Acts::Seed<xAOD::SpacePoint, 3ul>> groupSeeds = finder.createSeeds(internalRoi, *m_gbtsGeo);
 
@@ -135,10 +135,10 @@ namespace ActsTrk {
   }
 
   // own class functions
-  std::vector<Acts::TrigInDetSiLayer>
+  std::vector<Acts::Experimental::TrigInDetSiLayer>
   GbtsSeedingTool::LayerNumbering() const {
     std::vector<std::size_t> count_vector;
-    std::vector<Acts::TrigInDetSiLayer> input_vector;
+    std::vector<Acts::Experimental::TrigInDetSiLayer> input_vector;
 
     for(int hash = 0; hash<static_cast<int>(m_pixelId->wafer_hash_max()); hash++) {
       const Identifier offlineId = m_pixelId->wafer_id(hash); 
@@ -180,7 +180,7 @@ namespace ActsTrk {
 
       } else {  // end so doesn't exists
         // make new if one with Gbts ID doesn't exist:
-        Acts::TrigInDetSiLayer new_Gbts_ID(combined_id, barrel_ec, rc, minBound,
+        Acts::Experimental::TrigInDetSiLayer new_Gbts_ID(combined_id, barrel_ec, rc, minBound,
                                           maxBound);
         input_vector.push_back(new_Gbts_ID);
         count_vector.push_back(
