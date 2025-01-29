@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1TopoRatesCalculator.h"
@@ -163,7 +163,7 @@ StatusCode L1TopoRatesCalculator::initialize() {
           auto & conn = l1menu->connector(connName);
           for( auto & tl : conn.triggerLines() ) {
               //For electrical connectors from the L1Topo boards a triggerline vector holds up to 16 signals
-              if ((connName == "Topo2El") | (connName == "Topo3El")){
+              if ((connName == "Topo2El") || (connName == "Topo3El")){
                   for (size_t fpga = 0; fpga < 2; ++fpga){ //run over fpgas
                       for (size_t clock = 0; clock < 2; ++clock){ //run over clocks
                           for (auto & tl : conn.triggerLines(fpga,clock)){
@@ -464,7 +464,7 @@ StatusCode L1TopoRatesCalculator::ratesExecute() { //EXECUTE
   m_weighted_sum += m_weightingValues.m_enhancedBiasWeight;
   for (size_t i = 0; i < m_rates_matrix.size(); ++i){
 	  for (size_t j = 0; j < m_rates_matrix.size(); ++j){
-		weight=static_cast<double>((isPassed_L1item[i] & isPassed_L1item[j])*(m_weightingValues.m_enhancedBiasWeight)*(m_weightingValues.m_linearLumiFactor));
+		weight=static_cast<double>((isPassed_L1item[i] && isPassed_L1item[j])*(m_weightingValues.m_enhancedBiasWeight)*(m_weightingValues.m_linearLumiFactor));
 		(m_rates_matrix[i])[j] += weight;
 		(m_rates_matrix2[i])[j] += weight*weight;
 	  }
