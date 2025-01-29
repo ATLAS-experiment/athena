@@ -67,7 +67,7 @@ StatusCode FPGATrackSimEtaPatternFilterTool::initialize()
 
 void FPGATrackSimEtaPatternFilterTool::readPatterns(std::string const & filepath)
 {
-  
+
     // Open the file
     std::ifstream fin(PathResolverFindCalibFile(filepath));
     if (!fin.is_open())
@@ -143,7 +143,7 @@ StatusCode FPGATrackSimEtaPatternFilterTool::filterRoads(std::vector<std::shared
     {
         // reset all maps
         resetCounters();
-	
+
 
         // put hits in module objects
         addHitsToMap(road);
@@ -218,11 +218,20 @@ void FPGATrackSimEtaPatternFilterTool::addHitsToMap(const std::shared_ptr<const 
             {
                 ModuleId mod = { hit->getDetType(), hit->getDetectorZone(), (int)(hit->getEtaModule()) };
                 auto itr = m_moduleHits[lyr].find(mod);
-                if (itr != m_moduleHits[lyr].end())
-                    if (!((hit->getHitType() == HitType::spacepoint) && (hit->getSide() == 1))) { // in a way related to EFTRACK-743
-                        ATH_MSG_VERBOSE("Adding hit to map");
-                        itr->second.addHit(hit);
+                if (itr != m_moduleHits[lyr].end()) {
+                    ATH_MSG_VERBOSE("Adding hit to map");
+                    itr->second.addHit(hit);
+                } else {
+                    // If this is an outermost spacepoint this is, technically, okay, provided
+                    // we're only out of bounds byt a single etamod-- could check that.
+                    if (!((hit->getHitType() == HitType::spacepoint) && (hit->getSide() == 1))) {
+                        ATH_MSG_ERROR("Module not in map: " << hit->getDetType() << " " << hit->getDetectorZone() << " " <<  static_cast<int>(hit->getEtaModule()) << " type: " << hit->getHitType() << " layer: " << lyr);
+                        for (auto & itr2 : m_moduleHits[lyr])
+                        {
+                            ATH_MSG_ERROR("   " << itr2.first.siTech << " " << itr2.first.zone << " " << itr2.first.etaModule);
+                        }
                     }
+                }
             }
 }
 
