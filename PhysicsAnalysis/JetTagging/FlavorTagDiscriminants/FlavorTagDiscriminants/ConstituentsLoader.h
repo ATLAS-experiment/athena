@@ -60,7 +60,7 @@ namespace FlavorTagDiscriminants {
     struct ConstituentsInputConfig {
         std::string name;
         std::string output_name;
-        ConstituentsType type = ConstituentsType::IPARTICLE;
+        ConstituentsType type;
         ConstituentsSortOrder order;
         ConstituentsSelection selection = ConstituentsSelection::ALL;
         std::vector<InputVariableConfig> inputs;
