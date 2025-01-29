@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 ///
 ///    @author Vadim Kostyukhin <vadim.kostyukhin@cern.ch>
@@ -380,9 +380,9 @@ namespace Rec{
              std::vector<float> VARS(10);
              VARS[0]=vProb;
              VARS[1]=log(curVrtPt);
-             VARS[2]=log(std::max(minPtT,m_cutPt));
+             VARS[2]=log(std::max(minPtT,m_cutPt.value()));
              VARS[3]=log(vrtR<20. ? SVPV.Perp() : vrtR);
-             VARS[4]=log(std::max(minSig3DT,m_trkSigCut));
+             VARS[4]=log(std::max(minSig3DT,m_trkSigCut.value()));
              VARS[5]=log(maxSig3DT);
              VARS[6]=curVrt.vertexMom.M();
              VARS[7]=sqrt(std::abs(1.-cosSVPVM*cosSVPVM));
@@ -508,7 +508,11 @@ namespace Rec{
             wgtBDT  (*tmpVertex) =curVrt.BDT;
             nTrksDec(*tmpVertex) =curVrt.selTrk.size();
             vChrgTot(*tmpVertex) =curVrt.vertexCharge;
+            tmpVertex->setVertexType(xAOD::VxType::SecVtx);
             finalVertices.push_back(tmpVertex);
+            for (int j=0; j<nth; j++) {
+              m_chi2_toSV(*xAODwrk->listSelTracks[j]) = curVrt.chi2PerTrk[j] > FLT_MAX ? FLT_MAX : curVrt.chi2PerTrk[j];
+            }
           }
     }
     if(m_fillHist){
