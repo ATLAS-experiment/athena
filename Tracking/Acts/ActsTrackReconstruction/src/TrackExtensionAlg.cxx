@@ -37,8 +37,6 @@
 #include "ActsInterop/TableUtils.h"
 #include "src/detail/AtlasMeasurementSelector.h"
 #include "src/detail/OnTrackCalibrator.h"
-#include "src/detail/TrackFindingMeasurements.h"
-#include "src/detail/SharedHitCounter.h"
 #include "ActsGeometry/SurfaceOfMeasurementUtil.h"
 
 // STL
@@ -137,8 +135,7 @@ namespace ActsTrk{
        acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
     ATH_CHECK( acts_tracking_geometry != nullptr);
 
-    const auto ms = collectMeasurements(context, **detectorElementToGeometryIdMap);
-    const auto& [measurements, sharedHits] = ms;
+    detail::TrackFindingMeasurements measurements = collectMeasurements(context, **detectorElementToGeometryIdMap);
 
     ActsTrk::detail::UncalibSourceLinkAccessor slAccessor(measurements.measurementRanges());
     Acts::SourceLinkAccessorDelegate<ActsTrk::detail::UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
@@ -211,7 +208,7 @@ namespace ActsTrk{
         ATH_MSG_DEBUG("Reco MTJ size " << trackStateBackend.size() );
         for ( size_t stateIndex=0; stateIndex < trackStateBackend.size(); ++stateIndex) {
           auto state = trackStateBackend.getTrackState(stateIndex);
-          if (m_trackStatePrinter.isSet()) m_trackStatePrinter->printTrackState(tgContext, state, sharedHits, false);
+          if (m_trackStatePrinter.isSet()) m_trackStatePrinter->printTrackState(tgContext, state, measurements.measurementContainerOffsets(), false);
         }
         ATH_MSG_DEBUG("Track has: " << tempTrackProxy.nMeasurements() << " measurements ");
         ATH_MSG_DEBUG("track: eta: " <<  -1 * log(tan( tempTrackProxy.theta() * 0.5)) << " phi: " << tempTrackProxy.phi() << " pt:" << abs(1./tempTrackProxy.qOverP() * sin(protoTrack.parameters->theta())));
@@ -232,18 +229,15 @@ namespace ActsTrk{
   }
 
 
-  std::pair<detail::TrackFindingMeasurements, detail::SharedHitCounter> TrackExtensionAlg::collectMeasurements(
+  detail::TrackFindingMeasurements TrackExtensionAlg::collectMeasurements(
        const EventContext& context,
        const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap) const {
     SG::ReadHandle<xAOD::PixelClusterContainer> pixelClustersHandle(m_pixelClusters, context);
 
-    // setup to return both objects with RVO. Note that SharedHitCounter is only used to get hit offsets needed by TrackStatePrinter.
-    std::pair<detail::TrackFindingMeasurements, detail::SharedHitCounter> res{{}, {1u /* only one measurement collection: pixel clusters*/}};
-    auto& [measurements, sharedHits] = res;
+    detail::TrackFindingMeasurements measurements(1u /* only one measurement collection: pixel clusters*/);
     ATH_MSG_DEBUG("Measurements (pixels only) size: " << pixelClustersHandle->size());
     // potential TODO: filtering only certain layers
     measurements.addMeasurements(0, *pixelClustersHandle, detectorElementToGeometryIdMap);
-    sharedHits.addMeasurements(0, *pixelClustersHandle);
-    return res;
+    return measurements;
   }
 } // EOF namespace

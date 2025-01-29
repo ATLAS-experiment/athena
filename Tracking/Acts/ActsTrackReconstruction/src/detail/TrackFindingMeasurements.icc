@@ -3,13 +3,18 @@
 */
 
 namespace ActsTrk::detail {
+  
+  inline std::size_t TrackFindingMeasurements::measurementOffset(std::size_t typeIndex) const
+  { return typeIndex < m_measurementOffsets.size() ? m_measurementOffsets[typeIndex] : 0ul; }
+  
+  inline const std::vector<std::size_t>& TrackFindingMeasurements::measurementOffsets() const
+  { return m_measurementOffsets; }
+  
+  inline const ActsTrk::detail::MeasurementRangeList& TrackFindingMeasurements::measurementRanges() const
+  { return m_measurementRanges; }
+  
+  inline std::size_t TrackFindingMeasurements::nMeasurements() const
+  { return m_measurementsTotal; }
+  
+} // namespace ActsTrk::detail
 
-  inline const ActsTrk::detail::MeasurementRangeList& TrackFindingMeasurements::measurementRanges() const {
-    return m_measurementRanges;
-  }
-
-  inline std::size_t TrackFindingMeasurements::nMeasurements() const {
-    return m_measurementsTotal;
-  }
-
-}  // namespace ActsTrk::detail

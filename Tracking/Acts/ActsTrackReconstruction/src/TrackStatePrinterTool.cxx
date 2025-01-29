@@ -450,7 +450,7 @@ namespace ActsTrk
   TrackStatePrinterTool::printSeed(const Acts::GeometryContext &tgContext,
 				   const ActsTrk::Seed &seed,
 				   const Acts::BoundTrackParameters &initialParameters,
-				   const detail::SharedHitCounter &sharedHits,
+				   const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &offset,
 				   size_t iseed,
 				   bool isKF) const
   {
@@ -470,7 +470,7 @@ namespace ActsTrk
           os << ',';
         ++nos;
         ++nom;
-        os << sharedHits.measurementIndex(*el);
+        os << el->index() + containerOffset(el->container(), offset);
       }
     }
 
