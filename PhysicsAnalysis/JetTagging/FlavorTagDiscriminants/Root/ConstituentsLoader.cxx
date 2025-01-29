@@ -55,7 +55,7 @@ namespace {
     const SelRegexes& select_regexes,
     const std::regex& re,
     const FlipTagConfig& flip_config) {
-    ConstituentsInputConfig config;
+    ConstituentsInputConfig config = {};
     config.name = name;
     config.order = str::match_first(sort_regexes, name,
                               "track order matching");
