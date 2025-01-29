@@ -66,7 +66,17 @@ StatusCode MissingMassTool::initialize()
   } else {
     return StatusCode::FAILURE;
   }
-  m_MMC = new MissingMassCalculator(aset, m_param_file_path);
+
+
+  if(aset == MMCCalibrationSet::MMC2019 &&  m_param_file_path.find("v051224") != std::string::npos){
+		ATH_MSG_WARNING( m_param_file_path << " param file not suitable for 2019 calibration set; please use MMC_params_v1_fixed.root");
+	}
+ 
+	if(aset == MMCCalibrationSet::MMC2024 && m_param_file_path.find("MMC_params_v1") != std::string::npos){
+    ATH_MSG_WARNING( m_param_file_path << " param file not suitable for 2024 calibration set; please use MMC_params_v051224_angle_likelihoodFit.root or MMC_params_v051224_angle_noLikelihoodFit.root"); 
+	}
+
+	m_MMC = new MissingMassCalculator(aset, m_param_file_path);
   // set properties if non negative
   m_MMC->SetUseFloatStopping(m_float_stop);
   if (m_n_sigma_met>=0) m_MMC->SetNsigmaMETscan(m_n_sigma_met);
