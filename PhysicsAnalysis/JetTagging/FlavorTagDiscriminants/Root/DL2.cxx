@@ -63,7 +63,8 @@ namespace FlavorTagDiscriminants {
     // Update dependencies and used remap from the tracks loaders.
     for (auto loader : m_tracksLoaders){
       m_dataDependencyNames += loader->getDependencies();
-      rd.merge(loader->getUsedRemap());
+      std::set<std::string> used_remap = loader->getUsedRemap();
+      rd.merge(used_remap);
     }
     // check that all remapping was used
     rd.merge(rc);

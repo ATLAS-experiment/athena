@@ -52,16 +52,16 @@ namespace FlavorTagDiscriminants {
         return std::make_tuple(m_config.output_name, m_seqGetter.getFeats(jet, sorted_hits), dummy);
     }
 
-    FTagDataDependencyNames HitsLoader::getDependencies() const {
+    const FTagDataDependencyNames& HitsLoader::getDependencies() const {
         return m_deps;
     }
-    std::set<std::string> HitsLoader::getUsedRemap() const {
+    const std::set<std::string>& HitsLoader::getUsedRemap() const {
         return m_used_remap;
     }
-    std::string HitsLoader::getName() const {
+    const std::string& HitsLoader::getName() const {
         return m_name;
     }
-    ConstituentsType HitsLoader::getType() const {
+    const ConstituentsType& HitsLoader::getType() const {
         return m_config.type;
     }
 
