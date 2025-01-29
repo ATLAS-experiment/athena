@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -29,6 +29,7 @@
 #include "VxJetVertex/JetVtxParamDefs.h"
 #include "TrkVertexFitterInterfaces/IVertexLinearizedTrackFactory.h"
 #include "TrkTrack/Track.h"
+#include "CxxUtils/sincos.h"
 //#include "TrkVertexFitterUtils/FullLinearizedTrackFactory.h"
 
 namespace Trk
@@ -50,10 +51,12 @@ namespace Trk
       double phi=myPosition[Trk::jet_phi];
       double theta=myPosition[Trk::jet_theta];
       double dist=0.;
+      CxxUtils::sincos sc_theta (theta);
+      CxxUtils::sincos sc_phi (phi);
       if (numbRow>=0) {
 	dist=myPosition[numbRow];
-	if (fabs(dist)*sin(theta)>300.) {//MAX 30cm
-	  dist=dist/fabs(dist)*300./sin(theta);
+	if (fabs(dist)*sc_theta.sn>300.) {//MAX 30cm
+	  dist=dist/fabs(dist)*300./sc_theta.sn;
 	}
 	if (dist<0) {
 	  if (signFlipTreatment) {
@@ -63,9 +66,9 @@ namespace Trk
 	  }
 	}
       }
-      return Amg::Vector3D(xv+dist*cos(phi)*sin(theta),
-			   yv+dist*sin(phi)*sin(theta),
-			   zv+dist*cos(theta));
+      return Amg::Vector3D(xv+dist*sc_phi.cs*sc_theta.sn,
+			   yv+dist*sc_phi.sn*sc_theta.sn,
+			   zv+dist*sc_theta.cs);
     }
 
   }//end anonymous namespace
