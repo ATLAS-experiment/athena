@@ -8,6 +8,11 @@
 #include "FlavorTagDiscriminants/GNNOptions.h"
 #include "FlavorTagDiscriminants/StringUtils.h"
 
+
+#include "FlavorTagDiscriminants/TracksLoader.h"
+#include "FlavorTagDiscriminants/FlowElementsLoader.h"
+#include "FlavorTagDiscriminants/HitsLoader.h"
+
 #include "xAODBTagging/BTagging.h"
 #include "xAODJet/JetContainer.h"
 
@@ -65,8 +70,8 @@ namespace FlavorTagDiscriminants {
       case TRACK:
         m_constituentsLoaders.push_back(std::make_shared<TracksLoader>(config, options));
         break;
-      case IPARTICLE:
-        m_constituentsLoaders.push_back(std::make_shared<IParticlesLoader>(config, options));
+      case FLOW_ELEMENT:
+        m_constituentsLoaders.push_back(std::make_shared<FlowElementsLoader>(config, options));
         break;
       case HIT:
         m_constituentsLoaders.push_back(std::make_shared<HitsLoader>(config, options));
@@ -90,7 +95,8 @@ namespace FlavorTagDiscriminants {
     // Update dependencies and used remap from the constituents loaders.
     for (auto loader : m_constituentsLoaders){
       m_dataDependencyNames += loader->getDependencies();
-      rd.merge(loader->getUsedRemap());
+      std::set<std::string> used_remap = loader->getUsedRemap();
+      rd.merge(used_remap);
     }
     dataprep::checkForUnusedRemaps(options.remap_scalar, rd);
 
