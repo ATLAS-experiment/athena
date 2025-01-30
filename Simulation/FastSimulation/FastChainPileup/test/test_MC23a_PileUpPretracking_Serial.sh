@@ -34,7 +34,7 @@ pretracking=$?
 echo  "art-result: $pretracking PUTracking"
 status=$pretracking
 
-# Regression
+# Regression test
 reg=-9999
 if [ ${pretracking} -eq 0 ]
 then
