@@ -129,10 +129,10 @@ Amg::Vector2D sTgcReadoutElement::localChannelPosition(const IdentifierHash& mea
          return stripCenter;
       }
       stripCenter = std::move(*stripCenterOpt);
-      if (channelNumber(measHash) == 1 && firstStripPitch(measHash) < stripPitch(measHash)) {
+      if (channelNumber(measHash) == 1 && firstStripPitch(measHash) < 0.75 * stripPitch(measHash)) {
          stripCenter.x() += 0.25 * stripWidth(measHash);
       }
-      if (channelNumber(measHash) == numStrips(measHash) && firstStripPitch(measHash) == stripPitch(measHash)) {
+      if (channelNumber(measHash) == numStrips(measHash) && firstStripPitch(measHash) > 0.75 * stripPitch(measHash)) {
          stripCenter.x() -= 0.25 * stripWidth(measHash);
       }
       return stripCenter;
