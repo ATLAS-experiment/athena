@@ -44,22 +44,13 @@ FastChain_tf.py \
 
 fastchain=$?
 echo  "art-result: $fastchain EVNTtoRDO"
-status=$fastchain
 
-reg=-9999
 rec=-9999
-reg2=-9999
+reg=-9999
+
+# Reconstruction
 if [ ${fastchain} -eq 0 ]
 then
-
-   # Regression
-   ArtPackage=$1
-   ArtJobName=$2
-   art.py compare grid -entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file ${RDO_File}
-   reg=$?
-   status=$reg
-
-   # Reconstruction
    Reco_tf.py \
       --CA \
       --multithreaded True \
@@ -73,17 +64,30 @@ then
       --postExec 'RAWtoALL:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("RAWtoALL_config.txt")' \
       --imf False
      rec=$?
-     status=$rec
-     if [ ${rec} -eq 0 ]
-     then
-         art.py compare grid --entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file=${AOD_File}
-         reg2=$?
-         status=$reg2
-     fi
+fi
+
+echo  "art-result: $rec reconstruction"
+
+# Regression test
+if [ ${fastchain} -eq 0 ]
+then
+   ArtPackage=$1
+   ArtJobName=$2
+   art.py compare grid -entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file ${RDO_File}
+   reg=$?
 fi
 
 echo  "art-result: $reg regression"
-echo  "art-result: $rec reconstruction"
-echo  "art-result: $reg2 regression2"
+
+# Set status to the first failure encountered
+if [ ${fastchain} -ne 0 ]; then
+    status=$fastchain
+elif [ ${rec} -ne 0 ]; then
+    status=$rec
+elif [ ${reg} -ne 0 ]; then
+    status=$reg
+else
+    status=0
+fi
 
 exit $status

@@ -57,6 +57,8 @@ echo  "art-result: $fastchain EVNTtoDAOD"
 status=$fastchain
 
 reg=-9999
+
+# Regression test
 if [ $fastchain -eq 0 ]
 then
     ArtPackage=$1

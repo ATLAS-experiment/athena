@@ -37,12 +37,12 @@ echo  "art-result: $pretracking PUTracking"
 status=$pretracking
 
 rdomerge=-9999
-reg=-9999
+
+# RDOMerge
 if [ $pretracking -eq 0 ]
 then
     mv ${RDO_PU_File} backup_${RDO_PU_File}
     rm PoolFileCatalog.xml
-
     RDOMerge_tf.py \
       --CA \
       --PileUpPresampling True \
@@ -52,18 +52,21 @@ then
       rdomerge=$?
       rm backup_${RDO_PU_File}
       status=$rdomerge
-      if [ ${rdomerge} -eq 0 ]
-      then
-          # Regression 
-          ArtPackage=$1
-          ArtJobName=$2
-          art.py compare grid --entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file=${RDO_PU_File}
-          reg=$?
-          status=$reg
-     fi
 fi
 
 echo  "art-result: $rdomerge RDOmerge"
+
+# Regression test
+reg=-9999
+if [ ${rdomerge} -eq 0 ]
+then
+    ArtPackage=$1
+    ArtJobName=$2
+    art.py compare grid --entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file=${RDO_PU_File}
+    reg=$?
+    status=$reg
+fi
+
 echo  "art-result: $reg regression"
 
 exit $status
