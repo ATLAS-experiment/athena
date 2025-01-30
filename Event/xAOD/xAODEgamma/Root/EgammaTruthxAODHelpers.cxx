@@ -106,11 +106,11 @@ xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,
   }
 
   //And has to be a photon or electron
-  const xAOD::TruthParticle* parent = truthel->parent();
-  if ( !MC::isPhoton(parent) && !MC::isElectron(parent) ) {
-    return vec;
+  for (size_t p = 0; p < truthel->nParents(); ++p) {
+    if ( !MC::isPhoton(truthel->parent(p)) && !MC::isElectron(truthel->parent(p)) )  return vec;
   }
 
+  const xAOD::TruthParticle* parent = truthel->parent(0); //FIXME!!! One should get all the ancestors.
   vec.push_back(parent); //push in the parent as the second entry
 
   //Loop over the generations
