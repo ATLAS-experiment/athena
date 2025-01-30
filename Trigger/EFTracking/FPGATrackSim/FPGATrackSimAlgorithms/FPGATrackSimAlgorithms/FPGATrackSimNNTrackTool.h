@@ -56,6 +56,7 @@ class FPGATrackSimNNTrackTool : public FPGATrackSimTrackingToolBase, public Onnx
 
 	Gaudi::Property <double> m_NNCut{ this, "NNCut", 0.2, " NN output value to cut on when selecting good tracks" };
 	Gaudi::Property <double> m_chi2_scalefactor{ this, "Chi2ScaleFactor", 40 / (1 - 0.1), "Scale factor to use in converting to a chi2, Nominal chi2ndof cut is 40 and we want to use NN>0.0075 (or NN<(1-0.0075)" };
+	Gaudi::Property <unsigned int> m_minNumberOfRealHitsInATrack{ this, "MinNumberOfRealHitsInATrack", 4, "Minimum number of real hits in a track candidate to process" };
 
 
   private:

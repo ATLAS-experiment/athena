@@ -268,6 +268,7 @@ def NNTrackToolCfg(flags):
     NNTrackTool.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
     NNTrackTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan
     NNTrackTool.SPRoadFilterTool = getSPRoadFilterTool(flags)
+    NNTrackTool.MinNumberOfRealHitsInATrack = 5 if flags.Trigger.FPGATrackSim.ActiveConfig.genScan else 9
     
     result.setPrivateTools(NNTrackTool)
     return result
@@ -489,9 +490,9 @@ if __name__ == "__main__":
         flags.Trigger.FPGATrackSim.Hough.hough1D = False
         flags.Trigger.FPGATrackSim.Hough.hough = True
     elif (flags.Trigger.FPGATrackSim.pipeline.startswith('F-6')):
+        print("You are trying to run an F-6* pipeline! I am auto-configuring the Inside-Out for you. Whether you wanted to or not")
         flags.Trigger.FPGATrackSim.Hough.genScan=True
         flags.Trigger.FPGATrackSim.spacePoints=False # possibly redundant
-        
     elif (flags.Trigger.FPGATrackSim.pipeline != ""):
         raise AssertionError("ERROR You are trying to run the pipeline " + flags.Trigger.FPGATrackSim.pipeline + " which is not yet supported!")
 
