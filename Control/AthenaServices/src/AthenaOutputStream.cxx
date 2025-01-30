@@ -408,7 +408,7 @@ void AthenaOutputStream::handle(const Incident& inc)
          if( !rangeFN.empty() and rangeFN != newRangeFN ) {
             ATH_MSG_INFO("Slot range change: '" << rangeFN << "' -> '" << newRangeFN << "'");
             ATH_MSG_DEBUG("There are " << m_slotRangeMap.size() << " slots in use");
-            for(auto range : m_slotRangeMap ) {
+            for(const auto & range : m_slotRangeMap ) {
                ATH_MSG_DEBUG("Slot: " << range.first << "  FN=" << range.second);
             }
             if( count_events_in_range(rangeFN) == 1 ) {

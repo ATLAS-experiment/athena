@@ -257,7 +257,7 @@ StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) 
          // matches so that we retain the latest one.
          std::set<std::string> insertedTags{};
          for(auto iter=dh->beginProvenance(), iEnd=dh->endProvenance(); iter != iEnd; ++iter) {
-            const auto currentKey = (*iter).getKey();
+            const auto & currentKey = (*iter).getKey();
             if(!insertedTags.contains(currentKey)) {
                insertedTags.insert(currentKey);
                m_dataHeader->insertProvenance(*iter);

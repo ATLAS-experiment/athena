@@ -79,7 +79,7 @@ std::string formJVec (const RANGE& r) {
   std::ostringstream ss;
   ss << "[";
   std::string sep;
-  for (auto elt : r) {
+  for (const auto & elt : r) {
     ss << sep;
     sep = " ";
     ss << form_vec_elt (elt);
