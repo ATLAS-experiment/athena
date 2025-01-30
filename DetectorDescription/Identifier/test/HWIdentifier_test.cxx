@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
  
 #define BOOST_TEST_DYN_LINK
@@ -9,8 +9,6 @@
 #include <boost/test/tools/output_test_stream.hpp>
 #include <boost/core/demangle.hpp>
 namespace utf = boost::unit_test;
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "Identifier/HWIdentifier.h"
 #include "Identifier/Identifier.h"
