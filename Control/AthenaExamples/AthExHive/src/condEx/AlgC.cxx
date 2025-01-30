@@ -1,25 +1,15 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AlgC.h"
-
-#include "StoreGate/ReadCondHandleKey.h"
-
-#include "GaudiKernel/ServiceHandle.h"
-#include <thread>
-#include <chrono>
-#include <memory>
-
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/ReadCondHandle.h"
 
 AlgC::AlgC( const std::string& name, 
             ISvcLocator* pSvcLocator ) : 
   ::AthAlgorithm( name, pSvcLocator )
 {}
-
-//---------------------------------------------------------------------------
-
-AlgC::~AlgC() {}
 
 //---------------------------------------------------------------------------
 
@@ -38,13 +28,6 @@ StatusCode AlgC::initialize() {
 
 //---------------------------------------------------------------------------
 
-StatusCode AlgC::finalize() {
-  ATH_MSG_DEBUG("finalize " << name());
-  return StatusCode::SUCCESS;
-}
-
-//---------------------------------------------------------------------------
-
 StatusCode AlgC::execute() {
   ATH_MSG_DEBUG("execute " << name());
 
@@ -58,9 +41,6 @@ StatusCode AlgC::execute() {
 
   EventIDBase t( getContext().eventID() );
   
-  //  const CondDataObj *cdo = m_rch.retrieve(t);    
-  //  const CondDataObj *cdo = m_rch.retrieve();
-
   SG::ReadCondHandle<CondDataObj> rch( m_rch );
   const CondDataObj *cdo = *rch;
   if (cdo != 0) {

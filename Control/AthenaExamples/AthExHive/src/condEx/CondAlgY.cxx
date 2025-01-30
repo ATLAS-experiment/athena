@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CondAlgY.h"
@@ -8,18 +8,11 @@
 
 #include "GaudiKernel/ServiceHandle.h"
 
-#include <thread>
-#include <chrono>
-#include <memory>
-
 CondAlgY::CondAlgY( const std::string& name, 
-            ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator ),
-  m_cds("ASCIICondDbSvc",name)
+		    ISvcLocator* pSvcLocator ) : 
+  ::AthAlgorithm( name, pSvcLocator )
 {
 }
-
-CondAlgY::~CondAlgY() {}
 
 StatusCode CondAlgY::initialize() {
   ATH_MSG_DEBUG("initialize " << name());
@@ -37,14 +30,17 @@ StatusCode CondAlgY::initialize() {
 
 StatusCode CondAlgY::execute() {
   ATH_MSG_DEBUG("execute " << name());
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  EventIDBase now(ctx.eventID());
 
-  EventIDBase now(getContext().eventID());
-
-  SG::WriteCondHandle<CondDataObjY> wch1(m_wch1);
-  SG::WriteCondHandle<CondDataObjY> wch2(m_wch2);
+  SG::WriteCondHandle<CondDataObjY> wch1(m_wch1,ctx);
+  SG::WriteCondHandle<CondDataObjY> wch2(m_wch2,ctx);
 
   // do we have a valid m_wch for current time?
-  if ( !wch1.isValid(now) ) {
+  if ( wch1.isValid(now) ) {
+    ATH_MSG_DEBUG(" Found a valid write handle for " << wch1.key());
+  }
+  else {
 
     ATH_MSG_DEBUG("  CondHandle " << wch1.key() 
                   << " not valid. Getting new info for dbKey \"" 
@@ -70,7 +66,10 @@ StatusCode CondAlgY::execute() {
   }
 
   // do we have a valid wch for current time?
-  if ( !wch2.isValid(now) ) {
+  if ( wch2.isValid(now) ) {
+    ATH_MSG_DEBUG(" Found a valid write handle for " << wch2.key());
+  }
+  else {
 
     ATH_MSG_DEBUG("  CondHandle " << wch2.key() 
                   << " not valid. Getting new info for dbKey \"" 

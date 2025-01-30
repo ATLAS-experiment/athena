@@ -1,26 +1,17 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AlgT.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
-#include "GaudiKernel/ServiceHandle.h"
-
-#include <thread>
-#include <chrono>
-#include <ctime>
-#include <memory>
-
 AlgT::AlgT( const std::string& name, 
-		    ISvcLocator* pSvcLocator ) : 
+	    ISvcLocator* pSvcLocator ) : 
   ::AthAlgorithm( name, pSvcLocator )
 {}
 
 //---------------------------------------------------------------------------
-
-AlgT::~AlgT() {}
 
 StatusCode AlgT::initialize() {
   ATH_MSG_DEBUG("initialize " << name());
@@ -29,43 +20,10 @@ StatusCode AlgT::initialize() {
   ATH_CHECK( m_wrh1.initialize() );
   ATH_CHECK( m_evt.initialize() );
 
-  if ( m_tool1.retrieve().isFailure() ) {
-    ATH_MSG_FATAL 
-      (m_tool1.propertyName() << ": Failed to retrieve tool "
-       << m_tool1.type());
-    return StatusCode::FAILURE;
-  } else {
-    ATH_MSG_INFO("retreived " << m_tool1.name());
-  }
+  ATH_CHECK( m_tool1.retrieve() );
+  ATH_CHECK( m_tool2.retrieve() );
+  ATH_CHECK( m_tool3.retrieve() );
 
-  if ( m_tool2.retrieve().isFailure() ) {
-    ATH_MSG_FATAL 
-      (m_tool2.propertyName() << ": Failed to retrieve tool "
-       << m_tool2.type());
-    return StatusCode::FAILURE;
-  }else {
-    ATH_MSG_INFO("retreived " << m_tool2.name());
-  }
-
-  
-  if ( m_tool3.retrieve().isFailure() ) {
-    ATH_MSG_FATAL 
-      (m_tool3.propertyName() << ": Failed to retrieve tool "
-       << m_tool3.type());
-    return StatusCode::FAILURE;
-  }else {
-    ATH_MSG_INFO("retreived " << m_tool3.name());
-  }
-
-
-  
-  return StatusCode::SUCCESS;
-}
-
-//---------------------------------------------------------------------------
-
-StatusCode AlgT::finalize() {
-  ATH_MSG_DEBUG("finalize " << name());
   return StatusCode::SUCCESS;
 }
 

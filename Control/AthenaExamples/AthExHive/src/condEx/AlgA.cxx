@@ -1,27 +1,20 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AlgA.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
-#include "GaudiKernel/ServiceHandle.h"
-
-#include <thread>
-#include <chrono>
-#include <ctime>
 #include <memory>
 
 AlgA::AlgA( const std::string& name, 
-		    ISvcLocator* pSvcLocator ) : 
+	    ISvcLocator* pSvcLocator ) : 
   ::AthAlgorithm( name, pSvcLocator )
 {
 }
 
 //---------------------------------------------------------------------------
-
-AlgA::~AlgA() {}
 
 StatusCode AlgA::initialize() {
   ATH_MSG_DEBUG("initialize " << name());
@@ -30,13 +23,6 @@ StatusCode AlgA::initialize() {
   ATH_CHECK( m_wrh2.initialize() );
   ATH_CHECK( m_evt.initialize() );
 
-  return StatusCode::SUCCESS;
-}
-
-//---------------------------------------------------------------------------
-
-StatusCode AlgA::finalize() {
-  ATH_MSG_DEBUG("finalize " << name());
   return StatusCode::SUCCESS;
 }
 

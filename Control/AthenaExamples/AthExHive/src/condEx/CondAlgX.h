@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef CONDALGS_CONDALGX_H
-#define CONDALGS_CONDALGX_H 1
+#ifndef ATHEXHIVE_CONDEX_CONDALGX_H
+#define ATHEXHIVE_CONDEX_CONDALGX_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "StoreGate/ReadHandle.h"
@@ -15,14 +15,12 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "GaudiKernel/ICondSvc.h"
 
-#include <string>
-
 class CondAlgX  :  public AthAlgorithm {
   
 public:
     
   CondAlgX (const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~CondAlgX();
+  virtual ~CondAlgX() = default;
   
   virtual StatusCode initialize() override;
   virtual StatusCode execute() override;
@@ -35,9 +33,7 @@ private:
 
   Gaudi::Property<std::string> m_dbKey {this, "Key_DB", "X2", "explicit dbKey for cond handle"};
 
-  ServiceHandle<IASCIICondDbSvc> m_cds;
-
-
+  ServiceHandle<IASCIICondDbSvc> m_cds{this, "ASCIICondDbSvc", "ASCIICondDbSvc", "Handle to the ASCII CondDb service"};
 };
 
 #endif
