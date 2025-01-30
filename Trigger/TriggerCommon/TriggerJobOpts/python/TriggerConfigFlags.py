@@ -57,7 +57,8 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.enableL1TopoBWSimulation', True,
                   help='enable bitwise L1Topo simulation')
 
-    flags.addFlag('Trigger.enableL1CaloLegacy', True,
+    flags.addFlag('Trigger.enableL1CaloLegacy', lambda prevFlags:
+                  not (not prevFlags.Input.isMC and prevFlags.Trigger.doHLT), #Disable when we're running the trigger on data, keep when doing offline simulation
                   help='enable Run-2 L1Calo simulation and/or decoding')
 
     # L1MuonSim category
