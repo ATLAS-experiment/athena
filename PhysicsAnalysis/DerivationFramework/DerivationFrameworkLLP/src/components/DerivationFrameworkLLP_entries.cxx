@@ -1,11 +1,12 @@
 #include "DerivationFrameworkLLP/JetLargeD0TrackParticleThinning.h"
 #include "DerivationFrameworkLLP/VSITrackParticleThinning.h"
 #include "DerivationFrameworkLLP/RCJetSubstructureAug.h"
+#include "DerivationFrameworkLLP/DESDM_EXOTHIP_SkimmingTool.h"
 
 using namespace DerivationFramework;
 
 DECLARE_COMPONENT( JetLargeD0TrackParticleThinning )
 DECLARE_COMPONENT( VSITrackParticleThinning )
 DECLARE_COMPONENT( RCJetSubstructureAug )
-
+DECLARE_COMPONENT( DESDM_EXOTHIP_SkimmingTool )
 
