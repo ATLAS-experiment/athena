@@ -135,7 +135,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(std::vector<std::shared_ptr<const 
       }
 
       // TODO: for now ignore roads with non-real hits, because the network needs all hits as input
-      if (hit_list.size() < 9) continue;
+      if (hit_list.size() < m_minNumberOfRealHitsInATrack) continue;
 
       // Sort the list by radial distance
       std::sort(hit_list.begin(), hit_list.end(),
