@@ -43,6 +43,10 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag("Trigger.forceEnableAllChains", False,
                   help='always enable all configured chains (for testing)')
 
+    flags.addFlag("Trigger.disableL1ConsistencyChecker", False,
+                  help='force disabling the L1 ConsistencyChecker')
+
+
     flags.addFlag('Trigger.enableL1MuonPhase1', lambda prevFlags:
                   prevFlags.Trigger.EDMVersion >= 3 or prevFlags.Detector.EnableMM or prevFlags.Detector.EnablesTGC,
                   help='enable Run-3 LVL1 muon decoding')

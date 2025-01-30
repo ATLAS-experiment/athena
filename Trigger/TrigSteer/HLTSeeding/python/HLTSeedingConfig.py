@@ -323,7 +323,7 @@ def HLTSeedingCfg(flags, seqName = None):
     )
 
     # Add L1DataConsistencyChecker unless we forceEnableAllChains which always results in missing TOBs
-    if not flags.Trigger.forceEnableAllChains:
+    if not (flags.Trigger.forceEnableAllChains or flags.Trigger.disableL1ConsistencyChecker):
         def checkConsistency(thrName):
             '''Filter out threshold types for which HLT doesn't read TOBs from L1 readout'''
             return thrName not in ['FSNOSEED','TE','XE','XS'] and not thrName.startswith('PROBE')
