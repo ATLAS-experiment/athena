@@ -12,6 +12,7 @@
 #include "MCTruthClassifier/MCTruthClassifierDefs.h"
 
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #ifndef XAOD_STANDALONE // For now metadata is Athena-only
 #include "AthAnalysisBaseComps/AthAnalysisHelper.h"
@@ -147,16 +148,11 @@ bool SUSYObjDef_xAOD::FindSusyHardProc(const xAOD::TruthParticleContainer *truth
     return false;
   }
   for (const xAOD::TruthParticle* tp : *truthP) {
-
-    //check ifSUSY particle
-    if ((tp->absPdgId() > 1000000 && tp->absPdgId() < 1000007) || // squarkL
-        (tp->absPdgId() > 1000010 && tp->absPdgId() < 1000017) || // sleptonL
-        (tp->absPdgId() > 2000000 && tp->absPdgId() < 2000007) || // squarkR
-        (tp->absPdgId() > 2000010 && tp->absPdgId() < 2000017) || // sleptonR
-        (tp->absPdgId() > 1000020 && tp->absPdgId() < 1000040)) { // gauginos
+    if (MC::isSquark(tp) || MC::isSlepton(tp) || MC::isGaugino(tp)) {
 
       if (tp->nParents() != 0) {
-        if ( tp->parent(0)->absPdgId()  < 1000000) {
+
+        if ( !MC::isSUSY(tp->parent(0))) {
           if (!firstsp) {
             firstsp = tp;
           } else if (!secondsp) {
@@ -203,8 +199,8 @@ bool SUSYObjDef_xAOD::FindSusyHardProc(const xAOD::TruthParticleContainer *truth
     }
   }
 
-  if (firstsp->absPdgId() > 1000000) pdgid1 = firstsp->pdgId();
-  if (secondsp->absPdgId() > 1000000) pdgid2 = secondsp->pdgId();
+  if (MC::isSUSY(firstsp)) pdgid1 = firstsp->pdgId();
+  if (MC::isSUSY(secondsp)) pdgid2 = secondsp->pdgId();
 
   // Return gracefully:
   return true;
@@ -242,14 +238,10 @@ bool SUSYObjDef_xAOD::FindSusyHardProc(const xAOD::TruthEvent *truthE, int& pdgi
     const xAOD::TruthParticle* tp = truthE->truthParticle(p);
 
     //check ifSUSY particle
-    if ((tp->absPdgId() > 1000000 && tp->absPdgId() < 1000007) || // squarkL
-        (tp->absPdgId() > 1000010 && tp->absPdgId() < 1000017) || // sleptonL
-        (tp->absPdgId() > 2000000 && tp->absPdgId() < 2000007) || // squarkR
-        (tp->absPdgId() > 2000010 && tp->absPdgId() < 2000017) || // sleptonR
-        (tp->absPdgId() > 1000020 && tp->absPdgId() < 1000040)) { // gauginos
+    if (MC::isSquark(tp) || MC::isSlepton(tp) || MC::isGaugino(tp)) {
 
       if (tp->nParents() != 0) {
-        if ( tp->parent(0)->absPdgId()  < 1000000) {
+        if ( !MC::isSUSY(tp->parent(0))) {
           if (!firstsp) {
             firstsp = tp;
           } else if (!secondsp) {
@@ -298,8 +290,8 @@ bool SUSYObjDef_xAOD::FindSusyHardProc(const xAOD::TruthEvent *truthE, int& pdgi
     }
   }
 
-  if (firstsp->absPdgId() > 1000000) pdgid1 = firstsp->pdgId();
-  if (secondsp->absPdgId() > 1000000) pdgid2 = secondsp->pdgId();
+  if (MC::isSUSY(firstsp)) pdgid1 = firstsp->pdgId();
+  if (MC::isSUSY(secondsp)) pdgid2 = secondsp->pdgId();
 
   // Return gracefully:
   return true;

@@ -71,7 +71,7 @@ namespace DerivationFramework {
     for (const auto tp : *truthP) {
       if (MC::isSquark(tp) || MC::isSlepton(tp) || MC::isGaugino(tp)) {
         if (tp->nParents() != 0) {
-          if ( tp->parent(0)->absPdgId()  < 1000000) { // Replace with !MC::isSUSY(tp) ?
+          if ( !MC::isSUSY(tp->parent(0))) {
             if (!firstsp) {
               firstsp = tp;
             } else if (!secondsp) {
