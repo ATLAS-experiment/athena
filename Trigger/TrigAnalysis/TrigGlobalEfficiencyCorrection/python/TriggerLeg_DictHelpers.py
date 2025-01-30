@@ -73,8 +73,7 @@ def MapKeysDict(target_version):
             if len(parts) < 3:
                 continue
             key = f"{parts[0]}_{parts[1]}"
-            # skip parts that start with a year
-            values = [part for part in parts[2:] if not part.startswith(parts[0])]
+            values = parts[2:]
             trigger_dict[key] = values
 
     return trigger_dict

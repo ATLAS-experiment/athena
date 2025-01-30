@@ -122,30 +122,33 @@ bool ImportData::importTriggers()
 		auto& def = m_triggerDefs[h];
 		def.name = h;
 
-		bool found_tau_leg = false;
-		// Skip chains with a tau leg, not yet supported
-		while((ss >> token) && !found_tau_leg)
-		{
-			auto flavour = associatedLeptonFlavour(token, success);
-			if(flavour == xAOD::Type::Tau) found_tau_leg = true;
-		}
-		if(found_tau_leg) continue;
-
 		ss.clear();
 		ss.str(line);
 		ss >> triggerName;
 		m_dictionary[h] = triggerName;
 		ATH_MSG_DEBUG(std::to_string(h) << " " << triggerName );
+
+		bool hasTauLeg{};
 		for(std::size_t& leg : def.leg)
 		{
 			if(!(ss >> token)) break;
-			h = m_hasher(token);
-			m_dictionary.emplace(h,token);
-			leg = h;
-			if(m_triggerThresholds.find(h) == m_triggerThresholds.end())
+			auto flavour = associatedLeptonFlavour(token, success);
+			if (flavour == xAOD::Type::Tau)
 			{
-				ATH_MSG_ERROR("Unknown trigger leg '" << token << "' found in Triggers.cfg");
-				success = false;
+				// we don't support taus for now
+				leg = 0;
+				hasTauLeg = true;
+			}
+			else
+			{
+				h = m_hasher(token);
+				m_dictionary.emplace(h,token);
+				leg = h;
+				if(m_triggerThresholds.find(h) == m_triggerThresholds.end())
+				{
+					ATH_MSG_ERROR("Unknown trigger leg '" << token << "' found in Triggers.cfg");
+					success = false;
+				}
 			}
 		}
 		if(!def.leg[0])
@@ -160,7 +163,12 @@ bool ImportData::importTriggers()
 		if(!success) continue;
 		
 		/// Classify trigger and re-arrange legs (if needed) so that all electron legs come before muon legs, and muon legs before photon legs
-		def.type = TT_UNKNOWN;		
+		def.type = TT_UNKNOWN;
+		// triggers with tau legs should stay unknown
+		if (hasTauLeg) {
+			continue;
+		}
+
 		auto flavour0 = associatedLeptonFlavour(def.leg[0], success);
 		int ne = (flavour0 == xAOD::Type::Electron)*1;
 		int nm = (flavour0 == xAOD::Type::Muon)*1;
