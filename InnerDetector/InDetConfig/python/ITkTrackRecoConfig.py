@@ -183,7 +183,7 @@ def ITkStoreTrackSeparateContainerCfg(flags,
         # The following few lines will disappear once we have imposed a proper nomenclature for our algorithms and collection
         prefix = flags.Tracking.ActiveConfig.extension
         result.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, f"{prefix}ResolvedTrackToAltTrackParticleCnvAlg",
-                                                       ACTSTracksLocation=TrackContainer,
+                                                       ACTSTracksLocation=[TrackContainer],
                                                        TrackParticlesOutKey=f'{TrackContainer}ParticlesAlt'))
 
         if flags.Tracking.doTruth :
