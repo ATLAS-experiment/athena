@@ -10,6 +10,9 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
+from DerivationFrameworkFlavourTag.FtagBaseContent import (
+    addCommonAugmentation
+)
 
 # Main algorithm config
 def FTAG2KernelCfg(flags, name='FTAG2Kernel', **kwargs):
@@ -101,6 +104,8 @@ def FTAG2Cfg(flags):
 
     from DerivationFrameworkFlavourTag import FtagBaseContent
 
+    addCommonAugmentation(flags, acc, FTAG2SlimmingHelper)
+
     FTAG2SlimmingHelper.SmartCollections = []
     FtagBaseContent.add_baseline_slimming_smartcollections(FTAG2SlimmingHelper)
     
@@ -130,7 +135,7 @@ def FTAG2Cfg(flags):
     FtagBaseContent.trigger_setup(FTAG2SlimmingHelper, 'FTAG2')
     FtagBaseContent.trigger_matching(FTAG2SlimmingHelper, FTAG2TriggerListsHelper, flags)
 
-    # Output stream    
+    # Output stream
     FTAG2ItemList = FTAG2SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_FTAG2", ItemList=FTAG2ItemList, AcceptAlgs=["FTAG2Kernel"]))
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_FTAG2", AcceptAlgs=["FTAG2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
