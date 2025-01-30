@@ -391,12 +391,12 @@ StatusCode TruthClassificationTool::classifyElectron(const xAOD::IParticle &elec
   if (truthParticle != nullptr)
   {
     const xAOD::TruthParticle *parent = truthParticle;
-    ATH_MSG_DEBUG("Unknown particle decay chain:");
+    ATH_MSG_DEBUG("Unknown particle decay chain (approximate):");
     std::string out = "\t";
     while (parent != nullptr)
     {
       out.append(std::to_string(parent->pdgId()));
-      parent = parent->parent();
+      parent = parent->parent(0); //AV: Note the ambiguity: only the first particle is considered.
       if (parent) out.append(" -> ");
     }
     ATH_MSG_DEBUG(out);
