@@ -315,7 +315,7 @@ def HLTSeedingCfg(flags, seqName = None):
 
     from HLTSeeding.HLTSeedingMonitoring import CTPUnpackingMonitoring, L1DataConsistencyMonitoring
     decoderAlg = CompFactory.HLTSeeding(
-        RoIBResult = "RoIBResult" if flags.Trigger.enableL1CaloLegacy or not flags.Trigger.enableL1MuonPhase1 else "",
+        RoIBResult = "RoIBResult", # Not yet ready to disable, see ATR-29954
         L1TriggerResult = "L1TriggerResult" if flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL1CaloPhase1 else "",
         HLTSeedingSummaryKey = "HLTSeedingSummary", # Transient, consumed by DecisionSummaryMakerAlg
         ctpUnpacker = CompFactory.CTPUnpackingTool( ForceEnableAllChains = flags.Trigger.forceEnableAllChains,
