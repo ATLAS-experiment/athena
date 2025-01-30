@@ -81,6 +81,7 @@ class Registry(metaclass=Singleton):
         self.add_default("check_bad_st1", 1, description="check stage 1 output and discard bad grids. [1:enabled]")
         self.add_default("check_bad_st2", 1, description="check stage 2 output and discard bad grids. [1:enabled]")
         self.add_default("chhh", 1.0, description="ggF_HH and ggF_HH_SMEFT: Trilinear Higgs self-coupling")
+        self.add_default("ch4", 1.0, description="ggF_HH_quartic: Quartic Higgs self-coupling")
         self.add_default("ct", 1.0, description="ggF_HH and ggF_HH_SMEFT: Top-Higgs Yukawa coupling")
         self.add_default("ctt", 0., description="ggF_HH and ggF_HH_SMEFT: Two-top-two-Higgs (tthh) coupling")
         self.add_default("cggh", 0., description="ggF_HH and ggF_HH_SMEFT: Effective gluon-gluon-Higgs coupling")
