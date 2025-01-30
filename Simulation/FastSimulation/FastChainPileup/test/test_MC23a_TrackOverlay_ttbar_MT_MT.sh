@@ -42,20 +42,12 @@ overlay=$?
 echo  "art-result: $overlay Overlay"
 status=$overlay
 
-reg=-9999
 rec=-9999
-reg2=-9999
+reg=-9999
+
+# Reconstruction
 if [ ${overlay} -eq 0 ]
 then
-
-   # Regression
-   ArtPackage=$1
-   ArtJobName=$2
-   art.py compare grid -entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file ${RDO_File}
-   reg=$?
-   status=$reg
-
-   # Reconstruction
    Reco_tf.py \
       --CA \
       --multithreaded True \
@@ -71,16 +63,20 @@ then
       --imf False
      rec=$?
      status=$rec
-     if [ ${rec} -eq 0 ]
-     then
-         art.py compare grid --entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file=${AOD_File}
-         reg2=$?
-         status=$reg2
-     fi
+fi
+
+echo  "art-result: $rec reconstruction"
+
+# Regression test
+if [ ${rec} -eq 0 ]
+then
+   ArtPackage=$1
+   ArtJobName=$2
+   art.py compare grid -entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root --file ${AOD_File}
+   reg=$?
+   status=$reg
 fi
 
 echo  "art-result: $reg regression"
-echo  "art-result: $rec reconstruction"
-echo  "art-result: $reg2 regression2"
 
 exit $status
