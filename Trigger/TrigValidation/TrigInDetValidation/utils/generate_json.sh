@@ -28,7 +28,7 @@ for JOB in $(grep HLT comparitor.txt | awk '{print $1}' ) ; do
     
     [ -e tchains.log ] && rm tchains.log
     
-    grep "$JOB" comparitor.txt | awk '{print $2}' > tchains.log 
+    grep "$JOB" comparitor.txt | awk '{print $2}' | sed 's|:post:.*||' > tchains.log 
 
     CHAINS=
     
