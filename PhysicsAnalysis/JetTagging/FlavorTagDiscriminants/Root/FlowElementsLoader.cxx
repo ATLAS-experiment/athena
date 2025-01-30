@@ -26,7 +26,7 @@ namespace FlavorTagDiscriminants {
     } // end of FlowElements sort getter
 
     FlowElementsLoader::FlowElementsLoader(
-        const ConstituentsInputConfig cfg,
+        const ConstituentsInputConfig& cfg,
         const FTagOptions& options
     ):
         IConstituentsLoader(cfg),
