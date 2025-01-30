@@ -23,7 +23,7 @@ namespace {
   typedef std::vector<std::pair<std::regex, ConstituentsSortOrder>> SortRegexes;
   typedef std::vector<std::pair<std::regex, ConstituentsSelection>> SelRegexes;
   
-  ConstituentsInputConfig get_iparticle_input_config(
+  ConstituentsInputConfig get_flow_input_config(
     const std::string& name,
     const std::vector<std::string>& input_variables,
     const TypeRegexes& type_regexes) {
@@ -55,7 +55,7 @@ namespace {
     const SelRegexes& select_regexes,
     const std::regex& re,
     const FlipTagConfig& flip_config) {
-    ConstituentsInputConfig config;
+    ConstituentsInputConfig config = {};
     config.name = name;
     config.order = str::match_first(sort_regexes, name,
                               "track order matching");
@@ -109,10 +109,10 @@ namespace FlavorTagDiscriminants {
           // ConstituentsEDMType picked correspond to the first matching regex
           {"(j|a|b)"_r, ConstituentsEDMType::CUSTOM_GETTER}
       };
-      TypeRegexes iparticle_type_regexes {
-          // iparticle variables
+      TypeRegexes flow_type_regexes {
+          // FlowElement variables
           // ConstituentsEDMType picked correspond to the first matching regex
-          {"(pt|deta|dphi|dr|energy)"_r, ConstituentsEDMType::CUSTOM_GETTER}
+          {"(pt|deta|dphi|dr|energy|isCharged)"_r, ConstituentsEDMType::CUSTOM_GETTER}
       };
       TypeRegexes trk_type_regexes {
           // Some innermost / next-to-innermost hit variables had a different
@@ -128,7 +128,9 @@ namespace FlavorTagDiscriminants {
           {"(deta|dphi)"_r, ConstituentsEDMType::CUSTOM_GETTER},
           {"phi|theta|qOverP"_r, ConstituentsEDMType::FLOAT},
           {"(phi|theta|qOverP)Uncertainty"_r, ConstituentsEDMType::CUSTOM_GETTER},
-          {"leptonID"_r, ConstituentsEDMType::CHAR}
+          {"(leptonID|muon_quality)"_r, ConstituentsEDMType::CHAR},
+          {"(pT_wrtJet|pZ_wrtJet|EFrac_wrtJet).*"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          {"muon_(qOverPratio|momentumBalanceSignificance|scatteringNeighbourSignificance)"_r, ConstituentsEDMType::FLOAT}
       };
       // We have a number of special naming conventions to sort and
       // filter tracks. The track nodes should be named according to
@@ -168,10 +170,10 @@ namespace FlavorTagDiscriminants {
         config.output_name = "tracks";
       }
       else if (name.find("flows") != std::string::npos){
-        config = get_iparticle_input_config(
+        config = get_flow_input_config(
           name, input_variables,
-          iparticle_type_regexes);
-        config.type = ConstituentsType::IPARTICLE;
+          flow_type_regexes);
+        config.type = ConstituentsType::FLOW_ELEMENT;
         config.output_name = "flows";
       }
       else if (name.find("hits") != std::string::npos){

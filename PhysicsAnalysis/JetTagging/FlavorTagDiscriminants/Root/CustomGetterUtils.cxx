@@ -4,6 +4,11 @@
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
 #include "FlavorTagDiscriminants/CustomGetterUtils.h"
 
+#include "xAODTracking/TrackParticleFwd.h"
+#include <xAODPFlow/FlowElement.h>
+#include "AthContainers/AuxElement.h"
+#include "xAODTracking/TrackMeasurementValidation.h"
+
 #include <optional>
 #include <TVector3.h>
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -319,6 +324,13 @@ namespace {
         return p.e();
       });
     }
+    if constexpr (std::is_same_v<T, xAOD::FlowElement>) {
+      if (name == "isCharged") {
+        return CustomSeqGetter<T>([](const T& p, const Jet&) {
+          return p.isCharged();
+        });
+      }
+    }
     return std::nullopt;
   }
 
@@ -402,7 +414,6 @@ namespace {
     template <typename T>
     std::pair<SequenceGetterFunc<T>, std::set<std::string>>
     buildCustomSeqGetter(const std::string& name, const std::string& prefix) {
-
       if constexpr (std::is_same_v<T, xAOD::TrackParticle>) {
         if (auto getter = getterFromTracksWithIpDep(name, prefix)) {
           auto deps = BTagTrackIpAccessor(prefix).getTrackIpDataDependencyNames();
@@ -542,8 +553,9 @@ namespace {
     }
 
 
-    // Explicit instantiations of supported types (IParticle, TrackParticle, TrackMeasurementValidation)
+    // Explicit instantiations of supported types (IParticle, FlowElement, TrackParticle, TrackMeasurementValidation)
     template class SeqGetter<xAOD::IParticle>;
+    template class SeqGetter<xAOD::FlowElement>;
     template class SeqGetter<xAOD::TrackParticle>;
     template class SeqGetter<xAOD::TrackMeasurementValidation>;
   }

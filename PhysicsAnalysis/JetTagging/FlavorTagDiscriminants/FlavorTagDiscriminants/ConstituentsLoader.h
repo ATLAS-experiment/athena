@@ -46,7 +46,7 @@ namespace FlavorTagDiscriminants {
         R22_LOOSE
     };
     enum class ConstituentsType {
-        IPARTICLE,
+        FLOW_ELEMENT,
         TRACK,
         HIT
     };
@@ -60,7 +60,7 @@ namespace FlavorTagDiscriminants {
     struct ConstituentsInputConfig {
         std::string name;
         std::string output_name;
-        ConstituentsType type = ConstituentsType::IPARTICLE;
+        ConstituentsType type;
         ConstituentsSortOrder order;
         ConstituentsSelection selection = ConstituentsSelection::ALL;
         std::vector<InputVariableConfig> inputs;
@@ -83,10 +83,10 @@ namespace FlavorTagDiscriminants {
             virtual std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> getData(
                 const xAOD::Jet& jet, 
                 [[maybe_unused]] const SG::AuxElement& btag) const = 0;
-            virtual FTagDataDependencyNames getDependencies() const = 0;
-            virtual std::set<std::string> getUsedRemap() const = 0;
-            virtual std::string getName() const = 0;
-            virtual ConstituentsType getType() const = 0;
+            virtual const FTagDataDependencyNames& getDependencies() const = 0;
+            virtual const std::set<std::string>& getUsedRemap() const = 0;
+            virtual const std::string& getName() const = 0;
+            virtual const ConstituentsType& getType() const = 0;
 
         protected:
             FTagDataDependencyNames m_deps;

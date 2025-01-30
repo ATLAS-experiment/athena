@@ -374,16 +374,16 @@ namespace FlavorTagDiscriminants {
       return std::make_tuple(invalid, feats);
     };
 
-    FTagDataDependencyNames TracksLoader::getDependencies() const {
+    const FTagDataDependencyNames& TracksLoader::getDependencies() const {
         return m_deps;
     }
-    std::set<std::string> TracksLoader::getUsedRemap() const {
+    const std::set<std::string>& TracksLoader::getUsedRemap() const {
         return m_used_remap;
     }
-    std::string TracksLoader::getName() const {
+    const std::string& TracksLoader::getName() const {
         return m_name;
     }
-    ConstituentsType TracksLoader::getType() const {
+    const ConstituentsType& TracksLoader::getType() const {
         return m_config.type;
     }
 }
