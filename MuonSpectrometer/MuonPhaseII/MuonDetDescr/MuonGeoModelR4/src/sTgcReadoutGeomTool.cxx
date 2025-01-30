@@ -123,7 +123,7 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
         /// Strip Parameters
         double firstStripPos = -gapPars.halfHeight + paramBook.firstStripPitch[gasGap] - 0.5 * paramBook.stripPitch;
         define.firstStripPitch = paramBook.firstStripPitch;
-        ATH_MSG_DEBUG("FirstStripPos is: " << Amg::toString(firstStripPos, 2) << " and the half height is: " << gapPars.halfHeight);
+        ATH_MSG_DEBUG("FirstStripPos for stripPitch: " << paramBook.firstStripPitch[gasGap] << " is: " << Amg::toString(firstStripPos, 2) << " and the half height is: " << gapPars.halfHeight);
         
         /// wireGroup Parameters
         unsigned int numWireGroups = paramBook.numWireGroups[gasGap];
@@ -153,7 +153,7 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
         }
         else if (!gapPars.yCutOut) {
             /// Trapezoid Strip Design
-            stripDesign->defineTrapezoid(gapPars.shortWidth, gapPars.longWidth, gapPars.halfHeight);
+            stripDesign->defineTrapezoid(gapPars.shortWidth, gapPars.longWidth, gapPars.halfHeight + 0.01);
             stripDesign->defineStripLayout(Amg::Vector2D{firstStripPos, 0.},
                                         paramBook.stripPitch, paramBook.stripWidth, paramBook.numStrips);
             ATH_MSG_VERBOSE("Created new strip design "<<(*stripDesign));
