@@ -253,7 +253,7 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
                       <<" PDGID=" << part->pdgId()
                       <<" status=" << part->status()                       
                       );        
-      if (part->parent()) ATH_MSG_DEBUG (" parent status=" << part->parent()->pdgId());
+      if (part->parent(0)) ATH_MSG_DEBUG (" parent status=" << part->parent(0)->pdgId());
       
       if (std::abs(pt)/1000. > m_inputTracksPtCut) //GeV cut
       	{
@@ -297,7 +297,7 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
                       <<" PDGID=" << newtrk->pdgId()
                       <<" status=" << newtrk->status()                      
                   );
-                if (newtrk->parent()) ATH_MSG_DEBUG (" parent status=" << newtrk->parent()->pdgId());
+                if (newtrk->parent(0)) ATH_MSG_DEBUG (" parent status=" << newtrk->parent(0)->pdgId());
                 
                 if (m_enableMonitoring) {
                   hist("track_output_eta")->Fill(otrack.eta());
