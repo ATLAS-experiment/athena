@@ -664,26 +664,26 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
             # Value is empty for single leg trigger or list of legs
             triggerDict = TriggerDict()
 
-            version = ("2015_2018/rel21.2/Precision_Summer2020_v1"
-                       if config.geometry() is LHCPeriod.Run2 else
-                       "2015_2025/rel22.2/2022_Summer_Prerecom_v1")
+            # currently recommended versions
+            version_Run2 = "2015_2018/rel21.2/Precision_Summer2020_v1"
+            version_Run3 = "2015_2025/rel22.2/2022_Summer_Prerecom_v1"
+
+            version = version_Run2 if config.geometry() is LHCPeriod.Run2 else version_Run3
             # Dictionary from TrigGlobalEfficiencyCorrection/MapKeys.cfg
             # Key is year_leg
             # Value is list of configs available, first one will be used
             mapKeysDict = MapKeysDict(version)
 
             # helper function for leg filtering, very hardcoded but allows autoconfiguration
-            def filterConfFromMap(conf, legs):
+            def filterConfFromMap(conf, electronMapKeys):
                 if not conf:
                     raise ValueError("No configuration found for trigger chain.")
                 if len(conf) == 1:
                     return conf[0]
 
-                # options are TRI-MULTI and TRI-DI, no other combination has ambiguities
-                n_el = len([leg for leg in legs if leg[0] == 'e' and leg[1].isdigit()])
-                n_other = len([leg for leg in legs if leg[0] != 'e'])
-                if n_el != 3 or n_other > 0:
-                    return [c for c in conf if c.startswith("MULTI") or c.startswith("DI")][0]
+                for c in conf:
+                    if c in electronMapKeys:
+                        return c
 
                 return conf[0]
 
@@ -703,6 +703,31 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
             elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]:
                 years = [2023]
 
+            # prepare keys
+            import ROOT
+            triggerChainsPerYear_Run2 = {}
+            triggerChainsPerYear_Run3 = {}
+            for year, chains in self.triggerChainsPerYear.items():
+                if not chains:
+                    log.warning("No trigger chains configured for year %s. "
+                                "Assuming this is intended, no Electron trigger SF will be computed.", year)
+                    continue
+
+                chains_split = [chain.replace("HLT_", "").replace(" || ", "_OR_") for chain in chains]
+                if int(year) >= 2022:
+                    triggerChainsPerYear_Run3[str(year)] = ' || '.join(chains_split)
+                else:
+                    triggerChainsPerYear_Run2[str(year)] = ' || '.join(chains_split)
+            electronMapKeys_Run2 = ROOT.std.map("string", "string")()
+            electronMapKeys_Run3 = ROOT.std.map("string", "string")()
+
+            sc_Run2 = ROOT.TrigGlobalEfficiencyCorrectionTool.suggestElectronMapKeys(triggerChainsPerYear_Run2, version_Run2, electronMapKeys_Run2)
+            sc_Run3 = ROOT.TrigGlobalEfficiencyCorrectionTool.suggestElectronMapKeys(triggerChainsPerYear_Run3, version_Run3, electronMapKeys_Run3)
+            if sc_Run2.code() != 2 or sc_Run3.code() != 2:
+                raise RuntimeError("Failed to suggest electron map keys")
+            electronMapKeys = dict(electronMapKeys_Run2) | dict(electronMapKeys_Run3)
+
+            # collect configurations
             triggerConfigs = {}
             for year in years:
                 triggerChains = self.triggerChainsPerYear.get(int(year), self.triggerChainsPerYear.get(str(year), []))
@@ -721,7 +746,7 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
                             if leg[0] == 'e' and leg[1].isdigit:
                                 leg_out = leg if self.removeHLTPrefix else f"HLT_{leg}"
                                 leg_key = f"{year}_{leg}"
-                                leg_conf = filterConfFromMap(mapKeysDict[leg_key], legs)
+                                leg_conf = filterConfFromMap(mapKeysDict[leg_key], electronMapKeys)
                                 triggerConfigs[leg_conf if self.useToolKeyAsOutput else leg_out] = leg_conf
 
             decorations = [self.prefixSF]
