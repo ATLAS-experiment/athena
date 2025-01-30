@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ASCIICondDbSvc.h"
@@ -25,12 +25,6 @@ const boost::regex ref(r_ef);
 ASCIICondDbSvc::ASCIICondDbSvc( const std::string& name, ISvcLocator* svcLoc ):
   base_class(name,svcLoc)
 {}
-
-//---------------------------------------------------------------------------
-
-ASCIICondDbSvc::~ASCIICondDbSvc() {
-
-}
 
 //---------------------------------------------------------------------------
 

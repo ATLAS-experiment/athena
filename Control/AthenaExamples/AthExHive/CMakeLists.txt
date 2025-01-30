@@ -23,7 +23,6 @@ atlas_add_component( AthExHive
                      LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} AthenaKernel AthenaBaseComps GaudiKernel StoreGateLib xAODEventInfo AthExHiveLib )
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py )
 atlas_install_runtime( share/condDb.txt )
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 

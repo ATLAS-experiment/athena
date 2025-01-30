@@ -1,26 +1,16 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AlgD.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadCondHandle.h"
 
-#include "GaudiKernel/ServiceHandle.h"
-#include <thread>
-#include <chrono>
-#include <memory>
-
-
 AlgD::AlgD( const std::string& name, 
             ISvcLocator* pSvcLocator ) : 
   ::AthAlgorithm( name, pSvcLocator )
 {
 }
-
-//---------------------------------------------------------------------------
-
-AlgD::~AlgD() {}
 
 //---------------------------------------------------------------------------
 
@@ -35,13 +25,6 @@ StatusCode AlgD::initialize() {
   ATH_MSG_INFO( "m_rch1 id: " << m_rch1.fullKey() );
   ATH_MSG_INFO( "m_rch2 id: " << m_rch2.fullKey() );
 
-  return StatusCode::SUCCESS;
-}
-
-//---------------------------------------------------------------------------
-
-StatusCode AlgD::finalize() {
-  ATH_MSG_DEBUG("finalize " << name());
   return StatusCode::SUCCESS;
 }
 
@@ -63,8 +46,6 @@ StatusCode AlgD::execute() {
 
   EventIDBase t( getContext().eventID() );
   
-  //  const CondDataObj *cdo = m_rch.retrieve(t);    
-  //  const CondDataObj *cdo = m_rch.retrieve();
   const CondDataObj *cdo = *ch1;
   if (cdo != 0) {
     ATH_MSG_INFO("  CDO1: " << *cdo );

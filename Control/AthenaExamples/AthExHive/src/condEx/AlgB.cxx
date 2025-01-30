@@ -1,13 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AlgB.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include <thread>
-#include <chrono>
+
 #include <memory>
 
 AlgB::AlgB( const std::string& name, 
@@ -16,19 +14,12 @@ AlgB::AlgB( const std::string& name,
 {
 }
 
-AlgB::~AlgB() {}
-
 StatusCode AlgB::initialize() {
   ATH_MSG_DEBUG("initialize " << name());
 
   ATH_CHECK( m_rdh1.initialize() );
   ATH_CHECK( m_wrh1.initialize() );
 
-  return StatusCode::SUCCESS;
-}
-
-StatusCode AlgB::finalize() {
-  ATH_MSG_DEBUG("finalize " << name());
   return StatusCode::SUCCESS;
 }
 
