@@ -667,7 +667,8 @@ StatusCode GetLCSinglePionsPerf::execute()
   }
   HepMC::ConstGenParticlePtr gen{nullptr};
   for (auto p: *truthEvent->at(0)) {
-    if (std::abs(p->pdg_id()) !=  MC::PIPLUS || !MC::isGenStable(p)) continue;
+    if (!MC::isGenStable(p)) continue;
+    if (std::abs(p->pdg_id()) !=  MC::PIPLUS && std::abs(p->pdg_id()) !=  MC::PI0 ) continue;
     gen = p;
     break;
   }  
