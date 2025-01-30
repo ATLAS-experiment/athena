@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( IOVDbTestAlg )
@@ -10,7 +10,7 @@ find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 atlas_add_component( IOVDbTestAlg
                      src/IOVDbTestAlg.cxx
                      src/IOVDbTestCoolDCS.cxx
-                     src/IOVDbTestAlg_entries.cxx
+                     src/components/*_entries.cxx
                      INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CORAL_LIBRARIES} IOVDbTestConditions AthenaBaseComps AthenaKernel StoreGateLib GaudiKernel AthenaPoolUtilities RegistrationServicesLib )
 
