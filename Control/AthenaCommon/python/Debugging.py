@@ -19,10 +19,13 @@ class DbgStage:
     allowed_values = ( "conf", "init", "exec", "fini" )
     pass # class DbgStage
 
-def hookDebugger(debugger='gdb'):
+def hookDebugger():
     """debugging helper, hooks debugger to running interpreter process
+       gdb can be overridden via $ATLAS_DEBUGGER
     """
     import os
+    debugger = os.environ.get('ATLAS_DEBUGGER', 'gdb')
+
     pid = os.spawnvp(os.P_NOWAIT,
                      debugger, [debugger, '-q', 'python', str(os.getpid())])
 

@@ -209,7 +209,7 @@ def getArgumentParser(legacy_args=False, **kwargs):
 
     g.add_argument('-d', '--debug', metavar='STAGE', nargs='?', const='init',
                    choices=['conf', 'init', 'exec', 'fini'],
-                   help='attach debugger at stage: %(choices)s [%(const)s]')
+                   help='attach debugger at stage: %(choices)s [%(const)s] (gdb or $ATLAS_DEBUGGER if set)')
 
     g.add_argument('--debugWorker', action='store_true', dest='debug_worker',
                    help='pause AthenaMP workers at bootstrap until SIGUSR1 signal received')
