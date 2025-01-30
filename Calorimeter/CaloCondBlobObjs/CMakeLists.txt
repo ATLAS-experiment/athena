@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloCondBlobObjs )
@@ -23,7 +23,7 @@ atlas_add_dictionary( CaloCondBlobObjsDict
 atlas_add_test( CaloCondBlobBase_test
   SOURCES
   test/CaloCondBlobBase_test.cxx src/CaloCondBlobBase.cxx
-  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-  LINK_LIBRARIES ${Boost_LIBRARIES} CaloCondBlobObjs CxxUtils
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} ${CORAL_LIBRARIES} CaloCondBlobObjs
   POST_EXEC_SCRIPT nopost.sh
 )
