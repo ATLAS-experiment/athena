@@ -8,6 +8,9 @@ smart slimming lists, whhich are defined in BTaggingContent.py. New variables
 should be added there, not here.
 """
 
+from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
+    ParentDecoratorCfg
+)
 
 ## Common items used in PHYSVAL, FTAG1 and FTAG2
 PHYSVAL_FTAG1_FTAG2_SmartCollections = [
@@ -150,4 +153,27 @@ def add_baseline_slimming_smartcollections(SlimmingHelper):
 
 def add_baseline_slimming_allvariables(SlimmingHelper):
     SlimmingHelper.AllVariables += PHYSVAL_FTAG1_FTAG2_AllVariables
-    
+
+
+def addCommonAugmentation(flags, cfg, helper):
+    """add content common to all ftag derivations"""
+
+    if not flags.Input.isMC:
+        return
+
+    # match jets to the parent particles
+    cfg.merge(
+        ParentDecoratorCfg(
+            flags,
+            targetContainer="AntiKt4EMPFlowJets",
+            prefix="PFlow",
+            matchDeltaR=0.3
+        )
+    )
+    # todo add large-R jets
+    truth_labels = [
+        *[f"nTopTo{p}Children" for p in "BW"],
+        *[f"parent{p}ParentsMask" for p in ["Higgs", "Z", "Scalar", "Top"]],
+    ]
+
+    helper.ExtraVariables += ['.'.join(['AntiKt4EMPFlowJets'] + truth_labels)]

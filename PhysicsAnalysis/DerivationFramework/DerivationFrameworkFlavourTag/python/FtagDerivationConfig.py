@@ -12,6 +12,7 @@ from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import AsgElec
 from ElectronPhotonSelectorTools.LikelihoodEnums import LikeEnum
 from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
 from AthenaConfiguration.Enums import LHCPeriod
+import ParticleJetTools.ParentDecoratorConfig as pdc
 
 PFLOW_JETS = 'AntiKt4EMPFlowJets'
 
@@ -219,6 +220,19 @@ def _getTrackCollection(cfgFlags):
     if cfgFlags.BTagging.Pseudotrack:
         return 'InDetPseudoTrackParticles'
     return 'InDetTrackParticles'
+
+
+def ParentDecoratorCfg(flags, prefix="", **kwargs):
+    cfg = ComponentAccumulator()
+    cfg.merge(pdc.HiggsParentDecoratorCfg(
+        flags, name=prefix + "HiggsParentDecoratorAlg", **kwargs))
+    cfg.merge(pdc.ZParentDecoratorCfg(
+        flags, name=prefix + "ZParentDecoratorAlg", **kwargs))
+    cfg.merge(pdc.ScalarParentDecoratorCfg(
+        flags, name=prefix + "ScalarParentDecoratorAlg", **kwargs))
+    cfg.merge(pdc.TopParentDecoratorCfg(
+        flags, name=prefix + "TopParentDecoratorAlg", **kwargs))
+    return cfg
 
 
 # Valerio's magic hacks for emtopo

@@ -15,6 +15,9 @@ from AthenaConfiguration.Enums import LHCPeriod
 from DerivationFrameworkEGamma.ElectronsCPDetailedContent import (
     ElectronsCPDetailedContent
 )
+from DerivationFrameworkFlavourTag.FtagBaseContent import (
+    addCommonAugmentation
+)
 
 
 # Main algorithm config
@@ -74,6 +77,8 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
 
     FTAG1SlimmingHelper.SmartCollections = []
     FtagBaseContent.add_baseline_slimming_smartcollections(FTAG1SlimmingHelper)
+
+    addCommonAugmentation(flags, acc, FTAG1SlimmingHelper)
 
     FTAG1SlimmingHelper.SmartCollections += [
                                            "BTagging_AntiKt4UFOCSSK",
