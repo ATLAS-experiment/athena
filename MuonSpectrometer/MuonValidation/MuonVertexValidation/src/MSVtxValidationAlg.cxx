@@ -140,7 +140,12 @@ StatusCode MSVtxValidationAlg::fillTruth(const EventContext& ctx){
     for(const xAOD::TruthParticle* tp : *truth_particles){
         if (!tp) continue;
         // fill vector of portal particles, skipping the particle if it is a self-decay
-        if(std::abs(tp->pdgId()) == m_pdgId_portal && tp->parent()->pdgId() != tp->pdgId()) portals.push_back(tp);
+        if(std::abs(tp->pdgId()) == m_pdgId_portal){
+          bool selfdecay = false;
+          for (size_t p = 0; p < tp->production_vertex()->nIncomingParticles(); ++p) if (tp->parent(p)->pdgId() == tp->pdgId()) { selfdecay = true; break;}
+          if (!selfdecay) portals.push_back(tp);
+        }
+
         // fill vector of LLPs
         if(std::abs(tp->pdgId()) == m_pdgId_llp) llps.push_back(tp);
     }
