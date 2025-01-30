@@ -74,21 +74,6 @@ std::vector<const xAOD::TruthParticle*> getGenStableChildren(const xAOD::TruthPa
     return genStableChildren;
 }
 
-
-bool isFromParticle(const xAOD::TruthParticle *ptcl, int pdgId){
-    if (std::abs(ptcl->pdgId())==pdgId) return true;
-    if (ptcl->parent()==nullptr) return false;
-    return isFromParticle(ptcl->parent(),pdgId);
-}
-
-
-const xAOD::TruthParticle* getMotherLLP(const xAOD::TruthParticle *ptcl, int pdgId_llp){
-    if (std::abs(ptcl->pdgId())==pdgId_llp) return ptcl;
-    if (ptcl->parent()==nullptr) return nullptr;
-    return getMotherLLP(ptcl->parent(),pdgId_llp);
-}
-
-
 VtxIso getIso(const xAOD::Vertex *MSVtx, const xAOD::TrackParticleContainer& Tracks, const xAOD::JetContainer& Jets, 
               double trackIso_pT, double softTrackIso_R, double jetIso_pT, double jetIso_LogRatio){
     // compute the isolation metrics of the MS vertex: 

@@ -31,8 +31,6 @@ namespace MSVtxValidationAlgUtils {
     // decay chain utils
     std::vector<const xAOD::TruthParticle*> getChildren(const xAOD::TruthParticle* mother);
     std::vector<const xAOD::TruthParticle*> getGenStableChildren(const xAOD::TruthParticle* mother);
-    bool isFromParticle(const xAOD::TruthParticle *ptcl, int pdgId);
-    const xAOD::TruthParticle* getMotherLLP(const xAOD::TruthParticle *ptcl, int pdgId_llp);
 
     // vertex isolation
     struct VtxIso {
