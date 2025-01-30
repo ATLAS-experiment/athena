@@ -81,13 +81,21 @@ bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp,
   // -- added for dark jet clustering -- //
   // new classifiers to account for dark particles
   // for dark jets: ignore SM particles; include only "stable" dark hadrons
-  if (!m_includeSM && ((abs(tp->pdgId()) < 4.9e6) || (abs(tp->pdgId()) >= 5e6))) return false;
+  if (!m_includeSM && ((abs(tp->pdgId()) < 4900000) || (abs(tp->pdgId()) >= 5000000))) return false;
   if (m_includeDark) {
     if (abs(tp->pdgId()) <= 4900101) return false; // ignore Xd, qd, gd
-    if (tp->hasDecayVtx() && (abs(tp->child()->pdgId()) >= 4.9e6)) return false; // ignore "non-stable" dark hadrons (decaying to dark sector) -- "stable" if decaying to SM
+    if (tp->hasDecayVtx()) {
+       size_t good_hadrons = 0;
+       for (size_t p = 0; p < tp->end_vertex()->nOutgoingParticles(); ++p) {
+           if (abs(tp->child(p)->pdgId()) < 4900000) {
+                good_hadrons++; 
+           }
+       }
+       if (good_hadrons == 0) return false; // ignore "non-stable" dark hadrons (decaying to dark sector) -- "stable" if decaying to SM
+    }
   }
   // for SM jets: ignore dark particles - probably unnecessary bc of status requirement above
-  if (!m_includeDark && (std::abs(tp->pdgId()) >= 4.9e6) && (std::abs(tp->pdgId()) < 5e6)) return false;
+  if (!m_includeDark && (std::abs(tp->pdgId()) >= 4900000) && (std::abs(tp->pdgId()) < 5000000)) return false;
   // ----------------------------------- //
 
   if (!m_includePromptPhotons && MC::isPhoton(pdgid) && tp->hasProdVtx()){
