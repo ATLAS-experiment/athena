@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( McEventSelector )
@@ -9,7 +9,7 @@ atlas_add_component( McEventSelector
                      src/McEventSelector.cxx
                      src/McEventCnv.cxx
                      src/McCnvSvc.cxx
-                     src/McEventSelector_entries.cxx
+                     src/components/*_entries.cxx
                      LINK_LIBRARIES AthenaBaseComps AthenaKernel CxxUtils GaudiKernel EventInfo )
 
 # Install files from the package:
