@@ -3,6 +3,7 @@
 */
 #include "../CSCConditionsTestAlgMT.h"
 #include "../MdtTwinTubeTestAlg.h"
+#include "../MdtCalibTestAlg.h"
 #include "../NswCondTestAlg.h"
 #include "../NswDcsTestAlg.h"
 #include "../NswPassivationTestAlg.h"
@@ -16,6 +17,7 @@
 
 DECLARE_COMPONENT(ALineInjectTestAlg)
 DECLARE_COMPONENT(Muon::MdtTwinTubeTestAlg)
+DECLARE_COMPONENT(Muon::MdtCalibTestAlg)
 DECLARE_COMPONENT(CSCConditionsTestAlgMT)
 DECLARE_COMPONENT(NswCondTestAlg)
 DECLARE_COMPONENT(NswDcsTestAlg)

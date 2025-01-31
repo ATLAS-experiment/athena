@@ -16,7 +16,7 @@ atlas_add_library( MuonCondAlgR4Lib
                    INCLUDE_DIRS ${CORAL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS 
                    LINK_LIBRARIES  ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel Identifier GaudiKernel  
-                                   StoreGateLib MuonIdHelpersLib MuonAlignmentDataR4 PathResolver CoralUtilitiesLib
+                                   StoreGateLib MuonIdHelpersLib MuonAlignmentDataR4 PathResolver CoralUtilitiesLib MuonVisualizationHelpersR4
                                    nlohmann_json::nlohmann_json MuonReadoutGeometryR4 MdtCalibData MuonCalibITools AthenaPoolUtilities
                    PRIVATE_LINK_LIBRARIES EventInfo )
 
