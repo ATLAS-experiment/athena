@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iomanip>
@@ -166,16 +166,16 @@ std::ostream& robmonitor::operator<<(std::ostream& os, const ROBDataMonitorStruc
 
   const std::time_t s_time(rhs.start_time / static_cast<int>(1e6));
   struct tm buf;
-  localtime_r(&s_time, &buf);
+  gmtime_r(&s_time, &buf);
   os << "\n" << prefix << "Start time of ROB request         = "
      << std::put_time(&buf, "%c")
-     << " + " << (rhs.start_time % static_cast<int>(1e6)) / 1000.0f << " [ms]";
+     << " UTC + " << (rhs.start_time % static_cast<int>(1e6)) / 1000.0f << " [ms]";
 
   const std::time_t e_time(rhs.end_time / static_cast<int>(1e6));
-  localtime_r(&e_time, &buf);
+  gmtime_r(&e_time, &buf);
   os << "\n" << prefix << "Stop  time of ROB request         = "
      << std::put_time(&buf, "%c")
-     << " + " << (rhs.end_time % static_cast<int>(1e6)) / 1000.0f << " [ms]";
+     << " UTC + " << (rhs.end_time % static_cast<int>(1e6)) / 1000.0f << " [ms]";
   os << "\n" << prefix << "Elapsed time for ROB request [ms] = " << rhs.elapsedTime();
   os << "\n" << prefix << "Requested ROBs:";
   os << "\n" << prefix << prefix2 << "All          " << rhs.allROBs()          ;
