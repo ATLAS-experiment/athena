@@ -125,9 +125,9 @@ StatusCode TileJetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     if ((jet->pt() > m_jetPtMin) && (fabs(jet->eta()) < m_jetEtaMax)) {
       if (isGoodJet(*jet)) {
         ATH_MSG_DEBUG("::fillHistograms, jet " << iJet
-			                << ", eta " << jet->eta()
-			                << ", phi " << jet->phi()
-			                << ", constituents " << jet->numConstituents());
+                      << ", eta " << jet->eta()
+                      << ", phi " << jet->phi()
+                      << ", constituents " << jet->numConstituents());
         CHECK(fillTimeHistograms(*jet, lumiBlock, usedCells));
       } else {
         ATH_MSG_DEBUG("::fillHistogram, BAD jet " << iJet
@@ -182,7 +182,7 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
             // int module = m_tileID->module(id); // ranges 0..63
             auto module = Monitored::Scalar<int>("module", m_tileID->module(id));
             int sample = m_tileID->sample(id); // ranges 0..3 (A, BC, D, E)
-	    int tower = m_tileID->tower(id); 
+            int tower = m_tileID->tower(id); 
             int ros1 = 0;
             int ros2 = 0;
             int chan1 = -1;
@@ -310,10 +310,10 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
             /* 
                Now filling the cell-based histograms,
                HG-HG and LG-LG combinations only for normal cells, 
-	       also include E-cells
+               also include E-cells
             */
             if ((is_good1) && (((is_good2) && (gain1 == gain2)) || (sample == TileID::SAMP_E)))   {
-	      // E-cells are read-out by one channel only, so is_good2 = false for E-cells
+              // E-cells are read-out by one channel only, so is_good2 = false for E-cells
 
               if (m_doEnergyDiffHistograms && (tilecell->energy() > m_energyDiffThreshold))  { 
                 // EneDiff histograms
@@ -328,35 +328,108 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
               if ((bad1 < 2) && (bad2 < 2)) {
 
                 // cell-time histograms, only overall, require not affected channels
-		int index = findIndex(gain1, tilecell->energy());
-		ATH_MSG_DEBUG( "Filling in cell-time for " << TileCalibUtils::getDrawerString(ros1, module)
-			       << ", ch1 " << chan1  
-			       << ", ch2 " << chan2  
-			       << ", ene " << tilecell->energy()
-			       << ", index " << index
-			       << ", time: " << tilecell->time());
+                int index = findIndex(gain1, tilecell->energy());
+                ATH_MSG_DEBUG( "Filling in cell-time for " << TileCalibUtils::getDrawerString(ros1, module)
+                               << ", ch1 " << chan1  
+                               << ", ch2 " << chan2  
+                               << ", ene " << tilecell->energy()
+                               << ", index " << index
+                               << ", time: " << tilecell->time());
                   
-		// TD adding histograms per partition and per radial sampling
-		std::string name1("Cell_time_" + partitionName[ros1] + "_" + sampleName(ros1, sample, tower) + "_" + gainName[gain1] + "_slice_" + std::to_string(index));
-		auto cellTime1 = Monitored::Scalar<float>(name1, tilecell->time());
-		fill("TileJetCellTime", cellTime1);
+                // TD adding histograms per partition and per radial sampling
+                std::string name1("Cell_time_" + partitionName[ros1] + "_" + sampleName(ros1, sample, tower) + "_" + gainName[gain1] + "_slice_" + std::to_string(index));
+                auto cellTime1 = Monitored::Scalar<float>(name1, tilecell->time());
+                fill("TileJetCellTime", cellTime1);
+
+                // Adding histograms per selected individual cell
+                int index_ch1 = -1;
+                int index_ch2 = -1;
+                if (m_doCellHistograms)
+                {
+                  std::string name_sel("Cell_time_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_" + gainName[gain1] + "_slice_" + std::to_string(index));
+                  auto cellTime_sel = Monitored::Scalar<float>(name_sel, tilecell->time());
+                  fill("TileJetSelCellTime", cellTime_sel);
+
+                  // Adding histograms per channels of selected individual cell
+                  // First channel
+                  index_ch1 = findIndex(gain1, tilecell->ene1() * 2);   // Using twice the channel energy to find the correct index
+                  std::string name_selCh1("Cell_time_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_ch" + std::to_string(chan1) + "_" + gainName[gain1] + "_slice_" + std::to_string(index_ch1));
+                  auto cellTime_selCh1 = Monitored::Scalar<float>(name_selCh1, tilecell->time1());
+                  fill("TileJetSelChanTime", cellTime_selCh1);
+
+                  // Second channel
+                  index_ch2 = findIndex(gain2, tilecell->ene2() * 2);   // Using twice the channel energy to find the correct index
+                  std::string name_selCh2("Cell_time_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_ch" + std::to_string(chan2) + "_" + gainName[gain2] + "_slice_" + std::to_string(index_ch2));
+                  auto cellTime_selCh2 = Monitored::Scalar<float>(name_selCh2, tilecell->time2());
+                  fill("TileJetSelChanTime", cellTime_selCh2);
+                }
+
+                if (m_doEnergyProfiles) {
+                  // TD adding energy profiles per partition and per radial sampling
+                  std::string indexName1("index_" + partitionName[ros1] + "_" + sampleName(ros1, sample, tower) + "_" + gainName[gain1]);
+                  auto energyIndex1 = Monitored::Scalar<float>(indexName1, index);
                   
-		if (m_doEnergyProfiles) {
-		  // TD adding energy profiles per partition and per radial sampling
-		  std::string indexName1("index_" + partitionName[ros1] + "_" + sampleName(ros1, sample, tower) + "_" + gainName[gain1]);
-		  auto energyIndex1 = Monitored::Scalar<float>(indexName1, index);
-                  
-		  std::string energyName1("energy_" + partitionName[ros1] + "_" + sampleName(ros1, sample, tower) + "_" + gainName[gain1]);
-		  auto cellEnergy1 = Monitored::Scalar<float>(energyName1, tilecell->energy());
-                  
-		  fill("TileJetCellEnergyProfile", energyIndex1, cellEnergy1);
-		} else {
-		  // TD adding energy histograms per partition and per radial sampling
-		  std::string name1("Cell_ene_" + partitionName[ros1] + "_" + sampleName(ros1, sample, tower) + "_" + gainName[gain1] + "_slice_" + std::to_string(index));
-		  auto cellEnergy1 = Monitored::Scalar<float>(name1, tilecell->energy());
-		  fill("TileJetCellEnergy", cellEnergy1);
-		}
-	      }
+                  std::string energyName1("energy_" + partitionName[ros1] + "_" + sampleName(ros1, sample, tower) + "_" + gainName[gain1]);
+                  auto cellEnergy1 = Monitored::Scalar<float>(energyName1, tilecell->energy());
+
+                  fill("TileJetCellEnergyProfile", energyIndex1, cellEnergy1);
+
+                  // Adding energy profiles per selected individual cell
+                  if (m_doCellHistograms)
+                  {
+                    std::string indexname_sel("index_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_" + gainName[gain1]);
+                    auto energyIndex_sel = Monitored::Scalar<float>(indexname_sel, index);
+
+                    std::string energyname_sel("energy_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_" + gainName[gain1]);
+                    auto cellEnergy_sel = Monitored::Scalar<float>(energyname_sel, tilecell->energy());
+
+                    fill("TileJetSelCellEnergyProfile", energyIndex_sel, cellEnergy_sel);
+
+                    // Adding histograms per channels of selected individual cell
+                    // First channel
+                    std::string indexname_selCh1("index_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_ch" + std::to_string(chan1) + "_" + gainName[gain1]);
+                    auto energyIndex_selCh1 = Monitored::Scalar<float>(indexname_selCh1, index_ch1);
+
+                    std::string energyname_selCh1("energy_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_ch" + std::to_string(chan1) + "_" + gainName[gain1]);
+                    auto cellEnergy_selCh1 = Monitored::Scalar<float>(energyname_selCh1, tilecell->ene1());
+
+                    fill("TileJetSelChanEnergyProfile", energyIndex_selCh1, cellEnergy_selCh1);
+
+                    // Second channel
+                    std::string indexname_selCh2("index_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_ch" + std::to_string(chan2) + "_" + gainName[gain2]);
+                    auto energyIndex_selCh2 = Monitored::Scalar<float>(indexname_selCh2, index_ch2);
+
+                    std::string energyname_selCh2("energy_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_ch" + std::to_string(chan2) + "_" + gainName[gain2]);
+                    auto cellEnergy_selCh2 = Monitored::Scalar<float>(energyname_selCh2, tilecell->ene2());
+
+                    fill("TileJetSelChanEnergyProfile", energyIndex_selCh2, cellEnergy_selCh2);
+                  }
+                } else {
+                  // TD adding energy histograms per partition and per radial sampling
+                  std::string name1("Cell_ene_" + partitionName[ros1] + "_" + sampleName(ros1, sample, tower) + "_" + gainName[gain1] + "_slice_" + std::to_string(index));
+                  auto cellEnergy1 = Monitored::Scalar<float>(name1, tilecell->energy());
+                  fill("TileJetCellEnergy", cellEnergy1);
+
+                  // Adding energy histograms per selected individual cell
+                  if (m_doCellHistograms)
+                  {
+                    std::string name_sel("Cell_ene_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_" + gainName[gain1] + "_slice_" + std::to_string(index));
+                    auto cellEnergy_sel = Monitored::Scalar<float>(name_sel, tilecell->energy());
+                    fill("TileJetSelCellEnergy", cellEnergy_sel);
+
+                    // Adding histograms per channels of selected individual cell
+                    // First channel
+                    std::string name_selCh1("Cell_ene_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_ch" + std::to_string(chan1) + "_" + gainName[gain1] + "_slice_" + std::to_string(index_ch1));
+                    auto cellEnergy_selCh1 = Monitored::Scalar<float>(name_selCh1, tilecell->ene1());
+                    fill("TileJetSelChanEnergy", cellEnergy_selCh1);
+
+                    // Second channel
+                    std::string name_selCh2("Cell_ene_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_ch" + std::to_string(chan2) + "_" + gainName[gain2] + "_slice_" + std::to_string(index_ch2));
+                    auto cellEnergy_selCh2 = Monitored::Scalar<float>(name_selCh2, tilecell->ene2());
+                    fill("TileJetSelChanEnergy", cellEnergy_selCh2);
+                  }
+                }
+              }
             }
           } else {
             ATH_MSG_DEBUG("Cell " << cellIndex << " is NOT Tilecal");
@@ -372,7 +445,7 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
 /*---------------------------------------------------------*/  
 std::string TileJetMonitorAlgorithm::sampleName(const int ros, const int sample, const int tower) const {
 /*---------------------------------------------------------*/
-  std::array<std::string, 3> sample_Name_LB{"A", "BC", "D"};
+  std::array<std::string, 3> sample_Name_LB{"A", "B", "D"};
   std::array<std::string, 4> sample_Name_EB{"A", "B", "D", "E"};
   std::string s_name;
   if (ros < 3) { // LBA, LBC
@@ -388,20 +461,82 @@ std::string TileJetMonitorAlgorithm::sampleName(const int ros, const int sample,
     if ((sample == TileID::SAMP_D) && (tower == 8)) { // cell D4
       s_name = "D4";
     }
-    if ((sample == TileID::SAMP_E) && (tower == 10)) { // cell E1	
+    if ((sample == TileID::SAMP_E) && (tower == 10)) { // cell E1
       s_name = "E1";
     }
-    if ((sample == TileID::SAMP_E) && (tower == 11)) { // cell E2	
+    if ((sample == TileID::SAMP_E) && (tower == 11)) { // cell E2
       s_name = "E2";
     }
-    if ((sample == TileID::SAMP_E) && (tower == 13)) { // cell E3	
+    if ((sample == TileID::SAMP_E) && (tower == 13)) { // cell E3
       s_name = "E3";
     }
-    if ((sample == TileID::SAMP_E) && (tower == 15)) { // cell E4	
+    if ((sample == TileID::SAMP_E) && (tower == 15)) { // cell E4
       s_name = "E4";
     }
   }
   return s_name;
+}
+
+/*---------------------------------------------------------*/
+std::string TileJetMonitorAlgorithm::cellName(const int ros, const int sample, const int tower, const int module) const {
+/*---------------------------------------------------------*/
+  // names compatible with names in TileMonitoringCfgHelper.py
+  std::array<std::string, 3> sample_Name_LB{"A", "B", "D"};
+  std::array<std::string, 4> sample_Name_EB{"A", "B", "D", "E"};
+  std::string c_name;
+  if (ros < 3) { // LBA, LBC
+    c_name = sample_Name_LB[sample] + std::to_string(tower + 1); // default, standard cells
+    if ((sample == TileID::SAMP_BC) && (tower == 8)) { // cell B9
+      c_name = "B9";
+    }
+    if ((sample == TileID::SAMP_D) && (tower == 0)) { // cell D0
+      c_name = "D0";
+    }
+    if ((sample == TileID::SAMP_D) && (tower == 2)) { // cell D1
+      c_name = "D1";
+    }
+    if ((sample == TileID::SAMP_D) && (tower == 4)) { // cell D2
+      c_name = "D2";
+    }
+    if ((sample == TileID::SAMP_D) && (tower == 6)) { // cell D3
+      c_name = "D3";
+    }
+  } else { // EBA, EBC
+    c_name = sample_Name_EB[sample] + std::to_string(tower + 1); // default, standard cells
+    if ((sample == TileID::SAMP_C) && (tower == 9)) { // cell C10
+      c_name = "C10";
+    }
+    if ((sample == TileID::SAMP_D) && (tower == 8)) { // cell D4
+      c_name = "D4";
+    }
+    if ((sample == TileID::SAMP_D) && (tower == 10)) { // cell D5
+      c_name = "D5";
+    }
+    if ((sample == TileID::SAMP_D) && (tower == 12)) { // cell D6
+      c_name = "D6";
+    }
+    if ((sample == TileID::SAMP_E) && (tower == 10)) { // cell E1
+      c_name = "E1";
+    }
+    if ((sample == TileID::SAMP_E) && (tower == 11)) { // cell E2
+      c_name = "E2";
+    }
+    if ((sample == TileID::SAMP_E) && (tower == 13)) { // cell E3
+      if (((ros == 3) && ((module + 1) == 15)) || ((ros == 4) && ((module + 1) == 18))) { // special modules EBA15 & EBC18
+        c_name = "E3*";
+      } else {
+        c_name = "E3";
+      }
+    }
+    if ((sample == TileID::SAMP_E) && (tower == 15)) { // cell E4
+      if (((ros == 3) && ((module + 1) == 15)) || ((ros == 4) && ((module + 1) == 18))) { // special modules EBA15 & EBC18
+        c_name = "E4*";
+      } else {
+        c_name = "E4";
+      }
+    }
+  }
+  return c_name;
 }
 
 /*---------------------------------------------------------*/    
@@ -500,7 +635,7 @@ bool TileJetMonitorAlgorithm::isGoodEvent(const EventContext& ctx) const {
   int iJet = 0;
   for (auto jet : *jetsCopy) {
     ATH_MSG_DEBUG("Jet " << iJet << ", pT " << jet->pt()/1000.0 << " GeV, eta " 
-		  << jet->eta());
+                  << jet->eta());
     passJvt(*jet) = passesJvt(*jet);
     passOR(*jet) = true;
     ATH_MSG_DEBUG("... done with jet " << iJet);
