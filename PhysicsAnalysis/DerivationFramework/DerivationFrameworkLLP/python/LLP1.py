@@ -603,12 +603,6 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
         StreamName              = kwargs['StreamName'],
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
-    LLP1PixeldEdxDTTrackParticleThinningTool = acc.getPrimaryAndMerge(PixeldEdxTrackParticleThinningCfg(
-        flags,
-        name                    = "LLP1PixeldEdxDTTrackParticleThinningTool",
-        StreamName              = kwargs['StreamName'],
-        InDetTrackParticlesKey  = "InDetDisappearingTrackParticles"))
-
 
     #Thinning CaloCalTopoClusters associated to AntiKt4EMTopoJets
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import JetCaloClusterThinningCfg
@@ -644,7 +638,6 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                      LLP1JetTPThinningTool,
                      LLP1FatJetTPThinningTool,
                      LLP1PixeldEdxTrackParticleThinningTool,
-                     LLP1PixeldEdxDTTrackParticleThinningTool,
                      LLP1CCThinningTool
                      ]
 
