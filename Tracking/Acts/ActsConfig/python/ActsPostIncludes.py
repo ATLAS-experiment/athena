@@ -74,12 +74,12 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
                        f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackSurfacesAux."]
 
     # add track particles created by the Acts TrackToTrackParticleCnvAlg to the AOD
-    trackCnvPrefixes = ["ActsCombined"]
+    trackCnvPrefixes = ["Acts"]
     trackparticles_shortlist = [] if flags.Acts.EDM.PersistifyTracks else ['-actsTrack']
     trackparticles_variables = ".".join(trackparticles_shortlist)
     for prefix in trackCnvPrefixes:
-        toAOD += [f"xAOD::TrackParticleContainer#{prefix}TracksParticlesAlt",
-                  f"xAOD::TrackParticleAuxContainer#{prefix}TracksParticlesAltAux." + trackparticles_variables]
+        toAOD += [f"xAOD::TrackParticleContainer#InDet{prefix}TrackParticles",
+                  f"xAOD::TrackParticleAuxContainer#InDet{prefix}TrackParticlesAux." + trackparticles_variables]
 
     # If there is nothing to persistify, returns an empty CA
     if len(toAOD) == 0:

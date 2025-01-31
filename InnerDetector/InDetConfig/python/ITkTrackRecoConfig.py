@@ -184,14 +184,14 @@ def ITkStoreTrackSeparateContainerCfg(flags,
         prefix = flags.Tracking.ActiveConfig.extension
         result.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, f"{prefix}ResolvedTrackToAltTrackParticleCnvAlg",
                                                        ACTSTracksLocation=[TrackContainer],
-                                                       TrackParticlesOutKey=f'{TrackContainer}ParticlesAlt'))
-
+                                                       TrackParticlesOutKey=f'InDet{prefix}TrackParticles'))
+        
         if flags.Tracking.doTruth :
             from ActsConfig.ActsTruthConfig import ActsTrackParticleTruthDecorationAlgCfg
             result.merge(ActsTrackParticleTruthDecorationAlgCfg(flags,
                                                                 name=f'{TrackContainer}ParticleTruthDecorationAlg',
                                                                 TrackToTruthAssociationMaps = [f'{TrackContainer}ToTruthParticleAssociation'],
-                                                                TrackParticleContainerName = f'{TrackContainer}ParticlesAlt'
+                                                                TrackParticleContainerName = f'InDet{prefix}TrackParticles'
                                                                 ))
     return result
 
@@ -293,7 +293,7 @@ def ITkTrackRecoPassCfg(flags,
 
 def ITkActsTrackFinalCfg(flags,
                          InputCombinedITkTracks: list[str] = None,
-                         ActsTrackContainerName="ActsInDetTrackParticles") -> ComponentAccumulator:
+                         ActsTrackContainerName="InDetActsTrackParticles") -> ComponentAccumulator:
     # Inputs must not be None
     assert InputCombinedITkTracks is not None and isinstance(InputCombinedITkTracks, list)
 
@@ -577,7 +577,7 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
         # workflow has been executed, which we get by checking
         # the size of the track containers.
                 
-        ActsTrackContainerName = "InDetTrackParticles" if not InputCombinedITkTracks else "ActsInDetTrackParticles"
+        ActsTrackContainerName = "InDetTrackParticles" if not InputCombinedITkTracks else "InDetActsTrackParticles"
         ActsPrimaryVertices    = "PrimaryVertices" if not InputCombinedITkTracks else "ActsPrimaryVertices"
 
         result.merge(ITkActsTrackFinalCfg(flags,
