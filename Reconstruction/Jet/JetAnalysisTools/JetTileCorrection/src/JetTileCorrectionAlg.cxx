@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetTileCorrection includes
@@ -11,10 +11,11 @@
 
 #include "PathResolver/PathResolver.h"
 #include "AsgTools/ToolStore.h"
+#include "AthContainers/Accessor.h"
 
 // Global accessors and decorators
-static SG::AuxElement::Accessor<unsigned int> acc_tileok("TileStatus");
-static SG::AuxElement::Accessor<float> acc_ptraw("Ptraw");
+static const SG::Accessor<unsigned int> acc_tileok("TileStatus");
+static const SG::Accessor<float> acc_ptraw("Ptraw");
 
 using namespace CP;
 
