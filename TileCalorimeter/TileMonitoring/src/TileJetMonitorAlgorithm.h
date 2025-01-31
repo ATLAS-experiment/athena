@@ -48,6 +48,7 @@ class TileJetMonitorAlgorithm : public AthMonitorAlgorithm {
     bool isGoodJet(const xAOD::Jet& jet) const;
     bool isGoodEvent(const EventContext& ctx) const;
     std::string sampleName(const int ros, const int sample, const int tower) const;
+    std::string cellName(const int ros, const int sample, const int tower, const int module) const;
     bool matchesEnergyRange(const int sample, const int tower, const float energy, const int gain) const;
   
     Gaudi::Property<float> m_jetPtMin{this, "JetPtMin", 20000., "Threshold in MeV"};
@@ -71,6 +72,7 @@ class TileJetMonitorAlgorithm : public AthMonitorAlgorithm {
   //  
     Gaudi::Property<bool> m_do1DHistograms{this, "Do1DHistograms", false, ""};
     Gaudi::Property<bool> m_do2DHistograms{this, "Do2DHistograms", false, ""};
+    Gaudi::Property<bool> m_doCellHistograms{this, "DoCellHistograms", false, ""};
     Gaudi::Property<bool> m_doEnergyDiffHistograms{this, "DoEnergyDiffHistograms", false, ""};
     Gaudi::Property<float> m_energyDiffThreshold{this, "EnergyDiffThreshold", 2000, ""};
     Gaudi::Property<bool> m_doEnergyProfiles{this, "DoEnergyProfiles", true, ""};
