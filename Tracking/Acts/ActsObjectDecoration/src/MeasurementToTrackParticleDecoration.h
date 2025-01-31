@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -27,7 +27,6 @@
 #include "ActsEvent/TrackContainer.h"
 #include "Acts/EventData/TrackStateProxy.hpp"
 
-using namespace Acts::UnitLiterals;
 using EffectiveCalibrated =
   typename Acts::detail_lt::DynamicSizeTypes<>::CoefficientsMap;
 using EffectiveCalibratedCovariance =
