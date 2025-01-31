@@ -462,26 +462,23 @@ namespace MuonGM {
     MdtReadoutElement::deformedTransform(int tubeLayer, int tube) const {
 
         const MuonStation* ms = parentMuonStation();
-        if ( !ms->hasBLines() && !ms->hasMdtAsBuiltParams()) {
+        if (!ms->hasBLines() && !ms->hasMdtAsBuiltParams()) {
             return Amg::Transform3D::Identity();
         }
+
         const Amg::Vector3D fixedPoint = ms->getBlineFixedPointInAmdbLRS();
 
-
         // Chamber parameters
-        double width_narrow = m_Ssize;
-        double width_wide = m_LongSsize;
+        double moduleWidthS = m_Ssize;
+        double moduleWidthL = m_LongSsize;
         double height = barrel() ? ms->ZsizeMdtStation() : ms->RsizeMdtStation();
         double thickness = barrel() ? ms->RsizeMdtStation() : ms->ZsizeMdtStation();
-
-
        
         ATH_MSG_VERBOSE("Calculate deformed transform "<<idHelperSvc()->toStringDetEl(identify())
-                        <<", layer: "<<tubeLayer<<", tube: "<<tube
-                         <<", fixedPoint: "<<Amg::toString(fixedPoint)<<" / "
-                        <<Amg::toString(ms->getGeoTransform()->getDefTransform() *ms->getNativeToAmdbLRS().inverse()* fixedPoint)
-                         <<", height: "<<height<<", thickness: "<<thickness
-                         <<", ideal tube: "<<Amg::toString(localNominalTubePosWoCutouts(tubeLayer,tube)));
+                      <<", layer: "<<tubeLayer<<", tube: "<<tube<<", fixedPoint: "<<Amg::toString(fixedPoint)<<" / "
+                      <<Amg::toString(ms->getGeoTransform()->getDefTransform() *ms->getNativeToAmdbLRS().inverse()* fixedPoint)
+                      <<", height: "<<height<<", thickness: "<<thickness
+                      <<", ideal tube: "<<Amg::toString(localNominalTubePosWoCutouts(tubeLayer,tube)));
 
 #ifndef NDEBUG
         double heightML = barrel() ? m_Zsize : m_Rsize;
@@ -521,10 +518,10 @@ namespace MuonGM {
 
             // Get positions after the deformations applied
             // first wire end point
-            pt_end1_new = posOnDefChamWire(pt_end1_new, width_narrow, width_wide, height, thickness, fixedPoint);
+            pt_end1_new = posOnDefChamWire(pt_end1_new, moduleWidthS, moduleWidthL, height, thickness, fixedPoint);
 
             // second wire end point
-            pt_end2_new = posOnDefChamWire(pt_end2_new, width_narrow, width_wide, height, thickness, fixedPoint);
+            pt_end2_new = posOnDefChamWire(pt_end2_new, moduleWidthS, moduleWidthL, height, thickness, fixedPoint);
         }
 
         // Switch tube ends back to MGM coordinates
@@ -581,8 +578,8 @@ namespace MuonGM {
     //     note that nearly all deformation parameter names are meaningless
     //   */
     Amg::Vector3D MdtReadoutElement::posOnDefChamWire(const Amg::Vector3D& locAMDBPos,
-                                                      const double width_narrow,
-                                                      const double width_wide,
+                                                      const double moduleWidthS,
+                                                      const double moduleWidthL,
                                                       const double height,
                                                       const double thickness,
                                                       const Amg::Vector3D& fixedPoint) const {
@@ -624,37 +621,34 @@ namespace MuonGM {
         // NOTE s0,z0,t0 are the coord. in the amdb frame of this point: the origin of the frame can be different than the fixed point for
         // deformations s0mdt,z0mdt,t0mdt
         //    (always equal to the point at lowest t,z and s=0 of the MDT stack)
-        double s0 = locAMDBPos.x();
-        double z0 = locAMDBPos.y();
-        double t0 = locAMDBPos.z();
-        ATH_MSG_VERBOSE( "** In "<<__func__<<" - width_narrow, width_wide, length, thickness, " << width_narrow << " " << width_wide
-            << " " << height << " " << thickness << " " );
-        ATH_MSG_VERBOSE( "** In "<<__func__<<" - going to correct for B-line the position of Point at " << s0 << " " << z0 << " "
-            << t0 << " in the amdb-szt frame" );
+        ATH_MSG_VERBOSE( "** In "<<__func__<<" - moduleWidthS " << moduleWidthS<<", moduleWidthL: "
+                       <<moduleWidthL <<", height: "<<height<<", thickness: " <<thickness << "." );
+        ATH_MSG_VERBOSE( "** In "<<__func__<<" - going to correct for B-line the position of Point at " <<Amg::toString(locAMDBPos)
+                       << " in the amdb-szt frame" );
 
-        double s0mdt = s0;  // always I think !
-        if (std::abs(fixedPoint.x()) > 0.01) s0mdt = s0 - fixedPoint.x();
-        double z0mdt = z0;  // unless in the D section of this station there's a dy diff. from 0 for the innermost MDT multilayer (sometimes
-                            // in the barrel)
-        if (std::abs(fixedPoint.y()) > 0.01) z0mdt = z0 - fixedPoint.y();
-        double t0mdt =
-            t0;  // unless in the D section of this station there's a dz diff. from 0 for the innermost MDT multilayer (often in barrel)
-        if (std::abs(fixedPoint.z()) > 0.01) t0mdt = t0 - fixedPoint.z();
+        double s0mdt = locAMDBPos.x();  // always I think !
+        if (std::abs(fixedPoint.x()) > 0.01) s0mdt = locAMDBPos.x() - fixedPoint.x();
+        double z0mdt = locAMDBPos.y();  
+        // unless in the D section of this station there's a dy diff. from 0 for the innermost MDT multilayer (sometimes in the barrel)
+        if (std::abs(fixedPoint.y()) > 0.01) z0mdt = locAMDBPos.y() - fixedPoint.y();
+        double t0mdt = locAMDBPos.z();
+              // unless in the D section of this station there's a dz diff. from 0 for the innermost MDT multilayer (often in barrel)
+        if (std::abs(fixedPoint.z()) > 0.01) t0mdt = locAMDBPos.z() - fixedPoint.z();
         if (z0mdt < 0 || t0mdt < 0) {
             ATH_MSG_WARNING(""<<__func__<<": correcting the local position of a point outside the mdt station (2 multilayers) volume -- RE "
-                << idHelperSvc()->toStringDetEl(identify()) << " local point: szt=" << s0 << " " << z0 << " " << t0
+                << idHelperSvc()->toStringDetEl(identify()) << " local point: szt=" << Amg::toString(locAMDBPos)
                 << " fixedPoint " <<Amg::toString(fixedPoint) );
         }
         ATH_MSG_VERBOSE( "** In "<<__func__<<" - correct for offset of B-line fixed point " << s0mdt << " " << z0mdt << " " << t0mdt);
 
         double ds{0.},dz{0.},dt{0.};
-        double width_actual = width_narrow + (width_wide - width_narrow) * (z0mdt / height);
+        double width_actual = moduleWidthS + (moduleWidthL - moduleWidthS) * (z0mdt / height);
         double s_rel = s0mdt / (width_actual / 2.);
         double z_rel = (z0mdt - height / 2.) / (height / 2.);
         double t_rel = (t0mdt - thickness / 2.) / (thickness / 2.);
 
-        ATH_MSG_VERBOSE( "** In "<<__func__<<" - width_actual, s_rel, z_rel, t_rel  " << width_actual << " " << s_rel << " "
-                                 << z_rel << " " << t_rel );
+        ATH_MSG_VERBOSE( "** In "<<__func__<<" - width_actual: "<<width_actual<<", s_rel: "<<s_rel<<", z_rel: "
+                    <<z_rel<<", t_rel: "<<t_rel);
 
         // sp, sn - cross plate sag out of plane
         if ((sp != 0) || (sn != 0)) {
@@ -694,9 +688,9 @@ namespace MuonGM {
         }
 
         ATH_MSG_VERBOSE( "posOnDefChamStraighWire: ds,z,t = " << ds << " " << dz << " " << dt );
-        deformPos[0] = s0 + ds;
-        deformPos[1] = z0 + dz;
-        deformPos[2] = t0 + dt;
+        deformPos[0] = locAMDBPos[0] + ds;
+        deformPos[1] = locAMDBPos[1] + dz;
+        deformPos[2] = locAMDBPos[2] + dt;
 
         return deformPos;
     }

@@ -322,24 +322,22 @@ Amg::Vector3D MdtReadoutElement::applyBlineCorrections(const BLinePar& bline,
    // NOTE s0,z0,t0 are the coord. in the amdb frame of this point: the origin of the frame can be different than the fixed point for
    // deformations s0mdt,z0mdt,t0mdt
    //    (always equal to the point at lowest t,z and s=0 of the MDT stack)
-   double s0 = deformedPos.x();
-   double z0 = deformedPos.y();
-   double t0 = deformedPos.z();
-   ATH_MSG_VERBOSE( "** In "<<__func__<<" - moduleWidthS, moduleWidthL(), length, thickness, " << moduleWidthS() << " " << moduleWidthL()
-            << " " << chamberHeight << " " << chamberThickness << " " );
-   ATH_MSG_VERBOSE( "** In "<<__func__<<" - going to correct for B-line the position of Point at " << Amg::toString(deformedPos));
+   ATH_MSG_VERBOSE( "** In "<<__func__<<" - moduleWidthS " << moduleWidthS()<<", moduleWidthL: "
+                       <<moduleWidthL() <<", height: "<<chamberHeight<<", thickness: " <<chamberThickness << "." );
+   ATH_MSG_VERBOSE( "** In "<<__func__<<" - going to correct for B-line the position of Point at " << Amg::toString(localTubeEndPoint));
 
-   double s0mdt = s0;  // always I think !
-   if (std::abs(fixedPoint.x()) > 0.01) s0mdt = s0 - fixedPoint.x();
-   double z0mdt = z0;  // unless in the D section of this station there's a dy diff. from 0 for the innermost MDT multilayer (sometimes
-                       // in the barrel)
+   double s0mdt = localTubeEndPoint.x();  // always I think !
+   if (std::abs(fixedPoint.x()) > 0.01) s0mdt = localTubeEndPoint.x() - fixedPoint.x();
+   double z0mdt = localTubeEndPoint.y();  
+   // unless in the D section of this station there's a dy diff. from 0 for the innermost MDT multilayer (sometimes
+   // in the barrel)
    // unless in the D section of this station there's a dz diff. from 0 for the innermost MDT multilayer (often in barrel)
-   if (std::abs(fixedPoint.y()) > 0.01) z0mdt = z0 - fixedPoint.y();
-   double t0mdt = t0;  
-      if (std::abs(fixedPoint.z()) > 0.01) t0mdt = t0 - fixedPoint.z();
+   if (std::abs(fixedPoint.y()) > 0.01) z0mdt = localTubeEndPoint.y() - fixedPoint.y();
+   double t0mdt = localTubeEndPoint.z();  
+   if (std::abs(fixedPoint.z()) > 0.01) t0mdt = localTubeEndPoint.z() - fixedPoint.z();
    if (z0mdt < 0 || t0mdt < 0) {
       ATH_MSG_WARNING(""<<__func__<<": correcting the local position of a point outside the mdt station (2 multilayers) volume -- RE "
-                  << idHelperSvc()->toStringDetEl(identify()) << " local point: szt=" << s0 << " " << z0 << " " << t0
+                  << idHelperSvc()->toStringDetEl(identify()) << " local point: szt=" <<Amg::toString(localTubeEndPoint)
                   << " fixedPoint " <<Amg::toString(fixedPoint) );
    }
    ATH_MSG_VERBOSE( "** In "<<__func__<<" - correct for offset of B-line fixed point " << s0mdt << " " << z0mdt << " " << t0mdt);
@@ -393,9 +391,9 @@ Amg::Vector3D MdtReadoutElement::applyBlineCorrections(const BLinePar& bline,
    }
 
    ATH_MSG_VERBOSE( "posOnDefChamStraighWire: ds,z,t = " << ds << " " << dz << " " << dt );
-   deformedPos[0] = s0 + ds;
-   deformedPos[1] = z0 + dz;
-   deformedPos[2] = t0 + dt;
+   deformedPos[0] = localTubeEndPoint[0] + ds;
+   deformedPos[1] = localTubeEndPoint[1] + dz;
+   deformedPos[2] = localTubeEndPoint[2] + dt;
 
         
    return deformedPos;
@@ -403,16 +401,16 @@ Amg::Vector3D MdtReadoutElement::applyBlineCorrections(const BLinePar& bline,
 #endif
 Amg::Transform3D MdtReadoutElement::fromIdealToDeformed(const IdentifierHash& tubeHash,
                                                         const ActsTrk::DetectorAlignStore* store) const {
-
-   /// No deformation parameters were parsed at all
-   if (!store || !store->internalAlignment) {
-   ATH_MSG_VERBOSE("No deformed transformation available "<<idHelperSvc()->toString(measurementId(tubeHash)));
-
-      return Amg::Transform3D::Identity();
-   }
 #ifdef SIMULATIONBASE
+   ATH_MSG_VERBOSE("No deformed transformation available "<<idHelperSvc()->toString(measurementId(tubeHash))
+                  <<"store address to make the compiler happy: "<<store);
    return Amg::Transform3D::Identity();
 #else
+   /// No deformation parameters were parsed at all
+   if (!store || !store->internalAlignment) {
+      ATH_MSG_VERBOSE("No deformed transformation available "<<idHelperSvc()->toString(measurementId(tubeHash)));
+      return Amg::Transform3D::Identity();
+   }
    using ChamberDistortions = MdtAlignmentStore::chamberDistortions;
 
    /// No deformation parameters were stored for this particular readout element
@@ -432,6 +430,7 @@ Amg::Transform3D MdtReadoutElement::fromIdealToDeformed(const IdentifierHash& tu
    /// Relative sign to calculate the thickness. If multilayer == 1,
    /// we want the lower point and the upper point otherwise.
    const double relSign = (multilayer() == 1 ? -1. : 1.);
+   
    const double modHalfThick{0.5*relSign*moduleThickness()}, 
                 modHalTHickO{-0.5*relSign*m_reOtherMl->moduleThickness()};
 

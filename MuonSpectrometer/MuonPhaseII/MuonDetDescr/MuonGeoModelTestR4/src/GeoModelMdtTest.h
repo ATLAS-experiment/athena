@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTESTR4_GEOMODELMDTTEST_H
 #define MUONGEOMODELTESTR4_GEOMODELMDTTEST_H
 
 #include <AthenaBaseComps/AthHistogramAlgorithm.h>
+#include <StoreGate/ReadHandleKey.h>
+
 #include <set>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
@@ -17,8 +19,8 @@ namespace MuonGMR4{
 
 class GeoModelMdtTest : public AthHistogramAlgorithm{
     public:
-        GeoModelMdtTest(const std::string& name, ISvcLocator* pSvcLocator);
-
+        using AthHistogramAlgorithm::AthHistogramAlgorithm;
+       
         ~GeoModelMdtTest() = default;
 
         StatusCode execute() override;

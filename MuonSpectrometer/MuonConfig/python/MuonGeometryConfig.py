@@ -122,8 +122,8 @@ def MuonAlignmentCondAlgCfg(flags, name="MuonAlignmentCondAlg", **kwargs):
     if len(onl):
         ParlineFolders = [ x[ :x.find(onl)] + x[x.find(onl) + len(onl): ] for x in ParlineFolders]
 
-    kwargs.setdefault("LoadALines",flags.Muon.Align.UseALines)
-    kwargs.setdefault("LoadBLines",flags.Muon.Align.UseBLines)
+    kwargs.setdefault("LoadALines", flags.Muon.Align.UseALines)
+    kwargs.setdefault("LoadBLines", flags.Muon.Align.UseBLines)
     
     kwargs.setdefault("ParlineFolders", ParlineFolders)
     MuonAlign = CompFactory.MuonAlignmentCondAlg(name, **kwargs)

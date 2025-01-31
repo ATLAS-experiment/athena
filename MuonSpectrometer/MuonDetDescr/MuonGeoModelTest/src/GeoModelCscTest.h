@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTESTR4_GEOMODELRCSCTEST_H
 #define MUONGEOMODELTESTR4_GEOMODELRCSCTEST_H
@@ -18,8 +18,9 @@ namespace MuonGM {
 
 class GeoModelCscTest : public AthHistogramAlgorithm {
    public:
-    GeoModelCscTest(const std::string& name, ISvcLocator* pSvcLocator);
-
+   
+    using AthHistogramAlgorithm::AthHistogramAlgorithm;
+    
     StatusCode initialize() override;
     StatusCode execute() override;
     StatusCode finalize() override;
@@ -45,6 +46,7 @@ class GeoModelCscTest : public AthHistogramAlgorithm {
     Gaudi::Property<std::vector<std::string>> m_selectStat{
         this, "TestStations", {}, "Constrain the stations to be tested"};
 
+    Gaudi::Property<std::vector<std::string>> m_excludeStat{this, "ExcludeStations", {}};
     MuonVal::MuonTesterTree m_tree{"CscGeoModelTree", "GEOMODELTESTER"};
 
     /// Identifier of the readout element

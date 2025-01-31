@@ -25,7 +25,7 @@ def SetupArgParser():
                         help="Input file to run on ", nargs="+")
     parser.add_argument("--geoModelFile", default = geoModelFileDefault(), help="GeoModel SqLite file containing the muon geometry.")
     parser.add_argument("--chambers", default=["all"], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
-    parser.add_argument("--excludedChambers", default=["none"], nargs="+", help="Chambers to exclude. If string contains 'none', all chambers will be checked. Note: adding a chamber to --excludedChambers will overwrite it being in --chambers.")
+    parser.add_argument("--excludedChambers", default=[], nargs="+", help="Chambers to exclude. If string contains 'none', all chambers will be checked. Note: adding a chamber to --excludedChambers will overwrite it being in --chambers.")
     parser.add_argument("--outRootFile", default="NewGeoModelDump.root", help="Output ROOT file to dump the geomerty")
     parser.add_argument("--nEvents", help="Number of events to run", type = int ,default = 1)
     parser.add_argument("--skipEvents", help="Number of events to skip", type = int, default = 0)
@@ -199,7 +199,7 @@ if __name__=="__main__":
     flags, cfg = setupGeoR4TestCfg(args)  
     cfg.merge(setupHistSvcCfg(flags, outFile = args.outRootFile))
     chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []
-    chambToExclude = [] if "none" in args.excludedChambers else args.excludedChambers
+    chambToExclude = args.excludedChambers
     
     cfg.getCondAlgo("MuonDetectorManagerCondAlg").checkGeo = True
     cfg.getService("MessageSvc").setVerbose = []

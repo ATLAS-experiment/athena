@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeometryJiveXML/MuonGeometryWriter.h"
@@ -19,6 +19,8 @@
 #include "GeoModelKernel/GeoTubs.h"
 #include "GeoModelKernel/GeoTrd.h"
 #include "GeoModelKernel/GeoShapeShift.h"
+
+#include "GeoPrimitives/CLHEPtoEigenConverter.h"
 
 #include <fstream>
 

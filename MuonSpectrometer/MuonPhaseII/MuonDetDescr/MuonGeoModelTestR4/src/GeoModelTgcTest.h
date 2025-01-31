@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTESTR4_GEOMODELTgcTEST_H
 #define MUONGEOMODELTESTR4_GEOMODELTgcTEST_H
@@ -18,7 +18,7 @@ namespace MuonGMR4{
 
 class GeoModelTgcTest : public AthHistogramAlgorithm{
     public:
-        GeoModelTgcTest(const std::string& name, ISvcLocator* pSvcLocator);
+        using AthHistogramAlgorithm::AthHistogramAlgorithm;
 
         ~GeoModelTgcTest() = default;
 

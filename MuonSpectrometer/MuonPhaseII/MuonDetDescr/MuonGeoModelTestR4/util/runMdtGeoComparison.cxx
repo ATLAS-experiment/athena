@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @brief Helper macro to compare the output from the readout geometry dumps:
@@ -302,8 +302,9 @@ int main( int argc, char** argv ) {
         bool flippedChamb = {reference.id.eta < 0 && Amg::doesNotDeform(distortion * Amg::getRotateX3D(M_PI))};
         if (!Amg::doesNotDeform(distortion) && !flippedChamb) {   
             std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": The chamber coordinate systems rotate differently for  "
-                     <<reference<<". Difference in the coordinate transformation: "
-                     <<Amg::toString(distortion)<<std::endl;
+                     <<reference<<". Difference in the coordinate transformation: "<<Amg::toString(distortion)
+                     <<" --- refTrf: "<<Amg::toString(reference.geoModelTransform)
+                     <<" --- testTrf: "<<Amg::toString(test.geoModelTransform)<<std::endl;
             chamberOkay = false;            
         }
         /// The ultimate goal is to have the tube positioned at the same place. 

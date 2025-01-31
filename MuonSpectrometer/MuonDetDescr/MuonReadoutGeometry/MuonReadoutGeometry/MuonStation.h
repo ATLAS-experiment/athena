@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonReadoutGeometry_MuonStation_H
 #define MuonReadoutGeometry_MuonStation_H
 
-#include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 /// Ensure that the ATLAS eigen extenstions are loaded properly
 
@@ -16,6 +15,7 @@
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "MuonReadoutGeometry/GlobalUtilities.h"
 #include "AthenaBaseComps/AthMessaging.h"
+#include "CxxUtils/CachedValue.h"
 class BLinePar;
 class MdtAsBuiltPar;
 
@@ -95,8 +95,12 @@ namespace MuonGM {
         void setDelta_fromAline(double, double, double, double, double, double);
         //!< set the delta transform in the amdb frame and update the geoModel Delta
         void addMuonReadoutElementWithAlTransf(MuonReadoutElement* a, GeoAlignableTransform* ptrsf, int jobIndex);
+        
+       
         const MuonReadoutElement* getMuonReadoutElement(int jobIndex) const;
         MuonReadoutElement* getMuonReadoutElement(int jobIndex);
+        
+        
         GeoAlignableTransform* getComponentAlTransf(int jobIndex) const;
         
         inline int nMuonReadoutElements() const;
@@ -124,6 +128,10 @@ namespace MuonGM {
         void setPhysVol(const PVLink& vol);
         PVConstLink getPhysVol() const;
         PVLink getPhysVol();
+
+        void setMdtRsize(const double rSize);
+        void setMdtZsize(const double zSize);
+        
     private:
         // Declaring private message stream member.
         bool m_firstRequestBlineFixedP{true};
@@ -157,6 +165,9 @@ namespace MuonGM {
         std::map<int, pairRE_AlignTransf> m_REwithAlTransfInStation{};  //!< keep track of the REs in this station
         /// Link the full physical volume associated with the station
         PVLink m_physVol{nullptr};
+
+        CxxUtils::CachedValue<double> m_mdtRsize{};
+        CxxUtils::CachedValue<double> m_mdtZsize{};
     };
 
     int MuonStation::getPhiIndex() const { return m_statPhiIndex; }

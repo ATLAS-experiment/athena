@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_MDTREADOUTELEMENT_ICC
 #define MUONREADOUTGEOMETRYR4_MDTREADOUTELEMENT_ICC
@@ -46,7 +46,7 @@ inline double MdtReadoutElement::moduleWidthS() const{ return 2.*m_pars.shortHal
 inline double MdtReadoutElement::moduleWidthL() const{ return 2.*m_pars.longHalfX; }
 inline double MdtReadoutElement::moduleHeight() const{ return 2.*m_pars.halfY; }
 inline double MdtReadoutElement::moduleThickness() const{ return 2.*m_pars.halfHeight; }
-  
+inline const MdtReadoutElement* MdtReadoutElement::complementaryRE() const { return m_reOtherMl; }
 inline bool MdtReadoutElement::isValid(const IdentifierHash& measHash) const {
     return  layerNumber(measHash) < numLayers() && 
             tubeNumber(measHash) < numTubesInLay() && 

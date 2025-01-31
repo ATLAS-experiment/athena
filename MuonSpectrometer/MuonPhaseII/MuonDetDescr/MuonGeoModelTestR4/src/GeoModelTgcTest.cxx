@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelTgcTest.h"
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
@@ -12,84 +12,67 @@ using namespace ActsTrk;
 
 namespace MuonGMR4{
 
-GeoModelTgcTest::GeoModelTgcTest(const std::string& name, ISvcLocator* pSvcLocator):
-    AthHistogramAlgorithm(name,pSvcLocator) {}
-
 StatusCode GeoModelTgcTest::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_geoCtxKey.initialize());
     /// Prepare the TTree dump
     ATH_CHECK(m_tree.init(this));
 
-    const TgcIdHelper& id_helper{m_idHelperSvc->tgcIdHelper()};
-    for (const std::string& testCham : m_selectStat) {
-        /// Check that the station is not on the excluded list
-        if (std::find(m_excludeStat.begin(), m_excludeStat.end(), testCham) != m_excludeStat.end()) {
-            continue;
-        }
-        /// Check format
-        if (testCham.size() != 7) {
-            ATH_MSG_FATAL("Wrong format given " << testCham);
-            return StatusCode::FAILURE;
-        }
-        /// Example string T1F1A03
-        std::string statName = testCham.substr(0, 3);
-        unsigned int statEta = std::atoi(testCham.substr(3, 1).c_str()) *
-                               (testCham[4] == 'A' ? 1 : -1);
-        unsigned int statPhi = std::atoi(testCham.substr(5, 2).c_str());
-        bool is_valid{false};
-        const Identifier eleId{id_helper.elementID(statName, statEta, statPhi, is_valid)};
-        if (!is_valid) {
-            ATH_MSG_FATAL("Failed to deduce a station name for " << testCham);
-            return StatusCode::FAILURE;
-        }
-        m_testStations.insert(eleId);
-    }
-    /// Look at all stations for testing if nothing has been specified
-    if (m_testStations.empty()){
-        /// Construct list of excluded stations
-        std::set<Identifier> excludedStations{};
-        for (const std::string& testCham : m_excludeStat) {
-            /// Check format
-            if (testCham.size() != 7) {
-                ATH_MSG_FATAL("Wrong format given " << testCham);
-                return StatusCode::FAILURE;
+    const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
+    auto translateTokenList = [this, &idHelper](const std::vector<std::string>& chNames){
+
+        std::set<Identifier> transcriptedIds{};
+        for (const std::string& token : chNames) { 
+            if (token.size() != 7) {
+                ATH_MSG_WARNING("Wrong format given for "<<token<<". Expecting 7 characters");
+                continue;
             }
-            /// Construct identifier; example string T1F1A03
-            std::string statName = testCham.substr(0, 3);
-            unsigned int statEta = std::atoi(testCham.substr(3, 1).c_str()) *
-                                   (testCham[4] == 'A' ? 1 : -1);
-            unsigned int statPhi = std::atoi(testCham.substr(5, 2).c_str());
-            bool is_valid{false};
-            const Identifier eleId{id_helper.elementID(statName, statEta, statPhi, is_valid)};
-            if (!is_valid) {
-                ATH_MSG_FATAL("Failed to deduce a station name for " << testCham);
-                return StatusCode::FAILURE;
+            /// Example string T1E4A06
+            const std::string statName = token.substr(0, 3);
+            const unsigned statEta = std::atoi(token.substr(3, 1).c_str()) * (token[4] == 'A' ? 1 : -1);
+            const unsigned statPhi = std::atoi(token.substr(5, 2).c_str());
+            bool isValid{false};
+            const Identifier eleId = idHelper.elementID(statName, statEta, statPhi, isValid);
+            if (!isValid) {
+                ATH_MSG_WARNING("Failed to deduce a station name for " << token);
+                continue;
             }
-            /// Add station to excludedStations
-            excludedStations.insert(eleId);
+            transcriptedIds.insert(eleId);
         }
-        /// Add stations for testing
-        std::copy_if(id_helper.detectorElement_begin(), 
-                     id_helper.detectorElement_end(), 
-                     std::inserter(m_testStations, m_testStations.end()),
-                     [&](const Identifier& id) {
-                        return excludedStations.count(id) == 0;
-                     });
-        /// Report what stations are excluded
-        if (!excludedStations.empty()) {
-            std::stringstream excluded_report{};
-            for (const Identifier& id : excludedStations){
-                excluded_report << " *** " << m_idHelperSvc->toString(id) << std::endl;
-            }
-            ATH_MSG_INFO("Test all station except the following excluded ones " << std::endl << excluded_report.str());
-        }
-    } else {
+        return transcriptedIds;
+    };
+
+    std::vector <std::string>& selectedSt = m_selectStat.value();
+    const std::vector <std::string>& excludedSt = m_excludeStat.value();
+    selectedSt.erase(std::remove_if(selectedSt.begin(), selectedSt.end(),
+                     [&excludedSt](const std::string& token){
+                        return std::ranges::find(excludedSt, token) != excludedSt.end();
+                     }), selectedSt.end());
+    
+    if (selectedSt.size()) {
+        m_testStations = translateTokenList(selectedSt);
         std::stringstream sstr{};
         for (const Identifier& id : m_testStations) {
             sstr<<" *** "<<m_idHelperSvc->toString(id)<<std::endl;
         }
         ATH_MSG_INFO("Test only the following stations "<<std::endl<<sstr.str());
+    } else {
+        const std::set<Identifier> excluded = translateTokenList(excludedSt);
+        /// Add stations for testing
+        for(auto itr = idHelper.detectorElement_begin();
+                 itr!= idHelper.detectorElement_end();++itr){
+            if (!excluded.count(*itr)) {
+               m_testStations.insert(*itr);
+            }
+        }
+        /// Report what stations are excluded
+        if (!excluded.empty()) {
+            std::stringstream excluded_report{};
+            for (const Identifier& id : excluded){
+                excluded_report << " *** " << m_idHelperSvc->toStringDetEl(id) << std::endl;
+            }
+            ATH_MSG_INFO("Test all station except the following excluded ones " << std::endl << excluded_report.str());
+        }
     }
     ATH_CHECK(detStore()->retrieve(m_detMgr));
     return StatusCode::SUCCESS;
@@ -101,7 +84,7 @@ StatusCode GeoModelTgcTest::finalize() {
 StatusCode GeoModelTgcTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
 
-    SG::ReadHandle<ActsGeometryContext> geoContextHandle{m_geoCtxKey, ctx};
+    SG::ReadHandle geoContextHandle{m_geoCtxKey, ctx};
     ATH_CHECK(geoContextHandle.isPresent());
     const ActsGeometryContext& gctx{*geoContextHandle};
 

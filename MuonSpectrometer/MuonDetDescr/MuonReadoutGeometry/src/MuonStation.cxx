@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -89,7 +89,7 @@ namespace MuonGM {
         // edge at the second layer, i.e. the z should be corrected by a half tube
         // pitch. Correction is thus computed only for barrel side C.
         if (barrel() && (getEtaIndex() < 0)) {
-            for (auto&[jobId, alignPair] :m_REwithAlTransfInStation) {
+            for (auto&[jobId, alignPair] : m_REwithAlTransfInStation) {
                 const MuonReadoutElement* muonRE = alignPair.first;
                 
                 if (muonRE->detectorType() !=Trk::DetectorElemType::Mdt) {
@@ -161,7 +161,6 @@ namespace MuonGM {
         std::map<int, pairRE_AlignTransf>::const_iterator itr = m_REwithAlTransfInStation.find(jobIndex);
         return itr !=m_REwithAlTransfInStation.end() ? itr->second.first : nullptr;
     }
-
     MuonReadoutElement* MuonStation::getMuonReadoutElement(int jobIndex) {
         std::map<int, pairRE_AlignTransf>::const_iterator itr = m_REwithAlTransfInStation.find(jobIndex);
         return itr !=m_REwithAlTransfInStation.end() ?  itr->second.first : nullptr;
@@ -202,10 +201,12 @@ namespace MuonGM {
         Amg::Transform3D delta_amdb = Amg::Translation3D{tras, traz, trat} *
                                           Amg::getRotateX3D(rots) * Amg::getRotateY3D(rotz) * Amg::getRotateZ3D(rott);
         // The station to component transform is static and must be computed in terms of "nominal geometry parameters"; fixing here bug
-        const Amg::Vector3D thisREnominalCenter{getMuonReadoutElement(jobindex)->defTransform().translation()};
-        double Rcomp = thisREnominalCenter.perp() - (getMuonReadoutElement(jobindex)->getRsize()) / 2.;
+        const MuonReadoutElement* reElement = getMuonReadoutElement(jobindex);
+        
+        const Amg::Vector3D thisREnominalCenter{reElement->defTransform().translation()};
+        double Rcomp = thisREnominalCenter.perp() - (reElement->getRsize()) / 2.;
         double DZcomp = std::abs(thisREnominalCenter.z()) - std::abs((m_amdbl_to_global.translation()).z()) -
-                        std::abs((getMuonReadoutElement(jobindex)->getZsize()) / 2.);
+                        std::abs((reElement->getZsize()) / 2.);
 
         Amg::Transform3D childToLocAmdbStation = m_native_to_amdbl * parentToChildT;
         Amg::Transform3D locAmdbStatToLocAmdbComp{Amg::Transform3D::Identity()};
@@ -291,23 +292,27 @@ namespace MuonGM {
     double
     MuonStation::RsizeMdtStation() const {
         if (getStationName()[0] == 'T' || getStationName()[0] == 'C') return 0.;  // TGC and CSC stations
+        if (m_mdtRsize.isValid()) {
+            return *m_mdtRsize.ptr();
+        }
         double Rsize = 0.;
 
         Amg::Vector3D RposFirst{Amg::Vector3D::Zero()}, Rpos{Amg::Vector3D::Zero()};
         bool first = true;
         int nmdt = 0;
-        ATH_MSG_DEBUG("RsizeMdtStation for " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
+        ATH_MSG_VERBOSE("RsizeMdtStation for " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
                 << " nRE = " << nMuonReadoutElements());
         
-        for (int j = 1; j < 30; ++j) {
-            const MuonReadoutElement* activeComponent = getMuonReadoutElement(j);
-            if (!activeComponent) continue;
+        for (const auto& [jIdx, reWithTrf ] : m_REwithAlTransfInStation) {
+            const MuonReadoutElement* activeComponent = reWithTrf.first;
             if (activeComponent->detectorType() !=Trk::DetectorElemType::Mdt) {
                 continue;
             }
             ++nmdt;
             Rsize += activeComponent->getRsize() / 2.;
             Rpos = activeComponent->toParentStation().translation();
+            ATH_MSG_VERBOSE("Readout element "<<activeComponent->idHelperSvc()->toStringDetEl(activeComponent->identify())
+                            <<" r position: "<<Amg::toString(Rpos));
             if (first) {
                 RposFirst = Rpos;
                 first = false;
@@ -319,10 +324,14 @@ namespace MuonGM {
             }            
         }
         if (nmdt == 1) Rsize = 2. * Rsize;
+        m_mdtRsize.set(Rsize);
         return Rsize;
     }
     double MuonStation::ZsizeMdtStation() const {
         if (getStationName()[0] == 'T' || getStationName()[0] == 'C') return 0.;  // TGC and CSC stations
+        if (m_mdtZsize.isValid()) {
+            return *m_mdtZsize.ptr();
+        }
         double Zsize = 0.;
 
         Amg::Vector3D ZposFirst{Amg::Vector3D::Zero()}, Zpos{Amg::Vector3D::Zero()};
@@ -330,12 +339,11 @@ namespace MuonGM {
         int nmdt = 0;
 
 
-        ATH_MSG_DEBUG("ZsizeMdtStation for " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
+        ATH_MSG_VERBOSE("ZsizeMdtStation for " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
                 << " nRE = " << nMuonReadoutElements());
 
-         for (int j = 1; j < 30; ++j) {
-            const MuonReadoutElement* activeComponent = getMuonReadoutElement(j);
-            if (!activeComponent) continue;
+         for (const auto& [jobIdx, compWithTrf] : m_REwithAlTransfInStation) {
+            const MuonReadoutElement* activeComponent = compWithTrf.first;
             if (activeComponent->detectorType() !=Trk::DetectorElemType::Mdt) {
                 continue;
             }
@@ -343,6 +351,8 @@ namespace MuonGM {
 
             Zsize += activeComponent->getZsize() / 2.;
             Zpos = activeComponent->toParentStation() * Amg::Vector3D(0., 0., 0.);
+            ATH_MSG_VERBOSE("Readout element "<<activeComponent->idHelperSvc()->toStringDetEl(activeComponent->identify())
+                            <<" z position: "<<Amg::toString(Zpos));
             if (first) {
                 ZposFirst = Zpos;
                 first = false;
@@ -354,10 +364,17 @@ namespace MuonGM {
             }        
         }
         if (nmdt == 1) Zsize = 2. * Zsize;
-
+        m_mdtZsize.set(Zsize);
         return Zsize;
     }
-
+    void MuonStation::setMdtRsize(const double rSize){
+        m_mdtRsize.reset();
+        m_mdtRsize.set(rSize);
+    }
+    void MuonStation::setMdtZsize(const double zSize){
+        m_mdtZsize.reset();
+        m_mdtZsize.set(zSize);
+    }
     bool MuonStation::barrel() const {
         return getStationName()[0] == 'B';
     }
