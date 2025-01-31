@@ -155,7 +155,7 @@ StatusCode DerivationFramework::PixeldEdxTrackParticleThinning::doThinning() con
     }
     
     // Keep only delta(z0) is less than 10 mm
-    if( std::abs( trk->z0() - priVtx->z() ) > m_z0Cut ) {
+    if( std::abs( trk->z0() - priVtx->z() + trk->vz() ) > m_z0Cut ) {
       continue;
     }
     
