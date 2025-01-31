@@ -41,21 +41,21 @@ def timeBurnerCfg(flags):
 
 
 #----------------------------------------------------------------
-def LArSuperCellMonitoringGenCfg(flags):
+def LArSuperCellMonitoringGenCfg(flags,appendName=""):
    from LArMonitoring.LArSuperCellMonAlg import LArSuperCellMonConfigHLT
    # Input maker - required by the framework, but inputs don't matter for LArSuperCell
-   inputMaker = CompFactory.InputMakerForRoI("IM_LArSuperCellMon",
+   inputMaker = CompFactory.InputMakerForRoI("IM_LArSuperCellMon"+appendName,
                                              RoITool=CompFactory.ViewCreatorInitialROITool(),
-                                             RoIs="LArSuperCellMonRoIs",
+                                             RoIs="LArSuperCellMonRoIs"+appendName,
    )
-   reco = InEventRecoCA('LArSuperCellMonitoring',inputMaker=inputMaker)
-   reco.merge( LArSuperCellMonConfigHLT(flags) )
+   reco = InEventRecoCA('LArSuperCellMonitoring'+appendName,inputMaker=inputMaker)
+   reco.merge( LArSuperCellMonConfigHLT(flags,name="LArSuperCellMonConfigHLT"+appendName) )
    # TimeBurner alg works as a reject-all hypo
-   selAcc = SelectionCA('LArSuperCellMonitoringSequence')
+   selAcc = SelectionCA('LArSuperCellMonitoringSequence'+appendName)
    selAcc.mergeReco(reco)
    selAcc.addHypoAlgo(
        TimeBurnerCfg(flags,
-                     name="LArSuperCellMonHypoConfig",
+                     name="LArSuperCellMonHypoConfig"+appendName,
                      SleepTimeMillisec=0
        )
    )
@@ -160,7 +160,16 @@ class MonitorChainConfiguration(ChainConfigurationBase):
     # LArSuperCellMon configuration
     # --------------------
     def getLArSuperCellMonitoringGenCfg(self, flags):
-        return self.getStep(flags, 'larsupercellmon',[LArSuperCellMonitoringGenCfg])
+        appendName=""
+        if ( "_FILLED" in self.chainL1Item ):
+             appendName="_filled"
+        elif ( "_EMPTY" in self.chainL1Item ):
+             appendName="_empty"
+        elif ( "_FIRSTEMPTY" in self.chainL1Item ):
+             appendName="_firstempty"
+        else :
+             appendName="_dummy"
+        return self.getStep(flags, 'larsupercellmon'+appendName,[LArSuperCellMonitoringGenCfg],appendName=appendName)
 
     # --------------------
     # L1TopoOnlineMonitor configuration

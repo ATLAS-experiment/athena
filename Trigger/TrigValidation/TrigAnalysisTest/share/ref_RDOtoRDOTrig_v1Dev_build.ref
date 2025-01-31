@@ -15195,10 +15195,6 @@ HLT_j95_0eta290_020jvt_bgn260_pf_ftf_xe50_cell_xe85_tcpufit_L1jXE110:
     2: 4
 HLT_l1topoPh1debug_L1All:
   eventCount: 0
-HLT_larsupercellmon_L1RD0_EMPTY:
-  eventCount: 0
-HLT_larsupercellmon_L1RD0_FILLED:
-  eventCount: 0
 HLT_mu10_L1MU8F:
   eventCount: 7
   stepCounts:
