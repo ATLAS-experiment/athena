@@ -52,12 +52,12 @@ include("PowhegControl/PowhegControl_ggF_HH_SMEFT_Common.py")
 # Modify parameters related to truncation
 # --------------------------------------------------------------
 ### Truncation options (2,3 only available for leading operators defined above)
-## parameter multiple-insertion:
+## parameter SMEFTtruncation:
 ## 3: cross section based on |A_SM+A_dim6+A_dbldim6|^2
 ## 2: cross section based on |A_SM+A_dim6|^2+2*Re(A_SM x conj(A_dbldim6))
 ## 1: cross section based on |A_SM+A_dim6|^2
 ## 0: cross section based on |A_SM|^2+2*Re(A_SM*conj(A_dim6))
-#PowhegConfig.multiple-insertion = 1 # [default: 1]
+#PowhegConfig.SMEFTtruncation = 1 # [default: 1]
 
 ### Subleading operators (only available for truncation options 0,1)
 ## parameter includesubleading:
