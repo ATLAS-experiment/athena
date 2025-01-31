@@ -7,6 +7,7 @@ atlas_subdir( MuonCondAlgR4 )
 
 # External dependencies:
 find_package( nlohmann_json )
+find_package( CORAL )
 
 find_package(ROOT COMPONENTS Gpad)
 # Component(s) in the package:
