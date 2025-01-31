@@ -43,6 +43,10 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag("Trigger.forceEnableAllChains", False,
                   help='always enable all configured chains (for testing)')
 
+    flags.addFlag("Trigger.disableL1ConsistencyChecker", False,
+                  help='force disabling the L1 ConsistencyChecker')
+
+
     flags.addFlag('Trigger.enableL1MuonPhase1', lambda prevFlags:
                   prevFlags.Trigger.EDMVersion >= 3 or prevFlags.Detector.EnableMM or prevFlags.Detector.EnablesTGC,
                   help='enable Run-3 LVL1 muon decoding')
@@ -57,7 +61,8 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.enableL1TopoBWSimulation', True,
                   help='enable bitwise L1Topo simulation')
 
-    flags.addFlag('Trigger.enableL1CaloLegacy', True,
+    flags.addFlag('Trigger.enableL1CaloLegacy', lambda prevFlags:
+                  not (not prevFlags.Input.isMC and prevFlags.Trigger.doHLT), #Disable when we're running the trigger on data, keep when doing offline simulation
                   help='enable Run-2 L1Calo simulation and/or decoding')
 
     # L1MuonSim category

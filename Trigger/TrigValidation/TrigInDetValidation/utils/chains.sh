@@ -97,3 +97,6 @@ if [ $# -eq 0 -o "x$1" == "x-d" ]; then
 fi
 
 
+if [ $# -eq 0 -o "x$1" == "x-j" ]; then
+    generate_json.sh
+fi 

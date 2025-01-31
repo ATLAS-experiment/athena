@@ -5,8 +5,8 @@ testChains = {
 
     "HLT_mu24_idperf_L1MU14FCH:HLT_IDTrack_Muon_FTF:HLT_Roi_L2SAMuon",
     "HLT_mu24_idperf_L1MU14FCH:HLT_IDTrack_Muon_IDTrig:HLT_Roi_L2SAMuon",
-    "HLT_mu26_ivarperf_L1MU14FCH:HLT_IDTrack_MuonIso_FTF:HLT_Roi_MuonIso",
-    "HLT_mu26_ivarperf_L1MU14FCH:HLT_IDTrack_MuonIso_IDTrig:HLT_Roi_MuonIso",
+    "HLT_mu26_ivarperf_L1MU14FCH:HLT_IDTrack_MuonIso_FTF:HLT_Roi_MuonIso:post:d0=4",
+    "HLT_mu26_ivarperf_L1MU14FCH:HLT_IDTrack_MuonIso_IDTrig:HLT_Roi_MuonIso:post:d0=4",
 
     "HLT_mu14_mu14_idtp_idZmumu_L12MU8F_HLT_IDTrack_Muon_FTF_HLT_Roi_L2SAMuon_1",
     "HLT_mu14_mu14_idtp_idZmumu_L12MU8F_HLT_IDTrack_Muon_FTF_HLT_Roi_L2SAMuon_1_mu_probe",
@@ -28,8 +28,8 @@ testChains = {
     "HLT_e26_lhtight_e14_idperf_tight_probe_50invmAB130_L1eEM26M_HLT_IDTrack_Electron_GSF_1_el_probe",
 
     "HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:HLT_IDTrack_TauCore_FTF:HLT_Roi_TauCore",
-    "HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:HLT_IDTrack_TauIso_FTF:HLT_Roi_TauIso",
     "HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:HLT_IDTrack_Tau_IDTrig:HLT_Roi_TauIso",
+    "HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:HLT_IDTrack_TauIso_FTF:HLT_Roi_TauIso",
 
     "HLT_j20_roiftf_preselj20_L1RD0_FILLED:HLT_IDTrack_JetSuper_FTF:HLT_Roi_JetSuper",
     "HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50:HLT_IDTrack_Bjet_FTF:HLT_Roi_Bjet",
@@ -69,9 +69,9 @@ testChains = {
     "HLT_mu24_idperf_L1MU14FCH:HLT_IDTrack_Muon_FTF:HLT_Roi_L2SAMuon",
     "HLT_mu24_idperf_L1MU14FCH:HLT_IDTrack_Muon_IDTrig:HLT_Roi_L2SAMuon",
 
+    "HLT_fslrt0_L1jJ160:HLT_IDTrack_FS_FTF:HLT_FSRoI",
     "HLT_fslrt0_L1jJ160:HLT_IDTrack_FSLRT_FTF:HLT_FSRoI",
     "HLT_fslrt0_L1jJ160:HLT_IDTrack_FSLRT_IDTrig:HLT_FSRoI",
-    "HLT_fslrt0_L1jJ160:HLT_IDTrack_FS_FTF:HLT_FSRoI",
 
     "HLT_e20_idperf_loose_lrtloose_L1eEM18L:HLT_IDTrack_ElecLRT_FTF:HLT_Roi_FastElectron_LRT",
     "HLT_e20_idperf_loose_lrtloose_L1eEM18L:HLT_IDTrack_ElecLRT_IDTrig:HLT_Roi_FastElectron_LRT",
@@ -88,8 +88,8 @@ testChains = {
     "HLT_tau25_idperf_trackLRT_L1cTAU20M:HLT_IDTrack_TauLRT_FTF:HLT_Roi_TauLRT",
     "HLT_tau25_idperf_trackLRT_L1cTAU20M:HLT_IDTrack_TauLRT_IDTrig:HLT_Roi_TauLRT",
     "HLT_tau25_idperf_tracktwoLLP_L1cTAU20M:HLT_IDTrack_TauCore_FTF:HLT_Roi_TauCore",
-    "HLT_tau25_idperf_tracktwoLLP_L1cTAU20M:HLT_IDTrack_TauIso_FTF:HLT_Roi_TauIso",
     "HLT_tau25_idperf_tracktwoLLP_L1cTAU20M:HLT_IDTrack_Tau_IDTrig:HLT_Roi_TauIso",
+    "HLT_tau25_idperf_tracktwoLLP_L1cTAU20M:HLT_IDTrack_TauIso_FTF:HLT_Roi_TauIso",
 
 
   

@@ -1,19 +1,19 @@
 
 L2muon:	HLT_mu24_idperf_L1MU14FCH:HLT_IDTrack_Muon_FTF:HLT_Roi_L2SAMuon
-L2muon:	HLT_mu26_ivarperf_L1MU14FCH:HLT_IDTrack_MuonIso_FTF:HLT_Roi_MuonIso
+L2muon:	HLT_mu26_ivarperf_L1MU14FCH:HLT_IDTrack_MuonIso_FTF:HLT_Roi_MuonIso:post:d0=4
        
 EFmuon:	HLT_mu24_idperf_L1MU14FCH:HLT_IDTrack_Muon_FTF:HLT_Roi_L2SAMuon
 EFmuon:	HLT_mu24_idperf_L1MU14FCH:HLT_IDTrack_Muon_IDTrig:HLT_Roi_L2SAMuon
-EFmuon:	HLT_mu26_ivarperf_L1MU14FCH:HLT_IDTrack_MuonIso_IDTrig:HLT_Roi_MuonIso
+EFmuon:	HLT_mu26_ivarperf_L1MU14FCH:HLT_IDTrack_MuonIso_IDTrig:HLT_Roi_MuonIso:post:d0=4
     
 
     
 L2muonLowpt:	HLT_mu6_idperf_L1MU5VF:HLT_IDTrack_Muon_FTF:HLT_Roi_L2SAMuon
-L2muonLowpt:	HLT_mu6_ivarmedium_L1MU5VF:HLT_IDTrack_MuonIso_FTF:HLT_Roi_MuonIso
+L2muonLowpt:	HLT_mu6_ivarmedium_L1MU5VF:HLT_IDTrack_MuonIso_FTF:HLT_Roi_MuonIso:post:d0=4
 
 EFmuonLowpt:	HLT_mu6_idperf_L1MU5VF:HLT_IDTrack_Muon_FTF:HLT_Roi_L2SAMuon
 EFmuonLowpt:	HLT_mu6_idperf_L1MU5VF:HLT_IDTrack_Muon_IDTrig:HLT_Roi_L2SAMuon
-EFmuonLowpt:	HLT_mu6_ivarmedium_L1MU5VF:HLT_IDTrack_MuonIso_FTF:HLT_Roi_MuonIso
+EFmuonLowpt:	HLT_mu6_ivarmedium_L1MU5VF:HLT_IDTrack_MuonIso_FTF:HLT_Roi_MuonIso:post:d0=4
     
 
 
