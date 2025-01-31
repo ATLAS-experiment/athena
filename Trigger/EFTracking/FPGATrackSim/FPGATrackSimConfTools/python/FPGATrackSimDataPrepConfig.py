@@ -280,13 +280,13 @@ def FPGATrackSimDataPrepConnectToFastTracking(flags,FinalTracks="FPGADataPrep"):
     from ActsConfig.ActsTruthConfig import ActsTruthParticleHitCountAlgCfg, ActsPixelClusterToTruthAssociationAlgCfg,ActsStripClusterToTruthAssociationAlgCfg
     result.merge(ActsPixelClusterToTruthAssociationAlgCfg(flags,
                                                        name="FPGADataPrepActsPixelClusterToTruthAssociationAlg",
-                                                       InputTruthParticleLinks="xAODFPGATruthLinks",
+                                                       InputTruthParticleLinks="xAODTruthLinks",
                                                        AssociationMapOut="ITkFPGAPixelClustersToTruthParticles",
                                                        Measurements="xAODPixelClusters_1stFromFPGACluster")) 
     
     result.merge(ActsStripClusterToTruthAssociationAlgCfg(flags,
                                                        name="FPGADataPrepActsStripClusterToTruthAssociationAlg",
-                                                       InputTruthParticleLinks="xAODFPGATruthLinks",
+                                                       InputTruthParticleLinks="xAODTruthLinks",
                                                        AssociationMapOut="ITkFPGAStripClustersToTruthParticles",
                                                        Measurements="xAODStripClusters_1stFromFPGACluster"))
     
@@ -361,25 +361,6 @@ def runDataPrepChain():
     flags.Tracking.ITkMainPass.doActsTrack = False # when set to True it seems to be causing issues related to TrackToTruthAssociation. To be investigated...
     flags.Tracking.doITkFastTracking=False # turn to True to enable Fast Tracking chain
     
-    ###########################################
-    # IDTPM flags
-    from InDetTrackPerfMon.InDetTrackPerfMonFlags import initializeIDTPMConfigFlags, initializeIDTPMTrkAnaConfigFlags
-    flags = initializeIDTPMConfigFlags(flags)
-    
-    flags.PhysVal.IDTPM.outputFilePrefix = "myIDTPM_CA"
-    flags.PhysVal.IDTPM.plotsDefFileList = "InDetTrackPerfMon/PlotsDefFileList_default.txt" # default value - not needed
-    flags.PhysVal.IDTPM.plotsCommonValuesFile = "InDetTrackPerfMon/PlotsDefCommonValues.json" # default value - not needed
-    flags.PhysVal.OutputFileName = flags.PhysVal.IDTPM.outputFilePrefix + '.HIST.root' # automatically set in IDTPM config - not needed
-    flags.Output.doWriteAOD_IDTPM = True
-    flags.Output.AOD_IDTPMFileName = flags.PhysVal.IDTPM.outputFilePrefix + '.AOD_IDTPM.pool.root' # automatically set in IDTPM config - not needed
-    flags.PhysVal.IDTPM.trkAnaCfgFile = "InDetTrackPerfMon/EFTrkAnaConfig_example.json"
-    
-    flags = initializeIDTPMTrkAnaConfigFlags(flags)
-    ## override respective configurations from trkAnaCfgFile (in case something changes in the config file)
-    flags.PhysVal.IDTPM.TrkAnaEF.TrigTrkKey = f"{FinalDataPrepTrackChainxAODTracksKeyPrefix}TrackParticles"
-    flags.PhysVal.IDTPM.TrkAnaDoubleRatio.TrigTrkKey = f"{FinalDataPrepTrackChainxAODTracksKeyPrefix}TrackParticles"
-
-    flags.PhysVal.doExample = False
     ############################################
     flags.Concurrency.NumThreads=1
     flags.Scheduler.ShowDataDeps=True
@@ -392,7 +373,6 @@ def runDataPrepChain():
         flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
     
     flags.lock()
-    flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.MainPass", keepOriginal=True)
     flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkMainPass", keepOriginal=True)
     flags.dump()
     
@@ -419,10 +399,6 @@ def runDataPrepChain():
         if not flags.Reco.EnableTrackOverlay:
             from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
             acc.merge(InDetTrackRecoCfg(flags))
-        
-        if flags.Trigger.FPGATrackSim.connectToToITkTracking: # no point in running this if the seeding/tracking for FPGA SPs is off
-            from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
-            acc.merge(ITkTrackRecoCfg(flags))
 
     # Use the imported configuration function for the data prep algorithm.
     acc.merge(FPGATrackSimDataPrepAlgCfg(flags))
@@ -445,10 +421,6 @@ def runDataPrepChain():
         acc.merge(FPGATrackSimReportingCfg(flags,
                                            perEventReports = (flags.Trigger.FPGATrackSim.sampleType != 'skipTruth'),
                                            isDataPrep=True))
-        
-        # IDTPM running
-        from InDetTrackPerfMon.InDetTrackPerfMonConfig import InDetTrackPerfMonCfg
-        acc.merge( InDetTrackPerfMonCfg(flags) )
     
     acc.store(open('AnalysisConfig.pkl','wb'))
 
