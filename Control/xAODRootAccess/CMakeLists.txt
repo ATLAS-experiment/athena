@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # The name of the package:
 atlas_subdir( xAODRootAccess )
@@ -10,7 +10,7 @@ if( NOT XAOD_STANDALONE )
 endif()
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree NTuple RIO Net MathCore ROOTNTuple ROOTNTupleUtil VDT)
+find_package( ROOT COMPONENTS Core Tree RIO Net MathCore ROOTNTuple ROOTNTupleUtil VDT)
 
 # Generate a CINT dictionary source file:
 atlas_add_root_dictionary( xAODRootAccess xAODRootAccessDictSource
