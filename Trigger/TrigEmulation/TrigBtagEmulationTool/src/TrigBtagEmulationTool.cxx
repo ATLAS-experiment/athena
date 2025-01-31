@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration 
 */
 
 /**********************************************************************
@@ -81,7 +81,7 @@ bool TrigBtagEmulationTool::evaluate_L1(const TrigBtagEmulationChain& chain,
 bool TrigBtagEmulationTool::evaluate_HLT(const TrigBtagEmulationChain& chain,
 					 const EmulContext& emulCtx) const
 {
-  for ( const auto& is_chainPart_PFlow : chain.is_PFlow() ) {
+  for ( bool is_chainPart_PFlow : chain.is_PFlow() ) {
     if ( not is_chainPart_PFlow ) {
       ATH_MSG_ERROR( "Only PFlow jets are supported at this moment" );
       return false;
