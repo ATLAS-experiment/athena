@@ -32,7 +32,6 @@ class TH2D;
 #include "FPGATrackSimGenScanTool.h"
 
 
-
  class FPGATrackSimGenScanMonitoring : public AthAlgTool
  {
     public:
@@ -65,9 +64,12 @@ class TH2D;
     
     // Fill methods
     void fillHitLevelInput(const FPGATrackSimHit* hit);
-    void fillBinLevelOutput(const FPGATrackSimGenScanBinningBase::IdxSet &idx,
-                                  const FPGATrackSimGenScanTool::BinEntry &data,                            
-                                  const std::vector<std::vector<const FPGATrackSimGenScanTool::StoredHit *> >&  hitsByLayer);
+    void fillBinLevelOutput(
+        const FPGATrackSimGenScanBinningBase::IdxSet &idx,
+        const FPGATrackSimGenScanTool::BinEntry &data);
+    void fillHitsByLayer(const std::vector<
+            std::vector<const FPGATrackSimGenScanTool::StoredHit *>>
+            &hitsByLayer);
     void fillPairingHits(std::vector<const FPGATrackSimGenScanTool::StoredHit *> const *lastlyr,
                          std::vector<const FPGATrackSimGenScanTool::StoredHit *> const *lastlastlyr);
     void fillPairFilterCuts(const FPGATrackSimGenScanTool::HitPair &pair);
@@ -272,6 +274,21 @@ class TH2D;
     eventDispSet m_passPairFilterGraph{std::string("passpairfilter"), 10};
     eventDispSet m_lostPairSetFilterGraph{std::string("lostpairsetfilter"), 10};
     eventDispSet m_passPairSetFilterGraph{std::string("passpairsetfilter"), 10};
+
+    // TTree for layer definitions studies
+    StatusCode bookTree();
+    void ClearTreeVectors();
+    TTree *m_bin_module_tree = nullptr; // output tree
+    std::vector<unsigned> m_tree_bin; // 5 tracks parameter bin
+    std::vector<float> m_tree_r;
+    std::vector<float> m_tree_z;
+    std::vector<int> m_tree_id;
+    std::vector<int> m_tree_layer;
+    std::vector<int> m_tree_side;
+    std::vector<int> m_tree_etamod;
+    std::vector<int> m_tree_phimod;
+    std::vector<int> m_tree_dettype;
+    std::vector<int> m_tree_detzone;
 
     //////////////////////////////////////////////////////////////////////
     // make and register histogram or vector of histograms in one line...

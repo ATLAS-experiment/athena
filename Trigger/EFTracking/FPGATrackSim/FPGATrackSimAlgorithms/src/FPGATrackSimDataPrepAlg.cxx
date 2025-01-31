@@ -232,7 +232,8 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     }
 
     // Split the hits here by first stage vs second stage.
-    const FPGATrackSimRegionMap* rmap_1st = m_FPGATrackSimMapping->SubRegionMap();
+    const FPGATrackSimRegionMap *rmap_1st =
+        m_FPGATrackSimMapping->SubRegionMap();
     for (const auto & hit : phits) {
         // If the hit falls within the boundaries of ANY subregion in the first stage, it's 1st stage.
         if (rmap_1st->getRegions(*hit).size() > 0) {

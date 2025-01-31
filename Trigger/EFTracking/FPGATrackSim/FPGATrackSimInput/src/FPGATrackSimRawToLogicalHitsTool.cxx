@@ -59,6 +59,8 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
       ATH_MSG_FATAL("convert() must have stage == 1 or 2");
   }
 
+  const FPGATrackSimPlaneMap*  pmap = m_FPGATrackSimMapping->PlaneMap_2nd(0);
+  
   logicEventHeader.reserveTowers(m_towers.size());
   for (int ireg: m_towers){
     FPGATrackSimTowerInputHeader tower = FPGATrackSimTowerInputHeader(ireg);//default header, can eventually set eta/phi/deta/dphi
@@ -69,8 +71,10 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
       // This causes the code in this hit loop to crash. As a workaround for the moment, we currently
       // skip over hits in layers that are not included in the FPGATrackSim geometry, with plane = -1
 
-    ATH_CHECK(m_FPGATrackSimMapping.retrieve());
-    for (unsigned int ireg=0;ireg!=m_towers.size();++ireg) {
+      ATH_CHECK(m_FPGATrackSimMapping.retrieve());
+      pmap->doRemap(hit);
+
+    for (unsigned int ireg = 0; ireg != m_towers.size(); ++ireg) {
       logicEventHeader.getTower(ireg)->addHit(hit);
       ATH_MSG_VERBOSE("Hit mapped (" << hit.isMapped() << ") to tower=" << ireg << ", nHits now=" << logicEventHeader.getTower(ireg)->nHits());
     }

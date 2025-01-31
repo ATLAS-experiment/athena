@@ -54,7 +54,14 @@ class FPGATrackSimRoadUnionTool : public AthAlgTool
         // FPGATrackSimRoadUnionTool
 
         ToolHandleArray<IFPGATrackSimRoadFinderTool> const & tools() const { return m_tools; }
-        void setupSlices(FPGATrackSimLogicalEventInputHeader* slicedHitHeader) {m_slicedHitHeader = slicedHitHeader; }
+        void setupSlices(FPGATrackSimLogicalEventInputHeader *slicedHitHeader) {
+          m_slicedHitHeader = slicedHitHeader;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+        // Properties
+        Gaudi::Property<bool> m_noHitFilter{this, "noHitFilter", {false}, "Disable filtering of hits"};
+    
 
     private:
 

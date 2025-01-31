@@ -67,12 +67,12 @@ StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr
     int toolNum = 0;//same as sliceNum
     for (auto &tool : m_tools) {
         pmap = m_FPGATrackSimMapping->PlaneMap_1st(toolNum);
-        auto* subrmap = m_FPGATrackSimMapping->SubRegionMap();
+        auto *subrmap = m_FPGATrackSimMapping->SubRegionMap();
         for (auto & iHit:hits)
         {
             std::shared_ptr<FPGATrackSimHit> hitCopy = std::make_shared<FPGATrackSimHit>(*iHit);
             pmap->map(*hitCopy);
-            if ((subrmap->isInRegion(tool->getSubRegion(), *hitCopy))) {
+            if ((subrmap->isInRegion(tool->getSubRegion(), *hitCopy)) || m_noHitFilter) {
                 // Do we really need to do both of these? can we make the tower class produce a vector of shared pointers?
                 if (m_slicedHitHeader) m_slicedHitHeader->getTower(toolNum)->addHit(*hitCopy);
                 sliceHits[toolNum].push_back(hitCopy);

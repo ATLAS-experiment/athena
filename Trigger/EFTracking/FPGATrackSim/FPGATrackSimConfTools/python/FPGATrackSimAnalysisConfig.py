@@ -181,6 +181,7 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags):
     Binning = None
     if (cutset["parSet"]=="PhiSlicedKeyLyrPars") :
         Binning = CompFactory.FPGATrackSimGenScanPhiSlicedKeyLyrBinning("GenScanBinning")
+        Binning.approxMath = False
     else:
         log.error("Unknown Binning") 
     Binning.rin=cutset["rin"]
@@ -224,6 +225,13 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags):
     RoadUnion = CompFactory.FPGATrackSimRoadUnionTool()
     RoadUnion.tools = [tool,]
     result.addPublicTool(RoadUnion, primary=True)
+
+    # special configuration for studing layer definitions
+    # pass through all hits, but turn off pairing because
+    # it won't be able to run
+    if flags.Trigger.FPGATrackSim.GenScan.layerStudy:
+        RoadUnion.noHitFilter=True
+        tool.binningOnly=True
 
     return result
 

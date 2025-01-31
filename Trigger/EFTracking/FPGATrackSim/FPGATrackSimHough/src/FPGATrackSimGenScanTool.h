@@ -117,7 +117,8 @@ protected:
     Gaudi::Property<unsigned> m_threshold{this, "threshold", {}, "Minimum value to accept as a road (inclusive)"};
 
     Gaudi::Property<std::string> m_binFilter{this, "binFilter", {"PairThenGroup"}, "which bin filter to run, current options: PairThenGroup, IncrementalBuild"};
-    
+
+    Gaudi::Property<bool> m_binningOnly{this, "binningOnly", {false}, "Turn off road building to test the binning only"};
     Gaudi::Property<bool> m_applyPairFilter{this, "applyPairFilter", {}, "Apply Pair Filter"};
     Gaudi::Property<bool> m_reversePairDir{this, "reversePairDir", {}, "Build Pairs starting at last layer and work in"};
     Gaudi::Property<std::vector<double>> m_pairFilterDeltaPhiCut{this, "pairFilterDeltaPhiCut", {}, "Pair Filter Delta Phi Cut Value (list one per layer)"};
@@ -158,15 +159,13 @@ protected:
     // Filter the bins above threshold into pairsets which output roads (2 options)
     //
     // Option 1) Originl version described here: https://indico.cern.ch/event/1469103/contributions/6187259/attachments/2952665/5190800/InsideOut_241010.pdf
-    StatusCode pairThenGroupFilter(const BinEntry &bindata, const FPGATrackSimGenScanBinningBase::IdxSet &bin,
-                                   std::vector<HitPairSet> &output_pairset);
+    StatusCode pairThenGroupFilter(const BinEntry &bindata, std::vector<HitPairSet> &output_pairset);
     // Option 2) New version (no external documentation as of now)
     struct IntermediateState;
     void updateState(const IntermediateState &inputstate,
                      IntermediateState &outputstate,
                      unsigned lyridx, const std::vector<const StoredHit *>& newhits);
-    StatusCode incrementalBuildFilter(const BinEntry &bindata, const FPGATrackSimGenScanBinningBase::IdxSet &bin,
-                                    std::vector<HitPairSet> &output_pairset);
+    StatusCode incrementalBuildFilter(const BinEntry &bindata, std::vector<HitPairSet> &output_pairset);
     
     // 1st step of filter: sort hits by layer
     StatusCode sortHitsByLayer(const BinEntry &bindata, std::vector<std::vector<const StoredHit *>> &hitsByLayer);
@@ -198,6 +197,7 @@ protected:
         double phiShift;
         double etaShift; // note this might be eta or z depending on m_binning
         int layer;
+        double rzrad() const { return sqrt(hitptr->getR()*hitptr->getR()+hitptr->getZ()*hitptr->getZ());}
     };
     friend std::ostream &operator<<(std::ostream &os, const StoredHit &hit);
 
