@@ -7,13 +7,13 @@
 
 #include <memory>
 
+#include <nlohmann/json.hpp>
+
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "AthXRTInterfaces/IDeviceMgmtSvc.h"
 #include "Gaudi/Property.h"
 
-// Gaudi::Property<std::map<std::string, std::vector<std::map<std::string, std::string>>>> 
-#include "Gaudi/Parsers/Factory.h" 
 #include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/ReadHandleKeyArray.h"
 #include "StoreGate/WriteHandleKeyArray.h"
@@ -55,13 +55,11 @@ class EFTrackingXrtAlgorithm : public AthReentrantAlgorithm
     "Path to Xilinx Compute Language Binary (firmware)."
   };
 
-  Gaudi::Property<
-    std::map<std::string, std::vector<std::map<std::string, std::string>>>
-  > m_kernelDefinitions{
+  Gaudi::Property<std::string> m_kernelDefinitionsJsonString {
     this,
-    "kernelDefinitions", 
-    {}, 
-    "List of named kernels."
+    "kernelDefinitionsJsonString",
+    "{}",
+    "String representation of the json kernel definitions."
   };
 
   Gaudi::Property<std::size_t> m_bufferSize {
@@ -70,6 +68,10 @@ class EFTrackingXrtAlgorithm : public AthReentrantAlgorithm
     8192,
     "Capacity of xrt buffers in terms of 64bit words."
   };
+
+  // Too complicated to implement as a Gaudi::Property (would require a new 
+  // grammar) so get a string and make the nlohmann::json in initialize. 
+
   // Device pointer
   std::shared_ptr<xrt::device> m_device{};
 
@@ -82,16 +84,6 @@ class EFTrackingXrtAlgorithm : public AthReentrantAlgorithm
   // Buffer objects
   mutable std::vector<xrt::bo> m_inputBuffers ATLAS_THREAD_SAFE {};
   mutable std::vector<xrt::bo> m_outputBuffers ATLAS_THREAD_SAFE {};
-
-  std::shared_ptr<xrt::device> getDevice();
-  bool deviceHasKernels(
-    const std::shared_ptr<xrt::device>& device
-  ) const;
-
-  bool deviceHasKernel(
-    const std::shared_ptr<xrt::device>& device,
-    const std::vector<std::shared_ptr<xrt::device>>& devices
-  ) const;
 
  public:
   EFTrackingXrtAlgorithm(const std::string& name, ISvcLocator* pSvcLocator);

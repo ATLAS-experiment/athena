@@ -39,6 +39,7 @@ set_target_properties(LibXOCL PROPERTIES
 atlas_add_component(EFTrackingFPGAIntegration
     src/*.h src/*.cxx src/components/*.cxx 
     INCLUDE_DIRS ${OpenCL_INCLUDE_DIRS} 
+    PUBLIC_HEADERS EFTrackingFPGAIntegration 
     LINK_LIBRARIES GaudiKernel 
                    AthenaBaseComps 
                    AthXRTInterfacesLib
@@ -51,4 +52,11 @@ atlas_add_component(EFTrackingFPGAIntegration
                    LibXOCL
 )
 
+atlas_add_dictionary(
+  EFTrackingXrtParametersDict
+  EFTrackingFPGAIntegration/EFTrackingXrtParametersDict.h
+  EFTrackingFPGAIntegration/selection.xml
+)
+
 atlas_install_python_modules(python/*.py)
+

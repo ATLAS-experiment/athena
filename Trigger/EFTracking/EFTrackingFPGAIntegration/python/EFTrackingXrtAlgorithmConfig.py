@@ -1,19 +1,25 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration 
 
+import ROOT
+
 def EFTrackingXrtAlgorithmCfg(flags, **kwargs):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
 
-    # Example settings. No sensible defaults as the firmware distribution 
-    # (cvmfs, eos) is not yet stadardised.
     kwargs.setdefault("bufferSize", 8192)
-    #kwargs.setdefault("xclbinPath", "SerialLoaderToSerialUnloader")
-    #kwargs.setdefault("kernelDefinitions", {"serialLoader": [{"storeGateKey": "inputDataStream",
-    #                                                         "argumentIndex": "0",
-    #                                                         "interfaceMode": "INPUT"}],
-    #                                        "serialUnloader" : [{"storeGateKey": "outputDataStream",
-    #                                                            "argumentIndex": "1",
-    #                                                            "interfaceMode": "OUTPUT"}]})
+    kwargs.setdefault(
+       "xclbinPath", 
+       "/eos/project-a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/12_road2track_HLS/Road2Track_hw.xclbin"
+    )
+
+    from json import dumps
+    kwargs.setdefault("kernelDefinitionsJsonString", dumps({
+      "loader": [{"storeGateKey": "inputDataStream",
+                  "argumentIndex": 0,
+                  "interfaceMode": ROOT.EFTrackingXrtParameters.InterfaceMode.INPUT}],
+      "unloader": [{"storeGateKey": "outputDataStream",
+                    "argumentIndex": 1,
+                    "interfaceMode": ROOT.EFTrackingXrtParameters.InterfaceMode.OUTPUT}]}))
 
     from AthenaConfiguration.ComponentFactory import CompFactory 
     EFTrackingXrtAlgorithm = CompFactory.EFTrackingXrtAlgorithm("EFTrackingXrtAlgorithm", **kwargs)
@@ -38,6 +44,21 @@ if __name__ == "__main__":
     from argparse import Action
     class JsonToDictAction(Action):
         def __call__(self, parser, namespace, values, option_string=None):
+            # This is a hack but this is only needed when mapping commandline 
+            # arguments into an enum.
+            #
+            # The underlying dictionary can be hardcoded in dedicated Cfg
+            # functions, see defaults in EFTrackingXrtAlgorithmCfg 
+            #
+            # Get the members of InterfaceModes that are not present in an 
+            # EmptyEnum (i.e. the actual members of InterfaceModes).
+            interfaceModes = [(member, int(getattr(ROOT.EFTrackingXrtParameters.InterfaceMode, member)))
+                              for member in dir(ROOT.EFTrackingXrtParameters.InterfaceMode) 
+                              if member not in dir(ROOT.EFTrackingXrtParameters.EmptyEnum)]
+
+            for interfaceModeString, interfaceModeValue in interfaceModes:
+                values = values.replace(interfaceModeString, str(interfaceModeValue)) 
+
             from json import loads
             setattr(namespace, self.dest, loads(values))
 
@@ -51,19 +72,20 @@ if __name__ == "__main__":
     acc.addService(CompFactory.AthXRT.DeviceMgmtSvc(XclbinPathsList = [arguments.xclbinPath]))
 
     for inputCsvPath, sgKey in arguments.inputCsvPathToSgKeyMap.items():
-        from EFTrackingDataStreamLoaderAlgorithmConfig import EFTrackingDataStreamLoaderAlgorithmCfg
+        from EFTrackingFPGAIntegration.EFTrackingDataStreamLoaderAlgorithmConfig import EFTrackingDataStreamLoaderAlgorithmCfg
         acc.merge(EFTrackingDataStreamLoaderAlgorithmCfg(flags,
                                                          bufferSize = arguments.bufferSize,
                                                          inputCsvPath = inputCsvPath,
                                                          inputDataStream = sgKey))
 
+    from json import dumps
     acc.merge(EFTrackingXrtAlgorithmCfg(flags, 
                                         bufferSize = arguments.bufferSize,
                                         xclbinPath = arguments.xclbinPath,
-                                        kernelDefinitions = arguments.kernelDefinitions))
+                                        kernelDefinitionsJsonString = dumps(arguments.kernelDefinitions)))
 
     for outputCsvPath, sgKey in arguments.outputCsvPathToSgKeyMap.items():
-        from EFTrackingDataStreamUnloaderAlgorithmConfig import EFTrackingDataStreamUnloaderAlgorithmCfg
+        from EFTrackingFPGAIntegration.EFTrackingDataStreamUnloaderAlgorithmConfig import EFTrackingDataStreamUnloaderAlgorithmCfg
         acc.merge(EFTrackingDataStreamUnloaderAlgorithmCfg(flags,
                                                            outputCsvPath = outputCsvPath,
                                                            outputDataStream = sgKey))
