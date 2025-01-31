@@ -1,10 +1,10 @@
-## Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+## Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #=======================================================================
 
 # DESDM_EXOTHIP.py
 # Component accumulator version
-
+# Author : Priyanka Kumari (pkumari@cern.ch)
 #=======================================================================
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -21,17 +21,29 @@ def DESDM_EXOTHIPKernelCfg(flags, name='DESDM_EXOTHIPKernel', **kwargs):
     # SKIMMING TOOLS 
     #====================================================================
 
-    skimmingTools = []
     if not flags.Input.isMC:
         hip_trigger = '(HLT_g0_hiptrt_L1eEM26M || HLT_g0_hiptrt_L1eEM28M)'
         
         from DerivationFrameworkTools.DerivationFrameworkToolsConfig import xAODStringSkimmingToolCfg
-        skimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(flags, 
-                                                                        name       = "DESDM_EXOTHIP_SkimmingTool",
-                                                                        expression = hip_trigger))
-        skimmingTools.append(skimmingTool)
+        stringSkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(flags,
+                                                                              name       = "DESDM_EXOTHIP_SkimmingTool",
+                                                                              expression = hip_trigger))
+        skimTool1 = stringSkimmingTool
 
-    EXOTHIPKernel = CompFactory.DerivationFramework.DerivationKernel(name, SkimmingTools = skimmingTools)
+        CPPSkimmingTool =  CompFactory.DerivationFramework.DESDM_EXOTHIP_SkimmingTool(name = "DESDM_SkimmingCPPTool",
+                                                                                  HTTRTHitsCounter = "HLT_TrigTRTHTCounts",
+                                                                                  MinHTRatioWedge  = 0.5)
+        acc.addPublicTool(CPPSkimmingTool,primary =  True)
+        skimTool2 = CPPSkimmingTool
+
+
+        from DerivationFrameworkTools.DerivationFrameworkToolsConfig import FilterCombinationANDCfg
+        CombinedTool = acc.getPrimaryAndMerge(FilterCombinationANDCfg(flags,
+                                                                      name="HIPtrrigerTool",
+                                                                      FilterList=[skimTool1, skimTool2]))
+        acc.addPublicTool(CombinedTool,primary = True)
+        
+    EXOTHIPKernel = CompFactory.DerivationFramework.DerivationKernel(name, SkimmingTools = CombinedTool)
     acc.addEventAlgo( EXOTHIPKernel )
 
     return acc
