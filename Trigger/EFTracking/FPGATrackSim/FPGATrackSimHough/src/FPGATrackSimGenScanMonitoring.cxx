@@ -8,8 +8,11 @@
  */
 
 #include "FPGATrackSimGenScanMonitoring.h"
-#include "TH1.h"
-#include "TH2.h"
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "TH1D.h"
+#include "TH2D.h"
+#include "TTree.h"
+
 
 FPGATrackSimGenScanMonitoring::FPGATrackSimGenScanMonitoring(const std::string& algname, const std::string &name, const IInterface *ifc) :
   AthAlgTool(algname, name, ifc)
@@ -27,6 +30,8 @@ StatusCode FPGATrackSimGenScanMonitoring::initialize()
   }
 
   ATH_CHECK(m_tHistSvc.retrieve());
+
+  ATH_CHECK(bookTree());
 
   return StatusCode::SUCCESS;
 
@@ -181,6 +186,38 @@ StatusCode FPGATrackSimGenScanMonitoring::registerHistograms(
   return StatusCode::SUCCESS;
 }
 
+
+StatusCode FPGATrackSimGenScanMonitoring::bookTree() {
+  ATH_MSG_DEBUG("Booking Layers Study  Tree");
+  m_bin_module_tree = new TTree("LayerStudy","LayerStudy");
+  m_bin_module_tree->Branch("bin", &m_tree_bin);
+  m_bin_module_tree->Branch("r", &m_tree_r);
+  m_bin_module_tree->Branch("z", &m_tree_z);
+  m_bin_module_tree->Branch("id", &m_tree_id);
+  m_bin_module_tree->Branch("layer", &m_tree_layer);
+  m_bin_module_tree->Branch("side", &m_tree_side);
+  m_bin_module_tree->Branch("etamod",  &m_tree_etamod);
+  m_bin_module_tree->Branch("phimod",  &m_tree_phimod);
+  m_bin_module_tree->Branch("dettype", &m_tree_dettype);
+  m_bin_module_tree->Branch("detzone",  &m_tree_detzone);
+
+  ATH_CHECK(m_tHistSvc->regTree(m_dir + m_bin_module_tree->GetName(), m_bin_module_tree));
+  return StatusCode::SUCCESS;
+}
+void FPGATrackSimGenScanMonitoring::ClearTreeVectors()
+{
+  m_tree_r.clear();
+  m_tree_z.clear();
+  m_tree_id.clear();
+  m_tree_layer.clear();
+  m_tree_side.clear();
+  m_tree_etamod.clear();
+  m_tree_phimod.clear();
+  m_tree_dettype.clear();
+  m_tree_detzone.clear();
+}
+
+
 void FPGATrackSimGenScanMonitoring::allocateDataFlowCounters() {
 
   m_hitsCntByLayer.resize(m_nLayers,0);
@@ -225,8 +262,7 @@ StatusCode FPGATrackSimGenScanMonitoring::registerGraphs()
 
 
 void FPGATrackSimGenScanMonitoring::fillBinLevelOutput(const FPGATrackSimGenScanBinningBase::IdxSet &idx,
-                                  const FPGATrackSimGenScanTool::BinEntry &data,                            
-                                  const std::vector<std::vector<const FPGATrackSimGenScanTool::StoredHit *> > & hitsByLayer)
+                                  const FPGATrackSimGenScanTool::BinEntry &data)
 {
   setBinPlotsActive(idx);
 
@@ -244,8 +280,37 @@ void FPGATrackSimGenScanMonitoring::fillBinLevelOutput(const FPGATrackSimGenScan
       m_phiShift2D_road->Fill(hit.phiShift, hit.hitptr->getR());
       m_etaShift2D_road->Fill(hit.etaShift, hit.hitptr->getR());
     }
-  }
 
+
+    // Module mapping and Layer definition studies
+    // first sort hits by r+z radii
+    std::vector<FPGATrackSimGenScanTool::StoredHit> sorted_hits = data.hits;
+    std::sort(sorted_hits.begin(), sorted_hits.end(),
+              [](const auto &hit1, const auto &hit2) {
+                return hit1.rzrad() < hit2.rzrad();
+              });
+
+    // Fill tree
+    m_tree_bin = std::vector<unsigned>(idx);
+    ClearTreeVectors();
+    for (auto &hit : sorted_hits) {
+      m_tree_r.push_back(hit.hitptr->getR());
+      m_tree_z.push_back(hit.hitptr->getZ());
+      m_tree_id.push_back(hit.hitptr->getIdentifier());
+      m_tree_layer.push_back(hit.hitptr->getLayerDisk());
+      m_tree_side.push_back(hit.hitptr->getSide());
+      m_tree_etamod.push_back(hit.hitptr->getEtaModule());
+      m_tree_phimod.push_back(hit.hitptr->getPhiModule());
+      m_tree_dettype.push_back((int)hit.hitptr->getDetType());
+      m_tree_detzone.push_back((int)hit.hitptr->getDetectorZone());
+    }
+    m_bin_module_tree->Fill();
+  }
+}
+
+void FPGATrackSimGenScanMonitoring::fillHitsByLayer(                           
+      const std::vector<std::vector<const FPGATrackSimGenScanTool::StoredHit *> > & hitsByLayer)
+{
   for (unsigned lyr = 0; lyr < m_nLayers; lyr++)
   {
     m_hitsPerLayer_road->Fill(lyr, hitsByLayer[lyr].size());

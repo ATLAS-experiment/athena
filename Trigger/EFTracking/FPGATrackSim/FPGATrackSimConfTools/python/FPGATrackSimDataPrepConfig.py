@@ -168,6 +168,7 @@ def FPGATrackSimMappingCfg(flags):
     mappingSvc.FakeNNonnx = flags.Trigger.FPGATrackSim.FakeNNonnxFile
     mappingSvc.ParamNNonnx = flags.Trigger.FPGATrackSim.ParamNNonnxFile
     mappingSvc.layerOverride = []
+    mappingSvc.OutputLevel=2
     result.addService(mappingSvc, create=True, primary=True)
     return result
 

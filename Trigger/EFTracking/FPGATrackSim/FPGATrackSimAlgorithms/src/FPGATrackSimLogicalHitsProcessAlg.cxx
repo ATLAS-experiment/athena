@@ -172,7 +172,8 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
  
     // Get roads
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> prefilter_roads;
-    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st = prefilter_roads;
+    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st =
+        prefilter_roads;
     ATH_CHECK(m_roadFinderTool->getRoads(phits_1st, roads_1st, *FPGATruthTracks));
 
     auto mon_nroads_1st = Monitored::Scalar<unsigned>("nroads_1st", roads_1st.size());

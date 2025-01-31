@@ -188,7 +188,7 @@ public:
 
     // ussual std iterator meanings of begin, end, and size
     Iterator begin() { return Iterator(std::vector<unsigned int>(m_dims.size(), 0), *this); }
-    Iterator end()
+    Iterator end() 
     {
         std::vector<unsigned int> retv;
         for (auto &d : m_dims)

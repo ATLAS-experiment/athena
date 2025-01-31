@@ -269,6 +269,8 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('genScanCuts','FPGATrackSimHough.FPGATrackSimGenScanCuts_incr')
     cf.addFlag('reverse','True')
     cf.addFlag('binFilter','IncrementalBuild')
+    cf.addFlag('layerStudy',False)
+
 
     return cf
 

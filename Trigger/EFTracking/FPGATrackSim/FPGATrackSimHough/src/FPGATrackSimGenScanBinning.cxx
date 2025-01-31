@@ -9,6 +9,7 @@
 
 #include "FPGATrackSimGenScanBinning.h"
 
+
 //--------------------------------------------------------------------------------------------------
 //
 //   FPGATrackSimGenScanBinningBase base class implementation
@@ -84,21 +85,25 @@ std::vector<unsigned> FPGATrackSimGenScanBinningBase::subVec(const std::vector<u
     return retv;
 }
 
-StatusCode FPGATrackSimGenScanBinningBase::setIdxSubVec(IdxSet &idx, const std::vector<unsigned>& subvecelems, const std::vector<unsigned>& subvecidx) const
-{
-    if (subvecelems.size()!=subvecidx.size()) {
-        return StatusCode::FAILURE;
-    }
-    for (unsigned i = 0; i < subvecelems.size(); i++)
-    {        
-        if (subvecelems[i] >= idx.size()) {
-            return StatusCode::FAILURE;
-        }
-        idx[subvecelems[i]] = subvecidx[i];
-    }
-    return StatusCode::SUCCESS;
-}
+void FPGATrackSimGenScanBinningBase::setIdxSubVec(
+    IdxSet &idx, const std::vector<unsigned> &subvecelems,
+    const std::vector<unsigned> &subvecidx) const {
+  
+  if (subvecelems.size() != subvecidx.size()) {
+    throw std::invalid_argument(
+        "Setting FPGATrackSimGenScanBinningBase::setIdxSubVec with mismatched "
+        "sizes");
+  }
 
+  for (unsigned i = 0; i < subvecelems.size(); i++) {
+    if (subvecelems[i] >= idx.size()) {
+      throw std::invalid_argument(
+          "FPGATrackSimGenScanBinningBase::setIdxSubVec input out of range");
+    }
+    idx[subvecelems[i]] = subvecidx[i];
+  }
+
+}
 
 // This gives a list tracks parameters for the corners of bin of dimensions scanpars.size()
 std::vector<FPGATrackSimGenScanBinningBase::ParSet> FPGATrackSimGenScanBinningBase::makeVariationSet(const std::vector<unsigned> &scanpars, const IdxSet &idx) const

@@ -21,7 +21,11 @@
 #include <cmath>
 #include <algorithm>
 
+#include <nlohmann/json.hpp>
+
 #include "TH1.h"
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Debug Print Tools
@@ -191,12 +195,16 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
     if (bin.data().lyrCnt() < m_threshold) continue;
     ATH_MSG_DEBUG("newRoad " << bin.data().lyrCnt() << " " << bin.idx());
 
+    // Monitor contents of bins passing threshold
+    m_monitoring->fillBinLevelOutput(bin.idx(), bin.data());
+    if (m_binningOnly) continue;
+      
     // pass hits for bin to filterRoad and get back pairs of hits grouped into pairsets
     std::vector<HitPairSet> pairsets;
     if (m_binFilter=="PairThenGroup") {
-      ATH_CHECK(pairThenGroupFilter(bin.data(), bin.idx(), pairsets));
+      ATH_CHECK(pairThenGroupFilter(bin.data(), pairsets));
     } else if (m_binFilter=="IncrementalBuild") {
-      ATH_CHECK(incrementalBuildFilter(bin.data(), bin.idx(), pairsets));
+      ATH_CHECK(incrementalBuildFilter(bin.data(), pairsets));
     } else {
       ATH_MSG_FATAL("Unknown bin filter" << m_binFilter);
     }
@@ -252,7 +260,7 @@ StatusCode FPGATrackSimGenScanTool::fillImage(const std::vector<std::shared_ptr<
     // according to the m_binning class
 
     // this will contain current bin idx as it is built from slices and scans
-    FPGATrackSimGenScanBinningBase::IdxSet idx;    
+    FPGATrackSimGenScanBinningBase::IdxSet idx;
 
     // iterate over slices
     for (FPGATrackSimGenScanArray<int>::Iterator slicebin : m_validSlice)
@@ -261,9 +269,9 @@ StatusCode FPGATrackSimGenScanTool::fillImage(const std::vector<std::shared_ptr<
       if (!slicebin.data()) continue; 
 
       // set the slice bins in the current bin idx object
-      ATH_CHECK(m_binning->setIdxSubVec(idx, m_binning->slicePars(), slicebin.idx()));
-
-      // if hit is not in slice skip slice (continue)
+      m_binning->setIdxSubVec(idx, m_binning->slicePars(), slicebin.idx());
+                                   
+      // if hit is not in slice skip slice (contiue)
       if (!m_binning->hitInSlice(idx, hit.get()))
       {
         m_monitoring->sliceCheck(slicebin.idx());
@@ -279,7 +287,7 @@ StatusCode FPGATrackSimGenScanTool::fillImage(const std::vector<std::shared_ptr<
         if (!scanbin.data()) continue; // scan bin not valid
 
         // set the scan bins in the current bin idx object
-        ATH_CHECK(m_binning->setIdxSubVec(idx, m_binning->scanPars(), scanbin.idx()));
+        m_binning->setIdxSubVec(idx, m_binning->scanPars(), scanbin.idx());
 
         // Find the min/max bins for hit in the row
         std::pair<unsigned, unsigned> rowRange = m_binning->idxsetToRowParBinRange(idx, hit.get());
@@ -307,6 +315,7 @@ StatusCode FPGATrackSimGenScanTool::fillImage(const std::vector<std::shared_ptr<
     }
   }
 
+  
   m_monitoring->fillInputSummary(hits, m_validSlice, m_validSliceAndScan);
 
   return StatusCode::SUCCESS;
@@ -314,7 +323,6 @@ StatusCode FPGATrackSimGenScanTool::fillImage(const std::vector<std::shared_ptr<
 
 // Filter the bins above threshold into pairsets which output roads
 StatusCode FPGATrackSimGenScanTool::pairThenGroupFilter(const BinEntry &bindata,
-                                    const FPGATrackSimGenScanBinningBase::IdxSet &idx,
                                     std::vector<HitPairSet> &output_pairsets)
 {
   ATH_MSG_VERBOSE("In pairThenGroupFilter");
@@ -325,7 +333,7 @@ StatusCode FPGATrackSimGenScanTool::pairThenGroupFilter(const BinEntry &bindata,
   
   // This is monitoring for each bin over threshold
   // It's here so it can get the hitsByLayer
-  m_monitoring->fillBinLevelOutput(idx, bindata, hitsByLayer);
+  m_monitoring->fillHitsByLayer(hitsByLayer);
 
   // Make Pairs
   HitPairSet pairs;
@@ -372,7 +380,6 @@ StatusCode FPGATrackSimGenScanTool::pairThenGroupFilter(const BinEntry &bindata,
 
   return StatusCode::SUCCESS;
 }
-
 
 
 void FPGATrackSimGenScanTool::updateState(const IntermediateState &inputstate,
@@ -457,7 +464,6 @@ void FPGATrackSimGenScanTool::updateState(const IntermediateState &inputstate,
 
 // Filter the bins above threshold into pairsets which output roads
 StatusCode FPGATrackSimGenScanTool::incrementalBuildFilter(const BinEntry &bindata,
-                                    const FPGATrackSimGenScanBinningBase::IdxSet &idx,
                                     std::vector<HitPairSet> &output_pairsets)
 {
   ATH_MSG_VERBOSE("In buildGroupsWithPairs");
@@ -468,7 +474,7 @@ StatusCode FPGATrackSimGenScanTool::incrementalBuildFilter(const BinEntry &binda
   
   // This is monitoring for each bin over threshold
   // It's here so it can get the hitsByLayer
-  m_monitoring->fillBinLevelOutput(idx, bindata, hitsByLayer);
+  m_monitoring->fillHitsByLayer(hitsByLayer);
 
   std::vector<IntermediateState> states{m_nLayers+1};
   for (unsigned lyridx = 0; lyridx < m_nLayers; lyridx++) {
@@ -903,6 +909,11 @@ void FPGATrackSimGenScanTool::computeValidBins() {
   int validScans = 0;
   for (FPGATrackSimGenScanArray<int>::Iterator bin : m_validScan) { if(bin.data()) validScans++;}
 
+  // Dump FW constants
+  m_binning->writeScanConsts(m_validScan);
+  m_binning->writeSliceConsts(m_validSlice);
+
+  
   ATH_MSG_INFO("Valid Bins: " << validBins
                               << " valid slices: " << validSlices
                               << " valid scans: " << validScans);
