@@ -35,6 +35,11 @@ TCS::ADVAE_2A::ADVAE_2A(const std::string & name) : DecisionAlg(name)
 
    // Version parameter, used for L1TopoFW book-keeping, no practical application
    defineParameter("ADVAEVersion", 1);
+   //minEt cuts, one per input list (TOBs failing these are set to ET = eta = phi = 0)
+   defineParameter("MinET1",0);
+   defineParameter("MinET2",0);
+   defineParameter("MinET3",0);
+   defineParameter("MinET4",0);
    //The value used is AD threshold * 3 (since there are 3 gaussians) * 1024 (to make the decimal points available)
    defineParameter("AnomalyScoreThresh", 3875, 0);
    defineParameter("AnomalyScoreThresh", 3875, 1);
@@ -56,6 +61,11 @@ TCS::ADVAE_2A::initialize() {
    if(parameter("MaxTob2").value() > 0) p_NumberLeading2 = parameter("MaxTob2").value();
    if(parameter("MaxTob3").value() > 0) p_NumberLeading3 = parameter("MaxTob3").value();
    if(parameter("MaxTob4").value() > 0) p_NumberLeading4 = parameter("MaxTob4").value();
+
+    p_minEt1 = parameter("MinET1").value();
+    p_minEt2 = parameter("MinET2").value();
+    p_minEt3 = parameter("MinET3").value();
+    p_minEt4 = parameter("MinET4").value();
 
    for(unsigned int i=0; i<numberOutputBits(); ++i) {
       p_AnomalyScoreThresh[i] = parameter("AnomalyScoreThresh", i).value();
@@ -95,24 +105,34 @@ TCS::ADVAE_2A::processBitCorrect( const std::vector<TCS::TOBArray const *> & inp
       TRG_MSG_DEBUG("Number of mus are " << (*mus).size());
       TRG_MSG_DEBUG("Number of met are " << (*met).size());
 
-      std::vector<u_int> jet_pt(6,0), tau_pt(4,0), mu_pt(4,0);
-      std::vector<int>   jet_eta(6,0), tau_eta(4,0), mu_eta(4,0);
-      std::vector<int>   jet_phi(6,0), tau_phi(4,0), mu_phi(4,0);
+      std::vector<u_int> jet_pt(6,0), tau_pt(4,0), mu_pt(4,0), met_pt(1,0);
+      std::vector<int>   jet_eta(6,0), tau_eta(4,0), mu_eta(4,0); //no met_eta
+      std::vector<int>   jet_phi(6,0), tau_phi(4,0), mu_phi(4,0), met_phi(1,0);
+      
 
       for (u_int i = 0; i<(*jets).size() && i<6; ++i) {
+         if ( parType_t( (*jets)[i].Et() ) <= p_minEt1 ) continue; //ET cut, leave NN inputs at default values (0)
          jet_pt[i] = (*jets)[i].Et();
          jet_eta[i] = (*jets)[i].eta();
          jet_phi[i] = (*jets)[i].phi();
+         
       }
       for (u_int i = 0; i < (*taus).size() && i<4; ++i) {
+         if ( parType_t( (*taus)[i].Et() ) <= p_minEt2 ) continue; //ET cut, leave NN inputs at default values (0)
          tau_pt[i] = (*taus)[i].Et();
          tau_eta[i] = (*taus)[i].eta();
          tau_phi[i] = (*taus)[i].phi();
       }
       for (u_int i = 0; i < (*mus).size() && i<4; ++i) {
+         if ( parType_t( (*mus)[i].Et() ) <= p_minEt3 ) continue; //ET cut, leave NN inputs at default values (0)
          mu_pt[i] = (*mus)[i].Et();
          mu_eta[i] = (*mus)[i].eta();
          mu_phi[i] = (*mus)[i].phi();
+      }
+      for (u_int i = 0; i < (*met).size() && i<1; ++i) {
+         if ( parType_t( (*met)[i].Et() ) <= p_minEt4 ) continue; //ET cut, leave NN inputs at default values (0)
+         met_pt[i] = (*met)[i].Et();
+         met_phi[i] = (*met)[i].phi();
       }
 
       /// TODO:: Implement the anomaly score calculation based on the AD model when it is available in athena.
