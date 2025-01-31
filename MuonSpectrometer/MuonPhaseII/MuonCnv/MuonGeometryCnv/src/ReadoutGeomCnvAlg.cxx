@@ -189,8 +189,6 @@ StatusCode ReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
     const double longS  = (maxY2 - minY2);
     const double lengthR = (maxX - minX);
     const double lengthZ = (maxZ - minZ);
-
-
     
     const GeoAlignableTransform* alignTrf{copyMe->alignableTransform()};
     /// Transformation to reach from the alignable point to the Muon station
@@ -295,6 +293,7 @@ StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx, Construc
         newElement->setDoubletZ(copyMe->doubletZ());
         newElement->setIdentifier(reId);
         newElement->setParentMuonStation(station);
+        station->addMuonReadoutElementWithAlTransf(newElement.get(), nullptr, station->nMuonReadoutElements());
 
         /// Define the dimensions
         newElement->setLongRsize(pars.halfLength);
@@ -645,7 +644,26 @@ StatusCode ReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx, Construc
         GeoIntrusivePtr<GeoVFullPhysVol> physVol{};
         MuonGM::MuonStation* station{nullptr};
         ATH_CHECK(cloneReadoutVolume(gctx,reId, cacheObj, physVol, station));
+        if (copyMe->multilayer() == 1) {
+            const MuonGMR4::MdtReadoutElement* otherRE = copyMe->complementaryRE();
+            const double height = std::max(copyMe->moduleHeight(), otherRE->moduleHeight()) - 
+                                          (copyMe->tubePitch() - 2. * copyMe->tubeRadius());
 
+            const Amg::Transform3D toAMDB{copyMe->asBuiltRefFrame()};
+   
+            const double modHalTHickO{0.5*otherRE->moduleThickness()},
+                         modHalfThick{-0.5*copyMe->moduleThickness()};
+
+            const double thickness = ( (otherRE->asBuiltRefFrame()*(modHalTHickO* Amg::Vector3D::UnitX())) -
+                                        (copyMe->asBuiltRefFrame()*(modHalfThick* Amg::Vector3D::UnitX()))).z();
+            if (copyMe->isBarrel()) {
+                station->setMdtZsize(height);
+                station->setMdtRsize(thickness);
+            } else {
+                station->setMdtRsize(height);
+                station->setMdtZsize(thickness);
+            }
+        }
         const MuonGMR4::MdtReadoutElement::parameterBook& pars{copyMe->getParameters()};
         auto newElement = std::make_unique<MuonGM::MdtReadoutElement>(physVol, 
                                                                       m_idHelperSvc->stationNameString(reId), 
@@ -655,14 +673,14 @@ StatusCode ReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx, Construc
         newElement->setNMdtInStation(m_idHelperSvc->mdtIdHelper().multilayerMax(reId));
         // cppcheck-suppress invalidLifetime; ok: mgr took ownership.
         newElement->setParentMuonStation(station);
-        /// Define the dimensions
-        newElement->setLongRsize(2*pars.halfY);
+
         /// 1 cm is added as safety margin to the Mdt multilayer envelope
         newElement->setLongSsize(2*pars.longHalfX - 1.*Gaudi::Units::cm);
-        newElement->setLongZsize(2*pars.halfHeight);
-        newElement->setRsize(2*pars.halfY);
         newElement->setSsize(2*pars.shortHalfX - 1.*Gaudi::Units::cm);
+        newElement->setLongRsize(2*pars.halfY);
+        newElement->setRsize(2*pars.halfY);
         newElement->setZsize(2*pars.halfHeight);
+        newElement->setLongZsize(2*pars.halfHeight);
 
         newElement->m_nlayers = copyMe->numLayers();
         newElement->m_ntubesperlayer = copyMe->numTubesInLay();
@@ -718,8 +736,8 @@ StatusCode ReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx, Construc
         newElement->geoInitDone();
         newElement->setBLinePar(distort.bLine);
         newElement->fillCache();
-        /// Add the readout element to the manager
         ATH_CHECK(dumpAndCompare(gctx, *copyMe, *newElement));
+        /// Add the readout element to the detector manager
         cacheObj.detMgr->addMdtReadoutElement(std::move(newElement));
     }
     return StatusCode::SUCCESS;

@@ -13,7 +13,6 @@ def ActsMuonAlignCondAlgCfg(flags, name="ActsMuonAlignCondAlg", **kwargs):
     kwargs.setdefault("applyMmPassivation", flags.Muon.applyMMPassivation)
     kwargs.setdefault("FillAlignCache", False)
     kwargs.setdefault("FillGeoAlignStore", False)
-    kwargs.setdefault("applyBLines", False)
     
 
     if kwargs["applyMmPassivation"]:
@@ -21,8 +20,8 @@ def ActsMuonAlignCondAlgCfg(flags, name="ActsMuonAlignCondAlg", **kwargs):
         result.merge(NswPassivationDbAlgCfg(flags))
     if flags.Muon.enableAlignment:
         result.merge(MuonAlignmentCondAlgCfg(flags))
-    kwargs.setdefault("applyALines", len([alg for alg in result.getCondAlgos() if alg.name == "MuonAlignmentCondAlg"])>0)
-    kwargs.setdefault("applyBLines", len([alg for alg in result.getCondAlgos() if alg.name == "MuonAlignmentCondAlg"])>0)
+    kwargs.setdefault("applyALines", flags.Muon.Align.UseALines)
+    kwargs.setdefault("applyBLines", flags.Muon.Align.UseBLines)
     kwargs.setdefault("applyNswAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "NswAsBuiltCondAlg"])>0)
     kwargs.setdefault("applyMdtAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "MdtAsBuiltCondAlg"])>0)
 
