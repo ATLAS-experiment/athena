@@ -1,6 +1,9 @@
 /*
 Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
+
+/*EXTERNAL CODE PORTED FROM YARR MINIMALLY ADAPTED FOR ATHENA*/
+
 /*
 * Author: Ondra Kovanda, ondrej.kovanda at cern.ch
 * Date: 03/2024
@@ -9,6 +12,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #include "ITkPixEncoder.h"
 #include "ITkPixQCoreEncodingLUT.h"
+#include <bitset>
 
 //Constructor sets up the geometry for all future loops
 
@@ -20,7 +24,10 @@ ITkPixEncoder::ITkPixEncoder(const unsigned nCol, const unsigned nRow, const uns
     //nop
 }
 
-void ITkPixEncoder::addBits64(const uint64_t value, const uint8_t length){
+void ITkPixEncoder::addBits64(const uint64_t value, const uint8_t length) const {
+
+    //only called from mutex-protected function
+
     //This adds 'length' lowest bits to the current block. If the current
     //block gets filled, push it to the output and start a new block with
     //the rest of the bits that didn't make it. Need to keep track of the
@@ -63,10 +70,13 @@ void ITkPixEncoder::addBits64(const uint64_t value, const uint8_t length){
     }
 }
 
-void ITkPixEncoder::pushWords32(){
+void ITkPixEncoder::pushWords32() const{
     //whenever the current block is ready for output,
     //split it into two 32-bit words and push them to
     //the output container. Reset the current bloc/bit
+    
+    //only called from mutex-protected function
+    
     uint32_t word1 = m_currBlock >> 32;
     uint32_t word2 = m_currBlock & 0xFFFFFFFF;
     m_words.push_back(word1);
@@ -75,7 +85,10 @@ void ITkPixEncoder::pushWords32(){
     m_currBit   = 0;
 }
 
-void ITkPixEncoder::encodeQCore(const unsigned nCCol, const unsigned nQRow){
+void ITkPixEncoder::encodeQCore(const unsigned nCCol, const unsigned nQRow) const {
+
+    //only called from mutex-protected function
+
     //produce hit map and ToTs
     //First, get the top-left pixel in the QCore
     unsigned col = nCCol * m_nColInCCol;
@@ -101,7 +114,6 @@ void ITkPixEncoder::encodeQCore(const unsigned nCCol, const unsigned nQRow){
     //from the LUT to the stream. If, instead, the plain
     //hit map is requested, add the index (which is the
     //plain hit map in fact)
-    
     m_plainHitMap ? addBits64(lutIndex, 16) : addBits64(ITkPixEncoding::ITkPixV2QCoreEncodingLUT_Tree[lutIndex], ITkPixEncoding::ITkPixV2QCoreEncodingLUT_Length[lutIndex]);
 
     //if dropToT is requested, we can return here
@@ -113,7 +125,7 @@ void ITkPixEncoder::encodeQCore(const unsigned nCCol, const unsigned nQRow){
     }
 }
 
-bool ITkPixEncoder::hitInQCore(const unsigned CCol, const unsigned QRow){
+bool ITkPixEncoder::hitInQCore(const unsigned CCol, const unsigned QRow) const {
     //Was there a hit in this QCore?
 
     unsigned col = CCol * m_nColInCCol;
@@ -128,7 +140,10 @@ bool ITkPixEncoder::hitInQCore(const unsigned CCol, const unsigned QRow){
     return false;
 }
 
-void ITkPixEncoder::scanHitMap(){
+void ITkPixEncoder::scanHitMap() const {
+
+    //only called from mutex-protected function
+
     //Fill in a helper map of hit QCores and a vector of last qrow in each ccol
     m_hitQCores = std::vector<std::vector<bool>>(m_nCCol, std::vector<bool>(m_nQRow, false));
     m_lastQRow  = std::vector<unsigned> (m_nCCol, 0);
@@ -148,7 +163,10 @@ void ITkPixEncoder::scanHitMap(){
 
 }
 
-void ITkPixEncoder::encodeEvent(){
+void ITkPixEncoder::encodeEvent() const{
+
+    //only called from mutex-protected function
+
     //This produces the bits for one event.
     //First, scan the map and produce helpers
     scanHitMap();
@@ -185,14 +203,25 @@ void ITkPixEncoder::encodeEvent(){
     }    
 }
 
-void ITkPixEncoder::streamTag(const uint8_t nStream){
+void ITkPixEncoder::streamTag(const uint8_t nStream) const {
+
+    //only called from mutex-protected function
+
     //this adds the 8-bit 'global' stream tag
     addBits64(nStream, 8);
 }
 
-void ITkPixEncoder::intTag(const uint16_t nEvt){
+void ITkPixEncoder::intTag(const uint16_t nEvt) const {
+
+    //only called from mutex-protected function
+
     //this adds 11 bits of interal tagging between events.
     //does the tag always need to start with 111?
     uint16_t tag = nEvt | (0b111 << 8);
     addBits64(tag, 11);
+}
+
+void ITkPixEncoder::clear() const {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_words.clear();
 }

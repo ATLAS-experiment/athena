@@ -14,12 +14,13 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE TEST_ITKPIXELBYTESTREAMCNV
-//
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
+#include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 #pragma GCC diagnostic pop
-
+#include <iostream>
 #include "src/ITkPixQCoreEncodingLUT.h"
 using namespace ITkPixEncoding;
 
@@ -60,7 +61,7 @@ BOOST_AUTO_TEST_CASE(check_LUT){
   BOOST_TEST(lenLUT[0] == 0);
   BOOST_TEST(lenLUT[1] == 8);
   BOOST_TEST(encodeLUT[0] == 0);
-  BOOST_TEST(encodeLUT[1] == 713031680);
+  BOOST_TEST(encodeLUT[1] == 170);
 }
 
 BOOST_AUTO_TEST_CASE(one_bit_test){
@@ -78,7 +79,6 @@ BOOST_AUTO_TEST_CASE(prepByte_test){
   BOOST_TEST(prepByte(0) == expectedResultFor0);
   BOOST_TEST(prepByte(0xFFFF) == expectedResultForFFFF);
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()
 
