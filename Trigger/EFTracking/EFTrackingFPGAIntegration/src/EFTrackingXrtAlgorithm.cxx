@@ -5,6 +5,62 @@
 #include <set>
 
 #include "EFTrackingXrtAlgorithm.h"
+#include "EFTrackingFPGAIntegration/EFTrackingXrtParameters.h"
+
+namespace {
+bool deviceHasKernel(
+  const std::shared_ptr<xrt::device>& device,
+  const std::vector<std::shared_ptr<xrt::device>>& devices 
+) {
+  for (const std::shared_ptr<xrt::device>& otherDevice : devices) {
+    if (*device == *otherDevice) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool deviceHasKernels(
+  const nlohmann::json& kernelDefinitionsJson,
+  const ServiceHandle<AthXRT::IDeviceMgmtSvc>& deviceMgmtSvc,
+  const std::shared_ptr<xrt::device>& device
+) {
+  for (const auto& [kernelName, dummy] : kernelDefinitionsJson.items()) {
+    if (!deviceHasKernel(device, 
+                         deviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName))) {
+      return false;
+    }
+  }
+  
+  return true;
+}
+
+std::shared_ptr<xrt::device> getDevice(
+  const nlohmann::json& kernelDefinitionsJson,
+  const ServiceHandle<AthXRT::IDeviceMgmtSvc>& deviceMgmtSvc
+) {
+  std::set<std::shared_ptr<xrt::device>> devicesSet{};
+  std::vector<std::shared_ptr<xrt::device>> finalDevices{};
+
+  for (const auto& [kernelName, dummy] : kernelDefinitionsJson.items()) {
+    std::vector<std::shared_ptr<xrt::device>> devices = 
+      deviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName);
+
+    devicesSet.insert(devices.begin(), devices.end());
+  }
+
+  for (const std::shared_ptr<xrt::device>& device : devicesSet) {
+    if (!deviceHasKernels(kernelDefinitionsJson, deviceMgmtSvc, device)) {
+      continue;
+    }
+
+    return device;
+  }
+
+  return {};
+}
+}
 
 EFTrackingXrtAlgorithm::EFTrackingXrtAlgorithm(
   const std::string& name,
@@ -15,21 +71,40 @@ EFTrackingXrtAlgorithm::EFTrackingXrtAlgorithm(
 StatusCode EFTrackingXrtAlgorithm::initialize() {
   ATH_MSG_INFO("Initializing " << name());
 
-  // Retrieve the necessary component(s).
+  const std::optional<nlohmann::json> kernelDefinitionsJson {
+    [](const std::string& kernelDefinitionsJsonString)->std::optional<nlohmann::json> {
+      try {
+        const nlohmann::json kernelDefinitionsJson = 
+          nlohmann::json::parse(kernelDefinitionsJsonString);
+        return kernelDefinitionsJson;
+
+      }
+      catch (const nlohmann::json::exception& [[maybe_unused]]exception) {
+        return std::nullopt;
+      }
+
+      // c++23 std::unreachable()
+      return std::nullopt;
+    }(m_kernelDefinitionsJsonString)
+  };
+
+  if (!kernelDefinitionsJson) {
+    return StatusCode::FAILURE; 
+  }
+
   ATH_CHECK(m_DeviceMgmtSvc.retrieve());
 
   // Todo: Fix this disgusting mess (probably just add a new method to the 
   //       AthXrt service to enumerate devices and a method to check if a 
   //       device has a particular kernel.
-  m_device = getDevice();
-
+  m_device = getDevice(*kernelDefinitionsJson, m_DeviceMgmtSvc);
   if (!m_device) {
     ATH_MSG_ERROR("No XRT device provides all kernels.");
 
     return StatusCode::FAILURE;
   }
 
-  for (const auto& [kernelName, kernelDefinition] : m_kernelDefinitions) {
+  for (const auto& [kernelName, kernelDefinition] : kernelDefinitionsJson->items()) {
     m_kernels.push_back(std::make_unique<xrt::kernel>(*m_device, 
                                                       m_device->get_xclbin_uuid(), 
                                                       kernelName,
@@ -38,45 +113,55 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
     m_runs.push_back(std::make_unique<xrt::run>(*m_kernels.back()));
 
     for (const auto& interfaceDefinition : kernelDefinition) {
-      const std::string& storeGateKey = interfaceDefinition.at("storeGateKey");
-      const int argumentIndex = std::stoi(interfaceDefinition.at("argumentIndex"));
+      const std::string& storeGateKey = 
+        interfaceDefinition.at("storeGateKey").get<const std::string>();
 
-      // Todo: Reference the enum in the python to avoid painful string 
-      // comparisons here.
-      if (interfaceDefinition.at("interfaceMode") == "INPUT") {
-        m_inputDataStreamKeys.push_back({storeGateKey});
-        ATH_CHECK(m_inputDataStreamKeys.back().initialize());
+      const int argumentIndex = 
+        std::stoi(interfaceDefinition.at("argumentIndex").get<const std::string>());
 
-        m_inputBuffers.emplace_back(
-          *m_device, 
-          sizeof(unsigned long) * m_bufferSize, 
-          xrt::bo::flags::normal, 
-          m_kernels.back()->group_id(argumentIndex)
-        );
+      const int interfaceMode = 
+        std::stoi(interfaceDefinition.at("interfaceMode").get<const std::string>());
 
-        m_runs.back()->set_arg(argumentIndex, m_inputBuffers.back());
-      }
-      else if (interfaceDefinition.at("interfaceMode") == "OUTPUT") {
-        m_outputDataStreamKeys.push_back({storeGateKey});
-        ATH_CHECK(m_outputDataStreamKeys.back().initialize());
+      switch (interfaceMode) {
+        case EFTrackingXrtParameters::InterfaceMode::INPUT: {
+          m_inputDataStreamKeys.push_back({storeGateKey});
+          ATH_CHECK(m_inputDataStreamKeys.back().initialize());
 
-        m_outputBuffers.emplace_back(
-          *m_device, 
-          sizeof(unsigned long) * m_bufferSize, 
-          xrt::bo::flags::normal, 
-          m_kernels.back()->group_id(argumentIndex)
-        );
+          m_inputBuffers.emplace_back(
+            *m_device, 
+            sizeof(unsigned long) * m_bufferSize, 
+            xrt::bo::flags::normal, 
+            m_kernels.back()->group_id(argumentIndex)
+          );
 
-        m_runs.back()->set_arg(argumentIndex, m_outputBuffers.back());
-      }
-      else {
-        ATH_MSG_ERROR("Failed to map kernel definitions to xrt objects.");     
+          m_runs.back()->set_arg(argumentIndex, m_inputBuffers.back());
 
-        return StatusCode::FAILURE;
+          break;
+        }
+        case EFTrackingXrtParameters::InterfaceMode::OUTPUT: {
+          m_outputDataStreamKeys.push_back({storeGateKey});
+          ATH_CHECK(m_outputDataStreamKeys.back().initialize());
+
+          m_outputBuffers.emplace_back(
+            *m_device, 
+            sizeof(unsigned long) * m_bufferSize, 
+            xrt::bo::flags::normal, 
+            m_kernels.back()->group_id(argumentIndex)
+          );
+
+          m_runs.back()->set_arg(argumentIndex, m_outputBuffers.back());
+
+          break;
+        }
+        default: {
+          ATH_MSG_ERROR("Failed to map kernel definitions to xrt objects.");     
+
+          return StatusCode::FAILURE;
+        }
       }
     }
   }
-  
+
   return StatusCode::SUCCESS;
 }
 
@@ -89,10 +174,6 @@ StatusCode EFTrackingXrtAlgorithm::execute(const EventContext& ctx) const
     m_inputDataStreamKeys
   ) {
     SG::ReadHandle<std::vector<unsigned long>> inputDataStream(inputDataStreamKey, ctx);
-    //m_inputBuffers.at(handleIndex)->write(inputDataStream->data(), 
-    //                                       sizeof(unsigned long) * m_bufferSize,
-    //                                       0);
-
     unsigned long* inputMap = m_inputBuffers.at(handleIndex).map<unsigned long*>();
 
     if (inputDataStream->size() > m_bufferSize) {
@@ -105,11 +186,8 @@ StatusCode EFTrackingXrtAlgorithm::execute(const EventContext& ctx) const
       return StatusCode::FAILURE;
     }
 
-    ATH_MSG_INFO("Test: " << inputDataStream->size());
-
     for (std::size_t index = 0; index < inputDataStream->size(); index++) {
       inputMap[index] = inputDataStream->at(index);
-      ATH_MSG_INFO("Test: " << std::hex << inputDataStream->at(index));
     }
     
     m_inputBuffers.at(handleIndex).sync(XCL_BO_SYNC_BO_TO_DEVICE);
@@ -136,7 +214,6 @@ StatusCode EFTrackingXrtAlgorithm::execute(const EventContext& ctx) const
     ATH_CHECK(outputDataStream.record(std::make_unique<std::vector<unsigned long>>(m_bufferSize)));
 
     m_outputBuffers.at(handleIndex).sync(XCL_BO_SYNC_BO_FROM_DEVICE);
-    //m_outputBuffers.at(handleIndex)->read(outputDataStream->data());
 
     const unsigned long* outputMap = m_outputBuffers.at(handleIndex).map<unsigned long*>();
 
@@ -144,57 +221,9 @@ StatusCode EFTrackingXrtAlgorithm::execute(const EventContext& ctx) const
       outputDataStream->at(index) = outputMap[index];
     }
     
-
     handleIndex++;
   }
 
   return StatusCode::SUCCESS;
-}
-
-std::shared_ptr<xrt::device> EFTrackingXrtAlgorithm::getDevice() {
-  std::set<std::shared_ptr<xrt::device>> devicesSet{};
-  std::vector<std::shared_ptr<xrt::device>> finalDevices{};
-
-  for (const auto& [kernelName, _] : m_kernelDefinitions) {
-    std::vector<std::shared_ptr<xrt::device>> devices = 
-      m_DeviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName);
-
-    devicesSet.insert(devices.begin(), devices.end());
-  }
-
-  for (const std::shared_ptr<xrt::device>& device : devicesSet) {
-    if (!deviceHasKernels(device)) {
-      continue;
-    }
-
-    return device;
-  }
-
-  return {};
-}
-
-bool EFTrackingXrtAlgorithm::deviceHasKernels(
-  const std::shared_ptr<xrt::device>& device
-) const {
-  for (const auto& [kernelName, _] : m_kernelDefinitions) {
-    if (!deviceHasKernel(device, m_DeviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName))) {
-      return false;
-    }
-  }
-  
-  return true;
-}
-
-bool EFTrackingXrtAlgorithm::deviceHasKernel(
-  const std::shared_ptr<xrt::device>& device,
-  const std::vector<std::shared_ptr<xrt::device>>& devices 
-) const {
-  for (const std::shared_ptr<xrt::device>& otherDevice : devices) {
-    if (*device == *otherDevice) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
