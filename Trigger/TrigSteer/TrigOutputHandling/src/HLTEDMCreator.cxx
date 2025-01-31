@@ -18,7 +18,7 @@ HLTEDMCreator::HLTEDMCreator( const std::string& type,
 template<typename T>
 StatusCode HLTEDMCreator::initHandles( const HandlesGroup<T>&  handles ) {
   ATH_CHECK( handles.out.initialize() );
-  renounceArray( handles.out );
+  if(m_renounceOutputs) { renounceArray( handles.out ); }
   ATH_CHECK( handles.in.initialize() );
   renounceArray( handles.in );
   ATH_CHECK( handles.views.initialize() );
