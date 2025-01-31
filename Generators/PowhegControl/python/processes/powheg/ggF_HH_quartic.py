@@ -196,10 +196,11 @@ class ggF_HH_quartic(PowhegV2):
         # handling the parameters of this process
         # these parameters need to be parsed in a specific format
         chhh_str = f'{list(self.parameters_by_keyword("chhh"))[0].value:+.4E}'
-        ct_str   = f'{0.0:+.4E}'
-        ctt_str  = f'{0.0:+.4E}'
-        cggh_str   = f'{0.0:+.4E}'
-        cgghh_str  = f'{0.0:+.4E}'
+        ct_str   = f'{list(self.parameters_by_keyword("ct"))[0].value:+.4E}'
+        ctt_str  = f'{list(self.parameters_by_keyword("ctt"))[0].value:+.4E}'
+        cggh_str   = f'{list(self.parameters_by_keyword("cggh"))[0].value:+.4E}'
+        cgghh_str  = f'{list(self.parameters_by_keyword("cgghh"))[0].value:+.4E}'
+
         grid_file_name = f'Virt_full_{chhh_str}_{ct_str}_{ctt_str}_{cggh_str}_{cgghh_str}.grid'
 
         logger.info('Now trying to use creategrid.py to create the Virt_full_*.grid file')
