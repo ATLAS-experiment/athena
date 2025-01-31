@@ -1,33 +1,24 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
 
 
-
-//
-// includes
-//
-
 #include <AsgAnalysisAlgorithms/AsgShallowCopyAlg.h>
 
-#include <CxxUtils/fpcompare.h>
-#include <xAODCore/AuxContainerBase.h>
-#include <xAODEgamma/PhotonContainer.h>
-#include <xAODEgamma/ElectronContainer.h>
-#include <xAODJet/JetContainer.h>
-#include <xAODMuon/MuonContainer.h>
-#include <xAODTau/TauJetContainer.h>
-#include <xAODTau/DiTauJetContainer.h>
-#include <xAODTracking/TrackParticleContainer.h>
-#include <xAODMissingET/MissingETContainer.h>
-#include <xAODTruth/TruthParticleContainer.h>
 #include <SystematicsHandles/CopyHelpers.h>
+#include <xAODCore/AuxContainerBase.h>
+#include <xAODEgamma/ElectronContainer.h>
+#include <xAODEgamma/PhotonContainer.h>
+#include <xAODJet/JetContainer.h>
+#include <xAODMissingET/MissingETContainer.h>
+#include <xAODMuon/MuonContainer.h>
+#include <xAODTau/DiTauJetContainer.h>
+#include <xAODTau/TauJetContainer.h>
+#include <xAODTracking/TrackParticleContainer.h>
+#include <xAODTruth/TruthParticleContainer.h>
 
-//
-// method implementations
-//
 
 namespace CP
 {
@@ -46,30 +37,6 @@ namespace CP
     return StatusCode::SUCCESS;
   }
 
-  // Specialization for MissingETContainer
-  template<> StatusCode AsgShallowCopyAlg ::
-  executeTemplate<xAOD::MissingETContainer> (const CP::SystematicSet& sys)
-  {
-    const xAOD::MissingETContainer *input = nullptr;
-    ANA_CHECK (evtStore()->retrieve (input, m_inputHandle.getName (sys)));
-
-    auto name = m_outputHandle.getName(sys);
-    auto output = std::make_unique<xAOD::MissingETContainer>();
-    auto auxOutput = std::make_unique<xAOD::AuxContainerBase>();
-
-    output->setStore(auxOutput.get());
-    for (const auto* met : *input)
-      {
-        xAOD::MissingET* out = new xAOD::MissingET();
-        out->makePrivateStore(*met);
-        output->push_back(out);
-      }
-
-    ANA_CHECK(evtStore()->record(std::move(output), name));
-    ANA_CHECK(evtStore()->record(std::move(auxOutput), name + "Aux."));
-
-    return StatusCode::SUCCESS;
-  }
 
 
   StatusCode AsgShallowCopyAlg ::
