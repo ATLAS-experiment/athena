@@ -255,8 +255,8 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_noalg_L1jJ60p30ETA49_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1jJ30_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo','express'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup,monGroups=['detMon'] ),
         ChainProp(name='HLT_noalg_L1jJ60_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo','express'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup, monGroups=['detMon'] ),
-        ChainProp(name='HLT_noalg_L1jJ30_FIRSTEMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup, monGroups=['detMon'] ),
-        ChainProp(name='HLT_noalg_L1jJ60_FIRSTEMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup, monGroups=['detMon'] ),
+        ChainProp(name='HLT_noalg_L1jJ30_FIRSTEMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1jJ60_FIRSTEMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1RD0_FIRSTEMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'], groups=['RATE:Calibration','BW:Detector']),
         ChainProp(name='HLT_noalg_L1eTAU12_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo','express'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup, monGroups=['detMon'] ),
         ChainProp(name='HLT_noalg_L1RD0_BGRP7', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'], groups=['RATE:Calibration','BW:Detector']),
@@ -394,10 +394,10 @@ def addHighMuP1Signatures(chains):
         ChainProp(name='HLT_noalg_eb_L1All', l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=["RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
 
         #Beam splashes
-        ChainProp(name='HLT_noalg_L1eEM22A', l1SeedThresholds=['FSNOSEED'], stream=['MinBias','express'], groups=['RATE:MinBias', 'BW:MinBias']+SupportPhIGroup,monGroups=['detMon']  ),
-        ChainProp(name='HLT_noalg_L1eEM22C', l1SeedThresholds=['FSNOSEED'], stream=['MinBias','express'], groups=['RATE:MinBias', 'BW:MinBias']+SupportPhIGroup,monGroups=['detMon']  ),
+        ChainProp(name='HLT_noalg_L1eEM22A', l1SeedThresholds=['FSNOSEED'], stream=['MinBias','express'], groups=['RATE:MinBias', 'BW:MinBias']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1eEM22C', l1SeedThresholds=['FSNOSEED'], stream=['MinBias','express'], groups=['RATE:MinBias', 'BW:MinBias']+SupportPhIGroup),
         #Beam splash backup
-        ChainProp(name='HLT_noalg_mb_L1eEM18', l1SeedThresholds=['FSNOSEED'], stream=['MinBias','express'], groups=['RATE:MinBias', 'BW:MinBias']+SupportPhIGroup,monGroups=['detMon']  ),
+        ChainProp(name='HLT_noalg_mb_L1eEM18', l1SeedThresholds=['FSNOSEED'], stream=['MinBias','express'], groups=['RATE:MinBias', 'BW:MinBias']+SupportPhIGroup),
 
     ]
 
