@@ -1,25 +1,32 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
+def MdtCalibTestAlgCfg(flags, name="MdtCalibDbTestAlg", **kwargs):
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    result = ComponentAccumulator()
+    result.addEventAlgo(CompFactory.Muon.MdtCalibTestAlg(name, **kwargs), primary = True)
+    return result
 
 if __name__ == "__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest, geoModelFileDefault
     parser = SetupArgParser()
-    parser.add_argument("--setupRun4", default=True, action="store_true")
+    parser.add_argument("--setupRun4", default=False, action="store_true")
+    parser.add_argument("--rtJSON", help="Location of the RT json file", default="")
+    parser.add_argument("--t0JSON", help="Location of the T0 json file", default="")
     parser.set_defaults(nEvents = 1)
     parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)
     parser.set_defaults(noRpc=True)
     parser.set_defaults(noTgc=True)
-    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R4SimHits.pool.root"])
-
+    #parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R4SimHits.pool.root"])
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Muon.Calib.readMdtJSON = True
 
     args = parser.parse_args()
     args.geoModelFile = geoModelFileDefault(args.setupRun4)
-    flags, cfg = setupGeoR4TestCfg(args)
+    flags, cfg = setupGeoR4TestCfg(args, flags)
     from MuonConfig.MuonCalibrationConfig import MdtCalibDbAlgCfg
-    from MuonCondTest.MdtCablingTester import MdtCablingTestAlgCfg
-    cfg.merge(MdtCablingTestAlgCfg(flags))
-    cfg.merge(MdtCalibDbAlgCfg(flags))
-    from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
-    cfg.merge(xAODUncalibMeasPrepCfg(flags))
+    cfg.merge(MdtCalibDbAlgCfg(flags,RtJSON = args.rtJSON,  TubeT0JSON = args.t0JSON))
+    cfg.merge(MdtCalibTestAlgCfg(flags))
     executeTest(cfg)

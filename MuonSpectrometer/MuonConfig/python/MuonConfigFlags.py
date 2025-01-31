@@ -86,6 +86,9 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.applyMMPassivation", lambda prevFlags: prevFlags.Detector.EnableMM and not prevFlags.Common.isOnline and (prevFlags.Common.Project is not Project.AthSimulation \
                                                       and (prevFlags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain] or prevFlags.Overlay.DataOverlay)))
     # CalibFlags
+    mcf.addFlag("Muon.Calib.readMdtJSON", lambda prevFlags: prevFlags.GeoModel.Run > LHCPeriod.Run3 and prevFlags.Muon.usePhaseIIGeoSetup) # Toggle whether the calibration constants are read from the JSON format. Enabled by default for a Run4 geometry read by the muon phase II geometry setup 
+    mcf.addFlag("Muon.Calib.fitAnalyticRt", False) #Toggle whether the look-up  R-t tables shall undergo an intermediate polynomial fit
+
     mcf.addFlag("Muon.Calib.readMDTCalibFromBlob", True)  # Read mdt tube calibration from blob-folders
     mcf.addFlag("Muon.Calib.correctMdtRtForBField", lambda prevFlags : (prevFlags.Input.isMC is False and prevFlags.Beam.Type is BeamType.Collisions)) # Apply B-field correction to drift times only for collision data (as done in https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/MuonSpectrometer/MuonCnv/MuonCnvExample/python/MuonCalibFlags.py#0028)
     mcf.addFlag("Muon.Calib.correctMdtRtForTimeSlewing", lambda prevFlags : prevFlags.Input.isMC is False) # Apply time slewing correction to drift time only for data (as done in https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/MuonSpectrometer/MuonCnv/MuonCnvExample/python/MuonCalibFlags.py#0028)

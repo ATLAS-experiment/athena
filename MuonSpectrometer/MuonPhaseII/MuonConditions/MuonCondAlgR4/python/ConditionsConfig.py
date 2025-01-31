@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -29,4 +29,15 @@ def ActsMuonAlignCondAlgCfg(flags, name="ActsMuonAlignCondAlg", **kwargs):
     result.addCondAlgo(the_alg)
     return result
 
+def MdtAnalyticRtCalibAlgCfg(flags, name="MdtAnalyticCalibDbAlg",
+                                    diagnosticsFile="RtDiagnositcs.root", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("OutStream", "MDTANALYTICRTS")
+    kwargs.setdefault("saveDiagnosticHist", True)
+    if kwargs["saveDiagnosticHist"]:
+        from MuonGeoModelTestR4.testGeoModel import setupHistSvcCfg
+        result.merge(setupHistSvcCfg(flags, outFile=diagnosticsFile, outStream=kwargs["OutStream"]))
+    the_alg = CompFactory.MuonCalibR4.MdtAnalyticRtCalibAlg(name, **kwargs)
+    result.addCondAlgo(the_alg, primary = True)
+    return result
     

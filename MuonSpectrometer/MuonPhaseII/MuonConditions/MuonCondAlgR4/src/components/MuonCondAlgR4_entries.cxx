@@ -3,6 +3,8 @@
 */
 #include "../ActsMuonAlignCondAlg.h"
 #include "../MdtCalibDbAlg.h"
+#include "../MdtAnalyticRtCalibAlg.h"
 
 DECLARE_COMPONENT(MuonCalibR4::MdtCalibDbAlg)
+DECLARE_COMPONENT(MuonCalibR4::MdtAnalyticRtCalibAlg)
 DECLARE_COMPONENT(ActsMuonAlignCondAlg)

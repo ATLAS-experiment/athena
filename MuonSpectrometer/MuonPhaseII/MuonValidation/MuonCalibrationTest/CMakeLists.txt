@@ -16,8 +16,8 @@ atlas_add_component( MuonCalibrationTest
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
-#atlas_add_test( MdtCalibrationTest
-#                SCRIPT python -m MuonCalibrationTest.MuonCalibrationTesterConfig --nEvents 2 --noMM --noSTGC
-#                PROPERTIES TIMEOUT 600
-#                PRIVATE_WORKING_DIRECTORY
-#                POST_EXEC_SCRIPT nopost.sh)
+atlas_add_test( MdtCalibrationTest
+                SCRIPT python -m MuonCalibrationTest.MuonCalibrationTesterConfig --nEvents 2 --noMM --noSTGC
+                PROPERTIES TIMEOUT 600
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT nopost.sh)
