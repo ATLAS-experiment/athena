@@ -109,7 +109,7 @@ class ggF_HH_SMEFT(PowhegV2):
         self.add_keyword("mintupbratlim")
         self.add_keyword("mintupbxless")
         self.add_keyword("mtdep", 3)
-        self.add_keyword("multiple-insertion", 1)
+        self.add_keyword("SMEFTtruncation", 1)
         self.add_keyword("ncall1", 200000)
         self.add_keyword("ncall1rm")
         self.add_keyword("ncall2", 150000)
@@ -215,7 +215,7 @@ class ggF_HH_SMEFT(PowhegV2):
         if usesmeft_str == "0":
             EFTcount = 3
         else:
-            EFTcount = list(self.parameters_by_keyword("multiple-insertion"))[0].value
+            EFTcount = list(self.parameters_by_keyword("SMEFTtruncation"))[0].value
         # need to handle the case where we have different scales or pdfs in the joboption, provided as a list, or just one value
         renfact = list(self.parameters_by_keyword("renscfact"))[0].value
         renfac_str = f'{renfact[0]:+.2f}' if type(renfact) is list else f'{renfact:+.2f}'

@@ -379,7 +379,7 @@ class Registry(metaclass=Singleton):
         self.add_default("MSU", 1e4, description="Mass of the up-type leptoquark in Drell-Yan Scalar LeptoQuark production.")
         self.add_default("mu+e-", 0, hidden=True, description="WWj decay mode [1:enabled]")
         self.add_default("mu+mu-", 0, hidden=True, description="WWj decay mode [1:enabled]")
-        self.add_default("multiple-insertion", 1, description="ggF_HH_SMEFT: Truncation options")
+        self.add_default("SMEFTtruncation", 1, description="ggF_HH_SMEFT: Truncation options")
         self.add_default("Mumass", powheg_atlas_common.mass.mu, name="mass_mu", description="mass of muon in GeV")
         self.add_default("ncall1", 10000, description="number of calls for initializing the integration grid")
         self.add_default("ncall1btl", -1, description="number of calls btilde (itr1)")
