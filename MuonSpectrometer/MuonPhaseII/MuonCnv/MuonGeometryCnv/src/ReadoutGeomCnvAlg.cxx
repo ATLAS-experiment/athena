@@ -649,8 +649,6 @@ StatusCode ReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx, Construc
             const double height = std::max(copyMe->moduleHeight(), otherRE->moduleHeight()) - 
                                           (copyMe->tubePitch() - 2. * copyMe->tubeRadius());
 
-            const Amg::Transform3D toAMDB{copyMe->asBuiltRefFrame()};
-   
             const double modHalTHickO{0.5*otherRE->moduleThickness()},
                          modHalfThick{-0.5*copyMe->moduleThickness()};
 

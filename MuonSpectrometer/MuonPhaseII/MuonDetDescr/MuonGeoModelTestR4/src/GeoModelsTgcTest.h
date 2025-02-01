@@ -69,9 +69,6 @@ class GeoModelsTgcTest : public AthHistogramAlgorithm{
       MuonVal::ScalarBranch<float>& m_lGapLength{m_tree.newScalar<float>("lGapLength")}; //lStripWidth
       MuonVal::ScalarBranch<float>& m_gapHeight{m_tree.newScalar<float>("gapHeight")}; 
 
-      MuonVal::VectorBranch<float>& m_firstStripPitch{m_tree.newVector<float>("firstStripPitch")}; // firstStripWidth 1.6/3.2mm
-
-
       /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
       MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};
       MuonVal::CoordTransformBranch m_alignableNode {m_tree, "AlignableNode"};
