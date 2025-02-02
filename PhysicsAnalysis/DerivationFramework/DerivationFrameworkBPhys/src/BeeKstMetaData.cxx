@@ -126,7 +126,7 @@ namespace DerivationFramework {
      correspondence w/ each other, i.e., k-th isoTrackWorkingPoint will
      be used with k-th isoTrackMinPt. 
      */
-    recordPropertyVS ( "isoTrackWorkingPoints" , { "Loose", "NoCuts" } );
+    recordPropertyVS ( "isoTrackWorkingPoints" , { "Loose", "NoCut" } );
     recordPropertyVD ( "isoTrackMinPts"        , {   500.0,    500.0 } );
     recordPropertyS  ( "isoTTVAWorkingPoint"   ,    "Loose"            );
 
