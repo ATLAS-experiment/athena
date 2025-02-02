@@ -12,6 +12,7 @@
 #include <JetAnalysisAlgorithms/JetDecoratorAlg.h>
 #include <JetAnalysisAlgorithms/JetTruthTagAlg.h>
 #include <JetAnalysisAlgorithms/JetReclusteringAlg.h>
+#include <JetAnalysisAlgorithms/ReclusteredJetCalibrationAlg.h>
 
 DECLARE_COMPONENT (CP::JetCalibrationAlg)
 DECLARE_COMPONENT (CP::BJetCalibrationAlg)
@@ -25,3 +26,4 @@ DECLARE_COMPONENT (CP::JvtUpdateAlg)
 DECLARE_COMPONENT (CP::JetDecoratorAlg)
 DECLARE_COMPONENT (CP::JetTruthTagAlg)
 DECLARE_COMPONENT (CP::JetReclusteringAlg)
+DECLARE_COMPONENT (CP::ReclusteredJetCalibrationAlg)

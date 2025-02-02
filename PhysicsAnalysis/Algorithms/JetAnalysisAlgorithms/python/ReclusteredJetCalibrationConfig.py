@@ -1,0 +1,39 @@
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+
+from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+
+class ReclusteredJetCalibrationBlock(ConfigBlock):
+    """ConfigBlock for the jet reclustering calibration algorithm:
+    bootstrap reclustered Large-R jet calibration by manually
+    setting 4-momentum from calibrated constituent small-R jets"""
+
+    def __init__(self, containerName='', jetCollection='', jetInput=''):
+        super(ReclusteredJetCalibrationBlock, self).__init__()
+        self.addOption ('containerName', containerName, type=str,
+            info='the name of the output container after calibration.')
+        self.addOption ('jetCollection', jetCollection, type=str,
+            info="the reclustered Large-R jet container to run on.")
+        self.addOption ('jetInput', jetInput, type=str,
+            info='the input calibrated small-R jet collection to use')
+
+    def makeAlgs(self, config):
+
+        config.setSourceName (self.containerName, self.jetCollection, originalName = self.jetCollection)
+
+        # Set up a shallow copy to decorate
+        if config.wantCopy (self.containerName) :
+            alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'ReclusteredJetShallowCopyAlg')
+            alg.input = config.readName (self.containerName)
+            alg.output = config.copyName (self.containerName)
+
+        alg = config.createAlgorithm('CP::ReclusteredJetCalibrationAlg', 'ReclusteredJetCalibrationAlg' + self.containerName)
+
+        alg.reclusteredJets = config.readName(self.containerName)
+        alg.reclusteredJetsOut = config.copyName(self.containerName)
+        alg.smallRJets = config.readName(self.jetInput)
+
+        config.addOutputVar(self.containerName, 'pt', 'pt')
+        config.addOutputVar(self.containerName, 'eta', 'eta')
+        config.addOutputVar(self.containerName, 'phi', 'phi')
+        config.addOutputVar(self.containerName, 'm', 'm')
+
