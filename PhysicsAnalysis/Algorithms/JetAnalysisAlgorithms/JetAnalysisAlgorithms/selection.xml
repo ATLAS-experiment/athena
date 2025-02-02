@@ -12,5 +12,6 @@
    <class name="CP::JetTruthTagAlg" />
    <class name="CP::JetReclusteringAlg" />
    <class name="CP::BJetCalibrationAlg" />
+   <class name="CP::ReclusteredJetCalibrationAlg" />
 
 </lcgdict>

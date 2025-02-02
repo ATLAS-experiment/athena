@@ -352,6 +352,10 @@ class ConfigFactory():
         from JetAnalysisAlgorithms.JetReclusteringConfig import JetReclusteringBlock
         self.addAlgConfigBlock(algName="JetReclustering", alg=JetReclusteringBlock)
 
+        # jet reclustering calibration
+        from JetAnalysisAlgorithms.ReclusteredJetCalibrationConfig import ReclusteredJetCalibrationBlock
+        self.addAlgConfigBlock(algName="ReclusteredJetCalibration", alg=ReclusteredJetCalibrationBlock)
+
         # event selection
         from EventSelectionAlgorithms.EventSelectionConfig import makeMultipleEventSelectionConfigs
         self.addAlgConfigBlock(algName='EventSelection', alg=makeMultipleEventSelectionConfigs)
