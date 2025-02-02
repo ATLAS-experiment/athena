@@ -39,7 +39,9 @@ from pprint import pprint
 BPHY18cf                          = BPhysEnsureAttributes( BPHY18MetaDataTool )
 BPHY18cf.runGSFCalo               = vars().get( "BPHY18_runGSFCalo"          , BPHY18cf.runGSFCalo          )
 BPHY18cf.JPsiFinderLegAndLeg      = vars().get( "BPHY18_JPsiFinderLegAndLeg" , BPHY18cf.JPsiFinderLegAndLeg )
-BPHY18cf.BeeKstUseElMass          = vars().get( "BPHY18_BeeKstUseElMass"     , BPHY18cf.BeeKstUseElMass     )
+BPHY18cf.JPsiPreFitElPtCut        = vars().get( "BPHY18_JPsiPreFitElPtCut"   , BPHY18cf.JPsiPreFitElPtCut   )
+
+BPHY18cf.BeeKstUseElMass          = vars().get( "BPHY18_BeeKstUseElMass"         , BPHY18cf.BeeKstUseElMass          )
 BPHY18cf.GSFCaloRefitUsePosition  = vars().get( "BPHY18_GSFCaloRefitUsePosition" , BPHY18cf.GSFCaloRefitUsePosition  )
 BPHY18cf.GSFCaloRefitUseEnergy    = vars().get( "BPHY18_GSFCaloRefitUseEnergy"   , BPHY18cf.GSFCaloRefitUseEnergy    )
 BPHY18cf.GSFCaloRefitUseEta       = vars().get( "BPHY18_GSFCaloRefitUseEta"      , BPHY18cf.GSFCaloRefitUseEta       )
