@@ -4,10 +4,10 @@ RDO_TTBAR="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/
 RDO_EVT=500 # used for map/bank generation
 # instructions on how to change version of files can be found in https://twiki.cern.ch/twiki/bin/view/Atlas/EFTrackingSoftware
 MAP_9L_VERSION="v0.22"
-MAP_5L_VERSION="v0.11"
+MAP_5L_VERSION="v0.12"
 
 BANK_9L_VERSION="v0.20"
-BANK_5L_VERSION="v0.10"
+BANK_5L_VERSION="v0.11"
 
 export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/:$CALIBPATH
 MAPS_9L="maps_9L/OtherFPGAPipelines/${MAP_9L_VERSION}/"

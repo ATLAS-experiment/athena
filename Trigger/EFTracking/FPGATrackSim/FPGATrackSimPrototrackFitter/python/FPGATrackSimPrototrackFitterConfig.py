@@ -71,13 +71,13 @@ def FPGATruthDecorationCfg(flags, FinalProtoTrackChainxAODTracksKey="xAODFPGAPro
 
     acc.merge(ActsPixelClusterToTruthAssociationAlgCfg(flags,
                                                        name="ActsFPGAPixelClusterToTruthAssociationAlg",
-                                                       InputTruthParticleLinks="xAODFPGATruthLinks",
+                                                       InputTruthParticleLinks="xAODTruthLinks",
                                                        AssociationMapOut="ITkFPGAPixelClustersToTruthParticles",
                                                        Measurements=f"xAODPixelClusters{stage}FromFPGACluster")) 
     
     acc.merge(ActsStripClusterToTruthAssociationAlgCfg(flags,
                                                        name="ActsFPGAStripClusterToTruthAssociationAlg",
-                                                       InputTruthParticleLinks="xAODFPGATruthLinks",
+                                                       InputTruthParticleLinks="xAODTruthLinks",
                                                        AssociationMapOut="ITkFPGAStripClustersToTruthParticles",
                                                        Measurements=f"xAODStripClusters{stage}FromFPGACluster"))
     

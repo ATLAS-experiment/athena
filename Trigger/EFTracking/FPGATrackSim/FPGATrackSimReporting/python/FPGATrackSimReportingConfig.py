@@ -9,22 +9,22 @@ def FPGATrackSimActsInspectionToolCfg():
     acc.setPrivateTools(actsTrackInspection)
     return acc
 
-def FPGATrackSimReportingCfg(flags,name='FPGATrackSimReportingAlg',**kwargs):
+def FPGATrackSimReportingCfg(flags,name='FPGATrackSimReportingAlg',stage="",**kwargs):
     acc = ComponentAccumulator()
     
     xAODPixelClustersOfInterest=[]
     xAODStripClustersOfInterest=[]
     
-    xAODPixelClustersOfInterest += ["ITkPixelClusters" ,"xAODPixelClusters_1stFromFPGACluster", "xAODPixelClusters_1stFromFPGAHit"]
-    xAODStripClustersOfInterest += ["ITkStripClusters" ,"xAODStripClusters_1stFromFPGACluster", "xAODStripClusters_1stFromFPGAHit","xAODSpacePoints_1stFromFPGASP"]
+    xAODPixelClustersOfInterest += ["ITkPixelClusters" ,f"xAODPixelClusters{stage}FromFPGACluster", f"xAODPixelClusters{stage}FromFPGAHit"]
+    xAODStripClustersOfInterest += ["ITkStripClusters" ,f"xAODStripClusters{stage}FromFPGACluster", f"xAODStripClusters{stage}FromFPGAHit",f"xAODSpacePoints{stage}FromFPGASP"]
     
     kwargs.setdefault('perEventReports',True)
-    kwargs.setdefault('xAODPixelClusterContainers',["ITkPixelClusters" ,"xAODPixelClusters_1stFromFPGACluster", "xAODPixelClusters_1stFromFPGAHit"])
-    kwargs.setdefault('xAODStripClusterContainers',["ITkStripClusters" ,"xAODStripClusters_1stFromFPGACluster", "xAODStripClusters_1stFromFPGAHit"])
-    kwargs.setdefault('xAODSpacePointContainersFromFPGA',["xAODStripSpacePoints_1stFromFPGA","xAODPixelSpacePoints_1stFromFPGA"])
-    kwargs.setdefault('FPGATrackSimTracks','FPGATracks_1st')
-    kwargs.setdefault('FPGATrackSimRoads','FPGARoads_1st')
-    kwargs.setdefault('FPGATrackSimProtoTracks',["ActsProtoTracks_1stFromFPGATrack"])
+    kwargs.setdefault('xAODPixelClusterContainers',["ITkPixelClusters" ,f"xAODPixelClusters{stage}FromFPGACluster", f"xAODPixelClusters{stage}FromFPGAHit"])
+    kwargs.setdefault('xAODStripClusterContainers',["ITkStripClusters" ,f"xAODStripClusters{stage}FromFPGACluster", f"xAODStripClusters{stage}FromFPGAHit"])
+    kwargs.setdefault('xAODSpacePointContainersFromFPGA',[f"xAODStripSpacePoints{stage}FromFPGA",f"xAODPixelSpacePoints{stage}FromFPGA"])
+    kwargs.setdefault('FPGATrackSimTracks',f'FPGATracks{stage}')
+    kwargs.setdefault('FPGATrackSimRoads',f'FPGARoads{stage}')
+    kwargs.setdefault('FPGATrackSimProtoTracks',[f"ActsProtoTracks{stage}FromFPGATrack"])
     kwargs.setdefault('FPGAActsTracks',["ACTSProtoTrackChainTestTracks","ExtendedFPGATracks"])
     
     reportinAlgorithm = CompFactory.FPGATrackSim.FPGATrackSimReportingAlg(name,**kwargs)

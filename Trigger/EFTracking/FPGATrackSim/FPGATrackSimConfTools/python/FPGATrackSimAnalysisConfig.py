@@ -461,29 +461,12 @@ if __name__ == "__main__":
     flags.Tracking.recoChain = [TrackingComponent.ActsChain] # another viable option is TrackingComponent.AthenaChain
     flags.Acts.doRotCorrection = False
 
-    # IDTPM flags
-    from InDetTrackPerfMon.InDetTrackPerfMonFlags import initializeIDTPMConfigFlags, initializeIDTPMTrkAnaConfigFlags
-    flags = initializeIDTPMConfigFlags(flags)
-    
-    flags.PhysVal.IDTPM.outputFilePrefix = "myIDTPM_CA"
-    flags.PhysVal.IDTPM.plotsDefFileList = "InDetTrackPerfMon/PlotsDefFileList_default.txt" # default value - not needed
-    flags.PhysVal.IDTPM.plotsCommonValuesFile = "InDetTrackPerfMon/PlotsDefCommonValues.json" # default value - not needed
-    flags.PhysVal.OutputFileName = flags.PhysVal.IDTPM.outputFilePrefix + '.HIST.root' # automatically set in IDTPM config - not needed
-    flags.Output.doWriteAOD_IDTPM = True
-    flags.Output.AOD_IDTPMFileName = flags.PhysVal.IDTPM.outputFilePrefix + '.AOD_IDTPM.pool.root' # automatically set in IDTPM config - not needed
-    flags.PhysVal.IDTPM.trkAnaCfgFile = "InDetTrackPerfMon/EFTrkAnaConfig_example.json"
-    
-    flags = initializeIDTPMTrkAnaConfigFlags(flags)
-    ## override respective configurations from trkAnaCfgFile (in case something changes in the config file)
-    flags.PhysVal.IDTPM.TrkAnaEF.TrigTrkKey = f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"
-    flags.PhysVal.IDTPM.TrkAnaDoubleRatio.TrigTrkKey = f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"
-
-    flags.PhysVal.doExample = False
     ############################################
     flags.Concurrency.NumThreads=1
     #flags.Concurrency.NumProcs=0
     flags.Scheduler.ShowDataDeps=True
     flags.Scheduler.CheckDependencies=True
+    flags.Debug.DumpEvtStore=False
 
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
     flags.fillFromArgs()
@@ -509,7 +492,7 @@ if __name__ == "__main__":
     elif (flags.Trigger.FPGATrackSim.pipeline.startswith('F-6')):
         print("You are trying to run an F-6* pipeline! I am auto-configuring the Inside-Out for you. Whether you wanted to or not")
         flags.Trigger.FPGATrackSim.Hough.genScan=True
-        flags.Trigger.FPGATrackSim.spacePoints=False # possibly redundant
+        flags.Trigger.FPGATrackSim.spacePoints= flags.Trigger.FPGATrackSim.Hough.secondStage
     elif (flags.Trigger.FPGATrackSim.pipeline != ""):
         raise AssertionError("ERROR You are trying to run the pipeline " + flags.Trigger.FPGATrackSim.pipeline + " which is not yet supported!")
 
@@ -537,6 +520,7 @@ if __name__ == "__main__":
            flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
    
        flags.lock()
+       flags.dump()
        flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
        acc=MainServicesCfg(flags)
    
@@ -578,28 +562,24 @@ if __name__ == "__main__":
            acc.merge(FPGATrackSimSecondStageConfig.FPGATrackSimSecondStageAlgCfg(flags))
    
        if flags.Trigger.FPGATrackSim.doEDMConversion:
-           acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=True, doSP=flags.Trigger.FPGATrackSim.spacePoints))
+           stage = "_2nd" if flags.Trigger.FPGATrackSim.Hough.secondStage else "_1st"
+           acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = f"FPGAConversionAlg{stage}", stage = f"{stage}", doActsTrk=True, doSP=flags.Trigger.FPGATrackSim.spacePoints))
            from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGATruthDecorationCfg, FPGAProtoTrackFitCfg
-           acc.merge(FPGAProtoTrackFitCfg(flags,stage='_1st')) # Run ACTS KF for 1st stage
-           acc.merge(FPGATruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage='_1st')) # Run ACTS KF for 1st stage
+           acc.merge(FPGAProtoTrackFitCfg(flags,stage=f"{stage}")) # Run ACTS KF
+           acc.merge(FPGATruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage=f"{stage}")) # Run Truth Matching/Decoration chain
            if not flags.Trigger.FPGATrackSim.wrapperFileName and flags.Trigger.FPGATrackSim.runCKF:
                from FPGATrackSimConfTools.FPGATrackExtensionConfig import FPGATrackExtensionAlgCfg
-               acc.merge(FPGATrackExtensionAlgCfg(flags, enableTrackStatePrinter=False, name="FPGATrackExtension", ProtoTracksLocation="ActsProtoTracks_1stFromFPGATrack")) # run CKF track extension on FPGA tracks
+               acc.merge(FPGATrackExtensionAlgCfg(flags, enableTrackStatePrinter=False, name="FPGATrackExtension",
+                                                  ProtoTracksLocation=f"ActsProtoTracks{stage}FromFPGATrack")) # run CKF track extension on FPGA tracks
    
            if flags.Trigger.FPGATrackSim.writeToAOD: acc.merge(FPGATrackSimDataPrepConfig.WriteToAOD(flags,
-                                                                                                     stage = '_1st',
+                                                                                                     stage = f"{stage}",
                                                                                                      finalTrackParticles=f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"))
-           if flags.Trigger.FPGATrackSim.Hough.secondStage : acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_2nd', stage = '_2nd')) # Default disabled, doesn't work if enabled
-           if flags.Trigger.FPGATrackSim.convertUnmappedHits: acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgUnmapped_1st', stage = 'Unmapped_1st', doClusters = False))
-           if flags.Trigger.FPGATrackSim.Hough.hitFiltering : acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgFiltered_1st', stage = 'Filtered_1st', doHits = False)) # Default disabled, works if enabled
    
            # Reporting algorithm (used for debugging - can be disabled)
            from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
-           acc.merge(FPGATrackSimReportingCfg(flags,
-                                              perEventReports = (flags.Trigger.FPGATrackSim.sampleType != 'skipTruth') )) # disable perEventReports for ttbar
-           # IDTPM running
-           from InDetTrackPerfMon.InDetTrackPerfMonConfig import InDetTrackPerfMonCfg
-           acc.merge( InDetTrackPerfMonCfg(flags) )
+           acc.merge(FPGATrackSimReportingCfg(flags, stage=f"{stage}",
+                                              perEventReports = ((flags.Trigger.FPGATrackSim.sampleType != 'skipTruth') and flags.Exec.MaxEvents<=10 ) )) # disable perEventReports for pileup samples or many events
        
        acc.store(open('AnalysisConfig.pkl','wb'))
    

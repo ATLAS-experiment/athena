@@ -142,7 +142,7 @@ def FPGAConversionAlgCfg(inputFlags, name = 'FPGAConversionAlg', stage = '', **k
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
     result.merge(ITkStripReadoutGeometryCfg(flags))
 
-    kwargs.setdefault("FPGATrackSimClusterKey", "FPGAClusters%s" %(stage))
+    kwargs.setdefault("FPGATrackSimClusterKey", "FPGAClusters_1st")
     kwargs.setdefault("FPGATrackSimHitKey", "FPGAHits%s" %(stage))
     kwargs.setdefault("FPGATrackSimHitInRoadsKey", "FPGAHitsInRoads%s" %(stage))
     kwargs.setdefault("FPGATrackSimRoadKey", "FPGARoads%s" %(stage))
@@ -442,6 +442,7 @@ def runDataPrepChain():
     ############################################
     flags.Concurrency.NumThreads=1
     flags.Scheduler.ShowDataDeps=True
+    flags.Scheduler.CheckDependencies=True
     flags.Debug.DumpEvtStore=False # Set to Truth to enable Event Store printouts
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
     flags.fillFromArgs()
@@ -482,7 +483,7 @@ def runDataPrepChain():
     acc.merge(FPGATrackSimDataPrepAlgCfg(flags))
 
     if flags.Trigger.FPGATrackSim.doEDMConversion:
-        acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=False, doSP = flags.Trigger.FPGATrackSim.spacePoints))
+        acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=False, doSP = True))
         if flags.Trigger.FPGATrackSim.convertUnmappedHits: acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgUnmapped_1st', stage = 'Unmapped_1st', doClusters = False))
         
         if flags.Trigger.FPGATrackSim.connectToToITkTracking:

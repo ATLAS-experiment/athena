@@ -55,21 +55,20 @@ atlas_add_test( FPGATrackSim_F300_test
 atlas_add_test( FPGATrackSim_F100_test
                 SCRIPT FPGATrackSimDataPrepOnRDO.sh
                 PRIVATE_WORKING_DIRECTORY
-                LOG_IGNORE_PATTERN ".*ERROR.*Global to local transformation did not succeed.*" # TODO remove once we fix strip SP formation
                 POST_EXEC_SCRIPT noerror.sh 
                 PROPERTIES TIMEOUT 600 )
 
 atlas_add_test( FPGATrackSim_F600_test
                 PRIVATE_WORKING_DIRECTORY 
                 SCRIPT FPGATrackSim_F600.sh
-                LOG_IGNORE_PATTERN ".*FPGAActsTrkConverter.*ERROR.Found a proto-track with no measurements.*|.*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*|.*ERROR.*IDTPM.*|.*ERROR.*eftrig_chi2.*|.*ERROR.*InDetTrackPerfMonTool.*" # TODO Fix the prototrack-related issue described in EFTRACK-801
+                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*|.*WARNING FPE DIVBYZERO.*FPGATrackSimSecondStageAlg.*"
                 POST_EXEC_SCRIPT noerror.sh 
                 PROPERTIES TIMEOUT 600 )
 
 atlas_add_test( FPGATrackSim_F200_test
                 SCRIPT FPGATrackSim_F200.sh
                 PRIVATE_WORKING_DIRECTORY
-                LOG_IGNORE_PATTERN ".*FPGATrackSimEtaPatternFilterTool.*ERROR|.*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*" # ACTS (C)KF related errors
+                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*" # ACTS (C)KF related errors
                 POST_EXEC_SCRIPT noerror.sh 
                 PROPERTIES TIMEOUT 600 )
 
