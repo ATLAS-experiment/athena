@@ -54,6 +54,7 @@ namespace IDTPM {
     bool m_doGlobalPlots{};
     bool m_doTruthMuPlots{};
 
+    TEfficiency* m_eff_vs_inclusive{};
     TEfficiency* m_eff_vs_pt{};
     TEfficiency* m_eff_vs_lowPt{};
     TEfficiency* m_eff_vs_eta{};
