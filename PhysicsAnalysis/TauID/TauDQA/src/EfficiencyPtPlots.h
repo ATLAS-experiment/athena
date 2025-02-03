@@ -21,9 +21,9 @@ public:
   TProfile* m_eff_pt_jetRNNloose;
   TProfile* m_eff_pt_jetRNNmed;
   TProfile* m_eff_pt_jetRNNtight;
-  TProfile* m_eff_pt_jetRNNlooseHighPt = nullptr;
-  TProfile* m_eff_pt_jetRNNmedHighPt = nullptr;
-  TProfile* m_eff_pt_jetRNNtightHighPt = nullptr;
+  TProfile* m_eff_pt_jetRNNlooseHighPt;
+  TProfile* m_eff_pt_jetRNNmedHighPt;
+  TProfile* m_eff_pt_jetRNNtightHighPt;
 
   TProfile* m_eff_jetRNNloose;
   TProfile* m_eff_jetRNNmed;
@@ -33,9 +33,9 @@ public:
   TProfile* m_eff_pt_jetGNTaumed;
   TProfile* m_eff_pt_jetGNTautight;
 
-  TProfile* m_eff_pt_jetGNTaulooseHighPt = nullptr;
-  TProfile* m_eff_pt_jetGNTaumedHighPt = nullptr;
-  TProfile* m_eff_pt_jetGNTautightHighPt = nullptr;
+  TProfile* m_eff_pt_jetGNTaulooseHighPt;
+  TProfile* m_eff_pt_jetGNTaumedHighPt;
+  TProfile* m_eff_pt_jetGNTautightHighPt;
 
 
   TProfile* m_eff_jetGNTauloose;
