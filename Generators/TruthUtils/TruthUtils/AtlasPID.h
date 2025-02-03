@@ -651,6 +651,27 @@ template<> inline double baryonNumber(const DecodedPID& p){ return static_cast<d
 template<> inline double baryonNumber(const int& p){ auto value_digits = DecodedPID(p);  return static_cast<double>(baryonNumber3(value_digits))/3.0;}
 
 
+template<class T> inline int numberOfLambdas(const T& p) {return numberOfLambdas(p->pdg_id());}
+template<> inline int numberOfLambdas(const DecodedPID& p){
+  if (std::abs(p.pid()) == LAMBDA0) { return  (p.pid() > 0) ? 1 : -1; }
+  if (isNucleus(p) && p.ndigits() == 10) { return (p.pid() > 0) ? p(2) : -p(2); }
+  return 0;
+}
+template<> inline int numberOfLambdas(const int& p){ auto value_digits = DecodedPID(p); return numberOfLambdas(value_digits);}
+
+
+template<class T> inline int numberOfProtons(const T& p) {return numberOfProtons(p->pdg_id());}
+template<> inline int numberOfProtons(const DecodedPID& p){
+  if (std::abs(p.pid()) == PROTON) { return  (p.pid() > 0) ? 1 : -1; }
+  if (isNucleus(p)) {
+    const int result = p(5) + 10*p(4) + 100*p(3);
+    return (p.pid() > 0) ? result : -result;
+  }
+  return 0;
+}
+template<> inline int numberOfProtons(const int& p){ auto value_digits = DecodedPID(p); return numberOfProtons(value_digits);}
+
+
 /// APID: graviton and all Higgs extensions are BSM
 template<class T> inline bool isBSM(const T& p){return isBSM(p->pdg_id());}
 template<> inline bool isBSM(const DecodedPID& p){
