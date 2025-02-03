@@ -97,16 +97,15 @@ public:
 
     // --- Local Coordinates ---
     // The local coordinate is stored as an unsigned int, as in the hardware.
-    // To get the actual coordinate in units of sensor channels, use the float
-    // getCoord functions instead.
+    // To get the actual local coordinate, use the float getCoord functions instead.
     void setPhiIndex(unsigned v) { m_phiIndex = v; }
     void setEtaIndex(unsigned v) { m_etaIndex = v; }
-    void setPhiCoord(float v) { m_phiIndex = v; }
-    void setEtaCoord(float v) { m_etaIndex = v; }
+    void setPhiCoord(float v) { m_phiCoord = v; }
+    void setEtaCoord(float v) { m_etaCoord = v; }
     unsigned getPhiIndex() const { return m_phiIndex; }
     unsigned getEtaIndex() const { return m_etaIndex; }
-    float getPhiCoord() const { return m_phiIndex; }
-    float getEtaCoord() const { return m_etaIndex; }
+    float getPhiCoord() const { return m_phiCoord; }
+    float getEtaCoord() const { return m_etaCoord; }
 
     float getPhiWindow() const { return m_phiWindow; }
 
@@ -211,6 +210,8 @@ protected:
     // --- Local Coordinates ---
     int m_phiIndex = -1; // phi index for pixel, strip for strip
     int m_etaIndex = -1; // eta index for pixel, row for strip
+    float m_phiCoord = -999; // local position along phi direction
+    float m_etaCoord = -999; // local position along eta direction
 
     // --- Global Coordinates ---
     float m_x = 0;  // Hit position in global coordinates
@@ -262,7 +263,7 @@ protected:
 
     int m_roadID = 0;
 
-    ClassDefNV(FPGATrackSimHit, 9);
+    ClassDefNV(FPGATrackSimHit, 10);
 };
 
 // Container of <FPGATrackSimHit const *>

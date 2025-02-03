@@ -431,7 +431,7 @@ int FPGATrackSimFitConstantBank::missing_point_guess(sector_t sector, FPGATrackS
 	  newhit.setY(target_r*TMath::Sin(missing_hits[m]));
 	}
 	else{
-	  newhit.setPhiCoord(missing_hits[m]);
+	  newhit.setPhiIndex(missing_hits[m]);
 	}
 
 	track.setFPGATrackSimHit(missedplane, newhit);
@@ -454,8 +454,8 @@ int FPGATrackSimFitConstantBank::missing_point_guess(sector_t sector, FPGATrackS
 	  newhit.setZ(missing_hits[m+1]);
 	}
 	else {
-	  newhit.setPhiCoord(missing_hits[m]);
-	  newhit.setEtaCoord(missing_hits[m+1]);
+	  newhit.setPhiIndex(missing_hits[m]);
+	  newhit.setEtaIndex(missing_hits[m+1]);
 	}
 	m++; //skip ahead
 
@@ -578,15 +578,15 @@ void FPGATrackSimFitConstantBank::invlinfit(sector_t sector, FPGATrackSimTrack &
       hit.setDetType(Tech);
       hit.setLayer(plane);
       if (m_WCs(sector,j))
-	hit.setPhiCoord(-1); // to keep track later on, set hit position negative
+	hit.setPhiIndex(-1); // to keep track later on, set hit position negative
       else
-	hit.setPhiCoord(rawhits(j));
+	hit.setPhiIndex(rawhits(j));
 
       if (Tech == SiliconTech::pixel) {
 	if (m_WCs(sector,j))
-	  hit.setEtaCoord(-1); // to keep track later on, set hit position negative
+	  hit.setEtaIndex(-1); // to keep track later on, set hit position negative
 	else
-	  hit.setEtaCoord(rawhits(j+1));
+	  hit.setEtaIndex(rawhits(j+1));
 
 	++j; // skip a coordinate if doing two at once
       }

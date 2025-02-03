@@ -107,8 +107,8 @@ int findNonOverlapHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack&
         continue;
       }
     }
-    else if(hit1.getPhiCoord() != hit1.getPhiCoord()
-            || hit1.getEtaCoord() != hit1.getEtaCoord())
+    else if(hit1.getPhiIndex() != hit1.getPhiIndex()
+            || hit1.getEtaIndex() != hit1.getEtaIndex())
     {
       nonOverlapHits++;
     }
@@ -209,7 +209,7 @@ int findNCommonHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Tr
       }
     }
     // If both hits aren't spacepoints, we should be able to do this comparison.
-    else if (hit1.getPhiCoord() == hit2.getPhiCoord() && hit1.getEtaCoord() == hit2.getEtaCoord()) {
+    else if (hit1.getPhiIndex() == hit2.getPhiIndex() && hit1.getEtaIndex() == hit2.getEtaIndex()) {
       nCommHits++;
     }
     else

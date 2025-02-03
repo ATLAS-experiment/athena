@@ -128,11 +128,11 @@ StatusCode FPGATrackSimOverlapRemovalTool::removeOverlapping(FPGATrackSimTrack &
             auto hash_a = a->getIdentifierHash();
             auto hash_b = b->getIdentifierHash();
             if ( hash_a == hash_b ) {
-                auto phi_a = a->getPhiCoord();
-                auto phi_b = b->getPhiCoord();
+                auto phi_a = a->getPhiIndex();
+                auto phi_b = b->getPhiIndex();
                 if ( phi_a == phi_b ) {
-                    auto eta_a = a->getEtaCoord();
-                    auto eta_b = b->getEtaCoord();
+                    auto eta_a = a->getEtaIndex();
+                    auto eta_b = b->getEtaIndex();
                     if ( eta_a == eta_b) {
                         auto layer_a = a->getLayer();
                         auto layer_b = b->getLayer();

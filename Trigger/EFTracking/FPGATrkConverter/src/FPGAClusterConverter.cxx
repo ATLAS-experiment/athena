@@ -413,7 +413,7 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
   IdentifierHash hash = h.getIdentifierHash();
 
   float phiWidth = h.getPhiWidth();
-  int strip = static_cast<int>(h.getPhiCoord());
+  int strip = static_cast<int>(h.getPhiIndex());
   ATH_CHECK(strip >= 0);
   const InDetDD::SiDetectorElement* pDE = m_SCTManager->getDetectorElement(hash);
   ATH_CHECK(pDE != nullptr);
@@ -505,7 +505,7 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
   IdentifierHash hash = h.getIdentifierHash();
 
   float phiWidth = h.getPhiWidth();
-  int strip = static_cast<int>(h.getPhiCoord());
+  int strip = static_cast<int>(h.getPhiIndex());
   ATH_CHECK(strip >= 0);
   const InDetDD::SiDetectorElement* pDE = m_SCTManager->getDetectorElement(hash);
   ATH_CHECK(pDE != nullptr);
