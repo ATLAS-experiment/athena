@@ -17,11 +17,11 @@ class PixelClusterdEdxCondData {
   public:
     PixelClusterdEdxCondData();
     virtual ~PixelClusterdEdxCondData();
-    std::string getVar() const;
-    void setVar(const std::string& value);
+    int getVar() const;
+    void setVar(const int& value);
  
   private:
-    std::string m_var = "Rebecca was here"; //Default for testing
+    int m_var = 999; //Default for testing
 };
 
 CLASS_DEF( PixelClusterdEdxCondData , 112527067 , 1 );

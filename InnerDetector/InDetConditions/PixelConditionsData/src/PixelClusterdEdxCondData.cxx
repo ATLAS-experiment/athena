@@ -9,11 +9,11 @@ PixelClusterdEdxCondData::PixelClusterdEdxCondData() : m_var() {
 
 PixelClusterdEdxCondData::~PixelClusterdEdxCondData() = default;
 
-std::string PixelClusterdEdxCondData::getVar() const {
+int PixelClusterdEdxCondData::getVar() const {
   return m_var;
   }
 
-void PixelClusterdEdxCondData::setVar(const std::string& value){
+void PixelClusterdEdxCondData::setVar(const int& value){
   m_var = value;
   return;
   }
