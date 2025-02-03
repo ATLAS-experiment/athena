@@ -100,11 +100,8 @@ def FPGATrackSimBankGenCfg(flags, **kwargs):
     theFPGATrackSimMatrixGenAlg.FPGATrackSimSGToRawHitsTool = acc.popToolsAndMerge(FPGATrackSimSGToRawHitsToolCfg(flags))
     theFPGATrackSimMatrixGenAlg.FPGATrackSimClusteringFTKTool = CompFactory.FPGATrackSimClusteringTool()
 
-    # Do we really want to use the tag system for this? I think so but unsure if modernization needed.
-    import FPGATrackSimConfTools.FPGATrackSimTagConfig as FPGATrackSimTagConfig
-    bank_tag = FPGATrackSimTagConfig.getTags(stage='bank')['bank']
-    theFPGATrackSimMatrixGenAlg.sectorQPtBins = bank_tag['sectorQPtBins']
-    theFPGATrackSimMatrixGenAlg.qptAbsBinning = bank_tag['qptAbsBinning']
+    theFPGATrackSimMatrixGenAlg.sectorQPtBins = [-0.001, -0.0005, 0, 0.0005, 0.001] ### hard-code this for now
+    theFPGATrackSimMatrixGenAlg.qptAbsBinning = False
 
     acc.addEventAlgo(theFPGATrackSimMatrixGenAlg)
 

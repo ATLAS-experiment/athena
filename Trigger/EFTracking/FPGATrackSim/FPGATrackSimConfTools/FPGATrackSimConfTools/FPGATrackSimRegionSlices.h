@@ -24,8 +24,10 @@
 class FPGATrackSimRegionSlices
 {
  public:
- FPGATrackSimRegionSlices(std::string const & filepath);
-
+  FPGATrackSimRegionSlices(std::string const & filepath);
+  FPGATrackSimRegionSlices(float mind0, float minz0, float minqOverPt,
+			  float maxd0, float maxz0, float maxqOverPt);  
+  
   unsigned nRegions() const { return m_regions.size(); }
 
   std::pair<FPGATrackSimTrackPars, FPGATrackSimTrackPars> const & getRegion(unsigned region) const { return m_regions.at(region); }

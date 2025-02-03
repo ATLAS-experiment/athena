@@ -290,7 +290,11 @@ void FPGATrackSimEventSelectionSvc::createRegions()
       ATH_MSG_INFO("Creating the slices object");
       MsgStream cmsg(msgSvc(), "FPGATrackSimRegionSlices");
       cmsg.setLevel(msg().level()); // cause AthMessaging is stupid and doesn't have this function
-      m_regions = new FPGATrackSimRegionSlices(PathResolverFindCalibFile(m_regions_path.value()));
+      if (m_oldRegionDefs.value())
+	m_regions = new FPGATrackSimRegionSlices(PathResolverFindCalibFile(m_regions_path.value()));
+      else 
+	m_regions = new FPGATrackSimRegionSlices(m_mind0.value(), m_minz0.value(), m_minqOverPt.value(),
+						 m_maxd0.value(), m_maxz0.value(), m_maxqOverPt.value());
     }
 }
 
