@@ -6,6 +6,7 @@ atlas_subdir( Sherpa_i )
 # External dependencies:
 find_package( CLHEP )
 find_package( OpenLoops )
+find_package( sympy )
 find_package( Sherpa COMPONENTS SherpaMain SherpaInitialization SherpaSingleEvents SherpaSoftPhysics SherpaPerturbativePhysics LundTools SherpaTools
 ShrimpsMain ShrimpsEvents ShrimpsLadders ShrimpsBeamRemnants ShrimpsXsecs ShrimpsEikonals ShrimpsTools
 HadronsMain HadronsMEs HadronsCurrents HadronsPSs
