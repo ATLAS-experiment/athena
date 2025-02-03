@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALSIM_AP_INT_H
 #define GLOBALSIM_AP_INT_H
 
 #include <cstddef>
+#include <cstdint>
+#include <stdexcept>
 
 /*
  * class that represnts an int type of fixed width.
@@ -62,7 +64,7 @@ namespace GlobalSim {
     }
 
     ap_int operator * (const ap_int& f) const {
-      return form((WS(this->value) * WS(f.m_value)));
+      return form((WS(this->m_value) * WS(f.m_value)));
     }
   
     const ap_int& operator *= (const ap_int& f) {
@@ -73,7 +75,7 @@ namespace GlobalSim {
 
       
     ap_int operator / (const ap_int& f) const {
-      return form((WS(this->value)) / WS(f.m_value));
+      return form((WS(this->m_value)) / WS(f.m_value));
     }
   
     const ap_int& operator /= (const ap_int& f)  {
@@ -91,8 +93,8 @@ namespace GlobalSim {
       auto val = m_value >= 0 ? m_value : -m_value;
     
       if (val > (1<< n_dig)) {
-	m_ovflw=true;
-	throw std::runtime_error("ap_int overflow " + std::to_string(m_value));
+        m_ovflw=true;
+        throw std::runtime_error("ap_int overflow " + std::to_string(m_value));
       }
     }
   };
