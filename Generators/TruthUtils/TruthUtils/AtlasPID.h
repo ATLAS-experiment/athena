@@ -587,6 +587,70 @@ template<> inline bool isNucleus(const DecodedPID& p){
 }
 template<> inline bool isNucleus(const int& p){ auto value_digits = DecodedPID(p); return isNucleus(value_digits);}
 
+
+template<class T> inline bool hasQuark(const T& p, const int& q);
+template<> inline bool hasQuark(const DecodedPID& p, const int& q){
+  if (isQuark(p.pid())) { return (std::abs(p.pid()) == q );}
+  if (isMeson(p)) { return *(p.second.rbegin() + 1) == q ||*(p.second.rbegin()+2) ==q;}
+  if (isDiquark(p)) { auto i = std::find(p.second.rbegin() + 2,p.second.rbegin()+4,q); return (i!=p.second.rbegin()+4);}
+  if (isBaryon(p)) { auto i = std::find(p.second.rbegin() + 1,p.second.rbegin()+4,q); return (i!=p.second.rbegin()+4);}
+  if (isTetraquark(p)) { auto i = std::find(p.second.rbegin() + 1,p.second.rbegin()+5,q); return (i!=p.second.rbegin()+5);}
+  if (isPentaquark(p)) { auto i = std::find(p.second.rbegin() + 1,p.second.rbegin()+6,q); return (i!=p.second.rbegin()+6);}
+  if (isNucleus(p) && std::abs(p.pid()) != PROTON) { return (q == 1 || q == 2 || (q==3 && p(2) > 0));}
+  if (isSUSY(p)) { // APID SUSY case
+    auto pp = p.shift(1);
+    if ( pp.ndigits() == 1 ) { return false; } // Handle squarks
+    if ( pp.ndigits() == 3 ) { return (pp(1) == q); } // Handle ~q qbar pairs
+    if ( pp.ndigits() == 4 ) { return (pp(1) == q || pp(2) == q); } // Ignore gluinos and squarks
+    if ( pp.ndigits() == 5 ) {  return (pp(1) == q || pp(2) == q || pp(3) == q); } // Ignore gluinos and squarks
+    if ( pp.ndigits() > 5 ) { pp = pp.shift(1); } // Drop gluinos and squarks
+    return hasQuark(pp, q); }
+  return false;
+}
+template<> inline bool hasQuark(const int& p, const int& q){ auto value_digits = DecodedPID(p); return hasQuark(value_digits, q);}
+
+template<class T> inline bool hasStrange(const T& p) { return  hasQuark(p,SQUARK); }
+template<class T> inline bool hasCharm(const T& p) { return  hasQuark(p,CQUARK); }
+template<class T> inline bool hasBottom(const T& p) { return  hasQuark(p,BQUARK); }
+template<class T> inline bool hasTop(const T& p) { return  hasQuark(p,TQUARK); }
+
+
+// APID: The baryon number is defined as:
+// B = (1/3)*( n_q - n_{qbar} )
+// where n_q⁠ is the number of quarks, and ⁠n_{qbar} is the number of
+// antiquarks. By convention, squarks have the same quantum numbers as
+// the corresponding quarks (modulo spin and R), so have baryon number
+// 1/3.
+template<class T> inline int baryonNumber3(const T& p) {return baryonNumber3(p->pdg_id());}
+template<> inline int baryonNumber3(const DecodedPID& p){
+  if (isQuark(p.pid())) { return (p.pid() > 0) ? 1 : - 1;}
+  if (isDiquark(p)) { return (p.pid() > 0) ? 2 : -2; }
+  if (isMeson(p) || isTetraquark(p)) { return 0; }
+  if (isBaryon(p) || isPentaquark(p)){ return (p.pid() > 0) ? 3 : -3; }
+  if (isNucleus(p)) {
+    const int result = 3*p(8) + 30*p(7) + 300*p(6);
+    return (p.pid() > 0) ? result : -result;
+  }
+  if (isSUSY(p)) {
+    auto pp = p.shift(1);
+    if (pp.ndigits() < 3 ) { return baryonNumber3(pp); } // super-partners of fundamental particles
+    if (pp(0) == COMPOSITEGLUON) {
+      if (pp(1) == COMPOSITEGLUON) { return 0; } // R-Glueballs
+      if ( pp.ndigits() == 4 ) { return 0; }  // states with gluino-quark-antiquark
+      if ( pp.ndigits() == 5) { return (p.pid() > 0) ? 3 : -3; } // states with gluino-quark-quark-quark
+    }
+    if (pp.ndigits() == 3) { return 0; } // squark-antiquark
+    if (pp.ndigits() == 4) { return (p.pid() > 0) ? 3 : -3; } // states with squark-quark-quark
+  }
+  return 0;
+}
+template<> inline int baryonNumber3(const int& p){ auto value_digits = DecodedPID(p); return baryonNumber3(value_digits);}
+
+template<class T> inline double baryonNumber(const T& p) {return baryonNumber(p->pdg_id());}
+template<> inline double baryonNumber(const DecodedPID& p){ return static_cast<double>(baryonNumber3(p))/3.0;}
+template<> inline double baryonNumber(const int& p){ auto value_digits = DecodedPID(p);  return static_cast<double>(baryonNumber3(value_digits))/3.0;}
+
+
 /// APID: graviton and all Higgs extensions are BSM
 template<class T> inline bool isBSM(const T& p){return isBSM(p->pdg_id());}
 template<> inline bool isBSM(const DecodedPID& p){
@@ -628,27 +692,6 @@ template<> inline bool isValid(const int& p){ if (!p) return false; if (std::abs
   auto value_digits = DecodedPID(p); return isValid(value_digits);
 }
 
-template<class T> inline bool hasQuark(const T& p, const int& q);
-template<> inline bool hasQuark(const DecodedPID& p, const int& q){
-  if (isQuark(p.pid())) { return (std::abs(p.pid()) == q );}
-  if (isMeson(p)) { return *(p.second.rbegin() + 1) == q ||*(p.second.rbegin()+2) ==q;}
-  if (isDiquark(p)) { auto i = std::find(p.second.rbegin() + 2,p.second.rbegin()+4,q); return (i!=p.second.rbegin()+4);}
-  if (isBaryon(p)) { auto i = std::find(p.second.rbegin() + 1,p.second.rbegin()+4,q); return (i!=p.second.rbegin()+4);}
-  if (isTetraquark(p)) { auto i = std::find(p.second.rbegin() + 1,p.second.rbegin()+5,q); return (i!=p.second.rbegin()+5);}
-  if (isPentaquark(p)) { auto i = std::find(p.second.rbegin() + 1,p.second.rbegin()+6,q); return (i!=p.second.rbegin()+6);}
-  if (isNucleus(p) && p.first != PROTON) { return q==3 && p(2) > 0;}
-  if (isSUSY(p)) { // APID SUSY case
-    auto pp = p.shift(1);
-    if ( pp.ndigits() == 1 ) { return false; } // Handle squarks
-    if ( pp.ndigits() == 3 ) { return (pp(1) == q); } // Handle ~q qbar pairs
-    if ( pp.ndigits() == 4 ) { return (pp(1) == q || pp(2) == q); } // Ignore gluinos and squarks
-    if ( pp.ndigits() == 5 ) {  return (pp(1) == q || pp(2) == q || pp(3) == q); } // Ignore gluinos and squarks
-    if ( pp.ndigits() > 5 ) { pp = pp.shift(1); } // Drop gluinos and squarks
-    return hasQuark(pp, q); }
-  return false;
-}
-template<> inline bool hasQuark(const int& p, const int& q){ auto value_digits = DecodedPID(p); return hasQuark(value_digits, q);}
-
 template<class T> inline int leadingQuark(const T& p) {return leadingQuark(p->pdg_id());}
 template<> inline int leadingQuark(const DecodedPID& p){
   if (isQuark(p.pid())) { return std::abs(p.pid());}
@@ -667,11 +710,6 @@ template<> inline int leadingQuark(const DecodedPID& p){
 }
 
 template<> inline int leadingQuark(const int& p){ auto value_digits = DecodedPID(p); return leadingQuark(value_digits);}
-
-template<class T> inline bool hasStrange(const T& p) { return  hasQuark(p,SQUARK); }
-template<class T> inline bool hasCharm(const T& p) { return  hasQuark(p,CQUARK); }
-template<class T> inline bool hasBottom(const T& p) { return  hasQuark(p,BQUARK); }
-template<class T> inline bool hasTop(const T& p) { return  hasQuark(p,TQUARK); }
 
 template<class T> inline bool isLightHadron(const T& p) { auto lq = leadingQuark(p); return  (lq == DQUARK || lq == UQUARK||lq == SQUARK) && isHadron(p); }
 template<class T> inline bool isHeavyHadron(const T& p) {  auto lq = leadingQuark(p); return  (lq == CQUARK || lq == BQUARK || lq == TQUARK ) && isHadron(p); }
