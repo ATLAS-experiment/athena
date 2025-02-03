@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAOD_ANALYSIS
 
@@ -338,22 +338,22 @@ StatusCode TestHepMC::execute() {
       const double sumP = beams.first->momentum().pz() + beams.second->momentum().pz();
       cmenergy = std::sqrt(sumE*sumE - sumP*sumP);
 
-         if(beams.first->pid() == 1000080160 && beams.second->pid() == 1000080160){//OO collisions
+      if(beams.first->pdg_id() == 1000080160 && beams.second->pdg_id() == 1000080160){//OO collisions
           cmenergy /= 16.0; // divided by 16 for the total number of nucleons per nucleus
       }
-      if(beams.first->pid() == 1000822080 && beams.second->pid() == 1000822080){//PbPb collisions
+      if(beams.first->pdg_id() == 1000822080 && beams.second->pdg_id() == 1000822080){//PbPb collisions
          cmenergy /= 208.0; // divided by 208 for the total number of nucleons per nucleus
       }
-      if(beams.first->pid() == 1000080160 && beams.second->pid() == 2212){//Op collisions
+      if(beams.first->pdg_id() == 1000080160 && beams.second->pdg_id() == 2212){//Op collisions
          cmenergy = -2.0*beams.second->momentum().pz()*std::sqrt(8.0/16);
       }
-      if(beams.first->pid() == 2212 && beams.second->pid() == 1000080160){//pO collisions
+      if(beams.first->pdg_id() == 2212 && beams.second->pdg_id() == 1000080160){//pO collisions
          cmenergy = 2.0*beams.first->momentum().pz()*std::sqrt(8.0/16);
       }
-      if(beams.first->pid() == 1000822080 && beams.second->pid() == 2212){//Pbp collisions
+      if(beams.first->pdg_id() == 1000822080 && beams.second->pdg_id() == 2212){//Pbp collisions
          cmenergy = -2.0*beams.second->momentum().pz()*std::sqrt(82.0/208);
       }
-      if(beams.first->pid() == 2212 && beams.second->pid() == 1000822080){//pPb collisions
+      if(beams.first->pdg_id() == 2212 && beams.second->pdg_id() == 1000822080){//pPb collisions
          cmenergy = 2.0*beams.first->momentum().pz()*std::sqrt(82.0/208);
       }
 
