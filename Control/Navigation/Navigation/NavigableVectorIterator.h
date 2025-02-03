@@ -92,7 +92,7 @@ class NavigableVectorIterator
   NavigableVectorIterator& operator--(int)
     {
       --m_actualIter;
-      return *this--;
+      return *this;
     }
 
   // data access operations
