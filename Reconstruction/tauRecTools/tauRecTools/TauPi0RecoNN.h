@@ -42,7 +42,7 @@ public:
 
 private:
     // properties of the tool
-    std::string m_OutputPrefix;                   //!
+    std::string m_outputPrefix;                   //!
     std::string m_weightFile_1p1n;                //!
     std::string m_weightFile_1pXn;                //!
     std::string m_weightFile_3pXn;                //!
@@ -51,8 +51,8 @@ private:
     std::size_t m_maxShotPFOs;                    //!
     std::size_t m_maxConvTracks;                  //!
     float m_neutralPFOPtCut;                      //!
-    std::string m_DecayModeName;                  //!
-    // std::array<std::string, 3> m_FourVecDimNames; //!
+    std::string m_decayModeName;                  //!
+    // std::array<std::string, 3> m_fourVecDimNames; //!
   /**
    * @brief retrieve the input variables from a TauJet
    * @param xTau a TauJet object
