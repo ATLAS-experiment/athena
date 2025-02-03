@@ -8,11 +8,6 @@
  E, eta, and phi are set to 0 for 1p0n and 3p0n decay modes.
 */
 
-/*
-* TO DO
-* create the TauPi0RecoNN.h File
-* I so far only changed this line
-*/
 // local include(s)
 #include "tauRecTools/TauPi0RecoNN.h"
 
@@ -26,11 +21,6 @@
 #include <algorithm>
 #include <fstream>
 
-/*
-* TO DO
-* these are doubles, where I later use floats. Is that an issue? No, all good, tu I might want double precision for the four vectors
-* I guess I should change the names of things like TauDecayModeNNVariable and TauDecayModeNNHelper
-*/
 using PFOPtr = const xAOD::PFO *;
 using TrkPtr = const xAOD::TauTrack *;
 using PFOAttributes = xAOD::PFODetails::PFOAttributes;
@@ -45,7 +35,7 @@ TauPi0RecoNN::TauPi0RecoNN(const std::string &name)
     : TauRecToolBase(name)
 {
   // declareProperty("OutputName", m_outputName = "TauPi0FourVec"); // not needed, since we decorate three individual values, instead of one vector, so there's not just 1 Output
-  declareProperty("OutputPrefix", m_OutputPrefix = "pi0_NN_");
+  declareProperty("OutputPrefix", m_outputPrefix = "pi0_NN_");
   declareProperty("WeightFile_1p1n", m_weightFile_1p1n = "");
   declareProperty("WeightFile_1pXn", m_weightFile_1pXn = "");
   declareProperty("WeightFile_3pXn", m_weightFile_3pXn = "");
@@ -54,8 +44,8 @@ TauPi0RecoNN::TauPi0RecoNN(const std::string &name)
   declareProperty("MaxShotPFOs", m_maxShotPFOs = 6);
   declareProperty("MaxConvTracks", m_maxConvTracks = 4);
   declareProperty("NeutralPFOPtCut", m_neutralPFOPtCut = 1.5);
-  declareProperty("DecayModeName", m_DecayModeName = "NNDecayMode"); // needs to be same as m_outputName in TauDecayModeNNClassifier.cxx
-  // declareProperty("FourVecDimNames", m_FourVecDimNames = {"E", "eta", "phi"});
+  declareProperty("DecayModeName", m_decayModeName = "NNDecayMode"); // needs to be same as m_outputName in TauDecayModeNNClassifier.cxx
+  // declareProperty("FourVecDimNames", m_fourVecDimNames = {"E", "eta", "phi"});
 }
 
 TauPi0RecoNN::~TauPi0RecoNN()
@@ -161,7 +151,7 @@ StatusCode TauPi0RecoNN::execute(xAOD::TauJet &xTau) const
   // Read the previously classified decay mode of the tau
   // Decay modes are "1p0n", "1p1n", "1pXn", "3p0n", "3pXn",
   // here they are encoded as 0, 1, 2, 3, 4 (as in TauDecayModeNNClassifier.cxx)
-  const static SG::AuxElement::Accessor<int> accDecayMode(m_DecayModeName); // This can probably also be a ConstAccessor?
+  const static SG::AuxElement::Accessor<int> accDecayMode(m_decayModeName); // This can probably also be a ConstAccessor?
   int decayMode = 7; // 7 is the error mode used as initialisation
   if (accDecayMode.isAvailable(xTau))
   {
@@ -237,7 +227,7 @@ StatusCode TauPi0RecoNN::execute(xAOD::TauJet &xTau) const
   // {
   //   for (int i = 0; i < 3; i++)
   //   {
-  //     outputs[FourVecDimNames[i]] = 0;
+  //     outputs[m_fourVecDimNames[i]] = 0;
   //   }
   // }
 
@@ -246,14 +236,13 @@ StatusCode TauPi0RecoNN::execute(xAOD::TauJet &xTau) const
   // -------
   /*
   * TO DO
-  *  I think, we're currently predicting p not E, but wanna change that. Gotta make sure, this uses whatever the final version of the network is.
-  *  I'm currently just guessing, that the names of the output are going to be c_E, c_eta, and c_phi. E, eta, and phi make sense to me (though they might be like E_pi0 or something?), the c_ prefix I copy pasted from the DecayModeClassifier tool, because I assume that's a convention for these kind of json files or something. Gonna have to check that with Lukas' code (but that will of course also show up in testing)
-  * Maybe add mass to output (pion mass for 1p1n, but not trivial for 1pXn and 3pXn). In the end we wanna decorate TauDecayParticle Objects to the tau, not just the individual values, so for this step of development, I don't really need it. But in the end we do still need a decision on what mass to decorate onto the Xn objects.
+  *  - I think, we're currently predicting p not E, but wanna change that. Gotta make sure, this uses whatever the final version of the network is.
+  *  - I'm currently just guessing, that the names of the output are going to be c_E, c_eta, and c_phi. E, eta, and phi make sense to me (though they might be like E_pi0 or something?), the c_ prefix I copy pasted from the DecayModeClassifier tool, because I assume that's a convention for these kind of json files or something. Gonna have to check that with Lukas' code (but that will of course also show up in testing)
+  *  - Maybe add mass to output (pion mass for 1p1n, but not trivial for 1pXn and 3pXn). In the end we wanna decorate TauDecayParticle Objects to the tau, not just the individual values, so for this step of development, I don't really need it. But in the end we do still need a decision on what mass to decorate onto the Xn objects.
   */
   // Outputs are E, eta, and phi
   // here they are encoded as 0, 1, 2
-  //
-  const std::array<std::string, 3> FourVecDimNames = {"E", "eta", "phi"}; // ideally this shouldn't be "buried" down here in the code, but with declare properties but that doesn't seem to like getting vectors.
+  const std::array<std::string, 3> m_fourVecDimNames = {"E", "eta", "phi"}; // ideally this shouldn't be "buried" down here in the code, but with declare properties but that doesn't seem to like getting vectors.
   std::array<float, 3> pi0fourVec = {}; // = {} should initialize all values in the array to be 0 (which we want for deacy modes without neutral pions)
   if (decayMode != 0 && decayMode != 3) // not 1p0n or 1p3n
   {
@@ -261,13 +250,13 @@ StatusCode TauPi0RecoNN::execute(xAOD::TauJet &xTau) const
     std::string prefix = "c_";
     for (std::size_t i = 0; i < pi0fourVec.size(); ++i)
     {
-      pi0fourVec[i] = outputs.at(prefix + FourVecDimNames[i]);
+      pi0fourVec[i] = outputs.at(prefix + m_fourVecDimNames[i]);
     }
   }
 
   for (std::size_t i = 0; i < pi0fourVec.size(); ++i)
   {
-    const std::string fourVecDimName = m_OutputPrefix + FourVecDimNames[i];
+    const std::string fourVecDimName = m_outputPrefix + m_fourVecDimNames[i];
     const SG::AuxElement::Accessor<float> accPi0(fourVecDimName);
     accPi0(xTau) = pi0fourVec[i];
   }
