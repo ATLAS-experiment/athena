@@ -137,5 +137,8 @@ int main(int argc, char** argv) {
   TEST_FUNCTION(isMonopole)
   TEST_FUNCTION(isTechnicolor)
   std::cout << "========================================" << std::endl;
+  std::cout << ">>>>>>>>>> Nuclear Properties <<<<<<<<<<" << std::endl;
+  TEST_FUNCTION_DOUBLE(baryonNumber)
+ std::cout << "========================================" << std::endl;
   return 0;
 }
