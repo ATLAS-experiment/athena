@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cassert>
@@ -397,12 +397,10 @@ StatusCode BkgStreamsCache::addSubEvts(unsigned int iXing,
       // get the SG container for subevents infos
       xAOD::EventInfoContainer  *subEvCnt (nullptr);
       ATH_CHECK( overEvent->evtStore()->retrieve(subEvCnt, c_pileUpEventInfoContName) );
-      // temporary EI instance to modify BCID before adding the EI
-      xAOD::EventInfo   tmp_ei( *pBkgEvent );
-      tmp_ei.setBCID( BCID );
-      tmp_ei.setEvtStore(pBkgStore);
       // add subevent
-      addSubEvent( overEvent, &tmp_ei, t0BinCenter, m_pileUpEventType, subEvCnt, c_pileUpEventInfoContName );
+      addSubEvent( overEvent, pBkgEvent, t0BinCenter, m_pileUpEventType, subEvCnt, c_pileUpEventInfoContName );
+      subEvCnt->back()->setBCID( BCID );
+      subEvCnt->back()->setEvtStore( pBkgStore );
                
 #ifdef DEBUG_PILEUP
       const xAOD::EventInfo* pStoreInfo(nullptr);
