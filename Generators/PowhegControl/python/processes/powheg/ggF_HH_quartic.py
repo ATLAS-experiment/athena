@@ -156,6 +156,18 @@ class ggF_HH_quartic(PowhegV2):
 
         logger.info('Now attempting to link locally the files needed by this Powheg process')
         try:
+            processtopdir = os.path.join(os.environ["POWHEGPATH"], "POWHEG-BOX-V2", "ggHH_quartic")
+            directories = ["share", "test", "testrun"]
+            for directory in directories:
+                source_path = os.path.join(processtopdir, directory, "form-factor-1.dat")
+                if os.path.isfile(source_path):
+                    link_name = os.path.join(os.getcwd(), "form-factor-1.dat")
+                    try:
+                        os.symlink(source_path, link_name)
+                        logger.info(f"Created link: {link_name} -> {source_path}")
+                        break          
+                    except FileExistsError:
+                        logger.info(f"Link already exists: {link_name}")
             processpythondir = os.path.join(os.environ["POWHEGPATH"], "POWHEG-BOX-V2", "ggHH_quartic", 'python')
             if os.path.isdir(processpythondir):
                 for filename in os.listdir(processpythondir):
@@ -164,9 +176,9 @@ class ggF_HH_quartic(PowhegV2):
                         link_name = os.path.join(os.getcwd(), filename)
                         try:
                             os.symlink(source_path, link_name)
-                            print(f"Created link: {link_name} -> {source_path}")
+                            logger.info(f"Created link: {link_name} -> {source_path}")
                         except FileExistsError:
-                            print(f"Link already exists: {link_name}")
+                            logger.info(f"Link already exists: {link_name}")
             else:
                 os.system("ln -s " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH_quartic/Virtual/events.cdf events.cdf")
                 os.system("ln -s " + os.environ["POWHEGPATH"] + "/POWHEG-BOX-V2/ggHH_quartic/Virtual/creategrid.py creategrid.py")
