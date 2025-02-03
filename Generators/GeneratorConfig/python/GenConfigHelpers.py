@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Get logger
 from AthenaCommon.Logging import logging
@@ -25,9 +25,10 @@ MainGenerators += ["Epos"]
 # ATLAS-specific generators
 MainGenerators += ["ParticleGun"]
 MainGenerators += ["CosmicGenerator", "BeamHaloGenerator"]
-# Heavy ion generators
-MainGenerators += ["AMPT","Superchic","Starlight", "Hijing", "Hydjet"]
+# Heavy ion generators - as a special group to avoid problems in sorting
+HIMainGenerators = ["AMPT","SuperChic","Starlight", "Hijing", "Hydjet"]
 # Reading in fully-formed events
+
 MainGenerators += ["HepMCAscii"]
 
 # Special QED and decay afterburners
@@ -36,7 +37,7 @@ AfterburnerGenerators = ["Photospp", "TauolaPP", "EvtGen", "ParticleDecayer"]
 
 # Set up list of allowed generators. The sample.generators list will be used
 # to set random seeds, determine input config and event files, and report used generators to AMI.
-KnownGenerators = LHEFGenerators + MainGenerators + AfterburnerGenerators
+KnownGenerators = LHEFGenerators + HIMainGenerators +MainGenerators + AfterburnerGenerators
 
 # Note which generators should NOT be sanity tested by the TestHepMC alg
 NoTestHepMCGenerators = ["Superchic","ParticleDecayer", "ParticleGun", "CosmicGenerator", 
@@ -90,7 +91,7 @@ def gen_sortkey(genname):
     
     # Sort mainly in order of generator stage
     genstage = None
-    for istage, gens in enumerate([LHEFGenerators, MainGenerators, AfterburnerGenerators]):
+    for istage, gens in enumerate([LHEFGenerators, HIMainGenerators, MainGenerators,AfterburnerGenerators]):
         if genname in gens:
             genstage = istage
             break
