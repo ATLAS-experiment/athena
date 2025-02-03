@@ -26,7 +26,6 @@ from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
 from JetHitAssociation.JetHitAssociationConfig import JetHitAssociationCfg
 from TrackHitAssignement.TrackHitAssignementAlgCfg import TrackHitAssignementAlg
 
-
 def GetTaggerTrainingMap(inputFlags, jet_col):
     """This function defines the networks used for the different jet collections."""
     if inputFlags.GeoModel.Run >= LHCPeriod.Run4 and "AntiKt10UFOCSSKSoftDropBeta100Zcut10" not in jet_col:
@@ -178,11 +177,21 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow'
     if inputFlags.BTagging.savePixelHits:
         result.merge(JetHitAssociationCfg(inputFlags))
         result.merge(TrackHitAssignementAlg(inputFlags))
-        result.merge(addToAOD(inputFlags, _track_measurement_list("PixelClusters")))
+        result.merge(
+            addToAOD(
+              inputFlags,
+              _track_measurement_list(("ITk" if inputFlags.Detector.GeometryITk else "") + "PixelClusters")
+            )
+        )
     if inputFlags.BTagging.saveSCTHits:
         result.merge(JetHitAssociationCfg(inputFlags))
         result.merge(TrackHitAssignementAlg(inputFlags))
-        result.merge(addToAOD(inputFlags, _track_measurement_list("SCT_Clusters")))
+        result.merge(
+            addToAOD(
+              inputFlags,
+              _track_measurement_list("ITkStripClusters" if inputFlags.Detector.GeometryITk else "SCT_Clusters")
+            )
+        )
 
     return result
 
