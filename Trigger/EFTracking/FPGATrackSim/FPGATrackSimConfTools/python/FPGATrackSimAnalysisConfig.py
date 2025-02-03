@@ -65,10 +65,8 @@ def FPGATrackSimBankSvcCfg(flags):
     FPGATrackSimBankSvc.phiShift = flags.Trigger.FPGATrackSim.phiShift
 
     # These should be configurable. The tag system needs updating though.
-    import FPGATrackSimConfTools.FPGATrackSimTagConfig as FPGATrackSimTagConfig
-    bank_tag = FPGATrackSimTagConfig.getTags(stage='bank')['bank']
-    FPGATrackSimBankSvc.sectorQPtBins = bank_tag['sectorQPtBins']
-    FPGATrackSimBankSvc.qptAbsBinning = bank_tag['qptAbsBinning']
+    FPGATrackSimBankSvc.sectorQPtBins = [-0.001, -0.0005, 0, 0.0005, 0.001]
+    FPGATrackSimBankSvc.qptAbsBinning = False
 
     result.addService(FPGATrackSimBankSvc, create=True, primary=True)
     return result
@@ -82,13 +80,18 @@ def FPGATrackSimRoadUnionToolCfg(flags):
     xBufferBins = flags.Trigger.FPGATrackSim.ActiveConfig.xBufferBins
     yBins = flags.Trigger.FPGATrackSim.ActiveConfig.yBins
     yBufferBins = flags.Trigger.FPGATrackSim.ActiveConfig.yBufferBins
+    yMin = flags.Trigger.FPGATrackSim.ActiveConfig.qptMin
+    yMax = flags.Trigger.FPGATrackSim.ActiveConfig.qptMax
     xMin = flags.Trigger.FPGATrackSim.ActiveConfig.phiMin
     xMax = flags.Trigger.FPGATrackSim.ActiveConfig.phiMax
+    if (not flags.Trigger.FPGATrackSim.oldRegionDefs): ### auto-configure this
+        phiRange = FPGATrackSimDataPrepConfig.getPhiRange(flags)
+        xMin = phiRange[0]
+        xMax = phiRange[1]
+
     xBuffer = (xMax - xMin) / xBins * xBufferBins
     xMin = xMin - xBuffer
     xMax = xMax +  xBuffer
-    yMin = flags.Trigger.FPGATrackSim.ActiveConfig.qptMin
-    yMax = flags.Trigger.FPGATrackSim.ActiveConfig.qptMax
     yBuffer = (yMax - yMin) / yBins * yBufferBins
     yMin -= yBuffer
     yMax += yBuffer
@@ -143,8 +146,14 @@ def FPGATrackSimRoadUnionTool1DCfg(flags):
         for iSlice in range(nSlice):
             tool = CompFactory.FPGATrackSimHough1DShiftTool("Hough1DShift" + str(iSlice)+(("_pt{}".format(ptstep))  if splitpt>1 else ""))
             tool.subRegion = iSlice if nSlice > 1 else -1
-            tool.phiMin = flags.Trigger.FPGATrackSim.Hough1D.phiMin
-            tool.phiMax = flags.Trigger.FPGATrackSim.Hough1D.phiMax
+            xMin = flags.Trigger.FPGATrackSim.Hough1D.phiMin
+            xMax = flags.Trigger.FPGATrackSim.Hough1D.phiMax
+            if (not flags.Trigger.FPGATrackSim.oldRegionDefs): ### auto-configure this
+                phiRange = FPGATrackSimDataPrepConfig.getPhiRange(flags)
+                xMin = phiRange[0]
+                xMax = phiRange[1]
+            tool.phiMin = xMin
+            tool.phiMax = xMax
             tool.qptMin = lowpt
             tool.qptMax = highpt
             tool.nBins = flags.Trigger.FPGATrackSim.Hough1D.xBins

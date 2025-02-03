@@ -3,28 +3,96 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import AthenaLogger
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from math import pi
 
 def getBaseName(flags):
-    if (not (flags.Trigger.FPGATrackSim.baseName == '')):
-        return flags.Trigger.FPGATrackSim.baseName
-    elif (flags.Trigger.FPGATrackSim.region == 0):
-        return 'eta0103phi0305'
-    elif (flags.Trigger.FPGATrackSim.region == 1):
-        return 'eta0709phi0305'
-    elif (flags.Trigger.FPGATrackSim.region == 2):
-        return 'eta1214phi0305'
-    elif (flags.Trigger.FPGATrackSim.region == 3):
-        return 'eta2022phi0305'
-    elif (flags.Trigger.FPGATrackSim.region == 4):
-        return 'eta3234phi0305'
-    elif (flags.Trigger.FPGATrackSim.region == 5):
-        return 'eta0103phi1113'
-    elif (flags.Trigger.FPGATrackSim.region == 6):
-        return 'eta0103phi1921'
-    elif (flags.Trigger.FPGATrackSim.region == 7):
-        return 'eta0103phi3436'
+    if (flags.Trigger.FPGATrackSim.oldRegionDefs):
+        if (not (flags.Trigger.FPGATrackSim.baseName == '')):
+            return flags.Trigger.FPGATrackSim.baseName
+        elif (flags.Trigger.FPGATrackSim.region == 0):
+            return 'eta0103phi0305'
+        elif (flags.Trigger.FPGATrackSim.region == 1):
+            return 'eta0709phi0305'
+        elif (flags.Trigger.FPGATrackSim.region == 2):
+            return 'eta1214phi0305'
+        elif (flags.Trigger.FPGATrackSim.region == 3):
+            return 'eta2022phi0305'
+        elif (flags.Trigger.FPGATrackSim.region == 4):
+            return 'eta3234phi0305'
+        elif (flags.Trigger.FPGATrackSim.region == 5):
+            return 'eta0103phi1113'
+        elif (flags.Trigger.FPGATrackSim.region == 6):
+            return 'eta0103phi1921'
+        elif (flags.Trigger.FPGATrackSim.region == 7):
+            return 'eta0103phi3436'
+        else:
+            return 'default'
     else:
-        return 'default'
+        if (flags.Trigger.FPGATrackSim.region >= 1280 or flags.Trigger.FPGATrackSim.region < 0): return 'default'
+        else:
+            return str(flags.Trigger.FPGATrackSim.region)
+
+def getPhiRange(flags):
+    if (flags.Trigger.FPGATrackSim.oldRegionDefs):
+        if (not (flags.Trigger.FPGATrackSim.baseName == '')):
+            return [0.3,0.5]
+        elif (flags.Trigger.FPGATrackSim.region == 0):
+            return [0.3,0.5]
+        elif (flags.Trigger.FPGATrackSim.region == 1):
+            return [0.3,0.5]            
+        elif (flags.Trigger.FPGATrackSim.region == 2):
+            return [0.3,0.5]            
+        elif (flags.Trigger.FPGATrackSim.region == 3):
+            return [0.3,0.5]            
+        elif (flags.Trigger.FPGATrackSim.region == 4):
+            return [0.3,0.5]            
+        elif (flags.Trigger.FPGATrackSim.region == 5):
+            return [1.1,1.3]                        
+        elif (flags.Trigger.FPGATrackSim.region == 6):
+            return [1.9,2.1]                                    
+        elif (flags.Trigger.FPGATrackSim.region == 7):
+            return [3.4,3.6]
+        else:
+            return [0.3,0.5]
+    else:
+        binSize = pi/16
+        phiBin=flags.Trigger.FPGATrackSim.region & 0x1f
+        if (flags.Trigger.FPGATrackSim.region >= 1280 or flags.Trigger.FPGATrackSim.region < 0): return [binSize*2,binSize*3]
+        else:
+            return [binSize*phiBin,binSize*(phiBin+1)]
+
+def getEtaRange(flags):
+    if (flags.Trigger.FPGATrackSim.oldRegionDefs):
+        if (not (flags.Trigger.FPGATrackSim.baseName == '')):
+            return [0.1,0.3]
+        elif (flags.Trigger.FPGATrackSim.region == 0):
+            return [0.1,0.3]
+        elif (flags.Trigger.FPGATrackSim.region == 1):
+            return [0.7,0.9]            
+        elif (flags.Trigger.FPGATrackSim.region == 2):
+            return [1.2,1.4]
+        elif (flags.Trigger.FPGATrackSim.region == 3):
+            return [2.0,2.2]
+        elif (flags.Trigger.FPGATrackSim.region == 4):
+            return [3.2,3.4]
+        elif (flags.Trigger.FPGATrackSim.region == 5):
+            return [0.1,0.3]
+        elif (flags.Trigger.FPGATrackSim.region == 6):
+            return [0.1,0.3]
+        elif (flags.Trigger.FPGATrackSim.region == 7):
+            return [0.1,0.3]
+        else:
+            return [0.3,0.5]
+    else:
+        if (flags.Trigger.FPGATrackSim.region >= 1280 or flags.Trigger.FPGATrackSim.region < 0): return [0.2,0.4]
+        else:
+            binSize = 0.2
+            side = (flags.Trigger.FPGATrackSim.region >> 5) & 0x1 ### 1 is positive side, 0 negative side
+            etaBin = (flags.Trigger.FPGATrackSim.region >> 6) & 0x1f
+            if (side): return [binSize*etaBin,binSize*(etaBin+1)]
+            else: return [-binSize*(etaBin+1),-binSize*etaBin]
+
+
 
 def FPGATrackSimRawLogicCfg(flags):
     result=ComponentAccumulator()
@@ -152,6 +220,15 @@ def FPGATrackSimEventSelectionCfg(flags):
     eventSelector.sampleType = flags.Trigger.FPGATrackSim.sampleType
     eventSelector.skipRegionCheck = flags.Trigger.FPGATrackSim.pipeline.startswith('F-1') # if set to True, it will essentially run for the whole detector
     eventSelector.withPU = False
+    eventSelector.oldRegionDefs = flags.Trigger.FPGATrackSim.oldRegionDefs
+
+    ### these only get used if we use the new region definitions
+    eventSelector.mind0 = flags.Trigger.FPGATrackSim.d0min
+    eventSelector.maxd0 = flags.Trigger.FPGATrackSim.d0max
+    eventSelector.minz0 = flags.Trigger.FPGATrackSim.z0min
+    eventSelector.maxz0 = flags.Trigger.FPGATrackSim.z0max    
+    eventSelector.minqOverPt = flags.Trigger.FPGATrackSim.qOverPtmin
+    eventSelector.maxqOverPt = flags.Trigger.FPGATrackSim.qOverPtmax
     result.addService(eventSelector, create=True, primary=True)
     return result
 
