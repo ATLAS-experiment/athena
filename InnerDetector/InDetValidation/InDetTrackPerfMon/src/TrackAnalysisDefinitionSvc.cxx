@@ -26,8 +26,8 @@
 StatusCode TrackAnalysisDefinitionSvc::initialize()
 {
 
-  ATH_MSG_INFO( "Initialising  using TEST = " << m_testTypeStr.value() <<
-                " and REFERENCE = " << m_refTypeStr.value() );
+  ATH_MSG_DEBUG( "Initialising  using TEST = " << m_testTypeStr.value() <<
+                 " and REFERENCE = " << m_refTypeStr.value() );
 
   /// setting flags
   m_isTestTrigger = m_testTypeStr.value().find("Trigger") != std::string::npos;
@@ -43,11 +43,11 @@ StatusCode TrackAnalysisDefinitionSvc::initialize()
   m_useTrigger = m_isTestTrigger or m_isRefTrigger;
   m_useEFTrigger = m_isTestEFTrigger or m_isRefEFTrigger;
   m_useTruth   = m_isTestTruth or m_isRefTruth or m_matchingType.value().find("EFTruthMatch") != std::string::npos;;
-  ATH_MSG_INFO("USE TRUTH? " << m_useTruth);
+  ATH_MSG_DEBUG( "USE TRUTH? " << m_useTruth );
   m_useOffline = m_isTestOffline or m_isRefOffline;
 
   /// Looping all requested chains and filling configured chains list (to be processed)
-  if( m_useTrigger and not m_useEFTrigger) {
+  if( m_doTrigNavigation ) {
     for( size_t ic=0 ; ic<m_chainNames.size() ; ic++ ) {
       ATH_MSG_DEBUG( "Input chain : " << m_chainNames[ic] );
       m_configuredChains.push_back( m_chainNames[ic] );

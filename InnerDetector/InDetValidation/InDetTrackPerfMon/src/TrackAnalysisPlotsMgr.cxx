@@ -56,11 +56,11 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   if( m_trkAnaDefSvc->plotTrackMultiplicities() ) {
     m_plots_nTracks_vsTest = std::make_unique< NtracksPlots >(
         this, "Tracks/Multiplicities", m_anaTag, m_trkAnaDefSvc->testTag(),
-        m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger(),
+        m_trkAnaDefSvc->doTrigNavigation(),
         true, m_trkAnaDefSvc->hasFullPileupTruth() );
     m_plots_nTracks_vsRef = std::make_unique< NtracksPlots >(
         this, "Tracks/Multiplicities", m_anaTag, m_trkAnaDefSvc->referenceTag(),
-        m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() );
+        m_trkAnaDefSvc->doTrigNavigation() );
   }
 
   /// Efficiency plots

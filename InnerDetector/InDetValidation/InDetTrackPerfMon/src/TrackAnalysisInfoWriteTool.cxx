@@ -76,7 +76,7 @@ StatusCode IDTPM::TrackAnalysisInfoWriteTool::write(
   wh->push_back( std::make_unique< SG::AuxElement >() );
 
   /// Filling Trigger navigation info
-  if( m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() ) {
+  if( m_trkAnaDefSvc->doTrigNavigation() ) {
     chainAcc( *(wh->back()) ) = chain;
     roiIdxAcc( *(wh->back()) ) = roiIdx;
     roiStrAcc( *(wh->back()) ) = roiStr;

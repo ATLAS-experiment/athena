@@ -43,6 +43,7 @@ public:
   virtual bool useEFTrigger() const override { return m_useEFTrigger; }
   virtual bool useTruth() const override { return m_useTruth; }
   virtual bool useOffline() const override { return m_useOffline; }
+  virtual bool doTrigNavigation() const override { return m_doTrigNavigation; }
 
   virtual bool isTestTrigger() const override { return m_isTestTrigger; }
   virtual bool isTestEFTrigger() const override { return m_isTestEFTrigger; }
@@ -92,6 +93,7 @@ private:
 
   StringProperty m_testTypeStr { this, "TestType", "Offline", "Type of track collection to be used as test" }; 
   StringProperty m_refTypeStr { this, "RefType", "Truth", "Type of track collection to be used as reference" }; 
+  BooleanProperty m_doTrigNavigation { this, "doTrigNavigation", false, "Run Trigger Navigation monitoring" };
 
   bool m_useTrigger{}, m_useEFTrigger{}, m_useTruth{}, m_useOffline{};
   bool m_isTestTrigger{}, m_isTestEFTrigger{}, m_isTestTruth{}, m_isTestOffline{};

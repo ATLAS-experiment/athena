@@ -33,6 +33,7 @@ def __createIDTPMTrkAnaConfigFlags():
     # Test-Reference collections properties
     icf.addFlag( "TestType", "Offline" )
     icf.addFlag( "RefType", "Truth" )
+    icf.addFlag( "doTrigNavigation", False )
     icf.addFlag( "TrigTrkKey"    , "" )
     icf.addFlag( "OfflineTrkKey" , "InDetTrackParticles" )
     icf.addFlag( "TruthPartKey"  , "TruthParticles" )
@@ -185,10 +186,20 @@ def initializeIDTPMTrkAnaConfigFlags(flags):
 
             # set flags from values in trkAnaDict
             for fname, fvalue in trkAnaDict.items():
+                ## skipping comments
                 if fname.startswith( "_comment" ): continue
+                ## updating flags from json items
                 setattr( flags.PhysVal.IDTPM, 
                         trkAnaName+"."+fname, fvalue )
 
+            ## overwrite doTrigNavigation flag if test or reference
+            ## is "Trigger" (not "EFTrigger")
+            types = [ getattr( flags.PhysVal.IDTPM, trkAnaName+".TestType" ),
+                      getattr( flags.PhysVal.IDTPM, trkAnaName+".RefType" ) ]
+            if "Trigger" in types :
+                setattr( flags.PhysVal.IDTPM, trkAnaName+".doTrigNavigation", True )
+
     if trkAnaNames:
         flags.PhysVal.IDTPM.trkAnaNames = trkAnaNames
+
     return flags
