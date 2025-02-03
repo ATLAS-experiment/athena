@@ -45,7 +45,7 @@ StatusCode IDTPM::ResolutionPlots::bookPlots()
 {
   ATH_MSG_DEBUG( "Booking resolution plots in " << getDirectory() );
 
-  for( unsigned int i=0; i<NPARAMS; i++ ) {
+  for( unsigned int i=1; i<NPARAMS; i++ ) {
 
     ATH_CHECK( retrieveAndBook( m_pull[i], "pull_"+m_paramName[i] ) );
     ATH_CHECK( retrieveAndBook( m_res[i], "res_"+m_paramName[i] ) );
@@ -93,7 +93,7 @@ StatusCode IDTPM::ResolutionPlots::fillPlots(
   float testErrorP[ NPARAMS ];
   getTrackParameters( ptest, testP, testErrorP );
 
-  for( unsigned int i=0; i<NPARAMS; i++ ) {
+  for( unsigned int i=1; i<NPARAMS; i++ ) {
 
     float residual = testP[i] - refP[i];
     if( i==PHI ) residual = deltaPhi( ptest, pref ); // angular difference
@@ -144,7 +144,7 @@ void IDTPM::ResolutionPlots::finalizePlots()
   IDPVM::ResolutionHelper resolutionHelper;
   IDPVM::ResolutionHelper::methods thisMethod = IDPVM::ResolutionHelper::methods( m_method );
 
-  for( unsigned int i=0; i<NPARAMS; i++ ) {
+  for( unsigned int i=1; i<NPARAMS; i++ ) {
     for( unsigned int j=0; j<NPARAMSOUT; j++ ) {
       resolutionHelper.makeResolutions( m_resHelper[i][j], m_reswidth[i][j], m_resmean[i][j], thisMethod );
       resolutionHelper.makeResolutions( m_pullHelper[i][j], m_pullwidth[i][j], m_pullmean[i][j], thisMethod );
@@ -171,6 +171,7 @@ void IDTPM::ResolutionPlots::getTrackParameters(
   params[ PT ] = pT( p ) / Gaudi::Units::GeV;
   params[ Z0SIN ] = z0SinTheta( p );
   params[ ETA ] = eta( p );
+  params[ INCLUSIVE ] = 1;
 
   /// errors
   errors[ D0 ] = error( p, Trk::d0 );
@@ -182,6 +183,7 @@ void IDTPM::ResolutionPlots::getTrackParameters(
   errors[ PT ] = pTError( p ) / Gaudi::Units::GeV;
   errors[ Z0SIN ] = z0SinThetaError( p );
   errors[ ETA ] = etaError( p );
+  errors[ INCLUSIVE ] = 0;
 }
 
 template void IDTPM::ResolutionPlots::getTrackParameters< xAOD::TrackParticle >(

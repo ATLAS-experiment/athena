@@ -53,8 +53,8 @@ namespace IDTPM {
     unsigned int m_method{};
     
     enum Param {
-      PT, ETA, D0, Z0, QOVERP, QOVERPT, THETA, PHI, Z0SIN, NPARAMS,
-      NPARAMSOUT = 2 // Plot only vs pt and eta
+      INCLUSIVE, PT, ETA, D0, Z0, QOVERP, QOVERPT, THETA, PHI, Z0SIN, NPARAMS,
+      NPARAMSOUT = 3 // Plot only vs pt and eta and inclusive
     };
 
     /// get the track parameters
@@ -62,7 +62,7 @@ namespace IDTPM {
     void getTrackParameters( const PARTICLE& p, float* params, float* errors );
 
     std::string m_paramName[ NPARAMS ] = {
-      "pt", "eta", "d0", "z0", "qoverp", "ptqopt", "theta", "phi", "z0sin"
+      "inclusive", "pt", "eta", "d0", "z0", "qoverp", "ptqopt", "theta", "phi", "z0sin"
     };
 
     TH1* m_pull[ NPARAMS ]{};
