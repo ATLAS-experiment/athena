@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -20,8 +20,7 @@
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbTypeInfo.h"
 
-// STL include files
-#include <memory>
+
 /*
  *  POOL namespace declaration
  */
@@ -50,23 +49,14 @@ namespace pool  {
     /// Data access type (Default to READ)
     DbAccessMode      m_mode;
 
-  private:
-    /// Copy constructor
-    DbIter(const DbIter& c) : m_obj(c.m_obj), m_token(c.m_token), m_type(c.m_type),
-      m_mode(c.m_mode)                        {                           }
-    /// Equality operator
-    bool operator==(const DbIter<T>& iter)   const 
-    {    return m_obj.ptr() == iter.m_obj.ptr();                          }
-    /// Assignment operator
-    DbIter& operator=(const DbIter& copy)     {
-      m_cnt     = copy.m_cnt;
-      m_obj     = copy.m_obj;
-      m_mode    = copy.m_mode;
-      m_token   = copy.m_token;
-      m_type    = copy.m_type;
-      return *this;
-    }
   public:
+    /// Copy constructor
+    DbIter(const DbIter& c) = delete;
+    /// Equality operator
+    bool operator==(const DbIter<T>& iter) const = delete;
+    /// Assignment operator
+    DbIter& operator=(const DbIter& copy) = delete;
+
     /// Constructor with initializing arguments
     DbIter(DbAccessMode mode=pool::READ) : m_token(), m_type(0), m_mode(mode) { }
     /// Destructor
