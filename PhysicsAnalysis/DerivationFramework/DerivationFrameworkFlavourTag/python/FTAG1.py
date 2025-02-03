@@ -102,7 +102,6 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     FtagBaseContent.add_baseline_slimming_allvariables(FTAG1SlimmingHelper)
 
     FTAG1SlimmingHelper.AllVariables += [
-            "CaloCalFwdTopoTowers",
             "InDetLargeD0TrackParticles",
             "AntiKt4EMPFlowJets",
             "AntiKt4UFOCSSKJets",
