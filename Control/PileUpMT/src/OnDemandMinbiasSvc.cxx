@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "OnDemandMinbiasSvc.h"
@@ -21,12 +21,8 @@
 #include "AthenaKernel/IAddressProvider.h"
 #include "AthenaKernel/IProxyProviderSvc.h"
 #include "CxxUtils/FastReseededPRNG.h"
-#include "EventInfo/EventID.h"
-#include "EventInfo/EventInfo.h"
 #include "SGTools/CurrentEventStore.h"
-#include "xAODEventInfo/EventInfo.h"
 
-namespace rv = ranges::views;
 
 inline std::string CLIDToString(const CLID& clid) {
   return boost::core::demangle(CLIDRegistry::CLIDToTypeinfo(clid)->name());

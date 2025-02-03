@@ -11,21 +11,13 @@
 #include <fmt/ostream.h>
 #include <unistd.h>
 
-#include <array>
 #include <boost/core/demangle.hpp>
 #include <chrono>
 #include <range/v3/all.hpp>
-#include <tuple>
-
-#include "AthenaKernel/RNGWrapper.h"
-#include "CLHEP/Random/RandPoisson.h"
-#include "CLHEP/Random/RandomEngine.h"
-#include "EventInfo/EventID.h"
 #include "EventInfo/EventInfo.h"
-#include "EventInfo/PileUpEventInfo.h"
+
 #include "PileUpTools/PileUpHashHelper.h"
 #include "PileUpTools/PileUpMisc.h"
-#include "src/OnDemandMinbiasSvc.h"
 #include "xAODEventInfo/EventAuxInfo.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODEventInfo/EventInfoAuxContainer.h"
