@@ -44,9 +44,6 @@ namespace CP
       const xAOD::JetContainer *smallRJets = nullptr;
       ATH_CHECK(m_smallRJetHandle.retrieve(smallRJets, sys));
 
-      // fill workContainer with "views" of the inContainer
-      auto workContainer = std::make_unique<ConstDataVector<xAOD::JetContainer>>();
-
       // loop over jets
       for (xAOD::Jet *jet : *reclusteredJets)
       {  
