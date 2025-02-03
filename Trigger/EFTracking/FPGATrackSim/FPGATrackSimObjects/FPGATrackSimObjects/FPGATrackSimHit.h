@@ -100,10 +100,14 @@ public:
     // To get the actual local coordinate, use the float getCoord functions instead.
     void setPhiIndex(unsigned v) { m_phiIndex = v; }
     void setEtaIndex(unsigned v) { m_etaIndex = v; }
+    void setCentroidPhiIndex(float v) { m_centroidPhiIndex = v; }
+    void setCentroidEtaIndex(float v) { m_centroidEtaIndex = v; }
     void setPhiCoord(float v) { m_phiCoord = v; }
     void setEtaCoord(float v) { m_etaCoord = v; }
     unsigned getPhiIndex() const { return m_phiIndex; }
     unsigned getEtaIndex() const { return m_etaIndex; }
+    float getCentroidPhiIndex() const { return m_centroidPhiIndex; }
+    float getCentroidEtaIndex() const { return m_centroidEtaIndex; }
     float getPhiCoord() const { return m_phiCoord; }
     float getEtaCoord() const { return m_etaCoord; }
 
@@ -210,6 +214,8 @@ protected:
     // --- Local Coordinates ---
     int m_phiIndex = -1; // phi index for pixel, strip for strip
     int m_etaIndex = -1; // eta index for pixel, row for strip
+    float m_centroidPhiIndex = -1; // centroid's phi index for pixel, strip for strip
+    float m_centroidEtaIndex = -1; // centroid's eta index for pixel, row for strip
     float m_phiCoord = -999; // local position along phi direction
     float m_etaCoord = -999; // local position along eta direction
 
