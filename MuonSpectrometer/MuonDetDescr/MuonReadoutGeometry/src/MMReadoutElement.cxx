@@ -45,7 +45,7 @@
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
 
 
-#define THROW_EXCEPTION(MSG)                                                                            \
+#define THROW_EXCEPTION_MM(MSG)                                                                            \
      {                                                                                                  \
         std::stringstream sstr{};                                                                       \
         sstr<<"MMReadoutElement - "<<idHelperSvc()->toStringDetEl(identify())<<" "<<__LINE__<<": ";   \
@@ -104,7 +104,7 @@ namespace MuonGM {
             }
             ++m_nlayers;
             if (m_nlayers > 4) {
-                THROW_EXCEPTION("number of MM layers > 4: increase transform array size" );
+                THROW_EXCEPTION_MM("number of MM layers > 4: increase transform array size" );
             }
             m_Xlg[m_nlayers - 1] =  child.transform;
             // save layer dimensions
@@ -126,7 +126,7 @@ namespace MuonGM {
         }
     
         if (!foundShape) {
-            THROW_EXCEPTION(" failed to initialize dimensions of this chamber " );
+            THROW_EXCEPTION_MM(" failed to initialize dimensions of this chamber " );
         }
     }
 
@@ -139,11 +139,11 @@ namespace MuonGM {
       
         SmartIF<IGeoDbTagSvc> geoDbTag{Gaudi::svcLocator()->service("GeoDbTagSvc")};
         if (!geoDbTag) {
-            THROW_EXCEPTION("Could not locate GeoDbTagSvc");
+            THROW_EXCEPTION_MM("Could not locate GeoDbTagSvc");
         }
         SmartIF<IRDBAccessSvc> accessSvc{Gaudi::svcLocator()->service(geoDbTag->getParamSvcName())};
         if (!accessSvc) {            
-            THROW_EXCEPTION("Could not locate " << geoDbTag->getParamSvcName() );
+            THROW_EXCEPTION_MM("Could not locate " << geoDbTag->getParamSvcName() );
         }
         const char sector_l = getStationName()[2];
         IRDBRecordset_ptr wmmRec = accessSvc->getRecordsetPtr("WMM","","");
@@ -185,7 +185,7 @@ namespace MuonGM {
                 Identifier id = m_idHelper.channelID(identify(), m_ml, il + 1, 1);
                 int chMax = m_idHelper.channelMax(id);
                 if (chMax < 0) {
-                    THROW_EXCEPTION("MMReadoutElement -- Max number of strips not a valid value" );
+                    THROW_EXCEPTION_MM("MMReadoutElement -- Max number of strips not a valid value" );
                 }
                 MuonChannelDesign& design = m_etaDesign[il];
           
@@ -220,13 +220,13 @@ namespace MuonGM {
     
     void MMReadoutElement::initDesign() {
         if (m_ml < 1 || m_ml > 2) {
-           THROW_EXCEPTION("MMReadoutElement -- Unexpected Multilayer: m_ml= " << m_ml );
+           THROW_EXCEPTION_MM("MMReadoutElement -- Unexpected Multilayer: m_ml= " << m_ml );
            return;
        }
        // Get the detector configuration.
        SmartIF<IGeoDbTagSvc> geoDbTag{Gaudi::svcLocator()->service("GeoDbTagSvc")};
        if (!geoDbTag) {
-            THROW_EXCEPTION("Could not locate GeoDbTagSvc");
+            THROW_EXCEPTION_MM("Could not locate GeoDbTagSvc");
        }
        if (geoDbTag->getSqliteReader()) {
             initDesignSqLite();
@@ -262,7 +262,7 @@ namespace MuonGM {
             Identifier id = m_idHelper.channelID(identify(), m_ml, il + 1, 1);
             int chMax = m_idHelper.channelMax(id);
             if (chMax < 0) {
-                THROW_EXCEPTION("MMReadoutElement -- Max number of strips not a valid value" );
+                THROW_EXCEPTION_MM("MMReadoutElement -- Max number of strips not a valid value" );
             }
             MuonChannelDesign& design = m_etaDesign[il];
         
