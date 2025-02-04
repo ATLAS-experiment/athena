@@ -241,6 +241,16 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags):
     if flags.Trigger.FPGATrackSim.GenScan.layerStudy:
         RoadUnion.noHitFilter=True
         tool.binningOnly=True
+    return result
+
+def FPGATrackSimRoadUnionToolGNNCfg(flags):
+    result = ComponentAccumulator()
+    RF = CompFactory.FPGATrackSimRoadUnionTool()
+
+    patternRecoTool = CompFactory.FPGATrackSimGNNPatternRecoTool()
+    
+    RF.tools = [patternRecoTool]
+    result.addPublicTool(RF, primary=True)
 
     return result
 
@@ -378,6 +388,8 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
         theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionTool1DCfg(flags))
     elif (flags.Trigger.FPGATrackSim.ActiveConfig.genScan):
         theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolGenScanCfg(flags))
+    elif (flags.Trigger.FPGATrackSim.ActiveConfig.GNN):
+        theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolGNNCfg(flags))
     else:
         theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolCfg(flags))
 
@@ -471,7 +483,6 @@ if __name__ == "__main__":
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
     flags.fillFromArgs()
 
-    assert not flags.Trigger.FPGATrackSim.pipeline.startswith('F-4'),"ERROR You are trying to run an F-4* pipeline! This is not yet supported!"
     assert not flags.Trigger.FPGATrackSim.pipeline.startswith('F-5'),"ERROR You are trying to run an F-5* pipeline! This is not yet supported!"
 
     if (flags.Trigger.FPGATrackSim.pipeline.startswith('F-1')):
@@ -489,6 +500,10 @@ if __name__ == "__main__":
         flags.Trigger.FPGATrackSim.Hough.phiRoadFilter = False
         flags.Trigger.FPGATrackSim.Hough.hough1D = False
         flags.Trigger.FPGATrackSim.Hough.hough = True
+    elif (flags.Trigger.FPGATrackSim.pipeline.startswith('F-4')):
+        print("You are trying to run an F-4* pipeline! I am auto-configuring the GNN pattern recognition for you. Whether you wanted to or not")
+        flags.Trigger.FPGATrackSim.Hough.GNN = True
+        flags.Trigger.FPGATrackSim.Hough.chi2cut = 25 # All of the track candidates have chi2 values around 20 for some reason. Needs further investigation. For now move the default cut value to 25
     elif (flags.Trigger.FPGATrackSim.pipeline.startswith('F-6')):
         print("You are trying to run an F-6* pipeline! I am auto-configuring the Inside-Out for you. Whether you wanted to or not")
         flags.Trigger.FPGATrackSim.Hough.genScan=True
@@ -533,6 +548,9 @@ if __name__ == "__main__":
 
        if (flags.Trigger.FPGATrackSim.Hough.genScan):
            acc.addService(CompFactory.THistSvc(Output = ["GENSCAN DATAFILE='genscan.root', OPT='RECREATE'"]))
+
+       if (flags.Trigger.FPGATrackSim.Hough.GNN):
+           acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimGNNOUTPUT DATAFILE='GNNRootOutput.root', OPT='RECREATE'"]))
        
        if not flags.Trigger.FPGATrackSim.wrapperFileName:
            from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg

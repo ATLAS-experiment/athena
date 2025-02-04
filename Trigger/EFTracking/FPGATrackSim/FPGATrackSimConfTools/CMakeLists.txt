@@ -78,3 +78,10 @@ atlas_add_test( FPGATrackSim_F210_test # TODO: Figure out why we get this many e
                 LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*|.*KalmanRefitDirectKalmanFitterActor.*|.*ERROR KalmanFilter failed.*|.*WARNING FPE.*FPGATrackSimProtoTackFitAlg.*" # ACTS (C)KF related errors
                 POST_EXEC_SCRIPT noerror.sh 
                 PROPERTIES TIMEOUT 600 )
+
+atlas_add_test( FPGATrackSim_F410_test
+                SCRIPT FPGATrackSim_F410.sh
+                PRIVATE_WORKING_DIRECTORY
+                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*" # ACTS (C)KF related errors
+                POST_EXEC_SCRIPT noerror.sh 
+                PROPERTIES TIMEOUT 600 )
