@@ -79,9 +79,16 @@ namespace JiveXML {
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
+#if defined(__clang__) && __clang_major__ >= 19
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
+#endif
     //Now try pinging the server
     clnt_stat ret = clnt_call(m_client, NULLPROC, (xdrproc_t)xdr_void, NULL,
                              (xdrproc_t)xdr_void, NULL, GetTimeout());
+#if defined(__clang__) && __clang_major__ >= 19
+# pragma clang diagnostic pop
+#endif
 #if __GNUC__ >= 8
 # pragma GCC diagnostic pop
 #endif
