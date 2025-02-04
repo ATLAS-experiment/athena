@@ -12,7 +12,6 @@
 # art-output: mem.full.*
 # art-output: runargs.*
 # art-output: *.pkl
-# art-output: *Config.txt
 
 export ATHENA_CORE_NUMBER=8
 
@@ -30,7 +29,6 @@ Overlay_tf.py \
 --conditionsTag OFLCOND-MC16-SDR-RUN2-12 \
 --geometryVersion ATLAS-R2-2016-01-00-01 \
 --preInclude 'all:Campaigns.MC20e' \
---postInclude 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
 --postExec 'with open("ConfigOverlay.pkl", "wb") as f: cfg.store(f)' \
 --imf False
 

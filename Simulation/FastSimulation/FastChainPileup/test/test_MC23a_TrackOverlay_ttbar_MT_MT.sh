@@ -6,7 +6,6 @@
 # art-include: 24.0/Athena
 # art-output: log.*
 # art-output: *.pkl
-# art-output: *.txt
 # art-output: RDO.pool.root
 # art-output: AOD.pool.root
 # art-architecture: '#x86_64-intel'
@@ -31,7 +30,7 @@ Overlay_tf.py \
    --digiSeedOffset1 511 \
    --digiSeedOffset2 727 \
    --preInclude 'Campaigns.MC23a' \
-   --postInclude 'PyJobTransforms.UseFrontier' 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
+   --postInclude 'PyJobTransforms.UseFrontier' \
    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-07' \
    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
    --preExec 'ConfigFlags.Overlay.doTrackOverlay=True;' \
