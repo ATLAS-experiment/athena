@@ -106,10 +106,16 @@ static const int JPSI = 443;
 static const int B0 = 511;
 static const int BCPLUS = 541;
 static const int PROTON = 2212;
+static const int NEUTRON = 2112;
 static const int LAMBDA0 = 3122;
 static const int LAMBDACPLUS = 4122;
 static const int LAMBDAB0 = 5122;
 static const int PSI2S = 20443;
+
+static const int LEAD = 1000822080;
+static const int OXYGEN = 1000080160;
+static const int NEON = 1000100200;
+
 /// PDG rule 8:
 /// The pomeron and odderon trajectories and a generic reggeon trajectory
 /// of states in QCD areassigned codes 990, 9990, and 110 respectively
@@ -572,14 +578,20 @@ template<class T> inline bool isGenericMultichargedParticle(const T& p){return i
 template<> inline bool isGenericMultichargedParticle(const DecodedPID& p){return (p.ndigits() == 8 && (p(0) == 1 || p(0) == 2) && p(1) == 0 && p(2) == 0 && p(7) == 0);}
 template<> inline bool isGenericMultichargedParticle(const int& p){ auto value_digits = DecodedPID(p); return isGenericMultichargedParticle(value_digits);}
 
-/// PDG rule 16:
-/// Nuclear codes are given as 10-digit numbers±10LZZZAAAI. For a (hyper)nucleus
-/// consistingofnpprotons,nnneutrons andnΛΛ’s,A=np+nn+nΛgives the total baryon number,
-/// Z=np the total charge andL=nΛthe total number of strange quarks.Igives the isomerlevel,
-/// withI= 0corresponding to the ground state andI >0to excitations, see [2], wherestates
-/// denotedm,n,p,qtranslate toI= 1–4. As examples, the deuteron is 1000010020 and 235U is
-/// 1000922350. To avoid ambiguities, nuclear codes should not be applied to a singlehadron,
-/// like p,n or Λ0, where quark-contents-based codes already exist.
+/// PDG rule 16
+/// Nuclear codes are given as 10-digit numbers ±10LZZZAAAI.
+/// For a (hyper)nucleus consisting of n_p protons, n_n neutrons and
+/// n_Λ Λ’s:
+/// A = n_p + n_n + n_Λ gives the total baryon number,
+/// Z = n_p gives the total charge,
+/// L = n_Λ gives the total number of strange quarks.
+/// I gives the isomer level, with I= 0 corresponding to the ground
+/// state and I > 0 to excitations, see
+/// [http://www.nndc.bnl.gov/amdc/web/nubase en.html], where states
+/// denoted m, n, p ,q translate to I= 1–4. As examples, the deuteron
+/// is 1000010020 and 235U is 1000922350. To avoid ambiguities,
+/// nuclear codes should not be applied to a single hadron, like p, n or
+/// Λ^0, where quark-contents-based codes already exist.
 template<class T> inline bool isNucleus(const T& p){return isNucleus(p->pdg_id());}
 template<> inline bool isNucleus(const DecodedPID& p){
   if (std::abs(p.pid()) == PROTON) return true;
@@ -894,7 +906,7 @@ template<> inline int charge3(const DecodedPID& p) {
   if (!classified && isBaryon(p)) { classified = true; nq = 3; }
   if (!classified && isTetraquark(p)){ return triple_charge.at(p(3)) + triple_charge.at(p(4)) - triple_charge.at(p(6)) - triple_charge.at(p(7)); }
   if (!classified && isPentaquark(p)){ return triple_charge.at(p(3)) + triple_charge.at(p(4)) + triple_charge.at(p(5)) + triple_charge.at(p(6)) - triple_charge.at(p(7)); }
-  if (!classified && isNucleus(p)) { classified = true; nq=0; result = 3*(p(3)*100 + p(4)*10 + p(5)) + (-1)*p(2);}
+  if (!classified && isNucleus(p)) { return 3*numberOfProtons(p);}
   if (!classified && isSUSY(p)) {
     nq = 0;
     auto pp = p.shift(1);
@@ -999,7 +1011,9 @@ template<> inline std::vector<int> containedQuarks(const int& p) {
   else if (isBaryon(pp)) { for (size_t digit = 1; digit < 4; ++digit) { quarks.push_back(*(pp.second.rbegin() + digit)); } }
   else if (isTetraquark(pp)) { for (size_t digit = 1; digit < 5; ++digit) { quarks.push_back(*(pp.second.rbegin() + digit)); } }
   else if (isPentaquark(pp)) { for (size_t digit = 1; digit < 6; ++digit) { quarks.push_back(*(pp.second.rbegin() + digit)); } }
-  else if (isNucleus(pp)) { quarks.push_back(2); quarks.push_back(1); } // FIXME Updates for nuclei will be done in a follow-up MR
+  else if (isNucleus(pp)) { const int A = std::abs(baryonNumber3(pp)/3); const int Z = std::abs(numberOfProtons(pp)); const int L = std::abs(numberOfLambdas(pp));
+    const int n_uquarks = A + Z; const int n_dquarks = 2*A - Z - L; const int n_squarks = L;
+    quarks.reserve(3*A); quarks.insert(quarks.end(), n_dquarks, 1); quarks.insert(quarks.end(), n_uquarks, 2); quarks.insert(quarks.end(), n_squarks, 3); }
   else if (isSUSY(pp)) { // APID SUSY case
     pp = pp.shift(1);
     if ( pp.ndigits() > 1 ) { // skip squarks
