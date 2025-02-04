@@ -44,6 +44,7 @@ namespace CP {
 
   JetTileCorrectionTool :: JetTileCorrectionTool( const std::string& name )
     : asg::AsgMetadataTool( name ),
+      m_RJET(0),
       m_appliedSystematics(nullptr)
   {
     declareProperty("CorrectionFileName", m_rootFileName="JetTileCorrection/JetTile_pFile_010216.root", "Parametrization file");
