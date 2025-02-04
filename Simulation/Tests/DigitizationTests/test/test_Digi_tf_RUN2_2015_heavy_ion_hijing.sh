@@ -19,7 +19,7 @@ Digi_tf.py \
     --maxEvents 10 \
     --skipEvents 0 \
     --preInclude 'all:Campaigns.Run2_2015_HeavyIons' \
-    --postExec 'HITtoRDO:cfg.getCondAlgo("TileSamplingFractionCondAlg").G4Version=-1;cfg.addEventAlgo(CompFactory.JobOptsDumperAlg(FileName="CAJO.txt"))' \
+    --postExec 'HITtoRDO:cfg.getCondAlgo("TileSamplingFractionCondAlg").G4Version=-1;' \
     --postInclude 'all:PyJobTransforms.UseFrontier,MCTruthSimAlgs.MCTruthSimAlgsConfig.MergeHijingParsCfg,PixelConditionsAlgorithms.PixelConditionsConfig.PostInclude_UsePixelModuleLevelMask' \
     --geometryVersion ATLAS-R2-2015-03-01-00 \
     --conditionsTag all:OFLCOND-RUN12-SDR-31-02 \

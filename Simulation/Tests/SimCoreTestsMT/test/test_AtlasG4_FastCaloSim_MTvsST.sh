@@ -21,7 +21,6 @@ AtlasG4_tf.py \
    --skipEvents '0' \
    --preInclude 'sim:Campaigns.MC21Simulation,SimuJobTransforms.FastCaloSim' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
-    --postExec 'sim:cfg.addEventAlgo(CompFactory.JobOptsDumperAlg(FileName="CAConfig.txt"))' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
     --outputHITSFile="test.MT.HITS.pool.root" \
     --physicsList="FTFP_BERT_ATL"               \
@@ -40,7 +39,6 @@ AtlasG4_tf.py \
     --skipEvents '0' \
     --preInclude 'sim:Campaigns.MC21Simulation,SimuJobTransforms.FastCaloSim' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
-    --postExec 'sim:cfg.addEventAlgo(CompFactory.JobOptsDumperAlg(FileName="CAConfig.txt"))' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
     --outputHITSFile="test.ST.HITS.pool.root" \
     --physicsList="FTFP_BERT_ATL"               \
