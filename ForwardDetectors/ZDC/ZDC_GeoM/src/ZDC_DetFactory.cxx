@@ -103,7 +103,6 @@ void ZDC_DetFactory::create(GeoPhysVol *world)
     /*************************************************
     * Place TAN/TAXN slots
     **************************************************/
-    Identifier id;
     for(int side : {0, 1}){
         int sideSign = (side == 0) ? -1 : 1;
         world->add(new GeoNameTag(m_tanSlotName.at(side)));
