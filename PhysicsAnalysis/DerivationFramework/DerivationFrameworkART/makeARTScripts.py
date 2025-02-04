@@ -6,7 +6,7 @@ makeTruthDAODs=True
 makeTrains=True
 
 formatList = ["PHYSVAL","PHYS","PHYSLITE",
-              "LLP1","HIGG1D1",
+              "LLP1","HIGG1D1","HIGG1D2",
               "JETM1","JETM2","JETM3","JETM4","JETM5","JETM6","JETM10","JETM11","JETM12","JETM14",
               "IDTR2",
               "EGAM1","EGAM2","EGAM3","EGAM4","EGAM5","EGAM7","EGAM8","EGAM9","EGAM10",
