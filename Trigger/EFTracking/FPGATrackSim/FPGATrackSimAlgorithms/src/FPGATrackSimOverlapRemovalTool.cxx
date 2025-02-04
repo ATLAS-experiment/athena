@@ -134,8 +134,8 @@ StatusCode FPGATrackSimOverlapRemovalTool::removeOverlapping(FPGATrackSimTrack &
                     auto eta_a = a->getEtaIndex();
                     auto eta_b = b->getEtaIndex();
                     if ( eta_a == eta_b) {
-                        auto layer_a = a->getLayer();
-                        auto layer_b = b->getLayer();
+                        auto layer_a = a->getPhysLayer();
+                        auto layer_b = b->getPhysLayer();
                         return layer_a < layer_b;
                     }
                     return eta_a < eta_b;
