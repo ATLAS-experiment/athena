@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Constants import INFO
@@ -366,6 +366,13 @@ def MainEvgenServicesCfg(flags, LoopMgr="AthenaEventLoopMgr", withSequences=True
         addEvgenSequences(flags, cfg)
 
     return cfg
+
+
+def JobOptionsDumpCfg(flags, fileName="JobOptsConfig.txt"):
+    """Job options service configuration - mainly to dump the config."""
+    acc = ComponentAccumulator()
+    acc.addService(CompFactory.JobOptionsSvc(DUMPFILE=fileName))
+    return acc
 
 
 if __name__=="__main__":
