@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./cTauInputAlgTool.h"
@@ -143,7 +143,7 @@ namespace GlobalSim {
        */
     
       ATH_MSG_DEBUG( "EDM jFex Number: " 
-		     << jFexTauRoI->jFexNumber()
+		     << static_cast<int>(jFexTauRoI->jFexNumber())
 		     << " et: " 
 		     << jFexTauRoI->et()
 		     << " topEt: " 
