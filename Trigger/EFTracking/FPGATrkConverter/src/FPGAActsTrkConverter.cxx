@@ -59,7 +59,7 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
               }
               if (h.isStrip()) {
                 ATH_MSG_DEBUG("Looking for Strip cluster to match");
-                int strip = static_cast<int>(h.getPhiCoord());
+                int strip = static_cast<int>(h.getPhiIndex());
                 Identifier wafer_id = m_SCTId->wafer_id(hash);
                 Identifier id = m_SCTId->strip_id(wafer_id, strip);
                 for (const xAOD::StripCluster *cl : stripContainer){
@@ -124,7 +124,7 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
             }
             else if (h.isStrip()) {
               ATH_MSG_DEBUG("Looking for Strip cluster to match");
-              int strip = static_cast<int>(h.getPhiCoord());
+              int strip = static_cast<int>(h.getPhiIndex());
               Identifier wafer_id = m_SCTId->wafer_id(hash);
               Identifier id = m_SCTId->strip_id(wafer_id, strip);
               for (const xAOD::StripCluster* cl : stripContainer) {

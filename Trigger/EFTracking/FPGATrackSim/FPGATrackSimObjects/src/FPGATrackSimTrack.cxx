@@ -25,8 +25,8 @@ std::vector<float> FPGATrackSimTrack::getCoords(unsigned ilayer) const
 
   if (m_trackCorrType == TrackCorrType::None)
   {
-    coords.push_back(m_hits[ilayer].getEtaCoord());
-    coords.push_back(m_hits[ilayer].getPhiCoord());
+    coords.push_back(m_hits[ilayer].getEtaIndex());
+    coords.push_back(m_hits[ilayer].getPhiIndex());
   }
   else
   {

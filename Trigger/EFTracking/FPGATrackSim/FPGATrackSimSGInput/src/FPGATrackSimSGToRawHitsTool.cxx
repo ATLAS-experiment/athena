@@ -235,8 +235,8 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
       // get the det element from the det element collection
       const InDetDD::SiDetectorElement* sielement = m_PIX_mgr->getDetectorElement(rdoId); assert(sielement);
 
-      Amg::Vector2D LocalPos = sielement->rawLocalPositionOfCell(rdoId);
-      Amg::Vector3D globalPos = sielement->globalPosition(LocalPos);
+      Amg::Vector2D localPos = sielement->rawLocalPositionOfCell(rdoId);
+      Amg::Vector3D globalPos = sielement->globalPosition(localPos);
       InDetDD::SiCellId cellID = sielement->cellIdFromIdentifier(rdoId);
 
       // update map between pixel identifier and event-unique hit index.
@@ -285,6 +285,8 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
       tmpSGhit.setEtaModule(m_pixelId->eta_module(rdoId));
       tmpSGhit.setPhiIndex(m_pixelId->phi_index(rdoId));
       tmpSGhit.setEtaIndex(m_pixelId->eta_index(rdoId));
+      tmpSGhit.setPhiCoord(localPos[0]);
+      tmpSGhit.setEtaCoord(localPos[1]);
       tmpSGhit.setEtaWidth(0);
       tmpSGhit.setPhiWidth(0);
       tmpSGhit.setX(globalPos[Amg::x]);
@@ -392,8 +394,8 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
       const Identifier rdoId = sctRawData->identify();
       // get the det element from the det element collection
       const InDetDD::SiDetectorElement* sielement = m_SCT_mgr->getDetectorElement(rdoId);
-      Amg::Vector2D LocalPos = sielement->rawLocalPositionOfCell(rdoId);
-      std::pair<Amg::Vector3D, Amg::Vector3D> endsOfStrip = sielement->endsOfStrip(LocalPos);
+      Amg::Vector2D localPos = sielement->rawLocalPositionOfCell(rdoId);
+      std::pair<Amg::Vector3D, Amg::Vector3D> endsOfStrip = sielement->endsOfStrip(localPos);
 
       hitIndexMap[rdoId] = hitIndex;
       ++hitIndex;
@@ -428,6 +430,8 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
       tmpSGhit.setEtaModule(m_sctId->eta_module(rdoId));
       tmpSGhit.setPhiIndex(m_sctId->strip(rdoId));
       tmpSGhit.setEtaIndex(m_sctId->row(rdoId));
+      tmpSGhit.setPhiCoord(localPos[0]);
+      tmpSGhit.setEtaCoord(localPos[1]);
       tmpSGhit.setSide(m_sctId->side(rdoId));
       tmpSGhit.setEtaWidth(sctRawData->getGroupSize());
       tmpSGhit.setPhiWidth(0);
@@ -602,6 +606,8 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
       clusterEquiv.setEtaModule(m_pixelId->eta_module(theID));
       clusterEquiv.setPhiIndex(m_pixelId->phi_index(theID));
       clusterEquiv.setEtaIndex(m_pixelId->eta_index(theID));
+      clusterEquiv.setPhiCoord(localPos.xPhi());
+      clusterEquiv.setEtaCoord(localPos.xEta());
 
       clusterEquiv.setPhiWidth(cluster->width().colRow()[1]);
       clusterEquiv.setEtaWidth(cluster->width().colRow()[0]);
@@ -675,6 +681,8 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
       clusterEquiv.setEtaModule(m_sctId->eta_module(rdoId));
       clusterEquiv.setPhiIndex(m_sctId->strip(rdoId));
       clusterEquiv.setEtaIndex(m_sctId->row(rdoId));
+      clusterEquiv.setPhiCoord(localPos.xPhi());
+      clusterEquiv.setEtaCoord(localPos.xEta());
       clusterEquiv.setSide(m_sctId->side(rdoId));
       //I think this is the strip "cluster" width
       clusterEquiv.setPhiWidth(sctRawData->getGroupSize());
