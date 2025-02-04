@@ -11,7 +11,6 @@
 # art-output: mem.full.*
 # art-output: runargs.*
 # art-output: *.pkl
-# art-output: *Config.txt
 
 set -o pipefail
 
@@ -29,7 +28,6 @@ Overlay_tf.py \
 --conditionsTag OFLCOND-MC16-SDR-RUN2-12  \
 --geometryVersion ATLAS-R2-2016-01-00-01 \
 --preInclude 'all:Campaigns.MC20e' \
---postInclude 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
 --postExec 'with open("ConfigOverlay.pkl", "wb") as f: cfg.store(f)' \
 --imf False \
 --athenaopts="--threads=1"

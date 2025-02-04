@@ -10,7 +10,7 @@ from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from DigitizationConfig.DigitizationSteering import DigitizationMessageSvcCfg
 from OverlayConfiguration.OverlaySteering import OverlayMainCfg
 from OverlayConfiguration.OverlayTestHelpers import \
-    CommonTestArgumentParser, OverlayJobOptsDumperCfg, \
+    CommonTestArgumentParser, \
     overlayTestFlags, postprocessAndLockFlags, printAndRun
 
 # Argument parsing
@@ -57,7 +57,8 @@ if args.profile:
     from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
     acc.merge(VTuneProfilerServiceCfg(flags))
 if args.dump:
-    acc.merge(OverlayJobOptsDumperCfg(flags))
+    # TODO: will replace with something else in the future
+    pass
 acc.merge(DigitizationMessageSvcCfg(flags))
 if flags.Overlay.DataOverlay:
     from OverlayConfiguration.DataOverlayConditions import PPTestCfg
