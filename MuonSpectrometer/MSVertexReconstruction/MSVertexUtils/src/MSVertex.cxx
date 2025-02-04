@@ -4,30 +4,13 @@
 
 #include "MSVertexUtils/MSVertex.h"
 
-#include <cmath>
-
 #include <sstream>
 
-MSVertex::MSVertex() : m_author(0), m_position(), m_tracks(0), m_chi2prob(-1.), m_chi2(-1.), m_nMDT(-1), m_nRPC(-1), m_nTGC(-1) {}
 
-MSVertex::MSVertex(const MSVertex& vertex) :
-    m_author(vertex.getAuthor()),
-    m_position(vertex.getPosition()),
-    m_tracks(0),
-    m_chi2prob(vertex.getChi2Probability()),
-    m_chi2(vertex.getChi2()),
-    m_nMDT(vertex.getNMDT()),
-    m_nRPC(vertex.getNRPC()),
-    m_nTGC(vertex.getNTGC()) {
-    for (std::vector<xAOD::TrackParticle*>::const_iterator i = vertex.getTracks()->begin(); i != vertex.getTracks()->end(); ++i) {
-        m_tracks.push_back(new xAOD::TrackParticle(**i));
-    }
-}
-
-MSVertex::MSVertex(int author, const Amg::Vector3D& position, float chi2prob, float chi2, int nMDT, int nRPC, int nTGC) :
+MSVertex::MSVertex(int author, const Amg::Vector3D& position, double chi2prob, double chi2, int nMDT, int nRPC, int nTGC) :
     m_author(author), m_position(position), m_tracks(0), m_chi2prob(chi2prob), m_chi2(chi2), m_nMDT(nMDT), m_nRPC(nRPC), m_nTGC(nTGC) {}
 
-MSVertex::MSVertex(int author, const Amg::Vector3D& position, const std::vector<xAOD::TrackParticle*>& tracks, float chi2prob, float chi2,
+MSVertex::MSVertex(int author, const Amg::Vector3D& position, const std::vector<const xAOD::TrackParticle*>& tracks, double chi2prob, double chi2,
                    int nMDT, int nRPC, int nTGC) :
     m_author(author),
     m_position(position),
@@ -38,52 +21,19 @@ MSVertex::MSVertex(int author, const Amg::Vector3D& position, const std::vector<
     m_nRPC(nRPC),
     m_nTGC(nTGC) {}
 
-MSVertex::~MSVertex() {
-    for (std::vector<xAOD::TrackParticle*>::iterator i = m_tracks.begin(); i != m_tracks.end(); ++i) {
-        if ((*i)) {
-            delete (*i);
-            (*i) = 0;
-        }
-    }
-    m_tracks.clear();
-}
-
-MSVertex& MSVertex::operator=(const MSVertex& msvx) {
-    if (this != &msvx) {
-        m_author = msvx.getAuthor();
-        m_position = msvx.getPosition();
-        m_chi2prob = msvx.getChi2Probability();
-        m_chi2 = msvx.getChi2();
-        m_nMDT = msvx.getNMDT();
-        m_nRPC = msvx.getNRPC();
-        m_nTGC = msvx.getNTGC();
-
-        for (std::vector<xAOD::TrackParticle*>::const_iterator i = msvx.getTracks()->begin(); i != msvx.getTracks()->end(); ++i) {
-            m_tracks.push_back(new xAOD::TrackParticle(**i));
-        }
-    }
-    return *this;
-}
-
-MSVertex* MSVertex::clone() {
-    std::vector<xAOD::TrackParticle*> trk;
-    for (std::vector<xAOD::TrackParticle*>::iterator i = m_tracks.begin(); i != m_tracks.end(); ++i) {
-        trk.push_back(new xAOD::TrackParticle(**i));
-    }
-    return new MSVertex(m_author, m_position, trk, m_chi2prob, m_chi2, m_nMDT, m_nRPC, m_nTGC);
-}
+MSVertex::~MSVertex() = default;
 
 void MSVertex::setPosition(const Amg::Vector3D& position) { m_position = position; }
 
 const Amg::Vector3D& MSVertex::getPosition() const { return m_position; }
 
-const std::vector<xAOD::TrackParticle*>* MSVertex::getTracks(void) const { return &m_tracks; }
+const std::vector<const xAOD::TrackParticle*>* MSVertex::getTracks(void) const { return &m_tracks; }
 
 void MSVertex::setAuthor(const int author) { m_author = author; }
 
 int MSVertex::getAuthor() const { return m_author; }
-float MSVertex::getChi2Probability() const { return m_chi2prob; }
-float MSVertex::getChi2() const { return m_chi2; }
+double MSVertex::getChi2Probability() const { return m_chi2prob; }
+double MSVertex::getChi2() const { return m_chi2; }
 
 int MSVertex::getNTracks() const {
     if (getTracks())
@@ -92,13 +42,42 @@ int MSVertex::getNTracks() const {
         return 0;
 }
 
-void MSVertex::setNMDT(const int nMDT) { m_nMDT = nMDT; }
-void MSVertex::setNRPC(const int nRPC) { m_nRPC = nRPC; }
-void MSVertex::setNTGC(const int nTGC) { m_nTGC = nTGC; }
+void MSVertex::setNMDT(const int nMDT, const int nMDT_inwards, const int nMDT_I, const int nMDT_E, const int nMDT_M, const int nMDT_O) { 
+    m_nMDT = nMDT;                  // total number of MDT hits around the vertex
+    m_nMDT_inwards = nMDT_inwards;  // number of MDT hits around the vertex inwards of the vertex position
+    m_nMDT_I = nMDT_I;              // number of MDT hits around the vertex in the inner layer
+    m_nMDT_E = nMDT_E;              // number of MDT hits around the vertex in the extended layer
+    m_nMDT_M = nMDT_M;              // number of MDT hits around the vertex in the middle layer
+    m_nMDT_O = nMDT_O;              // number of MDT hits around the vertex in the outer layer
+}
+
+void MSVertex::setNRPC(const int nRPC, const int nRPC_inwards, const int nRPC_I, const int nRPC_E, const int nRPC_M, const int nRPC_O) { 
+    m_nRPC = nRPC; 
+    m_nRPC_inwards = nRPC_inwards;
+    m_nRPC_I = nRPC_I;
+    m_nRPC_E = nRPC_E;
+    m_nRPC_M = nRPC_M;
+    m_nRPC_O = nRPC_O;
+}
+
+void MSVertex::setNTGC(const int nTGC, const int nTGC_inwards, const int nTGC_I, const int nTGC_E, const int nTGC_M, const int nTGC_O) { 
+    m_nTGC = nTGC; 
+    m_nTGC_inwards = nTGC_inwards;
+    m_nTGC_I = nTGC_I;
+    m_nTGC_E = nTGC_E;
+    m_nTGC_M = nTGC_M;
+    m_nTGC_O = nTGC_O;
+}
+
 
 int MSVertex::getNMDT() const { return m_nMDT; }
 int MSVertex::getNRPC() const { return m_nRPC; }
 int MSVertex::getNTGC() const { return m_nTGC; }
+
+const std::vector<int> MSVertex::getNMDT_all() const { return  std::vector<int> {m_nMDT, m_nMDT_inwards, m_nMDT_I, m_nMDT_E, m_nMDT_M, m_nMDT_O}; }
+const std::vector<int> MSVertex::getNRPC_all() const { return  std::vector<int> {m_nRPC, m_nRPC_inwards, m_nRPC_I, m_nRPC_E, m_nRPC_M, m_nRPC_O}; }
+const std::vector<int> MSVertex::getNTGC_all() const { return  std::vector<int> {m_nTGC, m_nTGC_inwards, m_nTGC_I, m_nTGC_E, m_nTGC_M, m_nTGC_O}; }
+
 
 std::string str(const MSVertex& a) {
     std::stringstream ss;

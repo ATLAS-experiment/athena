@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MSVERTEX_TRACKLETSEGMENT_H
@@ -8,6 +8,10 @@
 #include <vector>
 
 #include "GeoPrimitives/GeoPrimitives.h"
+#include "Identifier/Identifier.h"
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "MuonPrepRawData/MdtPrepDataContainer.h"
+
 
 namespace Muon {
     class MdtPrepData;
@@ -15,40 +19,47 @@ namespace Muon {
 
 /// New segment class for single ML segments
 class TrackletSegment {
-    int m_chamber;
-    int m_cham_eta;
-    int m_cham_phi;
-    float m_alpha, m_dalpha;                       // angle of the segment
-    float m_rErr, m_zErr;                          // error on the r & z coordinates
-    Amg::Vector3D m_globalPosition;                // GlobalPosition of the segment
-    float m_chmid;                                 // radius of the middle of the chamber
-    std::vector<const Muon::MdtPrepData*> m_mdts;  // vector of hits on track
-    int m_pattern;
-    bool m_isCombined;
+    private:
+        const Muon::IMuonIdHelperSvc* m_idHelperSvc{nullptr};
 
-public:
-    TrackletSegment();
-    TrackletSegment(int ch, int cheta, int chphi, float chmid, float alpha, float dalpha, const Amg::Vector3D& gpos, float rErr, float zErr,
-                    const std::vector<const Muon::MdtPrepData*>& mdts, int pattern);
-    ~TrackletSegment();
+        std::vector<const Muon::MdtPrepData*> m_mdts{};     // vector of hits on track
+        Amg::Vector3D m_gpos{Amg::Vector3D::Zero()};        // global position of the segment
+        double m_alpha{-999.}, m_dalpha{-999.};             // angle of the segment
+        double m_rErr{-999.}, m_zErr{-999.};                // error on the r & z coordinates
+        int m_pattern{0};                                   // hit pattern of the mdt hits
+        bool m_isCombined{false};                           // TrackletSegment build from combined fit with another
 
-    // set functions
-    void clearMdt();
-    void isCombined(bool iscomb);
+    public:
+        TrackletSegment() = default;
+        TrackletSegment(const Muon::IMuonIdHelperSvc* idHelperSvc,
+                        const std::vector<const Muon::MdtPrepData*>& mdts, 
+                        const Amg::Vector3D& gpos, 
+                        double alpha, double dalpha, 
+                        double rErr, double zErr, 
+                        int pattern);
+                        
+        ~TrackletSegment();
 
-    // get functions
-    int mdtChamber() const;
-    int mdtChEta() const;
-    int mdtChPhi() const;
-    float alpha() const;
-    float alphaError() const;
-    float zError() const;
-    float rError() const;
-    float getChMidPoint() const;
-    bool isCombined() const;
-    const Amg::Vector3D& globalPosition() const;
-    const std::vector<const Muon::MdtPrepData*>& mdtHitsOnTrack() const;
-    int getHitPattern() const;
+        // set functions
+        void clearMdt();
+        void isCombined(bool iscomb);
+
+        // get functions
+        const std::vector<const Muon::MdtPrepData*>& mdtHitsOnTrack() const;
+        const Identifier getIdentifier() const;
+        const Amg::Vector3D& globalPosition() const;
+        double alpha() const;
+        double alphaError() const;
+        double zError() const;
+        double rError() const;
+        int getHitPattern() const;
+        bool isCombined() const;
+
+        // get properties of the MDT chamber
+        int mdtChamber() const;
+        int mdtChEta() const;
+        int mdtChPhi() const;
+        double getChMidPoint() const;
 };
 
 #endif
