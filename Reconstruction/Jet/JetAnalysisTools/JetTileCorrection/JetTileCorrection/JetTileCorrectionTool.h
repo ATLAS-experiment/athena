@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: JetTileCorrectionTool.h 2015-03-10 tripiana $
@@ -94,10 +94,6 @@ namespace CP {
     //DR helper
     void setRJET(float r); //Set Jet Radius. NOTE: Only for checking overlap! The correction is only derived for EMTopo R=0.4 jets at the moment.
 
-  protected:
-    // Arguments and tool dependencies
-    bool m_isData;
-    
   private:
 
     // Load dead regions DB
