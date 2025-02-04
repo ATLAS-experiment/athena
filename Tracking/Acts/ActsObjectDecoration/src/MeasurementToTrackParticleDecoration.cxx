@@ -146,7 +146,7 @@ namespace ActsTrk {
             std::vector<float>& trackParametersLocCovY{trackParameterLocCovYhandle(*track_particle)};
             trackParametersLocCovY.reserve(track.nMeasurements());
 
-            for (const auto& state : track.trackStatesReversed()) {
+            for (const auto state : track.trackStatesReversed()) {
 
                 auto flag = state.typeFlags();
 		// consider holes and measurements (also outliers)
