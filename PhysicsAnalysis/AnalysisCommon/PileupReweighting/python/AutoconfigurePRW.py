@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from Campaigns.Utils import Campaign, getMCCampaign
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
@@ -39,7 +39,7 @@ def getLumicalcFiles(campaign):
             'GoodRunsLists/data23_13p6TeV/20230828/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-003.root'
         ],
         Campaign.MC23e: [
-            'GoodRunsLists/data24_13p6TeV/20240723/ilumicalc_histograms_None_472943-477048_OflLumi-Run3-005.root'
+            'GoodRunsLists/data24_13p6TeV/20241118/ilumicalc_histograms_None_473235-486706_OflLumi-Run3-005.root'
         ]
     }
 
@@ -70,7 +70,7 @@ def actualMuFiles(campaign):
         )
     elif campaign in [Campaign.MC23e]:
         list.append(
-            'GoodRunsLists/data24_13p6TeV/20240723/purw.actualMu.root'
+            'GoodRunsLists/data24_13p6TeV/20241118/purw.actualMu.root'
         )
 
     if campaign in [Campaign.MC16d, Campaign.MC20d, Campaign.MC16e, Campaign.MC20e, Campaign.MC21a, Campaign.MC23a, Campaign.MC23c, Campaign.MC23d, Campaign.MC23e]:
