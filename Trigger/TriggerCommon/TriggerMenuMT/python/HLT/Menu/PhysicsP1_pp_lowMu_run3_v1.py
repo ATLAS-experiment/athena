@@ -441,7 +441,7 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_mb_sp5000_pusup250_trk290_hmt_L1MBTS_4_4',          l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
 
         # afprec chains
-        ChainProp(name='HLT_mb_afprec_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream,'express'], groups=MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_mb_afprec_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream,'express'], groups=MinBiasGroup+LowMuGroup, monGroups=['mbMon:t0']),
         ChainProp(name='HLT_mb_afprec_afptof_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=MinBiasGroup+LowMuGroup),
         ChainProp(name='HLT_mb_afprec_L1AFP_A_OR_C', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=MinBiasGroup+LowMuGroup,monGroups=['mbMon:online','mbMon:shifter']),
 
@@ -528,10 +528,10 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_noalg_L1AFP_A_OR_C_jJ30', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1AFP_A_AND_C', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1AFP_A_OR_C', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_L1AFP_A_OR_C_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream,'express'], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_L1AFP_A_OR_C_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream,'express'], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_L1AFP_A_OR_C_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream,'express'], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_L1AFP_A_OR_C_FIRSTEMPTY', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream,'express'], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_L1AFP_A_OR_C_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream,'express'], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_noalg_L1AFP_A_OR_C_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream,'express'], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_noalg_L1AFP_A_OR_C_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream,'express'], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_noalg_L1AFP_A_OR_C_FIRSTEMPTY', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream,'express'], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportGroup, monGroups=['mbMon:t0']),
 
         # Calibration AFP
         # low mu

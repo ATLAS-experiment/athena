@@ -54,7 +54,10 @@ def TileJetMonitoringConfig(flags, **kwargs):
             kwargs.setdefault('ChannelEnergyMin', 2000)
             kwargs.setdefault('ChannelEnergyMax', 4000)
             kwargs.setdefault('Gain', 1)
-            
+
+    if len(flags.Tile.doTimingHistogramsForCell) > 0:
+        kwargs.setdefault('DoCellHistograms', True)
+
     for k, v in kwargs.items():
         setattr(tileJetMonAlg, k, v)
 
@@ -62,6 +65,8 @@ def TileJetMonitoringConfig(flags, **kwargs):
 
     Do1DHistograms = kwargs.get('Do1DHistograms', tileJetMonAlg._descriptors['Do1DHistograms'].default)
     DoEnergyDiffHistograms  = kwargs.get('DoEnergyDiffHistograms', tileJetMonAlg._descriptors['DoEnergyDiffHistograms'].default)
+
+    DoCellHistograms = kwargs.get('DoCellHistograms', tileJetMonAlg._descriptors['DoCellHistograms'].default)
 
     from AthenaMonitoring.DQConfigFlags import DQDataType
     if flags.DQ.DataType not in (DQDataType.HeavyIon, DQDataType.Cosmics):
@@ -118,7 +123,7 @@ def TileJetMonitoringConfig(flags, **kwargs):
 
 
 
-    from TileMonitoring.TileMonitoringCfgHelper import addValueVsModuleAndChannelMaps, getPartitionName
+    from TileMonitoring.TileMonitoringCfgHelper import addValueVsModuleAndChannelMaps, getPartitionName, getChannelsForCell
     runNumber = flags.Input.RunNumbers[0]
 
 
@@ -156,11 +161,14 @@ def TileJetMonitoringConfig(flags, **kwargs):
     tileJetMonAlg.CellEnergyUpperLimitsHG = energiesHG
     tileJetMonAlg.CellEnergyUpperLimitsLG = energiesLG
 
-    samples_LB = ['A', 'BC', 'D', 'B9']
+    samples_LB = ['A', 'B', 'D', 'B9']
     samples_EB = ['A', 'B', 'C10', 'D4', 'E1', 'E2', 'E3', 'E4']
 
     # 4) Configure histograms with Tile cell time in energy slices per partition and gain
     cellTimeGroup = helper.addGroup(tileJetMonAlg, 'TileJetCellTime', 'Tile/Jet/CellTime/')
+    if DoCellHistograms:
+        selectedCellTimeGroup = helper.addGroup(tileJetMonAlg, 'TileJetSelCellTime', 'Tile/Jet/SelectedCellTime/')
+        selectedChanTimeGroup = helper.addGroup(tileJetMonAlg, 'TileJetSelChanTime', 'Tile/Jet/SelectedChanTime/')
     for partition in partitions:
         for gain in gains:
             index = 0
@@ -188,12 +196,40 @@ def TileJetMonitoringConfig(flags, **kwargs):
                         title = 'Partition ' + partition + ', sampling ' + samples_EB[samp] + ': ' + gain + ' Tile Cell time in energy range' + title_suffix
                         cellTimeGroup.defineHistogram(name, title = title, path = partition, type = 'TH1F',
                                                       xbins = 600, xmin = -30.0, xmax = 30.0)
-                    
-                    
+
+                # Add histograms per selected individual cell
+                if DoCellHistograms:
+                    for module in flags.Tile.doTimingHistogramsForCell:
+                        if partition in module:
+                            for cell in flags.Tile.doTimingHistogramsForCell[module]:
+                                name = 'Cell_time_' + module + '_' + cell + '_' + gain + '_slice_' + str(index)
+                                title = 'Module ' + module + ', cell ' + cell + ': ' + gain + ' Tile Cell time in energy range' + title_suffix
+                                selectedCellTimeGroup.defineHistogram(name, title = title, path = partition, type = 'TH1F',
+                                                                    xbins = 600, xmin = -30.0, xmax = 30.0)
+
+                                toEnergy_ch = energies[index] / 2 if index < len(energies) else None
+                                fromEnergy_ch = energies[index - 1] / 2 if index > 0 else None
+                                if not toEnergy_ch:
+                                    title_suffix_ch = ' > ' + str(fromEnergy_ch) + ' MeV; time [ns]'
+                                elif not fromEnergy_ch:
+                                    title_suffix_ch = ' < ' + str(toEnergy_ch) + ' MeV; time [ns]'
+                                else:
+                                    title_suffix_ch = ' [' + str(fromEnergy_ch) + ' .. ' + str(toEnergy_ch) + ') MeV; time [ns]'
+
+                                # Add histograms per channels of selected individual cell
+                                for channel in getChannelsForCell(module, cell):
+                                    name = 'Cell_time_' + module + '_' + cell + '_ch' + str(channel) + '_' + gain + '_slice_' + str(index)
+                                    title = 'Module ' + module + ', cell ' + cell + ', channel ' + str(channel) + ': ' + gain + ' Tile Channel time in energy range' + title_suffix_ch
+                                    selectedChanTimeGroup.defineHistogram(name, title = title, path = partition, type = 'TH1F',
+                                                                        xbins = 600, xmin = -30.0, xmax = 30.0)
+
     if DoEnergyProfiles:
 
         # 5) Configure 1D histograms (profiles) with Tile cell energy profile in energy slices per partition and gain
         cellEnergyProfileGroup = helper.addGroup(tileJetMonAlg, 'TileJetCellEnergyProfile', 'Tile/Jet/CellTime/')
+        if DoCellHistograms:
+            selectedCellEnergyProfileGroup = helper.addGroup(tileJetMonAlg, 'TileJetSelCellEnergyProfile', 'Tile/Jet/SelectedCellTime/')
+            selectedChanEnergyProfileGroup = helper.addGroup(tileJetMonAlg, 'TileJetSelChanEnergyProfile', 'Tile/Jet/SelectedChanTime/')
         for partition in partitions:
             for gain in gains:
                 # TD: add profiles per partition and per sampling
@@ -218,11 +254,38 @@ def TileJetMonitoringConfig(flags, **kwargs):
                         cellEnergyProfileGroup.defineHistogram(name, title = title, path = partition, type = 'TProfile',
                                                                xbins = nbins, xmin = -0.5, xmax = xmax)
 
+                # Add profiles per selected individual cell
+                if DoCellHistograms:
+                    for module in flags.Tile.doTimingHistogramsForCell:
+                        if partition in module:
+                            for cell in flags.Tile.doTimingHistogramsForCell[module]:
+                                name = 'index_' + module + '_' + cell + '_' + gain
+                                name += ',energy_' + module + '_' + cell + '_' + gain
+                                name += ';Cell_ene_' + module + '_' + cell + '_' + gain + '_prof'
+                                title = 'Module ' + module + ', cell ' + cell + ': ' + gain + ' Tile Cell energy profile;Slice;Energy [MeV]'
+                                xmax = len(energiesALL[gain]) + 0.5
+                                nbins = len(energiesALL[gain]) + 1
+                                selectedCellEnergyProfileGroup.defineHistogram(name, title = title, path = partition, type = 'TProfile',
+                                                                            xbins = nbins, xmin = -0.5, xmax = xmax)
+
+                                # Add profiles per channels of selected individual cell
+                                for channel in getChannelsForCell(module, cell):
+                                    name = 'index_' + module + '_' + cell + '_ch' + str(channel) + '_' + gain
+                                    name += ',energy_' + module + '_' + cell + '_ch' + str(channel) + '_' + gain
+                                    name += ';Cell_ene_' + module + '_' + cell + '_ch' + str(channel) + '_' + gain + '_prof'
+                                    title = 'Module ' + module + ', cell ' + cell + ', channel ' + str(channel) + ': ' + gain + ' Tile Channel energy profile;Slice;Energy [MeV]'
+                                    xmax = len(energiesALL[gain]) + 0.5
+                                    nbins = len(energiesALL[gain]) + 1
+                                    selectedChanEnergyProfileGroup.defineHistogram(name, title = title, path = partition, type = 'TProfile',
+                                                                                xbins = nbins, xmin = -0.5, xmax = xmax)
 
     else:
 
         # 6) Configure 1D histograms with Tile cell energy in energy slices per partition, gain and slice
         cellEnergyGroup = helper.addGroup(tileJetMonAlg, 'TileJetCellEnergy', 'Tile/Jet/CellTime/')
+        if DoCellHistograms:
+            selectedCellEnergyGroup = helper.addGroup(tileJetMonAlg, 'TileJetSelCellEnergy', 'Tile/Jet/SelectedCellTime/')
+            selectedChanEnergyGroup = helper.addGroup(tileJetMonAlg, 'TileJetSelChanEnergy', 'Tile/Jet/SelectedChanTime/')
         for partition in partitions:
             for gain in gains:
                 energies = energiesALL[gain]
@@ -249,9 +312,25 @@ def TileJetMonitoringConfig(flags, **kwargs):
                             title += ' in energy range [' + str(fromEnergy) + ' .. ' + str(toEnergy) + ') MeV;Energy [MeV]'
                             cellEnergyGroup.defineHistogram(name, title = title, path = partition, type = 'TH1F',
                                                             xbins = 100, xmin = fromEnergy, xmax = toEnergy)
-                        
 
+                    # Add histograms per selected individual cell
+                    if DoCellHistograms:
+                        for module in flags.Tile.doTimingHistogramsForCell:
+                            if partition in module:
+                                for cell in flags.Tile.doTimingHistogramsForCell[module]:
+                                    name = 'Cell_ene_' + module + '_' + cell + '_' + gain + '_slice_' + str(index)
+                                    title = 'Module ' + module + ', cell ' + cell + ': ' + gain + ' Tile Cell Energy'
+                                    title += ' in energy range [' + str(fromEnergy) + ' .. ' + str(toEnergy) + ') MeV;Energy [MeV]'
+                                    selectedCellEnergyGroup.defineHistogram(name, title = title, path = partition, type = 'TH1F',
+                                                                            xbins = 100, xmin = fromEnergy, xmax = toEnergy)
 
+                                    # Add profiles per channels of selected individual cell
+                                    for channel in getChannelsForCell(module, cell):
+                                        name = 'Cell_ene_' + module + '_' + cell + '_ch' + str(channel) + '_' + gain + '_slice_' + str(index)
+                                        title = 'Module ' + module + ', cell ' + cell + ', channel ' + str(channel) + ': ' + gain + ' Tile Channel Energy'
+                                        title += ' in energy range [' + str(fromEnergy / 2) + ' .. ' + str(toEnergy / 2) + ') MeV;Energy [MeV]'
+                                        selectedChanEnergyGroup.defineHistogram(name, title = title, path = partition, type = 'TH1F',
+                                                                                xbins = 100, xmin = fromEnergy / 2, xmax = toEnergy / 2)
 
     from TileCalibBlobObjs.Classes import TileCalibUtils as Tile
 
@@ -323,7 +402,8 @@ if __name__=='__main__':
 
     tileJetMonitorAccumulator  = TileJetMonitoringConfig(flags,
                                                          Do1DHistograms = True,
-                                                         DoEnergyDiffHistograms = True)
+                                                         DoEnergyDiffHistograms = True,
+                                                         DoCellHistograms = False)
     cfg.merge(tileJetMonitorAccumulator)
     #cfg.printConfig(withDetails = True, summariseProps = True)
     flags.dump()

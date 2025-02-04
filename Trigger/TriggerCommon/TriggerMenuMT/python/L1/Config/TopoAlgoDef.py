@@ -1780,6 +1780,10 @@ class TopoAlgoDef:
               "otype3" : "MU", "olist3": "s", "inputwidth3": 6, "nleading3": 4,
               "otype4" : "jXE", "olist4": "s", "inputwidth4": 1, "nleading4": 1,
               "WPList" : ["Tight", "Loose"],
+              "MinET1" : 0, # jJets in GeV (= 100MeV steps after conversion)
+              "MinET2" : 0, # eTaus
+              "MinET3" : 0, # muons
+              "MinET4" : 0, # jXE
               "AnomalyScoreThresh" : [3875, 3875], #corresponds to Tight and Loose WPs
         }
         class d:
@@ -1805,6 +1809,10 @@ class TopoAlgoDef:
         alg.addgeneric('MaxTob4', d.nleading4)
         alg.addgeneric('NumResultBits', len(toponames))
         alg.addgeneric('ADVAEVersion', 1)
+        alg.addvariable('MinET1', d.MinET1 * _et_conversion)
+        alg.addvariable('MinET2', d.MinET2 * _et_conversion)
+        alg.addvariable('MinET3', d.MinET3 * _et_conversion)
+        alg.addvariable('MinET4', d.MinET4 * _et_conversion)
         for bitId in range(len(toponames)):
             alg.addvariable('AnomalyScoreThresh', d.AnomalyScoreThresh[bitId], bitId)
         tm.registerTopoAlgo(alg)

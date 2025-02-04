@@ -89,10 +89,6 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
      return StatusCode::SUCCESS;
   }
   
-  SG::ReadCondHandle<CaloNoise> noiseHdl{m_noiseCDOKey, ctx};
-  const CaloNoise *noisep = *noiseHdl;
-
-
   const CaloCellContainer *superCellRecoCont = nullptr;
   if(m_doSCReco){
      SG::ReadHandle<CaloCellContainer > hSCetRecoContainer{m_superCellContainerRecoKey,ctx}; 
@@ -105,6 +101,8 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
   }
      
   if (ctx.evt()==0) {
+    SG::ReadCondHandle<CaloNoise> noiseHdl{m_noiseCDOKey, ctx};
+    const CaloNoise *noisep = *noiseHdl;
     ATH_CHECK(createPerJobHistograms(superCellCont, noisep));
   }
 
@@ -117,6 +115,26 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
   if (!m_bcDataKey.empty()){ 
     SG::ReadCondHandle<BunchCrossingCondData> bccd (m_bcDataKey,ctx);
     bcid=bccd->distanceFromFront(bcid,BunchCrossingCondData::BunchCrossings);
+  }
+
+  // create local variables to speed up things
+  // per layer
+  std::vector<std::vector<std::string> > nameHistos;
+  for ( auto& layerName : m_layerNames){
+        std::vector<std::string> vec;
+	vec.push_back("superCellEt_"+layerName);
+	vec.push_back("superCelltime_"+layerName);
+	vec.push_back("superCellprovenance_"+layerName);
+	vec.push_back("superCellEta_"+layerName);
+	vec.push_back("superCellPhi_"+layerName);
+	vec.push_back("resolution_"+layerName);
+	vec.push_back("resolutionPass_"+layerName);
+	vec.push_back("resolutionHET_"+layerName);
+	vec.push_back("superCellEtRef_"+layerName);
+	vec.push_back("superCelltimeRef_"+layerName);
+	vec.push_back("superCellprovenanceRef_"+layerName);
+	vec.push_back("superCellEtDiff_"+layerName);
+        nameHistos.push_back(vec);
   }
 
 
@@ -187,20 +205,20 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
 
     // per layer
     auto layerName=m_layerNames[iLyr];
-    auto LMSCet = Monitored::Scalar<float>("superCellEt_"+layerName,SCet);
-    auto LMSCt = Monitored::Scalar<float>("superCelltime_"+layerName,SCt);
-    auto LMSCprov = Monitored::Scalar<int>("superCellprovenance_"+layerName,SCprov);
-    auto LMSCeta = Monitored::Scalar<float>("superCellEta_"+layerName,SCeta);
-    auto LMSCphi = Monitored::Scalar<float>("superCellPhi_"+layerName,SCphi);
-    auto LMSCres = Monitored::Scalar<float>("resolution_"+layerName,resolution);
-    auto LMSCresPass = Monitored::Scalar<float>("resolutionPass_"+layerName,resolutionPass);
-    auto LMSCresHET = Monitored::Scalar<float>("resolutionHET_"+layerName,resolutionHET);
-    auto LMSCetRef = Monitored::Scalar<float>("superCellEtRef_"+layerName,SCetRef);
-    auto LMSCtRef = Monitored::Scalar<float>("superCelltimeRef_"+layerName,superCellRef->time());
-    auto LMSCprovRef = Monitored::Scalar<int>("superCellprovenanceRef_"+layerName,(superCellRef->provenance()&0xFFF));
+    auto LMSCet = Monitored::Scalar<float>(nameHistos[iLyr][0],SCet);
+    auto LMSCt = Monitored::Scalar<float>(nameHistos[iLyr][1],SCt);
+    auto LMSCprov = Monitored::Scalar<int>(nameHistos[iLyr][2],SCprov);
+    auto LMSCeta = Monitored::Scalar<float>(nameHistos[iLyr][3],SCeta);
+    auto LMSCphi = Monitored::Scalar<float>(nameHistos[iLyr][4],SCphi);
+    auto LMSCres = Monitored::Scalar<float>(nameHistos[iLyr][5],resolution);
+    auto LMSCresPass = Monitored::Scalar<float>(nameHistos[iLyr][6],resolutionPass);
+    auto LMSCresHET = Monitored::Scalar<float>(nameHistos[iLyr][7],resolutionHET);
+    auto LMSCetRef = Monitored::Scalar<float>(nameHistos[iLyr][8],SCetRef);
+    auto LMSCtRef = Monitored::Scalar<float>(nameHistos[iLyr][9],superCellRef->time());
+    auto LMSCprovRef = Monitored::Scalar<int>(nameHistos[iLyr][10],(superCellRef->provenance()&0xFFF));
 
     auto MBCIDFFB = Monitored::Scalar<int>("BCID",bcidFFB);
-    auto LMSCetDiff = Monitored::Scalar<float>("superCellEtDiff_"+layerName,SCetDiff);
+    auto LMSCetDiff = Monitored::Scalar<float>(nameHistos[iLyr][11],SCetDiff);
     variables.push_back(LMSCet);
     variables.push_back(LMSCt);
     variables.push_back(LMSCprov);
@@ -215,10 +233,10 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
     variables.push_back(MBCIDFFB);
     variables.push_back(LMSCetDiff);
 
-    auto MSCtReco = Monitored::Scalar<float>("superCelltimeReco",0.);
-    auto MSCetReco = Monitored::Scalar<float>("superCellEtReco",0.);
-    auto LMSCtReco = Monitored::Scalar<float>("superCelltimeReco_"+layerName,0.);
     if(m_doSCReco){
+       auto MSCtReco = Monitored::Scalar<float>("superCelltimeReco",0.);
+       auto MSCetReco = Monitored::Scalar<float>("superCellEtReco",0.);
+       auto LMSCtReco = Monitored::Scalar<float>("superCelltimeReco_"+layerName,0.);
        const CaloCell* superCellReco = superCellRecoCont->findCell( SCcaloDDE->identifyHash() );
        if(superCellReco) {
           float SCetReco = superCellReco->et();

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -26,7 +26,7 @@ def LArRawSCDataReadingCfg(configFlags, ROBList=None, name="LArRawSCDataReadingA
 
     return acc
 
-def LArRawSCDataReadingInRoICfg(configFlags,name="LArRawSCDataReadingInRoICfg",etIdCollKey="SC_ET_ID_RoI",ROBList=[]):
+def LArRawSCDataReadingInRoICfg(configFlags,name="LArRawSCDataReadingInRoI",etIdCollKey="SC_ET_ID_RoI",ROBList=[]):
     return LArRawSCDataReadingCfg(configFlags,name=name,adcCollKey="",adcBasCollKey="",etCollKey="",LArLATOMEHeaderKey="",etIdCollKey=etIdCollKey,ROBList=ROBList)
 
 
