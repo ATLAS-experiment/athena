@@ -29,9 +29,9 @@ public:
     virtual ~PunchThroughG4Classifier() = default;
 
     /** AlgTool initialize method */
-    virtual StatusCode initialize();
+    virtual StatusCode initialize() override;
     /** AlgTool finalize method */
-    virtual StatusCode finalize();
+    virtual StatusCode finalize() override;
 
     /** input variable MinMaxScaler initialize method */
     StatusCode initializeScaler(const std::string & scalerConfigFile);
