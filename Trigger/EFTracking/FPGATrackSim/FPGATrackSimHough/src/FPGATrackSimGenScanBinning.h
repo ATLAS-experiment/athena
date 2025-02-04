@@ -248,12 +248,12 @@ public:
 
     // Class for writing const files formatted for firmware
     struct StreamManager {
-      StreamManager(string setname) :  m_setname(setname) {}
+      StreamManager(const std::string& setname) :  m_setname(setname) {}
       ~StreamManager() {
         for (auto &f : m_map) { f.second << "\n"; }
       }
 
-      template<typename T> void writeVar(const string& var, T val) {
+      template<typename T> void writeVar(const std::string& var, T val) {
         auto emplace_result =
             m_map.try_emplace(var, m_setname + "_" + var + "_const.txt", std::ios_base::out);
             if (!emplace_result.second) {
@@ -263,8 +263,8 @@ public:
         }
 
       private:
-      string m_setname;
-      std::map<string, std::fstream> m_map;
+      std::string m_setname;
+      std::map<std::string, std::fstream> m_map;
     };
     
     //
