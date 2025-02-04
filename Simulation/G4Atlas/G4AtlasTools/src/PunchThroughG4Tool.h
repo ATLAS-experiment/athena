@@ -54,19 +54,19 @@ class PunchThroughG4Tool : virtual public extends<AthAlgTool, IPunchThroughG4Too
     virtual ~PunchThroughG4Tool () = default;
 
     /** AlgTool initialize method */
-    virtual StatusCode initialize();
+    virtual StatusCode initialize() override;
     /** AlgTool finalize method */
-    virtual StatusCode finalize();
+    virtual StatusCode finalize() override;
 
     /** interface function: fill a vector with the punch-through particles */
     //virtual const G4TrackVector* computePunchThroughParticles(G4ParticleTable &ptable, const G4FastTrack& fastTrack, G4FastStep& fastStep, const TFCSSimulationState& simulstate, CLHEP::HepRandomEngine* rndmEngine);
-    virtual std::vector<std::map<std::string, double>> computePunchThroughParticles(const G4FastTrack& fastTrack, CLHEP::HepRandomEngine* rndmEngine, double punchThroughProbability, double punchThroughClassifierRand);
+    virtual std::vector<std::map<std::string, double>> computePunchThroughParticles(const G4FastTrack& fastTrack, CLHEP::HepRandomEngine* rndmEngine, double punchThroughProbability, double punchThroughClassifierRand) override;
 
     /** create all secondary tracks  from kinematics map */
-    virtual void createAllSecondaryTracks(G4ParticleTable &ptable, G4FastStep& fastStep, const G4Track& g4PrimaryTrack, std::vector<std::map<std::string, double>> &secKinematicsMapVect, G4TrackVector& secTrackCont, std::vector<double> caloMSVars);
+    virtual void createAllSecondaryTracks(G4ParticleTable &ptable, G4FastStep& fastStep, const G4Track& g4PrimaryTrack, std::vector<std::map<std::string, double>> &secKinematicsMapVect, G4TrackVector& secTrackCont, std::vector<double> caloMSVars) override;
 
     /*helpers*/
-    virtual std::vector<double> getCaloMSVars();
+    virtual std::vector<double> getCaloMSVars() override;
 
   private:
     /*---------------------------------------------------------------------
