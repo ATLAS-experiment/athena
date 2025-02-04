@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
   */
 #pragma once
 
@@ -17,7 +17,6 @@
 #include "Acts/Utilities/Delegate.hpp"
 #include "Acts/EventData/SourceLink.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilterError.hpp"
-#include "Acts/Definitions/Algebra.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Geometry/GeometryHierarchyMap.hpp"
 #include "Acts/EventData/Types.hpp"
@@ -489,7 +488,7 @@ protected:
             TheMatchingMeasurement &matching_measurement=selected_measurements.slot();
             matching_measurement.m_measurement = preCalibrator(geometryContext,
                                                                calibrationContext,
-                                                               derived().template forwardToCalibrator(measurement),
+                                                               derived().forwardToCalibrator(measurement),
                                                                derived().boundParams(boundState));
             matching_measurement.m_chi2 = computeChi2(matching_measurement.m_measurement.first,
                                                       matching_measurement.m_measurement.second,
@@ -551,7 +550,7 @@ protected:
             // apply the calibration
             calibrated_measurement = postCalibrator(geometryContext,
                                                       calibrationContext,
-                                                      derived().template forwardToCalibrator(a_selected_measurement.m_sourceLink.value()),
+                                                      derived().forwardToCalibrator(a_selected_measurement.m_sourceLink.value()),
                                                       derived().boundParams(boundState));
             // update chi2 using calibrated measurement
             a_selected_measurement.m_chi2 = computeChi2(calibrated_measurement.first,
