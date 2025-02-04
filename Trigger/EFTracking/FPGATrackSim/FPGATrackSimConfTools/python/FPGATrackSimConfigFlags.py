@@ -70,6 +70,11 @@ def createFPGATrackSimConfigFlags():
         return createDev21_02_15_FPGATrackSimConfigFlags()
     cf.addFlagsCategory("Dev21_02_15", __httDev21_02_15Flags, prefix=True )
 
+    def __GNNFlags():
+        """Additional function delays import"""
+        from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createGNNFPGATrackSimConfigFlags
+        return createGNNFPGATrackSimConfigFlags()
+    cf.addFlagsCategory("GNN", __GNNFlags, prefix=True )
 
     # EDM conversion
     cf.addFlag('doEDMConversion', False)
@@ -104,6 +109,7 @@ def createBasicFPGATrackSimConfigFlags():
 
     cf.addFlag('etaPatternFilter', False)
     cf.addFlag('phiRoadFilter', False)    
+    cf.addFlag('GNN', False)
 
 
     # NN filtering
@@ -279,6 +285,13 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('layerStudy',False)
 
 
+    return cf
+    
+def createGNNFPGATrackSimConfigFlags():
+    cf = createBasicFPGATrackSimConfigFlags()
+
+    cf.name = 'GNN'
+    
     return cf
 
 
