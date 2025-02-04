@@ -187,11 +187,11 @@ def LArSuperCellMonConfigHLT(flags, name='LArSuperCellMonAlgHLT', RemoveMasked=T
 
     doDatabaseNoiseVsEtaPhi = False
     lArCellMonAlg.doDatabaseNoiseVsEtaPhi = doDatabaseNoiseVsEtaPhi
-    monTool=defineHistograms(monTool,lArCellMonAlg.LayerNames,isHLT=True,isDatabaseNoise=doDatabaseNoiseVsEtaPhi)
+    monTool=defineHistograms(monTool,lArCellMonAlg.LayerNames,isHLT=True,isDatabaseNoise=doDatabaseNoiseVsEtaPhi,isReco=False,jumpHEC=True)
     cfg.addEventAlgo(lArCellMonAlg)
     return cfg
 
-def defineHistograms(cellMonGroup,LayerNames,isHLT=False,isDatabaseNoise=True):
+def defineHistograms(cellMonGroup,LayerNames,isHLT=False,isDatabaseNoise=True,isReco=True,jumpHEC=False):
 
 
     from LArMonitoring.GlobalVariables import lArDQGlobals
@@ -212,10 +212,6 @@ def defineHistograms(cellMonGroup,LayerNames,isHLT=False,isDatabaseNoise=True):
                                  title='Super Cell time [ns]; ns; # entries',
                                  type='TH1F', path=sc_hist_path,
                                  xbins = 100, xmin=-400,xmax=400)
-    cellMonGroup.defineHistogram('superCelltimeReco;h_SuperCelltimeReco',
-                                 title='Reco Super Cell time [ns]; ns; # entries',
-                                 type='TH1F', path=sc_hist_path,
-                                 xbins = 100, xmin=-400,xmax=400)
     cellMonGroup.defineHistogram('superCellprovenance;h_SuperCellprovenance',
                                  title='Super Cell provenance; bitmask ; # entries',
                                  type='TH1F', path=sc_hist_path,
@@ -231,7 +227,7 @@ def defineHistograms(cellMonGroup,LayerNames,isHLT=False,isDatabaseNoise=True):
                                  xbins = 50, xmin=0,xmax=50,
                                  ybins = 80, ymin=-1000,ymax=1000)
 
-    cellMonGroup.defineHistogram('resolution;h_SuperCellResolution',
+    cellMonGroup.defineHistogram('resolutionHET;h_SuperCellResolution',
                                  title='Super Cell reconstruction resolution ; %; # entries',
                                  type='TH1F', path=sc_hist_path,
                                  xbins = 70, xmin=-20,xmax=120)
@@ -260,11 +256,6 @@ def defineHistograms(cellMonGroup,LayerNames,isHLT=False,isDatabaseNoise=True):
                                  type='TH2F', path=sc_hist_path,
                                  xbins =  100,xmin=0,xmax=50000,
                                  ybins =  100,ymin=0,ymax=50000)
-    cellMonGroup.defineHistogram('superCelltimeRef,superCelltimeReco;h_SuperCelltimeLin',
-                                 title='Super Cell time Linearity; Ref SC time [ns]; Reco SC time [ns]',
-                                 type='TH2F', path=sc_hist_path,
-                                 xbins = 100, xmin=-200,xmax=200,
-                                 ybins = 100, ymin=-200,ymax=200)
     cellMonGroup.defineHistogram('superCellprovenanceRef,superCellprovenance;h_SuperCellprovenanceLin',
                                  title='Super Cell provenance Linearity; Ref SC bitmask ; SC bitmask',
                                  type='TH2F', path=sc_hist_path,
@@ -274,6 +265,16 @@ def defineHistograms(cellMonGroup,LayerNames,isHLT=False,isDatabaseNoise=True):
                                  title='BCID from the front of the train; BCID ; # entries',
                                  type='TH1F', path=sc_hist_path,
                                  xbins = 120, xmin=0,xmax=120)
+    if ( isReco ):
+        cellMonGroup.defineHistogram('superCelltimeReco;h_SuperCelltimeReco',
+                                 title='Reco Super Cell time [ns]; ns; # entries',
+                                 type='TH1F', path=sc_hist_path,
+                                 xbins = 100, xmin=-400,xmax=400)
+        cellMonGroup.defineHistogram('superCelltimeRef,superCelltimeReco;h_SuperCelltimeLin',
+                                 title='Super Cell time Linearity; Ref SC time [ns]; Reco SC time [ns]',
+                                 type='TH2F', path=sc_hist_path,
+                                 xbins = 100, xmin=-200,xmax=200,
+                                 ybins = 100, ymin=-200,ymax=200)
 
 
     partxbins=lArDQGlobals.SuperCell_Variables["etaRange"]["All"]["All"]
@@ -296,6 +297,8 @@ def defineHistograms(cellMonGroup,LayerNames,isHLT=False,isDatabaseNoise=True):
            Sampling = part[-2]
            if Sampling == "P": 
                Sampling = "0"
+           if ( jumpHEC and ("HEC" in Part) and ( "0" not in Sampling ) ):
+             continue
            partxbins=lArDQGlobals.SuperCell_Variables["etaRange"][Part][Side][Sampling]
            partybins=lArDQGlobals.SuperCell_Variables["phiRange"][Part][Side][Sampling]
            cellMonGroup.defineHistogram('superCellEta_'+part+',superCellPhi_'+part+',superCellEtDiff_'+part+';h_SuperCellCoverage_EtDiff_'+part,
@@ -316,10 +319,6 @@ def defineHistograms(cellMonGroup,LayerNames,isHLT=False,isDatabaseNoise=True):
                                         title='Super Cell time [ns] '+partp+'; ns; # entries',
                                         type='TH1F', path=sc_hist_path,
                                         xbins = 100, xmin=-400,xmax=400)
-           cellMonGroup.defineHistogram('superCelltimeReco_'+part+';h_SuperCelltimeReco'+part,
-                                        title='Reco Super Cell time [ns] '+partp+'; ns; # entries',
-                                        type='TH1F', path=sc_hist_path,
-                                        xbins = 100, xmin=-400,xmax=400)
            cellMonGroup.defineHistogram('superCellprovenance_'+part+';h_SuperCellprovenance'+part,
                                         title='Super Cell provenance '+partp+'; bitmask ; # entries',
                                         type='TH1F', path=sc_hist_path,
@@ -335,7 +334,7 @@ def defineHistograms(cellMonGroup,LayerNames,isHLT=False,isDatabaseNoise=True):
                                         xbins = 50, xmin=0,xmax=50,
                                         ybins = 100, ymin=-1000,ymax=1000)
         
-           cellMonGroup.defineHistogram('resolution_'+part+';h_SuperCellResolution'+part,
+           cellMonGroup.defineHistogram('resolutionHET_'+part+';h_SuperCellResolution'+part,
                                         title='Super Cell reconstruction resolution '+partp+'; %; # entries',
                                         type='TH1F', path=sc_hist_path,
                                         xbins = 70, xmin=-20,xmax=120)
@@ -374,17 +373,22 @@ def defineHistograms(cellMonGroup,LayerNames,isHLT=False,isDatabaseNoise=True):
                                         type='TH2F', path=sc_hist_path,
                                         xbins = 17, xmin=0,xmax=680,
                                         ybins = 17, ymin=0,ymax=680)
+           if isReco:
+              cellMonGroup.defineHistogram('superCelltimeReco_'+part+';h_SuperCelltimeReco'+part,
+                                        title='Reco Super Cell time [ns] '+partp+'; ns; # entries',
+                                        type='TH1F', path=sc_hist_path,
+                                        xbins = 100, xmin=-400,xmax=400)
 
 
-           cellMonGroup.defineHistogram('cellEnergy_'+part+';CellEnergy_'+part,
+    if ( isDatabaseNoise ):
+      for part in LayerNames:        
+        
+        cellMonGroup.defineHistogram('cellEnergy_'+part+';CellEnergy_'+part,
                                         title='Cell Energy in ' +part+';Cell Energy [MeV];Cell Events',
                                         type='TH1F', path=sc_hist_path,
                                         xbins =  100,xmin=0,xmax=50000
                                         )
 
-    if ( isDatabaseNoise ):
-      for part in LayerNames:        
-        
         cellMonGroup.defineHistogram('celleta_'+part+';NCellsActiveVsEta_'+part,
                                            title="No. of Active Cells in #eta for "+part+";cell #eta",
                                            type='TH1F', path=sc_hist_path,
