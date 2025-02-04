@@ -667,11 +667,14 @@ StatusCode GetLCSinglePionsPerf::execute()
   }
   HepMC::ConstGenParticlePtr gen{nullptr};
   for (auto p: *truthEvent->at(0)) {
-    if (!MC::isGenStable(p)) continue;
-    if (std::abs(p->pdg_id()) !=  MC::PIPLUS && std::abs(p->pdg_id()) !=  MC::PI0 ) continue;
-    gen = p;
-    break;
-  }  
+    if (MC::isGenStable(p)) {
+      if (std::abs(p->pdg_id()) == MC::PIPLUS ||
+          std::abs(p->pdg_id()) == MC::PI0) {
+        gen = std::move(p);
+        break;
+      }
+    }
+  }
   if(!gen){
      ATH_MSG_ERROR( "No final stable pion in McEventCollection" );
      return StatusCode::FAILURE;

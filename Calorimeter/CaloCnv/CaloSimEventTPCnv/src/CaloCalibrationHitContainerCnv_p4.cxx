@@ -60,7 +60,7 @@ void CaloCalibrationHitContainerCnv_p4::transToPers(const CaloCalibrationHitCont
   Compressor A; A.setNrBits(18);
   A.reduce(tempE,persCont->m_energy); // packs energy
   persCont->m_name = transCont->Name(); //stores name
-  persCont->m_particleUID = tempPID;
+  persCont->m_particleUID = std::move(tempPID);
 
 }
 

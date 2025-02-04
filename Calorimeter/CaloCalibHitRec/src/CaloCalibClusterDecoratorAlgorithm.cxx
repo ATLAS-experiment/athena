@@ -34,7 +34,7 @@ StatusCode CaloCalibClusterDecoratorAlgorithm::execute(const EventContext& ctx) 
     ATH_CHECK(m_truthAttributerTool->calculateTruthEnergies(*thisCaloCluster, m_numTruthParticles, *mapIdentifierToCalibHitsReadHandle, newTruthIDTruthPairs));
     
     for (const auto& thisPair : newTruthIDTruthPairs) ATH_MSG_DEBUG("Cluster Final loop: Particle with truthID " << thisPair.first << " has truth energy of " <<  thisPair.second << " for cluster with e, eta " << thisCaloCluster->e() << " and " << thisCaloCluster->eta());
-    caloClusterWriteDecorHandleNLeadingTruthParticles(*thisCaloCluster) = newTruthIDTruthPairs;
+    caloClusterWriteDecorHandleNLeadingTruthParticles(*thisCaloCluster) = std::move(newTruthIDTruthPairs);
   }
   
   return StatusCode::SUCCESS;
