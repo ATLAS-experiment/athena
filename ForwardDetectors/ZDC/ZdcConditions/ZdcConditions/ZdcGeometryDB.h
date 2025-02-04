@@ -13,7 +13,7 @@ class IZdcGeometryDB
 {
 
 protected:
-  bool m_geoLoaded;
+  bool m_geoLoaded{};
   nlohmann::json m_mainJson;
 
 public:
