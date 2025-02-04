@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -13,10 +13,6 @@
 #include "AthenaKernel/EventContextClid.h"
 #include "AthenaKernel/IEvtIdModifierSvc.h"
 
-#include "EventInfo/EventID.h"         // OLD EDM
-#include "EventInfo/EventType.h"       // OLD EDM
-#include "EventInfo/EventInfo.h"       // OLD EDM
-
 #include "PileUpTools/IBeamIntensity.h"
 #include "PileUpTools/IBeamLuminosity.h"
 #include "PileUpTools/PileUpMergeSvc.h"
@@ -26,10 +22,10 @@
 
 #include "StoreGate/StoreGateSvc.h"
 
-#include "xAODEventInfo/EventInfo.h"             // NEW EDM
-#include "xAODEventInfo/EventAuxInfo.h"          // NEW EDM
-#include "xAODEventInfo/EventInfoContainer.h"    // NEW EDM
-#include "xAODEventInfo/EventInfoAuxContainer.h" // NEW EDM
+#include "xAODEventInfo/EventInfo.h"
+#include "xAODEventInfo/EventAuxInfo.h"
+#include "xAODEventInfo/EventInfoContainer.h"
+#include "xAODEventInfo/EventInfoAuxContainer.h"
 
 // xAOD include(s):
 #include "EventInfoUtils/EventInfoFromxAOD.h"
@@ -42,7 +38,6 @@
 #include "GaudiKernel/DataIncident.h" // For ContextIncident
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/ThreadLocalContext.h"
-#include "GaudiKernel/Algorithm.h"
 
 // std library headers
 #include <cmath>
