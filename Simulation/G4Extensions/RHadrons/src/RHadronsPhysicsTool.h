@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RHADRONS_RHADRONSPHYSICSTOOL_H
@@ -9,6 +9,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "G4AtlasInterfaces/IPhysicsOptionTool.h"
 #include "G4VPhysicsConstructor.hh"
+#include "CxxUtils/checker_macros.h"
 
 /** @class RHadronsPhysicsTool RHadronsPhysicsTool.h "RHadrons/RHadronsPhysicsTool.h"
  *
@@ -17,7 +18,7 @@
  *  @author Edoardo Farina
  *  @date  2015-05-14
  */
-class RHadronsPhysicsTool :  public G4VPhysicsConstructor, public extends<AthAlgTool, IPhysicsOptionTool>
+class ATLAS_NOT_THREAD_SAFE RHadronsPhysicsTool :  public G4VPhysicsConstructor, public extends<AthAlgTool, IPhysicsOptionTool>
 {
 public:
   /// Standard constructor
