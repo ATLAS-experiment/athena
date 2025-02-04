@@ -29,7 +29,7 @@ StatusCode MSVertexRecoAlg::initialize() {
 
 StatusCode MSVertexRecoAlg::execute(const EventContext& ctx) const {
     std::vector<Tracklet> tracklets;
-    std::vector<MSVertex*> vertices;
+    std::vector<std::unique_ptr<MSVertex>> vertices;
 
     StatusCode sc = m_vertexTrackletTool->findTracklets(tracklets, ctx);
     if (sc.isFailure()) {

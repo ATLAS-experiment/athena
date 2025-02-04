@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MSVERTEXRECOALG_H
@@ -13,10 +13,10 @@
 class MSVertexRecoAlg : public AthReentrantAlgorithm {
 public:
     MSVertexRecoAlg(const std::string& name, ISvcLocator* pSvcLocator);
-    ~MSVertexRecoAlg() = default;
+    virtual ~MSVertexRecoAlg() = default;
 
-    StatusCode initialize() override;
-    StatusCode execute(const EventContext& ctx) const override;
+    virtual StatusCode initialize() override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
     ToolHandle<Muon::IMSVertexTrackletTool> m_vertexTrackletTool{this, "MSVertexTrackletTool",

@@ -17,6 +17,6 @@ atlas_add_library( MSVertexUtils
                    src/*.cxx
                    PUBLIC_HEADERS MSVertexUtils
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} GeoPrimitives EventPrimitives xAODTracking GaudiKernel
-                   PRIVATE_LINK_LIBRARIES MuonPrepRawData )
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} GeoPrimitives EventPrimitives xAODTracking GaudiKernel MuonIdHelpersLib MuonPrepRawData
+                   PRIVATE_LINK_LIBRARIES )
 
