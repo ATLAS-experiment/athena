@@ -30,8 +30,8 @@ ZDC_ZDCModule::ZDC_ZDCModule()
 {
 }
 
-ZDC_ZDCModule::ZDC_ZDCModule(StoreGateSvc *detStore, int side, int module, const ZdcID *zdcID, int modType)
-    : ZDC_ModuleBase(detStore, side, module, zdcID),
+ZDC_ZDCModule::ZDC_ZDCModule(const std::string& name, int side, int module, int modType)
+    : ZDC_ModuleBase(name, side, module),
       m_modType(modType)
 {
 }
@@ -43,16 +43,9 @@ ZDC_ZDCModule::ZDC_ZDCModule(ZDC_ZDCModule *right, int side, int module)
 }
 
 
-void ZDC_ZDCModule::create(GeoFullPhysVol* mother, GeoAlignableTransform* trf){
+void ZDC_ZDCModule::create(GeoFullPhysVol* mother, StoredMaterialManager *materialManager, const ZdcID *zdcID){
 
     MsgStream LogStream(Athena::getMessageSvc(), "ZDC_ZDCModule::create");
-
-    StoredMaterialManager *materialManager = nullptr;
-    if (StatusCode::SUCCESS != m_detectorStore->retrieve(materialManager, "MATERIALS")) {
-        MsgStream LogStream(Athena::getMessageSvc(), "ZDC_ZDCModule::create");
-        LogStream << MSG::ERROR << "execute: Could not retrieve StoredMaterialManager object from the detector store" << endmsg;
-        return;
-    }
 
     const GeoMaterial *OpAir    = materialManager->getMaterial("ZDC::opticalAir"   );
     const GeoMaterial *OpSilica = materialManager->getMaterial("ZDC::opticalSilica");
@@ -176,7 +169,7 @@ void ZDC_ZDCModule::create(GeoFullPhysVol* mother, GeoAlignableTransform* trf){
         /*************************************************
          * Place the cavity the pixel rods are routed in
          **************************************************/
-        id = m_zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::AIR);
+        id = zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::AIR);
         sprintf(volName, "ZDC::Pixel_Routing %s", id.getString().c_str());
         Housing_Physical->add(new GeoNameTag(volName));
         Housing_Physical->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
@@ -190,7 +183,7 @@ void ZDC_ZDCModule::create(GeoFullPhysVol* mother, GeoAlignableTransform* trf){
         GeoFullPhysVol *Pixel_Hole_Abs_Empty  = new GeoFullPhysVol(Pixel_Hole_Abs_Logical);
         
         GeoFullPhysVol *Pixel_Hole_Abs_Filled = new GeoFullPhysVol(Pixel_Hole_Abs_Logical);
-        id = m_zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::PIXEL);
+        id = zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::PIXEL);
         sprintf(volName, "ZDC::Pixel %s", id.getString().c_str());
         Pixel_Hole_Abs_Filled->add(new GeoNameTag(volName));
         Pixel_Hole_Abs_Filled->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
@@ -203,7 +196,7 @@ void ZDC_ZDCModule::create(GeoFullPhysVol* mother, GeoAlignableTransform* trf){
         GeoFullPhysVol *Pixel_Hole_House_Empty  = new GeoFullPhysVol(Pixel_Hole_House_Logical);
         
         GeoFullPhysVol *Pixel_Hole_House_Filled = new GeoFullPhysVol(Pixel_Hole_House_Logical);
-        id = m_zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::PIXEL);
+        id = zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::PIXEL);
         sprintf(volName, "ZDC::Pixel %s", id.getString().c_str());
         Pixel_Hole_House_Filled->add(new GeoNameTag(volName));
         Pixel_Hole_House_Filled->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
@@ -223,7 +216,7 @@ void ZDC_ZDCModule::create(GeoFullPhysVol* mother, GeoAlignableTransform* trf){
 
                 if (pixelLayer >= pixelStart && pixelLayer <= pixelStop){//Populated holes
                     // Place pixel rods in the radiator gaps
-                    id = m_zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::PIXEL);
+                    id = zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::PIXEL);
                     sprintf(volName, "ZDC::Pixel_Rad %s", id.getString().c_str());
                     RadiatorGap->add(new GeoNameTag(volName));
                     RadiatorGap->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
@@ -238,7 +231,7 @@ void ZDC_ZDCModule::create(GeoFullPhysVol* mother, GeoAlignableTransform* trf){
                     Abs_Plate->add(Pixel_Hole_Abs_Filled);
 
                     // Place a pixel rod in the inner housing
-                    id = m_zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::AIR);
+                    id = zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::AIR);
                     sprintf(volName, "ZDC::Pixel_Housing %s", id.getString().c_str());
                     Housing_Physical->add(new GeoNameTag(volName));
                     Housing_Physical->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
@@ -246,7 +239,7 @@ void ZDC_ZDCModule::create(GeoFullPhysVol* mother, GeoAlignableTransform* trf){
                     Housing_Physical->add(Pixel_Hole_House_Filled);
                 
                 }else{// Unpopulated holes
-                    id = m_zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::AIR);
+                    id = zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::AIR);
                     sprintf(volName, "ZDC::Pixel_Hole %s", id.getString().c_str());
 
                     // Place an unpopulated hole in the tungsten plate
@@ -280,7 +273,7 @@ void ZDC_ZDCModule::create(GeoFullPhysVol* mother, GeoAlignableTransform* trf){
          * Place tungsten plates
          **************************************************/
         if (radGap != nRadGaps - 1){ // Don't place a tungsten plate after the last radiator gap
-            id = m_zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::TUNGSTEN);
+            id = zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::TUNGSTEN);
             sprintf(volName, "ZDC::W_Mod %s", id.getString().c_str());
             Housing_Physical->add(new GeoNameTag(volName));
             Housing_Physical->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
@@ -314,7 +307,7 @@ void ZDC_ZDCModule::create(GeoFullPhysVol* mother, GeoAlignableTransform* trf){
                 }
             }
 
-            id = m_zdcID->channel_id(m_side,m_module,ZdcIDType::ACTIVE, radGap*(nPixelHolesX+1) + rodChannel);
+            id = zdcID->channel_id(m_side,m_module,ZdcIDType::ACTIVE, radGap*(nPixelHolesX+1) + rodChannel);
             sprintf(volName, "ZDC::Strip %s", id.getString().c_str());
             for (int rod = 0; rod < nRods; ++rod){
                 thisRadGap->add(new GeoNameTag(volName));
@@ -328,7 +321,7 @@ void ZDC_ZDCModule::create(GeoFullPhysVol* mother, GeoAlignableTransform* trf){
         /*************************************************
          * Place the radiator gap
          **************************************************/
-        id = m_zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::AIR);
+        id = zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::AIR);
         sprintf(volName, "ZDC::Rad_Gap %s", id.getString().c_str());
         Housing_Physical->add(new GeoNameTag(volName));
         Housing_Physical->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
@@ -337,11 +330,11 @@ void ZDC_ZDCModule::create(GeoFullPhysVol* mother, GeoAlignableTransform* trf){
     }// end loop over radiator gaps
 
     // Place the steel case in the mother volume
-    id = m_zdcID->channel_id(m_side, m_module, ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
+    id = zdcID->channel_id(m_side, m_module, ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
     sprintf(volName, "Zdc::ZDC_Mod %s", id.getString().c_str());
     mother->add(new GeoNameTag(volName));
     mother->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
-    mother->add(trf);
+    mother->add(new GeoAlignableTransform( m_trf ));
     mother->add(Housing_Physical);
 
 }
