@@ -38,6 +38,9 @@ def fillAtlasMetadata(flags, dbFiller):
             if "FastCalo.doEMECFCS" in flag and not flags.Sim.FastCalo.doEMECFCS:
                 # This flag is only written to metadata in case FCS is used in EMEC region (1.5 < AbsEta < 3.2, Ekin < 8 GeV) is set
                 continue
+            if "FastCalo.doPunchThrough" in flag and not flags.Sim.FastCalo.doPunchThrough:
+                # This flag is only written to metadata in case PunchThroughG4Tool is set
+                continue
 
             key = flag.split(".")[-1] #use final part of flag as the key
             value = flags._get(flag)

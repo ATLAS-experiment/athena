@@ -17,7 +17,6 @@ def DeadMaterialShowerCfg(flags, **kwargs):
     result.setPrivateTools(CompFactory.DeadMaterialShowerTool(name="DeadMaterialShower", **kwargs))
     return result
 
-
 def FastCaloSimCfg(flags, **kwargs):
     result = ComponentAccumulator()
     # Set the parametrization service
@@ -39,10 +38,17 @@ def FastCaloSimCfg(flags, **kwargs):
     # Set the G4CaloTransportTool
     from G4AtlasTools.G4AtlasToolsConfig import G4CaloTransportToolCfg
     kwargs.setdefault("G4CaloTransportTool", result.addPublicTool(result.popToolsAndMerge(G4CaloTransportToolCfg(flags))))
+
+    # Set the PunchThrough G4 part
+    from G4AtlasTools.G4AtlasToolsConfig import PunchThroughSimWrapperCfg
+    if "PunchThroughSimWrapper" not in kwargs:
+        kwargs.setdefault("PunchThroughSimWrapper", result.addPublicTool(result.popToolsAndMerge(PunchThroughSimWrapperCfg(flags))))
     
+    # Config PunchThroughG4Tool
+    kwargs.setdefault('doPunchThrough', flags.Sim.FastCalo.doPunchThrough)
+
     # Config FastCaloSim
     kwargs.setdefault('doEMECFCS', flags.Sim.FastCalo.doEMECFCS)
-
     if flags.Sim.FastCalo.doEMECFCS:  # AF3 in EMEC and G4 in rest
         kwargs.setdefault('doPhotons', True)
         kwargs.setdefault('doElectrons', True)

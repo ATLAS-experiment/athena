@@ -35,6 +35,10 @@ namespace TCS {
       parType_t      p_NumberLeading2 = { 0 };
       parType_t      p_NumberLeading3 = { 0 };
       parType_t      p_NumberLeading4 = { 0 };
+      parType_t      p_minEt1 = { 0 };
+      parType_t      p_minEt2 = { 0 };
+      parType_t      p_minEt3 = { 0 };
+      parType_t      p_minEt4 = { 0 };
       parType_t      p_AnomalyScoreThresh[2] = { 0, 0 };
 
    };

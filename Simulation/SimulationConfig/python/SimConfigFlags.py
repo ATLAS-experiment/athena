@@ -232,10 +232,13 @@ def createSimConfigFlags():
 
     scf.addFlag("Sim.ISF.HITSMergingRequired", _decideHITSMerging)
 
+    # FastCalo
     scf.addFlag("Sim.FastCalo.ParamsInputFilename", "FastCaloSim/MC23/TFCSparam_AF3_MC23_Sep23.root") # filename of the input parametrizations file
     scf.addFlag("Sim.FastCalo.RunOnGPU", False) # Determines if run the FastCaloSim on GPU or not
     scf.addFlag("Sim.FastCalo.CaloCellsName", "AllCalo") # StoreGate collection name for FastCaloSim hits
     scf.addFlag("Sim.FastCalo.doEMECFCS", False) # Run FastCaloSim in the EMEC only during full sim jobs
+    scf.addFlag("Sim.FastCalo.doPunchThrough", lambda prevFlags:
+                prevFlags.Sim.LArParameterization is LArParameterization.FastCaloSim) 
 
     # FastChain
     # Setting the BCID for Out-of-Time PU events, list of int

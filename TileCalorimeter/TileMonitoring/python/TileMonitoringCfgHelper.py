@@ -37,6 +37,18 @@ def getCellName(partition, channel):
     return _cellNameLB[channel] if partition.startswith('L') else _cellNameEB[channel]
 
 
+def getChannelsForCell(partition, cellName):
+    '''
+    This function returns channel numbers of Tile cell for given partition and cell.
+
+    Arguments:
+        partition -- Tile partition name (LBA, LBC, EBA, EBC)
+        cellName  -- Tile cell name (A1, B1, ...)
+    '''
+    cellNames = _cellNameLB if partition.startswith('L') else _cellNameEB
+    return  [channel for channel, cell in enumerate(cellNames) if cell == cellName]
+
+
 def getPartitionName(ros):
     '''
     This function returns name of Tile partition for given ROS.

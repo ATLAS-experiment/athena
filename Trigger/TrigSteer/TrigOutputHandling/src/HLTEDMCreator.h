@@ -144,6 +144,7 @@ class HLTEDMCreator: public extends<AthAlgTool, IHLTOutputTool>  {
 
   Gaudi::Property<bool> m_dumpSGBefore{ this, "dumpSGBefore", false, "Dump SG content before the merging"}; // for debugging 
   Gaudi::Property<bool> m_dumpSGAfter { this, "dumpSGAfter", false, "Dump SG content after the merging"};
+  Gaudi::Property<bool> m_renounceOutputs { this, "RenounceOutputs", false, "Renounce outputs so that no algs can become dependent on this tool's output. Done in HLT jobs"};
 
 #define DEF_VIEWS(__TYPE) \
   SG::ReadHandleKeyArray< ViewContainer > m_##__TYPE##Views{ this, #__TYPE"Views", {}, "Name  views from where the "#__TYPE" will be read"}

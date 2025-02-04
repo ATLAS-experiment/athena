@@ -55,7 +55,7 @@ StatusCode ZDC_DetTool::create()
 
   //Retrieve the ZDC geometry from the database
 
-  const ZdcGeometryDB *theZdcGeoDB = ZdcGeometryDB::getInstance();  
+  const IZdcGeometryDB *theZdcGeoDB = ZdcGeoDBGeometryDB::getInstance();  
   const nlohmann::json& zdcGeo = theZdcGeoDB->getDB();
   
   /*************************************************
