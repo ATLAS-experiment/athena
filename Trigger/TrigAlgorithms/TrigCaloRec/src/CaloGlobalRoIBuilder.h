@@ -1,6 +1,6 @@
 
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /********************************************************************
@@ -17,18 +17,11 @@
 #define TRIGCALOREC_CALOGLOBALROIBUILDER_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "CaloEvent/CaloClusterContainer.h"
-#include "StoreGate/WriteHandleKey.h"
-#include "StoreGate/ReadDecorHandle.h"
 #include "CaloConditions/CaloNoise.h"
-#include "EventInfo/EventInfo.h"
-#include "xAODTrigCalo/TrigEMCluster.h"
-#include "xAODTrigCalo/TrigEMClusterContainer.h"
-#include "xAODTrigCalo/TrigEMClusterAuxContainer.h"
-#include "xAODTrigRinger/TrigRingerRings.h"
-#include "xAODTrigRinger/TrigRingerRingsContainer.h"
-#include "xAODTrigRinger/TrigRingerRingsAuxContainer.h"
+#include "StoreGate/WriteHandleKey.h"
 #include "TrigT2CaloEgamma/RingerReFex.h"
+#include "xAODTrigCalo/TrigEMClusterContainer.h"
+#include "xAODTrigRinger/TrigRingerRingsContainer.h"
 
 
 class CaloGlobalRoIBuilder :  public AthReentrantAlgorithm {
