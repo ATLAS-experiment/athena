@@ -1,21 +1,13 @@
 #!/usr/bin/env python
 """FastCaloSimServices test helpers
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 
 from argparse import ArgumentParser
 from AthenaConfiguration.Enums import ProductionStep
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-
-
-def JobOptsDumperCfg(flags):
-    """Configure event loop for FCSServices"""
-    JobOptsDumperAlg = CompFactory.JobOptsDumperAlg
-    acc = ComponentAccumulator()
-    acc.addEventAlgo(JobOptsDumperAlg(FileName="FCSServicesTestConfig.txt"))
-    return acc
 
 
 def TestMessageSvcCfg(flags):
