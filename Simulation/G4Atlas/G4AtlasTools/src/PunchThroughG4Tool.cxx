@@ -751,7 +751,7 @@ std::vector<std::map<std::string, double>> PunchThroughG4Tool::checkEnergySumFro
   return secKinematicsMapVect;
 }
 
-void PunchThroughG4Tool::createAllSecondaryTracks(G4ParticleTable &ptable, G4FastStep& fastStep, const G4Track& g4PrimaryTrack, std::vector<std::map<std::string, double>> &secKinematicsMapVect, G4TrackVector& secTrackCont, std::vector<double> caloMSVars){
+void PunchThroughG4Tool::createAllSecondaryTracks(G4ParticleTable &ptable, G4FastStep& fastStep, const G4Track& g4PrimaryTrack, std::vector<std::map<std::string, double>> &secKinematicsMapVect, G4TrackVector& secTrackCont, const std::vector<double> &caloMSVars){
   // Get Geant4 particle definition
   const G4ParticleDefinition* mainG4Particle = g4PrimaryTrack.GetDefinition();
   float mainMomMag2 = g4PrimaryTrack.GetMomentum().mag2();
@@ -802,7 +802,7 @@ void PunchThroughG4Tool::createAllSecondaryTracks(G4ParticleTable &ptable, G4Fas
 }
 
 G4Track* PunchThroughG4Tool::createSecondaryTrack( G4ParticleTable &ptable, G4FastStep& fastStep, double currentTime, int secondarySignedPDG, 
-                                                       double energy, double theta, double phi,double momTheta, double momPhi, std::vector<double> caloMSVars)
+                                                       double energy, double theta, double phi,double momTheta, double momPhi, const std::vector<double> &caloMSVars)
 {
   //initialize to nullptr
   G4Track *newSecTrack = nullptr;
@@ -1102,7 +1102,7 @@ std::map<double, double> PunchThroughG4Tool::getVariableCDFmappings(xmlNodePtr& 
     return mappings;
 }
 
-double PunchThroughG4Tool::inverseCdfTransform(double variable, std::map<double, double> inverse_cdf_map) {
+double PunchThroughG4Tool::inverseCdfTransform(double variable, const std::map<double, double> &inverse_cdf_map) {
 
     double norm_cdf = normal_cdf(variable);
 
@@ -1378,7 +1378,7 @@ std::unique_ptr<PunchThroughPDFCreator> PunchThroughG4Tool::readLookuptablePDF(i
           //Get directory object
           std::stringstream dirName;
           dirName << folderName << pdg;
-          pdf->setName(dirName.str().c_str());
+          pdf->setName(dirName.str());
 
           TDirectory * dir = (TDirectory*)fileLookupTable->Get(dirName.str().c_str());
           if(! dir)

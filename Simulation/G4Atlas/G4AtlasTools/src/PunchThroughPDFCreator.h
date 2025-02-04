@@ -46,7 +46,7 @@ public:
 
   /** get the random value with this method, by providing the input parameters */
   double getRand(CLHEP::HepRandomEngine* rndmEngine, const std::vector<int>& inputParameters) const;
-  std::string getName() const {return m_name;};
+  const std::string &getName() const {return m_name;};
 
 private:
   std::string                         m_name;               //!< Give pdf a name for debug purposes
