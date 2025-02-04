@@ -29,5 +29,11 @@ def SGInputLoaderCfg(flags, Load=None, **kwargs):
         kwargs.setdefault('Load', processed)
 
     acc = ComponentAccumulator()
-    acc.addEventAlgo(CompFactory.SGInputLoader(**kwargs), primary=True)
+    alg = CompFactory.SGInputLoader(**kwargs)
+    if not flags.Common.isOnline and not any(flags.Input.Files) or flags.Input.Files==['_ATHENA_GENERIC_INPUTFILE_NAME_']:
+        # eventloopmgr provides the EventInfo for inputless jobs, so add this as an extra output
+        # TODO: Would like to remove legacy EventInfo from Athena entirely in the future, then would remove this here too.
+        alg.ExtraOutputs.add( ('EventInfo', 'StoreGateSvc+McEventInfo') )
+    acc.addEventAlgo(alg, primary=True)
+
     return acc

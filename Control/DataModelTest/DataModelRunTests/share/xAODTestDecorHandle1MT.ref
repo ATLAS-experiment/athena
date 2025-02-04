@@ -1,5 +1,19 @@
+Mon Feb  3 12:23:54 CET 2025
+Preloading tcmalloc_minimal.so
+Preloading libexcabort.so
+ApplicationMgr    SUCCESS 
+====================================================================================================================================
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v38r0)
+                                          running on lxplus973.cern.ch on Mon Feb  3 12:23:57 2025
+====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
+Py:ComponentAccumulator    INFO Athena job with pid 3941610
+CoreDumpSvc                       INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 14(Alarm clock) 
 Athena...ntLoopMgr                INFO Initializing AthenaHiveEventLoopMgr
+ClassIDSvc                        INFO getRegistryEntries: read 3153 CLIDRegistry entries for module ALL
+ClassIDSvc                   0    INFO getRegistryEntries: read 1163 CLIDRegistry entries for module ALL
+ClassIDSvc                   0    INFO getRegistryEntries: read 1728 CLIDRegistry entries for module ALL
+ClassIDSvc                   0    INFO getRegistryEntries: read 6275 CLIDRegistry entries for module ALL
 EventInfoCnvAlg              0    INFO Initializing EventInfoCnvAlg
 EventI...foCnvTool           0    INFO Beam spot information not available
 EventI...foCnvTool           0    INFO Will not fill beam spot information into xAOD::EventInfo
@@ -12,7 +26,7 @@ Avalan...edulerSvc           0    INFO Data Dependencies for Algorithms:
   IncidentProcAlg1
       none
   SGInputLoader
-      none
+    o OUTPUT  ( 'EventInfo' , 'StoreGateSvc+McEventInfo' ) 
   EventInfoCnvAlg
     o INPUT   ( 'EventInfo' , 'StoreGateSvc+McEventInfo' ) 
     o OUTPUT  ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo' ) 
@@ -81,8 +95,6 @@ Avalan...edulerSvc           0    INFO Data Dependencies for Algorithms:
   IncidentProcAlg3
       none
 Avalan...edulerSvc           0    INFO Will attribute the following unmet INPUT dependencies to "SGInputLoader/SGInputLoader" Algorithm
-Avalan...edulerSvc           0    INFO    o  ( 'EventInfo' , 'StoreGateSvc+McEventInfo' )     required by Algorithm: 
-Avalan...edulerSvc           0    INFO        * EventInfoCnvAlg
 Avalan...edulerSvc           0    INFO    o  ( 'SG::AuxElement' , 'StoreGateSvc+scopy_cinfo.dInt1Base' )     required by Algorithm: 
 Avalan...edulerSvc           0    INFO        * xAODTestReadDecorSCopy
 PrecedenceSvc                0    INFO Assembling CF and DF task precedence rules
@@ -99,9 +111,10 @@ Athena...ntLoopMgr           0    INFO Setup EventSelector service EventSelector
 ApplicationMgr               0    INFO Application Manager Initialized successfully
 ApplicationMgr               0    INFO Application Manager Started successfully
 Athena...ntLoopMgr           0    INFO Starting loop on events
-EventP...stencySvc     0     0    INFO Added successfully Conversion service:McCnvSvc
+EventP...stencySvc     0     0    INFO Added successfully Conversion service McCnvSvc
 Athena...ntLoopMgr     0     0    INFO   ===>>>  start of run 0    <<<===
 Athena...ntLoopMgr     0     0    INFO   ===>>>  start processing event #1, run #0 on slot 0,  0 events processed so far  <<<===
+ClassIDSvc             0     0    INFO getRegistryEntries: read 110 CLIDRegistry entries for module ALL
 SGInputLoader          0     0 WARNING unable to find proxy for  ( 'SG::AuxElement' , 'StoreGateSvc+scopy_cinfo' ) 
 xAODTestReadDecor      0     0    INFO cvec.dInt1: 801 802 803 804 805 806 807 808 809 810
 xAODTestReadDecor      0     0    INFO cinfo.dInt1: 6000
@@ -302,8 +315,12 @@ xAODTe...ecorSCopy    19     0    INFO scopy_cinfo.dInt1: 63000
 xAODTe...ecorSCopy    19     0    INFO scopy_cinfo.dInt1Base: 63001
 xAODTe...ecorSCopy    19     0    INFO scopy_cinfo.dInt1: 63000
 Athena...ntLoopMgr    19     0    INFO   ===>>>  done processing event #20, run #0 on slot 0,  20 events processed so far  <<<===
+Athena...ntLoopMgr    19     0    INFO ---> Loop Finished (seconds): 0.0119674
 ApplicationMgr                    INFO Application Manager Stopped successfully
+SGInputLoader                     INFO Finalizing SGInputLoader...
+Avalan...edulerSvc                INFO Joining Scheduler thread
 ToolSvc                           INFO Removing all tools created by ToolSvc
+EventDataSvc                      INFO Finalizing EventDataSvc
 ApplicationMgr                    INFO Application Manager Finalized successfully
 ApplicationMgr                    INFO Application Manager Terminated successfully
 leaving with code 0: "successful run"
