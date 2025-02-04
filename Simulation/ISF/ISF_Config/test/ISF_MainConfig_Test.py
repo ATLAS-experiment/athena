@@ -3,7 +3,7 @@
 
 This test inherits from Simulation/G4Atlas/G4AtlasAlg/test/G4AtlasAlgConfig_Test.py
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 if __name__ == '__main__':
 
@@ -29,7 +29,6 @@ if __name__ == '__main__':
     flags.Input.OverrideRunNumber = True
     flags.Input.LumiBlockNumbers = [1] # dummy value
 
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1'] #defaultTestFiles.EVNT
     flags.Output.HITSFileName = "myHITSnew.pool.root"
 
@@ -90,8 +89,6 @@ if __name__ == '__main__':
     cfg.getService("AthenaPoolCnvSvc").PoolAttributes += PoolAttributes
 
     # Dump config
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    cfg.addEventAlgo(CompFactory.JobOptsDumperAlg(FileName="G4AtlasTestConfig.txt"))
     cfg.getService("StoreGateSvc").Dump = True
     cfg.getService("ConditionStore").Dump = True
     cfg.printConfig(withDetails=True, summariseProps = True)

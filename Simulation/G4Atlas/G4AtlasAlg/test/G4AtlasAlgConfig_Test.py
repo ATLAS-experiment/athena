@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Run tests on G4AtlasAlgConfig
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 
 
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     #Sim flags
     #flags.Sim.WorldRRange = 15000
     #flags.Sim.WorldZRange = 27000 #change defaults?
-    from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, SimulationFlavour, TruthStrategy
+    from SimulationConfig.SimEnums import CalibrationRun, CavernBackground, SimulationFlavour, TruthStrategy
     flags.Sim.CalibrationRun = CalibrationRun.Off
     flags.Sim.RecordStepInfo = False
     flags.Sim.CavernBackground = CavernBackground.Off
@@ -93,9 +93,7 @@ if __name__ == '__main__':
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     cfg.merge(SetupMetaDataForStreamCfg(flags, "HITS", AcceptAlgs=AcceptAlgNames))
 
-    # Dump config
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    cfg.addEventAlgo(CompFactory.JobOptsDumperAlg(FileName="G4AtlasTestConfig.txt"))
+    # Print config
     cfg.printConfig(withDetails=True, summariseProps = True)
 
     flags.dump()
