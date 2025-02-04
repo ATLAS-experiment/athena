@@ -177,8 +177,6 @@ def MdtDigitToMdtRDOCfg(flags, name="MdtDigitToMdtRDO", **kwargs):
 def RpcDigitToRpcRDOCfg(flags, name="RpcDigitToRpcRDO", **kwargs):
     """Return ComponentAccumulator with configured RpcDigitToRpcRDO algorithm"""
     acc = ComponentAccumulator()
-    from MuonConfig.MuonCondAlgConfig import RpcCondDbAlgCfg
-    acc.merge(RpcCondDbAlgCfg(flags))
     from MuonConfig.MuonCablingConfig import RPCCablingConfigCfg
     acc.merge(RPCCablingConfigCfg(flags))
     kwargs.setdefault("MuonIdHelperSvc", acc.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)))
