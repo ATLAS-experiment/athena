@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTINFOATTLISTTOOL_H 
@@ -17,7 +17,6 @@ Purpose : Tool to buid the Global Event Tags
 #include <memory> //unique_ptr
 
 class AthenaAttributeList;
-class EventInfo;
 namespace coral{
  class AttributeListSpecification;
 }
@@ -45,7 +44,6 @@ public:
   bool isValid();
   const coral::AttributeListSpecification& getAttributeSpecification();
   const AthenaAttributeList getAttributeList(const xAOD::EventInfo& einfo);
-  const AthenaAttributeList getAttributeList(const EventInfo& einfo);
 
   std::unique_ptr<AthenaAttributeList> getAttributeListPtr(const xAOD::EventInfo& einfo);
 
@@ -54,8 +52,6 @@ protected:
   /** the various components to build their own fragments of tag */
   StatusCode eventTag       (AthenaAttributeList& eventTagCol, 
                              const xAOD::EventInfo& eventInfo);
-  StatusCode eventTag       (AthenaAttributeList& eventTagCol, 
-                             const EventInfo& eventInfo);
 
   coral::AttributeListSpecification* m_attribListSpec{};
 
