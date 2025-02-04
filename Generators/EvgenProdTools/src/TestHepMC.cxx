@@ -5,6 +5,7 @@
 
 #include "EvgenProdTools/TestHepMC.h"
 #include "GaudiKernel/DataSvc.h"
+#include "GaudiKernel/SystemOfUnits.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "PathResolver/PathResolver.h"
 
@@ -330,7 +331,7 @@ StatusCode TestHepMC::execute() {
       if (cmenergy < 0) ATH_MSG_WARNING("Invalid expected beam energy: " << cmenergy << " MeV");
       ++m_invalidBeamParticlesCheckRate;
     } else {
-      if (beams.first->status() != 4 || beams.second->status() != 4) {
+      if (!MC::isBeam(beams.first) || !MC::isBeam(beams.second)) {
         ATH_MSG_WARNING("Beam particles have incorrectly set status -- this generator interface should be fixed");
         ++m_beamParticleswithStatusNotFourCheckRate;
       }
@@ -338,32 +339,32 @@ StatusCode TestHepMC::execute() {
       const double sumP = beams.first->momentum().pz() + beams.second->momentum().pz();
       cmenergy = std::sqrt(sumE*sumE - sumP*sumP);
 
-      if(beams.first->pdg_id() == 1000080160 && beams.second->pdg_id() == 1000080160){//OO collisions
-          cmenergy /= 16.0; // divided by 16 for the total number of nucleons per nucleus
+      if(beams.first->pdg_id() == MC::OXYGEN && beams.second->pdg_id() == MC::OXYGEN){//OO collisions
+        cmenergy /= MC::baryonNumber(MC::OXYGEN); // divided by the total number of nucleons per nucleus
       }
-      if(beams.first->pdg_id() == 1000822080 && beams.second->pdg_id() == 1000822080){//PbPb collisions
-         cmenergy /= 208.0; // divided by 208 for the total number of nucleons per nucleus
+      if(beams.first->pdg_id() == MC::LEAD && beams.second->pdg_id() == MC::LEAD){//PbPb collisions
+        cmenergy /= MC::baryonNumber(MC::LEAD); // divided by the total number of nucleons per nucleus
       }
-      if(beams.first->pdg_id() == 1000080160 && beams.second->pdg_id() == 2212){//Op collisions
-         cmenergy = -2.0*beams.second->momentum().pz()*std::sqrt(8.0/16);
+      if(beams.first->pdg_id() == MC::OXYGEN && beams.second->pdg_id() == MC::PROTON){//Op collisions
+        cmenergy = -2.0*beams.second->momentum().pz()*std::sqrt(static_cast<double>(MC::numberOfProtons(MC::OXYGEN))/MC::baryonNumber(MC::OXYGEN));
       }
-      if(beams.first->pdg_id() == 2212 && beams.second->pdg_id() == 1000080160){//pO collisions
-         cmenergy = 2.0*beams.first->momentum().pz()*std::sqrt(8.0/16);
+      if(beams.first->pdg_id() == MC::PROTON && beams.second->pdg_id() == MC::OXYGEN){//pO collisions
+        cmenergy = 2.0*beams.first->momentum().pz()*std::sqrt(static_cast<double>(MC::numberOfProtons(MC::OXYGEN))/MC::baryonNumber(MC::OXYGEN));
       }
-      if(beams.first->pdg_id() == 1000822080 && beams.second->pdg_id() == 2212){//Pbp collisions
-         cmenergy = -2.0*beams.second->momentum().pz()*std::sqrt(82.0/208);
+      if(beams.first->pdg_id() == MC::LEAD && beams.second->pdg_id() == MC::PROTON){//Pbp collisions
+        cmenergy = -2.0*beams.second->momentum().pz()*std::sqrt(static_cast<double>(MC::numberOfProtons(MC::LEAD))/MC::baryonNumber(MC::LEAD));
       }
-      if(beams.first->pdg_id() == 2212 && beams.second->pdg_id() == 1000822080){//pPb collisions
-         cmenergy = 2.0*beams.first->momentum().pz()*std::sqrt(82.0/208);
+      if(beams.first->pdg_id() == MC::PROTON && beams.second->pdg_id() == MC::LEAD){//pPb collisions
+        cmenergy = 2.0*beams.first->momentum().pz()*std::sqrt(static_cast<double>(MC::numberOfProtons(MC::LEAD))/MC::baryonNumber(MC::LEAD));
       }
 
       if (m_cm_energy > 0 && std::abs(cmenergy - m_cm_energy) > m_cme_diff) {
-        ATH_MSG_FATAL("Beam particles have incorrect energy: " << m_cm_energy/1000. << " GeV expected, vs. " << cmenergy/1000. << " GeV found");
+        ATH_MSG_FATAL("Beam particles have incorrect energy: " << m_cm_energy/Gaudi::Units::GeV << " GeV expected, vs. " << cmenergy/Gaudi::Units::GeV << " GeV found");
         setFilterPassed(false);
         if (m_doHist){
-          m_h_beamparticle1_Energy->Fill(beams.first->momentum().e()*1.E-03);
-          m_h_beamparticle2_Energy->Fill(beams.second->momentum().e()*1.E-03);
-          m_h_cmEnergyDiff->Fill((cmenergy-m_cm_energy)*1.E-03);
+          m_h_beamparticle1_Energy->Fill(beams.first->momentum().e()/Gaudi::Units::GeV);
+          m_h_beamparticle2_Energy->Fill(beams.second->momentum().e()/Gaudi::Units::GeV);
+          m_h_cmEnergyDiff->Fill((cmenergy-m_cm_energy)/Gaudi::Units::GeV);
         }
         ++m_beamEnergyCheckRate;
         // Special case: this is so bad that we immediately fail out
@@ -447,15 +448,15 @@ StatusCode TestHepMC::execute() {
           }
 
           if (m_doHist){
-            m_h_energy_dispVtxCheck->Fill(part->momentum().e()*1e-3);
-            if (part->momentum().e()*1e-3 < 10.) {
-              m_h_energy_dispVtxCheck_lt10->Fill(part->momentum().e()*1e-3);
+            m_h_energy_dispVtxCheck->Fill(part->momentum().e()/Gaudi::Units::GeV);
+            if (part->momentum().e()/Gaudi::Units::GeV < 10.) {
+              m_h_energy_dispVtxCheck_lt10->Fill(part->momentum().e()/Gaudi::Units::GeV);
             }
             m_h_pdgid_dispVtxCheck->Fill(part->pdg_id());
             m_h_status_dispVtxCheck->Fill(part->status());
-            m_h_px_dispVtxCheck->Fill(part->momentum().px()*1e-3);
-            m_h_py_dispVtxCheck->Fill(part->momentum().py()*1e-3);
-            m_h_pz_dispVtxCheck->Fill(part->momentum().pz()*1e-3);
+            m_h_px_dispVtxCheck->Fill(part->momentum().px()/Gaudi::Units::GeV);
+            m_h_py_dispVtxCheck->Fill(part->momentum().py()/Gaudi::Units::GeV);
+            m_h_pz_dispVtxCheck->Fill(part->momentum().pz()/Gaudi::Units::GeV);
             m_h_vx_dispVtxCheck->Fill(part->end_vertex()->position().x());
             m_h_vy_dispVtxCheck->Fill(part->end_vertex()->position().y());
             m_h_vz_dispVtxCheck->Fill(part->end_vertex()->position().z());
@@ -502,7 +503,7 @@ StatusCode TestHepMC::execute() {
       } // End of check for NaNs and infinities
 
       // Check for undecayed pi0s
-      if (pstatus == 1 || pstatus == 2) {
+      if (MC::isStable(pstatus) || MC::isDecayed(pstatus)) {
         if (ppdgid == 111 && !pitr->end_vertex() ) {
           unDecPi0.push_back( pitr);
           ++m_undecayedPi0CheckRate;
@@ -510,7 +511,7 @@ StatusCode TestHepMC::execute() {
       } // End of check for undecayed pi0s
 
       //check stable particle lifetimes
-      if (pstatus == 1) {
+      if (MC::isStable(pstatus)) {
         const HepPDT::ParticleData* pd = particleData(ppdgid);
         if (pd != NULL) {
           double plifetime = pd->lifetime()*1e+12;  // why lifetime doesn't come in common units???
@@ -543,11 +544,10 @@ StatusCode TestHepMC::execute() {
       } // Test if the particle is stable
 
       //Check that stable particles are known by G4 or they are non-interacting
-      HepPDT::ParticleID pid(ppdgid);
-      int first_dig = ppdgid;
-      while (first_dig > 9) first_dig /= 10;
+      const MC::DecodedPID decodedPID(ppdgid);
+      const int first_dig = decodedPID(0);
 
-      if ((pstatus == 1 ) && (!pitr->end_vertex()) && (MC::isSimInteracting(pitr)) && (!pid.isNucleus()) && (first_dig != 9) ) {
+      if (MC::isStable(pstatus) && (!pitr->end_vertex()) && (MC::isSimInteracting(pitr)) && (!MC::isNucleus(ppdgid)) && (first_dig != 9) ) {
 
         int known_byG4 = 0;
         std::vector<int>::size_type count =0;
@@ -572,14 +572,14 @@ StatusCode TestHepMC::execute() {
       } // End of check for invalid PDG IDs
 
       // Check for unstables with no end vertex, 
-      if (!pitr->end_vertex() && pstatus == 2) {
+      if (!pitr->end_vertex() && MC::isDecayed(pstatus)) {
         unstNoEnd.push_back(pitr);
         ++m_unstableNoEndVtxCheckRate;
       } // End of check for unstable with no end vertex
 
       // Sum final state mom/energy, and note negative energy / tachyonic particles
       //     std::cout << "status " << pstatus << " e " << pmom.e() << " pz " << pmom.pz()<< std::endl;
-      if ( pstatus == 1 && !pitr->end_vertex() ) {
+      if ( MC::isStable(pstatus) && !pitr->end_vertex() ) {
         totalPx += pmom.px();
         totalPy += pmom.py();
         totalPz += pmom.pz();
@@ -598,7 +598,7 @@ StatusCode TestHepMC::execute() {
       // Decay checks (uses PdgToSearch attr value, for tau by default)
       /// @todo Clean up / improve / apply to *all* decaying species
       int tau_child = 0;
-      if (std::abs(ppdgid) == m_pdg && (pstatus == 1 || pstatus == 2)) {
+      if (std::abs(ppdgid) == m_pdg && (MC::isStable(pstatus) || MC::isDecayed(pstatus))) {
         ++m_TotalTaus;
         auto vtx = pitr->end_vertex();
         if (vtx) {
@@ -656,7 +656,7 @@ StatusCode TestHepMC::execute() {
 
       // Check for photons with non-zero masses
       /// @todo Persuade generator authors to set proper generated masses in HepMC, then *really* require mass = 0
-      if (ppdgid == 22 && pstatus == 1) {
+      if (MC::isPhoton(ppdgid) && MC::isStable(pstatus)) {
         const double mass = pitr->generated_mass();
         if (std::abs(mass) > 1.0) { // in MeV
           ATH_MSG_WARNING("Photon with non-zero mass found! Mass: " << mass << " MeV" << pitr);
@@ -683,7 +683,7 @@ StatusCode TestHepMC::execute() {
       ATH_MSG_WARNING("balance " << totalPx << " " << totalPy << " " << totalPz << " " << totalE);
       
       if (m_doHist){
-        m_h_energyImbalance->Fill(lostE*1.E-03);
+        m_h_energyImbalance->Fill(lostE/Gaudi::Units::GeV);
       }
       if (m_dumpEvent) HepMC::Print::content(std::cout,*evt);
       if (m_energyImbalanceTest) {
@@ -696,9 +696,9 @@ StatusCode TestHepMC::execute() {
     if ( std::abs(totalPx) > m_energy_diff || std::abs(totalPy) > m_energy_diff || std::abs(totalPz) > m_energy_diff ) {
       ATH_MSG_WARNING("MOMENTUM BALANCE FAILED : SumPx = " << totalPx << " SumPy = " <<  totalPy << " SumPz = " <<  totalPz << " MeV");
       if (m_doHist){
-        m_h_momentumImbalance_px->Fill(std::abs(totalPx)*1.E-03);
-        m_h_momentumImbalance_py->Fill(std::abs(totalPy)*1.E-03);
-        m_h_momentumImbalance_pz->Fill(std::abs(totalPz)*1.E-03);
+        m_h_momentumImbalance_px->Fill(std::abs(totalPx)/Gaudi::Units::GeV);
+        m_h_momentumImbalance_py->Fill(std::abs(totalPy)/Gaudi::Units::GeV);
+        m_h_momentumImbalance_pz->Fill(std::abs(totalPz)/Gaudi::Units::GeV);
       }
       if (m_dumpEvent) HepMC::Print::content(std::cout,*evt);
       if (m_momImbalanceTest) {
