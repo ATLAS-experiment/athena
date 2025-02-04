@@ -34,7 +34,7 @@ grep 'runArgs.threads = 0' runargs.athena.py
 grep 'runArgs.concurrentEvents = 0' runargs.athena.py
 
 # postInclude/Exec
-HelloWorld_tf.py --maxEvents=5 --postInclude 'AthenaConfiguration.JobOptsDumper.JobOptsDumperCfg,PyJobTransforms.DumpPickle'
+HelloWorld_tf.py --maxEvents=5 --postInclude 'AthenaConfiguration.MainServicesConfig.JobOptionsDumpCfg,PyJobTransforms.DumpPickle'
 
 # CA arg test 1
 HelloWorld_tf.py --maxEvents=5 --CA HelloWorld:True
