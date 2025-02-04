@@ -140,6 +140,7 @@ int main(int argc, char** argv) {
   std::cout << ">>>>>>>>>> Nuclear Properties <<<<<<<<<<" << std::endl;
   TEST_FUNCTION_DOUBLE(baryonNumber)
   TEST_FUNCTION(numberOfProtons)
+  TEST_FUNCTION(strangeness)
   TEST_FUNCTION(numberOfLambdas)
  std::cout << "========================================" << std::endl;
   return 0;

@@ -651,6 +651,52 @@ template<> inline double baryonNumber(const DecodedPID& p){ return static_cast<d
 template<> inline double baryonNumber(const int& p){ auto value_digits = DecodedPID(p);  return static_cast<double>(baryonNumber3(value_digits))/3.0;}
 
 
+// APID: The strangeness of a particle is defined as:
+// S = − ( n_s − n_{sbar} )
+// where n_s represents the number of strange quarks and n_{sbar}
+// represents the number of strange antiquarks. By convention, strange
+// squarks have the same quantum numbers as strange quarks (modulo
+// spin and R), so have strangeness -1.
+static const std::array<int,10> is_strange = {
+  +0, +0, +0, -1, +0, +0, +0, +0, +0, +0 };
+template<class T> inline int strangeness(const T& p) {return strangeness(p->pdg_id());}
+template<> inline int strangeness(const DecodedPID& p){
+  if (isNucleus(p) && p.ndigits() == 10) { return (p.pid() > 0) ? -p(2) : p(2); }
+  if (isStrange(p.pid())) { return (p.pid() > 0) ? -1 : 1; }
+  if (!hasStrange(p) && !hasSquark(p,SQUARK)) { return 0; }
+  if (std::abs(p.pid()) == K0) { return (p.pid() > 0) ? 1 : -1; }
+  size_t nq = 0;
+  int sign = 1;
+  int signmult = 1;
+  int result=0;
+  bool classified = false;
+  if (!classified && isMeson(p)) { classified = true; nq = 2; if ((*(p.second.rbegin()+2)) == 2||(*(p.second.rbegin()+2)) == 4 ) { sign=-1;} signmult =-1; }
+  if (!classified && isDiquark(p)) {return is_strange.at(p(0))+is_strange.at(p(1)); }
+  if (!classified && isBaryon(p)) { classified = true; nq = 3; }
+  if (!classified && isTetraquark(p)){ return is_strange.at(p(3)) + is_strange.at(p(4)) - is_strange.at(p(6)) - is_strange.at(p(7)); }
+  if (!classified && isPentaquark(p)){ return is_strange.at(p(3)) + is_strange.at(p(4)) + is_strange.at(p(5)) + is_strange.at(p(6)) - is_strange.at(p(7)); }
+  if (!classified && isSUSY(p)) {
+    nq = 0;
+    auto pp = p.shift(1);
+    if (pp.ndigits() < 3 ) { return strangeness(pp); } // super-partners of fundamental particles
+    if (pp(0) == COMPOSITEGLUON) {
+      if (pp(1) == COMPOSITEGLUON) { return 0; } // R-Glueballs
+      if ( pp.ndigits() == 4 || pp.ndigits() == 5) {
+        pp = pp.shift(1); // Remove gluino
+      }
+    }
+    if (pp.ndigits() == 3) { classified = true; nq = 2; if (p.last()%2==0) {sign = -1;} signmult = -1; } // states with quark-antiquark or squark-antiquark
+    if (pp.ndigits() == 4) { classified = true; nq = 3; } // states with quark-quark-quark or squark-quark-quark
+  }
+  for (auto r = p.second.rbegin() + 1; r != p.second.rbegin() + 1 + nq; ++r) {
+    result += is_strange.at(*r)*sign;
+    sign*=signmult;
+  }
+  return p.pid() > 0 ? result : -result;
+}
+template<> inline int strangeness(const int& p){ auto value_digits = DecodedPID(p); return strangeness(value_digits);}
+
+
 template<class T> inline int numberOfLambdas(const T& p) {return numberOfLambdas(p->pdg_id());}
 template<> inline int numberOfLambdas(const DecodedPID& p){
   if (std::abs(p.pid()) == LAMBDA0) { return  (p.pid() > 0) ? 1 : -1; }
