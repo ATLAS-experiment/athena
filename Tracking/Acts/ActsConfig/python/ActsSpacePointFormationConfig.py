@@ -27,7 +27,8 @@ def ActsStripSpacePointToolCfg(flags,
     acc = ComponentAccumulator()
 
     kwargs.setdefault("useTopSp", flags.Acts.reverseTrackFindingForStrips)
-
+    kwargs.setdefault("useSCTLayerDep_OverlapCuts", False)
+    
     if 'LorentzAngleTool' not in kwargs:
         from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
@@ -43,7 +44,8 @@ def ActsCoreStripSpacePointToolCfg(flags,
     from ActsConfig.ActsGeometryConfig import ActsDetectorElementToActsGeometryIdMappingAlgCfg
     acc.merge( ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags) )
     kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
-
+    kwargs.setdefault("useSCTLayerDep_OverlapCuts", False)
+    
     if 'LorentzAngleTool' not in kwargs:
         from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
