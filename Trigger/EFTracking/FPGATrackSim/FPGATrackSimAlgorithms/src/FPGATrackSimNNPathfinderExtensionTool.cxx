@@ -10,14 +10,12 @@
  */
 
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
-#include "FPGATrackSimObjects/FPGATrackSimConstants.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimBanks/FPGATrackSimSectorBank.h"
 
 #include "FPGATrackSimAlgorithms/FPGATrackSimNNPathfinderExtensionTool.h"
 #include "FPGATrackSimHough/FPGATrackSimHoughFunctions.h"
 
-#include <sstream>
 #include <cmath>
 #include <algorithm>
 
@@ -286,13 +284,13 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::fillInputTensorForNN(FPGATrack
     // If outside in, sort in increasing R, otherwise, decreasing R
     if(m_doOutsideIn)
     {
-        std::sort(hitsR.begin(), hitsR.end(), [this](auto& a, auto& b){
+        std::sort(hitsR.begin(), hitsR.end(), [](auto& a, auto& b){
             return a->getR() < b->getR();
         });
     }
     else
     {
-        std::sort(hitsR.begin(), hitsR.end(), [this](auto& a, auto& b){
+        std::sort(hitsR.begin(), hitsR.end(), [](auto& a, auto& b){
             return a->getR() > b->getR();
         });  
     }
