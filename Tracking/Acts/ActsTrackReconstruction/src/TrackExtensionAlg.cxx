@@ -154,6 +154,8 @@ namespace ActsTrk{
                       plainOptions,
                       perigeeSurface.get());
 
+    options.targetSurface = perigeeSurface.get();                  
+
     auto calibrator = detail::OnTrackCalibrator<detail::RecoTrackStateContainer>(
        *acts_tracking_geometry,
        **detectorElementToGeometryIdMap,
