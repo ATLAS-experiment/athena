@@ -12,7 +12,6 @@
 # art-output: mem.full.*
 # art-output: runargs.*
 # art-output: *.pkl
-# art-output: *Config.txt
 
 Overlay_tf.py \
 --CA \
@@ -22,7 +21,7 @@ Overlay_tf.py \
 --maxEvents 10 \
 --conditionsTag CONDBR2-BLKPA-RUN2-10 \
 --preInclude 'Campaigns.DataOverlayPPTest' \
---postInclude 'OverlayConfiguration.DataOverlayConditions.PPTestCfg' 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
+--postInclude 'OverlayConfiguration.DataOverlayConditions.PPTestCfg' \
 --postExec 'with open("ConfigOverlay.pkl", "wb") as f: cfg.store(f)' \
 --imf False
 

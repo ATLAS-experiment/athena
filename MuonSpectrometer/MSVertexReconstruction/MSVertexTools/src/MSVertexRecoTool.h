@@ -4,8 +4,6 @@
 
 #pragma once
 
-
-
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/IAthRNGSvc.h"
 
@@ -19,6 +17,7 @@
 #include "StoreGate/WriteHandleKey.h"
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "MuonReadoutGeometry/MdtReadoutElement.h"
 #include "MuonPrepRawData/MdtPrepDataContainer.h"
 #include "MuonPrepRawData/RpcPrepDataContainer.h"
 #include "MuonPrepRawData/TgcPrepDataContainer.h"
@@ -67,10 +66,14 @@ namespace Muon {
         SG::ReadHandleKey<Muon::MdtPrepDataContainer> m_mdtTESKey{this, "MDTKey", "MDT_DriftCircles"};
 
         // count hits (total, inwards of the vertex and split by layer) around vertex
-        const std::vector<std::string> m_decMDT_str = {"nMDT", "nMDT_inwards", "nMDT_I", "nMDT_E", "nMDT_M", "nMDT_O"};
-        const std::vector<std::string> m_decRPC_str = {"nRPC", "nRPC_inwards", "nRPC_I", "nRPC_E", "nRPC_M", "nRPC_O"};
-        const std::vector<std::string> m_decTGC_str = {"nTGC", "nTGC_inwards", "nTGC_I", "nTGC_E", "nTGC_M", "nTGC_O"};
-    
+        const std::vector<std::string> m_accMDT_str = {"nMDT", "nMDT_inwards", "nMDT_I", "nMDT_E", "nMDT_M", "nMDT_O"};
+        const std::vector<std::string> m_accRPC_str = {"nRPC", "nRPC_inwards", "nRPC_I", "nRPC_E", "nRPC_M", "nRPC_O"};
+        const std::vector<std::string> m_accTGC_str = {"nTGC", "nTGC_inwards", "nTGC_I", "nTGC_E", "nTGC_M", "nTGC_O"};
+
+        std::vector<SG::AuxElement::Accessor<int>> m_nMDT_accs;
+        std::vector<SG::AuxElement::Accessor<int>> m_nRPC_accs;
+        std::vector<SG::AuxElement::Accessor<int>> m_nTGC_accs;
+   
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
         ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", "Random Number Service"};  // Random number service
         ToolHandle<Trk::IExtrapolator> m_extrapolator{this, "MyExtrapolator", "Trk::Extrapolator/AtlasExtrapolator"};
@@ -126,11 +129,8 @@ namespace Muon {
         void HitCounter(MSVertex *MSRecoVx, const EventContext &ctx) const;  // counts MDT, RPC & TGC around a reco'd vertex
         double vxPhiFinder(const double theta, const double phi, const EventContext &ctx) const;  // vertex phi location reco algorithm
         std::vector<Tracklet> getTracklets(const std::vector<Tracklet> &trks, const std::set<int> &tracklet_subset) const;
-        static void dressVtxHits(xAOD::Vertex* xAODVx, std::vector<SG::AuxElement::Decorator<int>>& decs, const std::vector<int> & hits);
-        static StatusCode FillOutputContainer(const std::vector<std::unique_ptr<MSVertex>> &, SG::WriteHandle<xAOD::VertexContainer> &xAODVxContainer,
-                                              std::vector<SG::AuxElement::Decorator<int>>& nMDT_decs,
-                                              std::vector<SG::AuxElement::Decorator<int>>& nRPC_decs,
-                                              std::vector<SG::AuxElement::Decorator<int>>& nTGC_decs);
+        void dressVtxHits(xAOD::Vertex* xAODVx, const std::vector<SG::AuxElement::Accessor<int>>& accs, const std::vector<int>& hits) const;
+        StatusCode FillOutputContainer(const std::vector<std::unique_ptr<MSVertex>> &, SG::WriteHandle<xAOD::VertexContainer> &xAODVxContainer) const;
     };
 
 }  // namespace Muon

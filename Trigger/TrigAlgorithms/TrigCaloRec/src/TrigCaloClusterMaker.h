@@ -2,7 +2,7 @@
 // Hi Emacs ! this is  -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -20,16 +20,13 @@
 #define TRIGCALOREC_TRIGCALOCLUSTERMAKER_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "CaloEvent/CaloClusterContainer.h"
+#include "AthenaMonitoringKernel/GenericMonitoringTool.h"
+#include "CaloConditions/CaloNoise.h"
 #include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "CaloUtils/CaloClusterProcessor.h"
-#include "xAODCaloEvent/CaloClusterContainer.h"
-#include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/WriteDecorHandleKey.h"
-#include "StoreGate/ReadDecorHandle.h"
-#include "CaloConditions/CaloNoise.h"
-#include "EventInfo/EventInfo.h"
+#include "xAODCaloEvent/CaloClusterContainer.h"
 
 
 class TrigCaloClusterMaker : public AthReentrantAlgorithm {

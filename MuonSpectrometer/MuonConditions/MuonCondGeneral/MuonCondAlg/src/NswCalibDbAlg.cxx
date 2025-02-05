@@ -33,14 +33,14 @@ NswCalibDbAlg::initialize(){
   ATH_CHECK(m_readKey_mm_sidec_tdo  .initialize(!m_readKey_mm_sidec_tdo  .empty() && m_idHelperSvc->hasMM()             ));
   ATH_CHECK(m_readKey_mm_sidea_pdo  .initialize(!m_readKey_mm_sidea_pdo  .empty() && m_idHelperSvc->hasMM()             ));
   ATH_CHECK(m_readKey_mm_sidec_pdo  .initialize(!m_readKey_mm_sidec_pdo  .empty() && m_idHelperSvc->hasMM()             ));
-  ATH_CHECK(m_readKey_mm_sidea_thr  .initialize(!m_readKey_mm_sidea_thr  .empty() && m_idHelperSvc->hasMM() && !m_isData));
-  ATH_CHECK(m_readKey_mm_sidec_thr  .initialize(!m_readKey_mm_sidec_thr  .empty() && m_idHelperSvc->hasMM() && !m_isData));
+  ATH_CHECK(m_readKey_mm_sidea_thr  .initialize(!m_readKey_mm_sidea_thr  .empty() && m_idHelperSvc->hasMM() && !m_isData && m_processThresholds));
+  ATH_CHECK(m_readKey_mm_sidec_thr  .initialize(!m_readKey_mm_sidec_thr  .empty() && m_idHelperSvc->hasMM() && !m_isData && m_processThresholds));
   ATH_CHECK(m_readKey_stgc_sidea_tdo.initialize(!m_readKey_stgc_sidea_tdo.empty() && m_idHelperSvc->hasSTGC()            ));
   ATH_CHECK(m_readKey_stgc_sidec_tdo.initialize(!m_readKey_stgc_sidec_tdo.empty() && m_idHelperSvc->hasSTGC()            ));
   ATH_CHECK(m_readKey_stgc_sidea_pdo.initialize(!m_readKey_stgc_sidea_pdo.empty() && m_idHelperSvc->hasSTGC()            ));
   ATH_CHECK(m_readKey_stgc_sidec_pdo.initialize(!m_readKey_stgc_sidec_pdo.empty() && m_idHelperSvc->hasSTGC()            ));
-  ATH_CHECK(m_readKey_stgc_sidea_thr.initialize(!m_readKey_stgc_sidea_thr.empty() && m_idHelperSvc->hasSTGC() && !m_isData));
-  ATH_CHECK(m_readKey_stgc_sidec_thr.initialize(!m_readKey_stgc_sidec_thr.empty() && m_idHelperSvc->hasSTGC() && !m_isData));
+  ATH_CHECK(m_readKey_stgc_sidea_thr.initialize(!m_readKey_stgc_sidea_thr.empty() && m_idHelperSvc->hasSTGC() && !m_isData && m_processThresholds));
+  ATH_CHECK(m_readKey_stgc_sidec_thr.initialize(!m_readKey_stgc_sidec_thr.empty() && m_idHelperSvc->hasSTGC() && !m_isData && m_processThresholds));
   m_loadMmT0Data = m_loadMmT0Data && m_idHelperSvc->hasMM() && (!m_mmT0FilePath.empty() || !m_readKey_mm_t0.empty());
   m_loadsTgcT0Data = m_loadsTgcT0Data && m_idHelperSvc->hasSTGC() && (!m_stgcT0FilePath.empty() || !m_readKey_stgc_t0.empty()) ;
 
@@ -51,7 +51,7 @@ NswCalibDbAlg::initialize(){
   ATH_CHECK(m_writeKey_tdopdo.initialize());
 
   // write key for threshold data
-  ATH_CHECK(m_writeKey_thr.initialize(!m_isData));
+  ATH_CHECK(m_writeKey_thr.initialize(!m_isData && m_processThresholds));
 
   ATH_CHECK(m_writeKey_nswT0.initialize(m_loadMmT0Data || m_loadsTgcT0Data));
 
@@ -134,7 +134,7 @@ NswCalibDbAlg::processTdoPdoData(const EventContext& ctx) const {
 StatusCode 
 NswCalibDbAlg::processThrData(const EventContext& ctx) const {
 
-  if(m_isData) return StatusCode::SUCCESS; // nothing to do
+  if(m_isData || !m_processThresholds) return StatusCode::SUCCESS; // nothing to do
 
   // set up write handles for threshold data
   SG::WriteCondHandle<NswCalibDbThresholdData> wrHdl{m_writeKey_thr, ctx};

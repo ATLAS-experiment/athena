@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -21,12 +21,10 @@
 
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaMonitoringKernel/GenericMonitoringTool.h"
+#include "CaloConditions/CaloNoise.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
-#include "AthenaMonitoringKernel/GenericMonitoringTool.h"
-#include "StoreGate/ReadDecorHandle.h"
-#include "CaloConditions/CaloNoise.h"
-#include "EventInfo/EventInfo.h"
 
 
 class TrigCaloClusterMonitor : public AthReentrantAlgorithm

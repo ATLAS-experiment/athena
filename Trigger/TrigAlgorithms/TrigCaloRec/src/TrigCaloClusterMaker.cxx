@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -15,23 +15,22 @@
 //
 // ********************************************************************
 //
-#include <sstream>
-
-#include "GaudiKernel/StatusCode.h"
-
-#include "AthenaMonitoringKernel/Monitored.h"
-
-#include "CaloInterface/ISetCaloCellContainerName.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloUtils/CaloClusterStoreHelper.h"
-#include "CaloUtils/CaloClusterCollectionProcessor.h"
-#include "CaloUtils/CaloClusterProcessor.h"
 
 #include "TrigCaloClusterMaker.h"
 
-#include "xAODTrigCalo/CaloClusterTrigAuxContainer.h"
-
+#include "AthenaMonitoringKernel/MonitoredCollection.h"
+#include "AthenaMonitoringKernel/MonitoredGroup.h"
+#include "AthenaMonitoringKernel/MonitoredScalar.h"
+#include "AthenaMonitoringKernel/MonitoredTimer.h"
+#include "CaloEvent/CaloCellContainer.h"
+#include "CaloInterface/ISetCaloCellContainerName.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterProcessor.h"
+#include "CaloUtils/CaloClusterStoreHelper.h"
+#include "GaudiKernel/StatusCode.h"
+#include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
+#include "xAODTrigCalo/CaloClusterTrigAuxContainer.h"
 
 
 /////////////////////////////////////////////////////////////////////

@@ -116,6 +116,11 @@ SGInputLoader::execute()
     // check if objects are not in EventStore
     DataObjIDColl toLoad;
     for (const DataObjID* obj : sortedDataObjIDColl (m_load)) {
+      // don't load anything that is in the ExtraOutputs list, which is used for objects created e.g. by the eventloopmgr
+      if( extraOutputDeps().count(*obj) ) {
+        ATH_MSG_DEBUG(obj->key() << " is in ExtraOutputs and will not be loaded");
+        continue;
+      }
       SG::VarHandleKey vhk(obj->clid(),obj->key(),Gaudi::DataHandle::Writer);
       if (StoreID::findStoreID(vhk.storeHandle().name()) == StoreID::EVENT_STORE) {
         toLoad.emplace(*obj);
@@ -154,7 +159,7 @@ SGInputLoader::execute()
 void
 SGInputLoader::loader(Gaudi::Details::PropertyBase& p ) {
 
-  ATH_MSG_DEBUG("setting prop ExtraOutputs to " <<  p.toString());
+  ATH_MSG_DEBUG("Adding to outputs: " <<  p.toString());
 
   DataObjIDColl toLoad;
 
@@ -163,12 +168,10 @@ SGInputLoader::loader(Gaudi::Details::PropertyBase& p ) {
     SG::VarHandleKey vhk(obj.clid(),obj.key(),Gaudi::DataHandle::Writer);
     obj.updateKey( vhk.objKey() );
     toLoad.emplace(obj);
+    if(!outputDataObjs().count(obj)) { addDependency(obj,Gaudi::DataHandle::Writer); }
   }
   m_load = toLoad;
 
-  if (!setProperty("ExtraOutputs", p).isSuccess()) {
-    ATH_MSG_WARNING("failed setting property ExtraOutputs");
-  }
 }
 
 //---------------------------------------------------------------------------------

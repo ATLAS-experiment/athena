@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #pragma once
@@ -43,9 +43,9 @@ public:
     int getNMDT() const;
     int getNRPC() const;
     int getNTGC() const;
-    std::vector<int> getNMDT_all() const;
-    std::vector<int> getNRPC_all() const;
-    std::vector<int> getNTGC_all() const;
+    const std::vector<int> getNMDT_all() const;
+    const std::vector<int> getNRPC_all() const;
+    const std::vector<int> getNTGC_all() const;
 
 private:
     unsigned int m_author{0};

@@ -74,9 +74,9 @@ int MSVertex::getNMDT() const { return m_nMDT; }
 int MSVertex::getNRPC() const { return m_nRPC; }
 int MSVertex::getNTGC() const { return m_nTGC; }
 
-std::vector<int> MSVertex::getNMDT_all() const { return std::vector<int> {m_nMDT, m_nMDT_inwards, m_nMDT_I, m_nMDT_E, m_nMDT_M, m_nMDT_O}; }
-std::vector<int> MSVertex::getNRPC_all() const { return std::vector<int> {m_nRPC, m_nRPC_inwards, m_nRPC_I, m_nRPC_E, m_nRPC_M, m_nRPC_O}; }
-std::vector<int> MSVertex::getNTGC_all() const { return std::vector<int> {m_nTGC, m_nTGC_inwards, m_nTGC_I, m_nTGC_E, m_nTGC_M, m_nTGC_O}; }
+const std::vector<int> MSVertex::getNMDT_all() const { return  std::vector<int> {m_nMDT, m_nMDT_inwards, m_nMDT_I, m_nMDT_E, m_nMDT_M, m_nMDT_O}; }
+const std::vector<int> MSVertex::getNRPC_all() const { return  std::vector<int> {m_nRPC, m_nRPC_inwards, m_nRPC_I, m_nRPC_E, m_nRPC_M, m_nRPC_O}; }
+const std::vector<int> MSVertex::getNTGC_all() const { return  std::vector<int> {m_nTGC, m_nTGC_inwards, m_nTGC_I, m_nTGC_E, m_nTGC_M, m_nTGC_O}; }
 
 
 std::string str(const MSVertex& a) {
