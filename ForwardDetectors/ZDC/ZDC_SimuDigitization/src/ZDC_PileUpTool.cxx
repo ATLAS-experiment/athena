@@ -164,7 +164,7 @@ StatusCode ZDC_PileUpTool::processAllSubEvents(const EventContext& ctx){
   std::unique_ptr<xAOD::ZdcModuleAuxContainer> sumsAuxContainer( new xAOD::ZdcModuleAuxContainer() );
   sumsContainer->setStore( sumsAuxContainer.get() );
 
-  for (int iside : {-1, 1}){
+  for (int iside : {-1, 0, 1}){
     xAOD::ZdcModule* new_sum = new xAOD::ZdcModule();
     sumsContainer->push_back(xAOD::ZdcModuleContainer::unique_type(new_sum));
     new_sum->setZdcSide(iside);
