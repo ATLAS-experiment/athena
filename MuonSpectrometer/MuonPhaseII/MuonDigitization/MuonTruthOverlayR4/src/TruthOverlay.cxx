@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "TruthOverlay.h"
 
@@ -74,9 +74,7 @@ namespace MuonR4{
                     if(mergeMe->globalTime() - primHit->globalTime() < m_mergeTime) {
                         /// If a background hit overlays with a signal hit, take the signal
                         if (std::abs(mergeMe->pdgId()) == 13 || (mergeMe->genParticleLink() && !merged->genParticleLink())){
-                            const float eDep = merged->energyDeposit();
                             (*merged) =  (*mergeMe);
-                            merged->setEnergyDeposit(eDep);
                         }
                         merged->setEnergyDeposit(mergeMe->energyDeposit() + primHit->energyDeposit());
                     } else if (mergeMe->globalTime() - primHit->globalTime() < m_deadTime) {

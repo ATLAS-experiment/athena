@@ -57,6 +57,11 @@ namespace MuonR4 {
                     ATH_MSG_VERBOSE("Hit "<<m_idHelperSvc->toString(hitId)<<" is rejected due to masking in DB.");
                     continue;
                 }
+                ATH_MSG_VERBOSE("Process sim hit "<<m_idHelperSvc->toString(hitId) <<", pdgId: "<<simHit->pdgId()<<", "
+                            <<Amg::toString(xAOD::toEigen(simHit->localPosition()))<<" + "<<Amg::toString(xAOD::toEigen(simHit->localDirection()))
+                            <<", time: "<<simHit->globalTime()<<", energy: "<<simHit->kineticEnergy() / Gaudi::Units::GeV
+                            <<" [GeV], mass: "<<simHit->mass()<<", deposited energy: "<<simHit->energyDeposit() / Gaudi::Units::eV
+                            <<" [eV], genLink: "<<simHit->genParticleLink());
                 const MuonGMR4::MdtReadoutElement* readOutEle = m_detMgr->getMdtReadoutElement(hitId);
                 const IdentifierHash measHash{readOutEle->measurementHash(hitId)};
                 if (m_digitizeMuonOnly && std::abs(simHit->pdgId()) != 13) {
