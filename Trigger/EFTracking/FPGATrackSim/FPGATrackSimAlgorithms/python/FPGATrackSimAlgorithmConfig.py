@@ -329,6 +329,7 @@ def FPGATrackSimSecondStageAlgMonitoringCfg(flags):
     monTool.defineHistogram('nroads_2nd', path='EXPERT', type='TH1I', title='nroads_2nd', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('nroads_2nd_postfilter', path='EXPERT', type='TH1I', title='nroads_2nd_postfilter', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('layerIDs_2nd', path='EXPERT', type='TH1I', title='layerIDs_2nd', xbins=20, xmin=-0.5, xmax = 19.5)
+    monTool.defineHistogram('layerIDs_2nd_best', path='EXPERT', type='TH1I', title='layerIDs_2nd_best', xbins=20, xmin=-0.5, xmax = 19.5)    
     monTool.defineHistogram('chi2_2nd_all', path='EXPERT', type='TH1F', title='chi2_2nd_all', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('chi2_2nd_afterOLR', path='EXPERT', type='TH1F', title='chi2_2nd_afterOLR', xbins=nbin, xmin=0, xmax=10.0)
     monTool.defineHistogram('best_chi2_2nd', path='EXPERT', type='TH1F', title='best_chi2_2nd', xbins=nbin, xmin=low, xmax=high)

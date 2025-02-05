@@ -244,6 +244,8 @@ def FPGATrackSimMappingCfg(flags):
     mappingSvc.radiiFile = flags.Trigger.FPGATrackSim.mapsDir + "/"+getBaseName(flags)+"_radii.txt"
     mappingSvc.FakeNNonnx = flags.Trigger.FPGATrackSim.FakeNNonnxFile
     mappingSvc.ParamNNonnx = flags.Trigger.FPGATrackSim.ParamNNonnxFile
+    mappingSvc.ExtensionNNVolonnx = flags.Trigger.FPGATrackSim.ExtensionNNVolonnxFile
+    mappingSvc.ExtensionNNHitonnx = flags.Trigger.FPGATrackSim.ExtensionNNHitonnxFile
     mappingSvc.layerOverride = []
     mappingSvc.OutputLevel=2
     result.addService(mappingSvc, create=True, primary=True)

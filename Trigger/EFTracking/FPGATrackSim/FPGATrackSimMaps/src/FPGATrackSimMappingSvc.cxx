@@ -97,6 +97,24 @@ std::string FPGATrackSimMappingSvc::getFakeNNMapString() const {
     }
 }
 
+std::string FPGATrackSimMappingSvc::getExtensionNNVolMapString() const {
+    if (m_NNmap_extension_vol != nullptr) {
+        return m_NNmap_extension_vol->getNNMap();
+    }
+    else{
+        return ""; // Handle null case appropriately
+    }
+}
+
+std::string FPGATrackSimMappingSvc::getExtensionNNHitMapString() const {
+    if (m_NNmap_extension_hit != nullptr) {
+        return m_NNmap_extension_hit->getNNMap();
+    }
+    else{
+        return ""; // Handle null case appropriately
+    }
+}
+
 std::string FPGATrackSimMappingSvc::getParamNNMapString() const {
     if (m_NNmap_param != nullptr) {
         return m_NNmap_param->getNNMap();
@@ -183,11 +201,27 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         m_subrmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));	
 	
         ATH_MSG_DEBUG("Creating NN weighting map");
-        ATH_MSG_INFO("MappingSVc using " << m_NNmap_path_fake.value() << " and " << m_NNmap_path_param.value());
+        ATH_MSG_INFO("MappingSVc using " << m_NNmap_path_fake.value() << " for fake track estimation");
+        ATH_MSG_INFO("MappingSVc using " << m_NNmap_path_param.value() << " for track parameter estimation");
+        ATH_MSG_INFO("MappingSVc using " << m_NNmap_path_extension_vol.value() << " for track extension");
+        ATH_MSG_INFO("MappingSVc using " << m_NNmap_path_extension_hit.value() << " for track extension");
+
         if ( ! m_NNmap_path_fake.empty() ) {
             m_NNmap_fake = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path_fake.value()));
         } else {
             m_NNmap_fake = nullptr;
+        }
+
+        if ( ! m_NNmap_path_extension_vol.empty() ) {
+            m_NNmap_extension_vol = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path_extension_vol.value()));
+        } else {
+            m_NNmap_extension_vol = nullptr;
+        }
+
+        if ( ! m_NNmap_path_extension_hit.empty() ) {
+            m_NNmap_extension_hit = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path_extension_hit.value()));
+        } else {
+            m_NNmap_extension_hit = nullptr;
         }
 
         if ( ! m_NNmap_path_param.empty() ) {

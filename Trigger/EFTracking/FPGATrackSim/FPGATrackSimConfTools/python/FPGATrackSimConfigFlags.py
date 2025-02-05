@@ -43,9 +43,15 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('loglevel', AthenaCommon.Constants.INFO)
     cf.addFlag('msgLimit',-1)
     cf.addFlag('singleTrackSample',  True)
-    cf.addFlag('FakeNNonnxFile', '')
-    cf.addFlag('ParamNNonnxFile', '')
-
+    cf.addFlag('FakeNNonnxFile', 'banks_9L/v0.20/ClassificationHT_v5.onnx')
+    cf.addFlag('ExtensionNNVolonnxFile', 'banks_9L/v0.20/HT_detector_v6_3.onnx')
+    cf.addFlag('ExtensionNNHitonnxFile', 'banks_9L/v0.20/Ath_Extrap_v51_6_superBig_0_outsideIN.onnx')
+    cf.addFlag('ParamNNonnxFile', 'banks_9L/v0.20/ParamEstimationHT_v5.onnx')
+    cf.addFlag('doNNPathFinder', False)
+    cf.addFlag('windowR', 20)
+    cf.addFlag('windowZ', 20)
+    cf.addFlag('maxBranches', -1)
+    
     def __httHough1DFlags():
         """Additional function delays import"""
         from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createHough1dFPGATrackSimConfigFlags

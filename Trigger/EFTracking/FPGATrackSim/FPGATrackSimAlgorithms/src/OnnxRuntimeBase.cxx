@@ -42,6 +42,7 @@ void OnnxRuntimeBase::initialize(TString fileName)
     // here we assume that all input nodes have the same dimensions
     Ort::TypeInfo inputTypeInfo = m_session->GetInputTypeInfo(i);
     auto tensorInfo = inputTypeInfo.GetTensorTypeAndShapeInfo();
+
     m_inputNodeDims = tensorInfo.GetShape();
   }
   // Get the names of the output nodes
@@ -91,7 +92,7 @@ std::vector<std::vector<float>> OnnxRuntimeBase::runONNXInference(NetworkBatchIn
     outputNodeDims[0] = batchSize;
   }
 
-  if(inputNodeDims[1]*inputNodeDims[2] != inputTensorValues.cols())
+  if(inputNodeDims[1]*inputNodeDims[2] != inputTensorValues.cols() && inputNodeDims[1] != inputTensorValues.cols())
   {
     throw std::runtime_error("runONNXInference: feature size doesn't match the input size: inputSize required: " + std::to_string(inputNodeDims[1]*inputNodeDims[2]) + " inputSize provided: " + std::to_string(inputTensorValues.cols()));
   }

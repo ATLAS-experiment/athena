@@ -202,13 +202,25 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     }
 
     auto mon_nroads = Monitored::Scalar<unsigned>("nroads_2nd", roads.size());
+    unsigned bitmask_best(0);
+    unsigned nhit_best(0);
     for (auto const &road : roads) {
       unsigned bitmask = road->getHitLayers();
+      if (road->getNHitLayers() > nhit_best) {
+	nhit_best = road->getNHitLayers();
+	bitmask_best = bitmask;
+      }
       for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers(); l++) {
         if (bitmask & (1 << l)) {
             auto mon_layerIDs = Monitored::Scalar<unsigned>("layerIDs_2nd",l);
             Monitored::Group(m_monTool,mon_layerIDs);
         }
+      }
+    }
+    for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers(); l++) {
+      if (bitmask_best & (1 << l)) {
+	auto mon_layerIDs_best = Monitored::Scalar<unsigned>("layerIDs_2nd_best",l);
+	Monitored::Group(m_monTool,mon_layerIDs_best);
       }
     }
     Monitored::Group(m_monTool, mon_nroads);
@@ -293,12 +305,12 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         m_evt_truth++;
         auto passroad = Monitored::Scalar<bool>("eff_road_2nd",(roads.size() > 0));
         auto passtrack = Monitored::Scalar<bool>("eff_track_2nd",(tracks.size() > 0));
-        auto truthpT_zoom = Monitored::Scalar<float>("pT_zoom_2nd",truthtracks.front().getPt()*0.001);
-        auto truthpT = Monitored::Scalar<float>("pT_2nd",truthtracks.front().getPt()*0.001);
-        auto trutheta = Monitored::Scalar<float>("eta_2nd",truthtracks.front().getEta());
-        auto truthphi= Monitored::Scalar<float>("phi_2nd",truthtracks.front().getPhi());
-        auto truthd0= Monitored::Scalar<float>("d0_2nd",truthtracks.front().getD0());
-        auto truthz0= Monitored::Scalar<float>("z0_2nd",truthtracks.front().getZ0());
+        auto truthpT_zoom = Monitored::Scalar<float>("pT_zoom",truthtracks.front().getPt()*0.001);
+        auto truthpT = Monitored::Scalar<float>("pT",truthtracks.front().getPt()*0.001);
+        auto trutheta = Monitored::Scalar<float>("eta",truthtracks.front().getEta());
+        auto truthphi= Monitored::Scalar<float>("phi",truthtracks.front().getPhi());
+        auto truthd0= Monitored::Scalar<float>("d0",truthtracks.front().getD0());
+        auto truthz0= Monitored::Scalar<float>("z0",truthtracks.front().getZ0());
         if (roads.size() > 0) m_nRoadsFound++;
         bool passchi2 = false;
         bool passchi2OLR = false;
