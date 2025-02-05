@@ -536,7 +536,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
       m_candidate_eventindex = -1;
       m_candidate_barcode = -1;
       m_candidate_barcodefrac = 0;
-      m_fakelabel = -1;
+      m_fakelabel = 2;
     }
     m_tree->Fill();
 

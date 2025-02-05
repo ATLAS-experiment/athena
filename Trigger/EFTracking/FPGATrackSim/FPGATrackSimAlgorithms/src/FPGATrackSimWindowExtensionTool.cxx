@@ -15,15 +15,16 @@
 #include "FPGATrackSimBanks/FPGATrackSimSectorBank.h"
 
 #include "FPGATrackSimAlgorithms/FPGATrackSimWindowExtensionTool.h"
+#include "FPGATrackSimHough/FPGATrackSimHoughFunctions.h"
 
 #include <sstream>
 #include <cmath>
 #include <algorithm>
 
 FPGATrackSimWindowExtensionTool::FPGATrackSimWindowExtensionTool(const std::string& algname, const std::string &name, const IInterface *ifc) :
-  base_class(algname, name, ifc) {
-  declareInterface<IFPGATrackSimTrackExtensionTool>(this);
-}
+    base_class(algname, name, ifc) {
+        declareInterface<IFPGATrackSimTrackExtensionTool>(this);
+    }
 
 
 StatusCode FPGATrackSimWindowExtensionTool::initialize() {
@@ -33,6 +34,9 @@ StatusCode FPGATrackSimWindowExtensionTool::initialize() {
     if (m_idealGeoRoads) ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
     m_nLayers_1stStage = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
     m_nLayers_2ndStage = m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers() - m_nLayers_1stStage;
+
+    m_maxMiss = (m_nLayers_1stStage + m_nLayers_2ndStage) - m_threshold;
+
 
     // This now needs to be done once for each slice.
     for (size_t j=0; j<m_FPGATrackSimMapping->GetPlaneMap_2ndSliceSize(); j++){
@@ -48,8 +52,8 @@ StatusCode FPGATrackSimWindowExtensionTool::initialize() {
 }
 
 StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits,
-                                                         const std::vector<std::shared_ptr<const FPGATrackSimTrack>> & tracks,
-                                                         std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) {
+        const std::vector<std::shared_ptr<const FPGATrackSimTrack>> & tracks,
+        std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) {
 
     // Reset the internal second stage roads storage.
     roads.clear();

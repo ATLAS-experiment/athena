@@ -1,10 +1,10 @@
 // Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-#ifndef FPGATrackSimWINDOWEXTENSION_H
-#define FPGATrackSimWINDOWEXTENSION_H
+#ifndef FPGATrackPATHFINDEREXTENSION_H
+#define FPGATrackPATHFINDEREXTENSION_H
 
 /**
- * @file FPGATrackSimWindowExtensionTool.h
+ * @file FPGATrackSimNNPathfinderExtensionTool.h
  * @author Ben Rosser - brosser@uchicago.edu
  * @date 2024/10/08
  * @brief Default track extension algorithm to produce "second stage" roads.
@@ -29,11 +29,11 @@
 
 #include <vector>
 
-class FPGATrackSimWindowExtensionTool : public extends <AthAlgTool, IFPGATrackSimTrackExtensionTool>
+class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPGATrackSimTrackExtensionTool>
 {
     public:
 
-        FPGATrackSimWindowExtensionTool(const std::string&, const std::string&, const IInterface*);
+        FPGATrackSimNNPathfinderExtensionTool(const std::string&, const std::string&, const IInterface*);
 
         virtual StatusCode initialize() override;
 
@@ -41,26 +41,21 @@ class FPGATrackSimWindowExtensionTool : public extends <AthAlgTool, IFPGATrackSi
                                         const std::vector<std::shared_ptr<const FPGATrackSimTrack>> & tracks,
                                         std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) override;
 
-
     private:
-
-        ServiceHandle<IFPGATrackSimBankSvc> m_FPGATrackSimBankSvc {this, "FPGATrackSimBankSvc", "FPGATrackSimBankSvc"};
         ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
 
         // We'll definitely need properties, but I don't know which ones.
         Gaudi::Property<int> m_threshold  { this, "threshold", 11, "Minimum number of hits to fire a road"};
-        Gaudi::Property<std::vector<float>> m_windows {this, "phiWindow", {}, "Default window settings for phi, must be size nlayers."};
-        Gaudi::Property<std::vector<float>> m_zwindows {this, "zWindow", {}, "Default window settings for z, must be size nlayers."};
-        Gaudi::Property<bool> m_fieldCorrection {this, "fieldCorrection", true, "Use magnetic field correction for Hough transform"};
-        Gaudi::Property<bool> m_idealGeoRoads {this, "IdealGeoRoads", true, "Do sector assignment of second stage roads"};
 
         // Options only needed for sector assignment.
         // The eta pattern option here should probably be dropped, because we're not using it
         // and supporting it requires having two sets of eta patterns (one for the first stage, one for the second)
         // and then running the eta pattern filter a second time.
-        Gaudi::Property <bool> m_doRegionalMapping { this, "RegionalMapping", false,  "Use the sub-region maps to define the sector"};
-        Gaudi::Property <bool> m_doEtaPatternConsts { this, "doEtaPatternConsts", false, "Whether to use the eta pattern tool for constant generation"};
-        Gaudi::Property <bool> m_useSpacePoints { this, "useSpacePoints", false, "Whether we are using spacepoints."};
+        Gaudi::Property <float> m_windowR { this, "windowR", 20.0, "Window Size to search in for r, right now one value for all layers"};
+        Gaudi::Property <float> m_windowZ { this, "windowZ", 20.0, "Window Size to search in for z, right now one value for all layers"};
+        Gaudi::Property <int> m_maxBranches { this, "maxBranches", -1, "Max number of branches before we stop, if negative this is disabled"};
+        Gaudi::Property <bool> m_doOutsideIn { this, "doOutsideIn", true, "Setup the tool so it's doing outside in extrap"};
+        Gaudi::Property <int> m_predictionWindowLength { this, "predictionWindowLength", 3, "Length of hits needed for prediction"};
 
         std::vector<FPGATrackSimRoad> m_roads;
         //This is a map(dict python equivalent) of slice IDs that have a map of layer IDs in it. That map has a vector of hits associated with it
@@ -69,8 +64,19 @@ class FPGATrackSimWindowExtensionTool : public extends <AthAlgTool, IFPGATrackSi
         unsigned m_nLayers_2ndStage = 0;
         unsigned m_maxMiss = 0;
 
-  
+        static float getXScale() { return 1015.;};
+        static float getYScale() { return 1015.;};
+        static float getZScale() { return 3000.;};
 
+
+  
+        OnnxRuntimeBase m_extensionVolNN;
+        OnnxRuntimeBase m_extensionHitNN;
+
+        StatusCode fillInputTensorForNN(FPGATrackSimRoad& thisRoad, std::vector<float>& inputTensorValues);
+        StatusCode getPredictedHit(std::vector<float>& inputTensorValues, std::vector<float>& outputTensorValues, long& fineID);
+        StatusCode addHitToRoad(FPGATrackSimRoad& newroad, FPGATrackSimRoad& currentRoad, const std::shared_ptr<const FPGATrackSimHit>&hit);
+        StatusCode getFakeHit(FPGATrackSimRoad& currentRoad, size_t slice, std::vector<float>& predhit, std::shared_ptr<FPGATrackSimHit> &guessedHitPtr);
 };
 
 #endif

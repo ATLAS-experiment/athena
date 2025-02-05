@@ -27,6 +27,9 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.bankDir=$BANKS_9L \
     Trigger.FPGATrackSim.FakeNNonnxFile=$ONNX_INPUT_FAKE \
     Trigger.FPGATrackSim.ParamNNonnxFile=$ONNX_INPUT_PARAM \
+    Trigger.FPGATrackSim.ExtensionNNVolonnxFile=$ONNX_INPUT_VOL \
+    Trigger.FPGATrackSim.ExtensionNNHitonnxFile=$ONNX_INPUT_HIT \
+    Trigger.FPGATrackSim.doNNPathFinder=True \
     Trigger.FPGATrackSim.outputMonitorFile="monitoring${TEST_LABEL}.root"
 }
 run_F210

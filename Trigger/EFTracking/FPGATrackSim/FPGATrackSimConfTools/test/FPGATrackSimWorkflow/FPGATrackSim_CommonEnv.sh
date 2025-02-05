@@ -20,6 +20,8 @@ COMBINED_MATRIX="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrad
 
 ONNX_INPUT_FAKE="${BANKS_9L}ClassificationHT_v5.onnx"
 ONNX_INPUT_PARAM="${BANKS_9L}ParamEstimationHT_v5.onnx"
+ONNX_INPUT_HIT="${BANKS_9L}Ath_Extrap_v51_6_superBig_0_outsideIN.onnx"
+ONNX_INPUT_VOL="${BANKS_9L}HT_detector_v6_3.onnx"
 
 RUN_CKF=True
 RUN_ON_TTBAR=False
