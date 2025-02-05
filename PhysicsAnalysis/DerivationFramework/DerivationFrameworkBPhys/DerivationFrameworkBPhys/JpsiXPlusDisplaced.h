@@ -149,6 +149,7 @@ namespace DerivationFramework {
     double m_massKs{};
     double m_massDpm{};
     double m_massD0{};
+    double m_massJXV0{};
     double m_massMainV{};
     bool   m_constrJX{};
     bool   m_constrJpsi{};
@@ -157,9 +158,11 @@ namespace DerivationFramework {
     bool   m_constrV0{};
     bool   m_constrDpm{};
     bool   m_constrD0{};
+    bool   m_constrJXV0{};
     bool   m_constrMainV{};
     bool   m_doPostMainVContrFit{};
     bool   m_JXSubVtx{};
+    bool   m_JXV0SubVtx{};
     double m_chi2cut_JX{};
     double m_chi2cut_V0{};
     double m_chi2cut_DisV{};
@@ -205,6 +208,7 @@ namespace DerivationFramework {
     double m_mass_Dpm{};
     double m_mass_D0{};
     double m_mass_BCPLUS{};
+    double m_mass_Lambdab{};
 
     std::vector<double> m_massesV0_ppi;
     std::vector<double> m_massesV0_pip;
