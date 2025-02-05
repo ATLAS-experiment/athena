@@ -400,6 +400,42 @@ below.**
           1.082e-01 2 13 -14
           1.082e-01 2 15 -16
 
+
+### How to use MadSTR?
+
+
+MadSTR package is a collection of techniques that are used for Diagram Removal and Diagram Subtraction. Here STR stands for *Simplified Treatment of Resonances*. 
+
+Consider the $pp\rightarrow t\bar{t}$ production at Leading Order. Now also consider the  Next-to-leading Order in QCD for the $pp\rightarrow tW$ process. Here, $tW$ process at NLO interferes with $t\bar{t}$ and leads to double counting. The motivation for using MadSTR package is to avoid this double counting by systematically removing amplitudes related to diagrams that overlap.   
+
+
+**How to Run the Code and some examples**
+
+
+Step 1: Software Setup 
+
+```
+setupATLAS
+asetup AthGeneration,23.6.34
+```
+
+This sets up AthGeneration to 23.6.34 branch where the working version of MadGraph+MadSTR are installed (Any later release of AthGeneration should work as well). 
+
+
+The examples includes two scripts  (1) [MadSTR](https://gitlab.cern.ch/atlas-physics/pmg/mcjoboptions/-/blob/master/421xxx/421498/mc.MGPy8_tW_madstr.py) which runs with istr parameter set to 1 and does not include MadSpin. For different istr parameters, the user can edit the `settings` parameter. (2) [MadSpin+MadSTR](https://gitlab.cern.ch/atlas-physics/pmg/mcjoboptions/-/blob/master/421xxx/421499/mc.aMCPy8_tW_MadSpin_MadStr.py) script runs for istr=1 including MadSpin usage. 
+
+
+Command line to execute the script- 
+
+```python
+Gen_tf.py --ecmEnergy=13600. \
+        --maxEvents=100 \
+        --randomSeed=123456 \
+        --outputEVNTFile=evgen.root \
+        --jobConfig=421498
+```
+
+
 ### Gridpack mode
 
 When generating complicated processes, especially at NLO,
