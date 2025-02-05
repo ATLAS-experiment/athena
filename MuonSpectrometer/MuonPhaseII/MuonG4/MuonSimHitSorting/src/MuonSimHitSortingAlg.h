@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONSIMHITSORTING_MUONSIMHITSORTINGALG_H
 #define MUONSIMHITSORTING_MUONSIMHITSORTINGALG_H
@@ -12,7 +12,7 @@
 
 class MuonSimHitSortingAlg: public AthReentrantAlgorithm{
     public:
-        MuonSimHitSortingAlg(const std::string& name, ISvcLocator* pSvcLocator);
+        using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
         ~MuonSimHitSortingAlg() = default;
 

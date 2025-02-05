@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonDigitizationR4/MuonDigitizationTool.h"
 
@@ -54,7 +54,7 @@ namespace MuonR4{
                 timedHits.emplace_back(timeIndex.time(), timeIndex.index(), simHit, timeIndex.type());
             }           
         }
-        std::sort(timedHits.begin(), timedHits.end(), 
+        std::stable_sort(timedHits.begin(), timedHits.end(), 
                  [](const TimedHit& a, const TimedHit& b){
                     if (a->identify() != b->identify()){
                         return a->identify() < b->identify();
