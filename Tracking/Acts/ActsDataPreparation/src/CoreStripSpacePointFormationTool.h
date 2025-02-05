@@ -112,6 +112,7 @@ namespace ActsTrk {
     Gaudi::Property<float> m_overlapLimitEtaMax{this, "OverlapLimitEtaMax", 3.0, "High overlap limit for eta-neighbours."};
     Gaudi::Property<float> m_stripLengthTolerance{this, "StripLengthTolerance", 0.01};
     Gaudi::Property<float> m_stripGapParameter{this, "StripGapParameter", 0.0015, "Recommend 0.001 - 0.0015 for ITK geometry"};
+    Gaudi::Property< bool > m_useSCTLayerDep_OverlapCuts{this,"useSCTLayerDep_OverlapCuts", true};
   };
 
 }
