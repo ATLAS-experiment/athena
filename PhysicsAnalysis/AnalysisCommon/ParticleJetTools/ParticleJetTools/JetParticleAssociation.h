@@ -31,12 +31,26 @@ class JetParticleAssociation : public asg::AsgTool,
         virtual StatusCode decorate(const xAOD::JetContainer& jets) const override;
 
         // obvs to be provided by the deriving class
+        
+        virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
+            match(const xAOD::JetContainer&, const xAOD::IParticleContainer&) const{
+                std::cerr << "2-argument match() not implemented in this class.\n";
+                return {};
+            }
+
+        virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
+            match(SG::ReadDecorHandleKey<xAOD::IParticleContainer>, const xAOD::JetContainer&, const xAOD::IParticleContainer&) const{
+                std::cerr << "3-argument match() not implemented in this class.\n";
+                return {};
+            }
+        
+        /*
         virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
             match(const xAOD::JetContainer&, const xAOD::IParticleContainer&) const = 0;
-
-        const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
-            matchOriginTrk(SG::ReadDecorHandleKey<xAOD::IParticleContainer>, const xAOD::JetContainer&, const xAOD::IParticleContainer&) const;
-
+        // Mario: adding this overload because we have an extra argument
+        virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
+            match(SG::ReadDecorHandleKey<xAOD::IParticleContainer>, const xAOD::JetContainer&, const xAOD::IParticleContainer&) const = 0;
+        */
     private:
 
         // note
@@ -46,7 +60,8 @@ class JetParticleAssociation : public asg::AsgTool,
         SG::ReadHandleKey<xAOD::IParticleContainer> m_particleKey{this, "InputParticleContainer", "", "Input particle collection name"};
         SG::WriteDecorHandleKey<xAOD::JetContainer> m_decKey{this, "OutputDecoration", "", "Output decoration name"};
         SG::WriteDecorHandleKey<xAOD::JetContainer> m_passPtKey{this, "PassPtFlag", "", "Name for decoration indicating we passed pt threshold"};
-        SG::ReadDecorHandleKey<xAOD::IParticleContainer> m_trk_origin_vtx { this, "btagIp_TrkOriginVtx", "InDetTrackParticles.btagIp_TrkOriginVtx", "Decoration for vertex matching to track" }; //InDetTrackParticles.btagIp_TrkOriginVertex
+        //Mario adding the track-vertex association
+        SG::ReadDecorHandleKey<xAOD::IParticleContainer> m_trk_origin_vtx { this, "btagIp_TrkOriginVtx", "InDetTrackParticles.btagIp_TrkOriginVtx", "Decoration for vertex matching to track" }; 
 };
 
 #endif

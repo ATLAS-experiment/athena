@@ -10,92 +10,6 @@
 #include "AsgDataHandles/ReadDecorHandle.h"
 
       
-const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
-JetParticleAssociation::matchOriginTrk(SG::ReadDecorHandleKey<xAOD::IParticleContainer> trk_origin_vtx, const xAOD::JetContainer& jets, const xAOD::IParticleContainer& parts) const {
-
-    //Get the vertex associated to each track by reading the decoration
-    SG::ReadDecorHandle<xAOD::IParticleContainer, ElementLink<xAOD::VertexContainer>> trkOrigin(trk_origin_vtx);
-    //Create the 2d output vector 
-    std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >* matchedparts =
-        new std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >(jets.size());
-    
-    // Set parameters for the cone size
-    double coneSizeFitPar1 = +0.239;
-    double coneSizeFitPar2 = -1.220;
-    double coneSizeFitPar3 = -1.64e-5;
-    //loop through the tracks
-    for (const xAOD::IParticle* part: parts) {
-      // Retrieve the ElementLink to the vertex
-      const ElementLink<xAOD::VertexContainer>& vertexLink = trkOrigin(*part);
-      // check if link is valid
-      if (!vertexLink.isValid()) {
-        ATH_MSG_WARNING("Track decoration 'btagIp_TrkOriginVertex' is missing for this track");
-        continue;
-      }
-      
-      // Continue processing
-      //Get vertex associated with the track
-      const xAOD::Vertex* vtx_to_trk = *vertexLink; 
-      int matchjetidx = -1;
-      double drmin = -1.0;
-      for (unsigned int iJet = 0; iJet < jets.size(); iJet++) {
-          //get jet
-          const xAOD::Jet* jet = jets[iJet];
-          // if origin of jet is not the same as the vertex associated to the track then continue to next jet
-          if (jet->getAssociatedObject<xAOD::Vertex>("OriginVertex") != vtx_to_trk) {
-            continue;
-          }
-          
-          // do dR matching between jet and track
-          double match_dr = coneSizeFitPar1 + exp(coneSizeFitPar2 + coneSizeFitPar3*jet->pt());
-          double dr = jet->p4().DeltaR(part->p4());
-          if (dr > match_dr) continue;
-          if (drmin < 0 || dr < drmin) {
-              drmin = dr;
-              matchjetidx = iJet;
-          }
-      }
-      if (matchjetidx >= 0) {
-        ElementLink<xAOD::IParticleContainer> EL; 
-        EL.toContainedElement(parts, part);
-        (*matchedparts)[matchjetidx].push_back(EL);
-      }      
-    }
-
-    return matchedparts;
-    
-}
-
-std::vector<std::vector<ElementLink<xAOD::IParticleContainer>>>* getIntersection(const std::vector<std::vector<ElementLink<xAOD::IParticleContainer>>>*matches1,
-                const std::vector<std::vector<ElementLink<xAOD::IParticleContainer>>>* matches2) {
-
-
-    // Create intersection vector, the same size as the match functions
-    auto* intersection = new std::vector<std::vector<ElementLink<xAOD::IParticleContainer>>>(matches1->size());
-
-    for (size_t i = 0; i < matches1->size(); ++i) {
-        // Convert each inner vector to sets for easy intersection
-        std::set<ElementLink<xAOD::IParticleContainer>> set1((*matches1)[i].begin(), (*matches1)[i].end());
-        std::set<ElementLink<xAOD::IParticleContainer>> set2((*matches2)[i].begin(), (*matches2)[i].end());
-
-        // Temp vector to store index
-        std::vector<ElementLink<xAOD::IParticleContainer>> tempIntersection;
-
-        // Find intersection between set1 and set2
-        std::set_intersection(
-            set1.begin(), set1.end(),
-            set2.begin(), set2.end(),
-            std::back_inserter(tempIntersection)
-        );
-
-        // Move the temporary intersection to the final result
-        (*intersection)[i] = std::move(tempIntersection);
-    }
-
-    return intersection;
-}
-
-
 JetParticleAssociation::JetParticleAssociation(const std::string& name)
     : asg::AsgTool(name) {
 }
@@ -145,13 +59,14 @@ StatusCode JetParticleAssociation::decorate(const xAOD::JetContainer& jets) cons
       }
     }
     
-    
+    // Mario: maybe this is hard-coded and not the best solution
+    // the second statement of asking it to be InDetTrackParticles is beacuse this is the container that has the variable m_trk_origin_vtx
     if ((m_jetContainerName == "AntiKt4EMPFlowByVertexJets") && (m_particleKey.key()=="InDetTrackParticles")){
-      matches = matchOriginTrk(m_trk_origin_vtx, *viewJets.asDataVector(), *parts);
+      matches = match(m_trk_origin_vtx, *viewJets.asDataVector(), *parts);
     }else{
       matches = match(*viewJets.asDataVector(), *parts);
     }
-    
+
     
     ATH_MSG_DEBUG("About to decorate jets with" << m_decKey);
 
