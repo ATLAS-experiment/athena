@@ -40,4 +40,14 @@ Usage with the input file specified at the command line:
 
 ```python -m  AthExBasics.ReadxAODConfig --filesInput=input.pool.root```
 
+## WritexAOD
 
+WritexAOD is similar to ReadxAOD in that it reads an xAOD and selects a subset of tracks using a tool, but it then demonstrates how to write that subset into a new container. In this way it demonstrates how to create a new xAOD container and enter objects on the C++ side, and also how to configure the output stream to write a file containing a new xAOD collection. 
+
+Usage with the input file specified in the python configuration:
+
+ ```python -m  AthExBasics.WritexAODConfig```   
+
+Usage with the input file specified at the command line:
+
+```python -m  AthExBasics.WritexAODConfig --filesInput=input.pool.root```
