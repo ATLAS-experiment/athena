@@ -42,15 +42,14 @@ def ByteStreamReadCfg(flags, type_names=None):
     bytestream_conversion = CompFactory.ByteStreamCnvSvc()
     result.addService(bytestream_conversion)
 
+    eiName = "EventInfo"
     if flags.Common.isOnline and not any(flags.Input.Files) and not (flags.Trigger.doHLT or flags.Trigger.doLVL1):
         bytestream_input = CompFactory.ByteStreamEmonInputSvc("ByteStreamInputSvc")
     else:
+        eiName = "{}EventInfo".format(flags.Overlay.BkgPrefix if flags.Overlay.ByteStream else "")
         bytestream_input = CompFactory.ByteStreamEventStorageInputSvc(
             name="ByteStreamInputSvc",
-            EventInfoKey="{}EventInfo".format(
-                flags.Overlay.BkgPrefix if flags.Overlay.ByteStream else ""
-            ),
-        )
+            EventInfoKey=eiName)
     result.addService(bytestream_input)
 
     if flags.Input.SecondaryFiles:
@@ -91,7 +90,9 @@ def ByteStreamReadCfg(flags, type_names=None):
     proxy = CompFactory.ProxyProviderSvc(ProviderNames = [address_provider.name])
     result.addService(proxy)
 
-    result.merge(SGInputLoaderCfg(flags, address_provider.TypeNames))
+    result.merge(SGInputLoaderCfg(flags, address_provider.TypeNames,
+           ExtraOutputs=[("xAOD::EventInfo",f"StoreGateSvc+{eiName}"),
+                      ("xAOD::EventAuxInfo",f"StoreGateSvc+{eiName}Aux.")]))
 
     return result
 

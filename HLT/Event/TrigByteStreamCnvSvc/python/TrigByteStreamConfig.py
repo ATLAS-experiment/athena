@@ -120,6 +120,7 @@ def TrigByteStreamCfg(flags, type_names=[]):
 
     acc.merge(SGInputLoaderCfg(flags,
                                Load=address_provider.TypeNames,
-                               FailIfNoProxy=flags.Input.FailOnUnknownCollections))
+                               FailIfNoProxy=flags.Input.FailOnUnknownCollections,
+                               ExtraOutputs=[("xAOD::EventInfo","StoreGateSvc+EventInfo"),("xAOD::EventAuxInfo","StoreGateSvc+EventInfoAux.")])) # EventInfo created by TrigEventSelectorByteStream 
 
     return acc
