@@ -116,7 +116,7 @@ L1TopoSimulation::initialize ATLAS_NOT_THREAD_SAFE () {
    m_topoSteering->setAlgMsgLevel( TrigConf::MSGTC::Level((int)m_topoOutputLevel) );
    m_topoSteering->setOutputAlgosFillBasedOnHardware(m_fillHistogramsBasedOnHardwareDecision);
 
-   ATH_CHECK(m_ControlHistSvc->SetHistSvc(m_topoSteering, m_histBaseDir.value()));
+   if (m_doMonitoring) {ATH_CHECK(m_ControlHistSvc->SetHistSvc(m_topoSteering, m_histBaseDir.value()));}
 
    ATH_CHECK(m_legacyL1topoKey.initialize(m_isLegacyTopo));
    ATH_CHECK(m_l1topoKey.initialize(!m_isLegacyTopo));
