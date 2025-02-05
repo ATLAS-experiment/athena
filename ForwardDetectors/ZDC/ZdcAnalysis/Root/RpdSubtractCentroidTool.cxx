@@ -45,7 +45,7 @@ StatusCode RpdSubtractCentroidTool::initializeKey(std::string const& containerNa
 
 StatusCode RpdSubtractCentroidTool::initialize() {
   // first initialize reconstruction parameters from config string
-  if (m_configuration == "default" || m_configuration == "pp2023" || m_configuration == "PbPb2023") {
+  if (m_configuration == "default" || m_configuration == "pp2023" || m_configuration == "PbPb2023" || m_configuration == "MonteCarloPbPb2023") {
     m_minZDCEnergy = {-1.0, -1.0};
     m_maxZDCEnergy = {-1.0, -1.0};
     m_minEMEnergy = {-1.0, -1.0};
