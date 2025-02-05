@@ -108,12 +108,16 @@ protected:
     Gaudi::Property<double> m_rin{this, "rin", {-1.0}, "Radius of inner layer for extrapolations and keylayer definition"};
     Gaudi::Property<double> m_rout{this, "rout", {-1.0}, "Radius of outer layer for extrapolations and keylayer definition"};
 
+    Gaudi::Property<std::string> m_lyrmapFile{this, "layerMapFile",{""}, "use externally defined layer map"};
+
     Gaudi::Property<double> m_d0FractionalPadding{this, "d0FractionalPadding", {}, "Fractional padding used when calculating the valid range of bins"};
     Gaudi::Property<double> m_z0FractionalPadding{this, "z0FractionalPadding", {}, "Fractional padding used when calculating the valid range of bins"};
     Gaudi::Property<double> m_etaFractionalPadding{this, "etaFractionalPadding", {}, "Fractional padding used when calculating the valid range of bins"};
     Gaudi::Property<double> m_phiFractionalPadding{this, "phiFractionalPadding", {}, "Fractional padding used when calculating the valid range of bins"};
     Gaudi::Property<double> m_qOverPtFractionalPadding{this, "qOverPtFractionalPadding", {}, "Fractional padding used when calculating the valid range of bins"};
 
+
+    
     Gaudi::Property<unsigned> m_threshold{this, "threshold", {}, "Minimum value to accept as a road (inclusive)"};
 
     Gaudi::Property<std::string> m_binFilter{this, "binFilter", {"PairThenGroup"}, "which bin filter to run, current options: PairThenGroup, IncrementalBuild"};
@@ -318,6 +322,11 @@ protected:
     FPGATrackSimGenScanArray<int> m_validSlice;
     FPGATrackSimGenScanArray<int> m_validScan;
     FPGATrackSimGenScanArray<int> m_validSliceAndScan;
+
+    // structure is indexed on bin, then layer, then a set of modules
+    void readLayerMap(const string & filename);
+    FPGATrackSimGenScanArray< std::vector <std::set<unsigned> > > m_lyr_to_mod_map;
+    FPGATrackSimGenScanArray< std::map<unsigned,unsigned> > m_mod_to_lyr_map;
 
     // output roads
     std::vector<FPGATrackSimRoad> m_roads{};

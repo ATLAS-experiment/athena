@@ -229,6 +229,9 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags):
     for (cut,val) in cutset.items():
         setattr(tool,cut,val)
 
+    # set layer map
+    tool.layerMapFile = flags.Trigger.FPGATrackSim.GenScan.layerMapFile
+
     # even though we are not actually doing a Union, we need the 
     # RoadUnionTool because mapping is now there
     RoadUnion = CompFactory.FPGATrackSimRoadUnionTool()
